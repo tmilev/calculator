@@ -262,9 +262,9 @@ class MathNodeFactory {
   fraction(
     /** @type {EquationEditor} */
     equationEditor,
-    /** @type{MathNode}*/
+    /** @type{MathNode|null}*/
     numeratorContent,
-    /** @type{MathNode}*/
+    /** @type{MathNode|null}*/
     denominatorContent,
   ) {
     const fraction = new MathNode(equationEditor, knownTypes.fraction);
@@ -504,6 +504,84 @@ class EquationEditor {
     this.container.style.height = boundingRectangle.height;
     this.container.style.width = boundingRectangle.width;
   }
+
+  /** @returns {SplitBySelectionResult|null} */
+  splitAtomsBySelection() {
+    if (this.selectionStart.element === null || this.selectionEnd.element === null) {
+      return null;
+    }
+    let start = this.selectionStart;
+    let end = this.selectionEnd;
+    if (end.element.isToTheLeftOf(start.element)) {
+      // Swap end and start
+      let temporary = start;
+      start = end;
+      end = temporary;
+    }
+    let ancestor = start.element.commonAncestor(end.element);
+    if (ancestor === null) {
+      console.log(`Not expected: no common ancestor element betwen ${start} and ${end}. `);
+      return null;
+    }
+    if (ancestor.type.type !== knownTypes.horizontalMath.type) {
+      // Common ancestor is not of type horizontal math. Don't split.
+      return null;
+    }
+    if (start.element === ancestor || end.element === ancestor) {
+      // Start and end should are the same node, which is the ancestor.
+      return null;
+    }
+    while (start.element.parent !== ancestor && start.element.parent !== null) {
+      start.element = start.element.parent;
+      start.position = - 1;
+    }
+    while (end.element.parent !== ancestor && end.element.parent !== null) {
+      end.element = end.element.parent;
+      end.position = - 1;
+    }
+    let startSplit = start.element.splitByPosition(start.position);
+    let endSplit = end.element.splitByPosition(end.position);
+    let result = new SplitBySelectionResult(ancestor);
+    for (let i = 0; i < start.element.indexInParent; i++) {
+      result.beforeSplit.push(ancestor.children[i]);
+    }
+    if (startSplit[0] !== null) {
+      result.beforeSplit.push(startSplit[0]);
+    }
+    if (startSplit[1] !== null) {
+      result.split.push(startSplit[1]);
+    }
+    for (let i = start.element.indexInParent + 1; i < end.element.indexInParent; i++) {
+      result.split.push(ancestor.children[i]);
+    }
+    if (endSplit[0] !== null) {
+      result.split.push(endSplit[0]);
+    }
+    if (endSplit[1] !== null) {
+      result.afterSplit.push(endSplit[1]);
+    }
+    for (let i = end.element.indexInParent + 1; i < ancestor.children.length; i++) {
+      result.afterSplit.push(ancestor.children[i]);
+    }
+    return result;
+  }
+}
+
+class SplitBySelectionResult {
+  constructor(
+    /**@type{MathNode} */
+    ancestor,
+  ) {
+    /**@type{MathNode[]} */
+    this.beforeSplit = [];
+    /**@type{MathNode[]} */
+    this.afterSplit = [];
+    /**@type{MathNode[]} */
+    this.split = [];
+    /**@type{MathNode} */
+    this.ancestor = ancestor;
+  }
+
 }
 
 class BoundingBox {
@@ -1110,6 +1188,32 @@ class MathNode {
     return reversed.reverse();
   }
 
+  /** @returns{MathNode|null} returns the common ancestor of two nodes. */
+  commonAncestor(
+    /**@type{MathNode} */
+    other,
+  ) {
+    if (this === other || other === null) {
+      return this;
+    }
+    if (this.equationEditor.rootNode !== other.equationEditor.rootNode) {
+      return null;
+    }
+    let thisPath = this.getPathToRoot();
+    let otherPath = other.getPathToRoot();
+    let current = this.equationEditor.rootNode;
+    for (let i = 0; i < thisPath.length; i++) {
+      if (i >= otherPath.length) {
+        return current;
+      }
+      if (thisPath[i] !== otherPath[i]) {
+        return current;
+      }
+      current = current.children[thisPath[i]];
+    }
+    return current;
+  }
+
   /** @returns{boolean} Given two atoms, decides whether this is to the left of the other atom. */
   isToTheLeftOf(
     /**@type{MathNode} */ other,
@@ -1383,6 +1487,29 @@ class MathNode {
     this.replaceChildRangeWithChildren(0, this.children.length - 1, normalizedChildren);
   }
 
+  mergeAtomContentToTheRight(
+    /**@type{MathNode} */
+    right,
+  ) {
+    let thisContent = this.initialContent;
+    if (this.element !== null) {
+      thisContent = this.element.textContent;
+    }
+    let rightContent = right.initialContent;
+    if (right.element !== null) {
+      rightContent = right.element.textContent;
+    }
+    if (right.desiredCaretPosition !== -1) {
+      this.desiredCaretPosition = thisContent.length + right.desiredCaretPosition;
+    }
+    thisContent += rightContent;
+    if (this.element === null) {
+      this.initialContent = thisContent;
+    } else {
+      this.element.textContent = thisContent;
+    }
+  }
+
   normalizeHorizontalMathAtomNextToAtomOnce() {
     for (let i = 0; i < this.children.length - 1; i++) {
       let current = this.children[i];
@@ -1393,12 +1520,7 @@ class MathNode {
       ) {
         continue;
       }
-      if (next.desiredCaretPosition !== -1) {
-        current.desiredCaretPosition = current.element.textContent.length + next.desiredCaretPosition;
-      }
-      if (next.element !== null) {
-        current.element.textContent += next.element.textContent;
-      }
+      current.mergeAtomContentToTheRight(next);
       this.removeChildRange(i + 1, i + 1);
       return true;
     }
@@ -1468,6 +1590,15 @@ class MathNode {
     // Please do not modify removed as removed can
     // be in use as a member of a sub-tree of the inputChildren.
     let toBeShiftedDown = [];
+    // Disown all removed children.
+    for (
+      let i = fromIndex;
+      i <= toIndex && i >= 0 && i < this.children.length;
+      i++
+    ) {
+      this.children[i].parent = null;
+    }
+    // Store all children that need to be shifted down.
     for (let i = toIndex + 1; i < this.children.length; i++) {
       toBeShiftedDown.push(this.removeChildReplaceWithNull(i));
     }
@@ -1787,7 +1918,7 @@ class MathNode {
   makeSqrt() {
     let parent = this.parent;
     let oldIndex = this.indexInParent;
-    let split = this.splitAtom();
+    let split = this.splitByCaret();
     let sqrt = mathNodeFactory.sqrt(this.equationEditor, split[1]);
     if (split[0] === null) {
       parent.replaceChildAtPosition(oldIndex, sqrt);
@@ -1891,15 +2022,26 @@ class MathNode {
   }
 
   /** @returns {MathNode[]} */
-  splitAtom() {
-    if (this.positionCaretBeforeKeyEvents === 0) {
+  splitByCaret() {
+    return this.splitByPosition(this.positionCaretBeforeKeyEvents)
+  }
+
+  /** @returns {MathNode[]} */
+  splitByPosition(
+    /** @type{number} */
+    position,
+  ) {
+    if (this.type.type !== knownTypes.atom.type || position < 0) {
       return [null, this];
     }
-    if (this.positionCaretBeforeKeyEvents >= this.element.textContent.length) {
+    if (position === 0) {
+      return [null, this];
+    }
+    if (position >= this.element.textContent.length) {
       return [this, null];
     }
-    let leftContent = this.element.textContent.slice(0, this.positionCaretBeforeKeyEvents);
-    let rightContent = this.element.textContent.slice(this.positionCaretBeforeKeyEvents, this.element.textContent.length);
+    let leftContent = this.element.textContent.slice(0, position);
+    let rightContent = this.element.textContent.slice(position, this.element.textContent.length);
     let leftNode = mathNodeFactory.atom(this.equationEditor, leftContent);
     let rightNode = mathNodeFactory.atom(this.equationEditor, rightContent);
     return [leftNode, rightNode];
@@ -1925,7 +2067,7 @@ class MathNode {
       isLeft,
     );
     if (positionOperator === 0) {
-      let leftAndRight = this.splitAtom();
+      let leftAndRight = this.splitByCaret();
       parent.replaceChildAtPositionWithChildren(
         oldIndexInParent, leftAndRight,
       );
@@ -2081,6 +2223,15 @@ class MathNode {
     if (this.parent === null) {
       return;
     }
+    let splitBySelection = this.equationEditor.splitAtomsBySelection();
+    if (splitBySelection === null) {
+      this.makeFractionNumeratorFromCaretPosition();
+    } else {
+      this.makeFractionNumeratorFromSelection(splitBySelection);
+    }
+  }
+
+  makeFractionNumeratorFromCaretPosition() {
     const oldParent = this.parent;
     const oldIndexInParent = this.indexInParent;
     let fraction = null;
@@ -2091,7 +2242,7 @@ class MathNode {
       fraction = mathNodeFactory.fraction(this.equationEditor, null, this);
       childIndexToFocus = 0;
     } else {
-      let split = this.splitAtom();
+      let split = this.splitByCaret();
       fraction = mathNodeFactory.fraction(this.equationEditor, split[0], split[1]);
     }
     oldParent.replaceChildAtPosition(oldIndexInParent, mathNodeFactory.atom(this.equationEditor, ""));
@@ -2099,6 +2250,30 @@ class MathNode {
     oldParent.insertChildAtPosition(oldIndexInParent + 2, mathNodeFactory.atom(this.equationEditor, ""));
     fraction.parent.updateDOM();
     fraction.children[childIndexToFocus].focus(- 1);
+  }
+
+  makeFractionNumeratorFromSelection(
+    /**@type{SplitBySelectionResult} */
+    split,
+  ) {
+    let ancestor = split.ancestor;
+    ancestor.removeChildRange(0, ancestor.children.length - 1);
+    for (let i = 0; i < split.beforeSplit.length; i++) {
+      ancestor.appendChild(split.beforeSplit[i]);
+    }
+    let numerator = mathNodeFactory.horizontalMath(this.equationEditor, null);
+    for (let i = 0; i < split.split.length; i++) {
+      numerator.appendChild(split.split[i]);
+    }
+    numerator.normalizeHorizontalMath();
+    let fraction = mathNodeFactory.fraction(this.equationEditor, numerator, null);
+    ancestor.appendChild(fraction);
+    for (let i = 0; i < split.afterSplit.length; i++) {
+      ancestor.appendChild(split.afterSplit[i]);
+    }
+    ancestor.normalizeHorizontalMath();
+    ancestor.updateDOM();
+    fraction.children[1].focus(- 1);
   }
 
   isEmptyAtom() {

@@ -373,6 +373,36 @@ class AtomWithPosition {
   }
 
   /** @returns {AtomWithPosition} */
+  leftHorizontalNeighbor() {
+    if (this.element === null) {
+      return new AtomWithPosition(null, -1);
+    }
+    if (this.position > 0 && this.element.hasHorizintalMathParent()) {
+      return new AtomWithPosition(this.element, this.position - 1);
+    }
+    let next = this.element.firstAtomUncle(-1);
+    if (next === null) {
+      return new AtomWithPosition(null, -1);
+    }
+    return new AtomWithPosition(next, next.lengthContentIfAtom());
+  }
+
+  /** @returns {AtomWithPosition} */
+  rightHorizontalNeighbor() {
+    if (this.element === null) {
+      return new AtomWithPosition(null, -1);
+    }
+    if (this.position < this.element.lengthContentIfAtom() && this.element.hasHorizintalMathParent()) {
+      return new AtomWithPosition(this.element, this.position + 1);
+    }
+    let next = this.element.firstAtomUncle(1);
+    if (next === null) {
+      return new AtomWithPosition(null, -1);
+    }
+    return new AtomWithPosition(next, 0);
+  }
+
+  /** @returns {AtomWithPosition} */
   leftNeighbor() {
     if (this.element === null) {
       return new AtomWithPosition(null, -1);
@@ -423,6 +453,9 @@ class EquationEditor {
     lastCreatedEquationEditor = this;
     /** @type{AtomWithPosition} */
     this.selectionStart = new AtomWithPosition(null, -1);
+    /** @type{AtomWithPosition} */
+    this.selectionStartExpanded = new AtomWithPosition(null, -1);
+    /** @type{AtomWithPosition} */
     this.selectionEnd = new AtomWithPosition(null, -1);
   }
 
@@ -430,6 +463,7 @@ class EquationEditor {
     let result = `Latex: ${this.rootNode.toLatex()}`;
     result += `<br>Drawing: ${this.rootNode.toString()}`;
     result += `<br>Structure: ${this.rootNode.toHtml(0)}`;
+    result += `<br>Selection: ${this.toStringSelection()}`;
     return result;
   }
 
@@ -503,6 +537,14 @@ class EquationEditor {
     let boundingRectangle = this.rootNode.element.getBoundingClientRect();
     this.container.style.height = boundingRectangle.height;
     this.container.style.width = boundingRectangle.width;
+  }
+
+  /**@returns {string} */
+  toStringSelection() {
+    if (this.selectionStart.element === null) {
+      return "";
+    }
+    return `Selection: from: ${this.selectionStart.toString()} to: ${this.selectionEnd.toString()}`;
   }
 
   /** @returns {SplitBySelectionResult|null} */
@@ -759,6 +801,19 @@ class MathNode {
     this.equationEditor.updateAlignment();
   }
 
+  /** @returns {number} 
+   * Returns the length of the content of an atom.
+   * Returns -1 if the element is not an atom. */
+  lengthContentIfAtom() {
+    if (!this.isAtomEditable()) {
+      return - 1;
+    }
+    if (this.element === null) {
+      return this.initialContent.length;
+    }
+    return this.element.textContent.length;
+  }
+
   /** @returns {boolean} */
   isAtomic() {
     return (
@@ -775,11 +830,13 @@ class MathNode {
     return this.type.type === knownTypes.atom.type;
   }
 
-  hasHorizontalLayout() {
-    if (this.type.type === knownTypes.fraction.type) {
+  /**@returns {boolean} */
+  hasHorizintalMathParent() {
+    if (this.parent === null) {
       return false;
+
     }
-    return true;
+    return this.parent.type.type === knownTypes.horizontalMath.type;
   }
 
   updateDOMRecursive(/** @type {number} */ depth) {
@@ -1277,9 +1334,11 @@ class MathNode {
     }
     let newSelection = null;
     if (key === "ArrowLeft" || key === "ArrowUp") {
-      newSelection = this.equationEditor.selectionEnd.leftNeighbor();
+      newSelection = this.equationEditor.selectionEnd.leftHorizontalNeighbor();
+      //  this.equationEditor.selectionEnd.leftNeighbor();
     } else {
-      newSelection = this.equationEditor.selectionEnd.rightNeighbor();
+      newSelection = this.equationEditor.selectionEnd.rightHorizontalNeighbor();
+      // newSelection = this.equationEditor.selectionEnd.rightNeighbor();
     }
     if (newSelection.element === null) {
       return false;
@@ -1359,7 +1418,7 @@ class MathNode {
   }
 
   /** @returns{MathNode|null} returns sibling, right one if direction is positive, left one otherwise. */
-  siblingAtom(
+  firstAtom(
     /**@type{number} */
     direction,
   ) {
@@ -1367,6 +1426,37 @@ class MathNode {
       return this.firstAtomToTheRight();
     } else {
       return this.firstAtomToTheLeft();
+    }
+  }
+
+  /** @returns{MathNode|null} 
+   * Returns first atom uncle to the left or right that is a child of a horizontal ancestor. 
+   * Negative direction indicates we are looking for uncles to the left, 
+   * else we are looking for uncles to the right of the this element.
+   * */
+  firstAtomUncle(direction) {
+    if (direction < 0) {
+      direction = -1;
+    } else {
+      direction = 1;
+    }
+    let current = this;
+    while (true) {
+      let horizontalAncestor = current.findHorizontalMathParent();
+      if (horizontalAncestor.parent === null) {
+        return null;
+      }
+      for (
+        let nextIndex = horizontalAncestor.indexInParent + direction;
+        nextIndex >= 0 && nextIndex < horizontalAncestor.parent.children.length;
+        nextIndex += direction
+      ) {
+        let candidate = horizontalAncestor.parent.children[nextIndex];
+        if (candidate.isAtomEditable()) {
+          return candidate;
+        }
+      }
+      current = horizontalAncestor.parent;
     }
   }
 
@@ -1641,7 +1731,7 @@ class MathNode {
     ) {
       return false;
     }
-    let sibling = this.siblingAtom(1);
+    let sibling = this.firstAtom(1);
     if (sibling === null) {
       return false;
     }
@@ -1872,14 +1962,14 @@ class MathNode {
   }
 
   /** @returns {ParentWithIndex} */
-  computeHorizontalMathParent() {
+  findHorizontalMathParent() {
     let result = new ParentWithIndex(this.parent, this.indexInParent);
     while (result.parent !== null) {
       if (result.parent.type.type === knownTypes.horizontalMath.type) {
         return result;
       }
+      result.indexInParent = result.parent.indexInParent;
       result.parent = result.parent.parent;
-      result.index = result.parent.indexInParent;
     }
     return result;
   }
@@ -1906,7 +1996,7 @@ class MathNode {
     this.storePositionCaret();
     let positionOperator = this.computePositionOfOperator();
     // Find closest ancestor node that's of type horizontal math.
-    let parentAndIndex = this.computeHorizontalMathParent();
+    let parentAndIndex = this.findHorizontalMathParent();
     if (parentAndIndex.parent === null) {
       // No ancestor is of type horizontal math. 
       console.log('Warning: could not find ancestor of type horizontal math.');
@@ -1958,7 +2048,7 @@ class MathNode {
   ) {
     let positionOperator = this.computePositionOfOperator();
     // Find closest ancestor node that's of type horizontal math.
-    let parentAndIndex = this.computeHorizontalMathParent();
+    let parentAndIndex = this.findHorizontalMathParent();
     if (parentAndIndex.parent === null) {
       // No ancestor is of type horizontal math. 
       console.log('Warning: could not find ancestor of type horizontal math.');
@@ -2427,7 +2517,7 @@ class MathNode {
     if (endToFocus === 0) {
       return false;
     }
-    let sibling = this.siblingAtom(endToFocus);
+    let sibling = this.firstAtom(endToFocus);
     if (sibling === null) {
       return false;
     }

@@ -1239,6 +1239,9 @@ class MathNode {
         return true;
       case "Enter":
         return true;
+      case "m":
+        this.makeMatrix(2, 2);
+        return true;
       case "s":
         this.makeSqrt();
         return true;
@@ -2077,29 +2080,31 @@ class MathNode {
     /** @type {string} */
     key,
   ) {
-    this.storePositionCaret();
     let positionOperator = this.computePositionOfOperator();
     // Find closest ancestor node that's of type horizontal math.
-    let parentAndIndex = this.findHorizontalMathParent();
-    if (parentAndIndex.parent === null) {
-      // No ancestor is of type horizontal math. 
-      console.log('Warning: could not find ancestor of type horizontal math.');
+    if (!this.hasHorizintalMathParent()) {
+      console.log('Warning: horizontal operator made on element not contained in horizontal math.');
       return;
     }
-    let oldIndexInParent = parentAndIndex.indexInParent;
-    let parent = parentAndIndex.parent;
-    if (positionOperator === 1) {
-      parent.insertChildAtPosition(oldIndexInParent + 1, mathNodeFactory.atomImmutable(this.equationEditor, key));
-      parent.insertChildAtPosition(oldIndexInParent + 2, mathNodeFactory.atom(this.equationEditor, ""));
-    } else if (positionOperator === 0) {
-      let leftContent = this.element.textContent.slice(0, this.positionCaretBeforeKeyEvents);
-      let rightContent = this.element.textContent.slice(this.positionCaretBeforeKeyEvents, this.element.textContent.length);
-      parent.replaceChildAtPosition(oldIndexInParent, mathNodeFactory.atom(this.equationEditor, leftContent));
-      parent.insertChildAtPosition(oldIndexInParent + 1, mathNodeFactory.atomImmutable(this.equationEditor, key));
-      parent.insertChildAtPosition(oldIndexInParent + 2, mathNodeFactory.atom(this.equationEditor, rightContent));
+    let parent = this.parent;
+    let split = this.splitByCaret();
+    if (split[1] === null) {
+      split[1] = mathNodeFactory.atom(this.equationEditor, null);
     }
+    if (split[0] === null) {
+      split[0] = mathNodeFactory.atom(this.equationEditor, null);
+    }
+    split[1].desiredCaretPosition = 0;
+    parent.replaceChildAtPositionWithChildren(
+      this.indexInParent, [
+      split[0],
+      mathNodeFactory.atomImmutable(this.equationEditor, key),
+      split[1]
+    ]);
+    parent.normalizeHorizontalMath();
+    parent.ensureEditableAtoms();
     parent.updateDOM();
-    parent.children[oldIndexInParent + 2].focus(- 1);
+    parent.focusRestore();
   }
 
   makeParenthesesLeft() {
@@ -2108,6 +2113,10 @@ class MathNode {
 
   makeParenthesesRight() {
     this.makeParenthesesCommon(false);
+  }
+
+  makeMatrix() {
+
   }
 
   makeSqrt() {

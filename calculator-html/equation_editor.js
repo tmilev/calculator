@@ -48,12 +48,17 @@ class MathNodeType {
     this.colorText = input["colorText"];
     this.boxSizing = input["boxSizing"];
     this.position = input["position"];
+    this.minWidth = input["minWidth"];
     // Padding.
     this.paddingBottom = input["paddingBottom"];
+    this.paddingRight = input["paddingRight"];
+    this.paddingLeft = input["paddingLeft"];
     this.padding = input["padding"];
     // Margins.
     this.margin = input["margin"];
     this.marginBottom = input["marginBottom"];
+    this.marginRight = input["marginRight"];
+    this.marginLeft = input["marginLeft"];
     // Borders
     this.borderStyle = input["borderStyle"];
     this.borderColor = input["borderColor"];
@@ -74,16 +79,20 @@ const knownTypeDefaults = {
   "whiteSpace": "",
   "float": "",
   "textAlign": "",
-  "boxSizing": "border-box",
+  "boxSizing": "",
   "position": "absolute",
   // Colors
   "colorText": "",
   "colorImplied": "",
   // Padding
   "paddingBottom": "",
+  "paddingLeft": "",
+  "paddingRight": "",
   "padding": "",
   // Margins
   "marginBottom": "",
+  "marginLeft": "",
+  "marginRight": "",
   "margin": "",
   // Borders.
   "borderStyle": "",
@@ -110,7 +119,7 @@ const knownTypeDefaultsArrows = {
 };
 
 const defaultFractionScale = 0.75;
-const atomPad = `${0.02}em`;
+const atomMargin = `${0.02}em`;
 
 const knownTypes = {
   root: new MathNodeType({
@@ -123,7 +132,7 @@ const knownTypes = {
   // This is the only element type that has contentEditable = true;
   atom: new MathNodeType({
     "type": "atom",
-    "padding": atomPad,
+    "margin": atomMargin,
     "outline": "0px solid transparent",
     "width": "auto",
     "height": "auto",
@@ -607,6 +616,15 @@ class EquationEditor {
     }
     return result;
   }
+
+  /** @returns{MathNode} */
+  elementFromPath(path) {
+    let current = this.rootNode;
+    for (let i = 0; i < path.length; i++) {
+      current = current.children[path[i]];
+    }
+    return current;
+  }
 }
 
 class SplitBySelectionResult {
@@ -695,12 +713,18 @@ class MathNode {
     if (this.type.type === knownTypes.atom.type) {
       this.element.contentEditable = true;
     }
-    if (this.type.paddingBottom !== "") {
-      this.element.style.paddingBottom = this.type.paddingBottom;
-    }
     // Padding.
     if (this.type.padding !== "") {
       this.element.style.padding = this.type.padding;
+    }
+    if (this.type.paddingBottom !== "") {
+      this.element.style.paddingBottom = this.type.paddingBottom;
+    }
+    if (this.type.paddingLeft !== "") {
+      this.element.style.paddingLeft = this.type.paddingLeft;
+    }
+    if (this.type.paddingRight !== "") {
+      this.element.style.paddingRight = this.type.paddingRight;
     }
     // Margins
     if (this.type.margin !== "") {
@@ -708,6 +732,12 @@ class MathNode {
     }
     if (this.type.marginBottom !== "") {
       this.element.style.marginBottom = this.type.marginBottom;
+    }
+    if (this.type.marginLeft !== "") {
+      this.element.style.marginLeft = this.type.marginLeft;
+    }
+    if (this.type.marginRight !== "") {
+      this.element.style.marginRight = this.type.marginRight;
     }
     // Borders.
     if (this.type.borderStyle !== "") {
@@ -726,7 +756,10 @@ class MathNode {
     this.element.style.height = this.type.height;
     this.element.style.display = this.type.display;
     if (this.type.minHeightScale !== 0) {
-      this.element.style.minWidth = this.type.minHeightScale * fontSize / 1.6;
+      this.element.style.minHeight = this.type.minHeightScale * fontSize / 1.6;
+    }
+    if (this.type.minWidth !== 0) {
+      this.element.style.minWidth = this.type.minWidth;
     }
     this.element.style.verticalAlign = this.type.verticalAlign;
     this.element.style.outline = this.type.outline;
@@ -875,8 +908,9 @@ class MathNode {
   }
 
   computeDimensionsAtomic() {
-    this.boundingBox.width = this.element.getBoundingClientRect().width;
-    this.boundingBox.height = this.element.getBoundingClientRect().height;
+    let boundingRecangleDOM = this.element.getBoundingClientRect();
+    this.boundingBox.width = boundingRecangleDOM.width;
+    this.boundingBox.height = boundingRecangleDOM.height;
     this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
   }
 
@@ -891,6 +925,9 @@ class MathNode {
     denominator.boundingBox.top = numerator.boundingBox.height;
     numerator.computeBoundingBoxLeftSingleChild();
     denominator.computeBoundingBoxLeftSingleChild();
+    this.boundingBox.width += 4;
+    numerator.boundingBox.left += 2;
+    denominator.boundingBox.left += 2;
   }
 
   computeDimensionsBaseWithExponent() {
@@ -1245,6 +1282,29 @@ class MathNode {
     return reversed.reverse();
   }
 
+  /** @returns {number[]|null} */
+  commonPathToRoot(
+    /**@type{MathNode} */
+    other,
+  ) {
+    if (this.equationEditor.rootNode !== other.equationEditor.rootNode) {
+      return null;
+    }
+    let thisPath = this.getPathToRoot();
+    let otherPath = other.getPathToRoot();
+    let result = [];
+    for (let i = 0; i < thisPath.length; i++) {
+      if (i >= otherPath.length) {
+        return result;
+      }
+      if (thisPath[i] !== otherPath[i]) {
+        return result;
+      }
+      result.push(thisPath[i]);
+    }
+    return result;
+  }
+
   /** @returns{MathNode|null} returns the common ancestor of two nodes. */
   commonAncestor(
     /**@type{MathNode} */
@@ -1256,19 +1316,29 @@ class MathNode {
     if (this.equationEditor.rootNode !== other.equationEditor.rootNode) {
       return null;
     }
+    let commonPath = this.commonPathToRoot();
+    return this.equationEditor.elementFromPath(commonPath);
+  }
+
+  /** @returns{ParentWithIndex} 
+   * returns the common ancestor of two nodes 
+   * with the index of the ancestor's child 
+   * that contains this node.  
+   */
+  commonParent(
+    /**@type{MathNode} */
+    other,
+  ) {
+    let commonPath = this.commonPathToRoot(other);
     let thisPath = this.getPathToRoot();
-    let otherPath = other.getPathToRoot();
-    let current = this.equationEditor.rootNode;
-    for (let i = 0; i < thisPath.length; i++) {
-      if (i >= otherPath.length) {
-        return current;
-      }
-      if (thisPath[i] !== otherPath[i]) {
-        return current;
-      }
-      current = current.children[thisPath[i]];
+    if (thisPath.length === commonPath.length) {
+      // The other element was contained in this element.
+      return new ParentWithIndex(this.parent, this.indexInParent);
     }
-    return current;
+    return new ParentWithIndex(
+      this.equationEditor.elementFromPath(commonPath),
+      thisPath[commonPath.length],
+    );
   }
 
   /** @returns{boolean} Given two atoms, decides whether this is to the left of the other atom. */
@@ -1344,8 +1414,18 @@ class MathNode {
       return false;
     }
     this.equationEditor.selectionEnd = newSelection;
+    this.equationEditor.selectionStartExpanded = this.equationEditor.selectionStart;
+    if (this.equationEditor.selectionStart.element.parent != this.equationEditor.selectionEnd.element.parent) {
+      let parentOfSelectionStart = this.equationEditor.selectionStart.element.commonParent(
+        this.equationEditor.selectionEnd.element
+      );
+      this.equationEditor.selectionStartExpanded = new AtomWithPosition(
+        parentOfSelectionStart.parent.children[parentOfSelectionStart.indexInParent],
+        - 1,
+      );
+    }
     this.selectBetween(
-      this.equationEditor.selectionStart,
+      this.equationEditor.selectionStartExpanded,
       this.equationEditor.selectionEnd,
     );
 
@@ -2559,7 +2639,9 @@ class MathNode {
     /** @type {number} */
     position,
   ) {
-    if (this.element.childNodes.length > 0) {
+    if (!this.isAtomEditable()) {
+      range.setStartBefore(this.element);
+    } else if (this.element.childNodes.length > 0) {
       range.setStart(this.element.childNodes[0], position);
     } else {
       range.setStart(this.element, 0);
@@ -2572,7 +2654,9 @@ class MathNode {
     /** @type {number} */
     position,
   ) {
-    if (this.element.childNodes.length > 0) {
+    if (!this.isAtomEditable()) {
+      range.setEndAfter(this.element);
+    } else if (this.element.childNodes.length > 0) {
       range.setEnd(this.element.childNodes[0], position);
     } else {
       range.setEnd(this.element, 0);

@@ -219,6 +219,26 @@ const knownTypes = {
     "type": "radicalUnderBox",
     "borderTop": "2px solid black",
   }),
+  matrix: new MathNodeType({
+    "type": "matrix",
+    "display": "",
+    "position": "relative",
+  }),
+  matrixTable: new MathNodeType({
+    "type": "matrixTable",
+    "display": "",
+    "position": "relative",
+  }),
+  matrixRow: new MathNodeType({
+    "type": "matrixRow",
+    "display": "",
+    "position": "relative",
+  }),
+  matrixRowEntry: new MathNodeType({
+    "type": "matrixRowEntry",
+    "display": "",
+    "position": "relative",
+  }),
 };
 
 class MathNodeFactory {
@@ -358,6 +378,49 @@ class MathNodeFactory {
     rightParentheses.initialContent = ")";
     rightParentheses.implied = implied;
     return rightParentheses;
+  }
+
+  matrix(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /** @type {number} */
+    rows,
+    /** @type {number} */
+    columns,
+  ) {
+    const matrixTable = new MathNode(equationEditor, knownTypes.matrixTable);
+    for (let i = 0; i < rows; i++) {
+      matrixTable.appendChild(this.matrixRow(equationEditor, columns));
+    }
+    const parenthesesLayout = this.horizontalMath(equationEditor, null);
+    parenthesesLayout.appendChild(this.leftParenthesis(equationEditor, false));
+    parenthesesLayout.appendChild(matrixTable);
+    parenthesesLayout.appendChild(this.rightParenthesis(equationEditor, false));
+    const result = new MathNode(equationEditor, knownTypes.matrix);
+    result.appendChild(parenthesesLayout);
+    return result;
+  }
+
+  matrixRow(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /** @type {number} */
+    columns,
+  ) {
+    let result = new MathNode(equationEditor, knownTypes.matrixRow);
+    for (let i = 0; i < columns; i++) {
+      result.appendChild(this.matrixRowEntry(equationEditor));
+    }
+    return result;
+  }
+
+  matrixRowEntry(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    let result = new MathNode(equationEditor, knownTypes.matrixRowEntry);
+    result.appendChild(this.horizontalMath(equationEditor, null));
+    return result;
   }
 }
 
@@ -712,7 +775,24 @@ class MathNode {
       // Element already created;
       return;
     }
-    this.element = document.createElement("div");
+    if (this.type.type === knownTypes.matrixTable.type) {
+      if (this.parent.element === null) {
+        this.parent.createDOMElementIfMissing();
+      }
+      this.element = document.createElement("table");
+    } else if (this.type.type === knownTypes.matrixRow.type) {
+      if (this.parent.element === null) {
+        this.parent.createDOMElementIfMissing();
+      }
+      this.element = this.parent.element.insertRow(- 1);
+    } else if (this.type.type === knownTypes.matrixRowEntry.type) {
+      if (this.parent.element === null) {
+        this.parent.createDOMElementIfMissing();
+      }
+      this.element = this.parent.element.insertCell(- 1);
+    } else {
+      this.element = document.createElement("div");
+    }
     const fontSize = 20;
     if (this.type.type === knownTypes.atom.type) {
       this.element.contentEditable = true;
@@ -1024,6 +1104,10 @@ class MathNode {
     this.boundingBox.width = underTheRadical.boundingBox.left + underTheRadical.boundingBox.width;
   }
 
+  computeDimensionsMatrixTable() {
+    this.computeDimensionsAtomic();
+  }
+
   computeDimensionsRadicalUnderBox() {
     this.computeDimensionsStandard();
     this.boundingBox.height = this.children[0].boundingBox.height + 1;
@@ -1036,6 +1120,10 @@ class MathNode {
     }
     if (this.type.type === knownTypes.sqrt.type) {
       this.computeDimensionsSqrt();
+      return;
+    }
+    if (this.type.type === knownTypes.matrixTable.type) {
+      this.computeDimensionsMatrixTable();
       return;
     }
     if (this.type.type === knownTypes.radicalUnderBox.type) {
@@ -2080,26 +2168,19 @@ class MathNode {
     /** @type {string} */
     key,
   ) {
-    let positionOperator = this.computePositionOfOperator();
     // Find closest ancestor node that's of type horizontal math.
     if (!this.hasHorizintalMathParent()) {
       console.log('Warning: horizontal operator made on element not contained in horizontal math.');
       return;
     }
     let parent = this.parent;
-    let split = this.splitByCaret();
-    if (split[1] === null) {
-      split[1] = mathNodeFactory.atom(this.equationEditor, null);
-    }
-    if (split[0] === null) {
-      split[0] = mathNodeFactory.atom(this.equationEditor, null);
-    }
+    let split = this.splitByCaretEmptyAtoms();
     split[1].desiredCaretPosition = 0;
     parent.replaceChildAtPositionWithChildren(
       this.indexInParent, [
       split[0],
       mathNodeFactory.atomImmutable(this.equationEditor, key),
-      split[1]
+      split[1],
     ]);
     parent.normalizeHorizontalMath();
     parent.ensureEditableAtoms();
@@ -2115,8 +2196,28 @@ class MathNode {
     this.makeParenthesesCommon(false);
   }
 
-  makeMatrix() {
-
+  makeMatrix(
+    /**@type{number} */
+    rows,
+    /**@type{number} */
+    columns,
+  ) {
+    // Find closest ancestor node that's of type horizontal math.
+    if (!this.hasHorizintalMathParent()) {
+      console.log('Warning: horizontal operator made on element not contained in horizontal math.');
+      return;
+    }
+    let parent = this.parent;
+    let split = this.splitByCaretEmptyAtoms();
+    parent.replaceChildAtPositionWithChildren(
+      this.indexInParent, [
+      split[0],
+      mathNodeFactory.matrix(this.equationEditor, rows, columns),
+      split[1],
+    ]);
+    parent.normalizeHorizontalMath();
+    parent.ensureEditableAtoms();
+    parent.updateDOM();
   }
 
   makeSqrt() {
@@ -2228,6 +2329,26 @@ class MathNode {
   /** @returns {MathNode[]} */
   splitByCaret() {
     return this.splitByPosition(this.positionCaretBeforeKeyEvents)
+  }
+
+  /** @returns {MathNode[]} */
+  splitByCaretEmptyAtoms() {
+    return this.splitByPositionEmptyAtoms(this.positionCaretBeforeKeyEvents)
+  }
+
+  /** @returns {MathNode[]} */
+  splitByPositionEmptyAtoms(
+    /** @type{number} */
+    position,
+  ) {
+    let result = this.splitByPosition(position);
+    if (result[0] === null) {
+      result[0] = mathNodeFactory.atom(this.equationEditor, "");
+    }
+    if (result[1] === null) {
+      result[1] = mathNodeFactory.atom(this.equationEditor, "");
+    }
+    return result;
   }
 
   /** @returns {MathNode[]} */

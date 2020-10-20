@@ -221,23 +221,15 @@ const knownTypes = {
   }),
   matrix: new MathNodeType({
     "type": "matrix",
-    "display": "",
-    "position": "relative",
   }),
   matrixTable: new MathNodeType({
     "type": "matrixTable",
-    "display": "",
-    "position": "relative",
   }),
   matrixRow: new MathNodeType({
     "type": "matrixRow",
-    "display": "",
-    "position": "relative",
   }),
   matrixRowEntry: new MathNodeType({
     "type": "matrixRowEntry",
-    "display": "",
-    "position": "relative",
   }),
 };
 
@@ -392,8 +384,7 @@ class MathNodeFactory {
     for (let i = 0; i < rows; i++) {
       matrixTable.appendChild(this.matrixRow(equationEditor, columns));
     }
-    const parenthesesLayout = this.horizontalMath(equationEditor, null);
-    parenthesesLayout.appendChild(this.leftParenthesis(equationEditor, false));
+    const parenthesesLayout = this.horizontalMath(equationEditor, this.leftParenthesis(equationEditor, false));
     parenthesesLayout.appendChild(matrixTable);
     parenthesesLayout.appendChild(this.rightParenthesis(equationEditor, false));
     const result = new MathNode(equationEditor, knownTypes.matrix);
@@ -775,24 +766,7 @@ class MathNode {
       // Element already created;
       return;
     }
-    if (this.type.type === knownTypes.matrixTable.type) {
-      if (this.parent.element === null) {
-        this.parent.createDOMElementIfMissing();
-      }
-      this.element = document.createElement("table");
-    } else if (this.type.type === knownTypes.matrixRow.type) {
-      if (this.parent.element === null) {
-        this.parent.createDOMElementIfMissing();
-      }
-      this.element = this.parent.element.insertRow(- 1);
-    } else if (this.type.type === knownTypes.matrixRowEntry.type) {
-      if (this.parent.element === null) {
-        this.parent.createDOMElementIfMissing();
-      }
-      this.element = this.parent.element.insertCell(- 1);
-    } else {
-      this.element = document.createElement("div");
-    }
+    this.element = document.createElement("div");
     const fontSize = 20;
     if (this.type.type === knownTypes.atom.type) {
       this.element.contentEditable = true;
@@ -1105,7 +1079,43 @@ class MathNode {
   }
 
   computeDimensionsMatrixTable() {
-    this.computeDimensionsAtomic();
+    this.boundingBox = new BoundingBox();
+    let numberOfColumns = this.children[0].children.length;
+    let numberOfRows = this.children.length;
+    let left = 0;
+    let betweenColumns = 10;
+    for (let i = 0; i < numberOfColumns; i++) {
+      let width = 0;
+      for (let j = 0; j < numberOfRows; j++) {
+        width = Math.max(width, this.children[j].children[i].boundingBox.width);
+      }
+      for (let j = 0; j < numberOfRows; j++) {
+        let child = this.children[j].children[i];
+        child.boundingBox.left = left + (width - child.boundingBox.width) / 2;
+        child.computeBoundingBoxLeftSingleChild();
+      }
+      left += width + betweenColumns;
+    }
+    let rowWidth = left - betweenColumns;
+    let top = 0;
+    let betweenRows = 10;
+    for (let i = 0; i < numberOfRows; i++) {
+      let row = this.children[i];
+      row.boundingBox = new BoundingBox();
+      row.boundingBox.width = rowWidth;
+      let height = 0;
+      for (let j = 0; j < numberOfColumns; j++) {
+        height = Math.max(height, row.children[j].boundingBox.height);
+      }
+      for (let j = 0; j < numberOfColumns; j++) {
+        row.children[j].boundingBox.top = (height - row.children[j].boundingBox.height) / 2;
+      }
+      row.boundingBox.top = top;
+      top += height + betweenRows;
+    }
+    this.boundingBox.height = top - betweenRows;
+    this.boundingBox.width = rowWidth;
+    this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
   }
 
   computeDimensionsRadicalUnderBox() {
@@ -1120,6 +1130,9 @@ class MathNode {
     }
     if (this.type.type === knownTypes.sqrt.type) {
       this.computeDimensionsSqrt();
+      return;
+    }
+    if (this.type.type === knownTypes.matrixRow.type) {
       return;
     }
     if (this.type.type === knownTypes.matrixTable.type) {
@@ -2209,15 +2222,17 @@ class MathNode {
     }
     let parent = this.parent;
     let split = this.splitByCaretEmptyAtoms();
+    let matrix = mathNodeFactory.matrix(this.equationEditor, rows, columns);
     parent.replaceChildAtPositionWithChildren(
       this.indexInParent, [
       split[0],
-      mathNodeFactory.matrix(this.equationEditor, rows, columns),
+      matrix,
       split[1],
     ]);
     parent.normalizeHorizontalMath();
     parent.ensureEditableAtoms();
     parent.updateDOM();
+    matrix.children[0].children[1].children[0].children[0].focus(0);
   }
 
   makeSqrt() {

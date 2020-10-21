@@ -238,13 +238,34 @@ class MathNodeFactory {
     /** @type {EquationEditor} */
     equationEditor,
     /** @type {MathNode|null} */
-    content
+    content,
   ) {
     const result = new MathNode(equationEditor, knownTypes.horizontalMath);
     if (content === null) {
       content = this.atom(equationEditor, "");
     }
     result.appendChild(content);
+    return result;
+  }
+
+  /** @returns{MathNode} 
+   * Returns a horizontal math with content given by the input array.
+   * Normalizes the input but does not ensure editable atoms at the ends. 
+   */
+  horizontalMathFromArray(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /** @type {MathNode|null[]} */
+    content,
+  ) {
+    let result = this.horizontalMath(equationEditor, null);
+    for (let i = 0; i < content.length; i++) {
+      if (content[i] === null) {
+        continue;
+      }
+      result.appendChild(content[i]);
+    }
+    result.normalizeHorizontalMath();
     return result;
   }
 
@@ -611,6 +632,75 @@ class EquationEditor {
   }
 
   /** @returns {SplitBySelectionResult|null} */
+  splitOneAtomBySelection() {
+    if (this.selectionStartExpanded.element === null) {
+      return null;
+    }
+    if (
+      this.selectionEnd.element !== this.selectionStartExpanded.element ||
+      !this.selectionEnd.element.isAtomEditable()
+    ) {
+      return null;
+    }
+    let atom = this.selectionEnd.element;
+    if (!atom.hasHorizintalMathParent()) {
+      console.log("Atom has non-horizontal math parent.");
+      return null;
+    }
+    let parent = atom.parent;
+    let result = new SplitBySelectionResult(parent);
+    for (let i = 0; i < atom.indexInParent; i++) {
+      result.beforeSplit.push(parent.children[i]);
+    }
+    let left = null;
+    let middle = null;
+    let right = null;
+    let leftPosition = this.selectionStartExpanded.position;
+    let rightPosition = this.selectionEnd.position;
+    if (rightPosition < leftPosition) {
+      let temporary = rightPosition;
+      rightPosition = leftPosition;
+      leftPosition = temporary;
+    }
+    if (leftPosition < 0) {
+      console.log("Unexpected negative left position.");
+      return null;
+    }
+    let rightPositionShifted = rightPosition - leftPosition;
+    if (rightPositionShifted < 0) {
+      console.log("Unexpected negative shifted right position.");
+      return null;
+    }
+
+    // Suppose our atom has content: "leftmiddleright". 
+    // Suppose the middle is selected, i.e., the selection borders are as indicated: "left|middle|right".
+    let leftSplit = atom.splitByPosition(leftPosition);
+    if (leftSplit[0] !== null) {
+      // The left section is non-empty.
+      left = leftSplit[0];
+    }
+    if (leftSplit[1] === null) {
+      // The middle section is empty - we have a zero-length selection.
+      // We choose not to split.
+      return null;
+    }
+    let rightSplit = leftSplit[1].splitByPosition(rightPositionShifted);
+    middle = rightSplit[0];
+    right = rightSplit[1];
+    if (left !== null) {
+      result.beforeSplit.push(left);
+    }
+    result.split.push(middle);
+    if (right !== null) {
+      result.afterSplit.push(right);
+    }
+    for (let i = atom.indexInParent + 1; i < parent.children.length; i++) {
+      result.afterSplit.push(parent.children[i]);
+    }
+    return result;
+  }
+
+  /** @returns {SplitBySelectionResult|null} */
   splitAtomsBySelection() {
     if (this.selectionStartExpanded.element === null || this.selectionEnd.element === null) {
       return null;
@@ -623,6 +713,12 @@ class EquationEditor {
       start = end;
       end = temporary;
     }
+    if (
+      this.selectionStartExpanded.element === this.selectionEnd.element &&
+      this.selectionEnd.element.isAtomEditable()
+    ) {
+      return this.splitOneAtomBySelection();
+    }
     let ancestor = start.element.commonAncestor(end.element);
     if (ancestor === null) {
       console.log(`Not expected: no common ancestor element betwen ${start} and ${end}. `);
@@ -633,7 +729,7 @@ class EquationEditor {
       return null;
     }
     if (start.element === ancestor || end.element === ancestor) {
-      // Start and end should are the same node, which is the ancestor.
+      // Start and end are the same node, which is the ancestor.
       return null;
     }
     while (start.element.parent !== ancestor && start.element.parent !== null) {
@@ -699,7 +795,6 @@ class SplitBySelectionResult {
     /**@type{MathNode} */
     this.ancestor = ancestor;
   }
-
 }
 
 class BoundingBox {
@@ -903,6 +998,16 @@ class MathNode {
       return this.initialContent.length;
     }
     return this.element.textContent.length;
+  }
+
+  contentIfAtom() {
+    if (!this.isAtomEditable()) {
+      return "";
+    }
+    if (this.element === null) {
+      return this.initialContent;
+    }
+    return this.element.textContent;
   }
 
   /** @returns {boolean} */
@@ -1734,6 +1839,18 @@ class MathNode {
     this.children.push(child);
   }
 
+  appendChildren(
+    /** @type{MathNode[]|null[]} */
+    newChildren,
+  ) {
+    for (let i = 0; i < newChildren.length; i++) {
+      if (newChildren[i] === null) {
+        continue;
+      }
+      this.appendChild(newChildren[i]);
+    }
+  }
+
   normalizeHorizontalMath() {
     if (!this.type.type === knownTypes.horizontalMath.type) {
       return false;
@@ -2236,6 +2353,31 @@ class MathNode {
   }
 
   makeSqrt() {
+    let splitBySelection = this.equationEditor.splitAtomsBySelection();
+    if (splitBySelection !== null) {
+      this.makeSqrtFromSelection(splitBySelection);
+    } else {
+      this.makeSqrtFromCaret(splitBySelection);
+    }
+  }
+
+  makeSqrtFromSelection(
+    /** @type{SplitBySelectionResult} */
+    splitBySelection,
+  ) {
+    let ancestor = splitBySelection.ancestor;
+    ancestor.removeAllChildren();
+    let underTheRadical = mathNodeFactory.horizontalMathFromArray(splitBySelection.split);
+    let sqrt = mathNodeFactory.sqrt(this.equationEditor, underTheRadical);
+    ancestor.appendChildren(splitBySelection.beforeSplit);
+    ancestor.appendChild(sqrt);
+    ancestor.appendChildren(splitBySelection.afterSplit);
+    ancestor.ensureEditableAtoms();
+    ancestor.updateDOM();
+    sqrt.children[2].focusStandard(0);
+  }
+
+  makeSqrtFromCaret() {
     let parent = this.parent;
     let oldIndex = this.indexInParent;
     let split = this.splitByCaret();
@@ -2381,11 +2523,12 @@ class MathNode {
     if (position === 0) {
       return [null, this];
     }
-    if (position >= this.element.textContent.length) {
+    let content = this.contentIfAtom();
+    if (position >= content.length) {
       return [this, null];
     }
-    let leftContent = this.element.textContent.slice(0, position);
-    let rightContent = this.element.textContent.slice(position, this.element.textContent.length);
+    let leftContent = content.slice(0, position);
+    let rightContent = content.slice(position, content.length);
     let leftNode = mathNodeFactory.atom(this.equationEditor, leftContent);
     let rightNode = mathNodeFactory.atom(this.equationEditor, rightContent);
     return [leftNode, rightNode];
@@ -2596,20 +2739,20 @@ class MathNode {
     fraction.children[childIndexToFocus].focus(- 1);
   }
 
+  removeAllChildren() {
+    this.removeChildRange(0, this.children.length - 1);
+  }
+
   makeFractionNumeratorFromSelection(
     /**@type{SplitBySelectionResult} */
     split,
   ) {
     let ancestor = split.ancestor;
-    ancestor.removeChildRange(0, ancestor.children.length - 1);
+    ancestor.removeAllChildren();
     for (let i = 0; i < split.beforeSplit.length; i++) {
       ancestor.appendChild(split.beforeSplit[i]);
     }
-    let numerator = mathNodeFactory.horizontalMath(this.equationEditor, null);
-    for (let i = 0; i < split.split.length; i++) {
-      numerator.appendChild(split.split[i]);
-    }
-    numerator.normalizeHorizontalMath();
+    let numerator = mathNodeFactory.horizontalMathFromArray(this.equationEditor, split.split);
     numerator.ensureEditableAtoms();
     let fraction = mathNodeFactory.fraction(this.equationEditor, numerator, null);
     ancestor.appendChild(fraction);
@@ -2669,12 +2812,10 @@ class MathNode {
     let rightIndex = this.indexInParent;
     let originalParent = this.parent;
     let leftIndex = originalParent.findIndexMatchingDelimiter(rightIndex);
-    let base = mathNodeFactory.horizontalMath(this.equationEditor, null);
-    for (let i = leftIndex; i < rightIndex + 1; i++) {
-      base.children.push(originalParent.children[i]);
-    }
-    base.normalizeHorizontalMath();
-    base.ensureEditableAtoms();
+    let base = mathNodeFactory.horizontalMathFromArray(
+      this.equationEditor,
+      originalParent.children.slice(leftIndex, rightIndex + 1),
+    );
     const baseWithExponent = mathNodeFactory.baseWithExponent(this.equationEditor, base);
     baseWithExponent.children[1].children[0].children[0].desiredCaretPosition = 0;
     originalParent.replaceChildRangeWithChildren(leftIndex, rightIndex, [baseWithExponent]);

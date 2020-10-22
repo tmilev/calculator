@@ -2232,6 +2232,18 @@ class MathNode {
     return true;
   }
 
+  applyBackspaceToTheRightMatrix() {
+    if (this.type.type !== knownTypes.matrix.type) {
+      return false;
+    }
+    let parent = this.parent;
+    parent.removeChildRange(this.indexInParent);
+    parent.normalizeHorizontalMath();
+    parent.updateDOM();
+    parent.focusRestore();
+    return true;
+  }
+
   /** @returns {boolean} whether backspace was applied */
   applyBackspaceToTheRight() {
     if (this.applyBackspaceToTheRightAtomImmutable()) {
@@ -2241,6 +2253,9 @@ class MathNode {
       return true;
     }
     if (this.applyBackspaceToTheRightFraction()) {
+      return true;
+    }
+    if (this.applyBackspaceToTheRightMatrix()) {
       return true;
     }
     if (this.applyBackspaceToTheRightBaseWithExponent()) {
@@ -2981,7 +2996,7 @@ class MathNode {
   toString() {
     const result = [];
     if (this.isAtomic()) {
-      result.push(this.element.textContent);
+      result.push(this.contentIfAtom());
     }
     result.push(`[${this.type.type}]`)
     if (this.children.length > 0) {

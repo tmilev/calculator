@@ -2382,7 +2382,7 @@ class MathNode {
   ) {
     let ancestor = splitBySelection.ancestor;
     ancestor.removeAllChildren();
-    let underTheRadical = mathNodeFactory.horizontalMathFromArray(splitBySelection.split);
+    let underTheRadical = mathNodeFactory.horizontalMathFromArray(this.equationEditor, splitBySelection.split);
     let sqrt = mathNodeFactory.sqrt(this.equationEditor, underTheRadical);
     ancestor.appendChildren(splitBySelection.beforeSplit);
     ancestor.appendChild(sqrt);

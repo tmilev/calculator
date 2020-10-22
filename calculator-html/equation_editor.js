@@ -1096,12 +1096,22 @@ class MathNode {
   computeDimensionsBaseWithExponent() {
     let base = this.children[0];
     let exponent = this.children[1];
-    let overlap = base.boundingBox.height * 0.4;
+    let overlapRatio = 0.35;
+    if (base.children[0].type.type === knownTypes.matrix.type) {
+      overlapRatio = 0.1;
+    }
+    let overlap = base.boundingBox.height * overlapRatio;
     this.boundingBox.height = exponent.boundingBox.height + base.boundingBox.height - overlap;
     if (exponent.boundingBox.height > this.boundingBox.height) {
       this.boundingBox.height = exponent.boundingBox.height;
     }
     base.boundingBox.top = exponent.boundingBox.height - overlap;
+    if (base.boundingBox.top < 0) {
+      // The exponent is so small relative to the base that it 
+      // fits entirely in the overlap between the base and the exponent.
+      exponent.boundingBox.top = - base.boundingBox.top;
+      base.boundingBox.top = 0;
+    }
     base.boundingBox.left = 0;
     this.boundingBox.width = base.boundingBox.width + exponent.boundingBox.width;
     exponent.boundingBox.left = base.boundingBox.width;
@@ -3085,11 +3095,51 @@ class MathNode {
     return `\\left${this.element.textContent}`;
   }
 
+  toLatexSqrt() {
+    if (this.element === null) {
+      return "[null(]";
+    }
+    let exponent = "";
+    let underTheRadical = "";
+    if (this.children.length > 0) {
+      exponent = this.children[0].toLatex();
+    }
+    if (this.children.length > 2) {
+      underTheRadical = this.children[2].toLatex();
+    }
+    if (exponent !== "") {
+      return `\\sqrt[${exponent}]{${underTheRadical}}`;
+    }
+    return `\\sqrt{${underTheRadical}}`;
+  }
+
   toLatexRightDelimiter() {
     if (this.element === null) {
       return "[null)]";
     }
     return `\\right${this.element.textContent}`;
+  }
+
+  toLatexMatrix() {
+    if (this.element === null) {
+      return "[null)]";
+    }
+    let matrixContent = this.children[0].children[1];
+    let result = [];
+    result.push("\\begin{pmatrix}");
+    let rows = [];
+    for (let i = 0; i < matrixContent.children.length; i++) {
+      let matrixRow = matrixContent.children[i];
+      let currentRowStrings = [];
+      for (let j = 0; j < matrixRow.children.length; j++) {
+        let entry = matrixRow.children[j];
+        currentRowStrings.push(entry.toLatex());
+      }
+      rows.push(currentRowStrings.join("&"));
+    }
+    result.push(rows.join("\\\\"));
+    result.push("\\end{pmatrix}");
+    return result.join("");
   }
 
   toLatex() {
@@ -3104,6 +3154,12 @@ class MathNode {
     }
     if (this.type.type === knownTypes.baseWithExponent.type) {
       return this.toLatexBaseWithExponent();
+    }
+    if (this.type.type === knownTypes.matrix.type) {
+      return this.toLatexMatrix();
+    }
+    if (this.type.type === knownTypes.sqrt.type) {
+      return this.toLatexSqrt();
     }
     if (this.type.type === knownTypes.leftDelimiter.type) {
       return this.toLatexLeftDelimiter();

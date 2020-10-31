@@ -437,8 +437,6 @@ class MathNodeFactory {
 }
 
 var mathNodeFactory = new MathNodeFactory();
-/** @type {EquationEditor} */
-var lastCreatedEquationEditor = null;
 
 class AtomWithPosition {
   constructor(
@@ -522,10 +520,224 @@ class AtomWithPosition {
   }
 }
 
+/** @returns {EquationEditor} Returns typeset math.*/
+function mathFromLatex(
+  /**@type{HTMLElement} */
+  container,
+  /**@type{string} */
+  latex,
+  /**@type{boolean} */
+  editable,
+) {
+  let result = new EquationEditor(container, new EquationEditorOptions(editable));
+  result.writeLatex(latex);
+  result.updateDOM();
+  result.updateAlignment();
+  return result;
+}
+
+class SyntancticElement {
+  constructor(
+    /**@type{MathNode|null} */
+    node,
+    /**@type{string} */
+    content,
+  ) {
+    /**@type{MathNode|null} contains parsed math content. */
+    this.node = node;
+    /**@type{string} contains non-parsed atomic content. */
+    this.content = content;
+    /**@type{string} */
+    this.syntacticContent = "";
+  }
+}
+
+class LaTeXConstants {
+  constructor() {
+    this.latinCharactersString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    this.latinCharacters = {};
+    for (let i = 0; i < this.latinCharactersString.length; i++) {
+      this.latinCharacters[this.latinCharactersString[i]] = true;
+    }
+    /**@type{Object.<string, string>} */
+    this.operatorsNormalized = {
+      "\u2212": "\u2212",
+      "-": "\u2212",
+      "*": "\u00B7",
+      "\u00B7": "\u00B7",
+    };
+    /**@type{Object.<string, string>} */
+    this.latexSyntacticValues = {
+      "{": "{",
+      "}": "}",
+    };
+  }
+  isLatinCharacter(
+    /**@type{string}*/
+    input,
+  ) {
+    return input in this.latinCharacters;
+  }
+
+  normalizeOperatorToUtf8(
+    /**@type{string}*/
+    input,
+  ) {
+    if (input in this.operatorsNormalized) {
+      return this.operatorsNormalized[input];
+    }
+    return input;
+  }
+
+}
+const latexConstants = new LaTeXConstants();
+
+class LaTeXParser {
+  constructor(
+    /**@type{EquationEditor} */
+    equationEditor,
+    /**@type{string} */
+    latex,
+  ) {
+    /**@type{EquationEditor} */
+    this.equationEditor = equationEditor;
+    /**@type{string} */
+    this.latex = latex;
+    /**@type {MathNode} */
+    this.result = new MathNode(equationEditor, knownTypes.horizontalMath);
+    /**@type{string[]} */
+    this.words = [];
+    /**@type{SyntancticElement[]} */
+    this.parsingStack = [];
+    /**@type {number} 
+     * Dummy elements are prepended to the parsing stack  
+     * so parsing rules can safely assume a minimal number 
+     * of syntanctic elements. 
+     */
+    this.dummyParsingElements = 6;
+    /**@type{string} */
+    this.reductionLog = [];
+  }
+  intialize() {
+    this.parsingStack = [];
+    for (let i = 0; i < this.dummyParsingElements; i++) {
+      this.parsingStack.push(new SyntancticElement(null, ""));
+    }
+  }
+  parseWords() {
+    let next = [];
+    for (let i = 0; i < this.latex.length; i++) {
+      let nextCharacter = this.latex[i];
+      if (latexConstants.isLatinCharacter(nextCharacter)) {
+        next.push(nextCharacter);
+        continue;
+      }
+      if (next.length > 0) {
+        this.words.push(next.join(""));
+      }
+      this.words.push(nextCharacter);
+      next = [];
+    }
+    if (next.length > 0) {
+      this.words.push(next.join(""));
+    }
+  }
+
+  /**@returns{MathNode} */
+  parse() {
+    this.intialize();
+    this.parseWords();
+    this.result = new MathNode(this.equationEditor, knownTypes.horizontalMath);
+    let startingNode = mathNodeFactory.horizontalMath(this.equationEditor, null);
+    this.parsingStack.push(new SyntancticElement(startingNode, "", ""));
+    for (let i = 0; i < this.words.length; i++) {
+      this.parsingStack.push(new SyntancticElement(null, this.words[i]));
+      while (this.applyOneRule()) {
+      }
+    }
+    if (this.parsingStack.length !== this.dummyParsingElements + 1) {
+      console.log(`Failed to parse ${this.latex}: not all syntactic elements were reduced.`);
+      return null;
+    }
+    let lastElement = this.parsingStack[this.parsingStack.length - 1];
+    if (lastElement.node === null) {
+      console.log(`Failed to parse ${this.latex}: final syntactic element is not a node.`);
+      return null;
+    }
+    return lastElement.node;
+  }
+
+  /** @returns{boolean} */
+  decreaseParsingStack(
+    /**@type{MathNode|null} */
+    node,
+    /**@type{string} */
+    syntancticValue,
+    /**@type{number} */
+    nodesToRemove,
+  ) {
+    let indexRetained = this.parsingStack.length - nodesToRemove - 1;
+    this.parsingStack[indexRetained].node = node;
+    this.parsingStack[indexRetained].content = "";
+    this.parsingStack[indexRetained].syntacticContent = syntancticValue;
+    this.parsingStack.length = indexRetained + 1;
+    return true;
+  }
+
+  /**@returns{boolean} Applies the first possible rule to the top of the parsing stack. */
+  applyOneRule() {
+    let last = this.parsingStack[this.parsingStack.length - 1];
+    let secondToLast = this.parsingStack[this.parsingStack.length - 2];
+    let thirdToLast = this.parsingStack[this.parsingStack.length - 2];
+    if (last.content in latexConstants.operatorsNormalized) {
+      let node = mathNodeFactory.atomImmutable(this.equationEditor, latexConstants.operatorsNormalized[last.content]);
+      return this.decreaseParsingStack(node, "", 0);
+    }
+    if (last.content in latexConstants.latexSyntacticValues) {
+      return this.decreaseParsingStack(null, latexConstants.latexSyntacticValues[last.content], 0);
+    }
+    if (thirdToLast.syntacticContent === "{" && secondToLast.node !== null && last.syntacticContent === "}") {
+      let node = secondToLast.node;
+      if (node.type.type !== knownTypes.horizontalMath.type) {
+        node = mathNodeFactory.horizontalMath(this.equationEditor, node);
+      }
+      return this.decreaseParsingStack(node, "", 2);
+    }
+    if (last.content === "frac" && secondToLast.content === "\\") {
+      return this.decreaseParsingStack(null, "\\frac", 1);
+    }
+    if (thirdToLast.syntacticContent === "\\frac" && secondToLast.node !== null && last.node !== null) {
+      let node = mathNodeFactory.fraction(this.equationEditor, secondToLast.node, thirdToLast.node);
+      return this.decreaseParsingStack(node, "", 2);
+    }
+    if (last.content !== "" && last.syntacticContent === "" && last.node === null) {
+      let node = mathNodeFactory.atom(this.equationEditor, last.content);
+      return this.decreaseParsingStack(node, "", 0);
+    }
+    if (last.node !== null && secondToLast.node !== null) {
+      if (secondToLast.node.type.type === knownTypes.horizontalMath.type) {
+        secondToLast.node.appendChild(last.node);
+        return this.decreaseParsingStack(secondToLast.node, "", 1);
+      }
+    }
+  }
+}
+
+class EquationEditorOptions {
+  constructor(
+    /**@type{boolean}*/
+    editable,
+  ) {
+    this.editable = editable;
+  }
+}
+
 class EquationEditor {
   constructor(
     /** @type{HTMLElement} */
     container,
+    /** @type{EquationEditorOptions|null} */
+    options,
   ) {
     this.container = container;
     this.container.innerHTML = "";
@@ -533,14 +745,34 @@ class EquationEditor {
     this.container.style.position = "relative";
     this.rootNode = mathNodeFactory.rootMath(this);
     this.rootNode.externalDOM = this.container;
-    this.rootNode.updateDOM();
-    lastCreatedEquationEditor = this;
+    /** @type{EquationEditorOptions} */
+    this.options = new EquationEditorOptions(true);
+    if (options !== null && options !== undefined) {
+      this.options = options;
+    }
     /** @type{AtomWithPosition} */
     this.selectionStart = new AtomWithPosition(null, -1);
     /** @type{AtomWithPosition} */
     this.selectionStartExpanded = new AtomWithPosition(null, -1);
     /** @type{AtomWithPosition} */
     this.selectionEnd = new AtomWithPosition(null, -1);
+  }
+
+  updateDOM() {
+    this.rootNode.updateDOM();
+  }
+
+  writeLatex(
+    /**@type {string} */
+    latex,
+  ) {
+    this.rootNode.removeAllChildren();
+    let newContent = new LaTeXParser(this, latex).parse();
+    if (newContent === null) {
+      console.log(`Failed to construct node from your input ${latex}.`);
+      return;
+    }
+    this.rootNode.appendChild(newContent);
   }
 
   toHtml() {
@@ -863,7 +1095,7 @@ class MathNode {
     }
     this.element = document.createElement("div");
     const fontSize = 20;
-    if (this.type.type === knownTypes.atom.type) {
+    if (this.type.type === knownTypes.atom.type && this.equationEditor.options.editable) {
       this.element.contentEditable = true;
     }
     // Padding.
@@ -1799,6 +2031,7 @@ class MathNode {
     return this.firstAtomToTheLeft();
   }
 
+  /** @returns{MathNode|null} */
   leftmostAtomChild() {
     if (this.type.type === knownTypes.atom.type) {
       return this;
@@ -2308,15 +2541,7 @@ class MathNode {
     /** @type {string} */
     contentTransformedToMathSymbol,
   ) {
-    if (contentTransformedToMathSymbol === "-") {
-      this.makeHorizontalOperator("\u2212");
-      return;
-    }
-    if (contentTransformedToMathSymbol === "*") {
-      this.makeHorizontalOperator("\u00B7");
-      return;
-    }
-    this.makeHorizontalOperator(contentTransformedToMathSymbol);
+    this.makeHorizontalOperator(latexConstants.normalizeOperatorToUtf8(contentTransformedToMathSymbol));
   }
 
   makeHorizontalOperator(
@@ -2861,6 +3086,7 @@ class MathNode {
     originalParent.focusRestore();
   }
 
+  /** @returns{boolean} Focuses the cursor on an atom. */
   focusAtom(endToFocus) {
     if (this.element === null) {
       this.desiredCaretPosition = - 1;
@@ -3195,14 +3421,16 @@ class ParentWithIndex {
 }
 
 function writeDebugInfo() {
-  document.getElementById("debug").innerHTML = lastCreatedEquationEditor.toHtml();
+  document.getElementById("debug").innerHTML = defaultEquationEditorLocal.toHtml();
 }
 
 /** @type {EquationEditor|null} */
 var defaultEquationEditorLocal = null;
 
 function initialize() {
-  defaultEquationEditorLocal = new EquationEditor(document.getElementById('equation-editor'));
+  let editorElement = document.getElementById('equation-editor');
+  defaultEquationEditorLocal = new EquationEditor(editorElement);
+  defaultEquationEditorLocal.updateDOM();
   MathQuill.getInterface(2).MathField(document.getElementById('mq-editor'));
 }
 
@@ -3223,9 +3451,22 @@ function testEquationEditor() {
   }, 300);
 }
 
+function testTypeset(
+  /** @type{string} */
+  inputId,
+  /** @type{string} */
+  outputId,
+) {
+  let input = document.getElementById(inputId);
+  let inputContent = input.value;
+  let output = document.getElementById(outputId);
+  mathFromLatex(output, inputContent, true);
+}
+
 module.exports = {
   defaultEquationEditorLocal,
   testEquationEditor,
+  testTypeset,
   EquationEditor,
   initialize
 };

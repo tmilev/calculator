@@ -575,9 +575,14 @@ class LaTeXConstants {
     }
     /**@type{Object.<string, string>} */
     this.operatorsNormalized = {
+      // Full-widgth plus sign, wider and taller plus sign.
+      "\uFF0B": "+",
+      "+": "+",
+      // Mathematical minus, a wider dash.
       "\u2212": "\u2212",
       "-": "\u2212",
       "*": "\u00B7",
+      // A vertically centered small solid dot.
       "\u00B7": "\u00B7",
     };
     /**@type{Object.<string, string>} */
@@ -586,6 +591,12 @@ class LaTeXConstants {
       "}": "}",
       "\\": "\\",
     };
+    this.whiteSpaceCharacters = {
+      " ": true,
+      "\t": true,
+      "\u00A0": true,
+      "\n": true,
+    };
   }
   isLatinCharacter(
     /**@type{string}*/
@@ -593,9 +604,13 @@ class LaTeXConstants {
   ) {
     return input in this.latinCharacters;
   }
-
+  isWhiteSpace(
+    /**@type{string} */ input,
+  ) {
+    return input in this.whiteSpaceCharacters;
+  }
   normalizeOperatorToUtf8(
-    /**@type{string}*/
+    /**@type{string} */
     input,
   ) {
     if (input in this.operatorsNormalized) {
@@ -667,9 +682,17 @@ class LaTeXParser {
     this.result = new MathNode(this.equationEditor, knownTypes.horizontalMath);
     let startingNode = mathNodeFactory.horizontalMath(this.equationEditor, null);
     this.parsingStack.push(new SyntancticElement(startingNode, "", ""));
+    let numberOfRuleApplications = 0;
     for (let i = 0; i < this.words.length; i++) {
       this.parsingStack.push(new SyntancticElement(null, this.words[i]));
       while (this.applyOneRule()) {
+        numberOfRuleApplications++;
+        if (numberOfRuleApplications > this.words.length * 10) {
+          // The number of rule applicatinos exceeds ten times the word length. 
+          // Perhaps we have a substitution loop in our parsing rules?
+          console.log("Too many parsing rule applications.");
+          return null;
+        }
       }
     }
     if (this.parsingStack.length !== this.dummyParsingElements + 1) {
@@ -680,6 +703,9 @@ class LaTeXParser {
     if (lastElement.node === null) {
       console.log(`Failed to parse ${this.latex}: final syntactic element is not a node.`);
       return null;
+    }
+    if (this.equationEditor.options.editable) {
+      lastElement.node.ensureEditableAtomsRecursive();
     }
     return lastElement.node;
   }
@@ -696,30 +722,44 @@ class LaTeXParser {
     let indexRetained = this.parsingStack.length - nodesToRemove - 1;
     let incoming = new SyntancticElement(node, "");
     incoming.syntacticContent = syntancticValue;
+    let log = "";
     if (this.debug) {
       let substituted = [];
       for (let i = indexRetained; i < this.parsingStack.length; i++) {
         substituted.push(this.parsingStack[i].toString());
       }
-      let log = `${substituted.join(",")} --&gt; ${incoming.toString()}`;
-      this.reductionLog.push(log);
+      log += `${substituted.join(",")} --&gt; ${incoming.toString()}`;
     }
     this.parsingStack[indexRetained] = incoming;
     this.parsingStack.length = indexRetained + 1;
+    if (this.debug) {
+      let totalStack = [];
+      for (let i = this.dummyParsingElements; i < this.parsingStack.length; i++) {
+        totalStack.push(this.parsingStack[i].toString());
+      }
+      log += ` ||| ${totalStack.join(",")} `;
+      this.reductionLog.push(log);
+    }
     return true;
   }
 
   /**@returns{boolean} Applies the first possible rule to the top of the parsing stack. */
   applyOneRule() {
     let last = this.parsingStack[this.parsingStack.length - 1];
-    let secondToLast = this.parsingStack[this.parsingStack.length - 2];
-    let thirdToLast = this.parsingStack[this.parsingStack.length - 3];
-    if (last.content in latexConstants.operatorsNormalized) {
-      let node = mathNodeFactory.atomImmutable(this.equationEditor, latexConstants.operatorsNormalized[last.content]);
-      return this.decreaseParsingStack(node, "", 0);
+    if (latexConstants.isWhiteSpace(last.content)) {
+      this.parsingStack.length = this.parsingStack.length - 1;
+      return true;
     }
     if (last.content in latexConstants.latexSyntacticValues) {
       return this.decreaseParsingStack(null, latexConstants.latexSyntacticValues[last.content], 0);
+    }
+    let secondToLast = this.parsingStack[this.parsingStack.length - 2];
+    let thirdToLast = this.parsingStack[this.parsingStack.length - 3];
+    if (secondToLast.syntacticContent === "{" && last.node !== null) {
+      if (last.node.type.type !== knownTypes.horizontalMath.type) {
+        let node = mathNodeFactory.horizontalMath(this.equationEditor, last.node);
+        return this.decreaseParsingStack(node, "", 0);
+      }
     }
     if (thirdToLast.syntacticContent === "{" && secondToLast.node !== null && last.syntacticContent === "}") {
       let node = secondToLast.node;
@@ -735,11 +775,21 @@ class LaTeXParser {
       let node = mathNodeFactory.fraction(this.equationEditor, secondToLast.node, last.node);
       return this.decreaseParsingStack(node, "", 2);
     }
+    if (last.content in latexConstants.operatorsNormalized) {
+      // Construct immutable atom from operator.
+      let node = mathNodeFactory.atomImmutable(
+        this.equationEditor,
+        latexConstants.operatorsNormalized[last.content],
+      );
+      return this.decreaseParsingStack(node, "", 0);
+    }
     if (last.content !== "" && last.syntacticContent === "" && last.node === null) {
+      // Construct atom.
       let node = mathNodeFactory.atom(this.equationEditor, last.content);
       return this.decreaseParsingStack(node, "", 0);
     }
     if (last.node !== null && secondToLast.node !== null) {
+      // Absorb atom / immutable atom to preceding horizontal math.
       if (secondToLast.node.type.type === knownTypes.horizontalMath.type) {
         secondToLast.node.appendChild(last.node);
         return this.decreaseParsingStack(secondToLast.node, "", 1);
@@ -2127,8 +2177,19 @@ class MathNode {
     }
   }
 
+  ensureEditableAtomsRecursive() {
+    for (let i = 0; i < this.children.length; i++) {
+      this.children[i].ensureEditableAtomsRecursive();
+    }
+    if (this.type.type !== knownTypes.horizontalMath.type) {
+      return;
+    }
+    this.normalizeHorizontalMath();
+    this.ensureEditableAtoms();
+  }
+
   normalizeHorizontalMath() {
-    if (!this.type.type === knownTypes.horizontalMath.type) {
+    if (this.type.type !== knownTypes.horizontalMath.type) {
       return false;
     }
     let found = false;
@@ -2984,6 +3045,9 @@ class MathNode {
           correctedChildren.push(mathNodeFactory.atom(this.equationEditor, ""));
         }
       }
+    }
+    if (!correctedChildren[correctedChildren.length - 1].isAtomEditable()) {
+      correctedChildren.push(mathNodeFactory.atom(this.equationEditor, ""));
     }
     if (correctedChildren.length > this.children.length) {
       this.replaceChildRangeWithChildren(0, this.children.length, correctedChildren);

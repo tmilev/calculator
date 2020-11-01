@@ -356,10 +356,15 @@ class MathNodeFactory {
     equationEditor,
     /** @type{MathNode}*/
     base,
+    /** @type{MathNode|null}*/
+    exponent,
   ) {
     // Horizontal math wrapper for the exponent.
-    const exponent = new MathNode(equationEditor, knownTypes.exponent);
-    exponent.appendChild(this.horizontalMath(equationEditor, null));
+    const exponentWrapped = new MathNode(equationEditor, knownTypes.exponent);
+    let exponentContainer = this.horizontalMath(equationEditor, exponent);
+    exponentContainer.normalizeHorizontalMath();
+    exponentContainer.ensureEditableAtoms();
+    exponentWrapped.appendChild(exponentContainer);
     // Horizontal math wrapper for the base.
     const baseHorizontal = new MathNode(equationEditor, knownTypes.horizontalMath);
     baseHorizontal.appendChild(this.horizontalMath(equationEditor, base));
@@ -367,7 +372,7 @@ class MathNodeFactory {
     // The base with the exponent.
     const baseWithExponent = new MathNode(equationEditor, knownTypes.baseWithExponent);
     baseWithExponent.appendChild(baseHorizontal);
-    baseWithExponent.appendChild(exponent);
+    baseWithExponent.appendChild(exponentWrapped);
     return baseWithExponent;
   }
 
@@ -543,13 +548,15 @@ class SyntancticElement {
     node,
     /**@type{string} */
     content,
+    /**@type{string} */
+    syntacticRole,
   ) {
     /**@type{MathNode|null} contains parsed math content. */
     this.node = node;
     /**@type{string} contains non-parsed atomic content. */
     this.content = content;
     /**@type{string} */
-    this.syntacticContent = "";
+    this.syntacticRole = syntacticRole;
   }
   toString() {
     let result = "";
@@ -559,8 +566,8 @@ class SyntancticElement {
     if (this.content !== "") {
       result += `[${this.content}]`;
     }
-    if (this.syntacticContent !== "") {
-      result += `(${this.syntacticContent})`;
+    if (this.syntacticRole !== "") {
+      result += `(${this.syntacticRole})`;
     }
     return result;
   }
@@ -589,6 +596,7 @@ class LaTeXConstants {
     this.latexSyntacticValues = {
       "{": "{",
       "}": "}",
+      "^": "^",
       "\\": "\\",
     };
     this.whiteSpaceCharacters = {
@@ -653,7 +661,7 @@ class LaTeXParser {
   intialize() {
     this.parsingStack = [];
     for (let i = 0; i < this.dummyParsingElements; i++) {
-      this.parsingStack.push(new SyntancticElement(null, ""));
+      this.parsingStack.push(new SyntancticElement(null, "", ""));
     }
   }
   parseWords() {
@@ -682,32 +690,50 @@ class LaTeXParser {
     this.result = new MathNode(this.equationEditor, knownTypes.horizontalMath);
     let startingNode = mathNodeFactory.horizontalMath(this.equationEditor, null);
     this.parsingStack.push(new SyntancticElement(startingNode, "", ""));
-    let numberOfRuleApplications = 0;
     for (let i = 0; i < this.words.length; i++) {
-      this.parsingStack.push(new SyntancticElement(null, this.words[i]));
-      while (this.applyOneRule()) {
-        numberOfRuleApplications++;
-        if (numberOfRuleApplications > this.words.length * 10) {
-          // The number of rule applicatinos exceeds ten times the word length. 
-          // Perhaps we have a substitution loop in our parsing rules?
-          console.log("Too many parsing rule applications.");
-          return null;
-        }
+      if (!this.reduceStack(new SyntancticElement(null, this.words[i], ""))) {
+        return null;
       }
     }
-    if (this.parsingStack.length !== this.dummyParsingElements + 1) {
+    if (!this.reduceStack(new SyntancticElement(null, "", "parsingEnd"))) {
+      return null;
+    }
+    if (this.parsingStack.length !== this.dummyParsingElements + 2) {
       console.log(`Failed to parse ${this.latex}: not all syntactic elements were reduced.`);
       return null;
     }
-    let lastElement = this.parsingStack[this.parsingStack.length - 1];
-    if (lastElement.node === null) {
+    let secondToLastElement = this.parsingStack[this.parsingStack.length - 2];
+    if (secondToLastElement.node === null) {
       console.log(`Failed to parse ${this.latex}: final syntactic element is not a node.`);
       return null;
     }
     if (this.equationEditor.options.editable) {
-      lastElement.node.ensureEditableAtomsRecursive();
+      secondToLastElement.node.ensureEditableAtomsRecursive();
     }
-    return lastElement.node;
+    return secondToLastElement.node;
+  }
+
+  /** @returns{boolean} */
+  reduceStack(
+    /**@type {SyntancticElement} */
+    syntacticElement,
+  ) {
+    let numberOfRuleApplications = 0;
+    let startingLength = this.parsingStack.length;
+    this.parsingStack.push(syntacticElement);
+    while (this.applyOneRule()) {
+      numberOfRuleApplications++;
+      let stackReduction = startingLength - this.parsingStack.length;
+      let maximumRuleApplications = Math.max(10, stackReduction * 10);
+      if (numberOfRuleApplications > maximumRuleApplications) {
+        // Too many rules to reduce an expression: no more than 10 rule applications per
+        // unit of stack reduction.
+        // Perhaps we have a substitution loop in our parsing rules?
+        console.log("Too many parsing rule applications.");
+        return false;
+      }
+    }
+    return true;
   }
 
   /** @returns{boolean} */
@@ -719,19 +745,41 @@ class LaTeXParser {
     /**@type{number} */
     nodesToRemove,
   ) {
-    let indexRetained = this.parsingStack.length - nodesToRemove - 1;
-    let incoming = new SyntancticElement(node, "");
-    incoming.syntacticContent = syntancticValue;
+    return this.decreaseParsingStackRange(node, syntancticValue, - nodesToRemove - 1, - 1);
+  }
+
+  /** @returns{boolean} */
+  decreaseParsingStackRange(
+    /**@type{MathNode|null} */
+    node,
+    /**@type{string} */
+    syntancticRole,
+    /**@type{number} */
+    firstIndexToRemove,
+    /**@type{number} */
+    lastIndexToRemove,
+  ) {
+    if (firstIndexToRemove < 0) {
+      firstIndexToRemove += this.parsingStack.length;
+    }
+    if (lastIndexToRemove < 0) {
+      lastIndexToRemove += this.parsingStack.length;
+    }
+    let incoming = new SyntancticElement(node, "", syntancticRole);
     let log = "";
     if (this.debug) {
       let substituted = [];
-      for (let i = indexRetained; i < this.parsingStack.length; i++) {
+      for (let i = firstIndexToRemove; i < this.parsingStack.length; i++) {
         substituted.push(this.parsingStack[i].toString());
       }
       log += `${substituted.join(",")} --&gt; ${incoming.toString()}`;
     }
-    this.parsingStack[indexRetained] = incoming;
-    this.parsingStack.length = indexRetained + 1;
+    this.parsingStack[firstIndexToRemove] = incoming;
+    let nodesToRemove = lastIndexToRemove - firstIndexToRemove;
+    for (let i = lastIndexToRemove + 1; i < this.parsingStack.length; i++) {
+      this.parsingStack[i - nodesToRemove] = this.parsingStack[i];
+    }
+    this.parsingStack.length -= nodesToRemove;
     if (this.debug) {
       let totalStack = [];
       for (let i = this.dummyParsingElements; i < this.parsingStack.length; i++) {
@@ -755,23 +803,27 @@ class LaTeXParser {
     }
     let secondToLast = this.parsingStack[this.parsingStack.length - 2];
     let thirdToLast = this.parsingStack[this.parsingStack.length - 3];
-    if (secondToLast.syntacticContent === "{" && last.node !== null) {
+    if (secondToLast.syntacticRole === "{" && last.node !== null) {
       if (last.node.type.type !== knownTypes.horizontalMath.type) {
         let node = mathNodeFactory.horizontalMath(this.equationEditor, last.node);
         return this.decreaseParsingStack(node, "", 0);
       }
     }
-    if (thirdToLast.syntacticContent === "{" && secondToLast.node !== null && last.syntacticContent === "}") {
+    if (thirdToLast.syntacticRole === "{" && secondToLast.node !== null && last.syntacticRole === "}") {
       let node = secondToLast.node;
       if (node.type.type !== knownTypes.horizontalMath.type) {
         node = mathNodeFactory.horizontalMath(this.equationEditor, node);
       }
       return this.decreaseParsingStack(node, "", 2);
     }
-    if (last.content === "frac" && secondToLast.syntacticContent === "\\") {
+    if (last.content === "frac" && secondToLast.syntacticRole === "\\") {
       return this.decreaseParsingStack(null, "\\frac", 1);
     }
-    if (thirdToLast.syntacticContent === "\\frac" && secondToLast.node !== null && last.node !== null) {
+    if (thirdToLast.node !== null && secondToLast.syntacticRole === "^" && last.node !== null) {
+      let node = mathNodeFactory.baseWithExponent(this.equationEditor, thirdToLast.node, last.node);
+      return this.decreaseParsingStack(node, "", 2);
+    }
+    if (thirdToLast.syntacticRole === "\\frac" && secondToLast.node !== null && last.node !== null) {
       let node = mathNodeFactory.fraction(this.equationEditor, secondToLast.node, last.node);
       return this.decreaseParsingStack(node, "", 2);
     }
@@ -783,16 +835,16 @@ class LaTeXParser {
       );
       return this.decreaseParsingStack(node, "", 0);
     }
-    if (last.content !== "" && last.syntacticContent === "" && last.node === null) {
+    if (last.content !== "" && last.syntacticRole === "" && last.node === null) {
       // Construct atom.
       let node = mathNodeFactory.atom(this.equationEditor, last.content);
       return this.decreaseParsingStack(node, "", 0);
     }
-    if (last.node !== null && secondToLast.node !== null) {
+    if (thirdToLast.node !== null && secondToLast.node !== null && last.syntacticRole !== "^") {
       // Absorb atom / immutable atom to preceding horizontal math.
-      if (secondToLast.node.type.type === knownTypes.horizontalMath.type) {
-        secondToLast.node.appendChild(last.node);
-        return this.decreaseParsingStack(secondToLast.node, "", 1);
+      if (thirdToLast.node.type.type === knownTypes.horizontalMath.type) {
+        thirdToLast.node.appendChild(secondToLast.node);
+        return this.decreaseParsingStackRange(thirdToLast.node, "", -3, -2);
       }
     }
   }
@@ -3164,7 +3216,7 @@ class MathNode {
       this.equationEditor,
       originalParent.children.slice(leftIndex, rightIndex + 1),
     );
-    const baseWithExponent = mathNodeFactory.baseWithExponent(this.equationEditor, base);
+    const baseWithExponent = mathNodeFactory.baseWithExponent(this.equationEditor, base, null);
     baseWithExponent.children[1].children[0].children[0].desiredCaretPosition = 0;
     originalParent.replaceChildRangeWithChildren(leftIndex, rightIndex, [baseWithExponent]);
     originalParent.ensureEditableAtoms();
@@ -3175,7 +3227,7 @@ class MathNode {
   makeBaseDefaultWithExponent() {
     let originalParent = this.parent;
     let originalIndexInParent = this.indexInParent;
-    const baseWithExponent = mathNodeFactory.baseWithExponent(this.equationEditor, this);
+    const baseWithExponent = mathNodeFactory.baseWithExponent(this.equationEditor, this, null);
     baseWithExponent.children[1].children[0].children[0].desiredCaretPosition = 0;
     originalParent.replaceChildAtPosition(originalIndexInParent, baseWithExponent);
     originalParent.ensureEditableAtoms();

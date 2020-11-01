@@ -51,6 +51,7 @@ class MathNodeType {
     this.minWidth = input["minWidth"];
     // Padding.
     this.paddingBottom = input["paddingBottom"];
+    this.paddingTop = input["paddingTop"];
     this.paddingRight = input["paddingRight"];
     this.paddingLeft = input["paddingLeft"];
     this.padding = input["padding"];
@@ -86,6 +87,7 @@ const knownTypeDefaults = {
   "colorImplied": "",
   // Padding
   "paddingBottom": "",
+  "paddingTop": "",
   "paddingLeft": "",
   "paddingRight": "",
   "padding": "",
@@ -171,7 +173,8 @@ const knownTypes = {
   // Represents the numerator x of a fraction x/y.
   numerator: new MathNodeType({
     "type": "numerator",
-    "borderBottom": "2px solid black",
+    "borderBottom": "1px solid black",
+    "padding": "1px",
     "fontSize": defaultFractionScale,
     "minHeightScale": defaultFractionScale,
     "arrows": {
@@ -550,6 +553,19 @@ class SyntancticElement {
     /**@type{string} */
     this.syntacticContent = "";
   }
+  toString() {
+    let result = "";
+    if (this.node !== null) {
+      result += this.node.toString();
+    }
+    if (this.content !== "") {
+      result += `[${this.content}]`;
+    }
+    if (this.syntacticContent !== "") {
+      result += `(${this.syntacticContent})`;
+    }
+    return result;
+  }
 }
 
 class LaTeXConstants {
@@ -570,6 +586,7 @@ class LaTeXConstants {
     this.latexSyntacticValues = {
       "{": "{",
       "}": "}",
+      "\\": "\\",
     };
   }
   isLatinCharacter(
@@ -615,6 +632,8 @@ class LaTeXParser {
      * of syntanctic elements. 
      */
     this.dummyParsingElements = 6;
+    /**@type{boolean} */
+    this.debug = true;
     /**@type{string} */
     this.reductionLog = [];
   }
@@ -677,9 +696,17 @@ class LaTeXParser {
     nodesToRemove,
   ) {
     let indexRetained = this.parsingStack.length - nodesToRemove - 1;
-    this.parsingStack[indexRetained].node = node;
-    this.parsingStack[indexRetained].content = "";
-    this.parsingStack[indexRetained].syntacticContent = syntancticValue;
+    let incoming = new SyntancticElement(node, "");
+    incoming.syntacticContent = syntancticValue;
+    if (this.debug) {
+      let substituted = [];
+      for (let i = indexRetained; i < this.parsingStack.length; i++) {
+        substituted.push(this.parsingStack[i].toString());
+      }
+      let log = `${substituted.join(",")} --&gt; ${incoming.toString()}`;
+      this.reductionLog.push(log);
+    }
+    this.parsingStack[indexRetained] = incoming;
     this.parsingStack.length = indexRetained + 1;
     return true;
   }
@@ -688,7 +715,7 @@ class LaTeXParser {
   applyOneRule() {
     let last = this.parsingStack[this.parsingStack.length - 1];
     let secondToLast = this.parsingStack[this.parsingStack.length - 2];
-    let thirdToLast = this.parsingStack[this.parsingStack.length - 2];
+    let thirdToLast = this.parsingStack[this.parsingStack.length - 3];
     if (last.content in latexConstants.operatorsNormalized) {
       let node = mathNodeFactory.atomImmutable(this.equationEditor, latexConstants.operatorsNormalized[last.content]);
       return this.decreaseParsingStack(node, "", 0);
@@ -703,11 +730,11 @@ class LaTeXParser {
       }
       return this.decreaseParsingStack(node, "", 2);
     }
-    if (last.content === "frac" && secondToLast.content === "\\") {
+    if (last.content === "frac" && secondToLast.syntacticContent === "\\") {
       return this.decreaseParsingStack(null, "\\frac", 1);
     }
     if (thirdToLast.syntacticContent === "\\frac" && secondToLast.node !== null && last.node !== null) {
-      let node = mathNodeFactory.fraction(this.equationEditor, secondToLast.node, thirdToLast.node);
+      let node = mathNodeFactory.fraction(this.equationEditor, secondToLast.node, last.node);
       return this.decreaseParsingStack(node, "", 2);
     }
     if (last.content !== "" && last.syntacticContent === "" && last.node === null) {
@@ -767,7 +794,9 @@ class EquationEditor {
     latex,
   ) {
     this.rootNode.removeAllChildren();
-    let newContent = new LaTeXParser(this, latex).parse();
+    let parser = new LaTeXParser(this, latex);
+    let newContent = parser.parse();
+    document.getElementById("parsingLog").innerHTML = parser.reductionLog.join("<br>");
     if (newContent === null) {
       console.log(`Failed to construct node from your input ${latex}.`);
       return;
@@ -1105,6 +1134,9 @@ class MathNode {
     if (this.type.paddingBottom !== "") {
       this.element.style.paddingBottom = this.type.paddingBottom;
     }
+    if (this.type.paddingTop !== "") {
+      this.element.style.paddingTop = this.type.paddingTop;
+    }
     if (this.type.paddingLeft !== "") {
       this.element.style.paddingLeft = this.type.paddingLeft;
     }
@@ -1148,6 +1180,7 @@ class MathNode {
     }
     this.element.style.verticalAlign = this.type.verticalAlign;
     this.element.style.outline = this.type.outline;
+    // this.element.style.overflow = "hidden";
     if (this.type.textAlign !== "") {
       this.element.style.textAlign = this.type.textAlign;
     }
@@ -1317,7 +1350,7 @@ class MathNode {
     this.boundingBox.width = Math.max(numerator.boundingBox.width, denominator.boundingBox.width);
     numerator.boundingBox.width = this.boundingBox.width;
     denominator.boundingBox.width = this.boundingBox.width;
-    denominator.boundingBox.top = numerator.boundingBox.height;
+    denominator.boundingBox.top = numerator.boundingBox.height + 3;
     numerator.computeBoundingBoxLeftSingleChild();
     denominator.computeBoundingBoxLeftSingleChild();
     this.boundingBox.width += 4;

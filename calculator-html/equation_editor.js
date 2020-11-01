@@ -534,8 +534,6 @@ function mathFromLatex(
 ) {
   let result = new EquationEditor(container, new EquationEditorOptions(editable));
   result.writeLatex(latex);
-  result.updateDOM();
-  result.updateAlignment();
   return result;
 }
 
@@ -802,6 +800,8 @@ class EquationEditor {
       return;
     }
     this.rootNode.appendChild(newContent);
+    this.updateDOM();
+    this.updateAlignment();
   }
 
   toHtml() {
@@ -1350,7 +1350,7 @@ class MathNode {
     this.boundingBox.width = Math.max(numerator.boundingBox.width, denominator.boundingBox.width);
     numerator.boundingBox.width = this.boundingBox.width;
     denominator.boundingBox.width = this.boundingBox.width;
-    denominator.boundingBox.top = numerator.boundingBox.height + 3;
+    denominator.boundingBox.top = numerator.boundingBox.height + 2;
     numerator.computeBoundingBoxLeftSingleChild();
     denominator.computeBoundingBoxLeftSingleChild();
     this.boundingBox.width += 4;
@@ -1416,7 +1416,7 @@ class MathNode {
 
   computeDimensionsNumerator() {
     this.computeDimensionsStandard();
-    this.boundingBox.height = this.children[0].boundingBox.height + 1;
+    this.boundingBox.height = this.children[0].boundingBox.height;
   }
 
   verticallyStretchSqrt(
@@ -3455,6 +3455,7 @@ class ParentWithIndex {
 
 function writeDebugInfo() {
   document.getElementById("debug").innerHTML = defaultEquationEditorLocal.toHtml();
+  document.getElementById("latexInputTest").value = defaultEquationEditorLocal.rootNode.toLatex();
 }
 
 /** @type {EquationEditor|null} */
@@ -3492,8 +3493,7 @@ function testTypeset(
 ) {
   let input = document.getElementById(inputId);
   let inputContent = input.value;
-  let output = document.getElementById(outputId);
-  mathFromLatex(output, inputContent, true);
+  defaultEquationEditorLocal.writeLatex(inputContent);
 }
 
 module.exports = {

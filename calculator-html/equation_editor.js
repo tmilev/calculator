@@ -658,12 +658,14 @@ class LaTeXParser {
     /**@type{string} */
     this.reductionLog = [];
   }
+
   intialize() {
     this.parsingStack = [];
     for (let i = 0; i < this.dummyParsingElements; i++) {
       this.parsingStack.push(new SyntancticElement(null, "", ""));
     }
   }
+
   parseWords() {
     let next = [];
     for (let i = 0; i < this.latex.length; i++) {
@@ -3384,10 +3386,14 @@ class MathNode {
     if (this.isAtomic()) {
       result.push(this.contentIfAtom());
     }
-    result.push(`[${this.type.type}]`)
+    result.push(`[${this.type.type}]`);
     if (this.children.length > 0) {
       result.push("{");
       for (let i = 0; i < this.children.length; i++) {
+        if (this.children[i] === null) {
+          result.push("null");
+          continue;
+        }
         result.push(this.children[i].toString());
         if (i !== this.children.length - 1) {
           result.push(",");

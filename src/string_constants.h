@@ -185,6 +185,7 @@ public:
   static std::string laTeXMaterials            ;
   static std::string slidesVideo               ;
   static std::string freecalc                  ;
+  static std::string useMathTags               ;
 };
 
 class DatabaseStrings {

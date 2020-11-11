@@ -366,8 +366,7 @@ public:
 
   std::string IPAdressCaller;
 
-  MemorySaving<Matrix<Rational> > matIdMatrix;
-  MemorySaving<Matrix<Rational> > matOneColumn;
+  bool flagUseMathTags;
 
   MemorySaving<DynkinDiagramRootSubalgebra > dynGetEpsCoords;
   MemorySaving<GroebnerBasisComputation<Rational> > theGroebnerBasisComputation;

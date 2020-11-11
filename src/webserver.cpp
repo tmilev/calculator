@@ -4370,6 +4370,8 @@ void GlobalVariables::configurationProcess() {
   if (global.configuration[Configuration::portHTTPSBuiltIn].theString == "") {
     global.configuration[Configuration::portHTTPSBuiltIn] = "8177";
   }
+  global.flagUseMathTags = global.configuration[Configuration::useMathTags].isTrueRepresentationInJSON();
+
   List<List<std::string> > folderVirtualLinksDefault = FileOperations::initializeFolderVirtualLinksDefaults();
   for (int i = 0; i < folderVirtualLinksDefault.size; i ++) {
     std::string key = folderVirtualLinksDefault[i][0];

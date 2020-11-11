@@ -8,7 +8,6 @@ if (module === undefined) {
 }
 
 class MathNodeType {
-
   normalizeConstructorInput(input) {
     for (let label in knownTypeDefaults) {
       if (!(label in input)) {
@@ -526,6 +525,18 @@ class AtomWithPosition {
     }
     return `[${this.element.toString()}, ${this.position}]`;
   }
+}
+
+/** @returns {EquationEditor} 
+ * Converts the textContent of an html element to typeset math.
+ */
+function mathFromElement(
+  /**@type{HTMLElement} */
+  container,
+  /**@type{boolean} */
+  editable,
+) {
+  return mathFromLatex(container, container.textContent, editable);
 }
 
 /** @returns {EquationEditor} Returns typeset math.*/
@@ -3623,5 +3634,7 @@ module.exports = {
   testEquationEditor,
   testTypeset,
   EquationEditor,
-  initialize
+  initialize,
+  mathFromLatex,
+  mathFromElement,
 };

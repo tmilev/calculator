@@ -1,639 +1,791 @@
-<html lang = "en">
+<html lang="en">
+
 <head>
-<script type = "text/javascript">
-"use strict";
-var calculatorHtmlBaseFolder = "/calculator-html/";
-function errorLoadingScript(e) {
-  var scriptSource = e.src;
-  if (scriptSource === undefined) {
-    scriptSource = e.href;
-  }
-  console.log("Error loading script: " + scriptSource);
-  console.log("This is most likely a server ssl configuration error, which we are currently working to resolve. ");
-  console.log("In the mean time, let me reload the page for you, this should fix the issue. ");
-  try {
-    var currentHash = decodeURIComponent(window.location.hash);
-    if (currentHash.startsWith('#')) {
-      currentHash = currentHash.slice(1);
+  <script type="text/javascript">
+    "use strict";
+    var calculatorHtmlBaseFolder = "/calculator-html/";
+    function errorLoadingScript(e) {
+      var scriptSource = e.src;
+      if (scriptSource === undefined) {
+        scriptSource = e.href;
+      }
+      console.log("Error loading script: " + scriptSource);
+      console.log("This is most likely a server ssl configuration error, which we are currently working to resolve. ");
+      console.log("In the mean time, let me reload the page for you, this should fix the issue. ");
+      try {
+        var currentHash = decodeURIComponent(window.location.hash);
+        if (currentHash.startsWith('#')) {
+          currentHash = currentHash.slice(1);
+        }
+
+        var urlObject = {};
+        if (currentHash !== "") {
+          urlObject = JSON.parse(currentHash);
+        }
+        if (urlObject.errorLoadingScriptReloadAttempt === undefined) {
+          urlObject.errorLoadingScriptReloadAttempt = 0;
+        }
+        if (urlObject.errorLoadingScriptReloadAttempt < 4) {
+          urlObject.errorLoadingScriptReloadAttempt++;
+          var newAddress = `${window.location.origin}${window.location.pathname}#${JSON.stringify(urlObject)}`;
+          window.location.assign(newAddress);
+          location.reload(true);
+        }
+      } catch (e) {
+        console.log(`Failed to parse your url hash ${currentHash} obtained from ${window.location.hash}. ${e}`);
+      }
     }
+  </script>
 
-    var urlObject = {};
-    if (currentHash !== "") {
-      urlObject = JSON.parse(currentHash);
-    }
-    if (urlObject.errorLoadingScriptReloadAttempt === undefined) {
-      urlObject.errorLoadingScriptReloadAttempt = 0;
-    }
-    if (urlObject.errorLoadingScriptReloadAttempt < 4) {
-      urlObject.errorLoadingScriptReloadAttempt ++;
-      var newAddress = `${window.location.origin}${window.location.pathname}#${JSON.stringify(urlObject)}`;
-      window.location.assign(newAddress);
-      location.reload(true);
-    }
-  } catch (e) {
-    console.log(`Failed to parse your url hash ${currentHash} obtained from ${window.location.hash}. ${e}`);
-  }
-}
-</script>
+  <link type="text/css" rel="stylesheet" href="/calculator-html/styleCalculator.css"
+    onerror="errorLoadingScript(this);">
+  <link type="text/css" rel="stylesheet" href="/html-common/mathquill/mathquill.css"
+    onerror="errorLoadingScript(this);">
+  <link type="text/css" rel="stylesheet" href="/html-common/jquery_ui/jquery-ui.css"
+    onerror="errorLoadingScript(this);">
 
-<link type = "text/css" rel = "stylesheet" href = "/calculator-html/styleCalculator.css" onerror = "errorLoadingScript(this);">
-<link type = "text/css" rel = "stylesheet" href = "/html-common/mathquill/mathquill.css" onerror = "errorLoadingScript(this);">
-<link type = "text/css" rel = "stylesheet" href = "/html-common/jquery_ui/jquery-ui.css" onerror = "errorLoadingScript(this);">
-
-<script src = "/html-common/jquery/jquery.min.js" onerror = "errorLoadingScript(this);"></script>
-<script src = "/html-common/jquery_ui/jquery-ui.min.js" onerror = "errorLoadingScript(this);"></script>
+  <script src="/html-common/jquery/jquery.min.js" onerror="errorLoadingScript(this);"></script>
+  <script src="/html-common/jquery_ui/jquery-ui.min.js" onerror="errorLoadingScript(this);"></script>
 
 
 
-<script type = "text/javascript" src = "/html-common/ace/src-min/ace.js" charset = "utf-8" onerror = "errorLoadingScript(this);"></script>
-<script src = "/html-common/ace/src-min/ext-language_tools.js" onerror = "errorLoadingScript(this);"></script>
-<!--script src = "/html-common/mathquill.min.js"></script-->
-<script src = "/html-common/mathquill/mathquill.min.js" onerror = "errorLoadingScript(this);"></script>
+  <script type="text/javascript" src="/html-common/ace/src-min/ace.js" charset="utf-8"
+    onerror="errorLoadingScript(this);"></script>
+  <script src="/html-common/ace/src-min/ext-language_tools.js" onerror="errorLoadingScript(this);"></script>
+  <!--script src = "/html-common/mathquill.min.js"></script-->
+  <script src="/html-common/mathquill/mathquill.min.js" onerror="errorLoadingScript(this);"></script>
   <!--script src ="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
 </script-->
-<script src = "https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
-<!-- the cpp builder auto-replaces the string /calculator-html/ with something along the lines of /calculator-html${hashOfCurrentBuildEnvironment}/-->
-<script type = "text/javascript" src = "/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full" onerror = "errorLoadingScript(this);"></script>
-<script type = "text/javascript" src = "/calculator-html/equation_editor.js"></script>
-<script type = "text/javascript" src = "/calculator-html/pathnames.js"></script>
-<script type = "text/javascript" src = "/calculator-html/server_information.js"></script>
-<script type = "text/javascript" src = "/calculator-html/ids_dom_elements.js"></script>
-<script type = "text/javascript" src = "/calculator-html/styles.js"></script>
-<script type = "text/javascript" src = "/calculator-html/modifiable_database_fields.js"></script>
-<script type = "text/javascript" src = "/calculator-html/miscellaneous.js"></script>
-<script type = "text/javascript" src = "/calculator-html/json_to_html.js"></script>
-<script type = "text/javascript" src = "/calculator-html/buffer.js"></script>
-<script type = "text/javascript" src = "/calculator-html/mathjax-calculator-setup.js"></script>
-<script type = "text/javascript" src = "/calculator-html/miscellaneous_frontend.js"></script>
-<script type = "text/javascript" src = "/calculator-html/cookies.js"></script>
-<script type = "text/javascript" src = "/calculator-html/crypto.js"></script>
-<script type = "text/javascript" src = "/calculator-html/submit_requests.js"></script>
-<script type = "text/javascript" src = "/calculator-html/autocomplete_keywords.js"></script>
-<script type = "text/javascript" src = "/calculator-html/themes.js"></script>
-<script type = "text/javascript" src = "/calculator-html/autocomplete.js"></script>
-<script type = "text/javascript" src = "/calculator-html/panels.js"></script>
-<script type = "text/javascript" src = "/calculator-html/initialize_buttons.js"></script>
-<script type = "text/javascript" src = "/calculator-html/page_navigation.js"></script>
-<script type = "text/javascript" src = "/calculator-html/three-d.js"></script>
-<script type = "text/javascript" src = "/calculator-html/graphics_n_dimensions.js"></script>
-<script type = "text/javascript" src = "/calculator-html/course_page.js"></script>
-<script type = "text/javascript" src = "/calculator-html/problem_page.js"></script>
-<script type = "text/javascript" src = "/calculator-html/stand_alone_problem.js"></script>
-<script type = "text/javascript" src = "/calculator-html/select_course.js"></script>
-<script type = "text/javascript" src = "/calculator-html/login.js"></script>
-<script type = "text/javascript" src = "/calculator-html/signup.js"></script>
-<script type = "text/javascript" src = "/calculator-html/forgot_password.js"></script>
-<script type = "text/javascript" src = "/calculator-html/database.js"></script>
-<script type = "text/javascript" src = "/calculator-html/server_status.js"></script>
-<script type = "text/javascript" src = "/calculator-html/account.js"></script>
-<script type = "text/javascript" src = "/calculator-html/account_activation.js"></script>
-<script type = "text/javascript" src = "/calculator-html/manage_accounts.js"></script>
-<script type = "text/javascript" src = "/calculator-html/edit_page.js"></script>
-<script type = "text/javascript" src = "/calculator-html/calculator_page.js"> </script>
-<script type = "text/javascript" src = "/calculator-html/app.js"></script>
-<script type = "text/javascript" src = "/calculator-html/process_monitoring.js"></script>
-<script type = "text/javascript" src = "/calculator-html/external/build/output-min.js"></script>
+  <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
+  <!-- the cpp builder auto-replaces the string /calculator-html/ with something along the lines of /calculator-html${hashOfCurrentBuildEnvironment}/-->
+  <script type="text/javascript" src="/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full"
+    onerror="errorLoadingScript(this);"></script>
+  <script type="text/javascript" src="/calculator-html/pathnames.js"></script>
+  <script type="text/javascript" src="/calculator-html/server_information.js"></script>
+  <script type="text/javascript" src="/calculator-html/ids_dom_elements.js"></script>
+  <script type="text/javascript" src="/calculator-html/styles.js"></script>
+  <script type="text/javascript" src="/calculator-html/modifiable_database_fields.js"></script>
+  <script type="text/javascript" src="/calculator-html/miscellaneous.js"></script>
+  <script type="text/javascript" src="/calculator-html/json_to_html.js"></script>
+  <script type="text/javascript" src="/calculator-html/buffer.js"></script>
+  <script type="text/javascript" src="/calculator-html/mathjax-calculator-setup.js"></script>
+  <script type="text/javascript" src="/calculator-html/miscellaneous_frontend.js"></script>
+  <script type="text/javascript" src="/calculator-html/cookies.js"></script>
+  <script type="text/javascript" src="/calculator-html/crypto.js"></script>
+  <script type="text/javascript" src="/calculator-html/submit_requests.js"></script>
+  <script type="text/javascript" src="/calculator-html/autocomplete_keywords.js"></script>
+  <script type="text/javascript" src="/calculator-html/themes.js"></script>
+  <script type="text/javascript" src="/calculator-html/autocomplete.js"></script>
+  <script type="text/javascript" src="/calculator-html/panels.js"></script>
+  <script type="text/javascript" src="/calculator-html/initialize_buttons.js"></script>
+  <script type="text/javascript" src="/calculator-html/page_navigation.js"></script>
+  <script type="text/javascript" src="/calculator-html/three-d.js"></script>
+  <script type="text/javascript" src="/calculator-html/graphics_n_dimensions.js"></script>
+  <script type="text/javascript" src="/calculator-html/course_page.js"></script>
+  <script type="text/javascript" src="/calculator-html/problem_page.js"></script>
+  <script type="text/javascript" src="/calculator-html/stand_alone_problem.js"></script>
+  <script type="text/javascript" src="/calculator-html/select_course.js"></script>
+  <script type="text/javascript" src="/calculator-html/equation_editor.js"></script>
+  <script type="text/javascript" src="/calculator-html/login.js"></script>
+  <script type="text/javascript" src="/calculator-html/signup.js"></script>
+  <script type="text/javascript" src="/calculator-html/forgot_password.js"></script>
+  <script type="text/javascript" src="/calculator-html/database.js"></script>
+  <script type="text/javascript" src="/calculator-html/server_status.js"></script>
+  <script type="text/javascript" src="/calculator-html/account.js"></script>
+  <script type="text/javascript" src="/calculator-html/account_activation.js"></script>
+  <script type="text/javascript" src="/calculator-html/manage_accounts.js"></script>
+  <script type="text/javascript" src="/calculator-html/edit_page.js"></script>
+  <script type="text/javascript" src="/calculator-html/calculator_page.js"> </script>
+  <script type="text/javascript" src="/calculator-html/app.js"></script>
+  <script type="text/javascript" src="/calculator-html/process_monitoring.js"></script>
+  <script type="text/javascript" src="/calculator-html/external/build/output-min.js"></script>
 
-<script note = "This tag has special treatment, do not change please." type = "text/javascript" src = "/calculator-html/browserifier.js"></script>
+  <script note="This tag has special treatment, do not change please." type="text/javascript"
+    src="/calculator-html/browserifier.js"></script>
 
-<script src = 'https://www.google.com/recaptcha/api.js'></script>
-<title>Calculator</title>
+  <script src='https://www.google.com/recaptcha/api.js'></script>
+  <title>Calculator</title>
 </head>
-<body onload = "browserifyRunCalculatorMainPage();">
-<div id = "divOnePageApp">
 
-<div id = "divLoginPage" class = "divPage">
-<div class = "centerHorizontallyInPageContainer">
-  <div class = "centerVerticallyInPageContainer">
-  <div class = "divCenteredItem divVisible" id = "divLoginCalculatorPanel">
-    <b>Local account:</b><br><br>
-    <form><!--pasword input form, avoid password not in form warning-->
-    <input class = "textInputUsername" type = "text" id = "inputUsername" name = "username" placeholder = "username" required><br>
-    <input class = "textInputUsername" type = "password" id = "inputPassword" name = "password" placeholder = "password" onkeypress = "if (event.keyCode === 13) window.calculator.login.loginCalculator();" autocomplete = "on"><br>
-    </form> <!--pasword input form-->
-    <button class = "buttonSelectPage" onclick = "window.calculator.login.loginCalculator();">Login</button><br>
-    <button class = "buttonSignUp"     onclick = "window.calculator.mainPage.selectPage('signUp');">Sign up</button><br>
-    <button class = "buttonSignUp"     onclick = "window.calculator.forgotLogin.forgotLoginPage();">Forgot login</button><br>
-  </div> <!--divLoginCalculatorPanel-->
-  <div class = "divCenteredItem">
-    <a href = "#" onclick = "window.calculator.login.logout();" class = "linkLogoutInactive linkStandardButtonLike" >Log out</a>
-  </div><!--divCenteredItem-->
-  <div class = "divCenteredItem">
-    <b>Google login:</b>
-    <div id = "divGoogleLoginButton">Google unavailable (did page fully load? Internet?).</div>
-  </div><!--divCenteredItem-->
-  <div class = "divCenteredItem">
-  </div><!--divCenteredItem-->
-  <div class = "divCenteredItem">
-    <div id = "spanLoginStatus" style = "height: 15px; width: 190px; text-align: center"></div>
-  </div>
-  </div><!--centerVerticallyInPageContainer-->
-</div><!--centerHorizontallyInPageContainer-->
-</div><!--divLoginPage-->
-<div id = "divSignUpPage" class = "divPage">
-  <table>
-    <tr>
-    <td>Desired user name:</td>
-    <td>
-      <input type = "text" id = "desiredUsername" name = "desiredUsername" placeholder = "username">
-    </td>
-    </tr>
-    <tr>
-      <td>Email:</td>
-      <td><input type = "text" id = "emailForSignUp" placeholder = "email"></td>
-    </tr>
-  </table>
-  <div id = "recaptchaSignUp"></div>
-  <button onclick = "window.calculator.signUp.submitSignUpInfo();">Sign up</button>
-  <span id = "signUpResultReport"></span>
-  <br>
-  <span id = "signUpResult"></span>
-</div><!--divSignUpPage-->
-<div id = "divForgotLogin" class = "divPage">
-  <table>
-  <tr><td> Email:</td><td><input type = "text" id = "emailForForgotLogin" placeholder = "email"></td></tr>
-  </table>
-  <div id = "recaptchaForgotPassword"></div>
-  <button onclick = "window.calculator.forgotLogin.submitForgotPassword();">Send recovery email</button><span id = "forgotLoginResultReport"></span>
-  <br>
-  <span id = "forgotLoginResult"></span>
-</div><!--divForgotLogin-->
+<body onload="browserifyRunCalculatorMainPage();">
+  <div id="divOnePageApp">
 
-<div id = "divProblemPage" class = "divPage">
-  <div id = 'divProblemInfoBar' class = 'problemInfoBar'></div>
-  <div id = "divProblemPageContentContainer">
-  </div><!--divProblemPageContentContainer-->
-</div><!--divProblemPage-->
-<div id = "divEditPage" class = "divPage">
-  <button id = "buttonSaveEdit">Save</button>
-  <span id = "spanSubmitEditPageReport"></span><br>
-  <textarea id = "textareaTopicListEntry"></textarea>
-  <span id = "spanErrorEditPage"></span>
-  <div id = "divEditorAce">
-  </div><!--divEditorAce-->
-</div>
-<div id = "divCurrentCourse" class = "divPage">
-  <div id = "divCurrentCourseEditPanel"></div>
-  <div id = "divCurrentCourseBody"></div>
-</div> <!--divCurrentCourse-->
+    <div id="divLoginPage" class="divPage">
+      <div class="centerHorizontallyInPageContainer">
+        <div class="centerVerticallyInPageContainer">
+          <div class="divCenteredItem divVisible" id="divLoginCalculatorPanel">
+            <b>Local account:</b><br><br>
+            <form>
+              <!--pasword input form, avoid password not in form warning-->
+              <input class="textInputUsername" type="text" id="inputUsername" name="username" placeholder="username"
+                required><br>
+              <input class="textInputUsername" type="password" id="inputPassword" name="password" placeholder="password"
+                onkeypress="if (event.keyCode === 13) window.calculator.login.loginCalculator();" autocomplete="on"><br>
+            </form>
+            <!--pasword input form-->
+            <button class="buttonSelectPage" onclick="window.calculator.login.loginCalculator();">Login</button><br>
+            <button class="buttonSignUp" onclick="window.calculator.mainPage.selectPage('signUp');">Sign up</button><br>
+            <button class="buttonSignUp" onclick="window.calculator.forgotLogin.forgotLoginPage();">Forgot
+              login</button><br>
+          </div>
+          <!--divLoginCalculatorPanel-->
+          <div class="divCenteredItem">
+            <a href="#" onclick="window.calculator.login.logout();"
+              class="linkLogoutInactive linkStandardButtonLike">Log out</a>
+          </div>
+          <!--divCenteredItem-->
+          <div class="divCenteredItem">
+            <b>Google login:</b>
+            <div id="divGoogleLoginButton">Google unavailable (did page fully load? Internet?).</div>
+          </div>
+          <!--divCenteredItem-->
+          <div class="divCenteredItem">
+          </div>
+          <!--divCenteredItem-->
+          <div class="divCenteredItem">
+            <div id="spanLoginStatus" style="height: 15px; width: 190px; text-align: center"></div>
+          </div>
+        </div>
+        <!--centerVerticallyInPageContainer-->
+      </div>
+      <!--centerHorizontallyInPageContainer-->
+    </div>
+    <!--divLoginPage-->
+    <div id="divSignUpPage" class="divPage">
+      <table>
+        <tr>
+          <td>Desired user name:</td>
+          <td>
+            <input type="text" id="desiredUsername" name="desiredUsername" placeholder="username">
+          </td>
+        </tr>
+        <tr>
+          <td>Email:</td>
+          <td><input type="text" id="emailForSignUp" placeholder="email"></td>
+        </tr>
+      </table>
+      <div id="recaptchaSignUp"></div>
+      <button onclick="window.calculator.signUp.submitSignUpInfo();">Sign up</button>
+      <span id="signUpResultReport"></span>
+      <br>
+      <span id="signUpResult"></span>
+    </div>
+    <!--divSignUpPage-->
+    <div id="divForgotLogin" class="divPage">
+      <table>
+        <tr>
+          <td> Email:</td>
+          <td><input type="text" id="emailForForgotLogin" placeholder="email"></td>
+        </tr>
+      </table>
+      <div id="recaptchaForgotPassword"></div>
+      <button onclick="window.calculator.forgotLogin.submitForgotPassword();">Send recovery email</button><span
+        id="forgotLoginResultReport"></span>
+      <br>
+      <span id="forgotLoginResult"></span>
+    </div>
+    <!--divForgotLogin-->
 
-<div id = "divSelectCourse" class = "divPage">
-</div> <!--divSelectCourse-->
+    <div id="divProblemPage" class="divPage">
+      <div id='divProblemInfoBar' class='problemInfoBar'></div>
+      <div id="divProblemPageContentContainer">
+      </div>
+      <!--divProblemPageContentContainer-->
+    </div>
+    <!--divProblemPage-->
+    <div id="divEditPage" class="divPage">
+      <button id="buttonSaveEdit">Save</button>
+      <span id="spanSubmitEditPageReport"></span><br>
+      <textarea id="textareaTopicListEntry"></textarea>
+      <span id="spanErrorEditPage"></span>
+      <div id="divEditorAce">
+      </div>
+      <!--divEditorAce-->
+    </div>
+    <div id="divCurrentCourse" class="divPage">
+      <div id="divCurrentCourseEditPanel"></div>
+      <div id="divCurrentCourseBody"></div>
+    </div>
+    <!--divCurrentCourse-->
 
-<div id = "divCalculatorPage" class = "divPage">
+    <div id="divSelectCourse" class="divPage">
+    </div>
+    <!--divSelectCourse-->
 
-<table id = "tableCalculatorExamples" class = "tableCalculatorInputs">
-<tr><td>
-<table id = "tableCalculatorAndOutput" class = "tableCalculatorInputs">
-<tr><td>
-<table class = "tableCalculatorInputs"><tr>
-<td>
-  <input type = "hidden" name = "request" id = "request" value = "compute">
-  <textarea class = "textareaCalculatorMain"
-  rows = "3" cols = "30" name = "mainInput" id = "mainInputID"
-  onkeypress = "window.calculator.calculator.submitCalculatorInputOnEnter(event);"
-  onkeyup    = "window.calculator.autocomplete.suggestWord(); window.calculator.initializeButtons.calculatorPanel.mQHelpCalculator();"
-  onkeydown  = "window.calculator.autocomplete.suggestWord(); window.calculator.initializeButtons.calculatorPanel.mQHelpCalculator(); window.calculator.autocomplete.arrowAction(event);"
-  onmouseup  = "window.calculator.autocomplete.suggestWord(); window.calculator.initializeButtons.calculatorPanel.mQHelpCalculator();"
-  oninput    = "window.calculator.autocomplete.suggestWord(); window.calculator.initializeButtons.calculatorPanel.mQHelpCalculator();"></textarea>
-</td>
-<td>
-  <span id = "mqPanelComments" style = "white-space:nowrap"> Equation assistant</span>
-  <br>
-  <span style = "vertical-align:top" id = "mainInputMQfield"></span>
-</td>
-<td>
-  <div class = "mqButtonPanel" style = "vertical-align:top" id = "mainInputMQfieldButtons" buttons = "algebra, logarithms, integrals, matrices"></div>
-</td>
-<td>
-  <span id = "spanDebugCalculatorPage">
-  </span>
-</td>
-<td>
-  <span id = "idAutocompletePanel">
-  <span id = "idAutocompleteHints" style = "font-size: x-small">
-    Ctrl+space = autocomplete<br>
-    Ctrl+arrow = select
-  </span>
-  <br>
-  <div id = "idAutocompleteSpan" style = "display:block; overflow:auto;" height = "100px"></div>
-  <span id = "idAutocompleteDebug"></span>
-  </span>
-</td>
-</tr>
-</table>
-</td></tr>
-<tr><td>
-<table>
-  <tr>
-    <td>
-    <button class = "buttonPreview" title = "Shift + Enter = shortcut from input text box. " name = "Go" onclick = "window.calculator.calculator.submitComputation(); event.preventDefault();">
-    Go
-    </button>
-    <span>
-    <button class = "buttonSubmit" id = "buttonSendTogglePauseRequest" onclick = "window.calculator.processMonitoring.monitor.togglePause()">Pause</button>
-    </span>
-    <span id = "spanProgressCalculatorInput"></span>
-    <span id = "idProgressReportTimer"></span>
-    <br>
-    <span id = "spanComputationLink"></span>
-    </td>
-  </tr>
-  <tr>
-  <td>
-    <span id = "spanCalculatorMainOutput"></span>
-  </td>
-  </tr>
-</table>
-</td></tr>
-</table> <!--tableCalculatorAndOutput-->
+    <div id="divCalculatorPage" class="divPage">
 
-</td><td>
-  <span id = "spanCalculatorExamplesContainer">
-  <button onclick = "window.calculator.calculator.toggleExamples(this)" class = "buttonToggleTopics">&#9656;</button> Examples
-  <span id = "spanProgressCalculatorExamples"></span>
-  <div id = "divCalculatorExamples">
-  </div><!--divCalculatorExamples-->
-  </span>
-</td></tr>
-</table><!--tableCalculatorExamples-->
-</div><!--divCalculatorPage-->
-<div id = "divAboutPage" class = "divPage">
-  <h2> Project mission</h2>
-  The mission of the calculator project is, to the extent possible,
-  <blockquote>
-  to develop a universally accessible, free and open source computer algebra system covering
-  all computational aspects of mathematical research and math education,
-  using an intuitive and user friendly interface that gives
-  full programmatic control over the system to its users.
-  </blockquote>
+      <table id="tableCalculatorExamples" class="tableCalculatorInputs">
+        <tr>
+          <td>
+            <table id="tableCalculatorAndOutput" class="tableCalculatorInputs">
+              <tr>
+                <td>
+                  <table class="tableCalculatorInputs">
+                    <tr>
+                      <td>
+                        <input type="hidden" name="request" id="request" value="compute">
+                        <textarea class="textareaCalculatorMain" rows="3" cols="30" name="mainInput" id="mainInputID"
+                          onkeypress="window.calculator.calculator.submitCalculatorInputOnEnter(event);"
+                          onkeyup="window.calculator.autocomplete.suggestWord(); window.calculator.initializeButtons.calculatorPanel.mQHelpCalculator();"
+                          onkeydown="window.calculator.autocomplete.suggestWord(); window.calculator.initializeButtons.calculatorPanel.mQHelpCalculator(); window.calculator.autocomplete.arrowAction(event);"
+                          onmouseup="window.calculator.autocomplete.suggestWord(); window.calculator.initializeButtons.calculatorPanel.mQHelpCalculator();"
+                          oninput="window.calculator.autocomplete.suggestWord(); window.calculator.initializeButtons.calculatorPanel.mQHelpCalculator();"></textarea>
+                      </td>
+                      <td>
+                        <span id="mqPanelComments" style="white-space:nowrap"> Equation assistant</span>
+                        <br>
+                        <span style="vertical-align:top" id="mainInputMQfield"></span>
+                      </td>
+                      <td>
+                        <div class="mqButtonPanel" style="vertical-align:top" id="mainInputMQfieldButtons"
+                          buttons="algebra, logarithms, integrals, matrices"></div>
+                      </td>
+                      <td>
+                        <span id="spanDebugCalculatorPage">
+                        </span>
+                      </td>
+                      <td>
+                        <span id="idAutocompletePanel">
+                          <span id="idAutocompleteHints" style="font-size: x-small">
+                            Ctrl+space = autocomplete<br>
+                            Ctrl+arrow = select
+                          </span>
+                          <br>
+                          <div id="idAutocompleteSpan" style="display:block; overflow:auto;" height="100px"></div>
+                          <span id="idAutocompleteDebug"></span>
+                        </span>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table>
+                    <tr>
+                      <td>
+                        <button class="buttonPreview" title="Shift + Enter = shortcut from input text box. " name="Go"
+                          onclick="window.calculator.calculator.submitComputation(); event.preventDefault();">
+                          Go
+                        </button>
+                        <span>
+                          <button class="buttonSubmit" id="buttonSendTogglePauseRequest"
+                            onclick="window.calculator.processMonitoring.monitor.togglePause()">Pause</button>
+                        </span>
+                        <span id="spanProgressCalculatorInput"></span>
+                        <span id="idProgressReportTimer"></span>
+                        <br>
+                        <span id="spanComputationLink"></span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span id="spanCalculatorMainOutput"></span>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+            <!--tableCalculatorAndOutput-->
 
-  <h2>About the software</h2>
-  The calculator is free and open source software. The calculator's <a href="https://github.com/tmilev/calculator" target="_blank">source code is here</a>.
-  The code is to be compiled on a Linux machine.
+          </td>
+          <td>
+            <span id="spanCalculatorExamplesContainer">
+              <button onclick="window.calculator.calculator.toggleExamples(this)"
+                class="buttonToggleTopics">&#9656;</button> Examples
+              <span id="spanProgressCalculatorExamples"></span>
+              <div id="divCalculatorExamples">
+              </div>
+              <!--divCalculatorExamples-->
+            </span>
+          </td>
+        </tr>
+      </table>
+      <!--tableCalculatorExamples-->
+    </div>
+    <!--divCalculatorPage-->
+    <div id="divAboutPage" class="divPage">
+      <h2> Project mission</h2>
+      The mission of the calculator project is, to the extent possible,
+      <blockquote>
+        to develop a universally accessible, free and open source computer algebra system covering
+        all computational aspects of mathematical research and math education,
+        using an intuitive and user friendly interface that gives
+        full programmatic control over the system to its users.
+      </blockquote>
 
-  <br>
-  <br>
-  The system should work out of the box on your own Linux machine (on localhost).
-  When installed locally, you access the system through your browser.
-  Login first as user <b>default</b> (this is the site's administrator account).
-  The first password you enter will be automatically registered as that of user default.
-  Futher accounts can be added by the default account using the server's menus.
-  <br>
-  If you wish to run the calculator open to the entire internet,
-  you will have to do quite a bit of extra work - just as with any website.
-  For example, you will need to get your own officially signed security certificates.
-  If you need help setting up the calculator on your linux machine, write me an email
-  (todor.milev at google's email).
+      <h2>About the software</h2>
+      The calculator is free and open source software. The calculator's <a href="https://github.com/tmilev/calculator"
+        target="_blank">source code is here</a>.
+      The code is to be compiled on a Linux machine.
 
-  <h3>Software license</h3>
-  The software is licensed to you under the <a href = 'https://www.apache.org/licenses/LICENSE-2.0', target = "_blank">Apache License, Version 2.0</a>.
-  This is a permissive free software license which, roughly speaking, states that you
-  are free to use the calculator, install it on your machine, use it to run your website,
-  modify its source code to suit your needs and redistribute the resulting work.
-  <br>
-  <br>
-  The calculator is fully functional without any homework/problem files,
-  and provides facilities for creating such.
-  All of my materials were created through the calculator interface.
-  Should you install the calculator on your own machine and
-  create your own homework problems,
-  you own the copyright to the resulting files; those are not subject
-  to the Apache License.
-  <br>
-  <br>
-  A big portion of the materials on this site are part of the <a href = "https://github.com/tmilev/freecalc/"> freecalc project</a> started by
-  <a href = "https://www.staff.ncl.ac.uk/gregory.maloney/about/" target = "blank"> Dr. Greg Maloney</a>.
-  The homework problems that are not part of freecalc are not subject to the Apache License and their copyright is held by their respective authors.
+      <br>
+      <br>
+      The system should work out of the box on your own Linux machine (on localhost).
+      When installed locally, you access the system through your browser.
+      Login first as user <b>default</b> (this is the site's administrator account).
+      The first password you enter will be automatically registered as that of user default.
+      Futher accounts can be added by the default account using the server's menus.
+      <br>
+      If you wish to run the calculator open to the entire internet,
+      you will have to do quite a bit of extra work - just as with any website.
+      For example, you will need to get your own officially signed security certificates.
+      If you need help setting up the calculator on your linux machine, write me an email
+      (todor.milev at google's email).
 
-
-
-  If you have any questions [proposals, feature requests, ...] about this project, write me an email (todor.milev at google's email).
-</div><!--divAboutPage-->
-
-<div id = "divPrivacyPolicy" class = "divPage">
-  <h1>Privacy Policy</h1>
-
-
-  <p>Effective date: December 10, 2018</p>
+      <h3>Software license</h3>
+      The software is licensed to you under the <a href='https://www.apache.org/licenses/LICENSE-2.0' ,
+        target="_blank">Apache License, Version 2.0</a>.
+      This is a permissive free software license which, roughly speaking, states that you
+      are free to use the calculator, install it on your machine, use it to run your website,
+      modify its source code to suit your needs and redistribute the resulting work.
+      <br>
+      <br>
+      The calculator is fully functional without any homework/problem files,
+      and provides facilities for creating such.
+      All of my materials were created through the calculator interface.
+      Should you install the calculator on your own machine and
+      create your own homework problems,
+      you own the copyright to the resulting files; those are not subject
+      to the Apache License.
+      <br>
+      <br>
+      A big portion of the materials on this site are part of the <a href="https://github.com/tmilev/freecalc/">
+        freecalc project</a> started by
+      <a href="https://www.staff.ncl.ac.uk/gregory.maloney/about/" target="blank"> Dr. Greg Maloney</a>.
+      The homework problems that are not part of freecalc are not subject to the Apache License and their copyright is
+      held by their respective authors.
 
 
-  <p>calculator ("us", "we", or "our") operates the https://calculator-algebra.org website (the "Service").</p>
 
-  <p>This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our Service and the choices you have associated with that data. Our Privacy Policy  for calculator is managed through <a href="https://www.freeprivacypolicy.com/free-privacy-policy-generator.php">Free Privacy Policy Website</a>.</p>
+      If you have any questions [proposals, feature requests, ...] about this project, write me an email (todor.milev at
+      google's email).
+    </div>
+    <!--divAboutPage-->
 
-  <p>We use your data to provide and improve the Service. By using the Service, you agree to the collection and use of information in accordance with this policy. Unless otherwise defined in this Privacy Policy, terms used in this Privacy Policy have the same meanings as in our Terms and Conditions, accessible from https://calculator-algebra.org</p>
+    <div id="divPrivacyPolicy" class="divPage">
+      <h1>Privacy Policy</h1>
 
 
-  <h2>Information Collection And Use</h2>
+      <p>Effective date: December 10, 2018</p>
 
-  <p>We collect several different types of information for various purposes to provide and improve our Service to you.</p>
 
-  <h3>Types of Data Collected</h3>
+      <p>calculator ("us", "we", or "our") operates the https://calculator-algebra.org website (the "Service").</p>
 
-  <h4>Personal Data</h4>
+      <p>This page informs you of our policies regarding the collection, use, and disclosure of personal data when you
+        use our Service and the choices you have associated with that data. Our Privacy Policy for calculator is managed
+        through <a href="https://www.freeprivacypolicy.com/free-privacy-policy-generator.php">Free Privacy Policy
+          Website</a>.</p>
 
-  <p>While using our Service, we may ask you to provide us with certain personally identifiable information that can be used to contact or identify you ("Personal Data"). Personally identifiable information may include, but is not limited to:</p>
+      <p>We use your data to provide and improve the Service. By using the Service, you agree to the collection and use
+        of information in accordance with this policy. Unless otherwise defined in this Privacy Policy, terms used in
+        this Privacy Policy have the same meanings as in our Terms and Conditions, accessible from
+        https://calculator-algebra.org</p>
 
-  <ul>
-  <li>Email address</li><li>Cookies and Usage Data</li>
-  </ul>
 
-  <h4>Usage Data</h4>
+      <h2>Information Collection And Use</h2>
 
-  <p>We may also collect information how the Service is accessed and used ("Usage Data"). This Usage Data may include information such as your computer's Internet Protocol address (e.g. IP address), browser type, browser version, the pages of our Service that you visit, the time and date of your visit, the time spent on those pages, unique device identifiers and other diagnostic data.</p>
+      <p>We collect several different types of information for various purposes to provide and improve our Service to
+        you.</p>
 
-  <h4>Tracking & Cookies Data</h4>
-  <p>We use cookies and similar tracking technologies to track the activity on our Service and hold certain information.</p>
-  <p>Cookies are files with small amount of data which may include an anonymous unique identifier. Cookies are sent to your browser from a website and stored on your device. Tracking technologies also used are beacons, tags, and scripts to collect and track information and to improve and analyze our Service.</p>
-  <p>You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use some portions of our Service.</p>
-  <p>Examples of Cookies we use:</p>
-  <ul>
-      <li><strong>Session Cookies.</strong> We use Session Cookies to operate our Service.</li>
-      <li><strong>Preference Cookies.</strong> We use Preference Cookies to remember your preferences and various settings.</li>
-      <li><strong>Security Cookies.</strong> We use Security Cookies for security purposes.</li>
-  </ul>
+      <h3>Types of Data Collected</h3>
 
-  <h2>Use of Data</h2>
+      <h4>Personal Data</h4>
 
-  <p>calculator uses the collected data for various purposes:</p>
-  <ul>
-      <li>To provide and maintain the Service</li>
-      <li>To notify you about changes to our Service</li>
-      <li>To allow you to participate in interactive features of our Service when you choose to do so</li>
-      <li>To provide customer care and support</li>
-      <li>To provide analysis or valuable information so that we can improve the Service</li>
-      <li>To monitor the usage of the Service</li>
-      <li>To detect, prevent and address technical issues</li>
-  </ul>
+      <p>While using our Service, we may ask you to provide us with certain personally identifiable information that can
+        be used to contact or identify you ("Personal Data"). Personally identifiable information may include, but is
+        not limited to:</p>
 
-  <h2>Transfer Of Data</h2>
-  <p>Your information, including Personal Data, may be transferred to — and maintained on — computers located outside of your state, province, country or other governmental jurisdiction where the data protection laws may differ than those from your jurisdiction.</p>
-  <p>If you are located outside Canada and choose to provide information to us, please note that we transfer the data, including Personal Data, to Canada and process it there.</p>
-  <p>Your consent to this Privacy Policy followed by your submission of such information represents your agreement to that transfer.</p>
-  <p>calculator will take all steps reasonably necessary to ensure that your data is treated securely and in accordance with this Privacy Policy and no transfer of your Personal Data will take place to an organization or a country unless there are adequate controls in place including the security of your data and other personal information.</p>
+      <ul>
+        <li>Email address</li>
+        <li>Cookies and Usage Data</li>
+      </ul>
 
-  <h2>Disclosure Of Data</h2>
+      <h4>Usage Data</h4>
 
-  <h3>Legal Requirements</h3>
-  <p>calculator may disclose your Personal Data in the good faith belief that such action is necessary to:</p>
-  <ul>
-      <li>To comply with a legal obligation</li>
-      <li>To protect and defend the rights or property of calculator</li>
-      <li>To prevent or investigate possible wrongdoing in connection with the Service</li>
-      <li>To protect the personal safety of users of the Service or the public</li>
-      <li>To protect against legal liability</li>
-  </ul>
+      <p>We may also collect information how the Service is accessed and used ("Usage Data"). This Usage Data may
+        include information such as your computer's Internet Protocol address (e.g. IP address), browser type, browser
+        version, the pages of our Service that you visit, the time and date of your visit, the time spent on those
+        pages, unique device identifiers and other diagnostic data.</p>
 
-  <h2>Security Of Data</h2>
-  <p>The security of your data is important to us, but remember that no method of transmission over the Internet, or method of electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your Personal Data, we cannot guarantee its absolute security.</p>
+      <h4>Tracking & Cookies Data</h4>
+      <p>We use cookies and similar tracking technologies to track the activity on our Service and hold certain
+        information.</p>
+      <p>Cookies are files with small amount of data which may include an anonymous unique identifier. Cookies are sent
+        to your browser from a website and stored on your device. Tracking technologies also used are beacons, tags, and
+        scripts to collect and track information and to improve and analyze our Service.</p>
+      <p>You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you
+        do not accept cookies, you may not be able to use some portions of our Service.</p>
+      <p>Examples of Cookies we use:</p>
+      <ul>
+        <li><strong>Session Cookies.</strong> We use Session Cookies to operate our Service.</li>
+        <li><strong>Preference Cookies.</strong> We use Preference Cookies to remember your preferences and various
+          settings.</li>
+        <li><strong>Security Cookies.</strong> We use Security Cookies for security purposes.</li>
+      </ul>
 
-  <h2>Service Providers</h2>
-  <p>We may employ third party companies and individuals to facilitate our Service ("Service Providers"), to provide the Service on our behalf, to perform Service-related services or to assist us in analyzing how our Service is used.</p>
-  <p>These third parties have access to your Personal Data only to perform these tasks on our behalf and are obligated not to disclose or use it for any other purpose.</p>
+      <h2>Use of Data</h2>
 
-  <h3>Analytics</h3>
-  <p>We may use third-party Service Providers to monitor and analyze the use of our Service.</p>
-  <ul>
-          <li>
+      <p>calculator uses the collected data for various purposes:</p>
+      <ul>
+        <li>To provide and maintain the Service</li>
+        <li>To notify you about changes to our Service</li>
+        <li>To allow you to participate in interactive features of our Service when you choose to do so</li>
+        <li>To provide customer care and support</li>
+        <li>To provide analysis or valuable information so that we can improve the Service</li>
+        <li>To monitor the usage of the Service</li>
+        <li>To detect, prevent and address technical issues</li>
+      </ul>
+
+      <h2>Transfer Of Data</h2>
+      <p>Your information, including Personal Data, may be transferred to — and maintained on — computers located
+        outside of your state, province, country or other governmental jurisdiction where the data protection laws may
+        differ than those from your jurisdiction.</p>
+      <p>If you are located outside Canada and choose to provide information to us, please note that we transfer the
+        data, including Personal Data, to Canada and process it there.</p>
+      <p>Your consent to this Privacy Policy followed by your submission of such information represents your agreement
+        to that transfer.</p>
+      <p>calculator will take all steps reasonably necessary to ensure that your data is treated securely and in
+        accordance with this Privacy Policy and no transfer of your Personal Data will take place to an organization or
+        a country unless there are adequate controls in place including the security of your data and other personal
+        information.</p>
+
+      <h2>Disclosure Of Data</h2>
+
+      <h3>Legal Requirements</h3>
+      <p>calculator may disclose your Personal Data in the good faith belief that such action is necessary to:</p>
+      <ul>
+        <li>To comply with a legal obligation</li>
+        <li>To protect and defend the rights or property of calculator</li>
+        <li>To prevent or investigate possible wrongdoing in connection with the Service</li>
+        <li>To protect the personal safety of users of the Service or the public</li>
+        <li>To protect against legal liability</li>
+      </ul>
+
+      <h2>Security Of Data</h2>
+      <p>The security of your data is important to us, but remember that no method of transmission over the Internet, or
+        method of electronic storage is 100% secure. While we strive to use commercially acceptable means to protect
+        your Personal Data, we cannot guarantee its absolute security.</p>
+
+      <h2>Service Providers</h2>
+      <p>We may employ third party companies and individuals to facilitate our Service ("Service Providers"), to provide
+        the Service on our behalf, to perform Service-related services or to assist us in analyzing how our Service is
+        used.</p>
+      <p>These third parties have access to your Personal Data only to perform these tasks on our behalf and are
+        obligated not to disclose or use it for any other purpose.</p>
+
+      <h3>Analytics</h3>
+      <p>We may use third-party Service Providers to monitor and analyze the use of our Service.</p>
+      <ul>
+        <li>
           <p><strong>Google Analytics</strong></p>
-          <p>Google Analytics is a web analytics service offered by Google that tracks and reports website traffic. Google uses the data collected to track and monitor the use of our Service. This data is shared with other Google services. Google may use the collected data to contextualize and personalize the ads of its own advertising network.</p>
-          <p>You can opt-out of having made your activity on the Service available to Google Analytics by installing the Google Analytics opt-out browser add-on. The add-on prevents the Google Analytics JavaScript (ga.js, analytics.js, and dc.js) from sharing information with Google Analytics about visits activity.</p>                <p>For more information on the privacy practices of Google, please visit the Google Privacy & Terms web page: <a href="https://policies.google.com/privacy?hl=en">https://policies.google.com/privacy?hl=en</a></p>
-      </li>
-                              </ul>
+          <p>Google Analytics is a web analytics service offered by Google that tracks and reports website traffic.
+            Google uses the data collected to track and monitor the use of our Service. This data is shared with other
+            Google services. Google may use the collected data to contextualize and personalize the ads of its own
+            advertising network.</p>
+          <p>You can opt-out of having made your activity on the Service available to Google Analytics by installing the
+            Google Analytics opt-out browser add-on. The add-on prevents the Google Analytics JavaScript (ga.js,
+            analytics.js, and dc.js) from sharing information with Google Analytics about visits activity.</p>
+          <p>For more information on the privacy practices of Google, please visit the Google Privacy & Terms web page:
+            <a href="https://policies.google.com/privacy?hl=en">https://policies.google.com/privacy?hl=en</a></p>
+        </li>
+      </ul>
 
 
-  <h2>Links To Other Sites</h2>
-  <p>Our Service may contain links to other sites that are not operated by us. If you click on a third party link, you will be directed to that third party's site. We strongly advise you to review the Privacy Policy of every site you visit.</p>
-  <p>We have no control over and assume no responsibility for the content, privacy policies or practices of any third party sites or services.</p>
+      <h2>Links To Other Sites</h2>
+      <p>Our Service may contain links to other sites that are not operated by us. If you click on a third party link,
+        you will be directed to that third party's site. We strongly advise you to review the Privacy Policy of every
+        site you visit.</p>
+      <p>We have no control over and assume no responsibility for the content, privacy policies or practices of any
+        third party sites or services.</p>
 
 
-  <h2>Children's Privacy</h2>
-  <p>Our Service does not address anyone under the age of 18 ("Children").</p>
-  <p>We do not knowingly collect personally identifiable information from anyone under the age of 18. If you are a parent or guardian and you are aware that your Children has provided us with Personal Data, please contact us. If we become aware that we have collected Personal Data from children without verification of parental consent, we take steps to remove that information from our servers.</p>
+      <h2>Children's Privacy</h2>
+      <p>Our Service does not address anyone under the age of 18 ("Children").</p>
+      <p>We do not knowingly collect personally identifiable information from anyone under the age of 18. If you are a
+        parent or guardian and you are aware that your Children has provided us with Personal Data, please contact us.
+        If we become aware that we have collected Personal Data from children without verification of parental consent,
+        we take steps to remove that information from our servers.</p>
 
 
-  <h2>Changes To This Privacy Policy</h2>
-  <p>We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page.</p>
-  <p>We will let you know via email and/or a prominent notice on our Service, prior to the change becoming effective and update the "effective date" at the top of this Privacy Policy.</p>
-  <p>You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are effective when they are posted on this page.</p>
+      <h2>Changes To This Privacy Policy</h2>
+      <p>We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new
+        Privacy Policy on this page.</p>
+      <p>We will let you know via email and/or a prominent notice on our Service, prior to the change becoming effective
+        and update the "effective date" at the top of this Privacy Policy.</p>
+      <p>You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are
+        effective when they are posted on this page.</p>
 
 
-  <h2>Contact Us</h2>
-  <p>If you have any questions about this Privacy Policy, please contact us:</p>
-  <ul>
-          <li>By email: todor.milev@gmail.com</li>
+      <h2>Contact Us</h2>
+      <p>If you have any questions about this Privacy Policy, please contact us:</p>
+      <ul>
+        <li>By email: todor.milev@gmail.com</li>
 
-          </ul>
+      </ul>
 
-</div>
+    </div>
 
-<div id = "divDatabase" class = "divPage">
-  <button class = "buttonStandard" onclick = "window.calculator.database.updateDatabasePageResetCurrentTable();">Tables</button><span id = "spanDatabaseComments"></span>
-<div id = "divDatabaseOutput"> </div>
-</div>
-<div id = "divThemes" class = "divPage" >
-  <label class="containerRadioButton">
-    Default
-    <input type="radio" checked="checked" name = "theme" id = "radioThemeDefault" onchange="window.calculator.themes.theme.setFromRadioButton()"></input>
-    <span class="radioMark"></span>
-  </label>
-  <label class="containerRadioButton">Experimental
-    <input type="radio" name = "theme" id = "radioThemeExperimental" onchange="window.calculator.themes.theme.setFromRadioButton()"></input>
-    <span class="radioMark"></span>
-  </label>
-</div>
-<div id = "divAccount" class = "divPage">
-  <form>
-  <table> <!--Password change table, to avoid password not in a form warning-->
-  <tr><td>User:</td><td> <span id = "spanUserIdInAccountsPage"></span></td></tr>
-  <tr>
-  <td>Current password:</td>
-  <td>
-  <input class = "textInputUsername" type = "password" id = "inputOldPasswordInAccount" name = "password" placeholder = "password" autocomplete = "on">
-  </td>
-  </tr>
-  <tr>
-    <td>New password:</td>
-    <td>
-      <input class = "textInputUsername" type = "password" id = "inputNewPasswordInAccount" name = "password" placeholder = "password" autocomplete = "on">
-    </td>
-  </tr>
-  <tr>
-    <td>Re-enter:</td>
-    <td>
-      <input class = "textInputUsername" type = "password" id = "inputReenteredPasswordInAccount" name = "password" placeholder = "password" autocomplete = "on">
-    </td>
-  </tr>
-  </table><!--Password change table-->
-  </form>
-  <button class = "buttonStandard" onclick = "window.calculator.account.submitChangePassRequest()">Change password</button>
-  <table>
-  <tr><td>Current email:</td><td><span id = 'spanOldEmail'></span></td></tr>
-  <tr>
-    <td id = "labelNewEmail">New email:</td>
-    <td>
-      <input class = "textInputUsername" type = "text" id = "inputEmail" placeholder = "email" autocomplete = "on">
-    </td>
-  </tr>
-  </table>
-  <button class = "buttonStandard" onclick = "window.calculator.account.submitChangePassRequest()" id = "buttonChangeEmail">Change email</button>
-  <br>
-  <span id = "spanVerification"></span>
-  <hr>
-  <span id = "spanUserExtraInfo"></span>
-</div>
+    <div id="divDatabase" class="divPage">
+      <button class="buttonStandard"
+        onclick="window.calculator.database.updateDatabasePageResetCurrentTable();">Tables</button><span
+        id="spanDatabaseComments"></span>
+      <div id="divDatabaseOutput"> </div>
+    </div>
+    <div id="divThemes" class="divPage">
+      <label class="containerRadioButton">
+        Default
+        <input type="radio" checked="checked" name="theme" id="radioThemeDefault"
+          onchange="window.calculator.themes.theme.setFromRadioButton()"></input>
+        <span class="radioMark"></span>
+      </label>
+      <label class="containerRadioButton">Experimental
+        <input type="radio" name="theme" id="radioThemeExperimental"
+          onchange="window.calculator.themes.theme.setFromRadioButton()"></input>
+        <span class="radioMark"></span>
+      </label>
+    </div>
+    <div id="divAccount" class="divPage">
+      <form>
+        <table>
+          <!--Password change table, to avoid password not in a form warning-->
+          <tr>
+            <td>User:</td>
+            <td> <span id="spanUserIdInAccountsPage"></span></td>
+          </tr>
+          <tr>
+            <td>Current password:</td>
+            <td>
+              <input class="textInputUsername" type="password" id="inputOldPasswordInAccount" name="password"
+                placeholder="password" autocomplete="on">
+            </td>
+          </tr>
+          <tr>
+            <td>New password:</td>
+            <td>
+              <input class="textInputUsername" type="password" id="inputNewPasswordInAccount" name="password"
+                placeholder="password" autocomplete="on">
+            </td>
+          </tr>
+          <tr>
+            <td>Re-enter:</td>
+            <td>
+              <input class="textInputUsername" type="password" id="inputReenteredPasswordInAccount" name="password"
+                placeholder="password" autocomplete="on">
+            </td>
+          </tr>
+        </table>
+        <!--Password change table-->
+      </form>
+      <button class="buttonStandard" onclick="window.calculator.account.submitChangePassRequest()">Change
+        password</button>
+      <table>
+        <tr>
+          <td>Current email:</td>
+          <td><span id='spanOldEmail'></span></td>
+        </tr>
+        <tr>
+          <td id="labelNewEmail">New email:</td>
+          <td>
+            <input class="textInputUsername" type="text" id="inputEmail" placeholder="email" autocomplete="on">
+          </td>
+        </tr>
+      </table>
+      <button class="buttonStandard" onclick="window.calculator.account.submitChangePassRequest()"
+        id="buttonChangeEmail">Change email</button>
+      <br>
+      <span id="spanVerification"></span>
+      <hr>
+      <span id="spanUserExtraInfo"></span>
+    </div>
 
-<div id = "divActivateAccount" class = "divPage">
-  <form>  <!--Activate account form, avoid password field not in a form warning. -->
-  <table>
-  <tr><td>User:</td><td><span id = "spanUserIdInActivateAccountPage"></span></td></tr>
-  <tr><td>Current email:</td><td><span id = "spanCurrentActivationEmail"></span></td></tr>
-  <tr><td>Activation token:</td><td><span id = "spanCurrentActivationToken"></span></td></tr>
-  <tr>
-  <td>New password:</td>
-  <td>
-    <input class = "textInputUsername" type = "password" id = "inputNewPasswordInActivationAccount" name = "password" placeholder = "password" autocomplete = "on">
-  </td>
-  </tr>
-  <tr>
-  <td>Re-enter:</td>
-  <td>
-    <input class = "textInputUsername" type = "password" id = "inputReenteredPasswordInActivationAccount" name = "password" placeholder = "password" autocomplete = "on">
-  </td>
-  </tr>
-  </table>
-  </form> <!--Activate account form-->
-  <button class = "buttonStandard" onclick = "window.calculator.accountActivation.submitActivateAccountRequest()">Change password</button>
-  <span id = "spanVerificationActivation"></span>
-</div>
+    <div id="divActivateAccount" class="divPage">
+      <form>
+        <!--Activate account form, avoid password field not in a form warning. -->
+        <table>
+          <tr>
+            <td>User:</td>
+            <td><span id="spanUserIdInActivateAccountPage"></span></td>
+          </tr>
+          <tr>
+            <td>Current email:</td>
+            <td><span id="spanCurrentActivationEmail"></span></td>
+          </tr>
+          <tr>
+            <td>Activation token:</td>
+            <td><span id="spanCurrentActivationToken"></span></td>
+          </tr>
+          <tr>
+            <td>New password:</td>
+            <td>
+              <input class="textInputUsername" type="password" id="inputNewPasswordInActivationAccount" name="password"
+                placeholder="password" autocomplete="on">
+            </td>
+          </tr>
+          <tr>
+            <td>Re-enter:</td>
+            <td>
+              <input class="textInputUsername" type="password" id="inputReenteredPasswordInActivationAccount"
+                name="password" placeholder="password" autocomplete="on">
+            </td>
+          </tr>
+        </table>
+      </form>
+      <!--Activate account form-->
+      <button class="buttonStandard" onclick="window.calculator.accountActivation.submitActivateAccountRequest()">Change
+        password</button>
+      <span id="spanVerificationActivation"></span>
+    </div>
 
-<div id = "divAccounts" class = "divPage">
-  <div id = "idAccountsOutput">
-    Assign section(s) to teacher(s).
-    <br>
-    <textarea width = "500px" id = "inputSetTeacher" placeholder = "email or user list, comma, space or ; separated"></textarea>
-    <textarea width = "500px" id = "inputSections" placeholder = "list of sections"></textarea>
-    <br>
-    <button class = "buttonNormal" onclick = "window.calculator.manageAccounts.getTeachersStudents()"> Set teacher</button>
-    <br><span id = "idOutputSections"></span>
-    <br>
-    <ul>
-      <li>Add <b>administrators</b> here.</li>
-      <li>Added/updated users will have their current course set to: <br>
-        <span class ="currentCourseIndicator"></span>
-      </li>
-      <li>To change course use the select course link in the navigation panel.</li>
-      <li>List users with a comma/space bar/new line/tab/semicolumn separated list. </li>
-      <li>List default passwords with a similarly separated list.</li>
-      <li>If left blank, password(s) are not (re)set.</li>
-      <li>If the password entries are not left blank and the number of passwords does not match the number of added users, the operation will fail (no users will be added).</li>
-    </ul>
-    <textarea width = "500px" id = "inputAddUsersadmin" placeholder = "admin list, comma, space or ; separated"></textarea>
-    <textarea width = "500px" id = "inputAddDefaultPasswordsadmin" placeholder = "default passwords"></textarea>
-    <textarea width = "500px" id = "inputAddExtraInfoadmin" placeholder = "section/class #"></textarea>
-    <br>
-    <button class = "buttonNormal" onclick = "window.calculator.manageAccounts.addEmailsOrUsers('inputAddUsersadmin', '', 'idOutputAdmins', 'admin', 'inputAddExtraInfoadmin', 'inputAddDefaultPasswordsadmin', 'addUsers' )"> Add users</button>
-    <br>
-    <span id = "idOutputAdmins"></span>
-    <ul>
-      <li>Add <b>student(s)</b> here.</li>
-      <li>Added/updated users will have their current course set to: <br>
-        <span class ="currentCourseIndicator"></span>
-      </li>
-      <li>To change course use the select course link in the top panel.</li>
-      <li>List users with a comma/space bar/new line/tab/semicolumn separated list. </li>
-      <li>List default passwords with a similarly separated list.</li>
-      <li>If left blank, password(s) are not (re)set.</li>
-      <li>If the password entries are not left blank and the number of passwords does not match the number of added users, the operation will fail (no users will be added).</li>
-    </ul>
-    <textarea width = "500px" id = "inputAddUsersstudent" placeholder = "user list, comma, space or ; separated"></textarea>
-    <textarea width = "500px" id = "inputAddDefaultPasswordsstudent" placeholder = "default passwords"></textarea>
-    <textarea width = "500px" id = "inputAddExtraInfostudent" placeholder = "section/class #"></textarea>
-    <br>
-    <button class = "normalButton" onclick = "window.calculator.manageAccounts.addEmailsOrUsers('inputAddUsersstudent', '', 'idOutputStudents', 'student', 'inputAddExtraInfostudent', 'inputAddDefaultPasswordsstudent', 'addUsers' )"> Add users</button>
-    <br>
-    <span id = "idOutputStudents"></span>
+    <div id="divAccounts" class="divPage">
+      <div id="idAccountsOutput">
+        Assign section(s) to teacher(s).
+        <br>
+        <textarea width="500px" id="inputSetTeacher"
+          placeholder="email or user list, comma, space or ; separated"></textarea>
+        <textarea width="500px" id="inputSections" placeholder="list of sections"></textarea>
+        <br>
+        <button class="buttonNormal" onclick="window.calculator.manageAccounts.getTeachersStudents()"> Set
+          teacher</button>
+        <br><span id="idOutputSections"></span>
+        <br>
+        <ul>
+          <li>Add <b>administrators</b> here.</li>
+          <li>Added/updated users will have their current course set to: <br>
+            <span class="currentCourseIndicator"></span>
+          </li>
+          <li>To change course use the select course link in the navigation panel.</li>
+          <li>List users with a comma/space bar/new line/tab/semicolumn separated list. </li>
+          <li>List default passwords with a similarly separated list.</li>
+          <li>If left blank, password(s) are not (re)set.</li>
+          <li>If the password entries are not left blank and the number of passwords does not match the number of added
+            users, the operation will fail (no users will be added).</li>
+        </ul>
+        <textarea width="500px" id="inputAddUsersadmin"
+          placeholder="admin list, comma, space or ; separated"></textarea>
+        <textarea width="500px" id="inputAddDefaultPasswordsadmin" placeholder="default passwords"></textarea>
+        <textarea width="500px" id="inputAddExtraInfoadmin" placeholder="section/class #"></textarea>
+        <br>
+        <button class="buttonNormal"
+          onclick="window.calculator.manageAccounts.addEmailsOrUsers('inputAddUsersadmin', '', 'idOutputAdmins', 'admin', 'inputAddExtraInfoadmin', 'inputAddDefaultPasswordsadmin', 'addUsers' )">
+          Add users</button>
+        <br>
+        <span id="idOutputAdmins"></span>
+        <ul>
+          <li>Add <b>student(s)</b> here.</li>
+          <li>Added/updated users will have their current course set to: <br>
+            <span class="currentCourseIndicator"></span>
+          </li>
+          <li>To change course use the select course link in the top panel.</li>
+          <li>List users with a comma/space bar/new line/tab/semicolumn separated list. </li>
+          <li>List default passwords with a similarly separated list.</li>
+          <li>If left blank, password(s) are not (re)set.</li>
+          <li>If the password entries are not left blank and the number of passwords does not match the number of added
+            users, the operation will fail (no users will be added).</li>
+        </ul>
+        <textarea width="500px" id="inputAddUsersstudent"
+          placeholder="user list, comma, space or ; separated"></textarea>
+        <textarea width="500px" id="inputAddDefaultPasswordsstudent" placeholder="default passwords"></textarea>
+        <textarea width="500px" id="inputAddExtraInfostudent" placeholder="section/class #"></textarea>
+        <br>
+        <button class="normalButton"
+          onclick="window.calculator.manageAccounts.addEmailsOrUsers('inputAddUsersstudent', '', 'idOutputStudents', 'student', 'inputAddExtraInfostudent', 'inputAddDefaultPasswordsstudent', 'addUsers' )">
+          Add users</button>
+        <br>
+        <span id="idOutputStudents"></span>
+      </div>
+    </div>
+
+    <div id="divServer" class="divPage">
+      <div id="idServerStatus">
+      </div>
+    </div>
+
+
+    <div id="divTheMainMenuPanel" class="divTheMainMenu">
+      <div class="divLoginPanel">
+        <button id="buttonToggleTheMainMenu" onclick="window.calculator.panels.toggleMenu(this);"
+          class="buttonToggleTopics">
+          &#9660;
+        </button>
+        <div id="divProfilePicture" class="divProfilePictureContainerExpanded divInvisible"></div>
+        <div id="divLoginPanelUsernameReport" class="divInvisible divSmall" style="margin: 4px"></div>
+        <div id="divLoginPanelExtraInfo" class="divInvisible divSmall" style="margin: 4px"></div>
+        <div id="divLoginPanelDatabaseInfo" class="divSmall" style="margin: 4px"></div>
+        <a href="#" onclick="window.calculator.login.logout();" class="linkLogoutInactive linkStandardButtonLike">Log
+          out</a>
+      </div>
+      <div><button class="buttonSelectPage" id="buttonLoginPage">Login</button></div>
+      <div><button class="buttonSelectPage" id="buttonProblemPage">Current problem</button></div>
+      <div><button class="buttonSelectPage" id="buttonCurrentCourse">Current course</button></div>
+      <div><button class="buttonSelectPage" id="buttonSelectCourse">Select course</button></div>
+      <div><button class="buttonSelectPage" id="buttonSelectCalculator">Calculator</button></div>
+      <div><button class="buttonSelectPage" id="buttonAboutPage">About</button></div>
+      <div><button class="buttonSelectPage" id="buttonPrivacyPolicy">Privacy</button></div>
+      <div><button class="buttonSelectPage" id="buttonThemes">Themes</button></div>
+      <div class="divMenuSeparator divAccountPanel divInvisible">Account</div>
+      <div class="divAccountPanel divInvisible"><button class="buttonSelectPage"
+          id="buttonSelectAccount">Account</button></div>
+
+      <div class="divMenuSeparator">Server</div>
+      <div><button class="buttonSelectPage" id="buttonSelectServer">Server</button></div>
+      <div class="divAdminPanel divInvisible"><button class="buttonSelectPage" id="buttonEditPage">Edit</button></div>
+      <div class="divAdminPanel divInvisible"><button class="buttonSelectPage"
+          id="buttonSelectAccounts">Accounts</button></div>
+      <div class="divAdminPanel divInvisible"><button class="buttonSelectPage"
+          id="buttonSelectDatabase">Database</button></div>
+      <br>
+      <div>
+        <!--div monitor flag-->
+        <label class="switch">
+          <input id="sliderMonitoring" type="checkbox" onchange="window.calculator.mainPage.toggleMonitoring();">
+          <span class="slider round"></span>
+        </label>
+        <span id="spanMonitoringStatus"></span>
+      </div>
+      <!--div monitor flag-->
+      <div>
+        <div>
+          <!--div containing debug flag-->
+          <label class="switch">
+            <input id="sliderDebugFlag" type="checkbox" onchange="window.calculator.mainPage.setSwitchDebug();">
+            <span class="slider round"></span>
+          </label><span id="spanDebugFlagToggleReport">-</span>
+        </div>
+        <!--div containing debug flag-->
+      </div>
+      <div>
+        <label class="switch">
+          <input id="sliderStudentView" type="checkbox" onchange="window.calculator.mainPage.setSwitchStudentView();">
+          <span class="slider round"></span>
+        </label><span id="spanStudentViewToggleReport">-</span>
+      </div>
+
+      <br>
+      <div id="spanProgressReportGeneral" class="spanProgressReport"></div>
+      <div id="spanStudentViewPanel">
+        <div>
+          <span id="spanStudentViewSectionSelectPanel">
+          </span>
+        </div>
+      </div>
+      <br>
+
+      <div style="text-align: center; font-size: small;">
+        <a href="https://github.com/tmilev/calculator" id="anchorCalculatorBuildVersion" target="_blank"></a>
+        <a href="https://github.com/tmilev/calculator/issues" target="_blank">Issues/bugs</a>
+      </div>
+
+
+
+    </div>
+    <!--divTheMainMenuPanel-->
+
+
   </div>
-</div>
-
-<div id = "divServer" class = "divPage">
-  <div id = "idServerStatus">
-  </div>
-</div>
-
-
-<div id = "divTheMainMenuPanel" class = "divTheMainMenu">
-<div class = "divLoginPanel">
-  <button id = "buttonToggleTheMainMenu" onclick = "window.calculator.panels.toggleMenu(this);" class = "buttonToggleTopics">
-  &#9660;
-  </button>
-  <div id = "divProfilePicture" class = "divProfilePictureContainerExpanded divInvisible"></div>
-  <div id = "divLoginPanelUsernameReport" class = "divInvisible divSmall" style = "margin: 4px"></div>
-  <div id = "divLoginPanelExtraInfo" class = "divInvisible divSmall" style = "margin: 4px"></div>
-  <div id = "divLoginPanelDatabaseInfo" class = "divSmall" style = "margin: 4px"></div>
-  <a href = "#" onclick = "window.calculator.login.logout();" class = "linkLogoutInactive linkStandardButtonLike">Log out</a>
-</div>
-<div><button class = "buttonSelectPage" id = "buttonLoginPage">Login</button></div>
-<div><button class = "buttonSelectPage" id = "buttonProblemPage">Current problem</button></div>
-<div><button class = "buttonSelectPage" id = "buttonCurrentCourse">Current course</button></div>
-<div><button class = "buttonSelectPage" id = "buttonSelectCourse">Select course</button></div>
-<div><button class = "buttonSelectPage" id = "buttonSelectCalculator">Calculator</button></div>
-<div><button class = "buttonSelectPage" id = "buttonAboutPage">About</button></div>
-<div><button class = "buttonSelectPage" id = "buttonPrivacyPolicy">Privacy</button></div>
-<div><button class = "buttonSelectPage" id = "buttonThemes">Themes</button></div>
-<div class = "divMenuSeparator divAccountPanel divInvisible">Account</div>
-<div class = "divAccountPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectAccount">Account</button></div>
-
-<div class = "divMenuSeparator">Server</div>
-<div><button class = "buttonSelectPage" id = "buttonSelectServer">Server</button></div>
-<div class = "divAdminPanel divInvisible"><button class = "buttonSelectPage" id = "buttonEditPage">Edit</button></div>
-<div class = "divAdminPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectAccounts">Accounts</button></div>
-<div class = "divAdminPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectDatabase">Database</button></div>
-<br>
-<div><!--div monitor flag-->
-  <label class = "switch">
-    <input id = "sliderMonitoring" type = "checkbox" onchange = "window.calculator.mainPage.toggleMonitoring();">
-    <span class = "slider round"></span>
-  </label>
-  <span id = "spanMonitoringStatus"></span>
-</div><!--div monitor flag-->
-<div>
-  <div><!--div containing debug flag-->
-  <label class = "switch">
-    <input id = "sliderDebugFlag" type = "checkbox" onchange = "window.calculator.mainPage.setSwitchDebug();">
-    <span class = "slider round"></span>
-  </label><span id = "spanDebugFlagToggleReport">-</span>
-  </div><!--div containing debug flag-->
-</div>
-<div>
-  <label class = "switch">
-  <input id = "sliderStudentView" type = "checkbox" onchange = "window.calculator.mainPage.setSwitchStudentView();">
-  <span class = "slider round"></span>
-</label><span id = "spanStudentViewToggleReport">-</span>
-</div>
-
-<br>
-<div id = "spanProgressReportGeneral" class = "spanProgressReport"></div>
-<div id = "spanStudentViewPanel">
-<div>
-<span id = "spanStudentViewSectionSelectPanel">
-</span>
-</div>
-</div>
-<br>
-
-<div style = "text-align: center; font-size: small;">
-<a href = "https://github.com/tmilev/calculator" id = "anchorCalculatorBuildVersion" target = "_blank"></a>
-<a href = "https://github.com/tmilev/calculator/issues" target = "_blank">Issues/bugs</a>
-</div>
-
-
-
-</div> <!--divTheMainMenuPanel-->
-
-
-</div><!--divPage-->
+  <!--divPage-->
 
 </body>
+
 </html>

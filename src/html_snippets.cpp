@@ -215,11 +215,20 @@ std::string HtmlRoutines::getMathSpan(const std::string& input, int upperNumChar
     << " characters and I dare not use mathjax. Here is the output as plain LaTeX.</b> " << input;
     return out.str();
   }
-  out << "\\(";
+  if (global.flagUseMathTags) {
+    out << "<math>";
+  } else {
+    out << "\\(";
+  }
   if (useDisplayStyle) {
     out << "\\displaystyle ";
   }
-  out << input << "\\)";
+  out << input;
+  if (global.flagUseMathTags) {
+    out << "</math>";
+  } else {
+    out << "\\)";
+  }
   return out.str();
 }
 

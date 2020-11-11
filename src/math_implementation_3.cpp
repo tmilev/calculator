@@ -185,6 +185,8 @@ GlobalVariables::GlobalVariables() {
   this->flagLocalhostConnectionMonitor = true;
   this->flagDaemonMonitor = false;
   this->flagDisableDatabaseLogEveryoneAsAdmin = false;
+
+  this->flagUseMathTags = false;
 }
 
 bool ProgressReport::tickAndWantReport() {

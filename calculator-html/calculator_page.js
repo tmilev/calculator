@@ -10,6 +10,7 @@ const panels = require('./panels');
 const mathjax = require('./mathjax-calculator-setup');
 const processMonitoring = require('./process_monitoring');
 const initializeButtons = require('./initialize_buttons');
+const equationEditor = require('./equation_editor')
 
 
 function Calculator() {
@@ -51,28 +52,28 @@ Calculator.prototype.updateCalculatorSliderEventHandler = function (inputBox) {
   event.preventDefault();
   var sliderName = this.inputBoxToSliderUpdaters[inputBox.name];
   var theSliders = document.getElementsByName(sliderName);
-  for (var counterSlider = 0; counterSlider < theSliders.length; counterSlider ++) {
+  for (var counterSlider = 0; counterSlider < theSliders.length; counterSlider++) {
     var currentSlider = theSliders[counterSlider];
     currentSlider.value = inputBox.value;
   }
   this.updateSliderToInputBox(inputBox.name, sliderName);
 }
 
-Calculator.prototype.addListenersToInputBoxes = function() {
+Calculator.prototype.addListenersToInputBoxes = function () {
   //var theString=" updating: box names, slider names: ";
-  for (var i = 0; i < this.inputBoxNames.length; i ++) {
+  for (var i = 0; i < this.inputBoxNames.length; i++) {
     var theBoxes = document.getElementsByName(this.inputBoxNames[i]);
-    for (var j = 0; j < theBoxes.length; j ++) {
+    for (var j = 0; j < theBoxes.length; j++) {
       theBoxes[j].addEventListener("input", this.updateCalculatorSliderEventHandler.bind(this, theBoxes[j]));
     }
   }
 }
 
-Calculator.prototype.updateSliderToInputBox =  function(boxName, sliderName) {
+Calculator.prototype.updateSliderToInputBox = function (boxName, sliderName) {
   var theBoxes = document.getElementsByName(boxName);
   var theSliders = document.getElementsByName(sliderName);
   var sliderValue = theSliders[0].value;
-  for (var i = 0; i < theBoxes.length; i ++) {
+  for (var i = 0; i < theBoxes.length; i++) {
     theBoxes[i].value = sliderValue;
   }
   var plodtId = drawing.plotUpdaters[sliderName];
@@ -114,9 +115,9 @@ function AtomHandler() {
 
 }
 
-AtomHandler.prototype.fromObject = function(
-  input, 
-  /**@type {number}*/ index, 
+AtomHandler.prototype.fromObject = function (
+  input,
+  /**@type {number}*/ index,
   /**@type {number}*/ totalRules,
 ) {
   this.index = index;
@@ -132,7 +133,7 @@ AtomHandler.prototype.fromObject = function(
   }
 }
 
-AtomHandler.prototype.toString = function(
+AtomHandler.prototype.toString = function (
   /**@type {Calculator}*/
   calculator
 ) {
@@ -159,9 +160,9 @@ AtomHandler.prototype.toString = function(
   return resultString;
 }
 
-Calculator.prototype.processOneFunctionAtom = function(handlers) {
+Calculator.prototype.processOneFunctionAtom = function (handlers) {
   var resultStrings = [];
-  for (var i = 0; i < handlers.length; i ++) {
+  for (var i = 0; i < handlers.length; i++) {
     resultStrings.push("<br>");
     var handler = new AtomHandler();
     handler.fromObject(handlers[i], i, handlers.length);
@@ -170,13 +171,13 @@ Calculator.prototype.processOneFunctionAtom = function(handlers) {
   return resultStrings.join("");
 }
 
-Calculator.prototype.processExamples = function(inputJSONtext) {
+Calculator.prototype.processExamples = function (inputJSONtext) {
   try {
     this.examples = miscellaneous.jsonUnescapeParse(inputJSONtext);
     var examplesString = "";
     var atomsSorted = Object.keys(this.examples).slice().sort();
     var numHandlers = 0;
-    for (var i = 0; i < atomsSorted.length; i ++) {
+    for (var i = 0; i < atomsSorted.length; i++) {
       var atom = atomsSorted[i];
       var currentExamples = this.examples[atom];
       examplesString += this.processOneFunctionAtom(currentExamples.regular);
@@ -200,7 +201,7 @@ Calculator.prototype.submitCalculatorInputOnEnter = function (event) {
   event.preventDefault();
 }
 
-Calculator.prototype.toggleExamples = function(theButton) {
+Calculator.prototype.toggleExamples = function (theButton) {
   var theExamples = document.getElementById(ids.domElements.calculatorExamples);
   var theURL = "";
   theURL += pathnames.urls.calculatorAPI;
@@ -214,7 +215,7 @@ Calculator.prototype.toggleExamples = function(theButton) {
     theButton.innerHTML = "&#9660;";
   } else {
     miscellaneousFrontend.switchMenu(ids.domElements.calculatorExamples);
-    if (! theExamples.classList.contains("hiddenClass")) {
+    if (!theExamples.classList.contains("hiddenClass")) {
       theButton.innerHTML = "&#9660;";
     } else {
       theButton.innerHTML = "&#9656;";
@@ -222,7 +223,7 @@ Calculator.prototype.toggleExamples = function(theButton) {
   }
 }
 
-Calculator.prototype.submitComputation = function() {
+Calculator.prototype.submitComputation = function () {
   processMonitoring.monitor.clearTimeout();
   var thePage = window.calculator.mainPage;
   var calculatorInput = document.getElementById(ids.domElements.inputMain).value;
@@ -235,7 +236,7 @@ Calculator.prototype.submitComputation = function() {
 }
 
 /**@returns {String} */
-Calculator.prototype.getComputationLink = function(input) {
+Calculator.prototype.getComputationLink = function (input) {
   var theURL = {
     currentPage: "calculator",
     calculatorInput: input,
@@ -245,7 +246,7 @@ Calculator.prototype.getComputationLink = function(input) {
   return stringifiedHash;
 }
 
-Calculator.prototype.writeErrorsAndCrashes = function(
+Calculator.prototype.writeErrorsAndCrashes = function (
   /**@type {BufferCalculator} */
   buffer,
   inputParsed,
@@ -267,7 +268,7 @@ Calculator.prototype.writeErrorsAndCrashes = function(
   }
 }
 
-Calculator.prototype.writeResult = function(
+Calculator.prototype.writeResult = function (
   /**@type {BufferCalculator} */
   buffer,
   inputParsed,
@@ -306,8 +307,8 @@ Calculator.prototype.writeResult = function(
     inputParsed.result.output = [inputParsed.result.output];
   }
   var numEntries = Math.max(inputParsed.result.input.length, inputParsed.result.output.length);
-  for (var i = 0; i < numEntries; i ++) {
-    this.numberOfCalculatorPanels ++;
+  for (var i = 0; i < numEntries; i++) {
+    this.numberOfCalculatorPanels++;
     var inputPanelId = `calculatorInputPanel${this.numberOfCalculatorPanels}`;
     var outputPanelId = `calculatorOutputPanel${this.numberOfCalculatorPanels}`;
     if (i < inputParsed.result.input.length) {
@@ -328,7 +329,7 @@ Calculator.prototype.writeResult = function(
   buffer.write(`</table>`);
   buffer.write(`</td><td><div class = "containerComments">`);
   buffer.write("<small>Double-click formulas: get LaTeX. Double-click back: hide. </small>");
-  var performance = inputParsed[pathnames.urlFields.result.performance]; 
+  var performance = inputParsed[pathnames.urlFields.result.performance];
   if (performance !== undefined) {
     var content = performance[pathnames.urlFields.result.comments];
     var label = `<b style='color:blue'>${performance[pathnames.urlFields.result.computationTime]}</b>`;
@@ -342,7 +343,7 @@ Calculator.prototype.writeResult = function(
     ));
     buffer.write("<br>");
   }
-  if (inputParsed.comments !== undefined ) {
+  if (inputParsed.comments !== undefined) {
     buffer.write(inputParsed.comments);
   }
   buffer.write(`</div></td>`);
@@ -358,8 +359,8 @@ Calculator.prototype.writeResult = function(
   }
 }
 
-Calculator.prototype.afterWriteOutput = function() {
-  for (var i = 0; i < this.panels.length; i ++) {
+Calculator.prototype.afterWriteOutput = function () {
+  for (var i = 0; i < this.panels.length; i++) {
     panels.makePanelFromData(this.panels[i]);
   }
   var spanVerification = document.getElementById(ids.domElements.spanCalculatorMainOutput);
@@ -371,16 +372,21 @@ Calculator.prototype.afterWriteOutput = function() {
   this.inputBoxToSliderUpdaters = {};
   this.canvases = {};
   thePage.pages.calculator.sciptIds = [];
-  for (var i = 0; i < incomingScripts.length; i ++) {
+  for (var i = 0; i < incomingScripts.length; i++) {
     var newId = `calculatorMainPageId_${i}`;
     thePage.pages.calculator.sciptIds.push(newId);
     thePage.injectScript(newId, incomingScripts[i].innerHTML);
   }
   this.addListenersToInputBoxes();
+  let mathElements = document.getElementsByTagName("math");
+  for (let i = 0; i < mathElements.length; i++) {
+    equationEditor.mathFromElement(mathElements[i]);
+  }
   mathjax.typeSetSoft(ids.domElements.spanCalculatorMainOutput);
 }
 
-Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input, output) {
+
+Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function (input, output) {
   var inputHtml = null;
   this.panels.length = 0;
   try {
@@ -399,7 +405,7 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
   this.afterWriteOutput();
 }
 
-Calculator.prototype.submitComputationPartTwo = function(input) {
+Calculator.prototype.submitComputationPartTwo = function (input) {
   //<- this function is called by a callback trigerred when calling
   //thePage.storage.variables.calculator.input.setAndStore(...)
   var thePage = window.calculator.mainPage;
@@ -412,15 +418,15 @@ Calculator.prototype.submitComputationPartTwo = function(input) {
   }, 0);
   var url = pathnames.urls.calculatorAPI;
   var parameters = this.getQueryStringSubmitStringAsMainInput(input, pathnames.urlFields.calculatorCompute);
-  submitRequests.submitPOST ({
+  submitRequests.submitPOST({
     url: url,
-    parameters:  parameters,
+    parameters: parameters,
     callback: this.defaultOnLoadInjectScriptsAndProcessLaTeX.bind(this),
     progress: ids.domElements.spanProgressCalculatorInput,
   });
 }
 
-Calculator.prototype.getQueryStringSubmitStringAsMainInput = function(theString, requestType) {
+Calculator.prototype.getQueryStringSubmitStringAsMainInput = function (theString, requestType) {
   var inputParams = '';
   var thePage = window.calculator.mainPage;
   inputParams += `${pathnames.urlFields.request}=${requestType}&`;
@@ -436,7 +442,7 @@ Calculator.prototype.getQueryStringSubmitStringAsMainInput = function(theString,
   return inputParams;
 }
 
-Calculator.prototype.submitStringAsMainInput= function (theString, idOutput, requestType, onLoadFunction, idStatus) {
+Calculator.prototype.submitStringAsMainInput = function (theString, idOutput, requestType, onLoadFunction, idStatus) {
   var inputParams = this.getQueryStringSubmitStringAsMainInput(theString, requestType);
   this.submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus);
 }

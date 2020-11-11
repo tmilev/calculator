@@ -875,12 +875,18 @@ class EquationEditorOptions {
 class EquationEditor {
   constructor(
     /** @type{HTMLElement} */
-    container,
+    containerGiven,
     /** @type{EquationEditorOptions|null} */
     options,
   ) {
-    this.container = container;
-    this.container.innerHTML = "";
+    this.containerGiven = containerGiven;
+    this.containerGiven.innerHTML = "";
+    /** @type{HTMLElement} */
+    this.container = containerGiven;
+    if (this.container.tagName !== "DIV") {
+      this.container = document.createElement("DIV");
+      this.containerGiven.appendChild(this.container);
+    }
     this.container.style.display = "inline-block";
     this.container.style.position = "relative";
     this.rootNode = mathNodeFactory.rootMath(this);
@@ -909,7 +915,9 @@ class EquationEditor {
     this.rootNode.removeAllChildren();
     let parser = new LaTeXParser(this, latex);
     let newContent = parser.parse();
-    document.getElementById("parsingLog").innerHTML = parser.reductionLog.join("<br>");
+    if (false) {
+      document.getElementById("parsingLog").innerHTML = parser.reductionLog.join("<br>");
+    }
     if (newContent === null) {
       console.log(`Failed to construct node from your input ${latex}.`);
       return;

@@ -378,7 +378,7 @@ Calculator.prototype.afterWriteOutput = function () {
     thePage.injectScript(newId, incomingScripts[i].innerHTML);
   }
   this.addListenersToInputBoxes();
-  let mathElements = document.getElementsByTagName("math");
+  let mathElements = document.getElementsByTagName("mathcalculator");
   for (let i = 0; i < mathElements.length; i++) {
     equationEditor.mathFromElement(mathElements[i]);
   }

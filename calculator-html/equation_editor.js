@@ -65,6 +65,11 @@ class MathNodeType {
     this.borderBottom = input["borderBottom"];
     this.borderTop = input["borderTop"];
   }
+
+  /**@return {MathNodeType} */
+  clone() {
+    return Object.assign(new MathNodeType({}), this);
+  }
 }
 
 const knownTypeDefaults = {
@@ -867,8 +872,15 @@ class EquationEditorOptions {
   constructor(
     /**@type{boolean}*/
     editable,
+    /**@type{HTMLElement|null} */
+    debugLogContainer,
   ) {
     this.editable = editable;
+    /**@type{HTMLElement|null} */
+    this.debugLogContainer = null;
+    if (debugLogContainer instanceof HTMLElement) {
+      this.debugLogContainer = debugLogContainer;
+    }
   }
 }
 
@@ -889,13 +901,16 @@ class EquationEditor {
     }
     this.container.style.display = "inline-block";
     this.container.style.position = "relative";
-    this.rootNode = mathNodeFactory.rootMath(this);
-    this.rootNode.externalDOM = this.container;
     /** @type{EquationEditorOptions} */
     this.options = new EquationEditorOptions(true);
     if (options !== null && options !== undefined) {
       this.options = options;
     }
+    this.rootNode = mathNodeFactory.rootMath(this);
+    if (!this.options.editable) {
+      this.rootNode.type.borderStyle = "";
+    }
+    this.rootNode.externalDOM = this.container;
     /** @type{AtomWithPosition} */
     this.selectionStart = new AtomWithPosition(null, -1);
     /** @type{AtomWithPosition} */
@@ -915,8 +930,8 @@ class EquationEditor {
     this.rootNode.removeAllChildren();
     let parser = new LaTeXParser(this, latex);
     let newContent = parser.parse();
-    if (false) {
-      document.getElementById("parsingLog").innerHTML = parser.reductionLog.join("<br>");
+    if (this.options.debugLogContainer !== null) {
+      debugLogContainer.innerHTML = parser.reductionLog.join("<br>");
     }
     if (newContent === null) {
       console.log(`Failed to construct node from your input ${latex}.`);
@@ -1207,7 +1222,7 @@ class MathNode {
     /** @type {Array<MathNode>} */
     this.children = [];
     /** @type {MathNodeType} */
-    this.type = type;
+    this.type = type.clone();
     /** @type {HTMLElement} */
     this.element = null;
     /** @type {MathNode} */

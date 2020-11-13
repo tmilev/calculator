@@ -850,6 +850,16 @@ class LaTeXParser {
     if (last.content === "left" && secondToLast.syntacticRole === "\\") {
       return this.decreaseParsingStack(2);
     }
+    if (last.content === "right" && secondToLast.syntacticRole === "\\") {
+      return this.decreaseParsingStack(2);
+    }
+    if (last.content === "sqrt" && secondToLast.syntacticRole === "\\") {
+      return this.writeToParsingStack(null, "\\sqrt", 2);
+    }
+    if (secondToLast.syntacticRole === "\\sqrt" && last.syntacticRole === "") {
+      let node = mathNodeFactory.sqrt(this.equationEditor, last.node);
+      return this.writeToParsingStack(node, "", 1);
+    }
     if (last.syntacticRole === "(") {
       let node = mathNodeFactory.leftParenthesis(this.equationEditor, false);
       return this.writeToParsingStack(node, "", 0);

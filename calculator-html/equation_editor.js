@@ -124,7 +124,7 @@ const knownTypeDefaultsArrows = {
   "ArrowRight": arrowMotion.firstAtomToTheRight,
 };
 
-const defaultFractionScale = 0.75;
+const defaultFractionScale = 0.9;
 const atomMargin = `${0.02}em`;
 
 const knownTypes = {
@@ -613,6 +613,8 @@ class LaTeXConstants {
       "{": "{",
       "}": "}",
       "^": "^",
+      "(": "(",
+      ")": ")",
       "\\": "\\",
     };
     this.whiteSpaceCharacters = {
@@ -756,6 +758,14 @@ class LaTeXParser {
 
   /** @returns{boolean} */
   decreaseParsingStack(
+    /**@type{number} */
+    elementToRemove,
+  ) {
+    this.parsingStack.length = this.parsingStack.length - elementToRemove;
+  }
+
+  /** @returns{boolean} */
+  writeToParsingStack(
     /**@type{MathNode|null} */
     node,
     /**@type{string} */
@@ -763,11 +773,11 @@ class LaTeXParser {
     /**@type{number} */
     nodesToRemove,
   ) {
-    return this.decreaseParsingStackRange(node, syntancticValue, - nodesToRemove - 1, - 1);
+    return this.writeToParsingStackRange(node, syntancticValue, - nodesToRemove - 1, - 1);
   }
 
   /** @returns{boolean} */
-  decreaseParsingStackRange(
+  writeToParsingStackRange(
     /**@type{MathNode|null} */
     node,
     /**@type{string} */
@@ -817,14 +827,14 @@ class LaTeXParser {
       return true;
     }
     if (last.content in latexConstants.latexSyntacticValues) {
-      return this.decreaseParsingStack(null, latexConstants.latexSyntacticValues[last.content], 0);
+      return this.writeToParsingStack(null, latexConstants.latexSyntacticValues[last.content], 0);
     }
     let secondToLast = this.parsingStack[this.parsingStack.length - 2];
     let thirdToLast = this.parsingStack[this.parsingStack.length - 3];
     if (secondToLast.syntacticRole === "{" && last.node !== null) {
       if (last.node.type.type !== knownTypes.horizontalMath.type) {
         let node = mathNodeFactory.horizontalMath(this.equationEditor, last.node);
-        return this.decreaseParsingStack(node, "", 0);
+        return this.writeToParsingStack(node, "", 0);
       }
     }
     if (thirdToLast.syntacticRole === "{" && secondToLast.node !== null && last.syntacticRole === "}") {
@@ -832,18 +842,29 @@ class LaTeXParser {
       if (node.type.type !== knownTypes.horizontalMath.type) {
         node = mathNodeFactory.horizontalMath(this.equationEditor, node);
       }
-      return this.decreaseParsingStack(node, "", 2);
+      return this.writeToParsingStack(node, "", 2);
     }
     if (last.content === "frac" && secondToLast.syntacticRole === "\\") {
-      return this.decreaseParsingStack(null, "\\frac", 1);
+      return this.writeToParsingStack(null, "\\frac", 1);
+    }
+    if (last.content === "left" && secondToLast.syntacticRole === "\\") {
+      return this.decreaseParsingStack(2);
+    }
+    if (last.syntacticRole === "(") {
+      let node = mathNodeFactory.leftParenthesis(this.equationEditor, false);
+      return this.writeToParsingStack(node, "", 0);
+    }
+    if (last.syntacticRole === ")") {
+      let node = mathNodeFactory.rightParenthesis(this.equationEditor, false);
+      return this.writeToParsingStack(node, "", 0);
     }
     if (thirdToLast.node !== null && secondToLast.syntacticRole === "^" && last.node !== null) {
       let node = mathNodeFactory.baseWithExponent(this.equationEditor, thirdToLast.node, last.node);
-      return this.decreaseParsingStack(node, "", 2);
+      return this.writeToParsingStack(node, "", 2);
     }
     if (thirdToLast.syntacticRole === "\\frac" && secondToLast.node !== null && last.node !== null) {
       let node = mathNodeFactory.fraction(this.equationEditor, secondToLast.node, last.node);
-      return this.decreaseParsingStack(node, "", 2);
+      return this.writeToParsingStack(node, "", 2);
     }
     if (last.content in latexConstants.operatorsNormalized) {
       // Construct immutable atom from operator.
@@ -851,18 +872,18 @@ class LaTeXParser {
         this.equationEditor,
         latexConstants.operatorsNormalized[last.content],
       );
-      return this.decreaseParsingStack(node, "", 0);
+      return this.writeToParsingStack(node, "", 0);
     }
     if (last.content !== "" && last.syntacticRole === "" && last.node === null) {
       // Construct atom.
       let node = mathNodeFactory.atom(this.equationEditor, last.content);
-      return this.decreaseParsingStack(node, "", 0);
+      return this.writeToParsingStack(node, "", 0);
     }
     if (thirdToLast.node !== null && secondToLast.node !== null && last.syntacticRole !== "^") {
       // Absorb atom / immutable atom to preceding horizontal math.
       if (thirdToLast.node.type.type === knownTypes.horizontalMath.type) {
         thirdToLast.node.appendChild(secondToLast.node);
-        return this.decreaseParsingStackRange(thirdToLast.node, "", -3, -2);
+        return this.writeToParsingStackRange(thirdToLast.node, "", -3, -2);
       }
     }
   }
@@ -934,7 +955,7 @@ class EquationEditor {
     let parser = new LaTeXParser(this, latex);
     let newContent = parser.parse();
     if (this.options.debugLogContainer !== null) {
-      debugLogContainer.innerHTML = parser.reductionLog.join("<br>");
+      this.options.debugLogContainer.innerHTML = parser.reductionLog.join("<br>");
     }
     if (newContent === null) {
       console.log(`Failed to construct node from your input ${latex}.`);
@@ -3651,13 +3672,14 @@ function writeDebugInfo() {
 var defaultEquationEditorLocal = null;
 
 function initialize() {
-  let editorElement = document.getElementById('equation-editor');
-  defaultEquationEditorLocal = new EquationEditor(editorElement);
-  defaultEquationEditorLocal.updateDOM();
   MathQuill.getInterface(2).MathField(document.getElementById('mq-editor'));
 }
 
 function testEquationEditor() {
+  let editorElement = document.getElementById('equation-editor');
+  defaultEquationEditorLocal = new EquationEditor(editorElement);
+  defaultEquationEditorLocal.options.debugLogContainer = document.getElementById("parsingLog");
+  defaultEquationEditorLocal.updateDOM();
   defaultEquationEditorLocal.rootNode.focus(- 1);
   setTimeout(() => {
     defaultEquationEditorLocal.sendKeys([

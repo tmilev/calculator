@@ -870,18 +870,20 @@ class LaTeXParser {
 
 class EquationEditorOptions {
   constructor(
-    /**@type{boolean}*/
+    /** @type{boolean} */
     editable,
     /**@type{HTMLElement|null} */
     debugLogContainer,
   ) {
+    /** @type{boolean} */
     this.editable = editable;
     /**@type{HTMLElement|null} */
     this.debugLogContainer = null;
     if (debugLogContainer instanceof HTMLElement) {
       this.debugLogContainer = debugLogContainer;
     }
-    this.showLatexOnDoubleClick = true;
+    /** @type{boolean} */
+    this.showLatexOnDoubleClick = !this.editable;
   }
 }
 

@@ -198,7 +198,6 @@ const knownTypes = {
       "ArrowDown": arrowMotion.firstAtomToTheRight,
     },
     "textAlign": "center",
-    // "whiteSpace": "nowrap",
   }),
   baseWithExponent: new MathNodeType({
     "type": "baseWithExponent",
@@ -393,6 +392,7 @@ class MathNodeFactory {
     return leftParentheses;
   }
 
+  /** @returns {MathNode} */
   rightParenthesis(
     /** @type {EquationEditor} */
     equationEditor,
@@ -405,6 +405,7 @@ class MathNodeFactory {
     return rightParentheses;
   }
 
+  /** @returns {MathNode} */
   matrix(
     /** @type {EquationEditor} */
     equationEditor,
@@ -425,6 +426,7 @@ class MathNodeFactory {
     return result;
   }
 
+  /** @returns {MathNode} */
   matrixRow(
     /** @type {EquationEditor} */
     equationEditor,
@@ -433,7 +435,7 @@ class MathNodeFactory {
   ) {
     let result = new MathNode(equationEditor, knownTypes.matrixRow);
     for (let i = 0; i < columns; i++) {
-      result.appendChild(this.matrixRowEntry(equationEditor));
+      result.appendChild(this.matrixRowEntry(equationEditor, null));
     }
     return result;
   }
@@ -441,9 +443,11 @@ class MathNodeFactory {
   matrixRowEntry(
     /** @type {EquationEditor} */
     equationEditor,
+    /** @type {MathNode|null} */
+    content,
   ) {
     let result = new MathNode(equationEditor, knownTypes.matrixRowEntry);
-    result.appendChild(this.horizontalMath(equationEditor, null));
+    result.appendChild(this.horizontalMath(equationEditor, content));
     return result;
   }
 }
@@ -587,6 +591,9 @@ class SyntancticElement {
     }
     return result;
   }
+  isExpression() {
+    return this.syntacticRole === "" && this.node !== null;
+  }
 }
 
 class LaTeXConstants {
@@ -616,6 +623,17 @@ class LaTeXConstants {
       "(": "(",
       ")": ")",
       "\\": "\\",
+      "&": "&",
+    };
+    /**@type{Object.<string, string>} */
+    this.latexBackslashCommands = {
+      "sqrt": "\\sqrt",
+      "begin": "\\begin",
+      "end": "\\end",
+      "frac": "\\frac",
+    };
+    this.beginEndEnvironments = {
+      "pmatrix": "pmatrix",
     };
     this.whiteSpaceCharacters = {
       " ": true,
@@ -809,14 +827,18 @@ class LaTeXParser {
     }
     this.parsingStack.length -= nodesToRemove;
     if (this.debug) {
-      let totalStack = [];
-      for (let i = this.dummyParsingElements; i < this.parsingStack.length; i++) {
-        totalStack.push(this.parsingStack[i].toString());
-      }
-      log += ` ||| ${totalStack.join(",")} `;
-      this.reductionLog.push(log);
+      log += ` ||| ${this.toStringSyntacticStack()}`
+      this.reductionLog.push(`<div style='white-space:nowrap'>${log}</div>`);
     }
     return true;
+  }
+  /**@returns{string} */
+  toStringSyntacticStack() {
+    let totalStack = [];
+    for (let i = this.dummyParsingElements; i < this.parsingStack.length; i++) {
+      totalStack.push(this.parsingStack[i].toString());
+    }
+    return totalStack.join(",");
   }
 
   /**@returns{boolean} Applies the first possible rule to the top of the parsing stack. */
@@ -830,31 +852,94 @@ class LaTeXParser {
       return this.writeToParsingStack(null, latexConstants.latexSyntacticValues[last.content], 0);
     }
     let secondToLast = this.parsingStack[this.parsingStack.length - 2];
+    if (last.syntacticRole === "\\" && secondToLast.syntacticRole === "\\") {
+      return this.writeToParsingStack(null, "\\\\", 1);
+    }
     let thirdToLast = this.parsingStack[this.parsingStack.length - 3];
-    if (secondToLast.syntacticRole === "{" && last.node !== null) {
+    let fourthToLast = this.parsingStack[this.parsingStack.length - 4];
+    if (secondToLast.syntacticRole === "{" && last.isExpression()) {
       if (last.node.type.type !== knownTypes.horizontalMath.type) {
         let node = mathNodeFactory.horizontalMath(this.equationEditor, last.node);
         return this.writeToParsingStack(node, "", 0);
       }
     }
-    if (thirdToLast.syntacticRole === "{" && secondToLast.node !== null && last.syntacticRole === "}") {
+    if (thirdToLast.syntacticRole === "{" && secondToLast.isExpression() && last.syntacticRole === "}") {
       let node = secondToLast.node;
       if (node.type.type !== knownTypes.horizontalMath.type) {
         node = mathNodeFactory.horizontalMath(this.equationEditor, node);
       }
       return this.writeToParsingStack(node, "", 2);
     }
-    if (last.content === "frac" && secondToLast.syntacticRole === "\\") {
-      return this.writeToParsingStack(null, "\\frac", 1);
+    if (secondToLast.syntacticRole === "\\" && last.content in latexConstants.latexBackslashCommands) {
+      return this.writeToParsingStack(null, latexConstants.latexBackslashCommands[last.content], 1);
+    }
+    if (
+      (thirdToLast.syntacticRole === "\\begin" || thirdToLast.syntacticRole === "\\end") &&
+      secondToLast.syntacticRole === "{" &&
+      last.content in latexConstants.beginEndEnvironments
+    ) {
+      return this.writeToParsingStack(null, latexConstants.beginEndEnvironments[last.content], 0);
+    }
+    if (
+      fourthToLast.syntacticRole === "\\begin" &&
+      thirdToLast.syntacticRole === "{" &&
+      secondToLast.syntacticRole in latexConstants.beginEndEnvironments &&
+      last.syntacticRole === "}"
+    ) {
+      let environment = latexConstants.beginEndEnvironments[secondToLast.syntacticRole];
+      return this.writeToParsingStack(null, `\\begin{${environment}}`, 3);
+    }
+    if (
+      fourthToLast.syntacticRole === "\\end" &&
+      thirdToLast.syntacticRole === "{" &&
+      secondToLast.syntacticRole in latexConstants.beginEndEnvironments &&
+      last.syntacticRole === "}"
+    ) {
+      let environment = latexConstants.beginEndEnvironments[secondToLast.syntacticRole];
+      return this.writeToParsingStack(null, `\\end{${environment}}`, 3);
+    }
+    if (last.syntacticRole === "\\begin{pmatrix}") {
+      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0);
+      return this.writeToParsingStack(matrix, "matrixBuilder", 0);
+    }
+    if (last.syntacticRole === "&" && secondToLast.isExpression() && thirdToLast.syntacticRole === "matrixBuilder") {
+      // Modify thirdToLast.node in place for performance reasons:
+      // copying it may cause unwanted quadratic comoplexity.
+      let incomingEntry = mathNodeFactory.matrixRowEntry(this.equationEditor, secondToLast.node);
+      thirdToLast.node.getLastMatrixRow().appendChild(incomingEntry);
+      return this.decreaseParsingStack(2);
+    }
+    if (last.syntacticRole === "\\\\" && secondToLast.isExpression() && thirdToLast.syntacticRole === "matrixBuilder") {
+      // Modify thirdToLast.node in place for performance reasons:
+      // copying it may cause unwanted quadratic comoplexity.
+      let lastRow = thirdToLast.node.getLastMatrixRow();
+      let incomingEntry = mathNodeFactory.matrixRowEntry(this.equationEditor, secondToLast.node);
+      lastRow.appendChild(incomingEntry);
+      let newRow = mathNodeFactory.matrixRow(this.equationEditor, 0);
+      lastRow.parent.appendChild(newRow);
+      return this.decreaseParsingStack(2);
+    }
+    if (thirdToLast.syntacticRole === "matrixBuilder" && secondToLast.isExpression() && last.syntacticRole === "\\end{pmatrix}") {
+      let incomingEntry = mathNodeFactory.matrixRowEntry(this.equationEditor, secondToLast.node);
+      thirdToLast.node.getLastMatrixRow().appendChild(incomingEntry);
+      // Normalize the matrix: ensure all rows have same number of columns, no last empty row, etc.
+      thirdToLast.node.normalizeMatrix();
+      // Mark the matrix as a regular expression.
+      thirdToLast.syntacticRole = "";
+      return this.decreaseParsingStack(2);
+    }
+    if (secondToLast.syntacticRole === "matrixBuilder" && last.syntacticRole === "\\end{pmatrix}") {
+      // Normalize the matrix: ensure all rows have same number of columns, no last empty row, etc.
+      secondToLast.node.normalizeMatrix();
+      // Mark the matrix as a regular expression.
+      secondToLast.syntacticRole = "";
+      return this.decreaseParsingStack(1);
     }
     if (last.content === "left" && secondToLast.syntacticRole === "\\") {
       return this.decreaseParsingStack(2);
     }
     if (last.content === "right" && secondToLast.syntacticRole === "\\") {
       return this.decreaseParsingStack(2);
-    }
-    if (last.content === "sqrt" && secondToLast.syntacticRole === "\\") {
-      return this.writeToParsingStack(null, "\\sqrt", 2);
     }
     if (secondToLast.syntacticRole === "\\sqrt" && last.syntacticRole === "") {
       let node = mathNodeFactory.sqrt(this.equationEditor, last.node);
@@ -868,11 +953,11 @@ class LaTeXParser {
       let node = mathNodeFactory.rightParenthesis(this.equationEditor, false);
       return this.writeToParsingStack(node, "", 0);
     }
-    if (thirdToLast.node !== null && secondToLast.syntacticRole === "^" && last.node !== null) {
+    if (thirdToLast.node !== null && secondToLast.syntacticRole === "^" && last.isExpression()) {
       let node = mathNodeFactory.baseWithExponent(this.equationEditor, thirdToLast.node, last.node);
       return this.writeToParsingStack(node, "", 2);
     }
-    if (thirdToLast.syntacticRole === "\\frac" && secondToLast.node !== null && last.node !== null) {
+    if (thirdToLast.syntacticRole === "\\frac" && secondToLast.isExpression() && last.isExpression()) {
       let node = mathNodeFactory.fraction(this.equationEditor, secondToLast.node, last.node);
       return this.writeToParsingStack(node, "", 2);
     }
@@ -889,7 +974,7 @@ class LaTeXParser {
       let node = mathNodeFactory.atom(this.equationEditor, last.content);
       return this.writeToParsingStack(node, "", 0);
     }
-    if (thirdToLast.node !== null && secondToLast.node !== null && last.syntacticRole !== "^") {
+    if (thirdToLast.isExpression() && secondToLast.isExpression() && last.syntacticRole !== "^") {
       // Absorb atom / immutable atom to preceding horizontal math.
       if (thirdToLast.node.type.type === knownTypes.horizontalMath.type) {
         thirdToLast.node.appendChild(secondToLast.node);
@@ -965,7 +1050,8 @@ class EquationEditor {
     let parser = new LaTeXParser(this, latex);
     let newContent = parser.parse();
     if (this.options.debugLogContainer !== null) {
-      this.options.debugLogContainer.innerHTML = parser.reductionLog.join("<br>");
+      this.options.debugLogContainer.innerHTML = parser.reductionLog.join("<hr>") + "<hr><hr>" + parser.toStringSyntacticStack();
+
     }
     if (newContent === null) {
       console.log(`Failed to construct node from your input ${latex}.`);
@@ -3656,6 +3742,22 @@ class MathNode {
       toJoin.push(this.children[i].toLatex());
     }
     return toJoin.join("");
+  }
+
+  /** If the element is a matrix, fetches its last row.
+   * @returns {MathNode|null}
+   */
+  getLastMatrixRow() {
+    if (this.type.type !== knownTypes.matrix.type) {
+      return null;
+    }
+    let matrixTable = this.children[0].children[1];
+    return matrixTable.children[matrixTable.children.length - 1];
+  }
+
+  /** Ensures that a matrix has rows with equal number of columns. */
+  normalizeMatrix() {
+    console.log("Not implemented yet");
   }
 }
 

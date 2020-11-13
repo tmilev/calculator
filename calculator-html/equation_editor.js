@@ -881,6 +881,7 @@ class EquationEditorOptions {
     if (debugLogContainer instanceof HTMLElement) {
       this.debugLogContainer = debugLogContainer;
     }
+    this.showLatexOnDoubleClick = true;
   }
 }
 
@@ -968,7 +969,6 @@ class EquationEditor {
 
   dispatchKey(
     /**@type{MathNode}*/ focused,
-
     /**@type{string} */ key,
   ) {
     if (focused === null) {
@@ -1178,6 +1178,30 @@ class EquationEditor {
     }
     return current;
   }
+
+  handleDoubleClick(
+    /** @type{MouseEvent} */
+    e,
+  ) {
+    if (!this.options.showLatexOnDoubleClick) {
+      return;
+    }
+    if (this.container.children.length >= 2) {
+      this.container.removeChild(this.container.children[1]);
+      return;
+    }
+    let staticContainer = document.createElement("SPAN");
+    staticContainer.textContent = this.rootNode.toLatex();
+    staticContainer.style.position = "absolute";
+    staticContainer.style.left = this.container.children[0].style.width;
+    staticContainer.style.whiteSpace = "nowrap";
+    this.container.appendChild(staticContainer);
+    let range = window.getSelection().getRangeAt(0);
+    let rangeClone = range.cloneRange();
+    rangeClone.selectNode(staticContainer);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(rangeClone);
+  }
 }
 
 class SplitBySelectionResult {
@@ -1357,18 +1381,25 @@ class MathNode {
     }
     this.fractionLineHeight = 0;
     this.element.setAttribute("mathTagName", this.type.type);
-    this.element.addEventListener("keyup", (e) => {
-      this.handleKeyUp(e);
-    });
-    this.element.addEventListener("keydown", (e) => {
-      this.handleKeyDown(e);
-    });
-    this.element.addEventListener("focus", (e) => {
-      this.handleFocus(e);
-    });
-    this.element.addEventListener("blur", (e) => {
-      this.handleBlur(e);
-    });
+    if (this.type.type === knownTypes.atom.type) {
+      this.element.addEventListener("keyup", (e) => {
+        this.handleKeyUp(e);
+      });
+      this.element.addEventListener("keydown", (e) => {
+        this.handleKeyDown(e);
+      });
+      this.element.addEventListener("focus", (e) => {
+        this.handleFocus(e);
+      });
+      this.element.addEventListener("blur", (e) => {
+        this.handleBlur(e);
+      });
+    }
+    if (this.type.type === knownTypes.root.type) {
+      this.element.addEventListener("dblclick", (e) => {
+        this.equationEditor.handleDoubleClick(e);
+      });
+    }
   }
 
   /** @returns {MathNode} */

@@ -856,6 +856,7 @@ class LaTeXParser {
       return true;
     }
     if (last.content in latexConstants.latexSyntacticValues) {
+      this.lastRuleName = "built-in syntactic element";
       return this.replaceParsingStackTop(null, latexConstants.latexSyntacticValues[last.content], - 1);
     }
     let secondToLast = this.parsingStack[this.parsingStack.length - 2];
@@ -987,10 +988,12 @@ class LaTeXParser {
     if (thirdToLast.isExpression() && secondToLast.isExpression() && last.syntacticRole !== "^") {
       // Absorb atom / immutable atom to preceding horizontal math.
       if (thirdToLast.node.type.type === knownTypes.horizontalMath.type) {
+        this.lastRuleName = "merge node into horizontal math";
         thirdToLast.node.appendChild(secondToLast.node);
         return this.replaceParsingStackRange(thirdToLast.node, "", - 3, - 2);
       }
       if (thirdToLast.node.isAtomic() && secondToLast.node.isAtomic()) {
+        this.lastRuleName = "merge atomic nodes into horizontal math";
         let node = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [thirdToLast.node, secondToLast.node]);
         return this.replaceParsingStackRange(node, "", - 2, - 2);
       }

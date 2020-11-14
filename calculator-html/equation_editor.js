@@ -264,8 +264,12 @@ class MathNodeFactory {
     /** @type {MathNode|null[]} */
     content,
   ) {
-    let result = this.horizontalMath(equationEditor, null);
-    for (let i = 0; i < content.length; i++) {
+    let first = null;
+    if (content.length > 0) {
+      first = content[0];
+    }
+    let result = this.horizontalMath(equationEditor, first);
+    for (let i = 1; i < content.length; i++) {
       if (content[i] === null) {
         continue;
       }
@@ -691,7 +695,7 @@ class LaTeXParser {
     this.dummyParsingElements = 6;
     /**@type{boolean} */
     this.debug = true;
-    /**@type{string} */
+    /**@type{string[]} */
     this.reductionLog = [];
   }
 
@@ -759,7 +763,13 @@ class LaTeXParser {
     let numberOfRuleApplications = 0;
     let startingLength = this.parsingStack.length;
     this.parsingStack.push(syntacticElement);
+    if (this.debug) {
+      this.reductionLog.push(this.toStringSyntacticStack());
+    }
     while (this.applyOneRule()) {
+      if (this.debug) {
+        this.reductionLog.push(this.toStringSyntacticStack());
+      }
       numberOfRuleApplications++;
       let stackReduction = startingLength - this.parsingStack.length;
       let maximumRuleApplications = Math.max(10, stackReduction * 10);
@@ -783,19 +793,19 @@ class LaTeXParser {
   }
 
   /** @returns{boolean} */
-  writeToParsingStack(
+  replaceParsingStackTop(
     /**@type{MathNode|null} */
     node,
     /**@type{string} */
     syntancticValue,
     /**@type{number} */
-    nodesToRemove,
+    indexToRemove,
   ) {
-    return this.writeToParsingStackRange(node, syntancticValue, - nodesToRemove - 1, - 1);
+    return this.replaceParsingStackRange(node, syntancticValue, indexToRemove, - 1);
   }
 
   /** @returns{boolean} */
-  writeToParsingStackRange(
+  replaceParsingStackRange(
     /**@type{MathNode|null} */
     node,
     /**@type{string} */
@@ -812,26 +822,15 @@ class LaTeXParser {
       lastIndexToRemove += this.parsingStack.length;
     }
     let incoming = new SyntancticElement(node, "", syntancticRole);
-    let log = "";
-    if (this.debug) {
-      let substituted = [];
-      for (let i = firstIndexToRemove; i < this.parsingStack.length; i++) {
-        substituted.push(this.parsingStack[i].toString());
-      }
-      log += `${substituted.join(",")} --&gt; ${incoming.toString()}`;
-    }
     this.parsingStack[firstIndexToRemove] = incoming;
     let nodesToRemove = lastIndexToRemove - firstIndexToRemove;
     for (let i = lastIndexToRemove + 1; i < this.parsingStack.length; i++) {
       this.parsingStack[i - nodesToRemove] = this.parsingStack[i];
     }
     this.parsingStack.length -= nodesToRemove;
-    if (this.debug) {
-      log += ` ||| ${this.toStringSyntacticStack()}`
-      this.reductionLog.push(`<div style='white-space:nowrap'>${log}</div>`);
-    }
     return true;
   }
+
   /**@returns{string} */
   toStringSyntacticStack() {
     let totalStack = [];
@@ -849,18 +848,18 @@ class LaTeXParser {
       return true;
     }
     if (last.content in latexConstants.latexSyntacticValues) {
-      return this.writeToParsingStack(null, latexConstants.latexSyntacticValues[last.content], 0);
+      return this.replaceParsingStackTop(null, latexConstants.latexSyntacticValues[last.content], - 1);
     }
     let secondToLast = this.parsingStack[this.parsingStack.length - 2];
     if (last.syntacticRole === "\\" && secondToLast.syntacticRole === "\\") {
-      return this.writeToParsingStack(null, "\\\\", 1);
+      return this.replaceParsingStackTop(null, "\\\\", - 2);
     }
     let thirdToLast = this.parsingStack[this.parsingStack.length - 3];
     let fourthToLast = this.parsingStack[this.parsingStack.length - 4];
     if (secondToLast.syntacticRole === "{" && last.isExpression()) {
       if (last.node.type.type !== knownTypes.horizontalMath.type) {
         let node = mathNodeFactory.horizontalMath(this.equationEditor, last.node);
-        return this.writeToParsingStack(node, "", 0);
+        return this.replaceParsingStackTop(node, "", - 1);
       }
     }
     if (thirdToLast.syntacticRole === "{" && secondToLast.isExpression() && last.syntacticRole === "}") {
@@ -868,17 +867,17 @@ class LaTeXParser {
       if (node.type.type !== knownTypes.horizontalMath.type) {
         node = mathNodeFactory.horizontalMath(this.equationEditor, node);
       }
-      return this.writeToParsingStack(node, "", 2);
+      return this.replaceParsingStackTop(node, "", - 3);
     }
     if (secondToLast.syntacticRole === "\\" && last.content in latexConstants.latexBackslashCommands) {
-      return this.writeToParsingStack(null, latexConstants.latexBackslashCommands[last.content], 1);
+      return this.replaceParsingStackTop(null, latexConstants.latexBackslashCommands[last.content], - 2);
     }
     if (
       (thirdToLast.syntacticRole === "\\begin" || thirdToLast.syntacticRole === "\\end") &&
       secondToLast.syntacticRole === "{" &&
       last.content in latexConstants.beginEndEnvironments
     ) {
-      return this.writeToParsingStack(null, latexConstants.beginEndEnvironments[last.content], 0);
+      return this.replaceParsingStackTop(null, latexConstants.beginEndEnvironments[last.content], - 1);
     }
     if (
       fourthToLast.syntacticRole === "\\begin" &&
@@ -887,7 +886,7 @@ class LaTeXParser {
       last.syntacticRole === "}"
     ) {
       let environment = latexConstants.beginEndEnvironments[secondToLast.syntacticRole];
-      return this.writeToParsingStack(null, `\\begin{${environment}}`, 3);
+      return this.replaceParsingStackTop(null, `\\begin{${environment}}`, - 4);
     }
     if (
       fourthToLast.syntacticRole === "\\end" &&
@@ -896,11 +895,11 @@ class LaTeXParser {
       last.syntacticRole === "}"
     ) {
       let environment = latexConstants.beginEndEnvironments[secondToLast.syntacticRole];
-      return this.writeToParsingStack(null, `\\end{${environment}}`, 3);
+      return this.replaceParsingStackTop(null, `\\end{${environment}}`, - 4);
     }
     if (last.syntacticRole === "\\begin{pmatrix}") {
       let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0);
-      return this.writeToParsingStack(matrix, "matrixBuilder", 0);
+      return this.replaceParsingStackTop(matrix, "matrixBuilder", - 1);
     }
     if (last.syntacticRole === "&" && secondToLast.isExpression() && thirdToLast.syntacticRole === "matrixBuilder") {
       // Modify thirdToLast.node in place for performance reasons:
@@ -943,23 +942,25 @@ class LaTeXParser {
     }
     if (secondToLast.syntacticRole === "\\sqrt" && last.syntacticRole === "") {
       let node = mathNodeFactory.sqrt(this.equationEditor, last.node);
-      return this.writeToParsingStack(node, "", 1);
+      return this.replaceParsingStackTop(node, "", - 2);
     }
-    if (last.syntacticRole === "(") {
-      let node = mathNodeFactory.leftParenthesis(this.equationEditor, false);
-      return this.writeToParsingStack(node, "", 0);
+    if (thirdToLast.syntacticRole === "(" && secondToLast.isExpression() && last.syntacticRole === ")") {
+      let leftParentheses = mathNodeFactory.leftParenthesis(this.equationEditor, false);
+      let rightParentheses = mathNodeFactory.rightParenthesis(this.equationEditor, false);
+      let horizontal = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [leftParentheses, secondToLast.node, rightParentheses]);
+      return this.replaceParsingStackTop(horizontal, "", - 3);
     }
     if (last.syntacticRole === ")") {
       let node = mathNodeFactory.rightParenthesis(this.equationEditor, false);
-      return this.writeToParsingStack(node, "", 0);
+      return this.replaceParsingStackTop(node, ")", - 1);
     }
-    if (thirdToLast.node !== null && secondToLast.syntacticRole === "^" && last.isExpression()) {
+    if (thirdToLast.isExpression() && secondToLast.syntacticRole === "^" && last.isExpression()) {
       let node = mathNodeFactory.baseWithExponent(this.equationEditor, thirdToLast.node, last.node);
-      return this.writeToParsingStack(node, "", 2);
+      return this.replaceParsingStackTop(node, "", - 3);
     }
     if (thirdToLast.syntacticRole === "\\frac" && secondToLast.isExpression() && last.isExpression()) {
       let node = mathNodeFactory.fraction(this.equationEditor, secondToLast.node, last.node);
-      return this.writeToParsingStack(node, "", 2);
+      return this.replaceParsingStackTop(node, "", - 3);
     }
     if (last.content in latexConstants.operatorsNormalized) {
       // Construct immutable atom from operator.
@@ -967,20 +968,25 @@ class LaTeXParser {
         this.equationEditor,
         latexConstants.operatorsNormalized[last.content],
       );
-      return this.writeToParsingStack(node, "", 0);
+      return this.replaceParsingStackTop(node, "", - 1);
     }
     if (last.content !== "" && last.syntacticRole === "" && last.node === null) {
       // Construct atom.
       let node = mathNodeFactory.atom(this.equationEditor, last.content);
-      return this.writeToParsingStack(node, "", 0);
+      return this.replaceParsingStackTop(node, "", - 1);
     }
     if (thirdToLast.isExpression() && secondToLast.isExpression() && last.syntacticRole !== "^") {
       // Absorb atom / immutable atom to preceding horizontal math.
       if (thirdToLast.node.type.type === knownTypes.horizontalMath.type) {
         thirdToLast.node.appendChild(secondToLast.node);
-        return this.writeToParsingStackRange(thirdToLast.node, "", -3, -2);
+        return this.replaceParsingStackRange(thirdToLast.node, "", - 3, - 2);
+      }
+      if (thirdToLast.node.isAtomic() && secondToLast.node.isAtomic()) {
+        let node = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [thirdToLast.node, secondToLast.node]);
+        return this.replaceParsingStackRange(node, "", - 2, - 2);
       }
     }
+    return false;
   }
 }
 
@@ -3361,17 +3367,37 @@ class MathNode {
     return this.element.textContent === "";
   }
 
+  /** Returns an immediate horizontal math sibling, provided the node 
+   * sits in horizontally laid out math and has a previous sibling.  
+   * @returns{MathNode|null} 
+   */
   previousHorizontalSibling() {
+    return this.horizontalSibling(-1);
+  }
+
+  /** Returns an immediate horizontal math sibling, provided the node 
+   * sits in horizontally laid out math and has a next sibling.  
+   * @returns{MathNode|null} 
+   */
+  nextHorizontalSibling() {
+    return this.horizontalSibling(1);
+  }
+
+  horizontalSibling(
+    /**@type{number}*/
+    direction
+  ) {
     if (this.parent === null) {
       return null;
     }
     if (this.parent.type.type !== knownTypes.horizontalMath.type) {
       return null;
     }
-    if (this.indexInParent <= 0) {
+    let index = this.indexInParent + direction;
+    if (index < 0 || index >= this.parent.children.length) {
       return null;
     }
-    return this.parent.children[this.indexInParent - 1];
+    return this.parent.children[index];
   }
 
   makeBaseWithExponent() {
@@ -3398,9 +3424,10 @@ class MathNode {
     let rightIndex = this.indexInParent;
     let originalParent = this.parent;
     let leftIndex = originalParent.findIndexMatchingDelimiter(rightIndex);
+    let baseContent = originalParent.children.slice(leftIndex, rightIndex + 1);
     let base = mathNodeFactory.horizontalMathFromArray(
       this.equationEditor,
-      originalParent.children.slice(leftIndex, rightIndex + 1),
+      baseContent,
     );
     const baseWithExponent = mathNodeFactory.baseWithExponent(this.equationEditor, base, null);
     baseWithExponent.children[1].children[0].children[0].desiredCaretPosition = 0;

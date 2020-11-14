@@ -955,14 +955,11 @@ class LaTeXParser {
       return this.replaceParsingStackTop(node, "", - 2);
     }
     if (thirdToLast.syntacticRole === "(" && secondToLast.isExpression() && last.syntacticRole === ")") {
+      this.lastRuleName = "parenthetic expression to expression";
       let leftParentheses = mathNodeFactory.leftParenthesis(this.equationEditor, false);
       let rightParentheses = mathNodeFactory.rightParenthesis(this.equationEditor, false);
       let horizontal = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [leftParentheses, secondToLast.node, rightParentheses]);
       return this.replaceParsingStackTop(horizontal, "", - 3);
-    }
-    if (last.syntacticRole === ")") {
-      let node = mathNodeFactory.rightParenthesis(this.equationEditor, false);
-      return this.replaceParsingStackTop(node, ")", - 1);
     }
     if (thirdToLast.isExpression() && secondToLast.syntacticRole === "^" && last.isExpression()) {
       let node = mathNodeFactory.baseWithExponent(this.equationEditor, thirdToLast.node, last.node);
@@ -995,7 +992,7 @@ class LaTeXParser {
       if (thirdToLast.node.isAtomic() && secondToLast.node.isAtomic()) {
         this.lastRuleName = "merge atomic nodes into horizontal math";
         let node = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [thirdToLast.node, secondToLast.node]);
-        return this.replaceParsingStackRange(node, "", - 2, - 2);
+        return this.replaceParsingStackRange(node, "", - 3, - 2);
       }
     }
     return false;

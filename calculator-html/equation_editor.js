@@ -585,13 +585,17 @@ class SyntancticElement {
   toString() {
     let result = "";
     if (this.node !== null) {
-      result += this.node.toString();
+      let next = this.node.toLatex();
+      if (next === "") {
+        next = `[${this.node.type.type}]`;
+      }
+      result += next;
     }
     if (this.content !== "") {
-      result += `[${this.content}]`;
+      result += `<b style='color:orange'>${this.content}</b>`;
     }
     if (this.syntacticRole !== "") {
-      result += `(${this.syntacticRole})`;
+      result += `<b style='color:red'>${this.syntacticRole}</b>`;
     }
     return result;
   }
@@ -697,6 +701,8 @@ class LaTeXParser {
     this.debug = true;
     /**@type{string[]} */
     this.reductionLog = [];
+    /**@type{string} */
+    this.lastRuleName = "";
   }
 
   intialize() {
@@ -764,11 +770,13 @@ class LaTeXParser {
     let startingLength = this.parsingStack.length;
     this.parsingStack.push(syntacticElement);
     if (this.debug) {
-      this.reductionLog.push(this.toStringSyntacticStack());
+      this.reductionLog.push(this.toStringSyntacticStack() + "&nbsp;[append]");
+      this.lastRuleName = "";
     }
     while (this.applyOneRule()) {
       if (this.debug) {
-        this.reductionLog.push(this.toStringSyntacticStack());
+        this.reductionLog.push(this.toStringSyntacticStack() + `&nbsp;[${this.lastRuleName}]`);
+        this.lastRuleName = "";
       }
       numberOfRuleApplications++;
       let stackReduction = startingLength - this.parsingStack.length;
@@ -837,7 +845,7 @@ class LaTeXParser {
     for (let i = this.dummyParsingElements; i < this.parsingStack.length; i++) {
       totalStack.push(this.parsingStack[i].toString());
     }
-    return totalStack.join(",");
+    return totalStack.join("&nbsp;&nbsp;");
   }
 
   /**@returns{boolean} Applies the first possible rule to the top of the parsing stack. */
@@ -877,6 +885,7 @@ class LaTeXParser {
       secondToLast.syntacticRole === "{" &&
       last.content in latexConstants.beginEndEnvironments
     ) {
+      this.lastRuleName = "begin or end environment";
       return this.replaceParsingStackTop(null, latexConstants.beginEndEnvironments[last.content], - 1);
     }
     if (
@@ -963,7 +972,7 @@ class LaTeXParser {
       return this.replaceParsingStackTop(node, "", - 3);
     }
     if (last.content in latexConstants.operatorsNormalized) {
-      // Construct immutable atom from operator.
+      this.lastRuleName = "atom immutable";
       let node = mathNodeFactory.atomImmutable(
         this.equationEditor,
         latexConstants.operatorsNormalized[last.content],
@@ -971,7 +980,7 @@ class LaTeXParser {
       return this.replaceParsingStackTop(node, "", - 1);
     }
     if (last.content !== "" && last.syntacticRole === "" && last.node === null) {
-      // Construct atom.
+      this.lastRuleName = "construct atom";
       let node = mathNodeFactory.atom(this.equationEditor, last.content);
       return this.replaceParsingStackTop(node, "", - 1);
     }
@@ -1563,10 +1572,21 @@ class MathNode {
     if (!this.isAtomEditable()) {
       return "";
     }
+    return this.textContentOrInitialContent();
+  }
+
+  textContentOrInitialContent() {
     if (this.element === null) {
       return this.initialContent;
     }
     return this.element.textContent;
+  }
+
+  contentIfAtomic() {
+    if (!this.isAtomic()) {
+      return "";
+    }
+    return this.textContentOrInitialContent();
   }
 
   /** @returns {boolean} */
@@ -3670,11 +3690,8 @@ class MathNode {
     return result;
   }
 
-  toLatexAtom() {
-    if (this.element === null) {
-      return "[null]";
-    }
-    return this.element.textContent;
+  toLatexAtomic() {
+    return this.contentIfAtomic();
   }
 
   toLatexBaseWithExponent() {
@@ -3739,11 +3756,8 @@ class MathNode {
     if (this.type.type === knownTypes.fraction.type) {
       return this.toLatexFraction();
     }
-    if (
-      this.type.type === knownTypes.atom.type ||
-      this.type.type === knownTypes.atomImmutable.type
-    ) {
-      return this.toLatexAtom();
+    if (this.isAtomic()) {
+      return this.toLatexAtomic();
     }
     if (this.type.type === knownTypes.baseWithExponent.type) {
       return this.toLatexBaseWithExponent();

@@ -954,6 +954,11 @@ class LaTeXParser {
       let node = mathNodeFactory.sqrt(this.equationEditor, last.node);
       return this.replaceParsingStackTop(node, "", - 2);
     }
+    if (secondToLast.syntacticRole === "{" && last.syntacticRole === "}") {
+      this.lastRuleName = "{} to empty atom";
+      let node = mathNodeFactory.atom(this.equationEditor, "");
+      return this.replaceParsingStackTop(node, "", -2);
+    }
     if (thirdToLast.syntacticRole === "(" && secondToLast.isExpression() && last.syntacticRole === ")") {
       this.lastRuleName = "parenthetic expression to expression";
       let leftParentheses = mathNodeFactory.leftParenthesis(this.equationEditor, false);

@@ -1082,6 +1082,8 @@ class EquationEditor {
     this.selectionStartExpanded = new AtomWithPosition(null, -1);
     /** @type{AtomWithPosition} */
     this.selectionEnd = new AtomWithPosition(null, -1);
+    /** @type{string} */
+    this.latexLastWritten = "";
   }
 
   updateDOM() {
@@ -1092,6 +1094,7 @@ class EquationEditor {
     /**@type {string} */
     latex,
   ) {
+    this.latexLastWritten = latex;
     this.rootNode.removeAllChildren();
     let parser = new LaTeXParser(this, latex);
     let newContent = parser.parse();
@@ -1356,7 +1359,13 @@ class EquationEditor {
       return;
     }
     let staticContainer = document.createElement("SPAN");
-    staticContainer.textContent = this.rootNode.toLatex();
+    let latex = "";
+    if (!this.options.editable && this.latexLastWritten !== "") {
+      latex = this.latexLastWritten;
+    } else {
+      latex = this.rootNode.toLatex();
+    }
+    staticContainer.textContent = latex;
     staticContainer.style.position = "absolute";
     staticContainer.style.left = this.container.children[0].style.width;
     staticContainer.style.whiteSpace = "nowrap";

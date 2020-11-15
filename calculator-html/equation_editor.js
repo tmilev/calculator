@@ -1696,7 +1696,7 @@ class MathNode {
   computeDimensionsFraction() {
     let numerator = this.children[0];
     let denominator = this.children[1];
-    this.boundingBox.fractionLineHeight = numerator.boundingBox.height;
+    this.boundingBox.fractionLineHeight = numerator.boundingBox.height + 2;
     this.boundingBox.height = numerator.boundingBox.height + denominator.boundingBox.height;
     this.boundingBox.width = Math.max(numerator.boundingBox.width, denominator.boundingBox.width);
     numerator.boundingBox.width = this.boundingBox.width;
@@ -2388,7 +2388,10 @@ class MathNode {
     return this.parent.firstAtomToTheRightOf(this.indexInParent);
   }
 
-  firstAtomToTheRightOf(/** @type{number}*/ childIndex) {
+  firstAtomToTheRightOf(
+    /** @type{number}*/
+    childIndex,
+  ) {
     for (let i = childIndex + 1; i < this.children.length; i++) {
       let candidate = this.children[i].leftmostAtomChild();
       if (candidate !== null) {
@@ -2405,7 +2408,10 @@ class MathNode {
     return this.parent.firstAtomToTheLeftOf(this.indexInParent);
   }
 
-  firstAtomToTheLeftOf(/** @type {number} */ childIndex) {
+  firstAtomToTheLeftOf(
+    /** @type {number} */
+    childIndex,
+  ) {
     for (let i = childIndex - 1; i >= 0; i--) {
       let candidate = this.children[i].rightmostAtomChild(i);
       if (candidate !== null) {

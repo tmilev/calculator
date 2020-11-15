@@ -151,6 +151,11 @@ const knownTypes = {
     "width": "auto",
     "height": "auto",
   }),
+  error: new MathNodeType({
+    type: "error",
+    colorText: "red",
+    whiteSpace: "nowrap",
+  }),
   // Left delimiter (parentheses, bracket, ...)
   leftDelimiter: new MathNodeType({
     "type": "leftDelimiter",
@@ -288,11 +293,22 @@ class MathNodeFactory {
     return result;
   }
 
+  error(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /** @type {string} */
+    initialContent,
+  ) {
+    const result = new MathNode(equationEditor, knownTypes.error);
+    result.initialContent = initialContent;
+    return result;
+  }
+
   atom(
     /** @type {EquationEditor} */
     equationEditor,
     /** @type {string} */
-    initialContent
+    initialContent,
   ) {
     const result = new MathNode(equationEditor, knownTypes.atom);
     result.initialContent = initialContent;
@@ -703,6 +719,8 @@ class LaTeXParser {
     this.reductionLog = [];
     /**@type{string} */
     this.lastRuleName = "";
+    /**@type{number} */
+    this.startTime = 0;
   }
 
   intialize() {
@@ -733,6 +751,7 @@ class LaTeXParser {
 
   /**@returns{MathNode} */
   parse() {
+    this.startTime = new Date().getTime();
     this.intialize();
     this.parseWords();
     this.result = new MathNode(this.equationEditor, knownTypes.horizontalMath);
@@ -740,25 +759,32 @@ class LaTeXParser {
     this.parsingStack.push(new SyntancticElement(startingNode, "", ""));
     for (let i = 0; i < this.words.length; i++) {
       if (!this.reduceStack(new SyntancticElement(null, this.words[i], ""))) {
-        return null;
+        return this.setError();
       }
     }
     if (!this.reduceStack(new SyntancticElement(null, "", "parsingEnd"))) {
-      return null;
+      return this.setError();
     }
     if (this.parsingStack.length !== this.dummyParsingElements + 2) {
       console.log(`Failed to parse ${this.latex}: not all syntactic elements were reduced.`);
-      return null;
+      return this.setError();
     }
     let secondToLastElement = this.parsingStack[this.parsingStack.length - 2];
     if (secondToLastElement.node === null) {
       console.log(`Failed to parse ${this.latex}: final syntactic element is not a node.`);
-      return null;
+      return this.setError();
     }
     if (this.equationEditor.options.editable) {
       secondToLastElement.node.ensureEditableAtomsRecursive();
     }
+    let elapsedTime = new Date().getTime() - this.startTime;
+    console.log(`Parsing of ${this.latex} took ${elapsedTime} ms.`);
     return secondToLastElement.node;
+  }
+
+  /**@returns{MathNode} */
+  setError() {
+    return mathNodeFactory.error(this.equationEditor, this.latex);
   }
 
   /** @returns{boolean} */
@@ -1824,6 +1850,10 @@ class MathNode {
 
   computeDimensions() {
     if (this.isAtomic()) {
+      this.computeDimensionsAtomic();
+      return;
+    }
+    if (this.type.type === knownTypes.error.type) {
       this.computeDimensionsAtomic();
       return;
     }

@@ -3893,7 +3893,7 @@ class MathTagCoverter {
     /**@type{number} */
     this.lastTimeSample = 0;
     /**@type{number} */
-    this.typesetTimeout = 200;
+    this.typesetTimeout = 50;
     /**@type{number} */
     this.elementsToTypeset = - 1;
     /**@type{number} */
@@ -3981,7 +3981,7 @@ class MathTagCoverter {
       return;
     }
     for (let i = 0; i < toBeModified.children.length; i++) {
-      this.convertTagsRecursive(toBeModified[i], recursionDepth + 1);
+      this.convertTagsRecursive(toBeModified.children[i], recursionDepth + 1);
     }
   }
 
@@ -4004,16 +4004,24 @@ class MathTagCoverter {
       this.elementsToTypeset = mathElements.length;
       this.typesetTotal = 0;
     }
-    for (let i = 0; i < mathElements.length; i++) {
+    for (; this.typesetTotal < mathElements.length;) {
       /** @type {HTMLElement} */
-      let element = mathElements[i];
+      let element = mathElements[this.typesetTotal];
+      if (element.typeset === "true") {
+        continue;
+      }
+      element.typeset = "true";
       element.style = "font-size: 20px; font-family: 'Times New Roman', Times, serif";
       mathFromElement(element);
       this.typesetTotal++;
       let currentTime = (new Date()).getTime();
-      if (currentTime - this.lastTimeSample > this.typesetTimeout) {
+      let elapsedTime = currentTime - this.lastTimeSample;
+      if (
+        elapsedTime > this.typesetTimeout &&
+        this.typesetTotal < this.elementsToTypeset
+      ) {
         this.lastTimeSample = currentTime;
-        this.setTimeout(this.typesetMathTags.bind(this), 10);
+        setTimeout(this.typesetMathTags.bind(this), 10);
         console.log(`Typeset ${this.typesetTotal} out of ${this.elementsToTypeset} elements.`);
         return;
       }

@@ -379,8 +379,11 @@ Calculator.prototype.afterWriteOutput = function () {
     thePage.injectScript(newId, incomingScripts[i].innerHTML);
   }
   this.addListenersToInputBoxes();
-  equationEditor.typeset(document.getElementById(ids.domElements.spanCalculatorMainOutput));
-  mathjax.typeSetSoft(ids.domElements.spanCalculatorMainOutput);
+  if (thePage.storage.variables.flagMathJax.isTrue()) {
+    mathjax.typeSetSoft(ids.domElements.spanCalculatorMainOutput);
+  } else {
+    equationEditor.typeset(document.getElementById(ids.domElements.spanCalculatorMainOutput));
+  }
 }
 
 

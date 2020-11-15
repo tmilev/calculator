@@ -216,7 +216,7 @@ std::string HtmlRoutines::getMathSpan(const std::string& input, int upperNumChar
     return out.str();
   }
   if (global.flagUseMathTags) {
-    out << "<mathcalculator>";
+    out << "<div class='mathcalculator'>";
   } else {
     out << "\\(";
   }
@@ -225,7 +225,7 @@ std::string HtmlRoutines::getMathSpan(const std::string& input, int upperNumChar
   }
   out << input;
   if (global.flagUseMathTags) {
-    out << "</mathcalculator>";
+    out << "</div>";
   } else {
     out << "\\)";
   }

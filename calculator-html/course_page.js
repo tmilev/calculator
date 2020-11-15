@@ -3,7 +3,7 @@ const submitRequests = require("./submit_requests");
 const pathnames = require("./pathnames");
 const ids = require("./ids_dom_elements");
 const problemPage = require("./problem_page");
-const mathjax = require("./mathjax-calculator-setup");
+const typeset = require("./math_typeset");
 const miscellaneous = require("./miscellaneous");
 
 function modifyDeadlines(incomingId) {
@@ -16,7 +16,7 @@ function modifyDeadlines(incomingId) {
     deadlines: {}
   };
 
-  for (var counterDates = 0; counterDates < theDates.length; counterDates ++) {
+  for (var counterDates = 0; counterDates < theDates.length; counterDates++) {
     var currentSection = thePage.user.sectionsTaught[counterDates];
     jsonToSubmit[idDecoded].deadlines[currentSection] = theDates[counterDates].value;
   }
@@ -50,7 +50,7 @@ function toggleDeadline(deadlineId, panelId, button) {
 function toggleProblemWeights() {
   var theWeights = document.getElementsByClassName('panelProblemWeights');
   var theButtons = document.getElementsByClassName('accordionLikeProblemWeight');
-  for (var i = 0; i < theWeights.length; i ++) {
+  for (var i = 0; i < theWeights.length; i++) {
     if (!problemWeightsVisible) {
       theWeights[i].style.opacity = '1';
       theWeights[i].style.maxHeight = '200px';
@@ -59,7 +59,7 @@ function toggleProblemWeights() {
       theWeights[i].style.maxHeight = '0';
     }
   }
-  for (var i = 0; i < theButtons.length; i ++) {
+  for (var i = 0; i < theButtons.length; i++) {
     var currentProblem = problemPage.allProblems.getProblemById(theButtons[i].name);
     if (!problemWeightsVisible) {
       theButtons[i].innerHTML = `${currentProblem.toStringProblemWeight()} &#9660;`;
@@ -81,10 +81,10 @@ function afterLoadCoursePage(incoming, result) {
     }
   }
   //mathjax.typeSetHard(coursePage);
-  mathjax.typeSetSoft(coursePage);
+  typeset.typesetter.typesetSoft(coursePage);
   var theTopics = document.getElementsByTagName("topicList");
   problemPage.writeEditCoursePagePanel();
-  if (theTopics.length  === 0) {
+  if (theTopics.length === 0) {
     return;
   }
   loadTopicList(problemPage.processLoadedTopicsWriteToCoursePage);
@@ -155,7 +155,7 @@ function selectCurrentCoursePage() {
   });
 }
 
-module.exports =  {
+module.exports = {
   loadTopicList,
   lastLoadedCourse,
   modifyDeadlines,

@@ -5,7 +5,7 @@ const ids = require("./ids_dom_elements");
 const editPage = require("./edit_page");
 const initializeButtons = require("./initialize_buttons");
 const InputPanelData = initializeButtons.InputPanelData;
-const mathjax = require("./mathjax-calculator-setup");
+const typeset = require("./math_typeset");
 const miscellaneous = require("./miscellaneous");
 const miscellaneousFrontend = require("./miscellaneous_frontend");
 
@@ -777,7 +777,7 @@ ProblemNavigation.prototype.writeToHTML = function () {
   //topPart += "<br>"
   problemTitle.appendChild(this.currentProblem.getEditPanel());
   infoBar.appendChild(problemTitle);
-  mathjax.typeSetSoft(ids.domElements.divProblemInfoBar);
+  typeset.typesetter.typesetSoft(ids.domElements.divProblemInfoBar);
 }
 
 Problem.prototype.writeToHTML = function (outputElement) {
@@ -796,7 +796,7 @@ Problem.prototype.writeToHTML = function (outputElement) {
     this.onePanel(this.answers[counterAnswers]);
   }
   initializeButtons.initializeAccordionButtons();
-  mathjax.typeSetSoft(ids.domElements.problemPageContentContainer);
+  typeset.typesetter.typesetSoft(ids.domElements.problemPageContentContainer);
 }
 
 Problem.prototype.toStringDeadline = function () {
@@ -1339,8 +1339,7 @@ function writeTopicsToCoursePage() {
   if (thePage.pages.problemPage.flagLoaded) {
     problemNavigation.writeToHTML();
   }
-  mathjax.typeSetSoft(topicsElements[0]);
-
+  typeset.typesetter.typesetSoft(topicsElements[0]);
 }
 
 function updateProblemPageCallback(input, outputComponent) {

@@ -1058,13 +1058,10 @@ class EquationEditor {
     options,
   ) {
     this.containerGiven = containerGiven;
-    this.containerGiven.innerHTML = "";
+    this.containerGiven.textContent = "";
     /** @type{HTMLElement} */
-    this.container = containerGiven;
-    if (this.container.tagName !== "DIV") {
-      this.container = document.createElement("DIV");
-      this.containerGiven.appendChild(this.container);
-    }
+    this.container = document.createElement("DIV");
+    this.containerGiven.appendChild(this.container);
     this.container.style.display = "inline-block";
     this.container.style.position = "relative";
     /** @type{EquationEditorOptions} */
@@ -3882,10 +3879,9 @@ class MathTagData {
 
 class MathTagCoverter {
   constructor(
-    /**@type{boolean} */
-    useMathJaxTags,
+    /**@type{string} */
+    style,
   ) {
-    this.useMathJaxTags = useMathJaxTags;
     /**@type{HTMLElement|null} */
     this.elementProcessed = null;
     /**@type{number} */
@@ -3898,6 +3894,19 @@ class MathTagCoverter {
     this.elementsToTypeset = - 1;
     /**@type{number} */
     this.typesetTotal = 0;
+    let styleComputer = document.createElement("DIV");
+    styleComputer.style = style;
+    this.style = {
+      fontFamily: styleComputer.style.fontFamily,
+      display: styleComputer.style.display,
+      fontSize: styleComputer.style.fontSize,
+    };
+    if (this.style.fontFamily === "") {
+      this.style.fontFamily = "Times New Roman, Times, serif";
+    }
+    if (this.style.display === "") {
+      this.style.display = "inline-block";
+    }
   }
 
   convertTags(
@@ -3920,8 +3929,12 @@ class MathTagCoverter {
       if (intermediateContent.length > 0) {
         newChildren.push(document.createTextNode(intermediateContent));
       }
-      let mathTag = document.createElement("mathcalculator");
+      let mathTag = document.createElement("DIV");
+      mathTag.className = "mathcalculator";
       mathTag.textContent = toBeConverted[i].content;
+      mathTag.style.fontFamily = this.style.fontFamily;
+      mathTag.style.display = this.style.display;
+      mathTag.style.fontSize = this.style.fontSize;
       newChildren.push(mathTag);
     }
     let previousIndex = toBeConverted[toBeConverted.length - 1].closeIndex + 1;
@@ -3998,33 +4011,39 @@ class MathTagCoverter {
     this.typesetMathTags();
   }
 
+  /**@returns{boolean} */
+  postponeTypeset() {
+    let currentTime = (new Date()).getTime();
+    let elapsedTime = currentTime - this.lastTimeSample;
+    if (
+      elapsedTime < this.typesetTimeout ||
+      this.typesetTotal >= this.elementsToTypeset
+    ) {
+      return false;
+    }
+    this.lastTimeSample = currentTime;
+    setTimeout(this.typesetMathTags.bind(this), 10);
+    console.log(`Typeset ${this.typesetTotal} out of ${this.elementsToTypeset} elements.`);
+    return true;
+  }
+
   typesetMathTags() {
-    let mathElements = document.getElementsByTagName("mathcalculator");
+    let mathElements = document.getElementsByClassName("mathcalculator");
     if (this.elementsToTypeset < 0) {
       this.elementsToTypeset = mathElements.length;
       this.typesetTotal = 0;
     }
-    for (; this.typesetTotal < mathElements.length;) {
+    for (; this.typesetTotal < mathElements.length; this.typesetTotal++) {
+      if (this.postponeTypeset()) {
+        return;
+      }
       /** @type {HTMLElement} */
       let element = mathElements[this.typesetTotal];
       if (element.typeset === "true") {
         continue;
       }
       element.typeset = "true";
-      element.style = "font-size: 20px; font-family: 'Times New Roman', Times, serif";
       mathFromElement(element);
-      this.typesetTotal++;
-      let currentTime = (new Date()).getTime();
-      let elapsedTime = currentTime - this.lastTimeSample;
-      if (
-        elapsedTime > this.typesetTimeout &&
-        this.typesetTotal < this.elementsToTypeset
-      ) {
-        this.lastTimeSample = currentTime;
-        setTimeout(this.typesetMathTags.bind(this), 10);
-        console.log(`Typeset ${this.typesetTotal} out of ${this.elementsToTypeset} elements.`);
-        return;
-      }
     }
   }
 }
@@ -4032,10 +4051,10 @@ class MathTagCoverter {
 function typeset(
   /**@type{HTMLElement} */
   toBeModified,
-  /**@type{boolean} */
-  useMathJaxTags,
+  /** @type {string} */
+  style,
 ) {
-  new MathTagCoverter(useMathJaxTags).typeset(toBeModified);
+  new MathTagCoverter(style).typeset(toBeModified);
 }
 
 function writeDebugInfo() {

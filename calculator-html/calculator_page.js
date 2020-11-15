@@ -7,10 +7,9 @@ const miscellaneousFrontend = require('./miscellaneous_frontend');
 const miscellaneous = require('./miscellaneous');
 const BufferCalculator = require('./buffer').BufferCalculator;
 const panels = require('./panels');
-const mathjax = require('./mathjax-calculator-setup');
+const typeset = require("./math_typeset");
 const processMonitoring = require('./process_monitoring');
 const initializeButtons = require('./initialize_buttons');
-const equationEditor = require('./equation_editor')
 
 
 function Calculator() {
@@ -379,13 +378,11 @@ Calculator.prototype.afterWriteOutput = function () {
     thePage.injectScript(newId, incomingScripts[i].innerHTML);
   }
   this.addListenersToInputBoxes();
-  if (thePage.storage.variables.flagMathJax.isTrue()) {
-    mathjax.typeSetSoft(ids.domElements.spanCalculatorMainOutput);
-  } else {
-    equationEditor.typeset(document.getElementById(ids.domElements.spanCalculatorMainOutput));
-  }
+  typeset.typesetter.typesetSoft(
+    ids.domElements.spanCalculatorMainOutput,
+    "font-size: 20px; font-family: 'Times New Roman', Times, serif; display:inline-block;",
+  );
 }
-
 
 Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function (input, output) {
   var inputHtml = null;

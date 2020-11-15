@@ -804,17 +804,16 @@ class Page {
   }
 
   onStudentViewChange() {
-    var studentView = this.storage.variables.flagStudentView.isTrue();
+    let studentView = this.storage.variables.flagStudentView.isTrue();
     document.getElementById(ids.domElements.sliderStudentView).checked = studentView;
-    var spanView = document.getElementById(ids.domElements.spanStudentViewFlagToggleReport);
-    var radioHTML = "";
+    let spanView = document.getElementById(ids.domElements.spanStudentViewFlagToggleReport);
+    let radioHTML = "";
     if (studentView) {
       spanView.innerHTML = "Student view";
-      for (var counterSections = 0; counterSections < this.user.sectionsTaught.length; counterSections++) {
+      for (let counterSections = 0; counterSections < this.user.sectionsTaught.length; counterSections++) {
         radioHTML += `<br><label class = "containerRadioButton">`;
-        radioHTML += `<input type = "radio" name = "radioSection" onchange = "window.calculator.mainPage.sectionSelect(${counterSections
-          }); " `;
-        var counterFromStorage = parseInt(this.storage.variables.currentSectionComputed.getValue());
+        radioHTML += `<input type = "radio" name = "radioSection" onchange = "window.calculator.mainPage.sectionSelect(${counterSections}); " `;
+        let counterFromStorage = parseInt(this.storage.variables.currentSectionComputed.getValue());
         if (counterSections === counterFromStorage) {
           radioHTML += "checked = 'true'";
         }

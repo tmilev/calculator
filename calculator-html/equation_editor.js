@@ -3859,6 +3859,177 @@ class ParentWithIndex {
   }
 }
 
+class MathTagData {
+  constructor(
+    /**@type {number} */
+    startIndex,
+    /**@type {number} */
+    startIndexData,
+    /**@type {number} */
+    closeIndexData,
+    /**@type {number} */
+    closeIndex,
+    /**@type{string} */
+    ambientContent,
+  ) {
+    this.startIndex = startIndex;
+    this.startIndexData = startIndexData;
+    this.closeIndexData = closeIndexData;
+    this.closeIndex = closeIndex;
+    this.content = ambientContent.slice(this.startIndexData, closeIndexData + 1);
+  }
+}
+
+class MathTagCoverter {
+  constructor(
+    /**@type{boolean} */
+    useMathJaxTags,
+  ) {
+    this.useMathJaxTags = useMathJaxTags;
+    /**@type{HTMLElement|null} */
+    this.elementProcessed = null;
+    /**@type{number} */
+    this.startTime = 0;
+    /**@type{number} */
+    this.lastTimeSample = 0;
+    /**@type{number} */
+    this.typesetTimeout = 200;
+    /**@type{number} */
+    this.elementsToTypeset = - 1;
+    /**@type{number} */
+    this.typesetTotal = 0;
+  }
+
+  convertTags(
+    /**@type{HTMLElement} */
+    toBeModified,
+    /**@type{MathTagData[]} */
+    toBeConverted,
+  ) {
+    if (toBeConverted.length === 0) {
+      return;
+    }
+    let content = toBeModified.textContent;
+    let newChildren = [];
+    for (let i = 0; i < toBeConverted.length; i++) {
+      let previousIndex = 0;
+      if (i > 0) {
+        previousIndex = toBeConverted[i - 1].closeIndex + 1;
+      }
+      let intermediateContent = content.slice(previousIndex, toBeConverted[i].startIndex);
+      if (intermediateContent.length > 0) {
+        newChildren.push(document.createTextNode(intermediateContent));
+      }
+      let mathTag = document.createElement("mathcalculator");
+      mathTag.textContent = toBeConverted[i].content;
+      newChildren.push(mathTag);
+    }
+    let previousIndex = toBeConverted[toBeConverted.length - 1].closeIndex + 1;
+    let remainingContent = content.slice(previousIndex);
+    if (remainingContent !== "" && remainingContent !== null) {
+      newChildren.push(document.createTextNode(remainingContent));
+    }
+    toBeModified.textContent = "";
+    for (let i = 0; i < newChildren.length; i++) {
+      toBeModified.appendChild(newChildren[i]);
+    }
+  }
+
+  processTextContent(
+    /**@type{HTMLElement} */
+    toBeModified,
+  ) {
+    if (toBeModified.textContent === "" || toBeModified.textContent === null) {
+      return;
+    }
+    let content = toBeModified.textContent;
+    let openIndex = -1;
+    /**@type{MathTagData[]} */
+    let toBeConverted = [];
+    for (let i = 1; i < content.length; i++) {
+      let previous = content[i - 1];
+      let current = content[i];
+      if (previous === "\\") {
+        if (openIndex === -1) {
+          if (current === "(") {
+            openIndex = i;
+            continue;
+          }
+        } else {
+          if (current === ")") {
+            toBeConverted.push(new MathTagData(openIndex - 1, openIndex + 1, i - 2, i, content))
+            openIndex = -1;
+          }
+        }
+      }
+    }
+    this.convertTags(toBeModified, toBeConverted);
+  }
+
+  convertTagsRecursive(
+    /**@type{HTMLElement} */
+    toBeModified,
+    /**@type{number} */
+    recursionDepth,
+  ) {
+    if (recursionDepth > 40) {
+      console.log("While converting mathtags, reached recursion depth limits");
+      return;
+    }
+    if (toBeModified.children.length === 0) {
+      this.processTextContent(toBeModified);
+      return;
+    }
+    for (let i = 0; i < toBeModified.children.length; i++) {
+      this.convertTagsRecursive(toBeModified[i], recursionDepth + 1);
+    }
+  }
+
+  typeset(
+    /**@type{HTMLElement} */
+    toBeModified,
+  ) {
+    this.elementProcessed = toBeModified;
+    this.startTime = (new Date()).getTime();
+    this.lastTimeSample = this.startTime;
+    if (this.elementProcessed) {
+      this.convertTagsRecursive(this.elementProcessed, 0);
+    }
+    this.typesetMathTags();
+  }
+
+  typesetMathTags() {
+    let mathElements = document.getElementsByTagName("mathcalculator");
+    if (this.elementsToTypeset < 0) {
+      this.elementsToTypeset = mathElements.length;
+      this.typesetTotal = 0;
+    }
+    for (let i = 0; i < mathElements.length; i++) {
+      /** @type {HTMLElement} */
+      let element = mathElements[i];
+      element.style = "font-size: 20px; font-family: 'Times New Roman', Times, serif";
+      mathFromElement(element);
+      this.typesetTotal++;
+      let currentTime = (new Date()).getTime();
+      if (currentTime - this.lastTimeSample > this.typesetTimeout) {
+        this.lastTimeSample = currentTime;
+        this.setTimeout(this.typesetMathTags.bind(this), 10);
+        console.log(`Typeset ${this.typesetTotal} out of ${this.elementsToTypeset} elements.`);
+        return;
+      }
+    }
+  }
+}
+
+function typeset(
+  /**@type{HTMLElement} */
+  toBeModified,
+  /**@type{boolean} */
+  useMathJaxTags,
+) {
+  new MathTagCoverter(useMathJaxTags).typeset(toBeModified);
+}
+
 function writeDebugInfo() {
   document.getElementById("debug").innerHTML = defaultEquationEditorLocal.toHtml();
   document.getElementById("latexInputTest").value = defaultEquationEditorLocal.rootNode.toLatex();
@@ -3904,6 +4075,7 @@ function testTypeset(
 }
 
 module.exports = {
+  typeset,
   defaultEquationEditorLocal,
   testEquationEditor,
   testTypeset,

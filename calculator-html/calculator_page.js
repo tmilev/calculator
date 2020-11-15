@@ -379,13 +379,7 @@ Calculator.prototype.afterWriteOutput = function () {
     thePage.injectScript(newId, incomingScripts[i].innerHTML);
   }
   this.addListenersToInputBoxes();
-  let mathElements = document.getElementsByTagName("mathcalculator");
-  for (let i = 0; i < mathElements.length; i++) {
-    /** @type {HTMLElement} */
-    let element = mathElements[i];
-    element.style = "font-size: 20px; font-family: 'Times New Roman', Times, serif";
-    equationEditor.mathFromElement(element);
-  }
+  equationEditor.typeset(document.getElementById(ids.domElements.spanCalculatorMainOutput));
   mathjax.typeSetSoft(ids.domElements.spanCalculatorMainOutput);
 }
 

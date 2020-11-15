@@ -1140,7 +1140,6 @@ class EquationEditor {
     /**@type{string} */ key,
   ) {
     if (focused === null) {
-      console.log('DEBUG: focused should not be null!');
       return;
     }
     let specialKeyCodes = {
@@ -1158,13 +1157,11 @@ class EquationEditor {
       "Backspace": null,
     };
     if (!(key in specialKeyCodes)) {
-      console.log("DEBUG: simulate non-special key:" + key);
       focused.element.textContent += key;
       focused.focus(1);
       return;
     }
     if (key === "ArrowLeft" && focused.positionCaretBeforeKeyEvents > 0) {
-      console.log('DEBUG: simulate arrow left');
       focused.focus(0);
       return;
     }
@@ -2217,7 +2214,6 @@ class MathNode {
     /** @type{AtomWithPosition} */
     end2,
   ) {
-    console.log(`DEBUG: select from: ${end1.toString()}, to ${end2.toString()}`);
     let shouldSwap = end2.element.isToTheLeftOf(end1.element);
     if (end1.element === end2.element) {
       shouldSwap = (end2.position < end1.position);
@@ -2227,13 +2223,11 @@ class MathNode {
       let end2copy = end2;
       end2 = end1;
       end1 = end2copy;
-      console.log(`DEBUG: selection corrected: ${end1.toString()}, to ${end2.toString()}`);
     }
     let newRange = document.createRange();
     end1.element.setRangeStart(newRange, end1.position);
     end2.element.setRangeEnd(newRange, end2.position);
     document.getSelection().removeAllRanges();
-    console.log(`DEBUG: And the new selection: ${newRange}`);
     document.getSelection().addRange(newRange);
   }
 
@@ -2244,7 +2238,6 @@ class MathNode {
     /** @type {boolean} */
     shiftHeld,
   ) {
-    console.log("DEBUG: inside set selection end");
     if (!shiftHeld) {
       return false;
     }
@@ -2780,7 +2773,7 @@ class MathNode {
     }
     let matchingIndex = this.parent.findIndexMatchingDelimiter(this.indexInParent);
     if (matchingIndex === -1) {
-      console.log('Unexpected failure to find matching left parenthesis.');
+      console.log("Unexpected failure to find matching left parenthesis.");
       return false;
     }
     if (!this.parent.children[matchingIndex].implied) {
@@ -2952,7 +2945,7 @@ class MathNode {
   ) {
     // Find closest ancestor node that's of type horizontal math.
     if (!this.hasHorizintalMathParent()) {
-      console.log('Warning: horizontal operator made on element not contained in horizontal math.');
+      console.log("Warning: horizontal operator made on element not contained in horizontal math.");
       return;
     }
     let parent = this.parent;
@@ -2986,7 +2979,7 @@ class MathNode {
   ) {
     // Find closest ancestor node that's of type horizontal math.
     if (!this.hasHorizintalMathParent()) {
-      console.log('Warning: horizontal operator made on element not contained in horizontal math.');
+      console.log("Warning: horizontal operator made on element not contained in horizontal math.");
       return;
     }
     let parent = this.parent;
@@ -3055,7 +3048,7 @@ class MathNode {
     let parentAndIndex = this.findHorizontalMathParent();
     if (parentAndIndex.parent === null) {
       // No ancestor is of type horizontal math. 
-      console.log('Warning: could not find ancestor of type horizontal math.');
+      console.log("Warning: could not find ancestor of type horizontal math.");
       return;
     }
     let oldIndexInParent = parentAndIndex.indexInParent;
@@ -3195,7 +3188,7 @@ class MathNode {
   ) {
     let parent = this.parent;
     if (parent.type.type !== knownTypes.horizontalMath.type) {
-      console.log('Warning: making parentheses in non-horizontal math.');
+      console.log("Warning: making parentheses in non-horizontal math.");
     }
     let oldIndexInParent = this.indexInParent;
     let leftParenthesis = mathNodeFactory.leftParenthesis(
@@ -3690,7 +3683,7 @@ class MathNode {
       content += `[${this.element.textContent}]`;
     }
     if (this.focused) {
-      content += ', F';
+      content += ", F";
     }
     if (this.desiredCaretPosition !== -1) {
       content += `, FD[${this.desiredCaretPosition}]`;
@@ -3869,11 +3862,11 @@ function writeDebugInfo() {
 var defaultEquationEditorLocal = null;
 
 function initialize() {
-  MathQuill.getInterface(2).MathField(document.getElementById('mq-editor'));
+  MathQuill.getInterface(2).MathField(document.getElementById("mq-editor"));
 }
 
 function testEquationEditor() {
-  let editorElement = document.getElementById('equation-editor');
+  let editorElement = document.getElementById("equation-editor");
   defaultEquationEditorLocal = new EquationEditor(editorElement);
   defaultEquationEditorLocal.options.debugLogContainer = document.getElementById("parsingLog");
   defaultEquationEditorLocal.updateDOM();

@@ -105,59 +105,60 @@ function createSelection(field, start, end) {
   }
 }
 
-function AtomHandler() {
-  this.description = "";
-  this.atom = "";
-  this.example = "";
-  this.composite = false;
-  this.index = - 1;
-  this.totalRules = 0;
-
-}
-
-AtomHandler.prototype.fromObject = function (
-  input,
-  /**@type {number}*/ index,
-  /**@type {number}*/ totalRules,
-) {
-  this.index = index;
-  this.totalRules = totalRules;
-  this.description = input.description;
-  this.example = input.example;
-  this.atom = input.atom;
-  this.ruleName = input.ruleName;
-  if (input.composite === "true" || input.composite === true) {
-    this.composite = true;
-  } else {
+class AtomHandler {
+  constructor() {
+    this.description = "";
+    this.atom = "";
+    this.example = "";
     this.composite = false;
+    this.index = - 1;
+    this.totalRules = 0;
   }
-}
 
-AtomHandler.prototype.toString = function (
-  /**@type {Calculator}*/
-  calculator
-) {
-  var resultString = "";
-  resultString += `<calculatorAtom>${this.atom}</calculatorAtom>`;
-  if (this.composite) {
-    resultString += "<calculatorCompositeAtom>(composite)</calculatorCompositeAtom>";
+  fromObject(
+    input,
+    /**@type {number}*/ index,
+    /**@type {number}*/ totalRules,
+  ) {
+    this.index = index;
+    this.totalRules = totalRules;
+    this.description = input.description;
+    this.example = input.example;
+    this.atom = input.atom;
+    this.ruleName = input.ruleName;
+    if (input.composite === "true" || input.composite === true) {
+      this.composite = true;
+    } else {
+      this.composite = false;
+    }
   }
-  resultString += ` (${this.index + 1} out of ${this.totalRules})`;
-  var currentId = "example_";
-  if (this.composite) {
-    currentId += "t_";
-  } else {
-    currentId += "f_";
+
+  toString(
+    /**@type {Calculator}*/
+    calculator,
+  ) {
+    let resultString = "";
+    resultString += `<calculatorAtom>${this.atom}</calculatorAtom>`;
+    if (this.composite) {
+      resultString += "<calculatorCompositeAtom>(composite)</calculatorCompositeAtom>";
+    }
+    resultString += ` (${this.index + 1} out of ${this.totalRules})`;
+    let currentId = "example_";
+    if (this.composite) {
+      currentId += "t_";
+    } else {
+      currentId += "f_";
+    }
+    let encodedAtom = encodeURIComponent(this.atom);
+    currentId += `${encodedAtom}_${this.index}_${this.totalRules}`;
+    resultString += `<a href = '#' class = 'linkInfo' onclick = "window.calculator.miscellaneousFrontend.switchMenu('${currentId}')">info</a>`;
+    resultString += `<calculatorExampleInfo id = "${currentId}" class = "hiddenClass">${this.description}`;
+    resultString += `<br><b>Example:</b><br>${this.example}</calculatorExampleInfo>`;
+    let theLink = calculator.getComputationLink(this.example);
+    resultString += `<a href = '#${theLink}' class = "linkInfo"> Example</a>`;
+    resultString += ` [${this.ruleName}]`;
+    return resultString;
   }
-  var encodedAtom = encodeURIComponent(this.atom);
-  currentId += `${encodedAtom}_${this.index}_${this.totalRules}`;
-  resultString += `<a href = '#' class = 'linkInfo' onclick = "window.calculator.miscellaneousFrontend.switchMenu('${currentId}')">info</a>`;
-  resultString += `<calculatorExampleInfo id = "${currentId}" class = "hiddenClass">${this.description}`;
-  resultString += `<br><b>Example:</b><br>${this.example}</calculatorExampleInfo>`;
-  var theLink = calculator.getComputationLink(this.example);
-  resultString += `<a href = '#${theLink}' class = "linkInfo"> Example</a>`;
-  resultString += ` [${this.ruleName}]`;
-  return resultString;
 }
 
 Calculator.prototype.processOneFunctionAtom = function (handlers) {
@@ -360,27 +361,30 @@ Calculator.prototype.writeResult = function (
 }
 
 Calculator.prototype.afterWriteOutput = function () {
-  for (var i = 0; i < this.panels.length; i++) {
+  for (let i = 0; i < this.panels.length; i++) {
     panels.makePanelFromData(this.panels[i]);
   }
-  var spanVerification = document.getElementById(ids.domElements.spanCalculatorMainOutput);
-  var incomingScripts = spanVerification.getElementsByTagName('script');
-  var thePage = window.calculator.mainPage;
-  var oldScripts = thePage.pages.calculator.scriptIds;
+  let spanVerification = document.getElementById(ids.domElements.spanCalculatorMainOutput);
+  let incomingScripts = spanVerification.getElementsByTagName("script");
+  let thePage = window.calculator.mainPage;
+  let oldScripts = thePage.pages.calculator.scriptIds;
   thePage.removeScripts(oldScripts);
   this.inputBoxNames = [];
   this.inputBoxToSliderUpdaters = {};
   this.canvases = {};
   thePage.pages.calculator.sciptIds = [];
-  for (var i = 0; i < incomingScripts.length; i++) {
-    var newId = `calculatorMainPageId_${i}`;
+  for (let i = 0; i < incomingScripts.length; i++) {
+    let newId = `calculatorMainPageId_${i}`;
     thePage.pages.calculator.sciptIds.push(newId);
     thePage.injectScript(newId, incomingScripts[i].innerHTML);
   }
   this.addListenersToInputBoxes();
   let mathElements = document.getElementsByTagName("mathcalculator");
   for (let i = 0; i < mathElements.length; i++) {
-    equationEditor.mathFromElement(mathElements[i]);
+    /** @type {HTMLElement} */
+    let element = mathElements[i];
+    element.style = "font-size: 20px; font-family: 'Times New Roman', Times, serif";
+    equationEditor.mathFromElement(element);
   }
   mathjax.typeSetSoft(ids.domElements.spanCalculatorMainOutput);
 }

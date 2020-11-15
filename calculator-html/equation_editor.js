@@ -638,6 +638,7 @@ class LaTeXConstants {
       "*": "\u00B7",
       // A vertically centered small solid dot.
       "\u00B7": "\u00B7",
+      "=": "=",
     };
     /**@type{Object.<string, string>} */
     this.latexSyntacticValues = {
@@ -2048,8 +2049,6 @@ class MathNode {
   ) {
     let key = event.key;
     let shiftHeld = event.shiftKey;
-    console.log("DEBUG: handle key down for: " + key);
-    console.log("DEBUG: shiftHeld: " + shiftHeld);
     switch (key) {
       case "/":
         this.makeFractionNumerator();
@@ -2057,6 +2056,7 @@ class MathNode {
       case "*":
       case "+":
       case "-":
+      case "=":
         this.makeHorizontalOperatorCorrectInput(key);
         return true;
       case "^":

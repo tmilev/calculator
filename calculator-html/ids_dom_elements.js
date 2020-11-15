@@ -1,7 +1,7 @@
 "use strict";
 
 var stringResources = {
-  prefixDeadlineContainer : "deadlinesContainer"
+  prefixDeadlineContainer: "deadlinesContainer"
 };
 
 var domElements = {
@@ -50,10 +50,12 @@ var domElements = {
   spanProblemLinkWithRandomSeed: "spanProblemLinkWithRandomSeed",
   inputNewPasswordInActivationAccount: "inputNewPasswordInActivationAccount",
   inputReenteredPasswordInActivationAccount: "inputReenteredPasswordInActivationAccount",
+  sliderMathJaxFlag: "mathJaxFlag",
   sliderDebugFlag: "sliderDebugFlag",
   sliderStudentView: "sliderStudentView",
   spanErrorsEditPage: "spanErrorEditPage",
   spanDatabaseComments: "spanDatabaseComments",
+  spanMathJaxFlag: "spanMathJaxFlag",
   spanDebugFlagToggleReport: "spanDebugFlagToggleReport",
   spanStudentViewFlagToggleReport: "spanStudentViewToggleReport",
   spanUserExtraInfo: "spanUserExtraInfo",

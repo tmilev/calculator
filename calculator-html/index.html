@@ -47,8 +47,6 @@
   <script src="/html-common/jquery/jquery.min.js" onerror="errorLoadingScript(this);"></script>
   <script src="/html-common/jquery_ui/jquery-ui.min.js" onerror="errorLoadingScript(this);"></script>
 
-
-
   <script type="text/javascript" src="/html-common/ace/src-min/ace.js" charset="utf-8"
     onerror="errorLoadingScript(this);"></script>
   <script src="/html-common/ace/src-min/ext-language_tools.js" onerror="errorLoadingScript(this);"></script>
@@ -754,6 +752,14 @@
           </label><span id="spanDebugFlagToggleReport">-</span>
         </div>
         <!--div containing debug flag-->
+      </div>
+      <div>
+        <div>
+          <label class="switch">
+            <input id="mathJaxFlag" type="checkbox" onchange="window.calculator.mainPage.setSwitchMathJax();">
+            <span class="slider round"></span>
+          </label><span id="spanMathJaxFlag">-</span>
+        </div>
       </div>
       <div>
         <label class="switch">

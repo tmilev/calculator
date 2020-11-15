@@ -290,11 +290,18 @@ class StorageCalculator {
           showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
         }),
       },
+      flagMathJax: new StorageVariable({
+        name: "useMathJax",
+        nameURL: "useMathJax",
+        nameCookie: "useMathJax",
+        secure: true,
+        callbackOnValueChange: mainPage().onMathJaxValueChange.bind(mainPage()),
+      }),
       flagDebug: new StorageVariable({
         name: "debugFlag",
         nameURL: "debugFlag",
         nameCookie: "debugFlag",
-        secure: false,
+        secure: true,
         callbackOnValueChange: mainPage().onDebugValueChange.bind(mainPage()),
       }),
       flagStudentView: new StorageVariable({
@@ -496,310 +503,419 @@ class StorageCalculator {
   }
 }
 
-function Page() {
-  window.calculator.mainPage = this;
-  this.pages = {
-    login: {
-      name: "login", //<-for autocomplete
-      id: "divLoginPage",
-      menuButtonId: "buttonLoginPage",
-      container: null,
-      selectFunction: null,
-      initialized: false,
-    },
-    selectCourse: {
-      name: "selectCourse",
-      id: "divSelectCourse",
-      menuButtonId: "buttonSelectCourse",
-      container: null,
-      selectFunction: selectCourse.selectCoursePage,
-    },
-    currentCourse: {
-      name: "currentCourse",
-      id: "divCurrentCourse",
-      menuButtonId: "buttonCurrentCourse",
-      container: null,
-      selectFunction: coursePage.selectCurrentCoursePage,
-    },
-    problemPage: {
-      name: "problemPage",
-      id: "divProblemPage",
-      menuButtonId: "buttonProblemPage",
-      container: null,
-      selectFunction: problemPage.updateProblemPage,
-      flagLoaded: false,
-    },
-    editPage: {
-      name: "editPage",
-      id: ids.domElements.pages.editPage.div,
-      menuButtonId: ids.domElements.pages.editPage.button,
-      container: null,
-      selectFunction: editPage.selectEditPage,
-      flagLoaded: false,
-      editor: null,
-    },
-    calculator: {
-      name: "calculator",
-      id: "divCalculatorPage",
-      menuButtonId: "buttonSelectCalculator",
-      container: null,
-      selectFunction: calculatorPage.calculator.submitComputation.bind(calculatorPage.calculator),
-      scriptIds: [],
-    },
-    signUp: {
-      name: "signUp",
-      id: "divSignUpPage",
-      container: null,
-      selectFunction: signUp.signUp.bind(signUp),
-    },
-    forgotLogin: {
-      name: "forgotLogin",
-      id: "divForgotLogin",
-      container: null,
-      selectFunction: null,
-    },
-    about: {
-      name: "about",
-      id: "divAboutPage",
-      menuButtonId: "buttonAboutPage",
-      container: null,
-      selectFunction: null,
-    },
-    privacyPolicy: {
-      name: "privacyPolicy",
-      id: ids.domElements.pages.privacyPolicy.div,
-      menuButtonId: ids.domElements.pages.privacyPolicy.button,
-    },
-    themes: {
-      name: "themes",
-      id: ids.domElements.pages.themes.div,
-      menuButtonId: ids.domElements.pages.themes.button,
-      container: null,
-    },
-    database: {
-      name: "database",
-      id: "divDatabase",
-      menuButtonId: "buttonSelectDatabase",
-      container: null,
-      selectFunction: database.updateDatabasePage,
-    },
-    server: {
-      name: "server",
-      id: "divServer",
-      menuButtonId: "buttonSelectServer",
-      container: null,
-      selectFunction: serverStatus.updateServerStatus,
-    },
-    account: {
-      name: "account",
-      id: "divAccount",
-      menuButtonId: "buttonSelectAccount",
-      container: null,
-      selectFunction: accountPage.updateAccountPage,
-    },
-    activateAccount: {
-      name: "activateAccount",
-      id: "divActivateAccount",
-      container: null,
-      selectFunction: activateAccount.updateAccountActivationPage,
-    },
-    accounts: {
-      name: "accounts",
-      id: "divAccounts",
-      menuButtonId: "buttonSelectAccounts",
-      container: null,
-      selectFunction: accountManagement.updateAccountsPage,
-    },
-  };
-  this.storage = new StorageCalculator();
-  this.scriptInjector = new AllScripts();
-  this.flagProblemPageOnly = false;
-}
+class Page {
+  constructor() {
+    window.calculator.mainPage = this;
+    this.pages = {
+      login: {
+        name: "login", //<-for autocomplete
+        id: "divLoginPage",
+        menuButtonId: "buttonLoginPage",
+        container: null,
+        selectFunction: null,
+        initialized: false,
+      },
+      selectCourse: {
+        name: "selectCourse",
+        id: "divSelectCourse",
+        menuButtonId: "buttonSelectCourse",
+        container: null,
+        selectFunction: selectCourse.selectCoursePage,
+      },
+      currentCourse: {
+        name: "currentCourse",
+        id: "divCurrentCourse",
+        menuButtonId: "buttonCurrentCourse",
+        container: null,
+        selectFunction: coursePage.selectCurrentCoursePage,
+      },
+      problemPage: {
+        name: "problemPage",
+        id: "divProblemPage",
+        menuButtonId: "buttonProblemPage",
+        container: null,
+        selectFunction: problemPage.updateProblemPage,
+        flagLoaded: false,
+      },
+      editPage: {
+        name: "editPage",
+        id: ids.domElements.pages.editPage.div,
+        menuButtonId: ids.domElements.pages.editPage.button,
+        container: null,
+        selectFunction: editPage.selectEditPage,
+        flagLoaded: false,
+        editor: null,
+      },
+      calculator: {
+        name: "calculator",
+        id: "divCalculatorPage",
+        menuButtonId: "buttonSelectCalculator",
+        container: null,
+        selectFunction: calculatorPage.calculator.submitComputation.bind(calculatorPage.calculator),
+        scriptIds: [],
+      },
+      signUp: {
+        name: "signUp",
+        id: "divSignUpPage",
+        container: null,
+        selectFunction: signUp.signUp.bind(signUp),
+      },
+      forgotLogin: {
+        name: "forgotLogin",
+        id: "divForgotLogin",
+        container: null,
+        selectFunction: null,
+      },
+      about: {
+        name: "about",
+        id: "divAboutPage",
+        menuButtonId: "buttonAboutPage",
+        container: null,
+        selectFunction: null,
+      },
+      privacyPolicy: {
+        name: "privacyPolicy",
+        id: ids.domElements.pages.privacyPolicy.div,
+        menuButtonId: ids.domElements.pages.privacyPolicy.button,
+      },
+      themes: {
+        name: "themes",
+        id: ids.domElements.pages.themes.div,
+        menuButtonId: ids.domElements.pages.themes.button,
+        container: null,
+      },
+      database: {
+        name: "database",
+        id: "divDatabase",
+        menuButtonId: "buttonSelectDatabase",
+        container: null,
+        selectFunction: database.updateDatabasePage,
+      },
+      server: {
+        name: "server",
+        id: "divServer",
+        menuButtonId: "buttonSelectServer",
+        container: null,
+        selectFunction: serverStatus.updateServerStatus,
+      },
+      account: {
+        name: "account",
+        id: "divAccount",
+        menuButtonId: "buttonSelectAccount",
+        container: null,
+        selectFunction: accountPage.updateAccountPage,
+      },
+      activateAccount: {
+        name: "activateAccount",
+        id: "divActivateAccount",
+        container: null,
+        selectFunction: activateAccount.updateAccountActivationPage,
+      },
+      accounts: {
+        name: "accounts",
+        id: "divAccounts",
+        menuButtonId: "buttonSelectAccounts",
+        container: null,
+        selectFunction: accountManagement.updateAccountsPage,
+      },
+    };
+    this.storage = new StorageCalculator();
+    this.scriptInjector = new AllScripts();
+    this.flagProblemPageOnly = false;
+  }
 
-Page.prototype.isLoggedIn = function () {
-  if (this.flagProblemPageOnly) {
+  isLoggedIn() {
+    if (this.flagProblemPageOnly) {
+      return false;
+    }
+    return this.user.isLoggedIn();
+  }
+
+  initBuildVersion() {
+    document.getElementById(ids.domElements.calculatorBuildVersion).innerHTML = `Build version ${serverInformation.serverInformation.version}`;
+  }
+
+  serverIsOnLocalHost() {
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      return true;
+    }
     return false;
   }
-  return this.user.isLoggedIn();
-}
 
-Page.prototype.initBuildVersion = function () {
-  document.getElementById(ids.domElements.calculatorBuildVersion).innerHTML = `Build version ${serverInformation.serverInformation.version}`;
-}
-
-Page.prototype.serverIsOnLocalHost = function () {
-  if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-    return true;
+  initHandlers() {
+    window.addEventListener("hashchange", this.storage.loadSettings.bind(this.storage));
   }
-  return false;
-}
 
-Page.prototype.initHandlers = function () {
-  window.addEventListener("hashchange", this.storage.loadSettings.bind(this.storage));
-}
-
-Page.prototype.initMenuBar = function () {
-  for (var page in this.pages) {
-    this.pages[page].container = document.getElementById(this.pages[page].id);
-    if (this.pages[page].menuButtonId !== null && this.pages[page].menuButtonId !== undefined) {
-      var currentButton = document.getElementById(this.pages[page].menuButtonId);
-      currentButton.pageToSelect = page;
-      currentButton.addEventListener("click", this.selectPage.bind(this, page));
-    }
-  }
-}
-
-Page.prototype.resetTopicProblems = function () {
-  problemPage.allProblems.resetTopicProblems();
-}
-
-Page.prototype.showProfilePicture = function () {
-  document.getElementById("divProfilePicture").classList.remove("divInvisible");
-  document.getElementById("divProfilePicture").classList.add("divVisible");
-  if (this.user.googleProfile.picture === undefined) {
-    return;
-  }
-  if (document.getElementById("divProfilePicture").children.length > 0) {
-    return;
-  }
-  try {
-    var theProfilePicElement = document.createElement("IMG");
-    theProfilePicElement.setAttribute("src", this.user.googleProfile.picture);
-    theProfilePicElement.setAttribute("alt", this.user.googleProfile.name);
-    theProfilePicElement.setAttribute("id", "imgProfilePicture");
-    theProfilePicElement.setAttribute("title", this.user.googleProfile.name);
-    theProfilePicElement.setAttribute("className", "profilePicture");
-    //theProfilePicElement.setAttribute("width", 50);
-    document.getElementById("divProfilePicture").appendChild(theProfilePicElement);
-  } catch (e) {
-    console.log("Failed to set profile picture: " + e);
-  }
-}
-
-Page.prototype.initializeCalculatorPage = function () {
-  this.initializeCalculatorPagePartOne();
-  this.initializeCalculatorPagePartTwo();
-}
-
-Page.prototype.initializeCalculatorPagePartOne = function () {
-  cookies.setCookie("useJSON", true, 300, false);
-  this.initMenuBar();
-  this.initBuildVersion();
-  this.initHandlers();
-  //////////////////////////////////////
-  //////////////////////////////////////
-  //Initialize global variables
-  //////////////////////////////////////
-  //////////////////////////////////////
-  this.theCourses = {};
-  this.logoutRequestFromUrl = null;
-  this.locationRequestFromUrl = null;
-  this.storage.loadSettings();
-  this.hashHistory = [];
-  this.lastKnownGoodProblemFileName = "";
-  this.user = new User();
-  this.aceEditorAutoCompletionWordList = [];
-  this.flagDoSubmitCalculatorComputation = true;
-  //////////////////////////////////////
-  //////////////////////////////////////
-  //Page manipulation functions
-  //////////////////////////////////////
-  //////////////////////////////////////
-  //////////////////////////////////////
-  //////////////////////////////////////
-  //Select page on first load
-  //////////////////////////////////////
-  //////////////////////////////////////
-  this.selectPage(this.storage.variables.currentPage.getValue());
-  if (this.storage.variables.currentPage.getValue() != this.pages.activateAccount.name) {
-    login.loginTry();
-  }
-  document.getElementById("divOnePageApp").style.display = "";
-  document.getElementById("divOnePageApp").className = "divOnePageApp";
-}
-
-Page.prototype.toStringProblem = function () {
-  return this.storage.toStringProblem();
-}
-
-Page.prototype.initializeCalculatorPagePartTwo = function () {
-  initializeButtons.initializeButtons();
-  initializeButtons.initializeCalculatorPage();
-  mathjax.typeSetHard(ids.domElements.divMathjaxProblematicRender);
-}
-
-Page.prototype.sectionSelect = function (sectionNumber) {
-  this.storage.variables.currentSectionComputed.setAndStore(sectionNumber);
-  this.user.sectionComputed = this.user.sectionsTaught[sectionNumber];
-  var deadlineSpans = document.getElementsByClassName(ids.domElements.classSpanDeadlineContainer);
-  for (var i = 0; i < deadlineSpans.length; i++) {
-    var currentDeadlineSpan = deadlineSpans[i];
-    var currentDeadlineId = currentDeadlineSpan.id.substr(
-      ids.stringResources.prefixDeadlineContainer.length
-    );
-    var currentProblem = problemPage.allProblems[currentDeadlineId];
-    if (currentProblem === undefined) {
-      continue;
-    }
-    currentDeadlineSpan.innerHTML = currentProblem.toStringDeadlinePanel();
-  }
-}
-
-Page.prototype.onStudentViewChange = function () {
-  var studentView = this.storage.variables.flagStudentView.isTrue();
-  document.getElementById(ids.domElements.sliderStudentView).checked = studentView;
-  var spanView = document.getElementById(ids.domElements.spanStudentViewFlagToggleReport);
-  var radioHTML = "";
-  if (studentView) {
-    spanView.innerHTML = "Student view";
-    for (var counterSections = 0; counterSections < this.user.sectionsTaught.length; counterSections++) {
-      radioHTML += `<br><label class = "containerRadioButton">`;
-      radioHTML += `<input type = "radio" name = "radioSection" onchange = "window.calculator.mainPage.sectionSelect(${counterSections});" `;
-      var counterFromStorage = parseInt(this.storage.variables.currentSectionComputed.getValue());
-      if (counterSections === counterFromStorage) {
-        radioHTML += "checked = 'true'";
+  initMenuBar() {
+    for (var page in this.pages) {
+      this.pages[page].container = document.getElementById(this.pages[page].id);
+      if (this.pages[page].menuButtonId !== null && this.pages[page].menuButtonId !== undefined) {
+        var currentButton = document.getElementById(this.pages[page].menuButtonId);
+        currentButton.pageToSelect = page;
+        currentButton.addEventListener("click", this.selectPage.bind(this, page));
       }
-      radioHTML += `>`;
-      radioHTML += `<span class = "radioMark"></span>`;
-      radioHTML += this.user.sectionsTaught[counterSections];
-      radioHTML += `</label>`
     }
-  } else {
-    spanView.innerHTML = "Admin view";
   }
-  login.resetPagesNeedingReload();
-  login.setAdminPanels();
-  document.getElementById(ids.domElements.spanStudentViewSectionSelectPanel).innerHTML = radioHTML;
-}
 
-Page.prototype.onDebugValueChange = function () {
-  var sliderDebug = document.getElementById(ids.domElements.sliderDebugFlag);
-  var debugOn = this.storage.variables.flagDebug.isTrue();
-  sliderDebug.checked = debugOn;
-  var debugSpan = document.getElementById(ids.domElements.spanDebugFlagToggleReport);
-  if (debugOn) {
-    debugSpan.innerHTML = "Debug <b style = 'color:red'>on</b>";
-  } else {
-    debugSpan.innerHTML = "Debug <b style = 'color:green'>off</b>";
+  resetTopicProblems() {
+    problemPage.allProblems.resetTopicProblems();
   }
-}
 
-Page.prototype.setSwitchDebug = function () {
-  var sliderDebug = document.getElementById(ids.domElements.sliderDebugFlag);
-  this.storage.variables.flagDebug.setAndStore(sliderDebug.checked);
-  this.pages.problemPage.flagLoaded = false;
-  this.selectPage(this.storage.variables.currentPage.getValue());
-}
+  showProfilePicture() {
+    document.getElementById("divProfilePicture").classList.remove("divInvisible");
+    document.getElementById("divProfilePicture").classList.add("divVisible");
+    if (this.user.googleProfile.picture === undefined) {
+      return;
+    }
+    if (document.getElementById("divProfilePicture").children.length > 0) {
+      return;
+    }
+    try {
+      var theProfilePicElement = document.createElement("IMG");
+      theProfilePicElement.setAttribute("src", this.user.googleProfile.picture);
+      theProfilePicElement.setAttribute("alt", this.user.googleProfile.name);
+      theProfilePicElement.setAttribute("id", "imgProfilePicture");
+      theProfilePicElement.setAttribute("title", this.user.googleProfile.name);
+      theProfilePicElement.setAttribute("className", "profilePicture");
+      //theProfilePicElement.setAttribute("width", 50);
+      document.getElementById("divProfilePicture").appendChild(theProfilePicElement);
+    } catch (e) {
+      console.log("Failed to set profile picture: " + e);
+    }
+  }
 
-Page.prototype.setSwitchStudentView = function () {
-  var sliderStudentView = document.getElementById(ids.domElements.sliderStudentView);
-  this.storage.variables.flagStudentView.setAndStore(sliderStudentView.checked);
-  this.pages.problemPage.flagLoaded = false;
-  this.selectPage(this.storage.variables.currentPage.getValue());
-}
+  initializeCalculatorPage() {
+    this.initializeCalculatorPagePartOne();
+    this.initializeCalculatorPagePartTwo();
+  }
 
-Page.prototype.studentView = function () {
-  return this.storage.variables.flagStudentView.isTrue();
+  initializeCalculatorPagePartOne() {
+    cookies.setCookie("useJSON", true, 300, false);
+    this.initMenuBar();
+    this.initBuildVersion();
+    this.initHandlers();
+    //////////////////////////////////////
+    //////////////////////////////////////
+    //Initialize global variables
+    //////////////////////////////////////
+    //////////////////////////////////////
+    this.theCourses = {
+    };
+    this.logoutRequestFromUrl = null;
+    this.locationRequestFromUrl = null;
+    this.storage.loadSettings();
+    this.hashHistory = [];
+    this.lastKnownGoodProblemFileName = "";
+    this.user = new User();
+    this.aceEditorAutoCompletionWordList = [];
+    this.flagDoSubmitCalculatorComputation = true;
+    //////////////////////////////////////
+    //////////////////////////////////////
+    //Page manipulation functions
+    //////////////////////////////////////
+    //////////////////////////////////////
+    //////////////////////////////////////
+    //////////////////////////////////////
+    //Select page on first load
+    //////////////////////////////////////
+    //////////////////////////////////////
+    this.selectPage(this.storage.variables.currentPage.getValue());
+    if (this.storage.variables.currentPage.getValue() != this.pages.activateAccount.name) {
+      login.loginTry();
+    }
+    document.getElementById("divOnePageApp").style.display = "";
+    document.getElementById("divOnePageApp").className = "divOnePageApp";
+  }
+
+  toStringProblem() {
+    return this.storage.toStringProblem();
+  }
+
+  initializeCalculatorPagePartTwo() {
+    initializeButtons.initializeButtons();
+    initializeButtons.initializeCalculatorPage();
+    mathjax.typeSetHard(ids.domElements.divMathjaxProblematicRender);
+  }
+
+  sectionSelect(sectionNumber) {
+    this.storage.variables.currentSectionComputed.setAndStore(sectionNumber);
+    this.user.sectionComputed = this.user.sectionsTaught[sectionNumber];
+    var deadlineSpans = document.getElementsByClassName(ids.domElements.classSpanDeadlineContainer);
+    for (var i = 0; i < deadlineSpans.length; i++) {
+      var currentDeadlineSpan = deadlineSpans[i];
+      var currentDeadlineId = currentDeadlineSpan.id.substr(
+        ids.stringResources.prefixDeadlineContainer.length
+      );
+      var currentProblem = problemPage.allProblems[currentDeadlineId];
+      if (currentProblem === undefined) {
+        continue;
+      }
+      currentDeadlineSpan.innerHTML = currentProblem.toStringDeadlinePanel();
+    }
+  }
+
+  onDebugValueChange() {
+    var sliderDebug = document.getElementById(ids.domElements.sliderDebugFlag);
+    var debugOn = this.storage.variables.flagDebug.isTrue();
+    sliderDebug.checked = debugOn;
+    var debugSpan = document.getElementById(ids.domElements.spanDebugFlagToggleReport);
+    if (debugOn) {
+      debugSpan.innerHTML = "Debug <b style = 'color:red'>on</b>";
+    } else {
+      debugSpan.innerHTML = "Debug <b style = 'color:green'>off</b>";
+    }
+  }
+
+  onMathJaxValueChange() {
+    let flagUseMathJax = this.storage.variables.flagMathJax.isTrue();
+    let mathjaxCheckbox = document.getElementById(ids.domElements.sliderMathJaxFlag);
+    mathjaxCheckbox.checked = flagUseMathJax;
+    var mathJaxSpan = document.getElementById(ids.domElements.spanMathJaxFlag);
+    if (flagUseMathJax) {
+      mathJaxSpan.innerHTML = "<b style = 'color:green'>MathJax</b>";
+    } else {
+      mathJaxSpan.innerHTML = "<b style = 'color:red'>Built-in</b>";
+    }
+  }
+
+  setSwitchMathJax() {
+    let sliderMathjax = document.getElementById(ids.domElements.sliderMathJaxFlag);
+    this.storage.variables.flagMathJax.setAndStore(sliderMathjax.checked);
+    this.pages.problemPage.flagLoaded = false;
+    this.selectPage(this.storage.variables.currentPage.getValue());
+  }
+
+  setSwitchDebug() {
+    var sliderDebug = document.getElementById(ids.domElements.sliderDebugFlag);
+    this.storage.variables.flagDebug.setAndStore(sliderDebug.checked);
+    this.pages.problemPage.flagLoaded = false;
+    this.selectPage(this.storage.variables.currentPage.getValue());
+  }
+
+  setSwitchStudentView() {
+    var sliderStudentView = document.getElementById(ids.domElements.sliderStudentView);
+    this.storage.variables.flagStudentView.setAndStore(sliderStudentView.checked);
+    this.pages.problemPage.flagLoaded = false;
+    this.selectPage(this.storage.variables.currentPage.getValue());
+  }
+
+  studentView() {
+    return this.storage.variables.flagStudentView.isTrue();
+  }
+
+  onStudentViewChange() {
+    var studentView = this.storage.variables.flagStudentView.isTrue();
+    document.getElementById(ids.domElements.sliderStudentView).checked = studentView;
+    var spanView = document.getElementById(ids.domElements.spanStudentViewFlagToggleReport);
+    var radioHTML = "";
+    if (studentView) {
+      spanView.innerHTML = "Student view";
+      for (var counterSections = 0; counterSections < this.user.sectionsTaught.length; counterSections++) {
+        radioHTML += `<br><label class = "containerRadioButton">`;
+        radioHTML += `<input type = "radio" name = "radioSection" onchange = "window.calculator.mainPage.sectionSelect(${counterSections
+          }); " `;
+        var counterFromStorage = parseInt(this.storage.variables.currentSectionComputed.getValue());
+        if (counterSections === counterFromStorage) {
+          radioHTML += "checked = 'true'";
+        }
+        radioHTML += `>`;
+        radioHTML += `<span class = "radioMark"></span>`;
+        radioHTML += this.user.sectionsTaught[counterSections];
+        radioHTML += `</label>`
+      }
+    } else {
+      spanView.innerHTML = "Admin view";
+    }
+    login.resetPagesNeedingReload();
+    login.setAdminPanels();
+    document.getElementById(ids.domElements.spanStudentViewSectionSelectPanel).innerHTML = radioHTML;
+  }
+
+  removeOneScript(scriptId) {
+    this.scriptInjector.removeOneScript(scriptId);
+  }
+
+  removeScripts(scriptIds) {
+    this.scriptInjector.removeScripts(scriptIds);
+  }
+
+  injectScript(scriptId, scriptContent) {
+    this.scriptInjector.injectScript(scriptId, scriptContent);
+  }
+
+  selectPage(inputPage) {
+    if (this.pages[inputPage] === undefined) {
+      inputPage = "calculator";
+    }
+    this.storage.variables.currentPage.setAndStore(inputPage);
+    if (!this.flagProblemPageOnly) {
+      for (var page in this.pages) {
+        this.pages[page].container.style.display = "none";
+        if (this.pages[page].menuButtonId !== null && this.pages[page].menuButtonId !== undefined) {
+          document.getElementById(this.pages[page].menuButtonId).classList.remove("buttonSelectPageSelected");
+        }
+      }
+      this.pages[inputPage].container.style.display = "";
+      if (this.pages[inputPage].menuButtonId !== null && this.pages[inputPage].menuButtonId !== undefined) {
+        document.getElementById(this.pages[inputPage].menuButtonId).classList.add("buttonSelectPageSelected");
+      }
+    }
+    if (this.pages[inputPage].selectFunction !== null && this.pages[inputPage].selectFunction !== undefined) {
+      this.pages[inputPage].selectFunction();
+    }
+    //location.href = `#${this.getHash()}`;
+  }
+
+  getCurrentProblem() {
+    var problemFileName = this.storage.variables.currentCourse.problemFileName.getValue();
+    if (
+      problemFileName === "" ||
+      problemFileName === null ||
+      problemFileName === undefined
+    ) {
+      return null;
+    }
+    return problemPage.allProblems.getProblemByIdOrRegisterEmpty(problemFileName);
+  }
+
+  getProblemById(label) {
+    return problemPage.allProblems.getProblemByIdOrRegisterEmpty(label);
+  }
+
+  cleanUpLoginSpan(componentToCleanUp) {
+    var loginInfo = document.getElementById("spanLoginRequired");
+    if (loginInfo !== null) {
+      if (loginInfo.parentElement === componentToCleanUp) {
+        loginInfo.innerHTML = "<b>...</b>";
+      }
+    }
+  }
+
+  toggleMonitoring() {
+    var monitoring = this.storage.variables.calculator.monitoring;
+    if (monitoring.value !== "false") {
+      monitoring.setAndStore("false")
+    } else {
+      monitoring.setAndStore("true")
+    }
+  }
+
+  setMonitoringComponent() {
+    var monitoring = this.storage.variables.calculator.monitoring.value;
+    if (monitoring !== "false") {
+      monitoring = "true";
+    }
+    var monitorResult = document.getElementById(ids.domElements.monitoring.spanStatus);
+    if (monitoring === "true") {
+      monitorResult.innerHTML = "Monitor <b style = 'color:red'>on</b>";
+      document.getElementById(ids.domElements.switch.monitoring).checked = true;
+      document.getElementById(ids.domElements.monitoring.buttonTogglePauseRequest).style.display = "";
+    } else {
+      document.getElementById(ids.domElements.switch.monitoring).checked = false;
+      monitorResult.innerHTML = "Monitor <b style = 'color:green'>off</b>";
+      document.getElementById(ids.domElements.monitoring.buttonTogglePauseRequest).style.display = "none";
+    }
+  }
 }
 
 function Script() {
@@ -843,92 +959,6 @@ AllScripts.prototype.injectScript = function (scriptId, scriptContent) {
   document.getElementsByTagName('head')[0].appendChild(scriptChild);
 }
 
-Page.prototype.removeOneScript = function (scriptId) {
-  this.scriptInjector.removeOneScript(scriptId);
-}
-
-Page.prototype.removeScripts = function (scriptIds) {
-  this.scriptInjector.removeScripts(scriptIds);
-}
-
-Page.prototype.injectScript = function (scriptId, scriptContent) {
-  this.scriptInjector.injectScript(scriptId, scriptContent);
-}
-
-Page.prototype.selectPage = function (inputPage) {
-  if (this.pages[inputPage] === undefined) {
-    inputPage = "calculator";
-  }
-  this.storage.variables.currentPage.setAndStore(inputPage);
-  if (!this.flagProblemPageOnly) {
-    for (var page in this.pages) {
-      this.pages[page].container.style.display = "none";
-      if (this.pages[page].menuButtonId !== null && this.pages[page].menuButtonId !== undefined) {
-        document.getElementById(this.pages[page].menuButtonId).classList.remove("buttonSelectPageSelected");
-      }
-    }
-    this.pages[inputPage].container.style.display = "";
-    if (this.pages[inputPage].menuButtonId !== null && this.pages[inputPage].menuButtonId !== undefined) {
-      document.getElementById(this.pages[inputPage].menuButtonId).classList.add("buttonSelectPageSelected");
-    }
-  }
-  if (this.pages[inputPage].selectFunction !== null && this.pages[inputPage].selectFunction !== undefined) {
-    this.pages[inputPage].selectFunction();
-  }
-  //location.href = `#${this.getHash()}`;
-}
-
-Page.prototype.getCurrentProblem = function () {
-  var problemFileName = this.storage.variables.currentCourse.problemFileName.getValue();
-  if (
-    problemFileName === "" ||
-    problemFileName === null ||
-    problemFileName === undefined
-  ) {
-    return null;
-  }
-  return problemPage.allProblems.getProblemByIdOrRegisterEmpty(problemFileName);
-}
-
-Page.prototype.getProblemById = function (label) {
-  return problemPage.allProblems.getProblemByIdOrRegisterEmpty(label);
-}
-
-Page.prototype.cleanUpLoginSpan = function (componentToCleanUp) {
-  var loginInfo = document.getElementById("spanLoginRequired");
-  if (loginInfo !== null) {
-    if (loginInfo.parentElement === componentToCleanUp) {
-      loginInfo.innerHTML = "<b>...</b>";
-    }
-  }
-}
-
-Page.prototype.toggleMonitoring = function () {
-  var monitoring = this.storage.variables.calculator.monitoring;
-  if (monitoring.value !== "false") {
-    monitoring.setAndStore("false")
-  } else {
-    monitoring.setAndStore("true")
-  }
-}
-
-Page.prototype.setMonitoringComponent = function () {
-  var monitoring = this.storage.variables.calculator.monitoring.value;
-  if (monitoring !== "false") {
-    monitoring = "true";
-  }
-  var monitorResult = document.getElementById(ids.domElements.monitoring.spanStatus);
-  if (monitoring === "true") {
-    monitorResult.innerHTML = "Monitor <b style = 'color:red'>on</b>";
-    document.getElementById(ids.domElements.switch.monitoring).checked = true;
-    document.getElementById(ids.domElements.monitoring.buttonTogglePauseRequest).style.display = "";
-  } else {
-    document.getElementById(ids.domElements.switch.monitoring).checked = false;
-    monitorResult.innerHTML = "Monitor <b style = 'color:green'>off</b>";
-    document.getElementById(ids.domElements.monitoring.buttonTogglePauseRequest).style.display = "none";
-  }
-
-}
 /**
  * @returns {Page}
  * */

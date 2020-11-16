@@ -3901,12 +3901,6 @@ class MathTagCoverter {
       display: styleComputer.style.display,
       fontSize: styleComputer.style.fontSize,
     };
-    if (this.style.fontFamily === "") {
-      this.style.fontFamily = "Times New Roman, Times, serif";
-    }
-    if (this.style.display === "") {
-      this.style.display = "inline-block";
-    }
   }
 
   convertTags(
@@ -3943,9 +3937,11 @@ class MathTagCoverter {
       newChildren.push(document.createTextNode(remainingContent));
     }
     toBeModified.textContent = "";
+    let replacing = document.createElement("span");
     for (let i = 0; i < newChildren.length; i++) {
-      toBeModified.appendChild(newChildren[i]);
+      replacing.appendChild(newChildren[i]);
     }
+    toBeModified.parentElement.replaceChild(replacing, toBeModified);
   }
 
   processTextContent(
@@ -3956,14 +3952,14 @@ class MathTagCoverter {
       return;
     }
     let content = toBeModified.textContent;
-    let openIndex = -1;
+    let openIndex = - 1;
     /**@type{MathTagData[]} */
     let toBeConverted = [];
     for (let i = 1; i < content.length; i++) {
       let previous = content[i - 1];
       let current = content[i];
       if (previous === "\\") {
-        if (openIndex === -1) {
+        if (openIndex === - 1) {
           if (current === "(") {
             openIndex = i;
             continue;
@@ -3971,7 +3967,7 @@ class MathTagCoverter {
         } else {
           if (current === ")") {
             toBeConverted.push(new MathTagData(openIndex - 1, openIndex + 1, i - 2, i, content))
-            openIndex = -1;
+            openIndex = - 1;
           }
         }
       }
@@ -3989,12 +3985,12 @@ class MathTagCoverter {
       console.log("While converting mathtags, reached recursion depth limits");
       return;
     }
-    if (toBeModified.children.length === 0) {
+    if (toBeModified.childNodes.length === 0) {
       this.processTextContent(toBeModified);
       return;
     }
-    for (let i = 0; i < toBeModified.children.length; i++) {
-      this.convertTagsRecursive(toBeModified.children[i], recursionDepth + 1);
+    for (let i = 0; i < toBeModified.childNodes.length; i++) {
+      this.convertTagsRecursive(toBeModified.childNodes[i], recursionDepth + 1);
     }
   }
 

@@ -3,6 +3,7 @@ const mathjaxSetup = require("./mathjax-calculator-setup");
 
 class TypeSetter {
   constructor() {
+    this.defaultStyle = "font-family: 'Times New Roman', Times, serif; display:inline-block;";
   }
 
   useBuiltInTypeSet() {
@@ -19,6 +20,9 @@ class TypeSetter {
     if (typeof element === "string") {
       element = document.getElementById(element);
     }
+    if (styleOverride === "") {
+      styleOverride = this.defaultStyle;
+    }
     if (this.useBuiltInTypeSet()) {
       equationEditor.typeset(element, styleOverride);
     } else {
@@ -34,6 +38,11 @@ class TypeSetter {
   ) {
     if (typeof element === "string") {
       element = document.getElementById(element);
+    }
+    // Style overrides works only when transforming \(\) to mathcalculator tags.
+    // Mathcalculator tags are not affected by styleOverride.
+    if (styleOverride === "") {
+      styleOverride = this.defaultStyle;
     }
     if (this.useBuiltInTypeSet()) {
       equationEditor.typeset(element, styleOverride);

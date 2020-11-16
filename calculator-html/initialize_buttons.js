@@ -392,7 +392,7 @@ InputPanelData.prototype.submitOrPreviewAnswersCallback = function (outputCompon
     this.numInsertedJavascriptChildren++;
   }
   this.javascriptInsertionAlreadyCalled = true;
-  typeset.typesetter.typesetSoft(outputComponent);
+  typeset.typesetter.typesetSoft(outputComponent, "");
 }
 
 InputPanelData.prototype.submitOrPreviewAnswers = function (requestQuery) {

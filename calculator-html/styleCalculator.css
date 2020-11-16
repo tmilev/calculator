@@ -1628,3 +1628,9 @@ table.tableBorderStandard, table.tableBorderStandard td{
   border-collapse: collapse;
   border: 1px solid;
 }
+
+div.mathcalculator{
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 20px;
+  display: inline-block;
+}

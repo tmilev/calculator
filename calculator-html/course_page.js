@@ -81,7 +81,7 @@ function afterLoadCoursePage(incoming, result) {
     }
   }
   //mathjax.typeSetHard(coursePage);
-  typeset.typesetter.typesetSoft(coursePage);
+  typeset.typesetter.typesetSoft(coursePage, "");
   var theTopics = document.getElementsByTagName("topicList");
   problemPage.writeEditCoursePagePanel();
   if (theTopics.length === 0) {

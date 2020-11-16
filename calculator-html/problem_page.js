@@ -777,7 +777,7 @@ ProblemNavigation.prototype.writeToHTML = function () {
   //topPart += "<br>"
   problemTitle.appendChild(this.currentProblem.getEditPanel());
   infoBar.appendChild(problemTitle);
-  typeset.typesetter.typesetSoft(ids.domElements.divProblemInfoBar);
+  typeset.typesetter.typesetSoft(ids.domElements.divProblemInfoBar, "");
 }
 
 Problem.prototype.writeToHTML = function (outputElement) {
@@ -796,7 +796,7 @@ Problem.prototype.writeToHTML = function (outputElement) {
     this.onePanel(this.answers[counterAnswers]);
   }
   initializeButtons.initializeAccordionButtons();
-  typeset.typesetter.typesetSoft(ids.domElements.problemPageContentContainer);
+  typeset.typesetter.typesetSoft(ids.domElements.problemPageContentContainer, "");
 }
 
 Problem.prototype.toStringDeadline = function () {
@@ -1339,7 +1339,7 @@ function writeTopicsToCoursePage() {
   if (thePage.pages.problemPage.flagLoaded) {
     problemNavigation.writeToHTML();
   }
-  typeset.typesetter.typesetSoft(topicsElements[0]);
+  typeset.typesetter.typesetSoft(topicsElements[0], "");
 }
 
 function updateProblemPageCallback(input, outputComponent) {

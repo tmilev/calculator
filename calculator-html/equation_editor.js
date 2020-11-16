@@ -138,16 +138,17 @@ const knownTypes = {
   // This is the only element type that has contentEditable = true;
   atom: new MathNodeType({
     "type": "atom",
-    "margin": atomMargin,
+    // "margin": atomMargin,
     "outline": "0px solid transparent",
     "width": "auto",
     "height": "auto",
     "minWidth": "4px",
+    "verticalAlign": "text-bottom",
   }),
   // A non-editable math expression/operator such as "+" or "-".
   atomImmutable: new MathNodeType({
     "type": "atomImmutable",
-    "padding": `${0.02}em`,
+    // "padding": `${0.02}em`,
     "width": "auto",
     "height": "auto",
   }),
@@ -172,7 +173,7 @@ const knownTypes = {
   horizontalMath: new MathNodeType({
     "type": "horizontalMath",
     "whiteSpace": "nowrap",
-    // "width": "100%",
+    "verticalAlign": "text-bottom",
     "textAlign": "center",
   }),
   // Represents expressions such as "x/y" or "\frac{x}{y}".
@@ -775,6 +776,7 @@ class LaTeXParser {
       console.log(`Failed to parse ${this.latex}: final syntactic element is not a node.`);
       return this.setError();
     }
+    secondToLastElement.node.normalizeHorizontalMath();
     if (this.equationEditor.options.editable) {
       secondToLastElement.node.ensureEditableAtomsRecursive();
     }
@@ -1064,6 +1066,7 @@ class EquationEditor {
     this.containerGiven.appendChild(this.container);
     this.container.style.display = "inline-block";
     this.container.style.position = "relative";
+    this.container.style.verticalAlign = "text-bottom";
     /** @type{EquationEditorOptions} */
     this.options = new EquationEditorOptions(true);
     if (options !== null && options !== undefined) {
@@ -1072,6 +1075,9 @@ class EquationEditor {
     this.rootNode = mathNodeFactory.rootMath(this);
     if (!this.options.editable) {
       this.rootNode.type.borderStyle = "";
+      this.rootNode.type.padding = "";
+      this.rootNode.type.margin = "";
+      this.rootNode.type.verticalAlign = "text-bottom";
     }
     this.rootNode.externalDOM = this.container;
     /** @type{AtomWithPosition} */
@@ -1088,25 +1094,40 @@ class EquationEditor {
     this.rootNode.updateDOM();
   }
 
+  writeDebugInfo(
+    /** @type{LaTeXParser|null} */ parser,
+  ) {
+    if (this.options.debugLogContainer === null) {
+      return;
+    }
+    let debugHTML = "";
+    if (parser !== null) {
+      parser.reductionLog.join("<hr>");
+      debugHTML += `<hr><hr>${parser.toStringSyntacticStack()}<hr><hr>`;
+    }
+    debugHTML += this.toHtml();
+    this.options.debugLogContainer.innerHTML = debugHTML;
+  }
+
   writeLatex(
     /**@type {string} */
     latex,
   ) {
     this.latexLastWritten = latex;
     this.rootNode.removeAllChildren();
+    this.container.textContent = "";
     let parser = new LaTeXParser(this, latex);
     let newContent = parser.parse();
-    if (this.options.debugLogContainer !== null) {
-      this.options.debugLogContainer.innerHTML = parser.reductionLog.join("<hr>") + "<hr><hr>" + parser.toStringSyntacticStack();
-
-    }
     if (newContent === null) {
+      this.writeDebugInfo(parser);
       console.log(`Failed to construct node from your input ${latex}.`);
       return;
     }
     this.rootNode.appendChild(newContent);
     this.updateDOM();
     this.updateAlignment();
+    this.writeDebugInfo(parser);
+    this.container.setAttribute("latexsource", latex);
   }
 
   toHtml() {
@@ -1183,6 +1204,8 @@ class EquationEditor {
     let boundingRectangle = this.rootNode.element.getBoundingClientRect();
     this.container.style.height = boundingRectangle.height;
     this.container.style.width = boundingRectangle.width;
+
+    // this.container.style.top = this.rootNode.boundingBox.fractionLineHeight;
   }
 
   /**@returns {string} */
@@ -1423,8 +1446,6 @@ class MathNode {
     /** @type {number} */
     this.indexInParent = - 1;
     /** @type {number} */
-    this.fractionLineHeight = 0;
-    /** @type {number} */
     this.scale = 0;
     /** @type {HTMLElement} */
     this.externalDOM = null;
@@ -1548,7 +1569,6 @@ class MathNode {
     if (this.type.position !== "") {
       this.element.style.position = this.type.position;
     }
-    this.fractionLineHeight = 0;
     this.element.setAttribute("mathTagName", this.type.type);
     if (this.type.type === knownTypes.atom.type) {
       this.element.addEventListener("keyup", (e) => {
@@ -1629,9 +1649,15 @@ class MathNode {
     return (
       this.type.type === knownTypes.atom.type ||
       this.type.type === knownTypes.atomImmutable.type ||
-      this.type.type === knownTypes.leftDelimiter.type ||
-      this.type.type === knownTypes.rightDelimiter.type ||
       this.type.type === knownTypes.sqrtSign.type
+    );
+  }
+
+  /** @returns {boolean} */
+  isDelimiter() {
+    return (
+      this.type.type === knownTypes.leftDelimiter.type ||
+      this.type.type === knownTypes.rightDelimiter.type
     );
   }
 
@@ -1644,7 +1670,6 @@ class MathNode {
   hasHorizintalMathParent() {
     if (this.parent === null) {
       return false;
-
     }
     return this.parent.type.type === knownTypes.horizontalMath.type;
   }
@@ -1684,6 +1709,11 @@ class MathNode {
     this.computeDimensions();
   }
 
+  computeDimensionsDelimiter() {
+    let boundingRecangleDOM = this.element.getBoundingClientRect();
+    this.boundingBox.width = boundingRecangleDOM.width;
+  }
+
   computeDimensionsAtomic() {
     let boundingRecangleDOM = this.element.getBoundingClientRect();
     this.boundingBox.width = boundingRecangleDOM.width;
@@ -1699,7 +1729,7 @@ class MathNode {
     this.boundingBox.width = Math.max(numerator.boundingBox.width, denominator.boundingBox.width);
     numerator.boundingBox.width = this.boundingBox.width;
     denominator.boundingBox.width = this.boundingBox.width;
-    denominator.boundingBox.top = numerator.boundingBox.height + 2;
+    denominator.boundingBox.top = numerator.boundingBox.height + 3;
     numerator.computeBoundingBoxLeftSingleChild();
     denominator.computeBoundingBoxLeftSingleChild();
     this.boundingBox.width += 4;
@@ -1748,17 +1778,17 @@ class MathNode {
     this.element.style.top = "";
     this.element.style.left = "";
     this.computeDimensionsAtomic();
+    let heightToEncloseScaled = heightToEnclose * 1.3;
     if (heightToEnclose !== 0) {
-      heightToEnclose *= 1.3;
-      this.boundingBox.stretchFactor = heightToEnclose / this.boundingBox.height;
+      this.boundingBox.stretchFactor = heightToEncloseScaled / this.boundingBox.height;
       this.boundingBox.height = heightToEnclose;
     }
     // For many fonts, the parenteses's middle appears to be below 
     // the middle of the line. We therefore translate the parenthesis up 
     // (negative translation) with a % of its bounding box height.
     let translateUpPercent = 0.15; //0.1;
-    this.boundingBox.fractionLineHeight = (1 - translateUpPercent) * this.boundingBox.height * 0.5;
-    let translateVertical = - this.boundingBox.height * translateUpPercent;
+    this.boundingBox.fractionLineHeight = (1 - translateUpPercent) * heightToEncloseScaled * 0.5;
+    let translateVertical = - heightToEncloseScaled * translateUpPercent;
     this.boundingBox.transformOrigin = "top left";
     this.boundingBox.transform = `matrix(1,0,0,${this.boundingBox.stretchFactor}, 0, ${translateVertical})`;
   }
@@ -1855,6 +1885,10 @@ class MathNode {
   computeDimensions() {
     if (this.isAtomic()) {
       this.computeDimensionsAtomic();
+      return;
+    }
+    if (this.isDelimiter()) {
+      this.computeDimensionsDelimiter();
       return;
     }
     if (this.type.type === knownTypes.error.type) {
@@ -2488,8 +2522,17 @@ class MathNode {
     if (this.type.type !== knownTypes.horizontalMath.type) {
       return;
     }
-    this.normalizeHorizontalMath();
     this.ensureEditableAtoms();
+  }
+
+  normalizeHorizontalMathRecursive() {
+    for (let i = 0; i < this.children.length; i++) {
+      this.children[i].normalizeHorizontalMathRecursive();
+    }
+    if (this.type.type !== knownTypes.horizontalMath.type) {
+      return;
+    }
+    this.normalizeHorizontalMath();
   }
 
   normalizeHorizontalMath() {
@@ -3799,6 +3842,9 @@ class MathNode {
     if (this.isAtomic()) {
       return this.toLatexAtomic();
     }
+    if (this.isDelimiter()) {
+      return this.textContentOrInitialContent();
+    }
     if (this.type.type === knownTypes.baseWithExponent.type) {
       return this.toLatexBaseWithExponent();
     }
@@ -3900,6 +3946,7 @@ class MathTagCoverter {
       fontFamily: styleComputer.style.fontFamily,
       display: styleComputer.style.display,
       fontSize: styleComputer.style.fontSize,
+      verticalAlign: styleComputer.style.verticalAlign,
     };
   }
 
@@ -3929,6 +3976,7 @@ class MathTagCoverter {
       mathTag.style.fontFamily = this.style.fontFamily;
       mathTag.style.display = this.style.display;
       mathTag.style.fontSize = this.style.fontSize;
+      mathTag.style.verticalAlign = this.style.verticalAlign;
       newChildren.push(mathTag);
     }
     let previousIndex = toBeConverted[toBeConverted.length - 1].closeIndex + 1;
@@ -4035,10 +4083,10 @@ class MathTagCoverter {
       }
       /** @type {HTMLElement} */
       let element = mathElements[this.typesetTotal];
-      if (element.typeset === "true") {
+      if (element["typeset"] === "true") {
         continue;
       }
-      element.typeset = "true";
+      element["typeset"] = "true";
       mathFromElement(element);
     }
   }
@@ -4050,6 +4098,9 @@ function typeset(
   /** @type {string} */
   style,
 ) {
+  if (style === "") {
+    style = "vertical-align:text-bottom; font-family: 'Times New Roman', Times, serif; display:inline-block";
+  }
   new MathTagCoverter(style).typeset(toBeModified);
 }
 
@@ -4089,8 +4140,6 @@ function testEquationEditor() {
 function testTypeset(
   /** @type{string} */
   inputId,
-  /** @type{string} */
-  outputId,
 ) {
   let input = document.getElementById(inputId);
   let inputContent = input.value;

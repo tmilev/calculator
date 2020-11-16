@@ -1204,8 +1204,7 @@ class EquationEditor {
     let boundingRectangle = this.rootNode.element.getBoundingClientRect();
     this.container.style.height = boundingRectangle.height;
     this.container.style.width = boundingRectangle.width;
-
-    // this.container.style.top = this.rootNode.boundingBox.fractionLineHeight;
+    this.container.style.marginBottom = "-0.05em";
   }
 
   /**@returns {string} */

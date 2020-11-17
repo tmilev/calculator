@@ -1816,7 +1816,7 @@ class MathNode {
     this.element.style.top = "";
     this.element.style.left = "";
     this.computeDimensionsAtomic();
-    let scaleParenthesis = 1.3;
+    let scaleParenthesis = 1.32;
     let scaleHeight = 1.1;
     heightToEnclose = Math.max(fractionLineHeightEnclosed * 2, (heightToEnclose - fractionLineHeightEnclosed) * 2);
     let heightToStretchTo = heightToEnclose * scaleParenthesis;
@@ -1827,7 +1827,7 @@ class MathNode {
     // For many fonts, the parenteses's middle appears to be below 
     // the middle of the line. We therefore translate the parenthesis up 
     // (negative translation) with a % of its bounding box height.
-    let translateUpPercent = (scaleParenthesis - 1) / 2;
+    let translateUpPercent = (scaleParenthesis - 1) / 2.15;
     this.boundingBox.fractionLineHeight = this.boundingBox.height * 0.5;
     let translateVertical = - heightToStretchTo * translateUpPercent;
     this.boundingBox.transformOrigin = "top left";

@@ -148,7 +148,8 @@ const knownTypes = {
   // A non-editable math expression/operator such as "+" or "-".
   atomImmutable: new MathNodeType({
     "type": "atomImmutable",
-    // "padding": `${0.02}em`,
+    "paddingLeft": `${0.1}em`,
+    "paddingRight": `${0.1}em`,
     "width": "auto",
     "height": "auto",
   }),
@@ -323,6 +324,11 @@ class MathNodeFactory {
     operator,
   ) {
     const result = new MathNode(equationEditor, knownTypes.atomImmutable);
+    if (operator in latexConstants.operatorsExtraPadding) {
+      let extraPadding = latexConstants.operatorsExtraPadding[operator];
+      result.type.paddingLeft = extraPadding;
+      result.type.paddingRight = extraPadding;
+    }
     result.initialContent = operator;
     return result;
   }
@@ -628,6 +634,15 @@ class LaTeXConstants {
     for (let i = 0; i < this.latinCharactersString.length; i++) {
       this.latinCharacters[this.latinCharactersString[i]] = true;
     }
+    this.operatorsExtraPadding = {
+      "=": "0.3em",
+      // \leq
+      "\u2264": "0.3em",
+      // \geq
+      "\u2265": "0.3em",
+      ">": "0.3em",
+      "<": "0.3em",
+    }
     /**@type{Object.<string, string>} */
     this.operatorsNormalized = {
       // Full-widgth plus sign, wider and taller plus sign.
@@ -658,6 +673,13 @@ class LaTeXConstants {
       "end": "\\end",
       "frac": "\\frac",
     };
+    /**@type{Object.<string, string>} */
+    this.latexBackslashOperators = {
+      "leq": "\u2264",
+      "lt": "<",
+      "gt": ">",
+      "geq": "\u2265",
+    }
     this.beginEndEnvironments = {
       "pmatrix": "pmatrix",
     };
@@ -910,6 +932,15 @@ class LaTeXParser {
     if (secondToLast.syntacticRole === "\\" && last.content in latexConstants.latexBackslashCommands) {
       return this.replaceParsingStackTop(null, latexConstants.latexBackslashCommands[last.content], - 2);
     }
+    if (secondToLast.syntacticRole === "\\" && last.content in latexConstants.latexBackslashOperators) {
+      this.lastRuleName = "atom immutable from backslash";
+      let node = mathNodeFactory.atomImmutable(
+        this.equationEditor,
+        latexConstants.latexBackslashOperators[last.content],
+      );
+      return this.replaceParsingStackTop(node, "", - 2);
+    }
+
     if (
       (thirdToLast.syntacticRole === "\\begin" || thirdToLast.syntacticRole === "\\end") &&
       secondToLast.syntacticRole === "{" &&
@@ -4207,4 +4238,5 @@ module.exports = {
   initialize,
   mathFromLatex,
   mathFromElement,
+  latexConstants,
 };

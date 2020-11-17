@@ -391,7 +391,7 @@ class MathNodeFactory {
     exponentWrapped.appendChild(exponentContainer);
     // Horizontal math wrapper for the base.
     const baseHorizontal = new MathNode(equationEditor, knownTypes.horizontalMath);
-    baseHorizontal.appendChild(this.horizontalMath(equationEditor, base));
+    baseHorizontal.appendChild(base);
     baseHorizontal.normalizeHorizontalMath();
     // The base with the exponent.
     const baseWithExponent = new MathNode(equationEditor, knownTypes.baseWithExponent);
@@ -1722,7 +1722,7 @@ class MathNode {
   computeDimensionsFraction() {
     let numerator = this.children[0];
     let denominator = this.children[1];
-    let extraSpaceBetweenNumeratorAndDenominator = 3;
+    let extraSpaceBetweenNumeratorAndDenominator = 4;
     this.boundingBox.fractionLineHeight = numerator.boundingBox.height + 2;
     this.boundingBox.height = numerator.boundingBox.height + denominator.boundingBox.height + extraSpaceBetweenNumeratorAndDenominator;
     this.boundingBox.width = Math.max(numerator.boundingBox.width, denominator.boundingBox.width);
@@ -1736,11 +1736,48 @@ class MathNode {
     denominator.boundingBox.left += 2;
   }
 
+  containsFractionLineRecursive() {
+    if (this.type.type === knownTypes.fraction.type) {
+      return true;
+    }
+    for (let i = 0; i < this.children.length; i++) {
+      if (this.children[i].containsFractionLineRecursive()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  requiresTallExponent(
+    /**@type{MathNode} */
+    base,
+  ) {
+    if (base.type.type !== knownTypes.horizontalMath.type) {
+      return false;
+    }
+    for (let i = base.children.length - 1; i >= 0; i--) {
+      let child = base.children[i];
+      if (child.type.type === knownTypes.matrix.type) {
+        return true;
+      }
+      if (child.type.type === knownTypes.rightDelimiter.type) {
+        return base.containsFractionLineRecursive();
+      }
+      if (child.type.type === knownTypes.atom.type) {
+        if (child.textContentOrInitialContent() === "") {
+          continue;
+        }
+      }
+      return false;
+    }
+    return false;
+  }
+
   computeDimensionsBaseWithExponent() {
     let base = this.children[0];
     let exponent = this.children[1];
     let overlapRatio = 0.35;
-    if (base.children[0].type.type === knownTypes.matrix.type) {
+    if (this.requiresTallExponent(base)) {
       overlapRatio = 0.1;
     }
     let overlap = base.boundingBox.height * overlapRatio;
@@ -1769,6 +1806,8 @@ class MathNode {
   verticallyStretchParenthesis(
     /** @type {number}*/
     heightToEnclose,
+    /** @type {number}*/
+    fractionLineHeightEnclosed,
   ) {
     this.element.style.transformOrigin = "top left";
     this.element.style.transform = "";
@@ -1777,17 +1816,20 @@ class MathNode {
     this.element.style.top = "";
     this.element.style.left = "";
     this.computeDimensionsAtomic();
-    let heightToEncloseScaled = heightToEnclose * 1.3;
+    let scaleParenthesis = 1.3;
+    let scaleHeight = 1.1;
+    heightToEnclose = Math.max(fractionLineHeightEnclosed * 2, (heightToEnclose - fractionLineHeightEnclosed) * 2);
+    let heightToStretchTo = heightToEnclose * scaleParenthesis;
     if (heightToEnclose !== 0) {
-      this.boundingBox.stretchFactor = heightToEncloseScaled / this.boundingBox.height;
-      this.boundingBox.height = heightToEnclose;
+      this.boundingBox.stretchFactor = heightToStretchTo / this.boundingBox.height;
     }
+    this.boundingBox.height = heightToEnclose * scaleHeight;
     // For many fonts, the parenteses's middle appears to be below 
     // the middle of the line. We therefore translate the parenthesis up 
     // (negative translation) with a % of its bounding box height.
-    let translateUpPercent = 0.15; //0.1;
-    this.boundingBox.fractionLineHeight = (1 - translateUpPercent) * heightToEncloseScaled * 0.5;
-    let translateVertical = - heightToEncloseScaled * translateUpPercent;
+    let translateUpPercent = (scaleParenthesis - 1) / 2;
+    this.boundingBox.fractionLineHeight = this.boundingBox.height * 0.5;
+    let translateVertical = - heightToStretchTo * translateUpPercent;
     this.boundingBox.transformOrigin = "top left";
     this.boundingBox.transform = `matrix(1,0,0,${this.boundingBox.stretchFactor}, 0, ${translateVertical})`;
   }
@@ -1934,11 +1976,12 @@ class MathNode {
     // Compute parentheses height
     /** @type {number[]} */
     let enclosedHeights = [];
+    let enclosedFractionLineHeights = [];
     /** @type {number[]} */
     let indicesOpenedParentheses = [];
     for (let i = 0; i < this.children.length; i++) {
       this.computeDimensionsHorizontalMathParenthesesAccountChild(
-        i, enclosedHeights, indicesOpenedParentheses
+        i, enclosedHeights, enclosedFractionLineHeights, indicesOpenedParentheses
       );
     }
   }
@@ -1949,11 +1992,14 @@ class MathNode {
     /** @type {number[]} */
     enclosedHeights,
     /** @type {number[]} */
+    enclosedFractionLineHeights,
+    /** @type {number[]} */
     indicesOpenedParentheses,
   ) {
     let child = this.children[index];
     if (child.type.type === knownTypes.leftDelimiter.type) {
       enclosedHeights.push(0);
+      enclosedFractionLineHeights.push(0);
       indicesOpenedParentheses.push(index);
       return;
     }
@@ -1963,13 +2009,18 @@ class MathNode {
         return;
       }
       let currentHeight = enclosedHeights.pop();
-      child.verticallyStretchParenthesis(currentHeight);
+      let currentFractionLineHeight = enclosedFractionLineHeights.pop();
+      child.verticallyStretchParenthesis(currentHeight, currentFractionLineHeight);
       let leftCounterpart = this.children[indicesOpenedParentheses.pop()];
-      leftCounterpart.verticallyStretchParenthesis(currentHeight);
+      leftCounterpart.verticallyStretchParenthesis(currentHeight, currentFractionLineHeight);
     }
     if (enclosedHeights.length > 0) {
       enclosedHeights[enclosedHeights.length - 1] = Math.max(
         child.boundingBox.height, enclosedHeights[enclosedHeights.length - 1]
+      );
+      enclosedFractionLineHeights[enclosedFractionLineHeights.length - 1] = Math.max(
+        child.boundingBox.fractionLineHeight,
+        enclosedFractionLineHeights[enclosedFractionLineHeights.length - 1]
       );
     }
   }

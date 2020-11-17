@@ -679,7 +679,72 @@ class LaTeXConstants {
       "lt": "<",
       "gt": ">",
       "geq": "\u2265",
+      "sin": "sin",
+      "cos": "cos",
+      "tan": "tan",
+      "cot": "cot",
+      "sec": "sec",
+      "csc": "csc",
+      "ln": "ln",
+      "log": "log",
+      "arctan": "arctan",
+      "arccos": "arccos",
+      "arcsin": "arcsin",
     }
+    /**@type{Object.<string, string>} */
+    this.latexBackslashAtomsEditable = {
+      "alpha": "\u03B1",
+      "beta": "\u03B2",
+      "gamma": "\u03B3",
+      "delta": "\u03B4",
+      "epsilon": "\u03B5",
+      "varepsilon": "",
+      "zeta": "\u03B6",
+      "eta": "\u03B7",
+      "theta": "\u03B8",
+      "vartheta": "",
+      "iota": "\u03B9",
+      "kappa": "\u03BA",
+      "lambda": "\u03BB",
+      "mu": "\u03BC",
+      "nu": "\u03BD",
+      "xi": "\u03BE",
+      "omicron": "\u03BF",
+      "pi": "\u03C0",
+      "rho": "\u03C1",
+      "sigma": "\u03C3",
+      "tau": "\u03C4",
+      "upsilon": "\u03C5",
+      "phi": "\u03C6",
+      "varphi": "\u03D5",
+      "chi": "\u03C7",
+      "psi": "\u03C8",
+      "omega": "\u03C9",
+      "Alpha": "\u0391",
+      "Beta": "\u0392",
+      "Gamma": "\u0393",
+      "Delta": "\u0394",
+      "Epsilon": "\u0395",
+      "Zeta": "\u0396",
+      "Eta": "\u0397",
+      "Theta": "\u0398",
+      "Iota": "\u0399",
+      "Kappa": "\u039A",
+      "Lambda": "\u039B",
+      "Mu": "\u039C",
+      "Nu": "\u039D",
+      "Xi": "\u039E",
+      "Omicron": "\u039F",
+      "Pi": "\u03A0",
+      "Rho": "\u03A1",
+      "Sigma": "\u03A3",
+      "Tau": "\u03A4",
+      "Upsilon": "\u03A5",
+      "Phi": "\u03A6",
+      "Chi": "\u03A7",
+      "Psi": "\u03A8",
+      "Omega": "\u03A9",
+    };
     this.beginEndEnvironments = {
       "pmatrix": "pmatrix",
     };
@@ -798,7 +863,7 @@ class LaTeXParser {
       console.log(`Failed to parse ${this.latex}: final syntactic element is not a node.`);
       return this.setError();
     }
-    secondToLastElement.node.normalizeHorizontalMath();
+    secondToLastElement.node.normalizeHorizontalMathRecursive();
     if (this.equationEditor.options.editable) {
       secondToLastElement.node.ensureEditableAtomsRecursive();
     }
@@ -903,6 +968,7 @@ class LaTeXParser {
   applyOneRule() {
     let last = this.parsingStack[this.parsingStack.length - 1];
     if (latexConstants.isWhiteSpace(last.content)) {
+      this.lastRuleName = "clean whitespace";
       this.parsingStack.length = this.parsingStack.length - 1;
       return true;
     }
@@ -930,6 +996,7 @@ class LaTeXParser {
       return this.replaceParsingStackTop(node, "", - 3);
     }
     if (secondToLast.syntacticRole === "\\" && last.content in latexConstants.latexBackslashCommands) {
+      this.lastRuleName = "latex command";
       return this.replaceParsingStackTop(null, latexConstants.latexBackslashCommands[last.content], - 2);
     }
     if (secondToLast.syntacticRole === "\\" && last.content in latexConstants.latexBackslashOperators) {
@@ -940,7 +1007,14 @@ class LaTeXParser {
       );
       return this.replaceParsingStackTop(node, "", - 2);
     }
-
+    if (secondToLast.syntacticRole === "\\" && last.content in latexConstants.latexBackslashAtomsEditable) {
+      this.lastRuleName = "latex symbol";
+      let node = mathNodeFactory.atom(
+        this.equationEditor,
+        latexConstants.latexBackslashAtomsEditable[last.content],
+      );
+      return this.replaceParsingStackTop(node, "", - 2);
+    }
     if (
       (thirdToLast.syntacticRole === "\\begin" || thirdToLast.syntacticRole === "\\end") &&
       secondToLast.syntacticRole === "{" &&
@@ -1054,7 +1128,10 @@ class LaTeXParser {
         thirdToLast.node.appendChild(secondToLast.node);
         return this.replaceParsingStackRange(thirdToLast.node, "", - 3, - 2);
       }
-      if (thirdToLast.node.isAtomic() && secondToLast.node.isAtomic()) {
+      if (
+        thirdToLast.node.isAtomic()
+        // && secondToLast.node.isAtomic()
+      ) {
         this.lastRuleName = "merge atomic nodes into horizontal math";
         let node = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [thirdToLast.node, secondToLast.node]);
         return this.replaceParsingStackRange(node, "", - 3, - 2);
@@ -1133,7 +1210,7 @@ class EquationEditor {
     }
     let debugHTML = "";
     if (parser !== null) {
-      parser.reductionLog.join("<hr>");
+      debugHTML += parser.reductionLog.join("<hr>");
       debugHTML += `<hr><hr>${parser.toStringSyntacticStack()}<hr><hr>`;
     }
     debugHTML += this.toHtml();

@@ -1204,7 +1204,6 @@ class EquationEditor {
     let boundingRectangle = this.rootNode.element.getBoundingClientRect();
     this.container.style.height = boundingRectangle.height;
     this.container.style.width = boundingRectangle.width;
-    this.container.style.marginBottom = "-0.05em";
   }
 
   /**@returns {string} */
@@ -1723,12 +1722,13 @@ class MathNode {
   computeDimensionsFraction() {
     let numerator = this.children[0];
     let denominator = this.children[1];
+    let extraSpaceBetweenNumeratorAndDenominator = 3;
     this.boundingBox.fractionLineHeight = numerator.boundingBox.height + 2;
-    this.boundingBox.height = numerator.boundingBox.height + denominator.boundingBox.height;
+    this.boundingBox.height = numerator.boundingBox.height + denominator.boundingBox.height + extraSpaceBetweenNumeratorAndDenominator;
     this.boundingBox.width = Math.max(numerator.boundingBox.width, denominator.boundingBox.width);
     numerator.boundingBox.width = this.boundingBox.width;
     denominator.boundingBox.width = this.boundingBox.width;
-    denominator.boundingBox.top = numerator.boundingBox.height + 3;
+    denominator.boundingBox.top = numerator.boundingBox.height + extraSpaceBetweenNumeratorAndDenominator;
     numerator.computeBoundingBoxLeftSingleChild();
     denominator.computeBoundingBoxLeftSingleChild();
     this.boundingBox.width += 4;
@@ -3946,6 +3946,7 @@ class MathTagCoverter {
       display: styleComputer.style.display,
       fontSize: styleComputer.style.fontSize,
       verticalAlign: styleComputer.style.verticalAlign,
+      marginBottom: styleComputer.style.marginBottom,
     };
   }
 
@@ -3976,6 +3977,7 @@ class MathTagCoverter {
       mathTag.style.display = this.style.display;
       mathTag.style.fontSize = this.style.fontSize;
       mathTag.style.verticalAlign = this.style.verticalAlign;
+      mathTag.style.marginBottom = this.style.marginBottom;
       newChildren.push(mathTag);
     }
     let previousIndex = toBeConverted[toBeConverted.length - 1].closeIndex + 1;
@@ -4098,7 +4100,7 @@ function typeset(
   style,
 ) {
   if (style === "") {
-    style = "vertical-align:text-bottom; font-family: 'Times New Roman', Times, serif; display:inline-block";
+    style = "vertical-align:text-bottom; font-family: 'Times New Roman', Times, serif; display:inline-block; margin-bottom:-0.05em";
   }
   new MathTagCoverter(style).typeset(toBeModified);
 }

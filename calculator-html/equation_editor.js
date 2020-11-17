@@ -214,6 +214,14 @@ const knownTypes = {
     "fontSize": 0.75,
     "minHeightScale": 0.75,
   }),
+  baseWithSubscript: new MathNodeType({
+    "type": "baseWithSubscript",
+  }),
+  subscript: new MathNodeType({
+    "type": "subscript",
+    "fontSize": 0.55,
+    "minHeightScale": 0.55,
+  }),
   sqrt: new MathNodeType({
     "type": "sqrt",
     "width": "auto",
@@ -404,6 +412,32 @@ class MathNodeFactory {
     baseWithExponent.appendChild(baseHorizontal);
     baseWithExponent.appendChild(exponentWrapped);
     return baseWithExponent;
+  }
+
+  /** @returns {MathNode} */
+  baseWithSubscript(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /** @type{MathNode}*/
+    base,
+    /** @type{MathNode|null}*/
+    subscript,
+  ) {
+    // Horizontal math wrapper for the exponent.
+    const subscriptWrapped = new MathNode(equationEditor, knownTypes.subscript);
+    let subscriptContainer = this.horizontalMath(equationEditor, subscript);
+    subscriptContainer.normalizeHorizontalMath();
+    subscriptContainer.ensureEditableAtoms();
+    subscriptWrapped.appendChild(subscriptContainer);
+    // Horizontal math wrapper for the base.
+    const baseHorizontal = new MathNode(equationEditor, knownTypes.horizontalMath);
+    baseHorizontal.appendChild(base);
+    baseHorizontal.normalizeHorizontalMath();
+    // The base with the subscript.
+    const baseWithSubscript = new MathNode(equationEditor, knownTypes.baseWithSubscript);
+    baseWithSubscript.appendChild(baseHorizontal);
+    baseWithSubscript.appendChild(subscriptWrapped);
+    return baseWithSubscript;
   }
 
   /** @returns {MathNode} */
@@ -1906,6 +1940,25 @@ class MathNode {
     this.boundingBox.fractionLineHeight = base.boundingBox.top + base.boundingBox.fractionLineHeight;
   }
 
+  computeDimensionsBaseWithSubscript() {
+    let base = this.children[0];
+    let subscript = this.children[1];
+    let overlapRatio = 0.35;
+    if (this.requiresTallExponent(base)) {
+      overlapRatio = 0.1;
+    }
+    let overlap = base.boundingBox.height * overlapRatio;
+    this.boundingBox.height = subscript.boundingBox.height + base.boundingBox.height - overlap;
+    if (subscript.boundingBox.height > this.boundingBox.height) {
+      this.boundingBox.height = subscript.boundingBox.height;
+    }
+    base.boundingBox.left = 0;
+    this.boundingBox.width = base.boundingBox.width + subscript.boundingBox.width;
+    subscript.boundingBox.left = base.boundingBox.width;
+    subscript.boundingBox.top = base.boundingBox.height * (1 - overlapRatio);
+    this.boundingBox.fractionLineHeight = base.boundingBox.fractionLineHeight;
+  }
+
   computeBoundingBoxLeftSingleChild() {
     let child = this.children[0];
     child.boundingBox.left = (this.boundingBox.width - child.boundingBox.width) / 2;
@@ -2068,6 +2121,10 @@ class MathNode {
     }
     if (this.type.type === knownTypes.baseWithExponent.type) {
       this.computeDimensionsBaseWithExponent();
+      return;
+    }
+    if (this.type.type === knownTypes.baseWithSubscript.type) {
+      this.computeDimensionsBaseWithSubscript();
       return;
     }
     if (this.type.type === knownTypes.horizontalMath) {
@@ -2250,6 +2307,9 @@ class MathNode {
         return true;
       case "^":
         this.makeBaseWithExponent();
+        return true;
+      case "_":
+        this.makeBaseWithSubscript();
         return true;
       case "ArrowLeft":
       case "ArrowRight":
@@ -2931,10 +2991,23 @@ class MathNode {
   }
 
   /** @returns {boolean} whether reduction ocurred. */
-  applyBackspaceToTheLeftExponent() {
+  applyBackspaceToTheLeftOfExponent() {
     if (this.type.type !== knownTypes.exponent.type) {
       return false;
     }
+    return this.applyBackspaceToTheLeftOfExponentOrSubscript();
+  }
+
+  /** @returns {boolean} whether reduction ocurred. */
+  applyBackspaceToTheLeftOfSubscript() {
+    if (this.type.type !== knownTypes.subscript.type) {
+      return false;
+    }
+    return this.applyBackspaceToTheLeftOfExponentOrSubscript();
+  }
+
+  /** @returns {boolean} whether reduction ocurred. */
+  applyBackspaceToTheLeftOfExponentOrSubscript() {
     let baseWithExponent = this.parent;
     let indexBaseWithExponent = baseWithExponent.indexInParent;
     let base = baseWithExponent.children[0];
@@ -3024,7 +3097,10 @@ class MathNode {
     if (this.applyBackspaceToTheLeftDenominator()) {
       return true;
     }
-    if (this.applyBackspaceToTheLeftExponent()) {
+    if (this.applyBackspaceToTheLeftOfExponent()) {
+      return true;
+    }
+    if (this.applyBackspaceToTheLeftOfSubscript()) {
       return true;
     }
     if (this.applyBackspaceToTheLeftOfSqrtSign()) {
@@ -3704,6 +3780,54 @@ class MathNode {
     const baseWithExponent = mathNodeFactory.baseWithExponent(this.equationEditor, this, null);
     baseWithExponent.children[1].children[0].children[0].desiredCaretPosition = 0;
     originalParent.replaceChildAtPosition(originalIndexInParent, baseWithExponent);
+    originalParent.ensureEditableAtoms();
+    originalParent.updateDOM();
+    originalParent.focusRestore();
+  }
+
+  makeBaseWithSubscript() {
+    if (this.parent === null) {
+      return;
+    }
+    if (this.isEmptyAtom()) {
+      let previous = this.previousHorizontalSibling();
+      if (previous !== null) {
+        previous.makeBaseWithSubscript();
+        return;
+      }
+    }
+    if (
+      this.type.type === knownTypes.rightDelimiter.type
+    ) {
+      this.makeBaseWithSubscriptRightDelimiter();
+      return;
+    }
+    this.makeBaseDefaultWithSubscript();
+  }
+
+  makeBaseWithSubscriptRightDelimiter() {
+    let rightIndex = this.indexInParent;
+    let originalParent = this.parent;
+    let leftIndex = originalParent.findIndexMatchingDelimiter(rightIndex);
+    let baseContent = originalParent.children.slice(leftIndex, rightIndex + 1);
+    let base = mathNodeFactory.horizontalMathFromArray(
+      this.equationEditor,
+      baseContent,
+    );
+    const baseWithSubscript = mathNodeFactory.baseWithSubscript(this.equationEditor, base, null);
+    baseWithSubscript.children[1].children[0].children[0].desiredCaretPosition = 0;
+    originalParent.replaceChildRangeWithChildren(leftIndex, rightIndex, [baseWithSubscript]);
+    originalParent.ensureEditableAtoms();
+    originalParent.updateDOM();
+    originalParent.focusRestore();
+  }
+
+  makeBaseDefaultWithSubscript() {
+    let originalParent = this.parent;
+    let originalIndexInParent = this.indexInParent;
+    const baseWithSubscript = mathNodeFactory.baseWithSubscript(this.equationEditor, this, null);
+    baseWithSubscript.children[1].children[0].children[0].desiredCaretPosition = 0;
+    originalParent.replaceChildAtPosition(originalIndexInParent, baseWithSubscript);
     originalParent.ensureEditableAtoms();
     originalParent.updateDOM();
     originalParent.focusRestore();

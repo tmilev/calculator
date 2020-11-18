@@ -749,6 +749,9 @@ class LaTeXConstants {
     };
     /**@type{Object.<string, string>} */
     this.latexBackslashOperators = {
+      "otimes": "\u2297",
+      "oplus": "\u2295",
+      "times": "\u00D7",
       "leq": "\u2264",
       "lt": "<",
       "gt": ">",

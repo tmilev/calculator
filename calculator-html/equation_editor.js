@@ -537,17 +537,21 @@ class MathNodeFactory {
     equationEditor,
     /** @type {string} */
     operator,
+    /** @type {MathNode|null} */
+    superscript,
+    /** @type {MathNode|null} */
+    subscript,
   ) {
     let result = new MathNode(equationEditor, knownTypes.operatorWithSuperAndSubscript);
-    let superscript = new MathNode(equationEditor, knownTypes.operatorSuperscript);
-    let subscript = new MathNode(equationEditor, knownTypes.operatorSubscript);
+    let superscriptNode = new MathNode(equationEditor, knownTypes.operatorSuperscript);
+    let subscriptNode = new MathNode(equationEditor, knownTypes.operatorSubscript);
     let operatorNode = new MathNode(equationEditor, knownTypes.operatorStandalone);
-    superscript.appendChild(this.horizontalMath(equationEditor, null));
-    subscript.appendChild(this.horizontalMath(equationEditor, null));
+    superscriptNode.appendChild(this.horizontalMath(equationEditor, superscript));
+    subscriptNode.appendChild(this.horizontalMath(equationEditor, subscript));
     operatorNode.appendChild(this.atomImmutable(equationEditor, operator));
-    result.appendChild(superscript);
+    result.appendChild(superscriptNode);
     result.appendChild(operatorNode);
-    result.appendChild(subscript);
+    result.appendChild(subscriptNode);
     return result;
   }
 }
@@ -770,7 +774,11 @@ class LaTeXConstants {
       "in": "\u2208",
       "cap": "\u2229",
       "cup": "\u222A",
-    }
+    };
+    /**@type{Object.<string, string>} */
+    this.operatorWithSuperAndSubscript = {
+      "sum": "\u03A3",
+    };
     /**@type{Object.<string, string>} */
     this.latexBackslashAtomsEditable = {
       "alpha": "\u03B1",
@@ -829,6 +837,7 @@ class LaTeXConstants {
       "left": true,
       "right": true,
       "displaystyle": true,
+      "text": true,
     };
     this.beginEndEnvironments = {
       "pmatrix": "pmatrix",
@@ -1083,6 +1092,34 @@ class LaTeXParser {
     if (secondToLast.syntacticRole === "\\" && last.content in latexConstants.latexBackslashCommands) {
       this.lastRuleName = "latex command";
       return this.replaceParsingStackTop(null, latexConstants.latexBackslashCommands[last.content], - 2);
+    }
+    if (secondToLast.syntacticRole === "\\" && last.content in latexConstants.operatorWithSuperAndSubscript) {
+      this.lastRuleName = "operator with superscript and subscript";
+      let operatorSymbol = latexConstants.operatorWithSuperAndSubscript[last.content];
+      let syntacticElement = new SyntancticElement(null, operatorSymbol, "operatorWithSuperAndSubscript");
+      this.parsingStack[this.parsingStack.length - 2] = syntacticElement;
+      return this.decreaseParsingStack(1);
+    }
+    let fifthToLast = this.parsingStack[this.parsingStack.length - 5];
+    if (
+      fifthToLast.syntacticRole === "operatorWithSuperAndSubscript" &&
+      fourthToLast.syntacticRole === "^" &&
+      thirdToLast.isExpression() &&
+      secondToLast.syntacticRole === "_" &&
+      last.isExpression()
+    ) {
+      let node = mathNodeFactory.operatorWithSuperAndSubscript(this.equationEditor, fifthToLast.content, thirdToLast.node, last.node);
+      return this.replaceParsingStackTop(node, "", -5);
+    }
+    if (
+      fifthToLast.syntacticRole === "operatorWithSuperAndSubscript" &&
+      fourthToLast.syntacticRole === "_" &&
+      thirdToLast.isExpression() &&
+      secondToLast.syntacticRole === "^" &&
+      last.isExpression()
+    ) {
+      let node = mathNodeFactory.operatorWithSuperAndSubscript(this.equationEditor, fifthToLast.content, last.node, thirdToLast.node);
+      return this.replaceParsingStackTop(node, "", -5);
     }
     if (secondToLast.syntacticRole === "\\" && last.content in latexConstants.latexBackslashOperators) {
       this.lastRuleName = "atom immutable from backslash";
@@ -3481,7 +3518,7 @@ class MathNode {
     let parent = this.parent;
     let oldIndex = this.indexInParent;
     let split = this.splitByCaret();
-    let operatorNode = mathNodeFactory.operatorWithSuperAndSubscript(this.equationEditor, operator);
+    let operatorNode = mathNodeFactory.operatorWithSuperAndSubscript(this.equationEditor, operator, null, null);
     if (split[0] === null) {
       parent.replaceChildAtPosition(oldIndex, operatorNode);
     } else {

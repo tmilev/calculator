@@ -252,6 +252,24 @@ const knownTypes = {
   matrixRowEntry: new MathNodeType({
     "type": "matrixRowEntry",
   }),
+  operatorWithSuperAndSubscript: new MathNodeType({
+    "type": "operatorWithSuperAndSubscript",
+  }),
+  operatorStandalone: new MathNodeType({
+    "type": "operatorStandalone",
+    "fontSize": 1.5,
+    "minHeightScale": 1.5,
+  }),
+  operatorSubscript: new MathNodeType({
+    "type": "operatorSubscript",
+    "fontSize": 0.55,
+    "minHeightScale": 0.55,
+  }),
+  operatorSuperscript: new MathNodeType({
+    "type": "operatorSuperscript",
+    "fontSize": 0.55,
+    "minHeightScale": 0.55,
+  }),
 };
 
 class MathNodeFactory {
@@ -501,6 +519,7 @@ class MathNodeFactory {
     return result;
   }
 
+  /** @returns {MathNode} */
   matrixRowEntry(
     /** @type {EquationEditor} */
     equationEditor,
@@ -509,6 +528,26 @@ class MathNodeFactory {
   ) {
     let result = new MathNode(equationEditor, knownTypes.matrixRowEntry);
     result.appendChild(this.horizontalMath(equationEditor, content));
+    return result;
+  }
+
+  /** @returns {MathNode} */
+  operatorWithSuperAndSubscript(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /** @type {string} */
+    operator,
+  ) {
+    let result = new MathNode(equationEditor, knownTypes.operatorWithSuperAndSubscript);
+    let superscript = new MathNode(equationEditor, knownTypes.operatorSuperscript);
+    let subscript = new MathNode(equationEditor, knownTypes.operatorSubscript);
+    let operatorNode = new MathNode(equationEditor, knownTypes.operatorStandalone);
+    superscript.appendChild(this.horizontalMath(equationEditor, null));
+    subscript.appendChild(this.horizontalMath(equationEditor, null));
+    operatorNode.appendChild(this.atomImmutable(equationEditor, operator));
+    result.appendChild(superscript);
+    result.appendChild(operatorNode);
+    result.appendChild(subscript);
     return result;
   }
 }
@@ -782,6 +821,11 @@ class LaTeXConstants {
       "Chi": "\u03A7",
       "Psi": "\u03A8",
       "Omega": "\u03A9",
+    };
+    this.latexCommandsIgnored = {
+      "left": true,
+      "right": true,
+      "displaystyle": true,
     };
     this.beginEndEnvironments = {
       "pmatrix": "pmatrix",
@@ -1116,10 +1160,7 @@ class LaTeXParser {
       secondToLast.syntacticRole = "";
       return this.decreaseParsingStack(1);
     }
-    if (last.content === "left" && secondToLast.syntacticRole === "\\") {
-      return this.decreaseParsingStack(2);
-    }
-    if (last.content === "right" && secondToLast.syntacticRole === "\\") {
+    if (last.content in latexConstants.latexCommandsIgnored && secondToLast.syntacticRole === "\\") {
       return this.decreaseParsingStack(2);
     }
     if (secondToLast.syntacticRole === "\\sqrt" && last.syntacticRole === "") {
@@ -1892,6 +1933,40 @@ class MathNode {
     denominator.boundingBox.left += 2;
   }
 
+  computeDimensionsOperatorStandalone() {
+    let child = this.children[0];
+    let proportionShiftUp = 0.22;
+    child.boundingBox.top = - child.boundingBox.height * proportionShiftUp;
+    this.boundingBox.height = child.boundingBox.height * (1 - proportionShiftUp * 2);
+    this.boundingBox.width = child.boundingBox.width;
+    this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
+  }
+
+  computeDimensionsOperatorWithSuperAndSubscript() {
+    let superscript = this.children[0];
+    let operator = this.children[1];
+    let subscript = this.children[2];
+    let extraSpaceBelowSuperscript = 2;
+    let extraSpaceBelowOperator = 2;
+    superscript.boundingBox.top = 0;
+    operator.boundingBox.top =
+      superscript.boundingBox.height + extraSpaceBelowSuperscript;
+    subscript.boundingBox.top =
+      superscript.boundingBox.height + extraSpaceBelowSuperscript +
+      operator.boundingBox.height + extraSpaceBelowOperator;
+    this.boundingBox.height =
+      superscript.boundingBox.height + operator.boundingBox.height + subscript.boundingBox.height +
+      extraSpaceBelowOperator + extraSpaceBelowSuperscript;
+    this.boundingBox.width = Math.max(superscript.boundingBox.width, operator.boundingBox.width, subscript.boundingBox.width);
+    this.boundingBox.fractionLineHeight = superscript.boundingBox.height + extraSpaceBelowSuperscript + operator.boundingBox.fractionLineHeight;
+    superscript.boundingBox.width = this.boundingBox.width;
+    subscript.boundingBox.width = this.boundingBox.width;
+    operator.boundingBox.width = this.boundingBox.width;
+    superscript.computeBoundingBoxLeftSingleChild();
+    operator.computeBoundingBoxLeftSingleChild();
+    subscript.computeBoundingBoxLeftSingleChild();
+  }
+
   containsFractionLineRecursive() {
     if (this.type.type === knownTypes.fraction.type) {
       return true;
@@ -2173,6 +2248,14 @@ class MathNode {
       this.computeDimensionsFraction();
       return;
     }
+    if (this.type.type === knownTypes.operatorWithSuperAndSubscript.type) {
+      this.computeDimensionsOperatorWithSuperAndSubscript();
+      return;
+    }
+    if (this.type.type === knownTypes.operatorStandalone.type) {
+      this.computeDimensionsOperatorStandalone();
+      return;
+    }
     if (this.type.type === knownTypes.numerator.type) {
       this.computeDimensionsNumerator();
     }
@@ -2386,6 +2469,9 @@ class MathNode {
         return true;
       case "s":
         this.makeSqrt();
+        return true;
+      case "S":
+        this.makeSum();
         return true;
       case "Delete":
         return this.deleteButton();
@@ -3341,6 +3427,29 @@ class MathNode {
     } else {
       this.makeSqrtFromCaret(splitBySelection);
     }
+  }
+
+  makeSum() {
+    this.makeOperatorWithSuperscriptAndSubscript(latexConstants.latexBackslashAtomsEditable["Sigma"]);
+  }
+
+  makeOperatorWithSuperscriptAndSubscript(
+    /** @type{string} */
+    operator,
+  ) {
+    let parent = this.parent;
+    let oldIndex = this.indexInParent;
+    let split = this.splitByCaret();
+    let operatorNode = mathNodeFactory.operatorWithSuperAndSubscript(this.equationEditor, operator);
+    if (split[0] === null) {
+      parent.replaceChildAtPosition(oldIndex, operatorNode);
+    } else {
+      parent.replaceChildAtPosition(oldIndex, split[0]);
+      parent.insertChildAtPosition(oldIndex + 1, operatorNode);
+    }
+    parent.ensureEditableAtoms();
+    parent.updateDOM();
+    operatorNode.focus(1);
   }
 
   makeSqrtFromSelection(

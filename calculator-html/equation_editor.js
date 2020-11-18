@@ -724,6 +724,9 @@ class LaTeXConstants {
       "arctan": "arctan",
       "arccos": "arccos",
       "arcsin": "arcsin",
+      "in": "\u2208",
+      "cap": "\u2229",
+      "cup": "\u222A",
     }
     /**@type{Object.<string, string>} */
     this.latexBackslashAtomsEditable = {
@@ -1559,6 +1562,10 @@ class BoundingBox {
     this.width = 0;
     this.height = 0;
     this.fractionLineHeight = 0;
+    // In a^b the following measures the width of b. 
+    this.superScriptWidth = 0;
+    // In a_b the following measures the width of b. 
+    this.subScriptWidth = 0;
     this.stretchFactor = 1;
     this.transform = "";
     this.transformOrigin = "";
@@ -1935,8 +1942,30 @@ class MathNode {
       base.boundingBox.top = 0;
     }
     base.boundingBox.left = 0;
-    this.boundingBox.width = base.boundingBox.width + exponent.boundingBox.width;
-    exponent.boundingBox.left = base.boundingBox.width;
+    let baseWithSubscript = null;
+    if (base.type.type === knownTypes.horizontalMath.type) {
+      if (base.children.length === 1) {
+        if (base.children[0].type.type === knownTypes.baseWithSubscript.type) {
+          baseWithSubscript = base.children[0];
+        }
+      }
+    }
+    if (baseWithSubscript === null) {
+      this.boundingBox.width = base.boundingBox.width + exponent.boundingBox.width;
+      this.boundingBox.superScriptWidth = exponent.boundingBox.width;
+      exponent.boundingBox.left = base.boundingBox.width;
+    } else {
+      this.boundingBox.width = Math.max(
+        baseWithSubscript.boundingBox.width +
+        exponent.boundingBox.width -
+        baseWithSubscript.boundingBox.subScriptWidth,
+        baseWithSubscript.boundingBox.width,
+      );
+      this.boundingBox.superScriptWidth = 0;
+      this.boundingBox.subScriptWidth = 0;
+      exponent.boundingBox.left = base.boundingBox.width - baseWithSubscript.boundingBox.subScriptWidth;
+
+    }
     this.boundingBox.fractionLineHeight = base.boundingBox.top + base.boundingBox.fractionLineHeight;
   }
 
@@ -1952,10 +1981,31 @@ class MathNode {
     if (subscript.boundingBox.height > this.boundingBox.height) {
       this.boundingBox.height = subscript.boundingBox.height;
     }
+    let baseWithExponent = null;
+    if (base.type.type === knownTypes.horizontalMath.type) {
+      if (base.children.length === 1) {
+        if (base.children[0].type.type === knownTypes.baseWithExponent.type) {
+          baseWithExponent = base.children[0];
+        }
+      }
+    }
     base.boundingBox.left = 0;
     this.boundingBox.width = base.boundingBox.width + subscript.boundingBox.width;
-    subscript.boundingBox.left = base.boundingBox.width;
     subscript.boundingBox.top = base.boundingBox.height * (1 - overlapRatio);
+    if (baseWithExponent === null) {
+      subscript.boundingBox.left = base.boundingBox.width;
+      this.boundingBox.subScriptWidth = subscript.boundingBox.width;
+    } else {
+      subscript.boundingBox.left = base.boundingBox.width - baseWithExponent.boundingBox.superScriptWidth;
+      this.boundingBox.superScriptWidth = 0;
+      this.boundingBox.subScriptWidth = 0;
+      this.boundingBox.width = Math.max(
+        baseWithExponent.boundingBox.width +
+        subscript.boundingBox.width -
+        baseWithExponent.boundingBox.superScriptWidth,
+        baseWithExponent.boundingBox.width,
+      );
+    }
     this.boundingBox.fractionLineHeight = base.boundingBox.fractionLineHeight;
   }
 
@@ -4063,6 +4113,10 @@ class MathNode {
     return `{${this.children[0].toLatex()}}^{${this.children[1].toLatex()}}`;
   }
 
+  toLatexBaseWithSubscript() {
+    return `{${this.children[0].toLatex()}}_{${this.children[1].toLatex()}}`;
+  }
+
   toLatexLeftDelimiter() {
     if (this.element === null) {
       return "[null(]";
@@ -4129,6 +4183,9 @@ class MathNode {
     }
     if (this.type.type === knownTypes.baseWithExponent.type) {
       return this.toLatexBaseWithExponent();
+    }
+    if (this.type.type === knownTypes.baseWithSubscript.type) {
+      return this.toLatexBaseWithSubscript();
     }
     if (this.type.type === knownTypes.matrix.type) {
       return this.toLatexMatrix();

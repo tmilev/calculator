@@ -219,8 +219,8 @@ const knownTypes = {
   }),
   subscript: new MathNodeType({
     "type": "subscript",
-    "fontSize": 0.55,
-    "minHeightScale": 0.55,
+    "fontSize": 0.67,
+    "minHeightScale": 0.67,
   }),
   sqrt: new MathNodeType({
     "type": "sqrt",
@@ -4458,7 +4458,7 @@ function typeset(
   style,
 ) {
   if (style === "") {
-    style = "vertical-align:text-bottom; font-family: 'Times New Roman', Times, serif; display:inline-block; margin-bottom:-0.05em";
+    style = "vertical-align:text-bottom; font-family: 'Georgia', Times, serif; display:inline-block; margin-bottom:-0.05em";
   }
   new MathTagCoverter(style).typeset(toBeModified);
 }

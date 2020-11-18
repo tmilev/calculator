@@ -380,7 +380,7 @@ Calculator.prototype.afterWriteOutput = function () {
   this.addListenersToInputBoxes();
   typeset.typesetter.typesetSoft(
     ids.domElements.spanCalculatorMainOutput,
-    "font-size: 20px; font-family: 'Times New Roman', Times, serif; display:inline-block;",
+    "font-size: 20px; font-family:Georgia 'Times New Roman', Times, serif; display:inline-block;",
   );
 }
 

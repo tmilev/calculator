@@ -695,6 +695,7 @@ class LaTeXConstants {
       "{": "{",
       "}": "}",
       "^": "^",
+      "_": "_",
       "(": "(",
       ")": ")",
       "\\": "\\",
@@ -1137,7 +1138,13 @@ class LaTeXParser {
       let horizontal = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [leftParentheses, secondToLast.node, rightParentheses]);
       return this.replaceParsingStackTop(horizontal, "", - 3);
     }
+    if (last.isExpression() && secondToLast.syntacticRole === "_" && thirdToLast.isExpression()) {
+      this.lastRuleName = "make subscript";
+      let node = mathNodeFactory.baseWithSubscript(this.equationEditor, thirdToLast.node, last.node);
+      return this.replaceParsingStackTop(node, "", - 3);
+    }
     if (thirdToLast.isExpression() && secondToLast.syntacticRole === "^" && last.isExpression()) {
+      this.lastRuleName = "make exponent";
       let node = mathNodeFactory.baseWithExponent(this.equationEditor, thirdToLast.node, last.node);
       return this.replaceParsingStackTop(node, "", - 3);
     }
@@ -1158,7 +1165,7 @@ class LaTeXParser {
       let node = mathNodeFactory.atom(this.equationEditor, last.content);
       return this.replaceParsingStackTop(node, "", - 1);
     }
-    if (thirdToLast.isExpression() && secondToLast.isExpression() && last.syntacticRole !== "^") {
+    if (thirdToLast.isExpression() && secondToLast.isExpression() && last.syntacticRole !== "^" && last.syntacticRole !== "_") {
       // Absorb atom / immutable atom to preceding horizontal math.
       if (thirdToLast.node.type.type === knownTypes.horizontalMath.type) {
         this.lastRuleName = "merge node into horizontal math";
@@ -3651,6 +3658,18 @@ class MathNode {
     return true;
   }
 
+  /** @returns{boolean} */
+  hasExponentOrSubscriptParent() {
+    if (this.parent === null) {
+      return false;
+    }
+    if (this.indexInParent !== 0) {
+      return false;
+    }
+    let type = this.parent.type.type;
+    return type === knownTypes.baseWithExponent.type || type === knownTypes.baseWithSubscript.type;
+  }
+
   ensureEditableAtoms() {
     if (this.type.type !== knownTypes.horizontalMath.type) {
       console.log("Warning: call ensureEditableAtomToTheRight on non-horizontal math. ");
@@ -3660,25 +3679,24 @@ class MathNode {
     if (this.children.length === 0) {
       correctedChildren.push(mathNodeFactory.atom(this.equationEditor, ""));
     } else if (!this.children[0].isAtomEditable()) {
-      correctedChildren.push(mathNodeFactory.atom(this.equationEditor, ""));
+      if (!this.hasExponentOrSubscriptParent()) {
+        correctedChildren.push(mathNodeFactory.atom(this.equationEditor, ""));
+      }
     }
-    for (let i = 0; i < this.children.length; i++) {
+    for (let i = 0; i < this.children.length - 1; i++) {
       let child = this.children[i];
-      let next = null;
-      if (i + 1 < this.children.length) {
-        next = this.children[i + 1];
-      }
+      let next = this.children[i + 1];
       correctedChildren.push(child);
-      if (!child.isAtomEditable()) {
-        if (next === null) {
-          correctedChildren.push(mathNodeFactory.atom(this.equationEditor, ""));
-        } else if (!next.isAtomEditable()) {
-          correctedChildren.push(mathNodeFactory.atom(this.equationEditor, ""));
-        }
+      if (!child.isAtomEditable() && !next.isAtomEditable()) {
+        correctedChildren.push(mathNodeFactory.atom(this.equationEditor, ""));
       }
     }
+    correctedChildren.push(this.children[this.children.length - 1]);
+    // Editable atom not inserted in the end if the parent is exponent or subscript.
     if (!correctedChildren[correctedChildren.length - 1].isAtomEditable()) {
-      correctedChildren.push(mathNodeFactory.atom(this.equationEditor, ""));
+      if (!this.hasExponentOrSubscriptParent()) {
+        correctedChildren.push(mathNodeFactory.atom(this.equationEditor, ""));
+      }
     }
     if (correctedChildren.length > this.children.length) {
       this.replaceChildRangeWithChildren(0, this.children.length, correctedChildren);

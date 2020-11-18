@@ -1589,16 +1589,16 @@ class EquationEditor {
 
 class SplitBySelectionResult {
   constructor(
-    /**@type{MathNode} */
+    /** @type{MathNode} */
     ancestor,
   ) {
-    /**@type{MathNode[]} */
+    /** @type{MathNode[]} */
     this.beforeSplit = [];
-    /**@type{MathNode[]} */
+    /** @type{MathNode[]} */
     this.afterSplit = [];
-    /**@type{MathNode[]} */
+    /** @type{MathNode[]} */
     this.split = [];
-    /**@type{MathNode} */
+    /** @type{MathNode} */
     this.ancestor = ancestor;
   }
 }
@@ -1807,7 +1807,8 @@ class MathNode {
 
   /** @returns {number} 
    * Returns the length of the content of an atom.
-   * Returns -1 if the element is not an atom. */
+   * Returns -1 if the element is not an atom. 
+   */
   lengthContentIfAtom() {
     if (!this.isAtomEditable()) {
       return - 1;
@@ -3134,6 +3135,37 @@ class MathNode {
   }
 
   /** @returns {boolean} whether reduction ocurred. */
+  applyBackspaceToTheRightOfOperatorWithSuperAndSubscript() {
+    if (this.type.type !== knownTypes.operatorWithSuperAndSubscript.type) {
+      return false;
+    }
+    this.children[2].focus(1);
+    return true;
+  }
+
+  /** @returns {boolean} whether reduction ocurred. */
+  applyBackspaceToTheLeftEndOfOperatorSubscript() {
+    if (
+      this.type.type !== knownTypes.operatorSubscript.type &&
+      this.type.type !== knownTypes.operatorSuperscript.type
+    ) {
+      return false;
+    }
+    let operatorWithSuperAndSubscript = this.parent;
+    let superscript = operatorWithSuperAndSubscript.children[0];
+    let subscript = operatorWithSuperAndSubscript.children[2];
+    let horizontal = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [superscript.children[0], subscript.children[0]]);
+    horizontal.normalizeHorizontalMath();
+    let parent = operatorWithSuperAndSubscript.parent;
+    let indexOperator = operatorWithSuperAndSubscript.indexInParent;
+    parent.replaceChildAtPosition(indexOperator, horizontal);
+    parent.normalizeHorizontalMath();
+    parent.updateDOM();
+    parent.focusRestore();
+    return true;
+  }
+
+  /** @returns {boolean} whether reduction ocurred. */
   applyBackspaceToTheLeftOfExponent() {
     if (this.type.type !== knownTypes.exponent.type) {
       return false;
@@ -3249,6 +3281,9 @@ class MathNode {
     if (this.applyBackspaceToTheLeftOfSqrtSign()) {
       return true;
     }
+    if (this.applyBackspaceToTheLeftEndOfOperatorSubscript()) {
+      return true;
+    }
     if (this.indexInParent === 0) {
       return this.parent.applyBackspaceToTheLeft();
     }
@@ -3314,6 +3349,9 @@ class MathNode {
       return true;
     }
     if (this.applyBackspaceToTheRightFraction()) {
+      return true;
+    }
+    if (this.applyBackspaceToTheRightOfOperatorWithSuperAndSubscript()) {
       return true;
     }
     if (this.applyBackspaceToTheRightMatrix()) {
@@ -3445,7 +3483,11 @@ class MathNode {
       parent.replaceChildAtPosition(oldIndex, operatorNode);
     } else {
       parent.replaceChildAtPosition(oldIndex, split[0]);
-      parent.insertChildAtPosition(oldIndex + 1, operatorNode);
+      oldIndex++;
+      parent.insertChildAtPosition(oldIndex, operatorNode);
+    }
+    if (split[1] !== null) {
+      parent.insertChildAtPosition(oldIndex + 1, split[1]);
     }
     parent.ensureEditableAtoms();
     parent.updateDOM();

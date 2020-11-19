@@ -1630,6 +1630,6 @@ table.tableBorderStandard, table.tableBorderStandard td{
 }
 
 div.mathcalculator{
-  font-family:Georgia, 'Times New Roman', Times, serif;
+  font-family:'Times New Roman';
   display: inline-block;
 }

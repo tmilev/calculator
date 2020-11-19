@@ -257,8 +257,8 @@ const knownTypes = {
   }),
   operatorStandalone: new MathNodeType({
     "type": "operatorStandalone",
-    "fontSize": 1.5,
-    "minHeightScale": 1.5,
+    "fontSize": 1.8,
+    "minHeightScale": 1.8,
   }),
   operatorSubscript: new MathNodeType({
     "type": "operatorSubscript",
@@ -2184,13 +2184,15 @@ class MathNode {
     this.element.style.top = "";
     this.element.style.left = "";
     this.computeDimensionsAtomic();
+    let translationDown = 0;
     if (heightToEnclose !== 0) {
-      heightToEnclose *= 1.3;
+      translationDown = heightToEnclose * 0.022;
+      heightToEnclose *= 1.28;
       this.boundingBox.stretchFactor = heightToEnclose / this.boundingBox.height;
       this.boundingBox.height = heightToEnclose;
     }
     this.boundingBox.transformOrigin = "top left";
-    this.boundingBox.transform = `matrix(1,0,0,${this.boundingBox.stretchFactor}, 0, 0)`;
+    this.boundingBox.transform = `matrix(1,0,0,${this.boundingBox.stretchFactor}, 0, ${translationDown})`;
   }
 
   computeDimensionsSqrt() {
@@ -4649,7 +4651,7 @@ function typeset(
   style,
 ) {
   if (style === "") {
-    style = "vertical-align:text-bottom; font-family: 'Georgia', Times, serif; display:inline-block; margin-bottom:-0.05em";
+    style = "vertical-align:text-bottom; font-family:'Times New Roman'; display:inline-block; margin-bottom:-0.05em";
   }
   new MathTagCoverter(style).typeset(toBeModified);
 }

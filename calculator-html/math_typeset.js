@@ -3,7 +3,7 @@ const mathjaxSetup = require("./mathjax-calculator-setup");
 
 class TypeSetter {
   constructor() {
-    this.defaultStyle = "vertical-align:text-bottom; font-family: 'Georgia', Times, serif; display:inline-block; margin-bottom:-0.05em";
+    this.defaultStyle = "vertical-align:text-bottom; font-family:'Times New Roman'; display:inline-block; margin-bottom:-0.05em";
   }
 
   useBuiltInTypeSet() {

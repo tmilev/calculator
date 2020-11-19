@@ -2246,7 +2246,7 @@ class MathNode {
     underTheRadical.boundingBox.left = sqrtSign.boundingBox.left + sqrtSign.boundingBox.width * widthSqrtSign;
     this.boundingBox = new BoundingBox();
     this.boundingBox.height = underTheRadical.boundingBox.height * 1.15;
-    this.boundingBox.fractionLineHeight = underTheRadical.boundingBox.fractionLineHeight;
+    this.boundingBox.fractionLineHeight = underTheRadical.boundingBox.fractionLineHeight + 2.2;
     this.boundingBox.width = underTheRadical.boundingBox.left + underTheRadical.boundingBox.width;
   }
 
@@ -2292,7 +2292,9 @@ class MathNode {
 
   computeDimensionsRadicalUnderBox() {
     this.computeDimensionsStandard();
-    this.boundingBox.height = this.children[0].boundingBox.height + 1;
+    let child = this.children[0];
+    this.boundingBox.height = child.boundingBox.height + 1;
+    this.boundingBox.fractionLineHeight = child.boundingBox.fractionLineHeight + 1;
   }
 
   computeDimensions() {
@@ -3236,6 +3238,15 @@ class MathNode {
   }
 
   /** @returns {boolean} whether reduction ocurred. */
+  applyBackspaceToTheRightSqrt() {
+    if (this.type.type !== knownTypes.sqrt.type) {
+      return false;
+    }
+    this.children[2].focus(1);
+    return true;
+  }
+
+  /** @returns {boolean} whether reduction ocurred. */
   applyBackspaceToTheLeftEndOfOperatorSubscript() {
     if (
       this.type.type !== knownTypes.operatorSubscript.type &&
@@ -3447,6 +3458,9 @@ class MathNode {
       return true;
     }
     if (this.applyBackspaceToTheRightMatrix()) {
+      return true;
+    }
+    if (this.applyBackspaceToTheRightSqrt()) {
       return true;
     }
     if (this.applyBackspaceToTheRightBaseWithExponent()) {

@@ -545,7 +545,21 @@ class MathNodeFactory {
     let result = new MathNode(equationEditor, knownTypes.operatorWithSuperAndSubscript);
     let superscriptNode = new MathNode(equationEditor, knownTypes.operatorSuperscript);
     let subscriptNode = new MathNode(equationEditor, knownTypes.operatorSubscript);
+    let subscriptScales = {
+      "lim": 0.8,
+    };
+    if (operator in subscriptScales) {
+      subscriptNode.type.fontSize = subscriptScales[operator];
+      subscriptNode.type.minHeightScale = subscriptScales[operator];
+    }
     let operatorNode = new MathNode(equationEditor, knownTypes.operatorStandalone);
+    let operatorScales = {
+      "lim": 1,
+    };
+    if (operator in operatorScales) {
+      operatorNode.type.fontSize = operatorScales[operator];
+      operatorNode.type.minHeightScale = operatorScales[operator];
+    }
     superscriptNode.appendChild(this.horizontalMath(equationEditor, superscript));
     subscriptNode.appendChild(this.horizontalMath(equationEditor, subscript));
     operatorNode.appendChild(this.atomImmutable(equationEditor, operator));
@@ -717,6 +731,8 @@ class LaTeXConstants {
       "\u2264": "0.3em",
       // \geq
       "\u2265": "0.3em",
+      // Latex to (right arrow).
+      "\u2192": "0.3em",
       ">": "0.3em",
       "<": "0.3em",
     }
@@ -725,6 +741,8 @@ class LaTeXConstants {
       // Full-widgth plus sign, wider and taller plus sign.
       "\uFF0B": "+",
       "+": "+",
+      // \pm
+      "\u00B1": "\u00B1",
       // Mathematical minus, a wider dash.
       "\u2212": "\u2212",
       "-": "\u2212",
@@ -750,6 +768,7 @@ class LaTeXConstants {
       "begin": "\\begin",
       "end": "\\end",
       "frac": "\\frac",
+      "mathcal": "\\mathcal",
     };
     /**@type{Object.<string, string>} */
     this.latexBackslashOperators = {
@@ -759,6 +778,8 @@ class LaTeXConstants {
       "leq": "\u2264",
       "lt": "<",
       "gt": ">",
+      "to": "\u2192",
+      "pm": "\u00B1",
       "geq": "\u2265",
       "sin": "sin",
       "cos": "cos",
@@ -779,6 +800,7 @@ class LaTeXConstants {
     this.operatorWithSuperAndSubscript = {
       "sum": "\u03A3",
       "int": "\u222B",
+      "lim": "lim",
     };
     /**@type{Object.<string, string>} */
     this.latexBackslashAtomsEditable = {
@@ -833,12 +855,36 @@ class LaTeXConstants {
       "Chi": "\u03A7",
       "Psi": "\u03A8",
       "Omega": "\u03A9",
+      "infty": "\u221E",
+      "S": "\u00A7",
+    };
+    this.mathcalEquivalents = {
+      "A": "\uD835\uDC9C",
+      "C": "\uD835\uDC9E",
+      "D": "\uD835\uDC9F",
+      "G": "\uD835\uDCA2",
+      "J": "\uD835\uDCA5",
+      "K": "\uD835\uDCA6",
+      "L": "\u2112",
+      "N": "\uD835\uDCA9",
+      "O": "\uD835\uDCAA",
+      "P": "\uD835\uDCAB",
+      "Q": "\uD835\uDCAC",
+      "S": "\uD835\uDCAE",
+      "T": "\uD835\uDCAF",
+      "U": "\uD835\uDCB0",
+      "V": "\uD835\uDCB1",
+      "W": "\uD835\uDCB2",
+      "X": "\uD835\uDCB3",
+      "Y": "\uD835\uDCB4",
+      "Z": "\uD835\uDCB5",
     };
     this.latexCommandsIgnored = {
       "left": true,
       "right": true,
       "displaystyle": true,
       "text": true,
+      "limits": true,
     };
     this.beginEndEnvironments = {
       "pmatrix": "pmatrix",
@@ -1073,12 +1119,14 @@ class LaTeXParser {
     }
     let secondToLast = this.parsingStack[this.parsingStack.length - 2];
     if (last.syntacticRole === "\\" && secondToLast.syntacticRole === "\\") {
+      this.lastRuleName = "double backslash";
       return this.replaceParsingStackTop(null, "\\\\", - 2);
     }
     let thirdToLast = this.parsingStack[this.parsingStack.length - 3];
     let fourthToLast = this.parsingStack[this.parsingStack.length - 4];
     if (secondToLast.syntacticRole === "{" && last.isExpression()) {
       if (last.node.type.type !== knownTypes.horizontalMath.type) {
+        this.lastRuleName = "horizontal math after curly brace";
         let node = mathNodeFactory.horizontalMath(this.equationEditor, last.node);
         return this.replaceParsingStackTop(node, "", - 1);
       }
@@ -1094,6 +1142,27 @@ class LaTeXParser {
     if (secondToLast.syntacticRole === "\\" && last.content in latexConstants.latexBackslashCommands) {
       this.lastRuleName = "latex command";
       return this.replaceParsingStackTop(null, latexConstants.latexBackslashCommands[last.content], - 2);
+    }
+    if (secondToLast.syntacticRole === "\\mathcal") {
+      if (latexConstants.isLatinCharacter(last.content)) {
+        if (last.content in latexConstants.mathcalEquivalents) {
+          this.lastRuleName = "mathcal font";
+          let node = mathNodeFactory.atom(this.equationEditor, latexConstants.mathcalEquivalents[last.content]);
+          return this.replaceParsingStackTop(node, "", -2);
+        }
+      } else if (last.isExpression() && last.node.type.type === knownTypes.horizontalMath.type) {
+        if (last.node.children.length === 1) {
+          let contentIfAtom = last.node.children[0].contentIfAtom();
+          if (contentIfAtom in latexConstants.mathcalEquivalents) {
+            this.lastRuleName = "mathcal font horizontal math";
+            let node = mathNodeFactory.atom(this.equationEditor, latexConstants.mathcalEquivalents[contentIfAtom]);
+            return this.replaceParsingStackTop(node, "", -2);
+          }
+        }
+      }
+    }
+    if (last.content in latexConstants.latexCommandsIgnored && secondToLast.syntacticRole === "\\") {
+      return this.decreaseParsingStack(2);
     }
     if (secondToLast.syntacticRole === "\\" && last.content in latexConstants.operatorWithSuperAndSubscript) {
       this.lastRuleName = "operator with superscript and subscript";
@@ -1125,7 +1194,13 @@ class LaTeXParser {
       let node = mathNodeFactory.operatorWithSuperAndSubscript(this.equationEditor, fifthToLast.content, last.node, thirdToLast.node);
       return this.replaceParsingStackTop(node, "", - 5);
     }
-    if (secondToLast.syntacticRole === "operatorWithSuperAndSubscript" && last.syntacticRole !== "^" && last.syntacticRole != "_") {
+    if (
+      secondToLast.syntacticRole === "operatorWithSuperAndSubscript" &&
+      last.syntacticRole !== "^" &&
+      last.syntacticRole != "_" &&
+      last.syntacticRole !== "\\"
+    ) {
+      this.lastRuleName = "operator standalone";
       let node = mathNodeFactory.operatorWithSuperAndSubscript(this.equationEditor, secondToLast.content, null, null);
       return this.replaceParsingStackRange(node, "", - 2, - 2);
     }
@@ -1135,6 +1210,7 @@ class LaTeXParser {
       secondToLast.isExpression() &&
       last.syntacticRole !== "_"
     ) {
+      this.lastRuleName = "operator with superscript only";
       let node = mathNodeFactory.operatorWithSuperAndSubscript(this.equationEditor, fourthToLast.content, secondToLast.node, null);
       return this.replaceParsingStackRange(node, "", - 4, - 2);
     }
@@ -1144,6 +1220,7 @@ class LaTeXParser {
       secondToLast.isExpression() &&
       last.syntacticRole !== "^"
     ) {
+      this.lastRuleName = "operator with subscript only";
       let node = mathNodeFactory.operatorWithSuperAndSubscript(this.equationEditor, fourthToLast.content, null, secondToLast.node);
       return this.replaceParsingStackRange(node, "", - 4, - 2);
     }
@@ -1225,9 +1302,6 @@ class LaTeXParser {
       // Mark the matrix as a regular expression.
       secondToLast.syntacticRole = "";
       return this.decreaseParsingStack(1);
-    }
-    if (last.content in latexConstants.latexCommandsIgnored && secondToLast.syntacticRole === "\\") {
-      return this.decreaseParsingStack(2);
     }
     if (secondToLast.syntacticRole === "\\sqrt" && last.syntacticRole === "") {
       let node = mathNodeFactory.sqrt(this.equationEditor, last.node);
@@ -2011,9 +2085,23 @@ class MathNode {
       // integral
       "\u222B": 0.03,
     };
-    let proportionShiftUp = operatorSuperAndSubscriptShifts[child.initialContent];
+    let operatorScales = {
+      // sum
+      "\u03A3": 2,
+      // integral
+      "\u222B": 2,
+    };
+    let proportionShiftUp = 0.1;
+    let operatorName = child.initialContent;
+    if (operatorName in operatorSuperAndSubscriptShifts) {
+      proportionShiftUp = operatorSuperAndSubscriptShifts[operatorName];
+    }
+    let operatorScale = 1;
+    if (operatorName in operatorScales) {
+      operatorScale = operatorScales[operatorName];
+    }
     child.boundingBox.top = - child.boundingBox.height * proportionShiftUp;
-    this.boundingBox.height = child.boundingBox.height * (1 - proportionShiftUp * 2);
+    this.boundingBox.height = child.boundingBox.height * (1 - proportionShiftUp * operatorScale);
     this.boundingBox.width = child.boundingBox.width;
     this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
   }
@@ -3509,24 +3597,33 @@ class MathNode {
     /** @type {string} */
     key,
   ) {
+    let split = this.splitByCaretEmptyAtoms();
+    this.makeHorizontalOperatorFromSplit(key, split);
+  }
+
+  makeHorizontalOperatorFromSplit(
+    /** @type {string} */
+    key,
+    /** @type {MathNode[]} */
+    split,
+  ) {
     // Find closest ancestor node that's of type horizontal math.
     if (!this.hasHorizintalMathParent()) {
       console.log("Warning: horizontal operator made on element not contained in horizontal math.");
       return;
     }
     let parent = this.parent;
-    let split = this.splitByCaretEmptyAtoms();
-    split[1].desiredCaretPosition = 0;
+    let operator = mathNodeFactory.atomImmutable(this.equationEditor, key);
     parent.replaceChildAtPositionWithChildren(
       this.indexInParent, [
       split[0],
-      mathNodeFactory.atomImmutable(this.equationEditor, key),
+      operator,
       split[1],
     ]);
     parent.normalizeHorizontalMath();
     parent.ensureEditableAtoms();
     parent.updateDOM();
-    parent.focusRestore();
+    operator.focus(1);
   }
 
   makeParenthesesLeft() {
@@ -4004,8 +4101,10 @@ class MathNode {
       "sqrt": "",
       "pmatrix": "",
       "matrix": "",
+      "to": latexConstants.latexBackslashOperators["to"],
+      "leq": latexConstants.latexBackslashOperators["leq"],
+      "geq": latexConstants.latexBackslashOperators["geq"],
     };
-    console.log("DEBUG: backslash sequence so far: " + this.equationEditor.backslashSequence);
     if (!this.equationEditor.backslashSequence in distinguishedSequences) {
       return false;
     }
@@ -4020,6 +4119,10 @@ class MathNode {
     }
     if (this.equationEditor.backslashSequence === "sqrt") {
       this.makseSqrtFromSplit(split);
+      return true;
+    }
+    if (this.equationEditor.backslashSequence in latexConstants.latexBackslashOperators) {
+      this.makeHorizontalOperatorFromSplit(latexConstants.latexBackslashOperators[this.equationEditor.backslashSequence], split);
       return true;
     }
     if (

@@ -2608,11 +2608,14 @@ class MathNode {
       this.equationEditor.backslashSequenceStarted = true;
       this.equationEditor.backslashSequence = "";
       this.equationEditor.backslashPosition = this.positionCaretBeforeKeyEvents;
+    } else if (key === " " && this.equationEditor.backslashSequenceStarted) {
+      this.equationEditor.backslashSequenceStarted = false;
+      return this.makeBackslashSequence();
     } else if (!latexConstants.isLatinCharacter(key)) {
       this.equationEditor.backslashSequenceStarted = false;
     } else if (this.equationEditor.backslashSequenceStarted) {
       this.equationEditor.backslashSequence += key;
-      return this.makeBackslashSequence();
+      return false;
     }
     switch (key) {
       case "/":
@@ -4095,26 +4098,18 @@ class MathNode {
 
   /** @returns {boolean} whether the default should be prevented. */
   makeBackslashSequence() {
-    let distinguishedSequences = {
-      "sum": latexConstants.operatorWithSuperAndSubscript["sum"],
-      "int": latexConstants.operatorWithSuperAndSubscript["int"],
-      "sqrt": "",
-      "pmatrix": "",
-      "matrix": "",
-      "to": latexConstants.latexBackslashOperators["to"],
-      "leq": latexConstants.latexBackslashOperators["leq"],
-      "geq": latexConstants.latexBackslashOperators["geq"],
-    };
-    if (!this.equationEditor.backslashSequence in distinguishedSequences) {
-      return false;
-    }
     let split = this.splitByPositionChopOffCharacters(
       this.equationEditor.backslashPosition,
-      this.equationEditor.backslashSequence.length,
+      this.equationEditor.backslashSequence.length + 1,
     );
     if (this.equationEditor.backslashSequence in latexConstants.operatorWithSuperAndSubscript) {
       let command = latexConstants.operatorWithSuperAndSubscript[this.equationEditor.backslashSequence];
       this.makeOperatorWithSuperscriptAndSubscriptFromSplit(command, split);
+      return true;
+    }
+    if (this.equationEditor.backslashSequence in latexConstants.latexBackslashOperators) {
+      let operator = latexConstants.latexBackslashOperators[this.equationEditor.backslashSequence];
+      this.makeHorizontalOperatorFromSplit(operator, split);
       return true;
     }
     if (this.equationEditor.backslashSequence === "sqrt") {

@@ -1084,6 +1084,7 @@ class LaTeXParser {
       }
     }
     if (thirdToLast.syntacticRole === "{" && secondToLast.isExpression() && last.syntacticRole === "}") {
+      this.lastRuleName = "remove curly braces";
       let node = secondToLast.node;
       if (node.type.type !== knownTypes.horizontalMath.type) {
         node = mathNodeFactory.horizontalMath(this.equationEditor, node);
@@ -1109,6 +1110,7 @@ class LaTeXParser {
       secondToLast.syntacticRole === "_" &&
       last.isExpression()
     ) {
+      this.lastRuleName = "operatorWithSuperAndSubscript combines with super and subscript.";
       let node = mathNodeFactory.operatorWithSuperAndSubscript(this.equationEditor, fifthToLast.content, thirdToLast.node, last.node);
       return this.replaceParsingStackTop(node, "", - 5);
     }
@@ -1119,6 +1121,7 @@ class LaTeXParser {
       secondToLast.syntacticRole === "^" &&
       last.isExpression()
     ) {
+      this.lastRuleName = "operatorWithSuperAndSubscript combines with sub and superscript.";
       let node = mathNodeFactory.operatorWithSuperAndSubscript(this.equationEditor, fifthToLast.content, last.node, thirdToLast.node);
       return this.replaceParsingStackTop(node, "", - 5);
     }
@@ -1275,12 +1278,8 @@ class LaTeXParser {
         this.lastRuleName = "merge node into horizontal math";
         thirdToLast.node.appendChild(secondToLast.node);
         return this.replaceParsingStackRange(thirdToLast.node, "", - 3, - 2);
-      }
-      if (
-        thirdToLast.node.isAtomic()
-        // && secondToLast.node.isAtomic()
-      ) {
-        this.lastRuleName = "merge atomic nodes into horizontal math";
+      } else {
+        this.lastRuleName = "merge expressions nodes into horizontal math";
         let node = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [thirdToLast.node, secondToLast.node]);
         return this.replaceParsingStackRange(node, "", - 3, - 2);
       }

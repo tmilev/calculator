@@ -2602,6 +2602,9 @@ class MathNode {
     /** @type{boolean} */
     shiftHeld,
   ) {
+    if (key === "Shift") {
+      return false;
+    }
     if (key === "\\" && !shiftHeld) {
       this.equationEditor.backslashSequenceStarted = true;
       this.equationEditor.backslashSequence = "";

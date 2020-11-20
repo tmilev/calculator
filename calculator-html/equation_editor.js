@@ -4693,7 +4693,24 @@ class MathNode {
 
   /** Ensures that a matrix has rows with equal number of columns. */
   normalizeMatrix() {
-    console.log("Not implemented yet");
+    let matrixTable = this.children[0].children[1];
+    let columnCount = 0;
+    let numberOfRows = matrixTable.children.length;
+    for (let i = 0; i < numberOfRows; i++) {
+      columnCount = Math.max(columnCount, matrixTable.children[i].children.length);
+    }
+    // Last empty row is ignored. Previous empty rows are preserved.
+    if (matrixTable.children[numberOfRows - 1].children.length === 0) {
+      numberOfRows--;
+      matrixTable.removeChild(numberOfRows);
+    }
+    // Expand rows to the colum count.
+    for (let i = 0; i < matrixTable.children.length; i++) {
+      let child = matrixTable.children[i];
+      for (let j = child.children.length; j < columnCount; j++) {
+        child.appendChild(mathNodeFactory.matrixRowEntry(this.equationEditor, null));
+      }
+    }
   }
 }
 

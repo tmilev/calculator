@@ -75,7 +75,7 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* theFormat) {
   theHtmlStream << "</table>";
   theTableLateXStream << "\\end{array}";
   if (this->getNumberOfGenerators() < 22) {
-    out << "<div class =\"math\">" << theTableLateXStream.str() << "</div>";
+    out << "<div class='mathcalculator'>" << theTableLateXStream.str() << "</div>";
     return out.str();
   }
   out << "<br><b> The Lie bracket table is too large to be rendered in LaTeX, displaying in "

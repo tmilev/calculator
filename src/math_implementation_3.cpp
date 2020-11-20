@@ -9097,7 +9097,7 @@ std::string QuasiPolynomial::toString(bool useHtml, bool useLatex, FormatExpress
       if (!useHtml) {
         out << "$\\begin{array}{rcl}&&";
       } else {
-        out << "<span class =\"math\">";
+        out << "<span class ='mathcalculator'>";
       }
     }
     out << this->valueOnEachLatticeShift[i].toString(thePolyFormat);

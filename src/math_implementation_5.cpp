@@ -1383,7 +1383,7 @@ void SlTwoInSlN::climbDownFromHighestWeightAlongSl2String(
 std::string SlTwoInSlN::ElementModuleIndexToString(int input, bool useHtml) {
   std::string beginMath, endMath, newLine;
   if (useHtml) {
-    beginMath = "<span class =\"math\">";
+    beginMath = "<span class ='mathcalculator'>";
     endMath = "</span>";
     newLine = "<br>";
   } else {
@@ -1442,7 +1442,7 @@ void SlTwoInSlN::getIsPlusKIndexingFrom(int input, int& s, int& k) {
 std::string SlTwoInSlN::elementMatrixToTensorString(const Matrix<Rational>& input, bool useHtml) {
   std::string beginMath, endMath, newLine;
   if (useHtml) {
-    beginMath = "<span class =\"math\">";
+    beginMath = "<span class ='mathcalculator'>";
     endMath = "</span>";
     newLine ="<br>";
   } else {
@@ -1547,7 +1547,7 @@ std::string SlTwoInSlN::GetNotationString(bool useHtml) {
   std::stringstream out;
   std::string beginMath, endMath, newLine;
   if (useHtml) {
-    beginMath = "<span class =\"math\">";
+    beginMath = "<span class ='mathcalculator'>";
     endMath = "</span>";
     newLine ="<br>";
   } else {
@@ -1586,7 +1586,7 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
   int currentOffset = 0;
   std::string beginMath, endMath, newLine;
   if (useHtml) {
-    beginMath = "<span class =\"math\">";
+    beginMath = "<span class ='mathcalculator'>";
     endMath = "</span>";
     newLine = "<br>";
   } else {
@@ -1684,7 +1684,7 @@ std::string SlTwoInSlN::pairTwoIndices(List<int>& output, int leftIndex, int rig
   latexFormat.flagUseLatex = true;
   latexFormat.flagUseHTML = false;
   if (useHtml) {
-    beginMath = "<span class =\"math\">";
+    beginMath = "<span class ='mathcalculator'>";
     endMath = "</span>";
     newLine = "<br>";
   } else {

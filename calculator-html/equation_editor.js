@@ -64,6 +64,8 @@ class MathNodeType {
     this.borderColor = input["borderColor"];
     this.borderBottom = input["borderBottom"];
     this.borderTop = input["borderTop"];
+    this.borderLeft = input["borderLeft"];
+    this.borderRight = input["borderRight"];
   }
 
   /**@return {MathNodeType} */
@@ -105,6 +107,8 @@ const knownTypeDefaults = {
   "borderColor": "",
   "borderBottom": "",
   "borderTop": "",
+  "borderLeft": "",
+  "borderRight": "",
 };
 
 class ArrowMotionTypes {
@@ -1371,7 +1375,7 @@ class LaTeXParser {
     }
     if (secondToLast.syntacticRole === "\\begin{array}" && last.isExpression()) {
       this.lastRuleName = "begin array to matrix builder";
-      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, last.node.textContentOrInitialContent());
+      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, last.node.toLatex());
       return this.replaceParsingStackTop(matrix, "matrixBuilder", - 2);
     }
     if (last.syntacticRole === "&" && secondToLast.isExpression() && thirdToLast.syntacticRole === "matrixBuilder") {
@@ -1396,6 +1400,7 @@ class LaTeXParser {
       thirdToLast.node.getLastMatrixRow().appendChild(incomingEntry);
       // Normalize the matrix: ensure all rows have same number of columns, no last empty row, etc.
       thirdToLast.node.normalizeMatrix();
+      thirdToLast.node.applyMatrixStyle();
       // Mark the matrix as a regular expression.
       thirdToLast.syntacticRole = "";
       return this.decreaseParsingStack(2);
@@ -1403,6 +1408,7 @@ class LaTeXParser {
     if (secondToLast.syntacticRole === "matrixBuilder" && last.isMatrixEnder()) {
       // Normalize the matrix: ensure all rows have same number of columns, no last empty row, etc.
       secondToLast.node.normalizeMatrix();
+      secondToLast.node.applyMatrixStyle();
       // Mark the matrix as a regular expression.
       secondToLast.syntacticRole = "";
       return this.decreaseParsingStack(1);
@@ -1964,6 +1970,12 @@ class MathNode {
     }
     if (this.type.borderTop !== "") {
       this.element.style.borderTop = this.type.borderTop;
+    }
+    if (this.type.borderLeft !== "") {
+      this.element.style.borderLeft = this.type.borderLeft;
+    }
+    if (this.type.borderRight !== "") {
+      this.element.style.borderRight = this.type.borderRight;
     }
     this.element.style.width = this.type.width;
     this.element.style.height = this.type.height;
@@ -4842,14 +4854,24 @@ class MathNode {
     return matrixTable.children[matrixTable.children.length - 1];
   }
 
-  /** Ensures that a matrix has rows with equal number of columns. */
-  normalizeMatrix() {
+  matrixColumnCount() {
+    if (this.type.type !== knownTypes.matrix) {
+      return - 1;
+    }
     let matrixTable = this.children[0].children[1];
     let columnCount = 0;
     let numberOfRows = matrixTable.children.length;
     for (let i = 0; i < numberOfRows; i++) {
       columnCount = Math.max(columnCount, matrixTable.children[i].children.length);
     }
+    return columnCount;
+  }
+
+  /** Ensures that a matrix has rows with equal number of columns. */
+  normalizeMatrix() {
+    let matrixTable = this.children[0].children[1];
+    let columnCount = this.matrixColumnCount();
+    let numberOfRows = matrixTable.children.length;
     // Last empty row is ignored. Previous empty rows are preserved.
     if (matrixTable.children[numberOfRows - 1].children.length === 0) {
       numberOfRows--;
@@ -4862,6 +4884,87 @@ class MathNode {
         child.appendChild(mathNodeFactory.matrixRowEntry(this.equationEditor, null));
       }
     }
+  }
+
+  applyMatrixStyle() {
+    if (this.type.type !== knownTypes.matrix.type) {
+      return;
+    }
+    let matrixTable = this.children[0].children[1];
+    // Expand rows to the colum count.
+    for (let i = 0; i < matrixTable.children.length; i++) {
+      let row = matrixTable.children[i];
+      row.applyMatrixStyleToRow(this.latexExtraStyle);
+    }
+
+  }
+
+  applyMatrixStyleToRow(
+    /** @type {string} */
+    style,
+  ) {
+    let styleIterator = new LatexColumnStyleIterator(style);
+    styleIterator.next();
+    for (let j = 0; j < this.children.length && styleIterator.isExhausted(); j++, styleIterator.next()) {
+      if (styleIterator.verticalBarRightCount > 0) {
+        // Logic to add right border can be insterted here
+      }
+      if (styleIterator.verticalBarLeftCount > 0) {
+        // Logic to add left border can be insterted here.
+      }
+    }
+  }
+}
+
+class LatexColumnStyleIterator {
+  constructor(/**@type{string} */ style) {
+    this.style = style;
+    this.nextStyleStartCharacter = 0;
+    this.currentColumnAlignment = "";
+    this.verticalBarRightCount = 0;
+    this.verticalBarLeftCount = 0;
+  }
+
+  next() {
+    this.currentColumnAlignment = "";
+    this.verticalBarRightCount = 0;
+    this.verticalBarLeftCount = 0;
+    for (let i = this.nextStyleStartCharacter; i < this.style.length; i++) {
+      let next = this.style[i];
+      if (next === "c" || next === "r" || next === "l") {
+        if (this.currentColumnAlignment !== "") {
+          return;
+        }
+        this.currentColumnAlignment = next;
+      }
+      this.nextStyleStartCharacter = i + 1;
+      if (next === "|") {
+        if (this.currentColumnAlignment === "") {
+          this.verticalBarLeftCount++;
+        } else {
+          this.verticalBarRightCount++
+        }
+      }
+    }
+  }
+
+  /** @returns {string} */
+  borderFromVerticalBarCount(
+    /**@type {number} */
+    verticalBars,
+  ) {
+    if (verticalBars <= 0) {
+      return "";
+    }
+    if (verticalBars === 1) {
+      return "1px solid black";
+    }
+    return "1px double black";
+  }
+
+  /**@returns {boolean} */
+  isExhausted() {
+    return this.nextStyleStartCharacter < this.style.length;
   }
 }
 

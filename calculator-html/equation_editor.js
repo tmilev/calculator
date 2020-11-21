@@ -465,8 +465,20 @@ class MathNodeFactory {
     /** @type {boolean} */
     implied,
   ) {
+    return this.leftDelimiter(equationEditor, "(", implied);
+  }
+
+  /** @returns {MathNode} */
+  leftDelimiter(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /** @type {string} */
+    content,
+    /** @type {boolean} */
+    implied,
+  ) {
     const leftParentheses = new MathNode(equationEditor, knownTypes.leftDelimiter);
-    leftParentheses.initialContent = "(";
+    leftParentheses.initialContent = content;
     leftParentheses.implied = implied;
     return leftParentheses;
   }
@@ -478,8 +490,20 @@ class MathNodeFactory {
     /** @type {boolean} */
     implied,
   ) {
+    return this.rightDelimiter(equationEditor, ")", implied);
+  }
+
+  /** @returns {MathNode} */
+  rightDelimiter(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /** @type {string} */
+    content,
+    /** @type {boolean} */
+    implied,
+  ) {
     const rightParentheses = new MathNode(equationEditor, knownTypes.rightDelimiter);
-    rightParentheses.initialContent = ")";
+    rightParentheses.initialContent = content;
     rightParentheses.implied = implied;
     return rightParentheses;
   }
@@ -761,6 +785,8 @@ class LaTeXConstants {
       ")": ")",
       "\\": "\\",
       "&": "&",
+      "[": "[",
+      "]": "]",
     };
     /**@type{Object.<string, string>} */
     this.latexBackslashCommands = {
@@ -769,6 +795,8 @@ class LaTeXConstants {
       "end": "\\end",
       "frac": "\\frac",
       "mathcal": "\\mathcal",
+      "langle": "\\langle",
+      "rangle": "\\rangle",
     };
     /**@type{Object.<string, string>} */
     this.latexBackslashOperators = {
@@ -878,6 +906,18 @@ class LaTeXConstants {
       "X": "\uD835\uDCB3",
       "Y": "\uD835\uDCB4",
       "Z": "\uD835\uDCB5",
+    };
+    this.leftDelimiters = {
+      "\\langle": "\u27E8",
+      "(": "(",
+      "[": "[",
+      "\\{": "{",
+    };
+    this.rightDelimiters = {
+      "\\rangle": "\u27E9",
+      ")": ")",
+      "]": "]",
+      "\\}": "}",
     };
     this.latexCommandsIgnored = {
       "left": true,
@@ -1312,10 +1352,16 @@ class LaTeXParser {
       let node = mathNodeFactory.atom(this.equationEditor, "");
       return this.replaceParsingStackTop(node, "", -2);
     }
-    if (thirdToLast.syntacticRole === "(" && secondToLast.isExpression() && last.syntacticRole === ")") {
+    if (
+      thirdToLast.syntacticRole in latexConstants.leftDelimiters &&
+      secondToLast.isExpression() &&
+      last.syntacticRole in latexConstants.rightDelimiters
+    ) {
       this.lastRuleName = "parenthetic expression to expression";
-      let leftParentheses = mathNodeFactory.leftParenthesis(this.equationEditor, false);
-      let rightParentheses = mathNodeFactory.rightParenthesis(this.equationEditor, false);
+      let leftDelimiter = latexConstants.leftDelimiters[thirdToLast.syntacticRole];
+      let rightDelimiter = latexConstants.rightDelimiters[last.syntacticRole];
+      let leftParentheses = mathNodeFactory.leftDelimiter(this.equationEditor, leftDelimiter, false);
+      let rightParentheses = mathNodeFactory.rightDelimiter(this.equationEditor, rightDelimiter, false);
       let horizontal = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [leftParentheses, secondToLast.node, rightParentheses]);
       return this.replaceParsingStackTop(horizontal, "", - 3);
     }
@@ -2105,8 +2151,25 @@ class MathNode {
     let superscript = this.children[0];
     let operator = this.children[1];
     let subscript = this.children[2];
-    let extraSpaceBelowSuperscript = 2;
-    let extraSpaceBelowOperator = 2;
+    let extraSpaceBelowSuperscriptPercent = 0.1;
+    let extraSpaceBelowOperatorPercent = 0.1;
+    let operatorContent = operator.children[0].initialContent;
+    let extraSpaceBelowSuperScriptCustom = {
+      "lim": - 0.1,
+    };
+    let extraSpaceBelowOperatorCustom = {
+      "lim": - 0.1,
+      // integral
+      "\u222B": - 0.1,
+    };
+    if (operatorContent in extraSpaceBelowSuperScriptCustom) {
+      extraSpaceBelowSuperscriptPercent = extraSpaceBelowSuperScriptCustom[operatorContent];
+    }
+    if (operatorContent in extraSpaceBelowOperatorCustom) {
+      extraSpaceBelowOperatorPercent = extraSpaceBelowOperatorCustom[operatorContent];
+    }
+    let extraSpaceBelowSuperscript = operator.boundingBox.height * extraSpaceBelowSuperscriptPercent;
+    let extraSpaceBelowOperator = operator.boundingBox.height * extraSpaceBelowOperatorPercent;
     superscript.boundingBox.top = 0;
     operator.boundingBox.top =
       superscript.boundingBox.height + extraSpaceBelowSuperscript;
@@ -3432,7 +3495,7 @@ class MathNode {
       return false;
     }
     let matchingIndex = this.parent.findIndexMatchingDelimiter(this.indexInParent);
-    if (matchingIndex === -1) {
+    if (matchingIndex === - 1) {
       console.log("Unexpected failure to find matching left parenthesis.");
       return false;
     }
@@ -3843,7 +3906,7 @@ class MathNode {
     if (this.children[indexStartingDelimiter].type.type === knownTypes.rightDelimiter.type) {
       endingDelimiter = knownTypes.leftDelimiter.type;
       startingDelimiter = knownTypes.rightDelimiter.type;
-      direction = -1;
+      direction = - 1;
     }
     let openDelimiters = 1;
     for (
@@ -3861,7 +3924,7 @@ class MathNode {
         return i;
       }
     }
-    return -1;
+    return - 1;
   }
 
   /** @returns {MathNode[]} */

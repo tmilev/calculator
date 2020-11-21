@@ -50,9 +50,9 @@ function configureMathJaxForCalculator() {
     extensions: ["tex2jax.js"],
     jax: ["input/TeX", "output/HTML-CSS"],
     tex2jax: {
-      inlineMath: [ ['\\(','\\)'] ],
-      displayMath: [ ['\\[','\\]'] ],
-      processClass: "calculator|calculatorStudentAnswer|calculatorAnswer",
+      inlineMath: [['\\(', '\\)']],
+      displayMath: [['\\[', '\\]']],
+      processClass: "mathcalculator|calculator|calculatorStudentAnswer|calculatorAnswer",
       processEscapes: true
     },
     "HTML-CSS": { availableFonts: ["TeX"] },
@@ -74,7 +74,7 @@ function configureMathJaxForCalculator() {
     //  It calls on the MathJax.Menu code, so make sure that is loaded and
     //  if not, load it and call the double-click handler again afterward.
     //
-    EVENT.DblClick = function(event) {
+    EVENT.DblClick = function (event) {
       if (MENU) {
         var jax = HUB.getJaxFor(this);
         showTex(jax.originalText, this, event);
@@ -122,49 +122,49 @@ function configureMathJaxForCalculator() {
    *  of the location of this file on your server.
    */
   MathJax.Callback.Queue(
-  MathJax.Hub.Register.StartupHook("TeX Jax Ready", function() {
-    var VERSION = "1.0";
+    MathJax.Hub.Register.StartupHook("TeX Jax Ready", function () {
+      var VERSION = "1.0";
 
-    var TEX = MathJax.InputJax.TeX,
+      var TEX = MathJax.InputJax.TeX,
         TEXDEF = TEX.Definitions,
         MML = MathJax.ElementJax.mml,
         HTML = MathJax.HTML;
 
-    TEXDEF.macros.FormInput = "FormInput";
+      TEXDEF.macros.FormInput = "FormInput";
 
-    TEX.Parse.Augment({
-      //
-      //  Implements \FormInput[value][size][class]{name}
-      //
-      FormInput: function (name) {
-        var val = this.GetBrackets(name);
-        var size = this.GetBrackets(name);
-        var cls = this.GetBrackets(name);
-        var inputName = this.GetArgument(name);
-        if (size === null || size === "" || size === undefined) {
-          size = "2";
+      TEX.Parse.Augment({
+        //
+        //  Implements \FormInput[value][size][class]{name}
+        //
+        FormInput: function (name) {
+          var val = this.GetBrackets(name);
+          var size = this.GetBrackets(name);
+          var cls = this.GetBrackets(name);
+          var inputName = this.GetArgument(name);
+          if (size === null || size === "" || size === undefined) {
+            size = "2";
+          }
+          if (val === null || val === undefined || val === "") {
+            val = "";
+          }
+          cls = ("MathJax_Input " + (cls || "")).replace(/ +$/, "");
+          var input = HTML.Element("input", {
+            type: "text",
+            name: inputName,
+            //          id: id,
+            size: size,
+            className: cls,
+            value: val
+          });
+          input.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+          var mml = MML["annotation-xml"](MML.xml(input)).With({
+            encoding: "application/xhtml+xml", isToken: true
+          });
+          this.Push(MML.semantics(mml));
         }
-        if (val === null || val === undefined || val === "") {
-          val = "";
-        }
-        cls = ("MathJax_Input " + (cls || "")).replace(/ +$/,"");
-        var input = HTML.Element("input", {
-          type: "text",
-          name: inputName,
-//          id: id,
-          size: size,
-          className: cls,
-          value: val
-        });
-        input.setAttribute("xmlns","http://www.w3.org/1999/xhtml");
-        var mml = MML["annotation-xml"](MML.xml(input)).With({
-          encoding: "application/xhtml+xml", isToken: true
-        });
-        this.Push(MML.semantics(mml));
-      }
-    });
+      });
 
-  }));
+    }));
   var address = "";
   if (
     window.calculator.browserifier.hardCodedServerAddress !== undefined &&

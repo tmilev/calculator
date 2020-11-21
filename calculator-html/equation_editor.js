@@ -1388,14 +1388,11 @@ class EquationEditor {
     /** @type{EquationEditorOptions|null} */
     options,
   ) {
-    this.containerGiven = containerGiven;
-    this.containerGiven.textContent = "";
     /** @type{HTMLElement} */
-    this.container = document.createElement("DIV");
-    this.containerGiven.appendChild(this.container);
+    this.container = containerGiven;
     this.container.style.display = "inline-block";
     this.container.style.position = "relative";
-    this.container.style.verticalAlign = "text-bottom";
+    this.container.style.verticalAlign = "middle";
     /** @type{EquationEditorOptions} */
     this.options = new EquationEditorOptions(true);
     if (options !== null && options !== undefined) {
@@ -4927,7 +4924,7 @@ function typeset(
   style,
 ) {
   if (style === "") {
-    style = "vertical-align:text-bottom; font-family:'Times New Roman'; display:inline-block; margin-bottom:-0.05em";
+    style = "font-family:'Times New Roman'; display:inline-block;";
   }
   new MathTagCoverter(style).typeset(toBeModified);
 }

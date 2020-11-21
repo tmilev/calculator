@@ -516,6 +516,8 @@ class MathNodeFactory {
     rows,
     /** @type {number} */
     columns,
+    /** @type {string} */
+    columnStyle,
   ) {
     const matrixTable = new MathNode(equationEditor, knownTypes.matrixTable);
     for (let i = 0; i < rows; i++) {
@@ -526,6 +528,7 @@ class MathNodeFactory {
     parenthesesLayout.appendChild(this.rightParenthesis(equationEditor, false));
     const result = new MathNode(equationEditor, knownTypes.matrix);
     result.appendChild(parenthesesLayout);
+    result.latexExtraStyle = columnStyle;
     return result;
   }
 
@@ -720,6 +723,7 @@ class SyntancticElement {
     /**@type{string} */
     this.syntacticRole = syntacticRole;
   }
+
   toString() {
     let result = "";
     if (this.node !== null) {
@@ -737,8 +741,13 @@ class SyntancticElement {
     }
     return result;
   }
+
   isExpression() {
     return this.syntacticRole === "" && this.node !== null;
+  }
+
+  isMatrixEnder() {
+    return this.syntacticRole in latexConstants.matrixEnder;
   }
 }
 
@@ -801,6 +810,7 @@ class LaTeXConstants {
     };
     /**@type{Object.<string, string>} */
     this.latexBackslashOperators = {
+      "bullet": "\u2022",
       "otimes": "\u2297",
       "oplus": "\u2295",
       "times": "\u00D7",
@@ -838,7 +848,7 @@ class LaTeXConstants {
       "gamma": "\u03B3",
       "delta": "\u03B4",
       "epsilon": "\u03B5",
-      "varepsilon": "",
+      "varepsilon": "\u03B5",
       "zeta": "\u03B6",
       "eta": "\u03B7",
       "theta": "\u03B8",
@@ -944,29 +954,50 @@ class LaTeXConstants {
       "right": true,
       "displaystyle": true,
       "text": true,
+      "mathrm": true,
       "limits": true,
     };
     this.beginEndEnvironments = {
       "pmatrix": "pmatrix",
+      "array": "array",
     };
-    this.whiteSpaceCharacters = {
+    this.matrixEnder = {
+      "\\end{pmatrix}": true,
+      "\\end{array}": true,
+    }
+    /** @type{Object.<string, boolean>} */
+    // The boolean indicates that the white space should be ignored.
+    this.whiteSpaceCharactersIgnored = {
+      "~": false,
       " ": true,
       "\t": true,
       "\u00A0": true,
       "\n": true,
     };
   }
+
   isLatinCharacter(
     /**@type{string}*/
     input,
   ) {
     return input in this.latinCharacters;
   }
+
   isWhiteSpace(
     /**@type{string} */ input,
   ) {
-    return input in this.whiteSpaceCharacters;
+    return (input in this.whiteSpaceCharactersIgnored);
   }
+
+  isWhiteSpaceIgnored(
+    /**@type{string} */ input,
+  ) {
+    if (!(input in this.whiteSpaceCharactersIgnored)) {
+      return false;
+    }
+    return this.whiteSpaceCharactersIgnored[input];
+  }
+
   normalizeOperatorToUtf8(
     /**@type{string} */
     input,
@@ -1169,14 +1200,21 @@ class LaTeXParser {
   applyOneRule() {
     let last = this.parsingStack[this.parsingStack.length - 1];
     if (latexConstants.isWhiteSpace(last.content)) {
-      this.lastRuleName = "clean whitespace";
-      this.parsingStack.length = this.parsingStack.length - 1;
-      return true;
+      if (latexConstants.isWhiteSpaceIgnored(last.content)) {
+        this.lastRuleName = "clean whitespace";
+        this.parsingStack.length = this.parsingStack.length - 1;
+        return true;
+      } else {
+        this.lastRuleName = "create whitespace";
+        let node = mathNodeFactory.atom(this.equationEditor, " ");
+        return this.replaceParsingStackTop(node, "", - 1);
+      }
     }
     if (last.content in latexConstants.latexSyntacticValues) {
       this.lastRuleName = "built-in syntactic element";
       return this.replaceParsingStackTop(null, latexConstants.latexSyntacticValues[last.content], - 1);
     }
+
     let secondToLast = this.parsingStack[this.parsingStack.length - 2];
     if (last.syntacticRole === "\\" && secondToLast.syntacticRole === "\\") {
       this.lastRuleName = "double backslash";
@@ -1327,8 +1365,14 @@ class LaTeXParser {
       return this.replaceParsingStackTop(null, `\\end{${environment}}`, - 4);
     }
     if (last.syntacticRole === "\\begin{pmatrix}") {
-      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0);
+      this.lastRuleName = "begin pmatrix to matrix builder";
+      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, "");
       return this.replaceParsingStackTop(matrix, "matrixBuilder", - 1);
+    }
+    if (secondToLast.syntacticRole === "\\begin{array}" && last.isExpression()) {
+      this.lastRuleName = "begin array to matrix builder";
+      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, last.node.textContentOrInitialContent());
+      return this.replaceParsingStackTop(matrix, "matrixBuilder", - 2);
     }
     if (last.syntacticRole === "&" && secondToLast.isExpression() && thirdToLast.syntacticRole === "matrixBuilder") {
       // Modify thirdToLast.node in place for performance reasons:
@@ -1347,7 +1391,7 @@ class LaTeXParser {
       lastRow.parent.appendChild(newRow);
       return this.decreaseParsingStack(2);
     }
-    if (thirdToLast.syntacticRole === "matrixBuilder" && secondToLast.isExpression() && last.syntacticRole === "\\end{pmatrix}") {
+    if (thirdToLast.syntacticRole === "matrixBuilder" && secondToLast.isExpression() && last.isMatrixEnder()) {
       let incomingEntry = mathNodeFactory.matrixRowEntry(this.equationEditor, secondToLast.node);
       thirdToLast.node.getLastMatrixRow().appendChild(incomingEntry);
       // Normalize the matrix: ensure all rows have same number of columns, no last empty row, etc.
@@ -1356,7 +1400,7 @@ class LaTeXParser {
       thirdToLast.syntacticRole = "";
       return this.decreaseParsingStack(2);
     }
-    if (secondToLast.syntacticRole === "matrixBuilder" && last.syntacticRole === "\\end{pmatrix}") {
+    if (secondToLast.syntacticRole === "matrixBuilder" && last.isMatrixEnder()) {
       // Normalize the matrix: ensure all rows have same number of columns, no last empty row, etc.
       secondToLast.node.normalizeMatrix();
       // Mark the matrix as a regular expression.
@@ -1865,6 +1909,8 @@ class MathNode {
     /** @type {EquationEditor} */
     this.equationEditor = equationEditor;
     this.boundingBox = new BoundingBox();
+    /**@type {stirng} Used for matrix column formatting; additionally reserved for unforeseen use cases.*/
+    this.latexExtraStyle = "";
   }
 
   createDOMElementIfMissing() {
@@ -3767,7 +3813,7 @@ class MathNode {
       return;
     }
     let parent = this.parent;
-    let matrix = mathNodeFactory.matrix(this.equationEditor, rows, columns);
+    let matrix = mathNodeFactory.matrix(this.equationEditor, rows, columns, "");
     parent.replaceChildAtPositionWithChildren(
       this.indexInParent, [
       split[0],

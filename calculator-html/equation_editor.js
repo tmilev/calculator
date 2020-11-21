@@ -1104,7 +1104,6 @@ class LaTeXParser {
       secondToLastElement.node.ensureEditableAtomsRecursive();
     }
     let elapsedTime = new Date().getTime() - this.startTime;
-    console.log(`Parsing of ${this.latex} took ${elapsedTime} ms.`);
     return secondToLastElement.node;
   }
 
@@ -5169,7 +5168,10 @@ class MathTagCoverter {
         continue;
       }
       element["typeset"] = "true";
+      let startTime = (new Date()).getTime();
       mathFromElement(element);
+      let typeSetTime = (new Date()).getTime() - startTime;
+      console.log(`Typeset of element ${this.typesetTotal + 1} out of ${this.elementsToTypeset} took ${typeSetTime} ms.`);
     }
   }
 }

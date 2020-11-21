@@ -1103,7 +1103,7 @@ class LaTeXParser {
     if (this.equationEditor.options.editable) {
       secondToLastElement.node.ensureEditableAtomsRecursive();
     }
-    let elapsedTime = new Date().getTime() - this.startTime;
+    // let elapsedTime = new Date().getTime() - this.startTime;
     return secondToLastElement.node;
   }
 

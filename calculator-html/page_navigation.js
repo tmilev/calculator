@@ -15,7 +15,7 @@ const login = require('./login');
 const initializeButtons = require('./initialize_buttons');
 const calculatorPage = require('./calculator_page');
 const signUp = require('./signup').signUp;
-const mathjax = require('./mathjax-calculator-setup');
+const mathTypeSet = require('./math_typeset');
 const themes = require('./themes');
 
 function User() {
@@ -734,7 +734,7 @@ class Page {
   initializeCalculatorPagePartTwo() {
     initializeButtons.initializeButtons();
     initializeButtons.initializeCalculatorPage();
-    mathjax.typeSetHard(ids.domElements.divMathjaxProblematicRender);
+    mathTypeSet.typesetter.typesetHard(ids.domElements.divMathjaxProblematicRender);
   }
 
   sectionSelect(sectionNumber) {

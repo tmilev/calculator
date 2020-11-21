@@ -788,6 +788,7 @@ class LaTeXConstants {
       "[": "[",
       "]": "]",
     };
+
     /**@type{Object.<string, string>} */
     this.latexBackslashCommands = {
       "sqrt": "\\sqrt",
@@ -886,6 +887,7 @@ class LaTeXConstants {
       "infty": "\u221E",
       "S": "\u00A7",
     };
+    /**@type{Object.<string, string>} */
     this.mathcalEquivalents = {
       "A": "\uD835\uDC9C",
       "C": "\uD835\uDC9E",
@@ -907,17 +909,35 @@ class LaTeXConstants {
       "Y": "\uD835\uDCB4",
       "Z": "\uD835\uDCB5",
     };
+    /**@type{Object.<string, string>} */
     this.leftDelimiters = {
       "\\langle": "\u27E8",
       "(": "(",
       "[": "[",
       "\\{": "{",
     };
+    /**@type{Object.<string, string>} */
     this.rightDelimiters = {
       "\\rangle": "\u27E9",
       ")": ")",
       "]": "]",
       "\\}": "}",
+    };
+    /**@type{Object.<string, string>} */
+    this.leftRightDelimiterPair = {
+      // \langle, \rangle
+      "\u27E8": "\u27E9",
+      "[": "]",
+      "(": ")",
+      "{": "}",
+    };
+    /**@type{Object.<string, string>} */
+    this.rightLeftDelimiterPair = {
+      // \rangle, \langle
+      "\u27E9": "\u27E8",
+      "]": "[",
+      ")": "(",
+      "}": "{",
     };
     this.latexCommandsIgnored = {
       "left": true,
@@ -2726,10 +2746,12 @@ class MathNode {
       case "ArrowDown":
         return this.arrow(key, shiftHeld);
       case "(":
-        this.makeParenthesesLeft();
+      case "[":
+        this.makeDelimiterLeft(key);
         return true;
       case ")":
-        this.makeParenthesesRight();
+      case "]":
+        this.makeDelimiterRight(key);
         return true;
       case "Enter":
         return true;
@@ -3707,12 +3729,18 @@ class MathNode {
     operator.focus(1);
   }
 
-  makeParenthesesLeft() {
-    this.makeParenthesesCommon(true);
+  makeDelimiterLeft(
+    /** @type{string} */
+    leftDelimiter,
+  ) {
+    this.makeDelimiterCommon(leftDelimiter, latexConstants.leftRightDelimiterPair[leftDelimiter], true);
   }
 
-  makeParenthesesRight() {
-    this.makeParenthesesCommon(false);
+  makeDelimiterRight(
+    /** @type{string} */
+    rightDelimiter,
+  ) {
+    this.makeDelimiterCommon(latexConstants.rightLeftDelimiterPair[rightDelimiter], rightDelimiter, false);
   }
 
   makeMatrix(
@@ -3837,7 +3865,11 @@ class MathNode {
     sqrt.children[2].focusStandard(0);
   }
 
-  makeParenthesesCommon(
+  makeDelimiterCommon(
+    /** @type{string} */
+    leftDelimiter,
+    /** @type{string} */
+    rightDelimiter,
     /** @type{boolean} */
     isLeft,
   ) {
@@ -3851,7 +3883,7 @@ class MathNode {
     }
     let oldIndexInParent = parentAndIndex.indexInParent;
     let parent = parentAndIndex.parent;
-    parent.children[oldIndexInParent].doMakeParenthesesCommon(positionOperator, isLeft);
+    parent.children[oldIndexInParent].doMakeDelimiterCommon(leftDelimiter, rightDelimiter, positionOperator, isLeft);
   }
 
   findIndexToInsertRightDelimiter(
@@ -3988,7 +4020,11 @@ class MathNode {
     return [leftNode, rightNode];
   }
 
-  doMakeParenthesesCommon(
+  doMakeDelimiterCommon(
+    /** @type{string} */
+    leftDelimiterString,
+    /** @type{string} */
+    rightDelimiterString,
     /**@type {number} */
     positionOperator,
     /**@type {boolean} */
@@ -3999,12 +4035,14 @@ class MathNode {
       console.log("Warning: making parentheses in non-horizontal math.");
     }
     let oldIndexInParent = this.indexInParent;
-    let leftParenthesis = mathNodeFactory.leftParenthesis(
+    let leftDelimiter = mathNodeFactory.leftDelimiter(
       this.equationEditor,
+      leftDelimiterString,
       !isLeft,
     );
-    let rightParenthesis = mathNodeFactory.rightParenthesis(
+    let rightDelimiter = mathNodeFactory.rightDelimiter(
       this.equationEditor,
+      rightDelimiterString,
       isLeft,
     );
     if (positionOperator === 0) {
@@ -4023,7 +4061,7 @@ class MathNode {
       } else {
         indexLeftDelimiter = oldIndexInParent;
       }
-      if (parent.replaceImpliedLeftDelimiter(indexLeftDelimiter)) {
+      if (parent.replaceImpliedLeftDelimiter(leftDelimiterString, indexLeftDelimiter)) {
         return;
       }
       indexRightDelimiter = parent.findIndexToInsertRightDelimiter(indexLeftDelimiter);
@@ -4035,26 +4073,28 @@ class MathNode {
       } else {
         indexRightDelimiter = oldIndexInParent;
       }
-      if (parent.replaceImpliedRightDelimiter(indexRightDelimiter)) {
+      if (parent.replaceImpliedRightDelimiter(rightDelimiterString, indexRightDelimiter)) {
         return;
       }
       indexLeftDelimiter = parent.findIndexToInsertLeftDelimiter(indexRightDelimiter);
     }
 
-    parent.insertChildAtPosition(indexRightDelimiter, rightParenthesis);
-    parent.insertChildAtPosition(indexLeftDelimiter, leftParenthesis);
+    parent.insertChildAtPosition(indexRightDelimiter, rightDelimiter);
+    parent.insertChildAtPosition(indexLeftDelimiter, leftDelimiter);
     parent.normalizeHorizontalMath();
     parent.ensureEditableAtoms();
     parent.updateDOM();
     if (isLeft) {
-      leftParenthesis.focus(1);
+      leftDelimiter.focus(1);
     } else {
-      rightParenthesis.focus(1);
+      rightDelimiter.focus(1);
     }
   }
 
   /** @returns{boolean} */
   replaceImpliedLeftDelimiter(
+    /** @type {string} */
+    delimiterString,
     /**@type {number}*/
     delimiterIndex,
   ) {
@@ -4074,7 +4114,7 @@ class MathNode {
           continue;
         }
         if (child.implied) {
-          return this.moveDelimiterMarkExplicit(delimiterIndex, i);
+          return this.moveDelimiterMarkExplicit(delimiterString, delimiterIndex, i);
         }
         return false;
       }
@@ -4084,6 +4124,8 @@ class MathNode {
 
   /** @returns{boolean} */
   replaceImpliedRightDelimiter(
+    /** @type {string} */
+    delimiterString,
     /**@type {number}*/
     delimiterIndex,
   ) {
@@ -4100,7 +4142,7 @@ class MathNode {
           continue;
         }
         if (child.implied) {
-          return this.moveDelimiterMarkExplicit(delimiterIndex, i);
+          return this.moveDelimiterMarkExplicit(delimiterString, delimiterIndex, i);
         }
         return false;
       }
@@ -4110,6 +4152,8 @@ class MathNode {
 
   /** @returns{boolean} */
   moveDelimiterMarkExplicit(
+    /** @type {string} */
+    delimiterString,
     /**@type {number}*/
     toIndex,
     /**@type {number}*/
@@ -4123,6 +4167,7 @@ class MathNode {
     }
     this.insertChildAtPosition(toIndex, delimiterReplaced);
     delimiterReplaced.implied = false;
+    delimiterReplaced.initialContent = delimiterString;
     this.ensureEditableAtoms();
     this.updateDOM();
     delimiterReplaced.focus(1);

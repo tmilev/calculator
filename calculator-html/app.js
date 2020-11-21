@@ -68,7 +68,7 @@ function loadGlobals() {
   window.calculator.panels = require('./panels');
   window.calculator.database = require('./database');
   window.calculator.themes = require('./themes');
-  window.calculator.mathjax = require('./mathjax-calculator-setup');
+  // window.calculator.mathjax = require('./mathjax-calculator-setup');
   window.calculator.graphicsNDimensions = require('./graphics_n_dimensions');
   window.calculator.processMonitoring = require('./process_monitoring');
   window.calculator.pageNavigation = require('./page_navigation');

@@ -802,7 +802,6 @@ bool Calculator::isInterpretedAsEmptySpace(unsigned char input) {
   switch (input) {
    
   case '\n': //numerical value: 10
-  case '~':
   case '\r': //numerical value: 13
   case '\t':
   case 160: //&nbsp

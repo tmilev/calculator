@@ -50,7 +50,7 @@ std::string SemisimpleLieAlgebra::toStringLieAlgebraNameFullHTML() const {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::toStringLieAlgebraNameFullHTML");
   std::stringstream out;
   if (this->theWeyl.theDynkinType.hasExceptionalComponent()) {
-    out << "\\(" << this->theWeyl.theDynkinType.toString() << "\\)";
+    out << "<div class='mathcalculator'>" << this->theWeyl.theDynkinType.toString() << "</div>";
     return out.str();
   }
   out << this->toStringLieAlgebraNameNonTechnicalHTML()

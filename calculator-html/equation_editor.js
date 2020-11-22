@@ -1507,7 +1507,6 @@ class EquationEditor {
     this.container = containerGiven;
     this.container.style.display = "inline-block";
     this.container.style.position = "relative";
-    this.container.style.verticalAlign = "middle";
     /** @type{EquationEditorOptions} */
     this.options = new EquationEditorOptions(true);
     if (options !== null && options !== undefined) {
@@ -1518,7 +1517,6 @@ class EquationEditor {
       this.rootNode.type.borderStyle = "";
       this.rootNode.type.padding = "";
       this.rootNode.type.margin = "";
-      this.rootNode.type.verticalAlign = "text-bottom";
     }
     this.rootNode.externalDOM = this.container;
     /** @type{AtomWithPosition} */
@@ -1651,6 +1649,8 @@ class EquationEditor {
     let boundingRectangle = this.rootNode.element.getBoundingClientRect();
     this.container.style.height = boundingRectangle.height;
     this.container.style.width = boundingRectangle.width;
+    let candidateAlignment = "middle";
+    this.container.style.verticalAlign = candidateAlignment;
   }
 
   /**@returns {string} */

@@ -527,10 +527,19 @@ class MathNodeFactory {
     for (let i = 0; i < rows; i++) {
       matrixTable.appendChild(this.matrixRow(equationEditor, columns));
     }
-    const parenthesesLayout = this.horizontalMath(equationEditor, this.leftParenthesis(equationEditor, false));
+    let leftDelimiter = null;
+    let rightDelimiter = null;
+    if (columnStyle === "") {
+      leftDelimiter = this.leftParenthesis(equationEditor, false);
+      rightDelimiter = this.rightParenthesis(equationEditor, false);
+    } else {
+      leftDelimiter = this.atom(equationEditor, null);
+      rightDelimiter = this.atom(equationEditor, null);
+    }
+    let parenthesesLayout = this.horizontalMath(equationEditor, leftDelimiter);
     parenthesesLayout.appendChild(matrixTable);
-    parenthesesLayout.appendChild(this.rightParenthesis(equationEditor, false));
-    const result = new MathNode(equationEditor, knownTypes.matrix);
+    parenthesesLayout.appendChild(rightDelimiter);
+    let result = new MathNode(equationEditor, knownTypes.matrix);
     result.appendChild(parenthesesLayout);
     result.latexExtraStyle = columnStyle;
     return result;
@@ -959,6 +968,7 @@ class LaTeXConstants {
       "displaystyle": true,
       "text": true,
       "mathrm": true,
+      "phantom": true,
       "limits": true,
     };
     this.beginEndEnvironments = {
@@ -1377,12 +1387,19 @@ class LaTeXParser {
       let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, last.node.toLatex());
       return this.replaceParsingStackTop(matrix, "matrixBuilder", - 2);
     }
-    if (last.syntacticRole === "&" && secondToLast.isExpression() && thirdToLast.syntacticRole === "matrixBuilder") {
+    if (thirdToLast.syntacticRole === "matrixBuilder" && secondToLast.isExpression() && last.syntacticRole === "&") {
       // Modify thirdToLast.node in place for performance reasons:
       // copying it may cause unwanted quadratic comoplexity.
       let incomingEntry = mathNodeFactory.matrixRowEntry(this.equationEditor, secondToLast.node);
       thirdToLast.node.getLastMatrixRow().appendChild(incomingEntry);
       return this.decreaseParsingStack(2);
+    }
+    if (secondToLast.syntacticRole === "matrixBuilder" && last.syntacticRole === "&") {
+      // Modify secondToLast.node in place for performance reasons:
+      // copying it may cause unwanted quadratic comoplexity.
+      let incomingEntry = mathNodeFactory.matrixRowEntry(this.equationEditor, mathNodeFactory.atom(this.equationEditor, ""));
+      secondToLast.node.getLastMatrixRow().appendChild(incomingEntry);
+      return this.decreaseParsingStack(1);
     }
     if (last.syntacticRole === "\\\\" && secondToLast.isExpression() && thirdToLast.syntacticRole === "matrixBuilder") {
       // Modify thirdToLast.node in place for performance reasons:
@@ -1393,6 +1410,16 @@ class LaTeXParser {
       let newRow = mathNodeFactory.matrixRow(this.equationEditor, 0);
       lastRow.parent.appendChild(newRow);
       return this.decreaseParsingStack(2);
+    }
+    if (last.syntacticRole === "\\\\" && secondToLast.syntacticRole === "matrixBuilder") {
+      // Modify secondToLast.node in place for performance reasons:
+      // copying it may cause unwanted quadratic comoplexity.
+      let lastRow = secondToLast.node.getLastMatrixRow();
+      let incomingEntry = mathNodeFactory.matrixRowEntry(this.equationEditor, mathNodeFactory.atom(this.equationEditor, ""));
+      lastRow.appendChild(incomingEntry);
+      let newRow = mathNodeFactory.matrixRow(this.equationEditor, 0);
+      lastRow.parent.appendChild(newRow);
+      return this.decreaseParsingStack(1);
     }
     if (thirdToLast.syntacticRole === "matrixBuilder" && secondToLast.isExpression() && last.isMatrixEnder()) {
       let incomingEntry = mathNodeFactory.matrixRowEntry(this.equationEditor, secondToLast.node);
@@ -2495,17 +2522,17 @@ class MathNode {
     let betweenRows = 10;
     for (let i = 0; i < numberOfRows; i++) {
       let row = this.children[i];
-      row.boundingBox = new BoundingBox();
-      row.boundingBox.width = rowWidth;
-      let height = 0;
-      for (let j = 0; j < numberOfColumns; j++) {
-        height = Math.max(height, row.children[j].boundingBox.height);
-      }
-      for (let j = 0; j < numberOfColumns; j++) {
-        row.children[j].boundingBox.top = (height - row.children[j].boundingBox.height) / 2;
-      }
+      row.mergeBoundingBoxesHorizontallyAlignedElements();
+      /*      row.boundingBox = new BoundingBox();
+            row.boundingBox.width = rowWidth;
+            let boundingBoxMerged = this.mergeBoundingBoxesHorizontallyAlignedElements(row.children);
+      
+            //asdf
+            for (let j = 0; j < numberOfColumns; j++) {
+              row.children[j].boundingBox.top = (height - row.children[j].boundingBox.height) / 2;
+            }*/
       row.boundingBox.top = top;
-      top += height + betweenRows;
+      top += row.boundingBox.height + betweenRows;
     }
     this.boundingBox.height = top - betweenRows;
     this.boundingBox.width = rowWidth;
@@ -2633,17 +2660,14 @@ class MathNode {
     }
   }
 
-  computeDimensionsHorizontalMath() {
-    this.boundingBox = new BoundingBox();
-    this.computeDimensionsHorizontalMathParenthesesHeight();
+  mergeBoundingBoxesHorizontallyAlignedElements() {
+    // Compute fraction line height.
     for (let i = 0; i < this.children.length; i++) {
       let child = this.children[i];
       this.boundingBox.fractionLineHeight = Math.max(
         this.boundingBox.fractionLineHeight,
         child.boundingBox.fractionLineHeight,
       );
-      child.boundingBox.left = this.boundingBox.width;
-      this.boundingBox.width += child.boundingBox.width;
     }
     // Compute top offsets of children.
     for (let i = 0; i < this.children.length; i++) {
@@ -2656,6 +2680,17 @@ class MathNode {
       let heightFromChild = child.boundingBox.height - child.boundingBox.fractionLineHeight + this.boundingBox.fractionLineHeight;
       this.boundingBox.height = Math.max(this.boundingBox.height, heightFromChild);
     }
+  }
+
+  computeDimensionsHorizontalMath() {
+    this.boundingBox = new BoundingBox();
+    this.computeDimensionsHorizontalMathParenthesesHeight();
+    for (let i = 0; i < this.children.length; i++) {
+      let child = this.children[i];
+      child.boundingBox.left = this.boundingBox.width;
+      this.boundingBox.width += child.boundingBox.width;
+    }
+    this.mergeBoundingBoxesHorizontallyAlignedElements();
   }
 
   doAlign() {
@@ -4854,7 +4889,7 @@ class MathNode {
   }
 
   matrixColumnCount() {
-    if (this.type.type !== knownTypes.matrix) {
+    if (this.type.type !== knownTypes.matrix.type) {
       return - 1;
     }
     let matrixTable = this.children[0].children[1];

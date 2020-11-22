@@ -185,6 +185,15 @@ const knownTypes = {
   fraction: new MathNodeType({
     "type": "fraction",
   }),
+  cancel: new MathNodeType({
+    "type": "cancel",
+  }),
+  cancelSign: new MathNodeType({
+    "type": "cancelSign",
+  }),
+  cancelUnderBox: new MathNodeType({
+    "type": "cancelUnderBox",
+  }),
   // Represents the numerator x of a fraction x/y.
   numerator: new MathNodeType({
     "type": "numerator",
@@ -360,6 +369,26 @@ class MathNodeFactory {
       result.type.paddingRight = extraPadding;
     }
     result.initialContent = operator;
+    return result;
+  }
+
+  /** @returns {MathNode} */
+  cancel(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /** @type{MathNode}*/
+    content,
+  ) {
+    const result = new MathNode(equationEditor, knownTypes.cancel);
+    const cancelSign = new MathNode(equationEditor, knownTypes.cancelSign);
+    cancelSign.initialContent = "\u2571"; // top-left to bottom-right: "\u2572"; x-cross: "\u2573"
+    const horizontal = this.horizontalMath(equationEditor, content);
+    let underTheCancel = new MathNode(equationEditor, knownTypes.cancelUnderBox);
+    underTheCancel.appendChild(horizontal);
+    underTheCancel.normalizeHorizontalMath();
+    underTheCancel.ensureEditableAtoms();
+    result.appendChild(cancelSign);
+    result.appendChild(underTheCancel);
     return result;
   }
 
@@ -773,14 +802,16 @@ class LaTeXConstants {
     }
     this.operatorsExtraPadding = {
       "=": "0.3em",
-      // \leq
+      // leq
       "\u2264": "0.3em",
-      // \geq
+      // geq
       "\u2265": "0.3em",
       // Latex to (right arrow).
       "\u2192": "0.3em",
       ">": "0.3em",
       "<": "0.3em",
+      // neq
+      "\u2260": "0.3em",
     }
     /**@type{Object.<string, string>} */
     this.operatorsNormalized = {
@@ -810,7 +841,6 @@ class LaTeXConstants {
       "[": "[",
       "]": "]",
     };
-
     /**@type{Object.<string, string>} */
     this.latexBackslashCommands = {
       "sqrt": "\\sqrt",
@@ -827,7 +857,9 @@ class LaTeXConstants {
       "otimes": "\u2297",
       "oplus": "\u2295",
       "times": "\u00D7",
+      "circ": "\u25CB",
       "leq": "\u2264",
+      "neq": "\u2260",
       "lt": "<",
       "gt": ">",
       "to": "\u2192",
@@ -2204,6 +2236,28 @@ class MathNode {
     this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
   }
 
+  computeDimensionsCancel() {
+    let content = this.children[1];
+    this.boundingBox.height = content.boundingBox.height;
+    this.boundingBox.width = content.boundingBox.width;
+    this.boundingBox.fractionLineHeight = content.boundingBox.fractionLineHeight;
+    let cancelSign = this.children[0];
+    cancelSign.element.style.transformOrigin = "top left";
+    cancelSign.element.style.transform = "";
+    cancelSign.element.style.width = "";
+    cancelSign.element.style.height = "";
+    cancelSign.element.style.top = "";
+    cancelSign.element.style.left = "";
+    cancelSign.computeDimensionsAtomic();
+    let originalCancelHeight = cancelSign.boundingBox.height;
+    let originalCancelWidth = cancelSign.boundingBox.width;
+    // cancelSign.boundingBox.height = this.boundingBox.height;
+    // cancelSign.boundingBox.width = this.boundingBox.width;
+    let stretchX = this.boundingBox.width / originalCancelWidth;
+    let stretchY = this.boundingBox.height / originalCancelHeight;
+    cancelSign.element.style.transform = `matrix(${stretchX},0,0,${stretchY}, 0, 0)`;
+  }
+
   computeDimensionsFraction() {
     let numerator = this.children[0];
     let denominator = this.children[1];
@@ -2559,6 +2613,10 @@ class MathNode {
       this.computeDimensionsAtomic();
       return;
     }
+    if (this.type.type === knownTypes.cancel.type) {
+      this.computeDimensionsCancel();
+      return;
+    }
     if (this.type.type === knownTypes.sqrt.type) {
       this.computeDimensionsSqrt();
       return;
@@ -2798,7 +2856,9 @@ class MathNode {
       if (this.equationEditor.backslashSequence === "") {
         this.equationEditor.backslashSequenceStarted = false;
       } else {
-        this.equationEditor.backslashSequence = this.equationEditor.backslashSequence.slice(0, this.equationEditor.backslashSequence.length - 1);
+        this.equationEditor.backslashSequence = this.equationEditor.backslashSequence.slice(
+          0, this.equationEditor.backslashSequence.length - 1
+        );
       }
       return false;
     }
@@ -3529,6 +3589,15 @@ class MathNode {
   }
 
   /** @returns {boolean} whether reduction ocurred. */
+  applyBackspaceToTheRightCancel() {
+    if (this.type.type !== knownTypes.cancel.type) {
+      return false;
+    }
+    this.children[1].focus(1);
+    return true;
+  }
+
+  /** @returns {boolean} whether reduction ocurred. */
   applyBackspaceToTheLeftEndOfOperatorSubscript() {
     if (
       this.type.type !== knownTypes.operatorSubscript.type &&
@@ -3601,6 +3670,23 @@ class MathNode {
   }
 
   /** @returns {boolean} whether reduction ocurred. */
+  applyBackspaceToTheLeftOfCancelSign() {
+    if (this.type.type !== knownTypes.cancelUnderBox.type) {
+      return false;
+    }
+    let cancel = this.parent;
+    let indexCancel = cancel.indexInParent;
+    let content = this.children[0];
+    content.children[0].desiredCaretPosition = 0;
+    let parent = cancel.parent;
+    parent.replaceChildAtPosition(indexCancel, content.children[0]);
+    parent.normalizeHorizontalMath();
+    parent.updateDOM();
+    parent.focusRestore();
+    return true;
+  }
+
+  /** @returns {boolean} whether reduction ocurred. */
   applyBackspaceToTheRightDelimiter() {
     if (
       this.type.type !== knownTypes.rightDelimiter.type &&
@@ -3664,6 +3750,9 @@ class MathNode {
       return true;
     }
     if (this.applyBackspaceToTheLeftOfSqrtSign()) {
+      return true;
+    }
+    if (this.applyBackspaceToTheLeftOfCancelSign()) {
       return true;
     }
     if (this.applyBackspaceToTheLeftEndOfOperatorSubscript()) {
@@ -3743,6 +3832,9 @@ class MathNode {
       return true;
     }
     if (this.applyBackspaceToTheRightSqrt()) {
+      return true;
+    }
+    if (this.applyBackspaceToTheRightCancel()) {
       return true;
     }
     if (this.applyBackspaceToTheRightBaseWithExponent()) {
@@ -3932,6 +4024,24 @@ class MathNode {
     ancestor.ensureEditableAtoms();
     ancestor.updateDOM();
     sqrt.children[2].focusStandard(0);
+  }
+
+  makeCancelFromSplit(
+    /** @type {MathNode[]} */
+    split,
+  ) {
+    let parent = this.parent;
+    let oldIndex = this.indexInParent;
+    let cancel = mathNodeFactory.cancel(this.equationEditor, split[1]);
+    if (split[0] === null) {
+      parent.replaceChildAtPosition(oldIndex, cancel);
+    } else {
+      parent.replaceChildAtPosition(oldIndex, split[0]);
+      parent.insertChildAtPosition(oldIndex + 1, cancel);
+    }
+    parent.ensureEditableAtoms();
+    parent.updateDOM();
+    cancel.children[1].focusStandard(- 1);
   }
 
   makeSqrtFromCaret() {
@@ -4343,6 +4453,10 @@ class MathNode {
     }
     if (backslashSequence === "sqrt") {
       this.makseSqrtFromSplit(split);
+      return true;
+    }
+    if (backslashSequence === "cancel") {
+      this.makeCancelFromSplit(split);
       return true;
     }
     if (backslashSequence === "pmatrix" || backslashSequence === "matrix") {

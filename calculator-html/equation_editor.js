@@ -181,9 +181,9 @@ const knownTypes = {
     "verticalAlign": "text-bottom",
     "textAlign": "center",
   }),
-  verticalLine: new MathNodeType({
+  verticalLineInTable: new MathNodeType({
     "type": "verticalLine",
-    "borderLeft": "1 px solid black",
+    "borderLeft": "1px solid black",
   }),
   // Represents expressions such as "x/y" or "\frac{x}{y}".
   fraction: new MathNodeType({
@@ -573,8 +573,11 @@ class MathNodeFactory {
     parenthesesLayout.appendChild(matrixTable);
     parenthesesLayout.appendChild(rightDelimiter);
     let result = new MathNode(equationEditor, knownTypes.matrix);
-    result.appendChild(parenthesesLayout);
     result.latexExtraStyle = columnStyle;
+    result.appendChild(parenthesesLayout);
+    result.appendChildren(
+      new LatexColumnStyleIterator(columnStyle).verticalSeparators(equationEditor),
+    );
     return result;
   }
 
@@ -601,6 +604,20 @@ class MathNodeFactory {
   ) {
     let result = new MathNode(equationEditor, knownTypes.matrixRowEntry);
     result.appendChild(this.horizontalMath(equationEditor, content));
+    return result;
+  }
+
+  /** @returns {MathNode} */
+  matrixVerticalLine(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /**@type {number} */
+    columnIndex,
+    /** @type {number} */
+    numberOfStrips,
+  ) {
+    let result = new MathNode(equationEditor, knownTypes.verticalLineInTable);
+    result.extraData = new VerticalBarData(columnIndex, numberOfStrips);
     return result;
   }
 
@@ -1464,7 +1481,7 @@ class LaTeXParser {
       thirdToLast.node.getLastMatrixRow().appendChild(incomingEntry);
       // Normalize the matrix: ensure all rows have same number of columns, no last empty row, etc.
       thirdToLast.node.normalizeMatrix();
-      thirdToLast.node.applyMatrixStyle();
+      (new LatexColumnStyleIterator(thirdToLast.node.latexExtraStyle)).applyStyleToMatrix(thirdToLast.node);
       // Mark the matrix as a regular expression.
       thirdToLast.syntacticRole = "";
       return this.decreaseParsingStack(2);
@@ -1472,7 +1489,7 @@ class LaTeXParser {
     if (secondToLast.syntacticRole === "matrixBuilder" && last.isMatrixEnder()) {
       // Normalize the matrix: ensure all rows have same number of columns, no last empty row, etc.
       secondToLast.node.normalizeMatrix();
-      secondToLast.node.applyMatrixStyle();
+      (new LatexColumnStyleIterator(secondToLast.node.latexExtraStyle)).applyStyleToMatrix(secondToLast.node);
       // Mark the matrix as a regular expression.
       secondToLast.syntacticRole = "";
       return this.decreaseParsingStack(1);
@@ -1932,6 +1949,9 @@ class BoundingBox {
     this.top = 0;
     this.width = 0;
     this.height = 0;
+
+    /** @type{number}*/
+    this.columnOffsets = [];
     this.fractionLineHeight = 0;
     // In a^b the following measures the width of b. 
     this.superScriptWidth = 0;
@@ -1942,6 +1962,20 @@ class BoundingBox {
     this.transformOrigin = "";
     this.heightBeforeTransform = - 1;
     this.widthBeforeTransform = - 1;
+  }
+
+  /** @returns {number} */
+  getColumnOffset(
+    /**@type{number} */
+    columnIndex,
+  ) {
+    if (columnIndex < 0) {
+      return 0;
+    }
+    if (columnIndex >= this.columnOffsets.length) {
+      return this.width;
+    }
+    return this.columnOffsets[columnIndex];
   }
 };
 
@@ -1985,8 +2019,10 @@ class MathNode {
     /** @type {EquationEditor} */
     this.equationEditor = equationEditor;
     this.boundingBox = new BoundingBox();
-    /**@type {stirng} Used for matrix column formatting; additionally reserved for unforeseen use cases.*/
+    /**@type {string} Used for matrix column formatting; additionally reserved for unforeseen use cases.*/
     this.latexExtraStyle = "";
+    /** @type{Object} Reserved for data specific to particular MathNode types.*/
+    this.extraData = null;
   }
 
   createDOMElementIfMissing() {
@@ -2558,6 +2594,21 @@ class MathNode {
     this.boundingBox.width = underTheRadical.boundingBox.left + underTheRadical.boundingBox.width;
   }
 
+  computeDimensionsMatrix() {
+    this.boundingBox.height = this.children[0].boundingBox.height;
+    this.boundingBox.width = this.children[0].boundingBox.width;
+    this.boundingBox.fractionLineHeight = this.children[0].boundingBox.fractionLineHeight;
+    let table = this.children[0].children[1];
+    for (let i = 1; i < this.children.length; i++) {
+      let verticalBar = this.children[i];
+      verticalBar.boundingBox.height = this.boundingBox.height;
+      verticalBar.boundingBox.width = 1;
+      let columnIndex = verticalBar.extraData.columnIndex;
+      let offset = table.boundingBox.getColumnOffset(columnIndex);
+      verticalBar.boundingBox.left = offset;
+    }
+  }
+
   computeDimensionsMatrixTable() {
     this.boundingBox = new BoundingBox();
     let numberOfColumns = this.children[0].children.length;
@@ -2565,6 +2616,7 @@ class MathNode {
     let left = 0;
     let betweenColumns = 10;
     for (let i = 0; i < numberOfColumns; i++) {
+      this.boundingBox.columnOffsets.push(left);
       let width = 0;
       for (let j = 0; j < numberOfRows; j++) {
         width = Math.max(width, this.children[j].children[i].boundingBox.width);
@@ -2575,7 +2627,7 @@ class MathNode {
         if (child.latexExtraStyle === "l") {
           extraShift = 0;
         } else if (child.latexExtraStyle === "r") {
-          extraShift = width;
+          extraShift = width - child.boundingBox.width;
         }
         child.boundingBox.left = left + extraShift;
         child.computeBoundingBoxLeftSingleChild();
@@ -2629,6 +2681,10 @@ class MathNode {
     }
     if (this.type.type === knownTypes.matrixTable.type) {
       this.computeDimensionsMatrixTable();
+      return;
+    }
+    if (this.type.type === knownTypes.matrix.type) {
+      this.computeDimensionsMatrix();
       return;
     }
     if (this.type.type === knownTypes.radicalUnderBox.type) {
@@ -5002,7 +5058,30 @@ class MathNode {
       return null;
     }
     let matrixTable = this.children[0].children[1];
+    if (matrixTable.children.length === 0) {
+      return null;
+    }
     return matrixTable.children[matrixTable.children.length - 1];
+  }
+
+  getMatrixCell(
+    /**@type {number} */
+    rowIndex,
+    /**@type {number} */
+    columnIndex,
+  ) {
+    if (this.type.type !== knownTypes.matrix.type) {
+      return null;
+    }
+    let matrixTable = this.children[0].children[1];
+    if (rowIndex >= matrixTable.children.length) {
+      return null;
+    }
+    let row = matrixTable.children[rowIndex];
+    if (columnIndex >= row.children.length) {
+      return null;
+    }
+    return row.children[columnIndex];
   }
 
   matrixColumnCount() {
@@ -5036,37 +5115,30 @@ class MathNode {
       }
     }
   }
+}
 
-  applyMatrixStyle() {
-    if (this.type.type !== knownTypes.matrix.type) {
-      return;
-    }
-    let matrixTable = this.children[0].children[1];
-    // Expand rows to the colum count.
-    for (let i = 0; i < matrixTable.children.length; i++) {
-      let row = matrixTable.children[i];
-      row.applyMatrixStyleToRow(this.latexExtraStyle);
-    }
-
-  }
-
-  applyMatrixStyleToRow(
-    /** @type {string} */
-    style,
+class VerticalBarData {
+  constructor(
+    /**@type {number} */
+    columnIndex,
+    /**@type {number} */
+    stripIndex,
   ) {
-    let styleIterator = new LatexColumnStyleIterator(style);
-    styleIterator.next();
-    for (let j = 0; j < this.children.length && styleIterator.isExhausted(); j++, styleIterator.next()) {
-      if (styleIterator.currentColumnAlignment === "l") {
-        this.children[j].latexExtraStyle = "l";
-      }
-    }
+    this.columnIndex = columnIndex;
+    this.stripIndex = stripIndex;
   }
 }
 
 class LatexColumnStyleIterator {
   constructor(/**@type{string} */ style) {
     this.style = style;
+    this.nextStyleStartCharacter = 0;
+    this.currentColumnAlignment = "";
+    this.verticalBarRightCount = 0;
+    this.verticalBarLeftCount = 0;
+  }
+
+  reset() {
     this.nextStyleStartCharacter = 0;
     this.currentColumnAlignment = "";
     this.verticalBarRightCount = 0;
@@ -5096,6 +5168,59 @@ class LatexColumnStyleIterator {
     }
   }
 
+  applyStyleToMatrix(
+    /** @type{MathNode} */
+    matrix,
+  ) {
+    if (matrix.type.type !== knownTypes.matrix.type) {
+      return;
+    }
+    let matrixTable = matrix.children[0].children[1];
+    // Expand rows to the colum count.
+    for (let i = 0; i < matrixTable.children.length; i++) {
+      let row = matrixTable.children[i];
+      this.applyStyleToRow(row);
+    }
+  }
+
+  applyStyleToRow(
+    /** @type{MathNode} */
+    row,
+  ) {
+    this.reset();
+    this.next();
+    for (let j = 0; j < row.children.length && !this.isExhausted(); j++, this.next()) {
+      row.children[j].latexExtraStyle = this.currentColumnAlignment;
+    }
+  }
+
+  /** @returns{MathNode[]} Given matrix column style such as {c|c}, generates the vertical bars.
+   * Example: \begin{array}{c|c}1&2\end{array}.
+   */
+  verticalSeparators(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    this.reset();
+    this.next();
+    let result = [];
+    let columnCount = 0;
+    for (; !this.isExhausted(); this.next()) {
+      for (let i = 0; i < this.verticalBarLeftCount; i++) {
+        result.push(mathNodeFactory.matrixVerticalLine(
+          equationEditor, columnCount, i,
+        ));
+      }
+      columnCount++;
+      for (let i = 0; i < this.verticalBarRightCount; i++) {
+        result.push(mathNodeFactory.matrixVerticalLine(
+          equationEditor, columnCount, i,
+        ));
+      }
+    }
+    return result;
+  }
+
   /** @returns {string} */
   borderFromVerticalBarCount(
     /**@type {number} */
@@ -5112,7 +5237,7 @@ class LatexColumnStyleIterator {
 
   /**@returns {boolean} */
   isExhausted() {
-    return this.nextStyleStartCharacter < this.style.length;
+    return this.nextStyleStartCharacter >= this.style.length;
   }
 }
 

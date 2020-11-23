@@ -859,6 +859,7 @@ class LaTeXConstants {
       "oplus": "\u2295",
       "times": "\u00D7",
       "circ": "\u25CB",
+      "cdot": "\u00B7",
       "leq": "\u2264",
       "neq": "\u2260",
       "lt": "<",

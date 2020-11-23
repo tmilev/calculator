@@ -1472,8 +1472,12 @@ class LaTeXParser {
       secondToLast.syntacticRole = "";
       return this.decreaseParsingStack(1);
     }
-    if (secondToLast.syntacticRole === "\\sqrt" && last.syntacticRole === "") {
+    if (secondToLast.syntacticRole === "\\sqrt" && last.isExpression()) {
       let node = mathNodeFactory.sqrt(this.equationEditor, last.node);
+      return this.replaceParsingStackTop(node, "", - 2);
+    }
+    if (secondToLast.syntacticRole === "\\cancel" && last.isExpression()) {
+      let node = mathNodeFactory.cancel(this.equationEditor, last.node);
       return this.replaceParsingStackTop(node, "", - 2);
     }
     if (secondToLast.syntacticRole === "{" && last.syntacticRole === "}") {
@@ -2260,7 +2264,7 @@ class MathNode {
     this.boundingBox.width = content.boundingBox.width;
     this.boundingBox.fractionLineHeight = content.boundingBox.fractionLineHeight;
     let cancelSign = this.children[0];
-    this.cancelSign.computeDimensionsAtomicNoTransform();
+    cancelSign.computeDimensionsAtomicNoTransform();
     let stretchX = this.boundingBox.width / cancelSign.boundingBox.widthBeforeTransform;
     let stretchY = this.boundingBox.height / cancelSign.boundingBox.heightBeforeTransform;
     cancelSign.element.style.transform = `matrix(${stretchX},0,0,${stretchY}, 0, 0)`;

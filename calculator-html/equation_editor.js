@@ -181,6 +181,10 @@ const knownTypes = {
     "verticalAlign": "text-bottom",
     "textAlign": "center",
   }),
+  verticalLine: new MathNodeType({
+    "type": "verticalLine",
+    "borderLeft": "1 px solid black",
+  }),
   // Represents expressions such as "x/y" or "\frac{x}{y}".
   fraction: new MathNodeType({
     "type": "fraction",
@@ -2567,7 +2571,13 @@ class MathNode {
       }
       for (let j = 0; j < numberOfRows; j++) {
         let child = this.children[j].children[i];
-        child.boundingBox.left = left + (width - child.boundingBox.width) / 2;
+        let extraShift = (width - child.boundingBox.width) / 2;
+        if (child.latexExtraStyle === "l") {
+          extraShift = 0;
+        } else if (child.latexExtraStyle === "r") {
+          extraShift = width;
+        }
+        child.boundingBox.left = left + extraShift;
         child.computeBoundingBoxLeftSingleChild();
       }
       left += width + betweenColumns;
@@ -2578,14 +2588,6 @@ class MathNode {
     for (let i = 0; i < numberOfRows; i++) {
       let row = this.children[i];
       row.mergeBoundingBoxesHorizontallyAlignedElements();
-      /*      row.boundingBox = new BoundingBox();
-            row.boundingBox.width = rowWidth;
-            let boundingBoxMerged = this.mergeBoundingBoxesHorizontallyAlignedElements(row.children);
-      
-            //asdf
-            for (let j = 0; j < numberOfColumns; j++) {
-              row.children[j].boundingBox.top = (height - row.children[j].boundingBox.height) / 2;
-            }*/
       row.boundingBox.top = top;
       top += row.boundingBox.height + betweenRows;
     }
@@ -5055,11 +5057,8 @@ class MathNode {
     let styleIterator = new LatexColumnStyleIterator(style);
     styleIterator.next();
     for (let j = 0; j < this.children.length && styleIterator.isExhausted(); j++, styleIterator.next()) {
-      if (styleIterator.verticalBarRightCount > 0) {
-        // Logic to add right border can be insterted here
-      }
-      if (styleIterator.verticalBarLeftCount > 0) {
-        // Logic to add left border can be insterted here.
+      if (styleIterator.currentColumnAlignment === "l") {
+        this.children[j].latexExtraStyle = "l";
       }
     }
   }

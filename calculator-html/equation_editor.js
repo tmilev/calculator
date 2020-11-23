@@ -843,6 +843,7 @@ class LaTeXConstants {
     };
     /**@type{Object.<string, string>} */
     this.latexBackslashCommands = {
+      "cancel": "\\cancel",
       "sqrt": "\\sqrt",
       "begin": "\\begin",
       "end": "\\end",
@@ -1930,6 +1931,8 @@ class BoundingBox {
     this.stretchFactor = 1;
     this.transform = "";
     this.transformOrigin = "";
+    this.heightBeforeTransform = - 1;
+    this.widthBeforeTransform = - 1;
   }
 };
 
@@ -2229,6 +2232,21 @@ class MathNode {
     this.boundingBox.width = boundingRecangleDOM.width;
   }
 
+  computeDimensionsAtomicNoTransform() {
+    if (this.boundingBox.widthBeforeTransform >= 0) {
+      return;
+    }
+    this.element.style.transformOrigin = "top left";
+    this.element.style.transform = "";
+    this.element.style.width = "";
+    this.element.style.height = "";
+    this.element.style.top = "";
+    this.element.style.left = "";
+    this.computeDimensionsAtomic();
+    this.boundingBox.heightBeforeTransform = this.boundingBox.height;
+    this.boundingBox.widthBeforeTransform = this.boundingBox.width;
+  }
+
   computeDimensionsAtomic() {
     let boundingRecangleDOM = this.element.getBoundingClientRect();
     this.boundingBox.width = boundingRecangleDOM.width;
@@ -2242,19 +2260,9 @@ class MathNode {
     this.boundingBox.width = content.boundingBox.width;
     this.boundingBox.fractionLineHeight = content.boundingBox.fractionLineHeight;
     let cancelSign = this.children[0];
-    cancelSign.element.style.transformOrigin = "top left";
-    cancelSign.element.style.transform = "";
-    cancelSign.element.style.width = "";
-    cancelSign.element.style.height = "";
-    cancelSign.element.style.top = "";
-    cancelSign.element.style.left = "";
-    cancelSign.computeDimensionsAtomic();
-    let originalCancelHeight = cancelSign.boundingBox.height;
-    let originalCancelWidth = cancelSign.boundingBox.width;
-    // cancelSign.boundingBox.height = this.boundingBox.height;
-    // cancelSign.boundingBox.width = this.boundingBox.width;
-    let stretchX = this.boundingBox.width / originalCancelWidth;
-    let stretchY = this.boundingBox.height / originalCancelHeight;
+    this.cancelSign.computeDimensionsAtomicNoTransform();
+    let stretchX = this.boundingBox.width / cancelSign.boundingBox.widthBeforeTransform;
+    let stretchY = this.boundingBox.height / cancelSign.boundingBox.heightBeforeTransform;
     cancelSign.element.style.transform = `matrix(${stretchX},0,0,${stretchY}, 0, 0)`;
   }
 
@@ -2482,19 +2490,13 @@ class MathNode {
     /** @type {number}*/
     fractionLineHeightEnclosed,
   ) {
-    this.element.style.transformOrigin = "top left";
-    this.element.style.transform = "";
-    this.element.style.width = "";
-    this.element.style.height = "";
-    this.element.style.top = "";
-    this.element.style.left = "";
-    this.computeDimensionsAtomic();
+    this.computeDimensionsAtomicNoTransform();
     let scaleParenthesis = 1.32;
     let scaleHeight = 1.1;
     heightToEnclose = Math.max(fractionLineHeightEnclosed * 2, (heightToEnclose - fractionLineHeightEnclosed) * 2);
     let heightToStretchTo = heightToEnclose * scaleParenthesis;
     if (heightToEnclose !== 0) {
-      this.boundingBox.stretchFactor = heightToStretchTo / this.boundingBox.height;
+      this.boundingBox.stretchFactor = heightToStretchTo / this.boundingBox.heightBeforeTransform;
     }
     this.boundingBox.height = heightToEnclose * scaleHeight;
     // For many fonts, the parenteses's middle appears to be below 
@@ -2516,18 +2518,12 @@ class MathNode {
     /** @type {number}*/
     heightToEnclose,
   ) {
-    this.element.style.transformOrigin = "top left";
-    this.element.style.transform = "";
-    this.element.style.width = "";
-    this.element.style.height = "";
-    this.element.style.top = "";
-    this.element.style.left = "";
-    this.computeDimensionsAtomic();
+    this.computeDimensionsAtomicNoTransform();
     let translationDown = 0;
     if (heightToEnclose !== 0) {
       translationDown = heightToEnclose * 0.022;
       heightToEnclose *= 1.28;
-      this.boundingBox.stretchFactor = heightToEnclose / this.boundingBox.height;
+      this.boundingBox.stretchFactor = heightToEnclose / this.boundingBox.heightBeforeTransform;
       this.boundingBox.height = heightToEnclose;
     }
     this.boundingBox.transformOrigin = "top left";
@@ -3807,7 +3803,7 @@ class MathNode {
       return false;
     }
     let parent = this.parent;
-    parent.removeChildRange(this.indexInParent);
+    parent.removeChild(this.indexInParent);
     parent.normalizeHorizontalMath();
     parent.updateDOM();
     parent.focusRestore();

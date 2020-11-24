@@ -1047,6 +1047,57 @@ class LaTeXConstants {
       "\u00A0": true,
       "\n": true,
     };
+    /** @type{Object.<string, string>} */
+    this.utf8ToLatexMap = null;
+  }
+
+  computeUtf8ToLatexMap() {
+    if (this.utf8ToLatexMap !== null) {
+      return;
+    }
+    this.utf8ToLatexMap = {};
+    for (let i = 32; i < 125; i++) {
+      let character = String.fromCharCode(i);
+      this.utf8ToLatexMap[character] = character;
+    }
+    for (let key in this.latexBackslashAtomsEditable) {
+      let current = this.latexBackslashAtomsEditable[key];
+      this.utf8ToLatexMap[current] = `\\${key} `;
+    }
+    for (let key in this.latexBackslashOperators) {
+      let current = this.latexBackslashOperators[key];
+      this.utf8ToLatexMap[current] = `\\${key} `;
+    }
+    for (let key in this.operatorWithSuperAndSubscript) {
+      let current = this.operatorWithSuperAndSubscript[key];
+      this.utf8ToLatexMap[current] = `\\${key} `;
+    }
+    for (let key in this.mathcalEquivalents) {
+      let current = this.mathcalEquivalents[key];
+      this.utf8ToLatexMap[current] = `\\mathcal{${key}} `;
+    }
+  }
+
+  /** @returns{string} */
+  convertUtf8ToLatex(
+    /** @type{string} */
+    input,
+  ) {
+    this.computeUtf8ToLatexMap();
+    let result = [];
+    for (let i = 0; i < input.length; i++) {
+      let current = "";
+      for (let j = 0; j < 8; j++) {
+        current += input[i + j];
+        if (current in this.utf8ToLatexMap) {
+          current = this.utf8ToLatexMap[current];
+          i += j;
+          break;
+        }
+      }
+      result.push(current);
+    }
+    return result.join("");
   }
 
   isLatinCharacter(
@@ -2223,13 +2274,22 @@ class MathNode {
     return this.textContentOrInitialContent();
   }
 
+  /** @returns {string} */
   textContentOrInitialContent() {
     if (this.element === null) {
+      if (this.initialContent === null) {
+        return "[null]";
+      }
       return this.initialContent;
     }
-    return this.element.textContent;
+    let result = this.element.textContent;
+    if (result === null) {
+      return "";
+    }
+    return result;
   }
 
+  /** @returns {string} */
   contentIfAtomic() {
     if (!this.isAtomic()) {
       return "";
@@ -4980,7 +5040,7 @@ class MathNode {
   }
 
   toLatexAtomic() {
-    return this.contentIfAtomic();
+    return latexConstants.convertUtf8ToLatex(this.contentIfAtomic())
   }
 
   toLatexBaseWithExponent() {

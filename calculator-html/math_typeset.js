@@ -24,7 +24,7 @@ class TypeSetter {
       styleOverride = this.defaultStyle;
     }
     if (this.useBuiltInTypeSet()) {
-      equationEditor.typeset(element, styleOverride);
+      equationEditor.typeset(element, styleOverride, true);
     } else {
       mathjaxSetup.typeSetSoft(element);
     }
@@ -45,7 +45,7 @@ class TypeSetter {
       styleOverride = this.defaultStyle;
     }
     if (this.useBuiltInTypeSet()) {
-      equationEditor.typeset(element, styleOverride);
+      equationEditor.typeset(element, styleOverride, true);
     } else {
       mathjaxSetup.typeSetHard(element);
     }

@@ -752,8 +752,10 @@ function mathFromElement(
   container,
   /**@type{boolean} */
   editable,
+  /**@type{boolean} */
+  sanitizeLatexSource,
 ) {
-  return mathFromLatex(container, container.textContent, editable);
+  return mathFromLatex(container, container.textContent, editable, sanitizeLatexSource);
 }
 
 /** @returns {EquationEditor} Returns typeset math.*/
@@ -764,8 +766,10 @@ function mathFromLatex(
   latex,
   /**@type{boolean} */
   editable,
+  /**@type{boolean} */
+  sanitizeLatexSource,
 ) {
-  let result = new EquationEditor(container, new EquationEditorOptions(editable));
+  let result = new EquationEditor(container, new EquationEditorOptions(editable, sanitizeLatexSource, null));
   result.writeLatex(latex);
   return result;
 }
@@ -1580,11 +1584,15 @@ class EquationEditorOptions {
   constructor(
     /** @type{boolean} */
     editable,
+    /** @type{boolean} */
+    sanitizeLatexSource,
     /**@type{HTMLElement|null} */
     debugLogContainer,
   ) {
     /** @type{boolean} */
     this.editable = editable;
+    /** @type{boolean} */
+    this.sanitizeLatexSource = sanitizeLatexSource;
     /**@type{HTMLElement|null} */
     this.debugLogContainer = null;
     if (debugLogContainer instanceof HTMLElement) {
@@ -1607,7 +1615,7 @@ class EquationEditor {
     this.container.style.display = "inline-block";
     this.container.style.position = "relative";
     /** @type{EquationEditorOptions} */
-    this.options = new EquationEditorOptions(true);
+    this.options = new EquationEditorOptions(true, false, null);
     if (options !== null && options !== undefined) {
       this.options = options;
     }
@@ -1923,7 +1931,13 @@ class EquationEditor {
     }
     let staticContainer = document.createElement("SPAN");
     let latex = "";
-    if (!this.options.editable && this.latexLastWritten !== "") {
+    let writeOriginal = false;
+    if (this.rootNode.children[0].type.type === knownTypes.error.type) {
+      writeOriginal = true;
+    } else if (!this.options.editable && this.latexLastWritten !== "" && !this.options.sanitizeLatexSource) {
+      writeOriginal = true;
+    }
+    if (writeOriginal) {
       latex = this.latexLastWritten;
     } else {
       latex = this.rootNode.toLatex();
@@ -5300,6 +5314,8 @@ class MathTagCoverter {
   constructor(
     /**@type{string} */
     style,
+    /**@type{boolean} */
+    sanitizeLatexSource,
   ) {
     /**@type{HTMLElement|null} */
     this.elementProcessed = null;
@@ -5315,6 +5331,8 @@ class MathTagCoverter {
     this.typesetTotal = 0;
     let styleComputer = document.createElement("DIV");
     styleComputer.style = style;
+    /**@type{boolean} */
+    this.sanitizeLatexSource = sanitizeLatexSource;
     this.style = {
       fontFamily: styleComputer.style.fontFamily,
       display: styleComputer.style.display,
@@ -5463,7 +5481,7 @@ class MathTagCoverter {
       }
       element["typeset"] = "true";
       let startTime = (new Date()).getTime();
-      mathFromElement(element);
+      mathFromElement(element, false, this.sanitizeLatexSource);
       let typeSetTime = (new Date()).getTime() - startTime;
       console.log(`Typeset of element ${this.typesetTotal + 1} out of ${this.elementsToTypeset} took ${typeSetTime} ms.`);
     }
@@ -5475,11 +5493,13 @@ function typeset(
   toBeModified,
   /** @type {string} */
   style,
+  /**@type{boolean} whether to convert the original latex to parsed one.*/
+  sanitizeLatexSource,
 ) {
   if (style === "") {
     style = "font-family:'Times New Roman'; display:inline-block;";
   }
-  new MathTagCoverter(style).typeset(toBeModified);
+  new MathTagCoverter(style, sanitizeLatexSource).typeset(toBeModified);
 }
 
 function writeDebugInfo() {

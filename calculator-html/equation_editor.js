@@ -129,7 +129,6 @@ const knownTypeDefaultsArrows = {
 };
 
 const defaultFractionScale = 0.9;
-const atomMargin = `${0.02}em`;
 
 const knownTypes = {
   root: new MathNodeType({
@@ -854,6 +853,10 @@ class LaTeXConstants {
       "=": "=",
     };
     /**@type{Object.<string, string>} */
+    this.operatorsFromUft8 = {
+      "\u2212": "-",
+    };
+    /**@type{Object.<string, string>} */
     this.latexSyntacticValues = {
       "{": "{",
       "}": "}",
@@ -1075,6 +1078,9 @@ class LaTeXConstants {
     for (let key in this.mathcalEquivalents) {
       let current = this.mathcalEquivalents[key];
       this.utf8ToLatexMap[current] = `\\mathcal{${key}} `;
+    }
+    for (let key in this.operatorsFromUft8) {
+      this.utf8ToLatexMap[key] = this.operatorsFromUft8[key];
     }
   }
 
@@ -5052,11 +5058,29 @@ class MathNode {
     return `{${this.children[0].toLatex()}}_{${this.children[1].toLatex()}}`;
   }
 
+  toLatexOperatorWithSuperAndSubscript() {
+    let top = this.children[0].toLatex();
+    let result = this.children[1].toLatex();
+    let bottom = this.children[2].toLatex();
+    if (bottom !== "") {
+      result += `_{${bottom}}`;
+    }
+    if (top !== "") {
+      result += `^{${top}}`;
+    }
+    return result;
+  }
+
   toLatexLeftDelimiter() {
     if (this.element === null) {
       return "[null(]";
     }
     return `\\left${this.element.textContent}`;
+  }
+
+  toLatexCancel() {
+    let childLatex = this.children[1].toLatex();
+    return `\\cancel{${childLatex}}`;
   }
 
   toLatexSqrt() {
@@ -5128,8 +5152,14 @@ class MathNode {
     if (this.type.type === knownTypes.sqrt.type) {
       return this.toLatexSqrt();
     }
+    if (this.type.type === knownTypes.cancel.type) {
+      return this.toLatexCancel();
+    }
     if (this.type.type === knownTypes.leftDelimiter.type) {
       return this.toLatexLeftDelimiter();
+    }
+    if (this.type.type === knownTypes.operatorWithSuperAndSubscript.type) {
+      return this.toLatexOperatorWithSuperAndSubscript();
     }
     if (this.type.type === knownTypes.rightDelimiter.type) {
       return this.toLatexRightDelimiter();

@@ -1584,7 +1584,7 @@ class LaTeXParser {
       let rightDelimiter = latexConstants.rightDelimiters[last.syntacticRole];
       let left = mathNodeFactory.leftDelimiter(this.equationEditor, leftDelimiter, false);
       let right = mathNodeFactory.rightDelimiter(this.equationEditor, rightDelimiter, false);
-      let atom = mathNodeFactory.atom(this.equationEditor, null);
+      let atom = mathNodeFactory.atom(this.equationEditor, "");
       let horizontal = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [left, atom, right]);
       return this.replaceParsingStackTop(horizontal, "", - 2);
     }
@@ -2278,6 +2278,7 @@ class MathNode {
   textContentOrInitialContent() {
     if (this.element === null) {
       if (this.initialContent === null) {
+        console.log("Unexpected: initial content is null.");
         return "[null]";
       }
       return this.initialContent;
@@ -3855,7 +3856,7 @@ class MathNode {
     if (!this.parent.children[matchingIndex].implied) {
       this.implied = true;
       this.parent.focusCancelOnce();
-      this.focus(-1);
+      this.focus(- 1);
       this.updateDOM();
       return true;
     }

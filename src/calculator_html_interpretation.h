@@ -202,15 +202,12 @@ public:
   int numberOfAnswerIdsMathquilled;
   uint32_t randomSeedCurrent;
   List<uint32_t> randomSeedPerAttempt;
-  bool flagIsExamHome;
-  bool flagIsExamProblem;
   bool flagParentInvestigated;
   bool flagIsForReal;
   bool flagLoadedFromDB;
   bool flagTagHtmlPresent;
   bool flagTagHeadPresent;
   bool flagTagBodyPresent;
-  bool flagDoPrependProblemNavigationBar;
   bool flagDoPrependEditPagePanel;
   bool flagMathQuillWithMatrices;
   bool flagSectionsPrepared;
@@ -390,7 +387,6 @@ public:
   void interpretTopicList(SyntacticElementHTML& inputOutput);
   bool computeTopicListAndPointsEarned(std::stringstream& commentsOnFailure);
   void interpretTableOfContents(SyntacticElementHTML& inputOutput);
-  void interpretProblemNavigationBar(SyntacticElementHTML& inputOutput);
   void interpretAccountInformationLinks(SyntacticElementHTML& inputOutput);
   void interpretJavascripts(SyntacticElementHTML& inputOutput);
   JSData getJavascriptMathQuillBoxesForJSON();
@@ -424,7 +420,6 @@ public:
     const std::string& studentSection = "",
     bool includeRandomSeedIfAppropriate = false
   ) const;
-  std::string toStringProblemNavigation() const;
   std::string ToStringExtractedCommands();
   std::string toStringContent();
   std::string toStringParsingStack(List<SyntacticElementHTML>& theStack);

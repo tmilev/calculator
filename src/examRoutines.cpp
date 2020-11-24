@@ -26,8 +26,6 @@ CalculatorHTML::CalculatorHTML() {
   this->numberOfAnswerIdsMathquilled = 0;
   this->MaxInterpretationAttempts = 25;
   this->flagLoadedSuccessfully = false;
-  this->flagIsExamHome = false;
-  this->flagIsExamProblem = false;
   this->flagParentInvestigated = false;
   this->numberOfProblemsFound = 0;
   this->numberOfVideosFound = 0;
@@ -41,7 +39,6 @@ CalculatorHTML::CalculatorHTML() {
   this->flagTagHeadPresent = false;
   this->flagTagHtmlPresent = false;
   this->flagTagBodyPresent = false;
-  this->flagDoPrependProblemNavigationBar = true;
   this->flagDoPrependEditPagePanel = true;
 
   this->flagTopicTableStarted      = false;
@@ -478,9 +475,6 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(
     << " second(s). ";
     return out.str();
   }
-  if (this->flagDoPrependProblemNavigationBar) {
-    out << this->outputProblemNavigatioN;
-  }
   out << this->outputHtmlBodyNoTag;
   return out.str();
 }
@@ -519,16 +513,6 @@ bool CalculatorHTML::isStateModifierApplyIfYes(SyntacticElementHTML& inputElt) {
     return false;
   }
   std::string tagClass = inputElt.getKeyValue("class");
-  if (tagClass == "setCalculatorExamHome") {
-    this->flagIsExamHome = true;
-    this->flagIsExamProblem = false;
-    global.setWebInput(WebAPI::problem::courseHome, HtmlRoutines::convertStringToURLString(this->fileName, false));
-  }
-  if (tagClass == "setCalculatorExamProblem") {
-    this->flagIsExamHome = false;
-    this->flagIsExamProblem = true;
-    return true;
-  }
   return false;
 }
 
@@ -881,7 +865,6 @@ bool SyntacticElementHTML::isInterpretedNotByCalculator() {
   tagClass == "accountInformationLinks" ||
   tagClass == "generateTableOfContents" ||
   tagClass == "calculatorNavigationHere" ||
-  tagClass == "calculatorProblemNavigationHere"||
   tagClass == "calculatorEditPageHere" ||
   this->isAnswerElement(nullptr);
 }
@@ -1411,8 +1394,6 @@ void CalculatorHTML::interpretNotByCalculatorNotAnswer(SyntacticElementHTML& inp
     this->interpretAccountInformationLinks(inputOutput);
   } else if (tagClass == "calculatorJavascript") {
     this->interpretJavascripts(inputOutput);
-  } else if (tagClass == "calculatorProblemNavigationHere") {
-    this->interpretProblemNavigationBar(inputOutput);
   }
 }
 
@@ -1993,9 +1974,7 @@ void CalculatorHTML::initBuiltInSpanClasses() {
     this->calculatorClasses.addOnTop(SyntacticElementHTML::Tags::calculatorExamProblem);
     this->calculatorClasses.addOnTop("calculatorNavigationHere");
     this->calculatorClasses.addOnTop("calculatorProblemNavigationHere");
-    this->calculatorClasses.addOnTop("calculatorEditPageHere");
     this->calculatorClasses.addOnTop("calculatorManageClass");
-    this->calculatorClasses.addOnTop("setCalculatorExamProblem");
     this->calculatorClasses.addOnTop("setCalculatorExamHome");
     this->calculatorClasses.addOnTop("generateTopicTable");
     this->calculatorClasses.addOnTop("generateTableOfContents");
@@ -2050,8 +2029,6 @@ bool CalculatorHTML::parseHTML(std::stringstream* comments) {
   }
   int indexInElts = - 1;
   bool reduced = false;
-  this->flagIsExamProblem = false;
-  this->flagIsExamHome = false;
   this->flagTagHeadPresent = false;
   this->flagTagBodyPresent = false;
   this->flagTagHtmlPresent = false;
@@ -2713,7 +2690,6 @@ void CalculatorHTML::computeProblemLabel() {
     return;
   }
   if (
-    this->flagIsExamHome ||
     global.requestType == "template" ||
     global.requestType == "templateNoLogin"
   ) {
@@ -2739,9 +2715,6 @@ void CalculatorHTML::computeBodyDebugString() {
   if (this->logCommandsProblemGeneratioN.str() != "") {
     out << "<br>" << this->logCommandsProblemGeneratioN.str() << "<hr>";
   }
-  if (this->flagIsExamProblem) {
-    out << "Exam problem here. ";
-  }
   out << "<br>Random seed: "
   << this->theProblemData.randomSeed
   << "<br>ForReal: " << this->flagIsForReal << "<br>seed given: "
@@ -2760,9 +2733,6 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   double startTime = global.getElapsedSeconds();
   std::stringstream outBody;
   std::stringstream outHeadPt2;
-  this->flagIsExamHome =
-  global.requestType == "template" ||
-  global.requestType == "templateNoLogin";
   this->theProblemData.randomSeed = this->randomSeedPerAttempt[
     this->numberOfInterpretationAttempts - 1
   ];
@@ -2779,7 +2749,6 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->computeProblemLabel();
   std::string problemLabel = "";
   if (
-    !this->flagIsExamHome &&
     global.requestType != "template" &&
     global.requestType != "templateNoLogin"
   ) {
@@ -2787,17 +2756,11 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       TopicElement& current = this->topics.theTopics.getValueCreate(this->fileName);
       current.computeLinks(*this, true);
       problemLabel = current.displayTitle + "&nbsp;&nbsp;";
-      if (this->flagDoPrependProblemNavigationBar) {
-        problemLabel += current.displayResourcesLinks;
-      }
     }
   }
   if (
-    this->flagIsExamProblem &&
     this->flagIsForReal &&
-    !this->flagIsExamHome &&
-    global.requestType != "template" &&
-    global.requestType != "templateNoLogin"
+    global.requestType == WebAPI::frontend::scoredQuiz
   ) {
     if (global.flagDatabaseCompiled) {
       bool problemAlreadySolved = false;
@@ -2866,13 +2829,11 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       }
     }
   }
-  if (this->flagIsExamProblem) {
-    if (theInterpreter.flagHasGraphics) {
-      MapReferences<std::string, std::string, MathRoutines::hashString>& theScripts =
-      theInterpreter.theObjectContainer.graphicsScripts;
-      for (int i = 0; i < theScripts.size(); i ++) {
-        this->theScripts.setKeyValue(theScripts.theKeys[i], theScripts.theValues[i]);
-      }
+  if (theInterpreter.flagHasGraphics) {
+    MapReferences<std::string, std::string, MathRoutines::hashString>& theScripts =
+    theInterpreter.theObjectContainer.graphicsScripts;
+    for (int i = 0; i < theScripts.size(); i ++) {
+      this->theScripts.setKeyValue(theScripts.theKeys[i], theScripts.theValues[i]);
     }
   }
   ////////////////////////////////////////////////////////////////////
@@ -2910,149 +2871,10 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
 
   }
   std::stringstream navigationAndEditTagStream;
-  if (this->flagDoPrependProblemNavigationBar) {
-    navigationAndEditTagStream << this->toStringProblemNavigation();
-  }
   this->outputProblemNavigatioN = navigationAndEditTagStream.str();
   this->outputHtmlBodyNoTag = outBody.str();
   this->outputHtmlHeadNoTag = outHeadPt2.str();
   return true;
-}
-
-std::string CalculatorHTML::toStringProblemNavigation() const {
-  MacroRegisterFunctionWithName("CalculatorHTML::toStringProblemNavigation");
-  std::stringstream out;
-  std::string exerciseRequest = "exercise";
-  std::string studentView = global.userStudentVieWOn() ? "true" : "false";
-  std::string linkSeparator = " | ";
-  std::string linkBigSeparator = " || ";
-  if (global.userGuestMode()) {
-    exerciseRequest = "exerciseNoLogin";
-  }
-  if (global.userGuestMode()) {
-    out << "<b>Guest mode</b>" << linkSeparator;
-  }
-  if (!global.flagLoggedIn) {
-    out << "<a href=\"" << global.displayNameExecutable
-    << "?request=login\">Log in</a> " << linkSeparator;
-  }
-  List<std::string> randomSeedContainer;
-  randomSeedContainer.addOnTop(WebAPI::problem::randomSeed);
-  std::string calcArgsNoPassExamDetails =
-  global.toStringCalculatorArgumentsNoNavigation(&randomSeedContainer);
-  if (this->flagIsExamProblem) {
-    if (global.requestType == "exercise") {
-      out << "<a href=\"" << global.displayNameExecutable << "?request=scoredQuiz&"
-      << this->toStringCalculatorArgumentsForProblem("scoredQuiz", studentView)
-      << "\">" << this->stringScoredQuizzes << "</a>" << linkSeparator;
-      out << "<b style =\"color:green\">" << this->stringPracticE
-      << "</b>" << linkSeparator;
-    } else if (global.requestType == "scoredQuiz") {
-      out << "<b style =\"color:brown\">"
-      << this->stringScoredQuizzes << "</b>" << linkSeparator;
-      out << "<a href=\"" << global.displayNameExecutable
-      << "?request=exercise&"
-      << this->toStringCalculatorArgumentsForProblem("exercise", studentView)
-      << "\">" << this->stringPracticE << "</a>" << linkSeparator;
-    }
-  }
-  if (this->flagIsExamProblem && this->flagParentInvestigated) {
-    int indexInParent = this->problemNamesNoTopics.getIndex(this->fileName);
-    if (indexInParent == - 1) {
-      out << "<b>Problem not in course</b>" << linkSeparator;
-    } else {
-      if (indexInParent > 0) {
-        out << "<a href=\"" << global.displayNameExecutable << "?request="
-        << global.requestType;
-        out << "&" << calcArgsNoPassExamDetails
-        << "studentView=" << studentView << "&";
-        if (global.getWebInput("studentSection") != "") {
-          out << "studentSection=" << global.getWebInput("studentSection") << "&";
-        }
-        out << "topicList=" << HtmlRoutines::convertStringToURLString(this->topicListFileName, false) << "&";
-        out << "courseHome=" << HtmlRoutines::convertStringToURLString(this->courseHome, false) << "&";
-        out << "fileName=" << HtmlRoutines::convertStringToURLString(this->problemNamesNoTopics[indexInParent - 1], false)
-        << "\">&#8592;</a>" << linkSeparator;
-      } else {
-        out << "<a disabled =\"disabled\">&#8592;</a>" << linkSeparator;
-      }
-      if (indexInParent < this->problemNamesNoTopics.size - 1) {
-        out << "<a href=\"" << global.displayNameExecutable << "?request="
-        << global.requestType;
-        out << "&" << calcArgsNoPassExamDetails
-        << "studentView=" << studentView << "&";
-        if (global.getWebInput("studentSection") != "") {
-          out << "studentSection=" << global.getWebInput("studentSection") << "&";
-        }
-        out << "topicList=" << HtmlRoutines::convertStringToURLString(this->topicListFileName, false) << "&";
-        out << "courseHome=" << HtmlRoutines::convertStringToURLString(this->courseHome, false) << "&";
-        out << "fileName=" << HtmlRoutines::convertStringToURLString(this->problemNamesNoTopics[indexInParent + 1], false)
-        << "\">&#8594;</a>" << linkSeparator;
-      } else {
-        out << "<a disabled =\"disabled\">&#8594;</a>" << linkSeparator;
-      }
-    }
-  }
-  if (this->flagIsExamProblem &&(
-    global.requestType == "exercise" ||
-    global.requestType == "exerciseNoLogin"
-  )) {
-    out << "<a href=\"" << global.displayNameExecutable
-    << "?request=" << global.requestType << "&"
-    << this->toStringCalculatorArgumentsForProblem(exerciseRequest, studentView, "", true)
-    << "\">" << this->stringProblemLink << " (#"
-    << this->theProblemData.randomSeed << ")</a>" << linkBigSeparator;
-  }
-  if (global.userDefaultHasAdminRights()) {
-    if (global.userStudentVieWOn()) {
-      out << "<a href=\"" << global.displayNameExecutable << "?"
-      << this->toStringCalculatorArgumentsForProblem(
-        global.requestType,
-        "false",
-        HtmlRoutines::convertURLStringToNormal(global.getWebInput("studentSection"), false)
-      ) << "\">Admin view</a>" << linkSeparator;
-    } else {
-      out << "<b>Admin view</b>" << linkSeparator;
-    }
-    if (this->databaseStudentSections.size == 0) {
-      if (global.userStudentVieWOn()) {
-        out << "<b>Student View</b>";
-      } else {
-        out << "<a href=\"" << global.displayNameExecutable << "?"
-        << this->toStringCalculatorArgumentsForProblem(global.requestType, "true", "")
-        << "\">Student view</a>";
-      }
-    } else {
-      out << "Student view, section: ";
-    }
-    for (int i = 0; i < this->databaseStudentSections.size; i ++) {
-      if (this->databaseStudentSections[i] != "") {
-        if (
-          global.userStudentVieWOn() &&
-          this->databaseStudentSections[i] == HtmlRoutines::convertURLStringToNormal(
-            global.getWebInput("studentSection"), false
-          )
-        ) {
-          out << "<b>" << this->databaseStudentSections[i] << "</b>";
-        } else {
-          out << "<a href=\"" << global.displayNameExecutable << "?"
-          << this->toStringCalculatorArgumentsForProblem(
-            global.requestType, "true", this->databaseStudentSections[i]
-          ) << "\">" << this->databaseStudentSections[i] << " </a>";
-        }
-        if (i != this->databaseStudentSections.size - 1) {
-          out << linkSeparator;
-        }
-      }
-    }
-  }
-  if (out.str() == "") {
-    return "";
-  }
-  std::stringstream outFinal;
-  outFinal << "<problemNavigation>" << out.str();
-  outFinal << "</problemNavigation>";
-  return outFinal.str();
 }
 
 std::string CalculatorHTML::toStringCalculatorArgumentsForProblem(
@@ -3870,12 +3692,6 @@ bool CalculatorHTML::loadAndParseTopicList(std::stringstream& comments) {
     }
   }
   return true;
-}
-
-void CalculatorHTML::interpretProblemNavigationBar(SyntacticElementHTML& inputOutput) {
-  MacroRegisterFunctionWithName("CalculatorHTML::InterpretCalculatorNavigationBar");
-  inputOutput.interpretedCommand = this->toStringProblemNavigation();
-  this->flagDoPrependProblemNavigationBar = false;
 }
 
 JSData CalculatorHTML::toStringTopicListJSON() {

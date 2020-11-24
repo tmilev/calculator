@@ -818,7 +818,6 @@ JSData WebAPIResponse::getExamPageJSON() {
     return output;
   }
   CalculatorHTML theFile;
-  theFile.flagDoPrependProblemNavigationBar = false;
   std::stringstream errorAndDebugStream;
   std::string problemBody = theFile.LoadAndInterpretCurrentProblemItemJSON(
     global.userRequestRequiresLoadingRealExamData(),
@@ -889,7 +888,13 @@ JSData WebAPIResponse::getEditPageJSON() {
   HashedList<std::string, MathRoutines::hashString> theAutocompleteKeyWords;
   theFile.initBuiltInSpanClasses();
   std::stringstream comments;
-  if (theFile.flagIsExamProblem) {
+  if (theFile.courseHome == theFile.fileName || theFile.topicListFileName == theFile.fileName) {
+    theFile.loadAndParseTopicList(comments);
+    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorClasses);
+    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorClassesAnswerFields);
+    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorTopicElementNames);
+    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.topics.knownTopicBundles.theKeys);
+  } else{
     Calculator tempCalculator;
     tempCalculator.initialize();
     tempCalculator.computeAutoCompleteKeyWords();
@@ -897,12 +902,6 @@ JSData WebAPIResponse::getEditPageJSON() {
     theAutocompleteKeyWords.addOnTopNoRepetition(tempCalculator.autoCompleteKeyWords);
     theFile.initAutocompleteExtras();
     theAutocompleteKeyWords.addOnTopNoRepetition(theFile.autoCompleteExtras);
-  } else {
-    theFile.loadAndParseTopicList(comments);
-    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorClasses);
-    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorClassesAnswerFields);
-    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorTopicElementNames);
-    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.topics.knownTopicBundles.theKeys);
   }
   JSData theAutoCompleteWordsJS;
   theAutoCompleteWordsJS.theType = JSData::token::tokenArray;

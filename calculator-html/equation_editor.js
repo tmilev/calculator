@@ -1515,10 +1515,23 @@ class LaTeXParser {
       this.lastRuleName = "parenthetic expression to expression";
       let leftDelimiter = latexConstants.leftDelimiters[thirdToLast.syntacticRole];
       let rightDelimiter = latexConstants.rightDelimiters[last.syntacticRole];
-      let leftParentheses = mathNodeFactory.leftDelimiter(this.equationEditor, leftDelimiter, false);
-      let rightParentheses = mathNodeFactory.rightDelimiter(this.equationEditor, rightDelimiter, false);
-      let horizontal = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [leftParentheses, secondToLast.node, rightParentheses]);
+      let left = mathNodeFactory.leftDelimiter(this.equationEditor, leftDelimiter, false);
+      let right = mathNodeFactory.rightDelimiter(this.equationEditor, rightDelimiter, false);
+      let horizontal = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [left, secondToLast.node, right]);
       return this.replaceParsingStackTop(horizontal, "", - 3);
+    }
+    if (
+      secondToLast.syntacticRole in latexConstants.leftDelimiters &&
+      last.syntacticRole in latexConstants.rightDelimiters
+    ) {
+      this.lastRuleName = "parenthetic expression to expression";
+      let leftDelimiter = latexConstants.leftDelimiters[secondToLast.syntacticRole];
+      let rightDelimiter = latexConstants.rightDelimiters[last.syntacticRole];
+      let left = mathNodeFactory.leftDelimiter(this.equationEditor, leftDelimiter, false);
+      let right = mathNodeFactory.rightDelimiter(this.equationEditor, rightDelimiter, false);
+      let atom = mathNodeFactory.atom(this.equationEditor, null);
+      let horizontal = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [left, atom, right]);
+      return this.replaceParsingStackTop(horizontal, "", - 2);
     }
     if (last.isExpression() && secondToLast.syntacticRole === "_" && thirdToLast.isExpression()) {
       this.lastRuleName = "make subscript";
@@ -1905,6 +1918,7 @@ class EquationEditor {
     }
     if (this.container.children.length >= 2) {
       this.container.removeChild(this.container.children[1]);
+      this.container.style.width = this.container.children[0].style.width;
       return;
     }
     let staticContainer = document.createElement("SPAN");
@@ -1919,6 +1933,8 @@ class EquationEditor {
     staticContainer.style.left = this.container.children[0].style.width;
     staticContainer.style.whiteSpace = "nowrap";
     this.container.appendChild(staticContainer);
+    let newWidth = this.container.children[0].getBoundingClientRect().width + staticContainer.getBoundingClientRect().width;
+    this.container.style.width = newWidth;
     let range = window.getSelection().getRangeAt(0);
     let rangeClone = range.cloneRange();
     rangeClone.selectNode(staticContainer);
@@ -2536,6 +2552,10 @@ class MathNode {
     fractionLineHeightEnclosed,
   ) {
     this.computeDimensionsAtomicNoTransform();
+    if (heightToEnclose === 0) {
+      heightToEnclose = this.boundingBox.height
+      fractionLineHeightEnclosed = this.boundingBox.height / 2;
+    }
     let scaleParenthesis = 1.32;
     let scaleHeight = 1.1;
     heightToEnclose = Math.max(fractionLineHeightEnclosed * 2, (heightToEnclose - fractionLineHeightEnclosed) * 2);

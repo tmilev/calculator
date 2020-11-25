@@ -7424,7 +7424,14 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     "If a rational number is small enough to factor, reduces the "
     "rational exponents of the rational number. ",
-    "\n%LogEvaluation (4/9)^{17/3}; (12/7)^{7/2}; 12^{2/3}; 12^{-2/3}; 5^{- 1/3}; 5^{- 1/3}-\\sqrt[3]{5^- 1} ; \\sqrt[20]{200!}",
+    "(32)^{-4/5};\n"
+    "(4/9)^{17/3};\n"
+    "(12/7)^{7/2};\n"
+    "12^{2/3};\n"
+    "12^{-2/3};\n"
+    "5^{- 1/3};\n"
+    "5^{- 1/3}-\\sqrt[3]{5^- 1};\n"
+    "\\sqrt[20]{200!}",
     "CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors",
     "PowerRationalByRational",
     innerStandard

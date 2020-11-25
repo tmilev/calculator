@@ -1498,7 +1498,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixExpressionsBySmallInteger(
 bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors");
   if (!input.startsWith(calculator.opThePower(), 3)) {
     return false;
   }
@@ -1617,9 +1617,6 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
     }
     currentContribution.raiseToPower(currentExpSmallInt);
     currentNumerator *= currentContribution;
-    if (!currentNumerator.isIntegerFittingInInt(nullptr)) {
-      return false;
-    }
   }
   for (int i = 0; i < denominatorPowers.size; i ++) {
     currentContribution = denominatorFactors[i];
@@ -1628,9 +1625,6 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
     }
     currentContribution.raiseToPower(currentExpSmallInt);
     currentDenominator *= currentContribution;
-    if (!currentDenominator.isIntegerFittingInInt(nullptr)) {
-      return false;
-    }
   }
   insideTheRadical = currentNumerator;
   insideTheRadical /= currentDenominator;
@@ -1650,6 +1644,9 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
     return false;
   }
   Expression insideTheRadicalE, theRadicalE, theRadicalCFE, exponentE;
+  if (exponentWorking < 0) {
+    outsideOfTheRadical.invert();
+  }
   theRadicalCFE.assignValue(outsideOfTheRadical, calculator);
   insideTheRadicalE.assignValue(insideTheRadical, calculator);
   exponentE.assignValue(exponentWorking, calculator);

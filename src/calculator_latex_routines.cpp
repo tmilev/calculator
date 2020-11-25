@@ -702,7 +702,6 @@ std::string LaTeXCrawler::adjustDisplayTitle(const std::string& input, bool isHo
   MacroRegisterFunctionWithName("LaTeXcrawler::adjustDisplayTitle");
   std::string result = input;
   List<std::string> ignoredTags;
-  ignoredTags.addOnTop("actualExamProblem");
   ignoredTags.addOnTop("lectureTag");
   ignoredTags.addOnTop("advancedTopic");
   ignoredTags.addOnTop("reviewProblem");

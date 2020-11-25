@@ -879,6 +879,7 @@ class LaTeXConstants {
       "end": "\\end",
       "frac": "\\frac",
       "mathcal": "\\mathcal",
+      "mathbb": "\\mathbb",
       "langle": "\\langle",
       "rangle": "\\rangle",
     };
@@ -995,6 +996,17 @@ class LaTeXConstants {
       "X": "\uD835\uDCB3",
       "Y": "\uD835\uDCB4",
       "Z": "\uD835\uDCB5",
+    };
+    /**@type{Object.<string, string>} */
+    this.mathbbEquivalents = {
+      "A": "\uD835\uDD38",
+      "C": "\u2102",
+      "H": "\u210D",
+      "N": "\u2115",
+      "O": "\uD835\uDD46",
+      "P": "\u2119",
+      "Q": "\u211A",
+      "R": "\u211D",
     };
     /**@type{Object.<string, string>} */
     this.leftDelimiters = {
@@ -1327,6 +1339,35 @@ class LaTeXParser {
     return totalStack.join("&nbsp;&nbsp;");
   }
 
+  specialFont(
+    /**@type{Object.<string, string>} */
+    specialFontEquivalents,
+  ) {
+    let last = this.parsingStack[this.parsingStack.length - 1];
+
+    if (latexConstants.isLatinCharacter(last.content)) {
+      if (!(last.content in specialFontEquivalents)) {
+        return false;
+      }
+      this.lastRuleName = "special font";
+      let node = mathNodeFactory.atom(this.equationEditor, specialFontEquivalents[last.content]);
+      return this.replaceParsingStackTop(node, "", -2);
+    }
+    if (!last.isExpression() || last.node.type.type !== knownTypes.horizontalMath.type) {
+      return false;
+    }
+    if (last.node.children.length !== 1) {
+      return false;
+    }
+    let contentIfAtom = last.node.children[0].contentIfAtom();
+    if (!(contentIfAtom in specialFontEquivalents)) {
+      return false;
+    }
+    this.lastRuleName = "special font horizontal math";
+    let node = mathNodeFactory.atom(this.equationEditor, specialFontEquivalents[contentIfAtom]);
+    return this.replaceParsingStackTop(node, "", - 2);
+  }
+
   /**@returns{boolean} Applies the first possible rule to the top of the parsing stack. */
   applyOneRule() {
     let last = this.parsingStack[this.parsingStack.length - 1];
@@ -1373,21 +1414,13 @@ class LaTeXParser {
       return this.replaceParsingStackTop(null, latexConstants.latexBackslashCommands[last.content], - 2);
     }
     if (secondToLast.syntacticRole === "\\mathcal") {
-      if (latexConstants.isLatinCharacter(last.content)) {
-        if (last.content in latexConstants.mathcalEquivalents) {
-          this.lastRuleName = "mathcal font";
-          let node = mathNodeFactory.atom(this.equationEditor, latexConstants.mathcalEquivalents[last.content]);
-          return this.replaceParsingStackTop(node, "", -2);
-        }
-      } else if (last.isExpression() && last.node.type.type === knownTypes.horizontalMath.type) {
-        if (last.node.children.length === 1) {
-          let contentIfAtom = last.node.children[0].contentIfAtom();
-          if (contentIfAtom in latexConstants.mathcalEquivalents) {
-            this.lastRuleName = "mathcal font horizontal math";
-            let node = mathNodeFactory.atom(this.equationEditor, latexConstants.mathcalEquivalents[contentIfAtom]);
-            return this.replaceParsingStackTop(node, "", -2);
-          }
-        }
+      if (this.specialFont(latexConstants.mathcalEquivalents)) {
+        return true;
+      }
+    }
+    if (secondToLast.syntacticRole === "\\mathbb") {
+      if (this.specialFont(latexConstants.mathbbEquivalents)) {
+        return true;
       }
     }
     if (last.content in latexConstants.latexCommandsIgnored && secondToLast.syntacticRole === "\\") {

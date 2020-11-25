@@ -430,10 +430,12 @@ class MathNodeFactory {
     equationEditor,
     /** @type {MathNode|null} */
     underTheRadicalContent,
+    /** @type {MathNode|null} */
+    exponentContent,
   ) {
     const sqrt = new MathNode(equationEditor, knownTypes.sqrt);
     const radicalExponentBox = new MathNode(equationEditor, knownTypes.radicalExponentBox);
-    radicalExponentBox.appendChild(this.horizontalMath(equationEditor, null));
+    radicalExponentBox.appendChild(this.horizontalMath(equationEditor, exponentContent));
     sqrt.appendChild(radicalExponentBox);
     sqrt.appendChild(mathNodeFactory.sqrtSign(equationEditor));
     const underTheRadical = new MathNode(equationEditor, knownTypes.radicalUnderBox);
@@ -1272,9 +1274,9 @@ class LaTeXParser {
   /** @returns{boolean} */
   decreaseParsingStack(
     /**@type{number} */
-    elementToRemove,
+    elementsToRemove,
   ) {
-    this.parsingStack.length = this.parsingStack.length - elementToRemove;
+    this.parsingStack.length = this.parsingStack.length - elementsToRemove;
   }
 
   /** @returns{boolean} */
@@ -1548,6 +1550,7 @@ class LaTeXParser {
       return this.decreaseParsingStack(2);
     }
     if (secondToLast.syntacticRole === "matrixBuilder" && last.isMatrixEnder()) {
+      this.lastRuleName = "finish matrix";
       // Normalize the matrix: ensure all rows have same number of columns, no last empty row, etc.
       secondToLast.node.normalizeMatrix();
       (new LatexColumnStyleIterator(secondToLast.node.latexExtraStyle)).applyStyleToMatrix(secondToLast.node);
@@ -1556,10 +1559,12 @@ class LaTeXParser {
       return this.decreaseParsingStack(1);
     }
     if (secondToLast.syntacticRole === "\\sqrt" && last.isExpression()) {
-      let node = mathNodeFactory.sqrt(this.equationEditor, last.node);
+      this.lastRuleName = "Square root";
+      let node = mathNodeFactory.sqrt(this.equationEditor, last.node, secondToLast.node);
       return this.replaceParsingStackTop(node, "", - 2);
     }
     if (secondToLast.syntacticRole === "\\cancel" && last.isExpression()) {
+      this.lastRuleName = "cancel expression";
       let node = mathNodeFactory.cancel(this.equationEditor, last.node);
       return this.replaceParsingStackTop(node, "", - 2);
     }
@@ -1567,6 +1572,17 @@ class LaTeXParser {
       this.lastRuleName = "{} to empty atom";
       let node = mathNodeFactory.atom(this.equationEditor, "");
       return this.replaceParsingStackTop(node, "", -2);
+    }
+    if (
+      fourthToLast.syntacticRole === "\\sqrt" &&
+      fourthToLast.node === null &&
+      thirdToLast.syntacticRole === "[" &&
+      secondToLast.isExpression() &&
+      last.syntacticRole === "]"
+    ) {
+      this.lastRuleName = "nth radical";
+      fourthToLast.node = secondToLast.node;
+      return this.decreaseParsingStack(3);
     }
     if (
       thirdToLast.syntacticRole in latexConstants.leftDelimiters &&
@@ -4177,7 +4193,7 @@ class MathNode {
     ancestor.removeAllChildren();
     let underTheRadical = mathNodeFactory.horizontalMathFromArray(this.equationEditor, splitBySelection.split);
     underTheRadical.ensureEditableAtoms();
-    let sqrt = mathNodeFactory.sqrt(this.equationEditor, underTheRadical);
+    let sqrt = mathNodeFactory.sqrt(this.equationEditor, underTheRadical, null);
     ancestor.appendChildren(splitBySelection.beforeSplit);
     ancestor.appendChild(sqrt);
     ancestor.appendChildren(splitBySelection.afterSplit);
@@ -4215,7 +4231,7 @@ class MathNode {
   ) {
     let parent = this.parent;
     let oldIndex = this.indexInParent;
-    let sqrt = mathNodeFactory.sqrt(this.equationEditor, split[1]);
+    let sqrt = mathNodeFactory.sqrt(this.equationEditor, split[1], null);
     if (split[0] === null) {
       parent.replaceChildAtPosition(oldIndex, sqrt);
     } else {

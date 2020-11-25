@@ -259,7 +259,7 @@ public:
   std::string courseHome;
   std::string topicListJavascriptWithTag;
 
-  static const std::string BugsGenericMessage;
+  static const std::string bugsGenericMessage;
   HashedList<std::string, MathRoutines::hashString> tagKeysNoValue;
   List<std::string> calculatorTopicElementNames;
   List<std::string> calculatorTagsRecordedLiterally;

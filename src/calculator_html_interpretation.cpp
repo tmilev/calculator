@@ -7,7 +7,7 @@
 #include "string_constants.h"
 
 JSData WebAPIResponse::getProblemSolutionJSON() {
-  MacroRegisterFunctionWithName("WebAPIReponse::GetProblemSolution");
+  MacroRegisterFunctionWithName("WebAPIReponse::getProblemSolutionJSON");
   if (!global.userDefaultHasAdminRights()) {
     global.theResponse.disallowReport();
   }
@@ -19,7 +19,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   if (!theProblem.flagLoadedSuccessfully) {
     out << "Problem name is: " << theProblem.fileName
     << " <b>Could not load problem, this may be a bug. "
-    << CalculatorHTML::BugsGenericMessage << "</b>";
+    << CalculatorHTML::bugsGenericMessage << "</b>";
     if (errorStream.str() != "") {
       out << " Comments: " << errorStream.str();
     }
@@ -72,7 +72,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     return result;
   }
   if (currentA.solutionElements.size == 0) {
-    out << "<b> Unfortunately there is no solution given for this question (answerID: " << lastStudentAnswerID << ").";
+    out << "<b>Unfortunately there is no solution given for this question (answerID: " << lastStudentAnswerID << ").</b>";
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
@@ -86,7 +86,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   if (theInterpreteR.syntaxErrors != "") {
     out << "<b style = 'color:red'>Failed to compose the solution. "
     << "Likely there is a bug with the problem. </b>"
-    << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
+    << "<br>" << CalculatorHTML::bugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.toStringSyntacticStackHumanReadable(false, false);
     result[WebAPI::result::resultHtml] = out.str();
     result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
@@ -95,7 +95,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   if (theInterpreteR.flagAbortComputationASAP) {
     out << "<b style = 'color:red'>Failed to compose the solution. "
     << "Likely there is a bug with the problem. </b>"
-    << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
+    << "<br>" << CalculatorHTML::bugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.outputString
     << theInterpreteR.outputCommentsString
     << "<hr>Input: <br>" << theInterpreteR.inputString;
@@ -114,7 +114,6 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     }
   }
   if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
-
     out << "<hr>"
     << HtmlRoutines::getCalculatorComputationAnchorNewPage(
       answerCommandsNoEnclosures.str(), "Input link"
@@ -1151,7 +1150,7 @@ JSData WebAPIResponse::submitAnswersJSON(
             << theDeadlineString << ". Comments: "
             << "<span style =\"color:red\">" << badDateStream.str() << "</span>"
             << "</td></tr><tr><td> This should not happen. "
-            << CalculatorHTML::BugsGenericMessage << "</td></tr>";
+            << CalculatorHTML::bugsGenericMessage << "</td></tr>";
             output << "</table>";
             result[WebAPI::result::resultHtml] = output.str();
             return result;
@@ -1186,7 +1185,7 @@ JSData WebAPIResponse::submitAnswersJSON(
       if (!theUser.storeProblemData(theProblem.fileName, &comments)) {
         output << "<tr><td><b>This shouldn't happen and may be a bug: "
         << "failed to store your answer in the database. "
-        << CalculatorHTML::BugsGenericMessage
+        << CalculatorHTML::bugsGenericMessage
         << "</b><br>Comments: "
         << comments.str() << "</td></tr>";
       } else {
@@ -1373,7 +1372,7 @@ std::string WebAPIResponse::addUserEmails(const std::string& hostWebAddressWithP
   return out.str();
 }
 
-const std::string CalculatorHTML::BugsGenericMessage =
+const std::string CalculatorHTML::bugsGenericMessage =
 "Please take a screenshot, copy the link address and send those along "
 "with a short explanation to the administrator of the web site. ";
 
@@ -1407,7 +1406,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   if (!theProblem.flagLoadedSuccessfully) {
     errorStream << "Problem name is: " << theProblem.fileName
     << " <b>Could not load problem, this may be a bug. "
-    << CalculatorHTML::BugsGenericMessage << "</b>";
+    << CalculatorHTML::bugsGenericMessage << "</b>";
     result[WebAPI::result::error] = errorStream.str();
     return result;
   }
@@ -1480,7 +1479,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
         answerCommandsNoEnclosure.str(), "Calculator input no enclosures"
       );
     }
-    out << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
+    out << "<br>" << CalculatorHTML::bugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.toStringSyntacticStackHumanReadable(false, false);
     result[WebAPI::result::resultHtml] = out.str();
     int64_t ellapsedTime = global.getElapsedMilliseconds() - startTimeInMilliseconds;
@@ -1495,7 +1494,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
         answerCommandsNoEnclosure.str(), "Calculator input no enclosures"
       );
     }
-    out << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
+    out << "<br>" << CalculatorHTML::bugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.outputString
     << theInterpreteR.outputCommentsString
     << "<hr>Input: <br>" << theInterpreteR.inputString;

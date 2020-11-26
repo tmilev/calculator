@@ -271,6 +271,9 @@ const knownTypes = {
   operatorWithSuperAndSubscript: new MathNodeType({
     "type": "operatorWithSuperAndSubscript",
   }),
+  operatorWithSubscript: new MathNodeType({
+    "type": "operatorWithSubscript",
+  }),
   operatorStandalone: new MathNodeType({
     "type": "operatorStandalone",
     "fontSize": 1.8,
@@ -636,25 +639,36 @@ class MathNodeFactory {
     let result = new MathNode(equationEditor, knownTypes.operatorWithSuperAndSubscript);
     let superscriptNode = new MathNode(equationEditor, knownTypes.operatorSuperscript);
     let subscriptNode = new MathNode(equationEditor, knownTypes.operatorSubscript);
-    let subscriptScales = {
-      "lim": 0.8,
-    };
-    if (operator in subscriptScales) {
-      subscriptNode.type.fontSize = subscriptScales[operator];
-      subscriptNode.type.minHeightScale = subscriptScales[operator];
-    }
     let operatorNode = new MathNode(equationEditor, knownTypes.operatorStandalone);
-    let operatorScales = {
-      "lim": 1,
-    };
-    if (operator in operatorScales) {
-      operatorNode.type.fontSize = operatorScales[operator];
-      operatorNode.type.minHeightScale = operatorScales[operator];
-    }
     superscriptNode.appendChild(this.horizontalMath(equationEditor, superscript));
     subscriptNode.appendChild(this.horizontalMath(equationEditor, subscript));
     operatorNode.appendChild(this.atomImmutable(equationEditor, operator));
     result.appendChild(superscriptNode);
+    result.appendChild(operatorNode);
+    result.appendChild(subscriptNode);
+    return result;
+  }
+
+  /** @returns {MathNode} */
+  operatorWithSubscript(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /** @type {string} */
+    operator,
+    /** @type {MathNode|null} */
+    subscript,
+  ) {
+    let result = new MathNode(equationEditor, knownTypes.operatorWithSubscript);
+    let subscriptNode = new MathNode(equationEditor, knownTypes.operatorSubscript);
+    let subscriptScale = 0.8;
+    subscriptNode.type.fontSize = subscriptScale;
+    subscriptNode.type.minHeightScale = subscriptScale;
+    let operatorNode = new MathNode(equationEditor, knownTypes.operatorStandalone);
+    let operatorScale = 1;
+    operatorNode.type.fontSize = operatorScale;
+    operatorNode.type.minHeightScale = operatorScale;
+    subscriptNode.appendChild(this.horizontalMath(equationEditor, subscript));
+    operatorNode.appendChild(this.atomImmutable(equationEditor, operator));
     result.appendChild(operatorNode);
     result.appendChild(subscriptNode);
     return result;
@@ -917,8 +931,11 @@ class LaTeXConstants {
     this.operatorWithSuperAndSubscript = {
       "sum": "\u03A3",
       "int": "\u222B",
-      "lim": "lim",
     };
+    /**@type{Object.<string, string>} */
+    this.operatorsWithSubscript = {
+      "lim": "lim",
+    }
     /**@type{Object.<string, string>} */
     this.latexBackslashAtomsEditable = {
       "alpha": "\u03B1",
@@ -1087,6 +1104,10 @@ class LaTeXConstants {
     }
     for (let key in this.operatorWithSuperAndSubscript) {
       let current = this.operatorWithSuperAndSubscript[key];
+      this.utf8ToLatexMap[current] = `\\${key} `;
+    }
+    for (let key in this.operatorWithSubscript) {
+      let current = this.operatorWithSubscript[key];
       this.utf8ToLatexMap[current] = `\\${key} `;
     }
     for (let key in this.mathcalEquivalents) {
@@ -1433,6 +1454,13 @@ class LaTeXParser {
       this.parsingStack[this.parsingStack.length - 2] = syntacticElement;
       return this.decreaseParsingStack(1);
     }
+    if (secondToLast.syntacticRole === "\\" && last.content in latexConstants.operatorsWithSubscript) {
+      this.lastRuleName = "operator with subscript";
+      let operatorSymbol = latexConstants.operatorsWithSubscript[last.content];
+      let syntacticElement = new SyntancticElement(null, operatorSymbol, "operatorWithSubscript");
+      this.parsingStack[this.parsingStack.length - 2] = syntacticElement;
+      return this.decreaseParsingStack(1);
+    }
     let fifthToLast = this.parsingStack[this.parsingStack.length - 5];
     if (
       fifthToLast.syntacticRole === "operatorWithSuperAndSubscript" &&
@@ -1482,9 +1510,18 @@ class LaTeXParser {
       secondToLast.isExpression() &&
       last.syntacticRole !== "^"
     ) {
-      this.lastRuleName = "operator with subscript only";
+      this.lastRuleName = "operator with subscript only (allows superscript)";
       let node = mathNodeFactory.operatorWithSuperAndSubscript(this.equationEditor, fourthToLast.content, null, secondToLast.node);
       return this.replaceParsingStackRange(node, "", - 4, - 2);
+    }
+    if (
+      thirdToLast.syntacticRole === "operatorWithSubscript" &&
+      secondToLast.syntacticRole === "_" &&
+      last.isExpression()
+    ) {
+      this.lastRuleName = "operator with subscript only";
+      let node = mathNodeFactory.operatorWithSubscript(this.equationEditor, thirdToLast.content, last.node);
+      return this.replaceParsingStackTop(node, "", - 3);
     }
     if (secondToLast.syntacticRole === "\\" && last.content in latexConstants.latexBackslashOperators) {
       this.lastRuleName = "atom immutable from backslash";
@@ -1862,8 +1899,12 @@ class EquationEditor {
     let boundingRectangle = this.rootNode.element.getBoundingClientRect();
     this.container.style.height = boundingRectangle.height;
     this.container.style.width = boundingRectangle.width;
-    let candidateAlignment = "middle";
-    this.container.style.verticalAlign = candidateAlignment;
+    if (this.rootNode.boundingBox.needsMiddleAlignment) {
+      this.container.style.verticalAlign = "middle";
+      this.container.style.top = this.rootNode.boundingBox.height / 2 - this.rootNode.boundingBox.fractionLineHeight;
+    } else {
+      this.container.style.verticalAlign = "text-bottom";
+    }
   }
 
   /**@returns {string} */
@@ -2081,22 +2122,37 @@ class SplitBySelectionResult {
 
 class BoundingBox {
   constructor() {
-    this.left = 0;
-    this.top = 0;
-    this.width = 0;
-    this.height = 0;
-
     /** @type{number}*/
-    this.columnOffsets = [];
+    this.left = 0;
+    /** @type{number}*/
+    this.top = 0;
+    /** @type{number}*/
+    this.width = 0;
+    /** @type{number}*/
+    this.height = 0;
+    /** @type{number}*/
     this.fractionLineHeight = 0;
+
+    /**@type {boolean} */
+    this.needsMiddleAlignment = false;
+    /** @type{number[]}*/
+    // Used for math nodes that have columns (matrices, tables (\begin{array}...)).
+    this.columnOffsets = [];
+    /** @type{number}*/
     // In a^b the following measures the width of b. 
     this.superScriptWidth = 0;
+    /** @type{number}*/
     // In a_b the following measures the width of b. 
     this.subScriptWidth = 0;
+    /** @type{number}*/
     this.stretchFactor = 1;
+    /** @type{number}*/
     this.transform = "";
+    /** @type{number}*/
     this.transformOrigin = "";
+    /** @type{number}*/
     this.heightBeforeTransform = - 1;
+    /** @type{number}*/
     this.widthBeforeTransform = - 1;
   }
 
@@ -2464,6 +2520,7 @@ class MathNode {
     this.boundingBox.fractionLineHeight = numerator.boundingBox.height + 2;
     this.boundingBox.height = numerator.boundingBox.height + denominator.boundingBox.height + extraSpaceBetweenNumeratorAndDenominator;
     this.boundingBox.width = Math.max(numerator.boundingBox.width, denominator.boundingBox.width);
+    this.boundingBox.needsMiddleAlignment = true;
     numerator.boundingBox.width = this.boundingBox.width;
     denominator.boundingBox.width = this.boundingBox.width;
     denominator.boundingBox.top = numerator.boundingBox.height + extraSpaceBetweenNumeratorAndDenominator;
@@ -2477,7 +2534,7 @@ class MathNode {
   computeDimensionsOperatorStandalone() {
     let child = this.children[0];
     // see latexConstants.operatorWithSuperAndSubscript
-    let operatorSuperAndSubscriptShifts = {
+    let operatorShifts = {
       // sum
       "\u03A3": 0.22,
       // integral
@@ -2491,8 +2548,8 @@ class MathNode {
     };
     let proportionShiftUp = 0.1;
     let operatorName = child.initialContent;
-    if (operatorName in operatorSuperAndSubscriptShifts) {
-      proportionShiftUp = operatorSuperAndSubscriptShifts[operatorName];
+    if (operatorName in operatorShifts) {
+      proportionShiftUp = operatorShifts[operatorName];
     }
     let operatorScale = 1;
     if (operatorName in operatorScales) {
@@ -2511,37 +2568,45 @@ class MathNode {
     let extraSpaceBelowSuperscriptPercent = 0.1;
     let extraSpaceBelowOperatorPercent = 0.1;
     let operatorContent = operator.children[0].initialContent;
-    let extraSpaceBelowSuperScriptCustom = {
-      "lim": - 0.1,
-    };
     let extraSpaceBelowOperatorCustom = {
-      "lim": - 0.1,
       // integral
       "\u222B": - 0.1,
     };
-    if (operatorContent in extraSpaceBelowSuperScriptCustom) {
-      extraSpaceBelowSuperscriptPercent = extraSpaceBelowSuperScriptCustom[operatorContent];
-    }
     if (operatorContent in extraSpaceBelowOperatorCustom) {
       extraSpaceBelowOperatorPercent = extraSpaceBelowOperatorCustom[operatorContent];
     }
     let extraSpaceBelowSuperscript = operator.boundingBox.height * extraSpaceBelowSuperscriptPercent;
     let extraSpaceBelowOperator = operator.boundingBox.height * extraSpaceBelowOperatorPercent;
     superscript.boundingBox.top = 0;
-    operator.boundingBox.top =
-      superscript.boundingBox.height + extraSpaceBelowSuperscript;
-    subscript.boundingBox.top =
-      superscript.boundingBox.height + extraSpaceBelowSuperscript +
-      operator.boundingBox.height + extraSpaceBelowOperator;
+    operator.boundingBox.top = superscript.boundingBox.height + extraSpaceBelowSuperscript;
+    subscript.boundingBox.top = superscript.boundingBox.height + extraSpaceBelowSuperscript + operator.boundingBox.height + extraSpaceBelowOperator;
     this.boundingBox.height =
       superscript.boundingBox.height + operator.boundingBox.height + subscript.boundingBox.height +
       extraSpaceBelowOperator + extraSpaceBelowSuperscript;
     this.boundingBox.width = Math.max(superscript.boundingBox.width, operator.boundingBox.width, subscript.boundingBox.width);
     this.boundingBox.fractionLineHeight = superscript.boundingBox.height + extraSpaceBelowSuperscript + operator.boundingBox.fractionLineHeight;
+    this.boundingBox.needsMiddleAlignment = true;
     superscript.boundingBox.width = this.boundingBox.width;
     subscript.boundingBox.width = this.boundingBox.width;
     operator.boundingBox.width = this.boundingBox.width;
     superscript.computeBoundingBoxLeftSingleChild();
+    operator.computeBoundingBoxLeftSingleChild();
+    subscript.computeBoundingBoxLeftSingleChild();
+  }
+
+  computeDimensionsOperatorWithSubscript() {
+    let operator = this.children[0];
+    let subscript = this.children[1];
+    let extraSpaceBelowOperatorPercent = 0.1;
+    let extraSpaceBelowOperator = operator.boundingBox.height * extraSpaceBelowOperatorPercent;
+    operator.boundingBox.top = 0;
+    subscript.boundingBox.top = operator.boundingBox.height + extraSpaceBelowOperator;
+    this.boundingBox.height = operator.boundingBox.height + extraSpaceBelowOperator + subscript.boundingBox.height;
+    this.boundingBox.width = Math.max(operator.boundingBox.width, subscript.boundingBox.width);
+    this.boundingBox.fractionLineHeight = operator.boundingBox.fractionLineHeight;
+    this.boundingBox.needsMiddleAlignment = true;
+    subscript.boundingBox.width = this.boundingBox.width;
+    operator.boundingBox.width = this.boundingBox.width;
     operator.computeBoundingBoxLeftSingleChild();
     subscript.computeBoundingBoxLeftSingleChild();
   }
@@ -2668,6 +2733,7 @@ class MathNode {
       );
     }
     this.boundingBox.fractionLineHeight = base.boundingBox.fractionLineHeight;
+    this.boundingBox.needsMiddleAlignment = true;
   }
 
   computeBoundingBoxLeftSingleChild() {
@@ -2742,12 +2808,14 @@ class MathNode {
     this.boundingBox.height = underTheRadical.boundingBox.height * 1.15;
     this.boundingBox.fractionLineHeight = underTheRadical.boundingBox.fractionLineHeight + 2.2;
     this.boundingBox.width = underTheRadical.boundingBox.left + underTheRadical.boundingBox.width;
+    this.boundingBox.needsMiddleAlignment = underTheRadical.boundingBox.needsMiddleAlignment;
   }
 
   computeDimensionsMatrix() {
     this.boundingBox.height = this.children[0].boundingBox.height;
     this.boundingBox.width = this.children[0].boundingBox.width;
     this.boundingBox.fractionLineHeight = this.children[0].boundingBox.fractionLineHeight;
+    this.boundingBox.needsMiddleAlignment = true;
     let table = this.children[0].children[1];
     for (let i = 1; i < this.children.length; i++) {
       let verticalBar = this.children[i];
@@ -2847,6 +2915,10 @@ class MathNode {
     }
     if (this.type.type === knownTypes.operatorWithSuperAndSubscript.type) {
       this.computeDimensionsOperatorWithSuperAndSubscript();
+      return;
+    }
+    if (this.type.type === knownTypes.operatorWithSubscript.type) {
+      this.computeDimensionsOperatorWithSubscript();
       return;
     }
     if (this.type.type === knownTypes.operatorStandalone.type) {
@@ -2958,6 +3030,17 @@ class MathNode {
       this.boundingBox.width += child.boundingBox.width;
     }
     this.mergeBoundingBoxesHorizontallyAlignedElements();
+    this.computeMiddleAlignment();
+  }
+
+  computeMiddleAlignment() {
+    for (let i = 0; i < this.children.length; i++) {
+      let child = this.children[i];
+      if (child.boundingBox.needsMiddleAlignment) {
+        this.boundingBox.needsMiddleAlignment = true;
+        return;
+      }
+    }
   }
 
   doAlign() {
@@ -4218,6 +4301,30 @@ class MathNode {
     operatorNode.focus(1);
   }
 
+  makeOperatorWithSubscriptFromSplit(
+    /** @type {string} */
+    operator,
+    /** @type {MathNode[] */
+    split,
+  ) {
+    let parent = this.parent;
+    let oldIndex = this.indexInParent;
+    let operatorNode = mathNodeFactory.operatorWithSubscript(this.equationEditor, operator, null);
+    if (split[0] === null) {
+      parent.replaceChildAtPosition(oldIndex, operatorNode);
+    } else {
+      parent.replaceChildAtPosition(oldIndex, split[0]);
+      oldIndex++;
+      parent.insertChildAtPosition(oldIndex, operatorNode);
+    }
+    if (split[1] !== null) {
+      parent.insertChildAtPosition(oldIndex + 1, split[1]);
+    }
+    parent.ensureEditableAtoms();
+    parent.updateDOM();
+    operatorNode.focus(1);
+  }
+
   makeSqrtFromSelection(
     /** @type{SplitBySelectionResult} */
     splitBySelection,
@@ -4640,6 +4747,11 @@ class MathNode {
     if (backslashSequence in latexConstants.operatorWithSuperAndSubscript) {
       let command = latexConstants.operatorWithSuperAndSubscript[backslashSequence];
       this.makeOperatorWithSuperscriptAndSubscriptFromSplit(command, split);
+      return true;
+    }
+    if (backslashSequence in latexConstants.operatorsWithSubscript) {
+      let command = latexConstants.operatorsWithSubscript[backslashSequence];
+      this.makeOperatorWithSubscriptFromSplit(command, split);
       return true;
     }
     if (backslashSequence in latexConstants.latexBackslashOperators) {
@@ -5119,6 +5231,9 @@ class MathNode {
     }
     return result;
   }
+  toLatexOperatorStandalone() {
+    return `\\${this.textContentOrInitialContent()}`;
+  }
 
   toLatexLeftDelimiter() {
     if (this.element === null) {
@@ -5209,6 +5324,9 @@ class MathNode {
     }
     if (this.type.type === knownTypes.operatorWithSuperAndSubscript.type) {
       return this.toLatexOperatorWithSuperAndSubscript();
+    }
+    if (this.type.type === knownTypes.operatorStandalone.type) {
+      return this.toLatexOperatorStandalone();
     }
     if (this.type.type === knownTypes.rightDelimiter.type) {
       return this.toLatexRightDelimiter();

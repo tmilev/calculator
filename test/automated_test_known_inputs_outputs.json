@@ -1044,7 +1044,7 @@
     "output":"(^;e;x)"
   },
   {
-    "input":"toString( e^x); \n \"e^x\";\"The quick brown fox jumps over the lazy dog.\"",
+    "input":"ToString( e^x); \n \"e^x\";\"The quick brown fox jumps over the lazy dog.\"",
     "output":"(\"e^{x}\";\"e^x\";\"The quick brown fox jumps over the lazy dog.\")"
   },
   {

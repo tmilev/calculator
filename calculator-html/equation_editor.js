@@ -887,6 +887,8 @@ class LaTeXConstants {
     };
     /**@type{Object.<string, string>} */
     this.latexBackslashCommands = {
+      "left": "\\left",
+      "right": "\\right",
       "cancel": "\\cancel",
       "sqrt": "\\sqrt",
       "begin": "\\begin",
@@ -1027,6 +1029,7 @@ class LaTeXConstants {
     };
     /**@type{Object.<string, string>} */
     this.leftDelimiters = {
+      "\\left.": "",
       "\\langle": "\u27E8",
       "(": "(",
       "[": "[",
@@ -1056,8 +1059,6 @@ class LaTeXConstants {
       "}": "{",
     };
     this.latexCommandsIgnored = {
-      "left": true,
-      "right": true,
       "displaystyle": true,
       "text": true,
       "mathrm": true,
@@ -1310,6 +1311,7 @@ class LaTeXParser {
     elementsToRemove,
   ) {
     this.parsingStack.length = this.parsingStack.length - elementsToRemove;
+    return true;
   }
 
   /** @returns{boolean} */
@@ -1433,6 +1435,22 @@ class LaTeXParser {
     if (secondToLast.syntacticRole === "\\" && last.content in latexConstants.latexBackslashCommands) {
       this.lastRuleName = "latex command";
       return this.replaceParsingStackTop(null, latexConstants.latexBackslashCommands[last.content], - 2);
+    }
+    if (secondToLast.syntacticRole === "\\left" && last.syntacticRole in latexConstants.leftDelimiters) {
+      this.lastRuleName = "\\left combined with left delimiter";
+      this.parsingStack[this.parsingStack.length - 2] = last;
+      return this.decreaseParsingStack(1);
+    }
+    if (secondToLast.syntacticRole === "\\right" && last.syntacticRole in latexConstants.rightDelimiters) {
+      this.lastRuleName = "\\right combined with right delimiter";
+      this.parsingStack[this.parsingStack.length - 2] = last;
+      return this.decreaseParsingStack(1);
+    }
+    if (secondToLast.syntacticRole === "\\left" && last.content === ".") {
+      return this.replaceParsingStackTop(null, "\\left.", - 2);
+    }
+    if (secondToLast.syntacticRole === "\\right" && last.content === ".") {
+      return this.replaceParsingStackTop(null, "\\right.", - 2);
     }
     if (secondToLast.syntacticRole === "\\mathcal") {
       if (this.specialFont(latexConstants.mathcalEquivalents)) {
@@ -2693,6 +2711,7 @@ class MathNode {
 
     }
     this.boundingBox.fractionLineHeight = base.boundingBox.top + base.boundingBox.fractionLineHeight;
+    this.computeMiddleAlignment();
   }
 
   computeDimensionsBaseWithSubscript() {

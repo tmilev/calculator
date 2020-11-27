@@ -5448,6 +5448,7 @@ class LatexColumnStyleIterator {
     this.currentColumnAlignment = "";
     this.verticalBarRightCount = 0;
     this.verticalBarLeftCount = 0;
+    this.exhausted = false;
   }
 
   reset() {
@@ -5455,12 +5456,17 @@ class LatexColumnStyleIterator {
     this.currentColumnAlignment = "";
     this.verticalBarRightCount = 0;
     this.verticalBarLeftCount = 0;
+    this.exhausted = false;
   }
 
   next() {
     this.currentColumnAlignment = "";
     this.verticalBarRightCount = 0;
     this.verticalBarLeftCount = 0;
+    if (this.nextStyleStartCharacter >= this.style.length) {
+      this.exhausted = true;
+      return;
+    }
     for (let i = this.nextStyleStartCharacter; i < this.style.length; i++) {
       let next = this.style[i];
       if (next === "c" || next === "r" || next === "l") {
@@ -5549,7 +5555,7 @@ class LatexColumnStyleIterator {
 
   /**@returns {boolean} */
   isExhausted() {
-    return this.nextStyleStartCharacter >= this.style.length;
+    return this.exhausted;
   }
 }
 

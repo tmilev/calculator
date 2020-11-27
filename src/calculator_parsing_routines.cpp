@@ -61,7 +61,7 @@ void Calculator::EvaluationStatistics::reset() {
 void Calculator::reset() {
   this->statistics.reset();
   this->maximumAlgebraicTransformationsPerExpression = 100;
-  this->MaxRuleStacksCached = 500;
+  this->maximumRuleStacksCached = 500;
   this->maximumCachedExpressionPerRuleStack = 100000;
   this->maximumRecursionDepth = 10000;
   this->recursionDepth = 0;
@@ -128,8 +128,8 @@ void Calculator::reset() {
   this->cachedExpressions.clear();
   this->imagesCachedExpressions.setSize(0);
   this->theProgramExpression.reset(*this);
-  this->RuleStackCacheIndex = - 1;
-  this->ruleStack.reset(*this,this->MaxRuleStacksCached);
+  this->ruleStackCacheIndex = - 1;
+  this->ruleStack.reset(*this,this->maximumRuleStacksCached);
   this->cachedRuleStacks.clear();
   // The expression container must be cleared second to last.
   this->allChildExpressions.clear();
@@ -341,7 +341,7 @@ void Calculator::initialize() {
   this->ruleStack.reset(*this, 100);
   this->ruleStack.addChildAtomOnTop(this->opEndStatement());
   this->cachedRuleStacks.clear();
-  this->RuleStackCacheIndex = 0;
+  this->ruleStackCacheIndex = 0;
   this->cachedRuleStacks.addOnTop(this->ruleStack);
   this->numberOfPredefinedAtoms = this->operations.size(); //<-operations added up to this point are called ``operations''
   this->checkConsistencyAfterInitialization();

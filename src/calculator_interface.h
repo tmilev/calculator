@@ -1215,8 +1215,8 @@ public:
   int maximumAlgebraicTransformationsPerExpression;
   int maximumLatexChars;
   int maximumCachedExpressionPerRuleStack;
-  int MaxRuleStacksCached;
-  int RuleStackCacheIndex;
+  int maximumRuleStacksCached;
+  int ruleStackCacheIndex;
   int numberExpectedExpressionsAtInitialization;
   class EvaluationStatistics {
   public:

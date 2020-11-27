@@ -183,7 +183,7 @@ bool Calculator::checkConsistencyAfterInitialization() {
     this->imagesCachedExpressions.size != 0 ||
     this->evaluatedExpressionsStack.size != 0
   ) {
-    global.fatal << "This is a programming error: cached expressions, "
+    global.fatal << "Cached expressions, "
     << "images cached expressions, expression stack and "
     << "expression container are supposed to be empty, but "
     << "instead they contain respectively "

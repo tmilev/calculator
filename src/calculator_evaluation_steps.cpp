@@ -220,7 +220,13 @@ std::string ExpressionHistoryEnumerator::toStringExpressionHistoryMerged() {
     currentRules.addListOnTop(this->rulesNames[j]);
     if (j > 0) {
       if (currentRules.size > 0) {
-        out << "&\\text{" << currentRules.toStringCommaDelimited() << "}";
+        out << "&" ;
+        for (int i = 0; i < currentRules.size; i ++) {
+          out << currentRules[i];
+          if (i != currentRules.size - 1) {
+            out << ",~";
+          }
+        }
       }
       currentRules.setSize(0);
       out << "\\\\";

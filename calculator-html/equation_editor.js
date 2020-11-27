@@ -1917,9 +1917,10 @@ class EquationEditor {
     let boundingRectangle = this.rootNode.element.getBoundingClientRect();
     this.container.style.height = boundingRectangle.height;
     this.container.style.width = boundingRectangle.width;
-    if (this.rootNode.boundingBox.needsMiddleAlignment) {
+    if (this.rootNode.boundingBox.needsMiddleAlignment && !this.options.editable) {
       this.container.style.verticalAlign = "middle";
       this.container.style.top = this.rootNode.boundingBox.height / 2 - this.rootNode.boundingBox.fractionLineHeight;
+      this.container.style.height += this.container.style.top;
     } else {
       this.container.style.verticalAlign = "text-bottom";
     }

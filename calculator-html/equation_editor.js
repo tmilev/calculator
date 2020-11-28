@@ -935,6 +935,7 @@ class LaTeXConstants {
       "arctan": "arctan",
       "arccos": "arccos",
       "arcsin": "arcsin",
+      "emptyset": "\u2205",
       "in": "\u2208",
       "cap": "\u2229",
       "cup": "\u222A",

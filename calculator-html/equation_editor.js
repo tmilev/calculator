@@ -907,6 +907,7 @@ class LaTeXConstants {
       "mathbb": "\\mathbb",
       "langle": "\\langle",
       "rangle": "\\rangle",
+      "{": "\\{",
     };
     /**@type{Object.<string, string>} */
     this.latexBackslashOperators = {
@@ -1048,6 +1049,7 @@ class LaTeXConstants {
     };
     /**@type{Object.<string, string>} */
     this.rightDelimiters = {
+      "\\right.": "",
       "\\rangle": "\u27E9",
       ")": ")",
       "]": "]",
@@ -1422,9 +1424,19 @@ class LaTeXParser {
     }
 
     let secondToLast = this.parsingStack[this.parsingStack.length - 2];
-    if (last.syntacticRole === "\\" && secondToLast.syntacticRole === "\\") {
-      this.lastRuleName = "double backslash";
-      return this.replaceParsingStackTop(null, "\\\\", - 2);
+    if (secondToLast.syntacticRole === "\\") {
+      if (last.syntacticRole === "\\") {
+        this.lastRuleName = "double backslash";
+        return this.replaceParsingStackTop(null, "\\\\", - 2);
+      }
+      if (last.syntacticRole === "{") {
+        this.lastRuleName = "{ delimiter";
+        return this.replaceParsingStackTop(null, "\\{", - 2);
+      }
+      if (last.syntacticRole === "}") {
+        this.lastRuleName = "} delimiter";
+        return this.replaceParsingStackTop(null, "\\}", - 2);
+      }
     }
     let thirdToLast = this.parsingStack[this.parsingStack.length - 3];
     let fourthToLast = this.parsingStack[this.parsingStack.length - 4];

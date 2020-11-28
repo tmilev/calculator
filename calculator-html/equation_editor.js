@@ -235,8 +235,8 @@ const knownTypes = {
   }),
   subscript: new MathNodeType({
     "type": "subscript",
-    "fontSize": 0.67,
-    "minHeightScale": 0.67,
+    "fontSize": 0.75,
+    "minHeightScale": 0.75,
   }),
   sqrt: new MathNodeType({
     "type": "sqrt",
@@ -249,12 +249,12 @@ const knownTypes = {
   }),
   radicalExponentBox: new MathNodeType({
     "type": "radicalExponentBox",
-    "fontSize": 0.55,
-    "minHeightScale": 0.55,
+    "fontSize": 0.75,
+    "minHeightScale": 0.75,
   }),
   radicalUnderBox: new MathNodeType({
     "type": "radicalUnderBox",
-    "borderTop": "2px solid black",
+    "borderTop": "1px solid black",
   }),
   matrix: new MathNodeType({
     "type": "matrix",
@@ -769,8 +769,10 @@ function mathFromElement(
   editable,
   /**@type{boolean} */
   sanitizeLatexSource,
+  /**@type{boolean} whether to remove \\displaystyle from latex source.*/
+  removeDisplayStyle,
 ) {
-  return mathFromLatex(container, container.textContent, editable, sanitizeLatexSource);
+  return mathFromLatex(container, container.textContent, editable, sanitizeLatexSource, removeDisplayStyle);
 }
 
 /** @returns {EquationEditor} Returns typeset math.*/
@@ -783,8 +785,10 @@ function mathFromLatex(
   editable,
   /**@type{boolean} */
   sanitizeLatexSource,
+  /**@type{boolean} whether to remove \\displaystyle from latex source.*/
+  removeDisplayStyle,
 ) {
-  let result = new EquationEditor(container, new EquationEditorOptions(editable, sanitizeLatexSource, null));
+  let result = new EquationEditor(container, new EquationEditorOptions(editable, sanitizeLatexSource, removeDisplayStyle, null));
   result.writeLatex(latex);
   return result;
 }
@@ -852,6 +856,8 @@ class LaTeXConstants {
       "<": "0.3em",
       // neq
       "\u2260": "0.3em",
+      // ellipsis dots
+      "\u2026": "0.3em",
     }
     /**@type{Object.<string, string>} */
     this.operatorsNormalized = {
@@ -909,6 +915,7 @@ class LaTeXConstants {
       "cdot": "\u00B7",
       "leq": "\u2264",
       "neq": "\u2260",
+      "dots": "\u2026",
       "lt": "<",
       "gt": ">",
       "to": "\u2192",
@@ -1747,11 +1754,15 @@ class EquationEditorOptions {
     editable,
     /** @type{boolean} */
     sanitizeLatexSource,
+    /**@type{boolean} whether to remove \\displaystyle from latex source.*/
+    removeDisplayStyle,
     /**@type{HTMLElement|null} */
     debugLogContainer,
   ) {
     /** @type{boolean} */
     this.editable = editable;
+    /** @type{boolean} */
+    this.removeDisplayStyle = removeDisplayStyle;
     /** @type{boolean} */
     this.sanitizeLatexSource = sanitizeLatexSource;
     /**@type{HTMLElement|null} */
@@ -1776,7 +1787,7 @@ class EquationEditor {
     this.container.style.display = "inline-block";
     this.container.style.position = "relative";
     /** @type{EquationEditorOptions} */
-    this.options = new EquationEditorOptions(true, false, null);
+    this.options = new EquationEditorOptions(true, false, false, null);
     if (options !== null && options !== undefined) {
       this.options = options;
     }
@@ -1919,8 +1930,6 @@ class EquationEditor {
     this.container.style.width = boundingRectangle.width;
     if (this.rootNode.boundingBox.needsMiddleAlignment && !this.options.editable) {
       this.container.style.verticalAlign = "middle";
-      this.container.style.top = this.rootNode.boundingBox.height / 2 - this.rootNode.boundingBox.fractionLineHeight;
-      this.container.style.height += this.container.style.top;
     } else {
       this.container.style.verticalAlign = "text-bottom";
     }
@@ -2098,13 +2107,19 @@ class EquationEditor {
     let staticContainer = document.createElement("SPAN");
     let latex = "";
     let writeOriginal = false;
+    let removeDisplayStyle = false;
     if (this.rootNode.children[0].type.type === knownTypes.error.type) {
       writeOriginal = true;
     } else if (!this.options.editable && this.latexLastWritten !== "" && !this.options.sanitizeLatexSource) {
       writeOriginal = true;
+      removeDisplayStyle = true;
     }
     if (writeOriginal) {
-      latex = this.latexLastWritten;
+      if (removeDisplayStyle) {
+        latex = this.latexLastWritten.split("\\displaystyle").join("");
+      } else {
+        latex = this.latexLastWritten;
+      }
     } else {
       latex = this.rootNode.toLatex();
     }
@@ -2790,6 +2805,21 @@ class MathNode {
     this.boundingBox.transform = `matrix(1,0,0,${this.boundingBox.stretchFactor}, 0, ${translateVertical})`;
   }
 
+  computeDimensionsRootNode() {
+    this.computeDimensionsStandard();
+    if (!this.boundingBox.needsMiddleAlignment || this.equationEditor.options.editable) {
+      return;
+    }
+    let bottomDistance = this.boundingBox.height - this.boundingBox.fractionLineHeight;
+    if (bottomDistance > this.boundingBox.fractionLineHeight) {
+      this.boundingBox.height = bottomDistance * 2;
+      this.boundingBox.top += bottomDistance - this.boundingBox.fractionLineHeight;
+      this.boundingBox.fractionLineHeight = bottomDistance;
+    } else {
+      this.boundingBox.height = this.boundingBox.fractionLineHeight * 2;
+    }
+  }
+
   computeDimensionsNumerator() {
     this.computeDimensionsStandard();
     this.boundingBox.height = this.children[0].boundingBox.height;
@@ -2821,13 +2851,15 @@ class MathNode {
     // The top of the sqrt sign may not connect perfectly with the overline of the under-the-radical content.
     // The following variable compensates for that.
     sqrtSign.verticallyStretchSqrt(underTheRadical.boundingBox.height);
+    radicalExponentBox.boundingBox.top = - 0.15 * radicalExponentBox.boundingBox.height;
     let widthSqrtSign = 0.99;// 0.92;
     sqrtSign.boundingBox.left = extraWidth;
     underTheRadical.boundingBox.left = sqrtSign.boundingBox.left + sqrtSign.boundingBox.width * widthSqrtSign;
     this.boundingBox = new BoundingBox();
     this.boundingBox.height = underTheRadical.boundingBox.height * 1.15;
     this.boundingBox.fractionLineHeight = underTheRadical.boundingBox.fractionLineHeight + 2.2;
-    this.boundingBox.width = underTheRadical.boundingBox.left + underTheRadical.boundingBox.width;
+    let extraSpaceAfterRadical = 4;
+    this.boundingBox.width = underTheRadical.boundingBox.left + underTheRadical.boundingBox.width + extraSpaceAfterRadical;
     this.boundingBox.needsMiddleAlignment = underTheRadical.boundingBox.needsMiddleAlignment;
   }
 
@@ -2954,6 +2986,10 @@ class MathNode {
     }
     if (this.type.type === knownTypes.baseWithSubscript.type) {
       this.computeDimensionsBaseWithSubscript();
+      return;
+    }
+    if (this.type.type === knownTypes.root.type) {
+      this.computeDimensionsRootNode();
       return;
     }
     if (this.type.type === knownTypes.horizontalMath) {
@@ -5600,6 +5636,8 @@ class MathTagCoverter {
     style,
     /**@type{boolean} */
     sanitizeLatexSource,
+    /**@type{boolean} whether to remove \\displaystyle from latex source.*/
+    removeDisplayStyle,
   ) {
     /**@type{HTMLElement|null} */
     this.elementProcessed = null;
@@ -5617,6 +5655,8 @@ class MathTagCoverter {
     styleComputer.style = style;
     /**@type{boolean} */
     this.sanitizeLatexSource = sanitizeLatexSource;
+    /**@type{boolean} */
+    this.removeDisplayStyle = removeDisplayStyle;
     this.style = {
       fontFamily: styleComputer.style.fontFamily,
       display: styleComputer.style.display,
@@ -5765,7 +5805,7 @@ class MathTagCoverter {
       }
       element["typeset"] = "true";
       let startTime = (new Date()).getTime();
-      mathFromElement(element, false, this.sanitizeLatexSource);
+      mathFromElement(element, false, this.sanitizeLatexSource, this.removeDisplayStyle);
       let typeSetTime = (new Date()).getTime() - startTime;
       console.log(`Typeset of element ${this.typesetTotal + 1} out of ${this.elementsToTypeset} took ${typeSetTime} ms.`);
     }
@@ -5779,11 +5819,13 @@ function typeset(
   style,
   /**@type{boolean} whether to convert the original latex to parsed one.*/
   sanitizeLatexSource,
+  /**@type{boolean} whether to remove \\displaystyle from latex source.*/
+  removeDisplayStyle,
 ) {
   if (style === "") {
     style = "font-family:'Times New Roman'; display:inline-block;";
   }
-  new MathTagCoverter(style, sanitizeLatexSource).typeset(toBeModified);
+  new MathTagCoverter(style, sanitizeLatexSource, removeDisplayStyle).typeset(toBeModified);
 }
 
 function writeDebugInfo() {

@@ -4168,7 +4168,7 @@ bool Expression::toStringOr(
   } else {
     out << input[1];
   }
-  out << "\\ or\\ ";
+  out << " ~or~ ";
   if (!input[2].isSequenceNElements()) {
     out << "\\left(" << input[2] << "\\right)";
   } else {

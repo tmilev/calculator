@@ -3235,6 +3235,12 @@ class MathNode {
       this.equationEditor.backslashSequenceStarted = false;
       return this.makeBackslashSequence();
     }
+    if (this.equationEditor.backslashSequence === "" && (key === "{" || key === "}")) {
+      this.equationEditor.backslashSequence = key;
+      this.equationEditor.backslashSequenceStarted = false;
+      this.makeBackslashSequence();
+      return true;
+    }
     if (latexConstants.isLatinCharacter(key)) {
       this.equationEditor.backslashSequence += key;
       return false;
@@ -3244,7 +3250,7 @@ class MathNode {
         this.equationEditor.backslashSequenceStarted = false;
       } else {
         this.equationEditor.backslashSequence = this.equationEditor.backslashSequence.slice(
-          0, this.equationEditor.backslashSequence.length - 1
+          0, this.equationEditor.backslashSequence.length - 1,
         );
       }
       return false;
@@ -4832,6 +4838,15 @@ class MathNode {
     }
   }
 
+  /** @returns {MathNode}. */
+  makeAtomFromSplit(
+    /** @type{MathNode[]} */
+    split,
+    /** @type{string} */
+    content,
+  ) {
+  }
+
   /** @returns {boolean} whether the default should be prevented. */
   makeBackslashSequence() {
     let backslashSequence = this.equationEditor.backslashSequence;
@@ -4854,6 +4869,27 @@ class MathNode {
       this.makeHorizontalOperatorFromSplit(operator, split);
       return true;
     }
+    let backslashSequenceWithBackslash = "\\" + backslashSequence;
+    if (backslashSequenceWithBackslash in latexConstants.leftDelimiters) {
+      let delimiter = latexConstants.leftDelimiters[backslashSequenceWithBackslash];
+      let atomNode = mathNodeFactory.atom(this.equationEditor, "");
+      let node = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [split[0], atomNode, split[1]]);
+      let parent = this.parent;
+      parent.replaceChildAtPosition(this.indexInParent, node);
+      node.makeDelimiterLeft(delimiter);
+      parent.normalizeHorizontalMath();
+      return true;
+    }
+    if (backslashSequenceWithBackslash in latexConstants.rightDelimiters) {
+      let delimiter = latexConstants.rightDelimiters[backslashSequenceWithBackslash];
+      let atomNode = mathNodeFactory.atom(this.equationEditor, "");
+      let node = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [split[0], atomNode, split[1]]);
+      let parent = this.parent;
+      parent.replaceChildAtPosition(this.indexInParent, node);
+      node.makeDelimiterRight(delimiter);
+      parent.normalizeHorizontalMath();
+      return true;
+    }
     if (backslashSequence in latexConstants.latexBackslashAtomsEditable) {
       let content = latexConstants.latexBackslashAtomsEditable[backslashSequence];
       let atomNode = mathNodeFactory.atom(this.equationEditor, content);
@@ -4861,7 +4897,7 @@ class MathNode {
       let node = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [split[0], atomNode, split[1]]);
       node.normalizeHorizontalMath();
       let parent = this.parent;
-      parent.replaceChildAtPosition(this.indexInParent, node);
+      parent.replaceChildAtPosition(this.indexInParent, contentNode);
       parent.normalizeHorizontalMath();
       parent.updateDOM();
       parent.focusRestore();

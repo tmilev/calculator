@@ -48,6 +48,7 @@ class MathNodeType {
     this.boxSizing = input["boxSizing"];
     this.position = input["position"];
     this.minWidth = input["minWidth"];
+    this.cursor = input["cursor"];
     // Padding.
     this.paddingBottom = input["paddingBottom"];
     this.paddingTop = input["paddingTop"];
@@ -88,6 +89,7 @@ const knownTypeDefaults = {
   "textAlign": "",
   "boxSizing": "",
   "position": "absolute",
+  "cursor": "",
   // Colors
   "colorText": "",
   "colorImplied": "",
@@ -136,6 +138,7 @@ const knownTypes = {
     "borderStyle": "1px solid black",
     "padding": "2px",
     "margin": "2px",
+    "cursor": "text",
   }),
   // A math expression with no children such as "x", "2".
   // This is the only element type that has contentEditable = true;
@@ -2099,6 +2102,7 @@ class EquationEditor {
     if (!this.options.showLatexOnDoubleClick) {
       return;
     }
+    e.preventDefault();
     if (this.container.children.length >= 2) {
       this.container.removeChild(this.container.children[1]);
       this.container.style.width = this.container.children[0].style.width;
@@ -2320,7 +2324,9 @@ class MathNode {
     }
     this.element.style.verticalAlign = this.type.verticalAlign;
     this.element.style.outline = this.type.outline;
-    // this.element.style.overflow = "hidden";
+    if (this.type.cursor !== "") {
+      this.element.style.cursor = this.type.cursor;
+    }
     if (this.type.textAlign !== "") {
       this.element.style.textAlign = this.type.textAlign;
     }
@@ -2372,12 +2378,32 @@ class MathNode {
         this.handleBlur(e);
       });
     }
+    this.element.addEventListener("click", (e) => {
+      this.handleSingleClick(e);
+    });
     if (this.type.type === knownTypes.root.type) {
       this.element.addEventListener("dblclick", (e) => {
         this.equationEditor.handleDoubleClick(e);
       });
     }
   }
+
+  handleSingleClick(
+    /** @type{MouseEvent} */
+    e,
+  ) {
+    if (!this.equationEditor.options.editable) {
+      return;
+    }
+    if (this.type.type === knownTypes.atom.type) {
+      e.stopPropagation();
+      return;
+    }
+    e.stopPropagation();
+    e.preventDefault();
+    this.focus(1);
+  }
+
 
   /** @returns {MathNode} */
   findFirstFocusedChild() {

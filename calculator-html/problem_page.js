@@ -51,21 +51,39 @@ ProblemCollection.prototype.CreateOrUpdateProblem = function (problemData) {
   return currentProblem;
 }
 
+ProblemCollection.prototype.normalizeFileName = function (
+  problemFileName,
+) {
+  problemFileName = decodeURIComponent(problemFileName);
+  return encodeURIComponent(problemFileName);
+}
+
+ProblemCollection.prototype.getProblemByIdOrNull = function (
+  problemFileName,
+) {
+  let label = this.normalizeFileName(problemFileName);
+  if (label in this.allProblems) {
+    return this.allProblems[label];
+  }
+  return null;
+}
+
 ProblemCollection.prototype.getProblemByIdOrRegisterEmpty = function (
-  problemFileName
+  problemFileName,
 ) {
   // normalize the file name:
-  problemFileName = decodeURIComponent(problemFileName);
-  var label = encodeURIComponent(problemFileName);
-  if (!(label in this.allProblems)) {
-    var incoming = new Problem();
-    incoming.initializeBasic({
-      id: label,
-      fileName: problemFileName
-    });
-    this.allProblems[label] = incoming;
+  let problem = this.getProblemByIdOrNull(problemFileName);
+  if (problem !== null) {
+    return problem;
   }
-  return this.allProblems[label];
+  var incoming = new Problem();
+  let label = this.normalizeFileName(problemFileName);
+  incoming.initializeBasic({
+    id: label,
+    fileName: problemFileName
+  });
+  this.allProblems[label] = incoming;
+  return incoming;
 }
 
 function selectCurrentProblem(problemIdURLed, exerciseType) {

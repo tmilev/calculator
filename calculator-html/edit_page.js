@@ -249,10 +249,10 @@ function getNavigationEditButton(problemId, contentHTML) {
 
 function writeNextPreviousEditButton(currentlyEditedPage) {
   var thePage = window.calculator.mainPage;
-  if (!(currentlyEditedPage in window.calculator.problemPage.allProblems.allProblems)) {
+  let problem = thePage.getProblemByIdOrNull(currentlyEditedPage);
+  if (problem === null) {
     return;
   }
-  var problem = thePage.getProblemById(currentlyEditedPage);
   var previousButtonSpan = document.getElementById(ids.domElements.spanButtonPreviousEdit);
   var nextButtonSpan = document.getElementById(ids.domElements.spanButtonNextEdit);
   if (previousButtonSpan !== null) {

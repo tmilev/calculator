@@ -877,6 +877,10 @@ class Page {
     return problemPage.allProblems.getProblemByIdOrRegisterEmpty(problemFileName);
   }
 
+  getProblemByIdOrNull(label) {
+    return problemPage.allProblems.getProblemByIdOrNull(label);
+  }
+
   getProblemById(label) {
     return problemPage.allProblems.getProblemByIdOrRegisterEmpty(label);
   }

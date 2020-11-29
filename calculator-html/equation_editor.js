@@ -920,6 +920,7 @@ class LaTeXConstants {
       "leq": "\u2264",
       "neq": "\u2260",
       "dots": "\u2026",
+      "vdots": "\u22EE",
       "lt": "<",
       "gt": ">",
       "to": "\u2192",

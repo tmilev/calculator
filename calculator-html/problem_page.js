@@ -9,81 +9,85 @@ const typeset = require("./math_typeset");
 const miscellaneous = require("./miscellaneous");
 const miscellaneousFrontend = require("./miscellaneous_frontend");
 
-function ProblemCollection() {
-  /** @type{Object<string,Problem>} */
-  this.topicProblems = {};
-  /** @type{Object<string,Problem>} */
-  this.allProblems = {};
-  /** @type{string} */
-  this.previousProblemId = null;
-  /** @type{string} */
-  this.nextProblemId = null;
-  /** @type{Object<string, boolean>} */
-  this.theChapterIds = {};
-  this.theTopics = {};
-}
-
-/** @returns{Problem} */
-ProblemCollection.prototype.getProblemById = function (
-  /**@type{string} */
-  label,
-) {
-  if (!(label in this.allProblems)) {
-    throw (`Error: problem label ${label} not found. `);
+class ProblemCollection {
+  constructor() {
+    /** @type{Object<string,Problem>} */
+    this.topicProblems = {};
+    /** @type{Object<string,Problem>} */
+    this.allProblems = {};
+    /** @type{string} */
+    this.previousProblemId = null;
+    /** @type{string} */
+    this.nextProblemId = null;
+    /** @type{Object<string, boolean>} */
+    this.theChapterIds = {};
+    this.theTopics = {};
   }
-  return this.allProblems[label];
-}
 
-ProblemCollection.prototype.resetTopicProblems = function () {
-  this.theChapterIds = {};
-  this.topicProblems = {};
-}
-
-/** @returns{Problem} */
-ProblemCollection.prototype.CreateOrUpdateProblem = function (problemData) {
-  // theProblemId is percent encoded, safe to embed in html.
-  if (problemData.id.includes("%")) {
-    console.log("Unexpected percent sign in problem id");
-  }
-  var theProblemId = encodeURIComponent(problemData.id);
-  var currentProblem = this.getProblemByIdOrRegisterEmpty(theProblemId, "");
-  currentProblem.initializeInfo(problemData, null);
-  return currentProblem;
-}
-
-ProblemCollection.prototype.normalizeFileName = function (
-  problemFileName,
-) {
-  problemFileName = decodeURIComponent(problemFileName);
-  return encodeURIComponent(problemFileName);
-}
-
-ProblemCollection.prototype.getProblemByIdOrNull = function (
-  problemFileName,
-) {
-  let label = this.normalizeFileName(problemFileName);
-  if (label in this.allProblems) {
+  /** @returns{Problem} */
+  getProblemById(
+    /**@type{string} */
+    label,
+  ) {
+    if (!(label in this.allProblems)) {
+      throw (`Error: problem label ${label} not found. `);
+    }
     return this.allProblems[label];
   }
-  return null;
-}
 
-ProblemCollection.prototype.getProblemByIdOrRegisterEmpty = function (
-  problemFileName,
-) {
-  // normalize the file name:
-  let problem = this.getProblemByIdOrNull(problemFileName);
-  if (problem !== null) {
-    return problem;
+  resetTopicProblems() {
+    this.theChapterIds = {};
+    this.topicProblems = {};
   }
-  var incoming = new Problem();
-  let label = this.normalizeFileName(problemFileName);
-  incoming.initializeBasic({
-    id: label,
-    fileName: problemFileName
-  });
-  this.allProblems[label] = incoming;
-  return incoming;
+
+  /** @returns{Problem} */
+  CreateOrUpdateProblem(
+    problemData,
+  ) {
+    // theProblemId is percent encoded, safe to embed in html.
+    if (problemData.id.includes("%")) {
+      console.log("Unexpected percent sign in problem id");
+    }
+    var theProblemId = encodeURIComponent(problemData.id);
+    var currentProblem = this.getProblemByIdOrRegisterEmpty(theProblemId, "");
+    currentProblem.initializeInfo(problemData, null);
+    return currentProblem;
+  }
+
+  normalizeFileName(
+    problemFileName,
+  ) {
+    problemFileName = decodeURIComponent(problemFileName);
+    return encodeURIComponent(problemFileName);
+  }
+
+  getProblemByIdOrNull(
+    problemFileName,
+  ) {
+    let label = this.normalizeFileName(problemFileName);
+    if (label in this.allProblems) {
+      return this.allProblems[label];
+    }
+    return null;
+  }
+
+  getProblemByIdOrRegisterEmpty(
+    problemFileName,
+  ) {
+    // normalize the file name:
+    let problem = this.getProblemByIdOrNull(problemFileName);
+    if (problem !== null) {
+      return problem;
+    }
+    var incoming = new Problem();
+    let label = this.normalizeFileName(problemFileName);
+    incoming.initializeBasic({
+      id: label,
+      fileName: problemFileName
+    });
+    this.allProblems[label] = incoming;
+    return incoming;
+  }
 }
 
 function selectCurrentProblem(problemIdURLed, exerciseType) {

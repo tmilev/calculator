@@ -1067,6 +1067,7 @@ class LaTeXConstants {
       "[": "]",
       "(": ")",
       "{": "}",
+      "|": "|",
     };
     /**@type{Object.<string, string>} */
     this.rightLeftDelimiterPair = {
@@ -3306,6 +3307,9 @@ class MathNode {
       case "ArrowUp":
       case "ArrowDown":
         return this.arrow(key, shiftHeld);
+      case "|":
+        this.makeDelimiterAmbiguous(key);
+        return true;
       case "(":
       case "[":
         this.makeDelimiterLeft(key);
@@ -4322,18 +4326,30 @@ class MathNode {
     operator.focus(1);
   }
 
+  makeDelimiterAmbiguous(
+    /** @type{string} */
+    ambiguousDelimiter,
+  ) {
+    this.makeDelimiterCommon(
+      ambiguousDelimiter,
+      latexConstants.leftRightDelimiterPair[ambiguousDelimiter],
+      true,
+      true
+    );
+  }
+
   makeDelimiterLeft(
     /** @type{string} */
     leftDelimiter,
   ) {
-    this.makeDelimiterCommon(leftDelimiter, latexConstants.leftRightDelimiterPair[leftDelimiter], true);
+    this.makeDelimiterCommon(leftDelimiter, latexConstants.leftRightDelimiterPair[leftDelimiter], true, false);
   }
 
   makeDelimiterRight(
     /** @type{string} */
     rightDelimiter,
   ) {
-    this.makeDelimiterCommon(latexConstants.rightLeftDelimiterPair[rightDelimiter], rightDelimiter, false);
+    this.makeDelimiterCommon(latexConstants.rightLeftDelimiterPair[rightDelimiter], rightDelimiter, false, false);
   }
 
   makeMatrix(
@@ -4507,6 +4523,8 @@ class MathNode {
     rightDelimiter,
     /** @type{boolean} */
     isLeft,
+    /** @type{boolean} */
+    isAmbiguous,
   ) {
     let positionOperator = this.computePositionOfOperator();
     // Find closest ancestor node that's of type horizontal math.
@@ -4518,7 +4536,7 @@ class MathNode {
     }
     let oldIndexInParent = parentAndIndex.indexInParent;
     let parent = parentAndIndex.parent;
-    parent.children[oldIndexInParent].doMakeDelimiterCommon(leftDelimiter, rightDelimiter, positionOperator, isLeft);
+    parent.children[oldIndexInParent].doMakeDelimiterCommon(leftDelimiter, rightDelimiter, positionOperator, isLeft, isAmbiguous);
   }
 
   findIndexToInsertRightDelimiter(
@@ -4664,6 +4682,8 @@ class MathNode {
     positionOperator,
     /**@type {boolean} */
     isLeft,
+    /** @type{boolean} */
+    isAmbiguous,
   ) {
     let parent = this.parent;
     if (parent.type.type !== knownTypes.horizontalMath.type) {
@@ -4688,6 +4708,26 @@ class MathNode {
     }
     let indexLeftDelimiter = - 1;
     let indexRightDelimiter = - 1;
+    if (isAmbiguous) {
+      for (let i = oldIndexInParent; i >= 0; i--) {
+        let child = parent.children[i];
+        if (
+          child.type.type === knownTypes.leftDelimiter.type &&
+          child.initialContent === "|" &&
+          !child.implied
+        ) {
+          isLeft = true;
+        }
+      }
+      if (isLeft) {
+        if (oldIndexInParent + 1 < parent.children.length) {
+          let child = parent.children[oldIndexInParent + 1];
+          if (child.type.type === knownTypes.rightDelimiter.type && child.implied === true) {
+            isLeft = false;
+          }
+        }
+      }
+    }
     if (isLeft) {
       if (positionOperator === 1) {
         indexLeftDelimiter = oldIndexInParent + 1;
@@ -4713,7 +4753,6 @@ class MathNode {
       }
       indexLeftDelimiter = parent.findIndexToInsertLeftDelimiter(indexRightDelimiter);
     }
-
     parent.insertChildAtPosition(indexRightDelimiter, rightDelimiter);
     parent.insertChildAtPosition(indexLeftDelimiter, leftDelimiter);
     parent.normalizeHorizontalMath();

@@ -361,7 +361,7 @@ Problem.prototype.getAppAnchorRequestFileCourseTopics = function (
 }
 
 Problem.prototype.getCalculatorURLFileCourseTopics = function () {
-  var thePage = window.calculator.mainPage;
+  let thePage = window.calculator.mainPage;
   return this.getCalculatorURLInput(
     this.fileName,
     thePage.storage.variables.currentCourse.courseHome.getValue(),
@@ -372,7 +372,7 @@ Problem.prototype.getCalculatorURLFileCourseTopics = function () {
 Problem.prototype.getCalculatorURLInput = function (
   inputFileName, inputCourseHome, inputTopicList
 ) {
-  var result = "";
+  let result = "";
   result += `fileName=${inputFileName}&`;
   result += `courseHome=${inputCourseHome}&`;
   result += `topicList=${inputTopicList}`;
@@ -380,7 +380,8 @@ Problem.prototype.getCalculatorURLInput = function (
 }
 
 Problem.prototype.getCalculatorURLRequestPartOne = function (isScoredQuiz) {
-  var result = "";
+  let thePage = window.calculator.mainPage;
+  let result = "";
   if (isScoredQuiz === undefined) {
     isScoredQuiz = this.flagForReal;
   }

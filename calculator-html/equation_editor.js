@@ -893,6 +893,7 @@ class LaTeXConstants {
       "&": "&",
       "[": "[",
       "]": "]",
+      "|": "|",
     };
     /**@type{Object.<string, string>} */
     this.latexBackslashCommands = {
@@ -921,6 +922,7 @@ class LaTeXConstants {
       "neq": "\u2260",
       "dots": "\u2026",
       "vdots": "\u22EE",
+      "approx": "~",
       "lt": "<",
       "gt": ">",
       "to": "\u2192",
@@ -1046,6 +1048,7 @@ class LaTeXConstants {
       "\\langle": "\u27E8",
       "(": "(",
       "[": "[",
+      "|": "|",
       "\\{": "{",
     };
     /**@type{Object.<string, string>} */
@@ -1053,6 +1056,7 @@ class LaTeXConstants {
       "\\right.": "",
       "\\rangle": "\u27E9",
       ")": ")",
+      "|": "|",
       "]": "]",
       "\\}": "}",
     };
@@ -1611,6 +1615,17 @@ class LaTeXParser {
       this.lastRuleName = "begin pmatrix to matrix builder";
       let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, "");
       return this.replaceParsingStackTop(matrix, "matrixBuilder", - 1);
+    }
+    if (
+      fourthToLast.syntacticRole === "\\begin{array}" &&
+      thirdToLast.syntacticRole === "{" &&
+      secondToLast.isExpression() &&
+      last.syntacticRole === "|"
+    ) {
+      if (secondToLast.node.type.type === knownTypes.horizontalMath.type) {
+        secondToLast.node.appendChild(mathNodeFactory.atom(this.equationEditor, last.syntacticRole));
+        return this.decreaseParsingStack(1);
+      }
     }
     if (secondToLast.syntacticRole === "\\begin{array}" && last.isExpression()) {
       this.lastRuleName = "begin array to matrix builder";

@@ -565,8 +565,8 @@ class MathNodeFactory {
       leftDelimiter = this.leftParenthesis(equationEditor, false);
       rightDelimiter = this.rightParenthesis(equationEditor, false);
     } else {
-      leftDelimiter = this.atom(equationEditor, null);
-      rightDelimiter = this.atom(equationEditor, null);
+      leftDelimiter = this.atom(equationEditor, "");
+      rightDelimiter = this.atom(equationEditor, "");
     }
     let parenthesesLayout = this.horizontalMath(equationEditor, leftDelimiter);
     parenthesesLayout.appendChild(matrixTable);
@@ -739,7 +739,7 @@ class AtomWithPosition {
       return new AtomWithPosition(null, -1);
 
     }
-    if (this.position < this.element.element.textContent.length) {
+    if (this.position < this.element.lengthContentIfAtom()) {
       return new AtomWithPosition(this.element, this.position + 1);
     }
     return new AtomWithPosition(this.element.firstAtomToTheRight(), 0);
@@ -767,7 +767,11 @@ function mathFromElement(
   /**@type{boolean} whether to remove \\displaystyle from latex source.*/
   removeDisplayStyle,
 ) {
-  return mathFromLatex(container, container.textContent, editable, sanitizeLatexSource, removeDisplayStyle);
+  let content = container.textContent;
+  if (content === null) {
+    content = "";
+  }
+  return mathFromLatex(container, content, editable, sanitizeLatexSource, removeDisplayStyle);
 }
 
 /** @returns {EquationEditor} Returns typeset math.*/
@@ -853,7 +857,7 @@ class LaTeXConstants {
       "\u2260": "0.3em",
       // ellipsis dots
       "\u2026": "0.3em",
-    }
+    };
     /**@type{Object.<string, string>} */
     this.operatorsNormalized = {
       // Full-widgth plus sign, wider and taller plus sign.
@@ -948,7 +952,7 @@ class LaTeXConstants {
     /**@type{Object.<string, string>} */
     this.operatorsWithSubscript = {
       "lim": "lim",
-    }
+    };
     /**@type{Object.<string, string>} */
     this.latexBackslashAtomsEditable = {
       "alpha": "\u03B1",
@@ -1087,7 +1091,7 @@ class LaTeXConstants {
     this.matrixEnder = {
       "\\end{pmatrix}": true,
       "\\end{array}": true,
-    }
+    };
     /** @type{Object.<string, boolean>} */
     // The boolean indicates that the white space should be ignored.
     this.whiteSpaceCharactersIgnored = {
@@ -1122,8 +1126,8 @@ class LaTeXConstants {
       let current = this.operatorWithSuperAndSubscript[key];
       this.utf8ToLatexMap[current] = `\\${key} `;
     }
-    for (let key in this.operatorWithSubscript) {
-      let current = this.operatorWithSubscript[key];
+    for (let key in this.operatorsWithSubscript) {
+      let current = this.operatorsWithSubscript[key];
       this.utf8ToLatexMap[current] = `\\${key} `;
     }
     for (let key in this.mathcalEquivalents) {
@@ -1225,7 +1229,7 @@ class LaTeXParser {
     this.startTime = 0;
   }
 
-  intialize() {
+  initialize() {
     this.parsingStack = [];
     for (let i = 0; i < this.dummyParsingElements; i++) {
       this.parsingStack.push(new SyntancticElement(null, "", ""));
@@ -1254,7 +1258,7 @@ class LaTeXParser {
   /**@returns{MathNode} */
   parse() {
     this.startTime = new Date().getTime();
-    this.intialize();
+    this.initialize();
     this.parseWords();
     this.result = new MathNode(this.equationEditor, knownTypes.horizontalMath);
     let startingNode = mathNodeFactory.horizontalMath(this.equationEditor, null);
@@ -3541,7 +3545,7 @@ class MathNode {
       return (new AtomWithPosition(this, 0)).leftNeighbor();
     }
     if (arrowType === arrowMotion.firstAtomToTheRight) {
-      return (new AtomWithPosition(this, this.element.textContent.length)).rightNeighbor();
+      return (new AtomWithPosition(this, this.textContentOrInitialContent().length)).rightNeighbor();
     }
     return new AtomWithPosition(null, - 1);
   }

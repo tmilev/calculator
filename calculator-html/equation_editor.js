@@ -33,19 +33,13 @@ class MathNodeType {
     this.width = input["width"];
     this.height = input["height"];
     this.display = input["display"];
-    this.flexDirection = input["flexDirection"];
-    this.justifyContent = input["justifyContent"];
-    this.alignContent = input["alignContent"];
-    this.alignItems = input["alignItems"];
     this.verticalAlign = input["verticalAlign"];
     this.outline = input["outline"];
-    this.fontSize = input["fontSize"];
+    this.fontSizeRatio = input["fontSizeRatio"];
     this.whiteSpace = input["whiteSpace"];
     this.textAlign = input["textAlign"];
-    this.float = input["float"];
     this.colorImplied = input["colorImplied"];
     this.colorText = input["colorText"];
-    this.boxSizing = input["boxSizing"];
     this.position = input["position"];
     this.minWidth = input["minWidth"];
     this.cursor = input["cursor"];
@@ -76,20 +70,18 @@ class MathNodeType {
 }
 
 const knownTypeDefaults = {
+  "width": "",
+  "height": "",
+  "minWidth": "",
   "display": "inline-block",
   "minHeightScale": 0,
-  "flexDirection": "",
-  "justifyContent": "",
-  "alignContent": "",
-  "alignItems": "",
   "verticalAlign": "",
-  "fontSize": "",
+  "fontSizeRatio": 1,
   "whiteSpace": "",
-  "float": "",
   "textAlign": "",
-  "boxSizing": "",
   "position": "absolute",
   "cursor": "",
+  "outline": "",
   // Colors
   "colorText": "",
   "colorImplied": "",
@@ -205,7 +197,7 @@ const knownTypes = {
     "type": "numerator",
     "borderBottom": "1px solid black",
     "padding": "1px",
-    "fontSize": defaultFractionScale,
+    "fontSizeRatio": defaultFractionScale,
     "minHeightScale": defaultFractionScale,
     "arrows": {
       "ArrowUp": arrowMotion.firstAtomToTheLeft,
@@ -217,7 +209,7 @@ const knownTypes = {
   // Represents the denominator y of a fraction x/y.
   denominator: new MathNodeType({
     "type": "denominator",
-    "fontSize": defaultFractionScale,
+    "fontSizeRatio": defaultFractionScale,
     "minHeightScale": defaultFractionScale,
     "arrows": {
       "ArrowUp": arrowMotion.firstAtomToTheLeft,
@@ -230,7 +222,7 @@ const knownTypes = {
   }),
   exponent: new MathNodeType({
     "type": "exponent",
-    "fontSize": 0.75,
+    "fontSizeRatio": 0.75,
     "minHeightScale": 0.75,
   }),
   baseWithSubscript: new MathNodeType({
@@ -238,7 +230,7 @@ const knownTypes = {
   }),
   subscript: new MathNodeType({
     "type": "subscript",
-    "fontSize": 0.75,
+    "fontSizeRatio": 0.75,
     "minHeightScale": 0.75,
   }),
   sqrt: new MathNodeType({
@@ -252,7 +244,7 @@ const knownTypes = {
   }),
   radicalExponentBox: new MathNodeType({
     "type": "radicalExponentBox",
-    "fontSize": 0.75,
+    "fontSizeRatio": 0.75,
     "minHeightScale": 0.75,
   }),
   radicalUnderBox: new MathNodeType({
@@ -279,17 +271,17 @@ const knownTypes = {
   }),
   operatorStandalone: new MathNodeType({
     "type": "operatorStandalone",
-    "fontSize": 1.8,
+    "fontSizeRatio": 1.8,
     "minHeightScale": 1.8,
   }),
   operatorSubscript: new MathNodeType({
     "type": "operatorSubscript",
-    "fontSize": 0.55,
+    "fontSizeRatio": 0.55,
     "minHeightScale": 0.55,
   }),
   operatorSuperscript: new MathNodeType({
     "type": "operatorSuperscript",
-    "fontSize": 0.55,
+    "fontSizeRatio": 0.55,
     "minHeightScale": 0.55,
   }),
 };
@@ -664,11 +656,11 @@ class MathNodeFactory {
     let result = new MathNode(equationEditor, knownTypes.operatorWithSubscript);
     let subscriptNode = new MathNode(equationEditor, knownTypes.operatorSubscript);
     let subscriptScale = 0.8;
-    subscriptNode.type.fontSize = subscriptScale;
+    subscriptNode.type.fontSizeRatio = subscriptScale;
     subscriptNode.type.minHeightScale = subscriptScale;
     let operatorNode = new MathNode(equationEditor, knownTypes.operatorStandalone);
     let operatorScale = 1;
-    operatorNode.type.fontSize = operatorScale;
+    operatorNode.type.fontSizeRatio = operatorScale;
     operatorNode.type.minHeightScale = operatorScale;
     subscriptNode.appendChild(this.horizontalMath(equationEditor, subscript));
     operatorNode.appendChild(this.atomImmutable(equationEditor, operator));
@@ -1834,7 +1826,6 @@ class EquationEditor {
       this.rootNode.type.padding = "";
       this.rootNode.type.margin = "";
     }
-    this.rootNode.externalDOM = this.container;
     /** @type{AtomWithPosition} */
     this.selectionStart = new AtomWithPosition(null, -1);
     /** @type{AtomWithPosition} */
@@ -2264,10 +2255,6 @@ class MathNode {
     /** @type {number} */
     this.indexInParent = - 1;
     /** @type {number} */
-    this.scale = 0;
-    /** @type {HTMLElement} */
-    this.externalDOM = null;
-    /** @type {number} */
     this.positionCaretBeforeKeyEvents = - 1;
     /** @type {number} */
     this.desiredCaretPosition = - 1;
@@ -2367,32 +2354,12 @@ class MathNode {
     if (this.type.whiteSpace !== "") {
       this.element.style.whiteSpace = this.type.whiteSpace;
     }
-    this.scale = 1;
-    if (this.type.fontSize !== "") {
-      this.element.style.fontSize = `${this.type.fontSize * 100}%`;
-      this.scale = this.type.fontSize;
-    }
-    if (this.type.flexDirection !== "") {
-      this.element.style.flexDirection = this.type.flexDirection;
-    }
-    if (this.type.justifyContent !== "") {
-      this.element.style.justifyContent = this.type.justifyContent;
-    }
-    if (this.type.alignContent !== "") {
-      this.element.style.alignContent = this.element.style.alignContent;
-    }
-    if (this.type.alignItems !== "") {
-      this.element.style.alignItems = this.element.style.alignItems;
+    if (this.type.fontSizeRatio !== 1) {
+      this.element.style.fontSize = `${this.type.fontSizeRatio * 100}%`;
     }
     this.element.innerHTML = "";
     if (this.initialContent !== "") {
       this.element.textContent = this.initialContent;
-    }
-    if (this.type.float !== "") {
-      this.element.style.cssFloat = this.type.float;
-    }
-    if (this.type.boxSizing !== "") {
-      this.element.style.boxSizing = this.type.boxSizing;
     }
     if (this.type.position !== "") {
       this.element.style.position = this.type.position;
@@ -3181,7 +3148,7 @@ class MathNode {
   updateParentDOM(/** @type {HTMLElement|null} */ oldElement) {
     let parentElement = null;
     if (this.type.type === knownTypes.root.type) {
-      parentElement = this.externalDOM;
+      parentElement = this.equationEditor.container;
     } else {
       if (oldElement !== null) {
         parentElement = oldElement.parentElement;
@@ -3631,6 +3598,7 @@ class MathNode {
     return this.parent.firstAtomToTheRightOf(this.indexInParent);
   }
 
+  /** @returns{MathNode|null} */
   firstAtomToTheRightOf(
     /** @type{number}*/
     childIndex,
@@ -3644,6 +3612,7 @@ class MathNode {
     return this.firstAtomToTheRight();
   }
 
+  /** @returns{MathNode|null} */
   firstAtomToTheLeft() {
     if (this.parent === null) {
       return null;
@@ -3651,6 +3620,7 @@ class MathNode {
     return this.parent.firstAtomToTheLeftOf(this.indexInParent);
   }
 
+  /** @returns{MathNode|null} */
   firstAtomToTheLeftOf(
     /** @type {number} */
     childIndex,

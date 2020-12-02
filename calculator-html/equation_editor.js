@@ -5950,7 +5950,7 @@ function initialize() {
 
 function testEquationEditor() {
   let editorElement = document.getElementById("equation-editor");
-  let editor = new EquationEditor(editorElement);
+  let editor = new EquationEditor(editorElement, new EquationEditorOptions(true, false, false, null));
   editor.options.debugLogContainer = document.getElementById("debug");
   editor.options.latexInput = document.getElementById("latexInputTest");
   editor.updateDOM();

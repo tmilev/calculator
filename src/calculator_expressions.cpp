@@ -3814,7 +3814,7 @@ bool Expression::toStringDifferentiate(
   } else {
     out << input[2].toString(theFormat);
   }
-  out << "}{\\text{d}} "
+  out << "}{\\text{d} "
   << input[1].toString(theFormat) << "}";
   return true;
 }

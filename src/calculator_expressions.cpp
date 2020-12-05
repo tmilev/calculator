@@ -1286,10 +1286,10 @@ bool Expression::addChildOnTop(const Expression& inputChild) {
   return true;
 }
 
-bool Expression::setChildAtomValue(int childIndex, int TheAtomValue) {
+bool Expression::setChildAtomValue(int childIndex, int theAtomValue) {
   this->checkInitialization();
   Expression tempE;
-  tempE.makeAtom(TheAtomValue, *this->owner);
+  tempE.makeAtom(theAtomValue, *this->owner);
   this->children.setObjectAtIndex(
     childIndex,
     this->owner->allChildExpressions.addNoRepetitionOrReturnIndexFirst(tempE)
@@ -1318,7 +1318,7 @@ bool Expression::setChild(int childIndexInMe, int childIndexInBoss) {
   this->checkInitialization();
   this->children.setObjectAtIndex(childIndexInMe, childIndexInBoss);
   if (this->children[childIndexInMe] != childIndexInBoss) {
-    global.fatal << "This shouldn't happen." << global.fatal;
+    global.fatal << "Bad child index. " << global.fatal;
   }
   return true;
 }
@@ -1651,11 +1651,11 @@ bool Expression::isSequenceDoubleButNotTripleNested() const {
   return false;
 }
 
-bool Expression::isSequenceNElements(int N) const {
+bool Expression::isSequenceNElements(int n) const {
   if (this->owner == nullptr) {
     return false;
   }
-  return this->startsWith(this->owner->opSequence(), N + 1);
+  return this->startsWith(this->owner->opSequence(), n + 1);
 }
 
 bool Expression::isIntervalRealLine() const {

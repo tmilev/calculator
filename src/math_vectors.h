@@ -95,7 +95,7 @@ public:
     Coefficient& result
   ) {
     if (r1.size != bilinearForm.numberOfRows || r1.size != r2.size || r1.size != bilinearForm.numberOfColumns) {
-      global.fatal << "This is a programming error: attempting to take "
+      global.fatal << "Attempt to take "
       << "a bilinear form represented by matrix with " << bilinearForm.numberOfRows
       << " rows and " << bilinearForm.numberOfColumns << " columns "
       << "of vectors of dimension " << r1.size << " and " << r2.size << ". "
@@ -448,7 +448,7 @@ public:
   }
   Vector<Coefficient> operator/(const Coefficient& other) const {
     if (other.isEqualToZero()) {
-      global.fatal << "This is a programming error: division by zero. "
+      global.fatal << "Division by zero. "
       << "Division by zero error are supposed to be handled at an earlier level. " << global.fatal;
     }
     Vector<Coefficient> result;
@@ -483,7 +483,7 @@ public:
   }
   bool operator>(const Vector<Coefficient>& other) const {
     if (this->size != other.size) {
-      global.fatal << "This is a programming error: comparing Vectors with different number of coordinates, namely, "
+      global.fatal << "Comparing vectors with different number of coordinates, namely, "
       << this->toString() << " and " << other.toString() << ". " << global.fatal;
     }
     Coefficient c1 = 0, c2 = 0;
@@ -510,7 +510,7 @@ public:
   template <class otherType>
   void operator-=(const Vector<otherType>& other) {
     if (this->size != other.size) {
-      global.fatal << "This is a programming error: subtracting vectors with different dimensions. " << global.fatal;
+      global.fatal << "Subtracting vectors with different dimensions. " << global.fatal;
     }
     for (int i = 0; i < this->size; i ++) {
       this->objects[i] -= other[i];
@@ -609,14 +609,14 @@ bool Vector<Coefficient>::isProportionalTo(
   if (this->size != input.size) {
     return false;
   }
-  int IndexFirstNonZero = - 1;
+  int indexFirstNonZero = - 1;
   for (int i = 0; i < this->size; i ++) {
     if (!this->objects[i].isEqualToZero()) {
-      IndexFirstNonZero = i;
+      indexFirstNonZero = i;
       break;
     }
   }
-  if (IndexFirstNonZero == - 1) {
+  if (indexFirstNonZero == - 1) {
     if (input.isEqualToZero()) {
       outputTimesMeEqualsInput.makeZero();
       return true;
@@ -624,8 +624,8 @@ bool Vector<Coefficient>::isProportionalTo(
     return false;
   }
   Vector<Rational> tempRoot = *this;
-  outputTimesMeEqualsInput = input[IndexFirstNonZero];
-  outputTimesMeEqualsInput /= (*this)[IndexFirstNonZero];
+  outputTimesMeEqualsInput = input[indexFirstNonZero];
+  outputTimesMeEqualsInput /= (*this)[indexFirstNonZero];
   tempRoot *= outputTimesMeEqualsInput;
   return tempRoot == input;
 }
@@ -1029,7 +1029,7 @@ bool Vector<Coefficient>::getCoordinatesInBasis(const Vectors<Coefficient>& inpu
   Vectors<Coefficient> bufferVectors;
   Matrix<Coefficient> bufferMat;
   if (this->size != inputBasis[0].size) {
-    global.fatal << "This is a programming error: asking to get coordinates of vector of "
+    global.fatal << "Attempt to get coordinates of vector of "
     << this->size << " coordinates using a basis whose first vector has "
     << inputBasis[0].size << " coordinates." << global.fatal;
   }
@@ -1057,10 +1057,10 @@ void Vectors<Coefficient>::getLinearDependenceRunTheLinearAlgebra(
   if (this->size == 0) {
     return;
   }
-  int Dimension = (*this)[0].size;
-  outputTheSystem.initialize(Dimension, this->size);
+  int dimension = (*this)[0].size;
+  outputTheSystem.initialize(dimension, this->size);
   for (int i = 0; i < this->size; i ++) {
-    for (int j = 0; j < Dimension; j ++) {
+    for (int j = 0; j < dimension; j ++) {
       outputTheSystem(j, i) = (*this)[i][j];
     }
   }
@@ -1083,9 +1083,6 @@ bool Vectors<Coefficient>::getCoordinatesInBasis(
   const Vectors<Coefficient>& inputBasis, Vectors<Coefficient>& outputCoords
 ) const {
   MacroRegisterFunctionWithName("Vectors::getCoordinatesInBasis");
-  //if (this == 0 || &outputCoords == 0 || this == &outputCoords)
-  //  global.fatal << "This is a programming error: input and output addresses are zero or coincide. this address: "
-  //  << (unsigned long) this << "; output address: " << (unsigned long)(&outputCoords) << global.fatal;
   outputCoords.setSize(this->size);
   for (int i = 0; i < this->size; i ++) {
     if (!(this->operator[](i).getCoordinatesInBasis(inputBasis, outputCoords[i]))) {

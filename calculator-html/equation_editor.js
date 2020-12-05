@@ -905,6 +905,7 @@ class LaTeXConstants {
       "langle": "\\langle",
       "rangle": "\\rangle",
       "{": "\\{",
+      "binom": "\\binom",
     };
     /**@type{Object.<string, string>} */
     this.latexBackslashOperators = {
@@ -1751,6 +1752,12 @@ class LaTeXParser {
     }
     if (thirdToLast.syntacticRole === "\\frac" && secondToLast.isExpression() && last.isExpression()) {
       let node = mathNodeFactory.fraction(this.equationEditor, secondToLast.node, last.node);
+      return this.replaceParsingStackTop(node, "", - 3);
+    }
+    if (thirdToLast.syntacticRole === "\\binom" && secondToLast.isExpression() && last.isExpression()) {
+      let node = mathNodeFactory.matrix(this.equationEditor, 2, 1, "");
+      node.getMatrixCell(0, 0).children[0].appendChild(secondToLast.node);
+      node.getMatrixCell(1, 0).children[0].appendChild(last.node);
       return this.replaceParsingStackTop(node, "", - 3);
     }
     if (last.content in latexConstants.operatorsNormalized) {
@@ -3741,6 +3748,11 @@ class MathNode {
     if (this.type.type !== knownTypes.horizontalMath.type) {
       return;
     }
+    if (this.parent !== null) {
+      if (this.parent.type.type === knownTypes.matrix.type) {
+        return;
+      }
+    }
     this.ensureEditableAtoms();
   }
 
@@ -3750,6 +3762,11 @@ class MathNode {
     }
     if (this.type.type !== knownTypes.horizontalMath.type) {
       return;
+    }
+    if (this.parent !== null) {
+      if (this.parent.type.type === knownTypes.matrix.type) {
+        return;
+      }
     }
     this.normalizeHorizontalMath();
   }

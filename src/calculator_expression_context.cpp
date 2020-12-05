@@ -230,10 +230,10 @@ bool ExpressionContext::setAmbientSemisimpleLieAlgebra(
   return true;
 }
 
-bool Expression::contextSetDiffOperatorVar(const Expression& thePolyVar, const Expression& theDiffOpVar) {
+bool Expression::contextSetDifferentialOperatorVariable(const Expression& thePolyVar, const Expression& theDiffOpVar) {
   if (!this->isContext()) {
     global.fatal << "This is a programming error: calling "
-    << "Expression::contextSetDiffOperatorVar on a non-context expression. " << global.fatal;
+    << "Expression::contextSetDifferentialOperatorVariable on a non-context expression. " << global.fatal;
   }
   Expression diffVarsE, polyVarsE;
   diffVarsE.reset(*this->owner, 2);

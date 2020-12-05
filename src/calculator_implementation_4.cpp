@@ -510,7 +510,8 @@ bool Calculator::getVectorLargeIntegerFromFunctionArguments(const Expression& in
   output.initializeFillInObject(theRats.size, 0);
   for (int i = 0; i < theRats.size; i ++) {
     if (!theRats[i].isInteger(&output[i])) {
-      return *this << "<hr>Succeeded to convert " << input.toString() << " to the vector of rationals: "
+      return *this << "<hr>Succeeded to convert "
+      << input.toString() << " to the vector of rationals: "
       << theRats.toString() << " but failed to convert that to list of integers. ";
     }
   }
@@ -526,8 +527,10 @@ bool Calculator::getVectorInt(const Expression& input, List<int>& output) {
   output.initializeFillInObject(theRats.size,0);
   for (int i = 0; i < theRats.size; i ++) {
     if (!theRats[i].isSmallInteger(&output[i])) {
-      return *this << "<hr>Succeeded to convert " << input.toString() << " to the vector of rationals: "
-      << theRats.toString() << " but failed to convert that to list of small integers. ";
+      return *this << "<hr>Succeeded to convert "
+      << input.toString() << " to the vector of rationals: "
+      << theRats.toString()
+      << " but failed to convert that to list of small integers. ";
     }
   }
   return true;
@@ -646,7 +649,7 @@ bool CalculatorBasics::rightDistributeBracketIsOnTheRight(
   int theMultiplicativeOp,
   bool constantsOnly
 ) {
-  MacroRegisterFunctionWithName("Calculator::outerRightDistributeBracketIsOnTheRight");
+  MacroRegisterFunctionWithName("Calculator::rightDistributeBracketIsOnTheRight");
   if (theAdditiveOp == - 1) {
     theAdditiveOp = calculator.opPlus();
   }

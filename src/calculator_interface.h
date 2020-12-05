@@ -125,8 +125,8 @@ private:
   typedef bool (*FunctionAddress) (Calculator& calculator, const Expression& input, Expression& output);
   typedef bool (*ToStringHandler) (const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
 //////
-  friend std::ostream& operator<<(std::ostream& output, const Expression& theMon) {
-    output << theMon.toString();
+  friend std::ostream& operator<<(std::ostream& output, const Expression& element) {
+    output << element.toString();
     return output;
   }
   friend Expression operator*(const Expression& left, const Expression& right);
@@ -154,7 +154,7 @@ private:
   void getCoefficientMultiplicandForm(Expression& outputCoeff, Expression& outputNoCoeff) const;
   void getCoefficientMultiplicandForm(Rational& outputCoeff, Expression& outputNoCoeff) const;
   bool setChildAtomValue(int childIndex, const std::string& theAtom);
-  bool setChildAtomValue(int childIndex, int TheAtomValue);
+  bool setChildAtomValue(int childIndex, int theAtomValue);
   int size() const {
     return this->children.size;
   }
@@ -229,7 +229,7 @@ private:
   bool isBuiltInType(int* outputWhichType) const;
   bool isIntervalRealLine() const;
   bool isSequenceDoubleButNotTripleNested() const;
-  bool isSequenceNElements(int N = - 2) const;
+  bool isSequenceNElements(int n = - 2) const;
   bool isError(std::string* outputErrorMessage = nullptr) const;
   bool isContext() const;
   bool needsParenthesisForBaseOfExponent() const;
@@ -342,7 +342,7 @@ private:
 
   bool containsAsSubExpressionNoBuiltInTypes(const Expression& input) const;
   bool containsAsSubExpressionNoBuiltInTypes(int inputAtom) const;
-  bool contextSetDiffOperatorVar(const Expression& thePolyVar, const Expression& theDiffOpVar);
+  bool contextSetDifferentialOperatorVariable(const Expression& thePolyVar, const Expression& theDiffOpVar);
   SemisimpleLieAlgebra* getAmbientSemisimpleLieAlgebraNonConstUseWithCaution() const;
   bool isEqualToZero() const;
   bool isEqualToOne() const;
@@ -1341,14 +1341,13 @@ public:
   std::string toStringSemismipleLieAlgebraLinksFromHD(
     const DynkinType& theType, FormatExpressions* theFormat = nullptr
   );
-  //void GetOutputFolders(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay, FormatExpressions& outputFormat);
   bool isBoundVariableInContext(int inputOp);
   bool isNonBoundVariableInContext(int inputOp);
   Function& getFunctionHandlerFromNamedRule(const std::string& inputRuleName);
   bool checkPredefinedFunctionNameRepetitions();
   bool checkOperationHandlers();
   bool checkConsistencyAfterInitialization();
-  //to make operations read only, we make operations private and return const pointer to it.
+  // To make operations read only, we make operations private and return const pointer to it.
   const HashedList<std::string, MathRoutines::hashString>& getOperations() {
     return this->operations.theKeys;
   }
@@ -2047,7 +2046,7 @@ public:
   );
   static void checkInputNotSameAsOutput(const Expression& input, const Expression& output) {
     if (&input == &output) {
-      global.fatal << "This is a programming error: the input expression, equal to "
+      global.fatal << "The input expression, equal to "
       << input.toString() << " has the same address as the output expression. "
       << global.fatal;
     }
@@ -2106,7 +2105,9 @@ public:
     std::stringstream* commentsGeneral = nullptr
   );
 
-  static bool functionReverseOrderRecursively(Calculator& calculator, const Expression& input, Expression& output);
+  static bool functionReverseOrderRecursively(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   std::string writeFileToOutputFolderReturnLink(
     const std::string& fileContent,
     const std::string& fileName,
@@ -2160,7 +2161,7 @@ public:
     const Expression& input,
     Expression& output,
     int opIndexParentIfAvailable,
-    Function **outputHandler
+    Function* *outputHandler
   );
   static bool outerStandardCompositeHandler(
     Calculator& calculator,
@@ -2814,7 +2815,7 @@ bool Expression::makeSum(
           summandsWithCoeff[i] > summandsWithCoeff[j] &&
           summandsWithCoeff[j] > summandsWithCoeff[i]
         ) {
-          global.fatal << "This is a programming error: bad comparison "
+          global.fatal << "Bad comparison "
           << "function: each of the expressions "
           << summandsWithCoeff[i].toString()
           << " and " << summandsWithCoeff[j].toString()
@@ -3137,7 +3138,8 @@ bool WithContext<BuiltIn>::setContextAtLeast(
   ExpressionContext newContext;
   if (!inputOutputContext.mergeContexts(this->context, newContext)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to merge context " << inputOutputContext.toString()
+      *commentsOnFailure << "Failed to merge context "
+      << inputOutputContext.toString()
       << " with " << this->context.toString();
     }
     return false;

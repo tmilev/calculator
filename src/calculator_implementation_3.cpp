@@ -374,7 +374,7 @@ bool Expression::assignMatrixExpressions(
   }
   this->reset(owner, input.numberOfRows + 1);
   Expression theMatType(owner);
-  theMatType.addChildAtomOnTop(owner.opMatriX());
+  theMatType.addChildAtomOnTop(owner.opMatrix());
   this->addChildOnTop(theMatType);
   enum matrixType {typeUnknown, typeRat, typeDouble, typeAlgebraic, typePolyRat, typePolyAlg, typeRF, typeExpression};
   matrixType outType = typeUnknown;

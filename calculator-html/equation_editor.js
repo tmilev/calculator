@@ -927,6 +927,7 @@ class LaTeXConstants {
       "searrow": "\u2198",
       "swarrow": "\u2199",
       "pm": "\u00B1",
+      "det": "det",
       "geq": "\u2265",
       "sin": "sin",
       "cos": "cos",
@@ -1846,6 +1847,12 @@ class EquationEditor {
     this.backslashSequence = "";
     /** @type {number} */
     this.backslashPosition = - 1;
+
+    if (this.options.latexInput !== null) {
+      this.options.latexInput.addEventListener('keyup', (e) => {
+        this.writeLatexFromInput();
+      });
+    }
   }
 
   updateDOM() {
@@ -1855,12 +1862,6 @@ class EquationEditor {
   writeDebugInfo(
     /** @type{LaTeXParser|null} */ parser,
   ) {
-    if (
-      this.options.latexInput !== null
-    ) {
-      let latex = this.rootNode.toLatex();
-      this.options.latexInput.value = latex;
-    }
     if (this.options.debugLogContainer === null) {
       return;
     }
@@ -1871,6 +1872,24 @@ class EquationEditor {
     }
     debugHTML += this.toHtml();
     this.options.debugLogContainer.innerHTML = debugHTML;
+  }
+
+  writeLatexToInput() {
+    if (
+      this.options.latexInput === null
+    ) {
+      return;
+    }
+    let latex = this.rootNode.toLatex();
+    this.options.latexInput.value = latex;
+  }
+
+  writeLatexFromInput() {
+    if (this.options.latexInput === null) {
+      return;
+    }
+    let inputContent = this.options.latexInput.value;
+    this.writeLatex(inputContent);
   }
 
   writeLatex(
@@ -3203,6 +3222,7 @@ class MathNode {
     }
     setTimeout(() => {
       this.equationEditor.updateAlignment();
+      this.equationEditor.writeLatexToInput();
       this.equationEditor.writeDebugInfo(null);
     }, 0);
   }
@@ -3691,8 +3711,6 @@ class MathNode {
     rangeClone.selectNodeContents(this.element);
     rangeClone.setEnd(range.endContainer, range.endOffset);
     this.positionCaretBeforeKeyEvents = rangeClone.toString().length - selected;
-    // window.getSelection().removeAllRanges();
-    // window.getSelection().addRange(rangeClone);
   }
 
   appendChild(/** @type{MathNode} */ child) {
@@ -4052,7 +4070,6 @@ class MathNode {
     base.normalizeHorizontalMath();
     let parent = baseWithExponent.parent;
     parent.replaceChildAtPosition(indexBaseWithExponent, base);
-    this.writeDebugInfo(null);
     parent.normalizeHorizontalMath();
     parent.updateDOM();
     parent.focusRestore();
@@ -5949,17 +5966,34 @@ function typeset(
   new MathTagCoverter(style, sanitizeLatexSource, removeDisplayStyle).typeset(toBeModified);
 }
 
-function initialize() {
-  MathQuill.getInterface(2).MathField(document.getElementById("mq-editor"));
-}
-
-function testEquationEditor() {
-  let editorElement = document.getElementById("equation-editor");
-  let editor = new EquationEditor(editorElement, new EquationEditorOptions(true, false, false, null));
-  editor.options.debugLogContainer = document.getElementById("debug");
-  editor.options.latexInput = document.getElementById("latexInputTest");
+function initializeTestPage(
+  /** @type{string} */
+  mqEditorId,
+  /** @type{string} */
+  equationEditorId,
+  /** @type{string} */
+  latexInputId,
+  /** @type{string} */
+  debugId,
+  /** @type{string} */
+  typesetButtonId,
+  /** @type{string} */
+  mathTagTesterId,
+) {
+  MathQuill.getInterface(2).MathField(document.getElementById(mqEditorId));
+  let editorElement = document.getElementById(equationEditorId);
+  const options = new EquationEditorOptions(true, false, false, null);
+  options.latexInput = document.getElementById(latexInputId);
+  options.debugLogContainer = document.getElementById(debugId);
+  let editor = new EquationEditor(editorElement, options);
   editor.updateDOM();
   editor.rootNode.focus(- 1);
+
+  const typesetButton = document.getElementById(typesetButtonId);
+  const mathTagTester = document.getElementById(mathTagTesterId);
+  typesetButton.addEventListener("click", (e) => {
+    typeset(mathTagTester, "", false, false);
+  });
   setTimeout(() => {
     editor.sendKeys([/*
       "(", "1", "/", "1",
@@ -5973,28 +6007,10 @@ function testEquationEditor() {
   }, 300);
 }
 
-function testTypeset(
-  /** @type{string} */
-  equationEditorId,
-  /** @type{string} */
-  inputId,
-  /** @type{string} */
-  debugId,
-) {
-  let input = document.getElementById(inputId);
-  let inputContent = input.value;
-  let editorElement = document.getElementById(equationEditorId);
-  let debugElement = document.getElementById(debugId);
-  let editor = new EquationEditor(editorElement, new EquationEditorOptions(true, false, false, debugElement));
-  editor.writeLatex(inputContent);
-}
-
 module.exports = {
   typeset,
-  testEquationEditor,
-  testTypeset,
   EquationEditor,
-  initialize,
+  initializeTestPage,
   mathFromLatex,
   mathFromElement,
   latexConstants,

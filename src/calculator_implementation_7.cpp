@@ -5156,7 +5156,7 @@ bool Expression::makeMatrix(Calculator& owner, Matrix<Expression>* inputMat) {
   if (inputMat == nullptr) {
     this->reset(owner);
     Expression theMatID(owner);
-    theMatID.addChildAtomOnTop(owner.opMatriX());
+    theMatID.addChildAtomOnTop(owner.opMatrix());
     this->addChildOnTop(theMatID);
     return true;
   }

@@ -6,19 +6,20 @@
 <script type="text/javascript" src="equation_editor.js"></script>
 
 
-<body onload="initialize(); testEquationEditor();">
+<body
+  onload="initializeTestPage('mq-editor', 'equation-editor','latexInputTest', 'debug', 'typeSetButton', 'mathTagTester');">
   Equation editor:<br><br>
   <div id="equation-editor" style="font-size: 72px; font-family:'Times New Roman'"></div>
   <br>
-  <input id="latexInputTest" type="text" value="" onkeyup="testTypeset('equation-editor','latexInputTest', 'debug');">
+  <input id="latexInputTest" type="text" value="">
   <hr>
   <div id="debug"></div>
 
   Mathquill:<div id="mq-editor"></div>
   <br>
-  <button onclick="typeset(document.getElementById('mathTagTester'), '', true);">typeset</button>
+  <button id="typeSetButton">typeset</button>
   <br>
-  <span id='mathTagTester'>
+  <span id="mathTagTester">
     Example content to be typeset follow.
     During development, we may shuffle examples we currently work on to the top.
     Feel free to reorder examples as you see fit (if possible, arranged by categories and from simpler to more

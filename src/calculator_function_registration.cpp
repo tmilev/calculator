@@ -8667,7 +8667,7 @@ void Calculator::initializeToStringHandlers() {
   this->addOneStringAtomHandler(this->opUnionNoRepetition()     , Expression::toStringUnionNoRepetition           );
   this->addOneStringAtomHandler(this->opError()                 , Expression::toStringError                       );
 
-  this->addOneStringCompositeHandler(this->opMatriX()           , Expression::toStringMatrix                      );
+  this->addOneStringCompositeHandler(this->opMatrix()           , Expression::toStringMatrix                      );
 
   this->addOneBuiltInHandler<std::string                                                              >();
   this->addOneBuiltInHandler<Rational                                                                 >();

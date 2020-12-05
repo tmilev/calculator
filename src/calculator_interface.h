@@ -1728,7 +1728,7 @@ public:
   int opLessThan() {
     return this->operations.getIndexNoFail("<");
   }
-  int opWeightLieAlg() {
+  int opWeightLieAlgebra() {
     return this->operations.getIndexNoFail("weightLieAlg");
   }
   int opWeightLieAlgPoly() {
@@ -1737,7 +1737,7 @@ public:
   int opError() {
     return this->operations.getIndexNoFail("Error");
   }
-  int opLisT() {
+  int opList() {
     return this->operations.getIndexNoFail("");
   }
   int opMonomialPoly() {
@@ -1746,7 +1746,7 @@ public:
   int opCalculusPlot() {
     return this->operations.getIndexNoFail("CalculusPlot");
   }
-  int opMatriX() {
+  int opMatrix() {
     return this->operations.getIndexNoFail("Matrix");
   }
   int opSequence() {
@@ -2652,9 +2652,9 @@ bool CalculatorConversions::functionExpressionFromPoly(
   if (!input.isOfType<Polynomial<Coefficient> >()) {
     return false;
   }
-  const Polynomial<Coefficient>& thePoly = input.getValue<Polynomial<Coefficient> >();
+  const Polynomial<Coefficient>& polynomial = input.getValue<Polynomial<Coefficient> >();
   ExpressionContext context = input.getContext();
-  return CalculatorConversions::innerExpressionFromPoly(calculator, thePoly, output, &context);
+  return CalculatorConversions::innerExpressionFromPoly(calculator, polynomial, output, &context);
 }
 
 template <class theType>
@@ -2662,7 +2662,7 @@ bool Expression::isMatrixOfType(int* outputNumRows, int* outputNumCols) const {
   if (!this->isMatrix()) {
     return false;
   }
-  if (!(*this)[0].startsWith(this->owner->opMatriX(), 2)) {
+  if (!(*this)[0].startsWith(this->owner->opMatrix(), 2)) {
     return false;
   }
   if (!(*this)[0][1].isOperationGiven(this->getTypeOperation<theType>())) {

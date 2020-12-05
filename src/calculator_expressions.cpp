@@ -128,7 +128,7 @@ int Expression::getTypeOperation<ElementUniversalEnveloping<RationalFunction<Rat
 template < >
 int Expression::getTypeOperation<Weight<Rational> >() const {
   this->checkInitialization();
-  return this->owner->opWeightLieAlg();
+  return this->owner->opWeightLieAlgebra();
 }
 
 template < >
@@ -917,7 +917,7 @@ bool Expression::isMatrix(int* outputNumRows, int* outputNumCols) const {
   if (this->size() < 1) {
     return false;
   }
-  bool isGood = (*this)[0].startsWith(this->owner->opMatriX());
+  bool isGood = (*this)[0].startsWith(this->owner->opMatrix());
   if (!isGood) {
     return false;
   }
@@ -1981,7 +1981,7 @@ ExpressionContext Expression::getContext() const {
     return result;
   }
   if (this->isMatrix()) {
-    if ((*this)[0].startsWith(this->owner->opMatriX())) {
+    if ((*this)[0].startsWith(this->owner->opMatrix())) {
       if ((*this)[0].size() > 2) {
         result.fromExpression((*this)[0][2]);
         return result;
@@ -3471,7 +3471,7 @@ bool Expression::toStringEndStatement(
   for (int i = 1; i < this->size(); i ++) {
     const Expression currentE = (*this)[i];
     if (createTable) {
-      out << "<tr><td class =\"cellCalculatorInput\">";
+      out << "<tr><td class = 'cellCalculatorInput'>";
       if (!this->owner->flagHideLHS) {
         if (i < (*startingExpression).size()) {
           theFormat->flagDontCollalpseProductsByUnits = true;
@@ -4070,7 +4070,7 @@ std::string Expression::toStringWithStartingExpression(
     theFormat->flagExpressionIsFinal = true;
   }
   isFinal = theFormat->flagExpressionIsFinal;
-  outTrue << "<table class =\"tableCalculatorOutput\">";
+  outTrue << "<table class = 'tableCalculatorOutput'>";
   outTrue << "<tr><th>Input</th><th>Result</th></tr>";
   if (this->isListStartingWithAtom(this->owner->opEndStatement())) {
     outTrue << out.str();
@@ -4082,7 +4082,7 @@ std::string Expression::toStringWithStartingExpression(
     if (theFormat != nullptr) {
       theFormat->flagDontCollalpseProductsByUnits = false;
     }
-    outTrue << "<tr><td class =\"cellCalculatorInput\">" << input << "</td>";
+    outTrue << "<tr><td class = 'cellCalculatorInput'>" << input << "</td>";
     if ((
         this->isOfType<std::string>() ||
         this->isOfType<Plot>() ||
@@ -4094,7 +4094,7 @@ std::string Expression::toStringWithStartingExpression(
     } else {
       output = HtmlRoutines::getMathNoDisplay(out.str(), 1700);
     }
-    outTrue << "<td class =\"cellCalculatorResult\">" << output << "</td></tr>";
+    outTrue << "<td class = 'cellCalculatorResult'>" << output << "</td></tr>";
     if (outputJS != nullptr) {
       (*outputJS)["input"] = input;
       (*outputJS)["output"] = output;
@@ -4111,8 +4111,8 @@ bool Expression::toStringMinus3(
     return false;
   }
   if (input.children.size != 3) {
-    global.fatal << "This is a programming error: "
-    << "the minus function expects 1 or 2 arguments, "
+    global.fatal
+    << "The minus function expects 1 or 2 arguments, "
     << "instead there are " << input.children.size - 1
     << ". " << global.fatal;
   }
@@ -4619,7 +4619,7 @@ bool Expression::isList() const {
   if (this->children.size <= 0) {
     return false;
   }
-  if (this->theData != this->owner->opLisT()) {
+  if (this->theData != this->owner->opList()) {
     global.fatal << "This is a programming error. List expressions "
     << "must have data valule equal to Calculator::opList(). " << global.fatal;
   }
@@ -5021,7 +5021,7 @@ bool Expression::makeXOX(Calculator& owner, int theOp, const Expression& left, c
   left.checkInitialization();
   right.checkInitialization();
   this->reset(owner, 3);
-  this->theData = owner.opLisT();
+  this->theData = owner.opList();
   this->addChildAtomOnTop(theOp);
   this->addChildOnTop(left);
   return this->addChildOnTop(right);
@@ -5033,7 +5033,7 @@ bool Expression::makeOX(Calculator& owner, int theOp, const Expression& opArgume
     return this->makeOX(owner, theOp, copyE);
   }
   this->reset(owner);
-  this->theData = owner.opLisT();
+  this->theData = owner.opList();
   this->addChildAtomOnTop(theOp);
   return this->addChildOnTop(opArgument);
 }

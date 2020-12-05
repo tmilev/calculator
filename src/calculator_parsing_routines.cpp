@@ -2516,7 +2516,7 @@ bool Calculator::applyOneRule() {
   if (
     lastS == "Sequence" &&
     lastE.theData.size() == 0 &&
-    lastE.theData.theData == this->opLisT()
+    lastE.theData.theData == this->opList()
   ) {
     return this->replaceXByCon(this->controlSequences.getIndexNoFail("MakeSequence"));
   }

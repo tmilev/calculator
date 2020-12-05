@@ -5404,7 +5404,12 @@ class MathNode {
   }
 
   toLatexOperatorStandalone() {
-    return `\\${this.textContentOrInitialContent()}`;
+    latexConstants.computeUtf8ToLatexMap();
+    const content = this.textContentOrInitialContent();
+    if (content in latexConstants.utf8ToLatexMap) {
+      return latexConstants.utf8ToLatexMap[content];
+    }
+    return `${content}`;
   }
 
   toLatexLeftDelimiter() {

@@ -225,6 +225,9 @@ const knownTypes = {
     },
     "textAlign": "center",
   }),
+  centeredBox: new MathNodeType({
+    "type": "centeredBox",
+  }),
   baseWithExponent: new MathNodeType({
     "type": "baseWithExponent",
   }),
@@ -342,6 +345,17 @@ class MathNodeFactory {
     return result;
   }
 
+  centeredBox(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /** @type {MathNode|null} */
+    content,
+  ) {
+    const result = new MathNode(equationEditor, knownTypes.centeredBox);
+    result.appendChild(this.horizontalMath(equationEditor, content));
+    return result;
+
+  }
   /** @returns{MathNode} 
    * Returns a horizontal math with content given by the input array.
    * Normalizes the input but does not ensure editable atoms at the ends. 
@@ -511,7 +525,7 @@ class MathNodeFactory {
       horizontalBraceRight,
       horizontalBraceTopRight,
     ]);
-    let superscript = mathNodeFactory.horizontalMath(equationEditor, overBraceContent);
+    let superscript = mathNodeFactory.centeredBox(equationEditor, overBraceContent);
     result.appendChild(base);
     result.appendChild(horizontalBrace);
     result.appendChild(superscript);
@@ -2773,7 +2787,7 @@ class MathNode {
 
     leftStraight.boundingBox.height = desiredHeight;
     rightStraight.boundingBox.height = desiredHeight;
-    this.boundingBox.height = desiredHeight;
+    this.boundingBox.height = desiredHeight + 2;
   }
 
   computeDimensionsOverBrace() {
@@ -2781,6 +2795,8 @@ class MathNode {
     let brace = this.children[1];
     let superscript = this.children[2];
     brace.computeDimensionsHorizontalBrace(base.boundingBox.width);
+    superscript.boundingBox.width = base.boundingBox.width;
+    superscript.computeBoundingBoxLeftSingleChild();
     this.boundingBox.width = base.boundingBox.width;
     this.boundingBox.height = base.boundingBox.height + brace.boundingBox.height + superscript.boundingBox.height;
     this.boundingBox.fractionLineHeight = brace.boundingBox.height + superscript.boundingBox.height + base.boundingBox.fractionLineHeight;
@@ -3239,6 +3255,7 @@ class MathNode {
     }
     if (this.type.type === knownTypes.horizontalMath.type) {
       this.computeDimensionsHorizontalMath();
+      return;
     }
     this.computeDimensionsStandard();
   }

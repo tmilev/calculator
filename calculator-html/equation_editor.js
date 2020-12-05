@@ -55,6 +55,10 @@ class MathNodeType {
     this.marginRight = input["marginRight"];
     this.marginLeft = input["marginLeft"];
     // Borders
+    this.borderTopLeftRadius = input["borderTopLeftRadius"];
+    this.borderTopRightRadius = input["borderTopRightRadius"];
+    this.borderBottomLeftRadius = input["borderBottomLeftRadius"];
+    this.borderBottomRightRadius = input["borderBottomRightRadius"];
     this.borderStyle = input["borderStyle"];
     this.borderColor = input["borderColor"];
     this.borderBottom = input["borderBottom"];
@@ -97,6 +101,10 @@ const knownTypeDefaults = {
   "marginRight": "",
   "margin": "",
   // Borders.
+  "borderBottomLeftRadius": "",
+  "borderBottomRightRadius": "",
+  "borderTopLeftRadius": "",
+  "borderTopRightRadius": "",
   "borderStyle": "",
   "borderColor": "",
   "borderBottom": "",
@@ -227,6 +235,39 @@ const knownTypes = {
   }),
   baseWithSubscript: new MathNodeType({
     "type": "baseWithSubscript",
+  }),
+  underBrace: new MathNodeType({
+    "type": "underBrace",
+  }),
+  overBrace: new MathNodeType({
+    "type": "overBrace",
+  }),
+  horizontalBraceUp: new MathNodeType({
+    "type": "horizontalBraceUp",
+  }),
+  halfHorizontalBraceTopRight: new MathNodeType({
+    "type": "halfHorizontalBraceTopRight",
+    "borderTop": "2px solid black",
+    "borderTopRightRadius": "4px",
+  }),
+  halfHorizontalBraceTopLeft: new MathNodeType({
+    "type": "halfHorizontalBraceTopLeft",
+    "borderTop": "2px solid black",
+    "borderTopLeftRadius": "4px",
+  }),
+  halfHorizontalBraceBottomRight: new MathNodeType({
+    "type": "halfHorizontalBraceBottomRight",
+    "borderBottom": "2px solid black",
+    "borderBottomRightRadius": "4px",
+  }),
+  halfHorizontalBraceBottomLeft: new MathNodeType({
+    "type": "halfHorizontalBraceBottomLeft",
+    "borderBottom": "2px solid black",
+    "borderBottomLeftRadius": "4px",
+  }),
+  horizontalLineBottomMargin: new MathNodeType({
+    "type": "horizontalLineBottomMargin",
+    "borderBottom": "2px solid black",
   }),
   subscript: new MathNodeType({
     "type": "subscript",
@@ -440,6 +481,41 @@ class MathNodeFactory {
     underTheRadical.appendChild(mathNodeFactory.horizontalMath(equationEditor, underTheRadicalContent));
     sqrt.appendChild(underTheRadical);
     return sqrt;
+  }
+
+  /** @returns {MathNode} */
+  overBrace(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /** @type {MathNode|null} */
+    content,
+    /** @type {MathNode|null} */
+    overBraceContent,
+  ) {
+    const result = new MathNode(equationEditor, knownTypes.overBrace);
+    const base = mathNodeFactory.horizontalMath(equationEditor, content);
+    // 6 components of overbrace line
+    const horizontalBraceTopLeft = new MathNode(equationEditor, knownTypes.halfHorizontalBraceTopLeft);
+    const horizontalBraceLeft = new MathNode(equationEditor, knownTypes.horizontalLineBottomMargin);
+    const horizontalBraceBottomRight = new MathNode(equationEditor, knownTypes.halfHorizontalBraceBottomRight);
+    const horizontalBraceBottomLeft = new MathNode(equationEditor, knownTypes.halfHorizontalBraceBottomLeft);
+    const horizontalBraceRight = new MathNode(equationEditor, knownTypes.horizontalLineBottomMargin);
+    const horizontalBraceTopRight = new MathNode(equationEditor, knownTypes.halfHorizontalBraceTopRight);
+
+    const horizontalBrace = new MathNode(equationEditor, knownTypes.horizontalBraceUp);
+    horizontalBrace.appendChildren([
+      horizontalBraceTopLeft,
+      horizontalBraceLeft,
+      horizontalBraceBottomRight,
+      horizontalBraceBottomLeft,
+      horizontalBraceRight,
+      horizontalBraceTopRight,
+    ]);
+    let superscript = mathNodeFactory.horizontalMath(equationEditor, overBraceContent);
+    result.appendChild(base);
+    result.appendChild(horizontalBrace);
+    result.appendChild(superscript);
+    return result;
   }
 
   /** @returns {MathNode} */
@@ -907,6 +983,7 @@ class LaTeXConstants {
       "{": "\\{",
       "binom": "\\binom",
       "stackrel": "\\stackrel",
+      "overbrace": "\\overbrace",
     };
     /**@type{Object.<string, string>} */
     this.latexBackslashOperators = {
@@ -1510,6 +1587,16 @@ class LaTeXParser {
       let syntacticElement = new SyntancticElement(null, operatorSymbol, "operatorWithSubscript");
       this.parsingStack[this.parsingStack.length - 2] = syntacticElement;
       return this.decreaseParsingStack(1);
+    }
+    if (
+      fourthToLast.syntacticRole === "\\overbrace" &&
+      thirdToLast.isExpression() &&
+      secondToLast.syntacticRole === "^" &&
+      last.isExpression()
+    ) {
+      this.lastRuleName = "over brace";
+      let node = mathNodeFactory.overBrace(this.equationEditor, thirdToLast.node, last.node);
+      return this.replaceParsingStackTop(node, "", - 4);
     }
     let fifthToLast = this.parsingStack[this.parsingStack.length - 5];
     if (
@@ -2376,6 +2463,18 @@ class MathNode {
     if (this.type.borderBottom !== "") {
       this.element.style.borderBottom = this.type.borderBottom;
     }
+    if (this.type.borderTopLeftRadius !== "") {
+      this.element.style.borderTopLeftRadius = this.type.borderTopLeftRadius;
+    }
+    if (this.type.borderTopRightRadius !== "") {
+      this.element.style.borderTopRightRadius = this.type.borderTopRightRadius;
+    }
+    if (this.type.borderBottomLeftRadius !== "") {
+      this.element.style.borderBottomLeftRadius = this.type.borderBottomLeftRadius;
+    }
+    if (this.type.borderBottomRightRadius !== "") {
+      this.element.style.borderBottomRightRadius = this.type.borderBottomRightRadius;
+    }
     if (this.type.borderTop !== "") {
       this.element.style.borderTop = this.type.borderTop;
     }
@@ -2625,6 +2724,68 @@ class MathNode {
     let stretchX = this.boundingBox.width / cancelSign.boundingBox.widthBeforeTransform;
     let stretchY = this.boundingBox.height / cancelSign.boundingBox.heightBeforeTransform;
     cancelSign.element.style.transform = `matrix(${stretchX},0,0,${stretchY}, 0, 0)`;
+  }
+
+  computeDimensionsHorizontalBrace(
+    /**@type{number} */
+    desiredWidth,
+  ) {
+    this.boundingBox.width = desiredWidth;
+    const topLeft = this.children[0];
+    const leftStraight = this.children[1];
+    const bottomRight = this.children[2];
+    const bottomLeft = this.children[3];
+    const rightStraight = this.children[4];
+    const topRight = this.children[5];
+    const desiredRadius = Math.max(4, Math.floor(desiredWidth * 0.02));
+    const desiredHeight = desiredRadius;
+
+    const radiusString = `${desiredRadius}px`;
+
+    topLeft.element.style.borderTopLeftRadius = radiusString;
+    topRight.element.style.borderTopRightRadius = radiusString;
+    bottomLeft.element.style.borderBottomLeftRadius = radiusString;
+    bottomRight.element.style.borderBottomRightRadius = radiusString;
+
+    const halfWidth = desiredWidth / 2;
+
+    topLeft.boundingBox.width = desiredRadius;
+    topRight.boundingBox.width = desiredRadius;
+    bottomRight.boundingBox.width = desiredRadius;
+    bottomLeft.boundingBox.width = desiredRadius;
+
+    topLeft.boundingBox.height = desiredHeight;
+    topRight.boundingBox.height = desiredHeight;
+    bottomRight.boundingBox.height = desiredHeight;
+    bottomLeft.boundingBox.height = desiredHeight;
+
+    topLeft.boundingBox.top = desiredHeight;
+    topRight.boundingBox.top = desiredHeight;
+
+    bottomRight.boundingBox.left = halfWidth - desiredRadius;
+    bottomLeft.boundingBox.left = halfWidth;
+    topRight.boundingBox.left = desiredWidth - desiredRadius;
+
+    leftStraight.boundingBox.width = halfWidth - 2 * desiredRadius;
+    leftStraight.boundingBox.left = desiredRadius;
+    rightStraight.boundingBox.width = halfWidth - 2 * desiredRadius;
+    rightStraight.boundingBox.left = halfWidth + desiredRadius;
+
+    leftStraight.boundingBox.height = desiredHeight;
+    rightStraight.boundingBox.height = desiredHeight;
+    this.boundingBox.height = desiredHeight;
+  }
+
+  computeDimensionsOverBrace() {
+    let base = this.children[0];
+    let brace = this.children[1];
+    let superscript = this.children[2];
+    brace.computeDimensionsHorizontalBrace(base.boundingBox.width);
+    this.boundingBox.width = base.boundingBox.width;
+    this.boundingBox.height = base.boundingBox.height + brace.boundingBox.height + superscript.boundingBox.height;
+    this.boundingBox.fractionLineHeight = brace.boundingBox.height + superscript.boundingBox.height + base.boundingBox.fractionLineHeight;
+    brace.boundingBox.top = superscript.boundingBox.height;
+    base.boundingBox.top = superscript.boundingBox.height + brace.boundingBox.height;
   }
 
   computeDimensionsFraction() {
@@ -3066,6 +3227,10 @@ class MathNode {
     }
     if (this.type.type === knownTypes.baseWithSubscript.type) {
       this.computeDimensionsBaseWithSubscript();
+      return;
+    }
+    if (this.type.type === knownTypes.overBrace.type) {
+      this.computeDimensionsOverBrace();
       return;
     }
     if (this.type.type === knownTypes.root.type) {

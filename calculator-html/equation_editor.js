@@ -1150,7 +1150,7 @@ class LaTeXConstants {
     let result = [];
     for (let i = 0; i < input.length; i++) {
       let current = "";
-      for (let j = 0; j < 8; j++) {
+      for (let j = 0; j < 8 && i + j < input.length; j++) {
         current += input[i + j];
         if (current in this.utf8ToLatexMap) {
           current = this.utf8ToLatexMap[current];

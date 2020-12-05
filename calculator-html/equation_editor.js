@@ -906,6 +906,7 @@ class LaTeXConstants {
       "rangle": "\\rangle",
       "{": "\\{",
       "binom": "\\binom",
+      "stackrel": "\\stackrel",
     };
     /**@type{Object.<string, string>} */
     this.latexBackslashOperators = {
@@ -1758,6 +1759,15 @@ class LaTeXParser {
       let node = mathNodeFactory.matrix(this.equationEditor, 2, 1, "");
       node.getMatrixCell(0, 0).children[0].appendChild(secondToLast.node);
       node.getMatrixCell(1, 0).children[0].appendChild(last.node);
+      return this.replaceParsingStackTop(node, "", - 3);
+    }
+    if (thirdToLast.syntacticRole === "\\stackrel" && secondToLast.isExpression() && last.isExpression()) {
+      let node = mathNodeFactory.matrix(this.equationEditor, 3, 1, "");
+      node.getMatrixCell(0, 0).children[0].appendChild(secondToLast.node);
+      node.getMatrixCell(1, 0).children[0].appendChild(last.node);
+      node.getMatrixCell(2, 0).children[0].appendChild(mathNodeFactory.atom(this.equationEditor, "\u00A0"));
+      node.children[0].children[0].initialContent = "";
+      node.children[0].children[2].initialContent = "";
       return this.replaceParsingStackTop(node, "", - 3);
     }
     if (last.content in latexConstants.operatorsNormalized) {

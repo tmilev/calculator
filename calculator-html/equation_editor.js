@@ -229,8 +229,8 @@ const knownTypes = {
     "type": "overLinedBox",
     "borderTop": "1px solid black",
   }),
-  centeredBox: new MathNodeType({
-    "type": "centeredBox",
+  genericMathBox: new MathNodeType({
+    "type": "genericMathBox",
   }),
   baseWithExponent: new MathNodeType({
     "type": "baseWithExponent",
@@ -349,13 +349,13 @@ class MathNodeFactory {
     return result;
   }
 
-  centeredBox(
+  genericMathBox(
     /** @type {EquationEditor} */
     equationEditor,
     /** @type {MathNode|null} */
     content,
   ) {
-    const result = new MathNode(equationEditor, knownTypes.centeredBox);
+    const result = new MathNode(equationEditor, knownTypes.genericMathBox);
     result.appendChild(this.horizontalMath(equationEditor, content));
     return result;
 
@@ -542,7 +542,7 @@ class MathNodeFactory {
       horizontalBraceRight,
       horizontalBraceTopRight,
     ]);
-    let superscript = mathNodeFactory.centeredBox(equationEditor, overBraceContent);
+    let superscript = mathNodeFactory.genericMathBox(equationEditor, overBraceContent);
     result.appendChild(base);
     result.appendChild(horizontalBrace);
     result.appendChild(superscript);
@@ -1016,6 +1016,7 @@ class LaTeXConstants {
       "stackrel": "\\stackrel",
       "overbrace": "\\overbrace",
       "overline": "\\overline",
+      "color": "\\color",
     };
     /**@type{Object.<string, string>} */
     this.latexBackslashOperators = {
@@ -1582,6 +1583,22 @@ class LaTeXParser {
       this.parsingStack[this.parsingStack.length - 2] = last;
       return this.decreaseParsingStack(1);
     }
+    if (secondToLast.syntacticRole === "\\color" && last.isExpression()) {
+      if (secondToLast.node === null) {
+        this.lastRuleName = "set color";
+        // We have a situation along the lines of \color{red} with last.node = red.
+        // Write the last node as the node that determines the color.
+        secondToLast.node = last.node;
+        return this.decreaseParsingStack(1);
+      } else {
+        this.lastRuleName = "apply color";
+        // We already have the color set along the lines of \\color{red}{last}
+        // with secondToLast = \color{red} and secondToLast.node = red.
+        let node = mathNodeFactory.genericMathBox(this.equationEditor, last.node);
+        node.type.colorText = secondToLast.node.toLatex();
+        return this.replaceParsingStackTop(node, "", - 2);
+      }
+    }
     if (secondToLast.syntacticRole === "\\right" && last.syntacticRole in latexConstants.rightDelimiters) {
       this.lastRuleName = "\\right combined with right delimiter";
       this.parsingStack[this.parsingStack.length - 2] = last;
@@ -2129,7 +2146,11 @@ class EquationEditor {
     this.rootNode.computeBoundingBox();
     this.rootNode.doAlign();
     let boundingRectangle = this.rootNode.element.getBoundingClientRect();
-    this.container.style.height = boundingRectangle.height;
+    let desiredHeight = boundingRectangle.height;
+    if (this.options.editable) {
+      desiredHeight += 2;
+    }
+    this.container.style.height = desiredHeight;
     this.container.style.width = boundingRectangle.width;
     if (this.rootNode.boundingBox.needsMiddleAlignment && !this.options.editable) {
       this.container.style.verticalAlign = "middle";
@@ -2479,6 +2500,9 @@ class MathNode {
     }
     if (this.type.paddingRight !== "") {
       this.element.style.paddingRight = this.type.paddingRight;
+    }
+    if (this.type.colorText !== "") {
+      this.element.style.color = this.type.colorText;
     }
     // Margins
     if (this.type.margin !== "") {

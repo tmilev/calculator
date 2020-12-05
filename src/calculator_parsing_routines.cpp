@@ -249,7 +249,7 @@ void Calculator::initialize() {
   this->controlSequences.addOnTopNoRepetitionMustBeNew("{}");
   this->controlSequences.addOnTopNoRepetitionMustBeNew(",");
   this->controlSequences.addOnTopNoRepetitionMustBeNew(".");
-  //  this->controlSequences.addOnTopNoRepetitionMustBeNew("\"");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("~");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("\\choose");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("\\frac");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("\\cdot");
@@ -1967,7 +1967,7 @@ bool Calculator::applyOneRule() {
     }
     return this->popTopSyntacticStack();
   }
-  if (lastS == " ") {
+  if (lastS == " " || lastS == "~") {
     if (this->flagLogSyntaxRules) {
       this->parsingLog += "[Rule: remove white space]";
     }
@@ -2453,9 +2453,6 @@ bool Calculator::applyOneRule() {
   }
   if (secondToLastS == "\"" && lastS == "\"") {
     return this->replaceXXByEmptyString();
-  }
-  if (lastS == "Expression" && secondToLastS == "~" && thirdToLastS == "Expression") {
-    return this->replaceEOEByE();
   }
   if (secondToLastS == "==" && lastS == "=") {
     this->replaceXXByCon(this->conEqualEqualEqual());

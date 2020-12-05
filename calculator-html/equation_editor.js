@@ -225,6 +225,10 @@ const knownTypes = {
     },
     "textAlign": "center",
   }),
+  overLinedBox: new MathNodeType({
+    "type": "overLinedBox",
+    "borderTop": "1px solid black",
+  }),
   centeredBox: new MathNodeType({
     "type": "centeredBox",
   }),
@@ -495,6 +499,19 @@ class MathNodeFactory {
     underTheRadical.appendChild(mathNodeFactory.horizontalMath(equationEditor, underTheRadicalContent));
     sqrt.appendChild(underTheRadical);
     return sqrt;
+  }
+
+  /** @returns {MathNode} */
+  overLine(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /** @type {MathNode|null} */
+    content,
+  ) {
+    const result = new MathNode(equationEditor, knownTypes.overLinedBox);
+    const horizontalMath = this.horizontalMath(equationEditor, content);
+    result.appendChild(horizontalMath);
+    return result;
   }
 
   /** @returns {MathNode} */
@@ -998,6 +1015,7 @@ class LaTeXConstants {
       "binom": "\\binom",
       "stackrel": "\\stackrel",
       "overbrace": "\\overbrace",
+      "overline": "\\overline",
     };
     /**@type{Object.<string, string>} */
     this.latexBackslashOperators = {
@@ -1603,12 +1621,20 @@ class LaTeXParser {
       return this.decreaseParsingStack(1);
     }
     if (
+      secondToLast.syntacticRole === "\\overline" &&
+      last.isExpression()
+    ) {
+      this.lastRuleName = "over-line";
+      let node = mathNodeFactory.overLine(this.equationEditor, last.node);
+      return this.replaceParsingStackTop(node, "", - 2);
+    }
+    if (
       fourthToLast.syntacticRole === "\\overbrace" &&
       thirdToLast.isExpression() &&
       secondToLast.syntacticRole === "^" &&
       last.isExpression()
     ) {
-      this.lastRuleName = "over brace";
+      this.lastRuleName = "over-brace";
       let node = mathNodeFactory.overBrace(this.equationEditor, thirdToLast.node, last.node);
       return this.replaceParsingStackTop(node, "", - 4);
     }
@@ -2790,6 +2816,12 @@ class MathNode {
     this.boundingBox.height = desiredHeight + 2;
   }
 
+  computeDimensionsOverLine() {
+    this.computeDimensionsStandard();
+    // Top border adds extra 1px to the height, which shifts the fraction line by 0.5px.
+    this.boundingBox.fractionLineHeight = this.children[0].boundingBox.fractionLineHeight + 0.5;
+  }
+
   computeDimensionsOverBrace() {
     let base = this.children[0];
     let brace = this.children[1];
@@ -3247,6 +3279,10 @@ class MathNode {
     }
     if (this.type.type === knownTypes.overBrace.type) {
       this.computeDimensionsOverBrace();
+      return;
+    }
+    if (this.type.type === knownTypes.overLinedBox.type) {
+      this.computeDimensionsOverLine();
       return;
     }
     if (this.type.type === knownTypes.root.type) {

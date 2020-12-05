@@ -6008,9 +6008,9 @@ function initializeTestPage(
 }
 
 module.exports = {
+  initializeTestPage,
   typeset,
   EquationEditor,
-  initializeTestPage,
   mathFromLatex,
   mathFromElement,
   latexConstants,

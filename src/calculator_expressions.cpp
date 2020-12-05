@@ -3807,7 +3807,7 @@ bool Expression::toStringDifferentiate(
   if (!input.startsWith(input.owner->opDifferentiate(), 3)) {
     return false;
   }
-  out << "\\frac{\\text{d}} ";
+  out << "\\frac{\\text{d} ";
   if (input[2].needsParenthesisForMultiplication()) {
     out << "\\left(" << input[2].toString(theFormat)
     << "\\right)";

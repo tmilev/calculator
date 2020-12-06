@@ -3576,6 +3576,8 @@ class MathNode {
       case "+":
       case "-":
       case "=":
+      case ">":
+      case "<":
         this.makeHorizontalOperatorCorrectInput(key);
         return true;
       case "^":

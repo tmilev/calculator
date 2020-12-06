@@ -953,7 +953,7 @@ template <class Coefficient>
 void Polynomial<Coefficient>::assignCharacteristicPolynomial(const Matrix<Coefficient>& input) {
   MacroRegisterFunctionWithName("Polynomial::assignCharacteristicPolynomial");
   if (input.numberOfColumns != input.numberOfRows) {
-    global.fatal << "Programming error: requesting the "
+    global.fatal << "Request the "
     << "minimimal polynomial of a non-square matrix. "
     << global.fatal;
   }
@@ -984,7 +984,7 @@ template <class Coefficient>
 void Polynomial<Coefficient>::assignMinimalPolynomial(const Matrix<Coefficient>& input) {
   MacroRegisterFunctionWithName("Polynomial::assignMinimalPolynomial");
   if (input.numberOfColumns != input.numberOfRows) {
-    global.fatal << "Programming error: requesting the "
+    global.fatal << "Request the "
     << "minimimal polynomial of a non-square matrix. "
     << global.fatal;
   }

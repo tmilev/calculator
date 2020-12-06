@@ -139,7 +139,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decodeSequenceLikeContent(
       return false;
     }
     if (lastPointer >= this->dataPointer) {
-      global.fatal << "Programming error: decode current "
+      global.fatal << "Decode current "
       << "did not increment the data pointer. " << global.fatal;
     }
     output.theElements.addOnTop(nextElement);

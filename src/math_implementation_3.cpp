@@ -6191,7 +6191,7 @@ std::string ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAu
 
 bool ElementWeylGroup::checkConsistency() const {
   if (this->flagDeallocated) {
-    global.fatal << "Programming error: use after free of class ElementWeylGroup" << global.fatal;
+    global.fatal << "Use after free of class ElementWeylGroup" << global.fatal;
   }
   return true;
 }
@@ -6199,7 +6199,7 @@ bool ElementWeylGroup::checkConsistency() const {
 bool ElementWeylGroup::checkInitialization() const {
   this->checkConsistency();
   if (this->owner == nullptr) {
-    global.fatal << "This is a programming error: non-initialized element Weyl group. " << global.fatal;
+    global.fatal << "Non-initialized element Weyl group. " << global.fatal;
     return false;
   }
   this->owner->checkConsistency();

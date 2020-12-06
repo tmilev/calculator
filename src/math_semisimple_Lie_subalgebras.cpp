@@ -2723,7 +2723,7 @@ void CandidateSemisimpleSubalgebra::computeRatioKillingsByComponent() {
       this->getAmbientSemisimpleLieAlgebra().lieBracket(currentElt, adActionElt, adadActionElt);
       bool tempB= currentElt.linearSpanContainsGetFirstLinearCombination(this->theBasis, adadActionElt, theLinearCombi);
       if (!tempB) {
-        global.fatal << "Programming error: Candidate subalgebra not closed under Lie bracket. " << global.fatal;
+        global.fatal << "Candidate subalgebra not closed under Lie bracket. " << global.fatal;
       }
       result += theLinearCombi[k];
     }
@@ -4023,10 +4023,8 @@ bool SemisimpleSubalgebras::checkInitialization() const {
 }
 
 bool SemisimpleSubalgebras::checkConsistency() const {
-  //if (this == 0)
-  //  global.fatal << "Programming error: this pointer is zero." << global.fatal;
   if (this->flagDeallocated) {
-    global.fatal << "This is a programming error: use after free of semisimple subalgebras. " << global.fatal;
+    global.fatal << "Use after free of semisimple subalgebras. " << global.fatal;
   }
   return true;
 }

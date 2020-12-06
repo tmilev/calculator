@@ -55,7 +55,7 @@ void Basis<Coefficient>::addVector(const Vector<Coefficient>& v) {
     basis.numberOfRows = 0;
   }
   if (basis.numberOfRows == basis.numberOfColumns) {
-    global.fatal << "Programming error: attempting to add the "
+    global.fatal << "Attempt to add the "
     << basis.numberOfRows
     << " vector to a Basis of degree " << basis.numberOfColumns
     << global.fatal;

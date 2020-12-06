@@ -1740,7 +1740,7 @@ void List<Object>::cycleIndices(const List<int>& cycle) {
   for (int i = 0; i < cycle.size; i ++) {
     if ((cycle[i] >= this->size) || (cycle[i] < 0)) {
       std::stringstream commentsOnCrash;
-      commentsOnCrash << "Programming error: request to cycle indices "
+      commentsOnCrash << "Request to cycle indices "
       << cycle << " in list of " << this->size << " elements.";
       fatalCrash(commentsOnCrash.str());
     }
@@ -2018,7 +2018,7 @@ void List<Object>::removeIndexSwapWithLast(int index) {
 template <class Object>
 void List<Object>::removeLastObject() {
   if (this->size == 0) {
-    fatalCrash("Programming error: attempting to pop empty list. ");
+    fatalCrash("Attempt to pop empty list. ");
   }
   this->size --;
 }
@@ -2026,7 +2026,7 @@ void List<Object>::removeLastObject() {
 template <class Object>
 Object List<Object>::popLastObject() {
   if (this->size == 0) {
-    fatalCrash("Programming error: attempting to pop empty list. ");
+    fatalCrash("Attempt to pop empty list. ");
   }
   this->size --;
   return this->objects[size];

@@ -95,7 +95,7 @@ public:
   }
   bool checkConsistency() {
     if (this->flagDeallocated) {
-      global.fatal << "Programming error: use after free of MonomialTensor." << global.fatal;
+      global.fatal << "Use after free of MonomialTensor." << global.fatal;
     }
     return true;
   }
@@ -600,7 +600,7 @@ public:
   }
   bool checkConsistency() const {
     if (this->flagDeallocated) {
-      global.fatal << "Programming error: use after free of Matrix. " << global.fatal;
+      global.fatal << "Use after free of Matrix. " << global.fatal;
     }
     return true;
   }
@@ -3217,7 +3217,6 @@ class GroebnerBasisComputation {
   std::string toStringStatusGroebnerBasisTransformation();
   void checkConsistency();
   void initializeForGroebnerComputation();
-  // void initializeForDivision(const List<Polynomial<Coefficient> >& inputBasis);
 };
 
 template<class Coefficient>

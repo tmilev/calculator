@@ -363,7 +363,7 @@ void SubgroupData<someGroup, elementSomeGroup>::computeCCRepresentativesPreimage
       }
     }
     if (notFound) {
-      global.fatal << "Programming error: couldn't find preimage "
+      global.fatal << "Couldn't find preimage "
       << "of the subgroup conjugacy class representative " << scr << global.fatal;
     }
   }

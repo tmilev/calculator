@@ -2078,7 +2078,7 @@ void RootSubalgebra::subalgebraEnumerationsToLinearCombinations() {
 
 bool RootSubalgebra::checkConsistency() const {
   if (this->flagDeallocated) {
-    global.fatal << "Programming error: use after free of root subalgebra. " << global.fatal;
+    global.fatal << "Use after free of root subalgebra. " << global.fatal;
     return false;
   }
   return true;
@@ -2665,7 +2665,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
     }
     for (int k = 0; k < rootsScalarProduct2HnonRaised.size; k ++) {
       if (this->getAmbientWeyl().rootScalarCartanRoot(characteristicH, rootsScalarProduct2HnonRaised[k]) != 2) {
-        global.fatal << "Programming error: characteristicH is: " << characteristicH.toString()
+        global.fatal << "CharacteristicH is: " << characteristicH.toString()
         << "; rootsWithScalarProduct2NonRaised: "
         << rootsScalarProduct2HnonRaised.toString()
         << "; the scalar product with vector " << rootsScalarProduct2HnonRaised[k].toString() << " is:  "
@@ -2684,7 +2684,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
     }
     for (int i = 0; i < theSl2.RootsWithScalar2WithH.size; i ++) {
       if (this->getAmbientWeyl().rootScalarCartanRoot(characteristicH, theSl2.RootsWithScalar2WithH[i]) != 2) {
-        global.fatal << "Programming error, bad scalar product after raising: raised characteristic: "
+        global.fatal << "Bad scalar product after raising: raised characteristic: "
         << characteristicH.toString()
         << " simplebasisK: " << this->simpleRootsReductiveSubalgebra.toString()
         << "raised by: " << raisingElt.toString()
@@ -3339,7 +3339,7 @@ int RootSubalgebras::getIndexUpToEquivalenceByDiagramsAndDimensions(const RootSu
   for (int i = 0; i < this->theSubalgebras.size; i ++) {
     if (this->theSubalgebras[i].isEquivalentToByDiagramsAndDimensions(theSA)) {
       if (result != - 1) {
-        global.fatal << "Programming error: experimental code internal check failed. " << global.fatal;
+        global.fatal << "Experimental code internal check failed. " << global.fatal;
       }
       result = i;
     }

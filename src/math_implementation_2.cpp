@@ -2298,7 +2298,7 @@ bool Rational::assignStringFailureAllowed(const std::string& input) {
 
 void Rational::assignString(const std::string& input) {
   if (!Rational::assignStringFailureAllowed(input)) {
-    global.fatal << "Programming error: "
+    global.fatal
     << "Rational::assignString failed (likely a zero denominator). "
     << global.fatal;
   }

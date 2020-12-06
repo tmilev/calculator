@@ -636,8 +636,7 @@ public:
     List<Vector<Coefficient> >& output
   ) const {
     if (this->numberOfColumns != standOnTheRightAsVectorRow.size) {
-      global.fatal << "This is a programming error: "
-      << "attempting to multiply a matrix, standing on the left, with "
+      global.fatal << "Attempting to multiply a matrix, standing on the left, with "
       << this->numberOfColumns << " columns, by a matrix, standing on the right, with "
       << standOnTheRightAsVectorRow.size << " rows. "
       << global.fatal;

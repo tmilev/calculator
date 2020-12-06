@@ -1552,7 +1552,8 @@ void Matrix<Coefficient>::multiplyOnTheLeft(
     return;
   }
   if (this->numberOfRows != standsOnTheLeft.numberOfColumns) {
-    global.fatal << "This is a programming error: attempting to multiply a matrix with " << standsOnTheLeft.numberOfColumns
+    global.fatal << "Attempt to multiply a matrix with "
+    << standsOnTheLeft.numberOfColumns
     << " columns by a matrix with " << this->numberOfRows << "rows. " << global.fatal;
   }
   Coefficient tempEl;
@@ -2068,7 +2069,7 @@ public:
   }
   void getMinimalMonomial(TemplateMonomial& outputMon, Coefficient& outputCF) const {
     if (this->isEqualToZero()) {
-      global.fatal << "This is a programming error: calling GetMinMon "
+      global.fatal << "Calling getMinimalMonomial "
       << "on a zero monomial collection is forbidden. " << global.fatal;
     }
     outputMon = (*this)[0];
@@ -2211,8 +2212,8 @@ public:
     Vector<Coefficient>& outputFirstLinearCombination,
     HashedList<TemplateMonomial>* seedMonomials = nullptr
   );
-  bool hasRationalCoefficients(LinearCombination<TemplateMonomial, Rational>*
-    outputConversionToRationals = nullptr
+  bool hasRationalCoefficients(
+    LinearCombination<TemplateMonomial, Rational>* outputConversionToRationals = nullptr
   ) {
     Rational tempRat;
     Rational* theCF = nullptr;
@@ -2363,7 +2364,7 @@ public:
   );
   void checkNumberOfCoefficientsConsistency() const {
     if (this->coefficients.size != this->monomials.size) {
-      global.fatal << "This is a programming error: a monomial collection has "
+      global.fatal << "A monomial collection has "
       << this->monomials.size << " monomials but "
       << this->coefficients.size << " coefficients. " << global.fatal;
     }
@@ -2461,7 +2462,7 @@ public:
   template <class otherType>
   void operator/=(const otherType& other) {
     if (other == 0) {
-      global.fatal << "This is a programming error. A LinearCombination division "
+      global.fatal << "A LinearCombination division "
       << "by zero has been requested: division by zero error should "
       << "be handled before calling operator/=. " << global.fatal;
       return;
@@ -3501,7 +3502,7 @@ void LinearCombination<TemplateMonomial, Coefficient>::gaussianEliminationByRows
   if (carbonCopyMatrix != 0) {
     if (carbonCopyMatrix->numberOfRows != theList.size) {
       global.fatal
-      << "This is a programming error: carbon copy matrix has "
+      << "Carbon copy matrix has "
       << carbonCopyMatrix->numberOfRows
       << " rows, while the gaussian-eliminated list has " << theList.size
       << " elements; the two numbers must be the same!" << global.fatal;
@@ -3510,7 +3511,7 @@ void LinearCombination<TemplateMonomial, Coefficient>::gaussianEliminationByRows
   if (carbonCopyList != 0) {
     if (carbonCopyList->size != theList.size) {
       global.fatal
-      << "This is a programming error: carbon copy list has "
+      << "Carbon copy list has "
       << carbonCopyList->size
       << " elements, while the gaussian-eliminated list has "
       << theList.size
@@ -3565,7 +3566,7 @@ void LinearCombination<TemplateMonomial, Coefficient>::gaussianEliminationByRows
     LinearCombination<TemplateMonomial, Coefficient>& currentPivot = theList[currentRowIndex];
     int colIndex = currentPivot.monomials.getIndex(currentMon);
     if (colIndex == - 1) {
-      global.fatal << "This is a programming error. An internal check at the "
+      global.fatal << "An internal check at the "
       << "Gaussian elimination method for monomial collections fails. "
       << "Something is wrong. Here is the List you wanted to perform Gaussian elimination upon. "
       << theList.toString() << ". " << global.fatal;
@@ -3628,7 +3629,7 @@ int LinearCombination<TemplateMonomial, Coefficient>::addMonomialNoCoefficientCl
     this->coefficients.addOnTop(inputCoefficient);
   } else {
     if (j >= this->coefficients.size) {
-      global.fatal << "This is a programming error. "
+      global.fatal
       << "Looking for coefficient index " << j
       << " when number of coefficients is "
       << this->coefficients.size <<  ". " << global.fatal;
@@ -3929,7 +3930,7 @@ public:
     SemisimpleLieAlgebra* owner = (*this)[0].owner;
     for (int i = 1; i < this->size(); i ++) {
       if (owner != (*this)[i].owner) {
-        global.fatal << "This is a programming error: ElementSemisimpleLieAlgebra "
+        global.fatal << "ElementSemisimpleLieAlgebra "
         << "contains Chevalley generators with different owners. " << global.fatal;
       }
     }
@@ -5795,7 +5796,7 @@ public:
   int getMultiplicity(int SimpleTypeIdentifier) const {
     int result = 0;
     if (!this->coefficients[SimpleTypeIdentifier].isSmallInteger(&result)) {
-      global.fatal << "This is a programming error: "
+      global.fatal
       << "Dynkin type has multiplicity that is not a small integer. "
       << global.fatal;
     }
@@ -5812,7 +5813,7 @@ public:
     }
     int intResult = 0;
     if (!result.isSmallInteger(&intResult)) {
-      global.fatal << "This is a programming error: multiplicity of simple type is not a small integer. " << global.fatal;
+      global.fatal << "Multiplicity of simple type is not a small integer. " << global.fatal;
     }
     return intResult;
   }
@@ -5823,7 +5824,7 @@ public:
     }
     int intResult = 0;
     if (!result.isSmallInteger(&intResult)) {
-      global.fatal << "This is a programming error: multiplicity of simple type is not a small integer. " << global.fatal;
+      global.fatal << "Multiplicity of simple type is not a small integer. " << global.fatal;
     }
     return intResult;
   }
@@ -6492,7 +6493,7 @@ public:
     output.setSize(this->getMinimalNumberOfRows());
     int numColsTarget = inputStandToTheLeftAsVectorRows[0].size;
     if (this->getMinimalNumberOfColumns() != inputStandToTheLeftAsVectorRows.size) {
-      global.fatal << "This is a programming error: attemtping to act by matrix "
+      global.fatal << "Attemtping to act by matrix "
       << this->toString() << " (" << this->getMinimalNumberOfColumns() << " columns) "
       << " on the " << inputStandToTheLeftAsVectorRows.size << " vector-rows: "
       << inputStandToTheLeftAsVectorRows.toString() << ". "
@@ -6606,7 +6607,7 @@ void MatrixTensor<Coefficient>::invert() {
   MatrixTensor<Coefficient> result = theId;
   this->gaussianEliminationByRowsMatrix(&result);
   if (*this != theId) {
-    global.fatal << "This is a programming error: attempting to invert a "
+    global.fatal << "Attempting to invert a "
     << "non-invertable matrix tensor. After Gaussian elimination, the matrix equals "
     << this->toStringMatrixForm() << " but should instead be equal to " << theId.toStringMatrixForm() << global.fatal;
   }
@@ -6836,7 +6837,7 @@ void Vectors<Coefficient>::intersectTwoLinearSpaces(
 template<class Coefficient>
 bool Matrix<Coefficient>::isPositiveDefinite() {
   if (this->numberOfRows != this->numberOfColumns) {
-    global.fatal << "This is a programming error: attempting to evaluate whether a matrix "
+    global.fatal << "Attempting to evaluate whether a matrix "
     << "is positive definite, but the matrix is not square. " << global.fatal;
   }
   Coefficient det;

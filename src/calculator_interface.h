@@ -1284,7 +1284,7 @@ public:
   Expression theProgramExpression;
   int counterInSyntacticSoup;
   List<SyntacticElement> syntacticSoup;
-  List<SyntacticElement> syntacticStacK;
+  List<SyntacticElement> syntacticStack;
 
   List<SyntacticElement>* currrentSyntacticSoup;
   List<SyntacticElement>* currentSyntacticStack;

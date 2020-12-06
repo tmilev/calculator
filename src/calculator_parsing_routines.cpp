@@ -111,7 +111,7 @@ void Calculator::reset() {
   this->knownOperationsInterpretedAsFunctionsMultiplicatively.clear();
 
   this->syntacticSoup.setSize(0);
-  this->syntacticStacK.setSize(0);
+  this->syntacticStack.setSize(0);
   this->flagTimeLimitErrorDetected = false;
   this->flagFirstErrorEncountered = false;
   this->flagMaxTransformationsErrorEncountered = false;
@@ -123,7 +123,7 @@ void Calculator::reset() {
   this->theCruncherS.setSize(0);
   this->syntaxErrors = "";
   this->evaluationErrors.setSize(0);
-  this->currentSyntacticStack = &this->syntacticStacK;
+  this->currentSyntacticStack = &this->syntacticStack;
   this->currrentSyntacticSoup = &this->syntacticSoup;
   this->cachedExpressions.clear();
   this->imagesCachedExpressions.setSize(0);

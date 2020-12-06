@@ -1132,7 +1132,7 @@ bool Calculator::parseAndExtractExpressions(
   this->currrentSyntacticSoup = &outputSynSoup;
   this->parseFillDictionary(input);
   bool result = this->extractExpressions(output, outputSynErrors);
-  this->currentSyntacticStack = &this->syntacticStacK;
+  this->currentSyntacticStack = &this->syntacticStack;
   this->currrentSyntacticSoup = &this->syntacticSoup;
   return result;
 }
@@ -1156,7 +1156,7 @@ void Calculator::evaluate(const std::string& theInput) {
   this->statistics.initialize();
   this->inputString = theInput;
   this->parseAndExtractExpressions(
-    theInput, this->theProgramExpression, this->syntacticSoup, this->syntacticStacK, &this->syntaxErrors
+    theInput, this->theProgramExpression, this->syntacticSoup, this->syntacticStack, &this->syntaxErrors
   );
   this->evaluateCommands();
 }

@@ -36,6 +36,7 @@ class MathNodeType {
     this.verticalAlign = input["verticalAlign"];
     this.outline = input["outline"];
     this.fontSizeRatio = input["fontSizeRatio"];
+    this.fontWeight = input["fontWeight"];
     this.whiteSpace = input["whiteSpace"];
     this.textAlign = input["textAlign"];
     this.colorImplied = input["colorImplied"];
@@ -81,6 +82,7 @@ const knownTypeDefaults = {
   "minHeightScale": 0,
   "verticalAlign": "",
   "fontSizeRatio": 1,
+  "fontWeight": "",
   "whiteSpace": "",
   "textAlign": "",
   "position": "absolute",
@@ -1017,6 +1019,7 @@ class LaTeXConstants {
       "overbrace": "\\overbrace",
       "overline": "\\overline",
       "color": "\\color",
+      "mathbf": "\\mathbf",
     };
     /**@type{Object.<string, string>} */
     this.latexBackslashOperators = {
@@ -1598,6 +1601,14 @@ class LaTeXParser {
         node.type.colorText = secondToLast.node.toLatex();
         return this.replaceParsingStackTop(node, "", - 2);
       }
+    }
+    if (secondToLast.syntacticRole === "\\mathbf" && last.isExpression()) {
+      this.lastRuleName = "apply bold";
+      // We already have the color set along the lines of \\color{red}{last}
+      // with secondToLast = \color{red} and secondToLast.node = red.
+      let node = mathNodeFactory.genericMathBox(this.equationEditor, last.node);
+      node.type.fontWeight = "bold";
+      return this.replaceParsingStackTop(node, "", - 2);
     }
     if (secondToLast.syntacticRole === "\\right" && last.syntacticRole in latexConstants.rightDelimiters) {
       this.lastRuleName = "\\right combined with right delimiter";
@@ -2567,6 +2578,10 @@ class MathNode {
     }
     if (this.type.whiteSpace !== "") {
       this.element.style.whiteSpace = this.type.whiteSpace;
+    }
+    // Fonts. 
+    if (this.type.fontWeight !== "") {
+      this.element.style.fontWeight = this.type.fontWeight;
     }
     if (this.type.fontSizeRatio !== 1) {
       this.element.style.fontSize = `${this.type.fontSizeRatio * 100}%`;

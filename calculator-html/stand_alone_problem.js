@@ -183,7 +183,7 @@ class StandAloneProblem {
     this.ensureSpansExist({
       progressReportGeneral: ids.domElements.spanProgressReportGeneral,
     });
-    this.problem = problemPage.allProblems.CreateOrUpdateProblem({
+    this.problem = problemPage.allProblems.createOrUpdateProblem({
       id: encodeURIComponent(this.problemFileName),
     });
     var theURL = `${pathnames.urls.calculatorAPI}?${this.problem.getCalculatorURLRequestInput(false, this.problemFileName, this.courseHome, this.topicList)}`;

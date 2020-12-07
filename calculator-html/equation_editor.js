@@ -6062,6 +6062,8 @@ class MathTagCoverter {
     sanitizeLatexSource,
     /**@type{boolean} whether to remove \\displaystyle from latex source.*/
     removeDisplayStyle,
+    /**@type{boolean} whether to log timing information. */
+    logTiming,
   ) {
     /**@type{HTMLElement|null} */
     this.elementProcessed = null;
@@ -6081,6 +6083,8 @@ class MathTagCoverter {
     this.sanitizeLatexSource = sanitizeLatexSource;
     /**@type{boolean} */
     this.removeDisplayStyle = removeDisplayStyle;
+    /**@type{boolean} */
+    this.logTiming = logTiming;
     this.style = {
       fontFamily: styleComputer.style.fontFamily,
       display: styleComputer.style.display,
@@ -6208,7 +6212,9 @@ class MathTagCoverter {
     }
     this.lastTimeSample = currentTime;
     setTimeout(this.typesetMathTags.bind(this), 10);
-    console.log(`Typeset ${this.typesetTotal} out of ${this.elementsToTypeset} elements.`);
+    if (this.logTiming) {
+      console.log(`Typeset ${this.typesetTotal} out of ${this.elementsToTypeset} elements.`);
+    }
     return true;
   }
 
@@ -6231,7 +6237,9 @@ class MathTagCoverter {
       let startTime = (new Date()).getTime();
       mathFromElement(element, false, this.sanitizeLatexSource, this.removeDisplayStyle);
       let typeSetTime = (new Date()).getTime() - startTime;
-      console.log(`Typeset of element ${this.typesetTotal + 1} out of ${this.elementsToTypeset} took ${typeSetTime} ms.`);
+      if (this.logTiming) {
+        console.log(`Typeset of element ${this.typesetTotal + 1} out of ${this.elementsToTypeset} took ${typeSetTime} ms.`);
+      }
     }
   }
 }
@@ -6245,11 +6253,13 @@ function typeset(
   sanitizeLatexSource,
   /**@type{boolean} whether to remove \\displaystyle from latex source.*/
   removeDisplayStyle,
+  /**@type{boolean} whether to log in the console timing statistics.*/
+  logTiming,
 ) {
   if (style === "") {
     style = "font-family:'Times New Roman'; display:inline-block;";
   }
-  new MathTagCoverter(style, sanitizeLatexSource, removeDisplayStyle).typeset(toBeModified);
+  new MathTagCoverter(style, sanitizeLatexSource, removeDisplayStyle, logTiming).typeset(toBeModified);
 }
 
 function initializeTestPage(

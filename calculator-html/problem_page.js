@@ -41,13 +41,13 @@ class ProblemCollection {
   }
 
   /** @returns{Problem} */
-  CreateOrUpdateProblem(
+  createOrUpdateProblem(
     problemData,
   ) {
-    // theProblemId is percent encoded, safe to embed in html.
     if (problemData.id.includes("%")) {
-      console.log("Unexpected percent sign in problem id");
+      console.log("Unexpected percent sign in problem id.");
     }
+    // theProblemId is percent encoded, safe to embed in html.
     var theProblemId = encodeURIComponent(problemData.id);
     var currentProblem = this.getProblemByIdOrRegisterEmpty(theProblemId, "");
     currentProblem.initializeInfo(problemData, null);
@@ -113,6 +113,8 @@ class Problem {
     this.nextProblemId = "";
     /**@type{string} */
     this.previousProblemId = "";
+    /**@type{number} */
+    this.totalChildren = 0;
   }
   setRandomSeed(input) {
     if (input === undefined) {
@@ -135,11 +137,12 @@ class Problem {
   }
 
   initializeBasic(problemData) {
-    /**ProblemId is percent encoded, safe to embed in html. */
+    /** ProblemId is percent encoded, safe to embed in html. */
     this.problemId = encodeURIComponent(problemData.id);
-    /**@type {string}
+    /** 
+     * @type {string}
      * This id is for problem navigation only, does not include the entire panel.
-    */
+     */
     this.idNavigationProblemNotEntirePanel = `navigationPanel${this.problemId}`;
     /**@type {InputPanelData[]} */
     this.answers = [];
@@ -155,6 +158,7 @@ class Problem {
     }
   }
 
+  /** @returns{number} Number of children processed. */
   initializeInfo(problemData, inputParentIdURLed) {
     this.initializeBasic(problemData);
     this.decodedProblem = "";
@@ -220,10 +224,12 @@ class Problem {
     if (this.type === "Chapter") {
       allProblems.theChapterIds[this.problemId] = true;
     }
+    const secondPartTime = new Date().getTime();
     this.childrenIds = [];
     if (Array.isArray(problemData.children)) {
       for (var counterChildren = 0; counterChildren < problemData.children.length; counterChildren++) {
-        var currentChild = allProblems.CreateOrUpdateProblem(problemData.children[counterChildren]);
+        const currentChild = allProblems.createOrUpdateProblem(problemData.children[counterChildren]);
+        this.totalChildren += currentChild.totalChildren + 1;
         this.childrenIds.push(currentChild.problemId);
       }
     }
@@ -1326,15 +1332,23 @@ function writeEditCoursePagePanel() {
 }
 
 function processLoadedTopics(incomingTopics, result) {
+  const startTime = new Date().getTime();
   allProblems.previousProblemId = null;
   allProblems.resetTopicProblems();
   allProblems.theTopics = miscellaneous.jsonUnescapeParse(incomingTopics);
   if (!Array.isArray(allProblems.theTopics["children"])) {
     return;
   }
+  let totalChildren = 0;
   for (var counterChapter = 0; counterChapter < allProblems.theTopics["children"].length; counterChapter++) {
-    var currentChapter = allProblems.theTopics["children"][counterChapter];
-    allProblems.CreateOrUpdateProblem(currentChapter);
+    const currentChapter = allProblems.theTopics["children"][counterChapter];
+    const problem = allProblems.createOrUpdateProblem(currentChapter);
+    totalChildren += problem.totalChildren;
+  }
+  const finalTime = new Date().getTime() - startTime;
+  const timePerChild = finalTime / totalChildren;
+  if (finalTime > 1000) {
+    console.log(`Final time of processLoadedTopics: ${finalTime} ms for ${totalChildren} children at ${timePerChild.toFixed()} ms per child.`);
   }
 }
 
@@ -1344,8 +1358,17 @@ function processLoadedTopicsWriteToEditPage(incomingTopics, result) {
 }
 
 function processLoadedTopicsWriteToCoursePage(incomingTopics, result) {
+  const startTime = new Date().getTime();
   processLoadedTopics(incomingTopics, result);
+  const processTime = new Date().getTime() - startTime;
+  console.log(`DEBUG ${processTime} ms to process loaded topics.`);
   writeTopicsToCoursePage();
+  const writeTimeSecondPart = new Date().getTime() - startTime - processTime;
+  console.log(`DEBUG ${writeTimeSecondPart} ms to process write second part.`);
+  const writeTime = new Date().getTime() - startTime;
+  if (writeTime > 1000) {
+    console.log(`Less than a second to generate html expected, needed ${writeTime} ms instead.`);
+  }
 }
 
 function writeTopicsToCoursePage() {

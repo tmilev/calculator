@@ -290,13 +290,6 @@ class StorageCalculator {
           showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
         }),
       },
-      flagMathJax: new StorageVariable({
-        name: "useMathJax",
-        nameURL: "useMathJax",
-        nameCookie: "useMathJax",
-        secure: true,
-        callbackOnValueChange: mainPage().onMathJaxValueChange.bind(mainPage()),
-      }),
       flagDebug: new StorageVariable({
         name: "debugFlag",
         nameURL: "debugFlag",
@@ -764,25 +757,6 @@ class Page {
     } else {
       debugSpan.innerHTML = "Debug <b style = 'color:green'>off</b>";
     }
-  }
-
-  onMathJaxValueChange() {
-    let flagUseMathJax = this.storage.variables.flagMathJax.isTrue();
-    let mathjaxCheckbox = document.getElementById(ids.domElements.sliderMathJaxFlag);
-    mathjaxCheckbox.checked = flagUseMathJax;
-    var mathJaxSpan = document.getElementById(ids.domElements.spanMathJaxFlag);
-    if (flagUseMathJax) {
-      mathJaxSpan.innerHTML = "<b style = 'color:green'>MathJax</b>";
-    } else {
-      mathJaxSpan.innerHTML = "<b style = 'color:red'>Built-in</b>";
-    }
-  }
-
-  setSwitchMathJax() {
-    let sliderMathjax = document.getElementById(ids.domElements.sliderMathJaxFlag);
-    this.storage.variables.flagMathJax.setAndStore(sliderMathjax.checked);
-    this.pages.problemPage.flagLoaded = false;
-    this.selectPage(this.storage.variables.currentPage.getValue());
   }
 
   setSwitchDebug() {

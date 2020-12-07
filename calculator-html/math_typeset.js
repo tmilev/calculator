@@ -1,5 +1,5 @@
 const equationEditor = require("./equation_editor");
-const mathjaxSetup = require("./mathjax-calculator-setup");
+// const mathjaxSetup = require("./mathjax-calculator-setup");
 
 class TypeSetter {
   constructor() {
@@ -7,8 +7,7 @@ class TypeSetter {
   }
 
   useBuiltInTypeSet() {
-    let thePage = window.calculator.mainPage;
-    return !thePage.storage.variables.flagMathJax.isTrue();
+    return true;
   }
 
   typesetSoft(
@@ -26,7 +25,7 @@ class TypeSetter {
     if (this.useBuiltInTypeSet()) {
       equationEditor.typeset(element, styleOverride, false, true);
     } else {
-      mathjaxSetup.typeSetSoft(element);
+      // mathjaxSetup.typeSetSoft(element);
     }
   }
 
@@ -47,7 +46,7 @@ class TypeSetter {
     if (this.useBuiltInTypeSet()) {
       equationEditor.typeset(element, styleOverride, false, true);
     } else {
-      mathjaxSetup.typeSetHard(element);
+      // mathjaxSetup.typeSetHard(element);
     }
   }
 }

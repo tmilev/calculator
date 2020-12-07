@@ -56,8 +56,6 @@
 </script-->
   <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
   <!-- the cpp builder auto-replaces the string /calculator-html/ with something along the lines of /calculator-html${hashOfCurrentBuildEnvironment}/-->
-  <script type="text/javascript" src="/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full"
-    onerror="errorLoadingScript(this);"></script>
   <script type="text/javascript" src="/calculator-html/pathnames.js"></script>
   <script type="text/javascript" src="/calculator-html/server_information.js"></script>
   <script type="text/javascript" src="/calculator-html/ids_dom_elements.js"></script>
@@ -67,7 +65,6 @@
   <script type="text/javascript" src="/calculator-html/json_to_html.js"></script>
   <script type="text/javascript" src="/calculator-html/buffer.js"></script>
   <script type="text/javascript" src="/calculator-html/math_typeset.js"></script>
-  <script type="text/javascript" src="/calculator-html/mathjax-calculator-setup.js"></script>
   <script type="text/javascript" src="/calculator-html/miscellaneous_frontend.js"></script>
   <script type="text/javascript" src="/calculator-html/cookies.js"></script>
   <script type="text/javascript" src="/calculator-html/crypto.js"></script>
@@ -754,14 +751,6 @@
           </label><span id="spanDebugFlagToggleReport">-</span>
         </div>
         <!--div containing debug flag-->
-      </div>
-      <div>
-        <div>
-          <label class="switch">
-            <input id="mathJaxFlag" type="checkbox" onchange="window.calculator.mainPage.setSwitchMathJax();">
-            <span class="slider round"></span>
-          </label><span id="spanMathJaxFlag">-</span>
-        </div>
       </div>
       <div>
         <label class="switch">

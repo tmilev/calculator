@@ -1392,9 +1392,6 @@ function updateProblemPageCallback(input, outputComponent) {
 }
 
 function updateProblemPage() {
-  setTimeout(() => {
-    window.calculator.coursePage.selectCurrentCoursePage();
-  }, 0);
   var thePage = window.calculator.mainPage;
   // thePage.pages.problemPage.flagLoaded is modified by the following
   // functions: selectCurrentProblem, logout, callbackClone,

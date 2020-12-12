@@ -182,7 +182,7 @@ void CharacterSemisimpleLieAlgebraModule<Coefficient>::makeFromWeight(
 ) {
   this->makeZero();
   if (inputWeightSimpleCoords.size != inputOwner->getRank()) {
-    global.fatal << "This is a programming error: attempting to create a character from highest weight in simple coords "
+    global.fatal << "Attempting to create a character from highest weight in simple coords "
     << inputWeightSimpleCoords.toString() << "("
     << inputWeightSimpleCoords.size << " coordinates) while the owner semisimple "
     << " Lie algebra is of rank " << (inputOwner->getRank()) << global.fatal;
@@ -335,7 +335,7 @@ Vector<Coefficient> ElementSemisimpleLieAlgebra<Coefficient>::getCartanPart() co
   int numPosRoots = owner->getNumberOfPositiveRoots();
   result.makeZero(theRank);
   if (theRank <= 0 || owner == nullptr) {
-    global.fatal << "This is a programming error: the owner of "
+    global.fatal << "The owner of "
     << "a semisimple Lie algebra element is non-present or corrupted. " << global.fatal;
   }
   for (int i = 0; i < theRank; i ++) {
@@ -486,7 +486,7 @@ std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::operator*=(const C
 template <class Coefficient>
 std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::multiplyBy(const CharacterSemisimpleLieAlgebraModule& other) {
   if (this->getOwner() != other.getOwner() || this->getOwner() == 0) {
-    global.fatal << "This is a programming error: attempting to multiply characters of "
+    global.fatal << "Attempt to multiply characters of "
     << "different or non-initialized semisimple Lie algebras." << global.fatal;
   }
   this->setExpectedSize(other.size() + this->size());

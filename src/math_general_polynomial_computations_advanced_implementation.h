@@ -288,7 +288,7 @@ void GroebnerBasisComputation<Coefficient>::oneDivisonSubStepWithBasis(
   MonomialP quotientMonomial = leadingMonomial;
   quotientMonomial /= leadingMonomialBasis;
   if (!quotientMonomial.hasPositiveOrZeroExponents()) {
-    global.fatal << "This is a programming error: the pivot monomial "
+    global.fatal << "The pivot monomial "
     << "in the polynomial division algorithm has negative exponent(s). "
     << "This is not allowed. " << global.fatal;
   }
@@ -975,7 +975,7 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
   this->setUpRecursiveComputation(theHeuristicAttempt);
   int theVarIndex = this->getPreferredSerreSystemSubstitutionIndex(inputSystem);
   if (theVarIndex == - 1) {
-    global.fatal << "This is a programming error: preferred substitution variable index is - 1. "
+    global.fatal << "Preferred substitution variable index is - 1. "
     << "Input system in calculator-input format: <br>"
     << this->toStringCalculatorInputFromSystem(inputSystem) << "<br>" << global.fatal;
   }
@@ -1369,7 +1369,6 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
     theFormat.polynomialAlphabet.addOnTop("x");
     theFormat.polynomialAlphabet.addOnTop("y");
     global.fatal
-    << "This is a programming error."
     << "<br>While computing the gcd of left = "
     << left.toString(&theFormat) << "<br>and right = "
     << right.toString(&theFormat) << "<br>I got that left * right = "

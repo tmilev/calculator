@@ -318,7 +318,7 @@ void Matrix<Coefficient>::gaussianEliminationEuclideanDomain(
   MacroRegisterFunctionWithName("Matrix_Element::gaussianEliminationEuclideanDomain");
   ProgressReport theReport(1, GlobalVariables::Response::ReportType::gaussianElimination);
   if (otherMatrix == this) {
-    global.fatal << "This is a programming error: the Carbon copy in the Gaussian elimination "
+    global.fatal << "The Carbon copy in the Gaussian elimination "
     << "coincides with the matrix which we are row-reducing "
     << "(most probably this is a wrong pointer typo). " << global.fatal;
   }
@@ -507,12 +507,12 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
 ) {
   MacroRegisterFunctionWithName("Matrix::gaussianEliminationByRows");
   if (this->numberOfRows == 0) {
-    global.fatal << "This is a programming error: requesting to do Gaussian elimination on a matrix with "
+    global.fatal << "Request to do Gaussian elimination on a matrix with "
     << " zero rows. " << global.fatal;
   }
   if (carbonCopyMat != 0) {
     if (carbonCopyMat->numberOfRows != this->numberOfRows) {
-      global.fatal << "This is a programming error: requesting to do "
+      global.fatal << "Request to do "
       << "Gaussian elimination with carbon copy, however the matrix has "
       << this->numberOfRows << " rows, while the carbon copy has "
       << carbonCopyMat->numberOfRows << " rows. " << global.fatal;

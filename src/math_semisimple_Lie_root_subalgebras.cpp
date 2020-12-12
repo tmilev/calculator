@@ -1726,7 +1726,7 @@ bool RootSubalgebra::linearCombinationToStringDistinguishedIndex(
 
 SemisimpleLieAlgebra& RootSubalgebra::getOwnerLieAlgebra() const {
   if (this->owner == nullptr) {
-    global.fatal << "This is a programming error. Attempting to "
+    global.fatal << "Attempt to "
     << "access ambient Lie algebra of non-initialized root subalgebras. " << global.fatal;
   }
   return *this->owner->owner;
@@ -2323,7 +2323,7 @@ bool RootSubalgebra::computeEssentialsIfNew() {
     Vectors<Rational> tempVs = this->SimpleBasisKinOrderOfGeneration;
     tempVs.removeLastObject();
     if (!this->getAmbientWeylAutomorphisms().areMaximallyDominantGroupOuter(tempVs)) {
-      global.fatal << "<br>This is a programming error: first vectors "
+      global.fatal << "<br>First vectors "
       << tempVs.toString() << " are not maximally dominant. " << global.fatal;
     }
     if (this->indexInducingSubalgebra != - 1) {
@@ -3321,7 +3321,7 @@ void RootSubalgebras::computeKmodMultTables() {
 
 bool RootSubalgebras::checkInitialization() const {
   if (this->owner == nullptr) {
-    global.fatal << "This is a programming error: root subalgebras with non-initialized owner. " << global.fatal;
+    global.fatal << "Root subalgebras with non-initialized owner. " << global.fatal;
   }
   return true;
 }
@@ -3541,7 +3541,7 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(std::string& output, bo
   char simpleType;
   int theRank;
   if (!this->getOwnerWeyl().theDynkinType.isSimple(&simpleType, &theRank)) {
-    global.fatal << "This is a programming error: toStringConeConditionNotSatisfying "
+    global.fatal << "toStringConeConditionNotSatisfying "
     << "called on a non-simple Lie algebra. " << global.fatal;
   }
   if (simpleType == 'B') {
@@ -3638,7 +3638,7 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
   char simpleType;
   int theDimension;
   if (!this->getOwnerWeyl().theDynkinType.isSimple(&simpleType, &theDimension)) {
-    global.fatal << "This is a programming error: toStringConeConditionNotSatisfying "
+    global.fatal << "toStringConeConditionNotSatisfying "
     << "called on a non-simple Lie algebra. " << global.fatal;
   }
   if (simpleType == 'B') {

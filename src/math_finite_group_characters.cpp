@@ -213,7 +213,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::multiplyBy(
   }
   //////////////////////////////////
   if (this->ownerGroup != other.ownerGroup) {
-    global.fatal << "This is a programming error: attempting to multiply "
+    global.fatal << "Attempt to multiply "
     << "representations with different owner groups. " << global.fatal;
   }
   output.reset(this->G);

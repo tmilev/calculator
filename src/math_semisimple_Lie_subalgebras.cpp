@@ -95,7 +95,7 @@ bool SemisimpleLieAlgebra::isSimpleGenerator(int generatorIndex) {
 
 bool SemisimpleLieAlgebra::checkConsistency() const {
   if (this->flagDeallocated) {
-    global.fatal << "This is a programming error: use after free of SemisimpleLieAlgebra. " << global.fatal;
+    global.fatal << "Use after free of SemisimpleLieAlgebra. " << global.fatal;
   }
   this->theWeyl.checkConsistency();
   return true;
@@ -1127,7 +1127,7 @@ Vector<Rational> SemisimpleSubalgebras::getHighestWeightFundNewComponentFromImag
   Vectors<Rational> simpleBasisOld;
   simpleBasisOld.setSize(newRank - 1);
   if (imagesOldSimpleRootsAndNewRoot.size != newRank) {
-    global.fatal << "This is a programming error: the root images must be "
+    global.fatal << "The root images must be "
     << newRank << " but there are " << imagesOldSimpleRootsAndNewRoot.size << " elements instead. "
     << "The type is " << input.toString() << ". " << global.fatal;
   }
@@ -1227,7 +1227,7 @@ bool SemisimpleSubalgebras::setUpParabolicInductionDataPrecomputedSubalgebra(Can
     theCandidate.theHsScaledToActByTwoInOrderOfCreation;
   }
   this->theSubalgebras.theValues[indexPrecomputed].indexIamInducedFrom = theCandidate.indexIamInducedFrom;
-  this->theSubalgebras.theValues[indexPrecomputed].RootInjectionsFromInducer = theCandidate.RootInjectionsFromInducer;
+  this->theSubalgebras.theValues[indexPrecomputed].rootInjectionsFromInducer = theCandidate.rootInjectionsFromInducer;
   theCandidate = this->theSubalgebras.theValues[indexPrecomputed];
   return theCandidate.computeAndVerifyFromGeneratorsAndHs();
 }
@@ -1241,14 +1241,14 @@ bool CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra(
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra");
   this->setUpInjectionHs(baseSubalgebra, theNewType, theRootInjection, &newHrescaledToActByTwo);
   this->indexIamInducedFrom = baseSubalgebra.indexInOwner;
-  this->RootInjectionsFromInducer = theRootInjection;
+  this->rootInjectionsFromInducer = theRootInjection;
   //induction history is complete.
   if (this->owner->setUpParabolicInductionDataPrecomputedSubalgebra(*this)) {
     return true;
   }
   this->checkFullInitialization();
   if (!baseSubalgebra.weylNonEmbedded->theDynkinType.isEqualToZero() && baseSubalgebra.indexInOwner == - 1) {
-    global.fatal << "This is a programming error: attempting to induce a subalgebra "
+    global.fatal << "Attempt to induce a subalgebra "
     << "from a non-registered base subalgebra of type "
     << baseSubalgebra.weylNonEmbedded->theDynkinType.toString() << ". " << global.fatal;
   }
@@ -1437,12 +1437,12 @@ std::string OrbitIteratorRootActionWeylGroupAutomorphisms::toString() const {
     out << "<br>The computed orbit size is: " << this->computedSize.toString() << ". ";
   }
   if (this->flagOrbitIsBuffered) {
-    out << "<br> The orbit is buffered, the orbit elements are: " << this->orbitBuffer.toString();
+    out << "<br>The orbit is buffered, the orbit elements are: " << this->orbitBuffer.toString();
   } else {
-    out << "<br> The orbit is either too large or not yet fully enumerated. "
+    out << "<br>The orbit is either too large or not yet fully enumerated. "
     << this->theIterator.toStringLayerSize() << ". The current buffer size is: " << this->orbitBuffer.size << ". ";
     if (this->currentIndexInBuffer + 1 > this->orbitBuffer.size) {
-      out << " The orbit buffer appears to have exceeded the allowed maximum, "
+      out << "The orbit buffer appears to have exceeded the allowed maximum, "
       << "I am enumerating without storing the elements. ";
     }
   }
@@ -1546,7 +1546,7 @@ const CandidateSemisimpleSubalgebra& SemisimpleSubalgebras::baseSubalgebra() {
     !this->currentSubalgebraChain.lastObject()->weylNonEmbedded->theDynkinType.isEqualToZero() &&
     this->currentSubalgebraChain.lastObject()->indexInOwner == - 1
   ) {
-    global.fatal << "This is a programming error: base subalgebra has index in owner equal to - 1 yet "
+    global.fatal << "Base subalgebra has index in owner equal to - 1 yet "
     << "is of non-zero type: "
     << this->currentSubalgebraChain.lastObject()->weylNonEmbedded->theDynkinType.toString() << ". "
     << global.fatal;
@@ -2172,7 +2172,7 @@ void DynkinSimpleType::getAutomorphismActingOnVectorColumn(MatrixTensor<Rational
         output.addMonomial(MonomialMatrix(2, 2), 1);
         output.addMonomial(MonomialMatrix(3, 0), 1);
       } else {
-        global.fatal << "This is a programming error: requesting triality "
+        global.fatal << "Requesting triality "
         << "automorphism with index not in the range 0-5. " << global.fatal;
       }
     } else {
@@ -2200,7 +2200,7 @@ void DynkinSimpleType::getAutomorphismActingOnVectorColumn(MatrixTensor<Rational
     FormatExpressions theFormat;
     theFormat.flagUseHTML = false;
     theFormat.flagUseLatex = true;
-    global.fatal << "This is a programming error: the determinant of the automorphism matrix "
+    global.fatal << "The determinant of the automorphism matrix "
     << "of the Dynkin graph must be +/- 1, it is instead "
     << tempRat.toString() << ". The auto matrix is: "
     << HtmlRoutines::getMathNoDisplay(output.toStringMatrixForm(&theFormat)) << " and the dynkin type is: "
@@ -2210,7 +2210,7 @@ void DynkinSimpleType::getAutomorphismActingOnVectorColumn(MatrixTensor<Rational
 
 DynkinSimpleType DynkinType::getSmallestSimpleType() const {
   if (this->size() == 0) {
-    global.fatal << "This is a programming error: asking for the smallest simple type of a 0 dynkin type. " << global.fatal;
+    global.fatal << "Asking for the smallest simple type of a 0 dynkin type. " << global.fatal;
   }
   DynkinSimpleType result = (*this)[0];
   for (int i = 1; i < this->size(); i ++) {
@@ -2223,7 +2223,7 @@ DynkinSimpleType DynkinType::getSmallestSimpleType() const {
 
 DynkinSimpleType DynkinType::getGreatestSimpleType() const {
   if (this->size() == 0) {
-    global.fatal << "This is a programming error: asking for the greatest simple type of a 0 dynkin type. " << global.fatal;
+    global.fatal << "Asking for the greatest simple type of a 0 dynkin type. " << global.fatal;
   }
   DynkinSimpleType result = (*this)[0];
   for (int i = 1; i < this->size(); i ++) {
@@ -2245,10 +2245,10 @@ Rational DynkinType::getPrincipalSlTwoCartanSymmetricInverseScale() const {
 
 bool CandidateSemisimpleSubalgebra::checkBasicInitialization() const {
   if (this->flagDeallocated) {
-    global.fatal << "This is a programming error: use after free of CandidateSemisimpleSubalgebra. " << global.fatal;
+    global.fatal << "Use after free of CandidateSemisimpleSubalgebra. " << global.fatal;
   }
   if (this->owner == nullptr) {
-    global.fatal << "This is a programming error: use of non-initialized semisimple subalgebra candidate. " << global.fatal;
+    global.fatal << "Use of non-initialized semisimple subalgebra candidate. " << global.fatal;
   }
   return true;
 }
@@ -2321,7 +2321,7 @@ bool CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo(
         canBeRaisingReflection = false;
       }
       if (theScalarProd < 0) {
-        global.fatal << "This is a programming error. While trying to realize type " << this->weylNonEmbedded->theDynkinType.toString()
+        global.fatal << "While trying to realize type " << this->weylNonEmbedded->theDynkinType.toString()
         << ", the candidate h elements of the semisimple subalgebra are supposed to be maximally dominant, "
         << "however the scalar product of the positive root " << currentPosRoot.toString() << " with the subalgebra root "
         << this->theHsScaledToActByTwoInOrderOfCreation[l].toString()
@@ -2445,17 +2445,17 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(bool AttemptToChooseCenta
   this->owner->theSubalgebrasNonDefaultCartanAndScale.theValues[this->indexNonEmbeddedMeNonStandardCartan];
   this->totalNumUnknownsNoCentralizer = 0;
   if (this->theHs.size == 0) {
-    global.fatal << "This is a programming error: the number of involved H's cannot be zero. " << global.fatal;
+    global.fatal << "The number of involved H's cannot be zero. " << global.fatal;
   }
   if (this->theInvolvedNegGenerators.size != this->theHs.size) {
-    global.fatal << "This is a programming error: the number of involved negative generators: " << this->theInvolvedNegGenerators.size
+    global.fatal << "The number of involved negative generators: " << this->theInvolvedNegGenerators.size
     << " is not equal to the subalgebra rank: " << this->theHs.size << ". " << global.fatal;
   }
   for (int i = 0; i < this->theInvolvedNegGenerators.size; i ++) {
     this->totalNumUnknownsNoCentralizer += this->theInvolvedNegGenerators[i].size;
   }
   if (this->weylNonEmbedded->rootSystem.size == 0) {
-    global.fatal << "This is a programming error: the root system of the candidate subalgebra has not been computed " << global.fatal;
+    global.fatal << "The root system of the candidate subalgebra has not been computed " << global.fatal;
   }
   this->totalNumUnknownsNoCentralizer *= 2;
   this->totalNumUnknownsWithCentralizer = this->totalNumUnknownsNoCentralizer;
@@ -2476,7 +2476,7 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(bool AttemptToChooseCenta
       << this->toString() << global.fatal;
     }
     if (rankCentralizer < 0) {
-      global.fatal << "This is a programming error: centralizer rank extracted as a negative number. The centralizer rank is: "
+      global.fatal << "Centralizer rank extracted as a negative number. The centralizer rank is: "
       << this->centralizerRank.toString() << ". This most probably means the centralizer was not computed correctly. "
       << "Here's a full subalgebra printout" << this->toString()
       << global.fatal;
@@ -2495,14 +2495,14 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(bool AttemptToChooseCenta
   }
   int indexNewRoot = - 1;
   if (this->flagUsedInducingSubalgebraRealization) {
-    indexNewRoot =*this->RootInjectionsFromInducer.lastObject();
+    indexNewRoot =*this->rootInjectionsFromInducer.lastObject();
   }
   for (int i = 0; i < this->theInvolvedNegGenerators.size; i ++) {
     bool seedsHaveBeenSown = false;
     if (this->flagUsedInducingSubalgebraRealization) {
       CandidateSemisimpleSubalgebra& theInducer = this->owner->theSubalgebras.theValues[this->indexIamInducedFrom];
       if (theInducer.flagSystemSolved && i != indexNewRoot) {
-        int preimageIndex = DynkinType::GetIndexPreimageFromRootInjection(i, this->RootInjectionsFromInducer);
+        int preimageIndex = DynkinType::GetIndexPreimageFromRootInjection(i, this->rootInjectionsFromInducer);
         this->theUnknownNegGens[i] = theInducer.theNegGens[preimageIndex];//<-implicit type conversion from base field to polynomial here
         this->theUnknownPosGens[i] = theInducer.thePosGens[preimageIndex];//<-implicit type conversion from base field to polynomial here
         seedsHaveBeenSown = true;
@@ -2554,7 +2554,7 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(bool AttemptToChooseCenta
         posRoot2.makeEi(this->weylNonEmbedded->getDimension(), j);
         int alphaStringLength = - 1;
         if (!nonEmbeddedMe.getMaxQForWhichBetaMinusQAlphaisARoot(posRoot1, - posRoot2, alphaStringLength)) {
-          global.fatal << "This is a programming error: the alpha-string along " << posRoot1.toString()
+          global.fatal << "The alpha-string along " << posRoot1.toString()
           << " through " << (- posRoot2).toString()
           << " does not contain any root, which is impossible. " << global.fatal;
         }
@@ -2605,7 +2605,7 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(bool AttemptToChooseCenta
       this->owner->owner->generateLieSubalgebra(this->theBasis);
       if (this->theBasis.size != this->weylNonEmbedded->theDynkinType.getLieAlgebraDimension()) {
         if (!allowNonPolynomialSystemFailure) {
-          global.fatal << "This is a programming error. "
+          global.fatal
           << "Lie subalgebra dimension doesn't fit: dimension of generated subalgebra is "
           << this->theBasis.size << ", must be " << this->weylNonEmbedded->theDynkinType.getLieAlgebraDimension()
           << ". The subalgebra is " << this->toString() << "<br>Involved generators: "
@@ -2773,7 +2773,7 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecomposition() {
     }
   }
   if (this->fullBasisByModules.size != this->getAmbientSemisimpleLieAlgebra().getNumberOfGenerators()) {
-    global.fatal << "This is a programming error: the full basis by modules "
+    global.fatal << "The full basis by modules "
     << "does not have same number of elements as the number of generators of the ambient Lie algebra. "
     << global.fatal;
   }
@@ -2881,7 +2881,7 @@ void CandidateSemisimpleSubalgebra::computePairKWeightElementAndModule(
   Vector<AlgebraicNumber> coordsInFullBasis;
   output.setSize(0);
   if (this->fullBasisByModules.size != this->getAmbientSemisimpleLieAlgebra().getNumberOfGenerators()) {
-    global.fatal << "This is a programming error: fullBasisByModules not computed when it should be. " << global.fatal;
+    global.fatal << "FullBasisByModules not computed when it should be. " << global.fatal;
   }
   for (int j = 0; j < rightModule.size; j ++) {
     this->getAmbientSemisimpleLieAlgebra().lieBracket(leftKweightElt, rightModule[j], theLieBracket);
@@ -2892,7 +2892,7 @@ void CandidateSemisimpleSubalgebra::computePairKWeightElementAndModule(
     }
     bool tempbool = theLieBracket.getCoordinatesInBasis(this->fullBasisByModules, coordsInFullBasis);
     if (!tempbool) {
-      global.fatal << "This is a programming error: something has gone very wrong: my k-weight basis "
+      global.fatal << "Something has gone very wrong: my k-weight basis "
       << this->fullBasisByModules.toString()
       << " does not contain " << theLieBracket.toString() << global.fatal;
     }
@@ -3043,8 +3043,7 @@ void CandidateSemisimpleSubalgebra::computeKsl2TriplesGetOppositeElementsAll(
         for (int k = 0; k < this->modules[i].size; k ++) {
           outputElts.addOnTop(this->modules[i][k][j]);
           if (!(theElementWeight + this->getPrimalWeightFirstGen(this->modules[i][k][j])).isEqualToZero()) {
-            global.fatal << "This is a programming error: element "
-            << "this->modules[i][k][j] does not have the primal weight it is supposed to have. "
+            global.fatal << "Element this->modules[i][k][j] does not have the primal weight it is supposed to have. "
             << global.fatal;
           }
         }
@@ -3121,7 +3120,7 @@ int CandidateSemisimpleSubalgebra::getPrimalRank() const {
 
 void NilradicalCandidate::checkInitialization() const {
   if (this->owner == nullptr) {
-    global.fatal << "This is a programming error: NilradicalCandidate with non-initialized owner" << global.fatal;
+    global.fatal << "NilradicalCandidate with non-initialized owner" << global.fatal;
   }
 }
 
@@ -3448,7 +3447,7 @@ void NilradicalCandidate::computeTheTwoCones() {
     this->ownerModulesNilradicalElements.size != this->theNilradical.size ||
     this->theNonFKhws.size != this->ownerModulestheNonFKhwVectors.size
   ) {
-    global.fatal << "This is a programming error: sizes of indexing arrasy in "
+    global.fatal << "Sizes of indexing arrasy in "
     << "Fernando Kac nilradical candidate don't match. " << global.fatal;
   }
 }
@@ -3470,14 +3469,14 @@ void CandidateSemisimpleSubalgebra::enumerateAllNilradicals() {
   }
   std::stringstream out;
   if (theSel.size != this->NilradicalPairingTable.size || theSel.size != this->ModulesIsotypicallyMerged.size) {
-    global.fatal << "This is a programming error: selection has "
+    global.fatal << "Selection has "
     << theSel.size << ", nilraidcal pairing table has " << this->NilradicalPairingTable.size
     << " elements and modules isotypically merged has " << this->ModulesIsotypicallyMerged.size
     << " elements." << global.fatal;
   }
   this->enumerateNilradicalsRecursively(theSel, &out);
   if (this->FKNilradicalCandidates.size < 1) {
-    global.fatal << "This is a programming error:" << " while enumerating nilradicals of "
+    global.fatal << "While enumerating nilradicals of "
     << this->weylNonEmbedded->theDynkinType.toString()
     << " got 0 nilradical candidates which is impossible (the zero nilradical is always possible). " << global.fatal;
   }
@@ -3526,7 +3525,7 @@ void Vector<Coefficient>::perturbNormalRelativeToVectorsInGeneralPosition(
   MacroRegisterFunctionWithName("Vectors::PerturbSplittingNormal");
   for (int i = 0; i < nonStrictConeNonPositiveScalar.size; i ++) {
     if (this->scalarEuclidean(nonStrictConeNonPositiveScalar[i]) < 0) {
-      global.fatal << "This is a programming error: the splitting normal " << this->toString()
+      global.fatal << "The splitting normal " << this->toString()
       << " is supposed to have non-negative scalar product with the vector "
       << nonStrictConeNonPositiveScalar[i].toString() << ", but it doesn't." << global.fatal;
     }
@@ -3565,7 +3564,7 @@ void Vector<Coefficient>::perturbNormalRelativeToVectorsInGeneralPosition(
     *this += currentModifier * theScale;
     for (int i = 0; i < nonStrictConeNonPositiveScalar.size; i ++) {
       if (this->scalarEuclidean(nonStrictConeNonPositiveScalar[i]) < 0) {
-        global.fatal << "<br>This is a programming error: during perturbation, the splitting normal " << this->toString()
+        global.fatal << "<br>During perturbation, the splitting normal " << this->toString()
         << " is supposed to have non-negative scalar product with the vector " << nonStrictConeNonPositiveScalar[i].toString()
         << ", but it doesn't." << global.fatal;
       } else {
@@ -3573,7 +3572,7 @@ void Vector<Coefficient>::perturbNormalRelativeToVectorsInGeneralPosition(
           this->scalarEuclidean(nonStrictConeNonPositiveScalar[i]) == 0 &&
           oldThis.scalarEuclidean(nonStrictConeNonPositiveScalar[i]) > 0
         ) {
-          global.fatal << "<br>This is a programming error: during perturbation, the splitting normal " << this->toString()
+          global.fatal << "<br>During perturbation, the splitting normal " << this->toString()
           << " lost  positive scalar product with " << nonStrictConeNonPositiveScalar[i].toString() << "." << global.fatal;
         }
       }
@@ -3881,7 +3880,7 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecompositionHWsHWVsOnlyL
         tempModules[i], this->theBasis, *this->highestVectors.lastObject()
       );
       if (this->highestVectors.lastObject()->size != 1) {
-        global.fatal << "This is a programming error: simple component "
+        global.fatal << "Simple component "
         << "computed to have more than one highest weight vector. " << global.fatal;
       }
       this->primalSubalgebraModules.addOnTop(this->modules.size- 1);
@@ -3905,7 +3904,7 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecompositionHWsHWVsOnlyL
         }
         this->highestVectors.lastObject()->removeIndexSwapWithLast(0);
         if (this->highestVectors.lastObject()->size != tempModules[i].size - 1) {
-          global.fatal << "This is a programming error: wrong number of hwv's: got "
+          global.fatal << "Wrong number of hwv's: got "
           << this->highestVectors.lastObject()->size << ", must have "
           << tempModules[i].size- 1 << ". " << global.fatal;
         }
@@ -3950,12 +3949,12 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecompositionHWsHWVsOnlyL
   for (int i = 0; i < this->modules.size; i ++) {
     for (int j = 0; j < this->modules[i].size; j ++) {
       if (this->modules[i][j].size != 1) {
-        global.fatal << "This is a programming error: empty module! " << global.fatal;
+        global.fatal << "Empty module! " << global.fatal;
       }
     }
   }
   if (this->thePrimalChaR.getCoefficientsSum() != numMods) {
-    global.fatal << "This is a programming error: the sum of the coeffs of the primal char is "
+    global.fatal << "The sum of the coeffs of the primal char is "
     << this->thePrimalChaR.getCoefficientsSum().toString()
     << " but there are  " << numMods << " modules. Tempmodules variable: "
     << tempModules.toString() << "<br>Candidate details: " << this->toString() << global.fatal;
@@ -4103,7 +4102,7 @@ bool CandidateSemisimpleSubalgebra::attemptToSolveSystem() {
       this->thePosGens[i] = currentPosElt;//<-implicit type conversion here, will crash if currentNegElt has non-const coefficients
     }
     if (!this->checkGeneratorsBracketToHs()) {
-      global.fatal << "This is a programming error: I just solved the "
+      global.fatal << "I just solved the "
       << "Serre-Like system governing the subalgebra embedding, but the Lie brackets of the "
       << "resulting positive and negative generators are not what they should be. "
       << "Something has gone very wrong. " << global.fatal;
@@ -4183,7 +4182,7 @@ void CandidateSemisimpleSubalgebra::getGenericLinearCombination(
 
 bool CandidateSemisimpleSubalgebra::computeCharacter(bool allowBadCharacter) {
   if (this->indexNonEmbeddedMeStandard == - 1) {
-    global.fatal << "This is a programming error: attempting to "
+    global.fatal << "Attempting to "
     << "compute char of candidate subalgebra that has not been initialized properly. " << global.fatal;
   }
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::computeCharacter");
@@ -4225,7 +4224,7 @@ bool CandidateSemisimpleSubalgebra::computeCharacter(bool allowBadCharacter) {
         );
         if (!tempMon.weightFundamentalCoordS[counter].isInteger()) {
           if (!allowBadCharacter) {
-            global.fatal << "This is a programming error: function computeCharacter "
+            global.fatal << "Function computeCharacter "
             << "called with Cartan that suggests non-integral characters. At "
             << "the same time, an option banning this possibility has been explicitly selected. " << global.fatal;
           }
@@ -4244,7 +4243,7 @@ bool CandidateSemisimpleSubalgebra::computeCharacter(bool allowBadCharacter) {
   while (accumChar.size() > 0) {
     int currentIndex = accumChar.getIndexExtremeWeightRelativeToWeyl(*this->weylNonEmbedded);
     if (currentIndex == - 1) {
-      global.fatal << "This is a programming error: while decomposing ambient Lie algebra over the candidate subalgebra, I got "
+      global.fatal << "While decomposing ambient Lie algebra over the candidate subalgebra, I got "
       << "that there is no extreme weight. This is impossible: something has gone very wrong. " << global.fatal;
     }
     if (accumChar.coefficients[currentIndex] < 0) {
@@ -4263,7 +4262,7 @@ bool CandidateSemisimpleSubalgebra::computeCharacter(bool allowBadCharacter) {
     std::string tempS;
     bool tempBool = freudenthalChar.freudenthalEvaluateMeFullCharacter(outputChar, - 1, &tempS);
     if (!tempBool && !allowBadCharacter) {
-      global.fatal << "This is a programming error: failed to evaluate full character "
+      global.fatal << "Failed to evaluate full character "
       << "via the Freudenthal formula on a relatively small example, namely "
       << freudenthalChar.toString() << ". The failure message was: "
       << tempS << ". This shouldn't happen. " << global.fatal;
@@ -4337,7 +4336,7 @@ bool SlTwoSubalgebra::operator>(const SlTwoSubalgebra& right) const {
 bool SlTwoSubalgebra::operator==(const SlTwoSubalgebra& right) const {
  // See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, chapter 7- 10
   if (this->owner != right.owner) {
-    global.fatal << "This is a programming error: comparing sl(2) "
+    global.fatal << "Comparing sl(2) "
     << "subalgebras that have different ambient Lie algebras. " << global.fatal;
   }
   return this->hCharacteristic == right.hCharacteristic;
@@ -4450,7 +4449,7 @@ void SlTwoSubalgebra::initialize() {
 
 bool SlTwoSubalgebra::checkConsistency() const {
   if (this->flagDeallocated) {
-    global.fatal << "This is a programming error: use after free of SlTwoSubalgebra. " << global.fatal;
+    global.fatal << "Use after free of SlTwoSubalgebra. " << global.fatal;
   }
   if (this->owner != nullptr) {
     this->owner->checkConsistency();
@@ -4599,7 +4598,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
 
 bool CandidateSemisimpleSubalgebra::checkConsistency() const {
   if (this->flagDeallocated) {
-    global.fatal << "This is a programming error: use after free of CandidateSemisimpleSubalgebra. " << global.fatal;
+    global.fatal << "Use after free of CandidateSemisimpleSubalgebra. " << global.fatal;
   }
   return true;
 }
@@ -4649,13 +4648,13 @@ bool CandidateSemisimpleSubalgebra::checkMaximalDominance() const {
           canBeRaisingReflection = false;
         }
         if (theScalarProd < 0) {
-          global.fatal << "This is a programming error. The candidate h elements "
+          global.fatal << "The candidate h elements "
           << "of the semisimple subalgebra are supposed to be maximally dominant, "
           << "however the scalar product of the positive root " << currentPosRoot.toString()
           << " with the subalgebra root "
           << this->cartanSubalgebrasByComponentScaledToActByTwo[k][l].toString()
           << " is negative, while the very same positive root has had zero scalar products with all "
-          << " preceding roots. Here are all preceding roots: "
+          << "preceding roots. Here are all preceding roots: "
           << this->cartanSubalgebrasByComponentScaledToActByTwo.toString() << global.fatal;
           return false;
         }
@@ -4667,7 +4666,7 @@ bool CandidateSemisimpleSubalgebra::checkMaximalDominance() const {
 
 bool SlTwoSubalgebras::checkConsistency() const {
   if (this->flagDeallocated) {
-    global.fatal << "This is a programming error: use after free of SemisimpleLieAlgebra. " << global.fatal;
+    global.fatal << "Use after free of SemisimpleLieAlgebra. " << global.fatal;
   }
   if (this->owner != nullptr) {
     this->owner->checkConsistency();
@@ -4831,7 +4830,7 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
   this->checkConsistency();
   positiveRootsContainingRegularSA.checkConsistency();
   if (positiveRootsContainingRegularSA.size <= 0) {
-    global.fatal << "This is a programming error: positiveRootsContainingRegularSA has less than one element. " << global.fatal;
+    global.fatal << "positiveRootsContainingRegularSA has less than one element. " << global.fatal;
   }
   int IndexZeroWeight = positiveRootsContainingRegularSA.size * 2;
   outputModuleDimensions.initializeFillInObject(4 * positiveRootsContainingRegularSA.size + 1, 0);
@@ -4848,7 +4847,7 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
       global.fatal << "Characteristic must be integer. " << global.fatal;
     }
     if (tempRat>positiveRootsContainingRegularSA.size * 2) {
-      global.fatal << "This is a programming error. The scalar product of the h-Characteristic "
+      global.fatal << "The scalar product of the h-Characteristic "
       << this->hCharacteristic.toString()
       << " with the simple root " << coordsInPreferredSimpleBasis[k].toString()
       << " is larger than " << positiveRootsContainingRegularSA.size * 2
@@ -4866,7 +4865,7 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
   for (int j = BufferHighestWeights.size - 1; j >= IndexZeroWeight; j --) {
     int topMult = BufferHighestWeights[j];
     if (topMult < 0) {
-      global.fatal << "This is a programming error: the sl(2)-module decomposition shows an sl(2)-module with highest weight "
+      global.fatal << "The sl(2)-module decomposition shows an sl(2)-module with highest weight "
       << topMult << " which is impossible. Here is the sl(2) subalgebra. " << this->toString() << "." << global.fatal;
     }
     if (topMult > 0) {
@@ -4882,8 +4881,8 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
         }
         if (BufferHighestWeights[k] < 0 || !(BufferHighestWeights[k] == BufferHighestWeights[IndexZeroWeight * 2 - k])) {
           std::stringstream crashStream;
-          crashStream << " This is a programming error: "
-          << "an error check has failed. While trying to decompose with respect to  h-characteristic <br> "
+          crashStream
+          << "An error check has failed. While trying to decompose with respect to  h-characteristic <br> "
           << this->hCharacteristic.toString()
           << ". The positive root system of the containing root subalgebra is <br>"
           << positiveRootsContainingRegularSA.toString()
@@ -6311,7 +6310,7 @@ void CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen() {
     this->centralizerRank -= centralizerTypeAlternative.getRootSystemSize();
     if (this->RootSystemCentralizerPrimalCoords.size > 0) {
       if (centralizerTypeAlternative != this->theCentralizerType) {
-        global.fatal << "This is a programming error: two different methods "
+        global.fatal << "Two different methods "
         << "for computing the centralizer type yield different results: "
         << "by sub-diagram I computed the type as "
         << this->theCentralizerType.toString()
@@ -6732,7 +6731,7 @@ void CandidateSemisimpleSubalgebra::GetHsScaledToActByTwoByType(
   outputHsByType.setSize(0);
   outputTypeList.setSize(0);
   if (allTypes.size != this->cartanSubalgebrasByComponentScaledToActByTwo.size) {
-    global.fatal << "This is a programming error: allTypes.size must equal this->cartanSubalgebrasByComponentScaledToActByTwo.size. " << global.fatal;
+    global.fatal << "AllTypes.size must equal this->cartanSubalgebrasByComponentScaledToActByTwo.size. " << global.fatal;
   }
   for (int i = 0; i < allTypes.size; i ++) {
     bool shouldOpenNewType = true;

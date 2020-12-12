@@ -509,7 +509,7 @@ public:
   ~List();
   bool checkConsistency() const {
     if (this->flagDeallocated) {
-      fatalCrash("This is a programming error: use after free of List. ");
+      fatalCrash("Use after free of List. ");
     }
     return true;
   }
@@ -1718,7 +1718,7 @@ void List<Object>::swapTwoIndices(int index1, int index2) {
   if (index1 < 0 || index1 >= this->size || index2 < 0 || index2 >= this->size) {
     std::stringstream commentsOnCrash;
     commentsOnCrash
-    << "This is a programming error: requested elements with indices "
+    << "Requested elements with indices "
     << index1 << " and " << index2 << " in a list that has "
     << this->size << " elements. ";
     fatalCrash(commentsOnCrash.str());
@@ -1906,8 +1906,8 @@ Object* List<Object>::lastObject() const {
   // <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (this->size <= 0) {
     std::stringstream commentsOnCrash;
-    commentsOnCrash << "This is a programming error: "
-    << "trying to fetch the last object of an array with "
+    commentsOnCrash
+    << "Trying to fetch the last object of an array with "
     << this->size << " elements. ";
     fatalCrash(commentsOnCrash.str());
   }

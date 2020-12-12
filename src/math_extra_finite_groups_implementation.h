@@ -256,7 +256,7 @@ bool SubgroupData<someGroup, elementSomeGroup>::checkInitialization() {
     global.fatal << "A subgroup has the ``this'' pointer equal to zero. " << global.fatal;
   }
   if (this->theGroup == 0) {
-    global.fatal << "This is a programming error: subgroup not initialized when it should be" << global.fatal;
+    global.fatal << "Subgroup not initialized when it should be" << global.fatal;
   }
   return true;
 }
@@ -994,7 +994,7 @@ void WeylGroupData::reflectMinusRhoSimple(int index, Vector<Coefficient>& theVec
 template <class Coefficient>
 void WeylGroupData::reflectSimple(int index, Vector<Coefficient>& theVector) const {
   if (index < 0 || index >= this->cartanSymmetric.numberOfColumns) {
-    global.fatal << "This is a programming error: simple reflection with respect to index "
+    global.fatal << "Simple reflection with respect to index "
     << index + 1 << " in a Weyl group of rank "
     << this->getDimension() << global.fatal;
   }
@@ -1299,7 +1299,7 @@ void WeylGroupData::reflectBetaWithRespectToAlpha(
 template <typename somegroup, typename Coefficient>
 bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::checkInitialization() const {
   if (this->ownerGroup == 0) {
-    global.fatal << "This is a programming error: working with a representation "
+    global.fatal << "Working with a representation "
     << "with non-initialized owner Weyl group. " << global.fatal;
     return false;
   }
@@ -2178,7 +2178,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::decomposeTod
   this->getCharacter();
   Coefficient SumOfNumComponentsSquared = this->getNumberOfComponents();
   if (SumOfNumComponentsSquared == 0) {
-    global.fatal << "This is a programming error: a module has character " << this->theCharacter.toString()
+    global.fatal << "A module has character " << this->theCharacter.toString()
     << " of zero length, which is impossible. " << "Here is a printout of the module. "
     << this->toString() << global.fatal;
   }
@@ -2247,7 +2247,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::decomposeTod
       }
       remainingVectorSpace = tempSpace;
       if (remainingCharacter[0] != remainingVectorSpace.size) {
-        global.fatal << "<br>This is a programming error: remaining char " << remainingCharacter.toString() << " indicates dimension "
+        global.fatal << "<br>Remaining char " << remainingCharacter.toString() << " indicates dimension "
         << remainingCharacter[0].toString()
         << " but remaining vector space has dim " << remainingVectorSpace.size << global.fatal;
       }
@@ -2299,7 +2299,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::decomposeTod
   average.makeZero(this->getDimension());
   for (int i = 0; i < this->theElementImages.size; i ++) {
     if (!this->theElementIsComputed[i]) {
-      global.fatal << "<hr>This is a programming error: an internal check failed. " << global.fatal;
+      global.fatal << "<hr>An internal check failed. " << global.fatal;
     }
     this->theElementImages[i].actOnVectorColumn(startingVector, tempV);
     average += tempV;

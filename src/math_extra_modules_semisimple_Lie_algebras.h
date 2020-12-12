@@ -330,7 +330,7 @@ public:
   );
   SemisimpleLieAlgebra& getOwner() const {
     if (this->owner == nullptr) {
-      global.fatal << "This is a programming error: calling getOwner() "
+      global.fatal << "Calling getOwner() "
       << "on a non-initialized generalized Verma module. " << global.fatal;
     }
     return *this->owner;
@@ -472,14 +472,14 @@ public:
   }
   ModuleSSalgebra<Coefficient>& getOwnerModule() const {
     if (this->size() <= 0) {
-      global.fatal << "This is a programming error: "
-      << "calling getOwnerModule() on a tensor element which has no monomials. "
+      global.fatal
+      << "Calling getOwnerModule() on a tensor element which has no monomials. "
       << "This is not allowed as the index of "
       << "the owner modules are stored in the monomials. " << global.fatal;
     }
     const MonomialTensorGeneralizedVermas<Coefficient>& theMon = (*this)[0];
     if (theMon.theMons.size <= 0) {
-      global.fatal << "This is a programming error: calling getOwnerModule() "
+      global.fatal << "Calling getOwnerModule() "
       << "on a tensor element which has a constant monomial. "
       << "This is not allowed: constant monomials do not have owners. " << global.fatal;
     }

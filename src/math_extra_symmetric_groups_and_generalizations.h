@@ -26,7 +26,7 @@ public:
   void denseVectorInBasis(Vector<Coefficient>& out, const templateVector& in);
   bool checkConsistency() const {
     if (this->flagDeallocated) {
-      global.fatal << "This is a programming error: use of SparseSubspaceBasis after free. " << global.fatal;
+      global.fatal << "Use of SparseSubspaceBasis after free. " << global.fatal;
     }
     for (int i = 0; i < this->involvedMonomials.size; i ++) {
       this->involvedMonomials[i].checkConsistency();

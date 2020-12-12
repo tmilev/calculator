@@ -16,7 +16,7 @@ void LargeIntegerUnsigned::assignString(const std::string& input) {
     this->operator*=(10);
     int whichDigit = input[i] - '0';
     if (whichDigit > 9 || whichDigit < 0) {
-      global.fatal << "This is a programming error: LargeIntUnsigned::assignString "
+      global.fatal << "LargeIntUnsigned::assignString "
       << "called on the string " << input
       << " which does not consist entirely of digits. "
       << "Please note that LargeIntUnsigned::assignString is a no-fail function, intended for "
@@ -527,7 +527,7 @@ bool LargeIntegerUnsigned::operator!=(const LargeIntegerUnsigned& other) const {
 
 void LargeIntegerUnsigned::operator--(int) {
   if (this->isEqualToZero()) {
-    global.fatal << "This is a programming error: attempting to subtract "
+    global.fatal << "Attemptto subtract "
     << "1 from a large unsigned integer with value 0. " << global.fatal;
   }
   this->subtractSmallerPositive(1);
@@ -1179,7 +1179,7 @@ void LargeIntegerUnsigned::leastCommonMultiple(
 ) {
   LargeIntegerUnsigned tempUI, tempUI2;
   if (a.isEqualToZero() || b.isEqualToZero()) {
-    global.fatal << "This is a programming error: calling lcm on zero elements is not allowed. " << global.fatal;
+    global.fatal << "Call lcm on zero elements is not allowed. " << global.fatal;
   }
   LargeIntegerUnsigned::greatestCommonDivisor(a, b, tempUI);
   a.multiplyBy(b, tempUI2);
@@ -1804,7 +1804,7 @@ bool Rational::getSquareRootIfRational(Rational& output) const {
 bool Rational::tryToAddQuickly(int otherNumerator, int otherDenominator) {
   int otherNumeratorAbsoluteValue, thisNumAbs;
   if (this->denominatorShort <= 0 || otherDenominator <= 0) {
-    global.fatal << "This is a programming error: trying to add corrupt rational number(s) with denominators "
+    global.fatal << "Try to add corrupt rational number(s) with denominators "
     << this->denominatorShort << " and " << otherDenominator
     << ". The cause of the error should be in some of the calling functions. " << global.fatal;
   }
@@ -1851,9 +1851,9 @@ bool Rational::tryToMultiplyQuickly(int otherNumerator, int otherDenominator) {
   int otherNumeratorAbsoluteValue, thisNumAbs;
   if (this->denominatorShort <= 0 || otherDenominator <= 0) {
     if (denominatorShort == 0 || otherDenominator == 0) {
-      global.fatal << "This is a programming error: division by zero. ";
+      global.fatal << "Division by zero. ";
     } else {
-      global.fatal << "This is a programming error during rational number multiplication: "
+      global.fatal << "During rational number multiplication: "
       << "corrupt rational number denominator. ";
     }
     global.fatal << global.fatal;
@@ -2007,7 +2007,7 @@ bool Rational::shrinkExtendedPartIfPossible() {
 
 Rational Rational::factorial(int n) {
   if (n < 0) {
-    global.fatal << "This is a programming error: taking factorial of the negative number " << n << ". " << global.fatal;
+    global.fatal << "Take factorial of the negative number " << n << ". " << global.fatal;
     return 0;
   }
   LargeIntegerUnsigned result;
@@ -2019,7 +2019,7 @@ Rational Rational::factorial(int n) {
 
 Rational Rational::twoToTheNth(int n) {
   Rational result = 1;
-  if (n>= 0) {
+  if (n >= 0) {
     for (int i = 0; i < n; i ++) {
       result.multiplyByInt(2);
     }
@@ -2120,7 +2120,7 @@ bool Polynomial<Rational>::isConstant(Rational* whichConstant) const;
 
 void Rational::operator=(const Polynomial<Rational>& other) {
   if (!other.isConstant(this)) {
-    global.fatal << "This is a programming error: attempting to assign "
+    global.fatal << "Attemptto assign "
     << "non-constant polynomial to a Rational number is not allowed. "
     << global.fatal;
   }
@@ -2228,7 +2228,7 @@ std::string Rational::toStringFrac() const {
 void Rational::operator=(const AlgebraicNumber& other) {
   bool isGood = other.isRational(this);
   if (!isGood) {
-    global.fatal << "This is a programming error: attempting to assign the "
+    global.fatal << "Attemptto assign the "
     << "non-rational algebraic number " << other.toString()
     << "to a rational number. " << global.fatal;
   }

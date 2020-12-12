@@ -163,7 +163,7 @@ MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionGeneratorIndex
   }
   this->ComputedGeneratorActions.addSelectionAppendNewIndex(generatorIndex);
   if (this->hasFreeAction(generatorIndex)) {
-    global.fatal << "This is a programming error, due to a change in "
+    global.fatal << "Due to a change in "
     << "implementation of the generalized Verma module class. " << global.fatal;
     this->actionsGeneratorsMaT[generatorIndex].makeZero();
     return this->actionsGeneratorsMaT[generatorIndex];
@@ -259,8 +259,10 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
   std::stringstream out;
   std::string tempS;
   if (this->getOwner()->getRank() != splittingParSel.numberOfElements) {
-    global.fatal << "This is a programming error: parabolic selection selects out of " << splittingParSel.numberOfElements
-    << " elements while the weyl group is of rank " << this->getOwner()->getRank() << ". " << global.fatal;
+    global.fatal << "Parabolic selection selects out of "
+    << splittingParSel.numberOfElements
+    << " elements while the weyl group is of rank "
+    << this->getOwner()->getRank() << ". " << global.fatal;
   }
   outputWeylSub.makeParabolicFromSelectionSimpleRoots(this->getOwner()->theWeyl, splittingParSel, 1);
   outputWeylSub.computeRootSubsystem();
@@ -404,7 +406,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
     return;
   }
   if (this->getOwner().getRank() != splittingParSel.numberOfElements) {
-    global.fatal << "This is a programming error: semisimple rank is "
+    global.fatal << "Semisimple rank is "
     << this->getOwner().getRank() << " but splitting parabolic selects "
     << " out of " << splittingParSel.numberOfElements << " simple roots. " << global.fatal;
   }
@@ -572,7 +574,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
 
   int theRank = theAlgebrA.getRank();
   if (HWFundCoords.size != theRank || selNonSelectedAreElementsLevi.numberOfElements != theRank) {
-    global.fatal << "This is a programming error. I am asked to create a "
+    global.fatal << "I am asked to create a "
     << "generalized Verma module with a semisimple Lie algebra of rank "
     << theRank << " but the input highest weight, "
     << HWFundCoords.toString() << ", has " << HWFundCoords.size << " coordinates and "
@@ -633,8 +635,8 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   tempCharMon.owner = nullptr;
   this->theCharOverH.makeZero();
   for (int i = 0; i < this->thePaths.size; i ++) {
-    this->theModuleWeightsSimpleCoords.addOnTopNoRepetition(*this->thePaths[i].Waypoints.lastObject());
-    tempCharMon.weightFundamentalCoordS = theWeyl.getFundamentalCoordinatesFromSimple(*this->thePaths[i].Waypoints.lastObject());
+    this->theModuleWeightsSimpleCoords.addOnTopNoRepetition(*this->thePaths[i].waypoints.lastObject());
+    tempCharMon.weightFundamentalCoordS = theWeyl.getFundamentalCoordinatesFromSimple(*this->thePaths[i].waypoints.lastObject());
     this->theCharOverH.addMonomial(tempCharMon, 1);
   }
   this->theModuleWeightsSimpleCoords.quickSortAscending();
@@ -661,7 +663,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
       );
       tempMonInt.multiplyByGeneratorPowerOnTheRight(this->getOwner().getGeneratorFromDisplayIndex(theIndex), 1);
     }
-    Vector<Rational>& hwCurrent = *this->thePaths[i].Waypoints.lastObject();
+    Vector<Rational>& hwCurrent = *this->thePaths[i].waypoints.lastObject();
     int theIndex = this->theModuleWeightsSimpleCoords.getIndex(hwCurrent);
     if (theIndex == - 1) {
       out2 << "Error: could not generate all weights in the weight support. Maybe they are too many? Allowed "
@@ -890,8 +892,7 @@ void ModuleSSalgebra<Coefficient>::checkConsistency() {
         << ", " << rightGen.toString() << "] = " << outputGen.toString()
         << "<br>"
         << outputGen.toString() << "->" << otherOutput.toString()
-        << "<br>This is a programming error: "
-        << "something is wrong with the algorithm, a check fails! "
+        << "<br>Something is wrong with the algorithm, a check fails! "
         << global.fatal;
       } else {
         std::stringstream tempStream;
@@ -1706,7 +1707,7 @@ std::string MonomialTensorGeneralizedVermas<Coefficient>::toString(FormatExpress
 template <class Coefficient>
 std::string MonomialGeneralizedVerma<Coefficient>::toString(FormatExpressions* theFormat, bool includeV) const {
   if (this->owner == nullptr) {
-    global.fatal << "This is a programming error: non-initialized generalized Verma monomial (owner is 0)." << global.fatal;
+    global.fatal << "Non-initialized generalized Verma monomial (owner is 0)." << global.fatal;
   }
   ModuleSSalgebra<Coefficient>& theMod = *this->owner;
   std::string tempS;

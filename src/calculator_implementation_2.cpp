@@ -333,7 +333,7 @@ bool Calculator::expressionMatchesPattern(
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (!(thePattern.owner == this && input.owner == this)) {
-    global.fatal << "This is a programming error. "
+    global.fatal
     << "Either a pattern or an input has a wrongly  initialized owner: the pattern is "
     << thePattern.toString() << " and the input is "
     << input.toString() << ". The error is certainly in the preceding code; here "
@@ -1183,7 +1183,7 @@ void Calculator::evaluateCommands() {
   }
   this->evaluateExpression(*this, this->theProgramExpression, this->theProgramExpression);
   if (this->recursionDepth != 0) {
-    global.fatal << "This is a programming error: the starting recursion "
+    global.fatal << "The starting recursion "
     << "depth before evaluation was 0, but after evaluation it is "
     << this->recursionDepth << "." << global.fatal;
   }

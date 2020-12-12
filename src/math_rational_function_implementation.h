@@ -66,20 +66,20 @@ bool RationalFunction<Coefficient>::checkConsistency() const {
       return false;
     }
     if (this->numerator.getElementConst().isConstant()) {
-      global.fatal << "This is a programming error: a rational function is flagged as "
+      global.fatal << "A rational function is flagged as "
       << "having a non-constant numerator, but the numerator is constant. " << global.fatal;
       return false;
     }
   }
   if (this->expressionType == this->typeRationalFunction) {
     if (this->numerator.isZeroPointer() || this->denominator.isZeroPointer()) {
-      global.fatal << "This is a programming error: a rational function is flagged as "
+      global.fatal << "A rational function is flagged as "
       << "having non-constant denominator, but either the numerator or the denominator pointer is zero. "
       << global.fatal;
       return false;
     }
     if (this->denominator.getElementConst().isConstant()) {
-      global.fatal << "This is a programming error: a rational function is flagged as "
+      global.fatal << "A rational function is flagged as "
       << "having non-constant denominator, but the denominator is constant. " << global.fatal;
       return false;
     }
@@ -89,7 +89,7 @@ bool RationalFunction<Coefficient>::checkConsistency() const {
     this->expressionType != this->typePolynomial &&
     this->expressionType != this->typeRationalFunction
   ) {
-    global.fatal << "This is a programming error: a rational function is not initialized properly: its type is "
+    global.fatal << "A rational function is not initialized properly: its type is "
     << this->expressionType
     << " which is not allowed. " << global.fatal;
     return false;
@@ -308,7 +308,7 @@ void RationalFunction<Coefficient>::greatestCommonDivisor(
   );
   if (!remainderBuffer.isEqualToZero() || output.isEqualToZero()) {
     global.fatal
-    << "This is a programming error. <br>While computing the gcd of left = "
+    << "While computing the gcd of left = "
     << left.toString() << " <br>and right = "
     << right.toString() << " <br>I got that left * right = "
     << productBuffer.toString()
@@ -328,7 +328,7 @@ void RationalFunction<Coefficient>::makeOneLetterMonomial(
   int theIndex, const Rational& theCoeff, int ExpectedNumVars
 ) {
   if (theIndex < 0) {
-    global.fatal << "This is a programming error: I am asked to create "
+    global.fatal << "I am asked to create "
     << "Monomial which has a variable of negative index " << theIndex << ". " << global.fatal;
   }
   this->expressionType = this->typePolynomial;

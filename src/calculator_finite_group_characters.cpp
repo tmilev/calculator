@@ -18,10 +18,8 @@ template < >
 WeylGroupData& Expression::getValueNonConst() const;
 
 bool WeylGroupData::checkConsistency() const {
-  //if (this == 0)
-  //  global.fatal << "The this pointer of a Weyl group is zero. " << global.fatal;
   if (this->flagDeallocated) {
-    global.fatal << "This is a programming error: use after free of WeylGroup. " << global.fatal;
+    global.fatal << "Use after free of WeylGroup. " << global.fatal;
   }
   for (int i = 0; i < this->theGroup.generators.size; i ++) {
     this->theGroup.generators[i].checkConsistency();
@@ -33,7 +31,7 @@ bool WeylGroupData::checkConsistency() const {
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::checkInitializationFiniteDimensionalRepresentationComputation() const {
   if (this->theElements.size == 0) {
-    global.fatal << "This is a programming error: requesting to compute character hermitian product in a group whose "
+    global.fatal << "Request to compute character hermitian product in a group whose "
     << "conjugacy classes and/or elements have not been computed. The group reports to have "
     << this->conjugacyClassCount() << " conjugacy classes and " << this->theElements.size << " elements. "
     << global.fatal;
@@ -47,7 +45,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::checkAllSimp
   this->checkInitialization();
   for (int i = 0; i < this->ownerGroup->generators.size; i ++) {
     if (this->generators[i].numberOfRows == 0) {
-      global.fatal << "This is a programming error: working with a "
+      global.fatal << "Working with a "
       << "representation in which the action of the simple generators is not computed. " << global.fatal;
       return false;
     }
@@ -166,10 +164,10 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::operator*=(
   }
   //////////////////////////////////
   if (this->ownerGroup != other.ownerGroup) {
-    global.fatal << "This is a programming error: attempting to multiply representations with different owner groups. " << global.fatal;
+    global.fatal << "Attempt to multiply representations with different owner groups. " << global.fatal;
   }
   if (!this->flagCharacterIsComputed || !other.flagCharacterIsComputed) {
-    global.fatal << "Attempting to multiply weyl group reps whose characters have not been computed. " << global.fatal;
+    global.fatal << "Attempting to multiply Weyl group reps whose characters have not been computed. " << global.fatal;
   }
   GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> output;
   output.initialize(*this->ownerGroup);
@@ -199,10 +197,10 @@ void GroupRepresentation<somegroup, Coefficient>::operator*=(const GroupRepresen
   }
   //////////////////////////////////
   if (this->ownerGroup != other.ownerGroup) {
-    global.fatal << "This is a programming error: attempting to multiply representations with different owner groups. " << global.fatal;
+    global.fatal << "Attempt to multiply representations with different owner groups. " << global.fatal;
   }
   if (!this->flagCharacterIsComputed || !other.flagCharacterIsComputed) {
-    global.fatal << "Attempting to multiply weyl group reps whose characters have not been computed. " << global.fatal;
+    global.fatal << "Attempting to multiply Weyl group reps whose characters have not been computed. " << global.fatal;
   }
   GroupRepresentation<somegroup, Coefficient> output;
   output.ownerGroup = this->ownerGroup;
@@ -857,7 +855,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesFromAllElements(
   double timeStart1 = global.getElapsedSeconds();
   theGroupData.theGroup.computeConjugacyClassesFromAllElements();
   //std::stringstream out;
-  calculator << "<hr> Computed conjugacy classes of "
+  calculator << "<hr>Computed conjugacy classes of "
   << theGroupData.toString() << " in " << global.getElapsedSeconds() - timeStart1
   << " second(s). ";
   return output.assignValue(theGroupData, calculator);
@@ -906,13 +904,6 @@ bool CalculatorFunctionsWeylGroup::weylGroupIrrepsAndCharTableComputeFromScratch
   std::stringstream out;
   out << "Character table: ";
   out << theGroupData.theGroup.prettyPrintCharacterTable();
-  //Matrix<Rational> charMat;
-  //charMat.initialize(theGroupData.theGroup.conjugacyClassCount(), theGroupData.theGroup.conjugacyClassCount());
-  //for (int i = 0; i < theGroupData.theGroup.irreps.size; i ++)
-  //{ //out << "<br>" << theGroup.irreps[i].theCharacter.toString();
-  //  charMat.assignVectorToRowKeepOtherRowsIntactNoInitialization(i, theGroupData.irreps[i].GetCharacter().data);
-  //}
-  //out << HtmlRoutines::getMathNoDisplay(charMat.toString(&tempFormat));
   out << "<br>Explicit realizations of each representation follow.";
   for (int i = 0; i < theGroupData.theGroup.irreps.size; i ++) {
     out << "<hr>" << theGroupData.theGroup.irreps[i].toString(&tempFormat);
@@ -1984,7 +1975,7 @@ public:
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   bool checkConsistency() {
     if (this->flagDeallocated) {
-      global.fatal << "This is a programming error: use after free of MonomialMacdonald. " << global.fatal;
+      global.fatal << "Use after free of MonomialMacdonald. " << global.fatal;
       return false;
     }
     return true;
@@ -2055,7 +2046,8 @@ void MonomialMacdonald::MakeFromRootSubsystem(const Vectors<Rational>& inputRoot
     }
     int indexInRoots = inputOwner.theWeyl.rootSystem.getIndex(currentV);
     if (indexInRoots < 0) {
-      global.fatal << "This is a programming error: attempting to make a Macdonald polynomial from " << inputRoots.toString()
+      global.fatal << "Attempt to make a Macdonald polynomial from "
+      << inputRoots.toString()
       << ": the vector " << currentV.toString()
       << " is not a root. " << global.fatal;
     }
@@ -2070,7 +2062,7 @@ void MonomialMacdonald::ActOnMeSimpleReflection(int indexSimpleReflection, Ratio
   this->rootSel.initialize(this->owner->theWeyl.rootSystem.size);
   Vector<Rational> currentV;
   outputMultiple = 1;
-  for (int i = 0; i <originalSel.cardinalitySelection; i ++) {
+  for (int i = 0; i < originalSel.cardinalitySelection; i ++) {
     currentV = this->owner->theWeyl.rootSystem[originalSel.elements[i]];
     this->owner->theWeyl.reflectSimple(indexSimpleReflection, currentV);
     if (currentV.isNegative()) {

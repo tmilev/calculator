@@ -34,7 +34,7 @@ public:
   }
   void makeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner) {
     if (generatorIndex < 0 || generatorIndex>inputOwner.getNumberOfGenerators()) {
-      global.fatal << "This is a programming error: attempting to assign impossible index to monomial UE. " << global.fatal;
+      global.fatal << "Attempt to assign impossible index to monomial UE. " << global.fatal;
     }
     this->owner = &inputOwner;
     this->generatorsIndices.setSize(1);

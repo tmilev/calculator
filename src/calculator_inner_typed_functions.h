@@ -222,8 +222,8 @@ bool CalculatorConversions::functionPolynomial(Calculator& calculator, const Exp
   }
   if (input.isOfType<Coefficient>() || input.isOfType<Rational>()) {
     if (!input.convertInternally<Polynomial<Coefficient> >(output)) {
-      global.fatal << "This is a programming error: "
-      << "failed to convert coefficient to polynomial. " << global.fatal;
+      global.fatal
+      << "Failed to convert coefficient to polynomial. " << global.fatal;
     }
     return true;
   }

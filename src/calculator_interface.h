@@ -2943,7 +2943,7 @@ bool Calculator::getTypeWeight(
   if (!calculator.theObjectContainer.semisimpleLieAlgebras.contains(
     ambientSSalgebra->theWeyl.theDynkinType
   )) {
-    global.fatal << "This is a programming error: "
+    global.fatal
     << ambientSSalgebra->toStringLieAlgebraName()
     << " contained object container more than once. " << global.fatal;
   }
@@ -3038,7 +3038,7 @@ bool Calculator::getTypeHighestWeightParabolic(
   if (!calculator.theObjectContainer.semisimpleLieAlgebras.contains(
     ambientSSalgebra->theWeyl.theDynkinType
   )) {
-    global.fatal << "This is a programming error: "
+    global.fatal
     << ambientSSalgebra->toStringLieAlgebraName()
     << " contained object container more than once. "
     << global.fatal;

@@ -37,7 +37,7 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
           int currentIndex = this->theWeyl.rootSystem.getIndex(theWeight);
           theIndex = this->getRootIndexFromGenerator(theIndex);
           if (!this->Computed.elements[theIndex][currentIndex]) {
-            global.fatal << "This is a programming error. "
+            global.fatal
             << "For some reason I am not computed. Here is me: " << this->toString() << global.fatal;
           }
           outputMultiplyLieBracketsToGetGenerator /= this->ChevalleyConstants.elements[theIndex][currentIndex];
@@ -88,7 +88,7 @@ void Lattice::intersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Ratio
 
 void LittelmannPath::actByEFDisplayIndex(int displayIndex) {
   if (this->owner == nullptr) {
-    global.fatal << " This is a programming error: LS path without initialized owner is begin acted upon. " << global.fatal;
+    global.fatal << "LS path without initialized owner is begin acted upon. " << global.fatal;
   }
   if (displayIndex > 0) {
     this->actByEAlpha(displayIndex - 1);
@@ -99,12 +99,12 @@ void LittelmannPath::actByEFDisplayIndex(int displayIndex) {
 
 void LittelmannPath::actByEAlpha(int indexAlpha) {
   if (this->owner == nullptr) {
-    global.fatal << " This is a programming error: LS path without initialized owner is begin acted upon. " << global.fatal;
+    global.fatal << "LS path without initialized owner is begin acted upon. " << global.fatal;
   }
   if (indexAlpha < 0 || indexAlpha >= this->owner->getDimension()) {
-    global.fatal << " This is a programming error: index of Littelmann root operator out of range. " << global.fatal;
+    global.fatal << "Index of Littelmann root operator out of range. " << global.fatal;
   }
-  if (this->Waypoints.size == 0) {
+  if (this->waypoints.size == 0) {
     return;
   }
   Rational theMin = 0;
@@ -117,20 +117,20 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
   Vector<Rational>& alpha = theWeyl.rootsOfBorel[indexAlpha];
   Rational LengthAlpha = theWeyl.rootScalarCartanRoot(alpha, alpha);
   Vector<Rational> alphaScaled = alpha * 2 / LengthAlpha;
-  for (int i = 0; i < this->Waypoints.size; i ++) {
-    Rational tempRat = this->owner->rootScalarCartanRoot(this->Waypoints[i], alphaScaled);
+  for (int i = 0; i < this->waypoints.size; i ++) {
+    Rational tempRat = this->owner->rootScalarCartanRoot(this->waypoints[i], alphaScaled);
     if (tempRat <= theMin) {
       theMin = tempRat;
       minIndex = i;
     }
   }
   if (minIndex <= 0 || theMin > - 1) {
-    this->Waypoints.size = 0;
+    this->waypoints.size = 0;
     return;
   }
   int precedingIndex = 0;
   for (int i = 0; i <= minIndex; i ++) {
-    Rational tempScalar = theWeyl.rootScalarCartanRoot(this->Waypoints[i], alphaScaled);
+    Rational tempScalar = theWeyl.rootScalarCartanRoot(this->waypoints[i], alphaScaled);
     if (tempScalar >= theMin + 1) {
       precedingIndex = i;
     }
@@ -138,29 +138,29 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
       break;
     }
   }
-  Rational s2 = this->owner->rootScalarCartanRoot(this->Waypoints[precedingIndex], alphaScaled);
+  Rational s2 = this->owner->rootScalarCartanRoot(this->waypoints[precedingIndex], alphaScaled);
   if (!this->minimaAreIntegral()) {
     global.comments << "<br>Something is wrong: starting path is BAD!";
   }
   if (s2 > theMin + 1) {
-    this->Waypoints.setSize(this->Waypoints.size + 1);
-    for (int i = this->Waypoints.size - 1; i >= precedingIndex + 2; i --) {
-      this->Waypoints[i] = this->Waypoints[i - 1];
+    this->waypoints.setSize(this->waypoints.size + 1);
+    for (int i = this->waypoints.size - 1; i >= precedingIndex + 2; i --) {
+      this->waypoints[i] = this->waypoints[i - 1];
     }
     precedingIndex ++;
     minIndex ++;
-    Vector<Rational>& r1 = this->Waypoints[precedingIndex];
-    Vector<Rational>& r2 = this->Waypoints[precedingIndex - 1];
+    Vector<Rational>& r1 = this->waypoints[precedingIndex];
+    Vector<Rational>& r2 = this->waypoints[precedingIndex - 1];
     Rational s1 = theWeyl.rootScalarCartanRoot(r1, alphaScaled);
     Rational x = (theMin + 1 - s2) / (s1 - s2);
-    this->Waypoints[precedingIndex] = (r1 - r2) * x + r2;
+    this->waypoints[precedingIndex] = (r1 - r2) * x + r2;
   }
   Vectors<Rational> differences;
   differences.setSize(minIndex-precedingIndex);
   Rational currentDist = 0;
   Rational minDist = 0;
   for (int i = 0; i < differences.size; i ++) {
-    differences[i] = this->Waypoints[i + precedingIndex + 1] - this->Waypoints[i + precedingIndex];
+    differences[i] = this->waypoints[i + precedingIndex + 1] - this->waypoints[i + precedingIndex];
     currentDist += theWeyl.rootScalarCartanRoot(differences[i], alphaScaled);
     if (currentDist < minDist) {
       theWeyl.reflectSimple(indexAlpha, differences[i]);
@@ -168,23 +168,23 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
     }
   }
   for (int i = 0; i < differences.size; i ++) {
-    this->Waypoints[i + precedingIndex + 1] = this->Waypoints[i + precedingIndex] + differences[i];
+    this->waypoints[i + precedingIndex + 1] = this->waypoints[i + precedingIndex] + differences[i];
   }
-  for (int i = minIndex + 1; i < this->Waypoints.size; i ++) {
-    this->Waypoints[i] += alpha;
+  for (int i = minIndex + 1; i < this->waypoints.size; i ++) {
+    this->waypoints[i] += alpha;
   }
   this->simplify();
 }
 
 void LittelmannPath::actByFAlpha(int indexAlpha) {
-  if (this->Waypoints.size == 0) {
+  if (this->waypoints.size == 0) {
     return;
   }
   if (this->owner == nullptr) {
-    global.fatal << " This is a programming error: LS path without initialized owner is begin acted upon. " << global.fatal;
+    global.fatal << "LS path without initialized owner is begin acted upon. " << global.fatal;
   }
   if (indexAlpha < 0 || indexAlpha >= this->owner->getDimension()) {
-    global.fatal << " This is a programming error: index of Littelmann root operator out of range. " << global.fatal;
+    global.fatal << "Index of Littelmann root operator out of range. " << global.fatal;
   }
   Rational theMin = 0;
   int minIndex = - 1;
@@ -192,21 +192,21 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
   Vector<Rational>& alpha = theWeyl.rootsOfBorel[indexAlpha];
   Rational LengthAlpha = this->owner->rootScalarCartanRoot(alpha, alpha);
   Vector<Rational> alphaScaled = alpha * 2 / LengthAlpha;
-  for (int i = 0; i < this->Waypoints.size; i ++) {
-    Rational tempRat = this->owner->rootScalarCartanRoot(this->Waypoints[i], alphaScaled);
+  for (int i = 0; i < this->waypoints.size; i ++) {
+    Rational tempRat = this->owner->rootScalarCartanRoot(this->waypoints[i], alphaScaled);
     if (tempRat <= theMin) {
       theMin = tempRat;
       minIndex = i;
     }
   }
-  Rational lastScalar = this->owner->rootScalarCartanRoot(*this->Waypoints.lastObject(), alphaScaled);
+  Rational lastScalar = this->owner->rootScalarCartanRoot(*this->waypoints.lastObject(), alphaScaled);
   if (minIndex < 0 || lastScalar - theMin < 1) {
-    this->Waypoints.size = 0;
+    this->waypoints.size = 0;
     return;
   }
   int succeedingIndex = 0;
-  for (int i = this->Waypoints.size - 1; i >= minIndex; i --) {
-    Rational tempScalar = theWeyl.rootScalarCartanRoot(alphaScaled, this->Waypoints[i]);
+  for (int i = this->waypoints.size - 1; i >= minIndex; i --) {
+    Rational tempScalar = theWeyl.rootScalarCartanRoot(alphaScaled, this->waypoints[i]);
     if (tempScalar >= theMin + 1) {
       succeedingIndex = i;
     }
@@ -214,50 +214,50 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
       break;
     }
   }
-  Rational s1 = this->owner->rootScalarCartanRoot(this->Waypoints[succeedingIndex], alphaScaled);
+  Rational s1 = this->owner->rootScalarCartanRoot(this->waypoints[succeedingIndex], alphaScaled);
   if (s1 > theMin + 1) {
-    this->Waypoints.setSize(this->Waypoints.size + 1);
-    for (int i = this->Waypoints.size - 1; i >= succeedingIndex + 1; i --) {
-      this->Waypoints[i] = this->Waypoints[i - 1];
+    this->waypoints.setSize(this->waypoints.size + 1);
+    for (int i = this->waypoints.size - 1; i >= succeedingIndex + 1; i --) {
+      this->waypoints[i] = this->waypoints[i - 1];
     }
-    //Rational scalarNext = theWeyl.rootScalarCartanRoot(this->Waypoints[succeedingIndex], alphaScaled);
-    Vector<Rational>& r1 = this->Waypoints[succeedingIndex];
-    Vector<Rational>& r2 = this->Waypoints[succeedingIndex - 1];
+    //Rational scalarNext = theWeyl.rootScalarCartanRoot(this->waypoints[succeedingIndex], alphaScaled);
+    Vector<Rational>& r1 = this->waypoints[succeedingIndex];
+    Vector<Rational>& r2 = this->waypoints[succeedingIndex - 1];
     Rational s2 = theWeyl.rootScalarCartanRoot(r2, alphaScaled);
     Rational x = (theMin + 1 - s2) / (s1 - s2);
-    this->Waypoints[succeedingIndex] = (r1 - r2) * x + r2;
+    this->waypoints[succeedingIndex] = (r1 - r2) * x + r2;
   }
   Vector<Rational> diff, oldWayPoint;
-  oldWayPoint = this->Waypoints[minIndex];
+  oldWayPoint = this->waypoints[minIndex];
   Rational currentDist = 0;
   for (int i = 0; i < succeedingIndex - minIndex; i ++) {
-    diff = this->Waypoints[i + minIndex + 1] - oldWayPoint;
+    diff = this->waypoints[i + minIndex + 1] - oldWayPoint;
     currentDist += theWeyl.rootScalarCartanRoot(diff, alphaScaled);
     if (currentDist > 0) {
       theWeyl.reflectSimple(indexAlpha, diff);
       currentDist = 0;
     }
-    oldWayPoint = this->Waypoints[i + minIndex + 1];
-    this->Waypoints[i + minIndex + 1] = this->Waypoints[i + minIndex] + diff;
+    oldWayPoint = this->waypoints[i + minIndex + 1];
+    this->waypoints[i + minIndex + 1] = this->waypoints[i + minIndex] + diff;
   }
-  for (int i = succeedingIndex + 1; i < this->Waypoints.size; i ++) {
-    this->Waypoints[i] -= alpha;
+  for (int i = succeedingIndex + 1; i < this->waypoints.size; i ++) {
+    this->waypoints[i] -= alpha;
   }
   this->simplify();
 }
 
 void LittelmannPath::simplify() {
-  if (this->Waypoints.size == 0) {
+  if (this->waypoints.size == 0) {
     return;
   }
   Vector<Rational> d1, d2;
   Rational d11, d12, d22;
   int leftIndex = 0;
   int rightIndex = 2;
-  while (rightIndex < this->Waypoints.size) {
-    Vector<Rational>& left = this->Waypoints[leftIndex];
-    Vector<Rational>& middle = this->Waypoints[rightIndex - 1];
-    Vector<Rational>& right = this->Waypoints[rightIndex];
+  while (rightIndex < this->waypoints.size) {
+    Vector<Rational>& left = this->waypoints[leftIndex];
+    Vector<Rational>& middle = this->waypoints[rightIndex - 1];
+    Vector<Rational>& right = this->waypoints[rightIndex];
     d1 = left - middle;
     d2 = right - middle;
     d11 = d1.scalarEuclidean(d1);
@@ -266,22 +266,17 @@ void LittelmannPath::simplify() {
     bool isBad = ((d11 * d22 - d12 * d12).isEqualToZero() && (d12 <= 0));
     if (!isBad) {
       leftIndex ++;
-      this->Waypoints[leftIndex] = middle;
+      this->waypoints[leftIndex] = middle;
     }
     rightIndex ++;
   }
   leftIndex ++;
-  this->Waypoints[leftIndex] = *this->Waypoints.lastObject();
-/*  if (leftIndex + 1< this->Waypoints.size) {
-    this->Waypoints.setSize(leftIndex + 1);
-    tempStream << " reduced to " << this->toString();
-    global.Comments << tempStream.str();
-  }*/
-  this->Waypoints.setSize(leftIndex + 1);
+  this->waypoints[leftIndex] = *this->waypoints.lastObject();
+  this->waypoints.setSize(leftIndex + 1);
 }
 
 bool LittelmannPath::minimaAreIntegral() {
-  if (this->Waypoints.size == 0) {
+  if (this->waypoints.size == 0) {
     return true;
   }
   List<Rational> theMinima;
@@ -289,12 +284,12 @@ bool LittelmannPath::minimaAreIntegral() {
   int theDim = theWeyl.getDimension();
   theMinima.setSize(theDim);
   for (int i = 0; i < theDim; i ++) {
-    theMinima[i] = theWeyl.getScalarProductSimpleRoot(this->Waypoints[0], i) * 2 / theWeyl.cartanSymmetric.elements[i][i];
+    theMinima[i] = theWeyl.getScalarProductSimpleRoot(this->waypoints[0], i) * 2 / theWeyl.cartanSymmetric.elements[i][i];
   }
-  for (int i = 1; i < this->Waypoints.size; i ++) {
+  for (int i = 1; i < this->waypoints.size; i ++) {
     for (int j = 0; j < theDim; j ++) {
       theMinima[j] = MathRoutines::minimum(theWeyl.getScalarProductSimpleRoot(
-        this->Waypoints[i], j) * 2 / theWeyl.cartanSymmetric.elements[j][j], theMinima[j]
+        this->waypoints[i], j) * 2 / theWeyl.cartanSymmetric.elements[j][j], theMinima[j]
       );
     }
   }
@@ -308,9 +303,9 @@ bool LittelmannPath::minimaAreIntegral() {
 
 void LittelmannPath::makeFromWeightInSimpleCoords(const Vector<Rational>& weightInSimpleCoords, WeylGroupData& theOwner) {
   this->owner = &theOwner;
-  this->Waypoints.setSize(2);
-  this->Waypoints[0].makeZero(theOwner.getDimension());
-  this->Waypoints[1] = weightInSimpleCoords;
+  this->waypoints.setSize(2);
+  this->waypoints[0].makeZero(theOwner.getDimension());
+  this->waypoints[1] = weightInSimpleCoords;
   this->simplify();
 }
 
@@ -324,7 +319,7 @@ std::string LittelmannPath::toStringIndicesToCalculatorOutput(LittelmannPath& in
     out << "eAlpha(" << displayIndex << ", ";
   }
   out << "littelmann"
-  << inputStartingPath.owner->getFundamentalCoordinatesFromSimple(*inputStartingPath.Waypoints.lastObject()).toString();
+  << inputStartingPath.owner->getFundamentalCoordinatesFromSimple(*inputStartingPath.waypoints.lastObject()).toString();
   for (int i = 0; i < input.size; i ++) {
     out << " ) ";
   }
@@ -930,17 +925,17 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
 }
 
 std::string LittelmannPath::toString(bool useSimpleCoords, bool useArrows, bool includeDominance) const {
-  if (this->Waypoints.size == 0) {
+  if (this->waypoints.size == 0) {
     return "0";
   }
   std::stringstream out;
-  for (int i = 0; i < this->Waypoints.size; i ++) {
+  for (int i = 0; i < this->waypoints.size; i ++) {
     if (useSimpleCoords) {
-      out << this->Waypoints[i].toString();
+      out << this->waypoints[i].toString();
     } else {
-      out << this->owner->getFundamentalCoordinatesFromSimple(this->Waypoints[i]).toString();
+      out << this->owner->getFundamentalCoordinatesFromSimple(this->waypoints[i]).toString();
     }
-    if (i != this->Waypoints.size - 1) {
+    if (i != this->waypoints.size - 1) {
       if (useArrows) {
         out << "->";
       } else {

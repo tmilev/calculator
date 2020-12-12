@@ -1539,8 +1539,7 @@ bool Calculator::replaceSsSsXdotsXbySsXdotsX(int numDots) {
   SyntacticElement& left = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - numDots - 2];
   SyntacticElement& right = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - numDots - 1];
   if (!left.theData.startsWith(this->opEndStatement())) {
-    global.fatal << "This is a programming error: replaceSsSsXdotsXbySsXdotsX "
-    << "called but left expression is not EndStatement." << global.fatal;
+    global.fatal << "replaceSsSsXdotsXbySsXdotsX called but left expression is not EndStatement." << global.fatal;
   }
   left.theData.children.reserve(left.theData.children.size + right.theData.children.size - 1);
   for (int i = 1; i < right.theData.children.size; i ++) {

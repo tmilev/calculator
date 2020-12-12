@@ -532,7 +532,7 @@ bool Pipe::createMe(const std::string& inputPipeName) {
 bool Pipe::checkConsistency() {
   MacroRegisterFunctionWithName("Pipe::checkConsistency");
   if (this->flagDeallocated) {
-    global.fatal << "This is a programming error: use after free of pipe. " << global.fatal;
+    global.fatal << "Use after free of pipe. " << global.fatal;
   }
   return true;
 }

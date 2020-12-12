@@ -284,7 +284,7 @@ public:
     if (this->owner != nullptr) {
       return;
     }
-    global.fatal << "This is a programming error: Monomial char has zero owner, "
+    global.fatal << "Monomial char has zero owner, "
     << "which is not allowed by the current function call. " << global.fatal;
   }
   void accountSingleWeight(
@@ -328,7 +328,7 @@ class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coef
     const SemisimpleLieAlgebra* owner = (*this)[0].owner;
     for (int i = 1; i < this->size(); i ++) {
       if ((*this)[i].owner != owner) {
-        global.fatal << "This is a programming error: CharacterSemisimpleLieAlgebraModule contains "
+        global.fatal << "CharacterSemisimpleLieAlgebraModule contains "
         << "elements belonging to different semisimple Lie algebras. " << global.fatal;
       }
     }
@@ -336,7 +336,7 @@ class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coef
   void checkNonZeroOwner() const {
     this->checkConsistency();
     if (this->getOwner() == 0) {
-      global.fatal << "This is a programming error: CharacterSemisimpleLieAlgebraModule has no owner semisimple Lie algebra, "
+      global.fatal << "CharacterSemisimpleLieAlgebraModule has no owner semisimple Lie algebra, "
       << "which is not allowed at by the calling function. " << global.fatal;
     }
   }
@@ -375,7 +375,7 @@ class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coef
   void drawMeAssumeCharIsOverCartan(WeylGroupData& actualAmbientWeyl, DrawingVariables& theDrawingVars) const;
   SemisimpleLieAlgebra* getOwner() const {
     if (this->size() == 0) {
-      global.fatal << "This is a programming error: requesting owner semisimple Lie algebra of zero character. " << global.fatal;
+      global.fatal << "Requesting owner semisimple Lie algebra of zero character. " << global.fatal;
     }
     return (*this)[0].owner;
   }
@@ -421,13 +421,13 @@ public:
   Vectors<Rational> ImagesCartanDomain;
   SemisimpleLieAlgebra& theDomain() {
     if (this->domainAlg == nullptr) {
-      global.fatal << "This is a programming error: non-initialized HomomorphismSemisimpleLieAlgebra. " << global.fatal;
+      global.fatal << "Non-initialized HomomorphismSemisimpleLieAlgebra. " << global.fatal;
     }
     return *this->domainAlg;
   }
   SemisimpleLieAlgebra& theRange() {
     if (this->rangeAlg == nullptr) {
-      global.fatal << "This is a programming error: non-initialized HomomorphismSemisimpleLieAlgebra. " << global.fatal;
+      global.fatal << "Non-initialized HomomorphismSemisimpleLieAlgebra. " << global.fatal;
     }
     return *this->rangeAlg;
   }

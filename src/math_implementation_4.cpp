@@ -689,7 +689,7 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
   Vectors<Rational>& currentComponent = this->simpleBasesConnectedComponents[indexComponent];
   List<int>& currentEnds = this->indicesEnds[indexComponent];
   if (currentComponent.size < 1) {
-    global.fatal << "This is a programming error: currentComponent is empty which is impossible. " << global.fatal;
+    global.fatal << "CurrentComponent is empty which is impossible. " << global.fatal;
   }
   if (this->numberOfThreeValencyNodes(indexComponent) == 1) {
     // type D or E
@@ -709,7 +709,7 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
     diagramWithoutTripleNode.ambientRootSystem = this->ambientRootSystem;
     diagramWithoutTripleNode.computeDiagramInputIsSimple(rootsWithoutTripleNode);
     if (diagramWithoutTripleNode.simpleBasesConnectedComponents.size != 3) {
-      global.fatal << "This is a programming error: Dynkin diagram has a triple "
+      global.fatal << "Dynkin diagram has a triple "
       << "node whose removal does not yield 3 connected components. " << global.fatal;
     }
     for (int i = 0; i < 3; i ++) {
@@ -745,7 +745,7 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
       //the second largest component has more than one element, hence we are in type E_n.
       Rational theScale = DynkinSimpleType::getDefaultLongRootLengthSquared('E') / tripleNode.scalarProduct(tripleNode, this->ambientBilinearForm);
       if (diagramWithoutTripleNode.simpleBasesConnectedComponents[1].size != 2) {
-        global.fatal << "This is a programming error: the Dynkin diagram has two components of "
+        global.fatal << "The Dynkin diagram has two components of "
         << "length larger than 2 linked to the triple node."
         << global.fatal;
       }
@@ -1138,9 +1138,9 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent) {
     if (counter > 3) {
       Matrix<Rational> theGram;
       currentComponent.getGramMatrix(theGram, &this->ambientBilinearForm);
-      global.fatal << "This is a programming error: corrupt simple basis corresponding to "
-      << "Dynkin diagram: the Dynkin diagram should have nodes with"
-      << " valency at most 3, but this diagram has node with valency "
+      global.fatal << "Corrupt simple basis corresponding to "
+      << "Dynkin diagram: the Dynkin diagram should have nodes with "
+      << "valency at most 3, but this diagram has node with valency "
       << counter << ". The current component is: "
       << currentComponent.toString()
       << ". The corresponding Symmetric Cartan is: "

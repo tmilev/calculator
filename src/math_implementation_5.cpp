@@ -1764,7 +1764,7 @@ void MonomialP::multiplyByVariable(int variableIndex, const Rational& variablePo
 
 const Rational& MonomialP::operator[](int i) const {
   if (i < 0 || i >= this->monomialBody.size) {
-    global.fatal << "This is a programming error: requested exponent "
+    global.fatal << "Requested exponent "
     << "of monomial variable with index "
     << i << " which is out of range (size = "
     << this->monomialBody.size
@@ -1775,8 +1775,8 @@ const Rational& MonomialP::operator[](int i) const {
 
 Rational MonomialP::operator()(int i) const {
   if (i < 0) {
-    global.fatal << "This is a programming error: "
-    << "requested exponent of monomial variable "
+    global.fatal
+    << "Requested exponent of monomial variable "
     << "with index " << i << " which is negative. " << global.fatal;
   }
   if (i >= this->monomialBody.size) {

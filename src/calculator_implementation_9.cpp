@@ -299,7 +299,7 @@ bool CalculatorFunctions::innerConesIntersect(Calculator& calculator, const Expr
       checkVector += coneNonStrictGens[i] * outputIntersection[coneStrictGens.size + i];
     }
     if (!checkVector.isEqualToZero()) {
-      global.fatal << "<br>This is a programming error: the output linear combination " << outputIntersection.toString()
+      global.fatal << "<br>The output linear combination " << outputIntersection.toString()
       << " corresponds to the cone intersection " << checkVector.toString()
       << " and is not equal to zero! Here is the cone output so far: "
       << out.str() << global.fatal;
@@ -307,7 +307,7 @@ bool CalculatorFunctions::innerConesIntersect(Calculator& calculator, const Expr
     out << "<br>Cones intersect, here is one intersection: 0= " << outputIntersection.toStringLetterFormat("v");
   } else {
     out << "<br>Cones have empty intersection.";
-    out << "<br> A normal separating the cones is: n =" << outputSeparatingNormal.toString() << ". Indeed, ";
+    out << "<br>A normal separating the cones is: n =" << outputSeparatingNormal.toString() << ". Indeed, ";
     for (int i = 0; i < coneStrictGens.size; i ++) {
       out << "<br>\\langle v_{" << i + 1 << "}, n\\rangle = "
       << outputSeparatingNormal.scalarEuclidean(coneStrictGens[i]).toString();

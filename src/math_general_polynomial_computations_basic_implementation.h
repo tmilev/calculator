@@ -147,7 +147,7 @@ int Polynomial<Coefficient>::totalDegreeInt() const {
   int result = - 1;
   if (!this->totalDegree().isSmallInteger(&result)) {
     global.fatal
-    << "This is a programming error: requested total degree of a "
+    << "Requested total degree of a "
     << "polynomial in int formal, but the "
     << "degree of the polynomial is not a small integer. "
     << global.fatal;
@@ -238,7 +238,7 @@ Coefficient Polynomial<Coefficient>::evaluate(const Vector<Coefficient>& input, 
     for (int j = 0; j < currentMon.minimalNumberOfVariables(); j ++) {
       int numCycles = 0;
       if (!(*this)[i](j).isSmallInteger(&numCycles)) {
-        global.fatal << "This is a programming error. "
+        global.fatal
         << "Attempting to evaluate a polynomial whose "
         << i + 1 << "^{th} variable is raised to the power "
         << (*this)[i](j).toString()
@@ -271,7 +271,7 @@ void Polynomial<Coefficient>::setNumberOfVariablesSubstituteDeletedByOne(int new
     return;
   }
   if (newNumVars < 0) {
-    global.fatal << "This is a programming error. "
+    global.fatal
     << "Requesting negative number of variables (more precisely, "
     << newNumVars << ") is not allowed. " << global.fatal;
   }
@@ -310,7 +310,7 @@ bool Polynomial<Coefficient>::hasSmallIntegralPositivePowers(
 template <class Coefficient>
 void Polynomial<Coefficient>::shiftVariableIndicesToTheRight(int VarIndexShift) {
   if (VarIndexShift < 0) {
-    global.fatal << "This is a programming error. "
+    global.fatal
     << "Requesting negative variable shift (more precisely, "
     << VarIndexShift << ") not allowed. " << global.fatal;
   }
@@ -550,7 +550,7 @@ void Polynomial<Coefficient>::raiseToPower(
     return;
   }
   if (d < 0) {
-    global.fatal << "This is a programming error: attempting to raise the polynomial "
+    global.fatal << "Attempt to raise the polynomial "
     << this->toString() << " to the negative power "
     << d << ". " << global.fatal;
   }
@@ -578,7 +578,6 @@ Matrix<Coefficient> Polynomial<Coefficient>::evaluateUnivariatePolynomial(
     int numCycles = 0;
     if (!currentMon(0).isSmallInteger(&numCycles) ) {
       global.fatal
-      << "This is a programming error. "
       << "Attempting to evaluate a polynomial whose "
       << i + 1 << "^{th} variable is raised to the power "
       << currentMon(0).toString()

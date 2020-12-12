@@ -206,7 +206,7 @@ bool Expression::checkInitializationRecursively() const {
 
 bool Expression::checkInitialization() const {
   if (this->owner == nullptr) {
-    global.fatal << "This is a programming error: " << "Expression has non-initialized owner. " << global.fatal;
+    global.fatal << "Expression has non-initialized owner. " << global.fatal;
     return false;
   }
   return true;
@@ -219,8 +219,8 @@ bool Expression::hasInputBoxVariables(HashedList<std::string, MathRoutines::hash
   }
   RecursionDepthCounter recursionCounter(&this->owner->recursionDepth);
   if (this->owner->recursionDepth > this->owner->maximumRecursionDepth) {
-    global.fatal << "This is a programming error: "
-    << "function hasInputBoxVariables has exceeded "
+    global.fatal
+    << "Function hasInputBoxVariables has exceeded "
     << "recursion depth limit. " << global.fatal;
   }
   bool result = false;
@@ -247,13 +247,13 @@ bool Expression::hasInputBoxVariables(HashedList<std::string, MathRoutines::hash
 
 bool Expression::hasBoundVariables() const {
   if (this->owner == nullptr) {
-    global.fatal << "This is a programming error: calling function "
+    global.fatal << "Calling function "
     << "hasBoundVariables on non-initialized expression. " << global.fatal;
   }
   RecursionDepthCounter recursionCounter(&this->owner->recursionDepth);
   MacroRegisterFunctionWithName("Expression::hasBoundVariables");
   if (this->owner->recursionDepth>this->owner->maximumRecursionDepth) {
-    global.fatal << "This is a programming error: function hasBoundVariables has exceeded recursion depth limit. " << global.fatal;
+    global.fatal << "Function hasBoundVariables has exceeded recursion depth limit. " << global.fatal;
   }
   if (this->isListOfTwoAtomsStartingWith(this->owner->opBind())) {
     return true;
@@ -853,8 +853,7 @@ bool Expression::makeXOXOdotsOX(Calculator& owner, int theOp, const List<Express
   MacroRegisterFunctionWithName("Expression::makeXOXOdotsOX");
   if (input.size == 0) {
     global.fatal
-    << "This is a programming error: cannot "
-    << "create operation sequence from an empty list. " << global.fatal;
+    << "Cannot create operation sequence from an empty list. " << global.fatal;
   }
   if (input.size == 1) {
     *this = input[0];
@@ -1219,8 +1218,8 @@ void Calculator::addOperationBuiltInType(const std::string& theOpName) {
 
 void Calculator::addOperationNoRepetitionAllowed(const std::string& theOpName) {
   if (this->operations.contains(theOpName)) {
-    global.fatal << "This is a programming error: operation "
-    << theOpName << " already created. " << global.fatal;
+    global.fatal << "Operation " << theOpName
+    << " already created. " << global.fatal;
   }
   this->operations.getValueCreate(theOpName);
 }

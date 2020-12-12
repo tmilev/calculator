@@ -1688,7 +1688,7 @@ bool CalculatorHTML::interpretProcessExecutedCommands(
       currentElt.commandIndex < 0
     ) {
       std::stringstream errorStream;
-      errorStream << "<b>This is a programming error: syntactic element "
+      errorStream << "<b>Syntactic element "
       << currentElt.toStringDebug() << " has wrongly computed commandIndex: "
       << currentElt.commandIndex << ". "
       << "Please report this error to the website admins. </b>";

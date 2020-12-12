@@ -4326,7 +4326,7 @@ void PartialFractions::computeKostantFunctionFromWeylGroup(
     theVPbasis.addOnTop(tempRoot);
     for (int i = this->AmbientDimension - 3; i >= 0; i --) {
       tempRoot[i] = 2;
-      global.fatal << "This is a programming error: this line of code "
+      global.fatal << "This line of code "
       << "needs to be fixed but I don't have time right now. "
       << "This code shouldn't be used before the line is fixed! " << global.fatal;
     }
@@ -4816,7 +4816,7 @@ int SelectionWithDifferentMaxMultiplicities::totalNumberSubsetsSmallInt() {
   for (int i = 0; i < this->capacities.size; i ++) {
     result *= (this->capacities[i] + 1);
     if (result < 0) {
-      global.fatal << "This is a programming error: I was asked to enumerate "
+      global.fatal << "I was asked to enumerate "
       << "all subsets of a multi-set, however the number of subsets is larger than  "
       << "the maximum value allowed for int on the system "
       << "(on a 32 bit machine that is around  2 billion). "
@@ -5137,7 +5137,7 @@ int DynkinType::GetIndexPreimageFromRootInjection(int inputIndex, const List<int
       return i;
     }
   }
-  global.fatal << "This is a programming error: asking to find the preimage of root index "
+  global.fatal << "Asking to find the preimage of root index "
   << inputIndex << " w.r.t. root injection "
   << inputRootInjection << " - the root index has no preimage. This function is not allowed to fail. ";
   global.fatal << global.fatal;
@@ -5199,7 +5199,7 @@ int DynkinType::getNumberOfSimpleComponentsOfGivenRank(int desiredRank) const {
   }
   int output = 0;
   if (!result.isSmallInteger(&output)) {
-    global.fatal << "This is a programming error: "
+    global.fatal
     << "Dynkin type has a number of simple components which is not a small integer. " << global.fatal;
   }
   return output;
@@ -5212,7 +5212,7 @@ int DynkinType::getNumberOfSimpleComponents() const {
   }
   int output = 0;
   if (!result.isSmallInteger(&output)) {
-    global.fatal << "This is a programming error: "
+    global.fatal
     << "Dynkin type has a number of simple components which is not a small integer. " << global.fatal;
   }
   return output;
@@ -5230,7 +5230,7 @@ int DynkinType::getRank() const {
   Rational tempRat = this->getRankRational();
   int result = 0;
   if (!tempRat.isSmallInteger(&result)) {
-    global.fatal << "This is a programming error: attempting to get a small integer "
+    global.fatal << "Attempt to get a small integer "
     << "rank from a Dynkin type whose rank is not a small integer, but is instead "
     << tempRat.toString() << ". " << global.fatal;
   }
@@ -5381,7 +5381,7 @@ Rational DynkinSimpleType::getEpsilonRealizationLongRootLengthSquared() const {
     default:
       break;
   }
-  global.fatal << "This is a programming error: calling "
+  global.fatal << "Calling "
   << "DynkinSimpleType::getLongRootLengthSquared on a non-initialized simple type. " << global.fatal;
   return - 1;
 }
@@ -5474,7 +5474,7 @@ void DynkinSimpleType::makeArbitrary(
       inputLetter != 'E' && inputLetter != 'F' && inputLetter != 'G'
     ) || inputRank <= 0
   ) {
-    global.fatal << "This is a programming error. "
+    global.fatal
     << "Requested to create a simple Dynkin type of type "
     << inputLetter << " and rank "
     << inputRank << ". This is not allowed: I only accept types "
@@ -5566,8 +5566,8 @@ Rational DynkinSimpleType::getRatioRootSquaredToFirstSquared(int rootIndex) cons
 
 Rational DynkinSimpleType::getDefaultRootLengthSquared(int rootIndex) const {
   if (rootIndex >= this->theRank) {
-    global.fatal << "This is a programming error: "
-    << "attempting to get the squared length of simple root number " << rootIndex + 1
+    global.fatal
+    << "Attempt to get the squared length of simple root number " << rootIndex + 1
     << ", however the root system if of rank " << this->theRank << ". " << global.fatal;
   }
   switch (this->theLetter) {
@@ -5596,7 +5596,7 @@ Rational DynkinSimpleType::getDefaultRootLengthSquared(int rootIndex) const {
       }
       return Rational(2, 3);
     default:
-      global.fatal << "This is a programming error: calling "
+      global.fatal << "Calling "
       << "DynkinSimpleType::getDefaultRootLengthSquared on the non-initialized Dynkin type "
       << this->toString() << global.fatal;
       return - 1;
@@ -5723,7 +5723,7 @@ void DynkinSimpleType::getEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
 
 void DynkinSimpleType::getAn(int n, Matrix<Rational>& output) const {
   if (n <= 0 || n > 30000) {
-    global.fatal << "This is a programming error: attempting to create type A_n with n ="
+    global.fatal << "Attempt to create type A_n with n ="
     << n << " is illegal. If this was a bad user input, it should "
     << " be handled at an earlier stage. " << global.fatal;
   }
@@ -5999,7 +5999,7 @@ Rational DynkinSimpleType::getPrincipalSlTwoCartanSymmetricInverseScale() const 
       nonScaled = 28;
       break;
     default:
-      global.fatal << "This is a programming error: requesting DynkinSimpleType::getCartanSymmetric "
+      global.fatal << "Request DynkinSimpleType::getCartanSymmetric "
       << "from a non-initialized Dynkin simple type. " << global.fatal;
       break;
   }
@@ -6016,7 +6016,7 @@ void DynkinSimpleType::getCartanSymmetric(Matrix<Rational>& output) const {
     case 'F': this->getF4(output);                break;
     case 'G': this->getG2(output);                break;
     default:
-      global.fatal << "This is a programming error: requesting "
+      global.fatal << "Request "
       << "DynkinSimpleType::getCartanSymmetric from a non-initialized Dynkin simple type. " << global.fatal;
       break;
   }
@@ -6081,7 +6081,7 @@ void DynkinSimpleType::operator++(int) {
     this->theLetter = 'A';
     return;
   }
-  global.fatal << "This is a programming error. "
+  global.fatal
   << "This is a portion of code that should never be reached. "
   << "Something has gone very wrong. " << global.fatal;
 }
@@ -6239,7 +6239,7 @@ void ElementWeylGroup::conjugationAction(
 
 void ElementWeylGroup::operator*=(const ElementWeylGroup& other) {
   if (this->owner != other.owner) {
-    global.fatal << "This is a programming error: attempting to "
+    global.fatal << "Attemptto "
     << "multiply elements belonging to different Weyl groups. " << global.fatal;
   }
   if (&other == this) {
@@ -7878,7 +7878,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::m
   Vectors<Rational> selectedRoots;
   selectedRoots.reserve(ZeroesMeanSimpleRootSpaceIsInParabolic.numberOfElements - ZeroesMeanSimpleRootSpaceIsInParabolic.cardinalitySelection);
   if (this->ambientWeyl->getDimension() != ZeroesMeanSimpleRootSpaceIsInParabolic.numberOfElements) {
-    global.fatal << "This is a programming error: parabolic selection selects out of "
+    global.fatal << "Parabolic selection selects out of "
     << ZeroesMeanSimpleRootSpaceIsInParabolic.numberOfElements
     << " elements while the Weyl group is of rank " << this->ambientWeyl->getDimension() << ". " << global.fatal;
   }
@@ -8034,7 +8034,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::c
   tempRoots.quickSortAscending();
   this->RootSubsystem = tempRoots;
   if (this->RootSubsystem.size % 2 != 0) {
-    global.fatal << "This is a programming error. "
+    global.fatal
     << "I am getting that the number of weights of a root system is odd. "
     << "The generating set of simple weights is "
     << this->simpleRootsInner.toString() << ", and the "
@@ -8208,9 +8208,9 @@ void KazhdanLusztigPolynomials::generatePartialBruhatOrder() {
       this->TheWeylGroup->reflectSimple(j, tempRoot, false, false);
       int x = this->getIndex(tempRoot);
       if (x == - 1) {
-        global.fatal << "This is a programming error: something wrong has happened. "
+        global.fatal << "Something wrong has happened. "
         << "A weight that is supposed to "
-        << " be in a certain Weyl group orbit isn't there. "
+        << "be in a certain Weyl group orbit isn't there. "
         << "There is an error in the code, crashing accordingly. " << global.fatal;
       }
       this->SimpleReflectionsActionList[i].addOnTop(x);
@@ -8382,7 +8382,7 @@ void KazhdanLusztigPolynomials::computeRPolys() {
         }
       }
       if (!tempBool) {
-        global.fatal << "This is a programming error: an algorithmic check failed while computing R-polynomials. " << global.fatal;
+        global.fatal << "An algorithmic check failed while computing R-polynomials. " << global.fatal;
       }
       ExploredFromTop[a] = true;
       a = this->findMaximalBruhatNonExplored(ExploredFromTop);
@@ -8456,7 +8456,7 @@ void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
       tempP1 *= tempP2;
       tempP1 *= this->theKLPolys[i][y];
       if (!this->Explored[i]) {
-        global.fatal << "This is a programming error: an internal check during the "
+        global.fatal << "An internal check during the "
         << "Kazhdan-Lusztig polynomial computation fails. More precisely, while computing "
         << "KL poly of indices " << x << ", " << y
         << " I am using KL poly with indices " << i << ", " << y << " which hasn't been computed yet. "
@@ -8496,7 +8496,7 @@ bool KazhdanLusztigPolynomials::computeRxy(int x, int y, int SimpleReflectionInd
   boolY = this->indexGreaterThanIndex(y, sy);
   if (boolX && boolY) {
     if (!this->Explored[sy]) {
-      global.fatal << "This is a programming error: the computaion of R-polynomials "
+      global.fatal << "The computaion of R-polynomials "
       << "is attempting to use a non-computed R-polynomial. " << global.fatal;
     }
     this->theRPolys[x][y] = this->theRPolys[sx][sy];
@@ -8735,7 +8735,7 @@ void Vector<Coefficient>::perturbNoZeroScalarProductWithMe(const List<Vector<Coe
   }
   for (int i = 0; i < inputVectors.size; i ++) {
     if (this->scalarEuclidean(inputVectors[i]) == 0) {
-      global.fatal << "This is a programming error: the vector produced by perturbNoZeroScalarProductWithMe, namely, "
+      global.fatal << "The vector produced by perturbNoZeroScalarProductWithMe, namely, "
       << this->toString() << " is orthogonal to input vector "
       << inputVectors[i].toString() << ". The full list of vectors is "
       << inputVectors.toString() << global.fatal;
@@ -9462,7 +9462,7 @@ void QuasiPolynomial::substitution(
     tempP = this->valueOnEachLatticeShift[i];
     bool tempB = tempP.substitution(theSub, Rational::one());
     if (!tempB) {
-      global.fatal << "This is a programming error: substitution "
+      global.fatal << "Substitution "
       << theSub.toString() << " into polynomial " << tempP.toString()
       << " failed but the current function does not handle this properly. " << global.fatal;
     }
@@ -9493,7 +9493,7 @@ void QuasiPolynomial::substitution(
     tempP = this->valueOnEachLatticeShift[i];
     bool tempB = tempP.substitution(theSub, Rational::one());
     if (!tempB) {
-      global.fatal << "This is a programming error: substitution "
+      global.fatal << "Substitution "
       << theSub.toString() << " into polynomial " << tempP.toString()
       << " failed but the current function does not handle this properly. " << global.fatal;
     }
@@ -9541,7 +9541,7 @@ bool QuasiPolynomial::substitutionFewerVariables(const PolynomialSubstitution<Ra
       tempP = this->valueOnEachLatticeShift[i];
       bool tempB = tempP.substitution(theSub, Rational::one());
       if (!tempB) {
-        global.fatal << "This is a programming error: substitution "
+        global.fatal << "Substitution "
         << theSub.toString() << " into polynomial " << tempP.toString()
         << " failed but the current function does not handle this properly. " << global.fatal;
       }
@@ -11461,7 +11461,7 @@ void ConeLatticeAndShiftMaxComputation::initialize(
   this->complexRefinedPerRepresentative.size = 0;
   this->theConesLargerDim.addOnTop(theCLS);
   this->LPtoMaximizeLargerDim.addOnTop(theNEq);
-  this->IsInfinity.initializeFillInObject(1, false);
+  this->isInfinity.initializeFillInObject(1, false);
 }
 
 void Cone::sliceInDirection(Vector<Rational>& theDirection, ConeComplex& output) {

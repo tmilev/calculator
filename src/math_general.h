@@ -6010,21 +6010,21 @@ public:
 class LittelmannPath {
 public:
   WeylGroupData* owner;
-  Vectors<Rational> Waypoints;
+  Vectors<Rational> waypoints;
   void makeFromWeightInSimpleCoords(const Vector<Rational>& weightInSimpleCoords, WeylGroupData& theOwner);
   void makeFromWaypoints(Vectors<Rational>& weightsInSimpleCoords, WeylGroupData& theOwner) {
     this->owner = &theOwner;
-    this->Waypoints = weightsInSimpleCoords;
+    this->waypoints = weightsInSimpleCoords;
     this->simplify();
   }
   void actByFAlpha(int indexAlpha);
   void actByEAlpha(int indexAlpha);
   void actByEFDisplayIndex(int displayIndex);
   void operator+=(const LittelmannPath& other) {
-    this->Waypoints.reserve(this->Waypoints.size + other.Waypoints.size);
-    Vector<Rational> endPoint = *this->Waypoints.lastObject();
-    for (int i = 0; i < other.Waypoints.size; i ++) {
-      this->Waypoints.addOnTop(other.Waypoints[i] + endPoint);
+    this->waypoints.reserve(this->waypoints.size + other.waypoints.size);
+    Vector<Rational> endPoint = *this->waypoints.lastObject();
+    for (int i = 0; i < other.waypoints.size; i ++) {
+      this->waypoints.addOnTop(other.waypoints[i] + endPoint);
     }
   }
   bool isAdaptedString(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theString);
@@ -6041,23 +6041,23 @@ public:
   std::string toString(bool useSimpleCoords = true, bool useArrows = true, bool includeDominance = false) const;
   void simplify();
   unsigned int hashFunction() const {
-    return this->Waypoints.hashFunction();
+    return this->waypoints.hashFunction();
   }
   static unsigned int hashFunction(const LittelmannPath& input) {
     return input.hashFunction();
   }
   bool isEqualToZero() const {
-    return this->Waypoints.size == 0;
+    return this->waypoints.size == 0;
   }
   LittelmannPath();
   LittelmannPath(const LittelmannPath& other);
   LittelmannPath& operator=(const LittelmannPath& other) {
-    this->Waypoints = other.Waypoints;
+    this->waypoints = other.waypoints;
     this->owner = other.owner;
     return *this;
   }
   bool operator==(const LittelmannPath& other) const {
-    return this->Waypoints == other.Waypoints;
+    return this->waypoints == other.waypoints;
   }
 };
 
@@ -6078,7 +6078,7 @@ public:
   List<ConeLatticeAndShift> theConesSmallerDim;
   List<List<ConeComplex> > finalMaximaChambers;
   List<List<List<int> > > finalMaximaChambersIndicesMaxFunctions;
-  List<bool> IsInfinity;
+  List<bool> isInfinity;
   Vectors<Rational> LPtoMaximizeLargerDim;
   Vectors<Rational> LPtoMaximizeSmallerDim;
 

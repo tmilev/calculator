@@ -149,7 +149,7 @@ template<class Object>
 void ListReferences<Object>::allocateElements(int newSize) {
   if (newSize < 0) {
     std::stringstream commentsOnCrash;
-    commentsOnCrash << "This is a programming error: requested to set negative size "
+    commentsOnCrash << "Requested to set negative size "
     << newSize << " of List of References. If a "
     << "List is to be set empty, then one should call setSize(0), "
     << "rather than provide a negative argument to setSize.";

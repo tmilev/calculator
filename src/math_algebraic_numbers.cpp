@@ -95,8 +95,7 @@ bool AlgebraicClosureRationals::getRadicalSelectionFromIndex(int inputIndex, Sel
 int AlgebraicClosureRationals::getIndexFromRadicalSelection(const Selection& theSel) {
   if (theSel.numberOfElements > 30) {
     global.fatal
-    << "This is a programming error: the algebraic extension "
-    << "is too large to be handled by the current data structures. "
+    << "The algebraic extension is too large to be handled by the current data structures. "
     << global.fatal;
   }
   int result = 0;
@@ -112,7 +111,7 @@ int AlgebraicClosureRationals::getIndexFromRadicalSelection(const Selection& the
 bool AlgebraicClosureRationals::mergeRadicals(const List<LargeInteger>& theRadicals) {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions");
   if (!this->flagIsQuadraticRadicalExtensionRationals) {
-    global.fatal << "This is a programming error: AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions "
+    global.fatal << "AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions "
     << "with at least one of two arguments that is not a quadratic radical extension of the rationals. "
     << global.fatal;
   }
@@ -330,7 +329,7 @@ bool AlgebraicClosureRationals::reduceMe(
   );
   if (!mustBeTrue) {
     global.fatal
-    << "This is a programming error: failed to factor polynomial "
+    << "Failed to factor polynomial "
     << theMinPoly.toString() << ". "
     << global.fatal;
   }
@@ -347,7 +346,6 @@ bool AlgebraicClosureRationals::reduceMe(
   int smallestFactorDegree = - 1;
   if (!smallestFactor.totalDegree().isSmallInteger(&smallestFactorDegree)) {
     global.fatal
-    << "This is a programming error: "
     << smallestFactor.toString()
     << " has non-integral exponent, which should be "
     << "impossible in the current context. "
@@ -432,7 +430,7 @@ void AlgebraicClosureRationals::getAdditionTo(
     input.basisIndex >= this->basisInjections.size
   ) {
     global.fatal
-    << "This is a programming error: element has out-of-range basis index "
+    << "Element has out-of-range basis index "
     << input.basisIndex << ". "
     << global.fatal;
   }
@@ -452,7 +450,7 @@ void AlgebraicClosureRationals::getAdditionTo(
       currentIndex >= this->basisInjections[input.basisIndex].size
     ) {
       global.fatal
-      << "This is a programming error: I am getting basis index "
+      << "I am getting basis index "
       << input.basisIndex
       << " with current index " << currentIndex
       << ". A printout of the algebraic closure follows. "
@@ -478,7 +476,7 @@ void AlgebraicClosureRationals::getMultiplicationBy(
       inputAdditiveForm[i].theIndex < 0 ||
       inputAdditiveForm[i].theIndex >= this->latestBasis.size
     ) {
-      global.fatal << "This is a programming error: element " << input.toString()
+      global.fatal << "Element " << input.toString()
       << " has bad index, namely, " << inputAdditiveForm[i].theIndex
       << ". The algebraic closure is: " << this->toString() << ". " << global.fatal;
     }
@@ -610,7 +608,7 @@ bool AlgebraicNumber::needsParenthesisForMultiplicationWhenSittingOnTheRightMost
 
 bool AlgebraicNumber::checkNonZeroOwner() const {
   if (this->owner == nullptr) {
-    global.fatal << "This is a programming error: algebraic number with "
+    global.fatal << "Algebraic number with "
     << "non-initialized owner not permitted in the current context." << global.fatal;
   }
   return true;
@@ -686,7 +684,7 @@ bool AlgebraicClosureRationals::adjoinRootQuadraticPolynomialToQuadraticRadicalE
   checkSub[0].makeConstant(outputRoot);
   algNumPoly.substitution(checkSub, this->one());
   if (!algNumPoly.isEqualToZero()) {
-    global.fatal << "This is a programming error. The number z = " << outputRoot.toString()
+    global.fatal << "The number z = " << outputRoot.toString()
     << " was just adjoined to a quadratic radical extension of the rationals; z "
     << "was given by requesting that it has minimial polynomial " << algNumPoly.toString()
     << ", however, substituting z back in to the minimal polynomial "
@@ -701,7 +699,7 @@ void AlgebraicClosureRationals::convertPolynomialDependingOneVariableToPolynomia
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail");
   int indexVar = - 1;
   if (!input.isOneVariableNonConstantPolynomial(&indexVar)) {
-    global.fatal << "This is a programming error: "
+    global.fatal
     << "I am being asked convert to a one-variable polynomial a polynomial "
     << "depending on more than one variables. "
     << "The input poly is: " << input.toString() << global.fatal;
@@ -783,7 +781,7 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
       int relRowIndex = currentCoeffMatForm[j].vIndex;
       int relColIndex = currentCoeffMatForm[j].dualIndex;
       if (relRowIndex == - 1 || relColIndex == - 1) {
-        global.fatal << "This is a programming error: non initialized monomial. " << global.fatal;
+        global.fatal << "Non initialized monomial. " << global.fatal;
       }
       theGenMat.addMonomial(
         MonomialMatrix(
@@ -842,7 +840,7 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   substitutedMinPoly = minPoly;
   substitutedMinPoly.substitution(theSub, this->one());
   if (!substitutedMinPoly.isEqualToZero()) {
-    global.fatal << "This is a programming error. The number z = "
+    global.fatal << "The number z = "
     << outputRoot.toString() << " was just adjoined to the base field; z "
     << "was given by requesting that it has minimial polynomial "
     << minPoly.toString()
@@ -859,14 +857,14 @@ void AlgebraicNumber::invert() {
   MacroRegisterFunctionWithName("AlgebraicNumber::invert");
   if (this->owner == nullptr) {
     if (this->element.isEqualToZero()) {
-      global.fatal << "This is a programming error: division by zero. " << global.fatal;
+      global.fatal << "Division by zero. " << global.fatal;
     }
     bool isGood = (this->element.size() == 1);
     if (isGood) {
       isGood = (this->element[0].theIndex == 0);
     }
     if (!isGood) {
-      global.fatal << "This is a programming error: Algebraic number has no owner, "
+      global.fatal << "Algebraic number has no owner, "
       << "so it must be rational, but it appears to be not. "
       << "Its theElt vector is: " << this->element.toString() << global.fatal;
     }
@@ -900,7 +898,7 @@ bool AlgebraicNumber::checkCommonOwner(const AlgebraicNumber& other) const {
     return true;
   }
   if (this->owner != other.owner) {
-    global.fatal << "This is a programming error. Two algebraic numbers have "
+    global.fatal << "Two algebraic numbers have "
     << "different algebraic closures when they shouldn't. " << global.fatal;
     return false;
   }
@@ -919,7 +917,7 @@ void AlgebraicNumber::operator-=(const AlgebraicNumber& other) {
     theOwner = other.owner;
   }
   if (theOwner == nullptr && this->basisIndex != other.basisIndex) {
-    global.fatal << "This is a programming error: algebraic numbers "
+    global.fatal << "Algebraic numbers "
     << "with zero owners but different basis indices. " << global.fatal;
   }
   VectorSparse<Rational> AdditiveFormOther;
@@ -946,7 +944,7 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other) {
     theOwner = other.owner;
   }
   if (theOwner == nullptr && this->basisIndex != other.basisIndex) {
-    global.fatal << "This is a programming error: algebraic numbers: "
+    global.fatal << "Algebraic numbers: "
     << this->toString() << " and " << other.toString()
     << " have with zero owners but different basis indices. " << global.fatal;
   }
@@ -969,7 +967,7 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other) {
 
 bool AlgebraicNumber::checkConsistency() const {
   if (this->flagDeallocated) {
-    global.fatal << "This is a programming error: use after free of AlgebraicNumber. " << global.fatal;
+    global.fatal << "Use after free of AlgebraicNumber. " << global.fatal;
   }
   if (this->owner == nullptr) {
     if (!this->isRational()) {
@@ -1460,7 +1458,7 @@ bool AlgebraicNumber::operator==(const AlgebraicNumber& other) const {
 void AlgebraicNumber::operator=(const Polynomial<AlgebraicNumber>& other) {
   if (!other.isConstant(this)) {
     global.fatal
-    << "This is a programming error: attempting to assign non-constant "
+    << "Attempt to assign non-constant "
     << "polynomial to a Rational number is not allowed. " << global.fatal;
   }
 }
@@ -1712,7 +1710,7 @@ void ElementZmodP::negate() {
 
 void ElementZmodP::checkEqualModuli(const ElementZmodP& other) {
   if (this->modulus != other.modulus) {
-    global.fatal << "This is a programming error: attempting to make an operation "
+    global.fatal << "Attempt to make an operation "
     << "with two elemetns of Z mod P with different moduli, "
     << this->modulus.toString() << " and "
     << other.modulus.toString() << ". " << global.fatal;
@@ -1809,8 +1807,8 @@ void ElementZmodP::operator-=(const ElementZmodP& other) {
 void ElementZmodP::operator=(const Rational& other) {
   bool tempB = this->assignRational(other);
   if (!tempB) {
-    global.fatal << "This is a programming error: "
-    << "using ElementZmodP::operator= to assign a Rational number failed. "
+    global.fatal
+    << "Using ElementZmodP::operator= to assign a Rational number failed. "
     << "Operator = does not allow failure. " << global.fatal;
   }
 }

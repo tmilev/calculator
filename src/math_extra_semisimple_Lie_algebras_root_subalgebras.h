@@ -584,7 +584,7 @@ public:
   bool checkConsistency() const;
   void checkInitialization() const {
     if (this->owner == nullptr) {
-      global.fatal << "<br>This is a programming error. Object SlTwoSubalgebras "
+      global.fatal << "<br>Object SlTwoSubalgebras "
       << "is not initialized, although it is supposed to be. " << global.fatal;
     }
   }

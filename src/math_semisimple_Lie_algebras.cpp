@@ -490,7 +490,7 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
     theReport.report(out.str());
   }
   if (this->getNumberOfPositiveRoots() <= 0) {
-    global.fatal << "This is a programming error: number of positive roots of a "
+    global.fatal << "Number of positive roots of a "
     << "semisimple Lie algebra is reported to be zero. " << global.fatal;
   }
 }
@@ -631,7 +631,7 @@ bool SemisimpleLieAlgebra::getMaxQForWhichBetaMinusQAlphaisARoot(
   output = - 1;
   Vector<Rational> tempRoot = beta;
   if (alpha.isEqualToZero()) {
-    global.fatal << "This is a programming error: calling function "
+    global.fatal << "Calling function "
     << "getMaxQForWhichBetaMinusQAlphaisARoot with zero value for alpha is not allowed. " << global.fatal;
   }
   bool foundRoot = false;
@@ -724,7 +724,7 @@ bool SemisimpleLieAlgebra::testForConsistency() {
         temp += g231;
         temp += g312;
         if (!temp.isEqualToZero()) {
-          global.fatal << "This is a programming error. "
+          global.fatal
           << "The computed structure constants are wrong: the Jacobi identity fails. "
           << "More precisely, I get that "
           << "<br>[" << g1.toString(&theFormat) << ", " << g2.toString(&theFormat) << "] =" << g12.toString(&theFormat)

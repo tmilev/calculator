@@ -5180,7 +5180,7 @@ bool Expression::makeSequenceCommands(Calculator& owner, List<std::string>& inpu
   List<Expression> theStatements;
   Expression currentStatement, currentKey;
   if (inputValues.size != inputKeys.size) {
-    global.fatal << "This is a programming error: I am asked to create a "
+    global.fatal << "I am asked to create a "
     << "sequence of statements but I was given different "
     << "number of keys and expressions." << global.fatal;
   }

@@ -41,7 +41,7 @@ void ExpressionContext::polynomialSubstitutionNoFailure(
 ) const {
   bool mustBeTrue = this->polynomialSubstitution(largerContext, output, one);
   if (!mustBeTrue) {
-    global.fatal << "This is a programming error: I was not able to "
+    global.fatal << "Unable to "
     << "extract a polynomial substitution from smaller context "
     << this->toString() << " relative to larger context "
     << largerContext.toString() << ". " << global.fatal;
@@ -232,8 +232,9 @@ bool ExpressionContext::setAmbientSemisimpleLieAlgebra(
 
 bool Expression::contextSetDifferentialOperatorVariable(const Expression& thePolyVar, const Expression& theDiffOpVar) {
   if (!this->isContext()) {
-    global.fatal << "This is a programming error: calling "
-    << "Expression::contextSetDifferentialOperatorVariable on a non-context expression. " << global.fatal;
+    global.fatal
+    << "Calling Expression::contextSetDifferentialOperatorVariable on a non-context expression. "
+    << global.fatal;
   }
   Expression diffVarsE, polyVarsE;
   diffVarsE.reset(*this->owner, 2);
@@ -551,8 +552,8 @@ void ExpressionContext::polynomialAndWeylAlgebraSubstitutionNoFailure(
     largerContext, outputPolyPart, outputDifferntialPart
   );
   if (!mustBeTrue) {
-    global.fatal << "This is a programming error: "
-    << "I was not able to extract a polynomial / differential "
+    global.fatal
+    << "Unable to extract a polynomial / differential "
     << "operator substitution from smaller context "
     << this->toString() << " relative to larger context "
     << largerContext.toString() << global.fatal;

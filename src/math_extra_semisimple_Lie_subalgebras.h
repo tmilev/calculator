@@ -133,7 +133,7 @@ public:
   SemisimpleSubalgebras* owner;
   int indexInOwner;
   int indexIamInducedFrom;
-  List<int> RootInjectionsFromInducer;
+  List<int> rootInjectionsFromInducer;
   int indexNonEmbeddedMeStandard;
   int indexNonEmbeddedMeNonStandardCartan;
   int indexHcandidateBeingGrown;
@@ -447,7 +447,7 @@ public:
   }
   SemisimpleLieAlgebra& getSemisimpleOwner() const {
     if (this->owner == nullptr) {
-      global.fatal << "This is a programming error: attempted to "
+      global.fatal << "Attempted to "
       << "access non-initialized semisimple Lie subalgerbas. " << global.fatal;
     }
     return *this->owner;

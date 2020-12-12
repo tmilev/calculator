@@ -227,7 +227,7 @@ public:
   }
   bool checkConsistency() const {
     if (this->flagDeallocated) {
-      global.fatal << "This is a programming error: use after free of Finite group. " << global.fatal;
+      global.fatal << "Use after free of Finite group. " << global.fatal;
     }
     return true;
   }
@@ -2490,7 +2490,7 @@ LargeInteger FiniteGroup<elementSomeGroup>::getSize() {
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::checkInitializationConjugacyClasses() const {
   if (this->conjugacyClassCount() == 0) {
-    global.fatal << "This is a programming error: requesting to "
+    global.fatal << "Request to "
     << "compute character hermitian product in a group whose "
     << "conjugacy classes and/or elements have not been computed. "
     << "The group reports to have "
@@ -2501,19 +2501,11 @@ bool FiniteGroup<elementSomeGroup>::checkInitializationConjugacyClasses() const 
   }
   for (int i = 0; i < this->irreps.size; i ++) {
     if (this->irreps[i].theCharacter.data.isEqualToZero()) {
-      global.fatal << "This is a programming error: irrep number "
+      global.fatal << "Irrep number "
       << i + 1 << " has zero character!" << global.fatal;
       return false;
     }
   }
-/*  Rational sumSquares = 0;
-  Rational tempRat;
-  for (int i = 0; i < this->conjugacyClassCount(); i ++) {
-    tempRat = this->conjugacyClassCount()/this->GetGroupSizeByFormula();
-    sumSquares+= tempRat*tempRat;
-  }
-  if (sumSquares !=1)
-    global.fatal << "This is a programming error: sumSquares equals " << sumSquares.toString() << " when it should equal 1. " << global.fatal;*/
   return true;
 }
 

@@ -424,16 +424,6 @@ Rational operator/(int left, const Rational& right);
 
 class Rational {
 private:
-//The following doesn't compile, when it should.
-//  friend int operator=(int& left, const Rational& right)
-//  { if (!right.isSmallInteger(&left))
-//      global.fatal << "This is a programming error. I am asked to assign a rational number to a small integer, but the rational "
-//      << " number is either too large or is not an integer. Namely, the rational number equals " << this->toString()
-//      << ". The programmer is supposed to write something of the sort int = rational only on condition that "
-//      << " the programmer is sure that the rational contains is a small int. "
-//      << global.fatal;
-//    return left;
-//  }
   struct LargeRationalExtended {
   public:
     LargeInteger numerator;

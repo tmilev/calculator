@@ -285,11 +285,11 @@ bool CalculatorLieTheory::highestWeightVectorCommon(
     }
   }
   if (&theMod.getOwner() != owner) {
-    global.fatal << "This is a programming error: module has owner that is not what it should be. " << global.fatal;
+    global.fatal << "Module has owner that is not what it should be. " << global.fatal;
   }
   theElt.makeHWV(theMod, RFOne);
   if (&theElt.getOwnerSemisimple() != owner) {
-    global.fatal << "This is a programming error: just created an ElementTensorsGeneralizedVermas "
+    global.fatal << "Just created an ElementTensorsGeneralizedVermas "
     << "whose owner is not what it should be. " << global.fatal;
   }
   return output.assignValueWithContext<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >(theElt, hwContext, calculator);
@@ -1437,7 +1437,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     theGenMod.getOwner().getRank() != theGenMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements ||
     theFDMod.getOwner().getRank() != theFDMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements
   ) {
-    global.fatal << "This is a programming error: the two modules have owners, "
+    global.fatal << "The two modules have owners, "
     << theFDMod.getOwner().theWeyl.theDynkinType.toString()
     << " and " << theGenMod.getOwner().theWeyl.theDynkinType.toString() << ", and parabolic selections of max size "
     << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements
@@ -1449,8 +1449,9 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   List<ElementUniversalEnveloping<RationalFunction<Rational> > > theLeviEigenVectors;
   Vectors<RationalFunction<Rational> > theEigenVectorWeightsFund;
   if (theGenMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements != theGenMod.getOwner().getRank()) {
-    global.fatal << "This is a programming error: module has parabolic selection with max size "
-    << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements << " but the ambient semisimple Lie algebra is of rank "
+    global.fatal << "Module has parabolic selection with max size "
+    << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements
+    << " but the ambient semisimple Lie algebra is of rank "
     << theGenMod.getOwner().getRank() << ". " << global.fatal;
   }
   std::string report;
@@ -2169,7 +2170,7 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
 
     int indexInWeyl = theKLpolys.TheWeylGroup->theGroup.theElements.getIndex(currentElement);
     if (indexInWeyl == - 1) {
-      global.fatal << "This is a programming error. Something is wrong: "
+      global.fatal << "Something is wrong: "
       << "I am getting that an element of the Weyl group of the Levi part of "
       << "the parabolic does not lie in the ambient Weyl group, which is impossible. "
       << "There is a bug somewhere; crashing in accordance. " << global.fatal;
@@ -3085,7 +3086,7 @@ bool CalculatorLieTheory::cartanGenerator(Calculator& calculator, const Expressi
     return output.makeError("Error extracting Lie algebra.", calculator);
   }
   if (theSSalg.content == nullptr) {
-    global.fatal << "This is a programming error: called conversion function successfully, "
+    global.fatal << "Called conversion function successfully, "
     << "but the output is a zero pointer to a semisimple Lie algebra. "
     << global.fatal;
   }

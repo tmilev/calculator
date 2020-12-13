@@ -181,7 +181,7 @@ public:
     }
   };
   List<ConjugacyClass> conjugacyClasses;
-  HashedList<Polynomial<Rational> > characterPolynomialsConjugacyClassesStandardRepresentation;
+  HashedList<Polynomial<Rational>,Polynomial<Rational>::hashFunction> characterPolynomialsConjugacyClassesStandardRepresentation;
 
   // All of these lists will be expected to be sorted at all times, so please
   // insert using .BSInsertDontDup() if you for some reason can't use the friendly

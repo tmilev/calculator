@@ -36,6 +36,9 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   List<QuasiDifferentialOperator<Rational> > theQDOs;
   FormatExpressions theWeylFormat, theUEformat;
   std::stringstream out, latexReport, latexReport2;
+  Polynomial<Rational> zero;
+  Polynomial<Rational> one;
+  one.makeConstant(Rational::one());
   theWeylFormat.maximumLineLength = 40;
   theWeylFormat.flagUseLatex = true;
   theUEformat.maximumLineLength = 20;
@@ -87,7 +90,15 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   for (int i = 0; i < theHws.size; i ++) {
     ModuleSSalgebra<RationalFunction<Rational> >& theMod = theMods[i];
     tempV = theHws[i];
-    if (!theMod.makeFromHW(theSSalgebra, tempV, selInducing, 1, 0, nullptr, true)) {
+    if (!theMod.makeFromHW(
+      theSSalgebra,
+      tempV,
+      selInducing,
+      RationalFunction<Rational>(Rational::one()),
+      RationalFunction<Rational>(Rational::zero()),
+      nullptr,
+      true
+    )) {
       return output.makeError("Failed to create module.", calculator);
     }
     if (i == 0) {
@@ -143,7 +154,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
         actionOnGenericElt.assignElementLieAlgebra(theGeneratorsItry[j], theSSalgebra, Pone);
         actionOnGenericElt *= genericElt;
         theSSalgebra.orderNilradical(theMod.parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
-        actionOnGenericElt.simplify();
+        actionOnGenericElt.simplify(one);
         theUEformat.numberOfAmpersandsPerNewLineForLaTeX = 2;
         out << "<td>" << HtmlRoutines::getMathNoDisplay("\\begin{array}{rcl}&&" + actionOnGenericElt.toString(&theUEformat) + "\\end{array}") << "</td>";
         theUEformat.numberOfAmpersandsPerNewLineForLaTeX = 0;
@@ -165,7 +176,9 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
       currentTime = global.getElapsedSeconds();
       currentAdditions = Rational::totalAdditions();
       currentMultiplications = Rational::totalMultiplications();
-      theMod.getActionGeneralizedVermaModuleAsDifferentialOperator(theGenerator, theQDOs[j], useNilWeight, ascending);
+      theMod.getActionGeneralizedVermaModuleAsDifferentialOperator(
+        theGenerator, theQDOs[j], useNilWeight, ascending
+      );
       totalAdditions += Rational::totalAdditions() - currentAdditions;
       totalMultiplications += Rational::totalMultiplications() - currentMultiplications;
       totalTime += global.getElapsedSeconds() - currentTime;
@@ -325,7 +338,7 @@ bool CalculatorLieTheory::animateLittelmannPaths(
     );
   }
   Vector<Rational> theWeightInSimpleCoords;
-  theWeightInSimpleCoords = theSSowner->theWeyl.getSimpleCoordinatesFromFundamental(theWeight);
+  theWeightInSimpleCoords = theSSowner->theWeyl.getSimpleCoordinatesFromFundamental(theWeight, Rational::zero());
   calculator << "<br>Function animateLittelmannPaths: your input in simple coords: "
   << theWeightInSimpleCoords.toString();
   LittelmannPath thePath;
@@ -337,7 +350,13 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
   MacroRegisterFunctionWithName("Calculator::splitFDpartB3overG2inner");
   ModuleSSalgebra<RationalFunction<Rational> > theModCopy;
   theModCopy.makeFromHW(
-    theG2B3Data.theHmm.theRange(), theG2B3Data.theWeightFundCoords, theG2B3Data.selInducing, 1, 0, nullptr, false
+    theG2B3Data.theHmm.theRange(),
+    theG2B3Data.theWeightFundCoords,
+    theG2B3Data.selInducing,
+    Rational::one(),
+    Rational::zero(),
+    nullptr,
+    false
   );
   theG2B3Data.resetOutputData();
   theG2B3Data.initAssumingParSelAndHmmInitted();
@@ -371,10 +390,14 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
   invertedG2cartanMat = theG2B3Data.theHmm.theDomain().theWeyl.cartanSymmetric;
   invertedG2cartanMat.invert();
   WeylGroupData& rangeWeyl = theG2B3Data.theHmm.theRange().theWeyl;
-  theG2B3Data.outputWeightsSimpleCoords = rangeWeyl.getSimpleCoordinatesFromFundamental(theG2B3Data.outputWeightsFundCoordS);
+  RationalFunction<Rational> zero(Rational::zero());
+  RationalFunction<Rational> one(Rational::one());
+  theG2B3Data.outputWeightsSimpleCoords = rangeWeyl.getSimpleCoordinatesFromFundamental(
+    theG2B3Data.outputWeightsFundCoordS, zero
+  );
   Vector<RationalFunction<Rational> > weightSimpleCoordinates;
   weightSimpleCoordinates = rangeWeyl.getSimpleCoordinatesFromFundamental(
-    theG2B3Data.theWeightFundCoords
+    theG2B3Data.theWeightFundCoords, zero
   );
   theG2B3Data.theAmbientChar.makeFromWeight(weightSimpleCoordinates, &theG2B3Data.theHmm.theRange());
   theG2B3Data.theSmallCharFDpart.makeZero();
@@ -392,7 +415,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
       currentWeight, theG2B3Data.theHmm.ImagesCartanDomain[1]
     );
     //<-note: implicit type conversion: the return type is the left coefficient type.
-    invertedG2cartanMat.actOnVectorColumn(currentG2DualWeight, currentG2Weight);//<-g2weight is now computed;
+    invertedG2cartanMat.actOnVectorColumn(currentG2DualWeight, currentG2Weight, zero);//<-g2weight is now computed;
     tempMon.makeFromWeight(currentG2Weight, &theG2B3Data.theHmm.theDomain());
     theG2B3Data.theSmallCharFDpart += tempMon;
   }
@@ -403,7 +426,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
   for (int i = 0; i < theG2B3Data.outputWeightsSimpleCoords.size; i ++) {
     Vector<RationalFunction<Rational> >& currentG2DualWeight = theG2B3Data.g2DualWeights[i];
     theG2CasimirCopy = theG2Casimir;
-    theG2CasimirCopy.modOutVermaRelations(&currentG2DualWeight, 1, 0);
+    theG2CasimirCopy.modOutVermaRelations(&currentG2DualWeight, one, zero);
     if (theG2CasimirCopy.isEqualToZero()) {
       theG2B3Data.theChars[i] = 0;
     } else {
@@ -416,7 +439,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
   theG2B3Data.theShapovalovProducts.setSize(theG2B3Data.g2Weights.size);
   theG2B3Data.theUEelts.setSize(theG2B3Data.g2Weights.size);
   ElementSumGeneralizedVermas<RationalFunction<Rational> >& theHWV = *theG2B3Data.theEigenVectorsLevi.lastObject();
-  theHWV.makeHWV(theMod, 1);
+  theHWV.makeHWV(theMod, one);
   theHWV *= - 1;
   *theG2B3Data.theEigenVectorS.lastObject() = theHWV;
   Vector<RationalFunction<Rational> > weightDifference;
@@ -443,7 +466,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
           theG2CasimirCopy = imageCasimirInB3;
           tempElt.makeConstant(theG2B3Data.theChars[j], theG2B3Data.theHmm.theRange());
           theG2CasimirCopy -= tempElt;
-          theG2CasimirCopy *= 12;
+          theG2CasimirCopy *= Rational(12);
           currentTensorEltEigen.multiplyMeByUEEltOnTheLeft(theG2CasimirCopy);
           charDiff = theG2B3Data.theChars[j];
           charDiff -= *theG2B3Data.theChars.lastObject();
@@ -457,7 +480,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
     }
     currentTensorEltEigen.extractElementUniversalEnveloping(currentUEelt, *theMod.owner);
     currentUEelt.highestWeightTransposeAntiAutomorphismBilinearForm(
-      currentUEelt, theG2B3Data.theShapovalovProducts[k], &theMod.theHWDualCoordsBaseFielD, 1, 0, nullptr
+      currentUEelt, theG2B3Data.theShapovalovProducts[k], &theMod.theHWDualCoordsBaseFielD, one, zero, nullptr
     );
   }
   return output.assignValue(out.str(), calculator);
@@ -550,7 +573,7 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(Calculator& calculator, con
       latexReport << "$" << currentHW.toStringLetterFormat("\\omega") << "$ &"
       << currentAlg.theWeyl.weylDimFormulaFundamentalCoords(currentHW) << "&";
       hwPath.makeFromWeightInSimpleCoords(
-        currentAlg.theWeyl.getSimpleCoordinatesFromFundamental(currentHW), currentAlg.theWeyl
+        currentAlg.theWeyl.getSimpleCoordinatesFromFundamental(currentHW, Rational::zero()), currentAlg.theWeyl
       );
       hwPath.generateOrbit(
         tempList,
@@ -675,7 +698,7 @@ bool CalculatorLieTheory::LSPath(Calculator& calculator, const Expression& input
       return output.makeError("Failed to extract waypoints", calculator);
     }
   }
-  waypoints = ownerSSalgebra.theWeyl.getSimpleCoordinatesFromFundamental(waypoints);
+  waypoints = ownerSSalgebra.theWeyl.getSimpleCoordinatesFromFundamental(waypoints, Rational::zero());
   LittelmannPath theLSpath;
   theLSpath.makeFromWaypoints(waypoints, ownerSSalgebra.theWeyl);
   return output.assignValue(theLSpath, calculator);
@@ -879,7 +902,8 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
           << theG2B3Data.theAmbientChar.toString(&theG2B3Data.theFormat) << "$}";
           Vector<RationalFunction<Rational> > theSimpleCoordinates;
           theSimpleCoordinates = theG2B3Data.WeylFD.ambientWeyl->getSimpleCoordinatesFromFundamental(
-            theG2B3Data.theAmbientChar[0].weightFundamentalCoordS
+            theG2B3Data.theAmbientChar[0].weightFundamentalCoordS,
+            RationalFunction<Rational>::oneRational()
           );
           RationalFunction<Rational> theWeylSize;
           theWeylSize = theG2B3Data.WeylFD.weylDimensionFormulaInnerSimpleCoords(theSimpleCoordinates);
@@ -902,7 +926,7 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
           }
           Vector<RationalFunction<Rational> > theSimpleCoordinates;
           theSimpleCoordinates = theG2B3Data.WeylFDSmall.ambientWeyl->getSimpleCoordinatesFromFundamental(
-            tempChar[0].weightFundamentalCoordS
+            tempChar[0].weightFundamentalCoordS, RationalFunction<Rational>::zeroRational()
           );
           RationalFunction<Rational> dimension;
           dimension = theG2B3Data.WeylFDSmall.weylDimensionFormulaInnerSimpleCoords(theSimpleCoordinates, rfOne);
@@ -1044,12 +1068,15 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(Calculator& calculato
   }
   theg2b3data.theFormat.flagUseLatex = true;
   ElementUniversalEnveloping<RationalFunction<Rational> > theCasimir, theCentralCharacter, resultChar;
+  RationalFunction<Rational> minusOne(Rational(- 1));
   HashedList<ElementUniversalEnveloping<RationalFunction<Rational> > > theCentralChars;
   theCasimir.makeCasimir(theg2b3data.theHmm.theDomain());
   WeylGroupData& smallWeyl = theg2b3data.theHmm.theDomain().theWeyl;
   for (int k = 0; k < theHWs.size; k ++) {
     theCharacter.makeFromWeight(
-      theg2b3data.theHmm.theRange().theWeyl.getSimpleCoordinatesFromFundamental(theHWs[k]),
+      theg2b3data.theHmm.theRange().theWeyl.getSimpleCoordinatesFromFundamental(
+        theHWs[k], RationalFunction<Rational>::zeroRational()
+      ),
       &theg2b3data.theHmm.theRange()
     );
     theCharacter.splitCharacterOverReductiveSubalgebra(nullptr, outputChar, theg2b3data);
@@ -1057,7 +1084,8 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(Calculator& calculato
     out << "<tr><td> " << theCharacter.toString(&theg2b3data.theFormat) << "</td> ";
     Vector<RationalFunction<Rational> > simpleCoordinates;
     simpleCoordinates = theg2b3data.WeylFD.ambientWeyl->getSimpleCoordinatesFromFundamental(
-      theCharacter[0].weightFundamentalCoordS
+      theCharacter[0].weightFundamentalCoordS,
+      RationalFunction<Rational>::zeroRational()
     );
     RationalFunction<Rational> dimension;
     dimension = theg2b3data.WeylFD.weylDimensionFormulaInnerSimpleCoords(simpleCoordinates);
@@ -1074,17 +1102,21 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(Calculator& calculato
         out << outputChar.coefficients[i].toString() << " x ";
       }
       simpleCoordinates = theg2b3data.WeylFDSmall.ambientWeyl->getSimpleCoordinatesFromFundamental(
-        outputChar[i].weightFundamentalCoordS
+        outputChar[i].weightFundamentalCoordS, RationalFunction<Rational>::zeroRational()
       );
       dimension = theg2b3data.WeylFDSmall.weylDimensionFormulaInnerSimpleCoords(simpleCoordinates);
       out << dimension;
       if (i != outputChar.size() - 1) {
         out << "+";
       }
-      leftWeightSimple = smallWeyl.getSimpleCoordinatesFromFundamental(outputChar[i].weightFundamentalCoordS);
+      leftWeightSimple = smallWeyl.getSimpleCoordinatesFromFundamental(
+        outputChar[i].weightFundamentalCoordS, RationalFunction<Rational>::zeroRational()
+      );
       leftWeightDual = smallWeyl.getDualCoordinatesFromFundamental(outputChar[i].weightFundamentalCoordS);
       for (int j = 0; j < outputChar.size(); j ++) {
-        rightWeightSimple = smallWeyl.getSimpleCoordinatesFromFundamental(outputChar[j].weightFundamentalCoordS);
+        rightWeightSimple = smallWeyl.getSimpleCoordinatesFromFundamental(
+          outputChar[j].weightFundamentalCoordS, RationalFunction<Rational>::zeroRational()
+        );
         rightWeightDual = smallWeyl.getDualCoordinatesFromFundamental(outputChar[j].weightFundamentalCoordS);
         if ((rightWeightSimple - leftWeightSimple).isPositive()) {
           resultChar = theCasimir;
@@ -1093,7 +1125,7 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(Calculator& calculato
           theCentralCharacter.modOutVermaRelations(&leftWeightDual);
           resultChar -= theCentralCharacter;
           resultChar.scaleNormalizeLeadingMonomial(nullptr);
-          resultChar *= - 1;
+          resultChar *= minusOne;
           theCentralChars.addOnTopNoRepetition(resultChar);
         }
       }
@@ -1143,7 +1175,7 @@ bool CalculatorLieTheory::printGeneralizedVermaModule(
     theHWfundcoords,
     selectionParSel,
     theSSalgebra,
-    CalculatorConversions::functionRationalFunction
+    CalculatorConversions::functionRationalFunction<Rational>
   )) {
     return output.makeError("Failed to extract highest weight vector data", calculator);
   } else {
@@ -1309,7 +1341,7 @@ bool CalculatorLieTheory::highestWeightVector(Calculator& calculator, const Expr
     theHWfundcoords,
     selectionParSel,
     theSSalgebra,
-    CalculatorConversions::functionRationalFunction
+    CalculatorConversions::functionRationalFunction<Rational>
   )) {
     return output.makeError("Failed to extract highest weight vector data", calculator);
   } else {
@@ -1355,7 +1387,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     highestWeightFundCoords,
     &hwContext,
     theRank,
-    CalculatorConversions::functionRationalFunction
+    CalculatorConversions::functionRationalFunction<Rational>
   )) {
     return calculator
     << "Failed to convert the third argument of "
@@ -1465,6 +1497,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   );
   theFDMod.getFDchar(theFDChaR);
   List<ElementUniversalEnveloping<RationalFunction<Rational> > > theCentralCharacters;
+  RationalFunction<Rational> zero(Rational::zero());
   theCasimir.makeCasimir(*theSSalgebra.content);
   Vector<RationalFunction<Rational> > currentHWsimplecoords, currentHWdualcoords;
   FormatExpressions tempFormat;
@@ -1526,7 +1559,9 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   << " Extra multiplier & Resulting $\\bar {\\mathfrak b}$-singular vector \\endhead\\hline";
   for (int i = 0; i < theCentralCharacters.size; i ++) {
     Vector<RationalFunction<Rational> > currentWeightSimpleCoords =
-    theSSalgebra.content->theWeyl.getSimpleCoordinatesFromFundamental(theEigenVectorWeightsFund[i]);
+    theSSalgebra.content->theWeyl.getSimpleCoordinatesFromFundamental(
+      theEigenVectorWeightsFund[i], RationalFunction<Rational>::zeroRational()
+    );
     tempElt.makeHWV(theFDMod, RFOne);
     tempElt.multiplyOnTheLeft(theLeviEigenVectors[i], theElt, *theSSalgebra.content, RFOne);
     tempElt.makeHWV(theGenMod, RFOne);
@@ -1538,7 +1573,9 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     bool found = false;
     for (int j = 0; j < theCentralCharacters.size; j ++) {
       Vector<RationalFunction<Rational> > otherWeightSimpleCoords =
-      theSSalgebra.content->theWeyl.getSimpleCoordinatesFromFundamental(theEigenVectorWeightsFund[j]);
+      theSSalgebra.content->theWeyl.getSimpleCoordinatesFromFundamental(
+        theEigenVectorWeightsFund[j], RationalFunction<Rational>::zeroRational()
+      );
       if ((otherWeightSimpleCoords - currentWeightSimpleCoords).isPositive()) {
         theCasimirMinusChar = theCasimir;
         theCasimirMinusChar -= theCentralCharacters[j];
@@ -1755,7 +1792,10 @@ bool CalculatorLieTheory::splitFDpartB3overG2CharsOutput(
   CharacterSemisimpleLieAlgebraModule<RationalFunction<Rational> > tempChar;
   CharacterSemisimpleLieAlgebraModule<RationalFunction<Rational> > startingChar;
   Vector<RationalFunction<Rational> > simpleWeight;
-  simpleWeight = theG2B3Data.theHmm.theRange().theWeyl.getSimpleCoordinatesFromFundamental(theG2B3Data.theWeightFundCoords);
+  simpleWeight = theG2B3Data.theHmm.theRange().theWeyl.getSimpleCoordinatesFromFundamental(
+    theG2B3Data.theWeightFundCoords,
+    RationalFunction<Rational>::zeroRational()
+  );
   startingChar.makeFromWeight(simpleWeight, &theG2B3Data.theHmm.theRange());
   startingChar.splitCharacterOverReductiveSubalgebra(&report, tempChar, theG2B3Data);
   out << report;
@@ -1782,7 +1822,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2Init(
     theG2B3Data.theWeightFundCoords,
     &outputContext,
     3,
-    CalculatorConversions::functionRationalFunction
+    CalculatorConversions::functionRationalFunction<Rational>
   )) {
     output.makeError(
       "Failed to extract highest weight in fundamental coordinates. ",
@@ -1896,7 +1936,7 @@ bool CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart(
     theWeightFundCoords,
     &finalContext,
     theDim,
-    CalculatorConversions::functionRationalFunction
+    CalculatorConversions::functionRationalFunction<Rational>
   )) {
     return output.makeError("Failed to extract highest weight from the second argument.", calculator);
   }
@@ -1908,7 +1948,9 @@ bool CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart(
   }
   calculator << "Your input weight in fundamental coordinates: " << theWeightFundCoords.toString();
   calculator << "<br>Your input weight in simple coordinates: "
-  << theWeyl.getSimpleCoordinatesFromFundamental(theWeightFundCoords).toString()
+  << theWeyl.getSimpleCoordinatesFromFundamental(
+    theWeightFundCoords, RationalFunction<Rational>::zeroRational()
+  ).toString()
   << "<br>Your inducing parabolic subalgebra: " << inducingParSel.toString() << "."
   << "<br>The parabolic subalgebra I should split over: " << splittingParSel.toString() << ".";
   ModuleSSalgebra<RationalFunction<Rational> > theMod;
@@ -1966,7 +2008,7 @@ bool CalculatorLieTheory::weylDimFormula(Calculator& calculator, const Expressio
     theWeight,
     &theSSowner.context,
     theSSowner.content->getRank(),
-    CalculatorConversions::functionRationalFunction
+    CalculatorConversions::functionRationalFunction<Rational>
   )) {
     return output.makeError(
       "Failed to convert the argument of the function to a highest weight vector",
@@ -1999,7 +2041,7 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(Calculator& calculator,
     theHWfundcoords,
     parabolicSel,
     theSSalgPointer,
-    CalculatorConversions::functionRationalFunction
+    CalculatorConversions::functionRationalFunction<Rational>
   )) {
     return output.makeError("Failed to extract highest weight vector data", calculator);
   } else {
@@ -2069,7 +2111,7 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(Calculator& calculator,
       out << "<tr><td>"
       << (useJavascript ? HtmlRoutines::getMathNoDisplay(current.toString()) : current.toString())
       << "</td>";
-      theHWsimplecoords = theSSalgebra.theWeyl.getSimpleCoordinatesFromFundamental(theHWfundcoords);
+      theHWsimplecoords = theSSalgebra.theWeyl.getSimpleCoordinatesFromFundamental(theHWfundcoords, RationalFunction<Rational>::zeroRational());
       theSSalgebra.theWeyl.actOnRhoModified(theSubgroup.RepresentativesQuotientAmbientOrder[i], theHWsimplecoords);
       out << "<td>"
       << (useJavascript ? HtmlRoutines::getMathNoDisplay(theHWsimplecoords.toString(&theFormat))
@@ -2103,7 +2145,7 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
     theHWfundcoords,
     parSel,
     theSSlieAlg,
-    CalculatorConversions::functionRationalFunction
+    CalculatorConversions::functionRationalFunction<Rational>
   )) {
    return false;
   }
@@ -2124,7 +2166,9 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
   if (!theKLpolys.computeKLPolys(&theWeyl)) {
     return output.makeError("failed to generate Kazhdan-Lusztig polynomials (output too large?)", calculator);
   }
-  theHWSimpCoordsFDPart = theWeyl.getSimpleCoordinatesFromFundamental(theHWFundCoordsFDPart);
+  theHWSimpCoordsFDPart = theWeyl.getSimpleCoordinatesFromFundamental(
+    theHWFundCoordsFDPart, RationalFunction<Rational>::zeroRational()
+  );
   theHWSimpCoordsFDPart += theWeyl.rho;
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSub;
   if (!theSub.makeParabolicFromSelectionSimpleRoots(theWeyl, parSel, 1000)) {
@@ -2133,7 +2177,9 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
       calculator
     );
   }
-  theHWsimpCoords = theWeyl.getSimpleCoordinatesFromFundamental(theHWfundcoords);
+  theHWsimpCoords = theWeyl.getSimpleCoordinatesFromFundamental(
+    theHWfundcoords, RationalFunction<Rational>::zeroRational()
+  );
   List<ElementWeylGroup> theWeylElements;
   theSub.getGroupElementsIndexedAsAmbientGroup(theWeylElements);
   Vector<RationalFunction<Rational> > currentHW;
@@ -2761,8 +2807,9 @@ std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::toStringFullCharac
   for (int k = 0; k < outputChar.size(); k ++) {
     out << "<tr>";
     out << "<td>" << outputChar[k].weightFundamentalCoordS.toString() << "</td>";
-    Vector<Coefficient> weightSimple = this->getOwner()->theWeyl.getSimpleCoordinatesFromFundamental
-    (outputChar[k].weightFundamentalCoordS);
+    Vector<Coefficient> weightSimple = this->getOwner()->theWeyl.getSimpleCoordinatesFromFundamental(
+      outputChar[k].weightFundamentalCoordS, Coefficient::zero()
+    );
     out << "<td>" << weightSimple.toString() << "</td>";
     outputSimpleStringCoords.makeZero(this->getOwner()->getRank());
     outputSimpleHalfStringCoords.makeZero(this->getOwner()->getRank());
@@ -2829,7 +2876,7 @@ bool CalculatorLieTheory::drawWeightSupport(
   }
   Vector<Rational> highestWeightSimpleCoords;
   WeylGroupData& theWeyl = theAlg.theWeyl;
-  highestWeightSimpleCoords = theWeyl.getSimpleCoordinatesFromFundamental(highestWeightFundCoords);
+  highestWeightSimpleCoords = theWeyl.getSimpleCoordinatesFromFundamental(highestWeightFundCoords, Rational::zero());
   // Vectors<Rational> theWeightsToBeDrawn;
   std::stringstream out;
   CharacterSemisimpleLieAlgebraModule<Rational> theChar;
@@ -3010,7 +3057,7 @@ bool CalculatorLieTheory::embedG2InB3(Calculator& calculator, const Expression& 
   if (!theHmm.applyHomomorphism(argument, outputUE)) {
     return output.makeError("Failed to apply homomorphism for unspecified reason", calculator);
   }
-  outputUE.simplify();
+  outputUE.simplify(RationalFunction<Rational>::oneRational());
   ExpressionContext context(calculator);
   context.setAmbientSemisimpleLieAlgebra(theHmm.theRange());
   return output.assignValueWithContext(outputUE, context, calculator);

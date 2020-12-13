@@ -510,13 +510,14 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
   out << "</tr>";
   bool useMathTag = outputOrbit.size < 150;
   Matrix<Rational> epsCoordMat;
+  Polynomial<Rational> zero;
   theWeyl.theDynkinType.getEpsilonMatrix(epsCoordMat);
   for (int i = 0; i < outputOrbit.size; i ++) {
     theFormat.simpleRootLetter = "\\alpha";
     theFormat.fundamentalWeightLetter = "\\psi";
     std::string orbitEltString = outputOrbit[i].toString(&theFormat);
     Vector<Polynomial<Rational> > epsVect = outputOrbit[i];
-    epsCoordMat.actOnVectorColumn(epsVect);
+    epsCoordMat.actOnVectorColumn(epsVect, zero);
     std::string orbitEltStringEpsilonCoords = epsVect.toStringLetterFormat("\\varepsilon", &theFormat);
     std::string weightEltString =
     theWeyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).toStringLetterFormat
@@ -586,13 +587,14 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     return false;
   }
   Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords, currentWeight;
+  Polynomial<Rational> zero;
   WeylGroupData& theWeyl = theSSalgebra.content->theWeyl;
   if (!useFundCoords) {
     theHWsimpleCoords = theWeight;
     theHWfundCoords = theWeyl.getFundamentalCoordinatesFromSimple(theWeight);
   } else {
     theHWfundCoords = theWeight;
-    theHWsimpleCoords = theWeyl.getSimpleCoordinatesFromFundamental(theWeight);
+    theHWsimpleCoords = theWeyl.getSimpleCoordinatesFromFundamental(theWeight, zero);
   }
   std::stringstream out, latexReport;
   Vectors<Polynomial<Rational> > theHWs;
@@ -671,7 +673,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     theFormat.fundamentalWeightLetter = "\\psi";
     std::string orbitEltString = outputOrbit[i].toString(&theFormat);
     Vector<Polynomial<Rational> > epsVect = outputOrbit[i];
-    epsCoordMat.actOnVectorColumn(epsVect);
+    epsCoordMat.actOnVectorColumn(epsVect, zero);
     std::string orbitEltStringEpsilonCoords = epsVect.toStringLetterFormat("\\varepsilon", &theFormat);
     std::string weightEltString=
     theWeyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).toStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);

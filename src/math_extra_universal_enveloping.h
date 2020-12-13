@@ -191,7 +191,7 @@ public:
     tempMon.makeOne(inputOwner);
     this->addMonomial(tempMon, coeff);
   }
-  void simplify(const Coefficient& ringUnit = 1);
+  void simplify(const Coefficient& ringUnit = Coefficient::one());
   int minimalNumberOfVariables() const {
     int result = 0;
     for (int i = 0; i < this->size; i ++) {
@@ -205,7 +205,9 @@ public:
     const Vector<Rational> & theHWinSimpleCoords, const Coefficient& ringUnit, const Coefficient& ringZero
   );
   void modOutVermaRelations(
-    const Vector<Coefficient>* substitutionHiGoesToIthElement, const Coefficient& ringUnit = 1, const Coefficient& ringZero = 0
+    const Vector<Coefficient>* substitutionHiGoesToIthElement,
+    const Coefficient& ringUnit = Coefficient::one(),
+    const Coefficient& ringZero = Coefficient::zero()
   );
   static void getCoordinateFormOfSpanOfElements(
     List<ElementUniversalEnveloping<Coefficient> >& theElements,

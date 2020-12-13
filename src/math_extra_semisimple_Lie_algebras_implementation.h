@@ -16,7 +16,9 @@ std::string Weight<Coefficient>::toString(FormatExpressions* theFormat) const {
       return this->weightFundamentalCoordS.toStringLetterFormat("\\psi", theFormat);
     }
     Vector<Coefficient> weightEpsCoords, weightSimpleCoords;
-    weightSimpleCoords = this->owner->theWeyl.getSimpleCoordinatesFromFundamental(this->weightFundamentalCoordS);
+    weightSimpleCoords = this->owner->theWeyl.getSimpleCoordinatesFromFundamental(
+      this->weightFundamentalCoordS, Coefficient::zero()
+    );
     this->owner->theWeyl.getEpsilonCoordinates(weightSimpleCoords, weightEpsCoords);
     return weightEpsCoords.toStringLetterFormat("\\varepsilon", theFormat);
   }
@@ -80,7 +82,9 @@ void Weight<Coefficient>::accountSingleWeight(
 
 template <class Coefficient>
 std::string Weight<Coefficient>::tensorAndDecompose(
-  const Weight<Coefficient>& other, CharacterSemisimpleLieAlgebraModule<Coefficient>& output
+  const Weight<Coefficient>& other,
+  CharacterSemisimpleLieAlgebraModule<Coefficient>& output,
+  const Coefficient& zero
 ) const {
   //This is the Brauer-Klimyk formula. Reference:
   //Humphreys J. Introduction to Lie algebras and representation theory
@@ -110,7 +114,7 @@ std::string Weight<Coefficient>::tensorAndDecompose(
   }
   HashedList<Vector<Coefficient> > currentOrbit;
   const int OrbitSizeHardLimit = 10000000;
-  Vector<Rational> rightHWSimpleCoords = theWeyl.getSimpleCoordinatesFromFundamental(rightHWFundCoords);
+  Vector<Rational> rightHWSimpleCoords = theWeyl.getSimpleCoordinatesFromFundamental(rightHWFundCoords, zero);
   Vectors<Rational> tempRoots;
   tempRoots.setSize(1);
   for (int i = 0; i < weightsLeftSimpleCoords.size; i ++) {
@@ -144,7 +148,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::freudenthalEvaluateMeFull
   Weight<Coefficient> tempMon;
   tempMon.owner = nullptr;
   for (int i = 0; i < domChar.size(); i ++) {
-    theVect[0] = this->getOwner()->theWeyl.getSimpleCoordinatesFromFundamental(domChar[i].weightFundamentalCoordS);
+    theVect[0] = this->getOwner()->theWeyl.getSimpleCoordinatesFromFundamental(domChar[i].weightFundamentalCoordS, Rational::zero());
     if (!(this->getOwner()->theWeyl.generateOrbit(theVect, false, theOrbit, false, - 1, 0, upperBoundNumDominantWeights))) {
       if (outputDetails != nullptr) {
         *outputDetails = "failed to generate orbit (possibly too large?)";

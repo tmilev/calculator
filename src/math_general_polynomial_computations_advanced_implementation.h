@@ -1258,6 +1258,28 @@ void PolynomialSystem<Coefficient>::setSerreLikeSolutionIndex(
 }
 
 template<class Coefficient>
+bool Polynomial<Coefficient>::leastCommonMultipleOneVariable(const Polynomial<Coefficient>& left,
+  const Polynomial<Coefficient>& right,
+  Polynomial<Coefficient>& output,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("Polynomial::leastCommonMultipleOneVariable");
+  Polynomial<Coefficient> divisor;
+  if (!Polynomial<Coefficient>::greatestCommonDivisorOneVariable(left, right, divisor, commentsOnFailure)) {
+    return false;
+  }
+  Polynomial<Coefficient> product = left;
+  Polynomial<Coefficient> remainder;
+  product *= right;
+  product.divideBy(divisor, output, remainder, &MonomialP::orderDegreeThenLeftLargerWins());
+  if (!remainder.isEqualToZero()) {
+    global.fatal << "In least common multiple computation: "
+    << "remainder when dividing by greatest common divisor not zero." << global.fatal;
+  }
+  return true;
+}
+
+template<class Coefficient>
 bool Polynomial<Coefficient>::leastCommonMultiple(
   const Polynomial<Coefficient>& left,
   const Polynomial<Coefficient>& right,
@@ -1269,13 +1291,17 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   if (left.isEqualToZero() || right.isEqualToZero()) {
     global.fatal << "Least common multiple of zero polynomials is not allowed. " << global.fatal;
   }
-  Polynomial<Coefficient> leftTemp, rightTemp, oneMinusT;
-  List<Polynomial<Coefficient> > theBasis;
-  leftTemp = left;
-  rightTemp = right;
   int numberOfVariables = MathRoutines::maximum(
     left.minimalNumberOfVariables(), right.minimalNumberOfVariables()
   );
+  if (numberOfVariables <= 1) {
+    return Polynomial<Coefficient>::leastCommonMultipleOneVariable(left, right, output, commentsOnFailure);
+  }
+  Polynomial<Coefficient> leftTemp, rightTemp;
+  leftTemp = left;
+  rightTemp = right;
+  Polynomial<Coefficient> oneMinusT;
+  List<Polynomial<Coefficient> > theBasis;
   leftTemp.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   rightTemp.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   oneMinusT.makeMonomial(numberOfVariables, 1, one);
@@ -1337,6 +1363,45 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
 }
 
 template<class Coefficient>
+bool Polynomial<Coefficient>::greatestCommonDivisorOneVariable(
+  const Polynomial<Coefficient>& left,
+  const Polynomial<Coefficient>& right,
+  Polynomial<Coefficient>& output,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("Polynomial::greatestCommonDivisorOneVariable");
+  Polynomial<Coefficient> leftCopy = left;
+  Polynomial<Coefficient> rightCopy = right;
+  Polynomial<Coefficient> quotient, remainder;
+  if (left.minimalNumberOfVariables() > 1 || right.minimalNumberOfVariables() > 1) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "This greatest common divisor computation method requires one variable.";
+    }
+    return false;
+  }
+  leftCopy.scaleNormalizeLeadingMonomial(nullptr);
+  rightCopy.scaleNormalizeLeadingMonomial(nullptr);
+  // We are re-implementing MathRoutines::greatestCommonDivisor,
+  // as this may be a performance-sensitve function.
+  while (!rightCopy.isEqualToZero()) {
+    leftCopy.divideBy(rightCopy, quotient, remainder, &MonomialP::orderDegreeThenLeftLargerWins());
+    if (remainder.totalDegree() >= rightCopy.totalDegree()) {
+      global.fatal
+      << "Univariate polynomial division of "
+      << leftCopy.toString() << " by "
+      << rightCopy.toString() << " yields remainder "
+      << remainder.toString()
+      << " which does not reduce the degree. "
+      << global.fatal;
+    }
+    leftCopy = rightCopy;
+    rightCopy = remainder;
+  }
+  output = leftCopy;
+  return true;
+}
+
+template<class Coefficient>
 bool Polynomial<Coefficient>::greatestCommonDivisor(
   const Polynomial<Coefficient>& left,
   const Polynomial<Coefficient>& right,
@@ -1348,6 +1413,10 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
   if (left.isEqualToZero() || right.isEqualToZero()) {
     global.fatal << "Greatest common divisor including zeroes not allowed. " << global.fatal;
   }
+  if (left.minimalNumberOfVariables() <= 1 && right.minimalNumberOfVariables() <= 1) {
+    return Polynomial<Coefficient>::greatestCommonDivisorOneVariable(left, right, output, commentsOnFailure);
+  }
+
   Polynomial<Coefficient> leastCommonMultipleBuffer;
   Polynomial<Coefficient> productBuffer;
   Polynomial<Coefficient> remainderBuffer;

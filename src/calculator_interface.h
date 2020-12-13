@@ -1018,6 +1018,7 @@ public:
   HashedListReferences<ElementWeylAlgebra<Rational> > theWeylAlgebraElements;
   HashedListReferences<ElementUniversalEnveloping<RationalFunction<Rational> > > theUEs;
   HashedListReferences<RationalFunction<Rational> > rationalFunctions;
+  HashedListReferences<RationalFunction<AlgebraicNumber> > rationalFunctionsAlgebraic;
   HashedListReferences<RationalFunction<ElementZmodP> > rationalFunctionsModular;
   HashedListReferences<Rational> theRationals;
   HashedListReferences<CharacterSemisimpleLieAlgebraModule<Rational> > theCharsSSLieAlgFD;
@@ -1814,6 +1815,9 @@ public:
   int opRationalFunction() {
     return this->operations.getIndexNoFail("RationalFunction");
   }
+  int opRationalFunctionAlgebraicCoefficients() {
+    return this->operations.getIndexNoFail("RationalFunctionAlgebraicCoefficients");
+  }
   int opRationalFunctionModuloInteger() {
     return this->operations.getIndexNoFail("RationalFunctionModuloInteger");
   }
@@ -2490,8 +2494,13 @@ public:
   // Conversions from expression tree to expression containing type.
   template <class Coefficient>
   static bool functionPolynomial(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerRationalFunctioN(Calculator& calculator, const Expression& input, Expression& output);
-  static bool functionRationalFunction(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerRationalFunction(Calculator& calculator, const Expression& input, Expression& output);
+  template <class Coefficient>
+  static bool functionRationalFunction(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output
+  );
   static bool innerElementUE(
     Calculator& calculator, const Expression& input, Expression& output, SemisimpleLieAlgebra& inputOwner
   );
@@ -2518,11 +2527,16 @@ public:
     Expression& output,
     ExpressionContext* inputContext = nullptr
   );
-  static bool innerExpressionFromRF(
+  template <class Coefficient>
+  static bool innerExpressionFromRationalFunction(
     Calculator& calculator,
-    const RationalFunction<Rational>& input,
+    const RationalFunction<Coefficient>& input,
     Expression& output,
-    ExpressionContext *inputContext = nullptr
+    ExpressionContext* inputContext = nullptr
+  );
+  template <class Coefficient>
+  static bool innerExpressionFromRationalFunction(
+    Calculator& calculator, const Expression& input, Expression& output
   );
   static bool innerLoadKey(
     Calculator& calculator,
@@ -2604,7 +2618,6 @@ public:
   static bool innerExpressionFromBuiltInTypE(Calculator& calculator, const Expression& input, Expression& output);
   template <class Coefficient>
   static bool functionExpressionFromPoly(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerExpressionFromRF(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerExpressionFromUE(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerExpressionFrom(Calculator& calculator, const MonomialP& input, Expression& output);
 };
@@ -3130,6 +3143,53 @@ bool CalculatorConversions::innerExpressionFromPoly(
   return output.makeSum(calculator, theTerms);
 }
 
+template <class Coefficient>
+bool CalculatorConversions::innerExpressionFromRationalFunction(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromRationalFunction");
+  if (!input.isOfType<RationalFunction<Rational> >()) {
+    return false;
+  }
+  const RationalFunction<Coefficient>& rationalFunction = input.getValue<RationalFunction<Rational> >();
+  ExpressionContext context = input.getContext();
+  return CalculatorConversions::innerExpressionFromRationalFunction<Coefficient>(
+    calculator, rationalFunction, output, &context
+  );
+}
+
+template <class Coefficient>
+bool CalculatorConversions::innerExpressionFromRationalFunction(
+  Calculator& calculator,
+  const RationalFunction<Coefficient>& input,
+  Expression& output,
+  ExpressionContext* inputContext
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromRF");
+  Rational aConst;
+  if (input.isConstant(&aConst)) {
+    return output.assignValue(aConst, calculator);
+  }
+  Polynomial<Coefficient> numerator, denominator;
+  input.getNumerator(numerator);
+
+  if (input.isConstant() || input.expressionType == input.typePolynomial) {
+    return CalculatorConversions::innerExpressionFromPoly<Coefficient>(calculator, numerator, output, inputContext);
+  }
+  Expression numeratorExpression, denominatorExpression;
+  input.getDenominator(denominator);
+  Polynomial<Coefficient> numeratorRescaled = numerator;
+  Polynomial<Coefficient> denominatorRescaled = denominator;
+  Coefficient topMultiple = numeratorRescaled.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  Coefficient bottomMultiple = denominatorRescaled.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  Coefficient multipleTopBottom = bottomMultiple / topMultiple;
+  numeratorRescaled *= multipleTopBottom.getNumerator();
+  denominatorRescaled *= multipleTopBottom.getDenominator();
+  CalculatorConversions::innerExpressionFromPoly<Coefficient>(calculator, numeratorRescaled, numeratorExpression, inputContext);
+  CalculatorConversions::innerExpressionFromPoly<Coefficient>(calculator, denominatorRescaled, denominatorExpression, inputContext);
+  return output.makeXOX(calculator, calculator.opDivide(), numeratorExpression, denominatorExpression);
+}
+
 template <class BuiltIn>
 bool WithContext<BuiltIn>::setContextAtLeast(
   ExpressionContext& inputOutputContext,
@@ -3159,7 +3219,6 @@ bool WithContext<BuiltIn>::setContextAndSerialize(
   }
   return output.assignWithContext(*this, *this->context.owner);
 }
-
 
 template <class BuiltIn>
 bool WithContext<BuiltIn>::mergeContexts(

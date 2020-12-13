@@ -1974,6 +1974,7 @@ void ObjectContainer::reset() {
   this->theWeylAlgebraElements.clear();
   this->theUEs.clear();
   this->rationalFunctions.clear();
+  this->rationalFunctionsAlgebraic.clear();
   this->rationalFunctionsModular.clear();
   this->theRationals.clear();
   this->theCharsSSLieAlgFD.clear();

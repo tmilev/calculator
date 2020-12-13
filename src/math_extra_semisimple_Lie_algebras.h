@@ -293,7 +293,11 @@ public:
     Rational& theMult,
     CharacterSemisimpleLieAlgebraModule<Coefficient>& outputAccum
   ) const;
-  std::string tensorAndDecompose(const Weight<Coefficient>& other, CharacterSemisimpleLieAlgebraModule<Coefficient>& output) const;
+  std::string tensorAndDecompose(
+    const Weight<Coefficient>& other,
+    CharacterSemisimpleLieAlgebraModule<Coefficient>& output,
+    const Coefficient& zero = Coefficient::zero()
+  ) const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   inline unsigned int hashFunction() const {
     return weightFundamentalCoordS.hashFunction();

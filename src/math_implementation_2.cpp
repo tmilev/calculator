@@ -260,7 +260,7 @@ bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabinOnce(
   }
   ElementZmodP thePower, one;
   thePower.modulus = *this;
-  thePower = theBase;
+  thePower = LargeIntegerUnsigned(theBase);
   one.makeOne(*this);
   MathRoutines::raiseToPower(thePower, theOddFactorOfNminusOne, one);
   if (thePower == 1) {
@@ -2244,6 +2244,10 @@ Rational Rational::zero() {
 
 Rational Rational::zeroStatic() {
   return 0;
+}
+
+Rational Rational::oneStatic() {
+  return 1;
 }
 
 bool Rational::assignStringFailureAllowed(const std::string& input) {

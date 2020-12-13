@@ -52,7 +52,7 @@ public:
   RationalFunction(const RationalFunction<Rational>& other);
   RationalFunction();
   RationalFunction(int other);
-  RationalFunction(const Rational& other);
+  RationalFunction(const Coefficient& other);
   Rational rationalValue() const;
   void raiseToPower(int thePower);
   void reduceMemory();
@@ -65,7 +65,7 @@ public:
   bool checkConsistency() const;
   void setNumberOfVariables(int goalNumVars);
   void setNumberOfVariablesSubstituteDeletedByOne(int newNumVars);
-  void makeOneLetterMonomial(int theIndex, const Rational& theCoeff, int ExpectedNumVars = 0);
+  void makeOneLetterMonomial(int theIndex, const Coefficient& theCoeff, int ExpectedNumVars = 0);
   void getNumerator(Polynomial<Coefficient>& output) const;
   void getDenominator(Polynomial<Coefficient>& output) const;
   bool isNegative();
@@ -105,9 +105,9 @@ public:
     const Rational& power,
     const Rational& coefficient = 1
   );
-  void makeConstant(const Rational& theCoeff) {
+  void makeConstant(const Coefficient& coefficient) {
     this->makeZero();
-    this->constantValue = theCoeff;
+    this->constantValue = coefficient;
   }
   bool isConstant(Rational* whichConstant = nullptr) const;
   bool isInteger() const;
@@ -147,6 +147,12 @@ public:
   void operator/=(const Polynomial<Coefficient>& other);
   void operator/=(const RationalFunction<Coefficient>& other);
   void negate();
+  static RationalFunction<Rational> oneRational() {
+    return RationalFunction(Rational::one());
+  }
+  static RationalFunction<Rational> zeroRational() {
+    return RationalFunction(Rational::zero());
+  }
   class Test {
   public:
     static bool all();

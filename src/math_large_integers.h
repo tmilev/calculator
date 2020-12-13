@@ -523,6 +523,7 @@ public:
   static Rational zero();
   static Rational zeroStatic();
   static Rational one();
+  static Rational oneStatic();
   void assignFractionalValue();
   void assignFloor() {
     Rational tempRat = *this;

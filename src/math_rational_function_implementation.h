@@ -134,10 +134,10 @@ void RationalFunction<Coefficient>::operator-=(const Coefficient& other) {
   if (!this->checkConsistency()) {
     global.fatal << "Corrupt rational function in operator-=(Rational). " << global.fatal;
   }
-  RationalFunction tempRF;
-  tempRF.makeConstant(other);
-  tempRF.negate();
-  this->operator+=(tempRF);
+  RationalFunction negated;
+  negated.makeConstant(other);
+  negated.negate();
+  this->operator+=(negated);
   if (!(this->checkConsistency())) {
     global.fatal << "Corrupt output in rational function operator-=(Rational)." << global.fatal;
   }
@@ -145,7 +145,7 @@ void RationalFunction<Coefficient>::operator-=(const Coefficient& other) {
 
 template<class Coefficient>
 void RationalFunction<Coefficient>::makeOne() {
-  this->makeConstant(1);
+  this->makeConstant(Coefficient::oneStatic());
 }
 
 template<class Coefficient>
@@ -184,13 +184,13 @@ RationalFunction<Coefficient>::RationalFunction() {
 }
 
 template<class Coefficient>
-RationalFunction<Coefficient>::RationalFunction(int other) {
+RationalFunction<Coefficient>::RationalFunction(const Coefficient& other) {
   this->expressionType = this->typeConstant;
   this->operator=(other);
 }
 
 template<class Coefficient>
-RationalFunction<Coefficient>::RationalFunction(const Rational& other) {
+RationalFunction<Coefficient>::RationalFunction(int other) {
   this->expressionType = this->typeConstant;
   this->operator=(other);
 }
@@ -325,11 +325,12 @@ void RationalFunction<Coefficient>::greatestCommonDivisor(
 
 template<class Coefficient>
 void RationalFunction<Coefficient>::makeOneLetterMonomial(
-  int theIndex, const Rational& theCoeff, int ExpectedNumVars
+  int theIndex, const Coefficient& theCoeff, int ExpectedNumVars
 ) {
   if (theIndex < 0) {
     global.fatal << "I am asked to create "
-    << "Monomial which has a variable of negative index " << theIndex << ". " << global.fatal;
+    << "Monomial which has a variable of negative index "
+    << theIndex << ". " << global.fatal;
   }
   this->expressionType = this->typePolynomial;
   ExpectedNumVars = MathRoutines::maximum(theIndex + 1, ExpectedNumVars);
@@ -833,17 +834,19 @@ void RationalFunction<Coefficient>::addSameTypes(const RationalFunction<Rational
 
 template<class Coefficient>
 void RationalFunction<Coefficient>::reducePolynomialToRational() {
-  if (this->expressionType == this->typePolynomial) {
-    if (this->numerator.getElement().isConstant()) {
-      this->expressionType = this->typeConstant;
-      if (this->numerator.getElement().isEqualToZero()) {
-        this->constantValue.makeZero();
-      } else {
-        this->constantValue = this->numerator.getElement().coefficients[0];
-      }
-      this->numerator.freeMemory();
-    }
+  if (this->expressionType != this->typePolynomial) {
+    return;
   }
+  if (!this->numerator.getElement().isConstant()) {
+    return;
+  }
+  this->expressionType = this->typeConstant;
+  if (this->numerator.getElement().isEqualToZero()) {
+    this->constantValue.makeZero();
+  } else {
+    this->constantValue = this->numerator.getElement().coefficients[0];
+  }
+  this->numerator.freeMemory();
 }
 
 template<class Coefficient>

@@ -679,9 +679,15 @@ public:
     return &this->simpleToFundamentalCoords;
   }
   template<class Coefficient>
-  Vector<Coefficient> getSimpleCoordinatesFromFundamental(const Vector<Coefficient>& inputInFundamentalCoords);
+  Vector<Coefficient> getSimpleCoordinatesFromFundamental(
+    const Vector<Coefficient>& inputInFundamentalCoords,
+    const Coefficient& zero = Coefficient::zero()
+  );
   template<class Coefficient>
-  Vectors<Coefficient> getSimpleCoordinatesFromFundamental(const Vectors<Coefficient>& inputInFundamentalCoords);
+  Vectors<Coefficient> getSimpleCoordinatesFromFundamental(
+    const Vectors<Coefficient>& inputInFundamentalCoords,
+    const Coefficient& zero = Coefficient::zero()
+  );
   template<class Coefficient>
   Vector<Coefficient> getFundamentalCoordinatesFromSimple(const Vector<Coefficient>& inputInSimpleCoords);
   template<class Coefficient>
@@ -773,7 +779,7 @@ public:
   void getEpsilonCoordinates(const Vector<Coefficient>& input, Vector<Coefficient>& output) {
     this->computeEpsilonMatrix();
     output = input;
-    this->matrixSendsSimpleVectorsToEpsilonVectors.getElement().actOnVectorColumn(output);
+    this->matrixSendsSimpleVectorsToEpsilonVectors.getElement().actOnVectorColumn(output, Coefficient::zero());
   }
   void getEpsilonCoordinates(const List<Vector<Rational> >& input, Vectors<Rational>& output);
   template <class Coefficient>
@@ -2001,7 +2007,7 @@ public:
   template <class Coefficient>
   Coefficient weylDimensionFormulaInnerSimpleCoords(
     const Vector<Coefficient>& theWeightInnerSimpleCoords,
-    const Coefficient& ringUnit = 1
+    const Coefficient& ringUnit = Coefficient::one()
   );
   void findQuotientRepresentatives(int UpperLimit);
   void getMatrixOfElement(

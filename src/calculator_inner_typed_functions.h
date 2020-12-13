@@ -305,4 +305,93 @@ bool CalculatorConversions::functionPolynomial(Calculator& calculator, const Exp
   theContext.makeOneVariable(input);
   return output.assignValueWithContext(monomial, theContext, calculator);
 }
+
+template <class Coefficient>
+bool CalculatorConversions::functionRationalFunction(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::functionRationalFunction");
+  Expression intermediate(calculator);
+  if (
+    input.startsWith(calculator.opPlus(), 3) ||
+    input.startsWith(calculator.opTimes(), 3) ||
+    input.startsWith(calculator.opDivide(), 3)
+  ) {
+    Expression leftE, rightE;
+    if (
+      !CalculatorConversions::functionRationalFunction<Coefficient>(calculator, input[1], leftE) ||
+      !CalculatorConversions::functionRationalFunction<Coefficient>(calculator, input[2], rightE)
+    ) {
+      return calculator << "<hr> Failed to convert " << input[1].toString()
+      << " and " << input[2].toString() << " to rational function. ";
+    }
+    if (leftE.isError() || rightE.isError()) {
+      return calculator << "<hr> Conversion of " << input[1].toString()
+      << " and " << input[2].toString() << " returned error(s): "
+      << leftE.toString() << " and " << rightE.toString();
+    }
+    intermediate.addChildOnTop(input[0]);
+    intermediate.addChildOnTop(leftE);
+    intermediate.addChildOnTop(rightE);
+    if (input.startsWith(calculator.opPlus())) {
+      return CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF(
+        calculator, intermediate, output
+      );
+    }
+    if (input.startsWith(calculator.opTimes())) {
+      return CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(
+        calculator, intermediate, output
+      );
+    }
+    if (input.startsWith(calculator.opDivide())) {
+      return CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial(
+        calculator, intermediate, output
+      );
+    }
+    global.fatal << "This line of code should never be reached, something has gone wrong." << global.fatal;
+  }
+  int theSmallPower = - 1;
+  if (input.startsWith(calculator.opThePower(), 3) ) {
+    if (input[2].isSmallInteger(&theSmallPower)) {
+      Expression leftE;
+      if (!CalculatorConversions::functionRationalFunction<Coefficient>(calculator, input[1], leftE)) {
+        return calculator << "<hr>CalculatorConversions::innerRationalFunction: failed to convert "
+        << input[1].toString() << " to rational function. ";
+      }
+      if (leftE.isError()) {
+        return calculator << "<hr> Conversion of " << input[1].toString() << " returned error: " << leftE.toString();
+      }
+      RationalFunction<Coefficient> rationalFunction;
+      rationalFunction = leftE.getValue<RationalFunction<Coefficient> >();
+      rationalFunction.raiseToPower(theSmallPower);
+      return output.assignValueWithContext(rationalFunction, leftE.getContext(), calculator);
+    }
+    calculator << "<hr>Warning: failed to raise "
+    << input[1].toString() << " to power " << input[2].toString()
+    << ": failed to convert the power to small integer. "
+    << "I am treating " << input.toString()
+    << " as a single variable: please make sure that is what you want.";
+  }
+  if (input.isOfType<RationalFunction<Coefficient> >()) {
+    output = input;
+    return true;
+  }
+  if (input.isOfType<Polynomial<Coefficient> >() || input.isOfType<Coefficient>()) {
+    return input.convertInternally<RationalFunction<Coefficient> >(output);
+  }
+  if (input.isOfType<AlgebraicNumber>()) {
+    Expression potentialOutput;
+    if (input.convertInternally<RationalFunction<Coefficient> > (potentialOutput)) {
+      output = potentialOutput;
+      return true;
+    }
+  }
+  ExpressionContext theContext(calculator);
+  theContext.makeOneVariable(input);
+  RationalFunction<Coefficient> rationalFunction;
+  rationalFunction.makeOneLetterMonomial(0, Coefficient::oneStatic());
+  return output.assignValueWithContext(rationalFunction, theContext, calculator);
+}
 #endif

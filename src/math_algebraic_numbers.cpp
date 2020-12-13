@@ -266,7 +266,7 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
     currentVect.makeEi(DimensionOverRationals, 0);
     this->theGeneratingElementPowersBasis.addOnTop(currentVect);
     do {
-      this->generatingElementMatrixForm.actOnVectorColumn(currentVect);
+      this->generatingElementMatrixForm.actOnVectorColumn(currentVect, Rational::zero());
       this->theGeneratingElementPowersBasis.addOnTop(currentVect);
       if (
         this->theGeneratingElementPowersBasis.size >
@@ -556,12 +556,12 @@ bool AlgebraicNumber::assignCosRationalTimesPi(const Rational& input, AlgebraicC
 
 
 unsigned int AlgebraicNumber::hashFunction() const {
-  //global.fatal << global.fatal;
-  //WARNING. Algebraic numbers, as they are recorded in memory at the moment,
-  //do not have unique presentations, so we return 0 as their hash function.
-  //Computing a hash function can be done, for example, by picking the hash function of the minimal polynomial
-  //over the rationals. However, such computations appear to be too heavy, and will make sense only if we need to deal
-  //with large sets of algebraic numbers without repetition.
+  // global.fatal << global.fatal;
+  // WARNING. Algebraic numbers, as they are recorded in memory at the moment,
+  // do not have unique presentations, so we return 0 as their hash function.
+  // Computing a hash function can be done, for example, by picking the hash function of the minimal polynomial
+  // over the rationals. However, such computations appear to be too heavy, and will make sense only if we need to deal
+  // with large sets of algebraic numbers without repetition.
   return 0;
 }
 
@@ -576,6 +576,17 @@ bool AlgebraicNumber::operator==(const Rational& other) const {
     return false;
   }
   return this->element.coefficients[0] == other;
+}
+
+AlgebraicNumber AlgebraicNumber::getNumerator() const {
+  AlgebraicNumber result = *this;
+  return result;
+}
+
+AlgebraicNumber AlgebraicNumber::getDenominator() const {
+  AlgebraicNumber result;
+  result.assignRational(1, this->owner);
+  return result;
 }
 
 bool AlgebraicNumber::needsParenthesisForMultiplication(
@@ -639,7 +650,7 @@ void AlgebraicClosureRationals::reset() {
   this->displayNamesBasisElements.setSize(1);
   this->displayNamesBasisElements[0] = "";
   this->generatingElementTensorForm.makeIdentity(1);
-  this->generatingElementMatrixForm.makeIdentityMatrix(1);
+  this->generatingElementMatrixForm.makeIdentityMatrix(1, Rational::one(), Rational::zero());
   this->generatingElement.owner = this;
   this->generatingElement.element.makeEi(0);
 }
@@ -1053,25 +1064,38 @@ bool AlgebraicNumber::constructFromMinimalPolynomial(
   return this->constructFromMinimalPolynomial(polyConverted, inputOwner, commentsOnFailure);
 }
 
-AlgebraicNumber AlgebraicNumber::one() const {
+AlgebraicNumber AlgebraicNumber::oneStatic() {
   AlgebraicNumber result;
-  result.assignRational(1, *this->owner);
+  result.assignRational(1, nullptr);
   return result;
-}
-
-void AlgebraicNumber::assignRational(const Rational& input, AlgebraicClosureRationals& inputOwner) {
-  this->basisIndex = 0;
-  this->owner = &inputOwner;
-  this->element.makeEi(0, input);
-}
-
-AlgebraicNumber AlgebraicNumber::zero() {
-  return AlgebraicNumber::zeroStatic();
 }
 
 AlgebraicNumber AlgebraicNumber::zeroStatic() {
   AlgebraicNumber result;
+  result.assignRational(1, nullptr);
   return result;
+}
+
+AlgebraicNumber AlgebraicNumber::zero() const {
+  AlgebraicNumber result;
+  result.assignRational(0, this->owner);
+  return result;
+}
+
+AlgebraicNumber AlgebraicNumber::one() const {
+  AlgebraicNumber result;
+  result.assignRational(1, this->owner);
+  return result;
+}
+
+void AlgebraicNumber::makeZero() {
+  this->assignRational(0, this->owner);
+}
+
+void AlgebraicNumber::assignRational(const Rational& input, AlgebraicClosureRationals* inputOwner) {
+  this->basisIndex = 0;
+  this->owner = inputOwner;
+  this->element.makeEi(0, input);
 }
 
 bool AlgebraicNumber::isExpressedViaLatestBasis() const {
@@ -1189,7 +1213,7 @@ bool AlgebraicNumber::assignRationalQuadraticRadical(
     theFactors.addOnTop(squareFreeInput);
   }
   if (theFactors.size == 0) {
-    this->assignRational(squareRootRationalPart, inputOwner);
+    this->assignRational(squareRootRationalPart, &inputOwner);
     this->checkConsistency();
     return true;
   }
@@ -1230,8 +1254,8 @@ bool AlgebraicNumber::radicalMeDefault(
     return false;
   }
   AlgebraicNumber result, one, minusOne;
-  one.assignRational(1, *this->owner);
-  minusOne.assignRational(- 1, *this->owner);
+  one.assignRational(1, this->owner);
+  minusOne.assignRational(- 1, this->owner);
   Polynomial<AlgebraicNumber> thePolynomial;
   thePolynomial.addConstant(*this * minusOne);
   MonomialP leadingMonomial;
@@ -1335,6 +1359,9 @@ AlgebraicNumber AlgebraicNumber::scaleNormalizeIndex(
 AlgebraicNumber AlgebraicClosureRationals::one() {
   return this->fromRational(1);
 }
+AlgebraicNumber AlgebraicClosureRationals::zero() {
+  return this->fromRational(0);
+}
 
 AlgebraicNumber AlgebraicClosureRationals::fromRational(const Rational& input) {
   AlgebraicNumber result(input);
@@ -1426,6 +1453,21 @@ std::string AlgebraicNumber::toStringNonInjected(FormatExpressions* theFormat) c
   return out.str();
 }
 
+bool AlgebraicNumber::operator==(int other) const {
+  return *this == Rational(other);
+}
+
+bool AlgebraicNumber::operator!= (const AlgebraicNumber& other) const {
+  return !(*this == other);
+}
+
+bool AlgebraicNumber::operator!= (int other) const {
+  return !(*this == other);
+}
+
+void AlgebraicNumber::negate() {
+  this->element *= - 1;
+}
 
 bool AlgebraicNumber::operator==(const AlgebraicNumber& other) const {
   Rational ratValue;
@@ -1442,8 +1484,9 @@ bool AlgebraicNumber::operator==(const AlgebraicNumber& other) const {
     << "comparing two algebraic number that do not have the same owner. "
     << "The numbers have owners of respective addresses "
     << this->owner << " and " << other.owner << ". The numbers are: "
-    << this->toString() << " and " << other.toString() << ". Crashing to let you know. ";
-    global.fatal << global.fatal;
+    << this->toString() << " and " << other.toString()
+    << ". Crashing to let you know. "
+    << global.fatal;
   }
   this->checkNonZeroOwner();
   if (this->basisIndex == other.basisIndex) {
@@ -1571,6 +1614,12 @@ bool ElementZmodP::operator>(const ElementZmodP& other) const {
 }
 
 ElementZmodP ElementZmodP::zeroStatic() {
+  ElementZmodP result;
+  result.modulus = 1;
+  return result;
+}
+
+ElementZmodP ElementZmodP::oneStatic() {
   ElementZmodP result;
   result.modulus = 1;
   return result;

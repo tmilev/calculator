@@ -680,7 +680,11 @@ public:
     }
   }
   template <class otherType>
-  void actOnVectorColumn(const Vector<otherType>& input, Vector<otherType>& output, const otherType& ringZero = 0) const {
+  void actOnVectorColumn(
+    const Vector<otherType>& input,
+    Vector<otherType>& output,
+    const otherType& ringZero = otherType::zero()
+  ) const {
     if (&input == &output) {
       Vector<otherType> inputNew = input;
       this->actOnVectorColumn(inputNew, output, ringZero);
@@ -744,7 +748,7 @@ public:
   template <class otherType>
   void actOnVectorColumn(
     Vector<otherType>& inputOutput,
-    const otherType& ringZero = static_cast<otherType>(0)
+    const otherType& ringZero = otherType::zero()
   ) const {
     Vector<otherType> buffer;
     this->actOnVectorColumn(inputOutput, buffer, ringZero);
@@ -753,7 +757,7 @@ public:
   template <class otherType>
   void actOnVectorsColumn(
     Vectors<otherType>& inputOutput,
-    const otherType& ringZero = static_cast<otherType>(0)
+    const otherType& ringZero = otherType::zero()
   ) const {
     for (int i = 0; i < inputOutput.size; i ++) {
       this->actOnVectorColumn(inputOutput[i], ringZero);
@@ -768,10 +772,14 @@ public:
   std::string toStringPlainText(bool jsonFormat = false) const;
   std::string toStringOneLine(bool jsonFormat = false) const;
   std::string toStringWithBlocks(List<int>& theBlocks);
-  void makeIdentityMatrix(int theDimension, const Coefficient& ringUnit = 1, const Coefficient& ringZero = 0) {
-    this->initialize(theDimension, theDimension);
-    for (int i = 0; i < theDimension; i ++) {
-      for (int j = 0; j < theDimension; j ++) {
+  void makeIdentityMatrix(
+    int dimension,
+    const Coefficient& ringUnit = Coefficient::oneStatic(),
+    const Coefficient& ringZero = Coefficient::zeroStatic()
+  ) {
+    this->initialize(dimension, dimension);
+    for (int i = 0; i < dimension; i ++) {
+      for (int j = 0; j < dimension; j ++) {
         if (j != i) {
           this->elements[i][j] = ringZero;
         } else {
@@ -2807,11 +2815,23 @@ public:
   void operator=(int other);
   template <class otherType>
   void assignOtherType(const Polynomial<otherType>& other);
+  static bool greatestCommonDivisorOneVariable(
+    const Polynomial<Coefficient>& left,
+    const Polynomial<Coefficient>& right,
+    Polynomial<Coefficient>& output,
+    std::stringstream* commentsOnFailure
+  );
   static bool greatestCommonDivisor(
     const Polynomial<Coefficient>& left,
     const Polynomial<Coefficient>& right,
     Polynomial<Coefficient>& output,
     const Coefficient& one,
+    std::stringstream* commentsOnFailure
+  );
+  static bool leastCommonMultipleOneVariable(
+    const Polynomial<Coefficient>& left,
+    const Polynomial<Coefficient>& right,
+    Polynomial<Coefficient>& output,
     std::stringstream* commentsOnFailure
   );
   static bool leastCommonMultiple(
@@ -5002,7 +5022,7 @@ public:
   }
   void writeToFile(std::fstream& output);
   bool readFromFile(std::fstream& input);
-  void makeZn(int theDim);
+  void makeZn(int dimension);
   void refineByOtherLattice(const Lattice& other);
   void makeFromRoots(const Vectors<Rational>& input);
   Lattice() {

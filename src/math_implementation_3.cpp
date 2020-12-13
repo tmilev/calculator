@@ -6588,7 +6588,7 @@ void WeylGroupData::getTrivialRepresentation(
   output.initialize(this->theGroup);
   output.basis.makeEiBasis(1);
   for (int i = 0; i < this->getDimension(); i ++) {
-    output.generators[i].makeIdentityMatrix(1);
+    output.generators[i].makeIdentityMatrix(1, Rational::one(), Rational::zero());
   }
   output.getCharacter();
 }
@@ -9228,9 +9228,9 @@ bool Lattice::reduceVector(Vector<Rational>& theVector) const {
   return true;
 }
 
-void Lattice::makeZn(int theDim) {
-  this->basisRationalForm.makeIdentityMatrix(theDim);
-  this->basis.makeIdentityMatrix(theDim, LargeInteger(1), LargeInteger(0));
+void Lattice::makeZn(int dimension) {
+  this->basisRationalForm.makeIdentityMatrix(dimension, Rational::one(), Rational::zero());
+  this->basis.makeIdentityMatrix(dimension, LargeInteger(1), LargeInteger(0));
   this->denominator.makeOne();
 }
 
@@ -9737,7 +9737,7 @@ void Cone::intersectHyperplane(Vector<Rational>& theNormal, Cone& outputConeLowe
   theProjection.transpose();
   theProjection.resize(theDimension - 1, theDimension, false);
   Vectors<Rational> newNormals = this->normals;
-  theProjection.actOnVectorsColumn(newNormals);
+  theProjection.actOnVectorsColumn(newNormals, Rational::zero());
   bool tempBool = outputConeLowerDim.createFromNormals(newNormals);
   if (tempBool) {
     global.fatal << "Create from normals failed. " << global.fatal;

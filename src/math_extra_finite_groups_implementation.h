@@ -1043,7 +1043,7 @@ template<class Coefficient>
 Vector<Coefficient> WeylGroupData::getFundamentalCoordinatesFromSimple(const Vector<Coefficient>& inputInFundamentalCoords) {
   Matrix<Rational>& tempMat = *this->getMatrixSimpleToFundamentalCoords();
   Vector<Coefficient> result = inputInFundamentalCoords;
-  tempMat.actOnVectorColumn(result);
+  tempMat.actOnVectorColumn(result, Coefficient::zero());
   return result;
 }
 
@@ -1069,27 +1069,33 @@ Vector<Coefficient> WeylGroupData::getFundamentalCoordinatesFromEpsilon(const Ve
 }
 
 template<class Coefficient>
-Vector<Coefficient> WeylGroupData::getSimpleCoordinatesFromFundamental(const Vector<Coefficient>& inputInFundamentalCoords) {
+Vector<Coefficient> WeylGroupData::getSimpleCoordinatesFromFundamental(
+  const Vector<Coefficient>& inputInFundamentalCoords,
+  const Coefficient& zero
+) {
   Matrix<Rational>& tempMat = *this->getMatrixFundamentalToSimpleCoords();
   Vector<Coefficient> result;
   result = inputInFundamentalCoords;
-  tempMat.actOnVectorColumn(result);
+  tempMat.actOnVectorColumn(result, zero);
   return result;
 }
 
 template<class Coefficient>
-Vectors<Coefficient> WeylGroupData::getSimpleCoordinatesFromFundamental(const Vectors<Coefficient>& inputInFundamentalCoords) {
+Vectors<Coefficient> WeylGroupData::getSimpleCoordinatesFromFundamental(
+  const Vectors<Coefficient>& inputInFundamentalCoords,
+  const Coefficient& zero
+) {
   Matrix<Rational>& tempMat = *this->getMatrixFundamentalToSimpleCoords();
   Vectors<Coefficient> result;
   result = inputInFundamentalCoords;
-  tempMat.actOnVectorsColumn(result);
+  tempMat.actOnVectorsColumn(result, zero);
   return result;
 }
 
 template<class Coefficient>
 Coefficient WeylGroupData::weylDimFormulaFundamentalCoords(Vector<Coefficient>& weightFundCoords) {
   Vector<Coefficient> theWeightInSimpleCoords;
-  theWeightInSimpleCoords = this->getSimpleCoordinatesFromFundamental(weightFundCoords);
+  theWeightInSimpleCoords = this->getSimpleCoordinatesFromFundamental(weightFundCoords, Coefficient::zero());
   return this->weylDimensionFormulaSimpleCoordinates(theWeightInSimpleCoords);
 }
 

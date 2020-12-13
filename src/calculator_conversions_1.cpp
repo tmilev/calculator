@@ -800,7 +800,7 @@ bool CalculatorConversions::innerExpressionFromMonomialUE(
   for (int i = 0; i < input.generatorsIndices.size; i ++) {
     theGen.generatorIndex = input.generatorsIndices[i];
     CalculatorConversions::innerExpressionFromChevalleyGenerator(calculator, theGen, chevGenE);
-    CalculatorConversions::innerExpressionFromRF(calculator, input.powers[i], powerE, inputContext);
+    CalculatorConversions::innerExpressionFromRationalFunction<Rational>(calculator, input.powers[i], powerE, inputContext);
     termE.makeXOX(calculator, calculator.opThePower(), chevGenE, powerE);
     theTerms.addOnTop(termE);
   }
@@ -1004,7 +1004,7 @@ bool CalculatorConversions::innerElementUE(
         << owner.toStringLieAlgebraName();
       }
       if (isHonestElementUE) {
-        currentMultiplicand.makeOneGenerator(theChevGen.generatorIndex, owner, 1);
+        currentMultiplicand.makeOneGenerator(theChevGen.generatorIndex, owner, Rational::one());
         currentMultiplicand.raiseToPower(thePower);
         currentSummand*= currentMultiplicand;
       } else {
@@ -1048,7 +1048,7 @@ bool CalculatorConversions::functionExpressionFromBuiltInType(
     return CalculatorConversions::functionExpressionFromPoly<AlgebraicNumber>(calculator, input, output);
   }
   if (input.isOfType<RationalFunction<Rational> >()) {
-    return CalculatorConversions::innerExpressionFromRF(calculator, input, output);
+    return CalculatorConversions::innerExpressionFromRationalFunction<Rational>(calculator, input, output);
   }
   return false;
 }
@@ -1063,146 +1063,14 @@ bool CalculatorConversions::innerExpressionFromUE(Calculator& calculator, const 
   return CalculatorConversions::innerExpressionFromUE(calculator, theUE, output);
 }
 
-bool CalculatorConversions::innerExpressionFromRF(
+bool CalculatorConversions::innerRationalFunction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromRF");
-  if (!input.isOfType<RationalFunction<Rational> >()) {
-    return false;
-  }
-  const RationalFunction<Rational>& theRF = input.getValue<RationalFunction<Rational> >();
-  ExpressionContext context = input.getContext();
-  return CalculatorConversions::innerExpressionFromRF(
-    calculator, theRF, output, &context
-  );
-}
-
-bool CalculatorConversions::innerExpressionFromRF(
-  Calculator& calculator,
-  const RationalFunction<Rational>& input,
-  Expression& output,
-  ExpressionContext* inputContext
-) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromRF");
-  Rational aConst;
-  if (input.isConstant(&aConst)) {
-    return output.assignValue(aConst, calculator);
-  }
-  Polynomial<Rational> numP, denP;
-  input.getNumerator(numP);
-
-  if (input.isConstant() || input.expressionType == input.typePolynomial) {
-    return CalculatorConversions::innerExpressionFromPoly<Rational>(calculator, numP, output, inputContext);
-  }
-  Expression numE, denE;
-  input.getDenominator(denP);
-  Polynomial<Rational> numRescaled = numP;
-  Polynomial<Rational> denRescaled = denP;
-  Rational topMultiple = numRescaled.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
-  Rational bottomMultiple = denRescaled.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
-  Rational multipleTopBottom = bottomMultiple / topMultiple;
-  numRescaled *= multipleTopBottom.getNumerator();
-  denRescaled *= multipleTopBottom.getDenominator();
-  CalculatorConversions::innerExpressionFromPoly<Rational>(calculator, numRescaled, numE, inputContext);
-  CalculatorConversions::innerExpressionFromPoly<Rational>(calculator, denRescaled, denE, inputContext);
-  return output.makeXOX(calculator, calculator.opDivide(), numE, denE);
-}
-
-bool CalculatorConversions::innerRationalFunctioN(
-  Calculator& calculator, const Expression& input, Expression& output
-) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerRationalFunctioN");
+  MacroRegisterFunctionWithName("CalculatorConversions::innerRationalFunction");
   if (input.size() != 2) {
     return false;
   }
-  return CalculatorConversions::functionRationalFunction(calculator, input[1], output);
-}
-
-bool CalculatorConversions::functionRationalFunction(
-  Calculator& calculator, const Expression& input, Expression& output
-) {
-  MacroRegisterFunctionWithName("CalculatorConversions::functionRationalFunction");
-  Expression intermediate(calculator);
-  if (
-    input.startsWith(calculator.opPlus(), 3) ||
-    input.startsWith(calculator.opTimes(), 3) ||
-    input.startsWith(calculator.opDivide(), 3)
-  ) {
-    Expression leftE, rightE;
-    if (
-      !CalculatorConversions::functionRationalFunction(calculator, input[1], leftE) ||
-      !CalculatorConversions::functionRationalFunction(calculator, input[2], rightE)
-    ) {
-      return calculator << "<hr> Failed to convert " << input[1].toString()
-      << " and " << input[2].toString() << " to rational function. ";
-    }
-    if (leftE.isError() || rightE.isError()) {
-      return calculator << "<hr> Conversion of " << input[1].toString()
-      << " and " << input[2].toString() << " returned error(s): "
-      << leftE.toString() << " and " << rightE.toString();
-    }
-    intermediate.addChildOnTop(input[0]);
-    intermediate.addChildOnTop(leftE);
-    intermediate.addChildOnTop(rightE);
-    if (input.startsWith(calculator.opPlus())) {
-      return CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF(
-        calculator, intermediate, output
-      );
-    }
-    if (input.startsWith(calculator.opTimes())) {
-      return CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(
-        calculator, intermediate, output
-      );
-    }
-    if (input.startsWith(calculator.opDivide())) {
-      return CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial(
-        calculator, intermediate, output
-      );
-    }
-    global.fatal << "This line of code should never be reached, something has gone wrong." << global.fatal;
-  }
-  int theSmallPower = - 1;
-  if (input.startsWith(calculator.opThePower(), 3) ) {
-    if (input[2].isSmallInteger(&theSmallPower)) {
-      Expression leftE;
-      if (!CalculatorConversions::functionRationalFunction(calculator, input[1], leftE)) {
-        return calculator << "<hr>CalculatorConversions::innerRationalFunction: failed to convert "
-        << input[1].toString() << " to rational function. ";
-      }
-      if (leftE.isError()) {
-        return calculator << "<hr> Conversion of " << input[1].toString() << " returned error: " << leftE.toString();
-      }
-      RationalFunction<Rational>  theRF = leftE.getValue<RationalFunction<Rational> >();
-      theRF.raiseToPower(theSmallPower);
-      return output.assignValueWithContext(theRF, leftE.getContext(), calculator);
-    }
-    calculator << "<hr>Warning: failed to raise "
-    << input[1].toString() << " to power " << input[2].toString()
-    << ": failed to convert the power to small integer. "
-    << "I am treating " << input.toString()
-    << " as a single variable: please make sure that is what you want.";
-  }
-  if (input.isOfType<RationalFunction<Rational> >()) {
-    output = input;
-    return true;
-  }
-  if (input.isOfType<Polynomial<Rational> >() || input.isOfType<Rational>()) {
-    return input.convertInternally<RationalFunction<Rational> >(output);
-  }
-  if (input.isOfType<AlgebraicNumber>()) {
-    AlgebraicNumber theNumber = input.getValue<AlgebraicNumber>();
-    Rational theRat;
-    if (theNumber.isRational(&theRat)) {
-      Expression tempE;
-      tempE.assignValue(theRat, calculator);
-      return tempE.convertInternally<RationalFunction<Rational> > (output);
-    }
-  }
-  ExpressionContext theContext(calculator);
-  theContext.makeOneVariable(input);
-  RationalFunction<Rational> theRF;
-  theRF.makeOneLetterMonomial(0, 1);
-  return output.assignValueWithContext(theRF, theContext, calculator);
+  return CalculatorConversions::functionRationalFunction<Rational>(calculator, input[1], output);
 }
 
 bool CalculatorConversions::functionMatrixRational(
@@ -1323,7 +1191,7 @@ bool CalculatorConversions::functionMatrixRationalFunction(
     outputMat,
     &context,
     - 1,
-    CalculatorConversions::functionRationalFunction
+    CalculatorConversions::functionRationalFunction<Rational>
   )) {
     return calculator << "<hr>Failed to get matrix of rational functions. ";
   }

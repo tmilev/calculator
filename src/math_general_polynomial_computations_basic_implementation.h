@@ -999,7 +999,7 @@ void Polynomial<Coefficient>::assignMinimalPolynomial(const Matrix<Coefficient>&
     theBasis.setSize(0);
     theBasis.addOnTop(theVectorPowers);
     for (int i = 0; i < theDim; i ++) {
-      input.actOnVectorColumn(*theBasis.lastObject(), theVectorPowers);
+      input.actOnVectorColumn(*theBasis.lastObject(), theVectorPowers, Coefficient::zero());
       if (theBasis.linearSpanContainsVector(theVectorPowers)) {
         break;
       }

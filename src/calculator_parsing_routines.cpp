@@ -207,6 +207,7 @@ void Calculator::initialize() {
   this->addOperationBuiltInType("PolynomialModuloInteger");
   this->addOperationBuiltInType("PolynomialModuloPolynomialModuloInteger");
   this->addOperationBuiltInType("RationalFunction");
+  this->addOperationBuiltInType("RationalFunctionAlgebraicCoefficients");
   this->addOperationBuiltInType("RationalFunctionModuloInteger");
   this->addOperationBuiltInType("string");
   this->addOperationBuiltInType("ElementUEoverRF");

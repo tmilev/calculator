@@ -72,6 +72,12 @@ int Expression::getTypeOperation<RationalFunction<Rational> >() const {
 }
 
 template < >
+int Expression::getTypeOperation<RationalFunction<AlgebraicNumber> >() const {
+  this->checkInitialization();
+  return this->owner->opRationalFunctionAlgebraicCoefficients();
+}
+
+template < >
 int Expression::getTypeOperation<RationalFunction<ElementZmodP> >() const {
   this->checkInitialization();
   return this->owner->opRationalFunctionModuloInteger();
@@ -387,6 +393,15 @@ RationalFunction<Rational>
 & inputValue) const {
   this->checkInitialization();
   return this->owner->theObjectContainer.rationalFunctions
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::addObjectReturnIndex(const
+RationalFunction<AlgebraicNumber>
+& inputValue) const {
+  this->checkInitialization();
+  return this->owner->theObjectContainer.rationalFunctionsAlgebraic
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -736,10 +751,19 @@ std::string& Expression::getValueNonConst() const {
 template < >
 RationalFunction<Rational>& Expression::getValueNonConst() const {
   if (!this->isOfType<RationalFunction<Rational> >()) {
-    global.fatal << "Expression not of required type RationalFunctionOld. "
+    global.fatal << "Expression not of required type RationalFunction_Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.rationalFunctions.getElement(this->getLastChild().theData);
+}
+
+template < >
+RationalFunction<AlgebraicNumber>& Expression::getValueNonConst() const {
+  if (!this->isOfType<RationalFunction<AlgebraicNumber> >()) {
+    global.fatal << "Expression not of required type RationalFunction_AlgebraicNumber. "
+    << "The expression equals " << this->toString() << "." << global.fatal;
+  }
+  return this->owner->theObjectContainer.rationalFunctionsAlgebraic.getElement(this->getLastChild().theData);
 }
 
 template < >
@@ -1010,14 +1034,55 @@ bool Expression::convertInternally<RationalFunction<Rational> >(Expression& outp
       resultRF, this->getContext(), *this->owner
     );
   }
+  if (this->isOfType<AlgebraicNumber>()) {
+    Rational rationalValue;
+    if (!this->getValue<AlgebraicNumber>().isRational(&rationalValue)) {
+      return false;
+    }
+    RationalFunction<Rational> result;
+    result.makeConstant(rationalValue);
+    return output.assignValueWithContext(result, this->getContext(), *this->owner);
+  }
   if (this->isOfType<Polynomial<Rational> >()) {
-    RationalFunction<Rational> resultRF;
-    resultRF = this->getValue<Polynomial<Rational> >();
+    RationalFunction<Rational> result;
+    result = this->getValue<Polynomial<Rational> >();
     return output.assignValueWithContext(
-      resultRF, this->getContext(), *this->owner
+      result, this->getContext(), *this->owner
     );
   }
   if (this->isOfType<RationalFunction<Rational> >()) {
+    output = *this;
+    return true;
+  }
+  (*this->owner)
+  << "<hr>ConvertToType_RationalFunctionOld: Failed to convert "
+  << this->toString() << " to rational function. ";
+  return false;
+}
+
+template< >
+bool Expression::convertInternally<RationalFunction<AlgebraicNumber> >(Expression& output) const {
+  MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
+  this->checkInitialization();
+  AlgebraicClosureRationals* closure = &this->owner->theObjectContainer.theAlgebraicClosure;
+  if (this->isOfType<Rational>()) {
+    RationalFunction<AlgebraicNumber> result;
+    AlgebraicNumber value;
+    value.assignRational(this->getValue<Rational>(), closure);
+    result.makeConstant(value);
+    return output.assignValueWithContext(
+      result, this->getContext(), *this->owner
+    );
+  }
+  // TODO(tmilev): please implement conversion from Polynomial<Rational> to Polynomial<AlgebraicNumber>.
+  if (this->isOfType<Polynomial<AlgebraicNumber> >()) {
+    RationalFunction<AlgebraicNumber> result;
+    result = this->getValue<Polynomial<AlgebraicNumber> >();
+    return output.assignValueWithContext(
+      result, this->getContext(), *this->owner
+    );
+  }
+  if (this->isOfType<RationalFunction<AlgebraicNumber> >()) {
     output = *this;
     return true;
   }

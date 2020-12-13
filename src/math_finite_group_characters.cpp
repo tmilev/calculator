@@ -29,7 +29,7 @@ Vector<Rational> WeylGroupData::applyReflectionList(const List<int>& rightReflec
 void WeylGroupData::getSimpleReflectionMatrix(int indexSimpleRoot, Matrix<Rational>& output) const {
   MacroRegisterFunctionWithName("WeylGroup::getSimpleReflectionMatrix");
   int rank = this->getDimension();
-  output.makeIdentityMatrix(rank);
+  output.makeIdentityMatrix(rank, Rational::one(), Rational::zero());
   for (int j = 0; j < rank; j ++) {
     output(indexSimpleRoot, j) -= (this->cartanSymmetric(indexSimpleRoot, j) / cartanSymmetric(indexSimpleRoot, indexSimpleRoot)) * 2;
   }

@@ -609,9 +609,9 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
     this->theHWDualCoordsBaseFielD[i] *= theWeyl.cartanSymmetric.elements[i][i] / 2;
   }
 
-  this->theHWFDpartSimpleCoordS = theWeyl.getSimpleCoordinatesFromFundamental(this->theHWFDpartFundamentalCoordS);
+  this->theHWFDpartSimpleCoordS = theWeyl.getSimpleCoordinatesFromFundamental(this->theHWFDpartFundamentalCoordS, Rational::zero());
   this->theHWFDpartDualCoords = theWeyl.getDualCoordinatesFromFundamental(this->theHWFDpartFundamentalCoordS);
-  this->theHWSimpleCoordSBaseField = theWeyl.getSimpleCoordinatesFromFundamental(this->theHWFundamentalCoordsBaseField);
+  this->theHWSimpleCoordSBaseField = theWeyl.getSimpleCoordinatesFromFundamental(this->theHWFundamentalCoordsBaseField, ringZero);
   this->theChaR.makeFromWeight(this->theHWSimpleCoordSBaseField, this->owner);
 
   unsigned long long startingNumRationalOperations =
@@ -1446,9 +1446,11 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
   ElementUniversalEnveloping<Polynomial<Rational> > theGenElt, result;
   this->getGenericUnMinusElt(true, theGenElt, useNilWeight, ascending);
   result.assignElementLieAlgebra(inputElt, *this->owner, 1);
-  theGenElt.simplify();
+  Polynomial<Rational> onePolynomial;
+  onePolynomial.makeConstant(1);
+  theGenElt.simplify(onePolynomial);
   result *= theGenElt;
-  result.simplify();
+  result.simplify(onePolynomial);
   MatrixTensor<Polynomial<Rational> > endoPart, tempMT, idMT;
   idMT.makeIdentitySpecial();
   MatrixTensor<RationalFunction<Rational> > tempMat1;

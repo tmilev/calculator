@@ -171,7 +171,9 @@ bool ElementUniversalEnveloping<Coefficient>::adjointRepresentationAction(
 }
 
 template <class Coefficient>
-void ElementUniversalEnveloping<Coefficient>::simplify(const Coefficient& ringUnit) {
+void ElementUniversalEnveloping<Coefficient>::simplify(
+  const Coefficient& ringUnit
+) {
   ElementUniversalEnveloping<Coefficient> buffer;
   ElementUniversalEnveloping<Coefficient> outpuT;
   MonomialUniversalEnveloping<Coefficient> tempMon;
@@ -629,7 +631,9 @@ std::string MonomialUniversalEnveloping<Coefficient>::toString(FormatExpressions
 }
 
 template <class Coefficient>
-void ElementUniversalEnveloping<Coefficient>::makeCasimir(SemisimpleLieAlgebra& theOwner) {
+void ElementUniversalEnveloping<Coefficient>::makeCasimir(
+  SemisimpleLieAlgebra& theOwner
+) {
   //std::stringstream out;
   this->makeZero(theOwner);
   WeylGroupData& theWeyl = this->getOwner().theWeyl;
@@ -1892,7 +1896,7 @@ void ElementUniversalEnvelopingOrdered<Coefficient>::assignElementLieAlgebra(
   this->makeZero(theOwner);
   Vector<Rational> elementRootForm;
   input.elementToVectorNegativeRootSpacesFirst(elementRootForm);
-  theOwner.chevalleyGeneratorsInCurrentCoordinates.actOnVectorColumn(elementRootForm);
+  theOwner.chevalleyGeneratorsInCurrentCoordinates.actOnVectorColumn(elementRootForm, ringZero);
   MonomialUniversalEnvelopingOrdered<Coefficient> tempMon;
   tempMon.makeZero(ringZero, theOwner);
   tempMon.generatorsIndices.setSize(1);
@@ -2054,9 +2058,9 @@ Coefficient ElementUniversalEnveloping<Coefficient>::getKillingFormProduct(
     adadAppliedToMon.makeZero(*theOwner);
     adadAppliedToMon.addMonomial(baseGen, 1);
     right.adjointRepresentationAction(adadAppliedToMon, tempElt);
-    tempElt.simplify();
+    tempElt.simplify(Coefficient::one());
     this->adjointRepresentationAction(tempElt, adadAppliedToMon);
-    adadAppliedToMon.simplify();
+    adadAppliedToMon.simplify(Coefficient::one());
     result += adadAppliedToMon.getCoefficientOf(baseGen);
   }
   return result;

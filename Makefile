@@ -24,18 +24,17 @@ OPTIMIZATION_FLAGS=
 # on my current dev laptop. 
 # -- Compilation time: 95 seconds on same machine.
 # - Without O2 optimization.
-# -- Speed: ~121ms to compute 2019 and openssl-send the result back.
+# -- Speed: ~121ms to compute 2019 factorial and openssl-send the result back.
 # -- Compilation time: 30 seconds.
 # -O3 "optimization" is known to break linkage, please DO NOT USE.
 #
 # Conclusion: O2 optimization speeds up computations by 40%, 
 # slows down compilation by a factor of three. 
-# Decision: for now, do not use optimizations:
-# 40% speed up not worth the 3-fold increase in build times.
-# 
 
-# OPTIMIZATION_FLAGS+=-O2
-
+ifeq ($(optimize), 1)
+$(info Optimization flag selected. [1;31mThis may slow down compilation a great deal.[0m) 
+OPTIMIZATION_FLAGS+=-O2
+endif
 
 CFLAGS=-Wpedantic -Wall -Wextra -std=c++0x $(OPTIMIZATION_FLAGS) -c
 LDFLAGS=-pthread $(OPTIMIZATION_FLAGS)

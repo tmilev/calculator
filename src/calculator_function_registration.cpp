@@ -2083,7 +2083,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "MakeRationalFunction",
-    CalculatorConversions::innerRationalFunctioN,
+    CalculatorConversions::innerRationalFunction,
     "",
     "Creates a built-in rational function.",
     "MakeRationalFunction{}(x_1 + MakeRationalFunction{}x_1 + x_2)",
@@ -3005,6 +3005,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "The divisor is scaled so that all coefficients are relatively prime integers, "
     "and so that the leading monomial under the graded lexicographic order (x_2>x_1, etc.) "
     "has positive coefficient.",
+    "GCDPoly{}(x^3-1, x^2-1)\n;"
+    "GCDPoly{}(2/3x^3-2/3, 10x^2-10)\n;"
     "GCDPoly( (a^2-b^2)(a^3-b^3), (a^4-b^4)(a^5-b^5));\n"
     "GCDPoly(PolynomialModP((x^2+3)(x^3+1), 7), PolynomialModP((x^2+3)(x^3+x+1), 7));\n"
     "f=PolynomialModP{}(x^{5}+x^{4}+3x^{3}+x^{2}+x +3,7);\n"
@@ -5860,7 +5862,8 @@ void Calculator::initPredefinedStandardOperations() {
     "a/b+c/d;\n"
     "z=(x-2)(x+1);\n"
     "w=(x-3)(x+1);\n"
-    "1/z+1/w",
+    "1/z+1/w;\n"
+    "1/(x+sqrt(20))+ 1/(x+sqrt(3));",
     "CalculatorFunctions::combineFractionsCommutativeWithInternalLibrary",
     "CommonDenominator",
     outerStandard

@@ -26,7 +26,7 @@ class AlgebraicNumber {
   bool flagDeallocated;
   AlgebraicNumber(): owner(nullptr), basisIndex(0), flagDeallocated(false) {}
   AlgebraicNumber(const Rational& other): owner(nullptr), basisIndex(0), flagDeallocated(false) {
-    this->operator= (other);
+    this->operator=(other);
   }
   AlgebraicNumber(int other): owner(nullptr), basisIndex(0), flagDeallocated(false) {
     this->operator=(Rational(other));
@@ -39,8 +39,12 @@ class AlgebraicNumber {
     this->basisIndex = 0;
     this->flagDeallocated = false;
   }
-  static AlgebraicNumber zero();
+  void makeZero();
   static AlgebraicNumber zeroStatic();
+  static AlgebraicNumber oneStatic();
+  AlgebraicNumber zero() const;
+  AlgebraicNumber one() const;
+
   bool isExpressedViaLatestBasis() const;
   void expressViaLatestBasis();
   bool assignCosRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner);
@@ -48,6 +52,10 @@ class AlgebraicNumber {
     Rational half(1, 2);
     return this->assignCosRationalTimesPi(half - input, inputOwner);
   }
+  // For the purposes fo rescaling rational functions with algebraic number coefficients.
+  AlgebraicNumber getNumerator() const;
+  // For the purposes fo rescaling rational functions with algebraic number coefficients.
+  AlgebraicNumber getDenominator() const;
   bool needsParenthesisForMultiplicationWhenSittingOnTheRightMost() const;
   bool needsParenthesisForMultiplication(FormatExpressions* unused) const;
   bool checkConsistency() const;
@@ -80,7 +88,7 @@ class AlgebraicNumber {
   bool isEqualToOne() const {
     return (*this) == 1;
   }
-  void operator= (const AlgebraicNumber& other) {
+  void operator=(const AlgebraicNumber& other) {
     this->basisIndex = other.basisIndex;
     this->owner = other.owner;
     this->element = other.element;
@@ -99,13 +107,12 @@ class AlgebraicNumber {
     AlgebraicClosureRationals& inputOwner,
     std::stringstream* commentsOnFailure
   );
-  AlgebraicNumber one() const;
   bool assignRationalQuadraticRadical(
     const Rational& input,
     AlgebraicClosureRationals& inputOwner,
     std::stringstream* commentsOnFailure
   );
-  void assignRational(const Rational& input, AlgebraicClosureRationals& inputOwner);
+  void assignRational(const Rational& input, AlgebraicClosureRationals* inputOwner);
   void squareRootDefault(std::stringstream* commentsOnError);
   bool isSmallInteger(int* whichInteger) const {
     Rational theRat;
@@ -127,18 +134,10 @@ class AlgebraicNumber {
   void operator/=(const AlgebraicNumber& other);
   bool operator==(const AlgebraicNumber& other) const;
   bool operator==(const Rational& other) const;
-  bool operator==(int other) const {
-    return *this == Rational(other);
-  }
-  bool operator!= (const AlgebraicNumber& other) const {
-    return !(*this == other);
-  }
-  bool operator!= (int other) const {
-    return !(*this == other);
-  }
-  void negate() {
-    this->element *= - 1;
-  }
+  bool operator==(int other) const;
+  bool operator!= (const AlgebraicNumber& other) const;
+  bool operator!= (int other) const;
+  void negate();
   void operator= (const Polynomial<AlgebraicNumber>& other);
   AlgebraicNumber operator+(const AlgebraicNumber& other) const {
     this->checkConsistency();
@@ -358,8 +357,9 @@ public:
   // at the end of the expression.
   std::string toStringPolynomial(const Polynomial<ElementZmodP>& input, FormatExpressions* format) const;
   ElementZmodP zero() const;
-  static ElementZmodP zeroStatic();
   ElementZmodP one() const;
+  static ElementZmodP zeroStatic();
+  static ElementZmodP oneStatic();
   bool operator>(const ElementZmodP& other) const;
   class Test {
   public:

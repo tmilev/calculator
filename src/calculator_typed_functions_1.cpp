@@ -180,12 +180,12 @@ bool CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNum
     if (!input[1].isOfType<Rational>(&tempRat)) {
       return false;
     }
-    leftAN.assignRational(tempRat, calculator.theObjectContainer.theAlgebraicClosure);
+    leftAN.assignRational(tempRat, &calculator.theObjectContainer.theAlgebraicClosure);
   } else if (!input[2].isOfType(&rightAN)) {
     if (!input[2].isOfType(&tempRat)) {
       return false;
     }
-    rightAN.assignRational(tempRat, calculator.theObjectContainer.theAlgebraicClosure);
+    rightAN.assignRational(tempRat, &calculator.theObjectContainer.theAlgebraicClosure);
   }
   if (rightAN.isEqualToZero()) {
     return output.makeError("Division by zero. ", calculator);
@@ -222,20 +222,20 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber
     return false;
   }
   AlgebraicNumber leftAN, rightAN;
-  Rational tempRat;
+  Rational rationalValue;
   if (!input[1].isOfType(&leftAN)) {
     if (!input[2].isOfType(&rightAN)) {
       return false;
     }
-    if (!input[1].isOfType<Rational>(&tempRat)) {
+    if (!input[1].isOfType<Rational>(&rationalValue)) {
       return false;
     }
-    leftAN.assignRational(tempRat, calculator.theObjectContainer.theAlgebraicClosure);
+    leftAN.assignRational(rationalValue, &calculator.theObjectContainer.theAlgebraicClosure);
   } else if (!input[2].isOfType(&rightAN)) {
-    if (!input[2].isOfType(&tempRat)) {
+    if (!input[2].isOfType(&rationalValue)) {
       return false;
     }
-    rightAN.assignRational(tempRat, calculator.theObjectContainer.theAlgebraicClosure);
+    rightAN.assignRational(rationalValue, &calculator.theObjectContainer.theAlgebraicClosure);
   }
   leftAN *= rightAN;
   return output.assignValue(leftAN, calculator);
@@ -257,13 +257,13 @@ bool CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber(
     if (!input[1].isOfType<Rational>(&tempRat)) {
       return false;
     }
-    leftAN.assignRational(tempRat, calculator.theObjectContainer.theAlgebraicClosure);
+    leftAN.assignRational(tempRat, &calculator.theObjectContainer.theAlgebraicClosure);
     leftAN.checkConsistency();
   } else if (!input[2].isOfType(&rightAN)) {
     if (!input[2].isOfType(&tempRat)) {
       return false;
     }
-    rightAN.assignRational(tempRat, calculator.theObjectContainer.theAlgebraicClosure);
+    rightAN.assignRational(tempRat, &calculator.theObjectContainer.theAlgebraicClosure);
     rightAN.checkConsistency();
   }
   leftAN.checkConsistency();
@@ -430,8 +430,10 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(
     return calculator << "<hr>Possible user input error: attempting to apply Weyl group "
     << "element to weight corresponding to different Weyl group.";
   }
+  Polynomial<Rational> zero;
   Vector<Polynomial<Rational> > theWeightSimpleCoords = theElt.owner->getSimpleCoordinatesFromFundamental(
-    theWeight.weightFundamentalCoordS
+    theWeight.weightFundamentalCoordS,
+    zero
   );
   theElt.actOn(theWeightSimpleCoords);
   theWeight.weightFundamentalCoordS = theElt.owner->getFundamentalCoordinatesFromSimple(theWeightSimpleCoords);
@@ -514,8 +516,12 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
   }
   theSSalg.orderNilradicalNilWeightAscending(rightEltETGVM.getOwnerModule().parabolicSelectionNonSelectedAreElementsLevi);
   theSSalg.flagHasNilradicalOrder = true;
+  RationalFunction<Rational> one(Rational::one());
   if (!rightEltETGVM.multiplyOnTheLeft(
-    leftE.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >(), outputElt, theSSalg, 1
+    leftE.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >(),
+    outputElt,
+    theSSalg,
+    one
   )) {
     return false;
   }
@@ -634,7 +640,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE(Calculator& calculator, 
   }
   ElementUniversalEnveloping<RationalFunction<Rational> > result = inputContextsMerged[1].getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >();
   result *= inputContextsMerged[2].getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >();
-  result.simplify();
+  result.simplify(RationalFunction<Rational>::oneRational());
   return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), calculator);
 }
 
@@ -1002,7 +1008,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossib
       largePower *= - 1;
     }
     Matrix<Rational> idMat;
-    idMat.makeIdentityMatrix(baseRat.numberOfRows);
+    idMat.makeIdentityMatrix(baseRat.numberOfRows, Rational::one(), Rational::zero());
     MathRoutines::raiseToPower(baseRat, largePower, idMat);
     return output.assignMatrix(baseRat, calculator);
   }
@@ -1028,7 +1034,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossib
       largePower *= - 1;
     }
     Matrix<AlgebraicNumber> idMat;
-    idMat.makeIdentityMatrix(baseAlg.numberOfRows);
+    AlgebraicNumber one = calculator.theObjectContainer.theAlgebraicClosure.one();
+    AlgebraicNumber zero = calculator.theObjectContainer.theAlgebraicClosure.zero();
+
+    idMat.makeIdentityMatrix(baseAlg.numberOfRows, one, zero);
     MathRoutines::raiseToPower(baseAlg, largePower, idMat);
     return output.assignMatrix(baseAlg, calculator);
   }  
@@ -1070,11 +1079,13 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger(
       thePower *= - 1;
     }
     Matrix<Rational> idMat;
-    idMat.makeIdentityMatrix(baseRat.numberOfRows);
+    idMat.makeIdentityMatrix(baseRat.numberOfRows, Rational::one(), Rational::zero());
     MathRoutines::raiseToPower(baseRat, thePower, idMat);
     return output.assignMatrix(baseRat, calculator);
   }
   Matrix<AlgebraicNumber> baseAlg;
+  AlgebraicNumber one = calculator.theObjectContainer.theAlgebraicClosure.one();
+  AlgebraicNumber zero = calculator.theObjectContainer.theAlgebraicClosure.zero();
   if (calculator.functionGetMatrix(matrixE, baseAlg)) {
     if (!baseAlg.isSquare() || baseAlg.numberOfColumns == 0) {
       return output.makeError("Exponentiating non-square matrices or matrices with zero rows is not allowed.", calculator);
@@ -1089,7 +1100,9 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger(
       thePower *= - 1;
     }
     Matrix<AlgebraicNumber> idMat;
-    idMat.makeIdentityMatrix(baseAlg.numberOfRows);
+    idMat.makeIdentityMatrix(
+      baseAlg.numberOfRows, one, zero
+    );
     MathRoutines::raiseToPower(baseAlg, thePower, idMat);
     return output.assignMatrix(baseAlg, calculator);
   }
@@ -1117,7 +1130,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger(
       << "negative powers not implemented yet. ";
     }
     Matrix<RationalFunction<Rational> > idMat;
-    idMat.makeIdentityMatrix(baseRF.numberOfRows);
+    idMat.makeIdentityMatrix(baseRF.numberOfRows, RationalFunction<Rational>::oneRational(), RationalFunction<Rational>::zeroRational());
     MathRoutines::raiseToPower(baseRF, thePower, idMat);
     return output.assignMatrix(baseRF, calculator, &theContext);
   }
@@ -2238,7 +2251,7 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE(
     leftE.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >().lieBracketOnTheRight(
       rightE.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >(), result
     );
-    result.simplify();
+    result.simplify(RationalFunction<Rational>::one());
     return output.assignValueWithContext(result, leftE.getContext(), calculator);
   }
   return false;

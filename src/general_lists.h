@@ -197,14 +197,14 @@ public:
   }
   static int leastCommonMultiple(int a, int b);
   template <typename Integral>
-  static Integral greatestCommonDivisor(Integral a, Integral b) {
+  static Integral greatestCommonDivisor(Integral left, Integral right) {
     Integral temp;
-    while (!(b == 0)) {
-      temp = a % b;
-      a = b;
-      b = temp;
+    while (!(right == 0)) {
+      temp = left % right;
+      left = right;
+      right = temp;
     }
-    return a;
+    return left;
   }
   template <typename Integral>
   static Integral leastCommonMultiple(Integral a, Integral b) {

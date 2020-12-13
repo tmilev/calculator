@@ -1359,14 +1359,14 @@ bool CalculatorFunctions::combineFractionsCommutativeWithInternalLibrary(
     return false;
   }
   Expression converted(calculator);
-  if (!CalculatorConversions::functionRationalFunction(calculator, input, converted)) {
+  if (!CalculatorConversions::functionRationalFunction<AlgebraicNumber>(calculator, input, converted)) {
     return false;
   }
-  WithContext<RationalFunction<Rational> > rationalFunction;
+  WithContext<RationalFunction<AlgebraicNumber> > rationalFunction;
   if (!converted.isOfTypeWithContext(&rationalFunction)) {
     return false;
   }
-  return CalculatorConversions::innerExpressionFromRF(calculator, rationalFunction.content, output, &rationalFunction.context);
+  return CalculatorConversions::innerExpressionFromRationalFunction(calculator, rationalFunction.content, output, &rationalFunction.context);
 }
 
 bool CalculatorFunctions::combineFractionsCommutative(
@@ -2059,7 +2059,7 @@ bool CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals");
   IntegralRationalFunctionComputation theComputation(&calculator);
-  bool isGood = CalculatorConversions::functionRationalFunction(calculator, input, theComputation.inpuTE);
+  bool isGood = CalculatorConversions::functionRationalFunction<Rational>(calculator, input, theComputation.inpuTE);
   if (isGood) {
     isGood = theComputation.inpuTE.isOfType<RationalFunction<Rational> >();
   }
@@ -2091,7 +2091,7 @@ bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorith
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals");
   IntegralRationalFunctionComputation theComputation(&calculator);
-  bool isGood = CalculatorConversions::innerRationalFunctioN(calculator, input, theComputation.inpuTE);
+  bool isGood = CalculatorConversions::innerRationalFunction(calculator, input, theComputation.inpuTE);
   if (isGood) {
     isGood = theComputation.inpuTE.isOfType<RationalFunction<Rational> >();
   }
@@ -3504,11 +3504,11 @@ bool CalculatorFunctions::innerRationalFunctionSubstitution(
   if (input[0].getValue<RationalFunction<Rational> >().minimalNumberOfVariables() > 1) {
     return false;
   }
-  Expression ResultRationalForm;
+  Expression resultRationalForm;
   ExpressionContext finalContext(calculator);
   finalContext.makeOneVariable(input[1]);
-  ResultRationalForm.assignValueWithContext(input[0].getValue<RationalFunction<Rational> >(), finalContext, calculator);
-  return CalculatorConversions::innerExpressionFromRF(calculator, ResultRationalForm, output);
+  resultRationalForm.assignValueWithContext(input[0].getValue<RationalFunction<Rational> >(), finalContext, calculator);
+  return CalculatorConversions::innerExpressionFromRationalFunction<Rational>(calculator, resultRationalForm, output);
 }
 
 bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
@@ -3533,7 +3533,8 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
     << "The matrix is not square.";
     return output.makeError(out.str(), calculator);
   }
-  outputMat.makeIdentityMatrix(theMatrix.numberOfRows);
+  outputMat.makeIdentityMatrix(
+  theMatrix.numberOfRows,RationalFunction<Rational>::oneRational(), RationalFunction<Rational>::zeroRational());
   int tempI;
   int NumFoundPivots = 0;
   std::stringstream out, outLaTeX;
@@ -3773,7 +3774,7 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionSplitToBuidingBloc
     return false;
   }
   IntegralRationalFunctionComputation theComputation(&calculator);
-  if (!CalculatorConversions::functionRationalFunction(
+  if (!CalculatorConversions::functionRationalFunction<Rational>(
     calculator, theFunctionE, theComputation.inpuTE
   )) {
     return calculator
@@ -6737,7 +6738,7 @@ bool CalculatorFunctions::innerDeterminant(
     return true;
   }
   if (CalculatorFunctions::functionDeterminant<RationalFunction<Rational> >(
-    calculator, argument, output, CalculatorConversions::functionRationalFunction, 10
+    calculator, argument, output, CalculatorConversions::functionRationalFunction<Rational>, 10
   )) {
     return true;
   }
@@ -6771,7 +6772,7 @@ bool CalculatorFunctions::innerHighestWeightTransposeAntiAutomorphismBilinearFor
     weight,
     &finalContext,
     constSSalg.getRank(),
-    CalculatorConversions::functionRationalFunction
+    CalculatorConversions::functionRationalFunction<Rational>
   )) {
     return calculator
     << "<hr>Failed to obtain highest weight from the third argument which is "

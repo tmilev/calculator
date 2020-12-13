@@ -6,6 +6,7 @@
 #include "math_general.h"
 #include "math_extra_vector_space.h"
 #include "math_extra_graph.h"
+#include "math_general_polynomial_computations_basic_implementation.h"
 #include "json.h"
 
 //To do: move Weyl groups to this file. Eliminate all redundant code and organize nicely.

@@ -396,14 +396,12 @@ std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(FormatExpres
   FormatExpressions charPolyFormat;
   charPolyFormat.polynomialAlphabet.setSize(1);
   charPolyFormat.polynomialAlphabet[0] = "q";
-  //  out << "Number of Vectors<Rational>: " << this->RootSystem.size<< "\n
   if (this->conjugacyClassCount() > 0) {
     out << "<br>" << this->conjugacyClassCount() << " conjugacy classes total.\n";
     for (int i = 0; i < this->conjugacyClasses.size; i ++) {
       out << "<hr>Conjugacy class " << i + 1 << ": ";
       if (this->conjugacyClasses[i].flagRepresentativeComputed) {
         out << " represented by " << this->conjugacyClasses[i].representative.toString(theFormat) << ". ";
-        //out << this->conjugacyClasses[i].toStringInvariants(theFormat); FIXME: do this sanely
       } else {
         out << " representative not computed. ";
       }
@@ -413,11 +411,16 @@ std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(FormatExpres
           out << "Characteristic poly standard representation: "
           << this->characterPolynomialsConjugacyClassesStandardRepresentation[i].toString(&charPolyFormat);
           const List<int>& currentHashList = this->characterPolynomialsConjugacyClassesStandardRepresentation.getHashArray(
-            this->characterPolynomialsConjugacyClassesStandardRepresentation.getHash(this->characterPolynomialsConjugacyClassesStandardRepresentation[i])
+            this->characterPolynomialsConjugacyClassesStandardRepresentation.getHash(
+              this->characterPolynomialsConjugacyClassesStandardRepresentation[i]
+            )
           );
           int numClassesSameCharPoly = 0;
           for (int j = 0; j < currentHashList.size; j ++) {
-            if (this->characterPolynomialsConjugacyClassesStandardRepresentation[currentHashList[j]] == this->characterPolynomialsConjugacyClassesStandardRepresentation[i]) {
+            if (
+              this->characterPolynomialsConjugacyClassesStandardRepresentation[currentHashList[j]] ==
+              this->characterPolynomialsConjugacyClassesStandardRepresentation[i]
+            ) {
               numClassesSameCharPoly ++;
             }
           }

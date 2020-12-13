@@ -411,16 +411,10 @@ std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(FormatExpres
           Polynomial<Rational> characteristicPolynomial = this->characterPolynomialsConjugacyClassesStandardRepresentation[i];
           out << "Characteristic poly standard representation: "
           << characteristicPolynomial.toString(&charPolyFormat);
-          int hashIndex = this->characterPolynomialsConjugacyClassesStandardRepresentation.getHash(
-            characteristicPolynomial
-          );
-          const List<int>& currentHashList = this->characterPolynomialsConjugacyClassesStandardRepresentation.getHashArray(
-            hashIndex
-          );
           int numClassesSameCharPoly = 0;
-          for (int j = 0; j < currentHashList.size; j ++) {
+          for (int j = 0; j < this->characterPolynomialsConjugacyClassesStandardRepresentation.size; j ++) {
             if (
-              this->characterPolynomialsConjugacyClassesStandardRepresentation[currentHashList[j]] ==
+              this->characterPolynomialsConjugacyClassesStandardRepresentation[j] ==
               characteristicPolynomial
             ) {
               numClassesSameCharPoly ++;
@@ -429,12 +423,12 @@ std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(FormatExpres
           if (numClassesSameCharPoly > 1) {
             out << " The characteristic polynomial is the same as that of " << numClassesSameCharPoly
             << " conjugacy classes, numbers: ";
-            for (int j = 0; j < currentHashList.size; j ++) {
+            for (int j = 0; j < this->characterPolynomialsConjugacyClassesStandardRepresentation.size; j ++) {
               if (
-                this->characterPolynomialsConjugacyClassesStandardRepresentation[currentHashList[j]] ==
-                this->characterPolynomialsConjugacyClassesStandardRepresentation[i]
+                this->characterPolynomialsConjugacyClassesStandardRepresentation[j] ==
+                characteristicPolynomial
               ) {
-                out << currentHashList[j] + 1 << (j == currentHashList.size - 1 ? "" : ", ");
+                out << j << ", ";
               }
             }
           }

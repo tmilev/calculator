@@ -408,18 +408,20 @@ std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(FormatExpres
       out << "Class size: " << this->conjugacyClasses[i].size.toString() << ".\n<br>\n";
       if (this->flagCharPolysAreComputed) {
         if (i < this->characterPolynomialsConjugacyClassesStandardRepresentation.size) {
+          Polynomial<Rational> characteristicPolynomial = this->characterPolynomialsConjugacyClassesStandardRepresentation[i];
           out << "Characteristic poly standard representation: "
-          << this->characterPolynomialsConjugacyClassesStandardRepresentation[i].toString(&charPolyFormat);
+          << characteristicPolynomial.toString(&charPolyFormat);
+          int hashIndex = this->characterPolynomialsConjugacyClassesStandardRepresentation.getHash(
+            characteristicPolynomial
+          );
           const List<int>& currentHashList = this->characterPolynomialsConjugacyClassesStandardRepresentation.getHashArray(
-            this->characterPolynomialsConjugacyClassesStandardRepresentation.getHash(
-              this->characterPolynomialsConjugacyClassesStandardRepresentation[i]
-            )
+            hashIndex
           );
           int numClassesSameCharPoly = 0;
           for (int j = 0; j < currentHashList.size; j ++) {
             if (
               this->characterPolynomialsConjugacyClassesStandardRepresentation[currentHashList[j]] ==
-              this->characterPolynomialsConjugacyClassesStandardRepresentation[i]
+              characteristicPolynomial
             ) {
               numClassesSameCharPoly ++;
             }
@@ -428,7 +430,10 @@ std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(FormatExpres
             out << " The characteristic polynomial is the same as that of " << numClassesSameCharPoly
             << " conjugacy classes, numbers: ";
             for (int j = 0; j < currentHashList.size; j ++) {
-              if (this->characterPolynomialsConjugacyClassesStandardRepresentation[currentHashList[j]] == this->characterPolynomialsConjugacyClassesStandardRepresentation[i]) {
+              if (
+                this->characterPolynomialsConjugacyClassesStandardRepresentation[currentHashList[j]] ==
+                this->characterPolynomialsConjugacyClassesStandardRepresentation[i]
+              ) {
                 out << currentHashList[j] + 1 << (j == currentHashList.size - 1 ? "" : ", ");
               }
             }

@@ -470,7 +470,7 @@ bool ExpressionContext::mergeContexts(
   const ExpressionContext& other,
   ExpressionContext& outputContext
 ) {
-  MacroRegisterFunctionWithName("Expression::ContextmergeContexts");
+  MacroRegisterFunctionWithName("Expression::mergeContexts");
   if (this == &outputContext || &other == &outputContext) {
     ExpressionContext leftCopy = *this;
     ExpressionContext rightCopy = other;
@@ -726,7 +726,8 @@ bool WithContext<ElementWeylAlgebra<Rational> >::extendContext(
 template<>
 bool WithContext<RationalFunction<Rational> >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
-){
+) {
+  MacroRegisterFunctionWithName("WithContext_RationalFunction_Rational::extendContext");
   PolynomialSubstitution<Rational> substitution;
   this->context.polynomialSubstitutionNoFailure(newContext, substitution, Rational::one());
   if (!this->content.substitution(substitution, Rational::one(), commentsOnFailure)) {
@@ -743,9 +744,30 @@ bool WithContext<RationalFunction<Rational> >::extendContext(
 }
 
 template<>
+bool WithContext<RationalFunction<AlgebraicNumber> >::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("WithContext_RationalFunction_AlgebraicNumber::extendContext");
+  PolynomialSubstitution<AlgebraicNumber> substitution;
+  AlgebraicClosureRationals& closure = this->context.owner->theObjectContainer.theAlgebraicClosure;
+  this->context.polynomialSubstitutionNoFailure(newContext, substitution, closure.one());
+  if (!this->content.substitution(substitution, closure.one(), commentsOnFailure)) {
+    // This is not supposed to happen.
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "<hr>Failed to apply substitution: "
+      << substitution.toString()
+      << " to " << this->content.toString();
+    }
+    return false;
+  }
+  this->context = newContext;
+  return true;
+}
+
+template<>
 bool WithContext<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
-){
+) {
   (void) commentsOnFailure;
   PolynomialSubstitution<Rational> substitution;
   this->context.polynomialSubstitutionNoFailure(newContext, substitution, Rational::one());
@@ -757,7 +779,7 @@ bool WithContext<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >:
 template<>
 bool WithContext<Weight<Polynomial<Rational> > >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
-){
+) {
   (void) commentsOnFailure;
   PolynomialSubstitution<Rational> substitution;
   this->context.polynomialSubstitution(newContext, substitution, Rational::one());
@@ -820,6 +842,10 @@ bool Expression::setContextAtLeastEqualTo(
   WithContext<RationalFunction<Rational> > rationalFunction;
   if (this->isOfTypeWithContext(&rationalFunction)) {
     return rationalFunction.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
+  }
+  WithContext<RationalFunction<AlgebraicNumber> > rationalFunctionAlgebraic;
+  if (this->isOfTypeWithContext(&rationalFunctionAlgebraic)) {
+    return rationalFunctionAlgebraic.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
   WithContext<ElementWeylAlgebra<Rational> > elementWeylAlgebra;
   if (this->isOfTypeWithContext(&elementWeylAlgebra)) {

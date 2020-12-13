@@ -8,8 +8,8 @@
 template <class Coefficient>
 class RationalFunction {
 private:
-  void addSameTypes(const RationalFunction<Rational>& other);
-  void addHonestRationalFunction(const RationalFunction<Rational>& other);
+  void addSameTypes(const RationalFunction<Coefficient>& other);
+  void addHonestRationalFunction(const RationalFunction<Coefficient>& other);
   void reduceRationalFunctionToPolynomial();
   void reducePolynomialToRational();
   bool convertToType(int theType);
@@ -45,7 +45,7 @@ public:
     const Coefficient& one
   );
   bool substitution(
-    const PolynomialSubstitution<Rational>& substitution,
+    const PolynomialSubstitution<Coefficient>& substitution,
     const Coefficient& one,
     std::stringstream* commentsOnFailure
   );

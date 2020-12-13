@@ -2901,16 +2901,16 @@ bool Expression::mergeContextsMyArumentsAndConvertThem(
   }
   output.reset(*this->owner, this->children.size);
   output.addChildOnTop((*this)[0]);
-  Expression convertedE;
+  Expression convertedExpression;
   for (int i = 1; i < mergedContexts.size(); i ++) {
-    if (!mergedContexts[i].convertInternally<theType>(convertedE)) {
+    if (!mergedContexts[i].convertInternally<theType>(convertedExpression)) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "<hr>Failed to convert "
         << mergedContexts[i].toString() << " to the desired type. ";
       }
       return false;
     }
-    output.addChildOnTop(convertedE);
+    output.addChildOnTop(convertedExpression);
   }
   return true;
 }
@@ -3195,6 +3195,7 @@ bool WithContext<BuiltIn>::setContextAtLeast(
   ExpressionContext& inputOutputContext,
   std::stringstream* commentsOnFailure
 ) {
+  MacroRegisterFunctionWithName("WithContext::setContextAtLeast");
   ExpressionContext newContext;
   if (!inputOutputContext.mergeContexts(this->context, newContext)) {
     if (commentsOnFailure != nullptr) {

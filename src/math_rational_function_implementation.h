@@ -577,7 +577,7 @@ void RationalFunction<Coefficient>::operator+=(const RationalFunction<Coefficien
     global.fatal << "Corrupt other rational function. " << global.fatal;
   }
   if (other.expressionType < this->expressionType) {
-    RationalFunction tempRF;
+    RationalFunction<Coefficient> tempRF;
     tempRF = other;
     tempRF.convertToType(this->expressionType);
     this->addSameTypes(tempRF);
@@ -814,7 +814,7 @@ void RationalFunction<Coefficient>::clearDenominators(RationalFunction<Coefficie
 }
 
 template<class Coefficient>
-void RationalFunction<Coefficient>::addSameTypes(const RationalFunction<Rational>& other) {
+void RationalFunction<Coefficient>::addSameTypes(const RationalFunction<Coefficient>& other) {
   switch (this->expressionType) {
     case RationalFunction::typeConstant:
       this->constantValue += other.constantValue;
@@ -850,22 +850,27 @@ void RationalFunction<Coefficient>::reducePolynomialToRational() {
 }
 
 template<class Coefficient>
-void RationalFunction<Coefficient>::addHonestRationalFunction(const RationalFunction<Rational>& other) {
-  MacroRegisterFunctionWithName("RationalFunctionOld::addHonestRationalFunction");
-  Rational tempRat;
-  if (!this->denominator.getElement().isProportionalTo(other.denominator.getElementConst(), tempRat, Rational(1))) {
-    Polynomial<Rational> buffer;
+void RationalFunction<Coefficient>::addHonestRationalFunction(const RationalFunction<Coefficient>& other) {
+  MacroRegisterFunctionWithName("RationalFunction::addHonestRationalFunction");
+  Coefficient proportionalityCoefficient;
+  if (!this->denominator.getElement().isProportionalTo(
+    other.denominator.getElementConst(),
+    proportionalityCoefficient,
+    Coefficient::oneStatic()
+  )) {
+    Polynomial<Coefficient> buffer;
     buffer = this->denominator.getElement();
     this->numerator.getElement() *= other.denominator.getElementConst();
     buffer *= other.numerator.getElementConst();
     this->numerator.getElement() += buffer;
     this->denominator.getElement() *= other.denominator.getElementConst();
-    if (this->denominator.getElement().isEqualToZero())
+    if (this->denominator.getElement().isEqualToZero()) {
       global.fatal << "Denominator of rational function is zero." << global.fatal;
+    }
     this->simplify();
   } else {
-    this->numerator.getElement() *= tempRat;
-    this->denominator.getElement() *= tempRat;
+    this->numerator.getElement() *= proportionalityCoefficient;
+    this->denominator.getElement() *= proportionalityCoefficient;
     this->numerator.getElement() += other.numerator.getElementConst();
     this->reduceMemory();
     this->simplifyLeadingCoefficientOnly();
@@ -1097,7 +1102,7 @@ bool RationalFunction<Coefficient>::substitution(
 
 template<class Coefficient>
 bool RationalFunction<Coefficient>::substitution(
-  const PolynomialSubstitution<Rational>& substitution,
+  const PolynomialSubstitution<Coefficient>& substitution,
   const Coefficient& one,
   std::stringstream* commentsOnFailure
 ) {
@@ -1127,7 +1132,8 @@ bool RationalFunction<Coefficient>::substitution(
       this->simplify();
       return true;
     default:
-      global.fatal << "Default case not allowed. " << global.fatal;
+      global.fatal << "Default case not allowed in RationalFunction::substitution. Rational function: "
+      << this->toString() << "." << global.fatal;
       break;
   }
   return false;

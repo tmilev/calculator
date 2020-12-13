@@ -2066,7 +2066,6 @@ bool Expression::mergeContextsMyAruments(
       << " with " << (*this)[i].getContext().toString();
       return false;
     }
-
   }
   output.reset(*this->owner, this->size());
   output.addChildOnTop((*this)[0]);

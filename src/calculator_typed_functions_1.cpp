@@ -560,11 +560,19 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF");
   if (!CalculatorFunctionsBinaryOps::innerMultiplyTypeByType<RationalFunction<Rational> >(calculator, input, output)) {
-    return false;
+    if (!CalculatorFunctionsBinaryOps::innerMultiplyTypeByType<RationalFunction<AlgebraicNumber> >(calculator, input, output)) {
+      return false;
+    }
+    RationalFunction<AlgebraicNumber> simplified;
+    if (!output.isOfType(&simplified)) {
+      return false;
+    }
+    simplified.simplify();
+    return output.assignValueWithContext(simplified, output.getContext(), calculator);
   }
   RationalFunction<Rational> simplified;
   if (!output.isOfType(&simplified)) {
-    return true;
+    return false;
   }
   simplified.simplify();
   return output.assignValueWithContext(simplified, output.getContext(), calculator);
@@ -575,11 +583,19 @@ bool CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRati
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial");
   if (!CalculatorFunctionsBinaryOps::innerDivideTypeByType<RationalFunction<Rational> >(calculator, input, output)) {
-    return false;
+    if (!CalculatorFunctionsBinaryOps::innerDivideTypeByType<RationalFunction<AlgebraicNumber> >(calculator, input, output)) {
+      return false;
+    }
+    RationalFunction<AlgebraicNumber> simplified;
+    if (!output.isOfType(&simplified)) {
+      return false;
+    }
+    simplified.simplify();
+    return output.assignValueWithContext(simplified, output.getContext(), calculator);
   }
   RationalFunction<Rational> simplified;
   if (!output.isOfType(&simplified)) {
-    return true;
+    return false;
   }
   simplified.simplify();
   return output.assignValueWithContext(simplified, output.getContext(), calculator);
@@ -589,7 +605,15 @@ bool CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF");
-  return CalculatorFunctionsBinaryOps::innerAddTypeToType<RationalFunction<Rational> >(calculator, input, output);
+  if (CalculatorFunctionsBinaryOps::innerAddTypeToType<RationalFunction<Rational> >(calculator, input, output)) {
+    return true;
+  }
+  if (CalculatorFunctionsBinaryOps::innerAddTypeToType<RationalFunction<AlgebraicNumber> >(
+    calculator, input, output
+  )) {
+    return true;
+  }
+  return false;
 }
 
 bool CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA(

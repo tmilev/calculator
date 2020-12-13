@@ -151,7 +151,8 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyTypeByType(Calculator& calculato
   if (!input.mergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &calculator.comments)) {
     return false;
   }
-  theType result = inputContextsMerged[1].getValue<theType>();
+  theType result;
+  result = inputContextsMerged[1].getValue<theType>();
   result *= inputContextsMerged[2].getValue<theType>();
   return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), calculator);
 }
@@ -185,7 +186,8 @@ bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& calculator,
   if (inputContextsMerged[2].getValue<theType>().isEqualToZero()) {
     return output.makeError("Division by zero. ", calculator);
   }
-  theType result = inputContextsMerged[1].getValue<theType>();
+  theType result;
+  result = inputContextsMerged[1].getValue<theType>();
   result /= inputContextsMerged[2].getValue<theType>();
   return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), calculator);
 }
@@ -324,11 +326,11 @@ bool CalculatorConversions::functionRationalFunction(
       !CalculatorConversions::functionRationalFunction<Coefficient>(calculator, input[1], leftE) ||
       !CalculatorConversions::functionRationalFunction<Coefficient>(calculator, input[2], rightE)
     ) {
-      return calculator << "<hr> Failed to convert " << input[1].toString()
+      return calculator << "<hr>Failed to convert " << input[1].toString()
       << " and " << input[2].toString() << " to rational function. ";
     }
     if (leftE.isError() || rightE.isError()) {
-      return calculator << "<hr> Conversion of " << input[1].toString()
+      return calculator << "<hr>Conversion of " << input[1].toString()
       << " and " << input[2].toString() << " returned error(s): "
       << leftE.toString() << " and " << rightE.toString();
     }
@@ -361,7 +363,7 @@ bool CalculatorConversions::functionRationalFunction(
         << input[1].toString() << " to rational function. ";
       }
       if (leftE.isError()) {
-        return calculator << "<hr> Conversion of " << input[1].toString() << " returned error: " << leftE.toString();
+        return calculator << "<hr>Conversion of " << input[1].toString() << " returned error: " << leftE.toString();
       }
       RationalFunction<Coefficient> rationalFunction;
       rationalFunction = leftE.getValue<RationalFunction<Coefficient> >();
@@ -372,13 +374,17 @@ bool CalculatorConversions::functionRationalFunction(
     << input[1].toString() << " to power " << input[2].toString()
     << ": failed to convert the power to small integer. "
     << "I am treating " << input.toString()
-    << " as a single variable: please make sure that is what you want.";
+    << " as a single variable: please make sure that is what you want. ";
   }
   if (input.isOfType<RationalFunction<Coefficient> >()) {
     output = input;
     return true;
   }
-  if (input.isOfType<Polynomial<Coefficient> >() || input.isOfType<Coefficient>()) {
+  if (
+    input.isOfType<Polynomial<Coefficient> >() ||
+    input.isOfType<Coefficient>() ||
+    input.isOfType<Rational>()
+  ) {
     return input.convertInternally<RationalFunction<Coefficient> >(output);
   }
   if (input.isOfType<AlgebraicNumber>()) {

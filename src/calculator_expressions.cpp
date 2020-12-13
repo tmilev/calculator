@@ -1025,7 +1025,7 @@ bool Expression::convertInternally<PolynomialModuloPolynomial<ElementZmodP> >(Ex
 
 template< >
 bool Expression::convertInternally<RationalFunction<Rational> >(Expression& output) const {
-  MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
+  MacroRegisterFunctionWithName("Expression::convertInternally_RationalFunction_Rational");
   this->checkInitialization();
   if (this->isOfType<Rational>()) {
     RationalFunction<Rational> resultRF;
@@ -1055,14 +1055,14 @@ bool Expression::convertInternally<RationalFunction<Rational> >(Expression& outp
     return true;
   }
   (*this->owner)
-  << "<hr>ConvertToType_RationalFunctionOld: Failed to convert "
+  << "<hr>convertInternally_RationalFunction_Rational: Failed to convert "
   << this->toString() << " to rational function. ";
   return false;
 }
 
 template< >
 bool Expression::convertInternally<RationalFunction<AlgebraicNumber> >(Expression& output) const {
-  MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
+  MacroRegisterFunctionWithName("Expression::converInternally_RationalFunction_AlgebraicNumber");
   this->checkInitialization();
   AlgebraicClosureRationals* closure = &this->owner->theObjectContainer.theAlgebraicClosure;
   if (this->isOfType<Rational>()) {
@@ -1070,6 +1070,13 @@ bool Expression::convertInternally<RationalFunction<AlgebraicNumber> >(Expressio
     AlgebraicNumber value;
     value.assignRational(this->getValue<Rational>(), closure);
     result.makeConstant(value);
+    return output.assignValueWithContext(
+      result, this->getContext(), *this->owner
+    );
+  }
+  if (this->isOfType<AlgebraicNumber>()) {
+    RationalFunction<AlgebraicNumber> result;
+    result.makeConstant(this->getValue<AlgebraicNumber>());
     return output.assignValueWithContext(
       result, this->getContext(), *this->owner
     );
@@ -1087,8 +1094,8 @@ bool Expression::convertInternally<RationalFunction<AlgebraicNumber> >(Expressio
     return true;
   }
   (*this->owner)
-  << "<hr>ConvertToType_RationalFunctionOld: Failed to convert "
-  << this->toString() << " to rational function. ";
+  << "<hr>converInternally_RationalFunction_AlgebraicNumber: Failed to convert "
+  << this->toString() << " to rational function with algebraic coefficients. ";
   return false;
 }
 

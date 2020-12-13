@@ -2438,12 +2438,8 @@ bool FiniteGroup<elementSomeGroup>::registerConjugacyClass(
   Polynomial<Rational> theCharPoly;
   theClass.representative.getCharacteristicPolynomialStandardRepresentation(theCharPoly);
   if (this->characterPolynomialsConjugacyClassesStandardRepresentation.contains(theCharPoly)) {
-    const List<int>& indicesPossibleConjugates =
-    this->characterPolynomialsConjugacyClassesStandardRepresentation.getHashArray(
-      this->characterPolynomialsConjugacyClassesStandardRepresentation.getHash(theCharPoly)
-    );
-    for (int i = 0; i < indicesPossibleConjugates.size; i ++) {
-      elementSomeGroup& otherRepresentative = this->conjugacyClasses[indicesPossibleConjugates[i]].representative;
+    for (int i = 0; i < this->conjugacyClasses.size; i ++) {
+      elementSomeGroup& otherRepresentative = this->conjugacyClasses[i].representative;
       if (!dontAddIfSameInvariants) {
         if (this->areConjugate(theClass.representative, otherRepresentative)) {
           return false;

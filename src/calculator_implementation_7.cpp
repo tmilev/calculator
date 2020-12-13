@@ -4066,10 +4066,10 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIaand
 
   Expression theQuadraticDiva = xSquared + (b / a) * x + c / a;
   Expression xplusbdiv2a = x + b / (twoE * a);
-  Expression D = (fourE * a * c - bSquared) / (fourE * aSquared);
-  Expression sqrtD;
-  sqrtD.makeSqrt(calculator, D, 2);
-  Expression arcTanArgument = xplusbdiv2a / sqrtD;
+  Expression F = (fourE * a * c - bSquared) / (fourE * aSquared);
+  Expression sqrtF;
+  sqrtF.makeSqrt(calculator, F, 2);
+  Expression arcTanArgument = xplusbdiv2a / sqrtF;
   Expression theArcTan(calculator);
   theArcTan.addChildAtomOnTop(calculator.opArcTan());
   theArcTan.addChildOnTop(arcTanArgument);
@@ -4077,7 +4077,7 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIaand
   theLog.addChildAtomOnTop(calculator.opLog());
   theLog.addChildOnTop(theQuadraticDiva);
   Expression C = B - (A * b) / (twoE * a);
-  output = (oneE / a) * ((A / twoE) * theLog + (C / sqrtD) * theArcTan);
+  output = (oneE / a) * ((A / twoE) * theLog + (C / sqrtF) * theArcTan);
   output.checkConsistencyRecursively();
   output.checkInitializationRecursively();
   return true;

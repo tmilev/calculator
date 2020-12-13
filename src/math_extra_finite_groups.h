@@ -50,9 +50,7 @@ public:
   Coefficient& operator[](int i) const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   static unsigned int hashFunction(const ClassFunction& input);
-  unsigned int hashFunction() const {
-    return this->hashFunction(*this);
-  }
+  unsigned int hashFunction() const;
   void operator*=(const Coefficient& inputCF) {
     this->data *= inputCF;
   }
@@ -177,11 +175,12 @@ public:
       return out.str();
     }
     bool operator>(const ConjugacyClass& other) const {
-      return this->representative>other.representative;
+      return this->representative > other.representative;
     }
   };
   List<ConjugacyClass> conjugacyClasses;
-  HashedList<Polynomial<Rational>,Polynomial<Rational>::hashFunction> characterPolynomialsConjugacyClassesStandardRepresentation;
+  HashedList<Polynomial<Rational>, Polynomial<Rational>::hashFunction>
+  characterPolynomialsConjugacyClassesStandardRepresentation;
 
   // All of these lists will be expected to be sorted at all times, so please
   // insert using .BSInsertDontDup() if you for some reason can't use the friendly
@@ -193,7 +192,6 @@ public:
   void addIrreducibleRepresentation(GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational>& r);
   void addIrreducibleRepresentation(GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational>& r);
   void addCharacter(const ClassFunction<FiniteGroup<elementSomeGroup>, Rational>& X);
-
 
   List<elementSomeGroup> squaresCCReps;
 

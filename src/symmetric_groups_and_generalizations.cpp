@@ -787,7 +787,6 @@ void PermutationR2::getWordjjPlus1(List<int>& word) const {
   }
 }
 
-
 void PermutationGroupData::makeSymmetricGroup(int n) {
   this->theGroup = &this->theGroupMayBeHereNameIsLongToDiscourageUse;
   this->theGroup->generators.setSize(n - 1);

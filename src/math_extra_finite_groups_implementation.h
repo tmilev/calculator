@@ -1908,6 +1908,11 @@ std::ostream& operator<<(std::ostream& out, const ClassFunction<someFiniteGroup,
 }
 
 template<class someFiniteGroup, typename Coefficient>
+unsigned int ClassFunction<someFiniteGroup, Coefficient>::hashFunction() const {
+  return this->hashFunction(*this);
+}
+
+template<class someFiniteGroup, typename Coefficient>
 unsigned int ClassFunction<someFiniteGroup, Coefficient>::hashFunction(const ClassFunction<someFiniteGroup, Coefficient>& input) {
   unsigned int acc = 0;
   int N = (input.data.size < someRandomPrimesSize) ? input.data.size : someRandomPrimesSize;

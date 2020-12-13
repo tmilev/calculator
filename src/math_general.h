@@ -2648,7 +2648,6 @@ public:
   Polynomial(const Polynomial<Coefficient>& other) {
     this->operator=(other);
   }
-  static bool flagAnErrorHasOccuredTimeToPanic;
   unsigned int hashFunction() const {
     return this->::LinearCombination<MonomialP, Coefficient>::hashFunction();
   }

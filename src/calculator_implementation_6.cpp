@@ -502,7 +502,7 @@ bool CalculatorFunctions::testTopicListProblems(
   (void) input;
   TopicElementParser::Test tester;
   tester.defaultTopicListsOK();
-  return output.assignValue(tester.comments, calculator);
+  return output.assignValue(tester.comments.str(), calculator);
 }
 
 bool CalculatorFunctions::testProblemInterpretation(

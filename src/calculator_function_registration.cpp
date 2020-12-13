@@ -8631,6 +8631,7 @@ void Calculator::initializeToStringHandlers() {
   this->addOneStringAtomHandler(this->opIntervalClosed()        , Expression::toStringIntervalClosed              );
   this->addOneStringAtomHandler(this->opQuote()                 , Expression::toStringQuote                       );
   this->addOneStringAtomHandler(this->opDefineConditional()     , Expression::toStringDefineConditional           );
+
   this->addOneStringAtomHandler(this->opDivide()                , Expression::toStringDivide                      );
   this->addOneStringAtomHandler(this->opTensor()                , Expression::toStringTensor                      );
   this->addOneStringAtomHandler(this->opIn()                    , Expression::toStringIn                          );
@@ -8686,6 +8687,7 @@ void Calculator::initializeToStringHandlers() {
   this->addOneBuiltInHandler<PolynomialModuloPolynomial<ElementZmodP>                                 >();
   this->addOneBuiltInHandler<AlgebraicNumber                                                          >();
   this->addOneBuiltInHandler<RationalFunction<Rational>                                               >();
+  this->addOneBuiltInHandler<RationalFunction<AlgebraicNumber>                                        >();
   this->addOneBuiltInHandler<RationalFunction<ElementZmodP>                                           >();
   this->addOneBuiltInHandler<Weight<Polynomial<Rational> >                                            >();
   this->addOneBuiltInHandler<SemisimpleLieAlgebra*                                                    >();

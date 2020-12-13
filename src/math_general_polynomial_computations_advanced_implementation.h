@@ -1258,7 +1258,8 @@ void PolynomialSystem<Coefficient>::setSerreLikeSolutionIndex(
 }
 
 template<class Coefficient>
-bool Polynomial<Coefficient>::leastCommonMultipleOneVariable(const Polynomial<Coefficient>& left,
+bool Polynomial<Coefficient>::leastCommonMultipleOneVariable(
+  const Polynomial<Coefficient>& left,
   const Polynomial<Coefficient>& right,
   Polynomial<Coefficient>& output,
   std::stringstream* commentsOnFailure
@@ -1276,6 +1277,7 @@ bool Polynomial<Coefficient>::leastCommonMultipleOneVariable(const Polynomial<Co
     global.fatal << "In least common multiple computation: "
     << "remainder when dividing by greatest common divisor not zero." << global.fatal;
   }
+  output.scaleNormalizeLeadingMonomial(nullptr);
   return true;
 }
 
@@ -1385,7 +1387,7 @@ bool Polynomial<Coefficient>::greatestCommonDivisorOneVariable(
   // as this may be a performance-sensitve function.
   while (!rightCopy.isEqualToZero()) {
     leftCopy.divideBy(rightCopy, quotient, remainder, &MonomialP::orderDegreeThenLeftLargerWins());
-    if (remainder.totalDegree() >= rightCopy.totalDegree()) {
+    if (!remainder.isEqualToZero() && remainder.totalDegree() >= rightCopy.totalDegree()) {
       global.fatal
       << "Univariate polynomial division of "
       << leftCopy.toString() << " by "
@@ -1398,6 +1400,7 @@ bool Polynomial<Coefficient>::greatestCommonDivisorOneVariable(
     rightCopy = remainder;
   }
   output = leftCopy;
+  output.scaleNormalizeLeadingMonomial(nullptr);
   return true;
 }
 

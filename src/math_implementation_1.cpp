@@ -4,6 +4,7 @@
 #include "general_lists.h"
 #include "math_general.h"
 #include "math_extra_universal_enveloping.h"
+#include "math_rational_function_implementation.h"
 
 void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
   int generatorIndex,

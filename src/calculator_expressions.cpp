@@ -2491,6 +2491,25 @@ bool Expression::toStringBuiltIn<RationalFunction<Rational> >(
 }
 
 template<>
+bool Expression::toStringBuiltIn<RationalFunction<AlgebraicNumber> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
+  (void) theFormat;
+  FormatExpressions format;
+  input.getContext().getFormat(format);
+  format.flagUseFrac = true;
+  out << "MakeRationalFunction{}("
+  << input.getValue<RationalFunction<AlgebraicNumber> >().toString(&format) << ")";
+  if (showContext) {
+    out << "[" << input.getContext().toString() << "]";
+  }
+  return true;
+}
+
+template<>
 bool Expression::toStringBuiltIn<RationalFunction<ElementZmodP> >(
   const Expression& input,
   std::stringstream& out,
@@ -3394,6 +3413,11 @@ bool Expression::toStringDivide(
     if (theFormat != nullptr) {
       maintain.initialize(theFormat->flagExpressionNewLineAllowed);
       theFormat->flagExpressionNewLineAllowed = false;
+    } else {
+      // Compilers will complain at certain optimization levels about
+      // maintain not being initialized.
+      maintain.toMaintain = nullptr;
+      maintain.contentAtStart = false;
     }
     std::string firstE = input[1].toString(theFormat);
     std::string secondE = input[2].toString(theFormat);

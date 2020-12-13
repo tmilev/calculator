@@ -583,8 +583,9 @@ private:
   void operator=(int other) {
     MacroRegisterFunctionWithName("Expression::operator=(int)");
     this->checkInitialization();
-    this->assignValue(other, *this->owner);
-  }  void operator/=(const Expression& other);
+    this->assignValue(Rational(other), *this->owner);
+  }
+  void operator/=(const Expression& other);
   void operator+=(const Expression& other);
   void operator-=(const Expression& other);
   Expression operator+(int other);
@@ -2840,12 +2841,13 @@ bool Expression::makeSum(
   return this->makeOXdotsX(calculator, calculator.opPlus(), summandsWithCoeff);
 }
 
-template <typename theType>
-int Expression::addObjectReturnIndex(const theType& inputValue) const {
-  (void) inputValue;
-  global.fatal << "Please implement addObjectReturnIndex for the current type. " << global.fatal;
-  return - 1;
-}
+template< >
+int Expression::getTypeOperation<Rational>() const;
+
+template < >
+int Expression::addObjectReturnIndex(const
+Rational
+& inputValue) const;
 
 template <class theType>
 bool Expression::assignValueWithContext(
@@ -2857,12 +2859,6 @@ bool Expression::assignValueWithContext(
   this->addChildAtomOnTop(this->getTypeOperation<theType>());
   this->addChildOnTop(theContext.toExpression());
   return this->addChildAtomOnTop(this->addObjectReturnIndex(inputValue));
-}
-
-template<class theType>
-int Expression::getTypeOperation() const {
-  global.fatal << "Please implement getTypeOperation for the current type. " << global.fatal;
-  return - 1;
 }
 
 template <class theType>

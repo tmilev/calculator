@@ -488,6 +488,9 @@ public:
   static unsigned long long int totalLargeMultiplications;
   static unsigned long long int totalSmallGreatestCommonDivisors;
   static unsigned long long int totalLargeGreatestCommonDivisors;
+  static std::string className() {
+    return "Rational";
+  }
   bool needsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
     return this->isNegative();
   }

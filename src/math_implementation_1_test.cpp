@@ -4,6 +4,7 @@
 #include "crypto.h"
 #include "math_extra_algebraic_numbers.h"
 #include "calculator.h"
+#include "math_rational_function_implementation.h"
 
 bool LargeIntegerUnsigned::Test::serializationToHex(const LargeIntegerUnsigned& input) {
   MacroRegisterFunctionWithName("LargeIntUnsigned::Test::serializationToHex");

@@ -32,7 +32,7 @@ https://github.com/tmilev/freecalc.git
 cd courses_calculator/calculator
 make -j10
 ```
-The -j10 flag tells the compiler to use 10 parallel compilation jobs. Adjust the number 10 to whatever is appropriate for your system (-j10 should work on a 4G RAM laptop).
+The -j10 flag tells the compiler to use 10 parallel compilation jobs. Adjust the number 10 to whatever is appropriate for your system (-j10 should work on a 4Gb RAM laptop).
 
 2.2. The build above assumes you have openssl and mongoDB installed on your system, but should work even if those are absent. 
 If it doesn't, please do let us know by posting a bug report here.
@@ -40,6 +40,12 @@ To explicitly request a build without mongoDB and openSSL, use the following.
 ```
 make -j10 nossl=1 noMongo=1
 ```
+
+The calculator-algebra.org site runs, at the time of writing, with 
+```
+make -j10 optimize=1
+```
+which turns on level -02 compiler optimizations. This speeds up computations - measured to be up to 40% when computing 2019! - at the cost of tripling build times and occasionally generating obscure linker errors.
 
 ### Run the calculator
 Start the calculator as a web server:

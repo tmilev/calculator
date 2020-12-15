@@ -3490,16 +3490,21 @@ class MathNode {
     /** @type {KeyboardEvent} */
     event,
   ) {
-    this.storeCaretPosition();
+    this.storeCaretPosition(event.key, event.shiftKey);
     event.stopPropagation();
     if (this.handleKeyDownCases(event)) {
       event.preventDefault();
-    }
-    setTimeout(() => {
-      this.equationEditor.updateAlignment();
+      this.storeCaretPosition(event.key, event.shiftKey);
       this.equationEditor.writeLatexToInput();
       this.equationEditor.writeDebugInfo(null);
-    }, 0);
+    } else {
+      setTimeout(() => {
+        this.storeCaretPosition(event.key, event.shiftKey);
+        this.equationEditor.updateAlignment();
+        this.equationEditor.writeLatexToInput();
+        this.equationEditor.writeDebugInfo(null);
+      }, 0);
+    }
   }
 
   handleKeyUp(
@@ -3559,6 +3564,26 @@ class MathNode {
     return false;
   }
 
+  /** @returns {boolean} whether the default should be prevented */
+  copy() {
+    if (this.equationEditor.options.latexInput === null) {
+      return false;
+    }
+    this.equationEditor.options.latexInput.focus();
+    this.equationEditor.options.latexInput.select();
+    console.log("DEBUG: inside copy.");
+    document.execCommand("copy");
+
+    return true;
+  }
+
+  /** @returns {boolean} whether the default should be prevented */
+  paste() {
+    console.log("DEBUG: inside paste.");
+
+    return true;
+  }
+
   /** @returns {boolean} whether default should be prevented. */
   handleKeyDownCases(
     /** @type {KeyboardEvent} */
@@ -3566,7 +3591,20 @@ class MathNode {
   ) {
     let key = event.key;
     let shiftHeld = event.shiftKey;
+    let ctrlHeld = event.ctrlKey;
     if (this.processBackslash(key, shiftHeld)) {
+      return true;
+    }
+    if (ctrlHeld) {
+      if (key === "c") {
+        return this.copy();
+      }
+      if (key === "v") {
+        return this.paste();
+      }
+    }
+    if (ctrlHeld && key === "c") {
+      console.log("Press ctrl+c detected!")
       return true;
     }
     switch (key) {
@@ -3977,14 +4015,23 @@ class MathNode {
     return null;
   }
 
-  storeCaretPosition() {
+  storeCaretPosition(
+    /** @type{string} */
+    key,
+    /** @type{boolean} */
+    shiftHeld,
+  ) {
     if (this.type.type !== knownTypes.atom.type) {
       this.positionCaretBeforeKeyEvents = - 1;
       return;
     }
     let selection = window.getSelection();
     let range = selection.getRangeAt(0);
+    let previousPosition = this.positionCaretBeforeKeyEvents;
     this.positionCaretBeforeKeyEvents = range.endOffset;
+    if (key === "ArrowRight" && previousPosition === this.positionCaretBeforeKeyEvents && !shiftHeld) {
+      this.positionCaretBeforeKeyEvents = range.startOffset;
+    }
   }
 
   appendChild(/** @type{MathNode} */ child) {

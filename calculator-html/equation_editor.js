@@ -414,6 +414,7 @@ class MathNodeFactory {
     initialContent,
   ) {
     const result = new MathNode(equationEditor, knownTypes.atom);
+    result.positionCaretBeforeKeyEvents = initialContent.length;
     result.initialContent = initialContent;
     return result;
   }
@@ -3489,7 +3490,7 @@ class MathNode {
     /** @type {KeyboardEvent} */
     event,
   ) {
-    this.storePositionCaret();
+    this.storeCaretPosition();
     event.stopPropagation();
     if (this.handleKeyDownCases(event)) {
       event.preventDefault();
@@ -3976,17 +3977,14 @@ class MathNode {
     return null;
   }
 
-  storePositionCaret() {
+  storeCaretPosition() {
     if (this.type.type !== knownTypes.atom.type) {
       this.positionCaretBeforeKeyEvents = - 1;
       return;
     }
-    let range = window.getSelection().getRangeAt(0);
-    let selected = range.toString().length;
-    let rangeClone = range.cloneRange();
-    rangeClone.selectNodeContents(this.element);
-    rangeClone.setEnd(range.endContainer, range.endOffset);
-    this.positionCaretBeforeKeyEvents = rangeClone.toString().length - selected;
+    let selection = window.getSelection();
+    let range = selection.getRangeAt(0);
+    this.positionCaretBeforeKeyEvents = range.endOffset;
   }
 
   appendChild(/** @type{MathNode} */ child) {
@@ -5596,7 +5594,7 @@ class MathNode {
       collapseToStart = true;
       this.setRangeStart(range, 0);
     }
-    console.log(`Position: ${position}, range ${range}, collapseToStart: ${collapseToStart} start offset: ${range.startOffset}, end offset: ${range.endOffset}, text len: ${this.element.textContent.length}`);
+    // console.log(`Position: ${position}, range ${range}, collapseToStart: ${collapseToStart} start offset: ${range.startOffset}, end offset: ${range.endOffset}, text len: ${this.element.textContent.length}`);
     range.collapse(collapseToStart);
     window.getSelection().removeAllRanges();
     window.getSelection().addRange(range);

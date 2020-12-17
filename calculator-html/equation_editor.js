@@ -343,7 +343,7 @@ class MathNodeFactory {
     /** @type {MathNode|null} */
     content,
   ) {
-    const result = new MathNode(equationEditor, knownTypes.horizontalMath);
+    const result = new MathNodeHorizontalMath(equationEditor);
     if (content === null) {
       content = this.atom(equationEditor, "");
     }
@@ -357,11 +357,11 @@ class MathNodeFactory {
     /** @type {MathNode|null} */
     content,
   ) {
-    const result = new MathNode(equationEditor, knownTypes.genericMathBox);
+    const result = new MathNodeGenericBox(equationEditor);
     result.appendChild(this.horizontalMath(equationEditor, content));
     return result;
-
   }
+
   /** @returns{MathNode} 
    * Returns a horizontal math with content given by the input array.
    * Normalizes the input but does not ensure editable atoms at the ends. 
@@ -387,33 +387,13 @@ class MathNodeFactory {
     return result;
   }
 
-  rootMath(
-    /** @type {EquationEditor} */
-    equationEditor,
-  ) {
-    const result = new MathNode(equationEditor, knownTypes.root);
-    result.appendChild(this.horizontalMath(equationEditor, null));
-    return result;
-  }
-
-  error(
-    /** @type {EquationEditor} */
-    equationEditor,
-    /** @type {string} */
-    initialContent,
-  ) {
-    const result = new MathNode(equationEditor, knownTypes.error);
-    result.initialContent = initialContent;
-    return result;
-  }
-
   atom(
     /** @type {EquationEditor} */
     equationEditor,
     /** @type {string} */
     initialContent,
   ) {
-    const result = new MathNode(equationEditor, knownTypes.atom);
+    const result = new MathNodeAtom(equationEditor);
     result.positionCaretBeforeKeyEvents = initialContent.length;
     result.initialContent = initialContent;
     return result;
@@ -425,7 +405,7 @@ class MathNodeFactory {
     /** @type {string} */
     operator,
   ) {
-    const result = new MathNode(equationEditor, knownTypes.atomImmutable);
+    const result = new MathNodeAtomImmutable(equationEditor);
     if (operator in latexConstants.operatorsExtraPadding) {
       let extraPadding = latexConstants.operatorsExtraPadding[operator];
       result.type.paddingLeft = extraPadding;
@@ -436,13 +416,52 @@ class MathNodeFactory {
   }
 
   /** @returns {MathNode} */
+  fraction(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /** @type{MathNode|null}*/
+    numeratorContent,
+    /** @type{MathNode|null}*/
+    denominatorContent,
+  ) {
+    const fraction = new MathNodeFraction(equationEditor);
+    const numerator = new MathNode(equationEditor, knownTypes.numerator);
+    const denominator = new MathNode(equationEditor, knownTypes.denominator);
+    numerator.appendChild(this.horizontalMath(equationEditor, numeratorContent));
+    denominator.appendChild(this.horizontalMath(equationEditor, denominatorContent));
+    fraction.appendChild(numerator);
+    fraction.appendChild(denominator);
+    return fraction;
+  }
+
+  rootMath(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    const result = new MathNodeRoot(equationEditor);
+    result.appendChild(this.horizontalMath(equationEditor, null));
+    return result;
+  }
+
+  error(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /** @type {string} */
+    initialContent,
+  ) {
+    const result = new MathNodeError(equationEditor);
+    result.initialContent = initialContent;
+    return result;
+  }
+
+  /** @returns {MathNode} */
   cancel(
     /** @type {EquationEditor} */
     equationEditor,
     /** @type{MathNode}*/
     content,
   ) {
-    const result = new MathNode(equationEditor, knownTypes.cancel);
+    const result = new MathNodeCancel(equationEditor);
     const cancelSign = new MathNode(equationEditor, knownTypes.cancelSign);
     cancelSign.initialContent = "\u2571"; // top-left to bottom-right: "\u2572"; x-cross: "\u2573"
     const horizontal = this.horizontalMath(equationEditor, content);
@@ -456,30 +475,11 @@ class MathNodeFactory {
   }
 
   /** @returns {MathNode} */
-  fraction(
-    /** @type {EquationEditor} */
-    equationEditor,
-    /** @type{MathNode|null}*/
-    numeratorContent,
-    /** @type{MathNode|null}*/
-    denominatorContent,
-  ) {
-    const fraction = new MathNode(equationEditor, knownTypes.fraction);
-    const numerator = new MathNode(equationEditor, knownTypes.numerator);
-    const denominator = new MathNode(equationEditor, knownTypes.denominator);
-    numerator.appendChild(this.horizontalMath(equationEditor, numeratorContent));
-    denominator.appendChild(this.horizontalMath(equationEditor, denominatorContent));
-    fraction.appendChild(numerator);
-    fraction.appendChild(denominator);
-    return fraction;
-  }
-
-  /** @returns {MathNode} */
   sqrtSign(
     /** @type {EquationEditor} */
     equationEditor,
   ) {
-    let result = new MathNode(equationEditor, knownTypes.sqrtSign);
+    let result = new MathNodeSqrtSign(equationEditor);
     result.initialContent = "\u221A";
     return result;
   }
@@ -493,7 +493,7 @@ class MathNodeFactory {
     /** @type {MathNode|null} */
     exponentContent,
   ) {
-    const sqrt = new MathNode(equationEditor, knownTypes.sqrt);
+    const sqrt = new MathNodeSqrt(equationEditor);
     const radicalExponentBox = new MathNode(equationEditor, knownTypes.radicalExponentBox);
     radicalExponentBox.appendChild(this.horizontalMath(equationEditor, exponentContent));
     sqrt.appendChild(radicalExponentBox);
@@ -511,7 +511,7 @@ class MathNodeFactory {
     /** @type {MathNode|null} */
     content,
   ) {
-    const result = new MathNode(equationEditor, knownTypes.overLinedBox);
+    const result = new MathNodeOverLine(equationEditor);
     const horizontalMath = this.horizontalMath(equationEditor, content);
     result.appendChild(horizontalMath);
     return result;
@@ -526,7 +526,7 @@ class MathNodeFactory {
     /** @type {MathNode|null} */
     overBraceContent,
   ) {
-    const result = new MathNode(equationEditor, knownTypes.overBrace);
+    const result = new MathNodeOverBrace(equationEditor);
     const base = mathNodeFactory.horizontalMath(equationEditor, content);
     // 6 components of overbrace line
     const horizontalBraceTopLeft = new MathNode(equationEditor, knownTypes.halfHorizontalBraceTopLeft);
@@ -561,8 +561,9 @@ class MathNodeFactory {
     /** @type{MathNode|null}*/
     exponent,
   ) {
+    const baseWithExponent = new MathNodeBaseWithExponent(equationEditor);
     // Horizontal math wrapper for the exponent.
-    const exponentWrapped = new MathNode(equationEditor, knownTypes.exponent);
+    const exponentWrapped = new MathNodeExponent(equationEditor);
     let exponentContainer = this.horizontalMath(equationEditor, exponent);
     exponentContainer.normalizeHorizontalMath();
     exponentContainer.ensureEditableAtoms();
@@ -572,7 +573,6 @@ class MathNodeFactory {
     baseHorizontal.appendChild(base);
     baseHorizontal.normalizeHorizontalMath();
     // The base with the exponent.
-    const baseWithExponent = new MathNode(equationEditor, knownTypes.baseWithExponent);
     baseWithExponent.appendChild(baseHorizontal);
     baseWithExponent.appendChild(exponentWrapped);
     return baseWithExponent;
@@ -598,7 +598,7 @@ class MathNodeFactory {
     baseHorizontal.appendChild(base);
     baseHorizontal.normalizeHorizontalMath();
     // The base with the subscript.
-    const baseWithSubscript = new MathNode(equationEditor, knownTypes.baseWithSubscript);
+    const baseWithSubscript = new MathNodeBaseWithSubscript(equationEditor);
     baseWithSubscript.appendChild(baseHorizontal);
     baseWithSubscript.appendChild(subscriptWrapped);
     return baseWithSubscript;
@@ -623,7 +623,7 @@ class MathNodeFactory {
     /** @type {boolean} */
     implied,
   ) {
-    const leftParentheses = new MathNode(equationEditor, knownTypes.leftDelimiter);
+    const leftParentheses = new MathNodeLeftDelimiter(equationEditor);
     leftParentheses.initialContent = content;
     leftParentheses.implied = implied;
     return leftParentheses;
@@ -648,7 +648,7 @@ class MathNodeFactory {
     /** @type {boolean} */
     implied,
   ) {
-    const rightParentheses = new MathNode(equationEditor, knownTypes.rightDelimiter);
+    const rightParentheses = new MathNodeBaseRightDelimiter(equationEditor);
     rightParentheses.initialContent = content;
     rightParentheses.implied = implied;
     return rightParentheses;
@@ -681,7 +681,7 @@ class MathNodeFactory {
     let parenthesesLayout = this.horizontalMath(equationEditor, leftDelimiter);
     parenthesesLayout.appendChild(matrixTable);
     parenthesesLayout.appendChild(rightDelimiter);
-    let result = new MathNode(equationEditor, knownTypes.matrix);
+    let result = new MathNodeMatrix(equationEditor);
     result.latexExtraStyle = columnStyle;
     result.appendChild(parenthesesLayout);
     result.appendChildren(
@@ -697,7 +697,7 @@ class MathNodeFactory {
     /** @type {number} */
     columns,
   ) {
-    let result = new MathNode(equationEditor, knownTypes.matrixRow);
+    let result = new MathNodeMatrixRow(equationEditor);
     for (let i = 0; i < columns; i++) {
       result.appendChild(this.matrixRowEntry(equationEditor, null));
     }
@@ -711,7 +711,7 @@ class MathNodeFactory {
     /** @type {MathNode|null} */
     content,
   ) {
-    let result = new MathNode(equationEditor, knownTypes.matrixRowEntry);
+    let result = new MathNodeRowEntry(equationEditor);
     result.appendChild(this.horizontalMath(equationEditor, content));
     return result;
   }
@@ -725,7 +725,7 @@ class MathNodeFactory {
     /** @type {number} */
     numberOfStrips,
   ) {
-    let result = new MathNode(equationEditor, knownTypes.verticalLineInTable);
+    let result = new MathNodeVerticalLine(equationEditor);
     result.extraData = new VerticalBarData(columnIndex, numberOfStrips);
     return result;
   }
@@ -741,7 +741,7 @@ class MathNodeFactory {
     /** @type {MathNode|null} */
     subscript,
   ) {
-    let result = new MathNode(equationEditor, knownTypes.operatorWithSuperAndSubscript);
+    let result = new MathNodeOperatorWithSuperAndSubscript(equationEditor);
     let superscriptNode = new MathNode(equationEditor, knownTypes.operatorSuperscript);
     let subscriptNode = new MathNode(equationEditor, knownTypes.operatorSubscript);
     let operatorNode = new MathNode(equationEditor, knownTypes.operatorStandalone);
@@ -763,7 +763,7 @@ class MathNodeFactory {
     /** @type {MathNode|null} */
     subscript,
   ) {
-    let result = new MathNode(equationEditor, knownTypes.operatorWithSubscript);
+    let result = new MathNodeOperatorWithSubscript(equationEditor);
     let subscriptNode = new MathNode(equationEditor, knownTypes.operatorSubscript);
     let subscriptScale = 0.8;
     subscriptNode.type.fontSizeRatio = subscriptScale;
@@ -5712,26 +5712,8 @@ class MathNode {
     return result.join("\n<br>\n");
   }
 
-  toLatexFraction() {
-    let result = `\\frac{${this.children[0].toLatex()}}{${this.children[1].toLatex()}}`;
-    if (this.children.length <= 2) {
-      return result;
-    }
-    // This is not expected to happen: a fraction should have exactly two children.
-    result += "[";
-    for (let i = 2; i < this.children.length; i++) {
-      result += this.children[i].toLatex();
-    }
-    result += "]";
-    return result;
-  }
-
   toLatexAtomic() {
     return latexConstants.convertUtf8ToLatex(this.contentIfAtomic());
-  }
-
-  toLatexBaseWithExponent() {
-    return `{${this.children[0].toLatex()}}^{${this.children[1].toLatex()}}`;
   }
 
   toLatexBaseWithSubscript() {
@@ -5823,14 +5805,8 @@ class MathNode {
     if (this.type.type === knownTypes.fraction.type) {
       return this.toLatexFraction();
     }
-    if (this.isAtomic()) {
-      return this.toLatexAtomic();
-    }
     if (this.isDelimiter()) {
       return this.textContentOrInitialContent();
-    }
-    if (this.type.type === knownTypes.baseWithExponent.type) {
-      return this.toLatexBaseWithExponent();
     }
     if (this.type.type === knownTypes.baseWithSubscript.type) {
       return this.toLatexBaseWithSubscript();
@@ -5931,6 +5907,237 @@ class MathNode {
         child.appendChild(mathNodeFactory.matrixRowEntry(this.equationEditor, null));
       }
     }
+  }
+}
+
+class MathNodeAtom extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.atom);
+  }
+  toLatex() {
+    return this.toLatexAtomic();
+  }
+}
+
+class MathNodeAtomImmutable extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.atomImmutable);
+  }
+  toLatex() {
+    return this.toLatexAtomic();
+  }
+}
+
+class MathNodeFraction extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.fraction);
+  }
+
+  toLatex() {
+    let result = `\\frac{${this.children[0].toLatex()}}{${this.children[1].toLatex()}}`;
+    if (this.children.length <= 2) {
+      return result;
+    }
+    // This is not expected to happen: a fraction should have exactly two children.
+    result += "[";
+    for (let i = 2; i < this.children.length; i++) {
+      result += this.children[i].toLatex();
+    }
+    result += "]";
+    return result;
+  }
+}
+
+class MathNodeBaseWithExponent extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.baseWithExponent);
+  }
+
+  toLatex() {
+    return `{${this.children[0].toLatex()}}^{${this.children[1].toLatex()}}`;
+  }
+}
+
+class MathNodeHorizontalMath extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.horizontalMath);
+  }
+}
+
+class MathNodeGenericBox extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.genericMathBox);
+  }
+}
+
+class MathNodeRoot extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.root);
+  }
+}
+
+class MathNodeError extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.error);
+  }
+}
+
+class MathNodeCancel extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.cancel);
+  }
+}
+
+class MathNodeSqrtSign extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.sqrtSign);
+  }
+}
+
+class MathNodeSqrt extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.sqrt);
+  }
+}
+
+class MathNodeOverLine extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.overLinedBox);
+  }
+}
+
+class MathNodeOverBrace extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.overBrace);
+  }
+}
+
+class MathNodeExponent extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.exponent);
+  }
+}
+
+class MathNodeBaseWithSubscript extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.baseWithSubscript);
+  }
+}
+
+class MathNodeLeftDelimiter extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.leftDelimiter);
+  }
+}
+
+class MathNodeBaseRightDelimiter extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.rightDelimiter);
+  }
+}
+
+class MathNodeMatrix extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.matrix);
+  }
+}
+
+class MathNodeMatrixRow extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.matrixRow);
+  }
+}
+
+class MathNodeRowEntry extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.matrixRowEntry);
+  }
+}
+
+class MathNodeVerticalLine extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.verticalLineInTable);
+  }
+}
+
+class MathNodeOperatorWithSuperAndSubscript extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.operatorWithSuperAndSubscript);
+  }
+}
+
+class MathNodeOperatorWithSubscript extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.operatorWithSubscript);
   }
 }
 

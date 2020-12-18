@@ -34,7 +34,7 @@ class MathNodeType {
     this.width = input["width"];
     this.height = input["height"];
     this.display = input["display"];
-    this.verticalAlign = input["verticalAlign"]cd;
+    this.verticalAlign = input["verticalAlign"];
     this.outline = input["outline"];
     this.fontSizeRatio = input["fontSizeRatio"];
     this.fontWeight = input["fontWeight"];

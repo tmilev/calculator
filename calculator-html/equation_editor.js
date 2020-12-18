@@ -798,17 +798,42 @@ class AtomWithPosition {
     }
   }
 
+  /**@returns{number} */
+  nextPositionInDirection(
+    /**@type{number} */
+    direction,
+  ) {
+    if (direction === 0) {
+      direction = 1;
+    }
+    let content = this.element.textContentOrInitialContent();
+    let result = this.position + direction;
+    for (; result >= 0 && result < content.length; result += direction) {
+      let code = content.charCodeAt(result);
+      if (code < 0xD800 || code > 0xDFFF) {
+        return result;
+      }
+    }
+    if (result >= content.length) {
+      return content.length;
+    }
+    if (result < 0) {
+      return 0;
+    }
+    return - 1;
+  }
+
   /** @returns {AtomWithPosition} */
   leftHorizontalNeighbor() {
     if (this.element === null) {
-      return new AtomWithPosition(null, -1);
+      return new AtomWithPosition(null, - 1);
     }
     if (this.position > 0 && this.element.hasHorizintalMathParent()) {
-      return new AtomWithPosition(this.element, this.position - 1);
+      return new AtomWithPosition(this.element, this.nextPositionInDirection(- 1));
     }
-    let next = this.element.firstAtomUncle(-1);
+    let next = this.element.firstAtomUncle(- 1);
     if (next === null) {
-      return new AtomWithPosition(null, -1);
+      return new AtomWithPosition(null, - 1);
     }
     return new AtomWithPosition(next, next.lengthContentIfAtom());
   }
@@ -819,7 +844,7 @@ class AtomWithPosition {
       return new AtomWithPosition(null, -1);
     }
     if (this.position < this.element.lengthContentIfAtom() && this.element.hasHorizintalMathParent()) {
-      return new AtomWithPosition(this.element, this.position + 1);
+      return new AtomWithPosition(this.element, this.nextPositionInDirection(1));
     }
     let next = this.element.firstAtomUncle(1);
     if (next === null) {
@@ -834,7 +859,7 @@ class AtomWithPosition {
       return new AtomWithPosition(null, -1);
     }
     if (this.position > 0) {
-      return new AtomWithPosition(this.element, this.position - 1);
+      return new AtomWithPosition(this.element, this.nextPositionInDirection(- 1));
     }
     let resultElement = this.element.firstAtomToTheLeft();
     if (resultElement === null) {
@@ -850,7 +875,7 @@ class AtomWithPosition {
 
     }
     if (this.position < this.element.lengthContentIfAtom()) {
-      return new AtomWithPosition(this.element, this.position + 1);
+      return new AtomWithPosition(this.element, this.nextPositionInDirection(1));
     }
     return new AtomWithPosition(this.element.firstAtomToTheRight(), 0);
   }
@@ -1251,21 +1276,29 @@ class LaTeXConstants {
       let current = this.mathcalEquivalents[key];
       this.utf8ToLatexMap[current] = `\\mathcal{${key}} `;
     }
+    for (let key in this.mathbbEquivalents) {
+      let current = this.mathbbEquivalents[key];
+      this.utf8ToLatexMap[current] = `\\mathbb{${key}} `;
+    }
     for (let key in this.operatorsFromUft8) {
       this.utf8ToLatexMap[key] = this.operatorsFromUft8[key];
     }
   }
 
-  /** @returns{string} */
+  /** @returns {LatexWithAnnotation} */
   convertUtf8ToLatex(
     /** @type{string} */
     input,
+    /** @type{number} */
+    selectionStart,
+    /** @type{number} */
+    selectionEnd,
   ) {
     this.computeUtf8ToLatexMap();
     let result = [];
     for (let i = 0; i < input.length; i++) {
       let current = "";
-      for (let j = 0; j < 8 && i + j < input.length; j++) {
+      for (let j = 0; j < 4 && i + j < input.length; j++) {
         current += input[i + j];
         if (current in this.utf8ToLatexMap) {
           current = this.utf8ToLatexMap[current];
@@ -1275,7 +1308,7 @@ class LaTeXConstants {
       }
       result.push(current);
     }
-    return result.join("");
+    return new LatexWithAnnotation(result.join(""), selectionStart, selectionEnd);
   }
 
   isLatinCharacter(
@@ -2020,7 +2053,8 @@ class EquationEditor {
     this.backslashSequence = "";
     /** @type {number} */
     this.backslashPosition = - 1;
-
+    /**@type {string} */
+    this.positionDebugString = ""
     if (this.options.latexInput !== null) {
       this.options.latexInput.addEventListener('keyup', (e) => {
         this.writeLatexFromInput();
@@ -2091,6 +2125,8 @@ class EquationEditor {
     result += `<br>Drawing: ${this.rootNode.toString()}`;
     result += `<br>Structure: ${this.rootNode.toHtml(0)}`;
     result += `<br>Selection: ${this.toStringSelection()}`;
+    result += `<br>Backslash position: ${this.backslashPosition}; started: ${this.backslashSequenceStarted}, sequence: ${this.backslashSequence}.`;
+    result += `<br>Position computation string: ${this.positionDebugString}.`;
     return result;
   }
 
@@ -2444,6 +2480,24 @@ class BoundingBox {
     return this.columnOffsets[columnIndex];
   }
 };
+
+class LatexWithAnnotation {
+  constructor(
+    /**@type{string} */
+    latex,
+    /**@type{number} */
+    selectionStart,
+    /**@type{number} */
+    selectionEnd,
+  ) {
+    /** @type {string} */
+    this.latex = latex;
+    /** @type {number} */
+    this.selectionStart = selectionStart;
+    /** @type {number} */
+    this.selectionEnd = selectionEnd;
+  }
+}
 
 class MathNode {
   constructor(
@@ -3492,19 +3546,23 @@ class MathNode {
   ) {
     this.storeCaretPosition(event.key, event.shiftKey);
     event.stopPropagation();
+    let doUpdateAlignment = true;
     if (this.handleKeyDownCases(event)) {
       event.preventDefault();
+      doUpdateAlignment = false;
+    }
+    // While we no longer propagate the event, we need to 
+    // release the thread so the browser can finish computations
+    // with the released element. 
+    setTimeout(() => {
       this.storeCaretPosition(event.key, event.shiftKey);
+      if (doUpdateAlignment) {
+        this.equationEditor.updateAlignment();
+      }
       this.equationEditor.writeLatexToInput();
       this.equationEditor.writeDebugInfo(null);
-    } else {
-      setTimeout(() => {
-        this.storeCaretPosition(event.key, event.shiftKey);
-        this.equationEditor.updateAlignment();
-        this.equationEditor.writeLatexToInput();
-        this.equationEditor.writeDebugInfo(null);
-      }, 0);
-    }
+    }, 0);
+
   }
 
   handleKeyUp(
@@ -4025,13 +4083,21 @@ class MathNode {
       this.positionCaretBeforeKeyEvents = - 1;
       return;
     }
+    let previousPosition = this.positionCaretBeforeKeyEvents;
+
     let selection = window.getSelection();
     let range = selection.getRangeAt(0);
-    let previousPosition = this.positionCaretBeforeKeyEvents;
-    this.positionCaretBeforeKeyEvents = range.endOffset;
+    let rangeClone = range.cloneRange();
+    rangeClone.selectNodeContents(this.element);
+    rangeClone.setEnd(range.endContainer, range.endOffset);
+    this.positionCaretBeforeKeyEvents = rangeClone.toString().length;// range.endOffset;
     if (key === "ArrowRight" && previousPosition === this.positionCaretBeforeKeyEvents && !shiftHeld) {
       this.positionCaretBeforeKeyEvents = range.startOffset;
     }
+    this.equationEditor.positionDebugString = `Computed position: ${this.positionCaretBeforeKeyEvents}.`
+    this.equationEditor.positionDebugString += `Range: [${range}], clone: [${rangeClone}], previous position: ${previousPosition}.`;
+    this.equationEditor.positionDebugString += `end offset: ${range.endOffset}, start offset: ${range.startOffset}`;
+    console.log("DEBUG: Just: " + this.equationEditor.positionDebugString);
   }
 
   appendChild(/** @type{MathNode} */ child) {
@@ -4132,7 +4198,7 @@ class MathNode {
     if (right.element !== null) {
       rightContent = right.element.textContent;
     }
-    if (right.desiredCaretPosition !== -1) {
+    if (right.desiredCaretPosition !== - 1) {
       this.desiredCaretPosition = thisContent.length + right.desiredCaretPosition;
     }
     thisContent += rightContent;
@@ -5412,9 +5478,9 @@ class MathNode {
     if (this.parent === null) {
       return;
     }
-    if (this.isEmptyAtom()) {
-      let previous = this.previousHorizontalSibling();
-      if (previous !== null) {
+    let previous = this.previousHorizontalSibling();
+    if (previous !== null) {
+      if (this.isEmptyAtom() || previous.type.type == knownTypes.rightDelimiter.type) {
         previous.makeBaseWithExponent();
         return;
       }
@@ -5571,8 +5637,8 @@ class MathNode {
 
   /** @returns {boolean} whether focus request was find. */
   focusCancelOnce() {
-    if (this.desiredCaretPosition !== -1) {
-      this.desiredCaretPosition = -1;
+    if (this.desiredCaretPosition !== - 1) {
+      this.desiredCaretPosition = - 1;
       return true;
     }
     for (let i = 0; i < this.children.length; i++) {
@@ -5585,7 +5651,7 @@ class MathNode {
 
   /** @returns {boolean} whether focused child was found. */
   focusRestore() {
-    if (this.desiredCaretPosition !== -1) {
+    if (this.desiredCaretPosition !== - 1) {
       this.focus(0);
       return true;
     }
@@ -5684,7 +5750,7 @@ class MathNode {
     if (this.focused) {
       content += ", F";
     }
-    if (this.desiredCaretPosition !== -1) {
+    if (this.desiredCaretPosition !== - 1) {
       content += `, FD[${this.desiredCaretPosition}]`;
     }
     if (this.boundingBox.width !== 0) {
@@ -5712,20 +5778,51 @@ class MathNode {
     return result.join("\n<br>\n");
   }
 
-  toLatexAtomic() {
-    return latexConstants.convertUtf8ToLatex(this.contentIfAtomic());
+  /** @returns {LatexWithAnnotation} */
+  toLatexWithAnnotationAtomic() {
+    let selectionStart = - 1;
+    let selectionEnd = - 1;
+    if (this === this.equationEditor.selectionStartExpanded.element) {
+      selectionStart = this.equationEditor.selectionStartExpanded.element.position;
+    }
+    if (this === this.equationEditor.selectionEnd.element) {
+      selectionEnd = this.equationEditor.selectionEnd.element.position;
+    }
+    return latexConstants.convertUtf8ToLatex(
+      this.contentIfAtomic(),
+      selectionStart,
+      selectionEnd,
+    );
   }
 
+  /** @returns{string} */
   toLatex() {
+    return this.toLatexWithAnnotation().latex;
+  }
+
+  /** @returns {LatexWithAnnotation} */
+  toLatexWithAnnotation() {
     let toJoin = [];
+    let charactersSoFar = 0;
+    let selectionStart = - 1;
+    let selectionEnd = - 1;
     for (let i = 0; i < this.children.length; i++) {
       if (this.children[i] === null) {
         toJoin.push("[[null]]");
         continue;
       }
-      toJoin.push(this.children[i].toLatex());
+      let childLatex = this.children[i].toLatexWithAnnotation();
+      if (childLatex.selectionStart !== - 1) {
+        selectionStart = charactersSoFar + childLatex.selectionStart;
+      }
+      if (childLatex.selectionEnd !== - 1) {
+        selectionEnd = charactersSoFar + childLatex.selectionEnd;
+      }
+      toJoin.push(childLatex.latex);
+      charactersSoFar += childLatex.latex.length;
     }
-    return toJoin.join("");
+    let result = new LatexWithAnnotation(toJoin.join(""), selectionStart, selectionEnd);
+    return result;
   }
 
   /** If the element is a matrix, fetches its last row.
@@ -5802,8 +5899,10 @@ class MathNodeAtom extends MathNode {
   ) {
     super(equationEditor, knownTypes.atom);
   }
-  toLatex() {
-    return this.toLatexAtomic();
+
+  /** @returns {LatexWithAnnotation} */
+  toLatexWithAnnotation() {
+    return this.toLatexWithAnnotationAtomic();
   }
 }
 
@@ -5814,8 +5913,10 @@ class MathNodeAtomImmutable extends MathNode {
   ) {
     super(equationEditor, knownTypes.atomImmutable);
   }
-  toLatex() {
-    return this.toLatexAtomic();
+
+  /** @returns {LatexWithAnnotation} */
+  toLatexWithAnnotation() {
+    return this.toLatexWithAnnotationAtomic();
   }
 }
 
@@ -5827,10 +5928,11 @@ class MathNodeFraction extends MathNode {
     super(equationEditor, knownTypes.fraction);
   }
 
-  toLatex() {
+  /** @returns {LatexWithAnnotation} */
+  toLatexWithAnnotation() {
     let result = `\\frac{${this.children[0].toLatex()}}{${this.children[1].toLatex()}}`;
     if (this.children.length <= 2) {
-      return result;
+      return new LatexWithAnnotation(result, - 1, - 1);
     }
     // This is not expected to happen: a fraction should have exactly two children.
     result += "[";
@@ -5838,7 +5940,7 @@ class MathNodeFraction extends MathNode {
       result += this.children[i].toLatex();
     }
     result += "]";
-    return result;
+    return new LatexWithAnnotation(result, - 1, - 1);
   }
 }
 
@@ -5850,8 +5952,13 @@ class MathNodeBaseWithExponent extends MathNode {
     super(equationEditor, knownTypes.baseWithExponent);
   }
 
-  toLatex() {
-    return `{${this.children[0].toLatex()}}^{${this.children[1].toLatex()}}`;
+  /** @returns {LatexWithAnnotation} */
+  toLatexWithAnnotation() {
+    return new LatexWithAnnotation(
+      `{${this.children[0].toLatex()}}^{${this.children[1].toLatex()}}`,
+      - 1,
+      - 1,
+    );
   }
 }
 
@@ -5899,9 +6006,9 @@ class MathNodeCancel extends MathNode {
     super(equationEditor, knownTypes.cancel);
   }
 
-  toLatex() {
+  toLatexWithAnnotation() {
     let childLatex = this.children[1].toLatex();
-    return `\\cancel{${childLatex}}`;
+    return new LatexWithAnnotation(`\\cancel{${childLatex}}`, - 1, - 1);
   }
 }
 
@@ -5922,9 +6029,10 @@ class MathNodeSqrt extends MathNode {
     super(equationEditor, knownTypes.sqrt);
   }
 
-  toLatex() {
+  /** @returns {LatexWithAnnotation} */
+  toLatexWithAnnotation() {
     if (this.element === null) {
-      return "[null(]";
+      return new LatexWithAnnotation("[null(]", - 1, - 1);
     }
     let exponent = "";
     let underTheRadical = "";
@@ -5935,9 +6043,9 @@ class MathNodeSqrt extends MathNode {
       underTheRadical = this.children[2].toLatex();
     }
     if (exponent !== "") {
-      return `\\sqrt[${exponent}]{${underTheRadical}}`;
+      return new LatexWithAnnotation(`\\sqrt[${exponent}]{${underTheRadical}}`, - 1, - 1);
     }
-    return `\\sqrt{${underTheRadical}}`;
+    return new LatexWithAnnotation(`\\sqrt{${underTheRadical}}`, - 1, - 1);
   }
 }
 
@@ -5976,10 +6084,10 @@ class MathNodeBaseWithSubscript extends MathNode {
     super(equationEditor, knownTypes.baseWithSubscript);
   }
 
-  toLatex() {
-    return `{${this.children[0].toLatex()}}_{${this.children[1].toLatex()}}`;
+  /** @returns {LatexWithAnnotation} */
+  toLatexWithAnnotation() {
+    return new LatexWithAnnotation(`{${this.children[0].toLatex()}}_{${this.children[1].toLatex()}}`, - 1, - 1);
   }
-
 }
 
 class MathNodeLeftDelimiter extends MathNode {
@@ -5989,8 +6097,10 @@ class MathNodeLeftDelimiter extends MathNode {
   ) {
     super(equationEditor, knownTypes.leftDelimiter);
   }
-  toLatex() {
-    return this.textContentOrInitialContent();
+
+  /** @returns {LatexWithAnnotation} */
+  toLatexWithAnnotation() {
+    return new LatexWithAnnotation(this.textContentOrInitialContent(), - 1, - 1);
   }
 }
 
@@ -6002,8 +6112,9 @@ class MathNodeBaseRightDelimiter extends MathNode {
     super(equationEditor, knownTypes.rightDelimiter);
   }
 
-  toLatex() {
-    return this.textContentOrInitialContent();
+  /** @returns {LatexWithAnnotation} */
+  toLatexWithAnnotation() {
+    return new LatexWithAnnotation(this.textContentOrInitialContent(), - 1, - 1);
   }
 }
 
@@ -6015,9 +6126,10 @@ class MathNodeMatrix extends MathNode {
     super(equationEditor, knownTypes.matrix);
   }
 
-  toLatex() {
+  /** @returns {LatexWithAnnotation} */
+  toLatexWithAnnotation() {
     if (this.element === null) {
-      return "[null)]";
+      return new LatexWithAnnotation("[null)]", - 1, - 1);
     }
     let matrixContent = this.children[0].children[1];
     let result = [];
@@ -6034,7 +6146,7 @@ class MathNodeMatrix extends MathNode {
     }
     result.push(rows.join("\\\\"));
     result.push("\\end{pmatrix}");
-    return result.join("");
+    return new LatexWithAnnotation(result.join(""), - 1, - 1);
   }
 }
 
@@ -6073,7 +6185,8 @@ class MathNodeOperatorWithSuperAndSubscript extends MathNode {
     super(equationEditor, knownTypes.operatorWithSuperAndSubscript);
   }
 
-  toLatex() {
+  /** @returns {LatexWithAnnotation} */
+  toLatexWithAnnotation() {
     let top = this.children[0].toLatex();
     let result = this.children[1].toLatex();
     let bottom = this.children[2].toLatex();
@@ -6083,10 +6196,9 @@ class MathNodeOperatorWithSuperAndSubscript extends MathNode {
     if (top !== "") {
       result += `^{${top}}`;
     }
-    return result;
+    return new LatexWithAnnotation(result, - 1, - 1);
   }
 }
-
 
 class MathNodeOperatorStandalone extends MathNode {
   constructor(
@@ -6095,13 +6207,15 @@ class MathNodeOperatorStandalone extends MathNode {
   ) {
     super(equationEditor, knownTypes.operatorStandalone);
   }
-  toLatex() {
+
+  /** @returns {LatexWithAnnotation} */
+  toLatexWithAnnotation() {
     latexConstants.computeUtf8ToLatexMap();
     const content = this.textContentOrInitialContent();
     if (content in latexConstants.utf8ToLatexMap) {
-      return latexConstants.utf8ToLatexMap[content];
+      return new LatexWithAnnotation(latexConstants.utf8ToLatexMap[content]);
     }
-    return `${content}`;
+    return new LatexWithAnnotation(`${content}`, - 1, - 1);
   }
 }
 

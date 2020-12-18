@@ -923,7 +923,11 @@ function mathFromLatex(
   /**@type{boolean} whether to remove \\displaystyle from latex source.*/
   removeDisplayStyle,
 ) {
-  let result = new EquationEditor(container, new EquationEditorOptions(editable, sanitizeLatexSource, removeDisplayStyle, null));
+  let result = new EquationEditor(container, new EquationEditorOptions({
+    editable: editable,
+    sanitizeLatexSource: sanitizeLatexSource,
+    removeDisplayStyle: removeDisplayStyle,
+  }));
   result.writeLatex(latex);
   return result;
 }
@@ -1992,30 +1996,41 @@ class LaTeXParser {
 
 class EquationEditorOptions {
   constructor(
-    /** @type{boolean} */
-    editable,
-    /** @type{boolean} */
-    sanitizeLatexSource,
-    /**@type{boolean} whether to remove \\displaystyle from latex source.*/
-    removeDisplayStyle,
-    /**@type{HTMLElement|null} */
-    debugLogContainer,
+    /** @type{{editable:boolean,removeDisplayStyle:boolean,sanitizeLatexSource:boolean,inputCopy:HTMLElement|null,debugLogContainer:HTMLElement|null,latexInput:HTMLElement|null}} */
+    options,
   ) {
     /** @type{boolean} */
-    this.editable = editable;
+    this.editable = options.editable;
     /** @type{boolean} */
-    this.removeDisplayStyle = removeDisplayStyle;
+    this.removeDisplayStyle = options.removeDisplayStyle;
     /** @type{boolean} */
-    this.sanitizeLatexSource = sanitizeLatexSource;
+    this.sanitizeLatexSource = options.sanitizeLatexSource;
     /**@type{HTMLElement|null} */
-    this.debugLogContainer = null;
-    if (debugLogContainer instanceof HTMLElement) {
-      this.debugLogContainer = debugLogContainer;
+    this.debugLogContainer = options.debugLogContainer;
+    /**@type{HTMLElement|null} */
+    this.latexInput = options.latexInput;
+    /**@type{HTMLElement|null} */
+    this.inputCopy = options.inputCopy;
+    if (this.editable === undefined) {
+      this.editable = true;
+    }
+    if (this.removeDisplayStyle === undefined) {
+      this.removeDisplayStyle = false;
+    }
+    if (this.sanitizeLatexSource === undefined) {
+      this.sanitizeLatexSource = false;
+    }
+    if (this.debugLogContainer === undefined) {
+      this.debugLogContainer = null;
+    }
+    if (this.latexInput === undefined) {
+      this.latexInput = null;
+    }
+    if (this.inputCopy === undefined) {
+      this.inputCopy = null;
     }
     /** @type{boolean} */
     this.showLatexOnDoubleClick = !this.editable;
-    /**@type{HTMLElement|null} */
-    this.latexInput = null;
   }
 }
 
@@ -2030,8 +2045,9 @@ class EquationEditor {
     this.container = containerGiven;
     this.container.style.display = "inline-block";
     this.container.style.position = "relative";
+    this.container.textContent = "";
     /** @type{EquationEditorOptions} */
-    this.options = new EquationEditorOptions(true, false, false, null);
+    this.options = new EquationEditorOptions({});
     if (options !== null && options !== undefined) {
       this.options = options;
     }
@@ -2085,15 +2101,23 @@ class EquationEditor {
 
   writeLatexToInput() {
     if (
-      this.options.latexInput === null
+      this.options.latexInput === null &&
+      this.options.inputCopy === null
     ) {
       return;
     }
     let latexWithAnnotation = this.rootNode.toLatexWithAnnotation();
-    this.options.latexInput.value = latexWithAnnotation.latex;
-    let range = window.getSelection().getRangeAt(0);
-    // range
-
+    if (this.options.latexInput !== null) {
+      this.options.latexInput.value = latexWithAnnotation.latex;
+    }
+    if (this.options.inputCopy !== null) {
+      if (latexWithAnnotation.selectionStart === -1 || latexWithAnnotation.selectionEnd === -1) {
+        this.options.inputCopy.value = latexWithAnnotation.latex;
+      } else {
+        let sliced = latexWithAnnotation.latex.slice(latexWithAnnotation.selectionStart, latexWithAnnotation.selectionEnd + 1);
+        this.options.inputCopy.value = sliced;
+      }
+    }
   }
 
   writeLatexFromInput() {
@@ -6612,12 +6636,16 @@ function initializeTestPage(
   /** @type{string} */
   latexInputId,
   /** @type{string} */
+  latexCopyId,
+  /** @type{string} */
   debugId,
 ) {
   let editorElement = document.getElementById(equationEditorId);
-  const options = new EquationEditorOptions(true, false, false, null);
-  options.latexInput = document.getElementById(latexInputId);
-  options.debugLogContainer = document.getElementById(debugId);
+  const options = new EquationEditorOptions({
+    latexInput: document.getElementById(latexInputId),
+    debugLogContainer: document.getElementById(debugId),
+    inputCopy: document.getElementById(latexCopyId),
+  });
   let editor = new EquationEditor(editorElement, options);
   editor.updateDOM();
   editor.rootNode.focus(- 1);

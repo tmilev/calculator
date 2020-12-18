@@ -10,14 +10,17 @@
 </style>
 
 
-<body onload="initializeTestPage( 'equation-editor','latexInputTest', 'debug', 'typeSetButton', 'mathTagTester');">
+<body
+  onload="initializeTestPage('equation-editor','latexInputTest', 'input-copy', 'debug', 'typeSetButton', 'mathTagTester');">
   <h1>A math equation editor written from scratch.</h1>
   <div style='text-align: center;'>
     <div id="equation-editor" style="font-size: 72px; font-family:'Times New Roman'"></div>
     <br>
-    <input id="latexInputTest" type="text" value="">
+    <input id="input-copy" type="text">
+    <br>
+    <input id="latexInputTest" type="text">
   </div>
-  <div id="debug" style='display:none;'></div>
+  <div id="debug"></div>
   <hr>
   <h2>How to use on your web site.</h2>
   Include the script <a
@@ -35,17 +38,19 @@
 &lt;script type="text/javascript" src="equation_editor.js"&gt;&lt;/script&gt;
 &lt;script&gt;
 function createEditor() {
-  const options = new EquationEditorOptions(
-    // editable - true for an editable equation box, false for static math
-    true, 
-    // sanitizeLatexSource - will sanitize your LaTeX to a preferred mathematical equivalent
-    false, 
-    // removeDisplayStyle - will strip \displaystyle from your latex source
-    false, 
-    // debugLogContainer: shows info 
-    null);
-  // Binds an raw LaTeX input box to the editor. Editing the box updates automatically the editor.  
-  options.latexInput = document.getElementById('latex');
+  const options = new EquationEditorOptions({
+    // Can you edit the math or is it static math?
+    editable: true, 
+    // Bind a raw LaTeX input box to the editor. Editing the box updates automatically updates the editor.  
+    latexInput:document.getElementById('latex'),
+    inputCopy:document.getElementById('input-copy'),
+    // Set to true to have your LaTeX sanitized to a preferred mathematical equivalent.
+    sanitizeLatexSource: false, 
+    // Set to true to strip \displaystyle from your latex source, independent of the sanitization flag.
+    removeDisplayStyle: false, 
+    // Show debug-related information.
+    debugLogContainer: null,
+  });
   let editor = new EquationEditor(document.getElementById('editor'), options);
   editor.updateDOM();
   editor.rootNode.focus(- 1);

@@ -1184,6 +1184,7 @@ class LaTeXConstants {
       "P": "\u2119",
       "Q": "\u211A",
       "R": "\u211D",
+      "Z": "\u2124",
     };
     /**@type{Object.<string, string>} */
     this.leftDelimiters = {

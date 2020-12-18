@@ -44,6 +44,7 @@ function createEditor() {
     false, 
     // debugLogContainer: shows info 
     null);
+  // Binds an raw LaTeX input box to the editor. Editing the box updates automatically the editor.  
   options.latexInput = document.getElementById('latex');
   let editor = new EquationEditor(document.getElementById('editor'), options);
   editor.updateDOM();

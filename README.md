@@ -13,17 +13,18 @@ The calculator runs on a math expression substitution and interpretation engine 
 
 More details on the calculator substitution engine can be found [here](wiki/README.md).
 
-## Check out our new math equation editor written from scratch:
+## Check out our new math equation editor
 
 https://calculator-algebra.org:8166/calculator-html/test_equation_editor.html
 
-Modelled after MathQuill (we continue to love that editor - best wishes to the MathQuill team!) but with the following advantages.
+Modelled after MathQuill (we continue to love that editor - best wishes to the MathQuill team!). Our editor has the following  advantages.
 
 - Uses Apache 2.0 license (no more license headaches).
+- Written from scratch: not a single line from another project.
 - No fonts (at the cost of looking less beautiful than MathQuill).
 - No css files.
 - No external dependencies whatsoever, not even jquery.
-- Written from scratch: not a single line from another project! No more build system headaches: just copy and paste one single javascript file and you're done.
+- No more build system headaches: just copy and paste one single javascript file and you're done.
 - Matrix support from the start.
 - Processes \(\) math tags just like MathJax, can be used a MathJax drop-in replacement.
 

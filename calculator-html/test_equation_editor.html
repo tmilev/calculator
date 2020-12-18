@@ -1,24 +1,76 @@
 <html>
-<link type="text/css" rel="stylesheet" href="/html-common/mathquill/mathquill.css">
-<link type="text/css" rel="stylesheet" href="/html-common/jquery_ui/jquery-ui.css">
-<script src="/html-common/jquery/jquery.min.js"></script>
-<script src="/html-common/mathquill/mathquill.js"></script>
+<title>A js math equation editor from scratch</title>
 <script type="text/javascript" src="equation_editor.js"></script>
 
+<style>
+  .code {
+    font-family: monospace;
+    background-color: #f4f4f4;
+  }
+</style>
 
-<body
-  onload="initializeTestPage('mq-editor', 'equation-editor','latexInputTest', 'debug', 'typeSetButton', 'mathTagTester');">
-  Equation editor:<br><br>
-  <div id="equation-editor" style="font-size: 72px; font-family:'Times New Roman'"></div>
-  <br>
-  <input id="latexInputTest" type="text" value="">
+
+<body onload="initializeTestPage( 'equation-editor','latexInputTest', 'debug', 'typeSetButton', 'mathTagTester');">
+  <h1>A math equation editor written from scratch.</h1>
+  <div style='text-align: center;'>
+    <div id="equation-editor" style="font-size: 72px; font-family:'Times New Roman'"></div>
+    <br>
+    <input id="latexInputTest" type="text" value="">
+  </div>
+  <div id="debug" style='display:none;'></div>
   <hr>
-  <div id="debug"></div>
+  <h2>How to use on your web site.</h2>
+  Include the script <a
+    href='https://github.com/tmilev/calculator/blob/master/calculator-html/equation_editor.js'>equation_editor.js</a> in
+  your html page. Use the typeset function to convert content enclosed in \( \) text to LaTeX. Use
+  new EquationEditor(...) to create an editable math equation editor. The file also works as a regular commonJS module
+  and can be used in node.js projects with
+  <span class='code'>require('./equation_editor.js');</span>.
 
-  Mathquill:<div id="mq-editor"></div>
   <br>
-  <button id="typeSetButton">typeset</button>
+
+  <pre class='code'>
+&lt;html&gt;  
+&lt;script type="text/javascript" src="equation_editor.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+function createEditor() {
+  const options = new EquationEditorOptions(
+    // editable - true for an editable equation box, false for static math
+    true, 
+    // sanitizeLatexSource - will sanitize your LaTeX to a preferred mathematical equivalent
+    false, 
+    // removeDisplayStyle - will strip \displaystyle from your latex source
+    false, 
+    // debugLogContainer: shows info 
+    null);
+  options.latexInput = document.getElementById('latex');
+  let editor = new EquationEditor(document.getElementById('editor'), options);
+  editor.updateDOM();
+  editor.rootNode.focus(- 1);
+}
+&lt;/script&gt;
+&lt;body onload="createEditor()"&gt;
+  
+Equation editor here: &lt;div id='editor' style="font-size: 72px; font-family:'Times New Roman'"&gt; &lt;/div&gt;
+&lt;br&gt;
+Latex of what you typed, can edit directly: &lt;input id="latex"&gt;
+&lt;hr&gt;
+Typeset all math in the 'toBeTypeSet' tag.
+&lt;button id="typeSetButton" onclick="typeset(document.getElementById('toBeTypeSet'), '', false, false, false);"&gt;typeset&lt;/button&gt;
+
+&lt;div id='toBeTypeSet'&gt;
+\(\frac{-b\pm \sqrt{b^2-4ac}}{2a}\)
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;  
+</pre>
+
+  <h2>Test page for static math content.</h2>
+  <button id="typeSetButton"
+    onclick="typeset(document.getElementById('mathTagTester'), '', false, false);">typeset</button>
   <br>
+
+
   <span id="mathTagTester">
     Example content to be typeset follow.
     During development, we may shuffle examples we currently work on to the top.

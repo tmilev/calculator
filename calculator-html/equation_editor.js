@@ -1,3 +1,4 @@
+// Licensed to you under the Apache 2.0 license.
 "use strict";
 
 var module;
@@ -33,7 +34,7 @@ class MathNodeType {
     this.width = input["width"];
     this.height = input["height"];
     this.display = input["display"];
-    this.verticalAlign = input["verticalAlign"];
+    this.verticalAlign = input["verticalAlign"]cd;
     this.outline = input["outline"];
     this.fontSizeRatio = input["fontSizeRatio"];
     this.fontWeight = input["fontWeight"];
@@ -2087,8 +2088,11 @@ class EquationEditor {
     ) {
       return;
     }
-    let latex = this.rootNode.toLatex();
-    this.options.latexInput.value = latex;
+    let latexWithAnnotation = this.rootNode.toLatexWithAnnotation();
+    this.options.latexInput.value = latexWithAnnotation.latex;
+    let range = window.getSelection().getRangeAt(0);
+    // range
+
   }
 
   writeLatexFromInput() {
@@ -3628,7 +3632,7 @@ class MathNode {
       return false;
     }
     this.equationEditor.options.latexInput.focus();
-    this.equationEditor.options.latexInput.select();
+    // this.equationEditor.options.latexInput.select();
     console.log("DEBUG: inside copy.");
     document.execCommand("copy");
 
@@ -6603,19 +6607,12 @@ function typeset(
 
 function initializeTestPage(
   /** @type{string} */
-  mqEditorId,
-  /** @type{string} */
   equationEditorId,
   /** @type{string} */
   latexInputId,
   /** @type{string} */
   debugId,
-  /** @type{string} */
-  typesetButtonId,
-  /** @type{string} */
-  mathTagTesterId,
 ) {
-  MathQuill.getInterface(2).MathField(document.getElementById(mqEditorId));
   let editorElement = document.getElementById(equationEditorId);
   const options = new EquationEditorOptions(true, false, false, null);
   options.latexInput = document.getElementById(latexInputId);
@@ -6624,11 +6621,6 @@ function initializeTestPage(
   editor.updateDOM();
   editor.rootNode.focus(- 1);
 
-  const typesetButton = document.getElementById(typesetButtonId);
-  const mathTagTester = document.getElementById(mathTagTesterId);
-  typesetButton.addEventListener("click", (e) => {
-    typeset(mathTagTester, "", false, false);
-  });
   setTimeout(() => {
     editor.sendKeys([/*
       "(", "1", "/", "1",
@@ -6646,6 +6638,7 @@ module.exports = {
   initializeTestPage,
   typeset,
   EquationEditor,
+  EquationEditorOptions,
   mathFromLatex,
   mathFromElement,
   latexConstants,

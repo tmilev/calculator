@@ -1,0 +1,37 @@
+<html>
+<script type="text/javascript" src="equation_editor.js"></script>
+<script>
+  function createEditor() {
+    const options = new EquationEditorOptions(
+      // editable - true for an editable equation box, false for static math
+      true,
+      // sanitizeLatexSource - will sanitize your LaTeX to a preferred mathematical equivalent
+      false,
+      // removeDisplayStyle - will strip \displaystyle from your latex source
+      false,
+      // debugLogContainer: shows info 
+      null);
+    options.latexInput = document.getElementById('latex');
+    let editor = new EquationEditor(document.getElementById('editor'), options);
+    editor.updateDOM();
+    editor.rootNode.focus(- 1);
+  }
+</script>
+
+<body onload="createEditor()">
+
+  Equation editor here: <div id='editor' style="font-size: 72px; font-family:'Times New Roman'"> </div>
+  <br>
+  Latex of what you typed, can edit directly: <input id="latex">
+  <hr>
+  Typeset all math in the 'toBeTypeSet' tag.
+  <button id="typeSetButton"
+    onclick="typeset(document.getElementById('toBeTypeSet'), '', false, false, false);">typeset</button>
+
+  <div id='toBeTypeSet'>
+    \(\frac{-b\pm \sqrt{b^2-4ac}}{2a}\)
+  </div>
+
+</body>
+
+</html>

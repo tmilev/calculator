@@ -744,7 +744,7 @@ class MathNodeFactory {
     let result = new MathNodeOperatorWithSuperAndSubscript(equationEditor);
     let superscriptNode = new MathNode(equationEditor, knownTypes.operatorSuperscript);
     let subscriptNode = new MathNode(equationEditor, knownTypes.operatorSubscript);
-    let operatorNode = new MathNode(equationEditor, knownTypes.operatorStandalone);
+    let operatorNode = new MathNodeOperatorStandalone(equationEditor);
     superscriptNode.appendChild(this.horizontalMath(equationEditor, superscript));
     subscriptNode.appendChild(this.horizontalMath(equationEditor, subscript));
     operatorNode.appendChild(this.atomImmutable(equationEditor, operator));
@@ -5716,122 +5716,7 @@ class MathNode {
     return latexConstants.convertUtf8ToLatex(this.contentIfAtomic());
   }
 
-  toLatexBaseWithSubscript() {
-    return `{${this.children[0].toLatex()}}_{${this.children[1].toLatex()}}`;
-  }
-
-  toLatexOperatorWithSuperAndSubscript() {
-    let top = this.children[0].toLatex();
-    let result = this.children[1].toLatex();
-    let bottom = this.children[2].toLatex();
-    if (bottom !== "") {
-      result += `_{${bottom}}`;
-    }
-    if (top !== "") {
-      result += `^{${top}}`;
-    }
-    return result;
-  }
-
-  toLatexOperatorStandalone() {
-    latexConstants.computeUtf8ToLatexMap();
-    const content = this.textContentOrInitialContent();
-    if (content in latexConstants.utf8ToLatexMap) {
-      return latexConstants.utf8ToLatexMap[content];
-    }
-    return `${content}`;
-  }
-
-  toLatexLeftDelimiter() {
-    if (this.element === null) {
-      return "[null(]";
-    }
-    return `\\left${this.element.textContent}`;
-  }
-
-  toLatexCancel() {
-    let childLatex = this.children[1].toLatex();
-    return `\\cancel{${childLatex}}`;
-  }
-
-  toLatexSqrt() {
-    if (this.element === null) {
-      return "[null(]";
-    }
-    let exponent = "";
-    let underTheRadical = "";
-    if (this.children.length > 0) {
-      exponent = this.children[0].toLatex();
-    }
-    if (this.children.length > 2) {
-      underTheRadical = this.children[2].toLatex();
-    }
-    if (exponent !== "") {
-      return `\\sqrt[${exponent}]{${underTheRadical}}`;
-    }
-    return `\\sqrt{${underTheRadical}}`;
-  }
-
-  toLatexRightDelimiter() {
-    if (this.element === null) {
-      return "[null)]";
-    }
-    return `\\right${this.element.textContent}`;
-  }
-
-  toLatexMatrix() {
-    if (this.element === null) {
-      return "[null)]";
-    }
-    let matrixContent = this.children[0].children[1];
-    let result = [];
-    result.push("\\begin{pmatrix}");
-    let rows = [];
-    for (let i = 0; i < matrixContent.children.length; i++) {
-      let matrixRow = matrixContent.children[i];
-      let currentRowStrings = [];
-      for (let j = 0; j < matrixRow.children.length; j++) {
-        let entry = matrixRow.children[j];
-        currentRowStrings.push(entry.toLatex());
-      }
-      rows.push(currentRowStrings.join("&"));
-    }
-    result.push(rows.join("\\\\"));
-    result.push("\\end{pmatrix}");
-    return result.join("");
-  }
-
   toLatex() {
-    if (this.type.type === knownTypes.fraction.type) {
-      return this.toLatexFraction();
-    }
-    if (this.isDelimiter()) {
-      return this.textContentOrInitialContent();
-    }
-    if (this.type.type === knownTypes.baseWithSubscript.type) {
-      return this.toLatexBaseWithSubscript();
-    }
-    if (this.type.type === knownTypes.matrix.type) {
-      return this.toLatexMatrix();
-    }
-    if (this.type.type === knownTypes.sqrt.type) {
-      return this.toLatexSqrt();
-    }
-    if (this.type.type === knownTypes.cancel.type) {
-      return this.toLatexCancel();
-    }
-    if (this.type.type === knownTypes.leftDelimiter.type) {
-      return this.toLatexLeftDelimiter();
-    }
-    if (this.type.type === knownTypes.operatorWithSuperAndSubscript.type) {
-      return this.toLatexOperatorWithSuperAndSubscript();
-    }
-    if (this.type.type === knownTypes.operatorStandalone.type) {
-      return this.toLatexOperatorStandalone();
-    }
-    if (this.type.type === knownTypes.rightDelimiter.type) {
-      return this.toLatexRightDelimiter();
-    }
     let toJoin = [];
     for (let i = 0; i < this.children.length; i++) {
       if (this.children[i] === null) {
@@ -6013,6 +5898,11 @@ class MathNodeCancel extends MathNode {
   ) {
     super(equationEditor, knownTypes.cancel);
   }
+
+  toLatex() {
+    let childLatex = this.children[1].toLatex();
+    return `\\cancel{${childLatex}}`;
+  }
 }
 
 class MathNodeSqrtSign extends MathNode {
@@ -6030,6 +5920,24 @@ class MathNodeSqrt extends MathNode {
     equationEditor,
   ) {
     super(equationEditor, knownTypes.sqrt);
+  }
+
+  toLatex() {
+    if (this.element === null) {
+      return "[null(]";
+    }
+    let exponent = "";
+    let underTheRadical = "";
+    if (this.children.length > 0) {
+      exponent = this.children[0].toLatex();
+    }
+    if (this.children.length > 2) {
+      underTheRadical = this.children[2].toLatex();
+    }
+    if (exponent !== "") {
+      return `\\sqrt[${exponent}]{${underTheRadical}}`;
+    }
+    return `\\sqrt{${underTheRadical}}`;
   }
 }
 
@@ -6067,6 +5975,11 @@ class MathNodeBaseWithSubscript extends MathNode {
   ) {
     super(equationEditor, knownTypes.baseWithSubscript);
   }
+
+  toLatex() {
+    return `{${this.children[0].toLatex()}}_{${this.children[1].toLatex()}}`;
+  }
+
 }
 
 class MathNodeLeftDelimiter extends MathNode {
@@ -6075,6 +5988,9 @@ class MathNodeLeftDelimiter extends MathNode {
     equationEditor,
   ) {
     super(equationEditor, knownTypes.leftDelimiter);
+  }
+  toLatex() {
+    return this.textContentOrInitialContent();
   }
 }
 
@@ -6085,6 +6001,10 @@ class MathNodeBaseRightDelimiter extends MathNode {
   ) {
     super(equationEditor, knownTypes.rightDelimiter);
   }
+
+  toLatex() {
+    return this.textContentOrInitialContent();
+  }
 }
 
 class MathNodeMatrix extends MathNode {
@@ -6093,6 +6013,28 @@ class MathNodeMatrix extends MathNode {
     equationEditor,
   ) {
     super(equationEditor, knownTypes.matrix);
+  }
+
+  toLatex() {
+    if (this.element === null) {
+      return "[null)]";
+    }
+    let matrixContent = this.children[0].children[1];
+    let result = [];
+    result.push("\\begin{pmatrix}");
+    let rows = [];
+    for (let i = 0; i < matrixContent.children.length; i++) {
+      let matrixRow = matrixContent.children[i];
+      let currentRowStrings = [];
+      for (let j = 0; j < matrixRow.children.length; j++) {
+        let entry = matrixRow.children[j];
+        currentRowStrings.push(entry.toLatex());
+      }
+      rows.push(currentRowStrings.join("&"));
+    }
+    result.push(rows.join("\\\\"));
+    result.push("\\end{pmatrix}");
+    return result.join("");
   }
 }
 
@@ -6129,6 +6071,37 @@ class MathNodeOperatorWithSuperAndSubscript extends MathNode {
     equationEditor,
   ) {
     super(equationEditor, knownTypes.operatorWithSuperAndSubscript);
+  }
+
+  toLatex() {
+    let top = this.children[0].toLatex();
+    let result = this.children[1].toLatex();
+    let bottom = this.children[2].toLatex();
+    if (bottom !== "") {
+      result += `_{${bottom}}`;
+    }
+    if (top !== "") {
+      result += `^{${top}}`;
+    }
+    return result;
+  }
+}
+
+
+class MathNodeOperatorStandalone extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.operatorStandalone);
+  }
+  toLatex() {
+    latexConstants.computeUtf8ToLatexMap();
+    const content = this.textContentOrInitialContent();
+    if (content in latexConstants.utf8ToLatexMap) {
+      return latexConstants.utf8ToLatexMap[content];
+    }
+    return `${content}`;
   }
 }
 

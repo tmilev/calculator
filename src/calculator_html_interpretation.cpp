@@ -2033,7 +2033,7 @@ void UserCalculator::computePointsEarned(
       continue;
     }
     ProblemData& currentP = this->theProblemData.theValues[i];
-    currentP.Points = 0;
+    currentP.points = 0;
     currentP.totalNumSubmissions = 0;
     currentP.numCorrectlyAnswered = 0;
     Rational currentWeight;
@@ -2051,8 +2051,8 @@ void UserCalculator::computePointsEarned(
     if (currentP.flagProblemWeightIsOK) {
       int expectedNumberOfAnswers = currentP.getExpectedNumberOfAnswers(problemName, commentsOnFailure);
       if (expectedNumberOfAnswers > 0) {
-        currentP.Points = (currentWeight * currentP.numCorrectlyAnswered) / expectedNumberOfAnswers;
-        this->pointsEarned += currentP.Points;
+        currentP.points = (currentWeight * currentP.numCorrectlyAnswered) / expectedNumberOfAnswers;
+        this->pointsEarned += currentP.points;
       }
     }
     if (theTopics != nullptr) {
@@ -2060,7 +2060,7 @@ void UserCalculator::computePointsEarned(
         TopicElement& currentElt = theTopics->getValueCreate(problemName);
         this->pointsMax += currentWeight;
         for (int j = 0; j < currentElt.parentTopics.size; j ++) {
-          (*theTopics).theValues[currentElt.parentTopics[j]].totalPointsEarned += currentP.Points;
+          (*theTopics).theValues[currentElt.parentTopics[j]].totalPointsEarned += currentP.points;
           (*theTopics).theValues[currentElt.parentTopics[j]].maxPointsInAllChildren += currentWeight;
           if (currentWeight == 0) {
             (*theTopics).theValues[currentElt.parentTopics[j]].flagSubproblemHasNoWeight = true;
@@ -2068,7 +2068,7 @@ void UserCalculator::computePointsEarned(
         }
         if (currentElt.parentTopics.size > 1) {
           (*theTopics).theValues[currentElt.parentTopics[currentElt.parentTopics.size - 2]].
-            pointsEarnedInProblemsThatAreImmediateChildren += currentP.Points;
+            pointsEarnedInProblemsThatAreImmediateChildren += currentP.points;
         }
       }
     }

@@ -1428,7 +1428,7 @@ std::string FiniteGroup<elementSomeGroup>::prettyPrintCharacterTable(bool andPri
     this->irreps[i].computeCharacter();
   }
   std::stringstream out;
-  out << this->getSize() << " elements.  Representatives and sizes are ";
+  out << this->getSize() << " elements. Representatives and sizes are ";
   for (int i = 0; i < this->conjugacyClasses.size; i ++) {
     out << this->conjugacyClasses[i].representative << " " << this->conjugacyClasses[i].size;
     if (i != this->conjugacyClasses.size - 1) {

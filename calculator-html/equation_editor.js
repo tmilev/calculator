@@ -2220,6 +2220,7 @@ class EquationEditor {
   }
 
   updateAlignment() {
+    console.log("DEBUG: updateAlignment...");
     this.rootNode.computeBoundingBox();
     this.rootNode.doAlign();
     let boundingRectangle = this.rootNode.element.getBoundingClientRect();
@@ -3865,7 +3866,6 @@ class MathNode {
     parent.updateDOM();
     parent.focusRestore();
   }
-
 
   /** @returns {boolean} whether default should be prevented. */
   handleKeyDownCases(

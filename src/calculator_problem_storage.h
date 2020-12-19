@@ -157,7 +157,7 @@ public:
   bool flagRandomSeedGiven;
   uint32_t randomSeed;
   bool flagProblemWeightIsOK;
-  Rational Points;
+  Rational points;
   ProblemDataAdministrative adminData;
   int numCorrectlyAnswered;
   int totalNumSubmissions;
@@ -253,6 +253,5 @@ public:
   UserCalculator();
   ~UserCalculator();
 };
-
 
 #endif // CALCULATOR_PROBLEM_STORAGE_HEADER_ALREADY_INCLUDED

@@ -2943,11 +2943,11 @@ std::string CalculatorHTML::toStringProblemScoreFull(const std::string& theFileN
     } else if (theProbData.totalNumSubmissions != 0) {
       if (theProbData.numCorrectlyAnswered < theProbData.theAnswers.size()) {
         out << "<b style =\"color:red\">"
-        << theProbData.Points << " out of "
+        << theProbData.points << " out of "
         << currentWeight << " point(s). </b>";
       } else if (theProbData.numCorrectlyAnswered == theProbData.theAnswers.size()) {
         out << "<b style =\"color:green\">"
-        << theProbData.Points << " out of "
+        << theProbData.points << " out of "
         << currentWeight << " point(s). </b> ";
       }
     }

@@ -586,7 +586,7 @@ std::string UserCalculator::toString() {
     << "; correct: "
     << this->theProblemData.theValues[i].numCorrectlyAnswered
     << "; points: "
-    << this->theProblemData.theValues[i].Points
+    << this->theProblemData.theValues[i].points
     << ";";
     if (!this->theProblemData.theValues[i].adminData.getWeightFromCourse(this->courseComputed, weightRat)) {
       out << " (weight not available). ";
@@ -997,7 +997,7 @@ bool ProblemData::loadFromOldFormat(const std::string& inputData, std::stringstr
   if (!HtmlRoutines::chopPercentEncodedString(inputData, theMap, commentsOnFailure)) {
     return false;
   }
-  this->Points = 0;
+  this->points = 0;
   this->numCorrectlyAnswered = 0;
   this->totalNumSubmissions = 0;
   this->flagRandomSeedGiven = false;
@@ -1045,7 +1045,7 @@ bool ProblemData::loadFromOldFormat(const std::string& inputData, std::stringstr
 bool ProblemData::loadFromJSON(const JSData& inputData, std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("ProblemData::loadFromJSON");
   (void) commentsOnFailure;
-  this->Points = 0;
+  this->points = 0;
   this->numCorrectlyAnswered = 0;
   this->totalNumSubmissions = 0;
   this->flagRandomSeedGiven = false;
@@ -1087,7 +1087,7 @@ bool ProblemData::loadFromJSON(const JSData& inputData, std::stringstream& comme
 }
 
 bool UserCalculator::interpretDatabaseProblemData(const std::string& theInfo, std::stringstream& commentsOnFailure) {
-  MacroRegisterFunctionWithName("UserCalculator::InterpretDatabaseProblemData");
+  MacroRegisterFunctionWithName("UserCalculator::interpretDatabaseProblemData");
   MapList<std::string, std::string, MathRoutines::hashString> theMap;
   if (!HtmlRoutines::chopPercentEncodedString(theInfo, theMap, commentsOnFailure)) {
     return false;

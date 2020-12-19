@@ -45,6 +45,7 @@ class MathNodeType {
     this.position = input["position"];
     this.minWidth = input["minWidth"];
     this.cursor = input["cursor"];
+    this.overflow = input["overflow"];
     // Padding.
     this.paddingBottom = input["paddingBottom"];
     this.paddingTop = input["paddingTop"];
@@ -89,6 +90,7 @@ const knownTypeDefaults = {
   "position": "absolute",
   "cursor": "",
   "outline": "",
+  "overflow": "",
   // Colors
   "colorText": "",
   "colorImplied": "",
@@ -153,6 +155,7 @@ const knownTypes = {
     "height": "auto",
     "minWidth": "4px",
     "verticalAlign": "text-bottom",
+    "overflow": "hidden",
   }),
   // A non-editable math expression/operator such as "+" or "-".
   atomImmutable: new MathNodeType({
@@ -2588,7 +2591,11 @@ class BoundingBox {
     }
     return this.columnOffsets[columnIndex];
   }
-};
+
+  toString() {
+    return `w: ${this.width.toFixed(2)}, h: ${this.height.toFixed(2)}, fl:${this.fractionLineHeight.toFixed(2)}`;
+  }
+}
 
 class LatexWithAnnotation {
   constructor(
@@ -2769,6 +2776,9 @@ class MathNode {
     }
     if (this.type.minWidth !== "") {
       this.element.style.minWidth = this.type.minWidth;
+    }
+    if (this.type.overflow !== "") {
+      this.element.style.overflow = this.type.overflow;
     }
     this.element.style.verticalAlign = this.type.verticalAlign;
     this.element.style.outline = this.type.outline;
@@ -2999,6 +3009,7 @@ class MathNode {
     this.boundingBox.width = boundingRecangleDOM.width;
     this.boundingBox.height = boundingRecangleDOM.height;
     this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
+    console.log("DEBUG: dimensions atomic: " + this.boundingBox.toString());
   }
 
   computeDimensionsCancel() {
@@ -3736,12 +3747,30 @@ class MathNode {
       event.preventDefault();
       doUpdateAlignment = false;
     }
+    if (doUpdateAlignment && this.type.type === knownTypes.atom.type && this.element !== null) {
+      // The content is not yet written to our editable field: 
+      // that will happen once the event default is carried out.
+      // This means that we cannot compute the width of our atom accurately now,
+      // but will be able to do in the body of the setTimeout'ed function below.
+      // This is a problem as the screen may be redrawn between the 
+      // time the event default is called and the time we call 
+      // equationEditor.updateAlignment in the timeout below, in which case the extra 
+      // content will overflow its container box.
+      this.element.style.maxWidth = `${this.boundingBox.width}px`;
+      this.element.style.maxHeight = `${this.boundingBox.height}px`;
+      this.element.style.width = `${this.boundingBox.width}px`;
+      this.element.style.height = `${this.boundingBox.height}px`;
+    }
     // While we no longer propagate the event, we need to 
     // release the thread so the browser can finish computations
     // with the released element. 
     setTimeout(() => {
       this.storeCaretPosition(event.key, event.shiftKey);
       if (doUpdateAlignment) {
+        this.element.style.maxWidth = "";
+        this.element.style.maxHeight = "";
+        this.element.style.width = "auto";
+        this.element.style.height = "auto";
         this.equationEditor.updateAlignment();
       }
       this.equationEditor.writeLatexToInput();

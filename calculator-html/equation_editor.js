@@ -454,6 +454,8 @@ class MathNodeFactory {
   ) {
     const result = new MathNodeRoot(equationEditor);
     result.appendChild(this.horizontalMath(equationEditor, null));
+    let atom = result.children[0].children[0];
+    atom.type.minWidth = 30;
     return result;
   }
 

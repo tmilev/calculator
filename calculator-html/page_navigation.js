@@ -17,6 +17,7 @@ const calculatorPage = require('./calculator_page');
 const signUp = require('./signup').signUp;
 const mathTypeSet = require('./math_typeset');
 const themes = require('./themes');
+const solver = require('./solve');
 
 function User() {
   this.flagLoggedIn = false;
@@ -508,6 +509,13 @@ class Page {
         selectFunction: null,
         initialized: false,
       },
+      solve: {
+        name: "solve",
+        menuButtonId: ids.domElements.pages.solve.button,
+        id: ids.domElements.pages.solve.div,
+        container: null,
+        selectFunction: solver.selectSolverPage,
+      },
       selectCourse: {
         name: "selectCourse",
         id: "divSelectCourse",
@@ -640,10 +648,10 @@ class Page {
   }
 
   initMenuBar() {
-    for (var page in this.pages) {
+    for (let page in this.pages) {
       this.pages[page].container = document.getElementById(this.pages[page].id);
       if (this.pages[page].menuButtonId !== null && this.pages[page].menuButtonId !== undefined) {
-        var currentButton = document.getElementById(this.pages[page].menuButtonId);
+        let currentButton = document.getElementById(this.pages[page].menuButtonId);
         currentButton.pageToSelect = page;
         currentButton.addEventListener("click", this.selectPage.bind(this, page));
       }
@@ -822,7 +830,7 @@ class Page {
     }
     this.storage.variables.currentPage.setAndStore(inputPage);
     if (!this.flagProblemPageOnly) {
-      for (var page in this.pages) {
+      for (let page in this.pages) {
         this.pages[page].container.style.display = "none";
         if (this.pages[page].menuButtonId !== null && this.pages[page].menuButtonId !== undefined) {
           document.getElementById(this.pages[page].menuButtonId).classList.remove("buttonSelectPageSelected");

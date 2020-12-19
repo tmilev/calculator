@@ -6,6 +6,12 @@ var stringResources = {
 
 var domElements = {
   pages: {
+    solve: {
+      div: "divSolvePage",
+      button: "buttonSolvePage",
+      editor: "editorSolveProblem",
+      solutionBox: "solutionBox",
+    },
     privacyPolicy: {
       div: "divPrivacyPolicy",
       button: "buttonPrivacyPolicy",

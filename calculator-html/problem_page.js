@@ -1360,11 +1360,7 @@ function processLoadedTopicsWriteToEditPage(incomingTopics, result) {
 function processLoadedTopicsWriteToCoursePage(incomingTopics, result) {
   const startTime = new Date().getTime();
   processLoadedTopics(incomingTopics, result);
-  const processTime = new Date().getTime() - startTime;
-  console.log(`DEBUG ${processTime} ms to process loaded topics.`);
   writeTopicsToCoursePage();
-  const writeTimeSecondPart = new Date().getTime() - startTime - processTime;
-  console.log(`DEBUG ${writeTimeSecondPart} ms to process write second part.`);
   const writeTime = new Date().getTime() - startTime;
   if (writeTime > 1000) {
     console.log(`Less than a second to generate html expected, needed ${writeTime} ms instead.`);

@@ -26,7 +26,7 @@ Inspired by MathQuill (we continue to love that editor - best wishes to the Math
 - No external dependencies whatsoever, not even jquery.
 - No more build system headaches: just copy and paste one single javascript file and you're done.
 - Matrix support from the start.
-- Processes \(\) math tags just like MathJax, can be used as a MathJax drop-in replacement.
+- Will construct math tags from content enclosed in \\(...\\) just like MathJax; can be used as a drop-in replacement.
 
 ## calculator installation 
 1. Download the `courses_calculator` repository:

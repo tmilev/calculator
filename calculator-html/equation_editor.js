@@ -3399,10 +3399,6 @@ class MathNode {
     this.boundingBox.width = left.boundingBox.width + preferredWidth + decoration.boundingBox.width;
   }
 
-  computeDimensionsSqrtSign() {
-
-  }
-
   computeDimensionsSqrt() {
     let radicalExponentBox = this.children[0];
     let sqrtSign = this.children[1];

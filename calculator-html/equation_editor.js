@@ -2150,6 +2150,17 @@ class EquationEditor {
     this.container.setAttribute("latexsource", latex);
   }
 
+  accountFrameTime(
+    /**@type{number} */
+    frameStart,
+  ) {
+    let now = new Date().getTime();
+    let elapsedTime = now - frameStart;
+    if (elapsedTime > 100) {
+      console.log(`Warning: last equation editor frame took a full ${elapsedTime}ms.`);
+    }
+  }
+
   toHtml() {
     let latexWithAnnotation = this.rootNode.toLatexWithAnnotation();
     let result = `Latex: ${latexWithAnnotation.latex}`
@@ -2223,7 +2234,6 @@ class EquationEditor {
   }
 
   updateAlignment() {
-    console.log("DEBUG: updateAlignment...");
     this.rootNode.computeBoundingBox();
     this.rootNode.doAlign();
     let boundingRectangle = this.rootNode.element.getBoundingClientRect();
@@ -3009,7 +3019,6 @@ class MathNode {
     this.boundingBox.width = boundingRecangleDOM.width;
     this.boundingBox.height = boundingRecangleDOM.height;
     this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
-    console.log("DEBUG: dimensions atomic: " + this.boundingBox.toString());
   }
 
   computeDimensionsCancel() {
@@ -3740,11 +3749,13 @@ class MathNode {
       event.stopPropagation();
       return;
     }
+    let frameStart = new Date().getTime();
     this.storeCaretPosition(event.key, event.shiftKey);
     event.stopPropagation();
     let doUpdateAlignment = true;
     if (this.handleKeyDownCases(event)) {
       event.preventDefault();
+      this.equationEditor.accountFrameTime(frameStart);
       doUpdateAlignment = false;
     }
     if (doUpdateAlignment && this.type.type === knownTypes.atom.type && this.element !== null) {
@@ -3772,6 +3783,7 @@ class MathNode {
         this.element.style.width = "auto";
         this.element.style.height = "auto";
         this.equationEditor.updateAlignment();
+        this.equationEditor.accountFrameTime(frameStart);
       }
       this.equationEditor.writeLatexToInput();
       this.equationEditor.writeDebugInfo(null);
@@ -3852,7 +3864,6 @@ class MathNode {
       toBeCopied = sliced;
     }
     event.clipboardData.setData('text/plain', toBeCopied);
-    console.log("Copying to clipboard: " + toBeCopied);
     event.preventDefault();
   }
 
@@ -3870,7 +3881,6 @@ class MathNode {
     if (this.type.type !== knownTypes.atom.type) {
       return;
     }
-    console.log("DEBUG: pasting: " + data);
     this.storeCaretPosition();
     let parser = new LaTeXParser(this.equationEditor, data);
     let newContent = parser.parse();

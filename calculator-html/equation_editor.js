@@ -795,7 +795,7 @@ class AtomWithPosition {
     /** @type {number} */
     this.position = position;
     if (this.element === null) {
-      this.position = -1;
+      this.position = - 1;
     }
   }
 
@@ -1996,7 +1996,7 @@ class LaTeXParser {
 
 class EquationEditorOptions {
   constructor(
-    /** @type{{editable:boolean,removeDisplayStyle:boolean,sanitizeLatexSource:boolean,inputCopy:HTMLElement|null,debugLogContainer:HTMLElement|null,latexInput:HTMLElement|null}} */
+    /** @type{{editable:boolean,removeDisplayStyle:boolean,sanitizeLatexSource:boolean,debugLogContainer:HTMLElement|null,latexInput:HTMLElement|null}} */
     options,
   ) {
     /** @type{boolean} */
@@ -2009,8 +2009,6 @@ class EquationEditorOptions {
     this.debugLogContainer = options.debugLogContainer;
     /**@type{HTMLElement|null} */
     this.latexInput = options.latexInput;
-    /**@type{HTMLElement|null} */
-    this.inputCopy = options.inputCopy;
     if (this.editable === undefined) {
       this.editable = true;
     }
@@ -2025,9 +2023,6 @@ class EquationEditorOptions {
     }
     if (this.latexInput === undefined) {
       this.latexInput = null;
-    }
-    if (this.inputCopy === undefined) {
-      this.inputCopy = null;
     }
     /** @type{boolean} */
     this.showLatexOnDoubleClick = !this.editable;
@@ -2060,7 +2055,7 @@ class EquationEditor {
     /** @type{AtomWithPosition} */
     this.selectionStart = new AtomWithPosition(null, -1);
     /** @type{AtomWithPosition} */
-    this.selectionStartExpanded = new AtomWithPosition(null, -1);
+    this.selectionStartExpanded = new AtomWithPosition(null, - 1);
     /** @type{AtomWithPosition} */
     this.selectionEnd = new AtomWithPosition(null, -1);
     /** @type{string} */
@@ -2101,22 +2096,13 @@ class EquationEditor {
 
   writeLatexToInput() {
     if (
-      this.options.latexInput === null &&
-      this.options.inputCopy === null
+      this.options.latexInput === null
     ) {
       return;
     }
     let latexWithAnnotation = this.rootNode.toLatexWithAnnotation();
     if (this.options.latexInput !== null) {
       this.options.latexInput.value = latexWithAnnotation.latex;
-    }
-    if (this.options.inputCopy !== null) {
-      if (latexWithAnnotation.selectionStart === -1 || latexWithAnnotation.selectionEnd === -1) {
-        this.options.inputCopy.value = latexWithAnnotation.latex;
-      } else {
-        let sliced = latexWithAnnotation.latex.slice(latexWithAnnotation.selectionStart, latexWithAnnotation.selectionEnd + 1);
-        this.options.inputCopy.value = sliced;
-      }
     }
   }
 
@@ -2150,10 +2136,12 @@ class EquationEditor {
   }
 
   toHtml() {
-    let result = `Latex: ${this.rootNode.toLatex()}`;
+    let latexWithAnnotation = this.rootNode.toLatexWithAnnotation();
+    let result = `Latex: ${latexWithAnnotation.latex}`
+    result += `<br>Latex selection: ${latexWithAnnotation.selectionStart}, ${latexWithAnnotation.selectionEnd}`;
     result += `<br>Drawing: ${this.rootNode.toString()}`;
     result += `<br>Structure: ${this.rootNode.toHtml(0)}`;
-    result += `<br>Selection: ${this.toStringSelection()}`;
+    result += `<br>${this.toStringSelection()}`;
     result += `<br>Backslash position: ${this.backslashPosition}; started: ${this.backslashSequenceStarted}, sequence: ${this.backslashSequence}.`;
     result += `<br>Position computation string: ${this.positionDebugString}.`;
     return result;
@@ -2241,7 +2229,11 @@ class EquationEditor {
     if (this.selectionStart.element === null) {
       return "";
     }
-    return `Selection: from: ${this.selectionStart.toString()} to: ${this.selectionEnd.toString()}`;
+    let startAnnotation = this.selectionStartExpanded.element.toLatexWithAnnotation();
+    let endAnnotation = this.selectionEnd.element.toLatexWithAnnotation();
+    let result = `Selection: from: ${this.selectionStartExpanded.toString()} to: ${this.selectionEnd.toString()}.`;
+    result += ` Latex from: ${startAnnotation.toString()} to ${endAnnotation.toString()}`;
+    return result;
   }
 
   /** @returns {SplitBySelectionResult|null} */
@@ -2441,6 +2433,81 @@ class EquationEditor {
     window.getSelection().removeAllRanges();
     window.getSelection().addRange(rangeClone);
   }
+
+  /** @returns{boolean} whether the default should be prevented. */
+  setSelectionEnd(
+    /** @type {string} */
+    key,
+    /** @type {boolean} */
+    shiftHeld,
+  ) {
+    if (!shiftHeld) {
+      return false;
+    }
+    let newSelection = null;
+    if (key === "ArrowLeft" || key === "ArrowUp") {
+      newSelection = this.selectionEnd.leftHorizontalNeighbor();
+    } else {
+      newSelection = this.selectionEnd.rightHorizontalNeighbor();
+    }
+    if (newSelection.element === null) {
+      return false;
+    }
+    this.selectionEnd = newSelection;
+    this.selectionStartExpanded = this.selectionStart;
+    if (this.selectionStart.element.parent !== this.selectionEnd.element.parent) {
+      let parentOfSelectionStart = this.selectionStart.element.commonParent(
+        this.selectionEnd.element
+      );
+      this.selectionStartExpanded = new AtomWithPosition(
+        parentOfSelectionStart.parent.children[parentOfSelectionStart.indexInParent],
+        - 1,
+      );
+    }
+    this.highlightSelection();
+    return true;
+  }
+
+  /**@return{boolean} */
+  selectionStartToTheLeftOfSelectionEnd() {
+    if (this.selectionStartExpanded.element === null || this.selectionEnd.element === null) {
+      return true;
+    }
+    return this.selectionStartExpanded.element.isToTheLeftOf(this.selectionEnd.element);
+  }
+
+  highlightSelection() {
+    if (this.selectionStartExpanded.element === null || this.selectionEnd.element === null) {
+      return;
+    }
+    this.selectBetween(
+      this.selectionStartExpanded,
+      this.selectionEnd,
+    );
+  }
+
+  selectBetween(
+    /** @type{AtomWithPosition} */
+    end1,
+    /** @type{AtomWithPosition} */
+    end2,
+  ) {
+    let shouldSwap = end2.element.isToTheLeftOf(end1.element);
+    if (end1.element === end2.element) {
+      shouldSwap = (end2.position < end1.position);
+    }
+    if (shouldSwap) {
+      // Swap the two ends.
+      let end2copy = end2;
+      end2 = end1;
+      end1 = end2copy;
+    }
+    let newRange = document.createRange();
+    end1.element.setRangeStart(newRange, end1.position);
+    end2.element.setRangeEnd(newRange, end2.position);
+    document.getSelection().removeAllRanges();
+    document.getSelection().addRange(newRange);
+  }
 }
 
 class SplitBySelectionResult {
@@ -2525,6 +2592,44 @@ class LatexWithAnnotation {
     this.selectionStart = selectionStart;
     /** @type {number} */
     this.selectionEnd = selectionEnd;
+  }
+
+  accountOwner(
+    /** @type{MathNode} */
+    owner,
+  ) {
+    if (owner === owner.equationEditor.selectionEnd.element) {
+      if (owner.equationEditor.selectionStartToTheLeftOfSelectionEnd()) {
+        this.selectionEnd = this.latex.length;
+      } else {
+        this.selectionEnd = 0;
+      }
+    }
+    if (owner === owner.equationEditor.selectionStartExpanded.element) {
+      if (owner.equationEditor.selectionStartToTheLeftOfSelectionEnd()) {
+        this.selectionStart = 0;
+      } else {
+        this.selectionEnd = this.latex.length;
+      }
+    }
+  }
+
+  accountChild(
+    /** @type{LatexWithAnnotation} */
+    child,
+    /** @type{number} */
+    shift,
+  ) {
+    if (child.selectionStart !== - 1) {
+      this.selectionStart = shift + child.selectionStart;
+    }
+    if (child.selectionEnd !== - 1) {
+      this.selectionEnd = shift + child.selectionEnd;
+    }
+  }
+
+  toString() {
+    return `${this.latex} [[${this.selectionStart}, ${this.selectionEnd}]]`;
   }
 }
 
@@ -2678,6 +2783,12 @@ class MathNode {
     }
     this.element.setAttribute("mathTagName", this.type.type);
     if (this.type.type === knownTypes.atom.type) {
+      this.element.addEventListener("copy", (e) => {
+        this.copyToClipboard(e);
+      });
+      this.element.addEventListener("paste", (e) => {
+        this.pasteFromClipboard(e);
+      });
       this.element.addEventListener("keyup", (e) => {
         this.handleKeyUp(e);
       });
@@ -3573,6 +3684,11 @@ class MathNode {
     /** @type {KeyboardEvent} */
     event,
   ) {
+    let key = event.key;
+    if (key === "Shift" || key === "Ctrl") {
+      event.stopPropagation();
+      return;
+    }
     this.storeCaretPosition(event.key, event.shiftKey);
     event.stopPropagation();
     let doUpdateAlignment = true;
@@ -3591,7 +3707,6 @@ class MathNode {
       this.equationEditor.writeLatexToInput();
       this.equationEditor.writeDebugInfo(null);
     }, 0);
-
   }
 
   handleKeyUp(
@@ -3651,25 +3766,67 @@ class MathNode {
     return false;
   }
 
-  /** @returns {boolean} whether the default should be prevented */
-  copy() {
-    if (this.equationEditor.options.latexInput === null) {
-      return false;
+  copyToClipboard(event) {
+    let latexWithAnnotation = this.equationEditor.rootNode.toLatexWithAnnotation();
+    let toBeCopied = "";
+    if (latexWithAnnotation.selectionStart === - 1 || latexWithAnnotation.selectionEnd === - 1) {
+      toBeCopied = latexWithAnnotation.latex;
+    } else {
+      let start = latexWithAnnotation.selectionStart;
+      let end = latexWithAnnotation.selectionEnd;
+      if (start > end) {
+        let original = start;
+        start = end;
+        end = original;
+      }
+      let sliced = latexWithAnnotation.latex.slice(start, end);
+      toBeCopied = sliced;
     }
-    this.equationEditor.options.latexInput.focus();
-    // this.equationEditor.options.latexInput.select();
-    console.log("DEBUG: inside copy.");
-    document.execCommand("copy");
-
-    return true;
+    event.clipboardData.setData('text/plain', toBeCopied);
+    console.log("Copying to clipboard: " + toBeCopied);
+    event.preventDefault();
   }
 
-  /** @returns {boolean} whether the default should be prevented */
-  paste() {
-    console.log("DEBUG: inside paste.");
-
-    return true;
+  pasteFromClipboard(event) {
+    event.preventDefault();
+    let data = event.clipboardData.getData('text');
+    event.preventDefault();
+    this.writeLatex(data);
   }
+
+  writeLatex(
+    /** @type {string} */
+    data,
+  ) {
+    if (this.type.type !== knownTypes.atom.type) {
+      return;
+    }
+    console.log("DEBUG: pasting: " + data);
+    this.storeCaretPosition();
+    let parser = new LaTeXParser(this.equationEditor, data);
+    let newContent = parser.parse();
+    if (newContent === null) {
+      let content = this.textContentOrInitialContent();
+      let leftSlice = content.slice(0, this.positionCaretBeforeKeyEvents);
+      let rightSlice = content.slice(this.positionCaretBeforeKeyEvents);
+      let endContent = leftSlice + data + rightSlice;
+      this.element.textContent = endContent;
+      this.desiredCaretPosition = this.positionCaretBeforeKeyEvents + data.length;
+      this.updateDOM();
+      this.focusRestore();
+      return;
+    }
+    let split = this.splitByCaretEmptyAtoms();
+    split[1].desiredCaretPosition = 0;
+    let horizontalContent = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [split[0], newContent, split[1]]);
+    horizontalContent.normalizeHorizontalMath();
+    let parent = this.parent;
+    parent.replaceChildAtPosition(this.indexInParent, horizontalContent);
+    parent.normalizeHorizontalMath();
+    parent.updateDOM();
+    parent.focusRestore();
+  }
+
 
   /** @returns {boolean} whether default should be prevented. */
   handleKeyDownCases(
@@ -3678,20 +3835,7 @@ class MathNode {
   ) {
     let key = event.key;
     let shiftHeld = event.shiftKey;
-    let ctrlHeld = event.ctrlKey;
     if (this.processBackslash(key, shiftHeld)) {
-      return true;
-    }
-    if (ctrlHeld) {
-      if (key === "c") {
-        return this.copy();
-      }
-      if (key === "v") {
-        return this.paste();
-      }
-    }
-    if (ctrlHeld && key === "c") {
-      console.log("Press ctrl+c detected!")
       return true;
     }
     switch (key) {
@@ -3859,69 +4003,6 @@ class MathNode {
     return false;
   }
 
-  selectBetween(
-    /** @type{AtomWithPosition} */
-    end1,
-    /** @type{AtomWithPosition} */
-    end2,
-  ) {
-    let shouldSwap = end2.element.isToTheLeftOf(end1.element);
-    if (end1.element === end2.element) {
-      shouldSwap = (end2.position < end1.position);
-    }
-    if (shouldSwap) {
-      // Swap the two ends.
-      let end2copy = end2;
-      end2 = end1;
-      end1 = end2copy;
-    }
-    let newRange = document.createRange();
-    end1.element.setRangeStart(newRange, end1.position);
-    end2.element.setRangeEnd(newRange, end2.position);
-    document.getSelection().removeAllRanges();
-    document.getSelection().addRange(newRange);
-  }
-
-  /** @returns{boolean} whether the default should be prevented. */
-  setSelectionEnd(
-    /** @type {string} */
-    key,
-    /** @type {boolean} */
-    shiftHeld,
-  ) {
-    if (!shiftHeld) {
-      return false;
-    }
-    let newSelection = null;
-    if (key === "ArrowLeft" || key === "ArrowUp") {
-      newSelection = this.equationEditor.selectionEnd.leftHorizontalNeighbor();
-      //  this.equationEditor.selectionEnd.leftNeighbor();
-    } else {
-      newSelection = this.equationEditor.selectionEnd.rightHorizontalNeighbor();
-      // newSelection = this.equationEditor.selectionEnd.rightNeighbor();
-    }
-    if (newSelection.element === null) {
-      return false;
-    }
-    this.equationEditor.selectionEnd = newSelection;
-    this.equationEditor.selectionStartExpanded = this.equationEditor.selectionStart;
-    if (this.equationEditor.selectionStart.element.parent !== this.equationEditor.selectionEnd.element.parent) {
-      let parentOfSelectionStart = this.equationEditor.selectionStart.element.commonParent(
-        this.equationEditor.selectionEnd.element
-      );
-      this.equationEditor.selectionStartExpanded = new AtomWithPosition(
-        parentOfSelectionStart.parent.children[parentOfSelectionStart.indexInParent],
-        - 1,
-      );
-    }
-    this.selectBetween(
-      this.equationEditor.selectionStartExpanded,
-      this.equationEditor.selectionEnd,
-    );
-
-    return true;
-  }
-
   /** @returns{boolean} whether the default should be prevented. */
   arrow(
     /** @type {string} */
@@ -3931,7 +4012,7 @@ class MathNode {
   ) {
     if (shiftHeld) {
       this.setSelectionStart();
-      this.setSelectionEnd(key, shiftHeld);
+      this.equationEditor.setSelectionEnd(key, shiftHeld);
       return true;
     }
     if (this.arrowAbsorbedByAtom(key)) {
@@ -4126,7 +4207,6 @@ class MathNode {
     this.equationEditor.positionDebugString = `Computed position: ${this.positionCaretBeforeKeyEvents}.`
     this.equationEditor.positionDebugString += `Range: [${range}], clone: [${rangeClone}], previous position: ${previousPosition}.`;
     this.equationEditor.positionDebugString += `end offset: ${range.endOffset}, start offset: ${range.startOffset}`;
-    console.log("DEBUG: Just: " + this.equationEditor.positionDebugString);
   }
 
   appendChild(/** @type{MathNode} */ child) {
@@ -5812,10 +5892,20 @@ class MathNode {
     let selectionStart = - 1;
     let selectionEnd = - 1;
     if (this === this.equationEditor.selectionStartExpanded.element) {
-      selectionStart = this.equationEditor.selectionStartExpanded.element.position;
+      let position = this.equationEditor.selectionStartExpanded.position;
+      if (this.equationEditor.selectionStartToTheLeftOfSelectionEnd()) {
+        selectionStart = position;
+      } else {
+        selectionEnd = position;
+      }
     }
     if (this === this.equationEditor.selectionEnd.element) {
-      selectionEnd = this.equationEditor.selectionEnd.element.position;
+      let position = this.equationEditor.selectionEnd.position;
+      if (this.equationEditor.selectionStartToTheLeftOfSelectionEnd()) {
+        selectionEnd = position;
+      } else {
+        selectionStart = position;
+      }
     }
     return latexConstants.convertUtf8ToLatex(
       this.contentIfAtomic(),
@@ -5833,24 +5923,19 @@ class MathNode {
   toLatexWithAnnotation() {
     let toJoin = [];
     let charactersSoFar = 0;
-    let selectionStart = - 1;
-    let selectionEnd = - 1;
+    let result = new LatexWithAnnotation("", - 1, - 1);
     for (let i = 0; i < this.children.length; i++) {
       if (this.children[i] === null) {
         toJoin.push("[[null]]");
         continue;
       }
       let childLatex = this.children[i].toLatexWithAnnotation();
-      if (childLatex.selectionStart !== - 1) {
-        selectionStart = charactersSoFar + childLatex.selectionStart;
-      }
-      if (childLatex.selectionEnd !== - 1) {
-        selectionEnd = charactersSoFar + childLatex.selectionEnd;
-      }
+      result.accountChild(childLatex, charactersSoFar);
       toJoin.push(childLatex.latex);
       charactersSoFar += childLatex.latex.length;
     }
-    let result = new LatexWithAnnotation(toJoin.join(""), selectionStart, selectionEnd);
+    result.latex = toJoin.join("");
+    result.accountOwner(this);
     return result;
   }
 
@@ -5959,17 +6044,23 @@ class MathNodeFraction extends MathNode {
 
   /** @returns {LatexWithAnnotation} */
   toLatexWithAnnotation() {
-    let result = `\\frac{${this.children[0].toLatex()}}{${this.children[1].toLatex()}}`;
+    let numerator = this.children[0].toLatexWithAnnotation();
+    let denominator = this.children[1].toLatexWithAnnotation();
+    let result = new LatexWithAnnotation(`\\frac{${numerator.latex}}{${denominator.latex}}`, - 1, - 1);
+    result.accountChild(numerator, 6);
+    result.accountChild(denominator, 6 + numerator.latex.length + 2);
+    result.accountOwner(this);
     if (this.children.length <= 2) {
-      return new LatexWithAnnotation(result, - 1, - 1);
+      return result;
     }
     // This is not expected to happen: a fraction should have exactly two children.
-    result += "[";
+    // console.log("Warning: corrupt fraction.");
+    result.latex += "[";
     for (let i = 2; i < this.children.length; i++) {
-      result += this.children[i].toLatex();
+      result.latex += this.children[i].toLatex();
     }
-    result += "]";
-    return new LatexWithAnnotation(result, - 1, - 1);
+    result.latex += "]";
+    return result;
   }
 }
 
@@ -6636,15 +6727,12 @@ function initializeTestPage(
   /** @type{string} */
   latexInputId,
   /** @type{string} */
-  latexCopyId,
-  /** @type{string} */
   debugId,
 ) {
   let editorElement = document.getElementById(equationEditorId);
   const options = new EquationEditorOptions({
     latexInput: document.getElementById(latexInputId),
     debugLogContainer: document.getElementById(debugId),
-    inputCopy: document.getElementById(latexCopyId),
   });
   let editor = new EquationEditor(editorElement, options);
   editor.updateDOM();

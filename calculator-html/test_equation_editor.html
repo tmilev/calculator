@@ -10,13 +10,10 @@
 </style>
 
 
-<body
-  onload="initializeTestPage('equation-editor','latexInputTest', 'input-copy', 'debug', 'typeSetButton', 'mathTagTester');">
+<body onload="initializeTestPage('equation-editor','latexInputTest', 'debug', 'typeSetButton', 'mathTagTester');">
   <h1>A math equation editor written from scratch.</h1>
   <div style='text-align: center;'>
     <div id="equation-editor" style="font-size: 72px; font-family:'Times New Roman'"></div>
-    <br>
-    <input id="input-copy" type="text">
     <br>
     <input id="latexInputTest" type="text">
   </div>
@@ -43,7 +40,6 @@ function createEditor() {
     editable: true, 
     // Bind a raw LaTeX input box to the editor. Editing the box updates automatically updates the editor.  
     latexInput:document.getElementById('latex'),
-    inputCopy:document.getElementById('input-copy'),
     // Set to true to have your LaTeX sanitized to a preferred mathematical equivalent.
     sanitizeLatexSource: false, 
     // Set to true to strip \displaystyle from your latex source, independent of the sanitization flag.

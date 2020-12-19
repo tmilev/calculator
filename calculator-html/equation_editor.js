@@ -286,12 +286,22 @@ const knownTypes = {
   }),
   sqrt: new MathNodeType({
     "type": "sqrt",
-    "width": "auto",
-    "height": "auto",
     "margin": "2px",
   }),
   sqrtSign: new MathNodeType({
     "type": "sqrtSign",
+  }),
+  sqrtSignDecoration: new MathNodeType({
+    "type": "sqrtSignDecoration",
+    "borderTop": "1px solid black",
+  }),
+  sqrtSignLeft: new MathNodeType({
+    "type": "sqrtSignLeft",
+    "borderLeft": "1px solid black",
+  }),
+  sqrtSignRight: new MathNodeType({
+    "type": "sqrtSignRight",
+    "borderLeft": "1px solid black",
   }),
   radicalExponentBox: new MathNodeType({
     "type": "radicalExponentBox",
@@ -481,7 +491,9 @@ class MathNodeFactory {
     equationEditor,
   ) {
     let result = new MathNodeSqrtSign(equationEditor);
-    result.initialContent = "\u221A";
+    result.appendChild(new MathNode(equationEditor, knownTypes.sqrtSignDecoration));
+    result.appendChild(new MathNode(equationEditor, knownTypes.sqrtSignLeft));
+    result.appendChild(new MathNode(equationEditor, knownTypes.sqrtSignRight));
     return result;
   }
 
@@ -3352,16 +3364,43 @@ class MathNode {
     /** @type {number}*/
     heightToEnclose,
   ) {
-    this.computeDimensionsAtomicNoTransform();
-    let translationDown = 0;
-    if (heightToEnclose !== 0) {
-      translationDown = heightToEnclose * 0.022;
-      heightToEnclose *= 1.28;
-      this.boundingBox.stretchFactor = heightToEnclose / this.boundingBox.heightBeforeTransform;
-      this.boundingBox.height = heightToEnclose;
+    let decoration = this.children[0];
+    let left = this.children[1];
+    let right = this.children[2];
+    let heightRatioRight = 0.5;
+    let heightToWidthRatio = 0.1;
+    let maxWidthHalfCheck = 10;
+    let preferredWidth = heightToEnclose * heightToWidthRatio;
+
+    decoration.boundingBox.width = 3;
+    decoration.boundingBox.height = 1;
+    decoration.boundingBox.top = heightToEnclose * (1 - heightRatioRight);
+    if (preferredWidth > maxWidthHalfCheck) {
+      preferredWidth = maxWidthHalfCheck;
     }
-    this.boundingBox.transformOrigin = "top left";
-    this.boundingBox.transform = `matrix(1,0,0,${this.boundingBox.stretchFactor}, 0, ${translationDown})`;
+
+    left.boundingBox.height = heightToEnclose * heightRatioRight;
+    left.boundingBox.width = preferredWidth;
+    left.boundingBox.top = heightToEnclose * (1 - heightRatioRight);
+    left.boundingBox.left = decoration.boundingBox.width - 1;
+
+    right.boundingBox.height = heightToEnclose;
+    right.boundingBox.width = 1;
+    right.boundingBox.left = left.boundingBox.left + preferredWidth;
+    right.boundingBox.top = 0;
+
+    left.boundingBox.transformOrigin = "top left";
+    right.boundingBox.transformOrigin = "top left";
+    let leftSkew = left.boundingBox.width / left.boundingBox.height;
+    left.boundingBox.transform = `matrix(1,0,${leftSkew},1,0,0)`;
+    let rightSkew = preferredWidth / right.boundingBox.height;
+    right.boundingBox.transform = `matrix(1,0,${-rightSkew},1,${preferredWidth},0)`;
+    this.boundingBox.height = heightToEnclose;
+    this.boundingBox.width = left.boundingBox.width + preferredWidth + decoration.boundingBox.width;
+  }
+
+  computeDimensionsSqrtSign() {
+
   }
 
   computeDimensionsSqrt() {
@@ -3469,6 +3508,10 @@ class MathNode {
       this.computeDimensionsSqrt();
       return;
     }
+    if (this.type.type === knownTypes.sqrtSign.type) {
+      this.computeDimensionsSqrtSign();
+      return;
+    }
     if (this.type.type === knownTypes.matrixRow.type) {
       return;
     }
@@ -3543,7 +3586,7 @@ class MathNode {
     let indicesOpenedParentheses = [];
     for (let i = 0; i < this.children.length; i++) {
       this.computeDimensionsHorizontalMathParenthesesAccountChild(
-        i, enclosedHeights, enclosedFractionLineHeights, indicesOpenedParentheses
+        i, enclosedHeights, enclosedFractionLineHeights, indicesOpenedParentheses,
       );
     }
   }
@@ -3635,14 +3678,14 @@ class MathNode {
     if (this.boundingBox.transform !== "") {
       this.element.style.transformOrigin = this.boundingBox.transformOrigin;
       this.element.style.transform = this.boundingBox.transform;
-    } else {
-      if (this.element.style.width !== "auto") {
-        this.element.style.width = this.boundingBox.width;
-      }
-      if (this.element.style.height !== "auto") {
-        this.element.style.height = this.boundingBox.height;
-      }
+    } //else {
+    if (this.element.style.width !== "auto") {
+      this.element.style.width = this.boundingBox.width;
     }
+    if (this.element.style.height !== "auto") {
+      this.element.style.height = this.boundingBox.height;
+    }
+    //    }
     this.element.style.left = this.boundingBox.left;
     this.element.style.top = this.boundingBox.top;
     for (let i = 0; i < this.children.length; i++) {

@@ -24,6 +24,7 @@ HEADERS += \
     calculator.h \
     calculator.h \
     calculator_database_mongo.h \
+    calculator_educational_functions_1.h \
     calculator_html_functions.h \
     calculator_html_interpretation.h \
     calculator_inner_functions.h \
@@ -98,6 +99,7 @@ SOURCES += \
     abstract_syntax_notation_one_decoder.cpp \
     abstract_syntax_notation_one_decoder_test.cpp \
     calculator_conversions_1.cpp \
+    calculator_educational_functions_1.cpp \
     calculator_expressions.cpp \
     calculator_finite_group_characters.cpp \
     calculator_function_registration.cpp \

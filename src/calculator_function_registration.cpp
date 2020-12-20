@@ -7,6 +7,7 @@
 #include "calculator_inner_typed_functions.h"
 #include "calculator_inner_functions.h"
 #include "calculator_functions_polynomial.h"
+#include "calculator_educational_functions_1.h"
 #include "calculator_html_functions.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "database.h"
@@ -5012,6 +5013,17 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->addOperationHandler(
+    "SolveJSON",
+    CalculatorEducationalFunctions::solveJSON,
+    "",
+    "Tries to interpret the input as a high-school or Calculus problem "
+    "and solve it. Freezes its inputs.",
+    "SolveJSON(x^2+2x-3=0);\n",
+    "CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT",
+    "SolveJSON",
+    innerStandard
+  );
+  this->addOperationHandler(
     "FindOneSolutionSerreLikePolynomialSystem",
     CalculatorFunctions::innerSolveSerreLikeSystemNoUpperLimit,
     "",
@@ -8740,4 +8752,5 @@ void Calculator::initAtomsThatFreezeArguments() {
   this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("Bind");
   this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("LogEvaluationSteps");
   this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("LogEvaluationStepsDebug");
+  this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("SolveJSON");
 }

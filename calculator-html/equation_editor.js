@@ -149,7 +149,9 @@ const knownTypes = {
   // This is the only element type that has contentEditable = true;
   atom: new MathNodeType({
     "type": "atom",
-    // "margin": atomMargin,
+    // If padding is missing, the position of the caret may make the 
+    // text wobble.
+    "padding": "1px",
     "outline": "0px solid transparent",
     "width": "auto",
     "height": "auto",
@@ -2046,6 +2048,18 @@ class EquationEditorOptions {
   }
 }
 
+class KeyHandlerResult {
+  constructor(
+    /**@type{boolean} */
+    preventDefault,
+    /**@type{boolean} */
+    updateAlignment,
+  ) {
+    this.preventDefault = preventDefault;
+    this.updateAlignment = updateAlignment;
+  }
+}
+
 class EquationEditor {
   constructor(
     /** @type{HTMLElement} */
@@ -3712,7 +3726,10 @@ class MathNode {
     }
   }
 
-  updateParentDOM(/** @type {HTMLElement|null} */ oldElement) {
+  updateParentDOM(
+    /** @type {HTMLElement|null} */
+    oldElement,
+  ) {
     let parentElement = null;
     if (this.type.type === knownTypes.root.type) {
       parentElement = this.equationEditor.container;
@@ -3754,13 +3771,12 @@ class MathNode {
     let frameStart = new Date().getTime();
     this.storeCaretPosition(event.key, event.shiftKey);
     event.stopPropagation();
-    let doUpdateAlignment = true;
-    if (this.handleKeyDownCases(event)) {
+    let handlerResult = this.handleKeyDownCases(event);
+    if (handlerResult.preventDefault) {
       event.preventDefault();
       this.equationEditor.accountFrameTime(frameStart);
-      doUpdateAlignment = false;
     }
-    if (doUpdateAlignment && this.type.type === knownTypes.atom.type && this.element !== null) {
+    if (handlerResult.preventDefault && this.type.type === knownTypes.atom.type && this.element !== null) {
       // The content is not yet written to our editable field: 
       // that will happen once the event default is carried out.
       // This means that we cannot compute the width of our atom accurately now,
@@ -3779,7 +3795,7 @@ class MathNode {
     // with the released element. 
     setTimeout(() => {
       this.storeCaretPosition(event.key, event.shiftKey);
-      if (doUpdateAlignment) {
+      if (handlerResult.updateAlignment) {
         this.element.style.maxWidth = "";
         this.element.style.maxHeight = "";
         this.element.style.width = "auto";
@@ -3908,7 +3924,7 @@ class MathNode {
     parent.focusRestore();
   }
 
-  /** @returns {boolean} whether default should be prevented. */
+  /** @returns {KeyHandlerResult} whether default should be prevented. */
   handleKeyDownCases(
     /** @type {KeyboardEvent} */
     event,
@@ -3916,12 +3932,12 @@ class MathNode {
     let key = event.key;
     let shiftHeld = event.shiftKey;
     if (this.processBackslash(key, shiftHeld)) {
-      return true;
+      return new KeyHandlerResult(true, true);
     }
     switch (key) {
       case "/":
         this.makeFractionNumerator();
-        return true;
+        return new KeyHandlerResult(true, true);
       case "*":
       case "+":
       case "-":
@@ -3929,13 +3945,13 @@ class MathNode {
       case ">":
       case "<":
         this.makeHorizontalOperatorCorrectInput(key);
-        return true;
+        return new KeyHandlerResult(true, true);
       case "^":
         this.makeBaseWithExponent();
-        return true;
+        return new KeyHandlerResult(true, true);
       case "_":
         this.makeBaseWithSubscript();
-        return true;
+        return new KeyHandlerResult(true, true);
       case "ArrowLeft":
       case "ArrowRight":
       case "ArrowUp":
@@ -3943,23 +3959,23 @@ class MathNode {
         return this.arrow(key, shiftHeld);
       case "|":
         this.makeDelimiterAmbiguous(key);
-        return true;
+        return new KeyHandlerResult(true, true);
       case "(":
       case "[":
         this.makeDelimiterLeft(key);
-        return true;
+        return new KeyHandlerResult(true, true);
       case ")":
       case "]":
         this.makeDelimiterRight(key);
-        return true;
+        return new KeyHandlerResult(true, true);
       case "Enter":
-        return true;
+        return new KeyHandlerResult(true, false);
       case "Delete":
         return this.deleteButton();
       case "Backspace":
         return this.backspace();
       default:
-        return false;
+        return new KeyHandlerResult(false, true);
     }
   }
 
@@ -4083,7 +4099,7 @@ class MathNode {
     return false;
   }
 
-  /** @returns{boolean} whether the default should be prevented. */
+  /** @returns{KeyHandlerResult} whether the default should be prevented. */
   arrow(
     /** @type {string} */
     key,
@@ -4093,10 +4109,10 @@ class MathNode {
     if (shiftHeld) {
       this.setSelectionStart();
       this.equationEditor.setSelectionEnd(key, shiftHeld);
-      return true;
+      return new KeyHandlerResult(true, true);
     }
     if (this.arrowAbsorbedByAtom(key)) {
-      return false;
+      return new KeyHandlerResult(false, false);
     }
     /** @type {AtomWithPosition} */
     const toFocus = this.getAtomToFocus(key);
@@ -4104,7 +4120,7 @@ class MathNode {
       toFocus.element.positionCaretBeforeKeyEvents = toFocus.element.element.textContent.length + 1;
       toFocus.element.focus(toFocus.position);
     }
-    return true;
+    return new KeyHandlerResult(true, true);
   }
 
   arrowAbsorbedByAtom(
@@ -4521,33 +4537,34 @@ class MathNode {
     return offset === this.element.textContent.length;
   }
 
-  /** @returns{boolean} whether the default should be prevented. */
+  /** @returns{KeyHandlerResult} whether the default should be prevented. */
   deleteButton() {
     if (
       this.positionCaretBeforeKeyEvents !== this.element.textContent.length ||
       this.type.type !== knownTypes.atom.type
     ) {
-      return false;
+      return new KeyHandlerResult(false, true);
     }
     let sibling = this.firstAtom(1);
     if (sibling === null) {
-      return false;
+      return new KeyHandlerResult(false, false);
     }
     this.positionCaretBeforeKeyEvents = - 1;
     sibling.positionCaretBeforeKeyEvents = 0;
     return sibling.backspace();
   }
 
-  /** @returns{boolean} whether the default should be prevented. */
+  /** @returns{KeyHandlerResult} whether the default should be prevented. */
   backspace() {
     if (
       this.positionCaretBeforeKeyEvents !== 0 ||
       this.type.type !== knownTypes.atom.type
     ) {
-      return false;
+      return new KeyHandlerResult(false, true);
     }
     this.desiredCaretPosition = 0;
-    return this.applyBackspaceToTheLeft();
+    let result = this.applyBackspaceToTheLeft();
+    return new KeyHandlerResult(result, true);
   }
 
   /** @returns {boolean} whether reduction occurred. */

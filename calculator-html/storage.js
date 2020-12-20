@@ -17,8 +17,10 @@ class StorageVariable {
     this.type = "string";
     this.secure = true;
     this.showInURLByDefault = false;
-    /**@type {Function} */
+    /**@type {Function|null} */
     this.callbackOnValueChange = null;
+    /**@type {Function|null} */
+    this.callbackSetValueFromStorage = null;
     var labelsToRead = [
       "nameURL",
       "nameCookie",
@@ -104,10 +106,14 @@ class StorageVariable {
     updateAssociatedInput,
   ) {
     this.storeMePersistent(updateURL);
-    if (updateAssociatedInput === true) {
-      if (this.associatedDOMId !== null && this.associatedDOMId !== undefined && this.associatedDOMId !== "") {
-        document.getElementById(this.associatedDOMId).value = this.value;
-      }
+    if (updateAssociatedInput !== true) {
+      return;
+    }
+    if (this.associatedDOMId !== null && this.associatedDOMId !== undefined && this.associatedDOMId !== "") {
+      document.getElementById(this.associatedDOMId).value = this.value;
+    }
+    if (this.callbackSetValueFromStorage !== null) {
+      this.callbackSetValueFromStorage(this.value);
     }
   }
 
@@ -124,14 +130,16 @@ class StorageVariable {
     var changed = (this.value !== newValue);
     this.value = newValue;
     this.storeMe(updateURL, updateAssociatedInput);
-    if (changed) {
-      if (this.callbackOnValueChange !== null && this.callbackOnValueChange !== undefined) {
-        //calling function with timeout ensures the current function sequence is finished first.
-        setTimeout(() => {
-          this.callbackOnValueChange(this.value);
-        }, 0);
-      }
+    if (!changed) {
+      return;
     }
+    if (this.callbackOnValueChange === null || this.callbackOnValueChange === undefined) {
+      return;
+    }
+    //calling function with timeout ensures the current function sequence is finished first.
+    setTimeout(() => {
+      this.callbackOnValueChange(this.value);
+    }, 0);
   }
 }
 
@@ -161,7 +169,14 @@ class StorageCalculator {
         currentlyEditedPage: new StorageVariable({
           name: "currentlyEditedPage",
           nameLocalStorage: "currentlyEditedPage"
-        })
+        }),
+      },
+      solve: {
+        problemToAutoSolve: new StorageVariable({
+          name: "problemToAutoSolve",
+          nameURL: "problemToAutoSolve",
+          nameLocalStorage: "problemToAutoSolve",
+        }),
       },
       currentSectionComputed: new StorageVariable({
         name: "currentSectionComputed",

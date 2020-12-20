@@ -18,7 +18,8 @@ const signUp = require("./signup").signUp;
 const mathTypeSet = require("./math_typeset");
 const themes = require("./themes");
 const solver = require("./solve");
-const storage = require("./storage");
+const solve = require("./solve");
+const storage = require("./storage").storage;
 
 function User() {
   this.flagLoggedIn = false;
@@ -197,7 +198,7 @@ class Page {
         selectFunction: accountManagement.updateAccountsPage,
       },
     };
-    this.storage = storage.storage;
+    this.storage = storage;
     this.initializeStorageCallbacks();
     this.scriptInjector = new AllScripts();
     this.flagProblemPageOnly = false;
@@ -221,6 +222,12 @@ class Page {
     };
     this.storage.variables.theme.callbackOnValueChange = (value) => {
       themes.theme.doChangeTheme(value);
+    };
+    this.storage.variables.solve.problemToAutoSolve.callbackOnValueChange = (value) => {
+      solve.solver.solveFromStorage(value);
+    };
+    this.storage.variables.solve.problemToAutoSolve.callbackSetValueFromStorage = (value) => {
+      solve.solver.setAutoSolveProblemBox(value);
     };
   }
 
@@ -360,8 +367,10 @@ class Page {
     sliderDebug.checked = debugOn;
     var debugSpan = document.getElementById(ids.domElements.spanDebugFlagToggleReport);
     if (debugOn) {
+      solve.solver.setDebugLogContainer();
       debugSpan.innerHTML = "Debug <b style = 'color:red'>on</b>";
     } else {
+      solve.solver.setDebugLogContainer();
       debugSpan.innerHTML = "Debug <b style = 'color:green'>off</b>";
     }
   }
@@ -423,7 +432,10 @@ class Page {
     this.scriptInjector.injectScript(scriptId, scriptContent);
   }
 
-  selectPage(inputPage) {
+  selectPage(
+    /** @type{string} */
+    inputPage,
+  ) {
     if (this.pages[inputPage] === undefined) {
       inputPage = "calculator";
     }

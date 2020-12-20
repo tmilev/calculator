@@ -3,132 +3,134 @@ const ids = require("./ids_dom_elements");
 const cookies = require("./cookies");
 
 
-function StorageVariable(
-  /**@type @{{name: string, nameURL: string, nameCookie: string, nameLocalStorage: string, associatedDOMId: string, type: string, secure: string, showInURLByDefault: bool, showInURLOnPages: Object, callbackOnValueChange: function}} */
-  inputs
-) {
-  this.value = "";
-  this.name = inputs.name;
-  this.nameURL = "";
-  this.nameCookie = "";
-  this.nameLocalStorage = "";
-  this.associatedDOMId = "";
-  this.type = "string";
-  this.secure = true;
-  this.showInURLByDefault = false;
-  /**@type {Function} */
-  this.callbackOnValueChange = null;
-  var labelsToRead = [
-    "nameURL",
-    "nameCookie",
-    "nameLocalStorage",
-    "associatedDOMId",
-    "type",
-    "secure",
-    "callbackOnValueChange",
-    "showInURLByDefault",
-    "showInURLOnPages",
-  ];
-  for (var counterLabel = 0; counterLabel < labelsToRead.length; counterLabel++) {
-    var currentLabel = labelsToRead[counterLabel];
-    var incoming = inputs[currentLabel];
-    if (incoming !== "" && incoming !== null && incoming !== undefined) {
-      this[currentLabel] = incoming;
-    }
-  }
-}
-
-/**@returns {Boolean}  */
-StorageVariable.prototype.isTrue = function () {
-  if (this.value === "true" || this.value === true) {
-    return true;
-  }
-  return false;
-}
-
-StorageVariable.prototype.getValue = function () {
-  return this.value;
-}
-
-/**@returns{string} */
-StorageVariable.prototype.loadMe = function (hashParsed) {
-  var candidate = "";
-  if (Storage !== undefined || localStorage !== undefined && this.nameLocalStorage !== "") {
-    var incoming = localStorage.getItem(this.nameLocalStorage);
-    if (incoming !== "" && incoming !== null && incoming !== undefined) {
-      candidate = incoming;
-    }
-  }
-  if (this.nameCookie !== "") {
-    var incoming = cookies.getCookie(this.nameCookie);
-    if (incoming !== "" && incoming !== null && incoming !== undefined) {
-      candidate = incoming;
-    }
-  }
-  if (hashParsed !== null && hashParsed !== undefined) {
-    if (this.nameURL !== "") {
-      if (this.nameURL in hashParsed) {
-        var incoming = hashParsed[this.nameURL];
-        if (incoming !== null && incoming !== undefined) {
-          candidate = incoming;
-        }
+class StorageVariable {
+  constructor(
+    /**@type @{{name: string, nameURL: string, nameCookie: string, nameLocalStorage: string, associatedDOMId: string, type: string, secure: string, showInURLByDefault: bool, showInURLOnPages: Object, callbackOnValueChange: function}} */
+    inputs
+  ) {
+    this.value = "";
+    this.name = inputs.name;
+    this.nameURL = "";
+    this.nameCookie = "";
+    this.nameLocalStorage = "";
+    this.associatedDOMId = "";
+    this.type = "string";
+    this.secure = true;
+    this.showInURLByDefault = false;
+    /**@type {Function} */
+    this.callbackOnValueChange = null;
+    var labelsToRead = [
+      "nameURL",
+      "nameCookie",
+      "nameLocalStorage",
+      "associatedDOMId",
+      "type",
+      "secure",
+      "callbackOnValueChange",
+      "showInURLByDefault",
+      "showInURLOnPages",
+    ];
+    for (var counterLabel = 0; counterLabel < labelsToRead.length; counterLabel++) {
+      var currentLabel = labelsToRead[counterLabel];
+      var incoming = inputs[currentLabel];
+      if (incoming !== "" && incoming !== null && incoming !== undefined) {
+        this[currentLabel] = incoming;
       }
     }
   }
-  this.setAndStore(candidate, false, true);
-  return candidate;
-}
 
-StorageVariable.prototype.storeMePersistent = function (
-  /**@type {boolean} */
-  updateURL,
-) {
-  if (Storage !== undefined || localStorage !== undefined) {
-    if (this.nameLocalStorage !== "" && this.nameLocalStorage !== null && this.nameLocalStorage !== undefined) {
-      localStorage[this.nameLocalStorage] = this.value;
+  /**@returns {boolean}  */
+  isTrue() {
+    if (this.value === "true" || this.value === true) {
+      return true;
+    }
+    return false;
+  }
+
+  getValue() {
+    return this.value;
+  }
+
+  /**@returns{string} */
+  loadMe(hashParsed) {
+    var candidate = "";
+    if (Storage !== undefined || localStorage !== undefined && this.nameLocalStorage !== "") {
+      var incoming = localStorage.getItem(this.nameLocalStorage);
+      if (incoming !== "" && incoming !== null && incoming !== undefined) {
+        candidate = incoming;
+      }
+    }
+    if (this.nameCookie !== "") {
+      var incoming = cookies.getCookie(this.nameCookie);
+      if (incoming !== "" && incoming !== null && incoming !== undefined) {
+        candidate = incoming;
+      }
+    }
+    if (hashParsed !== null && hashParsed !== undefined) {
+      if (this.nameURL !== "") {
+        if (this.nameURL in hashParsed) {
+          var incoming = hashParsed[this.nameURL];
+          if (incoming !== null && incoming !== undefined) {
+            candidate = incoming;
+          }
+        }
+      }
+    }
+    this.setAndStore(candidate, false, true);
+    return candidate;
+  }
+
+  storeMePersistent(
+    /**@type {boolean} */
+    updateURL,
+  ) {
+    if (Storage !== undefined || localStorage !== undefined) {
+      if (this.nameLocalStorage !== "" && this.nameLocalStorage !== null && this.nameLocalStorage !== undefined) {
+        localStorage[this.nameLocalStorage] = this.value;
+      }
+    }
+    if (this.nameCookie !== "") {
+      cookies.setCookie(this.nameCookie, this.value, 150, this.secure);
+    }
+    if (updateURL !== false) {
+      storage.setURL();
     }
   }
-  if (this.nameCookie !== "") {
-    cookies.setCookie(this.nameCookie, this.value, 150, this.secure);
-  }
-  if (updateURL !== false) {
-    storage.setURL();
-  }
-}
 
-StorageVariable.prototype.storeMe = function (
-  /**@type {boolean} */
-  updateURL,
-  /**@type {boolean} */
-  updateAssociatedInput,
-) {
-  this.storeMePersistent(updateURL);
-  if (updateAssociatedInput === true) {
-    if (this.associatedDOMId !== null && this.associatedDOMId !== undefined && this.associatedDOMId !== "") {
-      document.getElementById(this.associatedDOMId).value = this.value;
+  storeMe(
+    /**@type {boolean} */
+    updateURL,
+    /**@type {boolean} */
+    updateAssociatedInput,
+  ) {
+    this.storeMePersistent(updateURL);
+    if (updateAssociatedInput === true) {
+      if (this.associatedDOMId !== null && this.associatedDOMId !== undefined && this.associatedDOMId !== "") {
+        document.getElementById(this.associatedDOMId).value = this.value;
+      }
     }
   }
-}
 
-StorageVariable.prototype.setAndStore = function (
-  newValue,
-  /**@type {Boolean} */
-  updateURL,
-  /**@type {Boolean} */
-  updateAssociatedInput,
-) {
-  if (updateURL === undefined) {
-    updateURL = true;
-  }
-  var changed = (this.value !== newValue);
-  this.value = newValue;
-  this.storeMe(updateURL, updateAssociatedInput);
-  if (changed) {
-    if (this.callbackOnValueChange !== null && this.callbackOnValueChange !== undefined) {
-      //calling function with timeout ensures the current function sequence is finished first.
-      setTimeout(() => {
-        this.callbackOnValueChange(this.value);
-      }, 0);
+  setAndStore(
+    newValue,
+    /**@type {Boolean} */
+    updateURL,
+    /**@type {Boolean} */
+    updateAssociatedInput,
+  ) {
+    if (updateURL === undefined) {
+      updateURL = true;
+    }
+    var changed = (this.value !== newValue);
+    this.value = newValue;
+    this.storeMe(updateURL, updateAssociatedInput);
+    if (changed) {
+      if (this.callbackOnValueChange !== null && this.callbackOnValueChange !== undefined) {
+        //calling function with timeout ensures the current function sequence is finished first.
+        setTimeout(() => {
+          this.callbackOnValueChange(this.value);
+        }, 0);
+      }
     }
   }
 }

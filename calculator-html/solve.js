@@ -23,6 +23,7 @@ class Solver {
       this.solve();
     });
   }
+
   solve() {
     let input = this.equationEditor.rootNode.toLatex();
     let mainPage = window.calculator.mainPage;
@@ -36,6 +37,7 @@ class Solver {
       progress: ids.domElements.spanProgressReportGeneral,
     });
   }
+
   solveCallback(
     /**@type{string} */
     input,

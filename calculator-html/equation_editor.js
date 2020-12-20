@@ -5883,7 +5883,10 @@ class MathNode {
     }
   }
 
-  setCaretPosition(/** @type {number}*/ position) {
+  setCaretPosition(
+    /** @type {number}*/
+    position,
+  ) {
     let range = document.createRange();
     let collapseToStart = true;
     if (position >= this.element.textContent.length) {
@@ -6727,13 +6730,13 @@ class MathTagCoverter {
   }
 
   typeset(
-    /**@type{HTMLElement} */
+    /**@type{HTMLElement|null} */
     toBeModified,
   ) {
     this.elementProcessed = toBeModified;
     this.startTime = (new Date()).getTime();
     this.lastTimeSample = this.startTime;
-    if (this.elementProcessed) {
+    if (this.elementProcessed !== null) {
       this.convertTagsRecursive(this.elementProcessed, 0);
     }
     this.typesetMathTags();

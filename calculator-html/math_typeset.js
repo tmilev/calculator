@@ -7,10 +7,6 @@ class TypeSetter {
     this.logTiming = false;
   }
 
-  useBuiltInTypeSet() {
-    return true;
-  }
-
   typesetSoft(
     /**@type {HTMLElement|string} */
     element,
@@ -23,11 +19,7 @@ class TypeSetter {
     if (styleOverride === "") {
       styleOverride = this.defaultStyle;
     }
-    if (this.useBuiltInTypeSet()) {
-      equationEditor.typeset(element, styleOverride, false, true, this.logTiming);
-    } else {
-      // mathjaxSetup.typeSetSoft(element);
-    }
+    equationEditor.typeset(element, styleOverride, false, true, this.logTiming);
   }
 
   typesetHard(
@@ -44,11 +36,7 @@ class TypeSetter {
     if (styleOverride === "") {
       styleOverride = this.defaultStyle;
     }
-    if (this.useBuiltInTypeSet()) {
-      equationEditor.typeset(element, styleOverride, false, true, this.logTiming);
-    } else {
-      // mathjaxSetup.typeSetHard(element);
-    }
+    equationEditor.typeset(element, styleOverride, false, true, this.logTiming);
   }
 }
 

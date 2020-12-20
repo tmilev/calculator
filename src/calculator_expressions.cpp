@@ -3101,7 +3101,7 @@ bool CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
     output = result;
     return true;
   }
-  if (!input.startsWith(calculator.opEndStatement())) {
+  if (!input.startsWith(calculator.opCommandSequence())) {
     return false;
   }
   Expression result(calculator);
@@ -3110,7 +3110,7 @@ bool CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
       bool processed = false;
       result.addChildAtomOnTop(calculator.opCommandEnclosureStart());
       if (input[i].size() == 2) {
-        if (input[i][1].startsWith(calculator.opEndStatement())) {
+        if (input[i][1].startsWith(calculator.opCommandSequence())) {
           for (int j = 1; j < input[i][1].size(); j ++) {
             result.addChildOnTop(input[i][1][j]);
           }
@@ -3195,7 +3195,7 @@ JSData Expression::toJSData(FormatExpressions* theFormat, const Expression& star
   JSData result, input, output;
   input.theType = JSData::token::tokenArray;
   output.theType = JSData::token::tokenArray;
-  if (this->isListStartingWithAtom(this->owner->opEndStatement())) {
+  if (this->isListStartingWithAtom(this->owner->opCommandSequence())) {
     for (int i = 1; i < this->size(); i ++) {
       const Expression currentE = (*this)[i];
       if (!this->owner->flagHideLHS) {
@@ -3538,7 +3538,7 @@ bool Expression::toStringEndStatement(
   JSData* outputJS,
   FormatExpressions* theFormat
 ) const {
-  if (!this->isListStartingWithAtom(this->owner->opEndStatement())) {
+  if (!this->isListStartingWithAtom(this->owner->opCommandSequence())) {
     return false;
   }
   MemorySaving<FormatExpressions> temporaryFormat;
@@ -4168,7 +4168,7 @@ std::string Expression::toStringWithStartingExpression(
   isFinal = theFormat->flagExpressionIsFinal;
   outTrue << "<table class = 'tableCalculatorOutput'>";
   outTrue << "<tr><th>Input</th><th>Result</th></tr>";
-  if (this->isListStartingWithAtom(this->owner->opEndStatement())) {
+  if (this->isListStartingWithAtom(this->owner->opCommandSequence())) {
     outTrue << out.str();
   } else {
     if (theFormat != nullptr) {
@@ -4629,7 +4629,7 @@ std::string Expression::toString(
   std::stringstream out;
   if (
     !this->isOfType<std::string>() &&
-    !this->startsWith(this->owner->opEndStatement())
+    !this->startsWith(this->owner->opCommandSequence())
   ) {
     if (startingExpression == nullptr) {
       theFormat->flagUseQuotes = true;

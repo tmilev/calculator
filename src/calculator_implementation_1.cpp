@@ -1199,7 +1199,7 @@ bool Expression::assignStringParsed(
     this->assignValue(outputSyntacticErrors, owner);
     return false;
   }
-  if (commands.startsWith(owner.opEndStatement(), 2)) {
+  if (commands.startsWith(owner.opCommandSequence(), 2)) {
     result = commands[1];
   } else {
     result = commands;

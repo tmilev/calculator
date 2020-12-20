@@ -1011,7 +1011,7 @@ bool CalculatorHTML::prepareCommandsGenerateProblem(std::stringstream* comments)
   std::stringstream streamCommands, streamCommandsNoEnclosures;
   streamCommandsNoEnclosures << this->getProblemHeaderWithoutEnclosure();
   streamCommands << this->getProblemHeaderEnclosure();//first calculator enclosure contains the header
-  int numCommandsSoFar = 2;//two commands at the start: the opEndStatement command and
+  int numCommandsSoFar = 2;//two commands at the start: the opCommandSequence command and
   // the first enclosure.
   for (int i = 0; i < this->theContent.size; i ++) {
     SyntacticElementHTML& currentElt = this->theContent[i];
@@ -1639,20 +1639,20 @@ std::string CalculatorHTML::toStringInterprettedCommands(Calculator &theInterpre
   MacroRegisterFunctionWithName("CalculatorHTML::toStringInterprettedCommands");
   std::stringstream out;
   out << "<table>";
-  int commandCounter = theInterpreter.theProgramExpression.size() - 1;
+  int commandCounter = theInterpreter.programExpression.size() - 1;
   for (int eltCounter = theElements.size - 1; eltCounter > 0; eltCounter --) {
     SyntacticElementHTML& currentElt = theElements[eltCounter];
     std::string currentEltString = currentElt.gGetTagClass() + "[" + currentElt.content.substr(0, 10) + "...]";
     if (!currentElt.isInterpretedByCalculatorDuringProblemGeneration()) {
       out << "<tr><td>" << currentEltString << "</td>"
       << "<td>"
-      << theInterpreter.theProgramExpression[commandCounter].toString()
+      << theInterpreter.programExpression[commandCounter].toString()
       << "</td></tr>";
       commandCounter --;
       continue;
     }
     for (; commandCounter > 1; commandCounter --) {
-      std::string currentString= theInterpreter.theProgramExpression[commandCounter].toString();
+      std::string currentString= theInterpreter.programExpression[commandCounter].toString();
       out << "<tr><td>" << currentEltString << "</td><td>"
       << currentString << "</td></tr>";
       if (currentString == "SeparatorBetweenSpans") {
@@ -1684,7 +1684,7 @@ bool CalculatorHTML::interpretProcessExecutedCommands(
       continue;
     }
     if (
-      currentElt.commandIndex >= theInterpreter.theProgramExpression.size() ||
+      currentElt.commandIndex >= theInterpreter.programExpression.size() ||
       currentElt.commandIndex < 0
     ) {
       std::stringstream errorStream;
@@ -1696,16 +1696,16 @@ bool CalculatorHTML::interpretProcessExecutedCommands(
       result = false;
       continue;
     }
-    if (!theInterpreter.theProgramExpression[currentElt.commandIndex].startsWith(theInterpreter.opCommandEnclosure())) {
-      global.fatal << "Element: " << theInterpreter.theProgramExpression[currentElt.commandIndex].toString()
-      << " in " << theInterpreter.theProgramExpression.toString()
+    if (!theInterpreter.programExpression[currentElt.commandIndex].startsWith(theInterpreter.opCommandEnclosure())) {
+      global.fatal << "Element: " << theInterpreter.programExpression[currentElt.commandIndex].toString()
+      << " in " << theInterpreter.programExpression.toString()
       << " is supposed to be a command enclosure but apparently isn't. " << global.fatal;
     }
-    Expression currentExpr = theInterpreter.theProgramExpression[currentElt.commandIndex][1];
-    if (currentExpr.startsWith(theInterpreter.opEndStatement()) && currentExpr.size() == 2) {
+    Expression currentExpr = theInterpreter.programExpression[currentElt.commandIndex][1];
+    if (currentExpr.startsWith(theInterpreter.opCommandSequence()) && currentExpr.size() == 2) {
       currentExpr = currentExpr[1];
     }
-    if (currentExpr.startsWith(theInterpreter.opEndStatement())) {
+    if (currentExpr.startsWith(theInterpreter.opCommandSequence())) {
       currentElt.flagUseMathMode = false;
     }
     theFormat.flagUseQuotes = false;
@@ -1731,14 +1731,14 @@ void CalculatorHTML::logProblemGenerationObsolete(Calculator &theInterpreter) {
   }
   std::stringstream streamLog;
   streamLog << "<table border ='1'>";
-  for (int i = 0; i < theInterpreter.theProgramExpression.size(); i ++) {
+  for (int i = 0; i < theInterpreter.programExpression.size(); i ++) {
     streamLog << "<tr>";
     for (int j = 0; j < this->theContent.size; j ++) {
       if (this->theContent[j].commandIndex == i) {
         streamLog << "<td>" << this->theContent[j].toStringDebug() << "</td>";
       }
     }
-    streamLog << "<td>" << theInterpreter.theProgramExpression[i].toString()
+    streamLog << "<td>" << theInterpreter.programExpression[i].toString()
     << "</td></tr>";
   }
   streamLog << "</table>";

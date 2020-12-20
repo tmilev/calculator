@@ -1361,7 +1361,7 @@ int WebWorker::processFile() {
   << "Access-Control-Allow-Origin: *\r\n";
   for (int i = 0; i < this->parent->addressStartsSentWithCacheMaxAge.size; i ++) {
     if (StringRoutines::stringBeginsWith(this->VirtualFileName, this->parent->addressStartsSentWithCacheMaxAge[i])) {
-      theHeader << WebAPI::HeaderCacheControl << "\r\n";
+      theHeader << WebAPI::headerCacheControl << "\r\n";
       break;
     }
   }

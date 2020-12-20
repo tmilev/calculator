@@ -39,6 +39,7 @@ class WebAPIResponse {
   bool processPauseWorker();
   bool processUnpauseWorker();
   bool processAccountsJSON();
+  void initializeCalculatorComputation();
   bool processCompute();
   bool processCalculatorExamplesJSON();
   bool processSubmitAnswers();
@@ -59,6 +60,7 @@ class WebAPIResponse {
   bool processApp(bool appendBuildHash);
   bool processCalculatorOnePageJS(bool appendBuildHash);
   bool processTopicListJSON();
+  bool processSolveJSON();
   bool processScoresInCoursePage();
   bool processAssignTeacherToSection();
   bool processExamPageJSON();
@@ -102,6 +104,7 @@ class WebAPIResponse {
     JSData& outputAppend, const std::string& comments
   );
   static JSData getTopicTableJSON();
+  JSData solveJSON();
 
   static JSData getAnswerOnGiveUp(
     const std::string& inputRandomSeed,

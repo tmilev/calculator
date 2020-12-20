@@ -142,18 +142,18 @@ Polynomial<Rational> Polynomial<Rational>::Test::fromString(const std::string& i
   std::string inputModified = "Polynomial(" + input + ")";
   parser.initialize();
   parser.evaluate(inputModified);
-  if (!parser.theProgramExpression.startsWith(parser.opEndStatement())) {
+  if (!parser.programExpression.startsWith(parser.opCommandSequence())) {
     global.fatal
     << "Polynomial::fromString parsed: "
-    << parser.theProgramExpression.toString()
+    << parser.programExpression.toString()
     << " which was not expected. This function is not allowed to fail. "
     << global.fatal;
   }
   Polynomial<Rational> result;
-  if (!parser.theProgramExpression[1].isOfType(&result)) {
+  if (!parser.programExpression[1].isOfType(&result)) {
     global.fatal << "RationalFunction::fromString did not "
     << "produce a rational function, but instead: "
-    << parser.theProgramExpression.toString()
+    << parser.programExpression.toString()
     << global.fatal;
   }
   return result;
@@ -206,15 +206,15 @@ Vector<Polynomial<Rational> > Polynomial<Rational>::Test::fromStringCommonContex
   inputStream << ")";
   parser.initialize();
   parser.evaluate(inputStream.str());
-  if (!parser.theProgramExpression.startsWith(parser.opEndStatement())) {
+  if (!parser.programExpression.startsWith(parser.opCommandSequence())) {
     global.fatal
     << "Polynomial::fromString parsed: "
-    << parser.theProgramExpression.toString()
+    << parser.programExpression.toString()
     << " which was not expected. This function is not allowed to fail. "
     << global.fatal;
   }
   if (!parser.getVector<Polynomial<Rational> >(
-    parser.theProgramExpression[1], result
+    parser.programExpression[1], result
   )) {
     global.fatal
     << "Extracting vector from polynomial not allowed to fail. "

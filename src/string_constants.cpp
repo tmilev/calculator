@@ -2,7 +2,8 @@
 
 std::string WebAPI::appNoCache = "appNoCache";
 std::string WebAPI::app = "app";
-std::string WebAPI::HeaderCacheControl = "Cache-Control: max-age=129600000, public";
+std::string WebAPI::headerCacheControl = "Cache-Control: max-age=129600000, public";
+std::string WebAPI::request::solveRequest = "solveJSON";
 
 std::string WebAPI::commentsServer = "commentsServer";
 std::string WebAPI::userDefaultAdmin = "default";
@@ -32,6 +33,8 @@ std::string WebAPI::result::millisecondsComputation      = "timeComputation"    
 std::string WebAPI::result::loginDisabledEveryoneIsAdmin = "loginDisabledEveryoneIsAdmin";
 std::string WebAPI::result::useFallbackDatabase          = "useFallbackDatabase"         ;
 std::string WebAPI::result::httpsSupport                 = "httpsSupport"                ;
+std::string WebAPI::result::solution                     = "solution"                    ;
+std::string WebAPI::result::solutionData::steps          = "solutionSteps"               ;
 
 std::string WebAPI::problem::fileContent             = "fileContent"             ;
 std::string WebAPI::problem::title                   = "title"                   ;

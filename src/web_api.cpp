@@ -142,19 +142,21 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     return this->processModifyPage();
   } else if (
     global.requestType == WebAPI::request::slides::pdfFromSource ||
-    global.requestType == "homeworkFromSource"
+    global.requestType == WebAPI::request::homeworkFromSource
   ) {
     return this->processSlidesOrHomeworkFromSource();
   } else if (
     global.requestType == WebAPI::request::slides::source ||
-    global.requestType == "homeworkSource"
+    global.requestType == WebAPI::request::homeworkSource
   ) {
     return this->processSlidesSource();
   } else if (global.requestType == WebAPI::request::clonePage) {
     return this->processClonePage();
   } else if (global.requestType == WebAPI::request::compute) {
     return this->processCompute();
-  } else if (global.requestType == WebAPI::request::selectCourseJSON) {
+  } else if (global.requestType == WebAPI::request::solveRequest){
+    return this->processSolveJSON();
+  }   else if (global.requestType == WebAPI::request::selectCourseJSON) {
     return this->processSelectCourseJSON();
   } else if (
     global.requestType == "topicListJSON" ||
@@ -333,8 +335,8 @@ bool WebAPIResponse::processChangePassword(const std::string& reasonForNoAuthent
   return global.theResponse.writeResponse(result);
 }
 
-bool WebAPIResponse::processCompute() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processCompute");
+void WebAPIResponse::initializeCalculatorComputation() {
+  MacroRegisterFunctionWithName("WebAPIResponse::initializeCalculatorComputation");
   this->owner->setHeaderOKNoContentLength("");
   global.theResponse.flagReportDesired = true;
   if (global.getWebInput(WebAPI::request::monitoring) == "false") {
@@ -342,6 +344,11 @@ bool WebAPIResponse::processCompute() {
   } else {
     global.theResponse.flagReportDesired = true;
   }
+}
+
+bool WebAPIResponse::processCompute() {
+  MacroRegisterFunctionWithName("WebAPIResponse::processCompute");
+  this->initializeCalculatorComputation();
   Calculator& theCalculator = global.calculator().getElement();
 
   theCalculator.inputString = HtmlRoutines::convertURLStringToNormal(
@@ -365,6 +372,30 @@ bool WebAPIResponse::processCompute() {
   global.theResponse.writeResponse(result, false);
   global.flagComputationCompletE = true;
   return true;
+}
+
+JSData WebAPIResponse::solveJSON() {
+  MacroRegisterFunctionWithName("WebAPIResponse::solveJSON");
+  this->initializeCalculatorComputation();
+  Calculator& calculator = global.calculator().getElement();
+
+  calculator.inputString = HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput(WebAPI::request::calculatorInput),
+    false
+  );
+  global.initOutputReportAndCrashFileNames(
+    HtmlRoutines::convertStringToURLString("SolveJSON{}(" + calculator.inputString + ")", false),
+    calculator.inputString
+  );
+  global.theResponse.disallowReport();
+  JSData solution = calculator.solve(calculator.inputString);
+  JSData result;
+  result[WebAPI::result::solution] = solution;
+  result[WebAPI::result::commentsGlobal] = global.comments.getCurrentReset();
+  global.theResponse.writeResponse(result, false);
+  global.flagComputationCompletE = true;
+  result[WebAPI::result::error] = "not implemented yet.";
+  return result;
 }
 
 bool WebAPIResponse::processActivateAccount() {
@@ -396,10 +427,17 @@ bool WebAPIResponse::processTopicListJSON() {
   return global.theResponse.writeResponse(resultJSON);
 }
 
+bool WebAPIResponse::processSolveJSON() {
+  MacroRegisterFunctionWithName("WebAPIResponse::processSolveJSON");
+  this->owner->setHeaderOKNoContentLength("");
+  JSData resultJSON = this->solveJSON();
+  return global.theResponse.writeResponse(resultJSON);
+}
+
 bool WebAPIResponse::processCalculatorOnePageJS(bool appendBuildHash) {
   MacroRegisterFunctionWithName("WebAPIResponse::processCalculatorOnePageJS");
   if (appendBuildHash) {
-    this->owner->setHeaderOKNoContentLength(WebAPI::HeaderCacheControl, "text/javascript");
+    this->owner->setHeaderOKNoContentLength(WebAPI::headerCacheControl, "text/javascript");
   } else {
     this->owner->setHeaderOKNoContentLength("", "text/javascript");
   }

@@ -709,8 +709,8 @@ bool CalculatorFunctionsIntegration::integrateDefiniteIntegral(
   theSubBottom.addChildOnTop(theSetE[1]);
   theSubTop.addChildOnTop(theSetE[2]);
   Expression theTopCommands(calculator), theBottomCommands(calculator);
-  theTopCommands.addChildAtomOnTop(calculator.opEndStatement());
-  theBottomCommands.addChildAtomOnTop(calculator.opEndStatement());
+  theTopCommands.addChildAtomOnTop(calculator.opCommandSequence());
+  theBottomCommands.addChildAtomOnTop(calculator.opCommandSequence());
 
   theTopCommands.addChildOnTop(theSubTop);
   theBottomCommands.addChildOnTop(theSubBottom);

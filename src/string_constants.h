@@ -48,6 +48,7 @@ public:
     static std::string problemGiveUpNoLogin;
     static std::string problemSolutionNoLogin;
     static std::string homeworkFromSource;
+    static std::string solveRequest;
     struct slides {
     public:
       static std::string source;
@@ -99,6 +100,10 @@ public:
     static std::string loginDisabledEveryoneIsAdmin;
     static std::string useFallbackDatabase;
     static std::string httpsSupport;
+    static std::string solution;
+    struct solutionData {
+      static std::string steps;
+    };
   };
   struct frontend {
     static std::string problemFileName;
@@ -133,9 +138,8 @@ public:
   struct calculator {
   public:
     static std::string testFileNameVirtual;
-
   };
-  static std::string HeaderCacheControl;
+  static std::string headerCacheControl;
   static std::string commentsServer;
   struct UserInfo {
     static std::string processMonitoring;

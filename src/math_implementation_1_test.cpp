@@ -316,18 +316,18 @@ RationalFunction<Rational> RationalFunction<Rational>::Test::fromString(const st
   std::string inputModified = "MakeRationalFunction(" + input + ")";
   parser.initialize();
   parser.evaluate(inputModified);
-  if (!parser.theProgramExpression.startsWith(parser.opEndStatement())) {
+  if (!parser.programExpression.startsWith(parser.opCommandSequence())) {
     global.fatal
     << "RationalFunction::fromString parsed: "
-    << parser.theProgramExpression.toString()
+    << parser.programExpression.toString()
     << " which was not expected. This function is not allowed to fail. "
     << global.fatal;
   }
   RationalFunction<Rational> result;
-  if (!parser.theProgramExpression[1].isOfType(&result)) {
+  if (!parser.programExpression[1].isOfType(&result)) {
     global.fatal << "RationalFunction::fromString did not "
     << "produce a rational function, but instead: "
-    << parser.theProgramExpression.toString()
+    << parser.programExpression.toString()
     << global.fatal;
   }
   return result;

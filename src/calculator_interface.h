@@ -1283,7 +1283,7 @@ public:
   int totalPatternMatchesPerformed;
   int numberOfPredefinedAtoms;
   int numEmptyTokensStart;
-  Expression theProgramExpression;
+  Expression programExpression;
   int counterInSyntacticSoup;
   List<SyntacticElement> syntacticSoup;
   List<SyntacticElement> syntacticStack;
@@ -1969,7 +1969,7 @@ public:
   int opWeylGroupElement() {
     return this->operations.getIndexNoFail("ElementWeylGroup");
   }
-  int opEndStatement() {
+  int opCommandSequence() {
     return this->operations.getIndexNoFail(";");
   }
   int opUnionNoRepetition() {
@@ -1986,6 +1986,9 @@ public:
   }
   int opPlus() {
     return this->operations.getIndexNoFail("+");
+  }
+  int opSolveJSON() {
+    return this->operations.getIndexNoFail("SolveJSON");
   }
   int opDirectSum() {
     return this->operations.getIndexNoFail("\\oplus");
@@ -2336,6 +2339,7 @@ public:
   void initPredefinedOperationsComposite();
   bool extractExpressions(Expression& outputExpression, std::string* outputErrors);
   void evaluateCommands();
+  JSData extractSolution();
   bool isTimedOut();
   static bool evaluateExpression(
     Calculator& calculator, const Expression& input, Expression& output
@@ -2377,7 +2381,9 @@ public:
       const Expression& transformedChild, const Expression& childHistory, int childIndex
     );
   };
-  void evaluate(const std::string& theInput);
+  void evaluate(const std::string& input);
+  // Attempts to interpret the input string as a high-school or calculus problem and solve it.
+  JSData solve(const std::string& input);
   bool parseAndExtractExpressions(
     const std::string& input,
     Expression& output,

@@ -127,7 +127,7 @@ void Calculator::reset() {
   this->currrentSyntacticSoup = &this->syntacticSoup;
   this->cachedExpressions.clear();
   this->imagesCachedExpressions.setSize(0);
-  this->theProgramExpression.reset(*this);
+  this->programExpression.reset(*this);
   this->ruleStackCacheIndex = - 1;
   this->ruleStack.reset(*this,this->maximumRuleStacksCached);
   this->cachedRuleStacks.clear();
@@ -340,7 +340,7 @@ void Calculator::initialize() {
   this->initializeToStringHandlers();
 
   this->ruleStack.reset(*this, 100);
-  this->ruleStack.addChildAtomOnTop(this->opEndStatement());
+  this->ruleStack.addChildAtomOnTop(this->opCommandSequence());
   this->cachedRuleStacks.clear();
   this->ruleStackCacheIndex = 0;
   this->cachedRuleStacks.addOnTop(this->ruleStack);
@@ -1526,7 +1526,7 @@ bool Calculator::replaceEXdotsXbySsXdotsX(int numDots) {
   Expression newExpr;
   newExpr.reset(*this);
   newExpr.children.reserve(2);
-  newExpr.addChildAtomOnTop(this->opEndStatement());
+  newExpr.addChildAtomOnTop(this->opCommandSequence());
   newExpr.addChildOnTop(left.theData);
   left.theData = newExpr;
   left.controlIndex = this->conSequenceStatements();
@@ -1539,7 +1539,7 @@ bool Calculator::replaceEXdotsXbySsXdotsX(int numDots) {
 bool Calculator::replaceSsSsXdotsXbySsXdotsX(int numDots) {
   SyntacticElement& left = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - numDots - 2];
   SyntacticElement& right = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - numDots - 1];
-  if (!left.theData.startsWith(this->opEndStatement())) {
+  if (!left.theData.startsWith(this->opCommandSequence())) {
     global.fatal << "replaceSsSsXdotsXbySsXdotsX called but left expression is not EndStatement." << global.fatal;
   }
   left.theData.children.reserve(left.theData.children.size + right.theData.children.size - 1);

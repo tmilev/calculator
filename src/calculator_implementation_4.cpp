@@ -1809,7 +1809,7 @@ std::string Calculator::toStringSyntacticStackHumanReadable(
         if (currentElt.theData.startsWith(this->opCommandEnclosure())) {
           continue;
         }
-        if (currentElt.theData.startsWith(this->opEndStatement())) {
+        if (currentElt.theData.startsWith(this->opCommandSequence())) {
           if (currentElt.theData.size() >= 2) {
             if (currentElt.theData[1].startsWith(this->opCommandEnclosure())) {
               continue;
@@ -2011,7 +2011,7 @@ bool Expression::isMeltable(int* numResultingChildren) const {
     return false;
   }
   if (numResultingChildren != nullptr) {
-    if (!(*this)[1].startsWith(this->owner->opEndStatement())) {
+    if (!(*this)[1].startsWith(this->owner->opCommandSequence())) {
       *numResultingChildren = 1;
     } else {
       *numResultingChildren = (*this)[1].children.size - 1;
@@ -2118,7 +2118,7 @@ bool Calculator::convertExpressionsToCommonContext(
 bool CalculatorBasics::meltBrackets(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::outerMeltBrackets");
   RecursionDepthCounter theCounter(&calculator.recursionDepth);
-  if (!input.startsWith(calculator.opEndStatement())) {
+  if (!input.startsWith(calculator.opCommandSequence())) {
     return false;
   }
   int tempInt;
@@ -2135,14 +2135,14 @@ bool CalculatorBasics::meltBrackets(Calculator& calculator, const Expression& in
     return false;
   }
   output.reset(calculator, input.children.size + childIncrease);
-  output.addChildAtomOnTop(calculator.opEndStatement());
+  output.addChildAtomOnTop(calculator.opCommandSequence());
   for (int i = 1; i < input.children.size; i ++) {
     const Expression& currentChild = input[i];
     if (!currentChild.isMeltable()) {
       output.addChildOnTop(input[i]);
       continue;
     }
-    if (!currentChild[1].startsWith(calculator.opEndStatement())) {
+    if (!currentChild[1].startsWith(calculator.opCommandSequence())) {
       output.addChildOnTop(currentChild[1]);
       continue;
     }

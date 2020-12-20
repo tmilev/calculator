@@ -203,12 +203,12 @@ std::string WebAPIResponse::getCommentsInterpretation(
   theFormat.flagExpressionIsFinal = true;
   theFormat.flagIncludeExtraHtmlDescriptionsInPlots = false;
   theInterpreterWithAdvice.theObjectContainer.resetPlots();
-  if (indexShift >= theInterpreterWithAdvice.theProgramExpression.size()) {
+  if (indexShift >= theInterpreterWithAdvice.programExpression.size()) {
     return "";
   }
-  const Expression& currentE = theInterpreterWithAdvice.theProgramExpression[indexShift][1];
+  const Expression& currentE = theInterpreterWithAdvice.programExpression[indexShift][1];
   bool resultIsPlot = false;
-  if (!currentE.startsWith(theInterpreterWithAdvice.opEndStatement())) {
+  if (!currentE.startsWith(theInterpreterWithAdvice.opCommandSequence())) {
     out << WebAPIResponse::getSanitizedComment(currentE, theFormat, resultIsPlot);
     return out.str();
   }
@@ -312,7 +312,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   theFormat.flagUseLatex = true;
   theFormat.flagUsePmatrix = true;
   const Expression& studentAnswerNoContextE =
-  theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size() - 1];
+  theInterpreteR.programExpression[theInterpreteR.programExpression.size() - 1];
   out << "<span style =\"color:magenta\"><b>Interpreting as:</b></span><br>";
   out << "\\(\\displaystyle "
   << studentAnswerNoContextE.toString(&theFormat) << "\\)";
@@ -1089,7 +1089,7 @@ JSData WebAPIResponse::submitAnswersJSON(
   }
   *outputIsCorrect = false;
   int mustBeOne = - 1;
-  if (!theInterpreter.theProgramExpression[theInterpreter.theProgramExpression.size() - 1].isSmallInteger(&mustBeOne)) {
+  if (!theInterpreter.programExpression[theInterpreter.programExpression.size() - 1].isSmallInteger(&mustBeOne)) {
     *outputIsCorrect = false;
   } else {
     *outputIsCorrect = (mustBeOne == 1);
@@ -1510,10 +1510,10 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   theFormat.flagUseLatex = true;
   theFormat.flagUsePmatrix = true;
   bool isFirst = true;
-  const Expression& currentE = theInterpreteR.theProgramExpression[
-    theInterpreteR.theProgramExpression.size() - 1
+  const Expression& currentE = theInterpreteR.programExpression[
+    theInterpreteR.programExpression.size() - 1
   ][1];
-  if (!currentE.startsWith(theInterpreteR.opEndStatement())) {
+  if (!currentE.startsWith(theInterpreteR.opCommandSequence())) {
     out << "\\(\\displaystyle " << currentE.toString(&theFormat) << "\\)";
     if (outputNakedAnswer != nullptr) {
       *outputNakedAnswer = currentE.toString(&theFormat);

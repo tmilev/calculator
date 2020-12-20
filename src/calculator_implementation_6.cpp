@@ -682,7 +682,7 @@ bool CalculatorFunctions::innerGetSummand(
   valueToSubWith = theBottomBoundary[2] + input[2];
   theSub.setChild(2, valueToSubWith);
   Expression theCommandSequence(calculator);
-  theCommandSequence.addChildAtomOnTop(calculator.opEndStatement());
+  theCommandSequence.addChildAtomOnTop(calculator.opCommandSequence());
   theCommandSequence.addChildOnTop(theSub);
   theCommandSequence.addChildOnTop(theCoeff * theSum[2]);
   return output.makeXOX(calculator, calculator.opUnderscore(), theCommandSequence, calculator.expressionTwo());
@@ -1519,7 +1519,7 @@ bool CalculatorFunctions::innerMatchesPattern(
   }
   Expression commandList;
   commandList.reset(calculator);
-  commandList.addChildAtomOnTop(calculator.opEndStatement());
+  commandList.addChildAtomOnTop(calculator.opCommandSequence());
   for (int i = 0; i < matchedExpressions.size(); i ++) {
     Expression currentCommand;
     if (!matchedExpressions.theKeys[i].startsWith(calculator.opBind(), 2)) {

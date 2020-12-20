@@ -534,7 +534,7 @@ bool Calculator::accountRule(
   if (ruleE.size() <= 1) {
     return true;
   }
-  if (!ruleE[1].startsWith(this->opEndStatement())) {
+  if (!ruleE[1].startsWith(this->opCommandSequence())) {
     return this->accountRule(ruleE[1], theRuleStackMaintainer);
   }
   for (int i = 1; i < ruleE[1].size(); i ++) {
@@ -782,7 +782,7 @@ bool Calculator::EvaluateLoop::evaluateChildren(
       this->owner->flagAbortComputationASAP = true;
       return false;
     }
-    if (this->output->startsWith(this->owner->opEndStatement())) {
+    if (this->output->startsWith(this->owner->opCommandSequence())) {
       if (!this->owner->accountRule((*this->output)[i], maintainRuleStack)) {
         std::stringstream out;
         out
@@ -1151,14 +1151,35 @@ void Calculator::EvaluationStatistics::initialize() {
   this->numberOfLargeGreatestCommonDivisorsStart           = static_cast<signed>( Rational::totalLargeGreatestCommonDivisors          );
 }
 
-void Calculator::evaluate(const std::string& theInput) {
+void Calculator::evaluate(const std::string& input) {
   MacroRegisterFunctionWithName("Calculator::evaluate");
   this->statistics.initialize();
-  this->inputString = theInput;
+  this->inputString = input;
   this->parseAndExtractExpressions(
-    theInput, this->theProgramExpression, this->syntacticSoup, this->syntacticStack, &this->syntaxErrors
+    input,
+    this->programExpression,
+    this->syntacticSoup,
+    this->syntacticStack,
+    &this->syntaxErrors
   );
   this->evaluateCommands();
+}
+
+JSData Calculator::solve(const std::string& input) {
+  MacroRegisterFunctionWithName("Calculator::solve");
+  this->statistics.initialize();
+  this->inputString = input;
+  Expression toBeSolved;
+  this->parseAndExtractExpressions(
+    input,
+    toBeSolved,
+    this->syntacticSoup,
+    this->syntacticStack,
+    &this->syntaxErrors
+  );
+  this->programExpression.makeOX(*this, this->opSolveJSON(), toBeSolved);
+  this->evaluateCommands();
+  return this->extractSolution();
 }
 
 void Calculator::evaluateCommands() {
@@ -1174,14 +1195,14 @@ void Calculator::evaluateCommands() {
     out << this->syntaxErrors;
     out << "<hr>";
   }
-  Expression StartingExpression = this->theProgramExpression;
+  Expression startingExpression = this->programExpression;
   this->flagAbortComputationASAP = false;
   this->comments.clear();
   ProgressReport theReport;
   if (!global.flagRunningConsoleRegular) {
     theReport.report("Evaluating expressions, current expression stack:\n");
   }
-  this->evaluateExpression(*this, this->theProgramExpression, this->theProgramExpression);
+  this->evaluateExpression(*this, this->programExpression, this->programExpression);
   if (this->recursionDepth != 0) {
     global.fatal << "The starting recursion "
     << "depth before evaluation was 0, but after evaluation it is "
@@ -1198,12 +1219,12 @@ void Calculator::evaluateCommands() {
     global.theDefaultFormat.getElement().flagExpressionIsFinal = true;
     if (global.programArguments.size > 1) {
       out << "Input: " << Logger::consoleYellow()
-      << StartingExpression.toString(&global.theDefaultFormat.getElement()) << std::endl;
+      << startingExpression.toString(&global.theDefaultFormat.getElement()) << std::endl;
     }
     global.theDefaultFormat.getElement().flagExpressionIsFinal = true;
     this->theObjectContainer.resetSliders();
     out << Logger::consoleNormal() << "Output: " << Logger::consoleGreen()
-    << this->theProgramExpression.toString(&global.theDefaultFormat.getElement())
+    << this->programExpression.toString(&global.theDefaultFormat.getElement())
     << Logger::consoleNormal() << std::endl;
   } else if (!this->flagDisplayFullExpressionTree) {
     std::string badCharsString = this->toStringIsCorrectAsciiCalculatorString(this->inputString);
@@ -1220,8 +1241,8 @@ void Calculator::evaluateCommands() {
     out << javascriptString;
     JSData result;
     result.theType = JSData::token::tokenObject;
-    std::string resultString = this->theProgramExpression.toString(
-      &global.theDefaultFormat.getElement(), &StartingExpression, true, &result
+    std::string resultString = this->programExpression.toString(
+      &global.theDefaultFormat.getElement(), &startingExpression, true, &result
     );
     this->outputJS[WebAPI::result::resultLabel] = result;
     out << resultString;
@@ -1232,10 +1253,10 @@ void Calculator::evaluateCommands() {
       this->outputJS[WebAPI::result::badInput] = badCharsString;
     }
     this->theObjectContainer.resetSliders();
-    out << "<hr>Input:<br> " << StartingExpression.toStringFull() << "<hr>"
-    << "Output:<br>" << this->theProgramExpression.toStringFull();
-    this->outputJS[WebAPI::result::resultLabel]["input"] = StartingExpression.toStringFull();
-    this->outputJS[WebAPI::result::resultLabel]["output"] = this->theProgramExpression.toStringFull();
+    out << "<hr>Input:<br> " << startingExpression.toStringFull() << "<hr>"
+    << "Output:<br>" << this->programExpression.toStringFull();
+    this->outputJS[WebAPI::result::resultLabel]["input"] = startingExpression.toStringFull();
+    this->outputJS[WebAPI::result::resultLabel]["output"] = this->programExpression.toStringFull();
   }
   this->outputString = out.str();
   this->outputJS[WebAPI::result::resultHtml] = out.str();

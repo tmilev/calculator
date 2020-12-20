@@ -1146,7 +1146,7 @@ bool CalculatorFunctions::innerDereferenceSequenceStatements(
   if (input.size() != 3) {
     return false;
   }
-  if (!input[1].startsWith(calculator.opEndStatement())) {
+  if (!input[1].startsWith(calculator.opCommandSequence())) {
     return false;
   }
   int theIndex;
@@ -4515,7 +4515,7 @@ bool CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM(
 
     currentIntegralComputation.makeXOX(calculator, calculator.opDefine(), newResultE, currentIntegral);
     currentCommandListE.reset(calculator);
-    currentCommandListE.addChildAtomOnTop(calculator.opEndStatement());
+    currentCommandListE.addChildAtomOnTop(calculator.opCommandSequence());
     currentCommandListE.addChildOnTop(currentIntegralComputation);
     currentCommandListE.addChildOnTop(currentSubE);
     currentCommandListE.addChildOnTop(newResultE);
@@ -4656,7 +4656,7 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
 
     currentIntegralComputation.makeXOX(calculator, calculator.opDefine(), newResultE, currentIntegral);
     currentCommandListE.reset(calculator);
-    currentCommandListE.addChildAtomOnTop(calculator.opEndStatement());
+    currentCommandListE.addChildAtomOnTop(calculator.opCommandSequence());
     currentCommandListE.addChildOnTop(currentIntegralComputation);
     currentCommandListE.addChildOnTop(currentSubE);
     currentCommandListE.addChildOnTop(newResultE);
@@ -5196,7 +5196,7 @@ bool Expression::makeSequenceCommands(Calculator& owner, List<std::string>& inpu
 bool Expression::makeSequenceStatements(Calculator& owner, List<Expression>* inputStatements) {
   MacroRegisterFunctionWithName("Expression::makeSequenceStatements");
   this->reset(owner, inputStatements == nullptr ? 1 : inputStatements->size + 1);
-  this->addChildAtomOnTop(owner.opEndStatement());
+  this->addChildAtomOnTop(owner.opCommandSequence());
   if (inputStatements != nullptr) {
     for (int i = 0; i < inputStatements->size; i ++) {
       this->addChildOnTop((*inputStatements)[i]);
@@ -7597,8 +7597,8 @@ bool Calculator::Test::calculatorTestRun() {
     theTester.initialize();
     theTester.checkConsistencyAfterInitialization();
     theTester.evaluate(currentTest.command);
-    currentTest.actualResult = theTester.theProgramExpression.toString(&theFormat);
-    reportStream << "<br>Result: " << theTester.theProgramExpression.toString();
+    currentTest.actualResult = theTester.programExpression.toString(&theFormat);
+    reportStream << "<br>Result: " << theTester.programExpression.toString();
     reportStream << "<br>Done in: " << global.getElapsedSeconds() - this->startTime << " seconds. ";
     theReport.report(reportStream.str());
   }

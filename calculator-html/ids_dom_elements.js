@@ -8,7 +8,8 @@ var domElements = {
   pages: {
     solve: {
       div: "divSolvePage",
-      button: "buttonSolvePage",
+      buttonSelectSolvePage: "buttonSelectSolvePage",
+      buttonSolve: "buttonSolve",
       editor: "editorSolveProblem",
       solutionBox: "solutionBox",
     },

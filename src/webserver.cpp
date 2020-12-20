@@ -4069,6 +4069,7 @@ void WebServer::initializeMainRequests() {
   this->requestsNotNeedingLogin.addOnTop("about");
   this->requestsNotNeedingLogin.addOnTop("signUp");
   this->requestsNotNeedingLogin.addOnTop("signUpPage");
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::solveRequest);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::forgotLogin);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::compute);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::calculatorPage);

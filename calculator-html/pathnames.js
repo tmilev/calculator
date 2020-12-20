@@ -1,12 +1,12 @@
 "use strict";
 
-var urls = {
+const urls = {
   calculatorAPI: "/cgi-bin/calculator",
   appNoCache: "/appNoCache",
   appWithCache: "/app",
 };
 
-var urlFields = {
+const urlFields = {
   activationToken: "activationToken",
   request: "request",
   requests: {
@@ -35,6 +35,7 @@ var urlFields = {
     calculatorInput: "calculatorInput",
     fileContent: "fileContent",
     calculatorExamplesJSON: "calculatorExamplesJSON",
+    solveJSON: "solveJSON",
   },
   result: {
     resultHtml: "resultHtml",
@@ -95,7 +96,29 @@ var urlFields = {
   userRole: "userRole",
 }
 
+class Addresses {
+  constructor() { }
+  /** @returns{string} */
+  solveJSON(
+    /**@type{string} */
+    problem,
+    /**@type{boolean} */
+    debug,
+  ) {
+    let result = `${urls.calculatorAPI}?`;
+    result += `${urlFields.request}=${urlFields.requests.solveJSON}&`;
+    result += `${urlFields.requests.calculatorInput}=${encodeURIComponent(problem)}&`;
+    if (debug) {
+      result += `${urlFields.debugFlag}=true&`;
+    }
+    return result;
+  }
+}
+
+let addresses = new Addresses();
+
 module.exports = {
   urls,
   urlFields,
+  addresses,
 };

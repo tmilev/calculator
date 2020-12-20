@@ -156,7 +156,7 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     return this->processCompute();
   } else if (global.requestType == WebAPI::request::solveRequest){
     return this->processSolveJSON();
-  }   else if (global.requestType == WebAPI::request::selectCourseJSON) {
+  } else if (global.requestType == WebAPI::request::selectCourseJSON) {
     return this->processSelectCourseJSON();
   } else if (
     global.requestType == "topicListJSON" ||

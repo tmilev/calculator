@@ -511,7 +511,7 @@ class Page {
       },
       solve: {
         name: "solve",
-        menuButtonId: ids.domElements.pages.solve.button,
+        menuButtonId: ids.domElements.pages.solve.buttonSelectSolvePage,
         id: ids.domElements.pages.solve.div,
         container: null,
         selectFunction: solver.selectSolverPage,

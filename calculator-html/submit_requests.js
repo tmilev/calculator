@@ -20,7 +20,7 @@ function recordProgressDone(progress, timeFinished) {
 
 function convertStringToHtml(input) {
   var result = "";
-  for (var counter = 0; counter < input.length; counter ++) {
+  for (var counter = 0; counter < input.length; counter++) {
     if (input[counter] === '&') {
       result += '&amp;';
       continue;
@@ -31,7 +31,7 @@ function convertStringToHtml(input) {
 }
 
 /**@returns {String} */
-getLatexLink = function() {
+getLatexLink = function () {
   var firstPart = window.location.href.split("#")[0];
   var hash = window.location.hash;
   if (hash.startsWith('#')) {
@@ -48,10 +48,10 @@ getLatexLink = function() {
 }
 
 /**@returns {String} */
-latexifyLink = function(inputURL) {
+latexifyLink = function (inputURL) {
   var result = "";
   result += "\\href{";
-  for (var i = 0; i < inputURL.length; i ++) {
+  for (var i = 0; i < inputURL.length; i++) {
     if (inputURL[i] == '%') {
       result += "\\%";
     } else if (inputURL[i] == '_') {
@@ -88,7 +88,7 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
     pathnames.urlFields.reenteredPassword,
     pathnames.urlFields.password,
   ];
-  for (var i = 0; i < censoredAddressStarts.length; i ++) {
+  for (var i = 0; i < censoredAddressStarts.length; i++) {
     var addressPassSplit = addressSpreadOut.split(censoredAddressStarts[i]);
     if (addressPassSplit.length > 1) {
       var indexAmpersand = addressPassSplit[1].search("&");
@@ -130,9 +130,9 @@ function correctAddress(inputURL) {
   }
   if (window.calculator.hardCodedServerAddress !== "") {
     if (window.calculator.hardCodedServerAddress.endsWith("/") && inputURL.startsWith("/")) {
-      return window.calculator.hardCodedServerAddress  + inputURL.slice(1);
+      return window.calculator.hardCodedServerAddress + inputURL.slice(1);
     } else {
-      return window.calculator.hardCodedServerAddress  + inputURL;
+      return window.calculator.hardCodedServerAddress + inputURL;
     }
   }
   return inputURL;
@@ -164,11 +164,11 @@ function submitGET(
   /** @type {{url: string, callback: Function, progress: string, result: string}}*/
   inputObject
 ) {
-  var theAddress = correctAddress(inputObject.url);
-  var progress = inputObject.progress;
-  var result = inputObject.result;
-  var callback = inputObject.callback;
-  var xhr = new XMLHttpRequest();
+  let theAddress = correctAddress(inputObject.url);
+  let progress = inputObject.progress;
+  let result = inputObject.result;
+  let callback = inputObject.callback;
+  let xhr = new XMLHttpRequest();
   recordProgressStarted(progress, theAddress, false, (new Date()).getTime());
   xhr.open('GET', theAddress, true);
   xhr.setRequestHeader('Accept', 'text/html');

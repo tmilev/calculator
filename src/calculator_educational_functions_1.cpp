@@ -21,12 +21,13 @@ bool CalculatorEducationalFunctions::solveJSON(Calculator& calculator, const Exp
     - 1,
     &history.theHistory
   );
-  problem.solution = history.toStringExpressionHistoryMerged();
-  output.assignValue(problem.toJSON(), calculator);
-  if (!output.isOfType<JSData>()) {
-    global.fatal << "DEBUG: output not of type json." << global.fatal;
+  history.owner = &calculator;
+  std::stringstream commentsOnFailure;
+  if (!history.computeRecursively(0, &commentsOnFailure)) {
+    problem.error = commentsOnFailure.str();
   }
-  return true;
+  problem.solution = history.toStringExpressionHistoryMerged();
+  return output.assignValue(problem.toJSON(), calculator);
 }
 
 JSData Calculator::extractSolution() {
@@ -50,5 +51,6 @@ JSData ProblemWithSolution::toJSON() {
   result[WebAPI::result::solutionData::input] = this->toBeSolved.toString();
   result[WebAPI::result::solutionData::steps] = this->solution;
   result[WebAPI::result::solutionData::finalExpression] = this->finalExpression.toString();
+  result[WebAPI::result::error] = this->error;
   return result;
 }

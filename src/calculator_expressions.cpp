@@ -2300,14 +2300,10 @@ bool Expression::toStringBuiltIn<JSData>(
   std::stringstream& out,
   FormatExpressions* theFormat
 ) {
-  bool isFinal = theFormat == nullptr ? true : theFormat->flagExpressionIsFinal;
+  (void) theFormat;
   JSData data = input.getValue<JSData>();
   std::string dataString = data.toString();
-  if (isFinal) {
-    out << HtmlRoutines::convertStringToHtmlString(dataString, false);
-  } else {
-    out << dataString;
-  }
+  out << dataString;
   return true;
 }
 

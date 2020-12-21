@@ -1,9 +1,11 @@
 "use strict";
-const EquationEditor = require("./equation_editor").EquationEditor;
+const editor = require("./equation_editor");
+const EquationEditor = editor.EquationEditor;
 const ids = require("./ids_dom_elements");
 const pathnames = require("./pathnames");
 const submit = require("./submit_requests");
 const calculator = require("./calculator_page");
+const miscellaneous = require("./miscellaneous");
 const storage = require("./storage").storage;
 
 class Solver {
@@ -100,7 +102,14 @@ class Solver {
     input,
   ) {
     let output = document.getElementById(ids.domElements.pages.solve.solutionBox);
-    output.innerHTML = input;
+    try {
+      let solution = miscellaneous.jsonUnescapeParse(input);
+      let steps = solution["solution"]["solution"][pathnames.urlFields.result.solution.steps];
+      output.textContent = `${steps}`;
+      editor.typeset(output);
+    } catch (e) {
+      output.innerHTML = `<b style='color:red'>${e}</b><br>${input}`;
+    }
   }
 }
 

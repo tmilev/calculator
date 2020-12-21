@@ -9,7 +9,7 @@ public:
   Expression toBeSolved;
   std::string solution;
   Expression finalExpression;
-
+  std::string error;
   JSData toJSON();
 };
 

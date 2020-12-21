@@ -1,13 +1,11 @@
 "use srict";
-const submitRequests = require("./submit_requests");
 const miscellaneous = require('./miscellaneous');
-const ids = require("./ids_dom_elements");
 const modifiableDatabaseData = require('./modifiable_database_fields').modifiableDatabaseData;
 const panels = require('./panels');
 const BufferCalculator = require('./buffer').BufferCalculator;
 
 var modifiableFields = {};
-for (var i = 0; i < modifiableDatabaseData.modifiableFields.length; i ++) {
+for (var i = 0; i < modifiableDatabaseData.modifiableFields.length; i++) {
   var incomingLabel = modifiableDatabaseData.modifiableFields[i].join("");
   modifiableFields[incomingLabel] = true;
 }
@@ -38,7 +36,7 @@ function writeJSONtoDOMComponent(inputJSON, theDomComponent) {
     theDomComponent = document.getElementById(theDomComponent);
   }
   var transformer = new JSONToHTML();
-  theDomComponent.innerHTML = transformer.getTableFromObject(inputJSON, null, {forceRowLayout: true});
+  theDomComponent.innerHTML = transformer.getTableFromObject(inputJSON, null, { forceRowLayout: true });
 }
 
 var counterToggleButtons = 0;
@@ -65,14 +63,14 @@ function getDeleteButtonFromLabels(theLabels, selector, containerLabel) {
 
 var counterDatabaseTables = 0;
 
-JSONToHTML.prototype.getOptionFromLabel = function(
+JSONToHTML.prototype.getOptionFromLabel = function (
   /**@type {String[]} */
   currentLabelsGeneralized,
 ) {
   if (this.optionsConstant.transformers === null || this.optionsConstant.transformers === undefined) {
     return null;
   }
-  for (var i = - 1; i < currentLabelsGeneralized.length; i ++) {
+  for (var i = - 1; i < currentLabelsGeneralized.length; i++) {
     var labelTry = currentLabelsGeneralized.slice();
     if (i >= 0) {
       labelTry[i] = "${any}";
@@ -86,7 +84,7 @@ JSONToHTML.prototype.getOptionFromLabel = function(
 
 var numberOfButtonsGenerated = 0;
 
-JSONToHTML.prototype.getButtonFromLabels = function(
+JSONToHTML.prototype.getButtonFromLabels = function (
   input,
   /**@type {String} */
   panelId,
@@ -96,12 +94,12 @@ JSONToHTML.prototype.getButtonFromLabels = function(
   /**@type {Function} */
   clickHandler,
 ) {
-  numberOfButtonsGenerated ++;
+  numberOfButtonsGenerated++;
   var result = "";
   var id = `buttonClickHandler${numberOfButtonsGenerated}`;
   result += `<button id = "${id}">${inputTransformed}</button>`;
   this.buttonBindings[id] = {
-    clickHandler : clickHandler,
+    clickHandler: clickHandler,
     labels: currentLabels.slice(),
     panelId: panelId,
   };
@@ -109,7 +107,7 @@ JSONToHTML.prototype.getButtonFromLabels = function(
   return result;
 }
 
-JSONToHTML.prototype.getSingleEntry = function(
+JSONToHTML.prototype.getSingleEntry = function (
   input,
   /**@type {String[]} */
   currentLabels,
@@ -124,7 +122,7 @@ JSONToHTML.prototype.getSingleEntry = function(
   if (typeof currentOption.transformer === "function") {
     inputTransformed = currentOption.transformer(input);
   }
-  counterToggleButtons ++;
+  counterToggleButtons++;
   var panelId = `panelFromJSONFormatter${counterToggleButtons}`;
   if (typeof currentOption.clickHandler === "function") {
     inputTransformed = this.getButtonFromLabels(
@@ -137,7 +135,7 @@ JSONToHTML.prototype.getSingleEntry = function(
   return getToggleButton(this, panelId, input, inputTransformed);
 }
 
-JSONToHTML.prototype.getTableHorizontallyLaidFromJSON = function(
+JSONToHTML.prototype.getTableHorizontallyLaidFromJSON = function (
   input,
   /**@type {String[]} */
   currentLabels,
@@ -163,7 +161,7 @@ JSONToHTML.prototype.getTableHorizontallyLaidFromJSON = function(
   }
 }
 
-JSONToHTML.prototype.getTableHorizontallyLaidFromArray = function(
+JSONToHTML.prototype.getTableHorizontallyLaidFromArray = function (
   input,
   /**@type {String[]} */
   currentLabels,
@@ -185,7 +183,7 @@ JSONToHTML.prototype.getTableHorizontallyLaidFromArray = function(
     newLabelsGeneralized.push("");
   }
   output.write("<table class = 'tableJSONItem'>");
-  for (var counterInput = 0; counterInput < input.length; counterInput ++) {
+  for (var counterInput = 0; counterInput < input.length; counterInput++) {
     if (hasLabels) {
       newLabels[newLabels.length - 1] = "${number}";
     }
@@ -197,7 +195,7 @@ JSONToHTML.prototype.getTableHorizontallyLaidFromArray = function(
   output.write("</table>");
 }
 
-JSONToHTML.prototype.getTableHorizontallyLaidFromObject = function(
+JSONToHTML.prototype.getTableHorizontallyLaidFromObject = function (
   input,
   /**@type {String[]} */
   currentLabels,
@@ -224,7 +222,7 @@ JSONToHTML.prototype.getTableHorizontallyLaidFromObject = function(
     }
     var flagIsDeleteable = false;
     if (flagIsDeleteable) {
-      counterDatabaseTables ++;
+      counterDatabaseTables++;
       var tableLabel = `databaseItem${counterDatabaseTables}`;
       output.write(`<tr id='${tableLabel}'>`);
     } else {
@@ -250,7 +248,7 @@ function getLabelsRows(input) {
     idRow: - 1,
   };
   var labelFinder = {};
-  for (var counterRow = 0; counterRow < input.length; counterRow ++) {
+  for (var counterRow = 0; counterRow < input.length; counterRow++) {
     if (typeof input[counterRow] !== "object") {
       return null;
     }
@@ -259,17 +257,17 @@ function getLabelsRows(input) {
     }
   }
   result.labels = Object.keys(labelFinder).sort();
-  for (var counterLabel = 0; counterLabel < result.labels.length; counterLabel ++) {
+  for (var counterLabel = 0; counterLabel < result.labels.length; counterLabel++) {
     if (result.labels[counterLabel] === "_id") {
       result.idRow = counterLabel;
       break;
     }
   }
-  for (var counterRow = 0; counterRow < input.length; counterRow ++) {
+  for (var counterRow = 0; counterRow < input.length; counterRow++) {
     var currentInputItem = input[counterRow];
     result.rows.push([]);
     var currentOutputItem = result.rows[result.rows.length - 1];
-    for (var counterLabel = 0; counterLabel < result.labels.length; counterLabel ++) {
+    for (var counterLabel = 0; counterLabel < result.labels.length; counterLabel++) {
       var label = result.labels[counterLabel];
       if (label in currentInputItem) {
         currentOutputItem.push(currentInputItem[label]);
@@ -281,7 +279,7 @@ function getLabelsRows(input) {
   return result;
 }
 
-JSONToHTML.prototype.bindButtons = function() {
+JSONToHTML.prototype.bindButtons = function () {
   for (var i = this.panelInformation.length - 1; i >= 0; i--) {
     var currentInfo = this.panelInformation[i];
     var currentPanel = new panels.PanelExpandable(currentInfo.panelId);
@@ -289,7 +287,7 @@ JSONToHTML.prototype.bindButtons = function() {
     currentPanel.setPanelContent(currentInfo.content);
     currentPanel.setPanelLabel(currentInfo.label);
   }
-  for (var i = this.buttonIdsInOrderOfCreation.length - 1; i >= 0; i --) {
+  for (var i = this.buttonIdsInOrderOfCreation.length - 1; i >= 0; i--) {
     var currentId = this.buttonIdsInOrderOfCreation[i];
     var currentBinding = this.buttonBindings[currentId];
     var currentButton = document.getElementById(currentId);
@@ -297,7 +295,7 @@ JSONToHTML.prototype.bindButtons = function() {
     currentButton.setAttribute("labels", JSON.stringify(currentBinding.labels));
     currentButton.setAttribute("panelId", currentBinding.panelId);
   }
-  for (var i = 0; i < this.panelInformation.length; i ++) {
+  for (var i = 0; i < this.panelInformation.length; i++) {
     var currentInfo = this.panelInformation[i];
     var currentPanel = new panels.PanelExpandable(currentInfo.panelId);
     currentPanel.initialize(false);
@@ -305,7 +303,7 @@ JSONToHTML.prototype.bindButtons = function() {
   }
 }
 
-JSONToHTML.prototype.transformObjectToRows = function(input) {
+JSONToHTML.prototype.transformObjectToRows = function (input) {
   var result = [];
   for (var labelRow in input) {
     var currentInputItem = input[labelRow];
@@ -315,7 +313,7 @@ JSONToHTML.prototype.transformObjectToRows = function(input) {
   return result;
 }
 
-JSONToHTML.prototype.getTableFromObject = function(
+JSONToHTML.prototype.getTableFromObject = function (
   input,
   optionsConstant,
   /**@type {{table: String, forceRowLayout: Boolean}} */
@@ -362,7 +360,7 @@ JSONToHTML.prototype.getTableFromObject = function(
   return resultBuffer.toString();
 }
 
-JSONToHTML.prototype.getHtmlFromArray = function(
+JSONToHTML.prototype.getHtmlFromArray = function (
   inputJSON,
   /**@type {BufferCalculator} */
   output,
@@ -378,12 +376,12 @@ JSONToHTML.prototype.getHtmlFromArray = function(
   output.write("<table class = 'tableJSON'>");
   output.write("<tr>");
   output.write("<th></th>");
-  for (var counterColumn = 0; counterColumn < this.labelsRows.labels.length; counterColumn ++) {
+  for (var counterColumn = 0; counterColumn < this.labelsRows.labels.length; counterColumn++) {
     output.write(`<th>${this.labelsRows.labels[counterColumn]}</th>`);
   }
   output.write("</tr>");
   var id = "";
-  for (var counterRow = 0; counterRow < this.labelsRows.rows.length; counterRow ++) {
+  for (var counterRow = 0; counterRow < this.labelsRows.rows.length; counterRow++) {
     if (this.labelsRows.idRow != - 1) {
       id = this.labelsRows.rows[counterRow][this.labelsRows.idRow]["$oid"];
       output.write(`<tr id = "trOid${id}">`);
@@ -392,7 +390,7 @@ JSONToHTML.prototype.getHtmlFromArray = function(
       id = counterRow;
     }
     output.write(`<td><tiny>${counterRow}</tiny></td>`);
-    for (var counterColumn = 0; counterColumn < this.labelsRows.labels.length; counterColumn ++) {
+    for (var counterColumn = 0; counterColumn < this.labelsRows.labels.length; counterColumn++) {
       var labelsGeneralized = [];
       var labels = [];
       if (this.tableName !== "") {

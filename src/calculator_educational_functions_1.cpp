@@ -21,6 +21,7 @@ bool CalculatorEducationalFunctions::solveJSON(Calculator& calculator, const Exp
     - 1,
     &history.theHistory
   );
+  problem.solution = history.toStringExpressionHistoryMerged();
   output.assignValue(problem.toJSON(), calculator);
   if (!output.isOfType<JSData>()) {
     global.fatal << "DEBUG: output not of type json." << global.fatal;

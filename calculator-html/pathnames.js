@@ -49,6 +49,9 @@ const urlFields = {
     comments: "comments",
     // Global comments, usually used for debugging.
     commentsGlobal: "commentsGlobal",
+    solution: {
+      steps: "solutionSteps",
+    },
   },
   problem: {
     failedToLoadProblem: "Failed to load problem.",

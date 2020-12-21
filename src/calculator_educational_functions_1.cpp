@@ -11,13 +11,21 @@ bool CalculatorEducationalFunctions::solveJSON(Calculator& calculator, const Exp
   }
   ProblemWithSolution problem;
   problem.toBeSolved = input[1];
-  Expression simplification;
   bool outputNonCacheable = false;
   Calculator::ExpressionHistoryEnumerator history;
   calculator.evaluateExpression(
-    calculator, problem.toBeSolved, simplification, outputNonCacheable, - 1, &history.theHistory
+    calculator,
+    problem.toBeSolved,
+    problem.finalExpression,
+    outputNonCacheable,
+    - 1,
+    &history.theHistory
   );
-  return output.assignValue(problem.toJSON(), calculator);
+  output.assignValue(problem.toJSON(), calculator);
+  if (!output.isOfType<JSData>()) {
+    global.fatal << "DEBUG: output not of type json." << global.fatal;
+  }
+  return true;
 }
 
 JSData Calculator::extractSolution() {
@@ -26,12 +34,13 @@ JSData Calculator::extractSolution() {
     result[WebAPI::result::error] = this->toStringSyntacticStackHumanReadable(false, true);
     return result;
   }
-  std::string solutionJSON;
+  JSData solutionJSON;
   if (!this->programExpression.isOfType(&solutionJSON)) {
-    result[WebAPI::result::error] = "Could not solve your problem.";
+    result[WebAPI::result::error] = "Could not solve your problem. ";
     return result;
+  } else {
+    result[WebAPI::result::solution] = solutionJSON;
   }
-  result[WebAPI::result::solution] = solutionJSON;
   return result;
 }
 
@@ -39,5 +48,6 @@ JSData ProblemWithSolution::toJSON() {
   JSData result;
   result[WebAPI::result::solutionData::input] = this->toBeSolved.toString();
   result[WebAPI::result::solutionData::steps] = this->solution;
+  result[WebAPI::result::solutionData::finalExpression] = this->finalExpression.toString();
   return result;
 }

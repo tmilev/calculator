@@ -8,6 +8,7 @@ class ProblemWithSolution {
 public:
   Expression toBeSolved;
   std::string solution;
+  Expression finalExpression;
 
   JSData toJSON();
 };

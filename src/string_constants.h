@@ -103,6 +103,7 @@ public:
     static std::string solution;
     struct solutionData {
       static std::string input;
+      static std::string finalExpression;
       static std::string steps;
     };
   };

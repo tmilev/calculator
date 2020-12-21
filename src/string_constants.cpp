@@ -35,6 +35,7 @@ std::string WebAPI::result::useFallbackDatabase          = "useFallbackDatabase"
 std::string WebAPI::result::httpsSupport                 = "httpsSupport"                ;
 std::string WebAPI::result::solution                     = "solution"                    ;
 std::string WebAPI::result::solutionData::steps          = "solutionSteps"               ;
+std::string WebAPI::result::solutionData::input          = "input"                       ;
 
 std::string WebAPI::problem::fileContent             = "fileContent"             ;
 std::string WebAPI::problem::title                   = "title"                   ;

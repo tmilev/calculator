@@ -210,6 +210,7 @@ void Calculator::initialize() {
   this->addOperationBuiltInType("RationalFunctionAlgebraicCoefficients");
   this->addOperationBuiltInType("RationalFunctionModuloInteger");
   this->addOperationBuiltInType("string");
+  this->addOperationBuiltInType("JSON");
   this->addOperationBuiltInType("ElementUEoverRF");
   this->addOperationBuiltInType("ElementTensorGVM");
   this->addOperationBuiltInType("CharSSAlgMod");
@@ -1039,7 +1040,7 @@ bool Calculator::isNonBoundVariableInContext(int inputOp) {
 
 bool Calculator::replaceXXVXdotsXbyE_BOUND_XdotsX(int numXs) {
   SyntacticElement& theElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - numXs - 1];
-  int theBoundVar = theElt.theData.theData;
+  int theBoundVar = theElt.theData.data;
   if (this->isNonBoundVariableInContext(theBoundVar)) {
     std::stringstream out;
     out << "Syntax error. In the same syntactic scope, the string "
@@ -1066,7 +1067,7 @@ bool Calculator::replaceXXVXdotsXbyE_BOUND_XdotsX(int numXs) {
 
 bool Calculator::replaceVXdotsXbyE_NONBOUND_XdotsX(int numXs) {
   SyntacticElement& theElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1 - numXs];
-  int theBoundVar = theElt.theData.theData;
+  int theBoundVar = theElt.theData.data;
   if (this->isBoundVariableInContext(theBoundVar)) {
     theElt.theData.reset(*this, 2);
     theElt.theData.addChildAtomOnTop(this->opBind());
@@ -1381,7 +1382,7 @@ bool Calculator::replaceEOXbyEX() {
 bool Calculator::replaceVbyVdotsVAccordingToPredefinedWordSplits() {
   MacroRegisterFunctionWithName("Calculator::replaceVbyVdotsVAccordingToPredefinedWordSplits");
   SyntacticElement& theE = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1];
-  const std::string& currentVar = this->operations.theKeys[theE.theData.theData];
+  const std::string& currentVar = this->operations.theKeys[theE.theData.data];
   if (!this->predefinedWordSplits.contains(currentVar)) {
     global.fatal << "Predefined word splits array does not contain the variable: " << theE.theData.toString()
     << ". This should not happen in the body of this function. " << global.fatal;
@@ -2109,7 +2110,7 @@ bool Calculator::applyOneRule() {
   }
   if (this->flagUsePredefinedWordSplits) {
     if (lastS == "Variable") {
-      if (this->predefinedWordSplits.contains(this->operations.theKeys[lastE.theData.theData])) {
+      if (this->predefinedWordSplits.contains(this->operations.theKeys[lastE.theData.data])) {
         return this->replaceVbyVdotsVAccordingToPredefinedWordSplits();
       }
     }
@@ -2513,7 +2514,7 @@ bool Calculator::applyOneRule() {
   if (
     lastS == "Sequence" &&
     lastE.theData.size() == 0 &&
-    lastE.theData.theData == this->opList()
+    lastE.theData.data == this->opList()
   ) {
     return this->replaceXByCon(this->controlSequences.getIndexNoFail("MakeSequence"));
   }

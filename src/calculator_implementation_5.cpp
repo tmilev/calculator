@@ -1300,7 +1300,7 @@ bool CalculatorFunctions::innerOperatorBounds(
   }
   const Expression& baseE = input[1];
   Expression theLimitsE;
-  int theIntegralOp = baseE.theData;
+  int theIntegralOp = baseE.data;
   if (
     theIntegralOp == calculator.opIntegral() || theIntegralOp == calculator.opSum()
   ) {
@@ -1923,7 +1923,7 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
     if (input.isOperationGiven(calculator.opPi())) {
       return output.assignValue<std::string>(" 3.141592654 ", calculator);
     }
-    if (input.theData >= calculator.numberOfPredefinedAtoms) {
+    if (input.data >= calculator.numberOfPredefinedAtoms) {
       return output.assignValue(HtmlRoutines::getJavascriptVariable(atomString), calculator);
     }
     if (atomString == "+" || atomString == "*" || atomString == "/" || atomString == "-") {

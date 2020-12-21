@@ -51,6 +51,18 @@ public:
     }
     return *this->references[i];
   }
+  unsigned int hashFunction() const {
+    unsigned int result = 0;
+    int j = - 1;
+    for (int i = 0; i < this->size; i ++) {
+      j ++;
+      if (j > someRandomPrimesSize) {
+        j = 0;
+      }
+      result += someRandomPrimes[i] * HashFunctions::hashFunction((*this)[i]);
+    }
+    return result;
+  }
   bool contains(const Object& theObject) const {
     for (int i = 0; i < this->size; i ++) {
       if ((*this)[i] == theObject) {

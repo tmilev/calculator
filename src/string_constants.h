@@ -102,6 +102,7 @@ public:
     static std::string httpsSupport;
     static std::string solution;
     struct solutionData {
+      static std::string input;
       static std::string steps;
     };
   };

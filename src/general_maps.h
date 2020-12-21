@@ -6,11 +6,25 @@
 #include "general_lists.h"
 #include "general_list_references.h"
 
-template <class listType, class key, class value, unsigned int hashFunction(const key&) = key::hashFunction>
+template <class listType, class key, class value, unsigned int keyHashFunction(const key&) = key::hashFunction>
 class MapTemplate {
 public:
-  HashedList<key, hashFunction> theKeys;
+  HashedList<key, keyHashFunction> theKeys;
   listType theValues;
+  unsigned int hashFunction() const {
+    int j = - 1;
+    unsigned int result;
+    for (int i = 0; i < this->theKeys.size; i ++) {
+      j ++;
+      if (j >= someRandomPrimesSize) {
+        j = 0;
+      }
+      result += keyHashFunction(this->theKeys[i]) *
+      HashFunctions::hashFunction(this->theValues[i]) *
+      someRandomPrimes[j];
+    }
+    return result;
+  }
   int getIndex(const key& input) const {
     return this->theKeys.getIndex(input);
   }

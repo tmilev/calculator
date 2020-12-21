@@ -4,6 +4,14 @@
 #define CALCULATOR_EDUCATIONAL_FUNCTIONS
 #include "calculator_interface.h"
 
+class ProblemWithSolution {
+public:
+  Expression toBeSolved;
+  std::string solution;
+
+  JSData toJSON();
+};
+
 class CalculatorEducationalFunctions{
 public:
   static bool solveJSON(

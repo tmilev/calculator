@@ -144,6 +144,11 @@ class WebAPIResponse {
   static std::string getSanitizedComment(
     const Expression& input, FormatExpressions& theFormat, bool& resultIsPlot
   );
+  class Test {
+  public:
+    static bool all();
+    static bool solveJSON();
+  };
 };
 
 class HtmlRoutines {

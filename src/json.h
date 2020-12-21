@@ -47,6 +47,10 @@ public:
   MemorySaving<LargeInteger> theInteger;
   ListReferences<JSData> theList;
   MapReferences<std::string, JSData, MathRoutines::hashString> objects;
+  unsigned int hashFunction() const;
+  static unsigned int hashFunction(const JSData& input){
+    return input.hashFunction();
+  }
   void operator=(const bool other);
   void operator=(int other);
   void operator=(int64_t other);
@@ -134,6 +138,7 @@ public:
     const std::string& input,
     std::stringstream* commentsOnFailure
   );
+  bool operator==(const JSData& other) const;
   bool readstring(const std::string& json, std::stringstream* commentsOnFailure = nullptr);
   bool tryToComputeType(std::stringstream* commentsOnFailure);
   static void filterColumnsJSDataObjectList(List<JSData>& inputOutput, const List<std::string>& columnsToPreserve);

@@ -160,6 +160,7 @@ SOURCES += \
     transport_layer_security_implementation.cpp \
     transport_layer_security_openssl.cpp \
     transport_layer_security_test.cpp \
+    web_api_test.cpp \
     web_routines_1.cpp \
     webserver.cpp \
     webserver_fork.cpp \

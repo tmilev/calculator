@@ -1126,7 +1126,7 @@ bool CalculatorConversions::outerMatrixExpressionsToMatrixOfType(
   if (input[0].size() != 1) {
     return false;
   }
-  if (input[0][0].theData != calculator.opMatrix()) {
+  if (input[0][0].data != calculator.opMatrix()) {
     return false;
   }
   Matrix<Expression> theMatrix;

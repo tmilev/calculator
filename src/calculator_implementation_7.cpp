@@ -3302,7 +3302,7 @@ bool CalculatorFunctions::innerCompositeArithmeticOperationEvaluatedOnArgument(
   leftE.addChildOnTop(input[1]);
   rightE.addChildOnTop(input[0][2]);
   rightE.addChildOnTop(input[1]);
-  return output.makeXOX(calculator, input[0][0].theData, leftE, rightE);
+  return output.makeXOX(calculator, input[0][0].data, leftE, rightE);
 }
 
 bool CalculatorFunctions::innerIsEven(Calculator& calculator, const Expression& input, Expression& output) {
@@ -7777,7 +7777,7 @@ public:
       std::string atomName;
        if (input.isOperation(&atomName)) {
         if (atomName != "...") {
-          out << input.theData;
+          out << input.data;
         } else {
           out << "...";
         }

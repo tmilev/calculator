@@ -424,6 +424,17 @@ std::iostream& operator>>(std::iostream& input, List<Object>& theList) {
   return input;
 }
 
+class HashFunctions {
+public:
+  template<class Object>
+  static unsigned int hashFunction(const Object& object) {
+    return object.hashFunction();
+  }
+  static unsigned int hashFunction(const bool& input) {
+    return static_cast<unsigned int>(input);
+  }
+};
+
 // List serves the same purpose as std::vector
 // List is not thread safe!!!!
 // Lists are used in the implementation of mutexes!!!
@@ -937,10 +948,14 @@ public:
   void releaseMemory();
 
   unsigned int hashFunction() const {
-    int numCycles = MathRoutines::minimum(someRandomPrimesSize, this->size);
     unsigned int result = 0;
-    for (int i = 0; i < numCycles; i ++) {
-      result += someRandomPrimes[i] * MathRoutines::hashFunction(objects[i]);
+    int j = - 1;
+    for (int i = 0; i < this->size; i ++) {
+      j ++;
+      if (j >= someRandomPrimesSize) {
+        j = 0;
+      }
+      result += someRandomPrimes[i] * HashFunctions::hashFunction(objects[i]);
     }
     return result;
   }

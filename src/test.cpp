@@ -74,6 +74,7 @@ void Test::run() {
   if (this->shouldTest(Test::Suites::polynomial)) {
     MonomialP::Test::all();
     Polynomial<Rational>::Test::all();
+    WebAPIResponse::Test::all();
   }
   if (
     this->shouldTest(Test::Suites::topicLists) ||

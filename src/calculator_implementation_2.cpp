@@ -206,7 +206,7 @@ bool Calculator::outerStandardCompositeHandler(
   if (!functionNameNode.startsWith()) {
     return false;
   }
-  const List<Function>* theHandlers = calculator.getOperationCompositeHandlers(functionNameNode[0].theData);
+  const List<Function>* theHandlers = calculator.getOperationCompositeHandlers(functionNameNode[0].data);
   if (theHandlers == nullptr) {
     return false;
   }
@@ -366,7 +366,7 @@ bool Calculator::expressionMatchesPattern(
     }
     return true;
   }
-  if (thePattern.theData != input.theData || thePattern.size() != input.size()) {
+  if (thePattern.data != input.data || thePattern.size() != input.size()) {
     return false;
   }
   bool isGoodRegularOrder = true;
@@ -745,7 +745,7 @@ bool Calculator::EvaluateLoop::evaluateChildren(
   int indexOp = - 1;
   if (this->output->size() > 0) {
     if ((*this->output)[0].isAtom()) {
-      indexOp = (*this->output)[0].theData;
+      indexOp = (*this->output)[0].data;
     }
   }
   Expression childEvaluation, historyContainer;
@@ -927,7 +927,7 @@ void Calculator::EvaluateLoop::lookUpCache() {
 bool Calculator::evaluateExpression(
   Calculator& calculator,
   const Expression& input,
-  Expression& outpuT,
+  Expression& output,
   bool& outputIsNonCacheable,
   int opIndexParentIfAvailable,
   Expression* outputHistory
@@ -937,7 +937,7 @@ bool Calculator::evaluateExpression(
   calculator.statistics.expressionsEvaluated ++;
   calculator.statistics.callsSinceReport ++;
   Calculator::EvaluateLoop state(calculator);
-  state.output = &outpuT;
+  state.output = &output;
   state.history = outputHistory;
   if (state.history != nullptr) {
     state.history->reset(calculator);

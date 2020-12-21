@@ -108,6 +108,12 @@ int Expression::getTypeOperation<GroupRepresentation<FiniteGroup<ElementHyperoct
 }
 
 template < >
+int Expression::getTypeOperation<JSData>() const {
+  this->checkInitialization();
+  return this->owner->opJSON();
+}
+
+template < >
 int Expression::getTypeOperation<std::string>() const {
   this->checkInitialization();
   return this->owner->opString();
@@ -354,6 +360,15 @@ std::string
 & inputValue) const {
   this->checkInitialization();
   return this->owner->theObjectContainer.theStrings
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::addObjectReturnIndex(const
+JSData
+& inputValue) const {
+  this->checkInitialization();
+  return this->owner->theObjectContainer.jsonObjects
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -644,7 +659,7 @@ Rational& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theRationals.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.theRationals.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -653,7 +668,7 @@ ElementEllipticCurve<Rational>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.ellipticCurveElementsRational.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.ellipticCurveElementsRational.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -662,7 +677,7 @@ Polynomial<ElementZmodP>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type Polynomial mod integer. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.polynomialsModular.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.polynomialsModular.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -673,7 +688,7 @@ PolynomialModuloPolynomial<ElementZmodP>& Expression::getValueNonConst() const {
     << "The expression equals "
     << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.polynomialQuotientsModular.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.polynomialQuotientsModular.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -682,7 +697,7 @@ ElementEllipticCurve<ElementZmodP>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type Rational. The expression equals "
     << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.ellipticCurveElementsZmodP.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.ellipticCurveElementsZmodP.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -691,7 +706,7 @@ ElementHyperoctahedralGroupR2& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theElementsHyperOctGroup.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.theElementsHyperOctGroup.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -700,7 +715,7 @@ InputBox& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theUserInputTextBoxesWithValues.theValues[this->getLastChild().theData];
+  return this->owner->theObjectContainer.theUserInputTextBoxesWithValues.theValues[this->getLastChild().data];
 }
 
 template < >
@@ -709,7 +724,7 @@ GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> & Expr
     global.fatal << "Expression not of required type Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theHyperoctahedralReps[this->getLastChild().theData];
+  return this->owner->theObjectContainer.theHyperoctahedralReps[this->getLastChild().data];
 }
 
 template < >
@@ -717,7 +732,7 @@ ElementZmodP& Expression::getValueNonConst() const {
   if (!this->isOfType<ElementZmodP>())
     global.fatal << "Expression not of required type ElementZmodP. "
     << "The expression equals " << this->toString() << "." << global.fatal;
-  return this->owner->theObjectContainer.theEltsModP.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.theEltsModP.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -726,7 +741,7 @@ AlgebraicNumber& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type AlgebraicNumber. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theAlgebraicNumbers.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.theAlgebraicNumbers.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -735,7 +750,7 @@ double& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type double. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theDoubles.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.theDoubles.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -745,7 +760,7 @@ std::string& Expression::getValueNonConst() const {
     << "The expression equals " << this->toString() << ". Comments so far: "
     << this->owner->comments.str() << global.fatal;
   }
-  return this->owner->theObjectContainer.theStrings.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.theStrings.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -754,7 +769,7 @@ RationalFunction<Rational>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type RationalFunction_Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.rationalFunctions.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.rationalFunctions.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -763,7 +778,7 @@ RationalFunction<AlgebraicNumber>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type RationalFunction_AlgebraicNumber. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.rationalFunctionsAlgebraic.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.rationalFunctionsAlgebraic.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -772,7 +787,7 @@ RationalFunction<ElementZmodP>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type RationalFunctionOld. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.rationalFunctionsModular.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.rationalFunctionsModular.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -781,7 +796,7 @@ ElementUniversalEnveloping<RationalFunction<Rational> >& Expression::getValueNon
     global.fatal << "Expression not of required type "
     << "ElementUniversalEnveloping_RationalFunctionOld. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theUEs.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.theUEs.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -790,7 +805,7 @@ Polynomial<Rational>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type Polynomial_Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.polynomialsRational.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.polynomialsRational.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -799,7 +814,7 @@ Polynomial<AlgebraicNumber>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type Polynomial_AlgebraicNumber. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.polynomialsAlgebraic.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.polynomialsAlgebraic.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -808,7 +823,7 @@ ElementWeylAlgebra<Rational>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "ElementWeylAlgebra_Rational. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theWeylAlgebraElements.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.theWeylAlgebraElements.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -817,7 +832,7 @@ LittelmannPath& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "LittelmannPath. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theLSpaths.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.theLSpaths.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -826,7 +841,7 @@ Weight<Polynomial<Rational> >& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "LittelmannPath. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theWeightsPoly.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.theWeightsPoly.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -835,7 +850,7 @@ MonomialTensor<int, MathRoutines::IntUnsignIdentity>& Expression::getValueNonCon
     global.fatal << "Expression not of required type "
     << "MonomialTensor. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theLittelmannOperators.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.theLittelmannOperators.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -844,7 +859,7 @@ ElementTensorsGeneralizedVermas<RationalFunction<Rational> >& Expression::getVal
     global.fatal << "Expression not of "
     << "required type ElementTGVM_RationalFunctionOld. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theTensorElts.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.theTensorElts.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -853,7 +868,7 @@ CharacterSemisimpleLieAlgebraModule<Rational>& Expression::getValueNonConst() co
     global.fatal << "Expression not of required type "
     << "charSSAlgMod_Rational. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theCharsSSLieAlgFD.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.theCharsSSLieAlgFD.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -862,7 +877,7 @@ SemisimpleLieAlgebra*& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "SemisimpleLieAlgebra. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.semisimpleLieAlgebraPointers[this->getLastChild().theData];
+  return this->owner->theObjectContainer.semisimpleLieAlgebraPointers[this->getLastChild().data];
 }
 
 template < >
@@ -871,7 +886,7 @@ MatrixTensor<Rational>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "MatrixTensorRational. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theMatTensorRats.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.theMatTensorRats.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -880,7 +895,7 @@ SemisimpleSubalgebras& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "SemisimpleSubalgebras. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theSSSubalgebraS.theValues[this->getLastChild().theData];
+  return this->owner->theObjectContainer.theSSSubalgebraS.theValues[this->getLastChild().data];
 }
 
 template < >
@@ -889,7 +904,7 @@ Plot& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "Plot. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.thePlots[this->getLastChild().theData];
+  return this->owner->theObjectContainer.thePlots[this->getLastChild().data];
 }
 
 template < >
@@ -900,7 +915,7 @@ WeylGroupData& Expression::getValueNonConst() const {
     << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.semisimpleLieAlgebras.theValues[
-    this->getLastChild().theData
+    this->getLastChild().data
   ].theWeyl;
 }
 
@@ -910,7 +925,7 @@ GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::getVal
     global.fatal << "Expression not of required type "
     << "WeylGroupRepresentation_Rational. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theWeylGroupReps.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.theWeylGroupReps.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -919,7 +934,7 @@ ElementWeylGroup& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "ElementWeylGroup. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theWeylGroupElements.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.theWeylGroupElements.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -929,7 +944,7 @@ VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::getV
     << "WeylGroupVirtualRepresentation. The expression equals "
     << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theWeylGroupVirtualReps.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.theWeylGroupVirtualReps.getElement(this->getLastChild().data);
 }
 
 bool Expression::isMatrix(int* outputNumRows, int* outputNumCols) const {
@@ -1293,7 +1308,7 @@ unsigned int Expression::hashFunction(const Expression& input) {
 }
 
 unsigned int Expression::hashFunction() const {
-  unsigned int result = static_cast<unsigned>(this->theData) * someRandomPrimes[0];
+  unsigned int result = static_cast<unsigned>(this->data) * someRandomPrimes[0];
   if (this->owner == nullptr) {
     if (this->children.size == 0) {
       return result;
@@ -1305,7 +1320,6 @@ unsigned int Expression::hashFunction() const {
     result += this->owner->allChildExpressionHashes[this->children[i]] * someRandomPrimes[i + 1];
   }
   return result;
-
 }
 
 const Expression& Expression::operator[](int n) const {
@@ -1474,7 +1488,7 @@ bool Expression::startsWith(int theOp, int N) const {
   if (theOp == - 1) {
     return true;
   }
-  return (*this)[0].theData == theOp;
+  return (*this)[0].data == theOp;
 }
 
 bool Expression::getExpressionLeafs(HashedList<Expression>& outputAccumulateLeafs) const {
@@ -2025,7 +2039,7 @@ bool Expression::isIntegerFittingInInt(int* whichInteger) const {
 
 bool Expression::makeAtom(const std::string& atomName, Calculator& newBoss) {
   this->reset(newBoss);
-  this->theData = newBoss.addOperationNoRepetitionOrReturnIndexFirst(atomName);
+  this->data = newBoss.addOperationNoRepetitionOrReturnIndexFirst(atomName);
   return true;
 }
 
@@ -2231,7 +2245,7 @@ bool Expression::greaterThanNoCoefficient(const Expression& other) const {
         return leftS > rightS;
       }
     }
-    return this->theData > other.theData;
+    return this->data > other.data;
   }
   if (this->children.size > other.children.size) {
     return true;
@@ -2837,10 +2851,10 @@ bool Expression::toStringData(std::stringstream& out, FormatExpressions* theForm
       out << "\\phantom{}";
     } else if (this->owner->flagUseLnInsteadOfLog && this->isOperationGiven(this->owner->opLog())) {
       out << "\\ln";
-    } else if (this->theData < this->owner->getOperations().size && this->theData >= 0) {
-      out << this->owner->getOperations()[this->theData];
+    } else if (this->data < this->owner->getOperations().size && this->data >= 0) {
+      out << this->owner->getOperations()[this->data];
     } else {
-      out << "[unknown atom of value " << this->theData << "]";
+      out << "[unknown atom of value " << this->data << "]";
     }
     return true;
   }
@@ -2893,7 +2907,7 @@ std::string Expression::toStringSemiFull() const {
 std::string Expression::toStringFull() const {
   std::stringstream out;
   if (this->isAtom()) {
-    out << this->theData << " ";
+    out << this->data << " ";
   }
   if (this->children.size > 0) {
     out << "(";
@@ -3190,8 +3204,8 @@ std::string Expression::toStringAllSlidersInExpression() const {
   return out.str();
 }
 
-JSData Expression::toJSData(FormatExpressions* theFormat, const Expression& startingExpression) const {
-  MacroRegisterFunctionWithName("Expression::toJSData");
+JSData Expression::toJSON(FormatExpressions* theFormat, const Expression& startingExpression) const {
+  MacroRegisterFunctionWithName("Expression::toJSON");
   JSData result, input, output;
   input.theType = JSData::token::tokenArray;
   output.theType = JSData::token::tokenArray;
@@ -4561,7 +4575,7 @@ bool Expression::toStringWithAtomHandler(
   if (!(*this)[0].isAtom()) {
     return false;
   }
-  int atom = (*this)[0].theData;
+  int atom = (*this)[0].data;
   if (this->owner->toStringHandlersAtoms.contains(atom)) {
     Expression::ToStringHandler handler =
     this->owner->toStringHandlersAtoms.getValueNoFail(atom);
@@ -4583,7 +4597,7 @@ bool Expression::toStringWithCompositeHandler(
   if (!(*this)[0][0].isAtom()) {
     return false;
   }
-  int atom = (*this)[0][0].theData;
+  int atom = (*this)[0][0].data;
   if (this->owner->toStringHandlersComposite.contains(atom)) {
     Expression::ToStringHandler handler =
     this->owner->toStringHandlersComposite.getValueNoFail(atom);
@@ -4685,17 +4699,17 @@ std::string Expression::lispify() const {
   return out.str();
 }
 
-bool Expression::isListStartingWithAtom(int theOp) const {
+bool Expression::isListStartingWithAtom(int operation) const {
   if (!this->isList()) {
     return false;
   }
   if (!(*this)[0].isAtom()) {
     return false;
   }
-  if (theOp == - 1) {
+  if (operation == - 1) {
     return true;
   }
-  return (*this)[0].theData == theOp;
+  return (*this)[0].data == operation;
 }
 
 bool Expression::isListNElements(int N) const {
@@ -4715,7 +4729,7 @@ bool Expression::isList() const {
   if (this->children.size <= 0) {
     return false;
   }
-  if (this->theData != this->owner->opList()) {
+  if (this->data != this->owner->opList()) {
     global.fatal << "List expressions "
     << "must have data valule equal to Calculator::opList(). " << global.fatal;
   }
@@ -4746,13 +4760,13 @@ bool Expression::isAtomThatFreezesArguments(std::string* outputWhichAtom) const 
   if (this->isList()) {
     return false;
   }
-  if (this->theData < 0 || this->theData >= this->owner->getOperations().size) {
+  if (this->data < 0 || this->data >= this->owner->getOperations().size) {
     return false;
   }
   if (outputWhichAtom != nullptr) {
-    *outputWhichAtom = this->owner->getOperations()[this->theData];
+    *outputWhichAtom = this->owner->getOperations()[this->data];
   }
-  return this->owner->atomsThatFreezeArguments.contains(this->owner->getOperations()[this->theData]);
+  return this->owner->atomsThatFreezeArguments.contains(this->owner->getOperations()[this->data]);
 }
 
 bool Expression::isPowerOfAtomWhoseExponentsAreInterpretedAsFunction() const {
@@ -4772,13 +4786,13 @@ bool Expression::isAtomWhoseExponentsAreInterpretedAsFunction(std::string* outpu
   if (this->isList()) {
     return false;
   }
-  if (this->theData < 0 || this->theData >= this->owner->getOperations().size) {
+  if (this->data < 0 || this->data >= this->owner->getOperations().size) {
     return false;
   }
   if (outputWhichAtom != nullptr) {
-    *outputWhichAtom = this->owner->getOperations()[this->theData];
+    *outputWhichAtom = this->owner->getOperations()[this->data];
   }
-  return this->owner->atomsWhoseExponentsAreInterpretedAsFunctions.contains(this->owner->getOperations()[this->theData]);
+  return this->owner->atomsWhoseExponentsAreInterpretedAsFunctions.contains(this->owner->getOperations()[this->data]);
 }
 
 bool Expression::isAtomNotInterpretedAsFunction(std::string* outputWhichAtom) const {
@@ -4788,13 +4802,13 @@ bool Expression::isAtomNotInterpretedAsFunction(std::string* outputWhichAtom) co
   if (this->isList()) {
     return false;
   }
-  if (this->theData < 0 || this->theData>= this->owner->getOperations().size) {
+  if (this->data < 0 || this->data >= this->owner->getOperations().size) {
     return false;
   }
   if (outputWhichAtom != nullptr) {
-    *outputWhichAtom = this->owner->getOperations()[this->theData];
+    *outputWhichAtom = this->owner->getOperations()[this->data];
   }
-  return this->owner->atomsNotInterpretedAsFunctions.contains(this->owner->getOperations()[this->theData]);
+  return this->owner->atomsNotInterpretedAsFunctions.contains(this->owner->getOperations()[this->data]);
 }
 
 bool Expression::isAtom() const {
@@ -4819,10 +4833,10 @@ bool Expression::isOperation(int& outputWhichOperationIndex) const {
   if (!this->isAtom()) {
     return false;
   }
-  if (this->theData < 0 || this->theData >= this->owner->operations.size()) {
+  if (this->data < 0 || this->data >= this->owner->operations.size()) {
     return false;
   }
-  outputWhichOperationIndex = this->theData;
+  outputWhichOperationIndex = this->data;
   return true;
 }
 
@@ -4833,7 +4847,7 @@ bool Expression::isOperationGiven(const std::string& desiredAtom) const {
   if (this->owner == nullptr) {
     return false;
   }
-  return this->theData == this->owner->operations.getIndex(desiredAtom);
+  return this->data == this->owner->operations.getIndex(desiredAtom);
 }
 
 bool Expression::isOperationGiven(int desiredDataUseMinusOneForAny) const {
@@ -4843,7 +4857,7 @@ bool Expression::isOperationGiven(int desiredDataUseMinusOneForAny) const {
   if (desiredDataUseMinusOneForAny == - 1) {
     return true;
   }
-  return this->theData == desiredDataUseMinusOneForAny;
+  return this->data == desiredDataUseMinusOneForAny;
 }
 
 bool Expression::isKnownFunctionWithComplexRange(std::string* outputWhichOperation) const {
@@ -4892,14 +4906,14 @@ bool Expression::isBuiltInAtom(std::string* outputWhichOperation) const {
   if (this->isList()) {
     return false;
   }
-  if (this->theData < 0 || this->theData >= this->owner->getOperations().size) {
+  if (this->data < 0 || this->data >= this->owner->getOperations().size) {
     return false;
   }
-  if (this->theData >= this->owner->numberOfPredefinedAtoms) {
+  if (this->data >= this->owner->numberOfPredefinedAtoms) {
     return false;
   }
   if (outputWhichOperation != nullptr) {
-    *outputWhichOperation = this->owner->getOperations()[this->theData];
+    *outputWhichOperation = this->owner->getOperations()[this->data];
   }
   return true;
 }
@@ -4911,13 +4925,13 @@ bool Expression::isGoodForChainRuleFunction(std::string* outputWhichOperation) c
   if (this->isList()) {
     return false;
   }
-  if (this->theData < 0 || this->theData >= this->owner->getOperations().size) {
+  if (this->data < 0 || this->data >= this->owner->getOperations().size) {
     return false;
   }
   if (outputWhichOperation != nullptr) {
-    *outputWhichOperation = this->owner->getOperations()[this->theData];
+    *outputWhichOperation = this->owner->getOperations()[this->data];
   }
-  return !this->owner->atomsNotAllowingChainRule.contains(this->owner->getOperations()[this->theData]);
+  return !this->owner->atomsNotAllowingChainRule.contains(this->owner->getOperations()[this->data]);
 }
 
 bool Expression::hasContext() const {
@@ -4952,10 +4966,10 @@ bool Expression::isCacheableExpression() const {
     return true;
   }
   Calculator& theBoss = *this->owner;
-  if (this->theData < 0 || this->theData >= theBoss.operations.size()) {
+  if (this->data < 0 || this->data >= theBoss.operations.size()) {
     global.fatal << "Corrupted atom in Expression::isCacheableExpression. " << global.fatal;
   }
-  return theBoss.atomsThatMustNotBeCached.contains(theBoss.operations.theKeys[this->theData]);
+  return theBoss.atomsThatMustNotBeCached.contains(theBoss.operations.theKeys[this->data]);
 }
 
 bool Expression::isBuiltInScalar() const {
@@ -5106,18 +5120,18 @@ bool Expression::makeXOX(Calculator& owner, int theOp, const Expression& left, c
   }
   if (right.owner == nullptr) {
     Expression rightCopy;
-    rightCopy.assignValue(right.theData, *left.owner);
+    rightCopy.assignValue(right.data, *left.owner);
     return this->makeXOX(owner, theOp, left, rightCopy);
   }
  if (left.owner == nullptr) {
     Expression leftCopy;
-    leftCopy.assignValue(left.theData, *right.owner);
+    leftCopy.assignValue(left.data, *right.owner);
     return this->makeXOX(owner, theOp, leftCopy, right);
   }
   left.checkInitialization();
   right.checkInitialization();
   this->reset(owner, 3);
-  this->theData = owner.opList();
+  this->data = owner.opList();
   this->addChildAtomOnTop(theOp);
   this->addChildOnTop(left);
   return this->addChildOnTop(right);
@@ -5129,7 +5143,7 @@ bool Expression::makeOX(Calculator& owner, int theOp, const Expression& opArgume
     return this->makeOX(owner, theOp, copyE);
   }
   this->reset(owner);
-  this->theData = owner.opList();
+  this->data = owner.opList();
   this->addChildAtomOnTop(theOp);
   return this->addChildOnTop(opArgument);
 }

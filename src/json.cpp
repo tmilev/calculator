@@ -935,6 +935,23 @@ std::string JSData::toString(const JSData::PrintOptions* options) const {
   return out.str();
 }
 
+unsigned int JSData::hashFunction() const {
+  switch (this->theType) {
+  case JSData::token::tokenLargeInteger:
+    return this->theInteger.getElementConst().hashFunction();
+  case JSData::token::tokenArray:
+    return this->theList.hashFunction();
+  case JSData::token::tokenObject:
+    return this->objects.hashFunction();
+  default:
+    return 0;
+  }
+}
+
+bool JSData::operator==(const JSData& other) const {
+  return this->toString() == other.toString();
+}
+
 std::ostream& operator<<(std::ostream& out, const JSData& data) {
   return data.intoStream(out, nullptr);
 }

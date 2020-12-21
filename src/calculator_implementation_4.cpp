@@ -449,7 +449,7 @@ bool CalculatorBasics::associate(Calculator& calculator, const Expression& input
   if (input.size() != 3) {
     return false;
   }
-  int operation = input[0].theData;
+  int operation = input[0].data;
   if (!input[1].startsWith(operation) && !input[2].startsWith(operation)) {
     return false;
   }
@@ -868,7 +868,7 @@ bool Expression::makeXOXOdotsOX(Calculator& owner, int theOp, const List<Express
 
 bool Expression::makeAtom(int input, Calculator& newBoss) {
   this->reset(newBoss);
-  this->theData = input;
+  this->data = input;
   return true;
 }
 
@@ -944,20 +944,20 @@ bool CalculatorBasics::minus(Calculator& calculator, const Expression& input, Ex
 void Expression::operator+=(const Expression& other) {
   MacroRegisterFunctionWithName("Expression::operator+=");
   if (this->owner == nullptr && other.owner == nullptr) {
-    this->theData += other.theData;
-    if (this->theData != 1 && this->theData != 0) {
+    this->data += other.data;
+    if (this->data != 1 && this->data != 0) {
       global.fatal << "Attempting to add non-initialized expressions" << global.fatal;
     }
     return;
   }
   if (other.owner == nullptr) {
     Expression otherCopy;
-    otherCopy.assignValue(other.theData, *this->owner);
+    otherCopy.assignValue(other.data, *this->owner);
     *this += otherCopy;
     return;
   }
   if (this->owner == nullptr) {
-    this->assignValue(this->theData, *other.owner);
+    this->assignValue(this->data, *other.owner);
   }
   if (this->owner != other.owner) {
     global.fatal << "Error: adding expressions with different owners. " << global.fatal;
@@ -970,20 +970,20 @@ void Expression::operator+=(const Expression& other) {
 void Expression::operator-=(const Expression& other) {
   MacroRegisterFunctionWithName("Expression::operator+=");
   if (this->owner == nullptr && other.owner == nullptr) {
-    this->theData -= other.theData;
-    if (this->theData != 1 && this->theData != 0) {
+    this->data -= other.data;
+    if (this->data != 1 && this->data != 0) {
       global.fatal << "Attempt to subtract non-initialized expressions. " << global.fatal;
     }
     return;
   }
   if (other.owner == nullptr) {
     Expression otherCopy;
-    otherCopy.assignValue(other.theData, *this->owner);
+    otherCopy.assignValue(other.data, *this->owner);
     (*this) -= otherCopy;
     return;
   }
   if (this->owner == nullptr) {
-    this->assignValue(this->theData, *other.owner);
+    this->assignValue(this->data, *other.owner);
   }
   if (this->owner != other.owner) {
     global.fatal << "Error: attempt to add expressions with different owners. " << global.fatal;
@@ -1007,12 +1007,12 @@ Expression Expression::operator*(int other) {
   if (this->owner == nullptr) {
     // perhaps we should allow the code below for convenience: really
     // hard to judge if the convenience is worth it, or whether it will cause hard-to-detect bugs.
-    // Rational resultRat = this->theData;
+    // Rational resultRat = this->data;
     // resultRat*= other;
-    // if (resultRat.isSmallInteger(&result.theData))
+    // if (resultRat.isSmallInteger(&result.data))
     //  return result;
     global.fatal << "Multiplying non-initialized expression with data: "
-    << this->theData << " by integer " << other << " is not allowed. "
+    << this->data << " by integer " << other << " is not allowed. "
     << global.fatal;
   }
   Expression otherE;
@@ -1027,7 +1027,7 @@ Expression Expression::operator/(int other) {
   Expression result;
   if (this->owner == nullptr) {
     global.fatal << "Multiplying non-initialized expression with data: "
-    << this->theData << " by integer " << other
+    << this->data << " by integer " << other
     << " is not allowed. "
     << global.fatal;
   }
@@ -1063,20 +1063,20 @@ Expression Expression::operator/(const Expression& other) {
 void Expression::operator/=(const Expression& other) {
   MacroRegisterFunctionWithName("Expression::operator/=");
   if (this->owner == nullptr && other.owner == nullptr) {
-    this->theData /= other.theData;
-    if (this->theData != 1 && this->theData != 0) {
+    this->data /= other.data;
+    if (this->data != 1 && this->data != 0) {
       global.fatal << "Attempting to divide non-initialized expressions. " << global.fatal;
     }
     return;
   }
   if (other.owner == nullptr) {
     Expression otherCopy;
-    otherCopy.assignValue(other.theData, *this->owner);
+    otherCopy.assignValue(other.data, *this->owner);
     (*this) /= otherCopy;
     return;
   }
   if (this->owner == nullptr) {
-    this->assignValue(this->theData, *other.owner);
+    this->assignValue(this->data, *other.owner);
   }
   if (this->owner != other.owner) {
     global.fatal << "Error: dividing expressions with different owners. " << global.fatal;
@@ -1089,20 +1089,20 @@ void Expression::operator/=(const Expression& other) {
 void Expression::operator*=(const Expression& other) {
   MacroRegisterFunctionWithName("Expression::operator*=");
   if (this->owner == nullptr && other.owner == nullptr) {
-    this->theData *= other.theData;
-    if (this->theData != 1 && this->theData != 0) {
+    this->data *= other.data;
+    if (this->data != 1 && this->data != 0) {
       global.fatal << "Attempting to add non-initialized expressions. " << global.fatal;
     }
     return;
   }
   if (other.owner == nullptr) {
     Expression otherCopy;
-    otherCopy.assignValue(other.theData, *this->owner);
+    otherCopy.assignValue(other.data, *this->owner);
     (*this) *= otherCopy;
     return;
   }
   if (this->owner == nullptr) {
-    this->assignValue(this->theData, *other.owner);
+    this->assignValue(this->data, *other.owner);
   }
   if (this->owner != other.owner) {
     global.fatal << "Error: adding expressions with different owners. " << global.fatal;
@@ -1116,13 +1116,13 @@ bool Expression::operator==(const Expression& other) const {
   if (this->owner != other.owner) {
     return false;
   }
-  return this->theData == other.theData && this->children == other.children;
+  return this->data == other.data && this->children == other.children;
 }
 
 bool Expression::isEqualToMathematically(const Expression& other) const {
   MacroRegisterFunctionWithName("Expression::isEqualToMathematically");
   if (this->owner == nullptr && other.owner == nullptr) {
-    return this->theData == other.theData;
+    return this->data == other.data;
   }
   if (this->owner == nullptr) {
     return false;
@@ -1166,7 +1166,7 @@ bool Expression::isEqualToMathematically(const Expression& other) const {
     return false;
   }
   if (this->size() == 0) {
-    return this->theData == other.theData;
+    return this->data == other.data;
   }
   for (int i = 0; i < this->size(); i ++) {
     if (!(*this)[i].isEqualToMathematically(other[i])) {
@@ -1394,8 +1394,8 @@ bool Function::inputFitsMyInnerType(const Expression& input) {
   if (input.children.size != 3) {
     return false;
   }
-  bool argument1good = this->theArgumentTypes[0].theData == - 1 ? true : input[1].isListStartingWithAtom(this->theArgumentTypes[0].theData);
-  bool argument2good = this->theArgumentTypes[1].theData == - 1 ? true : input[2].isListStartingWithAtom(this->theArgumentTypes[1].theData);
+  bool argument1good = this->theArgumentTypes[0].data == - 1 ? true : input[1].isListStartingWithAtom(this->theArgumentTypes[0].data);
+  bool argument2good = this->theArgumentTypes[1].data == - 1 ? true : input[2].isListStartingWithAtom(this->theArgumentTypes[1].data);
   return argument1good && argument2good;
 }
 
@@ -1903,7 +1903,6 @@ bool ObjectContainer::checkConsistencyAfterReset() {
     global.fatal << "theSSLieAlgebras expected to be empty, got "
     << this->semisimpleLieAlgebras.size() << " elements. " << global.fatal;
   }
-  // MapReferences<DynkinType, SemisimpleSubalgebras> theSSSubalgebraS;
   if (this->theWeylGroupReps.size != 0) {
     global.fatal << "theWeylGroupReps expected to be empty, got "
     << this->theWeylGroupReps.size << " elements. " << global.fatal;
@@ -1912,49 +1911,18 @@ bool ObjectContainer::checkConsistencyAfterReset() {
     global.fatal << "theWeylGroupVirtualReps expected to be empty, got "
     << this->theWeylGroupVirtualReps.size << " elements. " << global.fatal;
   }
-  // ListReferences<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
-  // ListReferences<SlTwoSubalgebras> theSltwoSAs;
-  // HashedListReferences<ElementEllipticCurve<ElementZmodP> > ellipticCurveElementsZmodP;
-  // HashedListReferences<ElementEllipticCurve<Rational> > ellipticCurveElementsRational;
-  // HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theTensorElts;
-
   if (this->polynomialsRational.size != 0) {
     global.fatal << "The rational polynomials are expected to be empty, have: " << this->polynomialsRational.size << " elements instead. " << global.fatal;
   }
-  // HashedListReferences<Polynomial<AlgebraicNumber> > polynomialsAlgebraic;
-  // HashedListReferences<ElementWeylAlgebra<Rational> > theWeylAlgebraElements;
-  // HashedListReferences<ElementUniversalEnveloping<RationalFunctionOld> > theUEs;
-  // HashedListReferences<RationalFunctionOld> theRFs;
   if (this->theRationals.size != 0) {
     global.fatal << "Rationals expected to be empty, have: " << this->theRationals.size << " elements instead. " << global.fatal;
   }
-  // HashedListReferences<CharacterSemisimpleLieAlgebraModule<Rational> > theCharsSSLieAlgFD;
   if (this->theDoubles.size != 1) {
     global.fatal << "Doubles expected to be have exactly 1 element (namely, nan), have: " << this->theDoubles.size << " elements instead. " << global.fatal;
   }
-  // HashedListReferences<std::string, MathRoutines::hashString> theStrings;
-  // HashedListReferences<std::string, MathRoutines::hashString> expressionNotation;
-  // HashedListReferences<Expression> expressionWithNotation;
-  // HashedListReferences<LittelmannPath> theLSpaths;
-  // HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
-  // HashedListReferences<ElementZmodP> theEltsModP;
-  // HashedListReferences<Weight<Rational> > theWeights;
-  // HashedListReferences<Weight<Polynomial<Rational> > > theWeightsPoly;
-  // ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational > > theHyperoctahedralReps;
-  // ListReferences<Plot> thePlots;
-  // List<bool> userInputBoxSliderDisplayed;
-  // MapReferences<std::string, InputBox, MathRoutines::hashString> theUserInputTextBoxesWithValues;
-  // MapReferences<std::string, std::string, MathRoutines::hashString> graphicsScripts;
-  // AlgebraicClosureRationals theAlgebraicClosure;
   if (this->theAlgebraicNumbers.size != 0) {
     global.fatal << "Algebraic numbers expected to be empty, have: " << this->theAlgebraicNumbers.size << " elements instead. " << global.fatal;
   }
-  // HashedListReferences<ElementHyperoctahedralGroupR2> theElementsHyperOctGroup;
-  // ListReferences<HyperoctahedralGroupData> theHyperOctahedralGroups;
-  // HashedListReferences<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
-  // WeylGroupData& getWeylGroupDataCreateIfNotPresent(const DynkinType& input);
-  // SemisimpleLieAlgebra& getLieAlgebraCreateIfNotPresent(const DynkinType& input);
-  // SemisimpleSubalgebras& getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input);
   return true;
 }
 
@@ -1981,6 +1949,7 @@ void ObjectContainer::reset() {
   this->theDoubles.clear();
   this->theDoubles.addOnTop(std::nan(""));
   this->theStrings.clear();
+  this->jsonObjects.clear();
   this->expressionNotation.clear();
   this->expressionWithNotation.clear();
   this->theLSpaths.clear();

@@ -24,7 +24,7 @@ private:
   void reset() {
     this->owner = nullptr;
     this->children.size = 0;
-    this->theData = - 1;
+    this->data = - 1;
   }
   bool setChild(int childIndexInMe, int childIndexInBoss);
   // Definitions.
@@ -117,7 +117,7 @@ private:
   // this should not present a practical problem.
   public:
   Calculator* owner;
-  int theData;
+  int data;
   // List<int> children;
   HashedList<int, MathRoutines::IntUnsignIdentity> children;
   bool flagDeallocated;
@@ -136,7 +136,7 @@ private:
 
   void reset(Calculator& newBoss, int numExpectedChildren = 0) {
     this->owner = &newBoss;
-    this->theData = 0;
+    this->data = 0;
     this->children.clear();
     this->children.setExpectedSize(numExpectedChildren);
   }
@@ -182,7 +182,7 @@ private:
   bool startsWith(int theOp = - 1, int N = - 1) const;
 
   bool startsWithGivenOperation(const std::string& theOperation, int desiredChildren = - 1) const;
-  bool isListStartingWithAtom(int theOp = - 1) const;
+  bool isListStartingWithAtom(int operation = - 1) const;
   bool isListOfTwoAtomsStartingWith(int theOp) const;
   bool isFrozen() const;
   bool isAtomThatFreezesArguments(std::string* outputWhichAtom = nullptr) const;
@@ -497,7 +497,7 @@ private:
     FormatExpressions* theFormat
   ) const;
 
-  JSData toJSData(FormatExpressions* theFormat, const Expression& startingExpression) const;
+  JSData toJSON(FormatExpressions* theFormat, const Expression& startingExpression) const;
   static unsigned int hashFunction(const Expression& input);
   unsigned int hashFunction() const;
   Expression(): flagDeallocated(false) {
@@ -506,7 +506,7 @@ private:
   Expression(int x): flagDeallocated(false) {
     MacroRegisterFunctionWithName("Expression::Expression(int)");
     this->reset();
-    this->theData = x;
+    this->data = x;
   }
   const Expression& getLastChild() const {
     return (*this)[this->children.size - 1];
@@ -555,7 +555,7 @@ private:
   bool isMeltable(int* numResultingChildren = nullptr) const;
   bool areEqualExcludingChildren(const Expression& other) const {
     return this->owner == other.owner &&
-    this->theData == other.theData &&
+    this->data == other.data &&
     this->children.size == other.children.size;
   }
   // The following function creates an expression by parsing a calculator-like string.
@@ -571,7 +571,7 @@ private:
   );
   const Expression& operator[](int n) const;
   void operator=(const Expression& other) {
-    this->theData = other.theData;
+    this->data = other.data;
     this->children = other.children;
     this->owner = other.owner;
   }
@@ -1025,6 +1025,7 @@ public:
   HashedListReferences<CharacterSemisimpleLieAlgebraModule<Rational> > theCharsSSLieAlgFD;
   HashedListReferences<double, MathRoutines::hashDouble> theDoubles;
   HashedListReferences<std::string, MathRoutines::hashString> theStrings;
+  HashedListReferences<JSData> jsonObjects;
   HashedListReferences<std::string, MathRoutines::hashString> expressionNotation;
   HashedListReferences<Expression> expressionWithNotation;
   HashedListReferences<LittelmannPath> theLSpaths;
@@ -1849,6 +1850,9 @@ public:
   int opString() {
     return this->operations.getIndexNoFail("string");
   }
+  int opJSON() {
+    return this->operations.getIndexNoFail("JSON");
+  }
   int opElementUEoverRF() {
     return this->operations.getIndexNoFail("ElementUEoverRF");
   }
@@ -2344,9 +2348,10 @@ public:
   static bool evaluateExpression(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool evaluateExpression(Calculator& calculator,
+  static bool evaluateExpression(
+    Calculator& calculator,
     const Expression& input,
-    Expression& outpuT,
+    Expression& output,
     bool& outputIsCacheable,
     int opIndexParentIfAvailable,
     Expression* outputHistory
@@ -2380,6 +2385,32 @@ public:
     void accountHistoryChildTransformation(
       const Expression& transformedChild, const Expression& childHistory, int childIndex
     );
+  };
+
+  class ExpressionHistoryEnumerator {
+  public:
+    Calculator* owner;
+    int recursionDepth;
+    int maximumRecursionDepth;
+    Expression theHistory;
+    List<Expression> output;
+    List<List<std::string> > rulesNames;
+    // List<List<std::string> > rulesDisplayNames;
+    HashedList<std::string, MathRoutines::hashString> rulesToBeIgnored;
+    MapList<std::string, std::string, MathRoutines::hashString> rulesDisplayNamesMap;
+    bool computeRecursively(int incomingRecursionDepth, std::stringstream* commentsOnFailure);
+    bool processTransformation(const Expression& current, std::stringstream* commentsOnFailure);
+    bool processChildrenTransformations(int startIndex, int numberOfChildren, std::stringstream* commentsOnFailure);
+    void initializeComputation();
+    ExpressionHistoryEnumerator();
+    bool checkInitialization() {
+      if (this->owner == nullptr) {
+        global.fatal << "Expression history enumerator has zero owner. " << global.fatal;
+      }
+      return true;
+    }
+    std::string toStringExpressionHistoryMerged();
+    std::string toStringDebug();
   };
   void evaluate(const std::string& input);
   // Attempts to interpret the input string as a high-school or calculus problem and solve it.

@@ -1103,24 +1103,24 @@ bool CalculatorFunctions::innerIsSquare(Calculator& calculator, const Expression
   if (input.size() != 2) {
     return false;
   }
-  LargeInteger theLI;
-  if (!input[1].isInteger(&theLI)) {
+  LargeInteger value;
+  if (!input[1].isInteger(&value)) {
     return false;
   }
-  if (theLI < 0) {
+  if (value < 0) {
     return output.assignValue(0, calculator);
   }
-  if (theLI == 0) {
+  if (value == 0) {
     return output.assignValue(1, calculator);
   }
-  List<int> theMults;
+  List<int> multiplicities;
   List<LargeInteger> theFactors;
-  if (!theLI.value.factor(theFactors, theMults, 0, 4, nullptr)) {
-    return calculator << "Failed to factor: " << theLI.toString() << " (may be too large?).";
+  if (!value.value.factor(theFactors, multiplicities, 0, 4, nullptr)) {
+    return calculator << "Failed to factor: " << value.toString() << " (may be too large?).";
   }
   int result = 1;
-  for (int i = 0; i < theMults.size; i ++) {
-    if ((theMults[i] % 2) != 0) {
+  for (int i = 0; i < multiplicities.size; i ++) {
+    if ((multiplicities[i] % 2) != 0) {
       result = 0;
       break;
     }
@@ -1139,17 +1139,17 @@ bool CalculatorFunctions::innerIsSquareFree(
   if (!input[1].isInteger(&theInteger)) {
     return false;
   }
-  List<int> theMults;
+  List<int> multiplicities;
   List<LargeInteger> theFactors;
   if (!theInteger.value.factor(
-    theFactors, theMults, 0, 3, &calculator.comments
+    theFactors, multiplicities, 0, 3, &calculator.comments
   )) {
     return calculator << "Failed to factor: "
     << theInteger.toString() << " (may be too large?).";
   }
   int result = 1;
-  for (int i = 0; i < theMults.size; i ++) {
-    if (theMults[i] > 1) {
+  for (int i = 0; i < multiplicities.size; i ++) {
+    if (multiplicities[i] > 1) {
       result = 0;
       break;
     }
@@ -1189,20 +1189,20 @@ bool CalculatorFunctions::innerIsPower(
   if (toBeFactored.isEqualToZero()) {
     return false;
   }
-  List<int> theMults;
+  List<int> multiplicities;
   List<LargeInteger> theFactors;
   if (!toBeFactored.value.factor(
-    theFactors, theMults, 0, 3, &calculator.comments
+    theFactors, multiplicities, 0, 3, &calculator.comments
   )) {
     return calculator << "Failed to factor: "
     << toBeFactored.toString() << " (may be too large?).";
   }
   int result = 1;
-  if (theMults.size > 0) {
-    result = (theMults[0] > 1);
+  if (multiplicities.size > 0) {
+    result = (multiplicities[0] > 1);
   }
-  for (int i = 1; i < theMults.size; i ++) {
-    if (theMults[i] != theMults[0]) {
+  for (int i = 1; i < multiplicities.size; i ++) {
+    if (multiplicities[i] != multiplicities[0]) {
       result = 0;
       break;
     }
@@ -1291,17 +1291,17 @@ bool CalculatorFunctions::innerFactorOutNumberContent(
   if (theV.isEqualToZero()) {
     return output.assignValue(0, calculator);
   }
-  Rational theCF = theV.scaleNormalizeLeadingMonomial(nullptr);
-  if (theCF == 0) {
+  Rational scale = theV.scaleNormalizeLeadingMonomial(nullptr);
+  if (scale == 0) {
     return false;
   }
-  theCF.invert();
-  if (theCF == 1 ) {
+  scale.invert();
+  if (scale == 1 ) {
     output = input[1];
     return true;
   }
   Expression left, right;
-  left.assignValue(theCF, calculator);
+  left.assignValue(scale, calculator);
   right.makeSum(calculator, theV);
   output = left * right;
   return true;
@@ -1646,7 +1646,7 @@ bool CalculatorFunctions::innerCollectOpands(
     return false;
   }
   List<Expression> theList;
-  calculator.appendOpandsReturnTrueIfOrderNonCanonical(input[2], theList, input[1].theData);
+  calculator.appendOpandsReturnTrueIfOrderNonCanonical(input[2], theList, input[1].data);
   return output.makeSequence(calculator, &theList);
 }
 
@@ -2946,7 +2946,7 @@ bool CalculatorFunctions::innerSuffixNotationForPostScript(Calculator& calculato
     if (input.toString() == "\\pi") {
       return output.assignValue<std::string>(" 3.141592654 ", calculator);
     }
-    if (input.theData >= calculator.numberOfPredefinedAtoms) {
+    if (input.data >= calculator.numberOfPredefinedAtoms) {
       return output.assignValue(currentString, calculator);
     }
     if (currentString == "|") {

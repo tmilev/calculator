@@ -325,7 +325,7 @@ bool ExpressionContext::fromExpressionSemisimpleLieAlgebra(
   if (input.size() != 2) {
     return *this->owner << "Corrupt semisimple Lie algebra context: " << input.toString();
   }
-  this->indexAmbientSemisimpleLieAlgebra = input[1].theData;
+  this->indexAmbientSemisimpleLieAlgebra = input[1].data;
   return true;
 }
 

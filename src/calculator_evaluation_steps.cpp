@@ -2,33 +2,7 @@
 // For additional information refer to the file "calculator.h".
 #include "calculator_interface.h"
 
-class ExpressionHistoryEnumerator {
-public:
-  Calculator* owner;
-  int recursionDepth;
-  int maximumRecursionDepth;
-  Expression theHistory;
-  List<Expression> output;
-  List<List<std::string> > rulesNames;
-  // List<List<std::string> > rulesDisplayNames;
-  HashedList<std::string, MathRoutines::hashString> rulesToBeIgnored;
-  MapList<std::string, std::string, MathRoutines::hashString> rulesDisplayNamesMap;
-  bool computeRecursively(int incomingRecursionDepth, std::stringstream* commentsOnFailure);
-  bool processTransformation(const Expression& current, std::stringstream* commentsOnFailure);
-  bool processChildrenTransformations(int startIndex, int numberOfChildren, std::stringstream* commentsOnFailure);
-  void initializeComputation();
-  ExpressionHistoryEnumerator();
-  bool checkInitialization() {
-    if (this->owner == nullptr) {
-      global.fatal << "Expression history enumerator has zero owner. " << global.fatal;
-    }
-    return true;
-  }
-  std::string toStringExpressionHistoryMerged();
-  std::string toStringDebug();
-};
-
-void ExpressionHistoryEnumerator::initializeComputation() {
+void Calculator::ExpressionHistoryEnumerator::initializeComputation() {
   MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::initializeComputation");
   this->output.setSize(0);
   // this->rulesDisplayNames.setSize(0);
@@ -45,13 +19,13 @@ void ExpressionHistoryEnumerator::initializeComputation() {
   // this->rulesDisplayNamesMap.setKeyValue("AssociativeRule", "");
 }
 
-ExpressionHistoryEnumerator::ExpressionHistoryEnumerator() {
+Calculator::ExpressionHistoryEnumerator::ExpressionHistoryEnumerator() {
   this->owner = nullptr;
   this->maximumRecursionDepth = 1000;
   this->recursionDepth = 0;
 }
 
-bool ExpressionHistoryEnumerator::computeRecursively(
+bool Calculator::ExpressionHistoryEnumerator::computeRecursively(
   int incomingRecursionDepth, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::computeRecursively");
@@ -97,7 +71,7 @@ bool ExpressionHistoryEnumerator::computeRecursively(
   return true;
 }
 
-bool ExpressionHistoryEnumerator::processChildrenTransformations(
+bool Calculator::ExpressionHistoryEnumerator::processChildrenTransformations(
   int startIndex, int numberOfChildren, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::processChildrenTransformations");
@@ -166,7 +140,7 @@ bool ExpressionHistoryEnumerator::processChildrenTransformations(
   return true;
 }
 
-bool ExpressionHistoryEnumerator::processTransformation(
+bool Calculator::ExpressionHistoryEnumerator::processTransformation(
   const Expression& current, std::stringstream* commentsOnFailure
 ) {
   if (!current.startsWith(this->owner->opExpressionHistorySet())) {
@@ -193,7 +167,7 @@ bool ExpressionHistoryEnumerator::processTransformation(
   return true;
 }
 
-std::string ExpressionHistoryEnumerator::toStringDebug() {
+std::string Calculator::ExpressionHistoryEnumerator::toStringDebug() {
   MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::toStringDebug");
   std::stringstream out;
   out << "<b>History</b><br>" << this->theHistory.toStringTreeHtml(- 1) << "<hr>";
@@ -205,7 +179,7 @@ std::string ExpressionHistoryEnumerator::toStringDebug() {
   return out.str();
 }
 
-std::string ExpressionHistoryEnumerator::toStringExpressionHistoryMerged() {
+std::string Calculator::ExpressionHistoryEnumerator::toStringExpressionHistoryMerged() {
   std::stringstream out;
   out << "\\(\\begin{array}{ll|l}";
   std::string prevEstring = "";
@@ -269,7 +243,7 @@ bool CalculatorSteps::innerLogEvaluationStepsHumanReadableMerged(
   }
   Expression outputTransformation;
   bool notUsed = false;
-  ExpressionHistoryEnumerator history;
+  Calculator::ExpressionHistoryEnumerator history;
   calculator.evaluateExpression(
     calculator,
     argument,

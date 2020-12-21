@@ -151,7 +151,8 @@ const knownTypes = {
     "type": "atom",
     // If padding is missing, the position of the caret may make the 
     // text wobble.
-    "padding": "1px",
+    "padding": "2px",
+    //"margin": "2px",
     "outline": "0px solid transparent",
     "width": "auto",
     "height": "auto",

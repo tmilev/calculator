@@ -1238,17 +1238,17 @@ bool Calculator::replaceIntegerXbyEX() {
 
 std::string Calculator::toStringIsCorrectAsciiCalculatorString(const std::string& input) {
   std::stringstream out;
-  HashedList<char, MathRoutines::hashChar> theBadChars;
+  HashedList<char, HashFunctions::hashFunction> badCharacters;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (!this->isStandardCalculatorCharacter(static_cast<unsigned char>(input[i]))) {
-      theBadChars.addOnTopNoRepetition(input[i]);
+      badCharacters.addOnTopNoRepetition(input[i]);
     }
   }
-  if (theBadChars.size > 0) {
+  if (badCharacters.size > 0) {
     out << "Non-ascii characters detected in your input, namely: "
-    << theBadChars.toStringCommaDelimited() << ", ";
+    << badCharacters.toStringCommaDelimited() << ", ";
     List<int> ListInt;
-    ListInt = theBadChars;
+    ListInt = badCharacters;
     out << "with respective code numbers: " << ListInt.toStringCommaDelimited() << ". ";
     out << "Perhaps you copy+pasted from webpage/pdf file or are using non-English keyboard setup? ";
   }

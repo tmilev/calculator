@@ -3647,7 +3647,7 @@ bool CandidateSemisimpleSubalgebra::isPossibleNilradicalCarryOutSelectionImplica
   if (logStream != nullptr) {
     *logStream << "<br>********Considering selection " << this->toStringNilradicalSelection(theSelection) << "********";
   }
-  HashedList<int, MathRoutines::IntUnsignIdentity> selectedIndices;
+  HashedList<int, HashFunctions::hashFunction> selectedIndices;
   for (int i = 0; i < theSelection.size; i ++) {
     if (theSelection[i] == 1) {
       selectedIndices.addOnTop(i);
@@ -3696,7 +3696,7 @@ bool CandidateSemisimpleSubalgebra::isPossibleNilradicalCarryOutSelectionImplica
 }
 
 void CandidateSemisimpleSubalgebra::extendNilradicalSelectionToMultFreeOverSemisimplePartSubalgebra(
-  HashedList<int, MathRoutines::IntUnsignIdentity>& inputOutput
+  HashedList<int, HashFunctions::hashFunction>& inputOutput
 ) {
   for (int i = 0; i < inputOutput.size; i ++) {
     for (int j = 0; j < inputOutput.size; j ++) {
@@ -6939,7 +6939,7 @@ void SemisimpleSubalgebras::hookUpCentralizers(bool allowNonPolynomialSystemFail
   }
   this->theSubalgebras.theKeys = hsCopy;
 
-  HashedList<int, MathRoutines::IntUnsignIdentity> theCandidatePermutationHashed;
+  HashedList<int, HashFunctions::hashFunction> theCandidatePermutationHashed;
   theCandidatePermutationHashed = theCandidatePermutation;
   ProgressReport theReport1, theReport2;
   theReport1.report("<hr>\nHooking up centralizers ");

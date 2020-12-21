@@ -943,6 +943,12 @@ unsigned int JSData::hashFunction() const {
     return this->theList.hashFunction();
   case JSData::token::tokenObject:
     return this->objects.hashFunction();
+  case JSData::token::tokenString:
+    return HashFunctions::hashFunction(this->theString);
+  case JSData::token::tokenBool:
+    return HashFunctions::hashFunction(this->theBoolean);
+  case JSData::token::tokenFloat:
+    return HashFunctions::hashFunction(this->theFloat);
   default:
     return 0;
   }

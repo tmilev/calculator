@@ -216,7 +216,7 @@ int Expression::getTypeOperation<LittelmannPath>() const {
 }
 
 template < >
-int Expression::getTypeOperation<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >() const {
+int Expression::getTypeOperation<MonomialTensor<int, HashFunctions::hashFunction> >() const {
   this->checkInitialization();
   return this->owner->opLRO();
 }
@@ -560,7 +560,7 @@ ElementZmodP
 
 template < >
 int Expression::addObjectReturnIndex(const
-MonomialTensor<int, MathRoutines::IntUnsignIdentity>
+MonomialTensor<int, HashFunctions::hashFunction>
 & inputValue) const {
   this->checkInitialization();
   return this->owner->theObjectContainer.theLittelmannOperators
@@ -764,6 +764,16 @@ std::string& Expression::getValueNonConst() const {
 }
 
 template < >
+JSData& Expression::getValueNonConst() const {
+  if (!this->isOfType<JSData>()) {
+    global.fatal << "Expression not of required type std::string. "
+    << "The expression equals " << this->toString() << ". Comments so far: "
+    << this->owner->comments.str() << global.fatal;
+  }
+  return this->owner->theObjectContainer.jsonObjects.getElement(this->getLastChild().data);
+}
+
+template < >
 RationalFunction<Rational>& Expression::getValueNonConst() const {
   if (!this->isOfType<RationalFunction<Rational> >()) {
     global.fatal << "Expression not of required type RationalFunction_Rational. "
@@ -845,8 +855,8 @@ Weight<Polynomial<Rational> >& Expression::getValueNonConst() const {
 }
 
 template < >
-MonomialTensor<int, MathRoutines::IntUnsignIdentity>& Expression::getValueNonConst() const {
-  if (!this->isOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >()) {
+MonomialTensor<int, HashFunctions::hashFunction>& Expression::getValueNonConst() const {
+  if (!this->isOfType<MonomialTensor<int, HashFunctions::hashFunction> >()) {
     global.fatal << "Expression not of required type "
     << "MonomialTensor. The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -2280,6 +2290,23 @@ bool Expression::toStringBuiltIn<std::string>(
     }
   } else {
     out << "\"" << StringRoutines::convertStringToJavascriptString(input.getValue<std::string>()) << "\"";
+  }
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<JSData>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  bool isFinal = theFormat == nullptr ? true : theFormat->flagExpressionIsFinal;
+  JSData data = input.getValue<JSData>();
+  std::string dataString = data.toString();
+  if (isFinal) {
+    out << HtmlRoutines::convertStringToHtmlString(dataString, false);
+  } else {
+    out << dataString;
   }
   return true;
 }

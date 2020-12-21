@@ -304,7 +304,7 @@ void AnotherWeylGroup<scalar, templateVector>::computeConjugacyClasses() {
   Accounted.initializeFillInObject(this->size(), false);
   this->conjugacyClasses.setSize(0);
   this->conjugacyClasses.reserve(50);
-  HashedList<int, MathRoutines::IntUnsignIdentity> theStack;
+  HashedList<int, HashFunctions::hashFunction> theStack;
   theStack.setExpectedSize(this->size());
   int theRank = this->getRank();
   templateVector theRhoImage;

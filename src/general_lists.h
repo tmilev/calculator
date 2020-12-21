@@ -7,6 +7,7 @@
 #include "general_multitasking.h"
 #include <algorithm>
 #include <string.h>
+#include <math.h>
 
 // IMPORTANT.
 // Convention on Hash functions.
@@ -312,13 +313,7 @@ public:
   static unsigned int hashListInts(const List<int>& input);
   static unsigned int hashListUnsignedChars(const List<unsigned char>& input);
   static unsigned int hashListStrings(const List<std::string>& input);
-  inline static unsigned int IntUnsignIdentity(const int& input) {
-    return static_cast<unsigned>(input);
-  }
   static unsigned int hashString(const std::string& x);
-  static unsigned int hashChar(const char& x) {
-    return static_cast<unsigned int>(x);
-  }
   template <class Element>
   static void lieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output);
   template <typename number>
@@ -332,17 +327,6 @@ public:
     return x;
   }
   static bool isInteger(Rational x);
-  template <typename hashobject>
-  static unsigned int hashFunction(const hashobject& in) {
-    return in.hashFunction();
-  }
-  static unsigned int hashFunction(bool in) {
-    if (in) {
-      return 1;
-    } else {
-      return 0;
-    }
-  }
   static bool parseListIntegers(const std::string& input, List<int>& result, std::stringstream* commentsOnFailure);
   static void parseListIntegersNoFailure(const std::string& input, List<int>& result);
 };
@@ -431,6 +415,29 @@ public:
     return object.hashFunction();
   }
   static unsigned int hashFunction(const bool& input) {
+    return static_cast<unsigned int>(input);
+  }
+  static unsigned int hashFunction(const double& input) {
+    if (std::isnan(input)) {
+      return 5;
+    }
+    return static_cast<unsigned>(input * 10000);
+  }
+  static unsigned int hashFunction(const std::string& input) {
+    size_t numCycles = input.size();
+    unsigned int result = 0;
+    for (unsigned i = 0, counter = 0; i < numCycles; i ++, counter ++) {
+      if (counter >= someRandomPrimesSize) {
+        counter = 0;
+      }
+      result += static_cast<unsigned>(input[i]) * someRandomPrimes[counter];
+    }
+    return result;
+  }
+  static unsigned int hashFunction(const int& input) {
+    return static_cast<unsigned>(input);
+  }
+  static unsigned int hashFunction(const char& input) {
     return static_cast<unsigned int>(input);
   }
 };
@@ -1121,7 +1128,7 @@ public:
     return false;
   }
 };
-typedef Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> PairInts;
+typedef Pair<int, int, HashFunctions::hashFunction, HashFunctions::hashFunction> PairInts;
 
 template <class Object, class TemplateList, unsigned int hashFunction(const Object&) = Object::hashFunction>
 class HashTemplate: public TemplateList {

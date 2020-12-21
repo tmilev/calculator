@@ -197,13 +197,13 @@ class ModuleSSalgebra {
   List<List<List<ElementUniversalEnveloping<Coefficient> > > > actionsGeneratorS;
   Selection ComputedGeneratorActions;
   Rational hwtaabfSimpleGensOnly(
-    const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& leftMon,
-    const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& rightMon,
+    const MonomialTensor<int, HashFunctions::hashFunction>& leftMon,
+    const MonomialTensor<int, HashFunctions::hashFunction>& rightMon,
     ProgressReport* theProgressReport = nullptr
   );
   Rational hwTrace(
-    const Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
-    MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& thePair,
+    const Pair<MonomialTensor<int, HashFunctions::hashFunction>,
+    MonomialTensor<int, HashFunctions::hashFunction> >& thePair,
     ProgressReport* theProgressReport = nullptr
   );
   void checkConsistency();
@@ -214,11 +214,11 @@ public:
   // specialization below.
   // [Update:] made a bug report on this in the gcc bug tracker.
   // This issue has officially been recognized as a gcc bug. Hope to get a fix soon.
-  HashedListSpecialized<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theGeneratingWordsNonReducedInt;
+  HashedListSpecialized<MonomialTensor<int, HashFunctions::hashFunction> > theGeneratingWordsNonReducedInt;
   Vectors<Rational> theGeneratingWordsWeightsPlusWeightFDpart;
   List<LittelmannPath> thePaths;
   List<List<MonomialUniversalEnveloping<Coefficient> > > theGeneratingWordsGrouppedByWeight;
-  List<List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > > theGeneratingWordsIntGrouppedByWeight;
+  List<List<MonomialTensor<int, HashFunctions::hashFunction> > > theGeneratingWordsIntGrouppedByWeight;
   // List<ElementUniversalEnveloping<Coefficient> > theSimpleGens;
   // List<List<List<ElementUniversalEnveloping<Coefficient> > > > actionsSimpleGens;
   // List<Matrix<Coefficient> > actionsSimpleGensMatrixForM;
@@ -242,8 +242,8 @@ public:
   // explicit template specialization below.
   // [Update:] This is now a recognized gcc bug.
   HashedListSpecialized<
-    Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
-    MonomialTensor<int, MathRoutines::IntUnsignIdentity> >
+    Pair<MonomialTensor<int, HashFunctions::hashFunction>,
+    MonomialTensor<int, HashFunctions::hashFunction> >
   > cachedPairs;
   List<Rational> cachedTraces;
   bool flagIsInitialized;
@@ -285,7 +285,7 @@ public:
     }
     return result;
   }
-  void applyTAA(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theMon);
+  void applyTAA(MonomialTensor<int, HashFunctions::hashFunction>& theMon);
   void getFDchar(CharacterSemisimpleLieAlgebraModule<Coefficient>& output);
   void substitution(const PolynomialSubstitution<Rational>& theSub);
 //  List<ElementUniversalEnveloping<Coefficient> > theGeneratingWordsLittelmannForm;

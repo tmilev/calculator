@@ -237,7 +237,7 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
   out << "</table>";
   LittelmannPath lastPath = theOrbit[0];
   LittelmannPath tempPath;
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity> tempMon;
+  MonomialTensor<int, HashFunctions::hashFunction> tempMon;
   tempMon = *theGens.lastObject();
   tempMon.generatorsIndices.reverseElements();
   tempMon.powers.reverseElements();

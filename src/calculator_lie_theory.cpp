@@ -546,7 +546,7 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(Calculator& calculator, con
   LittelmannPath hwPath;
   List<LittelmannPath> tempList;
   List<List<int> > theStrings;
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity> tempMon;
+  MonomialTensor<int, HashFunctions::hashFunction> tempMon;
   DynkinType currentType;
   for (int i = 0; i < theRanks.size; i ++) {
     currentType.makeSimpleType(theWeylLetters[i], theRanks[i]);

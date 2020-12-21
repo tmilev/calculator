@@ -6046,7 +6046,7 @@ public:
       this->waypoints.addOnTop(other.waypoints[i] + endPoint);
     }
   }
-  bool isAdaptedString(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theString);
+  bool isAdaptedString(MonomialTensor<int, HashFunctions::hashFunction>& theString);
   std::string toStringIndicesToCalculatorOutput(LittelmannPath& inputStartingPath, List<int>& input);
   std::string toStringOperatorSequenceStartingOnMe(List<int>& input);
   bool generateOrbit(

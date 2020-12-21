@@ -729,7 +729,7 @@ std::string PermutationR2::toString(FormatExpressions* format) const {
 //  MonomialTensor<T1, T2> operator*(MonomialTensor<T1,T2>& right) const;
 // should this get stuffed in MonomialTensor?
 void PermutationR2::actOnMonomialTensor(
-  MonomialTensor<int,MathRoutines::IntUnsignIdentity>& out, const MonomialTensor<int,MathRoutines::IntUnsignIdentity>& in
+  MonomialTensor<int,HashFunctions::hashFunction>& out, const MonomialTensor<int,HashFunctions::hashFunction>& in
 ) const {
   int rank = 0;
   for (int i = 0; i < in.powers.size; i ++) {

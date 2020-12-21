@@ -33,7 +33,7 @@ public:
   HashedList<std::string, MathRoutines::hashString> loadedTopicBundleFiles;
 
   MapList<std::string, int, MathRoutines::hashString> elementTypes;
-  MapList<int, std::string, MathRoutines::IntUnsignIdentity> elementNames;
+  MapList<int, std::string, HashFunctions::hashFunction> elementNames;
   List<TopicElementParser::TopicLine> crawled;
   List<TopicElementParser::TopicLine> bundleStack;
   List<TopicElement> elements;

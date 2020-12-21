@@ -1785,21 +1785,13 @@ unsigned int MathRoutines::hashListInts(const List<int>& input) {
   unsigned int result = 0;
   int numCycles = MathRoutines::minimum(input.size, someRandomPrimesSize);
   for (int i = 0; i < numCycles; i ++) {
-    result += someRandomPrimes[i] * MathRoutines::IntUnsignIdentity(input[i]);
+    result += someRandomPrimes[i] * HashFunctions::hashFunction(input[i]);
   }
   return result;
 }
 
 unsigned int MathRoutines::hashString(const std::string& x) {
-  size_t numCycles = x.size();
-  unsigned int result = 0;
-  for (unsigned i = 0, counter = 0; i < numCycles; i ++, counter ++) {
-    if (counter >= someRandomPrimesSize) {
-      counter = 0;
-    }
-    result += static_cast<unsigned>(x[i]) * someRandomPrimes[counter];
-  }
-  return result;
+  return HashFunctions::hashFunction(x);
 }
 
 unsigned int MathRoutines::hashVectorDoubles(const Vector<double>& input) {

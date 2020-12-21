@@ -186,7 +186,7 @@ public:
   List<List<int> > OppositeModulesByStructure;
   List<List<int> > OppositeModulesByChar;
 
-  HashedList<int, MathRoutines::IntUnsignIdentity> modulesWithZeroWeights;
+  HashedList<int, HashFunctions::hashFunction> modulesWithZeroWeights;
   std::string comments;
   std::string nilradicalGenerationLog;
   Rational centralizerRank;
@@ -260,7 +260,7 @@ public:
     std::stringstream* logStream = nullptr
   );
   void extendNilradicalSelectionToMultFreeOverSemisimplePartSubalgebra(
-    HashedList<int, MathRoutines::IntUnsignIdentity>& inputOutput
+    HashedList<int, HashFunctions::hashFunction>& inputOutput
   );
   bool isPossibleNilradicalCarryOutSelectionImplications(
     List<int>& theSelection,

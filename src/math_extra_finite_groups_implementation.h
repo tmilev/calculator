@@ -695,7 +695,7 @@ void FiniteGroup<elementSomeGroup>::computeConjugacyClassesFromAllElements() {
   this->computeAllElements(false, - 1);
   List<bool> Accounted;
   Accounted.initializeFillInObject(this->theElements.size, false);
-  HashedList<int, MathRoutines::IntUnsignIdentity> theStack;
+  HashedList<int, HashFunctions::hashFunction> theStack;
   theStack.setExpectedSize(this->theElements.size);
   List<elementSomeGroup> inversesOfGenerators;
   inversesOfGenerators.setSize(this->generators.size);

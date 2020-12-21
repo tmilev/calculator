@@ -8617,7 +8617,7 @@ void Calculator::addOneStringCompositeHandler(
 void Calculator::addOneStringHandler(
   int atom,
   Expression::ToStringHandler handler,
-  MapList<int, Expression::ToStringHandler, MathRoutines::IntUnsignIdentity>& handlerCollection
+  MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction>& handlerCollection
 ) {
   if (handlerCollection.contains(atom)) {
     if (handlerCollection.getValueNoFail(
@@ -8685,7 +8685,10 @@ void Calculator::initializeToStringHandlers() {
 
   this->addOneStringCompositeHandler(this->opMatrix()           , Expression::toStringMatrix                      );
 
+  // To add a new type here, you need to define
+  // Expression::toStringBuiltIn<your_new_type>
   this->addOneBuiltInHandler<std::string                                                              >();
+  this->addOneBuiltInHandler<JSData                                                                   >();
   this->addOneBuiltInHandler<Rational                                                                 >();
   this->addOneBuiltInHandler<ElementEllipticCurve<Rational>                                           >();
   this->addOneBuiltInHandler<ElementEllipticCurve<ElementZmodP>                                       >();

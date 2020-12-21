@@ -8,8 +8,8 @@
 
 template<class Coefficient>
 Rational ModuleSSalgebra<Coefficient>::hwTrace(
-  const Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& thePair,
+  const Pair<MonomialTensor<int, HashFunctions::hashFunction>,
+  MonomialTensor<int, HashFunctions::hashFunction> >& thePair,
   ProgressReport* theProgressReport
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::hwTrace");
@@ -20,11 +20,11 @@ Rational ModuleSSalgebra<Coefficient>::hwTrace(
   if (thePair.object1.generatorsIndices.size == 0) {
     return 1;
   }
-  Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity> > newPair;
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity>& newLeft = newPair.object1;
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity>& newRight = newPair.object2;
-  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& oldRight = thePair.object2;
+  Pair<MonomialTensor<int, HashFunctions::hashFunction>,
+  MonomialTensor<int, HashFunctions::hashFunction> > newPair;
+  MonomialTensor<int, HashFunctions::hashFunction>& newLeft = newPair.object1;
+  MonomialTensor<int, HashFunctions::hashFunction>& newRight = newPair.object2;
+  const MonomialTensor<int, HashFunctions::hashFunction>& oldRight = thePair.object2;
   newLeft = thePair.object1;
   (*newLeft.powers.lastObject()) -= 1;
   int theIndex = *newLeft.generatorsIndices.lastObject();
@@ -34,7 +34,7 @@ Rational ModuleSSalgebra<Coefficient>::hwTrace(
   }
   int theIndexMinus = 2 * this->getOwner().getNumberOfPositiveRoots() + this->getOwner().getRank() - theIndex - 1;
   int theSimpleIndex = theIndex - this->getOwner().getNumberOfPositiveRoots() - this->getOwner().getRank();
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity> Accum;
+  MonomialTensor<int, HashFunctions::hashFunction> Accum;
   Accum.powers.reserve(oldRight.powers.size);
   Accum.generatorsIndices.reserve(oldRight.generatorsIndices.size);
   Vector<Rational> RemainingWeight;
@@ -82,7 +82,7 @@ Rational ModuleSSalgebra<Coefficient>::hwTrace(
 }
 
 template<class Coefficient>
-void ModuleSSalgebra<Coefficient>::applyTAA(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theMon) {
+void ModuleSSalgebra<Coefficient>::applyTAA(MonomialTensor<int, HashFunctions::hashFunction>& theMon) {
   for (int i = 0; i < theMon.generatorsIndices.size; i ++) {
     theMon.generatorsIndices[i] =
     this->getOwner().getNumberOfPositiveRoots() * 2 + this->getOwner().getRank() - theMon.generatorsIndices[i] - 1;
@@ -93,17 +93,17 @@ void ModuleSSalgebra<Coefficient>::applyTAA(MonomialTensor<int, MathRoutines::In
 
 template<class Coefficient>
 Rational ModuleSSalgebra<Coefficient>::hwtaabfSimpleGensOnly(
-  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& leftMon,
-  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& rightMon,
+  const MonomialTensor<int, HashFunctions::hashFunction>& leftMon,
+  const MonomialTensor<int, HashFunctions::hashFunction>& rightMon,
   ProgressReport* theProgressReport
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::hwtaabfSimpleGensOnly");
-  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>* left = &leftMon;
-  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>* right = &rightMon;
+  const MonomialTensor<int, HashFunctions::hashFunction>* left = &leftMon;
+  const MonomialTensor<int, HashFunctions::hashFunction>* right = &rightMon;
   if (leftMon > rightMon) {
     MathRoutines::swap(left, right);
   }
-  Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> > thePair;
+  Pair<MonomialTensor<int, HashFunctions::hashFunction>, MonomialTensor<int, HashFunctions::hashFunction> > thePair;
   thePair.object1 = *left;
   thePair.object2 = *right;
   this->applyTAA(thePair.object1);
@@ -515,12 +515,12 @@ template <class Coefficient>
 MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionSimpleGeneratorIndex(int generatorIndex) {
   Vector<Rational> genWeight = this->getOwner().getWeightOfGenerator(generatorIndex);
   Vector<Rational> targetWeight;
-  Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> > currentPair;
+  Pair<MonomialTensor<int, HashFunctions::hashFunction>, MonomialTensor<int, HashFunctions::hashFunction> > currentPair;
   MatrixTensor<Coefficient>& outputMat = this->actionsGeneratorsMaT[generatorIndex];
   Vector<Coefficient> theScalarProds;
   outputMat.makeZero();
   for (int i = 0; i < this->theGeneratingWordsGrouppedByWeight.size; i ++) {
-    List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentWordList =
+    List<MonomialTensor<int, HashFunctions::hashFunction> >& currentWordList =
     this->theGeneratingWordsIntGrouppedByWeight[i];
     const Vector<Rational>& currentWeight = this->theModuleWeightsSimpleCoords[i];
     targetWeight = currentWeight + genWeight;
@@ -528,7 +528,7 @@ MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionSimpleGenerato
     if (weightLevelIndex != - 1) {
       int columnOffset = this->getOffsetFromWeightIndex(i);
       int rowOffset = this->getOffsetFromWeightIndex(weightLevelIndex);
-      List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >&
+      List<MonomialTensor<int, HashFunctions::hashFunction> >&
       otherWordList = this->theGeneratingWordsIntGrouppedByWeight[weightLevelIndex];
       for (int j = 0; j < currentWordList.size; j ++) {
         theScalarProds.setSize(otherWordList.size);
@@ -648,7 +648,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
     this->theGeneratingWordsIntGrouppedByWeight[i].size = 0;
   }
   MonomialUniversalEnveloping<Coefficient> currentNonReducedElement;
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity> tempMonInt;
+  MonomialTensor<int, HashFunctions::hashFunction> tempMonInt;
   for (int i = 0; i < this->thePaths.size; i ++) {
     List<int>& currentPath = generatorsIndices[i];
     currentNonReducedElement.makeOne(this->getOwner());
@@ -685,7 +685,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   this->theGeneratingWordsWeightsPlusWeightFDpart.reserve(this->thePaths.size);
   for (int i = 0; i < this->theGeneratingWordsGrouppedByWeight.size; i ++) {
     List<MonomialUniversalEnveloping<Coefficient> >& currentList = this->theGeneratingWordsGrouppedByWeight[i];
-    List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentListInt = this->theGeneratingWordsIntGrouppedByWeight[i];
+    List<MonomialTensor<int, HashFunctions::hashFunction> >& currentListInt = this->theGeneratingWordsIntGrouppedByWeight[i];
     currentList.quickSortDescending();
     currentListInt.quickSortDescending();
     for (int j = 0; j < currentList.size; j ++) {
@@ -787,7 +787,7 @@ void ModuleSSalgebra<Coefficient>::intermediateStepForMakeFromHW(
     Matrix<Coefficient>& currentBF = this->theBilinearFormsAtEachWeightLevel[l];
     List<MonomialUniversalEnveloping<Coefficient> >& currentWordList =
     this->theGeneratingWordsGrouppedByWeight[l];
-    List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentWordListInt = this->theGeneratingWordsIntGrouppedByWeight[l];
+    List<MonomialTensor<int, HashFunctions::hashFunction> >& currentWordListInt = this->theGeneratingWordsIntGrouppedByWeight[l];
     currentBF.initialize(currentWordList.size, currentWordList.size);
     for (int i = 0; i < currentWordList.size; i ++) {
       for (int j = i; j < currentWordList.size; j ++) {
@@ -1264,7 +1264,7 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* theFormat)
   SimpleReflection aGen;
   for (int i = 0; i < this->theGeneratingWordsGrouppedByWeight.size; i ++) {
     List<MonomialUniversalEnveloping<Coefficient> >& currentList = this->theGeneratingWordsGrouppedByWeight[i];
-    List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentListInt = this->theGeneratingWordsIntGrouppedByWeight[i];
+    List<MonomialTensor<int, HashFunctions::hashFunction> >& currentListInt = this->theGeneratingWordsIntGrouppedByWeight[i];
     for (int j = 0; j < currentList.size; j ++) {
       wordCounter ++;
       tempWelt.generatorsLastAppliedFirst.setSize(currentListInt[j].generatorsIndices.size);

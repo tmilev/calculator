@@ -495,9 +495,9 @@ public:
   X509Certificate certificate;
   PrivateKeyRSA privateKey;
   // Ordered by preference (lower index = more preferred):
-  MapList<int, std::string, MathRoutines::IntUnsignIdentity> cipherSuiteNames;
-  MapList<int, CipherSuiteSpecification, MathRoutines::IntUnsignIdentity> supportedCiphers;
-  MapList<int, std::string, MathRoutines::IntUnsignIdentity> extensionNames;
+  MapList<int, std::string, HashFunctions::hashFunction> cipherSuiteNames;
+  MapList<int, CipherSuiteSpecification, HashFunctions::hashFunction> supportedCiphers;
+  MapList<int, std::string, HashFunctions::hashFunction> extensionNames;
   int64_t millisecondsTimeOut;
   int64_t millisecondsDefaultTimeOut;
   int defaultBufferCapacity;

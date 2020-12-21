@@ -74,9 +74,6 @@ double FloatingPoint::power(double base, double exponent) {
 }
 
 unsigned int MathRoutines::hashDouble(const double& input) {
-  if (std::isnan(input)) {
-    return 5;
-  }
-  return static_cast<unsigned>(input * 10000);
+  return HashFunctions::hashFunction(input);
 }
 

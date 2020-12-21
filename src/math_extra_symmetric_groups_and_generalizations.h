@@ -167,8 +167,8 @@ public:
   void columnStabilizer(FiniteGroup<PermutationR2>& in) const;
   template <typename Coefficient>
   void youngSymmetrizerAction(
-    ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, Coefficient>& out,
-    const ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, Coefficient>& in
+    ElementMonomialAlgebra<MonomialTensor<int, HashFunctions::hashFunction>, Coefficient>& out,
+    const ElementMonomialAlgebra<MonomialTensor<int, HashFunctions::hashFunction>, Coefficient>& in
   );
   List<int> turnIntoList() const;
   template <typename somestream>
@@ -244,14 +244,14 @@ public:
   void actOnList(List<Object>& in) const;
   //  MonomialTensor<T1, T2> operator*(MonomialTensor<T1,T2>& right) const;
   void actOnMonomialTensor(
-    MonomialTensor<int, MathRoutines::IntUnsignIdentity>& out,
-    const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& in
+    MonomialTensor<int, HashFunctions::hashFunction>& out,
+    const MonomialTensor<int, HashFunctions::hashFunction>& in
   ) const;
 
   template <typename Coefficient>
   void actOnTensor(
-    ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, Coefficient>& out,
-    const ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, Coefficient>& in
+    ElementMonomialAlgebra<MonomialTensor<int, HashFunctions::hashFunction>, Coefficient>& out,
+    const ElementMonomialAlgebra<MonomialTensor<int, HashFunctions::hashFunction>, Coefficient>& in
   ) const;
   void getWordjjPlus1(List<int>& word) const;
 
@@ -1104,20 +1104,20 @@ void Partition::spechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, c
     stuffing[i] = i;
   }
   this->fillTableau(initialTableau, stuffing);
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity> tm1;
+  MonomialTensor<int, HashFunctions::hashFunction> tm1;
   tm1.generatorsIndices.setSize(n);
   tm1.powers.setSize(n);
   for (int i = 0; i < n; i ++) {
     tm1.generatorsIndices[i] = i;
     tm1.powers[i] = 1;
   }
-  ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, scalar> t1, t2;
+  ElementMonomialAlgebra<MonomialTensor<int, HashFunctions::hashFunction>, scalar> t1, t2;
   t1.addMonomial(tm1,1);
   initialTableau.youngSymmetrizerAction(t2, t1);
-  List<ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, scalar> > basisvs;
+  List<ElementMonomialAlgebra<MonomialTensor<int, HashFunctions::hashFunction>, scalar> > basisvs;
   SparseSubspaceBasis<
-    ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, scalar>,
-    MonomialTensor<int, MathRoutines::IntUnsignIdentity>, scalar
+    ElementMonomialAlgebra<MonomialTensor<int, HashFunctions::hashFunction>, scalar>,
+    MonomialTensor<int, HashFunctions::hashFunction>, scalar
   > basis;
   List<Tableau> standardTableaux;
   this->getAllStandardTableaux(standardTableaux);
@@ -1132,7 +1132,7 @@ void Partition::spechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, c
   for (int permi = 0; permi < perms.size; permi ++) {
     out[permi].initialize(basis.rank, basis.rank);
     for (int bi = 0; bi < basis.rank; bi ++) {
-      ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, scalar> sparse;
+      ElementMonomialAlgebra<MonomialTensor<int, HashFunctions::hashFunction>, scalar> sparse;
       perms[permi].actOnTensor(sparse,basisvs[bi]);
       Vector<scalar> dense;
       basis.denseVectorInBasis(dense, sparse);
@@ -1158,13 +1158,13 @@ somestream& Partition::intoStream(somestream& out) const {
 
 template <typename Coefficient>
 void Tableau::youngSymmetrizerAction(
-  ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, Coefficient>& out,
-  const ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, Coefficient>& in
+  ElementMonomialAlgebra<MonomialTensor<int, HashFunctions::hashFunction>, Coefficient>& out,
+  const ElementMonomialAlgebra<MonomialTensor<int, HashFunctions::hashFunction>, Coefficient>& in
 ) {
   GeneratorElementsSnxSnOnIndicesAndIndices rs,cs;
-  ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, Coefficient> rst;
+  ElementMonomialAlgebra<MonomialTensor<int, HashFunctions::hashFunction>, Coefficient> rst;
   for (rs.initialize(this->t); !rs.doneIterating(); ++ rs) {
-    ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, Coefficient> tmp;
+    ElementMonomialAlgebra<MonomialTensor<int, HashFunctions::hashFunction>, Coefficient> tmp;
     (*rs).actOnTensor(tmp, in);
     rst += tmp;
   }
@@ -1173,7 +1173,7 @@ void Tableau::youngSymmetrizerAction(
   this->getColumns(columns);
   cs.initialize(columns);
   for (; !cs.doneIterating(); ++ cs) {
-    ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, Coefficient> tmp;
+    ElementMonomialAlgebra<MonomialTensor<int, HashFunctions::hashFunction>, Coefficient> tmp;
     PermutationR2 csi = *cs;
     csi.actOnTensor(tmp, rst);
     out += tmp * csi.sign();
@@ -1222,11 +1222,11 @@ void PermutationR2::actOnList(List<Object>& in) const {
 
 template <typename Coefficient>
 void PermutationR2::actOnTensor(
-  ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, Coefficient>& out,
-  const ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, Coefficient>& in
+  ElementMonomialAlgebra<MonomialTensor<int, HashFunctions::hashFunction>, Coefficient>& out,
+  const ElementMonomialAlgebra<MonomialTensor<int, HashFunctions::hashFunction>, Coefficient>& in
 ) const {
   for (int i = 0; i < in.monomials.size; i ++) {
-    MonomialTensor<int, MathRoutines::IntUnsignIdentity> tmpout, tmpin;
+    MonomialTensor<int, HashFunctions::hashFunction> tmpout, tmpin;
     tmpin = in.monomials[i];
     this->actOnMonomialTensor(tmpout, tmpin);
     out.addMonomial(tmpout, in.coefficients[i]);

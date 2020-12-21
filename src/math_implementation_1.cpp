@@ -877,7 +877,7 @@ LittelmannPath::LittelmannPath(const LittelmannPath& other) {
   *this = other;
 }
 
-bool LittelmannPath::isAdaptedString(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theString) {
+bool LittelmannPath::isAdaptedString(MonomialTensor<int, HashFunctions::hashFunction>& theString) {
   LittelmannPath tempPath = *this;
   LittelmannPath tempPath2;
   for (int i = 0; i < theString.generatorsIndices.size; i ++) {

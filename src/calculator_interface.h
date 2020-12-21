@@ -119,7 +119,7 @@ private:
   Calculator* owner;
   int data;
   // List<int> children;
-  HashedList<int, MathRoutines::IntUnsignIdentity> children;
+  HashedList<int, HashFunctions::hashFunction> children;
   bool flagDeallocated;
 //////
   typedef bool (*FunctionAddress) (Calculator& calculator, const Expression& input, Expression& output);
@@ -1042,7 +1042,7 @@ public:
   HashedList<AlgebraicNumber> theAlgebraicNumbers;
   HashedListReferences<ElementHyperoctahedralGroupR2> theElementsHyperOctGroup;
   ListReferences<HyperoctahedralGroupData> theHyperOctahedralGroups;
-  HashedListReferences<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
+  HashedListReferences<MonomialTensor<int, HashFunctions::hashFunction> > theLittelmannOperators;
   WeylGroupData& getWeylGroupDataCreateIfNotPresent(const DynkinType& input);
   SemisimpleLieAlgebra& getLieAlgebraCreateIfNotPresent(const DynkinType& input);
   SemisimpleSubalgebras& getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input);
@@ -1140,9 +1140,9 @@ public:
   HashedList<std::string, MathRoutines::hashString> autoCompleteKeyWords;
   HashedList<std::string, MathRoutines::hashString> stringsThatSplitIfFollowedByDigit;
 
-  MapList<int, Expression::ToStringHandler, MathRoutines::IntUnsignIdentity> toStringHandlersAtoms;
-  MapList<int, Expression::ToStringHandler, MathRoutines::IntUnsignIdentity> toStringHandlersComposite;
-  MapList<int, Expression::ToStringHandler, MathRoutines::IntUnsignIdentity> toStringDataHandlers;
+  MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction> toStringHandlersAtoms;
+  MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction> toStringHandlersComposite;
+  MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction> toStringDataHandlers;
 
   MapList<std::string, List<std::string>, MathRoutines::hashString> predefinedWordSplits;
   class NamedRuleLocation {
@@ -1296,8 +1296,8 @@ public:
   List<Expression> imagesCachedExpressions;
   ////
   HashedList<Expression> evaluatedExpressionsStack;
-  HashedList<int, MathRoutines::IntUnsignIdentity> nonBoundVariablesInContext;
-  HashedList<int, MathRoutines::IntUnsignIdentity> boundVariablesInContext;
+  HashedList<int, HashFunctions::hashFunction> nonBoundVariablesInContext;
+  HashedList<int, HashFunctions::hashFunction> boundVariablesInContext;
 
   Expression ruleStack;
   HashedList<Expression> cachedRuleStacks;
@@ -2319,7 +2319,7 @@ public:
   void addOneStringHandler(
     int atom,
     Expression::ToStringHandler handler,
-    MapList<int, Expression::ToStringHandler, MathRoutines::IntUnsignIdentity>& handlerCollection
+    MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction>& handlerCollection
   );
   void reset();
   void initialize();

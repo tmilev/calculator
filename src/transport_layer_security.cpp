@@ -1779,7 +1779,7 @@ bool SSLContent::prepareServerHello3ServerKeyExchange(std::stringstream* comment
 
 bool TransportLayerSecurityServer::Session::chooseCipher(std::stringstream* commentsOnFailure) {
   (void) commentsOnFailure;
-  MapList<int, CipherSuiteSpecification, MathRoutines::IntUnsignIdentity>& suites =
+  MapList<int, CipherSuiteSpecification, HashFunctions::hashFunction>& suites =
   this->owner->supportedCiphers;
   int bestIndex = suites.size();
   for (int i = 0; i < this->incomingCiphers.size; i ++) {

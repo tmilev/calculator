@@ -677,16 +677,16 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLRO(Calculator& calculator,
   output = input[1];
   Expression rightCopy = input[2];
   if (
-    !output.isOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >() ||
-    !rightCopy.isOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >()
+    !output.isOfType<MonomialTensor<int, HashFunctions::hashFunction> >() ||
+    !rightCopy.isOfType<MonomialTensor<int, HashFunctions::hashFunction> >()
   ) {
     return false;
   }
-  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& leftMon =
-  output.getValue<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
-  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& rightMon =
-  rightCopy.getValue<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity> result;
+  const MonomialTensor<int, HashFunctions::hashFunction>& leftMon =
+  output.getValue<MonomialTensor<int, HashFunctions::hashFunction> >();
+  const MonomialTensor<int, HashFunctions::hashFunction>& rightMon =
+  rightCopy.getValue<MonomialTensor<int, HashFunctions::hashFunction> >();
+  MonomialTensor<int, HashFunctions::hashFunction> result;
   result = leftMon;
   result *= rightMon;
   for (int i = 0; i < result.generatorsIndices.size; i ++) {
@@ -713,13 +713,13 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLSPath(
   if (!output.mergeContexts(output, rightCopy)) {
     return false;
   }
-  if (!output.isOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >() || !rightCopy.isOfType<LittelmannPath>()) {
+  if (!output.isOfType<MonomialTensor<int, HashFunctions::hashFunction> >() || !rightCopy.isOfType<LittelmannPath>()) {
     return false;
   }
   LittelmannPath result = rightCopy.getValue<LittelmannPath>();
   WeylGroupData& theWeyl = *result.owner;
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity> theLRO;
-  theLRO = output.getValue<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
+  MonomialTensor<int, HashFunctions::hashFunction> theLRO;
+  theLRO = output.getValue<MonomialTensor<int, HashFunctions::hashFunction> >();
   for (int i = theLRO.generatorsIndices.size - 1; i >= 0; i --) {
     if (
       theLRO.generatorsIndices[i] == 0 ||

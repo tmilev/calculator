@@ -13,7 +13,7 @@ public:
   listType theValues;
   unsigned int hashFunction() const {
     int j = - 1;
-    unsigned int result;
+    unsigned int result = 0;
     for (int i = 0; i < this->theKeys.size; i ++) {
       j ++;
       if (j >= someRandomPrimesSize) {

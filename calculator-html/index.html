@@ -97,10 +97,8 @@
   <script type="text/javascript" src="/calculator-html/app.js"></script>
   <script type="text/javascript" src="/calculator-html/process_monitoring.js"></script>
   <script type="text/javascript" src="/calculator-html/external/build/output-min.js"></script>
-
   <script note="This tag has special treatment, do not change please." type="text/javascript"
     src="/calculator-html/browserifier.js"></script>
-
   <script src='https://www.google.com/recaptcha/api.js'></script>
   <title>Calculator</title>
 </head>
@@ -228,12 +226,7 @@
                     <tr>
                       <td>
                         <input type="hidden" name="request" id="request" value="compute">
-                        <textarea class="textareaCalculatorMain" rows="3" cols="30" name="mainInput" id="mainInputID"
-                          onkeypress="window.calculator.calculator.submitCalculatorInputOnEnter(event);"
-                          onkeyup="window.calculator.autocomplete.suggestWord(); window.calculator.initializeButtons.calculatorPanel.mQHelpCalculator();"
-                          onkeydown="window.calculator.autocomplete.suggestWord(); window.calculator.initializeButtons.calculatorPanel.mQHelpCalculator(); window.calculator.autocomplete.arrowAction(event);"
-                          onmouseup="window.calculator.autocomplete.suggestWord(); window.calculator.initializeButtons.calculatorPanel.mQHelpCalculator();"
-                          oninput="window.calculator.autocomplete.suggestWord(); window.calculator.initializeButtons.calculatorPanel.mQHelpCalculator();"></textarea>
+                        <textarea class="textareaCalculatorMain" rows="3" cols="30" id="mainInputID"></textarea>
                       </td>
                       <td>
                         <span id="mqPanelComments" style="white-space:nowrap"> Equation assistant</span>

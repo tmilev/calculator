@@ -11,6 +11,7 @@ const typeset = require("./math_typeset");
 const processMonitoring = require("./process_monitoring");
 const initializeButtons = require("./initialize_buttons");
 const storage = require("./storage");
+const autocomplete = require("./autocomplete");
 
 class AtomHandler {
   constructor() {
@@ -83,6 +84,27 @@ class Calculator {
     processMonitoring.monitor.ownerCalculator = this;
     /**@type{boolean} */
     this.flagTypeset = false;
+    let inputMain = document.getElementById(ids.domElements.inputMain);
+    inputMain.addEventListener("keypress", (e) => {
+      this.submitCalculatorInputOnEnter(e);
+    });
+    inputMain.addEventListener("keyup", (e) => {
+      autocomplete.suggestWord();
+      initializeButtons.calculatorPanel.mQHelpCalculator();
+    });
+    inputMain.addEventListener("keydown", (e) => {
+      autocomplete.suggestWord();
+      initializeButtons.calculatorPanel.mQHelpCalculator();
+      autocomplete.arrowAction(e);
+    });
+    inputMain.addEventListener("mouseup", (e) => {
+      autocomplete.suggestWord();
+      initializeButtons.calculatorPanel.mQHelpCalculator();
+    });
+    inputMain.addEventListener("input", (e) => {
+      autocomplete.suggestWord();
+      initializeButtons.calculatorPanel.mQHelpCalculator();
+    });
   }
 
   updateCalculatorSliderEventHandler(inputBox) {

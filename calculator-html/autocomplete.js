@@ -1,6 +1,6 @@
 "use strict";
 const ids = require("./ids_dom_elements");
-var theAutocompleteDictionary = require('./autocomplete_keywords').theAutocompleteDictionary;
+var theAutocompleteDictionary = require("./autocomplete_keywords").theAutocompleteDictionary;
 
 var minLengthAutocompleteTrigger = 2;
 var DebugCounter = 0;
@@ -41,10 +41,10 @@ function initializeAutocomplete() {
   ignoreOninput = false;
   DebugCounter = 0;
   //theAutoCompleteHints.style.visibility ="hidden";
-  for (var i = 0; i < theAutocompleteDictionary.length; i ++) {
+  for (var i = 0; i < theAutocompleteDictionary.length; i++) {
     theAutocompleteDictionaryLowerCase.push(theAutocompleteDictionary[i].toLowerCase());
   }
-  for (i = 0; i < theAutocompleteDictionary.length; i ++) {
+  for (i = 0; i < theAutocompleteDictionary.length; i++) {
     theAutocompleteDictionaryByKey[theAutocompleteDictionary[i]] = 1;
   }
   return true;
@@ -53,11 +53,11 @@ function initializeAutocomplete() {
 //displayDictionary();
 function displayDictionary() {
   var result;
-  result ="";
+  result = "";
   counter = 0;
   for (var i in theAutocompleteDictionaryByKey) {
     result += i + " " + theAutocompleteDictionaryByKey[i] + " <br />";
-    counter ++;
+    counter++;
     if (counter >= 15) {
       result += "... displaying first 15 out of a total of " + Object.keys(theAutocompleteDictionaryByKey).length + " words in the dictionary.";
       break;
@@ -88,7 +88,7 @@ function getLastWord() {
   theLastWordReversed = "";
   var cursorPosition = theText.selectionEnd;
   lastWordStart = - 1;
-  for (var i = cursorPosition - 1; i >= 0; i --) {
+  for (var i = cursorPosition - 1; i >= 0; i--) {
     if (isSeparator(theText.value[i])) {
       break;
     }
@@ -96,23 +96,23 @@ function getLastWord() {
   }
   theLastWord = "";
   lastWordStart = i;
-  for (i = theLastWordReversed.length - 1; i >= 0; i --) {
+  for (i = theLastWordReversed.length - 1; i >= 0; i--) {
     theLastWord += theLastWordReversed[i];
   }
-  for (i = cursorPosition; i < theText.value.length; i ++) {
+  for (i = cursorPosition; i < theText.value.length; i++) {
     if (isSeparator(theText.value[i])) {
       break;
     } else {
       theLastWord += theText.value[i];
     }
   }
-  DebugCounter ++;
-//  autocompleteDebugWindow.innerHTML= theLastWord+ "<br>cursorPosition ="+ cursorPosition + "<br>theText.selectionEnd =" +theText.selectionEnd+  "theText.selectionStart ="+theText.selectionStart + "<br>DebugCounter ="+DebugCounter;
+  DebugCounter++;
+  //  autocompleteDebugWindow.innerHTML= theLastWord+ "<br>cursorPosition ="+ cursorPosition + "<br>theText.selectionEnd =" +theText.selectionEnd+  "theText.selectionStart ="+theText.selectionStart + "<br>DebugCounter ="+DebugCounter;
 }
 
 function clearAutocompleteTab() {
-  theAutoComplete.innerHTML="";
-//  theAutoCompleteHints.style.visibility ="hidden";
+  theAutoComplete.innerHTML = "";
+  //  theAutoCompleteHints.style.visibility ="hidden";
   indexInAutocomplete = - 1;
   theSuggestions.length = 0;
   theSuggestionsHighlighted.length = 0;
@@ -137,7 +137,7 @@ function suggestWord() {
     clearAutocompleteTab();
     return;
   }
-  for (var i = 0; i < theAutocompleteDictionary.length; i ++) {
+  for (var i = 0; i < theAutocompleteDictionary.length; i++) {
     if (theLastWord == theAutocompleteDictionary[i]) {
       clearAutocompleteTab();
       return;
@@ -168,7 +168,7 @@ function displaySuggestions() {
       indexInAutocomplete = 0;
     }
   }
-  for (var i = 0; i < theSuggestionsHighlighted.length; i ++) {
+  for (var i = 0; i < theSuggestionsHighlighted.length; i++) {
     if (i === indexInAutocomplete) {
       theAutoComplete.innerHTML += "<span style ='background:silver'>" + theSuggestionsHighlighted[i] + "</span><br>";
     } else {
@@ -186,7 +186,7 @@ function replaceLastWord() {
     return;
   }
   theText.value = theText.value.substring(0, lastWordStart + 1) + theSuggestions[indexInAutocomplete] +
-  theText.value.substring(1 + lastWordStart + theLastWord.length);
+    theText.value.substring(1 + lastWordStart + theLastWord.length);
   setCursorPosition(lastWordStart + theSuggestions[indexInAutocomplete].length + 1);
 }
 
@@ -198,16 +198,16 @@ function arrowAction(event) {
     replaceLastWord();
   }
   if (event.keyCode === 38) {//up arrow
-    indexInAutocomplete --;
+    indexInAutocomplete--;
   } else if (event.keyCode === 40) {//down arrow
-    indexInAutocomplete ++;
+    indexInAutocomplete++;
   } else {
     return;
   }
   displaySuggestions();
-//  event.stopPropagation();
+  //  event.stopPropagation();
   event.preventDefault();
-//  event.cancelBubble = true;
+  //  event.cancelBubble = true;
 }
 
 function accountWordAtCursor(amount) {
@@ -216,7 +216,7 @@ function accountWordAtCursor(amount) {
     return;
   }
   theAutoComplete.textContent = theLastWord;
-  if (typeof(theAutocompleteDictionary[theLastWord]) !== "number") {
+  if (typeof (theAutocompleteDictionary[theLastWord]) !== "number") {
     theAutocompleteDictionary[theLastWord] = amount;
   } else {
     theAutocompleteDictionary[theLastWord] += amount;

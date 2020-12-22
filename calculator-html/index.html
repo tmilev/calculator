@@ -39,8 +39,6 @@
 
   <link type="text/css" rel="stylesheet" href="/calculator-html/styleCalculator.css"
     onerror="errorLoadingScript(this);">
-  <link type="text/css" rel="stylesheet" href="/html-common/mathquill/mathquill.css"
-    onerror="errorLoadingScript(this);">
   <link type="text/css" rel="stylesheet" href="/html-common/jquery_ui/jquery-ui.css"
     onerror="errorLoadingScript(this);">
 
@@ -50,10 +48,6 @@
   <script type="text/javascript" src="/html-common/ace/src-min/ace.js" charset="utf-8"
     onerror="errorLoadingScript(this);"></script>
   <script src="/html-common/ace/src-min/ext-language_tools.js" onerror="errorLoadingScript(this);"></script>
-  <!--script src = "/html-common/mathquill.min.js"></script-->
-  <script src="/html-common/mathquill/mathquill.min.js" onerror="errorLoadingScript(this);"></script>
-  <!--script src ="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
-</script-->
   <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
   <!-- the cpp builder auto-replaces the string /calculator-html/ with something along the lines of /calculator-html${hashOfCurrentBuildEnvironment}/-->
   <script type="text/javascript" src="/calculator-html/pathnames.js"></script>
@@ -229,9 +223,10 @@
                         <textarea class="textareaCalculatorMain" rows="3" cols="30" id="mainInputID"></textarea>
                       </td>
                       <td>
-                        <span id="mqPanelComments" style="white-space:nowrap"> Equation assistant</span>
+                        <span id="mqPanelComments" style="white-space:nowrap">Equation assistant</span>
                         <br>
-                        <span style="vertical-align:top" id="mainInputMQfield"></span>
+                        <div style="font-size: 48px; font-family: 'Times New Roman'; vertical-align:top"
+                          id="mainInputMQfield"></div>
                       </td>
                       <td>
                         <div class="mqButtonPanel" style="vertical-align:top" id="mainInputMQfieldButtons"

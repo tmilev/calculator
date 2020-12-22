@@ -149,10 +149,6 @@ const knownTypes = {
   // This is the only element type that has contentEditable = true;
   atom: new MathNodeType({
     "type": "atom",
-    // If padding is missing, the position of the caret may make the 
-    // text wobble.
-    "padding": "2px",
-    //"margin": "2px",
     "outline": "0px solid transparent",
     "width": "auto",
     "height": "auto",
@@ -165,6 +161,7 @@ const knownTypes = {
     "type": "atomImmutable",
     "paddingLeft": `${0.1}em`,
     "paddingRight": `${0.1}em`,
+    "outline": "0px solid transparent",
     "width": "auto",
     "height": "auto",
   }),
@@ -2020,7 +2017,7 @@ class LaTeXParser {
 
 class EquationEditorOptions {
   constructor(
-    /** @type{{editable:boolean,removeDisplayStyle:boolean,sanitizeLatexSource:boolean,debugLogContainer:HTMLElement|null,latexInput:HTMLElement|null}} */
+    /** @type{{editable:boolean,removeDisplayStyle:boolean,sanitizeLatexSource:boolean,debugLogContainer:HTMLElement|null,latexInput:HTMLElement|null,editHandler:Function|null}} */
     options,
   ) {
     /** @type{boolean} */
@@ -2033,6 +2030,9 @@ class EquationEditorOptions {
     this.debugLogContainer = options.debugLogContainer;
     /**@type{HTMLElement|null} */
     this.latexInput = options.latexInput;
+    /**@type{Function|null} */
+    // Called on modification of the editor. Will provide two arguments: the editor and the MathNode being edited.
+    this.editHandler = options.editHandler;
     if (this.editable === undefined) {
       this.editable = true;
     }
@@ -2047,6 +2047,9 @@ class EquationEditorOptions {
     }
     if (this.latexInput === undefined) {
       this.latexInput = null;
+    }
+    if (this.editHandler === undefined) {
+      this.editHandler = null;
     }
     /** @type{boolean} */
     this.showLatexOnDoubleClick = !this.editable;
@@ -2169,6 +2172,22 @@ class EquationEditor {
     this.updateAlignment();
     this.writeDebugInfo(parser);
     this.container.setAttribute("latexsource", latex);
+  }
+
+  writeLatexToFocused(
+    /**@type {string} */
+    latex,
+  ) {
+    let toWriteTo = this.rootNode.findFirstFocusedChild();
+    if (toWriteTo === null) {
+      toWriteTo = this.rootNode.rightmostAtomChild();
+      if (toWriteTo === null) {
+        console.log("Unexpected failure to find atom child.");
+        return;
+      }
+      toWriteTo.positionCaretBeforeKeyEvents = toWriteTo.textContentOrInitialContent().length;
+    }
+    toWriteTo.writeLatex(latex);
   }
 
   accountFrameTime(
@@ -2882,8 +2901,7 @@ class MathNode {
     this.focus(1);
   }
 
-
-  /** @returns {MathNode} */
+  /** @returns {MathNode|null} */
   findFirstFocusedChild() {
     if (this.focused) {
       return this;
@@ -3037,8 +3055,10 @@ class MathNode {
 
   computeDimensionsAtomic() {
     let boundingRecangleDOM = this.element.getBoundingClientRect();
-    this.boundingBox.width = boundingRecangleDOM.width;
-    this.boundingBox.height = boundingRecangleDOM.height;
+    // With the extra pixel below missing, the position/presence of the caret may make the 
+    // text wobble.
+    this.boundingBox.width = boundingRecangleDOM.width + 1;
+    this.boundingBox.height = boundingRecangleDOM.height + 1;
     this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
   }
 
@@ -3127,7 +3147,7 @@ class MathNode {
   computeDimensionsFraction() {
     let numerator = this.children[0];
     let denominator = this.children[1];
-    let extraSpaceBetweenNumeratorAndDenominator = 4;
+    let extraSpaceBetweenNumeratorAndDenominator = 3;
     this.boundingBox.fractionLineHeight = numerator.boundingBox.height + 2;
     this.boundingBox.height = numerator.boundingBox.height + denominator.boundingBox.height + extraSpaceBetweenNumeratorAndDenominator;
     this.boundingBox.width = Math.max(numerator.boundingBox.width, denominator.boundingBox.width);
@@ -3810,6 +3830,9 @@ class MathNode {
       }
       this.equationEditor.writeLatexToInput();
       this.equationEditor.writeDebugInfo(null);
+      if (this.equationEditor.options.editHandler !== null) {
+        this.equationEditor.options.editHandler(this.equationEditor, this);
+      }
     }, 0);
   }
 
@@ -5843,7 +5866,7 @@ class MathNode {
     if (sibling === null) {
       return false;
     }
-    return sibling.focus(-endToFocus);
+    return sibling.focus(- endToFocus);
   }
 
   /** @returns {boolean} whether focus request was find. */

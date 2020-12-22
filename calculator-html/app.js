@@ -33,9 +33,7 @@ function initializeGlobals() {
     crypto: null,
     themes: null,
     pageNavigation: null,
-    globalMQ: MathQuill.getInterface(2),
     equationEditor: null,
-    MathQuillHasMatrixSupport: true,
     hardCodedServerAddress: "",
   };
   if (window.calculator === undefined || window.calculator === null) {

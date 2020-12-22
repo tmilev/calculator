@@ -117,7 +117,7 @@ class Solver {
       this.flagPendingSolutionTypeset = true;
       this.processPendingTypeset();
     } catch (e) {
-      output.innerHTML = `<b style='color:red'>${e}</b><br>${input}`;
+      this.solutionBox.innerHTML = `<b style='color:red'>${e}</b><br>${input}`;
     }
   }
 }

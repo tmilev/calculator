@@ -1329,6 +1329,7 @@ class LaTeXConstants {
         if (current in this.utf8ToLatexMap) {
           current = this.utf8ToLatexMap[current];
           i += j;
+          result.push(current);
           current = "";
           break;
         }
@@ -6178,8 +6179,10 @@ class MathNodeBaseWithExponent extends MathNode {
 
   /** @returns {LatexWithAnnotation} */
   toLatexWithAnnotation() {
+    let base = this.children[0].toLatex();
+    let exponent = this.children[1].toLatex();
     return new LatexWithAnnotation(
-      `{${this.children[0].toLatex()}}^{${this.children[1].toLatex()}}`,
+      `{${base}}^{${exponent}}`,
       - 1,
       - 1,
     );

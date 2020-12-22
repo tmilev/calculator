@@ -1329,10 +1329,13 @@ class LaTeXConstants {
         if (current in this.utf8ToLatexMap) {
           current = this.utf8ToLatexMap[current];
           i += j;
+          current = "";
           break;
         }
       }
-      result.push(current);
+      if (current !== "") {
+        result.push(current);
+      }
     }
     return new LatexWithAnnotation(result.join(""), selectionStart, selectionEnd);
   }

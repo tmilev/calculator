@@ -6,6 +6,7 @@ const pathnames = require("./pathnames");
 const submit = require("./submit_requests");
 const calculator = require("./calculator_page");
 const miscellaneous = require("./miscellaneous");
+const equation_editor = require("./equation_editor");
 const storage = require("./storage").storage;
 
 class Solver {
@@ -16,6 +17,10 @@ class Solver {
     this.pendingTypeset = null;
     /**@type{HTMLElement} */
     this.debugDiv = document.getElementById(ids.domElements.pages.solve.editorSolveProblemDebug);
+    /**@type{HTMLElement} */
+    this.flagPendingSolutionTypeset = false;
+    /**@type{HTMLElement} */
+    this.solutionBox = document.getElementById(ids.domElements.pages.solve.solutionBox);
   }
 
   selectPage() {
@@ -52,6 +57,13 @@ class Solver {
   }
 
   processPendingTypeset() {
+    if (storage.variables.currentPage.getValue() !== "solve") {
+      return;
+    }
+    if (this.flagPendingSolutionTypeset) {
+      this.flagPendingSolutionTypeset = false;
+      equation_editor.typeset(this.solutionBox);
+    }
     if (this.pendingTypeset === null) {
       return;
     }
@@ -69,9 +81,6 @@ class Solver {
     input,
   ) {
     this.pendingTypeset = input;
-    if (storage.variables.currentPage !== "solve") {
-      return;
-    }
     this.processPendingTypeset();
   }
 
@@ -101,12 +110,12 @@ class Solver {
     /**@type{string} */
     input,
   ) {
-    let output = document.getElementById(ids.domElements.pages.solve.solutionBox);
     try {
       let solution = miscellaneous.jsonUnescapeParse(input);
       let steps = solution["solution"]["solution"][pathnames.urlFields.result.solution.steps];
-      output.textContent = `${steps}`;
-      editor.typeset(output);
+      this.solutionBox.textContent = `${steps}`;
+      this.flagPendingSolutionTypeset = true;
+      this.processPendingTypeset();
     } catch (e) {
       output.innerHTML = `<b style='color:red'>${e}</b><br>${input}`;
     }

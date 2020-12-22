@@ -352,7 +352,6 @@ bool WebAPIResponse::processCompute() {
   MacroRegisterFunctionWithName("WebAPIResponse::processCompute");
   this->initializeCalculatorComputation();
   Calculator& theCalculator = global.calculator().getElement();
-
   theCalculator.inputString = HtmlRoutines::convertURLStringToNormal(
     global.getWebInput(WebAPI::request::calculatorInput),
     false
@@ -380,7 +379,6 @@ JSData WebAPIResponse::solveJSON() {
   MacroRegisterFunctionWithName("WebAPIResponse::solveJSON");
   this->initializeCalculatorComputation();
   Calculator& calculator = global.calculator().getElement();
-
   calculator.inputString = HtmlRoutines::convertURLStringToNormal(
     global.getWebInput(WebAPI::request::calculatorInput),
     false

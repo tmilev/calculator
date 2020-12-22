@@ -7,6 +7,9 @@
 class ProblemWithSolution {
 public:
   Expression toBeSolved;
+  std::string simplification;
+  std::string factorization;
+
   std::string solution;
   Expression finalExpression;
   std::string error;

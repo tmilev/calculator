@@ -286,7 +286,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFields(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::factorPolynomialFiniteFields");
   WithContext<Polynomial<Rational> > polynomial;
-  if (!calculator.convert(
+  if (!CalculatorConversions::convert(
     input, CalculatorConversions::innerPolynomial<Rational>, polynomial
   )) {
     return false;
@@ -329,7 +329,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
 ) {
   MacroRegisterFunctionWithName("Calculator::factorPolynomialKronecker");
   WithContext<Polynomial<Rational> > polynomial;
-  if (!calculator.convert(
+  if (!CalculatorConversions::convert(
     input, CalculatorConversions::innerPolynomial<Rational>, polynomial
   )) {
     return false;
@@ -370,7 +370,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialRational(
 ) {
   MacroRegisterFunctionWithName("Calculator::factorPolynomialRational");
   WithContext<Polynomial<Rational> > polynomial;
-  if (!calculator.convert(
+  if (!CalculatorConversions::convert(
     input, CalculatorConversions::innerPolynomial<Rational>, polynomial
   )) {
     return false;

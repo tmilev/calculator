@@ -1274,7 +1274,7 @@ bool CalculatorConversions::innerPolynomialModuloInteger(
     << "Expected two arguments, polynomial and positive integer.";
   }
   WithContext<Polynomial<Rational> > polynomial;
-  if (!calculator.convert(
+  if (!CalculatorConversions::convert(
     input[1],
     CalculatorConversions::functionPolynomial<Rational>,
     polynomial

@@ -26,11 +26,17 @@ bool CalculatorEducationalFunctions::solveJSON(Calculator& calculator, const Exp
   if (!history.computeRecursively(0, &commentsOnFailure)) {
     problem.error = commentsOnFailure.str();
   }
+//  if (
+//    !CalculatorConversions::functionPolynomial(problem.toBeSolved, )
+//  ) {
+//
+//  }
   problem.solution = history.toStringExpressionHistoryMerged();
   return output.assignValue(problem.toJSON(), calculator);
 }
 
 JSData Calculator::extractSolution() {
+  MacroRegisterFunctionWithName("Calculator::extractSolution");
   JSData result;
   if (this->syntaxErrors != "") {
     result[WebAPI::result::error] = this->toStringSyntacticStackHumanReadable(false, true);

@@ -405,7 +405,7 @@ bool CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant(
   }
   const Expression& semisimpleLieAlgebraNode = input[1];
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
-  if (!calculator.convert(
+  if (!CalculatorConversions::convert(
     semisimpleLieAlgebraNode,
     CalculatorConversions::functionSemisimpleLieAlgebra,
     semisimpleLieAlgebra
@@ -2083,7 +2083,7 @@ bool CalculatorFunctionsWeylGroup::macdonaldPolys(Calculator& calculator, const 
     return calculator << "Macdonald polynomials expects as input a single argument. ";
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
-  if (!calculator.convert(
+  if (!CalculatorConversions::convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
     return output.makeError("Error extracting Lie algebra.", calculator);
@@ -2390,7 +2390,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupElement(
     return output.makeError("Function WeylElement needs to know what group the element belongs to", calculator);
   }
   WithContext<SemisimpleLieAlgebra*> thePointer;
-  if (!calculator.convert(
+  if (!CalculatorConversions::convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, thePointer
   )) {
     return output.makeError("Error extracting Lie algebra.", calculator);

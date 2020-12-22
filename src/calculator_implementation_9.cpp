@@ -153,7 +153,7 @@ bool CalculatorFunctions::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& c
     return output.makeError("Function takes 2 arguments - type and an element of the Lie algebra.", calculator);
   }
   WithContext<SemisimpleLieAlgebra*> ownerAlgebra;
-  if (!calculator.convert(
+  if (!CalculatorConversions::convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, ownerAlgebra
   )) {
     return output.makeError("Error extracting Lie algebra.", calculator);
@@ -189,7 +189,7 @@ bool CalculatorFunctions::innerAdCommonEigenSpaces(Calculator& calculator, const
     );
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
-  if (!calculator.convert(
+  if (!CalculatorConversions::convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
     return output.makeError("Error extracting Lie algebra.", calculator);
@@ -480,7 +480,7 @@ bool CalculatorFunctions::innerPrintAllVectorPartitions(Calculator& calculator, 
     return output.makeError("Function innerPrintAllPartitions expects 2 arguments.", calculator);
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
-  if (!calculator.convert(
+  if (!CalculatorConversions::convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
     return output.makeError("Error extracting Lie algebra.", calculator);

@@ -2063,43 +2063,6 @@ public:
       << global.fatal;
     }
   }
-  // TODO: move to calculator conversions.
-  template <class theType>
-  bool convertToTypeUsingFunction(
-    Expression::FunctionAddress theFun, const Expression& input, Expression& output
-  ) {
-    MacroRegisterFunctionWithName("Calculator::convertToTypeUsingFunction");
-    if (input.isOfType<theType>()) {
-      output = input;
-      return true;
-    }
-    if (theFun == nullptr) {
-      return false;
-    }
-    if (!theFun(*this, input, output)) {
-      this->comments << "<hr>Conversion function failed on " << input.toString() << ". ";
-      return false;
-    }
-    return output.isOfType<theType>();
-  }
-  // TODO: move to calculator conversions.
-  template <class theType>
-  bool convert(
-    const Expression& input,
-    Expression::FunctionAddress conversion,
-    WithContext<theType>& output
-  ) {
-    MacroRegisterFunctionWithName("Calculator::convert");
-    Expression conversionExpression;
-    if (!this->convertToTypeUsingFunction<theType>(conversion, input, conversionExpression)) {
-      return false;
-    }
-    if (!conversionExpression.isOfType(&output.content)) {
-      return false;
-    }
-    output.context = conversionExpression.getContext();
-    return true;
-  }
   bool callCalculatorFunction(Expression::FunctionAddress theFun, const Expression& input, Expression& output) {
     if (&input == &output) {
       Expression inputCopy = input;
@@ -2658,6 +2621,44 @@ public:
   static bool functionExpressionFromPoly(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerExpressionFromUE(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerExpressionFrom(Calculator& calculator, const MonomialP& input, Expression& output);
+  // TODO: move to calculator conversions.
+  template <class theType>
+  static bool convertToTypeUsingFunction(
+    Expression::FunctionAddress theFun, const Expression& input, Expression& output
+  ) {
+    MacroRegisterFunctionWithName("Calculator::convertToTypeUsingFunction");
+    if (input.isOfType<theType>()) {
+      output = input;
+      return true;
+    }
+    if (theFun == nullptr) {
+      return false;
+    }
+    Calculator& calculator = *input.owner;
+    if (!theFun(calculator, input, output)) {
+      calculator.comments << "<hr>Conversion function failed on " << input.toString() << ". ";
+      return false;
+    }
+    return output.isOfType<theType>();
+  }
+  // TODO: move to calculator conversions.
+  template <class theType>
+  static bool convert(
+    const Expression& input,
+    Expression::FunctionAddress conversion,
+    WithContext<theType>& output
+  ) {
+    MacroRegisterFunctionWithName("Calculator::convert");
+    Expression conversionExpression;
+    if (!CalculatorConversions::convertToTypeUsingFunction<theType>(conversion, input, conversionExpression)) {
+      return false;
+    }
+    if (!conversionExpression.isOfType(&output.content)) {
+      return false;
+    }
+    output.context = conversionExpression.getContext();
+    return true;
+  }
 };
 
 template <class theType>
@@ -2675,7 +2676,7 @@ bool Calculator::getVector(const Expression& input,
   List<Expression> convertedEs;
   convertedEs.setSize(nonConvertedEs.size);
   for (int i = 0; i < nonConvertedEs.size; i ++) {
-    if (!this->convertToTypeUsingFunction<theType>(
+    if (!CalculatorConversions::convertToTypeUsingFunction<theType>(
       conversionFunction, nonConvertedEs[i], convertedEs[i]
     )) {
       return false;
@@ -2790,7 +2791,7 @@ bool Calculator::functionGetMatrix(
   }
   for (int i = 0; i < nonConvertedEs.numberOfRows; i ++) {
     for (int j = 0; j < nonConvertedEs.numberOfColumns; j ++) {
-      if (!this->convertToTypeUsingFunction<theType>(
+      if (!CalculatorConversions::convertToTypeUsingFunction<theType>(
         conversionFunction, nonConvertedEs(i, j), convertedEs(i, j)
       )) {
         if (!nonConvertedEs(i, j).convertInternally<theType>(convertedEs.elements[i][j])) {
@@ -2964,7 +2965,7 @@ bool Calculator::getTypeWeight(
   }
   const Expression& leftE = input[1];
   const Expression& middleE = input[2];
-  if (!Calculator::convert(
+  if (!CalculatorConversions::convert(
     leftE,
     CalculatorConversions::functionSemisimpleLieAlgebra,
     outputAmbientSemisimpleLieAlgebra
@@ -3031,7 +3032,7 @@ bool Calculator::getTypeHighestWeightParabolic(
   }
   const Expression& leftE = input[1];
   const Expression& middleE = input[2];
-  if (!Calculator::convert(
+  if (!CalculatorConversions::convert(
     leftE,
     CalculatorConversions::functionSemisimpleLieAlgebra,
     outputAmbientSSalgebra

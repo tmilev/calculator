@@ -1165,7 +1165,7 @@ bool CalculatorFunctions::innerIsSquareFreePolynomial(
     return false;
   }
   WithContext<Polynomial<Rational> > polynomial;
-  if (!calculator.convert(
+  if (!CalculatorConversions::convert(
     input, CalculatorConversions::innerPolynomial<Rational>, polynomial
   )) {
     return false;

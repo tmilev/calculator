@@ -6553,7 +6553,7 @@ bool CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calcula
   const Expression& EsmallSA = input[1];
   const Expression& ElargeSA = input[2];
   WithContext<SemisimpleLieAlgebra*> smallSubalgebraPointer;
-  if (!calculator.convert(
+  if (!CalculatorConversions::convert(
     EsmallSA,
     CalculatorConversions::functionSemisimpleLieAlgebra,
     smallSubalgebraPointer
@@ -6561,7 +6561,7 @@ bool CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calcula
     return output.makeError("Error extracting Lie algebra.", calculator);
   }
   WithContext<SemisimpleLieAlgebra*> largeSubalgebraPointer;
-  if (!calculator.convert(
+  if (!CalculatorConversions::convert(
     ElargeSA,
     CalculatorConversions::functionSemisimpleLieAlgebra,
     largeSubalgebraPointer

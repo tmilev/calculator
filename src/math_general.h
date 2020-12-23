@@ -2514,8 +2514,8 @@ public:
 };
 
 class MonomialVector {
-  friend std::ostream& operator << (std::ostream& output, const MonomialVector& theMon) {
-    output << theMon.toString();
+  friend std::ostream& operator << (std::ostream& output, const MonomialVector& monomial) {
+    output << monomial.toString();
     return output;
   }
   public:
@@ -3055,7 +3055,7 @@ class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
   // The first row denotes the constant term in the substitution of the respective variable.
   // An element in the x-th row and y-th column
   // is defined as element [x][y].
-  void makeExponentSubstitution(Matrix<LargeInteger>& theSub);
+  void makeExponentSubstitution(Matrix<LargeInteger>& substitution);
   void addConstant(Coefficient& theConst);
   void multiplyByConstant(Coefficient& r);
   int getHighestIndexSuchThatHigherIndexVariablesDontParticipate() {
@@ -3707,15 +3707,15 @@ void PolynomialSubstitution<Coefficient>::makeIdentityLikeInjectionSubstitution(
 }
 
 template <class Coefficient>
-void PolynomialSubstitution<Coefficient>::makeExponentSubstitution(Matrix<LargeInteger>& theSub) {
+void PolynomialSubstitution<Coefficient>::makeExponentSubstitution(Matrix<LargeInteger>& substitution) {
   Polynomial<Coefficient> tempP;
   MonomialP tempM;
   tempM.makeOne();
   this->size = 0;
-  this->setSize(theSub.numberOfColumns);
-  for (int i = 0; i < theSub.numberOfColumns; i ++) {
-    for (int j = 0; j < theSub.numberOfRows; j ++) {
-      tempM.setVariable(j, theSub(j, i));
+  this->setSize(substitution.numberOfColumns);
+  for (int i = 0; i < substitution.numberOfColumns; i ++) {
+    for (int j = 0; j < substitution.numberOfRows; j ++) {
+      tempM.setVariable(j, substitution(j, i));
     }
     tempP.makeZero();
     tempP.addMonomial(tempM, 1);
@@ -6150,8 +6150,8 @@ class PiecewiseQuasipolynomial {
 };
 
 class MonomialMatrix {
-  friend std::ostream& operator<<(std::ostream& output, const MonomialMatrix& theMon) {
-    output << theMon.toString();
+  friend std::ostream& operator<<(std::ostream& output, const MonomialMatrix& monomial) {
+    output << monomial.toString();
     return output;
   }
   public:

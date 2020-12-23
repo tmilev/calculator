@@ -8,6 +8,7 @@
 #include "calculator_database_mongo.h"
 #include "calculator_problem_storage.h"
 #include "string_constants.h"
+#include "crypto.h"
 
 bool Database::User::setPassword(
   const std::string& inputUsername,
@@ -470,21 +471,21 @@ bool ProblemDataAdministrative::getWeightFromCourse(
   const std::string& theCourseNonURLed, Rational& output, std::string* outputAsGivenByInstructor
 ) {
   MacroRegisterFunctionWithName("ProblemDataAdministrative::GetWeightFromSection");
-  if (!this->problemWeightsPerCoursE.contains(theCourseNonURLed)) {
+  if (!this->problemWeightsPerCourse.contains(theCourseNonURLed)) {
     return false;
   }
   std::string tempString;
   if (outputAsGivenByInstructor == nullptr) {
     outputAsGivenByInstructor = &tempString;
   }
-  *outputAsGivenByInstructor = this->problemWeightsPerCoursE.getValueCreate(theCourseNonURLed);
+  *outputAsGivenByInstructor = this->problemWeightsPerCourse.getValueCreate(theCourseNonURLed);
   return output.assignStringFailureAllowed(*outputAsGivenByInstructor);
 }
 
 std::string ProblemDataAdministrative::toString() const {
   std::stringstream out;
   out << this->deadlinesPerSection.toStringHtml();
-  out << this->problemWeightsPerCoursE.toStringHtml();
+  out << this->problemWeightsPerCourse.toStringHtml();
   return out.str();
 }
 
@@ -1577,20 +1578,20 @@ EmailRoutines::EmailRoutines() {
 }
 
 bool Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded(
-  UserCalculatorData& theUseR,
+  UserCalculatorData& user,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral,
   bool& tokenIsGood
 ) {
   (void) commentsOnFailure;
-  (void) theUseR;
+  (void) user;
   (void) commentsGeneral;
   if (!global.flagDatabaseCompiled) {
-    return Database::User::loginNoDatabaseSupport(theUseR, commentsGeneral);
+    return Database::User::loginNoDatabaseSupport(user, commentsGeneral);
   }
   MacroRegisterFunctionWithName("Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded");
   UserCalculator userWrapper;
-  userWrapper.::UserCalculatorData::operator=(theUseR);
+  userWrapper.::UserCalculatorData::operator=(user);
   if (userWrapper.enteredGoogleToken == "") {
     return false;
   }
@@ -1626,7 +1627,7 @@ bool Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded(
     if (commentsGeneral != nullptr) {
       *commentsGeneral << "Created new user with username: " << userWrapper.username;
     }
-    theUseR = userWrapper;
+    user = userWrapper;
     return true;
   }
   if (!userWrapper.loadFromDatabase(commentsOnFailure)) {
@@ -1638,12 +1639,12 @@ bool Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded(
   if (userWrapper.actualAuthenticationToken == "") {
     userWrapper.resetAuthenticationToken(commentsOnFailure);
   }
-  theUseR = userWrapper;
+  user = userWrapper;
   return true;
 }
 
 bool Database::User::loginNoDatabaseSupport(
-  UserCalculatorData& theUser, std::stringstream* commentsGeneral
+  UserCalculatorData& user, std::stringstream* commentsGeneral
 ) {
   if (global.flagDatabaseCompiled) {
     if (commentsGeneral != nullptr) {
@@ -1668,8 +1669,8 @@ bool Database::User::loginNoDatabaseSupport(
   // (or have troubles accessing it for some reason)
   // can still use the administrator functions of the calculator, for example,
   // modify problem files from the one-page app.
-  theUser.userRole = UserCalculatorData::Roles::administator;
-  theUser.actualAuthenticationToken = "compiledWithoutDatabaseSupport";
+  user.userRole = UserCalculatorData::Roles::administator;
+  user.actualAuthenticationToken = "compiledWithoutDatabaseSupport";
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "Automatic login as default: calculator compiled without DB. ";
   }
@@ -1677,17 +1678,17 @@ bool Database::User::loginNoDatabaseSupport(
 }
 
 bool Database::User::loginViaDatabase(
-  UserCalculatorData& theUseR,
+  UserCalculatorData& user,
   std::stringstream* commentsOnFailure
 ) {
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    return Database::User::loginNoDatabaseSupport(theUseR, commentsOnFailure);
+    return Database::User::loginNoDatabaseSupport(user, commentsOnFailure);
   }
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::loginViaDatabase");
   UserCalculator userWrapper;
-  userWrapper.::UserCalculatorData::operator=(theUseR);
+  userWrapper.::UserCalculatorData::operator=(user);
   if (userWrapper.authenticate(commentsOnFailure)) {
-    theUseR = userWrapper;
+    user = userWrapper;
     return true;
   }
   if (
@@ -1710,7 +1711,7 @@ bool Database::User::loginViaDatabase(
         userWrapper.actualActivationToken != "error"
       ) {
         if (userWrapper.enteredActivationToken == userWrapper.actualActivationToken) {
-          theUseR = userWrapper;
+          user = userWrapper;
           return true;
         }
       } else if (commentsOnFailure != nullptr) {
@@ -1747,7 +1748,7 @@ bool Database::User::loginViaDatabase(
           global << commentsOnFailure->str();
         }
       }
-      theUseR = userWrapper;
+      user = userWrapper;
       return true;
     }
   }
@@ -1785,16 +1786,13 @@ bool UserCalculator::storeToDatabase(bool doSetPassword, std::stringstream* comm
   );
 }
 
-//meld comment
-#include "crypto.h"
-
 std::string UserCalculator::getActivationAddressFromActivationToken(
-  const std::string& theActivationToken,
+  const std::string& activationToken,
   const std::string& calculatorBase,
   const std::string& inputUserNameUnsafe,
   const std::string& inputEmailUnsafe
 ) {
-  MacroRegisterFunctionWithName("UserCalculator::GetActivationLinkFromActivationToken");
+  MacroRegisterFunctionWithName("UserCalculator::getActivationAddressFromActivationToken");
   std::stringstream out;
   if (StringRoutines::stringBeginsWith(calculatorBase, "localhost")) {
     out << "https://" << calculatorBase;
@@ -1804,7 +1802,7 @@ std::string UserCalculator::getActivationAddressFromActivationToken(
     out << global.hopefullyPermanentWebAdress;
   }
   JSData theJS;
-  theJS[DatabaseStrings::labelActivationToken] = theActivationToken;
+  theJS[DatabaseStrings::labelActivationToken] = activationToken;
   theJS[DatabaseStrings::labelUsername] = inputUserNameUnsafe;
   theJS[DatabaseStrings::labelCalculatorRequest] = WebAPI::request::activateAccountJSON;
   theJS[DatabaseStrings::labelEmail] = inputEmailUnsafe;

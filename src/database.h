@@ -66,12 +66,12 @@ public:
     Database *owner;
     bool logoutViaDatabase();
     bool loginViaDatabase(
-      UserCalculatorData& theUseR,
+      UserCalculatorData& user,
       std::stringstream* commentsOnFailure
     );
-    bool loginNoDatabaseSupport(UserCalculatorData& theUser, std::stringstream* commentsGeneral);
+    bool loginNoDatabaseSupport(UserCalculatorData& user, std::stringstream* commentsGeneral);
     bool loginViaGoogleTokenCreateNewAccountIfNeeded(
-      UserCalculatorData& theUseR,
+      UserCalculatorData& user,
       std::stringstream* commentsOnFailure,
       std::stringstream* commentsGeneral,
       bool& tokenIsGood

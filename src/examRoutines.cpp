@@ -87,7 +87,7 @@ bool CalculatorHTML::mergeProblemWeight(
     ProblemData& currentProblemValue = outputAppendProblemInfo.getValueCreate(currentProblemName);
     JSData& currentWeight = currentProblem[DatabaseStrings::labelProblemWeight];
     if (currentWeight.theType == JSData::token::tokenString) {
-      currentProblemValue.adminData.problemWeightsPerCoursE.setKeyValue(currentCourse, currentWeight.theString);
+      currentProblemValue.adminData.problemWeightsPerCourse.setKeyValue(currentCourse, currentWeight.theString);
     } else if (currentWeight.theType == JSData::token::tokenObject) {
       for (int i = 0; i < currentWeight.objects.size(); i ++) {
         if (currentWeight.objects.theValues[i].theType != JSData::token::tokenString) {
@@ -98,7 +98,7 @@ bool CalculatorHTML::mergeProblemWeight(
           }
           return false;
         }
-        currentProblemValue.adminData.problemWeightsPerCoursE.setKeyValue(
+        currentProblemValue.adminData.problemWeightsPerCourse.setKeyValue(
           currentWeight.objects.theKeys[i],
           currentWeight.objects.theValues[i].theString
         );
@@ -193,20 +193,20 @@ QuerySet CalculatorHTML::toQuerySetProblemWeights(
   output.nestedLabels.addOnTop(DatabaseStrings::labelProblemWeight);
   for (int i = 0; i < inputProblemInfo.size(); i ++) {
     ProblemDataAdministrative& currentProblem = inputProblemInfo.theValues[i].adminData;
-    if (currentProblem.problemWeightsPerCoursE.size() == 0) {
+    if (currentProblem.problemWeightsPerCourse.size() == 0) {
       continue;
     }
     std::string currentProblemName = inputProblemInfo.theKeys[i];
     JSData currentProblemJSON;
-    for (int j = 0; j < currentProblem.problemWeightsPerCoursE.size(); j ++) {
+    for (int j = 0; j < currentProblem.problemWeightsPerCourse.size(); j ++) {
       std::string currentWeight = StringRoutines::stringTrimWhiteSpace(
-        currentProblem.problemWeightsPerCoursE.theValues[j]
+        currentProblem.problemWeightsPerCourse.theValues[j]
       );
       if (currentWeight == "") {
         continue;
       }
       std::string currentCourse = StringRoutines::stringTrimWhiteSpace(
-        currentProblem.problemWeightsPerCoursE.theKeys[j]
+        currentProblem.problemWeightsPerCourse.theKeys[j]
       );
       currentProblemJSON[currentCourse] = currentWeight;
     }
@@ -241,9 +241,9 @@ bool CalculatorHTML::mergeOneProblemAdminData(
   MapList<std::string, std::string, MathRoutines::hashString>&
   incomingDeadlines = inputProblemInfo.adminData.deadlinesPerSection;
   MapList<std::string, std::string, MathRoutines::hashString>&
-  currentWeightS = currentProblem.problemWeightsPerCoursE;
+  currentWeightS = currentProblem.problemWeightsPerCourse;
   MapList<std::string, std::string, MathRoutines::hashString>&
-  incomingWeightS = inputProblemInfo.adminData.problemWeightsPerCoursE;
+  incomingWeightS = inputProblemInfo.adminData.problemWeightsPerCourse;
 
   for (int i = 0; i < incomingDeadlines.size(); i ++) {
     if (this->databaseStudentSections.size >= 1000) {

@@ -1505,7 +1505,9 @@ class OrbitIterator {
 public:
   struct GroupActionWithName {
     typedef void (*GroupAction)(
-      const elementGroup& actingElement, const elementRepresentation& inputElementActedUpon, elementRepresentation& output
+      const elementGroup& actingElement,
+      const elementRepresentation& inputElementActedUpon,
+      elementRepresentation& output
     );
     OrbitIterator::GroupActionWithName::GroupAction actOn;
     std::string name;

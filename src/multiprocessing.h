@@ -112,7 +112,7 @@ public:
   // False result should normally be a fatal error but
   // may be handled gracefully for stability reasons.
   bool unlock();
-  static void release(int& theDescriptor);
+  static void release(int& descriptor);
   MutexProcess();
   ~MutexProcess();
 };

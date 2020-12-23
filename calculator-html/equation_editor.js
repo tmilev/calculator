@@ -2112,6 +2112,10 @@ class EquationEditor {
         this.writeLatexFromInput();
       });
     }
+    /** @type {MathNode|null} Used to write to the last focused node.*/
+    this.lastModified = null;
+    /** @type{number} */
+    this.lastCaretPosition = - 1;
   }
 
   updateDOM() {
@@ -2174,20 +2178,20 @@ class EquationEditor {
     this.container.setAttribute("latexsource", latex);
   }
 
-  writeLatexToFocused(
+  writeLatexLastFocused(
     /**@type {string} */
     latex,
   ) {
-    let toWriteTo = this.rootNode.findFirstFocusedChild();
-    if (toWriteTo === null) {
-      toWriteTo = this.rootNode.rightmostAtomChild();
+    if (this.lastModified === null) {
+      let toWriteTo = this.rootNode.rightmostAtomChild();
       if (toWriteTo === null) {
         console.log("Unexpected failure to find atom child.");
         return;
       }
       toWriteTo.positionCaretBeforeKeyEvents = toWriteTo.textContentOrInitialContent().length;
+      return;
     }
-    toWriteTo.writeLatex(latex);
+    this.lastModified.writeLatex(latex);
   }
 
   accountFrameTime(
@@ -2199,6 +2203,18 @@ class EquationEditor {
     if (elapsedTime > 100) {
       console.log(`Warning: last equation editor frame took a full ${elapsedTime}ms.`);
     }
+  }
+
+  setLastModified(
+    /**@type{MathNode|null} */
+    lastModified,
+  ) {
+    this.lastModified = lastModified;
+    if (this.lastModified === null) {
+      this.lastCaretPosition = - 1;
+      return;
+    }
+    this.lastCaretPosition = lastModified.positionCaretBeforeKeyEvents;
   }
 
   toHtml() {
@@ -2890,15 +2906,18 @@ class MathNode {
     e,
   ) {
     if (!this.equationEditor.options.editable) {
+      this.storeCaretPosition("", false);
       return;
     }
     if (this.type.type === knownTypes.atom.type) {
       e.stopPropagation();
+      this.storeCaretPosition("", false);
       return;
     }
     e.stopPropagation();
     e.preventDefault();
     this.focus(1);
+    this.storeCaretPosition("", false);
   }
 
   /** @returns {MathNode|null} */
@@ -3773,6 +3792,7 @@ class MathNode {
 
   handleFocus(e) {
     this.element.style.background = "#f0f0f0";
+    this.storeCaretPosition("", false);
     this.focused = true;
   }
 
@@ -3915,6 +3935,7 @@ class MathNode {
     event.preventDefault();
     let data = event.clipboardData.getData('text');
     event.preventDefault();
+    this.storeCaretPosition("", false);
     this.writeLatex(data);
   }
 
@@ -3925,7 +3946,6 @@ class MathNode {
     if (this.type.type !== knownTypes.atom.type) {
       return;
     }
-    this.storeCaretPosition();
     let parser = new LaTeXParser(this.equationEditor, data);
     let newContent = parser.parse();
     if (newContent === null) {
@@ -3948,6 +3968,7 @@ class MathNode {
     parent.normalizeHorizontalMath();
     parent.updateDOM();
     parent.focusRestore();
+    this.storeCaretPosition();
   }
 
   /** @returns {KeyHandlerResult} whether default should be prevented. */
@@ -4313,6 +4334,7 @@ class MathNode {
   ) {
     if (this.type.type !== knownTypes.atom.type) {
       this.positionCaretBeforeKeyEvents = - 1;
+      this.equationEditor.setLastModified(null);
       return;
     }
     let previousPosition = this.positionCaretBeforeKeyEvents;
@@ -4326,6 +4348,8 @@ class MathNode {
     if (key === "ArrowRight" && previousPosition === this.positionCaretBeforeKeyEvents && !shiftHeld) {
       this.positionCaretBeforeKeyEvents = range.startOffset;
     }
+    this.equationEditor.setLastModified(this);
+
     this.equationEditor.positionDebugString = `Computed position: ${this.positionCaretBeforeKeyEvents}.`
     this.equationEditor.positionDebugString += `Range: [${range}], clone: [${rangeClone}], previous position: ${previousPosition}.`;
     this.equationEditor.positionDebugString += `end offset: ${range.endOffset}, start offset: ${range.startOffset}`;
@@ -6243,6 +6267,15 @@ class MathNodeError extends MathNode {
     equationEditor,
   ) {
     super(equationEditor, knownTypes.error);
+  }
+  applyBackspaceToTheRight() {
+    let parent = this.parent;
+    parent.children[this.indexInParent + 1].desiredCaretPosition = 0;
+    parent.removeChild(this.indexInParent);
+    parent.normalizeHorizontalMath();
+    parent.updateDOM();
+    parent.focusRestore();
+    return true;
   }
 }
 

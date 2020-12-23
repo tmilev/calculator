@@ -79,7 +79,7 @@ var MathQuillCommandButtonCollection = {};
 
 class MathQuillCommandButton {
   constructor(inputCommand, inputLabel, inputAdditionalStyle, doWriteInsteadOfCmdInput, inputExtraDirection) {
-    this.theCommand = inputCommand;
+    this.command = inputCommand;
     this.theLabel = inputLabel;
     this.isComposite = false;
     this.extraDirection = inputExtraDirection;
@@ -89,7 +89,7 @@ class MathQuillCommandButton {
     }
     this.id = "";
     if (!this.isComposite) {
-      this.id = this.theCommand;
+      this.id = this.command;
     } else {
       this.id = "";
       for (var i = 0; i < inputCommand.length; i++) {
@@ -130,28 +130,28 @@ class MathQuillCommandButton {
     inputPanel,
   ) {
     let editor = inputPanel.equationEditor;
-    var doCMD = !this.doWriteInsteadOfCmd;
+    let doCMD = !this.doWriteInsteadOfCmd;
     if (!this.isComposite) {
       if (doCMD) {
-        editor.writeLatexToFocused(this.theCommand);
+        editor.writeLatexLastFocused(this.command);
       } else {
-        editor.writeLatex(this.theCommand);
+        editor.writeLatexLastFocused(this.command);
       }
     } else {
-      for (var i = 0; i < this.theCommand.length; i++) {
+      for (let i = 0; i < this.command.length; i++) {
         if (!doCMD) {
           if (
-            this.theCommand[i] === '(' ||
-            this.theCommand[i] === ')' ||
-            this.theCommand[i] === ' '
+            this.command[i] === '(' ||
+            this.command[i] === ')' ||
+            this.command[i] === ' '
           ) {
             doCMD = true;
           }
         }
         if (doCMD) {
-          editor.writeLatexToFocused(this.theCommand[i]);
+          editor.writeLatexLastFocused(this.command[i]);
         } else {
-          editor.writeLatex(this.theCommand[i]);
+          editor.writeLatexLastFocused(this.command[i]);
         }
       }
     }
@@ -170,7 +170,7 @@ function mathQuillCommandButton(inputCommand, inputLabel, additionalStyle, doWri
 
 mathQuillCommandButton("+", "+");
 mathQuillCommandButton("-", "-");
-mathQuillCommandButton("*", "*");
+mathQuillCommandButton("\\cdot", "\\cdot ");
 mathQuillCommandButton("/", "/");
 mathQuillCommandButton("sqrt", "&#8730;");
 mathQuillCommandButton("nthroot", "&#8731;");
@@ -595,7 +595,8 @@ class InputPanelData {
     this.timerForPreviewAnswers = setTimeout(this.submitPreview.bind(this), 4000);
   }
 
-  editLaTeX() { // useful event handlers
+  editLaTeX() {
+    // useful event handlers
     this.ignoreNextMathQuillUpdateEvent = true;
     this.mqObject.latex(document.getElementById(this.idPureLatex).value + ' ');
     this.ignoreNextMathQuillUpdateEvent = false;
@@ -607,12 +608,17 @@ class InputPanelData {
     unused,
     /**@type{equation_editor.MathNode} */
     unusedNode,
-  ) { // useful event handlers
+  ) {
+    // useful event handlers
     if (this.ignoreNextMathQuillUpdateEvent) {
       return;
     }
+    let latexBox = document.getElementById(this.idPureLatex);
+    if (latexBox === null) {
+      return;
+    }
     if (this.flagAnswerPanel) {
-      document.getElementById(this.idPureLatex).value = processMathQuillLatex(this.equationEditor.rootNode.toLatex());
+      latexBox.value = processMathQuillLatex(this.equationEditor.rootNode.toLatex());
       this.submitPreviewWithTimeOut();
       return;
     }
@@ -801,7 +807,7 @@ class InputPanelData {
     if (this.flagButtons.algebra.selected || noOptions || includeAll) {
       addCommand("+");
       addCommand("-");
-      addCommand("*");
+      addCommand("\\cdot");
       addCommand("/");
 
       addCommand("sqrt");

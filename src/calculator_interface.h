@@ -2427,24 +2427,24 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    int theAdditiveOp = - 1,
-    int theMultiplicativeOp = - 1,
+    int additiveOperation = - 1,
+    int multiplicativeOperation = - 1,
     bool constantsOnly = false
   );
   static bool leftDistributeBracketIsOnTheLeft(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    int theAdditiveOp = - 1,
-    int theMultiplicativeOp = - 1,
+    int additiveOperation = - 1,
+    int multiplicativeOperation = - 1,
     bool constantsOnly = false
   );
   static bool rightDistributeBracketIsOnTheRight(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    int theAdditiveOp = - 1,
-    int theMultiplicativeOp = - 1,
+    int additiveOperation = - 1,
+    int multiplicativeOperation = - 1,
     bool constantsOnly = false
   );
   static bool evaluateIf(Calculator& calculator, const Expression& input, Expression& output);

@@ -3040,7 +3040,6 @@ bool CalculatorLieTheory::embedG2InB3(Calculator& calculator, const Expression& 
   if (input.size() != 2) {
     return false;
   }
-
   output = input[1];
   if (!output.isOfType < ElementUniversalEnveloping<RationalFunction<Rational> > >()) {
     return output.makeError("Failed to convert argument to element of the Universal enveloping algebra. ", calculator);

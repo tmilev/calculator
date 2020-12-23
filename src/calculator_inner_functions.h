@@ -187,7 +187,6 @@ public:
   static bool floor(Calculator& calculator, const Expression& input, Expression& output);
   static bool round(Calculator& calculator, const Expression& input, Expression& output);
   static bool logarithmBaseNCeiling(Calculator& calculator, const Expression& input, Expression& output);
-
 };
 
 class CalculatorFunctionsListsAndSets {

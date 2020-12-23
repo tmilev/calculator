@@ -8,12 +8,12 @@
 
 std::string MutexProcess::currentProcessName = "S: ";
 
-void MutexProcess::release(int& theDescriptor) {
-  if (theDescriptor == - 1) {
+void MutexProcess::release(int& descriptor) {
+  if (descriptor == - 1) {
     return;
   }
-  close(theDescriptor);
-  theDescriptor = - 1;
+  close(descriptor);
+  descriptor = - 1;
 }
 
 PipePrimitive::PipePrimitive() {

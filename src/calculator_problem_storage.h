@@ -135,7 +135,7 @@ public:
 
 class ProblemDataAdministrative {
 public:
-  MapList<std::string, std::string, MathRoutines::hashString> problemWeightsPerCoursE;
+  MapList<std::string, std::string, MathRoutines::hashString> problemWeightsPerCourse;
   MapList<std::string, std::string, MathRoutines::hashString> deadlinesPerSection;
   bool getWeightFromCourse(
     const std::string& theCourseNonURLed,
@@ -161,7 +161,6 @@ public:
   ProblemDataAdministrative adminData;
   int numCorrectlyAnswered;
   int totalNumSubmissions;
-  //  int numAnswersSought;
   std::string commandsGenerateProblem;
   std::string commandsGenerateProblemNoEnclosures;
   std::string commandsGenerateProblemLink;
@@ -239,7 +238,7 @@ public:
   bool getActivationAbsoluteAddress(std::string& output, std::stringstream& comments);
   bool getActivationAddress(std::string& output, const std::string& calculatorBase, std::stringstream& comments);
   static std::string getActivationAddressFromActivationToken(
-    const std::string& theActivationToken,
+    const std::string& activationToken,
     const std::string& calculatorBase,
     const std::string& inputUserNameUnsafe,
     const std::string& inputEmailUnsafe

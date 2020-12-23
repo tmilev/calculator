@@ -553,16 +553,16 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
   this->firstNonZeroIndicesPerIntermediateSubtracand.initializeFillInObject(theSubtracands.size, 0);
   this->highlightMonsRemainders.initializeFillInObject(theRemainders.size,   dummyListList);
   this->highlightMonsSubtracands.initializeFillInObject(theSubtracands.size, dummyListList);
-  this->highlightMonsQuotients.initializeFillInObject(basis.size,   dummyListList);
-  this->highlightMonsDivisors.initializeFillInObject (basis.size,   dummyListList);
-  this->fcAnswerMonsRemainders.initializeFillInObject(theRemainders.size,    dummyList);
-  this->fcAnswerMonsSubtracands.initializeFillInObject(theSubtracands.size,  dummyList);
-  this->fcAnswerMonsQuotients.initializeFillInObject(basis.size,    dummyList);
-  this->fcAnswerMonsDivisors.initializeFillInObject (basis.size,    dummyList);
-  this->uncoverAllMonsRemainders.initializeFillInObject (theRemainders.size, 1);
+  this->highlightMonsQuotients.initializeFillInObject(basis.size, dummyListList);
+  this->highlightMonsDivisors.initializeFillInObject (basis.size, dummyListList);
+  this->fcAnswerMonsRemainders.initializeFillInObject(theRemainders.size, dummyList);
+  this->fcAnswerMonsSubtracands.initializeFillInObject(theSubtracands.size, dummyList);
+  this->fcAnswerMonsQuotients.initializeFillInObject(basis.size, dummyList);
+  this->fcAnswerMonsDivisors.initializeFillInObject(basis.size, dummyList);
+  this->uncoverAllMonsRemainders.initializeFillInObject(theRemainders.size, 1);
   this->uncoverAllMonsSubtracands.initializeFillInObject(theSubtracands.size, 1);
-  this->uncoverAllMonsQuotients.initializeFillInObject  (basis.size, 1);
-  this->uncoverAllMonsDivisors.initializeFillInObject   (basis.size, 1);
+  this->uncoverAllMonsQuotients.initializeFillInObject(basis.size, 1);
+  this->uncoverAllMonsDivisors.initializeFillInObject(basis.size, 1);
   this->uncoverMonsFinalRemainder.initializeFillInObject(this->allMonomials.size, - 1);
   this->additionalHighlightFinalRemainder.initializeFillInObject(this->allMonomials.size,- 1);
   this->additionalHighlightRemainders.initializeFillInObject(this->allMonomials.size, dummyList);
@@ -711,7 +711,6 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
   return out.str();
 }
 
-
 template <class Coefficient>
 std::string PolynomialDivisionReport<Coefficient>::getSpacedMonomialsWithHighlightLaTeX(
   const Polynomial<Coefficient>& thePoly,
@@ -851,7 +850,7 @@ template <class Coefficient>
 void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   int remainderIndex, int& currentSlideNumber
 ) {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::computeHighLightsFromRemainder");
+  MacroRegisterFunctionWithName("PolynomialDivisionReport::computeHighLightsFromRemainder");
   this->checkInitialization();
   auto& basis = this->owner->theBasis;
   if (remainderIndex == 0) {

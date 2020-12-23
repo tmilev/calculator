@@ -570,16 +570,16 @@ bool CalculatorBasics::distribute(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  int theAdditiveOp,
-  int theMultiplicativeOp,
+  int additiveOperation,
+  int multiplicativeOperation,
   bool constantsOnly
 ) {
   if (CalculatorBasics::leftDistributeBracketIsOnTheLeft(
     calculator,
     input,
     output,
-    theAdditiveOp,
-    theMultiplicativeOp,
+    additiveOperation,
+    multiplicativeOperation,
     constantsOnly
   )) {
     return true;
@@ -588,8 +588,8 @@ bool CalculatorBasics::distribute(
     calculator,
     input,
     output,
-    theAdditiveOp,
-    theMultiplicativeOp,
+    additiveOperation,
+    multiplicativeOperation,
     constantsOnly
   );
 }
@@ -613,21 +613,21 @@ bool CalculatorBasics::leftDistributeBracketIsOnTheLeft(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  int theAdditiveOp,
-  int theMultiplicativeOp,
+  int additiveOperation,
+  int multiplicativeOperation,
   bool constantsOnly
 ) {
   MacroRegisterFunctionWithName("CalculatorBasics::leftDistributeBracketIsOnTheLeft");
-  if (theAdditiveOp == - 1) {
-    theAdditiveOp = calculator.opPlus();
+  if (additiveOperation == - 1) {
+    additiveOperation = calculator.opPlus();
   }
-  if (theMultiplicativeOp == - 1) {
-    theMultiplicativeOp = calculator.opTimes();
+  if (multiplicativeOperation == - 1) {
+    multiplicativeOperation = calculator.opTimes();
   }
-  if (!input.startsWith(theMultiplicativeOp, 3)) {
+  if (!input.startsWith(multiplicativeOperation, 3)) {
     return false;
   }
-  if (!input[1].startsWith(theAdditiveOp, 3)) {
+  if (!input[1].startsWith(additiveOperation, 3)) {
     return false;
   }
   if (constantsOnly) {
@@ -636,30 +636,30 @@ bool CalculatorBasics::leftDistributeBracketIsOnTheLeft(
     }
   }
   Expression leftE, rightE;
-  leftE.makeXOX(calculator, theMultiplicativeOp, input[1][1], input[2]);
-  rightE.makeXOX(calculator, theMultiplicativeOp, input[1][2], input[2]);
-  return output.makeXOX(calculator, theAdditiveOp, leftE, rightE);
+  leftE.makeXOX(calculator, multiplicativeOperation, input[1][1], input[2]);
+  rightE.makeXOX(calculator, multiplicativeOperation, input[1][2], input[2]);
+  return output.makeXOX(calculator, additiveOperation, leftE, rightE);
 }
 
 bool CalculatorBasics::rightDistributeBracketIsOnTheRight(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  int theAdditiveOp,
-  int theMultiplicativeOp,
+  int additiveOperation,
+  int multiplicativeOperation,
   bool constantsOnly
 ) {
   MacroRegisterFunctionWithName("Calculator::rightDistributeBracketIsOnTheRight");
-  if (theAdditiveOp == - 1) {
-    theAdditiveOp = calculator.opPlus();
+  if (additiveOperation == - 1) {
+    additiveOperation = calculator.opPlus();
   }
-  if (theMultiplicativeOp == - 1) {
-    theMultiplicativeOp = calculator.opTimes();
+  if (multiplicativeOperation == - 1) {
+    multiplicativeOperation = calculator.opTimes();
   }
-  if (!input.startsWith(theMultiplicativeOp, 3)) {
+  if (!input.startsWith(multiplicativeOperation, 3)) {
     return false;
   }
-  if (!input[2].startsWith(theAdditiveOp, 3)) {
+  if (!input[2].startsWith(additiveOperation, 3)) {
     return false;
   }
   if (constantsOnly) {
@@ -669,9 +669,9 @@ bool CalculatorBasics::rightDistributeBracketIsOnTheRight(
   }
 //  int theFormat = input.format;
   Expression leftE, rightE;
-  leftE.makeXOX(calculator, theMultiplicativeOp, input[1], input[2][1]);
-  rightE.makeXOX(calculator, theMultiplicativeOp, input[1], input[2][2]);
-  return output.makeXOX(calculator, theAdditiveOp, leftE, rightE);
+  leftE.makeXOX(calculator, multiplicativeOperation, input[1], input[2][1]);
+  rightE.makeXOX(calculator, multiplicativeOperation, input[1], input[2][2]);
+  return output.makeXOX(calculator, additiveOperation, leftE, rightE);
 }
 
 bool Calculator::collectCoefficientsPowersVariables(

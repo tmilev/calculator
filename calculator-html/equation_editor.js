@@ -3055,10 +3055,8 @@ class MathNode {
 
   computeDimensionsAtomic() {
     let boundingRecangleDOM = this.element.getBoundingClientRect();
-    // With the extra pixel below missing, the position/presence of the caret may make the 
-    // text wobble.
-    this.boundingBox.width = boundingRecangleDOM.width + 1;
-    this.boundingBox.height = boundingRecangleDOM.height + 1;
+    this.boundingBox.width = boundingRecangleDOM.width;
+    this.boundingBox.height = boundingRecangleDOM.height;
     this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
   }
 

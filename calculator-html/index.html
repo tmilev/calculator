@@ -143,7 +143,18 @@
     <div id="divSolvePage" class="divPage">
       <div class="centerHorizontally">
         Type your problem here [<b style="color:red">Experimental feature</b>].<br>
-        <div id="editorSolveProblem" style="font-family: ' Times New Roman'; font-size: 72px;"></div><br><br>
+        <table style="margin: auto;">
+          <tr>
+            <td>
+              <div id="editorSolveProblem" style="font-family: ' Times New Roman'; font-size: 72px;"></div>
+            </td>
+            <td>
+              <div id="editorSolveButtonPanel" class="buttonPanel"
+                buttons="algebra, logarithms, trig, angles, infinity"></div>
+            </td>
+          </tr>
+        </table>
+        <br>
         <button id="buttonSolve" class="buttonSolve">Solve</button><br>
         <div id="editorSolveProblemDebug"></div>
         <hr>

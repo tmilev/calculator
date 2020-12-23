@@ -11,6 +11,7 @@ var domElements = {
       buttonSelectSolvePage: "buttonSelectSolvePage",
       buttonSolve: "buttonSolve",
       editor: "editorSolveProblem",
+      editorButtonPanel: "editorSolveButtonPanel",
       editorSolveProblemDebug: "editorSolveProblemDebug",
       solutionBox: "solutionBox",
     },

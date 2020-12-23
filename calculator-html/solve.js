@@ -1,18 +1,20 @@
 "use strict";
-const editor = require("./equation_editor");
-const EquationEditor = editor.EquationEditor;
 const ids = require("./ids_dom_elements");
 const pathnames = require("./pathnames");
 const submit = require("./submit_requests");
 const calculator = require("./calculator_page");
 const miscellaneous = require("./miscellaneous");
-const equation_editor = require("./equation_editor");
+const equationEditor = require("./equation_editor");
+const EquationEditor = require("./equation_editor").EquationEditor;
 const storage = require("./storage").storage;
+const InputPanelData = require("./initialize_buttons").InputPanelData;
 
 class Solver {
   constructor() {
     /**@type{EquationEditor|null} */
     this.equationEditor = null;
+    /**@type{InputPanelData|null} */
+    this.panel = null;
     /**@type{string|null} */
     this.pendingTypeset = null;
     /**@type{HTMLElement} */
@@ -27,8 +29,16 @@ class Solver {
     if (this.equationEditor !== null) {
       return;
     }
-    let editorElement = document.getElementById(ids.domElements.pages.solve.editor);
-    this.equationEditor = new EquationEditor(editorElement, null);
+    this.panel = new InputPanelData({
+      idMQSpan: ids.domElements.pages.solve.editor,
+      problemId: "",
+      idButtonContainer: ids.domElements.pages.solve.editorButtonPanel,
+      flagCalculatorPanel: true,
+      buttonsPerLine: 8,
+    });
+    this.panel.initialize();
+
+    this.equationEditor = this.panel.equationEditor;
     this.setDebugLogContainer();
     this.equationEditor.updateDOM();
     this.equationEditor.rootNode.focus(0);
@@ -62,7 +72,7 @@ class Solver {
     }
     if (this.flagPendingSolutionTypeset) {
       this.flagPendingSolutionTypeset = false;
-      equation_editor.typeset(this.solutionBox);
+      equationEditor.typeset(this.solutionBox);
     }
     if (this.pendingTypeset === null) {
       return;

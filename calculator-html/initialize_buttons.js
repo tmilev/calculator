@@ -33,16 +33,11 @@ var keyWordsKnownToMathQuill = [
   'cap',
 ];
 
-var studentScoresInHomePage = [];
 var charsToSplit = ['x', 'y'];
 var panelsCollapseStatus = {};
 var calculatorSeparatorLeftDelimiters = {
   '(': true,
   '{': true
-};
-var calculatorSeparatorRightDelimiters = {
-  ')': true,
-  '}': true
 };
 var startingCharacterSectionUnderMathQuillEdit = '';
 var panelDataRegistry = {};
@@ -163,7 +158,6 @@ class MathQuillCommandButton {
     if (this.extraDirection !== undefined) {
       console.log("DEBUG: Extra direction not implemented");
     }
-    editor.focus();
   }
 }
 
@@ -281,6 +275,27 @@ function initializeCalculatorPage() {
   calculatorPanel.initialize();
 }
 
+class ButtonCollection {
+  constructor(
+    /**@type {Object} */
+    keywords
+  ) {
+    this.selected = false;
+    this.keywords = keywords;
+  }
+  updateFlags(
+    /** @type{Object.<string, string} */
+    allFlags,
+  ) {
+    for (let keyword in this.keywords) {
+      if (keyword in allFlags) {
+        this.selected = true;
+        return;
+      }
+    }
+  }
+}
+
 class InputPanelData {
   constructor(input) {
     //to serve autocomplete:
@@ -289,8 +304,96 @@ class InputPanelData {
     this.idMQcomments = input.idMQcomments;
     this.problemId = input.problemId;
 
+    this.buttonsPerLine = input.buttonsPerLine;
+    if (this.buttonsPerLine === null || this.buttonsPerLine === undefined) {
+      this.buttonsPerLine = 4;
+    }
     this.flagRendered = false;
 
+    this.requestedButtons = [];
+    this.flagButtons = {
+      noPreference: new ButtonCollection({}),
+      all: new ButtonCollection({
+        "all": true,
+      }),
+      trigonometry: new ButtonCollection({
+        "trig": true,
+        "trigonometry": true,
+      }),
+      algebra: new ButtonCollection({
+        "algebra": true,
+      }),
+      inverseTrigonometry: new ButtonCollection({
+        "inversetrig": true,
+        "inverse_trig": true,
+        "inverse-trig": true,
+        "inversetrigonometry": true,
+        "inverse_trigonometry": true,
+        "inverse-trigonometry": true,
+        "inverse trigonometry": true,
+      }),
+      comma: new ButtonCollection({
+        "brackets": true,
+        "comma": true,
+        "commas": true,
+        "intervals": true,
+      }),
+      logarithms: new ButtonCollection({
+        "logarithms": true,
+        "logarithm": true,
+      }),
+      brackets: new ButtonCollection({
+        "brackets": true,
+        "intervals": true,
+      }),
+      variables: new ButtonCollection({
+        "variables": true,
+      }),
+      complex: new ButtonCollection({
+        "complex": true,
+        "imaginary": true,
+      }),
+      infinity: new ButtonCollection({
+        "infinity": true,
+        "infty": true,
+        "\\infty": true,
+        "interval": true,
+        "intervals": true,
+        "limits": true,
+        "limit": true,
+      }),
+      limits: new ButtonCollection({
+        "limits": true,
+        "limit": true,
+      }),
+      series: new ButtonCollection({
+        "sum": true,
+        "series": true,
+      }),
+      angles: new ButtonCollection({
+        "angle": true,
+        "angles": true,
+      }),
+      newtonsMethod: new ButtonCollection({
+        "newtonsmethod": true,
+        "newton": true,
+        "newton's method": true,
+        "newtons method": true,
+      }),
+      logical: new ButtonCollection({
+        "interval": true,
+        "intervals": true,
+        "or": true,
+      }),
+      setOperations: new ButtonCollection({
+        "interval": true,
+        "intervals": true,
+      }),
+      matrix: new ButtonCollection({
+        "matrix": true,
+        "matrices": true,
+      }),
+    };
     this.idPureLatex = input.idPureLatex;
     this.idButtonContainer = input.idButtonContainer;
     this.idExpandCollapseToggle = input.idButtonContainer + "_expand_collapse_toggle";
@@ -342,15 +445,14 @@ class InputPanelData {
     }
   }
 
-
   mQHelpCalculator() {
     this.getSemiColumnEnclosure();
-    if (this.mqObject === null) {
+    if (this.equationEditor === null) {
       return;
     }
     this.ignoreNextMathQuillUpdateEvent = true;
     if (this.flagCalculatorMQStringIsOK) {
-      this.mqObject.latex(this.theLaTeXString);
+      this.equationEditor.rootNode.toLatex(this.theLaTeXString);
     }
     this.ignoreNextMathQuillUpdateEvent = false;
   }
@@ -656,32 +758,47 @@ class InputPanelData {
     this.chopStrings();
   }
 
+  computeFlags(
+    /**@type {boolean} */
+    forceShowAll,
+  ) {
+    let currentButtonPanel = document.getElementById(this.idButtonContainer);
+    let buttonsNonSplit = currentButtonPanel.getAttribute("buttons");
+    if (buttonsNonSplit === null) {
+      buttonsNonSplit = "";
+    }
+    let buttonArray = buttonsNonSplit.split(/(?:,| ) +/);
+    this.flagButtons.noPreference.selected = false;
+    this.flagButtons.all.selected = false;
+    if (forceShowAll) {
+      this.flagButtons.all.selected = true;
+    }
+    let allFlags = {};
+    for (let i = 0; i < buttonArray.length; i++) {
+      allFlags[buttonArray[i].toLowerCase()] = true;
+    }
+    if (buttonArray.length === 0) {
+      this.flagButtons.noPreference.selected = true;
+    }
+    if (buttonArray.length === 1 && "" in allFlags) {
+      this.flagButtons.noPreference.selected = true;
+    }
+    for (let key in this.flagButtons) {
+      let flag = this.flagButtons[key];
+      flag.updateFlags(allFlags);
+    }
+  }
+
   initializePartTwo(forceShowAll) {
-    var currentButtonPanel = document.getElementById(this.idButtonContainer);
-    var buttonsNonSplit = currentButtonPanel.attributes.buttons.value.toLowerCase();
-    var buttonArray = buttonsNonSplit.split(/(?:,| ) +/);
-    //console.log(buttonArray);
-    var buttonBindings = [];
+    this.computeFlags(forceShowAll);
+    let buttonBindings = [];
     function addCommand(theCmd) {
       buttonBindings.push(MathQuillCommandButtonCollection[theCmd]);
     }
-    var noOptions = false;
-    var includeAll = false;
-    if (forceShowAll) {
-      includeAll = true;
-    }
-    if (buttonArray.indexOf("all") > - 1) {
-      includeAll = true;
-    }
-    if (buttonArray.length === 0) {
-      noOptions = true;
-    }
-    if (buttonArray.length === 1) {
-      if (buttonArray[0] === "") {
-        noOptions = true;
-      }
-    }
-    if (buttonArray.indexOf("algebra") > - 1 || noOptions || includeAll) {
+    let currentButtonPanel = document.getElementById(this.idButtonContainer);
+    let noOptions = this.flagButtons.noPreference.selected;
+    let includeAll = this.flagButtons.all.selected;
+    if (this.flagButtons.algebra.selected || noOptions || includeAll) {
       addCommand("+");
       addCommand("-");
       addCommand("*");
@@ -693,7 +810,7 @@ class InputPanelData {
       addCommand("(");
       addCommand(")");
     }
-    if (buttonArray.indexOf("trig") > - 1 || includeAll) {
+    if (this.flagButtons.trigonometry.selected || includeAll) {
       addCommand("sin");
       addCommand("cos");
       addCommand("tan");
@@ -701,70 +818,39 @@ class InputPanelData {
       addCommand("sec");
       addCommand("csc");
     }
-    if (
-      buttonArray.indexOf("inversetrig") > - 1 ||
-      buttonArray.indexOf("inverse_trig") > - 1 ||
-      buttonArray.indexOf("inverse-trig") > - 1 ||
-      buttonArray.indexOf("inverseTrig") > - 1 ||
-      buttonArray.indexOf("InverseTrig") > - 1 ||
-      buttonArray.indexOf("inversetrigonometry") > - 1 ||
-      buttonArray.indexOf("inverse_trigonometry") > - 1 ||
-      buttonArray.indexOf("inverse-trigonometry") > - 1 ||
-      includeAll
-    ) {
+    if (this.flagButtons.inverseTrigonometry.selected || includeAll) {
       addCommand("arcsin");
       addCommand("arccos");
       addCommand("arctan");
     }
-    if (
-      buttonArray.indexOf("brackets") > - 1 ||
-      buttonArray.indexOf("comma") > - 1 ||
-      buttonArray.indexOf("commas") > - 1 ||
-      buttonArray.indexOf("intervals") > - 1 ||
-      includeAll
-    ) {
+    if (this.flagButtons.comma.selected || includeAll) {
       addCommand(",");
     }
-    if (
-      buttonArray.indexOf("brackets") > - 1 ||
-      buttonArray.indexOf("intervals") > - 1 ||
-      includeAll
-    ) {
+    if (this.flagButtons.brackets.selected || includeAll) {
       addCommand("[");
       addCommand("]");
     }
-    if (buttonArray.indexOf("complex") > - 1 || buttonArray.indexOf("imaginary") > - 1 || includeAll) {
+    if (this.flagButtons.complex.selected || includeAll) {
       addCommand("i");
     }
-    if (buttonArray.indexOf("variables") > - 1 || includeAll) {
+    if (this.flagButtons.variables.selected || includeAll) {
       addCommand("x");
       addCommand("y");
       addCommand("=");
     }
-    if (buttonArray.indexOf("logarithms") > - 1 || noOptions || includeAll) {
+    if (this.flagButtons.logarithms.selected || noOptions || includeAll) {
       addCommand("log_");
       addCommand("_");
       addCommand("ln");
       addCommand("e");
     }
-    if (
-      buttonArray.indexOf("infinity") > - 1 || buttonArray.indexOf("infty") > - 1 ||
-      buttonArray.indexOf("\infty") > - 1 ||
-      buttonArray.indexOf("interval") > - 1 ||
-      buttonArray.indexOf("intervals") > - 1 ||
-      buttonArray.indexOf("limits") > - 1 ||
-      buttonArray.indexOf("limit") > - 1 ||
-      includeAll || noOptions
-    ) {
+    if (this.flagButtons.infinity.selected || includeAll || noOptions) {
       addCommand("infty");
     }
-    if (buttonArray.indexOf("limits") > - 1 ||
-      buttonArray.indexOf("limit") > - 1 ||
-      includeAll) {
+    if (this.flagButtons.limits.selected || includeAll) {
       addCommand(" DNE ");
     }
-    if (buttonArray.indexOf("sum") > - 1 ||
-      buttonArray.indexOf("series") > - 1 || noOptions || includeAll) {
+    if (this.flagButtons.series.selected || noOptions || includeAll) {
       addCommand("binom");
       addCommand("!");
       addCommand("sum");
@@ -772,22 +858,21 @@ class InputPanelData {
     if (noOptions || includeAll) {
       addCommand("circ");
     }
-    if (buttonArray.indexOf("interval") > - 1 || buttonArray.indexOf("intervals") > - 1 ||
-      buttonArray.indexOf("or") > - 1 || noOptions || includeAll) {
+    if (this.flagButtons.logical.selected || noOptions || includeAll) {
       addCommand(" or ");
     }
-    if (buttonArray.indexOf("interval") > - 1 || buttonArray.indexOf("intervals") > - 1 || noOptions || includeAll) {
+    if (this.flagButtons.setOperations.selected || noOptions || includeAll) {
       addCommand("cup");
       addCommand("in");
       addCommand("emptyset");
     }
-    if (buttonArray.indexOf("matrix") > - 1 || buttonArray.indexOf("matrices") > - 1 || includeAll) {
+    if (this.flagButtons.matrix.selected || includeAll) {
       addCommand("\\begin{pmatrix} \\\\ \\end{pmatrix}");
       addCommand("\\begin{pmatrix} \\\\ \\\\ \\end{pmatrix}");
       addCommand("\\begin{pmatrix} & \\\\ & \\end{pmatrix}");
       addCommand("\\begin{pmatrix} & & \\\\ & & \\\\ & & \\end{pmatrix}");
     }
-    if (buttonArray.indexOf("angle") > - 1 || buttonArray.indexOf("angles") > - 1 || noOptions || includeAll) {
+    if (this.flagButtons.angles.selected || noOptions || includeAll) {
       addCommand("pi");
       addCommand("^circ");
       addCommand("alpha");
@@ -795,20 +880,12 @@ class InputPanelData {
       addCommand("gamma");
       addCommand("theta");
     }
-    if (
-      buttonArray.indexOf("NewtonsMethod") > - 1 ||
-      buttonArray.indexOf("newtonsmethod") > - 1 ||
-      buttonArray.indexOf("NewtonMethod") > - 1 ||
-      buttonArray.indexOf("newtonmethod") > - 1 ||
-      buttonArray.indexOf("newton") > - 1 ||
-      includeAll
-    ) {
+    if (this.flagButtons.newtonsMethod.selected || includeAll) {
       addCommand("NewtonsMethod (,,)");
     }
-    var theContent = "<table>";
-    var numButtonsPerLine = 4;
-    for (var j = 0; j < buttonBindings.length; j++) {
-      if (j % numButtonsPerLine === 0) {
+    let theContent = "<table>";
+    for (let j = 0; j < buttonBindings.length; j++) {
+      if (j % this.buttonsPerLine === 0) {
         if (j !== 0) {
           theContent += "</tr>";
         }
@@ -821,7 +898,7 @@ class InputPanelData {
     }
     theContent += "</table>";
     theContent += `<button href = '#' id = '${this.idExpandCollapseToggle}' class = "buttonShowExpandMQPanel"><small>Show all</small></button>`;
-    var oldHeight = window.getComputedStyle(currentButtonPanel).height;
+    let oldHeight = window.getComputedStyle(currentButtonPanel).height;
     //console.log("oldHeight: " + oldHeight);
     currentButtonPanel.style.maxHeight = "";
     currentButtonPanel.style.height = "";

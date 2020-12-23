@@ -2189,6 +2189,7 @@ class EquationEditor {
         return;
       }
       toWriteTo.positionCaretBeforeKeyEvents = toWriteTo.textContentOrInitialContent().length;
+      toWriteTo.writeLatex(latex);
       return;
     }
     this.lastModified.writeLatex(latex);
@@ -3968,7 +3969,6 @@ class MathNode {
     parent.normalizeHorizontalMath();
     parent.updateDOM();
     parent.focusRestore();
-    this.storeCaretPosition();
   }
 
   /** @returns {KeyHandlerResult} whether default should be prevented. */
@@ -5849,6 +5849,7 @@ class MathNode {
       position = this.element.textContent.length;
     }
     this.setCaretPosition(position);
+    this.equationEditor.setLastModified(this);
     this.desiredCaretPosition = -1;
     return true;
   }
@@ -5970,6 +5971,7 @@ class MathNode {
     range.collapse(collapseToStart);
     window.getSelection().removeAllRanges();
     window.getSelection().addRange(range);
+    this.positionCaretBeforeKeyEvents = position;
     //    this.element.focus();
   }
 

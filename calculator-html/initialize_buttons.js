@@ -170,7 +170,7 @@ function mathQuillCommandButton(inputCommand, inputLabel, additionalStyle, doWri
 
 mathQuillCommandButton("+", "+");
 mathQuillCommandButton("-", "-");
-mathQuillCommandButton("\\cdot", "\\cdot ");
+mathQuillCommandButton("\\cdot", "*");
 mathQuillCommandButton("/", "/");
 mathQuillCommandButton("sqrt", "&#8730;");
 mathQuillCommandButton("nthroot", "&#8731;");
@@ -889,7 +889,7 @@ class InputPanelData {
     if (this.flagButtons.newtonsMethod.selected || includeAll) {
       addCommand("NewtonsMethod (,,)");
     }
-    let theContent = "<table>";
+    let theContent = "<table style='margin:auto'>";
     for (let j = 0; j < buttonBindings.length; j++) {
       if (j % this.buttonsPerLine === 0) {
         if (j !== 0) {

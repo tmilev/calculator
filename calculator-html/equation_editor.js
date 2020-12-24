@@ -439,8 +439,8 @@ class MathNodeFactory {
     denominatorContent,
   ) {
     const fraction = new MathNodeFraction(equationEditor);
-    const numerator = new MathNode(equationEditor, knownTypes.numerator);
-    const denominator = new MathNode(equationEditor, knownTypes.denominator);
+    const numerator = new MathNodeNumerator(equationEditor);
+    const denominator = new MathNodeDenominator(equationEditor);
     numerator.appendChild(this.horizontalMath(equationEditor, numeratorContent));
     denominator.appendChild(this.horizontalMath(equationEditor, denominatorContent));
     fraction.appendChild(numerator);
@@ -516,7 +516,7 @@ class MathNodeFactory {
     radicalExponentBox.appendChild(this.horizontalMath(equationEditor, exponentContent));
     sqrt.appendChild(radicalExponentBox);
     sqrt.appendChild(mathNodeFactory.sqrtSign(equationEditor));
-    const underTheRadical = new MathNode(equationEditor, knownTypes.radicalUnderBox);
+    const underTheRadical = new MathNodeRadicalUnderBox(equationEditor);
     underTheRadical.appendChild(mathNodeFactory.horizontalMath(equationEditor, underTheRadicalContent));
     sqrt.appendChild(underTheRadical);
     return sqrt;
@@ -606,7 +606,7 @@ class MathNodeFactory {
     subscript,
   ) {
     // Horizontal math wrapper for the exponent.
-    const subscriptWrapped = new MathNode(equationEditor, knownTypes.subscript);
+    const subscriptWrapped = new MathNodeSubscript(equationEditor);
     let subscriptContainer = this.horizontalMath(equationEditor, subscript);
     subscriptContainer.normalizeHorizontalMath();
     subscriptContainer.ensureEditableAtoms();
@@ -4631,33 +4631,33 @@ class MathNode {
   }
 
   /** @returns {boolean} whether reduction occurred. */
-  applyBackspaceToTheLeftNumerator() {
-    if (this.type.type !== knownTypes.numerator.type) {
-      return false;
-    }
-    return this.applyBackspaceToTheLeftNumeratorOrDenominator();
+  applyBackspaceToTheLeftChildWithSiblingWrapper() {
+    let parent = this.parent;
+    let parentIndexInParent = parent.indexInParent;
+    let base = parent.children[0];
+    this.children[0].children[0].desiredCaretPosition = 0;
+    base.appendChild(this.children[0]);
+    base.normalizeHorizontalMath();
+    let parentParent = parent.parent;
+    parentParent.replaceChildAtPosition(parentIndexInParent, base);
+    parentParent.normalizeHorizontalMath();
+    parentParent.updateDOM();
+    parentParent.focusRestore();
+    return true;
   }
 
   /** @returns {boolean} whether reduction occurred. */
-  applyBackspaceToTheLeftDenominator() {
-    if (this.type.type !== knownTypes.denominator.type) {
-      return false;
-    }
-    return this.applyBackspaceToTheLeftNumeratorOrDenominator();
-  }
-
-  /** @returns {boolean} whether reduction occurred. */
-  applyBackspaceToTheLeftNumeratorOrDenominator() {
-    let fraction = this.parent;
-    let fractionIndexInParent = fraction.indexInParent;
-    let horizontal = fraction.children[0].children[0];
-    horizontal.appendChild(fraction.children[1].children[0]);
+  applyBackspaceToTheLeftWrapperChildWithSiblingWrapper() {
+    let parent = this.parent;
+    let parentIndexInParent = parent.indexInParent;
+    let horizontal = parent.children[0].children[0];
+    horizontal.appendChild(parent.children[1].children[0]);
     horizontal.normalizeHorizontalMath();
-    let fractionParent = fraction.parent;
-    fractionParent.replaceChildAtPosition(fractionIndexInParent, horizontal);
-    fractionParent.normalizeHorizontalMath();
-    fractionParent.updateDOM();
-    fractionParent.focusRestore();
+    let parentParent = parent.parent;
+    parentParent.replaceChildAtPosition(parentIndexInParent, horizontal);
+    parentParent.normalizeHorizontalMath();
+    parentParent.updateDOM();
+    parentParent.focusRestore();
     return true;
   }
 
@@ -4704,55 +4704,6 @@ class MathNode {
     let parent = operatorWithSuperAndSubscript.parent;
     let indexOperator = operatorWithSuperAndSubscript.indexInParent;
     parent.replaceChildAtPosition(indexOperator, horizontal);
-    parent.normalizeHorizontalMath();
-    parent.updateDOM();
-    parent.focusRestore();
-    return true;
-  }
-
-  /** @returns {boolean} whether reduction occurred. */
-  applyBackspaceToTheLeftOfExponent() {
-    if (this.type.type !== knownTypes.exponent.type) {
-      return false;
-    }
-    return this.applyBackspaceToTheLeftOfExponentOrSubscript();
-  }
-
-  /** @returns {boolean} whether reduction occurred. */
-  applyBackspaceToTheLeftOfSubscript() {
-    if (this.type.type !== knownTypes.subscript.type) {
-      return false;
-    }
-    return this.applyBackspaceToTheLeftOfExponentOrSubscript();
-  }
-
-  /** @returns {boolean} whether reduction occurred. */
-  applyBackspaceToTheLeftOfExponentOrSubscript() {
-    let baseWithExponent = this.parent;
-    let indexBaseWithExponent = baseWithExponent.indexInParent;
-    let base = baseWithExponent.children[0];
-    this.children[0].children[0].desiredCaretPosition = 0;
-    base.appendChild(this.children[0]);
-    base.normalizeHorizontalMath();
-    let parent = baseWithExponent.parent;
-    parent.replaceChildAtPosition(indexBaseWithExponent, base);
-    parent.normalizeHorizontalMath();
-    parent.updateDOM();
-    parent.focusRestore();
-    return true;
-  }
-
-  /** @returns {boolean} whether reduction occurred. */
-  applyBackspaceToTheLeftOfSqrtSign() {
-    if (this.type.type !== knownTypes.radicalUnderBox.type) {
-      return false;
-    }
-    let sqrt = this.parent;
-    let indexSqrt = sqrt.indexInParent;
-    let exponent = sqrt.children[0].children[0];
-    this.children[0].children[0].desiredCaretPosition = 0;
-    let parent = sqrt.parent;
-    parent.replaceChildAtPositionWithChildren(indexSqrt, [exponent, sqrt.children[2].children[0]]);
     parent.normalizeHorizontalMath();
     parent.updateDOM();
     parent.focusRestore();
@@ -4826,21 +4777,6 @@ class MathNode {
       // We've reached the root node by pushing backspace in the first position.
       this.focusCancelOnce();
       return false;
-    }
-    if (this.applyBackspaceToTheLeftNumerator()) {
-      return true;
-    }
-    if (this.applyBackspaceToTheLeftDenominator()) {
-      return true;
-    }
-    if (this.applyBackspaceToTheLeftOfExponent()) {
-      return true;
-    }
-    if (this.applyBackspaceToTheLeftOfSubscript()) {
-      return true;
-    }
-    if (this.applyBackspaceToTheLeftOfSqrtSign()) {
-      return true;
     }
     if (this.applyBackspaceToTheLeftOfCancelSign()) {
       return true;
@@ -6234,6 +6170,32 @@ class MathNodeFraction extends MathNode {
   }
 }
 
+class MathNodeNumerator extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.numerator);
+  }
+  /** @returns {boolean} whether reduction occurred. */
+  applyBackspaceToTheLeft() {
+    return this.applyBackspaceToTheLeftWrapperChildWithSiblingWrapper();
+  }
+}
+
+class MathNodeDenominator extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.denominator);
+  }
+  /** @returns {boolean} whether reduction occurred. */
+  applyBackspaceToTheLeft() {
+    return this.applyBackspaceToTheLeftWrapperChildWithSiblingWrapper();
+  }
+}
+
 class MathNodeBaseWithExponent extends MathNode {
   constructor(
     /** @type {EquationEditor} */
@@ -6375,6 +6337,21 @@ class MathNodeExponent extends MathNode {
   ) {
     super(equationEditor, knownTypes.exponent);
   }
+  applyBackspaceToTheLeft() {
+    this.applyBackspaceToTheLeftChildWithSiblingWrapper();
+  }
+}
+
+class MathNodeSubscript extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.subscript);
+  }
+  applyBackspaceToTheLeft() {
+    this.applyBackspaceToTheLeftChildWithSiblingWrapper();
+  }
 }
 
 class MathNodeBaseWithSubscript extends MathNode {
@@ -6448,6 +6425,28 @@ class MathNodeMatrix extends MathNode {
     result.push(rows.join("\\\\"));
     result.push("\\end{pmatrix}");
     return new LatexWithAnnotation(result.join(""), - 1, - 1);
+  }
+}
+
+class MathNodeRadicalUnderBox extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.radicalUnderBox);
+  }
+  /** @returns {boolean} whether reduction occurred. */
+  applyBackspaceToTheLeft() {
+    let sqrt = this.parent;
+    let indexSqrt = sqrt.indexInParent;
+    let exponent = sqrt.children[0].children[0];
+    this.children[0].children[0].desiredCaretPosition = 0;
+    let parent = sqrt.parent;
+    parent.replaceChildAtPositionWithChildren(indexSqrt, [exponent, sqrt.children[2].children[0]]);
+    parent.normalizeHorizontalMath();
+    parent.updateDOM();
+    parent.focusRestore();
+    return true;
   }
 }
 

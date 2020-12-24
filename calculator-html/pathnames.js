@@ -110,7 +110,8 @@ class Addresses {
   ) {
     let result = `${urls.calculatorAPI}?`;
     result += `${urlFields.request}=${urlFields.requests.solveJSON}&`;
-    result += `${urlFields.requests.calculatorInput}=${encodeURIComponent(problem)}&`;
+    let encodedProblem = encodeURIComponent(problem);
+    result += `${urlFields.requests.calculatorInput}=${encodedProblem}&`;
     if (debug) {
       result += `${urlFields.debugFlag}=true&`;
     }

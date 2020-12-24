@@ -1274,7 +1274,7 @@ class LaTeXConstants {
     this.utf8ToLatexMap = null;
   }
 
-  computeUtf8ToLatexMap() {
+  computeUtf16ToLatexMap() {
     if (this.utf8ToLatexMap !== null) {
       return;
     }
@@ -1283,6 +1283,8 @@ class LaTeXConstants {
       let character = String.fromCharCode(i);
       this.utf8ToLatexMap[character] = character;
     }
+    // Non-breakable space.
+    this.utf8ToLatexMap["\u00A0"] = " ";
     for (let key in this.latexBackslashAtomsEditable) {
       let current = this.latexBackslashAtomsEditable[key];
       this.utf8ToLatexMap[current] = `\\${key} `;
@@ -1313,7 +1315,7 @@ class LaTeXConstants {
   }
 
   /** @returns {LatexWithAnnotation} */
-  convertUtf8ToLatex(
+  convertUtf16ToLatex(
     /** @type{string} */
     input,
     /** @type{number} */
@@ -1321,7 +1323,7 @@ class LaTeXConstants {
     /** @type{number} */
     selectionEnd,
   ) {
-    this.computeUtf8ToLatexMap();
+    this.computeUtf16ToLatexMap();
     let result = [];
     for (let i = 0; i < input.length; i++) {
       let current = "";
@@ -2233,6 +2235,7 @@ class EquationEditor {
   toHtml() {
     let latexWithAnnotation = this.rootNode.toLatexWithAnnotation();
     let result = `Latex: ${latexWithAnnotation.latex}`;
+    result += `<br>URL-encoded: ${encodeURIComponent(latexWithAnnotation.latex)}`;
     if (this.lastFocused !== null) {
       result += `<br>Last modified: ${this.lastFocused.toString()}`;
       if (this.lastFocused.isDetached()) {
@@ -5919,7 +5922,7 @@ class MathNode {
         selectionStart = position;
       }
     }
-    return latexConstants.convertUtf8ToLatex(
+    return latexConstants.convertUtf16ToLatex(
       this.contentIfAtomic(),
       selectionStart,
       selectionEnd,
@@ -6490,7 +6493,7 @@ class MathNodeOperatorStandalone extends MathNode {
 
   /** @returns {LatexWithAnnotation} */
   toLatexWithAnnotation() {
-    latexConstants.computeUtf8ToLatexMap();
+    latexConstants.computeUtf16ToLatexMap();
     const content = this.textContentOrInitialContent();
     if (content in latexConstants.utf8ToLatexMap) {
       return new LatexWithAnnotation(latexConstants.utf8ToLatexMap[content]);

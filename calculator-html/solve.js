@@ -116,7 +116,9 @@ class Solver {
     let debug = storage.variables.flagDebug.isTrue();
     submit.submitGET({
       url: pathnames.addresses.solveJSON(input, debug),
-      callback: (input) => { this.solveCallback(input); },
+      callback: (input) => {
+        this.solveCallback(input);
+      },
       progress: ids.domElements.spanProgressReportGeneral,
     });
   }

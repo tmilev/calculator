@@ -6,6 +6,7 @@ const ids = require("./ids_dom_elements");
 const typeset = require("./math_typeset");
 const miscellaneous = require("./miscellaneous");
 const equation_editor = require("./equation_editor");
+const storage = require("./storage");
 const EquationEditor = require("./equation_editor").EquationEditor;
 const EquationEditorOptions = require("./equation_editor").EquationEditorOptions;
 
@@ -287,7 +288,6 @@ class InputPanelData {
     };
     this.idPureLatex = input.idPureLatex;
     this.idButtonContainer = input.idButtonContainer;
-    this.idExpandCollapseToggle = input.idButtonContainer + "_expand_collapse_toggle";
     this.idButtonSubmit = input.idButtonSubmit;
     this.idButtonInterpret = input.idButtonInterpret;
     this.idButtonAnswer = input.idButtonAnswer;
@@ -548,7 +548,9 @@ class InputPanelData {
         this.editMQFunction(editor, node);
       },
     }));
-    this.initializePartTwo(false, false);
+    let forceShowAll = storage.storage.variables.solve.panel.forceShowAll.isTrue();
+    let forceShowNone = storage.storage.variables.solve.panel.forceShowNone.isTrue();
+    this.initializePartTwo(forceShowAll, forceShowNone);
     this.renderIfVisible();
   }
 
@@ -815,6 +817,8 @@ class InputPanelData {
     /**@type{boolean} */
     forceShowNone,
   ) {
+    storage.storage.variables.solve.panel.forceShowAll.setAndStore(forceShowAll);
+    storage.storage.variables.solve.panel.forceShowNone.setAndStore(forceShowNone);
     this.computeFlags(forceShowAll);
     this.addButtons(forceShowAll, forceShowNone);
     let currentButtonPanel = document.getElementById(this.idButtonContainer);

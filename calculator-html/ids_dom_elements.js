@@ -52,7 +52,6 @@ var domElements = {
   },
   calculatorExamples: "divCalculatorExamples",
   spanCalculatorMainOutput: "spanCalculatorMainOutput",
-  spanProgressCalculatorInput: "calculatorInputProgress",
   spanProgressReportGeneral: "spanProgressReportGeneral",
   spanUserIdInActivateAccountPage: "spanUserIdInActivateAccountPage",
   spanUserIdInAccountsPage: "spanUserIdInAccountsPage",

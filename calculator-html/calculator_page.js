@@ -430,6 +430,13 @@ class Calculator {
     this.afterWriteOutput();
   }
 
+  helpCalculator() {
+    if (!this.initialized) {
+      return;
+    }
+    this.calculatorPanel.mQHelpCalculator();
+  }
+
   submitComputationPartTwo(input) {
     //<- this function is called by a callback trigerred when calling
     //thePage.storage.variables.calculator.input.setAndStore(...)
@@ -439,7 +446,7 @@ class Calculator {
     let stringifiedHash = thePage.storage.getPercentEncodedURL(urlCopy);
     document.getElementById("spanComputationLink").innerHTML = `<a href = '#${stringifiedHash}'>Link to your input</a>`;
     setTimeout(() => {
-      this.calculatorPanel.mQHelpCalculator();
+      this.helpCalculator();
     }, 0);
     let url = pathnames.urls.calculatorAPI;
     let parameters = this.getQueryStringSubmitStringAsMainInput(input, pathnames.urlFields.calculatorCompute);

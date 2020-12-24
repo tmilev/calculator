@@ -2,7 +2,6 @@
 const ids = require("./ids_dom_elements");
 const cookies = require("./cookies");
 
-
 class StorageVariable {
   constructor(
     /**@type @{{name: string, nameURL: string, nameCookie: string, nameLocalStorage: string, associatedDOMId: string, type: string, secure: string, showInURLByDefault: bool, showInURLOnPages: Object, callbackOnValueChange: function}} */
@@ -177,6 +176,16 @@ class StorageCalculator {
           nameURL: "problemToAutoSolve",
           nameLocalStorage: "problemToAutoSolve",
         }),
+        panel: {
+          forceShowAll: new StorageVariable({
+            name: "solvePanelForceShowAll",
+            nameLocalStorage: "solvePanelForceShowAll",
+          }),
+          forceShowNone: new StorageVariable({
+            name: "solvePanelForceShowNone",
+            nameLocalStorage: "solvePanelForceShowNone",
+          }),
+        },
       },
       currentSectionComputed: new StorageVariable({
         name: "currentSectionComputed",

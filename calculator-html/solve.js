@@ -102,7 +102,7 @@ class Solver {
   solve() {
     let input = this.equationEditor.rootNode.toLatex();
     let inputCalculator = `SolveJSON(${input})`;
-    document.getElementById(ids.domElements.inputMain).value = inputCalculator;
+    document.getElementById(ids.domElements.pages.calculator.inputMain).value = inputCalculator;
     calculator.calculator.submitComputation();
     // Will trigger solveFromStorage; 
     // injection of the method happens in Page.initializeStorageCallbacks.

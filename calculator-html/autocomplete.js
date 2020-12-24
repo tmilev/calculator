@@ -30,7 +30,7 @@ function initializeAutocomplete() {
   AutocompleteIsInitialized = true;
   theAutocompleteDictionaryLowerCase = new Array;
   theAutocompleteDictionaryByKey = new Array;
-  theText = document.getElementById(ids.domElements.inputMain);
+  theText = document.getElementById(ids.domElements.pages.calculator.inputMain);
   theSuggestions = new Array;
   theSuggestionsHighlighted = new Array;
   theAutoComplete = document.getElementById('idAutocompleteSpan');

@@ -495,15 +495,15 @@ class Page {
     if (monitoring !== "false") {
       monitoring = "true";
     }
-    var monitorResult = document.getElementById(ids.domElements.monitoring.spanStatus);
+    var monitorResult = document.getElementById(ids.domElements.pages.calculator.monitoring.spanStatus);
     if (monitoring === "true") {
       monitorResult.innerHTML = "Monitor <b style = 'color:red'>on</b>";
       document.getElementById(ids.domElements.switch.monitoring).checked = true;
-      document.getElementById(ids.domElements.monitoring.buttonTogglePauseRequest).style.display = "";
+      document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle).style.display = "";
     } else {
       document.getElementById(ids.domElements.switch.monitoring).checked = false;
       monitorResult.innerHTML = "Monitor <b style = 'color:green'>off</b>";
-      document.getElementById(ids.domElements.monitoring.buttonTogglePauseRequest).style.display = "none";
+      document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle).style.display = "none";
     }
   }
 }

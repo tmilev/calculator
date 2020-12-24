@@ -84,29 +84,10 @@ class Calculator {
     processMonitoring.monitor.ownerCalculator = this;
     /**@type{boolean} */
     this.flagTypeset = false;
-    let inputMain = document.getElementById(ids.domElements.inputMain);
+    /**@type{boolean} */
+    this.initialized = false;
     /**@type{InputPanelData|null} */
     this.calculatorPanel = null;
-    inputMain.addEventListener("keypress", (e) => {
-      this.submitCalculatorInputOnEnter(e);
-    });
-    inputMain.addEventListener("keyup", (e) => {
-      autocomplete.suggestWord();
-      this.calculatorPanel.mQHelpCalculator();
-    });
-    inputMain.addEventListener("keydown", (e) => {
-      autocomplete.suggestWord();
-      this.calculatorPanel.mQHelpCalculator();
-      autocomplete.arrowAction(e);
-    });
-    inputMain.addEventListener("mouseup", (e) => {
-      autocomplete.suggestWord();
-      this.calculatorPanel.mQHelpCalculator();
-    });
-    inputMain.addEventListener("input", (e) => {
-      autocomplete.suggestWord();
-      this.calculatorPanel.mQHelpCalculator();
-    });
   }
 
   updateCalculatorSliderEventHandler(inputBox) {
@@ -211,24 +192,55 @@ class Calculator {
     }
   }
 
-  selectCalculatorPage() {
-    if (this.calculatorPanel === null) {
-      this.calculatorPanel = new InputPanelData({
-        idMQSpan: "mainInputMQfield",
-        idMQcomments: "mqPanelComments",
-        problemId: "",
-        idPureLatex: ids.domElements.inputMain,
-        idButtonContainer: 'mainInputMQfieldButtons',
-        flagCalculatorPanel: true,
-      });
-      this.calculatorPanel.initialize();
+  initialize() {
+    if (this.initialized) {
+      return;
     }
+    this.initialized = true;
+    this.calculatorPanel = new InputPanelData({
+      idMQSpan: "mainInputMQfield",
+      idMQcomments: "mqPanelComments",
+      problemId: "",
+      idPureLatex: ids.domElements.pages.calculator.inputMain,
+      idButtonContainer: 'mainInputMQfieldButtons',
+      flagCalculatorPanel: true,
+    });
+    this.calculatorPanel.initialize();
+    document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle).addEventListener(
+      "click", () => {
+        processMonitoring.monitor.togglePause();
+      }
+    )
+    let inputMain = document.getElementById(ids.domElements.pages.calculator.inputMain);
+    inputMain.addEventListener("keypress", (e) => {
+      this.submitCalculatorInputOnEnter(e);
+    });
+    inputMain.addEventListener("keyup", (e) => {
+      autocomplete.suggestWord();
+      this.calculatorPanel.mQHelpCalculator();
+    });
+    inputMain.addEventListener("keydown", (e) => {
+      autocomplete.suggestWord();
+      this.calculatorPanel.mQHelpCalculator();
+      autocomplete.arrowAction(e);
+    });
+    inputMain.addEventListener("mouseup", (e) => {
+      autocomplete.suggestWord();
+      this.calculatorPanel.mQHelpCalculator();
+    });
+    inputMain.addEventListener("input", (e) => {
+      autocomplete.suggestWord();
+      this.calculatorPanel.mQHelpCalculator();
+    });
+  }
+  selectCalculatorPage() {
+    this.initialize();
     this.submitComputation();
   }
 
   submitComputation() {
     processMonitoring.monitor.clearTimeout();
-    let calculatorInput = document.getElementById(ids.domElements.inputMain).value;
+    let calculatorInput = document.getElementById(ids.domElements.pages.calculator.inputMain).value;
     this.typeset();
     if (calculatorInput === this.lastSubmittedInput) {
       return;
@@ -405,7 +417,7 @@ class Calculator {
     try {
       this.parsedComputation = miscellaneous.jsonUnescapeParse(input);
       let buffer = new BufferCalculator();
-      let progReportTimer = document.getElementById(ids.domElements.monitoring.progressTimer);
+      let progReportTimer = document.getElementById(ids.domElements.pages.calculator.monitoring.progressTimer);
       progReportTimer.innerHTML = "";
       this.writeResult(buffer, this.parsedComputation, this.panels);
       inputHtml = buffer.toString();

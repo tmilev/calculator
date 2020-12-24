@@ -237,7 +237,7 @@ class StorageCalculator {
         input: new StorageVariable({
           name: "calculatorInput",
           nameURL: "calculatorInput",
-          associatedDOMId: ids.domElements.inputMain,
+          associatedDOMId: ids.domElements.pages.calculator.inputMain,
           showInURLByDefault: true,
         }),
         request: new StorageVariable({

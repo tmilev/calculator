@@ -27,12 +27,19 @@ var domElements = {
       div: "divEditPage",
       button: "buttonEditPage",
     },
+    calculator: {
+      inputMain: "mainInputID",
+      monitoring: {
+        progressTimer: "idProgressReportTimer",
+        spanStatus: "spanMonitoringStatus",
+        buttonPauseToggle: "buttonPauseToggle",
+      },
+    },
   },
   themeRadioButtons: {
     radioThemeExperimental: "radioThemeExperimental",
     radioThemeDefault: "radioThemeDefault",
   },
-  inputMain: "mainInputID",
   spanOldEmail: "spanOldEmail",
   buttonChangeEmail: "buttonChangeEmail",
   inputUsername: "inputUsername",
@@ -41,11 +48,6 @@ var domElements = {
   labelNewEmail: "labelNewEmail",
   switch: {
     monitoring: "sliderMonitoring",
-  },
-  monitoring: {
-    progressTimer: "idProgressReportTimer",
-    spanStatus: "spanMonitoringStatus",
-    buttonTogglePauseRequest: "buttonSendTogglePauseRequest",
   },
   calculatorExamples: "divCalculatorExamples",
   spanCalculatorMainOutput: "spanCalculatorMainOutput",

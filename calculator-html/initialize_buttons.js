@@ -9,9 +9,6 @@ const equation_editor = require("./equation_editor");
 const EquationEditor = require("./equation_editor").EquationEditor;
 const EquationEditorOptions = require("./equation_editor").EquationEditorOptions;
 
-var calculatorLeftPosition = 0;
-var calculatorRightPosition = 0;
-
 var keyWordsKnownToMathQuill = [
   'sqrt',
   'frac',
@@ -348,7 +345,7 @@ class InputPanelData {
     }
     this.ignoreNextMathQuillUpdateEvent = true;
     if (this.flagCalculatorMQStringIsOK) {
-      this.equationEditor.rootNode.toLatex(this.theLaTeXString);
+      this.equationEditor.writeLatex(this.theLaTeXString);
     }
     this.ignoreNextMathQuillUpdateEvent = false;
   }
@@ -562,7 +559,12 @@ class InputPanelData {
     this.equationEditor.updateAlignment();
   }
 
-  chopStrings() {
+  chopStrings(
+    /**@type{number} */
+    calculatorLeftPosition,
+    /**@type{number} */
+    calculatorRightPosition,
+  ) {
     let mqCommentsSpan = document.getElementById(this.idMQcomments);
     if (calculatorRightPosition - calculatorLeftPosition > 1000) {
       this.flagCalculatorMQStringIsOK = false;
@@ -650,14 +652,12 @@ class InputPanelData {
     if (rightPos - leftPos > 1000) {
       mqProblemSpan.innerHTML = "<span style ='color:red'><b></b></span>"
     }
-    calculatorLeftPosition = leftPos;
-    calculatorRightPosition = rightPos;
     startingCharacterSectionUnderMathQuillEdit = '';
     if (calculatorInput.value[leftPos] === '\n' || calculatorInput.value[leftPos] === ' ' ||
       calculatorInput.value[leftPos] === '\t') {
       startingCharacterSectionUnderMathQuillEdit = calculatorInput.value[leftPos];
     }
-    this.chopStrings();
+    this.chopStrings(leftPos, rightPos);
   }
 
   computeFlags(

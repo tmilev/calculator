@@ -61,10 +61,10 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     return result;
   }
   Answer& currentA = theProblem.theProblemData.theAnswers.theValues[indexLastAnswerId];
-  Calculator theInterpreteR;
-  theInterpreteR.initialize();
-  theInterpreteR.flagPlotNoControls = true;
-  theInterpreteR.flagWriteLatexPlots = false;
+  Calculator interpreter;
+  interpreter.initialize();
+  interpreter.flagPlotNoControls = true;
+  interpreter.flagWriteLatexPlots = false;
   if (!theProblem.prepareCommands(&comments)) {
     out << "<b>Failed to prepare calculator commands.</b>"
     << "<br>Comments:<br>" << comments.str();
@@ -82,28 +82,28 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   answerCommandsNoEnclosures
   << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING
   << currentA.commandsSolutionOnly;
-  theInterpreteR.evaluate(answerCommands.str());
-  if (theInterpreteR.syntaxErrors != "") {
+  interpreter.evaluate(answerCommands.str());
+  if (interpreter.syntaxErrors != "") {
     out << "<b style = 'color:red'>Failed to compose the solution. "
     << "Likely there is a bug with the problem. </b>"
     << "<br>" << CalculatorHTML::bugsGenericMessage << "<br>Details: <br>"
-    << theInterpreteR.toStringSyntacticStackHumanReadable(false, false);
+    << interpreter.toStringSyntacticStackHumanReadable(false, false);
     result[WebAPI::result::resultHtml] = out.str();
     result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
     return result;
   }
-  if (theInterpreteR.flagAbortComputationASAP) {
+  if (interpreter.flagAbortComputationASAP) {
     out << "<b style = 'color:red'>Failed to compose the solution. "
     << "Likely there is a bug with the problem. </b>"
     << "<br>" << CalculatorHTML::bugsGenericMessage << "<br>Details: <br>"
-    << theInterpreteR.outputString
-    << theInterpreteR.outputCommentsString
-    << "<hr>Input: <br>" << theInterpreteR.inputString;
+    << interpreter.outputString
+    << interpreter.outputCommentsString
+    << "<hr>Input: <br>" << interpreter.inputString;
     result[WebAPI::result::resultHtml] = out.str();
     result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
     return result;
   }
-  if (!theProblem.interpretProcessExecutedCommands(theInterpreteR, currentA.solutionElements, out)) {
+  if (!theProblem.interpretProcessExecutedCommands(interpreter, currentA.solutionElements, out)) {
     result[WebAPI::result::resultHtml] = out.str();
     result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
     return result;
@@ -117,7 +117,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     out << "<hr>"
     << HtmlRoutines::getCalculatorComputationAnchorNewPage(
       answerCommandsNoEnclosures.str(), "Input link"
-    ) << "<br>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString;
+    ) << "<br>" << interpreter.outputString << "<hr>" << interpreter.outputCommentsString;
   }
   result[WebAPI::result::resultHtml] = out.str();
   result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
@@ -196,19 +196,19 @@ std::string WebAPIResponse::getSanitizedComment(
 }
 
 std::string WebAPIResponse::getCommentsInterpretation(
-  Calculator& theInterpreterWithAdvice, int indexShift, FormatExpressions& theFormat
+  Calculator& interpreterWithAdvice, int indexShift, FormatExpressions& theFormat
 ) {
   MacroRegisterFunctionWithName("WebAPIReponse::getCommentsInterpretation");
   std::stringstream out;
   theFormat.flagExpressionIsFinal = true;
   theFormat.flagIncludeExtraHtmlDescriptionsInPlots = false;
-  theInterpreterWithAdvice.theObjectContainer.resetPlots();
-  if (indexShift >= theInterpreterWithAdvice.programExpression.size()) {
+  interpreterWithAdvice.theObjectContainer.resetPlots();
+  if (indexShift >= interpreterWithAdvice.programExpression.size()) {
     return "";
   }
-  const Expression& currentE = theInterpreterWithAdvice.programExpression[indexShift][1];
+  const Expression& currentE = interpreterWithAdvice.programExpression[indexShift][1];
   bool resultIsPlot = false;
-  if (!currentE.startsWith(theInterpreterWithAdvice.opCommandSequence())) {
+  if (!currentE.startsWith(interpreterWithAdvice.opCommandSequence())) {
     out << WebAPIResponse::getSanitizedComment(currentE, theFormat, resultIsPlot);
     return out.str();
   }
@@ -281,11 +281,11 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
-  Calculator theInterpreteR;
-  theInterpreteR.flagUseLnInsteadOfLog = true;
-  theInterpreteR.initialize();
-  theInterpreteR.flagWriteLatexPlots = false;
-  theInterpreteR.flagPlotNoControls = true;
+  Calculator interpreter;
+  interpreter.flagUseLnInsteadOfLog = true;
+  interpreter.initialize();
+  interpreter.flagWriteLatexPlots = false;
+  interpreter.flagPlotNoControls = true;
   std::stringstream studentAnswerWithComments;
   studentAnswerWithComments
   << Calculator::Atoms::commandEnclosure << "{}("
@@ -293,17 +293,17 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   << ");"
   << studentAnswerSream.str();
 
-  theInterpreteR.evaluate(studentAnswerWithComments.str());
-  if (theInterpreteR.syntaxErrors != "") {
+  interpreter.evaluate(studentAnswerWithComments.str());
+  if (interpreter.syntaxErrors != "") {
     errorStream << "<b style ='color:red'>Failed to parse your answer, got:</b><br>"
-    << theInterpreteR.toStringSyntacticStackHumanReadable(false, true);
+    << interpreter.toStringSyntacticStackHumanReadable(false, true);
     result[WebAPI::result::error] = errorStream.str();
     result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
     result[WebAPI::result::resultHtml] = out.str();
     return result;
-  } else if (theInterpreteR.flagAbortComputationASAP) {
+  } else if (interpreter.flagAbortComputationASAP) {
     out << "<b style = 'color:red'>Failed to evaluate your answer, got:</b><br>"
-    << theInterpreteR.outputString;
+    << interpreter.outputString;
     result[WebAPI::result::resultHtml] = out.str();
     result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
     return result;
@@ -312,15 +312,15 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   theFormat.flagUseLatex = true;
   theFormat.flagUsePmatrix = true;
   const Expression& studentAnswerNoContextE =
-  theInterpreteR.programExpression[theInterpreteR.programExpression.size() - 1];
+  interpreter.programExpression[interpreter.programExpression.size() - 1];
   out << "<span style =\"color:magenta\"><b>Interpreting as:</b></span><br>";
   out << "\\(\\displaystyle "
   << studentAnswerNoContextE.toString(&theFormat) << "\\)";
-  Calculator theInterpreterWithAdvice;
-  theInterpreterWithAdvice.flagUseLnInsteadOfLog = true;
-  theInterpreterWithAdvice.initialize();
-  theInterpreterWithAdvice.flagWriteLatexPlots = false;
-  theInterpreterWithAdvice.flagPlotNoControls = true;
+  Calculator interpreterWithAdvice;
+  interpreterWithAdvice.flagUseLnInsteadOfLog = true;
+  interpreterWithAdvice.initialize();
+  interpreterWithAdvice.flagWriteLatexPlots = false;
+  interpreterWithAdvice.flagPlotNoControls = true;
   std::stringstream calculatorInputStream,
   calculatorInputStreamNoEnclosures;
 
@@ -347,8 +347,8 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   << HtmlRoutines::getCalculatorComputationAnchorNewPage(
     calculatorInputStreamNoEnclosures.str(), "Input link"
   );
-  theInterpreterWithAdvice.evaluate(calculatorInputStream.str());
-  if (theInterpreterWithAdvice.syntaxErrors != "") {
+  interpreterWithAdvice.evaluate(calculatorInputStream.str());
+  if (interpreterWithAdvice.syntaxErrors != "") {
     out << "<br><span style =\"color:red\"><b>"
     << "Something went wrong when parsing your answer "
     << "in the context of the current problem. "
@@ -356,22 +356,22 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     if (global.userDefaultHasAdminRights()) {
       out
       << problemLinkStream.str()
-      << theInterpreterWithAdvice.outputString << "<br>"
-      << theInterpreterWithAdvice.outputCommentsString;
+      << interpreterWithAdvice.outputString << "<br>"
+      << interpreterWithAdvice.outputCommentsString;
     }
     result[WebAPI::result::resultHtml] = out.str();
     result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
     return result;
   }
-  if (theInterpreterWithAdvice.flagAbortComputationASAP) {
+  if (interpreterWithAdvice.flagAbortComputationASAP) {
     out << "<br><b style = 'color:red'>"
     << "Something went wrong when interpreting your answer "
     << "in the context of the current problem. "
     << "</b>";
     if (global.userDefaultHasAdminRights() && global.userDebugFlagOn()) {
       out << "<br>Logged-in as administator with debug flag on => printing error details. "
-      << theInterpreterWithAdvice.outputString << "<br>"
-      << theInterpreterWithAdvice.outputCommentsString;
+      << interpreterWithAdvice.outputString << "<br>"
+      << interpreterWithAdvice.outputCommentsString;
       out << "<hr><b>Calculator input:</b> "
       << problemLinkStream.str() << "<br>"
       << calculatorInputStream.str();
@@ -381,7 +381,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     return result;
   }
   if (hasCommentsBeforeSubmission){
-    out << WebAPIResponse::getCommentsInterpretation(theInterpreterWithAdvice, 3, theFormat);
+    out << WebAPIResponse::getCommentsInterpretation(interpreterWithAdvice, 3, theFormat);
   }
   result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
   if (global.userDefaultHasAdminRights() && global.userDebugFlagOn()) {
@@ -390,8 +390,8 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     << calculatorInputStreamNoEnclosures.str()
     << "<br>"
     << "Result:<br>"
-    << theInterpreterWithAdvice.outputString
-    << "<br>" << theInterpreterWithAdvice.outputCommentsString;
+    << interpreterWithAdvice.outputString
+    << "<br>" << interpreterWithAdvice.outputCommentsString;
   }
   result[WebAPI::result::resultHtml] = out.str();
   return result;
@@ -554,7 +554,7 @@ std::string WebAPIResponse::getOnePageJS(bool appendBuildHash) {
 }
 
 std::string BuilderApplication::getOnePageJavascriptBrowserify() {
-  MacroRegisterFunctionWithName("WebAPIReponse::getOnePageJavascriptBrowserify");
+  MacroRegisterFunctionWithName("BuilderApplication::getOnePageJavascriptBrowserify");
   std::stringstream out;
   out << "var theJSContent = {\n";
   for (int i = 0; i < this->jsFileContents.size; i ++) {
@@ -1039,17 +1039,17 @@ JSData WebAPIResponse::submitAnswersJSON(
   if (timeSafetyBrake) {
     global.millisecondsMaxComputation = global.getElapsedMilliseconds() + 20000; // + 20 sec
   }
-  Calculator theInterpreter;
-  theInterpreter.initialize();
-  theInterpreter.flagWriteLatexPlots = false;
-  theInterpreter.flagPlotNoControls = true;
+  Calculator interpreter;
+  interpreter.initialize();
+  interpreter.flagWriteLatexPlots = false;
+  interpreter.flagPlotNoControls = true;
 
-  theInterpreter.evaluate(completedProblemStream.str());
-  if (theInterpreter.flagAbortComputationASAP || theInterpreter.syntaxErrors != "") {
-    if (theInterpreter.errorsPublic.str() != "") {
+  interpreter.evaluate(completedProblemStream.str());
+  if (interpreter.flagAbortComputationASAP || interpreter.syntaxErrors != "") {
+    if (interpreter.errorsPublic.str() != "") {
       output << "While checking your answer, got the error: "
       << "<br><b style =\"color:red\">"
-      << theInterpreter.errorsPublic.str()
+      << interpreter.errorsPublic.str()
       << "</b> "
       << "<br><b>Most likely your answer is wrong. </b>";
     } else {
@@ -1074,8 +1074,8 @@ JSData WebAPIResponse::submitAnswersJSON(
     if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
       output << "<hr><b>Administartor view internals.</b><hr>"
       << debugInputStream.str() << "<hr>"
-      << theInterpreter.outputString
-      << "<br>" << theInterpreter.outputCommentsString
+      << interpreter.outputString
+      << "<br>" << interpreter.outputCommentsString
       << "<hr>Input, no enclosures: <hr>"
       << completedProblemStreamNoEnclosures.str()
       << "<br>";
@@ -1089,7 +1089,7 @@ JSData WebAPIResponse::submitAnswersJSON(
   }
   *outputIsCorrect = false;
   int mustBeOne = - 1;
-  if (!theInterpreter.programExpression[theInterpreter.programExpression.size() - 1].isSmallInteger(&mustBeOne)) {
+  if (!interpreter.programExpression[interpreter.programExpression.size() - 1].isSmallInteger(&mustBeOne)) {
     *outputIsCorrect = false;
   } else {
     *outputIsCorrect = (mustBeOne == 1);
@@ -1103,19 +1103,19 @@ JSData WebAPIResponse::submitAnswersJSON(
     if (global.userDefaultHasAdminRights() && global.userDebugFlagOn()) {
       output << "<tr><td>Administrator view internals. "
       << "<hr>" << debugInputStream.str()
-      << "<br>The calculator output is: " << theInterpreter.outputString
-      << "Comments: " << theInterpreter.comments.str()
+      << "<br>The calculator output is: " << interpreter.outputString
+      << "Comments: " << interpreter.comments.str()
       << "<hr>Input, no enclosures: <hr>"
       << completedProblemStreamNoEnclosures.str();
       output << "<hr>Input, full:<hr>"
-      << theInterpreter.inputString << "<hr></td></tr>";
+      << interpreter.inputString << "<hr></td></tr>";
     }
   } else {
     output << "<tr><td><span style =\"color:green\"><b>Correct! </b></span>" << "</td></tr>";
   }
   if (hasCommentsBeforeSubmission) {
     output << "<tr><td>"
-    << WebAPIResponse::getCommentsInterpretation(theInterpreter, 3, theFormat)
+    << WebAPIResponse::getCommentsInterpretation(interpreter, 3, theFormat)
     << "</td></tr>\n";
   }
   if (global.flagDatabaseCompiled) {
@@ -1221,7 +1221,7 @@ JSData WebAPIResponse::submitAnswersJSON(
   output << currentA.currentAnswerClean;
   output << "\\)";
   std::string errorMessage;
-  errorMessage = theInterpreter.toStringIsCorrectAsciiCalculatorString(currentA.currentAnswerClean);
+  errorMessage = interpreter.toStringIsCorrectAsciiCalculatorString(currentA.currentAnswerClean);
   if (errorMessage != "") {
     output << "<br>" << errorMessage
     << "<hr><b>If you entered this expression through the "
@@ -1460,18 +1460,18 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     result[WebAPI::result::error] = out.str();
     return result;
   }
-  Calculator theInterpreteR;
-  theInterpreteR.initialize();
-  theInterpreteR.flagPlotNoControls = true;
-  theInterpreteR.flagWriteLatexPlots = false;
+  Calculator interpreter;
+  interpreter.initialize();
+  interpreter.flagPlotNoControls = true;
+  interpreter.flagWriteLatexPlots = false;
   std::stringstream answerCommands, answerCommandsNoEnclosure;
   answerCommands << currentA.commandsBeforeAnswer;
   answerCommandsNoEnclosure << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
   answerCommands << Calculator::Atoms::commandEnclosure
   << "{}(" << currentA.commandsNoEnclosureAnswerOnGiveUpOnly << ");";
   answerCommandsNoEnclosure << currentA.commandsNoEnclosureAnswerOnGiveUpOnly;
-  theInterpreteR.evaluate(answerCommands.str());
-  if (theInterpreteR.syntaxErrors != "") {
+  interpreter.evaluate(answerCommands.str());
+  if (interpreter.syntaxErrors != "") {
     out << "<b style ='color:red'>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b>";
     if (global.userDefaultHasProblemComposingRights()) {
@@ -1480,13 +1480,13 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
       );
     }
     out << "<br>" << CalculatorHTML::bugsGenericMessage << "<br>Details: <br>"
-    << theInterpreteR.toStringSyntacticStackHumanReadable(false, false);
+    << interpreter.toStringSyntacticStackHumanReadable(false, false);
     result[WebAPI::result::resultHtml] = out.str();
     int64_t ellapsedTime = global.getElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::millisecondsComputation] = ellapsedTime;
     return result;
   }
-  if (theInterpreteR.flagAbortComputationASAP) {
+  if (interpreter.flagAbortComputationASAP) {
     out << "<b style = 'color:red'>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b>";
     if (global.userDefaultHasProblemComposingRights()) {
@@ -1495,9 +1495,9 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
       );
     }
     out << "<br>" << CalculatorHTML::bugsGenericMessage << "<br>Details: <br>"
-    << theInterpreteR.outputString
-    << theInterpreteR.outputCommentsString
-    << "<hr>Input: <br>" << theInterpreteR.inputString;
+    << interpreter.outputString
+    << interpreter.outputCommentsString
+    << "<hr>Input: <br>" << interpreter.inputString;
     int64_t ellapsedTime = global.getElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::millisecondsComputation] = ellapsedTime;
     result[WebAPI::result::resultHtml] = out.str();
@@ -1510,10 +1510,10 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   theFormat.flagUseLatex = true;
   theFormat.flagUsePmatrix = true;
   bool isFirst = true;
-  const Expression& currentE = theInterpreteR.programExpression[
-    theInterpreteR.programExpression.size() - 1
+  const Expression& currentE = interpreter.programExpression[
+    interpreter.programExpression.size() - 1
   ][1];
-  if (!currentE.startsWith(theInterpreteR.opCommandSequence())) {
+  if (!currentE.startsWith(interpreter.opCommandSequence())) {
     out << "\\(\\displaystyle " << currentE.toString(&theFormat) << "\\)";
     if (outputNakedAnswer != nullptr) {
       *outputNakedAnswer = currentE.toString(&theFormat);
@@ -1525,8 +1525,8 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   } else {
     for (int j = 1; j < currentE.size(); j ++) {
       if (
-        currentE[j].startsWith(theInterpreteR.opRulesOff()) ||
-        currentE[j].startsWith(theInterpreteR.opRulesOn())
+        currentE[j].startsWith(interpreter.opRulesOff()) ||
+        currentE[j].startsWith(interpreter.opRulesOn())
       ) {
         continue;
       }
@@ -1571,10 +1571,10 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
       answerCommandsNoEnclosure.str(),
       "Calculator input no enclosures"
     );
-    out << theInterpreteR.outputString << "<hr>"
-    << theInterpreteR.outputCommentsString
+    out << interpreter.outputString << "<hr>"
+    << interpreter.outputCommentsString
     << "<hr>" << HtmlRoutines::getCalculatorComputationAnchorNewPage(
-      theInterpreteR.inputString, "Raw calculator input"
+      interpreter.inputString, "Raw calculator input"
     );
   }
   result[WebAPI::result::resultHtml] = out.str();

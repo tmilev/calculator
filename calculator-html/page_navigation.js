@@ -21,58 +21,60 @@ const solver = require("./solve");
 const solve = require("./solve");
 const storage = require("./storage").storage;
 
-function User() {
-  this.flagLoggedIn = false;
-  this.googleProfile = null;
-  this.sectionsTaught = [];
-  this.instructor = "";
-  this.sectionInDB = "";
-  this.deadlineSchema = "";
-  this.sectionComputed = "";
-  this.flagDatabaseInactiveEveryoneIsAdmin = false;
-}
+class User {
+  constructor() {
+    this.flagLoggedIn = false;
+    this.googleProfile = null;
+    this.sectionsTaught = [];
+    this.instructor = "";
+    this.sectionInDB = "";
+    this.deadlineSchema = "";
+    this.sectionComputed = "";
+    this.flagDatabaseInactiveEveryoneIsAdmin = false;
+  }
 
-User.prototype.isLoggedIn = function () {
-  return this.flagLoggedIn;
-}
+  isLoggedIn() {
+    return this.flagLoggedIn;
+  }
 
-User.prototype.getRole = function () {
-  return mainPage().storage.variables.user.role.getValue();
-}
+  getRole() {
+    return mainPage().storage.variables.user.role.getValue();
+  }
 
-User.prototype.hasAdminRights = function () {
-  return this.getRole() === "admin" && this.isLoggedIn();
-}
+  hasAdminRights() {
+    return this.getRole() === "admin" && this.isLoggedIn();
+  }
 
-User.prototype.hasProblemEditRights = function () {
-  return this.getRole() === "admin" && this.isLoggedIn();
-}
+  hasProblemEditRights() {
+    return this.getRole() === "admin" && this.isLoggedIn();
+  }
 
-User.prototype.hasInstructorRights = function () {
-  return this.getRole() === "admin" && this.isLoggedIn();
-}
+  hasInstructorRights() {
+    return this.getRole() === "admin" && this.isLoggedIn();
+  }
 
-User.prototype.hideProfilePicture = function () {
-  document.getElementById("divProfilePicture").classList.add("divInvisible");
-  document.getElementById("divProfilePicture").classList.remove("divVisible");
-}
+  hideProfilePicture() {
+    document.getElementById("divProfilePicture").classList.add("divInvisible");
+    document.getElementById("divProfilePicture").classList.remove("divVisible");
+  }
 
-User.prototype.makeFromUserInfo = function (inputData) {
-  var thePage = window.calculator.mainPage;
-  // Please note: the authentication token is silently set through the cookie headers.
-  // Please do not take explicit action as
-  // inputdata.authenticationToken may not contain the authentication token.
-  // not ok: thePage.storage.variables.user.authenticationToken.setAndStore(inputData.authenticationToken);
-  thePage.storage.variables.user.name.setAndStore(inputData.username);
-  mainPage().storage.variables.user.role.setAndStore(inputData.userRole);
-  this.flagLoggedIn = true;
-  this.sectionsTaught = inputData.sectionsTaught;
-  this.instructor = inputData.instructor;
-  this.sectionInDB = inputData.studentSection;
-  this.sectionComputed = inputData.studentSection;
-  this.deadlineSchema = inputData.deadlineSchema;
-  document.getElementById(ids.domElements.spanUserIdInAccountsPage).innerHTML = thePage.storage.variables.user.name.value;
-  document.getElementById(ids.domElements.inputUsername).value = thePage.storage.variables.user.name.value;
+  makeFromUserInfo(inputData) {
+    var thePage = window.calculator.mainPage;
+    // Please note: the authentication token is silently set through the cookie headers.
+    // Please do not take explicit action as
+    // inputdata.authenticationToken may not contain the authentication token.
+    // not ok: thePage.storage.variables.user.authenticationToken.setAndStore(inputData.authenticationToken);
+    thePage.storage.variables.user.name.setAndStore(inputData.username);
+    mainPage().storage.variables.user.role.setAndStore(inputData.userRole);
+    this.flagLoggedIn = true;
+    this.sectionsTaught = inputData.sectionsTaught;
+    this.instructor = inputData.instructor;
+    this.sectionInDB = inputData.studentSection;
+    this.sectionComputed = inputData.studentSection;
+    this.deadlineSchema = inputData.deadlineSchema;
+    document.getElementById(ids.domElements.spanUserIdInAccountsPage).innerHTML = thePage.storage.variables.user.name.value;
+    document.getElementById(ids.domElements.inputUsername).value = thePage.storage.variables.user.name.value;
+  }
 }
 
 class Page {
@@ -130,7 +132,9 @@ class Page {
         id: "divCalculatorPage",
         menuButtonId: "buttonSelectCalculator",
         container: null,
-        selectFunction: calculatorPage.calculator.submitComputation.bind(calculatorPage.calculator),
+        selectFunction: () => {
+          calculatorPage.calculator.selectCalculatorPage();
+        },
         scriptIds: [],
       },
       signUp: {
@@ -340,7 +344,6 @@ class Page {
 
   initializeCalculatorPagePartTwo() {
     initializeButtons.initializeButtons();
-    initializeButtons.initializeCalculatorPage();
     mathTypeSet.typesetter.typesetHard(ids.domElements.divMathjaxProblematicRender);
   }
 
@@ -514,45 +517,49 @@ class Page {
   }
 }
 
-function Script() {
-  this.id = "";
-  this.content = "";
-}
-
-function AllScripts() {
-  /**@{Script[]} */
-  this.scriptsInjected = {};
-}
-
-AllScripts.prototype.removeOneScript = function (scriptId) {
-  var theScript = document.getElementById(scriptId);
-  if (theScript === null) {
-    return;
-  }
-  var parent = theScript.parentNode;
-  parent.removeChild(theScript);
-}
-
-AllScripts.prototype.removeScripts = function (scriptIds) {
-  for (var counter = 0; counter < scriptIds.length; counter++) {
-    this.removeOneScript(scriptIds[counter]);
+class Script {
+  constructor() {
+    this.id = "";
+    this.content = "";
   }
 }
 
-AllScripts.prototype.injectScript = function (scriptId, scriptContent) {
-  this.removeOneScript(scriptId);
-  if (scriptContent !== undefined && scriptContent !== null) {
-    this.scriptsInjected[scriptId] = new Script();
+class AllScripts {
+  constructor() {
+    /**@{Script[]} */
+    this.scriptsInjected = {};
+  }
+
+  removeOneScript(scriptId) {
+    var theScript = document.getElementById(scriptId);
+    if (theScript === null) {
+      return;
+    }
+    var parent = theScript.parentNode;
+    parent.removeChild(theScript);
+  }
+
+  removeScripts(scriptIds) {
+    for (var counter = 0; counter < scriptIds.length; counter++) {
+      this.removeOneScript(scriptIds[counter]);
+    }
+  }
+
+  injectScript(scriptId, scriptContent) {
+    this.removeOneScript(scriptId);
+    if (scriptContent !== undefined && scriptContent !== null) {
+      this.scriptsInjected[scriptId] = new Script();
+      var theScript = this.scriptsInjected[scriptId];
+      theScript.id = scriptId;
+      theScript.content = scriptContent;
+    }
     var theScript = this.scriptsInjected[scriptId];
-    theScript.id = scriptId;
-    theScript.content = scriptContent;
+    var scriptChild = document.createElement('script');
+    scriptChild.setAttribute('id', scriptId);
+    scriptChild.innerHTML = theScript.content;
+    scriptChild.type = 'text/javascript';
+    document.getElementsByTagName('head')[0].appendChild(scriptChild);
   }
-  var theScript = this.scriptsInjected[scriptId];
-  var scriptChild = document.createElement('script');
-  scriptChild.setAttribute('id', scriptId);
-  scriptChild.innerHTML = theScript.content;
-  scriptChild.type = 'text/javascript';
-  document.getElementsByTagName('head')[0].appendChild(scriptChild);
 }
 
 /**

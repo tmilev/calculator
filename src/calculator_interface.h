@@ -2033,7 +2033,7 @@ public:
   int opInterpretProblemGiveUp() {
     return this->operations.getIndexNoFail("ProblemGiveUp");
   }
-  bool appendOpandsReturnTrueIfOrderNonCanonical(const Expression& input, List<Expression>& output, int theOp);
+  bool appendOpandsReturnTrueIfOrderNonCanonical(const Expression& input, List<Expression>& output, int operation);
   bool appendMultiplicandsReturnTrueIfOrderNonCanonical(Expression& theExpression, List<Expression>& output) {
     return this->appendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opTimes());
   }

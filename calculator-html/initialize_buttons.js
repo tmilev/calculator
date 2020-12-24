@@ -168,10 +168,6 @@ function initializeButtons() {
   initializeAccordionButtons();
 }
 
-function initializeCalculatorPage() {
-  calculatorPanel.initialize();
-}
-
 class ButtonCollection {
   constructor(
     /**@type {Object} */
@@ -904,7 +900,6 @@ class InputPanelData {
   }
 }
 
-
 /**@returns {Boolean} */
 function isForRealProblem(problem) {
   let isForReal = false;
@@ -942,20 +937,9 @@ function isKeyWordEndKnownToMathQuill(input) {
   return false;
 }
 
-var calculatorPanel = new InputPanelData({
-  idMQSpan: "mainInputMQfield",
-  idMQcomments: "mqPanelComments",
-  problemId: "",
-  idPureLatex: ids.domElements.inputMain,
-  idButtonContainer: 'mainInputMQfieldButtons',
-  flagCalculatorPanel: true,
-});
-
 module.exports = {
   panelDataRegistry,
   initializeAccordionButtons,
   initializeButtons,
-  initializeCalculatorPage,
-  calculatorPanel,
   InputPanelData,
 };

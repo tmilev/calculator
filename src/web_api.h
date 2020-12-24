@@ -113,7 +113,7 @@ class WebAPIResponse {
     bool doIncludeTimeStats = true
   );
   static std::string getCommentsInterpretation(
-    Calculator& theInterpreterWithAdvice,
+    Calculator& interpreterWithAdvice,
     int indexShift,
     FormatExpressions& theFormat
   );

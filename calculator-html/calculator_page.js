@@ -9,7 +9,7 @@ const BufferCalculator = require("./buffer").BufferCalculator;
 const panels = require("./panels");
 const typeset = require("./math_typeset");
 const processMonitoring = require("./process_monitoring");
-const initializeButtons = require("./initialize_buttons");
+const InputPanelData = require("./initialize_buttons").InputPanelData;
 const storage = require("./storage");
 const autocomplete = require("./autocomplete");
 
@@ -63,7 +63,7 @@ class AtomHandler {
     resultString += `<calculatorExampleInfo id = "${currentId}" class = "hiddenClass">${this.description}`;
     resultString += `<br><b>Example:</b><br>${this.example}</calculatorExampleInfo>`;
     let theLink = calculator.getComputationLink(this.example);
-    resultString += `<a href = '#${theLink}' class = "linkInfo"> Example</a>`;
+    resultString += `<a href = '#${theLink}' class = "linkInfo">Example</a>`;
     resultString += ` [${this.ruleName}]`;
     return resultString;
   }
@@ -85,59 +85,61 @@ class Calculator {
     /**@type{boolean} */
     this.flagTypeset = false;
     let inputMain = document.getElementById(ids.domElements.inputMain);
+    /**@type{InputPanelData|null} */
+    this.calculatorPanel = null;
     inputMain.addEventListener("keypress", (e) => {
       this.submitCalculatorInputOnEnter(e);
     });
     inputMain.addEventListener("keyup", (e) => {
       autocomplete.suggestWord();
-      initializeButtons.calculatorPanel.mQHelpCalculator();
+      this.calculatorPanel.mQHelpCalculator();
     });
     inputMain.addEventListener("keydown", (e) => {
       autocomplete.suggestWord();
-      initializeButtons.calculatorPanel.mQHelpCalculator();
+      this.calculatorPanel.mQHelpCalculator();
       autocomplete.arrowAction(e);
     });
     inputMain.addEventListener("mouseup", (e) => {
       autocomplete.suggestWord();
-      initializeButtons.calculatorPanel.mQHelpCalculator();
+      this.calculatorPanel.mQHelpCalculator();
     });
     inputMain.addEventListener("input", (e) => {
       autocomplete.suggestWord();
-      initializeButtons.calculatorPanel.mQHelpCalculator();
+      this.calculatorPanel.mQHelpCalculator();
     });
   }
 
   updateCalculatorSliderEventHandler(inputBox) {
     event.preventDefault();
-    var sliderName = this.inputBoxToSliderUpdaters[inputBox.name];
-    var theSliders = document.getElementsByName(sliderName);
-    for (var counterSlider = 0; counterSlider < theSliders.length; counterSlider++) {
-      var currentSlider = theSliders[counterSlider];
+    let sliderName = this.inputBoxToSliderUpdaters[inputBox.name];
+    let theSliders = document.getElementsByName(sliderName);
+    for (let counterSlider = 0; counterSlider < theSliders.length; counterSlider++) {
+      let currentSlider = theSliders[counterSlider];
       currentSlider.value = inputBox.value;
     }
     this.updateSliderToInputBox(inputBox.name, sliderName);
   }
 
   addListenersToInputBoxes() {
-    //var theString=" updating: box names, slider names: ";
-    for (var i = 0; i < this.inputBoxNames.length; i++) {
-      var theBoxes = document.getElementsByName(this.inputBoxNames[i]);
-      for (var j = 0; j < theBoxes.length; j++) {
+    //let theString=" updating: box names, slider names: ";
+    for (let i = 0; i < this.inputBoxNames.length; i++) {
+      let theBoxes = document.getElementsByName(this.inputBoxNames[i]);
+      for (let j = 0; j < theBoxes.length; j++) {
         theBoxes[j].addEventListener("input", this.updateCalculatorSliderEventHandler.bind(this, theBoxes[j]));
       }
     }
   }
 
   updateSliderToInputBox(boxName, sliderName) {
-    var theBoxes = document.getElementsByName(boxName);
-    var theSliders = document.getElementsByName(sliderName);
-    var sliderValue = theSliders[0].value;
-    for (var i = 0; i < theBoxes.length; i++) {
+    let theBoxes = document.getElementsByName(boxName);
+    let theSliders = document.getElementsByName(sliderName);
+    let sliderValue = theSliders[0].value;
+    for (let i = 0; i < theBoxes.length; i++) {
       theBoxes[i].value = sliderValue;
     }
-    var plodtId = drawing.plotUpdaters[sliderName];
+    let plodtId = drawing.plotUpdaters[sliderName];
     if (plodtId !== undefined) {
-      var theCanvas = drawing.canvases[plodtId];
+      let theCanvas = drawing.canvases[plodtId];
       if (theCanvas !== undefined) {
         if (theCanvas.canvasResetFunction !== null) {
           theCanvas.canvasResetFunction();
@@ -147,10 +149,10 @@ class Calculator {
   }
 
   processOneFunctionAtom(handlers) {
-    var resultStrings = [];
-    for (var i = 0; i < handlers.length; i++) {
+    let resultStrings = [];
+    for (let i = 0; i < handlers.length; i++) {
       resultStrings.push("<br>");
-      var handler = new AtomHandler();
+      let handler = new AtomHandler();
       handler.fromObject(handlers[i], i, handlers.length);
       resultStrings.push(handler.toString(this));
     }
@@ -160,17 +162,17 @@ class Calculator {
   processExamples(inputJSONtext) {
     try {
       this.examples = miscellaneous.jsonUnescapeParse(inputJSONtext);
-      var examplesString = "";
-      var atomsSorted = Object.keys(this.examples).slice().sort();
-      var numHandlers = 0;
-      for (var i = 0; i < atomsSorted.length; i++) {
-        var atom = atomsSorted[i];
-        var currentExamples = this.examples[atom];
+      let examplesString = "";
+      let atomsSorted = Object.keys(this.examples).slice().sort();
+      let numHandlers = 0;
+      for (let i = 0; i < atomsSorted.length; i++) {
+        let atom = atomsSorted[i];
+        let currentExamples = this.examples[atom];
         examplesString += this.processOneFunctionAtom(currentExamples.regular);
         examplesString += this.processOneFunctionAtom(currentExamples.composite);
         numHandlers += this.examples[atom].regular.length + this.examples[atom].composite.length;
       }
-      var resultString = `${atomsSorted.length} built-in atoms, ${numHandlers} handlers. `;
+      let resultString = `${atomsSorted.length} built-in atoms, ${numHandlers} handlers. `;
       resultString += examplesString;
       document.getElementById(ids.domElements.calculatorExamples).innerHTML = resultString;
     } catch (e) {
@@ -188,8 +190,8 @@ class Calculator {
   }
 
   toggleExamples(theButton) {
-    var theExamples = document.getElementById(ids.domElements.calculatorExamples);
-    var theURL = "";
+    let theExamples = document.getElementById(ids.domElements.calculatorExamples);
+    let theURL = "";
     theURL += pathnames.urls.calculatorAPI;
     theURL += `?${pathnames.urlFields.request}=${pathnames.urlFields.requests.calculatorExamplesJSON}`;
     if (theExamples.innerHTML.length < 300) {
@@ -209,9 +211,24 @@ class Calculator {
     }
   }
 
+  selectCalculatorPage() {
+    if (this.calculatorPanel === null) {
+      this.calculatorPanel = new InputPanelData({
+        idMQSpan: "mainInputMQfield",
+        idMQcomments: "mqPanelComments",
+        problemId: "",
+        idPureLatex: ids.domElements.inputMain,
+        idButtonContainer: 'mainInputMQfieldButtons',
+        flagCalculatorPanel: true,
+      });
+      this.calculatorPanel.initialize();
+    }
+    this.submitComputation();
+  }
+
   submitComputation() {
     processMonitoring.monitor.clearTimeout();
-    var calculatorInput = document.getElementById(ids.domElements.inputMain).value;
+    let calculatorInput = document.getElementById(ids.domElements.inputMain).value;
     this.typeset();
     if (calculatorInput === this.lastSubmittedInput) {
       return;
@@ -223,12 +240,12 @@ class Calculator {
 
   /**@returns {String} */
   getComputationLink(input) {
-    var theURL = {
+    let theURL = {
       currentPage: "calculator",
       calculatorInput: input,
     };
-    var thePage = window.calculator.mainPage;
-    var stringifiedHash = thePage.storage.getPercentEncodedURL(theURL);
+    let thePage = window.calculator.mainPage;
+    let stringifiedHash = thePage.storage.getPercentEncodedURL(theURL);
     return stringifiedHash;
   }
 
@@ -292,11 +309,11 @@ class Calculator {
     if (typeof inputParsed.result.output === "string") {
       inputParsed.result.output = [inputParsed.result.output];
     }
-    var numEntries = Math.max(inputParsed.result.input.length, inputParsed.result.output.length);
-    for (var i = 0; i < numEntries; i++) {
+    let numEntries = Math.max(inputParsed.result.input.length, inputParsed.result.output.length);
+    for (let i = 0; i < numEntries; i++) {
       this.numberOfCalculatorPanels++;
-      var inputPanelId = `calculatorInputPanel${this.numberOfCalculatorPanels}`;
-      var outputPanelId = `calculatorOutputPanel${this.numberOfCalculatorPanels}`;
+      let inputPanelId = `calculatorInputPanel${this.numberOfCalculatorPanels}`;
+      let outputPanelId = `calculatorOutputPanel${this.numberOfCalculatorPanels}`;
       if (i < inputParsed.result.input.length) {
         panelData.push(new panels.PanelExpandableData(
           inputParsed.result.input[i], inputPanelId, 150,
@@ -315,10 +332,10 @@ class Calculator {
     buffer.write(`</table>`);
     buffer.write(`</td><td><div class = "containerComments">`);
     buffer.write("<small>Double-click formulas: get LaTeX. Double-click back: hide. </small>");
-    var performance = inputParsed[pathnames.urlFields.result.performance];
+    let performance = inputParsed[pathnames.urlFields.result.performance];
     if (performance !== undefined) {
-      var content = performance[pathnames.urlFields.result.comments];
-      var label = `<b style='color:blue'>${performance[pathnames.urlFields.result.computationTime]}</b>`;
+      let content = performance[pathnames.urlFields.result.comments];
+      let label = `<b style='color:blue'>${performance[pathnames.urlFields.result.computationTime]}</b>`;
       buffer.write(`<div id = '${ids.domElements.divPerformance}'></div>`);
       panelData.push(new panels.PanelExpandableData(
         content,
@@ -333,7 +350,7 @@ class Calculator {
       buffer.write(inputParsed.comments);
     }
     buffer.write(`</div></td>`);
-    var mainPage = window.calculator.mainPage;
+    let mainPage = window.calculator.mainPage;
     if (mainPage.storage.variables.flagDebug.isTrue() && inputParsed.debug !== undefined) {
       buffer.write(`<td>`);
       buffer.write(inputParsed.debug);
@@ -383,12 +400,12 @@ class Calculator {
   }
 
   defaultOnLoadInjectScriptsAndProcessLaTeX(input, output) {
-    var inputHtml = null;
+    let inputHtml = null;
     this.panels.length = 0;
     try {
       this.parsedComputation = miscellaneous.jsonUnescapeParse(input);
-      var buffer = new BufferCalculator();
-      var progReportTimer = document.getElementById(ids.domElements.monitoring.progressTimer);
+      let buffer = new BufferCalculator();
+      let progReportTimer = document.getElementById(ids.domElements.monitoring.progressTimer);
       progReportTimer.innerHTML = "";
       this.writeResult(buffer, this.parsedComputation, this.panels);
       inputHtml = buffer.toString();
@@ -396,7 +413,7 @@ class Calculator {
       inputHtml = input + "<br>" + e;
       console.log("Error processing calculator output: " + e);
     }
-    var spanVerification = document.getElementById(ids.domElements.spanCalculatorMainOutput);
+    let spanVerification = document.getElementById(ids.domElements.spanCalculatorMainOutput);
     spanVerification.innerHTML = inputHtml;
     this.afterWriteOutput();
   }
@@ -404,16 +421,16 @@ class Calculator {
   submitComputationPartTwo(input) {
     //<- this function is called by a callback trigerred when calling
     //thePage.storage.variables.calculator.input.setAndStore(...)
-    var thePage = window.calculator.mainPage;
-    var urlCopy = Object.assign({}, thePage.storage.urlObject);
+    let thePage = window.calculator.mainPage;
+    let urlCopy = Object.assign({}, thePage.storage.urlObject);
     urlCopy.inputFocus = true;
-    var stringifiedHash = thePage.storage.getPercentEncodedURL(urlCopy);
+    let stringifiedHash = thePage.storage.getPercentEncodedURL(urlCopy);
     document.getElementById("spanComputationLink").innerHTML = `<a href = '#${stringifiedHash}'>Link to your input</a>`;
     setTimeout(() => {
-      initializeButtons.calculatorPanel.mQHelpCalculator();
+      this.calculatorPanel.mQHelpCalculator();
     }, 0);
-    var url = pathnames.urls.calculatorAPI;
-    var parameters = this.getQueryStringSubmitStringAsMainInput(input, pathnames.urlFields.calculatorCompute);
+    let url = pathnames.urls.calculatorAPI;
+    let parameters = this.getQueryStringSubmitStringAsMainInput(input, pathnames.urlFields.calculatorCompute);
     submitRequests.submitPOST({
       url: url,
       parameters: parameters,
@@ -423,8 +440,8 @@ class Calculator {
   }
 
   getQueryStringSubmitStringAsMainInput(theString, requestType) {
-    var inputParams = '';
-    var thePage = window.calculator.mainPage;
+    let inputParams = '';
+    let thePage = window.calculator.mainPage;
     inputParams += `${pathnames.urlFields.request}=${requestType}&`;
     inputParams += `${pathnames.urlFields.requests.calculatorInput}=${encodeURIComponent(theString)}&`;
     if (thePage.storage.variables.flagDebug.isTrue()) {
@@ -439,12 +456,12 @@ class Calculator {
   }
 
   submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus) {
-    var inputParams = this.getQueryStringSubmitStringAsMainInput(theString, requestType);
+    let inputParams = this.getQueryStringSubmitStringAsMainInput(theString, requestType);
     this.submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus);
   }
 }
 
-var calculator = new Calculator();
+let calculator = new Calculator();
 
 module.exports = {
   calculator,

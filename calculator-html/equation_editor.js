@@ -481,7 +481,7 @@ class MathNodeFactory {
     const cancelSign = new MathNode(equationEditor, knownTypes.cancelSign);
     cancelSign.initialContent = "\u2571"; // top-left to bottom-right: "\u2572"; x-cross: "\u2573"
     const horizontal = this.horizontalMath(equationEditor, content);
-    let underTheCancel = new MathNode(equationEditor, knownTypes.cancelUnderBox);
+    let underTheCancel = new MathNodeCancelUnderBox(equationEditor);
     underTheCancel.appendChild(horizontal);
     underTheCancel.normalizeHorizontalMath();
     underTheCancel.ensureEditableAtoms();
@@ -666,7 +666,7 @@ class MathNodeFactory {
     /** @type {boolean} */
     implied,
   ) {
-    const rightParentheses = new MathNodeBaseRightDelimiter(equationEditor);
+    const rightParentheses = new MathNodeRightDelimiter(equationEditor);
     rightParentheses.initialContent = content;
     rightParentheses.implied = implied;
     return rightParentheses;
@@ -760,8 +760,8 @@ class MathNodeFactory {
     subscript,
   ) {
     let result = new MathNodeOperatorWithSuperAndSubscript(equationEditor);
-    let superscriptNode = new MathNode(equationEditor, knownTypes.operatorSuperscript);
-    let subscriptNode = new MathNode(equationEditor, knownTypes.operatorSubscript);
+    let superscriptNode = new MathNodeOperatorSuperscript(equationEditor);
+    let subscriptNode = new MathNodeOperatorSubscript(equationEditor);
     let operatorNode = new MathNodeOperatorStandalone(equationEditor);
     superscriptNode.appendChild(this.horizontalMath(equationEditor, superscript));
     subscriptNode.appendChild(this.horizontalMath(equationEditor, subscript));
@@ -4662,95 +4662,18 @@ class MathNode {
   }
 
   /** @returns {boolean} whether reduction occurred. */
-  applyBackspaceToTheRightOfOperatorWithSuperAndSubscript() {
-    if (this.type.type !== knownTypes.operatorWithSuperAndSubscript.type) {
-      return false;
-    }
-    this.children[2].focus(1);
-    return true;
-  }
-
-  /** @returns {boolean} whether reduction occurred. */
-  applyBackspaceToTheRightSqrt() {
-    if (this.type.type !== knownTypes.sqrt.type) {
-      return false;
-    }
-    this.children[2].focus(1);
-    return true;
-  }
-
-  /** @returns {boolean} whether reduction occurred. */
-  applyBackspaceToTheRightCancel() {
-    if (this.type.type !== knownTypes.cancel.type) {
-      return false;
-    }
-    this.children[1].focus(1);
-    return true;
-  }
-
-  /** @returns {boolean} whether reduction occurred. */
   applyBackspaceToTheLeftEndOfOperatorSubscript() {
-    if (
-      this.type.type !== knownTypes.operatorSubscript.type &&
-      this.type.type !== knownTypes.operatorSuperscript.type
-    ) {
-      return false;
-    }
     let operatorWithSuperAndSubscript = this.parent;
     let superscript = operatorWithSuperAndSubscript.children[0];
     let subscript = operatorWithSuperAndSubscript.children[2];
-    let horizontal = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [superscript.children[0], subscript.children[0]]);
+    let horizontal = mathNodeFactory.horizontalMathFromArray(
+      this.equationEditor,
+      [superscript.children[0], subscript.children[0]],
+    );
     horizontal.normalizeHorizontalMath();
     let parent = operatorWithSuperAndSubscript.parent;
     let indexOperator = operatorWithSuperAndSubscript.indexInParent;
     parent.replaceChildAtPosition(indexOperator, horizontal);
-    parent.normalizeHorizontalMath();
-    parent.updateDOM();
-    parent.focusRestore();
-    return true;
-  }
-
-  /** @returns {boolean} whether reduction occurred. */
-  applyBackspaceToTheLeftOfCancelSign() {
-    if (this.type.type !== knownTypes.cancelUnderBox.type) {
-      return false;
-    }
-    let cancel = this.parent;
-    let indexCancel = cancel.indexInParent;
-    let content = this.children[0];
-    content.children[0].desiredCaretPosition = 0;
-    let parent = cancel.parent;
-    parent.replaceChildAtPosition(indexCancel, content.children[0]);
-    parent.normalizeHorizontalMath();
-    parent.updateDOM();
-    parent.focusRestore();
-    return true;
-  }
-
-  /** @returns {boolean} whether reduction occurred. */
-  applyBackspaceToTheRightDelimiter() {
-    if (
-      this.type.type !== knownTypes.rightDelimiter.type &&
-      this.type.type !== knownTypes.leftDelimiter.type
-    ) {
-      return false;
-    }
-    let matchingIndex = this.parent.findIndexMatchingDelimiter(this.indexInParent);
-    if (matchingIndex === - 1) {
-      console.log("Unexpected failure to find matching left parenthesis.");
-      return false;
-    }
-    if (!this.parent.children[matchingIndex].implied) {
-      this.implied = true;
-      this.parent.focusCancelOnce();
-      this.focus(- 1);
-      this.updateDOM();
-      return true;
-    }
-    let parent = this.parent;
-    let startingIndexInParent = this.indexInParent;
-    parent.removeChild(Math.max(startingIndexInParent, matchingIndex));
-    parent.removeChild(Math.min(startingIndexInParent, matchingIndex));
     parent.normalizeHorizontalMath();
     parent.updateDOM();
     parent.focusRestore();
@@ -4778,12 +4701,6 @@ class MathNode {
       this.focusCancelOnce();
       return false;
     }
-    if (this.applyBackspaceToTheLeftOfCancelSign()) {
-      return true;
-    }
-    if (this.applyBackspaceToTheLeftEndOfOperatorSubscript()) {
-      return true;
-    }
     if (this.indexInParent === 0) {
       return this.parent.applyBackspaceToTheLeft();
     }
@@ -4794,79 +4711,47 @@ class MathNode {
     return false;
   }
 
-  /** @returns {boolean} whether backspace was applied */
-  applyBackspaceToTheRightFraction() {
-    if (this.type.type !== knownTypes.fraction.type) {
-      return false;
+  applyBackspaceToTheRightAsLeftArrow() {
+    let sibling = this.nextHorizontalSibling();
+    if (sibling !== null) {
+      sibling.focusCancelOnce();
     }
-    this.parent.children[this.indexInParent + 1].focusCancelOnce();
-    this.children[1].focus(1);
-    return true;
-  }
-
-  /** @returns {boolean} whether backspace was applied */
-  applyBackspaceToTheRightBaseWithExponent() {
-    if (this.type.type !== knownTypes.baseWithExponent.type) {
-      return false;
-    }
-    this.parent.children[this.indexInParent + 1].focusCancelOnce();
-    this.children[1].focus(1);
-    return true;
-  }
-
-  /** @returns {boolean} whether backspace was applied */
-  applyBackspaceToTheRightAtomImmutable() {
-    if (this.type.type !== knownTypes.atomImmutable.type) {
-      return false;
-    }
-    let parent = this.parent;
-    parent.children[this.indexInParent + 1].desiredCaretPosition = 0;
-    parent.removeChild(this.indexInParent);
-    parent.normalizeHorizontalMath();
-    parent.updateDOM();
-    parent.focusRestore();
-    return true;
-  }
-
-  applyBackspaceToTheRightMatrix() {
-    if (this.type.type !== knownTypes.matrix.type) {
-      return false;
-    }
-    let parent = this.parent;
-    parent.removeChild(this.indexInParent);
-    parent.normalizeHorizontalMath();
-    parent.updateDOM();
-    parent.focusRestore();
+    this.rightmostAtomChild().focus(1);
     return true;
   }
 
   /** @returns {boolean} whether backspace was applied */
   applyBackspaceToTheRight() {
-    if (this.applyBackspaceToTheRightAtomImmutable()) {
-      return true;
-    }
-    if (this.applyBackspaceToTheRightDelimiter()) {
-      return true;
-    }
-    if (this.applyBackspaceToTheRightFraction()) {
-      return true;
-    }
-    if (this.applyBackspaceToTheRightOfOperatorWithSuperAndSubscript()) {
-      return true;
-    }
-    if (this.applyBackspaceToTheRightMatrix()) {
-      return true;
-    }
-    if (this.applyBackspaceToTheRightSqrt()) {
-      return true;
-    }
-    if (this.applyBackspaceToTheRightCancel()) {
-      return true;
-    }
-    if (this.applyBackspaceToTheRightBaseWithExponent()) {
-      return true;
-    }
     return false;
+  }
+
+  applyBackspaceToTheRightDelimiter() {
+    if (
+      this.type.type !== knownTypes.rightDelimiter.type &&
+      this.type.type !== knownTypes.leftDelimiter.type
+    ) {
+      return false;
+    }
+    let matchingIndex = this.parent.findIndexMatchingDelimiter(this.indexInParent);
+    if (matchingIndex === - 1) {
+      console.log("Unexpected failure to find matching left parenthesis.");
+      return false;
+    }
+    if (!this.parent.children[matchingIndex].implied) {
+      this.implied = true;
+      this.parent.focusCancelOnce();
+      this.focus(- 1);
+      this.updateDOM();
+      return true;
+    }
+    let parent = this.parent;
+    let startingIndexInParent = this.indexInParent;
+    parent.removeChild(Math.max(startingIndexInParent, matchingIndex));
+    parent.removeChild(Math.min(startingIndexInParent, matchingIndex));
+    parent.normalizeHorizontalMath();
+    parent.updateDOM();
+    parent.focusRestore();
+    return true;
   }
 
   /** Returns the position of the operator.
@@ -6138,6 +6023,18 @@ class MathNodeAtomImmutable extends MathNode {
   toLatexWithAnnotation() {
     return this.toLatexWithAnnotationAtomic();
   }
+
+  /** @returns {boolean} whether backspace was applied */
+  applyBackspaceToTheRight() {
+    let parent = this.parent;
+    parent.children[this.indexInParent + 1].desiredCaretPosition = 0;
+    parent.removeChild(this.indexInParent);
+    parent.normalizeHorizontalMath();
+    parent.updateDOM();
+    parent.focusRestore();
+    return true;
+  }
+
 }
 
 class MathNodeFraction extends MathNode {
@@ -6167,6 +6064,10 @@ class MathNodeFraction extends MathNode {
     }
     result.latex += "]";
     return result;
+  }
+
+  applyBackspaceToTheRight() {
+    return this.applyBackspaceToTheRightAsLeftArrow();
   }
 }
 
@@ -6213,6 +6114,10 @@ class MathNodeBaseWithExponent extends MathNode {
       - 1,
       - 1,
     );
+  }
+
+  applyBackspaceToTheRight() {
+    return this.applyBackspaceToTheRightAsLeftArrow();
   }
 }
 
@@ -6273,6 +6178,32 @@ class MathNodeCancel extends MathNode {
     let childLatex = this.children[1].toLatex();
     return new LatexWithAnnotation(`\\cancel{${childLatex}}`, - 1, - 1);
   }
+
+  applyBackspaceToTheRight() {
+    this.applyBackspaceToTheRightAsLeftArrow();
+  }
+}
+
+class MathNodeCancelUnderBox extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.cancelUnderBox);
+  }
+  /** @returns {boolean} whether reduction occurred. */
+  applyBackspaceToTheLeft() {
+    let cancel = this.parent;
+    let indexCancel = cancel.indexInParent;
+    let content = this.children[0];
+    content.children[0].desiredCaretPosition = 0;
+    let parent = cancel.parent;
+    parent.replaceChildAtPosition(indexCancel, content.children[0]);
+    parent.normalizeHorizontalMath();
+    parent.updateDOM();
+    parent.focusRestore();
+    return true;
+  }
 }
 
 class MathNodeSqrtSign extends MathNode {
@@ -6310,6 +6241,9 @@ class MathNodeSqrt extends MathNode {
     }
     return new LatexWithAnnotation(`\\sqrt{${underTheRadical}}`, - 1, - 1);
   }
+  applyBackspaceToTheRight() {
+    return this.applyBackspaceToTheRightAsLeftArrow();
+  }
 }
 
 class MathNodeOverLine extends MathNode {
@@ -6338,7 +6272,7 @@ class MathNodeExponent extends MathNode {
     super(equationEditor, knownTypes.exponent);
   }
   applyBackspaceToTheLeft() {
-    this.applyBackspaceToTheLeftChildWithSiblingWrapper();
+    return this.applyBackspaceToTheLeftChildWithSiblingWrapper();
   }
 }
 
@@ -6350,7 +6284,7 @@ class MathNodeSubscript extends MathNode {
     super(equationEditor, knownTypes.subscript);
   }
   applyBackspaceToTheLeft() {
-    this.applyBackspaceToTheLeftChildWithSiblingWrapper();
+    return this.applyBackspaceToTheLeftChildWithSiblingWrapper();
   }
 }
 
@@ -6366,6 +6300,10 @@ class MathNodeBaseWithSubscript extends MathNode {
   toLatexWithAnnotation() {
     return new LatexWithAnnotation(`{${this.children[0].toLatex()}}_{${this.children[1].toLatex()}}`, - 1, - 1);
   }
+
+  applyBackspaceToTheRight() {
+    return this.applyBackspaceToTheRightAsLeftArrow();
+  }
 }
 
 class MathNodeLeftDelimiter extends MathNode {
@@ -6380,9 +6318,14 @@ class MathNodeLeftDelimiter extends MathNode {
   toLatexWithAnnotation() {
     return new LatexWithAnnotation(this.textContentOrInitialContent(), - 1, - 1);
   }
+
+  /** @returns {boolean} whether reduction occurred. */
+  applyBackspaceToTheRight() {
+    return this.applyBackspaceToTheRightDelimiter();
+  }
 }
 
-class MathNodeBaseRightDelimiter extends MathNode {
+class MathNodeRightDelimiter extends MathNode {
   constructor(
     /** @type {EquationEditor} */
     equationEditor,
@@ -6393,6 +6336,11 @@ class MathNodeBaseRightDelimiter extends MathNode {
   /** @returns {LatexWithAnnotation} */
   toLatexWithAnnotation() {
     return new LatexWithAnnotation(this.textContentOrInitialContent(), - 1, - 1);
+  }
+
+  /** @returns {boolean} whether reduction occurred. */
+  applyBackspaceToTheRight() {
+    return this.applyBackspaceToTheRightDelimiter();
   }
 }
 
@@ -6425,6 +6373,15 @@ class MathNodeMatrix extends MathNode {
     result.push(rows.join("\\\\"));
     result.push("\\end{pmatrix}");
     return new LatexWithAnnotation(result.join(""), - 1, - 1);
+  }
+
+  applyBackspaceToTheRight() {
+    let parent = this.parent;
+    parent.removeChild(this.indexInParent);
+    parent.normalizeHorizontalMath();
+    parent.updateDOM();
+    parent.focusRestore();
+    return true;
   }
 }
 
@@ -6498,6 +6455,9 @@ class MathNodeOperatorWithSuperAndSubscript extends MathNode {
     }
     return new LatexWithAnnotation(result, - 1, - 1);
   }
+  applyBackspaceToTheRight() {
+    return this.applyBackspaceToTheRightAsLeftArrow();
+  }
 }
 
 class MathNodeOperatorStandalone extends MathNode {
@@ -6525,6 +6485,30 @@ class MathNodeOperatorWithSubscript extends MathNode {
     equationEditor,
   ) {
     super(equationEditor, knownTypes.operatorWithSubscript);
+  }
+}
+
+class MathNodeOperatorSubscript extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.operatorSubscript);
+  }
+  applyBackspaceToTheLeft() {
+    return this.applyBackspaceToTheLeftEndOfOperatorSubscript();
+  }
+}
+
+class MathNodeOperatorSuperscript extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.operatorSuperscript);
+  }
+  applyBackspaceToTheLeft() {
+    return this.applyBackspaceToTheLeftEndOfOperatorSubscript();
   }
 }
 

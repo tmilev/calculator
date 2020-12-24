@@ -267,21 +267,21 @@ bool Expression::hasBoundVariables() const {
 }
 
 bool Calculator::appendOpandsReturnTrueIfOrderNonCanonical(
-  const Expression& input, List<Expression>& output, int theOp
+  const Expression& input, List<Expression>& output, int operation
 ) {
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
   if (this->recursionDepth > this->maximumRecursionDepth) {
     return false;
   }
   bool result = false;
-  if (!input.isListStartingWithAtom(theOp)) {
+  if (!input.isListStartingWithAtom(operation)) {
     output.addOnTop(input);
   } else {
     for (int i = 1; i < input.size(); i ++) {
-      if (this->appendOpandsReturnTrueIfOrderNonCanonical(input[i], output, theOp)) {
+      if (this->appendOpandsReturnTrueIfOrderNonCanonical(input[i], output, operation)) {
         result = true;
       }
-      if (i < input.size() - 1 && input[i].isListStartingWithAtom(theOp) && input[i].size() > 2) {
+      if (i < input.size() - 1 && input[i].isListStartingWithAtom(operation) && input[i].size() > 2) {
         result = true;
       }
     }
@@ -718,22 +718,22 @@ bool Calculator::collectCoefficientsPowersVariables(
   return true;
 }
 
-bool Calculator::collectOpands(const Expression& input, int theOp, List<Expression>& outputOpands) {
+bool Calculator::collectOpands(const Expression& input, int operation, List<Expression>& outputOpands) {
   MacroRegisterFunctionWithName("Calculator::collectOpands");
   outputOpands.setSize(0);
-  return this->collectOpandsAccumulate(input, theOp, outputOpands);
+  return this->collectOpandsAccumulate(input, operation, outputOpands);
 }
 
 bool Calculator::collectOpandsAccumulate(
-  const Expression& input, int theOp, List<Expression>& outputOpands
+  const Expression& input, int operation, List<Expression>& outputOpands
 ) {
   MacroRegisterFunctionWithName("Calculator::collectOpandsAccumulate");
-  if (!input.startsWith(theOp)) {
+  if (!input.startsWith(operation)) {
     outputOpands.addOnTop(input);
     return true;
   }
   for (int i = 1; i < input.size(); i ++) {
-    this->collectOpandsAccumulate(input[i], theOp, outputOpands);
+    this->collectOpandsAccumulate(input[i], operation, outputOpands);
   }
   return true;
 }
@@ -1211,17 +1211,17 @@ int Calculator::addOperationNoRepetitionOrReturnIndexFirst(const std::string& th
   return result;
 }
 
-void Calculator::addOperationBuiltInType(const std::string& theOpName) {
-  this->addOperationNoRepetitionAllowed(theOpName);
-  this->builtInTypes.addOnTop(theOpName);
+void Calculator::addOperationBuiltInType(const std::string& operationBuiltIn) {
+  this->addOperationNoRepetitionAllowed(operationBuiltIn);
+  this->builtInTypes.addOnTop(operationBuiltIn);
 }
 
-void Calculator::addOperationNoRepetitionAllowed(const std::string& theOpName) {
-  if (this->operations.contains(theOpName)) {
-    global.fatal << "Operation " << theOpName
+void Calculator::addOperationNoRepetitionAllowed(const std::string& operation) {
+  if (this->operations.contains(operation)) {
+    global.fatal << "Operation " << operation
     << " already created. " << global.fatal;
   }
-  this->operations.getValueCreate(theOpName);
+  this->operations.getValueCreate(operation);
 }
 
 Function::Function() {
@@ -1261,7 +1261,7 @@ Function::Function(
 }
 
 void Calculator::addOperationBinaryInnerHandlerWithTypes(
-  const std::string& theOpName,
+  const std::string& operation,
   Expression::FunctionAddress innerHandler,
   int leftType,
   int rightType,
@@ -1271,14 +1271,14 @@ void Calculator::addOperationBinaryInnerHandlerWithTypes(
   const std::string& inputCalculatorIdentifier,
   const Function::Options& options
 ) {
-  int indexOp = this->operations.getIndex(theOpName);
-  if (indexOp == - 1) {
-    indexOp = this->operations.size();
-    this->operations.getValueCreate(theOpName);
+  int indexOperation = this->operations.getIndex(operation);
+  if (indexOperation == - 1) {
+    indexOperation = this->operations.size();
+    this->operations.getValueCreate(operation);
   }
   Function innerFunction(
     *this,
-    indexOp,
+    indexOperation,
     innerHandler,
     nullptr,
     opDescription,
@@ -1291,7 +1291,7 @@ void Calculator::addOperationBinaryInnerHandlerWithTypes(
   innerFunction.theArgumentTypes.reset(*this, 2);
   innerFunction.theArgumentTypes.addChildAtomOnTop(leftType);
   innerFunction.theArgumentTypes.addChildAtomOnTop(rightType);
-  this->registerCalculatorFunction(innerFunction, indexOp);
+  this->registerCalculatorFunction(innerFunction, indexOperation);
 }
 
 void Calculator::registerCalculatorFunction(Function& theFun, int indexOp) {
@@ -1331,7 +1331,7 @@ void Calculator::registerCalculatorFunction(Function& theFun, int indexOp) {
 }
 
 void Calculator::addOperationHandler(
-  const std::string& theOpName,
+  const std::string& operation,
   Expression::FunctionAddress handler,
   const std::string& opArgumentListIgnoredForTheTimeBeing,
   const std::string& opDescription,
@@ -1344,10 +1344,10 @@ void Calculator::addOperationHandler(
   if (opArgumentListIgnoredForTheTimeBeing != "") {
     global.fatal << "This section of code is not implemented yet. Crashing to let you know. " << global.fatal;
   }
-  int indexOp = this->operations.getIndex(theOpName);
+  int indexOp = this->operations.getIndex(operation);
   if (indexOp == - 1) {
     indexOp = this->operations.size();
-    this->operations.getValueCreate(theOpName);
+    this->operations.getValueCreate(operation);
   }
   int indexParentOpThatBansHandler = this->operations.getIndex(parentOpThatBansHandler);
   Function theFun(
@@ -1376,7 +1376,7 @@ void Function::Options::reset() {
   this->flagIsExperimental        = false;
   this->disabledByUser            = false;
   this->disabledByUserDefault     = false;
-  this->dontTestAutomatically = false;
+  this->dontTestAutomatically     = false;
   this->adminOnly                 = false;
 }
 

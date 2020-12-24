@@ -320,12 +320,14 @@ void MeshTriangles::computeImplicitPlot() {
   this->thePlot.thePlots.addListOnTop(this->theCurve.thePlots);
 }
 
-bool Calculator::getMatrixDoubles(const Expression& input, Matrix<double>& output, int DesiredNumcols) {
+bool Calculator::getMatrixDoubles(
+  const Expression& input, Matrix<double>& output, int desiredNumberOfColumns
+) {
   return this->functionGetMatrix<double>(
     input,
     output,
     nullptr,
-    DesiredNumcols,
+    desiredNumberOfColumns,
     CalculatorFunctions::functionEvaluateToDouble
   );
 }
@@ -333,25 +335,25 @@ bool Calculator::getMatrixDoubles(const Expression& input, Matrix<double>& outpu
 bool Calculator::getVectorDoubles(
   const Expression& input,
   Vector<double>& output,
-  int DesiredDimensionNonMandatory
+  int desiredDimensionNonMandatory
 ) {
   return this->getVector(
     input,
     output,
     nullptr,
-    DesiredDimensionNonMandatory,
+    desiredDimensionNonMandatory,
     CalculatorFunctions::functionEvaluateToDouble
   );
 }
 
 bool Calculator::getVectorDoublesFromFunctionArguments(
-  const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory
+  const Expression& input, Vector<double>& output, int desiredDimensionNonMandatory
 ) {
   return this->getVectorFromFunctionArguments(
     input,
     output,
     nullptr,
-    DesiredDimensionNonMandatory,
+    desiredDimensionNonMandatory,
     CalculatorFunctions::functionEvaluateToDouble
   );
 }

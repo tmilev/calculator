@@ -2176,6 +2176,7 @@ class EquationEditor {
     this.updateAlignment();
     this.writeDebugInfo(parser);
     this.container.setAttribute("latexsource", latex);
+    this.setLastModified(this.rootNode.rightmostAtomChild());
   }
 
   writeLatexLastFocused(
@@ -2192,7 +2193,10 @@ class EquationEditor {
       toWriteTo.writeLatex(latex);
       return;
     }
-    this.lastModified.writeLatex(latex);
+    let lastModifiedReference = this.lastModified;
+    // Ensure reference to last modified is wiped early.
+    this.lastModified = null;
+    lastModifiedReference.writeLatex(latex);
   }
 
   accountFrameTime(
@@ -2220,7 +2224,8 @@ class EquationEditor {
 
   toHtml() {
     let latexWithAnnotation = this.rootNode.toLatexWithAnnotation();
-    let result = `Latex: ${latexWithAnnotation.latex}`
+    let result = `Latex: ${latexWithAnnotation.latex}`;
+    result += `Last modified: ${this.lastModified.toString()}`;
     result += `<br>Latex selection: ${latexWithAnnotation.selectionStart}, ${latexWithAnnotation.selectionEnd}`;
     result += `<br>Drawing: ${this.rootNode.toString()}`;
     result += `<br>Structure: ${this.rootNode.toHtml(0)}`;
@@ -3957,17 +3962,25 @@ class MathNode {
       this.element.textContent = endContent;
       this.desiredCaretPosition = this.positionCaretBeforeKeyEvents + data.length;
       this.updateDOM();
+      this.equationEditor.updateAlignment();
       this.focusRestore();
       return;
     }
     let split = this.splitByCaretEmptyAtoms();
-    split[1].desiredCaretPosition = 0;
+    /**@type {MathNode} */
+    let newRightMostAtom = newContent.rightmostAtomChild();
+    if (newRightMostAtom === null) {
+      split[1].desiredCaretPosition = 0;
+    } else {
+      newRightMostAtom.desiredCaretPosition = newRightMostAtom.textContentOrInitialContent().length;
+    }
     let horizontalContent = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [split[0], newContent, split[1]]);
     horizontalContent.normalizeHorizontalMath();
     let parent = this.parent;
     parent.replaceChildAtPosition(this.indexInParent, horizontalContent);
     parent.normalizeHorizontalMath();
     parent.updateDOM();
+    this.equationEditor.updateAlignment();
     parent.focusRestore();
   }
 
@@ -5834,7 +5847,6 @@ class MathNode {
     }
     // The call to focus(null) will wipe the desiredCaretPosition.
     let originalDesiredPosition = this.desiredCaretPosition;
-    // this.element.focus(null);
     let position = 0;
     if (endToFocus === 0) {
       position = originalDesiredPosition;
@@ -5955,6 +5967,12 @@ class MathNode {
     /** @type {number}*/
     position,
   ) {
+    let selection = window.getSelection();
+    if (this.element !== null) {
+      if (selection.rangeCount <= 0) {
+        this.element.focus();
+      }
+    }
     let range = document.createRange();
     let collapseToStart = true;
     if (position >= this.element.textContent.length) {
@@ -5969,8 +5987,8 @@ class MathNode {
     }
     // console.log(`Position: ${position}, range ${range}, collapseToStart: ${collapseToStart} start offset: ${range.startOffset}, end offset: ${range.endOffset}, text len: ${this.element.textContent.length}`);
     range.collapse(collapseToStart);
-    window.getSelection().removeAllRanges();
-    window.getSelection().addRange(range);
+    selection.removeAllRanges();
+    selection.addRange(range);
     this.positionCaretBeforeKeyEvents = position;
     //    this.element.focus();
   }

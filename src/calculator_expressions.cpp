@@ -152,7 +152,7 @@ int Expression::getTypeOperation<Weight<Polynomial<Rational> > >() const {
 template < >
 int Expression::getTypeOperation<MatrixTensor<Rational> >() const {
   this->checkInitialization();
-  return this->owner->opMatTensorRat();
+  return this->owner->opMatrixTensorRational();
 }
 
 template < >

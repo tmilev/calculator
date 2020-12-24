@@ -1634,9 +1634,6 @@ public:
   int conIsDenotedBy() {
     return this->controlSequences.getIndexNoFail("=:");
   }
-  int conLisT() {
-    return this->controlSequences.getIndexNoFail("");
-  }
   int conSequenceStatements() {
     return this->controlSequences.getIndexNoFail("SequenceStatements");
   }
@@ -1838,7 +1835,7 @@ public:
   int opAbsoluteValue() {
     return this->operations.getIndexNoFail("|");
   }
-  int opMatTensorRat() {
+  int opMatrixTensorRational() {
     return this->operations.getIndexNoFail("MatrixTensorRational");
   }
   int opWeylGroupRep() {
@@ -2063,12 +2060,12 @@ public:
       << global.fatal;
     }
   }
-  bool callCalculatorFunction(Expression::FunctionAddress theFun, const Expression& input, Expression& output) {
+  bool callCalculatorFunction(Expression::FunctionAddress toBeCalled, const Expression& input, Expression& output) {
     if (&input == &output) {
       Expression inputCopy = input;
-      return this->callCalculatorFunction(theFun, inputCopy, output);
+      return this->callCalculatorFunction(toBeCalled, inputCopy, output);
     }
-    if (!theFun(*this, input, output)) {
+    if (!toBeCalled(*this, input, output)) {
       return false;
     }
     return !output.isError();
@@ -2159,8 +2156,8 @@ public:
     const Expression& theVariable,
     VectorSparse<Expression>& outputPositionIiscoeffXtoIth
   );
-  bool collectOpands(const Expression& input, int theOp, List<Expression>& outputOpands);
-  bool collectOpandsAccumulate(const Expression& input, int theOp, List<Expression>& outputOpands);
+  bool collectOpands(const Expression& input, int operation, List<Expression>& outputOpands);
+  bool collectOpandsAccumulate(const Expression& input, int operation, List<Expression>& outputOpands);
   static bool functionCollectSummands(
     Calculator& calculator,
     const Expression& input,
@@ -2169,7 +2166,7 @@ public:
   template<class theType>
   bool functionGetMatrix(
     const Expression& input,
-    Matrix<theType>& outputMat,
+    Matrix<theType>& outputMatrix,
     ExpressionContext* inputOutputStartingContext = nullptr,
     int targetNumColsNonMandatory = - 1,
     Expression::FunctionAddress conversionFunction = nullptr,
@@ -2183,12 +2180,12 @@ public:
     int targetDimNonMandatory = - 1,
     Expression::FunctionAddress conversionFunction = nullptr
   ) {
-    Expression tempE = input;
-    if (tempE.isList()) {
-      tempE.setChildAtomValue(0, this->opSequence());
+    Expression list = input;
+    if (list.isList()) {
+      list.setChildAtomValue(0, this->opSequence());
     }
     return this->getVector(
-      tempE,
+      list,
       output,
       inputOutputStartingContext,
       targetDimNonMandatory,
@@ -2203,18 +2200,18 @@ public:
   );
   bool getVectorInt(const Expression& input, List<int>& output);
   bool getVectorLargeIntegerFromFunctionArguments(const Expression& input, List<LargeInteger>& output);
-  bool getMatrixDoubles(const Expression& input, Matrix<double>& output, int DesiredNumcols = - 1);
+  bool getMatrixDoubles(const Expression& input, Matrix<double>& output, int desiredNumberOfColumns = - 1);
 
-  bool getVectorDoubles(const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory = - 1);
+  bool getVectorDoubles(const Expression& input, Vector<double>& output, int desiredDimensionNonMandatory = - 1);
   bool getVectorDoublesFromFunctionArguments(
-    const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory = - 1
+    const Expression& input, Vector<double>& output, int desiredDimensionNonMandatory = - 1
   );
   template <class theType>
   bool getVector(
     const Expression& input,
     Vector<theType>& output,
     ExpressionContext* inputOutputStartingContext = nullptr,
-    int targetDimNonMandatory = - 1,
+    int targetDimensionNonMandatory = - 1,
     Expression::FunctionAddress conversionFunction = nullptr
   );
   bool getListPolynomialVariableLabelsLexicographic(
@@ -2236,19 +2233,19 @@ public:
     const Expression& input,
     Expression& output,
     Vector<Coefficient>& outputWeightHWFundcoords,
-    Selection& outputInducingSel,
+    Selection& outputInducingSelection,
     WithContext<SemisimpleLieAlgebra*>& outputAmbientSSalgebra,
     Expression::FunctionAddress ConversionFun
   );
   void addEmptyHeadedCommand();
   Calculator();
   int addOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName);
-  void addOperationNoRepetitionAllowed(const std::string& theOpName);
-  void addOperationBuiltInType(const std::string& theOpName);
-  void addTrigonometricSplit(const std::string& trigFun, const List<std::string>& theVars);
-  void addKnownDoubleConstant(const std::string& theConstantName, double theValue);
+  void addOperationNoRepetitionAllowed(const std::string& operation);
+  void addOperationBuiltInType(const std::string& operationBuiltIn);
+  void addTrigonometricSplit(const std::string& trigonometricFunction, const List<std::string>& variables);
+  void addKnownDoubleConstant(const std::string& constantName, double value);
   void addOperationBinaryInnerHandlerWithTypes(
-    const std::string& theOpName,
+    const std::string& operation,
     Expression::FunctionAddress innerHandler,
     int leftType,
     int rightType,
@@ -2259,7 +2256,7 @@ public:
     const Function::Options& options
   );
   void addOperationHandler(
-    const std::string& theOpName,
+    const std::string& operation,
     Expression::FunctionAddress handler,
     const std::string& opArgumentListIgnoredForTheTimeBeing,
     const std::string& opDescription,
@@ -2571,7 +2568,7 @@ public:
     Calculator& calculator,
     const ElementUniversalEnveloping<RationalFunction<Rational> >& input,
     Expression& output,
-    ExpressionContext *inputContext = nullptr
+    ExpressionContext* inputContext = nullptr
   );
   static bool innerStoreCandidateSubalgebra(Calculator& calculator, const CandidateSemisimpleSubalgebra& input, Expression& output);
   static bool innerExpressionFromDynkinType(Calculator& calculator, const DynkinType& input, Expression& output);
@@ -2662,15 +2659,16 @@ public:
 };
 
 template <class theType>
-bool Calculator::getVector(const Expression& input,
+bool Calculator::getVector(
+  const Expression& input,
   Vector<theType>& output,
-  ExpressionContext *inputOutputStartingContext,
-  int targetDimNonMandatory,
+  ExpressionContext* inputOutputStartingContext,
+  int targetDimensionNonMandatory,
   Expression::FunctionAddress conversionFunction
 ) {
   MacroRegisterFunctionWithName("Calculator::getVector");
   List<Expression> nonConvertedEs;
-  if (!this->getVectorExpressions(input, nonConvertedEs, targetDimNonMandatory)) {
+  if (!this->getVectorExpressions(input, nonConvertedEs, targetDimensionNonMandatory)) {
     return false;
   }
   List<Expression> convertedEs;
@@ -2685,8 +2683,8 @@ bool Calculator::getVector(const Expression& input,
   if (!this->convertExpressionsToCommonContext(convertedEs, inputOutputStartingContext)) {
     return false;
   }
-  if (targetDimNonMandatory > 0) {
-    if (convertedEs.size != targetDimNonMandatory) {
+  if (targetDimensionNonMandatory > 0) {
+    if (convertedEs.size != targetDimensionNonMandatory) {
       return false;
     }
   }
@@ -2767,7 +2765,7 @@ bool Expression::isOfTypeWithContext(WithContext<theType>* whichElement) const {
 template <class theType>
 bool Calculator::functionGetMatrix(
   const Expression& input,
-  Matrix<theType>& outputMat,
+  Matrix<theType>& outputMatrix,
   ExpressionContext* inputOutputStartingContext,
   int targetNumColsNonMandatory,
   Expression::FunctionAddress conversionFunction,
@@ -2822,10 +2820,10 @@ bool Calculator::functionGetMatrix(
       }
     }
   }
-  outputMat.initialize(convertedEs.numberOfRows, convertedEs.numberOfColumns);
+  outputMatrix.initialize(convertedEs.numberOfRows, convertedEs.numberOfColumns);
   for (int i = 0; i < convertedEs.numberOfRows; i ++) {
     for (int j = 0; j < convertedEs.numberOfColumns; j ++) {
-      outputMat(i, j) = convertedEs(i, j).getValue<theType>();
+      outputMatrix(i, j) = convertedEs(i, j).getValue<theType>();
     }
   }
   if (inputOutputStartingContext != nullptr) {
@@ -3017,7 +3015,7 @@ bool Calculator::getTypeHighestWeightParabolic(
   const Expression& input,
   Expression& output,
   Vector<Coefficient>& outputWeightHWFundcoords,
-  Selection& outputInducingSel,
+  Selection& outputInducingSelection,
   WithContext<SemisimpleLieAlgebra*>& outputAmbientSSalgebra,
   Expression::FunctionAddress ConversionFun
 ) {
@@ -3073,12 +3071,12 @@ bool Calculator::getTypeHighestWeightParabolic(
       << rightE.toString() << ".";
       return output.makeError(tempStream.str(), calculator);
     }
-    outputInducingSel = parabolicSel;
+    outputInducingSelection = parabolicSel;
   } else {
-    outputInducingSel.initialize(ambientSSalgebra->getRank());
+    outputInducingSelection.initialize(ambientSSalgebra->getRank());
     for (int i = 0; i < outputWeightHWFundcoords.size; i ++) {
       if (!outputWeightHWFundcoords[i].isSmallInteger()) {
-        outputInducingSel.addSelectionAppendNewIndex(i);
+        outputInducingSelection.addSelectionAppendNewIndex(i);
       }
     }
   }

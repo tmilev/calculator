@@ -82,6 +82,11 @@ class Solver {
     }
     let input = this.pendingTypeset;
     this.pendingTypeset = null;
+    if (input === "") {
+      if (this.equationEditor.rootNode.toLatex() === "") {
+        return;
+      }
+    }
     this.setDebugLogContainer();
     this.equationEditor.writeLatex(input);
   }

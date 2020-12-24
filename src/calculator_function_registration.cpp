@@ -6249,8 +6249,8 @@ void Calculator::initPredefinedStandardOperations() {
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor,
-    this->opMatTensorRat(),
-    this->opMatTensorRat(),
+    this->opMatrixTensorRational(),
+    this->opMatrixTensorRational(),
     "Adds two matrices.",
     "A = MakeMatrixTensorForm{}((5, 8), (3, 5));\n"
     "3A * A - A;",
@@ -6678,8 +6678,8 @@ void Calculator::initPredefinedStandardOperations() {
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor,
-    this->opMatTensorRat(),
-    this->opMatTensorRat(),
+    this->opMatrixTensorRational(),
+    this->opMatrixTensorRational(),
     "Multiplies matrix rational by matrix tensor. ",
     "M = MakeMatrixTensorForm{}((1, 1), (0, 1));\n"
     "M;\n"
@@ -6695,7 +6695,7 @@ void Calculator::initPredefinedStandardOperations() {
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor,
     this->opRational(),
-    this->opMatTensorRat(),
+    this->opMatrixTensorRational(),
     "Multiplies rational by matrix tensor form. ",
     "M = MakeMatrixTensorForm{}((1, 3, 5), (- 1, 1, 0), (2, 2, 7));\n"
     "M;\n"
@@ -7981,8 +7981,8 @@ void Calculator::initPredefinedStandardOperations() {
   this->addOperationBinaryInnerHandlerWithTypes(
     "\\otimes",
     CalculatorFunctionsBinaryOps::tensorMatrixByMatrixTensor,
-    this->opMatTensorRat(),
-    this->opMatTensorRat(),
+    this->opMatrixTensorRational(),
+    this->opMatrixTensorRational(),
     "Same as tensor product of matrices but uses class MatrixTensor instead of class Matrix.",
     "P = ((0 , 2 ),(1 , 0));\n"
     "Q = ((0 , 3 ),(1 , 0));\n"
@@ -8555,12 +8555,12 @@ void Calculator::initializeOperationsThatAreKnownFunctions() {
   this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("LogBase");
 }
 
-void Calculator::addKnownDoubleConstant(const std::string& theConstantName, double theConstantValue) {
-  this->atomsNotInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew(theConstantName);
-  Expression theConstantE;
-  theConstantE.makeAtom(theConstantName, *this);
-  this->knownDoubleConstants.addOnTopNoRepetitionMustBeNew(theConstantE);
-  this->knownDoubleConstantValues.addOnTop(theConstantValue);
+void Calculator::addKnownDoubleConstant(const std::string& constantName, double value) {
+  this->atomsNotInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew(constantName);
+  Expression constant;
+  constant.makeAtom(constantName, *this);
+  this->knownDoubleConstants.addOnTopNoRepetitionMustBeNew(constant);
+  this->knownDoubleConstantValues.addOnTop(value);
 }
 
 void Calculator::initBuiltInAtomsNotInterpretedAsFunctions() {
@@ -8573,29 +8573,31 @@ void Calculator::initBuiltInAtomsNotInterpretedAsFunctions() {
   this->atomsNotInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew("i");
 }
 
-void Calculator::addTrigonometricSplit(const std::string& trigFun, const List<std::string>& theVars) {
+void Calculator::addTrigonometricSplit(
+  const std::string& trigonometricFunction, const List<std::string>& variables
+) {
   MacroRegisterFunctionWithName("Calculator::addTrigonometricSplit");
   List<std::string> theSplit;
-  for (int i = 0; i < theVars.size; i ++) {
-    const std::string& theVar = theVars[i];
+  for (int i = 0; i < variables.size; i ++) {
+    const std::string& variable = variables[i];
     theSplit.setSize(0);
-    theSplit.addOnTop("\\" + trigFun);
-    theSplit.addOnTop(theVar);
-    this->predefinedWordSplits.setKeyValue(trigFun + theVar, theSplit);
-    this->predefinedWordSplits.setKeyValue("\\" + trigFun + theVar, theSplit);
+    theSplit.addOnTop("\\" + trigonometricFunction);
+    theSplit.addOnTop(variable);
+    this->predefinedWordSplits.setKeyValue(trigonometricFunction + variable, theSplit);
+    this->predefinedWordSplits.setKeyValue("\\" + trigonometricFunction + variable, theSplit);
     theSplit.setSize(0);
-    theSplit.addOnTop(theVar);
-    theSplit.addOnTop("\\" + trigFun);
-    this->predefinedWordSplits.setKeyValue(theVar + trigFun, theSplit);
-    this->predefinedWordSplits.setKeyValue(theVar + "\\" + trigFun, theSplit);
+    theSplit.addOnTop(variable);
+    theSplit.addOnTop("\\" + trigonometricFunction);
+    this->predefinedWordSplits.setKeyValue(variable + trigonometricFunction, theSplit);
+    this->predefinedWordSplits.setKeyValue(variable + "\\" + trigonometricFunction, theSplit);
   }
-  for (int i = 0; i < theVars.size; i ++) {
-    for (int j = 0; j < theVars.size; j ++) {
+  for (int i = 0; i < variables.size; i ++) {
+    for (int j = 0; j < variables.size; j ++) {
       theSplit.setSize(0);
-      theSplit.addOnTop(theVars[i]);
-      theSplit.addOnTop("\\" + trigFun);
-      theSplit.addOnTop(theVars[j]);
-      this->predefinedWordSplits.setKeyValue(theVars[i] + trigFun + theVars[j], theSplit);
+      theSplit.addOnTop(variables[i]);
+      theSplit.addOnTop("\\" + trigonometricFunction);
+      theSplit.addOnTop(variables[j]);
+      this->predefinedWordSplits.setKeyValue(variables[i] + trigonometricFunction + variables[j], theSplit);
     }
   }
 }

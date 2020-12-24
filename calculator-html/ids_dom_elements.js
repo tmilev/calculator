@@ -34,6 +34,7 @@ var domElements = {
         spanStatus: "spanMonitoringStatus",
         buttonPauseToggle: "buttonPauseToggle",
       },
+      progress: "calculatorInputProgress",
     },
   },
   themeRadioButtons: {
@@ -51,7 +52,7 @@ var domElements = {
   },
   calculatorExamples: "divCalculatorExamples",
   spanCalculatorMainOutput: "spanCalculatorMainOutput",
-  spanProgressCalculatorInput: "spanProgressCalculatorInput",
+  spanProgressCalculatorInput: "calculatorInputProgress",
   spanProgressReportGeneral: "spanProgressReportGeneral",
   spanUserIdInActivateAccountPage: "spanUserIdInActivateAccountPage",
   spanUserIdInAccountsPage: "spanUserIdInAccountsPage",

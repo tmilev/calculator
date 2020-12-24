@@ -37,7 +37,6 @@ var calculatorSeparatorLeftDelimiters = {
   '{': true
 };
 var startingCharacterSectionUnderMathQuillEdit = '';
-var panelDataRegistry = {};
 
 function processMathQuillLatex(theText) {
   for (let i = 0; i < theText.length; i++) {
@@ -188,14 +187,13 @@ class ButtonCollection {
 
 class InputPanelData {
   constructor(input) {
-    //to serve autocomplete:
-    this.idMQSpan = input.idMQSpan;
-    this.idMQSpanLocation = input.idMQSpanLocation;
-    this.idMQcomments = input.idMQcomments;
+    /** @type{string} Id of component where the editor is placed.*/
+    this.idEquationEditorElement = input.idEquationEditorElement;
+    this.idEquationEditorElementLocation = input.idEquationEditorElementLocation;
+    this.idEditorComments = input.idEditorComments;
     this.problemId = input.problemId;
     /**@type{EditorButton[]} */
     this.buttonBindings = [];
-
 
     this.buttonsPerLine = input.buttonsPerLine;
     if (this.buttonsPerLine === null || this.buttonsPerLine === undefined) {
@@ -312,9 +310,16 @@ class InputPanelData {
     this.layoutVertical = true;
 
     this.properties = input.properties;
+    this.previousAnswers = input.previousAnswers;
+    this.mathQuillPanelOptions = input.mathQuillPanelOptions;
+    this.flagAnswerPanel = input.flagAnswerPanel;
+    this.flagCalculatorPanel = input.flagCalculatorPanel;
     //just in case we forget some entry above:
-    Object.assign(this, input);
-    panelDataRegistry[this.idButtonContainer] = this;
+    for (let key in input) {
+      if (!(key in this)) {
+        console.log("Missing key: " + key);
+      }
+    }
     /**@type{EquationEditor|null} */
     this.equationEditor = null;
     this.ignoreNextMathQuillUpdateEvent = false;
@@ -333,8 +338,8 @@ class InputPanelData {
     if (this.flagCalculatorPanel === undefined) {
       this.flagCalculatorPanel = false;
     }
-    if (this.idMQcomments === undefined) {
-      this.idMQcomments = null;
+    if (this.idEditorComments === undefined) {
+      this.idEditorComments = null;
     }
   }
 
@@ -537,7 +542,7 @@ class InputPanelData {
     if (this.flagInitialized) {
       return;
     }
-    let currentMQspan = document.getElementById(this.idMQSpan);
+    let currentMQspan = document.getElementById(this.idEquationEditorElement);
     this.equationEditor = new EquationEditor(currentMQspan, new EquationEditorOptions({
       editHandler: (editor, node) => {
         this.editMQFunction(editor, node);
@@ -565,7 +570,7 @@ class InputPanelData {
     /**@type{number} */
     calculatorRightPosition,
   ) {
-    let mqCommentsSpan = document.getElementById(this.idMQcomments);
+    let mqCommentsSpan = document.getElementById(this.idEditorComments);
     if (calculatorRightPosition - calculatorLeftPosition > 1000) {
       this.flagCalculatorMQStringIsOK = false;
       mqCommentsSpan.innerHTML = "<span style ='color:red'><b>Formula too big </b></span>";
@@ -573,7 +578,7 @@ class InputPanelData {
     }
     this.flagCalculatorMQStringIsOK = true;
     mqCommentsSpan.innerHTML = "Equation assistant";
-    document.getElementById(this.idMQSpan).style.visibility = "visible";
+    document.getElementById(this.idEquationEditorElement).style.visibility = "visible";
     let calculatorInput = document.getElementById(this.idPureLatex);
     this.theLaTeXString = calculatorInput.value.substring(calculatorLeftPosition, calculatorRightPosition + 1);
     this.calculatorLeftString = calculatorInput.value.substring(0, calculatorLeftPosition);
@@ -864,7 +869,7 @@ class InputPanelData {
     );
     toggle.className = "buttonShowExpandMQPanel";
     toggle.style.fontSize = "x-small";
-    toggle.textContent = "all buttons";
+    toggle.textContent = "all";
     return toggle;
   }
 
@@ -879,7 +884,7 @@ class InputPanelData {
     );
     toggle.className = "buttonShowExpandMQPanel";
     toggle.style.fontSize = "x-small";
-    toggle.textContent = "no buttons";
+    toggle.textContent = "none";
     return toggle;
   }
 
@@ -894,7 +899,7 @@ class InputPanelData {
     );
     toggle.className = "buttonShowExpandMQPanel";
     toggle.style.fontSize = "x-small";
-    toggle.textContent = "default buttons";
+    toggle.textContent = "default";
     return toggle;
   }
 }
@@ -937,7 +942,6 @@ function isKeyWordEndKnownToMathQuill(input) {
 }
 
 module.exports = {
-  panelDataRegistry,
   initializeAccordionButtons,
   initializeButtons,
   InputPanelData,

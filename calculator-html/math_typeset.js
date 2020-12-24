@@ -3,7 +3,7 @@ const equationEditor = require("./equation_editor");
 
 class TypeSetter {
   constructor() {
-    this.defaultStyle = "vertical-align:text-bottom; font-family:'Times New Roman'; display:inline-block; margin-bottom:-0.05em";
+    this.defaultStyle = "vertical-align:text-bottom; font-family:'Times New Roman'; font-size:120%; display:inline-block; margin-bottom:-0.1em";
     this.logTiming = false;
   }
 

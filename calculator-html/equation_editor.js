@@ -1453,12 +1453,16 @@ class LaTeXParser {
       return this.setError();
     }
     if (this.parsingStack.length !== this.dummyParsingElements + 2) {
-      console.log(`Failed to parse ${this.latex}: not all syntactic elements were reduced.`);
+      if (this.equationEditor.options.debugLogContainer !== null) {
+        console.log(`Failed to parse ${this.latex}: not all syntactic elements were reduced.`);
+      }
       return this.setError();
     }
     let secondToLastElement = this.parsingStack[this.parsingStack.length - 2];
     if (secondToLastElement.node === null) {
-      console.log(`Failed to parse ${this.latex}: final syntactic element is not a node.`);
+      if (this.equationEditor.options.debugLogContainer !== null) {
+        console.log(`Failed to parse ${this.latex}: final syntactic element is not a node.`);
+      }
       return this.setError();
     }
     secondToLastElement.node.normalizeHorizontalMathRecursive();

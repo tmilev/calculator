@@ -30,7 +30,7 @@ class Solver {
       return;
     }
     this.panel = new InputPanelData({
-      idMQSpan: ids.domElements.pages.solve.editor,
+      idEquationEditorElement: ids.domElements.pages.solve.editor,
       problemId: "",
       idButtonContainer: ids.domElements.pages.solve.editorButtonPanel,
       flagCalculatorPanel: true,

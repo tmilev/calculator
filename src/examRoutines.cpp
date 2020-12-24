@@ -2612,8 +2612,8 @@ bool CalculatorHtmlFunctions::extractCalculatorExpressionFromHtml(
 std::string CalculatorHTML::answerLabels::properties = "properties";
 std::string CalculatorHTML::answerLabels::idPanel = "answerPanelId";
 std::string CalculatorHTML::answerLabels::answerHighlight = "answerHighlight";
-std::string CalculatorHTML::answerLabels::idMQSpan = "idMQSpan";
-std::string CalculatorHTML::answerLabels::idMQSpanLocation = "idMQSpanLocation";
+std::string CalculatorHTML::answerLabels::idEquationEditorElement = "idEquationEditorElement";
+std::string CalculatorHTML::answerLabels::idEquationEditorElementLocation = "idEquationEditorElementLocation";
 std::string CalculatorHTML::answerLabels::idButtonContainer = "idButtonContainer";
 std::string CalculatorHTML::answerLabels::mathQuillPanelOptions = "mathQuillPanelOptions";
 std::string CalculatorHTML::answerLabels::idPureLatex = "idPureLatex";
@@ -2642,8 +2642,8 @@ JSData CalculatorHTML::getJavascriptMathQuillBoxesForJSON() {
     }
     currentAnswerJS[answerLabels::idPanel] = currentAnswer.idAnswerPanel;
     currentAnswerJS[answerLabels::answerHighlight] = currentAnswer.htmlAnswerHighlight;
-    currentAnswerJS[answerLabels::idMQSpan] = currentAnswer.idMQfielD;
-    currentAnswerJS[answerLabels::idMQSpanLocation] = currentAnswer.idMQFieldLocation;
+    currentAnswerJS[answerLabels::idEquationEditorElement] = currentAnswer.idMQfielD;
+    currentAnswerJS[answerLabels::idEquationEditorElementLocation] = currentAnswer.idMQFieldLocation;
     currentAnswerJS[answerLabels::idButtonContainer] = currentAnswer.idMQButtonPanelLocation;
     currentAnswerJS[answerLabels::mathQuillPanelOptions] = currentAnswer.mathQuillPanelOptions;
     currentAnswerJS[answerLabels::idPureLatex] = currentAnswer.answerId;

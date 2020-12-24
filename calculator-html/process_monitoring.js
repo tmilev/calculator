@@ -46,7 +46,7 @@ class Monitor {
     sURL += `&${pathnames.urlFields.requests.workerId}=${this.currentWorkerId}`;
     submitRequests.submitGET({
       url: sURL,
-      progress: ids.domElements.spanProgressCalculatorInput,
+      progress: ids.domElements.pages.calculator.progress,
       callback: this.callbackPauseRequest.bind(this),
     });
     this.clearTimeout();
@@ -130,7 +130,7 @@ class Monitor {
     submitRequests.submitGET({
       url: pauseURL,
       callback: this.callbackPauseRequest.bind(this),
-      progress: ids.domElements.spanProgressCalculatorInput
+      progress: ids.domElements.pages.calculator.progress
     });
   }
 }

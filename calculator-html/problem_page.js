@@ -284,8 +284,8 @@ class Problem {
         answerHighlight: currentVector.answerHighlight,
         answerPanelId: currentVector.answerPanelId,
         mathQuillPanelOptions: currentVector.mathQuillPanelOptions,
-        idMQSpan: currentVector.idMQSpan,
-        idMQSpanLocation: currentVector.idMQSpanLocation,
+        idEquationEditorElement: currentVector.idEquationEditorElement,
+        idEquationEditorElementLocation: currentVector.idEquationEditorElementLocation,
         idPureLatex: currentVector.idPureLatex,
         idButtonContainer: currentVector.idButtonContainer,
         idButtonSubmit: currentVector.idButtonSubmit,
@@ -568,13 +568,13 @@ class Problem {
     thePanel.htmlPureLatex += `<textarea class = "calculatorAnswer" id = "${thePanel.idPureLatex}"></textarea>`;
     thePanel.htmlButtonContainer = `<div class = "mqButtonPanel" id = "${thePanel.idButtonContainer}" `;
     thePanel.htmlButtonContainer += `buttons = "${thePanel.mathQuillPanelOptions}"></div>`;
-    thePanel.htmlMQFieldEnclosure = `<div class = "calculatorMQfieldEnclosure"><span id = "${thePanel.idMQSpan}"></span></div>`;
+    thePanel.htmlMQFieldEnclosure = `<div class = "calculatorMQfieldEnclosure"><span id = "${thePanel.idEquationEditorElement}"></span></div>`;
 
     thePanel.htmlVerificationSpan = `<span id = "${thePanel.idVerificationSpan}">`;
 
     thePanel.flagGenerateQuestionAndAnswerField = true;
     if (this.htmlAnswerHighlight === undefined || this.htmlAnswerHighlight === null || this.htmlAnswerHighlight === "") {
-      if (document.getElementById(thePanel.idMQSpanLocation) !== null) {
+      if (document.getElementById(thePanel.idEquationEditorElementLocation) !== null) {
         thePanel.flagGenerateQuestionAndAnswerField = false;
       }
     }
@@ -652,7 +652,7 @@ class Problem {
     }
     this.onePanelComputeHtmlElements(thePanel);
     if (!thePanel.flagGenerateQuestionAndAnswerField) {
-      let mqSpan = document.getElementById(thePanel.idMQSpanLocation);
+      let mqSpan = document.getElementById(thePanel.idEquationEditorElementLocation);
       mqSpan.innerHTML = thePanel.htmlMQFieldEnclosure;
     }
     let panelContent = "";

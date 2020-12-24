@@ -271,7 +271,7 @@ class PanelExpandable {
 
 function makePanelFromData(
   /** @type {PanelExpandableData} */
-  data
+  data,
 ) {
   let doCreatePanel = false;
   if (data.content.length > data.minimalCharacterLengthForPanel) {

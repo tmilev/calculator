@@ -233,10 +233,10 @@
                         <span id="mqPanelComments" style="white-space:nowrap">Equation assistant</span>
                         <br>
                         <div style="font-size: 48px; font-family: 'Times New Roman'; vertical-align:top"
-                          id="mainInputMQfield"></div>
+                          id="mainInputEditorField"></div>
                       </td>
                       <td>
-                        <div class="mqButtonPanel" style="vertical-align:top" id="mainInputMQfieldButtons"
+                        <div class="mqButtonPanel" style="vertical-align:top" id="mainInputEditorFieldButtons"
                           buttons="algebra, logarithms, integrals, matrices"></div>
                       </td>
                       <td>
@@ -267,10 +267,8 @@
                           onclick="window.calculator.calculator.submitComputation(); event.preventDefault();">
                           Go
                         </button>
-                        <span>
-                          <button class="buttonSubmit" id="buttonPauseToggle"">Pause</button>
-                        </span>
-                        <span id=" spanProgressCalculatorInput"></span>
+                        <span><button class="buttonSubmit" id="buttonPauseToggle">Pause</button></span>
+                        <span id="calculatorInputProgress"></span>
                         <span id="idProgressReportTimer"></span>
                         <br>
                         <span id="spanComputationLink"></span>

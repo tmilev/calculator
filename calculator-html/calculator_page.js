@@ -198,11 +198,11 @@ class Calculator {
     }
     this.initialized = true;
     this.calculatorPanel = new InputPanelData({
-      idMQSpan: "mainInputMQfield",
-      idMQcomments: "mqPanelComments",
+      idEquationEditorElement: "mainInputEditorField",
+      idEditorComments: "mqPanelComments",
       problemId: "",
       idPureLatex: ids.domElements.pages.calculator.inputMain,
-      idButtonContainer: 'mainInputMQfieldButtons',
+      idButtonContainer: 'mainInputEditorFieldButtons',
       flagCalculatorPanel: true,
     });
     this.calculatorPanel.initialize();
@@ -447,7 +447,7 @@ class Calculator {
       url: url,
       parameters: parameters,
       callback: this.defaultOnLoadInjectScriptsAndProcessLaTeX.bind(this),
-      progress: ids.domElements.spanProgressCalculatorInput,
+      progress: ids.domElements.pages.calculator.progress,
     });
   }
 

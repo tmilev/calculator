@@ -320,16 +320,7 @@ class Page {
     this.user = new User();
     this.aceEditorAutoCompletionWordList = [];
     this.flagDoSubmitCalculatorComputation = true;
-    //////////////////////////////////////
-    //////////////////////////////////////
-    //Page manipulation functions
-    //////////////////////////////////////
-    //////////////////////////////////////
-    //////////////////////////////////////
-    //////////////////////////////////////
-    //Select page on first load
-    //////////////////////////////////////
-    //////////////////////////////////////
+    // Select page on first load
     this.selectPage(this.storage.variables.currentPage.getValue());
     if (this.storage.variables.currentPage.getValue() != this.pages.activateAccount.name) {
       login.loginTry();

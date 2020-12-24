@@ -2229,9 +2229,11 @@ class EquationEditor {
   toHtml() {
     let latexWithAnnotation = this.rootNode.toLatexWithAnnotation();
     let result = `Latex: ${latexWithAnnotation.latex}`;
-    result += `<br>Last modified: ${this.lastFocused.toString()}`;
-    if (this.lastFocused.isDetached()) {
-      result += "<br><b style='color:red'>Detached last modified.</b>";
+    if (this.lastFocused !== null) {
+      result += `<br>Last modified: ${this.lastFocused.toString()}`;
+      if (this.lastFocused.isDetached()) {
+        result += "<br><b style='color:red'>Detached last modified.</b>";
+      }
     }
     result += `<br>Latex selection: ${latexWithAnnotation.selectionStart}, ${latexWithAnnotation.selectionEnd}`;
     result += `<br>Drawing: ${this.rootNode.toString()}`;
@@ -3999,12 +4001,12 @@ class MathNode {
     let key = event.key;
     let shiftHeld = event.shiftKey;
     if (this.processBackslash(key, shiftHeld)) {
-      return new KeyHandlerResult(true, true);
+      return new KeyHandlerResult(true, false);
     }
     switch (key) {
       case "/":
         this.makeFractionNumerator();
-        return new KeyHandlerResult(true, true);
+        return new KeyHandlerResult(true, false);
       case "*":
       case "+":
       case "-":
@@ -4012,13 +4014,13 @@ class MathNode {
       case ">":
       case "<":
         this.makeHorizontalOperatorCorrectInput(key);
-        return new KeyHandlerResult(true, true);
+        return new KeyHandlerResult(true, false);
       case "^":
         this.makeBaseWithExponent();
-        return new KeyHandlerResult(true, true);
+        return new KeyHandlerResult(true, false);
       case "_":
         this.makeBaseWithSubscript();
-        return new KeyHandlerResult(true, true);
+        return new KeyHandlerResult(true, false);
       case "ArrowLeft":
       case "ArrowRight":
       case "ArrowUp":
@@ -4026,15 +4028,15 @@ class MathNode {
         return this.arrow(key, shiftHeld);
       case "|":
         this.makeDelimiterAmbiguous(key);
-        return new KeyHandlerResult(true, true);
+        return new KeyHandlerResult(true, false);
       case "(":
       case "[":
         this.makeDelimiterLeft(key);
-        return new KeyHandlerResult(true, true);
+        return new KeyHandlerResult(true, false);
       case ")":
       case "]":
         this.makeDelimiterRight(key);
-        return new KeyHandlerResult(true, true);
+        return new KeyHandlerResult(true, false);
       case "Enter":
         return new KeyHandlerResult(true, false);
       case "Delete":
@@ -4634,7 +4636,7 @@ class MathNode {
     }
     this.desiredCaretPosition = 0;
     let result = this.applyBackspaceToTheLeft();
-    return new KeyHandlerResult(result, true);
+    return new KeyHandlerResult(result, !result);
   }
 
   /** @returns {boolean} whether reduction occurred. */
@@ -4757,12 +4759,7 @@ class MathNode {
     parent.removeChild(Math.min(startingIndexInParent, matchingIndex));
     parent.normalizeHorizontalMath();
     parent.updateDOM();
-    // DEBUG: erase soon
-    parent.equationEditor.writeDebugInfo(null);
     parent.focusRestore();
-    // DEBUG: erase soon
-    parent.equationEditor.writeDebugInfo(null);
-
     return true;
   }
 

@@ -725,7 +725,6 @@ class InputPanelData {
       this.addCommand("\\cdot", "*");
       this.addCommand("\\frac{}{}", "/");
       this.addCommand("\\sqrt{}", "\u221A");
-      this.addCommand("\\sqrt[]{}", "\u221B");
       this.addCommand("{}^{}", "^");
       this.addCommand("()", "(");
       this.addCommand("()", ")");

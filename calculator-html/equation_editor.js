@@ -903,7 +903,11 @@ class AtomWithPosition {
     if (this.element === null) {
       return `[null, ${this.position}]`;
     }
-    return `[${this.element.toString()}, ${this.position}]`;
+    let detached = "";
+    if (this.element.isDetached()) {
+      detached = ",<b style='color:red'> detached</b>";
+    }
+    return `[${this.element.toString()}, ${this.position}${detached}]`;
   }
 }
 
@@ -2113,7 +2117,7 @@ class EquationEditor {
       });
     }
     /** @type {MathNode|null} Used to write to the last focused node.*/
-    this.lastModified = null;
+    this.lastFocused = null;
     /** @type{number} */
     this.lastCaretPosition = - 1;
   }
@@ -2176,14 +2180,14 @@ class EquationEditor {
     this.updateAlignment();
     this.writeDebugInfo(parser);
     this.container.setAttribute("latexsource", latex);
-    this.setLastModified(this.rootNode.rightmostAtomChild());
+    this.setLastFocused(this.rootNode.rightmostAtomChild());
   }
 
   writeLatexLastFocused(
     /**@type {string} */
     latex,
   ) {
-    if (this.lastModified === null) {
+    if (this.lastFocused === null) {
       let toWriteTo = this.rootNode.rightmostAtomChild();
       if (toWriteTo === null) {
         console.log("Unexpected failure to find atom child.");
@@ -2193,10 +2197,10 @@ class EquationEditor {
       toWriteTo.writeLatex(latex);
       return;
     }
-    let lastModifiedReference = this.lastModified;
+    let lastFocusedReference = this.lastFocused;
     // Ensure reference to last modified is wiped early.
-    this.lastModified = null;
-    lastModifiedReference.writeLatex(latex);
+    this.lastFocused = null;
+    lastFocusedReference.writeLatex(latex);
   }
 
   accountFrameTime(
@@ -2210,22 +2214,25 @@ class EquationEditor {
     }
   }
 
-  setLastModified(
+  setLastFocused(
     /**@type{MathNode|null} */
-    lastModified,
+    lastFocused,
   ) {
-    this.lastModified = lastModified;
-    if (this.lastModified === null) {
+    this.lastFocused = lastFocused;
+    if (this.lastFocused === null) {
       this.lastCaretPosition = - 1;
       return;
     }
-    this.lastCaretPosition = lastModified.positionCaretBeforeKeyEvents;
+    this.lastCaretPosition = lastFocused.positionCaretBeforeKeyEvents;
   }
 
   toHtml() {
     let latexWithAnnotation = this.rootNode.toLatexWithAnnotation();
     let result = `Latex: ${latexWithAnnotation.latex}`;
-    result += `Last modified: ${this.lastModified.toString()}`;
+    result += `<br>Last modified: ${this.lastFocused.toString()}`;
+    if (this.lastFocused.isDetached()) {
+      result += "<br><b style='color:red'>Detached last modified.</b>";
+    }
     result += `<br>Latex selection: ${latexWithAnnotation.selectionStart}, ${latexWithAnnotation.selectionEnd}`;
     result += `<br>Drawing: ${this.rootNode.toString()}`;
     result += `<br>Structure: ${this.rootNode.toHtml(0)}`;
@@ -3843,8 +3850,8 @@ class MathNode {
     // release the thread so the browser can finish computations
     // with the released element. 
     setTimeout(() => {
-      this.storeCaretPosition(event.key, event.shiftKey);
       if (handlerResult.updateAlignment) {
+        this.storeCaretPosition(event.key, event.shiftKey);
         this.element.style.maxWidth = "";
         this.element.style.maxHeight = "";
         this.element.style.width = "auto";
@@ -4347,7 +4354,7 @@ class MathNode {
   ) {
     if (this.type.type !== knownTypes.atom.type) {
       this.positionCaretBeforeKeyEvents = - 1;
-      this.equationEditor.setLastModified(null);
+      this.equationEditor.setLastFocused(null);
       return;
     }
     let previousPosition = this.positionCaretBeforeKeyEvents;
@@ -4361,7 +4368,7 @@ class MathNode {
     if (key === "ArrowRight" && previousPosition === this.positionCaretBeforeKeyEvents && !shiftHeld) {
       this.positionCaretBeforeKeyEvents = range.startOffset;
     }
-    this.equationEditor.setLastModified(this);
+    this.equationEditor.setLastFocused(this);
 
     this.equationEditor.positionDebugString = `Computed position: ${this.positionCaretBeforeKeyEvents}.`
     this.equationEditor.positionDebugString += `Range: [${range}], clone: [${rangeClone}], previous position: ${previousPosition}.`;
@@ -4750,7 +4757,12 @@ class MathNode {
     parent.removeChild(Math.min(startingIndexInParent, matchingIndex));
     parent.normalizeHorizontalMath();
     parent.updateDOM();
+    // DEBUG: erase soon
+    parent.equationEditor.writeDebugInfo(null);
     parent.focusRestore();
+    // DEBUG: erase soon
+    parent.equationEditor.writeDebugInfo(null);
+
     return true;
   }
 
@@ -5682,8 +5694,8 @@ class MathNode {
       position = this.element.textContent.length;
     }
     this.setCaretPosition(position);
-    this.equationEditor.setLastModified(this);
-    this.desiredCaretPosition = -1;
+    this.equationEditor.setLastFocused(this);
+    this.desiredCaretPosition = - 1;
     return true;
   }
 
@@ -5812,6 +5824,14 @@ class MathNode {
     selection.addRange(range);
     this.positionCaretBeforeKeyEvents = position;
     //    this.element.focus();
+  }
+
+  isDetached() {
+    let ancestor = this;
+    while (ancestor.parent !== null) {
+      ancestor = ancestor.parent;
+    }
+    return ancestor.type.type !== knownTypes.root.type;
   }
 
   toString() {
@@ -6034,7 +6054,6 @@ class MathNodeAtomImmutable extends MathNode {
     parent.focusRestore();
     return true;
   }
-
 }
 
 class MathNodeFraction extends MathNode {

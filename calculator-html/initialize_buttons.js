@@ -43,7 +43,7 @@ var startingCharacterSectionUnderMathQuillEdit = '';
 var panelDataRegistry = {};
 
 function processMathQuillLatex(theText) {
-  for (var i = 0; i < theText.length; i++) {
+  for (let i = 0; i < theText.length; i++) {
     if (i + 1 < theText.length) {
       if ((theText[i] === '_' || theText[i] === '^') && theText[i + 1] !== '{') {
         theText = theText.slice(0, i + 1) + '{' + theText[i + 1] + '}' + theText.slice(i + 2);
@@ -54,8 +54,8 @@ function processMathQuillLatex(theText) {
     }
   }
   if (charsToSplit !== undefined) {
-    for (var i = 0; i < theText.length - 1; i++) {
-      for (var j = 0; j < charsToSplit.length; j++) {
+    for (let i = 0; i < theText.length - 1; i++) {
+      for (let j = 0; j < charsToSplit.length; j++) {
         if (
           theText[i] === charsToSplit[j] && theText[i + 1] !== ' ' &&
           theText[i + 1] !== '\\' && theText[i + 1] !== '+' &&
@@ -138,22 +138,22 @@ function initializeAccordionButtons() {
   if (localStorage !== undefined) {
     if (localStorage.panels !== undefined) {
       panelsCollapseStatus = JSON.parse(localStorage.panels)
-      var theProps = Object.getOwnPropertyNames(panelsCollapseStatus);
-      for (var i = 0; i < theProps.length; i++) {
-        var current = panelsCollapseStatus[theProps[i]];
+      let theProps = Object.getOwnPropertyNames(panelsCollapseStatus);
+      for (let i = 0; i < theProps.length; i++) {
+        let current = panelsCollapseStatus[theProps[i]];
         if (current.isCollapsed) {
           panels.toggleHeight(document.getElementById(current.button), theProps[i]);
         }
       }
     }
   }
-  var acc = document.getElementsByClassName("accordion");
-  for (i = 0; i < acc.length; i++) {
+  let acc = document.getElementsByClassName("accordion");
+  for (let i = 0; i < acc.length; i++) {
     acc[i].onclick = function () {
       if (this.firstLoad === undefined) {
         this.firstLoad = true;
-        var theDeadlines = this.nextElementSibling.getElementsByClassName("modifyDeadlineInput");
-        for (var j = 0; j < theDeadlines.length; j++) {
+        let theDeadlines = this.nextElementSibling.getElementsByClassName("modifyDeadlineInput");
+        for (let j = 0; j < theDeadlines.length; j++) {
           $('#' + theDeadlines[j].id).datepicker();
         }
         this.nextElementSibling.style.display = "inline-block";
@@ -361,8 +361,8 @@ class InputPanelData {
     if (typeof outputComponent === "string") {
       outputComponent = document.getElementById(outputComponent);
     }
-    var inputParsed = miscellaneous.jsonUnescapeParse(input);
-    var resultHtml = "";
+    let inputParsed = miscellaneous.jsonUnescapeParse(input);
+    let resultHtml = "";
     if (inputParsed.error !== undefined && inputParsed.error !== null && inputParsed.error !== "") {
       resultHtml += `<b style = 'color:red'>Error.</b> ${inputParsed.error}`;
     }
@@ -376,14 +376,14 @@ class InputPanelData {
       }
       resultHtml += inputParsed.resultHtml;
     }
-    var crashReport = inputParsed.crashReport;
+    let crashReport = inputParsed.crashReport;
     if (crashReport !== undefined && crashReport !== null && crashReport) {
       if (resultHtml !== "") {
         resultHtml += "<br>";
       }
       resultHtml += crashReport;
     }
-    var timeComputation = inputParsed.timeComputation;
+    let timeComputation = inputParsed.timeComputation;
     if (timeComputation !== null && timeComputation !== undefined) {
       if (resultHtml !== "") {
         resultHtml += "<br>";
@@ -391,15 +391,15 @@ class InputPanelData {
       resultHtml += `<br><span style = 'font-size:x-small;float:right'>Response: ${timeComputation} ms</small>`;
     }
     outputComponent.innerHTML = resultHtml;
-    var spanVerification = document.getElementById(this.idVerificationSpan);
-    var scripts = spanVerification.getElementsByTagName('script');
-    var theHead = document.getElementsByTagName('head')[0];
-    for (var i = 0; i < this.numInsertedJavascriptChildren; i++) {
+    let spanVerification = document.getElementById(this.idVerificationSpan);
+    let scripts = spanVerification.getElementsByTagName('script');
+    let theHead = document.getElementsByTagName('head')[0];
+    for (let i = 0; i < this.numInsertedJavascriptChildren; i++) {
       theHead.removeChild(theHead.lastChild);
     }
     this.numInsertedJavascriptChildren = 0;
-    for (var i = 0; i < scripts.length; i++) {
-      var scriptChild = document.createElement('script');
+    for (let i = 0; i < scripts.length; i++) {
+      let scriptChild = document.createElement('script');
       scriptChild.innerHTML = scripts[i].innerHTML;
       scriptChild.type = 'text/javascript';
       theHead.appendChild(scriptChild);
@@ -411,8 +411,8 @@ class InputPanelData {
 
   submitOrPreviewAnswers(requestQuery) {
     clearTimeout(this.timerForPreviewAnswers);
-    var studentAnswer = document.getElementById(this.idPureLatex).value;
-    var theURL = "";
+    let studentAnswer = document.getElementById(this.idPureLatex).value;
+    let theURL = "";
     theURL += `${pathnames.urls.calculatorAPI}?${requestQuery}&`;
     theURL += `calculatorAnswer${this.idPureLatex}=${encodeURIComponent(studentAnswer)}&`;
     theURL += `${pathnames.urlFields.problem.fileName}=${this.problemId}&`;
@@ -424,9 +424,9 @@ class InputPanelData {
   }
 
   showSolution() {
-    var theRequest = "";
-    var thePage = window.calculator.mainPage;
-    var currentProblem = thePage.getProblemById(this.problemId);
+    let theRequest = "";
+    let thePage = window.calculator.mainPage;
+    let currentProblem = thePage.getProblemById(this.problemId);
     if (!isForRealProblem(currentProblem)) {
       if (thePage.isLoggedIn()) {
         theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemSolution}&`;
@@ -439,9 +439,9 @@ class InputPanelData {
   }
 
   submitAnswers() {
-    var theRequest = "";
-    var thePage = window.calculator.mainPage;
-    var currentProblem = thePage.getProblemById(this.problemId);
+    let theRequest = "";
+    let thePage = window.calculator.mainPage;
+    let currentProblem = thePage.getProblemById(this.problemId);
     if (thePage.isLoggedIn()) {
       if (isForRealProblem(currentProblem)) {
         theRequest = `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswers}`;
@@ -457,9 +457,9 @@ class InputPanelData {
   }
 
   submitGiveUp() {
-    var thePage = window.calculator.mainPage;
-    var currentProblem = thePage.getProblemById(this.problemId);
-    var theRequest = "";
+    let thePage = window.calculator.mainPage;
+    let currentProblem = thePage.getProblemById(this.problemId);
+    let theRequest = "";
     if (thePage.isLoggedIn()) {
       theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemGiveUp}&`;
     } else {
@@ -473,9 +473,9 @@ class InputPanelData {
   }
 
   submitPreview() {
-    var thePage = window.calculator.mainPage;
-    var theRequest = "";
-    var currentProblem = thePage.getProblemById(this.problemId);
+    let thePage = window.calculator.mainPage;
+    let theRequest = "";
+    let currentProblem = thePage.getProblemById(this.problemId);
     if (thePage.isLoggedIn()) {
       if (isForRealProblem(currentProblem)) {
         theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswersPreview}&`;
@@ -526,11 +526,11 @@ class InputPanelData {
       if (!this.flagCalculatorMQStringIsOK) {
         return;
       }
-      var theBoxContent = this.equationEditor.rootNode.toLatex();
+      let theBoxContent = this.equationEditor.rootNode.toLatex();
       if (this.calculatorLeftString === null || this.calculatorRightString === null) {
         this.mQHelpCalculator();
       }
-      var theInserted = processMathQuillLatex(theBoxContent);
+      let theInserted = processMathQuillLatex(theBoxContent);
       if (theInserted.length > 0 && startingCharacterSectionUnderMathQuillEdit.length > 0) {
         if (theInserted[0] !== ' ') {
           theInserted = ' ' + theInserted;
@@ -567,7 +567,7 @@ class InputPanelData {
   }
 
   chopStrings() {
-    var mqCommentsSpan = document.getElementById(this.idMQcomments);
+    let mqCommentsSpan = document.getElementById(this.idMQcomments);
     if (calculatorRightPosition - calculatorLeftPosition > 1000) {
       this.flagCalculatorMQStringIsOK = false;
       mqCommentsSpan.innerHTML = "<span style ='color:red'><b>Formula too big </b></span>";
@@ -576,15 +576,15 @@ class InputPanelData {
     this.flagCalculatorMQStringIsOK = true;
     mqCommentsSpan.innerHTML = "Equation assistant";
     document.getElementById(this.idMQSpan).style.visibility = "visible";
-    var calculatorInput = document.getElementById(this.idPureLatex);
+    let calculatorInput = document.getElementById(this.idPureLatex);
     this.theLaTeXString = calculatorInput.value.substring(calculatorLeftPosition, calculatorRightPosition + 1);
     this.calculatorLeftString = calculatorInput.value.substring(0, calculatorLeftPosition);
     this.calculatorRightString = calculatorInput.value.substring(calculatorRightPosition + 1);
   }
 
   getSemiColumnEnclosure() {
-    var startPos = this.selectionEnd;
-    var calculatorInput = document.getElementById(this.idPureLatex);
+    let startPos = this.selectionEnd;
+    let calculatorInput = document.getElementById(this.idPureLatex);
     for (; startPos > 0 && startPos < calculatorInput.value.length; startPos--) {
       if (isSeparatorCharacter(calculatorInput.value[startPos])) {
         break;
@@ -593,10 +593,10 @@ class InputPanelData {
     if (startPos >= calculatorInput.value.length) {
       startPos = calculatorInput.value.length - 1;
     }
-    var rightPos = startPos;
-    var lastSeparator = startPos;
-    var lastWord = '';
-    var currentChar = 'a';
+    let rightPos = startPos;
+    let lastSeparator = startPos;
+    let lastWord = '';
+    let currentChar = 'a';
     for (; rightPos < calculatorInput.value.length - 1; rightPos++) {
       currentChar = calculatorInput.value[rightPos];
       if (currentChar === ';') {
@@ -618,11 +618,11 @@ class InputPanelData {
         }
       }
     }
-    var calculatorSeparatorCounts = {
+    let calculatorSeparatorCounts = {
       leftSeparators: 0,
       rightSeparators: 0
     };
-    var leftPos = rightPos - 1;
+    let leftPos = rightPos - 1;
     lastWord = '';
     lastSeparator = rightPos;
     for (; leftPos > 0; leftPos--) {
@@ -848,7 +848,7 @@ class InputPanelData {
       currentButtonPanel.appendChild(toggles[i]);
     }
     if (oldHeight !== 0 && oldHeight !== "0px") {
-      var newHeight = window.getComputedStyle(currentButtonPanel).height;
+      let newHeight = window.getComputedStyle(currentButtonPanel).height;
       currentButtonPanel.style.maxHeight = oldHeight;
       currentButtonPanel.style.height = oldHeight;
       setTimeout(function () {
@@ -907,7 +907,7 @@ class InputPanelData {
 
 /**@returns {Boolean} */
 function isForRealProblem(problem) {
-  var isForReal = false;
+  let isForReal = false;
   if (problem !== null && problem !== undefined) {
     isForReal = problem.flagForReal;
   }
@@ -925,7 +925,7 @@ function isSeparatorCharacter(theChar) {
 }
 
 function isKeyWordStartKnownToMathQuill(input) {
-  for (var i = 0; i < keyWordsKnownToMathQuill.length; i++) {
+  for (let i = 0; i < keyWordsKnownToMathQuill.length; i++) {
     if (keyWordsKnownToMathQuill[i].startsWith(input)) {
       return true;
     }
@@ -934,7 +934,7 @@ function isKeyWordStartKnownToMathQuill(input) {
 }
 
 function isKeyWordEndKnownToMathQuill(input) {
-  for (var i = 0; i < keyWordsKnownToMathQuill.length; i++) {
+  for (let i = 0; i < keyWordsKnownToMathQuill.length; i++) {
     if (keyWordsKnownToMathQuill[i].endsWith(input)) {
       return true;
     }

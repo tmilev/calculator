@@ -170,11 +170,22 @@ const knownTypes = {
     colorText: "red",
     whiteSpace: "nowrap",
   }),
+  // Left delimiter mark surrounded by two spacers.
+  leftDelimiterMark: new MathNodeType({
+    "type": "leftDelimiterMark",
+    "borderLeft": "2px solid black",
+    "colorImplied": "silver",
+  }),
   // Left delimiter (parentheses, bracket, ...)
   leftDelimiter: new MathNodeType({
     "type": "leftDelimiter",
     "colorImplied": "silver",
-    //    "borderLeft": "3px solid black",
+  }),
+  // Right delimiter mark surrounded by two spacers.
+  rightDelimiterMark: new MathNodeType({
+    "type": "rightDelimiterMark",
+    "borderRight": "2px solid black",
+    "colorImplied": "silver",
   }),
   // Right delimiter (parentheses, bracket, ...)
   rightDelimiter: new MathNodeType({
@@ -643,8 +654,10 @@ class MathNodeFactory {
     implied,
   ) {
     const leftParentheses = new MathNodeLeftDelimiter(equationEditor);
-    leftParentheses.initialContent = content;
+    leftParentheses.appendChild(new MathNode(equationEditor, knownTypes.leftDelimiterMark));
+    leftParentheses.extraData = content;
     leftParentheses.implied = implied;
+    leftParentheses.children[0].implied = implied;
     return leftParentheses;
   }
 
@@ -668,8 +681,10 @@ class MathNodeFactory {
     implied,
   ) {
     const rightParentheses = new MathNodeRightDelimiter(equationEditor);
-    rightParentheses.initialContent = content;
+    rightParentheses.appendChild(new MathNode(equationEditor, knownTypes.rightDelimiterMark));
+    rightParentheses.extraData = content;
     rightParentheses.implied = implied;
+    rightParentheses.children[0].implied = implied;
     return rightParentheses;
   }
 
@@ -2655,8 +2670,6 @@ class BoundingBox {
     /** @type{number}*/
     // In a_b the following measures the width of b. 
     this.subScriptWidth = 0;
-    /** @type{number}*/
-    this.stretchFactor = 1;
     /** @type{string}*/
     this.transform = "";
     /** @type{string}*/
@@ -3059,8 +3072,10 @@ class MathNode {
     this.createDOMElementIfMissing();
     if (this.implied) {
       this.element.style.color = this.type.colorImplied;
+      this.element.style.borderColor = this.type.colorImplied;
     } else {
       this.element.style.color = this.type.colorText;
+      this.element.style.borderColor = this.type.colorText;
     }
     for (let i = 0; i < this.children.length; i++) {
       this.element.appendChild(this.children[i].element);
@@ -3409,29 +3424,37 @@ class MathNode {
     heightToEnclose,
     /** @type {number}*/
     fractionLineHeightEnclosed,
+    /** @type{boolean} */
+    left,
   ) {
-    this.computeDimensionsAtomicNoTransform();
-    if (heightToEnclose === 0) {
-      heightToEnclose = this.boundingBox.height;
-      fractionLineHeightEnclosed = this.boundingBox.height / 2;
-    }
-    let scaleParenthesis = 1.32;
+    let mark = this.children[0];
     let scaleHeight = 1.1;
-    heightToEnclose = Math.max(fractionLineHeightEnclosed * 2, (heightToEnclose - fractionLineHeightEnclosed) * 2);
-    let heightToStretchTo = heightToEnclose * scaleParenthesis;
-    if (heightToEnclose !== 0) {
-      this.boundingBox.stretchFactor = heightToStretchTo / this.boundingBox.heightBeforeTransform;
+    let parenthesisThickness = heightToEnclose / 24;
+    parenthesisThickness = Math.min(5, parenthesisThickness);
+    parenthesisThickness = Math.max(2, parenthesisThickness);
+    heightToEnclose = Math.max(2 * fractionLineHeightEnclosed, 2 * (heightToEnclose - fractionLineHeightEnclosed));
+    mark.boundingBox.top = 0;
+    mark.boundingBox.height = heightToEnclose * scaleHeight;
+    mark.boundingBox.fractionLineHeight = mark.boundingBox.height / 2;
+    let radius = mark.boundingBox.height / 2;
+    mark.boundingBox.width = radius / 2;
+    this.boundingBox.top = 0;
+    this.boundingBox.height = mark.boundingBox.height;
+    this.boundingBox.fractionLineHeight = mark.boundingBox.fractionLineHeight;
+    this.boundingBox.width = mark.boundingBox.width + 5;
+    if (mark.element !== null) {
+      mark.element.style.borderRadius = `${radius / 3}px / ${radius}px`;
+      mark.element.style.borderWidth = `${parenthesisThickness}px`;
     }
-    this.boundingBox.height = heightToEnclose * scaleHeight;
-    // For many fonts, the parenteses's middle appears to be below 
-    // the middle of the line. We therefore translate the parenthesis up 
-    // (negative translation) with a % of its bounding box height.
-    let translateUpPercent = (scaleParenthesis - 1) / 2.15;
-    this.boundingBox.fractionLineHeight = this.boundingBox.height * 0.5;
-    let translateVertical = - heightToStretchTo * translateUpPercent;
-    this.boundingBox.transformOrigin = "top left";
-    //this.element.style.transformOrigin = "top left";
-    this.boundingBox.transform = `matrix(1,0,0,${this.boundingBox.stretchFactor}, 0, ${translateVertical})`;
+    if (left) {
+      mark.type.borderTopLeftRadius = radius;
+      mark.type.borderBottomLeftRadius = radius;
+      mark.boundingBox.left = radius / 6;
+    } else {
+      mark.type.borderTopRightRadius = radius;
+      mark.type.borderBottomRightRadius = radius;
+      mark.boundingBox.left = - radius / 6;
+    }
   }
 
   computeDimensionsRootNode() {
@@ -3701,9 +3724,9 @@ class MathNode {
       }
       let currentHeight = enclosedHeights.pop();
       let currentFractionLineHeight = enclosedFractionLineHeights.pop();
-      child.verticallyStretchParenthesis(currentHeight, currentFractionLineHeight);
+      child.verticallyStretchParenthesis(currentHeight, currentFractionLineHeight, false);
       let leftCounterpart = this.children[indicesOpenedParentheses.pop()];
-      leftCounterpart.verticallyStretchParenthesis(currentHeight, currentFractionLineHeight);
+      leftCounterpart.verticallyStretchParenthesis(currentHeight, currentFractionLineHeight, true);
     }
     if (enclosedHeights.length > 0) {
       enclosedHeights[enclosedHeights.length - 1] = Math.max(
@@ -4744,6 +4767,7 @@ class MathNode {
     }
     if (!this.parent.children[matchingIndex].implied) {
       this.implied = true;
+      this.children[0].implied = true;
       this.parent.focusCancelOnce();
       this.focus(- 1);
       this.updateDOM();
@@ -5344,7 +5368,7 @@ class MathNode {
     }
     this.insertChildAtPosition(toIndex, delimiterReplaced);
     delimiterReplaced.implied = false;
-    delimiterReplaced.initialContent = delimiterString;
+    delimiterReplaced.children[0].implied = false;
     this.ensureEditableAtoms();
     this.updateDOM();
     delimiterReplaced.focus(1);

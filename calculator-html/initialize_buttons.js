@@ -548,8 +548,12 @@ class InputPanelData {
         this.editMQFunction(editor, node);
       },
     }));
-    let forceShowAll = storage.storage.variables.solve.panel.forceShowAll.isTrue();
-    let forceShowNone = storage.storage.variables.solve.panel.forceShowNone.isTrue();
+    let forceShowAll = false;
+    let forceShowNone = false;
+    if (this.idEquationEditorElement === ids.domElements.pages.solve.editor) {
+      forceShowAll = storage.storage.variables.solve.panel.forceShowAll.isTrue();
+      forceShowNone = storage.storage.variables.solve.panel.forceShowNone.isTrue();
+    }
     this.initializePartTwo(forceShowAll, forceShowNone);
     this.renderIfVisible();
   }
@@ -817,8 +821,10 @@ class InputPanelData {
     /**@type{boolean} */
     forceShowNone,
   ) {
-    storage.storage.variables.solve.panel.forceShowAll.setAndStore(forceShowAll);
-    storage.storage.variables.solve.panel.forceShowNone.setAndStore(forceShowNone);
+    if (this.idEquationEditorElement === ids.domElements.pages.solve.editor) {
+      storage.storage.variables.solve.panel.forceShowAll.setAndStore(forceShowAll);
+      storage.storage.variables.solve.panel.forceShowNone.setAndStore(forceShowNone);
+    }
     this.computeFlags(forceShowAll);
     this.addButtons(forceShowAll, forceShowNone);
     let currentButtonPanel = document.getElementById(this.idButtonContainer);

@@ -174,6 +174,7 @@ const knownTypes = {
   leftDelimiter: new MathNodeType({
     "type": "leftDelimiter",
     "colorImplied": "silver",
+    //    "borderLeft": "3px solid black",
   }),
   // Right delimiter (parentheses, bracket, ...)
   rightDelimiter: new MathNodeType({
@@ -202,6 +203,7 @@ const knownTypes = {
   }),
   cancelSign: new MathNodeType({
     "type": "cancelSign",
+    "borderRight": "5px solid black",
   }),
   cancelUnderBox: new MathNodeType({
     "type": "cancelUnderBox",
@@ -479,7 +481,6 @@ class MathNodeFactory {
   ) {
     const result = new MathNodeCancel(equationEditor);
     const cancelSign = new MathNode(equationEditor, knownTypes.cancelSign);
-    cancelSign.initialContent = "\u2571"; // top-left to bottom-right: "\u2572"; x-cross: "\u2573"
     const horizontal = this.horizontalMath(equationEditor, content);
     let underTheCancel = new MathNodeCancelUnderBox(equationEditor);
     underTheCancel.appendChild(horizontal);
@@ -3039,7 +3040,10 @@ class MathNode {
     return this.parent.type.type === knownTypes.horizontalMath.type;
   }
 
-  updateDOMRecursive(/** @type {number} */ depth) {
+  updateDOMRecursive(
+    /** @type {number} */
+    depth,
+  ) {
     if (
       this.type.type === knownTypes.atom.type
     ) {
@@ -3099,18 +3103,6 @@ class MathNode {
     this.boundingBox.width = boundingRecangleDOM.width;
     this.boundingBox.height = boundingRecangleDOM.height;
     this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
-  }
-
-  computeDimensionsCancel() {
-    let content = this.children[1];
-    this.boundingBox.height = content.boundingBox.height;
-    this.boundingBox.width = content.boundingBox.width;
-    this.boundingBox.fractionLineHeight = content.boundingBox.fractionLineHeight;
-    let cancelSign = this.children[0];
-    cancelSign.computeDimensionsAtomicNoTransform();
-    let stretchX = this.boundingBox.width / cancelSign.boundingBox.widthBeforeTransform;
-    let stretchY = this.boundingBox.height / cancelSign.boundingBox.heightBeforeTransform;
-    cancelSign.element.style.transform = `matrix(${stretchX},0,0,${stretchY}, 0, 0)`;
   }
 
   computeDimensionsHorizontalBrace(
@@ -3438,6 +3430,7 @@ class MathNode {
     this.boundingBox.fractionLineHeight = this.boundingBox.height * 0.5;
     let translateVertical = - heightToStretchTo * translateUpPercent;
     this.boundingBox.transformOrigin = "top left";
+    //this.element.style.transformOrigin = "top left";
     this.boundingBox.transform = `matrix(1,0,0,${this.boundingBox.stretchFactor}, 0, ${translateVertical})`;
   }
 
@@ -3595,10 +3588,6 @@ class MathNode {
     }
     if (this.type.type === knownTypes.error.type) {
       this.computeDimensionsAtomic();
-      return;
-    }
-    if (this.type.type === knownTypes.cancel.type) {
-      this.computeDimensionsCancel();
       return;
     }
     if (this.type.type === knownTypes.sqrt.type) {
@@ -6204,6 +6193,19 @@ class MathNodeCancel extends MathNode {
 
   applyBackspaceToTheRight() {
     this.applyBackspaceToTheRightAsLeftArrow();
+  }
+
+  computeDimensions() {
+    let content = this.children[1];
+    this.boundingBox.height = content.boundingBox.height;
+    this.boundingBox.width = content.boundingBox.width;
+    this.boundingBox.fractionLineHeight = content.boundingBox.fractionLineHeight;
+    let cancelSign = this.children[0];
+    cancelSign.boundingBox.width = 4;
+    cancelSign.boundingBox.height = content.boundingBox.height;
+    let stretchX = content.boundingBox.width / cancelSign.boundingBox.height;
+    cancelSign.boundingBox.transformOrigin = "top left";
+    cancelSign.boundingBox.transform = `matrix(1,0,${-stretchX},1,${content.boundingBox.width},0)`;
   }
 }
 

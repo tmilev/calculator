@@ -652,18 +652,40 @@ class MathNodeFactory {
     /** @type {boolean} */
     implied,
   ) {
-    const leftParenthesis = new MathNodeLeftDelimiter(equationEditor);
-    leftParenthesis.implied = implied;
+    const leftDelimiter = new MathNodeLeftDelimiter(equationEditor);
+    leftDelimiter.implied = implied;
     if (content === "") {
-      return leftParenthesis;
+      return leftDelimiter;
     }
+    leftDelimiter.appendChild(this.delimiterMark(equationEditor, content, true, implied));
+    leftDelimiter.extraData = content;
+    return leftDelimiter;
+  }
+
+  delimiterMark(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /** @type {string} */
+    content,
+    /**@type{boolean} */
+    left,
+    /** @type {boolean} */
+    implied,
+  ) {
+    let result = null;
     switch (content) {
+      case "[":
+      case "]":
+        result = new MathNodeSquareBrackets(equationEditor, left);
+        break;
+      case "(":
+      case ")":
       default:
-        leftParenthesis.appendChild(new MathNodeParenthesis(equationEditor, true));
+        result = new MathNodeParenthesis(equationEditor, left);
+        break;
     }
-    leftParenthesis.extraData = content;
-    leftParenthesis.children[0].implied = implied;
-    return leftParenthesis;
+    result.implied = implied;
+    return result;
   }
 
   /** @returns {MathNode} */
@@ -685,18 +707,14 @@ class MathNodeFactory {
     /** @type {boolean} */
     implied,
   ) {
-    const rightParenthesis = new MathNodeRightDelimiter(equationEditor);
-    rightParenthesis.implied = implied;
+    const rightDelimiter = new MathNodeRightDelimiter(equationEditor);
+    rightDelimiter.implied = implied;
     if (content === "") {
-      return rightParenthesis;
+      return rightDelimiter;
     }
-    switch (content) {
-      default:
-        rightParenthesis.appendChild(new MathNodeParenthesis(equationEditor, false));
-    }
-    rightParenthesis.extraData = content;
-    rightParenthesis.children[0].implied = implied;
-    return rightParenthesis;
+    rightDelimiter.appendChild(this.delimiterMark(equationEditor, content, false, implied));
+    rightDelimiter.extraData = content;
+    return rightDelimiter;
   }
 
   /** @returns {MathNode} */
@@ -5353,18 +5371,25 @@ class MathNode {
     /**@type {number}*/
     fromIndex,
   ) {
-    let delimiterReplaced = this.children[fromIndex];
-    delimiterReplaced.element = null;
+    let isLeft = this.children[fromIndex].type.type === knownTypes.leftDelimiter.type;
     this.removeChild(fromIndex);
     if (toIndex > fromIndex) {
       toIndex--;
     }
-    this.insertChildAtPosition(toIndex, delimiterReplaced);
-    delimiterReplaced.implied = false;
-    delimiterReplaced.children[0].implied = false;
+    let incomingDelimiter = null;
+    if (isLeft) {
+      incomingDelimiter = mathNodeFactory.leftDelimiter(
+        this.equationEditor, delimiterString, false
+      );
+    } else {
+      incomingDelimiter = mathNodeFactory.rightDelimiter(
+        this.equationEditor, delimiterString, false
+      );
+    }
+    this.insertChildAtPosition(toIndex, incomingDelimiter);
     this.ensureEditableAtoms();
     this.updateDOM();
-    delimiterReplaced.focus(1);
+    incomingDelimiter.focus(1);
     return true;
   }
 
@@ -6397,6 +6422,42 @@ class MathNodeDelimiterMark extends MathNode {
   }
 }
 
+class MathNodeSquareBrackets extends MathNodeDelimiterMark {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /**@type {boolean} */
+    left,
+  ) {
+    super(equationEditor, left);
+    this.left = left;
+  }
+  verticallyStretch(
+    /** @type {number}*/
+    heightToEnclose,
+    /** @type {number}*/
+    fractionLineHeightEnclosed,
+  ) {
+    let scaleHeight = 1.1;
+    let parenthesisThickness = heightToEnclose / 24;
+    parenthesisThickness = Math.min(5, parenthesisThickness);
+    parenthesisThickness = Math.max(2, parenthesisThickness);
+    heightToEnclose = Math.max(2 * fractionLineHeightEnclosed, 2 * (heightToEnclose - fractionLineHeightEnclosed));
+    this.boundingBox.top = 0;
+    this.boundingBox.height = heightToEnclose * scaleHeight;
+    this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
+
+    let shift = 2;
+    let width = 5;
+    this.boundingBox.width = width;
+    if (this.left) {
+      this.boundingBox.left = shift;
+    } else {
+      this.boundingBox.left = - shift;
+    }
+  }
+}
+
 class MathNodeParenthesis extends MathNodeDelimiterMark {
   constructor(
     /** @type {EquationEditor} */
@@ -6431,7 +6492,8 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
     if (smallRadius > 30) {
       smallRadius = 30;
     }
-    this.boundingBox.width = width; if (this.element !== null) {
+    this.boundingBox.width = width;
+    if (this.element !== null) {
       this.element.style.borderRadius = `${smallRadius}px / ${radius}px`;
       this.element.style.borderWidth = `${parenthesisThickness}px`;
     }

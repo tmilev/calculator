@@ -6616,8 +6616,8 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
     this.verticallyStretchCommon(heightToEnclose, fractionLineHeightEnclosed);
     let topBar = this.children[1];
     let bottomBar = this.children[4];
-    let radius = this.boundingBox.height / 12;
-    let heightBar = this.boundingBox.height * 3 / 8;
+    let radius = Math.floor(this.boundingBox.height / 12);
+    let heightBar = (this.boundingBox.height - 4 * radius) / 2;
     this.boundingBox.width = radius * 2 + 1;
     this.boundingBox.height += radius;
     let borderWidthString = `${this.parenthesisThickness}px`;

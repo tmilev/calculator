@@ -277,29 +277,33 @@ const knownTypes = {
   horizontalBraceUp: new MathNodeType({
     "type": "horizontalBraceUp",
   }),
-  halfHorizontalBraceTopRight: new MathNodeType({
-    "type": "halfHorizontalBraceTopRight",
-    "borderTop": "2px solid black",
+  topRightQuarterCircle: new MathNodeType({
+    "type": "topRightQuarterCircle",
     "borderTopRightRadius": "4px",
   }),
-  halfHorizontalBraceTopLeft: new MathNodeType({
-    "type": "halfHorizontalBraceTopLeft",
-    "borderTop": "2px solid black",
+  topLeftQuarterCircle: new MathNodeType({
+    "type": "topLeftQuarterCircle",
     "borderTopLeftRadius": "4px",
   }),
-  halfHorizontalBraceBottomRight: new MathNodeType({
-    "type": "halfHorizontalBraceBottomRight",
-    "borderBottom": "2px solid black",
+  bottomRightQuarterCircle: new MathNodeType({
+    "type": "bottomRightQuarterCircle",
     "borderBottomRightRadius": "4px",
   }),
-  halfHorizontalBraceBottomLeft: new MathNodeType({
-    "type": "halfHorizontalBraceBottomLeft",
-    "borderBottom": "2px solid black",
+  bottomLeftQuarterCircle: new MathNodeType({
+    "type": "bottomLeftQuarterCircle",
     "borderBottomLeftRadius": "4px",
   }),
   horizontalLineBottomMargin: new MathNodeType({
     "type": "horizontalLineBottomMargin",
     "borderBottom": "2px solid black",
+  }),
+  verticalLineLeftMargin: new MathNodeType({
+    "type": "verticalLineLeftMargin",
+    "borderLeft": "solid",
+  }),
+  verticalLineRightMargin: new MathNodeType({
+    "type": "verticalLineRightMargin",
+    "borderRight": "solid",
   }),
   subscript: new MathNodeType({
     "type": "subscript",
@@ -563,12 +567,12 @@ class MathNodeFactory {
     const result = new MathNodeOverBrace(equationEditor);
     const base = mathNodeFactory.horizontalMath(equationEditor, content);
     // 6 components of overbrace line
-    const horizontalBraceTopLeft = new MathNode(equationEditor, knownTypes.halfHorizontalBraceTopLeft);
+    const horizontalBraceTopLeft = new MathNode(equationEditor, knownTypes.topLeftQuarterCircle);
     const horizontalBraceLeft = new MathNode(equationEditor, knownTypes.horizontalLineBottomMargin);
-    const horizontalBraceBottomRight = new MathNode(equationEditor, knownTypes.halfHorizontalBraceBottomRight);
-    const horizontalBraceBottomLeft = new MathNode(equationEditor, knownTypes.halfHorizontalBraceBottomLeft);
+    const horizontalBraceBottomRight = new MathNode(equationEditor, knownTypes.bottomRightQuarterCircle);
+    const horizontalBraceBottomLeft = new MathNode(equationEditor, knownTypes.bottomLeftQuarterCircle);
     const horizontalBraceRight = new MathNode(equationEditor, knownTypes.horizontalLineBottomMargin);
-    const horizontalBraceTopRight = new MathNode(equationEditor, knownTypes.halfHorizontalBraceTopRight);
+    const horizontalBraceTopRight = new MathNode(equationEditor, knownTypes.topRightQuarterCircle);
 
     const horizontalBrace = new MathNode(equationEditor, knownTypes.horizontalBraceUp);
     horizontalBrace.appendChildren([
@@ -679,14 +683,36 @@ class MathNodeFactory {
   ) {
     let result = null;
     switch (content) {
+      case "|":
+        result = new MathNodeAbsoluteValue(equationEditor, left);
+        break;
       case "[":
       case "]":
         result = new MathNodeSquareBrackets(equationEditor, left);
         break;
       case "(":
       case ")":
-      default:
         result = new MathNodeParenthesis(equationEditor, left);
+        break;
+      case "{":
+      case "}":
+      default:
+        result = new MathNodeCurlyBrace(equationEditor, left);
+        if (left) {
+          result.appendChild(new MathNode(equationEditor, knownTypes.topLeftQuarterCircle));
+          result.appendChild(new MathNode(equationEditor, knownTypes.verticalLineLeftMargin));
+          result.appendChild(new MathNode(equationEditor, knownTypes.bottomRightQuarterCircle));
+          result.appendChild(new MathNode(equationEditor, knownTypes.topRightQuarterCircle));
+          result.appendChild(new MathNode(equationEditor, knownTypes.verticalLineLeftMargin));
+          result.appendChild(new MathNode(equationEditor, knownTypes.bottomLeftQuarterCircle));
+        } else {
+          result.appendChild(new MathNode(equationEditor, knownTypes.topRightQuarterCircle));
+          result.appendChild(new MathNode(equationEditor, knownTypes.verticalLineLeftMargin));
+          result.appendChild(new MathNode(equationEditor, knownTypes.bottomLeftQuarterCircle));
+          result.appendChild(new MathNode(equationEditor, knownTypes.topRightQuarterCircle));
+          result.appendChild(new MathNode(equationEditor, knownTypes.verticalLineLeftMargin));
+          result.appendChild(new MathNode(equationEditor, knownTypes.bottomRightQuarterCircle));
+        }
         break;
     }
     result.implied = implied;
@@ -2042,8 +2068,8 @@ class LaTeXParser {
       node.getMatrixCell(0, 0).children[0].appendChild(secondToLast.node);
       node.getMatrixCell(1, 0).children[0].appendChild(last.node);
       node.getMatrixCell(2, 0).children[0].appendChild(mathNodeFactory.atom(this.equationEditor, "\u00A0"));
-      node.children[0].children[0].initialContent = "";
-      node.children[0].children[2].initialContent = "";
+      node.children[0].replaceChildAtPosition(0, mathNodeFactory.leftDelimiter(this.equationEditor, "", false));
+      node.children[0].replaceChildAtPosition(2, mathNodeFactory.rightDelimiter(this.equationEditor, "", false));
       return this.replaceParsingStackTop(node, "", - 3);
     }
     if (last.content in latexConstants.operatorsNormalized) {
@@ -3172,11 +3198,16 @@ class MathNode {
     const desiredHeight = desiredRadius;
 
     const radiusString = `${desiredRadius}px`;
+    const borderString = `2px solid`;
 
     topLeft.element.style.borderTopLeftRadius = radiusString;
+    topLeft.element.style.borderTop = borderString;
     topRight.element.style.borderTopRightRadius = radiusString;
+    topRight.element.style.borderTop = borderString;
     bottomLeft.element.style.borderBottomLeftRadius = radiusString;
+    bottomLeft.element.style.borderBottom = borderString;
     bottomRight.element.style.borderBottomRightRadius = radiusString;
+    bottomRight.element.style.borderBottom = borderString;
 
     const halfWidth = desiredWidth / 2;
 
@@ -4069,8 +4100,10 @@ class MathNode {
         return new KeyHandlerResult(true, false);
       case "(":
       case "[":
+      case "{":
         this.makeDelimiterLeft(key);
         return new KeyHandlerResult(true, false);
+      case "}":
       case ")":
       case "]":
         this.makeDelimiterRight(key);
@@ -6397,7 +6430,13 @@ class MathNodeLeftDelimiter extends MathNode {
 
   /** @returns {LatexWithAnnotation} */
   toLatexWithAnnotation() {
-    return new LatexWithAnnotation(this.textContentOrInitialContent(), - 1, - 1);
+    if (this.children.length === 0) {
+      return new LatexWithAnnotation("\\left.", -1, -1);
+    }
+    if (this.extraData === "{") {
+      return new LatexWithAnnotation("\\{", -1, -1);
+    }
+    return new LatexWithAnnotation(this.extraData, - 1, - 1);
   }
 
   /** @returns {boolean} whether reduction occurred. */
@@ -6416,7 +6455,13 @@ class MathNodeRightDelimiter extends MathNode {
 
   /** @returns {LatexWithAnnotation} */
   toLatexWithAnnotation() {
-    return new LatexWithAnnotation(this.textContentOrInitialContent(), - 1, - 1);
+    if (this.children.length === 0) {
+      return new LatexWithAnnotation("\\right.", -1, -1);
+    }
+    if (this.extraData === "}") {
+      return new LatexWithAnnotation("\\}", -1, -1);
+    }
+    return new LatexWithAnnotation(this.extraData, - 1, - 1);
   }
 
   /** @returns {boolean} whether reduction occurred. */
@@ -6433,6 +6478,43 @@ class MathNodeDelimiterMark extends MathNode {
     left,
   ) {
     super(equationEditor, left ? knownTypes.leftDelimiterMark : knownTypes.rightDelimiterMark);
+    this.parenthesisThickness = 0;
+  }
+  verticallyStretchCommon(
+    /** @type {number}*/
+    heightToEnclose,
+    /** @type {number}*/
+    fractionLineHeightEnclosed,
+  ) {
+    let scaleHeight = 1.1;
+    this.parenthesisThickness = heightToEnclose / 24;
+    this.parenthesisThickness = Math.min(3, this.parenthesisThickness);
+    this.parenthesisThickness = Math.max(1.5, this.parenthesisThickness);
+    heightToEnclose = Math.max(2 * fractionLineHeightEnclosed, 2 * (heightToEnclose - fractionLineHeightEnclosed));
+    this.boundingBox.top = 0;
+    this.boundingBox.height = heightToEnclose * scaleHeight;
+    this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
+  }
+}
+
+class MathNodeAbsoluteValue extends MathNodeDelimiterMark {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /**@type {boolean} */
+    left,
+  ) {
+    super(equationEditor, left);
+    this.left = left;
+  }
+  verticallyStretch(
+    /** @type {number}*/
+    heightToEnclose,
+    /** @type {number}*/
+    fractionLineHeightEnclosed,
+  ) {
+    this.verticallyStretchCommon(heightToEnclose, fractionLineHeightEnclosed);
+    this.boundingBox.width = Math.max(heightToEnclose / 6, 3);
   }
 }
 
@@ -6453,24 +6535,16 @@ class MathNodeSquareBrackets extends MathNodeDelimiterMark {
     /** @type {number}*/
     fractionLineHeightEnclosed,
   ) {
-    let scaleHeight = 1.1;
-    let parenthesisThickness = heightToEnclose / 24;
-    parenthesisThickness = Math.min(3, parenthesisThickness);
-    parenthesisThickness = Math.max(1.5, parenthesisThickness);
-    heightToEnclose = Math.max(2 * fractionLineHeightEnclosed, 2 * (heightToEnclose - fractionLineHeightEnclosed));
-    this.boundingBox.top = 0;
-    this.boundingBox.height = heightToEnclose * scaleHeight;
-    this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
-
-    let shift = 0;
-    this.boundingBox.width = Math.min(heightToEnclose / 12, 8);
+    this.verticallyStretchCommon(heightToEnclose, fractionLineHeightEnclosed);
+    let shift = 2;
+    this.boundingBox.width = Math.max(heightToEnclose / 6, 3);
     if (this.left) {
       this.boundingBox.left = shift;
     } else {
       this.boundingBox.left = - shift;
     }
     if (this.element !== null) {
-      this.element.style.borderWidth = `${parenthesisThickness}px`;
+      this.element.style.borderWidth = `${this.parenthesisThickness}px`;
       this.element.style.borderTop = `solid`;
       this.element.style.borderBottom = `solid`;
     }
@@ -6493,21 +6567,14 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
     /** @type {number}*/
     fractionLineHeightEnclosed,
   ) {
-    let scaleHeight = 1.1;
-    let parenthesisThickness = heightToEnclose / 24;
-    parenthesisThickness = Math.min(3, parenthesisThickness);
-    parenthesisThickness = Math.max(1.5, parenthesisThickness);
-    heightToEnclose = Math.max(2 * fractionLineHeightEnclosed, 2 * (heightToEnclose - fractionLineHeightEnclosed));
-    this.boundingBox.top = 0;
-    this.boundingBox.height = heightToEnclose * scaleHeight;
-    this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
+    this.verticallyStretchCommon(heightToEnclose, fractionLineHeightEnclosed);
     let radius = this.boundingBox.height / 2;
-    let smallRadius = radius / 5;
+    let smallRadius = radius / 2;
     let shiftLeft = radius / 6;
     let rightCorrection = Math.max(0, heightToEnclose - 14) / heightToEnclose;
     rightCorrection = 1;
     let shiftRight = - radius / 6 * rightCorrection - 1;
-    let width = radius / 3;
+    let width = radius / 2;
     if (width > 60) {
       width = 60;
     }
@@ -6520,7 +6587,7 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
     this.boundingBox.width = width;
     if (this.element !== null) {
       this.element.style.borderRadius = `${smallRadius}px / ${radius}px`;
-      this.element.style.borderWidth = `${parenthesisThickness}px`;
+      this.element.style.borderWidth = `${this.parenthesisThickness}px`;
     }
     if (this.left) {
       this.type.borderTopLeftRadius = radius;
@@ -6530,6 +6597,98 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
       this.type.borderTopRightRadius = radius;
       this.type.borderBottomRightRadius = radius;
       this.boundingBox.left = shiftRight;
+    }
+  }
+}
+
+class MathNodeCurlyBrace extends MathNodeDelimiterMark {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /**@type {boolean} */
+    left,
+  ) {
+    super(equationEditor, left);
+    this.left = left;
+  }
+  verticallyStretch(
+    /** @type {number}*/
+    heightToEnclose,
+    /** @type {number}*/
+    fractionLineHeightEnclosed,
+  ) {
+    this.verticallyStretchCommon(heightToEnclose, fractionLineHeightEnclosed);
+    let topBar = this.children[1];
+    let bottomBar = this.children[4];
+    let radius = this.boundingBox.height / 12;
+    let heightBar = this.boundingBox.height * 3 / 8;
+    this.boundingBox.width = radius * 2 + 1;
+    this.boundingBox.height += radius;
+    let borderWidthString = `${this.parenthesisThickness}px`;
+
+    topBar.boundingBox.width = this.parenthesisThickness;
+    topBar.boundingBox.top = radius;
+    topBar.boundingBox.height = heightBar;
+    topBar.boundingBox.left = radius;
+    topBar.element.style.borderWidth = borderWidthString;
+
+    bottomBar.boundingBox.width = this.parenthesisThickness;
+    bottomBar.boundingBox.height = heightBar;
+    bottomBar.boundingBox.top = heightBar + radius * 3;
+    bottomBar.boundingBox.left = radius;
+    bottomBar.element.style.borderWidth = borderWidthString;
+    let topQuarterCircle = this.children[0];
+    let topMiddleQuarterCircle = this.children[2];
+    let bottomMiddleQuarterCircle = this.children[3];
+    let bottomQuarterCircle = this.children[5];
+    let allQuarterCircles = [topQuarterCircle, topMiddleQuarterCircle, bottomMiddleQuarterCircle, bottomQuarterCircle];
+    for (let i = 0; i < allQuarterCircles.length; i++) {
+      let quarterCircle = allQuarterCircles[i];
+      quarterCircle.boundingBox.width = radius;
+      quarterCircle.boundingBox.height = radius;
+      quarterCircle.element.style.borderWidth = borderWidthString;
+    }
+    let radiusString = `${radius}px`;
+    topQuarterCircle.boundingBox.top = 0;
+    topQuarterCircle.boundingBox.left = this.left ? radius : 0;
+
+    topMiddleQuarterCircle.boundingBox.top = heightBar + radius;
+    topMiddleQuarterCircle.boundingBox.left = this.left ? 0 : radius;
+
+    bottomMiddleQuarterCircle.boundingBox.top = heightBar + 2 * radius;
+    bottomMiddleQuarterCircle.boundingBox.left = this.left ? 0 : radiusString;
+
+    bottomQuarterCircle.boundingBox.top = 2 * heightBar + 3 * radius;
+    bottomQuarterCircle.boundingBox.left = this.left ? radius : 0;
+    if (this.element !== null) {
+      this.element.style.borderLeft = "";
+      this.element.style.borderRight = "";
+    }
+    let borderStyleString = `solid ${borderWidthString}`;
+    if (this.left) {
+      topQuarterCircle.element.style.borderTopLeftRadius = radiusString;
+      topQuarterCircle.element.style.borderLeft = borderStyleString;
+
+      topMiddleQuarterCircle.element.style.borderBottomRightRadius = radiusString;
+      topMiddleQuarterCircle.element.style.borderRight = borderStyleString;
+
+      bottomMiddleQuarterCircle.element.style.borderTopRightRadius = radiusString;
+      bottomMiddleQuarterCircle.element.style.borderRight = borderStyleString;
+
+      bottomQuarterCircle.element.style.borderBottomLeftRadius = radiusString;
+      bottomQuarterCircle.element.style.borderLeft = borderStyleString;
+    } else {
+      topQuarterCircle.element.style.borderTopRightRadius = radiusString;
+      topQuarterCircle.element.style.borderRight = borderStyleString;
+
+      topMiddleQuarterCircle.element.style.borderBottomLeftRadius = radiusString;
+      topMiddleQuarterCircle.element.style.borderLeft = borderStyleString;
+
+      bottomMiddleQuarterCircle.element.style.borderTopLeftRadius = radiusString;
+      bottomMiddleQuarterCircle.element.style.borderLeft = borderStyleString;
+
+      bottomQuarterCircle.element.style.borderBottomRightRadius = radiusString;
+      bottomQuarterCircle.element.style.borderRight = borderStyleString;
     }
   }
 }

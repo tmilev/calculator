@@ -2193,6 +2193,8 @@ class EquationEditor {
     this.backslashPosition = - 1;
     /**@type {string} */
     this.positionDebugString = ""
+    /**@type{boolean} If changing this.container's font size, set this to true before the change, and back to false after.*/
+    this.resizingEditorFont = false;
     if (this.options.latexInput !== null) {
       this.options.latexInput.addEventListener('keyup', (e) => {
         this.writeLatexFromInput();
@@ -3393,54 +3395,6 @@ class MathNode {
     return false;
   }
 
-  computeDimensionsBaseWithExponent() {
-    let base = this.children[0];
-    let exponent = this.children[1];
-    let overlapRatio = 0.35;
-    if (this.requiresTallExponent(base)) {
-      overlapRatio = 0.1;
-    }
-    let overlap = base.boundingBox.height * overlapRatio;
-    this.boundingBox.height = exponent.boundingBox.height + base.boundingBox.height - overlap;
-    if (exponent.boundingBox.height > this.boundingBox.height) {
-      this.boundingBox.height = exponent.boundingBox.height;
-    }
-    base.boundingBox.top = exponent.boundingBox.height - overlap;
-    if (base.boundingBox.top < 0) {
-      // The exponent is so small relative to the base that it 
-      // fits entirely in the overlap between the base and the exponent.
-      exponent.boundingBox.top = - base.boundingBox.top;
-      base.boundingBox.top = 0;
-    }
-    base.boundingBox.left = 0;
-    let baseWithSubscript = null;
-    if (base.type.type === knownTypes.horizontalMath.type) {
-      if (base.children.length === 1) {
-        if (base.children[0].type.type === knownTypes.baseWithSubscript.type) {
-          baseWithSubscript = base.children[0];
-        }
-      }
-    }
-    if (baseWithSubscript === null) {
-      this.boundingBox.width = base.boundingBox.width + exponent.boundingBox.width;
-      this.boundingBox.superScriptWidth = exponent.boundingBox.width;
-      exponent.boundingBox.left = base.boundingBox.width;
-    } else {
-      this.boundingBox.width = Math.max(
-        baseWithSubscript.boundingBox.width +
-        exponent.boundingBox.width -
-        baseWithSubscript.boundingBox.subScriptWidth,
-        baseWithSubscript.boundingBox.width,
-      );
-      this.boundingBox.superScriptWidth = 0;
-      this.boundingBox.subScriptWidth = 0;
-      exponent.boundingBox.left = base.boundingBox.width - baseWithSubscript.boundingBox.subScriptWidth;
-
-    }
-    this.boundingBox.fractionLineHeight = base.boundingBox.top + base.boundingBox.fractionLineHeight;
-    this.computeMiddleAlignment();
-  }
-
   computeDimensionsBaseWithSubscript() {
     let base = this.children[0];
     let subscript = this.children[1];
@@ -3505,21 +3459,6 @@ class MathNode {
     this.boundingBox.height = child.boundingBox.height;
     this.boundingBox.fractionLineHeight = child.boundingBox.fractionLineHeight;
     this.boundingBox.width = child.boundingBox.width;
-  }
-
-  computeDimensionsRootNode() {
-    this.computeDimensionsStandard();
-    if (!this.boundingBox.needsMiddleAlignment || this.equationEditor.options.editable) {
-      return;
-    }
-    let bottomDistance = this.boundingBox.height - this.boundingBox.fractionLineHeight;
-    if (bottomDistance > this.boundingBox.fractionLineHeight) {
-      this.boundingBox.height = bottomDistance * 2;
-      this.boundingBox.top += bottomDistance - this.boundingBox.fractionLineHeight;
-      this.boundingBox.fractionLineHeight = bottomDistance;
-    } else {
-      this.boundingBox.height = this.boundingBox.fractionLineHeight * 2;
-    }
   }
 
   computeDimensionsNumerator() {
@@ -3705,10 +3644,6 @@ class MathNode {
     if (this.type.type === knownTypes.numerator.type) {
       this.computeDimensionsNumerator();
     }
-    if (this.type.type === knownTypes.baseWithExponent.type) {
-      this.computeDimensionsBaseWithExponent();
-      return;
-    }
     if (this.type.type === knownTypes.baseWithSubscript.type) {
       this.computeDimensionsBaseWithSubscript();
       return;
@@ -3719,10 +3654,6 @@ class MathNode {
     }
     if (this.type.type === knownTypes.overLinedBox.type) {
       this.computeDimensionsOverLine();
-      return;
-    }
-    if (this.type.type === knownTypes.root.type) {
-      this.computeDimensionsRootNode();
       return;
     }
     if (this.type.type === knownTypes.horizontalMath.type) {
@@ -3903,7 +3834,12 @@ class MathNode {
       event.preventDefault();
       this.equationEditor.accountFrameTime(frameStart);
     }
-    if (handlerResult.preventDefault && this.type.type === knownTypes.atom.type && this.element !== null) {
+    if (
+      handlerResult.updateAlignment &&
+      this.type.type === knownTypes.atom.type &&
+      this.element !== null &&
+      !this.equationEditor.resizingEditorFont
+    ) {
       // The content is not yet written to our editable field: 
       // that will happen once the event default is carried out.
       // This means that we cannot compute the width of our atom accurately now,
@@ -3914,8 +3850,6 @@ class MathNode {
       // content will overflow its container box.
       this.element.style.maxWidth = `${this.boundingBox.width}px`;
       this.element.style.maxHeight = `${this.boundingBox.height}px`;
-      this.element.style.width = `${this.boundingBox.width}px`;
-      this.element.style.height = `${this.boundingBox.height}px`;
     }
     // While we no longer propagate the event, we need to 
     // release the thread so the browser can finish computations
@@ -3925,8 +3859,6 @@ class MathNode {
         this.storeCaretPosition(event.key, event.shiftKey);
         this.element.style.maxWidth = "";
         this.element.style.maxHeight = "";
-        this.element.style.width = "auto";
-        this.element.style.height = "auto";
         this.equationEditor.updateAlignment();
         this.equationEditor.accountFrameTime(frameStart);
       }
@@ -6214,6 +6146,54 @@ class MathNodeBaseWithExponent extends MathNode {
   applyBackspaceToTheRight() {
     return this.applyBackspaceToTheRightAsLeftArrow();
   }
+
+  computeDimensions() {
+    let base = this.children[0];
+    let exponent = this.children[1];
+    let overlapRatio = 0.35;
+    if (this.requiresTallExponent(base)) {
+      overlapRatio = 0.1;
+    }
+    let overlap = base.boundingBox.height * overlapRatio;
+    this.boundingBox.height = exponent.boundingBox.height + base.boundingBox.height - overlap;
+    if (exponent.boundingBox.height > this.boundingBox.height) {
+      this.boundingBox.height = exponent.boundingBox.height;
+    }
+    base.boundingBox.top = exponent.boundingBox.height - overlap;
+    if (base.boundingBox.top < 0) {
+      // The exponent is so small relative to the base that it 
+      // fits entirely in the overlap between the base and the exponent.
+      exponent.boundingBox.top = - base.boundingBox.top;
+      base.boundingBox.top = 0;
+    }
+    base.boundingBox.left = 0;
+    let baseWithSubscript = null;
+    if (base.type.type === knownTypes.horizontalMath.type) {
+      if (base.children.length === 1) {
+        if (base.children[0].type.type === knownTypes.baseWithSubscript.type) {
+          baseWithSubscript = base.children[0];
+        }
+      }
+    }
+    if (baseWithSubscript === null) {
+      this.boundingBox.width = base.boundingBox.width + exponent.boundingBox.width;
+      this.boundingBox.superScriptWidth = exponent.boundingBox.width;
+      exponent.boundingBox.left = base.boundingBox.width;
+    } else {
+      this.boundingBox.width = Math.max(
+        baseWithSubscript.boundingBox.width +
+        exponent.boundingBox.width -
+        baseWithSubscript.boundingBox.subScriptWidth,
+        baseWithSubscript.boundingBox.width,
+      );
+      this.boundingBox.superScriptWidth = 0;
+      this.boundingBox.subScriptWidth = 0;
+      exponent.boundingBox.left = base.boundingBox.width - baseWithSubscript.boundingBox.subScriptWidth;
+
+    }
+    this.boundingBox.fractionLineHeight = base.boundingBox.top + base.boundingBox.fractionLineHeight;
+    this.computeMiddleAlignment();
+  }
 }
 
 class MathNodeHorizontalMath extends MathNode {
@@ -6240,6 +6220,21 @@ class MathNodeRoot extends MathNode {
     equationEditor,
   ) {
     super(equationEditor, knownTypes.root);
+  }
+
+  computeDimensions() {
+    this.computeDimensionsStandard();
+    if (!this.boundingBox.needsMiddleAlignment || this.equationEditor.options.editable) {
+      return;
+    }
+    let bottomDistance = this.boundingBox.height - this.boundingBox.fractionLineHeight;
+    if (bottomDistance > this.boundingBox.fractionLineHeight) {
+      this.boundingBox.height = bottomDistance * 2;
+      this.boundingBox.top += bottomDistance - this.boundingBox.fractionLineHeight;
+      this.boundingBox.fractionLineHeight = bottomDistance;
+    } else {
+      this.boundingBox.height = this.boundingBox.fractionLineHeight * 2;
+    }
   }
 }
 

@@ -13,8 +13,11 @@
   function clickSlider(slider) {
     document.getElementById("equation-editor").style.fontSize = `${slider.value}px`;
     document.getElementById("font-size").textContent = `${slider.value}px`;
+    editor.resizingEditorFont = true;
     editor.updateDOM();
-    editor.updateAlignment();
+    editor.rootNode.focusRestore(1);
+    editor.writeDebugInfo(null);
+    editor.resizingEditorFont = false;
   }
   var editor = null;
 </script>

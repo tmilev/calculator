@@ -9,12 +9,27 @@
   }
 </style>
 
-<body onload="initializeTestPage('equation-editor','latexInputTest', 'debug', 'typeSetButton', 'mathTagTester');">
+<script>
+  function clickSlider(slider) {
+    document.getElementById("equation-editor").style.fontSize = `${slider.value}px`;
+    document.getElementById("font-size").textContent = `${slider.value}px`;
+    editor.updateDOM();
+    editor.updateAlignment();
+  }
+  var editor = null;
+</script>
+
+<body
+  onload="editor=initializeTestPage('equation-editor','latexInputTest', 'debug', 'typeSetButton', 'mathTagTester');">
   <h1>A math equation editor written from scratch.</h1>
   <div style='text-align: center;'>
     <div id="equation-editor" style="font-size: 72px; font-family:'Times New Roman'"></div>
     <br>
     <input id="latexInputTest" type="text">
+    <br>
+    Font size: <span id="font-size">72px</span>
+    <input type="range" min="5" max="100" value="72" class="slider" onchange="clickSlider(this);"
+      oninput="clickSlider(this);">
   </div>
   <div id="debug" style="display:normal"></div>
   <hr>

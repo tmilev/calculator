@@ -1097,7 +1097,7 @@ class LaTeXConstants {
     };
     /**@type{Object.<string, string>} */
     this.operatorsNormalized = {
-      // Full-widgth plus sign, wider and taller plus sign.
+      // Full-width plus sign, wider and taller plus sign.
       "\uFF0B": "+",
       "+": "+",
       // \pm

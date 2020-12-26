@@ -21,7 +21,7 @@ Inspired by MathQuill (we continue to love that editor - best wishes to the Math
 
 - Uses Apache 2.0 license (no more license headaches).
 - Written from scratch: not a single line from another project.
-- No fonts: uses Times New Roman by default. Chose Times New Roamn as that seemed to be most-likely-to-be-available out-of-the-box on Linux, Chromebook, Mac and Windows.
+- No fonts: uses Times New Roman by default. Chose Times New Roman as that seemed to be most-likely-to-be-available out-of-the-box on Linux, Chromebook, Mac and Windows.
 - No css files.
 - No external dependencies whatsoever, not even jquery.
 - No more build system headaches: just copy and paste one single javascript file and you're done.

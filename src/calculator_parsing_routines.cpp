@@ -1006,6 +1006,21 @@ bool Calculator::replaceXEXByE() {
   (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3] =
   (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
   (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3].controlIndex = this->conExpression();
+  if (this->flagLogSyntaxRules) {
+    this->parsingLog += "[Rule: Calculator::replaceXEXByE]";
+  }
+  return this->decreaseStackSetCharacterRanges(2);
+}
+
+bool Calculator::replaceXEXYByEY() {
+  (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4] =
+  (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3];
+  (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4].controlIndex = this->conExpression();
+  (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3] =
+  (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1];
+  if (this->flagLogSyntaxRules) {
+    this->parsingLog += "[Rule: Calculator::replaceXEXYByEY]";
+  }
   return this->decreaseStackSetCharacterRanges(2);
 }
 
@@ -2416,6 +2431,9 @@ bool Calculator::applyOneRule() {
   }
   if (thirdToLastS == "{" && secondToLastS == "Expression" && lastS == "}") {
     return this->replaceXEXByE();
+  }
+  if (fourthToLastS == "{" && thirdToLastS == "Expression" && secondToLastS == "}") {
+    return this->replaceXEXYByEY();
   }
   if (thirdToLastS == "(" && secondToLastS == "\\circ" && lastS == ")") {
     return this->replaceOXbyEX();

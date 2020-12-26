@@ -1550,6 +1550,7 @@ public:
     return true;
   }
   bool replaceXEXByE();
+  bool replaceXEXYByEY();
   bool replaceVbyVdotsVAccordingToPredefinedWordSplits();
   bool replaceAXbyEX();
   bool replaceIntegerXbyEX();

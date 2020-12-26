@@ -1346,47 +1346,55 @@ class LaTeXConstants {
       "\u00A0": true,
       "\n": true,
     };
+    this.whiteSpaceUtf16 = {
+      "\u00A0": " ",
+      "\u200A": " ",
+      "\u200B": " ",
+      "\u2009": " ",
+    };
     /** @type{Object.<string, string>} */
-    this.utf8ToLatexMap = null;
+    this.utf16ToLatexMap = null;
   }
 
   computeUtf16ToLatexMap() {
-    if (this.utf8ToLatexMap !== null) {
+    if (this.utf16ToLatexMap !== null) {
       return;
     }
-    this.utf8ToLatexMap = {};
+    this.utf16ToLatexMap = {};
     for (let i = 32; i < 125; i++) {
       let character = String.fromCharCode(i);
-      this.utf8ToLatexMap[character] = character;
+      this.utf16ToLatexMap[character] = character;
     }
     // Non-breakable space.
-    this.utf8ToLatexMap["\u00A0"] = " ";
+    for (let key in this.whiteSpaceUtf16) {
+      this.utf16ToLatexMap[key] = " ";
+    }
     for (let key in this.latexBackslashAtomsEditable) {
       let current = this.latexBackslashAtomsEditable[key];
-      this.utf8ToLatexMap[current] = `\\${key} `;
+      this.utf16ToLatexMap[current] = `\\${key} `;
     }
     for (let key in this.latexBackslashOperators) {
       let current = this.latexBackslashOperators[key];
-      this.utf8ToLatexMap[current] = `\\${key} `;
+      this.utf16ToLatexMap[current] = `\\${key} `;
     }
     for (let key in this.operatorWithSuperAndSubscript) {
       let current = this.operatorWithSuperAndSubscript[key];
-      this.utf8ToLatexMap[current] = `\\${key} `;
+      this.utf16ToLatexMap[current] = `\\${key} `;
     }
     for (let key in this.operatorsWithSubscript) {
       let current = this.operatorsWithSubscript[key];
-      this.utf8ToLatexMap[current] = `\\${key} `;
+      this.utf16ToLatexMap[current] = `\\${key} `;
     }
     for (let key in this.mathcalEquivalents) {
       let current = this.mathcalEquivalents[key];
-      this.utf8ToLatexMap[current] = `\\mathcal{${key}} `;
+      this.utf16ToLatexMap[current] = `\\mathcal{${key}} `;
     }
     for (let key in this.mathbbEquivalents) {
       let current = this.mathbbEquivalents[key];
-      this.utf8ToLatexMap[current] = `\\mathbb{${key}} `;
+      this.utf16ToLatexMap[current] = `\\mathbb{${key}} `;
     }
     for (let key in this.operatorsFromUft8) {
-      this.utf8ToLatexMap[key] = this.operatorsFromUft8[key];
+      this.utf16ToLatexMap[key] = this.operatorsFromUft8[key];
     }
   }
 
@@ -1405,8 +1413,8 @@ class LaTeXConstants {
       let current = "";
       for (let j = 0; j < 4 && i + j < input.length; j++) {
         current += input[i + j];
-        if (current in this.utf8ToLatexMap) {
-          current = this.utf8ToLatexMap[current];
+        if (current in this.utf16ToLatexMap) {
+          current = this.utf16ToLatexMap[current];
           i += j;
           result.push(current);
           current = "";
@@ -2039,7 +2047,7 @@ class LaTeXParser {
       let rightDelimiter = latexConstants.rightDelimiters[last.syntacticRole];
       let left = mathNodeFactory.leftDelimiter(this.equationEditor, leftDelimiter, false);
       let right = mathNodeFactory.rightDelimiter(this.equationEditor, rightDelimiter, false);
-      let atom = mathNodeFactory.atom(this.equationEditor, "");
+      let atom = mathNodeFactory.atom(this.equationEditor, "\u200B");
       let horizontal = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [left, atom, right]);
       return this.replaceParsingStackTop(horizontal, "", - 2);
     }
@@ -6817,8 +6825,8 @@ class MathNodeOperatorStandalone extends MathNode {
   toLatexWithAnnotation() {
     latexConstants.computeUtf16ToLatexMap();
     const content = this.textContentOrInitialContent();
-    if (content in latexConstants.utf8ToLatexMap) {
-      return new LatexWithAnnotation(latexConstants.utf8ToLatexMap[content]);
+    if (content in latexConstants.utf16ToLatexMap) {
+      return new LatexWithAnnotation(latexConstants.utf16ToLatexMap[content]);
     }
     return new LatexWithAnnotation(`${content}`, - 1, - 1);
   }

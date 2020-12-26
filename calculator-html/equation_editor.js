@@ -6515,6 +6515,7 @@ class MathNodeAbsoluteValue extends MathNodeDelimiterMark {
   ) {
     this.verticallyStretchCommon(heightToEnclose, fractionLineHeightEnclosed);
     this.boundingBox.width = Math.max(heightToEnclose / 6, 3);
+    this.element.style.borderWidth = `${this.parenthesisThickness}px`;
   }
 }
 

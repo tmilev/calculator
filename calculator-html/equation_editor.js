@@ -2184,6 +2184,7 @@ class EquationEditor {
       this.rootNode.type.borderStyle = "";
       this.rootNode.type.padding = "";
       this.rootNode.type.margin = "";
+      this.rootNode.type.cursor = "";
     }
     /** @type{AtomWithPosition} */
     this.selectionStart = new AtomWithPosition(null, -1);

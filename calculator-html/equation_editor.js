@@ -707,6 +707,11 @@ class MathNodeFactory {
       case "(":
       case ")":
         result = new MathNodeParenthesis(equationEditor, left);
+        if (left) {
+          result.appendChild(new MathNode(equationEditor, knownTypes.verticalLineLeftMargin));
+        } else {
+          result.appendChild(new MathNode(equationEditor, knownTypes.verticalLineRightMargin));
+        }
         break;
       case "{":
       case "}":
@@ -6613,10 +6618,8 @@ class MathNodeAngleBrackets extends MathNodeDelimiterMark {
       topBar.boundingBox.transform = `matrix(1,0,${scale},1,0,0)`;
       bottomBar.boundingBox.transform = `matrix(1,0,${-scale},1,${width},0)`;
     }
-    if (this.element !== null) {
-      this.element.style.borderLeft = "";
-      this.element.style.borderRight = "";
-    }
+    this.element.style.borderLeft = "";
+    this.element.style.borderRight = "";
     this.boundingBox.width = Math.max(width + 2 * margin + 2 * this.parenthesisThickness, 3);
     this.element.style.borderWidth = `${this.parenthesisThickness}px`;
   }
@@ -6639,36 +6642,25 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
     fractionLineHeightEnclosed,
   ) {
     this.verticallyStretchCommon(heightToEnclose, fractionLineHeightEnclosed);
+    this.boundingBox.width = Math.min(this.boundingBox.height / 4, 20);
+    this.element.style.borderLeft = "";
+    this.element.style.borderRight = "";
+    let scale = this.boundingBox.width / this.boundingBox.height;
+
     let radius = this.boundingBox.height / 2;
-    let smallRadius = radius / 2;
-    let shiftLeft = radius / 6;
-    let rightCorrection = Math.max(0, heightToEnclose - 14) / heightToEnclose;
-    rightCorrection = 1;
-    let shiftRight = - radius / 6 * rightCorrection - 1;
-    let width = radius / 2;
-    if (width > 60) {
-      width = 60;
-    }
-    if (smallRadius > 30) {
-      smallRadius = 30;
-    }
-    if (smallRadius < 5) {
-      smallRadius = 5;
-    }
-    this.boundingBox.width = width;
-    if (this.element !== null) {
-      this.element.style.borderRadius = `${smallRadius}px / ${radius}px`;
-      this.element.style.borderWidth = `${this.parenthesisThickness}px`;
-    }
+    let child = this.children[0];
+    child.element.style.borderRadius = `${radius}px`;
+    child.element.style.borderWidth = `${this.parenthesisThickness / scale}px`;
+    child.boundingBox.width = this.boundingBox.height;
+    child.boundingBox.height = this.boundingBox.height;
+    child.boundingBox.transformOrigin = "top left";
+    let shift = this.boundingBox.width / 3.5;
     if (this.left) {
-      this.type.borderTopLeftRadius = radius;
-      this.type.borderBottomLeftRadius = radius;
-      this.boundingBox.left = shiftLeft;
+      child.boundingBox.left = shift;
     } else {
-      this.type.borderTopRightRadius = radius;
-      this.type.borderBottomRightRadius = radius;
-      this.boundingBox.left = shiftRight;
+      child.boundingBox.left = - shift;
     }
+    child.boundingBox.transform = `matrix(${scale},0,0,1,0,0)`;
   }
 }
 

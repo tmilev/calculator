@@ -783,8 +783,8 @@ bool WithContext<Weight<Polynomial<Rational> > >::extendContext(
   (void) commentsOnFailure;
   PolynomialSubstitution<Rational> substitution;
   this->context.polynomialSubstitution(newContext, substitution, Rational::one());
-  for (int i = 0; i < this->content.weightFundamentalCoordS.size; i ++) {
-    this->content.weightFundamentalCoordS[i].substitution(substitution, Rational::one());
+  for (int i = 0; i < this->content.weightFundamentalCoordinates.size; i ++) {
+    this->content.weightFundamentalCoordinates[i].substitution(substitution, Rational::one());
   }
   this->context = newContext;
   return true;

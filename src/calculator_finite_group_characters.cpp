@@ -2148,9 +2148,9 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraWeight(
     Vector<Polynomial<Rational> > EiVector;
     EiVector.makeEi(theSSowner->getRank(), theWeightIndex - 1);
     if (theCoordsString == "fundamental") {
-      resultWeight.weightFundamentalCoordS = EiVector;
+      resultWeight.weightFundamentalCoordinates = EiVector;
     } else if (theCoordsString == "simple") {
-      resultWeight.weightFundamentalCoordS = theSSowner->theWeyl.getFundamentalCoordinatesFromSimple(EiVector);
+      resultWeight.weightFundamentalCoordinates = theSSowner->theWeyl.getFundamentalCoordinatesFromSimple(EiVector);
     }
   } else {
     Vector<Rational> EiVector;
@@ -2163,7 +2163,7 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraWeight(
       return output.makeError(errorStream.str(), calculator);
     }
     EiVector.makeEi(tempV.size, theWeightIndex - 1);
-    resultWeight.weightFundamentalCoordS = theSSowner->theWeyl.getFundamentalCoordinatesFromEpsilon(EiVector);
+    resultWeight.weightFundamentalCoordinates = theSSowner->theWeyl.getFundamentalCoordinatesFromEpsilon(EiVector);
   }
   resultWeight.owner = theSSowner;
   ExpressionContext theContext(calculator);
@@ -2189,7 +2189,7 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraRhoWeight(
   theSSowner->checkConsistency();
   ExpressionContext theContext(calculator);
   theContext.setAmbientSemisimpleLieAlgebra(*theSSowner);
-  resultWeight.weightFundamentalCoordS = theSSowner->theWeyl.getFundamentalCoordinatesFromSimple(theSSowner->theWeyl.rho);
+  resultWeight.weightFundamentalCoordinates = theSSowner->theWeyl.getFundamentalCoordinatesFromSimple(theSSowner->theWeyl.rho);
   resultWeight.owner = theSSowner;
   return output.assignValueWithContext(resultWeight, theContext, calculator);
 }

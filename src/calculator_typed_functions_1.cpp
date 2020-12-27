@@ -432,11 +432,11 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(
   }
   Polynomial<Rational> zero;
   Vector<Polynomial<Rational> > theWeightSimpleCoords = theElt.owner->getSimpleCoordinatesFromFundamental(
-    theWeight.weightFundamentalCoordS,
+    theWeight.weightFundamentalCoordinates,
     zero
   );
   theElt.actOn(theWeightSimpleCoords);
-  theWeight.weightFundamentalCoordS = theElt.owner->getFundamentalCoordinatesFromSimple(theWeightSimpleCoords);
+  theWeight.weightFundamentalCoordinates = theElt.owner->getFundamentalCoordinatesFromSimple(theWeightSimpleCoords);
   return output.assignValueWithContext(theWeight, inputConverted[2].getContext(), calculator);
 }
 

@@ -902,7 +902,7 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
           << theG2B3Data.theAmbientChar.toString(&theG2B3Data.theFormat) << "$}";
           Vector<RationalFunction<Rational> > theSimpleCoordinates;
           theSimpleCoordinates = theG2B3Data.WeylFD.ambientWeyl->getSimpleCoordinatesFromFundamental(
-            theG2B3Data.theAmbientChar[0].weightFundamentalCoordS,
+            theG2B3Data.theAmbientChar[0].weightFundamentalCoordinates,
             RationalFunction<Rational>::oneRational()
           );
           RationalFunction<Rational> theWeylSize;
@@ -926,7 +926,7 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
           }
           Vector<RationalFunction<Rational> > theSimpleCoordinates;
           theSimpleCoordinates = theG2B3Data.WeylFDSmall.ambientWeyl->getSimpleCoordinatesFromFundamental(
-            tempChar[0].weightFundamentalCoordS, RationalFunction<Rational>::zeroRational()
+            tempChar[0].weightFundamentalCoordinates, RationalFunction<Rational>::zeroRational()
           );
           RationalFunction<Rational> dimension;
           dimension = theG2B3Data.WeylFDSmall.weylDimensionFormulaInnerSimpleCoords(theSimpleCoordinates, rfOne);
@@ -1084,7 +1084,7 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(Calculator& calculato
     out << "<tr><td> " << theCharacter.toString(&theg2b3data.theFormat) << "</td> ";
     Vector<RationalFunction<Rational> > simpleCoordinates;
     simpleCoordinates = theg2b3data.WeylFD.ambientWeyl->getSimpleCoordinatesFromFundamental(
-      theCharacter[0].weightFundamentalCoordS,
+      theCharacter[0].weightFundamentalCoordinates,
       RationalFunction<Rational>::zeroRational()
     );
     RationalFunction<Rational> dimension;
@@ -1102,7 +1102,7 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(Calculator& calculato
         out << outputChar.coefficients[i].toString() << " x ";
       }
       simpleCoordinates = theg2b3data.WeylFDSmall.ambientWeyl->getSimpleCoordinatesFromFundamental(
-        outputChar[i].weightFundamentalCoordS, RationalFunction<Rational>::zeroRational()
+        outputChar[i].weightFundamentalCoordinates, RationalFunction<Rational>::zeroRational()
       );
       dimension = theg2b3data.WeylFDSmall.weylDimensionFormulaInnerSimpleCoords(simpleCoordinates);
       out << dimension;
@@ -1110,14 +1110,14 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(Calculator& calculato
         out << "+";
       }
       leftWeightSimple = smallWeyl.getSimpleCoordinatesFromFundamental(
-        outputChar[i].weightFundamentalCoordS, RationalFunction<Rational>::zeroRational()
+        outputChar[i].weightFundamentalCoordinates, RationalFunction<Rational>::zeroRational()
       );
-      leftWeightDual = smallWeyl.getDualCoordinatesFromFundamental(outputChar[i].weightFundamentalCoordS);
+      leftWeightDual = smallWeyl.getDualCoordinatesFromFundamental(outputChar[i].weightFundamentalCoordinates);
       for (int j = 0; j < outputChar.size(); j ++) {
         rightWeightSimple = smallWeyl.getSimpleCoordinatesFromFundamental(
-          outputChar[j].weightFundamentalCoordS, RationalFunction<Rational>::zeroRational()
+          outputChar[j].weightFundamentalCoordinates, RationalFunction<Rational>::zeroRational()
         );
-        rightWeightDual = smallWeyl.getDualCoordinatesFromFundamental(outputChar[j].weightFundamentalCoordS);
+        rightWeightDual = smallWeyl.getDualCoordinatesFromFundamental(outputChar[j].weightFundamentalCoordinates);
         if ((rightWeightSimple - leftWeightSimple).isPositive()) {
           resultChar = theCasimir;
           theCentralCharacter = theCasimir;
@@ -1524,16 +1524,16 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   tempMon.owner = theSSalgebra.content;
   ElementUniversalEnveloping<RationalFunction<Rational> > currentChar;
   for (int i = 0; i < theLeviEigenVectors.size; i ++) {
-    tempMon.weightFundamentalCoordS = theEigenVectorWeightsFund[i];
-    tempMon.weightFundamentalCoordS += theGenMod.theHWFundamentalCoordsBaseField;
+    tempMon.weightFundamentalCoordinates = theEigenVectorWeightsFund[i];
+    tempMon.weightFundamentalCoordinates += theGenMod.theHWFundamentalCoordsBaseField;
     theFDLeviSplitShifteD.addMonomial(tempMon, RFOne);
-    currentHWdualcoords = theSSalgebra.content->theWeyl.getDualCoordinatesFromFundamental(tempMon.weightFundamentalCoordS);
+    currentHWdualcoords = theSSalgebra.content->theWeyl.getDualCoordinatesFromFundamental(tempMon.weightFundamentalCoordinates);
     currentChar = theCasimir;
     currentChar.modOutVermaRelations(& currentHWdualcoords, RFOne, RFZero);
     theCentralCharacters.addOnTop(currentChar);
-    out << "<tr><td>" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.toStringLetterFormat("\\psi") << "</td><td>"
+    out << "<tr><td>" << theFDLeviSplitShifteD[i].weightFundamentalCoordinates.toStringLetterFormat("\\psi") << "</td><td>"
     << currentChar.toString(&tempFormat) << "</td></tr>";
-    latexReport1 << " $" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.toStringLetterFormat("\\psi", &tempFormat) << "$"
+    latexReport1 << " $" << theFDLeviSplitShifteD[i].weightFundamentalCoordinates.toStringLetterFormat("\\psi", &tempFormat) << "$"
     << "&$p_{" << i + 1 << "}=$ $" << currentChar.toString(&tempFormat) << "$\\\\<br>";
   }
   out << "</table>";
@@ -2227,7 +2227,7 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
       if (!theKLpolys.theKLcoeffs[indexInWeyl][j].isEqualToZero()) {
         currentHW = theHWsimpCoords;
         theWeyl.actOnRhoModified(j, currentHW);
-        theMon.weightFundamentalCoordS = theWeyl.getFundamentalCoordinatesFromSimple(currentHW);
+        theMon.weightFundamentalCoordinates = theWeyl.getFundamentalCoordinatesFromSimple(currentHW);
         int sign = (currentElement.generatorsLastAppliedFirst.size - theWeyl.theGroup.theElements[j].generatorsLastAppliedFirst.size) % 2 == 0 ? 1 : - 1;
         currentChar.addMonomial(theMon, theKLpolys.theKLcoeffs[indexInWeyl][j] * sign);
       }
@@ -2783,7 +2783,7 @@ int CharacterSemisimpleLieAlgebraModule<Coefficient>::getPositiveNStringSuchThat
   for (
     ;
     this->monomials.contains(currentWeight);
-    result ++, currentWeight.weightFundamentalCoordS -= theAlphaInFundCoords
+    result ++, currentWeight.weightFundamentalCoordinates -= theAlphaInFundCoords
   ) {
   }
   return result;
@@ -2806,9 +2806,9 @@ std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::toStringFullCharac
   Vector<Coefficient> theSimpleRootFundCoords;
   for (int k = 0; k < outputChar.size(); k ++) {
     out << "<tr>";
-    out << "<td>" << outputChar[k].weightFundamentalCoordS.toString() << "</td>";
+    out << "<td>" << outputChar[k].weightFundamentalCoordinates.toString() << "</td>";
     Vector<Coefficient> weightSimple = this->getOwner()->theWeyl.getSimpleCoordinatesFromFundamental(
-      outputChar[k].weightFundamentalCoordS, Coefficient::zero()
+      outputChar[k].weightFundamentalCoordinates, Coefficient::zero()
     );
     out << "<td>" << weightSimple.toString() << "</td>";
     outputSimpleStringCoords.makeZero(this->getOwner()->getRank());
@@ -2826,12 +2826,12 @@ std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::toStringFullCharac
         outputChar[k], theSimpleRootFundCoords
       );
     }
-    if (outputSimpleStringCoords != outputChar[k].weightFundamentalCoordS) {
+    if (outputSimpleStringCoords != outputChar[k].weightFundamentalCoordinates) {
       out << "<td><b style =\"color:red\">" << outputSimpleStringCoords.toString() << "</b></td>" ;
     } else {
       out << "<td>" << outputSimpleStringCoords.toString() << "</td>";
     }
-    if (outputSimpleHalfStringCoords != outputChar[k].weightFundamentalCoordS) {
+    if (outputSimpleHalfStringCoords != outputChar[k].weightFundamentalCoordinates) {
       out << "<td><b style =\"color:red\">"
       << outputSimpleHalfStringCoords.toString() << "</b></td>" ;
     } else {

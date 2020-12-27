@@ -925,7 +925,7 @@ std::string SemisimpleLieAlgebra::getStringFromChevalleyGenerator(
     thePolynomialFormat = &tempFormat.getElement();
   }
   if (this->isGeneratorFromCartan(theIndex)) {
-    out << thePolynomialFormat->chevalleyHgeneratorLetter << "_{" << theIndex-this->getNumberOfPositiveRoots() + 1 << "}";
+    out << thePolynomialFormat->chevalleyHgeneratorLetter << "_{" << theIndex - this->getNumberOfPositiveRoots() + 1 << "}";
   } else {
     out << thePolynomialFormat->chevalleyGgeneratorLetter << "_{";
     if (theIndex >= this->getNumberOfPositiveRoots()) {

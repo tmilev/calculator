@@ -270,7 +270,7 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
       this->theGeneratingElementPowersBasis.addOnTop(currentVect);
       if (
         this->theGeneratingElementPowersBasis.size >
-        this->theGeneratingElementPowersBasis.getRankOfSpanOfElements()
+        this->theGeneratingElementPowersBasis.getRankElementSpan()
       ) {
         this->theGeneratingElementPowersBasis.setSize(this->theGeneratingElementPowersBasis.size - 1);
         break;
@@ -1072,7 +1072,7 @@ AlgebraicNumber AlgebraicNumber::oneStatic() {
 
 AlgebraicNumber AlgebraicNumber::zeroStatic() {
   AlgebraicNumber result;
-  result.assignRational(1, nullptr);
+  result.assignRational(0, nullptr);
   return result;
 }
 

@@ -491,7 +491,7 @@ void Vectors<Coefficient>::gaussianEliminationForNormalComputation(
 }
 
 template <class Coefficient>
-int Vectors<Coefficient>::getRankOfSpanOfElements(Matrix<Coefficient>* buffer, Selection* bufferSelection) const {
+int Vectors<Coefficient>::getRankElementSpan(Matrix<Coefficient>* buffer, Selection* bufferSelection) const {
   if (this->size == 0) {
     return 0;
   }

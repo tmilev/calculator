@@ -803,7 +803,7 @@ class Vectors: public List<Vector<Coefficient> > {
   static void selectBasisInSubspace(
     const List<Vector<Coefficient> >& input, List<Vector<Coefficient> >& output, Selection& outputSelectedPivots
   );
-  int getRankOfSpanOfElements(Matrix<Coefficient>* buffer = 0, Selection* bufferSelection = nullptr) const;
+  int getRankElementSpan(Matrix<Coefficient>* buffer = 0, Selection* bufferSelection = nullptr) const;
   static bool conesIntersect(
     List<Vector<Rational> >& StrictCone,
     List<Vector<Rational> >& nonStrictCone,
@@ -1074,8 +1074,8 @@ bool Vectors<Coefficient>::linearSpanContainsVector(
   Vectors<Coefficient> tempVectors;
   tempVectors = (*this);
   tempVectors.addOnTop(input);
-  return this->getRankOfSpanOfElements(&bufferMatrix, &bufferSelection) ==
-  tempVectors.getRankOfSpanOfElements(&bufferMatrix, &bufferSelection);
+  return this->getRankElementSpan(&bufferMatrix, &bufferSelection) ==
+  tempVectors.getRankElementSpan(&bufferMatrix, &bufferSelection);
 }
 
 template <class Coefficient>
@@ -1181,7 +1181,7 @@ int Vectors<Coefficient>::arrangeFirstVectorsBeOfMaxPossibleRank(Matrix<Coeffici
   int oldRank = 0;
   for (int i = 0; i < this->size; i ++) {
     tempRoots.addOnTop(this->objects[i]);
-    int newRank = tempRoots.getRankOfSpanOfElements(bufferMat, bufferSel);
+    int newRank = tempRoots.getRankElementSpan(bufferMat, bufferSel);
     if (newRank == oldRank) {
       tempRoots.removeIndexSwapWithLast(tempRoots.size - 1);
     } else {

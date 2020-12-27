@@ -1197,7 +1197,7 @@ void WeylGroupData::getSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
   SubgroupDataRootReflections theSG;
   do {
     extendedBasis.subSelection(parSelrootsAreInLevi, currentBasisExtendedParabolic);
-    if (currentBasisExtendedParabolic.getRankOfSpanOfElements() == currentBasisExtendedParabolic.size) {
+    if (currentBasisExtendedParabolic.getRankElementSpan() == currentBasisExtendedParabolic.size) {
       theSG.makeFromRoots(*this, currentBasisExtendedParabolic);
       theSG.flagIsExtendedParabolic = true;
       theSG.simpleRootsInLeviParabolic = parSelrootsAreInLevi;

@@ -273,7 +273,7 @@ template <class Coefficient>
 class Weight {
 public:
   SemisimpleLieAlgebra* owner;
-  Vector<Coefficient> weightFundamentalCoordS;
+  Vector<Coefficient> weightFundamentalCoordinates;
   friend std::ostream& operator << (std::ostream& output, const Weight<Coefficient>& input) {
     output << input.toString();
     return output;
@@ -300,7 +300,7 @@ public:
   ) const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   inline unsigned int hashFunction() const {
-    return weightFundamentalCoordS.hashFunction();
+    return weightFundamentalCoordinates.hashFunction();
   }
   static inline unsigned int hashFunction(const Weight<Coefficient>& input) {
     return input.hashFunction();
@@ -309,16 +309,16 @@ public:
     if (this->owner != other.owner) {
       global.fatal << "Attempting to add weights with different owner algebras. " << global.fatal;
     }
-    this->weightFundamentalCoordS += other.weightFundamentalCoordS;
+    this->weightFundamentalCoordinates += other.weightFundamentalCoordinates;
   }
   void operator*=(const Coefficient& other) {
-    this->weightFundamentalCoordS *= other;
+    this->weightFundamentalCoordinates *= other;
   }
   inline bool operator==(const Weight<Coefficient>& other) const {
-    return this->weightFundamentalCoordS == other.weightFundamentalCoordS && this->owner == other.owner;
+    return this->weightFundamentalCoordinates == other.weightFundamentalCoordinates && this->owner == other.owner;
   }
   inline bool operator>(const Weight<Coefficient>& other) const {
-    return this->weightFundamentalCoordS > other.weightFundamentalCoordS;
+    return this->weightFundamentalCoordinates > other.weightFundamentalCoordinates;
   }
 };
 

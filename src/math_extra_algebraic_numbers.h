@@ -179,6 +179,11 @@ class AlgebraicNumber {
   bool operator>(const AlgebraicNumber& other) const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   std::string toStringNonInjected(FormatExpressions* theFormat = nullptr) const;
+  class Test{
+  public:
+    static bool all();
+    static bool constantValues();
+  };
 };
 
 // The algebraic closure of the rationals is

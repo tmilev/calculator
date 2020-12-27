@@ -336,7 +336,6 @@ bool CalculatorHTML::storeProblemDeadlines(
   QueryExact deadlineSchema;
   deadlineSchema.collection = DatabaseStrings::tableDeadlines;
   deadlineSchema.setLabelValue(DatabaseStrings::labelDeadlinesSchema, global.userDefault.deadlineSchema);
-  global.comments << "DEBUG: about to store: " << toStore.toStringHtml();
   QuerySet updateQuery = this->toJSONDeadlines(toStore);
   if (!Database::get().updateOne(deadlineSchema, updateQuery, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
@@ -2740,7 +2739,6 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->figureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("Time before after loading problem list");
-  outHeadPt2 << HtmlRoutines::getJavascriptMathjax("");
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("Time before execution");
   if (!this->prepareAndExecuteCommands(theInterpreter, &comments)) {
@@ -3798,9 +3796,6 @@ void CalculatorHTML::interpretTableOfContents(SyntacticElementHTML& inputOutput)
 void CalculatorHTML::interpretJavascripts(SyntacticElementHTML& inputOutput) {
   MacroRegisterFunctionWithName("CalculatorHTML::interpretJavascripts");
   std::string javascriptName = StringRoutines::stringTrimWhiteSpace(inputOutput.content);
-  if (javascriptName == "MathJax") {
-    inputOutput.interpretedCommand = HtmlRoutines::getJavascriptMathjax("");
-  }
 }
 
 int TopicElement::scoreButtonCounter = 0;

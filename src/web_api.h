@@ -258,9 +258,8 @@ public:
     const std::string& additionalEndTag = ""
   );
 
-  static const std::string& getMathQuillStyleSheeTWithTags();
-
   static const std::string& getJavascriptAceEditorScriptWithTags();
+  static const std::string getJavascriptEquationEditorWithTags(const std::string& baseFolder);
 
   static const std::string getCSSLinkLieAlgebrasAndCalculator(
     const std::string& relativeTo
@@ -269,11 +268,8 @@ public:
   static const std::string getJavascriptLinkGraphicsNDimensionsWithPanels(
     const std::string& relativeTo
   );
-  static std::string getJavascriptMathjax(const std::string& baseFolder);
   static const std::string& getJavascriptBrowserifier();
 
-  static const std::string& getJavascriptMathQuillDefaultWithTags();
-  static const std::string& getJavascriptMathQuillMatrixSupporTWithTags();
   static std::string getJavascriptVariable(const std::string& theVar);
 
   static std::string getMathDisplayStyle(

@@ -388,7 +388,7 @@ void Vectors<Coefficient>::chooseABasis() {
   Selection tempSel;
   for (int i = 0; i < this->size; i ++) {
     output.addOnTop(this->objects[i]);
-    if (output.getRankOfSpanOfElements(&tempMat, &tempSel) < output.size) {
+    if (output.getRankElementSpan(&tempMat, &tempSel) < output.size) {
       output.removeLastObject();
     }
   }
@@ -402,7 +402,7 @@ void Vectors<Coefficient>::beefUpWithEiToLinearlyIndependentBasis(int theDim) {
   if (this->size != 0 && theDim != this->getDimension()) {
     global.fatal << "Vector dimension is incorrect. " << global.fatal;
   }
-  int currentRank = this->getRankOfSpanOfElements(Buffer, BufferSel);
+  int currentRank = this->getRankElementSpan(Buffer, BufferSel);
   if (currentRank == theDim) {
     return;
   }
@@ -410,7 +410,7 @@ void Vectors<Coefficient>::beefUpWithEiToLinearlyIndependentBasis(int theDim) {
   for (int i = 0; i < theDim && currentRank < theDim; i ++) {
     theVect.makeEi(theDim, i);
     this->addOnTop(theVect);
-    int candidateRank = this->getRankOfSpanOfElements(Buffer, BufferSel);
+    int candidateRank = this->getRankElementSpan(Buffer, BufferSel);
     if (candidateRank > currentRank) {
       currentRank = candidateRank;
     } else {

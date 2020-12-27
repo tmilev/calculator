@@ -40,6 +40,15 @@ public:
 class ChevalleyGenerator {
 public:
   SemisimpleLieAlgebra* owner;
+  // generatorIndex = 0 stands for g_{- N} and all larger indices stand for the
+  // remaining generators in the Lie algebra basis:
+  // g_{- N}, ... g_{- 1}, h_1, ..., h_k, g_1, ..., g_N.
+  // Here h_1, ..., h_k are elements of the Cartan subalgebra, the elements
+  // g_{- N}, ..., g_{- 1} are the negative Chevalley generators,
+  // and g_1, ..., g_N are the positive.
+  // The generators are ordered in the standard order assumed in our system,
+  // i.e., in the graded lexicographic order with
+  // respect to the simple coordinates of the weights of the generators.
   int generatorIndex;
   ChevalleyGenerator(): owner(nullptr), generatorIndex(- 1) {
   }
@@ -1203,8 +1212,8 @@ public:
   );
   bool getEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDimension(List<Vectors<Coefficient> >& output) const;
   void getZeroEigenSpace(List<Vector<Coefficient> >& output) const {
-    Matrix<Coefficient> tempMat = *this;
-    tempMat.getZeroEigenSpaceModifyMe(output);
+    Matrix<Coefficient> matrixCopy = *this;
+    matrixCopy.getZeroEigenSpaceModifyMe(output);
   }
   void getZeroEigenSpaceModifyMe(List<Vector<Coefficient> >& output);
   void getEigenspaceModifyMe(const Coefficient &inputEigenValue, List<Vector<Coefficient> >& outputEigenspace) {
@@ -2177,24 +2186,27 @@ public:
   );
   template <class LinearCombinationTemplate>
   static int getRankIntersectionVectorSpaces(
-    List<LinearCombinationTemplate>& vectorSpace1,
-    List<LinearCombinationTemplate>& vectorSpace2,
+    const List<LinearCombinationTemplate>& left,
+    const List<LinearCombinationTemplate>& right,
     HashedList<TemplateMonomial>* seedMonomials = nullptr
   ) {
-    List<LinearCombinationTemplate> listCopy = vectorSpace1;
-    listCopy.addListOnTop(vectorSpace2);
-    return vectorSpace1.size + vectorSpace2.size -
-    LinearCombination<TemplateMonomial, Coefficient>::getRankOfSpanOfElements(listCopy, seedMonomials);
+    List<LinearCombinationTemplate> listCopy = left;
+    listCopy.addListOnTop(right);
+    int leftRank = LinearCombination::getRankElementSpan(left, seedMonomials);
+    int rightRank = LinearCombination::getRankElementSpan(right, seedMonomials);
+    return leftRank + rightRank -
+    LinearCombination<TemplateMonomial, Coefficient>::getRankElementSpan(listCopy, seedMonomials);
   }
   template <class LinearCombinationTemplate>
   static bool vectorSpacesIntersectionIsNonTrivial(
-    List<LinearCombinationTemplate>& vectorSpace1,
-    List<LinearCombinationTemplate>& vectorSpace2,
+    const List<LinearCombinationTemplate>& left,
+    const List<LinearCombinationTemplate>& right,
     HashedList<TemplateMonomial>* seedMonomials = nullptr
   ) {
-    return 0 != LinearCombination<TemplateMonomial, Coefficient>::getRankIntersectionVectorSpaces(
-      vectorSpace1, vectorSpace2, seedMonomials
+    int intersectionRank = LinearCombination<TemplateMonomial, Coefficient>::getRankIntersectionVectorSpaces(
+      left, right, seedMonomials
     );
+    return intersectionRank != 0;
   }
   template <class LinearCombinationTemplate>
   static bool linearSpanContains(
@@ -2241,8 +2253,8 @@ public:
     return true;
   }
   template <class LinearCombinationTemplate>
-  static int getRankOfSpanOfElements(
-    List<LinearCombinationTemplate>& theList,
+  static int getRankElementSpan(
+    const List<LinearCombinationTemplate>& theList,
     HashedList<TemplateMonomial>* seedMonomials = nullptr
   ) {
     List<LinearCombinationTemplate> listCopy = theList;

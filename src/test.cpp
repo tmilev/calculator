@@ -55,6 +55,7 @@ void Test::run() {
     Database::Test::all();
   }
   if (this->shouldTest(Test::Suites::basic)) {
+    AlgebraicNumber::Test::all();
     JSData::Test::all();
     Expression::Test::all();
     LargeIntegerUnsigned::Test::all();

@@ -6,10 +6,13 @@
  * Please don't require(...) any modules from this file.
  **/
 
-var PanelExpandable;
 var collectionGraphicsNDimensions = {};
 
-function GraphicsNDimensions(inputIdCanvas, inputIdInfo, inputIdHighlightInfo) {
+function GraphicsNDimensions(inputIdCanvas, inputIdInfo, inputIdHighlightInfo, PanelExpandable) {
+  this.PanelExpandable = PanelExpandable;
+  if (this.PanelExpandable === undefined) {
+    this.PanelExpandable = null;
+  }
   this.vectors = [];
   this.vectorProjections = [];
   this.drawOperations = [];
@@ -86,10 +89,10 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo, inputIdHighlightInfo) {
   this.textShift = [- 3, - 4];
 }
 
-GraphicsNDimensions.prototype.initVectors = function(inputVectors) {
+GraphicsNDimensions.prototype.initVectors = function (inputVectors) {
   this.vectors = inputVectors;
   this.vectorProjections = [];
-  for (var counterVector = 0; counterVector < this.vectors.length; counterVector ++) {
+  for (var counterVector = 0; counterVector < this.vectors.length; counterVector++) {
     this.vectorProjections.push([0, 0]);
   }
 }
@@ -101,7 +104,7 @@ function startProjectionPlaneUser(canvasId) {
 function toStringVector(vector) {
   var result = "";
   result += "(";
-  for (var i = 0; i < vector.length; i ++) {
+  for (var i = 0; i < vector.length; i++) {
     result += vector[i].toFixed(2);
     if (i !== vector.length - 1) {
       result += ", ";
@@ -112,7 +115,7 @@ function toStringVector(vector) {
 }
 
 /** @returns {string} */
-GraphicsNDimensions.prototype.getInfoHTML = function() {
+GraphicsNDimensions.prototype.getInfoHTML = function () {
   var result = "";
   result += `<br>Mouse position: ${toStringVector(this.mousePositionScreen)}`;
   result += `<br>Selected index: ${this.selectedBasisIndex}`;
@@ -130,13 +133,13 @@ GraphicsNDimensions.prototype.getInfoHTML = function() {
   result += "<br>The projection plane (drawn on the screen) is spanned by the following two vectors.\n";
   result += `<br>${toStringVector(this.screenBasis[0])}`;
   result += `<br>${toStringVector(this.screenBasis[1])}`;
-  for (var i = 0; i < this.basisCircles.length; i ++) {
+  for (var i = 0; i < this.basisCircles.length; i++) {
     result += `<br>${i}: ${toStringVector(this.basisCircles[i])}: ${toStringVector(this.projectionsBasisCircles[i])}`;
   }
   return result;
 }
 
-GraphicsNDimensions.prototype.writeInfo = function() {
+GraphicsNDimensions.prototype.writeInfo = function () {
   var info = this.getInfoHTML();
   var panelInfoElement = document.getElementById(this.idPlaneInfo);
   panelInfoElement.innerHTML = info;
@@ -145,9 +148,9 @@ GraphicsNDimensions.prototype.writeInfo = function() {
 GraphicsNDimensions.prototype.initInfo = function () {
   var infoHTML = "";
   infoHTML += "<div style = 'height:300px; overflow-y: scroll;'>";
-  for (var i = 0; i < 2; i ++) {
+  for (var i = 0; i < 2; i++) {
     this.idsBasis[i] = [];
-    for (var j = 0; j < this.dimension; j ++) {
+    for (var j = 0; j < this.dimension; j++) {
       this.idsBasis[i][j] = `${this.idCanvas}textEbasis_${i}_${j}`;
       infoHTML += `<textarea rows = "1" cols = "2" id = "${this.idsBasis[i][j]}"></textarea>`;
     }
@@ -159,10 +162,10 @@ GraphicsNDimensions.prototype.initInfo = function () {
   infoHTML += `<span id = '${this.idCanvas}snapShotLateXspan'></span>\n`;
   infoHTML += `<div id = '${this.idPlaneInfo}' class = 'panel'></div>`;
   infoHTML += `</div>`;
-  if (PanelExpandable === undefined) {
+  if (this.PanelExpandable === null) {
     document.getElementById(this.idInfo).innerHTML = infoHTML;
   } else {
-    this.panelInfo = new PanelExpandable(this.idInfo);
+    this.panelInfo = new this.PanelExpandable(this.idInfo);
     this.panelInfo.initialize(true);
     this.panelInfo.setPanelContent(infoHTML);
     this.panelInfo.doToggleContent();
@@ -170,14 +173,14 @@ GraphicsNDimensions.prototype.initInfo = function () {
   }
 }
 
-GraphicsNDimensions.prototype.snapShotLaTeX = function() {
+GraphicsNDimensions.prototype.snapShotLaTeX = function () {
   var textComponent = document.getElementById(`${this.idCanvas}snapShotLateXspan`);
   var result = "";
   result += `\\documentclass{article} \\usepackage{auto-pst-pdf}<br>`;
   result += `\n%\\usepackage{pst-plot}<br>\n\\begin{document}<br>\n`;
   result += `\\psset{xunit = 0.01cm, yunit = 0.01cm} <br>\n\\begin{pspicture}(0,0)(1,1)\n`;
   ComputeProjections();
-  for (var counterDrawOperation = 0; counterDrawOperation < this.drawOperations.length; counterDrawOperation ++) {
+  for (var counterDrawOperation = 0; counterDrawOperation < this.drawOperations.length; counterDrawOperation++) {
     result += this.drawOperations[counterDrawOperation].getLaTeXOperation();
   }
   result += "\\end{pspicture}<br>";
@@ -192,8 +195,8 @@ function setBilinearForm(idCanvas, row, column) {
 
 }
 
-GraphicsNDimensions.prototype.drawStandardEiBasis = function(color) {
-  for (var i = 0; i < this.dimension; i ++) {
+GraphicsNDimensions.prototype.drawStandardEiBasis = function (color) {
+  for (var i = 0; i < this.dimension; i++) {
     var eiVector = new Array(this.dimension);
     eiVector.fill(0);
     eiVector[i] = 1;
@@ -201,7 +204,7 @@ GraphicsNDimensions.prototype.drawStandardEiBasis = function(color) {
   }
 }
 
-GraphicsNDimensions.prototype.drawCircle = function(position, color, radius, frameId, frameIndex) {
+GraphicsNDimensions.prototype.drawCircle = function (position, color, radius, frameId, frameIndex) {
   if (radius === undefined) {
     radius = 3;
   }
@@ -210,44 +213,44 @@ GraphicsNDimensions.prototype.drawCircle = function(position, color, radius, fra
   }
   this.drawOperations.push(new DrawCircleAtVector(
     this.idCanvas, {
-      location: position,
-      colorFill: color,
-      radius: radius,
-      frameId: frameId,
-      frameIndex: frameIndex
+    location: position,
+    colorFill: color,
+    radius: radius,
+    frameId: frameId,
+    frameIndex: frameIndex
   }));
 }
 
-GraphicsNDimensions.prototype.drawLine = function(left, right, color) {
+GraphicsNDimensions.prototype.drawLine = function (left, right, color) {
   if (color === undefined) {
     color = "black";
   }
   this.drawOperations.push(new DrawSegmentBetweenTwoVectors(
     this.idCanvas, {
-      left: left,
-      right: right,
-      lineWidth: 1,
-      colorLine: color
-    }
+    left: left,
+    right: right,
+    lineWidth: 1,
+    colorLine: color
+  }
   ));
 }
 
-GraphicsNDimensions.prototype.drawPath = function(points, color, lineWidth, frameId, frameIndex) {
+GraphicsNDimensions.prototype.drawPath = function (points, color, lineWidth, frameId, frameIndex) {
   if (color === undefined) {
     color = "black";
   }
   this.drawOperations.push(new DrawPath(
     this.idCanvas, {
-      points: points,
-      lineWidth: lineWidth,
-      colorLine: color,
-      frameId: frameId,
-      frameIndex: frameIndex
-    }
+    points: points,
+    lineWidth: lineWidth,
+    colorLine: color,
+    frameId: frameId,
+    frameIndex: frameIndex
+  }
   ));
 }
 
-GraphicsNDimensions.prototype.drawHighlightGroup = function(points, labels, color, radius) {
+GraphicsNDimensions.prototype.drawHighlightGroup = function (points, labels, color, radius) {
   if (color === undefined) {
     color = "black";
   }
@@ -256,25 +259,25 @@ GraphicsNDimensions.prototype.drawHighlightGroup = function(points, labels, colo
   }
   this.drawOperations.push(new DrawHighlights(
     this.idCanvas, {
-      vectors: points,
-      indexInOperations: this.drawOperations.length,
-      labels: labels,
-      color: color,
-      radius: radius
-    }
+    vectors: points,
+    indexInOperations: this.drawOperations.length,
+    labels: labels,
+    color: color,
+    radius: radius
+  }
   ));
 }
 
-GraphicsNDimensions.prototype.drawText = function(location, text, color) {
+GraphicsNDimensions.prototype.drawText = function (location, text, color) {
   if (color === undefined) {
     color = "black";
   }
   this.drawOperations.push(new DrawTextAtVector(
     this.idCanvas, {
-      location: location,
-      text: text,
-      colorFill: color
-    }
+    location: location,
+    text: text,
+    colorFill: color
+  }
   ));
 }
 
@@ -284,8 +287,8 @@ GraphicsNDimensions.prototype.getBilinearFormInput = function () {
   result += "gives the scalar product of e_i and e_j. If you enter a degenerate or non-positive definite ";
   result += "symmetric bilinear form the javascript might crash. You are expected to enter ";
   result += "a symmetric strictly positive definite matrix. <br> \n";
-  for (var counterRow = 0; counterRow < this.theBilinearForm.length; counterRow ++) {
-    for (var counterColumn = 0; counterColumn < this.theBilinearForm[counterRow].NumCols; counterColumn ++) {
+  for (var counterRow = 0; counterRow < this.theBilinearForm.length; counterRow++) {
+    for (var counterColumn = 0; counterColumn < this.theBilinearForm[counterRow].NumCols; counterColumn++) {
       var idBilinearForm = `${this.idCanvas}textBilinearForm_${i}_${j}`;
       result += `<textarea rows = "1" cols = "2" id = "${idBilinearForm}" `;
       result += `onChange = "setBilinearForm('this.idCanvas', ${counterRow}, ${counterColumn})">`;
@@ -314,9 +317,9 @@ GraphicsNDimensions.prototype.startProjectionPlaneUser = function () {
   this.animationBasisChange.frameCount = 0;
   this.animationBasisChange.screenStart[0] = this.screenBasis[0].slice();
   this.animationBasisChange.screenStart[1] = this.screenBasis[1].slice();
-  for (var i = 0; i < 2; i ++) {
+  for (var i = 0; i < 2; i++) {
     this.animationBasisChange.screenGoal[i] = [];
-    for (var counterDimension = 0; counterDimension < this.dimension; counterDimension ++) {
+    for (var counterDimension = 0; counterDimension < this.dimension; counterDimension++) {
       var coordinate = document.getElementById(this.idsBasis[i][counterDimension]).value;
       this.animationBasisChange.screenGoal[i][counterDimension] = Number(coordinate);
     }
@@ -324,7 +327,7 @@ GraphicsNDimensions.prototype.startProjectionPlaneUser = function () {
   this.animateChangeProjectionPlaneUser();
 }
 
-GraphicsNDimensions.prototype.registerFrameIndex = function(frameIndex) {
+GraphicsNDimensions.prototype.registerFrameIndex = function (frameIndex) {
   if (typeof frameIndex !== "number") {
     return;
   }
@@ -333,8 +336,8 @@ GraphicsNDimensions.prototype.registerFrameIndex = function(frameIndex) {
   }
 }
 
-GraphicsNDimensions.prototype.animateChangeProjectionPlaneUser = function() {
-  this.animationBasisChange.frameCount ++;
+GraphicsNDimensions.prototype.animateChangeProjectionPlaneUser = function () {
+  this.animationBasisChange.frameCount++;
   var frameCount = this.animationBasisChange.frameCount;
   var maxFrameCount = this.animationBasisChange.numberOfFrames;
   if (frameCount > maxFrameCount) {
@@ -342,7 +345,7 @@ GraphicsNDimensions.prototype.animateChangeProjectionPlaneUser = function() {
   }
   var screenStart = this.animationBasisChange.screenStart;
   var screenGoal = this.animationBasisChange.screenGoal;
-  for (var i = 0; i < this.dimension; i ++) {
+  for (var i = 0; i < this.dimension; i++) {
     this.screenBasis[0][i] = screenGoal[0][i] * (frameCount / maxFrameCount) + screenStart[0][i] * (1 - frameCount / maxFrameCount);
     this.screenBasis[1][i] = screenGoal[1][i] * (frameCount / maxFrameCount) + screenStart[1][i] * (1 - frameCount / maxFrameCount);
   }
@@ -366,9 +369,9 @@ function DrawHighlights(inputOwnerId, inputData) {
 DrawHighlights.prototype.computeProjections = function () {
   var owner = collectionGraphicsNDimensions[this.ownerId];
   if (this.vectorProjections.length !== this.vectors.length) {
-    this.vectorProjecions = new Array (this.vectors.length);
+    this.vectorProjecions = new Array(this.vectors.length);
   }
-  for (var i = 0; i < this.vectors.length; i ++) {
+  for (var i = 0; i < this.vectors.length; i++) {
     if (this.vectorProjections[i] === undefined || this.vectorProjections[i] === null) {
       this.vectorProjections[i] = [];
     }
@@ -384,7 +387,7 @@ DrawHighlights.prototype.drawNoFinish = function () {
   }
   var currentIndices = owner.currentHighlightIndices[this.indexInOperations];
   var nextLine = [];
-  for (var i = 0; i < this.labels.length; i ++) {
+  for (var i = 0; i < this.labels.length; i++) {
     if (i in currentIndices) {
       nextLine.push(`<b>${this.labels[i]}</b>`);
     } else {
@@ -396,7 +399,7 @@ DrawHighlights.prototype.drawNoFinish = function () {
   this.computeProjections();
   var canvas = owner.canvas;
   canvas.strokeStyle = this.color;
-  for (var i = 0; i < this.vectors.length; i ++) {
+  for (var i = 0; i < this.vectors.length; i++) {
     canvas.beginPath();
     canvas.arc(
       this.vectorProjections[i][0],
@@ -420,7 +423,7 @@ function DrawPath(inputOwnerId, inputData) {
   }
 }
 
-DrawPath.prototype.drawNoFinish = function() {
+DrawPath.prototype.drawNoFinish = function () {
   var owner = collectionGraphicsNDimensions[this.ownerId];
   var canvas = owner.canvas;
   canvas.beginPath();
@@ -429,7 +432,7 @@ DrawPath.prototype.drawNoFinish = function() {
   var vector = [];
   owner.computeScreenCoordinates(this.points[0], vector);
   canvas.moveTo(vector[0], vector[1]);
-  for (var counterPoints = 1; counterPoints < this.points.length; counterPoints ++) {
+  for (var counterPoints = 1; counterPoints < this.points.length; counterPoints++) {
     owner.computeScreenCoordinates(this.points[counterPoints], vector);
     canvas.lineTo(vector[0], vector[1]);
   }
@@ -444,7 +447,7 @@ function DrawSegmentBetweenTwoVectors(inputOwnerId, inputData) {
   this.colorLine = inputData.colorLine;
 }
 
-DrawSegmentBetweenTwoVectors.prototype.drawNoFinish = function() {
+DrawSegmentBetweenTwoVectors.prototype.drawNoFinish = function () {
   var owner = collectionGraphicsNDimensions[this.ownerId];
   var canvas = owner.canvas;
   canvas.beginPath();
@@ -453,7 +456,7 @@ DrawSegmentBetweenTwoVectors.prototype.drawNoFinish = function() {
   var screenCoordinatesLeft = [];
   var screenCoordinatesRight = [];
   owner.computeScreenCoordinates(this.left, screenCoordinatesLeft);
-  owner.computeScreenCoordinates(this.right,screenCoordinatesRight);
+  owner.computeScreenCoordinates(this.right, screenCoordinatesRight);
   canvas.moveTo(screenCoordinatesLeft[0], screenCoordinatesLeft[1]);
   canvas.lineTo(screenCoordinatesRight[0], screenCoordinatesRight[1]);
   canvas.stroke();
@@ -475,7 +478,7 @@ DrawFilledShape.prototype.drawNoFinish = function () {
   var currentPoint = [];
   owner.computeScreenCoordinates(this.points[0], currentPoint);
   canvas.moveTo(currentPoint[0], currentPoint[1]);
-  for (var counterPoint = 1; counterPoint < this.points.length; counterPoint ++) {
+  for (var counterPoint = 1; counterPoint < this.points.length; counterPoint++) {
     owner.computeAllScreenCoordinates(this.points[counterPoint], currentPoint);
     canvas.lineTo(currentPoint[0], currentPoint[1]);
   }
@@ -497,7 +500,7 @@ function DrawCircleAtVector(inputOwnerId, inputData) {
   }
 }
 
-DrawCircleAtVector.prototype.drawNoFinish = function() {
+DrawCircleAtVector.prototype.drawNoFinish = function () {
   var owner = collectionGraphicsNDimensions[this.ownerId];
   var canvas = owner.canvas;
   canvas.strokeStyle = this.colorFill;
@@ -521,7 +524,7 @@ function DrawTextAtVector(inputOwnerId, inputData) {
   this.colorFill = inputData.colorFill;
 }
 
-DrawTextAtVector.prototype.drawNoFinish = function() {
+DrawTextAtVector.prototype.drawNoFinish = function () {
   var owner = collectionGraphicsNDimensions[this.ownerId];
   var canvas = owner.canvas;
   canvas.strokeStyle = this.colorFill;
@@ -529,7 +532,7 @@ DrawTextAtVector.prototype.drawNoFinish = function() {
   canvas.strokeText(this.text, this.locationScreen[0] + owner.textShift[0], this.locationScreen[1] + owner.textShift[1]);
 }
 
-GraphicsNDimensions.prototype.drawAll = function() {
+GraphicsNDimensions.prototype.drawAll = function () {
   if (this.animationBasisChange.frameStarted) {
     return;
   }
@@ -542,7 +545,7 @@ GraphicsNDimensions.prototype.drawAll = function() {
   this.canvas.clearRect(0, 0, this.widthHTML, this.heightHTML);
   this.writeInfo();
   this.highlightInfoContent = [];
-  for (var counterOperation = 0; counterOperation < this.drawOperations.length; counterOperation ++) {
+  for (var counterOperation = 0; counterOperation < this.drawOperations.length; counterOperation++) {
     var currentOperation = this.drawOperations[counterOperation];
     if (currentOperation.frameId !== undefined && currentOperation.frameId !== null) {
       if (currentOperation.frameIndex !== this.animation.currentFrameIndex) {
@@ -562,7 +565,7 @@ GraphicsNDimensions.prototype.drawAll = function() {
 
 GraphicsNDimensions.prototype.makeStandardBilinearForm = function () {
   this.theBilinearForm = new Array(this.dimension);
-  for (var i = 0; i < this.theBilinearForm.length; i ++) {
+  for (var i = 0; i < this.theBilinearForm.length; i++) {
     this.theBilinearForm[i] = newArray(this.dimension);
     this.theBilinearForm[i].fill(0, 0, this.dimension);
     this.theBilinearForm[i][i] = 1;
@@ -571,7 +574,7 @@ GraphicsNDimensions.prototype.makeStandardBilinearForm = function () {
 
 GraphicsNDimensions.prototype.makeEiBasis = function () {
   this.eiBasis = new Array(this.dimension);
-  for (var i = 0; i < this.eiBasis.length; i ++) {
+  for (var i = 0; i < this.eiBasis.length; i++) {
     this.eiBasis[i] = new Array(this.dimension);
     this.eiBasis[i].fill(0, 0, this.dimension);
     this.eiBasis[i][i] = 1;
@@ -581,7 +584,7 @@ GraphicsNDimensions.prototype.makeEiBasis = function () {
 GraphicsNDimensions.prototype.makeBasisCircles = function () {
   this.basisCircles = new Array(this.dimension);
   this.projectionsBasisCircles = new Array(this.dimension);
-  for (var i = 0; i < this.basisCircles.length; i ++) {
+  for (var i = 0; i < this.basisCircles.length; i++) {
     this.basisCircles[i] = new Array(this.dimension);
     this.basisCircles[i].fill(0, 0, this.dimension);
     this.basisCircles[i][i] = 1;
@@ -599,7 +602,7 @@ GraphicsNDimensions.prototype.init = function () {
     this.makeBasisCircles();
   } else {
     this.projectionsBasisCircles = new Array(this.basisCircles.length);
-    for (var i = 0; i < this.basisCircles.length; i ++) {
+    for (var i = 0; i < this.basisCircles.length; i++) {
       this.projectionsBasisCircles[i] = new Array(2);
       this.projectionsBasisCircles[i].fill(0, 0, 2);
     }
@@ -612,7 +615,7 @@ GraphicsNDimensions.prototype.init = function () {
   this.canvas = theDiv.getContext("2d");
 }
 
-GraphicsNDimensions.prototype.pointsAreWithinClickTolerance = function(x1, y1, x2, y2) {
+GraphicsNDimensions.prototype.pointsAreWithinClickTolerance = function (x1, y1, x2, y2) {
   if (
     Math.abs(x1 - x2) > this.clickTolerance ||
     Math.abs(y1 - y2) > this.clickTolerance
@@ -622,38 +625,38 @@ GraphicsNDimensions.prototype.pointsAreWithinClickTolerance = function(x1, y1, x
   return true;
 }
 
-GraphicsNDimensions.prototype.scaleToUnitLength = function(output) {
-  var scale =  1 / Math.sqrt(this.scalarProduct(output, output));
+GraphicsNDimensions.prototype.scaleToUnitLength = function (output) {
+  var scale = 1 / Math.sqrt(this.scalarProduct(output, output));
   multiplyVectorByScalar(output, scale)
 }
 
-GraphicsNDimensions.prototype.scalarProduct = function(left, right) {
+GraphicsNDimensions.prototype.scalarProduct = function (left, right) {
 
 }
 
 function multiplyVectorByScalar(vector, scalar) {
-  for (var counterDimension = 0; counterDimension < vector.length; counterDimension ++) {
+  for (var counterDimension = 0; counterDimension < vector.length; counterDimension++) {
     vector[counterDimension] *= scalar;
   }
 }
 
 function addVectorTimesScalar(vector, other, scalar) {
-  for (var counterDimension = 0; counterDimension < vector.length; counterDimension ++) {
+  for (var counterDimension = 0; counterDimension < vector.length; counterDimension++) {
     vector[counterDimension] += other[counterDimension] * scalar;
   }
 }
 
-GraphicsNDimensions.prototype.scalarProduct = function(vector1, vector2) {
+GraphicsNDimensions.prototype.scalarProduct = function (vector1, vector2) {
   var result = 0;
-  for (var i = 0; i < this.dimension; i ++) {
-    for (var j = 0; j < this.dimension; j ++) {
+  for (var i = 0; i < this.dimension; i++) {
+    for (var j = 0; j < this.dimension; j++) {
       result += vector1[i] * vector2[j] * this.theBilinearForm[i][j];
     }
   }
   return result;
 }
 
-GraphicsNDimensions.prototype.makeScreenBasisOrthonormal = function() {
+GraphicsNDimensions.prototype.makeScreenBasisOrthonormal = function () {
   addVectorTimesScalar(
     this.screenBasis[1],
     this.screenBasis[0],
@@ -664,7 +667,7 @@ GraphicsNDimensions.prototype.makeScreenBasisOrthonormal = function() {
   this.scaleToUnitLength(this.screenBasis[1]);
 }
 
-GraphicsNDimensions.prototype.computeScreenCoordinates = function(input, output) {
+GraphicsNDimensions.prototype.computeScreenCoordinates = function (input, output) {
   output[0] = this.shiftScreenCoordinates[0] + this.graphicsUnit * this.scalarProduct(this.screenBasis[0], input);
   output[1] = this.shiftScreenCoordinates[1] + this.graphicsUnit * this.scalarProduct(this.screenBasis[1], input);
 }
@@ -672,19 +675,19 @@ GraphicsNDimensions.prototype.computeScreenCoordinates = function(input, output)
 GraphicsNDimensions.prototype.computeProjectionsEiBasis = function () {
   if (this.projectionsEiVectors.length != this.dimension) {
     this.projectionsEiVectors[i] = new Array(this.dimension);
-    for (var i = 0; i < this.dimension; i ++) {
+    for (var i = 0; i < this.dimension; i++) {
       this.projectionsEiVectors[i] = new Array(this.dimension);
     }
   }
-  for (var i = 0; i < this.eiBasis.length; i ++) {
+  for (var i = 0; i < this.eiBasis.length; i++) {
     this.computeScreenCoordinates(this.eiBasis[i], this.projectionsEiVectors[i]);
   }
 }
 
-GraphicsNDimensions.prototype.ComputeProjectionsSpecialVectors = function() {
-  for (var i = 0; i < this.basisCircles.length; i ++) {
+GraphicsNDimensions.prototype.ComputeProjectionsSpecialVectors = function () {
+  for (var i = 0; i < this.basisCircles.length; i++) {
     if (this.projectionsBasisCircles[i] === null || this.projectionsBasisCircles[i] === undefined) {
-        this.projectionsBasisCircles[i] = [];
+      this.projectionsBasisCircles[i] = [];
     }
     this.computeScreenCoordinates(this.basisCircles[i], this.projectionsBasisCircles[i]);
   }
@@ -708,7 +711,7 @@ function getAngleScreenChange(newX, newY, oldX, oldY) {
   return result;
 }
 
-GraphicsNDimensions.prototype.rotateInPlane = function(
+GraphicsNDimensions.prototype.rotateInPlane = function (
   inputOutput, orthonormalBasis1, orthonormalBasis2, angle
 ) {
   var result = inputOutput.slice();
@@ -728,12 +731,12 @@ GraphicsNDimensions.prototype.rotateInPlane = function(
     scalarProductWithBasis1 * Math.sin(angle) +
     scalarProductWithBasis2 * Math.cos(angle)
   );
-  for (var i = 0; i < inputOutput.length; i ++) {
+  for (var i = 0; i < inputOutput.length; i++) {
     inputOutput[i] = result[i];
   }
 }
 
-GraphicsNDimensions.prototype.changeBasis = function() {
+GraphicsNDimensions.prototype.changeBasis = function () {
   var newX = this.mousePositionScreen[0] - this.shiftScreenCoordinates[0];
   var newY = this.mousePositionScreen[1] - this.shiftScreenCoordinates[1];
   if (newX == 0 && newY == 0) {
@@ -781,7 +784,7 @@ GraphicsNDimensions.prototype.changeBasis = function() {
   //  xCuttingNew *= - 1;
   //}
   this.angleCuttingChange = - Math.atan2(yCuttingNew, xCuttingNew) + Math.atan2(yCuttingOld, xCuttingOld);
-  for (var i = 0; i < 5; i ++) {
+  for (var i = 0; i < 5; i++) {
     if (this.angleCuttingChange <= - Math.PI) {
       this.angleCuttingChange += 2 * Math.PI;
     }
@@ -806,27 +809,27 @@ GraphicsNDimensions.prototype.changeBasis = function() {
   this.makeScreenBasisOrthonormal();
 }
 
-GraphicsNDimensions.prototype.computePosXPosY = function(event) {
+GraphicsNDimensions.prototype.computePosXPosY = function (event) {
   this.mousePositionScreen[0] = event.clientX;
   this.mousePositionScreen[1] = event.clientY;
   var rect = this.canvasContainer.getBoundingClientRect();
   this.mousePositionScreen[0] -= rect.left;
   this.mousePositionScreen[1] -= rect.top;
-//  while (thePointer) {
-//    this.mousePositionScreen[0] -= thePointer.offsetLeft;
-//    if (typeof thePointer.scrollLeft === "number") {
-//      this.mousePositionScreen[0] += thePointer.scrollLeft;
-//    }
-//    this.mousePositionScreen[1] -= thePointer.offsetTop;
-//    if (typeof thePointer.scrollTop === "number") {
-//      this.mousePositionScreen[1] += thePointer.scrollTop;
-//    }
-//    //thePointer = thePointer.offsetParent;
-//    thePointer = thePointer.parentElement;
-//  }
+  //  while (thePointer) {
+  //    this.mousePositionScreen[0] -= thePointer.offsetLeft;
+  //    if (typeof thePointer.scrollLeft === "number") {
+  //      this.mousePositionScreen[0] += thePointer.scrollLeft;
+  //    }
+  //    this.mousePositionScreen[1] -= thePointer.offsetTop;
+  //    if (typeof thePointer.scrollTop === "number") {
+  //      this.mousePositionScreen[1] += thePointer.scrollTop;
+  //    }
+  //    //thePointer = thePointer.offsetParent;
+  //    thePointer = thePointer.parentElement;
+  //  }
 }
 
-GraphicsNDimensions.prototype.releaseMouse = function(event) {
+GraphicsNDimensions.prototype.releaseMouse = function (event) {
   this.selectedBasisIndex = - 1;
 }
 
@@ -841,7 +844,7 @@ GraphicsNDimensions.prototype.selectIndex = function (index) {
   this.screenBasisAtSelection[1] = this.screenBasis[1].slice();
 
   var epsilon = 0.0000001;
-  for (var round = 0; round < this.dimension + 1; round ++) {
+  for (var round = 0; round < this.dimension + 1; round++) {
     var selectedVector = this.basisCircles[this.selectedBasisIndex].slice();
     if (round > 0) {
       selectedVector[(round + 1) % this.dimension] += 0.01;
@@ -868,7 +871,7 @@ GraphicsNDimensions.prototype.selectIndex = function (index) {
   }
 }
 
-GraphicsNDimensions.prototype.clickCanvas = function(event) {
+GraphicsNDimensions.prototype.clickCanvas = function (event) {
   this.computePosXPosY(event);
   this.mousePositionScreenClicked[0] = this.mousePositionScreen[0];
   this.mousePositionScreenClicked[1] = this.mousePositionScreen[1];
@@ -884,7 +887,7 @@ GraphicsNDimensions.prototype.clickCanvas = function(event) {
     this.shiftScreenCoordinatesClicked[0] = this.shiftScreenCoordinates[0];
     this.shiftScreenCoordinatesClicked[1] = this.shiftScreenCoordinates[1];
   }
-  for (var i = 0; i < this.basisCircles.length; i ++) {
+  for (var i = 0; i < this.basisCircles.length; i++) {
     if (this.pointsAreWithinClickTolerance(
       this.mousePositionScreenClicked[0], this.mousePositionScreenClicked[1],
       this.projectionsBasisCircles[i][0], this.projectionsBasisCircles[i][1]
@@ -894,16 +897,16 @@ GraphicsNDimensions.prototype.clickCanvas = function(event) {
   }
 }
 
-GraphicsNDimensions.prototype.computeHighlightedIndex = function() {
+GraphicsNDimensions.prototype.computeHighlightedIndex = function () {
   var oldSelected = this.selectedHighlightIndex;
   this.selectedHighlightIndex = - 1;
   this.currentHighlightIndices = {};
-  for (var i = 0; i < this.indicesHighlightOperations.length; i ++) {
+  for (var i = 0; i < this.indicesHighlightOperations.length; i++) {
     var currentIndex = this.indicesHighlightOperations[i];
     var currentHighlight = this.drawOperations[currentIndex];
     currentHighlight.computeProjections();
     var currentVectors = currentHighlight.vectorProjections;
-    for (var j = 0; j < currentVectors.length; j ++) {
+    for (var j = 0; j < currentVectors.length; j++) {
       if (this.pointsAreWithinClickTolerance(
         this.mousePositionScreen[0], this.mousePositionScreen[1], currentVectors[j][0], currentVectors[j][1]
       )) {
@@ -918,7 +921,7 @@ GraphicsNDimensions.prototype.computeHighlightedIndex = function() {
   return oldSelected !== this.selectedHighlightIndex;
 }
 
-GraphicsNDimensions.prototype.mouseMoveRedraw = function(event) {
+GraphicsNDimensions.prototype.mouseMoveRedraw = function (event) {
   this.computePosXPosY(event);
   this.writeInfo();
   //this.processMousePosition(posx, - posy);
@@ -946,7 +949,7 @@ GraphicsNDimensions.prototype.mouseMoveRedraw = function(event) {
   }
 }
 
-GraphicsNDimensions.prototype.mouseHandleWheel = function(event) {
+GraphicsNDimensions.prototype.mouseHandleWheel = function (event) {
   event = event ? event : window.event;
   event.preventDefault();
   event.stopPropagation();
@@ -972,69 +975,69 @@ function testA3(idCanvas, idSpanInformation) {
   var theA3 = new GraphicsNDimensions(idCanvas, idSpanInformation);
   theA3.dimension = 3;
   theA3.theBilinearForm = [
-    [ 2, -1,  0],
-    [-1,  2, -1],
-    [ 0, -1,  2]
+    [2, -1, 0],
+    [-1, 2, -1],
+    [0, -1, 2]
   ];
   theA3.screenBasis = [
     [0.707107, 0.707107, 0],
     [0, 0.707107, 0.707107]
   ];
   var labeledVectors = [
-    [-1,-1,-1],
-    [ 0,-1,-1],
-    [-1,-1, 0],
-    [ 0, 0,-1],
-    [ 0,-1, 0],
+    [-1, -1, -1],
+    [0, -1, -1],
+    [-1, -1, 0],
+    [0, 0, -1],
+    [0, -1, 0],
     [-1, 0, 0],
-    [ 1, 0, 0],
-    [ 0, 1, 0],
-    [ 0, 0, 1],
-    [ 1, 1, 0],
-    [ 0, 1, 1],
-    [ 1, 1, 1],
+    [1, 0, 0],
+    [0, 1, 0],
+    [0, 0, 1],
+    [1, 1, 0],
+    [0, 1, 1],
+    [1, 1, 1],
   ];
-  var segments =    [
-    [[0 , - 1, - 1], [ 1,  0,  0]],
-    [[0 , - 1, - 1], [-1, -1, -1]],
-    [[0 , - 1, - 1], [ 0,  0, -1]],
-    [[0 , - 1, - 1], [ 0, -1,  0]],
-    [[-1,  -1,   0], [-1,  0,  0]],
-    [[-1,  -1,   0], [ 0,  0,  1]],
-    [[-1,  -1,   0], [-1, -1, -1]],
-    [[-1,  -1,   0], [ 0, -1,  0]],
-    [[1 ,   1,   0], [ 1,  0,  0]],
-    [[1 ,   1,   0], [ 0,  0, -1]],
-    [[1 ,   1,   0], [ 1,  1,  1]],
-    [[1 ,   1,   0], [ 0,  1,  0]],
-    [[0 ,   1,   1], [-1,  0,  0]],
-    [[0 ,   1,   1], [ 0,  0,  1]],
-    [[0 ,   1,   1], [ 1,  1,  1]],
-    [[0 ,   1,   1], [ 0,  1,  0]],
-    [[-1,   0,   0], [-1, -1, -1]],
-    [[-1,   0,   0], [ 0,  1,  0]],
-    [[1 ,   0,   0], [ 1,  1,  1]],
-    [[1 ,   0,   0], [ 0, -1,  0]],
-    [[0 ,   0,   1], [ 1,  1,  1]],
-    [[0 ,   0,   1], [ 0, -1,  0]],
-    [[-1,  -1,  -1], [ 0,  0, -1]],
-    [[0 ,   0,  -1], [ 0,  1,  0]]
+  var segments = [
+    [[0, - 1, - 1], [1, 0, 0]],
+    [[0, - 1, - 1], [-1, -1, -1]],
+    [[0, - 1, - 1], [0, 0, -1]],
+    [[0, - 1, - 1], [0, -1, 0]],
+    [[-1, -1, 0], [-1, 0, 0]],
+    [[-1, -1, 0], [0, 0, 1]],
+    [[-1, -1, 0], [-1, -1, -1]],
+    [[-1, -1, 0], [0, -1, 0]],
+    [[1, 1, 0], [1, 0, 0]],
+    [[1, 1, 0], [0, 0, -1]],
+    [[1, 1, 0], [1, 1, 1]],
+    [[1, 1, 0], [0, 1, 0]],
+    [[0, 1, 1], [-1, 0, 0]],
+    [[0, 1, 1], [0, 0, 1]],
+    [[0, 1, 1], [1, 1, 1]],
+    [[0, 1, 1], [0, 1, 0]],
+    [[-1, 0, 0], [-1, -1, -1]],
+    [[-1, 0, 0], [0, 1, 0]],
+    [[1, 0, 0], [1, 1, 1]],
+    [[1, 0, 0], [0, -1, 0]],
+    [[0, 0, 1], [1, 1, 1]],
+    [[0, 0, 1], [0, -1, 0]],
+    [[-1, -1, -1], [0, 0, -1]],
+    [[0, 0, -1], [0, 1, 0]]
   ];
   theA3.drawStandardEiBasis("red");
-  theA3.drawText([1,0,0], "(1, 0, 0)");
-  for (var counterLabel = 0; counterLabel < labeledVectors.length; counterLabel ++) {
+  theA3.drawText([1, 0, 0], "(1, 0, 0)");
+  for (var counterLabel = 0; counterLabel < labeledVectors.length; counterLabel++) {
     theA3.drawLine([0, 0, 0], labeledVectors[counterLabel], "green");
     //theA3.drawText(labeledVectors[counterLabel], `[${labeledVectors.join(', ')}]`);
     //theA3.drawCircle(labeledVectors[counterLabel], "red");
   }
-  for (var counterSegment = 0; counterSegment < segments.length; counterSegment ++) {
+  for (var counterSegment = 0; counterSegment < segments.length; counterSegment++) {
     theA3.drawLine(segments[counterSegment][0], segments[counterSegment][1], "blue");
   }
   theA3.graphicsUnit = 150;
   theA3.drawAll();
 }
 
-GraphicsNDimensions.prototype.initFromObject = function(input) {
+GraphicsNDimensions.prototype.initFromObject = function (input) {
   this.dimension = input.dimension;
   this.theBilinearForm = input.bilinearForm;
   this.screenBasis = input.screenBasis;
@@ -1042,7 +1045,7 @@ GraphicsNDimensions.prototype.initFromObject = function(input) {
   if (input.frameLength !== undefined && input.frameLength !== null) {
     this.animation.frameLength = input.frameLength;
   }
-  for (var i = 0; i < input.drawObjects.length; i ++) {
+  for (var i = 0; i < input.drawObjects.length; i++) {
     var currentOperation = input.drawObjects[i];
     if (currentOperation.operation === "circleAtVector") {
       this.drawCircle(
@@ -1090,7 +1093,7 @@ GraphicsNDimensions.prototype.initFromObject = function(input) {
 
 GraphicsNDimensions.prototype.animate = function () {
   clearTimeout(this.animation.timeoutHandle);
-  this.animation.currentFrameIndex ++;
+  this.animation.currentFrameIndex++;
   if (this.animation.currentFrameIndex < 0 || this.animation.currentFrameIndex > this.animation.numberOfFrames) {
     this.animation.currentFrameIndex = 0;
   }
@@ -1100,10 +1103,10 @@ GraphicsNDimensions.prototype.animate = function () {
 
 function createGraphicsFromObject(input) {
   if (input.idCanvas === undefined || input.idCanvas === null) {
-    throw("idCanvas missing.");
+    throw ("idCanvas missing.");
   }
   if (input.idSpanInformation === undefined || input.idSpanInformation === null) {
-    throw("idSpanInformation missing.");
+    throw ("idSpanInformation missing.");
   }
   var theObject = new GraphicsNDimensions(input.idCanvas, input.idSpanInformation, input.idHighlightInformation);
   theObject.initFromObject(input);
@@ -1113,43 +1116,43 @@ function testA4(idCanvas, idSpanInformation) {
   var theA4 = new GraphicsNDimensions(idCanvas, idSpanInformation);
   theA4.dimension = 4;
   theA4.theBilinearForm = [
-    [ 2, -1,  0,  0],
-    [-1,  2, -1,  0],
-    [0,  -1,  2, -1],
-    [0,   0, -1,  2]
+    [2, -1, 0, 0],
+    [-1, 2, -1, 0],
+    [0, -1, 2, -1],
+    [0, 0, -1, 2]
   ];
   theA4.screenBasis = [
     [-0.195, 0.316, 0.828, 0.632],
-    [ 0.602, 0.973, 0.602, 0]
+    [0.602, 0.973, 0.602, 0]
   ];
   var labeledVectors = [
-    [ 1, 0, 0, 0],
-    [ 0, 1, 0, 0],
-    [ 0, 0, 1, 0],
-    [ 0, 0, 0, 1],
-    [ 1, 1, 0, 0],
-    [ 0, 1, 1, 0],
-    [ 0, 0, 1, 1],
-    [ 1, 1, 1, 0],
-    [ 0, 1, 1, 1],
-    [ 1, 1, 1, 1],
+    [1, 0, 0, 0],
+    [0, 1, 0, 0],
+    [0, 0, 1, 0],
+    [0, 0, 0, 1],
+    [1, 1, 0, 0],
+    [0, 1, 1, 0],
+    [0, 0, 1, 1],
+    [1, 1, 1, 0],
+    [0, 1, 1, 1],
+    [1, 1, 1, 1],
   ];
   var numberOfPositiveVectors = labeledVectors.length;
-  for (var counter = 0; counter < numberOfPositiveVectors; counter ++) {
+  for (var counter = 0; counter < numberOfPositiveVectors; counter++) {
     var theVector = labeledVectors[counter].slice();
     multiplyVectorByScalar(theVector, - 1);
     labeledVectors.push(theVector);
   }
   var segments = [];
-  for (var counter = 0; counter < labeledVectors.length; counter ++) {
+  for (var counter = 0; counter < labeledVectors.length; counter++) {
     var minDistance = 10;
-    for (var secondCounter = counter + 1; secondCounter < labeledVectors.length; secondCounter ++) {
+    for (var secondCounter = counter + 1; secondCounter < labeledVectors.length; secondCounter++) {
       var newDistance = theA4.scalarProduct(labeledVectors[counter], labeledVectors[secondCounter]);
       if (newDistance < minDistance && newDistance > 0) {
         minDistance = newDistance;
       }
     }
-    for (var secondCounter = counter + 1; secondCounter < labeledVectors.length; secondCounter ++) {
+    for (var secondCounter = counter + 1; secondCounter < labeledVectors.length; secondCounter++) {
       var theDistance = theA4.scalarProduct(labeledVectors[counter], labeledVectors[secondCounter]);
       if (theDistance != minDistance) {
         continue;
@@ -1159,12 +1162,12 @@ function testA4(idCanvas, idSpanInformation) {
   }
 
   theA4.drawStandardEiBasis("red");
-  for (var counterLabel = 0; counterLabel < labeledVectors.length; counterLabel ++) {
+  for (var counterLabel = 0; counterLabel < labeledVectors.length; counterLabel++) {
     theA4.drawLine([0, 0, 0, 0], labeledVectors[counterLabel], "green");
     //theA3.drawText(labeledVectors[counterLabel], `[${labeledVectors.join(', ')}]`);
     //theA3.drawCircle(labeledVectors[counterLabel], "red");
   }
-  for (var counterSegment = 0; counterSegment < segments.length; counterSegment ++) {
+  for (var counterSegment = 0; counterSegment < segments.length; counterSegment++) {
     theA4.drawLine(segments[counterSegment][0], segments[counterSegment][1], "blue");
   }
   theA4.graphicsUnit = 150;

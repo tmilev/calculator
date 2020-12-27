@@ -11893,7 +11893,7 @@ bool ConeComplex::splitChamber(
   Cone newPlusCone, newMinusCone;
   Matrix<Rational> bufferMat;
   Selection bufferSel;
-  bool needToRecomputeVertices = (myDyingCone.normals.getRankOfSpanOfElements(&bufferMat, &bufferSel) < this->getDimension());
+  bool needToRecomputeVertices = (myDyingCone.normals.getRankElementSpan(&bufferMat, &bufferSel) < this->getDimension());
 //  newPlusCone.flagHasSufficientlyManyVertices = true;
 //  newMinusCone.flagHasSufficientlyManyVertices = true;
   newPlusCone.LowestIndexNotCheckedForSlicingInDirection = myDyingCone.LowestIndexNotCheckedForSlicingInDirection;
@@ -12162,7 +12162,7 @@ bool Cone::eliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
   }
   Matrix<Rational> tempMatX;
   Selection tempSelX;
-  int DesiredRank = this->vertices.getRankOfSpanOfElements(&tempMatX, &tempSelX);
+  int DesiredRank = this->vertices.getRankElementSpan(&tempMatX, &tempSelX);
   if (DesiredRank > 1) {
     for (int i = 0; i < this->normals.size; i ++) {
       Vector<Rational>& currentNormal = this->normals[i];
@@ -12171,7 +12171,7 @@ bool Cone::eliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
       for (int j = 0; j < this->vertices.size; j ++) {
         if (currentNormal.scalarEuclidean(this->vertices[j]).isEqualToZero()) {
           verticesOnWall.addOnTop(this->vertices[j]);
-          int theRank = verticesOnWall.getRankOfSpanOfElements(&tempMatX, &tempSelX);
+          int theRank = verticesOnWall.getRankElementSpan(&tempMatX, &tempSelX);
           if (theRank < verticesOnWall.size) {
             verticesOnWall.removeLastObject();
           } else {
@@ -12255,7 +12255,7 @@ bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
   this->normals.size = 0;
   Matrix<Rational> tempMat;
   Selection tempSel;
-  int rankVerticesSpan = inputVertices.getRankOfSpanOfElements(&tempMat, &tempSel);
+  int rankVerticesSpan = inputVertices.getRankElementSpan(&tempMat, &tempSel);
   int theDim = inputVertices.getDimension();
   Vectors<Rational> extraVertices;
   extraVertices.setSize(0);
@@ -12327,7 +12327,7 @@ bool Cone::createFromNormals(
   Matrix<Rational> tempMat;
   Selection tempSel;
   if (!useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices) {
-    for (int i = 0; i < theDim && this->normals.getRankOfSpanOfElements(&tempMat, &tempSel) < theDim; i ++) {
+    for (int i = 0; i < theDim && this->normals.getRankElementSpan(&tempMat, &tempSel) < theDim; i ++) {
       Vector<Rational> tempRoot;
       tempRoot.makeEi(theDim, i);
       if (!this->normals.linearSpanContainsVector(tempRoot, tempMat, tempSel)) {

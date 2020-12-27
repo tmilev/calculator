@@ -125,7 +125,7 @@ public:
   List<List<ChevalleyGenerator> > theInvolvedNegGenerators;
   CharacterSemisimpleLieAlgebraModule<Rational> theCharFundamentalCoordsRelativeToCartan;
   CharacterSemisimpleLieAlgebraModule<Rational> theCharNonPrimalFundCoords;
-  CharacterSemisimpleLieAlgebraModule<Rational> thePrimalChaR;
+  CharacterSemisimpleLieAlgebraModule<Rational> primalCharacter;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
   Vectors<Rational> CartanOfCentralizer;
   List<Polynomial<AlgebraicNumber> > theSystemToSolve;
@@ -160,12 +160,12 @@ public:
   int NumCentralizerConditionFailsconeConditionHolds;
   //The highest weight vectors are by definition cartan-centralizer-split
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > highestVectorsNonSorted;
-  List<Vector<Rational> > HighestWeightsPrimalNonSorted;
-  List<Vector<Rational> > HighestWeightsNONprimalNonSorted;
+  List<Vector<Rational> > highestWeightsPrimalNonSorted;
+  List<Vector<Rational> > highestWeightsNonPrimalNonSorted;
 
   List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > highestVectors;
-  HashedList<Vector<Rational> > HighestWeightsPrimal;
-  List<Vector<Rational> > HighestWeightsNONPrimal;
+  HashedList<Vector<Rational> > highestWeightsPrimal;
+  List<Vector<Rational> > highestWeightsNonPrimal;
 
   List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > modules;
   List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > modulesSl2opposite;
@@ -305,7 +305,7 @@ public:
   void computeCartanOfCentralizer();
   void computePrimalModuleDecomposition();
   void computePrimalModuleDecompositionHWsHWVsOnly();
-  void computePrimalModuleDecompositionHWVsOnly(HashedList<Vector<Rational> >& inputHws);
+  void computePrimalModuleDecompositionHWVsOnly(HashedList<Vector<Rational> >& inputHighestWeights);
   void computePrimalModuleDecompositionHighestWeightsOnly(HashedList<Vector<Rational> >& outputHWsCoords);
   void computePrimalModuleDecompositionHWsHWVsOnlyLastPart();
   void getPrimalWeightProjectionFundamentalCoordinates(

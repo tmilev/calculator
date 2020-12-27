@@ -290,7 +290,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
   for (int i = 0; i < this->size(); i ++) {
     const Weight<Coefficient>& currentMon = (*this)[i];
     if (!theFDWeyl.freudenthalFormulaIrrepIsWRTLeviPart(
-      currentMon.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000
+      currentMon.weightFundamentalCoordinates, tempHashedRoots, tempMults, tempS, 10000
     )) {
       if (report != nullptr) {
         *report = tempS;
@@ -299,7 +299,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
     }
     for (int j = 0; j < tempHashedRoots.size; j ++) {
       bufferCoeff = this->coefficients[i];
-      tempMon.weightFundamentalCoordS = theWeyL.getFundamentalCoordinatesFromSimple(tempHashedRoots[j]);
+      tempMon.weightFundamentalCoordinates = theWeyL.getFundamentalCoordinatesFromSimple(tempHashedRoots[j]);
       bufferCoeff *= tempMults[j];
       charAmbientFDWeyl.addMonomial(tempMon, bufferCoeff);
     }
@@ -311,10 +311,10 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
   for (int i = 0; i < charAmbientFDWeyl.size(); i ++) {
     orbitDom.setSize(0);
     if (!theFDWeyl.generateOrbitReturnFalseIfTruncated(
-      theWeyL.getSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS), orbitDom, false, 10000
+      theWeyL.getSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordinates), orbitDom, false, 10000
     )) {
       out << "failed to generate the complement-sub-Weyl-orbit of weight "
-      << this->getOwner()->theWeyl.getSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS).toString();
+      << this->getOwner()->theWeyl.getSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordinates).toString();
       if (report != nullptr) {
         *report = out.str();
       }
@@ -322,7 +322,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
     }
     for (int k = 0; k < orbitDom.size; k ++) {
       if (outputWeylSub.isDominantWeight(orbitDom[k])) {
-        tempMon.weightFundamentalCoordS = theWeyL.getFundamentalCoordinatesFromSimple(orbitDom[k]);
+        tempMon.weightFundamentalCoordinates = theWeyL.getFundamentalCoordinatesFromSimple(orbitDom[k]);
         remainingCharDominantLevi.addMonomial(tempMon, charAmbientFDWeyl.coefficients[i]);
       }
     }
@@ -337,7 +337,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
       for (int i = 0; i < outputWeylSub.simpleRootsInner.size; i ++) {
         tempMon = localHighest;
         simpleGeneratorBaseField = outputWeylSub.simpleRootsInner[i]; // <- implicit type conversion here!
-        tempMon.weightFundamentalCoordS += this->getOwner()->theWeyl.getFundamentalCoordinatesFromSimple(simpleGeneratorBaseField);
+        tempMon.weightFundamentalCoordinates += this->getOwner()->theWeyl.getFundamentalCoordinatesFromSimple(simpleGeneratorBaseField);
         if (remainingCharDominantLevi.monomials.contains(tempMon)) {
           localHighest = tempMon;
           Found = true;
@@ -347,7 +347,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
     highestCoeff = remainingCharDominantLevi.coefficients[remainingCharDominantLevi.monomials.getIndex(localHighest)];
     output.addMonomial(localHighest, highestCoeff);
     if (!outputWeylSub.freudenthalFormulaIrrepIsWRTLeviPart(
-      localHighest.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000
+      localHighest.weightFundamentalCoordinates, tempHashedRoots, tempMults, tempS, 10000
     )) {
       if (report != nullptr) {
         *report = tempS;
@@ -356,7 +356,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
     }
     for (int i = 0; i < tempHashedRoots.size; i ++) {
       tempMon.owner = this->getOwner();
-      tempMon.weightFundamentalCoordS = theWeyL.getFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
+      tempMon.weightFundamentalCoordinates = theWeyL.getFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
       bufferCoeff = tempMults[i];
       bufferCoeff *= highestCoeff;
       remainingCharDominantLevi.subtractMonomial(tempMon, bufferCoeff);
@@ -373,7 +373,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
     << "simple reflections of one another, "
     << "with respect to a simple root of the Levi part of the parabolic subalgebra. ";
     for (int i = 0; i < output.size(); i ++) {
-      tempRoot = theWeyL.getSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordS).getVectorRational();
+      tempRoot = theWeyL.getSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordinates).getVectorRational();
       outputWeylSub.drawContour(tempRoot, theDV, "#a0a000", 1000);
       std::stringstream tempStream;
       tempStream << output.coefficients[i].toString();
@@ -636,7 +636,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   this->theCharOverH.makeZero();
   for (int i = 0; i < this->thePaths.size; i ++) {
     this->theModuleWeightsSimpleCoords.addOnTopNoRepetition(*this->thePaths[i].waypoints.lastObject());
-    tempCharMon.weightFundamentalCoordS = theWeyl.getFundamentalCoordinatesFromSimple(*this->thePaths[i].waypoints.lastObject());
+    tempCharMon.weightFundamentalCoordinates = theWeyl.getFundamentalCoordinatesFromSimple(*this->thePaths[i].waypoints.lastObject());
     this->theCharOverH.addMonomial(tempCharMon, 1);
   }
   this->theModuleWeightsSimpleCoords.quickSortAscending();
@@ -924,7 +924,7 @@ void ModuleSSalgebra<Coefficient>::getFDchar(CharacterSemisimpleLieAlgebraModule
   tempMon.owner = &this->getOwner();
   WeylGroupData& theWeyl = this->getOwner().theWeyl;
   for (int i = 0; i < this->theModuleWeightsSimpleCoords.size; i ++) {
-    tempMon.weightFundamentalCoordS = theWeyl.getFundamentalCoordinatesFromSimple(this->theModuleWeightsSimpleCoords[i]);
+    tempMon.weightFundamentalCoordinates = theWeyl.getFundamentalCoordinatesFromSimple(this->theModuleWeightsSimpleCoords[i]);
     output.addMonomial(tempMon, this->theGeneratingWordsGrouppedByWeight[i].size);
   }
 }
@@ -1553,7 +1553,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   out << "<br>Parabolic selection: " << LeviInSmall.toString();
   std::stringstream tempStream1;
   tempStream1 << "Started splitting the f.d. part of the " << theHmm.theRange().toStringLieAlgebraName() << "-module with highest weight in fund coords "
-  << this->theChaR[0].weightFundamentalCoordS.toString();
+  << this->theChaR[0].weightFundamentalCoordinates.toString();
   ProgressReport theReport;
   theReport.report(tempStream1.str());
   List<List<Vector<Coefficient> > > eigenSpacesPerSimpleGenerator;

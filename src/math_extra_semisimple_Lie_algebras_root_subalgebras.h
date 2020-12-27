@@ -128,12 +128,12 @@ public:
   List<Vectors<Rational> > WeightsModulesNONPrimalSimple;
   List<Vectors<Rational> > WeightsModulesNONPrimalFundamental;
   List<Vectors<Rational> > WeightsModulesPrimalSimple;
-  List<Vector<Rational> > HighestWeightsNONPrimalFundamental;
+  List<Vector<Rational> > highestWeightsNonPrimalFundamental;
 
-  List<Vector<Rational> > HighestWeightsPrimalSimple;
+  List<Vector<Rational> > highestWeightsPrimalSimple;
   List<Vector<Rational> > LowestWeightsPrimalSimple;
 
-//  HashedList<Vector<Rational> > HighestWeightsPrimal;
+//  HashedList<Vector<Rational> > highestWeightsPrimal;
 
   CharacterSemisimpleLieAlgebraModule<Rational> ModuleDecompoHighestWeights;
   List<int> indicesSubalgebrasContainingK;

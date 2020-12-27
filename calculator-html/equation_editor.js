@@ -174,7 +174,6 @@ const knownTypes = {
     colorText: "red",
     whiteSpace: "nowrap",
   }),
-  // Left delimiter mark surrounded by two spacers.
   leftDelimiterMark: new MathNodeType({
     "type": "leftDelimiterMark",
     "borderLeft": "2px solid",
@@ -685,6 +684,21 @@ class MathNodeFactory {
     switch (content) {
       case "|":
         result = new MathNodeAbsoluteValue(equationEditor, left);
+        break;
+      case "\\rangle":
+      case "\\langle":
+      // utf16 version of \\rangle 
+      case "\u27E9":
+      // utf16 version of \\langle 
+      case "\u27E8":
+        result = new MathNodeAngleBrackets(equationEditor, left);
+        if (left) {
+          result.appendChild(new MathNode(equationEditor, knownTypes.verticalLineLeftMargin));
+          result.appendChild(new MathNode(equationEditor, knownTypes.verticalLineLeftMargin));
+        } else {
+          result.appendChild(new MathNode(equationEditor, knownTypes.verticalLineRightMargin));
+          result.appendChild(new MathNode(equationEditor, knownTypes.verticalLineRightMargin));
+        }
         break;
       case "[":
       case "]":
@@ -6553,6 +6567,58 @@ class MathNodeSquareBrackets extends MathNodeDelimiterMark {
       this.element.style.borderTop = `solid`;
       this.element.style.borderBottom = `solid`;
     }
+  }
+}
+
+class MathNodeAngleBrackets extends MathNodeDelimiterMark {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /**@type {boolean} */
+    left,
+  ) {
+    super(equationEditor, left);
+    this.left = left;
+  }
+
+  verticallyStretch(
+    /** @type {number}*/
+    heightToEnclose,
+    /** @type {number}*/
+    fractionLineHeightEnclosed,
+  ) {
+    this.verticallyStretchCommon(heightToEnclose, fractionLineHeightEnclosed);
+    let topBar = this.children[0];
+    let bottomBar = this.children[1];
+    let halfHeight = this.boundingBox.height / 2;
+    let width = heightToEnclose / 6;
+    topBar.boundingBox.height = halfHeight;
+    bottomBar.boundingBox.height = halfHeight;
+    topBar.boundingBox.width = this.parenthesisThickness;
+    bottomBar.boundingBox.width = this.parenthesisThickness;
+    bottomBar.boundingBox.top = halfHeight;
+
+    let margin = 2;
+    topBar.boundingBox.left = margin;
+    bottomBar.boundingBox.left = margin;
+
+    topBar.boundingBox.transformOrigin = "top left";
+    bottomBar.boundingBox.transformOrigin = "top left";
+    let scale = width / halfHeight;
+
+    if (this.left) {
+      topBar.boundingBox.transform = `matrix(1,0,${-scale},1,${width},0)`;
+      bottomBar.boundingBox.transform = `matrix(1,0,${scale},1,0,0)`;
+    } else {
+      topBar.boundingBox.transform = `matrix(1,0,${scale},1,0,0)`;
+      bottomBar.boundingBox.transform = `matrix(1,0,${-scale},1,${width},0)`;
+    }
+    if (this.element !== null) {
+      this.element.style.borderLeft = "";
+      this.element.style.borderRight = "";
+    }
+    this.boundingBox.width = Math.max(width + 2 * margin + 2 * this.parenthesisThickness, 3);
+    this.element.style.borderWidth = `${this.parenthesisThickness}px`;
   }
 }
 

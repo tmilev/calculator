@@ -7,7 +7,6 @@ bool AlgebraicNumber::Test::all() {
   return true;
 }
 
-
 bool AlgebraicNumber::Test::constantValues() {
   if (AlgebraicNumber::oneStatic().toString() != "1") {
     global.fatal << "Algebraic number 1 has unexpected value. " << global.fatal;

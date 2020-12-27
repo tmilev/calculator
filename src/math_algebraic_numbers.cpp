@@ -1457,7 +1457,7 @@ bool AlgebraicNumber::operator==(int other) const {
   return *this == Rational(other);
 }
 
-bool AlgebraicNumber::operator!= (const AlgebraicNumber& other) const {
+bool AlgebraicNumber::operator!=(const AlgebraicNumber& other) const {
   return !(*this == other);
 }
 
@@ -1470,14 +1470,14 @@ void AlgebraicNumber::negate() {
 }
 
 bool AlgebraicNumber::operator==(const AlgebraicNumber& other) const {
-  Rational ratValue;
+  Rational rationalValue;
   this->checkConsistency();
   other.checkConsistency();
-  if (this->isRational(&ratValue)) {
-    return other == ratValue;
+  if (this->isRational(&rationalValue)) {
+    return other == rationalValue;
   }
-  if (other.isRational(&ratValue)) {
-    return *this == ratValue;
+  if (other.isRational(&rationalValue)) {
+    return *this == rationalValue;
   }
   if (this->owner != other.owner) {
     global.fatal << "This might or might not be a programming error: "

@@ -1153,8 +1153,8 @@ MapList<std::string, ASNObject, MathRoutines::hashString>& ASNObject::namesToObj
   );
   MapList<List<unsigned char>, ASNObject, MathRoutines::hashListUnsignedChars>& reverseMap =
   ASNObject::objectIdsToNames();
-  for (int i = 0; i < container.theValues.size; i ++) {
-    ASNObject& current = container.theValues[i];
+  for (int i = 0; i < container.values.size; i ++) {
+    ASNObject& current = container.values[i];
     reverseMap.setKeyValue(current.objectId.ASNAtom, current);
   }
   return container;
@@ -1191,8 +1191,8 @@ std::string ASNObject::toStringAllRecognizedObjectIds() {
   std::stringstream out;
   out << "<table>";
   for (int i = 0; i < ASNObject::objectIdsToNames().size(); i ++) {
-    ASNObject& current = ASNObject::objectIdsToNames().theValues[i];
-    const List<unsigned char>& currentId = ASNObject::objectIdsToNames().theKeys[i];
+    ASNObject& current = ASNObject::objectIdsToNames().values[i];
+    const List<unsigned char>& currentId = ASNObject::objectIdsToNames().keys[i];
     out << "<tr>"
     << "<td><small>" << i + 1 << "</small></td>"
     << "<td>" << Crypto::convertListUnsignedCharsToHexFormat(currentId, 50, false) << "</td>"
@@ -1274,7 +1274,7 @@ bool ASNObject::loadFromASN(
   }
   if (!ASNObject::objectIdsToNames().contains(this->objectId.ASNAtom)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Unrecognized object id. " << "Total known ids: " << ASNObject::objectIdsToNames().theKeys.size;
+      *commentsOnFailure << "Unrecognized object id. " << "Total known ids: " << ASNObject::objectIdsToNames().keys.size;
     }
     return false;
   }

@@ -634,8 +634,8 @@ bool Calculator::Test::writeTestStrings(std::stringstream* commentsOnFailure) {
   result.theList.setSize(this->commands.size());
   for (int i = 0; i < this->commands.size(); i ++) {
     JSData nextEntry;
-    nextEntry["input"] = this->commands.theKeys[i];
-    Calculator::Test::OneTest& output = this->commands.theValues[i];
+    nextEntry["input"] = this->commands.keys[i];
+    Calculator::Test::OneTest& output = this->commands.values[i];
     nextEntry["output"] = output.actualResult;
     result.theList[i] = nextEntry;
   }
@@ -712,7 +712,7 @@ bool Calculator::Test::processResults() {
     << " out of " << this->commands.size() << " processed. </b>";
   }
   for (int i = this->startIndex; i < this->lastIndexNotTested; i ++) {
-    Calculator::Test::OneTest& currentTest = this->commands.theValues[i];
+    Calculator::Test::OneTest& currentTest = this->commands.values[i];
     std::stringstream currentLine, currentLineConsole;
     currentLine << "<tr>";
     currentLine << "<td style = 'min-width:25px;'>" << i << "</td>";
@@ -721,10 +721,10 @@ bool Calculator::Test::processResults() {
     << "</td>";
     currentLineConsole << "Function " << currentTest.functionAdditionalIdentifier << ", atom: " << currentTest.atom << "\n";
     currentLine << "<td style = 'min-width:45px;'>" << currentTest.atom << "</td>";
-    currentLineConsole << "Ran:\n" << this->commands.theKeys[i] << "\n";
+    currentLineConsole << "Ran:\n" << this->commands.keys[i] << "\n";
     currentLine << "<td style = 'min-width:200px;'>"
     << HtmlRoutines::getCalculatorComputationNewPage(
-      this->commands.theKeys[i], this->commands.theKeys[i]
+      this->commands.keys[i], this->commands.keys[i]
     ) << "</td>";
     bool isBad = false;
     bool isUknown = false;
@@ -802,7 +802,7 @@ bool Calculator::Test::processResults() {
 int Calculator::getNumberOfBuiltInFunctions() {
   int result = 0;
   for (int i = this->numberOfPredefinedAtoms - 1; i >= 0; i --) {
-    MemorySaving<Calculator::OperationHandlers>& current = this->operations.theValues[i];
+    MemorySaving<Calculator::OperationHandlers>& current = this->operations.values[i];
     if (current.isZeroPointer()) {
       continue;
     }

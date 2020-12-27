@@ -409,11 +409,11 @@ bool CalculatorConversions::innerLoadKeysFromStatementList(
   }
   output.clear();
   std::string keyName;
-  for (int i = 0; i < outputExpressionFormat.theKeys.size; i ++) {
-    if (!outputExpressionFormat.theKeys[i].isOfType<std::string>(&keyName)) {
-      keyName = outputExpressionFormat.theKeys[i].toString();
+  for (int i = 0; i < outputExpressionFormat.keys.size; i ++) {
+    if (!outputExpressionFormat.keys[i].isOfType<std::string>(&keyName)) {
+      keyName = outputExpressionFormat.keys[i].toString();
     }
-    output.setKeyValue(keyName, outputExpressionFormat.theValues[i]);
+    output.setKeyValue(keyName, outputExpressionFormat.values[i]);
   }
   return true;
 }
@@ -698,10 +698,10 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
       continue;
     }
     theSAs.theSubalgebras.setKeyValue(currentCandidate.theHs, currentCandidate);
-    theSAs.theSubalgebras.theValues.lastObject().indexInOwner = theSAs.theSubalgebras.theValues.size - 1;
+    theSAs.theSubalgebras.values.lastObject().indexInOwner = theSAs.theSubalgebras.values.size - 1;
   }
   reportStream << "Subalgebra loading done, total "
-  << theSAs.theSubalgebras.theValues.size << " subalgebras loaded. ";
+  << theSAs.theSubalgebras.values.size << " subalgebras loaded. ";
   theReport.report(reportStream.str());
   theSAs.ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
   if (!theSAs.loadState(currentChainInt, numExploredTypes, numExploredHs, calculator.comments)) {
@@ -771,9 +771,9 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(
   theValues.addOnTop(numHsExploredE);
   Expression subalgebrasListE, candidateE;
   subalgebrasListE.makeSequence(calculator);
-  subalgebrasListE.children.reserve(input.theSubalgebras.theValues.size + 1);
-  for (int i = 0; i < input.theSubalgebras.theValues.size; i ++) {
-    if (!CalculatorConversions::innerStoreCandidateSubalgebra(calculator, input.theSubalgebras.theValues[i], candidateE)) {
+  subalgebrasListE.children.reserve(input.theSubalgebras.values.size + 1);
+  for (int i = 0; i < input.theSubalgebras.values.size; i ++) {
+    if (!CalculatorConversions::innerStoreCandidateSubalgebra(calculator, input.theSubalgebras.values[i], candidateE)) {
       return false;
     }
     subalgebrasListE.addChildOnTop(candidateE);

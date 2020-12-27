@@ -223,6 +223,10 @@ public:
   bool flagCertificatesAreOfficiallySigned;
   bool flagCrashInitiated;
 
+  // If false, signals use of a mock database.
+  // Mock database = simple json file that
+  // is 100% read/overwritten on each database
+  // read/store operation.
   bool flagDatabaseCompiled;
   bool flagDisableDatabaseLogEveryoneAsAdmin;
   bool flagLocalhostConnectionMonitor;

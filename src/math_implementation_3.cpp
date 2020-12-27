@@ -1433,20 +1433,20 @@ bool FileOperations::getPhysicalFileNameFromVirtual(
   }
   for (int i = 0; i < FileOperations::folderVirtualLinksNonSensitive().size(); i ++) {
     if (StringRoutines::stringBeginsWith(
-      inputCopy, FileOperations::folderVirtualLinksNonSensitive().theKeys[i], &folderEnd
+      inputCopy, FileOperations::folderVirtualLinksNonSensitive().keys[i], &folderEnd
     )) {
       output = global.physicalPathProjectBase +
-      FileOperations::folderVirtualLinksNonSensitive().theValues[i] + folderEnd;
+      FileOperations::folderVirtualLinksNonSensitive().values[i] + folderEnd;
       return true;
     }
   }
   if (accessSensitiveFolders) {
     for (int i = 0; i < FileOperations::folderVirtualLinksSensitive().size(); i ++) {
       if (StringRoutines::stringBeginsWith(
-        inputCopy, FileOperations::folderVirtualLinksSensitive().theKeys[i], &folderEnd
+        inputCopy, FileOperations::folderVirtualLinksSensitive().keys[i], &folderEnd
       )) {
         output = global.physicalPathProjectBase +
-        FileOperations::folderVirtualLinksSensitive().theValues[i] + folderEnd;
+        FileOperations::folderVirtualLinksSensitive().values[i] + folderEnd;
         return true;
       }
     }
@@ -1454,10 +1454,10 @@ bool FileOperations::getPhysicalFileNameFromVirtual(
   if (accessULTRASensitiveFolders) {
     for (int i = 0; i < FileOperations::folderVirtualLinksULTRASensitive().size(); i ++) {
       if (StringRoutines::stringBeginsWith(
-        inputCopy, FileOperations::folderVirtualLinksULTRASensitive().theKeys[i], &folderEnd
+        inputCopy, FileOperations::folderVirtualLinksULTRASensitive().keys[i], &folderEnd
       )) {
         output = global.physicalPathProjectBase +
-        FileOperations::folderVirtualLinksULTRASensitive().theValues[i] + folderEnd;
+        FileOperations::folderVirtualLinksULTRASensitive().values[i] + folderEnd;
         return true;
       }
     }
@@ -9785,8 +9785,8 @@ std::string HtmlRoutines::toHtmlTableRowsFromJSON(const JSData& input) {
     std::stringstream out;
     out << "<table class = \"tableDatabaseItem\">";
     for (int i = 0; i < input.objects.size(); i ++) {
-      out << "<tr><td>" << input.objects.theKeys[i] << "</td>" << "<td>"
-      << HtmlRoutines::toHtmlTableRowsFromJSON(input.objects.theValues[i]) << "</td>" << "</tr>";
+      out << "<tr><td>" << input.objects.keys[i] << "</td>" << "<td>"
+      << HtmlRoutines::toHtmlTableRowsFromJSON(input.objects.values[i]) << "</td>" << "</tr>";
     }
     out << "</table>";
     return out.str();
@@ -9796,7 +9796,7 @@ std::string HtmlRoutines::toHtmlTableRowsFromJSON(const JSData& input) {
     out << "<table class = \"tableDatabaseItem\">";
     for (int i = 0; i < input.objects.size(); i ++) {
       out << "<tr>" << "<td>"
-      << HtmlRoutines::toHtmlTableRowsFromJSON(input.objects.theValues[i]) << "</td>" << "</tr>";
+      << HtmlRoutines::toHtmlTableRowsFromJSON(input.objects.values[i]) << "</td>" << "</tr>";
     }
     out << "</table>";
     return out.str();

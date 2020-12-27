@@ -37,7 +37,7 @@ bool Calculator::Test::parseAllExamples(Calculator& ownerInitialized) {
   MacroRegisterFunctionWithName("Calculator::Test::parseAllExamples");
   for (int i = 0; i < ownerInitialized.numberOfPredefinedAtoms; i ++) {
     MemorySaving<Calculator::OperationHandlers>& operationPointer =
-    ownerInitialized.operations.theValues[i];
+    ownerInitialized.operations.values[i];
     if (operationPointer.isZeroPointer()) {
       continue;
     }

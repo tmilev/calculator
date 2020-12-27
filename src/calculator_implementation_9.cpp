@@ -578,7 +578,7 @@ bool CalculatorFunctions::innerOperationBinary(
   Expression& output,
   int theOp
 ) {
-  MemorySaving<Calculator::OperationHandlers>& theOperation = calculator.operations.theValues[theOp];
+  MemorySaving<Calculator::OperationHandlers>& theOperation = calculator.operations.values[theOp];
   if (theOperation.isZeroPointer()) {
     return false;
   }

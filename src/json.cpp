@@ -60,7 +60,7 @@ JSData& JSData::operator[](int i) {
 JSData JSData::getValue(const std::string& key) {
   int theIndex = this->getKeyIndex(key);
   if (theIndex != - 1) {
-    return this->objects.theValues[theIndex];
+    return this->objects.values[theIndex];
   }
   JSData result;
   result.theType = JSData::token::tokenUndefined;
@@ -546,8 +546,8 @@ bool JSData::mergeInMe(const JSData& input, std::stringstream* commentsOnFailure
     return false;
   }
   for (int i = 0; i < input.objects.size(); i ++) {
-    const std::string& key = input.objects.theKeys[i];
-    const JSData& value = input.objects.theValues[i];
+    const std::string& key = input.objects.keys[i];
+    const JSData& value = input.objects.values[i];
     if (!this->objects.contains(key)) {
       (*this)[key] = value;
     } else {
@@ -779,9 +779,9 @@ somestream& JSData::intoStream(
       out << "{" << newLine;
       for (int i = 0; i < this->objects.size(); i ++) {
         out << whiteSpaceInner << whiteSpaceOuter;
-        out << '"' << StringRoutines::convertStringToJSONString(this->objects.theKeys[i]) << '"';
+        out << '"' << StringRoutines::convertStringToJSONString(this->objects.keys[i]) << '"';
         out << ':';
-        this->objects.theValues[i].intoStream(out, &options);
+        this->objects.values[i].intoStream(out, &options);
         if (i != this->objects.size() - 1) {
           out << "," << newLine;
         }

@@ -915,7 +915,7 @@ bool LaTeXCrawler::buildTopicList(std::stringstream* commentsOnFailure, std::str
   }
   int numSlidePairsToBuild = 0;
   for (int i = 0; i < topicParser.topics.theTopics.size(); i ++) {
-    if (topicParser.topics.theTopics.theValues[i].sourceSlides.size > 0) {
+    if (topicParser.topics.theTopics.values[i].sourceSlides.size > 0) {
       numSlidePairsToBuild ++;
     }
   }
@@ -932,7 +932,7 @@ bool LaTeXCrawler::buildTopicList(std::stringstream* commentsOnFailure, std::str
     this->slideFileNamesVirtualWithPatH[i].isSolution = false;
   }
   for (int i = 0; i < topicParser.topics.theTopics.size(); i ++) {
-    TopicElement& currentElt = topicParser.topics.theTopics.theValues[i];
+    TopicElement& currentElt = topicParser.topics.theTopics.values[i];
     if (currentElt.sourceHomework.size == 0) {
       continue;
     }
@@ -981,7 +981,7 @@ bool LaTeXCrawler::buildTopicList(std::stringstream* commentsOnFailure, std::str
   numProcessed = 0;
   this->addSlidesOnTop(topicParser.slidesSourcesHeaders);
   for (int i = 0; i < topicParser.topics.theTopics.size(); i ++) {
-    TopicElement& currentElt = topicParser.topics.theTopics.theValues[i];
+    TopicElement& currentElt = topicParser.topics.theTopics.values[i];
     if (currentElt.sourceSlides.size == 0) {
       continue;
     }

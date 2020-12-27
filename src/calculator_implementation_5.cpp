@@ -86,7 +86,7 @@ void MeshTriangles::plotGrid(int theColor) {
 double MeshTriangles::getValueAtPoint(const Vector<double>& thePoint) {
   int theIndex = this->theEvaluatedPoints.getIndex(thePoint);
   if (theIndex != - 1) {
-    return this->theEvaluatedPoints.theValues[theIndex];
+    return this->theEvaluatedPoints.values[theIndex];
   }
   this->knownValues[this->knownValues.size - 2] = thePoint[0];
   this->knownValues[this->knownValues.size - 1] = thePoint[1];
@@ -2224,15 +2224,15 @@ bool CalculatorFunctionsPlot::plotSurface(Calculator& calculator, const Expressi
     keysToConvert.getValueCreate("numSegments2");
     keysToConvert.getValueCreate("lineWidth");
     for (int i = 0; i < keysToConvert.size(); i ++) {
-      if (!theKeys.contains(keysToConvert.theKeys[i])) {
+      if (!theKeys.contains(keysToConvert.keys[i])) {
         continue;
       }
-      Expression expressionToConvert = theKeys.getValueCreate(keysToConvert.theKeys[i]);
+      Expression expressionToConvert = theKeys.getValueCreate(keysToConvert.keys[i]);
       bool isGood = CalculatorFunctions::functionMakeJavascriptExpression(
         calculator, expressionToConvert, jsConverter
       );
       if (isGood) {
-        isGood = jsConverter.isOfType<std::string>(&keysToConvert.theValues[i]);
+        isGood = jsConverter.isOfType<std::string>(&keysToConvert.values[i]);
       }
       if (!isGood) {
         return calculator << "Failed to convert "

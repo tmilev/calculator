@@ -9,96 +9,96 @@
 template <class listType, class key, class value, unsigned int keyHashFunction(const key&) = key::hashFunction>
 class MapTemplate {
 public:
-  HashedList<key, keyHashFunction> theKeys;
-  listType theValues;
+  HashedList<key, keyHashFunction> keys;
+  listType values;
   unsigned int hashFunction() const {
     int j = - 1;
     unsigned int result = 0;
-    for (int i = 0; i < this->theKeys.size; i ++) {
+    for (int i = 0; i < this->keys.size; i ++) {
       j ++;
       if (j >= someRandomPrimesSize) {
         j = 0;
       }
-      result += keyHashFunction(this->theKeys[i]) *
-      HashFunctions::hashFunction(this->theValues[i]) *
+      result += keyHashFunction(this->keys[i]) *
+      HashFunctions::hashFunction(this->values[i]) *
       someRandomPrimes[j];
     }
     return result;
   }
   int getIndex(const key& input) const {
-    return this->theKeys.getIndex(input);
+    return this->keys.getIndex(input);
   }
   int getIndexNoFail(const key& input) const {
-    return this->theKeys.getIndexNoFail(input);
+    return this->keys.getIndexNoFail(input);
   }
   bool contains(const key& inputKey) const {
     return this->getIndex(inputKey) != - 1;
   }
   void removeKey(const key& theKey) {
-    int theIndex = this->theKeys.getIndex(theKey);
+    int theIndex = this->keys.getIndex(theKey);
     if (theIndex == - 1) {
       return;
     }
-    this->theKeys.removeIndexSwapWithLast(theIndex);
-    this->theValues.removeIndexSwapWithLast(theIndex);
+    this->keys.removeIndexSwapWithLast(theIndex);
+    this->values.removeIndexSwapWithLast(theIndex);
   }
   const value& getValueNoFail(const key& input) const {
-    int theIndex = this->theKeys.getIndex(input);
+    int theIndex = this->keys.getIndex(input);
     if (theIndex == - 1) {
       fatalCrash("Map does not contain key at a place where that is not allowed. ");
     }
-    return this->theValues[theIndex];
+    return this->values[theIndex];
   }
   value getValue(const key& input, const value& resultIfMissing) {
-    int theIndex = this->theKeys.getIndex(input);
+    int theIndex = this->keys.getIndex(input);
     if (theIndex == - 1) {
       return resultIfMissing;
     }
-    return this->theValues[theIndex];
+    return this->values[theIndex];
   }
   value& getValueCreate(const key& input) {
-    int theIndex = this->theKeys.getIndex(input);
+    int theIndex = this->keys.getIndex(input);
     if (theIndex == - 1) {
-      theIndex = this->theKeys.size;
-      this->theKeys.addOnTop(input);
+      theIndex = this->keys.size;
+      this->keys.addOnTop(input);
       value object;
-      this->theValues.addOnTop(object);
+      this->values.addOnTop(object);
     }
-    return this->theValues[theIndex];
+    return this->values[theIndex];
   }
   value& getValueCreateNoInit(const key& input) {
-    int theIndex = this->theKeys.getIndex(input);
+    int theIndex = this->keys.getIndex(input);
     if (theIndex == - 1) {
-      theIndex = this->theKeys.size;
-      this->theKeys.addOnTop(input);
-      this->theValues.setSize(this->theValues.size + 1);
+      theIndex = this->keys.size;
+      this->keys.addOnTop(input);
+      this->values.setSize(this->values.size + 1);
     }
-    return this->theValues[theIndex];
+    return this->values[theIndex];
   }
   void setKeyValue(const key& inputKey, const value& inputValue) {
     if (this->contains(inputKey)) {
-      this->theValues[this->theKeys.getIndex(inputKey)] = inputValue;
+      this->values[this->keys.getIndex(inputKey)] = inputValue;
       return;
     }
-    this->theValues.addOnTop(inputValue);
-    this->theKeys.addOnTop(inputKey);
+    this->values.addOnTop(inputValue);
+    this->keys.addOnTop(inputKey);
   }
   void setExpectedSize(int theSize) {
-    this->theKeys.setExpectedSize(theSize);
-    this->theValues.setExpectedSize(theSize);
+    this->keys.setExpectedSize(theSize);
+    this->values.setExpectedSize(theSize);
   }
   void clear() {
-    this->theKeys.clear();
-    this->theValues.setSize(0);
+    this->keys.clear();
+    this->values.setSize(0);
   }
   int size() const {
-    return this->theValues.size;
+    return this->values.size;
   }
   std::string toStringHtml() const {
     std::stringstream out;
     out << "{";
     for (int i = 0; i < this->size(); i ++) {
-      out << "\"" << this->theKeys[i] << "\":\"" << this->theValues[i] << "\"";
+      out << "\"" << this->keys[i] << "\":\"" << this->values[i] << "\"";
       if (i != this->size() - 1) {
         out << ", ";
       }

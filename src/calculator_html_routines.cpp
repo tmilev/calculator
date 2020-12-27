@@ -22,18 +22,18 @@ bool CalculatorHtmlFunctions::userInputBox(
   }
   InputBox newBox;
   newBox.name = boxName;
-  for (int i = 0; i < theArguments.theKeys.size; i ++) {
-    if (theArguments.theKeys[i] == "value") {
-      newBox.value = theArguments.theValues[i];
+  for (int i = 0; i < theArguments.keys.size; i ++) {
+    if (theArguments.keys[i] == "value") {
+      newBox.value = theArguments.values[i];
     }
-    if (theArguments.theKeys[i] == "min") {
-      newBox.min = theArguments.theValues[i];
+    if (theArguments.keys[i] == "min") {
+      newBox.min = theArguments.values[i];
     }
-    if (theArguments.theKeys[i] == "max") {
-      newBox.max = theArguments.theValues[i];
+    if (theArguments.keys[i] == "max") {
+      newBox.max = theArguments.values[i];
     }
-    if (theArguments.theKeys[i] == "step") {
-      newBox.step = theArguments.theValues[i];
+    if (theArguments.keys[i] == "step") {
+      newBox.step = theArguments.values[i];
     }
   }
   return output.assignValue(newBox, calculator);

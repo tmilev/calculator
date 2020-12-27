@@ -715,7 +715,7 @@ InputBox& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theUserInputTextBoxesWithValues.theValues[this->getLastChild().data];
+  return this->owner->theObjectContainer.theUserInputTextBoxesWithValues.values[this->getLastChild().data];
 }
 
 template < >
@@ -905,7 +905,7 @@ SemisimpleSubalgebras& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "SemisimpleSubalgebras. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theSSSubalgebraS.theValues[this->getLastChild().data];
+  return this->owner->theObjectContainer.theSSSubalgebraS.values[this->getLastChild().data];
 }
 
 template < >
@@ -924,7 +924,7 @@ WeylGroupData& Expression::getValueNonConst() const {
     << "WeylGroupData. The expression equals "
     << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.semisimpleLieAlgebras.theValues[
+  return this->owner->theObjectContainer.semisimpleLieAlgebras.values[
     this->getLastChild().data
   ].theWeyl;
 }
@@ -3196,7 +3196,7 @@ std::string Expression::toStringAllSlidersInExpression() const {
       continue;
     }
     this->owner->theObjectContainer.userInputBoxSliderDisplayed[theIndex] = true;
-    InputBox& theBox = theSliders.theValues[theIndex];
+    InputBox& theBox = theSliders.values[theIndex];
     std::string theSliderName = theBox.getSliderName();
     out << "<input name =\""
     << theSliderName
@@ -4847,7 +4847,7 @@ bool Expression::isOperation(std::string* outputWhichOperation) const {
     return false;
   }
   if (outputWhichOperation != nullptr) {
-    *outputWhichOperation = this->owner->operations.theKeys[index];
+    *outputWhichOperation = this->owner->operations.keys[index];
   }
   return true;
 }
@@ -4992,7 +4992,7 @@ bool Expression::isCacheableExpression() const {
   if (this->data < 0 || this->data >= theBoss.operations.size()) {
     global.fatal << "Corrupted atom in Expression::isCacheableExpression. " << global.fatal;
   }
-  return theBoss.atomsThatMustNotBeCached.contains(theBoss.operations.theKeys[this->data]);
+  return theBoss.atomsThatMustNotBeCached.contains(theBoss.operations.keys[this->data]);
 }
 
 bool Expression::isBuiltInScalar() const {

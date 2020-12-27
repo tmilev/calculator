@@ -8626,7 +8626,7 @@ void Calculator::addOneStringHandler(
       atom) != handler
     ) {
       global.fatal << "More than one toStringHandler for atom "
-      << this->operations.theKeys[atom] << "." << global.fatal;
+      << this->operations.keys[atom] << "." << global.fatal;
     }
   } else {
     handlerCollection.setKeyValue(atom, handler);

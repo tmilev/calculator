@@ -166,7 +166,7 @@ SemisimpleLieAlgebra* ExpressionContext::getAmbientSemisimpleLieAlgebra() const 
   if (this->indexAmbientSemisimpleLieAlgebra == - 1) {
     return nullptr;
   }
-  return &this->owner->theObjectContainer.semisimpleLieAlgebras.theValues[
+  return &this->owner->theObjectContainer.semisimpleLieAlgebras.values[
     this->indexAmbientSemisimpleLieAlgebra
   ];
 }

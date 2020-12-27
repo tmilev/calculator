@@ -492,10 +492,10 @@ bool WebWorker::extractArgumentsFromCookies(std::stringstream& argumentProcessin
     }
   }
   for (int i = 0; i < newlyFoundArgs.size(); i ++) {
-    if (global.webArguments.contains(newlyFoundArgs.theKeys[i])) {
+    if (global.webArguments.contains(newlyFoundArgs.keys[i])) {
       continue; // <-if a key is already given cookie entries are ignored.
     }
-    std::string trimmed = newlyFoundArgs.theValues[i];
+    std::string trimmed = newlyFoundArgs.values[i];
     if (trimmed.size() > 0) {
       if (trimmed[trimmed.size() - 1] == ';') {
         trimmed = trimmed.substr(0, trimmed.size() - 1);
@@ -503,7 +503,7 @@ bool WebWorker::extractArgumentsFromCookies(std::stringstream& argumentProcessin
     }
     //<-except the last cookie, cookies have extra semicolumn at the end, trimming.
     bool isGood = true;
-    if (newlyFoundArgs.theKeys[i] == "request") { //<- we are careful about
+    if (newlyFoundArgs.keys[i] == "request") { //<- we are careful about
       // reading arbitrary requests from the cookie. Those may effectively deny login
       // to a person who does not know to change the request type from the web address.
       // To prevent that we refuse to read requests from cookies except for the
@@ -521,7 +521,7 @@ bool WebWorker::extractArgumentsFromCookies(std::stringstream& argumentProcessin
       }
     }
     if (isGood) {
-      global.webArguments.setKeyValue(newlyFoundArgs.theKeys[i], trimmed);
+      global.webArguments.setKeyValue(newlyFoundArgs.keys[i], trimmed);
     }
   }
   return result;
@@ -953,9 +953,9 @@ std::string WebWorker::getHeaderConnectionKeepAlive() {
 std::string WebWorker::getHeaderSetCookie() {
   std::stringstream out;
   for (int i = 0; i < global.cookiesToBeSent.size(); i ++) {
-    out << "Set-Cookie: " << global.cookiesToBeSent.theKeys[i]
+    out << "Set-Cookie: " << global.cookiesToBeSent.keys[i]
     << "="
-    << global.cookiesToBeSent.theValues[i]
+    << global.cookiesToBeSent.values[i]
     << "; Path=/; Expires=Sat, 01 Jan 2030 20:00:00 GMT;Secure;SameSite=Strict;";
     if (i != global.cookiesToBeSent.size() - 1) {
       out << "\r\n";
@@ -1811,14 +1811,14 @@ bool WebWorker::redirectIfNeeded(std::stringstream& argumentProcessingFailureCom
   }
   for (int i = 0; i < global.webArguments.size(); i ++) {
     if (
-      global.webArguments.theKeys[i] != "password" &&
-      global.webArguments.theKeys[i] != "request" &&
-      global.webArguments.theKeys[i] != "googleToken" &&
-      global.webArguments.theKeys[i] != "G_AUTHUSER_H" &&
-      global.webArguments.theKeys[i] != "activationToken"
+      global.webArguments.keys[i] != "password" &&
+      global.webArguments.keys[i] != "request" &&
+      global.webArguments.keys[i] != "googleToken" &&
+      global.webArguments.keys[i] != "G_AUTHUSER_H" &&
+      global.webArguments.keys[i] != "activationToken"
     ) {
-      redirectedAddress << global.webArguments.theKeys[i] << "="
-      << global.webArguments.theValues[i] << "&";
+      redirectedAddress << global.webArguments.keys[i] << "="
+      << global.webArguments.values[i] << "&";
     }
   }
   if (argumentProcessingFailureComments.str() != "") {
@@ -4257,8 +4257,8 @@ void GlobalVariables::configurationProcess() {
   MacroRegisterFunctionWithName("GlobalVariables::configurationProcess");
   for (int i = 0; i < global.configurationCommandLine.objects.size(); i ++) {
     global.configuration.setKeyValue(
-      global.configurationCommandLine.objects.theKeys[i],
-      global.configurationCommandLine.objects.theValues[i]
+      global.configurationCommandLine.objects.keys[i],
+      global.configurationCommandLine.objects.values[i]
     );
   }
   global.flagServerDetailedLog = global.configuration[

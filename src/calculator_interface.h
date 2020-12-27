@@ -1352,7 +1352,7 @@ public:
   bool checkConsistencyAfterInitialization();
   // To make operations read only, we make operations private and return const pointer to it.
   const HashedList<std::string, MathRoutines::hashString>& getOperations() {
-    return this->operations.theKeys;
+    return this->operations.keys;
   }
   const HashedList<std::string, MathRoutines::hashString>& getBuiltInTypes() {
     return this->builtInTypes;

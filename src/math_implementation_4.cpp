@@ -448,7 +448,7 @@ std::string GlobalVariables::toStringCalculatorArgumentsNoNavigation(List<std::s
   }
   std::stringstream out;
   for (int i = 0; i < this->webArguments.size(); i ++) {
-    const std::string& currentName = this->webArguments.theKeys[i];
+    const std::string& currentName = this->webArguments.keys[i];
     if (
       currentName == "request" ||
       currentName == "password" ||
@@ -475,8 +475,8 @@ std::string GlobalVariables::toStringCalculatorArgumentsNoNavigation(List<std::s
         continue;
       }
     }
-    out << global.webArguments.theKeys[i] << "="
-    << global.webArguments.theValues[i]
+    out << global.webArguments.keys[i] << "="
+    << global.webArguments.values[i]
     << "&";
   }
   return out.str();

@@ -220,7 +220,7 @@ bool CalculatorHTML::Test::OneProblemTest::run() {
   this->flagSuccess = true;
   for (int j = 0; j < this->answers.size; j ++) {
     CalculatorHTML::Test::OneProblemTest::OneAnswer& current = this->answers[j];
-    current.answerId = theProblem.theProblemData.theAnswers.theValues[j].answerId;
+    current.answerId = theProblem.theProblemData.theAnswers.values[j].answerId;
     current.answerIdWebAPI = WebAPI::problem::calculatorAnswerPrefix + current.answerId;
     global.setWebInput(current.answerIdWebAPI, "1");
     current.builtInAnswerAPICall = WebAPIResponse::getAnswerOnGiveUp(
@@ -1522,17 +1522,17 @@ bool CalculatorFunctions::innerMatchesPattern(
   commandList.addChildAtomOnTop(calculator.opCommandSequence());
   for (int i = 0; i < matchedExpressions.size(); i ++) {
     Expression currentCommand;
-    if (!matchedExpressions.theKeys[i].startsWith(calculator.opBind(), 2)) {
+    if (!matchedExpressions.keys[i].startsWith(calculator.opBind(), 2)) {
       std::stringstream errorStream;
-      errorStream << "Bound variable " << matchedExpressions.theKeys[i].toString()
+      errorStream << "Bound variable " << matchedExpressions.keys[i].toString()
       << " does not start with the bind atom. ";
       return output.makeError(errorStream.str(), calculator);
     }
     currentCommand.makeXOX(
       calculator,
       calculator.opDefine(),
-      matchedExpressions.theKeys[i][1],
-      matchedExpressions.theValues[i]
+      matchedExpressions.keys[i][1],
+      matchedExpressions.values[i]
     );
     commandList.addChildOnTop(currentCommand);
   }

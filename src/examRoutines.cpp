@@ -68,7 +68,7 @@ bool CalculatorHTML::mergeProblemWeight(
   ProblemData emptyData;
   std::string currentCourse = global.userDefault.courseComputed;
   for (int i = 0; i < inputJSON.objects.size(); i ++) {
-    std::string currentProblemName = inputJSON.objects.theKeys[i];
+    std::string currentProblemName = inputJSON.objects.keys[i];
     if (checkFileExistence) {
       if (!FileOperations::fileExistsVirtualCustomizedReadOnly(
         currentProblemName, commentsOnFailure
@@ -80,7 +80,7 @@ bool CalculatorHTML::mergeProblemWeight(
         return false;
       }
     }
-    JSData currentProblem = inputJSON.objects.theValues[i];
+    JSData currentProblem = inputJSON.objects.values[i];
     if (!outputAppendProblemInfo.contains(currentProblemName)) {
       outputAppendProblemInfo.setKeyValue(currentProblemName, emptyData);
     }
@@ -90,17 +90,17 @@ bool CalculatorHTML::mergeProblemWeight(
       currentProblemValue.adminData.problemWeightsPerCourse.setKeyValue(currentCourse, currentWeight.theString);
     } else if (currentWeight.theType == JSData::token::tokenObject) {
       for (int i = 0; i < currentWeight.objects.size(); i ++) {
-        if (currentWeight.objects.theValues[i].theType != JSData::token::tokenString) {
+        if (currentWeight.objects.values[i].theType != JSData::token::tokenString) {
           if (commentsOnFailure != nullptr) {
             *commentsOnFailure << "Failed to extract weight from: "
-            << currentWeight.objects.theValues[i]
+            << currentWeight.objects.values[i]
             << " in weight: " << currentWeight.toString();
           }
           return false;
         }
         currentProblemValue.adminData.problemWeightsPerCourse.setKeyValue(
-          currentWeight.objects.theKeys[i],
-          currentWeight.objects.theValues[i].theString
+          currentWeight.objects.keys[i],
+          currentWeight.objects.values[i].theString
         );
       }
     } else {
@@ -127,8 +127,8 @@ bool CalculatorHTML::mergeProblemDeadline(
   }
   ProblemData emptyData;
   for (int i = 0; i < inputJSON.objects.size(); i ++) {
-    std::string currentProbName = inputJSON.objects.theKeys[i];
-    JSData currentProblem = inputJSON.objects.theValues[i];
+    std::string currentProbName = inputJSON.objects.keys[i];
+    JSData currentProblem = inputJSON.objects.values[i];
     if (currentProbName == "") {
       continue;
     }
@@ -140,8 +140,8 @@ bool CalculatorHTML::mergeProblemDeadline(
     if (currentDeadlines.theType == JSData::token::tokenObject) {
       for (int j = 0; j < currentDeadlines.objects.size(); j ++) {
         currentProblemValue.adminData.deadlinesPerSection.setKeyValue(
-          currentDeadlines.objects.theKeys[j],
-          currentDeadlines.objects.theValues[j].theString
+          currentDeadlines.objects.keys[j],
+          currentDeadlines.objects.values[j].theString
         );
       }
     } else {
@@ -162,21 +162,21 @@ JSData CalculatorHTML::toJSONDeadlines(
   output.theType = JSData::token::tokenObject;
 
   for (int i = 0; i < inputProblemInfo.size(); i ++) {
-    ProblemDataAdministrative& currentProblem = inputProblemInfo.theValues[i].adminData;
+    ProblemDataAdministrative& currentProblem = inputProblemInfo.values[i].adminData;
     if (currentProblem.deadlinesPerSection.size() == 0) {
       continue;
     }
-    std::string currentProblemName = inputProblemInfo.theKeys[i];
+    std::string currentProblemName = inputProblemInfo.keys[i];
     JSData currentProblemJSON;
     for (int j = 0; j < currentProblem.deadlinesPerSection.size(); j ++) {
       std::string currentDeadline = StringRoutines::stringTrimWhiteSpace(
-        currentProblem.deadlinesPerSection.theValues[j]
+        currentProblem.deadlinesPerSection.values[j]
       );
       if (currentDeadline == "") {
         continue;
       }
       std::string currentSection = StringRoutines::stringTrimWhiteSpace(
-        currentProblem.deadlinesPerSection.theKeys[j]
+        currentProblem.deadlinesPerSection.keys[j]
       );
       currentProblemJSON[DatabaseStrings::labelDeadlines][currentSection] = currentDeadline;
     }
@@ -192,21 +192,21 @@ QuerySet CalculatorHTML::toQuerySetProblemWeights(
   QuerySet output;
   output.nestedLabels.addOnTop(DatabaseStrings::labelProblemWeight);
   for (int i = 0; i < inputProblemInfo.size(); i ++) {
-    ProblemDataAdministrative& currentProblem = inputProblemInfo.theValues[i].adminData;
+    ProblemDataAdministrative& currentProblem = inputProblemInfo.values[i].adminData;
     if (currentProblem.problemWeightsPerCourse.size() == 0) {
       continue;
     }
-    std::string currentProblemName = inputProblemInfo.theKeys[i];
+    std::string currentProblemName = inputProblemInfo.keys[i];
     JSData currentProblemJSON;
     for (int j = 0; j < currentProblem.problemWeightsPerCourse.size(); j ++) {
       std::string currentWeight = StringRoutines::stringTrimWhiteSpace(
-        currentProblem.problemWeightsPerCourse.theValues[j]
+        currentProblem.problemWeightsPerCourse.values[j]
       );
       if (currentWeight == "") {
         continue;
       }
       std::string currentCourse = StringRoutines::stringTrimWhiteSpace(
-        currentProblem.problemWeightsPerCourse.theKeys[j]
+        currentProblem.problemWeightsPerCourse.keys[j]
       );
       currentProblemJSON[currentCourse] = currentWeight;
     }
@@ -231,11 +231,11 @@ bool CalculatorHTML::mergeOneProblemAdminData(
     }
     return false;
   }
-  if (!this->currentUser.theProblemData.contains(inputProblemName)) {
-    this->currentUser.theProblemData.setKeyValue(inputProblemName, inputProblemInfo);
+  if (!this->currentUser.problemData.contains(inputProblemName)) {
+    this->currentUser.problemData.setKeyValue(inputProblemName, inputProblemInfo);
   }
   ProblemDataAdministrative& currentProblem =
-  this->currentUser.theProblemData.getValueCreate(inputProblemName).adminData;
+  this->currentUser.problemData.getValueCreate(inputProblemName).adminData;
   MapList<std::string, std::string, MathRoutines::hashString>&
   currentDeadlines = currentProblem.deadlinesPerSection;
   MapList<std::string, std::string, MathRoutines::hashString>&
@@ -250,14 +250,14 @@ bool CalculatorHTML::mergeOneProblemAdminData(
       commentsOnFailure << "Failed to account deadlines: max 999 sections allowed. ";
       return false;
     }
-    this->databaseStudentSections.addOnTopNoRepetition(incomingDeadlines.theKeys[i]);
+    this->databaseStudentSections.addOnTopNoRepetition(incomingDeadlines.keys[i]);
   }
   ////////////////////////////////////////////
   for (int i = 0; i < incomingDeadlines.size(); i ++) {
-    currentDeadlines.setKeyValue(incomingDeadlines.theKeys[i], incomingDeadlines.theValues[i]);
+    currentDeadlines.setKeyValue(incomingDeadlines.keys[i], incomingDeadlines.values[i]);
   }
   for (int i = 0; i < incomingWeightS.size(); i ++) {
-    currentWeightS.setKeyValue(incomingWeightS.theKeys[i], incomingWeightS.theValues[i]);
+    currentWeightS.setKeyValue(incomingWeightS.keys[i], incomingWeightS.values[i]);
   }
   return true;
 }
@@ -336,6 +336,7 @@ bool CalculatorHTML::storeProblemDeadlines(
   QueryExact deadlineSchema;
   deadlineSchema.collection = DatabaseStrings::tableDeadlines;
   deadlineSchema.setLabelValue(DatabaseStrings::labelDeadlinesSchema, global.userDefault.deadlineSchema);
+  global.comments << "DEBUG: about to store: " << toStore.toStringHtml();
   QuerySet updateQuery = this->toJSONDeadlines(toStore);
   if (!Database::get().updateOne(deadlineSchema, updateQuery, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
@@ -369,7 +370,7 @@ bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
   }
   if (!this->mergeProblemWeight(
     this->currentUser.problemWeights,
-    this->currentUser.theProblemData,
+    this->currentUser.problemData,
     false,
     &comments
   )) {
@@ -377,14 +378,14 @@ bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
     return false;
   }
   if (!this->mergeProblemDeadline(
-    this->currentUser.deadlines, this->currentUser.theProblemData, &comments
+    this->currentUser.deadlines, this->currentUser.problemData, &comments
   )) {
     comments << "Failed to load problem deadlines. ";
     return false;
   }
 
-  if (this->currentUser.theProblemData.contains(this->fileName)) {
-    this->theProblemData = this->currentUser.theProblemData.getValueCreate(this->fileName);
+  if (this->currentUser.problemData.contains(this->fileName)) {
+    this->theProblemData = this->currentUser.problemData.getValueCreate(this->fileName);
   }
   global.userDefault = this->currentUser;
   return true;
@@ -428,7 +429,7 @@ bool CalculatorHTML::loadMe(
       }
       for (int i = 0; i < this->topics.theTopics.size(); i ++) {
         this->computeDeadlinesAllSectionsNoInheritance(
-          this->topics.theTopics.theValues[i]
+          this->topics.theTopics.values[i]
         );
       }
     }
@@ -631,8 +632,8 @@ std::string CalculatorHTML::toStringProblemInfo(const std::string& theFileName, 
   out << this->toStringProblemScoreFull(theFileName);
   if (global.flagDatabaseCompiled) {
     bool problemAlreadySolved = false;
-    if (this->currentUser.theProblemData.contains(theFileName)) {
-      ProblemData& theProbData = this->currentUser.theProblemData.getValueCreate(theFileName);
+    if (this->currentUser.problemData.contains(theFileName)) {
+      ProblemData& theProbData = this->currentUser.problemData.getValueCreate(theFileName);
       if (theProbData.numCorrectlyAnswered >= theProbData.theAnswers.size()) {
         problemAlreadySolved = true;
       }
@@ -746,7 +747,7 @@ std::string SyntacticElementHTML::toStringOpenTag(const std::string& overrideTag
     out << "<" << overrideTagIfNonEmpty;
   }
   for (int i = 0; i < this->properties.size(); i ++) {
-    out << " " << this->properties.theKeys[i] << "=\"" << this->properties.theValues[i] << "\"";
+    out << " " << this->properties.keys[i] << "=\"" << this->properties.values[i] << "\"";
   }
   for (int i = 0; i < this->defaultKeysIfMissing.size; i ++) {
     if (!this->properties.contains(this->defaultKeysIfMissing[i])) {
@@ -975,11 +976,11 @@ std::string CalculatorHTML::prepareUserInputBoxes() {
   MapList<std::string, std::string, MathRoutines::hashString>& theArgs = global.webArguments;
   std::string inputNonAnswerReader;
   for (int i = 0; i < theArgs.size(); i ++) {
-    if (StringRoutines::stringBeginsWith(theArgs.theKeys[i], "userInputBox", &inputNonAnswerReader)) {
-      if (inputNonAnswerReader != "" && theArgs.theValues[i] != "") {
+    if (StringRoutines::stringBeginsWith(theArgs.keys[i], "userInputBox", &inputNonAnswerReader)) {
+      if (inputNonAnswerReader != "" && theArgs.values[i] != "") {
         out << Calculator::Atoms::setInputBox << "(name = "
         << inputNonAnswerReader
-        << ", value = " << HtmlRoutines::convertURLStringToNormal(theArgs.theValues[i], false)
+        << ", value = " << HtmlRoutines::convertURLStringToNormal(theArgs.values[i], false)
         << "); ";
       }
     }
@@ -1050,19 +1051,19 @@ bool CalculatorHTML::prepareCommands(std::stringstream* comments) {
     return false;
   }
   for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++) {
-    if (!this->prepareCommandsAnswer(this->theProblemData.theAnswers.theValues[i], comments)) {
+    if (!this->prepareCommandsAnswer(this->theProblemData.theAnswers.values[i], comments)) {
       return false;
     }
-    if (!this->prepareCommandsAnswerOnGiveUp(this->theProblemData.theAnswers.theValues[i], comments)) {
+    if (!this->prepareCommandsAnswerOnGiveUp(this->theProblemData.theAnswers.values[i], comments)) {
       return false;
     }
-    if (!this->prepareCommandsSolution(this->theProblemData.theAnswers.theValues[i], comments)) {
+    if (!this->prepareCommandsSolution(this->theProblemData.theAnswers.values[i], comments)) {
       return false;
     }
-    if (!this->prepareCommentsBeforeSubmission(this->theProblemData.theAnswers.theValues[i], comments)) {
+    if (!this->prepareCommentsBeforeSubmission(this->theProblemData.theAnswers.values[i], comments)) {
       return false;
     }
-    if (!this->prepareCommentsBeforeInterpretation(this->theProblemData.theAnswers.theValues[i], comments)) {
+    if (!this->prepareCommentsBeforeInterpretation(this->theProblemData.theAnswers.values[i], comments)) {
       return false;
     }
   }
@@ -1235,7 +1236,7 @@ bool CalculatorHTML::prepareAndExecuteCommands(Calculator& theInterpreter, std::
   }
   for (int i = 0; i < theInterpreter.theObjectContainer.theUserInputTextBoxesWithValues.size(); i ++) {
     this->theProblemData.inputNonAnswerIds.addOnTop(
-      theInterpreter.theObjectContainer.theUserInputTextBoxesWithValues.theKeys[i]
+      theInterpreter.theObjectContainer.theUserInputTextBoxesWithValues.keys[i]
     );
   }
   return result;
@@ -1299,7 +1300,7 @@ bool CalculatorHTML::computeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
     << desiredAnswerId << " but the answerId is missing from the list of known answer ids. "
     << this->theProblemData.toStringAvailableAnswerIds() << global.fatal;
   }
-  Answer& currentA = this->theProblemData.theAnswers.theValues[theIndex];
+  Answer& currentA = this->theProblemData.theAnswers.values[theIndex];
   if (theIndex < this->answerHighlights.size) {
     currentA.htmlAnswerHighlight = this->answerHighlights[theIndex];
   } else {
@@ -1326,10 +1327,10 @@ bool CalculatorHTML::computeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   << currentA.idVerificationSpan << "');";
   currentA.properties.clear();
   for (int i = 0; i < inputOutput.properties.size(); i ++) {
-    if (inputOutput.properties.theKeys[i] == "id") {
+    if (inputOutput.properties.keys[i] == "id") {
       continue;
     }
-    currentA.properties.setKeyValue(inputOutput.properties.theKeys[i], inputOutput.properties.theValues[i]);
+    currentA.properties.setKeyValue(inputOutput.properties.keys[i], inputOutput.properties.values[i]);
   }
 
   currentA.javascriptPreviewAnswer = previewAnswerStream.str();
@@ -1363,7 +1364,7 @@ void CalculatorHTML::interpretGenerateStudentAnswerButton(SyntacticElementHTML& 
   if (!this->computeAnswerRelatedStrings(inputOutput)) {
     return;
   }
-  Answer& currentA = this->theProblemData.theAnswers.theValues[this->getAnswerIndex(inputOutput.getKeyValue("id"))];
+  Answer& currentA = this->theProblemData.theAnswers.values[this->getAnswerIndex(inputOutput.getKeyValue("id"))];
   std::stringstream out;
   out << "<br><span class =\"panelAnswer\" id = \"" << currentA.idAnswerPanel << "\"></span>";
   inputOutput.interpretedCommand = out.str();
@@ -1439,10 +1440,10 @@ std::string CalculatorHTML::getDeadlineNoInheritance(const std::string& id) {
     // deadline not present.
     return "";
   }
-  if (!this->currentUser.theProblemData.contains(id)) {
+  if (!this->currentUser.problemData.contains(id)) {
     return "";
   }
-  ProblemDataAdministrative& currentProb = this->currentUser.theProblemData.getValueCreateNoInit((id)).adminData;
+  ProblemDataAdministrative& currentProb = this->currentUser.problemData.getValueCreateNoInit((id)).adminData;
   if (!currentProb.deadlinesPerSection.contains(this->currentUser.sectionComputed)) {
     return "";
   }
@@ -1467,11 +1468,11 @@ std::string CalculatorHTML::getDeadline(
   }
   TopicElement& currentTopic = this->topics.theTopics.getValueCreate(problemName);
   for (int i = currentTopic.parentTopics.size - 1; i >= 0; i --) {
-    const std::string& containerName = this->topics.theTopics.theKeys[currentTopic.parentTopics[i]];
-    if (this->currentUser.theProblemData.contains(containerName)) {
-      ProblemDataAdministrative& currentProb =
-      this->currentUser.theProblemData.getValueCreateNoInit(containerName).adminData;
-      result = currentProb.deadlinesPerSection.getValueCreate(sectionNumber);
+    const std::string& containerName = this->topics.theTopics.keys[currentTopic.parentTopics[i]];
+    if (this->currentUser.problemData.contains(containerName)) {
+      ProblemDataAdministrative& currentProblem =
+      this->currentUser.problemData.getValueCreateNoInit(containerName).adminData;
+      result = currentProblem.deadlinesPerSection.getValueCreate(sectionNumber);
       if (StringRoutines::stringTrimWhiteSpace(result) != "") {
         outputIsInherited = (containerName != problemName);
         return result;
@@ -1629,7 +1630,7 @@ void CalculatorHTML::computeDeadlinesAllSectionsNoInheritance(TopicElement& inpu
   inputOutput.deadlinesPerSectioN.initializeFillInObject(this->databaseStudentSections.size, "");
   for (int i = 0; i < this->databaseStudentSections.size; i ++) {
     ProblemDataAdministrative& currentProb =
-    this->currentUser.theProblemData.getValueCreateNoInit(inputOutput.id).adminData;
+    this->currentUser.problemData.getValueCreateNoInit(inputOutput.id).adminData;
     inputOutput.deadlinesPerSectioN[i] =
     currentProb.deadlinesPerSection.getValueCreate(this->databaseStudentSections[i]);
   }
@@ -1930,7 +1931,7 @@ void TopicElementParser::initializeElementTypes() {
     this->elementTypes.setKeyValue("BundleBegin"            , static_cast<int>(TopicElement::types::bundleBegin           ));
     this->elementTypes.setKeyValue("BundleEnd"              , static_cast<int>(TopicElement::types::bundleEnd             ));
     for (int i = 0; i < this->elementTypes.size(); i ++) {
-      this->elementNames.setKeyValue(this->elementTypes.theValues[i], this->elementTypes.theKeys[i]);
+      this->elementNames.setKeyValue(this->elementTypes.values[i], this->elementTypes.keys[i]);
     }
   }
 }
@@ -2369,7 +2370,7 @@ bool CalculatorHTML::interpretOneAnswerElement(SyntacticElementHTML& inputOutput
     inputOutput.interpretedCommand = out.str();
     return true;
   }
-  Answer& currentA = this->theProblemData.theAnswers.theValues[theIndex];
+  Answer& currentA = this->theProblemData.theAnswers.values[theIndex];
   if (tagClass == "calculatorAnswerVerification") {
     inputOutput.interpretedCommand = currentA.htmlSpanVerifyAnswer;
   }
@@ -2425,7 +2426,7 @@ bool CalculatorHTML::prepareAnswerElements(std::stringstream &comments) {
       if (index == - 1) {
         continue;
       }
-      Answer& currentA = this->theProblemData.theAnswers.theValues[index];
+      Answer& currentA = this->theProblemData.theAnswers.values[index];
       std::string tagClass = this->theContent[i].gGetTagClass();
       if (
         tagClass == "calculatorButtonSubmit" ||
@@ -2631,11 +2632,11 @@ JSData CalculatorHTML::getJavascriptMathQuillBoxesForJSON() {
   output.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++) {
     JSData currentAnswerJS;
-    Answer& currentAnswer = this->theProblemData.theAnswers.theValues[i];
+    Answer& currentAnswer = this->theProblemData.theAnswers.values[i];
     ///////////////
     JSData properties;
     for (int j = 0; j < currentAnswer.properties.size(); j ++) {
-      properties[currentAnswer.properties.theKeys[j]] = currentAnswer.properties.theValues[j];
+      properties[currentAnswer.properties.keys[j]] = currentAnswer.properties.values[j];
     }
     if (currentAnswer.properties.size() > 0) {
       currentAnswerJS[answerLabels::properties] = properties;
@@ -2764,8 +2765,8 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   ) {
     if (global.flagDatabaseCompiled) {
       bool problemAlreadySolved = false;
-      if (this->currentUser.theProblemData.contains(this->fileName)) {
-        ProblemData& theProbData = this->currentUser.theProblemData.getValueCreate(this->fileName);
+      if (this->currentUser.problemData.contains(this->fileName)) {
+        ProblemData& theProbData = this->currentUser.problemData.getValueCreate(this->fileName);
         if (theProbData.numCorrectlyAnswered >= theProbData.theAnswers.size()) {
           problemAlreadySolved = true;
         }
@@ -2833,7 +2834,7 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     MapReferences<std::string, std::string, MathRoutines::hashString>& theScripts =
     theInterpreter.theObjectContainer.graphicsScripts;
     for (int i = 0; i < theScripts.size(); i ++) {
-      this->theScripts.setKeyValue(theScripts.theKeys[i], theScripts.theValues[i]);
+      this->theScripts.setKeyValue(theScripts.keys[i], theScripts.values[i]);
     }
   }
   ////////////////////////////////////////////////////////////////////
@@ -2923,8 +2924,8 @@ std::string CalculatorHTML::toStringProblemScoreFull(const std::string& theFileN
     return out.str();
   }
   Rational currentWeight;
-  if (this->currentUser.theProblemData.contains(theFileName)) {
-    ProblemData& theProbData = this->currentUser.theProblemData.getValueCreate(theFileName);
+  if (this->currentUser.problemData.contains(theFileName)) {
+    ProblemData& theProbData = this->currentUser.problemData.getValueCreate(theFileName);
     if (!theProbData.flagProblemWeightIsOK) {
       out << "<span style =\"color:orange\">No point weight assigned yet. </span>";
       if (!theProbData.adminData.getWeightFromCourse(this->currentUser.courseComputed, currentWeight)) {
@@ -2975,8 +2976,8 @@ std::string CalculatorHTML::toStringProblemScoreShort(const std::string& theFile
   outputAlreadySolved = false;
   Rational currentWeight;
   std::string currentWeightAsGivenByInstructor;
-  if (this->currentUser.theProblemData.contains(theFileName)) {
-    theProbData = this->currentUser.theProblemData.getValueCreate(theFileName);
+  if (this->currentUser.problemData.contains(theFileName)) {
+    theProbData = this->currentUser.problemData.getValueCreate(theFileName);
     Rational percentSolved = 0, totalPoints = 0;
     percentSolved.assignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.theAnswers.size());
     theProbData.flagProblemWeightIsOK = theProbData.adminData.getWeightFromCourse(
@@ -3100,10 +3101,10 @@ void TopicElement::reset() {
 bool TopicElementParser::checkConsistencyParsed() {
   MacroRegisterFunctionWithName("TopicElementParser::checkConsistencyParsed");
   for (int i = 0; i < this->theTopics.size(); i ++) {
-    if (this->theTopics.theValues[i].type == TopicElement::types::problem) {
-      if (this->theTopics.theValues[i].immediateChildren.size > 0) {
+    if (this->theTopics.values[i].type == TopicElement::types::problem) {
+      if (this->theTopics.values[i].immediateChildren.size > 0) {
         global.fatal << "Topic element: "
-        << this->theTopics.theValues[i].toString()
+        << this->theTopics.values[i].toString()
         << " has non-zero immediate children. " << global.fatal;
         return false;
       }
@@ -3115,7 +3116,7 @@ bool TopicElementParser::checkConsistencyParsed() {
 bool TopicElementParser::checkNoErrors(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TopicElementParser::checkNoErrors");
   for (int i = 0; i < this->theTopics.size(); i ++) {
-    TopicElement& current = this->theTopics.theValues[i];
+    TopicElement& current = this->theTopics.values[i];
     if (current.isError()) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Element index "
@@ -3228,7 +3229,7 @@ bool TopicElementParser::checkProblemsOpen(
 ) {
   MacroRegisterFunctionWithName("TopicElementParser::checkProblemsOpen");
   for (int i = 0; i < this->theTopics.size(); i ++) {
-    TopicElement& current = this->theTopics.theValues[i];
+    TopicElement& current = this->theTopics.values[i];
     if (!current.problemOpensIfAvailable(commentsOnFailure)) {
       return false;
     }
@@ -3242,7 +3243,7 @@ bool TopicElementParser::checkTopicPdfs(
   MacroRegisterFunctionWithName("TopicElementParser::checkTopicPdfs");
   this->checkInitialization();
   for (int i = 0; i < this->theTopics.size(); i ++) {
-    TopicElement& current = this->theTopics.theValues[i];
+    TopicElement& current = this->theTopics.values[i];
     if (!current.pdfsOpenIfAvailable(*this->owner, commentsOnFailure)) {
       return false;
     }
@@ -3359,7 +3360,7 @@ TopicElementParser::TopicLine TopicElementParser::extractLine(const std::string&
   }
   int indexElement = this->elementTypes.getIndex(result.tag);
   if (indexElement >= 0) {
-    result.theType = this->elementTypes.theValues[indexElement];
+    result.theType = this->elementTypes.values[indexElement];
   }
   return result;
 }
@@ -3560,7 +3561,7 @@ void TopicElementParser::parseTopicList(
 void TopicElementParser::computeTopicNumbers() {
   List<int> currentProblemNumber;
   for (int i = 0; i < this->theTopics.size(); i ++) {
-    TopicElement& current = this->theTopics.theValues[i];
+    TopicElement& current = this->theTopics.values[i];
     int labelsNeeded = current.type - TopicElement::types::chapter + 1;
     if (labelsNeeded > 4 || labelsNeeded < 0) {
       labelsNeeded = 4;
@@ -3584,7 +3585,7 @@ void TopicElementParser::computeTopicHierarchyPartOne() {
   List<int> parentChain;
   List<int> parentTypes;
   for (int i = 0; i < this->theTopics.size(); i ++) {
-    int currentAdjustedtype = this->theTopics.theValues[i].type;
+    int currentAdjustedtype = this->theTopics.values[i].type;
     if (
       currentAdjustedtype != TopicElement::types::chapter &&
       currentAdjustedtype != TopicElement::types::section &&
@@ -3599,12 +3600,12 @@ void TopicElementParser::computeTopicHierarchyPartOne() {
       }
     }
     if (parentChain.size > 0) {
-      TopicElement& parent = this->theTopics.theValues[*parentChain.lastObject()];
+      TopicElement& parent = this->theTopics.values[*parentChain.lastObject()];
       parent.immediateChildren.addOnTop(i);
     }
-    this->theTopics.theValues[i].parentTopics.setSize(0);
+    this->theTopics.values[i].parentTopics.setSize(0);
     for (int j = 0; j < parentChain.size; j ++) {
-      this->theTopics.theValues[i].parentTopics.addOnTop(parentChain[j]);
+      this->theTopics.values[i].parentTopics.addOnTop(parentChain[j]);
     }
     parentChain.addOnTop(i);
     parentTypes.addOnTop(currentAdjustedtype);
@@ -3614,7 +3615,7 @@ void TopicElementParser::computeTopicHierarchyPartOne() {
 void TopicElementParser::computeTopicHierarchyPartTwo() {
   MacroRegisterFunctionWithName("TopicElementParser::computeTopicHierarchyPartTwo");
   for (int i = this->theTopics.size() - 1; i >= 0; i --) {
-    TopicElement& currentElt = this->theTopics.theValues[i];
+    TopicElement& currentElt = this->theTopics.values[i];
     if (currentElt.problemFileName != "") {
       continue;
     }
@@ -3627,7 +3628,7 @@ void TopicElementParser::computeTopicHierarchyPartTwo() {
     currentElt.flagContainsProblemsNotInSubsection = false;
     currentElt.totalSubSectionsUnderME = 0;
     for (int j = 0; j < currentElt.immediateChildren.size; j ++) {
-      TopicElement& currentChild = this->theTopics.theValues[currentElt.immediateChildren[j]];
+      TopicElement& currentChild = this->theTopics.values[currentElt.immediateChildren[j]];
       if (currentChild.type == TopicElement::types::topic) {
         currentElt.totalSubSectionsUnderME ++;
         currentElt.totalSubSectionsUnderMeIncludingEmptySubsections ++;
@@ -3687,14 +3688,14 @@ bool CalculatorHTML::loadAndParseTopicList(std::stringstream& comments) {
   this->topics.parseTopicList(this->topicListContent);
   this->problemNamesNoTopics.clear();
   for (int i = 0; i < this->topics.theTopics.size(); i ++) {
-    if (this->topics.theTopics.theValues[i].problemFileName != "") {
-      this->problemNamesNoTopics.addOnTop(this->topics.theTopics.theValues[i].problemFileName);
+    if (this->topics.theTopics.values[i].problemFileName != "") {
+      this->problemNamesNoTopics.addOnTop(this->topics.theTopics.values[i].problemFileName);
     }
   }
   return true;
 }
 
-JSData CalculatorHTML::toStringTopicListJSON() {
+JSData CalculatorHTML::toStringTopicListJSON(std::stringstream* comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::toStringTopicListJSON");
   std::stringstream out;
   JSData output, topicBundleFiles;
@@ -3709,10 +3710,16 @@ JSData CalculatorHTML::toStringTopicListJSON() {
   output["topicBundleFile"] = topicBundleFiles;
   output["children"].theType = JSData::token::tokenArray;
   for (int i = 0; i < this->topics.theTopics.size(); i ++) {
-    TopicElement& currentElt = this->topics.theTopics.theValues[i];
+    TopicElement& currentElt = this->topics.theTopics.values[i];
     if (currentElt.type == TopicElement::types::chapter) {
       output["children"].theList.addOnTop(currentElt.toJSON(*this));
     }
+  }
+  if (global.userDefaultIsDebuggingAdmin()) {
+    if (comments != nullptr) {
+      output[WebAPI::result::comments] = comments->str();
+    }
+    output[WebAPI::result::commentsGlobal] = global.comments.getCurrentReset();
   }
   return output;
 }
@@ -3734,7 +3741,7 @@ void CalculatorHTML::interpretTableOfContents(SyntacticElementHTML& inputOutput)
   << "topicList=" << this->topicListFileName << "&" << "\">All topics</a>";
   out << "<ul>";
   for (int i = 0; i < this->topics.theTopics.size(); i ++) {
-    TopicElement& currentElt = this->topics.theTopics.theValues[i];
+    TopicElement& currentElt = this->topics.theTopics.values[i];
     if (subSectionStarted) {
       if (
         currentElt.type == TopicElement::types::topic ||
@@ -3816,10 +3823,10 @@ bool CalculatorHTML::computeTopicListAndPointsEarned(std::stringstream& comments
     global.requestType != "templateNoLogin";
     HashedList<std::string, MathRoutines::hashString> gradableProblems;
     for (int i = 0; i < this->topics.theTopics.size(); i ++) {
-      if (this->topics.theTopics.theValues[i].type == TopicElement::types::problem) {
-        gradableProblems.addOnTopNoRepetition(this->topics.theTopics.theValues[i].id);
-        if (this->topics.theTopics.theValues[i].immediateChildren.size > 0) {
-          global.fatal << "Error: problem " << this->topics.theTopics.theValues[i].toString()
+      if (this->topics.theTopics.values[i].type == TopicElement::types::problem) {
+        gradableProblems.addOnTopNoRepetition(this->topics.theTopics.values[i].id);
+        if (this->topics.theTopics.values[i].immediateChildren.size > 0) {
+          global.fatal << "Error: problem " << this->topics.theTopics.values[i].toString()
           << " has children topics which is not allowed. "
           << global.fatal;
         }
@@ -4098,7 +4105,7 @@ JSData TopicElement::toJSON(CalculatorHTML& owner) {
     << this->immediateChildren.toStringCommaDelimited() << global.fatal;
   }
   for (int i = 0; i < this->immediateChildren.size; i ++) {
-    TopicElement& currentChild = owner.topics.theTopics.theValues[this->immediateChildren[i]];
+    TopicElement& currentChild = owner.topics.theTopics.values[this->immediateChildren[i]];
     output["children"].theList.addOnTop(currentChild.toJSON(owner));
   }
   output["problemNumberString"] = this->problemNumberString;
@@ -4120,8 +4127,8 @@ JSData TopicElement::toJSON(CalculatorHTML& owner) {
   output[WebAPI::problem::fileName] = this->problemFileName;
   output[WebAPI::problem::idProblem] = this->id;
   if (global.flagDatabaseCompiled) {
-    if (owner.currentUser.theProblemData.contains(this->problemFileName)) {
-      ProblemData& currentData = owner.currentUser.theProblemData.getValueCreate(this->problemFileName);
+    if (owner.currentUser.problemData.contains(this->problemFileName)) {
+      ProblemData& currentData = owner.currentUser.problemData.getValueCreate(this->problemFileName);
       output["correctlyAnswered"] = currentData.numCorrectlyAnswered;
       output["totalQuestions"] = currentData.theAnswers.size();
       Rational currentWeight;

@@ -27,11 +27,11 @@ JSData Calculator::toJSONFunctionHandlers() {
   JSData output;
   output.theType = JSData::token::tokenObject;
   for (int i = 0; i < this->operations.size(); i ++) {
-    if (this->operations.theValues[i].isZeroPointer()) {
+    if (this->operations.values[i].isZeroPointer()) {
       continue;
     }
-    const std::string& operationName = this->operations.theKeys[i];
-    Calculator::OperationHandlers& handlers = this->operations.theValues[i].getElement();
+    const std::string& operationName = this->operations.keys[i];
+    Calculator::OperationHandlers& handlers = this->operations.values[i].getElement();
     output[operationName] = handlers.toJSON();
   }
   return output;
@@ -136,10 +136,10 @@ std::string Calculator::toStringRuleStatusUser() {
   MacroRegisterFunctionWithName("Calculator::toStringRuleStatusUser");
   std::stringstream out;
   for (int i = 0; i < this->operations.size(); i ++) {
-    if (this->operations.theValues[i].isZeroPointer()) {
+    if (this->operations.values[i].isZeroPointer()) {
       continue;
     }
-    out << this->operations.theValues[i].getElement().toStringRuleStatusUser();
+    out << this->operations.values[i].getElement().toStringRuleStatusUser();
   }
   return out.str();
 }
@@ -172,10 +172,10 @@ const List<Function>* Calculator::getOperationCompositeHandlers(int theOp) {
     // [note: I no longer remember the orginal rationale, if any].
     global.fatal << "Corrupt atom index: " << theOp << global.fatal;
   }
-  if (this->operations.theValues[theOp].isZeroPointer()) {
+  if (this->operations.values[theOp].isZeroPointer()) {
     return nullptr;
   }
-  return &this->operations.theValues[theOp].getElementConst().compositeHandlers;
+  return &this->operations.values[theOp].getElementConst().compositeHandlers;
 }
 
 const List<Function>* Calculator::getOperationHandlers(int theOp) {
@@ -186,10 +186,10 @@ const List<Function>* Calculator::getOperationHandlers(int theOp) {
     // [note: I no longer remember the original rationale, if any].
     global.fatal << "Corrupt atom index: " << theOp << global.fatal;
   }
-  if (this->operations.theValues[theOp].isZeroPointer()) {
+  if (this->operations.values[theOp].isZeroPointer()) {
     return nullptr;
   }
-  return &this->operations.theValues[theOp].getElementConst().handlers;
+  return &this->operations.values[theOp].getElementConst().handlers;
 }
 
 bool Calculator::outerStandardCompositeHandler(
@@ -282,10 +282,10 @@ bool Calculator::outerStandardHandler(
   if (!functionNameNode.isOperation(operationIndex)) {
     return false;
   }
-  if (calculator.operations.theValues[operationIndex].isZeroPointer()) {
+  if (calculator.operations.values[operationIndex].isZeroPointer()) {
     return false;
   }
-  const List<Function>& handlers = calculator.operations.theValues[operationIndex].getElement().handlers;
+  const List<Function>& handlers = calculator.operations.values[operationIndex].getElement().handlers;
   for (int i = 0; i < handlers.size; i ++) {
     Function& currentFunction = handlers[i];
     if (currentFunction.apply(
@@ -385,8 +385,8 @@ bool Calculator::expressionMatchesPattern(
     if (!input.startsWith(thePattern.owner->opPlus())) {
       return false;
     }
-    matchedExpressions.theValues.setSize(numMatchedExpressionsAtStart);
-    matchedExpressions.theKeys.setSize(numMatchedExpressionsAtStart);
+    matchedExpressions.values.setSize(numMatchedExpressionsAtStart);
+    matchedExpressions.keys.setSize(numMatchedExpressionsAtStart);
     for (int i = 1; i < thePattern.size(); i ++) {
       if (!(this->expressionMatchesPattern(
         thePattern[i], input[thePattern.size() - i], matchedExpressions, commentsGeneral

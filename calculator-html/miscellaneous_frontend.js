@@ -10,14 +10,6 @@ function switchMenu(obj) {
   }
 }
 
-function hideItem(obj) {
-  document.getElementById(obj).style.display = "none";
-}
-
-function showItem(obj) {
-  document.getElementById(obj).style.display = "";
-}
-
 function appendHtml(
   /** @type{HTMLElement}*/
   targetToAppendTo,
@@ -35,7 +27,7 @@ function appendHtml(
     return;
   }
   if (Array.isArray(contentToAppend)) {
-    for (var i = 0; i < contentToAppend.length; i ++) {
+    for (var i = 0; i < contentToAppend.length; i++) {
       appendHtml(targetToAppendTo, contentToAppend[i]);
     }
     return;
@@ -60,7 +52,7 @@ function appendHtmlToArray(
     return;
   }
   if (Array.isArray(contentToAppend)) {
-    for (var i = 0; i < contentToAppend.length; i ++) {
+    for (var i = 0; i < contentToAppend.length; i++) {
       appendHtmlToArray(targetArray, contentToAppend[i]);
     }
     return;
@@ -68,15 +60,16 @@ function appendHtmlToArray(
   throw (`Could not recognize the html content ${contentToAppend}`);
 }
 
+/**@returns{string} */
 function HTMLFromCommentsAndErrors(input) {
-  var extraTags = [
+  let extraTags = [
     pathnames.urlFields.result.comments,
     pathnames.urlFields.result.error,
     pathnames.urlFields.result.commentsGlobal,
   ];
-  var resultHTML = "";
-  for (var i = 0; i < extraTags.length; i ++) {
-    var current = input[extraTags[i]];
+  let resultHTML = "";
+  for (let i = 0; i < extraTags.length; i++) {
+    let current = input[extraTags[i]];
     if (current === undefined || current === null || current === "") {
       continue;
     }
@@ -85,9 +78,31 @@ function HTMLFromCommentsAndErrors(input) {
   return resultHTML;
 }
 
+/**@returns{HTMLElement[]} */
+function HTMLElementsFromCommentsAndErrors(input) {
+  let extraTags = [
+    pathnames.urlFields.result.comments,
+    pathnames.urlFields.result.error,
+    pathnames.urlFields.result.commentsGlobal,
+  ];
+  let result = [];
+  for (let i = 0; i < extraTags.length; i++) {
+    let current = input[extraTags[i]];
+    if (current === undefined || current === null || current === "") {
+      continue;
+    }
+    let incoming = document.createElement("div");
+    incoming.textContent = current;
+    result.push(incoming);
+    result.push(document.createElement("br"));
+  }
+  return result;
+}
+
 module.exports = {
   switchMenu,
   appendHtml,
   appendHtmlToArray,
   HTMLFromCommentsAndErrors,
+  HTMLElementsFromCommentsAndErrors
 };

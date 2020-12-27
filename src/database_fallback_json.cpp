@@ -89,7 +89,7 @@ bool Database::FallBack::updateOneNolocks(
     modified = &((*modified)[dataToMerge.nestedLabels[i]]);
   }
   for (int i = 0; i < dataToMerge.value.objects.size(); i ++) {
-    (*modified)[dataToMerge.value.objects.theKeys[i]] = dataToMerge.value.objects.theValues[i];
+    (*modified)[dataToMerge.value.objects.keys[i]] = dataToMerge.value.objects.values[i];
   }
   return true;
 }
@@ -123,12 +123,12 @@ std::string Database::FallBack::toStringIndices() const {
   int maxIndexedToDisplay = 3;
   for (int i = 0; i < this->indices.size(); i ++) {
     const MapList<std::string, List<int32_t>, MathRoutines::hashString>& currentLocation =
-    this->indices.theValues[i].locations;
-    out << this->indices.theKeys[i] << ": " << currentLocation.size() << " indexed: ";
+    this->indices.values[i].locations;
+    out << this->indices.keys[i] << ": " << currentLocation.size() << " indexed: ";
     int numberToDisplay = MathRoutines::minimum(currentLocation.size(), maxIndexedToDisplay);
     out << "[";
     for (int j = 0; j < numberToDisplay; j ++) {
-      out << currentLocation.theKeys[j];
+      out << currentLocation.keys[j];
       if (j != numberToDisplay - 1) {
         out << ", ";
       }
@@ -179,13 +179,13 @@ bool Database::FallBack::findIndexOneNolocksMinusOneNotFound(
     }
     return true;
   }
-  if (currentIndex.locations.theValues[currentLocationIndex].size == 0) {
+  if (currentIndex.locations.values[currentLocationIndex].size == 0) {
     if (commentsOnNotFound != nullptr ) {
       *commentsOnNotFound << "Element not found. ";
     }
     return true;
   }
-  output = currentIndex.locations.theValues[currentLocationIndex][0];
+  output = currentIndex.locations.values[currentLocationIndex][0];
   return true;
 }
 
@@ -197,7 +197,7 @@ bool Database::FallBack::fetchCollectionNames(
     return false;
   }
   output.setSize(0);
-  output.addListOnTop(this->reader.objects.theKeys);
+  output.addListOnTop(this->reader.objects.keys);
   return true;
 }
 
@@ -264,8 +264,8 @@ bool Database::FallBack::readAndIndexDatabase(std::stringstream* commentsOnFailu
     this->indices.getValueCreate(this->knownIndices[i]);
   }
   for (int i = 0; i < this->reader.objects.size(); i ++) {
-    std::string collection = this->reader.objects.theKeys[i];
-    JSData& currentCollection = this->reader.objects.theValues[i];
+    std::string collection = this->reader.objects.keys[i];
+    JSData& currentCollection = this->reader.objects.values[i];
     for (int i = 0; i < currentCollection.theList.size; i ++) {
       this->indexOneRecord(currentCollection.theList[i], i, collection);
     }
@@ -281,11 +281,11 @@ void Database::FallBack::indexOneRecord(
     return;
   }
   for (int i = 0; i < entry.objects.size(); i ++) {
-    std::string indexLabel = Database::FallBack::Index::collectionAndLabelStatic(collection, entry.objects.theKeys[i]);
+    std::string indexLabel = Database::FallBack::Index::collectionAndLabelStatic(collection, entry.objects.keys[i]);
     if (!this->indices.contains(indexLabel)) {
       continue;
     }
-    const JSData& keyToIndexBy = entry.objects.theValues[i];
+    const JSData& keyToIndexBy = entry.objects.values[i];
     if (keyToIndexBy.theType != JSData::token::tokenString) {
       continue;
     }

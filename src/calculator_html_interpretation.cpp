@@ -46,7 +46,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   std::string lastStudentAnswerID;
   MapList<std::string, std::string, MathRoutines::hashString>& theArgs = global.webArguments;
   for (int i = 0; i < theArgs.size(); i ++) {
-    StringRoutines::stringBeginsWith(theArgs.theKeys[i], WebAPI::problem::calculatorAnswerPrefix, &lastStudentAnswerID);
+    StringRoutines::stringBeginsWith(theArgs.keys[i], WebAPI::problem::calculatorAnswerPrefix, &lastStudentAnswerID);
   }
   int indexLastAnswerId = theProblem.getAnswerIndex(lastStudentAnswerID);
   if (indexLastAnswerId == - 1) {
@@ -60,7 +60,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
     return result;
   }
-  Answer& currentA = theProblem.theProblemData.theAnswers.theValues[indexLastAnswerId];
+  Answer& currentA = theProblem.theProblemData.theAnswers.values[indexLastAnswerId];
   Calculator interpreter;
   interpreter.initialize();
   interpreter.flagPlotNoControls = true;
@@ -144,7 +144,7 @@ std::string WebAPIResponse::setProblemWeight() {
 }
 
 std::string WebAPIResponse::setProblemDeadline() {
-  MacroRegisterFunctionWithName("WebAPIReponse::setProblemWeight");
+  MacroRegisterFunctionWithName("WebAPIReponse::setProblemDeadline");
   if (!global.flagDatabaseCompiled) {
     return "Cannot modify problem weights (no database available)";
   }
@@ -155,9 +155,9 @@ std::string WebAPIResponse::setProblemDeadline() {
   std::string inputProblemInfo = HtmlRoutines::convertURLStringToNormal(global.getWebInput("mainInput"), false);
   std::stringstream commentsOnFailure, out;
   if (theProblem.mergeProblemDeadlineAndStore(inputProblemInfo, &commentsOnFailure)) {
-    out << "<b style =\"color:green\">Modified. </b>";
+    out << "<b style ='color:green'>Modified. </b>" << global.comments.getCurrentReset();
   } else {
-    out << "<b style =\"color:red\">" << commentsOnFailure.str() << "</b>";
+    out << "<b style ='color:red'>" << commentsOnFailure.str() << "</b>";
   }
   return out.str();
 }
@@ -240,9 +240,9 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   JSData result;
   for (int i = 0; i < theArgs.size(); i ++) {
     if (StringRoutines::stringBeginsWith(
-      theArgs.theKeys[i], WebAPI::problem::calculatorAnswerPrefix, &lastStudentAnswerID)
+      theArgs.keys[i], WebAPI::problem::calculatorAnswerPrefix, &lastStudentAnswerID)
     ) {
-      lastAnswer = "(" + HtmlRoutines::convertURLStringToNormal(theArgs.theValues[i], false) + "); ";
+      lastAnswer = "(" + HtmlRoutines::convertURLStringToNormal(theArgs.values[i], false) + "); ";
     }
   }
   studentAnswerSream << lastAnswer;
@@ -270,7 +270,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
-  Answer& currentA = theProblem.theProblemData.theAnswers.theValues[indexLastAnswerId];
+  Answer& currentA = theProblem.theProblemData.theAnswers.values[indexLastAnswerId];
   if (!theProblem.prepareCommands(&comments)) {
     errorStream << "Something went wrong while interpreting the problem file. ";
     if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
@@ -727,8 +727,10 @@ JSData WebAPIResponse::getTopicTableJSON() {
     result[WebAPI::result::comments] = comments.str();
     return result;
   }
+  comments << "DEBUG: got to here!";
+  global.comments << "DEBUG: another tag";
   thePage.computeTopicListAndPointsEarned(comments);
-  return thePage.toStringTopicListJSON();
+  return thePage.toStringTopicListJSON(&comments);
 }
 
 void WebAPIResponse::getJSDataUserInfo(JSData& outputAppend, const std::string& comments) {
@@ -842,8 +844,8 @@ JSData WebAPIResponse::getExamPageJSON() {
     theScripts = JSData::token::tokenArray;
     theScripts.theList.setSize(theFile.theScripts.size());
     for (int i = 0; i < theFile.theScripts.size(); i ++) {
-      theScripts[theFile.theScripts.theKeys[i]] =
-      HtmlRoutines::convertStringToURLString(theFile.theScripts.theValues[i], false);
+      theScripts[theFile.theScripts.keys[i]] =
+      HtmlRoutines::convertStringToURLString(theFile.theScripts.values[i], false);
     }
     output["scripts"] = theScripts;
     output["forReal"] = theFile.flagIsForReal;
@@ -892,7 +894,7 @@ JSData WebAPIResponse::getEditPageJSON() {
     theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorClasses);
     theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorClassesAnswerFields);
     theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorTopicElementNames);
-    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.topics.knownTopicBundles.theKeys);
+    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.topics.knownTopicBundles.keys);
   } else{
     Calculator tempCalculator;
     tempCalculator.initialize();
@@ -954,7 +956,7 @@ JSData WebAPIResponse::submitAnswersJSON(
   int answerIdIndex = - 1;
   for (int i = 0; i < theArgs.size(); i ++) {
     if (StringRoutines::stringBeginsWith(
-      theArgs.theKeys[i], WebAPI::problem::calculatorAnswerPrefix, &studentAnswerNameReader
+      theArgs.keys[i], WebAPI::problem::calculatorAnswerPrefix, &studentAnswerNameReader
     )) {
       int newAnswerIndex = theProblem.getAnswerIndex(studentAnswerNameReader);
       if (answerIdIndex == - 1) {
@@ -965,8 +967,8 @@ JSData WebAPIResponse::submitAnswersJSON(
         newAnswerIndex != - 1
       ) {
         output << "<b>You submitted two or more answers [answer tags: "
-        << theProblem.theProblemData.theAnswers.theValues[answerIdIndex].answerId
-        << " and " << theProblem.theProblemData.theAnswers.theValues[newAnswerIndex].answerId
+        << theProblem.theProblemData.theAnswers.values[answerIdIndex].answerId
+        << " and " << theProblem.theProblemData.theAnswers.values[newAnswerIndex].answerId
         << "].</b> At present, multiple answer submission is not supported. ";
         result[WebAPI::result::resultHtml] = output.str();
         return result;
@@ -978,8 +980,8 @@ JSData WebAPIResponse::submitAnswersJSON(
         result[WebAPI::result::resultHtml] = output.str();
         return result;
       }
-      Answer& currentProblemData = theProblem.theProblemData.theAnswers.theValues[answerIdIndex];
-      currentProblemData.currentAnswerURLed = theArgs.theValues[i];
+      Answer& currentProblemData = theProblem.theProblemData.theAnswers.values[answerIdIndex];
+      currentProblemData.currentAnswerURLed = theArgs.values[i];
       if (currentProblemData.currentAnswerURLed == "") {
         output << "<b> Your answer to tag with id " << studentAnswerNameReader
         << " appears to be empty, please resubmit. </b>";
@@ -994,7 +996,7 @@ JSData WebAPIResponse::submitAnswersJSON(
     return result;
   }
   ProblemData& currentProblemData = theProblem.theProblemData;
-  Answer& currentA = currentProblemData.theAnswers.theValues[answerIdIndex];
+  Answer& currentA = currentProblemData.theAnswers.values[answerIdIndex];
 
   currentA.currentAnswerClean = HtmlRoutines::convertURLStringToNormal(
     currentA.currentAnswerURLed, false
@@ -1430,7 +1432,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   MapList<std::string, std::string, MathRoutines::hashString>& theArgs = global.webArguments;
   for (int i = 0; i < theArgs.size(); i ++) {
     StringRoutines::stringBeginsWith(
-      theArgs.theKeys[i],
+      theArgs.keys[i],
       WebAPI::problem::calculatorAnswerPrefix,
       &lastStudentAnswerID
     );
@@ -1450,7 +1452,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     result[WebAPI::result::error] = errorStream.str();
     return result;
   }
-  Answer& currentA = theProblem.theProblemData.theAnswers.theValues[indexLastAnswerId];
+  Answer& currentA = theProblem.theProblemData.theAnswers.values[indexLastAnswerId];
   if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly == "") {
     out << "<b> Unfortunately there is no answer given for this "
     << "question (answerID: " << lastStudentAnswerID << ").</b>";
@@ -2019,20 +2021,20 @@ void UserCalculator::computePointsEarned(
   this->pointsMax = 0;
   if (theTopics != nullptr) {
     for (int i = 0; i < theTopics->size(); i ++) {
-      (*theTopics).theValues[i].totalPointsEarned = 0;
-      (*theTopics).theValues[i].pointsEarnedInProblemsThatAreImmediateChildren = 0;
-      (*theTopics).theValues[i].maxPointsInAllChildren = 0;
-      (*theTopics).theValues[i].flagSubproblemHasNoWeight = false;
+      (*theTopics).values[i].totalPointsEarned = 0;
+      (*theTopics).values[i].pointsEarnedInProblemsThatAreImmediateChildren = 0;
+      (*theTopics).values[i].maxPointsInAllChildren = 0;
+      (*theTopics).values[i].flagSubproblemHasNoWeight = false;
       //(*theTopics).theValues[i].maxCorrectAnswersInAllChildren = 0;
       //(*theTopics).theValues[i].numAnsweredInAllChildren = 0;
     }
   }
-  for (int i = 0; i < this->theProblemData.size(); i ++) {
-    const std::string problemName = this->theProblemData.theKeys[i];
+  for (int i = 0; i < this->problemData.size(); i ++) {
+    const std::string problemName = this->problemData.keys[i];
     if (!gradableProblems.contains(problemName)) {
       continue;
     }
-    ProblemData& currentP = this->theProblemData.theValues[i];
+    ProblemData& currentP = this->problemData.values[i];
     currentP.points = 0;
     currentP.totalNumSubmissions = 0;
     currentP.numCorrectlyAnswered = 0;
@@ -2043,10 +2045,10 @@ void UserCalculator::computePointsEarned(
       currentWeight = 0;
     }
     for (int j = 0; j < currentP.theAnswers.size(); j ++) {
-      if (currentP.theAnswers.theValues[j].numCorrectSubmissions > 0) {
+      if (currentP.theAnswers.values[j].numCorrectSubmissions > 0) {
         currentP.numCorrectlyAnswered ++;
       }
-      currentP.totalNumSubmissions += currentP.theAnswers.theValues[j].numSubmissions;
+      currentP.totalNumSubmissions += currentP.theAnswers.values[j].numSubmissions;
     }
     if (currentP.flagProblemWeightIsOK) {
       int expectedNumberOfAnswers = currentP.getExpectedNumberOfAnswers(problemName, commentsOnFailure);
@@ -2060,14 +2062,14 @@ void UserCalculator::computePointsEarned(
         TopicElement& currentElt = theTopics->getValueCreate(problemName);
         this->pointsMax += currentWeight;
         for (int j = 0; j < currentElt.parentTopics.size; j ++) {
-          (*theTopics).theValues[currentElt.parentTopics[j]].totalPointsEarned += currentP.points;
-          (*theTopics).theValues[currentElt.parentTopics[j]].maxPointsInAllChildren += currentWeight;
+          (*theTopics).values[currentElt.parentTopics[j]].totalPointsEarned += currentP.points;
+          (*theTopics).values[currentElt.parentTopics[j]].maxPointsInAllChildren += currentWeight;
           if (currentWeight == 0) {
-            (*theTopics).theValues[currentElt.parentTopics[j]].flagSubproblemHasNoWeight = true;
+            (*theTopics).values[currentElt.parentTopics[j]].flagSubproblemHasNoWeight = true;
           }
         }
         if (currentElt.parentTopics.size > 1) {
-          (*theTopics).theValues[currentElt.parentTopics[currentElt.parentTopics.size - 2]].
+          (*theTopics).values[currentElt.parentTopics[currentElt.parentTopics.size - 2]].
             pointsEarnedInProblemsThatAreImmediateChildren += currentP.points;
         }
       }
@@ -2108,7 +2110,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
     comments << "<span style ='color:red'>Could not load your problem history.</span> <br>";
   }
   theProblem.currentUser.computePointsEarned(
-    theProblem.currentUser.theProblemData.theKeys,
+    theProblem.currentUser.problemData.keys,
     &theProblem.topics.theTopics,
     comments
   );
@@ -2175,7 +2177,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
     }
     currentUserRecord.mergeProblemWeight(
       theProblem.currentUser.problemWeights,
-      currentUserRecord.currentUser.theProblemData,
+      currentUserRecord.currentUser.problemData,
       false,
       &comments
     );
@@ -2186,11 +2188,11 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
     );
     this->scoresBreakdown.lastObject()->clear();
     for (int j = 0; j < theProblem.topics.theTopics.size(); j ++) {
-      TopicElement& currentTopic = theProblem.topics.theTopics.theValues[j];
+      TopicElement& currentTopic = theProblem.topics.theTopics.values[j];
       Rational currentPts = currentTopic.totalPointsEarned;
       Rational maxPts = currentTopic.maxPointsInAllChildren;
       this->scoresBreakdown.lastObject()->setKeyValue(
-        theProblem.topics.theTopics.theKeys[j], currentPts
+        theProblem.topics.theTopics.keys[j], currentPts
       );
       if (maxPts == currentPts) {
         this->numStudentsSolvedEntireTopic[j] ++;
@@ -2221,7 +2223,7 @@ std::string WebAPIResponse::getScoresInCoursePage() {
   out << "studentScoresInHomePage = new Array("
   << theScores.theProblem.topics.theTopics.size() << ");\n";
   for (int i = 0; i < theScores.theProblem.topics.theTopics.size(); i ++) {
-    TopicElement& currentElt = theScores.theProblem.topics.theTopics.theValues[i];
+    TopicElement& currentElt = theScores.theProblem.topics.theTopics.values[i];
     out << "studentScoresInHomePage[" << i << "] = new Object;\n";
     if (currentElt.flagSubproblemHasNoWeight) {
       out << "studentScoresInHomePage[" << i << "].weightsOK = false;\n";
@@ -2266,7 +2268,7 @@ std::string WebAPIResponse::toStringUserScores() {
   out << "<table class =\"scoreTable\"><tr><th rowspan =\"3\">User</th>"
   << "<th rowspan =\"3\">Section</th><th rowspan =\"3\"> Total score</th>";
   for (int i = 0; i < theScores.theProblem.topics.theTopics.size(); i ++) {
-    TopicElement& currentElt = theScores.theProblem.topics.theTopics.theValues[i];
+    TopicElement& currentElt = theScores.theProblem.topics.theTopics.values[i];
     if (
       currentElt.problemFileName != "" ||
       currentElt.type != TopicElement::types::chapter
@@ -2286,7 +2288,7 @@ std::string WebAPIResponse::toStringUserScores() {
   out << "</tr>\n";
   out << "<tr>";
   for (int i = 0; i < theScores.theProblem.topics.theTopics.size(); i ++) {
-    TopicElement& currentElt = theScores.theProblem.topics.theTopics.theValues[i];
+    TopicElement& currentElt = theScores.theProblem.topics.theTopics.values[i];
     if (currentElt.problemFileName != "" || currentElt.type != TopicElement::types::section) {
       continue;
     }
@@ -2300,7 +2302,7 @@ std::string WebAPIResponse::toStringUserScores() {
   out << "</tr>\n";
   out << "<tr>";
   for (int i = 0; i < theScores.theProblem.topics.theTopics.size(); i ++) {
-    TopicElement& currentElt = theScores.theProblem.topics.theTopics.theValues[i];
+    TopicElement& currentElt = theScores.theProblem.topics.theTopics.values[i];
     if (
       currentElt.problemFileName == "" &&
       currentElt.type != TopicElement::types::problem &&
@@ -2332,7 +2334,7 @@ std::string WebAPIResponse::toStringUserScores() {
   << "<td>" << theScores.theProblem.currentUser.pointsMax.getDoubleValue()
   << "</td>";
   for (int j = 0; j < theScores.theProblem.topics.theTopics.size(); j ++) {
-    TopicElement& currentElt = theScores.theProblem.topics.theTopics.theValues[j];
+    TopicElement& currentElt = theScores.theProblem.topics.theTopics.values[j];
     if (currentElt.problemFileName != "") {
       continue;
     }
@@ -2350,7 +2352,7 @@ std::string WebAPIResponse::toStringUserScores() {
     << "<td>" << theScores.userInfos[i] << "</td>"
     << "<td>" << theScores.userScores[i].getDoubleValue() << "</td>";
     for (int j = 0; j < theScores.theProblem.topics.theTopics.size(); j ++) {
-      TopicElement& currentElt = theScores.theProblem.topics.theTopics.theValues[j];
+      TopicElement& currentElt = theScores.theProblem.topics.theTopics.values[j];
       if (currentElt.problemFileName != "") {
         continue;
       }
@@ -2361,10 +2363,10 @@ std::string WebAPIResponse::toStringUserScores() {
         continue;
       }
       if (theScores.scoresBreakdown[i].contains(
-        theScores.theProblem.topics.theTopics.theKeys[j]
+        theScores.theProblem.topics.theTopics.keys[j]
       )) {
         out << "<td>"
-        << theScores.scoresBreakdown[i].theValues[j].getDoubleValue()
+        << theScores.scoresBreakdown[i].values[j].getDoubleValue()
         << "</td>";
       } else {
         out << "<td></td>";

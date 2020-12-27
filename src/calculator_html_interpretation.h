@@ -371,7 +371,7 @@ public:
   );
   void computeDeadlinesAllSections(TopicElement& inputOutput);
   void computeDeadlinesAllSectionsNoInheritance(TopicElement& inputOutput);
-  JSData toStringTopicListJSON();
+  JSData toStringTopicListJSON(std::stringstream* comments);
   std::string toStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay = "");
   static std::string toStringLinkFromProblem(const std::string& theFileName, bool practiceMode = true, int randomSeed = - 1);
   std::string toStringLinkFromFileName(const std::string& theFileName);

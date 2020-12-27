@@ -6764,7 +6764,7 @@ bool CalculatorFunctions::innerHighestWeightTransposeAntiAutomorphismBilinearFor
   if (algebraIndex == - 1) {
     return output.makeError("I couldn't extract a Lie algebra to compute hwtaabf.", calculator);
   }
-  SemisimpleLieAlgebra& constSSalg = calculator.theObjectContainer.semisimpleLieAlgebras.theValues[algebraIndex];
+  SemisimpleLieAlgebra& constSSalg = calculator.theObjectContainer.semisimpleLieAlgebras.values[algebraIndex];
   const Expression& weightExpression = input[3];
   Vector<RationalFunction<Rational> > weight;
   if (!calculator.getVector<RationalFunction<Rational> >(
@@ -7540,7 +7540,7 @@ void Calculator::Test::calculatorTestPrepare() {
   }
   this->commands.clear();
   for (int i = 0; i < this->owner->numberOfPredefinedAtoms; i ++) {
-    MemorySaving<Calculator::OperationHandlers>& currentPointer = this->owner->operations.theValues[i];
+    MemorySaving<Calculator::OperationHandlers>& currentPointer = this->owner->operations.values[i];
     if (currentPointer.isZeroPointer()) {
       continue;
     }
@@ -7555,7 +7555,7 @@ void Calculator::Test::calculatorTestPrepare() {
         }
         Calculator::Test::OneTest oneTest;
         oneTest.command = currentFunction.theExample;
-        oneTest.atom = this->owner->operations.theKeys[i];
+        oneTest.atom = this->owner->operations.keys[i];
         oneTest.functionAdditionalIdentifier = currentFunction.additionalIdentifier;
         this->commands.setKeyValue(oneTest.command, oneTest);
       }
@@ -7585,7 +7585,7 @@ bool Calculator::Test::calculatorTestRun() {
   }
   for (int i = this->startIndex; i < this->lastIndexNotTested; i ++) {
     std::stringstream reportStream;
-    Calculator::Test::OneTest& currentTest = this->commands.theValues[i];
+    Calculator::Test::OneTest& currentTest = this->commands.values[i];
     reportStream << "<br>Test progress: testing " << i + 1
     << " out of " << this->commands.size() << ". ";
     reportStream << "<br>Testing expression:<br> " << currentTest.command;

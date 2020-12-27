@@ -8,6 +8,8 @@ const InputPanelData = initializeButtons.InputPanelData;
 const typeset = require("./math_typeset");
 const miscellaneous = require("./miscellaneous");
 const miscellaneousFrontend = require("./miscellaneous_frontend");
+const { urls } = require("./pathnames");
+const datePicker = require("./date_picker").datePicker;
 
 class ProblemCollection {
   constructor() {
@@ -967,9 +969,10 @@ class Problem {
     result += "<tr><th>Grp.</th><th>Deadline</th></tr>";
     for (let counterGroup = 0; counterGroup < thePage.user.sectionsTaught.length; counterGroup++) {
       result += `<tr><td>${thePage.user.sectionsTaught[counterGroup]}</td>`;
-      result += `<td><input class = "datePicker" name = "datePicker${this.problemId}" `;
+      result += `<td><input type="date" class = "datePicker" name = "datePicker${this.problemId}" `;
       if (this.deadlines[counterGroup] !== "" && this.deadlines[counterGroup] !== undefined) {
-        result += `value = "${this.deadlines[counterGroup]}"`;
+        let deadline = this.deadlines[counterGroup];
+        result += `value = "${deadline}"`;
       }
       result += `></input></td></tr>`;
     }
@@ -1289,7 +1292,7 @@ function getHTMLfromTopics() {
 function initializeDatePickers() {
   let thePickers = document.getElementsByClassName("datePicker");
   for (let counterPicker = 0; counterPicker < thePickers.length; counterPicker++) {
-    $(thePickers[counterPicker]).datepicker();
+    datePicker.createDatePicker(thePickers[counterPicker]);
   }
 }
 
@@ -1369,11 +1372,10 @@ function processLoadedTopicsWriteToCoursePage(incomingTopics, result) {
 function writeTopicsToCoursePage() {
   let thePage = window.calculator.mainPage;
   let topicsElements = document.getElementsByTagName("topicList");
-  // if (topicsElements.length === 0) {
-  //  return;
-  // }
   writeEditCoursePagePanel();
   let htmlContentElements = getHTMLfromTopics();
+  let extraComments = miscellaneousFrontend.HTMLElementsFromCommentsAndErrors(allProblems.theTopics);
+  miscellaneousFrontend.appendHtml(topicsElements[0], extraComments);
   miscellaneousFrontend.appendHtml(topicsElements[0], htmlContentElements);
   initializeProblemWeightsAndDeadlines();
   initializeDatePickers();

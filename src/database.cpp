@@ -223,7 +223,7 @@ bool Database::convertJSONToJSONEncodeKeys(
     for (int i = 0; i < input.objects.size(); i ++) {
       JSData nextItem;
       if (!Database::convertJSONToJSONEncodeKeys(
-        input.objects.theValues[i],
+        input.objects.values[i],
         nextItem,
         recursionDepth + 1,
         encodeOverDecode,
@@ -234,10 +234,10 @@ bool Database::convertJSONToJSONEncodeKeys(
       std::string theKey;
       if (encodeOverDecode) {
         theKey = Database::convertStringToMongoKeyString(
-          input.objects.theKeys[i]
+          input.objects.keys[i]
         );
       } else {
-        theKey = HtmlRoutines::convertURLStringToNormal(input.objects.theKeys[i], false);
+        theKey = HtmlRoutines::convertURLStringToNormal(input.objects.keys[i], false);
       }
       output[theKey] = nextItem;
     }
@@ -459,7 +459,7 @@ std::string ProblemData::toStringAvailableAnswerIds() {
   std::stringstream out;
   out << "Available answer ids: ";
   for (int i = 0; i < this->theAnswers.size(); i ++) {
-    out << this->theAnswers.theValues[i].answerId;
+    out << this->theAnswers.values[i].answerId;
     if (i != this->theAnswers.size() - 1) {
       out << ", ";
     }
@@ -492,7 +492,7 @@ std::string ProblemDataAdministrative::toString() const {
 bool ProblemData::checkConsistency() const {
   MacroRegisterFunctionWithName("ProblemData::checkConsistency");
   for (int i = 0; i < this->theAnswers.size(); i ++) {
-    if (StringRoutines::stringTrimWhiteSpace(this->theAnswers.theValues[i].answerId) == "") {
+    if (StringRoutines::stringTrimWhiteSpace(this->theAnswers.values[i].answerId) == "") {
       global.fatal << "This is not supposed to happen: empty answer id." << global.fatal;
     }
   }
@@ -502,10 +502,10 @@ bool ProblemData::checkConsistency() const {
 bool ProblemData::checkConsistencyMathQuillIds() const {
   MacroRegisterFunctionWithName("ProblemData::checkConsistencyMathQuillIds");
   for (int i = 0; i < this->theAnswers.size(); i ++) {
-    if (StringRoutines::stringTrimWhiteSpace(this->theAnswers.theValues[i].idMQfielD) == "") {
+    if (StringRoutines::stringTrimWhiteSpace(this->theAnswers.values[i].idMQfielD) == "") {
       std::stringstream errorStream;
       errorStream << "This is not supposed to happen: empty idMQfield. The answer id is: "
-      << this->theAnswers.theValues[i].answerId << "<br>" << this->toString() << "<hr>Answer information: "
+      << this->theAnswers.values[i].answerId << "<br>" << this->toString() << "<hr>Answer information: "
       << this->toString() << "<br>";
       global.fatal << errorStream.str() << global.fatal;
     }
@@ -522,7 +522,7 @@ std::string ProblemData::toString() const {
   }
   out << ". <br>";
   for (int i = 0; i < this->theAnswers.size(); i ++) {
-    Answer& currentA = this->theAnswers.theValues[i];
+    Answer& currentA = this->theAnswers.values[i];
     out << "AnswerId: " << currentA.answerId;
     out << ", numCorrectSubmissions: " << currentA.numCorrectSubmissions;
     out << ", numSubmissions: " << currentA.numSubmissions;
@@ -580,16 +580,16 @@ std::string UserCalculator::toString() {
   << "<br>Course: computed: " << this->courseInDB << ", in DB: " << this->courseComputed;
 
   Rational weightRat;
-  for (int i = 0; i < this->theProblemData.size(); i ++) {
-    out << "<br>Problem: " << this->theProblemData.theKeys[i] << "; random seed: "
-    << this->theProblemData.theValues[i].randomSeed << "; numSubmissions: "
-    << this->theProblemData.theValues[i].totalNumSubmissions
+  for (int i = 0; i < this->problemData.size(); i ++) {
+    out << "<br>Problem: " << this->problemData.keys[i] << "; random seed: "
+    << this->problemData.values[i].randomSeed << "; numSubmissions: "
+    << this->problemData.values[i].totalNumSubmissions
     << "; correct: "
-    << this->theProblemData.theValues[i].numCorrectlyAnswered
+    << this->problemData.values[i].numCorrectlyAnswered
     << "; points: "
-    << this->theProblemData.theValues[i].points
+    << this->problemData.values[i].points
     << ";";
-    if (!this->theProblemData.theValues[i].adminData.getWeightFromCourse(this->courseComputed, weightRat)) {
+    if (!this->problemData.values[i].adminData.getWeightFromCourse(this->courseComputed, weightRat)) {
       out << " (weight not available). ";
     } else {
       out << " weight: " << weightRat.toString();
@@ -726,9 +726,9 @@ JSData UserCalculatorData::toJSON() {
   }
   result[DatabaseStrings::labelSectionsTaught] = sectionsTaughtList;
   for (int i = result.objects.size() - 1; i >= 0; i --) {
-    JSData& currentValue = result.objects.theValues[i];
+    JSData& currentValue = result.objects.values[i];
     if (currentValue.theString == "" && currentValue.theType == JSData::token::tokenString) {
-      result.objects.removeKey(result.objects.theKeys[i]);
+      result.objects.removeKey(result.objects.keys[i]);
     }
   }
   return result;
@@ -767,7 +767,7 @@ bool UserCalculatorData::computeCourseInformation() {
 
 void UserCalculator::setProblemData(const std::string& problemName, const ProblemData& inputData) {
   MacroRegisterFunctionWithName("UserCalculator::setProblemData");
-  this->theProblemData.setKeyValue(problemName, inputData);
+  this->problemData.setKeyValue(problemName, inputData);
 }
 
 std::string ProblemData::store(){
@@ -777,7 +777,7 @@ std::string ProblemData::store(){
     out << "randomSeed=" << this->randomSeed;
   }
   for (int i = 0; i < this->theAnswers.size(); i ++) {
-    Answer& currentA = this->theAnswers.theValues[i];
+    Answer& currentA = this->theAnswers.values[i];
     if (this->flagRandomSeedGiven || i != 0) {
       out << "&";
     }
@@ -800,7 +800,7 @@ JSData ProblemData::storeJSON() const {
     result[WebAPI::problem::randomSeed] = static_cast<int>(this->randomSeed);
   }
   for (int i = 0; i < this->theAnswers.size(); i ++) {
-    Answer& currentA = this->theAnswers.theValues[i];
+    Answer& currentA = this->theAnswers.values[i];
     JSData currentAnswerJSON;
     currentAnswerJSON["numCorrectSubmissions"] = std::to_string(currentA.numCorrectSubmissions);
     currentAnswerJSON["numSubmissions"] = std::to_string(currentA.numSubmissions);
@@ -1012,12 +1012,12 @@ bool ProblemData::loadFromOldFormat(const std::string& inputData, std::stringstr
   bool result = true;
   MapList<std::string, std::string, MathRoutines::hashString> currentQuestionMap;
   for (int i = 0; i < theMap.size(); i ++) {
-    if (theMap.theKeys[i] == WebAPI::problem::randomSeed) {
+    if (theMap.keys[i] == WebAPI::problem::randomSeed) {
       continue;
     }
-    this->addEmptyAnswerIdOnTop(HtmlRoutines::convertURLStringToNormal(theMap.theKeys[i], false));
-    Answer& currentA = *this->theAnswers.theValues.lastObject();
-    std::string currentQuestion = HtmlRoutines::convertURLStringToNormal(theMap.theValues[i], false);
+    this->addEmptyAnswerIdOnTop(HtmlRoutines::convertURLStringToNormal(theMap.keys[i], false));
+    Answer& currentA = *this->theAnswers.values.lastObject();
+    std::string currentQuestion = HtmlRoutines::convertURLStringToNormal(theMap.values[i], false);
     result = HtmlRoutines::chopPercentEncodedString(currentQuestion, currentQuestionMap, commentsOnFailure);
     if (!result) {
       commentsOnFailure << "Failed to interpret as key-value pair: "
@@ -1061,12 +1061,12 @@ bool ProblemData::loadFromJSON(const JSData& inputData, std::stringstream& comme
   this->theAnswers.clear();
   bool result = true;
   for (int i = 0; i < inputData.objects.size(); i ++) {
-    if (inputData.objects.theKeys[i] == WebAPI::problem::randomSeed) {
+    if (inputData.objects.keys[i] == WebAPI::problem::randomSeed) {
       continue;
     }
-    this->addEmptyAnswerIdOnTop(HtmlRoutines::convertURLStringToNormal(inputData.objects.theKeys[i], false));
-    Answer& currentA = *this->theAnswers.theValues.lastObject();
-    JSData currentQuestionJSON = inputData.objects.theValues[i];
+    this->addEmptyAnswerIdOnTop(HtmlRoutines::convertURLStringToNormal(inputData.objects.keys[i], false));
+    Answer& currentA = *this->theAnswers.values.lastObject();
+    JSData currentQuestionJSON = inputData.objects.values[i];
     if (currentQuestionJSON.objects.contains("numCorrectSubmissions")) {
       currentA.numCorrectSubmissions =
       atoi(currentQuestionJSON.objects.getValueNoFail("numCorrectSubmissions").theString.c_str());
@@ -1093,44 +1093,44 @@ bool UserCalculator::interpretDatabaseProblemData(const std::string& theInfo, st
   if (!HtmlRoutines::chopPercentEncodedString(theInfo, theMap, commentsOnFailure)) {
     return false;
   }
-  this->theProblemData.clear();
-  this->theProblemData.setExpectedSize(theMap.size());
+  this->problemData.clear();
+  this->problemData.setExpectedSize(theMap.size());
   bool result = true;
   ProblemData reader;
   std::string probNameNoWhiteSpace;
   for (int i = 0; i < theMap.size(); i ++) {
-    if (!reader.loadFromOldFormat(HtmlRoutines::convertURLStringToNormal(theMap.theValues[i], false), commentsOnFailure)) {
+    if (!reader.loadFromOldFormat(HtmlRoutines::convertURLStringToNormal(theMap.values[i], false), commentsOnFailure)) {
       result = false;
       continue;
     }
-    probNameNoWhiteSpace = StringRoutines::stringTrimWhiteSpace(HtmlRoutines::convertURLStringToNormal(theMap.theKeys[i], false));
+    probNameNoWhiteSpace = StringRoutines::stringTrimWhiteSpace(HtmlRoutines::convertURLStringToNormal(theMap.keys[i], false));
     if (probNameNoWhiteSpace == "") {
       continue;
     }
-    this->theProblemData.setKeyValue(probNameNoWhiteSpace, reader);
+    this->problemData.setKeyValue(probNameNoWhiteSpace, reader);
   }
   return result;
 }
 
 bool UserCalculator::interpretDatabaseProblemDataJSON(const JSData& theData, std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::interpretDatabaseProblemDataJSON");
-  this->theProblemData.clear();
-  this->theProblemData.setExpectedSize(theData.objects.size());
+  this->problemData.clear();
+  this->problemData.setExpectedSize(theData.objects.size());
   bool result = true;
   ProblemData reader;
   std::string problemNameNoWhiteSpace;
   for (int i = 0; i < theData.objects.size(); i ++) {
-    if (!reader.loadFromJSON(theData.objects.theValues[i], commentsOnFailure)) {
+    if (!reader.loadFromJSON(theData.objects.values[i], commentsOnFailure)) {
       result = false;
       continue;
     }
     problemNameNoWhiteSpace = StringRoutines::stringTrimWhiteSpace(
-      theData.objects.theKeys[i]
+      theData.objects.keys[i]
     );
     if (problemNameNoWhiteSpace == "") {
       continue;
     }
-    this->theProblemData.setKeyValue(problemNameNoWhiteSpace, reader);
+    this->problemData.setKeyValue(problemNameNoWhiteSpace, reader);
   }
   return result;
 }
@@ -1284,11 +1284,11 @@ bool UserCalculator::storeProblemData(
   const std::string& fileNamE, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("UserCalculator::storeProblemData");
-  if (!this->theProblemData.contains(fileNamE)) {
+  if (!this->problemData.contains(fileNamE)) {
     global.fatal << "I was asked to store fileName: "
     << fileNamE << " but I have no record of it in my problem data map. " << global.fatal;
   }
-  const ProblemData& problem = this->theProblemData.getValueNoFail(fileNamE);
+  const ProblemData& problem = this->problemData.getValueNoFail(fileNamE);
   QuerySet update;
   update.nestedLabels.addOnTop(DatabaseStrings::labelProblemDataJSON);
   update.value[fileNamE] = problem.storeJSON();

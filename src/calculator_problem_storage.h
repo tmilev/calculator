@@ -201,7 +201,7 @@ public:
 class TopicElement;
 class UserCalculator : public UserCalculatorData {
 public:
-  MapList<std::string, ProblemData, MathRoutines::hashString> theProblemData;
+  MapList<std::string, ProblemData, MathRoutines::hashString> problemData;
   TimeWrapper authenticationCreationTime;
   Rational pointsEarned;
   Rational pointsMax;

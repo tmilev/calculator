@@ -1208,8 +1208,8 @@ bool Expression::assignStringParsed(
     MapList<Expression, Expression> theSubs;
     for (int i = 0; i < substitutions->size(); i ++) {
       Expression theSubbed;
-      theSubbed.makeAtom(substitutions->theKeys[i], owner);
-      theSubs.setKeyValue(theSubbed, substitutions->theValues[i]);
+      theSubbed.makeAtom(substitutions->keys[i], owner);
+      theSubs.setKeyValue(theSubbed, substitutions->values[i]);
     }
     result.substituteRecursively(theSubs);
   }

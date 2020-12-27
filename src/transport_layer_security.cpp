@@ -1795,7 +1795,7 @@ bool TransportLayerSecurityServer::Session::chooseCipher(std::stringstream* comm
   }
   this->chosenCipher = - 1;
   if (bestIndex < suites.size()) {
-    this->chosenCipher = suites.theKeys[bestIndex];
+    this->chosenCipher = suites.keys[bestIndex];
   }
   return true;
 }

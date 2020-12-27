@@ -9,6 +9,7 @@ const equation_editor = require("./equation_editor");
 const storage = require("./storage");
 const EquationEditor = require("./equation_editor").EquationEditor;
 const EquationEditorOptions = require("./equation_editor").EquationEditorOptions;
+const datePicker = require("./date_picker").datePicker;
 
 var keyWordsKnownToMathQuill = [
   'sqrt',
@@ -151,7 +152,7 @@ function initializeAccordionButtons() {
         this.firstLoad = true;
         let theDeadlines = this.nextElementSibling.getElementsByClassName("modifyDeadlineInput");
         for (let j = 0; j < theDeadlines.length; j++) {
-          $('#' + theDeadlines[j].id).datepicker();
+          datePicker.createDatePicker(theDeadlines[j].id);
         }
         this.nextElementSibling.style.display = "inline-block";
       }

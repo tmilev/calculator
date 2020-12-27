@@ -2454,7 +2454,7 @@ bool CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras(
     << theSAs.owner->theWeyl.theDynkinType.toString() << ", (";
     for (int j = 0; j < theChains[i].size; j ++) {
       CalculatorConversions::innerStoreCandidateSubalgebra(
-        calculator, theSAs.theSubalgebras.theValues[theChains[i][j]], currentChainE
+        calculator, theSAs.theSubalgebras.values[theChains[i][j]], currentChainE
       );
       out << currentChainE.toString();
       if (j != theChains[i].size - 1) {

@@ -254,8 +254,8 @@ std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(const std::strin
     return "";
   }
   if (currentMap.size() == 1) {
-    if (currentMap.theValues[0] == "") {
-      return HtmlRoutines::convertURLStringToNormal(currentMap.theKeys[0], false);
+    if (currentMap.values[0] == "") {
+      return HtmlRoutines::convertURLStringToNormal(currentMap.keys[0], false);
     }
   }
   std::stringstream out;
@@ -263,12 +263,12 @@ std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(const std::strin
   for (int i = 0; i < currentMap.size(); i ++) {
     out << "<tr>";
     out << "<td>"
-    << HtmlRoutines::convertURLStringToNormal(currentMap.theKeys[i], false) << " </td>";
-    if (currentMap.theValues[i] != "") {
+    << HtmlRoutines::convertURLStringToNormal(currentMap.keys[i], false) << " </td>";
+    if (currentMap.values[i] != "") {
       out << "<td>=</td><td>";
-      if (currentMap.theValues[i] != "") {
+      if (currentMap.values[i] != "") {
         out << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(
-          HtmlRoutines::convertURLStringToNormal(currentMap.theValues[i], true), recursionDepth + 1
+          HtmlRoutines::convertURLStringToNormal(currentMap.values[i], true), recursionDepth + 1
         );
       }
       out << "</td>";

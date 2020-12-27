@@ -1113,7 +1113,7 @@ bool QuerySet::toJSONMongo(
     keyPrefix += ".";
   }
   for (int i = 0; i < converted.objects.size(); i ++) {
-    output[keyPrefix + converted.objects.theKeys[i]] = converted.objects.theValues[i];
+    output[keyPrefix + converted.objects.keys[i]] = converted.objects.values[i];
   }
   return true;
 }
@@ -1236,7 +1236,7 @@ bool Database::FetchTable(
   HashedList<std::string, MathRoutines::hashString> theLabels;
   for (int i = 0; i < rowsJSON.size; i ++) {
     for (int j = 0; j < rowsJSON[i].objects.size(); j ++) {
-      theLabels.addOnTopNoRepetition(rowsJSON[i].objects.theKeys[j]);
+      theLabels.addOnTopNoRepetition(rowsJSON[i].objects.keys[j]);
     }
   }
   outputLabels = theLabels;

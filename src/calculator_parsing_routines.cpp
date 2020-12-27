@@ -245,7 +245,7 @@ void Calculator::initialize() {
   this->controlSequences.addOnTopNoRepetitionMustBeNew(" ");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("{{}}");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("Variable");
-  this->controlSequences.addListOnTop(this->operations.theKeys);//all operations defined up to this point are also control sequences
+  this->controlSequences.addListOnTop(this->operations.keys);//all operations defined up to this point are also control sequences
   this->controlSequences.addOnTopNoRepetitionMustBeNew("Expression");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("Integer");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("{}");
@@ -353,7 +353,7 @@ bool Calculator::checkPredefinedFunctionNameRepetitions() {
   MacroRegisterFunctionWithName("Calculator::checkPredefinedFunctionNameRepetitions");
   HashedList<std::string, MathRoutines::hashString> ruleIds;
   for (int i = 0; i < this->operations.size(); i ++) {
-    MemorySaving<Calculator::OperationHandlers>& current = this->operations.theValues[i];
+    MemorySaving<Calculator::OperationHandlers>& current = this->operations.values[i];
     if (current.isZeroPointer()) {
       continue;
     }
@@ -1059,7 +1059,7 @@ bool Calculator::replaceXXVXdotsXbyE_BOUND_XdotsX(int numXs) {
   if (this->isNonBoundVariableInContext(theBoundVar)) {
     std::stringstream out;
     out << "Syntax error. In the same syntactic scope, the string "
-    << this->operations.theKeys[theBoundVar]
+    << this->operations.keys[theBoundVar]
     << " is first used to denote a non-bound variable "
     << "but later to denote a bound variable. This is not allowed. ";
     theElt.errorString = out.str();
@@ -1397,7 +1397,7 @@ bool Calculator::replaceEOXbyEX() {
 bool Calculator::replaceVbyVdotsVAccordingToPredefinedWordSplits() {
   MacroRegisterFunctionWithName("Calculator::replaceVbyVdotsVAccordingToPredefinedWordSplits");
   SyntacticElement& theE = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1];
-  const std::string& currentVar = this->operations.theKeys[theE.theData.data];
+  const std::string& currentVar = this->operations.keys[theE.theData.data];
   if (!this->predefinedWordSplits.contains(currentVar)) {
     global.fatal << "Predefined word splits array does not contain the variable: " << theE.theData.toString()
     << ". This should not happen in the body of this function. " << global.fatal;
@@ -2125,7 +2125,7 @@ bool Calculator::applyOneRule() {
   }
   if (this->flagUsePredefinedWordSplits) {
     if (lastS == "Variable") {
-      if (this->predefinedWordSplits.contains(this->operations.theKeys[lastE.theData.data])) {
+      if (this->predefinedWordSplits.contains(this->operations.keys[lastE.theData.data])) {
         return this->replaceVbyVdotsVAccordingToPredefinedWordSplits();
       }
     }

@@ -144,7 +144,7 @@ bool Calculator::recursionDepthExceededHandleRoughly(const std::string& addition
 bool Calculator::checkOperationHandlers() {
   MacroRegisterFunctionWithName("Calculator::checkOperationHandlers");
   for (int i = 0; i < this->operations.size(); i ++) {
-    MemorySaving<Calculator::OperationHandlers>& current = this->operations.theValues[i];
+    MemorySaving<Calculator::OperationHandlers>& current = this->operations.values[i];
     if (current.isZeroPointer()) {
       continue;
     }
@@ -1183,7 +1183,7 @@ SemisimpleLieAlgebra* Expression::getAmbientSemisimpleLieAlgebraNonConstUseWithC
   if (indexSSalg == - 1) {
     return nullptr;
   }
-  return &this->owner->theObjectContainer.semisimpleLieAlgebras.theValues[indexSSalg];
+  return &this->owner->theObjectContainer.semisimpleLieAlgebras.values[indexSSalg];
 }
 
 Function& Calculator::getFunctionHandlerFromNamedRule(const std::string& inputNamedRule) {
@@ -1301,7 +1301,7 @@ void Calculator::registerCalculatorFunction(Function& theFun, int indexOp) {
     << ", there are: " << this->operations.size()
     << " operations total." << global.fatal;
   }
-  MemorySaving<Calculator::OperationHandlers>& handlerPointer = this->operations.theValues[indexOp];
+  MemorySaving<Calculator::OperationHandlers>& handlerPointer = this->operations.values[indexOp];
   Calculator::OperationHandlers& handler = handlerPointer.getElement();
   handler.checkConsistency();
   if (theFun.options.flagIsCompositeHandler) {
@@ -1321,7 +1321,7 @@ void Calculator::registerCalculatorFunction(Function& theFun, int indexOp) {
     return;
   }
   Calculator::NamedRuleLocation namedRule;
-  namedRule.containerOperation = this->operations.theKeys[indexOp];
+  namedRule.containerOperation = this->operations.keys[indexOp];
   namedRule.index = theFun.indexInOperationHandlers;
   namedRule.isComposite = theFun.options.flagIsCompositeHandler;
   this->namedRules.setKeyValue(
@@ -1404,8 +1404,8 @@ std::string Function::ToStringShort() const {
     return "(non-initialized)";
   }
   std::stringstream out;
-  out << this->owner->operations.theKeys[this->indexOperation];
-  MemorySaving<Calculator::OperationHandlers>& handlerPointer = this->owner->operations.theValues[this->indexOperation];
+  out << this->owner->operations.keys[this->indexOperation];
+  MemorySaving<Calculator::OperationHandlers>& handlerPointer = this->owner->operations.values[this->indexOperation];
   Calculator::OperationHandlers& handler = handlerPointer.getElement();
   if (this->options.flagIsCompositeHandler) {
     out << " (composite) ("
@@ -1466,16 +1466,16 @@ JSData Function::toJSON() const {
   } else {
     result["visible"] = "false";
   }
-  Calculator::OperationHandlers& operationHandlers = this->owner->operations.theValues[this->indexOperation].getElement();
+  Calculator::OperationHandlers& operationHandlers = this->owner->operations.values[this->indexOperation].getElement();
   result["number"] = this->indexInOperationHandlers + 1;
   if (this->options.flagIsCompositeHandler) {
     result["composite"] = "true";
     result["total"] = operationHandlers.compositeHandlers.size;
-    result["atom"] = this->owner->operations.theKeys[this->indexOperation];
+    result["atom"] = this->owner->operations.keys[this->indexOperation];
   } else {
     result["composite"] = "false";
     result["total"] = operationHandlers.handlers.size;
-    result["atom"] = this->owner->operations.theKeys[this->indexOperation];
+    result["atom"] = this->owner->operations.keys[this->indexOperation];
   }
   if (this->options.flagIsExperimental) {
     result["experimental"] = "true";
@@ -1546,22 +1546,22 @@ std::string Function::toStringFull() const {
 std::string ObjectContainer::toString() {
   MacroRegisterFunctionWithName("ObjectContainer::toString");
   std::stringstream out;
-  if (this->semisimpleLieAlgebras.theValues.size > 0) {
-    out << "Lie algebras created (" << this->semisimpleLieAlgebras.theValues.size << " total): ";
-    for (int i = 0; i < this->semisimpleLieAlgebras.theValues.size; i ++) {
-      out << this->semisimpleLieAlgebras.theValues[i].toStringLieAlgebraName();
-      if (i != this->semisimpleLieAlgebras.theValues.size - 1) {
+  if (this->semisimpleLieAlgebras.values.size > 0) {
+    out << "Lie algebras created (" << this->semisimpleLieAlgebras.values.size << " total): ";
+    for (int i = 0; i < this->semisimpleLieAlgebras.values.size; i ++) {
+      out << this->semisimpleLieAlgebras.values[i].toStringLieAlgebraName();
+      if (i != this->semisimpleLieAlgebras.values.size - 1) {
         out << ", ";
       }
     }
   }
-  if (this->theSSSubalgebraS.theValues.size > 0) {
+  if (this->theSSSubalgebraS.values.size > 0) {
     out << "<br>Lie semisimple subalgebras computation data structures ("
-    << this->theSSSubalgebraS.theValues.size << " total): ";
-    for (int i = 0; i < this->theSSSubalgebraS.theValues.size; i ++) {
-      out << " Type " << this->theSSSubalgebraS.theValues[i].owner->toStringLieAlgebraName() << " with "
-      << this->theSSSubalgebraS.theValues[i].theSubalgebras.theValues.size << " candidates";
-      if (i != this->theSSSubalgebraS.theValues.size - 1) {
+    << this->theSSSubalgebraS.values.size << " total): ";
+    for (int i = 0; i < this->theSSSubalgebraS.values.size; i ++) {
+      out << " Type " << this->theSSSubalgebraS.values[i].owner->toStringLieAlgebraName() << " with "
+      << this->theSSSubalgebraS.values[i].theSubalgebras.values.size << " candidates";
+      if (i != this->theSSSubalgebraS.values.size - 1) {
         out << ", ";
       }
     }
@@ -1612,10 +1612,10 @@ void Calculator::computeAutoCompleteKeyWords() {
   MacroRegisterFunctionWithName("Calculator::computeAutoCompleteKeyWords");
   this->autoCompleteKeyWords.setExpectedSize(this->operations.size() * 2);
   for (int i = 0; i < this->operations.size(); i ++) {
-    this->autoCompleteKeyWords.addOnTopNoRepetition(this->operations.theKeys[i]);
+    this->autoCompleteKeyWords.addOnTopNoRepetition(this->operations.keys[i]);
   }
   for (int i = 0; i < this->namedRules.size(); i ++) {
-    this->autoCompleteKeyWords.addOnTopNoRepetition(this->namedRules.theKeys[i]);
+    this->autoCompleteKeyWords.addOnTopNoRepetition(this->namedRules.keys[i]);
   }
   for (int i = 0; i < this->controlSequences.size; i ++) {
     if (this->controlSequences[i].size() > 0) {
@@ -1744,7 +1744,7 @@ std::string Calculator::toString() {
   << this->numberOfPredefinedAtoms << " predefined + "
   << this->operations.size() - this->numberOfPredefinedAtoms << " user-defined):<br>\n";
   for (int i = 0; i < this->operations.size(); i ++) {
-    out << "\n" << i << ": " << openTag1 << this->operations.theKeys[i] << closeTag1;
+    out << "\n" << i << ": " << openTag1 << this->operations.keys[i] << closeTag1;
     if (i != this->operations.size() - 1) {
       out << ", ";
     }
@@ -1863,7 +1863,7 @@ std::string ObjectContainer::toStringJavascriptForUserInputBoxes() {
   out << "<script>\n";
   out << "window.calculator.calculator.inputBoxNames = [";
   for (int i = 0; i < this->theUserInputTextBoxesWithValues.size(); i ++) {
-    InputBox& currentBox = this->theUserInputTextBoxesWithValues.theValues[i];
+    InputBox& currentBox = this->theUserInputTextBoxesWithValues.values[i];
     out << "'" << currentBox.name << "'";
     if (i != this->theUserInputTextBoxesWithValues.size() - 1) {
       out << ", ";
@@ -1872,7 +1872,7 @@ std::string ObjectContainer::toStringJavascriptForUserInputBoxes() {
   out << "];\n";
   out << "window.calculator.calculator.inputBoxToSliderUpdaters = {};";
   for (int i = 0; i < this->theUserInputTextBoxesWithValues.size(); i ++) {
-    InputBox& currentBox = this->theUserInputTextBoxesWithValues.theValues[i];
+    InputBox& currentBox = this->theUserInputTextBoxesWithValues.values[i];
     out << "window.calculator.calculator.inputBoxToSliderUpdaters['"
     << currentBox.name << "'] ='"
     << currentBox.getSliderName() << "';\n";

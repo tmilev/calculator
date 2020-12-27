@@ -209,6 +209,9 @@ class InputPanelData {
       all: new ButtonCollection({
         "all": true,
       }),
+      none: new ButtonCollection({
+        "none": true,
+      }),
       trigonometry: new ButtonCollection({
         "trig": true,
         "trigonometry": true,
@@ -847,7 +850,7 @@ class InputPanelData {
     if (forceShowNone || forceShowAll) {
       toggles.push(this.getShowDefaultToggle());
     }
-    if (!forceShowNone) {
+    if (!forceShowNone && !this.flagButtons.none.selected) {
       toggles.push(this.getShowNoneToggle());
     }
     let oldHeight = window.getComputedStyle(currentButtonPanel).height;

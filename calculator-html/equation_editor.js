@@ -3876,8 +3876,6 @@ class MathNode {
       // time the event default is called and the time we call 
       // equationEditor.updateAlignment in the timeout below, in which case the extra 
       // content will overflow its container box.
-      this.element.style.maxWidth = `${this.boundingBox.width}px`;
-      this.element.style.maxHeight = `${this.boundingBox.height}px`;
     }
     // While we no longer propagate the event, we need to 
     // release the thread so the browser can finish computations

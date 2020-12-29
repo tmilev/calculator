@@ -957,14 +957,14 @@ class AtomWithPosition {
     if (this.element === null) {
       return new AtomWithPosition(null, - 1);
     }
-    if (this.position > 0 && this.element.hasHorizintalMathParent()) {
+    if (this.position > 0 && this.element.hasHorozintalMathParent()) {
       return new AtomWithPosition(this.element, this.nextPositionInDirection(- 1));
     }
     let next = this.element.firstAtomUncle(- 1);
     if (next === null) {
       return new AtomWithPosition(null, - 1);
     }
-    return new AtomWithPosition(next, next.lengthContentIfAtom());
+    return new AtomWithPosition(next, - 1);
   }
 
   /** @returns {AtomWithPosition} */
@@ -972,14 +972,18 @@ class AtomWithPosition {
     if (this.element === null) {
       return new AtomWithPosition(null, -1);
     }
-    if (this.position < this.element.lengthContentIfAtom() && this.element.hasHorizintalMathParent()) {
+    if (
+      this.position >= 0 &&
+      this.position < this.element.lengthContentIfAtom() &&
+      this.element.hasHorozintalMathParent()
+    ) {
       return new AtomWithPosition(this.element, this.nextPositionInDirection(1));
     }
     let next = this.element.firstAtomUncle(1);
     if (next === null) {
       return new AtomWithPosition(null, -1);
     }
-    return new AtomWithPosition(next, 0);
+    return new AtomWithPosition(next, - 1);
   }
 
   /** @returns {AtomWithPosition} */
@@ -2226,7 +2230,7 @@ class EquationEditor {
     /**@type{boolean} */
     this.mouseSelectionStarted = false;
     /**@type{boolean} */
-    this.mouseSelectionNoMoreDefault = false;
+    this.selectionNoMoreDefault = false;
     /**@type{boolean} */
     this.mouseIgnoreNextClick = false;
     /** @type {boolean} */
@@ -2531,7 +2535,7 @@ class EquationEditor {
       return null;
     }
     let atom = this.selectionEnd.element;
-    if (!atom.hasHorizintalMathParent()) {
+    if (!atom.hasHorozintalMathParent()) {
       console.log("Atom has non-horizontal math parent.");
       return null;
     }
@@ -2720,7 +2724,9 @@ class EquationEditor {
   }
 
   resetSelection() {
-
+    if (this.selectionStart.element !== null) {
+      this.rootNode.unSelectMouseRecursive();
+    }
     this.selectionStart.element = null;
     this.selectionStart.position = -1;
     this.selectionEnd.element = null;
@@ -2730,7 +2736,7 @@ class EquationEditor {
 
     this.mouseSelectionStarted = false;
     this.mouseIgnoreNextClick = false;
-    this.mouseSelectionNoMoreDefault = false;
+    this.selectionNoMoreDefault = false;
     this.mouseSelectionVisible = false;
   }
 
@@ -2741,6 +2747,7 @@ class EquationEditor {
     if (this.selectionStart.element !== null) {
       return;
     }
+    this.resetSelection();
     this.selectionStart = new AtomWithPosition(start, start.positionCaretBeforeKeyEvents);
     this.selectionEnd = new AtomWithPosition(start, start.positionCaretBeforeKeyEvents);
   }
@@ -2765,26 +2772,35 @@ class EquationEditor {
       return false;
     }
     this.selectionEnd = newSelection;
-    this.computeSelectionExpandedForKeys();
-    this.highlightSelectionKeys();
-    return true;
+    return this.selectFromElement(newSelection.element);
   }
 
-  computeSelectionExpandedForKeys() {
-    if (this.selectionStart.element === null || this.selectionEnd.element === null) {
-      return;
+  /** @returns{boolean} whether the default browser selection action should be prevented. */
+  selectFromElement(
+    /** @type {MathNode} */
+    element,
+  ) {
+    if (element === this.selectionStart.element && !this.selectionNoMoreDefault) {
+      return false;
     }
-    this.selectionStartExpanded.element = this.selectionStart.element;
-    this.selectionStartExpanded.position = this.selectionStart.position;
-    if (this.selectionStart.element.parent !== this.selectionEnd.element.parent) {
-      let parentOfSelectionStart = this.selectionStart.element.commonParent(
-        this.selectionEnd.element
-      );
-      this.selectionStartExpanded = new AtomWithPosition(
-        parentOfSelectionStart.parent.children[parentOfSelectionStart.indexInParent],
-        - 1,
-      );
+    this.selectionNoMoreDefault = true;
+    this.resetSelectionDOM();
+    window.getSelection().addRange(document.createRange());
+    // The selection has escaped the original element.
+    // Once we are out of the original element, we 
+    // can only select an entire atom.
+    this.selectionStart.position = - 1;
+
+    this.selectionEnd.element = element;
+    this.selectionEnd.position = - 1;
+    this.computeSelectionExpandedForMouse();
+    this.mouseIgnoreNextClick = true;
+    this.highlightSelectionMouse();
+    if (this.options.debugLogContainer !== null) {
+      this.lastSelectionAction = `Mouse move selection over ${element.toString()}.`;
     }
+    this.writeDebugInfo(null);
+    return true;
   }
 
   /**@returns{AtomWithPosition} */
@@ -2820,23 +2836,6 @@ class EquationEditor {
     return this.selectionStartExpanded.element.isToTheLeftOf(this.selectionEnd.element);
   }
 
-  highlightSelectionKeys() {
-    if (this.selectionStartExpanded.element === null || this.selectionEnd.element === null) {
-      return;
-    }
-    try {
-      this.selectBetweenKeys(
-        this.selectionStartExpanded,
-        this.selectionEnd,
-      );
-    } catch (e) {
-      if (this.options.debugLogContainer !== null) {
-        console.log(`Unexpected failure to highlight selection. Resetting selection. ${e}`);
-      }
-      this.resetSelection();
-    }
-  }
-
   highlightSelectionMouse() {
     if (this.selectionStartExpanded.element === null || this.selectionEnd.element === null) {
       return;
@@ -2864,36 +2863,6 @@ class EquationEditor {
     }
   }
 
-  selectBetweenKeys(
-    /** @type{AtomWithPosition} */
-    end1,
-    /** @type{AtomWithPosition} */
-    end2,
-  ) {
-    let left = end1;
-    let right = end2;
-    let shouldSwap = end2.element.isToTheLeftOf(end1.element);
-    if (left.element === right.element) {
-      shouldSwap = (right.position < left.position);
-    }
-    if (shouldSwap) {
-      // Swap the two ends.
-      let copy = right;
-      right = left;
-      left = copy;
-    }
-    let newRange = document.createRange();
-    left.element.setRangeStart(newRange, left.position);
-    right.element.setRangeEnd(newRange, right.position);
-    this.resetSelectionDOM();
-    document.getSelection().addRange(newRange);
-  }
-
-  resetMouseSelection() {
-    this.resetSelection();
-    this.rootNode.unSelectMouseRecursive();
-  }
-
   handleMouseMoveSelection(
     /**@type{MouseEvent} */
     e,
@@ -2904,27 +2873,9 @@ class EquationEditor {
       return;
     }
     e.stopPropagation();
-    if (this.selectionStart.element === element && !this.mouseSelectionNoMoreDefault) {
-      return;
+    if (this.selectFromElement(element)) {
+      e.preventDefault()
     }
-    this.mouseSelectionNoMoreDefault = true;
-    this.resetSelectionDOM();
-    window.getSelection().addRange(document.createRange());
-    e.preventDefault();
-    // The selection has escaped the original immutable element.
-    // Once we are out of the original immutable element, we 
-    // can only select the entire atom.
-    this.selectionStart.position = - 1;
-
-    this.selectionEnd.element = element;
-    this.selectionEnd.position = - 1;
-    this.computeSelectionExpandedForMouse();
-    this.mouseIgnoreNextClick = true;
-    this.highlightSelectionMouse();
-    if (this.options.debugLogContainer !== null) {
-      this.lastSelectionAction = `Mouse move selection over ${element.toString()}.`;
-    }
-    this.writeDebugInfo(null);
   }
 
   handleMouseSelectionStart(
@@ -2936,10 +2887,11 @@ class EquationEditor {
     e.stopPropagation();
     // e.preventDefault();
     element.storeCaretPosition("", false);
+    // Discard previous selection data.
     this.resetSelection();
+    this.initializeSelectionStart(element);
     this.mouseSelectionStarted = true;
     this.mouseSelectionVisible = true;
-    this.initializeSelectionStart(element);
     if (this.options.debugLogContainer !== null) {
       this.lastSelectionAction = `Mouse selection start over ${element.toString()}.`;
     }
@@ -3287,7 +3239,7 @@ class MathNode {
       this.equationEditor.mouseIgnoreNextClick = false;
       return;
     }
-    this.equationEditor.resetMouseSelection();
+    this.equationEditor.resetSelection();
     this.storeCaretPosition("", false);
     if (this.type.type === knownTypes.atom.type) {
       return;
@@ -3424,7 +3376,7 @@ class MathNode {
   }
 
   /**@returns {boolean} */
-  hasHorizintalMathParent() {
+  hasHorozintalMathParent() {
     if (this.parent === null) {
       return false;
     }
@@ -4380,10 +4332,6 @@ class MathNode {
     }
   }
 
-  setSelectionStart() {
-    this.equationEditor.initializeSelectionStart(this);
-  }
-
   /** @returns{number[]} The path needed to get from the current node to the root node.*/
   getPathToRoot() {
     let reversed = [];
@@ -4486,10 +4434,11 @@ class MathNode {
     shiftHeld,
   ) {
     if (shiftHeld) {
-      this.setSelectionStart();
-      this.equationEditor.computeSelectionEndFromKey(key, shiftHeld);
-      return new KeyHandlerResult(true, true);
+      this.equationEditor.initializeSelectionStart(this);
+      let preventDefault = this.equationEditor.computeSelectionEndFromKey(key, shiftHeld);
+      return new KeyHandlerResult(preventDefault, preventDefault);
     }
+    this.equationEditor.resetSelection();
     if (this.arrowAbsorbedByAtom(key)) {
       return new KeyHandlerResult(false, false);
     }
@@ -4560,7 +4509,10 @@ class MathNode {
    * Negative direction indicates we are looking for uncles to the left, 
    * else we are looking for uncles to the right of the this element.
    * */
-  firstAtomUncle(direction) {
+  firstAtomUncle(
+    /**@type{number} */
+    direction,
+  ) {
     if (direction < 0) {
       direction = -1;
     } else {
@@ -4578,7 +4530,7 @@ class MathNode {
         nextIndex += direction
       ) {
         let candidate = horizontalAncestor.parent.children[nextIndex];
-        if (candidate.isAtomEditable()) {
+        if (candidate.isAtomic()) {
           return candidate;
         }
       }
@@ -5138,7 +5090,7 @@ class MathNode {
     split,
   ) {
     // Find closest ancestor node that's of type horizontal math.
-    if (!this.hasHorizintalMathParent()) {
+    if (!this.hasHorozintalMathParent()) {
       console.log("Warning: horizontal operator made on element not contained in horizontal math.");
       return;
     }
@@ -5201,7 +5153,7 @@ class MathNode {
     split,
   ) {
     // Find closest ancestor node that's of type horizontal math.
-    if (!this.hasHorizintalMathParent()) {
+    if (!this.hasHorozintalMathParent()) {
       console.log("Warning: horizontal operator made on element not contained in horizontal math.");
       return;
     }

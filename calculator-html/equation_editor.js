@@ -2793,7 +2793,7 @@ class EquationEditor {
 
     this.selectionEnd.element = element;
     this.selectionEnd.position = - 1;
-    this.computeSelectionExpandedForMouse();
+    this.computeSelectionExpanded();
     this.mouseIgnoreNextClick = true;
     this.highlightSelectionMouse();
     if (this.options.debugLogContainer !== null) {
@@ -2820,7 +2820,7 @@ class EquationEditor {
     );
   }
 
-  computeSelectionExpandedForMouse() {
+  computeSelectionExpanded() {
     if (this.selectionStart.element === null || this.selectionEnd.element === null) {
       return;
     }
@@ -2847,6 +2847,8 @@ class EquationEditor {
       right = left;
       left = copy;
     }
+    left = left.beefUpToHorizontalParent();
+    right = right.beefUpToHorizontalParent();
     /**@type {MathNode} */
     let current = left;
     this.rootNode.unSelectMouseRecursive();
@@ -3286,6 +3288,15 @@ class MathNode {
   focusElement() {
     this.element.style.background = "#f0f0f0";
     this.focused = false;
+  }
+
+  /**@returns {MathNode} */
+  beefUpToHorizontalParent() {
+    let parentWithIndex = this.findHorizontalMathParent();
+    if (parentWithIndex.parent === null) {
+      return this;
+    }
+    return parentWithIndex.parent.children[parentWithIndex.indexInParent];
   }
 
   blurElement() {

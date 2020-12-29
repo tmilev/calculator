@@ -1,7 +1,6 @@
 # calculator
 
 
-
 An online computer algebra system and homework server. 
 Our mission is to construct a free and open source computer 
 algebra system that serves the computational needs of 
@@ -84,8 +83,7 @@ These can be overridden of course:
 
 runs the server on https port `12345`, http port `12346` with a timeout of `10000` seconds. 
 
-While running for first time, you may be prompted to fill in an openSSL certificate.
-This is to fill in a self-signed certificate to be used when running locally; 
+While running for first time, you may be prompted to fill in an openSSL certificate to be used when running locally; 
 the data of course stays on your computer (in folder `calculator/certificates`).
 
 ### Run the calculator in development mode.

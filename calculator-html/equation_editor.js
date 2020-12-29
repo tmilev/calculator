@@ -2237,6 +2237,8 @@ class EquationEditor {
     this.selectionStartExpanded = new AtomWithPosition(null, - 1);
     /** @type{AtomWithPosition} */
     this.selectionEnd = new AtomWithPosition(null, -1);
+    /** @type{AtomWithPosition} */
+    this.selectionEndExpanded = new AtomWithPosition(null, -1);
     /** @type{string} */
     this.latexLastWritten = "";
     /** @type {boolean}*/
@@ -2511,8 +2513,9 @@ class EquationEditor {
       startAnnotationString = startAnnotation.toString();
     }
     let endAnnotation = this.selectionEnd.element.toLatexWithAnnotation();
-    let result = `Selection: from: ${this.selectionStartExpanded.toString()} to: ${this.selectionEnd.toString()}.`;
-    result += ` Latex from: ${startAnnotationString} to ${endAnnotation.toString()}`;
+    let result = `Selection: from: ${this.selectionStartExpanded.toString()} to: ${this.selectionEndExpanded.toString()}.`;
+    result += `<br>Actually selected: ${this.selectionStart.toString()} to: ${this.selectionEnd.toString()}.`;
+    result += `<br>Latex from: ${startAnnotationString} to ${endAnnotation.toString()}`;
     return result;
   }
 
@@ -2784,26 +2787,29 @@ class EquationEditor {
     }
   }
 
+  /**@returns{AtomWithPosition} */
+  expandElementForSelection(
+    /**@type{MathNode} */
+    toBeExpanded,
+    /**@type{MathNode} */
+    peer,
+  ) {
+    let parent = toBeExpanded.commonParent(peer);
+    if (parent.parent === null) {
+      return new AtomWithPosition(this.rootNode, -1);
+    }
+    return new AtomWithPosition(
+      parent.parent.children[parent.indexInParent],
+      - 1,
+    );
+  }
+
   computeSelectionExpandedForMouse() {
     if (this.selectionStart.element === null || this.selectionEnd.element === null) {
       return;
     }
-    this.selectionStartExpanded.element = this.selectionStart.element;
-    this.selectionStartExpanded.position = this.selectionStart.position;
-    if (this.selectionStart.element === this.selectionEnd.element) {
-      return;
-    }
-    if (this.selectionStart.element.parent !== this.selectionEnd.element.parent) {
-      let parentOfSelectionStart = this.selectionStart.element.commonParent(
-        this.selectionEnd.element
-      );
-      this.selectionStartExpanded = new AtomWithPosition(
-        parentOfSelectionStart.parent.children[parentOfSelectionStart.indexInParent],
-        - 1,
-      );
-    } else {
-      this.selectionStartExpanded.position = -1;
-    }
+    this.selectionStartExpanded = this.expandElementForSelection(this.selectionStart.element, this.selectionEnd.element);
+    this.selectionEndExpanded = this.expandElementForSelection(this.selectionEnd.element, this.selectionStartExpanded.element);
   }
 
   /**@return{boolean} */
@@ -2836,7 +2842,7 @@ class EquationEditor {
       return;
     }
     let left = this.selectionStartExpanded.element;
-    let right = this.selectionEnd.element;
+    let right = this.selectionEndExpanded.element;
     if (right.isToTheLeftOf(left)) {
       let copy = right;
       right = left;
@@ -2845,6 +2851,7 @@ class EquationEditor {
     /**@type {MathNode} */
     let current = left;
     this.rootNode.unSelectMouseRecursive();
+    this.rootNode.blurRecursive();
     for (; ;) {
       current.selectElementByMouse();
       if (current === right) {
@@ -3321,6 +3328,23 @@ class MathNode {
     this.unSelectElementByMouse();
     for (let i = 0; i < this.children.length; i++) {
       this.children[i].unSelectMouseRecursive();
+    }
+  }
+
+  focusElement() {
+    this.element.style.background = "#f0f0f0";
+    this.focused = false;
+  }
+
+  blurElement() {
+    this.element.style.background = "";
+    this.focused = false;
+  }
+
+  blurRecursive() {
+    this.blurElement();
+    for (let i = 0; i < this.children.length; i++) {
+      this.children[i].blurRecursive();
     }
   }
 
@@ -4098,15 +4122,13 @@ class MathNode {
   }
 
   handleFocus(e) {
-    this.element.style.background = "#f0f0f0";
+    this.focusElement();
     this.storeCaretPosition("", false);
-    this.focused = true;
   }
 
   handleBlur(e) {
-    this.element.style.background = "";
+    this.blurElement();
     this.equationEditor.backslashSequenceStarted = false;
-    this.focused = false;
   }
 
   handleKeyDown(

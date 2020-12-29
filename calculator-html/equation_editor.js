@@ -912,6 +912,22 @@ class AtomWithPosition {
   }
 
   /**@returns{number} */
+  getPositionWholeItemIfNegative(
+    /**@type{number} If position is negative, 
+     * determines which end to select: 
+     * negative direction for left end, non-negative for right.*/
+    direction,
+  ) {
+    if (this.position >= 0) {
+      return this.position;
+    }
+    if (direction < 0) {
+      return 0;
+    }
+    return this.element.textContentOrInitialContent().length;
+  }
+
+  /**@returns{number} */
   nextPositionInDirection(
     /**@type{number} */
     direction,
@@ -2190,6 +2206,8 @@ class EquationEditor {
   ) {
     /** @type{HTMLElement} */
     this.container = containerGiven;
+    /** @type{HTMLElement|null} */
+    this.latexContainer = null;
     this.container.style.display = "inline-block";
     this.container.style.position = "relative";
     this.container.textContent = "";
@@ -2205,6 +2223,14 @@ class EquationEditor {
       this.rootNode.type.margin = "";
       this.rootNode.type.cursor = "";
     }
+    /**@type{boolean} */
+    this.mouseSelectionStarted = false;
+    /**@type{boolean} */
+    this.mouseSelectionNoMoreDefault = false;
+    /**@type{boolean} */
+    this.mouseIgnoreNextClick = false;
+    /** @type {boolean} */
+    this.mouseSelectionVisible = false;
     /** @type{AtomWithPosition} */
     this.selectionStart = new AtomWithPosition(null, -1);
     /** @type{AtomWithPosition} */
@@ -2232,6 +2258,37 @@ class EquationEditor {
     this.lastFocused = null;
     /** @type{number} */
     this.lastCaretPosition = - 1;
+    /** @type{string} */
+    this.lastSelectionAction = "";
+    /** @type{number} */
+    this.standardAtomHeight = 0;
+    /** @type{string} */
+    this.lastCopied = "";
+    this.computeStandardAtomHeight();
+  }
+
+  /** Removes all ranges from the window selection. */
+  resetSelectionDOM() {
+    try {
+      window.getSelection().removeAllRanges();
+    } catch (e) {
+      console.log(`Failed to remove all ranges ${e}`);
+    }
+  }
+
+  computeStandardAtomHeight() {
+    if (!this.options.editable) {
+      return;
+    }
+    let heightComputer = document.createElement("div");
+    heightComputer.style.position = "absolute";
+    // In firefox, empty space can be interpretted to have zero height; 
+    // not so for non-breaking space.
+    heightComputer.textContent = "\u00A0";
+    this.container.appendChild(heightComputer);
+    let boundingBox = heightComputer.getBoundingClientRect();
+    this.standardAtomHeight = boundingBox.height;
+    this.container.removeChild(heightComputer);
   }
 
   updateDOM() {
@@ -2342,16 +2399,22 @@ class EquationEditor {
     let latexWithAnnotation = this.rootNode.toLatexWithAnnotation();
     let result = `Latex: ${latexWithAnnotation.latex}`;
     result += `<br>URL-encoded: ${encodeURIComponent(latexWithAnnotation.latex)}`;
+    if (this.lastCopied !== "") {
+      result += `<br>Last copied: ${this.lastCopied}`;
+    }
     if (this.lastFocused !== null) {
       result += `<br>Last modified: ${this.lastFocused.toString()}`;
       if (this.lastFocused.isDetached()) {
         result += "<br><b style='color:red'>Detached last modified.</b>";
       }
     }
-    result += `<br>Latex selection: ${latexWithAnnotation.selectionStart}, ${latexWithAnnotation.selectionEnd}`;
-    result += `<br>Drawing: ${this.rootNode.toString()}`;
-    result += `<br>Structure: ${this.rootNode.toHtml(0)}`;
     result += `<br>${this.toStringSelection()}`;
+    if (this.lastSelectionAction !== "") {
+      result += `<br>Last selection action: ${this.lastSelectionAction}`;
+    }
+    result += `<br>Latex selection: ${latexWithAnnotation.selectionStart}, ${latexWithAnnotation.selectionEnd}`;
+    // result += `<br>Drawing: ${this.rootNode.toString()}`;
+    result += `<br>Structure: ${this.rootNode.toHtml(0)}`;
     result += `<br>Backslash position: ${this.backslashPosition}; started: ${this.backslashSequenceStarted}, sequence: ${this.backslashSequence}.`;
     result += `<br>Position computation string: ${this.positionDebugString}.`;
     return result;
@@ -2421,12 +2484,15 @@ class EquationEditor {
     this.rootNode.computeBoundingBox();
     this.rootNode.doAlign();
     let boundingRectangle = this.rootNode.element.getBoundingClientRect();
-    let desiredHeight = boundingRectangle.height;
+    // Bounding box may not be computed correctly at this point in Firefox.
+    let desiredHeight = Math.max(boundingRectangle.height, this.rootNode.boundingBox.height, this.standardAtomHeight);
+    // Bounding box may not be computed correctly at this point in Firefox.
+    let desiredWidth = Math.max(boundingRectangle.width, this.rootNode.boundingBox.width);
     if (this.options.editable) {
       desiredHeight += 2;
     }
     this.container.style.height = desiredHeight;
-    this.container.style.width = boundingRectangle.width;
+    this.container.style.width = desiredWidth;
     if (this.rootNode.boundingBox.needsMiddleAlignment && !this.options.editable) {
       this.container.style.verticalAlign = "middle";
     } else {
@@ -2439,10 +2505,14 @@ class EquationEditor {
     if (this.selectionStart.element === null) {
       return "";
     }
-    let startAnnotation = this.selectionStartExpanded.element.toLatexWithAnnotation();
+    let startAnnotationString = "[expanded selection null]";
+    if (this.selectionStartExpanded.element !== null) {
+      let startAnnotation = this.selectionStartExpanded.element.toLatexWithAnnotation();
+      startAnnotationString = startAnnotation.toString();
+    }
     let endAnnotation = this.selectionEnd.element.toLatexWithAnnotation();
     let result = `Selection: from: ${this.selectionStartExpanded.toString()} to: ${this.selectionEnd.toString()}.`;
-    result += ` Latex from: ${startAnnotation.toString()} to ${endAnnotation.toString()}`;
+    result += ` Latex from: ${startAnnotationString} to ${endAnnotation.toString()}`;
     return result;
   }
 
@@ -2606,12 +2676,14 @@ class EquationEditor {
       return;
     }
     e.preventDefault();
-    if (this.container.children.length >= 2) {
-      this.container.removeChild(this.container.children[1]);
+    e.stopPropagation();
+    if (this.latexContainer !== null) {
+      this.container.removeChild(this.latexContainer);
+      this.latexContainer = null;
       this.container.style.width = this.rootNode.element.style.width;
       return;
     }
-    let staticContainer = document.createElement("SPAN");
+    this.latexContainer = document.createElement("SPAN");
     let latex = "";
     let writeOriginal = false;
     let removeDisplayStyle = false;
@@ -2630,22 +2702,48 @@ class EquationEditor {
     } else {
       latex = this.rootNode.toLatex();
     }
-    staticContainer.textContent = latex;
-    staticContainer.style.position = "absolute";
-    staticContainer.style.left = this.rootNode.element.style.width;
-    staticContainer.style.whiteSpace = "nowrap";
-    this.container.appendChild(staticContainer);
-    let newWidth = this.rootNode.element.getBoundingClientRect().width + staticContainer.getBoundingClientRect().width;
+    this.latexContainer.textContent = latex;
+    this.latexContainer.style.position = "absolute";
+    this.latexContainer.style.left = this.rootNode.element.style.width;
+    this.latexContainer.style.whiteSpace = "nowrap";
+    this.container.appendChild(this.latexContainer);
+    let newWidth = this.rootNode.element.getBoundingClientRect().width + this.latexContainer.getBoundingClientRect().width;
     this.container.style.width = newWidth;
     let range = window.getSelection().getRangeAt(0);
     let rangeClone = range.cloneRange();
-    rangeClone.selectNode(staticContainer);
-    window.getSelection().removeAllRanges();
+    rangeClone.selectNode(this.latexContainer);
+    this.resetSelectionDOM();
     window.getSelection().addRange(rangeClone);
   }
 
+  resetSelection() {
+
+    this.selectionStart.element = null;
+    this.selectionStart.position = -1;
+    this.selectionEnd.element = null;
+    this.selectionEnd.position = -1;
+    this.selectionStartExpanded.element = null;
+    this.selectionStartExpanded.position = - 1;
+
+    this.mouseSelectionStarted = false;
+    this.mouseIgnoreNextClick = false;
+    this.mouseSelectionNoMoreDefault = false;
+    this.mouseSelectionVisible = false;
+  }
+
+  initializeSelectionStart(
+    /** @type {MathNode} */
+    start,
+  ) {
+    if (this.selectionStart.element !== null) {
+      return;
+    }
+    this.selectionStart = new AtomWithPosition(start, start.positionCaretBeforeKeyEvents);
+    this.selectionEnd = new AtomWithPosition(start, start.positionCaretBeforeKeyEvents);
+  }
+
   /** @returns{boolean} whether the default should be prevented. */
-  setSelectionEnd(
+  computeSelectionEndFromKey(
     /** @type {string} */
     key,
     /** @type {boolean} */
@@ -2664,7 +2762,17 @@ class EquationEditor {
       return false;
     }
     this.selectionEnd = newSelection;
-    this.selectionStartExpanded = this.selectionStart;
+    this.computeSelectionExpandedForKeys();
+    this.highlightSelectionKeys();
+    return true;
+  }
+
+  computeSelectionExpandedForKeys() {
+    if (this.selectionStart.element === null || this.selectionEnd.element === null) {
+      return;
+    }
+    this.selectionStartExpanded.element = this.selectionStart.element;
+    this.selectionStartExpanded.position = this.selectionStart.position;
     if (this.selectionStart.element.parent !== this.selectionEnd.element.parent) {
       let parentOfSelectionStart = this.selectionStart.element.commonParent(
         this.selectionEnd.element
@@ -2674,8 +2782,28 @@ class EquationEditor {
         - 1,
       );
     }
-    this.highlightSelection();
-    return true;
+  }
+
+  computeSelectionExpandedForMouse() {
+    if (this.selectionStart.element === null || this.selectionEnd.element === null) {
+      return;
+    }
+    this.selectionStartExpanded.element = this.selectionStart.element;
+    this.selectionStartExpanded.position = this.selectionStart.position;
+    if (this.selectionStart.element === this.selectionEnd.element) {
+      return;
+    }
+    if (this.selectionStart.element.parent !== this.selectionEnd.element.parent) {
+      let parentOfSelectionStart = this.selectionStart.element.commonParent(
+        this.selectionEnd.element
+      );
+      this.selectionStartExpanded = new AtomWithPosition(
+        parentOfSelectionStart.parent.children[parentOfSelectionStart.indexInParent],
+        - 1,
+      );
+    } else {
+      this.selectionStartExpanded.position = -1;
+    }
   }
 
   /**@return{boolean} */
@@ -2686,37 +2814,137 @@ class EquationEditor {
     return this.selectionStartExpanded.element.isToTheLeftOf(this.selectionEnd.element);
   }
 
-  highlightSelection() {
+  highlightSelectionKeys() {
     if (this.selectionStartExpanded.element === null || this.selectionEnd.element === null) {
       return;
     }
-    this.selectBetween(
-      this.selectionStartExpanded,
-      this.selectionEnd,
-    );
+    try {
+      this.selectBetweenKeys(
+        this.selectionStartExpanded,
+        this.selectionEnd,
+      );
+    } catch (e) {
+      if (this.options.debugLogContainer !== null) {
+        console.log(`Unexpected failure to highlight selection. Resetting selection. ${e}`);
+      }
+      this.resetSelection();
+    }
   }
 
-  selectBetween(
+  highlightSelectionMouse() {
+    if (this.selectionStartExpanded.element === null || this.selectionEnd.element === null) {
+      return;
+    }
+    let left = this.selectionStartExpanded.element;
+    let right = this.selectionEnd.element;
+    if (right.isToTheLeftOf(left)) {
+      let copy = right;
+      right = left;
+      left = copy;
+    }
+    /**@type {MathNode} */
+    let current = left;
+    this.rootNode.unSelectMouseRecursive();
+    for (; ;) {
+      current.selectElementByMouse();
+      if (current === right) {
+        break;
+      }
+      current = current.horizontalSibling(1);
+      if (current === null) {
+        break;
+      }
+    }
+  }
+
+  selectBetweenKeys(
     /** @type{AtomWithPosition} */
     end1,
     /** @type{AtomWithPosition} */
     end2,
   ) {
+    let left = end1;
+    let right = end2;
     let shouldSwap = end2.element.isToTheLeftOf(end1.element);
-    if (end1.element === end2.element) {
-      shouldSwap = (end2.position < end1.position);
+    if (left.element === right.element) {
+      shouldSwap = (right.position < left.position);
     }
     if (shouldSwap) {
       // Swap the two ends.
-      let end2copy = end2;
-      end2 = end1;
-      end1 = end2copy;
+      let copy = right;
+      right = left;
+      left = copy;
     }
     let newRange = document.createRange();
-    end1.element.setRangeStart(newRange, end1.position);
-    end2.element.setRangeEnd(newRange, end2.position);
-    document.getSelection().removeAllRanges();
+    left.element.setRangeStart(newRange, left.position);
+    right.element.setRangeEnd(newRange, right.position);
+    this.resetSelectionDOM();
     document.getSelection().addRange(newRange);
+  }
+
+  resetMouseSelection() {
+    this.resetSelection();
+    this.rootNode.unSelectMouseRecursive();
+  }
+
+  handleMouseMoveSelection(
+    /**@type{MouseEvent} */
+    e,
+    /**@type{MathNode} */
+    element,
+  ) {
+    if (!this.mouseSelectionStarted) {
+      return;
+    }
+    e.stopPropagation();
+    if (this.selectionStart.element === element && !this.mouseSelectionNoMoreDefault) {
+      return;
+    }
+    this.mouseSelectionNoMoreDefault = true;
+    this.resetSelectionDOM();
+    window.getSelection().addRange(document.createRange());
+    e.preventDefault();
+    // The selection has escaped the original immutable element.
+    // Once we are out of the original immutable element, we 
+    // can only select the entire atom.
+    this.selectionStart.position = - 1;
+
+    this.selectionEnd.element = element;
+    this.selectionEnd.position = - 1;
+    this.computeSelectionExpandedForMouse();
+    this.mouseIgnoreNextClick = true;
+    this.highlightSelectionMouse();
+    if (this.options.debugLogContainer !== null) {
+      this.lastSelectionAction = `Mouse move selection over ${element.toString()}.`;
+    }
+    this.writeDebugInfo(null);
+  }
+
+  handleMouseSelectionStart(
+    /**@type{MouseEvent} */
+    e,
+    /**@type{MathNode} */
+    element,
+  ) {
+    e.stopPropagation();
+    // e.preventDefault();
+    element.storeCaretPosition("", false);
+    this.resetSelection();
+    this.mouseSelectionStarted = true;
+    this.mouseSelectionVisible = true;
+    this.initializeSelectionStart(element);
+    if (this.options.debugLogContainer !== null) {
+      this.lastSelectionAction = `Mouse selection start over ${element.toString()}.`;
+    }
+    this.writeDebugInfo(null);
+    return;
+  }
+
+  handleMouseSelectionEnd() {
+    if (this.options.debugLogContainer !== null) {
+      this.lastSelectionAction = `Mouse selection end.`;
+    }
+    this.mouseSelectionStarted = false;
   }
 }
 
@@ -2878,6 +3106,8 @@ class MathNode {
      * or has been implied by a user action, such as parentheses auto-balancing.
      */
     this.implied = false;
+    /** @type {boolean} */
+    this.selectedByMouse = false;
     /** @type {EquationEditor} */
     this.equationEditor = equationEditor;
     this.boundingBox = new BoundingBox();
@@ -3000,29 +3230,40 @@ class MathNode {
       this.element.style.position = this.type.position;
     }
     this.element.setAttribute("mathTagName", this.type.type);
-    if (this.type.type === knownTypes.atom.type) {
-      this.element.addEventListener("copy", (e) => {
-        this.copyToClipboard(e);
+    if (this.equationEditor.options.editable) {
+      if (this.type.type === knownTypes.atom.type) {
+        this.element.addEventListener("copy", (e) => {
+          this.copyToClipboard(e);
+        });
+        this.element.addEventListener("paste", (e) => {
+          this.pasteFromClipboard(e);
+        });
+        this.element.addEventListener("keyup", (e) => {
+          this.handleKeyUp(e);
+        });
+        this.element.addEventListener("keydown", (e) => {
+          this.handleKeyDown(e);
+        });
+        this.element.addEventListener("focus", (e) => {
+          this.handleFocus(e);
+        });
+        this.element.addEventListener("blur", (e) => {
+          this.handleBlur(e);
+        });
+      }
+      this.element.addEventListener("click", (e) => {
+        this.handleSingleClick(e);
       });
-      this.element.addEventListener("paste", (e) => {
-        this.pasteFromClipboard(e);
+      this.element.addEventListener("mousedown", (e) => {
+        this.equationEditor.handleMouseSelectionStart(e, this);
       });
-      this.element.addEventListener("keyup", (e) => {
-        this.handleKeyUp(e);
+      this.element.addEventListener("mouseup", (_) => {
+        this.equationEditor.handleMouseSelectionEnd();
       });
-      this.element.addEventListener("keydown", (e) => {
-        this.handleKeyDown(e);
-      });
-      this.element.addEventListener("focus", (e) => {
-        this.handleFocus(e);
-      });
-      this.element.addEventListener("blur", (e) => {
-        this.handleBlur(e);
+      this.element.addEventListener("mousemove", (e) => {
+        this.equationEditor.handleMouseMoveSelection(e, this);
       });
     }
-    this.element.addEventListener("click", (e) => {
-      this.handleSingleClick(e);
-    });
     if (this.type.type === knownTypes.root.type) {
       this.element.addEventListener("dblclick", (e) => {
         this.equationEditor.handleDoubleClick(e);
@@ -3034,19 +3275,18 @@ class MathNode {
     /** @type{MouseEvent} */
     e,
   ) {
-    if (!this.equationEditor.options.editable) {
-      this.storeCaretPosition("", false);
-      return;
-    }
-    if (this.type.type === knownTypes.atom.type) {
-      e.stopPropagation();
-      this.storeCaretPosition("", false);
-      return;
-    }
     e.stopPropagation();
+    if (this.equationEditor.mouseIgnoreNextClick) {
+      this.equationEditor.mouseIgnoreNextClick = false;
+      return;
+    }
+    this.equationEditor.resetMouseSelection();
+    this.storeCaretPosition("", false);
+    if (this.type.type === knownTypes.atom.type) {
+      return;
+    }
     e.preventDefault();
     this.focus(1);
-    this.storeCaretPosition("", false);
   }
 
   /** @returns {MathNode|null} */
@@ -3061,6 +3301,27 @@ class MathNode {
       }
     }
     return null;
+  }
+
+  selectElementByMouse() {
+    if (!this.selectedByMouse && this.element !== null) {
+      this.element.style.backgroundColor = "blue";
+    }
+    this.selectedByMouse = true;
+  }
+
+  unSelectElementByMouse() {
+    if (this.selectedByMouse && this.element !== null) {
+      this.element.style.backgroundColor = "";
+    }
+    this.selectedByMouse = false;
+  }
+
+  unSelectMouseRecursive() {
+    this.unSelectElementByMouse();
+    for (let i = 0; i < this.children.length; i++) {
+      this.children[i].unSelectMouseRecursive();
+    }
   }
 
   updateDOM() {
@@ -3210,6 +3471,9 @@ class MathNode {
     let boundingRecangleDOM = this.element.getBoundingClientRect();
     this.boundingBox.width = boundingRecangleDOM.width;
     this.boundingBox.height = boundingRecangleDOM.height;
+    if (this.boundingBox.height === 0) {
+      this.boundingBox.height = this.equationEditor.standardAtomHeight;
+    }
     this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
   }
 
@@ -3969,6 +4233,7 @@ class MathNode {
       let sliced = latexWithAnnotation.latex.slice(start, end);
       toBeCopied = sliced;
     }
+    this.equationEditor.lastCopied = toBeCopied;
     event.clipboardData.setData('text/plain', toBeCopied);
     event.preventDefault();
   }
@@ -4094,11 +4359,7 @@ class MathNode {
   }
 
   setSelectionStart() {
-    if (this.equationEditor.selectionStart.element !== null) {
-      return;
-    }
-    this.equationEditor.selectionStart = new AtomWithPosition(this, this.positionCaretBeforeKeyEvents);
-    this.equationEditor.selectionEnd = new AtomWithPosition(this, this.positionCaretBeforeKeyEvents);
+    this.equationEditor.initializeSelectionStart(this);
   }
 
   /** @returns{number[]} The path needed to get from the current node to the root node.*/
@@ -4173,7 +4434,7 @@ class MathNode {
     );
   }
 
-  /** @returns{boolean} Given two atoms, decides whether this is to the left of the other atom. */
+  /** @returns{boolean} Given two atoms, elements whether this is to the left of the other atom. */
   isToTheLeftOf(
     /**@type{MathNode} */ other,
   ) {
@@ -4181,9 +4442,7 @@ class MathNode {
     let otherPath = other.getPathToRoot();
     for (let i = 0; i < thisPath.length; i++) {
       if (i >= otherPath.length) {
-        // The this element is contained in the other element: this 
-        // is not expected as both elements are required to be atoms and cannot contain one another.
-        console.log(`Element ${this.toString()} is contained in ${other.toString()}, which is not allowed in this function. `);
+        // The this element is contained in the other element.
         return false;
       }
       if (thisPath[i] < otherPath[i]) {
@@ -4206,7 +4465,7 @@ class MathNode {
   ) {
     if (shiftHeld) {
       this.setSelectionStart();
-      this.equationEditor.setSelectionEnd(key, shiftHeld);
+      this.equationEditor.computeSelectionEndFromKey(key, shiftHeld);
       return new KeyHandlerResult(true, true);
     }
     if (this.arrowAbsorbedByAtom(key)) {
@@ -4377,19 +4636,13 @@ class MathNode {
     return null;
   }
 
-  storeCaretPosition(
+  storeCaretPositionPreExisingRange(
     /** @type{string} */
     key,
     /** @type{boolean} */
     shiftHeld,
   ) {
-    if (this.type.type !== knownTypes.atom.type) {
-      this.positionCaretBeforeKeyEvents = - 1;
-      this.equationEditor.setLastFocused(null);
-      return;
-    }
     let previousPosition = this.positionCaretBeforeKeyEvents;
-
     let selection = window.getSelection();
     let range = selection.getRangeAt(0);
     let rangeClone = range.cloneRange();
@@ -4404,6 +4657,24 @@ class MathNode {
     this.equationEditor.positionDebugString = `Computed position: ${this.positionCaretBeforeKeyEvents}.`
     this.equationEditor.positionDebugString += `Range: [${range}], clone: [${rangeClone}], previous position: ${previousPosition}.`;
     this.equationEditor.positionDebugString += `end offset: ${range.endOffset}, start offset: ${range.startOffset}`;
+  }
+
+  storeCaretPosition(
+    /** @type{string} */
+    key,
+    /** @type{boolean} */
+    shiftHeld,
+  ) {
+    if (this.type.type !== knownTypes.atom.type) {
+      this.positionCaretBeforeKeyEvents = - 1;
+      this.equationEditor.setLastFocused(null);
+      return;
+    }
+    try {
+      this.storeCaretPositionPreExisingRange(key, shiftHeld);
+    } catch (e) {
+      console.log(`Failed to store caret position ${e}.`);
+    }
   }
 
   appendChild(/** @type{MathNode} */ child) {
@@ -5800,14 +6071,44 @@ class MathNode {
     return false;
   }
 
+  setRangeStartEntireElement(
+    /** @type{Range}  */
+    range,
+  ) {
+    if (this.element.childNodes.length > 0) {
+      range.setStart(this.element.childNodes[0], 0);
+      return;
+    }
+    if (this.element.textContent !== null) {
+      range.setStart(this.element, 0);
+      return;
+    }
+    range.setStart(this.element, 0);
+  }
+
+  setRangeEndEntireElement(
+    /** @type{Range}  */
+    range,
+  ) {
+    if (this.element.childNodes.length > 0) {
+      range.setEndAfter(this.element.lastChild);
+      return;
+    }
+    if (this.element.textContent !== null) {
+      range.setEnd(this.element, this.element.textContent.length);
+      return;
+    }
+    range.setEnd(this.element, 0);
+  }
+
   setRangeStart(
     /** @type{Range}  */
     range,
     /** @type {number} */
     position,
   ) {
-    if (!this.isAtomEditable()) {
-      range.setStartBefore(this.element);
+    if (!this.isAtomEditable() || position < 0) {
+      this.setRangeStartEntireElement(range);
     } else if (this.element.childNodes.length > 0) {
       range.setStart(this.element.childNodes[0], position);
     } else {
@@ -5821,8 +6122,8 @@ class MathNode {
     /** @type {number} */
     position,
   ) {
-    if (!this.isAtomEditable()) {
-      range.setEndAfter(this.element);
+    if (!this.isAtomEditable() || position < 0) {
+      this.setRangeEndEntireElement(range);
     } else if (this.element.childNodes.length > 0) {
       range.setEnd(this.element.childNodes[0], position);
     } else {
@@ -5854,7 +6155,7 @@ class MathNode {
     }
     // console.log(`Position: ${position}, range ${range}, collapseToStart: ${collapseToStart} start offset: ${range.startOffset}, end offset: ${range.endOffset}, text len: ${this.element.textContent.length}`);
     range.collapse(collapseToStart);
-    selection.removeAllRanges();
+    this.equationEditor.resetSelectionDOM();
     selection.addRange(range);
     this.positionCaretBeforeKeyEvents = position;
     //    this.element.focus();

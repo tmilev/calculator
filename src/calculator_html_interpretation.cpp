@@ -727,8 +727,8 @@ JSData WebAPIResponse::getTopicTableJSON() {
     result[WebAPI::result::comments] = comments.str();
     return result;
   }
-  comments << "DEBUG: got to here!";
-  global.comments << "DEBUG: another tag";
+  // comments << "DEBUG: got to here!";
+  // global.comments << "DEBUG: another tag";
   thePage.computeTopicListAndPointsEarned(comments);
   return thePage.toStringTopicListJSON(&comments);
 }

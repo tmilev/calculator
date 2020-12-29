@@ -2270,7 +2270,53 @@ class EquationEditor {
     this.standardAtomHeight = 0;
     /** @type{string} */
     this.lastCopied = "";
-    this.computeStandardAtomHeight();
+    /** @type{HTMLElement|null} */
+    this.generalPurposeDiv = null;
+    this.prepareGeneralPuposeDiv();
+  }
+
+  copyToClipboard(event) {
+    let latexWithAnnotation = this.rootNode.toLatexWithAnnotation();
+    let toBeCopied = "";
+    if (latexWithAnnotation.selectionStart === - 1 || latexWithAnnotation.selectionEnd === - 1) {
+      toBeCopied = latexWithAnnotation.latex;
+    } else {
+      let start = latexWithAnnotation.selectionStart;
+      let end = latexWithAnnotation.selectionEnd;
+      if (start > end) {
+        let original = start;
+        start = end;
+        end = original;
+      }
+      let sliced = latexWithAnnotation.latex.slice(start, end);
+      toBeCopied = sliced;
+    }
+    this.lastCopied = toBeCopied;
+    event.clipboardData.setData('text/plain', toBeCopied);
+    event.preventDefault();
+  }
+
+  prepareGeneralPuposeDiv() {
+    if (!this.options.editable) {
+      return;
+    }
+    this.generalPurposeDiv = document.createElement("div");
+    this.generalPurposeDiv.style.position = "absolute";
+    // In firefox, empty space can be interpretted to have zero height; 
+    // not so for non-breaking space.
+    this.generalPurposeDiv.textContent = "\u200A";
+    this.container.appendChild(this.generalPurposeDiv);
+    let boundingBox = this.generalPurposeDiv.getBoundingClientRect();
+    this.standardAtomHeight = boundingBox.height;
+    this.generalPurposeDiv.style.width = "0px";
+    this.generalPurposeDiv.style.maxWidth = "0px";
+    this.generalPurposeDiv.style.height = "0px";
+    this.generalPurposeDiv.style.maxHeight = "0px";
+    this.generalPurposeDiv.style.display = "hidden";
+    this.generalPurposeDiv.style.overflow = "hidden";
+    this.generalPurposeDiv.addEventListener("copy", (e) => {
+      this.copyToClipboard(e);
+    });
   }
 
   /** Removes all ranges from the window selection. */
@@ -2280,21 +2326,6 @@ class EquationEditor {
     } catch (e) {
       console.log(`Failed to remove all ranges ${e}`);
     }
-  }
-
-  computeStandardAtomHeight() {
-    if (!this.options.editable) {
-      return;
-    }
-    let heightComputer = document.createElement("div");
-    heightComputer.style.position = "absolute";
-    // In firefox, empty space can be interpretted to have zero height; 
-    // not so for non-breaking space.
-    heightComputer.textContent = "\u00A0";
-    this.container.appendChild(heightComputer);
-    let boundingBox = heightComputer.getBoundingClientRect();
-    this.standardAtomHeight = boundingBox.height;
-    this.container.removeChild(heightComputer);
   }
 
   updateDOM() {
@@ -2728,9 +2759,9 @@ class EquationEditor {
       this.rootNode.unSelectMouseRecursive();
     }
     this.selectionStart.element = null;
-    this.selectionStart.position = -1;
+    this.selectionStart.position = - 1;
     this.selectionEnd.element = null;
-    this.selectionEnd.position = -1;
+    this.selectionEnd.position = - 1;
     this.selectionStartExpanded.element = null;
     this.selectionStartExpanded.position = - 1;
 
@@ -2785,7 +2816,10 @@ class EquationEditor {
     }
     this.selectionNoMoreDefault = true;
     this.resetSelectionDOM();
-    window.getSelection().addRange(document.createRange());
+    let range = document.createRange();
+    range.setStart(this.generalPurposeDiv, 0);
+    range.setEnd(this.generalPurposeDiv, 1);
+    window.getSelection().addRange(range);
     // The selection has escaped the original element.
     // Once we are out of the original element, we 
     // can only select an entire atom.
@@ -2995,24 +3029,32 @@ class LatexWithAnnotation {
     this.selectionEnd = selectionEnd;
   }
 
+  /**@returns{LatexWithAnnotation} Accounts start/end of a selection. 
+   * Returns this object.
+   */
   accountOwner(
     /** @type{MathNode} */
     owner,
   ) {
-    if (owner === owner.equationEditor.selectionEnd.element) {
+    let endSelection = owner.equationEditor.selectionEndExpanded;
+    let endElement = endSelection.element;
+    if (owner === endElement && endSelection.position === -1) {
       if (owner.equationEditor.selectionStartToTheLeftOfSelectionEnd()) {
         this.selectionEnd = this.latex.length;
       } else {
         this.selectionEnd = 0;
       }
     }
-    if (owner === owner.equationEditor.selectionStartExpanded.element) {
+    let startSelection = owner.equationEditor.selectionStartExpanded;
+    let startElement = startSelection.element;
+    if (owner === startElement && startSelection.position === -1) {
       if (owner.equationEditor.selectionStartToTheLeftOfSelectionEnd()) {
         this.selectionStart = 0;
       } else {
-        this.selectionEnd = this.latex.length;
+        this.selectionStart = this.latex.length;
       }
     }
+    return this;
   }
 
   accountChild(
@@ -3193,9 +3235,6 @@ class MathNode {
     this.element.setAttribute("mathTagName", this.type.type);
     if (this.equationEditor.options.editable) {
       if (this.type.type === knownTypes.atom.type) {
-        this.element.addEventListener("copy", (e) => {
-          this.copyToClipboard(e);
-        });
         this.element.addEventListener("paste", (e) => {
           this.pasteFromClipboard(e);
         });
@@ -4200,27 +4239,6 @@ class MathNode {
     }
     this.equationEditor.backslashSequenceStarted = false;
     return false;
-  }
-
-  copyToClipboard(event) {
-    let latexWithAnnotation = this.equationEditor.rootNode.toLatexWithAnnotation();
-    let toBeCopied = "";
-    if (latexWithAnnotation.selectionStart === - 1 || latexWithAnnotation.selectionEnd === - 1) {
-      toBeCopied = latexWithAnnotation.latex;
-    } else {
-      let start = latexWithAnnotation.selectionStart;
-      let end = latexWithAnnotation.selectionEnd;
-      if (start > end) {
-        let original = start;
-        start = end;
-        end = original;
-      }
-      let sliced = latexWithAnnotation.latex.slice(start, end);
-      toBeCopied = sliced;
-    }
-    this.equationEditor.lastCopied = toBeCopied;
-    event.clipboardData.setData('text/plain', toBeCopied);
-    event.preventDefault();
   }
 
   pasteFromClipboard(event) {
@@ -6157,7 +6175,7 @@ class MathNode {
   toString() {
     const result = [];
     if (this.isAtomic()) {
-      result.push(this.contentIfAtom());
+      result.push(this.textContentOrInitialContent());
     }
     result.push(`[${this.type.type}]`);
     if (this.children.length > 0) {
@@ -6230,19 +6248,20 @@ class MathNode {
         selectionEnd = position;
       }
     }
-    if (this === this.equationEditor.selectionEnd.element) {
-      let position = this.equationEditor.selectionEnd.position;
+    if (this === this.equationEditor.selectionEndExpanded.element) {
+      let position = this.equationEditor.selectionEndExpanded.position;
       if (this.equationEditor.selectionStartToTheLeftOfSelectionEnd()) {
         selectionEnd = position;
       } else {
         selectionStart = position;
       }
     }
-    return latexConstants.convertUtf16ToLatex(
+    let result = latexConstants.convertUtf16ToLatex(
       this.contentIfAtomic(),
       selectionStart,
       selectionEnd,
     );
+    return result.accountOwner(this);
   }
 
   /** @returns{string} */
@@ -6256,11 +6275,12 @@ class MathNode {
     let charactersSoFar = 0;
     let result = new LatexWithAnnotation("", - 1, - 1);
     for (let i = 0; i < this.children.length; i++) {
-      if (this.children[i] === null) {
+      let child = this.children[i];
+      if (child === null) {
         toJoin.push("[[null]]");
         continue;
       }
-      let childLatex = this.children[i].toLatexWithAnnotation();
+      let childLatex = child.toLatexWithAnnotation();
       result.accountChild(childLatex, charactersSoFar);
       toJoin.push(childLatex.latex);
       charactersSoFar += childLatex.latex.length;
@@ -6402,7 +6422,7 @@ class MathNodeFraction extends MathNode {
       result.latex += this.children[i].toLatex();
     }
     result.latex += "]";
-    return result;
+    return result.accountOwner(this);
   }
 
   applyBackspaceToTheRight() {

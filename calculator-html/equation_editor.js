@@ -169,6 +169,15 @@ const knownTypes = {
     "width": "auto",
     "height": "auto",
   }),
+  eventCatcher: new MathNodeType({
+    "type": "eventCatcher",
+    "width": "1px",
+    "maxWidth": "1px",
+    "height": "1px",
+    "maxHeight": "1px",
+    "display": "hidden",
+    "overflow": "hidden",
+  }),
   error: new MathNodeType({
     type: "error",
     colorText: "red",
@@ -405,7 +414,7 @@ class MathNodeFactory {
   horizontalMathFromArray(
     /** @type {EquationEditor} */
     equationEditor,
-    /** @type {MathNode|null[]} */
+    /** @type {(MathNode|null)[]} */
     content,
   ) {
     let first = null;
@@ -2270,9 +2279,9 @@ class EquationEditor {
     this.standardAtomHeight = 0;
     /** @type{string} */
     this.lastCopied = "";
-    /** @type{HTMLElement|null} */
-    this.generalPurposeDiv = null;
-    this.prepareGeneralPuposeDiv();
+    /** @type{MathNode|null} */
+    this.eventCatcher = null;
+    this.prepareEventCatcher();
   }
 
   copyToClipboard(event) {
@@ -2296,26 +2305,27 @@ class EquationEditor {
     event.preventDefault();
   }
 
-  prepareGeneralPuposeDiv() {
+  prepareEventCatcher() {
     if (!this.options.editable) {
       return;
     }
-    this.generalPurposeDiv = document.createElement("div");
-    this.generalPurposeDiv.style.position = "absolute";
+    this.eventCatcher = new MathNode(this, knownTypes.eventCatcher);
+    this.eventCatcher.createDOMElementIfMissing();
     // In firefox, empty space can be interpretted to have zero height; 
     // not so for non-breaking space.
-    this.generalPurposeDiv.textContent = "\u200A";
-    this.container.appendChild(this.generalPurposeDiv);
-    let boundingBox = this.generalPurposeDiv.getBoundingClientRect();
+    this.eventCatcher.textContent = "\u200A";
+    this.container.appendChild(this.eventCatcher.element);
+    let boundingBox = this.eventCatcher.element.getBoundingClientRect();
     this.standardAtomHeight = boundingBox.height;
-    this.generalPurposeDiv.style.width = "0px";
-    this.generalPurposeDiv.style.maxWidth = "0px";
-    this.generalPurposeDiv.style.height = "0px";
-    this.generalPurposeDiv.style.maxHeight = "0px";
-    this.generalPurposeDiv.style.display = "hidden";
-    this.generalPurposeDiv.style.overflow = "hidden";
-    this.generalPurposeDiv.addEventListener("copy", (e) => {
+
+    this.eventCatcher.element.addEventListener("copy", (e) => {
       this.copyToClipboard(e);
+    });
+    this.eventCatcher.element.addEventListener("keydown", (e) => {
+      this.keyDownCatcher(e);
+    });
+    this.container.addEventListener("keydown", (e) => {
+      this.keyDownCatcher(e);
     });
   }
 
@@ -2326,6 +2336,12 @@ class EquationEditor {
     } catch (e) {
       console.log(`Failed to remove all ranges ${e}`);
     }
+  }
+
+  /** Removes all ranges from the window selection. */
+  resetSelectionDOMSelectEventCatcher() {
+    this.resetSelectionDOM();
+    this.eventCatcher.focus(1);
   }
 
   updateDOM() {
@@ -2517,6 +2533,63 @@ class EquationEditor {
     }
   }
 
+  keyDownCatcher(
+    /**@type{KeyboardEvent} */
+    e,
+  ) {
+    e.stopPropagation();
+    e.preventDefault();
+    if (e.key === "Delete" || e.key === "Backspace") {
+      this.deleteSelection();
+    }
+  }
+
+  /**@returns{boolean} */
+  hasSelection() {
+    return this.selectionStart.element !== null;
+  }
+
+  /**@returns{boolean} */
+  selectionEscapedOriginalAtom() {
+    return this.selectionStartExpanded.position === - 1
+  }
+
+  /** @returns{KeyHandlerResult} whether the default should be prevented. */
+  deleteSelection() {
+    if (!this.hasSelection()) {
+      return new KeyHandlerResult(false, false);
+    }
+    if (!this.selectionEscapedOriginalAtom()) {
+      this.resetSelectionLeaveRangesIntact();
+      return new KeyHandlerResult(false, false);
+    }
+    let horizontalOwner = this.selectionStartExpanded.element.beefUpToHorizontalParent().parent;
+    let parent = horizontalOwner.parent;
+    if (parent === null) {
+      console.log("Unexpected horizontal math element without parent.");
+      this.resetSelectionLeaveRangesIntact();
+      return new KeyHandlerResult(false, false);
+    }
+    let splitBySelection = this.splitAtomsBySelection();
+    if (splitBySelection === null) {
+      console.log("Unexpected failure to split by selection");
+      this.resetSelectionLeaveRangesIntact();
+      return new KeyHandlerResult(false, false);
+    }
+    let horizontalReplacement = mathNodeFactory.horizontalMathFromArray(this, splitBySelection.beforeSplit);
+    let atom = mathNodeFactory.atom(this, "");
+    atom.desiredCaretPosition = 0;
+    horizontalReplacement.appendChild(atom);
+    horizontalReplacement.appendChildren(splitBySelection.afterSplit);
+    horizontalReplacement.normalizeHorizontalMath();
+    horizontalReplacement.ensureEditableAtoms();
+    parent.replaceChildAtPosition(horizontalOwner.indexInParent, horizontalReplacement);
+    this.resetSelectionLeaveRangesIntact();
+    parent.updateDOM();
+    parent.focusRestore();
+    return new KeyHandlerResult(true, true);
+  }
+
   updateAlignment() {
     this.rootNode.computeBoundingBox();
     this.rootNode.doAlign();
@@ -2625,11 +2698,11 @@ class EquationEditor {
 
   /** @returns {SplitBySelectionResult|null} */
   splitAtomsBySelection() {
-    if (this.selectionStartExpanded.element === null || this.selectionEnd.element === null) {
+    if (this.selectionStartExpanded.element === null || this.selectionEndExpanded.element === null) {
       return null;
     }
     let start = this.selectionStartExpanded;
-    let end = this.selectionEnd;
+    let end = this.selectionEndExpanded;
     if (end.element.isToTheLeftOf(start.element)) {
       // Swap end and start
       let temporary = start;
@@ -2637,8 +2710,9 @@ class EquationEditor {
       end = temporary;
     }
     if (
-      this.selectionStartExpanded.element === this.selectionEnd.element &&
-      this.selectionEnd.element.isAtomEditable()
+      this.selectionStartExpanded.element === this.selectionEndExpanded.element &&
+      this.selectionStartExpanded.element.isAtomEditable() &&
+      !this.selectionEscapedOriginalAtom()
     ) {
       return this.splitOneAtomBySelection();
     }
@@ -2648,8 +2722,11 @@ class EquationEditor {
       return null;
     }
     if (ancestor.type.type !== knownTypes.horizontalMath.type) {
-      // Common ancestor is not of type horizontal math. Don't split.
-      return null;
+      ancestor = ancestor.beefUpToHorizontalParent().parent;
+      if (ancestor === null) {
+        // Common ancestor is not of type horizontal math. Don't split.
+        return null;
+      }
     }
     if (start.element === ancestor || end.element === ancestor) {
       // Start and end are the same node, which is the ancestor.
@@ -2754,7 +2831,7 @@ class EquationEditor {
     window.getSelection().addRange(rangeClone);
   }
 
-  resetSelection() {
+  resetSelectionLeaveRangesIntact() {
     if (this.selectionStart.element !== null) {
       this.rootNode.unSelectMouseRecursive();
     }
@@ -2778,7 +2855,7 @@ class EquationEditor {
     if (this.selectionStart.element !== null) {
       return;
     }
-    this.resetSelection();
+    this.resetSelectionLeaveRangesIntact();
     this.selectionStart = new AtomWithPosition(start, start.positionCaretBeforeKeyEvents);
     this.selectionEnd = new AtomWithPosition(start, start.positionCaretBeforeKeyEvents);
   }
@@ -2815,11 +2892,8 @@ class EquationEditor {
       return false;
     }
     this.selectionNoMoreDefault = true;
-    this.resetSelectionDOM();
-    let range = document.createRange();
-    range.setStart(this.generalPurposeDiv, 0);
-    range.setEnd(this.generalPurposeDiv, 1);
-    window.getSelection().addRange(range);
+    this.resetSelectionDOMSelectEventCatcher();
+    this.eventCatcher.focus();
     // The selection has escaped the original element.
     // Once we are out of the original element, we 
     // can only select an entire atom.
@@ -2831,7 +2905,7 @@ class EquationEditor {
     this.mouseIgnoreNextClick = true;
     this.highlightSelectionMouse();
     if (this.options.debugLogContainer !== null) {
-      this.lastSelectionAction = `Mouse move selection over ${element.toString()}.`;
+      this.lastSelectionAction = `Mouse move selection above ${element.toString()}.`;
     }
     this.writeDebugInfo(null);
     return true;
@@ -2910,7 +2984,7 @@ class EquationEditor {
     }
     e.stopPropagation();
     if (this.selectFromElement(element)) {
-      e.preventDefault()
+      e.preventDefault();
     }
   }
 
@@ -2924,8 +2998,9 @@ class EquationEditor {
     // e.preventDefault();
     element.storeCaretPosition("", false);
     // Discard previous selection data.
-    this.resetSelection();
+    this.resetSelectionLeaveRangesIntact();
     this.initializeSelectionStart(element);
+    this.resetSelectionDOMSelectEventCatcher();
     this.mouseSelectionStarted = true;
     this.mouseSelectionVisible = true;
     if (this.options.debugLogContainer !== null) {
@@ -2935,11 +3010,16 @@ class EquationEditor {
     return;
   }
 
-  handleMouseSelectionEnd() {
+  handleMouseSelectionEnd(
+    /**@type{MouseEvent} */
+    e,
+  ) {
     if (this.options.debugLogContainer !== null) {
       this.lastSelectionAction = `Mouse selection end.`;
     }
     this.mouseSelectionStarted = false;
+    e.preventDefault();
+    e.stopPropagation();
   }
 }
 
@@ -3257,8 +3337,8 @@ class MathNode {
       this.element.addEventListener("mousedown", (e) => {
         this.equationEditor.handleMouseSelectionStart(e, this);
       });
-      this.element.addEventListener("mouseup", (_) => {
-        this.equationEditor.handleMouseSelectionEnd();
+      this.element.addEventListener("mouseup", (e) => {
+        this.equationEditor.handleMouseSelectionEnd(e);
       });
       this.element.addEventListener("mousemove", (e) => {
         this.equationEditor.handleMouseMoveSelection(e, this);
@@ -3276,16 +3356,24 @@ class MathNode {
     e,
   ) {
     e.stopPropagation();
+    e.preventDefault();
     if (this.equationEditor.mouseIgnoreNextClick) {
       this.equationEditor.mouseIgnoreNextClick = false;
+      this.equationEditor.resetSelectionDOMSelectEventCatcher();
+      if (this.equationEditor.options.debugLogContainer !== null) {
+        this.equationEditor.lastSelectionAction = "Set mouse ignore next to true.";
+      }
+      this.equationEditor.writeDebugInfo(null);
       return;
     }
-    this.equationEditor.resetSelection();
+    if (this.equationEditor.options.debugLogContainer !== null) {
+      this.equationEditor.lastSelectionAction = "Reset selection on single click.";
+    }
+    this.equationEditor.resetSelectionLeaveRangesIntact();
     this.storeCaretPosition("", false);
     if (this.type.type === knownTypes.atom.type) {
       return;
     }
-    e.preventDefault();
     this.focus(1);
   }
 
@@ -4467,7 +4555,7 @@ class MathNode {
       let preventDefault = this.equationEditor.computeSelectionEndFromKey(key, shiftHeld);
       return new KeyHandlerResult(preventDefault, preventDefault);
     }
-    this.equationEditor.resetSelection();
+    this.equationEditor.resetSelectionLeaveRangesIntact();
     if (this.arrowAbsorbedByAtom(key)) {
       return new KeyHandlerResult(false, false);
     }
@@ -4914,6 +5002,9 @@ class MathNode {
 
   /** @returns{KeyHandlerResult} whether the default should be prevented. */
   deleteButton() {
+    if (this.equationEditor.hasSelection()) {
+      return this.equationEditor.deleteSelection();
+    }
     if (
       this.positionCaretBeforeKeyEvents !== this.element.textContent.length ||
       this.type.type !== knownTypes.atom.type
@@ -4931,6 +5022,9 @@ class MathNode {
 
   /** @returns{KeyHandlerResult} whether the default should be prevented. */
   backspace() {
+    if (this.equationEditor.hasSelection()) {
+      return this.equationEditor.deleteSelection();
+    }
     if (
       this.positionCaretBeforeKeyEvents !== 0 ||
       this.type.type !== knownTypes.atom.type
@@ -6015,7 +6109,7 @@ class MathNode {
    * should go on the right. Zero indicates to focus at this.positionCaretBeforeKeyEvents.
    */
   focus(endToFocus) {
-    if (this.type.type === knownTypes.atom.type) {
+    if (this.type.type === knownTypes.atom.type || this.type.type === knownTypes.eventCatcher.type) {
       return this.focusAtom(endToFocus);
     }
     return this.focusStandard(endToFocus);

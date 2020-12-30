@@ -2576,7 +2576,17 @@ class EquationEditor {
     return new KeyHandlerResult(preventDefault, preventDefault);
   }
 
-  resetSelectionFocusLast() {
+  resetSelectionFocusBestChoice() {
+    if (this.hasSelection()) {
+      let lastSelected = this.selectionEndExpanded.element;
+      let direction = - 1;
+      if (this.selectionStartToTheLeftOfSelectionEnd()) {
+        direction = 1;
+      }
+      this.resetSelectionFullSelectEventCatcher();
+      lastSelected.focus(direction);
+      return;
+    }
     this.resetSelectionFullSelectEventCatcher();
     this.getLastFocused().focus();
   }
@@ -2587,7 +2597,7 @@ class EquationEditor {
   ) {
     e.stopPropagation();
     e.preventDefault();
-    console.log(`DEBUG: Catch-all keyboard event, key: ${e.key}, shift: ${e.shiftKey}, ctrl: ${e.ctrlKey}`);
+    // console.log(`DEBUG: Catch-all keyboard event, key: ${e.key}, shift: ${e.shiftKey}, ctrl: ${e.ctrlKey}`);
     let key = e.key;
     if (key === "c" && e.ctrlKey) {
       this.copyToClipboard()
@@ -2602,7 +2612,7 @@ class EquationEditor {
           this.arrowShiftHeld(this.getLastFocused(), key);
           return;
         }
-        this.resetSelectionFocusLast();
+        this.resetSelectionFocusBestChoice();
         return;
       case "Delete":
       case "Backspace":
@@ -2610,7 +2620,7 @@ class EquationEditor {
           this.deleteSelection();
           return;
         }
-        this.resetSelectionFocusLast();
+        this.resetSelectionFocusBestChoice();
         return;
       default:
         return;

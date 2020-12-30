@@ -171,10 +171,10 @@ const knownTypes = {
   }),
   eventCatcher: new MathNodeType({
     "type": "eventCatcher",
-    "width": "1px",
-    "maxWidth": "1px",
-    "height": "1px",
-    "maxHeight": "1px",
+    "width": "0px",
+    "maxWidth": "0px",
+    "height": "0px",
+    "maxHeight": "0px",
     "display": "hidden",
     "overflow": "hidden",
   }),
@@ -2284,7 +2284,7 @@ class EquationEditor {
     this.prepareEventCatcher();
   }
 
-  copyToClipboard(event) {
+  copyToClipboard() {
     let latexWithAnnotation = this.rootNode.toLatexWithAnnotation();
     let toBeCopied = "";
     if (latexWithAnnotation.selectionStart === - 1 || latexWithAnnotation.selectionEnd === - 1) {
@@ -2301,8 +2301,21 @@ class EquationEditor {
       toBeCopied = sliced;
     }
     this.lastCopied = toBeCopied;
-    event.clipboardData.setData('text/plain', toBeCopied);
-    event.preventDefault();
+    navigator.clipboard.writeText(toBeCopied);
+    this.writeDebugInfo(null);
+  }
+
+  computeStandardAtomHeight() {
+    // In firefox, empty space can be interpretted to have zero height; 
+    // not so for non-breaking space.
+    this.eventCatcher.initialContent = "\u200A";
+    this.eventCatcher.element = document.createElement("div");
+    this.eventCatcher.element.textContent = this.eventCatcher.initialContent;
+    this.container.appendChild(this.eventCatcher.element);
+    let boundingBox = this.eventCatcher.element.getBoundingClientRect();
+    this.standardAtomHeight = boundingBox.height;
+    this.container.removeChild(this.eventCatcher.element);
+    this.eventCatcher.element = null;
   }
 
   prepareEventCatcher() {
@@ -2310,22 +2323,20 @@ class EquationEditor {
       return;
     }
     this.eventCatcher = new MathNode(this, knownTypes.eventCatcher);
+    this.computeStandardAtomHeight();
     this.eventCatcher.createDOMElementIfMissing();
-    // In firefox, empty space can be interpretted to have zero height; 
-    // not so for non-breaking space.
-    this.eventCatcher.textContent = "\u200A";
     this.container.appendChild(this.eventCatcher.element);
-    let boundingBox = this.eventCatcher.element.getBoundingClientRect();
-    this.standardAtomHeight = boundingBox.height;
-
-    this.eventCatcher.element.addEventListener("copy", (e) => {
-      this.copyToClipboard(e);
+    this.eventCatcher.element.style.position = "absolute";
+    this.eventCatcher.element.style.left = 0;
+    this.eventCatcher.element.style.top = 0;
+    this.eventCatcher.element.addEventListener("copy", (_) => {
+      this.copyToClipboard();
     });
     this.eventCatcher.element.addEventListener("keydown", (e) => {
-      this.keyDownCatcher(e);
+      this.handleKeyDownCatchAll(e);
     });
     this.container.addEventListener("keydown", (e) => {
-      this.keyDownCatcher(e);
+      this.handleKeyDownCatchAll(e);
     });
   }
 
@@ -2338,9 +2349,18 @@ class EquationEditor {
     }
   }
 
+  resetSelectionFullSelectEventCatcher() {
+    this.resetSelectionLeaveRangesIntact();
+    this.resetSelectionDOMSelectEventCatcher();
+  }
+
   /** Removes all ranges from the window selection. */
   resetSelectionDOMSelectEventCatcher() {
     this.resetSelectionDOM();
+    let range = document.createRange();
+    range.setStart(this.eventCatcher.element, 0);
+    range.setEnd(this.eventCatcher.element, 0);
+    window.getSelection().addRange(range);
     this.eventCatcher.focus(1);
   }
 
@@ -2533,14 +2553,67 @@ class EquationEditor {
     }
   }
 
-  keyDownCatcher(
+  /**@returns{MathNode} */
+  getLastFocused() {
+    if (this.lastFocused === null) {
+      return this.rootNode.rightmostAtomChild();
+    }
+    if (this.lastFocused.isDetached()) {
+      return this.rootNode.rightmostAtomChild();
+    }
+    return this.lastFocused;
+  }
+
+  /**@returns{KeyHandlerResult} */
+  arrowShiftHeld(
+    /**@type{MathNode} */
+    target,
+    /**@type{string} */
+    arrowKey,
+  ) {
+    this.initializeSelectionStart(target);
+    let preventDefault = this.computeSelectionEndFromShiftKey(arrowKey);
+    return new KeyHandlerResult(preventDefault, preventDefault);
+  }
+
+  resetSelectionFocusLast() {
+    this.resetSelectionFullSelectEventCatcher();
+    this.getLastFocused().focus();
+  }
+
+  handleKeyDownCatchAll(
     /**@type{KeyboardEvent} */
     e,
   ) {
     e.stopPropagation();
     e.preventDefault();
-    if (e.key === "Delete" || e.key === "Backspace") {
-      this.deleteSelection();
+    console.log(`DEBUG: Catch-all keyboard event, key: ${e.key}, shift: ${e.shiftKey}, ctrl: ${e.ctrlKey}`);
+    let key = e.key;
+    if (key === "c" && e.ctrlKey) {
+      this.copyToClipboard()
+      return;
+    }
+    switch (key) {
+      case "ArrowLeft":
+      case "ArrowRight":
+      case "ArrowUp":
+      case "ArrowDown":
+        if (e.shiftKey) {
+          this.arrowShiftHeld(this.getLastFocused(), key);
+          return;
+        }
+        this.resetSelectionFocusLast();
+        return;
+      case "Delete":
+      case "Backspace":
+        if (this.hasSelection()) {
+          this.deleteSelection();
+          return;
+        }
+        this.resetSelectionFocusLast();
+        return;
+      default:
+        return;
     }
   }
 
@@ -2714,6 +2787,7 @@ class EquationEditor {
       this.selectionStartExpanded.element.isAtomEditable() &&
       !this.selectionEscapedOriginalAtom()
     ) {
+      // Selection is contained within a single atom.
       return this.splitOneAtomBySelection();
     }
     let ancestor = start.element.commonAncestor(end.element);
@@ -2734,36 +2808,16 @@ class EquationEditor {
     }
     while (start.element.parent !== ancestor && start.element.parent !== null) {
       start.element = start.element.parent;
-      start.position = - 1;
     }
     while (end.element.parent !== ancestor && end.element.parent !== null) {
       end.element = end.element.parent;
-      end.position = 1;
     }
-    if (end.position === - 1) {
-      // The end is not atomic. Set its position to 1 so selections include it.
-      end.position = 1;
-    }
-    let startSplit = start.element.splitByPosition(start.position);
-    let endSplit = end.element.splitByPosition(end.position);
     let result = new SplitBySelectionResult(ancestor);
     for (let i = 0; i < start.element.indexInParent; i++) {
       result.beforeSplit.push(ancestor.children[i]);
     }
-    if (startSplit[0] !== null) {
-      result.beforeSplit.push(startSplit[0]);
-    }
-    if (startSplit[1] !== null) {
-      result.split.push(startSplit[1]);
-    }
     for (let i = start.element.indexInParent + 1; i < end.element.indexInParent; i++) {
       result.split.push(ancestor.children[i]);
-    }
-    if (endSplit[0] !== null) {
-      result.split.push(endSplit[0]);
-    }
-    if (endSplit[1] !== null) {
-      result.afterSplit.push(endSplit[1]);
     }
     for (let i = end.element.indexInParent + 1; i < ancestor.children.length; i++) {
       result.afterSplit.push(ancestor.children[i]);
@@ -2861,15 +2915,10 @@ class EquationEditor {
   }
 
   /** @returns{boolean} whether the default should be prevented. */
-  computeSelectionEndFromKey(
+  computeSelectionEndFromShiftKey(
     /** @type {string} */
     key,
-    /** @type {boolean} */
-    shiftHeld,
   ) {
-    if (!shiftHeld) {
-      return false;
-    }
     let newSelection = null;
     if (key === "ArrowLeft" || key === "ArrowUp") {
       newSelection = this.selectionEnd.leftHorizontalNeighbor();
@@ -2922,8 +2971,9 @@ class EquationEditor {
     if (parent.parent === null) {
       return new AtomWithPosition(this.rootNode, -1);
     }
+    let container = parent.parent.children[parent.indexInParent];
     return new AtomWithPosition(
-      parent.parent.children[parent.indexInParent],
+      container.beefUpToHorizontalParent(),
       - 1,
     );
   }
@@ -3207,7 +3257,10 @@ class MathNode {
     }
     this.element = document.createElement("div");
     const fontSize = 20;
-    if (this.type.type === knownTypes.atom.type && this.equationEditor.options.editable) {
+    if (
+      (this.type.type === knownTypes.eventCatcher.type || this.type.type === knownTypes.atom.type) &&
+      this.equationEditor.options.editable
+    ) {
       this.element.contentEditable = true;
     }
     // Padding.
@@ -3314,6 +3367,9 @@ class MathNode {
     }
     this.element.setAttribute("mathTagName", this.type.type);
     if (this.equationEditor.options.editable) {
+      this.element.addEventListener("copy", (e) => {
+        this.equationEditor.copyToClipboard();
+      });
       if (this.type.type === knownTypes.atom.type) {
         this.element.addEventListener("paste", (e) => {
           this.pasteFromClipboard(e);
@@ -3331,18 +3387,20 @@ class MathNode {
           this.handleBlur(e);
         });
       }
-      this.element.addEventListener("click", (e) => {
-        this.handleSingleClick(e);
-      });
-      this.element.addEventListener("mousedown", (e) => {
-        this.equationEditor.handleMouseSelectionStart(e, this);
-      });
-      this.element.addEventListener("mouseup", (e) => {
-        this.equationEditor.handleMouseSelectionEnd(e);
-      });
-      this.element.addEventListener("mousemove", (e) => {
-        this.equationEditor.handleMouseMoveSelection(e, this);
-      });
+      if (this.type.type !== knownTypes.eventCatcher.type) {
+        this.element.addEventListener("click", (e) => {
+          this.handleSingleClick(e);
+        });
+        this.element.addEventListener("mousedown", (e) => {
+          this.equationEditor.handleMouseSelectionStart(e, this);
+        });
+        this.element.addEventListener("mouseup", (e) => {
+          this.equationEditor.handleMouseSelectionEnd(e);
+        });
+        this.element.addEventListener("mousemove", (e) => {
+          this.equationEditor.handleMouseMoveSelection(e, this);
+        });
+      }
     }
     if (this.type.type === knownTypes.root.type) {
       this.element.addEventListener("dblclick", (e) => {
@@ -4382,6 +4440,10 @@ class MathNode {
     event,
   ) {
     let key = event.key;
+    if (key === "c" && event.ctrlKey) {
+      this.equationEditor.copyToClipboard();
+      return new KeyHandlerResult(true, false);
+    }
     let shiftHeld = event.shiftKey;
     if (this.processBackslash(key, shiftHeld)) {
       return new KeyHandlerResult(true, false);
@@ -4551,9 +4613,7 @@ class MathNode {
     shiftHeld,
   ) {
     if (shiftHeld) {
-      this.equationEditor.initializeSelectionStart(this);
-      let preventDefault = this.equationEditor.computeSelectionEndFromKey(key, shiftHeld);
-      return new KeyHandlerResult(preventDefault, preventDefault);
+      return this.equationEditor.arrowShiftHeld(this, key);
     }
     this.equationEditor.resetSelectionLeaveRangesIntact();
     if (this.arrowAbsorbedByAtom(key)) {
@@ -5557,7 +5617,7 @@ class MathNode {
     /** @type{number} */
     charactersToRemove,
   ) {
-    if (!this.isAtomEditable()) {
+    if (!this.isAtomEditable() || position < 0) {
       if (position <= 0) {
         return [null, this];
       } else {
@@ -6763,18 +6823,28 @@ class MathNodeSqrt extends MathNode {
     if (this.element === null) {
       return new LatexWithAnnotation("[null(]", - 1, - 1);
     }
-    let exponent = "";
-    let underTheRadical = "";
+    let result = new LatexWithAnnotation("", -1, -1);
+    let exponent = null;
+    let underTheRadical = null;
     if (this.children.length > 0) {
-      exponent = this.children[0].toLatex();
+      exponent = this.children[0].toLatexWithAnnotation();
     }
     if (this.children.length > 2) {
-      underTheRadical = this.children[2].toLatex();
+      underTheRadical = this.children[2].toLatexWithAnnotation();
     }
-    if (exponent !== "") {
-      return new LatexWithAnnotation(`\\sqrt[${exponent}]{${underTheRadical}}`, - 1, - 1);
+    if (exponent !== null) {
+      if (exponent.latex !== "") {
+        result.latex = `\\sqrt[${exponent.latex}]{${underTheRadical.latex}}`;
+        result.accountChild(exponent, 6);
+        result.accountChild(underTheRadical, exponent.latex.length + 6 + 2);
+        result.accountOwner(this);
+        return result;
+      }
     }
-    return new LatexWithAnnotation(`\\sqrt{${underTheRadical}}`, - 1, - 1);
+    result.latex = `\\sqrt{${underTheRadical.latex}}`;
+    result.accountChild(underTheRadical, 6);
+    result.accountOwner(this);
+    return result;
   }
   applyBackspaceToTheRight() {
     return this.applyBackspaceToTheRightAsLeftArrow();

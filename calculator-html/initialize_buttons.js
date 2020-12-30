@@ -8,6 +8,7 @@ const miscellaneous = require("./miscellaneous");
 const equation_editor = require("./equation_editor");
 const storage = require("./storage");
 const EquationEditor = require("./equation_editor").EquationEditor;
+const EquationEditorButtonFactory = require("./equation_editor").EquationEditorButtonFactory;
 const EquationEditorOptions = require("./equation_editor").EquationEditorOptions;
 const datePicker = require("./date_picker").datePicker;
 
@@ -71,54 +72,6 @@ function processMathQuillLatex(theText) {
     }
   }
   return theText;
-}
-
-class EditorButton {
-  constructor(command, label, additionalStyle, doWriteInsteadOfCmdInput) {
-    this.command = command;
-    this.label = label;
-    /**@type {string} */
-    this.additionalStyle = "";
-    /**@type {boolean} */
-    this.doWriteInsteadOfCmd = false;
-
-    if (additionalStyle !== undefined && additionalStyle !== null) {
-      this.additionalStyle = additionalStyle;
-    }
-    if (doWriteInsteadOfCmdInput !== undefined && doWriteInsteadOfCmdInput !== null) {
-      this.doWriteInsteadOfCmd = doWriteInsteadOfCmdInput;
-    }
-
-  }
-
-  /**@return {HTMLButtonElement} */
-  getButton(inputPanel) {
-    let result = document.createElement("button");
-    result.className = "buttonMQ";
-    if (this.additionalStyle !== undefined && this.additionalStyle !== null && this.additionalStyle !== "") {
-      result.style = this.additionalStyle;
-    }
-    result.textContent = this.label;
-    result.addEventListener(
-      'click', () => {
-        this.clickFunction(inputPanel);
-      }
-    );
-    return result;
-  }
-
-  clickFunction(
-    /**@type{InputPanelData} */
-    inputPanel,
-  ) {
-    let editor = inputPanel.equationEditor;
-    let doCMD = !this.doWriteInsteadOfCmd;
-    if (doCMD) {
-      editor.writeLatexLastFocused(this.command);
-    } else {
-      editor.writeLatexLastFocused(this.command);
-    }
-  }
 }
 
 function accountCalculatorDelimiterReturnMustEndSelection(character, calculatorSeparatorCounts) {
@@ -194,7 +147,7 @@ class InputPanelData {
     this.idEquationEditorElementLocation = input.idEquationEditorElementLocation;
     this.idEditorComments = input.idEditorComments;
     this.problemId = input.problemId;
-    /**@type{EditorButton[]} */
+    /**@type{EquationEditorButtonFactory[]} */
     this.buttonBindings = [];
 
     this.buttonsPerLine = input.buttonsPerLine;
@@ -347,7 +300,7 @@ class InputPanelData {
     }
   }
 
-  mQHelpCalculator() {
+  editorHelpCalculator() {
     this.getSemiColumnEnclosure();
     if (this.equationEditor === null) {
       return;
@@ -492,17 +445,9 @@ class InputPanelData {
     this.submitOrPreviewAnswers(theRequest);
   }
 
-  submitPreviewWithTimeOut() { // useful event handlers
+  submitPreviewWithTimeOut() {
     clearTimeout(this.timerForPreviewAnswers);
     this.timerForPreviewAnswers = setTimeout(this.submitPreview.bind(this), 4000);
-  }
-
-  editLaTeX() {
-    // useful event handlers
-    this.ignoreNextMathQuillUpdateEvent = true;
-    this.mqObject.latex(document.getElementById(this.idPureLatex).value + ' ');
-    this.ignoreNextMathQuillUpdateEvent = false;
-    this.submitPreviewWithTimeOut();
   }
 
   editMQFunction(
@@ -530,7 +475,7 @@ class InputPanelData {
       }
       let theBoxContent = this.equationEditor.rootNode.toLatex();
       if (this.calculatorLeftString === null || this.calculatorRightString === null) {
-        this.mQHelpCalculator();
+        this.editorHelpCalculator();
       }
       let theInserted = processMathQuillLatex(theBoxContent);
       if (theInserted.length > 0 && startingCharacterSectionUnderMathQuillEdit.length > 0) {
@@ -706,20 +651,28 @@ class InputPanelData {
     }
   }
 
-  addCommand(
+  addLatexCommand(
     /**@type{string} */
     command,
     /**@type{string} */
     label,
     /**@type{string} */
     additionalStyle,
-    /**@type{boolean} */
-    doWriteInsteadOfCmdInput,
   ) {
-    let button = new EditorButton(
-      command, label, additionalStyle, doWriteInsteadOfCmdInput
+    let button = new EquationEditorButtonFactory(
+      command, label, additionalStyle,
     );
     this.buttonBindings.push(button);
+  }
+
+  addKeySequence(
+    /**@type{string} */
+    command,
+    /**@type{string} */
+    label,
+    /**@type{string} */
+    additionalStyle,
+  ) {
   }
 
   addButtons(
@@ -735,87 +688,87 @@ class InputPanelData {
     let noOptions = this.flagButtons.noPreference.selected;
     let includeAll = this.flagButtons.all.selected || forceShowAll;
     if (this.flagButtons.algebra.selected || noOptions || includeAll) {
-      this.addCommand("+", "+");
-      this.addCommand("-", "-");
-      this.addCommand("\\cdot", "*");
-      this.addCommand("\\frac{}{}", "/");
-      this.addCommand("\\sqrt{}", "\u221A");
-      this.addCommand("{}^{}", "^");
-      this.addCommand("()", "(");
-      this.addCommand("()", ")");
+      this.addLatexCommand("+", "+");
+      this.addLatexCommand("-", "-");
+      this.addLatexCommand("\\cdot", "*");
+      this.addLatexCommand("\\frac{}{}", "/");
+      this.addLatexCommand("\\sqrt{}", "\u221A");
+      this.addLatexCommand("{}^{}", "^");
+      this.addLatexCommand("()", "(");
+      this.addLatexCommand("()", ")");
     }
     if (this.flagButtons.trigonometry.selected || includeAll) {
-      this.addCommand("\\sin", "sin", "font-size:10px; ");
-      this.addCommand("\\cos", "cos", "font-size:10px; ");
-      this.addCommand("\\tan", "tan", "font-size:10px; ");
-      this.addCommand("\\cot", "cot", "font-size:10px; ");
-      this.addCommand("\\sec", "sec", "font-size:10px; ");
-      this.addCommand("\\csc", "csc", "font-size:10px; ");
+      this.addLatexCommand("\\sin", "sin", "font-size:10px; ");
+      this.addLatexCommand("\\cos", "cos", "font-size:10px; ");
+      this.addLatexCommand("\\tan", "tan", "font-size:10px; ");
+      this.addLatexCommand("\\cot", "cot", "font-size:10px; ");
+      this.addLatexCommand("\\sec", "sec", "font-size:10px; ");
+      this.addLatexCommand("\\csc", "csc", "font-size:10px; ");
     }
     if (this.flagButtons.inverseTrigonometry.selected || includeAll) {
-      this.addCommand("\\arcsin", "asin", "font-size:7px");
-      this.addCommand("\\arccos", "acos", "font-size:7px");
-      this.addCommand("\\arctan", "atan", "font-size:7px");
+      this.addLatexCommand("\\arcsin", "asin", "font-size:7px");
+      this.addLatexCommand("\\arccos", "acos", "font-size:7px");
+      this.addLatexCommand("\\arctan", "atan", "font-size:7px");
     }
     if (this.flagButtons.comma.selected || includeAll) {
-      this.addCommand(",", ",");
+      this.addLatexCommand(",", ",");
     }
     if (this.flagButtons.brackets.selected || includeAll) {
-      this.addCommand("[", "[");
-      this.addCommand("]", "]");
+      this.addLatexCommand("[", "[");
+      this.addLatexCommand("]", "]");
     }
     if (this.flagButtons.complex.selected || includeAll) {
-      this.addCommand("i", "i");
+      this.addLatexCommand("i", "i");
     }
     if (this.flagButtons.variables.selected || includeAll) {
-      this.addCommand("x", "x");
-      this.addCommand("y", "y");
-      this.addCommand("=", "=");
+      this.addLatexCommand("x", "x");
+      this.addLatexCommand("y", "y");
+      this.addLatexCommand("=", "=");
     }
     if (this.flagButtons.logarithms.selected || noOptions || includeAll) {
-      this.addCommand("\\log_{} ", "log_", "font-size:10px; ");
-      this.addCommand("{}_{}", "_");
-      this.addCommand("\\ln", "ln");
-      this.addCommand("e", "e");
+      this.addLatexCommand("\\log_{} ", "log_", "font-size:10px; ");
+      this.addLatexCommand("{}_{}", "_");
+      this.addLatexCommand("\\ln", "ln");
+      this.addLatexCommand("e", "e");
     }
     if (this.flagButtons.infinity.selected || includeAll || noOptions) {
-      this.addCommand("\\infty", "\u221E");
+      this.addLatexCommand("\\infty", "\u221E");
     }
     if (this.flagButtons.limits.selected || includeAll) {
-      this.addCommand(" DNE ", "DNE", "font-size: 7px");
+      this.addLatexCommand(" DNE ", "DNE", "font-size: 7px");
     }
     if (this.flagButtons.series.selected || noOptions || includeAll) {
-      this.addCommand("\\sum", "\u03A3");
-      this.addCommand("!", "!");
-      this.addCommand("\\binom", "binom", "font-size : 7px;");
+      this.addLatexCommand("\\sum", "\u03A3");
+      this.addLatexCommand("!", "!");
+      this.addLatexCommand("\\binom", "binom", "font-size : 7px;");
     }
     if (noOptions || includeAll) {
-      this.addCommand("\\circ", "\u25CB");
+      this.addLatexCommand("\\circ", "\u25CB");
     }
     if (this.flagButtons.logical.selected || noOptions || includeAll) {
-      this.addCommand(" or ", "or");
+      this.addLatexCommand(" or ", "or");
     }
     if (this.flagButtons.setOperations.selected || noOptions || includeAll) {
-      this.addCommand("\\emptyset", "\u2205");
-      this.addCommand("\\cup", "\u222A");
-      this.addCommand("\\in", "\u2208");
+      this.addLatexCommand("\\emptyset", "\u2205");
+      this.addLatexCommand("\\cup", "\u222A");
+      this.addLatexCommand("\\in", "\u2208");
     }
     if (this.flagButtons.matrix.selected || includeAll) {
-      this.addCommand("\\begin{pmatrix} \\\\ \\end{pmatrix}", "2x1", "font-size : 7px;", true);
-      this.addCommand("\\begin{pmatrix} \\\\ \\\\ \\end{pmatrix}", "3x1", "font-size : 7px;", true);
-      this.addCommand("\\begin{pmatrix} & \\\\ & \\end{pmatrix}", "2x2", "font-size : 7px;", true);
-      this.addCommand("\\begin{pmatrix} & & \\\\ & & \\\\ & & \\end{pmatrix}", "3x3", "font-size : 7px;", true);
+      this.addLatexCommand("\\begin{pmatrix} \\\\ \\end{pmatrix}", "2x1", "font-size : 7px;", true);
+      this.addLatexCommand("\\begin{pmatrix} \\\\ \\\\ \\end{pmatrix}", "3x1", "font-size : 7px;", true);
+      this.addLatexCommand("\\begin{pmatrix} & \\\\ & \\end{pmatrix}", "2x2", "font-size : 7px;", true);
+      this.addLatexCommand("\\begin{pmatrix} & & \\\\ & & \\\\ & & \\end{pmatrix}", "3x3", "font-size : 7px;", true);
     }
     if (this.flagButtons.angles.selected || noOptions || includeAll) {
-      this.addCommand("\\alpha", "\u03B1");
-      this.addCommand("\\beta", "\u03B2");
-      this.addCommand("\\gamma", "\u03B3");
-      this.addCommand("\\theta", "\u03B8");
-      this.addCommand("\\pi", "\u03C0");
-      this.addCommand("{}^{\\circ}", "\u00B0");
+      this.addLatexCommand("\\alpha", "\u03B1");
+      this.addLatexCommand("\\beta", "\u03B2");
+      this.addLatexCommand("\\gamma", "\u03B3");
+      this.addLatexCommand("\\theta", "\u03B8");
+      this.addLatexCommand("\\pi", "\u03C0");
+      this.addLatexCommand("{}^{\\circ}", "\u00B0");
     }
     if (this.flagButtons.newtonsMethod.selected || includeAll) {
-      this.addCommand(["NewtonsMethod ", "(", ",", ",", ")"], "Newton", "font-size: 6px", false);
+      this.addLatexCommand(["NewtonsMethod ", "(", ",", ",", ")"], "Newton", "font-size: 6px", false);
     }
   }
 
@@ -841,7 +794,9 @@ class InputPanelData {
         currentRow = table.insertRow();
       }
       let cell = currentRow.insertCell();
-      cell.appendChild(this.buttonBindings[j].getButton(this));
+      let button = this.buttonBindings[j].getButton(this.equationEditor);
+      button.className = "buttonMQ";
+      cell.appendChild(button);
     }
     let toggles = [];
     if (!forceShowAll) {

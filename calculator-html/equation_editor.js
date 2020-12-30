@@ -2501,7 +2501,7 @@ class EquationEditor {
       return;
     }
     let key = keys[0];
-    let focused = this.rootNode.findFirstFocusedChild();
+    let focused = this.resetSelectionFocusBestChoice();
     this.dispatchKey(focused, key);
 
     setTimeout(() => {
@@ -2576,6 +2576,7 @@ class EquationEditor {
     return new KeyHandlerResult(preventDefault, preventDefault);
   }
 
+  /**@returns{MathNode} The node that was focused. */
   resetSelectionFocusBestChoice() {
     if (this.hasSelection()) {
       let lastSelected = this.selectionEndExpanded.element;
@@ -2585,10 +2586,12 @@ class EquationEditor {
       }
       this.resetSelectionFullSelectEventCatcher();
       lastSelected.focus(direction);
-      return;
+      return lastSelected;
     }
     this.resetSelectionFullSelectEventCatcher();
-    this.getLastFocused().focus();
+    let result = this.getLastFocused();
+    result.focus();
+    return result;
   }
 
   handleKeyDownCatchAll(
@@ -7775,42 +7778,71 @@ function typeset(
   new MathTagCoverter(style, sanitizeLatexSource, removeDisplayStyle, logTiming).typeset(toBeModified);
 }
 
-/**@returns{EquationEditor} */
-function initializeTestPage(
-  /** @type{string} */
-  equationEditorId,
-  /** @type{string} */
-  latexInputId,
-  /** @type{string} */
-  debugId,
-) {
-  let editorElement = document.getElementById(equationEditorId);
-  const options = new EquationEditorOptions({
-    latexInput: document.getElementById(latexInputId),
-    debugLogContainer: document.getElementById(debugId),
-  });
-  let editor = new EquationEditor(editorElement, options);
-  editor.updateDOM();
-  editor.rootNode.focus(- 1);
+class EquationEditorButtonFactory {
+  constructor(command, label, additionalStyle) {
+    this.command = command;
+    this.label = label;
+    /**@type {string} */
+    this.additionalStyle = additionalStyle;
+    if (this.additionalStyle === null || this.additionalStyle === undefined) {
+      this.additionalStyle = "";
+    }
+  }
 
-  setTimeout(() => {
-    editor.sendKeys([/*
-      "(", "1", "/", "1",
-      "1", "/", "1", "ArrowUp", "ArrowUp", "ArrowUp", "(",
-      "1", "+", "1",
-      "1", "+", "1", "/", "1", "+", "1", "/",
-      "1", "+", "1", "/", "1",
-      "ArrowUp", "ArrowUp", "ArrowUp", "ArrowUp", "ArrowUp",
-      "+", "1", "/", "1",*/
-    ]);
-  }, 300);
-  return editor;
+  /**@return {HTMLButtonElement} */
+  getButton(
+    /**@type{EquationEditor} */
+    editor,
+  ) {
+    let result = document.createElement("button");
+    if (this.additionalStyle !== undefined && this.additionalStyle !== null && this.additionalStyle !== "") {
+      result.style = this.additionalStyle;
+    }
+    result.textContent = this.label;
+    return this.attachToExistingElementClick(result, editor);
+  }
+
+  /**@return {HTMLButtonElement} */
+  attachToExistingElementClick(
+    /**@type{HTMLElement} */
+    element,
+    /**@type{EquationEditor} */
+    editor,
+  ) {
+    element.addEventListener(
+      'click', () => {
+        this.clickFunction(editor);
+      }
+    );
+    return element;
+  }
+
+  /**@return {HTMLButtonElement|null} */
+  attachToExistingElementClickById(
+    /**@type{string} */
+    buttonId,
+    /**@type{EquationEditor} */
+    editor,
+  ) {
+    let button = document.getElementById(buttonId);
+    if (button === null) {
+      return null;
+    }
+    return this.attachToExistingElementClick(button, editor);
+  }
+
+  clickFunction(
+    /**@type{EquationEditor} */
+    editor,
+  ) {
+    editor.writeLatexLastFocused(this.command);
+  }
 }
 
 module.exports = {
-  initializeTestPage,
   typeset,
   EquationEditor,
+  EquationEditorButtonFactory,
   EquationEditorOptions,
   mathFromLatex,
   mathFromElement,

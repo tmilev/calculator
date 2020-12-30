@@ -20,19 +20,37 @@
     editor.resizingEditorFont = false;
   }
   var editor = null;
+  function initializePage() {
+    let editorElement = document.getElementById("equation-editor");
+    const options = new EquationEditorOptions({
+      latexInput: document.getElementById("latex-input-test"),
+      debugLogContainer: document.getElementById("debug"),
+    });
+    editor = new EquationEditor(editorElement, options);
+    new EquationEditorButtonFactory("\\frac{}{}", "", "").attachToExistingElementClickById("fraction", editor);
+    new EquationEditorButtonFactory("{}^{}", "", "").attachToExistingElementClickById("exponent", editor);
+    new EquationEditorButtonFactory("\\sqrt{}", "", "").attachToExistingElementClickById("sqrt", editor);
+    new EquationEditorButtonFactory("\\begin{pmatrix}&\\\\&\\end{pmatrix}", "", "").attachToExistingElementClickById("matrix", editor);
+    editor.updateDOM();
+    editor.rootNode.focus(- 1);
+  }
 </script>
 
-<body
-  onload="editor=initializeTestPage('equation-editor','latexInputTest', 'debug', 'typeSetButton', 'mathTagTester');">
+<body onload="initializePage()">
   <h1>A self-contained math equation editor</h1>
   <div style='text-align: center;'>
     <div id="equation-editor" style="font-size: 72px; font-family:'Times New Roman'"></div>
     <br>
-    <input id="latexInputTest" type="text">
+    <input id="latex-input-test" type="text">
     <br>
     Font size: <span id="font-size">72px</span>
     <input type="range" min="5" max="100" value="72" class="slider" onchange="clickSlider(this);"
       oninput="clickSlider(this);">
+    <br>
+    <button id="fraction">/</button>
+    <button id="exponent">^</button>
+    <button id="sqrt">&Sqrt;</button><br>
+    <button id="matrix">2x2 matrix</button>
   </div>
   <div id="debug" style="display:none"></div>
   <hr>
@@ -64,6 +82,7 @@ function createEditor() {
     debugLogContainer: null,
   });
   let editor = new EquationEditor(document.getElementById('editor'), options);
+  new EquationEditorButtonFactory("\\sqrt{}", "", "").attachToExistingElementClickById("sqrtButton");
   editor.updateDOM();
   editor.rootNode.focus(- 1);
 }
@@ -73,6 +92,8 @@ function createEditor() {
 Equation editor here: &lt;div id='editor' style="font-size: 72px; font-family:'Times New Roman'"&gt; &lt;/div&gt;
 &lt;br&gt;
 Latex of what you typed, can edit directly: &lt;input id="latex"&gt;
+&lt;hr&gt;
+Sample button: &lt;button id="sqrtButton"&gt;&amp;Sqrt;&lt;/button&gt;
 &lt;hr&gt;
 Typeset all math in the 'toBeTypeSet' tag.
 &lt;button id="typeSetButton" onclick="typeset(document.getElementById('toBeTypeSet'), '', false, false, false);"&gt;typeset&lt;/button&gt;

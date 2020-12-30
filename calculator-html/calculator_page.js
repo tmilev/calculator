@@ -217,20 +217,20 @@ class Calculator {
     });
     inputMain.addEventListener("keyup", (e) => {
       autocomplete.suggestWord();
-      this.calculatorPanel.mQHelpCalculator();
+      this.calculatorPanel.editorHelpCalculator();
     });
     inputMain.addEventListener("keydown", (e) => {
       autocomplete.suggestWord();
-      this.calculatorPanel.mQHelpCalculator();
+      this.calculatorPanel.editorHelpCalculator();
       autocomplete.arrowAction(e);
     });
     inputMain.addEventListener("mouseup", (e) => {
       autocomplete.suggestWord();
-      this.calculatorPanel.mQHelpCalculator();
+      this.calculatorPanel.editorHelpCalculator();
     });
     inputMain.addEventListener("input", (e) => {
       autocomplete.suggestWord();
-      this.calculatorPanel.mQHelpCalculator();
+      this.calculatorPanel.editorHelpCalculator();
     });
   }
   selectCalculatorPage() {
@@ -434,7 +434,7 @@ class Calculator {
     if (!this.initialized) {
       return;
     }
-    this.calculatorPanel.mQHelpCalculator();
+    this.calculatorPanel.editorHelpCalculator();
   }
 
   submitComputationPartTwo(input) {

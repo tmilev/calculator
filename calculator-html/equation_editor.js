@@ -7799,11 +7799,11 @@ class EquationEditorButtonFactory {
       result.style = this.additionalStyle;
     }
     result.textContent = this.label;
-    return this.attachToExistingElementClick(result, editor);
+    return this.attachToClick(result, editor);
   }
 
   /**@return {HTMLButtonElement} */
-  attachToExistingElementClick(
+  attachToClick(
     /**@type{HTMLElement} */
     element,
     /**@type{EquationEditor} */
@@ -7818,7 +7818,7 @@ class EquationEditorButtonFactory {
   }
 
   /**@return {HTMLButtonElement|null} */
-  attachToExistingElementClickById(
+  attachToClickById(
     /**@type{string} */
     buttonId,
     /**@type{EquationEditor} */
@@ -7828,7 +7828,7 @@ class EquationEditorButtonFactory {
     if (button === null) {
       return null;
     }
-    return this.attachToExistingElementClick(button, editor);
+    return this.attachToClick(button, editor);
   }
 
   clickFunction(
@@ -7839,10 +7839,18 @@ class EquationEditorButtonFactory {
   }
 }
 
+let buttonFactories = {
+  "sqrt": new EquationEditorButtonFactory("\\sqrt{}"),
+  "fraction": new EquationEditorButtonFactory("\\frac{}{}"),
+  "exponent": new EquationEditorButtonFactory("{}^{}"),
+  "matrix2x2": new EquationEditorButtonFactory("\\begin{pmatrix}&\\\\&\\end{pmatrix}"),
+};
+
 module.exports = {
   typeset,
   EquationEditor,
   EquationEditorButtonFactory,
+  buttonFactories,
   EquationEditorOptions,
   mathFromLatex,
   mathFromElement,

@@ -2493,25 +2493,23 @@ class EquationEditor {
     return result;
   }
 
-  sendKeys(
-    /**@type {string[]} */
-    keys,
+  /** Resets the selection and dispatches a key string to the last focused / best element.
+   * 
+   * @param {string} key 
+   */
+  dispatchKey(
+    /**@type{string} */
+    key,
   ) {
-    if (keys.length === 0) {
-      return;
-    }
-    let key = keys[0];
     let focused = this.resetSelectionFocusBestChoice();
-    this.dispatchKey(focused, key);
-
-    setTimeout(() => {
-      this.sendKeys(keys.slice(1));
-    }, 400);
+    this.dispatchKeyToNode(focused, key);
   }
 
-  dispatchKey(
-    /**@type{MathNode|null}*/ focused,
-    /**@type{string} */ key,
+  dispatchKeyToNode(
+    /**@type{MathNode|null}*/
+    focused,
+    /**@type{string} */
+    key,
   ) {
     if (focused === null) {
       return;
@@ -7778,15 +7776,57 @@ function typeset(
   new MathTagCoverter(style, sanitizeLatexSource, removeDisplayStyle, logTiming).typeset(toBeModified);
 }
 
-class EquationEditorButtonFactory {
-  constructor(command, label, additionalStyle) {
+class EquationEditorAction {
+  constructor(
+    /**@type{string} */
+    command,
+    /**@type{boolean} */
+    isKeyPress,
+  ) {
     this.command = command;
+    this.isKeyPress = isKeyPress;
+  }
+  execute(
+    /**@type{EquationEditor} */
+    editor,
+  ) {
+    if (!this.isKeyPress) {
+      editor.writeLatexLastFocused(this.command);
+    } else {
+      editor.dispatchKey(this.command);
+    }
+  }
+}
+
+class EquationEditorButtonFactory {
+  constructor(
+    /**@type{string} */
+    command,
+    /**@type{boolean} */
+    isKeyPress,
+    /**@type{string} */
+    label,
+    /**@type{string} */
+    additionalStyle,
+  ) {
+    /**@type{EquationEditorAction} */
+    this.commands = [];
+    if (command !== "" && command !== null) {
+      this.commands.push(new EquationEditorAction(command, isKeyPress));
+    }
     this.label = label;
     /**@type {string} */
     this.additionalStyle = additionalStyle;
     if (this.additionalStyle === null || this.additionalStyle === undefined) {
       this.additionalStyle = "";
     }
+  }
+
+  addEditorAction(
+    /**@type{EquationEditorAction}*/
+    command,
+  ) {
+    this.commands.push(command);
   }
 
   /**@return {HTMLButtonElement} */
@@ -7835,21 +7875,24 @@ class EquationEditorButtonFactory {
     /**@type{EquationEditor} */
     editor,
   ) {
-    editor.writeLatexLastFocused(this.command);
+    for (let i = 0; i < this.commands.length; i++) {
+      this.commands[i].execute(editor);
+    }
   }
 }
 
 let buttonFactories = {
-  "sqrt": new EquationEditorButtonFactory("\\sqrt{}"),
-  "fraction": new EquationEditorButtonFactory("\\frac{}{}"),
-  "exponent": new EquationEditorButtonFactory("{}^{}"),
-  "matrix2x2": new EquationEditorButtonFactory("\\begin{pmatrix}&\\\\&\\end{pmatrix}"),
+  "sqrt": new EquationEditorButtonFactory("\\sqrt{}", false, "\u221A", ""),
+  "fraction": new EquationEditorButtonFactory("\\frac{}{}", false, "/", ""),
+  "exponent": new EquationEditorButtonFactory("^", true, "^", ""),
+  "matrix2x2": new EquationEditorButtonFactory("\\begin{pmatrix}&\\\\&\\end{pmatrix}", false, "2x2", ""),
 };
 
 module.exports = {
   typeset,
   EquationEditor,
   EquationEditorButtonFactory,
+  EquationEditorAction,
   buttonFactories,
   EquationEditorOptions,
   mathFromLatex,

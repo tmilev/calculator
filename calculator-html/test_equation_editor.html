@@ -27,7 +27,7 @@
       debugLogContainer: document.getElementById("debug"),
     });
     editor = new EquationEditor(editorElement, options);
-    (new EquationEditorButtonFactory("\\frac{123}{}\\sqrt{7}", "", "")).attachToClickById("custom-button", editor);
+    (new EquationEditorButtonFactory("\\frac{123}{}\\sqrt{7}", false, "", "")).attachToClickById("custom-button", editor);
     buttonFactories.fraction.attachToClickById("fraction-button", editor)
     buttonFactories.exponent.attachToClickById("exponent-button", editor)
     buttonFactories.sqrt.attachToClickById("sqrt-button", editor);

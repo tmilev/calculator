@@ -1383,8 +1383,8 @@ class LaTeXConstants {
     };
     /**@type{Object.<string, string>} */
     this.leftRightDelimiterPair = {
-      // \langle, \rangle
-      "\u27E8": "\u27E9",
+      "\\langle": "\\rangle",
+      "\u27E8": "\u27E9", // langle, rangle
       "[": "]",
       "(": ")",
       "{": "}",
@@ -1392,8 +1392,8 @@ class LaTeXConstants {
     };
     /**@type{Object.<string, string>} */
     this.rightLeftDelimiterPair = {
-      // \rangle, \langle
-      "\u27E9": "\u27E8",
+      "\\rangle": "\\langle",
+      "\u27E9": "\u27E8", // rangle, langle
       "]": "[",
       ")": "(",
       "}": "{",
@@ -1430,6 +1430,28 @@ class LaTeXConstants {
     };
     /** @type{Object.<string, string>} */
     this.utf16ToLatexMap = null;
+
+    /** @type{Object.<string, boolean>} */
+    this.recognizedCommandsKeyInput = {
+      "\\langle": true,
+      "\\rangle": true,
+      "\\matrix": true,
+      "\\pmatrix": true,
+      "\\cancel": true,
+      "\\sqrt": true,
+    };
+    for (let operator in this.operatorWithSuperAndSubscriptBackslashed) {
+      this.recognizedCommandsKeyInput[operator] = true;
+    }
+    for (let operator in this.operatorsWithSubscriptBackslashed) {
+      this.recognizedCommandsKeyInput[operator] = true;
+    }
+    for (let operator in this.latexBackslashOperatorsBackslashed) {
+      this.recognizedCommandsKeyInput[operator] = true;
+    }
+    for (let operator in this.latexBackslashAtomsEditableBackslashed) {
+      this.recognizedCommandsKeyInput[operator] = true;
+    }
   }
 
   computeUtf16ToLatexMap() {
@@ -4435,7 +4457,10 @@ class MathNode {
     }
     if (key === " " && this.equationEditor.backslashSequenceStarted) {
       this.equationEditor.backslashSequenceStarted = false;
-      return this.removeBackslashSequence();
+      if (this.equationEditor.backslashSequence in latexConstants.recognizedCommandsKeyInput) {
+        return this.removeBackslashSequence();
+      }
+      return result;
     }
     if (latexConstants.isLatinCharacter(key)) {
       this.equationEditor.backslashSequence += key;
@@ -4564,7 +4589,7 @@ class MathNode {
       command in latexConstants.rightDelimiters &&
       !(command in latexConstants.delimitersAmbiguous)
     ) {
-      this.makeDelimiterRight(key);
+      this.makeDelimiterRight(command);
       return new KeyHandlerResult(true, false);
     }
     if (command in latexConstants.latexBackslashAtomsEditableBackslashed) {
@@ -6055,6 +6080,7 @@ class MathNode {
       this.equationEditor.backslashPosition,
       backslashSequence.length,
     );
+    this.positionCaretBeforeKeyEvents = this.equationEditor.backslashPosition;
     this.setTextContent(split[0] + split[1]);
     return new BackslashResult(false, backslashSequence);
   }

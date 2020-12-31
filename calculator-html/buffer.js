@@ -1,17 +1,19 @@
 "use strict";
 
-function BufferCalculator() {
-  this.internal = [];
-}
-
-BufferCalculator.prototype.write = function (any) {
-  for (var i = 0; i < any.length; i ++) {
-    this.internal.push(any[i]);
+class BufferCalculator {
+  constructor() {
+    this.internal = [];
   }
-}
 
-BufferCalculator.prototype.toString = function() {
-  return this.internal.join("");
+  write(any) {
+    for (var i = 0; i < any.length; i++) {
+      this.internal.push(any[i]);
+    }
+  }
+
+  toString() {
+    return this.internal.join("");
+  }
 }
 
 module.exports = {

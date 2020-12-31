@@ -5,10 +5,7 @@ const pathnames = require("./pathnames");
 
 var recaptchaIdForSignUp = null;
 
-function SignUp() {
-
-}
-function getRecaptchaId () {
+function getRecaptchaId() {
   var localRecaptcha = '6LcSSSAUAAAAAIx541eeGZLoKx8iJehZPGrJkrql';
   var calculatorRecaptcha = "6LcgwR8UAAAAALQq02qZShfA1ZUZvZKRNWJ2CPPf";
   if (
@@ -27,15 +24,45 @@ function getRecaptchaId () {
   return "";
 }
 
-SignUp.prototype.signUp = function() {
+class SignUp {
+  constructor() {
 
-  if (recaptchaIdForSignUp === null) {
-    recaptchaIdForSignUp = grecaptcha.render("recaptchaSignUp", {'sitekey' : getRecaptchaId()});
   }
-}
+  signUp() {
 
-SignUp.prototype.resetRecaptchaOnLoad = function() {
-  grecaptcha.reset();
+    if (recaptchaIdForSignUp === null) {
+      recaptchaIdForSignUp = grecaptcha.render("recaptchaSignUp", { 'sitekey': getRecaptchaId() });
+    }
+  }
+
+  resetRecaptchaOnLoad() {
+    grecaptcha.reset();
+  }
+
+  submitSignUpInfo() {
+    if (grecaptcha === undefined || grecaptcha === null) {
+      document.getElementById('signUpResult').innerHTML = "<span style ='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>";
+      return false;
+    }
+    var desiredUsernameEncoded = encodeURIComponent(document.getElementById('desiredUsername').value);
+    var desiredEmailEncoded = encodeURIComponent(document.getElementById('emailForSignUp').value);
+    var theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.signUp}&desiredUsername=${desiredUsernameEncoded}&`;
+    theURL += `email=${desiredEmailEncoded}&`;
+    var theToken = grecaptcha.getResponse(recaptchaIdForSignUp);
+    if (theToken === '' || theToken === null) {
+      document.getElementById('signUpResult').innerHTML = "<span style ='color:red'><b>Please don't forget to solve the captcha. </b></span>";
+      return false;
+    }
+    recaptchaIdForSignUp = null;
+    theURL += `${pathnames.urlFields.recaptchaToken}=${encodeURIComponent(theToken)}&`;
+    submitRequests.submitGET({
+      url: theURL,
+      callback: callbackSignUp,
+      result: "signUpResultReport",
+      progress: ids.domElements.spanProgressReportGeneral
+    });
+  }
+
 }
 
 function callbackSignUp(input, output) {
@@ -58,30 +85,6 @@ function callbackSignUp(input, output) {
   } catch (e) {
     output.innerHTML = `Result: ${input}. Error: ${e}. ${input}`;
   }
-}
-
-SignUp.prototype.submitSignUpInfo = function () {
-  if (grecaptcha === undefined || grecaptcha === null) {
-    document.getElementById('signUpResult').innerHTML = "<span style ='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>";
-    return false;
-  }
-  var desiredUsernameEncoded = encodeURIComponent(document.getElementById('desiredUsername').value);
-  var desiredEmailEncoded = encodeURIComponent(document.getElementById('emailForSignUp').value);
-  var theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.signUp}&desiredUsername=${desiredUsernameEncoded}&`;
-  theURL += `email=${desiredEmailEncoded}&`;
-  var theToken = grecaptcha.getResponse(recaptchaIdForSignUp);
-  if (theToken === '' || theToken === null) {
-    document.getElementById('signUpResult').innerHTML = "<span style ='color:red'><b>Please don't forget to solve the captcha. </b></span>";
-    return false;
-  }
-  recaptchaIdForSignUp = null;
-  theURL += `${pathnames.urlFields.recaptchaToken}=${encodeURIComponent(theToken)}&`;
-  submitRequests.submitGET({
-    url: theURL,
-    callback: callbackSignUp,
-    result: "signUpResultReport",
-    progress: ids.domElements.spanProgressReportGeneral
-  });
 }
 
 var signUp = new SignUp();

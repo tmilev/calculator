@@ -16,21 +16,6 @@ var transformersStandard = {
   },
 };
 
-function JSONToHTML() {
-  /** @type {Array.<{panelId: string, label: string, content: string}>} */
-  this.panelInformation = [];
-  /** @type {String} */
-  this.tableName = "";
-  /**@type {Object.<string,{clickHandler: Function, labels: String[], panelId: String}>} */
-  this.buttonBindings = {};
-  /**@type {String[]} */
-  this.buttonIdsInOrderOfCreation = [];
-  this.ambientObject = null;
-  this.labelsRows = null;
-  this.optionsConstant = {};
-  this.inputParsed = null;
-}
-
 function writeJSONtoDOMComponent(inputJSON, theDomComponent) {
   if (typeof theDomComponent === "string") {
     theDomComponent = document.getElementById(theDomComponent);
@@ -62,183 +47,328 @@ function getDeleteButtonFromLabels(theLabels, selector, containerLabel) {
 }
 
 var counterDatabaseTables = 0;
-
-JSONToHTML.prototype.getOptionFromLabel = function (
-  /**@type {String[]} */
-  currentLabelsGeneralized,
-) {
-  if (this.optionsConstant.transformers === null || this.optionsConstant.transformers === undefined) {
-    return null;
-  }
-  for (var i = - 1; i < currentLabelsGeneralized.length; i++) {
-    var labelTry = currentLabelsGeneralized.slice();
-    if (i >= 0) {
-      labelTry[i] = "${any}";
-    }
-    var currentLabel = labelTry.join(".");
-    if (currentLabel in this.optionsConstant.transformers) {
-      return this.optionsConstant.transformers[currentLabel];
-    }
-  }
-}
-
 var numberOfButtonsGenerated = 0;
 
-JSONToHTML.prototype.getButtonFromLabels = function (
-  input,
-  /**@type {String} */
-  panelId,
-  inputTransformed,
-  /**@type {String[]} */
-  currentLabels,
-  /**@type {Function} */
-  clickHandler,
-) {
-  numberOfButtonsGenerated++;
-  var result = "";
-  var id = `buttonClickHandler${numberOfButtonsGenerated}`;
-  result += `<button id = "${id}">${inputTransformed}</button>`;
-  this.buttonBindings[id] = {
-    clickHandler: clickHandler,
-    labels: currentLabels.slice(),
-    panelId: panelId,
-  };
-  this.buttonIdsInOrderOfCreation.push(id);
-  return result;
-}
+class JSONToHTML {
+  constructor() {
+    /** @type {Array.<{panelId: string, label: string, content: string}>} */
+    this.panelInformation = [];
+    /** @type {String} */
+    this.tableName = "";
+    /**@type {Object.<string,{clickHandler: Function, labels: String[], panelId: String}>} */
+    this.buttonBindings = {};
+    /**@type {String[]} */
+    this.buttonIdsInOrderOfCreation = [];
+    this.ambientObject = null;
+    this.labelsRows = null;
+    this.optionsConstant = {};
+    this.inputParsed = null;
+  }
 
-JSONToHTML.prototype.getSingleEntry = function (
-  input,
-  /**@type {String[]} */
-  currentLabels,
-  /**@type {String[]} */
-  currentLabelsGeneralized,
-) {
-  var currentOption = this.getOptionFromLabel(currentLabelsGeneralized);
-  if (currentOption === null || currentOption === undefined) {
-    return `${input}`;
-  }
-  var inputTransformed = input;
-  if (typeof currentOption.transformer === "function") {
-    inputTransformed = currentOption.transformer(input);
-  }
-  counterToggleButtons++;
-  var panelId = `panelFromJSONFormatter${counterToggleButtons}`;
-  if (typeof currentOption.clickHandler === "function") {
-    inputTransformed = this.getButtonFromLabels(
-      input, panelId, inputTransformed, currentLabels, currentOption.clickHandler
-    );
-  }
-  if (inputTransformed === input) {
-    return `${input}`;
-  }
-  return getToggleButton(this, panelId, input, inputTransformed);
-}
-
-JSONToHTML.prototype.getTableHorizontallyLaidFromJSON = function (
-  input,
-  /**@type {String[]} */
-  currentLabels,
-  /**@type {String[]} */
-  currentLabelsGeneralized,
-  /**@type {BufferCalculator} */
-  output,
-) {
-  var inputType = typeof input;
-  if (inputType === "string" || inputType === "number" || inputType === "boolean") {
-    output.write(this.getSingleEntry(input, currentLabels, currentLabelsGeneralized));
-    return;
-  }
-  if (Array.isArray(input)) {
-    this.getTableHorizontallyLaidFromArray(input, currentLabels, currentLabelsGeneralized, output);
-    return;
-  } if (inputType === "object") {
-    this.getTableHorizontallyLaidFromObject(input, currentLabels, currentLabelsGeneralized, output);
-    return;
-  } else {
-    output.write(typeof input);
-    return;
-  }
-}
-
-JSONToHTML.prototype.getTableHorizontallyLaidFromArray = function (
-  input,
-  /**@type {String[]} */
-  currentLabels,
-  /**@type {String[]} */
-  currentLabelsGeneralized,
-  /**@type {BufferCalculator} */
-  output,
-) {
-  if (!Array.isArray(input)) {
-    return;
-  }
-  var hasLabels = (currentLabels !== undefined && currentLabels !== null);
-  var newLabels = null;
-  var newLabelsGeneralized = null;
-  if (hasLabels) {
-    newLabels = currentLabels.slice();
-    newLabelsGeneralized = currentLabelsGeneralized.slice();
-    newLabels.push("");
-    newLabelsGeneralized.push("");
-  }
-  output.write("<table class = 'tableJSONItem'>");
-  for (var counterInput = 0; counterInput < input.length; counterInput++) {
-    if (hasLabels) {
-      newLabels[newLabels.length - 1] = "${number}";
+  getOptionFromLabel(
+    /**@type {String[]} */
+    currentLabelsGeneralized,
+  ) {
+    if (this.optionsConstant.transformers === null || this.optionsConstant.transformers === undefined) {
+      return null;
     }
-    var item = input[counterInput];
-    output.write(`<tr><td><tiny>${counterInput}</tiny></td><td>`);
-    this.getTableHorizontallyLaidFromJSON(item, newLabels, newLabelsGeneralized, output);
-    output.write(`</td></tr>`);
-  }
-  output.write("</table>");
-}
-
-JSONToHTML.prototype.getTableHorizontallyLaidFromObject = function (
-  input,
-  /**@type {String[]} */
-  currentLabels,
-  /**@type {String[]} */
-  currentLabelsGeneralized,
-  /**@type {BufferCalculator} */
-  output,
-) {
-  if (typeof input !== "object") {
-    return;
-  }
-  var hasLabels = (currentLabels !== undefined && currentLabels !== null);
-  var newLabels = null;
-  var newLabelsGeneralized = null;
-  if (hasLabels) {
-    newLabels = currentLabels.slice();
-    newLabelsGeneralized = currentLabelsGeneralized.slice();
-    newLabels.push("");
-  }
-  output.write("<table class = 'tableJSONItem'>");
-  for (item in input) {
-    if (hasLabels) {
-      newLabels[newLabels.length - 1] = item;
+    for (var i = - 1; i < currentLabelsGeneralized.length; i++) {
+      var labelTry = currentLabelsGeneralized.slice();
+      if (i >= 0) {
+        labelTry[i] = "${any}";
+      }
+      var currentLabel = labelTry.join(".");
+      if (currentLabel in this.optionsConstant.transformers) {
+        return this.optionsConstant.transformers[currentLabel];
+      }
     }
-    var flagIsDeleteable = false;
-    if (flagIsDeleteable) {
-      counterDatabaseTables++;
-      var tableLabel = `databaseItem${counterDatabaseTables}`;
-      output.write(`<tr id='${tableLabel}'>`);
+  }
+
+  getButtonFromLabels(
+    input,
+    /**@type {String} */
+    panelId,
+    inputTransformed,
+    /**@type {String[]} */
+    currentLabels,
+    /**@type {Function} */
+    clickHandler,
+  ) {
+    numberOfButtonsGenerated++;
+    var result = "";
+    var id = `buttonClickHandler${numberOfButtonsGenerated}`;
+    result += `<button id = "${id}">${inputTransformed}</button>`;
+    this.buttonBindings[id] = {
+      clickHandler: clickHandler,
+      labels: currentLabels.slice(),
+      panelId: panelId,
+    };
+    this.buttonIdsInOrderOfCreation.push(id);
+    return result;
+  }
+
+  getSingleEntry(
+    input,
+    /**@type {String[]} */
+    currentLabels,
+    /**@type {String[]} */
+    currentLabelsGeneralized,
+  ) {
+    var currentOption = this.getOptionFromLabel(currentLabelsGeneralized);
+    if (currentOption === null || currentOption === undefined) {
+      return `${input}`;
+    }
+    var inputTransformed = input;
+    if (typeof currentOption.transformer === "function") {
+      inputTransformed = currentOption.transformer(input);
+    }
+    counterToggleButtons++;
+    var panelId = `panelFromJSONFormatter${counterToggleButtons}`;
+    if (typeof currentOption.clickHandler === "function") {
+      inputTransformed = this.getButtonFromLabels(
+        input, panelId, inputTransformed, currentLabels, currentOption.clickHandler
+      );
+    }
+    if (inputTransformed === input) {
+      return `${input}`;
+    }
+    return getToggleButton(this, panelId, input, inputTransformed);
+  }
+
+  getTableHorizontallyLaidFromJSON(
+    input,
+    /**@type {String[]} */
+    currentLabels,
+    /**@type {String[]} */
+    currentLabelsGeneralized,
+    /**@type {BufferCalculator} */
+    output,
+  ) {
+    var inputType = typeof input;
+    if (inputType === "string" || inputType === "number" || inputType === "boolean") {
+      output.write(this.getSingleEntry(input, currentLabels, currentLabelsGeneralized));
+      return;
+    }
+    if (Array.isArray(input)) {
+      this.getTableHorizontallyLaidFromArray(input, currentLabels, currentLabelsGeneralized, output);
+      return;
+    } if (inputType === "object") {
+      this.getTableHorizontallyLaidFromObject(input, currentLabels, currentLabelsGeneralized, output);
+      return;
     } else {
-      output.write(`<tr>`);
+      output.write(typeof input);
+      return;
     }
-    output.write(`<td>${item}</td><td>`);
-    this.getTableHorizontallyLaidFromJSON(input[item], newLabels, newLabelsGeneralized, output);
-    output.write(`</td>`);
-    if (flagIsDeleteable) {
-      output.write(`<td>`);
-      output.write(getDeleteButtonFromLabels(newLabels, tableName, tableLabel));
-      output.write(`</td>`);
-    }
-    output.write(`</tr>`);
   }
-  output.write("</table>");
+
+  getTableHorizontallyLaidFromArray(
+    input,
+    /**@type {String[]} */
+    currentLabels,
+    /**@type {String[]} */
+    currentLabelsGeneralized,
+    /**@type {BufferCalculator} */
+    output,
+  ) {
+    if (!Array.isArray(input)) {
+      return;
+    }
+    var hasLabels = (currentLabels !== undefined && currentLabels !== null);
+    var newLabels = null;
+    var newLabelsGeneralized = null;
+    if (hasLabels) {
+      newLabels = currentLabels.slice();
+      newLabelsGeneralized = currentLabelsGeneralized.slice();
+      newLabels.push("");
+      newLabelsGeneralized.push("");
+    }
+    output.write("<table class = 'tableJSONItem'>");
+    for (var counterInput = 0; counterInput < input.length; counterInput++) {
+      if (hasLabels) {
+        newLabels[newLabels.length - 1] = "${number}";
+      }
+      var item = input[counterInput];
+      output.write(`<tr><td><tiny>${counterInput}</tiny></td><td>`);
+      this.getTableHorizontallyLaidFromJSON(item, newLabels, newLabelsGeneralized, output);
+      output.write(`</td></tr>`);
+    }
+    output.write("</table>");
+  }
+
+  getTableHorizontallyLaidFromObject(
+    input,
+    /**@type {String[]} */
+    currentLabels,
+    /**@type {String[]} */
+    currentLabelsGeneralized,
+    /**@type {BufferCalculator} */
+    output,
+  ) {
+    if (typeof input !== "object") {
+      return;
+    }
+    var hasLabels = (currentLabels !== undefined && currentLabels !== null);
+    var newLabels = null;
+    var newLabelsGeneralized = null;
+    if (hasLabels) {
+      newLabels = currentLabels.slice();
+      newLabelsGeneralized = currentLabelsGeneralized.slice();
+      newLabels.push("");
+    }
+    output.write("<table class = 'tableJSONItem'>");
+    for (item in input) {
+      if (hasLabels) {
+        newLabels[newLabels.length - 1] = item;
+      }
+      var flagIsDeleteable = false;
+      if (flagIsDeleteable) {
+        counterDatabaseTables++;
+        var tableLabel = `databaseItem${counterDatabaseTables}`;
+        output.write(`<tr id='${tableLabel}'>`);
+      } else {
+        output.write(`<tr>`);
+      }
+      output.write(`<td>${item}</td><td>`);
+      this.getTableHorizontallyLaidFromJSON(input[item], newLabels, newLabelsGeneralized, output);
+      output.write(`</td>`);
+      if (flagIsDeleteable) {
+        output.write(`<td>`);
+        output.write(getDeleteButtonFromLabels(newLabels, tableName, tableLabel));
+        output.write(`</td>`);
+      }
+      output.write(`</tr>`);
+    }
+    output.write("</table>");
+  }
+
+  bindButtons() {
+    for (var i = this.panelInformation.length - 1; i >= 0; i--) {
+      var currentInfo = this.panelInformation[i];
+      var currentPanel = new panels.PanelExpandable(currentInfo.panelId);
+      currentPanel.initialize(true);
+      currentPanel.setPanelContent(currentInfo.content);
+      currentPanel.setPanelLabel(currentInfo.label);
+    }
+    for (var i = this.buttonIdsInOrderOfCreation.length - 1; i >= 0; i--) {
+      var currentId = this.buttonIdsInOrderOfCreation[i];
+      var currentBinding = this.buttonBindings[currentId];
+      var currentButton = document.getElementById(currentId);
+      currentButton.addEventListener('click', currentBinding.clickHandler);
+      currentButton.setAttribute("labels", JSON.stringify(currentBinding.labels));
+      currentButton.setAttribute("panelId", currentBinding.panelId);
+    }
+    for (var i = 0; i < this.panelInformation.length; i++) {
+      var currentInfo = this.panelInformation[i];
+      var currentPanel = new panels.PanelExpandable(currentInfo.panelId);
+      currentPanel.initialize(false);
+      currentPanel.matchPanelStatus();
+    }
+  }
+
+  transformObjectToRows(input) {
+    var result = [];
+    for (var labelRow in input) {
+      var currentInputItem = input[labelRow];
+      currentInputItem["_rowLabel"] = labelRow;
+      result.push(currentInputItem);
+    }
+    return result;
+  }
+
+  getTableFromObject(
+    input,
+    optionsConstant,
+    /**@type {{table: String, forceRowLayout: Boolean}} */
+    optionsModified,
+  ) {
+    this.inputParsed = input;
+    this.optionsConstant = {};
+    if ((typeof optionsConstant) === "object" && optionsConstant !== null) {
+      this.optionsConstant = optionsConstant;
+    }
+    if (optionsModified === null || typeof optionsModified !== "object") {
+      optionsModified = {};
+    }
+    if (typeof optionsModified.table === "string") {
+      this.tableName = optionsModified.table;
+    }
+    var forceRowLayout = false;
+    if (optionsModified.forceRowLayout === true) {
+      forceRowLayout = true;
+    }
+    if (typeof this.inputParsed === "string") {
+      this.inputParsed = input.replace(/[\r\n]/g, " ");
+      if (this.inputParsed[0] !== "{" && this.inputParsed[0] !== "[" && input[0] !== "\"") {
+        this.inputParsed = `"${this.inputParsed}"`;
+      }
+      try {
+        this.inputParsed = JSON.parse(this.inputParsed);
+      } catch (e) {
+        return `<b style = 'color:red'>Error while parsing ${escape(this.inputParsed)}: ${e}</b>`;
+      }
+    }
+    if (forceRowLayout && typeof this.inputParsed === "object" && !Array.isArray(this.inputParsed)) {
+      this.inputParsed = this.transformObjectToRows(this.inputParsed);
+    }
+    var resultBuffer = new BufferCalculator();
+    if (typeof this.inputParsed === "object" && !Array.isArray(this.inputParsed)) {
+      this.inputParsed = [this.inputParsed];
+    }
+    if (Array.isArray(this.inputParsed)) {
+      this.getHtmlFromArray(this.inputParsed, resultBuffer);
+    } else {
+      resultBuffer.write(this.inputParsed + "<br>");
+    }
+    return resultBuffer.toString();
+  }
+
+  getHtmlFromArray(
+    inputJSON,
+    /**@type {BufferCalculator} */
+    output,
+  ) {
+    if (!Array.isArray(inputJSON)) {
+      return;
+    }
+    this.labelsRows = getLabelsRows(inputJSON);
+    if (this.labelsRows === null) {
+      this.getTableHorizontallyLaidFromJSON(inputJSON, [], [], output);
+      return;
+    }
+    output.write("<table class = 'tableJSON'>");
+    output.write("<tr>");
+    output.write("<th></th>");
+    for (var counterColumn = 0; counterColumn < this.labelsRows.labels.length; counterColumn++) {
+      output.write(`<th>${this.labelsRows.labels[counterColumn]}</th>`);
+    }
+    output.write("</tr>");
+    var id = "";
+    for (var counterRow = 0; counterRow < this.labelsRows.rows.length; counterRow++) {
+      if (this.labelsRows.idRow != - 1) {
+        id = this.labelsRows.rows[counterRow][this.labelsRows.idRow]["$oid"];
+        output.write(`<tr id = "trOid${id}">`);
+      } else {
+        output.write("<tr>");
+        id = counterRow;
+      }
+      output.write(`<td><tiny>${counterRow}</tiny></td>`);
+      for (var counterColumn = 0; counterColumn < this.labelsRows.labels.length; counterColumn++) {
+        var labelsGeneralized = [];
+        var labels = [];
+        if (this.tableName !== "") {
+          labels.push(this.tableName);
+          labelsGeneralized.push(this.tableName);
+        }
+        labels.push(id, this.labelsRows.labels[counterColumn]);
+        labelsGeneralized.push("${number}", this.labelsRows.labels[counterColumn]);
+        output.write("<td>");
+        this.getTableHorizontallyLaidFromJSON(this.labelsRows.rows[counterRow][counterColumn], labels, labelsGeneralized, output);
+        output.write("</td>");
+      }
+      output.write("</tr>");
+    }
+    output.write("</table>");
+  }
 }
 
 function getLabelsRows(input) {
@@ -277,135 +407,6 @@ function getLabelsRows(input) {
     }
   }
   return result;
-}
-
-JSONToHTML.prototype.bindButtons = function () {
-  for (var i = this.panelInformation.length - 1; i >= 0; i--) {
-    var currentInfo = this.panelInformation[i];
-    var currentPanel = new panels.PanelExpandable(currentInfo.panelId);
-    currentPanel.initialize(true);
-    currentPanel.setPanelContent(currentInfo.content);
-    currentPanel.setPanelLabel(currentInfo.label);
-  }
-  for (var i = this.buttonIdsInOrderOfCreation.length - 1; i >= 0; i--) {
-    var currentId = this.buttonIdsInOrderOfCreation[i];
-    var currentBinding = this.buttonBindings[currentId];
-    var currentButton = document.getElementById(currentId);
-    currentButton.addEventListener('click', currentBinding.clickHandler);
-    currentButton.setAttribute("labels", JSON.stringify(currentBinding.labels));
-    currentButton.setAttribute("panelId", currentBinding.panelId);
-  }
-  for (var i = 0; i < this.panelInformation.length; i++) {
-    var currentInfo = this.panelInformation[i];
-    var currentPanel = new panels.PanelExpandable(currentInfo.panelId);
-    currentPanel.initialize(false);
-    currentPanel.matchPanelStatus();
-  }
-}
-
-JSONToHTML.prototype.transformObjectToRows = function (input) {
-  var result = [];
-  for (var labelRow in input) {
-    var currentInputItem = input[labelRow];
-    currentInputItem["_rowLabel"] = labelRow;
-    result.push(currentInputItem);
-  }
-  return result;
-}
-
-JSONToHTML.prototype.getTableFromObject = function (
-  input,
-  optionsConstant,
-  /**@type {{table: String, forceRowLayout: Boolean}} */
-  optionsModified,
-) {
-  this.inputParsed = input;
-  this.optionsConstant = {};
-  if ((typeof optionsConstant) === "object" && optionsConstant !== null) {
-    this.optionsConstant = optionsConstant;
-  }
-  if (optionsModified === null || typeof optionsModified !== "object") {
-    optionsModified = {};
-  }
-  if (typeof optionsModified.table === "string") {
-    this.tableName = optionsModified.table;
-  }
-  var forceRowLayout = false;
-  if (optionsModified.forceRowLayout === true) {
-    forceRowLayout = true;
-  }
-  if (typeof this.inputParsed === "string") {
-    this.inputParsed = input.replace(/[\r\n]/g, " ");
-    if (this.inputParsed[0] !== "{" && this.inputParsed[0] !== "[" && input[0] !== "\"") {
-      this.inputParsed = `"${this.inputParsed}"`;
-    }
-    try {
-      this.inputParsed = JSON.parse(this.inputParsed);
-    } catch (e) {
-      return `<b style = 'color:red'>Error while parsing ${escape(this.inputParsed)}: ${e}</b>`;
-    }
-  }
-  if (forceRowLayout && typeof this.inputParsed === "object" && !Array.isArray(this.inputParsed)) {
-    this.inputParsed = this.transformObjectToRows(this.inputParsed);
-  }
-  var resultBuffer = new BufferCalculator();
-  if (typeof this.inputParsed === "object" && !Array.isArray(this.inputParsed)) {
-    this.inputParsed = [this.inputParsed];
-  }
-  if (Array.isArray(this.inputParsed)) {
-    this.getHtmlFromArray(this.inputParsed, resultBuffer);
-  } else {
-    resultBuffer.write(this.inputParsed + "<br>");
-  }
-  return resultBuffer.toString();
-}
-
-JSONToHTML.prototype.getHtmlFromArray = function (
-  inputJSON,
-  /**@type {BufferCalculator} */
-  output,
-) {
-  if (!Array.isArray(inputJSON)) {
-    return;
-  }
-  this.labelsRows = getLabelsRows(inputJSON);
-  if (this.labelsRows === null) {
-    this.getTableHorizontallyLaidFromJSON(inputJSON, [], [], output);
-    return;
-  }
-  output.write("<table class = 'tableJSON'>");
-  output.write("<tr>");
-  output.write("<th></th>");
-  for (var counterColumn = 0; counterColumn < this.labelsRows.labels.length; counterColumn++) {
-    output.write(`<th>${this.labelsRows.labels[counterColumn]}</th>`);
-  }
-  output.write("</tr>");
-  var id = "";
-  for (var counterRow = 0; counterRow < this.labelsRows.rows.length; counterRow++) {
-    if (this.labelsRows.idRow != - 1) {
-      id = this.labelsRows.rows[counterRow][this.labelsRows.idRow]["$oid"];
-      output.write(`<tr id = "trOid${id}">`);
-    } else {
-      output.write("<tr>");
-      id = counterRow;
-    }
-    output.write(`<td><tiny>${counterRow}</tiny></td>`);
-    for (var counterColumn = 0; counterColumn < this.labelsRows.labels.length; counterColumn++) {
-      var labelsGeneralized = [];
-      var labels = [];
-      if (this.tableName !== "") {
-        labels.push(this.tableName);
-        labelsGeneralized.push(this.tableName);
-      }
-      labels.push(id, this.labelsRows.labels[counterColumn]);
-      labelsGeneralized.push("${number}", this.labelsRows.labels[counterColumn]);
-      output.write("<td>");
-      this.getTableHorizontallyLaidFromJSON(this.labelsRows.rows[counterRow][counterColumn], labels, labelsGeneralized, output);
-      output.write("</td>");
-    }
-    output.write("</tr>");
-  }
-  output.write("</table>");
 }
 
 module.exports = {

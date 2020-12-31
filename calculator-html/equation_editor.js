@@ -1183,6 +1183,9 @@ class LaTeXConstants {
       "cancel": "\\cancel",
       "sqrt": "\\sqrt",
       "begin": "\\begin",
+      // Special command reserved for indicating the 
+      // caret position when the latex is used in an editable box.
+      "caret": "\\caret",
       "end": "\\end",
       "frac": "\\frac",
       "mathcal": "\\mathcal",
@@ -1592,6 +1595,11 @@ class LaTeXParser {
     this.lastRuleName = "";
     /**@type{number} */
     this.startTime = 0;
+    /**@type{boolean} Whether the special command \caret is found. 
+     * Used to indicate the position of the 
+     * caret when the latex is used in an editable box.
+     */
+    this.caretFound = false;
   }
 
   initialize() {
@@ -1996,6 +2004,12 @@ class LaTeXParser {
         latexConstants.latexBackslashAtomsEditable[last.content],
       );
       return this.replaceParsingStackTop(node, "", - 2);
+    }
+    if (last.syntacticRole === "\\caret") {
+      this.lastRuleName = "caret location";
+      let node = mathNodeFactory.atom(this.equationEditor, "");
+      node.desiredCaretPosition = 0;
+      return this.replaceParsingStackTop(node, "", - 1);
     }
     if (
       (thirdToLast.syntacticRole === "\\begin" || thirdToLast.syntacticRole === "\\end") &&
@@ -7994,11 +8008,11 @@ class EquationEditorButtonFactory {
 }
 
 let buttonFactories = {
-  "sqrt": new EquationEditorButtonFactory("\\sqrt{}", false, "\u221A", ""),
-  "fraction": new EquationEditorButtonFactory("\\frac{}{}", false, "/", ""),
+  "sqrt": new EquationEditorButtonFactory("\\sqrt{\\caret}", false, "\u221A", ""),
+  "fraction": new EquationEditorButtonFactory("\\frac{\\caret}{}", false, "/", ""),
   "divide": new EquationEditorButtonFactory("/", true, "(\u2022)/(\u2022)", ""),
   "exponent": new EquationEditorButtonFactory("^", true, "^", ""),
-  "matrix2x2": new EquationEditorButtonFactory("\\begin{pmatrix}&\\\\&\\end{pmatrix}", false, "2x2", ""),
+  "matrix2x2": new EquationEditorButtonFactory("\\begin{pmatrix}\\caret&\\\\&\\end{pmatrix}", false, "2x2", ""),
 };
 
 module.exports = {

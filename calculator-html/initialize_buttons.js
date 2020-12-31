@@ -699,9 +699,9 @@ class InputPanelData {
       this.addLatexCommand("+", "+");
       this.addLatexCommand("-", "-");
       this.addLatexCommand("\\cdot", "*");
-      this.addLatexCommand("\\frac{}{}", "/");
+      this.addLatexCommand("\\frac{\\caret}{}", "/");
       this.addKeySequence(["/"], "(\u2022)/(\u2022)", "font-size:10px"); // \u2022 = bullet.
-      this.addLatexCommand("\\sqrt{}", "\u221A");
+      this.addLatexCommand("\\sqrt{\\caret}", "\u221A");
       this.addKeySequence(["^"], "^");
       this.addKeySequence(["("], "(");
       this.addKeySequence([")"], ")");
@@ -749,7 +749,7 @@ class InputPanelData {
     if (this.flagButtons.series.selected || noOptions || includeAll) {
       this.addLatexCommand("\\sum", "\u03A3");
       this.addLatexCommand("!", "!");
-      this.addLatexCommand("\\binom", "binom", "font-size : 7px;");
+      this.addLatexCommand("\\binom{\\caret}{}", "binom", "font-size : 7px;");
     }
     if (noOptions || includeAll) {
       this.addLatexCommand("\\circ", "\u25CB");
@@ -774,10 +774,10 @@ class InputPanelData {
       this.addLatexCommand("\\gamma", "\u03B3");
       this.addLatexCommand("\\theta", "\u03B8");
       this.addLatexCommand("\\pi", "\u03C0");
-      this.addLatexCommand("{}^{\\circ}", "\u00B0");
+      this.addKeySequence(["^", "\\circ"], "^\u00B0");
     }
     if (this.flagButtons.newtonsMethod.selected || includeAll) {
-      this.addLatexCommand(["NewtonsMethod ", "(", ",", ",", ")"], "Newton", "font-size: 6px", false);
+      this.addLatexCommand(["NewtonsMethod(\\caret,,)"], "Newton", "font-size: 6px", false);
     }
   }
 

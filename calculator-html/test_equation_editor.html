@@ -27,7 +27,8 @@
       debugLogContainer: document.getElementById("debug"),
     });
     editor = new EquationEditor(editorElement, options);
-    (new EquationEditorButtonFactory("\\frac{123}{}\\sqrt{7}", false, "", "")).attachToClickById("custom-button", editor);
+    // The \caret command indicates the desired location of the caret. 
+    (new EquationEditorButtonFactory("\\frac{123}{\\caret}\\sqrt{7}", false, "", "")).attachToClickById("custom-button", editor);
     buttonFactories.fraction.attachToClickById("fraction-button", editor)
     buttonFactories.divide.attachToClickById("divide-button", editor)
     buttonFactories.exponent.attachToClickById("exponent-button", editor)
@@ -86,8 +87,9 @@ function createEditor() {
     debugLogContainer: null,
   });
   let editor = new EquationEditor(document.getElementById('editor'), options);
-  new EquationEditorButtonFactory("\\frac{123}{}\sqrt{7}", "", "").attachToClick("custom-button", editor);
-  buttonFactories.sqrt.attachToClick("sqrt-button", editor);
+  // The \caret command indicates the desired location of the caret. 
+  new EquationEditorButtonFactory("\\frac{123}{\\caret}\\sqrt{7}", "", "").attachToClickById("custom-button", editor);
+  buttonFactories.sqrt.attachToClickById("sqrt-button", editor);
   editor.updateDOM();
   editor.rootNode.focus(- 1);
 }
@@ -100,7 +102,7 @@ Latex of what you typed, can edit directly: &lt;input id="latex"&gt;
 &lt;hr&gt;
 Sample buttons: 
 &lt;button id="sqrt-button"&gt;&amp;Sqrt;&lt;/button&gt;
-&lt;button id="sqrt-button"&gt;&amp;Sqrt;&lt;/button&gt;
+&lt;button id="custom-button"&gt;custom&lt;/button&gt;
 &lt;hr&gt;
 Typeset all math in the 'toBeTypeSet' tag.
 &lt;button id="typeSetButton" onclick="typeset(document.getElementById('toBeTypeSet'), '', false, false, false);"&gt;typeset&lt;/button&gt;

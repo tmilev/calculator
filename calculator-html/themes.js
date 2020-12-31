@@ -1,9 +1,10 @@
 "use strict";
-var ids = require("./ids_dom_elements");
+const ids = require("./ids_dom_elements");
+const storage = require("./storage");
 
 class Theme {
   constructor() {
-    var themeIds = ids.domElements.themeRadioButtons;
+    let themeIds = ids.domElements.themeRadioButtons;
     this.currentTheme = themeIds.radioThemeDefault;
     this.themes = {};
     this.themes[themeIds.radioThemeDefault] = {
@@ -29,10 +30,10 @@ class Theme {
   }
 
   setFromRadioButton() {
-    var value = null;
-    for (var label in ids.domElements.themeRadioButtons) {
-      var currentId = ids.domElements.themeRadioButtons[label];
-      var currentElement = document.getElementById(currentId);
+    let value = null;
+    for (let label in ids.domElements.themeRadioButtons) {
+      let currentId = ids.domElements.themeRadioButtons[label];
+      let currentElement = document.getElementById(currentId);
       if (currentElement.checked) {
         value = currentId;
       }
@@ -43,8 +44,7 @@ class Theme {
     if (value === this.currentTheme) {
       return;
     }
-    var variables = window.calculator.mainPage.storage.variables;
-    variables.theme.setAndStore(value);
+    storage.storage.variables.theme.setAndStore(value);
   }
 
   doChangeTheme(themeId) {
@@ -52,9 +52,9 @@ class Theme {
       return;
     }
     this.currentTheme = themeId;
-    var currentSpec = this.themes[this.currentTheme];
-    var root = document.documentElement;
-    for (var label in currentSpec) {
+    let currentSpec = this.themes[this.currentTheme];
+    let root = document.documentElement;
+    for (let label in currentSpec) {
       root.style.setProperty(label, currentSpec[label]);
     }
     document.getElementById(this.currentTheme).checked = true;

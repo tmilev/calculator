@@ -59,7 +59,7 @@ class User {
   }
 
   makeFromUserInfo(inputData) {
-    var thePage = window.calculator.mainPage;
+    let thePage = window.calculator.mainPage;
     // Please note: the authentication token is silently set through the cookie headers.
     // Please do not take explicit action as
     // inputdata.authenticationToken may not contain the authentication token.
@@ -282,7 +282,7 @@ class Page {
       return;
     }
     try {
-      var theProfilePicElement = document.createElement("IMG");
+      let theProfilePicElement = document.createElement("IMG");
       theProfilePicElement.setAttribute("src", this.user.googleProfile.picture);
       theProfilePicElement.setAttribute("alt", this.user.googleProfile.name);
       theProfilePicElement.setAttribute("id", "imgProfilePicture");
@@ -341,13 +341,13 @@ class Page {
   sectionSelect(sectionNumber) {
     this.storage.variables.currentSectionComputed.setAndStore(sectionNumber);
     this.user.sectionComputed = this.user.sectionsTaught[sectionNumber];
-    var deadlineSpans = document.getElementsByClassName(ids.domElements.classSpanDeadlineContainer);
-    for (var i = 0; i < deadlineSpans.length; i++) {
-      var currentDeadlineSpan = deadlineSpans[i];
-      var currentDeadlineId = currentDeadlineSpan.id.substr(
+    let deadlineSpans = document.getElementsByClassName(ids.domElements.classSpanDeadlineContainer);
+    for (let i = 0; i < deadlineSpans.length; i++) {
+      let currentDeadlineSpan = deadlineSpans[i];
+      let currentDeadlineId = currentDeadlineSpan.id.substr(
         ids.stringResources.prefixDeadlineContainer.length
       );
-      var currentProblem = problemPage.allProblems[currentDeadlineId];
+      let currentProblem = problemPage.allProblems[currentDeadlineId];
       if (currentProblem === undefined) {
         continue;
       }
@@ -356,10 +356,10 @@ class Page {
   }
 
   onDebugValueChange() {
-    var sliderDebug = document.getElementById(ids.domElements.sliderDebugFlag);
-    var debugOn = this.storage.variables.flagDebug.isTrue();
+    let sliderDebug = document.getElementById(ids.domElements.sliderDebugFlag);
+    let debugOn = this.storage.variables.flagDebug.isTrue();
     sliderDebug.checked = debugOn;
-    var debugSpan = document.getElementById(ids.domElements.spanDebugFlagToggleReport);
+    let debugSpan = document.getElementById(ids.domElements.spanDebugFlagToggleReport);
     if (debugOn) {
       solve.solver.setDebugLogContainer();
       debugSpan.innerHTML = "Debug <b style = 'color:red'>on</b>";
@@ -370,14 +370,14 @@ class Page {
   }
 
   setSwitchDebug() {
-    var sliderDebug = document.getElementById(ids.domElements.sliderDebugFlag);
+    let sliderDebug = document.getElementById(ids.domElements.sliderDebugFlag);
     this.storage.variables.flagDebug.setAndStore(sliderDebug.checked);
     this.pages.problemPage.flagLoaded = false;
     this.selectPage(this.storage.variables.currentPage.getValue());
   }
 
   setSwitchStudentView() {
-    var sliderStudentView = document.getElementById(ids.domElements.sliderStudentView);
+    let sliderStudentView = document.getElementById(ids.domElements.sliderStudentView);
     this.storage.variables.flagStudentView.setAndStore(sliderStudentView.checked);
     this.pages.problemPage.flagLoaded = false;
     this.selectPage(this.storage.variables.currentPage.getValue());
@@ -453,7 +453,7 @@ class Page {
   }
 
   getCurrentProblem() {
-    var problemFileName = this.storage.variables.currentCourse.problemFileName.getValue();
+    let problemFileName = this.storage.variables.currentCourse.problemFileName.getValue();
     if (
       problemFileName === "" ||
       problemFileName === null ||
@@ -473,7 +473,7 @@ class Page {
   }
 
   cleanUpLoginSpan(componentToCleanUp) {
-    var loginInfo = document.getElementById("spanLoginRequired");
+    let loginInfo = document.getElementById("spanLoginRequired");
     if (loginInfo !== null) {
       if (loginInfo.parentElement === componentToCleanUp) {
         loginInfo.innerHTML = "<b>...</b>";
@@ -482,7 +482,7 @@ class Page {
   }
 
   toggleMonitoring() {
-    var monitoring = this.storage.variables.calculator.monitoring;
+    let monitoring = this.storage.variables.calculator.monitoring;
     if (monitoring.value !== "false") {
       monitoring.setAndStore("false")
     } else {
@@ -491,11 +491,11 @@ class Page {
   }
 
   setMonitoringComponent() {
-    var monitoring = this.storage.variables.calculator.monitoring.value;
+    let monitoring = this.storage.variables.calculator.monitoring.value;
     if (monitoring !== "false") {
       monitoring = "true";
     }
-    var monitorResult = document.getElementById(ids.domElements.pages.calculator.monitoring.spanStatus);
+    let monitorResult = document.getElementById(ids.domElements.pages.calculator.monitoring.spanStatus);
     if (monitoring === "true") {
       monitorResult.innerHTML = "Monitor <b style = 'color:red'>on</b>";
       document.getElementById(ids.domElements.switch.monitoring).checked = true;
@@ -522,16 +522,16 @@ class AllScripts {
   }
 
   removeOneScript(scriptId) {
-    var theScript = document.getElementById(scriptId);
+    let theScript = document.getElementById(scriptId);
     if (theScript === null) {
       return;
     }
-    var parent = theScript.parentNode;
+    let parent = theScript.parentNode;
     parent.removeChild(theScript);
   }
 
   removeScripts(scriptIds) {
-    for (var counter = 0; counter < scriptIds.length; counter++) {
+    for (let counter = 0; counter < scriptIds.length; counter++) {
       this.removeOneScript(scriptIds[counter]);
     }
   }
@@ -540,12 +540,12 @@ class AllScripts {
     this.removeOneScript(scriptId);
     if (scriptContent !== undefined && scriptContent !== null) {
       this.scriptsInjected[scriptId] = new Script();
-      var theScript = this.scriptsInjected[scriptId];
+      let theScript = this.scriptsInjected[scriptId];
       theScript.id = scriptId;
       theScript.content = scriptContent;
     }
-    var theScript = this.scriptsInjected[scriptId];
-    var scriptChild = document.createElement('script');
+    let theScript = this.scriptsInjected[scriptId];
+    let scriptChild = document.createElement('script');
     scriptChild.setAttribute('id', scriptId);
     scriptChild.innerHTML = theScript.content;
     scriptChild.type = 'text/javascript';

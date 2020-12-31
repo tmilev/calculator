@@ -12,8 +12,8 @@ function deepCopy(from) {
   if (typeof from !== "object") {
     return from;
   }
-  var result = {};
-  for (var label in from) {
+  let result = {};
+  for (let label in from) {
     if (typeof from[label] === "object") {
       result[label] = deepCopy(from[label])
       continue;
@@ -25,15 +25,15 @@ function deepCopy(from) {
 
 /**@returns{string} */
 function jsonParseGetHtmlStandard(input) {
-  var parsed = jsonUnescapeParse(input);
-  var result = "";
+  let parsed = jsonUnescapeParse(input);
+  let result = "";
   if (parsed[pathnames.urlFields.result.resultHtml] !== undefined) {
     result += parsed[pathnames.urlFields.result.resultHtml];
   }
   if (parsed[pathnames.urlFields.result.commentsGlobal] !== undefined) {
     result += parsed[pathnames.urlFields.result.commentsGlobal];
   }
-  var lookForComments = false;
+  let lookForComments = false;
   if (parsed[pathnames.urlFields.result.error] !== undefined) {
     result += `<b style='color:red'>Error.</b> ${parsed[pathnames.urlFields.result.error]}`;
     lookForComments = true;
@@ -43,7 +43,7 @@ function jsonParseGetHtmlStandard(input) {
     lookForComments = true;
   }
   if (lookForComments) {
-    var comments = parsed[pathnames.urlFields.result.comments];
+    let comments = parsed[pathnames.urlFields.result.comments];
     if (comments !== undefined && comments !== "") {
       result += `<hr><b>Additional comments.</b><br>${comments}`;
     }
@@ -53,14 +53,14 @@ function jsonParseGetHtmlStandard(input) {
 
 /**@returns{string} */
 function unescapeInequalitiesAmpersands(input) {
-  input = input.replace(/&lt;/g,"<");
-  input = input.replace(/&gt;/g,">");
-  return input.replace(/&amp;/g,"&");
+  input = input.replace(/&lt;/g, "<");
+  input = input.replace(/&gt;/g, ">");
+  return input.replace(/&amp;/g, "&");
 }
 
 /**@returns{Object} */
 function jsonUnescapeParse(input) {
-  var unescaped = unescapeInequalitiesAmpersands(input);
+  let unescaped = unescapeInequalitiesAmpersands(input);
   return JSON.parse(unescaped);
 }
 

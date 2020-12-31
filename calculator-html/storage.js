@@ -20,7 +20,7 @@ class StorageVariable {
     this.callbackOnValueChange = null;
     /**@type {Function|null} */
     this.callbackSetValueFromStorage = null;
-    var labelsToRead = [
+    let labelsToRead = [
       "nameURL",
       "nameCookie",
       "nameLocalStorage",
@@ -31,9 +31,9 @@ class StorageVariable {
       "showInURLByDefault",
       "showInURLOnPages",
     ];
-    for (var counterLabel = 0; counterLabel < labelsToRead.length; counterLabel++) {
-      var currentLabel = labelsToRead[counterLabel];
-      var incoming = inputs[currentLabel];
+    for (let counterLabel = 0; counterLabel < labelsToRead.length; counterLabel++) {
+      let currentLabel = labelsToRead[counterLabel];
+      let incoming = inputs[currentLabel];
       if (incoming !== "" && incoming !== null && incoming !== undefined) {
         this[currentLabel] = incoming;
       }
@@ -54,15 +54,15 @@ class StorageVariable {
 
   /**@returns{string} */
   loadMe(hashParsed) {
-    var candidate = "";
+    let candidate = "";
     if (Storage !== undefined || localStorage !== undefined && this.nameLocalStorage !== "") {
-      var incoming = localStorage.getItem(this.nameLocalStorage);
+      let incoming = localStorage.getItem(this.nameLocalStorage);
       if (incoming !== "" && incoming !== null && incoming !== undefined) {
         candidate = incoming;
       }
     }
     if (this.nameCookie !== "") {
-      var incoming = cookies.getCookie(this.nameCookie);
+      let incoming = cookies.getCookie(this.nameCookie);
       if (incoming !== "" && incoming !== null && incoming !== undefined) {
         candidate = incoming;
       }
@@ -70,7 +70,7 @@ class StorageVariable {
     if (hashParsed !== null && hashParsed !== undefined) {
       if (this.nameURL !== "") {
         if (this.nameURL in hashParsed) {
-          var incoming = hashParsed[this.nameURL];
+          let incoming = hashParsed[this.nameURL];
           if (incoming !== null && incoming !== undefined) {
             candidate = incoming;
           }
@@ -126,7 +126,7 @@ class StorageVariable {
     if (updateURL === undefined) {
       updateURL = true;
     }
-    var changed = (this.value !== newValue);
+    let changed = (this.value !== newValue);
     this.value = newValue;
     this.storeMe(updateURL, updateAssociatedInput);
     if (!changed) {
@@ -307,10 +307,10 @@ class StorageCalculator {
 
   /**@returns {string} */
   getCleanedUpURL(input) {
-    var stringifiedInput = JSON.stringify(input);
-    var isGood = true;
+    let stringifiedInput = JSON.stringify(input);
+    let isGood = true;
     try {
-      var decodedAsURL = decodeURIComponent(stringifiedInput);
+      let decodedAsURL = decodeURIComponent(stringifiedInput);
       if (stringifiedInput !== decodedAsURL) {
         isGood = false;
       }
@@ -361,7 +361,7 @@ class StorageCalculator {
       return;
     }
     if (typeof currentStorage === "object") {
-      for (var subLabel in currentStorage) {
+      for (let subLabel in currentStorage) {
         this.loadSettingsRecursively(currentStorage[subLabel], inputHashParsed);
       }
     }
@@ -369,7 +369,7 @@ class StorageCalculator {
 
   setURL() {
     this.urlObject = this.computeURLRecursively(this.variables);
-    var incomingHashRaw = this.getPercentEncodedURL(this.urlObject);
+    let incomingHashRaw = this.getPercentEncodedURL(this.urlObject);
 
     if (incomingHashRaw !== this.currentHashRaw) {
       window.location.hash = incomingHashRaw;
@@ -384,14 +384,14 @@ class StorageCalculator {
     if (recursionDepth > 100) {
       throw ("Recursion is too deeply nested. This must be a programming error. ");
     }
-    var result = {
+    let result = {
     };
     if (currentStorage instanceof StorageVariable) {
-      var urlName = currentStorage.nameURL;
+      let urlName = currentStorage.nameURL;
       if (urlName === undefined || urlName === null || urlName === "") {
         return null;
       }
-      var shouldShow = false;
+      let shouldShow = false;
       if (currentStorage.showInURLByDefault === true) {
         shouldShow = true;
       }
@@ -412,8 +412,8 @@ class StorageCalculator {
     if (typeof currentStorage !== "object") {
       throw (`Unexpected currentStorage input while computing url: ${currentStorage}`);
     }
-    for (var label in currentStorage) {
-      var incoming = this.computeURLRecursively(currentStorage[label], recursionDepth + 1);
+    for (let label in currentStorage) {
+      let incoming = this.computeURLRecursively(currentStorage[label], recursionDepth + 1);
       if (incoming === null) {
         continue;
       }

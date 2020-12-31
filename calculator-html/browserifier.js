@@ -8,11 +8,11 @@ class Browserifier {
   }
 
   require(inputFileName) {
-    var currentSource = this.sanitizedFileNameContents[inputFileName];
+    let currentSource = this.sanitizedFileNameContents[inputFileName];
     if (!(inputFileName in this.allModules)) {
       this.allModules[inputFileName] = {};
     }
-    var currentModule = this.allModules[inputFileName];
+    let currentModule = this.allModules[inputFileName];
     if (!currentModule.flagLoaded) {
       currentModule.flagLoaded = true;
       currentSource(this.require.bind(this), currentModule);
@@ -22,9 +22,9 @@ class Browserifier {
 
   browserifyAndRun() {
     createBrowserifier();
-    var expectedStart = "/calculator-html/";
-    for (var fileName in theJSContent) {
-      var newFileName = "";
+    let expectedStart = "/calculator-html/";
+    for (let fileName in theJSContent) {
+      let newFileName = "";
       if (!fileName.startsWith(expectedStart)) {
         continue;
       }

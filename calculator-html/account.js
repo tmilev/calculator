@@ -15,11 +15,11 @@ function submitChangePassRequestCallback(result, outputComponent) {
 }
 
 function submitChangePassRequest() {
-  var inputOldPassword = document.getElementById("inputOldPasswordInAccount");
-  var inputNewPassword = document.getElementById("inputNewPasswordInAccount");
-  var inputReenteredPassword = document.getElementById("inputReenteredPasswordInAccount");
-  var inputEmail = document.getElementById("inputEmail");
-  var theURL = "";
+  let inputOldPassword = document.getElementById("inputOldPasswordInAccount");
+  let inputNewPassword = document.getElementById("inputNewPasswordInAccount");
+  let inputReenteredPassword = document.getElementById("inputReenteredPasswordInAccount");
+  let inputEmail = document.getElementById("inputEmail");
+  let theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.changePassword}&`;
   theURL += `${pathnames.urlFields.password}=${encodeURIComponent(inputOldPassword.value)}&`;
   theURL += `${pathnames.urlFields.newPassword}=${encodeURIComponent(inputNewPassword.value)}&`;
@@ -34,13 +34,13 @@ function submitChangePassRequest() {
 }
 
 function updateAccountPage() {
-  var thePage = window.calculator.mainPage;
-  var usernameInput = document.getElementById("spanUserIdInAccountsPage");
-  var emailSpan = document.getElementById(ids.domElements.spanOldEmail);
+  let thePage = window.calculator.mainPage;
+  let usernameInput = document.getElementById("spanUserIdInAccountsPage");
+  let emailSpan = document.getElementById(ids.domElements.spanOldEmail);
   usernameInput.innerHTML = thePage.storage.variables.user.name.getValue();
   emailSpan.innerHTML = thePage.storage.variables.user.email.getValue();
-  var spanExtraInfo = document.getElementById(ids.domElements.spanUserExtraInfo);
-  var extraInfo = "";
+  let spanExtraInfo = document.getElementById(ids.domElements.spanUserExtraInfo);
+  let extraInfo = "";
   extraInfo += "<table>";
   extraInfo += `<tr><td>Role: </td><td>${thePage.user.getRole()}</td><tr>`;
   if (thePage.user.sectionsTaught.length > 0 && !thePage.studentView()) {

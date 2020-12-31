@@ -1237,14 +1237,32 @@ class LaTeXConstants {
       "cup": "\u222A",
     };
     /**@type{Object.<string, string>} */
+    this.latexBackslashOperatorsBackslashed = {};
+    for (let operator in this.latexBackslashOperators) {
+      this.latexBackslashOperatorsBackslashed["\\" + operator] = this.latexBackslashOperators[operator];
+    }
+
+    /**@type{Object.<string, string>} */
     this.operatorWithSuperAndSubscript = {
       "sum": "\u03A3",
       "int": "\u222B",
     };
     /**@type{Object.<string, string>} */
+    this.operatorWithSuperAndSubscriptBackslashed = {};
+    for (let operator in this.operatorWithSuperAndSubscript) {
+      this.operatorWithSuperAndSubscriptBackslashed["\\" + operator] = this.operatorWithSuperAndSubscript[operator];
+    }
+
+    /**@type{Object.<string, string>} */
     this.operatorsWithSubscript = {
       "lim": "lim",
     };
+    /**@type{Object.<string, string>} */
+    this.operatorsWithSubscriptBackslashed = {};
+    for (let operator in this.operatorsWithSubscript) {
+      this.operatorsWithSubscriptBackslashed["\\" + operator] = this.operatorsWithSubscript[operator];
+    }
+
     /**@type{Object.<string, string>} */
     this.latexBackslashAtomsEditable = {
       "alpha": "\u03B1",
@@ -1302,6 +1320,12 @@ class LaTeXConstants {
       "S": "\u00A7",
     };
     /**@type{Object.<string, string>} */
+    this.latexBackslashAtomsEditableBackslashed = {};
+    for (let operator in this.latexBackslashAtomsEditable) {
+      this.latexBackslashAtomsEditableBackslashed["\\" + operator] = this.latexBackslashAtomsEditable[operator];
+    }
+
+    /**@type{Object.<string, string>} */
     this.mathcalEquivalents = {
       "A": "\uD835\uDC9C",
       "C": "\uD835\uDC9E",
@@ -1343,6 +1367,10 @@ class LaTeXConstants {
       "[": "[",
       "|": "|",
       "\\{": "{",
+    };
+    /**@type{Object.<string, string>} */
+    this.delimitersAmbiguous = {
+      "|": "|",
     };
     /**@type{Object.<string, string>} */
     this.rightDelimiters = {
@@ -2537,18 +2565,23 @@ class EquationEditor {
       focused.focus(0);
       return;
     }
-    const eventsToSend = [
-      "keydown",
-      "keyup",
-      "keypress",
-    ];
-    for (let i = 0; i < eventsToSend.length; i++) {
-      let event = new KeyboardEvent(
-        eventsToSend[i], {
-        key: key,
-      });
-      focused.element.dispatchEvent(event);
-    }
+    focused.handleKeyDownDontComputeCaretPosition(new KeyboardEvent(
+      "keydown", {
+      key: key,
+    }));
+    /*
+        const eventsToSend = [
+          "keydown",
+          "keyup",
+          "keypress",
+        ];
+        for (let i = 0; i < eventsToSend.length; i++) {
+          let event = new KeyboardEvent(
+            eventsToSend[i], {
+            key: key,
+          });
+          focused.element.dispatchEvent(event);
+        }*/
   }
 
   /**@returns{MathNode} */
@@ -2588,7 +2621,14 @@ class EquationEditor {
     }
     this.resetSelectionFullSelectEventCatcher();
     let result = this.getLastFocused();
-    result.focus();
+    let position = - 1;
+    if (result.isAtomEditable()) {
+      position = result.positionCaretBeforeKeyEvents;
+    }
+    result.focus(1);
+    if (position !== -1) {
+      result.positionCaretBeforeKeyEvents = position;
+    }
     return result;
   }
 
@@ -3214,6 +3254,18 @@ class LatexWithAnnotation {
 
   toString() {
     return `${this.latex} [[${this.selectionStart}, ${this.selectionEnd}]]`;
+  }
+}
+
+class BackslashResult {
+  constructor(
+    /**@type{boolean} */
+    keyAccountedCarryOutDefaultEvent,
+    /**@type{string} */
+    command,
+  ) {
+    this.keyAccountedCarryOutDefaultEvent = keyAccountedCarryOutDefaultEvent;
+    this.command = command;
   }
 }
 
@@ -4294,13 +4346,19 @@ class MathNode {
     /** @type {KeyboardEvent} */
     event,
   ) {
-    let key = event.key;
-    if (key === "Shift" || key === "Ctrl") {
+    if (event.key === "Shift" || event.key === "Ctrl") {
       event.stopPropagation();
       return;
     }
-    let frameStart = new Date().getTime();
     this.storeCaretPosition(event.key, event.shiftKey);
+    this.handleKeyDownDontComputeCaretPosition(event);
+  }
+
+  handleKeyDownDontComputeCaretPosition(
+    /** @type {KeyboardEvent} */
+    event,
+  ) {
+    let frameStart = new Date().getTime();
     event.stopPropagation();
     let handlerResult = this.handleKeyDownCases(event);
     if (handlerResult.preventDefault) {
@@ -4351,51 +4409,52 @@ class MathNode {
     }
   }
 
-  /** @returns {boolean} whether default should be prevented. */
+  /** @returns {BackslashResult} */
   processBackslash(
     /** @type {string} */
     key,
     /** @type{boolean} */
     shiftHeld,
   ) {
+    let result = new BackslashResult(false, key);
     if (key === "Shift") {
-      return false;
+      return result;
+    }
+    if (this.type.type !== knownTypes.atom.type) {
+      return result;
     }
     if (key === "\\" && !shiftHeld) {
       this.equationEditor.backslashSequenceStarted = true;
-      this.equationEditor.backslashSequence = "";
+      this.equationEditor.backslashSequence = "\\";
       this.equationEditor.backslashPosition = this.positionCaretBeforeKeyEvents;
-      return false;
+      result.keyAccountedCarryOutDefaultEvent = true;
+      return result;
     }
     if (!this.equationEditor.backslashSequenceStarted) {
-      return false;
+      return result;
     }
     if (key === " " && this.equationEditor.backslashSequenceStarted) {
       this.equationEditor.backslashSequenceStarted = false;
-      return this.makeBackslashSequence();
-    }
-    if (this.equationEditor.backslashSequence === "" && (key === "{" || key === "}")) {
-      this.equationEditor.backslashSequence = key;
-      this.equationEditor.backslashSequenceStarted = false;
-      this.makeBackslashSequence();
-      return true;
+      return this.removeBackslashSequence();
     }
     if (latexConstants.isLatinCharacter(key)) {
       this.equationEditor.backslashSequence += key;
-      return false;
+      result.keyAccountedCarryOutDefaultEvent = true;
+      return result;
     }
     if (key === "Backspace") {
-      if (this.equationEditor.backslashSequence === "") {
+      if (this.equationEditor.backslashSequence === "\\") {
         this.equationEditor.backslashSequenceStarted = false;
       } else {
         this.equationEditor.backslashSequence = this.equationEditor.backslashSequence.slice(
           0, this.equationEditor.backslashSequence.length - 1,
         );
       }
-      return false;
+      result.keyAccountedCarryOutDefaultEvent = true;
+      return result;
     }
     this.equationEditor.backslashSequenceStarted = false;
-    return false;
+    return result;
   }
 
   pasteFromClipboard(event) {
@@ -4445,6 +4504,23 @@ class MathNode {
     parent.focusRestore();
   }
 
+  insertString(
+    /**@type{string} */
+    input,
+  ) {
+    let split = this.splitByCaret();
+    let atomNode = mathNodeFactory.atom(this.equationEditor, input);
+    atomNode.desiredCaretPosition = input.length;
+    let node = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [split[0], atomNode, split[1]]);
+    node.normalizeHorizontalMath();
+    let parent = this.parent;
+    parent.replaceChildAtPosition(this.indexInParent, node);
+    parent.normalizeHorizontalMath();
+    parent.updateDOM();
+    parent.focusRestore();
+    return true;
+  }
+
   /** @returns {KeyHandlerResult} whether default should be prevented. */
   handleKeyDownCases(
     /** @type {KeyboardEvent} */
@@ -4456,10 +4532,47 @@ class MathNode {
       return new KeyHandlerResult(true, false);
     }
     let shiftHeld = event.shiftKey;
-    if (this.processBackslash(key, shiftHeld)) {
+    let backslashPreprocessing = this.processBackslash(key, shiftHeld);
+    if (backslashPreprocessing.keyAccountedCarryOutDefaultEvent) {
+      return new KeyHandlerResult(false, true);
+    }
+    let command = backslashPreprocessing.command;
+
+    if (command in latexConstants.operatorWithSuperAndSubscriptBackslashed) {
+      let operator = latexConstants.operatorWithSuperAndSubscriptBackslashed[command];
+      this.makeOperatorWithSuperscriptAndSubscript(operator);
       return new KeyHandlerResult(true, false);
     }
-    switch (key) {
+    if (command in latexConstants.operatorsWithSubscriptBackslashed) {
+      let operator = latexConstants.operatorsWithSubscriptBackslashed[command];
+      this.makeOperatorWithSubscript(operator);
+      return new KeyHandlerResult(true, false);
+    }
+    if (command in latexConstants.latexBackslashOperatorsBackslashed) {
+      let operator = latexConstants.latexBackslashOperatorsBackslashed[command];
+      this.makeHorizontalOperator(operator);
+      return new KeyHandlerResult(true, false);
+    }
+    if (
+      command in latexConstants.leftDelimiters &&
+      !(command in latexConstants.delimitersAmbiguous)
+    ) {
+      this.makeDelimiterLeft(command);
+      return new KeyHandlerResult(true, false);
+    }
+    if (
+      command in latexConstants.rightDelimiters &&
+      !(command in latexConstants.delimitersAmbiguous)
+    ) {
+      this.makeDelimiterRight(key);
+      return new KeyHandlerResult(true, false);
+    }
+    if (command in latexConstants.latexBackslashAtomsEditableBackslashed) {
+      let content = latexConstants.latexBackslashAtomsEditableBackslashed[command];
+      this.insertString(content);
+      return new KeyHandlerResult(true, false);
+    }
+    switch (backslashPreprocessing.command) {
       case "/":
         this.makeFractionNumerator();
         return new KeyHandlerResult(true, false);
@@ -4485,22 +4598,28 @@ class MathNode {
       case "|":
         this.makeDelimiterAmbiguous(key);
         return new KeyHandlerResult(true, false);
-      case "(":
-      case "[":
-      case "{":
-        this.makeDelimiterLeft(key);
-        return new KeyHandlerResult(true, false);
-      case "}":
-      case ")":
-      case "]":
-        this.makeDelimiterRight(key);
-        return new KeyHandlerResult(true, false);
       case "Enter":
         return new KeyHandlerResult(true, false);
       case "Delete":
         return this.deleteButton();
       case "Backspace":
         return this.backspace();
+      case "{":
+        this.makeDelimiterLeft("{");
+        return new KeyHandlerResult(true, false);
+      case "}":
+        this.makeDelimiterRight("}");
+        return new KeyHandlerResult(true, false);
+      case "\\sqrt":
+        this.makeSqrt();
+        return new KeyHandlerResult(true, false);
+      case "\\cancel":
+        this.makeCancel();
+        return new KeyHandlerResult(true, false);
+      case "\\pmatrix":
+      case "\\matrix":
+        this.makeMatrix(2, 2);
+        return new KeyHandlerResult(true, false);
       default:
         return new KeyHandlerResult(false, true);
     }
@@ -4628,6 +4747,11 @@ class MathNode {
     }
     this.equationEditor.resetSelectionLeaveRangesIntact();
     if (this.arrowAbsorbedByAtom(key)) {
+      if (key === "ArrowLeft") {
+        this.positionCaretBeforeKeyEvents--;
+      } else {
+        this.positionCaretBeforeKeyEvents++;
+      }
       return new KeyHandlerResult(false, false);
     }
     /** @type {AtomWithPosition} */
@@ -5365,6 +5489,15 @@ class MathNode {
     matrix.children[0].children[1].children[0].children[0].focus(0);
   }
 
+  makeCancel() {
+    let splitBySelection = this.equationEditor.splitAtomsBySelection();
+    if (splitBySelection !== null) {
+      this.makeCancelFromSplit(splitBySelection);
+      return;
+    }
+    this.makeCancelFromSplit(this.splitByCaret());
+  }
+
   makeSqrt() {
     let splitBySelection = this.equationEditor.splitAtomsBySelection();
     if (splitBySelection !== null) {
@@ -5408,6 +5541,14 @@ class MathNode {
     parent.ensureEditableAtoms();
     parent.updateDOM();
     operatorNode.focus(1);
+  }
+
+  makeOperatorWithSubscript(
+    /** @type {string} */
+    operator,
+  ) {
+    let split = this.splitByCaret();
+    return this.makeOperatorWithSubscriptFromSplit(operator, split)
   }
 
   makeOperatorWithSubscriptFromSplit(
@@ -5621,6 +5762,26 @@ class MathNode {
     return this.splitByPositionChopOffCharacters(position, 0);
   }
 
+  /** @returns {string[]} */
+  splitByPositionIntoStringsChopOffCharacters(
+    /** @type{number} */
+    position,
+    /** @type{number} */
+    charactersToRemove,
+  ) {
+    if (!this.isAtomEditable() || position < 0) {
+      if (position <= 0) {
+        return ["", ""];
+      } else {
+        return ["", ""];
+      }
+    }
+    let content = this.contentIfAtom();
+    let leftContent = content.slice(0, position);
+    let rightContent = content.slice(position + charactersToRemove, content.length);
+    return [leftContent, rightContent];
+  }
+
   /** @returns {MathNode[]} */
   splitByPositionChopOffCharacters(
     /** @type{number} */
@@ -5635,9 +5796,9 @@ class MathNode {
         return [this, null];
       }
     }
-    let content = this.contentIfAtom();
-    let leftContent = content.slice(0, position);
-    let rightContent = content.slice(position + charactersToRemove, content.length);
+    let splitStrings = this.splitByPositionIntoStringsChopOffCharacters(position, charactersToRemove);
+    let leftContent = splitStrings[0];
+    let rightContent = splitStrings[1]
     let leftNode = mathNodeFactory.atom(this.equationEditor, leftContent);
     let rightNode = mathNodeFactory.atom(this.equationEditor, rightContent);
     if (leftContent === "") {
@@ -5876,75 +6037,26 @@ class MathNode {
     }
   }
 
-  /** @returns {boolean} whether the default should be prevented. */
-  makeBackslashSequence() {
+  setTextContent(
+    /**@type{string} */
+    input,
+  ) {
+    if (this.element === null) {
+      this.initialContent = input;
+      return;
+    }
+    this.element.textContent = input;
+  }
+
+  /** @returns {BackslashResult} */
+  removeBackslashSequence() {
     let backslashSequence = this.equationEditor.backslashSequence;
-    let split = this.splitByPositionChopOffCharacters(
+    let split = this.splitByPositionIntoStringsChopOffCharacters(
       this.equationEditor.backslashPosition,
-      backslashSequence.length + 1,
+      backslashSequence.length,
     );
-    if (backslashSequence in latexConstants.operatorWithSuperAndSubscript) {
-      let command = latexConstants.operatorWithSuperAndSubscript[backslashSequence];
-      this.makeOperatorWithSuperscriptAndSubscriptFromSplit(command, split);
-      return true;
-    }
-    if (backslashSequence in latexConstants.operatorsWithSubscript) {
-      let command = latexConstants.operatorsWithSubscript[backslashSequence];
-      this.makeOperatorWithSubscriptFromSplit(command, split);
-      return true;
-    }
-    if (backslashSequence in latexConstants.latexBackslashOperators) {
-      let operator = latexConstants.latexBackslashOperators[backslashSequence];
-      this.makeHorizontalOperatorFromSplit(operator, split);
-      return true;
-    }
-    let backslashSequenceWithBackslash = "\\" + backslashSequence;
-    if (backslashSequenceWithBackslash in latexConstants.leftDelimiters) {
-      let delimiter = latexConstants.leftDelimiters[backslashSequenceWithBackslash];
-      let atomNode = mathNodeFactory.atom(this.equationEditor, "");
-      let node = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [split[0], atomNode, split[1]]);
-      let parent = this.parent;
-      parent.replaceChildAtPosition(this.indexInParent, node);
-      node.makeDelimiterLeft(delimiter);
-      parent.normalizeHorizontalMath();
-      return true;
-    }
-    if (backslashSequenceWithBackslash in latexConstants.rightDelimiters) {
-      let delimiter = latexConstants.rightDelimiters[backslashSequenceWithBackslash];
-      let atomNode = mathNodeFactory.atom(this.equationEditor, "");
-      let node = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [split[0], atomNode, split[1]]);
-      let parent = this.parent;
-      parent.replaceChildAtPosition(this.indexInParent, node);
-      node.makeDelimiterRight(delimiter);
-      parent.normalizeHorizontalMath();
-      return true;
-    }
-    if (backslashSequence in latexConstants.latexBackslashAtomsEditable) {
-      let content = latexConstants.latexBackslashAtomsEditable[backslashSequence];
-      let atomNode = mathNodeFactory.atom(this.equationEditor, content);
-      atomNode.desiredCaretPosition = content.length;
-      let node = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [split[0], atomNode, split[1]]);
-      node.normalizeHorizontalMath();
-      let parent = this.parent;
-      parent.replaceChildAtPosition(this.indexInParent, node);
-      parent.normalizeHorizontalMath();
-      parent.updateDOM();
-      parent.focusRestore();
-      return true;
-    }
-    if (backslashSequence === "sqrt") {
-      this.makseSqrtFromSplit(split);
-      return true;
-    }
-    if (backslashSequence === "cancel") {
-      this.makeCancelFromSplit(split);
-      return true;
-    }
-    if (backslashSequence === "pmatrix" || backslashSequence === "matrix") {
-      this.makeMatrixFromSplit(2, 2, split);
-      return true;
-    }
-    return false;
+    this.setTextContent(split[0] + split[1]);
+    return new BackslashResult(false, backslashSequence);
   }
 
   makeFractionNumerator() {
@@ -7786,6 +7898,7 @@ class EquationEditorAction {
     this.command = command;
     this.isKeyPress = isKeyPress;
   }
+
   execute(
     /**@type{EquationEditor} */
     editor,
@@ -7884,6 +7997,7 @@ class EquationEditorButtonFactory {
 let buttonFactories = {
   "sqrt": new EquationEditorButtonFactory("\\sqrt{}", false, "\u221A", ""),
   "fraction": new EquationEditorButtonFactory("\\frac{}{}", false, "/", ""),
+  "divide": new EquationEditorButtonFactory("/", true, "(\u2022)/(\u2022)", ""),
   "exponent": new EquationEditorButtonFactory("^", true, "^", ""),
   "matrix2x2": new EquationEditorButtonFactory("\\begin{pmatrix}&\\\\&\\end{pmatrix}", false, "2x2", ""),
 };

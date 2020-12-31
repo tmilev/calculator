@@ -29,6 +29,7 @@
     editor = new EquationEditor(editorElement, options);
     (new EquationEditorButtonFactory("\\frac{123}{}\\sqrt{7}", false, "", "")).attachToClickById("custom-button", editor);
     buttonFactories.fraction.attachToClickById("fraction-button", editor)
+    buttonFactories.divide.attachToClickById("divide-button", editor)
     buttonFactories.exponent.attachToClickById("exponent-button", editor)
     buttonFactories.sqrt.attachToClickById("sqrt-button", editor);
     buttonFactories.matrix2x2.attachToClickById("matrix-button", editor);
@@ -49,12 +50,13 @@
       oninput="clickSlider(this);">
     <br>
     <button id="fraction-button">/</button>
+    <button id="divide-button">(&bullet;)/(&bullet;)</button>
     <button id="exponent-button">^</button>
     <button id="sqrt-button">&Sqrt;</button><br>
     <button id="matrix-button">2x2 matrix</button><br>
     <button id="custom-button">custom</button>
   </div>
-  <div id="debug" style="display:none"></div>
+  <div id="debug" style="display:normal"></div>
   <hr>
   <h2>How to use on your web site.</h2>
   Include the script <a

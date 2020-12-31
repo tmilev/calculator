@@ -7,6 +7,7 @@ const typeset = require("./math_typeset");
 const miscellaneous = require("./miscellaneous");
 const equation_editor = require("./equation_editor");
 const storage = require("./storage");
+const EquationEditorAction = require("./equation_editor").EquationEditorAction;
 const EquationEditor = require("./equation_editor").EquationEditor;
 const EquationEditorButtonFactory = require("./equation_editor").EquationEditorButtonFactory;
 const EquationEditorOptions = require("./equation_editor").EquationEditorOptions;
@@ -148,7 +149,7 @@ class InputPanelData {
     this.idEditorComments = input.idEditorComments;
     this.problemId = input.problemId;
     /**@type{EquationEditorButtonFactory[]} */
-    this.buttonBindings = [];
+    this.buttonFactories = [];
 
     this.buttonsPerLine = input.buttonsPerLine;
     if (this.buttonsPerLine === null || this.buttonsPerLine === undefined) {
@@ -659,20 +660,27 @@ class InputPanelData {
     /**@type{string} */
     additionalStyle,
   ) {
-    let button = new EquationEditorButtonFactory(
+    let buttonFactory = new EquationEditorButtonFactory(
       command, false, label, additionalStyle,
     );
-    this.buttonBindings.push(button);
+    this.buttonFactories.push(buttonFactory);
   }
 
   addKeySequence(
-    /**@type{string} */
-    command,
+    /**@type{string[]} */
+    keys,
     /**@type{string} */
     label,
     /**@type{string} */
     additionalStyle,
   ) {
+    let buttonFactory = new EquationEditorButtonFactory(
+      "", true, label, additionalStyle,
+    );
+    for (let i = 0; i < keys.length; i++) {
+      buttonFactory.addEditorAction(new EquationEditorAction(keys[i], true));
+    }
+    this.buttonFactories.push(buttonFactory);
   }
 
   addButtons(
@@ -681,7 +689,7 @@ class InputPanelData {
     /**@type{boolean} */
     forceShowNone,
   ) {
-    this.buttonBindings = [];
+    this.buttonFactories = [];
     if (forceShowNone) {
       return;
     }
@@ -692,8 +700,9 @@ class InputPanelData {
       this.addLatexCommand("-", "-");
       this.addLatexCommand("\\cdot", "*");
       this.addLatexCommand("\\frac{}{}", "/");
+      this.addKeySequence(["/"], "\u2022/"); // \u2022 = bullet.
       this.addLatexCommand("\\sqrt{}", "\u221A");
-      this.addLatexCommand("{}^{}", "^");
+      this.addKeySequence(["^"], "^");
       this.addLatexCommand("()", "(");
       this.addLatexCommand("()", ")");
     }
@@ -789,12 +798,12 @@ class InputPanelData {
     let table = document.createElement("TABLE");
     table.style.margin = "auto";
     let currentRow = null;
-    for (let j = 0; j < this.buttonBindings.length; j++) {
+    for (let j = 0; j < this.buttonFactories.length; j++) {
       if (j % this.buttonsPerLine === 0) {
         currentRow = table.insertRow();
       }
       let cell = currentRow.insertCell();
-      let button = this.buttonBindings[j].getButton(this.equationEditor);
+      let button = this.buttonFactories[j].getButton(this.equationEditor);
       button.className = "buttonMQ";
       cell.appendChild(button);
     }

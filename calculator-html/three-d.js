@@ -760,8 +760,8 @@ class AxesGrid {
       theSurface.lineTo(theCoords[0], theCoords[1]);
       theSurface.stroke();
     }
-    for (i = floorBottom; i <= ceilTop; i += Delta) {
-      theCoords = theCanvas.coordsMathScreenToScreen([left, i]);
+    for (let i = floorBottom; i <= ceilTop; i += Delta) {
+      let theCoords = theCanvas.coordsMathScreenToScreen([left, i]);
       theSurface.moveTo(theCoords[0], theCoords[1]);
       theCoords = theCanvas.coordsMathScreenToScreen([right, i]);
       theSurface.lineTo(theCoords[0], theCoords[1]);
@@ -773,15 +773,15 @@ class AxesGrid {
     for (let i = floorLeft; i <= ceilRight; i += Delta) {
       counter++;
       //if (counter%2=== 0 && i !==1){
-      theCoords = theCanvas.coordsMathScreenToScreen([i, 0]);
+      let theCoords = theCanvas.coordsMathScreenToScreen([i, 0]);
       theSurface.fillText(i, theCoords[0], theCoords[1] + 10);
       //}
     }
     counter = 0;
-    for (i = floorBottom; i <= ceilTop; i += Delta) {
+    for (let i = floorBottom; i <= ceilTop; i += Delta) {
       counter++;
       //if (counter%2=== 0 && i !==1){
-      theCoords = theCanvas.coordsMathScreenToScreen([0, i]);
+      let theCoords = theCanvas.coordsMathScreenToScreen([0, i]);
       theSurface.fillText(i, theCoords[0] - 10, theCoords[1]);
       //}
     }
@@ -1034,7 +1034,7 @@ class PlotFillTwoD {
     theSurface.fillStyle = colorRGBToString(this.color);
     theSurface.fill();
     for (inputCanvas.numDrawnObjects++; inputCanvas.numDrawnObjects < theObs.length; inputCanvas.numDrawnObjects++) {
-      currentO = theObs[inputCanvas.numDrawnObjects];
+      let currentO = theObs[inputCanvas.numDrawnObjects];
       if (currentO.type === "plotFillFinish") {
         break;
       }
@@ -1970,17 +1970,17 @@ class Canvas {
         this.boundingBoxMathScreen[0][i] = theV[i];
       }
     }
-    for (i = 0; i < 2; i++) {
+    for (let i = 0; i < 2; i++) {
       if (theV[i] > this.boundingBoxMathScreen[1][i]) {
         this.boundingBoxMathScreen[1][i] = theV[i];
       }
     }
-    for (i = 0; i < 3; i++) {
+    for (let i = 0; i < 3; i++) {
       if (input[i] < this.boundingBoxMath[0][i]) {
         this.boundingBoxMath[0][i] = input[i];
       }
     }
-    for (i = 0; i < 3; i++) {
+    for (let i = 0; i < 3; i++) {
       if (input[i] > this.boundingBoxMath[1][i]) {
         this.boundingBoxMath[1][i] = input[i];
       }
@@ -2009,7 +2009,7 @@ class Canvas {
         this.computeBoundingBoxAccountPoint(theContours[i].thePoints[j]);
       }
     }
-    for (i = 0; i < thePoints.length; i++) {
+    for (let i = 0; i < thePoints.length; i++) {
       this.computeBoundingBoxAccountPoint(thePoints[i].location);
     }
   }
@@ -2024,7 +2024,7 @@ class Canvas {
     this.computeBoundingBox();
     this.bufferDeltaX = (this.boundingBoxMathScreen[1][0] - this.boundingBoxMathScreen[0][0]) / this.zBufferColCount;
     this.bufferDeltaY = (this.boundingBoxMathScreen[1][1] - this.boundingBoxMathScreen[0][1]) / this.zBufferRowCount;
-    for (i = 0; i < thePatches.length; i++) {
+    for (let i = 0; i < thePatches.length; i++) {
       this.accountOnePatch(i);
     }
     this.computePatchOrder();
@@ -2090,7 +2090,7 @@ class Canvas {
       this.patchIsAccounted[i] = 0;
     }
     this.numAccountedPatches = 0;
-    for (i = 0; i < thePatches.length; i++) {
+    for (let i = 0; i < thePatches.length; i++) {
       if (thePatches[i].patchesBelowMe.length === 0) {
         this.thePatchOrder[this.numAccountedPatches] = i;
         this.numAccountedPatches++;
@@ -2758,9 +2758,9 @@ class Canvas {
     let contourPoints = new Array(numSegmentsPerContour + 1);
     for (let i = 0; i < numUsegments + 1; i++) {
       for (let j = 0; j < numVsegments; j++) {
-        currentU = theSurface.uvBox[0][0] + i * deltaU;
+        let currentU = theSurface.uvBox[0][0] + i * deltaU;
         for (let k = 0; k < numSegmentsPerContour + 1; k++) {
-          currentV = theSurface.uvBox[0][1] + (j + k / numSegmentsPerContour) * deltaV;
+          let currentV = theSurface.uvBox[0][1] + (j + k / numSegmentsPerContour) * deltaV;
           contourPoints[k] = theSurface.xyzFun(currentU, currentV);
         }
         let incomingContour = new Contour(contourPoints, theSurface.colors.colorContour, theSurface.contourWidth);
@@ -2779,12 +2779,12 @@ class Canvas {
     }
     for (let i = 0; i < numUsegments; i++) {
       for (let j = 0; j < numVsegments + 1; j++) {
-        currentV = theSurface.uvBox[0][1] + j * deltaV;
+        let currentV = theSurface.uvBox[0][1] + j * deltaV;
         for (let k = 0; k < numSegmentsPerContour + 1; k++) {
-          currentU = theSurface.uvBox[0][0] + (i + k / numSegmentsPerContour) * deltaU;
+          let currentU = theSurface.uvBox[0][0] + (i + k / numSegmentsPerContour) * deltaU;
           contourPoints[k] = theSurface.xyzFun(currentU, currentV);
         }
-        incomingContour = new Contour(contourPoints, theSurface.colors.colorContour, theSurface.contourWidth);
+        let incomingContour = new Contour(contourPoints, theSurface.colors.colorContour, theSurface.contourWidth);
         incomingContour.index = theContours.length;
         if (j > 0) {
           incomingContour.adjacentPatches.push(firstPatchIndex + numVsegments * i + j - 1);

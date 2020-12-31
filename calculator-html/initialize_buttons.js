@@ -280,7 +280,7 @@ class InputPanelData {
     }
     /**@type{EquationEditor|null} */
     this.equationEditor = null;
-    this.ignoreNextMathQuillUpdateEvent = false;
+    this.ignoreNextEditorEvent = false;
     this.flagAnswerPanel = input.flagAnswerPanel;
     this.flagInitialized = false;
     this.flagCalculatorPanel = input.flagCalculatorPanel;
@@ -301,16 +301,24 @@ class InputPanelData {
     }
   }
 
+  editLaTeX() {
+    // useful event handlers	
+    this.ignoreNextEditorEvent = true;
+    this.equationEditor.writeLatex(document.getElementById(this.idPureLatex).value + ' ');
+    this.ignoreNextEditorEvent = false;
+    this.submitPreviewWithTimeOut();
+  }
+
   editorHelpCalculator() {
     this.getSemiColumnEnclosure();
     if (this.equationEditor === null) {
       return;
     }
-    this.ignoreNextMathQuillUpdateEvent = true;
+    this.ignoreNextEditorEvent = true;
     if (this.flagCalculatorMQStringIsOK) {
       this.equationEditor.writeLatex(this.theLaTeXString);
     }
-    this.ignoreNextMathQuillUpdateEvent = false;
+    this.ignoreNextEditorEvent = false;
   }
 
   submitOrPreviewAnswersCallback(outputComponent, input) {
@@ -458,7 +466,7 @@ class InputPanelData {
     unusedNode,
   ) {
     // useful event handlers
-    if (this.ignoreNextMathQuillUpdateEvent) {
+    if (this.ignoreNextEditorEvent) {
       return;
     }
     let latexBox = document.getElementById(this.idPureLatex);

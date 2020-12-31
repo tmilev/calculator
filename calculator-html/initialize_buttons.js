@@ -700,7 +700,7 @@ class InputPanelData {
       this.addLatexCommand("-", "-");
       this.addLatexCommand("\\cdot", "*");
       this.addLatexCommand("\\frac{}{}", "/");
-      this.addKeySequence(["/"], "\u2022/"); // \u2022 = bullet.
+      this.addKeySequence(["/"], "(\u2022)/(\u2022)", "font-size:10px"); // \u2022 = bullet.
       this.addLatexCommand("\\sqrt{}", "\u221A");
       this.addKeySequence(["^"], "^");
       this.addKeySequence(["("], "(");

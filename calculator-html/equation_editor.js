@@ -2526,9 +2526,9 @@ class EquationEditor {
       result += `<br>Last copied: ${this.lastCopied}`;
     }
     if (this.lastFocused !== null) {
-      result += `<br>Last modified: ${this.lastFocused.toString()}`;
+      result += `<br>Last focused: ${this.lastFocused.toString()}, position: ${this.lastFocused.positionCaretBeforeKeyEvents}`;
       if (this.lastFocused.isDetached()) {
-        result += "<br><b style='color:red'>Detached last modified.</b>";
+        result += "<br><b style='color:red'>Detached last focused.</b>";
       }
     }
     result += `<br>${this.toStringSelection()}`;
@@ -2609,8 +2609,8 @@ class EquationEditor {
       lastSelected.focus(direction);
       return lastSelected;
     }
-    this.resetSelectionFullSelectEventCatcher();
     let result = this.getLastFocused();
+    this.resetSelectionFullSelectEventCatcher();
     let position = - 1;
     if (result.isAtomEditable()) {
       position = result.positionCaretBeforeKeyEvents;
@@ -2665,7 +2665,7 @@ class EquationEditor {
 
   /**@returns{boolean} */
   selectionEscapedOriginalAtom() {
-    return this.selectionStartExpanded.position === - 1
+    return this.selectionStartExpanded.position === - 1;
   }
 
   /** @returns{KeyHandlerResult} whether the default should be prevented. */
@@ -2979,6 +2979,8 @@ class EquationEditor {
     element,
   ) {
     if (element === this.selectionStart.element && !this.selectionNoMoreDefault) {
+      this.selectionStartExpanded.element = this.selectionStart.element;
+      this.selectionStartExpanded.position = this.selectionStart.position;
       return false;
     }
     this.selectionNoMoreDefault = true;
@@ -4944,6 +4946,9 @@ class MathNode {
     /** @type{boolean} */
     shiftHeld,
   ) {
+    if (this.type.type === knownTypes.eventCatcher.type) {
+      return;
+    }
     if (this.type.type !== knownTypes.atom.type) {
       this.positionCaretBeforeKeyEvents = - 1;
       this.equationEditor.setLastFocused(null);

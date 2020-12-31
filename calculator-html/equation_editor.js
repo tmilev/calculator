@@ -2564,25 +2564,6 @@ class EquationEditor {
     if (focused === null) {
       return;
     }
-    let specialKeyCodes = {
-      "+": null,
-      "-": null,
-      "*": null,
-      "/": null,
-      "^": null,
-      "(": null,
-      ")": null,
-      "ArrowLeft": 37,
-      "ArrowRight": 39,
-      "ArrowUp": 38,
-      "ArrowDown": 40,
-      "Backspace": null,
-    };
-    if (!(key in specialKeyCodes)) {
-      focused.element.textContent += key;
-      focused.focus(1);
-      return;
-    }
     if (key === "ArrowLeft" && focused.positionCaretBeforeKeyEvents > 0) {
       focused.focus(0);
       return;
@@ -2591,19 +2572,6 @@ class EquationEditor {
       "keydown", {
       key: key,
     }));
-    /*
-        const eventsToSend = [
-          "keydown",
-          "keyup",
-          "keypress",
-        ];
-        for (let i = 0; i < eventsToSend.length; i++) {
-          let event = new KeyboardEvent(
-            eventsToSend[i], {
-            key: key,
-          });
-          focused.element.dispatchEvent(event);
-        }*/
   }
 
   /**@returns{MathNode} */

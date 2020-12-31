@@ -703,8 +703,8 @@ class InputPanelData {
       this.addKeySequence(["/"], "\u2022/"); // \u2022 = bullet.
       this.addLatexCommand("\\sqrt{}", "\u221A");
       this.addKeySequence(["^"], "^");
-      this.addLatexCommand("()", "(");
-      this.addLatexCommand("()", ")");
+      this.addKeySequence(["("], "(");
+      this.addKeySequence([")"], ")");
     }
     if (this.flagButtons.trigonometry.selected || includeAll) {
       this.addLatexCommand("\\sin", "sin", "font-size:10px; ");
@@ -723,8 +723,8 @@ class InputPanelData {
       this.addLatexCommand(",", ",");
     }
     if (this.flagButtons.brackets.selected || includeAll) {
-      this.addLatexCommand("[", "[");
-      this.addLatexCommand("]", "]");
+      this.addKeySequence(["["], "[");
+      this.addKeySequence(["]"], "]");
     }
     if (this.flagButtons.complex.selected || includeAll) {
       this.addLatexCommand("i", "i");

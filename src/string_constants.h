@@ -16,6 +16,8 @@ class WebAPI {
 public:
   static std::string appNoCache;
   static std::string app;
+  static std::string compareExpressions;
+  static std::string compareExpressionsNoCache;
   struct request {
     static std::string requestAPI;
     static std::string calculatorPage;

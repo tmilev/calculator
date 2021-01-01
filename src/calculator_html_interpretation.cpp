@@ -584,14 +584,16 @@ std::string BuilderApplication::getOnePageJavascriptBrowserify() {
   return out.str();
 }
 
-std::string WebAPIResponse::getApp(bool appendBuildHash) {
-  MacroRegisterFunctionWithName("WebAPIReponse::getApp");
-  BuilderApplication theInterpretation;
+std::string WebAPIResponse::getHTMLAllInOneJavascriptCSS(
+  const std::string& virtualHTMLFileName, bool appendBuildHash
+) {
+  MacroRegisterFunctionWithName("WebAPIReponse::getHTMLAllInOneJavascriptCSS");
+  BuilderApplication builder;
   std::stringstream out;
   std::stringstream errorStream;
   if (!FileOperations::loadFiletoStringVirtual(
-    "/calculator-html/index.html",
-    theInterpretation.htmlRaw,
+    virtualHTMLFileName,
+    builder.htmlRaw,
     false,
     &errorStream
   )) {
@@ -599,8 +601,16 @@ std::string WebAPIResponse::getApp(bool appendBuildHash) {
     << "Further comments follow. " << errorStream.str() << "</body></html>";
     return out.str();
   }
-  theInterpretation.buildHtmlJavascriptPage(appendBuildHash);
-  return theInterpretation.htmlJSbuild;
+  builder.buildHtmlJavascriptPage(appendBuildHash);
+  return builder.htmlJSbuild;
+}
+
+std::string WebAPIResponse::getApp(bool appendBuildHash) {
+  return WebAPIResponse::getHTMLAllInOneJavascriptCSS("/calculator-html/index.html", appendBuildHash);
+}
+
+std::string WebAPIResponse::getCompareExpressions(bool appendBuildHash) {
+  return WebAPIResponse::getHTMLAllInOneJavascriptCSS("/calculator-html/compare_expressions.html", appendBuildHash);
 }
 
 JSData Course::toJSON() const {

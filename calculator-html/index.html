@@ -3,9 +3,8 @@
 <head>
   <script type="text/javascript">
     "use strict";
-    var calculatorHtmlBaseFolder = "/calculator-html/";
     function errorLoadingScript(e) {
-      var scriptSource = e.src;
+      let scriptSource = e.src;
       if (scriptSource === undefined) {
         scriptSource = e.href;
       }
@@ -13,12 +12,12 @@
       console.log("This is most likely a server ssl configuration error, which we are currently working to resolve. ");
       console.log("In the mean time, let me reload the page for you, this should fix the issue. ");
       try {
-        var currentHash = decodeURIComponent(window.location.hash);
+        let currentHash = decodeURIComponent(window.location.hash);
         if (currentHash.startsWith('#')) {
           currentHash = currentHash.slice(1);
         }
 
-        var urlObject = {};
+        let urlObject = {};
         if (currentHash !== "") {
           urlObject = JSON.parse(currentHash);
         }
@@ -27,7 +26,7 @@
         }
         if (urlObject.errorLoadingScriptReloadAttempt < 4) {
           urlObject.errorLoadingScriptReloadAttempt++;
-          var newAddress = `${window.location.origin}${window.location.pathname}#${JSON.stringify(urlObject)}`;
+          let newAddress = `${window.location.origin}${window.location.pathname}#${JSON.stringify(urlObject)}`;
           window.location.assign(newAddress);
           location.reload(true);
         }

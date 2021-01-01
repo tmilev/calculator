@@ -2,6 +2,9 @@
 
 std::string WebAPI::appNoCache = "appNoCache";
 std::string WebAPI::app = "app";
+std::string WebAPI::compareExpressions = "compareExpressions";
+std::string WebAPI::compareExpressionsNoCache = "compareExpressionsNoCache";
+
 std::string WebAPI::headerCacheControl = "Cache-Control: max-age=129600000, public";
 std::string WebAPI::request::solveRequest = "solveJSON";
 

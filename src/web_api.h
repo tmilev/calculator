@@ -68,6 +68,7 @@ class WebAPIResponse {
   bool processActivateAccount();
   bool processScores();
   bool processApp(bool appendBuildHash);
+  bool processCompareExpressions(bool appendBuildHash);
   bool processCalculatorOnePageJS(bool appendBuildHash);
   bool processTopicListJSON();
   bool processSolveJSON();
@@ -131,6 +132,10 @@ class WebAPIResponse {
   static JSData getSelectCourseJSON();
   static std::string getScoresPage();
   static std::string getApp(bool appendBuildHash);
+  static std::string getHTMLAllInOneJavascriptCSS(
+    const std::string& virtualHTMLFileName, bool appendBuildHash
+  );
+  static std::string getCompareExpressions(bool appendBuildHash);
   static std::string getOnePageJS();
   static std::string getScoresInCoursePage();
   static std::string setProblemDeadline();

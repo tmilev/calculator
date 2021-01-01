@@ -237,7 +237,6 @@ const knownTypes = {
   numerator: new MathNodeType({
     "type": "numerator",
     "borderBottom": "1px solid black",
-    "padding": "1px",
     "fontSizeRatio": defaultFractionScale,
     "minHeightScale": defaultFractionScale,
     "arrows": {
@@ -3799,16 +3798,13 @@ class MathNode {
     let extraSpaceBetweenNumeratorAndDenominator = 3;
     this.boundingBox.fractionLineHeight = numerator.boundingBox.height + 2;
     this.boundingBox.height = numerator.boundingBox.height + denominator.boundingBox.height + extraSpaceBetweenNumeratorAndDenominator;
-    this.boundingBox.width = Math.max(numerator.boundingBox.width, denominator.boundingBox.width);
+    this.boundingBox.width = Math.max(numerator.boundingBox.width, denominator.boundingBox.width) + 4;
     this.boundingBox.needsMiddleAlignment = true;
     numerator.boundingBox.width = this.boundingBox.width;
     denominator.boundingBox.width = this.boundingBox.width;
     denominator.boundingBox.top = numerator.boundingBox.height + extraSpaceBetweenNumeratorAndDenominator;
     numerator.computeBoundingBoxLeftSingleChild();
     denominator.computeBoundingBoxLeftSingleChild();
-    this.boundingBox.width += 4;
-    numerator.boundingBox.left += 2;
-    denominator.boundingBox.left += 2;
   }
 
   computeDimensionsOperatorStandalone() {

@@ -38,6 +38,13 @@ var domElements = {
     },
     compareExpressions: {
       div: "divCompareExpressionsPage",
+      buttonCompare: "buttonCompareExpressions",
+      givenEquationEditor: "divGivenEquationEditor",
+      desiredEquationEditor: "divDesiredEquationEditor",
+      givenPanel: "divGivenPanel",
+      desiredPanel: "divDesiredPanel",
+      givenRawInput: "inputGivenRawInput",
+      desiredRawInput: "inputDesiredRawInput",
     },
   },
   applicationIdentifiers: {

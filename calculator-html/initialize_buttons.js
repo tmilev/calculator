@@ -501,7 +501,12 @@ class InputPanelData {
       return;
     }
     let currentMQspan = document.getElementById(this.idEquationEditorElement);
+    let latexInput = null;
+    if (!this.flagCalculatorPanel && !this.flagAnswerPanel) {
+      latexInput = document.getElementById(this.idPureLatex);
+    }
     this.equationEditor = new EquationEditor(currentMQspan, new EquationEditorOptions({
+      latexInput: latexInput,
       editHandler: (editor, node) => {
         this.editMQFunction(editor, node);
       },

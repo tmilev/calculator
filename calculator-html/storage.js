@@ -190,6 +190,18 @@ class StorageCalculator {
           }),
         },
       },
+      compare: {
+        given: new StorageVariable({
+          name: "given",
+          nameURL: "compareGivenExpression",
+          nameLocalStorage: "compareGivenExpression",
+        }),
+        desired: new StorageVariable({
+          name: "desired",
+          nameURL: "compareDesiredExpression",
+          nameLocalStorage: "compareDesiredExpression",
+        }),
+      },
       currentSectionComputed: new StorageVariable({
         name: "currentSectionComputed",
         nameLocalStorage: "currentSectionComputed"

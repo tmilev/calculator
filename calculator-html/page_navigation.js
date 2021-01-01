@@ -19,6 +19,7 @@ const mathTypeSet = require("./math_typeset");
 const themes = require("./themes");
 const solver = require("./solve");
 const solve = require("./solve");
+const compareExpressions = require("./compare_expressions").compareExpressions;
 const storage = require("./storage").storage;
 
 class User {
@@ -204,6 +205,7 @@ class Page {
       compareExpressions: {
         name: "compareExpressions",
         id: ids.domElements.pages.compareExpressions.div,
+        selectFunction: compareExpressions.selectPage.bind(compareExpressions),
       },
     };
     this.defaultPage = "calculator";

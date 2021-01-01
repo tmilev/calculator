@@ -36,6 +36,9 @@ const urlFields = {
     fileContent: "fileContent",
     calculatorExamplesJSON: "calculatorExamplesJSON",
     solveJSON: "solveJSON",
+    compareExpressions: "compareExpressions",
+    expressionGiven: "given",
+    expressionDesired: "desired",
   },
   result: {
     resultHtml: "resultHtml",
@@ -112,6 +115,23 @@ class Addresses {
     result += `${urlFields.request}=${urlFields.requests.solveJSON}&`;
     let encodedProblem = encodeURIComponent(problem);
     result += `${urlFields.requests.calculatorInput}=${encodedProblem}&`;
+    if (debug) {
+      result += `${urlFields.debugFlag}=true&`;
+    }
+    return result;
+  }
+  compareExpressions(
+    /**@type{string} */
+    given,
+    /**@type{string} */
+    desired,
+  ) {
+    let result = `${urls.calculatorAPI}?`;
+    result += `${urlFields.request}=${urlFields.requests.compareExpressions}&`;
+    let encodedGiven = encodeURIComponent(given);
+    let encodedDesired = encodeURIComponent(desired);
+    result += `${urlFields.requests.expressionLeft}=${encodedGiven}&`;
+    result += `${urlFields.requests.expressionRight}=${encodedDesired}&`;
     if (debug) {
       result += `${urlFields.debugFlag}=true&`;
     }

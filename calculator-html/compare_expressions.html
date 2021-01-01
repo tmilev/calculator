@@ -5,9 +5,40 @@
   <link type="text/css" rel="stylesheet" href="/calculator-html/calculator.css">
 </head>
 
-<body>
+<body onload="window.calculator.mainPage.selectPage('compareExpressions');">
   <div id="divCompareExpressions">
     <div id="divCompareExpressionsPage" class="divPage">
+      <table>
+        <tr>
+          <td style="text-align:center">
+            <div id="divGivenPanel" class="buttonPanel" style="margin:auto;"></div>
+          </td>
+          <td style="text-align:center">
+            <div id="divDesiredPanel"></div>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align:center">
+            <div id="divGivenEquationEditor"></div>
+          </td>
+          <td style="text-align:center">
+            <div id="divDesiredEquationEditor"></div>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align:center">Given raw:
+            <br>
+            <input type="text" id="inputGivenRawInput">
+          </td>
+          <td style="text-align:center">Desired raw:
+            <br>
+            <input type="text" id="inputDesiredRawInput">
+          </td>
+        </tr>
+      </table>
+      <button id="buttonCompareExpressions" class="buttonStandard">compare</button>
+
+      <div id="spanProgressReportGeneral" class="spanProgressReport"></div>
     </div>
   </div>
 </body>

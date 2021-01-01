@@ -45,6 +45,7 @@
   <script src="/html-common/ace/src-min/ext-language_tools.js" onerror="errorLoadingScript(this);"></script>
   <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
   <!-- the cpp builder auto-replaces the string /calculator-html/ with something along the lines of /calculator-html${hashOfCurrentBuildEnvironment}/-->
+  <script type="text/javascript" src="/calculator-html/browserifier.js"></script>
   <script type="text/javascript" src="/calculator-html/pathnames.js"></script>
   <script type="text/javascript" src="/calculator-html/server_information.js"></script>
   <script type="text/javascript" src="/calculator-html/ids_dom_elements.js"></script>
@@ -87,13 +88,12 @@
   <script type="text/javascript" src="/calculator-html/app.js"></script>
   <script type="text/javascript" src="/calculator-html/process_monitoring.js"></script>
   <script type="text/javascript" src="/calculator-html/external/build/output-min.js"></script>
-  <script note="This tag has special treatment, do not change please." type="text/javascript"
-    src="/calculator-html/browserifier.js"></script>
+
   <script src='https://www.google.com/recaptcha/api.js'></script>
   <title>Calculator</title>
 </head>
 
-<body onload="browserifyRunCalculatorMainPage();">
+<body>
   <div id="divOnePageApp">
     <div id="divLoginPage" class="divPage">
       <div class="centerHorizontallyInPageContainer">

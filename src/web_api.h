@@ -268,7 +268,6 @@ public:
   static const std::string getJavascriptLinkGraphicsNDimensionsWithPanels(
     const std::string& relativeTo
   );
-  static const std::string& getJavascriptBrowserifier();
 
   static std::string getJavascriptVariable(const std::string& theVar);
 

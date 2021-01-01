@@ -455,16 +455,7 @@ void BuilderApplication::buildHtmlJavascriptPage(bool appendBuildHash) {
   FileOperations::GetVirtualNameWithHash(WebAPI::request::calculatorHTML) :
   WebAPI::request::calculatorHTML;
 
-  const std::string& browserifierScript = HtmlRoutines::getJavascriptBrowserifier();
-  const std::string& browserifierTag =
-  "<script note = \"This tag has special treatment, do not change please.\" "
-  "type = \"text/javascript\" src = \"/calculator-html/browserifier.js\"></script>";
-
   for (std::string currentLine; std::getline(theReader, currentLine, '\n');) {
-    if (currentLine == browserifierTag) {
-      outSecondPart << browserifierScript << "\n";
-      continue;
-    }
     int startChar = static_cast<int>(currentLine.find(WebAPI::request::calculatorHTML));
     bool shouldShortCut = false;
     if (startChar == - 1) {
@@ -556,7 +547,8 @@ std::string WebAPIResponse::getOnePageJS(bool appendBuildHash) {
 std::string BuilderApplication::getOnePageJavascriptBrowserify() {
   MacroRegisterFunctionWithName("BuilderApplication::getOnePageJavascriptBrowserify");
   std::stringstream out;
-  out << "var theJSContent = {\n";
+  out << "(()=>{\n"
+  << "let theJSContent = {\n";
   for (int i = 0; i < this->jsFileContents.size; i ++) {
     std::string fileNameNoJS;
     if (!StringRoutines::stringEndsWith(this->jsFileNames[i], ".js", &fileNameNoJS)) {
@@ -566,7 +558,9 @@ std::string BuilderApplication::getOnePageJavascriptBrowserify() {
     out << this->jsFileContents[i];
     out << "\n},\n";
   }
-  out << "};\n";
+  out << "};\n"
+  << "theJSContent['/calculator-html/browserifier'](null, null, null);\n"
+  << "\n}) ();";
   return out.str();
 }
 

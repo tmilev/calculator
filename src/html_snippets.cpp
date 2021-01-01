@@ -57,7 +57,6 @@ void HtmlRoutines::loadStrings() {
     return;
   }
   HtmlRoutines::getJavascriptAceEditorScriptWithTags();
-  HtmlRoutines::getJavascriptBrowserifier();
 }
 
 const std::string HtmlRoutines::getJavascriptEquationEditorWithTags(
@@ -146,12 +145,7 @@ const std::string HtmlRoutines::getCSSLinkLieAlgebrasAndCalculator(const std::st
 const std::string HtmlRoutines::getJavascriptLinkGraphicsNDimensionsWithPanels(const std::string& relativeTo) {
   return
   HtmlRoutines::getJavascriptLink(relativeTo + "calculator-html/panels.js") +
-  HtmlRoutines::getJavascriptLink(relativeTo + "calculator-html/graphics_n_dimensions.js")
-  ;
-}
-
-const std::string& HtmlRoutines::getJavascriptBrowserifier() {
-  return HtmlRoutines::getJavascriptAddScriptTags("/calculator-html/browserifier.js");
+  HtmlRoutines::getJavascriptLink(relativeTo + "calculator-html/graphics_n_dimensions.js");
 }
 
 std::string HtmlRoutines::getCalculatorComputationURL(const std::string& inputNoEncoding) {

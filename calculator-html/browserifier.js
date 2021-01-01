@@ -1,10 +1,41 @@
 "use strict";
 class Browserifier {
-  constructor() {
-    this.allModules = {
+  constructor(
+    /**@type{string} */
+    runMode,
+    /**@type{string} */
+    idToRunIn,
+  ) {
+    document.onreadystatechange = () => {
+      if (document.readyState !== 'complete') {
+        return;
+      }
+      this.initialize(runMode, idToRunIn);
+    }
+  }
+
+  initialize(
+    /**@type{string} */
+    runMode,
+    /**@type{string} */
+    idToRunIn,
+  ) {
+    window.calculator = {
+      browserifier: this,
     };
+    this.allModules = {};
     this.sanitizedFileNameContents = {};
     this.calculatorHtmlBaseFolder = "/calculator-html/";
+    if (runMode === "runInId") {
+      this.browserifyRunInId(idToRunIn);
+      return;
+    }
+    if (runMode === "editInId") {
+      this.browserifyEditInId(idToRunIn);
+      return;
+    }
+    this.browserifyAndRun();
+
   }
 
   require(inputFileName) {
@@ -21,7 +52,6 @@ class Browserifier {
   }
 
   browserifyAndRun() {
-    createBrowserifier();
     let expectedStart = "/calculator-html/";
     for (let fileName in theJSContent) {
       let newFileName = "";
@@ -50,28 +80,4 @@ class Browserifier {
   }
 }
 
-function createBrowserifier() {
-  if (window.calculator !== undefined) {
-    return;
-  }
-  window.calculator = {
-    browserifier: new Browserifier(),
-  };
-}
-
-function browserifyRunCalculatorMainPage() {
-  createBrowserifier();
-  window.calculator.browserifier.browserifyAndRun();
-}
-
-function browserifyRunInId(input) {
-  createBrowserifier();
-  window.calculator.browserifier.browserifyRunInId(input);
-}
-
-function browserifyEditInId(input) {
-  createBrowserifier();
-  window.calculator.browserifier.browserifyEditInId(input);
-}
-
-createBrowserifier();
+new Browserifier("", "");

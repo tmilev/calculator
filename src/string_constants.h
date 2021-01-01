@@ -28,6 +28,7 @@ public:
     static std::string calculatorHTML;
     static std::string onePageJS;
     static std::string onePageJSWithHash;
+    static std::string calculatorCSS;
     static std::string userInfoJSON;
     static std::string editPage;
     static std::string debugFlag;

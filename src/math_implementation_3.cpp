@@ -2229,6 +2229,18 @@ std::string StringRoutines::replaceAll(
   return out.str();
 }
 
+bool StringRoutines::replaceOnce(
+  std::string& inputOutput, const std::string& subStringToReplace, const std::string& replaceWith
+) {
+
+  auto tagLocation = inputOutput.find(subStringToReplace);
+  if (tagLocation == std::string::npos) {
+    return false;
+  }
+  inputOutput.replace(tagLocation, subStringToReplace.size(), replaceWith);
+  return true;
+}
+
 void StringRoutines::splitStringInTwo(
   const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond
 ) {

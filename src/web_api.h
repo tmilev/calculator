@@ -13,13 +13,23 @@ public:
   std::string htmlRaw;
   std::string htmlJSbuild;
   List<std::string> currentWords;
-  // List<bool> charIsSplitting;
+  std::string buildFile;
   List<std::string> jsFileNames;
   List<std::string> jsFileContents;
 
+  std::string allInOneJavascriptTagOriginal;
+  std::string allInOneJavascriptTagDesired;
+  std::string calculatorCSSTagOriginal;
+  std::string calculatorCSSTagDesired;
+
+  void initializeTags(bool appendBuildHash);
   bool fileNameAllowedToBeMissing(const std::string& input);
   void buildHtmlJavascriptPage(bool appendBuildHash);
   std::string getOnePageJavascriptBrowserify();
+  bool loadJavascriptFileNames(
+    const std::string& buildFileNameVirtual,
+    std::stringstream* commentsOnFailure
+  );
 };
 
 class WebWorker;
@@ -121,7 +131,7 @@ class WebAPIResponse {
   static JSData getSelectCourseJSON();
   static std::string getScoresPage();
   static std::string getApp(bool appendBuildHash);
-  static std::string getOnePageJS(bool appendBuildHash);
+  static std::string getOnePageJS();
   static std::string getScoresInCoursePage();
   static std::string setProblemDeadline();
   static std::string setProblemWeight();

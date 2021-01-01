@@ -61,6 +61,12 @@ public:
     const std::string& subStringToReplace,
     const std::string& replaceWith
   );
+  // Returns true if an occurrence of the string was found, false otherwise.
+  static bool replaceOnce(
+    std::string& inputOutput,
+    const std::string& subStringToReplace,
+    const std::string& replaceWith
+  );
   static std::string stringShortenInsertDots(const std::string& inputString, int maxNumChars);
   static bool isASCIICharacterVisible(char input);
   class Differ {

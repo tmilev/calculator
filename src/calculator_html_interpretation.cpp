@@ -445,60 +445,47 @@ JSData WebAPIResponse::clonePageResult() {
   return result;
 }
 
+void BuilderApplication::initializeTags(bool appendBuildHash) {
+  this->allInOneJavascriptTagOriginal =
+  "<script type=\"text/javascript\" src=\"" + WebAPI::request::onePageJS + "\"></script>";
+  std::string virtualJavascriptFileName = WebAPI::request::onePageJS;
+  if (appendBuildHash) {
+    virtualJavascriptFileName = FileOperations::GetVirtualNameWithHash(WebAPI::request::onePageJS);
+  }
+  this->allInOneJavascriptTagDesired =
+  "<script src=\"" +
+  virtualJavascriptFileName +
+  "\" onerror = 'errorLoadingScript(this);'></script>\n";
+  this->calculatorCSSTagOriginal =
+  "<link type=\"text/css\" rel=\"stylesheet\" href=\"" + WebAPI::request::calculatorCSS + "\">";
+  std::string virtualCSSFileName = WebAPI::request::calculatorCSS;
+  if (appendBuildHash) {
+    virtualCSSFileName = FileOperations::GetVirtualNameWithHash(WebAPI::request::calculatorCSS);
+  }
+  this->calculatorCSSTagDesired =
+  "<link type=\"text/css\" rel=\"stylesheet\" href=\"" +
+  virtualCSSFileName +
+  "\" onerror = 'errorLoadingScript(this);'>";
+}
+
 void BuilderApplication::buildHtmlJavascriptPage(bool appendBuildHash) {
   MacroRegisterFunctionWithName("WebAPIReponse::buildHtmlJavascriptPage");
-  std::stringstream outFirstPart, outSecondPart;
-  std::stringstream theReader(this->htmlRaw);
-  theReader.seekg(0);
-  List<std::string> splitterStrings;
-  std::string virtualFolder = appendBuildHash ?
-  FileOperations::GetVirtualNameWithHash(WebAPI::request::calculatorHTML) :
-  WebAPI::request::calculatorHTML;
-
-  for (std::string currentLine; std::getline(theReader, currentLine, '\n');) {
-    int startChar = static_cast<int>(currentLine.find(WebAPI::request::calculatorHTML));
-    bool shouldShortCut = false;
-    if (startChar == - 1) {
-      shouldShortCut = true;
-    }
-    if (shouldShortCut) {
-      if (this->jsFileNames.size > 0) {
-        outSecondPart << currentLine << "\n";
-      } else {
-        outFirstPart << currentLine << "\n";
-      }
-      continue;
-    }
-    std::string firstPart, secondAndThirdPart, thirdPart, notUsed;
-    StringRoutines::splitStringInTwo(currentLine, startChar, firstPart, secondAndThirdPart);
-    StringRoutines::splitStringInTwo(
-      secondAndThirdPart,
-      static_cast<int>(WebAPI::request::calculatorHTML.size()),
-      notUsed,
-      thirdPart
-    );
-    if (
-      currentLine.find("<script") == std::string::npos ||
-      currentLine.find("/MathJax.js?") != std::string::npos
-    ) {
-      std::stringstream lineStream;
-      lineStream << firstPart << virtualFolder << thirdPart << "\n";
-      if (this->jsFileNames.size > 0) {
-        outSecondPart << lineStream.str();
-      } else {
-        outFirstPart << lineStream.str();
-      }
-    } else {
-      StringRoutines::stringSplitExcludeDelimiter(secondAndThirdPart, '"', splitterStrings);
-      this->jsFileNames.addOnTop(splitterStrings[0]);
-    }
+  this->initializeTags(appendBuildHash);
+  this->htmlJSbuild = this->htmlRaw;
+  if (!StringRoutines::replaceOnce(
+    this->htmlJSbuild, this->allInOneJavascriptTagOriginal, this->allInOneJavascriptTagDesired
+  )) {
+    global << Logger::red
+    << "Failed to find javascript_all_in_one.js tag in the html data."
+    << Logger::endL;
   }
-  std::string virtualOnePageJS = appendBuildHash ?
-  FileOperations::GetVirtualNameWithHash(WebAPI::request::onePageJS) :
-  WebAPI::request::onePageJS;
-  outFirstPart << "<script src=\"" << virtualOnePageJS << "\" onerror = 'errorLoadingScript(this);'></script>\n"
-  << outSecondPart.str();
-  this->htmlJSbuild = outFirstPart.str();
+  if (!StringRoutines::replaceOnce(
+    this->htmlJSbuild, this->calculatorCSSTagOriginal, this->calculatorCSSTagDesired
+  )) {
+    global << Logger::red
+    << "Failed to find javascript_all_in_one.js tag in the html data."
+    << Logger::endL;
+  }
 }
 
 bool BuilderApplication::fileNameAllowedToBeMissing(const std::string& input) {
@@ -508,40 +495,73 @@ bool BuilderApplication::fileNameAllowedToBeMissing(const std::string& input) {
   return  false;
 }
 
-std::string WebAPIResponse::getOnePageJS(bool appendBuildHash) {
+std::string WebAPIResponse::getOnePageJS() {
   MacroRegisterFunctionWithName("WebAPIReponse::getOnePageJS");
-  BuilderApplication theInterpretation;
-  std::stringstream out;
+  BuilderApplication builder;
   std::stringstream errorStream;
-  if (!FileOperations::loadFiletoStringVirtual(
-    "/calculator-html/index.html", theInterpretation.htmlRaw, false, &errorStream
-  )) {
-    out << "<html><body><b>Failed to load the application file. </b>"
-    << "Further comments follow. " << errorStream.str() << "</body></html>";
-    return out.str();
+  if (!builder.loadJavascriptFileNames("/calculator-html/BUILD.json", &errorStream)) {
+    errorStream << "<b>Failed to load the BUILD.json list of javascript sources.</b>";
+    return errorStream.str();
   }
-  theInterpretation.buildHtmlJavascriptPage(appendBuildHash);
-  theInterpretation.jsFileContents.setSize(theInterpretation.jsFileNames.size);
-  for (int i = 0; i < theInterpretation.jsFileNames.size; i ++) {
+  builder.jsFileContents.setSize(builder.jsFileNames.size);
+  for (int i = 0; i < builder.jsFileNames.size; i ++) {
     if (!FileOperations::loadFiletoStringVirtual(
-      theInterpretation.jsFileNames[i],
-      theInterpretation.jsFileContents[i],
+      builder.jsFileNames[i],
+      builder.jsFileContents[i],
       false,
       &errorStream
     )) {
-      if (!theInterpretation.fileNameAllowedToBeMissing(theInterpretation.jsFileNames[i])) {
-        errorStream << "Failed to load javascript file: " << theInterpretation.jsFileNames[i];
+      if (!builder.fileNameAllowedToBeMissing(builder.jsFileNames[i])) {
+        errorStream << "Failed to load javascript file: " << builder.jsFileNames[i];
         return errorStream.str();
       }
       std::stringstream moduleNotFound;
       moduleNotFound << "console.log(\"File '"
-      << theInterpretation.jsFileNames[i] << "' not found. "
+      << builder.jsFileNames[i] << "' not found. "
       << "Failure to find that file has been "
       << "specifically white-listed as ok. \");";
-      theInterpretation.jsFileContents[i] = moduleNotFound.str();
+      builder.jsFileContents[i] = moduleNotFound.str();
     }
   }
-  return theInterpretation.getOnePageJavascriptBrowserify();
+  return builder.getOnePageJavascriptBrowserify();
+}
+
+bool BuilderApplication::loadJavascriptFileNames(
+  const std::string& buildFileNameVirtual,
+  std::stringstream* commentsOnFailure
+) {
+  if (!FileOperations::loadFiletoStringVirtual(
+    buildFileNameVirtual, this->buildFile, false, commentsOnFailure
+  )) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to load build file. ";
+    }
+    return false;
+  }
+  JSData reader;
+  if (!reader.readstring(this->buildFile, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to parse build json file. ";
+    }
+    return false;
+  }
+  if (reader.theType != JSData::token::tokenArray) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Build json not of type list. ";
+    }
+    return false;
+  }
+  for (int i = 0; i < reader.theList.size; i ++) {
+    const JSData& current = reader.theList[i];
+    if (current.theType != JSData::token::tokenString) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Found non-string source javascript file. ";
+      }
+      return false;
+    }
+    this->jsFileNames.addOnTop(current.theString);
+  }
+  return true;
 }
 
 std::string BuilderApplication::getOnePageJavascriptBrowserify() {

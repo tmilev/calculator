@@ -1,6 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
+#include "string_constants.h"
 
 bool Calculator::Test::all() {
   Calculator tester;
@@ -89,7 +90,7 @@ bool Calculator::Test::builtInFunctionsABTest(Calculator& ownerInitialized) {
     crashFile << "<html><link "
     << "type = 'text/css' "
     << "rel = 'stylesheet' "
-    << "href = '../calculator-html/styleCalculator.css'>"
+    << "href = '" << WebAPI::request::calculatorCSS << "'>"
     << "<body>" << test.reportHtml << "</body></html>";
 
     FileOperations::writeFileVirual("output/crash_test.html", crashFile.str(), &crashFileWriteReport);

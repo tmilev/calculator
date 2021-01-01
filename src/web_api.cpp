@@ -441,7 +441,7 @@ bool WebAPIResponse::processCalculatorOnePageJS(bool appendBuildHash) {
   } else {
     this->owner->setHeaderOKNoContentLength("", "text/javascript");
   }
-  this->owner->writeToBody(WebAPIResponse::getOnePageJS(appendBuildHash));
+  this->owner->writeToBody(WebAPIResponse::getOnePageJS());
   this->owner->sendPending();
   return true;
 }

@@ -62,6 +62,7 @@ std::string WebAPI::request::editPage                     = "editPageJSON"      
 std::string WebAPI::request::calculatorHTML               = "/calculator-html"                         ;
 std::string WebAPI::request::onePageJS                    = "/calculator-html/javascript_all_in_one.js";
 std::string WebAPI::request::onePageJSWithHash            = "/calculator-html/javascript_all_in_one.js";
+std::string WebAPI::request::calculatorCSS                = "/calculator-html/calculator.css";
 std::string WebAPI::request::requestAPI                   = "request"                     ;
 std::string WebAPI::request::currentPage                  = "currentPage"                 ;
 std::string WebAPI::request::calculatorPage               = "calculator"                  ;

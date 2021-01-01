@@ -138,7 +138,7 @@ const std::string& HtmlRoutines::getCSSAddStyleTags(const std::string& fileNameV
 
 const std::string HtmlRoutines::getCSSLinkLieAlgebrasAndCalculator(const std::string& relativeTo) {
   return
-  HtmlRoutines::getCSSLink(relativeTo + "calculator-html/styleCalculator.css") +
+  HtmlRoutines::getCSSLink(relativeTo + WebAPI::request::calculatorCSS.substr(1)) +
   HtmlRoutines::getCSSLink(relativeTo + "calculator-html/style_lie_algebras.css") ;
 }
 

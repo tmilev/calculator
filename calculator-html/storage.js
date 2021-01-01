@@ -109,7 +109,10 @@ class StorageVariable {
       return;
     }
     if (this.associatedDOMId !== null && this.associatedDOMId !== undefined && this.associatedDOMId !== "") {
-      document.getElementById(this.associatedDOMId).value = this.value;
+      let element = document.getElementById(this.associatedDOMId);
+      if (element !== null) {
+        element.value = this.value;
+      }
     }
     if (this.callbackSetValueFromStorage !== null) {
       this.callbackSetValueFromStorage(this.value);
@@ -118,9 +121,9 @@ class StorageVariable {
 
   setAndStore(
     newValue,
-    /**@type {Boolean} */
+    /**@type {boolean} */
     updateURL,
-    /**@type {Boolean} */
+    /**@type {boolean} */
     updateAssociatedInput,
   ) {
     if (updateURL === undefined) {
@@ -135,7 +138,7 @@ class StorageVariable {
     if (this.callbackOnValueChange === null || this.callbackOnValueChange === undefined) {
       return;
     }
-    //calling function with timeout ensures the current function sequence is finished first.
+    // Calling function with timeout ensures the current function sequence is finished first.
     setTimeout(() => {
       this.callbackOnValueChange(this.value);
     }, 0);

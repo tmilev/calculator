@@ -113,6 +113,9 @@ class Solver {
     /**@type{string} */
     input,
   ) {
+    if (document.getElementById(ids.domElements.pages.solve.div) === null) {
+      return;
+    }
     let debug = storage.variables.flagDebug.isTrue();
     submit.submitGET({
       url: pathnames.addresses.solveJSON(input, debug),

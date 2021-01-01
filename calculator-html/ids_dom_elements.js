@@ -36,6 +36,16 @@ var domElements = {
       },
       progress: "calculatorInputProgress",
     },
+    compareExpressions: {
+      div: "divCompareExpressionsPage",
+    },
+  },
+  applicationIdentifiers: {
+    default: "divDefaultApplication",
+    compareExpressions: "divCompareExpressions",
+  },
+  compareExpressions: {
+    mainPage: "divCompareExpressionsMainPage",
   },
   themeRadioButtons: {
     radioThemeExperimental: "radioThemeExperimental",

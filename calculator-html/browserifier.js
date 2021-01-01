@@ -35,7 +35,6 @@ class Browserifier {
       return;
     }
     this.browserifyAndRun();
-
   }
 
   require(inputFileName) {

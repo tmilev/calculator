@@ -201,7 +201,15 @@ class Page {
         container: null,
         selectFunction: accountManagement.updateAccountsPage,
       },
+      compareExpressions: {
+        name: "compareExpressions",
+        id: ids.domElements.pages.compareExpressions.div,
+      },
     };
+    this.defaultPage = "calculator";
+    if (document.getElementById(ids.domElements.applicationIdentifiers.compareExpressions)) {
+      this.defaultPage = "compareExpressions";
+    }
     this.storage = storage;
     this.initializeStorageCallbacks();
     this.scriptInjector = new AllScripts();
@@ -243,7 +251,11 @@ class Page {
   }
 
   initBuildVersion() {
-    document.getElementById(ids.domElements.calculatorBuildVersion).innerHTML = `Build version ${serverInformation.serverInformation.version}`;
+    let buildVersion = document.getElementById(ids.domElements.calculatorBuildVersion);
+    if (buildVersion === null) {
+      return;
+    }
+    buildVersion.innerHTML = `Build version ${serverInformation.serverInformation.version}`;
   }
 
   serverIsOnLocalHost() {
@@ -258,13 +270,22 @@ class Page {
   }
 
   initMenuBar() {
-    for (let page in this.pages) {
-      this.pages[page].container = document.getElementById(this.pages[page].id);
-      if (this.pages[page].menuButtonId !== null && this.pages[page].menuButtonId !== undefined) {
-        let currentButton = document.getElementById(this.pages[page].menuButtonId);
-        currentButton.pageToSelect = page;
-        currentButton.addEventListener("click", this.selectPage.bind(this, page));
+    for (let label in this.pages) {
+      let page = this.pages[label];
+      page.container = document.getElementById(page.id);
+      if (page.menuButtonId === null || page.menuButtonId === undefined) {
+        continue;
       }
+      let currentButton = document.getElementById(page.menuButtonId);
+      if (currentButton === null) {
+        continue;
+      }
+      currentButton.pageToSelect = label;
+      currentButton.addEventListener(
+        "click", () => {
+          this.selectPage(label);
+        }
+      );
     }
   }
 
@@ -300,6 +321,17 @@ class Page {
     this.initializeCalculatorPagePartTwo();
   }
 
+  /**@type {boolean} */
+  loginAttemptDesired() {
+    if (this.storage.variables.currentPage.getValue() === this.pages.activateAccount.name) {
+      return false;
+    }
+    if (document.getElementById(ids.domElements.applicationIdentifiers.compareExpressions) !== null) {
+      return false;
+    }
+    return true;
+  }
+
   initializeCalculatorPagePartOne() {
     cookies.setCookie("useJSON", true, 300, false);
     this.initMenuBar();
@@ -310,8 +342,7 @@ class Page {
     //Initialize global variables
     //////////////////////////////////////
     //////////////////////////////////////
-    this.theCourses = {
-    };
+    this.theCourses = {};
     this.logoutRequestFromUrl = null;
     this.locationRequestFromUrl = null;
     this.storage.loadSettings();
@@ -322,11 +353,15 @@ class Page {
     this.flagDoSubmitCalculatorComputation = true;
     // Select page on first load
     this.selectPage(this.storage.variables.currentPage.getValue());
-    if (this.storage.variables.currentPage.getValue() != this.pages.activateAccount.name) {
+    if (this.loginAttemptDesired()) {
       login.loginTry();
     }
-    document.getElementById("divOnePageApp").style.display = "";
-    document.getElementById("divOnePageApp").className = "divOnePageApp";
+    let appElement = document.getElementById(ids.domElements.applicationIdentifiers.default);
+    if (appElement === null) {
+      return;
+    }
+    appElement.style.display = "";
+    appElement.className = "divOnePageApp";
   }
 
   toStringProblem() {
@@ -357,6 +392,9 @@ class Page {
 
   onDebugValueChange() {
     let sliderDebug = document.getElementById(ids.domElements.sliderDebugFlag);
+    if (sliderDebug === null) {
+      return;
+    }
     let debugOn = this.storage.variables.flagDebug.isTrue();
     sliderDebug.checked = debugOn;
     let debugSpan = document.getElementById(ids.domElements.spanDebugFlagToggleReport);
@@ -389,7 +427,12 @@ class Page {
 
   onStudentViewChange() {
     let studentView = this.storage.variables.flagStudentView.isTrue();
-    document.getElementById(ids.domElements.sliderStudentView).checked = studentView;
+    let slider = document.getElementById(ids.domElements.sliderStudentView);
+    if (slider === null) {
+      return;
+    }
+    slider.checked = studentView;
+
     let spanView = document.getElementById(ids.domElements.spanStudentViewFlagToggleReport);
     let radioHTML = "";
     if (studentView) {
@@ -430,26 +473,43 @@ class Page {
     /** @type{string} */
     inputPage,
   ) {
-    if (this.pages[inputPage] === undefined) {
-      inputPage = "calculator";
+    if (!(inputPage in this.pages)) {
+      inputPage = this.defaultPage;
     }
     this.storage.variables.currentPage.setAndStore(inputPage);
-    if (!this.flagProblemPageOnly) {
-      for (let page in this.pages) {
-        this.pages[page].container.style.display = "none";
-        if (this.pages[page].menuButtonId !== null && this.pages[page].menuButtonId !== undefined) {
-          document.getElementById(this.pages[page].menuButtonId).classList.remove("buttonSelectPageSelected");
-        }
+    if (this.flagProblemPageOnly) {
+      this.selectPageFunction(inputPage);
+      return;
+    }
+    for (let label in this.pages) {
+      let page = this.pages[label];
+      if (page.container === null) {
+        continue;
       }
-      this.pages[inputPage].container.style.display = "";
-      if (this.pages[inputPage].menuButtonId !== null && this.pages[inputPage].menuButtonId !== undefined) {
-        document.getElementById(this.pages[inputPage].menuButtonId).classList.add("buttonSelectPageSelected");
+      page.container.style.display = "none";
+      if (page.menuButtonId !== null && page.menuButtonId !== undefined) {
+        document.getElementById(page.menuButtonId).classList.remove("buttonSelectPageSelected");
       }
     }
-    if (this.pages[inputPage].selectFunction !== null && this.pages[inputPage].selectFunction !== undefined) {
-      this.pages[inputPage].selectFunction();
+    let selectedPage = this.pages[inputPage];
+    if (selectedPage.container === null) {
+      return;
     }
-    //location.href = `#${this.getHash()}`;
+    selectedPage.container.style.display = "";
+    if (selectedPage.menuButtonId !== null && selectedPage.menuButtonId !== undefined) {
+      document.getElementById(selectedPage.menuButtonId).classList.add("buttonSelectPageSelected");
+    }
+    this.selectPageFunction(inputPage);
+  }
+
+  selectPageFunction(
+    /** @type{string} */
+    inputPage,
+  ) {
+    let selectedPage = this.pages[inputPage];
+    if (selectedPage.selectFunction !== null && selectedPage.selectFunction !== undefined) {
+      selectedPage.selectFunction();
+    }
   }
 
   getCurrentProblem() {
@@ -496,6 +556,9 @@ class Page {
       monitoring = "true";
     }
     let monitorResult = document.getElementById(ids.domElements.pages.calculator.monitoring.spanStatus);
+    if (monitorResult === null) {
+      return;
+    }
     if (monitoring === "true") {
       monitorResult.innerHTML = "Monitor <b style = 'color:red'>on</b>";
       document.getElementById(ids.domElements.switch.monitoring).checked = true;

@@ -1466,7 +1466,7 @@ void WebWorker::wrapUpConnection() {
   if (global.flagServerDetailedLog) {
     global << "Detail: released. " << Logger::endL;
   }
-  global.flagComputationCompletE = true;
+  global.flagComputationComplete = true;
   global.joinAllThreads();
 }
 
@@ -1952,7 +1952,7 @@ int WebWorker::serveClient() {
   MacroRegisterFunctionWithName("WebWorker::serveClient");
   global.millisecondsComputationStart = global.getElapsedMilliseconds();
   global.flagComputationStarted = true;
-  global.flagComputationCompletE = false;
+  global.flagComputationComplete = false;
   global.userDefault.flagMustLogin = true;
   global.userDefault.flagStopIfNoLogin = true;
   UserCalculatorData& theUser = global.userDefault;
@@ -2159,7 +2159,7 @@ void WebWorker::getIndicatorOnTimeout(
   output[WebAPI::result::timeOut] = true;
 
   timeOutComments << message;
-  if (global.theResponse.flagBanProcessMonitorinG) {
+  if (global.theResponse.flagBanProcessMonitoring) {
     timeOutComments
     << "Monitoring computations is not allowed on this server.<br> "
     << "Please note that monitoring computations "
@@ -4182,7 +4182,7 @@ extern int mainTest(List<std::string>& remainingArgs);
 
 void WebServer::turnProcessMonitoringOn() {
   MacroRegisterFunctionWithName("WebServer::turnProcessMonitoringOn");
-  global.theResponse.flagBanProcessMonitorinG = false;
+  global.theResponse.flagBanProcessMonitoring = false;
   global.configuration[Configuration::processMonitoringBanned] = false;
   global
   << Logger::yellow << "Process monitoring IS ON, reply in: " << Logger::green
@@ -4195,7 +4195,7 @@ void WebServer::turnProcessMonitoringOff() {
   << Logger::green << "************************" << Logger::endL
   << Logger::red << "Process monitoring is now off. " << Logger::endL
   << Logger::green << "************************" << Logger::endL;
-  global.theResponse.flagBanProcessMonitorinG = true;
+  global.theResponse.flagBanProcessMonitoring = true;
   global.millisecondsReplyAfterComputation = 0;
   global.configuration[Configuration::processMonitoringBanned] = true;
 }

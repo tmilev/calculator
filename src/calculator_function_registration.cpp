@@ -63,6 +63,10 @@ void Calculator::initPredefinedInnerFunctions() {
   Function::Options innerStandard;
   innerStandard.flagIsInner = true;
 
+  Function::Options innerFreezesArguments;
+  innerFreezesArguments.flagIsInner = true;
+  innerFreezesArguments.freezesArguments = true;
+
   Function::Options innerInvisible;
   innerInvisible.flagIsInner = true;
   innerInvisible.visible = false;
@@ -285,7 +289,7 @@ void Calculator::initPredefinedInnerFunctions() {
     ,
     "CalculatorConversions::innerIfFrozen",
     "if",
-    innerStandard
+    innerFreezesArguments
   );
   this->addOperationHandler(
     "and",
@@ -521,7 +525,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "LogEvaluationStepsDebug((x +2)(x +3))",
     "CalculatorFunctions::innerLogEvaluationStepsDebug",
     "LogEvaluationStepsDebug",
-    innerStandard
+    innerFreezesArguments
   );
   this->addOperationHandler(
     "LogEvaluationSteps",
@@ -532,7 +536,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "LogEvaluationSteps((x +2)(x +3))",
     "CalculatorFunctions::innerLogEvaluationSteps",
     "LogEvaluationSteps",
-    innerStandard
+    innerFreezesArguments
   );
   this->addOperationHandler(
     "PlotExpressionTreeFull",
@@ -2067,7 +2071,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "x_1\\partial_1",
     "Calculator::innerElementWeylAlgebra",
     "ElementWeylAlgebraDO",
-    innerStandard
+    innerFreezesArguments
   );
   this->addOperationHandler(
     "ElementWeylAlgebraPoly",
@@ -2080,7 +2084,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "\\partial_1 x_1",
     "Calculator::innerPolynomialWithEWA",
     "ElementWeylAlgebraPoly",
-    innerStandard
+    innerFreezesArguments
   );
   this->addOperationHandler(
     "MakeRationalFunction",
@@ -5017,11 +5021,21 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorEducationalFunctions::solveJSON,
     "",
     "Tries to interpret the input as a high-school or Calculus problem "
-    "and solve it. Freezes its inputs.",
+    "and solve it. Returns its result in JSON format. Freezes its inputs.",
     "SolveJSON(x^2+2x-3=0);\n",
-    "CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT",
+    "CalculatorFunctions::solveJSON",
     "SolveJSON",
-    innerStandard
+    innerFreezesArguments
+  );
+  this->addOperationHandler(
+    "CompareExpressionsJSON",
+    CalculatorEducationalFunctions::compareExpressionsJSON,
+    "",
+    "Compares two expressions and returns the result in JSON format. Freezes its inputs.",
+    "CompareExpressionsJSON((x+1)(x+2),x^2+3x+2);\n",
+    "CalculatorFunctions::CompareExpressionsJSON",
+    "CompareExpressionsJSON",
+    innerFreezesArguments
   );
   this->addOperationHandler(
     "FindOneSolutionSerreLikePolynomialSystem",
@@ -8746,16 +8760,14 @@ void Calculator::initializePredefinedWordSplits() {
   this->addTrigonometricSplit("csc", theVars);
 }
 
-void Calculator::initAtomsThatFreezeArguments() {
-  MacroRegisterFunctionWithName("Calculator::initAtomsThatFreezeArguments");
+void Calculator::initializeBuiltInsFreezeArguments() {
+  MacroRegisterFunctionWithName("Calculator::initializeBuiltInsFreezeArguments");
   this->atomsThatFreezeArguments.setExpectedSize(this->builtInTypes.size + 100);
   this->atomsThatFreezeArguments.addListOnTop(this->builtInTypes);
-  this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("ElementWeylAlgebraDO"); //<-needed to facilitate civilized context handling
-  this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("ElementWeylAlgebraPoly"); //<-needed to facilitate civilized context handling
+}
+
+void Calculator::initializeAtomsThatFreezeArguments() {
+  MacroRegisterFunctionWithName("Calculator::initializeAtomsThatFreezeArguments");
   this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("Freeze");
-  this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("if");
   this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("Bind");
-  this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("LogEvaluationSteps");
-  this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("LogEvaluationStepsDebug");
-  this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("SolveJSON");
 }

@@ -53,6 +53,8 @@ public:
     static std::string homeworkFromSource;
     static std::string solveRequest;
     static std::string compareExpressions;
+    static std::string compareExpressionsGiven;
+    static std::string compareExpressionsDesired;
     struct slides {
     public:
       static std::string source;

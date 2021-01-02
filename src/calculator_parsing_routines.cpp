@@ -323,12 +323,13 @@ void Calculator::initialize() {
 
   this->initializePredefinedStandardOperationsWithoutHandler();
   this->totalPatternMatchesPerformed = 0;
+  this->initializeBuiltInsFreezeArguments();
   this->initPredefinedStandardOperations();
   this->initPredefinedInnerFunctions();
   this->initCalculusTestingFunctions();
   this->initPredefinedOperationsComposite();
   this->initializeAtomsThatAllowCommutingOfArguments();
-  this->initAtomsThatFreezeArguments();
+  this->initializeAtomsThatFreezeArguments();
   this->initializeAtomsNotGoodForChainRule();
   this->initBuiltInAtomsNotInterpretedAsFunctions();
   this->initializeBuiltInAtomsWhosePowersAreInterpretedAsFunctions();

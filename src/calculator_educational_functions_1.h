@@ -16,9 +16,20 @@ public:
   JSData toJSON();
 };
 
+class CompareExpressions {
+public:
+  Expression given;
+  Expression desired;
+  Expression comparisonRaw;
+  Expression comparisonEvaluated;
+};
+
 class CalculatorEducationalFunctions{
 public:
   static bool solveJSON(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool compareExpressionsJSON(
     Calculator& calculator, const Expression& input, Expression& output
   );
 

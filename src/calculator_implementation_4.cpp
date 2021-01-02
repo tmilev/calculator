@@ -1294,40 +1294,43 @@ void Calculator::addOperationBinaryInnerHandlerWithTypes(
   this->registerCalculatorFunction(innerFunction, indexOperation);
 }
 
-void Calculator::registerCalculatorFunction(Function& theFun, int indexOp) {
+void Calculator::registerCalculatorFunction(Function& inputFunction, int indexOperation) {
   MacroRegisterFunctionWithName("Calculator::registerCalculatorFunction");
-  if (indexOp < 0 || indexOp >= this->operations.size()) {
-    global.fatal << "Invalid index operation: " << indexOp
+  if (indexOperation < 0 || indexOperation >= this->operations.size()) {
+    global.fatal << "Invalid index operation: " << indexOperation
     << ", there are: " << this->operations.size()
     << " operations total." << global.fatal;
   }
-  MemorySaving<Calculator::OperationHandlers>& handlerPointer = this->operations.values[indexOp];
+  MemorySaving<Calculator::OperationHandlers>& handlerPointer = this->operations.values[indexOperation];
   Calculator::OperationHandlers& handler = handlerPointer.getElement();
   handler.checkConsistency();
-  if (theFun.options.flagIsCompositeHandler) {
-    theFun.indexInOperationHandlers = handler.compositeHandlers.size;
-    handler.compositeHandlers.addOnTop(theFun);
+  if (inputFunction.options.flagIsCompositeHandler) {
+    inputFunction.indexInOperationHandlers = handler.compositeHandlers.size;
+    handler.compositeHandlers.addOnTop(inputFunction);
     if (handler.compositeHandlers.size <= 0) {
       global.fatal << "Composite handlers cannot be empty. " << global.fatal;
     }
   } else {
-    theFun.indexInOperationHandlers = handler.handlers.size;
-    handler.handlers.addOnTop(theFun);
+    inputFunction.indexInOperationHandlers = handler.handlers.size;
+    handler.handlers.addOnTop(inputFunction);
     if (handler.handlers.size <= 0) {
       global.fatal << "Handlers cannot be empty. " << global.fatal;
     }
   }
-  if (theFun.calculatorIdentifier == "") {
+  if (inputFunction.calculatorIdentifier == "") {
     return;
   }
   Calculator::NamedRuleLocation namedRule;
-  namedRule.containerOperation = this->operations.keys[indexOp];
-  namedRule.index = theFun.indexInOperationHandlers;
-  namedRule.isComposite = theFun.options.flagIsCompositeHandler;
+  namedRule.containerOperation = this->operations.keys[indexOperation];
+  namedRule.index = inputFunction.indexInOperationHandlers;
+  namedRule.isComposite = inputFunction.options.flagIsCompositeHandler;
   this->namedRules.setKeyValue(
-    theFun.calculatorIdentifier,
+    inputFunction.calculatorIdentifier,
     namedRule
   );
+  if (inputFunction.options.freezesArguments) {
+    this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew(namedRule.containerOperation);
+  }
 }
 
 void Calculator::addOperationHandler(
@@ -1378,6 +1381,7 @@ void Function::Options::reset() {
   this->disabledByUserDefault     = false;
   this->dontTestAutomatically     = false;
   this->adminOnly                 = false;
+  this->freezesArguments          = false;
 }
 
 Function::Options::Options() {

@@ -125,7 +125,7 @@ bool GlobalVariables::Response::isTimedOut() {
 }
 
 bool GlobalVariables::Response::monitoringAllowed() {
-  return !this->flagBanProcessMonitorinG && this->flagReportAllowed;
+  return !this->flagBanProcessMonitoring && this->flagReportAllowed;
 }
 
 bool GlobalVariables::Response::reportDesired(int type) {
@@ -142,7 +142,7 @@ void GlobalVariables::Response::disallowReport() {
 }
 
 GlobalVariables::Response::Response() {
-  this->flagBanProcessMonitorinG = false;
+  this->flagBanProcessMonitoring = false;
   this->flagReportDesired = true;
   this->flagTimedOut = false;
   this->flagReportAllowed = false;
@@ -162,7 +162,7 @@ GlobalVariables::GlobalVariables() {
   this->pointerExternalCommandStream = nullptr;
   this->pointerCallChDir = nullptr;
   this->flagServerforkedIntoWorker = false;
-  this->flagComputationCompletE = false;
+  this->flagComputationComplete = false;
   this->flagComputationFinishedAllOutputSentClosing = false;
   this->flagRunningConsoleTest = false;
   this->flagRunningConsoleRegular = false;

@@ -258,7 +258,7 @@ public:
   MemorySaving<FormatExpressions> theDefaultFormat;
   MemorySaving<FormatExpressions> thePolyFormat;
   //status flags:
-  bool flagComputationCompletE;
+  bool flagComputationComplete;
   bool flagComputationStarted;
   bool flagComputationFinishedAllOutputSentClosing;
   bool flagDeallocated;
@@ -268,7 +268,7 @@ public:
     bool flagReportAllowed;
   public:
     bool flagReportDesired;
-    bool flagBanProcessMonitorinG;
+    bool flagBanProcessMonitoring;
     class StateMaintainer {
     public:
       GlobalVariables::Response* owner;

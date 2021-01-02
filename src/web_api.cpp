@@ -171,6 +171,8 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     return this->processCompareExpressionsPage(true);
   } else if (global.requestType == WebAPI::compareExpressionsPageNoCache) {
     return this->processCompareExpressionsPage(false);
+  } else if (global.requestType == WebAPI::request::compareExpressions) {
+    return this->processCompareExpressions();
   } else if ("/" + global.requestType == WebAPI::request::onePageJS) {
     return this->processCalculatorOnePageJS(false);
   } else if ("/" + global.requestType == WebAPI::request::onePageJSWithHash) {
@@ -375,7 +377,7 @@ bool WebAPIResponse::processCompute() {
   result = theCalculator.toJSONOutputAndSpecials();
   result[WebAPI::result::commentsGlobal] = global.comments.getCurrentReset();
   global.theResponse.writeResponse(result, false);
-  global.flagComputationCompletE = true;
+  global.flagComputationComplete = true;
   return true;
 }
 
@@ -397,7 +399,35 @@ JSData WebAPIResponse::solveJSON() {
   result[WebAPI::result::solution] = solution;
   result[WebAPI::result::commentsGlobal] = global.comments.getCurrentReset();
   global.theResponse.writeResponse(result, false);
-  global.flagComputationCompletE = true;
+  global.flagComputationComplete = true;
+  result[WebAPI::result::error] = "not implemented yet.";
+  return result;
+}
+
+JSData WebAPIResponse::compareExpressions() {
+  MacroRegisterFunctionWithName("WebAPIResponse::compareExpressions");
+  this->initializeCalculatorComputation();
+  Calculator& calculator = global.calculator().getElement();
+  std::string given = HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput(WebAPI::request::compareExpressionsGiven),
+    false
+  );
+  std::string desired = HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput(WebAPI::request::compareExpressionsDesired),
+    false
+  );
+  calculator.inputString = "CompareExpressionsJSON{}(" + given + ", " + desired + ")";
+  global.initOutputReportAndCrashFileNames(
+    HtmlRoutines::convertStringToURLString(calculator.inputString, false),
+    calculator.inputString
+  );
+  global.theResponse.disallowReport();
+  JSData comparison = calculator.compareExpressions(given, desired);
+  JSData result;
+  result[WebAPI::result::resultHtml] = comparison;
+  result[WebAPI::result::commentsGlobal] = global.comments.getCurrentReset();
+  global.theResponse.writeResponse(result, false);
+  global.flagComputationComplete = true;
   result[WebAPI::result::error] = "not implemented yet.";
   return result;
 }
@@ -438,6 +468,15 @@ bool WebAPIResponse::processSolveJSON() {
   return global.theResponse.writeResponse(resultJSON);
 }
 
+bool WebAPIResponse::processCompareExpressions() {
+  MacroRegisterFunctionWithName("WebAPIResponse::processCompareExpressions");
+  this->owner->setHeaderOKNoContentLength("", "text/html");
+  JSData resultJSON = this->compareExpressions();
+  return global.theResponse.writeResponse(resultJSON);
+  return true;
+}
+
+
 bool WebAPIResponse::processCalculatorOnePageJS(bool appendBuildHash) {
   MacroRegisterFunctionWithName("WebAPIResponse::processCalculatorOnePageJS");
   if (appendBuildHash) {
@@ -459,7 +498,7 @@ bool WebAPIResponse::processApp(bool appendBuildHash) {
 }
 
 bool WebAPIResponse::processCompareExpressionsPage(bool appendBuildHash) {
-  MacroRegisterFunctionWithName("WebAPIResponse::processCompareExpressionsPAge");
+  MacroRegisterFunctionWithName("WebAPIResponse::processCompareExpressionsPage");
   this->owner->setHeaderOKNoContentLength("", "text/html");
   this->owner->writeToBody(WebAPIResponse::getCompareExpressionsPage(appendBuildHash));
   this->owner->sendPending();

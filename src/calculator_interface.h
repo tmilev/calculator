@@ -765,6 +765,7 @@ class Function {
     bool flagIsExperimental;
     bool disabledByUser;
     bool disabledByUserDefault;
+    bool freezesArguments;
     // The dontTestAutomatically
     // indicates that the function should not be auto-tested.
     // This functions that are not auto-tested include the following.
@@ -1125,7 +1126,7 @@ public:
 
   // Operations parametrize the expression elements.
   // Operations are the labels of the atom nodes of the expression tree.
-  MapReferences<std::string, MemorySaving<OperationHandlers>, MathRoutines::hashString> operations;
+  MapReferences<std::string, MemorySaving<OperationHandlers>, HashFunctions::hashFunction> operations;
 
   HashedList<std::string, MathRoutines::hashString> atomsThatAllowCommutingOfCompositesStartingWithThem;
   HashedList<std::string, MathRoutines::hashString> atomsNotAllowingChainRule;
@@ -1340,7 +1341,7 @@ public:
   }
   // Adds an expression to the global list of expressions that are children of another expression.
   int addChildExpression(const Expression& child);
-  void registerCalculatorFunction(Function& theFun, int indexOp);
+  void registerCalculatorFunction(Function& inputFunction, int indexOperation);
   std::string toStringSemismipleLieAlgebraLinksFromHD(
     const DynkinType& theType, FormatExpressions* theFormat = nullptr
   );
@@ -1351,7 +1352,7 @@ public:
   bool checkOperationHandlers();
   bool checkConsistencyAfterInitialization();
   // To make operations read only, we make operations private and return const pointer to it.
-  const HashedList<std::string, MathRoutines::hashString>& getOperations() {
+  const HashedList<std::string, HashFunctions::hashFunction>& getOperations() {
     return this->operations.keys;
   }
   const HashedList<std::string, MathRoutines::hashString>& getBuiltInTypes() {
@@ -2286,7 +2287,8 @@ public:
   void initialize();
   void initializeToStringHandlers();
   void initializePredefinedWordSplits();
-  void initAtomsThatFreezeArguments();
+  void initializeAtomsThatFreezeArguments();
+  void initializeBuiltInsFreezeArguments();
   void initializeAtomsNonCacheable();
   void initializeAtomsThatAllowCommutingOfArguments();
   void initializeStringsThatSplitIfFollowedByDigit();
@@ -2305,6 +2307,7 @@ public:
   bool extractExpressions(Expression& outputExpression, std::string* outputErrors);
   void evaluateCommands();
   JSData extractSolution();
+  JSData extractComparison();
   bool isTimedOut();
   static bool evaluateExpression(
     Calculator& calculator, const Expression& input, Expression& output
@@ -2376,12 +2379,14 @@ public:
   void evaluate(const std::string& input);
   // Attempts to interpret the input string as a high-school or calculus problem and solve it.
   JSData solve(const std::string& input);
+  // Compares two expressions.
+  JSData compareExpressions(const std::string& given, const std::string& desired);
   bool parseAndExtractExpressions(
     const std::string& input,
     Expression& output,
     List<SyntacticElement>& outputSynSoup,
     List<SyntacticElement>& outputSynStack,
-    std::string* outputSynErrors
+    std::string* outputSyntacticErrors
   );
   bool parse(
     const std::string& input,

@@ -68,7 +68,7 @@ bool TimeoutThread::HandleMaxComputationTime() {
   if (this->elapsedComputationTimeInMilliseconds <= global.millisecondsMaxComputation) {
     return false;
   }
-  if (global.flagComputationCompletE) {
+  if (global.flagComputationComplete) {
     return false;
   }
   if (!global.flagComputationStarted) {

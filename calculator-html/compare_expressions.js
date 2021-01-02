@@ -72,7 +72,7 @@ class CompareExpressions {
 
     storage.variables.compare.given.setAndStore(givenData);
     storage.variables.compare.desired.setAndStore(desiredData);
-    this.doCompare();
+    this.doCompare(givenData, desiredData);
   }
 
   doCompare(

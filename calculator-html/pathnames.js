@@ -120,6 +120,7 @@ class Addresses {
     }
     return result;
   }
+
   compareExpressions(
     /**@type{string} */
     given,
@@ -132,8 +133,8 @@ class Addresses {
     result += `${urlFields.request}=${urlFields.requests.compareExpressions}&`;
     let encodedGiven = encodeURIComponent(given);
     let encodedDesired = encodeURIComponent(desired);
-    result += `${urlFields.requests.expressionLeft}=${encodedGiven}&`;
-    result += `${urlFields.requests.expressionRight}=${encodedDesired}&`;
+    result += `${urlFields.requests.expressionGiven}=${encodedGiven}&`;
+    result += `${urlFields.requests.expressionDesired}=${encodedDesired}&`;
     if (debug) {
       result += `${urlFields.debugFlag}=true&`;
     }

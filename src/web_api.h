@@ -69,6 +69,7 @@ class WebAPIResponse {
   bool processScores();
   bool processApp(bool appendBuildHash);
   bool processCompareExpressionsPage(bool appendBuildHash);
+  bool processCompareExpressions();
   bool processCalculatorOnePageJS(bool appendBuildHash);
   bool processTopicListJSON();
   bool processSolveJSON();
@@ -116,6 +117,7 @@ class WebAPIResponse {
   );
   static JSData getTopicTableJSON();
   JSData solveJSON();
+  JSData compareExpressions();
 
   static JSData getAnswerOnGiveUp(
     const std::string& inputRandomSeed,

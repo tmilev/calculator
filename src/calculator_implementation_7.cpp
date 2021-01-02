@@ -7182,7 +7182,7 @@ bool CalculatorFunctions::innerTestIndicator(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTestIndicator");
-  if (global.theResponse.flagBanProcessMonitorinG) {
+  if (global.theResponse.flagBanProcessMonitoring) {
     std::stringstream out;
     out << "The server's admins have explicitly banned monitoring. ";
     return output.assignValue(out.str(), calculator);

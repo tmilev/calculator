@@ -89,28 +89,25 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
   progress.setAttribute("timeStarted", timeStarted);
   panelWithButton.setPanelLabel(`<b style = "color:orange">Sent</b>`)
 
-  var addressSpreadOut = address.split("&").join(" &");
-  addressSpreadOut = addressSpreadOut.split("=").join("= ");
-  addressSpreadOut = addressSpreadOut.split("?").join("? ");
   censoredAddressStarts = [
     pathnames.urlFields.newPassword,
     pathnames.urlFields.reenteredPassword,
     pathnames.urlFields.password,
   ];
   for (var i = 0; i < censoredAddressStarts.length; i++) {
-    var addressPassSplit = addressSpreadOut.split(censoredAddressStarts[i]);
+    var addressPassSplit = address.split(censoredAddressStarts[i]);
     if (addressPassSplit.length > 1) {
       var indexAmpersand = addressPassSplit[1].search("&");
       addressPassSplit[1] = addressPassSplit[1].substr(indexAmpersand);
       addressPassSplit[1] = "***" + addressPassSplit[1];
-      addressSpreadOut = addressPassSplit.join(censoredAddressStarts[i] + "=");
+      address = addressPassSplit.join(censoredAddressStarts[i] + "=");
     }
   }
   var content = "";
   if (!isPost) {
-    content += `<a href='${address}' target ='_blank' class = 'linkProgressReport'>${convertStringToHtml(addressSpreadOut)}</a>`;
+    content += `<a href='${address}' target ='_blank' class = 'linkProgressReport'>${convertStringToHtml(address)}</a>`;
   } else {
-    content += addressSpreadOut;
+    content += address;
   }
   if (window.calculator.mainPage.storage.variables.flagDebug.isTrue()) {
     content += `<br> <b>LaTeX link:</b> `;

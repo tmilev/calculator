@@ -1125,13 +1125,13 @@ bool Calculator::parseAndExtractExpressions(
   Expression& output,
   List<SyntacticElement>& outputSynSoup,
   List<SyntacticElement>& outputSynStack,
-  std::string* outputSynErrors
+  std::string* outputSyntacticErrors
 ) {
   MacroRegisterFunctionWithName("Calculator::parseAndExtractExpressions");
   this->currentSyntacticStack = &outputSynStack;
   this->currrentSyntacticSoup = &outputSynSoup;
   this->parseFillDictionary(input);
-  bool result = this->extractExpressions(output, outputSynErrors);
+  bool result = this->extractExpressions(output, outputSyntacticErrors);
   this->currentSyntacticStack = &this->syntacticStack;
   this->currrentSyntacticSoup = &this->syntacticSoup;
   return result;
@@ -1168,18 +1168,52 @@ void Calculator::evaluate(const std::string& input) {
 JSData Calculator::solve(const std::string& input) {
   MacroRegisterFunctionWithName("Calculator::solve");
   this->statistics.initialize();
-  this->inputString = input;
+  // this->inputString = input;
   Expression toBeSolved;
-  this->parseAndExtractExpressions(
+  if (!this->parseAndExtractExpressions(
     input,
     toBeSolved,
     this->syntacticSoup,
     this->syntacticStack,
     &this->syntaxErrors
-  );
+  )) {
+    return this->extractSolution();
+  }
   this->programExpression.makeOX(*this, this->opSolveJSON(), toBeSolved);
   this->evaluateCommands();
   return this->extractSolution();
+}
+
+JSData Calculator::compareExpressions(const std::string& given, const std::string& desired) {
+  MacroRegisterFunctionWithName("Calculator::solve");
+  this->statistics.initialize();
+  Expression givenExpression, desiredExpression;
+  if (!this->parseAndExtractExpressions(
+    given,
+    givenExpression,
+    this->syntacticSoup,
+    this->syntacticStack,
+    &this->syntaxErrors
+  )) {
+    return this->extractComparison();
+  }
+  if (!this->parseAndExtractExpressions(
+    desired,
+    desiredExpression,
+    this->syntacticSoup,
+    this->syntacticStack,
+    &this->syntaxErrors
+  )) {
+    return this->extractComparison();
+  }
+  this->programExpression.makeXOX(
+    *this,
+    this->getOperations().getIndexNoFail("CompareExpressionsJSON"),
+    givenExpression,
+    desiredExpression
+  );
+  this->evaluateCommands();
+  return this->extractComparison();
 }
 
 void Calculator::evaluateCommands() {

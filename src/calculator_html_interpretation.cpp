@@ -609,7 +609,7 @@ std::string WebAPIResponse::getApp(bool appendBuildHash) {
   return WebAPIResponse::getHTMLAllInOneJavascriptCSS("/calculator-html/index.html", appendBuildHash);
 }
 
-std::string WebAPIResponse::getCompareExpressions(bool appendBuildHash) {
+std::string WebAPIResponse::getCompareExpressionsPage(bool appendBuildHash) {
   return WebAPIResponse::getHTMLAllInOneJavascriptCSS("/calculator-html/compare_expressions.html", appendBuildHash);
 }
 

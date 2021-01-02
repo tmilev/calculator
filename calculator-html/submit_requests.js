@@ -4,7 +4,13 @@ const miscellaneous = require('./miscellaneous');
 const ids = require("./ids_dom_elements");
 const panels = require('./panels');
 
-function recordProgressDone(progress, timeFinished) {
+function recordProgressDone(
+  progress,
+  /**@type{number} */
+  timeFinished,
+  /**@type{boolean} */
+  dontCollapsePanel,
+) {
   if (progress === null || progress === undefined || progress === "") {
     return;
   }
@@ -13,9 +19,12 @@ function recordProgressDone(progress, timeFinished) {
   }
   var timeTotal = timeFinished - progress.getAttribute("timeStarted");
   var panelLabel = `<b style = 'color:green'>Received</b> ${timeTotal} ms`;
-  var panel = new panels.PanelExpandable(progress);
+  let panel = new panels.PanelExpandable(progress);
   panel.initialize(false);
   panel.setPanelLabel(panelLabel);
+  if (dontCollapsePanel) {
+    panel.doToggleContent();
+  }
 }
 
 function convertStringToHtml(input) {
@@ -161,18 +170,22 @@ function correctAddress(inputURL) {
  *   Pass null or undefined if you don't want to show the result.
  */
 function submitGET(
-  /** @type {{url: string, callback: Function, progress: string, result: string}}*/
-  inputObject
+  /** @type {{url: string, callback: Function, progress: string, result: string, dontCollapsePanel:boolean}}*/
+  inputObject,
 ) {
   let theAddress = correctAddress(inputObject.url);
   let progress = inputObject.progress;
   let result = inputObject.result;
   let callback = inputObject.callback;
+  let dontCollapsePanel = false;
+  if (inputObject.dontCollapsePanel === true) {
+    dontCollapsePanel = true;
+  }
   let xhr = new XMLHttpRequest();
   recordProgressStarted(progress, theAddress, false, (new Date()).getTime());
   xhr.open('GET', theAddress, true);
   xhr.setRequestHeader('Accept', 'text/html');
-  xhr.onload = responseStandard.bind(null, xhr, callback, result, progress);
+  xhr.onload = responseStandard.bind(null, xhr, callback, result, progress, dontCollapsePanel);
   xhr.send();
 }
 
@@ -185,8 +198,10 @@ function responseStandard(
   result,
   /**@type {String|HTMLElement} */
   progress,
+  /**@type{boolean} */
+  dontCollapsePanel,
 ) {
-  recordProgressDone(progress, (new Date()).getTime());
+  recordProgressDone(progress, (new Date()).getTime(), dontCollapsePanel);
   if (callback !== undefined && callback !== null) {
     callback(request.responseText, result);
   } else {

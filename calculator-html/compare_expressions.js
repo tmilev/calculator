@@ -1,10 +1,11 @@
 "use strict";
-const EquationEditorOptions = require("./equation_editor").EquationEditorOptions;
-const EquationEditor = require("./equation_editor").EquationEditor;
 const ids = require("./ids_dom_elements");
+const pathnames = require("./pathnames");
 const InputPanelData = require("./initialize_buttons").InputPanelData;
-const storage = require("./storage");
-
+const storage = require("./storage").storage;
+const miscellaneous = require("./miscellaneous");
+const equationEditor = require("./equation_editor");
+const submit = require("./submit_requests");
 
 class CompareExpressions {
   constructor() {
@@ -14,6 +15,8 @@ class CompareExpressions {
     this.givenPanel = null;
     /**@type{InputPanelData|null} */
     this.desiredPanel = null;
+    /**@type{HTMLElement} */
+    this.resultBox = document.getElementById(ids.domElements.pages.compareExpressions.result);
   }
 
   selectPage() {
@@ -51,12 +54,12 @@ class CompareExpressions {
     });
     this.desiredPanel.initialize();
 
-    if (storage.storage.variables.compare.given.getValue() !== "") {
-      this.givenPanel.equationEditor.writeLatex(storage.storage.variables.compare.given.getValue());
+    if (storage.variables.compare.given.getValue() !== "") {
+      this.givenPanel.equationEditor.writeLatex(storage.variables.compare.given.getValue());
       this.givenPanel.equationEditor.writeLatexToInput();
     }
-    if (storage.storage.variables.compare.desired.getValue() !== "") {
-      this.desiredPanel.equationEditor.writeLatex(storage.storage.variables.compare.desired.getValue());
+    if (storage.variables.compare.desired.getValue() !== "") {
+      this.desiredPanel.equationEditor.writeLatex(storage.variables.compare.desired.getValue());
       this.desiredPanel.equationEditor.writeLatexToInput();
     }
   }
@@ -67,12 +70,40 @@ class CompareExpressions {
     let desiredContainer = document.getElementById(ids.domElements.pages.compareExpressions.desiredRawInput);
     let desiredData = desiredContainer.value;
 
-    storage.storage.variables.compare.given.setAndStore(givenData);
-    storage.storage.variables.compare.desired.setAndStore(desiredData);
+    storage.variables.compare.given.setAndStore(givenData);
+    storage.variables.compare.desired.setAndStore(desiredData);
     this.doCompare();
   }
 
-  doCompare() { }
+  doCompare(
+    /**@type{string} */
+    givenData,
+    /**@type{string} */
+    desiredData,
+  ) {
+    let debug = storage.variables.flagDebug.isTrue();
+    submit.submitGET({
+      url: pathnames.addresses.compareExpressions(givenData, desiredData, debug),
+      callback: (input) => {
+        this.writeResult(input);
+      },
+      progress: ids.domElements.pages.compareExpressions.progress,
+      dontCollapsePanel: true,
+    });
+  }
+
+  writeResult(
+    /**@type{string} */
+    input,
+  ) {
+    try {
+      let comparison = miscellaneous.jsonUnescapeParse(input);
+      this.resultBox.textContent = `${comparison}`;
+      equationEditor.typeset(this.resultBox);
+    } catch (e) {
+      this.resultBox.innerHTML = `<b style='color:red'>${e}</b><br>${input}`;
+    }
+  }
 }
 
 const compareExpressions = new CompareExpressions();

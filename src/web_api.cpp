@@ -167,10 +167,10 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     return this->processApp(true);
   } else if (global.requestType == WebAPI::appNoCache) {
     return this->processApp(false);
-  } else if (global.requestType == WebAPI::compareExpressions) {
-    return this->processCompareExpressions(true);
-  } else if (global.requestType == WebAPI::compareExpressionsNoCache) {
-    return this->processCompareExpressions(false);
+  } else if (global.requestType == WebAPI::compareExpressionsPage) {
+    return this->processCompareExpressionsPage(true);
+  } else if (global.requestType == WebAPI::compareExpressionsPageNoCache) {
+    return this->processCompareExpressionsPage(false);
   } else if ("/" + global.requestType == WebAPI::request::onePageJS) {
     return this->processCalculatorOnePageJS(false);
   } else if ("/" + global.requestType == WebAPI::request::onePageJSWithHash) {
@@ -458,10 +458,10 @@ bool WebAPIResponse::processApp(bool appendBuildHash) {
   return true;
 }
 
-bool WebAPIResponse::processCompareExpressions(bool appendBuildHash) {
-  MacroRegisterFunctionWithName("WebAPIResponse::processCompareExpressions");
+bool WebAPIResponse::processCompareExpressionsPage(bool appendBuildHash) {
+  MacroRegisterFunctionWithName("WebAPIResponse::processCompareExpressionsPAge");
   this->owner->setHeaderOKNoContentLength("", "text/html");
-  this->owner->writeToBody(WebAPIResponse::getCompareExpressions(appendBuildHash));
+  this->owner->writeToBody(WebAPIResponse::getCompareExpressionsPage(appendBuildHash));
   this->owner->sendPending();
   return true;
 }

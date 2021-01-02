@@ -16,8 +16,8 @@ class WebAPI {
 public:
   static std::string appNoCache;
   static std::string app;
-  static std::string compareExpressions;
-  static std::string compareExpressionsNoCache;
+  static std::string compareExpressionsPage;
+  static std::string compareExpressionsPageNoCache;
   struct request {
     static std::string requestAPI;
     static std::string calculatorPage;
@@ -52,6 +52,7 @@ public:
     static std::string problemSolutionNoLogin;
     static std::string homeworkFromSource;
     static std::string solveRequest;
+    static std::string compareExpressions;
     struct slides {
     public:
       static std::string source;

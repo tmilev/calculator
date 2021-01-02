@@ -2,11 +2,10 @@
 
 std::string WebAPI::appNoCache = "appNoCache";
 std::string WebAPI::app = "app";
-std::string WebAPI::compareExpressions = "compareExpressions";
-std::string WebAPI::compareExpressionsNoCache = "compareExpressionsNoCache";
+std::string WebAPI::compareExpressionsPage = "compareExpressionsPage";
+std::string WebAPI::compareExpressionsPageNoCache = "compareExpressionsPageNoCache";
 
 std::string WebAPI::headerCacheControl = "Cache-Control: max-age=129600000, public";
-std::string WebAPI::request::solveRequest = "solveJSON";
 
 std::string WebAPI::commentsServer = "commentsServer";
 std::string WebAPI::userDefaultAdmin = "default";
@@ -106,6 +105,8 @@ std::string WebAPI::request::addUsers                     = "addUsers"          
 std::string WebAPI::request::addEmails                    = "addEmails"                   ;
 std::string WebAPI::request::userList                     = "userList"                    ;
 std::string WebAPI::request::passwordList                 = "passwordList"                ;
+std::string WebAPI::request::solveRequest                 = "solveJSON"                   ;
+std::string WebAPI::request::compareExpressions           = "compareExpressions"          ;
 
 std::string WebAPI::request::slides::source               = "slidesSource"                ;
 std::string WebAPI::request::slides::pdfFromSource        = "slidesFromSource"            ;

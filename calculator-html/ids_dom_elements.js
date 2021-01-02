@@ -45,6 +45,8 @@ var domElements = {
       desiredPanel: "divDesiredPanel",
       givenRawInput: "inputGivenRawInput",
       desiredRawInput: "inputDesiredRawInput",
+      result: "divCompareExpressionsResult",
+      progress: "progressReportCompareExpressions",
     },
   },
   applicationIdentifiers: {

@@ -4072,6 +4072,7 @@ void WebServer::initializeMainRequests() {
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::solveRequest);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::forgotLogin);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::compute);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::compareExpressions);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::calculatorPage);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::examplesJSON);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::indicator);
@@ -4092,8 +4093,9 @@ void WebServer::initializeMainRequests() {
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::selectCourseJSON);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::app);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::appNoCache);
-  this->requestsNotNeedingLogin.addOnTop(WebAPI::compareExpressions);
-  this->requestsNotNeedingLogin.addOnTop(WebAPI::compareExpressionsNoCache);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::compareExpressionsPage);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::compareExpressionsPageNoCache);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::compareExpressions);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::userInfoJSON);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::serverStatusJSON);
 }
@@ -4119,10 +4121,10 @@ void WebServer::initializeMainAddresses() {
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop("/" + WebAPI::appNoCache);
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(WebAPI::appNoCache);
 
-  this->addressStartsInterpretedAsCalculatorRequest.addOnTop("/" + WebAPI::compareExpressions);
-  this->addressStartsInterpretedAsCalculatorRequest.addOnTop(WebAPI::compareExpressions);
-  this->addressStartsInterpretedAsCalculatorRequest.addOnTop("/" + WebAPI::compareExpressionsNoCache);
-  this->addressStartsInterpretedAsCalculatorRequest.addOnTop(WebAPI::compareExpressionsNoCache);
+  this->addressStartsInterpretedAsCalculatorRequest.addOnTop("/" + WebAPI::compareExpressionsPage);
+  this->addressStartsInterpretedAsCalculatorRequest.addOnTop(WebAPI::compareExpressionsPage);
+  this->addressStartsInterpretedAsCalculatorRequest.addOnTop("/" + WebAPI::compareExpressionsPageNoCache);
+  this->addressStartsInterpretedAsCalculatorRequest.addOnTop(WebAPI::compareExpressionsPageNoCache);
 
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(WebAPI::request::onePageJS);
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(WebAPI::request::onePageJSWithHash);

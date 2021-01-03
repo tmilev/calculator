@@ -195,11 +195,13 @@ class StorageCalculator {
           name: "given",
           nameURL: "compareGivenExpression",
           nameLocalStorage: "compareGivenExpression",
+          showInURLOnPages: { "compareExpressions": true },
         }),
         desired: new StorageVariable({
           name: "desired",
           nameURL: "compareDesiredExpression",
           nameLocalStorage: "compareDesiredExpression",
+          showInURLOnPages: { "compareExpressions": true },
         }),
       },
       currentSectionComputed: new StorageVariable({

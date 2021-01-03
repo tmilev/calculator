@@ -4116,6 +4116,11 @@ void WebServer::initializeMainAddresses() {
   this->addressStartsNotNeedingLogin.addOnTop("/" + WebAPI::appNoCache);
   this->addressStartsNotNeedingLogin.addOnTop(WebAPI::request::onePageJS);
 
+  this->addressStartsNotNeedingLogin.addOnTop("/" + WebAPI::compareExpressionsPage);
+  this->addressStartsNotNeedingLogin.addOnTop(WebAPI::compareExpressionsPage);
+  this->addressStartsNotNeedingLogin.addOnTop("/" + WebAPI::compareExpressionsPageNoCache);
+  this->addressStartsNotNeedingLogin.addOnTop(WebAPI::compareExpressionsPageNoCache);
+
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop("/" + WebAPI::app);
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(WebAPI::app);
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop("/" + WebAPI::appNoCache);

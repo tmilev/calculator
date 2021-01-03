@@ -8,7 +8,7 @@ function recordProgressDone(
   progress,
   /**@type{number} */
   timeFinished,
-  /**@type{{dontCollapsePanel:boolean, width:number}} */
+  /**@type{{dontCollapsePanel:boolean, width:number}|null} */
   panelOptions,
 ) {
   if (progress === null || progress === undefined || progress === "") {
@@ -22,8 +22,10 @@ function recordProgressDone(
   let panel = new panels.PanelExpandable(progress);
   panel.initialize(false);
   panel.setPanelLabel(panelLabel);
-  if (panelOptions.dontCollapsePanel === true) {
-    panel.doToggleContent();
+  if (panelOptions !== null) {
+    if (panelOptions.dontCollapsePanel === true) {
+      panel.doToggleContent();
+    }
   }
 }
 

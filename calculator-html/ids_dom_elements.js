@@ -49,6 +49,10 @@ var domElements = {
       resultFormatted: "divCompareExpressionsResultFormatted",
       progress: "progressReportCompareExpressions",
     },
+    login: {
+      divLoginCalculatorPanel: "divLoginCalculatorPanel",
+      userNameReport: "divLoginPanelUsernameReport"
+    },
   },
   applicationIdentifiers: {
     default: "divDefaultApplication",

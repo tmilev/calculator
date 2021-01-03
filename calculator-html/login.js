@@ -4,10 +4,10 @@ const pathnames = require("./pathnames");
 const ids = require("./ids_dom_elements");
 
 function loginCalculator() {
-  var password = document.getElementById("inputPassword").value;
+  let password = document.getElementById("inputPassword").value;
   document.getElementById("inputPassword").value = "";
-  var username = document.getElementById("inputUsername").value;
-  var url = "";
+  let username = document.getElementById("inputUsername").value;
+  let url = "";
   url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.userInfoJSON}&`;
   url += `password=${password}&username=${username}&`;
   submitRequests.submitGET({
@@ -29,7 +29,7 @@ function reloadPage(reason, time) {
   if (time < 0) {
     time = 0;
   }
-  var timeRemaining = time / 1000;
+  let timeRemaining = time / 1000;
   document.getElementById("spanLoginStatus").innerHTML = `${reason} [in ${timeRemaining} (s)]`;
   if (time <= 0) {
     doReload();
@@ -40,7 +40,7 @@ function reloadPage(reason, time) {
 
 var oldUserRole;
 function logout() {
-  var thePage = window.calculator.mainPage;
+  let thePage = window.calculator.mainPage;
   thePage.storage.variables.user.name.setAndStore("");
   thePage.storage.variables.user.authenticationToken.setAndStore("");
   thePage.storage.variables.user.role.setAndStore("");
@@ -82,9 +82,9 @@ function loginTry() {
 }
 
 function toggleAccountPanels() {
-  var thePage = window.calculator.mainPage;
-  var accountPanels = document.getElementsByClassName("divAccountPanel");
-  for (var counterPanels = 0; counterPanels < accountPanels.length; counterPanels++) {
+  let thePage = window.calculator.mainPage;
+  let accountPanels = document.getElementsByClassName("divAccountPanel");
+  for (let counterPanels = 0; counterPanels < accountPanels.length; counterPanels++) {
     if (thePage.user.flagLoggedIn === true) {
       accountPanels[counterPanels].classList.remove("divInvisible");
       accountPanels[counterPanels].classList.add("divVisible");
@@ -96,11 +96,11 @@ function toggleAccountPanels() {
 }
 
 function setAdminPanels() {
-  var thePage = window.calculator.mainPage;
-  var adminPanels = document.getElementsByClassName("divAdminPanel");
-  var currentRole = thePage.user.getRole();
-  var studentView = thePage.studentView();
-  for (var counterPanels = 0; counterPanels < adminPanels.length; counterPanels++) {
+  let thePage = window.calculator.mainPage;
+  let adminPanels = document.getElementsByClassName("divAdminPanel");
+  let currentRole = thePage.user.getRole();
+  let studentView = thePage.studentView();
+  for (let counterPanels = 0; counterPanels < adminPanels.length; counterPanels++) {
     if (currentRole === "admin" && !studentView) {
       adminPanels[counterPanels].classList.remove("divInvisible");
       adminPanels[counterPanels].classList.add("divVisible");
@@ -109,7 +109,7 @@ function setAdminPanels() {
       adminPanels[counterPanels].classList.add("divInvisible");
     }
   }
-  var studentViewPanel = document.getElementById(ids.domElements.spanStudentViewPanel);
+  let studentViewPanel = document.getElementById(ids.domElements.spanStudentViewPanel);
   if (currentRole === "admin") {
     studentViewPanel.classList.remove("divInvisible")
     studentViewPanel.classList.add("divVisible");
@@ -127,15 +127,15 @@ function resetPagesNeedingReload() {
 
 function loginWithServerCallback(incomingString, result) {
   document.getElementById("spanLoginStatus").innerHTML = "";
-  var thePage = window.calculator.mainPage;
-  var success = false;
-  var loginErrorMessage = "";
-  var parsedAuthentication = JSON.parse(incomingString);
+  let thePage = window.calculator.mainPage;
+  let success = false;
+  let loginErrorMessage = "";
+  let parsedAuthentication = JSON.parse(incomingString);
   resetPagesNeedingReload();
   if (parsedAuthentication["status"] === "logged in") {
     success = true;
   }
-  var loginInfo = "";
+  let loginInfo = "";
   if (
     parsedAuthentication[pathnames.urlFields.requests.loginDisabledEveryoneIsAdmin] === "true" ||
     parsedAuthentication[pathnames.urlFields.requests.loginDisabledEveryoneIsAdmin] === true
@@ -159,10 +159,10 @@ function loginWithServerCallback(incomingString, result) {
     parsedAuthentication[pathnames.urlFields.requests.useFallbackDatabase] === "true" ||
     parsedAuthentication[pathnames.urlFields.requests.useFallbackDatabase] === true
   ) {
-    var databaseInfo = document.getElementById(ids.domElements.divLoginPanelDatabaseInfo);
+    let databaseInfo = document.getElementById(ids.domElements.divLoginPanelDatabaseInfo);
     databaseInfo.innerHTML = "<b style = 'color:red'>Fallback database.</b>";
   }
-  var loginExtraInfo = document.getElementById(ids.domElements.divLoginPanelExtraInfo);
+  let loginExtraInfo = document.getElementById(ids.domElements.divLoginPanelExtraInfo);
   loginExtraInfo.innerHTML = loginInfo;
   if (success) {
     thePage.user.makeFromUserInfo(parsedAuthentication);
@@ -190,14 +190,14 @@ function loginWithServerCallback(incomingString, result) {
 }
 
 function onGoogleSignIn(googleUser) {
-  var theToken = googleUser.getAuthResponse().id_token;
-  var thePage = window.calculator.mainPage;
+  let theToken = googleUser.getAuthResponse().id_token;
+  let thePage = window.calculator.mainPage;
   thePage.user.googleToken = theToken;
   thePage.storage.variables.user.name.setAndStore("");
   thePage.user.googleProfile = window.calculator.jwt.decode(theToken);
   thePage.showProfilePicture();
   showLogoutButton();
-  var theURL = "";
+  let theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.userInfoJSON}&`;
   theURL += `googleToken=${theToken}&`;
   submitRequests.submitGET({
@@ -211,7 +211,7 @@ function initGoogleLogin() {
   if (typeof (gapi) === "undefined") {
     return;
   }
-  var thePage = window.calculator.mainPage;
+  let thePage = window.calculator.mainPage;
   if (thePage.pages.login.initialized === true) {
     return;
   }
@@ -236,28 +236,28 @@ function initGoogleLogin() {
 }
 
 function showLoginCalculatorButtons() {
-  document.getElementById("divLoginCalculatorPanel").classList.remove("divInvisible");
-  document.getElementById("divLoginCalculatorPanel").classList.add("divVisible");
-  document.getElementById(ids.domElements.divLoginPanelUsernameReport).classList.remove("divVisible");
-  document.getElementById(ids.domElements.divLoginPanelUsernameReport).classList.add("divInvisible");
+  document.getElementById(ids.domElements.pages.login.divLoginCalculatorPanel).classList.remove("divInvisible");
+  document.getElementById(ids.domElements.pages.login.divLoginCalculatorPanel).classList.add("divVisible");
+  document.getElementById(ids.domElements.pages.login.userNameReport).classList.remove("divVisible");
+  document.getElementById(ids.domElements.pages.login.userNameReport).classList.add("divInvisible");
   document.getElementById(ids.domElements.divLoginPanelExtraInfo).classList.remove("divVisible");
   document.getElementById(ids.domElements.divLoginPanelExtraInfo).classList.add("divInvisible");
 }
 
 function hideLoginCalculatorButtons() {
-  var thePage = window.calculator.mainPage;
-  document.getElementById("divLoginCalculatorPanel").classList.remove("divVisible");
-  document.getElementById("divLoginCalculatorPanel").classList.add("divInvisible");
-  document.getElementById(ids.domElements.divLoginPanelUsernameReport).innerHTML = thePage.storage.variables.user.name.value;
-  document.getElementById(ids.domElements.divLoginPanelUsernameReport).classList.remove("divInvisible");
-  document.getElementById(ids.domElements.divLoginPanelUsernameReport).classList.add("divVisible");
+  let thePage = window.calculator.mainPage;
+  document.getElementById(ids.domElements.pages.login.divLoginCalculatorPanel).classList.remove("divVisible");
+  document.getElementById(ids.domElements.pages.login.divLoginCalculatorPanel).classList.add("divInvisible");
+  document.getElementById(ids.domElements.pages.login.userNameReport).innerHTML = thePage.storage.variables.user.name.value;
+  document.getElementById(ids.domElements.pages.login.userNameReport).classList.remove("divInvisible");
+  document.getElementById(ids.domElements.pages.login.userNameReport).classList.add("divVisible");
   document.getElementById(ids.domElements.divLoginPanelExtraInfo).classList.remove("divInvisible");
   document.getElementById(ids.domElements.divLoginPanelExtraInfo).classList.add("divVisible");
 }
 
 function showLogoutButton() {
   for (; ;) {
-    var theLogoutLinks = document.getElementsByClassName("linkLogoutInactive");
+    let theLogoutLinks = document.getElementsByClassName("linkLogoutInactive");
     if (theLogoutLinks.length === 0) {
       break;
     }
@@ -268,7 +268,7 @@ function showLogoutButton() {
 
 function hideLogoutButton() {
   for (; ;) {
-    var theLogoutLinks = document.getElementsByClassName("linkLogoutActive");
+    let theLogoutLinks = document.getElementsByClassName("linkLogoutActive");
     if (theLogoutLinks.length === 0) {
       break;
     }
@@ -278,7 +278,7 @@ function hideLogoutButton() {
 }
 
 function logoutGoogle() {
-  var thePage = window.calculator.mainPage;
+  let thePage = window.calculator.mainPage;
   thePage.storage.variables.user.googleToken.setAndStore("");
   thePage.user.googleProfile = {};
   if (gapi !== undefined && gapi !== null) {
@@ -287,10 +287,10 @@ function logoutGoogle() {
 }
 
 function getQueryVariable(variable) {
-  var query = window.location.search.substring(1);
-  var vars = query.split('&');
-  for (var i = 0; i < vars.length; i++) {
-    var pair = vars[i].split('=');
+  let query = window.location.search.substring(1);
+  let vars = query.split('&');
+  for (let i = 0; i < vars.length; i++) {
+    let pair = vars[i].split('=');
     if (decodeURIComponent(pair[0]) === variable) {
       return decodeURIComponent(pair[1]);
     }

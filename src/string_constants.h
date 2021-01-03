@@ -113,7 +113,7 @@ public:
       static std::string givenRaw;
       static std::string desiredRaw;
       static std::string areEqual;
-      static std::string areEqualBarDistribution;
+      static std::string areEqualAsAnswers;
     };
 
     static std::string solution;

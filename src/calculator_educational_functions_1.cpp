@@ -52,8 +52,8 @@ bool CalculatorEducationalFunctions::compareExpressionsJSON(
   substitution.setKeyValue("a", comparison.given);
   substitution.setKeyValue("b", comparison.desired);
   comparison.comparisonNoDistributionRaw.assignStringParsed(
-    "TurnOffRules(DistributeMultiplication);\n"
-    "a==b",
+    "(TurnOffRules(DistributeMultiplication, AddRationals);\n"
+    "a==b)_2",
     &substitution,
     calculator
   );
@@ -72,9 +72,9 @@ bool CalculatorEducationalFunctions::compareExpressionsJSON(
     result[WebAPI::result::ComparisonData::areEqual] = false;
   }
   if (comparison.comparisonNoDistributionEvaluated.toString() == "1") {
-    result[WebAPI::result::ComparisonData::areEqualBarDistribution] = true;
+    result[WebAPI::result::ComparisonData::areEqualAsAnswers] = true;
   } else {
-    result[WebAPI::result::ComparisonData::areEqualBarDistribution] = false;
+    result[WebAPI::result::ComparisonData::areEqualAsAnswers] = false;
   }
   return output.assignValue(result, calculator);
 }

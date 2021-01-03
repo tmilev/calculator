@@ -73,8 +73,8 @@ class CompareExpressions {
     let desiredContainer = document.getElementById(ids.domElements.pages.compareExpressions.desiredRawInput);
     let desiredData = desiredContainer.value;
 
-    storage.variables.compare.given.setAndStore(givenData);
-    storage.variables.compare.desired.setAndStore(desiredData);
+    storage.variables.compare.given.setAndStore(givenData, true);
+    storage.variables.compare.desired.setAndStore(desiredData, true);
     this.doCompare(givenData, desiredData);
   }
 

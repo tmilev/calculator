@@ -91,7 +91,9 @@ class CompareExpressions {
         this.writeResult(input);
       },
       progress: ids.domElements.pages.compareExpressions.progress,
-      dontCollapsePanel: true,
+      panelOptions: {
+        dontCollapsePanel: true,
+      },
     });
   }
 

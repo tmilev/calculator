@@ -565,7 +565,7 @@ private:
   // Instead, we can simply parse the expression from a string.
   // The inputExpressions give us the ability to specify substitutions
   bool assignStringParsed(
-    const std::string& theString,
+    const std::string& input,
     MapList<std::string, Expression, MathRoutines::hashString>* substitutions,
     Calculator& owner
   );

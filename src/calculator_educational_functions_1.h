@@ -20,8 +20,10 @@ class CompareExpressions {
 public:
   Expression given;
   Expression desired;
-  Expression comparisonRaw;
-  Expression comparisonEvaluated;
+  Expression comparisonStandardRaw;
+  Expression comparisonStandardEvaluated;
+  Expression comparisonNoDistributionRaw;
+  Expression comparisonNoDistributionEvaluated;
 };
 
 class CalculatorEducationalFunctions{

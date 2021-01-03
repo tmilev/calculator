@@ -40,17 +40,42 @@ bool CalculatorEducationalFunctions::compareExpressionsJSON(
   CompareExpressions comparison;
   comparison.given = input[1];
   comparison.desired = input[2];
-  comparison.comparisonRaw.makeXOX(
+  comparison.comparisonStandardRaw.makeXOX(
     calculator, calculator.opEqualEqual(), comparison.given, comparison.desired
   );
-
   calculator.evaluateExpression(
     calculator,
-    comparison.comparisonRaw,
-    comparison.comparisonEvaluated
+    comparison.comparisonStandardRaw,
+    comparison.comparisonStandardEvaluated
   );
+  MapList<std::string, Expression, MathRoutines::hashString> substitution;
+  substitution.setKeyValue("a", comparison.given);
+  substitution.setKeyValue("b", comparison.desired);
+  comparison.comparisonNoDistributionRaw.assignStringParsed(
+    "TurnOffRules(DistributeMultiplication);\n"
+    "a==b",
+    &substitution,
+    calculator
+  );
+  calculator.evaluateExpression(
+    calculator,
+    comparison.comparisonNoDistributionRaw,
+    comparison.comparisonNoDistributionEvaluated
+  );
+
   JSData result;
-  result["comparison"] = comparison.comparisonEvaluated.toString();
+  result[WebAPI::result::ComparisonData::given] = comparison.given.toString();
+  result[WebAPI::result::ComparisonData::desired] = comparison.desired.toString();
+  if (comparison.comparisonStandardEvaluated.toString() == "1") {
+    result[WebAPI::result::ComparisonData::areEqual] = true;
+  } else {
+    result[WebAPI::result::ComparisonData::areEqual] = false;
+  }
+  if (comparison.comparisonNoDistributionEvaluated.toString() == "1") {
+    result[WebAPI::result::ComparisonData::areEqualBarDistribution] = true;
+  } else {
+    result[WebAPI::result::ComparisonData::areEqualBarDistribution] = false;
+  }
   return output.assignValue(result, calculator);
 }
 
@@ -74,8 +99,8 @@ JSData Calculator::extractSolution() {
 JSData Calculator::extractComparison(const std::string& given, const std::string& desired) {
   MacroRegisterFunctionWithName("Calculator::extractComparison");
   JSData result;
-  result["given"] = given;
-  result["desired"] = desired;
+  result[WebAPI::result::ComparisonData::givenRaw] = given;
+  result[WebAPI::result::ComparisonData::desiredRaw] = desired;
   if (this->syntaxErrors != "") {
     result[WebAPI::result::error] = this->toStringSyntacticStackHumanReadable(false, true);
     return result;
@@ -85,16 +110,16 @@ JSData Calculator::extractComparison(const std::string& given, const std::string
     result[WebAPI::result::error] = "Could not solve your problem. ";
     return result;
   } else {
-    result[WebAPI::result::solution] = comparisonJSON;
+    result[WebAPI::result::comparison] = comparisonJSON;
   }
   return result;
 }
 
 JSData ProblemWithSolution::toJSON() {
   JSData result;
-  result[WebAPI::result::solutionData::input] = this->toBeSolved.toString();
-  result[WebAPI::result::solutionData::steps] = this->solution;
-  result[WebAPI::result::solutionData::finalExpression] = this->finalExpression.toString();
+  result[WebAPI::result::SolutionData::input] = this->toBeSolved.toString();
+  result[WebAPI::result::SolutionData::steps] = this->solution;
+  result[WebAPI::result::SolutionData::finalExpression] = this->finalExpression.toString();
   result[WebAPI::result::error] = this->error;
   return result;
 }

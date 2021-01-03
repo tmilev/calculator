@@ -106,8 +106,18 @@ public:
     static std::string loginDisabledEveryoneIsAdmin;
     static std::string useFallbackDatabase;
     static std::string httpsSupport;
+    static std::string comparison;
+    struct ComparisonData {
+      static std::string given;
+      static std::string desired;
+      static std::string givenRaw;
+      static std::string desiredRaw;
+      static std::string areEqual;
+      static std::string areEqualBarDistribution;
+    };
+
     static std::string solution;
-    struct solutionData {
+    struct SolutionData {
       static std::string input;
       static std::string finalExpression;
       static std::string steps;

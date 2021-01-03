@@ -8,8 +8,8 @@ function recordProgressDone(
   progress,
   /**@type{number} */
   timeFinished,
-  /**@type{boolean} */
-  dontCollapsePanel,
+  /**@type{{dontCollapsePanel:boolean, width:number}} */
+  panelOptions,
 ) {
   if (progress === null || progress === undefined || progress === "") {
     return;
@@ -22,7 +22,7 @@ function recordProgressDone(
   let panel = new panels.PanelExpandable(progress);
   panel.initialize(false);
   panel.setPanelLabel(panelLabel);
-  if (dontCollapsePanel) {
+  if (panelOptions.dontCollapsePanel === true) {
     panel.doToggleContent();
   }
 }
@@ -167,22 +167,22 @@ function correctAddress(inputURL) {
  *   Pass null or undefined if you don't want to show the result.
  */
 function submitGET(
-  /** @type {{url: string, callback: Function, progress: string, result: string, dontCollapsePanel:boolean}}*/
+  /** @type {{url: string, callback: Function, progress: string, result: string, panelOptions:{dontCollapsePanel:boolean, width:number}}}*/
   inputObject,
 ) {
   let theAddress = correctAddress(inputObject.url);
   let progress = inputObject.progress;
   let result = inputObject.result;
   let callback = inputObject.callback;
-  let dontCollapsePanel = false;
-  if (inputObject.dontCollapsePanel === true) {
-    dontCollapsePanel = true;
+  let panelOptions = null;
+  if (inputObject.panelOptions !== undefined) {
+    panelOptions = inputObject.panelOptions;
   }
   let xhr = new XMLHttpRequest();
   recordProgressStarted(progress, theAddress, false, (new Date()).getTime());
   xhr.open('GET', theAddress, true);
   xhr.setRequestHeader('Accept', 'text/html');
-  xhr.onload = responseStandard.bind(null, xhr, callback, result, progress, dontCollapsePanel);
+  xhr.onload = responseStandard.bind(null, xhr, callback, result, progress, panelOptions);
   xhr.send();
 }
 
@@ -195,10 +195,10 @@ function responseStandard(
   result,
   /**@type {String|HTMLElement} */
   progress,
-  /**@type{boolean} */
-  dontCollapsePanel,
+  /**@type{{dontCollapsePanel:boolean, width:number}} */
+  panelOptions,
 ) {
-  recordProgressDone(progress, (new Date()).getTime(), dontCollapsePanel);
+  recordProgressDone(progress, (new Date()).getTime(), panelOptions);
   if (callback !== undefined && callback !== null) {
     callback(request.responseText, result);
   } else {
@@ -208,7 +208,7 @@ function responseStandard(
 
 function submitPOST(
   /** @type {{url: string, parameters: string, callback: Function, progress: string, result: string}}*/
-  inputObject
+  inputObject,
 ) {
   var theAddress = correctAddress(inputObject.url);
   var progress = inputObject.progress;

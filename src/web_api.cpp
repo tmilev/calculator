@@ -476,7 +476,6 @@ bool WebAPIResponse::processCompareExpressions() {
   return true;
 }
 
-
 bool WebAPIResponse::processCalculatorOnePageJS(bool appendBuildHash) {
   MacroRegisterFunctionWithName("WebAPIResponse::processCalculatorOnePageJS");
   if (appendBuildHash) {

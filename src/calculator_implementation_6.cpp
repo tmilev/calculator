@@ -2501,21 +2501,21 @@ bool CalculatorFunctions::innerNewtonsMethod(Calculator& calculator, const Expre
     << " iterations. However, the number of iterations is required to be a number between 1 and 50. ";
     return output.makeError(errorStream.str(), calculator);
   }
-  MapList<std::string, Expression, MathRoutines::hashString> theSub;
-  theSub.setKeyValue("x", theVars[0]);
-  theSub.setKeyValue("f", theFun);
-  theSub.setKeyValue("a", calculator.getNewAtom());
-  theSub.setKeyValue("iteratedMap", calculator.getNewAtom());
-  theSub.setKeyValue("NewtonMap", calculator.getNewAtom());
-  theSub.setKeyValue("y", calculator.getNewAtom());
-  theSub.setKeyValue("startingPoint", input[2]);
-  theSub.setKeyValue("numIterations", input[3]);
+  MapList<std::string, Expression, MathRoutines::hashString> substitution;
+  substitution.setKeyValue("x", theVars[0]);
+  substitution.setKeyValue("f", theFun);
+  substitution.setKeyValue("a", calculator.getNewAtom());
+  substitution.setKeyValue("iteratedMap", calculator.getNewAtom());
+  substitution.setKeyValue("NewtonMap", calculator.getNewAtom());
+  substitution.setKeyValue("y", calculator.getNewAtom());
+  substitution.setKeyValue("startingPoint", input[2]);
+  substitution.setKeyValue("numIterations", input[3]);
   return output.assignStringParsed(
     "(NewtonMap{}{{a}} = DoubleValue( (iteratedMap =x- f/ Differentiate{}(x, f); x ={{a}}; iteratedMap )_3); "
     "y_{0} = startingPoint;"
     "y_{{a}} = NewtonMap{}(y_{a- 1});"
     "y_{numIterations})_4",
-    &theSub,
+    &substitution,
     calculator
   );
 }

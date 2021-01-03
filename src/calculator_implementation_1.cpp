@@ -1189,13 +1189,17 @@ std::string Plot::getPlotStringAddLatexCommands(bool useHtml) {
 }
 
 bool Expression::assignStringParsed(
-  const std::string& theString, MapList<std::string, Expression, MathRoutines::hashString>* substitutions, Calculator& owner
+  const std::string& input,
+  MapList<std::string, Expression, MathRoutines::hashString>* substitutions,
+  Calculator& owner
 ) {
   MacroRegisterFunctionWithName("Expression::assignStringParsed");
   Expression commands, result;
   List<SyntacticElement> outputSyntacticSoup, outputSyntacticStack;
   std::string outputSyntacticErrors;
-  if (!owner.parseAndExtractExpressions(theString, commands, outputSyntacticSoup, outputSyntacticStack, &outputSyntacticErrors)) {
+  if (!owner.parseAndExtractExpressions(
+    input, commands, outputSyntacticSoup, outputSyntacticStack, &outputSyntacticErrors
+  )) {
     this->assignValue(outputSyntacticErrors, owner);
     return false;
   }

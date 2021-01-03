@@ -2,12 +2,12 @@
 const submitRequests = require("./submit_requests");
 const ids = require("./ids_dom_elements");
 const pathnames = require("./pathnames");
-const miscellaneous = require("./miscellaneous");
+const miscellaneous = require("./miscellaneous_frontend");
 
 function getAccountsTable(inputAccounts) {
   var result = "";
   result += "<table><tr><th>username</th><th>Email</th><th>Activated?</th><th>Course</th><th>Section</th><th>Semester</th></tr>";
-  for (var counterAccounts = 0; counterAccounts < inputAccounts.length; counterAccounts ++) {
+  for (var counterAccounts = 0; counterAccounts < inputAccounts.length; counterAccounts++) {
     result += "<tr>";
     var currentUser = inputAccounts[counterAccounts];
     //console.log("Current user: " + JSON.stringify(currentUser));
@@ -48,7 +48,7 @@ function updateAccountsPageCallback(input, notUsed) {
   var outputComponentStudents = document.getElementById("idOutputStudents");
   var parsedUserInfo = null;
   try {
-    parsedUserInfo =  miscellaneous.jsonUnescapeParse(input);
+    parsedUserInfo = miscellaneous.jsonUnescapeParse(input);
     var admins = parsedUserInfo["admins"];
     var students = parsedUserInfo["students"];
     if (parsedUserInfo.error !== undefined && parsedUserInfo.error !== "") {
@@ -99,7 +99,7 @@ function addEmailsOrUsers(
 }
 
 function getTeachersStudentsCallback(input, output) {
-  document.getElementById(output).innerHTML =  miscellaneous.jsonParseGetHtmlStandard(decodeURIComponent(input));
+  document.getElementById(output).innerHTML = miscellaneous.jsonParseGetHtmlStandard(decodeURIComponent(input));
 }
 
 function getTeachersStudents() {

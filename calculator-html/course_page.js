@@ -4,7 +4,7 @@ const pathnames = require("./pathnames");
 const ids = require("./ids_dom_elements");
 const problemPage = require("./problem_page");
 const typeset = require("./math_typeset");
-const miscellaneous = require("./miscellaneous");
+const miscellaneous = require("./miscellaneous_frontend");
 
 function modifyDeadlines(incomingId) {
   var thePage = window.calculator.mainPage;

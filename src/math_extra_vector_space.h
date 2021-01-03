@@ -15,7 +15,7 @@ class Basis {
   void addVector(const Vector<Coefficient>& v);
   void computeGramMatrix();
   Vector<Coefficient> putInBasis(const Vector<Coefficient>& input);
-  Matrix<Coefficient> putInBasis(const Matrix<Coefficient>& M);
+  Matrix<Coefficient> putInBasis(const Matrix<Coefficient>& input);
 };
 
 template <typename Coefficient>
@@ -100,17 +100,17 @@ Vector<Coefficient> Basis<Coefficient>::putInBasis(const Vector<Coefficient>& in
 }
 
 template <typename Coefficient>
-Matrix<Coefficient> Basis<Coefficient>::putInBasis(const Matrix<Coefficient>& in) {
+Matrix<Coefficient> Basis<Coefficient>::putInBasis(const Matrix<Coefficient>& input) {
   if (!haveGramMatrix) {
     computeGramMatrix();
   }
-  return gramMatrix * (basis * in);
+  return gramMatrix * (basis * input);
 }
 
 template <typename Coefficient>
 bool VectorSpace<Coefficient>::addVector(const Vector<Coefficient>& v) {
-  Vector<Coefficient> tmp = v;
-  return addVectorDestructively(tmp);
+  Vector<Coefficient> copy = v;
+  return addVectorDestructively(copy);
 }
 
 template <typename Coefficient>

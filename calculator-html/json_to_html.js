@@ -1,5 +1,5 @@
 "use srict";
-const miscellaneous = require('./miscellaneous');
+const miscellaneous = require("./miscellaneous_frontend");
 const modifiableDatabaseData = require('./modifiable_database_fields').modifiableDatabaseData;
 const panels = require('./panels');
 const BufferCalculator = require('./buffer').BufferCalculator;
@@ -16,12 +16,18 @@ var transformersStandard = {
   },
 };
 
-function writeJSONtoDOMComponent(inputJSON, theDomComponent) {
+function writeJSONtoDOMComponent(
+  /**@type{Object} */
+  inputObject,
+  /**@type{HTMLElement|string} */
+  theDomComponent,
+) {
   if (typeof theDomComponent === "string") {
     theDomComponent = document.getElementById(theDomComponent);
   }
   let transformer = new JSONToHTML();
-  theDomComponent.innerHTML = transformer.getTableFromObject(inputJSON, null, { forceRowLayout: true });
+  let copy = miscellaneous.deepCopy(inputObject);
+  theDomComponent.innerHTML = transformer.getTableFromObject(copy, null, { forceRowLayout: true });
 }
 
 var counterToggleButtons = 0;
@@ -269,6 +275,11 @@ class JSONToHTML {
     let result = [];
     for (let labelRow in input) {
       let currentInputItem = input[labelRow];
+      let typeOf = typeof currentInputItem;
+      if (typeOf !== "object") {
+        input[labelRow] = { "x": currentInputItem };
+        currentInputItem = input[labelRow];
+      }
       currentInputItem["_rowLabel"] = labelRow;
       result.push(currentInputItem);
     }

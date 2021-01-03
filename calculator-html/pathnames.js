@@ -37,8 +37,8 @@ const urlFields = {
     calculatorExamplesJSON: "calculatorExamplesJSON",
     solveJSON: "solveJSON",
     compareExpressions: "compareExpressions",
-    expressionGiven: "given",
-    expressionDesired: "desired",
+    expressionGiven: "compareExpressionsGiven",
+    expressionDesired: "compareExpressionsDesired",
   },
   result: {
     resultHtml: "resultHtml",

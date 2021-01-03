@@ -2307,7 +2307,7 @@ public:
   bool extractExpressions(Expression& outputExpression, std::string* outputErrors);
   void evaluateCommands();
   JSData extractSolution();
-  JSData extractComparison();
+  JSData extractComparison(const std::string& given, const std::string& desired);
   bool isTimedOut();
   static bool evaluateExpression(
     Calculator& calculator, const Expression& input, Expression& output

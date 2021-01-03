@@ -71,9 +71,11 @@ JSData Calculator::extractSolution() {
   return result;
 }
 
-JSData Calculator::extractComparison() {
+JSData Calculator::extractComparison(const std::string& given, const std::string& desired) {
   MacroRegisterFunctionWithName("Calculator::extractComparison");
   JSData result;
+  result["given"] = given;
+  result["desired"] = desired;
   if (this->syntaxErrors != "") {
     result[WebAPI::result::error] = this->toStringSyntacticStackHumanReadable(false, true);
     return result;

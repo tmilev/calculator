@@ -3,7 +3,7 @@ const submitRequests = require("./submit_requests");
 const pathnames = require("./pathnames");
 // const calculatorPage = require('./calculator_page');
 const ids = require("./ids_dom_elements");
-const miscellaneous = require("./miscellaneous");
+const miscellaneous = require("./miscellaneous_frontend");
 
 var staticWordCompleter = {
   getCompletions: function (editor, session, pos, prefix, callback) {

@@ -1776,8 +1776,7 @@ std::string Calculator::toString() {
       out << "<br>";
     }
   }
-  out2 <<
-    out.str();
+  out2 << out.str();
   return out2.str();
 }
 

@@ -3,7 +3,7 @@ const ids = require("./ids_dom_elements");
 const submitRequests = require("./submit_requests");
 const pathnames = require("./pathnames");
 const login = require('./login');
-const miscellaneous = require('./miscellaneous');
+const miscellaneous = require("./miscellaneous_frontend");
 
 function submitChangePassRequestCallback(result, outputComponent) {
   outputComponent = document.getElementById("spanVerification").innerHTML = miscellaneous.jsonParseGetHtmlStandard(result);

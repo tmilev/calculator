@@ -3,9 +3,10 @@ const ids = require("./ids_dom_elements");
 const pathnames = require("./pathnames");
 const InputPanelData = require("./initialize_buttons").InputPanelData;
 const storage = require("./storage").storage;
-const miscellaneous = require("./miscellaneous");
+const miscellaneous = require("./miscellaneous_frontend");
 const equationEditor = require("./equation_editor");
 const submit = require("./submit_requests");
+const jsonToHtml = require("./json_to_html");
 
 class CompareExpressions {
   constructor() {
@@ -16,7 +17,9 @@ class CompareExpressions {
     /**@type{InputPanelData|null} */
     this.desiredPanel = null;
     /**@type{HTMLElement} */
-    this.resultBox = document.getElementById(ids.domElements.pages.compareExpressions.result);
+    this.resultBoxRaw = document.getElementById(ids.domElements.pages.compareExpressions.resultRaw);
+    /**@type{HTMLElement} */
+    this.resultBoxFormatted = document.getElementById(ids.domElements.pages.compareExpressions.resultFormatted);
   }
 
   selectPage() {
@@ -97,11 +100,12 @@ class CompareExpressions {
     input,
   ) {
     try {
-      let comparison = miscellaneous.jsonUnescapeParse(input);
-      this.resultBox.textContent = `${comparison}`;
-      equationEditor.typeset(this.resultBox);
+      let result = miscellaneous.jsonUnescapeParse(input);
+      this.resultBoxRaw.textContent = JSON.stringify(result);
+      jsonToHtml.writeJSONtoDOMComponent(result, this.resultBoxFormatted);
+      equationEditor.typeset(this.resultBoxFormatted);
     } catch (e) {
-      this.resultBox.innerHTML = `<b style='color:red'>${e}</b><br>${input}`;
+      this.resultBoxRaw.innerHTML = `<b style='color:red'>${e}</b><br>${input}`;
     }
   }
 }

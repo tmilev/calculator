@@ -1195,7 +1195,7 @@ JSData Calculator::compareExpressions(const std::string& given, const std::strin
     this->syntacticStack,
     &this->syntaxErrors
   )) {
-    return this->extractComparison();
+    return this->extractComparison(given, desired);
   }
   if (!this->parseAndExtractExpressions(
     desired,
@@ -1204,7 +1204,7 @@ JSData Calculator::compareExpressions(const std::string& given, const std::strin
     this->syntacticStack,
     &this->syntaxErrors
   )) {
-    return this->extractComparison();
+    return this->extractComparison(given, desired);
   }
   this->programExpression.makeXOX(
     *this,
@@ -1213,7 +1213,7 @@ JSData Calculator::compareExpressions(const std::string& given, const std::strin
     desiredExpression
   );
   this->evaluateCommands();
-  return this->extractComparison();
+  return this->extractComparison(given, desired);
 }
 
 void Calculator::evaluateCommands() {

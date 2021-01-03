@@ -1,5 +1,5 @@
 "use strict";
-const miscellaneous = require('./miscellaneous');
+const miscellaneous = require("./miscellaneous_frontend");
 const styles = require('./styles');
 const jsonToHtml = require('./json_to_html');
 

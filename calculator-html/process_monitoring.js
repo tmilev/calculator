@@ -3,7 +3,7 @@ const pathnames = require("./pathnames");
 const submitRequests = require("./submit_requests");
 const ids = require("./ids_dom_elements");
 const BufferCalculator = require("./buffer").BufferCalculator;
-const miscellaneous = require("./miscellaneous");
+const miscellaneous = require("./miscellaneous_frontend");
 
 class Monitor {
   constructor() {

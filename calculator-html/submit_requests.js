@@ -1,6 +1,6 @@
 "use srict";
 const pathnames = require("./pathnames");
-const miscellaneous = require('./miscellaneous');
+const miscellaneous = require("./miscellaneous_frontend");
 const ids = require("./ids_dom_elements");
 const panels = require('./panels');
 

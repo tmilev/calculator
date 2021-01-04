@@ -98,7 +98,6 @@ void Calculator::initializeStandardFunctions() {
   innerNoTest.flagIsInner = true;
   innerNoTest.dontTestAutomatically = true;
 
-
   Function::Options innerExperimental;
   innerExperimental.flagIsInner = true;
   innerExperimental.flagIsExperimental = true;
@@ -111,8 +110,6 @@ void Calculator::initializeStandardFunctions() {
   innerAdminNoTest.flagIsInner = true;
   innerAdminNoTest.dontTestAutomatically = true;
   innerAdminNoTest.adminOnly = true;
-
-  Function::Options innerAdminNoTestExperimental = Function::Options::innerAdminNoTestExperimental();
 
   Function::Options innerAdminNoTestInvisibleOffByDefault;
   innerAdminNoTestInvisibleOffByDefault.flagIsInner = true;
@@ -2152,400 +2149,6 @@ void Calculator::initializeStandardFunctions() {
     innerStandard
   );
   this->addOperationHandler(
-    "PerturbSplittingNormal",
-    CalculatorFunctions::innerPerturbSplittingNormal,
-    "",
-    "Takes 3 arguments: normal, cone and general vectors. "
-    "Attempts to perturb the normal so that the cone stays on "
-    "one side of the normal and so that the general vectors "
-    "have as little zero scalar products with the normal as possible. ",
-    "PerturbSplittingNormal{}((0,0,0,0), ("
-    "(- 1, -2, -2, -2), (- 1, - 1, -2, -2), (0, - 1, -2, -2), "
-    "(- 1, - 1, - 1, - 1), (0, - 1, - 1, - 1),"
-    "(0, 0, - 1, - 1), (- 1, - 1, 0, 0), (0, - 1, 0, 0), "
-    "(- 1, 0, 0, 0), (1, 0, 0, 0), (0, 1, 0, 0), (1, 1, 0, 0),"
-    "(0, 0, 1, 1), (0, 1, 1, 1), (1, 1, 1, 1), "
-    "(0, 1, 2, 2), (1, 1, 2, 2), (1, 2, 2, 2)),"
-    "("
-    "(-2, -3, -4, -2), (- 1, -3, -4, -2), (- 1, -2, -4, -2), "
-    "(- 1, -2, -3, -2), (- 1, -2, -2, -2), (- 1, -2, -3, - 1),"
-    "(- 1, - 1, -2, -2), (- 1, -2, -2, - 1), (0, - 1, -2, -2), "
-    "(- 1, - 1, -2, - 1), (- 1, -2, -2, 0),"
-    "(0, - 1, -2, - 1), (- 1, - 1, - 1, - 1), (- 1, - 1, -2, 0), "
-    "(0, - 1, - 1, - 1), (0, - 1, -2, 0), (- 1, - 1, - 1, 0),"
-    "(0, 0, - 1, - 1), (0, - 1, - 1, 0), (- 1, - 1, 0, 0), "
-    "(0, 0, 0, - 1), (0, 0, - 1, 0), (0, - 1, 0, 0), (- 1, 0, 0, 0),"
-    "(1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1), "
-    "(1, 1, 0, 0), (0, 1, 1, 0), (0, 0, 1, 1), (1, 1, 1, 0),"
-    "(0, 1, 2, 0), (0, 1, 1, 1), (1, 1, 2, 0), (1, 1, 1, 1), "
-    "(0, 1, 2, 1), (1, 2, 2, 0), (1, 1, 2, 1), (0, 1, 2, 2), "
-    "(1, 2, 2, 1),"
-    "(1, 1, 2, 2), (1, 2, 3, 1), (1, 2, 2, 2), (1, 2, 3, 2), "
-    "(1, 2, 4, 2), (1, 3, 4, 2), (2, 3, 4, 2)))",
-    "Calculator::innerPerturbSplittingNormal",
-    "PerturbSplittingNormal",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "TestSpechtModules",
-    CalculatorFunctionsWeylGroup::testSpechtModules,
-    "",
-    "Tests all Specht modules of S_n, where n is the only argument taken by the function.",
-    "TestSpechtModules(4); ",
-    "CalculatorFunctionsWeylGroup::testSpechtModules",
-    "TestSpechtModules",
-    innerAdminNoTest
-  );
-  this->addOperationHandler(
-    "MakeElementWeylGroup",
-    CalculatorFunctionsWeylGroup::weylGroupElement,
-    "",
-    "Needs a group name and a list of generators",
-    "s_{{i}} = MakeElementWeylGroup{}(A_2, i);\n"
-    "(s_1 + s_2)(2s_1 + s_2)(3s_1 + s_2)",
-    "CalculatorFunctionsWeylGroup::weylGroupElement",
-    "MakeElementWeylGroup",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "MakeElementHyperOctahedral",
-    CalculatorConversions::innerMakeElementHyperOctahedral,
-    "",
-    "Needs a group name and a list of generators",
-    "s = MakeElementHyperOctahedral{}((1, 2), 1, 0, 0);\n"
-    "t = MakeElementHyperOctahedral{}((1, 3), 0, 0, 0);\n"
-    "s * t * s * t",
-    "CalculatorConversions::innerMakeElementHyperOctahedral",
-    "MakeElementHyperOctahedral",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "WeylGroupClassicalSignMultiplicities",
-    CalculatorFunctionsWeylGroup::signSignatureRootSubsystemsFromKostkaNumbers,
-    "",
-    "Prints the sign multiplicities of a simple Weyl group of classical type. "
-    "See a common article by "
-    "T. Folz-Donahue, S. Jackson, T. Milev, A. Noel. ",
-    "WeylGroupClassicalSignMultiplicities{}(b_3);\n"
-    "WeylGroupClassicalSignMultiplicities{}(b_4);\n"
-    "WeylGroupClassicalSignMultiplicities{}(b_5);\n"
-    "WeylGroupClassicalSignMultiplicities{}(d_4);\n"
-    "WeylGroupClassicalSignMultiplicities{}(d_5);\n"
-    "WeylGroupClassicalSignMultiplicities{}(d_6);\n"
-    "WeylGroupClassicalSignMultiplicities{}(a_2);\n"
-    "WeylGroupClassicalSignMultiplicities{}(a_3);\n"
-    "WeylGroupClassicalSignMultiplicities{}(a_4);\n",
-    "CalculatorFunctionsWeylGroup::signSignatureRootSubsystemsFromKostkaNumbers",
-    "WeylGroupClassicalSignMultiplicities",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "WeylGroupTauSignatures",
-    CalculatorFunctionsWeylGroup::signSignatureRootSubsystems,
-    "",
-    "Prints the tau signatures of a Weyl group. See a common article by "
-    "T. Folz-Donahue, S. Jackson, T. Milev, A. Noel. ",
-    "WeylGroupTauSignatures{}(b_3);",
-    "CalculatorFunctionsWeylGroup::signSignatureRootSubsystems",
-    "WeylGroupTauSignatures",
-    innerAdminNoTestExperimental
-  );
-  this->addOperationHandler(
-    "WeylGroupConjugacyClassesFromAllElements",
-    CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesFromAllElements,
-    "",
-    "For small ranks, computes the conjugacy classes of a Weyl "
-    "group by enumerating all elements of the group. ",
-    "WeylGroupConjugacyClassesFromAllElements{}(A_2);",
-    "CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesFromAllElements",
-    "WeylGroupConjugacyClassesFromAllElements",
-    innerAdminNoTestExperimental
-  );
-  this->addOperationHandler(
-    "WeylGroupOuterConjugacyClassesFromAllElements",
-    CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements,
-    "",
-    "Computes conjugacy classes, identifying classes that "
-    "are conjugate using outer automorphisms. ",
-    "WeylGroupOuterConjugacyClassesFromAllElements{}(D_4);",
-    "CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements",
-    "WeylGroupOuterConjugacyClassesFromAllElements",
-    innerAdminNoTestExperimental
-  );
-  this->addOperationHandler(
-    "WeylGroupConjugacyClassesRepresentatives",
-    CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesRepresentatives,
-    "",
-    "Computes a representative in each conjugacy classes of a "
-    "Weyl group by comparing conjugacy classes invariants and by "
-    "enumerating conjugacy class orbits. ",
-    "WeylGroupConjugacyClassesRepresentatives{}(A_2);",
-    "CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesRepresentatives",
-    "WeylGroupConjugacyClassesRepresentatives",
-    innerAdminNoTestExperimental
-  );
-  this->addOperationHandler(
-    "WeylGroupConjugacyClasses",
-    CalculatorFunctionsWeylGroup::weylGroupConjugacyClasseS,
-    "",
-    "Loads the conjugacy classes of a Weyl group (hard-coded), "
-    "or computes them if rank<=6. ",
-    "WeylGroupConjugacyClasses{}(f_4);",
-    "CalculatorFunctionsWeylGroup::weylGroupConjugacyClasseS",
-    "WeylGroupConjugacyClasses",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "WeylGroupCharTable",
-    CalculatorFunctionsWeylGroup::weylGroupLoadOrComputeCharTable,
-    "",
-    "Loads the character table of a Weyl group. "
-    "The character tables are hard-coded.",
-    "WeylGroupCharTable{}(b_3);",
-    "CalculatorFunctionsWeylGroup::weylGroupLoadOrComputeCharTable",
-    "WeylGroupCharTable",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "WeylGroupIrrepsAndCharTableComputeFromScratch",
-    CalculatorFunctionsWeylGroup::weylGroupIrrepsAndCharTableComputeFromScratch,
-    "",
-    "<b>Work in progress. Please do not use.</b> "
-    "Computes from scratch the irreducible representations "
-    "and the character table of a Weyl group.",
-    "WeylGroupIrrepsAndCharTableComputeFromScratch{}(b_3);",
-    "CalculatorFunctionsWeylGroup::weylGroupIrrepsAndCharTableComputeFromScratch",
-    "WeylGroupIrrepsAndCharTableComputeFromScratch",
-    innerAdminNoTestExperimental
-  );
-  this->addOperationHandler(
-    "WeylOrbitSize",
-    CalculatorFunctionsWeylGroup::weylGroupOrbitSize,
-    "",
-    "Computes the size of a Weyl group orbit of a weight",
-    "WeylOrbitSize(E_6, (3, 3, 3, 7, 7, 11));\n"
-    "WeylOrbitSize(E_8, (3, 3, 3, 7, 7, 11, 13, 13));",
-    "CalculatorFunctionsWeylGroup::weylGroupOrbitSize",
-    "WeylOrbitSize",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "WeylOrbitSimpleCoords",
-    CalculatorFunctionsWeylGroup::weylGroupOrbitSimple,
-    "",
-    "Generates a Weyl orbit printout from simple coords. "
-    "First argument = type. Second argument = weight in simple coords. "
-    "The orbit size is cut off at max 1920 elements (type D_5).",
-    "WeylOrbitSimpleCoords{}(B_2, (y, y));",
-    "CalculatorFunctionsWeylGroup::weylGroupOrbitSimple",
-    "WeylOrbitSimpleCoords",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "WeylGroupOrbitOuterSimple",
-    CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple,
-    "",
-    "Generates a Weyl outer orbit printout from simple coords. "
-    "The outer orbit is the orbit "
-    "under the Weyl group extended with the outer automoprhisms of the Weyl group. "
-    "First argument = type. Second argument = weight in simple coords. "
-    "The orbit size is cut off at 1921*2 elements. ",
-    "WeylGroupOrbitOuterSimple{}(D_4, (1, 0, 0, 0))",
-    "CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple",
-    "WeylGroupOrbitOuterSimple",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "WeylOrbitFundCoords",
-    CalculatorFunctionsWeylGroup::weylGroupOrbitFund,
-    "",
-    "Generates a Weyl orbit printout from fundamental coords. "
-    "First argument = type. Second argument = weight in fundamental coords. ",
-    "WeylOrbitFundCoords{}(B_2, (y, 0));",
-    "CalculatorFunctionsWeylGroup::weylGroupOrbitFund",
-    "WeylOrbitFundCoords",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "WeylOrbitFundRho",
-    CalculatorFunctionsWeylGroup::weylGroupOrbitFundRho,
-    "",
-    "Generates a Weyl orbit printout from fundamental coords. "
-    "First argument = type. Second argument = weight in fundamental coords. "
-    "Doing the rho-modified action. ",
-    "WeylOrbitFundRho{}(B_2, (y, 0) )",
-    "CalculatorFunctionsWeylGroup::weylGroupOrbitFundRho",
-    "WeylOrbitFundRho",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "WeylRaiseToMaximallyDominant",
-    CalculatorFunctionsWeylGroup::weylNoOuterRaiseToMaximallyDominant,
-    "",
-    "Raises a set of rational vectors simultaneously to maximally dominant: "
-    "it raises the first vector to dominant, then each consecutive vector is "
-    "raised as much as possible without changing the preceding, "
-    "alrady raised,  vectors. First argument = type. "
-    "Second argument = weight in simple coords. ",
-    "WeylRaiseToMaximallyDominant{}(F_4, (3, 6, 8, 4), (- 1, - 3, - 2, 0));\n"
-    "WeylRaiseToMaximallyDominant{}(F_4, (3, 6, 8, 4), (0, - 3, - 4, - 2));\n"
-    "WeylRaiseToMaximallyDominant{}(F_4, (0, - 3, - 4, - 2) , (3, 6, 8, 4));",
-    "CalculatorFunctionsWeylGroup::weylNoOuterRaiseToMaximallyDominant",
-    "WeylRaiseToMaximallyDominant",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "MakeWeight",
-    CalculatorFunctionsWeylGroup::lieAlgebraWeight,
-    "",
-    "Makes a weight. First argument = type. "
-    "Second argument = coordinate. "
-    "Third argument = one of the keywords epsilon, simple, "
-    "fundamental, standing for the coordinate system. ",
-    "\\varepsilon_{{a}}=MakeWeight{}(B_3, a, epsilon);\n"
-    "\\psi_{{a}}=MakeWeight{}(B_3, a, fundamental);\n"
-    "\\eta_{{a}}= MakeWeight{}(B_3, a, simple);\n"
-    "\\varepsilon_1;\n"
-    "\\psi_1;\n"
-    "\\eta_3",
-    "CalculatorFunctionsWeylGroup::lieAlgebraWeight",
-    "MakeWeight",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "MakeRho",
-    CalculatorFunctionsWeylGroup::lieAlgebraRhoWeight,
-    "",
-    "Makes the half-sum of the positive roots.",
-    "\\rho = MakeRho(B_3);",
-    "CalculatorFunctionsWeylGroup::lieAlgebraRhoWeight",
-    "MakeRho",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "IsOuterAuto",
-    CalculatorFunctionsWeylGroup::isOuterAutoWeylGroup,
-    "",
-    "Checks whether the element is outer automorphism of a root system. "
-    "First argument = type. "
-    "Second argument = matrix linear operator corresponding written in simple basis. ",
-    "A = MakeMatrix"
-    "((1, 0, 0, 0, 0, - 1),"
-    "(0, 0, 0, 0, 1, - 2),"
-    "(0, 0, 1, 0, 0, - 2),"
-    "(0, 0, 0, 1, 0, - 3),"
-    "(0, 1, 0, 0, 0, - 2),"
-    "(0, 0, 0, 0, 0, - 1));"
-    "IsOuterAuto{}(e_6, A);",
-    "CalculatorFunctionsWeylGroup::isOuterAutoWeylGroup",
-    "IsOuterAuto",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "WeylOuterRaiseToMaximallyDominant",
-    CalculatorFunctionsWeylGroup::weylOuterRaiseToMaximallyDominant,
-    "",
-    "Same as WeylRaiseToMaximallyDominant but uses outer Weyl group automorphisms as well.",
-    "WeylOuterRaiseToMaximallyDominant{}(D_4, (1, 0, 0, 0), (0, 0, 0, 1));\n"
-    "WeylOuterRaiseToMaximallyDominant{}(D_4, (0, 0, 0, 1), (1, 0, 0, 0));\n"
-    "WeylOuterRaiseToMaximallyDominant{}(D_4, (1, 0, 0, 0), (0, 0, 1, 0));\n"
-    "WeylOuterRaiseToMaximallyDominant{}(D_4, (0, 0, 1, 0), (1, 0, 0, 0));\n",
-    "CalculatorFunctionsWeylGroup::weylOuterRaiseToMaximallyDominant",
-    "WeylOuterRaiseToMaximallyDominant",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "GenerateFiniteMultiplicativelyClosedSet",
-    CalculatorFunctions::innerGenerateMultiplicativelyClosedSet,
-    "",
-    "The first argument gives upper_bound to the number of elements of the set. "
-    "Generates a finite multiplicatively closed set of at most upper_bound elements, "
-    "or returns error indicating the multiplicatively closed "
-    "set is larger than the upper bound.",
-    "s_1=MakeMatrix{}((- 1, 1, 0), (0, 1, 0), (0, 0, 1));\n"
-    "s_2=MakeMatrix{}((1, 0, 0), (1, - 1, 1), (0, 0, 1));\n"
-    "s_3=MakeMatrix{}((1, 0, 0), (0, 1, 0), (0, 2, - 1));\n"
-    "GenerateFiniteMultiplicativelyClosedSet{}(48, s_1, s_2, s_3);",
-    "Calculator::innerGenerateMultiplicativelyClosedSet",
-    "GenerateFiniteMultiplicativelyClosedSet",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "CartanSA",
-    CalculatorLieTheory::constructCartanSubalgebra,
-    "",
-    "Generates a Cartan subalgebra, code is still experimental.",
-    "g_{{i}} = GetChevalleyGenerator{}(b_3, i);\n"
-    "h_{{i}} = GetCartanGenerator{}(b_3, i);\n"
-    "CartanSA(g_1 + g_3, g_-1 + g_-3, g_2, g_-2);",
-    "CalculatorFunctions::constructCartanSubalgebra",
-    "CartanSA",
-    innerAdminNoTestExperimental
-  );
-  this->addOperationHandler(
-    "GenerateVectorSpaceClosedWithRespectToLieBracket",
-    CalculatorLieTheory::generateVectorSpaceClosedWithRespectToLieBracket,
-    "",
-    "Generates a vector space closed with respect to the Lie bracket "
-    "from input of type elements of Weyl algebra or Lie algebra. "
-    "The first argument of the input is an upper bound for the dimension of the vector space. "
-    "The remaining arguments must be differential operators. "
-    "The output is a vector space basis printout. "
-    "Fails if the dimension of the vector space is larger than the upper bound.",
-    "\\partial_{{i}} = ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
-    "x_{{i}} = ElementWeylAlgebraPoly{}(\\partial_i, x_i); "
-    "g_1 = (- x_{5} \\partial_{5}^{2} - x_{4} \\partial_{4} \\partial_{5}  - x_{3} \\partial_{3} \\partial_{5} "
-    "- x_{2} \\partial_{2} \\partial_{5} + x_{1} \\partial_{2} \\partial_{4} +x_{1} \\partial_{3}^{2});\n"
-    "g_- 1 = x_5;\n"
-    "g_2 = x_{5} \\partial_{4} - x_{2} \\partial_{1};\n"
-    "g_-2 = (x_{4} \\partial_{5} - x_{1} \\partial_{2});\n"
-    "g_3 = (2x_{4} \\partial_{3} - x_{3} \\partial_{2});\n"
-    "g_-3 = (x_{3} \\partial_{4} - 2x_{2} \\partial_{3});\n"
-    "GenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3, g_-3);\n"
-    "GenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_2, g_-2, g_3, g_-3);\n"
-    "GenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3);\n"
-    "q_{{i}} = GetChevalleyGenerator{}(F_4, i);\n"
-    "s_2 = - q_{- 5} - q_{-6};\n"
-    "s_1 = q_{20} + q_{19};\n"
-    "s_- 1 = - q_{- 19} - q_{- 20};\n"
-    "s_-2 = 2q_{6} + 2q_{5};\n"
-    "GenerateVectorSpaceClosedWithRespectToLieBracket(52, s_1, s_2, s_- 1, s_-2);",
-    "CalculatorFunctions::generateVectorSpaceClosedWithRespectToLieBracket",
-    "GenerateVectorSpaceClosedWithRespectToLieBracket",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "WeylGroupNaturalRep",
-    CalculatorFunctionsWeylGroup::weylGroupNaturalRep,
-    "",
-    "Gets the natural representation of the Weyl group.",
-    "WeylGroupNaturalRep{}(B_3)",
-    "CalculatorFunctionsWeylGroup::weylGroupNaturalRep",
-    "WeylGroupNaturalRep",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "WeylGroupGetOuterAutoGenerators",
-    CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint,
-    "",
-    "Gets the generators of the outer automorphism group (the group generated by "
-    "the graph automorphisms of the Dynkin diagram.",
-    "WeylGroupGetOuterAutoGenerators{}(2D_4)",
-    "CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint",
-    "WeylGroupGetOuterAutoGenerators",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "MakeVirtualWeylGroupRepresentation",
-    CalculatorFunctionsWeylGroup::makeVirtualWeylRep,
-    "",
-    "Convert a representation into virtual one.",
-    "MakeVirtualWeylGroupRepresentation{}(WeylGroupNaturalRep{}(B_3))",
-    "CalculatorFunctionsWeylGroup::makeVirtualWeylRep",
-    "MakeVirtualWeylGroupRepresentation",
-    innerAdminNoTestExperimental
-  );
-  this->addOperationHandler(
     "MinPolyMatrix",
     CalculatorFunctions::innerMinPolyMatrix,
     "",
@@ -4483,143 +4086,7 @@ void Calculator::initializeStandardFunctions() {
     "GroebnerGrLexUpperLimit",
     innerStandard
   );
-  this->addOperationHandler(
-    "ComputeFKFT",
-    CalculatorLieTheory::computePairingTablesAndFKFTsubalgebras,
-    "",
-    "Attempts to compute all Fernando-Kac subalgebras according "
-    "to the most experimental, latest and greatest algorithm. "
-    "Argument must be of type semisimple Lie subalgebras. ",
-    "ComputeFKFT( ComputeSemisimpleSubalgebras(c_3))",
-    "CalculatorFunctions::computePairingTablesAndFKFTsubalgebras",
-    "ComputeFKFT",
-    innerAdminNoTestExperimental
-  );
-  this->addOperationHandler(
-    "ComputeSemisimpleSubalgebras",
-    CalculatorLieTheory::computeSemisimpleSubalgebras,
-    "",
-    "Computes the semisimple subalgebras of a semisimple "
-    "Lie algebra and creates a data structure containing them. ",
-    "ComputeSemisimpleSubalgebras(A_2)",
-    "CalculatorFunctions::computeSemisimpleSubalgebras",
-    "ComputeSemisimpleSubalgebras",
-    innerInvisibleNoTest
-  );
-  this->addOperationHandler(
-    "CentralizerChains",
-    CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras,
-    "",
-    "This function is disabled by default (takes too long): you have to first call "
-    "TurnRulesOn(CentralizerChains). "
-    "Please use this function only if running the calculator on "
-    "your own machine; don't use it on a public server. "
-    "Creates a printout with centralizer chains of semisimple Lie subalgebras. ",
-    "CentralizerChains (ComputeSemisimpleSubalgebras{}(B_3))",
-    "CalculatorFunctions::getCentralizerChainsSemisimpleSubalgebras",
-    "CentralizerChains",
-    innerAdminNoTest
-  );
-  this->addOperationHandler(
-    "PrintSemisimpleSubalgebras",
-    CalculatorLieTheory::printSemisimpleSubalgebrasRegular,
-    "",
-    "<b>This function is being developed and is not implemented fully yet.</b> "
-    "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
-    "PrintSemisimpleSubalgebras(B_3)",
-    "Calculator::printSemisimpleSubalgebrasRegular",
-    "PrintSemisimpleSubalgebras",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "PrintSemisimpleSubalgebrasRecompute",
-    CalculatorLieTheory::printSemisimpleSubalgebrasRecompute,
-    "",
-    "<b>This function is being developed and is not implemented fully yet.</b> "
-    "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
-    "PrintSemisimpleSubalgebrasRecompute(C_3)",
-    "Calculator::printSemisimpleSubalgebrasRecompute",
-    "PrintSemisimpleSubalgebrasRecompute",
-    innerAdminNoTest
-  );
-  this->addOperationHandler(
-    "PrintSemisimpleSubalgebrasNoCentralizers",
-    CalculatorLieTheory::printSemisimpleSubalgebrasNoCentralizers,
-    "",
-    "<b>This function is being developed and is not implemented fully yet.</b> "
-    "Prints the semisimple subalgebra candidates of a Lie algebra. ",
-    "PrintSemisimpleSubalgebrasNoCentralizers(A_3)",
-    "Calculator::printSemisimpleSubalgebrasNoCentralizers",
-    "PrintSemisimpleSubalgebrasNoCentralizers",
-    innerAdminNoTest
-  );
-  this->addOperationHandler(
-    "PrintSemisimpleSubalgebrasFull",
-    CalculatorLieTheory::printSemisimpleSubalgebrasNilradicals,
-    "",
-    "<b>This function is being developed and is not implemented fully yet.</b>"
-    "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
-    "PrintSemisimpleSubalgebrasFull{}(A_2)",
-    "Calculator::printSemisimpleSubalgebrasNilradicals",
-    "PrintSemisimpleSubalgebrasFull",
-    innerAdminNoTest
-  );
-  this->addOperationHandler(
-    "CanBeExtendedParabolicallyTo",
-    CalculatorLieTheory::canBeExtendedParabolicallyTo,
-    "",
-    "Finds whether a Dynkin type extends via the standard parabolic extension to another. ",
-    "CanBeExtendedParabolicallyTo(A^3_1, A_5);"
-    "CanBeExtendedParabolicallyTo(a_2, b_3);"
-    "CanBeExtendedParabolicallyTo(g_2, b_3);"
-    "CanBeExtendedParabolicallyTo(d_5, e_6);"
-    "CanBeExtendedParabolicallyTo(b_3, a_10);"
-    "CanBeExtendedParabolicallyTo(c_2, c_10);"
-    "CanBeExtendedParabolicallyTo(b_3+e_6+a_3, d_4+e_8+f_4)",
-    "CalculatorFunctions::canBeExtendedParabolicallyTo",
-    "CanBeExtendedParabolicallyTo",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "EmbedSemisimpleInSemisimple",
-    CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra,
-    "",
-    "Tries to find all embeddings of the first semisimple type into the second. "
-    "Records all intermediate subalgebras. ",
-    "EmbedSemisimpleInSemisimple{}(G^3_2, B_3);"
-    "EmbedSemisimpleInSemisimple{}(G_2, B_3)",
-    "CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra",
-    "EmbedSemisimpleInSemisimple",
-    innerNoTest
-  );
-  this->addOperationHandler(
-    "LoadSemisimpleSubalgebras",
-    CalculatorConversions::innerLoadSemisimpleSubalgebras,
-    "",
-    "<b>This function is being developed and is not implemented fully yet.</b>"
-    "Loads a semisimpleSubalgebra from expression. ",
-    "LoadSemisimpleSubalgebras {}(EmbedSemisimpleInSemisimple{}(G_2, B_3))",
-    "CalculatorConversions::innerLoadSemisimpleSubalgebras",
-    "LoadSemisimpleSubalgebras",
-    innerAdminNoTest
-  );
-  this->addOperationHandler(
-    "SltwoSubalgebra",
-    CalculatorConversions::innerSlTwoSubalgebraPrecomputed,
-    "",
-    "<b>This function is being developed and is not implemented fully yet. </b>"
-    "Loads an sl(2) subalgebra from expression. ",
-    "SltwoSubalgebra(\n"
-    "B_{3},\n"
-    "3 GetChevalleyGenerator((B)_{3}, -2),\n"
-    "3 GetChevalleyGenerator( (B)_{3}, 3)\n"
-    "+ 6 GetChevalleyGenerator( (B)_{3}, 1)\n"
-    "+ 10 / 3 GetChevalleyGenerator( (B)_{3}, 2)\n"
-    ")",
-    "CalculatorConversions::innerSlTwoSubalgebraPrecomputed",
-    "SltwoSubalgebra",
-    innerAdminNoTest
-  );
+
   this->addOperationHandler(
     "\\sqrt",
     CalculatorFunctions::innerSqrt,
@@ -4723,43 +4190,6 @@ void Calculator::initializeStandardFunctions() {
     "FactorInteger(0);",
     "Calculator::innerFactorInteger",
     "FactorInteger",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "Freudenthal",
-    CalculatorFunctions::innerFreudenthalFormula,
-    "",
-    "Computes the dominant weights with multiplicities of a "
-    "finite dimensional module of a highest weight "
-    "given in fundamental coordinates. The first argument gives "
-    "the semisimple Lie algebra type, the second argument gives "
-    "the highest weight in fundamental coordinates. ",
-    "Freudenthal{}(B_3, (2,2,2))",
-    "Calculator::innerFreudenthalFormula",
-    "Freudenthal",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "Killing",
-    CalculatorLieTheory::killingForm,
-    "",
-    "Computes the Killing form product of two elements of semisimple Lie algebra. ",
-    "h_{{i}}= GetCartanGenerator{}(F_1, i);"
-    "KF{}({{i}},{{j}})=Killing{}(h_i, h_j);"
-    "FunctionToMatrix(KF, 4, 4)",
-    "CalculatorLieTheory::killingForm",
-    "Killing",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "FreudenthalFull",
-    CalculatorFunctions::innerFreudenthalFull,
-    "",
-    "Computes the full character and prints it to screen. "
-    "Argument format same as the Freudenthal function. ",
-    "FreudenthalFull{}(G_2, (2, 1))",
-    "Calculator::innerFreudenthalFull",
-    "FreudenthalFull",
     innerStandard
   );
   this->addOperationHandler(
@@ -7645,6 +7075,8 @@ void Calculator::initializeSemisimpleLieAlgebraFunctions() {
   Function::Options innerAdminNoTestExperimental = Function::Options::innerAdminNoTestExperimental();
   Function::Options innerExperimental = Function::Options::experimental();
   Function::Options innerAdminNoTestInvisibleOffByDefault = Function::Options::innerAdminNoTestInvisibleOffByDefault();
+  Function::Options innerInvisibleNoTest = Function::Options::invisibleNoTest();
+  Function::Options innerNoTest = Function::Options::innerNoTest();
 
   this->addOperationHandler(
     "SemisimpleLieAlgebra",
@@ -8437,6 +7869,575 @@ void Calculator::initializeSemisimpleLieAlgebraFunctions() {
     "CalculatorFunctions::innerFindProductDistanceModN",
     "SolveProductSumEquationOverSetModN",
     innerAdminNoTestInvisibleOffByDefault
+  );
+  this->addOperationHandler(
+    "ComputeFKFT",
+    CalculatorLieTheory::computePairingTablesAndFKFTsubalgebras,
+    "",
+    "Attempts to compute all Fernando-Kac subalgebras according "
+    "to the most experimental, latest and greatest algorithm. "
+    "Argument must be of type semisimple Lie subalgebras. ",
+    "ComputeFKFT( ComputeSemisimpleSubalgebras(c_3))",
+    "CalculatorFunctions::computePairingTablesAndFKFTsubalgebras",
+    "ComputeFKFT",
+    innerAdminNoTestExperimental
+  );
+  this->addOperationHandler(
+    "ComputeSemisimpleSubalgebras",
+    CalculatorLieTheory::computeSemisimpleSubalgebras,
+    "",
+    "Computes the semisimple subalgebras of a semisimple "
+    "Lie algebra and creates a data structure containing them. ",
+    "ComputeSemisimpleSubalgebras(A_2)",
+    "CalculatorFunctions::computeSemisimpleSubalgebras",
+    "ComputeSemisimpleSubalgebras",
+    innerInvisibleNoTest
+  );
+  this->addOperationHandler(
+    "CentralizerChains",
+    CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras,
+    "",
+    "This function is disabled by default (takes too long): you have to first call "
+    "TurnRulesOn(CentralizerChains). "
+    "Please use this function only if running the calculator on "
+    "your own machine; don't use it on a public server. "
+    "Creates a printout with centralizer chains of semisimple Lie subalgebras. ",
+    "CentralizerChains (ComputeSemisimpleSubalgebras{}(B_3))",
+    "CalculatorFunctions::getCentralizerChainsSemisimpleSubalgebras",
+    "CentralizerChains",
+    innerAdminNoTest
+  );
+  this->addOperationHandler(
+    "PrintSemisimpleSubalgebras",
+    CalculatorLieTheory::printSemisimpleSubalgebrasRegular,
+    "",
+    "<b>This function is being developed and is not implemented fully yet.</b> "
+    "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
+    "PrintSemisimpleSubalgebras(B_3)",
+    "Calculator::printSemisimpleSubalgebrasRegular",
+    "PrintSemisimpleSubalgebras",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "PrintSemisimpleSubalgebrasRecompute",
+    CalculatorLieTheory::printSemisimpleSubalgebrasRecompute,
+    "",
+    "<b>This function is being developed and is not implemented fully yet.</b> "
+    "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
+    "PrintSemisimpleSubalgebrasRecompute(C_3)",
+    "Calculator::printSemisimpleSubalgebrasRecompute",
+    "PrintSemisimpleSubalgebrasRecompute",
+    innerAdminNoTest
+  );
+  this->addOperationHandler(
+    "PrintSemisimpleSubalgebrasNoCentralizers",
+    CalculatorLieTheory::printSemisimpleSubalgebrasNoCentralizers,
+    "",
+    "<b>This function is being developed and is not implemented fully yet.</b> "
+    "Prints the semisimple subalgebra candidates of a Lie algebra. ",
+    "PrintSemisimpleSubalgebrasNoCentralizers(A_3)",
+    "Calculator::printSemisimpleSubalgebrasNoCentralizers",
+    "PrintSemisimpleSubalgebrasNoCentralizers",
+    innerAdminNoTest
+  );
+  this->addOperationHandler(
+    "PrintSemisimpleSubalgebrasFull",
+    CalculatorLieTheory::printSemisimpleSubalgebrasNilradicals,
+    "",
+    "<b>This function is being developed and is not implemented fully yet.</b>"
+    "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
+    "PrintSemisimpleSubalgebrasFull{}(A_2)",
+    "Calculator::printSemisimpleSubalgebrasNilradicals",
+    "PrintSemisimpleSubalgebrasFull",
+    innerAdminNoTest
+  );
+  this->addOperationHandler(
+    "CanBeExtendedParabolicallyTo",
+    CalculatorLieTheory::canBeExtendedParabolicallyTo,
+    "",
+    "Finds whether a Dynkin type extends via the standard parabolic extension to another. ",
+    "CanBeExtendedParabolicallyTo(A^3_1, A_5);"
+    "CanBeExtendedParabolicallyTo(a_2, b_3);"
+    "CanBeExtendedParabolicallyTo(g_2, b_3);"
+    "CanBeExtendedParabolicallyTo(d_5, e_6);"
+    "CanBeExtendedParabolicallyTo(b_3, a_10);"
+    "CanBeExtendedParabolicallyTo(c_2, c_10);"
+    "CanBeExtendedParabolicallyTo(b_3+e_6+a_3, d_4+e_8+f_4)",
+    "CalculatorFunctions::canBeExtendedParabolicallyTo",
+    "CanBeExtendedParabolicallyTo",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "EmbedSemisimpleInSemisimple",
+    CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra,
+    "",
+    "Tries to find all embeddings of the first semisimple type into the second. "
+    "Records all intermediate subalgebras. ",
+    "EmbedSemisimpleInSemisimple{}(G^3_2, B_3);"
+    "EmbedSemisimpleInSemisimple{}(G_2, B_3)",
+    "CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra",
+    "EmbedSemisimpleInSemisimple",
+    innerNoTest
+  );
+  this->addOperationHandler(
+    "LoadSemisimpleSubalgebras",
+    CalculatorConversions::innerLoadSemisimpleSubalgebras,
+    "",
+    "<b>This function is being developed and is not implemented fully yet.</b>"
+    "Loads a semisimpleSubalgebra from expression. ",
+    "LoadSemisimpleSubalgebras {}(EmbedSemisimpleInSemisimple{}(G_2, B_3))",
+    "CalculatorConversions::innerLoadSemisimpleSubalgebras",
+    "LoadSemisimpleSubalgebras",
+    innerAdminNoTest
+  );
+  this->addOperationHandler(
+    "SltwoSubalgebra",
+    CalculatorConversions::innerSlTwoSubalgebraPrecomputed,
+    "",
+    "<b>This function is being developed and is not implemented fully yet. </b>"
+    "Loads an sl(2) subalgebra from expression. ",
+    "SltwoSubalgebra(\n"
+    "B_{3},\n"
+    "3 GetChevalleyGenerator((B)_{3}, -2),\n"
+    "3 GetChevalleyGenerator( (B)_{3}, 3)\n"
+    "+ 6 GetChevalleyGenerator( (B)_{3}, 1)\n"
+    "+ 10 / 3 GetChevalleyGenerator( (B)_{3}, 2)\n"
+    ")",
+    "CalculatorConversions::innerSlTwoSubalgebraPrecomputed",
+    "SltwoSubalgebra",
+    innerAdminNoTest
+  );
+
+  this->addOperationHandler(
+    "Freudenthal",
+    CalculatorFunctions::innerFreudenthalFormula,
+    "",
+    "Computes the dominant weights with multiplicities of a "
+    "finite dimensional module of a highest weight "
+    "given in fundamental coordinates. The first argument gives "
+    "the semisimple Lie algebra type, the second argument gives "
+    "the highest weight in fundamental coordinates. ",
+    "Freudenthal{}(B_3, (2,2,2))",
+    "Calculator::innerFreudenthalFormula",
+    "Freudenthal",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "Killing",
+    CalculatorLieTheory::killingForm,
+    "",
+    "Computes the Killing form product of two elements of semisimple Lie algebra. ",
+    "h_{{i}}= GetCartanGenerator{}(F_1, i);"
+    "KF{}({{i}},{{j}})=Killing{}(h_i, h_j);"
+    "FunctionToMatrix(KF, 4, 4)",
+    "CalculatorLieTheory::killingForm",
+    "Killing",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "FreudenthalFull",
+    CalculatorFunctions::innerFreudenthalFull,
+    "",
+    "Computes the full character and prints it to screen. "
+    "Argument format same as the Freudenthal function. ",
+    "FreudenthalFull{}(G_2, (2, 1))",
+    "Calculator::innerFreudenthalFull",
+    "FreudenthalFull",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "PerturbSplittingNormal",
+    CalculatorFunctions::innerPerturbSplittingNormal,
+    "",
+    "Takes 3 arguments: normal, cone and general vectors. "
+    "Attempts to perturb the normal so that the cone stays on "
+    "one side of the normal and so that the general vectors "
+    "have as little zero scalar products with the normal as possible. ",
+    "PerturbSplittingNormal{}((0,0,0,0), ("
+    "(- 1, -2, -2, -2), (- 1, - 1, -2, -2), (0, - 1, -2, -2), "
+    "(- 1, - 1, - 1, - 1), (0, - 1, - 1, - 1),"
+    "(0, 0, - 1, - 1), (- 1, - 1, 0, 0), (0, - 1, 0, 0), "
+    "(- 1, 0, 0, 0), (1, 0, 0, 0), (0, 1, 0, 0), (1, 1, 0, 0),"
+    "(0, 0, 1, 1), (0, 1, 1, 1), (1, 1, 1, 1), "
+    "(0, 1, 2, 2), (1, 1, 2, 2), (1, 2, 2, 2)),"
+    "("
+    "(-2, -3, -4, -2), (- 1, -3, -4, -2), (- 1, -2, -4, -2), "
+    "(- 1, -2, -3, -2), (- 1, -2, -2, -2), (- 1, -2, -3, - 1),"
+    "(- 1, - 1, -2, -2), (- 1, -2, -2, - 1), (0, - 1, -2, -2), "
+    "(- 1, - 1, -2, - 1), (- 1, -2, -2, 0),"
+    "(0, - 1, -2, - 1), (- 1, - 1, - 1, - 1), (- 1, - 1, -2, 0), "
+    "(0, - 1, - 1, - 1), (0, - 1, -2, 0), (- 1, - 1, - 1, 0),"
+    "(0, 0, - 1, - 1), (0, - 1, - 1, 0), (- 1, - 1, 0, 0), "
+    "(0, 0, 0, - 1), (0, 0, - 1, 0), (0, - 1, 0, 0), (- 1, 0, 0, 0),"
+    "(1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1), "
+    "(1, 1, 0, 0), (0, 1, 1, 0), (0, 0, 1, 1), (1, 1, 1, 0),"
+    "(0, 1, 2, 0), (0, 1, 1, 1), (1, 1, 2, 0), (1, 1, 1, 1), "
+    "(0, 1, 2, 1), (1, 2, 2, 0), (1, 1, 2, 1), (0, 1, 2, 2), "
+    "(1, 2, 2, 1),"
+    "(1, 1, 2, 2), (1, 2, 3, 1), (1, 2, 2, 2), (1, 2, 3, 2), "
+    "(1, 2, 4, 2), (1, 3, 4, 2), (2, 3, 4, 2)))",
+    "Calculator::innerPerturbSplittingNormal",
+    "PerturbSplittingNormal",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "TestSpechtModules",
+    CalculatorFunctionsWeylGroup::testSpechtModules,
+    "",
+    "Tests all Specht modules of S_n, where n is the only argument taken by the function.",
+    "TestSpechtModules(4); ",
+    "CalculatorFunctionsWeylGroup::testSpechtModules",
+    "TestSpechtModules",
+    innerAdminNoTest
+  );
+  this->addOperationHandler(
+    "MakeElementWeylGroup",
+    CalculatorFunctionsWeylGroup::weylGroupElement,
+    "",
+    "Needs a group name and a list of generators",
+    "s_{{i}} = MakeElementWeylGroup{}(A_2, i);\n"
+    "(s_1 + s_2)(2s_1 + s_2)(3s_1 + s_2)",
+    "CalculatorFunctionsWeylGroup::weylGroupElement",
+    "MakeElementWeylGroup",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "MakeElementHyperOctahedral",
+    CalculatorConversions::innerMakeElementHyperOctahedral,
+    "",
+    "Needs a group name and a list of generators",
+    "s = MakeElementHyperOctahedral{}((1, 2), 1, 0, 0);\n"
+    "t = MakeElementHyperOctahedral{}((1, 3), 0, 0, 0);\n"
+    "s * t * s * t",
+    "CalculatorConversions::innerMakeElementHyperOctahedral",
+    "MakeElementHyperOctahedral",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "WeylGroupClassicalSignMultiplicities",
+    CalculatorFunctionsWeylGroup::signSignatureRootSubsystemsFromKostkaNumbers,
+    "",
+    "Prints the sign multiplicities of a simple Weyl group of classical type. "
+    "See a common article by "
+    "T. Folz-Donahue, S. Jackson, T. Milev, A. Noel. ",
+    "WeylGroupClassicalSignMultiplicities{}(b_3);\n"
+    "WeylGroupClassicalSignMultiplicities{}(b_4);\n"
+    "WeylGroupClassicalSignMultiplicities{}(b_5);\n"
+    "WeylGroupClassicalSignMultiplicities{}(d_4);\n"
+    "WeylGroupClassicalSignMultiplicities{}(d_5);\n"
+    "WeylGroupClassicalSignMultiplicities{}(d_6);\n"
+    "WeylGroupClassicalSignMultiplicities{}(a_2);\n"
+    "WeylGroupClassicalSignMultiplicities{}(a_3);\n"
+    "WeylGroupClassicalSignMultiplicities{}(a_4);\n",
+    "CalculatorFunctionsWeylGroup::signSignatureRootSubsystemsFromKostkaNumbers",
+    "WeylGroupClassicalSignMultiplicities",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "WeylGroupTauSignatures",
+    CalculatorFunctionsWeylGroup::signSignatureRootSubsystems,
+    "",
+    "Prints the tau signatures of a Weyl group. See a common article by "
+    "T. Folz-Donahue, S. Jackson, T. Milev, A. Noel. ",
+    "WeylGroupTauSignatures{}(b_3);",
+    "CalculatorFunctionsWeylGroup::signSignatureRootSubsystems",
+    "WeylGroupTauSignatures",
+    innerAdminNoTestExperimental
+  );
+  this->addOperationHandler(
+    "WeylGroupConjugacyClassesFromAllElements",
+    CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesFromAllElements,
+    "",
+    "For small ranks, computes the conjugacy classes of a Weyl "
+    "group by enumerating all elements of the group. ",
+    "WeylGroupConjugacyClassesFromAllElements{}(A_2);",
+    "CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesFromAllElements",
+    "WeylGroupConjugacyClassesFromAllElements",
+    innerAdminNoTestExperimental
+  );
+  this->addOperationHandler(
+    "WeylGroupOuterConjugacyClassesFromAllElements",
+    CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements,
+    "",
+    "Computes conjugacy classes, identifying classes that "
+    "are conjugate using outer automorphisms. ",
+    "WeylGroupOuterConjugacyClassesFromAllElements{}(D_4);",
+    "CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements",
+    "WeylGroupOuterConjugacyClassesFromAllElements",
+    innerAdminNoTestExperimental
+  );
+  this->addOperationHandler(
+    "WeylGroupConjugacyClassesRepresentatives",
+    CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesRepresentatives,
+    "",
+    "Computes a representative in each conjugacy classes of a "
+    "Weyl group by comparing conjugacy classes invariants and by "
+    "enumerating conjugacy class orbits. ",
+    "WeylGroupConjugacyClassesRepresentatives{}(A_2);",
+    "CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesRepresentatives",
+    "WeylGroupConjugacyClassesRepresentatives",
+    innerAdminNoTestExperimental
+  );
+  this->addOperationHandler(
+    "WeylGroupConjugacyClasses",
+    CalculatorFunctionsWeylGroup::weylGroupConjugacyClasseS,
+    "",
+    "Loads the conjugacy classes of a Weyl group (hard-coded), "
+    "or computes them if rank<=6. ",
+    "WeylGroupConjugacyClasses{}(f_4);",
+    "CalculatorFunctionsWeylGroup::weylGroupConjugacyClasseS",
+    "WeylGroupConjugacyClasses",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "WeylGroupCharTable",
+    CalculatorFunctionsWeylGroup::weylGroupLoadOrComputeCharTable,
+    "",
+    "Loads the character table of a Weyl group. "
+    "The character tables are hard-coded.",
+    "WeylGroupCharTable{}(b_3);",
+    "CalculatorFunctionsWeylGroup::weylGroupLoadOrComputeCharTable",
+    "WeylGroupCharTable",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "WeylGroupIrrepsAndCharTableComputeFromScratch",
+    CalculatorFunctionsWeylGroup::weylGroupIrrepsAndCharTableComputeFromScratch,
+    "",
+    "<b>Work in progress. Please do not use.</b> "
+    "Computes from scratch the irreducible representations "
+    "and the character table of a Weyl group.",
+    "WeylGroupIrrepsAndCharTableComputeFromScratch{}(b_3);",
+    "CalculatorFunctionsWeylGroup::weylGroupIrrepsAndCharTableComputeFromScratch",
+    "WeylGroupIrrepsAndCharTableComputeFromScratch",
+    innerAdminNoTestExperimental
+  );
+  this->addOperationHandler(
+    "WeylOrbitSize",
+    CalculatorFunctionsWeylGroup::weylGroupOrbitSize,
+    "",
+    "Computes the size of a Weyl group orbit of a weight",
+    "WeylOrbitSize(E_6, (3, 3, 3, 7, 7, 11));\n"
+    "WeylOrbitSize(E_8, (3, 3, 3, 7, 7, 11, 13, 13));",
+    "CalculatorFunctionsWeylGroup::weylGroupOrbitSize",
+    "WeylOrbitSize",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "WeylOrbitSimpleCoords",
+    CalculatorFunctionsWeylGroup::weylGroupOrbitSimple,
+    "",
+    "Generates a Weyl orbit printout from simple coords. "
+    "First argument = type. Second argument = weight in simple coords. "
+    "The orbit size is cut off at max 1920 elements (type D_5).",
+    "WeylOrbitSimpleCoords{}(B_2, (y, y));",
+    "CalculatorFunctionsWeylGroup::weylGroupOrbitSimple",
+    "WeylOrbitSimpleCoords",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "WeylGroupOrbitOuterSimple",
+    CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple,
+    "",
+    "Generates a Weyl outer orbit printout from simple coords. "
+    "The outer orbit is the orbit "
+    "under the Weyl group extended with the outer automoprhisms of the Weyl group. "
+    "First argument = type. Second argument = weight in simple coords. "
+    "The orbit size is cut off at 1921*2 elements. ",
+    "WeylGroupOrbitOuterSimple{}(D_4, (1, 0, 0, 0))",
+    "CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple",
+    "WeylGroupOrbitOuterSimple",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "WeylOrbitFundCoords",
+    CalculatorFunctionsWeylGroup::weylGroupOrbitFund,
+    "",
+    "Generates a Weyl orbit printout from fundamental coords. "
+    "First argument = type. Second argument = weight in fundamental coords. ",
+    "WeylOrbitFundCoords{}(B_2, (y, 0));",
+    "CalculatorFunctionsWeylGroup::weylGroupOrbitFund",
+    "WeylOrbitFundCoords",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "WeylOrbitFundRho",
+    CalculatorFunctionsWeylGroup::weylGroupOrbitFundRho,
+    "",
+    "Generates a Weyl orbit printout from fundamental coords. "
+    "First argument = type. Second argument = weight in fundamental coords. "
+    "Doing the rho-modified action. ",
+    "WeylOrbitFundRho{}(B_2, (y, 0) )",
+    "CalculatorFunctionsWeylGroup::weylGroupOrbitFundRho",
+    "WeylOrbitFundRho",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "WeylRaiseToMaximallyDominant",
+    CalculatorFunctionsWeylGroup::weylNoOuterRaiseToMaximallyDominant,
+    "",
+    "Raises a set of rational vectors simultaneously to maximally dominant: "
+    "it raises the first vector to dominant, then each consecutive vector is "
+    "raised as much as possible without changing the preceding, "
+    "alrady raised,  vectors. First argument = type. "
+    "Second argument = weight in simple coords. ",
+    "WeylRaiseToMaximallyDominant{}(F_4, (3, 6, 8, 4), (- 1, - 3, - 2, 0));\n"
+    "WeylRaiseToMaximallyDominant{}(F_4, (3, 6, 8, 4), (0, - 3, - 4, - 2));\n"
+    "WeylRaiseToMaximallyDominant{}(F_4, (0, - 3, - 4, - 2) , (3, 6, 8, 4));",
+    "CalculatorFunctionsWeylGroup::weylNoOuterRaiseToMaximallyDominant",
+    "WeylRaiseToMaximallyDominant",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "MakeWeight",
+    CalculatorFunctionsWeylGroup::lieAlgebraWeight,
+    "",
+    "Makes a weight. First argument = type. "
+    "Second argument = coordinate. "
+    "Third argument = one of the keywords epsilon, simple, "
+    "fundamental, standing for the coordinate system. ",
+    "\\varepsilon_{{a}}=MakeWeight{}(B_3, a, epsilon);\n"
+    "\\psi_{{a}}=MakeWeight{}(B_3, a, fundamental);\n"
+    "\\eta_{{a}}= MakeWeight{}(B_3, a, simple);\n"
+    "\\varepsilon_1;\n"
+    "\\psi_1;\n"
+    "\\eta_3",
+    "CalculatorFunctionsWeylGroup::lieAlgebraWeight",
+    "MakeWeight",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "MakeRho",
+    CalculatorFunctionsWeylGroup::lieAlgebraRhoWeight,
+    "",
+    "Makes the half-sum of the positive roots.",
+    "\\rho = MakeRho(B_3);",
+    "CalculatorFunctionsWeylGroup::lieAlgebraRhoWeight",
+    "MakeRho",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "IsOuterAuto",
+    CalculatorFunctionsWeylGroup::isOuterAutoWeylGroup,
+    "",
+    "Checks whether the element is outer automorphism of a root system. "
+    "First argument = type. "
+    "Second argument = matrix linear operator corresponding written in simple basis. ",
+    "A = MakeMatrix"
+    "((1, 0, 0, 0, 0, - 1),"
+    "(0, 0, 0, 0, 1, - 2),"
+    "(0, 0, 1, 0, 0, - 2),"
+    "(0, 0, 0, 1, 0, - 3),"
+    "(0, 1, 0, 0, 0, - 2),"
+    "(0, 0, 0, 0, 0, - 1));"
+    "IsOuterAuto{}(e_6, A);",
+    "CalculatorFunctionsWeylGroup::isOuterAutoWeylGroup",
+    "IsOuterAuto",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "WeylOuterRaiseToMaximallyDominant",
+    CalculatorFunctionsWeylGroup::weylOuterRaiseToMaximallyDominant,
+    "",
+    "Same as WeylRaiseToMaximallyDominant but uses outer Weyl group automorphisms as well.",
+    "WeylOuterRaiseToMaximallyDominant{}(D_4, (1, 0, 0, 0), (0, 0, 0, 1));\n"
+    "WeylOuterRaiseToMaximallyDominant{}(D_4, (0, 0, 0, 1), (1, 0, 0, 0));\n"
+    "WeylOuterRaiseToMaximallyDominant{}(D_4, (1, 0, 0, 0), (0, 0, 1, 0));\n"
+    "WeylOuterRaiseToMaximallyDominant{}(D_4, (0, 0, 1, 0), (1, 0, 0, 0));\n",
+    "CalculatorFunctionsWeylGroup::weylOuterRaiseToMaximallyDominant",
+    "WeylOuterRaiseToMaximallyDominant",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "GenerateFiniteMultiplicativelyClosedSet",
+    CalculatorFunctions::innerGenerateMultiplicativelyClosedSet,
+    "",
+    "The first argument gives upper_bound to the number of elements of the set. "
+    "Generates a finite multiplicatively closed set of at most upper_bound elements, "
+    "or returns error indicating the multiplicatively closed "
+    "set is larger than the upper bound.",
+    "s_1=MakeMatrix{}((- 1, 1, 0), (0, 1, 0), (0, 0, 1));\n"
+    "s_2=MakeMatrix{}((1, 0, 0), (1, - 1, 1), (0, 0, 1));\n"
+    "s_3=MakeMatrix{}((1, 0, 0), (0, 1, 0), (0, 2, - 1));\n"
+    "GenerateFiniteMultiplicativelyClosedSet{}(48, s_1, s_2, s_3);",
+    "Calculator::innerGenerateMultiplicativelyClosedSet",
+    "GenerateFiniteMultiplicativelyClosedSet",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "CartanSA",
+    CalculatorLieTheory::constructCartanSubalgebra,
+    "",
+    "Generates a Cartan subalgebra, code is still experimental.",
+    "g_{{i}} = GetChevalleyGenerator{}(b_3, i);\n"
+    "h_{{i}} = GetCartanGenerator{}(b_3, i);\n"
+    "CartanSA(g_1 + g_3, g_-1 + g_-3, g_2, g_-2);",
+    "CalculatorFunctions::constructCartanSubalgebra",
+    "CartanSA",
+    innerAdminNoTestExperimental
+  );
+  this->addOperationHandler(
+    "GenerateVectorSpaceClosedWithRespectToLieBracket",
+    CalculatorLieTheory::generateVectorSpaceClosedWithRespectToLieBracket,
+    "",
+    "Generates a vector space closed with respect to the Lie bracket "
+    "from input of type elements of Weyl algebra or Lie algebra. "
+    "The first argument of the input is an upper bound for the dimension of the vector space. "
+    "The remaining arguments must be differential operators. "
+    "The output is a vector space basis printout. "
+    "Fails if the dimension of the vector space is larger than the upper bound.",
+    "\\partial_{{i}} = ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
+    "x_{{i}} = ElementWeylAlgebraPoly{}(\\partial_i, x_i); "
+    "g_1 = (- x_{5} \\partial_{5}^{2} - x_{4} \\partial_{4} \\partial_{5}  - x_{3} \\partial_{3} \\partial_{5} "
+    "- x_{2} \\partial_{2} \\partial_{5} + x_{1} \\partial_{2} \\partial_{4} +x_{1} \\partial_{3}^{2});\n"
+    "g_- 1 = x_5;\n"
+    "g_2 = x_{5} \\partial_{4} - x_{2} \\partial_{1};\n"
+    "g_-2 = (x_{4} \\partial_{5} - x_{1} \\partial_{2});\n"
+    "g_3 = (2x_{4} \\partial_{3} - x_{3} \\partial_{2});\n"
+    "g_-3 = (x_{3} \\partial_{4} - 2x_{2} \\partial_{3});\n"
+    "GenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3, g_-3);\n"
+    "GenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_2, g_-2, g_3, g_-3);\n"
+    "GenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3);\n"
+    "q_{{i}} = GetChevalleyGenerator{}(F_4, i);\n"
+    "s_2 = - q_{- 5} - q_{-6};\n"
+    "s_1 = q_{20} + q_{19};\n"
+    "s_- 1 = - q_{- 19} - q_{- 20};\n"
+    "s_-2 = 2q_{6} + 2q_{5};\n"
+    "GenerateVectorSpaceClosedWithRespectToLieBracket(52, s_1, s_2, s_- 1, s_-2);",
+    "CalculatorFunctions::generateVectorSpaceClosedWithRespectToLieBracket",
+    "GenerateVectorSpaceClosedWithRespectToLieBracket",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "WeylGroupNaturalRep",
+    CalculatorFunctionsWeylGroup::weylGroupNaturalRep,
+    "",
+    "Gets the natural representation of the Weyl group.",
+    "WeylGroupNaturalRep{}(B_3)",
+    "CalculatorFunctionsWeylGroup::weylGroupNaturalRep",
+    "WeylGroupNaturalRep",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "WeylGroupGetOuterAutoGenerators",
+    CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint,
+    "",
+    "Gets the generators of the outer automorphism group (the group generated by "
+    "the graph automorphisms of the Dynkin diagram.",
+    "WeylGroupGetOuterAutoGenerators{}(2D_4)",
+    "CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint",
+    "WeylGroupGetOuterAutoGenerators",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "MakeVirtualWeylGroupRepresentation",
+    CalculatorFunctionsWeylGroup::makeVirtualWeylRep,
+    "",
+    "Convert a representation into virtual one.",
+    "MakeVirtualWeylGroupRepresentation{}(WeylGroupNaturalRep{}(B_3))",
+    "CalculatorFunctionsWeylGroup::makeVirtualWeylRep",
+    "MakeVirtualWeylGroupRepresentation",
+    innerAdminNoTestExperimental
   );
 }
 

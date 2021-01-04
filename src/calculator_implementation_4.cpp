@@ -1426,6 +1426,21 @@ Function::Options Function::Options::innerInvisible() {
   return result;
 }
 
+Function::Options Function::Options::innerNoTest() {
+  Function::Options result;
+  result.flagIsInner = true;
+  result.dontTestAutomatically = true;
+  return result;
+}
+
+Function::Options Function::Options::invisibleNoTest() {
+  Function::Options result;
+  result.flagIsInner = true;
+  result.visible = false;
+  result.dontTestAutomatically = true;
+  return result;
+}
+
 Function::Options Function::Options::adminNoTest() {
   Function::Options result;
   result.flagIsInner = true;

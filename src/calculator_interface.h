@@ -789,6 +789,8 @@ class Function {
     static Options innerAdminNoTestExperimental();
     static Options innerAdminNoTest();
     static Options experimental();
+    static Options invisibleNoTest();
+    static Options innerNoTest();
     Options();
   };
   Options options;

@@ -24,6 +24,10 @@ public:
   Expression comparisonStandardEvaluated;
   Expression comparisonNoDistributionRaw;
   Expression comparisonNoDistributionEvaluated;
+  HashedList<Expression> freeVariablesDesired;
+  HashedList<Expression> freeVariablesFound;
+  List<Expression> unexpectedVariables;
+  List<Expression> missingVariables;
 };
 
 class CalculatorEducationalFunctions{

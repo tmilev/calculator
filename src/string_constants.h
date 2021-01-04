@@ -135,6 +135,7 @@ public:
     static std::string title;
     static std::string fileName;
     static std::string courseHome;
+    static std::string courseTitle;
     static std::string topicList;
     static std::string fileNameTarget;
     static std::string fileContent;

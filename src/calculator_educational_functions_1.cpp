@@ -40,6 +40,27 @@ bool CalculatorEducationalFunctions::compareExpressionsJSON(
   CompareExpressions comparison;
   comparison.given = input[1];
   comparison.desired = input[2];
+  JSData result;
+  if (!comparison.desired.getFreeVariables(comparison.freeVariablesDesired, false)) {
+    result[WebAPI::result::error] = "Unexpected failure to extract free variables from desired answer.";
+    return output.assignValue(result, calculator);
+  }
+  if (!comparison.given.getFreeVariables(comparison.freeVariablesFound, false)) {
+    result[WebAPI::result::error] = "Unexpected failure to extract free variables from given answer.";
+    return output.assignValue(result, calculator);
+  }
+  for (int i = 0; i < comparison.freeVariablesFound.size; i ++) {
+    const Expression& current = comparison.freeVariablesFound[i];
+    if (!comparison.freeVariablesDesired.contains(current)) {
+      comparison.unexpectedVariables.addOnTop(current);
+    }
+  }
+  if (comparison.unexpectedVariables.size > 0) {
+    std::stringstream errorStream;
+    errorStream << "Unexpected symbols: <b style='color:red'>" << comparison.unexpectedVariables.toStringCommaDelimited() << "</b>";
+    result[WebAPI::result::error] = errorStream.str();
+    return output.assignValue(result, calculator);
+  }
   comparison.comparisonStandardRaw.makeXOX(
     calculator, calculator.opEqualEqual(), comparison.given, comparison.desired
   );
@@ -48,6 +69,7 @@ bool CalculatorEducationalFunctions::compareExpressionsJSON(
     comparison.comparisonStandardRaw,
     comparison.comparisonStandardEvaluated
   );
+
   MapList<std::string, Expression, MathRoutines::hashString> substitution;
   substitution.setKeyValue("a", comparison.given);
   substitution.setKeyValue("b", comparison.desired);
@@ -63,7 +85,6 @@ bool CalculatorEducationalFunctions::compareExpressionsJSON(
     comparison.comparisonNoDistributionEvaluated
   );
 
-  JSData result;
   result[WebAPI::result::ComparisonData::given] = comparison.given.toString();
   result[WebAPI::result::ComparisonData::desired] = comparison.desired.toString();
   if (comparison.comparisonStandardEvaluated.toString() == "1") {
@@ -83,7 +104,8 @@ JSData Calculator::extractSolution() {
   MacroRegisterFunctionWithName("Calculator::extractSolution");
   JSData result;
   if (this->syntaxErrors != "") {
-    result[WebAPI::result::error] = this->toStringSyntacticStackHumanReadable(false, true);
+    result[WebAPI::result::error] = "Failed to parse.";
+    result[WebAPI::result::syntaxErrors] = this->toStringSyntacticStackHTMLSimple();
     return result;
   }
   JSData solutionJSON;
@@ -102,7 +124,8 @@ JSData Calculator::extractComparison(const std::string& given, const std::string
   result[WebAPI::result::ComparisonData::givenRaw] = given;
   result[WebAPI::result::ComparisonData::desiredRaw] = desired;
   if (this->syntaxErrors != "") {
-    result[WebAPI::result::error] = this->toStringSyntacticStackHumanReadable(false, true);
+    result[WebAPI::result::error] = "Failed to parse.";
+    result[WebAPI::result::syntaxErrors] = this->toStringSyntacticStackHTMLSimple();
     return result;
   }
   JSData comparisonJSON;

@@ -424,7 +424,7 @@ JSData WebAPIResponse::compareExpressions() {
   global.theResponse.disallowReport();
   JSData comparison = calculator.compareExpressions(given, desired);
   JSData result;
-  result[WebAPI::result::resultHtml] = comparison;
+  result[WebAPI::result::resultLabel] = comparison;
   result[WebAPI::result::commentsGlobal] = global.comments.getCurrentReset();
   global.theResponse.writeResponse(result, false);
   global.flagComputationComplete = true;

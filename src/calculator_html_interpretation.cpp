@@ -87,7 +87,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     out << "<b style = 'color:red'>Failed to compose the solution. "
     << "Likely there is a bug with the problem. </b>"
     << "<br>" << CalculatorHTML::bugsGenericMessage << "<br>Details: <br>"
-    << interpreter.toStringSyntacticStackHumanReadable(false, false);
+    << interpreter.toStringSyntacticStackHTMLSimple();
     result[WebAPI::result::resultHtml] = out.str();
     result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
     return result;
@@ -247,20 +247,20 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   }
   studentAnswerSream << lastAnswer;
   out << "Your answer(s): \\(\\displaystyle " << lastAnswer << "\\)" << "\n<br>\n";
-  CalculatorHTML theProblem;
+  CalculatorHTML problem;
   std::stringstream errorStream, comments;
-  theProblem.loadCurrentProblemItem(
+  problem.loadCurrentProblemItem(
     global.userRequestRequiresLoadingRealExamData(),
     global.getWebInput(WebAPI::problem::randomSeed),
     &errorStream
   );
-  if (!theProblem.flagLoadedSuccessfully) {
+  if (!problem.flagLoadedSuccessfully) {
     out << "<br><b>" << WebAPI::problem::failedToLoadProblem << "</b> ";
   }
-  if (!theProblem.parseHTMLPrepareCommands(&comments)) {
+  if (!problem.parseHTMLPrepareCommands(&comments)) {
     out << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
   }
-  int indexLastAnswerId = theProblem.getAnswerIndex(lastStudentAnswerID);
+  int indexLastAnswerId = problem.getAnswerIndex(lastStudentAnswerID);
   if (indexLastAnswerId == - 1) {
     errorStream << "<br>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
@@ -270,8 +270,8 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
-  Answer& currentA = theProblem.theProblemData.theAnswers.values[indexLastAnswerId];
-  if (!theProblem.prepareCommands(&comments)) {
+  Answer& currentA = problem.theProblemData.theAnswers.values[indexLastAnswerId];
+  if (!problem.prepareCommands(&comments)) {
     errorStream << "Something went wrong while interpreting the problem file. ";
     if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
       errorStream << comments.str();
@@ -295,8 +295,8 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
 
   interpreter.evaluate(studentAnswerWithComments.str());
   if (interpreter.syntaxErrors != "") {
-    errorStream << "<b style ='color:red'>Failed to parse your answer, got:</b><br>"
-    << interpreter.toStringSyntacticStackHumanReadable(false, true);
+    errorStream << "<b style ='color:red'>Parsing failure:</b><br>"
+    << interpreter.toStringSyntacticStackHTMLSimple();
     result[WebAPI::result::error] = errorStream.str();
     result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
     result[WebAPI::result::resultHtml] = out.str();
@@ -349,10 +349,10 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   );
   interpreterWithAdvice.evaluate(calculatorInputStream.str());
   if (interpreterWithAdvice.syntaxErrors != "") {
-    out << "<br><span style =\"color:red\"><b>"
+    out << "<br><b style='color:red'>"
     << "Something went wrong when parsing your answer "
     << "in the context of the current problem. "
-    << "</b></span>";
+    << "</b>";
     if (global.userDefaultHasAdminRights()) {
       out
       << problemLinkStream.str()
@@ -615,7 +615,7 @@ std::string WebAPIResponse::getCompareExpressionsPage(bool appendBuildHash) {
 
 JSData Course::toJSON() const {
   JSData result;
-  result["title"] = this->title;
+  result[WebAPI::problem::courseTitle] = this->title;
   result[WebAPI::problem::courseHome] = Configuration::courseTemplates + this->courseTemplate;
   result[WebAPI::problem::topicList] = Configuration::topicLists + this->courseTopicsNoFolder;
   if (this->flagRoughDraft != "") {
@@ -1093,7 +1093,7 @@ JSData WebAPIResponse::submitAnswersJSON(
     }
     isolatedInterpreter.evaluate("(" + currentA.currentAnswerClean + ")");
     if (isolatedInterpreter.syntaxErrors != "") {
-      output << isolatedInterpreter.toStringSyntacticStackHumanReadable(false, true);
+      output << isolatedInterpreter.toStringSyntacticStackHTMLSimple();
     } else {
       output << isolatedInterpreter.outputString;
     }
@@ -1506,7 +1506,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
       );
     }
     out << "<br>" << CalculatorHTML::bugsGenericMessage << "<br>Details: <br>"
-    << interpreter.toStringSyntacticStackHumanReadable(false, false);
+    << interpreter.toStringSyntacticStackHTMLSimple();
     result[WebAPI::result::resultHtml] = out.str();
     int64_t ellapsedTime = global.getElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::millisecondsComputation] = ellapsedTime;

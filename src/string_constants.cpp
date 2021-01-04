@@ -52,6 +52,7 @@ std::string WebAPI::problem::title                   = "title"                  
 std::string WebAPI::problem::fileName                = "fileName"                ;
 std::string WebAPI::problem::fileNameTarget          = "fileNameTarget"          ;
 std::string WebAPI::problem::courseHome              = "courseHome"              ;
+std::string WebAPI::problem::courseTitle             = "title"                   ;
 std::string WebAPI::problem::topicList               = "topicList"               ;
 std::string WebAPI::problem::idProblem               = "id"                      ;
 std::string WebAPI::problem::deadlineSingle          = "deadline"                ;

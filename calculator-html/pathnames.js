@@ -41,9 +41,11 @@ const urlFields = {
     expressionDesired: "compareExpressionsDesired",
   },
   result: {
+    result: "result",
     resultHtml: "resultHtml",
     crashReport: "crashReport",
     error: "error",
+    syntaxErrors: "syntaxErrors",
     // Comments on performance.
     performance: "performance",
     // Computation time. Excludes https traffic.
@@ -54,6 +56,10 @@ const urlFields = {
     commentsGlobal: "commentsGlobal",
     solution: {
       steps: "solutionSteps",
+    },
+    comparison: {
+      comparison: "comparison",
+      areEqual: "areEqual",
     },
   },
   problem: {

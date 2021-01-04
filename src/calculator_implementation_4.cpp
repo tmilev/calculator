@@ -1858,10 +1858,38 @@ std::string Calculator::toString() {
   return out2.str();
 }
 
-std::string Calculator::toStringSyntacticStackHumanReadable(
+std::string Calculator::toStringSyntacticStackHTMLSimple() {
+  MacroRegisterFunctionWithName("Calculator::toStringSyntacticStackHTMLTable");
+  std::stringstream out;
+  bool isBad = ((*this->currentSyntacticStack).size > this->numEmptyTokensStart + 1);
+  SyntacticElement& lastSyntacticElt = *(*this->currentSyntacticStack).lastObject();
+  if ((*this->currentSyntacticStack).size == this->numEmptyTokensStart + 1) {
+    if (lastSyntacticElt.controlIndex != this->conExpression()) {
+      isBad = true;
+    }
+  }
+  if (!isBad) {
+    out << this->currentSyntacticStack->lastObject()->theData.toString();
+    return out.str();
+  }
+  for (int i = this->numEmptyTokensStart; i < (*this->currentSyntacticStack).size; i ++) {
+    SyntacticElement& currentElt = (*this->currentSyntacticStack)[i];
+    if (currentElt.isCommandEnclosure()) {
+      continue;
+    }
+    if (currentElt.controlIndex != this->conExpression()) {
+      out << " <b style='color:red'>" << currentElt.toStringSyntaxRole(*this) << "</b> ";
+    } else {
+      out << currentElt.theData.toString();
+    }
+  }
+  return out.str();
+}
+
+std::string Calculator::toStringSyntacticStackHTMLTable(
   bool includeLispifiedExpressions, bool ignoreCommandEnclosures
 ) {
-  MacroRegisterFunctionWithName("Calculator::toStringSyntacticStackHumanReadable");
+  MacroRegisterFunctionWithName("Calculator::toStringSyntacticStackHTMLTable");
   std::stringstream out;
   if ((*this->currentSyntacticStack).size < this->numEmptyTokensStart) {
     return
@@ -1883,20 +1911,8 @@ std::string Calculator::toStringSyntacticStackHumanReadable(
   for (int i = this->numEmptyTokensStart; i < (*this->currentSyntacticStack).size; i ++) {
     SyntacticElement& currentElt = (*this->currentSyntacticStack)[i];
     if (ignoreCommandEnclosures) {
-      if (
-        currentElt.controlIndex == this->conExpression() ||
-        currentElt.controlIndex == this->conSequenceStatements()
-      ) {
-        if (currentElt.theData.startsWith(this->opCommandEnclosure())) {
-          continue;
-        }
-        if (currentElt.theData.startsWith(this->opCommandSequence())) {
-          if (currentElt.theData.size() >= 2) {
-            if (currentElt.theData[1].startsWith(this->opCommandEnclosure())) {
-              continue;
-            }
-          }
-        }
+      if (currentElt.isCommandEnclosure()) {
+        continue;
       }
     }
     out
@@ -1908,10 +1924,6 @@ std::string Calculator::toStringSyntacticStackHumanReadable(
   }
   out << "</tr></table>";
   return out.str();
-}
-
-std::string Calculator::toStringSyntacticStackHTMLTable(bool ignoreCommandEnclosures) {
-  return this->toStringSyntacticStackHumanReadable(true, ignoreCommandEnclosures);
 }
 
 SemisimpleSubalgebras& ObjectContainer::getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input) {

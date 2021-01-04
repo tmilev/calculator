@@ -851,7 +851,8 @@ class SyntacticElement {
   Expression theData;
   List<Expression> dataList;
   std::string errorString;
-  std::string toStringHumanReadable(Calculator& theBoss, bool includeLispifiedExpressions) const;
+  std::string toStringHumanReadable(Calculator& owner, bool includeLispifiedExpressions) const;
+  std::string toStringSyntaxRole(const Calculator& owner) const;
   SyntacticElement() {
     this->controlIndex = 0; //controlIndex = 0 *MUST* point to the empty control sequence.
     this->errorString = "";
@@ -859,6 +860,7 @@ class SyntacticElement {
     this->numBoundVariablesInherited = - 1; // - 1 stands for unknown
   }
   std::string getIntegerStringCrashIfNot(Calculator& owner);
+  bool isCommandEnclosure() const;
 };
 
 class PlotObject {
@@ -1400,10 +1402,10 @@ public:
   void logPublicError(const std::string& theError);
   bool decreaseStackExceptLast(int decrease);
   bool decreaseStackExceptLastTwo(int decrease);
-  std::string toStringSyntacticStackHTMLTable(bool ignoreCommandEnclosures);
-  std::string toStringSyntacticStackHumanReadable(
+  std::string toStringSyntacticStackHTMLTable(
     bool includeLispifiedExpressions, bool ignoreCommandEnclosures
   );
+  std::string toStringSyntacticStackHTMLSimple();
   std::string writeDefaultLatexFileReturnHtmlLink(
     const std::string& fileContent,
     std::string* outputFileNameNoExtension,

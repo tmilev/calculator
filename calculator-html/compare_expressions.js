@@ -17,6 +17,8 @@ class CompareExpressions {
     /**@type{InputPanelData|null} */
     this.desiredPanel = null;
     /**@type{HTMLElement} */
+    this.resultUserFriendly = document.getElementById(ids.domElements.pages.compareExpressions.resultUserFriendly);
+    /**@type{HTMLElement} */
     this.resultBoxRaw = document.getElementById(ids.domElements.pages.compareExpressions.resultRaw);
     /**@type{HTMLElement} */
     this.resultBoxFormatted = document.getElementById(ids.domElements.pages.compareExpressions.resultFormatted);
@@ -103,11 +105,39 @@ class CompareExpressions {
   ) {
     try {
       let result = miscellaneous.jsonUnescapeParse(input);
+      this.writeUserFriendlyResult(result);
       this.resultBoxRaw.textContent = JSON.stringify(result);
       jsonToHtml.writeJSONtoDOMComponent(result, this.resultBoxFormatted);
       equationEditor.typeset(this.resultBoxFormatted);
     } catch (e) {
       this.resultBoxRaw.innerHTML = `<b style='color:red'>${e}</b><br>${input}`;
+    }
+  }
+
+  writeUserFriendlyResult(input) {
+    this.resultUserFriendly.innerHTML = "";
+    let result = input[pathnames.urlFields.result.result];
+    if (typeof result !== "object") {
+      return;
+    }
+    let syntaxErrors = result[pathnames.urlFields.result.syntaxErrors];
+    if (syntaxErrors !== "" && syntaxErrors !== undefined && syntaxErrors !== null) {
+      this.resultUserFriendly.innerHTML = `<b style='color:red'>?</b><br>${syntaxErrors}`;
+      return;
+    }
+    let comparison = result[pathnames.urlFields.result.comparison.comparison];
+    if (comparison === undefined) {
+      return;
+    }
+    let error = comparison[pathnames.urlFields.result.error];
+    if (error !== "" && error !== undefined && error !== null) {
+      this.resultUserFriendly.innerHTML = `<b style='color:red'>?</b><br>${error}`;
+      return;
+    }
+    let areEqual = comparison[pathnames.urlFields.result.comparison.areEqual];
+    if (areEqual !== true) {
+      this.resultUserFriendly.innerHTML = "<b style='color:red'>&cross;</b>";
+      return;
     }
   }
 }

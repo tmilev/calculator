@@ -9,16 +9,42 @@ SyntacticElement Calculator::getEmptySyntacticElement() {
   return result;
 }
 
-std::string SyntacticElement::toStringHumanReadable(Calculator& theBoss, bool includeLispifiedExpressions) const {
-  std::string controlString;
-  if (this->controlIndex < 0) {
-    controlString = "Error: control index is not initialized! This is likely a programming error.";
-  } else {
-    controlString = theBoss.controlSequences[this->controlIndex];
+bool SyntacticElement::isCommandEnclosure() const {
+  Calculator* owner = this->theData.owner;
+  if (this->theData.owner == nullptr) {
+    return false;
   }
-  bool makeTable = this->controlIndex == theBoss.conExpression() ||
-  this->controlIndex == theBoss.conError() || this->controlIndex == theBoss.conSequence() ||
-  this->controlIndex == theBoss.conSequenceStatements()|| this->controlIndex == theBoss.conVariable();
+  if (
+    this->controlIndex != owner->conExpression() &&
+    this->controlIndex != owner->conSequenceStatements()
+  ) {
+    return false;
+  }
+  if (this->theData.startsWith(owner->opCommandEnclosure())) {
+    return true;
+  }
+  if (this->theData.startsWith(owner->opCommandSequence()) && this->theData.size() >=2) {
+    if (this->theData[1].startsWith(owner->opCommandEnclosure())) {
+      return true;
+    }
+  }
+  return false;
+}
+
+std::string SyntacticElement::toStringSyntaxRole(const Calculator& owner) const {
+  if (this->controlIndex < 0) {
+    return "Control index not initialized. ";
+  }
+  return owner.controlSequences[this->controlIndex];
+}
+
+std::string SyntacticElement::toStringHumanReadable(
+  Calculator& owner, bool includeLispifiedExpressions
+) const {
+  std::string controlString = this->toStringSyntaxRole(owner);
+  bool makeTable = this->controlIndex == owner.conExpression() ||
+  this->controlIndex == owner.conError() || this->controlIndex == owner.conSequence() ||
+  this->controlIndex == owner.conSequenceStatements()|| this->controlIndex == owner.conVariable();
   if (!makeTable) {
     return controlString;
   }
@@ -1947,11 +1973,11 @@ bool Calculator::extractExpressions(Expression& outputExpression, std::string* o
       errorLog << "Syntax error with message: " << result.errorString;
     } else {
       errorLog << "Syntax error: your command simplifies to a single syntactic element but it is not an expression. <br>";
-      errorLog << "It simplifies to:<br> " << this->toStringSyntacticStackHTMLTable(false);
+      errorLog << "It simplifies to:<br> " << this->toStringSyntacticStackHTMLTable(false, false);
     }
   } else {
     errorLog << "Syntax error: your command does not simplify to a single syntactic element. <br>";
-    errorLog << "Instead it simplifies to:<br> " << this->toStringSyntacticStackHTMLTable(false);
+    errorLog << "Instead it simplifies to:<br> " << this->toStringSyntacticStackHTMLTable(false, false);
   }
   if (outputErrors != nullptr) {
     *outputErrors = errorLog.str();
@@ -2008,10 +2034,10 @@ bool Calculator::applyOneRule() {
   const SyntacticElement& eighthToLastE = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 8];
   const std::string& eighthToLastS = this->controlSequences[eighthToLastE.controlIndex];
   if (this->flagLogSyntaxRules) {
-    this->parsingLog += "<hr>" + this->toStringSyntacticStackHTMLTable(false);
+    this->parsingLog += "<hr>" + this->toStringSyntacticStackHTMLTable(false, false);
   }
   if (secondToLastS == "%" && lastS == "LogParsing") {
-    this->parsingLog += "<hr>" + this->toStringSyntacticStackHTMLTable(false);
+    this->parsingLog += "<hr>" + this->toStringSyntacticStackHTMLTable(false, false);
     this->flagLogSyntaxRules = true;
     this->parsingLog += "[Rule: remove white space]";
     this->popTopSyntacticStack();

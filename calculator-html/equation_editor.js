@@ -1127,6 +1127,11 @@ class LaTeXConstants {
     for (let i = 0; i < this.latinCharactersString.length; i++) {
       this.latinCharacters[this.latinCharactersString[i]] = true;
     }
+    this.characterReplacingSelectionString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 +-*";
+    this.characterReplacingSelection = {};
+    for (let i = 0; i < this.characterReplacingSelectionString.length; i++) {
+      this.characterReplacingSelection[this.characterReplacingSelectionString[i]] = true;
+    }
     this.operatorsExtraPadding = {
       "=": "0.3em",
       // leq
@@ -1526,6 +1531,13 @@ class LaTeXConstants {
       }
     }
     return new LatexWithAnnotation(result.join(""), selectionStart, selectionEnd);
+  }
+
+  isCharacterReplacingSelection(
+    /**@type{string}*/
+    input,
+  ) {
+    return input in this.characterReplacingSelection;
   }
 
   isLatinCharacter(
@@ -2347,6 +2359,10 @@ class EquationEditor {
     this.prepareEventCatcher();
   }
 
+  pasteFromClipboard() {
+    throw "Paste not implemented";
+  }
+
   copyToClipboard() {
     let latexWithAnnotation = this.rootNode.toLatexWithAnnotation();
     let toBeCopied = "";
@@ -2635,6 +2651,20 @@ class EquationEditor {
     return result;
   }
 
+  /** Determines whether to delete a selection with non-default editable action when
+   * a key is pressed.
+   * 
+   * @param {string} key
+   * 
+   */
+  shouldDeleteSelection(
+    key,
+  ) {
+    return this.hasSelection() &&
+      this.selectionEscapedOriginalAtom() &&
+      latexConstants.isCharacterReplacingSelection(key);
+  }
+
   handleKeyDownCatchAll(
     /**@type{KeyboardEvent} */
     e,
@@ -2643,8 +2673,20 @@ class EquationEditor {
     e.preventDefault();
     // console.log(`DEBUG: Catch-all keyboard event, key: ${e.key}, shift: ${e.shiftKey}, ctrl: ${e.ctrlKey}`);
     let key = e.key;
-    if (key === "c" && e.ctrlKey) {
-      this.copyToClipboard()
+    if (e.ctrlKey) {
+      switch (key) {
+        case "c":
+          this.copyToClipboard();
+          break;
+        case "v":
+          this.pasteFromClipboard();
+          break;
+        default: break;
+      }
+      return;
+    }
+    if (this.shouldDeleteSelection(key)) {
+      this.deleteSelection(key);
       return;
     }
     switch (key) {
@@ -2661,7 +2703,7 @@ class EquationEditor {
       case "Delete":
       case "Backspace":
         if (this.hasSelection()) {
-          this.deleteSelection();
+          this.deleteSelection(null);
           return;
         }
         this.resetSelectionFocusBestChoice();
@@ -2681,8 +2723,14 @@ class EquationEditor {
     return this.selectionStartExpanded.position === - 1;
   }
 
-  /** @returns{KeyHandlerResult} whether the default should be prevented. */
-  deleteSelection() {
+  /** @returns{KeyHandlerResult} whether the default should be prevented. 
+   * 
+   * @param {string|null} keyOrLatex A Latex snippet, latin character, whitespace or digit to replace the selection.
+  */
+  deleteSelection(
+    /**@type{string|null} */
+    keyOrLatex,
+  ) {
     if (!this.hasSelection()) {
       return new KeyHandlerResult(false, false);
     }
@@ -2711,9 +2759,19 @@ class EquationEditor {
       return new KeyHandlerResult(false, false);
     }
     let horizontalReplacement = mathNodeFactory.horizontalMathFromArray(this, splitBySelection.beforeSplit);
-    let atom = mathNodeFactory.atom(this, "");
-    atom.desiredCaretPosition = 0;
-    horizontalReplacement.appendChild(atom);
+    /**@type{MathNode} */
+    let replacing = null;
+    if (keyOrLatex !== null) {
+      replacing = new LaTeXParser(this, keyOrLatex).parse();
+    } else {
+      replacing = mathNodeFactory.atom(this, "");
+    }
+    if (replacing.type.type === knownTypes.atom.type) {
+      replacing.desiredCaretPosition = replacing.textContentOrInitialContent().length;
+    } else {
+      replacing.desiredCaretPosition = 1;
+    }
+    horizontalReplacement.appendChild(replacing);
     horizontalReplacement.appendChildren(splitBySelection.afterSplit);
     horizontalReplacement.normalizeHorizontalMath();
     horizontalReplacement.ensureEditableAtoms();
@@ -2721,6 +2779,7 @@ class EquationEditor {
     this.resetSelectionLeaveRangesIntact();
     parent.updateDOM();
     parent.focusRestore();
+    this.writeDebugInfo(null);
     return new KeyHandlerResult(true, true);
   }
 
@@ -4921,6 +4980,7 @@ class MathNode {
     return null;
   }
 
+  /**@returns{MathNode|null} */
   rightmostAtomChild() {
     if (this.type.type === knownTypes.atom.type) {
       return this;
@@ -5043,18 +5103,37 @@ class MathNode {
     return found;
   }
 
+  /**@returns{boolean} Whether normalization of horizontal math is needed. */
+  normalizeHorizontalMathInHorizontalMathOnceAccountOneChild(
+    /**@type{MathNode[]} */
+    normalizedChildren,
+    /**@type{MathNode} */
+    current,
+  ) {
+    if (current.type.type !== knownTypes.horizontalMath.type) {
+      normalizedChildren.push(current);
+      return false;
+    }
+    for (let j = 0; j < current.children.length; j++) {
+      if (current.desiredCaretPosition === 0 && j === 0) {
+        current.children[j].desiredCaretPosition = 0;
+      } else if (current.desiredCaretPosition > 0 && j === current.children.length - 1) {
+        current.children[j].desiredCaretPosition = 1;
+      }
+      normalizedChildren.push(current.children[j]);
+    }
+    return true;
+
+  }
+
   normalizeHorizontalMathInHorizontalMathOnce() {
     let normalizedChildren = [];
     let found = false;
     for (let i = 0; i < this.children.length; i++) {
-      let current = this.children[i];
-      if (current.type.type === knownTypes.horizontalMath.type) {
+      if (this.normalizeHorizontalMathInHorizontalMathOnceAccountOneChild(
+        normalizedChildren, this.children[i],
+      )) {
         found = true;
-        for (let j = 0; j < current.children.length; j++) {
-          normalizedChildren.push(current.children[j]);
-        }
-      } else {
-        normalizedChildren.push(current);
       }
     }
     if (!found) {
@@ -5213,7 +5292,7 @@ class MathNode {
   /** @returns{KeyHandlerResult} whether the default should be prevented. */
   deleteButton() {
     if (this.equationEditor.hasSelection()) {
-      return this.equationEditor.deleteSelection();
+      return this.equationEditor.deleteSelection(null);
     }
     if (
       this.positionCaretBeforeKeyEvents !== this.element.textContent.length ||
@@ -5233,7 +5312,7 @@ class MathNode {
   /** @returns{KeyHandlerResult} whether the default should be prevented. */
   backspace() {
     if (this.equationEditor.hasSelection()) {
-      return this.equationEditor.deleteSelection();
+      return this.equationEditor.deleteSelection(null);
     }
     if (
       this.positionCaretBeforeKeyEvents !== 0 ||
@@ -6363,6 +6442,16 @@ class MathNode {
       if (this.children[i].focusRestore()) {
         return true;
       }
+    }
+    let sibling = null;
+    if (this.desiredCaretPosition > 0) {
+      sibling = this.firstAtomToTheRight();
+    } else if (this.desiredCaretPosition === 0) {
+      sibling = this.firstAtomToTheLeft();
+    }
+    if (sibling !== null) {
+      sibling.focus(0);
+      return true;
     }
     return false;
   }

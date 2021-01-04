@@ -2749,9 +2749,14 @@ class EquationEditor {
     let expanded = this.selectionStartExpanded.element.beefUpToHorizontalParent();
     if (expanded.type.type === knownTypes.root.type) {
       // Delete the root node.
-      this.rootNode = mathNodeFactory.rootMath(this);
+      this.rootNode.removeAllChildren();
+      this.rootNode.appendChild(mathNodeFactory.horizontalMath(this, null));
+      this.resetSelectionLeaveRangesIntact();
       this.updateDOM();
-      this.focusRestore();
+      this.rootNode.focus(0);
+      this.writeLatexToInput();
+      this.writeDebugInfo(null);
+      return new KeyHandlerResult(true, true);
     }
     let horizontalOwner = expanded.parent;
     let parent = horizontalOwner.parent;

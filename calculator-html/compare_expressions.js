@@ -121,6 +121,9 @@ class CompareExpressions {
       return;
     }
     let syntaxErrors = result[pathnames.urlFields.result.syntaxErrors];
+    if (syntaxErrors === "") {
+      syntaxErrors = result[pathnames.urlFields.result.syntaxErrorsExtra];
+    }
     if (syntaxErrors !== "" && syntaxErrors !== undefined && syntaxErrors !== null) {
       this.resultUserFriendly.innerHTML = `<b style='color:red'>?</b><br>${syntaxErrors}`;
       return;

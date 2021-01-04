@@ -46,6 +46,7 @@ const urlFields = {
     crashReport: "crashReport",
     error: "error",
     syntaxErrors: "syntaxErrors",
+    syntaxErrorsExtra: "syntaxErrorsExtra",
     // Comments on performance.
     performance: "performance",
     // Computation time. Excludes https traffic.

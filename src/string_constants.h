@@ -87,6 +87,7 @@ public:
   struct result {
     static std::string resultHtml;
     static std::string syntaxErrors;
+    static std::string syntaxErrorsExtra;
     static std::string resultLabel;
     static std::string badInput;
     static std::string comments;

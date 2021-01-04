@@ -125,8 +125,9 @@ JSData Calculator::extractComparison(const std::string& given, const std::string
   result[WebAPI::result::ComparisonData::givenRaw] = given;
   result[WebAPI::result::ComparisonData::desiredRaw] = desired;
   if (this->syntaxErrors != "") {
-    result[WebAPI::result::error] = "Failed to parse.";
+    result[WebAPI::result::error] = "Failed to parse. ";
     result[WebAPI::result::syntaxErrors] = this->toStringSyntacticStackHTMLSimple();
+    result[WebAPI::result::syntaxErrorsExtra] = this->syntaxErrors;
     return result;
   }
   JSData comparisonJSON;

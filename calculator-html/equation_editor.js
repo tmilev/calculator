@@ -2360,7 +2360,12 @@ class EquationEditor {
   }
 
   pasteFromClipboard() {
-    throw "Paste not implemented";
+    if (!this.hasSelection() || !this.selectionEscapedOriginalAtom()) {
+      return;
+    }
+    navigator.clipboard.readText().then((text) => {
+      this.deleteSelection(text);
+    });
   }
 
   copyToClipboard() {
@@ -2410,6 +2415,9 @@ class EquationEditor {
     this.eventCatcher.element.style.top = 0;
     this.eventCatcher.element.addEventListener("copy", (_) => {
       this.copyToClipboard();
+    });
+    this.eventCatcher.element.addEventListener("paste", (e) => {
+      this.pasteFromClipboard(e);
     });
     this.eventCatcher.element.addEventListener("keydown", (e) => {
       this.handleKeyDownCatchAll(e);

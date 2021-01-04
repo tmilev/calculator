@@ -139,6 +139,13 @@ class CompareExpressions {
       this.resultUserFriendly.innerHTML = "<b style='color:red'>&cross;</b>";
       return;
     }
+    let areEqualAsAnswers = comparison[pathnames.urlFields.result.comparison.areEqualAsAnswers];
+    if (areEqualAsAnswers !== true) {
+      this.resultUserFriendly.innerHTML = "<b style='color:blue'>&#x2713;</b> [more work needed]";
+      return;
+    }
+    this.resultUserFriendly.innerHTML = "<b style='color:green'>&#x2713;</b>";
+    return;
   }
 }
 

@@ -60,6 +60,7 @@ const urlFields = {
     comparison: {
       comparison: "comparison",
       areEqual: "areEqual",
+      areEqualAsAnswers: "areEqualAsAnswers",
     },
   },
   problem: {

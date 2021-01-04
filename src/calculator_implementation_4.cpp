@@ -24,6 +24,7 @@ Calculator::Calculator() {
   this->flagUseLnInsteadOfLog = false;
   this->flagPlotShowJavascriptOnly = false;
   this->numberExpectedExpressionsAtInitialization = - 1;
+  this->flagUseScientificFunctions = true;
 }
 
 MemorySaving<Calculator>& GlobalVariables::calculator() {
@@ -1369,6 +1370,68 @@ void Calculator::addOperationHandler(
     global.fatal << "Function not initialized properly. " << global.fatal;
   }
   this->registerCalculatorFunction(theFun, indexOp);
+}
+
+Function::Options Function::Options::innerAdminNoTestInvisibleOffByDefault() {
+  Function::Options result;
+  result.flagIsInner = true;
+  result.dontTestAutomatically = true;
+  result.adminOnly = true;
+  result.visible = false;
+  result.disabledByUser = true;
+  result.disabledByUserDefault = true;
+  return result;
+}
+
+
+Function::Options Function::Options::innerAdminNoTest() {
+  Function::Options result;
+  result.flagIsInner = true;
+  result.dontTestAutomatically = true;
+  result.adminOnly = true;
+  return result;
+}
+
+Function::Options Function::Options::innerAdminNoTestExperimental() {
+  Function::Options result = Function::Options::innerAdminNoTest();
+  result.flagIsExperimental = true;
+  return result;
+}
+
+Function::Options Function::Options::innerInvisibleExperimental() {
+  Function::Options result;
+  result.flagIsInner = true;
+  result.flagIsExperimental = true;
+  result.visible = false;
+  return result;
+}
+
+Function::Options Function::Options::experimental() {
+  Function::Options result;
+  result.flagIsInner = true;
+  result.flagIsExperimental = true;
+  return result;
+}
+
+Function::Options Function::Options::standard() {
+  Function::Options result;
+  result.flagIsInner = true;
+  return result;
+}
+
+Function::Options Function::Options::innerInvisible() {
+  Function::Options result;
+  result.flagIsInner = true;
+  result.visible = false;
+  return result;
+}
+
+Function::Options Function::Options::adminNoTest() {
+  Function::Options result;
+  result.flagIsInner = true;
+  result.dontTestAutomatically = true;
+  result.adminOnly = true;
+  return result;
 }
 
 void Function::Options::reset() {

@@ -781,6 +781,14 @@ class Function {
     bool dontTestAutomatically;
     bool adminOnly;
     void reset();
+    static Options adminNoTest();
+    static Options innerInvisible();
+    static Options standard();
+    static Options innerAdminNoTestInvisibleOffByDefault();
+    static Options innerInvisibleExperimental();
+    static Options innerAdminNoTestExperimental();
+    static Options innerAdminNoTest();
+    static Options experimental();
     Options();
   };
   Options options;
@@ -1277,6 +1285,7 @@ public:
   bool flagDefaultRulesWereTamperedWith;
   bool flagHasGraphics;
   bool flagWriteLatexPlots;
+  bool flagUseScientificFunctions;
 
   bool flagNoApproximations;
 
@@ -2115,7 +2124,7 @@ public:
     JSData storedResults;
     Test(Calculator& inputOwner);
     bool processResults();
-    bool loadTestStrings(std::stringstream *commentsOnFailure);
+    bool loadTestStrings(std::stringstream* commentsOnFailure);
     bool writeTestStrings(std::stringstream* commentsOnFailure);
     bool processOneTest(JSData& input);
     static bool all();
@@ -2298,9 +2307,10 @@ public:
   void initializeBuiltInAtomsWhosePowersAreInterpretedAsFunctions();
   void initBuiltInAtomsNotInterpretedAsFunctions();
   void initializeAtomsNotGoodForChainRule();
-  void initPredefinedStandardOperations();
+  void initializeStandardFunctions();
+  void initializeScientificFunctions();
+  void initializeSemisimpleLieAlgebraFunctions();
   void initializePredefinedStandardOperationsWithoutHandler();
-  void initPredefinedInnerFunctions();
   void initCalculusTestingFunctions();
   void initAdminFunctions();
   void initPredefinedOperationsComposite();

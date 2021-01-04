@@ -8,6 +8,7 @@
     "colors": "^1.2.1",
     "fs": "^0.0.1-security",
     "jsonwebtoken": "^8.2.0",
+    "minify": "^6.0.1",
     "uglify": "^0.1.5"
   },
   "devDependencies": {},

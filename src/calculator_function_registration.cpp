@@ -50,7 +50,6 @@ void Calculator::initCalculusTestingFunctions() {
   this->initAdminFunctions();
 }
 
-// Calculator::initPredefinedInnerFunctions
 // Naming conventions: please start all built-in calculator functions with capital letter.
 // Exceptions are made for the following.
 // 1) Functions that have mathematical names
@@ -59,7 +58,21 @@ void Calculator::initCalculusTestingFunctions() {
 // 2) Exceptions (desired or otherwise) are made for functions that have already
 // been assigned keywords starting with non-capital letter
 // and have been used too often.
-void Calculator::initPredefinedInnerFunctions() {
+// IMPORTANT.
+// The order of registration of operation handlers for the same operation name
+// defines the order in which operation
+// handlers are called. Operations handlers registered first are executed first.
+// The order only matters for different handlers of the same operation.
+// This order is very important, as some of the
+// handlers will act properly only if the preceding ones have been carried through
+// (example: outerExtractBaseMultiplication requires outerAssociate).
+// Note that one can easily transform the code so that the order does not matter.
+// One can do that by ``packing'' the correct order of operations into a super-function,
+// or by making the corresponding handlers call each other as needed.
+// A combination of these two was indeed the original design approach,
+// but experience showed that life is easier if we
+// take advantage of the order of operations to write less code.
+void Calculator::initializeStandardFunctions() {
   Function::Options innerStandard;
   innerStandard.flagIsInner = true;
 
@@ -94,19 +107,12 @@ void Calculator::initPredefinedInnerFunctions() {
   innerNoTestExperimental = innerNoTest;
   innerNoTestExperimental.flagIsExperimental = true;
 
-  Function::Options innerInvisibleExperimental;
-  innerInvisibleExperimental.flagIsInner = true;
-  innerInvisibleExperimental.flagIsExperimental = true;
-  innerInvisibleExperimental.visible = false;
-
   Function::Options innerAdminNoTest;
   innerAdminNoTest.flagIsInner = true;
   innerAdminNoTest.dontTestAutomatically = true;
   innerAdminNoTest.adminOnly = true;
 
-  Function::Options innerAdminNoTestExperimental;
-  innerAdminNoTestExperimental = innerAdminNoTest;
-  innerAdminNoTestExperimental.flagIsExperimental = true;
+  Function::Options innerAdminNoTestExperimental = Function::Options::innerAdminNoTestExperimental();
 
   Function::Options innerAdminNoTestInvisibleOffByDefault;
   innerAdminNoTestInvisibleOffByDefault.flagIsInner = true;
@@ -1323,16 +1329,6 @@ void Calculator::initPredefinedInnerFunctions() {
     "CalculatorFunctionsWeylGroup::hyperOctahedralPrintGeneratorCommutationRelations",
     "HyperOctahedralGeneratorPrint",
     innerAdminNoTest
-  );
-  this->addOperationHandler(
-    "PrintMacdonaldPolys",
-    CalculatorFunctionsWeylGroup::macdonaldPolys,
-    "",
-    "Prints macdonald polynomials from a semisimple type. ",
-    "PrintMacdonaldPolys{}(B_3)",
-    "CalculatorFunctionsWeylGroup::macdonaldPolys",
-    "PrintMacdonaldPolys",
-    innerStandard
   );
   this->addOperationHandler(
     "Numerator",
@@ -2560,59 +2556,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "MinPolyMatrix",
     innerStandard
   );
-  this->addOperationHandler(
-    "CharPoly",
-    CalculatorFunctions::innerCharPolyMatrix,
-    "",
-    "Computes the characteristic polynomial of a matrix (= det(A-q*Id)), "
-    "provided that the matrix is not too large.",
-    "A =\\begin{pmatrix}2 & 3& 5\\\\ 7& 11& 13\\\\ 17&19 &23\\end{pmatrix}; p =MinPolyMatrix{}A",
-    "CalculatorFunctions::innerCharPolyMatrix",
-    "CharPoly",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "MakeCharacterLieAlg",
-    CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional,
-    "",
-    "Creates character of a semisimple Lie algebra finite dimensional irreducible module. "
-    "First argument gives type, second argument gives highest weight in fundamental coordinates.",
-    "x = MakeCharacterLieAlg{}(G_2, (1, 0));\n"
-    "y = MakeCharacterLieAlg{}(G_2, (0, 1));\n"
-    "x * y",
-    "Calculator::characterSemisimpleLieAlgebraFiniteDimensional",
-    "MakeCharacterLieAlg",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "GetLinks",
-    CalculatorLieTheory::getLinksToSimpleLieAlgerbas,
-    "",
-    "Gets simple Lie algebra links to the calculator.",
-    "GetLinks{}0",
-    "Calculator::getLinksToSimpleLieAlgerbas",
-    "GetLinks",
-    innerInvisible
-  );
-  this->addOperationHandler(
-    "ConesIntersection",
-    CalculatorFunctions::innerConesIntersect,
-    "",
-    "Takes as input two sequences of vectors, generates two cones, "
-    "and intersects them using the simplex algorithm. "
-    "The output is a string report of the operation. "
-    "The first cone is generated over Z_{&gt;} (``strict cone'') "
-    "the second cone is generated over Z_{&gt;= 0} (``non-strict cone'').",
-    "v_1 = (1, 2, 3);\n"
-    "v_2 = (1, 3, 2);\n"
-    "v_3 = (3, 1, 1);\n"
-    "v_4 = (- 2, 2, 2);\n"
-    "ConesIntersection{}((v_1, v_2), (v_3, v_4 ));\n"
-    "ConesIntersection{}((v_1, v_2), (v_3, - v_4));",
-    "Calculator::innerConesIntersect",
-    "ConesIntersection",
-    innerStandard
-  );
+
   this->addOperationHandler(
     "PrintRuleStack",
     CalculatorFunctions::printRuleStack,
@@ -2928,29 +2872,6 @@ void Calculator::initPredefinedInnerFunctions() {
     "ModP{}(7, 3)",
     "Calculator::innerZmodP",
     "ModP",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "AdCommonEigenspace",
-    CalculatorFunctions::innerAdCommonEigenSpaces,
-    "",
-    "Computes common eigenspace of the adjoint action of semisimple Lie "
-    "algebra elements inside the semisimple Lie algebra. ",
-    "AdCommonEigenspace{}(F_4, -5 (g_{9}) +3 (g_{13}) +5 (g_{16}) +4 (g_{10}), g_{14}+g_{22}+g_{20})",
-    "Calculator::innerAdCommonEigenSpaces",
-    "AdCommonEigenspace",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "AttemptExtendingEtoHEFwithHinCartan",
-    CalculatorFunctions::innerAttemptExtendingEtoHEFwithHinCartan,
-    "",
-    "Attempts to embed an element E into an sl(2)-triple over "
-    "the rationals, such that the element H is in the "
-    "ambient Cartan algebra. ",
-    "AttemptExtendingEtoHEFwithHinCartan{}(F_4, g_1+2g_2+3g_3+4g_4)",
-    "Calculator::innerAttemptExtendingEtoHEFwithHinCartan",
-    "AttemptExtendingEtoHEFwithHinCartan",
     innerStandard
   );
   this->addOperationHandler(
@@ -3941,130 +3862,6 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->addOperationHandler(
-    "SemisimpleLieAlgebra",
-    CalculatorConversions::innerSemisimpleLieAlgebra,
-    "",
-    "Creates a semisimple Lie algebra. The semisimple Lie algebra "
-    "is given via its Dynkin type. A simple Dynkin type is given by "
-    "type letter with upper index equal to the "
-    "inverse of the scale of the symmetric Cartan "
-    "matrix and lower index equal to "
-    "the rank of the subalgebra. "
-    "For example A^2_3 stands for type "
-    "A_3 (sl (4)) with symmetric "
-    "Cartan matrix scale equal to 1/2. "
-    "If the upper index is omitted, "
-    "it is implied to be 1.<hr> "
-    "We define the symmetric Cartan matrix "
-    "as the matrix whose (i, j)^{th} "
-    "entry is the scalar product of the "
-    "i^{th} and j^{th} roots. "
-    "We assume the roots to be ordered in "
-    "the order implied by the "
-    "(non-symmetric) Cartan matrices on "
-    "page 59 in Humphreys, "
-    "Introduction to Lie algebras and representation theory. "
-    "If the upper index of the Dynkin type is 1, "
-    "the corresponding symmetric Cartan matrix is "
-    "assigned the default value. "
-    "The default values are chosen "
-    "so that the long root has squared "
-    "length 2 in types A_n, B_n, D_n, E_6, E_7, E_8, "
-    "and F_4, squared length 4 in C_n, "
-    "and squared length 6 in type G_2. "
-    "<br>If upper index is not equal to 1, "
-    "the symmetric "
-    "Cartan matrix is given by dividing "
-    "the default symmetric "
-    "Cartan matrix by the upper index. ",
-    "g_{{i}}= GetChevalleyGenerator{}(SemisimpleLieAlgebra{}G_2, i);\n"
-    "h_{{i}}= GetCartanGenerator{}(SemisimpleLieAlgebra{}G_2, i);\n"
-    "[g_1,g_{- 1}]; \n[g_2, g_{-2}]; \n[h_{1}, g_6]; \n[h_2, g_{-6}]",
-    "CalculatorConversions::innerSemisimpleLieAlgebra",
-    "SemisimpleLieAlgebra",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "WriteSemisimpleLieAlgebra",
-    CalculatorLieTheory::writeSemisimpleLieAlgebraToHardDisk,
-    "",
-    "Writes semisimple Lie algebra structure constants to "
-    "the output folder of the calculator. Available to logged-in admins only. ",
-    "WriteSemisimpleLieAlgebra(F_4)",
-    "Calculator::writeToHardDiskOrPrintSemisimpleLieAlgebra",
-    "WriteSemisimpleLieAlgebra",
-    innerStandard
-  );
-
-  this->addOperationHandler(
-    "PrintSemisimpleLieAlgebra",
-    CalculatorLieTheory::printSemisimpleLieAlgebraVerbose,
-    "",
-    "Creates a printout with information about the "
-    "semisimple Lie algebra, including "
-    "the Lie bracket pairing table. "
-    "In addition, this function creates "
-    "a graphics of the root system. ",
-    "PrintSemisimpleLieAlgebra{}(F_4);\n"
-    "PrintSemisimpleLieAlgebra{}(2 G^5_2 + B_3);",
-    "Calculator::printSemisimpleLieAlgebraVerbose",
-    "PrintSemisimpleLieAlgebra",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "PrecomputeSemisimpleLieAlgebraStructure",
-    CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure,
-    "",
-    "Function available to logged-in admins only. "
-    "Precomputes all built-in semisimple Lie algebra information. "
-    "Argument gives a starting point (0 or negative to start at the beginning). "
-    "Turn process monitoring on when using this function. ",
-    "PrecomputeSemisimpleLieAlgebraStructure 0",
-    "CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure",
-    "PrecomputeSemisimpleLieAlgebraStructure",
-    innerAdminNoTest
-  );
-  this->addOperationHandler(
-    "GetChevalleyGenerator",
-    CalculatorLieTheory::chevalleyGenerator,
-    "",
-    "First argument must be a semisimple "
-    "Lie algebra, second argument must "
-    "be an integer from -N to N, "
-    "where N is the number of positive "
-    "roots of the Lie algebra. "
-    "The function returns the "
-    "Chevalley-Weyl generator labeled by the root "
-    "corresponding to the integer index. "
-    "The roots are indexed in the "
-    "ordered displayed by the "
-    "PrintSemisimpleLieAlgebra function. ",
-    "[GetChevalleyGenerator{}(G_2, 6), GetChevalleyGenerator{}(G_2, -6)]",
-    "Calculator::chevalleyGenerator",
-    "GetChevalleyGenerator",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "GetCartanGenerator",
-    CalculatorLieTheory::cartanGenerator,
-    "",
-    "First argument must be a semisimple Lie algebra, "
-    "second argument must "
-    "be a number between 1 and K, where K is the rank "
-    "of the Lie algebra. "
-    "In this case the function returns the element of "
-    "the Cartan subalgebra that is dual "
-    "to the simple root with the same index. "
-    "Note that this element of the Cartan subalgebra "
-    "is proportional to a Chevalley-Weyl generator "
-    "with a coefficient of proportionality "
-    "equal to 2/(simple root length squared) ).",
-    "GetCartanGenerator{}(G_2, 1)",
-    "Calculator::cartanGenerator",
-    "GetCartanGenerator",
-    innerStandard
-  );
-  this->addOperationHandler(
     "FunctionToMatrix",
     CalculatorFunctions::innerFunctionToMatrix,
     "",
@@ -4326,587 +4123,6 @@ void Calculator::initPredefinedInnerFunctions() {
     "CalculatorFunctions::innerGetUserDefinedSubExpressions",
     "BlocksOfCommutativity",
     innerStandard
-  );
-  this->addOperationHandler(
-    "HeighestWeightVector",
-    CalculatorLieTheory::highestWeightVector,
-    "",
-    "Highest weight vector in a generalized Verma module. "
-    "The first argument gives the semisimple Lie algebra. "
-    "The second argument "
-    "gives the highest weight in fundamental coordinates. "
-    "The third argument parametrizes the parabolic subalgebra, e.g. "
-    "(1,0,0) stands for a "
-    "parabolic subalgebra with first simple root crossed-out. "
-    "The second argument is allowed to have "
-    "entries that are not non-negative integers in the "
-    "positions in which the third argument has 1's. ",
-    "g_{{i}}= GetChevalleyGenerator{}(B_3, i);\n"
-    "h_{{i}}= GetCartanGenerator{}(B_3, i);\n"
-    "v_\\mu=HeighestWeightVector{} (A_3, (1,0,1),(0,0,0));\n"
-    "v_\\lambda =HeighestWeightVector{}(B_3, (x_1,0,1),(1,0,0));\n"
-    "h_1g_{- 1}v_\\lambda",
-    "CalculatorFunctions::highestWeightVector",
-    "HeighestWeightVector",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "PrintModule",
-    CalculatorLieTheory::printGeneralizedVermaModule,
-    "",
-    "Makes a report on a finite dimensional Lie algebra module, "
-    "or more generally, on a generalized Verma module "
-    "(irreducible finite dimensional semisimple Lie algebra "
-    "modules are a partial case of generalized Verma modules). "
-    "The first argument gives the semisimple Lie algebra. "
-    "The second argument gives the highest weight "
-    "in fundamental coordinates. The third argument "
-    "parametrizes the parabolic subalgebra, e.g. "
-    "(1,0) stands for a parabolic subalgebra "
-    "(lying in algebra of rank 2) "
-    "with first simple root crossed-out. "
-    "The second argument is allowed to have "
-    "entries that are not non-negative integers "
-    "in the positions in which the third argument has 1's. ",
-    "PrintModule{}(G_2, (2, 0), (0, 0))",
-    "CalculatorFunctions::printGeneralizedVermaModule",
-    "PrintModule",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "HighestWeightTAAbf",
-    CalculatorFunctions::innerHighestWeightTransposeAntiAutomorphismBilinearForm,
-    "",
-    "Highest weight transpose anti-automorphism bilinear form, a.k.a. "
-    "Shapovalov form. Let M be a Verma module "
-    "with highest weight vector v given in "
-    "fundamental coordinates. Let P:M->M "
-    "be a projection map onto Cv that maps "
-    "every weight vector of M of weight "
-    "different from the highest to 0. "
-    "Let u_1, u_2 be two words in the "
-    "universal enveloping algebra. "
-    "Then define HighestWeightTAAbf(u_1,u_2)= Tr_M (P ( taa(u_1) u_2 ), "
-    "where taa() is the transpose anti-automorphism of g. ",
-    "g_{{a}}= GetChevalleyGenerator{} (G_2, a);\nHighestWeightTAAbf{}(g_{- 1} g_{-2}, g_{- 1}g_{-2}, (2,2))",
-    "CalculatorFunctions::innerHWTAABF",
-    "HighestWeightTAAbf",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "WeylDimFormula",
-    CalculatorLieTheory::weylDimFormula,
-    "",
-    "Weyl dimension formula. First argument gives "
-    "the type of the Weyl group of the simple "
-    "Lie algebra in the form Type_Rank (e.g. E_6). "
-    "The second argument gives the highest weight in fundamental coordinates. ",
-    "WeylDimFormula{}(G_2, (x,0));\nWeylDimFormula{}(B_3, (x,0,0));",
-    "CalculatorFunctions::weylDimFormula",
-    "WeylDimFormula",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "AnimateLittelmannPaths",
-    CalculatorLieTheory::animateLittelmannPaths,
-    "",
-    "Generates all Littelmann-Lakshmibai-Seshadri paths, draws them and animates them. "
-    "Presented first on the seminar in Charles University Prague. "
-    "The first argument gives the type of the semisimple Lie algebra, "
-    "the second gives the highest weight. ",
-    "AnimateLittelmannPaths{}(G_2, (2, 0));",
-    "CalculatorLieTheory::animateLittelmannPaths",
-    "AnimateLittelmannPaths",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "DecomposeInducingRepGenVermaModule",
-    CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart,
-    "",
-    "Decomposes the inducing module of a generalized "
-    "Verma module over the Levi part of a parabolic "
-    "smaller than the inducing one. "
-    "The first argument gives the type of the algebra. "
-    "The second argument gives the highest "
-    "weight of the module in "
-    "fundamental coordinates. "
-    "The third argument gives "
-    "the parabolic subalgebra with respect "
-    "to which we induce. The last argument "
-    "gives the parabolic subalgebra with "
-    "respect to whose Levi part we decompose.",
-    "DecomposeInducingRepGenVermaModule{}(B_3, (0, 1, 1), (1, 0, 0), (1, 0, 1))",
-    "CalculatorFunctions::decomposeFDPartGeneralizedVermaModuleOverLeviPart",
-    "DecomposeInducingRepGenVermaModule",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "Casimir",
-    CalculatorLieTheory::casimir,
-    "",
-    "Gives the Casimir element. ",
-    "Casimir{}(G_2)",
-    "Calculator::casimir",
-    "Casimir",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "CasimirWRTLevi",
-    CalculatorLieTheory::casimirWithRespectToLevi,
-    "",
-    "Gives the Casimir element of a Levi part of "
-    "a parabolic subalgebra. First argument = ambient Lie algebra. "
-    "Second argument = parabolic selection = 1 "
-    "stands for simple root outside of the Levi "
-    "component, 0 stands for simple root of the Levi component.",
-    "CasimirWRTLevi{}(B_3, (1,0,0))",
-    "CalculatorFunctions::casimirWithRespectToLevi",
-    "CasimirWRTLevi",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "HmmG2inB3",
-    CalculatorLieTheory::embedG2InB3,
-    "",
-    "Embeds elements of the Universal enveloping "
-    "of G_2 in B_3, following an embedding found "
-    "in a paper by McGovern.",
-    "g_{{a}}= GetChevalleyGenerator{} (G_2, a); "
-    "HmmG2inB3{}(g_1);\nHmmG2inB3{}(g_2) ",
-    "Calculator::embedG2InB3",
-    "HmmG2inB3",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "DrawRootSystem",
-    CalculatorLieTheory::drawRootSystem,
-    "",
-    "Draws the root system of a semisimple Lie algebra. "
-    "Takes one or three arguments: "
-    "if one argument is provided, that must "
-    "be a semisimple Lie algebra or "
-    "a semisimple Lie algebra type; "
-    "if three arguments are provided, "
-    "the first must be a semisimple "
-    "Lie algebra or a semisimple Lie algebra type, "
-    "and the second and third argument must be two "
-    "rational vectors of dimension "
-    "equal to the rank of the semisimple "
-    "Lie algebra. The root system is drawn in a "
-    "Coxeter plane. If the extra two vectors "
-    "are given, they are used to initialize "
-    "a preferred projection plane "
-    "in the change-to-basis entries "
-    "below the graphics. "
-    "Clicking the obvious button creates a basis "
-    "change animations ideal for presentations.",
-    "DrawRootSystem{}(A_7, (1, 0 , 2, 2, 2, 0, 1), (1, 3, 2, 2, 2, 3, 1))",
-    "CalculatorFunctions::drawRootSystem",
-    "DrawRootSystem",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "DrawWeightSupportWithMults",
-    CalculatorLieTheory::drawWeightSupportWithMults,
-    "",
-    "Draws the weight support of an irreducible "
-    "finite-dimensional highest weight module. "
-    "The first argument gives the type and the second "
-    "gives the highest weight given in "
-    "fundamental weight basis. The maximum number "
-    "of drawn weights allowed is (hard-code) "
-    "limited to 10 000. "
-    "If the number of weights in the weight "
-    "support exceeds this number, only "
-    "the first 10 000 weights will be drawn. "
-    "<b>Warning. Drawing text (i.e. multiplicities) "
-    "is very javascript-processor-intensive. "
-    "Use only for *small* examples, "
-    "else you might hang your browser. </b>",
-    "DrawWeightSupportWithMults{}(B_3, (0, 1, 1));\n"
-    "DrawWeightSupportWithMults{}(G_2, (1, 0))",
-    "CalculatorFunctions::drawWeightSupportWithMults",
-    "DrawWeightSupportWithMults",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "DrawWeightSupport",
-    CalculatorLieTheory::drawWeightSupport,
-    "",
-    "Same as DrawWeightSupportWithMults but displays no multiplicities. "
-    "Same warning for hanging up your browser "
-    "with javascript holds.",
-    "DrawWeightSupport{}(B_3, (1, 1, 1));\n"
-    "DrawWeightSupport{}(G_2, (1, 2))",
-    "CalculatorFunctions::drawWeightSupport",
-    "DrawWeightSupport",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "SplitFDpartB3overG2CharsOnly",
-    CalculatorLieTheory::splitFDpartB3overG2CharsOnly,
-    "",
-    "Splits the finite dimensional part of the "
-    "inducing module of the generalized "
-    "Verma module of B_3(so(7)) into G_2-components. "
-    "The argument is gives the highest weight of the "
-    "generalized Verma module in fundamental "
-    "coordinates with respect to so(7). "
-    "The arguments which are not small integers "
-    "indicate the non-selected "
-    "roots of the inducing parabolic subalgebra of B_3. ",
-    "SplitFDpartB3overG2CharsOnly(x_1, 2, 0)",
-    "CalculatorLieTheory::splitFDpartB3overG2CharsOnly",
-    "SplitFDpartB3overG2CharsOnly",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "SplitFDpartB3overG2",
-    CalculatorLieTheory::splitFDpartB3overG2,
-    "",
-    "Splits the finite dimensional part of the inducing "
-    "module of the generalized Verma module of "
-    "B_3(so(7)) into G_2-components. "
-    "The argument is gives the highest weight of the "
-    "generalized Verma module in fundamental "
-    "coordinates with respect to so(7). "
-    "The arguments which are not small integers "
-    "indicate the non-selected roots of the inducing "
-    "parabolic subalgebra of B_3. ",
-    "SplitFDpartB3overG2{}(x_1, 1, 0)",
-    "CalculatorFunctions::splitFDpartB3overG2",
-    "SplitFDpartB3overG2",
-    innerInvisibleExperimental
-  );
-  this->addOperationHandler(
-    "PrintB3G2branchingTableCharsOnly",
-    CalculatorLieTheory::printB3G2branchingTableCharsOnly,
-    "",
-    "Creates a table of branching of finite dimensional B_3-modules over G_2. "
-    "The argument of the function gives the "
-    "maximum height of the B_3-weight. "
-    "The second argument indicates the parabolic subalgebra of "
-    "B_3- zero entry stands for the corresponding "
-    "root space lying in the Levi part of the parabolic. "
-    "Non-zero entry means the corresponding "
-    "negative root space is not in the parabolic. "
-    "The expression given in that coordinate "
-    "is used as the corresponding highest weight. ",
-    "PrintB3G2branchingTableCharsOnly{}(2, (0,0,0)); "
-    "PrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))",
-    "CalculatorLieTheory::printB3G2branchingTableCharsOnly",
-    "PrintB3G2branchingTableCharsOnly",
-    innerInvisibleExperimental
-  );
-  this->addOperationHandler(
-    "PrintB3G2branchingTable",
-    CalculatorLieTheory::printB3G2branchingTable,
-    "",
-    "Creates a table of branching of finite dimensional B_3-modules over G_2. "
-    "The argument of the function gives the maximum height "
-    "of the B_3-weight. The function works with arguments 0 or 1; "
-    "values of 2 or more must be run off-line.",
-    "PrintB3G2branchingTable{}(1, (0,0,0)); "
-    "PrintB3G2branchingTable{}(1, (x_1,0,0))",
-    "Calculator::printB3G2branchingTable",
-    "PrintB3G2branchingTable",
-    innerInvisibleExperimental
-  );
-  this->addOperationHandler(
-    "SplitFDTensorGenericGeneralizedVerma",
-    CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional,
-    "",
-    "Experimental, please don't use. Splits generic generalized "
-    "Verma module tensor finite dimensional module. ",
-    "SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (x_1, x_2)); ",
-    "CalculatorFunctions::splitGenericGeneralizedVermaTensorFiniteDimensional",
-    "SplitFDTensorGenericGeneralizedVerma",
-    innerAdminNoTestExperimental
-  );
-  this->addOperationHandler(
-    "WriteGenVermaAsDiffOperatorsUpToWeightLevel",
-    CalculatorLieTheory::writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel,
-    "",
-    "<b>Experimental, please don't use</b>. "
-    "Embeds a Lie algebra in the Weyl algebra "
-    "with matrix coefficients. The third argument "
-    "gives the highest weight. The non-zero entries "
-    "of the highest weight give the root spaces "
-    "outside of the Levi part of the parabolic. "
-    "The second argument gives the weight "
-    "level to which the computation should be carried out",
-    "WriteGenVermaAsDiffOperatorsUpToWeightLevel{}(B_3, 1, (0, 0, y)); ",
-    "CalculatorFunctions::writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel",
-    "WriteGenVermaAsDiffOperatorsUpToWeightLevel",
-    innerAdminNoTestExperimental
-  );
-  this->addOperationHandler(
-    "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder",
-    CalculatorLieTheory::writeGenVermaModAsDiffOperatorsGeneratorOrder,
-    "",
-    "Constructs a parabolically induced map from a "
-    "semisimple Lie algebra to a Weyl algebra "
-    "with matrix coefficients. "
-    "More precisely, this function constructs a "
-    "generalized Verma module and writes it using "
-    "differential operators with matrix coefficients. "
-    "The first argument gives the type of the "
-    "semisimple Lie algebra, the second argument "
-    "gives the highest weight in fundamental coordinates. "
-    "The third argument gives the parabolic subalgebra "
-    "selection with 0 standing for non-crossed "
-    "out roots and 1 for crossed-out roots. "
-    "In all non crossed-out root positions, "
-    "the coordinates of the highest weight "
-    "vector must be small integers (because the highest "
-    "weight must be dominant and integral with respect "
-    "to the Levi part of the inducing parabolic subalgebra). "
-    "In the crossed-out root positions, the coordinates "
-    "of the highest weight vector can be "
-    "arbitrary polynomial expressions. "
-    "The algorithm depends on an order chosen on "
-    "the Chevalley-Weyl generators of the nilradical. "
-    "Here, we sort the nilradical elements in descending "
-    "order relative to the order of their roots. "
-    "In addition to the first 3 arguments, this function "
-    "accepts further optional arguments, "
-    "customizing the notation of the final printout.",
-    "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ",
-    "CalculatorLieTheory::writeGenVermaModAsDiffOperatorsGeneratorOrder",
-    "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "MapSemisimpleLieAlgebraInWeylAlgebra",
-    CalculatorLieTheory::writeGenVermaModAsDiffOperatorsNilOrderDescending,
-    "",
-    "Same as MapSemisimpleLieAlgebraInWeylAlgebra, "
-    "but with a different order on the elements "
-    "of the nilradical. We sort the elements "
-    "of the nilradical as follows. "
-    "Consider the partial order given "
-    "by the graded lex order on the coordinates that "
-    "correspond to crossed-out roots. "
-    "Then extend this partial order "
-    "by ``breaking the ties'' via the graded "
-    "lexicographic order on the non-crossed out roots. "
-    "This extension we call "
-    "the nil-order. Now this function sorts the "
-    "elements of the nilradical in descending nil-order, "
-    "that is, elements with higher nil-order come first.",
-    "MapSemisimpleLieAlgebraInWeylAlgebra{}(B_3, (0, 0, 0), (0, 0, 1), x, \\partial, a); ",
-    "Calculator::writeGenVermaModAsDiffOperatorsNilOrderDescending",
-    "MapSemisimpleLieAlgebraInWeylAlgebra",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "MapSemisimpleLieAlgebraInWeylAlgebraAllGens",
-    CalculatorLieTheory::writeGenVermaModAsDiffOperatorsAllGensNilOrderDescending,
-    "",
-    "Constructs a parabolically induced map from "
-    "a semisimple Lie algebra "
-    "to a Weyl algebra with matrix coefficients. "
-    "More precisely, this function constructs a "
-    "generalized Verma module and writes it using "
-    "differential operators with matrix coefficients. "
-    "The first argument gives the type of the "
-    "semisimple Lie algebra, the second argument "
-    "gives the highest weight in fundamental coordinates. "
-    "The third argument gives the parabolic "
-    "subalgebra selection with 0 standing for "
-    "non-crossed out roots and 1 for crossed-out roots. "
-    "In all non crossed-out root positions, "
-    "the coordinates of the highest weight "
-    "vector must be small integers (because the highest "
-    "weight must be dominant and integral with "
-    "respect to the Levi part of the inducing parabolic subalgebra). "
-    "In the crossed-out root positions, the "
-    "coordinates of the highest weight vector can be "
-    "arbitrary polynomial expressions. "
-    "In addition to the first 3 arguments, this function "
-    "accepts further optional arguments, customizing the "
-    "notation of the final printout. The differential "
-    "operator part of the algorithm uses the "
-    "nil-order given by the function "
-    "MapSemisimpleLieAlgebraInWeylAlgebra.",
-    "MapSemisimpleLieAlgebraInWeylAlgebraAllGens{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ",
-    "Calculator::writeGenVermaModAsDiffOperatorsAllGensNilOrderDescending",
-    "MapSemisimpleLieAlgebraInWeylAlgebraAllGens",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "KLcoeffs",
-    CalculatorLieTheory::kazhdanLuzstigCoeffificents,
-    "",
-    "Computes the n by n tables of "
-    "1) Kazhdan-Lusztig polynomials, "
-    "2) R polynomials and "
-    "3) Kazhdan-Lusztig polynomials evaluated at one, where n<=192 "
-    "is the size of the Weyl group (i.e. no larger than D_4(so(8)). "
-    "The notation follows the original paper by Kazhdan and Lusztig, "
-    "\"Representations of Coxeter Groups and Hecke Algebras\". "
-    "The algorithm is directly derived from formulas (2.0a-c) there, "
-    "as explained in the Wikipedia page on Kazhdan-Lusztig polynomials. "
-    "Please note that the 192 by 192 element table takes "
-    "almost 3 minutes to compute. "
-    "Faster implementations of the KL polynomials are "
-    "available from programs by Fokko du Cloux and others "
-    "(our simple implementation stores the full table "
-    "of R-polynomials and KL-polynomials in RAM memory at "
-    "all times, unlike the other more efficient implementations).",
-    "KLcoeffs{}(B_3)",
-    "Calculator::kazhdanLuzstigCoeffificents",
-    "KLcoeffs",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "RootSubsystem",
-    CalculatorLieTheory::rootSubsystem,
-    "",
-    "Generates a root subsystem of a simple type. "
-    "First argument indicates simple type, second, third,... arguments "
-    "give the generating roots. ",
-    "RootSubsystem(F_4, (0, 1, 0, 0), (0, 0, 1, 0), (1, 1, 2, 2))",
-    "Calculator::rootSubsystem",
-    "RootSubsystem",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "PrintRootSubalgebras",
-    CalculatorLieTheory::printRootSAs,
-    "",
-    "Prints sl(2) subalgebras and root subalgebras. "
-    "The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",
-    "PrintRootSubalgebras(E_6)",
-    "CalculatorFunctions::printRootSAs",
-    "PrintRootSubalgebras",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "PrintRootSubalgebrasRecompute",
-    CalculatorLieTheory::printRootSAsForceRecompute,
-    "",
-    "Same as printRootSubalgebras but forces recomputation. "
-    "Use to recompute obsolete or interrupted output files.",
-    "PrintRootSubalgebrasRecompute(b_3)",
-    "CalculatorFunctions::printRootSAsForceRecompute",
-    "PrintRootSubalgebrasRecompute",
-    innerAdminNoTest
-  );
-  this->addOperationHandler(
-    "PrintSlTwoSubalgebras",
-    CalculatorLieTheory::printSltwos,
-    "",
-    "Prints sl(2) subalgebras and root subalgebras. "
-    "The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",
-    "PrintSlTwoSubalgebras(g_2)",
-    "CalculatorFunctions::printSltwos",
-    "PrintSlTwoSubalgebras",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "ParabolicsInfoBruhatGraph",
-    CalculatorLieTheory::parabolicWeylGroupsBruhatGraph,
-    "",
-    "Makes a table with information about the Weyl group of a "
-    "parabolic subalgebra of the ambient Lie algebra, "
-    "as well as the cosets "
-    "(given by minimal coset representatives) of the Weyl subgroup "
-    "in question. "
-    "The input must have as many integers as there "
-    "are simple roots in the ambient Lie algebra. "
-    "If the root is crossed out "
-    "(i.e. not a root space of the Levi part), "
-    "one should put a 1 in the corresponding coordinate. "
-    "Otherwise, one should put 0. "
-    "For example, for Lie algebra B3(so(7)), calling "
-    "parabolicsInfoBruhatGraph(0, 0, 0) gives you the "
-    "Weyl group info for the entire algebra; "
-    "calling parabolicsInfoBruhatGraph(1,0,0) gives you "
-    "info for the Weyl subgroup generated by "
-    "the last two simple root. "
-    "In the produced graph, the element s_{\\eta_i} "
-    "corresponds to a reflection with respect "
-    "to the i^th simple root. You will get your "
-    "output as a .png file link, you must click onto "
-    "the link to see the end result. "
-    "<b>Please do not use for subalgebras "
-    "larger than B_4 (so(9)). The vpf program has "
-    "no problem handling this function up to "
-    "E_6 but LaTeX crashes trying to process the output. </b>",
-    "parabolicsInfoBruhatGraph{}(B_3,(1,0,0),(1,0,0))",
-    "CalculatorFunctions::parabolicWeylGroupsBruhatGraph",
-    "ParabolicsInfoBruhatGraph",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "TestMonomialBasisConjecture",
-    CalculatorLieTheory::testMonomialBaseConjecture,
-    "",
-    "Tests the monomial basis conjecture from a common work by Jackson and Milev paper. "
-    "First argument gives rank bound. "
-    "Second argument gives dimension bound. ",
-    "TestMonomialBasisConjecture{}(2, 50)",
-    "Calculator::testMonomialBaseConjecture",
-    "TestMonomialBasisConjecture",
-    innerAdminNoTestExperimental
-  );
-  this->addOperationHandler(
-    "LSpath",
-    CalculatorLieTheory::LSPath,
-    "",
-    "Lakshmibai-Seshadri path starting at 0. "
-    "The first argument gives the semisimple Lie algebra, "
-    "the next arguments give the way-points of the path.",
-    "LSpath{}(G_2, (0,0), (2,1) )",
-    "Calculator::LSPath",
-    "LSpath",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "LROdefine",
-    CalculatorLieTheory::littelmannOperator,
-    "",
-    "Littelmann root operator e_i, where e_i is the Littelmann "
-    "root operator with respect to root of index i. "
-    "If i is negative then the e_i root operator is defined to be "
-    "the f_\\alpha operator.",
-    "e_{{i}}= LROdefine_i; e_{- 1} e_{- 1} LSpath{}(G_2, (0,0), (2,1))",
-    "Calculator::littelmannOperator",
-    "LROdefine",
-    innerExperimental
-  );
-  this->addOperationHandler(
-    "PrintProductDistancesModN",
-    CalculatorFunctions::innerFindProductDistanceModN,
-    "",
-    "First argument = number N. Second argument = list of positive numbers. "
-    "This function finds, modulo N, the product "
-    "distance between 1 and each number mod N. "
-    "We define the product distance between 1 and a "
-    "number X as the minimal sum of elements "
-    "whose product equals X mod N, where "
-    "the elements are taken from the predefined "
-    "list of positive integers given by the second argument.",
-    "PrintProductDistancesModN(65537, "
-    "(97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122)"
-    ")",
-    "CalculatorFunctions::innerFindProductDistanceModN",
-    "PrintProductDistancesModN",
-    innerAdminNoTestInvisibleOffByDefault
-  );
-  this->addOperationHandler(
-    "SolveProductSumEquationOverSetModN",
-    CalculatorFunctions::innerSolveProductSumEquationOverSetModN,
-    "",
-    "Tries to find one solution of the system a_1*a_2* ...= X mod N a_1+a_2+...=Y "
-    "where the a_i's belong to a "
-    "predefined set of positive numbers. ",
-    "SolveProductSumEquationOverSetModN(theMod =65537; theProduct =16628; theSum=1286; "
-    "theSet = (97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122)) ",
-    "CalculatorFunctions::innerFindProductDistanceModN",
-    "SolveProductSumEquationOverSetModN",
-    innerAdminNoTestInvisibleOffByDefault
   );
   this->addOperationHandler(
     "IsNilpotent",
@@ -5625,30 +4841,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsProductTermsUpToPower",
     innerStandard
   );
-}
-
-void Calculator::initPredefinedStandardOperations() {
-  // IMPORTANT.
-  // The order of registration of operation handlers for the same operation name
-  // defines the order in which operation
-  // handlers are called. Operations handlers registered first are executed first.
-  // The order only matters for different handlers of the same operation.
-  // This order is very important, as some of the
-  // handlers will act properly only if the preceding ones have been carried through
-  // (example: outerExtractBaseMultiplication requires outerAssociate).
-  // Note that one can easily transform the code so that the order does not matter.
-  // One can do that by ``packing'' the the correct order of operations into a super-function,
-  // or by making the corresponding handlers call each other as needed.
-  // A combination of these two was indeed the original design approach,
-  // and gradually evolved to what is used now.
   Function::Options outerStandard;
   outerStandard.flagIsInner = false;
   Function::Options outerAdminInvisibleNoTest;
   outerAdminInvisibleNoTest.flagIsInner = false;
   outerAdminInvisibleNoTest.adminOnly = true;
   outerAdminInvisibleNoTest.dontTestAutomatically = true;
-  Function::Options innerStandard;
-  innerStandard.flagIsInner = true;
   Function::Options innerExperimentalNoTest;
   innerExperimentalNoTest.flagIsInner = true;
   innerExperimentalNoTest.flagIsExperimental = true;
@@ -8427,6 +7625,818 @@ void Calculator::initPredefinedOperationsComposite() {
     "CalculatorFunctions::innerCompositeDifferentiateLog",
     "DifferentiateLog",
     compositeStandard
+  );
+}
+
+void Calculator::initializeScientificFunctions() {
+  MacroRegisterFunctionWithName("Calculator::initializeScientificFunctions");
+  if (!this->flagUseScientificFunctions){
+    return;
+  }
+  this->initializeSemisimpleLieAlgebraFunctions();
+}
+
+void Calculator::initializeSemisimpleLieAlgebraFunctions() {
+  MacroRegisterFunctionWithName("Calculator::initializeSemisimpleLieAlgebraFunctions");
+  Function::Options innerStandard = Function::Options::standard();
+  Function::Options innerInvisible = Function::Options::innerInvisible();
+  Function::Options innerAdminNoTest = Function::Options::adminNoTest();
+  Function::Options innerInvisibleExperimental = Function::Options::innerInvisibleExperimental();
+  Function::Options innerAdminNoTestExperimental = Function::Options::innerAdminNoTestExperimental();
+  Function::Options innerExperimental = Function::Options::experimental();
+  Function::Options innerAdminNoTestInvisibleOffByDefault = Function::Options::innerAdminNoTestInvisibleOffByDefault();
+
+  this->addOperationHandler(
+    "SemisimpleLieAlgebra",
+    CalculatorConversions::innerSemisimpleLieAlgebra,
+    "",
+    "Creates a semisimple Lie algebra. The semisimple Lie algebra "
+    "is given via its Dynkin type. A simple Dynkin type is given by "
+    "type letter with upper index equal to the "
+    "inverse of the scale of the symmetric Cartan "
+    "matrix and lower index equal to "
+    "the rank of the subalgebra. "
+    "For example A^2_3 stands for type "
+    "A_3 (sl (4)) with symmetric "
+    "Cartan matrix scale equal to 1/2. "
+    "If the upper index is omitted, "
+    "it is implied to be 1.<hr> "
+    "We define the symmetric Cartan matrix "
+    "as the matrix whose (i, j)^{th} "
+    "entry is the scalar product of the "
+    "i^{th} and j^{th} roots. "
+    "We assume the roots to be ordered in "
+    "the order implied by the "
+    "(non-symmetric) Cartan matrices on "
+    "page 59 in Humphreys, "
+    "Introduction to Lie algebras and representation theory. "
+    "If the upper index of the Dynkin type is 1, "
+    "the corresponding symmetric Cartan matrix is "
+    "assigned the default value. "
+    "The default values are chosen "
+    "so that the long root has squared "
+    "length 2 in types A_n, B_n, D_n, E_6, E_7, E_8, "
+    "and F_4, squared length 4 in C_n, "
+    "and squared length 6 in type G_2. "
+    "<br>If upper index is not equal to 1, "
+    "the symmetric "
+    "Cartan matrix is given by dividing "
+    "the default symmetric "
+    "Cartan matrix by the upper index. ",
+    "g_{{i}}= GetChevalleyGenerator{}(SemisimpleLieAlgebra{}G_2, i);\n"
+    "h_{{i}}= GetCartanGenerator{}(SemisimpleLieAlgebra{}G_2, i);\n"
+    "[g_1,g_{- 1}]; \n[g_2, g_{-2}]; \n[h_{1}, g_6]; \n[h_2, g_{-6}]",
+    "CalculatorConversions::innerSemisimpleLieAlgebra",
+    "SemisimpleLieAlgebra",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "WriteSemisimpleLieAlgebra",
+    CalculatorLieTheory::writeSemisimpleLieAlgebraToHardDisk,
+    "",
+    "Writes semisimple Lie algebra structure constants to "
+    "the output folder of the calculator. Available to logged-in admins only. ",
+    "WriteSemisimpleLieAlgebra(F_4)",
+    "Calculator::writeToHardDiskOrPrintSemisimpleLieAlgebra",
+    "WriteSemisimpleLieAlgebra",
+    innerStandard
+  );
+
+  this->addOperationHandler(
+    "PrintSemisimpleLieAlgebra",
+    CalculatorLieTheory::printSemisimpleLieAlgebraVerbose,
+    "",
+    "Creates a printout with information about the "
+    "semisimple Lie algebra, including "
+    "the Lie bracket pairing table. "
+    "In addition, this function creates "
+    "a graphics of the root system. ",
+    "PrintSemisimpleLieAlgebra{}(F_4);\n"
+    "PrintSemisimpleLieAlgebra{}(2 G^5_2 + B_3);",
+    "Calculator::printSemisimpleLieAlgebraVerbose",
+    "PrintSemisimpleLieAlgebra",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "PrecomputeSemisimpleLieAlgebraStructure",
+    CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure,
+    "",
+    "Function available to logged-in admins only. "
+    "Precomputes all built-in semisimple Lie algebra information. "
+    "Argument gives a starting point (0 or negative to start at the beginning). "
+    "Turn process monitoring on when using this function. ",
+    "PrecomputeSemisimpleLieAlgebraStructure 0",
+    "CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure",
+    "PrecomputeSemisimpleLieAlgebraStructure",
+    innerAdminNoTest
+  );
+  this->addOperationHandler(
+    "GetChevalleyGenerator",
+    CalculatorLieTheory::chevalleyGenerator,
+    "",
+    "First argument must be a semisimple "
+    "Lie algebra, second argument must "
+    "be an integer from -N to N, "
+    "where N is the number of positive "
+    "roots of the Lie algebra. "
+    "The function returns the "
+    "Chevalley-Weyl generator labeled by the root "
+    "corresponding to the integer index. "
+    "The roots are indexed in the "
+    "ordered displayed by the "
+    "PrintSemisimpleLieAlgebra function. ",
+    "[GetChevalleyGenerator{}(G_2, 6), GetChevalleyGenerator{}(G_2, -6)]",
+    "Calculator::chevalleyGenerator",
+    "GetChevalleyGenerator",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "GetCartanGenerator",
+    CalculatorLieTheory::cartanGenerator,
+    "",
+    "First argument must be a semisimple Lie algebra, "
+    "second argument must "
+    "be a number between 1 and K, where K is the rank "
+    "of the Lie algebra. "
+    "In this case the function returns the element of "
+    "the Cartan subalgebra that is dual "
+    "to the simple root with the same index. "
+    "Note that this element of the Cartan subalgebra "
+    "is proportional to a Chevalley-Weyl generator "
+    "with a coefficient of proportionality "
+    "equal to 2/(simple root length squared) ).",
+    "GetCartanGenerator{}(G_2, 1)",
+    "Calculator::cartanGenerator",
+    "GetCartanGenerator",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "AdCommonEigenspace",
+    CalculatorFunctions::innerAdCommonEigenSpaces,
+    "",
+    "Computes common eigenspace of the adjoint action of semisimple Lie "
+    "algebra elements inside the semisimple Lie algebra. ",
+    "AdCommonEigenspace{}(F_4, -5 (g_{9}) +3 (g_{13}) +5 (g_{16}) +4 (g_{10}), g_{14}+g_{22}+g_{20})",
+    "Calculator::innerAdCommonEigenSpaces",
+    "AdCommonEigenspace",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "AttemptExtendingEtoHEFwithHinCartan",
+    CalculatorFunctions::innerAttemptExtendingEtoHEFwithHinCartan,
+    "",
+    "Attempts to embed an element E into an sl(2)-triple over "
+    "the rationals, such that the element H is in the "
+    "ambient Cartan algebra. ",
+    "AttemptExtendingEtoHEFwithHinCartan{}(F_4, g_1+2g_2+3g_3+4g_4)",
+    "Calculator::innerAttemptExtendingEtoHEFwithHinCartan",
+    "AttemptExtendingEtoHEFwithHinCartan",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "PrintMacdonaldPolys",
+    CalculatorFunctionsWeylGroup::macdonaldPolys,
+    "",
+    "Prints macdonald polynomials from a semisimple type. ",
+    "PrintMacdonaldPolys{}(B_3)",
+    "CalculatorFunctionsWeylGroup::macdonaldPolys",
+    "PrintMacdonaldPolys",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "CharPoly",
+    CalculatorFunctions::innerCharPolyMatrix,
+    "",
+    "Computes the characteristic polynomial of a matrix (= det(A-q*Id)), "
+    "provided that the matrix is not too large.",
+    "A =\\begin{pmatrix}2 & 3& 5\\\\ 7& 11& 13\\\\ 17&19 &23\\end{pmatrix}; p =MinPolyMatrix{}A",
+    "CalculatorFunctions::innerCharPolyMatrix",
+    "CharPoly",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "MakeCharacterLieAlg",
+    CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional,
+    "",
+    "Creates character of a semisimple Lie algebra finite dimensional irreducible module. "
+    "First argument gives type, second argument gives highest weight in fundamental coordinates.",
+    "x = MakeCharacterLieAlg{}(G_2, (1, 0));\n"
+    "y = MakeCharacterLieAlg{}(G_2, (0, 1));\n"
+    "x * y",
+    "Calculator::characterSemisimpleLieAlgebraFiniteDimensional",
+    "MakeCharacterLieAlg",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "GetLinks",
+    CalculatorLieTheory::getLinksToSimpleLieAlgerbas,
+    "",
+    "Gets simple Lie algebra links to the calculator.",
+    "GetLinks{}0",
+    "Calculator::getLinksToSimpleLieAlgerbas",
+    "GetLinks",
+    innerInvisible
+  );
+  this->addOperationHandler(
+    "ConesIntersection",
+    CalculatorFunctions::innerConesIntersect,
+    "",
+    "Takes as input two sequences of vectors, generates two cones, "
+    "and intersects them using the simplex algorithm. "
+    "The output is a string report of the operation. "
+    "The first cone is generated over Z_{&gt;} (``strict cone'') "
+    "the second cone is generated over Z_{&gt;= 0} (``non-strict cone'').",
+    "v_1 = (1, 2, 3);\n"
+    "v_2 = (1, 3, 2);\n"
+    "v_3 = (3, 1, 1);\n"
+    "v_4 = (- 2, 2, 2);\n"
+    "ConesIntersection{}((v_1, v_2), (v_3, v_4 ));\n"
+    "ConesIntersection{}((v_1, v_2), (v_3, - v_4));",
+    "Calculator::innerConesIntersect",
+    "ConesIntersection",
+    innerStandard
+  );
+
+  this->addOperationHandler(
+    "HeighestWeightVector",
+    CalculatorLieTheory::highestWeightVector,
+    "",
+    "Highest weight vector in a generalized Verma module. "
+    "The first argument gives the semisimple Lie algebra. "
+    "The second argument "
+    "gives the highest weight in fundamental coordinates. "
+    "The third argument parametrizes the parabolic subalgebra, e.g. "
+    "(1,0,0) stands for a "
+    "parabolic subalgebra with first simple root crossed-out. "
+    "The second argument is allowed to have "
+    "entries that are not non-negative integers in the "
+    "positions in which the third argument has 1's. ",
+    "g_{{i}}= GetChevalleyGenerator{}(B_3, i);\n"
+    "h_{{i}}= GetCartanGenerator{}(B_3, i);\n"
+    "v_\\mu=HeighestWeightVector{} (A_3, (1,0,1),(0,0,0));\n"
+    "v_\\lambda =HeighestWeightVector{}(B_3, (x_1,0,1),(1,0,0));\n"
+    "h_1g_{- 1}v_\\lambda",
+    "CalculatorFunctions::highestWeightVector",
+    "HeighestWeightVector",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "PrintModule",
+    CalculatorLieTheory::printGeneralizedVermaModule,
+    "",
+    "Makes a report on a finite dimensional Lie algebra module, "
+    "or more generally, on a generalized Verma module "
+    "(irreducible finite dimensional semisimple Lie algebra "
+    "modules are a partial case of generalized Verma modules). "
+    "The first argument gives the semisimple Lie algebra. "
+    "The second argument gives the highest weight "
+    "in fundamental coordinates. The third argument "
+    "parametrizes the parabolic subalgebra, e.g. "
+    "(1,0) stands for a parabolic subalgebra "
+    "(lying in algebra of rank 2) "
+    "with first simple root crossed-out. "
+    "The second argument is allowed to have "
+    "entries that are not non-negative integers "
+    "in the positions in which the third argument has 1's. ",
+    "PrintModule{}(G_2, (2, 0), (0, 0))",
+    "CalculatorFunctions::printGeneralizedVermaModule",
+    "PrintModule",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "HighestWeightTAAbf",
+    CalculatorFunctions::innerHighestWeightTransposeAntiAutomorphismBilinearForm,
+    "",
+    "Highest weight transpose anti-automorphism bilinear form, a.k.a. "
+    "Shapovalov form. Let M be a Verma module "
+    "with highest weight vector v given in "
+    "fundamental coordinates. Let P:M->M "
+    "be a projection map onto Cv that maps "
+    "every weight vector of M of weight "
+    "different from the highest to 0. "
+    "Let u_1, u_2 be two words in the "
+    "universal enveloping algebra. "
+    "Then define HighestWeightTAAbf(u_1,u_2)= Tr_M (P ( taa(u_1) u_2 ), "
+    "where taa() is the transpose anti-automorphism of g. ",
+    "g_{{a}}= GetChevalleyGenerator{} (G_2, a);\nHighestWeightTAAbf{}(g_{- 1} g_{-2}, g_{- 1}g_{-2}, (2,2))",
+    "CalculatorFunctions::innerHWTAABF",
+    "HighestWeightTAAbf",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "WeylDimFormula",
+    CalculatorLieTheory::weylDimFormula,
+    "",
+    "Weyl dimension formula. First argument gives "
+    "the type of the Weyl group of the simple "
+    "Lie algebra in the form Type_Rank (e.g. E_6). "
+    "The second argument gives the highest weight in fundamental coordinates. ",
+    "WeylDimFormula{}(G_2, (x,0));\nWeylDimFormula{}(B_3, (x,0,0));",
+    "CalculatorFunctions::weylDimFormula",
+    "WeylDimFormula",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "AnimateLittelmannPaths",
+    CalculatorLieTheory::animateLittelmannPaths,
+    "",
+    "Generates all Littelmann-Lakshmibai-Seshadri paths, draws them and animates them. "
+    "Presented first on the seminar in Charles University Prague. "
+    "The first argument gives the type of the semisimple Lie algebra, "
+    "the second gives the highest weight. ",
+    "AnimateLittelmannPaths{}(G_2, (2, 0));",
+    "CalculatorLieTheory::animateLittelmannPaths",
+    "AnimateLittelmannPaths",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "DecomposeInducingRepGenVermaModule",
+    CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart,
+    "",
+    "Decomposes the inducing module of a generalized "
+    "Verma module over the Levi part of a parabolic "
+    "smaller than the inducing one. "
+    "The first argument gives the type of the algebra. "
+    "The second argument gives the highest "
+    "weight of the module in "
+    "fundamental coordinates. "
+    "The third argument gives "
+    "the parabolic subalgebra with respect "
+    "to which we induce. The last argument "
+    "gives the parabolic subalgebra with "
+    "respect to whose Levi part we decompose.",
+    "DecomposeInducingRepGenVermaModule{}(B_3, (0, 1, 1), (1, 0, 0), (1, 0, 1))",
+    "CalculatorFunctions::decomposeFDPartGeneralizedVermaModuleOverLeviPart",
+    "DecomposeInducingRepGenVermaModule",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "Casimir",
+    CalculatorLieTheory::casimir,
+    "",
+    "Gives the Casimir element. ",
+    "Casimir{}(G_2)",
+    "Calculator::casimir",
+    "Casimir",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "CasimirWRTLevi",
+    CalculatorLieTheory::casimirWithRespectToLevi,
+    "",
+    "Gives the Casimir element of a Levi part of "
+    "a parabolic subalgebra. First argument = ambient Lie algebra. "
+    "Second argument = parabolic selection = 1 "
+    "stands for simple root outside of the Levi "
+    "component, 0 stands for simple root of the Levi component.",
+    "CasimirWRTLevi{}(B_3, (1,0,0))",
+    "CalculatorFunctions::casimirWithRespectToLevi",
+    "CasimirWRTLevi",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "HmmG2inB3",
+    CalculatorLieTheory::embedG2InB3,
+    "",
+    "Embeds elements of the Universal enveloping "
+    "of G_2 in B_3, following an embedding found "
+    "in a paper by McGovern.",
+    "g_{{a}}= GetChevalleyGenerator{} (G_2, a); "
+    "HmmG2inB3{}(g_1);\nHmmG2inB3{}(g_2) ",
+    "Calculator::embedG2InB3",
+    "HmmG2inB3",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "DrawRootSystem",
+    CalculatorLieTheory::drawRootSystem,
+    "",
+    "Draws the root system of a semisimple Lie algebra. "
+    "Takes one or three arguments: "
+    "if one argument is provided, that must "
+    "be a semisimple Lie algebra or "
+    "a semisimple Lie algebra type; "
+    "if three arguments are provided, "
+    "the first must be a semisimple "
+    "Lie algebra or a semisimple Lie algebra type, "
+    "and the second and third argument must be two "
+    "rational vectors of dimension "
+    "equal to the rank of the semisimple "
+    "Lie algebra. The root system is drawn in a "
+    "Coxeter plane. If the extra two vectors "
+    "are given, they are used to initialize "
+    "a preferred projection plane "
+    "in the change-to-basis entries "
+    "below the graphics. "
+    "Clicking the obvious button creates a basis "
+    "change animations ideal for presentations.",
+    "DrawRootSystem{}(A_7, (1, 0 , 2, 2, 2, 0, 1), (1, 3, 2, 2, 2, 3, 1))",
+    "CalculatorFunctions::drawRootSystem",
+    "DrawRootSystem",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "DrawWeightSupportWithMults",
+    CalculatorLieTheory::drawWeightSupportWithMults,
+    "",
+    "Draws the weight support of an irreducible "
+    "finite-dimensional highest weight module. "
+    "The first argument gives the type and the second "
+    "gives the highest weight given in "
+    "fundamental weight basis. The maximum number "
+    "of drawn weights allowed is (hard-code) "
+    "limited to 10 000. "
+    "If the number of weights in the weight "
+    "support exceeds this number, only "
+    "the first 10 000 weights will be drawn. "
+    "<b>Warning. Drawing text (i.e. multiplicities) "
+    "is very javascript-processor-intensive. "
+    "Use only for *small* examples, "
+    "else you might hang your browser. </b>",
+    "DrawWeightSupportWithMults{}(B_3, (0, 1, 1));\n"
+    "DrawWeightSupportWithMults{}(G_2, (1, 0))",
+    "CalculatorFunctions::drawWeightSupportWithMults",
+    "DrawWeightSupportWithMults",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "DrawWeightSupport",
+    CalculatorLieTheory::drawWeightSupport,
+    "",
+    "Same as DrawWeightSupportWithMults but displays no multiplicities. "
+    "Same warning for hanging up your browser "
+    "with javascript holds.",
+    "DrawWeightSupport{}(B_3, (1, 1, 1));\n"
+    "DrawWeightSupport{}(G_2, (1, 2))",
+    "CalculatorFunctions::drawWeightSupport",
+    "DrawWeightSupport",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "SplitFDpartB3overG2CharsOnly",
+    CalculatorLieTheory::splitFDpartB3overG2CharsOnly,
+    "",
+    "Splits the finite dimensional part of the "
+    "inducing module of the generalized "
+    "Verma module of B_3(so(7)) into G_2-components. "
+    "The argument is gives the highest weight of the "
+    "generalized Verma module in fundamental "
+    "coordinates with respect to so(7). "
+    "The arguments which are not small integers "
+    "indicate the non-selected "
+    "roots of the inducing parabolic subalgebra of B_3. ",
+    "SplitFDpartB3overG2CharsOnly(x_1, 2, 0)",
+    "CalculatorLieTheory::splitFDpartB3overG2CharsOnly",
+    "SplitFDpartB3overG2CharsOnly",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "SplitFDpartB3overG2",
+    CalculatorLieTheory::splitFDpartB3overG2,
+    "",
+    "Splits the finite dimensional part of the inducing "
+    "module of the generalized Verma module of "
+    "B_3(so(7)) into G_2-components. "
+    "The argument is gives the highest weight of the "
+    "generalized Verma module in fundamental "
+    "coordinates with respect to so(7). "
+    "The arguments which are not small integers "
+    "indicate the non-selected roots of the inducing "
+    "parabolic subalgebra of B_3. ",
+    "SplitFDpartB3overG2{}(x_1, 1, 0)",
+    "CalculatorFunctions::splitFDpartB3overG2",
+    "SplitFDpartB3overG2",
+    innerInvisibleExperimental
+  );
+  this->addOperationHandler(
+    "PrintB3G2branchingTableCharsOnly",
+    CalculatorLieTheory::printB3G2branchingTableCharsOnly,
+    "",
+    "Creates a table of branching of finite dimensional B_3-modules over G_2. "
+    "The argument of the function gives the "
+    "maximum height of the B_3-weight. "
+    "The second argument indicates the parabolic subalgebra of "
+    "B_3- zero entry stands for the corresponding "
+    "root space lying in the Levi part of the parabolic. "
+    "Non-zero entry means the corresponding "
+    "negative root space is not in the parabolic. "
+    "The expression given in that coordinate "
+    "is used as the corresponding highest weight. ",
+    "PrintB3G2branchingTableCharsOnly{}(2, (0,0,0)); "
+    "PrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))",
+    "CalculatorLieTheory::printB3G2branchingTableCharsOnly",
+    "PrintB3G2branchingTableCharsOnly",
+    innerInvisibleExperimental
+  );
+  this->addOperationHandler(
+    "PrintB3G2branchingTable",
+    CalculatorLieTheory::printB3G2branchingTable,
+    "",
+    "Creates a table of branching of finite dimensional B_3-modules over G_2. "
+    "The argument of the function gives the maximum height "
+    "of the B_3-weight. The function works with arguments 0 or 1; "
+    "values of 2 or more must be run off-line.",
+    "PrintB3G2branchingTable{}(1, (0,0,0)); "
+    "PrintB3G2branchingTable{}(1, (x_1,0,0))",
+    "Calculator::printB3G2branchingTable",
+    "PrintB3G2branchingTable",
+    innerInvisibleExperimental
+  );
+  this->addOperationHandler(
+    "SplitFDTensorGenericGeneralizedVerma",
+    CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional,
+    "",
+    "Experimental, please don't use. Splits generic generalized "
+    "Verma module tensor finite dimensional module. ",
+    "SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (x_1, x_2)); ",
+    "CalculatorFunctions::splitGenericGeneralizedVermaTensorFiniteDimensional",
+    "SplitFDTensorGenericGeneralizedVerma",
+    innerAdminNoTestExperimental
+  );
+  this->addOperationHandler(
+    "WriteGenVermaAsDiffOperatorsUpToWeightLevel",
+    CalculatorLieTheory::writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel,
+    "",
+    "<b>Experimental, please don't use</b>. "
+    "Embeds a Lie algebra in the Weyl algebra "
+    "with matrix coefficients. The third argument "
+    "gives the highest weight. The non-zero entries "
+    "of the highest weight give the root spaces "
+    "outside of the Levi part of the parabolic. "
+    "The second argument gives the weight "
+    "level to which the computation should be carried out",
+    "WriteGenVermaAsDiffOperatorsUpToWeightLevel{}(B_3, 1, (0, 0, y)); ",
+    "CalculatorFunctions::writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel",
+    "WriteGenVermaAsDiffOperatorsUpToWeightLevel",
+    innerAdminNoTestExperimental
+  );
+  this->addOperationHandler(
+    "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder",
+    CalculatorLieTheory::writeGenVermaModAsDiffOperatorsGeneratorOrder,
+    "",
+    "Constructs a parabolically induced map from a "
+    "semisimple Lie algebra to a Weyl algebra "
+    "with matrix coefficients. "
+    "More precisely, this function constructs a "
+    "generalized Verma module and writes it using "
+    "differential operators with matrix coefficients. "
+    "The first argument gives the type of the "
+    "semisimple Lie algebra, the second argument "
+    "gives the highest weight in fundamental coordinates. "
+    "The third argument gives the parabolic subalgebra "
+    "selection with 0 standing for non-crossed "
+    "out roots and 1 for crossed-out roots. "
+    "In all non crossed-out root positions, "
+    "the coordinates of the highest weight "
+    "vector must be small integers (because the highest "
+    "weight must be dominant and integral with respect "
+    "to the Levi part of the inducing parabolic subalgebra). "
+    "In the crossed-out root positions, the coordinates "
+    "of the highest weight vector can be "
+    "arbitrary polynomial expressions. "
+    "The algorithm depends on an order chosen on "
+    "the Chevalley-Weyl generators of the nilradical. "
+    "Here, we sort the nilradical elements in descending "
+    "order relative to the order of their roots. "
+    "In addition to the first 3 arguments, this function "
+    "accepts further optional arguments, "
+    "customizing the notation of the final printout.",
+    "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ",
+    "CalculatorLieTheory::writeGenVermaModAsDiffOperatorsGeneratorOrder",
+    "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "MapSemisimpleLieAlgebraInWeylAlgebra",
+    CalculatorLieTheory::writeGenVermaModAsDiffOperatorsNilOrderDescending,
+    "",
+    "Same as MapSemisimpleLieAlgebraInWeylAlgebra, "
+    "but with a different order on the elements "
+    "of the nilradical. We sort the elements "
+    "of the nilradical as follows. "
+    "Consider the partial order given "
+    "by the graded lex order on the coordinates that "
+    "correspond to crossed-out roots. "
+    "Then extend this partial order "
+    "by ``breaking the ties'' via the graded "
+    "lexicographic order on the non-crossed out roots. "
+    "This extension we call "
+    "the nil-order. Now this function sorts the "
+    "elements of the nilradical in descending nil-order, "
+    "that is, elements with higher nil-order come first.",
+    "MapSemisimpleLieAlgebraInWeylAlgebra{}(B_3, (0, 0, 0), (0, 0, 1), x, \\partial, a); ",
+    "Calculator::writeGenVermaModAsDiffOperatorsNilOrderDescending",
+    "MapSemisimpleLieAlgebraInWeylAlgebra",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "MapSemisimpleLieAlgebraInWeylAlgebraAllGens",
+    CalculatorLieTheory::writeGenVermaModAsDiffOperatorsAllGensNilOrderDescending,
+    "",
+    "Constructs a parabolically induced map from "
+    "a semisimple Lie algebra "
+    "to a Weyl algebra with matrix coefficients. "
+    "More precisely, this function constructs a "
+    "generalized Verma module and writes it using "
+    "differential operators with matrix coefficients. "
+    "The first argument gives the type of the "
+    "semisimple Lie algebra, the second argument "
+    "gives the highest weight in fundamental coordinates. "
+    "The third argument gives the parabolic "
+    "subalgebra selection with 0 standing for "
+    "non-crossed out roots and 1 for crossed-out roots. "
+    "In all non crossed-out root positions, "
+    "the coordinates of the highest weight "
+    "vector must be small integers (because the highest "
+    "weight must be dominant and integral with "
+    "respect to the Levi part of the inducing parabolic subalgebra). "
+    "In the crossed-out root positions, the "
+    "coordinates of the highest weight vector can be "
+    "arbitrary polynomial expressions. "
+    "In addition to the first 3 arguments, this function "
+    "accepts further optional arguments, customizing the "
+    "notation of the final printout. The differential "
+    "operator part of the algorithm uses the "
+    "nil-order given by the function "
+    "MapSemisimpleLieAlgebraInWeylAlgebra.",
+    "MapSemisimpleLieAlgebraInWeylAlgebraAllGens{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ",
+    "Calculator::writeGenVermaModAsDiffOperatorsAllGensNilOrderDescending",
+    "MapSemisimpleLieAlgebraInWeylAlgebraAllGens",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "KLcoeffs",
+    CalculatorLieTheory::kazhdanLuzstigCoeffificents,
+    "",
+    "Computes the n by n tables of "
+    "1) Kazhdan-Lusztig polynomials, "
+    "2) R polynomials and "
+    "3) Kazhdan-Lusztig polynomials evaluated at one, where n<=192 "
+    "is the size of the Weyl group (i.e. no larger than D_4(so(8)). "
+    "The notation follows the original paper by Kazhdan and Lusztig, "
+    "\"Representations of Coxeter Groups and Hecke Algebras\". "
+    "The algorithm is directly derived from formulas (2.0a-c) there, "
+    "as explained in the Wikipedia page on Kazhdan-Lusztig polynomials. "
+    "Please note that the 192 by 192 element table takes "
+    "almost 3 minutes to compute. "
+    "Faster implementations of the KL polynomials are "
+    "available from programs by Fokko du Cloux and others "
+    "(our simple implementation stores the full table "
+    "of R-polynomials and KL-polynomials in RAM memory at "
+    "all times, unlike the other more efficient implementations).",
+    "KLcoeffs{}(B_3)",
+    "Calculator::kazhdanLuzstigCoeffificents",
+    "KLcoeffs",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "RootSubsystem",
+    CalculatorLieTheory::rootSubsystem,
+    "",
+    "Generates a root subsystem of a simple type. "
+    "First argument indicates simple type, second, third,... arguments "
+    "give the generating roots. ",
+    "RootSubsystem(F_4, (0, 1, 0, 0), (0, 0, 1, 0), (1, 1, 2, 2))",
+    "Calculator::rootSubsystem",
+    "RootSubsystem",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "PrintRootSubalgebras",
+    CalculatorLieTheory::printRootSAs,
+    "",
+    "Prints sl(2) subalgebras and root subalgebras. "
+    "The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",
+    "PrintRootSubalgebras(E_6)",
+    "CalculatorFunctions::printRootSAs",
+    "PrintRootSubalgebras",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "PrintRootSubalgebrasRecompute",
+    CalculatorLieTheory::printRootSAsForceRecompute,
+    "",
+    "Same as printRootSubalgebras but forces recomputation. "
+    "Use to recompute obsolete or interrupted output files.",
+    "PrintRootSubalgebrasRecompute(b_3)",
+    "CalculatorFunctions::printRootSAsForceRecompute",
+    "PrintRootSubalgebrasRecompute",
+    innerAdminNoTest
+  );
+  this->addOperationHandler(
+    "PrintSlTwoSubalgebras",
+    CalculatorLieTheory::printSltwos,
+    "",
+    "Prints sl(2) subalgebras and root subalgebras. "
+    "The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",
+    "PrintSlTwoSubalgebras(g_2)",
+    "CalculatorFunctions::printSltwos",
+    "PrintSlTwoSubalgebras",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "ParabolicsInfoBruhatGraph",
+    CalculatorLieTheory::parabolicWeylGroupsBruhatGraph,
+    "",
+    "Makes a table with information about the Weyl group of a "
+    "parabolic subalgebra of the ambient Lie algebra, "
+    "as well as the cosets "
+    "(given by minimal coset representatives) of the Weyl subgroup "
+    "in question. "
+    "The input must have as many integers as there "
+    "are simple roots in the ambient Lie algebra. "
+    "If the root is crossed out "
+    "(i.e. not a root space of the Levi part), "
+    "one should put a 1 in the corresponding coordinate. "
+    "Otherwise, one should put 0. "
+    "For example, for Lie algebra B3(so(7)), calling "
+    "parabolicsInfoBruhatGraph(0, 0, 0) gives you the "
+    "Weyl group info for the entire algebra; "
+    "calling parabolicsInfoBruhatGraph(1,0,0) gives you "
+    "info for the Weyl subgroup generated by "
+    "the last two simple root. "
+    "In the produced graph, the element s_{\\eta_i} "
+    "corresponds to a reflection with respect "
+    "to the i^th simple root. You will get your "
+    "output as a .png file link, you must click onto "
+    "the link to see the end result. "
+    "<b>Please do not use for subalgebras "
+    "larger than B_4 (so(9)). The vpf program has "
+    "no problem handling this function up to "
+    "E_6 but LaTeX crashes trying to process the output. </b>",
+    "parabolicsInfoBruhatGraph{}(B_3,(1,0,0),(1,0,0))",
+    "CalculatorFunctions::parabolicWeylGroupsBruhatGraph",
+    "ParabolicsInfoBruhatGraph",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "TestMonomialBasisConjecture",
+    CalculatorLieTheory::testMonomialBaseConjecture,
+    "",
+    "Tests the monomial basis conjecture from a common work by Jackson and Milev paper. "
+    "First argument gives rank bound. "
+    "Second argument gives dimension bound. ",
+    "TestMonomialBasisConjecture{}(2, 50)",
+    "Calculator::testMonomialBaseConjecture",
+    "TestMonomialBasisConjecture",
+    innerAdminNoTestExperimental
+  );
+  this->addOperationHandler(
+    "LSpath",
+    CalculatorLieTheory::LSPath,
+    "",
+    "Lakshmibai-Seshadri path starting at 0. "
+    "The first argument gives the semisimple Lie algebra, "
+    "the next arguments give the way-points of the path.",
+    "LSpath{}(G_2, (0,0), (2,1) )",
+    "Calculator::LSPath",
+    "LSpath",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "LROdefine",
+    CalculatorLieTheory::littelmannOperator,
+    "",
+    "Littelmann root operator e_i, where e_i is the Littelmann "
+    "root operator with respect to root of index i. "
+    "If i is negative then the e_i root operator is defined to be "
+    "the f_\\alpha operator.",
+    "e_{{i}}= LROdefine_i; e_{- 1} e_{- 1} LSpath{}(G_2, (0,0), (2,1))",
+    "Calculator::littelmannOperator",
+    "LROdefine",
+    innerExperimental
+  );
+  this->addOperationHandler(
+    "PrintProductDistancesModN",
+    CalculatorFunctions::innerFindProductDistanceModN,
+    "",
+    "First argument = number N. Second argument = list of positive numbers. "
+    "This function finds, modulo N, the product "
+    "distance between 1 and each number mod N. "
+    "We define the product distance between 1 and a "
+    "number X as the minimal sum of elements "
+    "whose product equals X mod N, where "
+    "the elements are taken from the predefined "
+    "list of positive integers given by the second argument.",
+    "PrintProductDistancesModN(65537, "
+    "(97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122)"
+    ")",
+    "CalculatorFunctions::innerFindProductDistanceModN",
+    "PrintProductDistancesModN",
+    innerAdminNoTestInvisibleOffByDefault
+  );
+  this->addOperationHandler(
+    "SolveProductSumEquationOverSetModN",
+    CalculatorFunctions::innerSolveProductSumEquationOverSetModN,
+    "",
+    "Tries to find one solution of the system a_1*a_2* ...= X mod N a_1+a_2+...=Y "
+    "where the a_i's belong to a "
+    "predefined set of positive numbers. ",
+    "SolveProductSumEquationOverSetModN(theMod =65537; theProduct =16628; theSum=1286; "
+    "theSet = (97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122)) ",
+    "CalculatorFunctions::innerFindProductDistanceModN",
+    "SolveProductSumEquationOverSetModN",
+    innerAdminNoTestInvisibleOffByDefault
   );
 }
 

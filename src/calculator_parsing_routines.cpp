@@ -88,6 +88,7 @@ void Calculator::reset() {
   this->flagPlotShowJavascriptOnly = false;
   this->flagHasGraphics = false;
   this->flagUseBracketsForIntervals = false;
+  this->flagUseScientificFunctions = true;
 
   this->maximumLatexChars = 2000;
   this->numEmptyTokensStart = 9;
@@ -324,8 +325,8 @@ void Calculator::initialize() {
   this->initializePredefinedStandardOperationsWithoutHandler();
   this->totalPatternMatchesPerformed = 0;
   this->initializeBuiltInsFreezeArguments();
-  this->initPredefinedStandardOperations();
-  this->initPredefinedInnerFunctions();
+  this->initializeStandardFunctions();
+  this->initializeScientificFunctions();
   this->initCalculusTestingFunctions();
   this->initPredefinedOperationsComposite();
   this->initializeAtomsThatAllowCommutingOfArguments();

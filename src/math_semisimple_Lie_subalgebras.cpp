@@ -5440,7 +5440,6 @@ std::string CandidateSemisimpleSubalgebra::toStringModuleDecompositionLaTeX(Form
   return out.str();
 }
 
-
 std::string CandidateSemisimpleSubalgebra::toStringModuleDecomposition(FormatExpressions* theFormat) const {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::toStringModuleDecomposition");
   if (this->modules.size <= 0) {

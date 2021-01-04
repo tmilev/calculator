@@ -641,7 +641,7 @@ bool Calculator::Test::writeTestStrings(std::stringstream* commentsOnFailure) {
   }
   return FileOperations::writeFileVirual(
     WebAPI::calculator::testFileNameVirtual,
-    result.toString(&JSData::PrintOptions::NewLine()),
+    result.toString(&JSData::PrintOptions::newLine()),
     commentsOnFailure
   );
 }

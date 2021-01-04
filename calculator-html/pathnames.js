@@ -39,6 +39,8 @@ const urlFields = {
     compareExpressions: "compareExpressions",
     expressionGiven: "compareExpressionsGiven",
     expressionDesired: "compareExpressionsDesired",
+    calculatorCompute: "compute",
+    mainInput: "mainInput",
   },
   result: {
     result: "result",
@@ -75,9 +77,9 @@ const urlFields = {
     topicList: "topicList",
   },
   teachersAndSections: "teachersAndSections",
-  mainInput: "mainInput",
   requestEditPage: "editPageJSON",
   calculatorCompute: "compute",
+  mainInput: "mainInput",
   database: {
     operation: "databaseOperation",
     fetch: "databaseFetch",
@@ -112,6 +114,20 @@ const urlFields = {
 
 class Addresses {
   constructor() { }
+
+  /** @returns{string} */
+  calculatorComputation(
+    /**@type{string} */
+    input,
+  ) {
+    let url = {
+      "currentPage": "calculator",
+      "calculatorInput": input,
+    };
+    let encoded = encodeURIComponent(JSON.stringify(url));
+    return `${urls.appWithCache}#${encoded}`;
+  }
+
   /** @returns{string} */
   solveJSON(
     /**@type{string} */

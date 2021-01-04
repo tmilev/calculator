@@ -677,13 +677,13 @@ JSData::PrintOptions::PrintOptions() {
   this->hexEncodeNonAsciiStrings = false;
 }
 
-const JSData::PrintOptions& JSData::PrintOptions::HexEncodeNonASCII() {
+const JSData::PrintOptions& JSData::PrintOptions::hexEncodeNonASCII() {
   static JSData::PrintOptions result;
   result.hexEncodeNonAsciiStrings = true;
   return result;
 }
 
-const JSData::PrintOptions& JSData::PrintOptions::NewLine() {
+const JSData::PrintOptions& JSData::PrintOptions::newLine() {
   static JSData::PrintOptions result;
   result.useNewLine = true;
   return result;

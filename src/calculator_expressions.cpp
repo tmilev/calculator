@@ -2302,7 +2302,7 @@ bool Expression::toStringBuiltIn<JSData>(
 ) {
   (void) theFormat;
   JSData data = input.getValue<JSData>();
-  std::string dataString = data.toString();
+  std::string dataString = data.toString(&JSData::PrintOptions::HTML());
   out << dataString;
   return true;
 }
@@ -3227,6 +3227,16 @@ std::string Expression::toStringAllSlidersInExpression() const {
   return out.str();
 }
 
+bool Expression::requiresNoMathTags() const {
+  return
+  this->hasType<Plot> () ||
+  this->isOfType<std::string>() ||
+  this->isOfType<JSData> () ||
+  this->isOfType<SemisimpleSubalgebras>() ||
+  this->isOfType<WeylGroupData>() ||
+  this->isOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
+}
+
 JSData Expression::toJSON(FormatExpressions* theFormat, const Expression& startingExpression) const {
   MacroRegisterFunctionWithName("Expression::toJSON");
   JSData result, input, output;
@@ -3247,12 +3257,7 @@ JSData Expression::toJSON(FormatExpressions* theFormat, const Expression& starti
       std::stringstream out;
       if (currentE.isOfType<std::string>()) {
         out << currentE.getValue<std::string>();
-      } else if (
-        currentE.hasType<Plot> () ||
-        currentE.isOfType<SemisimpleSubalgebras>() ||
-        currentE.isOfType<WeylGroupData>() ||
-        currentE.isOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()
-      ) {
+      } else if (this->requiresNoMathTags()) {
         out << currentE.toString(theFormat);
       } else {
         out << HtmlRoutines::getMathNoDisplay(currentE.toString(theFormat), 1700);
@@ -3262,10 +3267,7 @@ JSData Expression::toJSON(FormatExpressions* theFormat, const Expression& starti
     }
   } else {
     input[0] = HtmlRoutines::getMathNoDisplay(startingExpression.toString(theFormat), 1700);
-    if (
-      this->isOfType<std::string>() || this->isOfType<Plot>() ||
-      this->isOfType<SemisimpleSubalgebras>() || this->isOfType<WeylGroupData>()
-    ) {
+    if (this->requiresNoMathTags()) {
       output[0] = this->toString(theFormat);
     } else {
       output[0] = HtmlRoutines::getMathNoDisplay(this->toString(theFormat), 1700);
@@ -3625,13 +3627,7 @@ bool Expression::toStringEndStatement(
       out << "</td><td class =\"cellCalculatorResult\">";
       if ((*this)[i].isOfType<std::string>() && isFinal) {
         currentOutput = StringRoutines::convertStringToCalculatorDisplay(currentE.getValue<std::string>());
-      } else if ((
-          currentE.hasType<Plot> () ||
-          currentE.isOfType<SemisimpleSubalgebras>() ||
-          currentE.isOfType<WeylGroupData>() ||
-          currentE.isOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()
-        ) && isFinal
-      ) {
+      } else if (currentE.requiresNoMathTags() && isFinal) {
         theFormat->flagDontCollalpseProductsByUnits = false;
         currentOutput = currentE.toString(theFormat);
       } else {
@@ -3645,11 +3641,11 @@ bool Expression::toStringEndStatement(
       out << currentOutput;
       out << "</td></tr>";
     } else {
-      bool addLatexDelimiter = true;
+      bool addLatexDelimiter = !currentE.isOfType<JSData>();
       std::stringstream outWithDelimiter;
       if (createSingleTable) {
         out << "<tr><td>\n";
-        addLatexDelimiter = !currentE.hasType<Plot>();
+        addLatexDelimiter = !currentE.hasType<Plot>() && !currentE.isOfType<JSData>();
         if (addLatexDelimiter) {
           outWithDelimiter << "\\(";
         }
@@ -4630,16 +4626,16 @@ bool Expression::toStringWithCompositeHandler(
 }
 
 std::string Expression::toString(
-  FormatExpressions* theFormat,
+  FormatExpressions* format,
   Expression* startingExpression,
   bool unfoldCommandEnclosures,
   JSData* outputJS
 ) const {
   MacroRegisterFunctionWithName("Expression::toString");
   MemorySaving<FormatExpressions> tempFormat;
-  if (theFormat == nullptr) {
-    theFormat = &tempFormat.getElement();
-    theFormat->flagUseQuotes = false;
+  if (format == nullptr) {
+    format = &tempFormat.getElement();
+    format->flagUseQuotes = false;
   }
   if (this->owner != nullptr) {
     if (this->owner->recursionDepth + 1 > this->owner->maximumRecursionDepth) {
@@ -4656,7 +4652,7 @@ std::string Expression::toString(
       CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(*this->owner, *this, newMe) &&
       CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(*this->owner, *startingExpression, newStart)
     ) {
-      return newMe.toString(theFormat, &newStart, false, outputJS);
+      return newMe.toString(format, &newStart, false, outputJS);
     }
   }
   int notationIndex = owner->theObjectContainer.expressionWithNotation.getIndex(*this);
@@ -4669,26 +4665,26 @@ std::string Expression::toString(
     !this->startsWith(this->owner->opCommandSequence())
   ) {
     if (startingExpression == nullptr) {
-      theFormat->flagUseQuotes = true;
+      format->flagUseQuotes = true;
     } else {
-      theFormat->flagUseQuotes = false;
+      format->flagUseQuotes = false;
     }
   }
   if (outputJS != nullptr) {
     outputJS->reset();
   }
-  if (this->toStringData(out, theFormat)) {
-  } else if (this->toStringWithAtomHandler(out, theFormat)) {
-  } else if (this->toStringWithCompositeHandler(out, theFormat)) {
-  } else if (this->toStringEndStatement(out, startingExpression, outputJS, theFormat)) {
+  if (this->toStringData(out, format)) {
+  } else if (this->toStringWithAtomHandler(out, format)) {
+  } else if (this->toStringWithCompositeHandler(out, format)) {
+  } else if (this->toStringEndStatement(out, startingExpression, outputJS, format)) {
   } else if (this->size() == 1) {
-    out << (*this)[0].toString(theFormat);
-  } else if (this->toStringGeneral(out, theFormat)) {
+    out << (*this)[0].toString(format);
+  } else if (this->toStringGeneral(out, format)) {
   } else { //<-not sure if this case is possible
     out << "(ProgrammingError:NotDocumented)";
   }
   if (startingExpression != nullptr) {
-    return this->toStringWithStartingExpression(theFormat, startingExpression, out, outputJS);
+    return this->toStringWithStartingExpression(format, startingExpression, out, outputJS);
   }
   if (outputJS != nullptr) {
     if (outputJS->theType == JSData::token::tokenUndefined) {

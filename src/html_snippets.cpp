@@ -223,7 +223,7 @@ std::string HtmlRoutines::getMathSpan(const std::string& input, int upperNumChar
   return out.str();
 }
 
-std::string HtmlRoutines::getMathNoDisplay(const std::string &input, int upperNumChars) {
+std::string HtmlRoutines::getMathNoDisplay(const std::string& input, int upperNumChars) {
   return HtmlRoutines::getMathSpan(input, upperNumChars, false);
 }
 

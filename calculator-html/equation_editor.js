@@ -5042,8 +5042,14 @@ class MathNode {
   ) {
     let previousPosition = this.positionCaretBeforeKeyEvents;
     let selection = window.getSelection();
-    let range = selection.getRangeAt(0);
-    let rangeClone = range.cloneRange();
+    let range = null;
+    let rangeClone = null;
+    if (selection.rangeCount > 0) {
+      range = selection.getRangeAt(0);
+    } else {
+      range = document.createRange();
+    }
+    rangeClone = range.cloneRange();
     rangeClone.selectNodeContents(this.element);
     rangeClone.setEnd(range.endContainer, range.endOffset);
     this.positionCaretBeforeKeyEvents = rangeClone.toString().length;// range.endOffset;

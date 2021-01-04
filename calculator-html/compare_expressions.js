@@ -22,6 +22,12 @@ class CompareExpressions {
     this.resultBoxRaw = document.getElementById(ids.domElements.pages.compareExpressions.resultRaw);
     /**@type{HTMLElement} */
     this.resultBoxFormatted = document.getElementById(ids.domElements.pages.compareExpressions.resultFormatted);
+    /**@type{HTMLElement} */
+    this.calculatorLink = document.getElementById(ids.domElements.pages.compareExpressions.calculatorLink);
+    /**@type{string} */
+    this.givenData = "";
+    /**@type{string} */
+    this.desiredData = "";
   }
 
   selectPage() {
@@ -69,26 +75,25 @@ class CompareExpressions {
     }
   }
 
-  compare() {
+  storeData() {
     let givenContainer = document.getElementById(ids.domElements.pages.compareExpressions.givenRawInput);
-    let givenData = givenContainer.value;
+    this.givenData = givenContainer.value;
     let desiredContainer = document.getElementById(ids.domElements.pages.compareExpressions.desiredRawInput);
-    let desiredData = desiredContainer.value;
+    this.desiredData = desiredContainer.value;
+  }
 
-    storage.variables.compare.given.setAndStore(givenData, true);
-    storage.variables.compare.desired.setAndStore(desiredData, true);
-    this.doCompare(givenData, desiredData);
+  compare() {
+    this.storeData();
+    storage.variables.compare.given.setAndStore(this.givenData, true);
+    storage.variables.compare.desired.setAndStore(this.desiredData, true);
+    this.doCompare();
   }
 
   doCompare(
-    /**@type{string} */
-    givenData,
-    /**@type{string} */
-    desiredData,
   ) {
     let debug = storage.variables.flagDebug.isTrue();
     submit.submitGET({
-      url: pathnames.addresses.compareExpressions(givenData, desiredData, debug),
+      url: pathnames.addresses.compareExpressions(this.givenData, this.desiredData, debug),
       callback: (input) => {
         this.writeResult(input);
       },
@@ -114,6 +119,13 @@ class CompareExpressions {
     }
   }
 
+  writeCalculatorLink() {
+    let url = pathnames.addresses.calculatorComputation(
+      `CompareExpressionsJSON(${this.givenData},${this.desiredData})`,
+    );
+    this.calculatorLink.innerHTML = `<a href=${url} target="_blank">calculator link</a>`;
+  }
+
   writeUserFriendlyResult(input) {
     this.resultUserFriendly.innerHTML = "";
     let result = input[pathnames.urlFields.result.result];
@@ -128,6 +140,7 @@ class CompareExpressions {
       this.resultUserFriendly.innerHTML = `<b style='color:red'>?</b><br>${syntaxErrors}`;
       return;
     }
+    this.writeCalculatorLink();
     let comparison = result[pathnames.urlFields.result.comparison.comparison];
     if (comparison === undefined) {
       return;

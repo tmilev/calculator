@@ -108,9 +108,9 @@ public:
     bool useHTML;
     int indentation;
     PrintOptions();
-    static const JSData::PrintOptions& NewLine();
+    static const JSData::PrintOptions& newLine();
     static const JSData::PrintOptions& HTML();
-    static const PrintOptions& HexEncodeNonASCII();
+    static const PrintOptions& hexEncodeNonASCII();
   };
   std::string toString(const JSData::PrintOptions* options = nullptr) const;
   template <typename somestream>

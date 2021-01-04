@@ -475,7 +475,7 @@ private:
 
   std::string toStringTreeHtml(int depth) const;
   std::string toString(
-    FormatExpressions* theFormat = nullptr,
+    FormatExpressions* format = nullptr,
     Expression* startingExpression = nullptr,
     bool unfoldCommandEnclosures = true,
     JSData* outputJS = nullptr
@@ -496,7 +496,7 @@ private:
     JSData* outputJS,
     FormatExpressions* theFormat
   ) const;
-
+  bool requiresNoMathTags() const;
   JSData toJSON(FormatExpressions* theFormat, const Expression& startingExpression) const;
   static unsigned int hashFunction(const Expression& input);
   unsigned int hashFunction() const;

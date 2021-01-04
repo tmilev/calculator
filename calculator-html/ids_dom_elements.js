@@ -48,6 +48,7 @@ var domElements = {
       resultUserFriendly: "compareExpressionsResultUserFriendly",
       resultRaw: "divCompareExpressionsResultRaw",
       resultFormatted: "divCompareExpressionsResultFormatted",
+      calculatorLink: "divCompareExpressionsCalculatorLink",
       progress: "progressReportCompareExpressions",
     },
     login: {

@@ -434,7 +434,7 @@ void GlobalVariables::initModifiableDatabaseFields() {
   outputFile << "//File automatically generated. Please do not modify.\n";
   outputFile << "\"use strict\";\n";
   outputFile << "var modifiableDatabaseData = "
-  << toWrite.toString(&JSData::PrintOptions::NewLine())
+  << toWrite.toString(&JSData::PrintOptions::newLine())
   << ";\n";
   outputFile << "module.exports = {modifiableDatabaseData};";
 }

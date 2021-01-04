@@ -226,7 +226,7 @@ class Problem {
     if (this.type === "Chapter") {
       allProblems.theChapterIds[this.problemId] = true;
     }
-    const secondPartTime = new Date().getTime();
+    // const secondPartTime = new Date().getTime();
     this.childrenIds = [];
     if (Array.isArray(problemData.children)) {
       for (let counterChildren = 0; counterChildren < problemData.children.length; counterChildren++) {
@@ -309,6 +309,7 @@ class Problem {
       window.calculator.mainPage.scriptInjector.injectScript(newLabel, scriptContent);
     }
   }
+
   getAppAnchorRequestFileCourseTopics(
     /**@type {boolean} */
     isScoredQuiz,

@@ -4241,7 +4241,7 @@ bool GlobalVariables::configurationStore() {
     << "configuration file not stored. ";
     return true;
   }
-  std::string correctedConfiguration = global.configuration.toString(&JSData::PrintOptions::NewLine());
+  std::string correctedConfiguration = global.configuration.toString(&JSData::PrintOptions::newLine());
   if (correctedConfiguration == global.configurationFileContent) {
     return true;
   }

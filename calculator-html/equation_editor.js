@@ -2312,6 +2312,8 @@ class EquationEditor {
       this.rootNode.type.cursor = "";
     }
     /**@type{boolean} */
+    this.preventEditorBlur = false;
+    /**@type{boolean} */
     this.mouseSelectionStarted = false;
     /**@type{boolean} */
     this.selectionNoMoreDefault = false;
@@ -2336,7 +2338,9 @@ class EquationEditor {
     /** @type {number} */
     this.backslashPosition = - 1;
     /**@type {string} */
-    this.positionDebugString = ""
+    this.positionDebugString = "";
+    /**@type {boolean} */
+    this.hasFocusDOM = false;
     /**@type{boolean} If changing this.container's font size, set this to true before the change, and back to false after.*/
     this.resizingEditorFont = false;
     if (this.options.latexInput !== null) {
@@ -2424,6 +2428,9 @@ class EquationEditor {
     });
     this.container.addEventListener("keydown", (e) => {
       this.handleKeyDownCatchAll(e);
+    });
+    this.eventCatcher.element.addEventListener("blur", (e) => {
+      this.blur();
     });
   }
 
@@ -2679,7 +2686,6 @@ class EquationEditor {
   ) {
     e.stopPropagation();
     e.preventDefault();
-    // console.log(`DEBUG: Catch-all keyboard event, key: ${e.key}, shift: ${e.shiftKey}, ctrl: ${e.ctrlKey}`);
     let key = e.key;
     if (e.ctrlKey) {
       switch (key) {
@@ -3075,6 +3081,7 @@ class EquationEditor {
       this.selectionStartExpanded.position = this.selectionStart.position;
       return false;
     }
+    this.preventEditorBlur = true;
     this.selectionNoMoreDefault = true;
     this.resetSelectionDOMSelectEventCatcher();
     this.eventCatcher.focus();
@@ -3092,6 +3099,7 @@ class EquationEditor {
       this.lastSelectionAction = `Mouse move selection above ${element.toString()}.`;
     }
     this.writeDebugInfo(null);
+    this.preventEditorBlur = false;
     return true;
   }
 
@@ -3179,6 +3187,7 @@ class EquationEditor {
     /**@type{MathNode} */
     element,
   ) {
+    this.preventEditorBlur = true;
     e.stopPropagation();
     // e.preventDefault();
     element.storeCaretPosition("", false);
@@ -3203,8 +3212,19 @@ class EquationEditor {
       this.lastSelectionAction = `Mouse selection end.`;
     }
     this.mouseSelectionStarted = false;
+    this.preventEditorBlur = false;
     e.preventDefault();
     e.stopPropagation();
+  }
+
+  blur() {
+    if (this.preventEditorBlur) {
+      return;
+    }
+    this.hasFocusDOM = false;
+    this.backslashSequenceStarted = false;
+    this.resetSelectionLeaveRangesIntact();
+    this.rootNode.blurRecursive();
   }
 }
 
@@ -3619,7 +3639,8 @@ class MathNode {
 
   focusElement() {
     this.element.style.background = "#f0f0f0";
-    this.focused = false;
+    this.focused = true;
+    this.equationEditor.hasFocusDOM = true;
   }
 
   /**@returns {MathNode} */
@@ -3632,8 +3653,11 @@ class MathNode {
   }
 
   blurElement() {
-    this.element.style.background = "";
     this.focused = false;
+    if (this.element === null) {
+      return;
+    }
+    this.element.style.background = "";
   }
 
   blurRecursive() {
@@ -4420,7 +4444,7 @@ class MathNode {
 
   handleBlur(e) {
     this.blurElement();
-    this.equationEditor.backslashSequenceStarted = false;
+    this.equationEditor.blur();
   }
 
   handleKeyDown(

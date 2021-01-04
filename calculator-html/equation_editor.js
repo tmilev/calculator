@@ -2690,7 +2690,14 @@ class EquationEditor {
       this.resetSelectionLeaveRangesIntact();
       return new KeyHandlerResult(false, false);
     }
-    let horizontalOwner = this.selectionStartExpanded.element.beefUpToHorizontalParent().parent;
+    let expanded = this.selectionStartExpanded.element.beefUpToHorizontalParent();
+    if (expanded.type.type === knownTypes.root.type) {
+      // Delete the root node.
+      this.rootNode = mathNodeFactory.rootMath(this);
+      this.updateDOM();
+      this.focusRestore();
+    }
+    let horizontalOwner = expanded.parent;
     let parent = horizontalOwner.parent;
     if (parent === null) {
       console.log("Unexpected horizontal math element without parent.");

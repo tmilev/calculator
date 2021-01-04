@@ -57,7 +57,8 @@ bool CalculatorEducationalFunctions::compareExpressionsJSON(
   }
   if (comparison.unexpectedVariables.size > 0) {
     std::stringstream errorStream;
-    errorStream << "Unexpected symbols: <b style='color:red'>" << comparison.unexpectedVariables.toStringCommaDelimited() << "</b>";
+    errorStream << "Unexpected symbols: <b style='color:red'>"
+    << comparison.unexpectedVariables.toStringCommaDelimited() << "</b>";
     result[WebAPI::result::error] = errorStream.str();
     return output.assignValue(result, calculator);
   }

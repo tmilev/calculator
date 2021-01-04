@@ -1649,24 +1649,24 @@ class LaTeXParser {
     this.parsingStack.push(new SyntancticElement(startingNode, "", ""));
     for (let i = 0; i < this.words.length; i++) {
       if (!this.reduceStack(new SyntancticElement(null, this.words[i], ""))) {
-        return this.setError();
+        return this.constructError();
       }
     }
     if (!this.reduceStack(new SyntancticElement(null, "", "parsingEnd"))) {
-      return this.setError();
+      return this.constructError();
     }
     if (this.parsingStack.length !== this.dummyParsingElements + 2) {
       if (this.equationEditor.options.debugLogContainer !== null) {
         console.log(`Failed to parse ${this.latex}: not all syntactic elements were reduced.`);
       }
-      return this.setError();
+      return this.constructError();
     }
     let secondToLastElement = this.parsingStack[this.parsingStack.length - 2];
     if (secondToLastElement.node === null) {
       if (this.equationEditor.options.debugLogContainer !== null) {
         console.log(`Failed to parse ${this.latex}: final syntactic element is not a node.`);
       }
-      return this.setError();
+      return this.constructError();
     }
     secondToLastElement.node.normalizeHorizontalMathRecursive();
     if (this.equationEditor.options.editable) {
@@ -1677,8 +1677,11 @@ class LaTeXParser {
   }
 
   /**@returns{MathNode} */
-  setError() {
-    return mathNodeFactory.error(this.equationEditor, this.latex);
+  constructError() {
+    let error = mathNodeFactory.error(this.equationEditor, this.latex);
+    let left = mathNodeFactory.atom(this.equationEditor, "");
+    let right = mathNodeFactory.atom(this.equationEditor, "");
+    return mathNodeFactory.horizontalMathFromArray(this.equationEditor, [left, error, right]);
   }
 
   /** @returns{boolean} */

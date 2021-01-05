@@ -363,8 +363,8 @@ private:
     const Expression& theVariable
   );
   template<class Coefficient>
-  bool makeSum(Calculator& calculator, const LinearCombination<Expression, Coefficient>& theSum);
-  bool makeSum(Calculator& calculator, const List<Expression>& theSum);
+  bool makeSum(Calculator& calculator, const LinearCombination<Expression, Coefficient>& summands);
+  bool makeSum(Calculator& calculator, const List<Expression>& summands);
   bool makeProduct(Calculator& owner, const List<Expression>& theMultiplicands);
   bool makeProduct(Calculator& owner, const Expression& left, const Expression& right);
   int getNumberOfColumns() const;
@@ -791,12 +791,13 @@ class Function {
     static Options experimental();
     static Options invisibleNoTest();
     static Options innerNoTest();
+    static Options outerOffByDefault();
     Options();
   };
   Options options;
   Expression::FunctionAddress theFunction;
 
-  std::string ToStringShort() const;
+  std::string toStringShort() const;
   std::string toStringSummary() const;
   std::string toStringFull() const;
   JSData toJSON() const;
@@ -2164,7 +2165,6 @@ public:
     int opIndexParentIfAvailable,
     Function** outputHandler
   );
-  static bool outerPlus(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerPowerRaiseToFirst(Calculator& calculator, const Expression& input, Expression& output);
   static bool collectCoefficientsPowersVariables(
     const Expression& input,
@@ -2173,7 +2173,20 @@ public:
   );
   bool collectOpands(const Expression& input, int operation, List<Expression>& outputOpands);
   bool collectOpandsAccumulate(const Expression& input, int operation, List<Expression>& outputOpands);
-  static bool functionCollectSummands(
+  static bool functionCollectOneSummand(
+    Calculator& calculator,
+    const Expression& input,
+    HashedList<Expression>& outputMonomials,
+    List<Rational>& outputCoefficients
+  );
+  static bool functionCollectSummandsSeparately(
+    Calculator& calculator,
+    const Expression& input,
+    List<Expression>& summands,
+    HashedList<Expression>& outputMonomials,
+    List<Rational>& outputCoefficients
+  );
+  static bool functionCollectSummandsCombine(
     Calculator& calculator,
     const Expression& input,
     LinearCombination<Expression, Rational>& outputSum
@@ -2853,29 +2866,28 @@ bool Calculator::functionGetMatrix(
 }
 
 template <class Coefficient>
-bool Expression::makeSum(
-  Calculator& calculator,
-  const LinearCombination<Expression, Coefficient>& theSum
+bool Expression::makeSum(Calculator& calculator,
+  const LinearCombination<Expression, Coefficient>& summands
 ) {
   MacroRegisterFunctionWithName("Expression::makeSum");
   Expression oneE; //used to record the constant term
   oneE.assignValue<Rational>(1, calculator);
-  if (theSum.isEqualToZero()) {
+  if (summands.isEqualToZero()) {
     return this->assignValue<Rational>(0, calculator);
   }
   List<Expression> summandsWithCoeff;
-  summandsWithCoeff.setSize(theSum.size());
-  for (int i = 0; i < theSum.size(); i ++) {
+  summandsWithCoeff.setSize(summands.size());
+  for (int i = 0; i < summands.size(); i ++) {
     Expression& current = summandsWithCoeff[i];
-    if (theSum[i] == oneE) {
-      current.assignValue(theSum.coefficients[i], calculator);
-    } else if (!(theSum.coefficients[i] == 1)) {
+    if (summands[i] == oneE) {
+      current.assignValue(summands.coefficients[i], calculator);
+    } else if (!(summands.coefficients[i] == 1)) {
       current.reset(calculator, 3);
       current.addChildAtomOnTop(calculator.opTimes());
-      current.addChildValueOnTop(theSum.coefficients[i]);
-      current.addChildOnTop(theSum[i]);
+      current.addChildValueOnTop(summands.coefficients[i]);
+      current.addChildOnTop(summands[i]);
     } else {
-      current = theSum[i];
+      current = summands[i];
     }
   }
   if (summandsWithCoeff.size < 5) {

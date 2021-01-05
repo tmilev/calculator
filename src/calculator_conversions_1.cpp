@@ -187,7 +187,7 @@ bool CalculatorConversions::functionDynkinType(
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionDynkinType");
   LinearCombination<Expression, Rational> theType;
-  if (!calculator.functionCollectSummands(calculator, input, theType)) {
+  if (!calculator.functionCollectSummandsCombine(calculator, input, theType)) {
     return false;
   }
   DynkinSimpleType simpleComponent;

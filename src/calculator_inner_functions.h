@@ -346,6 +346,8 @@ public:
 
   static bool combineFractionsCommutative(Calculator& calculator, const Expression& input, Expression& output);
   static bool combineFractionsCommutativeWithInternalLibrary(Calculator& calculator, const Expression& input, Expression& output);
+  static bool sortTerms(Calculator& calculator, const Expression& input, Expression& output);
+  static bool addTerms(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerIsPrimeMillerRabin(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIsPossiblyPrime(Calculator& calculator, const Expression& input, Expression& output);
@@ -366,7 +368,7 @@ public:
   static bool innerSortDescending(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerGetUserDefinedSubExpressions(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool outerDivideByNumber(Calculator& calculator, const Expression& input, Expression& output);
+  static bool divideByNumber(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerDivCancellations(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerAssociateDivisionDivision(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerAssociateAdivBdivCpowerD(Calculator& calculator, const Expression& input, Expression& output);
@@ -565,6 +567,10 @@ public:
   static bool innerFreudenthalFormula(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerFreudenthalFull(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerJacobiSymbol(Calculator& calculator, const Expression& input, Expression& output);
+  class Test{
+  public:
+    static bool checkSorting(const HashedList<Expression>& mustBeSorted);
+  };
 };
 #endif
 

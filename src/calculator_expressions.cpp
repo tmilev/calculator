@@ -1896,9 +1896,9 @@ bool Expression::isRational(Rational* whichRational) const {
   if (this->isOfType<Rational>(whichRational)) {
     return true;
   }
-  AlgebraicNumber theAlgNum;
-  if (this->isOfType<AlgebraicNumber>(&theAlgNum)) {
-    return theAlgNum.isRational(whichRational);
+  AlgebraicNumber algebraic;
+  if (this->isOfType(&algebraic)) {
+    return algebraic.isRational(whichRational);
   }
   return false;
 }
@@ -5051,12 +5051,12 @@ bool Expression::makeProduct(Calculator& owner, const List<Expression>& theMulti
   return this->makeXOXOdotsOX(owner, owner.opTimes(), theMultiplicands);
 }
 
-bool Expression::makeSum(Calculator& owner, const List<Expression>& theSummands) {
+bool Expression::makeSum(Calculator& owner, const List<Expression>& summands) {
   MacroRegisterFunctionWithName("Expression::MakeSum");
-  if (theSummands.size == 0) {
+  if (summands.size == 0) {
     return this->assignValue(0, owner);
   }
-  return this->makeXOXOdotsOX(owner, owner.opPlus(), theSummands);
+  return this->makeXOXOdotsOX(owner, owner.opPlus(), summands);
 }
 
 bool Expression::makeOXdotsX(Calculator& owner, int theOp, const List<Expression>& theOpands) {

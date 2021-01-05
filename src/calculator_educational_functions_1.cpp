@@ -75,8 +75,16 @@ bool CalculatorEducationalFunctions::compareExpressionsJSON(
   substitution.setKeyValue("a", comparison.given);
   substitution.setKeyValue("b", comparison.desired);
   comparison.comparisonNoDistributionRaw.assignStringParsed(
-    "(TurnOffRules(DistributeMultiplication, AddRationals);\n"
-    "a==b)_2",
+    "(TurnOffRules("
+    "DistributeMultiplication, "
+    "AddRationals, "
+    "AddTerms, "
+    "DivideByNumber, "
+    "ConvertShortDenominatorToNegativePower,"
+    "DivideRationalByRational"
+    ");\n"
+    "TurnOnRules(SortTerms, DivideByNumberTrivial);\n"
+    "a===b)_3",
     &substitution,
     calculator
   );
@@ -147,4 +155,28 @@ JSData ProblemWithSolution::toJSON() {
   result[WebAPI::result::SolutionData::finalExpression] = this->finalExpression.toString();
   result[WebAPI::result::error] = this->error;
   return result;
+}
+
+bool CalculatorEducationalFunctions::divideByNumberTrivial(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorEducationalFunctions::divideByNumberTrivial");
+  if (!input.startsWith(calculator.opDivide(), 3)) {
+    return false;
+  }
+  if (input[2].isEqualToZero()) {
+    return output.makeError("Division by zero. ", calculator);
+  }
+  Rational numerator, denominator;
+  if (!input[1].isRational(&numerator)) {
+    return false;
+  }
+  if (!input[2].isRational(&denominator)) {
+    return false;
+  }
+  Rational result = numerator / denominator;
+  if (numerator == result.getNumerator() && denominator == result.getDenominator()) {
+    return output.assignValue(result, calculator);
+  }
+  return false;
 }

@@ -739,12 +739,68 @@ bool Calculator::collectOpandsAccumulate(
   return true;
 }
 
-bool Calculator::functionCollectSummands(
+bool Calculator::functionCollectOneSummand(
+  Calculator& calculator,
+  const Expression& input,
+  HashedList<Expression>& outputMonomials,
+  List<Rational>& outputCoefficients
+) {
+  MacroRegisterFunctionWithName("Calculator::functionCollectOneSummand");
+  if (input.isEqualToZero()) {
+    outputMonomials.addOnTop(calculator.expressionZero());
+    outputCoefficients.addOnTop(1);
+    return true;
+  }
+  Rational coefficient;
+  if (input.isRational(&coefficient)) {
+    outputMonomials.addOnTop(calculator.expressionOne());
+    outputCoefficients.addOnTop(coefficient);
+    return true;
+  }
+  if (!input.startsWith(calculator.opTimes(), 3)) {
+    outputMonomials.addOnTop(input);
+    outputCoefficients.addOnTop(1);
+    return true;
+  }
+  if (input[1].isRational(&coefficient)) {
+    outputMonomials.addOnTop(input[2]);
+    outputCoefficients.addOnTop(coefficient);
+    return true;
+  }
+  AlgebraicNumber coefficientAlgebraic;
+  if (input[1].isOfType<AlgebraicNumber>(&coefficientAlgebraic)) {
+    if (coefficientAlgebraic.isRational(&coefficient)) {
+      outputMonomials.addOnTop(input[2]);
+      outputCoefficients.addOnTop(coefficient);
+      return true;
+    }
+  }
+  outputMonomials.addOnTop(input);
+  outputCoefficients.addOnTop(1);
+  return true;
+}
+
+bool Calculator::functionCollectSummandsSeparately(
+  Calculator& calculator,
+  const Expression& input,
+  List<Expression>& summands,
+  HashedList<Expression>& outputMonomials,
+  List<Rational>& outputCoefficients
+) {
+  MacroRegisterFunctionWithName("Calculator::functionCollectSummandsSeparately");
+  calculator.appendSummandsReturnTrueIfOrderNonCanonical(input, summands);
+  for (int i = 0; i < summands.size; i ++) {
+    Calculator::functionCollectOneSummand(calculator, summands[i], outputMonomials, outputCoefficients);
+  }
+  return true;
+}
+
+bool Calculator::functionCollectSummandsCombine(
   Calculator& calculator,
   const Expression& input,
   LinearCombination<Expression, Rational>& outputSum
 ) {
-  MacroRegisterFunctionWithName("Calculator::functionCollectSummands");
+  MacroRegisterFunctionWithName("Calculator::functionCollectSummandsCombine");
   List<Expression> summands;
   calculator.appendSummandsReturnTrueIfOrderNonCanonical(input, summands);
   outputSum.makeZero();
@@ -877,35 +933,6 @@ bool Expression::makeIdentityMatrixExpressions(int theDim, Calculator& inputBoss
   Matrix<Expression> theMat;
   theMat.makeIdentityMatrix(theDim, inputBoss.expressionOne(), inputBoss.expressionZero());
   return this->assignMatrixExpressions(theMat, inputBoss, false, true);
-}
-
-bool Calculator::outerPlus(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::outerPlus");
-  calculator.checkInputNotSameAsOutput(input, output);
-  if (!input.startsWith(calculator.opPlus())) {
-    return false;
-  }
-  LinearCombination<Expression, Rational> theSum;
-  if (!calculator.functionCollectSummands(calculator, input, theSum)) {
-    return false;
-  }
-  theSum.quickSortDescending();
-  if (theSum.size() < 5) {
-    for (int i = 0; i < theSum.size(); i ++) {
-      for (int j = i; j < theSum.size(); j ++) {
-        if (theSum[i] > theSum[j] && theSum[j] > theSum[i]) {
-          global.fatal << "Faulty comparison: "
-          << theSum[i].toString() << " and " << theSum[j].toString()
-          << " are mutually greater than one another. " << global.fatal;
-        }
-      }
-    }
-  }
-  output.makeSum(calculator, theSum);
-  if (output == input) {
-    return false;
-  }
-  return true;
 }
 
 bool CalculatorBasics::evaluateIf(Calculator& calculator, const Expression& input, Expression& output) {
@@ -1433,6 +1460,13 @@ Function::Options Function::Options::innerNoTest() {
   return result;
 }
 
+Function::Options Function::Options::outerOffByDefault() {
+  Function::Options result;
+  result.flagIsInner = false;
+  result.disabledByUserDefault = true;
+  return result;
+}
+
 Function::Options Function::Options::invisibleNoTest() {
   Function::Options result;
   result.flagIsInner = true;
@@ -1481,7 +1515,7 @@ bool Function::inputFitsMyInnerType(const Expression& input) {
   return argument1good && argument2good;
 }
 
-std::string Function::ToStringShort() const {
+std::string Function::toStringShort() const {
   if (this->owner == nullptr) {
     return "(non-initialized)";
   }
@@ -1505,7 +1539,7 @@ std::string Function::toStringSummary() const {
     return "(non-initialized)";
   }
   std::stringstream out;
-  out << this->ToStringShort();
+  out << this->toStringShort();
   if (this->calculatorIdentifier != "") {
     out << "Rule name: <span style ='color:blue'>" << this->calculatorIdentifier << "</span>. ";
   }
@@ -1593,7 +1627,7 @@ std::string Function::toStringFull() const {
     return "(non-intialized)";
   }
   std::stringstream out2;
-  out2 << this->ToStringShort();
+  out2 << this->toStringShort();
   if (!this->options.flagIsExperimental) {
     std::stringstream out;
     out << this->theDescription;

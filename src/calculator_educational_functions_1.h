@@ -38,7 +38,7 @@ public:
   static bool compareExpressionsJSON(
     Calculator& calculator, const Expression& input, Expression& output
   );
-
+  static bool divideByNumberTrivial(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 #endif //CALCULATOR_EDUCATIONAL_FUNCTIONS

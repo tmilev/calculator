@@ -2546,10 +2546,10 @@ bool CalculatorFunctions::innerCompositeDifferentiateLog(
   return output.makeXOX(calculator, calculator.opDivide(), OneE, input[1]);
 }
 
-bool CalculatorFunctions::outerDivideByNumber(
+bool CalculatorFunctions::divideByNumber(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::outerDivide");
+  MacroRegisterFunctionWithName("CalculatorFunctions::divideByNumber");
   if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
   }
@@ -3004,6 +3004,68 @@ bool CalculatorFunctions::innerGetFreeVariablesExcludeNamedConstants(
     return calculator << "Function getFreeVariables failed, this shouldn't happen.";
   }
   return output.makeSequence(calculator, &outputList);
+}
+
+bool CalculatorFunctions::Test::checkSorting(
+  const HashedList<Expression>& mustBeSorted
+) {
+  if (mustBeSorted.size < 5) {
+    // too many elements, bail out.
+    return true;
+  }
+  for (int i = 0; i < mustBeSorted.size; i ++) {
+    for (int j = i; j < mustBeSorted.size; j ++) {
+      if (mustBeSorted[i] > mustBeSorted[j] && mustBeSorted[j] > mustBeSorted[i]) {
+        global.fatal << "Faulty comparison: "
+        << mustBeSorted[i].toString() << " and " << mustBeSorted[j].toString()
+        << " are mutually greater than one another. " << global.fatal;
+      }
+    }
+  }
+  return true;
+}
+
+bool CalculatorFunctions::addTerms(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("Calculator::addTerms");
+  calculator.checkInputNotSameAsOutput(input, output);
+  if (!input.startsWith(calculator.opPlus())) {
+    return false;
+  }
+  LinearCombination<Expression, Rational> sum;
+  if (!calculator.functionCollectSummandsCombine(calculator, input, sum)) {
+    return false;
+  }
+  sum.quickSortDescending();
+  CalculatorFunctions::Test::checkSorting(sum.monomials);
+  output.makeSum(calculator, sum);
+  if (output == input) {
+    return false;
+  }
+  return true;
+}
+
+bool CalculatorFunctions::sortTerms(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("Calculator::sortTerms");
+  calculator.checkInputNotSameAsOutput(input, output);
+  if (!input.startsWith(calculator.opPlus())) {
+    return false;
+  }
+  HashedList<Expression> monomials;
+  List<Rational> coefficients;
+  List<Expression> summands;
+  if (!calculator.functionCollectSummandsSeparately(calculator, input, summands, monomials, coefficients)) {
+    return false;
+  }
+  monomials.quickSortDescending(nullptr, &summands);
+  output.makeSum(calculator, summands);
+  if (output == input) {
+    return false;
+  }
+  return true;
 }
 
 bool CalculatorFunctions::innerCompareFunctionsNumerically(
@@ -5084,7 +5146,7 @@ bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
     return false;
   }
   LinearCombination<Expression, Rational> numerators, numeratorsNew;
-  calculator.functionCollectSummands(calculator, input[1], numerators);
+  calculator.functionCollectSummandsCombine(calculator, input[1], numerators);
   numeratorsNew.setExpectedSize(numerators.size());
   numeratorsNew.makeZero();
   Expression numeratorMultiplicandLeft, numeratorMultiplicandRight, numeratorBaseRight, numeratorExponentRight;

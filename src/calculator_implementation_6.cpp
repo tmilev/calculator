@@ -1285,7 +1285,7 @@ bool CalculatorFunctions::innerFactorOutNumberContent(
     return calculator << "FactorOutNumberContent expects single argument. ";
   }
   LinearCombination<Expression, Rational> theV;
-  if (!calculator.functionCollectSummands(calculator, input[1], theV)) {
+  if (!calculator.functionCollectSummandsCombine(calculator, input[1], theV)) {
     return calculator << "Failed to extract summands from: " << input[1].toString();
   }
   if (theV.isEqualToZero()) {
@@ -2432,7 +2432,7 @@ bool CalculatorFunctions::innerScaleToLeadingUnit(Calculator& calculator, const 
   }
   const Expression& argument = input[1];
   LinearCombination<Expression, Rational> theCollection;
-  calculator.functionCollectSummands(calculator, argument, theCollection);
+  calculator.functionCollectSummandsCombine(calculator, argument, theCollection);
   theCollection /= theCollection.getLeadingCoefficient(nullptr);
   return output.makeSum(calculator, theCollection);
 }

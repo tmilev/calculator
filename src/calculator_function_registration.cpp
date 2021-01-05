@@ -4495,13 +4495,25 @@ void Calculator::initializeStandardFunctions() {
   );
   this->addOperationHandler(
     "+",
-    Calculator::outerPlus,
+    CalculatorFunctions::sortTerms,
+    "",
+    "Sorts terms (over the rationals). "
+    "Similar to AddTerms but doesn't combine monomial coefficients or drop zeroes. ",
+    "2+3+a+2a+b+1+a",
+    "Calculator::sortTerms",
+    "SortTerms",
+    Function::Options::outerOffByDefault(),
+    "+"
+  );
+  this->addOperationHandler(
+    "+",
+    CalculatorFunctions::addTerms,
     "",
     "Collects all terms (over the rationals), adding up terms "
     "proportional up to a rational number. "
     "Zero summands are removed, unless zero is the only term left. ",
     "1+a-2a_1+ 1/2+a_1",
-    "Calculator::outerPlus",
+    "Calculator::addTerms",
     "AddTerms",
     outerStandard,
     "+"
@@ -5920,16 +5932,37 @@ void Calculator::initializeStandardFunctions() {
   );
   this->addOperationHandler(
     "/",
-    CalculatorFunctions::outerDivideByNumber,
+    CalculatorFunctions::divideByNumber,
     "",
     "If b is rational, algebraic, or double, substitutes (anything)/b with anything* (1/b).",
     "6/15+(a +b)/5;\n"
     "a/\\sqrt{}2;\n"
     "x/DoubleValue{}10^10;x/DoubleValue{}5;\n"
     "6/4+3/0",
-    "CalculatorFunctions::outerDivideByNumber",
+    "CalculatorFunctions::divideByNumber",
     "DivideByNumber",
     outerStandard
+  );
+  this->addOperationHandler(
+    "/",
+    CalculatorEducationalFunctions::divideByNumberTrivial,
+    "",
+    "Intended for educational purposes. "
+    "Divides rationals only if the operation is trivial, such as in"
+    "(2) /(3) --> (2/3). "
+    "The rule is turned off by default.",
+    "%LogEvaluation\n"
+    "TurnOnRules(DivideByNumberTrivial);\n"
+    "TurnOffRules("
+    "DivideByNumber, "
+    "ConvertShortDenominatorToNegativePower, "
+    "DivideRationalByRational"
+    ");\n"
+    "4/6;\n"
+    "2/3",
+    "CalculatorEducationalFunctions::divideByNumberTrivial",
+    "DivideByNumberTrivial",
+    Function::Options::outerOffByDefault()
   );
   this->addOperationHandler(
     "/",

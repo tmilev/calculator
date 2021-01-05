@@ -5052,7 +5052,7 @@ bool Expression::makeProduct(Calculator& owner, const List<Expression>& theMulti
 }
 
 bool Expression::makeSum(Calculator& owner, const List<Expression>& summands) {
-  MacroRegisterFunctionWithName("Expression::MakeSum");
+  MacroRegisterFunctionWithName("Expression::makeSum");
   if (summands.size == 0) {
     return this->assignValue(0, owner);
   }

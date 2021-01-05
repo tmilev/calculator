@@ -2176,14 +2176,14 @@ public:
   static bool functionCollectOneSummand(
     Calculator& calculator,
     const Expression& input,
-    HashedList<Expression>& outputMonomials,
+    List<Expression>& outputMonomials,
     List<Rational>& outputCoefficients
   );
   static bool functionCollectSummandsSeparately(
     Calculator& calculator,
     const Expression& input,
     List<Expression>& summands,
-    HashedList<Expression>& outputMonomials,
+    List<Expression>& outputMonomials,
     List<Rational>& outputCoefficients
   );
   static bool functionCollectSummandsCombine(

@@ -3007,7 +3007,7 @@ bool CalculatorFunctions::innerGetFreeVariablesExcludeNamedConstants(
 }
 
 bool CalculatorFunctions::Test::checkSorting(
-  const HashedList<Expression>& mustBeSorted
+  const List<Expression>& mustBeSorted
 ) {
   if (mustBeSorted.size < 5) {
     // too many elements, bail out.
@@ -3060,7 +3060,15 @@ bool CalculatorFunctions::sortTerms(
   if (!calculator.functionCollectSummandsSeparately(calculator, input, summands, monomials, coefficients)) {
     return false;
   }
-  monomials.quickSortDescending(nullptr, &summands);
+  List<Expression> sortedMonomials = monomials;
+  // Not guaranteed to be stable. Consider fixing.
+  sortedMonomials.quickSortDescending(nullptr, &summands);
+  if (monomials == sortedMonomials) {
+    // Possible when monomials repeat, for example 2x+x will have the monomial x appear twice.
+    // Since sorting is not guaranteed to be stable at present, the two terms may have been swapped.
+    return false;
+  }
+  CalculatorFunctions::Test::checkSorting(summands);
   output.makeSum(calculator, summands);
   if (output == input) {
     return false;

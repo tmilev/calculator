@@ -742,7 +742,7 @@ bool Calculator::collectOpandsAccumulate(
 bool Calculator::functionCollectOneSummand(
   Calculator& calculator,
   const Expression& input,
-  HashedList<Expression>& outputMonomials,
+  List<Expression>& outputMonomials,
   List<Rational>& outputCoefficients
 ) {
   MacroRegisterFunctionWithName("Calculator::functionCollectOneSummand");
@@ -784,7 +784,7 @@ bool Calculator::functionCollectSummandsSeparately(
   Calculator& calculator,
   const Expression& input,
   List<Expression>& summands,
-  HashedList<Expression>& outputMonomials,
+  List<Expression>& outputMonomials,
   List<Rational>& outputCoefficients
 ) {
   MacroRegisterFunctionWithName("Calculator::functionCollectSummandsSeparately");
@@ -1464,6 +1464,7 @@ Function::Options Function::Options::outerOffByDefault() {
   Function::Options result;
   result.flagIsInner = false;
   result.disabledByUserDefault = true;
+  result.disabledByUser = true;
   return result;
 }
 

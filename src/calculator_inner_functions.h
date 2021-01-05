@@ -569,7 +569,7 @@ public:
   static bool innerJacobiSymbol(Calculator& calculator, const Expression& input, Expression& output);
   class Test{
   public:
-    static bool checkSorting(const HashedList<Expression>& mustBeSorted);
+    static bool checkSorting(const List<Expression>& mustBeSorted);
   };
 };
 #endif

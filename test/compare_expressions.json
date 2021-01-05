@@ -1,0 +1,19 @@
+[
+{
+  "desiredAnswer": "(x+1)(x+2)",
+  "correct": ["(x+1)(x+2)", "(x+2)(x+1)"],
+  "incompleteCorrect": ["x^2+3x+2", "(x+1+1)(x+1)"],
+  "incorrectAnswer": ["x^2+3x+3"],
+},
+{
+  "desiredAnswer": "7",
+  "correct": ["7", "7  ", "  7 ", "7.0"],
+  "incompleteCorrect": ["5+2", "49/7"],
+  "incorrectAnswer": ["8"]
+},
+{
+  "desiredAnswer": "a+b+c+d",
+  "correct": ["a+b+c+d", "d+c+b+a", "(a+c)+(b+d)"],
+  "incorrectAnswer": ["a+b+c"],
+}
+]

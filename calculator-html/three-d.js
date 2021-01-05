@@ -539,7 +539,7 @@ function accountBoundingBox(inputPoint, outputBox) {
       outputBox[0][i] = inputPoint[i];
     }
   }
-  for (i = 0; i < inputPoint.length; i++) {
+  for (let i = 0; i < inputPoint.length; i++) {
     if (inputPoint[i] > outputBox[1][i]) {
       outputBox[1][i] = inputPoint[i];
     }
@@ -2599,14 +2599,14 @@ class Canvas {
       if (currentPatch.patchesBelowMe.length > 0) {
         this.textPatchInfo += "->";
       }
-      for (j = 0; j < currentPatch.patchesBelowMe.length; j++) {
+      for (let j = 0; j < currentPatch.patchesBelowMe.length; j++) {
         this.textPatchInfo += currentPatch.patchesBelowMe[j];
         if (j !== currentPatch.patchesBelowMe.length) {
           this.textPatchInfo += ", ";
         }
       }
       this.textPatchInfo += "; contours: ";
-      for (j = 0; j < currentPatch.adjacentContours.length; j++) {
+      for (let j = 0; j < currentPatch.adjacentContours.length; j++) {
         this.textPatchInfo += currentPatch.adjacentContours[j];
         if (j !== currentPatch.adjacentContours.length - 1) {
           this.textPatchInfo += ", ";

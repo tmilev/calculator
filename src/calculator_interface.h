@@ -2179,7 +2179,7 @@ public:
     List<Expression>& outputMonomials,
     List<Rational>& outputCoefficients
   );
-  static bool functionCollectSummandsSeparately(
+  static bool functionCollectSummandsSeparatelyTrueIfOrderNonCanonical(
     Calculator& calculator,
     const Expression& input,
     List<Expression>& summands,

@@ -780,19 +780,19 @@ bool Calculator::functionCollectOneSummand(
   return true;
 }
 
-bool Calculator::functionCollectSummandsSeparately(
+bool Calculator::functionCollectSummandsSeparatelyTrueIfOrderNonCanonical(
   Calculator& calculator,
   const Expression& input,
   List<Expression>& summands,
   List<Expression>& outputMonomials,
   List<Rational>& outputCoefficients
 ) {
-  MacroRegisterFunctionWithName("Calculator::functionCollectSummandsSeparately");
-  calculator.appendSummandsReturnTrueIfOrderNonCanonical(input, summands);
+  MacroRegisterFunctionWithName("Calculator::functionCollectSummandsSeparatelyTrueIfOrderNonCanonical");
+  bool result = calculator.appendSummandsReturnTrueIfOrderNonCanonical(input, summands);
   for (int i = 0; i < summands.size; i ++) {
     Calculator::functionCollectOneSummand(calculator, summands[i], outputMonomials, outputCoefficients);
   }
-  return true;
+  return result;
 }
 
 bool Calculator::functionCollectSummandsCombine(
@@ -1511,9 +1511,9 @@ bool Function::inputFitsMyInnerType(const Expression& input) {
   if (input.children.size != 3) {
     return false;
   }
-  bool argument1good = this->theArgumentTypes[0].data == - 1 ? true : input[1].isListStartingWithAtom(this->theArgumentTypes[0].data);
-  bool argument2good = this->theArgumentTypes[1].data == - 1 ? true : input[2].isListStartingWithAtom(this->theArgumentTypes[1].data);
-  return argument1good && argument2good;
+  bool argument1Good = this->theArgumentTypes[0].data == - 1 ? true : input[1].isListStartingWithAtom(this->theArgumentTypes[0].data);
+  bool argument2Good = this->theArgumentTypes[1].data == - 1 ? true : input[2].isListStartingWithAtom(this->theArgumentTypes[1].data);
+  return argument1Good && argument2Good;
 }
 
 std::string Function::toStringShort() const {

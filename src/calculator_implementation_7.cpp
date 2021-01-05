@@ -3057,16 +3057,18 @@ bool CalculatorFunctions::sortTerms(
   HashedList<Expression> monomials;
   List<Rational> coefficients;
   List<Expression> summands;
-  if (!calculator.functionCollectSummandsSeparately(calculator, input, summands, monomials, coefficients)) {
-    return false;
-  }
+  bool orderNonCanonical= calculator.functionCollectSummandsSeparatelyTrueIfOrderNonCanonical(
+    calculator, input, summands, monomials, coefficients
+  );
   List<Expression> sortedMonomials = monomials;
   // Not guaranteed to be stable. Consider fixing.
   sortedMonomials.quickSortDescending(nullptr, &summands);
-  if (monomials == sortedMonomials) {
-    // Possible when monomials repeat, for example 2x+x will have the monomial x appear twice.
-    // Since sorting is not guaranteed to be stable at present, the two terms may have been swapped.
-    return false;
+  if (!orderNonCanonical) {
+    if (monomials == sortedMonomials) {
+      // Possible when monomials repeat, for example 2x+x will have the monomial x appear twice.
+      // Since sorting is not guaranteed to be stable at present, the two terms may have been swapped.
+      return false;
+    }
   }
   CalculatorFunctions::Test::checkSorting(summands);
   output.makeSum(calculator, summands);

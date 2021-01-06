@@ -515,7 +515,7 @@ JSData SSLContent::toJSON() const {
   JSData extensionsObject;
   extensionsObject.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->extensions.size; i ++) {
-    extensionsObject.theList.addOnTop(this->extensions[i].toJSON());
+    extensionsObject.listObjects.addOnTop(this->extensions[i].toJSON());
   }
   result[SSLContent::JSLabels::extensions] = extensionsObject;
   result[SSLContent::JSLabels::renegotiate                      ] = this->flagRenegotiate;
@@ -1554,7 +1554,7 @@ JSData TransportLayerSecurityServer::Session::toJSON() {
   result[TransportLayerSecurityServer::Session::JSLabels::bytesToSign                      ] = Crypto::convertListUnsignedCharsToHex(this->bytesToSign);
   JSData ciphers;
   ciphers.theType = JSData::token::tokenObject;
-  ciphers.theList.setSize(this->incomingCiphers.size);
+  ciphers.listObjects.setSize(this->incomingCiphers.size);
   for (int i = 0; i < this->incomingCiphers.size; i ++) {
     CipherSuiteSpecification& current = this->incomingCiphers[i];
     ciphers[Crypto::convertIntToHex(current.id, 2)] = current.name;
@@ -1562,7 +1562,7 @@ JSData TransportLayerSecurityServer::Session::toJSON() {
   JSData algorithmSpecifications;
   algorithmSpecifications.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->incomingAlgorithmSpecifications.size; i ++) {
-    algorithmSpecifications.theList.addOnTop(this->incomingAlgorithmSpecifications[i].toJSON());
+    algorithmSpecifications.listObjects.addOnTop(this->incomingAlgorithmSpecifications[i].toJSON());
   }
   result[TransportLayerSecurityServer::Session::JSLabels::algorithmSpecifications] = algorithmSpecifications;
   result[TransportLayerSecurityServer::Session::JSLabels::cipherSuites] = ciphers;
@@ -1585,7 +1585,7 @@ JSData SSLRecord::toJSONSerialization() {
   JSData jsMarkers;
   jsMarkers.theType = JSData::token::tokenArray;
   for (int i = 0; i < markers.size; i ++) {
-    jsMarkers.theList.addOnTop(markers[i].toJSON());
+    jsMarkers.listObjects.addOnTop(markers[i].toJSON());
   }
   result[serialization::JSLabels::markers] = jsMarkers;
   result[serialization::JSLabels::body] = Crypto::convertListUnsignedCharsToHex(serialization);

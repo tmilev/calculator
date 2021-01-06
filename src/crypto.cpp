@@ -1471,16 +1471,16 @@ bool PublicKeyRSA::loadFromJSON(JSData& input, std::stringstream* commentsOnFail
   this->theModulusString = "";
   this->theExponentString = "";
   if (input.hasKey("alg")) {
-    this->algorithm = input.getValue("alg").theString;
+    this->algorithm = input.getValue("alg").stringValue;
   }
   if (input.hasKey("kid")) {
-    this->keyid = input.getValue("kid").theString;
+    this->keyid = input.getValue("kid").stringValue;
   }
   if (input.hasKey("n")) {
-    this->theModulusString = input.getValue("n").theString;
+    this->theModulusString = input.getValue("n").stringValue;
   }
   if (input.hasKey("e")) {
-    this->theExponentString = input.getValue("e").theString;
+    this->theExponentString = input.getValue("e").stringValue;
   }
   return this->loadFromModulusAndExponentStrings(commentsOnFailure);
 }
@@ -1516,8 +1516,8 @@ bool Crypto::loadOneKnownCertificate(
       JSData theKeys = certificateJSON.getValue("keys");
       if (theKeys.theType == JSData::token::tokenArray) {
         isGood = true;
-        for (int i = 0; i < theKeys.theList.size; i ++) {
-          if (!currentCert.loadFromJSON(theKeys.theList[i], commentsOnFailure, commentsGeneral)) {
+        for (int i = 0; i < theKeys.listObjects.size; i ++) {
+          if (!currentCert.loadFromJSON(theKeys.listObjects[i], commentsOnFailure, commentsGeneral)) {
             return false;
           }
           Crypto::knownCertificates.addOnTop(currentCert);

@@ -165,6 +165,7 @@ class WebAPIResponse {
   public:
     static bool all();
     static bool solveJSON();
+    static bool compareExpressions();
   };
 };
 

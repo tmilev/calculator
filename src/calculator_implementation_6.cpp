@@ -232,7 +232,7 @@ bool CalculatorHTML::Test::OneProblemTest::run() {
     global.webArguments.removeKey(current.answerIdWebAPI);
     if (!current.flagBuiltInGenerated) {
       commentsOnFailure << "Failed to generate answer: " << current.answerId << "<br>";
-      commentsOnFailure << current.builtInAnswerAPICall[WebAPI::result::resultHtml].theString;
+      commentsOnFailure << current.builtInAnswerAPICall[WebAPI::result::resultHtml].stringValue;
       this->flagAllBuiltInAnswersOK = false;
       this->flagSuccess = false;
       break;
@@ -251,7 +251,7 @@ bool CalculatorHTML::Test::OneProblemTest::run() {
       << j << " does not work:<br>"
       << current.builtInAnswer
       << "<hr>"
-      << current.builtInAnswerReply[WebAPI::result::resultHtml].theString;
+      << current.builtInAnswerReply[WebAPI::result::resultHtml].stringValue;
       this->flagSuccess = false;
       break;
     }

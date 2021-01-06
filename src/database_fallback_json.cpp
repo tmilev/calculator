@@ -79,10 +79,10 @@ bool Database::FallBack::updateOneNolocks(
     return false;
   }
   if (index == - 1) {
-    index = this->reader[findQuery.collection].theList.size;
+    index = this->reader[findQuery.collection].listObjects.size;
     JSData incoming;
     incoming.theType = JSData::token::tokenObject;
-    this->reader[findQuery.collection].theList.addOnTop(incoming);
+    this->reader[findQuery.collection].listObjects.addOnTop(incoming);
   }
   JSData* modified = &(this->reader[findQuery.collection][index]);
   for (int i = 0; i < dataToMerge.nestedLabels.size; i ++) {
@@ -171,7 +171,7 @@ bool Database::FallBack::findIndexOneNolocksMinusOneNotFound(
     }
     return false;
   }
-  int currentLocationIndex = currentIndex.locations.getIndex(query.value.theString);
+  int currentLocationIndex = currentIndex.locations.getIndex(query.value.stringValue);
   if (currentLocationIndex == - 1) {
     if (commentsOnNotFound != nullptr ) {
       *commentsOnNotFound << "Entry "
@@ -266,8 +266,8 @@ bool Database::FallBack::readAndIndexDatabase(std::stringstream* commentsOnFailu
   for (int i = 0; i < this->reader.objects.size(); i ++) {
     std::string collection = this->reader.objects.keys[i];
     JSData& currentCollection = this->reader.objects.values[i];
-    for (int i = 0; i < currentCollection.theList.size; i ++) {
-      this->indexOneRecord(currentCollection.theList[i], i, collection);
+    for (int i = 0; i < currentCollection.listObjects.size; i ++) {
+      this->indexOneRecord(currentCollection.listObjects[i], i, collection);
     }
   }
   // global << "Database indexed. " << this->toStringIndices() << Logger::endL;
@@ -290,7 +290,7 @@ void Database::FallBack::indexOneRecord(
       continue;
     }
     Database::FallBack::Index& currentIndex = this->indices.getValueCreate(indexLabel);
-    currentIndex.locations.getValueCreate(keyToIndexBy.theString).addOnTop(row);
+    currentIndex.locations.getValueCreate(keyToIndexBy.stringValue).addOnTop(row);
   }
 }
 

@@ -773,7 +773,7 @@ bool Crypto::verifyJWTagainstKnownKeys(
   }
   if (header.theType == JSData::token::tokenObject) {
     if (header.hasKey("kid")) {
-      keyIDstring = header.getValue("kid").theString;
+      keyIDstring = header.getValue("kid").stringValue;
     }
   }
   if (keyIDstring == "") {

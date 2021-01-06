@@ -689,26 +689,26 @@ void ExportCharTable(FiniteGroup<elementSomeGroup>& G, JSData& data) {
   JSData& sizes = data.objects.getValueCreate("sizes");
   JSData& characters = data.objects.getValueCreate("characters");
   representatives.theType = JSData::token::tokenArray;
-  representatives.theList.setSize(G.conjugacyClassCount());
+  representatives.listObjects.setSize(G.conjugacyClassCount());
 
   for (int i = 0; i < G.conjugacyClassCount(); i ++) {
     List<int> reprefs;
     G.getWord(G.conjugacyClasses[i].representative, reprefs);
-    representatives.theList[i].theType = JSData::token::tokenArray;
-    representatives.theList[i].theList.setSize(reprefs.size);
+    representatives.listObjects[i].theType = JSData::token::tokenArray;
+    representatives.listObjects[i].listObjects.setSize(reprefs.size);
     for (int j = 0; j < reprefs.size; j ++) {
-      representatives.theList[i].theList[j].theType = JSData::token::tokenLargeInteger;
-      representatives.theList[i].theList[j].theInteger.getElement() = reprefs[j];
+      representatives.listObjects[i].listObjects[j].theType = JSData::token::tokenLargeInteger;
+      representatives.listObjects[i].listObjects[j].theInteger.getElement() = reprefs[j];
     }
   }
   sizes.theType = JSData::token::tokenArray;
-  sizes.theList.setSize(G.conjugacyClassCount());
+  sizes.listObjects.setSize(G.conjugacyClassCount());
   for (int i = 0; i < G.conjugacyClassCount(); i ++) {
-    sizes.theList[i].theType = JSData::token::tokenLargeInteger;
-    sizes.theList[i].theInteger.getElement() = G.conjugacyClasses[i].size;
+    sizes.listObjects[i].theType = JSData::token::tokenLargeInteger;
+    sizes.listObjects[i].theInteger.getElement() = G.conjugacyClasses[i].size;
   }
   characters.theType = JSData::token::tokenArray;
-  characters.theList.setSize(G.characterTable.size);
+  characters.listObjects.setSize(G.characterTable.size);
   for (int i = 0; i < G.characterTable.size; i ++) {
     for (int j = 0; j < G.characterTable[i].data.size; j ++) {
       characters[i][j] = G.characterTable[i][j].getNumerator();

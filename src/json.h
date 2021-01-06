@@ -43,12 +43,12 @@ public:
   char theType;
   bool theBoolean;
   double theFloat;
-  std::string theString;
+  std::string stringValue;
   MemorySaving<LargeInteger> theInteger;
-  ListReferences<JSData> theList;
+  ListReferences<JSData> listObjects;
   MapReferences<std::string, JSData, MathRoutines::hashString> objects;
   unsigned int hashFunction() const;
-  static unsigned int hashFunction(const JSData& input){
+  static unsigned int hashFunction(const JSData& input) {
     return input.hashFunction();
   }
   void operator=(const bool other);
@@ -83,9 +83,9 @@ public:
   void operator=(const List<any>& other) {
     this->reset();
     this->theType = JSData::token::tokenArray;
-    this->theList.setSize(other.size);
+    this->listObjects.setSize(other.size);
     for (int i = 0; i < other.size; i ++) {
-      this->theList[i] = other[i];
+      this->listObjects[i] = other[i];
     }
   }
   void operator=(const LargeInteger& input);

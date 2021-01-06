@@ -1565,8 +1565,8 @@ std::string WebWorker::getChangePasswordPagePartOne(bool& outputDoShowPasswordCh
     << claimedEmail << " </b>";
     return out.str();
   }
-  usernameAssociatedWithToken = emailInfo.value[DatabaseStrings::labelUsernameAssociatedWithToken].theString;
-  actualEmailActivationToken = emailInfo.value[DatabaseStrings::labelActivationToken].theString;
+  usernameAssociatedWithToken = emailInfo.value[DatabaseStrings::labelUsernameAssociatedWithToken].stringValue;
+  actualEmailActivationToken = emailInfo.value[DatabaseStrings::labelActivationToken].stringValue;
   if (actualEmailActivationToken != claimedActivationToken) {
     out << "\n<b style =\"color:red\">Bad activation token. Could not activate your email. </b>";
     return out.str();
@@ -2690,12 +2690,12 @@ void WebServer::stop() {
 }
 
 void WebServer::initPortsITry() {
-  this->portHTTP = global.configuration[Configuration::portHTTP].theString;
+  this->portHTTP = global.configuration[Configuration::portHTTP].stringValue;
   if (!global.flagSSLIsAvailable) {
     return;
   }
-  this->portHTTPSOpenSSL = global.configuration[Configuration::portHTTPSOpenSSL].theString;
-  this->portHTTPSBuiltIn = global.configuration[Configuration::portHTTPSBuiltIn].theString;
+  this->portHTTPSOpenSSL = global.configuration[Configuration::portHTTPSOpenSSL].stringValue;
+  this->portHTTPSBuiltIn = global.configuration[Configuration::portHTTPSBuiltIn].stringValue;
   this->portHTTPSDefault = this->portHTTPSOpenSSL;
 }
 
@@ -4373,17 +4373,17 @@ void GlobalVariables::configurationProcess() {
     global.configuration[Configuration::monitorPingTime] = global.server().webServerPingIntervalInSeconds;
   }
   if (global.configuration[Configuration::gitRepository].theType == JSData::token::tokenString) {
-    HtmlRoutines::gitRepository = global.configuration[Configuration::gitRepository].theString;
+    HtmlRoutines::gitRepository = global.configuration[Configuration::gitRepository].stringValue;
   } else {
     global.configuration[Configuration::gitRepository] = HtmlRoutines::gitRepository;
   }
-  if (global.configuration[Configuration::portHTTP].theString == "") {
+  if (global.configuration[Configuration::portHTTP].stringValue == "") {
     global.configuration[Configuration::portHTTP] = "8155";
   }
-  if (global.configuration[Configuration::portHTTPSOpenSSL].theString == "") {
+  if (global.configuration[Configuration::portHTTPSOpenSSL].stringValue == "") {
     global.configuration[Configuration::portHTTPSOpenSSL] = "8166";
   }
-  if (global.configuration[Configuration::portHTTPSBuiltIn].theString == "") {
+  if (global.configuration[Configuration::portHTTPSBuiltIn].stringValue == "") {
     global.configuration[Configuration::portHTTPSBuiltIn] = "8177";
   }
   global.flagUseMathTags = global.configuration[Configuration::useMathTags].isTrueRepresentationInJSON();
@@ -4393,7 +4393,7 @@ void GlobalVariables::configurationProcess() {
     std::string key = folderVirtualLinksDefault[i][0];
     std::string value = folderVirtualLinksDefault[i][1];
     if (
-      global.configuration[key].theString == ""
+      global.configuration[key].stringValue == ""
     ) {
       global.configuration[key] = value;
     }

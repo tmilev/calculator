@@ -100,7 +100,7 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand() {
     global.configuration["openSSLSubject"].theType != JSData::token::tokenUndefined &&
     global.configuration["openSSLSubject"].theType == JSData::token::tokenString
   ) {
-    theCommand << "-subj " << global.configuration["openSSLSubject"].theString;
+    theCommand << "-subj " << global.configuration["openSSLSubject"].stringValue;
     // "/C=CA/ST=ON/L=MyTown/O=MyOrganization/OU=none/CN=localhost/emailAddress=myemail@gmail.com"
   }
   global << "About to generate key files with the following command. " << Logger::endL;

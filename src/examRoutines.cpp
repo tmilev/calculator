@@ -87,7 +87,7 @@ bool CalculatorHTML::mergeProblemWeight(
     ProblemData& currentProblemValue = outputAppendProblemInfo.getValueCreate(currentProblemName);
     JSData& currentWeight = currentProblem[DatabaseStrings::labelProblemWeight];
     if (currentWeight.theType == JSData::token::tokenString) {
-      currentProblemValue.adminData.problemWeightsPerCourse.setKeyValue(currentCourse, currentWeight.theString);
+      currentProblemValue.adminData.problemWeightsPerCourse.setKeyValue(currentCourse, currentWeight.stringValue);
     } else if (currentWeight.theType == JSData::token::tokenObject) {
       for (int i = 0; i < currentWeight.objects.size(); i ++) {
         if (currentWeight.objects.values[i].theType != JSData::token::tokenString) {
@@ -100,7 +100,7 @@ bool CalculatorHTML::mergeProblemWeight(
         }
         currentProblemValue.adminData.problemWeightsPerCourse.setKeyValue(
           currentWeight.objects.keys[i],
-          currentWeight.objects.values[i].theString
+          currentWeight.objects.values[i].stringValue
         );
       }
     } else {
@@ -141,7 +141,7 @@ bool CalculatorHTML::mergeProblemDeadline(
       for (int j = 0; j < currentDeadlines.objects.size(); j ++) {
         currentProblemValue.adminData.deadlinesPerSection.setKeyValue(
           currentDeadlines.objects.keys[j],
-          currentDeadlines.objects.values[j].theString
+          currentDeadlines.objects.values[j].stringValue
         );
       }
     } else {
@@ -666,7 +666,7 @@ bool CalculatorHtmlFunctions::interpretProblemGiveUp(
   std::stringstream out;
   out << WebAPI::problem::answerGenerationSuccess
   << ":" << result[WebAPI::problem::answerGenerationSuccess] << "<br>";
-  out << "<br>resultHTML:<br>" << result[WebAPI::result::resultHtml].theString;
+  out << "<br>resultHTML:<br>" << result[WebAPI::result::resultHtml].stringValue;
   return output.assignValue(out.str(), calculator);
 }
 
@@ -3710,7 +3710,7 @@ JSData CalculatorHTML::toStringTopicListJSON(std::stringstream* comments) {
   for (int i = 0; i < this->topics.theTopics.size(); i ++) {
     TopicElement& currentElt = this->topics.theTopics.values[i];
     if (currentElt.type == TopicElement::types::chapter) {
-      output["children"].theList.addOnTop(currentElt.toJSON(*this));
+      output["children"].listObjects.addOnTop(currentElt.toJSON(*this));
     }
   }
   if (global.userDefaultIsDebuggingAdmin()) {
@@ -3855,9 +3855,9 @@ bool LaTeXCrawler::FileWithOption::fromJSON(JSData& input, std::stringstream* co
     }
     return false;
   }
-  this->fileName = file.theString;
+  this->fileName = file.stringValue;
   this->isSolution = false;
-  if (input[WebAPI::request::slides::isSolution].theString == "true") {
+  if (input[WebAPI::request::slides::isSolution].stringValue == "true") {
     this->isSolution = true;
   }
   return true;
@@ -3875,7 +3875,7 @@ JSData LaTeXCrawler::Slides::toJSON() {
   JSData theFiles;
   theFiles.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->filesToCrawl.size; i ++) {
-    theFiles.theList.addOnTop(this->filesToCrawl[i].toJSON());
+    theFiles.listObjects.addOnTop(this->filesToCrawl[i].toJSON());
   }
   result[WebAPI::request::slides::files] = theFiles;
   return result;
@@ -3897,9 +3897,9 @@ bool LaTeXCrawler::Slides::fromJSON(
     }
     return false;
   }
-  this->filesToCrawl.setSize(files.theList.size);
-  for (int i = 0; i < files.theList.size; i ++) {
-    if (!this->filesToCrawl[i].fromJSON(files.theList[i], commentsOnFailure)) {
+  this->filesToCrawl.setSize(files.listObjects.size);
+  for (int i = 0; i < files.listObjects.size; i ++) {
+    if (!this->filesToCrawl[i].fromJSON(files.listObjects[i], commentsOnFailure)) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Failed to extract file from entry index " << i << ". ";
       }
@@ -4101,7 +4101,7 @@ JSData TopicElement::toJSON(CalculatorHTML& owner) {
   }
   for (int i = 0; i < this->immediateChildren.size; i ++) {
     TopicElement& currentChild = owner.topics.theTopics.values[this->immediateChildren[i]];
-    output["children"].theList.addOnTop(currentChild.toJSON(owner));
+    output["children"].listObjects.addOnTop(currentChild.toJSON(owner));
   }
   output["problemNumberString"] = this->problemNumberString;
   output["video"] = this->video;

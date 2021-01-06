@@ -1081,11 +1081,11 @@ void FileOperations::initializeFoldersNonSensitive() {
   // are used together with file configuration.json,
   // to compute the folder locations below.
 
-  std::string HTMLCommonFolder = global.configuration[Configuration::HTMLCommon].theString;
+  std::string HTMLCommonFolder = global.configuration[Configuration::HTMLCommon].stringValue;
   List<List<std::string> >& links = FileOperations::folderVirtualLinksDefault();
   for (int i = 0; i < links.size; i ++) {
     std::string& key = links[i][0];
-    std::string value = global.configuration.getValue(key).theString;
+    std::string value = global.configuration.getValue(key).stringValue;
     if (value == "") {
       global.fatal << Logger::red << "Unexpected empty folder mapping: key: "
       << key << ", value: " << value << global.fatal;
@@ -10507,9 +10507,9 @@ void DrawOperations::initDimensions(int theDim) {
 
 int DrawOperations::getDimensionFirstDimensionDependentOperation() {
   for (int i = 0; i < this->theOperations.size; i ++) {
-    if (this->theOperations[i][fieldOperation].theString == DrawOperations::typeSegment) {
-      if (this->theOperations[i][DrawOperations::fieldPoints].theList.size > 0) {
-        return this->theOperations[i][DrawOperations::fieldPoints][0].theList.size;
+    if (this->theOperations[i][fieldOperation].stringValue == DrawOperations::typeSegment) {
+      if (this->theOperations[i][DrawOperations::fieldPoints].listObjects.size > 0) {
+        return this->theOperations[i][DrawOperations::fieldPoints][0].listObjects.size;
       }
     }
   }

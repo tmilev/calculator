@@ -11,6 +11,7 @@ public:
   class Suites {
   public:
     static const std::string all;
+    static const std::string API;
     static const std::string database;
     static const std::string problems;
     static const std::string build;
@@ -46,10 +47,11 @@ const std::string Test::Suites::calculator = "calculator";
 const std::string Test::Suites::polynomial = "polynomial";
 const std::string Test::Suites::build = "build";
 const std::string Test::Suites::basic = "basic";
+const std::string Test::Suites::API = "api";
 
 void Test::run() {
   MacroRegisterFunctionWithName("Test::run");
-  global << "Testing ..." << Logger::endL;
+  global << "Testing: " << this->inputs.toStringCommaDelimited() << " ..." << Logger::endL;
   global.millisecondsMaxComputation = 100000000;
   if (this->shouldTest(Test::Suites::database)) {
     Database::Test::all();
@@ -72,10 +74,12 @@ void Test::run() {
     X509Certificate::Test::all();
     SSLRecord::Test::all();
   }
+  if (this->shouldTest(Test::Suites::API)) {
+    WebAPIResponse::Test::all();
+  }
   if (this->shouldTest(Test::Suites::polynomial)) {
     MonomialP::Test::all();
     Polynomial<Rational>::Test::all();
-    WebAPIResponse::Test::all();
   }
   if (
     this->shouldTest(Test::Suites::topicLists) ||

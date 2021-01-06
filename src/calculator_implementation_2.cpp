@@ -9,13 +9,13 @@ JSData Calculator::OperationHandlers::toJSON() {
   currentFunctionListDirect.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->handlers.size; i ++) {
     Function& currentHandler = this->handlers[i];
-    currentFunctionListDirect.theList.addOnTop(currentHandler.toJSON());
+    currentFunctionListDirect.listObjects.addOnTop(currentHandler.toJSON());
   }
   JSData currentFunctionListComposite;
   currentFunctionListComposite.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->compositeHandlers.size; i ++) {
     Function& currentHandler = this->compositeHandlers[i];
-    currentFunctionListComposite.theList.addOnTop(currentHandler.toJSON());
+    currentFunctionListComposite.listObjects.addOnTop(currentHandler.toJSON());
   }
   result["regular"] = currentFunctionListDirect;
   result["composite"] = currentFunctionListComposite;

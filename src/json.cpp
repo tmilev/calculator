@@ -36,7 +36,7 @@ void JSData::operator=(const char* other) {
 void JSData::operator=(const std::string& other) {
   this->reset();
   this->theType = JSData::token::tokenString;
-  this->theString = other;
+  this->stringValue = other;
 }
 
 void JSData::operator=(const JSData& other) {
@@ -44,17 +44,17 @@ void JSData::operator=(const JSData& other) {
   this->theBoolean = other.theBoolean;
   this->theFloat = other.theFloat;
   this->theInteger = other.theInteger;
-  this->theString = other.theString;
-  this->theList = other.theList;
+  this->stringValue = other.stringValue;
+  this->listObjects = other.listObjects;
   this->objects = other.objects;
 }
 
 JSData& JSData::operator[](int i) {
   this->theType = JSData::token::tokenArray;
-  if (this->theList.size < i + 1) {
-    this->theList.setSize(i + 1);
+  if (this->listObjects.size < i + 1) {
+    this->listObjects.setSize(i + 1);
   }
-  return this->theList[i];
+  return this->listObjects[i];
 }
 
 JSData JSData::getValue(const std::string& key) {
@@ -102,7 +102,7 @@ bool JSData::hasCompositeKeyOfType(
   if (!this->hasCompositeKeyOfToken(key, &container, JSData::token::tokenString, commentsOnFailure)) {
     return false;
   }
-  output = container.theString;
+  output = container.stringValue;
   return true;
 }
 
@@ -113,7 +113,7 @@ bool JSData::hasCompositeKeyOfType(
   if (!this->hasCompositeKeyOfToken(key, &container, JSData::token::tokenString, commentsOnFailure)) {
     return false;
   }
-  output = container.theString;
+  output = container.stringValue;
   return true;
 }
 
@@ -175,14 +175,14 @@ bool JSData::hasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
         }
         return false;
       }
-      if (currentData->theList.size <= theDigit) {
+      if (currentData->listObjects.size <= theDigit) {
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "Key index: " << theDigit
           << " is too large for current value: " << currentData->toString(&JSData::PrintOptions::HTML());
         }
         return false;
       }
-      currentData = &currentData->theList[theDigit];
+      currentData = &currentData->listObjects[theDigit];
       continue;
     }
     if (currentData->theType != JSData::token::tokenObject) {
@@ -222,16 +222,16 @@ JSData& JSData::operator[](const std::string& key) {
 
 void JSData::operator=(const List<unsigned char>& other) {
   this->theType = JSData::token::tokenString;
-  this->theString = other.toStringConcatenate();
-  this->theList.setSize(0); ;
+  this->stringValue = other.toStringConcatenate();
+  this->listObjects.setSize(0); ;
   this->objects.clear();
 }
 
 void JSData::operator=(const List<JSData>& other) {
   this->theType = JSData::token::tokenArray;
-  this->theList.setSize(other.size);
+  this->listObjects.setSize(other.size);
   for (int i = 0; i < other.size; i ++) {
-    this->theList[i] = other[i];
+    this->listObjects[i] = other[i];
   }
   this->objects.clear();
 }
@@ -262,7 +262,7 @@ bool JSData::isEqualTo(const std::string& other) {
   if (this->theType != JSData::token::tokenString) {
     return false;
   }
-  return this->theString == other;
+  return this->stringValue == other;
 }
 
 bool JSData::isNullOrUndefined() {
@@ -278,7 +278,7 @@ bool JSData::isTrueRepresentationInJSON() {
   if (this->theType != JSData::token::tokenString) {
     return false;
   }
-  return this->theString == "true";
+  return this->stringValue == "true";
 }
 
 bool JSData::isString(std::string* whichString) {
@@ -286,7 +286,7 @@ bool JSData::isString(std::string* whichString) {
     return false;
   }
   if (whichString != nullptr) {
-    *whichString = this->theString;
+    *whichString = this->stringValue;
   }
   return true;
 }
@@ -295,15 +295,15 @@ bool JSData::isListOfStrings(List<std::string>* whichStrings) {
   if (this->theType != JSData::token::tokenArray) {
     return false;
   }
-  for (int i = 0; i < this->theList.size; i ++) {
-    if (this->theList[i].theType != JSData::token::tokenString) {
+  for (int i = 0; i < this->listObjects.size; i ++) {
+    if (this->listObjects[i].theType != JSData::token::tokenString) {
       return false;
     }
   }
   if (whichStrings != nullptr) {
-    whichStrings->setSize(this->theList.size);
-    for (int i = 0; i < this->theList.size; i ++) {
-      (*whichStrings)[i] = this->theList[i].theString;
+    whichStrings->setSize(this->listObjects.size);
+    for (int i = 0; i < this->listObjects.size; i ++) {
+      (*whichStrings)[i] = this->listObjects[i].stringValue;
     }
   }
   return true;
@@ -324,40 +324,40 @@ bool JSData::tryToComputeType(std::stringstream* commentsOnFailure) {
   if (this->theType != JSData::token::tokenUnknown) {
     return true;
   }
-  if (this->theString == "null") {
+  if (this->stringValue == "null") {
     this->reset();
     this->theType = JSData::token::tokenNull;
     return true;
   }
-  if (this->theString == "true") {
+  if (this->stringValue == "true") {
     this->reset();
     this->theType = JSData::token::tokenBool;
     this->theBoolean = true;
     return true;
   }
-  if (this->theString == "false") {
+  if (this->stringValue == "false") {
     this->reset();
     this->theType = JSData::token::tokenBool;
     this->theBoolean = false;
     return true;
   }
-  if (this->theString.size() > 0) {
-    if (this->theString[0] == '-' || MathRoutines::isADigit(this->theString[0])) {
+  if (this->stringValue.size() > 0) {
+    if (this->stringValue[0] == '-' || MathRoutines::isADigit(this->stringValue[0])) {
       this->theInteger.freeMemory();
       this->theType = JSData::token::tokenUndefined;
       Rational parser;
-      if (parser.assignStringFailureAllowed(this->theString)) {
+      if (parser.assignStringFailureAllowed(this->stringValue)) {
         LargeInteger theInt;
         if (parser.isInteger(&theInt)) {
           this->theType = JSData::token::tokenLargeInteger;
           this->theInteger.getElement() = theInt;
-          this->theString = "";
+          this->stringValue = "";
           return true;
         }
       }
-      this->theFloat = std::stod(this->theString);
+      this->theFloat = std::stod(this->stringValue);
       this->theType = JSData::token::tokenFloat;
-      this->theString = "";
+      this->stringValue = "";
       return true;
     }
   }
@@ -435,7 +435,7 @@ bool JSData::readstringConsumeNextCharacter(
       last.theType = JSData::token::tokenString;
       return true;
     }
-    last.theString.push_back(next);
+    last.stringValue.push_back(next);
     return true;
   }
   if (last.theType == JSData::token::tokenQuoteUnclosedEscapeAtEnd) {
@@ -443,23 +443,23 @@ bool JSData::readstringConsumeNextCharacter(
     switch (next) {
       case 'u':
         currentIndex ++;
-        result = JSData::readstringConsumeFourHexAppendUnicode(last.theString, currentIndex, input, commentsOnFailure);
+        result = JSData::readstringConsumeFourHexAppendUnicode(last.stringValue, currentIndex, input, commentsOnFailure);
         break;
       case 'n':
-        last.theString.push_back('\n');
+        last.stringValue.push_back('\n');
         break;
       case '\\':
-        last.theString.push_back('\\');
+        last.stringValue.push_back('\\');
         break;
       case 't':
-        last.theString.push_back('\t');
+        last.stringValue.push_back('\t');
         break;
       case '"':
-        last.theString.push_back('"');
+        last.stringValue.push_back('"');
         break;
       default:
-        last.theString.push_back('\\');
-        last.theString.push_back(next);
+        last.stringValue.push_back('\\');
+        last.stringValue.push_back(next);
         break;
     }
     last.theType = JSData::token::tokenQuoteUnclosedStandard;
@@ -496,11 +496,11 @@ bool JSData::readstringConsumeNextCharacter(
       break;
     default:
       if (last.theType == JSData::token::tokenUnknown) {
-        last.theString.push_back(next);
+        last.stringValue.push_back(next);
         return true;
       }
       incoming.theType = JSData::token::tokenUnknown;
-      incoming.theString = next;
+      incoming.stringValue = next;
       break;
   }
   readingStack.addOnTop(incoming);
@@ -598,12 +598,12 @@ bool JSData::readstring(
       fourthToLast.theType == JSData::token::tokenOpenBrace && thirdToLast.theType == JSData::token::tokenString &&
       secondToLast.theType == JSData::token::tokenColon && last.isValidElement()
     ) {
-      fourthToLast.objects.setKeyValue(thirdToLast.theString, last);
+      fourthToLast.objects.setKeyValue(thirdToLast.stringValue, last);
       readingStack.setSize(readingStack.size - 3);
       continue;
     }
     if (secondToLast.theType == JSData::token::tokenOpenBracket && last.isValidElement()) {
-      secondToLast.theList.addOnTop(last);
+      secondToLast.listObjects.addOnTop(last);
       readingStack.removeLastObject();
       continue;
     }
@@ -749,23 +749,23 @@ somestream& JSData::intoStream(
       return out;
     case JSData::token::tokenString:
       if (!options.hexEncodeNonAsciiStrings) {
-        out << '"' << StringRoutines::convertStringToJSONString(this->theString) << '"';
+        out << '"' << StringRoutines::convertStringToJSONString(this->stringValue) << '"';
       } else {
         out << '"' << StringRoutines::convertStringToJSONString(
-          StringRoutines::convertStringToHexIfNonReadable(this->theString, 0, false)
+          StringRoutines::convertStringToHexIfNonReadable(this->stringValue, 0, false)
         ) << '"';
       }
       return out;
     case JSData::token::tokenArray:
-      if (this->theList.size == 0) {
+      if (this->listObjects.size == 0) {
         out << "[]";
         return out;
       }
       out << "[" << newLine;
-      for (int i = 0; i < this->theList.size; i ++) {
+      for (int i = 0; i < this->listObjects.size; i ++) {
         out << whiteSpaceInner << whiteSpaceOuter;
-        this->theList[i].intoStream(out, &options);
-        if (i != this->theList.size - 1) {
+        this->listObjects[i].intoStream(out, &options);
+        if (i != this->listObjects.size - 1) {
           out << "," << newLine;
         }
       }
@@ -920,8 +920,8 @@ void JSData::reset(char inputType) {
   this->theType = inputType;
   this->theBoolean = false;
   this->theFloat = 0;
-  this->theString = "";
-  this->theList.setSize(0);
+  this->stringValue = "";
+  this->listObjects.setSize(0);
   this->objects.clear();
   this->theInteger.freeMemory();
   if (inputType == JSData::token::tokenLargeInteger) {
@@ -940,11 +940,11 @@ unsigned int JSData::hashFunction() const {
   case JSData::token::tokenLargeInteger:
     return this->theInteger.getElementConst().hashFunction();
   case JSData::token::tokenArray:
-    return this->theList.hashFunction();
+    return this->listObjects.hashFunction();
   case JSData::token::tokenObject:
     return this->objects.hashFunction();
   case JSData::token::tokenString:
-    return HashFunctions::hashFunction(this->theString);
+    return HashFunctions::hashFunction(this->stringValue);
   case JSData::token::tokenBool:
     return HashFunctions::hashFunction(this->theBoolean);
   case JSData::token::tokenFloat:

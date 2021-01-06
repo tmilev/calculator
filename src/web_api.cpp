@@ -398,7 +398,6 @@ JSData WebAPIResponse::solveJSON() {
   JSData result;
   result[WebAPI::result::solution] = solution;
   result[WebAPI::result::commentsGlobal] = global.comments.getCurrentReset();
-  global.theResponse.writeResponse(result, false);
   global.flagComputationComplete = true;
   result[WebAPI::result::error] = "not implemented yet.";
   return result;
@@ -426,9 +425,7 @@ JSData WebAPIResponse::compareExpressions() {
   JSData result;
   result[WebAPI::result::resultLabel] = comparison;
   result[WebAPI::result::commentsGlobal] = global.comments.getCurrentReset();
-  global.theResponse.writeResponse(result, false);
   global.flagComputationComplete = true;
-  result[WebAPI::result::error] = "not implemented yet.";
   return result;
 }
 

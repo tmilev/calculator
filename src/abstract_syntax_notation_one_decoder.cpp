@@ -560,7 +560,7 @@ void ASNElement::toJSON(JSData& output) const {
   );
   output[ASNElement::JSLabels::lengthEncoding] = Crypto::convertListUnsignedCharsToHex(lengthEncoding);
   if (this->flagHeaderPadded) {
-    output[ASNElement::JSLabels::lengthEncoding] = output[ASNElement::JSLabels::lengthEncoding].theString + "00";
+    output[ASNElement::JSLabels::lengthEncoding] = output[ASNElement::JSLabels::lengthEncoding].stringValue + "00";
   }
   output[ASNElement::JSLabels::isConstructed] = this->flagIsConstructed;
   output[ASNElement::JSLabels::numberOfChildren] = this->theElements.size;
@@ -570,11 +570,11 @@ void ASNElement::toJSON(JSData& output) const {
   if (this->isComposite()) {
     JSData children;
     children.theType = JSData::token::tokenArray;
-    children.theList.reserve(this->theElements.size);
+    children.listObjects.reserve(this->theElements.size);
     for (int i = 0; i < this->theElements.size; i ++) {
       JSData incoming;
       this->theElements[i].toJSON(incoming);
-      children.theList.addOnTop(incoming);
+      children.listObjects.addOnTop(incoming);
     }
     output[ASNElement::JSLabels::children] = children;
   }

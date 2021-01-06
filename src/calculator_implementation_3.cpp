@@ -556,7 +556,7 @@ bool Calculator::Test::processOneTest(JSData& input) {
     global << Logger::red << "Input command is missing. " << Logger::endL;
     return false;
   }
-  std::string command = input["input"].theString;
+  std::string command = input["input"].stringValue;
   if (!this->commands.contains(command)) {
     std::stringstream reportStream;
     reportStream << "Command [" << command
@@ -572,7 +572,7 @@ bool Calculator::Test::processOneTest(JSData& input) {
     return false;
   }
   Calculator::Test::OneTest& currentTest = this->commands.getValueCreate(command);
-  currentTest.expectedResult = input["output"].theString;
+  currentTest.expectedResult = input["output"].stringValue;
   return true;
 }
 
@@ -613,8 +613,8 @@ bool Calculator::Test::loadTestStrings(
     }
     return false;
   }
-  for (int i = 0; i < this->storedResults.theList.size; i ++) {
-    this->processOneTest(this->storedResults.theList[i]);
+  for (int i = 0; i < this->storedResults.listObjects.size; i ++) {
+    this->processOneTest(this->storedResults.listObjects[i]);
   }
   return true;
 }
@@ -631,13 +631,13 @@ bool Calculator::Test::writeTestStrings(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("Calculator::writeTestStrings");
   JSData result;
   result.theType = JSData::token::tokenArray;
-  result.theList.setSize(this->commands.size());
+  result.listObjects.setSize(this->commands.size());
   for (int i = 0; i < this->commands.size(); i ++) {
     JSData nextEntry;
     nextEntry["input"] = this->commands.keys[i];
     Calculator::Test::OneTest& output = this->commands.values[i];
     nextEntry["output"] = output.actualResult;
-    result.theList[i] = nextEntry;
+    result.listObjects[i] = nextEntry;
   }
   return FileOperations::writeFileVirual(
     WebAPI::calculator::testFileNameVirtual,

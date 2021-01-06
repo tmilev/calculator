@@ -204,10 +204,10 @@ bool Database::convertJSONToJSONEncodeKeys(
   }
   output.reset(input.theType);
   if (input.theType == JSData::token::tokenArray) {
-    for (int i = 0; i < input.theList.size; i ++) {
+    for (int i = 0; i < input.listObjects.size; i ++) {
       JSData nextItem;
       if (!Database::convertJSONToJSONEncodeKeys(
-        input.theList[i],
+        input.listObjects[i],
         nextItem,
         recursionDepth + 1,
         encodeOverDecode,
@@ -215,7 +215,7 @@ bool Database::convertJSONToJSONEncodeKeys(
       )) {
         return false;
       }
-      output.theList.addOnTop(nextItem);
+      output.listObjects.addOnTop(nextItem);
     }
     return true;
   }
@@ -663,20 +663,20 @@ bool UserCalculator::loadFromDatabase(std::stringstream* commentsOnFailure, std:
 
 bool UserCalculatorData::loadFromJSON(JSData& input) {
   MacroRegisterFunctionWithName("UserCalculatorData::loadFromJSON");
-  this->userId                            = input[DatabaseStrings::labelUserId                            ].theString;
-  this->username                          = input[DatabaseStrings::labelUsername                          ].theString;
-  this->email                             = input[DatabaseStrings::labelEmail                             ].theString;
-  this->actualActivationToken             = input[DatabaseStrings::labelActivationToken                   ].theString;
-  this->timeOfActivationTokenCreation     = input[DatabaseStrings::labelTimeOfActivationTokenCreation     ].theString;
-  this->actualAuthenticationToken         = input[DatabaseStrings::labelAuthenticationToken               ].theString;
-  this->timeOfAuthenticationTokenCreation = input[DatabaseStrings::labelTimeOfAuthenticationTokenCreation ].theString;
+  this->userId                            = input[DatabaseStrings::labelUserId                            ].stringValue;
+  this->username                          = input[DatabaseStrings::labelUsername                          ].stringValue;
+  this->email                             = input[DatabaseStrings::labelEmail                             ].stringValue;
+  this->actualActivationToken             = input[DatabaseStrings::labelActivationToken                   ].stringValue;
+  this->timeOfActivationTokenCreation     = input[DatabaseStrings::labelTimeOfActivationTokenCreation     ].stringValue;
+  this->actualAuthenticationToken         = input[DatabaseStrings::labelAuthenticationToken               ].stringValue;
+  this->timeOfAuthenticationTokenCreation = input[DatabaseStrings::labelTimeOfAuthenticationTokenCreation ].stringValue;
   this->problemDataJSON                   = input[DatabaseStrings::labelProblemDataJSON                   ]          ;
-  this->actualHashedSaltedPassword        = input[DatabaseStrings::labelPassword                          ].theString;
-  this->userRole                          = input[DatabaseStrings::labelUserRole                          ].theString;
-  this->instructorInDB                    = input[DatabaseStrings::labelInstructor                        ].theString;
-  this->semesterInDB                      = input[DatabaseStrings::labelSemester                          ].theString;
-  this->sectionInDB                       = input[DatabaseStrings::labelSection                           ].theString;
-  this->courseInDB                        = input[DatabaseStrings::labelCurrentCourses                    ].theString;
+  this->actualHashedSaltedPassword        = input[DatabaseStrings::labelPassword                          ].stringValue;
+  this->userRole                          = input[DatabaseStrings::labelUserRole                          ].stringValue;
+  this->instructorInDB                    = input[DatabaseStrings::labelInstructor                        ].stringValue;
+  this->semesterInDB                      = input[DatabaseStrings::labelSemester                          ].stringValue;
+  this->sectionInDB                       = input[DatabaseStrings::labelSection                           ].stringValue;
+  this->courseInDB                        = input[DatabaseStrings::labelCurrentCourses                    ].stringValue;
   this->sectionsTaught.setSize(0);
   // TODO(tmilev): Remove URL decoding.
   // The layer of URL decoding is here because older
@@ -690,8 +690,8 @@ bool UserCalculatorData::loadFromJSON(JSData& input) {
   this->actualHashedSaltedPassword = HtmlRoutines::convertURLStringToNormal(this->actualHashedSaltedPassword, false);
   JSData sectionsTaughtList = input[DatabaseStrings::labelSectionsTaught];
   if (sectionsTaughtList.theType == JSData::token::tokenArray) {
-    for (int i = 0; i < sectionsTaughtList.theList.size; i ++) {
-      this->sectionsTaught.addOnTop(sectionsTaughtList.theList[i].theString);
+    for (int i = 0; i < sectionsTaughtList.listObjects.size; i ++) {
+      this->sectionsTaught.addOnTop(sectionsTaughtList.listObjects[i].stringValue);
     }
   }
   return true;
@@ -727,7 +727,7 @@ JSData UserCalculatorData::toJSON() {
   result[DatabaseStrings::labelSectionsTaught] = sectionsTaughtList;
   for (int i = result.objects.size() - 1; i >= 0; i --) {
     JSData& currentValue = result.objects.values[i];
-    if (currentValue.theString == "" && currentValue.theType == JSData::token::tokenString) {
+    if (currentValue.stringValue == "" && currentValue.theType == JSData::token::tokenString) {
       result.objects.removeKey(result.objects.keys[i]);
     }
   }
@@ -1053,7 +1053,7 @@ bool ProblemData::loadFromJSON(const JSData& inputData, std::stringstream& comme
   if (global.userRequestRequiresLoadingRealExamData()) {
     if (inputData.objects.contains(WebAPI::problem::randomSeed)) {
       this->randomSeed = static_cast<uint32_t>(atoi(
-        inputData.objects.getValueNoFail(WebAPI::problem::randomSeed).theString.c_str()
+        inputData.objects.getValueNoFail(WebAPI::problem::randomSeed).stringValue.c_str()
       ));
       this->flagRandomSeedGiven = true;
     }
@@ -1069,14 +1069,14 @@ bool ProblemData::loadFromJSON(const JSData& inputData, std::stringstream& comme
     JSData currentQuestionJSON = inputData.objects.values[i];
     if (currentQuestionJSON.objects.contains("numCorrectSubmissions")) {
       currentA.numCorrectSubmissions =
-      atoi(currentQuestionJSON.objects.getValueNoFail("numCorrectSubmissions").theString.c_str());
+      atoi(currentQuestionJSON.objects.getValueNoFail("numCorrectSubmissions").stringValue.c_str());
     }
     if (currentQuestionJSON.objects.contains("numSubmissions")) {
       currentA.numSubmissions =
-      atoi(currentQuestionJSON.objects.getValueNoFail("numSubmissions").theString.c_str());
+      atoi(currentQuestionJSON.objects.getValueNoFail("numSubmissions").stringValue.c_str());
     }
     if (currentQuestionJSON.objects.contains("firstCorrectAnswer")) {
-      currentA.firstCorrectAnswerURLed = currentQuestionJSON.objects.getValueNoFail("firstCorrectAnswer").theString;
+      currentA.firstCorrectAnswerURLed = currentQuestionJSON.objects.getValueNoFail("firstCorrectAnswer").stringValue;
       currentA.firstCorrectAnswerClean = HtmlRoutines::convertURLStringToNormal(currentA.firstCorrectAnswerURLed, false);
       currentA.firstCorrectAnswerURLed = HtmlRoutines::convertStringToURLString(currentA.firstCorrectAnswerClean, false); //url-encoding back the cleaned up answer:
       //this protects from the possibility that currentA.firstCorrectAnswerURLed was not encoded properly,
@@ -1194,8 +1194,8 @@ bool UserCalculator::computeAndStoreActivationStats(
     findEmail, emailStat, commentsOnFailure
   );
   std::string lastEmailTime, emailCountForThisEmail;
-  lastEmailTime = emailStat[DatabaseStrings::labelLastActivationEmailTime].theString;
-  emailCountForThisEmail = emailStat[DatabaseStrings::labelNumActivationEmails].theString;
+  lastEmailTime = emailStat[DatabaseStrings::labelLastActivationEmailTime].stringValue;
+  emailCountForThisEmail = emailStat[DatabaseStrings::labelNumActivationEmails].stringValue;
 
   LargeInteger numActivationsThisEmail = 0;
   if (emailCountForThisEmail != "") {
@@ -1614,7 +1614,7 @@ bool Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded(
     }
     return false;
   }
-  userWrapper.email = theData.getValue("email").theString;
+  userWrapper.email = theData.getValue("email").stringValue;
   userWrapper.username = "";
   if (!userWrapper.exists(commentsOnFailure)) {
     if (commentsGeneral != nullptr) {

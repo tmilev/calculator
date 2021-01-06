@@ -551,15 +551,15 @@ bool BuilderApplication::loadJavascriptFileNames(
     }
     return false;
   }
-  for (int i = 0; i < reader.theList.size; i ++) {
-    const JSData& current = reader.theList[i];
+  for (int i = 0; i < reader.listObjects.size; i ++) {
+    const JSData& current = reader.listObjects[i];
     if (current.theType != JSData::token::tokenString) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Found non-string source javascript file. ";
       }
       return false;
     }
-    this->jsFileNames.addOnTop(current.theString);
+    this->jsFileNames.addOnTop(current.stringValue);
   }
   return true;
 }
@@ -712,7 +712,7 @@ JSData CourseList::toJSON() {
   output["courses"].theType = JSData::token::tokenArray;
   for (int i = 0; i < this->theCourses.size; i ++) {
     Course& currentCourse = this->theCourses[i];
-    output["courses"].theList.addOnTop(currentCourse.toJSON());
+    output["courses"].listObjects.addOnTop(currentCourse.toJSON());
   }
   return output;
 }
@@ -796,7 +796,7 @@ void WebAPIResponse::getJSDataUserInfo(JSData& outputAppend, const std::string& 
   for (int i = 0; i < global.userDefault.sectionsTaught.size; i ++) {
     JSData nextSection;
     nextSection = HtmlRoutines::convertStringToHtmlString(global.userDefault.sectionsTaught[i], false);
-    sectionsTaught.theList.addOnTop(nextSection);
+    sectionsTaught.listObjects.addOnTop(nextSection);
   }
   outputAppend[DatabaseStrings::labelSectionsTaught] = sectionsTaught;
 }
@@ -866,7 +866,7 @@ JSData WebAPIResponse::getExamPageJSON() {
     output["answers"] = theFile.getJavascriptMathQuillBoxesForJSON();
     JSData theScripts;
     theScripts = JSData::token::tokenArray;
-    theScripts.theList.setSize(theFile.theScripts.size());
+    theScripts.listObjects.setSize(theFile.theScripts.size());
     for (int i = 0; i < theFile.theScripts.size(); i ++) {
       theScripts[theFile.theScripts.keys[i]] =
       HtmlRoutines::convertStringToURLString(theFile.theScripts.values[i], false);
@@ -1294,9 +1294,9 @@ std::string WebAPIResponse::addTeachersSections() {
     return "<b>no database present.</b>";
   }
   std::string desiredUsers =
-  HtmlRoutines::convertURLStringToNormal(inputParsed["teachers"].theString, false);
+  HtmlRoutines::convertURLStringToNormal(inputParsed["teachers"].stringValue, false);
   std::string desiredSectionsOneString =
-  HtmlRoutines::convertURLStringToNormal(inputParsed["students"].theString, false);
+  HtmlRoutines::convertURLStringToNormal(inputParsed["students"].stringValue, false);
   List<std::string> desiredSectionsList;
 
   List<std::string> theTeachers;
@@ -1975,13 +1975,13 @@ int ProblemData::getExpectedNumberOfAnswers(
       for (int i = 0; i < result.size; i ++) {
         const std::string& currentProblemName = result[i][
           DatabaseStrings::labelProblemFileName
-        ].theString;
+        ].stringValue;
         if (currentProblemName == "") {
           continue;
         }
         const std::string& expectedNumberOfAnswersString = result[i][
           DatabaseStrings::labelProblemTotalQuestions
-        ].theString;
+        ].stringValue;
         if (expectedNumberOfAnswersString == "") {
           continue;
         }
@@ -2187,12 +2187,12 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
       }
     }
     this->userScores.addOnTop(- 1);
-    this->userNames.addOnTop(this->userProblemData[i][DatabaseStrings::labelUsername].theString);
+    this->userNames.addOnTop(this->userProblemData[i][DatabaseStrings::labelUsername].stringValue);
     this->userInfos.addOnTop(currentUserRecord.currentUser.sectionInDB);
     this->scoresBreakdown.setSize(this->scoresBreakdown.size + 1);
     currentUserRecord.currentUser.username = this->userProblemData[i][
       DatabaseStrings::labelUsername
-    ].theString;
+    ].stringValue;
     if (!currentUserRecord.currentUser.interpretDatabaseProblemDataJSON(
       this->userProblemData[i][DatabaseStrings::labelProblemDataJSON],
       comments

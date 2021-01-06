@@ -1131,27 +1131,27 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
     return false;
   }
   SubgroupDataRootReflections readerSubgroup;
-  for (int i = 0; i < input.theList.size; i ++) {
-    JSData& currentSGdata = input.theList[i];
-    if (currentSGdata.theList[0].theList[0].theString == "parabolic") {
+  for (int i = 0; i < input.listObjects.size; i ++) {
+    JSData& currentSGdata = input.listObjects[i];
+    if (currentSGdata.listObjects[0].listObjects[0].stringValue == "parabolic") {
       readerSubgroup.flagIsParabolic = true;
       readerSubgroup.flagIsExtendedParabolic = true;
-    } else if (currentSGdata.theList[0].theList[0].theString == "pseudoParabolicNonParabolic") {
+    } else if (currentSGdata.listObjects[0].listObjects[0].stringValue == "pseudoParabolicNonParabolic") {
       readerSubgroup.flagIsExtendedParabolic = true;
       readerSubgroup.flagIsParabolic = false;
-    } else if (currentSGdata.theList[0].theList[0].theString == "nonPseudoParabolic") {
+    } else if (currentSGdata.listObjects[0].listObjects[0].stringValue == "nonPseudoParabolic") {
       readerSubgroup.flagIsExtendedParabolic = false;
       readerSubgroup.flagIsParabolic = false;
     } else {
       global.fatal << "Corrupt JSON data, entry number "
       << i + 1 << ": the group labels are: "
-      << currentSGdata.theList[0].toString(nullptr) << global.fatal;
+      << currentSGdata.listObjects[0].toString(nullptr) << global.fatal;
     }
-    std::string sgString = currentSGdata.theList[0].theList[1].theString;
+    std::string sgString = currentSGdata.listObjects[0].listObjects[1].stringValue;
     readerSubgroup.generatingSimpleRoots.setSize(0);
-    for (int j = 0; j < currentSGdata.theList[0].theList[2].theList.size; j ++) {
+    for (int j = 0; j < currentSGdata.listObjects[0].listObjects[2].listObjects.size; j ++) {
       int theInt = 0;
-      currentSGdata.theList[0].theList[2].theList[j].theInteger.getElement().isIntegerFittingInInt(&theInt);
+      currentSGdata.listObjects[0].listObjects[2].listObjects[j].theInteger.getElement().isIntegerFittingInInt(&theInt);
       readerSubgroup.generatingSimpleRoots.addOnTop(gapRootSystem[- 1 + theInt]);
     }
     DynkinDiagramRootSubalgebra theSAdiagram;
@@ -1162,8 +1162,8 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
       << sgString << " but dynkin type is computed to be: "
       << readerSubgroup.theDynkinType.toString() << global.fatal;
     }
-    if (currentSGdata.theList[1].theList.size != inputGroup.theGroup.characterTable.size) {
-      global.fatal << "Corrupt JSon or non-initialized Weyl group: tau signature has " << currentSGdata.theList[1].theList.size
+    if (currentSGdata.listObjects[1].listObjects.size != inputGroup.theGroup.characterTable.size) {
+      global.fatal << "Corrupt JSon or non-initialized Weyl group: tau signature has " << currentSGdata.listObjects[1].listObjects.size
       << " entries "
       << " but Weyl group has " << inputGroup.theGroup.characterTable.size << " irreps. " << global.fatal;
     }
@@ -1180,7 +1180,7 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
     }
     readerSubgroup.tauSignature.setSize(inputGroup.theGroup.characterTable.size);
     for (int j = 0; j < readerSubgroup.tauSignature.size; j ++) {
-      readerSubgroup.tauSignature[j] = currentSGdata.theList[1].theList[j].theInteger.getElement();
+      readerSubgroup.tauSignature[j] = currentSGdata.listObjects[1].listObjects[j].theInteger.getElement();
     }
     outputSubgroups.addOnTop(readerSubgroup);
   }

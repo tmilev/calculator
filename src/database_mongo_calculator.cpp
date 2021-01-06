@@ -31,6 +31,6 @@ bool CalculatorDatabaseFunctions::innerExecuteMongoQuery(
   }
   JSData finalOutput;
   finalOutput.theType = JSData::token::tokenArray;
-  finalOutput.theList = outputList;
+  finalOutput.listObjects = outputList;
   return output.assignValue(HtmlRoutines::toHtmlTableRowsFromJSON(finalOutput), calculator);
 }

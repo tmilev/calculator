@@ -819,14 +819,14 @@ bool Database::getLabels(
 ) {
   MacroRegisterFunctionWithName("Database::getLabels");
   output.setSize(0);
-  for (int i = 0; i < fieldEntries.theList.size; i ++) {
-    if (fieldEntries.theList[i].theType != JSData::token::tokenString) {
+  for (int i = 0; i < fieldEntries.listObjects.size; i ++) {
+    if (fieldEntries.listObjects[i].theType != JSData::token::tokenString) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Label index " << i << " is not of type string as required. ";
       }
       return false;
     }
-    output.addOnTop(fieldEntries.theList[i].theString);
+    output.addOnTop(fieldEntries.listObjects[i].stringValue);
   }
   return true;
 }
@@ -1315,7 +1315,7 @@ JSData Database::toJSONFetchItem(const List<std::string>& labelStrings) {
   }
   JSData theRows;
   theRows.theType = JSData::token::tokenArray;
-  theRows.theList = rowsJSON;
+  theRows.listObjects = rowsJSON;
   if (flagDebuggingAdmin) {
     result["findQuery"] = findQuery;
   }
@@ -1337,7 +1337,7 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
     if (Database::fetchCollectionNames(theCollectionNames, &out)) {
       JSData collectionNames;
       collectionNames.theType = JSData::token::tokenArray;
-      collectionNames.theList.setSize(theCollectionNames.size);
+      collectionNames.listObjects.setSize(theCollectionNames.size);
       for (int i = 0; i < theCollectionNames.size; i ++) {
         collectionNames[i] = theCollectionNames[i];
       }
@@ -1378,7 +1378,7 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
   }
   JSData theRows;
   theRows.theType = JSData::token::tokenArray;
-  theRows.theList = rowsJSON;
+  theRows.listObjects = rowsJSON;
   result["rows"] = theRows;
   result["totalRows"] = static_cast<int>(totalItems);
   return result;

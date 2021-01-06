@@ -1654,3 +1654,12 @@ button.buttonSolve{
 button.buttonSolve:hover {
   background-color: lightskyblue;
 }
+
+.equationeditoreditable {
+  border: 2px solid black;
+}
+
+.equationeditoreditablehighlighted {
+  border: 2px solid blue;
+  border-radius: 3px;
+}

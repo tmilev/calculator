@@ -142,7 +142,6 @@ const defaultFractionScale = 0.9;
 const knownTypes = {
   root: new MathNodeType({
     "type": "root",
-    "borderStyle": "1px solid black",
     "padding": "2px",
     "margin": "2px",
     "cursor": "text",
@@ -179,9 +178,9 @@ const knownTypes = {
     "overflow": "hidden",
   }),
   error: new MathNodeType({
-    type: "error",
-    colorText: "red",
-    whiteSpace: "nowrap",
+    "type": "error",
+    "colorText": "red",
+    "whiteSpace": "nowrap",
   }),
   leftDelimiterMark: new MathNodeType({
     "type": "leftDelimiterMark",
@@ -260,6 +259,7 @@ const knownTypes = {
   overLinedBox: new MathNodeType({
     "type": "overLinedBox",
     "borderTop": "1px solid black",
+    "boxSizing": "border-box",
   }),
   genericMathBox: new MathNodeType({
     "type": "genericMathBox",
@@ -2313,6 +2313,9 @@ class EquationEditor {
       this.rootNode.type.padding = "";
       this.rootNode.type.margin = "";
       this.rootNode.type.cursor = "";
+    } else {
+      this.container.style.margin = "2px";
+      this.container.style.padding = "2px";
     }
     /**@type{boolean} */
     this.preventEditorBlur = false;
@@ -3433,6 +3436,14 @@ class MathNode {
     ) {
       this.element.contentEditable = true;
     }
+    if (this.type.type === knownTypes.root.type && this.equationEditor.options.editable) {
+      // equationeditoreditable one word for maximum portability.
+      this.element.classList.add("equationeditoreditable");
+      if (getComputedStyle(this.element).borderWidth === "") {
+        this.element.style.borderStyle = "solid";
+      }
+    }
+
     // Padding.
     if (this.type.padding !== "") {
       this.element.style.padding = this.type.padding;
@@ -3569,6 +3580,15 @@ class MathNode {
         });
         this.element.addEventListener("mousemove", (e) => {
           this.equationEditor.handleMouseMoveSelection(e, this);
+        });
+      }
+      if (this.type.type === knownTypes.root.type) {
+        this.element.addEventListener("focusin", () => {
+          // equationeditoreditablehighlighted one word for portability.
+          this.element.classList.add("equationeditoreditablehighlighted")
+        });
+        this.element.addEventListener("focusout", () => {
+          this.element.classList.remove("equationeditoreditablehighlighted")
         });
       }
     }
@@ -3880,8 +3900,8 @@ class MathNode {
 
   computeDimensionsOverLine() {
     this.computeDimensionsStandard();
-    // Top border adds extra 1px to the height, which shifts the fraction line by 0.5px.
-    this.boundingBox.fractionLineHeight = this.children[0].boundingBox.fractionLineHeight + 0.5;
+    // The border add 1 extra pixel of height.
+    this.boundingBox.fractionLineHeight = this.children[0].boundingBox.fractionLineHeight + 1;
   }
 
   computeDimensionsOverBrace() {
@@ -3902,7 +3922,7 @@ class MathNode {
     let numerator = this.children[0];
     let denominator = this.children[1];
     let extraSpaceBetweenNumeratorAndDenominator = 3;
-    this.boundingBox.fractionLineHeight = numerator.boundingBox.height + 2;
+    this.boundingBox.fractionLineHeight = numerator.boundingBox.height + 1;
     this.boundingBox.height = numerator.boundingBox.height + denominator.boundingBox.height + extraSpaceBetweenNumeratorAndDenominator;
     this.boundingBox.width = Math.max(numerator.boundingBox.width, denominator.boundingBox.width) + 4;
     this.boundingBox.needsMiddleAlignment = true;
@@ -7426,6 +7446,9 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
     let topBar = this.children[1];
     let bottomBar = this.children[4];
     let radius = Math.floor(this.boundingBox.height / 12);
+    if (radius < 2) {
+      radius = 2;
+    }
     let heightBar = (this.boundingBox.height - 4 * radius) / 2;
     this.boundingBox.width = radius * 2 + 1;
     this.boundingBox.height += radius;

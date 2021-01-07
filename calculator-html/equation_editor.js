@@ -1127,6 +1127,11 @@ class LaTeXConstants {
     for (let i = 0; i < this.latinCharactersString.length; i++) {
       this.latinCharacters[this.latinCharactersString[i]] = true;
     }
+    this.digitString = "0123456789";
+    this.digits = {};
+    for (let i = 0; i < this.digitString.length; i++) {
+      this.digits[this.digitString[i]] = true;
+    }
     this.characterReplacingSelectionString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 +-*";
     this.characterReplacingSelection = {};
     for (let i = 0; i < this.characterReplacingSelectionString.length; i++) {
@@ -1545,6 +1550,13 @@ class LaTeXConstants {
     input,
   ) {
     return input in this.latinCharacters;
+  }
+
+  isDigit(
+    /**@type{string}*/
+    input,
+  ) {
+    return input in this.digits;
   }
 
   isWhiteSpace(
@@ -6294,7 +6306,7 @@ class MathNode {
    * @returns{MathNode|null} 
    */
   previousHorizontalSibling() {
-    return this.horizontalSibling(-1);
+    return this.horizontalSibling(- 1);
   }
 
   /** Returns an immediate horizontal math sibling, provided the node 
@@ -6307,7 +6319,7 @@ class MathNode {
 
   horizontalSibling(
     /**@type{number}*/
-    direction
+    direction,
   ) {
     if (this.parent === null) {
       return null;
@@ -6339,7 +6351,7 @@ class MathNode {
       this.makeBaseWithExponentRightDelimiter();
       return;
     }
-    this.makeBaseDefaultWithExponent();
+    this.makeBaseDefaultWithExponentNoDelimiter();
   }
 
   makeBaseWithExponentRightDelimiter() {
@@ -6354,6 +6366,41 @@ class MathNode {
     const baseWithExponent = mathNodeFactory.baseWithExponent(this.equationEditor, base, null);
     baseWithExponent.children[1].children[0].children[0].desiredCaretPosition = 0;
     originalParent.replaceChildRangeWithChildren(leftIndex, rightIndex, [baseWithExponent]);
+    originalParent.ensureEditableAtoms();
+    originalParent.updateDOM();
+    originalParent.focusRestore();
+  }
+
+  makeBaseDefaultWithExponentNoDelimiter() {
+    if (!this.isAtomEditable()) {
+      this.makeBaseDefaultWithExponent();
+      return;
+    }
+    let content = this.textContentOrInitialContent();
+    let numberOfCharactersToSlice = 0;
+    for (let i = content.length - 1; i >= 0; i--) {
+      let current = content[i];
+      if (!latexConstants.isDigit(current)) {
+        break;
+      }
+      numberOfCharactersToSlice++;
+    }
+    if (numberOfCharactersToSlice === 0) {
+      numberOfCharactersToSlice = 1;
+    }
+    if (numberOfCharactersToSlice >= content.length) {
+      this.makeBaseDefaultWithExponent();
+      return;
+    }
+    let leftContent = content.slice(0, content.length - numberOfCharactersToSlice);
+    let rightContent = content.slice(content.length - numberOfCharactersToSlice);
+    let left = mathNodeFactory.atom(this.equationEditor, leftContent);
+    let right = mathNodeFactory.atom(this.equationEditor, rightContent);
+    let originalParent = this.parent;
+    let originalIndexInParent = this.indexInParent;
+    const baseWithExponent = mathNodeFactory.baseWithExponent(this.equationEditor, right, null);
+    baseWithExponent.children[1].children[0].children[0].desiredCaretPosition = 0;
+    originalParent.replaceChildAtPositionWithChildren(originalIndexInParent, [left, baseWithExponent]);
     originalParent.ensureEditableAtoms();
     originalParent.updateDOM();
     originalParent.focusRestore();

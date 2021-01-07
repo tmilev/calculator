@@ -15,5 +15,21 @@
   "desiredAnswer": "a+b+c+d",
   "correct": ["a+b+c+d", "d+c+b+a", "(a+c)+(b+d)"],
   "incorrect": ["a+b+c"],
-}
+},
+{
+  "desiredAnswer": "2x+3",
+  "correct": ["2x+3"],
+  "incomplete": ["(2x+3)^2/(2x+3)"],
+  "incorrect": ["2x-3"],
+},
+{
+  "desiredAnswer": "2x+3",
+  "incomplete": ["(2x^2+x-3)/(x-1)"],
+  "incorrect": ["2x-3"],
+},
+{
+  "desiredAnswer": "2x+3",
+  "incomplete": ["3-(-2x)"],
+  "correct": ["3+2x", "2x+3"],
+},
 ]

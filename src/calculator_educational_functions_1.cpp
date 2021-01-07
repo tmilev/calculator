@@ -81,7 +81,8 @@ bool CalculatorEducationalFunctions::compareExpressionsJSON(
     "AddTerms, "
     "DivideByNumber, "
     "ConvertShortDenominatorToNegativePower,"
-    "DivideRationalByRational"
+    "DivideRationalByRational,"
+    "ConstantExtraction"
     ");\n"
     "TurnOnRules(SortTerms, DivideByNumberTrivial);\n"
     "a===b)_3",

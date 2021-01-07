@@ -1214,22 +1214,10 @@ JSData Calculator::compareExpressions(const std::string& given, const std::strin
   MacroRegisterFunctionWithName("Calculator::solve");
   this->statistics.initialize();
   Expression givenExpression, desiredExpression;
-  if (!this->parseAndExtractExpressions(
-    given,
-    givenExpression,
-    this->syntacticSoup,
-    this->syntacticStack,
-    &this->syntaxErrors
-  )) {
+  if (!this->parse(given, true, givenExpression)) {
     return this->extractComparison(given, desired);
   }
-  if (!this->parseAndExtractExpressions(
-    desired,
-    desiredExpression,
-    this->syntacticSoup,
-    this->syntacticStack,
-    &this->syntaxErrors
-  )) {
+  if (!this->parse(desired, true, desiredExpression)) {
     return this->extractComparison(given, desired);
   }
   this->programExpression.makeXOX(

@@ -62,14 +62,21 @@ bool CalculatorEducationalFunctions::compareExpressionsJSON(
     result[WebAPI::result::error] = errorStream.str();
     return output.assignValue(result, calculator);
   }
+  Expression givenSimplified;
+  givenSimplified.makeOX(calculator, calculator.getOperations().getIndexNoFail("Polynomialize"), comparison.given);
+  Expression desiredSimplified;
+  desiredSimplified.makeOX(calculator, calculator.getOperations().getIndexNoFail("Polynomialize"), comparison.desired);
+
   comparison.comparisonStandardRaw.makeXOX(
-    calculator, calculator.opEqualEqual(), comparison.given, comparison.desired
+    calculator, calculator.opEqualEqual(), givenSimplified, desiredSimplified
   );
+  global.comments << "DEBUG: Evaluating: " << comparison.comparisonStandardRaw.toString() << "<br>";
   calculator.evaluateExpression(
     calculator,
     comparison.comparisonStandardRaw,
     comparison.comparisonStandardEvaluated
   );
+  global.comments << "DEBUG: Evaluated: " << comparison.comparisonStandardEvaluated.toString() << "<br>";
 
   MapList<std::string, Expression, MathRoutines::hashString> substitution;
   substitution.setKeyValue("a", comparison.given);

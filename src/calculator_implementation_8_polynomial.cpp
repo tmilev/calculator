@@ -1414,7 +1414,7 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
   WithContext<Polynomial<AlgebraicNumber> > denominator;
   if (!CalculatorConversions::convert(
     input[2],
-    CalculatorConversions::functionPolynomialWithExponentLimit<AlgebraicNumber, 6>,
+    CalculatorConversions::functionPolynomialWithExponentLimit<AlgebraicNumber, 6, 1>,
     denominator
   )) {
     return false;
@@ -1426,7 +1426,7 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
   }
   if (!CalculatorConversions::convert(
     input[1],
-    CalculatorConversions::functionPolynomialWithExponentLimit<AlgebraicNumber, 6>,
+    CalculatorConversions::functionPolynomialWithExponentLimit<AlgebraicNumber, 6, 1>,
     numerator
   )) {
     return false;
@@ -1436,6 +1436,11 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
   }
   if (!numerator.context.hasAtomicUserDefinedVariables()) {
     return false;
+  }
+  if (numerator.content.minimalNumberOfVariables() > 1) {
+    if (numerator.content.totalDegree() > 4 || denominator.content.totalDegree() > 4) {
+      return false;
+    }
   }
   RationalFunction<AlgebraicNumber> result;
   result = numerator.content;

@@ -2538,9 +2538,9 @@ public:
   // Conversions from expression tree to expression containing type.
   template <class Coefficient>
   static bool functionPolynomial(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorConversions::functionPolynomialWithExponentLimit<Coefficient, - 1>(calculator, input, output);
+    return CalculatorConversions::functionPolynomialWithExponentLimit<Coefficient, - 1, - 1>(calculator, input, output);
   }
-  template <class Coefficient, int MaximumPower>
+  template <class Coefficient, int MaximumPower, int MaximumVariables>
   static bool functionPolynomialWithExponentLimit(
     Calculator& calculator, const Expression& input, Expression& output
   );

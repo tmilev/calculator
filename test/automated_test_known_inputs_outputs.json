@@ -1177,7 +1177,7 @@
   },
   {
     "input":"MakeExpression(Polynomial{}((x - 2y + z - 1)^2(x + y - z)));\nA = \\frac{64 x^{2} y x y + 16 x y - y}{- 32 x^{2} y x^{2} - 8 x^{2} + x};\nB = MakeRationalFunction(A);\nC = MakeExpression B;\nD = MakeRationalFunction {}(\\frac{- 2x^{3}y^{2} - \\frac{x y}{2} + \\frac{y }{32}}{x^{4}y + \\frac{x^{2}}{4} - \\frac{x}{32}});\nMakeExpression {}D - C;\nD - B;",
-    "output":"(-8 y^{2} z+x^{2} z-3 x^{2} y+5 y z^{2}-x z^{2}-z^{3}+2 z^{2}+4 y^{3}+4 y^{2}+x^{3}-2 x^{2}+2 x y z-6 y z+2 x y-z+y+x;A=\\frac{-64 x^{3} y^{2}-16 x y+y}{32 x^{4} y+8 x^{2}-x};B=MakeRationalFunction{}(\\frac{-64x^{3}y^{2}-16x y +y }{32x^{4}y +8x^{2}-x });C=\\frac{-64 x^{3} y^{2}-16 x y+y}{32 x^{4} y+8 x^{2}-x};D=MakeRationalFunction{}(\\frac{-64x^{3}y^{2}-16x y +y }{32x^{4}y +8x^{2}-x });0;MakeRationalFunction{}(0))"
+    "output":"(-8 y^{2} z+x^{2} z-3 x^{2} y+5 y z^{2}-x z^{2}-z^{3}+2 z^{2}+4 y^{3}+4 y^{2}+x^{3}-2 x^{2}+2 x y z-6 y z+2 x y-z+y+x;A=\\frac{64 x^{2} y x y+16 x y-y}{-32 x^{2} y x^{2}-8 x^{2}+x};B=MakeRationalFunction{}(\\frac{-64x^{3}y^{2}-16x y +y }{32x^{4}y +8x^{2}-x });C=\\frac{-64 x^{3} y^{2}-16 x y+y}{32 x^{4} y+8 x^{2}-x};D=MakeRationalFunction{}(\\frac{-64x^{3}y^{2}-16x y +y }{32x^{4}y +8x^{2}-x });0;MakeRationalFunction{}(0))"
   },
   {
     "input":"Polynomial{}((x-2y+z- 1)^2(x +y-z));\nPolynomial{}(y^2)-(Polynomial{}y)^2",

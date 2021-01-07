@@ -203,7 +203,7 @@ bool CalculatorConversions::innerPolynomial(
   return CalculatorConversions::functionPolynomial<Coefficient>(calculator, input[1], output);
 }
 
-template <class Coefficient, int MaximumPower>
+template <class Coefficient, int MaximumPower, int MaximumVariables>
 bool CalculatorConversions::functionPolynomialWithExponentLimit(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
@@ -231,52 +231,74 @@ bool CalculatorConversions::functionPolynomialWithExponentLimit(
     }
     return true;
   }
-  Expression theConverted, theComputed;
+  Expression converted, computer, candidate;
   if (
     input.isListStartingWithAtom(calculator.opTimes()) ||
     input.isListStartingWithAtom(calculator.opPlus())
   ) {
-    theComputed.reset(calculator, input.size());
-    theComputed.addChildOnTop(input[0]);
+    computer.reset(calculator, input.size());
+    computer.addChildOnTop(input[0]);
     for (int i = 1; i < input.size(); i ++) {
-      if (!CalculatorConversions::functionPolynomial<Coefficient>(
-        calculator, input[i], theConverted
+      if (!CalculatorConversions::functionPolynomialWithExponentLimit<Coefficient, MaximumPower, MaximumVariables>(
+        calculator, input[i], converted
       )) {
         return calculator << "<hr>Failed to extract polynomial from "
         << input[i].toString();
       }
-      theComputed.addChildOnTop(theConverted);
+      computer.addChildOnTop(converted);
     }
     if (input.isListStartingWithAtom(calculator.opTimes())) {
-      return CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial(
-        calculator, theComputed, output
-      );
+      if (!CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial(
+        calculator, computer, candidate
+      )) {
+        return false;
+      }
+      if (candidate.getContext().numberOfVariables() > MaximumVariables && MaximumVariables >= 0) {
+        return calculator << "Too many variables";
+      }
+      output = candidate;
+      return true;
     }
     if (input.isListStartingWithAtom(calculator.opPlus())) {
-      return CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial(calculator, theComputed, output);
+      if (!CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial(
+        calculator, computer, candidate
+      )) {
+        return false;
+      }
+      if (candidate.getContext().numberOfVariables() > MaximumVariables && MaximumVariables >= 0) {
+        return calculator << "Too many variables";
+      }
+      output = candidate;
+      return true;
     }
     global.fatal << "Error, this line of code should never be reached. " << global.fatal;
   }
   if (input.startsWith(calculator.opMinus(), 3)) {
-    theComputed.reset(calculator, input.size());
-    theComputed.addChildOnTop(input[0]);
+    computer.reset(calculator, input.size());
+    computer.addChildOnTop(input[0]);
     for (int i = 1; i < 3; i ++) {
       Expression summand = input[i];
       if (i == 2) {
         summand *= - 1;
       }
-      if (!CalculatorConversions::functionPolynomial<Coefficient>(calculator, summand, theConverted)) {
+      if (!CalculatorConversions::functionPolynomialWithExponentLimit<Coefficient, MaximumPower, MaximumVariables>(
+        calculator, summand, converted
+      )) {
         return calculator << "<hr>Failed to extract polynomial from " << summand.toString();
       }
-      theComputed.addChildOnTop(theConverted);
+      computer.addChildOnTop(converted);
     }
-    return CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial(calculator, theComputed, output);
+    if (!CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial(calculator, computer, candidate)) {
+      return calculator << "Too many variables";
+    }
+    output = candidate;
+    return true;
   }
 
   int power = - 1;
   if (input.startsWith(calculator.opThePower(), 3)) {
     if (input[2].isSmallInteger(&power)) {
-      if (!CalculatorConversions::functionPolynomial<Coefficient>(calculator, input[1], theConverted)) {
+      if (!CalculatorConversions::functionPolynomialWithExponentLimit<Coefficient, MaximumPower, MaximumVariables>(calculator, input[1], converted)) {
         return calculator
         << "<hr>Failed to extract polynomial from "
         << input[1].toString() << ".";
@@ -286,7 +308,10 @@ bool CalculatorConversions::functionPolynomialWithExponentLimit(
         << "Polynomial expression "
         << "has power larger than the maximum allowed: " << MaximumPower << ".";
       }
-      Polynomial<Coefficient> resultP = theConverted.getValue<Polynomial<Coefficient> >();
+      if (converted.getContext().numberOfVariables() > MaximumVariables && MaximumVariables >= 0) {
+        return calculator << "Too many variables";
+      }
+      Polynomial<Coefficient> resultP = converted.getValue<Polynomial<Coefficient> >();
       if (power < 0) {
         Coefficient theConst;
         if (!resultP.isConstant(&theConst)) {
@@ -305,7 +330,7 @@ bool CalculatorConversions::functionPolynomialWithExponentLimit(
         resultP = theConst;
       }
       resultP.raiseToPower(power, 1);
-      return output.assignValueWithContext(resultP, theConverted.getContext(), calculator);
+      return output.assignValueWithContext(resultP, converted.getContext(), calculator);
     }
   }
   Polynomial<Coefficient> monomial;

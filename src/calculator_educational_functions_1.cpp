@@ -70,13 +70,11 @@ bool CalculatorEducationalFunctions::compareExpressionsJSON(
   comparison.comparisonStandardRaw.makeXOX(
     calculator, calculator.opEqualEqual(), givenSimplified, desiredSimplified
   );
-  global.comments << "DEBUG: Evaluating: " << comparison.comparisonStandardRaw.toString() << "<br>";
   calculator.evaluateExpression(
     calculator,
     comparison.comparisonStandardRaw,
     comparison.comparisonStandardEvaluated
   );
-  global.comments << "DEBUG: Evaluated: " << comparison.comparisonStandardEvaluated.toString() << "<br>";
 
   MapList<std::string, Expression, MathRoutines::hashString> substitution;
   substitution.setKeyValue("a", comparison.given);

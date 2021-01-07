@@ -183,6 +183,7 @@ class AlgebraicNumber {
   public:
     static bool all();
     static bool constantValues();
+    static bool hashFunction();
   };
 };
 

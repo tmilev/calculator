@@ -643,10 +643,6 @@ bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
   }
   this->factorsOverPrime = factorizationModular.reduced;
   this->format.flagSuppressModP = true;
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "DEBUG Factorization mod " << this->oneModular.modulus.toString()
-    << ": " << factorizationModular.toStringResult(&this->format);
-  }
   this->computeCoefficientBounds();
   this->henselLift(comments);
   return this->factorizationFromHenselLift(comments, commentsOnFailure);

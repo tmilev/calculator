@@ -800,7 +800,7 @@ bool CalculatorConversions::innerExpressionFromMonomialUE(
   for (int i = 0; i < input.generatorsIndices.size; i ++) {
     theGen.generatorIndex = input.generatorsIndices[i];
     CalculatorConversions::innerExpressionFromChevalleyGenerator(calculator, theGen, chevGenE);
-    CalculatorConversions::innerExpressionFromRationalFunction<Rational>(calculator, input.powers[i], powerE, inputContext);
+    CalculatorConversions::expressionFromRationalFunction<Rational>(calculator, input.powers[i], powerE, inputContext);
     termE.makeXOX(calculator, calculator.opThePower(), chevGenE, powerE);
     theTerms.addOnTop(termE);
   }
@@ -1024,7 +1024,7 @@ bool CalculatorConversions::innerElementUE(
   return output.assignValueWithContext(outputUE, outputContext, calculator);
 }
 
-bool CalculatorConversions::innerExpressionFromBuiltInTypE(
+bool CalculatorConversions::innerExpressionFromBuiltInType(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   if (input.size() != 2) {
@@ -1036,19 +1036,22 @@ bool CalculatorConversions::innerExpressionFromBuiltInTypE(
 bool CalculatorConversions::functionExpressionFromBuiltInType(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromBuiltInType");
+  MacroRegisterFunctionWithName("CalculatorConversions::functionExpressionFromBuiltInType");
   if (input.isOfType<Rational>() || input.isOfType<double>() || input.isOfType<AlgebraicNumber>()) {
     output = input;
     return true;
   }
   if (input.isOfType<Polynomial<Rational> >()) {
-    return CalculatorConversions::functionExpressionFromPoly<Rational>(calculator, input, output);
+    return CalculatorConversions::functionExpressionFromPolynomial<Rational>(calculator, input, output);
   }
   if (input.isOfType<Polynomial<AlgebraicNumber> >()) {
-    return CalculatorConversions::functionExpressionFromPoly<AlgebraicNumber>(calculator, input, output);
+    return CalculatorConversions::functionExpressionFromPolynomial<AlgebraicNumber>(calculator, input, output);
   }
   if (input.isOfType<RationalFunction<Rational> >()) {
-    return CalculatorConversions::innerExpressionFromRationalFunction<Rational>(calculator, input, output);
+    return CalculatorConversions::expressionFromRationalFunction<Rational>(calculator, input, output);
+  }
+  if (input.isOfType<RationalFunction<AlgebraicNumber> >()) {
+    return CalculatorConversions::expressionFromRationalFunction<AlgebraicNumber>(calculator, input, output);
   }
   return false;
 }

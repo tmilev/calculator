@@ -51,7 +51,7 @@ bool Calculator::Test::parseAllExamples(Calculator& ownerInitialized) {
         << currentHandler.calculatorIdentifier << global.fatal;
       }
       Expression notUsed;
-      if (!ownerInitialized.parse(currentHandler.theExample, notUsed)) {
+      if (!ownerInitialized.parse(currentHandler.theExample, false, notUsed)) {
         global.fatal << "Failed to parse built-in example for rule: "
         << currentHandler.calculatorIdentifier
         << ". The example was: " << currentHandler.theExample << ". "

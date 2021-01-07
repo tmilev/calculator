@@ -95,6 +95,8 @@ public:
     int order,
     bool useModZp = false
   );
+  static bool divideExpressionsAsIfPolynomial(Calculator& calculator, const Expression& input, Expression& output);
+  static bool combineFractionsCommutativeWithInternalLibrary(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 #endif // vpfHeaderCalculatorFunctionsPolynomial

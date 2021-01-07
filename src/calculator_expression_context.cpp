@@ -57,6 +57,15 @@ bool ExpressionContext::checkInitialization() const {
   return false;
 }
 
+bool ExpressionContext::hasAtomicUserDefinedVariables() const {
+  for (int i = 0; i < this->variables.size; i ++) {
+    if (!this->variables[i].isAtomUserDefined()) {
+      return false;
+    }
+  }
+  return true;
+}
+
 int ExpressionContext::numberOfVariables() const {
   return this->variables.size;
 }

@@ -345,7 +345,6 @@ public:
   static bool outerAtimesBpowerJplusEtcDivBpowerI(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool combineFractionsCommutative(Calculator& calculator, const Expression& input, Expression& output);
-  static bool combineFractionsCommutativeWithInternalLibrary(Calculator& calculator, const Expression& input, Expression& output);
   static bool sortTerms(Calculator& calculator, const Expression& input, Expression& output);
   static bool addTerms(Calculator& calculator, const Expression& input, Expression& output);
 

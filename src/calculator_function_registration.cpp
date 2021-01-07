@@ -1415,7 +1415,7 @@ void Calculator::initializeStandardFunctions() {
   );
   this->addOperationHandler(
     "MakeExpression",
-    CalculatorConversions::innerExpressionFromBuiltInTypE,
+    CalculatorConversions::innerExpressionFromBuiltInType,
     "",
     "Creates expression from built-in polynomial. ",
     "MakeExpression(Polynomial{}((x - 2y + z - 1)^2(x + y - z)));\n"
@@ -4520,9 +4520,9 @@ void Calculator::initializeStandardFunctions() {
   );
   this->addOperationHandler(
     "+",
-    CalculatorFunctions::combineFractionsCommutativeWithInternalLibrary,
+    CalculatorFunctionsPolynomial::combineFractionsCommutativeWithInternalLibrary,
     "",
-    "Combines fractions on condition that all participants commute. "
+    "Combines fractions under the assumption that all participants commute. "
     "Equivalent to {{a}}/{{b}}+{{c}}/{{d}}= (a * lcm(b,d)/b+c*lcm(b,d)/d)/(lcm(b,d)); "
     "Please note that this transformation is not correct if b and d do not commute. ",
     "a/b+c/d;\n"
@@ -4530,7 +4530,7 @@ void Calculator::initializeStandardFunctions() {
     "w=(x-3)(x+1);\n"
     "1/z+1/w;\n"
     "1/(x+sqrt(20))+ 1/(x+sqrt(3));",
-    "CalculatorFunctions::combineFractionsCommutativeWithInternalLibrary",
+    "CalculatorFunctionsPolynomial::combineFractionsCommutativeWithInternalLibrary",
     "CommonDenominator",
     outerStandard
   );
@@ -4805,8 +4805,8 @@ void Calculator::initializeStandardFunctions() {
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddUEToAny,
-    this->opElementUEoverRF(),
-    this->opElementUEoverRF(),
+    this->opElementUEOverRF(),
+    this->opElementUEOverRF(),
     "Adds an element of UE (Universal Enveloping algebra) to an element of UE.",
     "g_{{{i}}} = GetChevalleyGenerator{}(F_{1}, {{i}});\n"
     "h_{{{i}}} = GetCartanGenerator{}(F_{1}, {{i}});\n"
@@ -5528,7 +5528,7 @@ void Calculator::initializeStandardFunctions() {
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE,
     this->opRational(),
-    this->opElementUEoverRF(),
+    this->opElementUEOverRF(),
     "Multiplies rational number by an element universal enveloping algebra.",
     "g_{{i}}= GetChevalleyGenerator{}(F_1, i); h_{{i}}= GetCartanGenerator{}(F_1, i);\n"
     "[g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]",
@@ -5539,8 +5539,8 @@ void Calculator::initializeStandardFunctions() {
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE,
-    this->opElementUEoverRF(),
-    this->opElementUEoverRF(),
+    this->opElementUEOverRF(),
+    this->opElementUEOverRF(),
     "Multiplies elment Universal enveloping by element universal enveloping algebra.",
     "g_{{i}}= GetChevalleyGenerator{}(F_1, i);"
     "h_{{i}}= GetCartanGenerator{}(F_1, i) ;\n"
@@ -5642,7 +5642,7 @@ void Calculator::initializeStandardFunctions() {
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor,
-    this->opElementUEoverRF(),
+    this->opElementUEOverRF(),
     this->opElementTensorGVM(),
     "Handles acting by element Universal enveloping on an element of "
     "tensor product of generalized Verma modules. "
@@ -6096,6 +6096,20 @@ void Calculator::initializeStandardFunctions() {
     "DividePolynomialModPByPolynomialModP",
     innerStandard
   );
+  this->addOperationHandler(
+    "/",
+    CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial,
+    "",
+    "Assumes that the numerator and denominator of a fraction commute. "
+    "Divides the two expressions under the assumption that both can be converted to"
+    "polynomials with rational coefficients.",
+    "(2x^2+3x-5)/(5x^4+x^2+2x-8);\n"
+    "x^2/x;\n"
+    "(x+1)^2/(x+1)",
+    "CalculatorFunctionsPolynomial::innerDivideExpressionsAsIfPolynomial",
+    "DivideExpressionsAsIfPolynomial",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerRationalByInteger,
@@ -6371,7 +6385,7 @@ void Calculator::initializeStandardFunctions() {
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF,
-    this->opElementUEoverRF(),
+    this->opElementUEOverRF(),
     this->opRational(),
     "Raises element of universal enveloping to integer power. "
     "If the exponent is non-positive integer but the element of the UE is "
@@ -6385,7 +6399,7 @@ void Calculator::initializeStandardFunctions() {
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF,
-    this->opElementUEoverRF(),
+    this->opElementUEOverRF(),
     this->opPolynomialRational(),
     "Provided that an element of Universal Enveloping algebra is "
     "a single generator (raised to arbitrary formal polynomial power) with coefficient 1, "
@@ -6399,7 +6413,7 @@ void Calculator::initializeStandardFunctions() {
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF,
-    this->opElementUEoverRF(),
+    this->opElementUEOverRF(),
     this->opRationalFunction(),
     "Provided that an element of Universal Enveloping algebra is a single generator "
     "(raised to arbitrary formal RF power) with coefficient 1, raises "
@@ -8500,6 +8514,7 @@ void Calculator::initializePredefinedStandardOperationsWithoutHandler() {
   this->addOperationNoRepetitionAllowed("e");
   this->addOperationNoRepetitionAllowed("i");
   this->addOperationNoRepetitionAllowed("\\arctan");
+  this->addOperationNoRepetitionAllowed("\\neq");
   this->addOperationNoRepetitionAllowed("CommandEnclosureStart");
   this->addOperationNoRepetitionAllowed("CommandEnclosureFinish");
   this->addOperationNoRepetitionAllowed("ExpressionHistory");
@@ -8621,8 +8636,8 @@ void Calculator::addKnownDoubleConstant(const std::string& constantName, double 
   this->knownDoubleConstantValues.addOnTop(value);
 }
 
-void Calculator::initBuiltInAtomsNotInterpretedAsFunctions() {
-  MacroRegisterFunctionWithName("Calculator::initBuiltInAtomsNotInterpretedAsFunctions");
+void Calculator::initializeBuiltInAtomsNotInterpretedAsFunctions() {
+  MacroRegisterFunctionWithName("Calculator::initializeBuiltInAtomsNotInterpretedAsFunctions");
   this->atomsNotInterpretedAsFunctions.setExpectedSize(30);
 
   this->addKnownDoubleConstant("\\pi", MathRoutines::pi());

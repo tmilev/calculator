@@ -876,7 +876,7 @@ void Polynomial<Coefficient>::divideBy(
 ) const {
   MacroRegisterFunctionWithName("Polynomial::divideBy");
   if (monomialOrder == nullptr) {
-    global.fatal << "Non-initialized monomial pointer not allowed. " << global.fatal;
+    monomialOrder = &MonomialP::orderDefault();
   }
   if (&outputQuotient == &outputRemainder) {
     global.fatal << "Input and output addresses not allowed to coincide. " << global.fatal;

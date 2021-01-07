@@ -358,7 +358,7 @@ void Calculator::initialize() {
   this->initializeAtomsThatAllowCommutingOfArguments();
   this->initializeAtomsThatFreezeArguments();
   this->initializeAtomsNotGoodForChainRule();
-  this->initBuiltInAtomsNotInterpretedAsFunctions();
+  this->initializeBuiltInAtomsNotInterpretedAsFunctions();
   this->initializeBuiltInAtomsWhosePowersAreInterpretedAsFunctions();
   this->initializeOperationsThatAreKnownFunctions();
   this->initializeAtomsNonCacheable();
@@ -880,7 +880,7 @@ void Calculator::parseFillDictionary(const std::string& input, List<SyntacticEle
   std::string current;
   output.reserve(static_cast<signed>(input.size()));
   output.setSize(0);
-  char LookAheadChar;
+  char lookAheadChar;
   SyntacticElement currentElement;
   bool inQuotes = false;
   bool escapedInQuotes = false;
@@ -895,11 +895,11 @@ void Calculator::parseFillDictionary(const std::string& input, List<SyntacticEle
     }
     current.push_back(input[i]);
     if (i + 1 < input.size()) {
-      LookAheadChar = input[i + 1];
+      lookAheadChar = input[i + 1];
     } else {
-      LookAheadChar = ' ';
+      lookAheadChar = ' ';
       if (inQuotes) {
-        LookAheadChar = '"';
+        lookAheadChar = '"';
       }
     }
     if (!inQuotes) {
@@ -909,19 +909,19 @@ void Calculator::parseFillDictionary(const std::string& input, List<SyntacticEle
     }
     bool shouldSplit = false;
     if (!inQuotes) {
-      shouldSplit = this->shouldSplitOutsideQuotes(current, LookAheadChar);
+      shouldSplit = this->shouldSplitOutsideQuotes(current, lookAheadChar);
     } else {
       if (escapingAllowed) {
         if (current.size() >= 1) {
           if (current[current.size() - 1] == '\\') {
-            if (LookAheadChar == '\\' || LookAheadChar == '"') {
+            if (lookAheadChar == '\\' || lookAheadChar == '"') {
               escapedInQuotes = true;
               continue;
             }
           }
         }
       }
-      shouldSplit = (LookAheadChar == '"');
+      shouldSplit = (lookAheadChar == '"');
     }
     if (current == "\"" && escapingAllowed) {
       inQuotes =!inQuotes;

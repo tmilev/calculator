@@ -194,6 +194,7 @@ private:
   bool isMatrixOfType(int* outputNumRows = nullptr, int* outputNumCols = nullptr) const;
 
   bool isAtom() const;
+  bool isAtomUserDefined() const;
   bool isOperationGiven(const std::string& desiredAtom) const;
   bool isOperationGiven(int desiredDataUseMinusOneForAny = - 1) const;
   bool isOperation(int& outputWhichOperationIndex) const;
@@ -616,8 +617,10 @@ private:
   class Test {
   public:
     static bool all();
-    static bool toStringTestRecode(Calculator& ownerInitialized);
-    static bool toStringTestRecodeOnce(const std::string& inputHardCodedMustParse, Calculator& ownerInitialized);
+    static bool toStringTestRecode(Calculator& owner);
+    static bool toStringTestRecodeOnce(const std::string& inputHardCodedMustParse, Calculator& owner);
+    static bool isUserDefinedAtomOnce(Calculator& owner, const std::string& input, bool isUserDefinedAtom);
+    static bool isUserDefinedAtom(Calculator& owner);
   };
 };
 
@@ -652,7 +655,9 @@ public:
 
   ExpressionContext(Calculator& inputOwner);
   ExpressionContext();
-
+  const HashedList<Expression>& getVariables() {
+    return this->variables;
+  }
   bool checkInitialization() const;
   bool mergeContexts(
     const ExpressionContext& other,
@@ -703,6 +708,7 @@ public:
     PolynomialSubstitution<Coefficient>& outputDifferentialPart
   ) const;
   bool operator==(const ExpressionContext& other) const;
+  bool hasAtomicUserDefinedVariables() const;
   int numberOfVariables() const;
   Expression toExpression() const;
   bool fromExpression(const Expression& input);
@@ -1042,6 +1048,7 @@ public:
   HashedListReferences<JSData> jsonObjects;
   HashedListReferences<std::string, MathRoutines::hashString> expressionNotation;
   HashedListReferences<Expression> expressionWithNotation;
+  HashedListReferences<Expression> constraints;
   HashedListReferences<LittelmannPath> theLSpaths;
   HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
   HashedListReferences<ElementZmodP> theEltsModP;
@@ -1728,6 +1735,9 @@ public:
   int opEqualEqual() {
     return this->operations.getIndexNoFail("==");
   }
+  int opNotEqual() {
+    return this->operations.getIndexNoFail("\\neq");
+  }
   int opEqualEqualEqual() {
     return this->operations.getIndexNoFail("===");
   }
@@ -1866,7 +1876,7 @@ public:
   int opJSON() {
     return this->operations.getIndexNoFail("JSON");
   }
-  int opElementUEoverRF() {
+  int opElementUEOverRF() {
     return this->operations.getIndexNoFail("ElementUEoverRF");
   }
   int opHyperoctahedralGroupRep() {
@@ -2322,7 +2332,7 @@ public:
   void initializeOperationsThatAreKnownFunctions();
   void initializeArithmeticOperations();
   void initializeBuiltInAtomsWhosePowersAreInterpretedAsFunctions();
-  void initBuiltInAtomsNotInterpretedAsFunctions();
+  void initializeBuiltInAtomsNotInterpretedAsFunctions();
   void initializeAtomsNotGoodForChainRule();
   void initializeStandardFunctions();
   void initializeScientificFunctions();
@@ -2417,8 +2427,11 @@ public:
   );
   bool parse(
     const std::string& input,
+    bool stripCommandSequence,
     Expression& output
   );
+  // For internal use only; will crash the calculator if the input has syntax errors.
+  Expression parseOrCrash(const std::string& input, bool stripCommandSequence);
   bool isLeftSeparator(unsigned char c);
   bool isRightSeparator(unsigned char c);
   bool shouldSplitOutsideQuotes(const std::string& left, char right);
@@ -2524,7 +2537,13 @@ public:
   static bool innerPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   // Conversions from expression tree to expression containing type.
   template <class Coefficient>
-  static bool functionPolynomial(Calculator& calculator, const Expression& input, Expression& output);
+  static bool functionPolynomial(Calculator& calculator, const Expression& input, Expression& output) {
+    return CalculatorConversions::functionPolynomialWithExponentLimit<Coefficient, - 1>(calculator, input, output);
+  }
+  template <class Coefficient, int MaximumPower>
+  static bool functionPolynomialWithExponentLimit(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool innerRationalFunction(Calculator& calculator, const Expression& input, Expression& output);
   template <class Coefficient>
   static bool functionRationalFunction(
@@ -2552,21 +2571,21 @@ public:
   ////////////////////Conversion to expression tree/////////////////////////////////////
   //converstion from type to expression tree.
   template <class Coefficient>
-  static bool innerExpressionFromPoly(
+  static bool expressionFromPolynomial(
     Calculator& calculator,
     const Polynomial<Coefficient>& input,
     Expression& output,
     ExpressionContext* inputContext = nullptr
   );
   template <class Coefficient>
-  static bool innerExpressionFromRationalFunction(
+  static bool expressionFromRationalFunction(
     Calculator& calculator,
     const RationalFunction<Coefficient>& input,
     Expression& output,
     ExpressionContext* inputContext = nullptr
   );
   template <class Coefficient>
-  static bool innerExpressionFromRationalFunction(
+  static bool expressionFromRationalFunction(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool innerLoadKey(
@@ -2646,9 +2665,9 @@ public:
     ExpressionContext* inputContext = nullptr
   );
   static bool functionExpressionFromBuiltInType(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerExpressionFromBuiltInTypE(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerExpressionFromBuiltInType(Calculator& calculator, const Expression& input, Expression& output);
   template <class Coefficient>
-  static bool functionExpressionFromPoly(Calculator& calculator, const Expression& input, Expression& output);
+  static bool functionExpressionFromPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerExpressionFromUE(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerExpressionFrom(Calculator& calculator, const MonomialP& input, Expression& output);
   // TODO: move to calculator conversions.
@@ -2671,14 +2690,13 @@ public:
     }
     return output.isOfType<theType>();
   }
-  // TODO: move to calculator conversions.
   template <class theType>
   static bool convert(
     const Expression& input,
     Expression::FunctionAddress conversion,
     WithContext<theType>& output
   ) {
-    MacroRegisterFunctionWithName("Calculator::convert");
+    MacroRegisterFunctionWithName("CalculatorConversions::convert");
     Expression conversionExpression;
     if (!CalculatorConversions::convertToTypeUsingFunction<theType>(conversion, input, conversionExpression)) {
       return false;
@@ -2729,16 +2747,16 @@ bool Calculator::getVector(
 }
 
 template <class Coefficient>
-bool CalculatorConversions::functionExpressionFromPoly(
+bool CalculatorConversions::functionExpressionFromPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::functionExpressionFromPoly");
+  MacroRegisterFunctionWithName("CalculatorConversions::functionExpressionFromPolynomial");
   if (!input.isOfType<Polynomial<Coefficient> >()) {
     return false;
   }
   const Polynomial<Coefficient>& polynomial = input.getValue<Polynomial<Coefficient> >();
   ExpressionContext context = input.getContext();
-  return CalculatorConversions::innerExpressionFromPoly(calculator, polynomial, output, &context);
+  return CalculatorConversions::expressionFromPolynomial(calculator, polynomial, output, &context);
 }
 
 template <class theType>
@@ -2931,21 +2949,21 @@ bool Expression::assignValueWithContext(
 
 template <class theType>
 bool Expression::assignValue(const theType& inputValue, Calculator& owner) {
-  Expression tempE;
-  tempE.owner = &owner;
-  int curType = tempE.getTypeOperation<theType>();
+  Expression typeComputer;
+  typeComputer.owner = &owner;
+  int currentType = typeComputer.getTypeOperation<theType>();
   if (
-    curType == owner.opEltZmodP() ||
-    curType == owner.opPolynomialRational() ||
-    curType == owner.opRationalFunction() ||
-    curType == owner.opElementTensorGVM() ||
-    curType == owner.opElementUEoverRF() ||
-    curType == owner.opElementWeylAlgebra() ||
-    curType == owner.opWeightLieAlgPoly()
+    currentType == owner.opEltZmodP() ||
+    currentType == owner.opPolynomialRational() ||
+    currentType == owner.opRationalFunction() ||
+    currentType == owner.opElementTensorGVM() ||
+    currentType == owner.opElementUEOverRF() ||
+    currentType == owner.opElementWeylAlgebra() ||
+    currentType == owner.opWeightLieAlgPoly()
   ) {
     global.fatal << "This may or may not be a programming error. "
     << "Assigning value WITHOUT CONTEXT to data type "
-    << owner.getOperations()[curType]
+    << owner.getOperations()[currentType]
     << " is discouraged, and most likely is an error. Crashing to let you know. "
     << global.fatal;
   }
@@ -3154,13 +3172,13 @@ bool Expression::assignMatrix(
 }
 
 template <class Coefficient>
-bool CalculatorConversions::innerExpressionFromPoly(
+bool CalculatorConversions::expressionFromPolynomial(
   Calculator& calculator,
   const Polynomial<Coefficient>& input,
   Expression& output,
   ExpressionContext* inputContext
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromPoly");
+  MacroRegisterFunctionWithName("CalculatorConversions::expressionFromPolynomial");
   LinearCombination<Expression, Coefficient> theTerms;
   Expression currentBase, currentPower, currentTerm, currentMultTermE;
   if (!input.isConstant() && inputContext == nullptr) {
@@ -3208,28 +3226,28 @@ bool CalculatorConversions::innerExpressionFromPoly(
 }
 
 template <class Coefficient>
-bool CalculatorConversions::innerExpressionFromRationalFunction(
+bool CalculatorConversions::expressionFromRationalFunction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromRationalFunction");
-  if (!input.isOfType<RationalFunction<Rational> >()) {
+  MacroRegisterFunctionWithName("CalculatorConversions::expressionFromRationalFunction");
+  if (!input.isOfType<RationalFunction<Coefficient> >()) {
     return false;
   }
-  const RationalFunction<Coefficient>& rationalFunction = input.getValue<RationalFunction<Rational> >();
+  const RationalFunction<Coefficient>& rationalFunction = input.getValue<RationalFunction<Coefficient> >();
   ExpressionContext context = input.getContext();
-  return CalculatorConversions::innerExpressionFromRationalFunction<Coefficient>(
+  return CalculatorConversions::expressionFromRationalFunction<Coefficient>(
     calculator, rationalFunction, output, &context
   );
 }
 
 template <class Coefficient>
-bool CalculatorConversions::innerExpressionFromRationalFunction(
+bool CalculatorConversions::expressionFromRationalFunction(
   Calculator& calculator,
   const RationalFunction<Coefficient>& input,
   Expression& output,
   ExpressionContext* inputContext
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromRF");
+  MacroRegisterFunctionWithName("CalculatorConversions::expressionFromRationalFunction");
   Rational aConst;
   if (input.isConstant(&aConst)) {
     return output.assignValue(aConst, calculator);
@@ -3238,7 +3256,7 @@ bool CalculatorConversions::innerExpressionFromRationalFunction(
   input.getNumerator(numerator);
 
   if (input.isConstant() || input.expressionType == input.typePolynomial) {
-    return CalculatorConversions::innerExpressionFromPoly<Coefficient>(calculator, numerator, output, inputContext);
+    return CalculatorConversions::expressionFromPolynomial<Coefficient>(calculator, numerator, output, inputContext);
   }
   Expression numeratorExpression, denominatorExpression;
   input.getDenominator(denominator);
@@ -3249,8 +3267,8 @@ bool CalculatorConversions::innerExpressionFromRationalFunction(
   Coefficient multipleTopBottom = bottomMultiple / topMultiple;
   numeratorRescaled *= multipleTopBottom.getNumerator();
   denominatorRescaled *= multipleTopBottom.getDenominator();
-  CalculatorConversions::innerExpressionFromPoly<Coefficient>(calculator, numeratorRescaled, numeratorExpression, inputContext);
-  CalculatorConversions::innerExpressionFromPoly<Coefficient>(calculator, denominatorRescaled, denominatorExpression, inputContext);
+  CalculatorConversions::expressionFromPolynomial<Coefficient>(calculator, numeratorRescaled, numeratorExpression, inputContext);
+  CalculatorConversions::expressionFromPolynomial<Coefficient>(calculator, denominatorRescaled, denominatorExpression, inputContext);
   return output.makeXOX(calculator, calculator.opDivide(), numeratorExpression, denominatorExpression);
 }
 

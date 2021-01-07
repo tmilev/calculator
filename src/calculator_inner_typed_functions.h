@@ -203,9 +203,11 @@ bool CalculatorConversions::innerPolynomial(
   return CalculatorConversions::functionPolynomial<Coefficient>(calculator, input[1], output);
 }
 
-template <class Coefficient>
-bool CalculatorConversions::functionPolynomial(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorConversions::functionPolynomial");
+template <class Coefficient, int MaximumPower>
+bool CalculatorConversions::functionPolynomialWithExponentLimit(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::functionPolynomialWithExponentLimit");
   RecursionDepthCounter theRecursionCounter(&calculator.recursionDepth);
   if (calculator.recursionDepth > calculator.maximumRecursionDepth) {
     return calculator << "Max recursion depth of " << calculator.maximumRecursionDepth
@@ -271,16 +273,21 @@ bool CalculatorConversions::functionPolynomial(Calculator& calculator, const Exp
     return CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial(calculator, theComputed, output);
   }
 
-  int thePower = - 1;
+  int power = - 1;
   if (input.startsWith(calculator.opThePower(), 3)) {
-    if (input[2].isSmallInteger(&thePower)) {
+    if (input[2].isSmallInteger(&power)) {
       if (!CalculatorConversions::functionPolynomial<Coefficient>(calculator, input[1], theConverted)) {
         return calculator
         << "<hr>Failed to extract polynomial from "
         << input[1].toString() << ".";
       }
+      if (power > MaximumPower && MaximumPower >= 0) {
+        return calculator
+        << "Polynomial expression "
+        << "has power larger than the maximum allowed: " << MaximumPower << ".";
+      }
       Polynomial<Coefficient> resultP = theConverted.getValue<Polynomial<Coefficient> >();
-      if (thePower < 0) {
+      if (power < 0) {
         Coefficient theConst;
         if (!resultP.isConstant(&theConst)) {
           calculator << "<hr>Failed to extract polynomial from  "
@@ -294,10 +301,10 @@ bool CalculatorConversions::functionPolynomial(Calculator& calculator, const Exp
           return output.assignValueWithContext(monomial, theContext, calculator);
         }
         theConst.invert();
-        thePower *= - 1;
+        power *= - 1;
         resultP = theConst;
       }
-      resultP.raiseToPower(thePower, 1);
+      resultP.raiseToPower(power, 1);
       return output.assignValueWithContext(resultP, theConverted.getContext(), calculator);
     }
   }

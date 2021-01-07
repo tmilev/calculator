@@ -556,13 +556,16 @@ bool AlgebraicNumber::assignCosRationalTimesPi(const Rational& input, AlgebraicC
 
 
 unsigned int AlgebraicNumber::hashFunction() const {
-  // global.fatal << global.fatal;
   // WARNING. Algebraic numbers, as they are recorded in memory at the moment,
-  // do not have unique presentations, so we return 0 as their hash function.
-  // Computing a hash function can be done, for example, by picking the hash function of the minimal polynomial
-  // over the rationals. However, such computations appear to be too heavy, and will make sense only if we need to deal
+  // do not have unique reprentations in memory.
+  // 1. Computing a hash function can be done by picking the hash
+  // function of the minimal polynomial over the rationals.
+  // However, such computations
+  // appear to be too heavy, and will make sense only if we need to deal
   // with large sets of algebraic numbers without repetition.
-  return 0;
+  // 2. Currently, we choose to compute the hash function by computing the
+  // rational part of the number, which should be unique.
+  return this->element.getCoefficientOf(MonomialVector(0)).hashFunction();
 }
 
 bool AlgebraicNumber::operator==(const Rational& other) const {

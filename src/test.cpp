@@ -55,6 +55,7 @@ void Test::run() {
   global.millisecondsMaxComputation = 100000000;
   if (this->shouldTest(Test::Suites::database)) {
     Database::Test::all();
+    global << Logger::green << "Database tests completed." << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::basic)) {
     AlgebraicNumber::Test::all();
@@ -65,6 +66,7 @@ void Test::run() {
     ElementZmodP::Test::all();
     RationalFunction<Rational>::Test::all();
     Selection::Test::all();
+    global << Logger::green << "Basic tests completed." << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::crypto)) {
     ASNObject::initializeNonThreadSafe();

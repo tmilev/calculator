@@ -1343,32 +1343,6 @@ bool CalculatorFunctions::innerConstantFunction(Calculator& calculator, const Ex
   return true;
 }
 
-bool CalculatorFunctions::combineFractionsCommutativeWithInternalLibrary(
-  Calculator& calculator, const Expression& input, Expression& output
-) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::combineFractionsCommutativeWithInternalLibrary");
-  if (!input.startsWith(calculator.opPlus(), 3)) {
-    return false;
-  }
-  const Expression& leftE = input[1];
-  const Expression& rightE = input[2];
-  if (
-    !leftE.startsWith(calculator.opDivide(), 3) ||
-    !rightE.startsWith(calculator.opDivide(), 3)
-  ) {
-    return false;
-  }
-  Expression converted(calculator);
-  if (!CalculatorConversions::functionRationalFunction<AlgebraicNumber>(calculator, input, converted)) {
-    return false;
-  }
-  WithContext<RationalFunction<AlgebraicNumber> > rationalFunction;
-  if (!converted.isOfTypeWithContext(&rationalFunction)) {
-    return false;
-  }
-  return CalculatorConversions::innerExpressionFromRationalFunction(calculator, rationalFunction.content, output, &rationalFunction.context);
-}
-
 bool CalculatorFunctions::combineFractionsCommutative(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
@@ -1564,7 +1538,7 @@ bool IntegralRationalFunctionComputation::preparePartialFractionExpressionSumman
     currentPFpolyForm.assignValueWithContext(
       this->quotientRat, this->context, *this->owner
     );
-    if (!CalculatorConversions::functionExpressionFromPoly<Rational>(
+    if (!CalculatorConversions::functionExpressionFromPolynomial<Rational>(
       *this->owner, currentPFpolyForm, currentPFWithCoeff
     )) {
       *this->owner
@@ -1642,7 +1616,7 @@ bool IntegralRationalFunctionComputation::integrateRationalFunction() {
     currentIntegrandPolyForm.assignValueWithContext(
       this->quotientRat, this->context, *this->owner
     );
-    if (!CalculatorConversions::functionExpressionFromPoly<Rational>(
+    if (!CalculatorConversions::functionExpressionFromPolynomial<Rational>(
       *this->owner, currentIntegrandPolyForm, currentIntegrand
     )) {
       *this->owner << "<br>Something is wrong: failed to convert polynomial "
@@ -3580,7 +3554,7 @@ bool CalculatorFunctions::innerRationalFunctionSubstitution(
   ExpressionContext finalContext(calculator);
   finalContext.makeOneVariable(input[1]);
   resultRationalForm.assignValueWithContext(input[0].getValue<RationalFunction<Rational> >(), finalContext, calculator);
-  return CalculatorConversions::innerExpressionFromRationalFunction<Rational>(calculator, resultRationalForm, output);
+  return CalculatorConversions::expressionFromRationalFunction<Rational>(calculator, resultRationalForm, output);
 }
 
 bool CalculatorFunctions::innerInvertMatrixRFsVerbose(

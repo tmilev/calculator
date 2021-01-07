@@ -134,7 +134,7 @@ int Expression::getTypeOperation<ElementZmodP>() const {
 template < >
 int Expression::getTypeOperation<ElementUniversalEnveloping<RationalFunction<Rational> > >() const {
   this->checkInitialization();
-  return this->owner->opElementUEoverRF();
+  return this->owner->opElementUEOverRF();
 }
 
 template < >
@@ -4835,6 +4835,16 @@ bool Expression::isAtom() const {
     return false;
   }
   return !this->isList();
+}
+
+bool Expression::isAtomUserDefined() const {
+  if (this->owner == nullptr) {
+    return false;
+  }
+  if (this->isList()) {
+    return false;
+  }
+  return this->data >= this->owner->numberOfPredefinedAtoms;
 }
 
 bool Expression::isOperation(std::string* outputWhichOperation) const {

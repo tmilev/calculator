@@ -2080,6 +2080,7 @@ void ObjectContainer::reset() {
   this->jsonObjects.clear();
   this->expressionNotation.clear();
   this->expressionWithNotation.clear();
+  this->constraints.clear();
   this->theLSpaths.clear();
   this->theMatTensorRats.clear();
   this->theEltsModP.clear();

@@ -3,19 +3,19 @@
 #include "calculator.h"
 
 bool Expression::Test::all() {
+  MacroRegisterFunctionWithName("Expression::Test::all");
   Calculator tester;
   tester.initialize();
   Expression::Test::toStringTestRecode(tester);
+  Expression::Test::isUserDefinedAtom(tester);
   return true;
 }
 
 bool Expression::Test::toStringTestRecodeOnce(
-  const std::string& inputHardCodedMustParse, Calculator& ownerInitialized
+  const std::string& inputHardCodedMustParse, Calculator& owner
 ) {
-  Expression parsed;
-  if (!ownerInitialized.parse(inputHardCodedMustParse, parsed)) {
-    global.fatal << "Failed to parse hard-coded input string. " << global.fatal;
-  }
+  MacroRegisterFunctionWithName("Expression::Test::toStringTestRecodeOnce");
+  Expression parsed = owner.parseOrCrash(inputHardCodedMustParse, true);
   std::string recoded = parsed.toString();
   if (recoded != inputHardCodedMustParse) {
     global.fatal << "Recoded string: " << recoded
@@ -25,7 +25,37 @@ bool Expression::Test::toStringTestRecodeOnce(
   return true;
 }
 
-bool Expression::Test::toStringTestRecode(Calculator& ownerInitialized) {
-  Expression::Test::toStringTestRecodeOnce("1+1", ownerInitialized);
+bool Expression::Test::toStringTestRecode(Calculator& owner) {
+  MacroRegisterFunctionWithName("Expression::Test::toStringTestRecode");
+  owner.initialize();
+  Expression::Test::toStringTestRecodeOnce("1+1", owner);
+  return true;
+}
+
+bool Expression::Test::isUserDefinedAtomOnce(
+  Calculator &owner, const std::string &input, bool isUserDefinedAtom
+) {
+  MacroRegisterFunctionWithName("Expression::Test::isUserDefinedAtomOnce");
+  Expression expression = owner.parseOrCrash(input, true);
+  if (expression.isAtomUserDefined() != isUserDefinedAtom) {
+    global.fatal << "Expression::isAtomUserDefined did not return "
+    << isUserDefinedAtom
+    << " for input: "
+    << expression.toString()
+    << " with lispification: "
+    << expression.toStringFull()
+    << ", parsed from: " << input
+    << global.fatal;
+  }
+  return true;
+}
+
+bool Expression::Test::isUserDefinedAtom(Calculator& owner) {
+  MacroRegisterFunctionWithName("Expression::Test::isUserDefinedAtom");
+  owner.initialize();
+  Expression::Test::isUserDefinedAtomOnce(owner, "x", true);
+  Expression::Test::isUserDefinedAtomOnce(owner, "x+y", false);
+  Expression::Test::isUserDefinedAtomOnce(owner, "x+1", false);
+  Expression::Test::isUserDefinedAtomOnce(owner, "1", false);
   return true;
 }

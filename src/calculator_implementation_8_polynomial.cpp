@@ -1376,3 +1376,107 @@ bool CalculatorFunctionsPolynomial::groebner(
   }
   return output.assignValue(out.str(), calculator);
 }
+
+bool CalculatorFunctionsPolynomial::combineFractionsCommutativeWithInternalLibrary(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::combineFractionsCommutativeWithInternalLibrary");
+  if (!input.startsWith(calculator.opPlus(), 3)) {
+    return false;
+  }
+  const Expression& leftE = input[1];
+  const Expression& rightE = input[2];
+  if (
+    !leftE.startsWith(calculator.opDivide(), 3) ||
+    !rightE.startsWith(calculator.opDivide(), 3)
+  ) {
+    return false;
+  }
+  Expression converted(calculator);
+  if (!CalculatorConversions::functionRationalFunction<AlgebraicNumber>(calculator, input, converted)) {
+    return false;
+  }
+  WithContext<RationalFunction<AlgebraicNumber> > rationalFunction;
+  if (!converted.isOfTypeWithContext(&rationalFunction)) {
+    return false;
+  }
+  return CalculatorConversions::expressionFromRationalFunction(calculator, rationalFunction.content, output, &rationalFunction.context);
+}
+
+bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial");
+  if (!input.startsWith(calculator.opDivide(), 3)) {
+    return false;
+  }
+  WithContext<Polynomial<AlgebraicNumber> > numerator;
+  WithContext<Polynomial<AlgebraicNumber> > denominator;
+  if (!CalculatorConversions::convert(
+    input[2],
+    CalculatorConversions::functionPolynomialWithExponentLimit<AlgebraicNumber, 6>,
+    denominator
+  )) {
+    return false;
+  }
+  Rational denominatorDegree = denominator.content.totalDegree();
+  if (denominatorDegree == 0) {
+    // The denominator is a constant;
+    return false;
+  }
+  if (!CalculatorConversions::convert(
+    input[1],
+    CalculatorConversions::functionPolynomialWithExponentLimit<AlgebraicNumber, 6>,
+    numerator
+  )) {
+    return false;
+  }
+  if (!WithContext<Polynomial<AlgebraicNumber> >::mergeContexts(numerator, denominator, nullptr)) {
+    return false;
+  }
+  if (!numerator.context.hasAtomicUserDefinedVariables()) {
+    return false;
+  }
+  RationalFunction<AlgebraicNumber> result;
+  result = numerator.content;
+  result /= denominator.content;
+  Polynomial<AlgebraicNumber> simplifiedNumerator;
+  result.getNumerator(simplifiedNumerator);
+  if (numerator.content == simplifiedNumerator) {
+    // Nothing was cancelled.
+    return false;
+  }
+  WithContext<RationalFunction<AlgebraicNumber> > simplified;
+  simplified.context = numerator.context;
+  simplified.content = result;
+  Expression simplifiedExpression;
+  simplifiedExpression.assignWithContext(simplified, calculator);
+  Expression outputCandidate;
+  if (!CalculatorConversions::functionExpressionFromBuiltInType(
+    calculator, simplifiedExpression, outputCandidate
+  )) {
+    return calculator
+    << "Unexpected failure to convert "
+    << simplifiedExpression.toString()
+    << " to expression.";
+  }
+  output = outputCandidate;
+  Polynomial<AlgebraicNumber> simplifiedDenominator;
+  result.getDenominator(simplifiedDenominator);
+  if (simplifiedDenominator.totalDegree() < denominatorDegree) {
+    Polynomial<AlgebraicNumber> quotient, remainder;
+    denominator.content.divideBy(simplifiedDenominator, quotient, remainder, nullptr);
+    if (!remainder.isEqualToZero()) {
+      global.fatal << "Remainder of quotient must not be zero. " << global.fatal;
+    }
+    WithContext<Polynomial<AlgebraicNumber> > quotientWithContext;
+    quotientWithContext.context = numerator.context;
+    quotientWithContext.content = quotient;
+    Expression quotientExpression;
+    quotientExpression.assignWithContext(quotientWithContext, calculator);
+    Expression quotientNotZero;
+    quotientNotZero.makeXOX(calculator, calculator.opNotEqual(), quotientExpression, calculator.expressionZero());
+    calculator.theObjectContainer.constraints.addOnTop(quotientNotZero);
+  }
+  return true;
+}

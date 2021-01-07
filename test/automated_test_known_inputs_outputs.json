@@ -69,11 +69,11 @@
   },
   {
     "input":"TurnOffRules(\"CommonDenominator\");\na/b+c/d;\nz=(x-2)(x+1);\nw=(x-3)(x+1);\n1/z+1/w",
-    "output":"(RulesOff{}\\left(\"CommonDenominator\"\\right);\\frac{c b+a d}{d b};z=x^{2}-x-2;w=x^{2}-2 x-3;\\frac{2 x^{2}-3 x-5}{x^{4}-3 x^{3}-3 x^{2}+7 x+6})"
+    "output":"(RulesOff{}\\left(\"CommonDenominator\"\\right);\\frac{c b+a d}{d b};z=x^{2}-x-2;w=x^{2}-2 x-3;\\frac{2 x-5}{x^{3}-4 x^{2}+x+6})"
   },
   {
     "input":"f{}{{x}}= (2x +3)/(2x + 1);\ng{}{{y}}= (y-2)/(y+3);\ng{}f{}z;\nf{}g{}z",
-    "output":"(f{}\\left({{x}}\\right)=\\frac{2 {{x}}+3}{2 {{x}}+1};g{}\\left({{y}}\\right)=\\frac{{{y}}-2}{{{y}}+3};\\frac{-2 z+1}{8 z+6};\\frac{5 z+5}{3 z-1})"
+    "output":"(f{}\\left({{x}}\\right)=\\frac{2 {{x}}+3}{2 {{x}}+1};g{}\\left({{y}}\\right)=\\frac{{{y}}-2}{{{y}}+3};\\frac{-z+\\frac{1}{2}}{4 z+3};\\frac{5 z+5}{3 z-1})"
   },
   {
     "input":"v=HeighestWeightVector{}(G_2, (1,0),(0,0));\n(3/4 v)\\otimes v-3/4 (v\\otimes v)",
@@ -250,6 +250,10 @@
   {
     "input":"PolynomialModP{}(x^5+5x^3+x^2+4x+1, 7) / PolynomialModP{}(x^5+6x^3+x^2+5x+1, 7);\nPolynomialModP{}(x^3-x+1, 3) / PolynomialModP{}(x^2+2, 3);\nPolynomialModP{}(x^3-x+1, 3) / PolynomialModP{}(x^2+2, 7);\nPolynomialModP{}(x^3-x+1, 6) / PolynomialModP{}(2x^2+2, 6);\nPolynomialModP{}(x^3-x+1, 21) / PolynomialModP{}(2x^2+2, 21);\n",
     "output":"(\\frac{PolynomialModP{}(x^{3}+4x +1, 7)} {PolynomialModP{}(x^{3}+5x +1, 7)};\\frac{PolynomialModP{}(x^{3}+2x +1, 3)} {PolynomialModP{}(x^{2}+2, 3)};\\frac{PolynomialModP{}(x^{3}+2x +1, 3)}{PolynomialModP{}(x^{2}+2, 7)};\\frac{PolynomialModP{}(x^{3}+5x +1, 6)}{PolynomialModP{}(2x^{2}+2, 6)};\\frac{PolynomialModP{}(x^{3}+20x +1, 21)}{PolynomialModP{}(2x^{2}+2, 21)})"
+  },
+  {
+    "input":"(2x^2+3x-5)/(5x^4+x^2+2x-8);\nx^2/x;\n(x+1)^2/(x+1)",
+    "output":"(\\frac{2 x+5}{5 x^{3}+5 x^{2}+6 x+8};x;x+1)"
   },
   {
     "input":"(a/b){}x;",
@@ -837,7 +841,7 @@
   },
   {
     "input":"\\int (\\frac{3}{(x / 2 - 1)}) dx ",
-    "output":"6 \\log{}\\left(\\frac{1}{2} x-1\\right)"
+    "output":"6 \\log{}\\left(x-2\\right)"
   },
   {
     "input":"\\int (\\frac{2}{(3x- 1)^2}) dx ",
@@ -973,7 +977,7 @@
   },
   {
     "input":"LispifyFull(e^x)",
-    "output":"\"(20 , 102 , 465 )\""
+    "output":"\"(20 , 102 , 466 )\""
   },
   {
     "input":"ChildExpression(e^x, 1); ChildExpression(e^x, 2); ChildExpression(e^x, 3)",
@@ -1173,7 +1177,7 @@
   },
   {
     "input":"MakeExpression(Polynomial{}((x - 2y + z - 1)^2(x + y - z)));\nA = \\frac{64 x^{2} y x y + 16 x y - y}{- 32 x^{2} y x^{2} - 8 x^{2} + x};\nB = MakeRationalFunction(A);\nC = MakeExpression B;\nD = MakeRationalFunction {}(\\frac{- 2x^{3}y^{2} - \\frac{x y}{2} + \\frac{y }{32}}{x^{4}y + \\frac{x^{2}}{4} - \\frac{x}{32}});\nMakeExpression {}D - C;\nD - B;",
-    "output":"(-8 y^{2} z+x^{2} z-3 x^{2} y+5 y z^{2}-x z^{2}-z^{3}+2 z^{2}+4 y^{3}+4 y^{2}+x^{3}-2 x^{2}+2 x y z-6 y z+2 x y-z+y+x;A=\\frac{64 x^{2} y x y+16 x y-y}{-32 x^{2} y x^{2}-8 x^{2}+x};B=MakeRationalFunction{}(\\frac{-64x^{3}y^{2}-16x y +y }{32x^{4}y +8x^{2}-x });C=\\frac{-64 x^{3} y^{2}-16 x y+y}{32 x^{4} y+8 x^{2}-x};D=MakeRationalFunction{}(\\frac{-64x^{3}y^{2}-16x y +y }{32x^{4}y +8x^{2}-x });0;MakeRationalFunction{}(0))"
+    "output":"(-8 y^{2} z+x^{2} z-3 x^{2} y+5 y z^{2}-x z^{2}-z^{3}+2 z^{2}+4 y^{3}+4 y^{2}+x^{3}-2 x^{2}+2 x y z-6 y z+2 x y-z+y+x;A=\\frac{-64 x^{3} y^{2}-16 x y+y}{32 x^{4} y+8 x^{2}-x};B=MakeRationalFunction{}(\\frac{-64x^{3}y^{2}-16x y +y }{32x^{4}y +8x^{2}-x });C=\\frac{-64 x^{3} y^{2}-16 x y+y}{32 x^{4} y+8 x^{2}-x};D=MakeRationalFunction{}(\\frac{-64x^{3}y^{2}-16x y +y }{32x^{4}y +8x^{2}-x });0;MakeRationalFunction{}(0))"
   },
   {
     "input":"Polynomial{}((x-2y+z- 1)^2(x +y-z));\nPolynomial{}(y^2)-(Polynomial{}y)^2",

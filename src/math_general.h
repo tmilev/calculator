@@ -2557,11 +2557,11 @@ class MonomialVector {
 template <class Coefficient>
 class VectorSparse : public LinearCombination<MonomialVector, Coefficient> {
   public:
-  void makeEi(int NonZeroIndex, const Coefficient& theCoeff = 1) {
+  void makeEi(int nonZeroIndex, const Coefficient& coefficient = 1) {
     this->makeZero();
     MonomialVector theMon;
-    theMon.makeEi(NonZeroIndex);
-    this->addMonomial(theMon, theCoeff);
+    theMon.makeEi(nonZeroIndex);
+    this->addMonomial(theMon, coefficient);
   }
   int getLargestParticipatingBasisIndex() {
     int result = - 1;

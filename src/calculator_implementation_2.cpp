@@ -1115,9 +1115,35 @@ bool Calculator::processOneExpressionOnePatternOneSub(
   return true;
 }
 
-bool Calculator::parse(const std::string& input, Expression& output) {
+bool Calculator::parse(
+  const std::string& input,
+  bool stripCommandSequence,
+  Expression& output
+) {
   List<SyntacticElement> syntacticSoup, syntacticStack;
-  return this->parseAndExtractExpressions(input, output, syntacticSoup, syntacticStack, nullptr);
+  if (!this->parseAndExtractExpressions(
+    input, output, syntacticSoup, syntacticStack, nullptr
+  )) {
+    return false;
+  }
+  if (stripCommandSequence) {
+    if (output.startsWith(this->opCommandSequence(), 2)) {
+      output = output[1];
+    }
+  }
+  return true;
+}
+
+Expression Calculator::parseOrCrash(
+  const std::string& input, bool stripCommandSequence
+) {
+  Expression result;
+  if (!this->parse(input, stripCommandSequence, result)) {
+    global.fatal << "Failed to parse: " << input
+    << " with a function that does not allow failure."
+    << global.fatal;
+  }
+  return result;
 }
 
 bool Calculator::parseAndExtractExpressions(
@@ -1298,6 +1324,14 @@ void Calculator::evaluateCommands() {
   if (this->theObjectContainer.theAlgebraicClosure.latestBasis.size > 1) {
     commentsStream << "<b>Algebraic closure status.</b><br>"
     << this->theObjectContainer.theAlgebraicClosure.toString();
+  }
+  if (this->theObjectContainer.constraints.size > 0) {
+    commentsStream << "<b>Constraints.</b><br>";
+    for (int i = 0; i < this->theObjectContainer.constraints.size; i ++) {
+      commentsStream
+      << HtmlRoutines::getMathNoDisplay(this->theObjectContainer.constraints[i].toString())
+      << "<br>";
+    }
   }
   if (this->comments.str() != "") {
     commentsStream << "<br><span>" << this->comments.str() << "</span>";

@@ -614,18 +614,18 @@ void RationalFunction<Coefficient>::simplify() {
   List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderForGreatestCommonDivisor();
   if (this->expressionType == this->typeRationalFunction) {
     if (!this->numerator.getElement().isEqualToZero()) {
-      Polynomial<Coefficient> theGCD, tempP, tempP2;
-      this->greatestCommonDivisor(this->numerator.getElement(), this->denominator.getElement(), theGCD);
-      if (theGCD.isEqualToZero()) {
+      Polynomial<Coefficient> greatestCommonDivisor, quotientByGCD, remainderByGCD;
+      this->greatestCommonDivisor(this->numerator.getElement(), this->denominator.getElement(), greatestCommonDivisor);
+      if (greatestCommonDivisor.isEqualToZero()) {
         global.fatal << "This is a programing error: "
         << " while fetching the gcd of " << this->numerator.getElement().toString()
         << " and " << this->denominator.getElement().toString()
         << " I got 0, which is impossible. " << global.fatal;
       }
-      this->numerator.getElement().divideBy(theGCD, tempP, tempP2, monomialOrder);
-      this->numerator.getElement() = tempP;
-      this->denominator.getElement().divideBy(theGCD, tempP, tempP2, monomialOrder);
-      this->denominator.getElement() = tempP;
+      this->numerator.getElement().divideBy(greatestCommonDivisor, quotientByGCD, remainderByGCD, monomialOrder);
+      this->numerator.getElement() = quotientByGCD;
+      this->denominator.getElement().divideBy(greatestCommonDivisor, quotientByGCD, remainderByGCD, monomialOrder);
+      this->denominator.getElement() = quotientByGCD;
     }
   }
   this->reduceMemory();

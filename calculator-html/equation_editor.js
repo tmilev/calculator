@@ -5608,13 +5608,21 @@ class MathNode {
     ) {
       return new KeyHandlerResult(false, true);
     }
-    let sibling = this.firstAtom(1);
-    if (sibling === null) {
+    let cousinAtom = this.firstAtom(1);
+    if (cousinAtom === null) {
       return new KeyHandlerResult(false, false);
     }
+    let cousinLeftSibling = cousinAtom.previousHorizontalSibling();
+    if (cousinLeftSibling !== null) {
+      if (cousinLeftSibling.implied) {
+        cousinAtom.desiredCaretPosition = 0;
+        this.parent.focusRestore();
+        return new KeyHandlerResult(true, false);
+      }
+    }
     this.positionCaretBeforeKeyEvents = - 1;
-    sibling.positionCaretBeforeKeyEvents = 0;
-    return sibling.backspace();
+    cousinAtom.positionCaretBeforeKeyEvents = 0;
+    return cousinAtom.backspace();
   }
 
   /** @returns{KeyHandlerResult} whether the default should be prevented. */

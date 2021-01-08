@@ -1120,6 +1120,14 @@ class SyntancticElement {
   }
 }
 
+class ToLatexOptions {
+  constructor(useCaretCommand) {
+    this.useCaretCommand = useCaretCommand;
+  }
+}
+
+let latexOptionsWithCaret = new ToLatexOptions(true);
+
 class LaTeXConstants {
   constructor() {
     this.latinCharactersString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -1516,9 +1524,19 @@ class LaTeXConstants {
     selectionStart,
     /** @type{number} */
     selectionEnd,
+    /**@type{number} */
+    positionCaret,
   ) {
     this.computeUtf16ToLatexMap();
     let result = [];
+    let lengthSoFar = 0;
+    let startFound = false;
+    let endFound = false;
+
+    if (positionCaret === 0) {
+      result.push("\\caret ");
+      lengthSoFar += 7;
+    }
     for (let i = 0; i < input.length; i++) {
       let current = "";
       for (let j = 0; j < 4 && i + j < input.length; j++) {
@@ -1533,6 +1551,19 @@ class LaTeXConstants {
       }
       if (current !== "") {
         result.push(current);
+      }
+      if (i === selectionStart && !startFound) {
+        selectionStart = lengthSoFar;
+        startFound = true;
+      }
+      lengthSoFar += current.length;
+      if (i + 1 === selectionEnd && !endFound) {
+        selectionEnd = lengthSoFar;
+        endFound = true;
+      }
+      if (i + 1 === positionCaret) {
+        result.push("\\caret ");
+        lengthSoFar += 7;
       }
     }
     return new LatexWithAnnotation(result.join(""), selectionStart, selectionEnd);
@@ -2300,6 +2331,107 @@ class KeyHandlerResult {
   }
 }
 
+class CircularBuffer {
+  constructor(
+    /**@type{number} */
+    capacity,
+  ) {
+    /**@type{string[]} */
+    this.elements = [];
+    /**@type{number} */
+    this.lowestIndex = 0;
+    /**@type{number} */
+    this.highestIndex = - 1;
+    /**@type{number} */
+    this.capacity = capacity;
+  }
+
+  push(
+    /**@type{string} */
+    input,
+  ) {
+    this.highestIndex++;
+    if (this.totalElements() > this.capacity) {
+      this.lowestIndex++;
+    }
+    this.setElement(this.highestIndex, input);
+  }
+
+  pop() {
+    if (this.totalElements() <= 0) {
+      return null;
+    }
+    let circularIndex = this.indexToCircular(this.highestIndex);
+    let result = this.elements[circularIndex];
+    this.highestIndex--;
+    return result;
+  }
+
+  setElement(
+    /**@type{number} */
+    index,
+    /**@type{string} */
+    input,
+  ) {
+    let circularIndex = this.indexToCircular(index);
+    for (let i = this.elements.length; i <= circularIndex; i++) {
+      this.elements.push("");
+    }
+    this.elements[circularIndex] = input;
+  }
+
+  indexToCircular(
+    /**@type{number} */
+    index,
+  ) {
+    return index % this.capacity;
+  }
+
+  /**@returns{string|null} */
+  get(
+    /**@type{number} */
+    index,
+  ) {
+    if (index > this.highestIndex || index < this.lowestIndex) {
+      return null;
+    }
+    let circularIndex = this.indexToCircular(index);
+    if (circularIndex >= this.elements.length) {
+      return null;
+    }
+    return this.elements[circularIndex];
+  }
+
+  /**@returns{number} */
+  totalElements() {
+    return this.highestIndex - this.lowestIndex + 1;
+  }
+
+  /**@returns{string} */
+  toString() {
+    let elementsToShowAtEachEnd = 2;
+    if (this.totalElements() <= elementsToShowAtEachEnd * 2) {
+      let result = [];
+      for (let i = this.lowestIndex; i <= this.highestIndex; i++) {
+        result.push(this.get(i));
+      }
+      return result.join(", ");
+    }
+    let resultLeft = [];
+    for (let i = this.lowestIndex; i < this.lowestIndex + elementsToShowAtEachEnd; i++) {
+      resultLeft.push(this.get(i));
+    }
+    let resultRight = [];
+    for (let i = this.highestIndex - elementsToShowAtEachEnd + 1; i <= this.highestIndex; i++) {
+      resultRight.push(this.get(i));
+    }
+    let left = resultLeft.join(", ");
+    let right = resultRight.join(", ");
+    let omitted = this.totalElements() - 2 * elementsToShowAtEachEnd;
+    return `${left} ...(${omitted} omitted)...${right}`;
+  }
+}
+
 class EquationEditor {
   constructor(
     /** @type{HTMLElement} */
@@ -2349,6 +2481,10 @@ class EquationEditor {
     this.selectionEndExpanded = new AtomWithPosition(null, -1);
     /** @type{string} */
     this.latexLastWritten = "";
+    /** @type{string} */
+    this.latexLastEdit = "";
+    /** @type{string} */
+    this.latexLastEditWithCaret = "";
     /** @type {boolean}*/
     this.backslashSequenceStarted = false;
     /** @type {string}*/
@@ -2378,7 +2514,23 @@ class EquationEditor {
     this.lastCopied = "";
     /** @type{MathNode|null} */
     this.eventCatcher = null;
+    /** @type{CircularBuffer} */
+    this.history = new CircularBuffer(5000);
     this.prepareEventCatcher();
+  }
+
+  undo() {
+    if (this.history.totalElements() <= 0) {
+      return;
+    }
+    let element = this.history.pop();
+    this.writeLatex(element);
+    this.latexLastEditWithCaret = element;
+    this.latexLastEdit = this.rootNode.toLatexWithAnnotation(null).latex;
+    this.rootNode.focusRestore();
+  }
+
+  redo() {
   }
 
   pasteFromClipboard() {
@@ -2391,7 +2543,7 @@ class EquationEditor {
   }
 
   copyToClipboard() {
-    let latexWithAnnotation = this.rootNode.toLatexWithAnnotation();
+    let latexWithAnnotation = this.rootNode.toLatexWithAnnotation(null);
     let toBeCopied = "";
     if (latexWithAnnotation.selectionStart === - 1 || latexWithAnnotation.selectionEnd === - 1) {
       toBeCopied = latexWithAnnotation.latex;
@@ -2496,14 +2648,18 @@ class EquationEditor {
   }
 
   writeLatexToInput() {
-    if (
-      this.options.latexInput === null
-    ) {
+    if (this.backslashSequenceStarted) {
       return;
     }
-    let latexWithAnnotation = this.rootNode.toLatexWithAnnotation();
+    let latexWithAnnotationNoCaret = this.rootNode.toLatexWithAnnotation(null);
+    if (this.latexLastEdit === latexWithAnnotationNoCaret.latex) {
+      return;
+    }
+    this.history.push(this.latexLastEditWithCaret);
+    this.latexLastEditWithCaret = this.rootNode.toLatexWithAnnotation(latexOptionsWithCaret).latex;
+    this.latexLastEdit = latexWithAnnotationNoCaret.latex;
     if (this.options.latexInput !== null) {
-      this.options.latexInput.value = latexWithAnnotation.latex;
+      this.options.latexInput.value = latexWithAnnotationNoCaret.latex;
     }
   }
 
@@ -2521,7 +2677,9 @@ class EquationEditor {
   ) {
     this.latexLastWritten = latex;
     this.rootNode.removeAllChildren();
-    this.container.textContent = "";
+    if (this.rootNode.element !== null) {
+      this.rootNode.element.textContent = "";
+    }
     let parser = new LaTeXParser(this, latex);
     let newContent = parser.parse();
     if (newContent === null) {
@@ -2581,7 +2739,7 @@ class EquationEditor {
   }
 
   toHtml() {
-    let latexWithAnnotation = this.rootNode.toLatexWithAnnotation();
+    let latexWithAnnotation = this.rootNode.toLatexWithAnnotation(null);
     let result = `Latex: ${latexWithAnnotation.latex}`;
     result += `<br>URL-encoded: ${encodeURIComponent(latexWithAnnotation.latex)}`;
     if (this.lastCopied !== "") {
@@ -2593,6 +2751,7 @@ class EquationEditor {
         result += "<br><b style='color:red'>Detached last focused.</b>";
       }
     }
+    result += `<br>History: ${this.toStringHistory()}`;
     result += `<br>${this.toStringSelection()}`;
     if (this.lastSelectionAction !== "") {
       result += `<br>Last selection action: ${this.lastSelectionAction}`;
@@ -2603,6 +2762,10 @@ class EquationEditor {
     result += `<br>Backslash position: ${this.backslashPosition}; started: ${this.backslashSequenceStarted}, sequence: ${this.backslashSequence}.`;
     result += `<br>Position computation string: ${this.positionDebugString}.`;
     return result;
+  }
+
+  toStringHistory() {
+    return this.history.toString();
   }
 
   /** Resets the selection and dispatches a key string to the last focused / best element.
@@ -2702,6 +2865,7 @@ class EquationEditor {
     /**@type{KeyboardEvent} */
     e,
   ) {
+    console.log("DEBUG: key down catch all.");
     e.stopPropagation();
     e.preventDefault();
     let key = e.key;
@@ -2712,6 +2876,13 @@ class EquationEditor {
           break;
         case "v":
           this.pasteFromClipboard();
+          break;
+        case "z":
+          if (!e.shiftKey) {
+            this.undo();
+          } else {
+            this.redo();
+          }
           break;
         default: break;
       }
@@ -2847,10 +3018,10 @@ class EquationEditor {
     }
     let startAnnotationString = "[expanded selection null]";
     if (this.selectionStartExpanded.element !== null) {
-      let startAnnotation = this.selectionStartExpanded.element.toLatexWithAnnotation();
+      let startAnnotation = this.selectionStartExpanded.element.toLatexWithAnnotation(null);
       startAnnotationString = startAnnotation.toString();
     }
-    let endAnnotation = this.selectionEnd.element.toLatexWithAnnotation();
+    let endAnnotation = this.selectionEnd.element.toLatexWithAnnotation(null);
     let result = `Selection: from: ${this.selectionStartExpanded.toString()} to: ${this.selectionEndExpanded.toString()}.`;
     result += `<br>Actually selected: ${this.selectionStart.toString()} to: ${this.selectionEnd.toString()}.`;
     result += `<br>Latex from: ${startAnnotationString} to ${endAnnotation.toString()}`;
@@ -3206,6 +3377,10 @@ class EquationEditor {
     element,
   ) {
     this.preventEditorBlur = true;
+    if (!this.hasFocusDOM) {
+      this.eventCatcher.focus(1);
+      this.hasFocusDOM = true;
+    }
     e.stopPropagation();
     // e.preventDefault();
     element.storeCaretPosition("", false);
@@ -3668,6 +3843,9 @@ class MathNode {
   unSelectMouseRecursive() {
     this.unSelectElementByMouse();
     for (let i = 0; i < this.children.length; i++) {
+      if (this.children[i] === null) {
+        continue;
+      }
       this.children[i].unSelectMouseRecursive();
     }
   }
@@ -4472,12 +4650,12 @@ class MathNode {
     }
   }
 
-  handleFocus(e) {
+  handleFocus(_) {
     this.focusElement();
     this.storeCaretPosition("", false);
   }
 
-  handleBlur(e) {
+  handleBlur(_) {
     this.blurElement();
     this.equationEditor.blur();
   }
@@ -4670,9 +4848,19 @@ class MathNode {
     event,
   ) {
     let key = event.key;
-    if (key === "c" && event.ctrlKey) {
-      this.equationEditor.copyToClipboard();
-      return new KeyHandlerResult(true, false);
+    if (event.ctrlKey) {
+      if (key === "c") {
+        this.equationEditor.copyToClipboard();
+        return new KeyHandlerResult(true, false);
+      }
+      if (key === "z") {
+        if (event.shiftKey) {
+          this.equationEditor.redo();
+        } else {
+          this.equationEditor.undo();
+        }
+        return new KeyHandlerResult(true, true);
+      }
     }
     let shiftHeld = event.shiftKey;
     let backslashPreprocessing = this.processBackslash(key, shiftHeld);
@@ -5116,7 +5304,10 @@ class MathNode {
     }
   }
 
-  appendChild(/** @type{MathNode} */ child) {
+  appendChild(
+    /** @type{MathNode} */
+    child,
+  ) {
     if (child.parent !== this && child.parent !== null && child.indexInParent >= 0) {
       child.parent.children[child.indexInParent] = null;
     }
@@ -5289,7 +5480,10 @@ class MathNode {
   }
 
   /** @returns {MathNode} */
-  removeChildReplaceWithNull(childIndex) {
+  removeChildReplaceWithNull(
+    /** @type{number} */
+    childIndex,
+  ) {
     let result = this.children[childIndex];
     result.parent = null;
     result.indexInParent = - 1;
@@ -5606,7 +5800,7 @@ class MathNode {
       ambiguousDelimiter,
       latexConstants.leftRightDelimiterPair[ambiguousDelimiter],
       true,
-      true
+      true,
     );
   }
 
@@ -6109,7 +6303,7 @@ class MathNode {
   replaceImpliedRightDelimiter(
     /** @type {string} */
     delimiterString,
-    /**@type {number}*/
+    /** @type {number} */
     delimiterIndex,
   ) {
     let openDelimiters = 0;
@@ -6137,9 +6331,9 @@ class MathNode {
   moveDelimiterMarkExplicit(
     /** @type {string} */
     delimiterString,
-    /**@type {number}*/
+    /** @type {number}*/
     toIndex,
-    /**@type {number}*/
+    /** @type {number}*/
     fromIndex,
   ) {
     let isLeft = this.children[fromIndex].type.type === knownTypes.leftDelimiter.type;
@@ -6466,7 +6660,10 @@ class MathNode {
   }
 
   /** @returns{boolean} Focuses the cursor on an atom. */
-  focusAtom(endToFocus) {
+  focusAtom(
+    /** @type{number} */
+    endToFocus,
+  ) {
     if (this.element === null) {
       this.desiredCaretPosition = - 1;
       return false;
@@ -6498,15 +6695,32 @@ class MathNode {
    * At the moment, negative endToFocus indicates the caret should
    * be on the element's left, and positive endToFocus indicates the caret 
    * should go on the right. Zero indicates to focus at this.positionCaretBeforeKeyEvents.
+   * 
+   * @returns{boolean} Whether the focus was successful.
    */
-  focus(endToFocus) {
-    if (this.type.type === knownTypes.atom.type || this.type.type === knownTypes.eventCatcher.type) {
+  focus(
+    /** @type{number} */
+    endToFocus,
+  ) {
+    if (this.type.type === knownTypes.atom.type) {
       return this.focusAtom(endToFocus);
     }
+    if (this.type.type === knownTypes.eventCatcher.type) {
+      if (this.element === null) {
+        return false;
+      }
+      console.log("DEBUG: focus event catcher.");
+      this.element.focus();
+      return true;
+    }
+
     return this.focusStandard(endToFocus);
   }
 
-  focusStandard(endToFocus) {
+  focusStandard(
+    /** @type{number} */
+    endToFocus,
+  ) {
     if (endToFocus === 1) {
       for (let i = this.children.length - 1; i >= 0; i--) {
         if (this.children[i].focus(endToFocus)) {
@@ -6690,7 +6904,10 @@ class MathNode {
     return result.join("");
   }
 
-  toHtml(indentationLevel) {
+  toHtml(
+    /** @type{number} */
+    indentationLevel,
+  ) {
     if (indentationLevel === null || indentationLevel === undefined) {
       indentationLevel = 0;
     }
@@ -6732,7 +6949,10 @@ class MathNode {
   }
 
   /** @returns {LatexWithAnnotation} */
-  toLatexWithAnnotationAtomic() {
+  toLatexWithAnnotationAtomic(
+    /**@type{ToLatexOptions|null} */
+    options,
+  ) {
     let selectionStart = - 1;
     let selectionEnd = - 1;
     if (this === this.equationEditor.selectionStartExpanded.element) {
@@ -6751,21 +6971,29 @@ class MathNode {
         selectionStart = position;
       }
     }
+    let positionCaret = - 1;
+    if (this.focused && options !== null && options.useCaretCommand) {
+      positionCaret = this.positionCaretBeforeKeyEvents;
+    }
     let result = latexConstants.convertUtf16ToLatex(
       this.contentIfAtomic(),
       selectionStart,
       selectionEnd,
+      positionCaret,
     );
     return result.accountOwner(this);
   }
 
   /** @returns{string} */
   toLatex() {
-    return this.toLatexWithAnnotation().latex;
+    return this.toLatexWithAnnotation(null).latex;
   }
 
   /** @returns {LatexWithAnnotation} */
-  toLatexWithAnnotation() {
+  toLatexWithAnnotation(
+    /**@type{ToLatexOptions|null} */
+    options,
+  ) {
     let toJoin = [];
     let charactersSoFar = 0;
     let result = new LatexWithAnnotation("", - 1, - 1);
@@ -6775,7 +7003,7 @@ class MathNode {
         toJoin.push("[[null]]");
         continue;
       }
-      let childLatex = child.toLatexWithAnnotation();
+      let childLatex = child.toLatexWithAnnotation(options);
       result.accountChild(childLatex, charactersSoFar);
       toJoin.push(childLatex.latex);
       charactersSoFar += childLatex.latex.length;
@@ -6861,8 +7089,11 @@ class MathNodeAtom extends MathNode {
   }
 
   /** @returns {LatexWithAnnotation} */
-  toLatexWithAnnotation() {
-    return this.toLatexWithAnnotationAtomic();
+  toLatexWithAnnotation(
+    /**@type{ToLatexOptions|null} */
+    options,
+  ) {
+    return this.toLatexWithAnnotationAtomic(options);
   }
 }
 
@@ -6875,8 +7106,11 @@ class MathNodeAtomImmutable extends MathNode {
   }
 
   /** @returns {LatexWithAnnotation} */
-  toLatexWithAnnotation() {
-    return this.toLatexWithAnnotationAtomic();
+  toLatexWithAnnotation(
+    /**@type{ToLatexOptions|null} */
+    options,
+  ) {
+    return this.toLatexWithAnnotationAtomic(options);
   }
 
   /** @returns {boolean} whether backspace was applied */
@@ -6900,9 +7134,12 @@ class MathNodeFraction extends MathNode {
   }
 
   /** @returns {LatexWithAnnotation} */
-  toLatexWithAnnotation() {
-    let numerator = this.children[0].toLatexWithAnnotation();
-    let denominator = this.children[1].toLatexWithAnnotation();
+  toLatexWithAnnotation(
+    /**@type{ToLatexOptions|null} */
+    options,
+  ) {
+    let numerator = this.children[0].toLatexWithAnnotation(options);
+    let denominator = this.children[1].toLatexWithAnnotation(options);
     let result = new LatexWithAnnotation(`\\frac{${numerator.latex}}{${denominator.latex}}`, - 1, - 1);
     result.accountChild(numerator, 6);
     result.accountChild(denominator, 6 + numerator.latex.length + 2);
@@ -6960,7 +7197,10 @@ class MathNodeBaseWithExponent extends MathNode {
   }
 
   /** @returns {LatexWithAnnotation} */
-  toLatexWithAnnotation() {
+  toLatexWithAnnotation(
+    /**@type{ToLatexOptions|null} */
+    options,
+  ) {
     let base = this.children[0].toLatex();
     let exponent = this.children[1].toLatex();
     return new LatexWithAnnotation(
@@ -7091,7 +7331,10 @@ class MathNodeCancel extends MathNode {
     super(equationEditor, knownTypes.cancel);
   }
 
-  toLatexWithAnnotation() {
+  toLatexWithAnnotation(
+    /**@type{ToLatexOptions|null} */
+    options,
+  ) {
     let childLatex = this.children[1].toLatex();
     return new LatexWithAnnotation(`\\cancel{${childLatex}}`, - 1, - 1);
   }
@@ -7160,7 +7403,10 @@ class MathNodeSqrt extends MathNode {
   }
 
   /** @returns {LatexWithAnnotation} */
-  toLatexWithAnnotation() {
+  toLatexWithAnnotation(
+    /**@type{ToLatexOptions|null} */
+    options,
+  ) {
     if (this.element === null) {
       return new LatexWithAnnotation("[null(]", - 1, - 1);
     }
@@ -7168,10 +7414,10 @@ class MathNodeSqrt extends MathNode {
     let exponent = null;
     let underTheRadical = null;
     if (this.children.length > 0) {
-      exponent = this.children[0].toLatexWithAnnotation();
+      exponent = this.children[0].toLatexWithAnnotation(options);
     }
     if (this.children.length > 2) {
-      underTheRadical = this.children[2].toLatexWithAnnotation();
+      underTheRadical = this.children[2].toLatexWithAnnotation(options);
     }
     if (exponent !== null) {
       if (exponent.latex !== "") {
@@ -7243,7 +7489,10 @@ class MathNodeBaseWithSubscript extends MathNode {
   }
 
   /** @returns {LatexWithAnnotation} */
-  toLatexWithAnnotation() {
+  toLatexWithAnnotation(
+    /**@type{ToLatexOptions|null} */
+    options,
+  ) {
     return new LatexWithAnnotation(`{${this.children[0].toLatex()}}_{${this.children[1].toLatex()}}`, - 1, - 1);
   }
 
@@ -7261,7 +7510,10 @@ class MathNodeLeftDelimiter extends MathNode {
   }
 
   /** @returns {LatexWithAnnotation} */
-  toLatexWithAnnotation() {
+  toLatexWithAnnotation(
+    /**@type{ToLatexOptions|null} */
+    options,
+  ) {
     if (this.children.length === 0) {
       return new LatexWithAnnotation("\\left.", -1, -1);
     }
@@ -7286,7 +7538,11 @@ class MathNodeRightDelimiter extends MathNode {
   }
 
   /** @returns {LatexWithAnnotation} */
-  toLatexWithAnnotation() {
+  toLatexWithAnnotation(
+    /**@type{ToLatexOptions|null} */
+    options,
+
+  ) {
     if (this.children.length === 0) {
       return new LatexWithAnnotation("\\right.", -1, -1);
     }
@@ -7577,7 +7833,11 @@ class MathNodeMatrix extends MathNode {
   }
 
   /** @returns {LatexWithAnnotation} */
-  toLatexWithAnnotation() {
+  toLatexWithAnnotation(
+    /**@type{ToLatexOptions|null} */
+    options,
+
+  ) {
     if (this.element === null) {
       return new LatexWithAnnotation("[null)]", - 1, - 1);
     }
@@ -7667,7 +7927,11 @@ class MathNodeOperatorWithSuperAndSubscript extends MathNode {
   }
 
   /** @returns {LatexWithAnnotation} */
-  toLatexWithAnnotation() {
+  toLatexWithAnnotation(
+    /**@type{ToLatexOptions|null} */
+    options,
+
+  ) {
     let top = this.children[0].toLatex();
     let result = this.children[1].toLatex();
     let bottom = this.children[2].toLatex();
@@ -7693,7 +7957,10 @@ class MathNodeOperatorStandalone extends MathNode {
   }
 
   /** @returns {LatexWithAnnotation} */
-  toLatexWithAnnotation() {
+  toLatexWithAnnotation(
+    /**@type{ToLatexOptions|null} */
+    options,
+  ) {
     latexConstants.computeUtf16ToLatexMap();
     const content = this.textContentOrInitialContent();
     if (content in latexConstants.utf16ToLatexMap) {

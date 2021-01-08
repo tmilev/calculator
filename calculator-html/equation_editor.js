@@ -2485,6 +2485,10 @@ class EquationEditor {
     this.latexLastEdit = "";
     /** @type{string} */
     this.latexLastEditWithCaret = "";
+    /** @type{CircularBuffer} */
+    this.history = new CircularBuffer(5000);
+    /** @type{string[]} */
+    this.redoBuffer = [];
     /** @type {boolean}*/
     this.backslashSequenceStarted = false;
     /** @type {string}*/
@@ -2514,32 +2518,53 @@ class EquationEditor {
     this.lastCopied = "";
     /** @type{MathNode|null} */
     this.eventCatcher = null;
-    /** @type{CircularBuffer} */
-    this.history = new CircularBuffer(5000);
     this.prepareEventCatcher();
   }
 
+  focusEventCatcher() {
+    if (this.eventCatcher.element === null) {
+      return false;
+    }
+    this.eventCatcher.element.focus();
+    return true;
+  }
+
+  focusRestore() {
+    if (!this.rootNode.focusRestore()) {
+      this.resetSelectionFocusBestChoice();
+    }
+  }
   undo() {
     if (this.history.totalElements() <= 0) {
       return;
     }
+    this.redoBuffer.push(this.latexLastEditWithCaret);
     let element = this.history.pop();
     this.writeLatex(element);
     this.latexLastEditWithCaret = element;
     this.latexLastEdit = this.rootNode.toLatexWithAnnotation(null).latex;
-    this.rootNode.focusRestore();
+    this.focusRestore();
   }
 
   redo() {
+    if (this.redoBuffer.length === 0) {
+      return;
+    }
+    let element = this.redoBuffer.pop();
+    this.writeLatex(element);
+    this.writeLatexToInput(false);
+    this.focusRestore();
   }
 
+  /**@returns{KeyHandlerResult} */
   pasteFromClipboard() {
     if (!this.hasSelection() || !this.selectionEscapedOriginalAtom()) {
-      return;
+      return new KeyHandlerResult(false, false);
     }
     navigator.clipboard.readText().then((text) => {
       this.deleteSelection(text);
     });
+    return new KeyHandlerResult(true, true);
   }
 
   copyToClipboard() {
@@ -2647,13 +2672,19 @@ class EquationEditor {
     this.options.debugLogContainer.innerHTML = debugHTML;
   }
 
-  writeLatexToInput() {
+  writeLatexToInput(
+    /**@type{boolean} */
+    wipeOffRedoBuffer,
+  ) {
     if (this.backslashSequenceStarted) {
       return;
     }
     let latexWithAnnotationNoCaret = this.rootNode.toLatexWithAnnotation(null);
     if (this.latexLastEdit === latexWithAnnotationNoCaret.latex) {
       return;
+    }
+    if (wipeOffRedoBuffer) {
+      this.redoBuffer = [];
     }
     this.history.push(this.latexLastEditWithCaret);
     this.latexLastEditWithCaret = this.rootNode.toLatexWithAnnotation(latexOptionsWithCaret).latex;
@@ -2752,7 +2783,6 @@ class EquationEditor {
       }
     }
     result += `<br>History: ${this.toStringHistory()}`;
-    result += `<br>${this.toStringSelection()}`;
     if (this.lastSelectionAction !== "") {
       result += `<br>Last selection action: ${this.lastSelectionAction}`;
     }
@@ -2765,7 +2795,11 @@ class EquationEditor {
   }
 
   toStringHistory() {
-    return this.history.toString();
+    let result = this.history.toString();
+    if (this.redoBuffer.length > 0) {
+      result += `<br>Redo buffer: ${this.redoBuffer.join(", ")}`;
+    }
+    return result;
   }
 
   /** Resets the selection and dispatches a key string to the last focused / best element.
@@ -2861,31 +2895,44 @@ class EquationEditor {
       latexConstants.isCharacterReplacingSelection(key);
   }
 
+  /** @returns{KeyHandlerResult} */
+  handleControlKeys(
+    /**@type{KeyboardEvent} */
+    e,
+  ) {
+    if (!e.ctrlKey) {
+      return new KeyHandlerResult(false, false);
+    }
+    switch (e.key) {
+      case "Z":
+        this.redo();
+        return new KeyHandlerResult(true, true);
+      case "z":
+        this.undo();
+        return new KeyHandlerResult(true, true);
+      case "c":
+        this.copyToClipboard();
+        return new KeyHandlerResult(true, false);
+      case "x":
+        this.copyToClipboard();
+        return this.deleteSelection(null);
+      case "v":
+        this.pasteFromClipboard();
+        return new KeyHandlerResult()
+      default:
+        return new KeyHandlerResult(false, false);
+    }
+  }
+
   handleKeyDownCatchAll(
     /**@type{KeyboardEvent} */
     e,
   ) {
-    console.log("DEBUG: key down catch all.");
     e.stopPropagation();
     e.preventDefault();
     let key = e.key;
     if (e.ctrlKey) {
-      switch (key) {
-        case "c":
-          this.copyToClipboard();
-          break;
-        case "v":
-          this.pasteFromClipboard();
-          break;
-        case "z":
-          if (!e.shiftKey) {
-            this.undo();
-          } else {
-            this.redo();
-          }
-          break;
-        default: break;
-      }
+      this.handleControlKeys(e);
       return;
     }
     if (this.shouldDeleteSelection(key)) {
@@ -2949,7 +2996,7 @@ class EquationEditor {
       this.resetSelectionLeaveRangesIntact();
       this.updateDOM();
       this.rootNode.focus(0);
-      this.writeLatexToInput();
+      this.writeLatexToInput(true);
       this.writeDebugInfo(null);
       return new KeyHandlerResult(true, true);
     }
@@ -4709,7 +4756,7 @@ class MathNode {
         this.equationEditor.updateAlignment();
         this.equationEditor.accountFrameTime(frameStart);
       }
-      this.equationEditor.writeLatexToInput();
+      this.equationEditor.writeLatexToInput(true);
       this.equationEditor.writeDebugInfo(null);
       if (this.equationEditor.options.editHandler !== null) {
         this.equationEditor.options.editHandler(this.equationEditor, this);
@@ -4845,24 +4892,13 @@ class MathNode {
   /** @returns {KeyHandlerResult} whether default should be prevented. */
   handleKeyDownCases(
     /** @type {KeyboardEvent} */
-    event,
+    e,
   ) {
-    let key = event.key;
-    if (event.ctrlKey) {
-      if (key === "c") {
-        this.equationEditor.copyToClipboard();
-        return new KeyHandlerResult(true, false);
-      }
-      if (key === "z") {
-        if (event.shiftKey) {
-          this.equationEditor.redo();
-        } else {
-          this.equationEditor.undo();
-        }
-        return new KeyHandlerResult(true, true);
-      }
+    let key = e.key;
+    if (e.ctrlKey) {
+      return this.equationEditor.handleControlKeys(e);
     }
-    let shiftHeld = event.shiftKey;
+    let shiftHeld = e.shiftKey;
     let backslashPreprocessing = this.processBackslash(key, shiftHeld);
     if (backslashPreprocessing.keyAccountedCarryOutDefaultEvent) {
       return new KeyHandlerResult(false, true);

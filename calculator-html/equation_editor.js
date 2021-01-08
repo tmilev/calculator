@@ -2881,6 +2881,31 @@ class EquationEditor {
     return result;
   }
 
+  makeFractionNumeratorFromSelection(
+    /**@type{SplitBySelectionResult|split} */
+    split,
+  ) {
+    if (split === null) {
+      return;
+    }
+    let ancestor = split.ancestor;
+    ancestor.removeAllChildren();
+    for (let i = 0; i < split.beforeSplit.length; i++) {
+      ancestor.appendChild(split.beforeSplit[i]);
+    }
+    let numerator = mathNodeFactory.horizontalMathFromArray(this, split.split);
+    numerator.ensureEditableAtoms();
+    let fraction = mathNodeFactory.fraction(this, numerator, null);
+    ancestor.appendChild(fraction);
+    for (let i = 0; i < split.afterSplit.length; i++) {
+      ancestor.appendChild(split.afterSplit[i]);
+    }
+    ancestor.normalizeHorizontalMath();
+    ancestor.ensureEditableAtoms();
+    ancestor.updateDOM();
+    fraction.children[1].focus(- 1);
+  }
+
   /** Determines whether to delete a selection with non-default editable action when
    * a key is pressed.
    * 
@@ -2949,6 +2974,9 @@ class EquationEditor {
           return;
         }
         this.resetSelectionFocusBestChoice();
+        return;
+      case "/":
+        this.makeFractionNumeratorFromSelection(this.splitAtomsBySelection());
         return;
       case "Delete":
       case "Backspace":
@@ -3191,7 +3219,7 @@ class EquationEditor {
     for (let i = 0; i < start.element.indexInParent; i++) {
       result.beforeSplit.push(ancestor.children[i]);
     }
-    for (let i = start.element.indexInParent + 1; i < end.element.indexInParent; i++) {
+    for (let i = start.element.indexInParent; i <= end.element.indexInParent; i++) {
       result.split.push(ancestor.children[i]);
     }
     for (let i = end.element.indexInParent + 1; i < ancestor.children.length; i++) {
@@ -6478,7 +6506,7 @@ class MathNode {
     if (splitBySelection === null) {
       this.makeFractionNumeratorFromCaretPosition();
     } else {
-      this.makeFractionNumeratorFromSelection(splitBySelection);
+      this.equationEditor.makeFractionNumeratorFromSelection(splitBySelection);
     }
   }
 
@@ -6505,28 +6533,6 @@ class MathNode {
 
   removeAllChildren() {
     this.removeChildRange(0, this.children.length - 1);
-  }
-
-  makeFractionNumeratorFromSelection(
-    /**@type{SplitBySelectionResult} */
-    split,
-  ) {
-    let ancestor = split.ancestor;
-    ancestor.removeAllChildren();
-    for (let i = 0; i < split.beforeSplit.length; i++) {
-      ancestor.appendChild(split.beforeSplit[i]);
-    }
-    let numerator = mathNodeFactory.horizontalMathFromArray(this.equationEditor, split.split);
-    numerator.ensureEditableAtoms();
-    let fraction = mathNodeFactory.fraction(this.equationEditor, numerator, null);
-    ancestor.appendChild(fraction);
-    for (let i = 0; i < split.afterSplit.length; i++) {
-      ancestor.appendChild(split.afterSplit[i]);
-    }
-    ancestor.normalizeHorizontalMath();
-    ancestor.ensureEditableAtoms();
-    ancestor.updateDOM();
-    fraction.children[1].focus(- 1);
   }
 
   isEmptyAtom() {

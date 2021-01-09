@@ -903,7 +903,7 @@ class MathNodeFactory {
 
 var mathNodeFactory = new MathNodeFactory();
 
-class AtomWithPosition {
+class MathNodeWithCaretPosition {
   constructor(
     /** @type {MathNode|null} */
     element,
@@ -960,65 +960,89 @@ class AtomWithPosition {
     return - 1;
   }
 
-  /** @returns {AtomWithPosition} */
-  leftHorizontalNeighbor() {
+  /** @returns {MathNodeWithCaretPosition} */
+  leftHorizontalNeighborBalanced(
+    /**@type{boolean} */
+    shrinking,
+  ) {
     if (this.element === null) {
-      return new AtomWithPosition(null, - 1);
+      return new MathNodeWithCaretPosition(null, - 1);
     }
     if (this.position > 0 && this.element.hasHorozintalMathParent()) {
-      return new AtomWithPosition(this.element, this.nextPositionInDirection(- 1));
+      return new MathNodeWithCaretPosition(this.element, this.nextPositionInDirection(- 1));
     }
-    let next = this.element.firstAtomUncle(- 1);
+    let next = null;
+    if (shrinking && this.element.type.type === knownTypes.rightDelimiter.type) {
+      let matching = this.element.findMatchingDelimiter();
+      if (matching === null) {
+        return new MathNodeWithCaretPosition(null, - 1);
+      }
+      next = matching.firstAtomSiblingOrUncle(- 1);
+    } else {
+      next = this.element.firstAtomSiblingOrUncle(- 1);
+    }
     if (next === null) {
-      return new AtomWithPosition(null, - 1);
+      return new MathNodeWithCaretPosition(null, - 1);
     }
-    return new AtomWithPosition(next, - 1);
+    return new MathNodeWithCaretPosition(next, - 1);
   }
 
-  /** @returns {AtomWithPosition} */
-  rightHorizontalNeighbor() {
+  /** @returns {MathNodeWithCaretPosition} */
+  rightHorizontalNeighborBalanced(
+    /**@type{boolean} */
+    shrinking,
+  ) {
     if (this.element === null) {
-      return new AtomWithPosition(null, -1);
+      return new MathNodeWithCaretPosition(null, -1);
     }
     if (
       this.position >= 0 &&
       this.position < this.element.lengthContentIfAtom() &&
       this.element.hasHorozintalMathParent()
     ) {
-      return new AtomWithPosition(this.element, this.nextPositionInDirection(1));
+      return new MathNodeWithCaretPosition(this.element, this.nextPositionInDirection(1));
     }
-    let next = this.element.firstAtomUncle(1);
+    let next = null;
+    if (shrinking && this.element.type.type === knownTypes.leftDelimiter.type) {
+      let matching = this.element.findMatchingDelimiter();
+      if (matching === null) {
+        return new MathNodeWithCaretPosition(null, - 1);
+      }
+      next = matching.firstAtomSiblingOrUncle(1);
+    } else {
+      next = this.element.firstAtomSiblingOrUncle(1);
+    }
     if (next === null) {
-      return new AtomWithPosition(null, -1);
+      return new MathNodeWithCaretPosition(null, -1);
     }
-    return new AtomWithPosition(next, - 1);
+    return new MathNodeWithCaretPosition(next, - 1);
   }
 
-  /** @returns {AtomWithPosition} */
+  /** @returns {MathNodeWithCaretPosition} */
   leftNeighbor() {
     if (this.element === null) {
-      return new AtomWithPosition(null, -1);
+      return new MathNodeWithCaretPosition(null, -1);
     }
     if (this.position > 0) {
-      return new AtomWithPosition(this.element, this.nextPositionInDirection(- 1));
+      return new MathNodeWithCaretPosition(this.element, this.nextPositionInDirection(- 1));
     }
     let resultElement = this.element.firstAtomToTheLeft();
     if (resultElement === null) {
-      return new AtomWithPosition(null, - 1);
+      return new MathNodeWithCaretPosition(null, - 1);
     }
-    return new AtomWithPosition(resultElement, resultElement.element.textContent.length);
+    return new MathNodeWithCaretPosition(resultElement, resultElement.element.textContent.length);
   }
 
-  /** @returns {AtomWithPosition} */
+  /** @returns {MathNodeWithCaretPosition} */
   rightNeighbor() {
     if (this.element === null) {
-      return new AtomWithPosition(null, -1);
+      return new MathNodeWithCaretPosition(null, -1);
 
     }
     if (this.position < this.element.lengthContentIfAtom()) {
-      return new AtomWithPosition(this.element, this.nextPositionInDirection(1));
+      return new MathNodeWithCaretPosition(this.element, this.nextPositionInDirection(1));
     }
-    return new AtomWithPosition(this.element.firstAtomToTheRight(), 0);
+    return new MathNodeWithCaretPosition(this.element.firstAtomToTheRight(), 0);
   }
 
   /** @returns {string} */
@@ -2504,14 +2528,14 @@ class EquationEditor {
     this.mouseIgnoreNextClick = false;
     /** @type {boolean} */
     this.mouseSelectionVisible = false;
-    /** @type{AtomWithPosition} */
-    this.selectionStart = new AtomWithPosition(null, -1);
-    /** @type{AtomWithPosition} */
-    this.selectionStartExpanded = new AtomWithPosition(null, - 1);
-    /** @type{AtomWithPosition} */
-    this.selectionEnd = new AtomWithPosition(null, -1);
-    /** @type{AtomWithPosition} */
-    this.selectionEndExpanded = new AtomWithPosition(null, -1);
+    /** @type{MathNodeWithCaretPosition} */
+    this.selectionStart = new MathNodeWithCaretPosition(null, -1);
+    /** @type{MathNodeWithCaretPosition} */
+    this.selectionStartExpanded = new MathNodeWithCaretPosition(null, - 1);
+    /** @type{MathNodeWithCaretPosition} */
+    this.selectionEnd = new MathNodeWithCaretPosition(null, -1);
+    /** @type{MathNodeWithCaretPosition} */
+    this.selectionEndExpanded = new MathNodeWithCaretPosition(null, -1);
     /** @type{string} */
     this.latexLastWritten = "";
     /** @type{string} */
@@ -3377,8 +3401,22 @@ class EquationEditor {
       return;
     }
     this.resetSelectionLeaveRangesIntact();
-    this.selectionStart = new AtomWithPosition(start, start.positionCaretBeforeKeyEvents);
-    this.selectionEnd = new AtomWithPosition(start, start.positionCaretBeforeKeyEvents);
+    this.selectionStart = new MathNodeWithCaretPosition(start, start.positionCaretBeforeKeyEvents);
+    this.selectionEnd = new MathNodeWithCaretPosition(start, start.positionCaretBeforeKeyEvents);
+  }
+
+  /**@returns{MathNodeWithCaretPosition|null} */
+  computeNewSelectionFromShiftKey(
+    /** @type {string} */
+    key,
+  ) {
+    if (key === "ArrowLeft" || key === "ArrowUp") {
+      let shrinking = this.selectionStartToTheLeftOfSelectionEnd();
+      return this.selectionEnd.leftHorizontalNeighborBalanced(shrinking);
+    } else {
+      let shrinking = !this.selectionStartToTheLeftOfSelectionEnd();
+      return this.selectionEnd.rightHorizontalNeighborBalanced(shrinking);
+    }
   }
 
   /** @returns{boolean} whether the default should be prevented. */
@@ -3386,11 +3424,9 @@ class EquationEditor {
     /** @type {string} */
     key,
   ) {
-    let newSelection = null;
-    if (key === "ArrowLeft" || key === "ArrowUp") {
-      newSelection = this.selectionEnd.leftHorizontalNeighbor();
-    } else {
-      newSelection = this.selectionEnd.rightHorizontalNeighbor();
+    let newSelection = this.computeNewSelectionFromShiftKey(key);
+    if (newSelection === null) {
+      return false;
     }
     if (newSelection.element === null) {
       return false;
@@ -3417,7 +3453,6 @@ class EquationEditor {
     // Once we are out of the original element, we 
     // can only select an entire atom.
     this.selectionStart.position = - 1;
-
     this.selectionEnd.element = element;
     this.selectionEnd.position = - 1;
     this.computeSelectionExpanded();
@@ -3431,7 +3466,7 @@ class EquationEditor {
     return true;
   }
 
-  /**@returns{AtomWithPosition} */
+  /**@returns{MathNodeWithCaretPosition} */
   expandElementForSelection(
     /**@type{MathNode} */
     toBeExpanded,
@@ -3440,10 +3475,10 @@ class EquationEditor {
   ) {
     let parent = toBeExpanded.commonParent(peer);
     if (parent.parent === null) {
-      return new AtomWithPosition(this.rootNode, -1);
+      return new MathNodeWithCaretPosition(this.rootNode, -1);
     }
     let container = parent.parent.children[parent.indexInParent];
-    return new AtomWithPosition(
+    return new MathNodeWithCaretPosition(
       container.beefUpToHorizontalParent(),
       - 1,
     );
@@ -3455,6 +3490,88 @@ class EquationEditor {
     }
     this.selectionStartExpanded = this.expandElementForSelection(this.selectionStart.element, this.selectionEnd.element);
     this.selectionEndExpanded = this.expandElementForSelection(this.selectionEnd.element, this.selectionStartExpanded.element);
+    this.balanceSelection();
+  }
+
+  balanceSelection() {
+    let startElement = this.selectionStartExpanded.element;
+    let endElement = this.selectionEndExpanded.element;
+    let parent = startElement.parent;
+    if (
+      parent !== endElement.parent ||
+      parent.type.type !== knownTypes.horizontalMath.type
+    ) {
+      console.log("Unexpected form of the selection (non-horizontal parent or different parent).");
+      return;
+    }
+    let left = startElement.indexInParent;
+    let right = endElement.indexInParent;
+    let swapped = (right < left);
+    if (swapped) {
+      let swapper = right;
+      right = left;
+      left = swapper;
+    }
+    let leftOpenCount = 0;
+    let rightOpenCount = 0;
+    function accountChildToTheLeft(
+      /**@type{MathNode} */
+      child,
+    ) {
+      if (child.type.type === knownTypes.leftDelimiter.type) {
+        if (rightOpenCount > 0) {
+          rightOpenCount--;
+        } else {
+          leftOpenCount++;
+        }
+      } else if (child.type.type === knownTypes.rightDelimiter.type) {
+        rightOpenCount++;
+      }
+    }
+    function accountChildToTheRight(
+      /**@type{MathNode} */
+      child,
+    ) {
+      if (child.type.type === knownTypes.rightDelimiter.type) {
+        if (leftOpenCount > 0) {
+          leftOpenCount--;
+        } else {
+          rightOpenCount++;
+        }
+      } else if (child.type.type === knownTypes.leftDelimiter.type) {
+        leftOpenCount++;
+      }
+    }
+    for (let i = left; i <= right; i++) {
+      accountChildToTheRight(parent.children[i]);
+    }
+    while (leftOpenCount > 0 || rightOpenCount > 0) {
+      if (leftOpenCount > 0) {
+        right++;
+        if (right >= parent.children.length) {
+          console.log("Missing right deliimiter");
+          return;
+        }
+        accountChildToTheRight(parent.children[right]);
+      }
+      if (rightOpenCount > 0) {
+        left--;
+        if (left < 0) {
+          console.log("Missing left delimiter");
+          return;
+        }
+        accountChildToTheLeft(parent.children[left]);
+      }
+    }
+    if (swapped) {
+      this.selectionStartExpanded.element = parent.children[right];
+      this.selectionEndExpanded.element = parent.children[left];
+      this.selectionEnd.element = parent.children[left];
+    } else {
+      this.selectionStartExpanded.element = parent.children[left];
+      this.selectionEndExpanded.element = parent.children[right];
+      this.selectionEnd.element = parent.children[right];
+    }
   }
 
   /**@return{boolean} */
@@ -3967,7 +4084,7 @@ class MathNode {
 
   selectElementByMouse() {
     if (!this.selectedByMouse && this.element !== null) {
-      this.element.style.backgroundColor = "blue";
+      this.element.style.backgroundColor = "lightskyblue";
     }
     this.selectedByMouse = true;
   }
@@ -4861,8 +4978,8 @@ class MathNode {
     event,
   ) {
     if (!event.shiftKey && event.key !== "Shift") {
-      this.equationEditor.selectionStart = new AtomWithPosition(null, - 1);
-      this.equationEditor.selectionEnd = new AtomWithPosition(null, - 1);
+      this.equationEditor.selectionStart = new MathNodeWithCaretPosition(null, - 1);
+      this.equationEditor.selectionEnd = new MathNodeWithCaretPosition(null, - 1);
     }
   }
 
@@ -5213,7 +5330,7 @@ class MathNode {
       }
       return new KeyHandlerResult(false, false);
     }
-    /** @type {AtomWithPosition} */
+    /** @type {MathNodeWithCaretPosition} */
     const toFocus = this.getAtomToFocus(key);
     if (toFocus.element !== null) {
       toFocus.element.positionCaretBeforeKeyEvents = toFocus.element.element.textContent.length + 1;
@@ -5238,29 +5355,29 @@ class MathNode {
     return false;
   }
 
-  /** @returns {AtomWithPosition} */
+  /** @returns {MathNodeWithCaretPosition} */
   getAtomToFocus(/** @type {string} */ key) {
     return this.getAtomToFocusFromAction(key, this.type.arrows[key]);
   }
 
-  /** @returns {AtomWithPosition} */
+  /** @returns {MathNodeWithCaretPosition} */
   getAtomToFocusFromAction(
     /** @type {string} */ key,
     /** @type {string} */ arrowType,
   ) {
     if (arrowType === arrowMotion.parentForward) {
       if (this.parent === null) {
-        return new AtomWithPosition(null, - 1);
+        return new MathNodeWithCaretPosition(null, - 1);
       }
       return this.parent.getAtomToFocus(key);
     }
     if (arrowType === arrowMotion.firstAtomToTheLeft) {
-      return (new AtomWithPosition(this, 0)).leftNeighbor();
+      return (new MathNodeWithCaretPosition(this, 0)).leftNeighbor();
     }
     if (arrowType === arrowMotion.firstAtomToTheRight) {
-      return (new AtomWithPosition(this, this.textContentOrInitialContent().length)).rightNeighbor();
+      return (new MathNodeWithCaretPosition(this, this.textContentOrInitialContent().length)).rightNeighbor();
     }
-    return new AtomWithPosition(null, - 1);
+    return new MathNodeWithCaretPosition(null, - 1);
   }
 
   /** @returns{MathNode|null} returns sibling, right one if direction is positive, left one otherwise. */
@@ -5280,7 +5397,7 @@ class MathNode {
    * Negative direction indicates we are looking for uncles to the left, 
    * else we are looking for uncles to the right of the this element.
    * */
-  firstAtomUncle(
+  firstAtomSiblingOrUncle(
     /**@type{number} */
     direction,
   ) {
@@ -6197,6 +6314,25 @@ class MathNode {
       }
     }
     return 0;
+  }
+
+  /**@returns{MathNode|null} */
+  findMatchingDelimiter() {
+    if (
+      this.type.type !== knownTypes.rightDelimiter.type &&
+      this.type.type !== knownTypes.leftDelimiter.type
+    ) {
+      return null;
+    }
+    if (!this.hasHorozintalMathParent()) {
+      return null;
+    }
+    let parent = this.parent;
+    let index = parent.findIndexMatchingDelimiter(this.indexInParent);
+    if (index === - 1) {
+      return null;
+    }
+    return parent.children[index];
   }
 
   /** @returns {number}*/

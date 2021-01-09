@@ -1076,6 +1076,19 @@ function mathFromLatex(
   return result;
 }
 
+/**@returns{HTMLElement}*/
+function boldElement(
+  /**@type{string} */
+  text,
+  /**@type{string} */
+  color,
+) {
+  let result = document.createElement("b");
+  result.textContent = text;
+  result.style.color = color;
+  return result;
+}
+
 class SyntancticElement {
   constructor(
     /**@type{MathNode|null} */
@@ -1093,20 +1106,21 @@ class SyntancticElement {
     this.syntacticRole = syntacticRole;
   }
 
-  toString() {
-    let result = "";
+  /**@returns{HTMLElement[]} */
+  toHtmlDebugData() {
+    let result = [];
     if (this.node !== null) {
       let next = this.node.toLatex();
       if (next === "") {
         next = `[${this.node.type.type}]`;
       }
-      result += next;
+      result.push(document.createTextNode(next));
     }
     if (this.content !== "") {
-      result += `<b style='color:orange'>${this.content}</b>`;
+      result.push(boldElement(this.content, "orange"));
     }
     if (this.syntacticRole !== "") {
-      result += `<b style='color:red'>${this.syntacticRole}</b>`;
+      result.push(boldElement(this.syntacticRole, "red"));
     }
     return result;
   }
@@ -1643,7 +1657,7 @@ class LaTeXParser {
     this.dummyParsingElements = 6;
     /**@type{boolean} */
     this.debug = true;
-    /**@type{string[]} */
+    /**@type{HTMLElement[][]} */
     this.reductionLog = [];
     /**@type{string} */
     this.lastRuleName = "";
@@ -1736,12 +1750,12 @@ class LaTeXParser {
     let startingLength = this.parsingStack.length;
     this.parsingStack.push(syntacticElement);
     if (this.debug) {
-      this.reductionLog.push(this.toStringSyntacticStack() + "&nbsp;[append]");
+      this.reductionLog.push(this.toHtmlStackDebug("append"));
       this.lastRuleName = "";
     }
     while (this.applyOneRule()) {
       if (this.debug) {
-        this.reductionLog.push(this.toStringSyntacticStack() + `&nbsp;[${this.lastRuleName}]`);
+        this.reductionLog.push(this.toHtmlStackDebug(this.lastRuleName));
         this.lastRuleName = "";
       }
       numberOfRuleApplications++;
@@ -1806,13 +1820,32 @@ class LaTeXParser {
     return true;
   }
 
-  /**@returns{string} */
-  toStringSyntacticStack() {
-    let totalStack = [];
+  /**@returns{HtmlElement[]} */
+  toHtmlStackDebug(
+    /**@type{string} */
+    ruleName,
+  ) {
+    let result = [];
     for (let i = this.dummyParsingElements; i < this.parsingStack.length; i++) {
-      totalStack.push(this.parsingStack[i].toString());
+      let currentElements = this.parsingStack[i].toHtmlDebugData();
+      for (let j = 0; j < currentElements.length; j++) {
+        result.push(currentElements[j]);
+      }
     }
-    return totalStack.join("&nbsp;&nbsp;");
+    result.push(document.createTextNode(` [${ruleName}]`));
+    return result;
+  }
+
+  /**@returns{HtmlElement[]} */
+  toHtmlDebug() {
+    let result = [];
+    for (let i = 0; i < this.reductionLog.length; i++) {
+      for (let j = 0; j < this.reductionLog[i].length; j++) {
+        result.push(this.reductionLog[i][j]);
+      }
+      result.push(document.createElement("hr"));
+    }
+    return result;
   }
 
   specialFont(
@@ -2663,13 +2696,22 @@ class EquationEditor {
     if (this.options.debugLogContainer === null) {
       return;
     }
-    let debugHTML = "";
+    let result = [];
     if (parser !== null) {
-      debugHTML += parser.reductionLog.join("<hr>");
-      debugHTML += `<hr><hr>${parser.toStringSyntacticStack()}<hr><hr>`;
+      let syntacticStack = parser.toHtmlDebug();
+      for (let i = 0; i < syntacticStack.length; i++) {
+        result.push(syntacticStack[i]);
+      }
+      result.push(document.createElement("hr"));
     }
-    debugHTML += this.toHtml();
-    this.options.debugLogContainer.innerHTML = debugHTML;
+    let debugPart = this.toHtmlDebugData();
+    for (let i = 0; i < debugPart.length; i++) {
+      result.push(debugPart[i]);
+    }
+    this.options.debugLogContainer.textContent = "";
+    for (let i = 0; i < result.length; i++) {
+      this.options.debugLogContainer.appendChild(result[i]);
+    }
   }
 
   writeLatexToInput(
@@ -2769,28 +2811,50 @@ class EquationEditor {
     this.lastCaretPosition = lastFocused.positionCaretBeforeKeyEvents;
   }
 
-  toHtml() {
+  /**@returns {HTMLElement[]} */
+  toHtmlDebugData() {
     let latexWithAnnotation = this.rootNode.toLatexWithAnnotation(null);
-    let result = `Latex: ${latexWithAnnotation.latex}`;
-    result += `<br>URL-encoded: ${encodeURIComponent(latexWithAnnotation.latex)}`;
+    let result = [];
+    result.push(document.createTextNode(`Latex: ${latexWithAnnotation.latex}`));
+    result.push(document.createElement("br"));
+    result.push(document.createTextNode(`URL-encoded: ${encodeURIComponent(latexWithAnnotation.latex)}`));
     if (this.lastCopied !== "") {
-      result += `<br>Last copied: ${this.lastCopied}`;
+      result.push(document.createElement("br"));
+      result.push(document.createTextNode(`Last copied: ${this.lastCopied}`))
     }
     if (this.lastFocused !== null) {
-      result += `<br>Last focused: ${this.lastFocused.toString()}, position: ${this.lastFocused.positionCaretBeforeKeyEvents}`;
+      result.push(document.createElement("br"));
+      result.push(document.createTextNode(
+        `Last focused: ${this.lastFocused.toString()}, position: ${this.lastFocused.positionCaretBeforeKeyEvents}`
+      ));
       if (this.lastFocused.isDetached()) {
-        result += "<br><b style='color:red'>Detached last focused.</b>";
+        result.push(document.createElement("br"));
+        result.push(boldElement("Detached last focused.", "red"));
       }
     }
-    result += `<br>History: ${this.toStringHistory()}`;
+    result.push(document.createElement("br"));
+    result.push(document.createTextNode(`History: ${this.toStringHistory()}`));
     if (this.lastSelectionAction !== "") {
-      result += `<br>Last selection action: ${this.lastSelectionAction}`;
+      result.push(document.createElement("br"));
+      result.push(document.createTextNode(`Last selection action: ${this.lastSelectionAction}`));
     }
-    result += `<br>Latex selection: ${latexWithAnnotation.selectionStart}, ${latexWithAnnotation.selectionEnd}`;
-    // result += `<br>Drawing: ${this.rootNode.toString()}`;
-    result += `<br>Structure: ${this.rootNode.toHtml(0)}`;
-    result += `<br>Backslash position: ${this.backslashPosition}; started: ${this.backslashSequenceStarted}, sequence: ${this.backslashSequence}.`;
-    result += `<br>Position computation string: ${this.positionDebugString}.`;
+    result.push(document.createElement("br"));
+    result.push(document.createTextNode(`Latex selection: ${latexWithAnnotation.selectionStart}, ${latexWithAnnotation.selectionEnd}`));
+    result.push(document.createElement("br"));
+    result.push(document.createTextNode(`Structure: `));
+    let elements = this.rootNode.toHtmlDebugData(0);
+    for (let i = 0; i < elements.length; i++) {
+      result.push(document.createElement("br"));
+      result.push(elements[i]);
+    }
+    result.push(document.createElement("br"));
+    result.push(document.createTextNode(
+      `Backslash position: ${this.backslashPosition}; started: ${this.backslashSequenceStarted}, sequence: ${this.backslashSequence}.`
+    ));
+    result.push(document.createElement("br"));
+    result.push(document.createTextNode(
+      `Position computation string: ${this.positionDebugString}.`
+    ));
     return result;
   }
 
@@ -6759,7 +6823,6 @@ class MathNode {
       if (this.element === null) {
         return false;
       }
-      console.log("DEBUG: focus event catcher.");
       this.element.focus();
       return true;
     }
@@ -6954,7 +7017,8 @@ class MathNode {
     return result.join("");
   }
 
-  toHtml(
+  /**@returns{HTMLElement[]} */
+  toHtmlDebugData(
     /** @type{number} */
     indentationLevel,
   ) {
@@ -6991,11 +7055,14 @@ class MathNode {
     if (this.type.type === knownTypes.atom.type) {
       content += `, caret: ${this.positionCaretBeforeKeyEvents}, `;
     }
-    result.push(content);
+    result.push(document.createTextNode(content));
     for (let i = 0; i < this.children.length; i++) {
-      result.push(this.children[i].toHtml(indentationLevel + 1));
+      let childrenElements = this.children[i].toHtmlDebugData(indentationLevel + 1);
+      for (let j = 0; j < childrenElements.length; j++) {
+        result.push(childrenElements[j]);
+      }
     }
-    return result.join("\n<br>\n");
+    return result;
   }
 
   /** @returns {LatexWithAnnotation} */

@@ -498,7 +498,7 @@ void Calculator::initializeStandardFunctions() {
   );
   this->addOperationHandler(
     "PlotExpressionTree",
-    CalculatorFunctions::innerDrawExpressionGraph,
+    CalculatorFunctionsPlot::drawExpressionGraph,
     "",
     "Draws the internal tree structure of an expression. "
     "Does not unfold built-in types.",
@@ -543,7 +543,7 @@ void Calculator::initializeStandardFunctions() {
   );
   this->addOperationHandler(
     "PlotExpressionTreeFull",
-    CalculatorFunctions::innerDrawExpressionGraphFull,
+    CalculatorFunctionsPlot::drawExpressionGraphFull,
     "",
     "Draws the internal tree structure of an expression. Unfolds built-in types. ",
     "PlotExpressionTreeFull(1);\n"
@@ -1589,7 +1589,7 @@ void Calculator::initializeStandardFunctions() {
   );
   this->addOperationHandler(
     "Polynomialize",
-    CalculatorFunctions::outerPolynomializE,
+    CalculatorFunctions::outerPolynomialize,
     "",
     "Polynomialize(a) is equivalent to MakeExpression(Polynomial(a)).",
     "C = (c a + a b + b c + 1)^3;\n"
@@ -2150,7 +2150,7 @@ void Calculator::initializeStandardFunctions() {
   );
   this->addOperationHandler(
     "MinPolyMatrix",
-    CalculatorFunctions::innerMinPolyMatrix,
+    CalculatorFunctionsLinearAlgebra::minimalPolynomialMatrix,
     "",
     "Computes the minimal polynomial of a matrix, provided that the matrix is not too large.",
     "A = MakeMatrix{}((0, 1), (- 1, 0));\n"
@@ -2174,7 +2174,7 @@ void Calculator::initializeStandardFunctions() {
   );
   this->addOperationHandler(
     "Crawl",
-    CalculatorFunctions::innerCrawlTexFile,
+    CalculatorFunctionsFreecalc::crawlTexFile,
     "",
     "Crawls a latex file collecting all local style files and all \\input "
     "commands to produce a single latex file. The function was "
@@ -2187,7 +2187,7 @@ void Calculator::initializeStandardFunctions() {
   );
   this->addOperationHandler(
     "BuildFreecalc",
-    CalculatorFunctions::innerBuildFreecalc,
+    CalculatorFunctionsFreecalc::buildFreecalc,
     "",
     "Builds the freecalc lecture pdfs. "
     "This function performs file operations and is allowed only to logged-in administrator accounts. "
@@ -2210,7 +2210,7 @@ void Calculator::initializeStandardFunctions() {
   );
   this->addOperationHandler(
     "BuildFreecalcWithSlides",
-    CalculatorFunctions::innerBuildFreecalcSingleSlides,
+    CalculatorFunctionsFreecalc::buildFreecalcSingleSlides,
     "",
     "Same as BuildFreeCalc but attempts to also build individual slides. ",
     "BuildFreecalcWithSlides(\"freecalc/lectures/referenceallproblemsbycourse/calculusimasterproblemsheet.tex\");",
@@ -2220,7 +2220,7 @@ void Calculator::initializeStandardFunctions() {
   );
   this->addOperationHandler(
     "BuildSlidesInTopicList",
-    CalculatorFunctions::innerBuildFreecalcSlidesOnTopic,
+    CalculatorFunctionsFreecalc::buildFreecalcSlidesOnTopic,
     "",
     "Builds all slides in the current topic list. Available to logged-in admins only. ",
     "BuildSlidesInTopicList (0);",
@@ -3466,7 +3466,7 @@ void Calculator::initializeStandardFunctions() {
   );
   this->addOperationHandler(
     "FunctionToMatrix",
-    CalculatorFunctions::innerFunctionToMatrix,
+    CalculatorFunctionsLinearAlgebra::functionToMatrix,
     "",
     "Creates a matrix from a function. "
     "The first argument gives the function, "
@@ -4181,7 +4181,7 @@ void Calculator::initializeStandardFunctions() {
   );
   this->addOperationHandler(
     "FactorInteger",
-    CalculatorFunctions::innerFactorIntegeR,
+    CalculatorFunctions::factorInteger,
     "",
     "Factors an integer, assuming the integer is small enough. ",
     "FactorInteger(10001011);\n"
@@ -6885,7 +6885,7 @@ void Calculator::initializeStandardFunctions() {
   );
   this->addOperationHandler(
     "Last",
-    CalculatorFunctions::innerLastElement,
+    CalculatorFunctionsListsAndSets::lastElement,
     "",
     "Returns the last element of the expression, provided the argument has "
     "no bound variables. If the expression has bound variables does nothing.",
@@ -6907,7 +6907,7 @@ void Calculator::initializeStandardFunctions() {
   );
   this->addOperationHandler(
     "RemoveLast",
-    CalculatorFunctions::innerRemoveLastElement,
+    CalculatorFunctionsListsAndSets::removeLastElement,
     "",
     "Returns a list with the last element removed, provided "
     "the argument has no bound variables. If the expression "
@@ -6916,7 +6916,7 @@ void Calculator::initializeStandardFunctions() {
     "Y = (RemoveLast X)\\cup Sequence{}(Last X) - X;\n"
     "RemoveLast{}(());\n"
     "RemoveLast{}();\n",
-    "CalculatorFunctions::innerRemoveLastElement",
+    "CalculatorFunctionsListsAndSets::removeLastElement",
     "RemoveLast",
     innerStandard
   );
@@ -7284,7 +7284,7 @@ void Calculator::initializeSemisimpleLieAlgebraFunctions() {
   );
   this->addOperationHandler(
     "CharPoly",
-    CalculatorFunctions::innerCharPolyMatrix,
+    CalculatorFunctionsLinearAlgebra::characteristicPolynomialMatrix,
     "",
     "Computes the characteristic polynomial of a matrix (= det(A-q*Id)), "
     "provided that the matrix is not too large.",

@@ -541,14 +541,14 @@ public:
       }
       return;
     }
-    Matrix<Coefficient> tempMat;
-    tempMat.initialize(this->numberOfColumns, this->numberOfRows);
+    Matrix<Coefficient> matrix;
+    matrix.initialize(this->numberOfColumns, this->numberOfRows);
     for (int i = 0; i < this->numberOfRows; i ++) {
       for (int j = 0; j < this->numberOfColumns; j ++) {
-        tempMat.elements[j][i] = this->elements[i][j];
+        matrix.elements[j][i] = this->elements[i][j];
       }
     }
-    *this = tempMat;
+    *this = matrix;
   }
   void appendMatrixOnTheRight(const Matrix<Coefficient>& standsOnTheRight) {
     if (&standsOnTheRight == this) {
@@ -565,9 +565,9 @@ public:
       return;
     }
     if (this->numberOfRows < standsOnTheRight.numberOfRows) {
-      Coefficient theZero;
-      theZero = 0;
-      this->resize(standsOnTheRight.numberOfRows, this->numberOfColumns, true, &theZero);
+      Coefficient zero;
+      zero = 0;
+      this->resize(standsOnTheRight.numberOfRows, this->numberOfColumns, true, &zero);
     }
     int oldNumCols = this->numberOfColumns;
     this->resize(this->numberOfRows, standsOnTheRight.numberOfColumns + oldNumCols, true);
@@ -584,10 +584,10 @@ public:
       return;
     }
     if (standsBelow.numberOfColumns < this->numberOfColumns) {
-      Coefficient theZero;
-      theZero = 0;
+      Coefficient zero;
+      zero = 0;
       Matrix<Coefficient> standsBelowNew = standsBelow;
-      standsBelowNew.resize(standsBelow.numberOfRows, this->numberOfColumns, true, &theZero);
+      standsBelowNew.resize(standsBelow.numberOfRows, this->numberOfColumns, true, &zero);
       this->appendMatrixOnTheRight(standsBelowNew);
       return;
     }
@@ -621,11 +621,11 @@ public:
   ) {
     int d = basis.size;
     output.initialize(d, d);
-    Vector<Rational> tempV;
+    Vector<Rational> vectorColumn;
     for (int j = 0; j < d; j ++) {
-      input.actOnVectorColumn(basis[j], tempV);
+      input.actOnVectorColumn(basis[j], vectorColumn);
       for (int i = 0; i < d; i ++) {
-        output.elements[i][j] = basis[i].scalarEuclidean(tempV);
+        output.elements[i][j] = basis[i].scalarEuclidean(vectorColumn);
       }
     }
     output.multiplyOnTheLeft(gramMatrixInverted);
@@ -920,13 +920,13 @@ public:
   void subtractRowsWithCarbonCopy(
     int indexRowWeSubtractFrom,
     int indexSubtracted,
-    int StartColIndex,
+    int startColumnIndex,
     const Coefficient& scalar,
-    Matrix<Coefficient>* theCarbonCopy
+    Matrix<Coefficient>* carbonCopy
   ) {
-    this->subtractRows(indexRowWeSubtractFrom, indexSubtracted, StartColIndex, scalar);
-    if (theCarbonCopy != 0) {
-      theCarbonCopy->subtractRows(indexRowWeSubtractFrom, indexSubtracted, StartColIndex, scalar);
+    this->subtractRows(indexRowWeSubtractFrom, indexSubtracted, startColumnIndex, scalar);
+    if (carbonCopy != 0) {
+      carbonCopy->subtractRows(indexRowWeSubtractFrom, indexSubtracted, startColumnIndex, scalar);
     }
   }
   void multiplyOnTheLeft(
@@ -976,12 +976,12 @@ public:
     const Coefficient& ringZero = 0,
     const Coefficient& theRingOne = 1
   );
-  // if m1 corresponds to a linear operator from V1 to V2 and
+  // If m1 corresponds to a linear operator from V1 to V2 and
   // m2 to a linear operator from W1 to W2, then the result of the below function
   // corresponds to the linear operator from V1+W1 to V2+W2 (direct sum)
   // this means you write the matrix m1 in the upper left corner m2 in the lower right
   // and everything else you fill with zeros
-  void assignDirectSum(Matrix<Coefficient>& m1,  Matrix<Coefficient>& m2);
+  void assignDirectSum(Matrix<Coefficient>& m1, Matrix<Coefficient>& m2);
   // if S and T are endomorphisms of V and W, build the matrix of SⓧT that acts on
   // VⓧW with basis (v1ⓧw1,v1ⓧw2,...,v2ⓧw1,v2ⓧw2,...vnⓧwn)
   void assignTensorProduct(const Matrix<Coefficient>& left, const Matrix<Coefficient>& right);
@@ -1015,8 +1015,10 @@ public:
     if (input.size != this->numberOfColumns || rowIndex >= this->numberOfRows || rowIndex < 0) {
       global.fatal << "Attempt to assign vector " << input.toString()
       << " (" << input.size << " coordinates) "
-      << " to row with index " << rowIndex << " in a matrix with "
-      << this->numberOfRows << " rows and " << this->numberOfColumns << " columns. " << global.fatal;
+      << " to row with index " << rowIndex
+      << " in a matrix with "
+      << this->numberOfRows << " rows and "
+      << this->numberOfColumns << " columns. " << global.fatal;
     }
     for (int i = 0; i < this->numberOfColumns; i ++) {
       this->elements[rowIndex][i] = input[i];
@@ -1099,7 +1101,9 @@ public:
   }
   //returns true if the system has a solution, false otherwise
   bool rowEchelonFormToLinearSystemSolution(
-    Selection& inputPivotPoints, Matrix<Coefficient>& inputRightHandSide, Matrix<Coefficient>& outputSolution
+    Selection& inputPivotPoints,
+    Matrix<Coefficient>& inputRightHandSide,
+    Matrix<Coefficient>& outputSolution
   );
   void operator+=(const Matrix<Coefficient>& right) {
     if (this->numberOfRows != right.numberOfRows || this->numberOfColumns != right.numberOfColumns) {
@@ -1204,12 +1208,6 @@ public:
   void scaleToIntegralForMinimalRationalHeightNoSignChange();
   void getMatrixIntegerWithDenominator(Matrix<LargeInteger>& outputMat, LargeIntegerUnsigned& outputDen);
   void lieBracketWith(const Matrix<Coefficient>& right);
-  void approximateLargestEigenSpace(
-    Vectors<Rational>& outputBasis,
-    const Rational& DesiredError,
-    int SuggestedOrder,
-    int numIterations
-  );
   bool getEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDimension(List<Vectors<Coefficient> >& output) const;
   void getZeroEigenSpace(List<Vector<Coefficient> >& output) const {
     Matrix<Coefficient> matrixCopy = *this;
@@ -1297,14 +1295,14 @@ public:
 
 template <class Coefficient>
 bool Vectors<Coefficient>::conesIntersect(
-  List<Vector<Rational> >& StrictCone,
+  List<Vector<Rational> >& strictCone,
   List<Vector<Rational> >& nonStrictCone,
   Vector<Rational>* outputLinearCombo,
   Vector<Rational>* outputSplittingNormal
 ) {
   Matrix<Rational> matA;
   Matrix<Rational> matb;
-  if (StrictCone.size == 0) {
+  if (strictCone.size == 0) {
     if (outputSplittingNormal != nullptr) {
       if (nonStrictCone.size > 0) {
         outputSplittingNormal->makeZero(nonStrictCone[0].size);
@@ -1312,19 +1310,19 @@ bool Vectors<Coefficient>::conesIntersect(
     }
     return false;
   }
-  int theDimension = StrictCone[0].size;
-  int numCols = StrictCone.size + nonStrictCone.size;
+  int theDimension = strictCone[0].size;
+  int numCols = strictCone.size + nonStrictCone.size;
   matA.initialize(theDimension + 1, numCols);
   matb.initialize(theDimension + 1, 1);
   matb.makeZero(); matb.elements[theDimension][0].makeOne();
-  for (int i = 0; i < StrictCone.size; i ++) {
+  for (int i = 0; i < strictCone.size; i ++) {
     for (int k = 0; k < theDimension; k ++) {
-      matA.elements[k][i].assign(StrictCone[i][k]);
+      matA.elements[k][i].assign(strictCone[i][k]);
     }
     matA.elements[theDimension][i].makeOne();
   }
   for (int i = 0; i < nonStrictCone.size; i ++) {
-    int currentCol = i + StrictCone.size;
+    int currentCol = i + strictCone.size;
     for (int k = 0; k < theDimension; k ++) {
       matA.elements[k][currentCol].assign(nonStrictCone[i][k]);
       matA.elements[k][currentCol].negate();
@@ -1335,20 +1333,20 @@ bool Vectors<Coefficient>::conesIntersect(
     matA, matb, outputLinearCombo
   )) {
     if (outputSplittingNormal != nullptr) {
-      bool tempBool = Vectors<Coefficient>::getNormalSeparatingCones(StrictCone, nonStrictCone, *outputSplittingNormal);
+      bool tempBool = Vectors<Coefficient>::getNormalSeparatingCones(strictCone, nonStrictCone, *outputSplittingNormal);
       if (!tempBool) {
         global.fatal << "This is an algorithmic/mathematical (hence also programming) error. "
         << "I get that two cones do not intersect, yet there exists no plane separating them. "
         << "Something is wrong with the implementation of the simplex algorithm. "
         << "The input which manifested the problem was: <br>StrictCone: <br>"
-        << StrictCone.toString() << "<br>Non-strict cone: <br>"
+        << strictCone.toString() << "<br>Non-strict cone: <br>"
         << nonStrictCone.toString() << "<br>" << global.fatal;
       }
     }
     return false;
   }
   if (outputLinearCombo != nullptr) {
-    for (int i = StrictCone.size; i < outputLinearCombo->size; i ++) {
+    for (int i = strictCone.size; i < outputLinearCombo->size; i ++) {
       (*outputLinearCombo)[i] *= - 1;
     }
   }
@@ -1434,10 +1432,10 @@ void Vectors<Coefficient>::getMatrixRootsToRows(Matrix<Rational>& output) const 
 }
 
 template <typename Coefficient>
-void Vectors<Coefficient>::getOrthogonalComplement(Vectors<Coefficient>& output, Matrix<Rational>* theBilinearForm) {
+void Vectors<Coefficient>::getOrthogonalComplement(Vectors<Coefficient>& output, Matrix<Rational>* bilinearForm) {
   if (this->size == 0) {
-    if (theBilinearForm != nullptr) {
-      output.makeEiBasis(theBilinearForm->numberOfRows);
+    if (bilinearForm != nullptr) {
+      output.makeEiBasis(bilinearForm->numberOfRows);
       return;
     }
     global.fatal << "Finding orthogonal complement of zero vectors without specifying a bilinear form is "
@@ -1445,16 +1443,16 @@ void Vectors<Coefficient>::getOrthogonalComplement(Vectors<Coefficient>& output,
   }
   Matrix<Coefficient> theMatrix;
   theMatrix.assignVectorsToRows(*this);
-  if (theBilinearForm != nullptr) {
-    theMatrix *= *theBilinearForm;
+  if (bilinearForm != nullptr) {
+    theMatrix *= *bilinearForm;
   }
   theMatrix.getZeroEigenSpaceModifyMe(output);
 }
 
 template <typename Coefficient>
-bool Vectors<Coefficient>::computeNormal(Vector<Coefficient>& output, int inputDim) {
+bool Vectors<Coefficient>::computeNormal(Vector<Coefficient>& output, int inputDimension) {
   if (this->size == 0) {
-    if (inputDim == 1) {
+    if (inputDimension == 1) {
       output.makeEi(1, 0);
       return true;
     }
@@ -1462,14 +1460,14 @@ bool Vectors<Coefficient>::computeNormal(Vector<Coefficient>& output, int inputD
   }
   int theDimension = this->objects[0].size;
   Matrix<Coefficient> tempMatrix;
-  Selection NonPivotPoints;
-  NonPivotPoints.initialize(theDimension);
+  Selection nonPivotPoints;
+  nonPivotPoints.initialize(theDimension);
   output.setSize(theDimension);
-  this->gaussianEliminationForNormalComputation(tempMatrix, NonPivotPoints, theDimension);
-  if (NonPivotPoints.cardinalitySelection != 1) {
+  this->gaussianEliminationForNormalComputation(tempMatrix, nonPivotPoints, theDimension);
+  if (nonPivotPoints.cardinalitySelection != 1) {
     return false;
   }
-  tempMatrix.nonPivotPointsToEigenVector(NonPivotPoints, output);
+  tempMatrix.nonPivotPointsToEigenVector(nonPivotPoints, output);
   return true;
 }
 
@@ -1927,7 +1925,7 @@ class MonomialWeylAlgebra {
   bool isConstant() const {
     return this->polynomialPart.isConstant() && this->differentialPart.isConstant();
   }
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   static unsigned int hashFunction(const MonomialWeylAlgebra& input) {
     return
     input.polynomialPart.hashFunction() +

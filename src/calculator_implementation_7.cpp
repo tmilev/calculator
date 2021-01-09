@@ -3804,7 +3804,7 @@ bool CalculatorFunctions::functionPolynomialize(
   return true;
 }
 
-bool CalculatorFunctions::outerPolynomializE(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::outerPolynomialize(Calculator& calculator, const Expression& input, Expression& output) {
   if (input.size() != 2) {
     return false;
   }
@@ -5279,10 +5279,10 @@ bool CalculatorFunctions::innerLispifyFull(Calculator& calculator, const Express
   return output.assignValue(input[1].toStringFull(), calculator);
 }
 
-bool CalculatorFunctions::innerMinPolyMatrix(
+bool CalculatorFunctionsLinearAlgebra::minimalPolynomialMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerMinPolyMatrix");
+  MacroRegisterFunctionWithName("CalculatorFunctionsLinearAlgebra::minimalPolynomialMatrix");
   if (input.size() != 2) {
     return false;
   }
@@ -5309,7 +5309,7 @@ bool CalculatorFunctions::innerMinPolyMatrix(
   return output.assignValue(theMinPoly.toString(&tempF), calculator);
 }
 
-bool CalculatorFunctions::innerCharPolyMatrix(
+bool CalculatorFunctionsLinearAlgebra::characteristicPolynomialMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerMinPolyMatrix");
@@ -5317,21 +5317,21 @@ bool CalculatorFunctions::innerCharPolyMatrix(
     return false;
   }
   const Expression& argument = input[1];
-  Matrix<Rational> theMat;
-  if (!calculator.functionGetMatrix(argument, theMat)) {
+  Matrix<Rational> matrix;
+  if (!calculator.functionGetMatrix(argument, matrix)) {
     return calculator
     << "<hr>Characteristic poly computation: could not convert "
     << input.toString() << " to rational matrix.";
   }
-  if (theMat.numberOfRows != theMat.numberOfColumns || theMat.numberOfRows <= 0) {
+  if (matrix.numberOfRows != matrix.numberOfColumns || matrix.numberOfRows <= 0) {
     return output.makeError("Error: matrix is not square.", calculator);
   }
-  FormatExpressions tempF;
-  tempF.polynomialAlphabet.setSize(1);
-  tempF.polynomialAlphabet[0] = "q";
+  FormatExpressions format;
+  format.polynomialAlphabet.setSize(1);
+  format.polynomialAlphabet[0] = "q";
   Polynomial<Rational> theCharPoly;
-  theCharPoly.assignCharacteristicPolynomial(theMat);
-  return output.assignValue(theCharPoly.toString(&tempF), calculator);
+  theCharPoly.assignCharacteristicPolynomial(matrix);
+  return output.assignValue(theCharPoly.toString(&format), calculator);
 }
 
 bool CalculatorFunctions::innerReverseBytes(Calculator& calculator, const Expression& input, Expression& output) {
@@ -5358,42 +5358,42 @@ bool CalculatorFunctions::innerTrace(
   if (input.size() != 2) {
     return false;
   }
-  Matrix<Rational> theMat;
-  if (calculator.functionGetMatrix(input[1], theMat)) {
-    if (!theMat.isSquare()) {
+  Matrix<Rational> matrix;
+  if (calculator.functionGetMatrix(input[1], matrix)) {
+    if (!matrix.isSquare()) {
       return output.makeError(
         "Error: attempting to get trace of non-square matrix. ",
         calculator
       );
     }
-    return output.assignValue(theMat.getTrace(), calculator);
+    return output.assignValue(matrix.getTrace(), calculator);
   }
-  Matrix<RationalFunction<Rational> > theMatRF;
-  if (calculator.functionGetMatrix(input[1], theMatRF)) {
-    if (!theMatRF.isSquare()) {
+  Matrix<RationalFunction<Rational> > matrixRationalFunction;
+  if (calculator.functionGetMatrix(input[1], matrixRationalFunction)) {
+    if (!matrixRationalFunction.isSquare()) {
       return output.makeError(
         "Error: attempting to get trace of non-square matrix. ",
         calculator
       );
     }
-    return output.assignValue(theMatRF.getTrace(), calculator);
+    return output.assignValue(matrixRationalFunction.getTrace(), calculator);
   }
-  Matrix<Expression> theMatExp;
-  if (!calculator.getMatrixExpressionsFromArguments(input[1], theMatExp)) {
+  Matrix<Expression> matrixExpression;
+  if (!calculator.getMatrixExpressionsFromArguments(input[1], matrixExpression)) {
     return false;
   }
-  if (!theMat.isSquare()) {
+  if (!matrixExpression.isSquare()) {
     return output.makeError(
       "Error: attempting to get trace of non-square matrix. ",
       calculator
     );
   }
-  if (theMat.numberOfRows == 1) {
+  if (matrixExpression.numberOfRows == 1) {
     calculator << "Requested trace of 1x1 matrix: possible "
     << "interpretation of a scalar as a 1x1 matrix. Trace not taken. ";
     return false;
   }
-  output = theMat.getTrace();
+  output = matrixExpression.getTrace();
   return true;
 }
 
@@ -5428,8 +5428,10 @@ bool CalculatorFunctions::innerExpressionLeafs(
   return output.makeSequence(calculator, &theLeafs);
 }
 
-bool CalculatorFunctions::innerLastElement(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerLastElement");
+bool CalculatorFunctionsListsAndSets::lastElement(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsListsAndSets::lastElement");
   if (input.hasBoundVariables()) {
     return false;
   }
@@ -5449,8 +5451,10 @@ bool CalculatorFunctions::innerLastElement(Calculator& calculator, const Express
   return true;
 }
 
-bool CalculatorFunctions::innerRemoveLastElement(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerRemoveLastElement");
+bool CalculatorFunctionsListsAndSets::removeLastElement(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsListsAndSets::removeLastElement");
   if (input.hasBoundVariables()) {
     return false;
   }
@@ -6584,13 +6588,6 @@ bool CalculatorFunctions::functionEvaluateToDouble(
   return output.assignValue(theValue, calculator);
 }
 
-bool CalculatorFunctions::innerTestMathMouseHover(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTestMathMouseHover");
-  std::stringstream out;
-  out << "Hover mouse to render: " << HtmlRoutines::getMathNoDisplay(input.toString());
-  return output.assignValue(out.str(), calculator);
-}
-
 bool CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra");
   if (input.size() != 3) {
@@ -7288,10 +7285,10 @@ bool CalculatorFunctions::innerTestIndicator(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerCrawlTexFile(
+bool CalculatorFunctionsFreecalc::crawlTexFile(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerCrawlTexFile");
+  MacroRegisterFunctionWithName("CalculatorFunctionsFreecalc::crawlTexFile");
   if (!global.userDefaultHasAdminRights()) {
     std::stringstream out;
     out << "Command available to logged-in admins only. ";
@@ -7307,10 +7304,10 @@ bool CalculatorFunctions::innerCrawlTexFile(
   return output.assignValue(theCrawler.displayResult.str(), calculator);
 }
 
-bool CalculatorFunctions::innerBuildFreecalcSlidesOnTopic(
+bool CalculatorFunctionsFreecalc::buildFreecalcSlidesOnTopic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerBuildFreecalcSlidesOnTopic");
+  MacroRegisterFunctionWithName("CalculatorFunctionsFreecalc::buildFreecalcSlidesOnTopic");
   if (!global.userDefaultHasAdminRights()) {
     std::stringstream out;
     out << "Command available to logged-in admins only. ";
@@ -7326,10 +7323,10 @@ bool CalculatorFunctions::innerBuildFreecalcSlidesOnTopic(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerBuildFreecalcSingleSlides(
+bool CalculatorFunctionsFreecalc::buildFreecalcSingleSlides(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerBuildFreecalcSingleSlides");
+  MacroRegisterFunctionWithName("CalculatorFunctionsFreecalc::buildFreecalcSingleSlides");
   if (!global.userDefaultHasAdminRights()) {
     std::stringstream out;
     out << "Command available to logged-in admins only. ";
@@ -7348,10 +7345,10 @@ bool CalculatorFunctions::innerBuildFreecalcSingleSlides(
   return output.assignValue(theCrawler.displayResult.str(), calculator);
 }
 
-bool CalculatorFunctions::innerBuildFreecalc(
+bool CalculatorFunctionsFreecalc::buildFreecalc(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerBuildFreecalc");
+  MacroRegisterFunctionWithName("CalculatorFunctionsFreecalc::buildFreecalc");
   if (!global.userDefaultHasAdminRights()) {
     std::stringstream out;
     out << "Command available to logged-in admins only. ";
@@ -7363,14 +7360,14 @@ bool CalculatorFunctions::innerBuildFreecalc(
   if (!input[1].isOfType<std::string>()) {
     return calculator << "<hr>Input " << input.toString() << " is not of type string. ";
   }
-  LaTeXCrawler theCrawler;
-  theCrawler.flagBuildSingleSlides = false;
-  theCrawler.ownerCalculator = &calculator;
-  theCrawler.theFileNameToCrawlRelative = input[1].getValue<std::string>();
+  LaTeXCrawler crawler;
+  crawler.flagBuildSingleSlides = false;
+  crawler.ownerCalculator = &calculator;
+  crawler.theFileNameToCrawlRelative = input[1].getValue<std::string>();
   std::string startingFolder = FileOperations::getCurrentFolder();
-  theCrawler.buildFreecalc();
+  crawler.buildFreecalc();
   global.changeDirectory(startingFolder);
-  return output.assignValue(theCrawler.displayResult.str(), calculator);
+  return output.assignValue(crawler.displayResult.str(), calculator);
 }
 
 bool CalculatorFunctions::innerFindProductDistanceModN(
@@ -7679,16 +7676,16 @@ bool CalculatorFunctions::crashByListOutOfBounds(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::crashByListOutOfBounds");
   (void) input;//portable way of avoiding unused parameter warning
-  List<int> theList;
-  std::vector<int> theVector;
+  List<int> list;
+  std::vector<int> array;
   for (int i = 0; i < 5; i ++) {
-    theList.addOnTop(0);
-    theVector.push_back(0);
+    list.addOnTop(0);
+    array.push_back(0);
   }
-  theList.setSize(0);
-  theVector.resize(0);
-  theVector[1] = 1;
-  theList[1] = 1;
+  list.setSize(0);
+  array.resize(0);
+  array[1] = 1;
+  list[1] = 1;
   return output.assignValue(std::string("Crashing: list out of bounds."), calculator);
 }
 
@@ -7697,8 +7694,8 @@ bool CalculatorFunctions::crashByVectorOutOfBounds(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::crashByVectorOutOfBounds");
   (void) input;//portable way of avoiding unused parameter warning
-  std::vector<int> theVector;
-  theVector[1] = 1;
+  std::vector<int> array;
+  array[1] = 1;
   return output.assignValue(std::string("Crashing: std::vector out of bounds."), calculator);
 }
 
@@ -7994,10 +7991,10 @@ public:
   }
 };
 
-bool CalculatorFunctions::innerDrawExpressionGraphWithOptions(
+bool CalculatorFunctionsPlot::drawExpressionGraphWithOptions(
   Calculator& calculator, const Expression& input, Expression& output, bool useFullTree
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerDrawExpressionGraph");
+  MacroRegisterFunctionWithName("CalculatorFunctionsPlot::drawExpressionGraphWithOptions");
   ExpressionTreeDrawer theEdrawer;
   theEdrawer.flagUseFullTree = useFullTree;
   theEdrawer.owner = &calculator;
@@ -8114,7 +8111,8 @@ bool CalculatorFunctions::innerIfFrozen(
 bool CalculatorFunctions::turnRulesOnOff(
   Calculator& calculator,
   const Expression& input,
-  Expression& output, bool turnOff
+  Expression& output,
+  bool turnOff
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::turnRulesOnOff");
   List<std::string> rulesToConsider;
@@ -8149,8 +8147,7 @@ bool CalculatorFunctions::turnRulesOnOff(
   for (int i = 0; i < rulesToConsider.size; i ++) {
     if (!calculator.namedRules.contains(rulesToConsider[i])) {
       return calculator << "Can't find named rule: " << rulesToConsider[i]
-      << ". Turn-off rules command failed. "
-      ;
+      << ". Turn-off rules command failed. ";
     } else {
       rulesToSwitch.addOnTopNoRepetition(rulesToConsider[i]);
     }

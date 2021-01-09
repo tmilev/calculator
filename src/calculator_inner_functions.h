@@ -93,6 +93,17 @@ public:
   static bool plotViewWindow(Calculator& calculator, const Expression& input, Expression& output);
   static bool plotPoint(Calculator& calculator, const Expression& input, Expression& output);
   static bool plot2DWithBars(Calculator& calculator, const Expression& input, Expression& output);
+
+  static bool drawExpressionGraphWithOptions(
+    Calculator& calculator, const Expression& input, Expression& output, bool useFullTree
+  );
+  static bool drawExpressionGraph(Calculator& calculator, const Expression& input, Expression& output) {
+    return CalculatorFunctionsPlot::drawExpressionGraphWithOptions(calculator, input, output, false);
+  }
+  static bool drawExpressionGraphFull(Calculator& calculator, const Expression& input, Expression& output) {
+    return CalculatorFunctionsPlot::drawExpressionGraphWithOptions(calculator, input, output, true);
+  }
+
 };
 
 class CalculatorFunctionsTrigonometry {
@@ -197,6 +208,8 @@ public:
   static bool length(Calculator& calculator, const Expression& input, Expression& output);
   static bool intersectUnion(Calculator& calculator, const Expression& input, Expression& output);
   static bool unionEmptySet(Calculator& calculator, const Expression& input, Expression& output);
+  static bool lastElement(Calculator& calculator, const Expression& input, Expression& output);
+  static bool removeLastElement(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 class CalculatorFunctionsIntervals {
@@ -205,6 +218,21 @@ public:
   static bool unionIntervals(Calculator& calculator, const Expression& input, Expression& output);
   static bool intersectIntervals(Calculator& calculator, const Expression& input, Expression& output);
   static bool normalizeIntervals(Calculator& calculator, const Expression& input, Expression& output);
+};
+
+class CalculatorFunctionsFreecalc {
+public:
+  static bool buildFreecalc(Calculator& calculator, const Expression& input, Expression& output);
+  static bool buildFreecalcSingleSlides(Calculator& calculator, const Expression& input, Expression& output);
+  static bool buildFreecalcSlidesOnTopic(Calculator& calculator, const Expression& input, Expression& output);
+  static bool crawlTexFile(Calculator& calculator, const Expression& input, Expression& output);
+};
+
+class CalculatorFunctionsLinearAlgebra {
+public:
+  static bool minimalPolynomialMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool characteristicPolynomialMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool functionToMatrix(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 class CalculatorFunctions {
@@ -256,7 +284,7 @@ public:
   static bool innerFourierTransformEWA(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerSqrt(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerFactorIntegeR(Calculator& calculator, const Expression& input, Expression& output);
+  static bool factorInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionFactorInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerFactorOutNumberContent(Calculator& calculator, const Expression& input, Expression& output);
 
@@ -298,7 +326,7 @@ public:
   static bool innerSumTimesExpressionToSumOf(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerSumAsOperatorToSumInternalNotation(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerHandleUnderscorePowerLimits(Calculator& calculator, const Expression& input, Expression& output);
-  static bool outerPolynomializE(Calculator& calculator, const Expression& input, Expression& output);
+  static bool outerPolynomialize(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionPolynomialize(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerApplyToSubexpressionsRecurseThroughCalculusFunctions(
     Calculator& calculator, const Expression& input, Expression& output
@@ -325,12 +353,7 @@ public:
   static bool innerOperatorBounds(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerAnyToZero(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerExponentToLog(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerTestMathMouseHover(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerNewtonsMethod(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerBuildFreecalc(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerBuildFreecalcSingleSlides(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerBuildFreecalcSlidesOnTopic(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCrawlTexFile(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerCompareIntervalsNumerically(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIntersectEmptySet(Calculator& calculator, const Expression& input, Expression& output);
@@ -404,18 +427,6 @@ public:
 
   static bool innerTrace(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerReverseBytes(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMinPolyMatrix(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCharPolyMatrix(Calculator& calculator, const Expression& input, Expression& output);
-
-  static bool innerDrawExpressionGraphWithOptions(
-    Calculator& calculator, const Expression& input, Expression& output, bool useFullTree
-  );
-  static bool innerDrawExpressionGraph(Calculator& calculator, const Expression& input, Expression& output) {
-    return innerDrawExpressionGraphWithOptions(calculator, input, output, false);
-  }
-  static bool innerDrawExpressionGraphFull(Calculator& calculator, const Expression& input, Expression& output) {
-    return innerDrawExpressionGraphWithOptions(calculator, input, output, true);
-  }
 
   static bool innerIfStandard(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIfFrozen(Calculator& calculator, const Expression& input, Expression& output);
@@ -431,13 +442,10 @@ public:
   static bool functionMakeJavascriptExpression(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerContains(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerExpressionLeafs(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerLastElement(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerRemoveLastElement(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerLispify(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerLispifyFull(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerChildExpression(Calculator& calculator, const Expression& input, Expression& output);
-
 
   static bool innerDegreesToRadians(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerEvaluateToDoublE(Calculator& calculator, const Expression& input, Expression& output);
@@ -554,7 +562,6 @@ public:
   static bool innerReverseOrderRecursively(Calculator& calculator, const Expression& input, Expression& output);
   static bool transpose(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerFunctionToMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerGenerateMultiplicativelyClosedSet(
     Calculator& calculator, const Expression& input, Expression& output
   );

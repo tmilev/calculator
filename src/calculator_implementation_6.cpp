@@ -1210,8 +1210,8 @@ bool CalculatorFunctions::innerIsPower(
   return output.assignValue(result, calculator);
 }
 
-bool CalculatorFunctions::innerFactorIntegeR(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerFactorInteger");
+bool CalculatorFunctions::factorInteger(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::factorInteger");
   if (input.size() != 2) {
     return false;
   }
@@ -2893,8 +2893,8 @@ bool CalculatorFunctions::innerGenerateMultiplicativelyClosedSet(
   return true;
 }
 
-bool CalculatorFunctions::innerFunctionToMatrix(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerFunctionToMatrix");
+bool CalculatorFunctionsLinearAlgebra::functionToMatrix(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsLinearAlgebra::functionToMatrix");
   if (!input.isListNElements(4)) {
     return false;
   }

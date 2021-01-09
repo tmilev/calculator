@@ -789,7 +789,7 @@ class Vectors: public List<Vector<Coefficient> > {
   void selectionToMatrix(Selection& theSelection, int outputDimension, Matrix<Coefficient>& output, int startRowIndex);
   void getGramMatrix(Matrix<Coefficient>& output, const Matrix<Rational>* theBilinearForm = nullptr) const;
   void getMatrixRootsToRows(Matrix<Rational>& output) const;
-  void getOrthogonalComplement(Vectors<Coefficient>& output, Matrix<Rational>* theBilinearForm = nullptr);
+  void getOrthogonalComplement(Vectors<Coefficient>& output, Matrix<Rational>* bilinearForm = nullptr);
   bool linearSpanContainsVector(
     const Vector<Coefficient>& input, Matrix<Coefficient>& bufferMatrix, Selection& bufferSelection
   ) const;
@@ -805,7 +805,7 @@ class Vectors: public List<Vector<Coefficient> > {
   );
   int getRankElementSpan(Matrix<Coefficient>* buffer = 0, Selection* bufferSelection = nullptr) const;
   static bool conesIntersect(
-    List<Vector<Rational> >& StrictCone,
+    List<Vector<Rational> >& strictCone,
     List<Vector<Rational> >& nonStrictCone,
     Vector<Rational>* outputLinearCombo = nullptr,
     Vector<Rational>* outputSplittingNormal = nullptr
@@ -916,7 +916,7 @@ class Vectors: public List<Vector<Coefficient> > {
     Matrix<Coefficient>& bufferMat,
     Selection& bufferSel
   );
-  bool computeNormal(Vector<Coefficient>& output, int inputDim);
+  bool computeNormal(Vector<Coefficient>& output, int inputDimension);
   void gaussianEliminationForNormalComputation(
     Matrix<Coefficient>& inputMatrix, Selection& outputNonPivotPoints, int theDimension
   ) const;

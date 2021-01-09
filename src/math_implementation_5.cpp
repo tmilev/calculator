@@ -13,19 +13,19 @@
 #include "math_extra_universal_enveloping_implementation.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::makeZero(SemisimpleLieAlgebra&)'
 #include "math_extra_differential_operators.h"
 
-std::string MonomialWeylAlgebra::toString(FormatExpressions* theFormat) const {
+std::string MonomialWeylAlgebra::toString(FormatExpressions* format) const {
   if (this->isConstant()) {
     return "1";
   }
   std::stringstream out;
   FormatExpressions tempFormat;
-  if (theFormat == nullptr) {
+  if (format == nullptr) {
     tempFormat.polyDefaultLetter = "\\partial";
   } else {
-    tempFormat.polyDefaultLetter = theFormat->weylAlgebraDefaultLetter;
-    tempFormat.polynomialAlphabet = theFormat->weylAlgebraLetters;
+    tempFormat.polyDefaultLetter = format->weylAlgebraDefaultLetter;
+    tempFormat.polynomialAlphabet = format->weylAlgebraLetters;
   }
-  std::string firstS = this->polynomialPart.toString(theFormat);
+  std::string firstS = this->polynomialPart.toString(format);
   std::string secondS = this->differentialPart.toString(&tempFormat);
   if (firstS != "1") {
     out << firstS;

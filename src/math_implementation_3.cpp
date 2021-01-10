@@ -8957,14 +8957,14 @@ void QuasiPolynomial::makeRougherLattice(const Lattice& latticeToRoughenBy) {
   this->AmbientLatticeReduced.intersectWith(latticeToRoughenBy);
   Vectors<Rational> representativesQuotientLattice;
   OldLattice.getAllRepresentatives(this->AmbientLatticeReduced, representativesQuotientLattice);
-  Vectors<Rational> OldLatticeShifts = this->LatticeShifts;
+  Vectors<Rational> OldLatticeShifts = this->latticeShifts;
   List<Polynomial<Rational> > oldValues;
   oldValues = this->valueOnEachLatticeShift;
-  this->LatticeShifts.setSize(OldLatticeShifts.size * representativesQuotientLattice.size);
-  this->valueOnEachLatticeShift.setSize(this->LatticeShifts.size);
+  this->latticeShifts.setSize(OldLatticeShifts.size * representativesQuotientLattice.size);
+  this->valueOnEachLatticeShift.setSize(this->latticeShifts.size);
   for (int i = 0; i < OldLatticeShifts.size; i ++) {
     for (int j = 0; j < representativesQuotientLattice.size; j ++) {
-      this->LatticeShifts[i * representativesQuotientLattice.size + j] = OldLatticeShifts[i] + representativesQuotientLattice[j];
+      this->latticeShifts[i * representativesQuotientLattice.size + j] = OldLatticeShifts[i] + representativesQuotientLattice[j];
       this->valueOnEachLatticeShift[i * representativesQuotientLattice.size + j] = oldValues[i];
     }
   }
@@ -9078,14 +9078,14 @@ void QuasiPolynomial::operator+=(const QuasiPolynomial& other) {
   this->makeRougherLattice(other.AmbientLatticeReduced);
   QuasiPolynomial tempQP = other;
   tempQP.makeRougherLattice(this->AmbientLatticeReduced);
-  for (int i = 0; i < tempQP.LatticeShifts.size; i ++) {
-    this->addLatticeShift(tempQP.valueOnEachLatticeShift[i], tempQP.LatticeShifts[i]);
+  for (int i = 0; i < tempQP.latticeShifts.size; i ++) {
+    this->addLatticeShift(tempQP.valueOnEachLatticeShift[i], tempQP.latticeShifts[i]);
   }
 }
 
-std::string QuasiPolynomial::toString(bool useHtml, bool useLatex, FormatExpressions* thePolyFormat) {
+std::string QuasiPolynomial::toString(bool useHtml, bool useLatex, FormatExpressions* format) {
   std::stringstream out;
-  if (this->LatticeShifts.size == 0) {
+  if (this->latticeShifts.size == 0) {
     return "0";
   }
   if (useLatex && !useHtml) {
@@ -9094,7 +9094,7 @@ std::string QuasiPolynomial::toString(bool useHtml, bool useLatex, FormatExpress
   if (useLatex && useHtml) {
     out << "\\begin{array}{rcl}&&";
   }
-  for (int i = 0; i < this->LatticeShifts.size; i ++) {
+  for (int i = 0; i < this->latticeShifts.size; i ++) {
     if (useLatex) {
       if (!useHtml) {
         out << "$\\begin{array}{rcl}&&";
@@ -9102,7 +9102,7 @@ std::string QuasiPolynomial::toString(bool useHtml, bool useLatex, FormatExpress
         out << "<span class ='mathcalculator'>";
       }
     }
-    out << this->valueOnEachLatticeShift[i].toString(thePolyFormat);
+    out << this->valueOnEachLatticeShift[i].toString(format);
     if (useLatex) {
       if (!useHtml) {
         out << "\\end{array}$";
@@ -9119,8 +9119,8 @@ std::string QuasiPolynomial::toString(bool useHtml, bool useLatex, FormatExpress
         out << " over ";
       }
     }
-    if (!this->LatticeShifts[i].isEqualToZero()) {
-      out << this->LatticeShifts[i].toString() << " + ";
+    if (!this->latticeShifts[i].isEqualToZero()) {
+      out << this->latticeShifts[i].toString() << " + ";
     }
     if (useLatex) {
       if (!useHtml) {
@@ -9131,7 +9131,7 @@ std::string QuasiPolynomial::toString(bool useHtml, bool useLatex, FormatExpress
     } else {
       out << "L ";
     }
-    if (this->LatticeShifts.size > 1) {
+    if (this->latticeShifts.size > 1) {
       if (useHtml & ! useLatex) {
         out << "<br>";
       }
@@ -9198,13 +9198,13 @@ void QuasiPolynomial::makeFromPolynomialShiftAndLattice(
   const Polynomial<Rational>& inputPoly, const MonomialP& theShift, const Lattice& theLattice
 ) {
   this->AmbientLatticeReduced = theLattice;
-  this->LatticeShifts.setSize(1);
-  Vector<Rational>& firstShift = this->LatticeShifts[0];
+  this->latticeShifts.setSize(1);
+  Vector<Rational>& firstShift = this->latticeShifts[0];
   firstShift.setSize(theLattice.getDimension());
   for (int i = 0; i < theLattice.getDimension(); i ++) {
     firstShift[i] = theShift(i);
   }
-  this->AmbientLatticeReduced.reduceVector(this->LatticeShifts[0]);
+  this->AmbientLatticeReduced.reduceVector(this->latticeShifts[0]);
   this->valueOnEachLatticeShift.setSize(1);
   this->valueOnEachLatticeShift[0] = inputPoly;
 }
@@ -9238,7 +9238,7 @@ void Lattice::makeZn(int dimension) {
 
 void QuasiPolynomial::makeZeroOverLattice(Lattice& theLattice) {
   this->AmbientLatticeReduced = theLattice;
-  this->LatticeShifts.size = 0;
+  this->latticeShifts.size = 0;
   this->valueOnEachLatticeShift.size = 0;
 }
 
@@ -9247,7 +9247,7 @@ void QuasiPolynomial::makeZeroLatticeZn(int theDim) {
     global.fatal << "Negative dimension not allowed. " << global.fatal;
   }
   this->AmbientLatticeReduced.makeZn(theDim);
-  this->LatticeShifts.size = 0;
+  this->latticeShifts.size = 0;
   this->valueOnEachLatticeShift.size = 0;
 }
 
@@ -9407,16 +9407,16 @@ void QuasiPolynomial::addLatticeShift(
 ) {
   Vector<Rational> theShift = inputShift;
   this->AmbientLatticeReduced.reduceVector(theShift);
-  int index = this->LatticeShifts.getIndex(theShift);
+  int index = this->latticeShifts.getIndex(theShift);
   if (index == - 1) {
-    index = this->LatticeShifts.size;
-    this->LatticeShifts.addOnTop(theShift);
+    index = this->latticeShifts.size;
+    this->latticeShifts.addOnTop(theShift);
     this->valueOnEachLatticeShift.expandOnTop(1);
     this->valueOnEachLatticeShift.lastObject()->makeZero();
   }
   this->valueOnEachLatticeShift[index] += input;
   if (this->valueOnEachLatticeShift[index].isEqualToZero()) {
-    this->LatticeShifts.removeIndexSwapWithLast(index);
+    this->latticeShifts.removeIndexSwapWithLast(index);
     this->valueOnEachLatticeShift.removeIndexSwapWithLast(index);
   }
 }
@@ -9469,7 +9469,7 @@ void QuasiPolynomial::substitution(
       << " failed but the current function does not handle this properly. " << global.fatal;
     }
     for (int j = 0; j < allRepresentatives.size; j ++) {
-      if (imagesAllRepresentatives[j] == this->LatticeShifts[i]) {
+      if (imagesAllRepresentatives[j] == this->latticeShifts[i]) {
         output.addLatticeShift(tempP, allRepresentatives[j]);
       }
     }
@@ -9499,7 +9499,7 @@ void QuasiPolynomial::substitution(
       << theSub.toString() << " into polynomial " << tempP.toString()
       << " failed but the current function does not handle this properly. " << global.fatal;
     }
-    output.addLatticeShift(tempP, this->LatticeShifts[i] + inputTranslationSubtractedFromArgument);
+    output.addLatticeShift(tempP, this->latticeShifts[i] + inputTranslationSubtractedFromArgument);
   }
 }
 
@@ -9529,14 +9529,14 @@ bool QuasiPolynomial::substitutionFewerVariables(const PolynomialSubstitution<Ra
     theSub[i].getConstantTerm(theSubLatticeShift.elements[i][0], Rational(0));
   }
   Matrix<Rational> theShiftImage, shiftMatForm;
-  output.LatticeShifts.size = 0;
+  output.latticeShifts.size = 0;
   output.valueOnEachLatticeShift.size = 0;
-  output.valueOnEachLatticeShift.reserve(this->LatticeShifts.size);
-  output.LatticeShifts.reserve(this->LatticeShifts.size);
+  output.valueOnEachLatticeShift.reserve(this->latticeShifts.size);
+  output.latticeShifts.reserve(this->latticeShifts.size);
   Vector<Rational> tempRoot;
   Polynomial<Rational> tempP;
-  for (int i = 0; i < this->LatticeShifts.size; i ++) {
-    shiftMatForm.assignVectorColumn(this->LatticeShifts[i]);
+  for (int i = 0; i < this->latticeShifts.size; i ++) {
+    shiftMatForm.assignVectorColumn(this->latticeShifts[i]);
     shiftMatForm -= theSubLatticeShift;
     if (theLatticeSub.solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(theLatticeSub, shiftMatForm, theShiftImage)) {
       tempRoot.assignMatrixDetectRowOrColumn(theShiftImage);
@@ -9709,7 +9709,7 @@ bool Lattice::substitutionHomogeneous(const Matrix<Rational>& theSub) {
 void QuasiPolynomial::operator*=(const Rational& theConst) {
   if (theConst.isEqualToZero()) {
     this->valueOnEachLatticeShift.size = 0;
-    this->LatticeShifts.size = 0;
+    this->latticeShifts.size = 0;
     return;
   }
   for (int i = 0; i < this->valueOnEachLatticeShift.size; i ++) {
@@ -9772,9 +9772,9 @@ bool Cone::solveLPolynomialEqualsZeroIAmProjective(Polynomial<Rational>& inputLP
 }
 
 bool Cone::solveLQuasiPolyEqualsZeroIAmProjective(QuasiPolynomial& inputLQP, List<Cone>& outputConesOverEachLatticeShift) {
-  outputConesOverEachLatticeShift.setSize(inputLQP.LatticeShifts.size);
+  outputConesOverEachLatticeShift.setSize(inputLQP.latticeShifts.size);
   bool result = true;
-  for (int i = 0; i < inputLQP.LatticeShifts.size; i ++) {
+  for (int i = 0; i < inputLQP.latticeShifts.size; i ++) {
     result = result && this->solveLPolynomialEqualsZeroIAmProjective(
       inputLQP.valueOnEachLatticeShift[i], outputConesOverEachLatticeShift[i]
     );
@@ -11219,10 +11219,10 @@ void PiecewiseQuasipolynomial::drawMe(
     tempStream << i + 1;
     Vector<Rational> tempRoot = this->theProjectivizedComplex[i].getInternalPoint();
     tempRoot.makeAffineUsingLastCoordinate();
-    for (int j = 0; j < this->theQPs[i].LatticeShifts.size; j ++) {
+    for (int j = 0; j < this->theQPs[i].latticeShifts.size; j ++) {
       this->theProjectivizedComplex[i].getLatticePointsInCone(
         this->theQPs[i].AmbientLatticeReduced,
-        this->theQPs[i].LatticeShifts[j],
+        this->theQPs[i].latticeShifts[j],
         numLatticePointsPerDim,
         true,
         latticePoints,
@@ -11254,8 +11254,8 @@ void PiecewiseQuasipolynomial::drawMe(
 
 Rational QuasiPolynomial::evaluate(const Vector<Rational>& input) {
   Vector<Rational> testLatticeBelonging;
-  for (int i = 0; i < this->LatticeShifts.size; i ++) {
-    testLatticeBelonging = this->LatticeShifts[i] - input;
+  for (int i = 0; i < this->latticeShifts.size; i ++) {
+    testLatticeBelonging = this->latticeShifts[i] - input;
     if (this->AmbientLatticeReduced.isInLattice(testLatticeBelonging)) {
       return this->valueOnEachLatticeShift[i].evaluate(input);
     }

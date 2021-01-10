@@ -52,8 +52,8 @@ public:
   int generatorIndex;
   ChevalleyGenerator(): owner(nullptr), generatorIndex(- 1) {
   }
-  friend std::ostream& operator << (std::ostream& output, const ChevalleyGenerator& theGen) {
-    output << theGen.toString();
+  friend std::ostream& operator << (std::ostream& output, const ChevalleyGenerator& generator) {
+    output << generator.toString();
     return output;
   }
   bool checkInitialization() const;
@@ -82,8 +82,8 @@ public:
 
 template <class Coefficient, unsigned int inputHashFunction(const Coefficient&) = Coefficient::hashFunction>
 class MonomialTensor {
-  friend std::ostream& operator << (std::ostream& output, const MonomialTensor<Coefficient, inputHashFunction>& theMon) {
-    return output << theMon.toString();
+  friend std::ostream& operator << (std::ostream& output, const MonomialTensor<Coefficient, inputHashFunction>& monomial) {
+    return output << monomial.toString();
   }
 private:
 public:
@@ -134,7 +134,7 @@ public:
     }
   }
   bool simplifyEqualConsecutiveGenerators(int lowestNonReducedIndex);
-  void multiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const Coefficient& thePower);
+  void multiplyByGeneratorPowerOnTheRight(int generatorIndex, const Coefficient& power);
   void multiplyByGeneratorPowerOnTheLeft(int theGeneratorIndexStandsToTheLeft, const Coefficient& thePower);
   unsigned int hashFunction() const {
     int top = MathRoutines::minimum(someRandomPrimesSize, this->generatorsIndices.size);
@@ -820,7 +820,7 @@ public:
       }
     }
   }
-  void substitution(const PolynomialSubstitution<Rational>& theSub);
+  void substitution(const PolynomialSubstitution<Rational>& substitution);
   Coefficient scalarProduct(const Vector<Coefficient>& left, const Vector<Coefficient>& right) {
     return this->scalarProduct(left, right, static_cast<Coefficient>(0));
   }
@@ -2003,7 +2003,7 @@ private:
   std::string getTermString(
     const Coefficient& coefficient,
     const TemplateMonomial& monomial,
-    FormatExpressions* theFormat,
+    FormatExpressions* format,
     const std::string& customCoefficientMonomialSeparator
   ) const;
 public:
@@ -2028,7 +2028,7 @@ public:
     (void) unused;
     return this->size() > 1;
   }
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   int size() const {
     return this->monomials.size;
   }
@@ -2380,7 +2380,7 @@ public:
     const TemplateMonomial& inputMonomial,
     Coefficient& inputCoefficient,
     bool addPlusToFront,
-    FormatExpressions* theFormat = nullptr
+    FormatExpressions* format = nullptr
   );
   void checkNumberOfCoefficientsConsistency() const {
     if (this->coefficients.size != this->monomials.size) {
@@ -3112,7 +3112,7 @@ class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
     out << ": ";
     output = out.str();
   }
-  void makeLinearSubstitutionConstantTermsLastRow(Matrix<Coefficient>& theMat);
+  void makeLinearSubstitutionConstantTermsLastRow(Matrix<Coefficient>& matrix);
 };
 
 template<class Coefficient>
@@ -3978,7 +3978,7 @@ public:
     SemisimpleLieAlgebra& owner
   );
   bool getCoordinatesInBasis(
-    const List<ElementSemisimpleLieAlgebra<Coefficient> >& theBasis, Vector<Coefficient>& output
+    const List<ElementSemisimpleLieAlgebra<Coefficient> >& basis, Vector<Coefficient>& output
   ) const;
   SemisimpleLieAlgebra* getOwner() const {
     this->checkConsistency();
@@ -4484,19 +4484,19 @@ void MonomialTensor<Coefficient, inputHashFunction>::multiplyByGeneratorPowerOnT
 
 template <class Coefficient, unsigned int inputHashFunction(const Coefficient&)>
 void MonomialTensor<Coefficient, inputHashFunction>::multiplyByGeneratorPowerOnTheRight(
-  int theGeneratorIndex, const Coefficient& thePower
+  int generatorIndex, const Coefficient& power
 ) {
-  if (thePower == 0) {
+  if (power == 0) {
     return;
   }
   if (this->generatorsIndices.size > 0) {
-    if (*this->generatorsIndices.lastObject() == theGeneratorIndex) {
-      (*this->powers.lastObject()) += thePower;
+    if (*this->generatorsIndices.lastObject() == generatorIndex) {
+      (*this->powers.lastObject()) += power;
       return;
     }
   }
-  this->powers.addOnTop(thePower);
-  this->generatorsIndices.addOnTop(theGeneratorIndex);
+  this->powers.addOnTop(power);
+  this->generatorsIndices.addOnTop(generatorIndex);
 }
 
 template <class Coefficient, unsigned int inputHashFunction(const Coefficient&)>
@@ -4776,10 +4776,10 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::getBlendCoefficien
   const TemplateMonomial& inputMonomial,
   Coefficient& inputCoefficient,
   bool addPlusToFront,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
   std::stringstream out;
-  std::string coefficientString = inputCoefficient.toString(theFormat);
+  std::string coefficientString = inputCoefficient.toString(format);
   if (inputMonomial.isConstant()) {
     if (coefficientString[0] != '-' && addPlusToFront) {
       out << "+" << coefficientString;
@@ -4788,8 +4788,8 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::getBlendCoefficien
     }
     return out.str();
   }
-  std::string monString = inputMonomial.toString(theFormat);
-  if (inputCoefficient.needsParenthesisForMultiplication(theFormat)) {
+  std::string monString = inputMonomial.toString(format);
+  if (inputCoefficient.needsParenthesisForMultiplication(format)) {
     coefficientString = "\\left(" + coefficientString + "\\right)";
   }
   if (coefficientString == "1") {
@@ -4815,22 +4815,22 @@ template <class TemplateMonomial, class Coefficient>
 std::string LinearCombination<TemplateMonomial, Coefficient>::getTermString(
   const Coefficient& coefficient,
   const TemplateMonomial& monomial,
-  FormatExpressions* theFormat,
+  FormatExpressions* format,
   const std::string& customCoefficientMonomialSeparator
 ) const {
   bool fracSpecialDesired = false;
-  if (theFormat != nullptr) {
-    if (theFormat->flagUseFrac && theFormat->flagSuppressOneIn1overXtimesY) {
+  if (format != nullptr) {
+    if (format->flagUseFrac && format->flagSuppressOneIn1overXtimesY) {
       fracSpecialDesired = true;
     }
   }
   std::string coefficientString, monomialString;
-  if (coefficient.needsParenthesisForMultiplication(theFormat)) {
-    coefficientString = "\\left(" + coefficient.toString(theFormat) + "\\right)";
+  if (coefficient.needsParenthesisForMultiplication(format)) {
+    coefficientString = "\\left(" + coefficient.toString(format) + "\\right)";
   } else {
-    coefficientString = coefficient.toString(theFormat);
+    coefficientString = coefficient.toString(format);
   }
-  monomialString = monomial.toString(theFormat);
+  monomialString = monomial.toString(format);
   if (monomialString == "") {
     return coefficientString;
   }
@@ -4859,7 +4859,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::getTermString(
 
 template <class TemplateMonomial, class Coefficient>
 std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) const {
   if (this->size() == 0) {
     return "0";
@@ -4873,26 +4873,26 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
   // and make it return 0 (or a pointer to a monomial order, should you
   // wish to use a custom one.
   typename List<TemplateMonomial>::Comparator*
-  theOrder = (theFormat == nullptr) ? 0 : theFormat->getMonomialOrder<TemplateMonomial>();
+  theOrder = (format == nullptr) ? 0 : format->getMonomialOrder<TemplateMonomial>();
   sortedMons.quickSortDescending(theOrder);
   int cutOffCounter = 0;
   bool useCustomPlus = false;
-  int maximumLineLength = theFormat == nullptr ? 200 : theFormat->maximumLineLength;
-  int numberOfAmpersandsPerNewLineForLaTeX = (theFormat == nullptr) ? 1 : theFormat->numberOfAmpersandsPerNewLineForLaTeX;
-  bool flagUseLaTeX = (theFormat == nullptr) ? false : theFormat->flagUseLatex;
-  bool flagUseHTML = (theFormat == nullptr) ? false : theFormat->flagUseHTML;
+  int maximumLineLength = format == nullptr ? 200 : format->maximumLineLength;
+  int numberOfAmpersandsPerNewLineForLaTeX = (format == nullptr) ? 1 : format->numberOfAmpersandsPerNewLineForLaTeX;
+  bool flagUseLaTeX = (format == nullptr) ? false : format->flagUseLatex;
+  bool flagUseHTML = (format == nullptr) ? false : format->flagUseHTML;
   std::string customTimes = "";
-  if (theFormat != nullptr) {
-    useCustomPlus = (theFormat->customPlusSign != "");
-    if (theFormat->flagPassCustomCoeffMonSeparatorToCoeffs == false) {
-      customTimes = theFormat->customCoefficientMonomialSeparator;
-      theFormat->customCoefficientMonomialSeparator = "";
+  if (format != nullptr) {
+    useCustomPlus = (format->customPlusSign != "");
+    if (format->flagPassCustomCoeffMonSeparatorToCoeffs == false) {
+      customTimes = format->customCoefficientMonomialSeparator;
+      format->customCoefficientMonomialSeparator = "";
     }
   }
   for (int i = 0; i < sortedMons.size; i ++) {
     TemplateMonomial& monomial = sortedMons[i];
     Coefficient& coefficient = this->coefficients[this->monomials.getIndex(monomial)];
-    std::string termString = this->getTermString(coefficient, monomial, theFormat, customTimes);
+    std::string termString = this->getTermString(coefficient, monomial, format, customTimes);
     if (i > 0) {
       if (!useCustomPlus) {
         if (termString.size() > 0) {
@@ -4905,7 +4905,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
           cutOffCounter += 1;
         }
       } else {
-        out << theFormat->customPlusSign;
+        out << format->customPlusSign;
       }
     }
     out << termString;
@@ -4926,10 +4926,10 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
       }
     }
   }
-  if (theFormat != nullptr) {
-    theFormat->customCoefficientMonomialSeparator = customTimes;
-    if (theFormat->suffixLinearCombination != "") {
-      out << " " << theFormat->suffixLinearCombination;
+  if (format != nullptr) {
+    format->customCoefficientMonomialSeparator = customTimes;
+    if (format->suffixLinearCombination != "") {
+      out << " " << format->suffixLinearCombination;
     }
   }
   return out.str();
@@ -5050,12 +5050,12 @@ public:
     return this->AmbientLatticeReduced.basis.numberOfRows;
   }
   Lattice AmbientLatticeReduced;
-  Vectors<Rational> LatticeShifts;
+  Vectors<Rational> latticeShifts;
   List<Polynomial<Rational> > valueOnEachLatticeShift;
   std::string toString(bool useHtml, bool useLatex) {
     return this->toString(useHtml, useLatex, nullptr);
   }
-  std::string toString(bool useHtml, bool useLatex, FormatExpressions* thePolyFormat);
+  std::string toString(bool useHtml, bool useLatex, FormatExpressions* format);
   Rational evaluate(const Vector<Rational>& input);
   void addLatticeShift(const Polynomial<Rational>& input, const Vector<Rational>& inputShift);
   void makeRougherLattice(const Lattice& latticeToRoughenBy);
@@ -5093,7 +5093,7 @@ public:
   void operator*=(const Rational& theConst);
   void operator=(const QuasiPolynomial& other) {
     this->AmbientLatticeReduced = other.AmbientLatticeReduced;
-    this->LatticeShifts = other.LatticeShifts;
+    this->latticeShifts = other.latticeShifts;
     this->valueOnEachLatticeShift = other.valueOnEachLatticeShift;
   }
 };
@@ -6752,29 +6752,29 @@ public:
 
 
 template<class Coefficient>
-void Matrix<Coefficient>::substitution(const PolynomialSubstitution<Rational>& theSub) {
+void Matrix<Coefficient>::substitution(const PolynomialSubstitution<Rational>& substitution) {
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
-      this->elements[i][j].substitution(theSub, 1);
+      this->elements[i][j].substitution(substitution, 1);
     }
   }
 }
 
 template <class TemplateMonomial, class Coefficient>
-std::ostream& operator<<(std::ostream& output, const LinearCombination<TemplateMonomial, Coefficient>& theCollection) {
-  if (theCollection.size() == 0) {
+std::ostream& operator<<(std::ostream& output, const LinearCombination<TemplateMonomial, Coefficient>& collection) {
+  if (collection.size() == 0) {
     output << "0";
     return output;
   }
   std::string tempS1, tempS2;
   List<TemplateMonomial> sortedMons;
-  sortedMons = theCollection.monomials;
+  sortedMons = collection.monomials;
   sortedMons.quickSortDescending();
   int cutOffCounter = 0;
   for (int i = 0; i < sortedMons.size; i ++) {
     TemplateMonomial& currentMon = sortedMons[i];
     std::stringstream tempStream;
-    Coefficient& currentCoeff = theCollection.coefficients[theCollection.monomials.getIndex(currentMon)];
+    Coefficient& currentCoeff = collection.coefficients[collection.monomials.getIndex(currentMon)];
     tempStream << currentCoeff;
     tempS1 = tempStream.str();
     tempS2 = currentMon.toString();
@@ -6805,17 +6805,19 @@ std::ostream& operator<<(std::ostream& output, const LinearCombination<TemplateM
 }
 
 template <class Coefficient>
-void PolynomialSubstitution<Coefficient>::makeLinearSubstitutionConstantTermsLastRow(Matrix<Coefficient>& theMat) {
-  this->setSize(theMat.numberOfColumns);
+void PolynomialSubstitution<Coefficient>::makeLinearSubstitutionConstantTermsLastRow(
+  Matrix<Coefficient>& matrix
+) {
+  this->setSize(matrix.numberOfColumns);
   MonomialP tempM;
   for (int i = 0; i < this->size; i ++) {
     this->objects[i].makeZero();
-    for (int j = 0; j < theMat.numberOfRows - 1; j ++) {
+    for (int j = 0; j < matrix.numberOfRows - 1; j ++) {
       tempM.makeOne();
       tempM.setVariable(j, 1);
-      this->objects[i].addMonomial(tempM, theMat.elements[j][i]);
+      this->objects[i].addMonomial(tempM, matrix.elements[j][i]);
     }
-    this->objects[i] += theMat.elements[theMat.numberOfRows - 1][i];
+    this->objects[i] += matrix.elements[matrix.numberOfRows - 1][i];
   }
 }
 
@@ -6889,24 +6891,24 @@ bool Matrix<Coefficient>::isPositiveDefinite() {
 
 template <class Coefficient>
 bool ElementSemisimpleLieAlgebra<Coefficient>::getCoordinatesInBasis(
-  const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<Coefficient>& output
+  const List<ElementSemisimpleLieAlgebra>& basis, Vector<Coefficient>& output
 ) const {
-  if (theBasis.size == 0) {
+  if (basis.size == 0) {
     return false;
   }
   if (this->isEqualToZero()) {
-    output.makeZero(theBasis.size);
+    output.makeZero(basis.size);
     return true;
   }
   MacroRegisterFunctionWithName("ElementSemisimpleLieAlgebra::getCoordinatesInBasis");
-  Vectors<Coefficient> tempBasis;
-  Vector<Coefficient> tempRoot;
-  tempBasis.setSize(theBasis.size);
-  for (int i = 0 ; i < theBasis.size; i ++) {
-    theBasis[i].elementToVectorNegativeRootSpacesFirst(tempBasis[i]);
+  Vectors<Coefficient> basisVector;
+  Vector<Coefficient> element;
+  basisVector.setSize(basis.size);
+  for (int i = 0 ; i < basis.size; i ++) {
+    basis[i].elementToVectorNegativeRootSpacesFirst(basisVector[i]);
   }
-  this->elementToVectorNegativeRootSpacesFirst(tempRoot);
-  return tempRoot.getCoordinatesInBasis(tempBasis, output);
+  this->elementToVectorNegativeRootSpacesFirst(element);
+  return element.getCoordinatesInBasis(basisVector, output);
 }
 
 template <class Coefficient>

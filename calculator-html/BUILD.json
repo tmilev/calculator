@@ -19,6 +19,7 @@
   "/calculator-html/autocomplete.js",
   "/calculator-html/panels.js",
   "/calculator-html/solve.js",
+  "/calculator-html/solve_socratic.js",
   "/calculator-html/initialize_buttons.js",
   "/calculator-html/storage.js",
   "/calculator-html/page_navigation.js",

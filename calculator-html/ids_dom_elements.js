@@ -15,6 +15,10 @@ var domElements = {
       editorSolveProblemDebug: "editorSolveProblemDebug",
       solutionBox: "solutionBox",
     },
+    solveSocratic: {
+      div: "divSolveSocraticPage",
+      link: "socraticLink",
+    },
     privacyPolicy: {
       div: "divPrivacyPolicy",
       button: "buttonPrivacyPolicy",

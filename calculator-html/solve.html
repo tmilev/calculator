@@ -1,0 +1,29 @@
+<html lang="en">
+
+<head>
+  <script type="text/javascript" src="/calculator-html/javascript_all_in_one.js"></script>
+  <link type="text/css" rel="stylesheet" href="/calculator-html/calculator.css">
+</head>
+
+<body onload="window.calculator.mainPage.selectPage('solve');">
+  <div id="divSolvePage" class="divPage">
+    <div class="centerHorizontally">
+      Type your problem here [<b style="color:red">Experimental</b>].<br>
+      <div class="centerHorizontally">
+        <div id="editorSolveButtonPanel" class="buttonPanel" style="margin:auto;"
+          buttons="algebra, logarithms, trig, angles, infinity">
+        </div>
+      </div>
+      <br>
+      <div id="editorSolveProblem" style="font-family: ' Times New Roman'; font-size: 72px;"></div>
+      <br>
+      <button id="buttonSolve" class="buttonSolve">Solve</button><br>
+      <div id="spanProgressReportGeneral"></div><br>
+      <div id="editorSolveProblemDebug"></div>
+      <hr>
+      <div id="solutionBox" style="font-size: 48px;"></div>
+    </div>
+  </div>
+</body>
+
+</html>

@@ -150,7 +150,10 @@ class InputPanelData {
     this.problemId = input.problemId;
     /**@type{EquationEditorButtonFactory[]} */
     this.buttonFactories = [];
-
+    this.valueChangeHandler = null;
+    if (input.valueChangeHandler !== undefined) {
+      this.valueChangeHandler = input.valueChangeHandler;
+    }
     this.buttonsPerLine = input.buttonsPerLine;
     if (this.buttonsPerLine === null || this.buttonsPerLine === undefined) {
       this.buttonsPerLine = 4;
@@ -461,13 +464,16 @@ class InputPanelData {
 
   editMQFunction(
     /**@type{EquationEditor} */
-    unused,
+    editor,
     /**@type{equation_editor.MathNode} */
     unusedNode,
   ) {
     // useful event handlers
     if (this.ignoreNextEditorEvent) {
       return;
+    }
+    if (this.valueChangeHandler !== null) {
+      this.valueChangeHandler(editor.rootNode.toLatex());
     }
     let latexBox = document.getElementById(this.idPureLatex);
     if (latexBox === null) {

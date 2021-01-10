@@ -21,6 +21,7 @@ const solver = require("./solve");
 const solve = require("./solve");
 const compareExpressions = require("./compare_expressions").compareExpressions;
 const storage = require("./storage").storage;
+const solveSocratic = require("./solve_socratic");
 
 class User {
   constructor() {
@@ -96,6 +97,13 @@ class Page {
         id: ids.domElements.pages.solve.div,
         container: null,
         selectFunction: solver.selectSolverPage,
+      },
+      solveSocratic: {
+        name: "solveSocratic",
+        id: ids.domElements.pages.solveSocratic.div,
+        selectFunction: () => {
+          solveSocratic.solver.selectPage();
+        }
       },
       selectCourse: {
         name: "selectCourse",
@@ -328,7 +336,7 @@ class Page {
     if (this.storage.variables.currentPage.getValue() === this.pages.activateAccount.name) {
       return false;
     }
-    if (document.getElementById(ids.domElements.applicationIdentifiers.compareExpressions) !== null) {
+    if (document.getElementById(ids.domElements.pages.login.divLoginCalculatorPanel) === null) {
       return false;
     }
     return true;
@@ -490,7 +498,10 @@ class Page {
       }
       page.container.style.display = "none";
       if (page.menuButtonId !== null && page.menuButtonId !== undefined) {
-        document.getElementById(page.menuButtonId).classList.remove("buttonSelectPageSelected");
+        let button = document.getElementById(page.menuButtonId);
+        if (button !== null) {
+          button.classList.remove("buttonSelectPageSelected");
+        }
       }
     }
     let selectedPage = this.pages[inputPage];
@@ -499,7 +510,10 @@ class Page {
     }
     selectedPage.container.style.display = "";
     if (selectedPage.menuButtonId !== null && selectedPage.menuButtonId !== undefined) {
-      document.getElementById(selectedPage.menuButtonId).classList.add("buttonSelectPageSelected");
+      let button = document.getElementById(selectedPage.menuButtonId);
+      if (button !== null) {
+        button.classList.add("buttonSelectPageSelected");
+      }
     }
     this.selectPageFunction(inputPage);
   }

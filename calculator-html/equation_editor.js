@@ -5519,9 +5519,6 @@ class MathNode {
     rangeClone.selectNodeContents(this.element);
     rangeClone.setEnd(range.endContainer, range.endOffset);
     this.positionCaretBeforeKeyEvents = rangeClone.toString().length;// range.endOffset;
-    if (key === "ArrowRight" && previousPosition === this.positionCaretBeforeKeyEvents && !shiftHeld) {
-      this.positionCaretBeforeKeyEvents = range.startOffset;
-    }
     this.equationEditor.setLastFocused(this);
 
     this.equationEditor.positionDebugString = `Computed position: ${this.positionCaretBeforeKeyEvents}.`

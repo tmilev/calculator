@@ -2293,7 +2293,7 @@ class LaTeXParser {
     if (
       last.isExpression() &&
       secondToLast.isExpression() &&
-      latexConstants.isDigit(secondToLast.node.contentIfAtom())
+      latexConstants.isDigit(last.node.contentIfAtom())
     ) {
       if (secondToLast.node.type.type === knownTypes.horizontalMath.type && secondToLast.node.children.length > 0) {
         if (latexConstants.isDigit(secondToLast.node.children[secondToLast.node.children.length - 1].contentIfAtom())) {
@@ -2310,8 +2310,9 @@ class LaTeXParser {
       latexConstants.isDigit(secondToLast.node.contentIfAtom())
     ) {
       this.lastRuleName = "merge two digits";
-      let node = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [secondToLast.node, last.node]);
-      return this.replaceParsingStackTop(node, "", -2);
+      let node = mathNodeFactory.horizontalMath(this.equationEditor, secondToLast.node);
+      node.appendChild(last.node);
+      return this.replaceParsingStackTop(node, "", - 2);
     }
     if (thirdToLast.isExpression() && secondToLast.syntacticRole === "^" && last.isExpression()) {
       this.lastRuleName = "make exponent";

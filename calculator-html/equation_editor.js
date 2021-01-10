@@ -5867,6 +5867,11 @@ class MathNode {
         return new KeyHandlerResult(true, false);
       }
     }
+    let rightSibling = this.nextHorizontalSibling();
+    if (rightSibling !== null && rightSibling.type.type === knownTypes.baseWithExponent.type) {
+      rightSibling.focus(- 1);
+      return new KeyHandlerResult(true, false);
+    }
     this.positionCaretBeforeKeyEvents = - 1;
     cousinAtom.positionCaretBeforeKeyEvents = 0;
     return cousinAtom.backspace();
@@ -5975,6 +5980,15 @@ class MathNode {
       sibling.focusCancelOnce();
     }
     this.rightmostAtomChild().focus(1);
+    return true;
+  }
+
+  applyBackspaceToTheLeftAsLeftArrow() {
+    let sibling = this.previousHorizontalSibling();
+    if (sibling === null) {
+      return false;
+    }
+    sibling.rightmostAtomChild().focus(1);
     return true;
   }
 
@@ -7492,17 +7506,34 @@ class MathNodeBaseWithExponent extends MathNode {
     /**@type{ToLatexOptions|null} */
     options,
   ) {
-    let base = this.children[0].toLatex();
+    let base = this.children[0];
+    let baseLatex = base.toLatex();
     let exponent = this.children[1].toLatex();
-    return new LatexWithAnnotation(
-      `{${base}}^{${exponent}}`,
-      - 1,
-      - 1,
-    );
+    let useBracesInBase = false;
+    if (base.type.type === knownTypes.fraction.type) {
+      useBracesInBase = true;
+    }
+    if (useBracesInBase) {
+      return new LatexWithAnnotation(
+        `{${baseLatex}}^{${exponent}}`,
+        - 1,
+        - 1,
+      );
+    } else {
+      return new LatexWithAnnotation(
+        `${baseLatex}^{${exponent}}`,
+        - 1,
+        - 1,
+      );
+    }
   }
 
   applyBackspaceToTheRight() {
     return this.applyBackspaceToTheRightAsLeftArrow();
+  }
+
+  applyBackspaceToTheLeft() {
+    return this.applyBackspaceToTheLeftAsLeftArrow();
   }
 
   computeDimensions() {

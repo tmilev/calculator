@@ -2381,12 +2381,17 @@ class EquationEditorOptions {
     /**@type{HTMLElement|null} */
     this.debugLogContainer = options.debugLogContainer;
     /**@type{HTMLElement|null} */
+    this.svgContainer = options.svgContainer;
+    /**@type{HTMLElement|null} */
     this.latexInput = options.latexInput;
     /** @type{boolean} */
     this.logTiming = options.logTiming;
     /**@type{Function|null} */
     // Called on modification of the editor. Will provide two arguments: the editor and the MathNode being edited.
     this.editHandler = options.editHandler;
+    if (this.svgContainer === undefined) {
+      this.svgContainer = null;
+    }
     if (this.editable === undefined) {
       this.editable = true;
     }
@@ -2749,6 +2754,14 @@ class EquationEditor {
 
   updateDOM() {
     this.rootNode.updateDOM();
+  }
+
+  writeSVG() {
+    if (this.options.svgContainer === null) {
+      return;
+    }
+    this.options.svgContainer.textContent = "";
+    this.options.svgContainer.appendChild(new ScalableVectorGraphicsWriter().typeset(this.rootNode));
   }
 
   writeDebugInfo(
@@ -4180,6 +4193,7 @@ class MathNode {
   updateDOM() {
     this.updateDOMRecursive(0);
     this.equationEditor.updateAlignment();
+    this.equationEditor.writeSVG();
   }
 
   /** @returns {number} 
@@ -5008,6 +5022,7 @@ class MathNode {
       }
       this.equationEditor.writeLatexToInput(true);
       this.equationEditor.writeDebugInfo(null);
+      this.equationEditor.writeSVG();
       if (this.equationEditor.options.editHandler !== null) {
         this.equationEditor.options.editHandler(this.equationEditor, this);
       }
@@ -7182,6 +7197,36 @@ class MathNode {
     return ancestor.type.type !== knownTypes.root.type;
   }
 
+  toScalableVectorGraphicsAtomic(
+    /**@type{SVGElement}*/
+    container,
+    /**@type{BoundingBox} */
+    boundingBoxFromParent,
+  ) {
+    let result = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    result.setAttributeNS(null, "x", boundingBoxFromParent.left + this.boundingBox.left);
+    result.setAttributeNS(null, "y", boundingBoxFromParent.top + this.boundingBox.top + this.boundingBox.fractionLineHeight);
+    result.setAttributeNS(null, "fill", "red");
+    // result.style.color = "blue";
+    //    result.
+    result.appendChild(document.createTextNode(this.textContentOrInitialContent()));
+    container.appendChild(result);
+  }
+
+  toScalableVectorGraphics(
+    /**@type{SVGElement}*/
+    container,
+    /**@type{BoundingBox} */
+    boundingBoxFromParent,
+  ) {
+    let shiftedBoundingBox = new BoundingBox();
+    shiftedBoundingBox.left = this.boundingBox.left + boundingBoxFromParent.left;
+    shiftedBoundingBox.top = this.boundingBox.top + boundingBoxFromParent.top;
+    for (let i = 0; i < this.children.length; i++) {
+      this.children[i].toScalableVectorGraphics(container, shiftedBoundingBox);
+    }
+  }
+
   toString() {
     const result = [];
     if (this.isAtomic()) {
@@ -7385,6 +7430,25 @@ class MathNode {
   }
 }
 
+class ScalableVectorGraphicsWriter {
+  constructor() {
+    /**@type{HTMLElement|null} */
+    this.underConstruction = null;
+  }
+
+  /**@returns{HTMLElement} */
+  typeset(
+    /**@type{MathNode} */
+    input,
+  ) {
+    this.underConstruction = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    this.underConstruction.setAttributeNS(null, "width", input.boundingBox.width);
+    this.underConstruction.setAttributeNS(null, "height", input.boundingBox.height);
+    input.toScalableVectorGraphics(this.underConstruction, new BoundingBox());
+    return this.underConstruction;
+  }
+}
+
 class MathNodeAtom extends MathNode {
   constructor(
     /** @type {EquationEditor} */
@@ -7399,6 +7463,15 @@ class MathNodeAtom extends MathNode {
     options,
   ) {
     return this.toLatexWithAnnotationAtomic(options);
+  }
+
+  toScalableVectorGraphics(
+    /**@type{SVGElement}*/
+    container,
+    /**@type{BoundingBox} */
+    boundingBoxFromParent,
+  ) {
+    this.toScalableVectorGraphicsAtomic(container, boundingBoxFromParent);
   }
 }
 
@@ -7427,6 +7500,15 @@ class MathNodeAtomImmutable extends MathNode {
     parent.updateDOM();
     parent.focusRestore();
     return true;
+  }
+
+  toScalableVectorGraphics(
+    /**@type{SVGElement}*/
+    container,
+    /**@type{BoundingBox} */
+    boundingBoxFromParent,
+  ) {
+    this.toScalableVectorGraphicsAtomic(container, boundingBoxFromParent);
   }
 }
 
@@ -7591,6 +7673,22 @@ class MathNodeHorizontalMath extends MathNode {
     equationEditor,
   ) {
     super(equationEditor, knownTypes.horizontalMath);
+  }
+
+  toScalableVectorGraphics(
+    /**@type{SVGElement}*/
+    container,
+    /**@type{BoundingBox} */
+    boundingBoxFromParent,
+  ) {
+    let boundingBoxForChildren = new BoundingBox();
+    boundingBoxForChildren.top = this.boundingBox.top + boundingBoxFromParent.top;
+    boundingBoxForChildren.left = this.boundingBox.left + boundingBoxFromParent.left;
+    for (let i = 0; i < this.children.length; i++) {
+      let child = this.children[i];
+      child.toScalableVectorGraphics(container, boundingBoxForChildren);
+      boundingBoxForChildren.left = boundingBoxFromParent.left + child.boundingBox.left + child.boundingBox.width;
+    }
   }
 }
 
@@ -8158,7 +8256,6 @@ class MathNodeMatrix extends MathNode {
   toLatexWithAnnotation(
     /**@type{ToLatexOptions|null} */
     options,
-
   ) {
     if (this.element === null) {
       return new LatexWithAnnotation("[null)]", - 1, - 1);

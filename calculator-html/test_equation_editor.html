@@ -34,6 +34,7 @@
     const options = new EquationEditorOptions({
       latexInput: document.getElementById("latex-input-test"),
       debugLogContainer: document.getElementById("debug"),
+      svgContainer: document.getElementById("svgContainer"),
     });
     editor = new EquationEditor(editorElement, options);
     // The \caret command indicates the desired location of the caret. 
@@ -66,6 +67,7 @@
     <button id="matrix-button">2x2 matrix</button><br>
     <button id="custom-button">custom</button>
   </div>
+  <div id="svgContainer"></div><br>
   <div id="debug" style="display:normal"></div>
   <hr>
   <h2>How to use on your web site.</h2>

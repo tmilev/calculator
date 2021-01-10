@@ -671,12 +671,12 @@ public:
       global.fatal << "Number of rows of matrix vector number of elements. " << global.fatal;
     }
     output.makeZero(this->numberOfColumns);
-    Coefficient tempElt;
+    Coefficient coefficient;
     for (int i = 0; i < this->numberOfColumns; i ++) {
       for (int j = 0; j < this->numberOfRows; j ++) {
-        tempElt = this->elements[j][i];
-        tempElt *= standsOnTheLeft[j];
-        output[i] += tempElt;
+        coefficient = this->elements[j][i];
+        coefficient *= standsOnTheLeft[j];
+        output[i] += coefficient;
       }
     }
   }
@@ -830,17 +830,17 @@ public:
     if (left.size != this->numberOfColumns || right.size != this->numberOfRows) {
       global.fatal << "Scalar product using matrix: dimensions of vectors don't match. " << global.fatal;
     }
-    Coefficient Result, tempElt;
-    Result = ringZero;
+    Coefficient result, contribution;
+    result = ringZero;
     for (int i = 0; i < this->numberOfRows; i ++) {
       for (int j = 0; j < this->numberOfColumns; j ++) {
-        tempElt = left[i];
-        tempElt *= this->elements[i][j];
-        tempElt *= right[j];
-        Result += tempElt;
+        contribution = left[i];
+        contribution *= this->elements[i][j];
+        contribution *= right[j];
+        result += contribution;
       }
     }
-    return Result;
+    return result;
   }
   inline Coefficient& operator()(unsigned i, unsigned j) const {
     return (*this)(static_cast<signed>(i), static_cast<signed>(j));
@@ -892,12 +892,12 @@ public:
     return false;
   }
   void makeLinearOperatorFromDomainAndRange(Vectors<Coefficient>& domain, Vectors<Coefficient>& range) {
-    Matrix<Coefficient> A;
-    Matrix<Coefficient> B;
-    A.assignVectorsToRows(domain);
-    B.assignVectorsToRows(range);
-    A.invert();
-    (*this) = A * B;
+    Matrix<Coefficient> domainMatrix;
+    Matrix<Coefficient> codomainMatrix;
+    domainMatrix.assignVectorsToRows(domain);
+    codomainMatrix.assignVectorsToRows(range);
+    domainMatrix.invert();
+    (*this) = domainMatrix * codomainMatrix;
     this->transpose();
   }
   void rowTimesScalar(int rowIndex, const Coefficient& scalar);
@@ -909,11 +909,15 @@ public:
   }
   void addTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const Coefficient& scalar);
   void addTwoRowsWithCarbonCopy(
-    int fromRowIndex, int ToRowIndex, int StartColIndex, const Coefficient& scalar, Matrix<Coefficient>* theCarbonCopy
+    int fromRowIndex,
+    int toRowIndex,
+    int startColumnIndex,
+    const Coefficient& scalar,
+    Matrix<Coefficient>* carbonCopy
   ) {
-    this->addTwoRows(fromRowIndex, ToRowIndex, StartColIndex, scalar);
-    if (theCarbonCopy != 0) {
-      theCarbonCopy->addTwoRows(fromRowIndex, ToRowIndex, StartColIndex, scalar);
+    this->addTwoRows(fromRowIndex, toRowIndex, startColumnIndex, scalar);
+    if (carbonCopy != 0) {
+      carbonCopy->addTwoRows(fromRowIndex, toRowIndex, startColumnIndex, scalar);
     }
   }
   void subtractRows(int indexRowWeSubtractFrom, int indexSubtracted, int startColumnIndex, const Coefficient& scalar);
@@ -2970,7 +2974,7 @@ public:
   void operator*=(const PolynomialModuloPolynomial<Coefficient>& other);
   void operator+=(const PolynomialModuloPolynomial<Coefficient>& other);
   void operator-=(const PolynomialModuloPolynomial<Coefficient>& other);
-  std::string toString(FormatExpressions* theFormat = nullptr);
+  std::string toString(FormatExpressions* format = nullptr);
   PolynomialModuloPolynomial<Coefficient> one();
   static unsigned int hashFunction(const PolynomialModuloPolynomial<Coefficient>& input);
   unsigned int hashFunction() const;

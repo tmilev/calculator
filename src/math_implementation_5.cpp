@@ -36,10 +36,10 @@ std::string MonomialWeylAlgebra::toString(FormatExpressions* format) const {
   return out.str();
 }
 
-std::string QuasiDifferentialMononomial::toString(FormatExpressions* theFormat) const {
+std::string QuasiDifferentialMononomial::toString(FormatExpressions* format) const {
   std::stringstream out;
-  out << this->theWeylMon.toString(theFormat) << "\\otimes ";
-  out << this->theMatMon.toString(theFormat);
+  out << this->theWeylMon.toString(format) << "\\otimes ";
+  out << this->theMatMon.toString(format);
   return out.str();
 }
 

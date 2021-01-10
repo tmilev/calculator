@@ -3150,6 +3150,7 @@ class EquationEditor {
     this.resetSelectionLeaveRangesIntact();
     parent.updateDOM();
     parent.focusRestore();
+    this.writeLatexToInput(true);
     this.writeDebugInfo(null);
     return new KeyHandlerResult(true, true);
   }

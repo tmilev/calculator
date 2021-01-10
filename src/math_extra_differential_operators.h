@@ -31,7 +31,7 @@ class QuasiDifferentialMononomial {
     }
     return this->theMatMon>other.theMatMon;
   }
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
 };
 
 template <class Coefficient>

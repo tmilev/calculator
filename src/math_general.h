@@ -90,7 +90,7 @@ public:
   List<int> generatorsIndices;
   List<Coefficient> powers;
   bool flagDeallocated;
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   bool isEqualToOne() const {
     return this->generatorsIndices.size == 0;
   }
@@ -772,8 +772,8 @@ public:
       this->actOnVectorColumn(inputOutput[i], ringZero);
     }
   }
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringLatex(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toStringLatex(FormatExpressions* format = nullptr) const;
   std::string toStringSystemLatex(
     Matrix<Coefficient>* constTerms = 0,
     FormatExpressions* theFormat = nullptr
@@ -807,16 +807,16 @@ public:
   }
   void actOnMonomialAsDifferentialOperator(const MonomialP& input, Polynomial<Rational>& output);
   void switchRows(int row1, int row2);
-  void switchRowsWithCarbonCopy(int row1, int row2, Matrix<Coefficient>* theCarbonCopy) {
+  void switchRowsWithCarbonCopy(int row1, int row2, Matrix<Coefficient>* carbonCopy) {
     this->switchRows(row1, row2);
-    if (theCarbonCopy != 0) {
-      theCarbonCopy->switchRows(row1, row2);
+    if (carbonCopy != 0) {
+      carbonCopy->switchRows(row1, row2);
     }
   }
-  void setNumberOfVariables(int goalNumVars) {
+  void setNumberOfVariables(int desiredNumberOfVariables) {
     for (int i = 0; i < this->numberOfRows; i ++) {
       for (int j = 0; j < this->numberOfColumns; j ++) {
-        this->elements[i][j].setNumberOfVariables(goalNumVars);
+        this->elements[i][j].setNumberOfVariables(desiredNumberOfVariables);
       }
     }
   }
@@ -877,7 +877,7 @@ public:
     }
     return true;
   }
-  void getVectorFromColumn(int colIndex, Vector<Coefficient>& output) const;
+  void getVectorFromColumn(int columnIndex, Vector<Coefficient>& output) const;
   void getVectorFromRow(int rowIndex, Vector<Coefficient>& output) const;
   int findPivot(int columnIndex, int rowStartIndex);
   bool findFirstNonZeroElementSearchEntireRow(Coefficient& output) {
@@ -1234,18 +1234,16 @@ public:
     Matrix<Coefficient>& matb,
     Vector<Coefficient>* outputSolution = 0
   );
-  static void computePotentialChangeGradient(
-    Matrix<Coefficient>& matA,
-    Selection& BaseVariables,
+  static void computePotentialChangeGradient(Matrix<Coefficient>& matA,
+    Selection& baseVariables,
     int numberOfTrueVariables,
-    int ColumnIndex,
+    int columnIndex,
     Rational& outputChangeGradient,
     bool& hasAPotentialLeavingVariable
   );
-  static void getMaxMovementAndLeavingVariableRow(
-    Rational& maxMovement,
-    int& LeavingVariableRow,
-    int EnteringVariable,
+  static void getMaxMovementAndLeavingVariableRow(Rational& maxMovement,
+    int& leavingVariableRow,
+    int enteringVariable,
     Matrix<Coefficient>& tempMatA,
     Vector<Coefficient>& inputVectorX,
     Selection& BaseVariables
@@ -4251,21 +4249,21 @@ bool Vectors<Coefficient>::getNormalSeparatingCones(
 template<class Coefficient>
 void Matrix<Coefficient>::computePotentialChangeGradient(
   Matrix<Coefficient>& matA,
-  Selection& BaseVariables,
+  Selection& baseVariables,
   int numberOfTrueVariables,
-  int ColumnIndex,
+  int columnIndex,
   Rational& outputChangeGradient,
   bool& hasAPotentialLeavingVariable
 ) {
   hasAPotentialLeavingVariable = false;
   outputChangeGradient.makeZero();
   for (int j = 0; j < matA.numberOfRows; j ++) {
-    if (BaseVariables.elements[j] >= numberOfTrueVariables) {
-      outputChangeGradient += matA.elements[j][ColumnIndex];
+    if (baseVariables.elements[j] >= numberOfTrueVariables) {
+      outputChangeGradient += matA.elements[j][columnIndex];
     }
-    hasAPotentialLeavingVariable = hasAPotentialLeavingVariable || matA.elements[j][ColumnIndex].isPositive();
+    hasAPotentialLeavingVariable = hasAPotentialLeavingVariable || matA.elements[j][columnIndex].isPositive();
   }
-  if (ColumnIndex >= numberOfTrueVariables) {
+  if (columnIndex >= numberOfTrueVariables) {
     outputChangeGradient -= 1;
   }
 }
@@ -4273,23 +4271,23 @@ void Matrix<Coefficient>::computePotentialChangeGradient(
 template<class Coefficient>
 void Matrix<Coefficient>::getMaxMovementAndLeavingVariableRow(
   Rational& maxMovement,
-  int& LeavingVariableRow,
-  int EnteringVariable,
+  int& leavingVariableRow,
+  int enteringVariable,
   Matrix<Coefficient>& tempMatA,
   Vector<Coefficient>& inputVectorX,
   Selection& BaseVariables
 ) {
-  LeavingVariableRow = - 1;
+  leavingVariableRow = - 1;
   maxMovement.makeZero();
   for (int i = 0; i < tempMatA.numberOfRows; i ++) {
     Rational tempRat;
-    tempRat.assign(tempMatA.elements[i][EnteringVariable]);
+    tempRat.assign(tempMatA.elements[i][enteringVariable]);
     if (tempRat.isPositive()) {
       tempRat.invert();
       tempRat.multiplyBy(inputVectorX[BaseVariables.elements[i]]);
-      if (maxMovement.isGreaterThan(tempRat) || (LeavingVariableRow == - 1)) {
+      if (maxMovement.isGreaterThan(tempRat) || (leavingVariableRow == - 1)) {
         maxMovement.assign(tempRat);
-        LeavingVariableRow = i;
+        leavingVariableRow = i;
       }
     }
   }
@@ -4502,11 +4500,11 @@ void MonomialTensor<Coefficient, inputHashFunction>::multiplyByGeneratorPowerOnT
 }
 
 template <class Coefficient, unsigned int inputHashFunction(const Coefficient&)>
-std::string MonomialTensor<Coefficient, inputHashFunction>::toString(FormatExpressions* theFormat) const {
+std::string MonomialTensor<Coefficient, inputHashFunction>::toString(FormatExpressions* format) const {
   if (this->generatorsIndices.size == 0) {
     return "1";
   }
-  std::string theLetter = theFormat == nullptr ?  "g" : theFormat->chevalleyGgeneratorLetter;
+  std::string theLetter = format == nullptr ?  "g" : format->chevalleyGgeneratorLetter;
   std::string letters = "abcdefghijklmnopqrstuvwxyz";
   std::string exponents[10] = {"⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"};
   std::stringstream out;
@@ -4566,10 +4564,10 @@ bool MonomialTensor<Coefficient, inputHashFunction>::simplifyEqualConsecutiveGen
 }
 
 template <typename Coefficient>
-std::string Matrix<Coefficient>::toStringLatex(FormatExpressions* theFormat) const {
+std::string Matrix<Coefficient>::toStringLatex(FormatExpressions* format) const {
   FormatExpressions formatCopy;
-  if (theFormat != nullptr) {
-    formatCopy = *theFormat;
+  if (format != nullptr) {
+    formatCopy = *format;
   }
   formatCopy.flagUseLatex = true;
   formatCopy.flagUseHTML = false;
@@ -4623,17 +4621,17 @@ std::string Matrix<Coefficient>::toStringSystemLatex(
 }
 
 template <typename Coefficient>
-std::string Matrix<Coefficient>::toString(FormatExpressions* theFormat) const {
+std::string Matrix<Coefficient>::toString(FormatExpressions* format) const {
   std::stringstream out;
   std::string tempS;
-  bool useHtml    = (theFormat == nullptr) ? true : theFormat->flagUseHTML;
-  bool useLatex   = (theFormat == nullptr) ? false : theFormat->flagUseLatex;
-  bool usePmatrix = (theFormat == nullptr) ? true : theFormat->flagUsePmatrix;
+  bool useHtml    = (format == nullptr) ? true : format->flagUseHTML;
+  bool useLatex   = (format == nullptr) ? false : format->flagUseLatex;
+  bool usePmatrix = (format == nullptr) ? true : format->flagUsePmatrix;
   if (useHtml) {
     out << "<table>";
   }
   if (useLatex) {
-    int verticalLineIndex = theFormat == nullptr ? - 1 : theFormat->matrixColumnVerticalLineIndex;
+    int verticalLineIndex = format == nullptr ? - 1 : format->matrixColumnVerticalLineIndex;
     if (usePmatrix) {
       out << "\\begin{pmatrix}";
     } else {
@@ -4653,7 +4651,7 @@ std::string Matrix<Coefficient>::toString(FormatExpressions* theFormat) const {
       out << "<tr>";
     }
     for (int j = 0; j < this->numberOfColumns; j ++) {
-      tempS = (*this)(i, j).toString(theFormat);
+      tempS = (*this)(i, j).toString(format);
       if (useHtml) {
         out << "<td>";
       }
@@ -6700,10 +6698,10 @@ void Matrix<Coefficient>::getVectorFromRow(int rowIndex, Vector<Coefficient>& ou
 }
 
 template<typename Coefficient>
-void Matrix<Coefficient>::getVectorFromColumn(int colIndex, Vector<Coefficient>& output) const {
+void Matrix<Coefficient>::getVectorFromColumn(int columnIndex, Vector<Coefficient>& output) const {
   output.setSize(this->numberOfRows);
   for (int i = 0; i < this->numberOfRows; i ++) {
-    output[i] = this->elements[i][colIndex];
+    output[i] = this->elements[i][columnIndex];
   }
 }
 

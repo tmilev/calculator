@@ -1095,6 +1095,7 @@ function mathFromLatex(
     editable: editable,
     sanitizeLatexSource: sanitizeLatexSource,
     removeDisplayStyle: removeDisplayStyle,
+    logTiming: true,
   }));
   result.writeLatex(latex);
   return result;
@@ -1680,7 +1681,7 @@ class LaTeXParser {
      */
     this.dummyParsingElements = 6;
     /**@type{boolean} */
-    this.debug = true;
+    this.debug = false;
     /**@type{HTMLElement[][]} */
     this.reductionLog = [];
     /**@type{string} */
@@ -1749,9 +1750,16 @@ class LaTeXParser {
       }
       return this.constructError();
     }
+    let elapsedTime = new Date().getTime() - this.startTime;
+    if (elapsedTime > 200 && this.equationEditor.options.logTiming) {
+      console.log(`Parsing took too long: ${elapsedTime}ms`);
+    }
     secondToLastElement.node.normalizeHorizontalMathRecursive();
     if (this.equationEditor.options.editable) {
       secondToLastElement.node.ensureEditableAtomsRecursive();
+    }
+    if (elapsedTime > 200 && this.equationEditor.options.logTiming) {
+      console.log(`Normalization+parsing took too long: ${elapsedTime}ms`);
     }
     // let elapsedTime = new Date().getTime() - this.startTime;
     return secondToLastElement.node;
@@ -2282,6 +2290,29 @@ class LaTeXParser {
       let node = mathNodeFactory.baseWithSubscript(this.equationEditor, thirdToLast.node, last.node);
       return this.replaceParsingStackTop(node, "", - 3);
     }
+    if (
+      last.isExpression() &&
+      secondToLast.isExpression() &&
+      latexConstants.isDigit(secondToLast.node.contentIfAtom())
+    ) {
+      if (secondToLast.node.type.type === knownTypes.horizontalMath.type && secondToLast.node.children.length > 0) {
+        if (latexConstants.isDigit(secondToLast.node.children[secondToLast.node.children.length - 1].contentIfAtom())) {
+          this.lastRuleName = "merge digits into horizontal math";
+          secondToLast.node.appendChild(last.node);
+          return this.decreaseParsingStack(1);
+        }
+      }
+    }
+    if (
+      last.isExpression() &&
+      secondToLast.isExpression() &&
+      latexConstants.isDigit(last.node.contentIfAtom()) &&
+      latexConstants.isDigit(secondToLast.node.contentIfAtom())
+    ) {
+      this.lastRuleName = "merge two digits";
+      let node = mathNodeFactory.horizontalMathFromArray(this.equationEditor, [secondToLast.node, last.node]);
+      return this.replaceParsingStackTop(node, "", -2);
+    }
     if (thirdToLast.isExpression() && secondToLast.syntacticRole === "^" && last.isExpression()) {
       this.lastRuleName = "make exponent";
       let node = mathNodeFactory.baseWithExponent(this.equationEditor, thirdToLast.node, last.node);
@@ -2350,6 +2381,8 @@ class EquationEditorOptions {
     this.debugLogContainer = options.debugLogContainer;
     /**@type{HTMLElement|null} */
     this.latexInput = options.latexInput;
+    /** @type{boolean} */
+    this.logTiming = options.logTiming;
     /**@type{Function|null} */
     // Called on modification of the editor. Will provide two arguments: the editor and the MathNode being edited.
     this.editHandler = options.editHandler;
@@ -2370,6 +2403,9 @@ class EquationEditorOptions {
     }
     if (this.editHandler === undefined) {
       this.editHandler = null;
+    }
+    if (this.logTiming === undefined) {
+      this.logTiming = false;
     }
     /** @type{boolean} */
     this.showLatexOnDoubleClick = !this.editable;
@@ -2778,6 +2814,9 @@ class EquationEditor {
       this.rootNode.element.textContent = "";
     }
     let parser = new LaTeXParser(this, latex);
+    if (this.options.debugLogContainer !== null) {
+      parser.debug = true;
+    }
     let newContent = parser.parse();
     if (newContent === null) {
       this.writeDebugInfo(parser);
@@ -8623,6 +8662,9 @@ function typeset(
 ) {
   if (style === "") {
     style = "font-family:'Times New Roman'; display:inline-block;";
+  }
+  if (logTiming) {
+    console.log("Logging parsing speed times; to turn off, set logTiming=false.")
   }
   new MathTagCoverter(style, sanitizeLatexSource, removeDisplayStyle, logTiming).typeset(toBeModified);
 }

@@ -3563,15 +3563,27 @@ class EquationEditor {
     /** @type {string} */
     key,
   ) {
+    console.log("DEBUG: about to comptue new selection");
     let newSelection = this.computeNewSelectionFromShiftKey(key);
     if (newSelection === null) {
+      console.log("DEBUG: new selection is null");
       return false;
     }
     if (newSelection.element === null) {
+      console.log("DEBUG: new selection element is null");
       return false;
     }
     this.selectionEnd = newSelection;
-    return this.selectFromElement(newSelection.element);
+    setTimeout(() => {
+      this.selectFromElement(newSelection.element);
+    }, 0);
+    if (this.selectionNoMoreDefault) {
+      return true;
+    }
+    if (newSelection.element !== this.selectionStart.element) {
+      return true;
+    }
+    return false;
   }
 
   /** @returns{boolean} whether the default browser selection action should be prevented. */
@@ -3581,10 +3593,14 @@ class EquationEditor {
   ) {
     this.mouseIgnoreNextClick = true;
     if (element === this.selectionStart.element && !this.selectionNoMoreDefault) {
+      console.log("DEBUG: inside selection.");
       this.selectionStartExpanded.assign(this.selectionStart);
       this.selectionEnd.element.storeCaretPosition("", false);
       this.selectionEnd.position = this.selectionEnd.element.positionCaretBeforeKeyEvents;
-      if (this.selectionEnd.position === this.selectionStart.position && this.selectionEnd.element.selectionLength !== 0) {
+      if (
+        this.selectionEnd.position === this.selectionStart.position &&
+        this.selectionEnd.element.selectionLength !== 0
+      ) {
         this.selectionEnd.position -= this.selectionEnd.element.selectionLength;
       }
       this.selectionEndExpanded.assign(this.selectionEnd);

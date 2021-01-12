@@ -468,7 +468,6 @@ class InputPanelData {
     /**@type{equation_editor.MathNode} */
     unusedNode,
   ) {
-    // useful event handlers
     if (this.ignoreNextEditorEvent) {
       return;
     }

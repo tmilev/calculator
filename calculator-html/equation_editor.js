@@ -919,6 +919,14 @@ class MathNodeWithCaretPosition {
     }
   }
 
+  assign(
+    /**@type{MathNodeWithCaretPosition} */
+    other,
+  ) {
+    this.element = other.element;
+    this.position = other.position;
+  }
+
   /**@returns{number} */
   getPositionWholeItemIfNegative(
     /**@type{number} If position is negative, 
@@ -2526,6 +2534,65 @@ class CircularBuffer {
   }
 }
 
+class FocusInformation {
+  constructor() {
+    /** @type {MathNode|null} Used to write to the last focused node.*/
+    this.lastFocused = null;
+    /** @type{MathNodeWithCaretPosition} */
+    this.lastSelectionStart = new MathNodeWithCaretPosition(null, -1);
+    /** @type{MathNodeWithCaretPosition} */
+    this.lastSelectionStartExpanded = new MathNodeWithCaretPosition(null, - 1);
+    /** @type{MathNodeWithCaretPosition} */
+    this.lastSelectionEnd = new MathNodeWithCaretPosition(null, -1);
+    /** @type{MathNodeWithCaretPosition} */
+    this.lastSelectionEndExpanded = new MathNodeWithCaretPosition(null, -1);
+  }
+
+  setLastFocused(
+    /**@type{MathNode|null} */
+    lastFocused,
+  ) {
+    this.lastFocused = lastFocused;
+  }
+
+  setLastSelection(
+    /**@type{EquationEditor} */
+    editor,
+  ) {
+    this.lastSelectionStart.assign(editor.selectionStart);
+    this.lastSelectionStartExpanded.assign(editor.selectionStartExpanded);
+    this.lastSelectionEnd.assign(editor.selectionEnd);
+    this.lastSelectionEndExpanded.assign(editor.selectionEndExpanded);
+  }
+
+  restoreSelection(
+    /**@type{EquationEditor} */
+    editor,
+  ) {
+    editor.selectionStart.assign(this.lastSelectionStart);
+    editor.selectionStartExpanded.assign(this.lastSelectionStartExpanded);
+    editor.selectionEnd.assign(this.lastSelectionEnd);
+    editor.selectionEndExpanded.assign(this.lastSelectionEndExpanded);
+  }
+
+  /**@returns {HTMLElement[]} */
+  toHtmlDebugData() {
+    let result = [];
+    if (this.lastFocused === null) {
+      return result;
+    }
+    result.push(document.createElement("br"));
+    result.push(document.createTextNode(
+      `Last focused: ${this.lastFocused.toString()}, position: ${this.lastFocused.positionCaretBeforeKeyEvents}`
+    ));
+    if (this.lastFocused.isDetached()) {
+      result.push(document.createElement("br"));
+      result.push(boldElement("Detached last focused.", "red"));
+    }
+    return result;
+  }
+}
+
 class EquationEditor {
   constructor(
     /** @type{HTMLElement} */
@@ -2600,10 +2667,7 @@ class EquationEditor {
         this.writeLatexFromInput();
       });
     }
-    /** @type {MathNode|null} Used to write to the last focused node.*/
-    this.lastFocused = null;
-    /** @type{number} */
-    this.lastCaretPosition = - 1;
+    this.focusInformation = new FocusInformation();
     /** @type{string} */
     this.lastSelectionAction = "";
     /** @type{number} */
@@ -2747,6 +2811,10 @@ class EquationEditor {
     this.eventCatcher.focus(1);
   }
 
+  storeSelection() {
+    this.focusInformation.setLastSelection(this);
+  }
+
   updateDOM() {
     this.rootNode.updateDOM();
   }
@@ -2836,7 +2904,7 @@ class EquationEditor {
     /**@type {string} */
     latex,
   ) {
-    if (this.lastFocused === null) {
+    if (this.focusInformation.lastFocused === null) {
       let toWriteTo = this.rootNode.rightmostAtomChild();
       if (toWriteTo === null) {
         console.log("Unexpected failure to find atom child.");
@@ -2846,9 +2914,9 @@ class EquationEditor {
       toWriteTo.writeLatex(latex);
       return;
     }
-    let lastFocusedReference = this.lastFocused;
+    let lastFocusedReference = this.focusInformation.lastFocused;
     // Ensure reference to last modified is wiped early.
-    this.lastFocused = null;
+    this.focusInformation.lastFocused = null;
     lastFocusedReference.writeLatex(latex);
   }
 
@@ -2867,12 +2935,7 @@ class EquationEditor {
     /**@type{MathNode|null} */
     lastFocused,
   ) {
-    this.lastFocused = lastFocused;
-    if (this.lastFocused === null) {
-      this.lastCaretPosition = - 1;
-      return;
-    }
-    this.lastCaretPosition = lastFocused.positionCaretBeforeKeyEvents;
+    this.focusInformation.setLastFocused(lastFocused);
   }
 
   /**@returns {HTMLElement[]} */
@@ -2886,15 +2949,9 @@ class EquationEditor {
       result.push(document.createElement("br"));
       result.push(document.createTextNode(`Last copied: ${this.lastCopied}`))
     }
-    if (this.lastFocused !== null) {
-      result.push(document.createElement("br"));
-      result.push(document.createTextNode(
-        `Last focused: ${this.lastFocused.toString()}, position: ${this.lastFocused.positionCaretBeforeKeyEvents}`
-      ));
-      if (this.lastFocused.isDetached()) {
-        result.push(document.createElement("br"));
-        result.push(boldElement("Detached last focused.", "red"));
-      }
+    let focusInformation = this.focusInformation.toHtmlDebugData();
+    for (let i = 0; i < focusInformation.length; i++) {
+      result.push(focusInformation[i]);
     }
     result.push(document.createElement("br"));
     result.push(document.createTextNode(`History: ${this.toStringHistory()}`));
@@ -2904,6 +2961,8 @@ class EquationEditor {
     }
     result.push(document.createElement("br"));
     result.push(document.createTextNode(`Latex selection: ${latexWithAnnotation.selectionStart}, ${latexWithAnnotation.selectionEnd}`));
+    result.push(document.createElement("br"));
+    result.push(document.createTextNode(this.toStringSelection()));
     result.push(document.createElement("br"));
     result.push(document.createTextNode(`Structure: `));
     let elements = this.rootNode.toHtmlDebugData(0);
@@ -2938,7 +2997,7 @@ class EquationEditor {
     /**@type{string} */
     key,
   ) {
-    let focused = this.resetSelectionFocusBestChoice();
+    let focused = this.restoreSelectionOrFocusBestChoice();
     this.dispatchKeyToNode(focused, key);
   }
 
@@ -2955,21 +3014,26 @@ class EquationEditor {
       focused.focus(0);
       return;
     }
-    focused.handleKeyDownDontComputeCaretPosition(new KeyboardEvent(
+    let event = new KeyboardEvent(
       "keydown", {
       key: key,
-    }));
+    });
+    if (focused === this.eventCatcher) {
+      this.handleKeyDownCatchAll(event);
+      return;
+    }
+    focused.handleKeyDownDontComputeCaretPosition(event);
   }
 
   /**@returns{MathNode} */
   getLastFocused() {
-    if (this.lastFocused === null) {
+    if (this.focusInformation.lastFocused === null) {
       return this.rootNode.rightmostAtomChild();
     }
-    if (this.lastFocused.isDetached()) {
+    if (this.focusInformation.lastFocused.isDetached()) {
       return this.rootNode.rightmostAtomChild();
     }
-    return this.lastFocused;
+    return this.focusInformation.lastFocused;
   }
 
   /**@returns{KeyHandlerResult} */
@@ -2982,6 +3046,15 @@ class EquationEditor {
     this.initializeSelectionStart(target);
     let preventDefault = this.computeSelectionEndFromShiftKey(arrowKey);
     return new KeyHandlerResult(preventDefault, preventDefault);
+  }
+
+  /**@returns{MathNode} The node that was focused or the event catcher. */
+  restoreSelectionOrFocusBestChoice() {
+    if (this.hasSelection()) {
+      this.eventCatcher.focus(0);
+      return this.eventCatcher;
+    }
+    return this.resetSelectionFocusBestChoice();
   }
 
   /**@returns{MathNode} The node that was focused. */
@@ -3007,6 +3080,23 @@ class EquationEditor {
       result.positionCaretBeforeKeyEvents = position;
     }
     return result;
+  }
+
+  makeSqrtFromSelection(
+    /** @type{SplitBySelectionResult} */
+    splitBySelection,
+  ) {
+    let ancestor = splitBySelection.ancestor;
+    ancestor.removeAllChildren();
+    let underTheRadical = mathNodeFactory.horizontalMathFromArray(this, splitBySelection.split);
+    underTheRadical.ensureEditableAtoms();
+    let sqrt = mathNodeFactory.sqrt(this, underTheRadical, null);
+    ancestor.appendChildren(splitBySelection.beforeSplit);
+    ancestor.appendChild(sqrt);
+    ancestor.appendChildren(splitBySelection.afterSplit);
+    ancestor.ensureEditableAtoms();
+    ancestor.updateDOM();
+    sqrt.children[2].focusStandard(0);
   }
 
   makeFractionNumeratorFromSelection(
@@ -3105,6 +3195,13 @@ class EquationEditor {
         return;
       case "/":
         this.makeFractionNumeratorFromSelection(this.splitAtomsBySelection());
+        return;
+      case "\\sqrt":
+        if (!this.hasSelection()) {
+          this.resetSelectionFocusBestChoice().makeSqrt();
+          return;
+        }
+        this.makeSqrtFromSelection(this.splitAtomsBySelection());
         return;
       case "Delete":
       case "Backspace":
@@ -3227,8 +3324,8 @@ class EquationEditor {
     }
     let endAnnotation = this.selectionEnd.element.toLatexWithAnnotation(null);
     let result = `Selection: from: ${this.selectionStartExpanded.toString()} to: ${this.selectionEndExpanded.toString()}.`;
-    result += `<br>Actually selected: ${this.selectionStart.toString()} to: ${this.selectionEnd.toString()}.`;
-    result += `<br>Latex from: ${startAnnotationString} to ${endAnnotation.toString()}`;
+    result += `Actually selected: ${this.selectionStart.toString()} to: ${this.selectionEnd.toString()}.`;
+    result += `Latex from: ${startAnnotationString} to ${endAnnotation.toString()}`;
     return result;
   }
 
@@ -3308,6 +3405,7 @@ class EquationEditor {
     }
     let start = this.selectionStartExpanded;
     let end = this.selectionEndExpanded;
+
     if (end.element.isToTheLeftOf(start.element)) {
       // Swap end and start
       let temporary = start;
@@ -3481,9 +3579,17 @@ class EquationEditor {
     /** @type {MathNode} */
     element,
   ) {
+    this.mouseIgnoreNextClick = true;
     if (element === this.selectionStart.element && !this.selectionNoMoreDefault) {
-      this.selectionStartExpanded.element = this.selectionStart.element;
-      this.selectionStartExpanded.position = this.selectionStart.position;
+      this.selectionStartExpanded.assign(this.selectionStart);
+      this.selectionEnd.element.storeCaretPosition("", false);
+      this.selectionEnd.position = this.selectionEnd.element.positionCaretBeforeKeyEvents;
+      if (this.selectionEnd.position === this.selectionStart.position && this.selectionEnd.element.selectionLength !== 0) {
+        this.selectionEnd.position -= this.selectionEnd.element.selectionLength;
+      }
+      this.selectionEndExpanded.assign(this.selectionEnd);
+      this.storeSelection();
+      this.writeDebugInfo(null);
       return false;
     }
     this.preventEditorBlur = true;
@@ -3497,11 +3603,11 @@ class EquationEditor {
     this.selectionEnd.element = element;
     this.selectionEnd.position = - 1;
     this.computeSelectionExpanded();
-    this.mouseIgnoreNextClick = true;
     this.highlightSelectionMouse();
     if (this.options.debugLogContainer !== null) {
       this.lastSelectionAction = `Mouse move selection above ${element.toString()}.`;
     }
+    this.storeSelection();
     this.writeDebugInfo(null);
     this.preventEditorBlur = false;
     return true;
@@ -3688,8 +3794,16 @@ class EquationEditor {
     this.mouseSelectionStarted = true;
     this.mouseSelectionVisible = true;
     if (this.options.debugLogContainer !== null) {
-      this.lastSelectionAction = `Mouse selection start over ${element.toString()}.`;
+      this.lastSelectionAction = `Mouse selection start over ${element.toString()}, position:${element.positionCaretBeforeKeyEvents}.`;
     }
+    // The mouse down event may fire before the built-in element ranges are updated.
+    // So, release the event handling to allow built-in processing to take place, and 
+    // schedule an element update immediately after.
+    setTimeout(() => {
+      element.storeCaretPosition("", false);
+      this.selectionStart.position = element.positionCaretBeforeKeyEvents;
+      this.writeDebugInfo(null);
+    }, 0);
     this.writeDebugInfo(null);
     return;
   }
@@ -3703,6 +3817,7 @@ class EquationEditor {
     }
     this.mouseSelectionStarted = false;
     this.preventEditorBlur = false;
+    this.writeDebugInfo(null);
     e.preventDefault();
     e.stopPropagation();
   }
@@ -3885,6 +4000,8 @@ class MathNode {
     this.indexInParent = - 1;
     /** @type {number} */
     this.positionCaretBeforeKeyEvents = - 1;
+    /** @type {number} */
+    this.selectionLength = - 1;
     /** @type {number} */
     this.desiredCaretPosition = - 1;
     /** @type {string} */
@@ -4091,9 +4208,11 @@ class MathNode {
     e.preventDefault();
     if (this.equationEditor.mouseIgnoreNextClick) {
       this.equationEditor.mouseIgnoreNextClick = false;
-      this.equationEditor.resetSelectionDOMSelectEventCatcher();
-      if (this.equationEditor.options.debugLogContainer !== null) {
-        this.equationEditor.lastSelectionAction = "Set mouse ignore next to true.";
+      if (this.equationEditor.selectionEscapedOriginalAtom()) {
+        this.equationEditor.resetSelectionDOMSelectEventCatcher();
+        if (this.equationEditor.options.debugLogContainer !== null) {
+          this.equationEditor.lastSelectionAction = "Set mouse ignore next to true.";
+        }
       }
       this.equationEditor.writeDebugInfo(null);
       return;
@@ -4999,6 +5118,7 @@ class MathNode {
     // release the thread so the browser can finish computations
     // with the released element. 
     setTimeout(() => {
+      this.equationEditor.storeSelection();
       if (handlerResult.updateAlignment) {
         this.storeCaretPosition(event.key, event.shiftKey);
         this.element.style.maxWidth = "";
@@ -5559,11 +5679,12 @@ class MathNode {
     rangeClone.selectNodeContents(this.element);
     rangeClone.setEnd(range.endContainer, range.endOffset);
     this.positionCaretBeforeKeyEvents = rangeClone.toString().length;// range.endOffset;
+    this.selectionLength = range.toString().length;
     this.equationEditor.setLastFocused(this);
-
     this.equationEditor.positionDebugString = `Computed position: ${this.positionCaretBeforeKeyEvents}.`
     this.equationEditor.positionDebugString += `Range: [${range}], clone: [${rangeClone}], previous position: ${previousPosition}.`;
     this.equationEditor.positionDebugString += `end offset: ${range.endOffset}, start offset: ${range.startOffset}`;
+    this.equationEditor.writeDebugInfo(null);
   }
 
   storeCaretPosition(
@@ -5577,6 +5698,7 @@ class MathNode {
     }
     if (this.type.type !== knownTypes.atom.type) {
       this.positionCaretBeforeKeyEvents = - 1;
+      this.selectionLength = 0;
       this.equationEditor.setLastFocused(null);
       return;
     }
@@ -6172,7 +6294,7 @@ class MathNode {
   makeSqrt() {
     let splitBySelection = this.equationEditor.splitAtomsBySelection();
     if (splitBySelection !== null) {
-      this.makeSqrtFromSelection(splitBySelection);
+      this.equationEditor.makeSqrtFromSelection(splitBySelection);
     } else {
       this.makeSqrtFromCaret(splitBySelection);
     }
@@ -6244,23 +6366,6 @@ class MathNode {
     parent.ensureEditableAtoms();
     parent.updateDOM();
     operatorNode.focus(1);
-  }
-
-  makeSqrtFromSelection(
-    /** @type{SplitBySelectionResult} */
-    splitBySelection,
-  ) {
-    let ancestor = splitBySelection.ancestor;
-    ancestor.removeAllChildren();
-    let underTheRadical = mathNodeFactory.horizontalMathFromArray(this.equationEditor, splitBySelection.split);
-    underTheRadical.ensureEditableAtoms();
-    let sqrt = mathNodeFactory.sqrt(this.equationEditor, underTheRadical, null);
-    ancestor.appendChildren(splitBySelection.beforeSplit);
-    ancestor.appendChild(sqrt);
-    ancestor.appendChildren(splitBySelection.afterSplit);
-    ancestor.ensureEditableAtoms();
-    ancestor.updateDOM();
-    sqrt.children[2].focusStandard(0);
   }
 
   makeCancelFromSplit(
@@ -8719,6 +8824,7 @@ class EquationEditorAction {
     if (!this.isKeyPress) {
       editor.writeLatexLastFocused(this.command);
     } else {
+      editor.focusInformation.restoreSelection(editor);
       editor.dispatchKey(this.command);
     }
   }
@@ -8735,7 +8841,7 @@ class EquationEditorButtonFactory {
     /**@type{string} */
     additionalStyle,
   ) {
-    /**@type{EquationEditorAction} */
+    /**@type{EquationEditorAction[]} */
     this.commands = [];
     if (command !== "" && command !== null) {
       this.commands.push(new EquationEditorAction(command, isKeyPress));
@@ -8808,7 +8914,7 @@ class EquationEditorButtonFactory {
 }
 
 let buttonFactories = {
-  "sqrt": new EquationEditorButtonFactory("\\sqrt{\\caret}", false, "\u221A", ""),
+  "sqrt": new EquationEditorButtonFactory("\\sqrt", true, "\u221A", ""),
   "fraction": new EquationEditorButtonFactory("\\frac{\\caret}{}", false, "/", ""),
   "divide": new EquationEditorButtonFactory("/", true, "(\u2022)/(\u2022)", ""),
   "exponent": new EquationEditorButtonFactory("^", true, "^", ""),

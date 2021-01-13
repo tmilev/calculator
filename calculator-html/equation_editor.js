@@ -7953,13 +7953,17 @@ class MathNodeLeftDelimiter extends MathNode {
     /**@type{ToLatexOptions|null} */
     options,
   ) {
+    /**@type{LatexWithAnnotation} */
+    let result = null;
     if (this.children.length === 0) {
-      return new LatexWithAnnotation("\\left.", -1, -1);
+      result = new LatexWithAnnotation("\\left.", -1, -1);
+    } else if (this.extraData === "{") {
+      result = new LatexWithAnnotation("\\{", -1, -1);
+    } else {
+      result = new LatexWithAnnotation(this.extraData, - 1, - 1);
     }
-    if (this.extraData === "{") {
-      return new LatexWithAnnotation("\\{", -1, -1);
-    }
-    return new LatexWithAnnotation(this.extraData, - 1, - 1);
+    result.accountOwner(this);
+    return result;
   }
 
   /** @returns {boolean} whether reduction occurred. */
@@ -7980,15 +7984,18 @@ class MathNodeRightDelimiter extends MathNode {
   toLatexWithAnnotation(
     /**@type{ToLatexOptions|null} */
     options,
-
   ) {
+    /**@type{LatexWithAnnotation} */
+    let result = null;
     if (this.children.length === 0) {
-      return new LatexWithAnnotation("\\right.", -1, -1);
+      result = new LatexWithAnnotation("\\right.", -1, -1);
+    } else if (this.extraData === "{") {
+      result = new LatexWithAnnotation("\\}", -1, -1);
+    } else {
+      result = new LatexWithAnnotation(this.extraData, - 1, - 1);
     }
-    if (this.extraData === "}") {
-      return new LatexWithAnnotation("\\}", -1, -1);
-    }
-    return new LatexWithAnnotation(this.extraData, - 1, - 1);
+    result.accountOwner(this);
+    return result;
   }
 
   /** @returns {boolean} whether reduction occurred. */
@@ -8275,7 +8282,6 @@ class MathNodeMatrix extends MathNode {
   toLatexWithAnnotation(
     /**@type{ToLatexOptions|null} */
     options,
-
   ) {
     if (this.element === null) {
       return new LatexWithAnnotation("[null)]", - 1, - 1);

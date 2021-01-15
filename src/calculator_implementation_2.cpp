@@ -1120,9 +1120,8 @@ bool Calculator::parse(
   bool stripCommandSequence,
   Expression& output
 ) {
-  List<SyntacticElement> syntacticSoup, syntacticStack;
   if (!this->parseAndExtractExpressions(
-    input, output, syntacticSoup, syntacticStack, nullptr
+    input, output, this->syntacticSoup, this->syntacticStack, nullptr
   )) {
     return false;
   }
@@ -1211,13 +1210,15 @@ JSData Calculator::solve(const std::string& input) {
 }
 
 JSData Calculator::compareExpressions(const std::string& given, const std::string& desired) {
-  MacroRegisterFunctionWithName("Calculator::solve");
+  MacroRegisterFunctionWithName("Calculator::compareExpressions");
   this->statistics.initialize();
   Expression givenExpression, desiredExpression;
   if (!this->parse(given, true, givenExpression)) {
+    this->syntaxErrors += "Failed to parse given answer.";
     return this->extractComparison(given, desired);
   }
   if (!this->parse(desired, true, desiredExpression)) {
+    this->syntaxErrors += "Failed to parse desired answer.";
     return this->extractComparison(given, desired);
   }
   this->programExpression.makeXOX(
@@ -1239,7 +1240,7 @@ void Calculator::evaluateCommands() {
     } else {
       out << Logger::consoleRed() << "Syntax errors encountered: " << Logger::consoleNormal();
     }
-    this->outputJS[WebAPI::result::syntaxErrors] = this->syntaxErrors;
+    this->outputJS[WebAPI::result::syntaxErrors] = this->toStringSyntacticStackHTMLSimple();
     out << this->syntaxErrors;
     out << "<hr>";
   }

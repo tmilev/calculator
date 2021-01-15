@@ -146,7 +146,7 @@ JSData Calculator::extractComparison(const std::string& given, const std::string
   }
   JSData comparisonJSON;
   if (!this->programExpression.isOfType(&comparisonJSON)) {
-    result[WebAPI::result::error] = "Could not solve your problem. ";
+    result[WebAPI::result::error] = "Error evaluating your example. ";
     return result;
   } else {
     result[WebAPI::result::comparison] = comparisonJSON;

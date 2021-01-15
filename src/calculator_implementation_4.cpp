@@ -1894,7 +1894,10 @@ std::string Calculator::toString() {
 }
 
 std::string Calculator::toStringSyntacticStackHTMLSimple() {
-  MacroRegisterFunctionWithName("Calculator::toStringSyntacticStackHTMLTable");
+  MacroRegisterFunctionWithName("Calculator::toStringSyntacticStackHTMLSimple");
+  if (this->currentSyntacticStack->size == 0) {
+    global.fatal << "Unexpected empty syntactic stack." << global.fatal;
+  }
   std::stringstream out;
   bool isBad = ((*this->currentSyntacticStack).size > this->numEmptyTokensStart + 1);
   SyntacticElement& lastSyntacticElt = *(*this->currentSyntacticStack).lastObject();

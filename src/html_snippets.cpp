@@ -64,10 +64,10 @@ const std::string HtmlRoutines::getJavascriptEquationEditorWithTags(
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::getJavascriptEquationEditorWithTags");
   std::stringstream out;
-  std::string mathjaxSetupScript = FileOperations::GetVirtualNameWithHash(
+  std::string editorScript = FileOperations::GetVirtualNameWithHash(
     "calculator-html/equation_editor.js"
   );
-  out << "<script src =\"" << baseFolder << mathjaxSetupScript << "\"></script>";
+  out << "<script src =\"" << baseFolder << editorScript << "\"></script>";
   return out.str();
 }
 
@@ -203,7 +203,8 @@ std::string HtmlRoutines::getMathSpan(const std::string& input, int upperNumChar
   std::stringstream out;
   if (input.size() > static_cast<unsigned>(upperNumChars) && upperNumChars > 0) {
     out << "<b>LaTeX output is longer than " << upperNumChars
-    << " characters and I dare not use mathjax. Here is the output as plain LaTeX.</b> " << input;
+    << " characters and I dare not use the equation editor. "
+    << "Here is the output as plain LaTeX.</b> " << input;
     return out.str();
   }
   if (global.flagUseMathTags) {

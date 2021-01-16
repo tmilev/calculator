@@ -40,15 +40,6 @@
     onerror="errorLoadingScript(this);"></script>
   <script src="/html-common/ace/src-min/ext-language_tools.js" onerror="errorLoadingScript(this);"></script>
   <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
-  <!-- 
-    Upon cached page request of address "/app",
-    the cpp html builder will replace 
-    the following tags with one of the form 
-    "/calculator-html${uniquehash}/javascript_all_in_one.js",
-    likewise for the css file,
-    and will transmit the script with a no-expiration date cache.
-  -->
-  <!-- WARNING: to not change the tag below, it is searched+replaced as an exact match by the cpp builder.-->
   <script type="text/javascript" src="/calculator-html/javascript_all_in_one.js"></script>
   <link type="text/css" rel="stylesheet" href="/calculator-html/calculator.css">
 

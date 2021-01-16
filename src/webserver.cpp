@@ -3805,64 +3805,6 @@ void WebServer::checkFreecalcSetup() {
   global.configurationStore();
 }
 
-void WebServer::checkMathJaxSetup() {
-  MacroRegisterFunctionWithName("WebServer::checkMathJaxSetup");
-  if (!global.configuration[
-    Configuration::installMathJax
-  ].isTrueRepresentationInJSON()) {
-    return;
-  }
-  std::string mathjaxBase;
-  std::string mathjaxZipSource;
-  std::string publicHtmlFolder;
-  std::stringstream commentsOnFailure;
-  if (!FileOperations::getPhysicalFileNameFromVirtual(
-    Configuration::mathJaxLatest,
-    mathjaxBase,
-    false,
-    false,
-    &commentsOnFailure
-  )) {
-    global << Logger::red << "Failed to compute mathjax folder. "
-    << Logger::endL << commentsOnFailure.str() << Logger::endL;
-    return;
-  }
-
-  if (FileOperations::fileExistsUnsecure(mathjaxBase)) {
-    // Mathjax folder is there.
-    // We assume it is correctly installed.
-    return;
-  }
-  global << Logger::red << "MathJax not found. "
-  << Logger::green << "Attempting to auto-install it for you. "
-  << Logger::endL;
-  if (!FileOperations::getPhysicalFileNameFromVirtual(
-    Configuration::publicHTML, publicHtmlFolder, false, false, & commentsOnFailure
-  )) {
-    global << Logger::red << "Failed to compute public html folder. "
-    << Logger::endL << commentsOnFailure.str() << Logger::endL;
-    return;
-  }
-  if (!FileOperations::getPhysicalFileNameFromVirtual(
-    Configuration::HTMLCommon + "MathJax-2.7-latest.zip",
-    mathjaxZipSource,
-    false,
-    false,
-    &commentsOnFailure
-  )) {
-    global << Logger::red << "Failed to compute mathjax zip source folder. "
-    << Logger::endL << commentsOnFailure.str() << Logger::endL;
-    return;
-  }
-  global << "Proceeding to unzip MathJax. ";
-  global << "Current folder: " << FileOperations::getCurrentFolder() << Logger::endL;
-  std::stringstream unzipCommand, moveCommand;
-  unzipCommand << "unzip " << mathjaxZipSource << " -d " << publicHtmlFolder;
-  moveCommand << "mv " << publicHtmlFolder << "MathJax-2.7.2 " << publicHtmlFolder << "MathJax-2.7-latest";
-  global.externalCommandNoOutput(unzipCommand.str(), true);
-  global.externalCommandNoOutput(moveCommand.str(), true);
-}
-
 bool WebServer::analyzeMainArgumentsTimeString(const std::string& timeLimitString) {
   if (timeLimitString == "") {
     return false;
@@ -4024,8 +3966,7 @@ void WebServer::analyzeMainArguments(int argC, char **argv) {
   arguments.currentIndex = 1;
   arguments.commandLineConfigurations.addListOnTop(List<std::string> ({
     Configuration::portHTTP,
-    Configuration::portHTTPSOpenSSL,
-    Configuration::installMathJax
+    Configuration::portHTTPSOpenSSL
   }));
   for (; arguments.processOneArgument(); arguments.currentIndex ++) {
   }
@@ -4110,11 +4051,13 @@ void WebServer::initializeMainAddresses() {
   this->addressStartsNotNeedingLogin.addOnTop("/output/");
   this->addressStartsNotNeedingLogin.addOnTop("/css/");
   this->addressStartsNotNeedingLogin.addOnTop("/javascriptlibs/");
-  this->addressStartsNotNeedingLogin.addOnTop("/MathJax-2.7-latest/");
   this->addressStartsNotNeedingLogin.addOnTop("/login");
   this->addressStartsNotNeedingLogin.addOnTop("/" + WebAPI::app);
   this->addressStartsNotNeedingLogin.addOnTop("/" + WebAPI::appNoCache);
   this->addressStartsNotNeedingLogin.addOnTop(WebAPI::request::onePageJS);
+
+  this->addressStartsNotNeedingLogin.addOnTop(Configuration::publicHTML);
+  this->addressStartsNotNeedingLogin.addOnTop("/" + Configuration::publicHTML);
 
   this->addressStartsNotNeedingLogin.addOnTop("/" + WebAPI::compareExpressionsPage);
   this->addressStartsNotNeedingLogin.addOnTop(WebAPI::compareExpressionsPage);
@@ -4144,8 +4087,6 @@ void WebServer::initializeMainAddresses() {
   this->addressStartsNotNeedingLogin.addListOnTop(
     FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash()
   );
-
-  this->addressStartsSentWithCacheMaxAge.addOnTop("/MathJax-2.7-latest/");
   this->addressStartsSentWithCacheMaxAge.addOnTop("/html-common/");
   for (int i = 0; i < FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i ++) {
     this->addressStartsSentWithCacheMaxAge.addOnTop(
@@ -4153,7 +4094,6 @@ void WebServer::initializeMainAddresses() {
       global.buildHeadHashWithServerTime
     );
   }
-
 }
 
 void WebServer::initializeMainFoldersInstructorSpecific() {
@@ -4404,7 +4344,6 @@ void WebServer::checkInstallation() {
   global.server().checkSystemInstallationOpenSSL();
   global.server().checkSystemInstallationMongoDatabase();
   global.server().checkMongoDatabaseSetup();
-  global.server().checkMathJaxSetup();
   global.server().checkFreecalcSetup();
 }
 
@@ -4462,11 +4401,6 @@ int WebServer::main(int argc, char **argv) {
     // Uses the configuration file.
     // Calls again global.server().InitializeMainFoldersSensitive();
     global.server().initializeMainAll();
-    global.server().checkMathJaxSetup();
-    bool mathJaxPresent = FileOperations::fileExistsVirtual("/MathJax-2.7-latest/", false);
-    if (!mathJaxPresent && global.flagRunningBuiltInWebServer) {
-      global << Logger::red << "MathJax not available. " << Logger::endL;
-    }
     if (global.flagDaemonMonitor) {
       return global.server().daemon();
     } else if (global.flagRunningBuiltInWebServer) {

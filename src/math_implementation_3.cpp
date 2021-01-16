@@ -1051,8 +1051,6 @@ List<List<std::string> >& FileOperations::initializeFolderVirtualLinksDefaults()
     List<std::string>({Configuration::testFolder                , "test/"                                      }),
     List<std::string>({Configuration::outputFolder              , "output/"                                    }),
     List<std::string>({Configuration::HTMLGeneral               , "public_html/"                               }),
-    List<std::string>({Configuration::mathJaxLatestConfiguration, "calculator-html/mathjax-calculator-setup.js"}),
-    List<std::string>({Configuration::mathJaxLatest             , "public_html/MathJax-2.7-latest/"            }),
     List<std::string>({Configuration::problemsFolder            , "../problems/"                               }),
     List<std::string>({Configuration::courseTemplates           , "../coursetemplates/"                        }),
     List<std::string>({Configuration::coursesAvailable          , "../coursesavailable/"                       }),

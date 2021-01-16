@@ -1,43 +1,31 @@
+// The present file is the entry point of the entire
+// javascript library.
 "use strict";
 class Browserifier {
-  constructor(
-    /**@type{string} */
-    runMode,
-    /**@type{string} */
-    idToRunIn,
-  ) {
+  constructor() {
+    // theJSContent is closure variable that is constructed by the calculator builder
+    // and contains an object whose keys are the file names of the scripts.
+    // The values of the object are functions that enclose the contents of each script.
+    /**@type{Object<string,Function>} */
+    this.theJSContent = theJSContent;
     document.onreadystatechange = () => {
       if (document.readyState !== 'complete') {
         return;
       }
-      this.initialize(runMode, idToRunIn);
+      this.browserifyAndRun();
     }
-  }
-
-  initialize(
-    /**@type{string} */
-    runMode,
-    /**@type{string} */
-    idToRunIn,
-  ) {
     window.calculator = {
       browserifier: this,
     };
     this.allModules = {};
     this.sanitizedFileNameContents = {};
     this.calculatorHtmlBaseFolder = "/calculator-html/";
-    if (runMode === "runInId") {
-      this.browserifyRunInId(idToRunIn);
-      return;
-    }
-    if (runMode === "editInId") {
-      this.browserifyEditInId(idToRunIn);
-      return;
-    }
-    this.browserifyAndRun();
   }
 
-  require(inputFileName) {
+  require(
+    /**@type{string} */
+    inputFileName,
+  ) {
     let currentSource = this.sanitizedFileNameContents[inputFileName];
     if (!(inputFileName in this.allModules)) {
       this.allModules[inputFileName] = {};
@@ -52,7 +40,7 @@ class Browserifier {
 
   browserifyAndRun() {
     let expectedStart = "/calculator-html/";
-    for (let fileName in theJSContent) {
+    for (let fileName in this.theJSContent) {
       let newFileName = "";
       if (!fileName.startsWith(expectedStart)) {
         continue;
@@ -63,20 +51,7 @@ class Browserifier {
     }
     this.require('./app');
   }
-
-  browserifyRunInId(input) {
-    createBrowserifier();
-    window.calculator.flagRunMainPage = false;
-    window.calculator.browserifier.browserifyAndRun();
-    window.calculator.standAloneProblem.standAloneProblem.initAndRun(input);
-  }
-
-  browserifyEditInId(input) {
-    createBrowserifier();
-    window.calculator.flagRunMainPage = false;
-    window.calculator.browserifier.browserifyAndRun();
-    window.calculator.standAloneProblem.standAloneProblem.initAndEdit(input);
-  }
 }
 
-new Browserifier("", "");
+// This is the first and only function call that will be executed by loading the javascript library.
+new Browserifier();

@@ -4045,7 +4045,6 @@ void WebServer::initializeMainAddresses() {
   MacroRegisterFunctionWithName("WebServer::initializeMainAddresses");
   this->addressStartsNotNeedingLogin.addOnTop("favicon.ico");
   this->addressStartsNotNeedingLogin.addOnTop("/favicon.ico");
-  this->addressStartsNotNeedingLogin.addOnTop("/html-common/");
   this->addressStartsNotNeedingLogin.addOnTop("/calculator-html/");
   this->addressStartsNotNeedingLogin.addOnTop("/src/");
   this->addressStartsNotNeedingLogin.addOnTop("/output/");
@@ -4055,6 +4054,9 @@ void WebServer::initializeMainAddresses() {
   this->addressStartsNotNeedingLogin.addOnTop("/" + WebAPI::app);
   this->addressStartsNotNeedingLogin.addOnTop("/" + WebAPI::appNoCache);
   this->addressStartsNotNeedingLogin.addOnTop(WebAPI::request::onePageJS);
+
+  this->addressStartsNotNeedingLogin.addOnTop(Configuration::HTMLCommon);
+  this->addressStartsNotNeedingLogin.addOnTop("/" + Configuration::HTMLCommon);
 
   this->addressStartsNotNeedingLogin.addOnTop(Configuration::publicHTML);
   this->addressStartsNotNeedingLogin.addOnTop("/" + Configuration::publicHTML);

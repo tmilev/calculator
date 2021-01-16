@@ -1,6 +1,7 @@
 "use strict";
 const ids = require("./ids_dom_elements");
 const cookies = require("./cookies");
+const configuration = require("./configuration");
 
 class StorageVariable {
   constructor(
@@ -131,6 +132,9 @@ class StorageVariable {
     }
     let changed = (this.value !== newValue);
     this.value = newValue;
+    if (configuration.configuration.disableStorage) {
+      return;
+    }
     this.storeMe(updateURL, updateAssociatedInput);
     if (!changed) {
       return;
@@ -364,6 +368,9 @@ class StorageCalculator {
   }
 
   loadSettings() {
+    if (configuration.configuration.disableStorage) {
+      return;
+    }
     this.parseURL();
     this.loadSettingsRecursively(this.variables, this.urlObject);
   }

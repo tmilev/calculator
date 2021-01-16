@@ -4,7 +4,7 @@ const mainPage = require('./page_navigation');
 //declare globals:
 
 function initializeGlobals() {
-  var incomingGlobals = {
+  let incomingGlobals = {
     mainPage: null,
     login: null,
     signUp: null,

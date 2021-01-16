@@ -44,4 +44,5 @@
   "/calculator-html/process_monitoring.js",
   "/calculator-html/external/build/output-min.js",
   "/calculator-html/compare_expressions.js",
+  "/calculator-html/configuration.js",
 ]

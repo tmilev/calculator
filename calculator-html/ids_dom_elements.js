@@ -1,10 +1,11 @@
 "use strict";
 
-var stringResources = {
+let stringResources = {
   prefixDeadlineContainer: "deadlinesContainer"
 };
 
-var domElements = {
+let domElements = {
+  calculatorStorageEnabled: "calculatorStorageEnabled",
   pages: {
     solve: {
       div: "divSolvePage",

@@ -51,7 +51,8 @@ class ProblemCollection {
     }
     // theProblemId is percent encoded, safe to embed in html.
     let theProblemId = encodeURIComponent(problemData.id);
-    let currentProblem = this.getProblemByIdOrRegisterEmpty(theProblemId, "");
+    let element = document.getElementById(ids.domElements.problemPageContentContainer);
+    let currentProblem = this.getProblemByIdOrRegisterEmpty(theProblemId, element);
     currentProblem.initializeInfo(problemData, null);
     return currentProblem;
   }
@@ -76,13 +77,15 @@ class ProblemCollection {
   /**@return{Problem} */
   getProblemByIdOrRegisterEmpty(
     problemFileName,
+    /**@type{HTMLElement} */
+    outputElement,
   ) {
     // normalize the file name:
     let problem = this.getProblemByIdOrNull(problemFileName);
     if (problem !== null) {
       return problem;
     }
-    let incoming = new Problem();
+    let incoming = new Problem(outputElement);
     let label = this.normalizeFileName(problemFileName);
     incoming.initializeBasic({
       id: label,
@@ -110,14 +113,22 @@ function selectCurrentProblem(problemIdURLed, exerciseType) {
 }
 
 class Problem {
-  constructor() {
+  constructor(
+    /** @type{HTMLElement}*/
+    outputElement,
+  ) {
     /**@type{string}*/
     this.nextProblemId = "";
     /**@type{string} */
     this.previousProblemId = "";
     /**@type{number} */
     this.totalChildren = 0;
+    /** @type{HTMLElement}*/
+    this.outputElement = outputElement;
+    /** @type{HTMLElement|null}*/
+    this.infoBar = document.getElementById(ids.domElements.divProblemInfoBar);
   }
+
   setRandomSeed(input) {
     if (input === undefined) {
       input = null;
@@ -287,7 +298,7 @@ class Problem {
     this.computeBadProblemExplanation();
     let answerVectors = problemData["answers"];
     if (answerVectors === undefined) {
-      this.writeToHTML(ids.domElements.problemPageContentContainer);
+      this.writeToHTML();
       return;
     }
     this.flagForReal = problemData["forReal"];
@@ -315,7 +326,7 @@ class Problem {
         randomSeed: problemData.randomSeed,
       });
     }
-    this.writeToHTML(ids.domElements.problemPageContentContainer);
+    this.writeToHTML();
     this.scriptIds = [];
     for (let scriptLabel in problemData.scripts) {
       let newLabel = encodeURIComponent(this.problemId + "_" + scriptLabel);
@@ -899,23 +910,20 @@ class Problem {
     nextCell.innerHTML = this.toStringDeadlineContainer();
   }
 
-  writeToHTML(outputElement) {
-    if (typeof outputElement === "string") {
-      outputElement = document.getElementById(outputElement);
-    }
-    outputElement.innerHTML = "";
+  writeToHTML() {
+    this.outputElement.textContent = "";
     problemNavigation.setCurrentProblemAndUpdate(this);
     let contentArray = [];
     miscellaneousFrontend.appendHtmlToArray(contentArray, this.badProblemExplanation);
     let problemBody = document.createElement("span");
     problemBody.innerHTML = this.decodedProblem + this.commentsProblem
     contentArray.push(problemBody);
-    miscellaneousFrontend.appendHtml(outputElement, contentArray);
+    miscellaneousFrontend.appendHtml(this.outputElement, contentArray);
     for (let counterAnswers = 0; counterAnswers < this.answers.length; counterAnswers++) {
       this.onePanel(this.answers[counterAnswers]);
     }
     initializeButtons.initializeAccordionButtons();
-    typeset.typesetter.typesetSoft(ids.domElements.problemPageContentContainer, "");
+    typeset.typesetter.typesetSoft(this.outputElement, "");
   }
 
   toStringDeadline() {
@@ -1174,11 +1182,17 @@ class ProblemNavigation {
     this.writeToHTML();
   }
 
+  writeInfoBar() {
+
+  }
+
   writeToHTML() {
     if (this.currentProblem === null) {
       return;
     }
-
+    if (this.currentProblem.infoBar === null) {
+      return;
+    }
     let problemTitle = document.createElement("DIV");
     problemTitle.className = "problemTitle";
 
@@ -1194,8 +1208,7 @@ class ProblemNavigation {
     }
     problemTitleContainer.appendChild(document.createTextNode(this.currentProblem.title));
 
-    let infoBar = document.getElementById(ids.domElements.divProblemInfoBar);
-    infoBar.innerHTML = "";
+    this.infoBar.textContent = "";
     if (!window.calculator.mainPage.flagProblemPageOnly) {
       infoBar.appendChild(this.currentProblem.getProblemNavigation());
     }
@@ -1466,7 +1479,7 @@ function loadProblemIntoElement(
     problemElement = document.getElementById(problemElement);
   }
   let problemFileName = problemElement.getAttribute("problem");
-  let problem = allProblems.getProblemByIdOrRegisterEmpty(problemFileName);
+  let problem = allProblems.getProblemByIdOrRegisterEmpty(problemFileName, problemElement);
   problem.flagForReal = false;
   if (problemElement.getAttribute("forReal") === "true") {
     problem.flagForReal = true;
@@ -1492,7 +1505,8 @@ function getCurrentProblem() {
   ) {
     return null;
   }
-  return allProblems.getProblemByIdOrRegisterEmpty(problemFileName);
+  let element = document.getElementById(ids.domElements.problemPageContentContainer);
+  return allProblems.getProblemByIdOrRegisterEmpty(problemFileName, element);
 }
 
 let problemNavigation = new ProblemNavigation();

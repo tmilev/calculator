@@ -533,7 +533,8 @@ class Page {
   }
 
   getProblemById(label) {
-    return problemPage.allProblems.getProblemByIdOrRegisterEmpty(label);
+    let element = document.getElementById(ids.domElements.problemPageContentContainer);
+    return problemPage.allProblems.getProblemByIdOrRegisterEmpty(label, element);
   }
 
 

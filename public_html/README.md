@@ -2,7 +2,5 @@
 
 Reserved for external content. 
 This folder is similar to html-common/, 
-except that the content of this folder 
-may be computed by the calculator, rather than be statically checked-in.
+except that its content is not kept in github.
 
-Currently we extract MathJax here. 

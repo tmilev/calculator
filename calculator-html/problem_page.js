@@ -73,6 +73,7 @@ class ProblemCollection {
     return null;
   }
 
+  /**@return{Problem} */
   getProblemByIdOrRegisterEmpty(
     problemFileName,
   ) {
@@ -109,7 +110,6 @@ function selectCurrentProblem(problemIdURLed, exerciseType) {
 }
 
 class Problem {
-
   constructor() {
     /**@type{string}*/
     this.nextProblemId = "";
@@ -158,6 +158,21 @@ class Problem {
     } else {
       this.setRandomSeedFromEnvironment();
     }
+  }
+
+  writeProblemPage(input, outputComponent) {
+    let problemData = null;
+    try {
+      problemData = miscellaneous.jsonUnescapeParse(input);
+    } catch (e) {
+      outputComponent.innerHTML = `Error parsing: ${e}. Failed to parse: ${input}`;
+      return;
+    }
+    if (problemData.crashReport !== undefined && problemData.crashReport !== null) {
+      outputComponent.innerHTML = problemData.crashReport;
+      return;
+    }
+    this.initializeProblemContent(problemData);
   }
 
   /** @returns{number} Number of children processed. */
@@ -1388,44 +1403,19 @@ function writeTopicsToCoursePage() {
   typeset.typesetter.typesetSoft(topicsElements[0], "");
 }
 
-function updateProblemPageCallback(input, outputComponent) {
-  let thePage = window.calculator.mainPage;
-  if (typeof outputComponent === "string" || outputComponent === undefined || outputComponent === null) {
-    outputComponent = document.getElementById(outputComponent);
-  }
-  if (outputComponent === null || outputComponent === undefined) {
-    outputComponent = document.getElementById(ids.domElements.problemPageContentContainer);
-  }
-  let theProblem = null;
-  try {
-    theProblem = miscellaneous.jsonUnescapeParse(input);
-  } catch (e) {
-    outputComponent.innerHTML = `Error parsing: ${e}. Failed to parse: ${input}`;
-    thePage.cleanUpLoginSpan(outputComponent);
-    return;
-  }
-  if (theProblem.crashReport !== undefined && theProblem.crashReport !== null) {
-    outputComponent.innerHTML = theProblem.crashReport;
-    return;
-  }
-  /**@type {Problem} */
-  let currentProblem = getCurrentProblem();
-  currentProblem.initializeProblemContent(theProblem);
-}
-
 function updateProblemPage() {
   let thePage = window.calculator.mainPage;
   // thePage.pages.problemPage.flagLoaded is modified by the following
   // functions: selectCurrentProblem, logout, callbackClone,
   // the present function updateProblemPage
   /**@type {Problem} */
-  let theProblem = getCurrentProblem();
+  let problem = getCurrentProblem();
   if (thePage.pages.problemPage.flagLoaded) {
-    if (theProblem !== undefined && theProblem !== null) {
-      let problemNavigation = document.getElementById(theProblem.idNavigationProblemNotEntirePanel);
+    if (problem !== undefined && problem !== null) {
+      let problemNavigation = document.getElementById(problem.idNavigationProblemNotEntirePanel);
       if (problemNavigation !== null) {
         problemNavigation.innerHTML = "";
-        let updatedContent = theProblem.getProblemNavigationContent();
+        let updatedContent = problem.getProblemNavigationContent();
         for (let i = 0; i < updatedContent.length; i++) {
           problemNavigation.appendChild(updatedContent[i]);
         }
@@ -1434,12 +1424,12 @@ function updateProblemPage() {
     return;
   }
   let theURL;
-  if (theProblem !== undefined && theProblem !== null) {
-    let forReal = theProblem.flagForReal;
+  if (problem !== undefined && problem !== null) {
+    let forReal = problem.flagForReal;
     if (!thePage.user.flagLoggedIn) {
       forReal = false;
     }
-    theURL = `${pathnames.urls.calculatorAPI}?${theProblem.getCalculatorURLRequestFileCourseTopics(forReal)}`;
+    theURL = `${pathnames.urls.calculatorAPI}?${problem.getCalculatorURLRequestFileCourseTopics(forReal)}`;
   } else {
     let fileName = thePage.storage.variables.currentCourse.fileName.getValue();
     if (fileName === "" || fileName === undefined || fileName === null) {
@@ -1461,22 +1451,38 @@ function updateProblemPage() {
   thePage.pages.problemPage.flagLoaded = true;
   submitRequests.submitGET({
     url: theURL,
-    callback: updateProblemPageCallback,
-    progress: ids.domElements.spanProgressReportGeneral
+    callback: (input, outputComponent) => {
+      problem.writeProblemPage(input, outputComponent);
+    },
+    progress: ids.domElements.spanProgressReportGeneral,
   });
 }
 
 function loadProblemIntoElement(
   /**@type{HTMLElement|string} */
-  problem,
+  problemElement,
 ) {
-  if (typeof problem === "string") {
-    problem = document.getElementById(problem);
+  if (typeof problemElement === "string") {
+    problemElement = document.getElementById(problemElement);
   }
-  let problemFileName = problem.getAttribute("problem");
-
+  let problemFileName = problemElement.getAttribute("problem");
+  let problem = allProblems.getProblemByIdOrRegisterEmpty(problemFileName);
+  problem.flagForReal = false;
+  if (problemElement.getAttribute("forReal") === "true") {
+    problem.flagForReal = true;
+  }
+  let theURL = `${pathnames.urls.calculatorAPI}?${problem.getCalculatorURLRequestFileCourseTopics(problem.flagForReal)}`;
+  submitRequests.submitGET({
+    url: theURL,
+    callback: (input, outputComponent) => {
+      problem.writeProblemPage(input, outputComponent);
+    },
+    progress: ids.domElements.spanProgressReportGeneral,
+    result: problemElement,
+  });
 }
 
+/**@returns{Problem|null} */
 function getCurrentProblem() {
   let problemFileName = storage.storage.variables.currentCourse.problemFileName.getValue();
   if (

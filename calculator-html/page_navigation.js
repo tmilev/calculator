@@ -536,14 +536,6 @@ class Page {
     return problemPage.allProblems.getProblemByIdOrRegisterEmpty(label);
   }
 
-  cleanUpLoginSpan(componentToCleanUp) {
-    let loginInfo = document.getElementById("spanLoginRequired");
-    if (loginInfo !== null) {
-      if (loginInfo.parentElement === componentToCleanUp) {
-        loginInfo.innerHTML = "<b>...</b>";
-      }
-    }
-  }
 
   toggleMonitoring() {
     let monitoring = this.storage.variables.calculator.monitoring;

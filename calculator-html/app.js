@@ -56,7 +56,6 @@ function loadGlobals() {
   calculator.selectCourse = require('./select_course');
   calculator.coursePage = require('./course_page');
   calculator.problemPage = require('./problem_page');
-  calculator.standAloneProblem = require('./stand_alone_problem');
   calculator.submitRequests = require("./submit_requests");
   calculator.editPage = require("./edit_page");
   calculator.drawing = require('./three-d').drawing;

@@ -5,6 +5,7 @@ const ids = require("./ids_dom_elements");
 const panels = require('./panels');
 
 function recordProgressDone(
+  /**@type{HTMLElement|string} */
   progress,
   /**@type{number} */
   timeFinished,
@@ -17,8 +18,11 @@ function recordProgressDone(
   if (typeof progress === "string") {
     progress = document.getElementById(progress);
   }
-  var timeTotal = timeFinished - progress.getAttribute("timeStarted");
-  var panelLabel = `<b style = 'color:green'>Received</b> ${timeTotal} ms`;
+  if (progress === null) {
+    return;
+  }
+  let timeTotal = timeFinished - progress.getAttribute("timeStarted");
+  let panelLabel = `<b style = 'color:green'>Received</b> ${timeTotal} ms`;
   let panel = new panels.PanelExpandable(progress);
   panel.initialize(false);
   panel.setPanelLabel(panelLabel);
@@ -30,8 +34,8 @@ function recordProgressDone(
 }
 
 function convertStringToHtml(input) {
-  var result = "";
-  for (var counter = 0; counter < input.length; counter++) {
+  let result = "";
+  for (let counter = 0; counter < input.length; counter++) {
     if (input[counter] === '&') {
       result += '&amp;';
       continue;
@@ -43,8 +47,8 @@ function convertStringToHtml(input) {
 
 /**@returns {String} */
 getLatexLink = function () {
-  var firstPart = window.location.href.split("#")[0];
-  var hash = window.location.hash;
+  let firstPart = window.location.href.split("#")[0];
+  let hash = window.location.hash;
   if (hash.startsWith('#')) {
     hash = hash.substring(1);
   }
@@ -54,15 +58,15 @@ getLatexLink = function () {
   if (hash.indexOf("{") !== - 1) {
     hash = encodeURIComponent(hash);
   }
-  var theURL = `${firstPart}#${hash}`;
+  let theURL = `${firstPart}#${hash}`;
   return latexifyLink(theURL);
 }
 
 /**@returns {String} */
 latexifyLink = function (inputURL) {
-  var result = "";
+  let result = "";
   result += "\\href{";
-  for (var i = 0; i < inputURL.length; i++) {
+  for (let i = 0; i < inputURL.length; i++) {
     if (inputURL[i] == '%') {
       result += "\\%";
     } else if (inputURL[i] == '_') {
@@ -75,7 +79,13 @@ latexifyLink = function (inputURL) {
   return result;
 }
 
-function recordProgressStarted(progress, address, isPost, timeStarted) {
+function recordProgressStarted(
+  /**@returns{HTMLElement} */
+  progress,
+  address,
+  isPost,
+  timeStarted,
+) {
   if (progress === "" || progress === null || progress === undefined) {
     return;
   }
@@ -85,7 +95,10 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
   if (typeof progress === "string") {
     progress = document.getElementById(progress);
   }
-  var panelWithButton = new panels.PanelExpandable(progress);
+  if (progress === null) {
+    return;
+  }
+  let panelWithButton = new panels.PanelExpandable(progress);
   panelWithButton.initialize(true);
   panelWithButton.initialize
   progress.setAttribute("timeStarted", timeStarted);
@@ -96,16 +109,16 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
     pathnames.urlFields.reenteredPassword,
     pathnames.urlFields.password,
   ];
-  for (var i = 0; i < censoredAddressStarts.length; i++) {
-    var addressPassSplit = address.split(censoredAddressStarts[i]);
+  for (let i = 0; i < censoredAddressStarts.length; i++) {
+    let addressPassSplit = address.split(censoredAddressStarts[i]);
     if (addressPassSplit.length > 1) {
-      var indexAmpersand = addressPassSplit[1].search("&");
+      let indexAmpersand = addressPassSplit[1].search("&");
       addressPassSplit[1] = addressPassSplit[1].substr(indexAmpersand);
       addressPassSplit[1] = "***" + addressPassSplit[1];
       address = addressPassSplit.join(censoredAddressStarts[i] + "=");
     }
   }
-  var content = "";
+  let content = "";
   if (!isPost) {
     content += `<a href='${address}' target ='_blank' class = 'linkProgressReport'>${convertStringToHtml(address)}</a>`;
   } else {
@@ -169,7 +182,7 @@ function correctAddress(inputURL) {
  *   Pass null or undefined if you don't want to show the result.
  */
 function submitGET(
-  /** @type {{url: string, callback: Function, progress: string, result: string, panelOptions:{dontCollapsePanel:boolean, width:number}}}*/
+  /** @type {{url: string, callback: Function, progress: string, result: HTMLElement|string, panelOptions:{dontCollapsePanel:boolean, width:number}}}*/
   inputObject,
 ) {
   let theAddress = correctAddress(inputObject.url);
@@ -212,12 +225,12 @@ function submitPOST(
   /** @type {{url: string, parameters: string, callback: Function, progress: string, result: string}}*/
   inputObject,
 ) {
-  var theAddress = correctAddress(inputObject.url);
-  var progress = inputObject.progress;
-  var result = inputObject.result;
-  var callback = inputObject.callback;
-  var https = new XMLHttpRequest();
-  var parameters = inputObject.parameters;
+  let theAddress = correctAddress(inputObject.url);
+  let progress = inputObject.progress;
+  let result = inputObject.result;
+  let callback = inputObject.callback;
+  let https = new XMLHttpRequest();
+  let parameters = inputObject.parameters;
   https.open("POST", theAddress, true);
   https.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   if (progress === undefined) {
@@ -225,7 +238,7 @@ function submitPOST(
   }
   timeOutCounter = 0;
 
-  var postRequest = `POST ${pathnames.urls.calculatorAPI}<br>message: ${miscellaneous.shortenString(200, parameters)}`;
+  let postRequest = `POST ${pathnames.urls.calculatorAPI}<br>message: ${miscellaneous.shortenString(200, parameters)}`;
   recordProgressStarted(progress, postRequest, true, (new Date()).getTime());
 
   https.onload = responseStandard.bind(null, https, callback, result, progress);

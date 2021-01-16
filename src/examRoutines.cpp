@@ -20,6 +20,7 @@ std::string SyntacticElementHTML::Tags::calculatorHidden = "calculatorHidden";
 std::string SyntacticElementHTML::Tags::calculatorSolution = "calculatorSolution";
 std::string SyntacticElementHTML::Tags::calculatorExamProblem = "calculatorExamProblem";
 std::string SyntacticElementHTML::Tags::calculatorAnswer = "calculatorAnswer";
+std::string SyntacticElementHTML::Tags::hardCodedAnswer = "answer";
 
 CalculatorHTML::CalculatorHTML() {
   this->numberOfInterpretationAttempts = 0;

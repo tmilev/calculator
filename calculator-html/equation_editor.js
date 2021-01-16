@@ -1270,7 +1270,7 @@ class LaTeXConstants {
       "otimes": "\u2297",
       "oplus": "\u2295",
       "times": "\u00D7",
-      "circ": "\u25CB",
+      "circ": "\u2218",
       "cdot": "\u00B7",
       "leq": "\u2264",
       "neq": "\u2260",

@@ -132,7 +132,7 @@ class StorageVariable {
     }
     let changed = (this.value !== newValue);
     this.value = newValue;
-    if (configuration.configuration.disableStorage) {
+    if (!configuration.configuration.calculatorDefaultsEnabled) {
       return;
     }
     this.storeMe(updateURL, updateAssociatedInput);
@@ -368,7 +368,7 @@ class StorageCalculator {
   }
 
   loadSettings() {
-    if (configuration.configuration.disableStorage) {
+    if (!configuration.configuration.calculatorDefaultsEnabled) {
       return;
     }
     this.parseURL();

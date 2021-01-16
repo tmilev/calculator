@@ -8,8 +8,8 @@ const InputPanelData = initializeButtons.InputPanelData;
 const typeset = require("./math_typeset");
 const miscellaneous = require("./miscellaneous_frontend");
 const miscellaneousFrontend = require("./miscellaneous_frontend");
-const { urls } = require("./pathnames");
 const datePicker = require("./date_picker").datePicker;
+const storage = require("./storage");
 
 class ProblemCollection {
   constructor() {
@@ -96,7 +96,7 @@ function selectCurrentProblem(problemIdURLed, exerciseType) {
   let thePage = window.calculator.mainPage;
   thePage.storage.variables.currentCourse.problemFileName.setAndStore(decodeURIComponent(problemIdURLed));
   thePage.storage.variables.currentCourse.exerciseType.setAndStore(exerciseType);
-  let theProblem = thePage.getCurrentProblem();
+  let theProblem = getCurrentProblem();
   theProblem.flagForReal = false;
   if (
     exerciseType === pathnames.urlFields.scoredQuizJSON &&
@@ -480,7 +480,8 @@ class Problem {
     return result;
   }
 
-/**@returns {HTMLElement[]} */getProblemNavigationContent() {
+  /**@returns {HTMLElement[]} */
+  getProblemNavigationContent() {
     let thePage = window.calculator.mainPage;
     let result = [];
     let hints = this.getProblemNavigationHints();
@@ -1408,7 +1409,7 @@ function updateProblemPageCallback(input, outputComponent) {
     return;
   }
   /**@type {Problem} */
-  let currentProblem = thePage.getCurrentProblem();
+  let currentProblem = getCurrentProblem();
   currentProblem.initializeProblemContent(theProblem);
 }
 
@@ -1418,7 +1419,7 @@ function updateProblemPage() {
   // functions: selectCurrentProblem, logout, callbackClone,
   // the present function updateProblemPage
   /**@type {Problem} */
-  let theProblem = thePage.getCurrentProblem();
+  let theProblem = getCurrentProblem();
   if (thePage.pages.problemPage.flagLoaded) {
     if (theProblem !== undefined && theProblem !== null) {
       let problemNavigation = document.getElementById(theProblem.idNavigationProblemNotEntirePanel);
@@ -1458,12 +1459,34 @@ function updateProblemPage() {
     theURL = getCalculatorURLRequestFileCourseTopicsFromStorage();
   }
   thePage.pages.problemPage.flagLoaded = true;
-  //console.log("Current course: " + JSON.stringify(thePage.storage.variables.currentCourse));
   submitRequests.submitGET({
     url: theURL,
     callback: updateProblemPageCallback,
     progress: ids.domElements.spanProgressReportGeneral
   });
+}
+
+function loadProblemIntoElement(
+  /**@type{HTMLElement|string} */
+  problem,
+) {
+  if (typeof problem === "string") {
+    problem = document.getElementById(problem);
+  }
+  let problemFileName = problem.getAttribute("problem");
+
+}
+
+function getCurrentProblem() {
+  let problemFileName = storage.storage.variables.currentCourse.problemFileName.getValue();
+  if (
+    problemFileName === "" ||
+    problemFileName === null ||
+    problemFileName === undefined
+  ) {
+    return null;
+  }
+  return allProblems.getProblemByIdOrRegisterEmpty(problemFileName);
 }
 
 let problemNavigation = new ProblemNavigation();
@@ -1474,6 +1497,7 @@ module.exports = {
   allProblems,
   problemNavigation,
   updateProblemPage,
+  loadProblemIntoElement,
   processLoadedTopicsWriteToCoursePage,
   processLoadedTopicsWriteToEditPage,
   writeEditCoursePagePanel,

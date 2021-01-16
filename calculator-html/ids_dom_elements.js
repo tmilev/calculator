@@ -5,7 +5,7 @@ let stringResources = {
 };
 
 let domElements = {
-  calculatorStorageEnabled: "calculatorStorageEnabled",
+  calculatorDefaultsEnabled: "calculatorDefaultsEnabled",
   pages: {
     solve: {
       div: "divSolvePage",

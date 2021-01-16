@@ -528,18 +528,6 @@ class Page {
     }
   }
 
-  getCurrentProblem() {
-    let problemFileName = this.storage.variables.currentCourse.problemFileName.getValue();
-    if (
-      problemFileName === "" ||
-      problemFileName === null ||
-      problemFileName === undefined
-    ) {
-      return null;
-    }
-    return problemPage.allProblems.getProblemByIdOrRegisterEmpty(problemFileName);
-  }
-
   getProblemByIdOrNull(label) {
     return problemPage.allProblems.getProblemByIdOrNull(label);
   }

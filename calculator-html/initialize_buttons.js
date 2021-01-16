@@ -770,7 +770,7 @@ class InputPanelData {
       this.addLatexCommand("\\binom{\\caret}{}", "binom", "font-size : 7px;");
     }
     if (noOptions || includeAll) {
-      this.addLatexCommand("\\circ", "\u25CB");
+      this.addLatexCommand("\\circ", "\u2218");
     }
     if (this.flagButtons.logical.selected || noOptions || includeAll) {
       this.addLatexCommand(" or ", "or");
@@ -792,7 +792,7 @@ class InputPanelData {
       this.addLatexCommand("\\gamma", "\u03B3");
       this.addLatexCommand("\\theta", "\u03B8");
       this.addLatexCommand("\\pi", "\u03C0");
-      this.addKeySequence(["^", "\\circ"], "^\u00B0");
+      this.addKeySequence(["^", "\\circ"], "^\u2218");
     }
     if (this.flagButtons.newtonsMethod.selected || includeAll) {
       this.addLatexCommand(["NewtonsMethod(\\caret,,)"], "Newton", "font-size: 6px", false);

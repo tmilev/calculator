@@ -20,7 +20,6 @@ public:
   static std::string compareExpressionsPageNoCache;
   struct request {
     static std::string requestAPI;
-    static std::string calculatorPage;
     static std::string database;
     static std::string setProblemWeight;
     static std::string setProblemDeadline;
@@ -78,7 +77,6 @@ public:
     static std::string login;
     static std::string logout;
     static std::string signUp;
-    static std::string currentPage;
     static std::string addUsers;
     static std::string addEmails;
     static std::string userList;
@@ -128,6 +126,7 @@ public:
     static std::string problemFileName;
     static std::string problemPage;
     static std::string currentPage;
+    static std::string calculatorPage;
     static std::string exerciseType;
     static std::string scoredQuiz;
     static std::string exercise;

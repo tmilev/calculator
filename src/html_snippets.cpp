@@ -152,8 +152,19 @@ std::string HtmlRoutines::getCalculatorComputationURL(const std::string& inputNo
   std::stringstream out;
   JSData theRequest;
   theRequest[DatabaseStrings::labelCalculatorInput] = inputNoEncoding;
-  theRequest[DatabaseStrings::labelCurrentPage] = WebAPI::request::calculatorPage;
+  theRequest[DatabaseStrings::labelCurrentPage] = WebAPI::frontend::calculatorPage;
   out << "#" << HtmlRoutines::convertStringToURLString(theRequest.toString(nullptr), false);
+  return out.str();
+}
+
+std::string HtmlRoutines::getProblemURLRelative(
+  const std::string& problemName
+){
+  std::stringstream out;
+  JSData anchor;
+  anchor[WebAPI::frontend::currentPage] = WebAPI::frontend::problemPage;
+  anchor[WebAPI::frontend::problemFileName] = problemName;
+  out << "/" << WebAPI::appNoCache << "#" << anchor.toString();
   return out.str();
 }
 

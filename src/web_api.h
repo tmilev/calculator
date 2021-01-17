@@ -236,6 +236,7 @@ public:
   static std::string getCalculatorComputationURL(
     const std::string& inputNoEncoding
   );
+  static std::string getProblemURLRelative(const std::string& problemName);
   static std::string getCalculatorComputationAnchorSamePage(
     const std::string& inputNoEncoding
   );

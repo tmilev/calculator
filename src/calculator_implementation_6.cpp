@@ -495,7 +495,10 @@ bool CalculatorHTML::Test::parsingTest() {
       global.fatal << "Failed to load filename: " << currentFileName << "." << global.fatal;
     }
     if (!parser.parseHTML(nullptr)) {
-      global.fatal << "Failed to parse: " << currentFileName << ". " << global.fatal;
+      global.fatal << "Failed to parse: " << currentFileName
+      << ". Calculator link:\n"
+      << "https://localhost:8166" << HtmlRoutines::getProblemURLRelative(currentFileName)
+      << "\n" << global.fatal;
     }
   }
   return true;

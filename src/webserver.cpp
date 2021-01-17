@@ -4014,7 +4014,6 @@ void WebServer::initializeMainRequests() {
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::forgotLogin);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::compute);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::compareExpressions);
-  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::calculatorPage);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::examplesJSON);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::indicator);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::pause);

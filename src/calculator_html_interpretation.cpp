@@ -60,7 +60,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
     return result;
   }
-  Answer& currentA = theProblem.theProblemData.theAnswers.values[indexLastAnswerId];
+  Answer& currentA = theProblem.theProblemData.answers.values[indexLastAnswerId];
   Calculator interpreter;
   interpreter.initialize();
   interpreter.flagPlotNoControls = true;
@@ -270,7 +270,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
-  Answer& currentA = problem.theProblemData.theAnswers.values[indexLastAnswerId];
+  Answer& currentA = problem.theProblemData.answers.values[indexLastAnswerId];
   if (!problem.prepareCommands(&comments)) {
     errorStream << "Something went wrong while interpreting the problem file. ";
     if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
@@ -901,7 +901,7 @@ JSData WebAPIResponse::getEditPageJSON() {
     output[WebAPI::result::error] = errorStream.str();
     return output;
   }
-  if (!theFile.parseHTML(&failureStream)) {
+  if (!theFile.parser.parseHTML(&failureStream)) {
     std::stringstream errorStream;
     errorStream << "<b>Failed to parse file: " << theFile.fileName
     << ".</b> Details:<br>" << failureStream.str();
@@ -913,15 +913,15 @@ JSData WebAPIResponse::getEditPageJSON() {
   std::stringstream comments;
   if (theFile.courseHome == theFile.fileName || theFile.topicListFileName == theFile.fileName) {
     theFile.loadAndParseTopicList(comments);
-    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorClasses);
-    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorClassesAnswerFields);
+    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.parser.calculatorClasses);
+    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.parser.calculatorClassesAnswerFields);
     theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorTopicElementNames);
     theAutocompleteKeyWords.addOnTopNoRepetition(theFile.topics.knownTopicBundles.keys);
   } else{
     Calculator tempCalculator;
     tempCalculator.initialize();
     tempCalculator.computeAutoCompleteKeyWords();
-    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorClasses);
+    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.parser.calculatorClasses);
     theAutocompleteKeyWords.addOnTopNoRepetition(tempCalculator.autoCompleteKeyWords);
     theFile.initAutocompleteExtras();
     theAutocompleteKeyWords.addOnTopNoRepetition(theFile.autoCompleteExtras);
@@ -932,7 +932,7 @@ JSData WebAPIResponse::getEditPageJSON() {
     theAutoCompleteWordsJS[i] = theAutocompleteKeyWords[i];
   }
   output["autoComplete"] = theAutoCompleteWordsJS;
-  output["content"] = HtmlRoutines::convertStringToURLString(theFile.inputHtml, false);
+  output["content"] = HtmlRoutines::convertStringToURLString(theFile.parser.inputHtml, false);
   return output;
 }
 
@@ -973,7 +973,7 @@ JSData WebAPIResponse::submitAnswersJSON(
     global.fatal << "This shouldn't happen: empty file name: theProblem.fileName." << global.fatal;
   }
   std::string studentAnswerNameReader;
-  theProblem.studentTagsAnswered.initialize(theProblem.theProblemData.theAnswers.size());
+  theProblem.studentTagsAnswered.initialize(theProblem.theProblemData.answers.size());
   MapList<std::string, std::string, MathRoutines::hashString>& theArgs = global.webArguments;
   int answerIdIndex = - 1;
   for (int i = 0; i < theArgs.size(); i ++) {
@@ -989,8 +989,8 @@ JSData WebAPIResponse::submitAnswersJSON(
         newAnswerIndex != - 1
       ) {
         output << "<b>You submitted two or more answers [answer tags: "
-        << theProblem.theProblemData.theAnswers.values[answerIdIndex].answerId
-        << " and " << theProblem.theProblemData.theAnswers.values[newAnswerIndex].answerId
+        << theProblem.theProblemData.answers.values[answerIdIndex].answerId
+        << " and " << theProblem.theProblemData.answers.values[newAnswerIndex].answerId
         << "].</b> At present, multiple answer submission is not supported. ";
         result[WebAPI::result::resultHtml] = output.str();
         return result;
@@ -1002,7 +1002,7 @@ JSData WebAPIResponse::submitAnswersJSON(
         result[WebAPI::result::resultHtml] = output.str();
         return result;
       }
-      Answer& currentProblemData = theProblem.theProblemData.theAnswers.values[answerIdIndex];
+      Answer& currentProblemData = theProblem.theProblemData.answers.values[answerIdIndex];
       currentProblemData.currentAnswerURLed = theArgs.values[i];
       if (currentProblemData.currentAnswerURLed == "") {
         output << "<b> Your answer to tag with id " << studentAnswerNameReader
@@ -1018,7 +1018,7 @@ JSData WebAPIResponse::submitAnswersJSON(
     return result;
   }
   ProblemData& currentProblemData = theProblem.theProblemData;
-  Answer& currentA = currentProblemData.theAnswers.values[answerIdIndex];
+  Answer& currentA = currentProblemData.answers.values[answerIdIndex];
 
   currentA.currentAnswerClean = HtmlRoutines::convertURLStringToNormal(
     currentA.currentAnswerURLed, false
@@ -1474,7 +1474,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     result[WebAPI::result::error] = errorStream.str();
     return result;
   }
-  Answer& currentA = theProblem.theProblemData.theAnswers.values[indexLastAnswerId];
+  Answer& currentA = theProblem.theProblemData.answers.values[indexLastAnswerId];
   if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly == "") {
     out << "<b> Unfortunately there is no answer given for this "
     << "question (answerID: " << lastStudentAnswerID << ").</b>";
@@ -2013,7 +2013,7 @@ int ProblemData::getExpectedNumberOfAnswers(
     << ".</b> Details:<br>" << commentsOnFailure.str();
     return 0;
   }
-  this->knownNumberOfAnswersFromHD = problemParser.theProblemData.theAnswers.size();
+  this->knownNumberOfAnswersFromHD = problemParser.theProblemData.answers.size();
   global << Logger::yellow << "Loaded problem: " << problemName
   << "; number of answers: " << this->knownNumberOfAnswersFromHD << Logger::endL;
   this->expectedNumberOfAnswersFromDB = this->knownNumberOfAnswersFromHD;
@@ -2066,11 +2066,11 @@ void UserCalculator::computePointsEarned(
     if (!currentP.flagProblemWeightIsOK) {
       currentWeight = 0;
     }
-    for (int j = 0; j < currentP.theAnswers.size(); j ++) {
-      if (currentP.theAnswers.values[j].numCorrectSubmissions > 0) {
+    for (int j = 0; j < currentP.answers.size(); j ++) {
+      if (currentP.answers.values[j].numCorrectSubmissions > 0) {
         currentP.numCorrectlyAnswered ++;
       }
-      currentP.totalNumSubmissions += currentP.theAnswers.values[j].numSubmissions;
+      currentP.totalNumSubmissions += currentP.answers.values[j].numSubmissions;
     }
     if (currentP.flagProblemWeightIsOK) {
       int expectedNumberOfAnswers = currentP.getExpectedNumberOfAnswers(problemName, commentsOnFailure);

@@ -164,7 +164,7 @@ std::string HtmlRoutines::getProblemURLRelative(
   JSData anchor;
   anchor[WebAPI::frontend::currentPage] = WebAPI::frontend::problemPage;
   anchor[WebAPI::frontend::problemFileName] = problemName;
-  out << "/" << WebAPI::appNoCache << "#" << anchor.toString();
+  out << "/" << WebAPI::appNoCache << "#" << HtmlRoutines::convertStringToURLString(anchor.toString(), false);
   return out.str();
 }
 

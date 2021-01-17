@@ -61,11 +61,12 @@ function appendHtmlToArray(
 }
 
 /**@returns{string} */
-function HTMLFromCommentsAndErrors(input) {
+function htmlFromCommentsAndErrors(input) {
   let extraTags = [
     pathnames.urlFields.result.comments,
     pathnames.urlFields.result.error,
     pathnames.urlFields.result.commentsGlobal,
+    pathnames.urlFields.result.crashReport,
   ];
   let resultHTML = "";
   for (let i = 0; i < extraTags.length; i++) {
@@ -79,11 +80,12 @@ function HTMLFromCommentsAndErrors(input) {
 }
 
 /**@returns{HTMLElement[]} */
-function HTMLElementsFromCommentsAndErrors(input) {
+function htmlElementsFromCommentsAndErrors(input) {
   let extraTags = [
     pathnames.urlFields.result.comments,
     pathnames.urlFields.result.error,
     pathnames.urlFields.result.commentsGlobal,
+    pathnames.urlFields.result.crashReport,
   ];
   let result = [];
   for (let i = 0; i < extraTags.length; i++) {
@@ -166,8 +168,8 @@ module.exports = {
   switchMenu,
   appendHtml,
   appendHtmlToArray,
-  HTMLFromCommentsAndErrors,
-  HTMLElementsFromCommentsAndErrors,
+  htmlFromCommentsAndErrors,
+  htmlElementsFromCommentsAndErrors,
   shortenString,
   deepCopy,
   jsonParseGetHtmlStandard,

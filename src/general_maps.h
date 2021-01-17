@@ -49,7 +49,7 @@ public:
     }
     return this->values[theIndex];
   }
-  value getValue(const key& input, const value& resultIfMissing) {
+  value getValue(const key& input, const value& resultIfMissing) const {
     int theIndex = this->keys.getIndex(input);
     if (theIndex == - 1) {
       return resultIfMissing;

@@ -213,14 +213,14 @@ bool CalculatorHTML::Test::OneProblemTest::run() {
   }
   std::stringstream randomSeedStream;
   randomSeedStream << theProblem.theProblemData.randomSeed;
-  this->answers.setSize(theProblem.theProblemData.theAnswers.size());
+  this->answers.setSize(theProblem.theProblemData.answers.size());
   this->flagAllBuiltInAnswersOK = true;
   global.setWebInput(WebAPI::problem::fileName, theProblem.fileName);
   global.setWebInput(WebAPI::problem::randomSeed, randomSeedStream.str());
   this->flagSuccess = true;
   for (int j = 0; j < this->answers.size; j ++) {
     CalculatorHTML::Test::OneProblemTest::OneAnswer& current = this->answers[j];
-    current.answerId = theProblem.theProblemData.theAnswers.values[j].answerId;
+    current.answerId = theProblem.theProblemData.answers.values[j].answerId;
     current.answerIdWebAPI = WebAPI::problem::calculatorAnswerPrefix + current.answerId;
     global.setWebInput(current.answerIdWebAPI, "1");
     current.builtInAnswerAPICall = WebAPIResponse::getAnswerOnGiveUp(
@@ -491,10 +491,10 @@ bool CalculatorHTML::Test::parsingTest() {
     }
     std::string currentFileName = "test/html_parser/" + fileNames[i];
     CalculatorHTML parser;
-    if (!FileOperations::loadFileToStringVirtual(currentFileName, parser.inputHtml, false, nullptr)) {
+    if (!FileOperations::loadFileToStringVirtual(currentFileName, parser.parser.inputHtml, false, nullptr)) {
       global.fatal << "Failed to load filename: " << currentFileName << "." << global.fatal;
     }
-    if (!parser.parseHTML(nullptr)) {
+    if (!parser.parser.parseHTML(nullptr)) {
       global.fatal << "Failed to parse: " << currentFileName
       << ". Calculator link:\n"
       << "https://localhost:8166" << HtmlRoutines::getProblemURLRelative(currentFileName)

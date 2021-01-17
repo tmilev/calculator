@@ -205,11 +205,7 @@ public:
   bool flagParentInvestigated;
   bool flagIsForReal;
   bool flagLoadedFromDB;
-  bool flagTagHtmlPresent;
-  bool flagTagHeadPresent;
-  bool flagTagBodyPresent;
   bool flagDoPrependEditPagePanel;
-  bool flagMathQuillWithMatrices;
   bool flagSectionsPrepared;
   bool flagIncludeStudentScores;
   bool flagTopicTableStarted;
@@ -217,6 +213,7 @@ public:
   bool flagTopicSubSectionStarted;
   bool flagTopicChapterStarted;
   double timeToParseHtml;
+  List<SyntacticElementHTML> content;
   List<double> timePerAttempt;
   List<List<double> > timeIntermediatePerAttempt;
   List<List<std::string> > timeIntermediateComments;
@@ -228,7 +225,6 @@ public:
   List<std::string> sourcesHomeworkHeaders;
   std::string fileName;
   std::string relativePhysicalFileNameWithFolder;
-  std::string inputHtml;
   struct answerLabels {
     static std::string properties;
     static std::string idPanel;
@@ -262,13 +258,7 @@ public:
   static const std::string bugsGenericMessage;
   HashedList<std::string, MathRoutines::hashString> tagKeysNoValue;
   List<std::string> calculatorTopicElementNames;
-  List<std::string> calculatorTagsRecordedLiterally;
-  List<std::string> calculatorClasses;
-  List<std::string> calculatorClassesAnswerFields;
   List<std::string> autoCompleteExtras;
-  List<char> splittingChars;
-  List<SyntacticElementHTML> elementStack;
-  List<SyntacticElementHTML> content;
   //  List<std::string> answerFirstCorrectSubmission;
   Selection studentTagsAnswered;
   ProblemData theProblemData;
@@ -282,22 +272,73 @@ public:
   List<std::string> databaseStudentSections;
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;
+  class Parser {
+    public:
+    enum Phase {
+      none,
+      leftAngleBracketEncountered,
+      startedOpenTag,
+      startedCloseTag,
+      startedOpenTagGotBackslash,
+      propertyEncountered,
+      equalityEncountered,
+      singleQuoteOpened,
+      doubleQuoteOpened,
+      closeTagWaitingForRightAngleBracket,
+      error,
+    };
+    Phase phase;
+    std::string inputHtml;
+    CalculatorHTML* owner;
+    static HashedList<std::string, HashFunctions::hashFunction> calculatorClasses;
+    static HashedList<std::string, HashFunctions::hashFunction> calculatorClassesAnswerFields;
+    List<char> splittingChars;
+    List<SyntacticElementHTML> elementStack;
+    Parser();
+    void reset();
+    bool parseHTML(std::stringstream* comments);
+    bool reduceMore();
+    void initBuiltInSpanClasses();
+    std::string toStringParsingStack(List<SyntacticElementHTML>& theStack);
+    bool isWhiteSpace(const std::string& input);
+    bool isSplittingChar(const std::string& input);
+    bool isCalculatorTag(const SyntacticElementHTML& input);
+    bool consumeContentStandard();
+    bool consumeAfterSolution();
+    bool consumeAfterLeftAngleBracket();
+    bool consumeTagOpened();
+    bool consumeTagOpenedGotBackSlash();
+    bool consumeCloseTagOpened();
+    bool consumeCloseTagWaitingForRightAngleBracket();
+    bool consumeAfterProperty();
+    bool consumeAfterEquality();
+    bool consumeAfterQuote(const std::string& quoteSymbol);
+    bool consumeBackSlashInQuote(const std::string& quoteSymbol);
+    bool consumeErrorOrMergeInCalculatorTag(int calculatorTagNegativeOffset, const std::string& errorMessage);
+    bool reduceStackMergeContents(int numberOfElementsToRemove);
+    bool setLastToError(const std::string& errorMessage);
+
+    bool canBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
+    bool setTagClassFromOpenTag(SyntacticElementHTML& output);
+    bool isStateModifierApplyIfYes(SyntacticElementHTML& inputElt);
+  };
+  Parser parser;
   /////////////////
   int getAnswerIndex(const std::string& desiredAnswerId);
+  bool parseHTML(std::stringstream* comments) {
+    return this->parser.parseHTML(comments);
+  }
   bool checkContent(std::stringstream* comments);
-  bool canBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
   bool loadMe(bool doLoadDatabase, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure);
   bool loadAndParseTopicList(std::stringstream& comments);
   bool loadDatabaseInfo(std::stringstream& comments);
   std::string cleanUpFileName(const std::string& inputLink);
   void initAutocompleteExtras();
   void initBuiltInSpanClasses();
-  bool parseHTML(std::stringstream* comments);
-  bool parseHTMLPrepareCommands(std::stringstream* comments);
-  bool isSplittingChar(const std::string& input);
+
   void loadFileNames();
-  bool isStateModifierApplyIfYes(SyntacticElementHTML& inputElt);
   bool extractAnswerIds(std::stringstream* comments);
+  bool extractOneAnswerId(SyntacticElementHTML& input, std::stringstream* comments);
   bool interpretHtml(std::stringstream* comments);
   bool interpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments);
   void computeProblemLabel();
@@ -321,9 +362,8 @@ public:
   bool prepareCommandsGenerateProblem(std::stringstream* comments);
   std::string getProblemHeaderEnclosure();
   std::string getProblemHeaderWithoutEnclosure();
-  bool setTagClassFromOpenTag(SyntacticElementHTML& output);
-  bool setTagClassFromCloseTag(SyntacticElementHTML& output);
   bool storeRandomSeedCurrent(std::stringstream* commentsOnFailure);
+  bool parseHTMLPrepareCommands(std::stringstream* comments);
   bool prepareCommands(std::stringstream* comments);
   std::string cleanUpCommandString(const std::string& inputCommand);
   void interpretNotByCalculatorNotAnswer(SyntacticElementHTML& inputOutput);
@@ -420,9 +460,8 @@ public:
     const std::string& studentSection = "",
     bool includeRandomSeedIfAppropriate = false
   ) const;
-  std::string ToStringExtractedCommands();
+  std::string toStringExtractedCommands();
   std::string toStringContent();
-  std::string toStringParsingStack(List<SyntacticElementHTML>& theStack);
   CalculatorHTML();
   class Test {
   public:

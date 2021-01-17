@@ -22,10 +22,11 @@ public:
   std::string syntacticRole;
   std::string content;
   std::string tag;
+  std::string errorComment;
   MapList<std::string, std::string, MathRoutines::hashString> properties;
+  List<std::string> propertiesWithoutValue;
   List<std::string> defaultKeysIfMissing;
   List<std::string> defaultValuesIfMissing;
-  List<std::string> tagKeysWithoutValue;
   List<SyntacticElementHTML> children;
   bool flagUseDisplaystyleInMathMode;
   bool flagUseMathMode;
@@ -51,7 +52,7 @@ public:
   std::string toStringTagAndContent();
   std::string toStringOpenTag(const std::string& overrideTagIfNonEmpty, bool immediatelyClose = false);
   std::string toStringCloseTag(const std::string& overrideTagIfNonEmpty);
-  std::string gGetTagClass();
+  std::string getTagClass();
   std::string toStringDebug();
   SyntacticElementHTML() {
     this->flagUseDisplaystyleInMathMode = false;
@@ -165,10 +166,9 @@ public:
   std::string commandsGenerateProblem;
   std::string commandsGenerateProblemNoEnclosures;
   std::string commandsGenerateProblemLink;
-  MapList<std::string, Answer, MathRoutines::hashString> theAnswers;
+  MapList<std::string, Answer, MathRoutines::hashString> answers;
   List<std::string> inputNonAnswerIds;
   int getExpectedNumberOfAnswers(const std::string& problemName, std::stringstream& commentsOnFailure);
-  void addEmptyAnswerIdOnTop(const std::string& inputAnswerId);
   ProblemData();
   bool checkConsistency() const;
   bool checkConsistencyMathQuillIds() const;

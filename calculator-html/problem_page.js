@@ -171,14 +171,17 @@ class Problem {
 
   writeProblemPage(input, outputComponent) {
     let problemData = null;
+    this.outputElement.textContent = "";
     try {
       problemData = miscellaneous.jsonUnescapeParse(input);
     } catch (e) {
-      outputComponent.innerHTML = `Error parsing: ${e}. Failed to parse: ${input}`;
+      this.outputElement.textContent = `Error parsing: ${e}. Failed to parse: ${input}`;
       return;
     }
+
     if (problemData.crashReport !== undefined && problemData.crashReport !== null) {
-      outputComponent.innerHTML = problemData.crashReport;
+      let html = miscellaneousFrontend.htmlFromCommentsAndErrors(problemData);
+      this.outputElement.innerHTML = html;
       return;
     }
     this.initializeProblemContent(problemData);
@@ -1306,7 +1309,7 @@ function getHTMLfromTopics() {
     let currentProblem = allProblems.getProblemById(label);
     result.push(currentProblem.toHTMLChapter());
   }
-  let extraHtml = miscellaneousFrontend.HTMLFromCommentsAndErrors(allProblems.theTopics);
+  let extraHtml = miscellaneousFrontend.htmlFromCommentsAndErrors(allProblems.theTopics);
   if (extraHtml !== "") {
     let extraNode = document.createElement("span");
     extraNode.innerHTML = extraHtml;
@@ -1400,7 +1403,7 @@ function writeTopicsToCoursePage() {
   let topicsElements = document.getElementsByTagName("topicList");
   writeEditCoursePagePanel();
   let htmlContentElements = getHTMLfromTopics();
-  let extraComments = miscellaneousFrontend.HTMLElementsFromCommentsAndErrors(allProblems.theTopics);
+  let extraComments = miscellaneousFrontend.htmlElementsFromCommentsAndErrors(allProblems.theTopics);
   miscellaneousFrontend.appendHtml(topicsElements[0], extraComments);
   miscellaneousFrontend.appendHtml(topicsElements[0], htmlContentElements);
   initializeProblemWeightsAndDeadlines();

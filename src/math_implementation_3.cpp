@@ -914,7 +914,7 @@ std::string FileOperations::writeFileReturnHTMLLink(
   return out.str();
 }
 
-bool FileOperations::loadFiletoStringVirtual(
+bool FileOperations::loadFileToStringVirtual(
   const std::string& theFileName,
   std::string& output,
   bool accessSensitiveFolders,
@@ -1352,7 +1352,7 @@ bool FileOperations::getPhysicalFileNameFromVirtualCustomizedWriteOnly(
   if (!FileOperations::fileExistsVirtual(outputCandidate, false, false)) {
     std::string fileContent;
     std::string inputDefault = inputStart + "default/" + fileEnd;
-    if (FileOperations::loadFiletoStringVirtual(inputDefault, fileContent, false, commentsOnFailure)) {
+    if (FileOperations::loadFileToStringVirtual(inputDefault, fileContent, false, commentsOnFailure)) {
       std::fstream theFile;
       if (FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
         theFile, inputCopy, false, true, false, false

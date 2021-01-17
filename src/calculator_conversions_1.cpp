@@ -1218,7 +1218,7 @@ bool CalculatorConversions::innerLoadFileIntoString(
     theRelativeFileName = argument.toString();
   }
   std::string outputString;
-  if (!FileOperations::loadFiletoStringVirtual(
+  if (!FileOperations::loadFileToStringVirtual(
     theRelativeFileName, outputString, false, &calculator.comments
   )) {
     return false;

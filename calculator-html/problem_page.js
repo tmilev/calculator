@@ -125,8 +125,6 @@ class Problem {
     this.totalChildren = 0;
     /** @type{HTMLElement}*/
     this.outputElement = outputElement;
-    /** @type{HTMLElement|null}*/
-    this.infoBar = document.getElementById(ids.domElements.divProblemInfoBar);
   }
 
   setRandomSeed(input) {
@@ -1172,6 +1170,8 @@ class ProblemNavigation {
   constructor() {
     /**@type{Problem} */
     this.currentProblem = null;
+    /** @type{HTMLElement|null}*/
+    this.infoBar = document.getElementById(ids.domElements.divProblemInfoBar);
   }
 
   setCurrentProblemAndUpdate(
@@ -1182,15 +1182,11 @@ class ProblemNavigation {
     this.writeToHTML();
   }
 
-  writeInfoBar() {
-
-  }
-
   writeToHTML() {
     if (this.currentProblem === null) {
       return;
     }
-    if (this.currentProblem.infoBar === null) {
+    if (this.infoBar === null) {
       return;
     }
     let problemTitle = document.createElement("DIV");
@@ -1210,7 +1206,7 @@ class ProblemNavigation {
 
     this.infoBar.textContent = "";
     if (!window.calculator.mainPage.flagProblemPageOnly) {
-      infoBar.appendChild(this.currentProblem.getProblemNavigation());
+      this.infoBar.appendChild(this.currentProblem.getProblemNavigation());
     }
 
     if (
@@ -1226,8 +1222,8 @@ class ProblemNavigation {
     }
     //topPart += "<br>"
     problemTitle.appendChild(this.currentProblem.getEditPanel());
-    infoBar.appendChild(problemTitle);
-    typeset.typesetter.typesetSoft(ids.domElements.divProblemInfoBar, "");
+    this.infoBar.appendChild(problemTitle);
+    typeset.typesetter.typesetSoft(this.infoBar, "");
   }
 }
 

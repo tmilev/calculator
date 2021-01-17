@@ -505,7 +505,7 @@ std::string WebAPIResponse::getOnePageJS() {
   }
   builder.jsFileContents.setSize(builder.jsFileNames.size);
   for (int i = 0; i < builder.jsFileNames.size; i ++) {
-    if (!FileOperations::loadFiletoStringVirtual(
+    if (!FileOperations::loadFileToStringVirtual(
       builder.jsFileNames[i],
       builder.jsFileContents[i],
       false,
@@ -530,7 +530,7 @@ bool BuilderApplication::loadJavascriptFileNames(
   const std::string& buildFileNameVirtual,
   std::stringstream* commentsOnFailure
 ) {
-  if (!FileOperations::loadFiletoStringVirtual(
+  if (!FileOperations::loadFileToStringVirtual(
     buildFileNameVirtual, this->buildFile, false, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -591,7 +591,7 @@ std::string WebAPIResponse::getHTMLAllInOneJavascriptCSS(
   BuilderApplication builder;
   std::stringstream out;
   std::stringstream errorStream;
-  if (!FileOperations::loadFiletoStringVirtual(
+  if (!FileOperations::loadFileToStringVirtual(
     virtualHTMLFileName,
     builder.htmlRaw,
     false,

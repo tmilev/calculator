@@ -745,7 +745,7 @@ bool LaTeXCrawler::buildOrFetchFromCachePDF(
     return false;
   }
   if (!this->flagForceSlideRebuild && this->flagPDFExists && !this->flagSourceOnly) {
-    bool result = FileOperations::loadFiletoStringVirtual(
+    bool result = FileOperations::loadFileToStringVirtual(
       this->targetPDFFileNameWithPathVirtual,
       this->targetPDFbinaryContent,
       false,

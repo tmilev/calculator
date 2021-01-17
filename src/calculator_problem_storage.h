@@ -15,6 +15,7 @@ public:
     static std::string calculatorSolution;
     static std::string calculatorExamProblem;
     static std::string calculatorAnswer;
+    static std::string hardCodedAnswer;
   };
   int indexInOwner;
   int commandIndex;

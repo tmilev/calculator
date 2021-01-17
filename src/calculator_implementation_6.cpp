@@ -277,7 +277,7 @@ std::string CalculatorHTML::Test::toStringSummary() {
   return out.str();
 }
 
-bool CalculatorHTML::Test::BuiltInMultiple(
+bool CalculatorHTML::Test::builtInMultiple(
   int inputFirstFileIndex,
   int inputFilesToInterpret,
   int inputRandomSeed,
@@ -477,13 +477,33 @@ bool TopicElementParser::Test::defaultTopicListsOK() {
 }
 
 bool CalculatorHTML::Test::all() {
+  CalculatorHTML::Test::parsingTest();
   CalculatorHTML::Test::builtInCrashOnFailure();
+  return true;
+}
+
+bool CalculatorHTML::Test::parsingTest() {
+  List<std::string> fileNames;
+  FileOperations::getFolderFileNamesVirtual("test/html_parser/", fileNames);
+  for (int i = 0; i < fileNames.size; i ++) {
+    if (fileNames[i] == "." || fileNames[i] == "..") {
+      continue;
+    }
+    std::string currentFileName = "test/html_parser/" + fileNames[i];
+    CalculatorHTML parser;
+    if (!FileOperations::loadFileToStringVirtual(currentFileName, parser.inputHtml, false, nullptr)) {
+      global.fatal << "Failed to load filename: " << currentFileName << "." << global.fatal;
+    }
+    if (!parser.parseHTML(nullptr)) {
+      global.fatal << "Failed to parse: " << currentFileName << ". " << global.fatal;
+    }
+  }
   return true;
 }
 
 bool CalculatorHTML::Test::builtInCrashOnFailure() {
   std::stringstream comments;
-  if (!CalculatorHTML::Test::BuiltInMultiple(0, 0, 0, 3, &comments)) {
+  if (!CalculatorHTML::Test::builtInMultiple(0, 0, 0, 3, &comments)) {
     global.fatal << "Built-in problem tests failed. "
     << comments.str() << global.fatal;
   }
@@ -520,8 +540,7 @@ bool CalculatorFunctions::testProblemInterpretation(
     << "1) index of first problem to test, where "
     << "0 = start at beginning, 1 = start at second problem, etc.; "
     << "2) number of problems to test (0 or less = test all); "
-    << "3) starting random seed, set to 0 if you don't know what this is. "
-    ;
+    << "3) starting random seed, set to 0 if you don't know what this is. ";
   }
   if (global.theResponse.monitoringAllowed()) {
     global.theResponse.initiate("Triggered by testProblemInterpretation.");
@@ -533,7 +552,7 @@ bool CalculatorFunctions::testProblemInterpretation(
   input[2].isSmallInteger(&desiredNumberOfTests);
   input[3].isSmallInteger(&randomSeed);
   std::stringstream comments;
-  CalculatorHTML::Test::BuiltInMultiple(firstFileIndex, desiredNumberOfTests, randomSeed, 3, &comments);
+  CalculatorHTML::Test::builtInMultiple(firstFileIndex, desiredNumberOfTests, randomSeed, 3, &comments);
   return output.assignValue(comments.str(), calculator);
 }
 

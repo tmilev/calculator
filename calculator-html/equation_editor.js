@@ -2618,6 +2618,7 @@ class EquationEditor {
       this.rootNode.type.padding = "";
       this.rootNode.type.margin = "";
       this.rootNode.type.cursor = "";
+      this.rootNode.type.minWidth = "";
     } else {
       this.container.style.margin = "2px";
       this.container.style.padding = "2px";

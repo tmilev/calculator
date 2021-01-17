@@ -192,7 +192,7 @@ public:
 class CalculatorHTML {
 public:
   int numberOfInterpretationAttempts;
-  int MaxInterpretationAttempts;
+  int maxInterpretationAttempts;
   int numberOfProblemsFound;
   int numberOfVideosFound;
   int numberOfVideosWithSlidesFound;
@@ -227,7 +227,7 @@ public:
   List<std::string> slidesSourcesHeaders;
   List<std::string> sourcesHomeworkHeaders;
   std::string fileName;
-  std::string RelativePhysicalFileNameWithFolder;
+  std::string relativePhysicalFileNameWithFolder;
   std::string inputHtml;
   struct answerLabels {
     static std::string properties;
@@ -267,8 +267,8 @@ public:
   List<std::string> calculatorClassesAnswerFields;
   List<std::string> autoCompleteExtras;
   List<char> splittingChars;
-  List<SyntacticElementHTML> eltsStack;
-  List<SyntacticElementHTML> theContent;
+  List<SyntacticElementHTML> elementStack;
+  List<SyntacticElementHTML> content;
   //  List<std::string> answerFirstCorrectSubmission;
   Selection studentTagsAnswered;
   ProblemData theProblemData;
@@ -464,7 +464,7 @@ public:
     std::string errorComments;
     Test();
     bool computeTotalFiles();
-    static bool BuiltInMultiple(
+    static bool builtInMultiple(
       int inputFirstFileIndex,
       int inputFilesToInterpret,
       int inputRandomSeed,
@@ -478,6 +478,7 @@ public:
     );
     static bool builtInCrashOnFailure();
     static bool all();
+    static bool parsingTest();
     std::string toStringSummary();
     std::string toHTMLBuiltIn();
     std::string toHTMLDebug();

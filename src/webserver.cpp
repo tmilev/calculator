@@ -4153,7 +4153,7 @@ bool GlobalVariables::configurationLoad() {
   if (this->configurationFileName == "") {
     this->configurationFileName = "/configuration/configuration.json";
   }
-  if (!FileOperations::loadFiletoStringVirtual(
+  if (!FileOperations::loadFileToStringVirtual(
     this->configurationFileName, global.configurationFileContent, true, &out
   )) {
     global << Logger::yellow << "Failed to read configuration file. " << out.str() << Logger::endL;

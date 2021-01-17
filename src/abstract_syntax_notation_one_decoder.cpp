@@ -1585,7 +1585,7 @@ bool PrivateKeyRSA::loadFromPEMFile(const std::string& input, std::stringstream*
   std::string certificateContent;
   // No access to sensitive folders here, so this cannot be used for the server's private key.
   // For server's certificate, use TransportLayerSecurity::loadPEMPrivateKey.
-  if (!FileOperations::loadFiletoStringVirtual(input, certificateContent, false, commentsOnFailure)) {
+  if (!FileOperations::loadFileToStringVirtual(input, certificateContent, false, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load key file. ";
     }
@@ -1852,7 +1852,7 @@ bool X509Certificate::loadFromPEMFile(const std::string& input, std::stringstrea
   std::string certificateContent;
   // No access to sensitive folders here, so this cannot be used for the server's certificate.
   // For server's certificate, use TransportLayerSecurity::loadPEMCertificate.
-  if (!FileOperations::loadFiletoStringVirtual(
+  if (!FileOperations::loadFileToStringVirtual(
     input, certificateContent, false, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {

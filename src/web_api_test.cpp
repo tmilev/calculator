@@ -146,7 +146,7 @@ bool OneComparison::compare() {
 bool WebAPIResponse::Test::compareExpressions() {
   std::string comparisonJSON;
   std::stringstream commentsOnFailure;
-  if (!FileOperations::loadFiletoStringVirtual(
+  if (!FileOperations::loadFileToStringVirtual(
     "test/compare_expressions.json", comparisonJSON, false, &commentsOnFailure
   )) {
     global.fatal << "File compare_expressions.json is missing. "

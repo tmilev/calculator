@@ -590,7 +590,7 @@ bool Calculator::Test::loadTestStrings(
     return false;
   }
   std::string testStrings;
-  if (!FileOperations::loadFiletoStringVirtual(
+  if (!FileOperations::loadFileToStringVirtual(
     WebAPI::calculator::testFileNameVirtual,
     testStrings,
     false,

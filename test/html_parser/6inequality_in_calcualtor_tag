@@ -1,5 +1,5 @@
 Tricky example.
-<calculatorAnswerOnGiveUp>
+<calculatorAnswerOnGiveUp name="asdf">
 a< 0
 </calculatorAnswerOnGiveUp>
 

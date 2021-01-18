@@ -2343,6 +2343,7 @@ bool CalculatorHTML::Parser::consumeAfterProperty() {
   if (last.syntacticRole == "/") {
     thirdToLast.propertiesWithoutValue.addOnTop(StringRoutines::stringTrimWhiteSpace(secondToLast.content));
     thirdToLast.syntacticRole = "<openTag/";
+    this->phase = CalculatorHTML::Parser::Phase::startedOpenTagGotBackslash;
     return this->reduceStackMergeContents(2);
   }
   if (last.syntacticRole == "=") {

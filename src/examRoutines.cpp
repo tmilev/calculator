@@ -2023,7 +2023,7 @@ bool CalculatorHTML::Parser::parseHTML(std::stringstream* comments) {
   this->initBuiltInSpanClasses();
   this->elementStack.setSize(0);
   SyntacticElementHTML dummyElt, tempElt;
-  dummyElt.content = "<>";
+  dummyElt.content = "";
   dummyElt.syntacticRole = SyntacticElementHTML::Tags::filler;
   tempElt.syntacticRole = "command";
   tempElt.tag = "";
@@ -2040,13 +2040,13 @@ bool CalculatorHTML::Parser::parseHTML(std::stringstream* comments) {
     }
     while (this->reduceMore()) {
       if (doLog) {
-        global.comments << "&nbsp;&nbsp;&larr;&nbsp;&nbsp;"
+        global.comments << "&nbsp;&nbsp;&rarr;&nbsp;&nbsp;"
         << this->toStringPhaseInfo() << "<br>";
         global.comments << this->toStringPhaseInfo();
       }
     }
     if (doLog) {
-      global.comments << "&nbsp;&nbsp;&larr;&nbsp;&nbsp;"
+      global.comments << "&nbsp;&nbsp;&rarr;&nbsp;&nbsp;"
       << this->toStringPhaseInfo() << "<br>";
     }
     if (this->elementStack.lastObject()->syntacticRole == "error") {
@@ -2164,6 +2164,19 @@ bool CalculatorHTML::Parser::consumeErrorOrMergeInCalculatorTag(
   return false;
 }
 
+bool CalculatorHTML::Parser::consumeErrorOrMergeInCalculatorTagRetainLast(
+  int calculatorTagNegativeOffset, const std::string& errorMessage
+) {
+  int startIndex = this->elementStack.size + calculatorTagNegativeOffset;
+  SyntacticElementHTML& calculatorTag = this->elementStack[startIndex];
+  if (calculatorTag.syntacticRole != "<calculatorTag>") {
+    return this->setLastToError(errorMessage);
+  }
+  this->reduceStackMergeContentsRetainLast(- calculatorTagNegativeOffset - 1);
+  this->phase = CalculatorHTML::Parser::Phase::none;
+  return false;
+}
+
 bool CalculatorHTML::Parser::reduceStackMergeContents(
   int numberOfElementsToRemove
 ) {
@@ -2171,6 +2184,18 @@ bool CalculatorHTML::Parser::reduceStackMergeContents(
   for (int i = this->elementStack.size - numberOfElementsToRemove; i < this->elementStack.size; i ++) {
     calculatorTag.content.append(this->elementStack[i].content);
   }
+  this->elementStack.setSize(this->elementStack.size - numberOfElementsToRemove);
+  return false;
+}
+
+bool CalculatorHTML::Parser::reduceStackMergeContentsRetainLast(
+  int numberOfElementsToRemove
+) {
+  SyntacticElementHTML& calculatorTag = this->elementStack[this->elementStack.size - numberOfElementsToRemove - 2];
+  for (int i = this->elementStack.size - numberOfElementsToRemove - 1; i < this->elementStack.size - 1; i ++) {
+    calculatorTag.content.append(this->elementStack[i].content);
+  }
+  this->elementStack[this->elementStack.size - numberOfElementsToRemove - 1] = *this->elementStack.lastObject();
   this->elementStack.setSize(this->elementStack.size - numberOfElementsToRemove);
   return false;
 }
@@ -2249,6 +2274,13 @@ bool CalculatorHTML::Parser::consumeTagOpened() {
     secondToLast.syntacticRole = "<openTag/";
     this->phase = CalculatorHTML::Parser::Phase::startedOpenTagGotBackslash;
     return this->reduceStackMergeContents(1);
+  }
+  if (last.syntacticRole == "<") {
+    this->consumeErrorOrMergeInCalculatorTagRetainLast(
+      - 3, "While constructing your tag, failed to interpret " + last.syntacticRole
+    );
+    // Don't push new elements to be parsed on the stack.
+    return true;
   }
   return this->consumeErrorOrMergeInCalculatorTag(
     - 3, "While constructing your tag, failed to interpret " + last.syntacticRole
@@ -2410,6 +2442,13 @@ std::string CalculatorHTML::Parser::toStringPhaseInfo() {
   std::stringstream stackTop;
   int stepsToShow = 5;
   for (int i = this->elementStack.size - stepsToShow - 1; i < this->elementStack.size; i ++) {
+    SyntacticElementHTML& current = this->elementStack[i];
+    if (
+      current.syntacticRole == SyntacticElementHTML::Tags::filler &&
+      current.content == ""
+    ) {
+      continue;
+    }
     stackTop << this->elementStack[i].toStringDebug() << " ";
   }
   // stackTop << stackContent.str();

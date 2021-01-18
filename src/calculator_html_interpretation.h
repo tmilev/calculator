@@ -315,8 +315,14 @@ public:
     bool consumeAfterEquality();
     bool consumeAfterQuote(const std::string& quoteSymbol);
     bool consumeBackSlashInQuote(const std::string& quoteSymbol);
-    bool consumeErrorOrMergeInCalculatorTag(int calculatorTagNegativeOffset, const std::string& errorMessage);
+    bool consumeErrorOrMergeInCalculatorTag(
+      int calculatorTagNegativeOffset, const std::string& errorMessage
+    );
+    bool consumeErrorOrMergeInCalculatorTagRetainLast(
+      int calculatorTagNegativeOffset, const std::string& errorMessage
+    );
     bool reduceStackMergeContents(int numberOfElementsToRemove);
+    bool reduceStackMergeContentsRetainLast(int numberOfElementsToRemove);
     bool setLastToError(const std::string& errorMessage);
     std::string toStringPhaseInfo();
     bool canBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);

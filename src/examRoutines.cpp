@@ -1989,9 +1989,9 @@ bool CalculatorHTML::Parser::parseHTML(std::stringstream* comments) {
   theReader.seekg(0);
   std::string word;
   char currentChar;
-  List<SyntacticElementHTML> theElements;
-  theElements.setSize(0);
-  theElements.setExpectedSize(static_cast<int>(theReader.str().size()) / 4);
+  List<SyntacticElementHTML> elements;
+  elements.setSize(0);
+  elements.setExpectedSize(static_cast<int>(theReader.str().size()) / 4);
   this->splittingChars.addOnTop('<');
   this->splittingChars.addOnTop('\"');
   this->splittingChars.addOnTop('>');
@@ -2005,20 +2005,20 @@ bool CalculatorHTML::Parser::parseHTML(std::stringstream* comments) {
   while (theReader.get(currentChar)) {
     if (splittingChars.contains(currentChar)) {
       if (word != "") {
-        theElements.addOnTop(word);
+        elements.addOnTop(word);
       }
       std::string charToString;
       charToString.push_back(currentChar);
       SyntacticElementHTML element(charToString);
       element.syntacticRole = charToString;
-      theElements.addOnTop(element);
+      elements.addOnTop(element);
       word = "";
     } else {
       word.push_back(currentChar);
     }
   }
   if (word != "") {
-    theElements.addOnTop(word);
+    elements.addOnTop(word);
   }
   this->initBuiltInSpanClasses();
   this->elementStack.setSize(0);
@@ -2028,13 +2028,26 @@ bool CalculatorHTML::Parser::parseHTML(std::stringstream* comments) {
   tempElt.syntacticRole = "command";
   tempElt.tag = "";
   tempElt.content = "";
-  this->elementStack.setExpectedSize(theElements.size + SyntacticElementHTML::parsingDummyElements);
+  this->elementStack.setExpectedSize(elements.size + SyntacticElementHTML::parsingDummyElements);
   for (int i = 0; i < SyntacticElementHTML::parsingDummyElements; i ++) {
     this->elementStack.addOnTop(dummyElt);
   }
-  for (int i = 0; i < theElements.size; i ++) {
-    this->elementStack.addOnTop(theElements[i]);
+  bool doLog = global.userDefaultIsDebuggingAdmin();
+  for (int i = 0; i < elements.size; i ++) {
+    this->elementStack.addOnTop(elements[i]);
+    if (doLog) {
+      global.comments << this->toStringPhaseInfo();
+    }
     while (this->reduceMore()) {
+      if (doLog) {
+        global.comments << "&nbsp;&nbsp;&larr;&nbsp;&nbsp;"
+        << this->toStringPhaseInfo() << "<br>";
+        global.comments << this->toStringPhaseInfo();
+      }
+    }
+    if (doLog) {
+      global.comments << "&nbsp;&nbsp;&larr;&nbsp;&nbsp;"
+      << this->toStringPhaseInfo() << "<br>";
     }
     if (this->elementStack.lastObject()->syntacticRole == "error") {
       break;
@@ -2484,7 +2497,7 @@ bool CalculatorHTML::interpretAnswerHighlights(std::stringstream& comments) {
   this->answerHighlights.setSize(0);
   bool answerHighlightStarted = false;
   for (int i = 0; i < this->content.size; i ++) {
-    if (this->content[i].tag == "answerCalculatorHighlightStart") {
+    if (this->content[i].tag == SyntacticElementHTML::Tags::answerCalculatorHighlightStart) {
       answerHighlightStarted = true;
       this->answerHighlights.addOnTop("");
       this->content[i].content = "";
@@ -2496,7 +2509,7 @@ bool CalculatorHTML::interpretAnswerHighlights(std::stringstream& comments) {
     if (this->content[i].isAnswerElement(nullptr)) {
       continue;
     }
-    if (this->content[i].tag == "answerCalculatorHighlightFinish") {
+    if (this->content[i].tag == SyntacticElementHTML::Tags::answerCalculatorHighlightEnd) {
       answerHighlightStarted = false;
       this->content[i].content = "";
       continue;

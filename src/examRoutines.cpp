@@ -2327,7 +2327,8 @@ bool CalculatorHTML::Parser::consumeAfterProperty() {
   if (last.syntacticRole == "") {
     thirdToLast.propertiesWithoutValue.addOnTop(StringRoutines::stringTrimWhiteSpace(secondToLast.content));
     thirdToLast.content.append(secondToLast.content);
-    this->elementStack[this->elementStack.size - 2] = secondToLast;
+    last.syntacticRole = "property";
+    this->elementStack[this->elementStack.size - 2] = last;
     this->elementStack.removeLastObject();
     return false;
   }
@@ -2439,7 +2440,7 @@ bool CalculatorHTML::Parser::consumeCloseTagWaitingForRightAngleBracket() {
       secondToLast.syntacticRole = "command";
       return this->reduceStackMergeContents(1);
     }
-    if (thirdToLast.syntacticRole == "<calculatorTag>") {
+    if (thirdToLast.syntacticRole == "<calculatorTag>" && secondToLast.tag == thirdToLast.tag) {
       thirdToLast.syntacticRole = "command";
       this->elementStack.setSize(this->elementStack.size - 2);
       return false;

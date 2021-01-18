@@ -2437,7 +2437,9 @@ bool CalculatorHTML::Parser::consumeCloseTagWaitingForRightAngleBracket() {
       this->elementStack.setSize(this->elementStack.size - 2);
       return false;
     }
-    return this->reduceStackMergeContents(2);
+    secondToLast.syntacticRole = "";
+    this->reduceStackMergeContents(1);
+    return true;
   }
   return this->consumeErrorOrMergeInCalculatorTag(- 3, "Unexpected character after langle forward slash closeTag");
 }
@@ -2476,7 +2478,7 @@ std::string CalculatorHTML::Parser::toStringPhaseInfo() {
   case CalculatorHTML::Parser::Phase::startedCloseTag:
     return "Phase::startedCloseTag: " + stackTop.str();
   case CalculatorHTML::Parser::Phase::closeTagWaitingForRightAngleBracket:
-    return "Phase::startedCloseTag: " + stackTop.str();
+    return "Phase::closeTagWaitingForRightAngleBracket: " + stackTop.str();
   case CalculatorHTML::Parser::Phase::error:
     return "Phase::error: " + stackTop.str();
   }

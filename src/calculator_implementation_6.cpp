@@ -357,7 +357,8 @@ bool CalculatorHTML::Test::builtIn(
     currentTest.randomSeed = this->randomSeed;
     std::stringstream reportStream;
     if (badSoFar > 0) {
-      reportStream << "<b style = 'color:red'>Found " << badSoFar << " bad files so far. </b><br>";
+      reportStream << "<b style = 'color:red'>Found "
+      << badSoFar << " bad files so far. </b><br>";
     }
     reportStream << "File: "
     << i
@@ -381,7 +382,11 @@ bool CalculatorHTML::Test::builtIn(
       if (global.flagRunningConsoleTest) {
         global << Logger::red << "Failure @ index: " << i << ". "
         << "Elapsed ms: " << global.getElapsedMilliseconds() << ". "
-        << Logger::endL;        
+        << Logger::endL;
+        global << Logger::yellow
+        << "https://localhost:8166"
+        << HtmlRoutines::getProblemURLRelative(currentTest.fileName)
+        << Logger::endL;
       }
     } else {
       if (global.flagRunningConsoleTest) {

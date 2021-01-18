@@ -728,10 +728,12 @@ class Problem {
     );
     if (this.flagForReal !== true && thePanel.htmlButtonAnswer !== "") {
       let buttonAnswer = document.getElementById(thePanel.idButtonAnswer);
-      buttonAnswer.addEventListener(
-        'click',
-        thePanel.submitGiveUp.bind(thePanel)
-      );
+      if (buttonAnswer !== null) {
+        buttonAnswer.addEventListener(
+          'click',
+          thePanel.submitGiveUp.bind(thePanel)
+        );
+      }
     }
     if (
       thePanel.idButtonSolution !== undefined &&

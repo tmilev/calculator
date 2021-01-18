@@ -1268,10 +1268,17 @@ bool CalculatorHTML::prepareAndExecuteCommands(Calculator& theInterpreter, std::
 }
 
 std::string SyntacticElementHTML::getTagClass() const {
+  std::string className = this->getKeyValue("class");
   if (this->tag != "") {
+    if (
+      !CalculatorHTML::Parser::calculatorClasses.contains(this->tag) &&
+      CalculatorHTML::Parser::calculatorClasses.contains(className)
+    ) {
+      return className;
+    }
     return this->tag;
   }
-  return this->getKeyValue("class");
+  return className;
 }
 
 bool CalculatorHTML::prepareSectionList(std::stringstream& commentsOnFailure) {

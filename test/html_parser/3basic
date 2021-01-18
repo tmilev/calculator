@@ -1,0 +1,34 @@
+Test for basic parsing
+
+<calculatorHidden>
+some hidden content
+</calculatorHidden>
+<br>
+<calculator>
+non-hidden content
+</calculator>.
+<calculatorCommentsBeforeInterpretation name="AlgebraAnswer">
+X
+</calculatorCommentsBeforeInterpretation>
+<answerCalculatorHighlight>\(A\)</answerCalculatorHighlight>
+<calculatorAnswer id="AlgebraAnswer" buttons="algebra">
+Y
+</calculatorAnswer>
+<calculatorCommentsBeforeSubmission>
+B
+</calculatorCommentsBeforeSubmission>
+<calculatorAnswerOnGiveUp>
+A
+</calculatorAnswerOnGiveUp>
+
+<calculatorSolution name="AlgebraAnswer">
+<calculatorHidden>
+A</calculatorHidden>
+Some content 
+ 
+\(<calculator> 
+B</calculator>\)
+</calculatorSolution>
+
+
+

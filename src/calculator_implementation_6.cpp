@@ -212,15 +212,15 @@ bool CalculatorHTML::Test::OneProblemTest::run() {
     return this->flagSuccess;
   }
   std::stringstream randomSeedStream;
-  randomSeedStream << theProblem.theProblemData.randomSeed;
-  this->answers.setSize(theProblem.theProblemData.answers.size());
+  randomSeedStream << theProblem.problemData.randomSeed;
+  this->answers.setSize(theProblem.problemData.answers.size());
   this->flagAllBuiltInAnswersOK = true;
   global.setWebInput(WebAPI::problem::fileName, theProblem.fileName);
   global.setWebInput(WebAPI::problem::randomSeed, randomSeedStream.str());
   this->flagSuccess = true;
   for (int j = 0; j < this->answers.size; j ++) {
     CalculatorHTML::Test::OneProblemTest::OneAnswer& current = this->answers[j];
-    current.answerId = theProblem.theProblemData.answers.values[j].answerId;
+    current.answerId = theProblem.problemData.answers.values[j].answerId;
     current.answerIdWebAPI = WebAPI::problem::calculatorAnswerPrefix + current.answerId;
     global.setWebInput(current.answerIdWebAPI, "1");
     current.builtInAnswerAPICall = WebAPIResponse::getAnswerOnGiveUp(

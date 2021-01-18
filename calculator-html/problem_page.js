@@ -296,6 +296,7 @@ class Problem {
     if (this.commentsProblem === undefined) {
       this.commentsProblem = "";
     }
+    this.commentsProblem += miscellaneousFrontend.htmlFromCommentsAndErrors(problemData);
     this.computeBadProblemExplanation();
     let answerVectors = problemData["answers"];
     if (answerVectors === undefined) {

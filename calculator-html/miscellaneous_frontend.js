@@ -1,8 +1,8 @@
 "use strict";
-var pathnames = require("./pathnames");
+let pathnames = require("./pathnames");
 
 function switchMenu(obj) {
-  var el = document.getElementById(obj);
+  let el = document.getElementById(obj);
   if (el.classList.contains("hiddenClass")) {
     el.classList.remove("hiddenClass");
   } else {
@@ -27,7 +27,7 @@ function appendHtml(
     return;
   }
   if (Array.isArray(contentToAppend)) {
-    for (var i = 0; i < contentToAppend.length; i++) {
+    for (let i = 0; i < contentToAppend.length; i++) {
       appendHtml(targetToAppendTo, contentToAppend[i]);
     }
     return;
@@ -52,7 +52,7 @@ function appendHtmlToArray(
     return;
   }
   if (Array.isArray(contentToAppend)) {
-    for (var i = 0; i < contentToAppend.length; i++) {
+    for (let i = 0; i < contentToAppend.length; i++) {
       appendHtmlToArray(targetArray, contentToAppend[i]);
     }
     return;

@@ -10,12 +10,18 @@ class SyntacticElementHTML {
 public:
   struct Tags{
   public:
+    static std::string filler;
     static std::string calculator;
     static std::string calculatorHidden;
     static std::string calculatorSolution;
+    static std::string calculatorSolutionStart;
+    static std::string calculatorSolutionEnd;
     static std::string calculatorExamProblem;
     static std::string calculatorAnswer;
     static std::string hardCodedAnswer;
+    static std::string answerCalculatorHighlight;
+    static std::string answerCalculatorHighlightStart;
+    static std::string answerCalculatorHighlightEnd;
   };
   int indexInOwner;
   int commandIndex;
@@ -27,13 +33,13 @@ public:
   List<std::string> propertiesWithoutValue;
   List<std::string> defaultKeysIfMissing;
   List<std::string> defaultValuesIfMissing;
-  List<SyntacticElementHTML> children;
+  // List<SyntacticElementHTML> children;
   bool flagUseDisplaystyleInMathMode;
   bool flagUseMathMode;
   bool flagUseMathSpan;
   std::string interpretedCommand;
   static int parsingDummyElements;
-  bool isInterpretedByCalculatorDuringProblemGeneration();
+  bool isInterpretedByCalculatorDuringProblemGeneration() const;
   bool isInterpretedByCalculatorDuringSubmission();
   bool isInterpretedNotByCalculator();
   bool isHidden();
@@ -41,6 +47,7 @@ public:
   bool isCalculatorCommand();
   bool isAnswer();
   bool isSolution();
+  std::string getAnswerIdOfOwner() const;
   bool isAnswerElement(std::string* desiredAnswerId);
   bool isCommentBeforeInterpretation();
   bool isCommentBeforeSubmission();
@@ -49,11 +56,14 @@ public:
   void setKeyValue(const std::string& theKey, const std::string& theValue);
   void resetAllExceptContent();
   std::string toStringInterpretedBody();
-  std::string toStringTagAndContent();
-  std::string toStringOpenTag(const std::string& overrideTagIfNonEmpty, bool immediatelyClose = false);
-  std::string toStringCloseTag(const std::string& overrideTagIfNonEmpty);
-  std::string getTagClass();
-  std::string toStringDebug();
+  std::string toStringTagAndContent() const;
+  std::string toStringOpenTag(const std::string& overrideTagIfNonEmpty, bool immediatelyClose = false) const;
+  std::string toStringCloseTag(const std::string& overrideTagIfNonEmpty) const;
+  std::string getTagClass() const;
+  std::string toStringDebug() const;
+  static std::string toHTMLElements(
+    const List<SyntacticElementHTML>& input
+  );
   SyntacticElementHTML() {
     this->flagUseDisplaystyleInMathMode = false;
     this->indexInOwner = - 1;
@@ -79,12 +89,12 @@ public:
 
 class Answer {
 public:
+  bool flagAnswerVerificationFound;
   bool flagAutoGenerateSubmitButtons;
   bool flagAutoGenerateMQButtonPanel;
   bool flagAutoGenerateMQfield;
   bool flagAutoGenerateVerificationField;
   bool flagAutoGenerateButtonSolution;
-  bool flagSolutionFound;
   int numSubmissions;
   int numCorrectSubmissions;
   std::string commandsCommentsBeforeSubmission;
@@ -97,7 +107,6 @@ public:
   List<SyntacticElementHTML> solutionElements;
   MapList<std::string, std::string, MathRoutines::hashString> properties;
   std::string answerId;
-  std::string varAnswerId;
   std::string idVerificationSpan;
   std::string idAnswerPanel;
   std::string idButtonSubmit;
@@ -111,13 +120,10 @@ public:
   //////////////////////////////////////
   std::string mathQuillPanelOptions;
   //////////////////////////////////////
-  std::string varMQfield;
-  std::string MQobject;
   std::string idSpanSolution;
   std::string idMQfielD;
   std::string idMQFieldLocation;
   std::string idMQButtonPanelLocation;
-  std::string MQUpdateFunction;
   std::string currentAnswerURLed;
   std::string currentAnswerClean;
   std::string firstCorrectAnswerURLed;
@@ -130,9 +136,11 @@ public:
     this->flagAutoGenerateMQfield = true;
     this->flagAutoGenerateVerificationField = true;
     this->flagAutoGenerateButtonSolution = true;
-    this->flagSolutionFound = false;
+    this->flagAnswerVerificationFound = false;
   }
+  bool hasSolution() const;
   std::string toString();
+  std::string toStringSolutionElements();
 };
 
 class ProblemDataAdministrative {

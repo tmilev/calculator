@@ -12,12 +12,12 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     global.theResponse.disallowReport();
   }
   int64_t startMilliseconds = global.getElapsedMilliseconds();
-  CalculatorHTML theProblem;
+  CalculatorHTML problem;
   std::stringstream out, errorStream;
   JSData result;
-  theProblem.loadCurrentProblemItem(false, global.getWebInput(WebAPI::problem::randomSeed), &errorStream);
-  if (!theProblem.flagLoadedSuccessfully) {
-    out << "Problem name is: " << theProblem.fileName
+  problem.loadCurrentProblemItem(false, global.getWebInput(WebAPI::problem::randomSeed), &errorStream);
+  if (!problem.flagLoadedSuccessfully) {
+    out << "Problem name is: " << problem.fileName
     << " <b>Could not load problem, this may be a bug. "
     << CalculatorHTML::bugsGenericMessage << "</b>";
     if (errorStream.str() != "") {
@@ -26,7 +26,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
-  if (theProblem.flagIsForReal) {
+  if (problem.flagIsForReal) {
     out << " <b>Not allowed to show answer of a problem being tested for real. </b>";
     result[WebAPI::result::resultHtml] = out.str();
     return result;
@@ -37,7 +37,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     return result;
   }
   std::stringstream comments;
-  if (!theProblem.parseHTMLPrepareCommands(&comments)) {
+  if (!problem.parseHTMLPrepareCommands(&comments)) {
     out << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
     result[WebAPI::result::resultHtml] = out.str();
     return result;
@@ -48,40 +48,41 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   for (int i = 0; i < theArgs.size(); i ++) {
     StringRoutines::stringBeginsWith(theArgs.keys[i], WebAPI::problem::calculatorAnswerPrefix, &lastStudentAnswerID);
   }
-  int indexLastAnswerId = theProblem.getAnswerIndex(lastStudentAnswerID);
+  int indexLastAnswerId = problem.getAnswerIndex(lastStudentAnswerID);
   if (indexLastAnswerId == - 1) {
     out << "<b>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
     << "</b>";
     if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
-      out << "<hr>" << theProblem.theProblemData.toStringAvailableAnswerIds();
+      out << "<hr>" << problem.problemData.toStringAvailableAnswerIds();
     }
     result[WebAPI::result::resultHtml] = out.str();
     result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
     return result;
   }
-  Answer& currentA = theProblem.theProblemData.answers.values[indexLastAnswerId];
+  Answer& answer = problem.problemData.answers.values[indexLastAnswerId];
   Calculator interpreter;
   interpreter.initialize();
   interpreter.flagPlotNoControls = true;
   interpreter.flagWriteLatexPlots = false;
-  if (!theProblem.prepareCommands(&comments)) {
+  if (!problem.prepareCommands(&comments)) {
     out << "<b>Failed to prepare calculator commands.</b>"
     << "<br>Comments:<br>" << comments.str();
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
-  if (currentA.solutionElements.size == 0) {
-    out << "<b>Unfortunately there is no solution given for this question (answerID: " << lastStudentAnswerID << ").</b>";
+  if (answer.solutionElements.size == 0) {
+    out << "<b>There is no solution given for this question (answerID: " << lastStudentAnswerID << ").</b>";
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
   std::stringstream answerCommands, answerCommandsNoEnclosures;
-  answerCommands << Calculator::Atoms::commandEnclosure << "{}(" << currentA.commandsBeforeAnswer << "); "
-  << currentA.commandsSolutionOnly;
+  answerCommands << Calculator::Atoms::commandEnclosure
+  << "{}(" << answer.commandsBeforeAnswer << "); "
+  << answer.commandsSolutionOnly;
   answerCommandsNoEnclosures
-  << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING
-  << currentA.commandsSolutionOnly;
+  << answer.commandsBeforeAnswerNoEnclosuresForDEBUGGING
+  << answer.commandsSolutionOnly;
   interpreter.evaluate(answerCommands.str());
   if (interpreter.syntaxErrors != "") {
     out << "<b style = 'color:red'>Failed to compose the solution. "
@@ -103,21 +104,23 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
     return result;
   }
-  if (!theProblem.interpretProcessExecutedCommands(interpreter, currentA.solutionElements, out)) {
+  if (!problem.interpretProcessExecutedCommands(interpreter, answer.solutionElements, out)) {
     result[WebAPI::result::resultHtml] = out.str();
     result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
     return result;
   }
-  for (int i = 0; i < currentA.solutionElements.size; i ++) {
-    if (!currentA.solutionElements[i].isHidden()) {
-      out << currentA.solutionElements[i].toStringInterpretedBody();
+  for (int i = 0; i < answer.solutionElements.size; i ++) {
+    if (!answer.solutionElements[i].isHidden()) {
+      out << answer.solutionElements[i].toStringInterpretedBody();
     }
   }
   if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
     out << "<hr>"
     << HtmlRoutines::getCalculatorComputationAnchorNewPage(
       answerCommandsNoEnclosures.str(), "Input link"
-    ) << "<br>" << interpreter.outputString << "<hr>" << interpreter.outputCommentsString;
+    ) << "<br>" << interpreter.outputString
+    << "<hr>" << interpreter.outputCommentsString
+    << "<hr><b>Raw command:</b> " << answer.commandsSolutionOnly;
   }
   result[WebAPI::result::resultHtml] = out.str();
   result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
@@ -214,7 +217,7 @@ std::string WebAPIResponse::getCommentsInterpretation(
   }
   std::string currentS;
   for (int i = 1; i < currentE.size(); i ++) {
-    currentS = WebAPIResponse::getSanitizedComment(currentE[i], theFormat,resultIsPlot);
+    currentS = WebAPIResponse::getSanitizedComment(currentE[i], theFormat, resultIsPlot);
     if (StringRoutines::stringTrimWhiteSpace(currentS) == "") {
       continue;
     }
@@ -270,7 +273,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
-  Answer& currentA = problem.theProblemData.answers.values[indexLastAnswerId];
+  Answer& currentA = problem.problemData.answers.values[indexLastAnswerId];
   if (!problem.prepareCommands(&comments)) {
     errorStream << "Something went wrong while interpreting the problem file. ";
     if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
@@ -391,7 +394,9 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     << "<br>"
     << "Result:<br>"
     << interpreterWithAdvice.outputString
-    << "<br>" << interpreterWithAdvice.outputCommentsString;
+    << "<br>" << interpreterWithAdvice.outputCommentsString
+    << "<br>Parsed elements: " << problem.parser.toStringParsingStack(problem.content)
+    ;
   }
   result[WebAPI::result::resultHtml] = out.str();
   return result;
@@ -873,7 +878,7 @@ JSData WebAPIResponse::getExamPageJSON() {
     output["forReal"] = theFile.flagIsForReal;
     if (!theFile.flagIsForReal) {
       std::stringstream randomSeedStream;
-      randomSeedStream << theFile.theProblemData.randomSeed;
+      randomSeedStream << theFile.problemData.randomSeed;
       output[WebAPI::problem::randomSeed] = randomSeedStream.str();
     }
   }
@@ -917,7 +922,7 @@ JSData WebAPIResponse::getEditPageJSON() {
     theAutocompleteKeyWords.addOnTopNoRepetition(theFile.parser.calculatorClassesAnswerFields);
     theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorTopicElementNames);
     theAutocompleteKeyWords.addOnTopNoRepetition(theFile.topics.knownTopicBundles.keys);
-  } else{
+  } else {
     Calculator tempCalculator;
     tempCalculator.initialize();
     tempCalculator.computeAutoCompleteKeyWords();
@@ -966,14 +971,14 @@ JSData WebAPIResponse::submitAnswersJSON(
     result[WebAPI::result::comments] = comments.str();
     return result;
   }
-  if (!theProblem.theProblemData.flagRandomSeedGiven && !theProblem.flagIsForReal) {
+  if (!theProblem.problemData.flagRandomSeedGiven && !theProblem.flagIsForReal) {
     output << "<b>Random seed not given.</b>";
   }
   if (theProblem.fileName == "") {
     global.fatal << "This shouldn't happen: empty file name: theProblem.fileName." << global.fatal;
   }
   std::string studentAnswerNameReader;
-  theProblem.studentTagsAnswered.initialize(theProblem.theProblemData.answers.size());
+  theProblem.studentTagsAnswered.initialize(theProblem.problemData.answers.size());
   MapList<std::string, std::string, MathRoutines::hashString>& theArgs = global.webArguments;
   int answerIdIndex = - 1;
   for (int i = 0; i < theArgs.size(); i ++) {
@@ -989,8 +994,8 @@ JSData WebAPIResponse::submitAnswersJSON(
         newAnswerIndex != - 1
       ) {
         output << "<b>You submitted two or more answers [answer tags: "
-        << theProblem.theProblemData.answers.values[answerIdIndex].answerId
-        << " and " << theProblem.theProblemData.answers.values[newAnswerIndex].answerId
+        << theProblem.problemData.answers.values[answerIdIndex].answerId
+        << " and " << theProblem.problemData.answers.values[newAnswerIndex].answerId
         << "].</b> At present, multiple answer submission is not supported. ";
         result[WebAPI::result::resultHtml] = output.str();
         return result;
@@ -1002,7 +1007,7 @@ JSData WebAPIResponse::submitAnswersJSON(
         result[WebAPI::result::resultHtml] = output.str();
         return result;
       }
-      Answer& currentProblemData = theProblem.theProblemData.answers.values[answerIdIndex];
+      Answer& currentProblemData = theProblem.problemData.answers.values[answerIdIndex];
       currentProblemData.currentAnswerURLed = theArgs.values[i];
       if (currentProblemData.currentAnswerURLed == "") {
         output << "<b> Your answer to tag with id " << studentAnswerNameReader
@@ -1017,7 +1022,7 @@ JSData WebAPIResponse::submitAnswersJSON(
     result[WebAPI::result::resultHtml] = output.str();
     return result;
   }
-  ProblemData& currentProblemData = theProblem.theProblemData;
+  ProblemData& currentProblemData = theProblem.problemData;
   Answer& currentA = currentProblemData.answers.values[answerIdIndex];
 
   currentA.currentAnswerClean = HtmlRoutines::convertURLStringToNormal(
@@ -1468,13 +1473,13 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     << " but that is not an ID of an answer tag. "
     << "</b>";
     if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
-      errorStream << "<hr>" << theProblem.theProblemData.toStringAvailableAnswerIds();
+      errorStream << "<hr>" << theProblem.problemData.toStringAvailableAnswerIds();
     }
     result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::error] = errorStream.str();
     return result;
   }
-  Answer& currentA = theProblem.theProblemData.answers.values[indexLastAnswerId];
+  Answer& currentA = theProblem.problemData.answers.values[indexLastAnswerId];
   if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly == "") {
     out << "<b> Unfortunately there is no answer given for this "
     << "question (answerID: " << lastStudentAnswerID << ").</b>";
@@ -2013,7 +2018,7 @@ int ProblemData::getExpectedNumberOfAnswers(
     << ".</b> Details:<br>" << commentsOnFailure.str();
     return 0;
   }
-  this->knownNumberOfAnswersFromHD = problemParser.theProblemData.answers.size();
+  this->knownNumberOfAnswersFromHD = problemParser.problemData.answers.size();
   global << Logger::yellow << "Loaded problem: " << problemName
   << "; number of answers: " << this->knownNumberOfAnswersFromHD << Logger::endL;
   this->expectedNumberOfAnswersFromDB = this->knownNumberOfAnswersFromHD;

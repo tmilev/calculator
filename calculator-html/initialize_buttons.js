@@ -13,7 +13,7 @@ const EquationEditorButtonFactory = require("./equation_editor").EquationEditorB
 const EquationEditorOptions = require("./equation_editor").EquationEditorOptions;
 const datePicker = require("./date_picker").datePicker;
 
-var keyWordsKnownToMathQuill = [
+let keyWordsKnownToMathQuill = [
   'sqrt',
   'frac',
   'cdot',
@@ -34,13 +34,13 @@ var keyWordsKnownToMathQuill = [
   'cap',
 ];
 
-var charsToSplit = ['x', 'y'];
-var panelsCollapseStatus = {};
-var calculatorSeparatorLeftDelimiters = {
+let charsToSplit = ['x', 'y'];
+let panelsCollapseStatus = {};
+let calculatorSeparatorLeftDelimiters = {
   '(': true,
   '{': true
 };
-var startingCharacterSectionUnderMathQuillEdit = '';
+let startingCharacterSectionUnderMathQuillEdit = '';
 
 function processMathQuillLatex(theText) {
   for (let i = 0; i < theText.length; i++) {
@@ -343,20 +343,14 @@ class InputPanelData {
       }
       resultHtml += inputParsed.resultHtml;
     }
-    let crashReport = inputParsed.crashReport;
-    if (crashReport !== undefined && crashReport !== null && crashReport) {
-      if (resultHtml !== "") {
-        resultHtml += "<br>";
-      }
-      resultHtml += crashReport;
-    }
     let timeComputation = inputParsed.timeComputation;
     if (timeComputation !== null && timeComputation !== undefined) {
       if (resultHtml !== "") {
         resultHtml += "<br>";
       }
-      resultHtml += `<br><span style = 'font-size:x-small;float:right'>Response: ${timeComputation} ms</small>`;
+      resultHtml += `<br><span style='font-size:x-small;float:right'>Response: ${timeComputation} ms</span>`;
     }
+    resultHtml += miscellaneous.htmlFromCommentsAndErrors(inputParsed);
     outputComponent.innerHTML = resultHtml;
     let spanVerification = document.getElementById(this.idVerificationSpan);
     let scripts = spanVerification.getElementsByTagName('script');

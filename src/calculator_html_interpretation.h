@@ -261,7 +261,7 @@ public:
   List<std::string> autoCompleteExtras;
   //  List<std::string> answerFirstCorrectSubmission;
   Selection studentTagsAnswered;
-  ProblemData theProblemData;
+  ProblemData problemData;
   List<std::string> answerHighlights;
   int topicLectureCounter;
   std::string topicListContent;
@@ -304,9 +304,10 @@ public:
     bool isSplittingChar(const std::string& input);
     bool isCalculatorTag(const SyntacticElementHTML& input);
     bool consumeContentStandard();
-    bool consumeAfterSolution();
+    bool consumeAfterAnswerHighlight();
     bool consumeAfterLeftAngleBracket();
     bool consumeTagOpened();
+    bool closeOpenTag(int tagOffsetNegative);
     bool consumeTagOpenedGotBackSlash();
     bool consumeCloseTagOpened();
     bool consumeCloseTagWaitingForRightAngleBracket();
@@ -317,7 +318,7 @@ public:
     bool consumeErrorOrMergeInCalculatorTag(int calculatorTagNegativeOffset, const std::string& errorMessage);
     bool reduceStackMergeContents(int numberOfElementsToRemove);
     bool setLastToError(const std::string& errorMessage);
-
+    std::string toStringPhaseInfo();
     bool canBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
     bool setTagClassFromOpenTag(SyntacticElementHTML& output);
     bool isStateModifierApplyIfYes(SyntacticElementHTML& inputElt);
@@ -337,6 +338,21 @@ public:
   void initBuiltInSpanClasses();
 
   void loadFileNames();
+  bool extractContent(std::stringstream* comments);
+  bool processParsedElements(std::stringstream* comments);
+  class SolutionProcessor {
+  public:
+    List<SyntacticElementHTML> contentWithoutSolutionElements;
+    List<SyntacticElementHTML> currentSolution;
+    Answer* currentAnswer;
+    SolutionProcessor();
+  };
+  bool processSolutions(std::stringstream* comments);
+  bool processOneSolution(
+    SyntacticElementHTML& input,
+    SolutionProcessor& processor,
+    std::stringstream* comments
+  );
   bool extractAnswerIds(std::stringstream* comments);
   bool extractOneAnswerId(SyntacticElementHTML& input, std::stringstream* comments);
   bool interpretHtml(std::stringstream* comments);
@@ -344,7 +360,7 @@ public:
   void computeProblemLabel();
   void computeBodyDebugString();
   std::string toStringInterprettedCommands(Calculator& theInterpreter, List<SyntacticElementHTML>& theElements);
-  void logProblemGenerationObsolete(Calculator& theInterpreter);
+  void logProblemGenerationObsolete(Calculator& interpreter);
   bool interpretProcessExecutedCommands(
     Calculator& theInterpreter, List<SyntacticElementHTML>& theElements, std::stringstream& comments
   );
@@ -357,7 +373,7 @@ public:
   bool prepareCommandsAnswerOnGiveUp(Answer& theAnswer, std::stringstream* comments);
   bool prepareCommentsBeforeSubmission(Answer& theAnswer, std::stringstream* comments);
   bool prepareCommentsBeforeInterpretation(Answer& theAnswer, std::stringstream* comments);
-  bool prepareCommandsSolution(Answer& theAnswer, std::stringstream* comments);
+  bool exrtactSolutionCommands(Answer& answer, std::stringstream* comments);
   bool prepareCommandsAnswer(Answer& theAnswer, std::stringstream* comments);
   bool prepareCommandsGenerateProblem(std::stringstream* comments);
   std::string getProblemHeaderEnclosure();
@@ -462,6 +478,7 @@ public:
   ) const;
   std::string toStringExtractedCommands();
   std::string toStringContent();
+  std::string toStringParsedElements() const;
   CalculatorHTML();
   class Test {
   public:

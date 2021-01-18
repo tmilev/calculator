@@ -440,9 +440,7 @@ public:
   void interpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
   bool prepareSectionList(std::stringstream& commentsOnFailure);
   void interpretManageClass(SyntacticElementHTML& inputOutput);
-  void interpretTopicList(SyntacticElementHTML& inputOutput);
   bool computeTopicListAndPointsEarned(std::stringstream& commentsOnFailure);
-  void interpretTableOfContents(SyntacticElementHTML& inputOutput);
   void interpretAccountInformationLinks(SyntacticElementHTML& inputOutput);
   void interpretJavascripts(SyntacticElementHTML& inputOutput);
   JSData getJavascriptMathQuillBoxesForJSON();

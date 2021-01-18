@@ -11,6 +11,7 @@ public:
   struct Tags{
   public:
     static std::string filler;
+    static std::string command;
     static std::string calculator;
     static std::string calculatorHidden;
     static std::string calculatorSolution;

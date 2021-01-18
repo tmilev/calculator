@@ -16,6 +16,7 @@ std::string CalculatorHTML::stringPracticE = "Practice";
 std::string CalculatorHTML::stringProblemLink = "Problem";
 
 std::string SyntacticElementHTML::Tags::filler = "filler";
+std::string SyntacticElementHTML::Tags::command = "command";
 std::string SyntacticElementHTML::Tags::calculator = "calculator";
 std::string SyntacticElementHTML::Tags::calculatorHidden = "calculatorHidden";
 std::string SyntacticElementHTML::Tags::calculatorSolution = "calculatorSolution";
@@ -887,10 +888,8 @@ bool SyntacticElementHTML::isInterpretedNotByCalculator() {
   return
   tagClass == SyntacticElementHTML::Tags::calculatorExamProblem || tagClass == "calculatorExamIntermediate" ||
   tagClass == SyntacticElementHTML::Tags::calculatorAnswer || tagClass == "calculatorManageClass" ||
-  tagClass == "generateTopicTable" ||
   tagClass == "calculatorJavascript" ||
   tagClass == "accountInformationLinks" ||
-  tagClass == "generateTableOfContents" ||
   tagClass == "calculatorNavigationHere" ||
   tagClass == "calculatorEditPageHere" ||
   this->isAnswerElement(nullptr);
@@ -1412,10 +1411,6 @@ void CalculatorHTML::interpretNotByCalculatorNotAnswer(SyntacticElementHTML& inp
     this->interpretGenerateLink(inputOutput);
   } else if (tagClass == "calculatorManageClass") {
     this->interpretManageClass(inputOutput);
-  } else if (tagClass == "generateTopicTable") {
-    this->interpretTopicList(inputOutput);
-  } else if (tagClass == "generateTableOfContents") {
-    this->interpretTableOfContents(inputOutput);
   } else if (tagClass == "accountInformationLinks") {
     this->interpretAccountInformationLinks(inputOutput);
   } else if (tagClass == "calculatorJavascript") {
@@ -1971,8 +1966,6 @@ void CalculatorHTML::Parser::initBuiltInSpanClasses() {
     this->calculatorClasses.addOnTop("calculatorProblemNavigationHere");
     this->calculatorClasses.addOnTop("calculatorManageClass");
     this->calculatorClasses.addOnTop("setCalculatorExamHome");
-    this->calculatorClasses.addOnTop("generateTopicTable");
-    this->calculatorClasses.addOnTop("generateTableOfContents");
     this->calculatorClasses.addOnTop("accountInformationLinks");
     this->calculatorClasses.addOnTop("calculatorJavascript");
     this->calculatorClasses.addOnTop("answerCalculatorHighlight");
@@ -2121,14 +2114,17 @@ bool CalculatorHTML::Parser::consumeContentStandard() {
     this->phase = CalculatorHTML::Parser::Phase::leftAngleBracketEncountered;
     return false;
   }
-  SyntacticElementHTML& secondToLast = this->elementStack[this->elementStack.size - 2];
-  if (secondToLast.syntacticRole == SyntacticElementHTML::Tags::filler) {
-    return false;
+  if (
+    last.syntacticRole != SyntacticElementHTML::Tags::command &&
+    last.syntacticRole != SyntacticElementHTML::Tags::filler
+  ) {
+    last.syntacticRole = "";
   }
-  if (secondToLast.syntacticRole == "command") {
-    if (last.syntacticRole != "command") {
-      last.syntacticRole = "";
-    }
+  SyntacticElementHTML& secondToLast = this->elementStack[this->elementStack.size - 2];
+  if (
+    secondToLast.syntacticRole == SyntacticElementHTML::Tags::filler ||
+    secondToLast.syntacticRole == SyntacticElementHTML::Tags::command
+  ) {
     return false;
   }
   return this->reduceStackMergeContents(1);
@@ -3901,77 +3897,6 @@ JSData CalculatorHTML::toStringTopicListJSON(std::stringstream* comments) {
   return output;
 }
 
-void CalculatorHTML::interpretTableOfContents(SyntacticElementHTML& inputOutput) {
-  MacroRegisterFunctionWithName("CalculatorHTML::interpretTableOfContents");
-  std::stringstream out;
-  if (!this->loadAndParseTopicList(out)) {
-    inputOutput.interpretedCommand = out.str();
-    return;
-  }
-  bool sectionStarted = false;
-  bool subSectionStarted = false;
-  bool chapterStarted = false;
-  out << "\n\n\n<!--Topic list automatically generated from topic list: " << this->topicListFileName
-  << ".-->";
-  out << "<a href=\"" << global.displayNameExecutable
-  << "?request=template&fileName=" << this->fileName << "&"
-  << "topicList=" << this->topicListFileName << "&" << "\">All topics</a>";
-  out << "<ul>";
-  for (int i = 0; i < this->topics.theTopics.size(); i ++) {
-    TopicElement& currentElt = this->topics.theTopics.values[i];
-    if (subSectionStarted) {
-      if (
-        currentElt.type == TopicElement::types::topic ||
-        currentElt.type == TopicElement::types::section ||
-        currentElt.type == TopicElement::types::chapter
-      ) {
-        out << "</li>";
-      }
-    }
-    if (sectionStarted) {
-      if (
-        currentElt.type == TopicElement::types::section ||
-        currentElt.type == TopicElement::types::chapter
-      ) {
-        out << "</ul></li>";
-      }
-    }
-    if (chapterStarted) {
-      if (currentElt.type == TopicElement::types::chapter) {
-        out << "</ul></li>";
-      }
-    }
-    if (currentElt.type == TopicElement::types::chapter) {
-      out << "<li>" << "<a href=\"" << global.displayNameExecutable
-      << "?request=template&fileName=" << this->fileName << "&"
-      << "topicList=" << this->topicListFileName << "&" << "chapter =" << currentElt.title
-      << "\">" << currentElt.title << "</a>" << "<br>\n";
-      chapterStarted = true;
-      sectionStarted = false;
-      subSectionStarted = false;
-      out << "<ul>";
-    } else if (currentElt.type == TopicElement::types::section) {
-      out << "<li>" << currentElt.title << "<br>\n";
-      sectionStarted = true;
-      subSectionStarted = false;
-      out << "<ul>";
-    } else if (currentElt.type == TopicElement::types::error) {
-      out << "Error parsing topic list. " << currentElt.error;
-    }
-  }
-  if (subSectionStarted) {
-    out << "</li>";
-  }
-  if (sectionStarted) {
-    out << "</ul></li>";
-  }
-  if (chapterStarted) {
-    out << "</ul></li>";
-  }
-  out << "</ul>";
-  inputOutput.interpretedCommand = out.str();
-}
-
 void CalculatorHTML::interpretJavascripts(SyntacticElementHTML& inputOutput) {
   MacroRegisterFunctionWithName("CalculatorHTML::interpretJavascripts");
   std::string javascriptName = StringRoutines::stringTrimWhiteSpace(inputOutput.content);
@@ -4010,11 +3935,6 @@ bool CalculatorHTML::computeTopicListAndPointsEarned(std::stringstream& comments
   }
   this->topics.initializeElementTypes();
   return true;
-}
-
-void CalculatorHTML::interpretTopicList(SyntacticElementHTML& inputOutput) {
-  MacroRegisterFunctionWithName("CalculatorHTML::interpretTopicList");
-  inputOutput.interpretedCommand = "<topicList></topicList>";
 }
 
 JSData LaTeXCrawler::FileWithOption::toJSON() {

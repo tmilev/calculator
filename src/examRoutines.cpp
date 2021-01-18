@@ -2674,9 +2674,13 @@ bool CalculatorHTML::processOneSolution(
   if (tagName == SyntacticElementHTML::Tags::calculatorSolutionStart) {
     std::string answerId = input.getAnswerIdOfOwner();
     if (answerId == "") {
+      if (this->problemData.answers.size() > 0) {
+        answerId = *this->problemData.answers.keys.lastObject();
+      }
+    }
+    if (answerId == "") {
       if (comments != nullptr) {
-        *comments << "Solution tag with id: [" << answerId
-        << "] does not match any question. ";
+        *comments << "Solution tag with tag name: " << tagName << " has empty id. ";
       }
       return false;
     }

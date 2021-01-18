@@ -359,6 +359,7 @@ public:
     SolutionProcessor& processor,
     std::stringstream* comments
   );
+  bool extractAnswerIdsOnce(SyntacticElementHTML& element, std::stringstream* comments);
   bool extractAnswerIds(std::stringstream* comments);
   bool extractOneAnswerId(SyntacticElementHTML& input, std::stringstream* comments);
   bool interpretHtml(std::stringstream* comments);

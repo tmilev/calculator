@@ -2172,7 +2172,7 @@ bool CalculatorHTML::Parser::consumeErrorOrMergeInCalculatorTagRetainLast(
   if (calculatorTag.syntacticRole != "<calculatorTag>") {
     return this->setLastToError(errorMessage);
   }
-  this->reduceStackMergeContentsRetainLast(- calculatorTagNegativeOffset - 1);
+  this->reduceStackMergeContentsRetainLast(- calculatorTagNegativeOffset - 2);
   this->phase = CalculatorHTML::Parser::Phase::none;
   return false;
 }
@@ -2327,6 +2327,10 @@ bool CalculatorHTML::Parser::consumeAfterProperty() {
   if (last.syntacticRole == ">") {
     thirdToLast.propertiesWithoutValue.addOnTop(StringRoutines::stringTrimWhiteSpace(secondToLast.content));
     return this->closeOpenTag(- 3);
+  }
+  if (last.syntacticRole == "<") {
+    this->consumeErrorOrMergeInCalculatorTagRetainLast(- 4, "Couldn't continue tag construction after property " + secondToLast.content);
+    return true;
   }
   if (last.syntacticRole == "/") {
     thirdToLast.propertiesWithoutValue.addOnTop(StringRoutines::stringTrimWhiteSpace(secondToLast.content));
@@ -2685,53 +2689,62 @@ bool CalculatorHTML::processSolutions(std::stringstream* comments) {
   return true;
 }
 
+bool CalculatorHTML::extractAnswerIdsOnce(
+  SyntacticElementHTML& element, std::stringstream* comments
+) {
+  MacroRegisterFunctionWithName("CalculatorHTML::extractAnswerIdsOnce");
+  if (!this->extractOneAnswerId(element, comments)) {
+    return false;
+  }
+  if (element.isAnswer()) {
+    return true;
+  }
+  if (
+    !element.isCommentBeforeSubmission() &&
+    !element.isCommentBeforeInterpretation() &&
+    !element.isAnswerOnGiveUp() &&
+    !element.isSolution()
+  ) {
+    return true;
+  }
+  std::string nameOfTag = element.getAnswerIdOfOwner();
+  if (nameOfTag == "") {
+    int numberOfIdsSoFar = this->problemData.answers.size();
+    if (numberOfIdsSoFar == 0) {
+      if (comments != nullptr) {
+        *comments << "Auxilary answer element: " << element.toStringDebug()
+        << " has no name and appears before the first answer tag. "
+        << "Auxilary answers apply the answer tag whose id is specified in the name "
+        << "tag of the auxilary answer. If the auxilary answer has no "
+        << "name tag, it is assumed to apply to the (nearest) answer tag above it. "
+        << "To fix the issue either place the auxilary element after the answer or "
+        << "specify the answer's id in the name tag of the auxilary element. ";
+      }
+      return false;
+    }
+    element.setKeyValue("name", *this->problemData.answers.keys.lastObject());
+    nameOfTag = element.getAnswerIdOfOwner();
+  }
+  if (nameOfTag == "") {
+    global.fatal << "Unexpected empty answer name." << global.fatal;
+  }
+  if (!this->problemData.answers.contains(nameOfTag)) {
+    Answer newAnswer;
+    newAnswer.answerId = nameOfTag;
+    this->problemData.answers.setKeyValue(newAnswer.answerId, newAnswer);
+  }
+  return true;
+}
+
 bool CalculatorHTML::extractAnswerIds(std::stringstream* comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::extractAnswerIds");
   // we shouldn't clear this->theProblemData.theAnswers: it may contain
   // outdated information loaded from the database. We don't want to loose that info
   // (say we renamed an answerId but students have already stored answers using the old answerId...).
   for (int i = 0; i < this->content.size; i ++) {
-    SyntacticElementHTML& currentE = this->content[i];
-    if (!this->extractOneAnswerId(currentE, comments)) {
+    if (!this->extractAnswerIdsOnce(this->content[i], comments)) {
       return false;
     }
-    if (currentE.isAnswer()) {
-      continue;
-    }
-    if (
-      !currentE.isCommentBeforeSubmission() &&
-      !currentE.isCommentBeforeInterpretation() &&
-      !currentE.isAnswerOnGiveUp() &&
-      !currentE.isSolution()
-    ) {
-      continue;
-    }
-    std::string nameOfTag = currentE.getAnswerIdOfOwner();
-    if (nameOfTag == "") {
-      int numberOfIdsSoFar = this->problemData.answers.size();
-      if (numberOfIdsSoFar == 0) {
-        if (comments != nullptr) {
-          *comments << "Auxilary answer element: " << currentE.toStringDebug()
-          << " has no name and appears before the first answer tag. "
-          << "Auxilary answers apply the answer tag whose id is specified in the name "
-          << "tag of the auxilary answer. If the auxilary answer has no "
-          << "name tag, it is assumed to apply to the (nearest) answer tag above it. "
-          << "To fix the issue either place the auxilary element after the answer or "
-          << "specify the answer's id in the name tag of the auxilary element. ";
-        }
-      }
-      currentE.setKeyValue("name", *this->problemData.answers.keys.lastObject());
-      nameOfTag = currentE.getAnswerIdOfOwner();
-    }
-    if (nameOfTag == "") {
-      global.fatal << "Unexpected empty answer name." << global.fatal;
-    }
-    if (!this->problemData.answers.contains(nameOfTag)) {
-      Answer newAnswer;
-      newAnswer.answerId = nameOfTag;
-      this->problemData.answers.setKeyValue(newAnswer.answerId, newAnswer);
-    }
-    // Set the name tag to the id of the last answer.
   }
   this->problemData.checkConsistency();
   return true;

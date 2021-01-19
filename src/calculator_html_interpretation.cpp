@@ -948,23 +948,32 @@ JSData WebAPIResponse::submitAnswersJSON() {
 class AnswerChecker {
 public:
   CalculatorHTML problem;
+  Calculator interpreter;
   JSData result;
   double startTime;
   std::stringstream output;
+  int answerIndex;
   JSData submitAnswersJSON(
     const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
   );
   bool prepareProblem(const std::string& inputRandomSeed);
+  bool extractStudentAnswerPartOne();
+  bool extractStudentAnswerPartTwo();
+  bool storeInDatabase(bool answerIsCorrect);
+  bool checkAnswerStandard(bool* outputIsCorrect);
+  bool checkAnswerHardcoded(bool* outputIsCorrect);
   AnswerChecker();
 };
 
 AnswerChecker::AnswerChecker() {
   this->startTime = 0;
+  this->answerIndex = - 1;
 }
 
 bool AnswerChecker::prepareProblem(
   const std::string &inputRandomSeed
 ) {
+  MacroRegisterFunctionWithName("AnswerChecker::prepareProblem");
   if (!global.userDefaultHasAdminRights()) {
     global.theResponse.disallowReport();
   }
@@ -994,60 +1003,61 @@ bool AnswerChecker::prepareProblem(
   return true;
 }
 
-JSData AnswerChecker::submitAnswersJSON(
-  const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
-) {
-  MacroRegisterFunctionWithName("WebAPIReponse::submitAnswers");
-  if (!this->prepareProblem(inputRandomSeed)) {
-    return this->result;
-  }
+bool AnswerChecker::extractStudentAnswerPartOne() {
+  MacroRegisterFunctionWithName("AnswerChecker::extractStudentAnswerPartOne");
   std::string studentAnswerNameReader;
   this->problem.studentTagsAnswered.initialize(this->problem.problemData.answers.size());
   MapList<std::string, std::string, MathRoutines::hashString>& theArgs = global.webArguments;
-  int answerIdIndex = - 1;
+  this->answerIndex = - 1;
   for (int i = 0; i < theArgs.size(); i ++) {
-    if (StringRoutines::stringBeginsWith(
+    if (!StringRoutines::stringBeginsWith(
       theArgs.keys[i], WebAPI::problem::calculatorAnswerPrefix, &studentAnswerNameReader
     )) {
-      int newAnswerIndex = this->problem.getAnswerIndex(studentAnswerNameReader);
-      if (answerIdIndex == - 1) {
-        answerIdIndex = newAnswerIndex;
-      } else if (
-        answerIdIndex != newAnswerIndex &&
-        answerIdIndex != - 1 &&
-        newAnswerIndex != - 1
-      ) {
-        this->output << "<b>You submitted two or more answers [answer tags: "
-        << this->problem.problemData.answers.values[answerIdIndex].answerId
-        << " and " << this->problem.problemData.answers.values[newAnswerIndex].answerId
-        << "].</b> At present, multiple answer submission is not supported. ";
-        result[WebAPI::result::resultHtml] = this->output.str();
-        return result;
-      }
-      if (answerIdIndex == - 1) {
-        this->output << "<b> You submitted an answer to tag with id "
-        << studentAnswerNameReader
-        << " which is not on my list of answerable tags. </b>";
-        result[WebAPI::result::resultHtml] = this->output.str();
-        return result;
-      }
-      Answer& currentProblemData = this->problem.problemData.answers.values[answerIdIndex];
-      currentProblemData.currentAnswerURLed = theArgs.values[i];
-      if (currentProblemData.currentAnswerURLed == "") {
-        output << "<b> Your answer to tag with id " << studentAnswerNameReader
-        << " appears to be empty, please resubmit. </b>";
-        result[WebAPI::result::resultHtml] = output.str();
-        return result;
-      }
+      continue;
+    }
+    int newAnswerIndex = this->problem.getAnswerIndex(studentAnswerNameReader);
+    if (this->answerIndex == - 1) {
+      this->answerIndex = newAnswerIndex;
+    } else if (
+      this->answerIndex != newAnswerIndex &&
+      this->answerIndex != - 1 &&
+      newAnswerIndex != - 1
+    ) {
+      this->output << "<b>You submitted two or more answers [answer tags: "
+      << this->problem.problemData.answers.values[this->answerIndex].answerId
+      << " and " << this->problem.problemData.answers.values[newAnswerIndex].answerId
+      << "].</b> At present, multiple answer submission is not supported. ";
+      result[WebAPI::result::resultHtml] = this->output.str();
+      return false;
+    }
+    if (this->answerIndex == - 1) {
+      this->output << "<b> You submitted an answer to tag with id "
+      << studentAnswerNameReader
+      << " which is not on my list of answerable tags. </b>";
+      result[WebAPI::result::resultHtml] = this->output.str();
+      return false;
+    }
+    Answer& currentProblemData = this->problem.problemData.answers.values[this->answerIndex];
+    currentProblemData.currentAnswerURLed = theArgs.values[i];
+    if (currentProblemData.currentAnswerURLed == "") {
+      output << "<b> Your answer to tag with id " << studentAnswerNameReader
+      << " appears to be empty, please resubmit. </b>";
+      result[WebAPI::result::resultHtml] = output.str();
+      return false;
     }
   }
-  if (answerIdIndex == - 1) {
+  if (this->answerIndex == - 1) {
     output << "<b>Something is wrong: I found no submitted answers.</b>";
     result[WebAPI::result::resultHtml] = output.str();
-    return result;
+    return false;
   }
+  return true;
+}
+
+bool AnswerChecker::extractStudentAnswerPartTwo() {
+  MacroRegisterFunctionWithName("AnswerChecker::extractStudentAnswerPartTwo");
   ProblemData& currentProblemData = this->problem.problemData;
-  Answer& currentA = currentProblemData.answers.values[answerIdIndex];
+  Answer& currentA = currentProblemData.answers.values[this->answerIndex];
 
   currentA.currentAnswerClean = HtmlRoutines::convertURLStringToNormal(
     currentA.currentAnswerURLed, false
@@ -1055,7 +1065,150 @@ JSData AnswerChecker::submitAnswersJSON(
   currentA.currentAnswerURLed = HtmlRoutines::convertStringToURLString(
     currentA.currentAnswerClean, false
   );//<-encoding back to overwrite malformed input
-  this->problem.studentTagsAnswered.addSelectionAppendNewIndex(answerIdIndex);
+  this->problem.studentTagsAnswered.addSelectionAppendNewIndex(this->answerIndex);
+  return true;
+}
+
+bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
+  MacroRegisterFunctionWithName("AnswerChecker::storeInDatabase");
+  if (!global.flagDatabaseCompiled) {
+    return true;
+  }
+  ProblemData& currentProblemData = this->problem.problemData;
+  Answer& currentA = currentProblemData.answers.values[this->answerIndex];
+  UserCalculator& theUser = this->problem.currentUser;
+  theUser.::UserCalculatorData::operator=(global.userDefault);
+  bool deadLinePassed = false;
+  bool hasDeadline = true;
+  double secondsTillDeadline = - 1;
+  if (this->problem.flagIsForReal) {
+    if (!this->problem.loadAndParseTopicList(output)) {
+      hasDeadline = false;
+    }
+    std::string theSQLstring;
+    theSQLstring = theUser.sectionComputed;
+    if (hasDeadline) {
+      bool unused = false;
+      std::string theDeadlineString = this->problem.getDeadline(
+        this->problem.fileName,
+        HtmlRoutines::convertStringToURLString(theSQLstring, false),
+        unused
+      );
+
+      if (theDeadlineString == "" || theDeadlineString == " ") {
+        hasDeadline = false;
+      } else {
+        TimeWrapper now, deadline; //<-needs a fix for different time formats.
+        // <-For the time being, we hard-code it
+        // to month/day/year format (no time to program it better).
+        std::stringstream badDateStream;
+        if (!deadline.assignMonthDayYear(theDeadlineString, badDateStream)) {
+          output << "<tr><td><b>Problem reading deadline. </b> The deadline string was: "
+          << theDeadlineString << ". Comments: "
+          << "<span style =\"color:red\">" << badDateStream.str() << "</span>"
+          << "</td></tr><tr><td> This should not happen. "
+          << CalculatorHTML::bugsGenericMessage << "</td></tr>";
+          output << "</table>";
+          result[WebAPI::result::resultHtml] = output.str();
+          return false;
+        }
+        now.assignLocalTime();
+        // out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
+        // << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
+        secondsTillDeadline = deadline.subtractAnotherTimeFromMeInSeconds(now) + 7 * 3600;
+        deadLinePassed = (secondsTillDeadline < - 18000);
+      }
+    }
+    if (deadLinePassed) {
+      output << "<tr><td><b style =\"color:red\">"
+      << "Deadline passed, attempt not recorded."
+      << "</b></td></tr>";
+    } else {
+      currentA.numSubmissions ++;
+      if (answerIsCorrect) {
+        currentA.numCorrectSubmissions ++;
+        if (currentA.firstCorrectAnswerClean == "") {
+          currentA.firstCorrectAnswerClean = currentA.currentAnswerClean;
+        } else {
+          output << "<tr><td>[first correct answer: "
+          << currentA.firstCorrectAnswerClean << "]</td></tr>";
+        }
+      }
+    }
+  }
+  if (this->problem.flagIsForReal) {
+    std::stringstream comments;
+    theUser.setProblemData(this->problem.fileName, currentProblemData);
+    if (!theUser.storeProblemData(this->problem.fileName, &comments)) {
+      output << "<tr><td><b>This shouldn't happen and may be a bug: "
+      << "failed to store your answer in the database. "
+      << CalculatorHTML::bugsGenericMessage
+      << "</b><br>Comments: "
+      << comments.str() << "</td></tr>";
+    } else {
+      output << "<tr><td>So far " << currentA.numCorrectSubmissions
+      << " correct and "
+      << currentA.numSubmissions - currentA.numCorrectSubmissions
+      << " incorrect submissions.</td></tr>";
+    }
+    if (hasDeadline) {
+      if (secondsTillDeadline < 0) {
+        secondsTillDeadline *= - 1;
+      }
+      if (deadLinePassed) {
+        output << "<tr><td><span style =\"color:red\"><b>Submission "
+        << TimeWrapper::toStringSecondsToDaysHoursSecondsString(
+          secondsTillDeadline, false, false
+        ) << " after deadline. </b></span></td></tr>";
+      } else {
+        output << "<tr><td><span style =\"color:green\"><b>Submission "
+        << TimeWrapper::toStringSecondsToDaysHoursSecondsString(
+          secondsTillDeadline, false, false
+        ) << " before deadline. </b></span></td></tr>";
+      }
+    } else {
+      output << "<tr><td><b style =\"color:green\">"
+      << "No deadline yet."
+      << "</b></td></tr>";
+    }
+  }
+  return true;
+}
+
+bool AnswerChecker::checkAnswerHardcoded(
+  bool* outputIsCorrect
+) {
+  MacroRegisterFunctionWithName("AnswerChecker::checkAnswerHardcoded");
+  ProblemData& currentProblemData = this->problem.problemData;
+  Answer& answer = currentProblemData.answers.values[this->answerIndex];
+  interpreter.initialize();
+  interpreter.flagWriteLatexPlots = false;
+  interpreter.flagPlotNoControls = true;
+  JSData comparison = interpreter.compareExpressions(
+    answer.currentAnswerClean, answer.commandAnswerOnGiveUp
+  );
+  bool correct = comparison[
+    WebAPI::result::comparison
+  ][
+    WebAPI::result::ComparisonData::areEqualAsAnswers
+  ].isTrueRepresentationInJSON();
+  if (outputIsCorrect != nullptr) {
+    *outputIsCorrect = correct;
+  }
+  global.comments << "DEBUG: comparison: " << comparison.toString();
+  if (!this->result.mergeInMe(comparison, nullptr)) {
+    return false;
+  }
+  return true;
+}
+
+bool AnswerChecker::checkAnswerStandard(
+ bool* outputIsCorrect
+) {
+  MacroRegisterFunctionWithName("AnswerChecker::checkAnswerStandard");
+  ProblemData& currentProblemData = this->problem.problemData;
+  Answer& currentA = currentProblemData.answers.values[this->answerIndex];
+
   std::stringstream completedProblemStreamNoEnclosures;
 
   std::stringstream completedProblemStream;
@@ -1089,10 +1242,6 @@ JSData AnswerChecker::submitAnswersJSON(
       completedProblemStreamNoEnclosures.str(), "Input, no enclosures. "
     );
   }
-  if (timeSafetyBrake) {
-    global.millisecondsMaxComputation = global.getElapsedMilliseconds() + 20000; // + 20 sec
-  }
-  Calculator interpreter;
   interpreter.initialize();
   interpreter.flagWriteLatexPlots = false;
   interpreter.flagPlotNoControls = true;
@@ -1115,9 +1264,6 @@ JSData AnswerChecker::submitAnswersJSON(
     isolatedInterpreter.initialize();
     isolatedInterpreter.flagWriteLatexPlots = false;
     isolatedInterpreter.flagPlotNoControls = true;
-    if (timeSafetyBrake) {
-      global.millisecondsMaxComputation = global.getElapsedMilliseconds() + 20000; //+20 sec
-    }
     isolatedInterpreter.evaluate("(" + currentA.currentAnswerClean + ")");
     if (isolatedInterpreter.syntaxErrors != "") {
       output << isolatedInterpreter.toStringSyntacticStackHTMLSimple();
@@ -1134,7 +1280,7 @@ JSData AnswerChecker::submitAnswersJSON(
       << "<br>";
     }
     result[WebAPI::result::resultHtml] = output.str();
-    return result;
+    return false;
   }
   bool tempIsCorrect = false;
   if (outputIsCorrect == nullptr) {
@@ -1171,103 +1317,43 @@ JSData AnswerChecker::submitAnswersJSON(
     << WebAPIResponse::getCommentsInterpretation(interpreter, 3, theFormat)
     << "</td></tr>\n";
   }
-  if (global.flagDatabaseCompiled) {
-    UserCalculator& theUser = this->problem.currentUser;
-    theUser.::UserCalculatorData::operator=(global.userDefault);
-    bool deadLinePassed = false;
-    bool hasDeadline = true;
-    double secondsTillDeadline = - 1;
-    if (this->problem.flagIsForReal) {
-      if (!this->problem.loadAndParseTopicList(output)) {
-        hasDeadline = false;
-      }
-      std::string theSQLstring;
-      theSQLstring = theUser.sectionComputed;
-      if (hasDeadline) {
-        bool unused = false;
-        std::string theDeadlineString = this->problem.getDeadline(
-          this->problem.fileName,
-          HtmlRoutines::convertStringToURLString(theSQLstring, false),
-          unused
-        );
+  return true;
+}
 
-        if (theDeadlineString == "" || theDeadlineString == " ") {
-          hasDeadline = false;
-        } else {
-          TimeWrapper now, deadline; //<-needs a fix for different time formats.
-          // <-For the time being, we hard-code it
-          // to month/day/year format (no time to program it better).
-          std::stringstream badDateStream;
-          if (!deadline.assignMonthDayYear(theDeadlineString, badDateStream)) {
-            output << "<tr><td><b>Problem reading deadline. </b> The deadline string was: "
-            << theDeadlineString << ". Comments: "
-            << "<span style =\"color:red\">" << badDateStream.str() << "</span>"
-            << "</td></tr><tr><td> This should not happen. "
-            << CalculatorHTML::bugsGenericMessage << "</td></tr>";
-            output << "</table>";
-            result[WebAPI::result::resultHtml] = output.str();
-            return result;
-          }
-          now.assignLocalTime();
-          // out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
-          // << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
-          secondsTillDeadline = deadline.subtractAnotherTimeFromMeInSeconds(now) + 7 * 3600;
-          deadLinePassed = (secondsTillDeadline < - 18000);
-        }
-      }
-      if (deadLinePassed) {
-        output << "<tr><td><b style =\"color:red\">"
-        << "Deadline passed, attempt not recorded."
-        << "</b></td></tr>";
-      } else {
-        currentA.numSubmissions ++;
-        if ((*outputIsCorrect)) {
-          currentA.numCorrectSubmissions ++;
-          if (currentA.firstCorrectAnswerClean == "") {
-            currentA.firstCorrectAnswerClean = currentA.currentAnswerClean;
-          } else {
-            output << "<tr><td>[first correct answer: "
-            << currentA.firstCorrectAnswerClean << "]</td></tr>";
-          }
-        }
-      }
-    }
-    if (this->problem.flagIsForReal) {
-      std::stringstream comments;
-      theUser.setProblemData(this->problem.fileName, currentProblemData);
-      if (!theUser.storeProblemData(this->problem.fileName, &comments)) {
-        output << "<tr><td><b>This shouldn't happen and may be a bug: "
-        << "failed to store your answer in the database. "
-        << CalculatorHTML::bugsGenericMessage
-        << "</b><br>Comments: "
-        << comments.str() << "</td></tr>";
-      } else {
-        output << "<tr><td>So far " << currentA.numCorrectSubmissions
-        << " correct and "
-        << currentA.numSubmissions - currentA.numCorrectSubmissions
-        << " incorrect submissions.</td></tr>";
-      }
-      if (hasDeadline) {
-        if (secondsTillDeadline < 0) {
-          secondsTillDeadline *= - 1;
-        }
-        if (deadLinePassed) {
-          output << "<tr><td><span style =\"color:red\"><b>Submission "
-          << TimeWrapper::toStringSecondsToDaysHoursSecondsString(
-            secondsTillDeadline, false, false
-          ) << " after deadline. </b></span></td></tr>";
-        } else {
-          output << "<tr><td><span style =\"color:green\"><b>Submission "
-          << TimeWrapper::toStringSecondsToDaysHoursSecondsString(
-            secondsTillDeadline, false, false
-          ) << " before deadline. </b></span></td></tr>";
-        }
-      } else {
-        output << "<tr><td><b style =\"color:green\">"
-        << "No deadline yet."
-        << "</b></td></tr>";
-      }
-    }
+JSData AnswerChecker::submitAnswersJSON(
+  const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
+) {
+  MacroRegisterFunctionWithName("WebAPIReponse::submitAnswers");
+  if (!this->prepareProblem(inputRandomSeed)) {
+    return this->result;
+  }
+  if (!this->extractStudentAnswerPartOne()) {
+    return this->result;
+  }
+  if (!this->extractStudentAnswerPartTwo()) {
+    return this->result;
+  }
+  ProblemData& currentProblemData = this->problem.problemData;
+  Answer& currentA = currentProblemData.answers.values[this->answerIndex];
+  bool errorsCheckingAnswer = false;
+  if (timeSafetyBrake) {
+    global.millisecondsMaxComputation = global.getElapsedMilliseconds() + 20000; // + 20 sec
+  }
+  bool temporary = false;
+  if (outputIsCorrect == nullptr) {
+    outputIsCorrect = &temporary;
+  }
+  if (currentA.flagAnswerHardcoded) {
+    errorsCheckingAnswer = this->checkAnswerHardcoded(outputIsCorrect);
+  } else {
+    errorsCheckingAnswer = this->checkAnswerStandard(outputIsCorrect);
+  }
+  if (!errorsCheckingAnswer) {
+    return this->result;
+  }
+  if (!this->storeInDatabase(*outputIsCorrect)) {
+    global.comments << "return from store in db";
+    return this->result;
   }
   output << "<tr><td>Your answer was: ";
   output << "\\(\\displaystyle ";

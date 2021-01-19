@@ -46,15 +46,17 @@ public:
   bool isHidden();
   bool isCalculatorHidden();
   bool isCalculatorCommand();
-  bool isAnswer();
+  bool isAnswerStandard() const;
+  bool isAnswerHardCoded() const;
+  bool isAnsweR() const;
   bool isSolution();
   std::string getAnswerIdOfOwner() const;
   bool isAnswerElement(std::string* desiredAnswerId);
   bool isCommentBeforeInterpretation();
   bool isCommentBeforeSubmission();
   bool isAnswerOnGiveUp();
-  std::string getKeyValue(const std::string& theKey) const;
-  void setKeyValue(const std::string& theKey, const std::string& theValue);
+  std::string getKeyValue(const std::string& key) const;
+  void setKeyValue(const std::string& key, const std::string& value);
   void resetAllExceptContent();
   std::string toStringInterpretedBody();
   std::string toStringTagAndContent() const;
@@ -86,6 +88,10 @@ public:
   bool operator!=(const std::string& other) {
     return this->content != other;
   }
+
+  static std::string cleanUpCommandString(const std::string& inputCommand);
+  std::string commandCleaned() const;
+  std::string commandEnclosed() const;
 };
 
 class Answer {
@@ -139,6 +145,14 @@ public:
     this->flagAutoGenerateButtonSolution = true;
     this->flagAnswerVerificationFound = false;
   }
+  // Returns true if answer checking instructions could be extracted from the input.
+  bool prepareAnswer(
+    const SyntacticElementHTML& input,
+    std::stringstream& streamCommandsBody,
+    std::stringstream& streamCommandS,
+    std::stringstream& streamCommandsNoEnclosures,
+    std::stringstream& streamCommandsBodyNoEnclosures
+  );
   bool hasSolution() const;
   std::string toString();
   std::string toStringSolutionElements();

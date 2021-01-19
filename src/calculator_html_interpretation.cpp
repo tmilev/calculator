@@ -1055,8 +1055,8 @@ JSData WebAPIResponse::submitAnswersJSON(
     << ");";
     completedProblemStreamNoEnclosures << currentA.commandsCommentsBeforeSubmission;
   }
-  completedProblemStream << theProblem.cleanUpCommandString(currentA.commandVerificationOnly);
-  completedProblemStreamNoEnclosures << theProblem.cleanUpCommandString(currentA.commandVerificationOnly);
+  completedProblemStream << SyntacticElementHTML::cleanUpCommandString(currentA.commandVerificationOnly);
+  completedProblemStreamNoEnclosures << SyntacticElementHTML::cleanUpCommandString(currentA.commandVerificationOnly);
 
   std::stringstream debugInputStream;
   if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {

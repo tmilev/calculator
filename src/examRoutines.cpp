@@ -835,17 +835,17 @@ std::string SyntacticElementHTML::toStringDebug() const {
   return out.str();
 }
 
-std::string SyntacticElementHTML::getKeyValue(const std::string& theKey) const {
+std::string SyntacticElementHTML::getKeyValue(const std::string& key) const {
   MacroRegisterFunctionWithName("SyntacticElementHTML::getKeyValue");
-  if (!this->properties.contains(theKey)) {
+  if (!this->properties.contains(key)) {
     return "";
   }
-  return this->properties.getValueNoFail(theKey);
+  return this->properties.getValueNoFail(key);
 }
 
-void SyntacticElementHTML::setKeyValue(const std::string& theKey, const std::string& theValue) {
+void SyntacticElementHTML::setKeyValue(const std::string& key, const std::string& value) {
   MacroRegisterFunctionWithName("SyntacticElementHTML::setKeyValue");
-  this->properties.setKeyValue(theKey, theValue);
+  this->properties.setKeyValue(key, value);
 }
 
 std::string SyntacticElementHTML::toStringInterpretedBody() {
@@ -912,11 +912,22 @@ bool SyntacticElementHTML::isInterpretedByCalculatorDuringSubmission() {
   return tagClass == "calculator" || tagClass == "calculatorHidden";
 }
 
-bool SyntacticElementHTML::isAnswer() {
+bool SyntacticElementHTML::isAnswerStandard() const {
   if (this->syntacticRole != "command") {
     return false;
   }
   return this->getTagClass() == SyntacticElementHTML::Tags::calculatorAnswer;
+}
+
+bool SyntacticElementHTML::isAnsweR() const {
+  return this->isAnswerStandard() || this->isAnswerHardCoded();
+}
+
+bool SyntacticElementHTML::isAnswerHardCoded() const {
+  if (this->syntacticRole != "command") {
+    return false;
+  }
+  return this->getTagClass() == SyntacticElementHTML::Tags::hardCodedAnswer;
 }
 
 bool SyntacticElementHTML::isCalculatorCommand() {
@@ -1044,19 +1055,17 @@ bool CalculatorHTML::prepareCommandsGenerateProblem(std::stringstream* comments)
   std::stringstream streamCommands, streamCommandsNoEnclosures;
   streamCommandsNoEnclosures << this->getProblemHeaderWithoutEnclosure();
   streamCommands << this->getProblemHeaderEnclosure();//first calculator enclosure contains the header
-  int numCommandsSoFar = 2;//two commands at the start: the opCommandSequence command and
+  int commandCount = 2;//two commands at the start: the opCommandSequence command and
   // the first enclosure.
   for (int i = 0; i < this->content.size; i ++) {
-    SyntacticElementHTML& currentElt = this->content[i];
-    if (!currentElt.isInterpretedByCalculatorDuringProblemGeneration()) {
+    SyntacticElementHTML& current = this->content[i];
+    if (!current.isInterpretedByCalculatorDuringProblemGeneration()) {
       continue;
     }
-    std::string commandCleaned = this->cleanUpCommandString(currentElt.content);
-    std::string commandEnclosed = Calculator::Atoms::commandEnclosure + "{}( " + commandCleaned + " );";
-    streamCommands << commandEnclosed;
-    streamCommandsNoEnclosures << commandCleaned;
-    currentElt.commandIndex = numCommandsSoFar;
-    numCommandsSoFar ++;
+    streamCommands << current.commandEnclosed();
+    streamCommandsNoEnclosures << current.commandCleaned();
+    current.commandIndex = commandCount;
+    commandCount ++;
   }
   this->problemData.commandsGenerateProblem = streamCommands.str();
   this->problemData.commandsGenerateProblemNoEnclosures = streamCommandsNoEnclosures.str();
@@ -1103,60 +1112,60 @@ bool CalculatorHTML::prepareCommands(std::stringstream* comments) {
   return true;
 }
 
-bool CalculatorHTML::prepareCommandsAnswerOnGiveUp(Answer& theAnswer, std::stringstream* comments) {
+bool CalculatorHTML::prepareCommandsAnswerOnGiveUp(Answer& answer, std::stringstream* comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::prepareCommandsAnswerOnGiveUp");
   (void) comments;
   std::stringstream streamCommands;
   for (int i = 0; i < this->content.size; i ++) {
-    SyntacticElementHTML& currentElt = this->content[i];
-    if (!currentElt.isAnswerOnGiveUp()) {
+    SyntacticElementHTML& current = this->content[i];
+    if (!current.isAnswerOnGiveUp()) {
       continue;
     }
-    if (currentElt.getKeyValue("name") == theAnswer.answerId) {
-      streamCommands << this->cleanUpCommandString(currentElt.content);
+    if (current.getKeyValue("name") == answer.answerId) {
+      streamCommands << current.commandCleaned();
     }
   }
-  theAnswer.commandsNoEnclosureAnswerOnGiveUpOnly = streamCommands.str();
+  answer.commandsNoEnclosureAnswerOnGiveUpOnly = streamCommands.str();
   return true;
 }
 
 bool CalculatorHTML::prepareCommentsBeforeSubmission(
-  Answer& theAnswer, std::stringstream* comments
+  Answer& answer, std::stringstream* comments
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::prepareCommentsBeforeSubmission");
   (void) comments;
   std::stringstream streamCommands;
   for (int i = 0; i < this->content.size; i ++) {
-    SyntacticElementHTML& currentElt = this->content[i];
-    if (!currentElt.isCommentBeforeSubmission()) {
+    SyntacticElementHTML& current = this->content[i];
+    if (!current.isCommentBeforeSubmission()) {
       continue;
     }
-    if (currentElt.getKeyValue("name") != theAnswer.answerId) {
+    if (current.getKeyValue("name") != answer.answerId) {
       continue;
     }
-    streamCommands << this->cleanUpCommandString(currentElt.content);
+    streamCommands << current.commandCleaned();
   }
-  theAnswer.commandsCommentsBeforeSubmission = streamCommands.str();
+  answer.commandsCommentsBeforeSubmission = streamCommands.str();
   return true;
 }
 
 bool CalculatorHTML::prepareCommentsBeforeInterpretation(
-  Answer& theAnswer, std::stringstream* comments
+  Answer& answer, std::stringstream* comments
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::prepareCommentsBeforeInterpretation");
   (void) comments;
   std::stringstream streamCommands;
   for (int i = 0; i < this->content.size; i ++) {
-    SyntacticElementHTML& currentElt = this->content[i];
-    if (!currentElt.isCommentBeforeInterpretation()) {
+    SyntacticElementHTML& current = this->content[i];
+    if (!current.isCommentBeforeInterpretation()) {
       continue;
     }
-    if (currentElt.getKeyValue("name") != theAnswer.answerId) {
+    if (current.getKeyValue("name") != answer.answerId) {
       continue;
     }
-    streamCommands << this->cleanUpCommandString(currentElt.content);
+    streamCommands << current.commandCleaned();
   }
-  theAnswer.commandsCommentsBeforeInterpretatioN = streamCommands.str();
+  answer.commandsCommentsBeforeInterpretatioN = streamCommands.str();
   return true;
 }
 
@@ -1168,56 +1177,74 @@ bool CalculatorHTML::exrtactSolutionCommands(
   std::stringstream streamCommands;
   int numCommandsSoFar = 2;
   for (int j = 0; j < answer.solutionElements.size; j ++) {
-    SyntacticElementHTML& currentElt = answer.solutionElements[j];
-    if (!currentElt.isCalculatorCommand() && !currentElt.isCalculatorHidden()) {
+    SyntacticElementHTML& current = answer.solutionElements[j];
+    if (!current.isCalculatorCommand() && !current.isCalculatorHidden()) {
       continue;
     }
-    currentElt.commandIndex = numCommandsSoFar;
+    current.commandIndex = numCommandsSoFar;
     numCommandsSoFar ++;
     streamCommands << Calculator::Atoms::commandEnclosure << "{}("
-    << this->cleanUpCommandString(currentElt.content) << "); ";
+    << current.commandCleaned() << "); ";
   }
   answer.commandsSolutionOnly = streamCommands.str();
   return true;
 }
 
-bool CalculatorHTML::prepareCommandsAnswer(Answer& theAnswer, std::stringstream* comments) {
+bool Answer::prepareAnswer(
+  const SyntacticElementHTML& input,
+  std::stringstream& streamCommandsBody,
+  std::stringstream& streamCommandS,
+  std::stringstream& streamCommandsNoEnclosures,
+  std::stringstream& streamCommandsBodyNoEnclosures
+) {
+  if (!input.isAnsweR() || input.getKeyValue("id") != this->answerId) {
+    return false;
+  }
+  std::string stringCommandsBody = streamCommandsBody.str();
+  if (stringCommandsBody != "") {
+    streamCommandS << Calculator::Atoms::commandEnclosure << "{}(" << stringCommandsBody << ");\n";
+    streamCommandsNoEnclosures << streamCommandsBodyNoEnclosures.str();
+  }
+  this->commandsBeforeAnswer = streamCommandS.str();
+  this->commandsBeforeAnswerNoEnclosuresForDEBUGGING = streamCommandsNoEnclosures.str();
+  this->commandVerificationOnly = input.commandCleaned();
+  return true;
+}
+
+bool CalculatorHTML::prepareCommandsAnswer(Answer& answer, std::stringstream* comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::prepareCommandsAnswer");
-  std::stringstream streamCommandS;
+  std::stringstream commands;
   std::stringstream streamCommandsNoEnclosures;
-  streamCommandS << this->getProblemHeaderEnclosure(); // first calculator enclosure contains the header
+  commands << this->getProblemHeaderEnclosure(); // first calculator enclosure contains the header
   streamCommandsNoEnclosures << this->getProblemHeaderWithoutEnclosure();
   std::stringstream streamCommandsBody;
   std::stringstream streamCommandsBodyNoEnclosures;
   for (int i = 0; i < this->content.size; i ++) {
-    SyntacticElementHTML& currentElt = this->content[i];
+    SyntacticElementHTML& current = this->content[i];
     if (
-      !currentElt.isCalculatorHidden() && !currentElt.isCalculatorCommand()
-      && !currentElt.isAnswer()
+      !current.isCalculatorHidden() &&
+      !current.isCalculatorCommand() &&
+      !current.isAnsweR()
     ) {
       continue;
     }
-    std::string commandCleaned = this->cleanUpCommandString(this->content[i].content);
-    std::string commandEnclosed = Calculator::Atoms::commandEnclosure + "{}( " + commandCleaned + " );";
-    if (currentElt.isAnswer() && currentElt.getKeyValue("id") == theAnswer.answerId) {
-      std::string stringCommandsBody = streamCommandsBody.str();
-      if (stringCommandsBody != "") {
-        streamCommandS << Calculator::Atoms::commandEnclosure << "{}(" << stringCommandsBody << ");\n";
-        streamCommandsNoEnclosures << streamCommandsBodyNoEnclosures.str();
-      }
-      theAnswer.commandsBeforeAnswer = streamCommandS.str();
-      theAnswer.commandsBeforeAnswerNoEnclosuresForDEBUGGING = streamCommandsNoEnclosures.str();
-      theAnswer.commandVerificationOnly = commandCleaned;
+    if (answer.prepareAnswer(
+      current,
+      streamCommandsBody,
+      commands,
+      streamCommandsNoEnclosures,
+      streamCommandsBodyNoEnclosures
+    )) {
       return true;
     }
     if (this->content[i].isCalculatorHidden() || this->content[i].isCalculatorCommand()) {
-      streamCommandsBody << commandEnclosed;
-      streamCommandsBodyNoEnclosures << commandCleaned;
+      streamCommandsBody << current.commandEnclosed();
+      streamCommandsBodyNoEnclosures << current.commandCleaned();
     }
   }
   if (comments != nullptr) {
     *comments << "<b>Something is wrong: did not find answer for answer tag: "
-    << theAnswer.answerId << ". </b>";
+    << answer.answerId << ". </b>";
   }
   return false;
 }
@@ -2624,7 +2651,7 @@ bool CalculatorHTML::extractOneAnswerId(
   SyntacticElementHTML& input, std::stringstream* comments
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::extractOneAnswerId");
-  if (!input.isAnswer()) {
+  if (!input.isAnsweR()) {
     return true;
   }
   std::string currentId = StringRoutines::stringTrimWhiteSpace(input.getKeyValue("id"));
@@ -2711,7 +2738,7 @@ bool CalculatorHTML::extractAnswerIdsOnce(
   if (!this->extractOneAnswerId(element, comments)) {
     return false;
   }
-  if (element.isAnswer()) {
+  if (element.isAnsweR()) {
     return true;
   }
   if (
@@ -2772,7 +2799,7 @@ bool CalculatorHTML::checkContent(std::stringstream* comments) {
     SyntacticElementHTML& currentElt = this->content[i];
     if (
       currentElt.syntacticRole == "command" &&
-      currentElt.isAnswer() &&
+      currentElt.isAnsweR() &&
       currentElt.getKeyValue("id").find('=') != std::string::npos
     ) {
       result = false;
@@ -2786,7 +2813,15 @@ bool CalculatorHTML::checkContent(std::stringstream* comments) {
   return result;
 }
 
-std::string CalculatorHTML::cleanUpCommandString(const std::string& inputCommand) {
+std::string SyntacticElementHTML::commandCleaned() const {
+  return SyntacticElementHTML::cleanUpCommandString(this->content);
+}
+
+std::string SyntacticElementHTML::commandEnclosed() const {
+  return Calculator::Atoms::commandEnclosure + "{}( " + this->commandCleaned() + " );";
+}
+
+std::string SyntacticElementHTML::cleanUpCommandString(const std::string& inputCommand) {
   MacroRegisterFunctionWithName("CalculatorHTML::cleanUpCommandString");
   if (inputCommand == "") {
     return "";

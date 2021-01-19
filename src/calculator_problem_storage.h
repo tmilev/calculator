@@ -48,9 +48,10 @@ public:
   bool isCalculatorCommand();
   bool isAnswerStandard() const;
   bool isAnswerHardCoded() const;
-  bool isAnsweR() const;
+  bool isAnswer() const;
   bool isSolution();
   std::string getAnswerIdOfOwner() const;
+  std::string answerIdIfAnswer() const;
   bool isAnswerElement(std::string* desiredAnswerId);
   bool isCommentBeforeInterpretation();
   bool isCommentBeforeSubmission();
@@ -148,10 +149,10 @@ public:
   // Returns true if answer checking instructions could be extracted from the input.
   bool prepareAnswer(
     const SyntacticElementHTML& input,
-    std::stringstream& streamCommandsBody,
-    std::stringstream& streamCommandS,
-    std::stringstream& streamCommandsNoEnclosures,
-    std::stringstream& streamCommandsBodyNoEnclosures
+    std::stringstream& commandsBody,
+    std::stringstream& commands,
+    std::stringstream& commandsNoEnclosures,
+    std::stringstream& commandsBodyNoEnclosures
   );
   bool hasSolution() const;
   std::string toString();

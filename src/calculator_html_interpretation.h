@@ -190,6 +190,14 @@ public:
 };
 
 class CalculatorHTML {
+private:
+  bool interpretHtmlOneAttemptPartTwo(
+    Calculator& interpreter,
+    std::stringstream& comments,
+    double startTime,
+    std::stringstream& outBody,
+    std::stringstream& outHeadPt2
+  );
 public:
   int numberOfInterpretationAttempts;
   int maxInterpretationAttempts;
@@ -336,7 +344,11 @@ public:
     return this->parser.parseHTML(comments);
   }
   bool checkContent(std::stringstream* comments);
-  bool loadMe(bool doLoadDatabase, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure);
+  bool loadMe(
+    bool doLoadDatabase,
+    const std::string& inputRandomSeed,
+    std::stringstream* commentsOnFailure
+  );
   bool loadAndParseTopicList(std::stringstream& comments);
   bool loadDatabaseInfo(std::stringstream& comments);
   std::string cleanUpFileName(const std::string& inputLink);
@@ -363,7 +375,7 @@ public:
   bool extractAnswerIds(std::stringstream* comments);
   bool extractOneAnswerId(SyntacticElementHTML& input, std::stringstream* comments);
   bool interpretHtml(std::stringstream* comments);
-  bool interpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments);
+  bool interpretHtmlOneAttempt(Calculator& interpreter, std::stringstream& comments);
   void computeProblemLabel();
   void computeBodyDebugString();
   std::string toStringInterprettedCommands(Calculator& theInterpreter, List<SyntacticElementHTML>& theElements);
@@ -435,7 +447,11 @@ public:
   void computeDeadlinesAllSectionsNoInheritance(TopicElement& inputOutput);
   JSData toStringTopicListJSON(std::stringstream* comments);
   std::string toStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay = "");
-  static std::string toStringLinkFromProblem(const std::string& theFileName, bool practiceMode = true, int randomSeed = - 1);
+  static std::string toStringLinkFromProblem(
+    const std::string& theFileName,
+    bool practiceMode = true,
+    int randomSeed = - 1
+  );
   std::string toStringLinkFromFileName(const std::string& theFileName);
   std::string toStringLinkCurrentAdmin(const std::string& displayString, bool setDebugFlag, bool includeRandomSeed);
   std::string toStringCalculatorProblemSourceFromFileName(const std::string& theFileName);
@@ -449,7 +465,7 @@ public:
   bool computeTopicListAndPointsEarned(std::stringstream& commentsOnFailure);
   void interpretAccountInformationLinks(SyntacticElementHTML& inputOutput);
   void interpretJavascripts(SyntacticElementHTML& inputOutput);
-  JSData getJavascriptMathQuillBoxesForJSON();
+  JSData getEditorBoxesHTML();
   void loadCurrentProblemItem(
     bool needToLoadDatabaseMayIgnore, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure
   );

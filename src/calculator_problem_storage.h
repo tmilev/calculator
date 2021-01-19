@@ -43,7 +43,7 @@ public:
   bool isInterpretedByCalculatorDuringProblemGeneration() const;
   bool isInterpretedByCalculatorDuringSubmission();
   bool isInterpretedNotByCalculator();
-  bool isHidden();
+  bool shouldShow() const;
   bool isCalculatorHidden();
   bool isCalculatorCommand();
   bool isAnswerStandard() const;
@@ -52,6 +52,7 @@ public:
   bool isSolution();
   std::string getAnswerIdOfOwner() const;
   std::string answerIdIfAnswer() const;
+  std::string answerIdCorrectIfEmpty();
   bool isAnswerElement(std::string* desiredAnswerId);
   bool isCommentBeforeInterpretation();
   bool isCommentBeforeSubmission();
@@ -91,11 +92,27 @@ public:
   }
 
   static std::string cleanUpCommandString(const std::string& inputCommand);
+  static std::string cleanUpEncloseCommand(const std::string& inputCommand);
   std::string commandCleaned() const;
   std::string commandEnclosed() const;
 };
 
 class Answer {
+private:
+  bool prepareAnswerStandard(
+    const SyntacticElementHTML& input,
+    std::stringstream& commands,
+    std::stringstream& commandsBody,
+    std::stringstream& commandsNoEnclosures,
+    std::stringstream& commandsBodyNoEnclosures
+  );
+  bool prepareAnswerHardCoded(
+    const SyntacticElementHTML& input,
+    std::stringstream& commands,
+    std::stringstream& commandsBody,
+    std::stringstream& commandsNoEnclosures,
+    std::stringstream& commandsBodyNoEnclosures
+  );
 public:
   bool flagAnswerVerificationFound;
   bool flagAutoGenerateSubmitButtons;
@@ -103,15 +120,16 @@ public:
   bool flagAutoGenerateMQfield;
   bool flagAutoGenerateVerificationField;
   bool flagAutoGenerateButtonSolution;
+  bool flagAnswerHardcoded;
   int numSubmissions;
   int numCorrectSubmissions;
   std::string commandsCommentsBeforeSubmission;
-  std::string commandsCommentsBeforeInterpretatioN;
+  std::string commandsCommentsBeforeInterpretation;
   std::string commandsBeforeAnswer;
   std::string commandsBeforeAnswerNoEnclosuresForDEBUGGING;
   std::string commandVerificationOnly;
   std::string commandsSolutionOnly;
-  std::string commandsNoEnclosureAnswerOnGiveUpOnly;
+  std::string commandAnswerOnGiveUp;
   List<SyntacticElementHTML> solutionElements;
   MapList<std::string, std::string, MathRoutines::hashString> properties;
   std::string answerId;
@@ -129,28 +147,19 @@ public:
   std::string mathQuillPanelOptions;
   //////////////////////////////////////
   std::string idSpanSolution;
-  std::string idMQfielD;
+  std::string idMQField;
   std::string idMQFieldLocation;
   std::string idMQButtonPanelLocation;
   std::string currentAnswerURLed;
   std::string currentAnswerClean;
   std::string firstCorrectAnswerURLed;
   std::string firstCorrectAnswerClean;
-  Answer() {
-    this->numSubmissions = 0;
-    this->numCorrectSubmissions = 0;
-    this->flagAutoGenerateSubmitButtons = true;
-    this->flagAutoGenerateMQButtonPanel = true;
-    this->flagAutoGenerateMQfield = true;
-    this->flagAutoGenerateVerificationField = true;
-    this->flagAutoGenerateButtonSolution = true;
-    this->flagAnswerVerificationFound = false;
-  }
+  Answer();
   // Returns true if answer checking instructions could be extracted from the input.
   bool prepareAnswer(
     const SyntacticElementHTML& input,
-    std::stringstream& commandsBody,
     std::stringstream& commands,
+    std::stringstream& commandsBody,
     std::stringstream& commandsNoEnclosures,
     std::stringstream& commandsBodyNoEnclosures
   );

@@ -110,7 +110,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     return result;
   }
   for (int i = 0; i < answer.solutionElements.size; i ++) {
-    if (!answer.solutionElements[i].isHidden()) {
+    if (answer.solutionElements[i].shouldShow()) {
       out << answer.solutionElements[i].toStringInterpretedBody();
     }
   }
@@ -292,7 +292,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   std::stringstream studentAnswerWithComments;
   studentAnswerWithComments
   << Calculator::Atoms::commandEnclosure << "{}("
-  << currentA.commandsCommentsBeforeInterpretatioN
+  << currentA.commandsCommentsBeforeInterpretation
   << ");"
   << studentAnswerSream.str();
 
@@ -866,7 +866,7 @@ JSData WebAPIResponse::getExamPageJSON() {
   output[WebAPI::problem::fileName] = theFile.fileName;
   output[WebAPI::problem::idProblem] = theFile.fileName;
   if (theFile.flagLoadedSuccessfully) {
-    output["answers"] = theFile.getJavascriptMathQuillBoxesForJSON();
+    output["answers"] = theFile.getEditorBoxesHTML();
     JSData theScripts;
     theScripts = JSData::token::tokenArray;
     theScripts.listObjects.setSize(theFile.theScripts.size());
@@ -945,47 +945,71 @@ JSData WebAPIResponse::submitAnswersJSON() {
   return WebAPIResponse::submitAnswersJSON(global.getWebInput(WebAPI::problem::randomSeed), nullptr, true);
 }
 
-JSData WebAPIResponse::submitAnswersJSON(
-  const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
+class AnswerChecker {
+public:
+  CalculatorHTML problem;
+  JSData result;
+  double startTime;
+  std::stringstream output;
+  JSData submitAnswersJSON(
+    const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
+  );
+  bool prepareProblem(const std::string& inputRandomSeed);
+  AnswerChecker();
+};
+
+AnswerChecker::AnswerChecker() {
+  this->startTime = 0;
+}
+
+bool AnswerChecker::prepareProblem(
+  const std::string &inputRandomSeed
 ) {
-  MacroRegisterFunctionWithName("WebAPIReponse::submitAnswers");
   if (!global.userDefaultHasAdminRights()) {
     global.theResponse.disallowReport();
   }
 
-  std::stringstream output, errorStream, comments;
-  JSData result;
-  double startTime = global.getElapsedSeconds();
-  CalculatorHTML theProblem;
-  theProblem.loadCurrentProblemItem(
+  std::stringstream errorStream, comments;
+  this->startTime = global.getElapsedSeconds();
+  this->problem.loadCurrentProblemItem(
     global.userRequestRequiresLoadingRealExamData(), inputRandomSeed, &errorStream
   );
-  if (!theProblem.flagLoadedSuccessfully) {
+  if (!this->problem.flagLoadedSuccessfully) {
     errorStream << "Failed to load current problem. ";
     result[WebAPI::result::error] = errorStream.str();
-    return result;
+    return false;
   }
-  if (!theProblem.parseHTMLPrepareCommands(&comments)) {
+  if (!this->problem.parseHTMLPrepareCommands(&comments)) {
     errorStream << "<b>Failed to parse problem. </b>";
     result[WebAPI::result::error] = errorStream.str();
     result[WebAPI::result::comments] = comments.str();
-    return result;
+    return false;
   }
-  if (!theProblem.problemData.flagRandomSeedGiven && !theProblem.flagIsForReal) {
-    output << "<b>Random seed not given.</b>";
+  if (!this->problem.problemData.flagRandomSeedGiven && !this->problem.flagIsForReal) {
+    this->output << "<b>Random seed not given.</b>";
   }
-  if (theProblem.fileName == "") {
-    global.fatal << "This shouldn't happen: empty file name: theProblem.fileName." << global.fatal;
+  if (this->problem.fileName == "") {
+    global.fatal << "This shouldn't happen: empty file name." << global.fatal;
+  }
+  return true;
+}
+
+JSData AnswerChecker::submitAnswersJSON(
+  const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
+) {
+  MacroRegisterFunctionWithName("WebAPIReponse::submitAnswers");
+  if (!this->prepareProblem(inputRandomSeed)) {
+    return this->result;
   }
   std::string studentAnswerNameReader;
-  theProblem.studentTagsAnswered.initialize(theProblem.problemData.answers.size());
+  this->problem.studentTagsAnswered.initialize(this->problem.problemData.answers.size());
   MapList<std::string, std::string, MathRoutines::hashString>& theArgs = global.webArguments;
   int answerIdIndex = - 1;
   for (int i = 0; i < theArgs.size(); i ++) {
     if (StringRoutines::stringBeginsWith(
       theArgs.keys[i], WebAPI::problem::calculatorAnswerPrefix, &studentAnswerNameReader
     )) {
-      int newAnswerIndex = theProblem.getAnswerIndex(studentAnswerNameReader);
+      int newAnswerIndex = this->problem.getAnswerIndex(studentAnswerNameReader);
       if (answerIdIndex == - 1) {
         answerIdIndex = newAnswerIndex;
       } else if (
@@ -993,21 +1017,21 @@ JSData WebAPIResponse::submitAnswersJSON(
         answerIdIndex != - 1 &&
         newAnswerIndex != - 1
       ) {
-        output << "<b>You submitted two or more answers [answer tags: "
-        << theProblem.problemData.answers.values[answerIdIndex].answerId
-        << " and " << theProblem.problemData.answers.values[newAnswerIndex].answerId
+        this->output << "<b>You submitted two or more answers [answer tags: "
+        << this->problem.problemData.answers.values[answerIdIndex].answerId
+        << " and " << this->problem.problemData.answers.values[newAnswerIndex].answerId
         << "].</b> At present, multiple answer submission is not supported. ";
-        result[WebAPI::result::resultHtml] = output.str();
+        result[WebAPI::result::resultHtml] = this->output.str();
         return result;
       }
       if (answerIdIndex == - 1) {
-        output << "<b> You submitted an answer to tag with id "
+        this->output << "<b> You submitted an answer to tag with id "
         << studentAnswerNameReader
         << " which is not on my list of answerable tags. </b>";
-        result[WebAPI::result::resultHtml] = output.str();
+        result[WebAPI::result::resultHtml] = this->output.str();
         return result;
       }
-      Answer& currentProblemData = theProblem.problemData.answers.values[answerIdIndex];
+      Answer& currentProblemData = this->problem.problemData.answers.values[answerIdIndex];
       currentProblemData.currentAnswerURLed = theArgs.values[i];
       if (currentProblemData.currentAnswerURLed == "") {
         output << "<b> Your answer to tag with id " << studentAnswerNameReader
@@ -1022,7 +1046,7 @@ JSData WebAPIResponse::submitAnswersJSON(
     result[WebAPI::result::resultHtml] = output.str();
     return result;
   }
-  ProblemData& currentProblemData = theProblem.problemData;
+  ProblemData& currentProblemData = this->problem.problemData;
   Answer& currentA = currentProblemData.answers.values[answerIdIndex];
 
   currentA.currentAnswerClean = HtmlRoutines::convertURLStringToNormal(
@@ -1031,7 +1055,7 @@ JSData WebAPIResponse::submitAnswersJSON(
   currentA.currentAnswerURLed = HtmlRoutines::convertStringToURLString(
     currentA.currentAnswerClean, false
   );//<-encoding back to overwrite malformed input
-  theProblem.studentTagsAnswered.addSelectionAppendNewIndex(answerIdIndex);
+  this->problem.studentTagsAnswered.addSelectionAppendNewIndex(answerIdIndex);
   std::stringstream completedProblemStreamNoEnclosures;
 
   std::stringstream completedProblemStream;
@@ -1148,21 +1172,21 @@ JSData WebAPIResponse::submitAnswersJSON(
     << "</td></tr>\n";
   }
   if (global.flagDatabaseCompiled) {
-    UserCalculator& theUser = theProblem.currentUser;
+    UserCalculator& theUser = this->problem.currentUser;
     theUser.::UserCalculatorData::operator=(global.userDefault);
     bool deadLinePassed = false;
     bool hasDeadline = true;
     double secondsTillDeadline = - 1;
-    if (theProblem.flagIsForReal) {
-      if (!theProblem.loadAndParseTopicList(output)) {
+    if (this->problem.flagIsForReal) {
+      if (!this->problem.loadAndParseTopicList(output)) {
         hasDeadline = false;
       }
       std::string theSQLstring;
       theSQLstring = theUser.sectionComputed;
       if (hasDeadline) {
         bool unused = false;
-        std::string theDeadlineString = theProblem.getDeadline(
-          theProblem.fileName,
+        std::string theDeadlineString = this->problem.getDeadline(
+          this->problem.fileName,
           HtmlRoutines::convertStringToURLString(theSQLstring, false),
           unused
         );
@@ -1208,10 +1232,10 @@ JSData WebAPIResponse::submitAnswersJSON(
         }
       }
     }
-    if (theProblem.flagIsForReal) {
+    if (this->problem.flagIsForReal) {
       std::stringstream comments;
-      theUser.setProblemData(theProblem.fileName, currentProblemData);
-      if (!theUser.storeProblemData(theProblem.fileName, &comments)) {
+      theUser.setProblemData(this->problem.fileName, currentProblemData);
+      if (!theUser.storeProblemData(this->problem.fileName, &comments)) {
         output << "<tr><td><b>This shouldn't happen and may be a bug: "
         << "failed to store your answer in the database. "
         << CalculatorHTML::bugsGenericMessage
@@ -1268,6 +1292,13 @@ JSData WebAPIResponse::submitAnswersJSON(
   result[WebAPI::result::resultHtml] = output.str();
   result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
   return result;
+}
+
+JSData WebAPIResponse::submitAnswersJSON(
+  const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
+) {
+  AnswerChecker checker;
+  return checker.submitAnswersJSON(inputRandomSeed, outputIsCorrect, timeSafetyBrake);
 }
 
 std::string WebAPIResponse::addTeachersSections() {
@@ -1480,8 +1511,8 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     return result;
   }
   Answer& currentA = theProblem.problemData.answers.values[indexLastAnswerId];
-  if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly == "") {
-    out << "<b> Unfortunately there is no answer given for this "
+  if (currentA.commandAnswerOnGiveUp == "") {
+    out << "<b>No answer given for "
     << "question (answerID: " << lastStudentAnswerID << ").</b>";
     if (global.userDebugFlagOn() && global.userDefaultHasProblemComposingRights()) {
       out << "<br>Answer status: " << currentA.toString();
@@ -1497,8 +1528,8 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   answerCommands << currentA.commandsBeforeAnswer;
   answerCommandsNoEnclosure << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
   answerCommands << Calculator::Atoms::commandEnclosure
-  << "{}(" << currentA.commandsNoEnclosureAnswerOnGiveUpOnly << ");";
-  answerCommandsNoEnclosure << currentA.commandsNoEnclosureAnswerOnGiveUpOnly;
+  << "{}(" << currentA.commandAnswerOnGiveUp << ");";
+  answerCommandsNoEnclosure << currentA.commandAnswerOnGiveUp;
   interpreter.evaluate(answerCommands.str());
   if (interpreter.syntaxErrors != "") {
     out << "<b style ='color:red'>Failed to evaluate the default answer. "

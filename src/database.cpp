@@ -496,9 +496,9 @@ bool ProblemData::checkConsistency() const {
 bool ProblemData::checkConsistencyMathQuillIds() const {
   MacroRegisterFunctionWithName("ProblemData::checkConsistencyMathQuillIds");
   for (int i = 0; i < this->answers.size(); i ++) {
-    if (StringRoutines::stringTrimWhiteSpace(this->answers.values[i].idMQfielD) == "") {
+    if (StringRoutines::stringTrimWhiteSpace(this->answers.values[i].idMQField) == "") {
       std::stringstream errorStream;
-      errorStream << "This is not supposed to happen: empty idMQfield. The answer id is: "
+      errorStream << "This is not supposed to happen: empty idMQField. The answer id is: "
       << this->answers.values[i].answerId << "<br>" << this->toString() << "<hr>Answer information: "
       << this->toString() << "<br>";
       global.fatal << errorStream.str() << global.fatal;

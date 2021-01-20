@@ -54,7 +54,7 @@ public:
     this->expectedWrong = false;
     this->expectedIncomplete = false;
   }
-  bool compare();
+  bool compare(bool hideDesiredAnswer);
   std::string toString() const;
 };
 
@@ -82,7 +82,8 @@ bool OneComparisonSet::doCompareAll() {
     comparison.given = this->incorrect[i];
     comparison.expectedWrong = true;
     comparison.expectedIncomplete = false;
-    comparison.compare();
+    comparison.compare(true);
+    comparison.compare(false);
   }
   for (int i = 0; i < this->incomplete.size; i ++) {
     OneComparison comparison;
@@ -90,7 +91,8 @@ bool OneComparisonSet::doCompareAll() {
     comparison.given = this->incomplete[i];
     comparison.expectedWrong = false;
     comparison.expectedIncomplete = true;
-    comparison.compare();
+    comparison.compare(true);
+    comparison.compare(false);
   }
   for (int i = 0; i < this->correct.size; i ++) {
     OneComparison comparison;
@@ -98,7 +100,8 @@ bool OneComparisonSet::doCompareAll() {
     comparison.given = this->correct[i];
     comparison.expectedWrong = false;
     comparison.expectedIncomplete = false;
-    comparison.compare();
+    comparison.compare(true);
+    comparison.compare(false);
   }
   return true;
 }
@@ -112,13 +115,13 @@ std::string OneComparison::toString() const {
   return out.str();
 }
 
-bool OneComparison::compare() {
+bool OneComparison::compare(bool hideDesiredAnswer) {
   WebAPIResponse response;
   global.calculator().freeMemory();
   global.calculator().getElement().initialize();
   global.setWebInput(WebAPI::request::compareExpressionsGiven, HtmlRoutines::convertStringToURLString(this->given, false));
   global.setWebInput(WebAPI::request::compareExpressionsDesired, HtmlRoutines::convertStringToURLString(this->desired, false));
-  JSData result = response.compareExpressions();
+  JSData result = response.compareExpressions(false);
   JSData comparison = result[WebAPI::result::resultLabel][WebAPI::result::comparison];
   std::string areEqual = comparison[WebAPI::result::ComparisonData::areEqual].toString();
   std::string areEqualAsAnswers = comparison[WebAPI::result::ComparisonData::areEqualAsAnswers].toString();
@@ -139,6 +142,11 @@ bool OneComparison::compare() {
   if (areEqual != "true" && areEqualAsAnswers != "true") {
     global.fatal << "Expected correct answer for: " << this->toString() << ", got: "
     << result.toString() << global.fatal;
+  }
+  if (hideDesiredAnswer) {
+    if (result[WebAPI::result::ComparisonData::desired].isString(nullptr)) {
+      global.fatal << "Desired answer must be absent but was given. " << global.fatal;
+    }
   }
   return true;
 }

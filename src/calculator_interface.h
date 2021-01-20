@@ -2344,7 +2344,6 @@ public:
   bool extractExpressions(Expression& outputExpression, std::string* outputErrors);
   void evaluateCommands();
   JSData extractSolution();
-  JSData extractComparison(const std::string& given, const std::string& desired);
   bool isTimedOut();
   static bool evaluateExpression(
     Calculator& calculator, const Expression& input, Expression& output
@@ -2416,8 +2415,6 @@ public:
   void evaluate(const std::string& input);
   // Attempts to interpret the input string as a high-school or calculus problem and solve it.
   JSData solve(const std::string& input);
-  // Compares two expressions.
-  JSData compareExpressions(const std::string& given, const std::string& desired);
   bool parseAndExtractExpressions(
     const std::string& input,
     Expression& output,

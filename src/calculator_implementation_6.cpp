@@ -550,8 +550,8 @@ bool CalculatorFunctions::testProblemInterpretation(
     << "2) number of problems to test (0 or less = test all); "
     << "3) starting random seed, set to 0 if you don't know what this is. ";
   }
-  if (global.theResponse.monitoringAllowed()) {
-    global.theResponse.initiate("Triggered by testProblemInterpretation.");
+  if (global.response.monitoringAllowed()) {
+    global.response.initiate("Triggered by testProblemInterpretation.");
   }
   int desiredNumberOfTests = 0;
   int firstFileIndex = 0;
@@ -2718,8 +2718,8 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure");
-  if (!global.theResponse.monitoringAllowed()) {
-    global.theResponse.initiate("Triggered by precomputeSemisimpleLieAlgebraStructure.");
+  if (!global.response.monitoringAllowed()) {
+    global.response.initiate("Triggered by precomputeSemisimpleLieAlgebraStructure.");
   }
   (void) input;
   List<DynkinType> theTypes;

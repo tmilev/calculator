@@ -17,9 +17,25 @@ public:
 };
 
 class CompareExpressions {
+private:
+  void comparePartTwo(Calculator& calculator);
 public:
+  std::string givenString;
+  std::string desiredString;
+  std::string syntaxErrorsLeftRaw;
+  std::string syntaxErrorsLeftFormatted;
+  std::string syntaxErrorsRightRaw;
+  std::string syntaxErrorsRightFormatted;
+  std::string errorEvaluation;
+  bool flagHideDesiredAnswer;
+  bool flagAreEqual;
+  bool flagAreEqualAsAnswers;
   Expression given;
   Expression desired;
+  Expression givenSimplified;
+  Expression desiredSimplified;
+  Expression comparisonExpression;
+  Expression comparisonExpressionEvaluated;
   Expression comparisonStandardRaw;
   Expression comparisonStandardEvaluated;
   Expression comparisonNoDistributionRaw;
@@ -28,6 +44,14 @@ public:
   HashedList<Expression> freeVariablesFound;
   List<Expression> unexpectedVariables;
   List<Expression> missingVariables;
+  CompareExpressions(bool hideDesiredAnswer);
+  JSData toJSON() const;
+  void compare(
+    const std::string& givenInput,
+    const std::string& desiredInput,
+    Calculator& calculator
+  );
+  void processComparisonRestricted();
 };
 
 class CalculatorEducationalFunctions{
@@ -35,8 +59,16 @@ public:
   static bool solveJSON(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool compareExpressionsJSON(
-    Calculator& calculator, const Expression& input, Expression& output
+  static bool compareExpressionsJSOn(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output
+  );
+  static bool compareExpressionsJSONInternal(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    CompareExpressions& comparison
   );
   static bool divideByNumberTrivial(Calculator& calculator, const Expression& input, Expression& output);
 };

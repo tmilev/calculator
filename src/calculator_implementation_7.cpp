@@ -7225,12 +7225,12 @@ bool CalculatorFunctions::innerTestIndicator(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTestIndicator");
-  if (global.theResponse.flagBanProcessMonitoring) {
+  if (global.response.flagBanProcessMonitoring) {
     std::stringstream out;
     out << "The server's admins have explicitly banned monitoring. ";
     return output.assignValue(out.str(), calculator);
   }
-  if (!global.theResponse.flagReportDesired) {
+  if (!global.response.flagReportDesired) {
     std::stringstream out;
     out << "Process monitoring turned off by user. ";
     return output.assignValue(out.str(), calculator);
@@ -7269,7 +7269,7 @@ bool CalculatorFunctions::innerTestIndicator(
   for (unsigned i = 0; i < static_cast<unsigned>(dummyCommentSize); i ++) {
     dummyComment[i] = 'a';
   }
-  global.theResponse.initiate("Triggered by test indicator. ");
+  global.response.initiate("Triggered by test indicator. ");
   ProgressReport theReport;
   for (int i = 0; i < numRuns; i ++) {
     std::stringstream reportStream;

@@ -3848,7 +3848,7 @@ void Calculator::initializeStandardFunctions() {
   );
   this->addOperationHandler(
     "CompareExpressionsJSON",
-    CalculatorEducationalFunctions::compareExpressionsJSON,
+    CalculatorEducationalFunctions::compareExpressionsJSOn,
     "",
     "Compares two expressions and returns the result in JSON format. Freezes its inputs.",
     "CompareExpressionsJSON((x+1)(x+2),x^2+3x+2);\n",

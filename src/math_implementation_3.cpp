@@ -223,7 +223,7 @@ void ProgressReport::report(const std::string& theReport) {
 
 void ProgressReport::initialize() {
   this->flagInitialized = false;
-  if (!global.theResponse.monitoringAllowed()) {
+  if (!global.response.monitoringAllowed()) {
     return;
   }
   if (global.fatal.flagCrashInitiated) {
@@ -4079,7 +4079,7 @@ int PartFraction::controlLineSizeStringPolys(std::string& output, FormatExpressi
 }
 
 void PartialFractions::makeProgressReportSplittingMainPart() {
-  if (!global.theResponse.monitoringAllowed()) {
+  if (!global.response.monitoringAllowed()) {
     return;
   }
   std::stringstream out1, out2, out3;
@@ -4111,7 +4111,7 @@ void PartialFractions::makeProgressReportSplittingMainPart() {
 
 void PartialFractions::makeProgressVPFcomputation() {
   this->NumProcessedForVPFfractions ++;
-  if (!global.theResponse.monitoringAllowed()) {
+  if (!global.response.monitoringAllowed()) {
     return;
   }
   std::stringstream out2;

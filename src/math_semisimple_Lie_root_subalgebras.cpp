@@ -431,7 +431,7 @@ void RootSubalgebra::makeProgressReportGeneratorAutomorphisms(int progress, int 
 
 void RootSubalgebra::makeProgressReportpossibleNilradicalComputation(RootSubalgebras& owner) {
   MacroRegisterFunctionWithName("RootSubalgebra::makeProgressReportpossibleNilradicalComputation");
-  if (!global.theResponse.monitoringAllowed()) {
+  if (!global.response.monitoringAllowed()) {
     return;
   }
   ProgressReport report1, report2, report3, report4, report5;
@@ -3434,7 +3434,7 @@ void RootSubalgebras::computeActionNormalizerOfCentralizerIntersectNilradical(
       int tempI = theRootSA.getIndexKModuleContainingRoot(tempRoot);
       this->ActionsNormalizerCentralizerNilradical[i][j] = tempI;
     }
-    if (global.theResponse.monitoringAllowed()) {
+    if (global.response.monitoringAllowed()) {
       std::stringstream out;
       out << "Computing action of element " << i + 1 << " out of " << theSubgroup.allElements.size;
       theReport.report(out.str());

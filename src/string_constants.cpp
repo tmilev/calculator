@@ -114,6 +114,7 @@ std::string WebAPI::request::userList                     = "userList"          
 std::string WebAPI::request::passwordList                 = "passwordList"                ;
 std::string WebAPI::request::solveRequest                 = "solveJSON"                   ;
 std::string WebAPI::request::compareExpressions           = "compareExpressions"          ;
+std::string WebAPI::request::compareExpressionsInternal   = "compareExpressionsInternal"  ;
 std::string WebAPI::request::compareExpressionsGiven      = "compareExpressionsGiven"     ;
 std::string WebAPI::request::compareExpressionsDesired    = "compareExpressionsDesired"   ;
 

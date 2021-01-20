@@ -1004,7 +1004,7 @@ void SemisimpleSubalgebras::findTheSemisimpleSubalgebrasInitialize() {
   if (this->owner == nullptr) {
     global.fatal << "<hr>Owner of semisimple subalgebras is zero" << global.fatal;
   }
-  if (global.theResponse.monitoringAllowed()) {
+  if (global.response.monitoringAllowed()) {
     this->fileNameToLogComments = "LogFileComments_" +
     FileOperations::cleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.toString()) +
     ".html";

@@ -768,7 +768,7 @@ bool SemisimpleLieAlgebra::getConstantOrHElement(
 }
 
 void SemisimpleLieAlgebra::makeChevalleyTestReport(int i, int j, int k, int Total) {
-  if (!global.theResponse.reportDesired()) {
+  if (!global.response.reportDesired()) {
     return;
   }
   std::stringstream out2, out3;

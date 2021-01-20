@@ -5,11 +5,12 @@
 #include "database.h"
 #include <iomanip>
 #include "string_constants.h"
+#include "calculator_educational_functions_1.h"
 
 JSData WebAPIResponse::getProblemSolutionJSON() {
   MacroRegisterFunctionWithName("WebAPIReponse::getProblemSolutionJSON");
   if (!global.userDefaultHasAdminRights()) {
-    global.theResponse.disallowReport();
+    global.response.disallowReport();
   }
   int64_t startMilliseconds = global.getElapsedMilliseconds();
   CalculatorHTML problem;
@@ -232,7 +233,7 @@ std::string WebAPIResponse::getCommentsInterpretation(
 JSData WebAPIResponse::submitAnswersPreviewJSON() {
   MacroRegisterFunctionWithName("WebAPIResponse::submitAnswersPreviewJSON");
   if (!global.userDefaultHasAdminRights()) {
-    global.theResponse.disallowReport();
+    global.response.disallowReport();
   }
   double startTime = global.getElapsedSeconds();
   std::string lastStudentAnswerID;
@@ -769,7 +770,7 @@ void WebAPIResponse::getJSDataUserInfo(JSData& outputAppend, const std::string& 
   if (comments != "") {
     outputAppend[WebAPI::result::comments] = HtmlRoutines::convertStringToHtmlString(comments, false);
   }
-  if (global.theResponse.monitoringAllowed()) {
+  if (global.response.monitoringAllowed()) {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "true";
     outputAppend[Configuration::millisecondsReplyAfterComputation] = static_cast<double>(
       global.millisecondsReplyAfterComputation
@@ -962,6 +963,7 @@ public:
   bool storeInDatabase(bool answerIsCorrect);
   bool checkAnswerStandard(bool* outputIsCorrect);
   bool checkAnswerHardcoded(bool* outputIsCorrect);
+  void writeResultHTML(bool correct);
   AnswerChecker();
 };
 
@@ -975,7 +977,7 @@ bool AnswerChecker::prepareProblem(
 ) {
   MacroRegisterFunctionWithName("AnswerChecker::prepareProblem");
   if (!global.userDefaultHasAdminRights()) {
-    global.theResponse.disallowReport();
+    global.response.disallowReport();
   }
 
   std::stringstream errorStream, comments;
@@ -1181,24 +1183,18 @@ bool AnswerChecker::checkAnswerHardcoded(
   MacroRegisterFunctionWithName("AnswerChecker::checkAnswerHardcoded");
   ProblemData& currentProblemData = this->problem.problemData;
   Answer& answer = currentProblemData.answers.values[this->answerIndex];
-  interpreter.initialize();
-  interpreter.flagWriteLatexPlots = false;
-  interpreter.flagPlotNoControls = true;
-  JSData comparison = interpreter.compareExpressions(
-    answer.currentAnswerClean, answer.commandAnswerOnGiveUp
+  this->interpreter.initialize();
+  this->interpreter.flagWriteLatexPlots = false;
+  this->interpreter.flagPlotNoControls = true;
+  CompareExpressions comparison(true);
+  comparison.compare(
+    answer.currentAnswerClean, answer.commandAnswerOnGiveUp, interpreter
   );
-  bool correct = comparison[
-    WebAPI::result::comparison
-  ][
-    WebAPI::result::ComparisonData::areEqualAsAnswers
-  ].isTrueRepresentationInJSON();
+  bool correct = comparison.flagAreEqual;
   if (outputIsCorrect != nullptr) {
     *outputIsCorrect = correct;
   }
-  global.comments << "DEBUG: comparison: " << comparison.toString();
-  if (!this->result.mergeInMe(comparison, nullptr)) {
-    return false;
-  }
+  this->result = comparison.toJSON();
   return true;
 }
 
@@ -1533,9 +1529,9 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   bool doIncludeTimeStats
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::getAnswerOnGiveUp");
-  GlobalVariables::Response::StateMaintainer maintain(global.theResponse);
+  GlobalVariables::Response::StateMaintainer maintain(global.response);
   if (!global.userDefaultHasAdminRights()) {
-    global.theResponse.disallowReport();
+    global.response.disallowReport();
   }
   if (outputNakedAnswer != nullptr) {
     *outputNakedAnswer = "";

@@ -129,7 +129,7 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
   JSData output;
   output[WebAPI::result::crashReport] = this->crashReportHtml.str();
   output[WebAPI::result::comments] = global.comments.getCurrentReset();
-  global.theResponse.writeResponse(output, true);
+  global.response.writeResponse(output, true);
   assert(false);
   return *this;
 }
@@ -488,7 +488,7 @@ std::string GlobalVariables::getWebInput(const std::string& inputName) {
 
 void GlobalVariables::makeReport() {
   MacroRegisterFunctionWithName("GlobalVariables::makeReport");
-  if (!global.theResponse.monitoringAllowed()) {
+  if (!global.response.monitoringAllowed()) {
     return;
   }
   std::string reportString;
@@ -497,7 +497,7 @@ void GlobalVariables::makeReport() {
   } else {
     reportString = this->toStringProgressReportNoThreadData(true);
   }
-  this->theResponse.report(reportString);
+  this->response.report(reportString);
 }
 
 void GlobalVariables::initOutputReportAndCrashFileNames(

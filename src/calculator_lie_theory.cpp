@@ -2958,8 +2958,8 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
       return calculator << "Only logged-in admins allowed to force-recompute semisimple subalgebras. ";
     }
   }
-  if (global.theResponse.monitoringAllowed()) {
-    global.theResponse.initiate("Triggered by printSemisimpleSubalgebras.");
+  if (global.response.monitoringAllowed()) {
+    global.response.initiate("Triggered by printSemisimpleSubalgebras.");
   }
   if (input.size() != 2) {
     return calculator << "Semisimple Lie algebra expects a single argument. ";

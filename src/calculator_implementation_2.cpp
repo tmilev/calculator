@@ -1209,28 +1209,6 @@ JSData Calculator::solve(const std::string& input) {
   return this->extractSolution();
 }
 
-JSData Calculator::compareExpressions(const std::string& given, const std::string& desired) {
-  MacroRegisterFunctionWithName("Calculator::compareExpressions");
-  this->statistics.initialize();
-  Expression givenExpression, desiredExpression;
-  if (!this->parse(given, true, givenExpression)) {
-    this->syntaxErrors += "Failed to parse given answer.";
-    return this->extractComparison(given, desired);
-  }
-  if (!this->parse(desired, true, desiredExpression)) {
-    this->syntaxErrors += "Failed to parse desired answer.";
-    return this->extractComparison(given, desired);
-  }
-  this->programExpression.makeXOX(
-    *this,
-    this->getOperations().getIndexNoFail("CompareExpressionsJSON"),
-    givenExpression,
-    desiredExpression
-  );
-  this->evaluateCommands();
-  return this->extractComparison(given, desired);
-}
-
 void Calculator::evaluateCommands() {
   MacroRegisterFunctionWithName("Calculator::evaluateCommands");
   std::stringstream out;

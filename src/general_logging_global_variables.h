@@ -305,7 +305,7 @@ public:
     bool isTimedOut();
     Response();
   };
-  Response theResponse;
+  Response response;
   ListReferences<std::thread> theThreads;
   ListReferences<ThreadData> theThreadData;
   ListReferences<ListReferences<StackInfo> > customStackTrace;

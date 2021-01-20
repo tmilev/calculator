@@ -924,7 +924,7 @@ bool WebAPIResponse::processForgotLogin() {
   JSData result;
   if (!global.flagDatabaseCompiled) {
     result[WebAPI::result::error] = "Error: database not running. ";
-    return global.theResponse.writeResponse(result, false);
+    return global.response.writeResponse(result, false);
   }
   std::stringstream out;
   if (!global.userDefaultHasAdminRights()) {
@@ -940,21 +940,21 @@ bool WebAPIResponse::processForgotLogin() {
   << "</b><br>\n";
   if (!theCrawler.verifyRecaptcha(&out, &out, nullptr)) {
     result[WebAPI::result::comments] = out.str();
-    return global.theResponse.writeResponse(result, false);
+    return global.response.writeResponse(result, false);
   }
   if (!theUser.exists(&out)) {
     out << "<br><b style ='color:red'>"
     << "We failed to find your email: " << theUser.email << " in our records. "
     << "</b>";
     result[WebAPI::result::comments] = out.str();
-    return global.theResponse.writeResponse(result, false);
+    return global.response.writeResponse(result, false);
   }
   if (!theUser.loadFromDatabase(&out, &out)) {
     out << "<br><b style='color:red'>"
     << "Failed to fetch user info for email: " << theUser.email
     << "</b>";
     result[WebAPI::result::comments] = out.str();
-    return global.theResponse.writeResponse(result, false);
+    return global.response.writeResponse(result, false);
   }
   out << "<b style ='color:green'>"
   << "Your email is on record. "
@@ -967,7 +967,7 @@ bool WebAPIResponse::processForgotLogin() {
   out << "<br>Response time: " << global.getElapsedSeconds() << " second(s); "
   << global.getElapsedSeconds() << " second(s) spent creating account. ";
   result[WebAPI::result::comments] = out.str();
-  return global.theResponse.writeResponse(result, false);
+  return global.response.writeResponse(result, false);
 }
 
 JSData WebWorker::getSignUpRequestResult() {
@@ -1102,17 +1102,17 @@ void GlobalVariables::Response::report(const std::string &input) {
 
 void GlobalVariables::Response::initiate(const std::string& message) {
   // TODO(tmilev): investigate the performance of this snippet
-  if (global.theResponse.flagTimedOut) {
+  if (global.response.flagTimedOut) {
     return;
   }
   MutexlockGuard guard(global.mutexReturnBytes);
   MacroRegisterFunctionWithName("GlobalVariables::Progress::initiate");
-  if (!global.theResponse.monitoringAllowed()) {
+  if (!global.response.monitoringAllowed()) {
     return;
   }
-  if (!global.theResponse.flagReportDesired) {
+  if (!global.response.flagReportDesired) {
     return;
   }
-  global.theResponse.flagTimedOut = true;
+  global.response.flagTimedOut = true;
   global.server().getActiveWorker().writeAfterTimeoutShowIndicator(message);
 }

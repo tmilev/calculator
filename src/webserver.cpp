@@ -1228,7 +1228,7 @@ int WebWorker::processFolder() {
     << " </b>";
     JSData result;
     result[WebAPI::result::error] = outError.str();
-    global.theResponse.writeResponse(result);
+    global.response.writeResponse(result);
     return 0;
   }
   outPage << "Browsing folder: "
@@ -1505,7 +1505,7 @@ std::string WebWorker::mimeTypeFromFileExtension(const std::string& fileExtensio
 int WebWorker::processUnknown() {
   MacroRegisterFunctionWithName("WebWorker::processUnknown");
   this->setHeader("HTTP/1.0 501 Method Not Implemented", "Content-Type: text/html");
-  global.theResponse.writeResponse(WebAPIResponse::getJSONUserInfo("Unknown request"), false);
+  global.response.writeResponse(WebAPIResponse::getJSONUserInfo("Unknown request"), false);
   return 0;
 }
 
@@ -2112,7 +2112,7 @@ int WebWorker::processFolderOrFile() {
     << "are not allowed to start with dots. There may be additional restrictions "
     << "on file names added for security reasons.";
     result[WebAPI::result::error] = out.str();
-    return global.theResponse.writeResponse(result);
+    return global.response.writeResponse(result);
   }
   if (FileOperations::isFolderUnsecure(this->RelativePhysicalFileNamE)) {
     return this->processFolder();
@@ -2159,14 +2159,14 @@ void WebWorker::getIndicatorOnTimeout(
   output[WebAPI::result::timeOut] = true;
 
   timeOutComments << message;
-  if (global.theResponse.flagBanProcessMonitoring) {
+  if (global.response.flagBanProcessMonitoring) {
     timeOutComments
     << "Monitoring computations is not allowed on this server.<br> "
     << "Please note that monitoring computations "
     << "is the default behavior, so the "
     << "owners of the server must have explicitly banned monitoring. ";
     output[WebAPI::result::timeOutComments] = timeOutComments.str();
-  } else if (!global.theResponse.flagReportDesired){
+  } else if (!global.response.flagReportDesired){
     timeOutComments
     << "Monitoring computations not desired by user. ";
     output[WebAPI::result::timeOutComments] = timeOutComments.str();
@@ -3609,7 +3609,7 @@ bool WebWorker::runOnce() {
   this->statistics.allReceives ++;
   if (
     (!this->flagKeepAlive) ||
-    global.theResponse.isTimedOut()
+    global.response.isTimedOut()
   ) {
     return false;
   }
@@ -4128,7 +4128,7 @@ extern int mainTest(List<std::string>& remainingArgs);
 
 void WebServer::turnProcessMonitoringOn() {
   MacroRegisterFunctionWithName("WebServer::turnProcessMonitoringOn");
-  global.theResponse.flagBanProcessMonitoring = false;
+  global.response.flagBanProcessMonitoring = false;
   global.configuration[Configuration::processMonitoringBanned] = false;
   global
   << Logger::yellow << "Process monitoring IS ON, reply in: " << Logger::green
@@ -4141,7 +4141,7 @@ void WebServer::turnProcessMonitoringOff() {
   << Logger::green << "************************" << Logger::endL
   << Logger::red << "Process monitoring is now off. " << Logger::endL
   << Logger::green << "************************" << Logger::endL;
-  global.theResponse.flagBanProcessMonitoring = true;
+  global.response.flagBanProcessMonitoring = true;
   global.millisecondsReplyAfterComputation = 0;
   global.configuration[Configuration::processMonitoringBanned] = true;
 }

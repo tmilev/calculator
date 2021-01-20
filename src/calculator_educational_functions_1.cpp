@@ -244,14 +244,15 @@ JSData CompareExpressions::toJSON() const {
   }
   std::stringstream resultHTML;
   if (!this->flagAreEqual) {
-    resultHTML <<  "<b style='color:red'>&cross;</b>";
+    resultHTML <<  "<b style='color:red;font-size: x-large;'>&cross;</b><br>";
   } else {
     if (!this->flagAreEqualAsAnswers) {
-      resultHTML << "<b style='color:blue'>&#x2713;</b> [more work needed]";
+      resultHTML << "<b style='color:blue;font-size: x-large;'>&#x2713;</b> [more work needed]<br>";
     } else {
-      resultHTML << "<b style='color:green'>&#x2713;</b>";
+      resultHTML << "<b style='color:green;font-size: x-large;'>&#x2713;</b><br>";
     }
   }
+  result[WebAPI::problem::answerWasHardCoded] = true;
   result[WebAPI::result::resultHtml] = resultHTML.str();
   return result;
 }

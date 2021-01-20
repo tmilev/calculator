@@ -67,6 +67,7 @@ std::string WebAPI::problem::commentsProblem         = "commentsProblem"        
 std::string WebAPI::problem::calculatorAnswerPrefix  = "calculatorAnswer"        ;
 std::string WebAPI::problem::answerGenerationSuccess = "generationSuccess"       ;
 std::string WebAPI::problem::randomSeed              = "randomSeed"              ;
+std::string WebAPI::problem::answerWasHardCoded      = "answerWasHardCoded"      ;
 
 std::string WebAPI::request::workerId                     = WebAPI::result::workerId                   ;
 std::string WebAPI::request::database                     = "database"                                 ;

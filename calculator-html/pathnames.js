@@ -76,6 +76,7 @@ const urlFields = {
     courseHome: "courseHome",
     fileNameTarget: "fileNameTarget",
     topicList: "topicList",
+    answerWasHardCoded: "answerWasHardCoded",
   },
   teachersAndSections: "teachersAndSections",
   requestEditPage: "editPageJSON",

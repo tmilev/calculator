@@ -164,6 +164,7 @@ public:
     static std::string answerGenerationSuccess;
     static std::string commentsProblem;
     static std::string calculatorAnswerPrefix;
+    static std::string answerWasHardCoded;
   };
   struct databaseParameters {
     static std::string labels;

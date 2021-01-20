@@ -1195,6 +1195,9 @@ bool AnswerChecker::checkAnswerHardcoded(
     *outputIsCorrect = correct;
   }
   this->result = comparison.toJSON();
+  if (this->result.hasKey(WebAPI::result::resultHtml)) {
+    output << this->result.getValue(WebAPI::result::resultHtml).stringValue;
+  }
   return
   comparison.syntaxErrorsLeftRaw == "" &&
   comparison.syntaxErrorsRightRaw == "" &&

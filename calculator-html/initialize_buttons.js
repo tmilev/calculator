@@ -12,6 +12,7 @@ const EquationEditor = require("./equation_editor").EquationEditor;
 const EquationEditorButtonFactory = require("./equation_editor").EquationEditorButtonFactory;
 const EquationEditorOptions = require("./equation_editor").EquationEditorOptions;
 const datePicker = require("./date_picker").datePicker;
+const answerProcessing = require("./answer_processing").answerProcessing;
 
 let keyWordsKnownToMathQuill = [
   'sqrt',
@@ -348,8 +349,9 @@ class InputPanelData {
       if (resultHtml !== "") {
         resultHtml += "<br>";
       }
-      resultHtml += `<br><span style='font-size:x-small;float:right'>Response: ${timeComputation} ms</span>`;
+      resultHtml += `<br><span style='font-size:x-small;float:right'>Computation time: ${timeComputation} ms</span>`;
     }
+    resultHtml += answerProcessing.htmlUserFriendlyResultComparisonErrorsOnly(inputParsed);
     resultHtml += miscellaneous.htmlFromCommentsAndErrors(inputParsed);
     outputComponent.innerHTML = resultHtml;
     let spanVerification = document.getElementById(this.idVerificationSpan);

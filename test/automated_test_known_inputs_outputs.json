@@ -1785,7 +1785,7 @@
   },
   {
     "input":"CompareExpressionsJSON((x+1)(x+2),x^2+3x+2);\n",
-    "output":"{\n<br>\n&nbsp;\"given\":\"\\\\left(x+1\\\\right)\\\\left(x+2\\\\right)\",\n<br>\n&nbsp;\"desired\":\"x^{2}+3 x+2\",\n<br>\n&nbsp;\"areEqual\":true,\n<br>\n&nbsp;\"areEqualAsAnswers\":false\n<br>\n}"
+    "output":"{\n<br>\n&nbsp;\"commentsGlobal\":\"\",\n<br>\n&nbsp;\"givenRaw\":\"(Error:NoOwner)\",\n<br>\n&nbsp;\"desiredRaw\":\"(Error:NoOwner)\",\n<br>\n&nbsp;\"areEqual\":true,\n<br>\n&nbsp;\"areEqualAsAnswers\":false,\n<br>\n&nbsp;\"answerWasHardCoded\":true,\n<br>\n&nbsp;\"resultHtml\":\"<b style='color:blue;font-size: x-large;'>&#x2713;</b> [more work needed]<br>\"\n<br>\n}"
   },
   {
     "input":"FindOneSolutionSerreLikePolynomialSystem{}(x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+ 1, x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21}, x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21}, x_{6}x_{24}+2x_{5}x_{23}-x_{4}x_{22}+2x_{3}x_{21}-2x_{2}x_{20}-x_{1}x_{19}, x_{12}x_{23}-x_{11}x_{22}-x_{9}x_{20}, x_{11}x_{23}+x_{10}x_{22}+x_{8}x_{20}- 1, x_{9}x_{23}+x_{8}x_{22}-x_{7}x_{20}, x_{12}x_{21}-x_{11}x_{20}+x_{9}x_{19}, x_{11}x_{21}+x_{10}x_{20}-x_{8}x_{19}, x_{9}x_{21}+x_{8}x_{20}+x_{7}x_{19}- 1, x_{12}x_{18}+2x_{11}x_{17}-x_{10}x_{16}+2x_{9}x_{15}-2x_{8}x_{14}-x_{7}x_{13}, x_{6}x_{18}-x_{4}x_{16}-2x_{2}x_{14} - x_{1}x_{13} + 1, x_{5}x_{18}+x_{4}x_{17}+x_{2}x_{15}, x_{3}x_{18}+x_{2}x_{17}-x_{1}x_{15}, x_{6}x_{17}+x_{5}x_{16}+x_{3}x_{14}, x_{5}x_{17}+x_{4}x_{16}+x_{2}x_{14} - 1, x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14}, x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13}, x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13}, x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13} - 1)",

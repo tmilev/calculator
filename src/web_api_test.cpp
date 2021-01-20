@@ -122,9 +122,8 @@ bool OneComparison::compare(bool hideDesiredAnswer) {
   global.setWebInput(WebAPI::request::compareExpressionsGiven, HtmlRoutines::convertStringToURLString(this->given, false));
   global.setWebInput(WebAPI::request::compareExpressionsDesired, HtmlRoutines::convertStringToURLString(this->desired, false));
   JSData result = response.compareExpressions(false);
-  JSData comparison = result[WebAPI::result::resultLabel][WebAPI::result::comparison];
-  std::string areEqual = comparison[WebAPI::result::ComparisonData::areEqual].toString();
-  std::string areEqualAsAnswers = comparison[WebAPI::result::ComparisonData::areEqualAsAnswers].toString();
+  std::string areEqual = result[WebAPI::result::ComparisonData::areEqual].toString();
+  std::string areEqualAsAnswers = result[WebAPI::result::ComparisonData::areEqualAsAnswers].toString();
   if (this->expectedWrong) {
     if (areEqual != "false" || areEqualAsAnswers != "false") {
       global.fatal << "Expected wrong answer for: " << this->toString() << ", got: "

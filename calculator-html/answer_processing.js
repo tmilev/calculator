@@ -36,9 +36,9 @@ class AnswerProcessing {
   }
 
   htmlUserFriendlyResult(input) {
-    let resultHtml = this.htmlUserFriendlyResultComparisonErrorsOnly(input);
-    if (resultHtml !== "") {
-      return resultHtml;
+    let resultHTML = this.htmlUserFriendlyResultComparisonErrorsOnly(input);
+    if (resultHTML !== "") {
+      return resultHTML;
     }
     resultHTML += this.getAllValuesOfGivenKeys(input, [pathnames.urlFields.result.resultHtml]);
     let commentsAndCrashes = [

@@ -47,6 +47,9 @@ std::string WebAPI::result::ComparisonData::given                   = "given"   
 std::string WebAPI::result::ComparisonData::desired                 = "desired"                     ;
 std::string WebAPI::result::ComparisonData::givenRaw                = "givenRaw"                    ;
 std::string WebAPI::result::ComparisonData::desiredRaw              = "desiredRaw"                  ;
+std::string WebAPI::result::ComparisonData::errorEvaluation         = "errorEvaluation"             ;
+std::string WebAPI::result::ComparisonData::errorInAnswer           = "errorInAnswer"               ;
+
 
 std::string WebAPI::problem::fileContent             = "fileContent"             ;
 std::string WebAPI::problem::title                   = "title"                   ;

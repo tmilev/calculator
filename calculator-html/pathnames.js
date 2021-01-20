@@ -61,7 +61,8 @@ const urlFields = {
       steps: "solutionSteps",
     },
     comparison: {
-      comparison: "comparison",
+      errorEvaluation: "errorEvaluation",
+      errorInAnswer: "errorInAnswer",
       areEqual: "areEqual",
       areEqualAsAnswers: "areEqualAsAnswers",
     },

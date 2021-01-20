@@ -110,7 +110,8 @@ class CompareExpressions {
   ) {
     try {
       let result = miscellaneous.jsonUnescapeParse(input);
-      this.writeUserFriendlyResult(result);
+      let resultHTML = this.htmlUserFriendlyResult(result);
+      this.resultUserFriendly.innerHTML = resultHTML;
       this.resultBoxRaw.textContent = JSON.stringify(result);
       jsonToHtml.writeJSONtoDOMComponent(result, this.resultBoxFormatted);
       equationEditor.typeset(this.resultBoxFormatted);
@@ -126,42 +127,61 @@ class CompareExpressions {
     this.calculatorLink.innerHTML = `<a href=${url} target="_blank">calculator link</a>`;
   }
 
-  writeUserFriendlyResult(input) {
-    this.resultUserFriendly.innerHTML = "";
-    let result = input[pathnames.urlFields.result.result];
-    if (typeof result !== "object") {
-      return;
+  getFirstValueFromKeys(
+    input,
+    /**@type{string[]} */
+    keys,
+  ) {
+    for (let i = 0; i < keys.length; i++) {
+      let candidate = input[keys[i]];
+      if (candidate !== undefined && candidate !== null && candidate !== "") {
+        return candidate;
+      }
     }
-    let syntaxErrors = result[pathnames.urlFields.result.syntaxErrors];
-    if (syntaxErrors === "") {
-      syntaxErrors = result[pathnames.urlFields.result.syntaxErrorsExtra];
+    return "";
+  }
+
+  getAllValuesOfGivenKeys(
+    input,
+    /**@type{string[]} */
+    labels,
+  ) {
+    let result = [];
+    for (let i = 0; i < labels.length; i++) {
+      let candidate = input[labels[i]];
+      if (candidate !== undefined && candidate !== null && candidate !== "") {
+        result.push(candidate);
+      }
     }
-    if (syntaxErrors !== "" && syntaxErrors !== undefined && syntaxErrors !== null) {
-      this.resultUserFriendly.innerHTML = `<b style='color:red'>?</b><br>${syntaxErrors}`;
-      return;
+    return result.join("<br>");
+  }
+
+  htmlUserFriendlyResult(input) {
+    let syntaxErrors = this.getFirstValueFromKeys(input, [
+      pathnames.urlFields.result.syntaxErrors,
+      pathnames.urlFields.result.syntaxErrorsExtra
+    ]);
+    if (syntaxErrors !== "") {
+      return `<b style='color:red'>?</b><br>${syntaxErrors}`;
     }
     this.writeCalculatorLink();
-    let comparison = result[pathnames.urlFields.result.comparison.comparison];
-    if (comparison === undefined) {
-      return;
+    let errorTags = [
+      pathnames.urlFields.result.error,
+      pathnames.urlFields.result.comparison.errorEvaluation,
+      pathnames.urlFields.result.comparison.errorInAnswer,
+    ];
+    let errorsEvaluation = this.getAllValuesOfGivenKeys(input, errorTags);
+    if (errorsEvaluation !== "") {
+      return `<b style='color:red'>?</b><br>${errorsEvaluation}`;
     }
-    let error = comparison[pathnames.urlFields.result.error];
-    if (error !== "" && error !== undefined && error !== null) {
-      this.resultUserFriendly.innerHTML = `<b style='color:red'>?</b><br>${error}`;
-      return;
-    }
-    let areEqual = comparison[pathnames.urlFields.result.comparison.areEqual];
-    if (areEqual !== true) {
-      this.resultUserFriendly.innerHTML = "<b style='color:red'>&cross;</b>";
-      return;
-    }
-    let areEqualAsAnswers = comparison[pathnames.urlFields.result.comparison.areEqualAsAnswers];
-    if (areEqualAsAnswers !== true) {
-      this.resultUserFriendly.innerHTML = "<b style='color:blue'>&#x2713;</b> [more work needed]";
-      return;
-    }
-    this.resultUserFriendly.innerHTML = "<b style='color:green'>&#x2713;</b>";
-    return;
+    let resultHTML = this.getAllValuesOfGivenKeys(input, [pathnames.urlFields.result.resultHtml]);
+    let commentsAndCrashes = [
+      pathnames.urlFields.result.comments,
+      pathnames.urlFields.result.commentsGlobal,
+      pathnames.urlFields.result.crashReport,
+    ];
+    resultHTML += this.getAllValuesOfGivenKeys(input, commentsAndCrashes);
+    return resultHTML;
   }
 }
 

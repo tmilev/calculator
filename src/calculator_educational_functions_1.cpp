@@ -32,7 +32,7 @@ bool CalculatorEducationalFunctions::solveJSON(
   return output.assignValue(problem.toJSON(), calculator);
 }
 
-bool CalculatorEducationalFunctions::compareExpressionsJSOn(
+bool CalculatorEducationalFunctions::compareExpressionsJSON(
   Calculator& calculator,
   const Expression& input,
   Expression& output
@@ -79,7 +79,7 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
     std::stringstream errorStream;
     errorStream << "Unexpected symbols: <b style='color:red'>"
     << comparison.unexpectedVariables.toStringCommaDelimited() << "</b>";
-    comparison.errorEvaluation = errorStream.str();
+    comparison.errorInAnswer = errorStream.str();
     return output.assignValue(comparison.toJSON(), calculator);
   }
   comparison.givenSimplified.makeOX(
@@ -134,11 +134,8 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
 
 void CompareExpressions::processComparisonRestricted() {
   MacroRegisterFunctionWithName("CompareExpressions::processComparisonRestricted");
-  if (this->comparisonNoDistributionEvaluated.toString() == "1") {
-    this->flagAreEqualAsAnswers = true;
-  } else {
-    this->flagAreEqualAsAnswers = false;
-  }
+  this->flagAreEqualAsAnswers = this->comparisonNoDistributionEvaluated.toString() == "1";
+  this->flagAreEqual = this->comparisonStandardEvaluated.toString() == "1";
 }
 
 JSData Calculator::extractSolution() {
@@ -181,12 +178,12 @@ void CompareExpressions::comparePartTwo(Calculator& calculator) {
   MacroRegisterFunctionWithName("Calculator::compareExpressions");
   calculator.statistics.initialize();
   if (!calculator.parse(this->givenString, true, this->given)) {
-    this->syntaxErrorsLeftRaw = calculator.syntaxErrors;
+    this->syntaxErrorsLeftRaw = "Error parsing given expression." + calculator.syntaxErrors;
     this->syntaxErrorsLeftFormatted = calculator.toStringSyntacticStackHTMLSimple();
     return;
   }
   if (!calculator.parse(this->desiredString, true, this->desired)) {
-    this->syntaxErrorsRightRaw = calculator.syntaxErrors;
+    this->syntaxErrorsRightRaw =  "Error parsing desired expression." + calculator.syntaxErrors;
     this->syntaxErrorsRightFormatted = calculator.toStringSyntacticStackHTMLSimple();
     return;
   }
@@ -215,22 +212,46 @@ JSData CompareExpressions::toJSON() const {
   JSData result;
   result[WebAPI::result::commentsGlobal] = global.comments.getCurrentReset();
   result[WebAPI::result::ComparisonData::givenRaw] = this->givenString;
-  result[WebAPI::result::ComparisonData::desiredRaw] = this->desiredString;
+  if (!this->flagHideDesiredAnswer) {
+    result[WebAPI::result::ComparisonData::desiredRaw] = this->desiredString;
+  }
   if (this->syntaxErrorsLeftRaw != "") {
     result[WebAPI::result::error] = "Failed to parse the given (student) answer.";
-  }
-  if (this->syntaxErrorsRightRaw != "") {
-    result[WebAPI::result::error] = "Failed to parse the desired (teacher) answer.";
-  }
-  if (this->syntaxErrorsLeftRaw != "" || this->syntaxErrorsRightRaw != "") {
     result[WebAPI::result::syntaxErrors] = this->syntaxErrorsLeftFormatted;
     result[WebAPI::result::syntaxErrorsExtra] = this->syntaxErrorsLeftRaw;
     return result;
   }
+  if (this->syntaxErrorsRightRaw != "") {
+    result[WebAPI::result::error] = "Failed to parse the desired (teacher) answer.";
+    result[WebAPI::result::syntaxErrors] = this->syntaxErrorsRightFormatted;
+    result[WebAPI::result::syntaxErrorsExtra] = this->syntaxErrorsRightRaw;
+    return result;
+  }
+  if (this->errorEvaluation != "") {
+    result[WebAPI::result::ComparisonData::errorEvaluation] = this->errorEvaluation;
+  }
+  if (this->errorInAnswer != "") {
+    result[WebAPI::result::ComparisonData::errorInAnswer] = this->errorInAnswer;
+  }
   result[WebAPI::result::ComparisonData::areEqual] = this->flagAreEqual;
   result[WebAPI::result::ComparisonData::areEqualAsAnswers] = this->flagAreEqualAsAnswers;
+  if (
+    this->syntaxErrorsLeftRaw != "" ||
+    this->syntaxErrorsLeftFormatted != "" ||
+    this->errorEvaluation != ""
+  ) {
+    return result;
+  }
   std::stringstream resultHTML;
-  resultHTML << "";
+  if (!this->flagAreEqual) {
+    resultHTML <<  "<b style='color:red'>&cross;</b>";
+  } else {
+    if (!this->flagAreEqualAsAnswers) {
+      resultHTML << "<b style='color:blue'>&#x2713;</b> [more work needed]";
+    } else {
+      resultHTML << "<b style='color:green'>&#x2713;</b>";
+    }
+  }
   result[WebAPI::result::resultHtml] = resultHTML.str();
   return result;
 }

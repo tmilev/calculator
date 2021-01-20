@@ -1195,7 +1195,10 @@ bool AnswerChecker::checkAnswerHardcoded(
     *outputIsCorrect = correct;
   }
   this->result = comparison.toJSON();
-  return true;
+  return
+  comparison.syntaxErrorsLeftRaw == "" &&
+  comparison.syntaxErrorsRightRaw == "" &&
+  comparison.errorEvaluation == "";
 }
 
 bool AnswerChecker::checkAnswerStandard(

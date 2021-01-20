@@ -108,11 +108,26 @@ public:
     static std::string httpsSupport;
     static std::string comparison;
     struct ComparisonData {
-      static std::string given;
-      static std::string desired;
+      // The given (student answer) expression string.
       static std::string givenRaw;
+      // The desired (teacher-prodived answer) expression string.
       static std::string desiredRaw;
+      // The given answer as parsed / understood by the calculator.
+      static std::string given;
+      // The desired answer as parsed / understood by the calculator.
+      static std::string desired;
+      // If non-empty, signifies the calculator could not
+      // evaluate one of the answers, for reasons such as division by zero.
+      static std::string errorEvaluation;
+      // If non-empty, signifies the calculator found some
+      // obvious error in the answer such as wrong variable name.
+      static std::string errorInAnswer;
+      // Whether the desired and given answer simplify to
+      // equal mathematical expressions.
       static std::string areEqual;
+      // Whether the desired and given answer
+      // are equal as aswers, i.e., simplify to equal mathematical expressions
+      // under a reduced set of simplification rules.
       static std::string areEqualAsAnswers;
     };
 

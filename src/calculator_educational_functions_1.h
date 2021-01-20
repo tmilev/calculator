@@ -26,6 +26,7 @@ public:
   std::string syntaxErrorsLeftFormatted;
   std::string syntaxErrorsRightRaw;
   std::string syntaxErrorsRightFormatted;
+  std::string errorInAnswer;
   std::string errorEvaluation;
   bool flagHideDesiredAnswer;
   bool flagAreEqual;
@@ -59,7 +60,7 @@ public:
   static bool solveJSON(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool compareExpressionsJSOn(
+  static bool compareExpressionsJSON(
     Calculator& calculator,
     const Expression& input,
     Expression& output

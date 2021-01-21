@@ -3,7 +3,6 @@ const submitRequests = require("./submit_requests");
 const panels = require("./panels");
 const pathnames = require("./pathnames");
 const ids = require("./ids_dom_elements");
-const typeset = require("./math_typeset");
 const miscellaneous = require("./miscellaneous_frontend");
 const equation_editor = require("./equation_editor");
 const storage = require("./storage");
@@ -12,7 +11,6 @@ const EquationEditor = require("./equation_editor").EquationEditor;
 const EquationEditorButtonFactory = require("./equation_editor").EquationEditorButtonFactory;
 const EquationEditorOptions = require("./equation_editor").EquationEditorOptions;
 const datePicker = require("./date_picker").datePicker;
-const answerProcessing = require("./answer_processing").answerProcessing;
 
 let keyWordsKnownToMathQuill = [
   'sqrt',
@@ -41,7 +39,6 @@ let calculatorSeparatorLeftDelimiters = {
   '(': true,
   '{': true
 };
-let startingCharacterSectionUnderMathQuillEdit = '';
 
 function processMathQuillLatex(theText) {
   for (let i = 0; i < theText.length; i++) {
@@ -146,9 +143,28 @@ class InputPanelData {
   constructor(input) {
     /** @type{string} Id of component where the editor is placed.*/
     this.idEquationEditorElement = input.idEquationEditorElement;
-    this.idEquationEditorElementLocation = input.idEquationEditorElementLocation;
+    if (this.idEquationEditorElement === "") {
+      this.idEquationEditorElement = "";
+    }
+    /**@type{HTMLElement|null} */
+    this.equationEditorContainer = null;
+    if (input.equationEditorContainer !== undefined) {
+      this.equationEditorContainer = input.equationEditorContainer;
+    }
     this.idEditorComments = input.idEditorComments;
+    if (this.idEditorComments === "") {
+      this.idEditorComments = "";
+    }
     this.problemId = input.problemId;
+    if (this.problemId === "") {
+      this.problemId = "";
+    }
+    this.idPureLatex = input.idPureLatex;
+    /**@type{HTMLElement|null} */
+    this.pureLatexElement = null;
+    if (input.pureLatexElement !== undefined && input.pureLatexElement !== null) {
+      this.pureLatexElement = input.pureLatexElement;
+    }
     /**@type{EquationEditorButtonFactory[]} */
     this.buttonFactories = [];
     this.valueChangeHandler = null;
@@ -248,8 +264,18 @@ class InputPanelData {
         "matrices": true,
       }),
     };
-    this.idPureLatex = input.idPureLatex;
+    /**@type{HTMLElement|null} */
+    this.buttonSubmitHardCoded = input.buttonSubmitHardCoded;
+    if (this.buttonSubmitHardCoded === undefined) {
+      this.buttonSubmitHardCoded = null;
+    }
+    /**@type{string} */
     this.idButtonContainer = input.idButtonContainer;
+    /**@type{HTMLElement|null} */
+    this.buttonContainer = input.buttonContainer;
+    if (this.buttonContainer === undefined || this.buttonContainer === null) {
+      this.buttonContainer = document.getElementById(this.idButtonContainer);
+    }
     this.idButtonSubmit = input.idButtonSubmit;
     this.idButtonInterpret = input.idButtonInterpret;
     this.idButtonAnswer = input.idButtonAnswer;
@@ -269,7 +295,6 @@ class InputPanelData {
     this.htmlSolution = "";
     this.htmlAnswerHighlight = "";
     this.htmlMQFieldEnclosure = "";
-    this.layoutVertical = true;
 
     this.properties = input.properties;
     this.previousAnswers = input.previousAnswers;
@@ -305,6 +330,33 @@ class InputPanelData {
     }
   }
 
+  /**@returns{HTMLElement|null} */
+  getButtonContainer() {
+    if (this.buttonContainer !== null) {
+      return this.buttonContainer;
+    }
+    this.buttonContainer = document.getElementById(this.idButtonContainer);
+    return this.buttonContainer;
+  }
+
+  /**@returns{HTMLElement|null} */
+  getEditorContainer() {
+    if (this.equationEditorContainer !== null && this.equationEditorContainer !== undefined) {
+      return this.equationEditorContainer;
+    }
+    this.equationEditorContainer = document.getElementById(this.idEquationEditorElement);
+    return this.equationEditorContainer;
+  }
+
+  /**@returns{HTMLElement|null} */
+  getPureLatexElement() {
+    if (this.pureLatexElement !== null && this.pureLatexElement !== undefined) {
+      return this.pureLatexElement;
+    }
+    this.pureLatexElement = document.getElementById(this.idPureLatex);
+    return this.pureLatexElement;
+  }
+
   editLaTeX() {
     // useful event handlers	
     this.ignoreNextEditorEvent = true;
@@ -325,140 +377,7 @@ class InputPanelData {
     this.ignoreNextEditorEvent = false;
   }
 
-  submitOrPreviewAnswersCallback(outputComponent, input) {
-    if (typeof outputComponent === "string") {
-      outputComponent = document.getElementById(outputComponent);
-    }
-    let inputParsed = miscellaneous.jsonUnescapeParse(input);
-    let resultHtml = "";
-    if (inputParsed.error !== undefined && inputParsed.error !== null && inputParsed.error !== "") {
-      resultHtml += `<b style = 'color:red'>Error.</b> ${inputParsed.error}`;
-    }
-    if (
-      inputParsed.resultHtml !== "" &&
-      inputParsed.resultHtml !== undefined &&
-      inputParsed.resultHtml !== null
-    ) {
-      if (resultHtml !== "") {
-        resultHtml += "<br>";
-      }
-      resultHtml += inputParsed.resultHtml;
-    }
-    let timeComputation = inputParsed.timeComputation;
-    if (timeComputation !== null && timeComputation !== undefined) {
-      if (resultHtml !== "") {
-        resultHtml += "<br>";
-      }
-      resultHtml += `<br><span style='font-size:x-small;float:right'>Computation time: ${timeComputation} ms</span>`;
-    }
-    resultHtml += answerProcessing.htmlUserFriendlyResultComparisonErrorsOnly(inputParsed);
-    resultHtml += miscellaneous.htmlFromCommentsAndErrors(inputParsed);
-    outputComponent.innerHTML = resultHtml;
-    let spanVerification = document.getElementById(this.idVerificationSpan);
-    let scripts = spanVerification.getElementsByTagName('script');
-    let theHead = document.getElementsByTagName('head')[0];
-    for (let i = 0; i < this.numInsertedJavascriptChildren; i++) {
-      theHead.removeChild(theHead.lastChild);
-    }
-    this.numInsertedJavascriptChildren = 0;
-    for (let i = 0; i < scripts.length; i++) {
-      let scriptChild = document.createElement('script');
-      scriptChild.innerHTML = scripts[i].innerHTML;
-      scriptChild.type = 'text/javascript';
-      theHead.appendChild(scriptChild);
-      this.numInsertedJavascriptChildren++;
-    }
-    this.javascriptInsertionAlreadyCalled = true;
-    typeset.typesetter.typesetSoft(outputComponent, "");
-  }
-
-  submitOrPreviewAnswers(requestQuery) {
-    clearTimeout(this.timerForPreviewAnswers);
-    let studentAnswer = document.getElementById(this.idPureLatex).value;
-    let theURL = "";
-    theURL += `${pathnames.urls.calculatorAPI}?${requestQuery}&`;
-    theURL += `calculatorAnswer${this.idPureLatex}=${encodeURIComponent(studentAnswer)}&`;
-    theURL += `${pathnames.urlFields.problem.fileName}=${this.problemId}&`;
-    submitRequests.submitGET({
-      url: theURL,
-      progress: ids.domElements.spanProgressReportGeneral,
-      callback: this.submitOrPreviewAnswersCallback.bind(this, this.idVerificationSpan),
-    });
-  }
-
-  showSolution() {
-    let theRequest = "";
-    let thePage = window.calculator.mainPage;
-    let currentProblem = thePage.getProblemById(this.problemId);
-    if (!isForRealProblem(currentProblem)) {
-      if (thePage.isLoggedIn()) {
-        theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemSolution}&`;
-      } else {
-        theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemSolutionNoLogin}&`;
-      }
-      theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
-    }
-    this.submitOrPreviewAnswers(theRequest);
-  }
-
-  submitAnswers() {
-    let theRequest = "";
-    let thePage = window.calculator.mainPage;
-    let currentProblem = thePage.getProblemById(this.problemId);
-    if (thePage.isLoggedIn()) {
-      if (isForRealProblem(currentProblem)) {
-        theRequest = `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswers}`;
-      } else {
-        theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercise}&`;
-        theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
-      }
-    } else {
-      theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExerciseNoLogin}&`;
-      theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
-    }
-    this.submitOrPreviewAnswers(theRequest);
-  }
-
-  submitGiveUp() {
-    let thePage = window.calculator.mainPage;
-    let currentProblem = thePage.getProblemById(this.problemId);
-    let theRequest = "";
-    if (thePage.isLoggedIn()) {
-      theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemGiveUp}&`;
-    } else {
-      theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemGiveUpNoLogin}&`;
-    }
-    if (currentProblem.randomSeed === undefined) {
-      throw ("Random seed not supposed to be undefined. ");
-    }
-    theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
-    this.submitOrPreviewAnswers(theRequest);
-  }
-
-  submitPreview() {
-    let thePage = window.calculator.mainPage;
-    let theRequest = "";
-    let currentProblem = thePage.getProblemById(this.problemId);
-    if (thePage.isLoggedIn()) {
-      if (isForRealProblem(currentProblem)) {
-        theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswersPreview}&`;
-      } else {
-        theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercisePreview}&`;
-        theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
-      }
-    } else {
-      theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercisePreviewNoLogin}&`;
-      theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
-    }
-    this.submitOrPreviewAnswers(theRequest);
-  }
-
-  submitPreviewWithTimeOut() {
-    clearTimeout(this.timerForPreviewAnswers);
-    this.timerForPreviewAnswers = setTimeout(this.submitPreview.bind(this), 4000);
-  }
-
-  editMQFunction(
+  editLatexHook(
     /**@type{EquationEditor} */
     editor,
     /**@type{equation_editor.MathNode} */
@@ -470,46 +389,21 @@ class InputPanelData {
     if (this.valueChangeHandler !== null) {
       this.valueChangeHandler(editor.rootNode.toLatex());
     }
-    let latexBox = document.getElementById(this.idPureLatex);
-    if (latexBox === null) {
-      return;
-    }
-    if (this.flagAnswerPanel) {
-      latexBox.value = processMathQuillLatex(this.equationEditor.rootNode.toLatex());
-      this.submitPreviewWithTimeOut();
-      return;
-    }
-    if (this.flagCalculatorPanel) {
-      if (!this.flagCalculatorMQStringIsOK) {
-        return;
-      }
-      let theBoxContent = this.equationEditor.rootNode.toLatex();
-      if (this.calculatorLeftString === null || this.calculatorRightString === null) {
-        this.editorHelpCalculator();
-      }
-      let theInserted = processMathQuillLatex(theBoxContent);
-      if (theInserted.length > 0 && startingCharacterSectionUnderMathQuillEdit.length > 0) {
-        if (theInserted[0] !== ' ') {
-          theInserted = ' ' + theInserted;
-        }
-      }
-      document.getElementById(this.idPureLatex).value = this.calculatorLeftString + theInserted + this.calculatorRightString;
-    }
   }
 
   initialize() {
     if (this.flagInitialized) {
       return;
     }
-    let currentMQspan = document.getElementById(this.idEquationEditorElement);
+    let currentMQspan = this.getEditorContainer();
     let latexInput = null;
     if (!this.flagCalculatorPanel && !this.flagAnswerPanel) {
-      latexInput = document.getElementById(this.idPureLatex);
+      latexInput = this.getPureLatexElement();
     }
     this.equationEditor = new EquationEditor(currentMQspan, new EquationEditorOptions({
       latexInput: latexInput,
       editHandler: (editor, node) => {
-        this.editMQFunction(editor, node);
+        this.editLatexHook(editor, node);
       },
     }));
     let forceShowAll = false;
@@ -548,8 +442,8 @@ class InputPanelData {
     }
     this.flagCalculatorMQStringIsOK = true;
     mqCommentsSpan.innerHTML = "Equation assistant";
-    document.getElementById(this.idEquationEditorElement).style.visibility = "visible";
-    let calculatorInput = document.getElementById(this.idPureLatex);
+    this.getEditorContainer().style.visibility = "visible";
+    let calculatorInput = this.getPureLatexElement();
     this.theLaTeXString = calculatorInput.value.substring(calculatorLeftPosition, calculatorRightPosition + 1);
     this.calculatorLeftString = calculatorInput.value.substring(0, calculatorLeftPosition);
     this.calculatorRightString = calculatorInput.value.substring(calculatorRightPosition + 1);
@@ -557,7 +451,7 @@ class InputPanelData {
 
   getSemiColumnEnclosure() {
     let startPos = this.selectionEnd;
-    let calculatorInput = document.getElementById(this.idPureLatex);
+    let calculatorInput = this.getPureLatexElement();
     for (; startPos > 0 && startPos < calculatorInput.value.length; startPos--) {
       if (isSeparatorCharacter(calculatorInput.value[startPos])) {
         break;
@@ -627,7 +521,7 @@ class InputPanelData {
     if (rightPos - leftPos > 1000) {
       mqProblemSpan.innerHTML = "<span style ='color:red'><b></b></span>"
     }
-    startingCharacterSectionUnderMathQuillEdit = '';
+    let startingCharacterSectionUnderMathQuillEdit = '';
     if (calculatorInput.value[leftPos] === '\n' || calculatorInput.value[leftPos] === ' ' ||
       calculatorInput.value[leftPos] === '\t') {
       startingCharacterSectionUnderMathQuillEdit = calculatorInput.value[leftPos];
@@ -639,7 +533,7 @@ class InputPanelData {
     /**@type {boolean} */
     forceShowAll,
   ) {
-    let currentButtonPanel = document.getElementById(this.idButtonContainer);
+    let currentButtonPanel = this.getButtonContainer();
     let buttonsNonSplit = currentButtonPanel.getAttribute("buttons");
     if (buttonsNonSplit === null) {
       buttonsNonSplit = "";
@@ -807,7 +701,7 @@ class InputPanelData {
     }
     this.computeFlags(forceShowAll);
     this.addButtons(forceShowAll, forceShowNone);
-    let currentButtonPanel = document.getElementById(this.idButtonContainer);
+    let currentButtonPanel = this.getButtonContainer();
     /** @type{HTMLTableElement} */
     let table = document.createElement("TABLE");
     table.style.margin = "auto";
@@ -896,15 +790,6 @@ class InputPanelData {
   }
 }
 
-/**@returns {Boolean} */
-function isForRealProblem(problem) {
-  let isForReal = false;
-  if (problem !== null && problem !== undefined) {
-    isForReal = problem.flagForReal;
-  }
-  return isForReal;
-}
-
 function isSeparatorCharacter(theChar) {
   if (theChar[0] >= 'a' && theChar[0] <= 'z') {
     return false;
@@ -937,4 +822,5 @@ module.exports = {
   initializeAccordionButtons,
   initializeButtons,
   InputPanelData,
+  processMathQuillLatex,
 };

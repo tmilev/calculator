@@ -12,6 +12,7 @@ const processMonitoring = require("./process_monitoring");
 const InputPanelData = require("./initialize_buttons").InputPanelData;
 const storage = require("./storage");
 const autocomplete = require("./autocomplete");
+const initializeButtons = require("./initialize_buttons");
 
 class AtomHandler {
   constructor() {
@@ -204,6 +205,9 @@ class Calculator {
       idPureLatex: ids.domElements.pages.calculator.inputMain,
       idButtonContainer: 'mainInputEditorFieldButtons',
       flagCalculatorPanel: true,
+      valueChangeHandler: () => {
+        this.equationEditorChangeCallback();
+      },
     });
     this.calculatorPanel.initialize();
     document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle).addEventListener(
@@ -477,6 +481,23 @@ class Calculator {
   submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus) {
     let inputParams = this.getQueryStringSubmitStringAsMainInput(theString, requestType);
     this.submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus);
+  }
+
+  equationEditorChangeCallback() {
+    if (!this.calculatorPanel.flagCalculatorMQStringIsOK) {
+      return;
+    }
+    let theBoxContent = this.equationEditor.rootNode.toLatex();
+    if (this.calculatorLeftString === null || this.calculatorRightString === null) {
+      this.editorHelpCalculator();
+    }
+    let theInserted = initializeButtons.processMathQuillLatex(theBoxContent);
+    if (theInserted.length > 0 && startingCharacterSectionUnderMathQuillEdit.length > 0) {
+      if (theInserted[0] !== ' ') {
+        theInserted = ' ' + theInserted;
+      }
+    }
+    latexBox.value = this.calculatorLeftString + theInserted + this.calculatorRightString;
   }
 }
 

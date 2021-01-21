@@ -44,5 +44,7 @@
   "/calculator-html/external/build/output-min.js",
   "/calculator-html/compare_expressions.js",
   "/calculator-html/configuration.js",
-  "/calculator-html/answer_processing.js"
+  "/calculator-html/answer_processing.js",
+  "/calculator-html/hard_coded_problems.js",
+  "/calculator-html/answer_panel.js"
 ]

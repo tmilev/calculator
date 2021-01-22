@@ -2034,13 +2034,13 @@ bool ObjectContainer::checkConsistencyAfterReset() {
     global.fatal << "theSSLieAlgebras expected to be empty, got "
     << this->semisimpleLieAlgebras.size() << " elements. " << global.fatal;
   }
-  if (this->theWeylGroupReps.size != 0) {
+  if (this->weylGroupRepresentations.size != 0) {
     global.fatal << "theWeylGroupReps expected to be empty, got "
-    << this->theWeylGroupReps.size << " elements. " << global.fatal;
+    << this->weylGroupRepresentations.size << " elements. " << global.fatal;
   }
-  if (this->theWeylGroupVirtualReps.size != 0) {
+  if (this->weylGroupVirtualRepresentations.size != 0) {
     global.fatal << "theWeylGroupVirtualReps expected to be empty, got "
-    << this->theWeylGroupVirtualReps.size << " elements. " << global.fatal;
+    << this->weylGroupVirtualRepresentations.size << " elements. " << global.fatal;
   }
   if (this->polynomialsRational.size != 0) {
     global.fatal << "The rational polynomials are expected to be empty, have: " << this->polynomialsRational.size << " elements instead. " << global.fatal;
@@ -2060,8 +2060,8 @@ bool ObjectContainer::checkConsistencyAfterReset() {
 void ObjectContainer::reset() {
   MacroRegisterFunctionWithName("ObjectContainer::reset");
   this->theWeylGroupElements.clear();
-  this->theWeylGroupReps.clear();
-  this->theWeylGroupVirtualReps.clear();
+  this->weylGroupRepresentations.clear();
+  this->weylGroupVirtualRepresentations.clear();
   this->theCategoryOmodules.setSize(0);
   this->semisimpleLieAlgebras.clear();
   this->semisimpleLieAlgebraPointers.clear();
@@ -2084,7 +2084,7 @@ void ObjectContainer::reset() {
   this->expressionNotation.clear();
   this->expressionWithNotation.clear();
   this->constraints.clear();
-  this->theLSpaths.clear();
+  this->lakshmibaiSeshadriPaths.clear();
   this->theMatTensorRats.clear();
   this->theEltsModP.clear();
   this->thePlots.setSize(0);

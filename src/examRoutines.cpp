@@ -826,13 +826,6 @@ std::string SyntacticElementHTML::toStringDebug() const {
     return HtmlRoutines::convertStringToHtmlString(this->toStringTagAndContent(), false);
   }
   std::stringstream out;
-  if (this->isCalculatorCommand() || this->isCalculatorCommandGenerationOnly()) {
-    out << "<b style='color:black'>["
-    << HtmlRoutines::convertStringToHtmlString(
-      this->interpretedCommand, false
-    )
-    << "]</b> ";
-  }
   out << "<span style='color:green'>";
   out << HtmlRoutines::convertStringToHtmlString(this->syntacticRole, false);
   out << "</span>";

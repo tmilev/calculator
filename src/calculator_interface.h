@@ -1024,8 +1024,8 @@ public:
   MapReferences<DynkinType, SemisimpleLieAlgebra> semisimpleLieAlgebras;
   ListReferences<SemisimpleLieAlgebra*> semisimpleLieAlgebraPointers;
   MapReferences<DynkinType, SemisimpleSubalgebras> theSSSubalgebraS;
-  HashedListReferences<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > theWeylGroupReps;
-  HashedListReferences<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > theWeylGroupVirtualReps;
+  HashedListReferences<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > weylGroupRepresentations;
+  HashedListReferences<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > weylGroupVirtualRepresentations;
   ListReferences<ModuleSSalgebra<RationalFunction<Rational> > > theCategoryOmodules;
   ListReferences<SlTwoSubalgebras> theSltwoSAs;
   HashedListReferences<ElementEllipticCurve<ElementZmodP> > ellipticCurveElementsZmodP;
@@ -1049,12 +1049,12 @@ public:
   HashedListReferences<std::string, MathRoutines::hashString> expressionNotation;
   HashedListReferences<Expression> expressionWithNotation;
   HashedListReferences<Expression> constraints;
-  HashedListReferences<LittelmannPath> theLSpaths;
+  HashedListReferences<LittelmannPath> lakshmibaiSeshadriPaths;
   HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
   HashedListReferences<ElementZmodP> theEltsModP;
   HashedListReferences<Weight<Rational> > theWeights;
   HashedListReferences<Weight<Polynomial<Rational> > > theWeightsPoly;
-  ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational > > theHyperoctahedralReps;
+  ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational > > hyperoctahedralRepresentations;
   ListReferences<Plot> thePlots;
   List<bool> userInputBoxSliderDisplayed;
   MapReferences<std::string, InputBox, MathRoutines::hashString> userInputTextBoxesWithValues;

@@ -377,7 +377,7 @@ int Expression::addObjectReturnIndex(const
 GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.theHyperoctahedralReps
+  return this->owner->objectContainer.hyperoctahedralRepresentations
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -590,7 +590,7 @@ int Expression::addObjectReturnIndex(const
 LittelmannPath
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.theLSpaths
+  return this->owner->objectContainer.lakshmibaiSeshadriPaths
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -628,7 +628,7 @@ int Expression::addObjectReturnIndex(const
 GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.theWeylGroupReps
+  return this->owner->objectContainer.weylGroupRepresentations
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -637,7 +637,7 @@ int Expression::addObjectReturnIndex(const
 VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.theWeylGroupVirtualReps
+  return this->owner->objectContainer.weylGroupVirtualRepresentations
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -724,7 +724,7 @@ GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> & Expr
     global.fatal << "Expression not of required type Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->objectContainer.theHyperoctahedralReps[this->getLastChild().data];
+  return this->owner->objectContainer.hyperoctahedralRepresentations[this->getLastChild().data];
 }
 
 template < >
@@ -842,7 +842,7 @@ LittelmannPath& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "LittelmannPath. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->objectContainer.theLSpaths.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.lakshmibaiSeshadriPaths.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -935,7 +935,7 @@ GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::getVal
     global.fatal << "Expression not of required type "
     << "WeylGroupRepresentation_Rational. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->objectContainer.theWeylGroupReps.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.weylGroupRepresentations.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -954,7 +954,7 @@ VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::getV
     << "WeylGroupVirtualRepresentation. The expression equals "
     << this->toString() << "." << global.fatal;
   }
-  return this->owner->objectContainer.theWeylGroupVirtualReps.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.weylGroupVirtualRepresentations.getElement(this->getLastChild().data);
 }
 
 bool Expression::isMatrix(int* outputNumRows, int* outputNumCols) const {

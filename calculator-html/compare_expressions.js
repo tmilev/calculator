@@ -90,8 +90,7 @@ class CompareExpressions {
     this.doCompare();
   }
 
-  doCompare(
-  ) {
+  doCompare() {
     let debug = storage.variables.flagDebug.isTrue();
     submit.submitGET({
       url: pathnames.addresses.compareExpressions(this.givenData, this.desiredData, debug),

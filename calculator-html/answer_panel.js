@@ -9,6 +9,13 @@ const typeset = require("./math_typeset");
 
 class AnswerPanel {
   constructor(
+    /**@type{{
+     * forReal:boolean,
+     * generateInterpretButton:boolean,
+     * mathQuillPanelOptions:string,
+     * dontBootstrapButtons:boolean,
+     * valueChangeHandler:function,
+     * idButtonAnswer:string}}*/
     input,
   ) {
     this.input = input;
@@ -25,6 +32,10 @@ class AnswerPanel {
     this.flagGenerateInterpretButton = true;
     if (input.generateInterpretButton === false) {
       this.flagGenerateInterpretButton = false;
+    }
+    this.flagDontBootstrapButtons = false;
+    if (input.dontBootstrapButtons === true) {
+      this.flagDontBootstrapButtons = true;
     }
     /**@type{boolean} */
     this.layoutVertical = true;
@@ -69,15 +80,22 @@ class AnswerPanel {
     this.input.equationEditorContainer = this.editorSpan;
     this.input.buttonContainer = this.buttonContainerMath;
     this.input.pureLatexElement = this.pureLatexElement;
-    this.input.valueChangeHandler = () => {
-      this.callbackLatexChange();
-    };
+    if (!this.flagDontBootstrapButtons) {
+      this.input.valueChangeHandler = () => {
+        this.callbackLatexChange();
+      };
+    }
     this.panel = new InputPanelData(this.input);
     this.panel.initialize();
   }
 
   createTable() {
-    this.layoutVertical = this.input.properties.layout !== "horizontal";
+    this.layoutVertical = true;
+    if (this.input.properties !== undefined) {
+      if (this.input.properties.layout === "horizontal") {
+        this.layoutVertical = true;
+      }
+    }
     this.onePanelComputeHtmlElements();
     this.table = document.createElement("table");
     if (this.layoutVertical === true) {
@@ -86,7 +104,9 @@ class AnswerPanel {
       row.insertCell().appendChild(this.onePanelQuestionAndAnswerField());
       row.insertCell().appendChild(this.buttonContainerMath);
       row.insertCell().appendChild(this.onePanelButtonsVerticalLayout());
-      row.insertCell().appendChild(this.pureLatexElement);
+      let cell = row.insertCell();
+      cell.appendChild(this.buttonDetails);
+      cell.appendChild(this.pureLatexElement);
     } else {
       let row = this.table.insertRow();
       row.insertCell().appendChild(this.onePanelQuestionAndAnswerField());
@@ -99,13 +119,17 @@ class AnswerPanel {
     if (this.solutionSpan !== null) {
       this.element.appendChild(this.solutionSpan);
     }
+    if (this.flagDontBootstrapButtons) {
+      return;
+    }
     this.pureLatexElement.addEventListener('keyup', () => {
       this.editLaTeX();
     });
-
-    this.buttonInterpret.addEventListener('click', () => {
-      this.submitPreview();
-    });
+    if (this.buttonInterpret !== null) {
+      this.buttonInterpret.addEventListener('click', () => {
+        this.submitPreview();
+      });
+    }
     this.buttonSubmit.addEventListener('click', () => {
       this.submitAnswers();
     });
@@ -128,7 +152,7 @@ class AnswerPanel {
       this.buttonAnswer = null;
       this.htmlButtonSolution = null;
     } else {
-      if (this.input.idButtonAnswer !== undefined && this.input.buttonAnswer !== null) {
+      if (this.input.idButtonAnswer !== undefined && this.input.idButtonAnswer !== null) {
         this.buttonAnswer = document.createElement("button");
         this.buttonAnswer.textContent = "Answer";
         this.buttonAnswer.className = "buttonAnswer";

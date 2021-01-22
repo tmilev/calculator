@@ -159,6 +159,12 @@ class AnswerPanel {
     this.editorEnclosure.className = "calculatorMQfieldEnclosure";
     this.editorSpan = document.createElement("span");
     this.spanAnswerHighlight = document.createElement("span");
+    if (
+      this.input.answerHighlight !== undefined &&
+      this.input.answerHighlight !== null
+    ) {
+      this.spanAnswerHighlight.innerHTML = this.input.answerHighlight;
+    }
     this.editorEnclosure.appendChild(this.editorSpan);
     this.verificationSpan = document.createElement("span");
     if (this.input.previousAnswers !== undefined && this.input.previousAnswers !== "") {

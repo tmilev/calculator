@@ -107,7 +107,7 @@ class AnswerPanel {
       this.submitPreview();
     });
     this.buttonSubmit.addEventListener('click', () => {
-      this.submitPreview();
+      this.submitAnswers();
     });
     if (this.flagForReal !== true && this.buttonAnswer !== null) {
       this.buttonAnswer.addEventListener('click', () => {
@@ -292,42 +292,42 @@ class AnswerPanel {
   }
 
   showSolution() {
-    let theRequest = "";
+    let request = "";
     let thePage = window.calculator.mainPage;
     let currentProblem = thePage.getProblemById(this.problemId);
     if (!this.flagForReal) {
       if (thePage.isLoggedIn()) {
-        theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemSolution}&`;
+        request += `${pathnames.urlFields.request}=${pathnames.urlFields.problemSolution}&`;
       } else {
-        theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemSolutionNoLogin}&`;
+        request += `${pathnames.urlFields.request}=${pathnames.urlFields.problemSolutionNoLogin}&`;
       }
       if (currentProblem.randomSeed !== undefined) {
-        theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
+        request += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
       }
     }
-    this.submitOrPreviewAnswers(theRequest);
+    this.submitOrPreviewAnswers(request);
   }
 
   submitAnswers() {
-    let theRequest = "";
+    let request = "";
     let thePage = window.calculator.mainPage;
     let currentProblem = thePage.getProblemById(this.problemId);
     if (thePage.isLoggedIn()) {
       if (this.flagForReal) {
-        theRequest = `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswers}`;
+        request = `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswers}`;
       } else {
-        theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercise}&`;
+        request += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercise}&`;
         if (currentProblem.randomSeed !== undefined) {
-          theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
+          request += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
         }
       }
     } else {
-      theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExerciseNoLogin}&`;
+      request += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExerciseNoLogin}&`;
       if (currentProblem.randomSeed !== undefined) {
-        theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
+        request += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
       }
     }
-    this.submitOrPreviewAnswers(theRequest);
+    this.submitOrPreviewAnswers(request);
   }
 
   submitGiveUp() {

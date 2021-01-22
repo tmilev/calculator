@@ -117,7 +117,7 @@ class AnswerPanel {
     if (
       this.buttonSolution !== null
     ) {
-      theSolutionButton.addEventListener('click', () => {
+      this.buttonSolution.addEventListener('click', () => {
         this.showSolution();
       });
     }

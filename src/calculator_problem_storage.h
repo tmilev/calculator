@@ -92,7 +92,6 @@ public:
   bool operator!=(const std::string& other) {
     return this->content != other;
   }
-
   static std::string cleanUpCommandString(const std::string& inputCommand);
   static std::string cleanUpEncloseCommand(const std::string& inputCommand);
   std::string commandCleaned() const;

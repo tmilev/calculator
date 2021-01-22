@@ -1531,7 +1531,7 @@ void CalculatorHTML::interpretGenerateStudentAnswerButton(SyntacticElementHTML& 
   std::string answerId = inputOutput.answerIdIfAnswer();
   Answer& answer = this->problemData.answers.values[this->getAnswerIndex(answerId)];
   std::stringstream out;
-  out << "<br><span class='panelAnswer' id='" << answer.idAnswerPanel << "'></span>";
+  out << "<span class='panelAnswer' id='" << answer.idAnswerPanel << "'></span>";
   inputOutput.interpretedCommand = out.str();
 }
 
@@ -2767,7 +2767,7 @@ bool CalculatorHTML::extractOneAnswerId(
   for (unsigned i = 0; i < currentId.size(); i ++) {
     if (!MathRoutines::isALatinLetter(currentId[i])) {
       if (comments != nullptr) {
-        *comments << "Answer id must contain latin letters only.";
+        *comments << "Answer id must contain latin letters only, but was: " << currentId;
       }
       return false;
     }
@@ -3276,12 +3276,14 @@ bool CalculatorHTML::interpretHtmlOneAttemptPartTwo(
       << "You should not be seeing this message a second time. "
       << "<b style='color:red'>If you see this message every "
       << "time you reload the problem "
-      << "this is a bug. Please take a screenshot and send it to your instructor. </b>";
+      << "this is a bug. "
+      << "Please take a screenshot and send it to your instructor. </b>";
     }
     if (shouldResetTheRandomSeed) {
       bool successStoringSeed = this->storeRandomSeedCurrent(&comments);
       if (!successStoringSeed) {
-        global << Logger::red << "This should not happen: failed to store random seed." << Logger::endL
+        global << Logger::red
+        << "This should not happen: failed to store random seed." << Logger::endL
         << Logger::yellow << comments.str() << Logger::endL;
       }
     }

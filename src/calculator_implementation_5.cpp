@@ -1118,7 +1118,7 @@ bool CalculatorFunctionsPlot::plotGrid(Calculator& calculator, const Expression&
   MacroRegisterFunctionWithName("CalculatorFunctions::plotGrid");
   (void) input;
   PlotObject thePlot;
-  thePlot.thePlotType = "axesGrid";
+  thePlot.plotType = "axesGrid";
   thePlot.dimension = 2;
   return output.assignValue(thePlot, calculator);
 }
@@ -1153,7 +1153,7 @@ bool CalculatorFunctionsPlot::plotLabel(
   thePlot.dimension = labelPosition.size;
   thePlot.thePlotString = theLabel;
   thePlot.thePointsDouble.addOnTop(labelPosition);
-  thePlot.thePlotType = "label";
+  thePlot.plotType = "label";
   thePlot.colorJS = "black";
   return output.assignValue(thePlot, calculator);
 }
@@ -1175,7 +1175,7 @@ bool CalculatorFunctionsPlot::plotRectangle(
   }
   PlotObject thePlot;
   thePlot.dimension = 2;
-  thePlot.thePlotType = "pathFilled";
+  thePlot.plotType = "pathFilled";
   Vector<double> currentCorner = theRectangle[0];
   Vector<double>& dimensions = theRectangle[1];
 
@@ -1278,7 +1278,7 @@ bool CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT(
   if (PolynomialFactorizationKronecker::solvePolynomial(
     polynomial,
     solutions,
-    calculator.theObjectContainer.theAlgebraicClosure,
+    calculator.objectContainer.theAlgebraicClosure,
     &calculator.comments
   )) {
     output.makeSequence(calculator);
@@ -1458,7 +1458,7 @@ bool CalculatorFunctions::innerSqrt(
   AlgebraicNumber theNumber;
   if (!theNumber.assignRationalQuadraticRadical(
     rationalValue,
-    calculator.theObjectContainer.theAlgebraicClosure,
+    calculator.objectContainer.theAlgebraicClosure,
     &calculator.comments
   )) {
     return false;
@@ -1571,7 +1571,7 @@ bool CalculatorFunctionsPlot::plotPath(Calculator& calculator, const Expression&
     lineWidthStream << theSegment.lineWidth;
     theSegment.lineWidthJS = lineWidthStream.str();
   }
-  theSegment.thePlotType = "segmentPath";
+  theSegment.plotType = "segmentPath";
   theSegment.dimension = theMat.numberOfColumns;
   theMat.getVectorsFromRows(theSegment.thePointsDouble);
   if (input.size() >= 4) {
@@ -1671,7 +1671,7 @@ bool CalculatorFunctionsPlot::plotSegment(Calculator& calculator, const Expressi
     lineWidthStream << theSegment.lineWidth;
     theSegment.lineWidthJS = lineWidthStream.str();
   }
-  theSegment.thePlotType = "segment";
+  theSegment.plotType = "segment";
   if (leftV.size == 3) {
     theSegment.dimension = 3;
   } else {
@@ -2073,7 +2073,7 @@ bool CalculatorFunctionsPlot::plotSetProjectionScreenBasis(
   Plot resultPlot;
   resultPlot.dimension = 3;
   PlotObject thePlot;
-  thePlot.thePlotType = "setProjectionScreen";
+  thePlot.plotType = "setProjectionScreen";
   thePlot.thePointsDouble.addOnTop(v1);
   thePlot.thePointsDouble.addOnTop(v2);
   resultPlot += thePlot;
@@ -2098,7 +2098,7 @@ bool CalculatorFunctionsPlot::plotCoordinateSystem(Calculator& calculator, const
   resultPlot.dimension = 3;
   PlotObject thePlot;
   thePlot.colorJS = "black";
-  thePlot.thePlotType = "segment";
+  thePlot.plotType = "segment";
   thePlot.thePointsDouble.setSize(2);
   for (int i = 0; i < 3; i ++) {
     thePlot.thePointsDouble[0].makeZero(3);
@@ -2108,7 +2108,7 @@ bool CalculatorFunctionsPlot::plotCoordinateSystem(Calculator& calculator, const
     resultPlot += thePlot;
   }
   PlotObject plotLabels;
-  plotLabels.thePlotType = "label";
+  plotLabels.plotType = "label";
   plotLabels.thePointsDouble.setSize(1);
   plotLabels.colorJS = "blue";
   for (char i = 0; i < 3; i ++) {
@@ -2260,7 +2260,7 @@ bool CalculatorFunctionsPlot::plotSurface(Calculator& calculator, const Expressi
     return calculator << "Could not extract variable ranges, got the var ranges: "
     << thePlot.theVarRangesJS;
   }
-  thePlot.thePlotType = "surface";
+  thePlot.plotType = "surface";
   thePlot.dimension = thePlot.coordinateFunctionsE.size;
   Plot result;
   result += thePlot;

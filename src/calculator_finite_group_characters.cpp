@@ -2287,24 +2287,24 @@ bool CalculatorFunctionsWeylGroup::hyperOctahedralGetOneRepresentation(
   //out << "Left partition is: " << partitionLeft.toString() << ", created from: " << inputLeft;
   //out << "Right partition is: " << partitionRight.toString() << ", created from: " << inputRight;
   int index = 0;
-  for (; index < calculator.theObjectContainer.theHyperOctahedralGroups.size; index ++) {
+  for (; index < calculator.objectContainer.theHyperOctahedralGroups.size; index ++) {
     if (
-      calculator.theObjectContainer.theHyperOctahedralGroups[index].flagIsEntireHyperoctahedralGroup &&
-      calculator.theObjectContainer.theHyperOctahedralGroups[index].N == partitionLeft.n + partitionRight.n
+      calculator.objectContainer.theHyperOctahedralGroups[index].flagIsEntireHyperoctahedralGroup &&
+      calculator.objectContainer.theHyperOctahedralGroups[index].N == partitionLeft.n + partitionRight.n
     ) {
       break;
     }
   }
-  if (index == calculator.theObjectContainer.theHyperOctahedralGroups.size) {
-    calculator.theObjectContainer.theHyperOctahedralGroups.setSize(
-      calculator.theObjectContainer.theHyperOctahedralGroups.size + 1
+  if (index == calculator.objectContainer.theHyperOctahedralGroups.size) {
+    calculator.objectContainer.theHyperOctahedralGroups.setSize(
+      calculator.objectContainer.theHyperOctahedralGroups.size + 1
     );
-    calculator.theObjectContainer.theHyperOctahedralGroups[index].makeHyperoctahedralGroup(
+    calculator.objectContainer.theHyperOctahedralGroups[index].makeHyperoctahedralGroup(
       partitionLeft.n + partitionRight.n
     );
   }
   //<-may be broken if copying of groups doesn't work!!!!!!!!
-  HyperoctahedralGroupData& HD = calculator.theObjectContainer.theHyperOctahedralGroups[index];
+  HyperoctahedralGroupData& HD = calculator.objectContainer.theHyperOctahedralGroups[index];
   GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> R;
   HD.spechtModuleOfPartititons(partitionLeft, partitionRight, R);
   //out << R;

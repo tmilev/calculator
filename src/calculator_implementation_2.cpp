@@ -1249,7 +1249,7 @@ void Calculator::evaluateCommands() {
       << startingExpression.toString(&global.theDefaultFormat.getElement()) << std::endl;
     }
     global.theDefaultFormat.getElement().flagExpressionIsFinal = true;
-    this->theObjectContainer.resetSliders();
+    this->objectContainer.resetSliders();
     out << Logger::consoleNormal() << "Output: " << Logger::consoleGreen()
     << this->programExpression.toString(&global.theDefaultFormat.getElement())
     << Logger::consoleNormal() << std::endl;
@@ -1259,9 +1259,9 @@ void Calculator::evaluateCommands() {
       out << badCharsString << "<hr>";
       this->outputJS[WebAPI::result::badInput] = badCharsString;
     }
-    this->theObjectContainer.resetSliders();
-    this->theObjectContainer.resetPlots();
-    std::string javascriptString = this->theObjectContainer.toStringJavascriptForUserInputBoxes();
+    this->objectContainer.resetSliders();
+    this->objectContainer.resetPlots();
+    std::string javascriptString = this->objectContainer.toStringJavascriptForUserInputBoxes();
     if (javascriptString != "") {
       this->outputJS["javascriptForUserInputBoxes"] = javascriptString;
     }
@@ -1279,7 +1279,7 @@ void Calculator::evaluateCommands() {
       out << badCharsString << "<hr>";
       this->outputJS[WebAPI::result::badInput] = badCharsString;
     }
-    this->theObjectContainer.resetSliders();
+    this->objectContainer.resetSliders();
     out << "<hr>Input:<br> " << startingExpression.toStringFull() << "<hr>"
     << "Output:<br>" << this->programExpression.toStringFull();
     this->outputJS[WebAPI::result::resultLabel]["input"] = startingExpression.toStringFull();
@@ -1288,15 +1288,15 @@ void Calculator::evaluateCommands() {
   this->outputString = out.str();
   this->outputJS[WebAPI::result::resultHtml] = out.str();
   std::stringstream commentsStream;
-  if (this->theObjectContainer.theAlgebraicClosure.latestBasis.size > 1) {
+  if (this->objectContainer.theAlgebraicClosure.latestBasis.size > 1) {
     commentsStream << "<b>Algebraic closure status.</b><br>"
-    << this->theObjectContainer.theAlgebraicClosure.toString();
+    << this->objectContainer.theAlgebraicClosure.toString();
   }
-  if (this->theObjectContainer.constraints.size > 0) {
+  if (this->objectContainer.constraints.size > 0) {
     commentsStream << "<b>Constraints.</b><br>";
-    for (int i = 0; i < this->theObjectContainer.constraints.size; i ++) {
+    for (int i = 0; i < this->objectContainer.constraints.size; i ++) {
       commentsStream
-      << HtmlRoutines::getMathNoDisplay(this->theObjectContainer.constraints[i].toString())
+      << HtmlRoutines::getMathNoDisplay(this->objectContainer.constraints[i].toString())
       << "<br>";
     }
   }

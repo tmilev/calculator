@@ -276,7 +276,7 @@ public:
   std::string topicListFileName;
   HashedList<std::string, MathRoutines::hashString> problemNamesNoTopics;
   TopicElementParser topics;
-  MapList<std::string, std::string, MathRoutines::hashString> theScripts;
+  MapList<std::string, std::string, MathRoutines::hashString> scripts;
   List<std::string> databaseStudentSections;
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;
@@ -307,7 +307,7 @@ public:
     bool parseHTML(std::stringstream* comments);
     bool reduceMore();
     void initBuiltInSpanClasses();
-    std::string toStringParsingStack(List<SyntacticElementHTML>& theStack);
+    std::string toStringParsingStack(List<SyntacticElementHTML>& stack);
     bool isWhiteSpace(const std::string& input);
     bool isSplittingChar(const std::string& input);
     bool isCalculatorTag(const SyntacticElementHTML& input);
@@ -380,14 +380,17 @@ public:
   void computeBodyDebugString();
   std::string toStringInterprettedCommands(Calculator& theInterpreter, List<SyntacticElementHTML>& theElements);
   void logProblemGenerationObsolete(Calculator& interpreter);
-  bool interpretProcessExecutedCommands(
-    Calculator& theInterpreter, List<SyntacticElementHTML>& theElements, std::stringstream& comments
+  bool processExecutedCommands(
+    Calculator& interpreter, List<SyntacticElementHTML>& elements, std::stringstream& comments
+  );
+  bool processOneExecutedCommand(
+    Calculator& interpreter, SyntacticElementHTML& element, std::stringstream& comments
   );
   bool prepareAnswerElements(std::stringstream& comments);
   bool interpretAnswerHighlights(std::stringstream& comments);
   bool interpretAnswerElements(std::stringstream& comments);
   bool interpretOneAnswerElement(SyntacticElementHTML& inputOutput);
-  bool prepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream* comments);
+  bool prepareAndExecuteCommands(Calculator& interpreter, std::stringstream* comments);
   std::string prepareUserInputBoxes();
   bool prepareCommandsAnswerOnGiveUp(Answer& answer, std::stringstream* comments);
   bool prepareCommentsBeforeSubmission(Answer& answer, std::stringstream* comments);

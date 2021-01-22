@@ -175,7 +175,7 @@ SemisimpleLieAlgebra* ExpressionContext::getAmbientSemisimpleLieAlgebra() const 
   if (this->indexAmbientSemisimpleLieAlgebra == - 1) {
     return nullptr;
   }
-  return &this->owner->theObjectContainer.semisimpleLieAlgebras.values[
+  return &this->owner->objectContainer.semisimpleLieAlgebras.values[
     this->indexAmbientSemisimpleLieAlgebra
   ];
 }
@@ -227,7 +227,7 @@ bool ExpressionContext::setAmbientSemisimpleLieAlgebra(
   SemisimpleLieAlgebra& algebra
 ) {
   this->checkInitialization();
-  MapReferences<DynkinType, SemisimpleLieAlgebra>& algebras = this->owner->theObjectContainer.semisimpleLieAlgebras;
+  MapReferences<DynkinType, SemisimpleLieAlgebra>& algebras = this->owner->objectContainer.semisimpleLieAlgebras;
   this->indexAmbientSemisimpleLieAlgebra = algebras.getIndex(
     algebra.theWeyl.theDynkinType
   );
@@ -699,7 +699,7 @@ bool WithContext<Polynomial<AlgebraicNumber> >::extendContext(
   this->context.polynomialSubstitutionNoFailure<AlgebraicNumber>(
     newContext,
     substitution,
-    this->context.owner->theObjectContainer.theAlgebraicClosure.one()
+    this->context.owner->objectContainer.theAlgebraicClosure.one()
   );
   if (!this->content.substitution(substitution, Rational::one())) {
     return false;
@@ -758,7 +758,7 @@ bool WithContext<RationalFunction<AlgebraicNumber> >::extendContext(
 ) {
   MacroRegisterFunctionWithName("WithContext_RationalFunction_AlgebraicNumber::extendContext");
   PolynomialSubstitution<AlgebraicNumber> substitution;
-  AlgebraicClosureRationals& closure = this->context.owner->theObjectContainer.theAlgebraicClosure;
+  AlgebraicClosureRationals& closure = this->context.owner->objectContainer.theAlgebraicClosure;
   this->context.polynomialSubstitutionNoFailure(newContext, substitution, closure.one());
   if (!this->content.substitution(substitution, closure.one(), commentsOnFailure)) {
     // This is not supposed to happen.
@@ -780,7 +780,7 @@ bool WithContext<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >:
   (void) commentsOnFailure;
   PolynomialSubstitution<Rational> substitution;
   this->context.polynomialSubstitutionNoFailure(newContext, substitution, Rational::one());
-  this->content.substitution(substitution, this->context.owner->theObjectContainer.theCategoryOmodules);
+  this->content.substitution(substitution, this->context.owner->objectContainer.theCategoryOmodules);
   this->context = newContext;
   return true;
 }

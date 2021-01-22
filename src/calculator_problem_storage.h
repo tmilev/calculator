@@ -15,6 +15,7 @@ public:
     static std::string calculator;
     static std::string calculatorHidden;
     static std::string calculatorSolution;
+    static std::string calculatorShowToUserOnly;
     static std::string calculatorSolutionStart;
     static std::string calculatorSolutionEnd;
     static std::string calculatorExamProblem;
@@ -40,12 +41,13 @@ public:
   bool flagUseMathSpan;
   std::string interpretedCommand;
   static int parsingDummyElements;
-  bool isInterpretedByCalculatorDuringProblemGeneration() const;
-  bool isInterpretedByCalculatorDuringSubmission();
+  bool isInterpretedByCalculatorOnGeneration() const;
+  bool isInterpretedByCalculatorOnSubmission();
   bool isInterpretedNotByCalculator();
   bool shouldShow() const;
   bool isCalculatorHidden();
-  bool isCalculatorCommand();
+  bool isCalculatorCommand() const;
+  bool isCalculatorCommandGenerationOnly() const;
   bool isAnswerStandard() const;
   bool isAnswerHardCoded() const;
   bool isAnswer() const;

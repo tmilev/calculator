@@ -60,7 +60,7 @@ bool CalculatorConversions::innerLoadWeylGroup(Calculator& calculator, const Exp
   if (!CalculatorConversions::innerDynkinTypE(calculator, input, theType)) {
     return false;
   }
-  SemisimpleLieAlgebra& theSA = calculator.theObjectContainer.getLieAlgebraCreateIfNotPresent(theType);
+  SemisimpleLieAlgebra& theSA = calculator.objectContainer.getLieAlgebraCreateIfNotPresent(theType);
   return output.assignValue(theSA.theWeyl, calculator);
 }
 
@@ -237,8 +237,8 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
     << "You have been warned. Alternatively, you may want to implement a sparse structure constant table "
     << "(write me an email if you want to do that, I will help you). ";
   }
-  bool newlyCreated = !calculator.theObjectContainer.semisimpleLieAlgebras.contains(theDynkinType);
-  outputPointer = &calculator.theObjectContainer.getLieAlgebraCreateIfNotPresent(theDynkinType);
+  bool newlyCreated = !calculator.objectContainer.semisimpleLieAlgebras.contains(theDynkinType);
+  outputPointer = &calculator.objectContainer.getLieAlgebraCreateIfNotPresent(theDynkinType);
   outputPointer->checkConsistency();
   output.assignValue(outputPointer, calculator);
   if (newlyCreated) {
@@ -363,7 +363,7 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
   output.owner = eltE.getOwner();
   DynkinType& theType = output.owner->theWeyl.theDynkinType;
   SemisimpleSubalgebras& ownerSubalgebras =
-  calculator.theObjectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(theType);
+  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(theType);
   output.container = &ownerSubalgebras.theSl2s;
   return true;
 }
@@ -534,7 +534,7 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
   reportStream << "Non embedded Dynkin type: " << DynkinTypeE.toString() << ". ";
   theReport.report(reportStream.str());
   outputSubalgebra.weylNonEmbedded = &
-  calculator.theObjectContainer.getWeylGroupDataCreateIfNotPresent(theNonEmbeddedDynkinType);
+  calculator.objectContainer.getWeylGroupDataCreateIfNotPresent(theNonEmbeddedDynkinType);
   outputSubalgebra.weylNonEmbedded->makeFromDynkinType(theNonEmbeddedDynkinType);
   int theRank = owner.owner->getRank();
   reportStream << "Extracting matrix of Cartan elements. ";
@@ -654,8 +654,8 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   theReport.report(reportStream.str());
 
   SemisimpleSubalgebras& theSAs =
-  calculator.theObjectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSemisimple->theWeyl.theDynkinType);
-  theSAs.theSubalgebrasNonEmbedded = &calculator.theObjectContainer.semisimpleLieAlgebras;
+  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSemisimple->theWeyl.theDynkinType);
+  theSAs.theSubalgebrasNonEmbedded = &calculator.objectContainer.semisimpleLieAlgebras;
   theSAs.owner = ownerSemisimple;
   reportStream << " Initializing data structures... ";
   theReport.report(reportStream.str());

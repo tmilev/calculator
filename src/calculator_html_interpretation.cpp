@@ -105,7 +105,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
     return result;
   }
-  if (!problem.interpretProcessExecutedCommands(interpreter, answer.solutionElements, out)) {
+  if (!problem.processExecutedCommands(interpreter, answer.solutionElements, out)) {
     result[WebAPI::result::resultHtml] = out.str();
     result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
     return result;
@@ -206,7 +206,7 @@ std::string WebAPIResponse::getCommentsInterpretation(
   std::stringstream out;
   theFormat.flagExpressionIsFinal = true;
   theFormat.flagIncludeExtraHtmlDescriptionsInPlots = false;
-  interpreterWithAdvice.theObjectContainer.resetPlots();
+  interpreterWithAdvice.objectContainer.resetPlots();
   if (indexShift >= interpreterWithAdvice.programExpression.size()) {
     return "";
   }
@@ -870,10 +870,10 @@ JSData WebAPIResponse::getExamPageJSON() {
     output["answers"] = theFile.getEditorBoxesHTML();
     JSData theScripts;
     theScripts = JSData::token::tokenArray;
-    theScripts.listObjects.setSize(theFile.theScripts.size());
-    for (int i = 0; i < theFile.theScripts.size(); i ++) {
-      theScripts[theFile.theScripts.keys[i]] =
-      HtmlRoutines::convertStringToURLString(theFile.theScripts.values[i], false);
+    theScripts.listObjects.setSize(theFile.scripts.size());
+    for (int i = 0; i < theFile.scripts.size(); i ++) {
+      theScripts[theFile.scripts.keys[i]] =
+      HtmlRoutines::convertStringToURLString(theFile.scripts.values[i], false);
     }
     output["scripts"] = theScripts;
     output["forReal"] = theFile.flagIsForReal;

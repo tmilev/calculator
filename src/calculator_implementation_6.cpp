@@ -812,7 +812,7 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   for (int i = 0; i < thePlotObj.variablesInPlay.size; i ++) {
     thePlotObj.variablesInPlayJS[i] = thePlotObj.variablesInPlay[i].toString();
   }
-  thePlotObj.thePlotType = "plotDirectionField";
+  thePlotObj.plotType = "plotDirectionField";
   if (
     !input[4].isSequenceNElements(2) &&
     !input[4].startsWith(calculator.opIntervalOpen(), 3)
@@ -1425,7 +1425,7 @@ bool CalculatorFunctionsTrigonometry::arccosAlgebraic(Calculator& calculator, co
   if (argumentE.isOfType<AlgebraicNumber>(&argument)) {
     candidate.assignRationalQuadraticRadical(
       Rational(1, 2),
-      calculator.theObjectContainer.theAlgebraicClosure,
+      calculator.objectContainer.theAlgebraicClosure,
       nullptr
     );
     if (candidate == argument) {
@@ -1442,7 +1442,7 @@ bool CalculatorFunctionsTrigonometry::arccosAlgebraic(Calculator& calculator, co
     }
     candidate.assignRationalQuadraticRadical(
       Rational(3, 4),
-      calculator.theObjectContainer.theAlgebraicClosure,
+      calculator.objectContainer.theAlgebraicClosure,
       nullptr
     );
     if (candidate == argument) {
@@ -1499,7 +1499,7 @@ bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
   if (argumentE.isOfType<AlgebraicNumber>(&argument)) {
     candidate.assignRationalQuadraticRadical(
       Rational(1, 2),
-      calculator.theObjectContainer.theAlgebraicClosure,
+      calculator.objectContainer.theAlgebraicClosure,
       nullptr
     );
     if (candidate == argument) {
@@ -1515,7 +1515,7 @@ bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
     }
     candidate.assignRationalQuadraticRadical(
       Rational(3, 4),
-      calculator.theObjectContainer.theAlgebraicClosure,
+      calculator.objectContainer.theAlgebraicClosure,
       nullptr
     );
     if (candidate == argument) {
@@ -2750,7 +2750,7 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
         ListReferences<SlTwoSubalgebras> sl2Conainer;
         if (!theSubalgebras.computeStructureWriteFiles(
           theAlgebra,
-          calculator.theObjectContainer.theAlgebraicClosure,
+          calculator.objectContainer.theAlgebraicClosure,
           subalgebrasContainer,
           sl2Conainer,
           nullptr,

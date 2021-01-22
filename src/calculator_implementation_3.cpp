@@ -295,8 +295,8 @@ void Calculator::makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output) {
   DynkinType b3Type, g2Type;
   b3Type.makeSimpleType('B', 3);
   g2Type.makeSimpleType('G', 2);
-  output.domainAlg = &this->theObjectContainer.getLieAlgebraCreateIfNotPresent(g2Type);
-  output.rangeAlg = &this->theObjectContainer.getLieAlgebraCreateIfNotPresent(b3Type);
+  output.domainAlg = &this->objectContainer.getLieAlgebraCreateIfNotPresent(g2Type);
+  output.rangeAlg = &this->objectContainer.getLieAlgebraCreateIfNotPresent(b3Type);
 
   output.theRange().computeChevalleyConstants();
   output.theDomain().computeChevalleyConstants();

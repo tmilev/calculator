@@ -1481,7 +1481,7 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
     quotientExpression.assignWithContext(quotientWithContext, calculator);
     Expression quotientNotZero;
     quotientNotZero.makeXOX(calculator, calculator.opNotEqual(), quotientExpression, calculator.expressionZero());
-    calculator.theObjectContainer.constraints.addOnTop(quotientNotZero);
+    calculator.objectContainer.constraints.addOnTop(quotientNotZero);
   }
   return true;
 }

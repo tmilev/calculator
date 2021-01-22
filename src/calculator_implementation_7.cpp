@@ -911,7 +911,7 @@ bool CalculatorFunctionsTrigonometry::sin(Calculator& calculator, const Expressi
       if (argument[1].isOfType<Rational>(&piProportion)) {
         AlgebraicNumber algOutput;
         Rational ratOutput;
-        if (algOutput.assignSinRationalTimesPi(piProportion, calculator.theObjectContainer.theAlgebraicClosure)) {
+        if (algOutput.assignSinRationalTimesPi(piProportion, calculator.objectContainer.theAlgebraicClosure)) {
           if (algOutput.isRational(&ratOutput)) {
             return output.assignValue(ratOutput, calculator);
           }
@@ -948,7 +948,7 @@ bool CalculatorFunctionsTrigonometry::cos(Calculator& calculator, const Expressi
       if (argument[1].isOfType<Rational>(&piProportion)) {
         AlgebraicNumber algOutput;
         Rational ratOutput;
-        if (algOutput.assignCosRationalTimesPi(piProportion, calculator.theObjectContainer.theAlgebraicClosure)) {
+        if (algOutput.assignCosRationalTimesPi(piProportion, calculator.objectContainer.theAlgebraicClosure)) {
           if (algOutput.isRational(&ratOutput)) {
             return output.assignValue(ratOutput, calculator);
           }
@@ -1213,7 +1213,7 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   system.groebner.maximumPolynomialComputations = upperLimit;
   system.maximumSerreSystemComputationsPreferred = upperLimit;
   system.groebner.polynomialOrder.monomialOrder = MonomialP::orderDefault();
-  system.theAlgebraicClosure = &calculator.theObjectContainer.theAlgebraicClosure;
+  system.theAlgebraicClosure = &calculator.objectContainer.theAlgebraicClosure;
   system.flagTryDirectlySolutionOverAlgebraicClosure = startWithAlgebraicClosure;
   global.theDefaultFormat.getElement() = system.groebner.theFormat;
   system.flagUseTheMonomialBranchingOptimization = true;
@@ -1267,7 +1267,7 @@ bool CalculatorFunctionsAlgebraic::printAlgebraicClosureStatus(
   theFormat.flagUseHTML = false;
   theFormat.flagUseLatex = true;
   return output.assignValue(
-    calculator.theObjectContainer.theAlgebraicClosure.toStringFull(&theFormat),
+    calculator.objectContainer.theAlgebraicClosure.toStringFull(&theFormat),
     calculator
   );
 }
@@ -1298,7 +1298,7 @@ bool CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinPoly(
   std::stringstream commentsOnFailure;
   if (!theAN.constructFromMinimalPolynomial(
     polynomial.content,
-    calculator.theObjectContainer.theAlgebraicClosure,
+    calculator.objectContainer.theAlgebraicClosure,
     &commentsOnFailure
   )) {
     return calculator << "Failed to construct minimal polynomial. " << commentsOnFailure.str();
@@ -1936,7 +1936,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     AlgebraicNumber theDiscriminantSqrt;
     if (!theDiscriminantSqrt.assignRationalQuadraticRadical(
       theDiscriminant,
-      this->owner->theObjectContainer.theAlgebraicClosure,
+      this->owner->objectContainer.theAlgebraicClosure,
       &this->printoutPFsHtml
     )) {
       this->printoutPFsHtml
@@ -2001,7 +2001,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     for (int k = 0; k < theDenominatorFactorsWithMults.coefficients[i]; k ++) {
       this->theNumerators[i][k].substitution(
         substitution,
-        this->owner->theObjectContainer.theAlgebraicClosure.one()
+        this->owner->objectContainer.theAlgebraicClosure.one()
       );
     }
   }
@@ -5867,12 +5867,12 @@ bool CalculatorFunctionsPlot::plotFill(Calculator& calculator, const Expression&
     theFilledPlot.thePointsDouble.addListOnTop(startPlot.thePlots[i].thePointsDouble);
   }
   theFilledPlot.fillStyle = "filled";
-  theFilledPlot.thePlotType = "plotFillStart";
+  theFilledPlot.plotType = "plotFillStart";
   outputPlot.desiredHtmlHeightInPixels = startPlot.desiredHtmlHeightInPixels;
   outputPlot.desiredHtmlWidthInPixels = startPlot.desiredHtmlWidthInPixels;
   outputPlot.thePlots.addOnTop(theFilledPlot);
   outputPlot += startPlot;
-  theFilledPlot.thePlotType = "plotFillFinish";
+  theFilledPlot.plotType = "plotFillFinish";
   outputPlot.thePlots.addOnTop(theFilledPlot);
   return output.assignValue(outputPlot, calculator);
 }
@@ -6001,14 +6001,14 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
   thePlotObj.variablesInPlayJS[0] = thePlotObj.variablesInPlay[0].toString();
   std::string theVarString = thePlotObj.variablesInPlayJS[0];
   Expression jsConverterE;
-  thePlotObj.thePlotType = "plotFunction";
+  thePlotObj.plotType = "plotFunction";
   if (CalculatorFunctions::functionMakeJavascriptExpression(
     calculator, thePlotObj.coordinateFunctionsE[0], jsConverterE
   )) {
     thePlotObj.coordinateFunctionsJS[0] = jsConverterE.toString();
     thePlotObj.coordinateFunctionsE[0].hasInputBoxVariables(&thePlot.boxesThatUpdateMe);
   } else {
-    thePlotObj.thePlotType = "plotFunctionPrecomputed";
+    thePlotObj.plotType = "plotFunctionPrecomputed";
   }
   if (CalculatorFunctions::functionMakeJavascriptExpression(
     calculator, thePlotObj.leftPtE, jsConverterE
@@ -6016,7 +6016,7 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
     thePlotObj.leftPtJS = jsConverterE.toString();
     thePlotObj.leftPtE.hasInputBoxVariables(&thePlot.boxesThatUpdateMe);
   } else {
-    thePlotObj.thePlotType = "plotFunctionPrecomputed";
+    thePlotObj.plotType = "plotFunctionPrecomputed";
   }
   if (CalculatorFunctions::functionMakeJavascriptExpression(
     calculator, thePlotObj.rightPtE, jsConverterE
@@ -6024,7 +6024,7 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
     thePlotObj.rightPtJS = jsConverterE.toString();
     thePlotObj.rightPtE.hasInputBoxVariables(&thePlot.boxesThatUpdateMe);
   } else {
-    thePlotObj.thePlotType = "plotFunctionPrecomputed";
+    thePlotObj.plotType = "plotFunctionPrecomputed";
   }
   thePlotObj.numSegmenTsJS.setSize(1);
   thePlotObj.numSegmenTsJS[0] = "200";
@@ -6034,7 +6034,7 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
     thePlotObj.numSegmenTsJS[0] = jsConverterE.toString();
     thePlotObj.numSegmentsE.hasInputBoxVariables(&thePlot.boxesThatUpdateMe);
   } else {
-    thePlotObj.thePlotType = "plotFunctionPrecomputed";
+    thePlotObj.plotType = "plotFunctionPrecomputed";
   }
   Vectors<double>& thePointsDouble = thePlotObj.thePointsDouble;
   if (thePlot.boxesThatUpdateMe.size == 0) {
@@ -6120,7 +6120,7 @@ bool CalculatorFunctionsPlot::plotPoint(Calculator& calculator, const Expression
     DrawingVariables::getColorIntFromColorString(input[2].getValue<std::string>(), thePlot.colorRGB);
   }
   thePlot.colorJS = input[2].toString();
-  thePlot.thePlotType = "points";
+  thePlot.plotType = "points";
   theFinalPlot.thePlots.addOnTop(thePlot);
   theFinalPlot.desiredHtmlHeightInPixels = 100;
   theFinalPlot.desiredHtmlWidthInPixels = 100;
@@ -6486,7 +6486,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     thePlot.thePlotStringWithHtml = outHtml.str();
   }
   Expression converterE;
-  thePlot.thePlotType = "parametricCurve";
+  thePlot.plotType = "parametricCurve";
   thePlot.coordinateFunctionsJS.setSize(thePlot.dimension);
   for (int i = 0; i < thePlot.dimension; i ++) {
     if (CalculatorFunctions::functionMakeJavascriptExpression(
@@ -6496,7 +6496,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     )) {
       thePlot.coordinateFunctionsJS[i] = converterE.toString();
     } else {
-      thePlot.thePlotType = "parametricCurvePrecomputed";
+      thePlot.plotType = "parametricCurvePrecomputed";
       calculator << "Failed to convert: "
       << thePlot.coordinateFunctionsE[i] << " to js. ";
     }
@@ -6508,7 +6508,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   )) {
     thePlot.numSegmenTsJS[0] = converterE.toString();
   } else {
-    thePlot.thePlotType = "parametricCurvePrecomputMakeBoxed";
+    thePlot.plotType = "parametricCurvePrecomputMakeBoxed";
     calculator << "Failed to convert: "
     << thePlot.numSegmentsE << " to js. ";
   }
@@ -6517,7 +6517,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   )) {
     thePlot.paramLowJS = converterE.toString();
   } else {
-    thePlot.thePlotType = "parametricCurvePrecomputed";
+    thePlot.plotType = "parametricCurvePrecomputed";
     calculator << "Failed to convert: " << thePlot.paramLowE << " to js. ";
   }
   if (CalculatorFunctions::functionMakeJavascriptExpression(
@@ -6525,7 +6525,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   )) {
     thePlot.paramHighJS = converterE.toString();
   } else {
-    thePlot.thePlotType = "parametricCurvePrecomputed";
+    thePlot.plotType = "parametricCurvePrecomputed";
     calculator << "Failed to convert: " << thePlot.paramHighE << " to js. ";
   }
   if (thePlot.dimension == 2) {
@@ -6620,7 +6620,7 @@ bool CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calcula
     out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
   }
   SemisimpleSubalgebras& theSSsubalgebras =
-  calculator.theObjectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
+  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
   theSSsubalgebras.ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
 
   out << "Attempting to embed "
@@ -6628,9 +6628,9 @@ bool CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calcula
   << " in " << ownerSS.toStringLieAlgebraName();
   theSSsubalgebras.findTheSemisimpleSubalgebrasFromScratch(
     ownerSS,
-    calculator.theObjectContainer.theAlgebraicClosure,
-    calculator.theObjectContainer.semisimpleLieAlgebras,
-    calculator.theObjectContainer.theSltwoSAs,
+    calculator.objectContainer.theAlgebraicClosure,
+    calculator.objectContainer.semisimpleLieAlgebras,
+    calculator.objectContainer.theSltwoSAs,
     &smallSubalgebraPointer.content->theWeyl.theDynkinType
   );
   return output.assignValue(theSSsubalgebras, calculator);
@@ -6807,7 +6807,7 @@ bool CalculatorFunctions::innerHighestWeightTransposeAntiAutomorphismBilinearFor
   if (algebraIndex == - 1) {
     return output.makeError("I couldn't extract a Lie algebra to compute hwtaabf.", calculator);
   }
-  SemisimpleLieAlgebra& constSSalg = calculator.theObjectContainer.semisimpleLieAlgebras.values[algebraIndex];
+  SemisimpleLieAlgebra& constSSalg = calculator.objectContainer.semisimpleLieAlgebras.values[algebraIndex];
   const Expression& weightExpression = input[3];
   Vector<RationalFunction<Rational> > weight;
   if (!calculator.getVector<RationalFunction<Rational> >(
@@ -7972,7 +7972,7 @@ public:
       }
       if (this->displayedExpressionStrings[i] != "") {
         PlotObject theText;
-        theText.thePlotType = "label";
+        theText.plotType = "label";
         theText.thePointsDouble.addOnTop(this->nodePositionsDouble[i]);
         theText.colorJS =
         this->displayedStringIsLeaf[i] ? "red" : "gray";
@@ -7982,7 +7982,7 @@ public:
         thePlot += theText;
       } else {
         PlotObject thePoint;
-        thePoint.thePlotType = "point";
+        thePoint.plotType = "point";
         thePoint.colorJS = "blue";
         thePoint.thePointsDouble.addOnTop(this->nodePositionsDouble[i]);
         this->thePlot += thePoint;
@@ -8016,7 +8016,7 @@ bool CalculatorFunctions::setRandomSeed(
     return calculator << "Failed to extract integer random seed. ";
   }
   std::stringstream out;
-  calculator.theObjectContainer.pseudoRandom.setRandomSeedLarge(seedOriginal, &out);
+  calculator.objectContainer.pseudoRandom.setRandomSeedLarge(seedOriginal, &out);
   return output.assignValue(out.str(), calculator);
 }
 
@@ -8253,7 +8253,7 @@ bool CalculatorFunctions::randomInteger(
     global.fatal << "This shouldn't happen: accum should not be zero at this point. " << global.fatal;
   }
   int generatedRandomInt = static_cast<signed>(
-    calculator.theObjectContainer.pseudoRandom.getRandomNonNegativeLessThanMaximumSeed()
+    calculator.objectContainer.pseudoRandom.getRandomNonNegativeLessThanMaximumSeed()
   );
   generatedRandomInt %= accum;
   int resultRandomValue = theIntervals[0][0];
@@ -8299,7 +8299,7 @@ bool CalculatorFunctions::selectAtRandom(
     return true;
   }
   int randomIndex = static_cast<signed>(
-    (calculator.theObjectContainer.pseudoRandom.getRandomNonNegativeLessThanMaximumSeed()
+    (calculator.objectContainer.pseudoRandom.getRandomNonNegativeLessThanMaximumSeed()
   )) % (input.size() - 1)  + 1;
   if (randomIndex < 0 || randomIndex > input.size() - 1) {
     randomIndex = input.size() - 1;

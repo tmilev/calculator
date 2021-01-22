@@ -118,7 +118,7 @@ void Calculator::reset() {
 
   this->maximumLatexChars = 2000;
   this->numEmptyTokensStart = 9;
-  this->theObjectContainer.reset();
+  this->objectContainer.reset();
   this->controlSequences.clear();
 
   //this->logEvaluationSteps.setSize(0);

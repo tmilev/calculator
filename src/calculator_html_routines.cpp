@@ -17,8 +17,8 @@ bool CalculatorHtmlFunctions::userInputBox(
     return calculator << "User input name not specified in: " << input.toString();
   }
   std::string boxName = CalculatorHtmlFunctions::getUserInputBoxName(input);
-  if (calculator.theObjectContainer.theUserInputTextBoxesWithValues.contains(boxName)) {
-    return output.assignValue(calculator.theObjectContainer.theUserInputTextBoxesWithValues.getValueCreate(boxName), calculator);
+  if (calculator.objectContainer.userInputTextBoxesWithValues.contains(boxName)) {
+    return output.assignValue(calculator.objectContainer.userInputTextBoxesWithValues.getValueCreate(boxName), calculator);
   }
   InputBox newBox;
   newBox.name = boxName;
@@ -100,11 +100,11 @@ bool CalculatorHtmlFunctions::setInputBox(
     return calculator << "Input box value not specified in: " << input.toString();
   }
   std::string boxName = CalculatorHtmlFunctions::getUserInputBoxName(input);
-  if (calculator.theObjectContainer.theUserInputTextBoxesWithValues.contains(boxName)) {
+  if (calculator.objectContainer.userInputTextBoxesWithValues.contains(boxName)) {
     return calculator << "Input box with name: " << boxName << " already has value.";
   }
   InputBox& theBox =
-  calculator.theObjectContainer.theUserInputTextBoxesWithValues.getValueCreate(boxName);
+  calculator.objectContainer.userInputTextBoxesWithValues.getValueCreate(boxName);
   theBox.name = boxName;
   theBox.value = theArguments.getValueCreate("value");
   std::stringstream out;

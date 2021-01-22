@@ -268,7 +268,7 @@ bool CalculatorLieTheory::highestWeightVectorCommon(
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFunction<Rational> > theElt;
   //= theElementData.theElementTensorGenVermas.getElement();
-  ListReferences<ModuleSSalgebra<RationalFunction<Rational> > >& theMods = calculator.theObjectContainer.theCategoryOmodules;
+  ListReferences<ModuleSSalgebra<RationalFunction<Rational> > >& theMods = calculator.objectContainer.theCategoryOmodules;
   int indexOfModule = - 1;
 
   for (int i = 0; i < theMods.size; i ++) {
@@ -368,9 +368,9 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
   Vector<Rational> splittingParSel;
   splittingParSel = theG2B3Data.SelSplittingParSel;
 
-  calculator.theObjectContainer.theCategoryOmodules.addNoRepetitionOrReturnIndexFirst(theModCopy);
-  int theModIndex = calculator.theObjectContainer.theCategoryOmodules.getIndex(theModCopy);
-  ModuleSSalgebra<RationalFunction<Rational> >& theMod = calculator.theObjectContainer.theCategoryOmodules[theModIndex];
+  calculator.objectContainer.theCategoryOmodules.addNoRepetitionOrReturnIndexFirst(theModCopy);
+  int theModIndex = calculator.objectContainer.theCategoryOmodules.getIndex(theModCopy);
+  ModuleSSalgebra<RationalFunction<Rational> >& theMod = calculator.objectContainer.theCategoryOmodules[theModIndex];
   theMod.getOwner().flagHasNilradicalOrder = true;
   std::stringstream out;
   calculator << "<hr>Time elapsed before making B3 irrep: " << global.getElapsedSeconds();
@@ -551,7 +551,7 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(Calculator& calculator, con
   for (int i = 0; i < theRanks.size; i ++) {
     currentType.makeSimpleType(theWeylLetters[i], theRanks[i]);
     SemisimpleLieAlgebra& currentAlg =
-    calculator.theObjectContainer.getLieAlgebraCreateIfNotPresent(currentType);
+    calculator.objectContainer.getLieAlgebraCreateIfNotPresent(currentType);
     currentAlg.computeChevalleyConstants();
     currentAlg.theWeyl.getHighestWeightsAllRepresentationsDimensionLessThanOrEqualTo(theHighestWeights[i], dimBound);
     latexReport << "\\hline\\multicolumn{5}{c}{" << "$" << currentAlg.toStringLieAlgebraName() << "$}\\\\\\hline\n\n"
@@ -2316,9 +2316,9 @@ bool CalculatorLieTheory::growDynkinType(
   SemisimpleSubalgebras tempSas;
   tempSas.initHookUpPointers(
     *theSSalg.content,
-    &calculator.theObjectContainer.theAlgebraicClosure,
-    &calculator.theObjectContainer.semisimpleLieAlgebras,
-    &calculator.theObjectContainer.theSltwoSAs
+    &calculator.objectContainer.theAlgebraicClosure,
+    &calculator.objectContainer.semisimpleLieAlgebras,
+    &calculator.objectContainer.theSltwoSAs
   );
   tempSas.computeSl2sInitOrbitsForComputationOnDemand();
   if (!tempSas.ranksAndIndicesFit(theSmallDynkinType)) {
@@ -2393,14 +2393,14 @@ bool CalculatorLieTheory::computeSemisimpleSubalgebras(
     out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
   }
   SemisimpleSubalgebras& theSSsubalgebras =
-  calculator.theObjectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
+  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
   theSSsubalgebras.flagcomputePairingTable = false;
   theSSsubalgebras.flagComputeNilradicals = false;
   theSSsubalgebras.findTheSemisimpleSubalgebrasFromScratch(
     ownerSS,
-    calculator.theObjectContainer.theAlgebraicClosure,
-    calculator.theObjectContainer.semisimpleLieAlgebras,
-    calculator.theObjectContainer.theSltwoSAs,
+    calculator.objectContainer.theAlgebraicClosure,
+    calculator.objectContainer.semisimpleLieAlgebras,
+    calculator.objectContainer.theSltwoSAs,
     nullptr
   );
   return output.assignValue(theSSsubalgebras, calculator);
@@ -2996,12 +2996,12 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
   global.relativePhysicalNameOptionalProgressReport = "progress_subalgebras_" + dynkinString;
   global.relativePhysicalNameOptionalResult = "result_subalgebras_" + dynkinString;
   SemisimpleSubalgebras& theSubalgebras =
-  calculator.theObjectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerLieAlgebra.theWeyl.theDynkinType);
+  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerLieAlgebra.theWeyl.theDynkinType);
   theSubalgebras.computeStructureWriteFiles(
     ownerLieAlgebra,
-    calculator.theObjectContainer.theAlgebraicClosure,
-    calculator.theObjectContainer.semisimpleLieAlgebras,
-    calculator.theObjectContainer.theSltwoSAs,
+    calculator.objectContainer.theAlgebraicClosure,
+    calculator.objectContainer.semisimpleLieAlgebras,
+    calculator.objectContainer.theSltwoSAs,
     &out,
     doForceRecompute,
     !isAlreadySubalgebrasObject,
@@ -3113,7 +3113,7 @@ bool CalculatorLieTheory::chevalleyGenerator(
   ElementUniversalEnveloping<RationalFunction<Rational> > theUE;
   theUE.assignElementLieAlgebra(theElt, *theSSalg.content);
   ExpressionContext context(calculator);
-  int indexInOwner = calculator.theObjectContainer.semisimpleLieAlgebras.getIndex(
+  int indexInOwner = calculator.objectContainer.semisimpleLieAlgebras.getIndex(
     theSSalg.content->theWeyl.theDynkinType
   );
   context.setIndexAmbientSemisimpleLieAlgebra(indexInOwner);
@@ -3153,7 +3153,7 @@ bool CalculatorLieTheory::cartanGenerator(Calculator& calculator, const Expressi
   ElementUniversalEnveloping<RationalFunction<Rational> > theUE;
   theUE.assignElementLieAlgebra(theElt, *theSSalg.content);
   ExpressionContext theContext(calculator);
-  int theAlgIndex = calculator.theObjectContainer.semisimpleLieAlgebras.getIndex(theSSalg.content->theWeyl.theDynkinType);
+  int theAlgIndex = calculator.objectContainer.semisimpleLieAlgebras.getIndex(theSSalg.content->theWeyl.theDynkinType);
   theContext.setIndexAmbientSemisimpleLieAlgebra(theAlgIndex);
   return output.assignValueWithContext(theUE, theContext, calculator);
 }

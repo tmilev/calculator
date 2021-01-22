@@ -193,7 +193,7 @@ bool Calculator::checkConsistencyAfterInitialization() {
     << this->evaluatedExpressionsStack.size
     << " elements. " << global.fatal;
   }
-  return this->theObjectContainer.checkConsistencyAfterReset();
+  return this->objectContainer.checkConsistencyAfterReset();
 }
 
 bool Expression::checkInitializationRecursively() const {
@@ -475,8 +475,8 @@ bool CalculatorBasics::standardIsDenotedBy(Calculator& calculator, const Express
   const Expression& theNotation = input[1];
   calculator << "<br>Registering notation: globally, " << withNotation.toString() << " will be denoted by "
   << theNotation.toString();
-  calculator.theObjectContainer.expressionNotation.addOnTop(theNotation.toString());
-  calculator.theObjectContainer.expressionWithNotation.addOnTop(withNotation);
+  calculator.objectContainer.expressionNotation.addOnTop(theNotation.toString());
+  calculator.objectContainer.expressionWithNotation.addOnTop(withNotation);
   output = input;
   output.setChildAtomValue(0, calculator.opDefine());
   ////
@@ -1211,7 +1211,7 @@ SemisimpleLieAlgebra* Expression::getAmbientSemisimpleLieAlgebraNonConstUseWithC
   if (indexSSalg == - 1) {
     return nullptr;
   }
-  return &this->owner->theObjectContainer.semisimpleLieAlgebras.values[indexSSalg];
+  return &this->owner->objectContainer.semisimpleLieAlgebras.values[indexSSalg];
 }
 
 Function& Calculator::getFunctionHandlerFromNamedRule(const std::string& inputNamedRule) {
@@ -1848,7 +1848,7 @@ std::string Calculator::toString() {
   << "<br><b>Object container information</b>. "
   << "The object container is the data "
   << "structure storing all c++ built-in data types "
-  << "requested by the user<br> " << this->theObjectContainer.toString();
+  << "requested by the user<br> " << this->objectContainer.toString();
   out << "<hr>Control sequences (" << this->controlSequences.size
   << " total):\n<br>\n";
   for (int i = 0; i < this->controlSequences.size; i ++) {
@@ -1993,17 +1993,17 @@ std::string ObjectContainer::toStringJavascriptForUserInputBoxes() {
   std::stringstream out;
   out << "<script>\n";
   out << "window.calculator.calculator.inputBoxNames = [";
-  for (int i = 0; i < this->theUserInputTextBoxesWithValues.size(); i ++) {
-    InputBox& currentBox = this->theUserInputTextBoxesWithValues.values[i];
+  for (int i = 0; i < this->userInputTextBoxesWithValues.size(); i ++) {
+    InputBox& currentBox = this->userInputTextBoxesWithValues.values[i];
     out << "'" << currentBox.name << "'";
-    if (i != this->theUserInputTextBoxesWithValues.size() - 1) {
+    if (i != this->userInputTextBoxesWithValues.size() - 1) {
       out << ", ";
     }
   }
   out << "];\n";
   out << "window.calculator.calculator.inputBoxToSliderUpdaters = {};";
-  for (int i = 0; i < this->theUserInputTextBoxesWithValues.size(); i ++) {
-    InputBox& currentBox = this->theUserInputTextBoxesWithValues.values[i];
+  for (int i = 0; i < this->userInputTextBoxesWithValues.size(); i ++) {
+    InputBox& currentBox = this->userInputTextBoxesWithValues.values[i];
     out << "window.calculator.calculator.inputBoxToSliderUpdaters['"
     << currentBox.name << "'] ='"
     << currentBox.getSliderName() << "';\n";
@@ -2021,7 +2021,7 @@ void ObjectContainer::resetPlots() {
 }
 
 void ObjectContainer::resetSliders() {
-  this->userInputBoxSliderDisplayed.initializeFillInObject(this->theUserInputTextBoxesWithValues.size(), false);
+  this->userInputBoxSliderDisplayed.initializeFillInObject(this->userInputTextBoxesWithValues.size(), false);
 }
 
 bool ObjectContainer::checkConsistencyAfterReset() {
@@ -2097,7 +2097,7 @@ void ObjectContainer::reset() {
   this->theHyperOctahedralGroups.setSize(0);
   this->theElementsHyperOctGroup.clear();
   this->pseudoRandom.setRandomSeedSmall(static_cast<uint32_t>(time(nullptr)));
-  this->theUserInputTextBoxesWithValues.clear();
+  this->userInputTextBoxesWithValues.clear();
   this->graphicsScripts.clear();
   this->ellipticCurveElementsZmodP.clear();
   this->ellipticCurveElementsRational.clear();

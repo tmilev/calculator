@@ -902,7 +902,7 @@ public:
   // The first vector gives the (x, y) - coordinates
   // of the lower left corner of the rectangle.
   // The Second vector gives the (width, height) of the rectangle.
-  std::string thePlotType;
+  std::string plotType;
 
   Expression manifoldImmersion;
   std::string manifoldImmersionJS;
@@ -1057,7 +1057,7 @@ public:
   ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational > > theHyperoctahedralReps;
   ListReferences<Plot> thePlots;
   List<bool> userInputBoxSliderDisplayed;
-  MapReferences<std::string, InputBox, MathRoutines::hashString> theUserInputTextBoxesWithValues;
+  MapReferences<std::string, InputBox, MathRoutines::hashString> userInputTextBoxesWithValues;
   MapReferences<std::string, std::string, MathRoutines::hashString> graphicsScripts;
   AlgebraicClosureRationals theAlgebraicClosure;
   HashedList<AlgebraicNumber> theAlgebraicNumbers;
@@ -1337,7 +1337,7 @@ public:
 
   std::string outputCommentsString;
   std::string parsingLog;
-  ObjectContainer theObjectContainer;
+  ObjectContainer objectContainer;
 
   std::string javaScriptDisplayingIndicator;
   int numOutputFileS;
@@ -3032,14 +3032,14 @@ bool Calculator::getTypeWeight(
     << middleE.toString() << ".";
     return false;
   }
-  if (!calculator.theObjectContainer.semisimpleLieAlgebras.contains(
+  if (!calculator.objectContainer.semisimpleLieAlgebras.contains(
     ambientSSalgebra->theWeyl.theDynkinType
   )) {
     global.fatal
     << ambientSSalgebra->toStringLieAlgebraName()
     << " contained object container more than once. " << global.fatal;
   }
-  int algebraIndex = calculator.theObjectContainer.semisimpleLieAlgebras.getIndex(
+  int algebraIndex = calculator.objectContainer.semisimpleLieAlgebras.getIndex(
     ambientSSalgebra->theWeyl.theDynkinType
   );
   outputAmbientSemisimpleLieAlgebra.context.setIndexAmbientSemisimpleLieAlgebra(algebraIndex);
@@ -3127,7 +3127,7 @@ bool Calculator::getTypeHighestWeightParabolic(
       }
     }
   }
-  if (!calculator.theObjectContainer.semisimpleLieAlgebras.contains(
+  if (!calculator.objectContainer.semisimpleLieAlgebras.contains(
     ambientSSalgebra->theWeyl.theDynkinType
   )) {
     global.fatal
@@ -3135,7 +3135,7 @@ bool Calculator::getTypeHighestWeightParabolic(
     << " contained object container more than once. "
     << global.fatal;
   }
-  int algebraIndex = calculator.theObjectContainer.semisimpleLieAlgebras.getIndex(
+  int algebraIndex = calculator.objectContainer.semisimpleLieAlgebras.getIndex(
     ambientSSalgebra->theWeyl.theDynkinType
   );
   outputAmbientSSalgebra.context.setIndexAmbientSemisimpleLieAlgebra(algebraIndex);

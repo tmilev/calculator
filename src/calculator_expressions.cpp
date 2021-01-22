@@ -308,7 +308,7 @@ int Expression::addObjectReturnIndex(const
 ElementEllipticCurve<Rational>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.ellipticCurveElementsRational
+  return this->owner->objectContainer.ellipticCurveElementsRational
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -317,7 +317,7 @@ int Expression::addObjectReturnIndex(const
 ElementEllipticCurve<ElementZmodP>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.ellipticCurveElementsZmodP
+  return this->owner->objectContainer.ellipticCurveElementsZmodP
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -327,11 +327,11 @@ SemisimpleSubalgebras
 & inputValue) const {
   this->checkInitialization();
   inputValue.checkInitialization();
-  if (!this->owner->theObjectContainer.theSSSubalgebraS.contains(inputValue.owner->theWeyl.theDynkinType)) {
+  if (!this->owner->objectContainer.theSSSubalgebraS.contains(inputValue.owner->theWeyl.theDynkinType)) {
     global.fatal << "Semisimple subalgebras must be "
     << "allocated directly in the object container. " << global.fatal;
   }
-  return this->owner->theObjectContainer.theSSSubalgebraS.getIndex(inputValue.owner->theWeyl.theDynkinType);
+  return this->owner->objectContainer.theSSSubalgebraS.getIndex(inputValue.owner->theWeyl.theDynkinType);
 }
 
 template < >
@@ -339,7 +339,7 @@ int Expression::addObjectReturnIndex(const
 ElementHyperoctahedralGroupR2
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theElementsHyperOctGroup
+  return this->owner->objectContainer.theElementsHyperOctGroup
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -348,9 +348,9 @@ int Expression::addObjectReturnIndex(const
 InputBox
 & inputValue) const {
   this->checkInitialization();
-  this->owner->theObjectContainer.theUserInputTextBoxesWithValues
+  this->owner->objectContainer.userInputTextBoxesWithValues
   .setKeyValue(inputValue.name, inputValue);
-  return this->owner->theObjectContainer.theUserInputTextBoxesWithValues
+  return this->owner->objectContainer.userInputTextBoxesWithValues
   .getIndex(inputValue.name);
 }
 
@@ -359,7 +359,7 @@ int Expression::addObjectReturnIndex(const
 std::string
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theStrings
+  return this->owner->objectContainer.theStrings
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -368,7 +368,7 @@ int Expression::addObjectReturnIndex(const
 JSData
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.jsonObjects
+  return this->owner->objectContainer.jsonObjects
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -377,7 +377,7 @@ int Expression::addObjectReturnIndex(const
 GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theHyperoctahedralReps
+  return this->owner->objectContainer.theHyperoctahedralReps
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -386,7 +386,7 @@ int Expression::addObjectReturnIndex(const
 Rational
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theRationals
+  return this->owner->objectContainer.theRationals
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -398,7 +398,7 @@ double
   if (std::isnan(inputValue)) {
     return 0;
   }
-  return this->owner->theObjectContainer.theDoubles
+  return this->owner->objectContainer.theDoubles
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -407,7 +407,7 @@ int Expression::addObjectReturnIndex(const
 RationalFunction<Rational>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.rationalFunctions
+  return this->owner->objectContainer.rationalFunctions
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -416,7 +416,7 @@ int Expression::addObjectReturnIndex(const
 RationalFunction<AlgebraicNumber>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.rationalFunctionsAlgebraic
+  return this->owner->objectContainer.rationalFunctionsAlgebraic
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -425,7 +425,7 @@ int Expression::addObjectReturnIndex(const
 RationalFunction<ElementZmodP>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.rationalFunctionsModular
+  return this->owner->objectContainer.rationalFunctionsModular
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -434,7 +434,7 @@ int Expression::addObjectReturnIndex(const
 MatrixTensor<Rational>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theMatTensorRats
+  return this->owner->objectContainer.theMatTensorRats
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -443,7 +443,7 @@ int Expression::addObjectReturnIndex(const
 ElementUniversalEnveloping<RationalFunction<Rational> >
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theUEs
+  return this->owner->objectContainer.theUEs
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -452,7 +452,7 @@ int Expression::addObjectReturnIndex(const
 Weight<Rational>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theWeights
+  return this->owner->objectContainer.theWeights
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -461,7 +461,7 @@ int Expression::addObjectReturnIndex(const
 Weight<Polynomial<Rational> >
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theWeightsPoly
+  return this->owner->objectContainer.theWeightsPoly
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -470,7 +470,7 @@ int Expression::addObjectReturnIndex(const
 int
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theRationals
+  return this->owner->objectContainer.theRationals
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -479,7 +479,7 @@ int Expression::addObjectReturnIndex(const
 LargeIntegerUnsigned
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theRationals
+  return this->owner->objectContainer.theRationals
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -488,7 +488,7 @@ int Expression::addObjectReturnIndex(const
 Polynomial<Rational>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.polynomialsRational
+  return this->owner->objectContainer.polynomialsRational
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -497,7 +497,7 @@ int Expression::addObjectReturnIndex(const
 Polynomial<ElementZmodP>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.polynomialsModular
+  return this->owner->objectContainer.polynomialsModular
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -506,7 +506,7 @@ int Expression::addObjectReturnIndex(const
 PolynomialModuloPolynomial<ElementZmodP>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.polynomialQuotientsModular
+  return this->owner->objectContainer.polynomialQuotientsModular
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -515,7 +515,7 @@ int Expression::addObjectReturnIndex(const
 Polynomial<AlgebraicNumber>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.polynomialsAlgebraic
+  return this->owner->objectContainer.polynomialsAlgebraic
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -524,7 +524,7 @@ int Expression::addObjectReturnIndex(const
 ElementWeylAlgebra<Rational>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theWeylAlgebraElements
+  return this->owner->objectContainer.theWeylAlgebraElements
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -533,10 +533,10 @@ int Expression::addObjectReturnIndex(
 SemisimpleLieAlgebra* const
 & inputValue) const {
   this->checkInitialization();
-  if (!this->owner->theObjectContainer.semisimpleLieAlgebras.contains(inputValue->theWeyl.theDynkinType)) {
+  if (!this->owner->objectContainer.semisimpleLieAlgebras.contains(inputValue->theWeyl.theDynkinType)) {
     global.fatal << "Semisimple Lie algebra must be allocated directly in the object container. " << global.fatal;
   }
-  int index = this->owner->theObjectContainer.semisimpleLieAlgebras.getIndex(inputValue->theWeyl.theDynkinType);
+  int index = this->owner->objectContainer.semisimpleLieAlgebras.getIndex(inputValue->theWeyl.theDynkinType);
   return index;
 }
 
@@ -545,7 +545,7 @@ int Expression::addObjectReturnIndex(const
 AlgebraicNumber
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theAlgebraicNumbers
+  return this->owner->objectContainer.theAlgebraicNumbers
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -554,7 +554,7 @@ int Expression::addObjectReturnIndex(const
 ElementZmodP
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theEltsModP
+  return this->owner->objectContainer.theEltsModP
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -563,7 +563,7 @@ int Expression::addObjectReturnIndex(const
 MonomialTensor<int, HashFunctions::hashFunction>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theLittelmannOperators
+  return this->owner->objectContainer.theLittelmannOperators
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -572,7 +572,7 @@ int Expression::addObjectReturnIndex(const
 ElementTensorsGeneralizedVermas<RationalFunction<Rational> >
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theTensorElts
+  return this->owner->objectContainer.theTensorElts
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -581,7 +581,7 @@ int Expression::addObjectReturnIndex(const
 CharacterSemisimpleLieAlgebraModule<Rational>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theCharsSSLieAlgFD
+  return this->owner->objectContainer.theCharsSSLieAlgFD
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -590,7 +590,7 @@ int Expression::addObjectReturnIndex(const
 LittelmannPath
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theLSpaths
+  return this->owner->objectContainer.theLSpaths
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -599,7 +599,7 @@ int Expression::addObjectReturnIndex(const
 Plot
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.thePlots
+  return this->owner->objectContainer.thePlots
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -610,7 +610,7 @@ PlotObject
   this->checkInitialization();
   Plot plotContainer;
   plotContainer += inputValue;
-  return this->owner->theObjectContainer.thePlots
+  return this->owner->objectContainer.thePlots
   .addNoRepetitionOrReturnIndexFirst(plotContainer);
 }
 
@@ -619,8 +619,8 @@ int Expression::addObjectReturnIndex(const
 WeylGroupData
 & inputValue) const {
   this->checkInitialization();
-  this->owner->theObjectContainer.getLieAlgebraCreateIfNotPresent(inputValue.theDynkinType);
-  return this->owner->theObjectContainer.semisimpleLieAlgebras.getIndex(inputValue.theDynkinType);
+  this->owner->objectContainer.getLieAlgebraCreateIfNotPresent(inputValue.theDynkinType);
+  return this->owner->objectContainer.semisimpleLieAlgebras.getIndex(inputValue.theDynkinType);
 }
 
 template < >
@@ -628,7 +628,7 @@ int Expression::addObjectReturnIndex(const
 GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theWeylGroupReps
+  return this->owner->objectContainer.theWeylGroupReps
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -637,7 +637,7 @@ int Expression::addObjectReturnIndex(const
 VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theWeylGroupVirtualReps
+  return this->owner->objectContainer.theWeylGroupVirtualReps
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -646,7 +646,7 @@ int Expression::addObjectReturnIndex(const
 ElementWeylGroup
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theWeylGroupElements
+  return this->owner->objectContainer.theWeylGroupElements
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -659,7 +659,7 @@ Rational& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theRationals.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.theRationals.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -668,7 +668,7 @@ ElementEllipticCurve<Rational>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.ellipticCurveElementsRational.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.ellipticCurveElementsRational.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -677,7 +677,7 @@ Polynomial<ElementZmodP>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type Polynomial mod integer. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.polynomialsModular.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.polynomialsModular.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -688,7 +688,7 @@ PolynomialModuloPolynomial<ElementZmodP>& Expression::getValueNonConst() const {
     << "The expression equals "
     << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.polynomialQuotientsModular.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.polynomialQuotientsModular.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -697,7 +697,7 @@ ElementEllipticCurve<ElementZmodP>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type Rational. The expression equals "
     << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.ellipticCurveElementsZmodP.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.ellipticCurveElementsZmodP.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -706,7 +706,7 @@ ElementHyperoctahedralGroupR2& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theElementsHyperOctGroup.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.theElementsHyperOctGroup.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -715,7 +715,7 @@ InputBox& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theUserInputTextBoxesWithValues.values[this->getLastChild().data];
+  return this->owner->objectContainer.userInputTextBoxesWithValues.values[this->getLastChild().data];
 }
 
 template < >
@@ -724,7 +724,7 @@ GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> & Expr
     global.fatal << "Expression not of required type Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theHyperoctahedralReps[this->getLastChild().data];
+  return this->owner->objectContainer.theHyperoctahedralReps[this->getLastChild().data];
 }
 
 template < >
@@ -732,7 +732,7 @@ ElementZmodP& Expression::getValueNonConst() const {
   if (!this->isOfType<ElementZmodP>())
     global.fatal << "Expression not of required type ElementZmodP. "
     << "The expression equals " << this->toString() << "." << global.fatal;
-  return this->owner->theObjectContainer.theEltsModP.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.theEltsModP.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -741,7 +741,7 @@ AlgebraicNumber& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type AlgebraicNumber. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theAlgebraicNumbers.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.theAlgebraicNumbers.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -750,7 +750,7 @@ double& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type double. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theDoubles.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.theDoubles.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -760,7 +760,7 @@ std::string& Expression::getValueNonConst() const {
     << "The expression equals " << this->toString() << ". Comments so far: "
     << this->owner->comments.str() << global.fatal;
   }
-  return this->owner->theObjectContainer.theStrings.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.theStrings.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -770,7 +770,7 @@ JSData& Expression::getValueNonConst() const {
     << "The expression equals " << this->toString() << ". Comments so far: "
     << this->owner->comments.str() << global.fatal;
   }
-  return this->owner->theObjectContainer.jsonObjects.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.jsonObjects.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -779,7 +779,7 @@ RationalFunction<Rational>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type RationalFunction_Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.rationalFunctions.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.rationalFunctions.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -788,7 +788,7 @@ RationalFunction<AlgebraicNumber>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type RationalFunction_AlgebraicNumber. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.rationalFunctionsAlgebraic.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.rationalFunctionsAlgebraic.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -797,7 +797,7 @@ RationalFunction<ElementZmodP>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type RationalFunctionOld. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.rationalFunctionsModular.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.rationalFunctionsModular.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -806,7 +806,7 @@ ElementUniversalEnveloping<RationalFunction<Rational> >& Expression::getValueNon
     global.fatal << "Expression not of required type "
     << "ElementUniversalEnveloping_RationalFunctionOld. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theUEs.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.theUEs.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -815,7 +815,7 @@ Polynomial<Rational>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type Polynomial_Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.polynomialsRational.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.polynomialsRational.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -824,7 +824,7 @@ Polynomial<AlgebraicNumber>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type Polynomial_AlgebraicNumber. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.polynomialsAlgebraic.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.polynomialsAlgebraic.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -833,7 +833,7 @@ ElementWeylAlgebra<Rational>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "ElementWeylAlgebra_Rational. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theWeylAlgebraElements.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.theWeylAlgebraElements.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -842,7 +842,7 @@ LittelmannPath& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "LittelmannPath. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theLSpaths.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.theLSpaths.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -851,7 +851,7 @@ Weight<Polynomial<Rational> >& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "LittelmannPath. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theWeightsPoly.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.theWeightsPoly.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -860,7 +860,7 @@ MonomialTensor<int, HashFunctions::hashFunction>& Expression::getValueNonConst()
     global.fatal << "Expression not of required type "
     << "MonomialTensor. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theLittelmannOperators.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.theLittelmannOperators.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -869,7 +869,7 @@ ElementTensorsGeneralizedVermas<RationalFunction<Rational> >& Expression::getVal
     global.fatal << "Expression not of "
     << "required type ElementTGVM_RationalFunctionOld. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theTensorElts.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.theTensorElts.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -878,7 +878,7 @@ CharacterSemisimpleLieAlgebraModule<Rational>& Expression::getValueNonConst() co
     global.fatal << "Expression not of required type "
     << "charSSAlgMod_Rational. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theCharsSSLieAlgFD.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.theCharsSSLieAlgFD.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -887,7 +887,7 @@ SemisimpleLieAlgebra*& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "SemisimpleLieAlgebra. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.semisimpleLieAlgebraPointers[this->getLastChild().data];
+  return this->owner->objectContainer.semisimpleLieAlgebraPointers[this->getLastChild().data];
 }
 
 template < >
@@ -896,7 +896,7 @@ MatrixTensor<Rational>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "MatrixTensorRational. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theMatTensorRats.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.theMatTensorRats.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -905,7 +905,7 @@ SemisimpleSubalgebras& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "SemisimpleSubalgebras. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theSSSubalgebraS.values[this->getLastChild().data];
+  return this->owner->objectContainer.theSSSubalgebraS.values[this->getLastChild().data];
 }
 
 template < >
@@ -914,7 +914,7 @@ Plot& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "Plot. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.thePlots[this->getLastChild().data];
+  return this->owner->objectContainer.thePlots[this->getLastChild().data];
 }
 
 template < >
@@ -924,7 +924,7 @@ WeylGroupData& Expression::getValueNonConst() const {
     << "WeylGroupData. The expression equals "
     << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.semisimpleLieAlgebras.values[
+  return this->owner->objectContainer.semisimpleLieAlgebras.values[
     this->getLastChild().data
   ].theWeyl;
 }
@@ -935,7 +935,7 @@ GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::getVal
     global.fatal << "Expression not of required type "
     << "WeylGroupRepresentation_Rational. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theWeylGroupReps.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.theWeylGroupReps.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -944,7 +944,7 @@ ElementWeylGroup& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "ElementWeylGroup. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theWeylGroupElements.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.theWeylGroupElements.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -954,7 +954,7 @@ VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::getV
     << "WeylGroupVirtualRepresentation. The expression equals "
     << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theWeylGroupVirtualReps.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.theWeylGroupVirtualReps.getElement(this->getLastChild().data);
 }
 
 bool Expression::isMatrix(int* outputNumRows, int* outputNumCols) const {
@@ -1089,7 +1089,7 @@ template< >
 bool Expression::convertInternally<RationalFunction<AlgebraicNumber> >(Expression& output) const {
   MacroRegisterFunctionWithName("Expression::converInternally_RationalFunction_AlgebraicNumber");
   this->checkInitialization();
-  AlgebraicClosureRationals* closure = &this->owner->theObjectContainer.theAlgebraicClosure;
+  AlgebraicClosureRationals* closure = &this->owner->objectContainer.theAlgebraicClosure;
   if (this->isOfType<Rational>()) {
     RationalFunction<AlgebraicNumber> result;
     AlgebraicNumber value;
@@ -3178,13 +3178,13 @@ std::string Expression::toStringAllSlidersInExpression() const {
     return "";
   }
   if (
-    this->owner->theObjectContainer.userInputBoxSliderDisplayed.size <
-    this->owner->theObjectContainer.theUserInputTextBoxesWithValues.size()
+    this->owner->objectContainer.userInputBoxSliderDisplayed.size <
+    this->owner->objectContainer.userInputTextBoxesWithValues.size()
   ) {
-    this->owner->theObjectContainer.resetSliders();
+    this->owner->objectContainer.resetSliders();
   }
   MapReferences<std::string, InputBox, MathRoutines::hashString>&
-  theSliders = this->owner->theObjectContainer.theUserInputTextBoxesWithValues;
+  theSliders = this->owner->objectContainer.userInputTextBoxesWithValues;
   std::stringstream out;
   for (int i = 0; i < boxNames.size; i ++) {
     if (!theSliders.contains(boxNames[i])) {
@@ -3192,10 +3192,10 @@ std::string Expression::toStringAllSlidersInExpression() const {
       continue;
     }
     int theIndex = theSliders.getIndex(boxNames[i]);
-    if (this->owner->theObjectContainer.userInputBoxSliderDisplayed[theIndex]) {
+    if (this->owner->objectContainer.userInputBoxSliderDisplayed[theIndex]) {
       continue;
     }
-    this->owner->theObjectContainer.userInputBoxSliderDisplayed[theIndex] = true;
+    this->owner->objectContainer.userInputBoxSliderDisplayed[theIndex] = true;
     InputBox& theBox = theSliders.values[theIndex];
     std::string theSliderName = theBox.getSliderName();
     out << "<input name =\""
@@ -4655,9 +4655,9 @@ std::string Expression::toString(
       return newMe.toString(format, &newStart, false, outputJS);
     }
   }
-  int notationIndex = owner->theObjectContainer.expressionWithNotation.getIndex(*this);
+  int notationIndex = owner->objectContainer.expressionWithNotation.getIndex(*this);
   if (notationIndex != - 1) {
-    return owner->theObjectContainer.expressionNotation[notationIndex];
+    return owner->objectContainer.expressionNotation[notationIndex];
   }
   std::stringstream out;
   if (

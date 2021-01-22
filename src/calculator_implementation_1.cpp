@@ -43,7 +43,7 @@ bool Calculator::getListPolynomialVariableLabelsLexicographic(
   theVars.quickSortAscending();
   PolynomialSubstitution<AlgebraicNumber> substitution;
   substitution.setSize(numVars);
-  const AlgebraicNumber& one = this->theObjectContainer.theAlgebraicClosure.one();
+  const AlgebraicNumber& one = this->objectContainer.theAlgebraicClosure.one();
   for (int i = 0; i < substitution.size; i ++) {
     int currentIndex = theVars.getIndex(theContextStart.getVariable(i));
     substitution[i].makeMonomial(
@@ -341,7 +341,7 @@ bool PlotObject::operator==(const PlotObject& other) const {
   this->thePointsDouble                == other.thePointsDouble              &&
   this->thePointsJS                    == other.thePointsJS                  &&
   this->theRectangles                  == other.theRectangles                &&
-  this->thePlotType                    == other.thePlotType                  &&
+  this->plotType                    == other.plotType                  &&
   this->manifoldImmersion              == other.manifoldImmersion            &&
   this->coordinateFunctionsE           == other.coordinateFunctionsE         &&
   this->coordinateFunctionsJS          == other.coordinateFunctionsJS        &&
@@ -523,7 +523,7 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
   MacroRegisterFunctionWithName("Plot::getPlotHtml3d");
   owner.flagHasGraphics = true;
   std::stringstream outContent, outScript;
-  this->computeCanvasNameIfNecessary(owner.theObjectContainer.canvasPlotCounter);
+  this->computeCanvasNameIfNecessary(owner.objectContainer.canvasPlotCounter);
   if (!owner.flagPlotShowJavascriptOnly) {
     outContent << "<canvas width =\"" << this->desiredHtmlWidthInPixels
     << "\" height =\"" << this->desiredHtmlHeightInPixels << "\" "
@@ -544,8 +544,8 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
   << "}\n";
   outScript << "function " << canvasFunctionName << "() {\n";
   for (int i = 0; i < this->boxesThatUpdateMe.size; i ++) {
-    InputBox& currentBox = owner.theObjectContainer.
-    theUserInputTextBoxesWithValues.getValueCreate(this->boxesThatUpdateMe[i]);
+    InputBox& currentBox = owner.objectContainer.
+    userInputTextBoxesWithValues.getValueCreate(this->boxesThatUpdateMe[i]);
     outScript << " window.calculator.drawing.plotUpdaters['"
     << currentBox.getSliderName() << "'] =" << "'" << this->getCanvasName() << "'"
     << ";\n";
@@ -555,10 +555,10 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
   int funCounter = 0;
   for (int i = 0; i < this->thePlots.size; i ++) {
     PlotObject& currentO = this->thePlots[i];
-    if (currentO.thePlotType == "surface") {
+    if (currentO.plotType == "surface") {
       outScript << currentO.getJavascriptSurfaceImmersion(the3dObjects[i], this->getCanvasName(), funCounter) << "\n ";
     }
-    if (currentO.thePlotType == "parametricCurve") {
+    if (currentO.plotType == "parametricCurve") {
       outScript << currentO.getJavascriptCurveImmersionIn3d(the3dObjects[i], this->getCanvasName(), funCounter) << "\n ";
     }
   }
@@ -568,19 +568,19 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
   outScript << "theCanvas.canvasResetFunction = " << canvasResetFunctionName << ";\n";
   for (int i = 0; i < this->thePlots.size; i ++) {
     PlotObject& currentPlot = this->thePlots[i];
-    if (currentPlot.thePlotType == "surface") {
+    if (currentPlot.plotType == "surface") {
       outScript
       << "theCanvas.drawSurface("
       <<  the3dObjects[i]
       << ");\n";
     }
-    if (currentPlot.thePlotType == "parametricCurve") {
+    if (currentPlot.plotType == "parametricCurve") {
       outScript
       << "theCanvas.drawCurve("
       <<  the3dObjects[i]
       << ");\n";
     }
-    if (currentPlot.thePlotType == "setProjectionScreen" && currentPlot.thePointsDouble.size >= 2) {
+    if (currentPlot.plotType == "setProjectionScreen" && currentPlot.thePointsDouble.size >= 2) {
       outScript
       << "theCanvas.screenBasisUserDefault = "
       << "["
@@ -590,7 +590,7 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
       << "];\n";
       outScript << "theCanvas.screenBasisUser = theCanvas.screenBasisUserDefault.slice();\n";
     }
-    if (currentPlot.thePlotType == "label") {
+    if (currentPlot.plotType == "label") {
       outScript
       << "theCanvas.drawText({"
       << "location: "
@@ -605,7 +605,7 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
       << "'"
       << "});\n";
     }
-    if (currentPlot.thePlotType == "segment" && currentPlot.thePointsDouble.size >= 2) {
+    if (currentPlot.plotType == "segment" && currentPlot.thePointsDouble.size >= 2) {
       outScript
       << "theCanvas.drawLine("
       << currentPlot.thePointsDouble[0].toStringSquareBracketsBasicType()
@@ -631,7 +631,7 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
   outScript << canvasFunctionName << "();\n";
   outContent << outScript.str();
   outContent << "</script>";
-  owner.theObjectContainer.graphicsScripts.setKeyValue(this->getCanvasName(), outScript.str());
+  owner.objectContainer.graphicsScripts.setKeyValue(this->getCanvasName(), outScript.str());
   return outContent.str();
 }
 
@@ -647,7 +647,7 @@ std::string Plot::toStringDebug() {
   std::stringstream out;
   out <<  "Objects: " << this->thePlots.size << "<br>";
   for (int i = 0; i < this->thePlots.size; i ++) {
-    if (this->thePlots[i].thePlotType == "surface") {
+    if (this->thePlots[i].plotType == "surface") {
       PlotObject& theSurface = this->thePlots[i];
       out << theSurface.toStringDebug();
     }
@@ -989,24 +989,23 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
     return "[plot alredy displayed]";
   }
   this->flagDivAlreadyDisplayed = true;
-  this->computeCanvasNameIfNecessary(owner.theObjectContainer.canvasPlotCounter);
+  this->computeCanvasNameIfNecessary(owner.objectContainer.canvasPlotCounter);
   std::stringstream out;
   if (this->priorityViewRectangle <= 0) {
     this->computeAxesAndBoundingBox();
   }
   if (!this->flagPlotShowJavascriptOnly) {
-    out << "<canvas width =\"" << this->desiredHtmlWidthInPixels
-    << "\" height =\"" << this->desiredHtmlHeightInPixels << "\" "
-    << "style =\"border:solid 1px\" id =\""
-    << this->getCanvasName()
-    << "\" "
+    out << "<canvas width='" << this->desiredHtmlWidthInPixels
+    << "' height='" << this->desiredHtmlHeightInPixels << "' "
+    << "style='border:solid 1px' "
+    << "id ='" << this->getCanvasName() << "'"
     << ">"
     << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
-    << "<span id =\"" << this->getCanvasName() << "Controls\"></span>";
+    << "<span id='" << this->getCanvasName() << "Controls'></span>";
     if (!owner.flagPlotNoControls) {
       out << "<br>";
     }
-    out << "<span id =\"" << this->getCanvasName() << "Messages\"></span>";
+    out << "<span id='" << this->getCanvasName() << "Messages'></span>";
   }
   std::stringstream outScript;
   std::string canvasFunctionName = "functionMake" + this->getCanvasName();
@@ -1018,7 +1017,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
 
   outScript << "function " << canvasFunctionName << "() {\n";
   for (int i = 0; i < this->boxesThatUpdateMe.size; i ++) {
-    InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.getValueCreate(this->boxesThatUpdateMe[i]);
+    InputBox& currentBox = owner.objectContainer.userInputTextBoxesWithValues.getValueCreate(this->boxesThatUpdateMe[i]);
     outScript << "  window.calculator.drawing.plotUpdaters['"
     << currentBox.getSliderName() << "'] ="
     << "'" << this->getCanvasName() << "'"
@@ -1029,16 +1028,16 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   theFnPlots.setSize(this->thePlots.size);
   for (int i = 0; i < this->thePlots.size; i ++) {
     PlotObject& currentPlot = this->thePlots[i];
-    if (currentPlot.thePlotType == "plotFunction") {
+    if (currentPlot.plotType == "plotFunction") {
       outScript << currentPlot.getJavascript2dPlot(theFnPlots[i], this->getCanvasName(), funCounter) << "\n ";
     }
-    if (currentPlot.thePlotType == "parametricCurve") {
+    if (currentPlot.plotType == "parametricCurve") {
       outScript << currentPlot.getJavascriptParametricCurve2D(theFnPlots[i], this->getCanvasName(), funCounter) << "\n ";
     }
-    if (currentPlot.thePlotType == "plotDirectionField") {
+    if (currentPlot.plotType == "plotDirectionField") {
       outScript << currentPlot.getJavascriptDirectionField(theFnPlots[i], this->getCanvasName(), funCounter) << "\n ";
     }
-    if (currentPlot.thePlotType == "points") {
+    if (currentPlot.plotType == "points") {
       currentPlot.getJavascriptPoints(theFnPlots[i], this->getCanvasName(), funCounter);
     }
   }
@@ -1054,23 +1053,23 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   outScript.precision(7);
   for (int i = 0; i < this->thePlots.size; i ++) {
     PlotObject& currentPlot = this->thePlots[i];
-    if (currentPlot.thePlotType == "plotFunction") {
+    if (currentPlot.plotType == "plotFunction") {
       outScript << "theCanvas." << theFnPlots[i];
       continue;
     }
-    if (currentPlot.thePlotType == "parametricCurve") {
+    if (currentPlot.plotType == "parametricCurve") {
       outScript << "theCanvas." << theFnPlots[i];
       continue;
     }
-    if (currentPlot.thePlotType == "plotDirectionField") {
+    if (currentPlot.plotType == "plotDirectionField") {
       outScript << "theCanvas." << theFnPlots[i];
       continue;
     }
-    if (currentPlot.thePlotType == "points") {
+    if (currentPlot.plotType == "points") {
       outScript << "theCanvas." << theFnPlots[i];
       continue;
     }
-    if (currentPlot.thePlotType == "label") {
+    if (currentPlot.plotType == "label") {
       if (currentPlot.thePointsDouble.size > 0) {
         outScript << "theCanvas.drawText("
         << currentPlot.thePointsDouble[0].toStringSquareBracketsBasicType()
@@ -1081,19 +1080,19 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
       }
       continue;
     }
-    if (currentPlot.thePlotType == "plotFillStart") {
+    if (currentPlot.plotType == "plotFillStart") {
       outScript << "theCanvas.plotFillStart('" << currentPlot.colorFillJS << "');\n";
       continue;
     }
-    if (currentPlot.thePlotType == "plotFillFinish") {
+    if (currentPlot.plotType == "plotFillFinish") {
       outScript << "theCanvas.plotFillFinish();\n";
       continue;
     }
-    if (currentPlot.thePlotType == "axesGrid") {
+    if (currentPlot.plotType == "axesGrid") {
       outScript << "theCanvas.drawGrid();\n";
       continue;
     }
-    if (currentPlot.thePlotType == "pathFilled") {
+    if (currentPlot.plotType == "pathFilled") {
       outScript << "theCanvas.drawPathFilled( ";
       outScript << currentPlot.toStringPointsList();
       outScript << ", "
@@ -1146,7 +1145,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   << canvasFunctionName << ";\n"
   << canvasFunctionName << "();\n"
   << "}\n";
-  owner.theObjectContainer.graphicsScripts.setKeyValue(this->getCanvasName(), outScript.str());
+  owner.objectContainer.graphicsScripts.setKeyValue(this->getCanvasName(), outScript.str());
   out << "<script language =\"javascript\">\n" << outScript.str() << "</script>";
   return out.str();
 }

@@ -3378,7 +3378,6 @@ int WebServer::run() {
   global.initModifiableDatabaseFields();
   HtmlRoutines::loadStrings();
   this->theTLS.initializeNonThreadSafeOnFirstCall(true);
-  global.calculator().getElement().flagShowCalculatorExamples = false;
   if (!this->initPrepareWebServerALL()) {
     return 1;
   }

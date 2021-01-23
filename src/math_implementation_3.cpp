@@ -2225,7 +2225,9 @@ std::string StringRoutines::replaceAll(
 }
 
 bool StringRoutines::replaceOnce(
-  std::string& inputOutput, const std::string& subStringToReplace, const std::string& replaceWith
+  std::string& inputOutput,
+  const std::string& subStringToReplace,
+  const std::string& replaceWith
 ) {
 
   auto tagLocation = inputOutput.find(subStringToReplace);

@@ -109,7 +109,6 @@ void Calculator::reset() {
   this->flagUseFracInRationalLaTeX = true;
   this->flagForkingprocessAllowed = true;
   this->flagNoApproximations = false;
-  this->flagDefaultRulesWereTamperedWith = false;
   this->flagUsePredefinedWordSplits = true;
   this->flagPlotNoControls = true;
   this->flagPlotShowJavascriptOnly = false;
@@ -156,7 +155,7 @@ void Calculator::reset() {
   this->imagesCachedExpressions.setSize(0);
   this->programExpression.reset(*this);
   this->ruleStackCacheIndex = - 1;
-  this->ruleStack.reset(*this,this->maximumRuleStacksCached);
+  this->ruleStack.reset(*this, this->maximumRuleStacksCached);
   this->cachedRuleStacks.clear();
   // The expression container must be cleared second to last.
   this->allChildExpressions.clear();
@@ -273,7 +272,7 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
   this->controlSequences.addOnTopNoRepetitionMustBeNew(" ");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("{{}}");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("Variable");
-  this->controlSequences.addListOnTop(this->operations.keys);//all operations defined up to this point are also control sequences
+  this->controlSequences.addListOnTop(this->operations.keys); //all operations defined up to this point are also control sequences
   this->controlSequences.addOnTopNoRepetitionMustBeNew("Expression");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("Integer");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("{}");

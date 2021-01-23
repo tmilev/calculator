@@ -19,12 +19,12 @@ Calculator::Calculator() {
   this->numOutputFileS = 0;
   this->flagHideLHS = false;
   this->flagUseHtml = true;
-  this->flagShowCalculatorExamples = true;
   this->flagWriteLatexPlots = true;
   this->flagUseLnInsteadOfLog = false;
   this->flagPlotShowJavascriptOnly = false;
   this->numberExpectedExpressionsAtInitialization = - 1;
   this->mode = Calculator::Mode::full;
+  this->examples.owner = this;
 }
 
 MemorySaving<Calculator>& GlobalVariables::calculator() {

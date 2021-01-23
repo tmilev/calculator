@@ -1313,8 +1313,6 @@ public:
   bool flagUseFracInRationalLaTeX;
   bool flagUseHtml;
   bool flagDisplayContext;
-  bool flagShowCalculatorExamples;
-  bool flagDefaultRulesWereTamperedWith;
   bool flagHasGraphics;
   bool flagWriteLatexPlots;
 
@@ -1374,8 +1372,31 @@ public:
   void writeAutoCompleteKeyWordsToFile();
   JSData toJSONOutputAndSpecials();
   std::string toStringOutputAndSpecials();
-  JSData toJSONFunctionHandlers();
-  // the purpose of the operator below is to save on typing when returning false with a comment.
+  class Examples {
+    std::string toStringOneOperationHandler(
+      const std::string& escapedAtom,
+      bool isComposite,
+      const Function& function
+    );
+    std::string escape(const std::string& atom);
+  public:
+    Calculator* owner;
+    HashedList<std::string, HashFunctions::hashFunction> toBeEscaped;
+    // Generates a JSON with all functions and their documentation.
+    JSData toJSONFunctionHandlers();
+    // Writes a readme file in folder examples/Readme.md.
+    bool writeExamplesReadme();
+    std::string getExamplesReadmeFragment();
+    Examples();
+    class Test {
+    public:
+      static bool compose();
+      static bool all();
+    };
+  };
+  Examples examples;
+  // The purpose of the operator below is to save on typing
+  // when returning false with a comment.
   operator bool() const {
     return false;
   }

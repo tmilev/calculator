@@ -22,19 +22,108 @@ JSData Calculator::OperationHandlers::toJSON() {
   return result;
 }
 
-JSData Calculator::toJSONFunctionHandlers() {
+Calculator::Examples::Examples() {
+  this->owner = nullptr;
+}
+
+JSData Calculator::Examples::toJSONFunctionHandlers() {
   MacroRegisterFunctionWithName("Calculator::toJSONFunctionHandlers");
   JSData output;
   output.theType = JSData::token::tokenObject;
-  for (int i = 0; i < this->operations.size(); i ++) {
-    if (this->operations.values[i].isZeroPointer()) {
+  MapReferences<std::string, MemorySaving<OperationHandlers>, HashFunctions::hashFunction>&
+  operations = this->owner->operations;
+  for (int i = 0; i < operations.size(); i ++) {
+    if (operations.values[i].isZeroPointer()) {
       continue;
     }
-    const std::string& operationName = this->operations.keys[i];
-    Calculator::OperationHandlers& handlers = this->operations.values[i].getElement();
+    const std::string& operationName = operations.keys[i];
+    Calculator::OperationHandlers& handlers = operations.values[i].getElement();
     output[operationName] = handlers.toJSON();
   }
   return output;
+}
+
+std::string Calculator::Examples::escape(const std::string& atom) {
+  if (this->toBeEscaped.size == 0) {
+    this->toBeEscaped = List<std::string>({
+      "\\", "`", "*", "_",
+      "{", "}", "[", "]", "<", ">", "(", ")",
+      "#", "+", "-", ".", "!", "|"
+    });
+  }
+  if (!this->toBeEscaped.contains(atom)) {
+    return atom;
+  }
+  return "\\" + atom;
+}
+
+std::string Calculator::Examples::getExamplesReadmeFragment() {
+  MacroRegisterFunctionWithName("Calculator::getExamplesReadmeFragment");
+  std::stringstream out;
+
+  MapReferences<std::string, MemorySaving<OperationHandlers>, HashFunctions::hashFunction>&
+  operations = this->owner->operations;
+  for (int i = 0; i < operations.size(); i ++) {
+    if (operations.values[i].isZeroPointer()) {
+      continue;
+    }
+    std::string atomEscaped = this->escape(operations.keys[i]);
+    Calculator::OperationHandlers& handlers = operations.values[i].getElement();
+    int totalHandlers = handlers.handlers.size + handlers.compositeHandlers.size;
+    if (totalHandlers > 1) {
+      out << "Operator or function " << atomEscaped
+      << " is overloaded with "
+      << totalHandlers << " total handlers.";
+    }
+    for (int j = 0; j < handlers.handlers.size; j ++ ) {
+      out << "\n" << this->toStringOneOperationHandler(atomEscaped, false, handlers.handlers[j]);
+    }
+    for (int j = 0; j < handlers.compositeHandlers.size; j ++ ) {
+      out << "\n" << this->toStringOneOperationHandler(atomEscaped, true, handlers.compositeHandlers[j]);
+    }
+  }
+  return out.str();
+}
+
+std::string Calculator::Examples::toStringOneOperationHandler(
+  const std::string& escapedAtom,
+  bool isComposite,
+  const Function& function
+) {
+  std::stringstream out;
+  out << "*" << escapedAtom << "*";
+  if (isComposite) {
+    out << " (_composite_)";
+  }
+  out << " [" << function.calculatorIdentifier << "]";
+  if (function.additionalIdentifier != "") {
+    out << " {" << function.additionalIdentifier << "}.";
+  }
+  out << "\n";
+  out << "[Example](" << HtmlRoutines::getCalculatorComputationURL(function.theExample) << ")\n";
+  out << "```";
+  out << function.theExample;
+  out << "```";
+  out << "\n";
+  out << function.theDescription;
+  return out.str();
+}
+
+bool Calculator::Examples::writeExamplesReadme() {
+  std::stringstream out;
+  std::string readmeTemplate;
+  if (!FileOperations::loadFileToStringVirtual(
+    "examples/readme_template.md", readmeTemplate, false, nullptr
+  )) {
+    global << Logger::red << "Failed to read readme template." << Logger::endL;
+    return false;
+  }
+  std::string examples = this->getExamplesReadmeFragment();
+  StringRoutines::replaceOnce(readmeTemplate,
+    "${content-inserted-by-calculator-in-Calculator::Examples::writeExamplesReadme}",
+    examples
+  );
+  return FileOperations::writeFileVirual("examples/README.md", examples, nullptr);
 }
 
 Calculator::OperationHandlers::OperationHandlers() {

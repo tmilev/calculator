@@ -100,3 +100,15 @@ bool Calculator::Test::builtInFunctionsABTest(Calculator& ownerInitialized) {
   }
   return true;
 }
+
+bool Calculator::Examples::Test::all() {
+  Calculator::Examples::Test::compose();
+  return true;
+}
+
+bool Calculator::Examples::Test::compose() {
+  Calculator calculator;
+  calculator.initialize(Calculator::Mode::full);
+  calculator.examples.writeExamplesReadme();
+  return true;
+}

@@ -66,6 +66,8 @@ void Test::run() {
     ElementZmodP::Test::all();
     RationalFunction<Rational>::Test::all();
     Selection::Test::all();
+    // Also tested in calculator test suite.
+    Calculator::Examples::Test::all();
     global << Logger::green << "Basic tests completed." << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::crypto)) {
@@ -90,6 +92,7 @@ void Test::run() {
     TopicElementParser::Test::all();
   }
   if (this->shouldTest(Test::Suites::calculator)) {
+    Calculator::Examples::Test::all();
     Calculator::Test::all();
   }
   if (this->shouldTest(Test::Suites::problems)) {

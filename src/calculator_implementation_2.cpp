@@ -100,7 +100,9 @@ std::string Calculator::Examples::toStringOneOperationHandler(
     out << " {" << function.additionalIdentifier << "}.";
   }
   out << "\n";
-  out << "[Example](" << HtmlRoutines::getCalculatorComputationURL(function.theExample) << ")\n";
+  out << "[Example](" << "https://calculator-algebra.org/"
+  << WebAPI::app
+  << HtmlRoutines::getCalculatorComputationURL(function.theExample) << ")\n";
   out << "```\n";
   out << function.theExample;
   out << "\n```";

@@ -76,10 +76,10 @@ std::string Calculator::Examples::getExamplesReadmeFragment() {
       << totalHandlers << " total handlers.";
     }
     for (int j = 0; j < handlers.handlers.size; j ++ ) {
-      out << "\n" << this->toStringOneOperationHandler(atomEscaped, false, handlers.handlers[j]);
+      out << "\n\n" << this->toStringOneOperationHandler(atomEscaped, false, handlers.handlers[j]);
     }
     for (int j = 0; j < handlers.compositeHandlers.size; j ++ ) {
-      out << "\n" << this->toStringOneOperationHandler(atomEscaped, true, handlers.compositeHandlers[j]);
+      out << "\n\n" << this->toStringOneOperationHandler(atomEscaped, true, handlers.compositeHandlers[j]);
     }
   }
   return out.str();

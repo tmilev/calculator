@@ -19,28 +19,29 @@ However, since we allow arbitrary user modifications of our rules, it is guarant
 
 - The engine has computational timeouts and RAM memory limits.
 
--- If a first, "soft" timeout is hit (less than 10 seconds, depending on configuration), the calculator will continue the computation, but will return to the user with an explanation and a handle to monitor the so queued long computation.
+    -- If a first "soft" timeout is hit (less than 10 seconds, depending on configuration), the calculator will continue the computation, but will return to the user with an explanation and a handle to monitor the so queued long computation.
 
--- If a larger "hard" timeout is hit (usually between 30-100 seconds, depending on configuration), the calculator will crash gracefully, with a reasonable progress report of how far it got. This timeout can be turned off entirely for the purpose of carrying out scientific computations. Of course, turning off the calculator hard is not recommended for a public server. 
+    -- If a larger "hard" timeout is hit (usually between 30-100 seconds, depending on configuration), the calculator will crash gracefully, with a reasonable progress report of how far it got. This timeout can be turned off entirely for the purpose of carrying out scientific computations. Of course, turning off the hard timeout is not recommended for a public server. 
 
--- There are various RAM memory and stack depth limits. Hitting any of these will cause the calculator to crash with a reasonable explanation of its internal state.
+    -- There are various RAM memory and stack depth limits. Hitting any of these will cause the calculator to crash with a reasonable explanation of its internal state.
 
 
-## List of handlers
-Below, we list all built-in calculator commands. The command is used to tell the calculator to carry out a given computation, with unspecified syntax. 
-
-The next item in [] brackets is the calculator name of the handler, distinguishing between different overloaded commands bound to the same symbol. This can be used to turn on/turn off the handler (use TurnOnRules/TurnOffRules).
-
-The entry in {} braces is a name of the C++ function where the handler is implemented. This can be used to easily search the source code of the calculator.
-
-### Syntax is not fixed in stone 
-In this section, we use the term "syntax" to refer to the translation of a sequence of characters to an internal tree-based Expression data structure.
+## Syntax is not fixed in stone 
+By "syntax", we mean the translation of a sequence of characters to an internal tree-based Expression data structure.
 
 - In the terminology of our handlers, the string "a+b" corresponds to the command "+" with inputs "a" and "b". These are in turn handled by one of 40+ handlers, of which the first applicable one is chosen. Each of these handlers is implemented by a C++ function that takes as input the calculator expressions "+", "a" and "b" (note the command name is passed to the C++ handler as part of the inputs).
 
-- Likewise, the string "Polynomialize((x+1)^2)" corresponds to the command "Polynomialize" with input "(x+1)^2". 
+- Likewise, the string "Polynomialize((x+1)^2)" corresponds to the command "Polynomialize" with input "(x+1)^2". The actual C++ handler takes as input both the expression "Polynomialize" and the expression "(x+1)^2".
 
-Note that the two examples given here have different syntax; this is so by design. Our syntax is not fixed in stone but in practice is very stable for commonly used expressions, as it is built on top of a subset of LaTeX. 
+Note that these two examples have different syntax; this is so by design. Our syntax is not fixed in stone but in practice is very stable for commonly used expressions, as it is built on top of a subset of LaTeX. 
+
+
+## List of handlers
+Below, we list all built-in calculator commands. For each handler, the first entry is the name of the command.
+
+The next handler item show in [] brackets is the calculator name of the handler, distinguishing between different overloaded commands bound to the same symbol. This can be used to turn on/turn off the handler (use TurnOnRules/TurnOffRules).
+
+The entry in {} braces is a name of the C++ function where the handler is implemented. This can be used to easily search the source code of the calculator.
 
 
 ### Auto-generated list of handlers.

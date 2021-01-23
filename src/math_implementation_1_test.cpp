@@ -314,7 +314,7 @@ template<>
 RationalFunction<Rational> RationalFunction<Rational>::Test::fromString(const std::string& input) {
   Calculator parser;
   std::string inputModified = "MakeRationalFunction(" + input + ")";
-  parser.initialize();
+  parser.initialize(Calculator::Mode::full);
   parser.evaluate(inputModified);
   if (!parser.programExpression.startsWith(parser.opCommandSequence())) {
     global.fatal

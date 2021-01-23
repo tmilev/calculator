@@ -377,7 +377,6 @@ public:
   static bool greatestCommonDivisorInteger(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerIsNilpotent(Calculator& calculator, const Expression& input, Expression& output);
-  //static bool innerGramSchmidtVerbose(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerInvertMatrixRFsVerbose(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerInvertMatrix(Calculator& calculator, const Expression& input, Expression& output);

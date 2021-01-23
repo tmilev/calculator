@@ -1360,7 +1360,7 @@ bool CalculatorHTML::prepareAndExecuteCommands(Calculator& interpreter, std::str
   double startTime = global.getElapsedSeconds();
   this->prepareCommands(comments);
 
-  interpreter.initialize();
+  interpreter.initialize(Calculator::Mode::educational);
   interpreter.flagWriteLatexPlots = false;
   interpreter.flagPlotNoControls = true;
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds()-startTime);

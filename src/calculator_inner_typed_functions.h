@@ -76,6 +76,7 @@ public:
   static bool innerMultiplyRationalByRational(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyDoubleOrRationalByDoubleOrRational(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyCoxeterEltByCoxeterElt(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPowerWeylGroupElementByInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyCharacterByCharacter(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyCharSSLieAlgByCharSSLieAlg(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyAnyByUE(Calculator& calculator, const Expression& input, Expression& output);

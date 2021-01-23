@@ -122,7 +122,7 @@ int Expression::getTypeOperation<std::string>() const {
 template < >
 int Expression::getTypeOperation<AlgebraicNumber>() const {
   this->checkInitialization();
-  return this->owner->opAlgNumber();
+  return this->owner->opAlgebraicNumber();
 }
 
 template < >

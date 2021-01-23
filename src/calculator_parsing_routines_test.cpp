@@ -5,7 +5,7 @@
 
 bool Calculator::Test::all() {
   Calculator tester;
-  tester.initialize();
+  tester.initialize(Calculator::Mode::full);
   Calculator::Test::checkBuiltInInitializations(tester);
   Calculator::Test::parseAllExamples(tester);
   Calculator::Test::numberOfTestFunctions(tester);

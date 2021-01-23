@@ -86,6 +86,7 @@ void Calculator::EvaluationStatistics::reset() {
 
 void Calculator::reset() {
   this->statistics.reset();
+  this->mode = Calculator::Mode::full;
   this->maximumAlgebraicTransformationsPerExpression = 100;
   this->maximumRuleStacksCached = 500;
   this->maximumCachedExpressionPerRuleStack = 100000;
@@ -114,7 +115,6 @@ void Calculator::reset() {
   this->flagPlotShowJavascriptOnly = false;
   this->flagHasGraphics = false;
   this->flagUseBracketsForIntervals = false;
-  this->flagUseScientificFunctions = true;
 
   this->maximumLatexChars = 2000;
   this->numEmptyTokensStart = 9;
@@ -165,9 +165,10 @@ void Calculator::reset() {
   this->allChildExpressionHashes.clear();
 }
 
-void Calculator::initialize() {
+void Calculator::initialize(Calculator::Mode desiredMode) {
   MacroRegisterFunctionWithName("Calculator::initialize");
   this->reset();
+  this->mode = desiredMode;
 
   this->operations.setExpectedSize(1000);
   this->namedRules.setExpectedSize(500);
@@ -351,10 +352,14 @@ void Calculator::initialize() {
   this->initializePredefinedStandardOperationsWithoutHandler();
   this->totalPatternMatchesPerformed = 0;
   this->initializeBuiltInsFreezeArguments();
-  this->initializeStandardFunctions();
-  this->initializeScientificFunctions();
-  this->initCalculusTestingFunctions();
-  this->initPredefinedOperationsComposite();
+  this->initializeFunctionsStandard();
+  if (this->mode == Calculator::Mode::full) {
+    this->initializeFunctionsCryptoAndEncoding();
+    this->initializeFunctionsScientificBasic();
+    this->initializeFunctionsSemisimpleLieAlgebras();
+    this->initializeAdminFunctions();
+    this->initializeFunctionsExtra();
+  }
   this->initializeAtomsThatAllowCommutingOfArguments();
   this->initializeAtomsThatFreezeArguments();
   this->initializeAtomsNotGoodForChainRule();

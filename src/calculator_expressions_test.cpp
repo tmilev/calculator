@@ -5,7 +5,7 @@
 bool Expression::Test::all() {
   MacroRegisterFunctionWithName("Expression::Test::all");
   Calculator tester;
-  tester.initialize();
+  tester.initialize(Calculator::Mode::full);
   Expression::Test::toStringTestRecode(tester);
   Expression::Test::isUserDefinedAtom(tester);
   return true;
@@ -27,7 +27,7 @@ bool Expression::Test::toStringTestRecodeOnce(
 
 bool Expression::Test::toStringTestRecode(Calculator& owner) {
   MacroRegisterFunctionWithName("Expression::Test::toStringTestRecode");
-  owner.initialize();
+  owner.initialize(Calculator::Mode::full);
   Expression::Test::toStringTestRecodeOnce("1+1", owner);
   return true;
 }
@@ -52,7 +52,7 @@ bool Expression::Test::isUserDefinedAtomOnce(
 
 bool Expression::Test::isUserDefinedAtom(Calculator& owner) {
   MacroRegisterFunctionWithName("Expression::Test::isUserDefinedAtom");
-  owner.initialize();
+  owner.initialize(Calculator::Mode::full);
   Expression::Test::isUserDefinedAtomOnce(owner, "x", true);
   Expression::Test::isUserDefinedAtomOnce(owner, "x+y", false);
   Expression::Test::isUserDefinedAtomOnce(owner, "x+1", false);

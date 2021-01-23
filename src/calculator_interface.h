@@ -790,6 +790,8 @@ class Function {
     static Options adminNoTest();
     static Options innerInvisible();
     static Options standard();
+    static Options compositeStandard();
+    static Options innerFreezesArguments();
     static Options innerAdminNoTestInvisibleOffByDefault();
     static Options innerInvisibleExperimental();
     static Options innerAdminNoTestExperimental();
@@ -797,6 +799,7 @@ class Function {
     static Options experimental();
     static Options invisibleNoTest();
     static Options innerNoTest();
+    static Options innerNoTestExperimental();
     static Options outerOffByDefault();
     Options();
   };
@@ -1079,29 +1082,29 @@ public:
 
 class ExpressionTripleCrunchers {
 public:
-  int theOp;
+  int operation;
   int leftType;
   int rightType;
   bool operator==(const ExpressionTripleCrunchers& other) const {
-    return this->leftType == other.leftType && this->rightType == other.rightType && this->theOp == other.theOp;
+    return this->leftType == other.leftType && this->rightType == other.rightType && this->operation == other.operation;
   }
   void operator=(const ExpressionTripleCrunchers& other) {
     this->leftType = other.leftType;
     this->rightType = other.rightType;
-    this->theOp = other.theOp;
+    this->operation = other.operation;
   }
-  ExpressionTripleCrunchers(): theOp(- 1), leftType(- 1), rightType(- 1) {
+  ExpressionTripleCrunchers(): operation(- 1), leftType(- 1), rightType(- 1) {
   }
   ExpressionTripleCrunchers(
-    int inputOp, int inputLeft, int inputRight
-  ): theOp(inputOp), leftType(inputLeft), rightType(inputRight) {
+    int inputOperation, int inputLeft, int inputRight
+  ): operation(inputOperation), leftType(inputLeft), rightType(inputRight) {
 
   }
   static unsigned int hashFunction(const ExpressionTripleCrunchers& input) {
     return
       static_cast<unsigned int>(input.leftType) * someRandomPrimes[0] +
       static_cast<unsigned int>(input.rightType) * someRandomPrimes[1] +
-      static_cast<unsigned int>(input.theOp) * someRandomPrimes[2];
+      static_cast<unsigned int>(input.operation) * someRandomPrimes[2];
   }
 };
 
@@ -1143,6 +1146,23 @@ public:
     static std::string sort;
     static std::string transpose;
   };
+
+  // Initialization mode for the calculator.
+  // Allows to avoid bootstrapping a number of
+  // functions/operations.
+  enum Mode {
+    // Run in full scientific mode;
+    // initialize all scientific functions.
+    full,
+    // Initialize only the functions required for
+    // basic mathematics. Integrals and
+    // commutative algebra are included but not
+    // representation theory, Lie theory and other
+    // advanced functions
+    educational
+  };
+
+  Mode mode;
 
   // Operations parametrize the expression elements.
   // Operations are the labels of the atom nodes of the expression tree.
@@ -1297,7 +1317,6 @@ public:
   bool flagDefaultRulesWereTamperedWith;
   bool flagHasGraphics;
   bool flagWriteLatexPlots;
-  bool flagUseScientificFunctions;
 
   bool flagNoApproximations;
 
@@ -1813,7 +1832,7 @@ public:
   int opDouble() {
     return this->operations.getIndexNoFail("Double");
   }
-  int opAlgNumber() {
+  int opAlgebraicNumber() {
     return this->operations.getIndexNoFail("AlgebraicNumber");
   }
   int opElementWeylAlgebra() {
@@ -2320,7 +2339,7 @@ public:
     MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction>& handlerCollection
   );
   void reset();
-  void initialize();
+  void initialize(Calculator::Mode desiredMode);
   void initializeToStringHandlers();
   void initializePredefinedWordSplits();
   void initializeAtomsThatFreezeArguments();
@@ -2334,13 +2353,13 @@ public:
   void initializeBuiltInAtomsWhosePowersAreInterpretedAsFunctions();
   void initializeBuiltInAtomsNotInterpretedAsFunctions();
   void initializeAtomsNotGoodForChainRule();
-  void initializeStandardFunctions();
-  void initializeScientificFunctions();
-  void initializeSemisimpleLieAlgebraFunctions();
+  void initializeFunctionsStandard();
+  void initializeFunctionsScientificBasic();
+  void initializeFunctionsExtra();
+  void initializeFunctionsCryptoAndEncoding();
+  void initializeFunctionsSemisimpleLieAlgebras();
   void initializePredefinedStandardOperationsWithoutHandler();
-  void initCalculusTestingFunctions();
-  void initAdminFunctions();
-  void initPredefinedOperationsComposite();
+  void initializeAdminFunctions();
   bool extractExpressions(Expression& outputExpression, std::string* outputErrors);
   void evaluateCommands();
   JSData extractSolution();

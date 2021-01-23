@@ -460,7 +460,7 @@ bool Expression::assignMatrixExpressions(
       theMatType.addChildAtomOnTop(owner.opDouble());
       break;
     case typeAlgebraic:
-      theMatType.addChildAtomOnTop(owner.opAlgNumber());
+      theMatType.addChildAtomOnTop(owner.opAlgebraicNumber());
       break;
     case typePolyRat:
       theMatType.addChildAtomOnTop(owner.opPolynomialRational());

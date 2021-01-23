@@ -15,7 +15,7 @@ bool WebAPIResponse::Test::all() {
 bool WebAPIResponse::Test::solveJSON() {
   WebAPIResponse response;
   global.calculator().freeMemory();
-  global.calculator().getElement().initialize();
+  global.calculator().getElement().initialize(Calculator::Mode::educational);
   global.setWebInput(WebAPI::request::calculatorInput, "1+1");
   JSData result = response.solveJSON();
   std::string expected =
@@ -118,7 +118,7 @@ std::string OneComparison::toString() const {
 bool OneComparison::compare(bool hideDesiredAnswer) {
   WebAPIResponse response;
   global.calculator().freeMemory();
-  global.calculator().getElement().initialize();
+  global.calculator().getElement().initialize(Calculator::Mode::educational);
   global.setWebInput(WebAPI::request::compareExpressionsGiven, HtmlRoutines::convertStringToURLString(this->given, false));
   global.setWebInput(WebAPI::request::compareExpressionsDesired, HtmlRoutines::convertStringToURLString(this->desired, false));
   JSData result = response.compareExpressions(false);

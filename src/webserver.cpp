@@ -3369,7 +3369,7 @@ int WebServer::run() {
   }
   global.logs.logType = GlobalVariables::LogData::type::server;
   this->initializeSignals();
-  global.calculator().getElement().initialize();
+  global.calculator().getElement().initialize(Calculator::Mode::full);
   // Cannot call initializeMutex here: not before we execute fork();
   global.calculator().getElement().computeAutoCompleteKeyWords();
   global.calculator().getElement().writeAutoCompleteKeyWordsToFile();
@@ -3589,7 +3589,7 @@ bool WebWorker::runOnce() {
   }
   if (this->statistics.allReceives > 0) {
     global.calculator().freeMemory();
-    global.calculator().getElement().initialize();
+    global.calculator().getElement().initialize(Calculator::Mode::full);
     global.comments.resetComments();
     global << Logger::blue << "Created new calculator for connection: "
     << this->statistics.allReceives << Logger::endL;
@@ -4443,7 +4443,7 @@ int WebServer::mainConsoleHelp() {
 int WebServer::mainCommandLine() {
   MacroRegisterFunctionWithName("WebServer::mainCommandLine");
   Calculator& theCalculator = global.calculator().getElement();
-  theCalculator.initialize();
+  theCalculator.initialize(Calculator::Mode::full);
   if (global.programArguments.size > 1) {
     for (int i = 1; i < global.programArguments.size; i ++) {
       theCalculator.inputString += global.programArguments[i];

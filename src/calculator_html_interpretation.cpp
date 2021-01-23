@@ -63,7 +63,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   }
   Answer& answer = problem.problemData.answers.values[indexLastAnswerId];
   Calculator interpreter;
-  interpreter.initialize();
+  interpreter.initialize(Calculator::Mode::educational);
   interpreter.flagPlotNoControls = true;
   interpreter.flagWriteLatexPlots = false;
   if (!problem.prepareCommands(&comments)) {
@@ -287,7 +287,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   }
   Calculator interpreter;
   interpreter.flagUseLnInsteadOfLog = true;
-  interpreter.initialize();
+  interpreter.initialize(Calculator::Mode::educational);
   interpreter.flagWriteLatexPlots = false;
   interpreter.flagPlotNoControls = true;
   std::stringstream studentAnswerWithComments;
@@ -322,7 +322,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   << studentAnswerNoContextE.toString(&theFormat) << "\\)";
   Calculator interpreterWithAdvice;
   interpreterWithAdvice.flagUseLnInsteadOfLog = true;
-  interpreterWithAdvice.initialize();
+  interpreterWithAdvice.initialize(Calculator::Mode::educational);
   interpreterWithAdvice.flagWriteLatexPlots = false;
   interpreterWithAdvice.flagPlotNoControls = true;
   std::stringstream calculatorInputStream,
@@ -925,7 +925,7 @@ JSData WebAPIResponse::getEditPageJSON() {
     theAutocompleteKeyWords.addOnTopNoRepetition(theFile.topics.knownTopicBundles.keys);
   } else {
     Calculator tempCalculator;
-    tempCalculator.initialize();
+    tempCalculator.initialize(Calculator::Mode::educational);
     tempCalculator.computeAutoCompleteKeyWords();
     theAutocompleteKeyWords.addOnTopNoRepetition(theFile.parser.calculatorClasses);
     theAutocompleteKeyWords.addOnTopNoRepetition(tempCalculator.autoCompleteKeyWords);
@@ -1183,7 +1183,7 @@ bool AnswerChecker::checkAnswerHardcoded(
   MacroRegisterFunctionWithName("AnswerChecker::checkAnswerHardcoded");
   ProblemData& currentProblemData = this->problem.problemData;
   Answer& answer = currentProblemData.answers.values[this->answerIndex];
-  this->interpreter.initialize();
+  this->interpreter.initialize(Calculator::Mode::educational);
   this->interpreter.flagWriteLatexPlots = false;
   this->interpreter.flagPlotNoControls = true;
   CompareExpressions comparison(true);
@@ -1244,7 +1244,7 @@ bool AnswerChecker::checkAnswerStandard(
       completedProblemStreamNoEnclosures.str(), "Input, no enclosures. "
     );
   }
-  interpreter.initialize();
+  interpreter.initialize(Calculator::Mode::educational);
   interpreter.flagWriteLatexPlots = false;
   interpreter.flagPlotNoControls = true;
 
@@ -1263,7 +1263,7 @@ bool AnswerChecker::checkAnswerStandard(
     }
     output << "<br>Here's what I understood. ";
     Calculator isolatedInterpreter;
-    isolatedInterpreter.initialize();
+    isolatedInterpreter.initialize(Calculator::Mode::educational);
     isolatedInterpreter.flagWriteLatexPlots = false;
     isolatedInterpreter.flagPlotNoControls = true;
     isolatedInterpreter.evaluate("(" + currentA.currentAnswerClean + ")");
@@ -1609,7 +1609,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     return result;
   }
   Calculator interpreter;
-  interpreter.initialize();
+  interpreter.initialize(Calculator::Mode::educational);
   interpreter.flagPlotNoControls = true;
   interpreter.flagWriteLatexPlots = false;
   std::stringstream answerCommands, answerCommandsNoEnclosure;

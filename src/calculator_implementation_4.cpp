@@ -24,7 +24,7 @@ Calculator::Calculator() {
   this->flagUseLnInsteadOfLog = false;
   this->flagPlotShowJavascriptOnly = false;
   this->numberExpectedExpressionsAtInitialization = - 1;
-  this->flagUseScientificFunctions = true;
+  this->mode = Calculator::Mode::full;
 }
 
 MemorySaving<Calculator>& GlobalVariables::calculator() {
@@ -1410,6 +1410,19 @@ Function::Options Function::Options::innerAdminNoTestInvisibleOffByDefault() {
   return result;
 }
 
+Function::Options Function::Options::compositeStandard() {
+  Function::Options result;
+  result.flagIsCompositeHandler = true;
+  result.flagIsInner = true;
+  return result;
+}
+
+Function::Options Function::Options::innerFreezesArguments() {
+  Function::Options result;
+  result.flagIsInner = true;
+  result.freezesArguments = true;
+  return result;
+}
 
 Function::Options Function::Options::innerAdminNoTest() {
   Function::Options result;
@@ -1457,6 +1470,14 @@ Function::Options Function::Options::innerNoTest() {
   Function::Options result;
   result.flagIsInner = true;
   result.dontTestAutomatically = true;
+  return result;
+}
+
+Function::Options Function::Options::innerNoTestExperimental() {
+  Function::Options result;
+  result.flagIsInner = true;
+  result.dontTestAutomatically = true;
+  result.flagIsExperimental = true;
   return result;
 }
 

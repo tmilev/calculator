@@ -305,6 +305,28 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt(
   return output.assignValue(leftR, calculator);
 }
 
+bool CalculatorFunctionsBinaryOps::innerPowerWeylGroupElementByInteger(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerWeylGroupElementByInteger");
+  if (input.size() != 3) {
+    return false;
+  }
+  ElementWeylGroup left;
+  if (!input[1].isOfType(&left)) {
+    return false;
+  }
+  LargeInteger power;
+  if (!input[2].isInteger(&power)) {
+    return false;
+  }
+  ElementWeylGroup identity;
+  identity.makeIdentity(*left.owner);
+  MathRoutines::raiseToPower(left, power, identity);
+  return output.assignValue(left, calculator);
+}
+
+
 bool CalculatorFunctionsBinaryOps::innerDivideRatByRat(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

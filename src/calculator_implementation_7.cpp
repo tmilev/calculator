@@ -7637,7 +7637,7 @@ bool Calculator::Test::calculatorTestRun() {
     << ", command:\n"
     << currentTest.command << Logger::endL;
     theReport.report(reportStream.str());
-    theTester.initialize();
+    theTester.initialize(Calculator::Mode::full);
     theTester.checkConsistencyAfterInitialization();
     theTester.evaluate(currentTest.command);
     currentTest.actualResult = theTester.programExpression.toString(&theFormat);

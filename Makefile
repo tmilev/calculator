@@ -121,6 +121,9 @@ SOURCES_RELATIVE_PATH=\
     calculator_lie_theory.cpp \
     calculator_finite_group_characters.cpp \
     calculator_function_registration.cpp \
+    calculator_function_registration_extra.cpp \
+    calculator_function_registration_scientific.cpp \
+    calculator_function_registration_lie_theory.cpp \
     calculator_html_interpretation.cpp \
     calculator_html_routines.cpp \
     calculator_implementation_1.cpp \

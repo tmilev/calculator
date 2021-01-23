@@ -18,8 +18,11 @@ However, since we allow arbitrary user modifications of our rules, it is guarant
 - The engine caches all expressions generated in the past, up to a computational threshold, and, using the cache, can detect cycles. This can detect both types of cycles: ever-growing and finite ones, where we note that every infinite substitution falls into one of these two categories. The cache is also used to speed up substitutions of expressions that have previously been "reduced".
 
 - The engine has computational timeouts and RAM memory limits.
+
 -- If a first, "soft" timeout is hit (less than 10 seconds, depending on configuration), the calculator will continue the computation, but will return to the user with an explanation and a handle to monitor the so queued long computation.
+
 -- If a larger "hard" timeout is hit (usually between 30-100 seconds, depending on configuration), the calculator will crash gracefully, with a reasonable progress report of how far it got. This timeout can be turned off entirely for the purpose of carrying out scientific computations. Of course, turning off the calculator hard is not recommended for a public server. 
+
 -- There are various RAM memory and stack depth limits. Hitting any of these will cause the calculator to crash with a reasonable explanation of its internal state.
 
 

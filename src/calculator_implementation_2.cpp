@@ -71,7 +71,7 @@ std::string Calculator::Examples::getExamplesReadmeFragment() {
     Calculator::OperationHandlers& handlers = operations.values[i].getElement();
     int totalHandlers = handlers.handlers.size + handlers.compositeHandlers.size;
     if (totalHandlers > 1) {
-      out << "Operator or function " << atomEscaped
+      out << "\n\nOperator or function " << atomEscaped
       << " is overloaded with "
       << totalHandlers << " total handlers.";
     }
@@ -101,9 +101,9 @@ std::string Calculator::Examples::toStringOneOperationHandler(
   }
   out << "\n";
   out << "[Example](" << HtmlRoutines::getCalculatorComputationURL(function.theExample) << ")\n";
-  out << "```";
+  out << "```\n";
   out << function.theExample;
-  out << "```";
+  out << "\n```";
   out << "\n";
   out << function.theDescription;
   return out.str();
@@ -123,7 +123,7 @@ bool Calculator::Examples::writeExamplesReadme() {
     "${content-inserted-by-calculator-in-Calculator::Examples::writeExamplesReadme}",
     examples
   );
-  return FileOperations::writeFileVirual("examples/README.md", examples, nullptr);
+  return FileOperations::writeFileVirual("examples/README.md", readmeTemplate, nullptr);
 }
 
 Calculator::OperationHandlers::OperationHandlers() {

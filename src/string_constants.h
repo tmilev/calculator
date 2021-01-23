@@ -202,11 +202,8 @@ public:
   static std::string calculatorHTML            ;
   static std::string HTMLCommon                ;
   static std::string HTMLCommonFonts           ;
-  static std::string HTMLJQueryMinified        ;
   static std::string HTMLAceSrcMin             ;
-  static std::string HTMLJQueryUI              ;
-  static std::string HTMLMathQuill             ;
-  static std::string HTMLMathQuillFonts        ;
+  static std::string examples                  ;
 
   static std::string HTMLCommonFont            ;
   static std::string publicHTML                ;

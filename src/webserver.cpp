@@ -2719,7 +2719,8 @@ void WebServer::initListeningSockets() {
       this->theListeningSockets[i], this->highestSocketNumber
     );
     if (listen(this->theListeningSockets[i], WebServer::maxNumPendingConnections) == - 1) {
-      global.fatal << "Listen function failed on socket: " << this->theListeningSockets[i] << global.fatal;
+      global.fatal << "Listen function failed on socket: "
+      << this->theListeningSockets[i] << global.fatal;
     }
   }
 }

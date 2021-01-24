@@ -1872,7 +1872,8 @@ bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
 }
 
 std::string InputBox::getSliderName() const {
-  return StringRoutines::convertStringToJSONString(this->name);
+  return StringRoutines::convertStringToJSONString(this->name +
+  Crypto::convertStringToHex(Crypto::computeSha256(this->name), 0, false));
 }
 
 std::string InputBox::getUserInputBox() const {
@@ -1883,10 +1884,10 @@ std::string InputBox::getUserInputBox() const {
   out << std::fixed;
   if (this->value.evaluatesToDouble(&reader)) {
     out << "\\formInput"
-    << "{" << reader << ", " << this->name << "}" ;
+    << "{" << reader << ", " << this->getSliderName() << "}" ;
   } else {
     out << "\\formInput" << "{" << this->value.toString()
-    << ", " << this->name << "}" ;
+    << ", " << this->getSliderName() << "}" ;
   }
   return out.str();
 }

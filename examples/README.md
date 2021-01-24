@@ -39,7 +39,7 @@ Note that these two examples have different syntax; this is so by design. Our sy
 ## List of handlers
 Below, we list all built-in calculator commands. For each handler, the first entry is the name of the command.
 
-The next handler item show in [] brackets is the calculator name of the handler, distinguishing between different overloaded commands bound to the same symbol. This can be used to turn on/turn off the handler (use TurnOnRules/TurnOffRules).
+The next item, shown in [] brackets is the calculator name of the handler, distinguishing between different overloaded commands bound to the same symbol. This can be used to turn on/turn off the handler (use TurnOnRules/TurnOffRules).
 
 The entry in {} braces is a name of the C++ function where the handler is implemented. This can be used to easily search the source code of the calculator.
 

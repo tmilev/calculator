@@ -1236,7 +1236,6 @@ function writeTopicsToCoursePage() {
   miscellaneousFrontend.appendHtml(topicsElements[0], htmlContentElements);
   initializeProblemWeightsAndDeadlines();
   initializeDatePickers();
-  //mathjax.typeSetHard(topicsElements[0]);
   if (thePage.pages.problemPage.flagLoaded) {
     problemNavigation.writeToHTML();
   }

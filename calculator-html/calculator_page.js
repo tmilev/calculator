@@ -13,6 +13,9 @@ const InputPanelData = require("./initialize_buttons").InputPanelData;
 const storage = require("./storage");
 const autocomplete = require("./autocomplete");
 const initializeButtons = require("./initialize_buttons");
+const EquationEditor = require("./equation_editor").EquationEditor;
+const MathNode = require("./equation_editor").MathNode;
+const knownTypes = require("./equation_editor").knownTypes;
 
 class AtomHandler {
   constructor() {
@@ -91,45 +94,6 @@ class Calculator {
     this.calculatorPanel = null;
   }
 
-  updateCalculatorSliderEventHandler(inputBox) {
-    event.preventDefault();
-    let sliderName = this.inputBoxToSliderUpdaters[inputBox.name];
-    let theSliders = document.getElementsByName(sliderName);
-    for (let counterSlider = 0; counterSlider < theSliders.length; counterSlider++) {
-      let currentSlider = theSliders[counterSlider];
-      currentSlider.value = inputBox.value;
-    }
-    this.updateSliderToInputBox(inputBox.name, sliderName);
-  }
-
-  addListenersToInputBoxes() {
-    //let theString=" updating: box names, slider names: ";
-    for (let i = 0; i < this.inputBoxNames.length; i++) {
-      let theBoxes = document.getElementsByName(this.inputBoxNames[i]);
-      for (let j = 0; j < theBoxes.length; j++) {
-        theBoxes[j].addEventListener("input", this.updateCalculatorSliderEventHandler.bind(this, theBoxes[j]));
-      }
-    }
-  }
-
-  updateSliderToInputBox(boxName, sliderName) {
-    let theBoxes = document.getElementsByName(boxName);
-    let theSliders = document.getElementsByName(sliderName);
-    let sliderValue = theSliders[0].value;
-    for (let i = 0; i < theBoxes.length; i++) {
-      theBoxes[i].value = sliderValue;
-    }
-    let plodtId = drawing.plotUpdaters[sliderName];
-    if (plodtId !== undefined) {
-      let theCanvas = drawing.canvases[plodtId];
-      if (theCanvas !== undefined) {
-        if (theCanvas.canvasResetFunction !== null) {
-          theCanvas.canvasResetFunction();
-        }
-      }
-    }
-  }
-
   processOneFunctionAtom(handlers) {
     let resultStrings = [];
     for (let i = 0; i < handlers.length; i++) {
@@ -170,6 +134,67 @@ class Calculator {
     this.submitComputation();
     event.preventDefault();
   }
+
+  bootstrapSlider(
+    /**@type{EquationEditor} */
+    editor,
+    /**@type{HTMLElement} */
+    container,
+  ) {
+    this.processMathNodesRecursive(editor.rootNode, container)
+  }
+
+  processMathNodesRecursive(
+    /**@type{MathNode} */
+    node,
+    /**@type{HTMLElement} */
+    container,
+  ) {
+    for (let i = 0; i < node.children.length; i++) {
+      this.processMathNodesRecursive(node.children[i], container);
+    }
+    this.processOne(node, container);
+  }
+
+  processOne(
+    /**@type{MathNode} */
+    node,
+    /**@type{HTMLElement} */
+    container,
+  ) {
+    if (node.type.type !== knownTypes.formInput.type) {
+      return;
+    }
+    let name = node.name;
+    let elements = container.querySelectorAll(`input[type=range][name="${name}"]`);
+    for (let i = 0; i < elements.length; i++) {
+      let current = elements[i];
+      node.element.addEventListener("input", () => {
+        current.value = node.element.value;
+        this.updateGraphics(name);
+      });
+      current.addEventListener("input", () => {
+        node.element.value = current.value;
+        this.updateGraphics(name);
+      });
+    }
+  }
+
+  updateGraphics(graphicsName) {
+    let plodtId = drawing.plotUpdaters[graphicsName];
+    if (plodtId === undefined) {
+      return;
+    }
+    let canvas = drawing.canvases[plodtId];
+    if (canvas === undefined) {
+      return;
+    }
+    if (canvas.canvasResetFunction === null) {
+      return;
+    }
+    canvas.canvasResetFunction();
+  }
+
 
   toggleExamples(theButton) {
     let theExamples = document.getElementById(ids.domElements.calculatorExamples);
@@ -385,9 +410,13 @@ class Calculator {
     if (this.flagTypeset === true) {
       return;
     }
+    let output = this.getOutputElement();
     typeset.typesetter.typesetSoft(
-      ids.domElements.spanCalculatorMainOutput,
+      output,
       "font-size: 20px; font-family:'Times New Roman'; display:inline-block;",
+      (editor) => {
+        this.bootstrapSlider(editor, output);
+      }
     );
     this.flagTypeset = true;
   }
@@ -410,9 +439,12 @@ class Calculator {
       thePage.pages.calculator.sciptIds.push(newId);
       thePage.injectScript(newId, incomingScripts[i].innerHTML);
     }
-    this.addListenersToInputBoxes();
     this.flagTypeset = false;
     this.typeset();
+  }
+
+  getOutputElement() {
+    return document.getElementById(ids.domElements.spanCalculatorMainOutput);
   }
 
   defaultOnLoadInjectScriptsAndProcessLaTeX(input, output) {
@@ -421,7 +453,9 @@ class Calculator {
     try {
       this.parsedComputation = miscellaneous.jsonUnescapeParse(input);
       let buffer = new BufferCalculator();
-      let progReportTimer = document.getElementById(ids.domElements.pages.calculator.monitoring.progressTimer);
+      let progReportTimer = document.getElementById(
+        ids.domElements.pages.calculator.monitoring.progressTimer,
+      );
       progReportTimer.innerHTML = "";
       this.writeResult(buffer, this.parsedComputation, this.panels);
       inputHtml = buffer.toString();
@@ -429,8 +463,7 @@ class Calculator {
       inputHtml = input + "<br>" + e;
       console.log("Error processing calculator output: " + e);
     }
-    let spanVerification = document.getElementById(ids.domElements.spanCalculatorMainOutput);
-    spanVerification.innerHTML = inputHtml;
+    this.getOutputElement().innerHTML = inputHtml;
     this.afterWriteOutput();
   }
 

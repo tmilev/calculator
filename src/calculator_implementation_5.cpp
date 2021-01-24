@@ -1872,23 +1872,21 @@ bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
 }
 
 std::string InputBox::getSliderName() const {
-  List<unsigned char> hex;
-  Crypto::computeSha256(this->name, hex);
-  return this->name + "_" + Crypto::convertListUnsignedCharsToHex(hex);
+  return StringRoutines::convertStringToJSONString(this->name);
 }
 
 std::string InputBox::getUserInputBox() const {
   MacroRegisterFunctionWithName("InputBox::getUserInputBox");
   std::stringstream out;
-  double theReader = 0;
+  double reader = 0;
   out.precision(4);
   out << std::fixed;
-  if (this->value.evaluatesToDouble(&theReader)) {
-    out << "\\FormInput" << "[" << theReader
-    << "]" << "{" << this->name << "}" ;
+  if (this->value.evaluatesToDouble(&reader)) {
+    out << "\\formInput"
+    << "{" << reader << ", " << this->name << "}" ;
   } else {
-    out << "\\FormInput" << "[" << this->value.toString()
-    << "]" << "{" << this->name << "}" ;
+    out << "\\formInput" << "{" << this->value.toString()
+    << ", " << this->name << "}" ;
   }
   return out.str();
 }

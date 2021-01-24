@@ -380,7 +380,7 @@ class Page {
 
   initializeCalculatorPagePartTwo() {
     initializeButtons.initializeButtons();
-    mathTypeSet.typesetter.typesetHard(ids.domElements.divMathjaxProblematicRender);
+    mathTypeSet.typesetter.typesetSoft(ids.domElements.divMathjaxProblematicRender);
   }
 
   sectionSelect(sectionNumber) {

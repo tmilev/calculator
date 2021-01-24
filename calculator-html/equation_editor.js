@@ -158,6 +158,11 @@ const knownTypes = {
     "verticalAlign": "text-bottom",
     "overflow": "hidden",
   }),
+  // An input element: rather than being a contentEditable div,
+  // this is a text-only input box.
+  formInput: new MathNodeType({
+    "type": "formInput",
+  }),
   // A non-editable math expression/operator such as "+" or "-".
   atomImmutable: new MathNodeType({
     "type": "atomImmutable",
@@ -547,6 +552,25 @@ class MathNodeFactory {
     underTheRadical.appendChild(mathNodeFactory.horizontalMath(equationEditor, underTheRadicalContent));
     sqrt.appendChild(underTheRadical);
     return sqrt;
+  }
+
+  formInput(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /** @type {string} */
+    content,
+  ) {
+    let nameAndContent = content.split(",");
+    if (nameAndContent.length < 2) {
+      nameAndContent.push("");
+      nameAndContent.push("");
+    }
+    nameAndContent[0] = nameAndContent[0].trim();
+    nameAndContent[1] = nameAndContent[1].trim();
+    const formInput = new MathNodeFormInput(
+      equationEditor, nameAndContent[0], nameAndContent[1],
+    );
+    return formInput;
   }
 
   /** @returns {MathNode} */
@@ -1078,12 +1102,21 @@ function mathFromElement(
   sanitizeLatexSource,
   /**@type{boolean} whether to remove \\displaystyle from latex source.*/
   removeDisplayStyle,
+  /**@type{Function|null} callback after the element has been typeset.*/
+  callback,
 ) {
   let content = container.textContent;
   if (content === null) {
     content = "";
   }
-  return mathFromLatex(container, content, editable, sanitizeLatexSource, removeDisplayStyle);
+  return mathFromLatex(
+    container,
+    content,
+    editable,
+    sanitizeLatexSource,
+    removeDisplayStyle,
+    callback,
+  );
 }
 
 /** @returns {EquationEditor} Returns typeset math.*/
@@ -1098,6 +1131,8 @@ function mathFromLatex(
   sanitizeLatexSource,
   /**@type{boolean} whether to remove \\displaystyle from latex source.*/
   removeDisplayStyle,
+  /**@type{Function|null} callback after the element has been typeset*/
+  callback,
 ) {
   let result = new EquationEditor(container, new EquationEditorOptions({
     editable: editable,
@@ -1106,6 +1141,9 @@ function mathFromLatex(
     logTiming: true,
   }));
   result.writeLatex(latex);
+  if (callback !== undefined && callback !== null) {
+    callback(result);
+  }
   return result;
 }
 
@@ -1250,6 +1288,8 @@ class LaTeXConstants {
       // Special command reserved for indicating the 
       // caret position when the latex is used in an editable box.
       "caret": "\\caret",
+      // Special command reserved for generation of input box.
+      "formInput": "\\formInput",
       "end": "\\end",
       "frac": "\\frac",
       "mathcal": "\\mathcal",
@@ -2251,6 +2291,15 @@ class LaTeXParser {
       let node = mathNodeFactory.cancel(this.equationEditor, last.node);
       return this.replaceParsingStackTop(node, "", - 2);
     }
+    if (
+      secondToLast.syntacticRole === "\\formInput" &&
+      last.isExpression() &&
+      !this.equationEditor.options.editable
+    ) {
+      this.lastRuleName = "form input";
+      let node = mathNodeFactory.formInput(this.equationEditor, last.node.toLatex());
+      return this.replaceParsingStackTop(node, "", - 2);
+    }
     if (secondToLast.syntacticRole === "{" && last.syntacticRole === "}") {
       this.lastRuleName = "{} to empty atom";
       let node = mathNodeFactory.atom(this.equationEditor, "");
@@ -2377,7 +2426,14 @@ class LaTeXParser {
 
 class EquationEditorOptions {
   constructor(
-    /** @type{{editable:boolean,removeDisplayStyle:boolean,sanitizeLatexSource:boolean,debugLogContainer:HTMLElement|null,latexInput:HTMLElement|null,editHandler:Function|null}} */
+    /** @type{{
+     * editable:boolean,
+     * removeDisplayStyle:boolean,
+     * sanitizeLatexSource:boolean,
+     * debugLogContainer:HTMLElement|null,
+     * latexInput:HTMLElement|null,
+     * editHandler:Function|null,
+     * }} */
     options,
   ) {
     /** @type{boolean} */
@@ -4042,7 +4098,11 @@ class MathNode {
       // Element already created;
       return;
     }
-    this.element = document.createElement("div");
+    if (this.type.type === knownTypes.formInput.type) {
+      this.element = document.createElement("input");
+    } else {
+      this.element = document.createElement("div");
+    }
     const fontSize = 20;
     if (
       (this.type.type === knownTypes.eventCatcher.type || this.type.type === knownTypes.atom.type) &&
@@ -4155,7 +4215,11 @@ class MathNode {
       this.element.style.fontSize = `${this.type.fontSizeRatio * 100}%`;
     }
     if (this.initialContent !== "") {
-      this.element.textContent = this.initialContent;
+      if (this.type.type === knownTypes.formInput.type) {
+        this.element.value = this.initialContent;
+      } else {
+        this.element.textContent = this.initialContent;
+      }
     }
     if (this.type.position !== "") {
       this.element.style.position = this.type.position;
@@ -4397,7 +4461,9 @@ class MathNode {
     depth,
   ) {
     if (
-      this.type.type === knownTypes.atom.type
+      this.type.type === knownTypes.atom.type ||
+      this.type.type === knownTypes.atomImmutable.type ||
+      this.type.type === knownTypes.formInput
     ) {
       this.createDOMElementIfMissing();
       return;
@@ -7887,6 +7953,31 @@ class MathNodeOverLine extends MathNode {
   }
 }
 
+class MathNodeFormInput extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /**@type{string} */
+    value,
+    /**@type{string} */
+    name,
+  ) {
+    super(equationEditor, knownTypes.formInput);
+    this.value = value;
+    this.name = name;
+    this.initialContent = this.value;
+  }
+  computeDimensions() {
+    this.computeDimensionsStandard();
+    this.boundingBox.height = this.equationEditor.standardAtomHeight;
+    if (this.boundingBox.height === 0) {
+      this.boundingBox.height = 20;
+    }
+    this.boundingBox.width = this.value.length * this.boundingBox.height;
+    this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
+  }
+}
+
 class MathNodeOverBrace extends MathNode {
   constructor(
     /** @type {EquationEditor} */
@@ -8750,6 +8841,8 @@ class MathTagCoverter {
   typeset(
     /**@type{HTMLElement|null} */
     toBeModified,
+    /**@type{Function|null} callback after the element has been typeset*/
+    callback,
   ) {
     this.elementProcessed = toBeModified;
     this.startTime = (new Date()).getTime();
@@ -8757,11 +8850,14 @@ class MathTagCoverter {
     if (this.elementProcessed !== null) {
       this.convertTagsRecursive(this.elementProcessed, 0);
     }
-    this.typesetMathTags();
+    this.typesetMathTags(callback);
   }
 
   /**@returns{boolean} */
-  postponeTypeset() {
+  postponeTypeset(
+    /**@type{Function|null} callback after the element has been typeset*/
+    callback,
+  ) {
     let currentTime = (new Date()).getTime();
     let elapsedTime = currentTime - this.lastTimeSample;
     if (
@@ -8771,21 +8867,26 @@ class MathTagCoverter {
       return false;
     }
     this.lastTimeSample = currentTime;
-    setTimeout(this.typesetMathTags.bind(this), 10);
+    setTimeout(() => {
+      this.typesetMathTags(callback);
+    }, 10);
     if (this.logTiming) {
       console.log(`Typeset ${this.typesetTotal} out of ${this.elementsToTypeset} elements.`);
     }
     return true;
   }
 
-  typesetMathTags() {
+  typesetMathTags(
+    /**@type{Function|null} callback after the element has been typeset*/
+    callback,
+  ) {
     let mathElements = document.getElementsByClassName("mathcalculator");
     if (this.elementsToTypeset < 0) {
       this.elementsToTypeset = mathElements.length;
       this.typesetTotal = 0;
     }
     for (; this.typesetTotal < mathElements.length; this.typesetTotal++) {
-      if (this.postponeTypeset()) {
+      if (this.postponeTypeset(callback)) {
         return;
       }
       /** @type {HTMLElement} */
@@ -8795,7 +8896,13 @@ class MathTagCoverter {
       }
       element["typeset"] = "true";
       let startTime = (new Date()).getTime();
-      mathFromElement(element, false, this.sanitizeLatexSource, this.removeDisplayStyle);
+      mathFromElement(
+        element,
+        false,
+        this.sanitizeLatexSource,
+        this.removeDisplayStyle,
+        callback,
+      );
       let typeSetTime = (new Date()).getTime() - startTime;
       if (this.logTiming) {
         console.log(`Typeset of element ${this.typesetTotal + 1} out of ${this.elementsToTypeset} took ${typeSetTime} ms.`);
@@ -8815,6 +8922,8 @@ function typeset(
   removeDisplayStyle,
   /**@type{boolean} whether to log in the console timing statistics.*/
   logTiming,
+  /**@type{Function|null} */
+  callbackEquationCreation,
 ) {
   if (style === "") {
     style = "font-family:'Times New Roman'; display:inline-block;";
@@ -8822,7 +8931,15 @@ function typeset(
   if (logTiming) {
     console.log("Logging parsing speed times; to turn off, set logTiming=false.")
   }
-  new MathTagCoverter(style, sanitizeLatexSource, removeDisplayStyle, logTiming).typeset(toBeModified);
+  new MathTagCoverter(
+    style,
+    sanitizeLatexSource,
+    removeDisplayStyle,
+    logTiming,
+  ).typeset(
+    toBeModified,
+    callbackEquationCreation,
+  );
 }
 
 class EquationEditorAction {
@@ -8950,4 +9067,6 @@ module.exports = {
   mathFromLatex,
   mathFromElement,
   latexConstants,
+  MathNode,
+  knownTypes,
 };

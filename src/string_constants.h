@@ -98,6 +98,7 @@ public:
     static std::string timeOutComments;
     static std::string workerId;
     static std::string workerIndex;
+    static std::string outputString;
     static std::string error;
     static std::string status;
     static std::string running;

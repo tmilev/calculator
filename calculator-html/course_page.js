@@ -80,7 +80,6 @@ function afterLoadCoursePage(incoming, result) {
       document.getElementsByTagName('title')[0].text = titleElements[0].text;
     }
   }
-  //mathjax.typeSetHard(coursePage);
   typeset.typesetter.typesetSoft(coursePage, "");
   let theTopics = document.getElementsByTagName("topicList");
   problemPage.writeEditCoursePagePanel();

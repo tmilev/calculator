@@ -45,6 +45,8 @@ const urlFields = {
   result: {
     result: "result",
     resultHtml: "resultHtml",
+    outputString: "outputString",
+    outputSliders: "sliders",
     crashReport: "crashReport",
     error: "error",
     syntaxErrors: "syntaxErrors",

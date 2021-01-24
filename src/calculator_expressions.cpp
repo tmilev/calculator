@@ -12,6 +12,7 @@
 #include "math_extra_elliptic_curves_implementation.h"
 #include <cmath>
 #include "math_rational_function_implementation.h"
+#include "string_constants.h"
 
 Expression operator*(const Expression& left, const Expression& right) {
   MacroRegisterFunctionWithName("operator*(Expression, Expression)");
@@ -3200,29 +3201,25 @@ std::string Expression::toStringAllSlidersInExpression() const {
     std::string theSliderName = theBox.getSliderName();
     out << "<input name =\""
     << theSliderName
-    << "\" type =\"range\"";
+    << "\" type='range'";
     double theReader = 0;
     out << std::fixed;
     out.precision(4);
     if (theBox.min.evaluatesToDouble(&theReader)) {
-      out << "min =\"" << theReader << "\" ";
+      out << "min='" << theReader << "' ";
     }
     if (theBox.max.evaluatesToDouble(&theReader)) {
-      out << "max =\"" << theReader << "\" ";
+      out << "max='" << theReader << "' ";
     }
     if (theBox.step.evaluatesToDouble(&theReader)) {
-      out << "step =\"" << theReader << "\" ";
+      out << "step ='" << theReader << "' ";
     }
     if (theBox.value.evaluatesToDouble(&theReader)) {
-      out << "value =\"" << theReader << "\" ";
+      out << "value='" << theReader << "' ";
     } else {
-      out << "value =\"1\" ";
+      out << "value='1' ";
     }
-    out << "oninput =\"window.calculator.calculator.updateSliderToInputBox('"
-    << boxNames[i]
-    << "','"
-    << theSliderName
-    << "');\"></input>";
+    out << "></input>";
   }
   return out.str();
 }
@@ -3247,12 +3244,12 @@ JSData Expression::toJSON(FormatExpressions* theFormat, const Expression& starti
       const Expression currentE = (*this)[i];
       if (!this->owner->flagHideLHS) {
         if (i < startingExpression.size()) {
-          input[i - 1] = startingExpression[i].toString(theFormat);
+          input[i - 1][WebAPI::result::outputString] = startingExpression[i].toString(theFormat);
         } else {
-          input[i - 1] = "No matching starting expression - possible use of the Melt keyword.";
+          input[i - 1][WebAPI::result::outputString]  = "No matching starting expression - possible use of the Melt keyword.";
         }
       } else {
-        input[i - 1] = "...";
+        input[i - 1][WebAPI::result::outputString]  = "...";
       }
       std::stringstream out;
       if (currentE.isOfType<std::string>()) {
@@ -3263,14 +3260,14 @@ JSData Expression::toJSON(FormatExpressions* theFormat, const Expression& starti
         out << HtmlRoutines::getMathNoDisplay(currentE.toString(theFormat), 1700);
       }
       out << currentE.toStringAllSlidersInExpression();
-      output[i - 1] = out.str();
+      output[i - 1][WebAPI::result::outputString]  = out.str();
     }
   } else {
     input[0] = HtmlRoutines::getMathNoDisplay(startingExpression.toString(theFormat), 1700);
     if (this->requiresNoMathTags()) {
-      output[0] = this->toString(theFormat);
+      output[0][WebAPI::result::outputString]  = this->toString(theFormat);
     } else {
-      output[0] = HtmlRoutines::getMathNoDisplay(this->toString(theFormat), 1700);
+      output[0][WebAPI::result::outputString]  = HtmlRoutines::getMathNoDisplay(this->toString(theFormat), 1700);
     }
   }
   result["input"] = input;

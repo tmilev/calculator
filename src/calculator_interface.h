@@ -873,7 +873,32 @@ class SyntacticElement {
 };
 
 class PlotObject {
+private:
+  JSData coordinateFunction(int index);
+  std::string manifoldImmersionFunctionsJS();
+  void writeColorWidthSegments(JSData& output);
+  void writeColorLineWidth(JSData& output);
 public:
+  struct Labels {
+  public:
+    static std::string drawOperation;
+    static std::string points;
+    static std::string functionLabel;
+    static std::string coordinateFunctions;
+    static std::string left;
+    static std::string right;
+    static std::string numberOfSegments;
+    static std::string color;
+    static std::string lineWidth;
+    static std::string manifoldImmersion;
+    static std::string variableRange;
+    static std::string segmentRange;
+    static std::string defaultLength;
+    static std::string plotType;
+    static std::string body;
+    static std::string arguments;
+  };
+
   std::string thePlotString;
   std::string fillStyle;
   std::string thePlotStringWithHtml;
@@ -943,16 +968,10 @@ public:
     double upperBound
   );
   JSData toJSON();
-  JSData toJSON2dPlot();
-  std::string getJavascriptParametricCurve2D(
-    std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter
-  );
-  std::string getJavascriptPoints(
-    std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter
-  );
-  std::string getJavascriptDirectionField(
-    std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter
-  );
+  JSData toJSON2dDrawFunction();
+  JSData toJSONParametricCurveInTwoDimensions();
+  JSData toJSONPoints();
+  JSData toJSONDirectionFieldInTwoDimensions(  );
   PlotObject();
   bool operator==(const PlotObject& other) const;
 };
@@ -962,7 +981,12 @@ class Plot {
 private:
   std::string canvasNamE;
 public:
-  List<PlotObject> thePlots;
+  struct Labels {
+  public:
+    static std::string canvasName;
+    static std::string graphicsType;
+  };
+  List<PlotObject> plotObjects;
   HashedList<std::string, MathRoutines::hashString> boxesThatUpdateMe;
   double theLowerBoundAxes;
   double theUpperBoundAxes;

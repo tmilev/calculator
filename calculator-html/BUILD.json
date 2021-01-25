@@ -23,7 +23,7 @@
   "/calculator-html/initialize_buttons.js",
   "/calculator-html/storage.js",
   "/calculator-html/page_navigation.js",
-  "/calculator-html/three-d.js",
+  "/calculator-html/graphics.js",
   "/calculator-html/graphics_n_dimensions.js",
   "/calculator-html/course_page.js",
   "/calculator-html/problem_page.js",
@@ -46,5 +46,6 @@
   "/calculator-html/configuration.js",
   "/calculator-html/answer_processing.js",
   "/calculator-html/hard_coded_problems.js",
-  "/calculator-html/answer_panel.js"
+  "/calculator-html/answer_panel.js",
+  "/calculator-html/graphics_serialization.js"
 ]

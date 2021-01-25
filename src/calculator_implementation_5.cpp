@@ -68,8 +68,8 @@ MeshTriangles::MeshTriangles() {
 
 void MeshTriangles::plotGrid(int theColor) {
   MacroRegisterFunctionWithName("MeshTriangles::plotGrid");
-  this->theGrid.thePlots.setSize(0);
-  this->theGrid.thePlots.setExpectedSize(this->theGrid.thePlots.size + this->theTriangles.size * 3);
+  this->theGrid.plotObjects.setSize(0);
+  this->theGrid.plotObjects.setExpectedSize(this->theGrid.plotObjects.size + this->theTriangles.size * 3);
   PlotObject currentLinePlot;
   List<Vector<double> >& pointsVector = currentLinePlot.thePointsDouble;
   currentLinePlot.thePointsDouble.setSize(4);
@@ -79,7 +79,7 @@ void MeshTriangles::plotGrid(int theColor) {
     pointsVector[1] = this->theTriangles[i][1];
     pointsVector[2] = this->theTriangles[i][2];
     pointsVector[3] = this->theTriangles[i][0];
-    this->theGrid.thePlots.addOnTop(currentLinePlot);
+    this->theGrid.plotObjects.addOnTop(currentLinePlot);
   }
 }
 
@@ -276,7 +276,7 @@ void MeshTriangles::computeImplicitPlotPart2() {
     if (theSegment.size != 2) {
       continue;
     }
-    this->theCurve.thePlots.addOnTop(currentPlot);
+    this->theCurve.plotObjects.addOnTop(currentPlot);
   }
 }
 
@@ -309,15 +309,15 @@ void MeshTriangles::computeImplicitPlot() {
   }
   if (this->flagShowGrid) {
     this->plotGrid(static_cast<int>(HtmlRoutines::redGreenBlue(240, 240, 0)));
-    this->thePlot.thePlots.addListOnTop(this->theGrid.thePlots);
+    this->thePlot.plotObjects.addListOnTop(this->theGrid.plotObjects);
   }
   this->computeImplicitPlotPart2();
   if (this->flagShowGrid) {
     this->plotGrid(static_cast<int>(HtmlRoutines::redGreenBlue(100, 100, 100)));
-    this->thePlot.thePlots.addListOnTop(this->theGrid.thePlots);
+    this->thePlot.plotObjects.addListOnTop(this->theGrid.plotObjects);
   }
   // this->theCurve.colorRGB=HtmlRoutines::redGreenBlue(255,0,0);
-  this->thePlot.thePlots.addListOnTop(this->theCurve.thePlots);
+  this->thePlot.plotObjects.addListOnTop(this->theCurve.plotObjects);
 }
 
 bool Calculator::getMatrixDoubles(
@@ -367,9 +367,9 @@ bool CalculatorFunctions::innerGetPointsImplicitly(
     return false;
   }
   HashedList<Vector<double>, MathRoutines::hashVectorDoubles> thePoints;
-  for (int i = 0; i < theMesh.theCurve.thePlots.size; i ++) {
-    thePoints.addOnTopNoRepetition(theMesh.theCurve.thePlots[i].thePointsDouble[0]);
-    thePoints.addOnTopNoRepetition(theMesh.theCurve.thePlots[i].thePointsDouble[1]);
+  for (int i = 0; i < theMesh.theCurve.plotObjects.size; i ++) {
+    thePoints.addOnTopNoRepetition(theMesh.theCurve.plotObjects[i].thePointsDouble[0]);
+    thePoints.addOnTopNoRepetition(theMesh.theCurve.plotObjects[i].thePointsDouble[1]);
   }
   Matrix<double> theMatrix;
   theMatrix.assignVectorsToRows(thePoints);

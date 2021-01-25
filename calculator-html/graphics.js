@@ -789,10 +789,23 @@ class AxesGrid {
 }
 
 class PlotTwoD {
-  constructor(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth) {
-    this.theFunction = inputTheFn;
-    this.leftPt = inputLeftPt;
-    this.rightPt = inputRightPt;
+  constructor(
+    /**@type{Function} */
+    inputFunction,
+    /**@type{number} */
+    leftPoint,
+    /**@type{number} */
+    rightPoint,
+    /**@type{number} */
+    numberOfSegments,
+    /**@type{string} */
+    inputColor,
+    /**@type{number} */
+    inputLineWidth,
+  ) {
+    this.functionPlotted = inputFunction;
+    this.leftPoint = leftPoint;
+    this.rightPoint = rightPoint;
     this.color = colorToRGB(inputColor);
     if (inputLineWidth === undefined) {
       this.lineWidth = 1;
@@ -800,17 +813,17 @@ class PlotTwoD {
       this.lineWidth = inputLineWidth;
     }
     this.type = "plotFunction";
-    this.numSegments = inputNumSegments;
-    if (inputRightPt !== "infinity" && inputLeftPt !== "minusInfinity") {
-      this.Delta = (inputRightPt - inputLeftPt) / inputNumSegments;
+    this.numberOfSegments = numberOfSegments;
+    if (this.rightPoint !== "infinity" && this.leftPoint !== "minusInfinity") {
+      this.Delta = (this.rightPoint - this.leftPoint) / this.numberOfSegments;
     }
   }
 
   accountBoundingBox(inputOutputBox) {
-    for (let i = 0; i < this.numSegments; i++) {
-      let theRatio = i / (this.numSegments - 1);
-      let theX = this.leftPt * (1 - theRatio) + this.rightPt * theRatio;
-      let theY = this.theFunction(theX);
+    for (let i = 0; i < this.numberOfSegments; i++) {
+      let theRatio = i / (this.numberOfSegments - 1);
+      let theX = this.leftPoint * (1 - theRatio) + this.rightPoint * theRatio;
+      let theY = this.functionPlotted(theX);
       if (!isFinite(theY)) {
         continue;
       }
@@ -825,19 +838,19 @@ class PlotTwoD {
     let theSurface = theCanvas.surface;
     theSurface.strokeStyle = colorRGBToString(this.color);
     theSurface.fillStyle = colorRGBToString(this.color);
-    let realLeft = this.leftPt;
-    let realRight = this.rightPt;
+    let realLeft = this.leftPoint;
+    let realRight = this.rightPoint;
     if (realLeft === "minusInfinity") {
       realLeft = theCanvas.leftMostPlotPoint;
     }
-    if (this.rightPt === "infinity" || this.leftPt === "minusInfinity") {
+    if (this.rightPoint === "infinity" || this.leftPoint === "minusInfinity") {
       if (realRight === "infinity") {
         realRight = theCanvas.rightMostPlotPoint;
       }
-      this.Delta = (realRight - realLeft) / this.numSegments;
+      this.Delta = (realRight - realLeft) / this.numberOfSegments;
     }
     let theX = realLeft;
-    let theY = this.theFunction(theX);
+    let theY = this.functionPlotted(theX);
     let theCoords = theCanvas.coordsMathToScreen([theX, theY]);
     let alreadyMoved = false;
     if (startByMoving) {
@@ -845,8 +858,8 @@ class PlotTwoD {
     }
     theSurface.lineWidth = this.lineWidth;
     let skippedValues = false;
-    for (let i = 0; i < this.numSegments; i++) {
-      let theRatio = i / (this.numSegments - 1);
+    for (let i = 0; i < this.numberOfSegments; i++) {
+      let theRatio = i / (this.numberOfSegments - 1);
       theX = realLeft * (1 - theRatio) + realRight * theRatio; //<- this way of
       //computing x this way introduces smaller numerical errors.
       //For example, suppose you plot sqrt(1-x^2) from - 1 to 1.
@@ -854,9 +867,9 @@ class PlotTwoD {
       //you may end up evaluating sqrt(1-x^2) for x =1.00000000000004
       //resulting in serious visual glitches.
       //Note: the remarks above were discovered the painful way (trial and error).
-      theY = this.theFunction(theX);
+      theY = this.functionPlotted(theX);
       if (!isFinite(theY)) {
-        console.log('Failed to evaluate: ' + this.theFunction + ' at x = ' + theX);
+        console.log('Failed to evaluate: ' + this.functionPlotted + ' at x = ' + theX);
       }
       if (Math.abs(theY) > 10000) {
         if (!skippedValues) {
@@ -1044,16 +1057,32 @@ class PlotFillTwoD {
 }
 
 class CanvasTwoD {
-  constructor(inputCanvas) {
+  constructor(
+    /**@type{HTMLCanvasElement} */
+    inputCanvas,
+    /**@type{HTMLElement} */
+    controls,
+    /**@type{HTMLElement} */
+    messages,
+  ) {
     this.canvasResetFunction = null;
     this.theObjects = [];
     this.surface = null;
-    this.canvasContainer = null;
+    this.canvasContainer = inputCanvas;
+
     this.canvasId = null;
     this.screenBasisOrthonormal = [];
-    this.spanMessages = null;
+    /**@type{HTMLElement|null} */
+    this.spanMessages = messages;
+    if (this.spanMessages === undefined) {
+      this.spanMessages = null;
+    }
+    /**@type{HTMLElement|null} */
+    this.spanControls = controls;
+    if (this.spanControls === undefined) {
+      this.spanControls = null;
+    }
     this.spanCriticalErrors = null;
-    this.spanControls = null;
     this.numDrawnObjects = 0;
     this.boundingBoxMath = [[- 0.1, - 0.1], [0.1, 0.1]];
     this.leftMostPlotPoint = "none";
@@ -1138,18 +1167,18 @@ class CanvasTwoD {
     this.theObjects.push(newPath);
   }
 
-  drawFunction(inputFun, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth) {
-    let newPlot = new PlotTwoD(inputFun, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth);
-    if (inputLeftPt !== "minusInfinity" && inputRightPt !== "infinity") {
+  drawFunction(inputFun, leftPoint, rightPoint, inputNumSegments, inputColor, inputLineWidth) {
+    let newPlot = new PlotTwoD(inputFun, leftPoint, rightPoint, inputNumSegments, inputColor, inputLineWidth);
+    if (leftPoint !== "minusInfinity" && rightPoint !== "infinity") {
       if (this.leftMostPlotPoint === "none") {
-        this.leftMostPlotPoint = inputLeftPt;
+        this.leftMostPlotPoint = leftPoint;
       } else {
-        this.leftMostPlotPoint = Math.min(inputLeftPt, this.leftMostPlotPoint);
+        this.leftMostPlotPoint = Math.min(leftPoint, this.leftMostPlotPoint);
       }
       if (this.rightMostPlotPoint === "none") {
-        this.rightMostPlotPoint = inputRightPt;
+        this.rightMostPlotPoint = rightPoint;
       } else {
-        this.rightMostPlotPoint = Math.max(inputRightPt, this.rightMostPlotPoint);
+        this.rightMostPlotPoint = Math.max(rightPoint, this.rightMostPlotPoint);
       }
     }
     this.theObjects.push(newPlot);
@@ -1225,15 +1254,39 @@ class CanvasTwoD {
     this.textProjectionInfo += `<br>e1: ${this.screenBasisOrthonormal[0]} <br>e2: ${this.screenBasisOrthonormal[1]}`;
   }
 
-  initialize(inputCanvasId) {
-    this.canvasId = inputCanvasId;
-    this.canvasContainer = document.getElementById(inputCanvasId);
+  mouseWheelHandler(e) {
+    let inputs = drawing.mouseWheelCommon(e);
+    this.mouseWheel(inputs.delta, inputs.x, input.y);
+  }
+
+  mouseUp() {
+    this.selectEmpty();
+    this.redraw();
+  }
+
+  clickHandler(e) {
+    this.canvasClick(e.clientX, e.clientY, e);
+  }
+
+  initialize() {
     this.surface = this.canvasContainer.getContext("2d");
-    this.canvasContainer.addEventListener("DOMMouseScroll", drawing.mouseWheel.bind(drawing), false);
-    this.canvasContainer.addEventListener("mousewheel", drawing.mouseWheel.bind(drawing), false);
-    this.canvasContainer.addEventListener("mousedown", drawing.canvasClick.bind(drawing, this.canvasContainer), true);
-    this.canvasContainer.addEventListener("mouseup", drawing.mouseUp.bind(drawing, this.canvasContainer), true);
-    this.canvasContainer.addEventListener("mousemove", drawing.mouseMoveRedraw.bind(drawing, this.canvasContainer), true);
+    this.canvasContainer.addEventListener("DOMMouseScroll", (e) => {
+      this.mouseWheelHandler(e);
+    }, false);
+    this.canvasContainer.addEventListener("mousewheel", (e) => {
+      this.mouseWheelHandler(e);
+    }, false);
+    this.canvasContainer.addEventListener("mousedown", (e) => {
+      this.clickHandler(e);
+    }, true);
+    this.canvasContainer.addEventListener("mouseup", () => {
+      this.mouseUp();
+    }, true);
+    this.canvasContainer.addEventListener("mousemove", (e) => {
+      let x = e.clientX;
+      let y = e.clientY;
+      this.mouseMove(x, y);
+    }, true);
 
     this.theObjects = [];
     this.spanMessages = document.getElementById(this.canvasId + "Messages");
@@ -1249,6 +1302,9 @@ class CanvasTwoD {
   }
 
   constructControls() {
+    if (this.spanControls === null) {
+      return;
+    }
     drawing.numberOfControlsConstructed++;
     let controlButtonId = `buttonControlCanvas${drawing.numberOfControlsConstructed}`;
     this.spanControls.innerHTML = `<button id = "${controlButtonId}" style = "border:none; background:none; color:blue; padding:0; text-decoration: underline; cursor:pointer" >reset view</button> `;
@@ -1343,7 +1399,7 @@ class CanvasTwoD {
     return squaredDistance < 1000;
   }
 
-  canvasClick(screenX, screenY) {
+  canvasClick(screenX, screenY, e) {
     this.clickedPosition = this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
     this.mousePosition = [];
     //if (this.pointsWithinClickTolerance(this.clickedPosition,[0,0]))
@@ -1390,7 +1446,11 @@ class CanvasTwoD {
 }
 
 class Canvas {
-  constructor(inputCanvas) {
+  constructor(
+    /**@type{HTMLCanvasElement} */
+    inputCanvas,
+  ) {
+    this.canvasContainer = inputCanvas;
     this.canvasResetFunction = null;
     this.theIIIdObjects = {
       thePatches: [],
@@ -1468,15 +1528,39 @@ class Canvas {
     this.flagRoundPatches = true;
   }
 
-  initialize(inputCanvasId) {
-    this.canvasId = inputCanvasId;
-    this.canvasContainer = document.getElementById(inputCanvasId);
+  mouseWheelHandler(e) {
+    let inputs = drawing.mouseWheelCommon(e);
+    this.mouseWheel(inputs.delta, inputs.x, input.y);
+  }
+
+  mouseUp() {
+    this.selectEmpty();
+    this.redraw();
+  }
+
+  clickHandler(e) {
+    this.canvasClick(e.clientX, e.clientY, e);
+  }
+
+  initialize() {
     this.surface = this.canvasContainer.getContext("2d");
-    this.canvasContainer.addEventListener("DOMMouseScroll", drawing.mouseWheel.bind(drawing), true);
-    this.canvasContainer.addEventListener("mousewheel", drawing.mouseWheel.bind(drawing), true);
-    this.canvasContainer.addEventListener("mousedown", drawing.canvasClick.bind(drawing, this.canvasContainer), true);
-    this.canvasContainer.addEventListener("mouseup", drawing.mouseUp.bind(drawing, this.canvasContainer), true);
-    this.canvasContainer.addEventListener("mousemove", drawing.mouseMoveRedraw.bind(drawing, this.canvasContainer), true);
+    this.canvasContainer.addEventListener("DOMMouseScroll", (e) => {
+      this.mouseWheelHandler(e);
+    }, true);
+    this.canvasContainer.addEventListener("mousewheel", (e) => {
+      this.mouseWheelHandler(e);
+    }, true);
+    this.canvasContainer.addEventListener("mousedown", (e) => {
+      this.clickHandler(e);
+    }, true);
+    this.canvasContainer.addEventListener("mouseup", () => {
+      this.mouseUp();
+    }, true);
+    this.canvasContainer.addEventListener("mousemove", (e) => {
+      let x = e.clientX;
+      let y = e.clientY;
+      this.mouseMove(x, y);
+    }, true);
     this.spanMessages = document.getElementById(`${this.canvasId}Messages`);
     this.spanCriticalErrors = document.getElementById(`${this.canvasId}CriticalErrors`);
     this.spanControls = document.getElementById(`${this.canvasId}Controls`);
@@ -2803,7 +2887,6 @@ class Canvas {
 
 class Drawing {
   constructor() {
-    this.canvases = {};
     this.firstCriticalRunTimeError = "";
     this.firstCanvas = null;
     this.numberOfControlsConstructed = 0;
@@ -2812,76 +2895,11 @@ class Drawing {
     this.CurveThreeD = CurveThreeD;
   }
 
-  deleteCanvas(canvasId) {
-    if (typeof canvasId !== "string") {
-      canvasId = canvasId.id;
-    }
-    if (this.canvases[canvasId] !== undefined && this.canvases[canvasId] !== null) {
-      delete this.canvases[canvasId];
-    }
-  }
-
-  /**@returns {Canvas} */
-  getCanvas(/**@type {string}*/ canvasId) {
-    let theCanvas = null;
-    if (typeof canvasId === "string") {
-      theCanvas = document.getElementById(canvasId);
-      if (theCanvas === null) {
-        throw (`Canvas with id ${canvasId} missing. `);
-      }
-    } else {
-      theCanvas = canvasId;
-      canvasId = theCanvas.id;
-    }
-    if (this.canvases[canvasId] === undefined) {
-      this.canvases[canvasId] = new Canvas(theCanvas);
-      if (this.firstCanvas == null) {
-        this.firstCanvas = this.canvases[canvasId];
-      }
-    }
-    return this.canvases[canvasId];
-  }
-
-  /**@returns {CanvasTwoD} */
-  getCanvasTwoDNullOnFailure(canvasId) {
-    return this.getCanvasTwoDInternal(canvasId, false);
-  }
-
-  /**@returns {CanvasTwoD} */
-  getCanvasTwoD(canvasId) {
-    return this.getCanvasTwoDInternal(canvasId, true);
-  }
-
-  /**@returns {CanvasTwoD} */
-  getCanvasTwoDInternal(canvasId, /**@type {boolean} */ throwOnFailure) {
-    let theCanvas = null;
-    if (typeof canvasId === "string") {
-      theCanvas = document.getElementById(canvasId);
-      if (theCanvas === null) {
-        if (throwOnFailure) {
-          throw (`Canvas with id ${canvasId} missing. `);
-        } else {
-          return null;
-        }
-      }
-    } else {
-      theCanvas = canvasId;
-      canvasId = theCanvas.id;
-    }
-    if (this.canvases[canvasId] === undefined) {
-      this.canvases[canvasId] = new CanvasTwoD(theCanvas);
-      if (this.firstCanvas == null) {
-        this.firstCanvas = this.canvases[canvasId];
-      }
-    }
-    return this.canvases[canvasId];
-  }
-
-  testPicture(inputCanvas) {
-    let theCanvas = this.getCanvas(document.getElementById(inputCanvas));
+  testPicture(inputCanvasId) {
+    let theCanvas = new Canvas(document.getElementById(inputCanvasId));
     theCanvas.screenBasisUserDefault = [[0.59, 0.78, 0.18], [0.46, - 0.15, - 0.87]];
     theCanvas.screenBasisUser = theCanvas.screenBasisUserDefault.slice();
-    theCanvas.initialize(inputCanvas, false);
+    theCanvas.initialize();
     theCanvas.drawLine([- 1, 0, 0], [1, 0, 0], 'black', 2);
     theCanvas.drawLine([0, - 1, 0], [0, 1, 0], 'black', 2);
     theCanvas.drawLine([0, 0, - 1], [0, 0, 1], 'black', 2);
@@ -2901,7 +2919,7 @@ class Drawing {
   }
 
   testPictureTwoD(inputCanvas1, inputCanvas2, inputCanvas3) {
-    let theCanvas = this.getCanvasTwoD(document.getElementById(inputCanvas1));
+    let theCanvas = new CanvasTwoD(document.getElementById(inputCanvas1));
     theCanvas.initialize(inputCanvas1);
     theCanvas.drawLine([- 10, 0], [19, 0], 'green');
     theCanvas.drawLine([0, - 1], [0, 1], 'purple');
@@ -2918,7 +2936,7 @@ class Drawing {
     theCanvas.plotFillFinish();
     theCanvas.drawVectorField(testVectorField2d, true, [- 6, - 6], [6, 6], [20, 20], 0.5, "red", 2);
     theCanvas.redraw();
-    let theCanvas2 = this.getCanvasTwoD(document.getElementById(inputCanvas2));
+    let theCanvas2 = new CanvasTwoD(document.getElementById(inputCanvas2));
     theCanvas2.initialize(inputCanvas2);
     theCanvas2.drawLine([- 10, - 1], [10, 1], 'green');
     theCanvas2.drawLine([0, - 19], [0, 1], 'purple');
@@ -2933,7 +2951,7 @@ class Drawing {
     theCanvas2.setViewWindow([- 1, - 19], [1, 5]);
     theCanvas2.drawVectorField(testVectorField2d, false, [- 6, - 6], [6, 6], [20, 20], 0.5, "red", 2);
     theCanvas2.redraw();
-    let theCanvas3 = this.getCanvasTwoD(document.getElementById(inputCanvas3));
+    let theCanvas3 = new CanvasTwoD(document.getElementById(inputCanvas3));
     theCanvas3.initialize(inputCanvas3);
     theCanvas3.drawFunction(testFunctionPlot, - 10, 10, 100, 'red', 2);
     theCanvas3.drawGrid();
@@ -2943,49 +2961,19 @@ class Drawing {
     theCanvas3.redraw();
   }
 
-
-  mouseMoveRedraw(inputCanvas, event) {
-    let x = event.clientX;
-    let y = event.clientY;
-    let theCanvas = this.getCanvas(inputCanvas);
-    if (theCanvas !== null && theCanvas !== undefined) {
-      theCanvas.mouseMove(x, y);
-    }
-  }
-
-  mouseWheel(theEvent) {
-    if (theEvent === undefined) {
-      theEvent = window.event;
-    }
-    if (theEvent.target === undefined) {
-      return;
-    }
-    if (theEvent.preventDefault !== undefined) {
-      theEvent.preventDefault();
-    }
-    if (theEvent.stopPropagation !== undefined) {
-      theEvent.stopPropagation();
-    }
-    let theWheelDelta = theEvent.detail ? theEvent.detail * - 1 : theEvent.wheelDelta / 40;
-    let theCanvas = this.canvases[theEvent.target.id];
-    if (theCanvas === undefined || theCanvas === null) {
-      return;
-    }
+  /**@returns{{delta:number, x:number, y:number}} */
+  mouseWheelCommon(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    let theWheelDelta = e.detail ? e.detail * - 1 : e.wheelDelta / 40;
     let theIncrement = 0.6;
-    theCanvas.mouseWheel(theWheelDelta * theIncrement, theEvent.clientX, theEvent.clientY);
-  }
-
-  mouseUp(inputCanvas) {
-    let theCanvas = this.getCanvas(inputCanvas);
-    theCanvas.selectEmpty();
-    theCanvas.redraw();
-  }
-
-  canvasClick(theCanvasContainer, theEvent) {
-    this.canvases[theCanvasContainer.id].canvasClick(theEvent.clientX, theEvent.clientY, theEvent);
+    return {
+      delta: theWheelDelta * theIncrement,
+      x: e.clientX,
+      y: e.clientY,
+    };
   }
 }
-
 
 let drawing = new Drawing();
 if (window.calculator === undefined) {
@@ -2995,4 +2983,6 @@ window.calculator.drawing = drawing;
 
 module.exports = {
   drawing,
+  Canvas,
+  CanvasTwoD,
 };

@@ -59,6 +59,7 @@ const urlFields = {
     comments: "comments",
     // Global comments, usually used for debugging.
     commentsGlobal: "commentsGlobal",
+    canvasName: "canvasName",
     solution: {
       steps: "solutionSteps",
     },

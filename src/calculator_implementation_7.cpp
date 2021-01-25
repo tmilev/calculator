@@ -5863,17 +5863,17 @@ bool CalculatorFunctionsPlot::plotFill(Calculator& calculator, const Expression&
     calculator << "Failed to extract color from: " << colorE.toString() << "; using default color value. ";
   }
   theFilledPlot.colorFillJS = colorString;
-  for (int i = 0; i < startPlot.thePlots.size; i ++) {
-    theFilledPlot.thePointsDouble.addListOnTop(startPlot.thePlots[i].thePointsDouble);
+  for (int i = 0; i < startPlot.plotObjects.size; i ++) {
+    theFilledPlot.thePointsDouble.addListOnTop(startPlot.plotObjects[i].thePointsDouble);
   }
   theFilledPlot.fillStyle = "filled";
   theFilledPlot.plotType = "plotFillStart";
   outputPlot.desiredHtmlHeightInPixels = startPlot.desiredHtmlHeightInPixels;
   outputPlot.desiredHtmlWidthInPixels = startPlot.desiredHtmlWidthInPixels;
-  outputPlot.thePlots.addOnTop(theFilledPlot);
+  outputPlot.plotObjects.addOnTop(theFilledPlot);
   outputPlot += startPlot;
   theFilledPlot.plotType = "plotFillFinish";
-  outputPlot.thePlots.addOnTop(theFilledPlot);
+  outputPlot.plotObjects.addOnTop(theFilledPlot);
   return output.assignValue(outputPlot, calculator);
 }
 
@@ -6078,7 +6078,7 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
     );
     thePlotObj.thePlotStringWithHtml = thePlotObj.thePlotString;
   }
-  thePlot.thePlots.addOnTop(thePlotObj);
+  thePlot.plotObjects.addOnTop(thePlotObj);
   return output.assignValue(thePlot, calculator);
 }
 
@@ -6121,7 +6121,7 @@ bool CalculatorFunctionsPlot::plotPoint(Calculator& calculator, const Expression
   }
   thePlot.colorJS = input[2].toString();
   thePlot.plotType = "points";
-  theFinalPlot.thePlots.addOnTop(thePlot);
+  theFinalPlot.plotObjects.addOnTop(thePlot);
   theFinalPlot.desiredHtmlHeightInPixels = 100;
   theFinalPlot.desiredHtmlWidthInPixels = 100;
   return output.assignValue(theFinalPlot, calculator);

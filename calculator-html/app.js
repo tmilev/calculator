@@ -59,7 +59,7 @@ function loadGlobals() {
   calculator.problemPage = require("./problem_page");
   calculator.submitRequests = require("./submit_requests");
   calculator.editPage = require("./edit_page");
-  calculator.drawing = require("./three-d").drawing;
+  calculator.drawing = require("./graphics").drawing;
   calculator.miscellaneousFrontend = require("./miscellaneous_frontend");
   calculator.accountActivation = require("./account_activation");
   calculator.manageAccounts = require("./manage_accounts");

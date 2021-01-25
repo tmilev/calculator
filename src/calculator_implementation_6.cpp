@@ -831,7 +831,7 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
     }
     thePlotObj.numSegmenTsJS[i] = jsConverterE.toString();
   }
-  thePlot.thePlots.addOnTop(thePlotObj);
+  thePlot.plotObjects.addOnTop(thePlotObj);
   return output.assignValue(thePlot, calculator);
 }
 

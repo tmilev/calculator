@@ -1,7 +1,7 @@
 "use strict";
 const submitRequests = require("./submit_requests");
 const pathnames = require("./pathnames");
-const drawing = require("./three-d").drawing;
+const drawing = require("./graphics").drawing;
 const ids = require("./ids_dom_elements");
 const miscellaneousFrontend = require("./miscellaneous_frontend");
 const miscellaneous = require("./miscellaneous_frontend");
@@ -16,6 +16,7 @@ const initializeButtons = require("./initialize_buttons");
 const EquationEditor = require("./equation_editor").EquationEditor;
 const MathNode = require("./equation_editor").MathNode;
 const knownTypes = require("./equation_editor").knownTypes;
+const graphicsSerialization = require("./graphics_serialization").graphicsSerialization;
 
 class AtomHandler {
   constructor() {
@@ -80,7 +81,7 @@ class Calculator {
     this.panels = [];
     this.inputBoxNames = [];
     this.inputBoxToSliderUpdaters = {};
-    this.scriptContents = [];
+    this.scriptContents = {};
     this.canvases = null;
     this.examples = null;
     this.submissionCalculatorCounter = 0;
@@ -423,27 +424,42 @@ class Calculator {
   }
 
   afterWriteOutput() {
+    let output = document.getElementById(ids.domElements.spanCalculatorMainOutput);
     for (let i = 0; i < this.panels.length; i++) {
       panels.makePanelFromData(this.panels[i]);
     }
-    let spanVerification = document.getElementById(ids.domElements.spanCalculatorMainOutput);
-    let incomingScripts = spanVerification.getElementsByTagName("script");
+    let incomingScripts = output.getElementsByTagName("script");
+    this.scriptContents = {};
     for (let i = 0; i < incomingScripts.length; i++) {
-      let current = incomingScripts[i].textContent;
-      console.log("DEBUG: Incoming script content: " + current);
-      this.scriptContents.push(current);
+      let current = incomingScripts[i];
+      let content = current.textContent;
+      let scriptType = current.getAttribute("scriptType");
+      if (scriptType === "" || scriptType === null || scriptType === undefined) {
+        scriptType = "unknown";
+      }
+      console.log("DEBUG: Incoming script tag, content: " + scriptType + ", " + content);
+      if (!(scriptType in this.scriptContents)) {
+        this.scriptContents[scriptType] = [];
+      }
+      this.scriptContents[scriptType].push(content);
     }
     this.inputBoxNames = [];
     this.inputBoxToSliderUpdaters = {};
     this.canvases = {};
-    this.scriptContents = [];
     this.flagTypeset = false;
     this.typeset();
     this.bootstrapGraphics();
   }
 
   bootstrapGraphics() {
-    console.log("Not implemented yet.");
+    if (this.scriptContents["graphics"] === undefined) {
+      return;
+    }
+    let graphics = JSON.parse(this.scriptContents["graphics"]);
+    let canvasName = graphics[pathnames.urlFields.result.canvasName];
+    let output = this.getOutputElement();
+    let canvases = output.querySelectorAll(`[name="${canvasName}"]`);
+    graphicsSerialization.fromJSON(graphics, canvases);
   }
 
   getOutputElement() {

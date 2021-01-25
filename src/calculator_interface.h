@@ -498,7 +498,6 @@ private:
     FormatExpressions* theFormat
   ) const;
   bool requiresNoMathTags() const;
-  JSData toJSON(FormatExpressions* theFormat, const Expression& startingExpression) const;
   static unsigned int hashFunction(const Expression& input);
   unsigned int hashFunction() const;
   Expression(): flagDeallocated(false) {
@@ -943,9 +942,8 @@ public:
     double lowerBound,
     double upperBound
   );
-  std::string getJavascript2dPlot(
-    std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter
-  );
+  JSData toJSON();
+  JSData toJSON2dPlot();
   std::string getJavascriptParametricCurve2D(
     std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter
   );
@@ -990,11 +988,11 @@ public:
   std::string toStringDebug();
   std::string getPlotHtml(Calculator& owner);
   void computeCanvasNameIfNecessary(int& canvasCounter);
-  std::string commonCanvasSetup();
   std::string getPlotHtml3d(Calculator& owner);
   std::string getPlotHtml2d(Calculator& owner);
   std::string getPlotStringAddLatexCommands(bool useHtml);
   bool isOKVector(const Vector<double>& input);
+  std::string commonCanvasSetup();
   Plot();
   void computeAxesAndBoundingBox3d();
   void computeAxesAndBoundingBox();
@@ -1370,7 +1368,6 @@ public:
   Expression getNewAtom();
   void computeAutoCompleteKeyWords();
   void writeAutoCompleteKeyWordsToFile();
-  JSData toJSONOutputAndSpecials();
   std::string toStringOutputAndSpecials();
   class Examples {
     std::string toStringOneOperationHandler(
@@ -2382,6 +2379,7 @@ public:
   void initializePredefinedStandardOperationsWithoutHandler();
   void initializeAdminFunctions();
   bool extractExpressions(Expression& outputExpression, std::string* outputErrors);
+  JSData toJSONOutputAndSpecials();
   void evaluateCommands();
   JSData extractSolution();
   bool isTimedOut();

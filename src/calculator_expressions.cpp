@@ -3234,47 +3234,6 @@ bool Expression::requiresNoMathTags() const {
   this->isOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
 }
 
-JSData Expression::toJSON(FormatExpressions* theFormat, const Expression& startingExpression) const {
-  MacroRegisterFunctionWithName("Expression::toJSON");
-  JSData result, input, output;
-  input.theType = JSData::token::tokenArray;
-  output.theType = JSData::token::tokenArray;
-  if (this->isListStartingWithAtom(this->owner->opCommandSequence())) {
-    for (int i = 1; i < this->size(); i ++) {
-      const Expression currentE = (*this)[i];
-      if (!this->owner->flagHideLHS) {
-        if (i < startingExpression.size()) {
-          input[i - 1][WebAPI::result::outputString] = startingExpression[i].toString(theFormat);
-        } else {
-          input[i - 1][WebAPI::result::outputString]  = "No matching starting expression - possible use of the Melt keyword.";
-        }
-      } else {
-        input[i - 1][WebAPI::result::outputString]  = "...";
-      }
-      std::stringstream out;
-      if (currentE.isOfType<std::string>()) {
-        out << currentE.getValue<std::string>();
-      } else if (this->requiresNoMathTags()) {
-        out << currentE.toString(theFormat);
-      } else {
-        out << HtmlRoutines::getMathNoDisplay(currentE.toString(theFormat), 1700);
-      }
-      out << currentE.toStringAllSlidersInExpression();
-      output[i - 1][WebAPI::result::outputString]  = out.str();
-    }
-  } else {
-    input[0] = HtmlRoutines::getMathNoDisplay(startingExpression.toString(theFormat), 1700);
-    if (this->requiresNoMathTags()) {
-      output[0][WebAPI::result::outputString]  = this->toString(theFormat);
-    } else {
-      output[0][WebAPI::result::outputString]  = HtmlRoutines::getMathNoDisplay(this->toString(theFormat), 1700);
-    }
-  }
-  result["input"] = input;
-  result["output"] = output;
-  return result;
-}
-
 bool Expression::toStringTimes(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {

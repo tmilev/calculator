@@ -80,6 +80,7 @@ class Calculator {
     this.panels = [];
     this.inputBoxNames = [];
     this.inputBoxToSliderUpdaters = {};
+    this.scriptContents = [];
     this.canvases = null;
     this.examples = null;
     this.submissionCalculatorCounter = 0;
@@ -427,20 +428,22 @@ class Calculator {
     }
     let spanVerification = document.getElementById(ids.domElements.spanCalculatorMainOutput);
     let incomingScripts = spanVerification.getElementsByTagName("script");
-    let thePage = window.calculator.mainPage;
-    let oldScripts = thePage.pages.calculator.scriptIds;
-    thePage.removeScripts(oldScripts);
+    for (let i = 0; i < incomingScripts.length; i++) {
+      let current = incomingScripts[i].textContent;
+      console.log("DEBUG: Incoming script content: " + current);
+      this.scriptContents.push(current);
+    }
     this.inputBoxNames = [];
     this.inputBoxToSliderUpdaters = {};
     this.canvases = {};
-    thePage.pages.calculator.sciptIds = [];
-    for (let i = 0; i < incomingScripts.length; i++) {
-      let newId = `calculatorMainPageId_${i}`;
-      thePage.pages.calculator.sciptIds.push(newId);
-      thePage.injectScript(newId, incomingScripts[i].innerHTML);
-    }
+    this.scriptContents = [];
     this.flagTypeset = false;
     this.typeset();
+    this.bootstrapGraphics();
+  }
+
+  bootstrapGraphics() {
+    console.log("Not implemented yet.");
   }
 
   getOutputElement() {

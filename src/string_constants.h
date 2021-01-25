@@ -97,6 +97,7 @@ public:
     static std::string timeOut;
     static std::string timeOutComments;
     static std::string workerId;
+    static std::string functions;
     static std::string workerIndex;
     static std::string outputString;
     static std::string error;

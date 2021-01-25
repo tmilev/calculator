@@ -144,7 +144,6 @@ class Page {
         selectFunction: () => {
           calculatorPage.calculator.selectCalculatorPage();
         },
-        scriptIds: [],
       },
       signUp: {
         name: "signUp",
@@ -222,7 +221,6 @@ class Page {
     }
     this.storage = storage;
     this.initializeStorageCallbacks();
-    this.scriptInjector = new AllScripts();
     this.flagProblemPageOnly = false;
   }
 
@@ -565,51 +563,6 @@ class Page {
       monitorResult.innerHTML = "Monitor <b style = 'color:green'>off</b>";
       document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle).style.display = "none";
     }
-  }
-}
-
-class Script {
-  constructor() {
-    this.id = "";
-    this.content = "";
-  }
-}
-
-class AllScripts {
-  constructor() {
-    /**@{Script[]} */
-    this.scriptsInjected = {};
-  }
-
-  removeOneScript(scriptId) {
-    let theScript = document.getElementById(scriptId);
-    if (theScript === null) {
-      return;
-    }
-    let parent = theScript.parentNode;
-    parent.removeChild(theScript);
-  }
-
-  removeScripts(scriptIds) {
-    for (let counter = 0; counter < scriptIds.length; counter++) {
-      this.removeOneScript(scriptIds[counter]);
-    }
-  }
-
-  injectScript(scriptId, scriptContent) {
-    this.removeOneScript(scriptId);
-    if (scriptContent !== undefined && scriptContent !== null) {
-      this.scriptsInjected[scriptId] = new Script();
-      let theScript = this.scriptsInjected[scriptId];
-      theScript.id = scriptId;
-      theScript.content = scriptContent;
-    }
-    let theScript = this.scriptsInjected[scriptId];
-    let scriptChild = document.createElement('script');
-    scriptChild.setAttribute('id', scriptId);
-    scriptChild.innerHTML = theScript.content;
-    scriptChild.type = 'text/javascript';
-    document.getElementsByTagName('head')[0].appendChild(scriptChild);
   }
 }
 

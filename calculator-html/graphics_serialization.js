@@ -17,24 +17,18 @@ class GraphicsSerialization {
   }
 
   fromJSON(
-    json,
-    /**@type{HTMLCanvasElement[]} */
-    canvases,
-  ) {
-    for (let i = 0; i < canvases.length; i++) {
-      this.fromJSONOnce(json, canvases[i]);
-    }
-  }
-
-  fromJSONOnce(
     input,
-    /**@type{HTMLCanvasElement[]} */
+    /**@type{HTMLCanvasElement} */
     canvas,
+    /**@type{HTMLElement} */
+    controls,
+    /**@type{HTMLElement} */
+    messages,
   ) {
     let graphicsType = input["graphicsType"];
     switch (graphicsType) {
       case "twoDimensional":
-        this.twoDimensionalGraphics(input, canvas);
+        this.twoDimensionalGraphics(input, canvas, controls, messages);
         return;
       default:
         throw `Unknown graphics type ${graphicsType}.`;
@@ -45,12 +39,16 @@ class GraphicsSerialization {
     input,
     /**@type{HTMLCanvasElement}*/
     canvasElement,
+    /**@type{HTMLElement} */
+    controls,
+    /**@type{HTMLElement} */
+    messages,
   ) {
     let plotObjects = input["plotObjects"];
     if (!Array.isArray(plotObjects)) {
       throw `Plot objects not an array.`;
     }
-    let canvas = new CanvasTwoD(canvasElement, null, null);
+    let canvas = new CanvasTwoD(canvasElement, controls, messages);
     canvas.initialize();
     for (let i = 0; i < plotObjects.length; i++) {
       this.oneTwoDimensionalObject(plotObjects[i], canvas);
@@ -76,6 +74,8 @@ class GraphicsSerialization {
           this.interpretStringToNumber(plot[this.labels.lineWidth]),
         );
         return;
+      case "coordinateAxes":
+        canvas.drawCoordinateAxes();
       default:
       //throw `Uknown plot type: ${plotType}.`;
     }

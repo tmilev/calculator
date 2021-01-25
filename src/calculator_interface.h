@@ -875,13 +875,13 @@ class SyntacticElement {
 class PlotObject {
 private:
   JSData coordinateFunction(int index);
-  std::string manifoldImmersionFunctionsJS();
+  JSData manifoldImmersionFunctionsJS();
   void writeColorWidthSegments(JSData& output);
   void writeColorLineWidth(JSData& output);
+  JSData functionFromString(const std::string& input);
 public:
   struct Labels {
   public:
-    static std::string drawOperation;
     static std::string points;
     static std::string functionLabel;
     static std::string coordinateFunctions;
@@ -980,10 +980,13 @@ public:
 class Plot {
 private:
   std::string canvasNamE;
+  static JSData getCoordinateSystem();
 public:
   struct Labels {
   public:
     static std::string canvasName;
+    static std::string controlsName;
+    static std::string messagesName;
     static std::string graphicsType;
   };
   List<PlotObject> plotObjects;

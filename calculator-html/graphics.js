@@ -1098,7 +1098,6 @@ class CanvasTwoD {
     this.mousePosition = [];
     this.clickedPosition = [];
     this.positionDelta = [];
-    this.spanMessages = undefined;
     this.textMouseInfo = "";
     this.textProjectionInfo = "";
     this.textPatchInfo = "";
@@ -1256,7 +1255,7 @@ class CanvasTwoD {
 
   mouseWheelHandler(e) {
     let inputs = drawing.mouseWheelCommon(e);
-    this.mouseWheel(inputs.delta, inputs.x, input.y);
+    this.mouseWheel(inputs.delta, inputs.x, inputs.y);
   }
 
   mouseUp() {
@@ -1289,9 +1288,6 @@ class CanvasTwoD {
     }, true);
 
     this.theObjects = [];
-    this.spanMessages = document.getElementById(this.canvasId + "Messages");
-    this.spanCriticalErrors = document.getElementById(this.canvasId + "CriticalErrors");
-    this.spanControls = document.getElementById(this.canvasId + "Controls");
     this.constructControls();
     this.computeBasis();
   }

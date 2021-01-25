@@ -457,9 +457,13 @@ class Calculator {
     }
     let graphics = JSON.parse(this.scriptContents["graphics"]);
     let canvasName = graphics[pathnames.urlFields.result.canvasName];
+    let controlsName = graphics[pathnames.urlFields.result.controlsName];
+    // let messagesName = graphics[pathnames.urlFields.result.messagesName];
     let output = this.getOutputElement();
     let canvases = output.querySelectorAll(`[name="${canvasName}"]`);
-    graphicsSerialization.fromJSON(graphics, canvases);
+    let controls = output.querySelectorAll(`[name="${controlsName}"]`);
+    // let messages = output.querySelectorAll(`[name="${messagesName}"]`);
+    graphicsSerialization.fromJSON(graphics, canvases[0], controls[0], null);
   }
 
   getOutputElement() {

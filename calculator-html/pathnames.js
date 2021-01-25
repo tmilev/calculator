@@ -60,6 +60,8 @@ const urlFields = {
     // Global comments, usually used for debugging.
     commentsGlobal: "commentsGlobal",
     canvasName: "canvasName",
+    controlsName: "controlsName",
+    messagesName: "messagesName",
     solution: {
       steps: "solutionSteps",
     },

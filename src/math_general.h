@@ -4877,7 +4877,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
   sortedMons.quickSortDescending(theOrder);
   int cutOffCounter = 0;
   bool useCustomPlus = false;
-  int maximumLineLength = format == nullptr ? 200 : format->maximumLineLength;
+  int maximumLineLength = format == nullptr ? - 1 : format->maximumLineLength;
   int numberOfAmpersandsPerNewLineForLaTeX = (format == nullptr) ? 1 : format->numberOfAmpersandsPerNewLineForLaTeX;
   bool flagUseLaTeX = (format == nullptr) ? false : format->flagUseLatex;
   bool flagUseHTML = (format == nullptr) ? false : format->flagUseHTML;

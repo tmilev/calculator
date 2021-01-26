@@ -2239,6 +2239,7 @@ class LaTeXParser {
     if (secondToLast.syntacticRole === "matrixBuilder" && last.syntacticRole === "&") {
       // Modify secondToLast.node in place for performance reasons:
       // copying it may cause unwanted quadratic complexity.
+      this.lastRuleName = "matrix builder ampersand";
       let incomingEntry = mathNodeFactory.matrixRowEntry(this.equationEditor, mathNodeFactory.atom(this.equationEditor, ""));
       secondToLast.node.getLastMatrixRow().appendChild(incomingEntry);
       return this.decreaseParsingStack(1);
@@ -2246,6 +2247,7 @@ class LaTeXParser {
     if (last.syntacticRole === "\\\\" && secondToLast.isExpression() && thirdToLast.syntacticRole === "matrixBuilder") {
       // Modify thirdToLast.node in place for performance reasons:
       // copying it may cause unwanted quadratic complexity.
+      this.lastRuleName = "matrix builder expression double backslash";
       let lastRow = thirdToLast.node.getLastMatrixRow();
       let incomingEntry = mathNodeFactory.matrixRowEntry(this.equationEditor, secondToLast.node);
       lastRow.appendChild(incomingEntry);
@@ -2256,11 +2258,16 @@ class LaTeXParser {
     if (last.syntacticRole === "\\\\" && secondToLast.syntacticRole === "matrixBuilder") {
       // Modify secondToLast.node in place for performance reasons:
       // copying it may cause unwanted quadratic comoplexity.
+      this.lastRuleName = "matrix builder double backslash";
       let lastRow = secondToLast.node.getLastMatrixRow();
       let incomingEntry = mathNodeFactory.matrixRowEntry(this.equationEditor, mathNodeFactory.atom(this.equationEditor, ""));
       lastRow.appendChild(incomingEntry);
       let newRow = mathNodeFactory.matrixRow(this.equationEditor, 0);
       lastRow.parent.appendChild(newRow);
+      return this.decreaseParsingStack(1);
+    }
+    if (last.syntacticRole === "\\\\") {
+      this.lastRuleName = "remove double backslash";
       return this.decreaseParsingStack(1);
     }
     if (thirdToLast.syntacticRole === "matrixBuilder" && secondToLast.isExpression() && last.isMatrixEnder()) {
@@ -2348,6 +2355,11 @@ class LaTeXParser {
       let node = mathNodeFactory.baseWithSubscript(this.equationEditor, thirdToLast.node, last.node);
       return this.replaceParsingStackTop(node, "", - 3);
     }
+
+    if (thirdToLast.syntacticRole === "\\frac" && secondToLast.isExpression() && last.isExpression()) {
+      let node = mathNodeFactory.fraction(this.equationEditor, secondToLast.node, last.node);
+      return this.replaceParsingStackTop(node, "", - 3);
+    }
     if (
       last.isExpression() &&
       secondToLast.isExpression() &&
@@ -2375,10 +2387,6 @@ class LaTeXParser {
     if (thirdToLast.isExpression() && secondToLast.syntacticRole === "^" && last.isExpression()) {
       this.lastRuleName = "make exponent";
       let node = mathNodeFactory.baseWithExponent(this.equationEditor, thirdToLast.node, last.node);
-      return this.replaceParsingStackTop(node, "", - 3);
-    }
-    if (thirdToLast.syntacticRole === "\\frac" && secondToLast.isExpression() && last.isExpression()) {
-      let node = mathNodeFactory.fraction(this.equationEditor, secondToLast.node, last.node);
       return this.replaceParsingStackTop(node, "", - 3);
     }
     if (thirdToLast.syntacticRole === "\\binom" && secondToLast.isExpression() && last.isExpression()) {

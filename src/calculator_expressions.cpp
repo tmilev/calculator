@@ -2814,6 +2814,9 @@ bool Expression::toStringBuiltIn<AlgebraicNumber>(
     format.flagUseFrac = true;
   }
   std::string currentString = input.getValue<AlgebraicNumber>().toString(&format);
+  if (currentString.find("<br>") != std::string::npos) {
+    global << Logger::red << "DEBUG: warning: line break in algebraic number" << Logger::endL;
+  }
   if (currentString.size() > 0) {
     if (currentString[0] == '-') {
       currentString = currentString.substr(1);

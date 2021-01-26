@@ -1251,6 +1251,7 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* theFormat)
   FormatExpressions latexFormat;
   latexFormat.flagUseLatex = true;
   latexFormat.flagUseHTML = false;
+  latexFormat.maximumLineLength = 0;
   if (this->theCharOverH.size() < 100) {
     out << HtmlRoutines::getMathNoDisplay(this->theCharOverH.toString(&latexFormat));
   } else {

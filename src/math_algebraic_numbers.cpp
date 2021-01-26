@@ -1423,6 +1423,7 @@ std::string AlgebraicNumber::toString(FormatExpressions* theFormat) const {
   if (theFormat != nullptr) {
     tempFormat.flagUseFrac = theFormat->flagUseFrac;
   }
+  tempFormat.flagUseHTML = false;
   VectorSparse<Rational> theAdditiveVector;
   this->owner->getAdditionTo(*this, theAdditiveVector);
   out << theAdditiveVector.toString(&tempFormat); //<< "~ in~ the~ field~ " << this->owner->toString();

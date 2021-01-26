@@ -2714,7 +2714,7 @@ FormatExpressions::FormatExpressions() {
   this->maximumLineLength = 100;
   this->flagPassCustomCoeffMonSeparatorToCoeffs = false;
   this->flagUseCalculatorFormatForUEOrdered = true;
-  this->flagUseHTML = true;
+  this->flagUseHTML = false;
   this->flagUseLatex = false;
   this->flagUsePNG = false;
   this->flagUsePmatrix = true;

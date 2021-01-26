@@ -71,8 +71,8 @@ void MeshTriangles::plotGrid(int theColor) {
   this->theGrid.plotObjects.setSize(0);
   this->theGrid.plotObjects.setExpectedSize(this->theGrid.plotObjects.size + this->theTriangles.size * 3);
   PlotObject currentLinePlot;
-  List<Vector<double> >& pointsVector = currentLinePlot.thePointsDouble;
-  currentLinePlot.thePointsDouble.setSize(4);
+  List<Vector<double> >& pointsVector = currentLinePlot.pointsDouble;
+  currentLinePlot.pointsDouble.setSize(4);
   currentLinePlot.colorRGB = theColor;
   for (int i = 0; i < this->theTriangles.size; i ++) {
     pointsVector[0] = this->theTriangles[i][0];
@@ -230,7 +230,7 @@ void MeshTriangles::computeImplicitPlotPart2() {
   double minSide = MathRoutines::minimum(this->height, this->width) * this->minTriangleSideAsPercentOfWidthPlusHeight;
   PlotObject currentPlot;
   currentPlot.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(255, 0, 0));
-  Vectors<double>& theSegment = currentPlot.thePointsDouble;
+  Vectors<double>& theSegment = currentPlot.pointsDouble;
   List<Vector<double> > currentTriangle;
   for (int i = 0; i < this->theTriangles.size; i ++) {
     currentTriangle = this->theTriangles[i]; //making a copy in case this->theTriangles changes underneath.
@@ -368,8 +368,8 @@ bool CalculatorFunctions::innerGetPointsImplicitly(
   }
   HashedList<Vector<double>, MathRoutines::hashVectorDoubles> thePoints;
   for (int i = 0; i < theMesh.theCurve.plotObjects.size; i ++) {
-    thePoints.addOnTopNoRepetition(theMesh.theCurve.plotObjects[i].thePointsDouble[0]);
-    thePoints.addOnTopNoRepetition(theMesh.theCurve.plotObjects[i].thePointsDouble[1]);
+    thePoints.addOnTopNoRepetition(theMesh.theCurve.plotObjects[i].pointsDouble[0]);
+    thePoints.addOnTopNoRepetition(theMesh.theCurve.plotObjects[i].pointsDouble[1]);
   }
   Matrix<double> theMatrix;
   theMatrix.assignVectorsToRows(thePoints);
@@ -1152,7 +1152,7 @@ bool CalculatorFunctionsPlot::plotLabel(
   PlotObject thePlot;
   thePlot.dimension = labelPosition.size;
   thePlot.thePlotString = theLabel;
-  thePlot.thePointsDouble.addOnTop(labelPosition);
+  thePlot.pointsDouble.addOnTop(labelPosition);
   thePlot.plotType = "label";
   thePlot.colorJS = "black";
   return output.assignValue(thePlot, calculator);
@@ -1179,18 +1179,18 @@ bool CalculatorFunctionsPlot::plotRectangle(
   Vector<double> currentCorner = theRectangle[0];
   Vector<double>& dimensions = theRectangle[1];
 
-  thePlot.thePointsDouble.addOnTop(currentCorner);
+  thePlot.pointsDouble.addOnTop(currentCorner);
   currentCorner[0] += dimensions[0];
-  thePlot.thePointsDouble.addOnTop(currentCorner);
+  thePlot.pointsDouble.addOnTop(currentCorner);
   currentCorner[1] += dimensions[1];
-  thePlot.thePointsDouble.addOnTop(currentCorner);
+  thePlot.pointsDouble.addOnTop(currentCorner);
   currentCorner[0] -= dimensions[0];
-  thePlot.thePointsDouble.addOnTop(currentCorner);
+  thePlot.pointsDouble.addOnTop(currentCorner);
   currentCorner[1] -= dimensions[1];
-  thePlot.thePointsDouble.addOnTop(currentCorner);
+  thePlot.pointsDouble.addOnTop(currentCorner);
   thePlot.colorFillJS = "cyan";
   thePlot.colorJS = "blue";
-  thePlot.thePointsDouble.addOnTop(currentCorner);
+  thePlot.pointsDouble.addOnTop(currentCorner);
   thePlot.theRectangles.addOnTop(theRectangle);
   thePlot.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 255));
   thePlot.colorFillRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 255, 255));
@@ -1573,7 +1573,7 @@ bool CalculatorFunctionsPlot::plotPath(Calculator& calculator, const Expression&
   }
   theSegment.plotType = "segmentPath";
   theSegment.dimension = theMat.numberOfColumns;
-  theMat.getVectorsFromRows(theSegment.thePointsDouble);
+  theMat.getVectorsFromRows(theSegment.pointsDouble);
   if (input.size() >= 4) {
     if (!input[3].evaluatesToDouble(&theSegment.lineWidth)) {
       theSegment.lineWidth = 1;
@@ -1677,8 +1677,8 @@ bool CalculatorFunctionsPlot::plotSegment(Calculator& calculator, const Expressi
   } else {
     theSegment.dimension = 2;
   }
-  theSegment.thePointsDouble.addOnTop(leftV);
-  theSegment.thePointsDouble.addOnTop(rightV);
+  theSegment.pointsDouble.addOnTop(leftV);
+  theSegment.pointsDouble.addOnTop(rightV);
   if (input.size() >= 5) {
     if (!input[4].evaluatesToDouble(&theSegment.lineWidth)) {
       theSegment.lineWidth = 1;
@@ -2073,8 +2073,8 @@ bool CalculatorFunctionsPlot::plotSetProjectionScreenBasis(
   resultPlot.dimension = 3;
   PlotObject thePlot;
   thePlot.plotType = "setProjectionScreen";
-  thePlot.thePointsDouble.addOnTop(v1);
-  thePlot.thePointsDouble.addOnTop(v2);
+  thePlot.pointsDouble.addOnTop(v1);
+  thePlot.pointsDouble.addOnTop(v2);
   resultPlot += thePlot;
   return output.assignValue(resultPlot, calculator);
 }
@@ -2098,21 +2098,21 @@ bool CalculatorFunctionsPlot::plotCoordinateSystem(Calculator& calculator, const
   PlotObject thePlot;
   thePlot.colorJS = "black";
   thePlot.plotType = "segment";
-  thePlot.thePointsDouble.setSize(2);
+  thePlot.pointsDouble.setSize(2);
   for (int i = 0; i < 3; i ++) {
-    thePlot.thePointsDouble[0].makeZero(3);
-    thePlot.thePointsDouble[1].makeZero(3);
-    thePlot.thePointsDouble[0][i] = corner1[i];
-    thePlot.thePointsDouble[1][i] = corner2[i];
+    thePlot.pointsDouble[0].makeZero(3);
+    thePlot.pointsDouble[1].makeZero(3);
+    thePlot.pointsDouble[0][i] = corner1[i];
+    thePlot.pointsDouble[1][i] = corner2[i];
     resultPlot += thePlot;
   }
   PlotObject plotLabels;
   plotLabels.plotType = "label";
-  plotLabels.thePointsDouble.setSize(1);
+  plotLabels.pointsDouble.setSize(1);
   plotLabels.colorJS = "blue";
   for (char i = 0; i < 3; i ++) {
-    plotLabels.thePointsDouble[0].makeZero(3);
-    plotLabels.thePointsDouble[0][i] = corner2[i];
+    plotLabels.pointsDouble[0].makeZero(3);
+    plotLabels.pointsDouble[0][i] = corner2[i];
     std::stringstream out;
     out << static_cast<char>('x' + i);
     plotLabels.thePlotString = out.str();

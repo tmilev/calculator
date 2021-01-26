@@ -883,17 +883,21 @@ private:
   JSData manifoldImmersionFunctionsJS();
   void writeColorWidthSegments(JSData& output);
   void writeColorLineWidth(JSData& output);
+  void writeColor(JSData& output);
+  void writeColorFilled(JSData& output);
   JSData functionFromString(const std::string& input);
 public:
   struct Labels {
   public:
     static std::string points;
+    static std::string point;
     static std::string functionLabel;
     static std::string coordinateFunctions;
     static std::string left;
     static std::string right;
     static std::string numberOfSegments;
     static std::string color;
+    static std::string colorFill;
     static std::string lineWidth;
     static std::string manifoldImmersion;
     static std::string variableRange;
@@ -902,6 +906,7 @@ public:
     static std::string plotType;
     static std::string viewWindow;
     static std::string body;
+    static std::string text;
     static std::string arguments;
   };
 
@@ -929,7 +934,7 @@ public:
   List<std::string> numSegmenTsJS;
   Matrix<Expression> thePointS;
   Matrix<std::string> thePointsJS;
-  Vectors<double> thePointsDouble;
+  Vectors<double> pointsDouble;
   List<Vectors<double> > theRectangles;
   // Each rectangle is a list of two 2-dim vectors.
   // The first vector gives the (x, y) - coordinates
@@ -965,7 +970,6 @@ public:
   );
   std::string toStringDebug();
   void computeYBounds();
-  std::string toStringPointsList();
   std::string getPlotStringFromFunctionStringAndRanges(
     bool useHtml,
     const std::string& functionStringPostfixNotation,
@@ -977,7 +981,12 @@ public:
   JSData toJSON2dDrawFunction();
   JSData toJSONParametricCurveInTwoDimensions();
   JSData toJSONPoints();
-  JSData toJSONDirectionFieldInTwoDimensions(  );
+  JSData toJSONDirectionFieldInTwoDimensions();
+  JSData toJSONDrawText();
+  JSData toJSONDrawPath();
+  JSData toJSONDrawPathFilled();
+  JSData toJSONPlotFillStart();
+  JSData toJSONPlotFillEnd();
   PlotObject();
   bool operator==(const PlotObject& other) const;
 };

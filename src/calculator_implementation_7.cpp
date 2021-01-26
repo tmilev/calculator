@@ -5732,7 +5732,7 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& calculator, const Ex
   for (int i = firstGoodXIndex; i <= lastGoodXIndex; i ++) {
     currentPt[0] = XValues[i];
     currentPt[1] = YValues[i];
-    thePlot.thePointsDouble.addOnTop(currentPt);
+    thePlot.pointsDouble.addOnTop(currentPt);
   }
   thePlot.xLow = XValues[0];
   thePlot.xHigh = *XValues.lastObject();
@@ -5864,7 +5864,7 @@ bool CalculatorFunctionsPlot::plotFill(Calculator& calculator, const Expression&
   }
   theFilledPlot.colorFillJS = colorString;
   for (int i = 0; i < startPlot.plotObjects.size; i ++) {
-    theFilledPlot.thePointsDouble.addListOnTop(startPlot.plotObjects[i].thePointsDouble);
+    theFilledPlot.pointsDouble.addListOnTop(startPlot.plotObjects[i].pointsDouble);
   }
   theFilledPlot.fillStyle = "filled";
   theFilledPlot.plotType = "plotFillStart";
@@ -6036,7 +6036,7 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
   } else {
     thePlotObj.plotType = "plotFunctionPrecomputed";
   }
-  Vectors<double>& thePointsDouble = thePlotObj.thePointsDouble;
+  Vectors<double>& thePointsDouble = thePlotObj.pointsDouble;
   if (thePlot.boxesThatUpdateMe.size == 0) {
     if (!input[1].evaluatesToDoubleInRange(
       theVarString,
@@ -6551,11 +6551,11 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     )) {
       calculator << "<hr>Failed to evaluate curve function. ";
     }
-    thePlot.thePointsDouble.setSize(theXs.size);
+    thePlot.pointsDouble.setSize(theXs.size);
     for (int i = 0; i < theXs.size; i ++) {
-      thePlot.thePointsDouble[i].setSize(2);
-      thePlot.thePointsDouble[i][0] = theXs[i][1];
-      thePlot.thePointsDouble[i][1] = theYs[i][1];
+      thePlot.pointsDouble[i].setSize(2);
+      thePlot.pointsDouble[i][0] = theXs[i][1];
+      thePlot.pointsDouble[i][1] = theYs[i][1];
     }
   }
   Plot outputPlot;
@@ -7965,15 +7965,15 @@ public:
         arrowHead[1] += this->charHeight.getDoubleValue() / 2;
         PlotObject theSegment;
         theSegment.thePlotString = "segment";
-        theSegment.thePointsDouble.addOnTop(arrowBase);
-        theSegment.thePointsDouble.addOnTop(arrowHead);
+        theSegment.pointsDouble.addOnTop(arrowBase);
+        theSegment.pointsDouble.addOnTop(arrowHead);
         theSegment.colorJS = "black";
         this->thePlot += theSegment;
       }
       if (this->displayedExpressionStrings[i] != "") {
         PlotObject theText;
         theText.plotType = "label";
-        theText.thePointsDouble.addOnTop(this->nodePositionsDouble[i]);
+        theText.pointsDouble.addOnTop(this->nodePositionsDouble[i]);
         theText.colorJS =
         this->displayedStringIsLeaf[i] ? "red" : "gray";
         theText.thePlotString =
@@ -7984,7 +7984,7 @@ public:
         PlotObject thePoint;
         thePoint.plotType = "point";
         thePoint.colorJS = "blue";
-        thePoint.thePointsDouble.addOnTop(this->nodePositionsDouble[i]);
+        thePoint.pointsDouble.addOnTop(this->nodePositionsDouble[i]);
         this->thePlot += thePoint;
       }
     }

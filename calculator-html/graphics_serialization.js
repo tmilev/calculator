@@ -13,6 +13,9 @@ class GraphicsSerialization {
       lineWidth: "lineWidth",
       body: "body",
       arguments: "arguments",
+      points: "points",
+      onePoint: "point",
+      text: "text",
     };
   }
 
@@ -62,16 +65,24 @@ class GraphicsSerialization {
     canvas,
   ) {
     let plotType = plot["plotType"];
-
+    let functionString = plot[this.labels.functionLabel];
+    let left = plot[this.labels.left];
+    let right = plot[this.labels.right];
+    let numberOfSegments = plot[this.labels.numberOfSegments];
+    let color = plot[this.labels.color];
+    let lineWidth = plot[this.labels.lineWidth];
+    let points = plot[this.labels.points];
+    let onePoint = plot[this.labels.onePoint];
+    let text = plot[this.labels.text];
     switch (plotType) {
       case "plotFunction":
         canvas.drawFunction(
-          this.functionFromString(plot[this.labels.functionLabel]),
-          this.interpretStringToNumber(plot[this.labels.left]),
-          this.interpretStringToNumber(plot[this.labels.right]),
-          this.interpretStringToNumber(plot[this.labels.numberOfSegments]),
-          plot[this.labels.color],
-          this.interpretStringToNumber(plot[this.labels.lineWidth]),
+          this.functionFromString(functionString),
+          this.interpretStringToNumber(left),
+          this.interpretStringToNumber(right),
+          this.interpretStringToNumber(numberOfSegments),
+          color,
+          this.interpretStringToNumber(lineWidth),
         );
         return;
       case "coordinateAxes":
@@ -80,8 +91,14 @@ class GraphicsSerialization {
       case "computeViewWindow":
         canvas.computeViewWindow();
         return;
+      case "path":
+        canvas.drawPath(points, color, lineWidth);
+        return;
+      case "label":
+        canvas.drawText(onePoint, text, color);
+        return;
       default:
-        throw `Uknown plot type: ${plotType}.`;
+        throw `Unknown plot type: ${plotType}.`;
     }
   }
 

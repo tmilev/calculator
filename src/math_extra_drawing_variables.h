@@ -233,8 +233,8 @@ public:
   int ColorTextPermanentlyZeroChamber;
   int ColorChamberIndicator;
   int ColorWeylChamberWalls;
-  int DefaultHtmlWidth;
-  int DefaultHtmlHeight;
+  int defaultHtmlWidth;
+  int defaultHtmlHeight;
   void initDrawingVariables();
   DrawingVariables() {
     this->initDrawingVariables();

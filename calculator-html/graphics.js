@@ -1271,10 +1271,10 @@ class CanvasTwoD {
     this.surface = this.canvasContainer.getContext("2d");
     this.canvasContainer.addEventListener("DOMMouseScroll", (e) => {
       this.mouseWheelHandler(e);
-    }, false);
+    }, { passive: false });
     this.canvasContainer.addEventListener("mousewheel", (e) => {
       this.mouseWheelHandler(e);
-    }, false);
+    }, { passive: false });
     this.canvasContainer.addEventListener("mousedown", (e) => {
       this.clickHandler(e);
     }, true);
@@ -1542,10 +1542,10 @@ class Canvas {
     this.surface = this.canvasContainer.getContext("2d");
     this.canvasContainer.addEventListener("DOMMouseScroll", (e) => {
       this.mouseWheelHandler(e);
-    }, true);
+    }, { passive: false });
     this.canvasContainer.addEventListener("mousewheel", (e) => {
       this.mouseWheelHandler(e);
-    }, true);
+    }, { passive: false });
     this.canvasContainer.addEventListener("mousedown", (e) => {
       this.clickHandler(e);
     }, true);

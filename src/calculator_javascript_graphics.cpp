@@ -7,8 +7,8 @@
 
 std::string DrawingVariables::getHTMLDiv(int theDimension) {
   JSData theData;
-  theData["widthHTML"] = this->DefaultHtmlWidth;
-  theData["heightHTML"] = this->DefaultHtmlHeight;
+  theData["widthHTML"] = this->defaultHtmlWidth;
+  theData["heightHTML"] = this->defaultHtmlHeight;
   theData["screenBasis"] = this->theBuffer.BasisProjectionPlane;
   theData["draggablePoints"] = this->theBuffer.basisToDrawCirclesAt;
   theData["bilinearForm"] = this->theBuffer.theBilinearForm;
@@ -29,8 +29,8 @@ std::string DrawingVariables::getHTMLDiv(int theDimension) {
 
   std::stringstream out;
   std::string graphicsVar = "drawGraphics" + graphicsId;
-  out << "<canvas width = '" << this->DefaultHtmlWidth << "' "
-  << "height = '" << this->DefaultHtmlHeight << "'"
+  out << "<canvas width = '" << this->defaultHtmlWidth << "' "
+  << "height = '" << this->defaultHtmlHeight << "'"
   << " id = '" << idCanvas << "'>Canvas not supported</canvas><br>";
   out << "<div id = '" << idHighlightInformation << "'></div><br>";
   out << "<span id = '" << idSpanInformation << "'></span><br>";

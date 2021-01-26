@@ -17,12 +17,14 @@
 #include <cfloat>
 
 std::string PlotObject::Labels::points              = "points";
+std::string PlotObject::Labels::point               = "point";
 std::string PlotObject::Labels::functionLabel       = "function";
 std::string PlotObject::Labels::coordinateFunctions = "coordinateFunctions";
 std::string PlotObject::Labels::left                = "left";
 std::string PlotObject::Labels::right               = "right";
 std::string PlotObject::Labels::numberOfSegments    = "numberOfSegments";
 std::string PlotObject::Labels::color               = "color";
+std::string PlotObject::Labels::colorFill           = "colorFill";
 std::string PlotObject::Labels::lineWidth           = "lineWidth";
 std::string PlotObject::Labels::manifoldImmersion   = "manifoldImmersion";
 std::string PlotObject::Labels::variableRange       = "variableRange";
@@ -30,6 +32,7 @@ std::string PlotObject::Labels::segmentRange        = "segmentRange";
 std::string PlotObject::Labels::defaultLength       = "defaultLength";
 std::string PlotObject::Labels::plotType            = "plotType";
 std::string PlotObject::Labels::body                = "body";
+std::string PlotObject::Labels::text                = "text";
 std::string PlotObject::Labels::arguments           = "arguments";
 std::string PlotObject::Labels::viewWindow          = "viewWindow";
 
@@ -361,7 +364,7 @@ bool PlotObject::operator==(const PlotObject& other) const {
   this->lineWidthJS                    == other.lineWidthJS                  &&
   this->numSegmenTsJS                  == other.numSegmenTsJS                &&
   this->thePointS                      == other.thePointS                    &&
-  this->thePointsDouble                == other.thePointsDouble              &&
+  this->pointsDouble                == other.pointsDouble              &&
   this->thePointsJS                    == other.thePointsJS                  &&
   this->theRectangles                  == other.theRectangles                &&
   this->plotType                    == other.plotType                  &&
@@ -404,9 +407,9 @@ PlotObject::PlotObject() {
 
 void PlotObject::computeYBounds() {
   MacroRegisterFunctionWithName("PlotObject::computeYBounds");
-  for (int i = 0; i < this->thePointsDouble.size; i ++) {
-    this->yHigh = MathRoutines::maximum(this->yHigh, this->thePointsDouble[i][1]);
-    this->yLow = MathRoutines::minimum(this->yLow, this->thePointsDouble[i][1]);
+  for (int i = 0; i < this->pointsDouble.size; i ++) {
+    this->yHigh = MathRoutines::maximum(this->yHigh, this->pointsDouble[i][1]);
+    this->yLow = MathRoutines::minimum(this->yLow, this->pointsDouble[i][1]);
   }
 }
 
@@ -473,8 +476,8 @@ void Plot::computeAxesAndBoundingBox() {
       this->highBoundY =MathRoutines::maximum (currentLine[0][1], this->highBoundY);
       this->highBoundY =MathRoutines::maximum (currentLine[1][1], this->highBoundY);
     }*/
-    for (int j = 0; j < this->plotObjects[k].thePointsDouble.size; j ++) {
-      Vector<double>& currentPoint = this->plotObjects[k].thePointsDouble[j];
+    for (int j = 0; j < this->plotObjects[k].pointsDouble.size; j ++) {
+      Vector<double>& currentPoint = this->plotObjects[k].pointsDouble[j];
       if (!this->isOKVector(currentPoint)) {
         continue;
       }
@@ -509,8 +512,8 @@ void Plot::computeAxesAndBoundingBox3d() {
       this->highBoundY =MathRoutines::maximum (currentLine[0][1], this->highBoundY);
       this->highBoundY =MathRoutines::maximum (currentLine[1][1], this->highBoundY);
     }*/
-    for (int j = 0; j < this->plotObjects[k].thePointsDouble.size; j ++) {
-      Vector<double>& currentPoint = this->plotObjects[k].thePointsDouble[j];
+    for (int j = 0; j < this->plotObjects[k].pointsDouble.size; j ++) {
+      Vector<double>& currentPoint = this->plotObjects[k].pointsDouble[j];
       if (!this->isOKVector(currentPoint)) {
         continue;
       }
@@ -603,13 +606,13 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
       <<  the3dObjects[i]
       << ");\n";
     }
-    if (currentPlot.plotType == "setProjectionScreen" && currentPlot.thePointsDouble.size >= 2) {
+    if (currentPlot.plotType == "setProjectionScreen" && currentPlot.pointsDouble.size >= 2) {
       outScript
       << "theCanvas.screenBasisUserDefault = "
       << "["
-      << currentPlot.thePointsDouble[0].toStringSquareBracketsBasicType()
+      << currentPlot.pointsDouble[0].toStringSquareBracketsBasicType()
       << ","
-      << currentPlot.thePointsDouble[1].toStringSquareBracketsBasicType()
+      << currentPlot.pointsDouble[1].toStringSquareBracketsBasicType()
       << "];\n";
       outScript << "theCanvas.screenBasisUser = theCanvas.screenBasisUserDefault.slice();\n";
     }
@@ -617,7 +620,7 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
       outScript
       << "theCanvas.drawText({"
       << "location: "
-      << currentPlot.thePointsDouble[0].toStringSquareBracketsBasicType()
+      << currentPlot.pointsDouble[0].toStringSquareBracketsBasicType()
       << ", "
       << "text:"
       << "'" << currentPlot.thePlotString << "'"
@@ -628,12 +631,12 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
       << "'"
       << "});\n";
     }
-    if (currentPlot.plotType == "segment" && currentPlot.thePointsDouble.size >= 2) {
+    if (currentPlot.plotType == "segment" && currentPlot.pointsDouble.size >= 2) {
       outScript
       << "theCanvas.drawLine("
-      << currentPlot.thePointsDouble[0].toStringSquareBracketsBasicType()
+      << currentPlot.pointsDouble[0].toStringSquareBracketsBasicType()
       << ", "
-      << currentPlot.thePointsDouble[1].toStringSquareBracketsBasicType()
+      << currentPlot.pointsDouble[1].toStringSquareBracketsBasicType()
       << ", "
       << "'"
       << currentPlot.colorJS
@@ -834,13 +837,17 @@ void PlotObject::writeColorWidthSegments(JSData& output) {
   this->writeColorLineWidth(output);
 }
 
-void PlotObject::writeColorLineWidth(JSData& output) {
+void PlotObject::writeColor(JSData& output) {
   output[PlotObject::Labels::color] = this->colorJS;
+}
+
+void PlotObject::writeColorLineWidth(JSData& output) {
   if (this->lineWidthJS != "") {
     output[PlotObject::Labels::lineWidth] = this->lineWidthJS;
   } else {
     output[PlotObject::Labels::lineWidth] = this->lineWidth;
   }
+  this->writeColor(output);
 }
 
 JSData PlotObject::toJSON2dDrawFunction() {
@@ -902,60 +909,65 @@ JSData PlotObject::toJSONDirectionFieldInTwoDimensions() {
   return result;
 }
 
+JSData PlotObject::toJSONDrawText() {
+  JSData result;
+  result[PlotObject::Labels::text] = this->thePlotString;
+  this->writeColor(result);
+  if (this->pointsDouble.size > 0) {
+    result[PlotObject::Labels::point] = this->pointsDouble[0];
+  }
+  return result;
+}
+
+JSData PlotObject::toJSONDrawPath() {
+  JSData result;
+  result[PlotObject::Labels::points] = this->pointsDouble;
+  this->writeColorLineWidth(result);
+  return result;
+}
+
+void PlotObject::writeColorFilled(JSData& output) {
+  output[PlotObject::Labels::colorFill] = this->colorFillJS;
+}
+
+JSData PlotObject::toJSONDrawPathFilled() {
+  JSData result = this->toJSONDrawPath();
+  this->writeColorFilled(result);
+  return result;
+}
+
+JSData PlotObject::toJSONPlotFillStart() {
+  JSData result;
+  this->writeColorFilled(result);
+  return result;
+}
+
 JSData PlotObject::toJSON() {
   JSData result;
-  std::string unused;
-  if (this->plotType == "plotFunction") {
-    result = this->toJSON2dDrawFunction();
-  } else if (this->plotType == "parametricCurve") {
-    result = this->toJSONParametricCurveInTwoDimensions();
-  } else if (this->plotType == "plotDirectionField") {
-    result = this->toJSONDirectionFieldInTwoDimensions() ;
-  } else if (this->plotType == "points") {
-    result = this->toJSONPoints();
-  } else if (this->plotType == "label") {
-    if (this->thePointsDouble.size > 0) {
-      result["data"] = "theCanvas.drawText("
-      + this->thePointsDouble[0].toStringSquareBracketsBasicType()
-      +  ", "
-      + "'" + this->thePlotString + "'"
-      + ", "
-      + "'" + this->colorJS + "');\n" ;
-    }
-  } else if (this->plotType == "plotFillStart") {
-    result["data"] = "theCanvas.plotFillStart('" + this->colorFillJS + "');\n";
-  } else if (this->plotType == "plotFillFinish") {
-    result["data"] = "theCanvas.plotFillFinish();\n";
-  } else if (this->plotType == "axesGrid") {
-    result["data"] = "theCanvas.drawGrid();\n";
-  } else if (this->plotType == "pathFilled") {
-    result["data"] = "theCanvas.drawPathFilled( "+
-    this->toStringPointsList() +
-    +  ", " +
-    "\"" + this->colorJS + "\""
-    + ","
-  + "\"" + this->colorFillJS + "\""
-    + ");\n";
-  } else {
-    std::stringstream outScript;
-    outScript << "theCanvas.drawPath( ";
-    outScript << this->toStringPointsList();
-    outScript << ", " << "\"";
-    if (this->colorJS == "") {
-      outScript << DrawingVariables::getColorHtmlFromColorIndex (this->colorRGB);
-    } else {
-      outScript << this->colorJS;
-    }
-    outScript << "\"";
-    if (this->lineWidthJS != "") {
-      outScript << ", " << "\"" << this->lineWidthJS << "\"";
-    } else {
-      outScript << ", " << "\"" << this->lineWidth << "\"";
-    }
-    outScript << ");\n";
-    result["data"] = outScript.str();
+  std::string correctedPlotType = this->plotType;
+  if (correctedPlotType == "") {
+    correctedPlotType = "path";
   }
-  result[PlotObject::Labels::plotType] = this->plotType;
+  if (correctedPlotType == "plotFunction") {
+    result = this->toJSON2dDrawFunction();
+  } else if (correctedPlotType == "parametricCurve") {
+    result = this->toJSONParametricCurveInTwoDimensions();
+  } else if (correctedPlotType == "plotDirectionField") {
+    result = this->toJSONDirectionFieldInTwoDimensions() ;
+  } else if (correctedPlotType == "points") {
+    result = this->toJSONPoints();
+  } else if (correctedPlotType == "label") {
+    result = this->toJSONDrawText();
+  } else if (correctedPlotType == "plotFillStart") {
+    result = this->toJSONPlotFillStart();
+  } else if (correctedPlotType == "plotFillFinish") {
+  } else if (correctedPlotType == "axesGrid") {
+  } else if (correctedPlotType == "pathFilled") {
+    result = this->toJSONDrawPathFilled();
+  } else {
+    result = this->toJSONDrawPath();
+  }
+  result[PlotObject::Labels::plotType] = correctedPlotType;
   return result;
 }
 
@@ -973,21 +985,6 @@ JSData PlotObject::toJSONPoints() {
   result[PlotObject::Labels::points] = points;
   result[PlotObject::Labels::color] = this->colorJS;
   return result;
-}
-
-std::string PlotObject::toStringPointsList() {
-  MacroRegisterFunctionWithName("PlotObject::toStringPointsList");
-  std::stringstream out;
-  out << "[";
-  for (int j = 0; j < this->thePointsDouble.size; j ++) {
-    out << this->thePointsDouble[j].toStringSquareBracketsBasicType();
-    if (j != this->thePointsDouble.size - 1) {
-      out << ",";
-    }
-  }
-  out << "]";
-
-  return out.str();
 }
 
 void Plot::computeCanvasNameIfNecessary(int& canvasCounter) {

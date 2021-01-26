@@ -25,11 +25,6 @@ function toStringVector(vector) {
   return result;
 }
 
-function setBilinearForm(idCanvas, row, column) {
-
-}
-
-
 function getAngleFromXandY(x, y) {
   return Math.atan2(y, x);
 }
@@ -1207,5 +1202,7 @@ if (module === undefined) {
 module.exports = {
   createGraphicsFromObject,
   GraphicsNDimensions,
-  startProjectionPlaneUser
+  startProjectionPlaneUser,
+  testA3,
+  testA4,
 };

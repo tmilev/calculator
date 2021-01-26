@@ -540,11 +540,10 @@ class Calculator {
     let graphics = JSON.parse(content);
     let canvasName = graphics[pathnames.urlFields.result.canvasName];
     let controlsName = graphics[pathnames.urlFields.result.controlsName];
-    // let messagesName = graphics[pathnames.urlFields.result.messagesName];
+    console.log("DEBUG: bootstrap graphics: " + JSON.stringify(graphics));
     let output = this.getOutputElement();
     let canvases = output.querySelectorAll(`[name="${canvasName}"]`);
     let controls = output.querySelectorAll(`[name="${controlsName}"]`);
-    // let messages = output.querySelectorAll(`[name="${messagesName}"]`);
     graphicsSerialization.fromJSON(graphics, canvases[0], controls[0], null);
   }
 

@@ -5277,7 +5277,7 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(FormatExpressions
   for (int i = 0; i < this->modules.size; i ++) {
     maxModDim = MathRoutines::maximum(this->modules[i][0].size, maxModDim);
   }
-  theDV.DefaultHtmlHeight = MathRoutines::maximum(600, maxModDim * 35);
+  theDV.defaultHtmlHeight = MathRoutines::maximum(600, maxModDim * 35);
   for (int i = 0; i < this->modules.size; i ++) {
     cornerWeights.setSize(0);
     for (int j = 0; j < this->modules[i].size; j ++) {

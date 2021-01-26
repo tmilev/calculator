@@ -299,8 +299,8 @@ int DrawingVariables::getColorFromChamberIndex(int index) {
 }
 
 void DrawingVariables::initDrawingVariables() {
-  this->DefaultHtmlHeight = 400;
-  this->DefaultHtmlWidth = 400;
+  this->defaultHtmlHeight = 400;
+  this->defaultHtmlWidth = 400;
   this->theDrawLineFunction = nullptr;
   this->theDrawTextFunction = nullptr;
   this->theDrawCircleFunction = nullptr;

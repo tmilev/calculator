@@ -1679,7 +1679,7 @@ std::string RootSubalgebra::toStringLieBracketTable(bool useLaTeX, bool useHtml,
 }
 
 WeylGroupData& RootSubalgebra::getAmbientWeyl() const {
-  return this->getOwnerLieAlgebra().theWeyl;
+  return this->getOwnerLieAlgebra().weylGroup;
 }
 
 WeylGroupAutomorphisms& RootSubalgebra::getAmbientWeylAutomorphisms() const {
@@ -2118,7 +2118,7 @@ bool RootSubalgebras::growDynkinType(
   MacroRegisterFunctionWithName("RootSubalgebras::growDynkinType");
   input.grow(this->validScales, this->getOwnerWeyl().getDimension(), output, outputPermutationSimpleRoots);
   char theLetter;
-  if (!this->owner->theWeyl.theDynkinType.isSimple(&theLetter)) {
+  if (!this->owner->weylGroup.theDynkinType.isSimple(&theLetter)) {
     return true;
   }
   for (int i = output.size - 1; i >= 0; i --) {
@@ -2700,7 +2700,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
       }
     }
     theSl2.theH.makeCartanGenerator(characteristicH, theLieAlgebra);
-    theSl2.LengthHsquared = theSl2.getOwnerSemisimpleAlgebra().theWeyl.rootScalarCartanRoot(characteristicH, characteristicH);
+    theSl2.LengthHsquared = theSl2.getOwnerSemisimpleAlgebra().weylGroup.rootScalarCartanRoot(characteristicH, characteristicH);
     theSl2.theE.makeZero();
     theSl2.theF.makeZero();
     if (theSl2.attemptExtendingHFtoHEFWRTSubalgebra(
@@ -2748,7 +2748,7 @@ void RootSubalgebras::computeAllReductiveRootSAsInit() {
   this->validScales.clear();
   this->validScales.setExpectedSize(this->owner->getRank() * 2);
   for (int i = 0; i < this->owner->getRank(); i ++) {
-    this->validScales.addOnTopNoRepetition(2 / this->owner->theWeyl.cartanSymmetric(i, i));
+    this->validScales.addOnTopNoRepetition(2 / this->owner->weylGroup.cartanSymmetric(i, i));
   }
   this->theWeylGroupAutomorphisms.theWeyl = &this->getOwnerWeyl();
 }
@@ -2813,7 +2813,7 @@ void RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder() {
     } while (parSel.incrementReturnFalseIfPastLast());
     currentList.quickSortAscending();
     this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.addListOnTop(currentList);
-    basis.addOnTop(this->owner->theWeyl.rootSystem[0]);
+    basis.addOnTop(this->owner->weylGroup.rootSystem[0]);
     parSel.initialize(this->owner->getRank() + 1);
   }
   this->NumNonPseudoParabolic = this->theSubalgebras.size - this->NumParabolic - this->NumPseudoParabolicNonParabolic;
@@ -2832,7 +2832,7 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
   this->initOwnerMustBeNonZero();
   this->computeAllReductiveRootSAsInit();
   HashedList<Vector<Rational> > tempVs;
-  this->flagPrintGAPinput = this->owner->theWeyl.loadGAPRootSystem(tempVs);
+  this->flagPrintGAPinput = this->owner->weylGroup.loadGAPRootSystem(tempVs);
   ProgressReport theReport2;
   RootSubalgebra currentSA;
   currentSA.owner = this;
@@ -2940,7 +2940,7 @@ void RootSubalgebras::computeAllRootSubalgebrasUpToIsomorphism(int StartingIndex
 }
 
 WeylGroupData& RootSubalgebras::getOwnerWeyl() const {
-  return this->GetOwnerSSalgebra().theWeyl;
+  return this->GetOwnerSSalgebra().weylGroup;
 }
 
 SemisimpleLieAlgebra& RootSubalgebras::GetOwnerSSalgebra() const {
@@ -3207,7 +3207,7 @@ std::string RootSubalgebras::toStringDynkinTableHTML(FormatExpressions* theForma
     << this->NumPseudoParabolicNonParabolic << " pseudo-parabolic but not parabolic and "
     << this->NumNonPseudoParabolic << " non pseudo-parabolic root subsystems.";
     HashedList<Vector<Rational> > GAPPosRootSystem;
-    if (this->flagPrintGAPinput && this->owner->theWeyl.loadGAPRootSystem(GAPPosRootSystem)) {
+    if (this->flagPrintGAPinput && this->owner->weylGroup.loadGAPRootSystem(GAPPosRootSystem)) {
       out << " The roots needed to generate the root subsystems are listed below using the root indices in GAP. ";
       for (int i = 0; i < this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size; i ++) {
         RootSubalgebra& currentSA = this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither[i];
@@ -3329,7 +3329,7 @@ void RootSubalgebras::initOwnerMustBeNonZero() {
   MacroRegisterFunctionWithName("RootSubalgebras::initOwnerMustBeNonZero");
   this->checkInitialization();
   this->theSubalgebras.setSize(0);
-  this->owner->theWeyl.computeRho(false);
+  this->owner->weylGroup.computeRho(false);
 }
 
 int RootSubalgebras::getIndexUpToEquivalenceByDiagramsAndDimensions(const RootSubalgebra& theSA) {

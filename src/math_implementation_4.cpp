@@ -1428,8 +1428,8 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords, Vector<Rational>& parabolicSel
 ) {
   std::stringstream out;
-  WeylGroupData& LargerWeyl = this->theHmm.theRange().theWeyl;
-  WeylGroupData& SmallerWeyl = this->theHmm.theDomain().theWeyl;
+  WeylGroupData& LargerWeyl = this->theHmm.theRange().weylGroup;
+  WeylGroupData& SmallerWeyl = this->theHmm.theDomain().weylGroup;
   if (!LargerWeyl.isOfSimpleType('B', 3)) {
     return "Error: algebra is not so(7).";
   }
@@ -1630,9 +1630,9 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
 ) {
   MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::initFromHomomorphism");
   Vectors<Rational> tempRoots;
-  this->weylLarger = &input.theRange().theWeyl;
-  this->weylSmaller = &input.theDomain().theWeyl;
-  WeylGroupData& theWeYl = input.theRange().theWeyl;
+  this->weylLarger = &input.theRange().weylGroup;
+  this->weylSmaller = &input.theDomain().weylGroup;
+  WeylGroupData& theWeYl = input.theRange().weylGroup;
 //  input.projectOntoSmallCartan(theWeyl.RootsOfBorel, tempRoots);
   this->log << "projections: " << tempRoots.toString();
   theWeYl.theGroup.computeAllElements(false);
@@ -1648,7 +1648,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   input.getWeightsGmodKInSimpleCoordinatesK(this->GmodKnegativeWeightS);
 //  this->log << "weights of g mod k: " << this->GmodKnegativeWeights.toString();
   Matrix<Rational> tempMat;
-  tempMat = input.theDomain().theWeyl.cartanSymmetric;
+  tempMat = input.theDomain().weylGroup.cartanSymmetric;
   tempMat.invert();
 //  tempMat.actOnVectorsColumn(this->GmodKnegativeWeightS);
   this->log << this->GmodKnegativeWeightS.toString();
@@ -1762,11 +1762,11 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   }
   Matrix<Polynomial<Rational> > tempMatPoly;
   Vector<Polynomial<Rational> > tempVect, tempVect2;
-  tempVect.setSize(input.theDomain().theWeyl.getDimension() + input.theRange().theWeyl.getDimension());
+  tempVect.setSize(input.theDomain().weylGroup.getDimension() + input.theRange().weylGroup.getDimension());
   for (int i = 0; i < tempVect.size; i ++) {
     tempVect[i].makeMonomial(i, 1, Rational(1));
   }
-  tempMatPoly.initialize(input.theDomain().theWeyl.getDimension(), tempVect.size);
+  tempMatPoly.initialize(input.theDomain().weylGroup.getDimension(), tempVect.size);
   Polynomial<Rational> polyZero;
   polyZero.makeZero();
   theFormat.polynomialAlphabet.setSize(5);
@@ -1835,13 +1835,13 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     }
     this->PreimageWeylChamberLargerAlgebra.normals[i] = tempRoot;
   }
-  tempMat = input.theDomain().theWeyl.cartanSymmetric;
+  tempMat = input.theDomain().weylGroup.cartanSymmetric;
   tempMat.invert();
   tempRoots.size = 0;
   Vector<Rational> ParabolicEvaluationRootSmallerAlgebra;
   ParabolicEvaluationRootSmallerAlgebra = this->ParabolicSelectionSmallerAlgebra;
   for (int i = 0; i < tempMat.numberOfRows; i ++) {
-    input.theDomain().theWeyl.cartanSymmetric.getVectorFromRow(i, tempRoot);
+    input.theDomain().weylGroup.cartanSymmetric.getVectorFromRow(i, tempRoot);
     if (tempRoot.scalarEuclidean(ParabolicEvaluationRootSmallerAlgebra).isEqualToZero()) {
       tempRoots.setSize(tempRoots.size + 1);
       tempMat.getVectorFromRow(i, *tempRoots.lastObject());

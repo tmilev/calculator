@@ -80,11 +80,16 @@ public:
   std::string toString(FormatExpressions* theFormat = nullptr);
   SemisimpleLieAlgebra* owner;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theGenerators;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theBasis;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basis;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > cartanSubalgebra;
   void computeBasis();
   void computeCartanSubalgebra();
   SubalgebraSemisimpleLieAlgebra();
+  bool findCartanSubalgebraCandidate(
+    const List<MatrixTensor<AlgebraicNumber> >& adjointOperators,
+    ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputCandidate,
+    const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& currentCentralizer
+  );
   bool checkInitialization();
 };
 

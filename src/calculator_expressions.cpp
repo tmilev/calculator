@@ -328,11 +328,11 @@ SemisimpleSubalgebras
 & inputValue) const {
   this->checkInitialization();
   inputValue.checkInitialization();
-  if (!this->owner->objectContainer.theSSSubalgebraS.contains(inputValue.owner->theWeyl.theDynkinType)) {
+  if (!this->owner->objectContainer.theSSSubalgebraS.contains(inputValue.owner->weylGroup.theDynkinType)) {
     global.fatal << "Semisimple subalgebras must be "
     << "allocated directly in the object container. " << global.fatal;
   }
-  return this->owner->objectContainer.theSSSubalgebraS.getIndex(inputValue.owner->theWeyl.theDynkinType);
+  return this->owner->objectContainer.theSSSubalgebraS.getIndex(inputValue.owner->weylGroup.theDynkinType);
 }
 
 template < >
@@ -534,10 +534,10 @@ int Expression::addObjectReturnIndex(
 SemisimpleLieAlgebra* const
 & inputValue) const {
   this->checkInitialization();
-  if (!this->owner->objectContainer.semisimpleLieAlgebras.contains(inputValue->theWeyl.theDynkinType)) {
+  if (!this->owner->objectContainer.semisimpleLieAlgebras.contains(inputValue->weylGroup.theDynkinType)) {
     global.fatal << "Semisimple Lie algebra must be allocated directly in the object container. " << global.fatal;
   }
-  int index = this->owner->objectContainer.semisimpleLieAlgebras.getIndex(inputValue->theWeyl.theDynkinType);
+  int index = this->owner->objectContainer.semisimpleLieAlgebras.getIndex(inputValue->weylGroup.theDynkinType);
   return index;
 }
 
@@ -927,7 +927,7 @@ WeylGroupData& Expression::getValueNonConst() const {
   }
   return this->owner->objectContainer.semisimpleLieAlgebras.values[
     this->getLastChild().data
-  ].theWeyl;
+  ].weylGroup;
 }
 
 template < >

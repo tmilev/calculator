@@ -78,6 +78,11 @@ public:
     this->checkConsistencyWithOther(other);
     return this->generatorIndex == other.generatorIndex;
   }
+  class Test {
+  public:
+    static bool all();
+    static bool basic();
+  };
 };
 
 template <class Coefficient, unsigned int inputHashFunction(const Coefficient&) = Coefficient::hashFunction>
@@ -2171,8 +2176,8 @@ public:
   );
   template <class LinearCombinationTemplate>
   static void gaussianEliminationByRows(
-    List<LinearCombinationTemplate>& theList,
-    bool *IHaveMadeARowSwitch = nullptr,
+    List<LinearCombinationTemplate>& toBeEliminated,
+    bool *madeARowSwitch = nullptr,
     HashedList<TemplateMonomial>* seedMonomials = nullptr,
     Matrix<Coefficient>* carbonCopyMatrix = nullptr,
     List<LinearCombinationTemplate>* carbonCopyList = nullptr
@@ -3522,29 +3527,29 @@ bool LinearCombination<TemplateMonomial, Coefficient>::linearSpanContainsGetFirs
 template <class TemplateMonomial, class Coefficient>
 template <class LinearCombinationTemplate>
 void LinearCombination<TemplateMonomial, Coefficient>::gaussianEliminationByRows(
-  List<LinearCombinationTemplate>& theList,
-  bool *IHaveMadeARowSwitch,
+  List<LinearCombinationTemplate>& toBeEliminated,
+  bool *madeARowSwitch,
   HashedList<TemplateMonomial>* seedMonomials,
   Matrix<Coefficient>* carbonCopyMatrix,
   List<LinearCombinationTemplate>* carbonCopyList
 ) {
   MacroRegisterFunctionWithName("LinearCombination::gaussianEliminationByRows");
   if (carbonCopyMatrix != 0) {
-    if (carbonCopyMatrix->numberOfRows != theList.size) {
+    if (carbonCopyMatrix->numberOfRows != toBeEliminated.size) {
       global.fatal
       << "Carbon copy matrix has "
       << carbonCopyMatrix->numberOfRows
-      << " rows, while the gaussian-eliminated list has " << theList.size
+      << " rows, while the gaussian-eliminated list has " << toBeEliminated.size
       << " elements; the two numbers must be the same!" << global.fatal;
     }
   }
   if (carbonCopyList != 0) {
-    if (carbonCopyList->size != theList.size) {
+    if (carbonCopyList->size != toBeEliminated.size) {
       global.fatal
       << "Carbon copy list has "
       << carbonCopyList->size
       << " elements, while the gaussian-eliminated list has "
-      << theList.size
+      << toBeEliminated.size
       << " elements; the two numbers must be the same!"
       << global.fatal;
     }
@@ -3553,78 +3558,79 @@ void LinearCombination<TemplateMonomial, Coefficient>::gaussianEliminationByRows
   HashedList<TemplateMonomial>& allMons = seedMonomials == 0 ? bufferMons.getElement() : *seedMonomials;
   if (seedMonomials == 0) {
     int topBoundNumMons = 0;
-    for (int i = 0; i < theList.size; i ++) {
-      topBoundNumMons += theList[i].size();
+    for (int i = 0; i < toBeEliminated.size; i ++) {
+      topBoundNumMons += toBeEliminated[i].size();
     }
     allMons.setExpectedSize(topBoundNumMons);
   }
-  for (int i = 0; i < theList.size; i ++) {
-    allMons.addOnTopNoRepetition(theList[i].monomials);
+  for (int i = 0; i < toBeEliminated.size; i ++) {
+    allMons.addOnTopNoRepetition(toBeEliminated[i].monomials);
   }
   allMons.quickSortAscending();
   FormatExpressions tempFormat;
   tempFormat.flagUseHTML = true;
   tempFormat.flagUseLatex = true;
-  if (IHaveMadeARowSwitch != nullptr) {
-    *IHaveMadeARowSwitch = false;
+  if (madeARowSwitch != nullptr) {
+    *madeARowSwitch = false;
   }
   int currentRowIndex = 0;
-  Coefficient tempCF, tempCF2;
-  for (int i = 0; i < allMons.size && currentRowIndex < theList.size; i ++) {
+  Coefficient accumulator, negated;
+  for (int i = 0; i < allMons.size && currentRowIndex < toBeEliminated.size; i ++) {
     const TemplateMonomial& currentMon = allMons[i];
     int goodRow = currentRowIndex;
-    for (; goodRow < theList.size; goodRow ++) {
-      if (theList[goodRow].monomials.contains(currentMon)) {
+    for (; goodRow < toBeEliminated.size; goodRow ++) {
+      if (toBeEliminated[goodRow].monomials.contains(currentMon)) {
         break;
       }
     }
-    if (goodRow >= theList.size) {
+    if (goodRow >= toBeEliminated.size) {
       continue;
     }
     if (currentRowIndex != goodRow) {
-      theList.swapTwoIndices(currentRowIndex, goodRow);
+      toBeEliminated.swapTwoIndices(currentRowIndex, goodRow);
       if (carbonCopyList != 0) {
         carbonCopyList->swapTwoIndices(currentRowIndex, goodRow);
       }
       if (carbonCopyMatrix != 0) {
         carbonCopyMatrix->switchRows(currentRowIndex, goodRow);
       }
-      if (IHaveMadeARowSwitch != nullptr) {
-        *IHaveMadeARowSwitch = true;
+      if (madeARowSwitch != nullptr) {
+        *madeARowSwitch = true;
       }
     }
-    LinearCombination<TemplateMonomial, Coefficient>& currentPivot = theList[currentRowIndex];
-    int colIndex = currentPivot.monomials.getIndex(currentMon);
-    if (colIndex == - 1) {
+    LinearCombination<TemplateMonomial, Coefficient>& currentPivot = toBeEliminated[currentRowIndex];
+    int columnIndex = currentPivot.monomials.getIndex(currentMon);
+    if (columnIndex == - 1) {
       global.fatal << "An internal check at the "
       << "Gaussian elimination method for monomial collections fails. "
       << "Something is wrong. Here is the List you wanted to perform Gaussian elimination upon. "
-      << theList.toString() << ". " << global.fatal;
+      << toBeEliminated.toString() << ". " << global.fatal;
     }
-    tempCF = currentPivot.coefficients[colIndex];
-    tempCF.invert();
-    currentPivot *= tempCF;
+    accumulator = currentPivot.coefficients[columnIndex];
+    accumulator.invert();
+    currentPivot *= accumulator;
     if (carbonCopyMatrix != 0) {
-      carbonCopyMatrix->rowTimesScalar(currentRowIndex, tempCF);
+      carbonCopyMatrix->rowTimesScalar(currentRowIndex, accumulator);
     }
     if (carbonCopyList != 0) {
-      (*carbonCopyList)[currentRowIndex] *= tempCF;
+      (*carbonCopyList)[currentRowIndex] *= accumulator;
     }
-    for (int j = 0; j < theList.size; j ++) {
-      if (j != currentRowIndex) {
-        LinearCombination<TemplateMonomial, Coefficient>& currentOther = theList[j];
-        int otherColIndex = currentOther.monomials.getIndex(currentMon);
-        if (otherColIndex != - 1) {
-          tempCF = currentOther.coefficients[otherColIndex];
-          currentOther.subtractOtherTimesCoefficient(currentPivot, &tempCF);
-          if (carbonCopyList != 0) {
-            (*carbonCopyList)[j].subtractOtherTimesCoefficient((*carbonCopyList)[currentRowIndex], &tempCF);
-          }
-          if (carbonCopyMatrix != 0) {
-            tempCF2 = tempCF;
-            tempCF2 *= - 1;
-            carbonCopyMatrix->addTwoRows(currentRowIndex, j, 0, tempCF2);
-          }
+    for (int j = 0; j < toBeEliminated.size; j ++) {
+      if (j == currentRowIndex) {
+        continue;
+      }
+      LinearCombination<TemplateMonomial, Coefficient>& currentOther = toBeEliminated[j];
+      int otherColumnIndex = currentOther.monomials.getIndex(currentMon);
+      if (otherColumnIndex != - 1) {
+        accumulator = currentOther.coefficients[otherColumnIndex];
+        currentOther.subtractOtherTimesCoefficient(currentPivot, &accumulator);
+        if (carbonCopyList != 0) {
+          (*carbonCopyList)[j].subtractOtherTimesCoefficient((*carbonCopyList)[currentRowIndex], &accumulator);
+        }
+        if (carbonCopyMatrix != 0) {
+          negated = accumulator;
+          negated *= - 1;
+          carbonCopyMatrix->addTwoRows(currentRowIndex, j, 0, negated);
         }
       }
     }
@@ -6462,11 +6468,12 @@ public:
     }
   }
   bool isNilpotent() const {
-    MatrixTensor<Coefficient> theMat;
-    theMat = *this;
-    for (int theDim = this->getMinimumNumberOfColumnsNumberOfRows() + 1; theDim > 0; theDim /= 2) {
-      theMat *= theMat;
-      if (theMat.isEqualToZero()) {
+    MatrixTensor<Coefficient> element;
+    element = *this;
+    int dimensionPlusOne = this->getMinimumNumberOfColumnsNumberOfRows() + 1;
+    for (int i = dimensionPlusOne; i > 0; i /= 2) {
+      element *= element;
+      if (element.isEqualToZero()) {
         return true;
       }
     }

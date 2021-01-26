@@ -512,7 +512,7 @@ bool CalculatorFunctions::innerPrintAllVectorPartitions(Calculator& calculator, 
     thePartition[i] = 0;
   }
   Vector<Rational> theWeight, tmpWt;
-  Vectors<Rational>& rootsBorel = theSSalgebra.theWeyl.rootsOfBorel;
+  Vectors<Rational>& rootsBorel = theSSalgebra.weylGroup.rootsOfBorel;
   int counter = 0;
   int totalCycles = 0;
   theWeight.makeZero(theSSalgebra.getRank());

@@ -193,7 +193,7 @@ std::string ExpressionContext::toString() const {
   }
   if (this->indexAmbientSemisimpleLieAlgebra != - 1) {
     out << "Ambient semisimple Lie algebra: "
-    << this->getAmbientSemisimpleLieAlgebra()->theWeyl.theDynkinType.toString();
+    << this->getAmbientSemisimpleLieAlgebra()->weylGroup.theDynkinType.toString();
   }
   return out.str();
 }
@@ -229,11 +229,11 @@ bool ExpressionContext::setAmbientSemisimpleLieAlgebra(
   this->checkInitialization();
   MapReferences<DynkinType, SemisimpleLieAlgebra>& algebras = this->owner->objectContainer.semisimpleLieAlgebras;
   this->indexAmbientSemisimpleLieAlgebra = algebras.getIndex(
-    algebra.theWeyl.theDynkinType
+    algebra.weylGroup.theDynkinType
   );
   if (this->indexAmbientSemisimpleLieAlgebra == - 1) {
     global.fatal << "Attempt to add semisimple algebra of type "
-    << algebra.theWeyl.theDynkinType << " which is unknown to the calculator. "
+    << algebra.weylGroup.theDynkinType << " which is unknown to the calculator. "
     << global.fatal;
   }
   return true;

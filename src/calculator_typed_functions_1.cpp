@@ -448,7 +448,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(
     return false;
   }
   ElementWeylGroup theElt = inputConverted[1].getValue<ElementWeylGroup>();
-  if (theElt.owner != &theWeight.owner->theWeyl) {
+  if (theElt.owner != &theWeight.owner->weylGroup) {
     return calculator << "<hr>Possible user input error: attempting to apply Weyl group "
     << "element to weight corresponding to different Weyl group.";
   }

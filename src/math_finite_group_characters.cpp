@@ -1139,7 +1139,7 @@ void WeylGroupData::getSignSignatureAllRootSubsystems(List<SubgroupDataRootRefle
   MacroRegisterFunctionWithName("WeylGroup::getSignSignatureAllRootSubsystems");
   RootSubalgebras theRootSAs;
   SemisimpleLieAlgebra theSSlieAlg;
-  theSSlieAlg.theWeyl.makeFromDynkinType(this->theDynkinType);
+  theSSlieAlg.weylGroup.makeFromDynkinType(this->theDynkinType);
 //  theSSlieAlg.computeChevalleyConstants(global);
   theRootSAs.owner = &theSSlieAlg;
   theRootSAs.computeAllReductiveRootSubalgebrasUpToIsomorphism();

@@ -6620,18 +6620,18 @@ bool CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calcula
     out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
   }
   SemisimpleSubalgebras& theSSsubalgebras =
-  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
+  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.weylGroup.theDynkinType);
   theSSsubalgebras.ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
 
   out << "Attempting to embed "
-  << smallSubalgebraPointer.content->theWeyl.theDynkinType.toString()
+  << smallSubalgebraPointer.content->weylGroup.theDynkinType.toString()
   << " in " << ownerSS.toStringLieAlgebraName();
   theSSsubalgebras.findTheSemisimpleSubalgebrasFromScratch(
     ownerSS,
     calculator.objectContainer.theAlgebraicClosure,
     calculator.objectContainer.semisimpleLieAlgebras,
     calculator.objectContainer.theSltwoSAs,
-    &smallSubalgebraPointer.content->theWeyl.theDynkinType
+    &smallSubalgebraPointer.content->weylGroup.theDynkinType
   );
   return output.assignValue(theSSsubalgebras, calculator);
 }
@@ -6840,7 +6840,7 @@ bool CalculatorFunctions::innerHighestWeightTransposeAntiAutomorphismBilinearFor
   }
   const ElementUniversalEnveloping<RationalFunction<Rational> >& leftUE = leftConverted.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >();
   const ElementUniversalEnveloping<RationalFunction<Rational> >& rightUE = rightConverted.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >();
-  WeylGroupData& theWeyl = constSSalg.theWeyl;
+  WeylGroupData& theWeyl = constSSalg.weylGroup;
   Vector<RationalFunction<Rational> > hwDualCoords;
   constSSalg.orderSSalgebraForHWbfComputation();
   hwDualCoords = theWeyl.getDualCoordinatesFromFundamental(weight);

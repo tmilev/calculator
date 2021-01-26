@@ -312,3 +312,31 @@ bool Polynomial<Rational>::Test::differential() {
   this->oneDifferential("x^2y^3z^5 + x", "5x^{2}y^{3}z^{4}dz +3x^{2}y^{2}z^{5}dy +2x y^{3}z^{5}dx +dx ");
   return true;
 }
+
+bool ChevalleyGenerator::Test::all() {
+  ChevalleyGenerator::Test::basic();
+  return true;
+}
+
+bool ChevalleyGenerator::Test::basic() {
+  HashedList<ChevalleyGenerator> allGenerators;
+  SemisimpleLieAlgebra lieAlgebra;
+  lieAlgebra.weylGroup.makeArbitrarySimple('B', 3);
+  lieAlgebra.weylGroup.computeRho(false);
+  for (int i = 0; i < lieAlgebra.getNumberOfGenerators(); i ++) {
+    ChevalleyGenerator generator;
+    generator.makeGenerator(lieAlgebra, i);
+    allGenerators.addOnTopNoRepetitionMustBeNew(generator);
+  }
+  std::string allGeneratorsString = allGenerators.toStringCommaDelimited();
+  std::string expected =
+  "g_{-9}, g_{-8}, g_{-7}, g_{-6}, g_{-5}, g_{-4}, g_{-3}, g_{-2}, g_{-1}, "
+  "h_{1}, h_{2}, h_{3}, "
+  "g_{1}, g_{2}, g_{3}, g_{4}, g_{5}, g_{6}, g_{7}, g_{8}, g_{9}";
+  if (allGeneratorsString != expected) {
+    global << "Expected generator string:" << Logger::endL
+    << expected << "\nbut got:\n" << allGeneratorsString << Logger::endL;
+    global.fatal << "Bad generators. " << global.fatal;
+  }
+  return true;
+}

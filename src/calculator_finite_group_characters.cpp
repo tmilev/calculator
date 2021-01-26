@@ -439,12 +439,12 @@ bool CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant(
   std::stringstream out;
   out << "Input: " << theHWs.toString()
   << ", simultaneously raising to maximally dominant in Weyl group of type "
-  << theSSalgebra->theWeyl.theDynkinType.toString();
+  << theSSalgebra->weylGroup.theDynkinType.toString();
   if (!useOuter) {
-    theSSalgebra->theWeyl.raiseToMaximallyDominant(theHWs);
+    theSSalgebra->weylGroup.raiseToMaximallyDominant(theHWs);
   } else {
     WeylGroupAutomorphisms theOuterAutos;
-    theOuterAutos.theWeyl = &theSSalgebra->theWeyl;
+    theOuterAutos.theWeyl = &theSSalgebra->weylGroup;
     theOuterAutos.raiseToMaximallyDominant(theHWs);
   }
   out << "<br>Maximally dominant output: " << theHWs.toString();
@@ -466,7 +466,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
   DynkinType theType;
   if (theSSalgebraNode.isOfType<SemisimpleLieAlgebra*>()) {
     SemisimpleLieAlgebra* theAlgebra = theSSalgebraNode.getValue<SemisimpleLieAlgebra*>();
-    theType = theAlgebra->theWeyl.theDynkinType;
+    theType = theAlgebra->weylGroup.theDynkinType;
   } else {
     if (!CalculatorConversions::functionDynkinType(
       calculator, theSSalgebraNode, theType
@@ -546,7 +546,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitSize(
   if (calculator.getTypeWeight<Rational>(
     calculator, input, theWeightRat, theAlgebra, nullptr
   )) {
-    Rational result = theAlgebra.content->theWeyl.getOrbitSize(theWeightRat);
+    Rational result = theAlgebra.content->weylGroup.getOrbitSize(theWeightRat);
     return output.assignValue(result, calculator);
   }
   SemisimpleLieAlgebra* theSSalgebra = theAlgebra.content;
@@ -558,7 +558,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitSize(
     theAlgebra,
     CalculatorConversions::functionPolynomial<Rational>
   )) {
-    Rational result = theSSalgebra->theWeyl.getOrbitSize(theWeightPoly);
+    Rational result = theSSalgebra->weylGroup.getOrbitSize(theWeightPoly);
     return output.assignValue(result, calculator);
   }
   return false;
@@ -588,7 +588,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   }
   Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords, currentWeight;
   Polynomial<Rational> zero;
-  WeylGroupData& theWeyl = theSSalgebra.content->theWeyl;
+  WeylGroupData& theWeyl = theSSalgebra.content->weylGroup;
   if (!useFundCoords) {
     theHWsimpleCoords = theWeight;
     theHWfundCoords = theWeyl.getFundamentalCoordinatesFromSimple(theWeight);
@@ -605,7 +605,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   HashedList<ElementWeylGroup> orbitGeneratingSet;
   Polynomial<Rational> theExp;
-  if (!theSSalgebra.content->theWeyl.generateOrbit(theHWs, useRho, outputOrbit, false, 1921, &orbitGeneratingSet, 1921)) {
+  if (!theSSalgebra.content->weylGroup.generateOrbit(theHWs, useRho, outputOrbit, false, 1921, &orbitGeneratingSet, 1921)) {
     out << "Failed to generate the entire orbit (maybe too large?), generated the first " << outputOrbit.size << " elements only.";
   } else {
     out << "The orbit has " << outputOrbit.size << " elements.";
@@ -2039,14 +2039,14 @@ void MonomialMacdonald::GenerateMyOrbit(HashedList<MonomialMacdonald>& output) {
 void MonomialMacdonald::MakeFromRootSubsystem(const Vectors<Rational>& inputRoots, SemisimpleLieAlgebra& inputOwner) {
   MacroRegisterFunctionWithName("MonomialMacdonald::MakeFromRootSubsystem");
   this->owner = &inputOwner;
-  this->rootSel.initialize(inputOwner.theWeyl.rootSystem.size);
+  this->rootSel.initialize(inputOwner.weylGroup.rootSystem.size);
   Vector<Rational> currentV;
   for (int i = 0; i < inputRoots.size; i ++) {
     currentV = inputRoots[i];
     if (currentV.isNegative()) {
       currentV *= - 1;
     }
-    int indexInRoots = inputOwner.theWeyl.rootSystem.getIndex(currentV);
+    int indexInRoots = inputOwner.weylGroup.rootSystem.getIndex(currentV);
     if (indexInRoots < 0) {
       global.fatal << "Attempt to make a Macdonald polynomial from "
       << inputRoots.toString()
@@ -2061,17 +2061,17 @@ void MonomialMacdonald::MakeFromRootSubsystem(const Vectors<Rational>& inputRoot
 void MonomialMacdonald::ActOnMeSimpleReflection(int indexSimpleReflection, Rational& outputMultiple) {
   Selection originalSel;
   originalSel = this->rootSel;
-  this->rootSel.initialize(this->owner->theWeyl.rootSystem.size);
+  this->rootSel.initialize(this->owner->weylGroup.rootSystem.size);
   Vector<Rational> currentV;
   outputMultiple = 1;
   for (int i = 0; i < originalSel.cardinalitySelection; i ++) {
-    currentV = this->owner->theWeyl.rootSystem[originalSel.elements[i]];
-    this->owner->theWeyl.reflectSimple(indexSimpleReflection, currentV);
+    currentV = this->owner->weylGroup.rootSystem[originalSel.elements[i]];
+    this->owner->weylGroup.reflectSimple(indexSimpleReflection, currentV);
     if (currentV.isNegative()) {
       currentV *= - 1;
       outputMultiple *= - 1;
     }
-    this->rootSel.addSelectionAppendNewIndex(this->owner->theWeyl.rootSystem.getIndex(currentV));
+    this->rootSel.addSelectionAppendNewIndex(this->owner->weylGroup.rootSystem.getIndex(currentV));
   }
 }
 
@@ -2104,7 +2104,7 @@ bool CalculatorFunctionsWeylGroup::macdonaldPolys(Calculator& calculator, const 
       out << "<br>" << theOrbit[j].toString();
     }
   }
-  out << "Type: " << theRootSAs.owner->theWeyl.theDynkinType.toString()
+  out << "Type: " << theRootSAs.owner->weylGroup.theDynkinType.toString()
   << ". Number of root subsystems: " << theRootSAs.theSubalgebras.size;
   return output.assignValue(out.str(), calculator);
 }
@@ -2150,12 +2150,12 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraWeight(
     if (theCoordsString == "fundamental") {
       resultWeight.weightFundamentalCoordinates = EiVector;
     } else if (theCoordsString == "simple") {
-      resultWeight.weightFundamentalCoordinates = theSSowner->theWeyl.getFundamentalCoordinatesFromSimple(EiVector);
+      resultWeight.weightFundamentalCoordinates = theSSowner->weylGroup.getFundamentalCoordinatesFromSimple(EiVector);
     }
   } else {
     Vector<Rational> EiVector;
     EiVector.makeZero(theSSowner->getRank());
-    Vector<Rational> tempV = theSSowner->theWeyl.getEpsilonCoordinates(EiVector);
+    Vector<Rational> tempV = theSSowner->weylGroup.getEpsilonCoordinates(EiVector);
     if (theWeightIndex>tempV.size || theWeightIndex < 1) {
       std::stringstream errorStream;
       errorStream << "The second argument of the MakeWeight function needs to be index of a weight between 1 and " << tempV.size
@@ -2163,7 +2163,7 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraWeight(
       return output.makeError(errorStream.str(), calculator);
     }
     EiVector.makeEi(tempV.size, theWeightIndex - 1);
-    resultWeight.weightFundamentalCoordinates = theSSowner->theWeyl.getFundamentalCoordinatesFromEpsilon(EiVector);
+    resultWeight.weightFundamentalCoordinates = theSSowner->weylGroup.getFundamentalCoordinatesFromEpsilon(EiVector);
   }
   resultWeight.owner = theSSowner;
   ExpressionContext theContext(calculator);
@@ -2189,7 +2189,7 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraRhoWeight(
   theSSowner->checkConsistency();
   ExpressionContext theContext(calculator);
   theContext.setAmbientSemisimpleLieAlgebra(*theSSowner);
-  resultWeight.weightFundamentalCoordinates = theSSowner->theWeyl.getFundamentalCoordinatesFromSimple(theSSowner->theWeyl.rho);
+  resultWeight.weightFundamentalCoordinates = theSSowner->weylGroup.getFundamentalCoordinatesFromSimple(theSSowner->weylGroup.rho);
   resultWeight.owner = theSSowner;
   return output.assignValueWithContext(resultWeight, theContext, calculator);
 }
@@ -2404,7 +2404,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupElement(
     }
     theElt.multiplyOnTheRightBySimpleReflection(tmp - 1);
   }
-  theElt.owner = &thePointer.content->theWeyl;
+  theElt.owner = &thePointer.content->weylGroup;
   for (int i = 0; i < theElt.generatorsLastAppliedFirst.size; i ++) {
     if (
       theElt.generatorsLastAppliedFirst[i].index >= thePointer.content->getRank() ||

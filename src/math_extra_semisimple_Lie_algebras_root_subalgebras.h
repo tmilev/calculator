@@ -589,7 +589,7 @@ public:
     }
   }
   WeylGroupData& getOwnerWeyl() const {
-    return this->getOwner().theWeyl;
+    return this->getOwner().weylGroup;
   }
   SemisimpleLieAlgebra& getOwner() const {
     this->checkInitialization();

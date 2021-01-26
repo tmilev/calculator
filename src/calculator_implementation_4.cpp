@@ -1432,6 +1432,14 @@ Function::Options Function::Options::innerAdminNoTest() {
   return result;
 }
 
+Function::Options Function::Options::administrativeExperimentalTested() {
+  Function::Options result;
+  result.flagIsExperimental = true;
+  result.adminOnly = true;
+  result.dontTestAutomatically = false;
+  return result;
+}
+
 Function::Options Function::Options::innerAdminNoTestExperimental() {
   Function::Options result = Function::Options::innerAdminNoTest();
   result.flagIsExperimental = true;
@@ -2000,14 +2008,14 @@ SemisimpleLieAlgebra& ObjectContainer::getLieAlgebraCreateIfNotPresent(const Dyn
   SemisimpleLieAlgebra& theLA = this->semisimpleLieAlgebras.getValueCreateNoInit(input);
   if (needToInit) {
     this->semisimpleLieAlgebraPointers.addOnTop(&theLA);
-    theLA.theWeyl.makeFromDynkinType(input);
+    theLA.weylGroup.makeFromDynkinType(input);
   }
   return theLA;
 }
 
 WeylGroupData& ObjectContainer::getWeylGroupDataCreateIfNotPresent(const DynkinType& input) {
   MacroRegisterFunctionWithName("ObjectContainer::getWeylGroupDataCreateIfNotPresent");
-  return this->getLieAlgebraCreateIfNotPresent(input).theWeyl;
+  return this->getLieAlgebraCreateIfNotPresent(input).weylGroup;
 }
 
 std::string ObjectContainer::toStringJavascriptForUserInputBoxes() {

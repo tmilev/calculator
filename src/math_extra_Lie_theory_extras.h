@@ -91,10 +91,10 @@ Vector<Coefficient> BranchingData::projectWeight(Vector<Coefficient>& input) {
   Vector<Coefficient> fundCoordsSmaller;
   fundCoordsSmaller.makeZero(this->theHmm.theDomain().getRank());
   for (int j = 0; j < this->theHmm.theDomain().getRank(); j ++) {
-    fundCoordsSmaller[j] = this->theHmm.theRange().theWeyl.rootScalarCartanRoot(input, theHmm.ImagesCartanDomain[j]);
-    fundCoordsSmaller[j] /= this->theHmm.theDomain().theWeyl.cartanSymmetric.elements[j][j] / 2;
+    fundCoordsSmaller[j] = this->theHmm.theRange().weylGroup.rootScalarCartanRoot(input, theHmm.ImagesCartanDomain[j]);
+    fundCoordsSmaller[j] /= this->theHmm.theDomain().weylGroup.cartanSymmetric.elements[j][j] / 2;
   }
-  result = this->theHmm.theDomain().theWeyl.getSimpleCoordinatesFromFundamental(
+  result = this->theHmm.theDomain().weylGroup.getSimpleCoordinatesFromFundamental(
     fundCoordsSmaller, Coefficient::zero()
   );
   return result;

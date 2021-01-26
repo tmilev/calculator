@@ -800,6 +800,7 @@ class Function {
     static Options innerInvisibleExperimental();
     static Options innerAdminNoTestExperimental();
     static Options innerAdminNoTest();
+    static Options administrativeExperimentalTested();
     static Options experimental();
     static Options invisibleNoTest();
     static Options innerNoTest();
@@ -3115,14 +3116,14 @@ bool Calculator::getTypeWeight(
     return false;
   }
   if (!calculator.objectContainer.semisimpleLieAlgebras.contains(
-    ambientSSalgebra->theWeyl.theDynkinType
+    ambientSSalgebra->weylGroup.theDynkinType
   )) {
     global.fatal
     << ambientSSalgebra->toStringLieAlgebraName()
     << " contained object container more than once. " << global.fatal;
   }
   int algebraIndex = calculator.objectContainer.semisimpleLieAlgebras.getIndex(
-    ambientSSalgebra->theWeyl.theDynkinType
+    ambientSSalgebra->weylGroup.theDynkinType
   );
   outputAmbientSemisimpleLieAlgebra.context.setIndexAmbientSemisimpleLieAlgebra(algebraIndex);
   return true;
@@ -3210,7 +3211,7 @@ bool Calculator::getTypeHighestWeightParabolic(
     }
   }
   if (!calculator.objectContainer.semisimpleLieAlgebras.contains(
-    ambientSSalgebra->theWeyl.theDynkinType
+    ambientSSalgebra->weylGroup.theDynkinType
   )) {
     global.fatal
     << ambientSSalgebra->toStringLieAlgebraName()
@@ -3218,7 +3219,7 @@ bool Calculator::getTypeHighestWeightParabolic(
     << global.fatal;
   }
   int algebraIndex = calculator.objectContainer.semisimpleLieAlgebras.getIndex(
-    ambientSSalgebra->theWeyl.theDynkinType
+    ambientSSalgebra->weylGroup.theDynkinType
   );
   outputAmbientSSalgebra.context.setIndexAmbientSemisimpleLieAlgebra(algebraIndex);
   return true;

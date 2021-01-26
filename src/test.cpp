@@ -68,6 +68,7 @@ void Test::run() {
     Selection::Test::all();
     // Also tested in calculator test suite.
     Calculator::Examples::Test::all();
+    ChevalleyGenerator::Test::all();
     global << Logger::green << "Basic tests completed." << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::crypto)) {

@@ -4506,7 +4506,6 @@ std::string MonomialTensor<Coefficient, inputHashFunction>::toString(FormatExpre
   }
   std::string theLetter = format == nullptr ?  "g" : format->chevalleyGgeneratorLetter;
   std::string letters = "abcdefghijklmnopqrstuvwxyz";
-  std::string exponents[10] = {"⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"};
   std::stringstream out;
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
     if (static_cast<unsigned>(generatorsIndices[i]) < letters.size()) {
@@ -4514,27 +4513,7 @@ std::string MonomialTensor<Coefficient, inputHashFunction>::toString(FormatExpre
     } else {
       out << theLetter << "_{" << this->generatorsIndices[i] << "}";
     }
-    if (!(this->powers[i] == 1)) {
-      if (this->powers[i] == 2) {
-        out << exponents[2];
-      } else if (this->powers[i] == 3) {
-        out << exponents[3];
-      } else if (this->powers[i] == 4) {
-        out << exponents[4];
-      } else if (this->powers[i] == 5) {
-        out << exponents[5];
-      } else if (this->powers[i] == 6) {
-        out << exponents[6];
-      } else if (this->powers[i] == 7) {
-        out << exponents[7];
-      } else if (this->powers[i] == 8) {
-        out << exponents[8];
-      } else if (this->powers[i] == 9) {
-        out << exponents[9];
-      } else {
-        out << "^{" << this->powers[i] << "}";
-      }
-    }
+    out << "^{" << this->powers[i] << "}";
   }
   return out.str();
 }

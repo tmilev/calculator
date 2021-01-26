@@ -2267,6 +2267,7 @@ class LaTeXParser {
       return this.decreaseParsingStack(1);
     }
     if (last.syntacticRole === "\\\\") {
+      // Double backslah indicates a line break, which we choose to ignore.
       this.lastRuleName = "remove double backslash";
       return this.decreaseParsingStack(1);
     }

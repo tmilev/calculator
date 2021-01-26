@@ -201,6 +201,7 @@ public:
     const std::string& input, int recursionDepth = 0
   );
 
+  static std::string scriptFromJSON(const std::string& scriptType, const JSData& scriptContent);
   static void convertURLStringToNormal(
     const std::string& input, std::string& output, bool replacePlusBySpace
   );

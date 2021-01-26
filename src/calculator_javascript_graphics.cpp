@@ -34,9 +34,6 @@ std::string DrawingVariables::getHTMLDiv(int theDimension) {
   << " id = '" << idCanvas << "'>Canvas not supported</canvas><br>";
   out << "<div id = '" << idHighlightInformation << "'></div><br>";
   out << "<span id = '" << idSpanInformation << "'></span><br>";
-  out << "<script>\n";
-  out << "var " << graphicsVar << " = " << theData.toString(nullptr) << ";\n";
-  out << "window.calculator.graphicsNDimensions.createGraphicsFromObject(" << graphicsVar << ");\n";
-  out << "</script>";
+  out << HtmlRoutines::scriptFromJSON("graphicsNDimensional", theData);
   return out.str();
 }

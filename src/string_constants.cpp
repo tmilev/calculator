@@ -42,6 +42,7 @@ std::string WebAPI::result::SolutionData::steps                     = "solutionS
 std::string WebAPI::result::SolutionData::input                     = "input"                       ;
 std::string WebAPI::result::SolutionData::finalExpression           = "finalExpression"             ;
 std::string WebAPI::result::comparison                              = "comparison"                  ;
+std::string WebAPI::result::scriptType                              = "scriptType"                  ;
 std::string WebAPI::result::ComparisonData::areEqual                = "areEqual"                    ;
 std::string WebAPI::result::ComparisonData::areEqualAsAnswers       = "areEqualAsAnswers"           ;
 std::string WebAPI::result::ComparisonData::given                   = "given"                       ;

@@ -109,6 +109,7 @@ public:
     static std::string useFallbackDatabase;
     static std::string httpsSupport;
     static std::string comparison;
+    static std::string scriptType;
     struct ComparisonData {
       // The given (student answer) expression string.
       static std::string givenRaw;

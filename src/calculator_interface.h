@@ -726,6 +726,11 @@ public:
 template <class BuiltIn>
 class WithContext {
   bool extendContext(ExpressionContext& newContext, std::stringstream* commentsOnFailure);
+  bool extendContextTrivially(ExpressionContext& newContext, std::stringstream* commentsOnFailure) {
+    (void) commentsOnFailure;
+    this->context = newContext;
+    return true;
+  }
 public:
   ExpressionContext context;
   BuiltIn content;
@@ -895,6 +900,7 @@ public:
     static std::string segmentRange;
     static std::string defaultLength;
     static std::string plotType;
+    static std::string viewWindow;
     static std::string body;
     static std::string arguments;
   };
@@ -981,6 +987,8 @@ class Plot {
 private:
   std::string canvasNamE;
   static JSData getCoordinateSystem();
+  static JSData getComputeViewWindow();
+  JSData getSetViewWindow();
 public:
   struct Labels {
   public:

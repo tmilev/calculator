@@ -1822,17 +1822,17 @@ std::string StringRoutines::Differ::differenceHTML(
     std::string rightS = this->rightResult[i];
     if (leftS == rightS && leftS.size() != 0) {
       if (leftS.size() > 0) {
-        leftOut << "<span class = 'spanStringEqual'>" << leftS << "</span>";
+        leftOut << "<span class='spanStringEqual'>" << leftS << "</span>";
       }
       if (rightS.size() > 0) {
-        rightOut << "<span class = 'spanStringEqual'>" << rightS << "</span>";
+        rightOut << "<span class='spanStringEqual'>" << rightS << "</span>";
       }
     } else {
       if (leftS.size() > 0) {
-        leftOut << "<span class = 'spanStringDifferent'>" << leftS << "</span>";
+        leftOut << "<span class='spanStringDifferent'>" << leftS << "</span>";
       }
       if (rightS.size() > 0) {
-        rightOut << "<span class = 'spanStringDifferent'>" << rightS << "</span>";
+        rightOut << "<span class='spanStringDifferent'>" << rightS << "</span>";
       }
     }
   }
@@ -1848,7 +1848,7 @@ std::string StringRoutines::Differ::differenceHTMLPartTwo(
 ) {
   std::stringstream out;
   out << preamble;
-  out << "<span class = 'abstractSyntaxOneAnnotation'><b>" << labelLeft << "</b><br>";
+  out << "<span class='abstractSyntaxOneAnnotation'><b>" << labelLeft << "</b><br>";
   out << outputLeft;
   out << "<hr><b>" << labelRight << "</b><br>";
   out << outputRight;

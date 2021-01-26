@@ -11,6 +11,7 @@
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h" // undefined reference to `WeylGroupRepresentation<Rational>::reset()
 #include "math_rational_function_implementation.h"
+#include "string_constants.h"
 
 #include <cmath>
 #include <cfloat>
@@ -30,11 +31,12 @@ std::string PlotObject::Labels::defaultLength       = "defaultLength";
 std::string PlotObject::Labels::plotType            = "plotType";
 std::string PlotObject::Labels::body                = "body";
 std::string PlotObject::Labels::arguments           = "arguments";
+std::string PlotObject::Labels::viewWindow          = "viewWindow";
 
 std::string Plot::Labels::canvasName     = "canvasName";
 std::string Plot::Labels::controlsName   = "controlsName";
 std::string Plot::Labels::messagesName   = "messagesName";
-std::string Plot::Labels::graphicsType = "graphicsType";
+std::string Plot::Labels::graphicsType   = "graphicsType";
 
 bool Calculator::getListPolynomialVariableLabelsLexicographic(
   const Expression& input,
@@ -1004,6 +1006,28 @@ JSData Plot::getCoordinateSystem() {
   return result;
 }
 
+JSData Plot::getComputeViewWindow() {
+  JSData result;
+  result[PlotObject::Labels::plotType] = "computeViewWindow";
+  return result;
+}
+
+JSData Plot::getSetViewWindow() {
+  JSData result;
+  result[PlotObject::Labels::plotType] = "setViewWindow";
+  JSData lowLeft = JSData::makeEmptyArray();
+  JSData topRight = JSData::makeEmptyArray();
+  lowLeft[0] = this->theLowerBoundAxes * 1.10;
+  lowLeft[1] = this->lowBoundY * 1.10;
+  topRight[0] = this->theUpperBoundAxes * 1.10;
+  topRight[1] = this->highBoundY * 1.10;
+  JSData window = JSData::makeEmptyArray();
+  window[0] = lowLeft;
+  window[1] = topRight;
+  result[PlotObject::Labels::viewWindow] = window;
+  return result;
+}
+
 std::string Plot::getPlotHtml2d(Calculator& owner) {
   MacroRegisterFunctionWithName("Plot::getPlotHtml2d");
   owner.flagHasGraphics = true;
@@ -1051,18 +1075,12 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
     plotObjects.listObjects.addOnTop(currentPlot.toJSON());
   }
   if (this->priorityViewRectangle > 0) {
-    std::stringstream outScript;
-    outScript << "theCanvas.setViewWindow("
-    << "[" << this->theLowerBoundAxes * 1.10 << ", " << this->lowBoundY * 1.10 << "]"
-    << ", "
-    << "[" << this->theUpperBoundAxes * 1.10 << ", " << this->highBoundY * 1.10 << "]"
-    << ");\n";
-    plotObjects[plotObjects.listObjects.size] = outScript.str();
+    plotObjects[plotObjects.listObjects.size] = this->getSetViewWindow();
   } else {
-    plotObjects[plotObjects.listObjects.size] = "theCanvas.computeViewWindow();\n";
+    plotObjects[plotObjects.listObjects.size] = this->getComputeViewWindow();
   }
   result["plotObjects"] = plotObjects;
-  out << "<script scriptType='graphics'>\n" << result.toString() << "</script>";
+  out << "<script " << WebAPI::result::scriptType << "='graphics'>\n" << result.toString() << "</script>";
   return out.str();
 }
 

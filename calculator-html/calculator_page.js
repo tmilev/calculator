@@ -17,6 +17,8 @@ const EquationEditor = require("./equation_editor").EquationEditor;
 const MathNode = require("./equation_editor").MathNode;
 const knownTypes = require("./equation_editor").knownTypes;
 const graphicsSerialization = require("./graphics_serialization").graphicsSerialization;
+const crypto = require("./crypto");
+const graphicsNDimensions = require("./graphics_n_dimensions");
 
 class AtomHandler {
   constructor() {
@@ -424,38 +426,118 @@ class Calculator {
   }
 
   afterWriteOutput() {
-    let output = document.getElementById(ids.domElements.spanCalculatorMainOutput);
     for (let i = 0; i < this.panels.length; i++) {
       panels.makePanelFromData(this.panels[i]);
     }
-    let incomingScripts = output.getElementsByTagName("script");
-    this.scriptContents = {};
+    this.flagTypeset = false;
+    this.typeset();
+    this.bootstrapAllScripts(this.getOutputElement());
+  }
+
+  bootstrapAllScripts(
+    /**@type{HTMLElement} */
+    element,
+  ) {
+    let incomingScripts = element.getElementsByTagName("script");
+    this.scriptContents = {
+      "graphics": [],
+      "abstractSyntaxNotationAnnotate": [],
+      "displaySSLRecord": [],
+      "displayTransportLayerSecurity": [],
+      "graphicsNDimensional": [],
+    };
     for (let i = 0; i < incomingScripts.length; i++) {
       let current = incomingScripts[i];
       let content = current.textContent;
       let scriptType = current.getAttribute("scriptType");
-      if (scriptType === "" || scriptType === null || scriptType === undefined) {
-        scriptType = "unknown";
+      if (scriptType in this.scriptContents) {
+        this.scriptContents[scriptType].push(content);
+      } else {
+        throw `Unrecognized script type ${scriptType}.`;
       }
-      console.log("DEBUG: Incoming script tag, content: " + scriptType + ", " + content);
-      if (!(scriptType in this.scriptContents)) {
-        this.scriptContents[scriptType] = [];
-      }
-      this.scriptContents[scriptType].push(content);
     }
     this.inputBoxNames = [];
     this.inputBoxToSliderUpdaters = {};
     this.canvases = {};
-    this.flagTypeset = false;
-    this.typeset();
     this.bootstrapGraphics();
+    this.bootstrapAbstractSyntaxNotationScripts();
+    this.bootstrapDisplaySSLRecord();
+    this.bootstrapDisplayTransportLayerSecurity();
+    this.bootstrapGraphicsNDimensional();
+  }
+
+  bootstrapGraphicsNDimensional() {
+    let annotations = this.scriptContents["graphicsNDimensional"];
+    for (let i = 0; i < annotations.length; i++) {
+      this.bootstrapOneGraphicsNDimensional(annotations[i]);
+    }
+  }
+
+  bootstrapOneGraphicsNDimensional(
+    /**@type{string} */
+    content,
+  ) {
+    let parsed = JSON.parse(content);
+    graphicsNDimensions.createGraphicsFromObject(parsed);
+  }
+
+  bootstrapDisplayTransportLayerSecurity() {
+    let annotations = this.scriptContents["displayTransportLayerSecurity"];
+    for (let i = 0; i < annotations.length; i++) {
+      this.bootstrapOneDisplayTransportLayerSecurity(annotations[i]);
+    }
+  }
+
+  bootstrapOneDisplayTransportLayerSecurity(
+    /**@type{string} */
+    content,
+  ) {
+    let parsed = JSON.parse(content);
+    crypto.displayTransportLayerSecurity(parsed["id"], parsed["content"]);
+  }
+
+  bootstrapDisplaySSLRecord() {
+    let annotations = this.scriptContents["displaySSLRecord"];
+    for (let i = 0; i < annotations.length; i++) {
+      this.bootstrapOneDisplaySSLRecord(annotations[i]);
+    }
+  }
+
+  bootstrapOneDisplaySSLRecord(
+    /**@type{string} */
+    content,
+  ) {
+    let parsed = JSON.parse(content);
+    crypto.displaySSLRecord(parsed["id"], parsed["content"]);
+  }
+
+  bootstrapAbstractSyntaxNotationScripts() {
+    let annotations = this.scriptContents["abstractSyntaxNotationAnnotate"];
+    for (let i = 0; i < annotations.length; i++) {
+      this.bootstrapOneAbstractSyntaxNotation(annotations[i]);
+    }
+  }
+
+  bootstrapOneAbstractSyntaxNotation(
+    /**@type{string} */
+    content,
+  ) {
+    let parsed = JSON.parse(content);
+    crypto.abstractSyntaxNotationAnnotate(parsed[0], parsed[1], parsed[2]);
   }
 
   bootstrapGraphics() {
-    if (this.scriptContents["graphics"] === undefined) {
-      return;
+    let graphics = this.scriptContents["graphics"];
+    for (let i = 0; i < graphics.length; i++) {
+      this.bootstrapOneGraphic(graphics[i]);
     }
-    let graphics = JSON.parse(this.scriptContents["graphics"]);
+  }
+
+  bootstrapOneGraphic(
+    /**@type{string} */
+    content,
+  ) {
+    let graphics = JSON.parse(content);
     let canvasName = graphics[pathnames.urlFields.result.canvasName];
     let controlsName = graphics[pathnames.urlFields.result.controlsName];
     // let messagesName = graphics[pathnames.urlFields.result.messagesName];

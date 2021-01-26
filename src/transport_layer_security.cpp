@@ -1444,11 +1444,11 @@ JSData serialization::Marker::toJSON() {
 std::string SSLRecord::toHtml(int id) {
   std::stringstream out, spanId;
   spanId << "spanSSLRecord_" << "_" << id;
+  JSData content;
   out << "<div id = '" << spanId.str() << "'></div>";
-  out << "<script>"
-  << "window.calculator.crypto.displaySSLRecord('"
-  << spanId.str() << "', " << this->toJSON() << ");"
-  << "</script>";
+  content["id"] = spanId.str();
+  content["content"] = this->toJSON();
+  out << HtmlRoutines::scriptFromJSON("displaySSLRecord", content);
   return out.str();
 }
 

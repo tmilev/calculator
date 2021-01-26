@@ -88,11 +88,21 @@ public:
   void clear() {
     this->setSize(0);
   }
+  // Resizes the array.
+  // Fills newly created objects with objects allocated with default constructors.
   void setSize(int newSize) {
-    //std::cout << "Setting size to: " << newSize << std::endl;
     this->allocateElements(newSize);
     this->size = newSize;
   }
+  // Resizes the object and sets teh expected size.
+  void setSizeAndExpectedSize(int newSize) {
+    this->setExpectedSize(newSize);
+    this->allocateElements(newSize);
+    this->size = newSize;
+  }
+  // Resizes the array. When enlarged, the array will increase by a
+  // fixed percent, which gurantees that N non-trivial resizes
+  // will result in exponential in N growth.
   void setExpectedSize(int theSize) {
     int newSize = (theSize * 6) / 5;
     if (newSize > 0) {

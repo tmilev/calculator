@@ -7,6 +7,7 @@
 #include "math_general_implementation.h"
 #include "serialization_basic.h"
 #include "transport_layer_security.h"
+#include "string_constants.h"
 
 // Putting this in the header file currently breaks the linking for this particular tag.
 // Appears to be a compiler/linker bug (?).
@@ -904,9 +905,8 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::toStringAnnotateBinary() {
     return "ASN1 not initialized properly. ";
   }
   std::stringstream out;
-  out << "<script>";
-  out << "window.calculator.crypto.abstractSyntaxNotationAnnotate(";
-  out << "'" << Crypto::convertListUnsignedCharsToHex(*this->rawDatA) << "'";
+  out << "<script " << WebAPI::result::scriptType << "='abstractSyntaxNotationAnnotate'>";
+  out << "[\"" << Crypto::convertListUnsignedCharsToHex(*this->rawDatA) << "\"";
   out << ", ";
   out << this->decodedData->toString();
   out << ", ";
@@ -914,9 +914,9 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::toStringAnnotateBinary() {
   Crypto::computeSha256(*this->rawDatA, idNonHexed);
   std::string theID = Crypto::convertListUnsignedCharsToHex(idNonHexed);
   out << "\"" << theID << "\"";
-  out << ");";
+  out << "]";
   out << "</script>";
-  out << "<span id=\"" << theID << "\"></span>";
+  out << "<span id='" << theID << "'></span>";
   return out.str();
 }
 

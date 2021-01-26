@@ -119,10 +119,10 @@ bool CalculatorFunctionsCrypto::testTLSMessageSequence(
   std::stringstream spanId;
   spanId << "spanServerSpoofer_" << "_" << global.getElapsedMilliseconds();
   out << "<div id = '" << spanId.str() << "'></div>";
-  out << "<script>"
-  << "window.calculator.crypto.displayTransportLayerSecurity('"
-  << spanId.str() << "', " << spoofServer.toJSON() << ");"
-  << "</script>";
+  JSData script;
+  script["id"] = spanId.str();
+  script["content"] = spoofServer.toJSON();
+  out << HtmlRoutines::scriptFromJSON("displayTransportLayerSecurity", script);
   return output.assignValue(out.str(), calculator);
 }
 

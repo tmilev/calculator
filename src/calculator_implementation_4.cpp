@@ -2011,27 +2011,20 @@ WeylGroupData& ObjectContainer::getWeylGroupDataCreateIfNotPresent(const DynkinT
 }
 
 std::string ObjectContainer::toStringJavascriptForUserInputBoxes() {
-  std::stringstream out;
-  out << "<script>\n";
-  out << "window.calculator.calculator.inputBoxNames = [";
+  JSData inputBoxes;
+  JSData inputBoxNames = JSData::makeEmptyArray();
+  JSData inputBoxToSliderUpdaters;
   for (int i = 0; i < this->userInputTextBoxesWithValues.size(); i ++) {
     InputBox& currentBox = this->userInputTextBoxesWithValues.values[i];
-    out << "'" << currentBox.name << "'";
-    if (i != this->userInputTextBoxesWithValues.size() - 1) {
-      out << ", ";
-    }
+    inputBoxNames[i] = currentBox.name;
   }
-  out << "];\n";
-  out << "window.calculator.calculator.inputBoxToSliderUpdaters = {};";
   for (int i = 0; i < this->userInputTextBoxesWithValues.size(); i ++) {
     InputBox& currentBox = this->userInputTextBoxesWithValues.values[i];
-    out << "window.calculator.calculator.inputBoxToSliderUpdaters['"
-    << currentBox.name << "'] ='"
-    << currentBox.getSliderName() << "';\n";
+    inputBoxToSliderUpdaters[currentBox.name] = currentBox.getSliderName();
   }
-  //out << "console.log(window.calculator.calculator.inputBoxNames);\n ";
-  out << "</script>";
-  return out.str();
+  inputBoxes["inputBoxNames"] = inputBoxNames;
+  inputBoxes["inputBoxToSliderUpdaters"] = inputBoxToSliderUpdaters;
+  return HtmlRoutines::scriptFromJSON("userInputBoxes", inputBoxes);
 }
 
 void ObjectContainer::resetPlots() {

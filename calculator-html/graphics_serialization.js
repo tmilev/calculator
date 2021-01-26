@@ -76,8 +76,12 @@ class GraphicsSerialization {
         return;
       case "coordinateAxes":
         canvas.drawCoordinateAxes();
+        return;
+      case "computeViewWindow":
+        canvas.computeViewWindow();
+        return;
       default:
-      //throw `Uknown plot type: ${plotType}.`;
+        throw `Uknown plot type: ${plotType}.`;
     }
   }
 

@@ -597,9 +597,35 @@ template<>
 bool WithContext<Rational>::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ) {
-  (void) commentsOnFailure;
-  this->context = newContext;
-  return true;
+  return this->extendContextTrivially(newContext, commentsOnFailure);
+}
+
+template<>
+bool WithContext<std::string>::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+) {
+  return this->extendContextTrivially(newContext, commentsOnFailure);
+}
+
+template<>
+bool WithContext<ElementWeylGroup>::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+) {
+  return this->extendContextTrivially(newContext, commentsOnFailure);
+}
+
+template<>
+bool WithContext<AlgebraicNumber>::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+) {
+  return this->extendContextTrivially(newContext, commentsOnFailure);
+}
+
+template<>
+bool WithContext<double>::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+) {
+  return this->extendContextTrivially(newContext, commentsOnFailure);
 }
 
 template<>
@@ -614,33 +640,6 @@ bool WithContext<ElementZmodP>::extendContext(
     }
     return false;
   }
-  this->context = newContext;
-  return true;
-}
-
-template<>
-bool WithContext<ElementWeylGroup>::extendContext(
-  ExpressionContext& newContext, std::stringstream* commentsOnFailure
-) {
-  (void) commentsOnFailure;
-  this->context = newContext;
-  return true;
-}
-
-template<>
-bool WithContext<AlgebraicNumber>::extendContext(
-  ExpressionContext& newContext, std::stringstream* commentsOnFailure
-) {
-  (void) commentsOnFailure;
-  this->context = newContext;
-  return true;
-}
-
-template<>
-bool WithContext<double>::extendContext(
-  ExpressionContext& newContext, std::stringstream* commentsOnFailure
-){
-  (void) commentsOnFailure;
   this->context = newContext;
   return true;
 }
@@ -813,6 +812,10 @@ bool Expression::setContextAtLeastEqualTo(
   WithContext<Rational> rational;
   if (this->isOfTypeWithContext(&rational)) {
     return rational.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
+  }
+  WithContext<std::string> stringValue;
+  if (this->isOfTypeWithContext(&stringValue)) {
+    return stringValue.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
   WithContext<ElementZmodP> modularElement;
   if (this->isOfTypeWithContext(&modularElement)) {

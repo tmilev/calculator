@@ -282,6 +282,15 @@ std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(const std::strin
   return out.str();
 }
 
+std::string HtmlRoutines::scriptFromJSON(const std::string& scriptType, const JSData& scriptContent) {
+  std::stringstream out;
+  out << "<script " << WebAPI::result::scriptType << "='" << scriptType << "'>\n"
+  <<  scriptContent.toString()
+  << "</script>";
+  return out.str();
+
+}
+
 std::string HtmlRoutines::convertURLStringToNormal(const std::string& input, bool replacePlusBySpace) {
   std::string output;
   HtmlRoutines::convertURLStringToNormal(input, output, replacePlusBySpace);

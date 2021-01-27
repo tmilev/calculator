@@ -409,7 +409,7 @@ public:
   // Possible values:
   // 1. nulltpr.
   // 2. CalculatorConversions::innerStringFromSemisimpleSubalgebras.
-  std::string (*ToStringExpressionString)(SemisimpleSubalgebras& input);
+  std::string (*toStringExpressionString)(SemisimpleSubalgebras& input);
   bool loadState(
     List<int>& currentChainInt,
     List<int>& numExploredTypes,
@@ -491,8 +491,8 @@ public:
   bool checkConsistency() const;
   bool checkInitialization() const;
   std::string toStringState(FormatExpressions* theFormat = nullptr);
-  std::string ToStringCurrentChain(FormatExpressions* theFormat = nullptr);
-  std::string ToStringProgressReport(FormatExpressions* theFormat = nullptr);
+  std::string toStringCurrentChain(FormatExpressions* theFormat = nullptr);
+  std::string toStringProgressReport(FormatExpressions* theFormat = nullptr);
   std::string toString(FormatExpressions* theFormat = nullptr);
   std::string toStringPart2(FormatExpressions* theFormat = nullptr);
   std::string toStringTableSubalgebraLinksTable(FormatExpressions* theFormat);

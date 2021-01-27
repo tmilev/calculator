@@ -1007,7 +1007,9 @@ public:
     static std::string controlsName;
     static std::string messagesName;
     static std::string graphicsType;
-    static std::string objects;
+    static std::string graphicsTwoDimensional;
+    static std::string graphicsThreeDimensional;
+    static std::string plotObjects;
   };
   List<PlotObject> plotObjects;
   HashedList<std::string, MathRoutines::hashString> boxesThatUpdateMe;
@@ -1039,7 +1041,6 @@ public:
   std::string getPlotHtml2d(Calculator& owner);
   std::string getPlotStringAddLatexCommands(bool useHtml);
   bool isOKVector(const Vector<double>& input);
-  std::string commonCanvasSetup();
   Plot();
   void computeAxesAndBoundingBox3d();
   void computeAxesAndBoundingBox();

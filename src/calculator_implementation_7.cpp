@@ -6622,7 +6622,7 @@ bool CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calcula
   }
   SemisimpleSubalgebras& theSSsubalgebras =
   calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.weylGroup.theDynkinType);
-  theSSsubalgebras.ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
+  theSSsubalgebras.toStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
 
   out << "Attempting to embed "
   << smallSubalgebraPointer.content->weylGroup.theDynkinType.toString()

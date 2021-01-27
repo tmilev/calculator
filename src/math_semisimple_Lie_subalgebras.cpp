@@ -864,7 +864,7 @@ std::string SemisimpleSubalgebras::toStringPart3(FormatExpressions* theFormat) {
   if (!writingToHD) {
     out << this->toStringSl2s(theFormat);
     out << "<hr>Calculator input for loading subalgebras directly without recomputation. "
-    << this->ToStringProgressReport(theFormat);
+    << this->toStringProgressReport(theFormat);
   } else {
     std::string sl2SubalgebraReports = this->owner->toStringVirtualFolderName() + "orbit_computation_information_" +
     FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.theDynkinType.toString()) + ".html";
@@ -880,7 +880,7 @@ std::string SemisimpleSubalgebras::toStringPart3(FormatExpressions* theFormat) {
     << "</body></html>";
     fileLoadContent << "<html>"
     << "<body>"
-    << this->ToStringProgressReport(theFormat)
+    << this->toStringProgressReport(theFormat)
     << "</body></html>";
     FileOperations::writeFileVirual(sl2SubalgebraReports, fileSl2Content.str(), nullptr);
     FileOperations::writeFileVirual(loadSubalgebrasFile, fileLoadContent.str(), nullptr);
@@ -1015,10 +1015,10 @@ bool SemisimpleSubalgebras::findTheSemisimpleSubalgebrasContinue() {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::findTheSemisimpleSubalgebrasContinue");
   ProgressReport theReport;
   std::stringstream reportstream;
-  reportstream << "State at beginning of computation: " << this->ToStringProgressReport();
+  reportstream << "State at beginning of computation: " << this->toStringProgressReport();
   theReport.report(reportstream.str());
   while (this->incrementReturnFalseIfPastLast()) {
-    theReport.report(this->ToStringProgressReport());
+    theReport.report(this->toStringProgressReport());
     if (!this->flagRealizedAllCandidates) {
       this->comments = this->comments + "Failed to realize all candidates, aborting computation.";
       return false;
@@ -1998,7 +1998,7 @@ void SemisimpleSubalgebras::addSubalgebraToStack(
   this->computeCurrentHCandidates();
 }
 
-std::string SemisimpleSubalgebras::ToStringCurrentChain(FormatExpressions* theFormat) {
+std::string SemisimpleSubalgebras::toStringCurrentChain(FormatExpressions* theFormat) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToStringCurrentChain");
   (void) theFormat;//avoid unused parameter warning in a portable way
   std::stringstream out;
@@ -2020,7 +2020,7 @@ std::string SemisimpleSubalgebras::toStringState(FormatExpressions* theFormat) {
     out << "A^" << (this->theOrbitHelementLengths[i] / 2).toString() << "_1: "
     << this->orbits[i].toStringSize();
   }
-  out << this->ToStringCurrentChain(theFormat);
+  out << this->toStringCurrentChain(theFormat);
   out << "<hr>";
   for (int i = 0; i < this->currentSubalgebraChain.size; i ++) {
     out << "<br>Extensions of " << this->currentSubalgebraChain[i].weylNonEmbedded->theDynkinType.toString()
@@ -2050,13 +2050,13 @@ std::string SemisimpleSubalgebras::toStringState(FormatExpressions* theFormat) {
   return out.str();
 }
 
-std::string SemisimpleSubalgebras::ToStringProgressReport(FormatExpressions* theFormat) {
+std::string SemisimpleSubalgebras::toStringProgressReport(FormatExpressions* theFormat) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToStringProgressReport");
   std::stringstream out;
   out << this->toStringState(theFormat);
-  if (this->ToStringExpressionString != nullptr) {
+  if (this->toStringExpressionString != nullptr) {
     out << "\n<hr>\n"
-    << "LoadSemisimpleSubalgebras {}" << this->ToStringExpressionString(*this);
+    << "LoadSemisimpleSubalgebras {}" << this->toStringExpressionString(*this);
   }
   out << "\n\n<hr>";
   return out.str();
@@ -4089,7 +4089,7 @@ void SemisimpleSubalgebras::initHookUpPointers(
 }
 
 void SemisimpleSubalgebras::reset() {
-  this->ToStringExpressionString = nullptr;
+  this->toStringExpressionString = nullptr;
   this->owner = nullptr;
   this->ownerField = nullptr;
   this->theSl2s.owner = nullptr;

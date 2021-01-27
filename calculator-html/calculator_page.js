@@ -441,6 +441,7 @@ class Calculator {
     let incomingScripts = element.getElementsByTagName("script");
     this.scriptContents = {
       "graphics": [],
+      "graphics3d": [],
       "abstractSyntaxNotationAnnotate": [],
       "displaySSLRecord": [],
       "displayTransportLayerSecurity": [],
@@ -459,11 +460,40 @@ class Calculator {
     this.inputBoxNames = [];
     this.inputBoxToSliderUpdaters = {};
     this.canvases = {};
+    this.bootstrapGraphics3d();
     this.bootstrapGraphics();
     this.bootstrapAbstractSyntaxNotationScripts();
     this.bootstrapDisplaySSLRecord();
     this.bootstrapDisplayTransportLayerSecurity();
     this.bootstrapGraphicsNDimensional();
+  }
+
+  bootstrapGraphics3d() {
+    let annotations = this.scriptContents["graphics3d"];
+    for (let i = 0; i < annotations.length; i++) {
+      this.bootstrapOneGraphic(annotations[i]);
+    }
+  }
+
+  bootstrapGraphics() {
+    let graphics = this.scriptContents["graphics"];
+    for (let i = 0; i < graphics.length; i++) {
+      this.bootstrapOneGraphic(graphics[i]);
+    }
+  }
+
+  bootstrapOneGraphic(
+    /**@type{string} */
+    content,
+  ) {
+    let graphics = JSON.parse(content);
+    let canvasName = graphics[pathnames.urlFields.result.canvasName];
+    let controlsName = graphics[pathnames.urlFields.result.controlsName];
+    console.log("DEBUG: bootstrap graphics: " + JSON.stringify(graphics));
+    let output = this.getOutputElement();
+    let canvases = output.querySelectorAll(`[name="${canvasName}"]`);
+    let controls = output.querySelectorAll(`[name="${controlsName}"]`);
+    graphicsSerialization.fromJSON(graphics, canvases[0], controls[0], null);
   }
 
   bootstrapGraphicsNDimensional() {
@@ -524,27 +554,6 @@ class Calculator {
   ) {
     let parsed = JSON.parse(content);
     crypto.abstractSyntaxNotationAnnotate(parsed[0], parsed[1], parsed[2]);
-  }
-
-  bootstrapGraphics() {
-    let graphics = this.scriptContents["graphics"];
-    for (let i = 0; i < graphics.length; i++) {
-      this.bootstrapOneGraphic(graphics[i]);
-    }
-  }
-
-  bootstrapOneGraphic(
-    /**@type{string} */
-    content,
-  ) {
-    let graphics = JSON.parse(content);
-    let canvasName = graphics[pathnames.urlFields.result.canvasName];
-    let controlsName = graphics[pathnames.urlFields.result.controlsName];
-    console.log("DEBUG: bootstrap graphics: " + JSON.stringify(graphics));
-    let output = this.getOutputElement();
-    let canvases = output.querySelectorAll(`[name="${canvasName}"]`);
-    let controls = output.querySelectorAll(`[name="${controlsName}"]`);
-    graphicsSerialization.fromJSON(graphics, canvases[0], controls[0], null);
   }
 
   getOutputElement() {

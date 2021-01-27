@@ -1441,17 +1441,32 @@ class CanvasTwoD {
   }
 }
 
+class TextInThreeD {
+  constructor(location, text, color) {
+    this.location = location;
+    this.text = text;
+    this.color = color;
+  }
+}
+
 class Canvas {
   constructor(
     /**@type{HTMLCanvasElement} */
     inputCanvas,
+    /**@type{HTMLElement} */
+    controls,
+    /**@type{HTMLElement} */
+    messages,
   ) {
     this.canvasContainer = inputCanvas;
+    this.spanControls = controls;
+    this.spanMessages = messages;
     this.canvasResetFunction = null;
     this.theIIIdObjects = {
       thePatches: [],
       theContours: [],
       thePoints: [],
+      /**@type{TextInThreeD[]} */
       theLabels: [],
     };
     this.screenXY = [0, 0];
@@ -1468,7 +1483,6 @@ class Canvas {
     this.numContourPaths = 0;
     this.patchIsAccounted = [];
     this.surface = null;
-    this.canvasContainer = null;
     this.canvasId = null;
     this.screenBasisUserDefault = [[2, 1, 0], [0, 1, 1]];
     this.screenBasisUser = this.screenBasisUserDefault.slice();
@@ -1526,7 +1540,7 @@ class Canvas {
 
   mouseWheelHandler(e) {
     let inputs = drawing.mouseWheelCommon(e);
-    this.mouseWheel(inputs.delta, inputs.x, input.y);
+    this.mouseWheel(inputs.delta, inputs.x, inputs.y);
   }
 
   mouseUp() {
@@ -1557,9 +1571,7 @@ class Canvas {
       let y = e.clientY;
       this.mouseMove(x, y);
     }, true);
-    this.spanMessages = document.getElementById(`${this.canvasId}Messages`);
     this.spanCriticalErrors = document.getElementById(`${this.canvasId}CriticalErrors`);
-    this.spanControls = document.getElementById(`${this.canvasId}Controls`);
     this.theIIIdObjects.thePatches = [];
     this.theIIIdObjects.theContours = [];
     this.theIIIdObjects.thePoints = [];
@@ -1571,8 +1583,8 @@ class Canvas {
     }
   }
 
-  drawText(theText) {
-    this.theIIIdObjects.theLabels.push(theText);
+  drawText(location, text, color) {
+    this.theIIIdObjects.theLabels.push(new TextInThreeD(location, text, color));
   }
 
   drawCurve(theCurve) {

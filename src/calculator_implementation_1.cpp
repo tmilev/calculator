@@ -38,11 +38,13 @@ std::string PlotObject::Labels::text                = "text";
 std::string PlotObject::Labels::arguments           = "arguments";
 std::string PlotObject::Labels::viewWindow          = "viewWindow";
 
-std::string Plot::Labels::canvasName     = "canvasName";
-std::string Plot::Labels::controlsName   = "controlsName";
-std::string Plot::Labels::messagesName   = "messagesName";
-std::string Plot::Labels::graphicsType   = "graphicsType";
-std::string Plot::Labels::objects   = "objects";
+std::string Plot::Labels::canvasName                = "canvasName";
+std::string Plot::Labels::controlsName              = "controlsName";
+std::string Plot::Labels::messagesName              = "messagesName";
+std::string Plot::Labels::graphicsType              = "graphicsType";
+std::string Plot::Labels::graphicsThreeDimensional  = "graphicsThreeDimensional";
+std::string Plot::Labels::graphicsTwoDimensional    = "graphicsTwoDimensional";
+std::string Plot::Labels::plotObjects               = "plotObjects";
 
 bool Calculator::getListPolynomialVariableLabelsLexicographic(
   const Expression& input,
@@ -154,15 +156,15 @@ std::string Calculator::toStringSemismipleLieAlgebraLinksFromHD(const DynkinType
   SemisimpleLieAlgebra folderComputer;
   folderComputer.weylGroup.theDynkinType = theType;
   std::string prefixFolder = "calculator/";
-  out << "<tr><td><a href=\""
+  out << "<tr><td><a href='"
   << folderComputer.toStringDisplayFolderName(prefixFolder)
   << folderComputer.toStringFileNameNoPathStructureConstants()
-  << "\">"
+  << "'>"
   << theType[0].theLetter << theType[0].theRank << " structure constants</a></td>\n ";
   if (theType[0].hasPrecomputedSubalgebras()) {
-    out << "<td><a href=\""
+    out << "<td><a href='"
     << folderComputer.toStringDisplayFolderName(prefixFolder) << folderComputer.toStringFileNameNoPathSemisimpleSubalgebras()
-    << "\">"
+    << "'>"
     << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a>";
     out << "</td>\n ";
   } else {
@@ -225,7 +227,7 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
   bool adjustCentralizers
 ) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::computeStructureWriteFiles");
-  this->ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
+  this->toStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
   this->owner = &newOwner;
   this->computeFolderNames(this->currentFormat);
   if (!FileOperations::fileExistsVirtual(this->virtualNameMainFile1) || forceRecompute) {
@@ -248,19 +250,19 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
     }
   }
   if (outputStream != nullptr) {
-    *outputStream << "<br>Output file: <a href = \""
-    << this->displayNameMainFile1WithPath << "\" target = \"_blank\">"
+    *outputStream << "<br>Output file: <a href='"
+    << this->displayNameMainFile1WithPath << "' target = '_blank'>"
     << this->displayNameMainFile1NoPath << "</a>";
   }
   return true;
 }
 
-bool MathRoutines::isPrime(int theInt) {
-  if (theInt <= 1) {
+bool MathRoutines::isPrime(int input) {
+  if (input <= 1) {
     return false;
   }
-  for (int i = 2; i * i <= theInt; i += 2) {
-    if (theInt % i == 0) {
+  for (int i = 2; i * i <= input; i += 2) {
+    if (input % i == 0) {
       return false;
     }
   }
@@ -468,17 +470,6 @@ void Plot::computeAxesAndBoundingBox() {
     this->theUpperBoundAxes = MathRoutines::maximum(this->plotObjects[k].xHigh, theUpperBoundAxes);
     this->lowBoundY = MathRoutines::minimum(this->plotObjects[k].yLow, this->lowBoundY);
     this->highBoundY = MathRoutines::maximum(this->plotObjects[k].yHigh, this->highBoundY);
-/*    for (int j = 0; j < this->thePlots[k].theLines.size; j ++) {
-      List<Vector<double> > currentLine = this->thePlots[k].theLines[j];
-      this->theLowerBoundAxes =MathRoutines::minimum(this->theLowerBoundAxes, currentLine[0][0]);
-      this->theLowerBoundAxes =MathRoutines::minimum(this->theLowerBoundAxes, currentLine[1][0]);
-      this->theUpperBoundAxes =MathRoutines::maximum(this->theUpperBoundAxes, currentLine[0][0]);
-      this->theUpperBoundAxes =MathRoutines::maximum(this->theUpperBoundAxes, currentLine[1][0]);
-      this->lowBoundY =MathRoutines::minimum  (currentLine[0][1], this->lowBoundY);
-      this->lowBoundY =MathRoutines::minimum  (currentLine[1][1], this->lowBoundY);
-      this->highBoundY =MathRoutines::maximum (currentLine[0][1], this->highBoundY);
-      this->highBoundY =MathRoutines::maximum (currentLine[1][1], this->highBoundY);
-    }*/
     for (int j = 0; j < this->plotObjects[k].pointsDouble.size; j ++) {
       Vector<double>& currentPoint = this->plotObjects[k].pointsDouble[j];
       if (!this->isOKVector(currentPoint)) {
@@ -504,17 +495,6 @@ void Plot::computeAxesAndBoundingBox3d() {
     this->theUpperBoundAxes = MathRoutines::maximum(this->plotObjects[k].xHigh, theUpperBoundAxes);
     this->lowBoundY = MathRoutines::minimum(this->plotObjects[k].yLow, this->lowBoundY);
     this->highBoundY = MathRoutines::maximum(this->plotObjects[k].yHigh, this->highBoundY);
-/*    for (int j = 0; j < this->thePlots[k].theLines.size; j ++) {
-      List<Vector<double> > currentLine = this->thePlots[k].theLines[j];
-      this->theLowerBoundAxes =MathRoutines::minimum(this->theLowerBoundAxes, currentLine[0][0]);
-      this->theLowerBoundAxes =MathRoutines::minimum(this->theLowerBoundAxes, currentLine[1][0]);
-      this->theUpperBoundAxes =MathRoutines::maximum(this->theUpperBoundAxes, currentLine[0][0]);
-      this->theUpperBoundAxes =MathRoutines::maximum(this->theUpperBoundAxes, currentLine[1][0]);
-      this->lowBoundY =MathRoutines::minimum  (currentLine[0][1], this->lowBoundY);
-      this->lowBoundY =MathRoutines::minimum  (currentLine[1][1], this->lowBoundY);
-      this->highBoundY =MathRoutines::maximum (currentLine[0][1], this->highBoundY);
-      this->highBoundY =MathRoutines::maximum (currentLine[1][1], this->highBoundY);
-    }*/
     for (int j = 0; j < this->plotObjects[k].pointsDouble.size; j ++) {
       Vector<double>& currentPoint = this->plotObjects[k].pointsDouble[j];
       if (!this->isOKVector(currentPoint)) {
@@ -537,17 +517,6 @@ bool Plot::isOKVector(const Vector<double>& input) {
   return true;
 }
 
-std::string Plot::commonCanvasSetup() {
-  std::stringstream out;
-  out
-  << "var theDrawer = window.calculator.drawing;\n"
-  << "if (document.getElementById('" << this->getCanvasName() << "') === null) {\n"
-  << "  return;\n"
-  << "}\n"
-  << "theDrawer.deleteCanvas('" << this->getCanvasName() << "');\n";
-  return out.str();
-}
-
 std::string Plot::getPlotHtml3d(Calculator& owner) {
   MacroRegisterFunctionWithName("Plot::getPlotHtml3d");
   owner.flagHasGraphics = true;
@@ -560,16 +529,16 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
     std::string messagesId = canvasId + "Messages";
     out << "<canvas width='" << this->desiredHtmlWidthInPixels
     << "' height='" << this->desiredHtmlHeightInPixels << "' "
-    << "style='border:solid 1px' id='"
+    << "style='border:solid 1px' name='"
     << canvasId
     << "'"
     << ">"
     << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
-    << "<span id='" << controlsId << "'></span>"
-    << "<span id='" << messagesId << "'></span>";
-    result["id"] = canvasId;
-    result["controls"] = controlsId;
-    result["messages"] = messagesId;
+    << "<span name='" << controlsId << "'></span>"
+    << "<span name='" << messagesId << "'></span>";
+    result[Plot::Labels::canvasName] = this->getCanvasName();
+    result[Plot::Labels::controlsName] = controlsId;
+    result[Plot::Labels::messagesName] = messagesId;
   }
   JSData plotUpdaters;
   for (int i = 0; i < this->boxesThatUpdateMe.size; i ++) {
@@ -583,9 +552,11 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
     PlotObject& current = this->plotObjects[i];
     objects3D.listObjects.addOnTop(current.toJSON());
   }
-  result[Plot::Labels::objects] = objects3D;
+  result[Plot::Labels::plotObjects] = objects3D;
   result["showPerformance"] = owner.flagPlotNoControls;
   result["setBoundingBoxAsDefaultViewWindow"] = true;
+  result[Plot::Labels::graphicsType] = "threeDimensional";
+
   std::string script = HtmlRoutines::scriptFromJSON("graphics3d", result);
   out << script;
   owner.objectContainer.graphicsScripts.setKeyValue(this->getCanvasName(), script);
@@ -961,8 +932,8 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
       out << "<br>";
     }
     out << "<span name='" << messages << "'></span>";
-    result[Plot::Labels::canvasName] = this->getCanvasName();
     result[Plot::Labels::graphicsType] = "twoDimensional";
+    result[Plot::Labels::canvasName] = this->getCanvasName();
     result[Plot::Labels::controlsName] = controls;
     result[Plot::Labels::messagesName] = messages;
     result["noControls"] = owner.flagPlotNoControls;
@@ -985,7 +956,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   } else {
     plotObjects[plotObjects.listObjects.size] = this->getComputeViewWindow();
   }
-  result["plotObjects"] = plotObjects;
+  result[Plot::Labels::plotObjects] = plotObjects;
   out << HtmlRoutines::scriptFromJSON("graphics", result);
   return out.str();
 }

@@ -703,7 +703,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   reportStream << "Subalgebra loading done, total "
   << theSAs.theSubalgebras.values.size << " subalgebras loaded. ";
   theReport.report(reportStream.str());
-  theSAs.ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
+  theSAs.toStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
   if (!theSAs.loadState(currentChainInt, numExploredTypes, numExploredHs, calculator.comments)) {
     return false;
   }
@@ -714,7 +714,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     << "computation aborted. The failure report follows. "
     << theSAs.comments << "<br>The progress report for the "
     << "entire computation follows.<br>"
-    << theSAs.ToStringProgressReport();
+    << theSAs.toStringProgressReport();
     return output.assignValue(out.str(), calculator);
   }
   theSAs.millisecondsComputationEnd = global.getElapsedMilliseconds();

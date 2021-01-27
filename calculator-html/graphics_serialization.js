@@ -1,6 +1,7 @@
 "use strict";
 
 const CanvasTwoD = require("./graphics").CanvasTwoD;
+const CanvasThreeD = require("./graphics").Canvas;
 
 class GraphicsSerialization {
   constructor() {
@@ -33,6 +34,9 @@ class GraphicsSerialization {
       case "twoDimensional":
         this.twoDimensionalGraphics(input, canvas, controls, messages);
         return;
+      case "threeDimensional":
+        this.threeDimensionalGraphics(input, canvas, controls, messages);
+        return;
       default:
         throw `Unknown graphics type ${graphicsType}.`;
     }
@@ -55,6 +59,30 @@ class GraphicsSerialization {
     canvas.initialize();
     for (let i = 0; i < plotObjects.length; i++) {
       this.oneTwoDimensionalObject(plotObjects[i], canvas);
+    }
+    canvas.redraw();
+  }
+
+  threeDimensionalGraphics(
+    input,
+    /**@type{HTMLCanvasElement}*/
+    canvasElement,
+    /**@type{HTMLElement} */
+    controls,
+    /**@type{HTMLElement} */
+    messages,
+  ) {
+    let plotObjects = input["plotObjects"];
+    if (!Array.isArray(plotObjects)) {
+      throw `Plot objects not an array.`;
+    }
+    let canvas = new CanvasThreeD(canvasElement, controls, messages);
+    canvas.initialize();
+    for (let i = 0; i < plotObjects.length; i++) {
+      this.oneThreeDimensionalObject(plotObjects[i], canvas);
+    }
+    if (input["setBoundingBoxAsDefaultViewWindow"]) {
+      canvas.setBoundingBoxAsDefaultViewWindow();
     }
     canvas.redraw();
   }
@@ -96,6 +124,29 @@ class GraphicsSerialization {
         return;
       case "label":
         canvas.drawText(onePoint, text, color);
+        return;
+      default:
+        throw `Unknown plot type: ${plotType}.`;
+    }
+  }
+
+  oneThreeDimensionalObject(
+    plot,
+    /**@type{CanvasThreeD} */
+    canvas,
+  ) {
+    let plotType = plot["plotType"];
+    let points = plot["points"];
+    let color = plot["color"];
+    let lineWidth = plot["lineWidth"];
+    let point = plot["point"];
+    let text = plot["text"];
+    switch (plotType) {
+      case "segment":
+        canvas.drawLine(points[0], points[1], color, lineWidth);
+        return;
+      case "label":
+        canvas.drawText(point, text, color);
         return;
       default:
         throw `Unknown plot type: ${plotType}.`;

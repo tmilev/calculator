@@ -328,19 +328,20 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
     }
   }
   output.makeZero();
-  out << "<br>Character w.r.t Levi part: \\(" << HtmlRoutines::getMathNoDisplay(remainingCharDominantLevi.toString());
+  out << "<br>Character with respect to Levi part: "
+  << HtmlRoutines::getMathNoDisplay(remainingCharDominantLevi.toString());
   Vector<Coefficient> simpleGeneratorBaseField;
   while (!remainingCharDominantLevi.isEqualToZero()) {
     localHighest = *remainingCharDominantLevi.monomials.lastObject();
-    for (bool Found = true; Found; ) {
-      Found = false;
+    for (bool found = true; found; ) {
+      found = false;
       for (int i = 0; i < outputWeylSub.simpleRootsInner.size; i ++) {
         tempMon = localHighest;
         simpleGeneratorBaseField = outputWeylSub.simpleRootsInner[i]; // <- implicit type conversion here!
         tempMon.weightFundamentalCoordinates += this->getOwner()->weylGroup.getFundamentalCoordinatesFromSimple(simpleGeneratorBaseField);
         if (remainingCharDominantLevi.monomials.contains(tempMon)) {
           localHighest = tempMon;
-          Found = true;
+          found = true;
         }
       }
     }
@@ -362,7 +363,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
       remainingCharDominantLevi.subtractMonomial(tempMon, bufferCoeff);
     }
   }
-  out << "<br>Character w.r.t Levi part: " << HtmlRoutines::getMathNoDisplay(output.toString());
+  out << "<br>Character with respect to Levi part: " << HtmlRoutines::getMathNoDisplay(output.toString());
   if (report != nullptr) {
     DrawingVariables theDV;
     std::string tempS;

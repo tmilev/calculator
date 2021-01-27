@@ -1440,6 +1440,13 @@ Function::Options Function::Options::administrativeExperimentalTested() {
   return result;
 }
 
+Function::Options Function::Options::administrativeTested() {
+  Function::Options result;
+  result.adminOnly = true;
+  result.dontTestAutomatically = false;
+  return result;
+}
+
 Function::Options Function::Options::innerAdminNoTestExperimental() {
   Function::Options result = Function::Options::innerAdminNoTest();
   result.flagIsExperimental = true;

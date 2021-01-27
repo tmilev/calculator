@@ -5726,19 +5726,19 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& calculator, const Ex
       }
     }
   }
-  PlotObject thePlot;
+  PlotObject plot;
   Vector<double> currentPt;
   currentPt.setSize(2);
   for (int i = firstGoodXIndex; i <= lastGoodXIndex; i ++) {
     currentPt[0] = XValues[i];
     currentPt[1] = YValues[i];
-    thePlot.pointsDouble.addOnTop(currentPt);
+    plot.pointsDouble.addOnTop(currentPt);
   }
-  thePlot.xLow = XValues[0];
-  thePlot.xHigh = *XValues.lastObject();
-  thePlot.yLow = - 0.5;
-  thePlot.yHigh = 0.5;
-  thePlot.coordinateFunctionsE.addOnTop(input);
+  plot.xLow = XValues[0];
+  plot.xHigh = *XValues.lastObject();
+  plot.yLow = - 0.5;
+  plot.yHigh = 0.5;
+  plot.coordinateFunctionsE.addOnTop(input);
   std::stringstream outLatex, outHtml;
   outLatex << "\n\n%calculator input:" << input.toString() << "\n\n"
   << "\\psline[linecolor =\\fcColorGraph]";
@@ -5747,12 +5747,13 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& calculator, const Ex
   for (int i = firstGoodXIndex; i <= lastGoodXIndex; i ++) {
     outLatex << std::fixed << "(" << XValues[i] << ", " << YValues[i] << ")";
     outHtml << std::fixed << "(" << XValues[i] << ", " << YValues[i] << ")";
-    thePlot.yLow = MathRoutines::minimum(YValues[i], thePlot.yLow);
-    thePlot.yHigh = MathRoutines::maximum(YValues[i], thePlot.yHigh);
+    plot.yLow = MathRoutines::minimum(YValues[i], plot.yLow);
+    plot.yHigh = MathRoutines::maximum(YValues[i], plot.yHigh);
   }
-  thePlot.thePlotString = outLatex.str();
-  thePlot.thePlotStringWithHtml = outHtml.str();
-  return output.assignValue(thePlot, calculator);
+  plot.thePlotString = outLatex.str();
+  plot.thePlotStringWithHtml = outHtml.str();
+  plot.dimension = 2;
+  return output.assignValue(plot, calculator);
 }
 
 bool CalculatorFunctionsPlot::plotViewWindow(
@@ -7294,12 +7295,16 @@ bool CalculatorFunctionsFreecalc::crawlTexFile(
     out << "Command available to logged-in admins only. ";
     return output.assignValue(out.str(), calculator);
   }
-  if (!input.isOfType<std::string>()) {
+  if (input.size() != 2) {
+    return calculator << "<hr>Input " << input.toString() << " requires a single argument. ";
+  }
+  std::string argument;
+  if (!input[1].isOfType<std::string>(&argument)) {
     return calculator << "<hr>Input " << input.toString() << " is not of type string. ";
   }
   LaTeXCrawler theCrawler;
   theCrawler.ownerCalculator = &calculator;
-  theCrawler.theFileNameToCrawlRelative = input.getValue<std::string>();
+  theCrawler.theFileNameToCrawlRelative = argument;
   theCrawler.crawl();
   return output.assignValue(theCrawler.displayResult.str(), calculator);
 }

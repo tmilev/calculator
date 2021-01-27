@@ -24,6 +24,8 @@ std::string PlotObject::Labels::left                = "left";
 std::string PlotObject::Labels::right               = "right";
 std::string PlotObject::Labels::numberOfSegments    = "numberOfSegments";
 std::string PlotObject::Labels::color               = "color";
+std::string PlotObject::Labels::colorFront          = "colorFront";
+std::string PlotObject::Labels::colorBack           = "colorBack";
 std::string PlotObject::Labels::colorFill           = "colorFill";
 std::string PlotObject::Labels::lineWidth           = "lineWidth";
 std::string PlotObject::Labels::manifoldImmersion   = "manifoldImmersion";
@@ -40,6 +42,7 @@ std::string Plot::Labels::canvasName     = "canvasName";
 std::string Plot::Labels::controlsName   = "controlsName";
 std::string Plot::Labels::messagesName   = "messagesName";
 std::string Plot::Labels::graphicsType   = "graphicsType";
+std::string Plot::Labels::objects   = "objects";
 
 bool Calculator::getListPolynomialVariableLabelsLexicographic(
   const Expression& input,
@@ -548,117 +551,45 @@ std::string Plot::commonCanvasSetup() {
 std::string Plot::getPlotHtml3d(Calculator& owner) {
   MacroRegisterFunctionWithName("Plot::getPlotHtml3d");
   owner.flagHasGraphics = true;
-  std::stringstream outContent, outScript;
   this->computeCanvasNameIfNecessary(owner.objectContainer.canvasPlotCounter);
+  JSData result;
+  std::stringstream out;
   if (!owner.flagPlotShowJavascriptOnly) {
-    outContent << "<canvas width =\"" << this->desiredHtmlWidthInPixels
-    << "\" height =\"" << this->desiredHtmlHeightInPixels << "\" "
-    << "style =\"border:solid 1px\" id =\""
-    << this->getCanvasName()
-    << "\" "
+    std::string canvasId = this->getCanvasName();
+    std::string controlsId = canvasId + "Controls";
+    std::string messagesId = canvasId + "Messages";
+    out << "<canvas width='" << this->desiredHtmlWidthInPixels
+    << "' height='" << this->desiredHtmlHeightInPixels << "' "
+    << "style='border:solid 1px' id='"
+    << canvasId
+    << "'"
     << ">"
     << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
-    << "<span id =\"" << this->getCanvasName() << "Controls\"></span>"
-    << "<span id =\"" << this->getCanvasName() << "Messages\"></span>";
+    << "<span id='" << controlsId << "'></span>"
+    << "<span id='" << messagesId << "'></span>";
+    result["id"] = canvasId;
+    result["controls"] = controlsId;
+    result["messages"] = messagesId;
   }
-  outContent << "<script language =\"javascript\">\n";
-  std::string canvasFunctionName = "functionMake" + this->getCanvasName();
-  std::string canvasResetFunctionName = "functionReset" + this->getCanvasName();
-  outScript
-  << "function " << canvasResetFunctionName << "() {\n"
-  << canvasFunctionName << "();\n"
-  << "}\n";
-  outScript << "function " << canvasFunctionName << "() {\n";
+  JSData plotUpdaters;
   for (int i = 0; i < this->boxesThatUpdateMe.size; i ++) {
     InputBox& currentBox = owner.objectContainer.
     userInputTextBoxesWithValues.getValueCreate(this->boxesThatUpdateMe[i]);
-    outScript << " window.calculator.drawing.plotUpdaters['"
-    << currentBox.getSliderName() << "'] =" << "'" << this->getCanvasName() << "'"
-    << ";\n";
+    plotUpdaters[currentBox.getSliderName()] = this->getCanvasName();
   }
-  List<std::string> the3dObjects;
-  the3dObjects.setSize(this->plotObjects.size);
-  int funCounter = 0;
+  result["plotUpdaters"] = plotUpdaters;
+  JSData objects3D = JSData::makeEmptyArray();
   for (int i = 0; i < this->plotObjects.size; i ++) {
-    PlotObject& currentO = this->plotObjects[i];
-    if (currentO.plotType == "surface") {
-      outScript << currentO.getJavascriptSurfaceImmersion(the3dObjects[i], this->getCanvasName(), funCounter) << "\n ";
-    }
-    if (currentO.plotType == "parametricCurve") {
-      outScript << currentO.getJavascriptCurveImmersionIn3d(the3dObjects[i], this->getCanvasName(), funCounter) << "\n ";
-    }
+    PlotObject& current = this->plotObjects[i];
+    objects3D.listObjects.addOnTop(current.toJSON());
   }
-  outScript << this->commonCanvasSetup();
-  outScript << "var theCanvas = theDrawer.getCanvas('" << this->getCanvasName() << "');\n"
-  << "theCanvas.initialize('" << this->getCanvasName() << "');\n";
-  outScript << "theCanvas.canvasResetFunction = " << canvasResetFunctionName << ";\n";
-  for (int i = 0; i < this->plotObjects.size; i ++) {
-    PlotObject& currentPlot = this->plotObjects[i];
-    if (currentPlot.plotType == "surface") {
-      outScript
-      << "theCanvas.drawSurface("
-      <<  the3dObjects[i]
-      << ");\n";
-    }
-    if (currentPlot.plotType == "parametricCurve") {
-      outScript
-      << "theCanvas.drawCurve("
-      <<  the3dObjects[i]
-      << ");\n";
-    }
-    if (currentPlot.plotType == "setProjectionScreen" && currentPlot.pointsDouble.size >= 2) {
-      outScript
-      << "theCanvas.screenBasisUserDefault = "
-      << "["
-      << currentPlot.pointsDouble[0].toStringSquareBracketsBasicType()
-      << ","
-      << currentPlot.pointsDouble[1].toStringSquareBracketsBasicType()
-      << "];\n";
-      outScript << "theCanvas.screenBasisUser = theCanvas.screenBasisUserDefault.slice();\n";
-    }
-    if (currentPlot.plotType == "label") {
-      outScript
-      << "theCanvas.drawText({"
-      << "location: "
-      << currentPlot.pointsDouble[0].toStringSquareBracketsBasicType()
-      << ", "
-      << "text:"
-      << "'" << currentPlot.thePlotString << "'"
-      << ", "
-      << "color: "
-      << "'"
-      << currentPlot.colorJS
-      << "'"
-      << "});\n";
-    }
-    if (currentPlot.plotType == "segment" && currentPlot.pointsDouble.size >= 2) {
-      outScript
-      << "theCanvas.drawLine("
-      << currentPlot.pointsDouble[0].toStringSquareBracketsBasicType()
-      << ", "
-      << currentPlot.pointsDouble[1].toStringSquareBracketsBasicType()
-      << ", "
-      << "'"
-      << currentPlot.colorJS
-      << "'"
-      << ", "
-      << currentPlot.lineWidth
-      << ");\n";
-    }
-  }
-  if (owner.flagPlotNoControls) {
-    outScript << "theCanvas.flagShowPerformance = false;\n";
-  } else {
-    outScript << "theCanvas.flagShowPerformance = true;\n";
-  }
-  outScript << "theCanvas.setBoundingBoxAsDefaultViewWindow();\n"
-  << "theCanvas.redraw();\n"
-  << "}\n";
-  outScript << canvasFunctionName << "();\n";
-  outContent << outScript.str();
-  outContent << "</script>";
-  owner.objectContainer.graphicsScripts.setKeyValue(this->getCanvasName(), outScript.str());
-  return outContent.str();
+  result[Plot::Labels::objects] = objects3D;
+  result["showPerformance"] = owner.flagPlotNoControls;
+  result["setBoundingBoxAsDefaultViewWindow"] = true;
+  std::string script = HtmlRoutines::scriptFromJSON("graphics3d", result);
+  out << script;
+  owner.objectContainer.graphicsScripts.setKeyValue(this->getCanvasName(), script);
+  return out.str();
 }
 
 void Plot::setCanvasName(const std::string& input) {
@@ -692,106 +623,52 @@ std::string PlotObject::toStringDebug() {
   return out.str();
 }
 
-std::string PlotObject::getJavascriptCurveImmersionIn3d(
-  std::string& outputCurveInstantiationJS, const std::string& canvasName, int& funCounter
-) {
-  MacroRegisterFunctionWithName("PlotSurfaceIn3d::getJavascriptCurveImmersionIn3d");
-  std::stringstream out;
-  funCounter ++;
-  std::stringstream fnNameStream;
-  fnNameStream << "theCanvasSurfaceFn_" << canvasName << "_" << funCounter;
-  std::string fnName = fnNameStream.str();
-
-  if (this->coordinateFunctionsJS.size == 3) {
-    out << "function " << fnName
-    << " (" << this->variablesInPlayJS[0]
-    << "){\n";
-    out << "return [ " << this->coordinateFunctionsJS[0] << ", "
-    << this->coordinateFunctionsJS[1]
-    << ", " << this->coordinateFunctionsJS[2] << "];\n";
-    out << "}\n";
-  } else {
-    out << "//this->theCoordinateFunctionsJS has "
-    << this->coordinateFunctionsJS.size
-    << " elements instead of 3 (expected).\n";
-  }
+JSData PlotObject::toJSONCurveImmersionIn3d() {
+  MacroRegisterFunctionWithName("PlotSurfaceIn3d::toJSONCurveImmersionIn3d");
+  JSData result;
+  this->writeVariables(result);
+  result[PlotObject::Labels::coordinateFunctions] = this->coordinateFunctionsJS;
   std::stringstream curveInstStream;
-  curveInstStream << "new theDrawer.CurveThreeD(" << fnName
-  << ", " << this->paramLowJS << ", " << this->paramHighJS;
+  result[PlotObject::Labels::variableRange][0] = this->paramLowJS;
+  result[PlotObject::Labels::variableRange][1] = this->paramHighJS;
   if (this->numSegmenTsJS.size > 0) {
-    curveInstStream << ", " << this->numSegmenTsJS[0];
+    result[PlotObject::Labels::segmentRange] = this->numSegmenTsJS[0];
   } else {
-    curveInstStream << ", 100";
+    result[PlotObject::Labels::segmentRange] = 100;
   }
-  curveInstStream << ", "
-  << "\"" << this->colorJS << "\"";
-  curveInstStream << ", " << this->lineWidth;
-  curveInstStream << ")";
-  outputCurveInstantiationJS = curveInstStream.str();
-  return out.str();
+  this->writeColorLineWidth(result);
+  return result;
 }
 
-std::string PlotObject::getJavascriptSurfaceImmersion(
-  std::string& outputSurfaceInstantiationJS, const std::string& canvasName, int& funCounter
-) {
-  MacroRegisterFunctionWithName("PlotSurfaceIn3d::getJavascriptSurfaceImmersion");
-  std::stringstream out;
-  funCounter ++;
-  std::stringstream fnNameStream;
-  fnNameStream << "theCanvasSurfaceFn_" << canvasName << "_" << funCounter;
-  std::string fnName = fnNameStream.str();
-
+JSData PlotObject::toJSONSurfaceImmersion() {
+  MacroRegisterFunctionWithName("PlotObject::toJSONSurfaceImmersion");
+  JSData result;
+  this->writeVariables(result);
   if (this->coordinateFunctionsJS.size == 3) {
-    out << "function " << fnName
-    << " (" << this->variablesInPlayJS[0] << ","
-    << this->variablesInPlayJS[1] << "){\n";
-    out << "return [ " << this->coordinateFunctionsJS[0] << ", "
-    << this->coordinateFunctionsJS[1]
-    << ", " << this->coordinateFunctionsJS[2] << "];\n";
-    out << "}\n";
-  } else
-    out << "//this->theCoordinateFunctionsJS has "
-    << this->coordinateFunctionsJS.size
-    << " elements instead of 3 (expected).\n";
-  if (this->theVarRangesJS.size != 2) {
-    out << "//this->theVarRangesJS has "
-    << this->theVarRangesJS.size << " elements instead of 2 (expected).";
-  } else if (this->theVarRangesJS[0].size != 2 || this->theVarRangesJS[1].size != 2) {
-    out << "//this->theVarRangesJS had unexpected value: "
-    << this->theVarRangesJS.size;
+    result[PlotObject::Labels::coordinateFunctions] = this->coordinateFunctionsJS;
   } else {
-    std::stringstream surfaceInstStream;
-    surfaceInstStream << "new window.calculator.drawing.Surface("
-    << fnName
-    << ", [[" << this->theVarRangesJS[0][0] << "," << this->theVarRangesJS[1][0] << "],"
-    << " ["   << this->theVarRangesJS[0][1] << ", " << this->theVarRangesJS[1][1] << "]], ";
-    if (this->numSegmenTsJS.size > 1) {
-      surfaceInstStream << "[" << this->numSegmenTsJS[0] << ","
-      << this->numSegmenTsJS[1] << "], ";
-    } else {
-      surfaceInstStream << "[22, 4], ";
-    }
-    surfaceInstStream << "{colorContour: \"black\", ";
-    if (this->colorUV != "") {
-      surfaceInstStream << "colorUV: \"" << this->colorUV << "\",";
-    } else {
-      surfaceInstStream << "colorUV: \"red\",";
-    }
-    if (this->colorVU != "") {
-      surfaceInstStream << "colorVU: \"" << this->colorVU << "\"";
-    } else {
-      surfaceInstStream << "colorVU: \"pink\"";
-    }
-    surfaceInstStream << "}" << ",";
-    if (this->lineWidthJS != "") {
-      surfaceInstStream << this->lineWidthJS;
-    } else {
-      surfaceInstStream << "1";
-    }
-    surfaceInstStream << ")";
-    outputSurfaceInstantiationJS = surfaceInstStream.str();
+    result["error"] = "wrong number of coordinates";
   }
-  return out.str();
+  result["ranges"] = this->theVarRangesJS;
+  if (this->numSegmenTsJS.size <= 1) {
+    result[PlotObject::Labels::segmentRange] = this->numSegmenTsJS;
+  } else {
+    result[PlotObject::Labels::segmentRange][0] = 22;
+    result[PlotObject::Labels::segmentRange][1] = 4;
+  }
+  result["colorContour"] = "black";
+  if (this->colorUV != "") {
+    result[PlotObject::Labels::colorBack] = this->colorUV;
+  } else {
+    result[PlotObject::Labels::colorBack] = "red";
+  }
+  if (this->colorVU != "") {
+    result[PlotObject::Labels::colorFront] = this->colorVU;
+  } else {
+    result[PlotObject::Labels::colorFront] = "pink";
+  }
+  this->writeLineWidth(result);
+  return result;
 }
 
 std::string Plot::getPlotHtml(Calculator& owner) {
@@ -807,14 +684,18 @@ std::string Plot::getPlotHtml(Calculator& owner) {
   }
 }
 
-JSData PlotObject::functionFromString(const std::string& input) {
-  JSData result;
+void PlotObject::writeVariables(JSData& output) {
   JSData arguments = JSData::makeEmptyArray();
   for (int i = 0; i < this->variablesInPlayJS.size; i ++) {
     arguments[i] = HtmlRoutines::getJavascriptVariable(this->variablesInPlayJS[i]);
   }
+  output[PlotObject::Labels::arguments] = arguments;
+}
+
+JSData PlotObject::functionFromString(const std::string& input) {
+  JSData result;
+  this->writeVariables(result);
   result[PlotObject::Labels::body] = input;
-  result[PlotObject::Labels::arguments] = arguments;
   return result;
 }
 
@@ -842,12 +723,16 @@ void PlotObject::writeColor(JSData& output) {
 }
 
 void PlotObject::writeColorLineWidth(JSData& output) {
+  this->writeLineWidth(output);
+  this->writeColor(output);
+}
+
+void PlotObject::writeLineWidth(JSData& output) {
   if (this->lineWidthJS != "") {
     output[PlotObject::Labels::lineWidth] = this->lineWidthJS;
   } else {
     output[PlotObject::Labels::lineWidth] = this->lineWidth;
   }
-  this->writeColor(output);
 }
 
 JSData PlotObject::toJSON2dDrawFunction() {
@@ -942,13 +827,35 @@ JSData PlotObject::toJSONPlotFillStart() {
   return result;
 }
 
+JSData PlotObject::toJSONSetProjectionScreen() {
+  JSData result;
+  result["projectionScreen"] = this->pointsDouble;
+  return result;
+}
+
+JSData PlotObject::toJSONSegment() {
+  JSData result;
+  result[PlotObject::Labels::points] = this->pointsDouble;
+  this->writeColorLineWidth(result);
+  return result;
+}
+
 JSData PlotObject::toJSON() {
   JSData result;
   std::string correctedPlotType = this->plotType;
   if (correctedPlotType == "") {
     correctedPlotType = "path";
   }
-  if (correctedPlotType == "plotFunction") {
+
+  if (correctedPlotType == "setProjectionScreen" ) {
+    result = this->toJSONSetProjectionScreen();
+  } else if (correctedPlotType == "segment") {
+    result = this->toJSONSegment();
+  } else if (correctedPlotType == "surface") {
+    result = this->toJSONSurfaceImmersion();
+  } else if (correctedPlotType == "parametricCurve") {
+    result = this->toJSONCurveImmersionIn3d();
+  } else if (correctedPlotType == "plotFunction") {
     result = this->toJSON2dDrawFunction();
   } else if (correctedPlotType == "parametricCurve") {
     result = this->toJSONParametricCurveInTwoDimensions();
@@ -961,7 +868,9 @@ JSData PlotObject::toJSON() {
   } else if (correctedPlotType == "plotFillStart") {
     result = this->toJSONPlotFillStart();
   } else if (correctedPlotType == "plotFillFinish") {
+    // The plot type carries all information.
   } else if (correctedPlotType == "axesGrid") {
+    // The plot type carries all information.
   } else if (correctedPlotType == "pathFilled") {
     result = this->toJSONDrawPathFilled();
   } else {
@@ -1077,7 +986,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
     plotObjects[plotObjects.listObjects.size] = this->getComputeViewWindow();
   }
   result["plotObjects"] = plotObjects;
-  out << "<script " << WebAPI::result::scriptType << "='graphics'>\n" << result.toString() << "</script>";
+  out << HtmlRoutines::scriptFromJSON("graphics", result);
   return out.str();
 }
 

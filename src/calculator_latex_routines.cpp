@@ -550,7 +550,7 @@ void LaTeXCrawler::crawlRecursive(std::stringstream& crawlingResult, const std::
         newFileName = StringRoutines::stringTrimWhiteSpace(newFileName);
         std::string newFileNameEnd;
         if (StringRoutines::stringBeginsWith(newFileName, "\\freecalcBaseFolder", &newFileNameEnd)) {
-          newFileName = "../../freecalc" + newFileNameEnd;
+          newFileName = "../.." + newFileNameEnd;
         }
         newFileName += ".tex";
         crawlingResult << "%input from file: " << newFileName << "\n";

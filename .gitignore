@@ -52,5 +52,6 @@ output/progress_subalgebras_*
 output/progress_subalgebras_*
 output/result_subalgebras_*
 output/outputFileCommandLine.html
+output/latexOutput.tex
 
 public_html/MathJax-2.7-latest

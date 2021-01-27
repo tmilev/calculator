@@ -801,6 +801,7 @@ class Function {
     static Options innerAdminNoTestExperimental();
     static Options innerAdminNoTest();
     static Options administrativeExperimentalTested();
+    static Options administrativeTested();
     static Options experimental();
     static Options invisibleNoTest();
     static Options innerNoTest();
@@ -885,7 +886,9 @@ private:
   void writeColorWidthSegments(JSData& output);
   void writeColorLineWidth(JSData& output);
   void writeColor(JSData& output);
+  void writeLineWidth(JSData& output);
   void writeColorFilled(JSData& output);
+  void writeVariables(JSData& output);
   JSData functionFromString(const std::string& input);
 public:
   struct Labels {
@@ -898,6 +901,8 @@ public:
     static std::string right;
     static std::string numberOfSegments;
     static std::string color;
+    static std::string colorFront;
+    static std::string colorBack;
     static std::string colorFill;
     static std::string lineWidth;
     static std::string manifoldImmersion;
@@ -961,14 +966,8 @@ public:
   std::string paramLowJS;
   std::string paramHighJS;
   ////////////////
-  std::string getJavascriptSurfaceImmersion(
-    std::string& outputSurfaceInstantiationJS,
-    const std::string& canvasName,
-    int& funCounter
-  );
-  std::string getJavascriptCurveImmersionIn3d(
-    std::string& outputCurveInstantiationJS, const std::string& canvasName, int& funCounter
-  );
+  JSData toJSONSurfaceImmersion();
+  JSData toJSONCurveImmersionIn3d();
   std::string toStringDebug();
   void computeYBounds();
   std::string getPlotStringFromFunctionStringAndRanges(
@@ -980,6 +979,8 @@ public:
   );
   JSData toJSON();
   JSData toJSON2dDrawFunction();
+  JSData toJSONSetProjectionScreen();
+  JSData toJSONSegment();
   JSData toJSONParametricCurveInTwoDimensions();
   JSData toJSONPoints();
   JSData toJSONDirectionFieldInTwoDimensions();
@@ -1006,6 +1007,7 @@ public:
     static std::string controlsName;
     static std::string messagesName;
     static std::string graphicsType;
+    static std::string objects;
   };
   List<PlotObject> plotObjects;
   HashedList<std::string, MathRoutines::hashString> boxesThatUpdateMe;

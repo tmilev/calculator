@@ -319,7 +319,7 @@ void Calculator::initializeFunctionsExtra() {
     "Crawl(\"freecalc/homework/referenceallproblemsbycourse/calculusimasterproblemsheet.tex\")",
     "CalculatorFunctions::innerCrawlTexFile",
     "Crawl",
-    innerAdminNoTest
+    Function::Options::administrativeTested()
   );
   this->addOperationHandler(
     "BuildFreecalc",

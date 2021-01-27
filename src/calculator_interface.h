@@ -903,11 +903,11 @@ public:
     static std::string color;
     static std::string colorFront;
     static std::string colorBack;
+    static std::string colorContour;
     static std::string colorFill;
     static std::string lineWidth;
     static std::string manifoldImmersion;
     static std::string variableRange;
-    static std::string segmentRange;
     static std::string defaultLength;
     static std::string plotType;
     static std::string viewWindow;

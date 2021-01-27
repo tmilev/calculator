@@ -6,17 +6,23 @@ const CanvasThreeD = require("./graphics").Canvas;
 class GraphicsSerialization {
   constructor() {
     this.labels = {
+      plotType: "plotType",
       functionLabel: "function",
+      variableRanges: "variableRange",
       left: "left",
       right: "right",
       numberOfSegments: "numberOfSegments",
       color: "color",
+      colorFront: "colorFront",
+      colorBack: "colorBack",
+      colorContour: "colorContour",
       lineWidth: "lineWidth",
       body: "body",
       arguments: "arguments",
       points: "points",
       onePoint: "point",
       text: "text",
+      coordinateFunctions: "coordinateFunctions",
     };
   }
 
@@ -92,8 +98,8 @@ class GraphicsSerialization {
     /**@type{CanvasTwoD} */
     canvas,
   ) {
-    let plotType = plot["plotType"];
-    let functionString = plot[this.labels.functionLabel];
+    let plotType = plot[this.labels.plotType];
+    let functionObject = plot[this.labels.functionLabel];
     let left = plot[this.labels.left];
     let right = plot[this.labels.right];
     let numberOfSegments = plot[this.labels.numberOfSegments];
@@ -105,7 +111,7 @@ class GraphicsSerialization {
     switch (plotType) {
       case "plotFunction":
         canvas.drawFunction(
-          this.functionFromString(functionString),
+          this.functionFromObject(functionObject),
           this.interpretStringToNumber(left),
           this.interpretStringToNumber(right),
           this.interpretStringToNumber(numberOfSegments),
@@ -120,6 +126,7 @@ class GraphicsSerialization {
         canvas.computeViewWindow();
         return;
       case "path":
+      case "segment":
         canvas.drawPath(points, color, lineWidth);
         return;
       case "label":
@@ -135,10 +142,17 @@ class GraphicsSerialization {
     /**@type{CanvasThreeD} */
     canvas,
   ) {
-    let plotType = plot["plotType"];
+    let plotType = plot[this.labels.plotType];
+    let variableRanges = plot[this.labels.variableRanges];
+    let numberOfSegments = plot[this.labels.numberOfSegments];
+    let coordinateFunctions = plot[this.labels.coordinateFunctions];
+    let inputArguments = plot[this.labels.arguments];
+    let colorFront = plot[this.labels.colorFront];
+    let colorBack = plot[this.labels.colorBack];
+    let colorContour = plot[this.labels.colorContour];
     let points = plot["points"];
     let color = plot["color"];
-    let lineWidth = plot["lineWidth"];
+    let lineWidth = plot[this.labels.lineWidth];
     let point = plot["point"];
     let text = plot["text"];
     switch (plotType) {
@@ -147,6 +161,24 @@ class GraphicsSerialization {
         return;
       case "label":
         canvas.drawText(point, text, color);
+        return;
+      case "surface":
+        let convertedRanges = [[
+          this.interpretStringToNumber(variableRanges[0][0]),
+          this.interpretStringToNumber(variableRanges[0][1]),
+        ], [
+          this.interpretStringToNumber(variableRanges[1][0]),
+          this.interpretStringToNumber(variableRanges[1][1]),
+        ]];
+        canvas.drawSurfaceCreate(
+          this.functionFromBodyAndArguments(coordinateFunctions, inputArguments),
+          convertedRanges,
+          numberOfSegments,
+          colorFront,
+          colorBack,
+          colorContour,
+          lineWidth,
+        );
         return;
       default:
         throw `Unknown plot type: ${plotType}.`;
@@ -160,14 +192,19 @@ class GraphicsSerialization {
     return Function(`"use strict"; return (${input});`)();
   }
 
-  functionFromString(
+  functionFromObject(
     input,
   ) {
     /**@type{string[]} */
     let inputArguments = input[this.labels.arguments];
     /**@type{string[]} */
     let body = input[this.labels.body];
-    //return Function(inputArguments, body);
+    return this.functionFromBodyAndArguments(body, inputArguments);
+  }
+
+  functionFromBodyAndArguments(
+    body, inputArguments,
+  ) {
     if (inputArguments.length === 1) {
       return Function(inputArguments[0], body);
     } else if (inputArguments.length === 2) {
@@ -185,6 +222,7 @@ class GraphicsSerialization {
     } else if (inputArguments.length === 8) {
       return Function(inputArguments[0], inputArguments[1], inputArguments[3], inputArguments[4], inputArguments[5], inputArguments[6], inputArguments[7], body);
     }
+    return null;
   }
 }
 

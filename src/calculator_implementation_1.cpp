@@ -26,11 +26,11 @@ std::string PlotObject::Labels::numberOfSegments    = "numberOfSegments";
 std::string PlotObject::Labels::color               = "color";
 std::string PlotObject::Labels::colorFront          = "colorFront";
 std::string PlotObject::Labels::colorBack           = "colorBack";
+std::string PlotObject::Labels::colorContour        = "colorContour";
 std::string PlotObject::Labels::colorFill           = "colorFill";
 std::string PlotObject::Labels::lineWidth           = "lineWidth";
 std::string PlotObject::Labels::manifoldImmersion   = "manifoldImmersion";
 std::string PlotObject::Labels::variableRange       = "variableRange";
-std::string PlotObject::Labels::segmentRange        = "segmentRange";
 std::string PlotObject::Labels::defaultLength       = "defaultLength";
 std::string PlotObject::Labels::plotType            = "plotType";
 std::string PlotObject::Labels::body                = "body";
@@ -603,9 +603,9 @@ JSData PlotObject::toJSONCurveImmersionIn3d() {
   result[PlotObject::Labels::variableRange][0] = this->paramLowJS;
   result[PlotObject::Labels::variableRange][1] = this->paramHighJS;
   if (this->numSegmenTsJS.size > 0) {
-    result[PlotObject::Labels::segmentRange] = this->numSegmenTsJS[0];
+    result[PlotObject::Labels::numberOfSegments] = this->numSegmenTsJS[0];
   } else {
-    result[PlotObject::Labels::segmentRange] = 100;
+    result[PlotObject::Labels::numberOfSegments] = 100;
   }
   this->writeColorLineWidth(result);
   return result;
@@ -616,18 +616,19 @@ JSData PlotObject::toJSONSurfaceImmersion() {
   JSData result;
   this->writeVariables(result);
   if (this->coordinateFunctionsJS.size == 3) {
-    result[PlotObject::Labels::coordinateFunctions] = this->coordinateFunctionsJS;
+    result[PlotObject::Labels::coordinateFunctions] =
+    "return [" + this->coordinateFunctionsJS.toStringCommaDelimited() + "];";
   } else {
     result["error"] = "wrong number of coordinates";
   }
-  result["ranges"] = this->theVarRangesJS;
+  result[PlotObject::Labels::variableRange] = this->theVarRangesJS;
   if (this->numSegmenTsJS.size <= 1) {
-    result[PlotObject::Labels::segmentRange] = this->numSegmenTsJS;
+    result[PlotObject::Labels::numberOfSegments] = this->numSegmenTsJS;
   } else {
-    result[PlotObject::Labels::segmentRange][0] = 22;
-    result[PlotObject::Labels::segmentRange][1] = 4;
+    result[PlotObject::Labels::numberOfSegments][0] = 22;
+    result[PlotObject::Labels::numberOfSegments][1] = 4;
   }
-  result["colorContour"] = "black";
+  result[PlotObject::Labels::colorContour] = "black";
   if (this->colorUV != "") {
     result[PlotObject::Labels::colorBack] = this->colorUV;
   } else {
@@ -759,7 +760,7 @@ JSData PlotObject::toJSONDirectionFieldInTwoDimensions() {
   for (int i = 0; i < this->numSegmenTsJS.size; i ++) {
     segmentRange[i] = this->numSegmenTsJS[i];
   }
-  result[PlotObject::Labels::segmentRange] = segmentRange;
+  result[PlotObject::Labels::numberOfSegments] = segmentRange;
   result[PlotObject::Labels::defaultLength] = this->defaultLengthJS;
   this->writeColorLineWidth(result);
   return result;

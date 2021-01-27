@@ -160,22 +160,29 @@ function testMoebiusStripEmbedding2(u, v) {
 }
 
 function testGetMoebiusSurface() {
-  let colors = {
-    colorContour: "black",
-    colorUV: "blue",
-    colorVU: "cyan"
-  };
-  let result = new Surface(testMoebiusStripEmbedding, [[0, - 0.6], [Math.PI * 2, 0.6]], [22, 4], colors, 2);
+  let result = new Surface(
+    testMoebiusStripEmbedding,
+    [[0, Math.PI * 2], [- 0.6, 0.6]],
+    [22, 4],
+    "cyan",
+    "blue",
+    "black",
+    2,
+  );
   return result;
 }
 
 function testGetMoebiusSurface2() {
-  let colors = {
-    colorContour: "black",
-    colorUV: "red",
-    colorVU: "pink"
-  };
-  let result = new Surface(testMoebiusStripEmbedding2, [[0, - 0.6], [Math.PI * 2, 0.6]], [22, 4], colors, 0.5);
+  let result = new Surface(
+    testMoebiusStripEmbedding2,
+    [[0, Math.PI * 2], [- 0.6, 0.6]],
+    [22, 4],
+    colors,
+    "pink",
+    "red",
+    "black",
+    0.5,
+  );
   return result;
 }
 
@@ -184,14 +191,9 @@ function testVectorField2d(x, y) {
 }
 
 function testGetTestPlane() {
-  let colors = {
-    colorContour: "black",
-    colorUV: "blue",
-    colorVU: "cyan"
-  };
   let result = new Surface(function (u, v) {
     return [u, 0.9 * v, 1 + u + v];
-  }, [[- 1.2, - 0.7], [1, 1]], [5, 5], colors);
+  }, [[- 1.2, 1], [- 0.7, 1]], [5, 5], "cyan", "blue", "black");
   return result;
 }
 
@@ -270,16 +272,33 @@ class CurveThreeD {
 }
 
 class Surface {
-  constructor(inputxyzFun, inputUVBox, inputPatchDimensions, inputColors, inputContourWidth) {
+  constructor(
+    /**@type{Function} */
+    inputxyzFun,
+    /**@type{number[][]} Variable ranges, in format [[uMin, uMax], [vMin, vMax]]*/
+    inputUVBox,
+    /**@type{number[]} Number of patches in the format [uPatchCount, vPathCount]*/
+    inputPatchDimensions,
+    /**@type{string} */
+    colorFront,
+    /**@type{string} */
+    colorBack,
+    /**@type{string} */
+    colorContour,
+    /**@type{number} */
+    inputContourWidth,
+  ) {
     this.xyzFun = inputxyzFun;
     this.uvBox = inputUVBox;
     this.patchDimensions = inputPatchDimensions;
-    this.colors = inputColors;
+    this.colors = {
+      colorContour: colorContour,
+      colorUV: colorToHex(colorBack),
+      colorVU: colorToHex(colorFront),
+    };
     this.contourWidth = inputContourWidth;
-    this.colors.colorUV = colorToHex(this.colors.colorUV);
-    this.colors.colorVU = colorToHex(this.colors.colorVU);
-    this.deltaU = (inputUVBox[1][0] - inputUVBox[0][0]) / this.patchDimensions[0];
-    this.deltaV = (inputUVBox[1][1] - inputUVBox[0][1]) / this.patchDimensions[1];
+    this.deltaU = (inputUVBox[0][1] - inputUVBox[0][0]) / this.patchDimensions[0];
+    this.deltaV = (inputUVBox[1][1] - inputUVBox[1][0]) / this.patchDimensions[1];
     this.numSamplesUSegment = 10;
     this.numSamplesVSegment = 10;
   }
@@ -2818,31 +2837,54 @@ class Canvas {
     this.showMessages();
   }
 
-  drawSurface(theSurface) {
-    let numUsegments = theSurface.patchDimensions[0];
-    let numVsegments = theSurface.patchDimensions[1];
+  drawSurfaceCreate(
+    inputxyzFun,
+    inputUVBox,
+    inputPatchDimensions,
+    colorFront,
+    colorBack,
+    colorContour,
+    inputContourWidth,
+  ) {
+    this.drawSurface(new Surface(
+      inputxyzFun,
+      inputUVBox,
+      inputPatchDimensions,
+      colorFront,
+      colorBack,
+      colorContour,
+      inputContourWidth,
+    ));
+  }
+
+  drawSurface(
+    /**@type{Surface} */
+    surface,
+  ) {
+    let numUsegments = surface.patchDimensions[0];
+    let numVsegments = surface.patchDimensions[1];
     let thePatches = this.theIIIdObjects.thePatches;
     let theContours = this.theIIIdObjects.theContours;
-    //let incomingPatches = new Array(numUsegments);
-    let deltaU = theSurface.deltaU;
-    let deltaV = theSurface.deltaV;
+    // let incomingPatches = new Array(numUsegments);
+    let deltaU = surface.deltaU;
+    let deltaV = surface.deltaV;
     let firstPatchIndex = thePatches.length;
     for (let i = 0; i < numUsegments; i++) {
       //incomingPatches[i] = new Array(numVsegments);
       for (let j = 0; j < numVsegments; j++) {
         //let incomingPatch = incomingPatches[i][j];
-        let currentU = theSurface.uvBox[0][0] + i * deltaU;
-        let currentV = theSurface.uvBox[0][1] + j * deltaV;
-        let base = theSurface.xyzFun(currentU, currentV);
-        let v1 = theSurface.xyzFun(currentU + deltaU, currentV);
-        let v2 = theSurface.xyzFun(currentU, currentV + deltaV);
+        let currentU = surface.uvBox[0][0] + i * deltaU;
+        let currentV = surface.uvBox[0][1] + j * deltaV;
+        let base = surface.xyzFun(currentU, currentV);
+        let v1 = surface.xyzFun(currentU + deltaU, currentV);
+        let v2 = surface.xyzFun(currentU, currentV + deltaV);
         let edge1 = vectorMinusVector(v1, base);
         let edge2 = vectorMinusVector(v2, base);
-        let incomingPatch = new Patch(base, edge1, edge2, theSurface.colors.colorUV, theSurface.colors.colorVU);
+        let incomingPatch = new Patch(base, edge1, edge2, surface.colors.colorUV, surface.colors.colorVU);
         incomingPatch.adjacentContours = new Array(4);
         incomingPatch.traversalOrder = [1, 1, 1, 1];
         incomingPatch.index = thePatches.length;
-        incomingPatch.internalPoint = theSurface.xyzFun(currentU + deltaU / 2, currentV + deltaV / 2);
+        incomingPatch.internalPoint = surface.xyzFun(currentU + deltaU / 2, currentV + deltaV / 2);
         thePatches.push(incomingPatch);
       }
     }
@@ -2850,12 +2892,12 @@ class Canvas {
     let contourPoints = new Array(numSegmentsPerContour + 1);
     for (let i = 0; i < numUsegments + 1; i++) {
       for (let j = 0; j < numVsegments; j++) {
-        let currentU = theSurface.uvBox[0][0] + i * deltaU;
+        let currentU = surface.uvBox[0][0] + i * deltaU;
         for (let k = 0; k < numSegmentsPerContour + 1; k++) {
-          let currentV = theSurface.uvBox[0][1] + (j + k / numSegmentsPerContour) * deltaV;
-          contourPoints[k] = theSurface.xyzFun(currentU, currentV);
+          let currentV = surface.uvBox[0][1] + (j + k / numSegmentsPerContour) * deltaV;
+          contourPoints[k] = surface.xyzFun(currentU, currentV);
         }
-        let incomingContour = new Contour(contourPoints, theSurface.colors.colorContour, theSurface.contourWidth);
+        let incomingContour = new Contour(contourPoints, surface.colors.colorContour, surface.contourWidth);
         incomingContour.index = theContours.length;
         if (i > 0) {
           incomingContour.adjacentPatches.push(firstPatchIndex + numVsegments * (i - 1) + j);
@@ -2871,12 +2913,12 @@ class Canvas {
     }
     for (let i = 0; i < numUsegments; i++) {
       for (let j = 0; j < numVsegments + 1; j++) {
-        let currentV = theSurface.uvBox[0][1] + j * deltaV;
+        let currentV = surface.uvBox[0][1] + j * deltaV;
         for (let k = 0; k < numSegmentsPerContour + 1; k++) {
-          let currentU = theSurface.uvBox[0][0] + (i + k / numSegmentsPerContour) * deltaU;
-          contourPoints[k] = theSurface.xyzFun(currentU, currentV);
+          let currentU = surface.uvBox[0][0] + (i + k / numSegmentsPerContour) * deltaU;
+          contourPoints[k] = surface.xyzFun(currentU, currentV);
         }
-        let incomingContour = new Contour(contourPoints, theSurface.colors.colorContour, theSurface.contourWidth);
+        let incomingContour = new Contour(contourPoints, surface.colors.colorContour, surface.contourWidth);
         incomingContour.index = theContours.length;
         if (j > 0) {
           incomingContour.adjacentPatches.push(firstPatchIndex + numVsegments * i + j - 1);

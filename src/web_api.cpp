@@ -467,6 +467,14 @@ bool WebAPIResponse::processCompareExpressions(bool hideDesiredAnswer) {
   return true;
 }
 
+bool WebAPIResponse::processCheckAnswer(bool hideDesiredAnswer) {
+  MacroRegisterFunctionWithName("WebAPIResponse::processCheckAnswer");
+  this->owner->setHeaderOKNoContentLength("", "text/html");
+  JSData resultJSON = WebAPIResponse::checkAnswer(hideDesiredAnswer);
+  return global.response.writeResponse(resultJSON);
+  return true;
+}
+
 bool WebAPIResponse::processCalculatorOnePageJS(bool appendBuildHash) {
   MacroRegisterFunctionWithName("WebAPIResponse::processCalculatorOnePageJS");
   if (appendBuildHash) {

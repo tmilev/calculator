@@ -3,7 +3,8 @@
 <link type="text/css" rel="stylesheet" href="calculator.css">
 
 
-<body onload="window.calculator.hardCodedProblems.create(['problem1', 'problem2'], 'https://calculator-algebra.org')">
+<body
+  onload="window.calculator.hardCodedProblems.create(['problem1', 'problem2', 'problem3'], 'https://calculator-algebra.org')">
 
   <!--To activate the problem, add the problem's id 
     to the list in the body's onload handler-->
@@ -27,6 +28,13 @@
     <answer style="display:none" buttons="variables, algebra" forReal="true">
       (3x-2)(3x+1)
     </answer>
+
+  </div>
+  <div id="problem3">
+    Compute 2+3.
+    <calculatorAnswer id="answer" style="display:none" buttons="variables, algebra" forReal="true">
+      answer == 5
+    </calculatorAnswer>
 
   </div>
 </body>

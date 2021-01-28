@@ -127,7 +127,6 @@ class HardCodedAnswer {
         this.giveUp();
       });
     }
-
   }
 
   submitAnswer() {

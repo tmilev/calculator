@@ -10,17 +10,6 @@ if (module === undefined) {
   module = {};
 }
 
-function calculatorError(x) {
-  console.log(x);
-  if (firstCriticalRunTimeError !== "") {
-    return;
-  }
-  firstCriticalRunTimeError = x;
-  if (firstCriticalRunTimeError !== "" && firstCanvas !== undefined && firstCanvas !== null) {
-    firstCanvas.textErrors = firstCriticalRunTimeError + " All further error messages are suppressed.";
-    firstCanvas.showMessages();
-  }
-}
 
 function vectorToString(vector) {
   let result = "[";
@@ -43,7 +32,7 @@ function vectorToString(vector) {
 function vectorScalarVector(s, t) {
   let result = 0;
   if (s.length !== t.length) {
-    calculatorError(`Scalar product of vectors of different length: ${s} and ${t}.`);
+    drawing.calculatorError(`Scalar product of vectors of different length: ${s} and ${t}.`);
   }
   for (let i = 0; i < s.length; i++) {
     result += s[i] * t[i];
@@ -177,7 +166,6 @@ function testGetMoebiusSurface2() {
     testMoebiusStripEmbedding2,
     [[0, Math.PI * 2], [- 0.6, 0.6]],
     [22, 4],
-    colors,
     "pink",
     "red",
     "black",
@@ -297,8 +285,8 @@ class Surface {
       colorVU: colorToHex(colorFront),
     };
     this.contourWidth = inputContourWidth;
-    this.deltaU = (inputUVBox[0][1] - inputUVBox[0][0]) / this.patchDimensions[0];
-    this.deltaV = (inputUVBox[1][1] - inputUVBox[1][0]) / this.patchDimensions[1];
+    this.deltaU = (this.uvBox[0][1] - this.uvBox[0][0]) / this.patchDimensions[0];
+    this.deltaV = (this.uvBox[1][1] - this.uvBox[1][0]) / this.patchDimensions[1];
     this.numSamplesUSegment = 10;
     this.numSamplesVSegment = 10;
   }
@@ -1864,21 +1852,6 @@ class Canvas {
       theSurface.fillStyle = colorRGBToString(colorScale(thePatch.colorVU, colorFactor));
     }
     theSurface.beginPath();
-    /*    if (0)
-      { var
-        theCoords = this.coordsMathToScreen(thePatch.base);
-        theSurface.moveTo(Math.round(theCoords[0]), Math.round(theCoords[1]));
-        theCoords = this.coordsMathToScreen(thePatch.v1);
-        theSurface.lineTo(Math.round(theCoords[0]), Math.round(theCoords[1]));
-        theCoords = this.coordsMathToScreen(thePatch.vEnd);
-        theSurface.lineTo(Math.round(theCoords[0]), Math.round(theCoords[1]));
-        theCoords = this.coordsMathToScreen(thePatch.v2);
-        theSurface.lineTo(Math.round(theCoords[0]), Math.round(theCoords[1]));
-        theCoords = this.coordsMathToScreen(thePatch.base);
-        theSurface.lineTo(Math.round(theCoords[0]), Math.round(theCoords[1]));
-        theSurface.fill();
-        return;
-      }*/
     let first = true;
     for (let i = 0; i < thePatch.adjacentContours.length; i++) {
       let currentContour = this.theIIIdObjects.theContours[thePatch.adjacentContours[i]];
@@ -1899,15 +1872,6 @@ class Canvas {
     theSurface.closePath();
     //    theSurface.clip();
     theSurface.fill();
-    if (false) {
-      theCoords = this.coordsMathToScreen(thePatch.internalPoint);
-      theSurface.fillStyle = "black";
-      theSurface.font = "20pt sans-serif";
-      theSurface.fillStyle = "cyan";
-      //if (thePatch.index ===90)
-      theSurface.fillText(thePatch.index, theCoords[0], theCoords[1]);
-    }
-    //    theSurface.stroke();
   }
 
   paintText(theText) {
@@ -2683,7 +2647,7 @@ class Canvas {
       theHTML += this.textPerformance + "<hr>";
     }
     if (this.textErrors !== "") {
-      theHTML += `<span style =\"red\"><b>${this.textErrors}</b></span><hr>`;
+      theHTML += `<b style='red'>${this.textErrors}</b><hr>`;
     }
     theHTML += `<span>${this.textMouseInfo}</span><hr><span>${this.textProjectionInfo}</span>`;
     if (this.textPatchInfo !== "") {
@@ -2874,7 +2838,7 @@ class Canvas {
       for (let j = 0; j < numVsegments; j++) {
         //let incomingPatch = incomingPatches[i][j];
         let currentU = surface.uvBox[0][0] + i * deltaU;
-        let currentV = surface.uvBox[0][1] + j * deltaV;
+        let currentV = surface.uvBox[1][0] + j * deltaV;
         let base = surface.xyzFun(currentU, currentV);
         let v1 = surface.xyzFun(currentU + deltaU, currentV);
         let v2 = surface.xyzFun(currentU, currentV + deltaV);
@@ -2894,7 +2858,7 @@ class Canvas {
       for (let j = 0; j < numVsegments; j++) {
         let currentU = surface.uvBox[0][0] + i * deltaU;
         for (let k = 0; k < numSegmentsPerContour + 1; k++) {
-          let currentV = surface.uvBox[0][1] + (j + k / numSegmentsPerContour) * deltaV;
+          let currentV = surface.uvBox[1][0] + (j + k / numSegmentsPerContour) * deltaV;
           contourPoints[k] = surface.xyzFun(currentU, currentV);
         }
         let incomingContour = new Contour(contourPoints, surface.colors.colorContour, surface.contourWidth);
@@ -2913,7 +2877,7 @@ class Canvas {
     }
     for (let i = 0; i < numUsegments; i++) {
       for (let j = 0; j < numVsegments + 1; j++) {
-        let currentV = surface.uvBox[0][1] + j * deltaV;
+        let currentV = surface.uvBox[1][0] + j * deltaV;
         for (let k = 0; k < numSegmentsPerContour + 1; k++) {
           let currentU = surface.uvBox[0][0] + (i + k / numSegmentsPerContour) * deltaU;
           contourPoints[k] = surface.xyzFun(currentU, currentV);
@@ -2945,8 +2909,19 @@ class Drawing {
     this.CurveThreeD = CurveThreeD;
   }
 
+  calculatorError(
+    /**@type{string} */
+    x,
+  ) {
+    console.log(x);
+  }
+
   testPicture(inputCanvasId) {
-    let theCanvas = new Canvas(document.getElementById(inputCanvasId));
+    let theCanvas = new Canvas(
+      document.getElementById(inputCanvasId),
+      document.getElementById(inputCanvasId + "Controls"),
+      document.getElementById(inputCanvasId + "Messages"),
+    );
     theCanvas.screenBasisUserDefault = [[0.59, 0.78, 0.18], [0.46, - 0.15, - 0.87]];
     theCanvas.screenBasisUser = theCanvas.screenBasisUserDefault.slice();
     theCanvas.initialize();
@@ -2960,9 +2935,9 @@ class Drawing {
     theCanvas.drawPoints([[1, 0, 0]], 'red');
     theCanvas.drawPoints([[0, 1, 0]], 'green');
     theCanvas.drawPoints([[0, 0, 1]], 'blue');
-    theCanvas.drawText({ location: [1, 0, 0], text: "x", color: "green" });
-    theCanvas.drawText({ location: [0, 1, 0], text: "y", color: "green" });
-    theCanvas.drawText({ location: [0, 0, 1], text: "z", color: "green" });
+    theCanvas.drawText([1, 0, 0], "x", "green");
+    theCanvas.drawText([0, 1, 0], "y", "green");
+    theCanvas.drawText([0, 0, 1], "z", "green");
     theCanvas.setBoundingBoxAsDefaultViewWindow();
     //console.log(theCanvas.theIIIdObjects.thePatches);
     theCanvas.redraw();

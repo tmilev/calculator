@@ -238,7 +238,6 @@ public:
     static std::string idPanel;
     static std::string answerHighlight;
     static std::string idEquationEditorElement;
-    static std::string idEquationEditorElementLocation;
     static std::string idButtonContainer;
     static std::string mathQuillPanelOptions;
     static std::string idPureLatex;

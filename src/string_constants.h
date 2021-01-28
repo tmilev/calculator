@@ -55,6 +55,7 @@ public:
     static std::string compareExpressionsInternal;
     static std::string compareExpressionsGiven;
     static std::string compareExpressionsDesired;
+    static std::string checkAnswer;
     struct slides {
     public:
       static std::string source;
@@ -108,7 +109,6 @@ public:
     static std::string loginDisabledEveryoneIsAdmin;
     static std::string useFallbackDatabase;
     static std::string httpsSupport;
-    static std::string comparison;
     static std::string scriptType;
     struct ComparisonData {
       // The given (student answer) expression string.
@@ -159,6 +159,9 @@ public:
     static std::string fileNameTarget;
     static std::string fileContent;
     static std::string idProblem; //<- a little more specific than just id, easier to string-search
+    static std::string answerId; //<- a little more specific than just id, easier to string-search
+    static std::string answerValue;
+    static std::string answerCheck;
     static std::string deadlineSingle;
     static std::string failedToLoadProblem;
     static std::string problemLabel;

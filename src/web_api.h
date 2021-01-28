@@ -70,6 +70,8 @@ class WebAPIResponse {
   bool processApp(bool appendBuildHash);
   bool processCompareExpressionsPage(bool appendBuildHash);
   bool processCompareExpressions(bool hideDesiredAnswer);
+  bool processCheckAnswer(bool hideDesiredAnswer);
+  JSData checkAnswer(bool hideDesiredAnswer);
   bool processCalculatorOnePageJS(bool appendBuildHash);
   bool processTopicListJSON();
   bool processSolveJSON();

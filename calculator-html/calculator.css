@@ -559,11 +559,19 @@ a.linkProgressReport {
   font-size: small;
 }
 
-#spanCalculatorExamplesContainer {
+#divCalculatorMainInputOutput{
+  max-width: 70%;
   overflow: auto;
-  display: inline-block;
+}
+
+#divCalculatorExamplesContainer {
+  overflow: auto;
   vertical-align:top;
   white-space:nowrap;
+  position: absolute; 
+  right:0%;
+  top: 0%;
+  max-width: 30%;
 }
 
 #idAutocompletePanel {
@@ -679,6 +687,7 @@ div.divPage {
   width: 90%;
   height: 100%;
   overflow: auto;
+  position: relative;
 }
 
 div.divTheMainMenu {
@@ -1287,9 +1296,9 @@ button.buttonSelectPage {
   box-shadow: var(--box-shadow-buttonSelectPage);
   border: none;
   font-weight: bold;
-  padding: 8px;
-  margin-top: 5px;
-  margin-bottom: 5px;
+  padding: 3px;
+  margin-top: 4px;
+  margin-bottom: 4px;
   font-size: 14px;
   transition: 1.5s;
   width: 100%;

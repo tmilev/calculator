@@ -593,7 +593,7 @@ a.linkProgressReport {
   font-size: small;
 }
 
-#spanCalculatorExamplesContainer {
+#divCalculatorExamplesContainer {
   overflow: auto;
   display: inline-block;
   vertical-align:top;
@@ -713,6 +713,7 @@ div.divPage {
   width: 90%;
   height: 100%;
   overflow: auto;
+  position: relative;
 }
 
 div.divTheMainMenu {

@@ -16,9 +16,7 @@ const initializeButtons = require("./initialize_buttons");
 const EquationEditor = require("./equation_editor").EquationEditor;
 const MathNode = require("./equation_editor").MathNode;
 const knownTypes = require("./equation_editor").knownTypes;
-const graphicsSerialization = require("./graphics_serialization").graphicsSerialization;
-const crypto = require("./crypto");
-const graphicsNDimensions = require("./graphics_n_dimensions");
+const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
 
 class AtomHandler {
   constructor() {
@@ -304,7 +302,7 @@ class Calculator {
       inputParsed.error !== null &&
       inputParsed.error !== ""
     ) {
-      buffer.write("<b style = 'color:red'>Error.</b>");
+      buffer.write("<b style ='color:red'>Error.</b>");
       buffer.write(inputParsed.error);
     }
     if (
@@ -431,129 +429,7 @@ class Calculator {
     }
     this.flagTypeset = false;
     this.typeset();
-    this.bootstrapAllScripts(this.getOutputElement());
-  }
-
-  bootstrapAllScripts(
-    /**@type{HTMLElement} */
-    element,
-  ) {
-    let incomingScripts = element.getElementsByTagName("script");
-    this.scriptContents = {
-      "graphics": [],
-      "graphics3d": [],
-      "abstractSyntaxNotationAnnotate": [],
-      "displaySSLRecord": [],
-      "displayTransportLayerSecurity": [],
-      "graphicsNDimensional": [],
-    };
-    for (let i = 0; i < incomingScripts.length; i++) {
-      let current = incomingScripts[i];
-      let content = current.textContent;
-      let scriptType = current.getAttribute("scriptType");
-      if (scriptType in this.scriptContents) {
-        this.scriptContents[scriptType].push(content);
-      } else {
-        throw `Unrecognized script type ${scriptType}.`;
-      }
-    }
-    this.inputBoxNames = [];
-    this.inputBoxToSliderUpdaters = {};
-    this.canvases = {};
-    this.bootstrapGraphics3d();
-    this.bootstrapGraphics();
-    this.bootstrapAbstractSyntaxNotationScripts();
-    this.bootstrapDisplaySSLRecord();
-    this.bootstrapDisplayTransportLayerSecurity();
-    this.bootstrapGraphicsNDimensional();
-  }
-
-  bootstrapGraphics3d() {
-    let annotations = this.scriptContents["graphics3d"];
-    for (let i = 0; i < annotations.length; i++) {
-      this.bootstrapOneGraphic(annotations[i]);
-    }
-  }
-
-  bootstrapGraphics() {
-    let graphics = this.scriptContents["graphics"];
-    for (let i = 0; i < graphics.length; i++) {
-      this.bootstrapOneGraphic(graphics[i]);
-    }
-  }
-
-  bootstrapOneGraphic(
-    /**@type{string} */
-    content,
-  ) {
-    let graphics = JSON.parse(content);
-    let canvasName = graphics[pathnames.urlFields.result.canvasName];
-    let controlsName = graphics[pathnames.urlFields.result.controlsName];
-    console.log("DEBUG: bootstrap graphics: " + JSON.stringify(graphics));
-    let output = this.getOutputElement();
-    let canvases = output.querySelectorAll(`[name="${canvasName}"]`);
-    let controls = output.querySelectorAll(`[name="${controlsName}"]`);
-    graphicsSerialization.fromJSON(graphics, canvases[0], controls[0], null);
-  }
-
-  bootstrapGraphicsNDimensional() {
-    let annotations = this.scriptContents["graphicsNDimensional"];
-    for (let i = 0; i < annotations.length; i++) {
-      this.bootstrapOneGraphicsNDimensional(annotations[i]);
-    }
-  }
-
-  bootstrapOneGraphicsNDimensional(
-    /**@type{string} */
-    content,
-  ) {
-    let parsed = JSON.parse(content);
-    graphicsNDimensions.createGraphicsFromObject(parsed);
-  }
-
-  bootstrapDisplayTransportLayerSecurity() {
-    let annotations = this.scriptContents["displayTransportLayerSecurity"];
-    for (let i = 0; i < annotations.length; i++) {
-      this.bootstrapOneDisplayTransportLayerSecurity(annotations[i]);
-    }
-  }
-
-  bootstrapOneDisplayTransportLayerSecurity(
-    /**@type{string} */
-    content,
-  ) {
-    let parsed = JSON.parse(content);
-    crypto.displayTransportLayerSecurity(parsed["id"], parsed["content"]);
-  }
-
-  bootstrapDisplaySSLRecord() {
-    let annotations = this.scriptContents["displaySSLRecord"];
-    for (let i = 0; i < annotations.length; i++) {
-      this.bootstrapOneDisplaySSLRecord(annotations[i]);
-    }
-  }
-
-  bootstrapOneDisplaySSLRecord(
-    /**@type{string} */
-    content,
-  ) {
-    let parsed = JSON.parse(content);
-    crypto.displaySSLRecord(parsed["id"], parsed["content"]);
-  }
-
-  bootstrapAbstractSyntaxNotationScripts() {
-    let annotations = this.scriptContents["abstractSyntaxNotationAnnotate"];
-    for (let i = 0; i < annotations.length; i++) {
-      this.bootstrapOneAbstractSyntaxNotation(annotations[i]);
-    }
-  }
-
-  bootstrapOneAbstractSyntaxNotation(
-    /**@type{string} */
-    content,
-  ) {
-    let parsed = JSON.parse(content);
-    crypto.abstractSyntaxNotationAnnotate(parsed[0], parsed[1], parsed[2]);
+    dynamicJavascript.bootstrapAllScripts(this.getOutputElement());
   }
 
   getOutputElement() {

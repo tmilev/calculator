@@ -23,6 +23,7 @@ class GraphicsSerialization {
       onePoint: "point",
       text: "text",
       coordinateFunctions: "coordinateFunctions",
+      viewWindow: "viewWindow",
     };
   }
 
@@ -108,6 +109,7 @@ class GraphicsSerialization {
     let points = plot[this.labels.points];
     let onePoint = plot[this.labels.onePoint];
     let text = plot[this.labels.text];
+    let viewWindow = plot[this.labels.viewWindow];
     switch (plotType) {
       case "plotFunction":
         canvas.drawFunction(
@@ -119,8 +121,13 @@ class GraphicsSerialization {
           this.interpretStringToNumber(lineWidth),
         );
         return;
+      case "axesGrid":
+        canvas.drawGrid();
       case "coordinateAxes":
         canvas.drawCoordinateAxes();
+        return;
+      case "setViewWindow":
+        canvas.setViewWindow(viewWindow[0], viewWindow[1]);
         return;
       case "computeViewWindow":
         canvas.computeViewWindow();

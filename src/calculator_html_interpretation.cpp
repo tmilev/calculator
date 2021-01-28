@@ -306,7 +306,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   } else if (interpreter.flagAbortComputationASAP) {
-    out << "<b style = 'color:red'>Failed to evaluate your answer, got:</b><br>"
+    out << "<b style='color:red'>Failed to evaluate your answer, got:</b><br>"
     << interpreter.outputString;
     result[WebAPI::result::resultHtml] = out.str();
     result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
@@ -317,7 +317,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   theFormat.flagUsePmatrix = true;
   const Expression& studentAnswerNoContextE =
   interpreter.programExpression[interpreter.programExpression.size() - 1];
-  out << "<span style =\"color:magenta\"><b>Interpreting as:</b></span><br>";
+  out << "<b style='color:magenta'>Interpreting as:</b><br>";
   out << "\\(\\displaystyle "
   << studentAnswerNoContextE.toString(&theFormat) << "\\)";
   Calculator interpreterWithAdvice;
@@ -368,7 +368,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     return result;
   }
   if (interpreterWithAdvice.flagAbortComputationASAP) {
-    out << "<br><b style = 'color:red'>"
+    out << "<br><b style='color:red'>"
     << "Something went wrong when interpreting your answer "
     << "in the context of the current problem. "
     << "</b>";
@@ -1365,12 +1365,11 @@ bool AnswerCheckerNoProblem::checkAnswer(bool* outputIsCorrect) {
 }
 
 void AnswerCheckerNoProblem::computeVerificationString() {
-  FormatExpressions theFormat;
   std::stringstream out;
   out << "<table style = 'width:300px'>";
   if (!this->answerIsCorrect) {
     out << "<tr><td>";
-    out << "<b style = 'color:red'>Your answer appears to be incorrect. </b>";
+    out << "<b style='color:red'>Your answer appears to be incorrect. </b>";
     out << "</td></tr>";
     if (global.userDefaultHasAdminRights() && global.userDebugFlagOn()) {
       out << "<tr><td>Administrator view internals. "
@@ -1386,8 +1385,9 @@ void AnswerCheckerNoProblem::computeVerificationString() {
     out << "<tr><td><b style='color:green'>Correct!</b>" << "</td></tr>";
   }
   if (this->hasCommentsBeforeSubmission) {
+    FormatExpressions format;
     out << "<tr><td>"
-    << WebAPIResponse::getCommentsInterpretation(interpreter, 3, theFormat)
+    << WebAPIResponse::getCommentsInterpretation(interpreter, 3, format)
     << "</td></tr>\n";
   }
   out << "<tr><td>Your answer was: ";
@@ -1404,7 +1404,7 @@ void AnswerCheckerNoProblem::computeVerificationString() {
     << "Don't forget to mention your keyboard/character setup. "
     << "Are you using the standard English keyboard? "
     << "Cyrillic, Chinese, etc. characters are not accepted. </b> "
-    << "<hr><b style ='color:red'>Copying and pasting an answer "
+    << "<hr><b style='color:red'>Copying and pasting an answer "
     << "not computed by yourself is considered cheating "
     << "(example: answer from an online program for doing homework).</b>";
   }
@@ -1459,7 +1459,6 @@ JSData AnswerChecker::submitAnswersJSON(
   if (!this->storeInDatabase(*outputIsCorrect)) {
     return this->result;
   }
-  global.comments << this->checker.verification + this->storageReport;
   this->result[WebAPI::result::resultHtml] = this->checker.verification + this->storageReport;
   this->result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
   return this->result;

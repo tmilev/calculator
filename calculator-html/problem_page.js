@@ -10,6 +10,7 @@ const miscellaneousFrontend = require("./miscellaneous_frontend");
 const datePicker = require("./date_picker").datePicker;
 const storage = require("./storage");
 const AnswerPanel = require("./answer_panel").AnswerPanel;
+const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
 
 class ProblemCollection {
   constructor() {
@@ -315,7 +316,6 @@ class Problem {
         answerPanelId: currentVector.answerPanelId,
         mathQuillPanelOptions: currentVector.mathQuillPanelOptions,
         idEquationEditorElement: currentVector.idEquationEditorElement,
-        idEquationEditorElementLocation: currentVector.idEquationEditorElementLocation,
         idPureLatex: currentVector.idPureLatex,
         idButtonContainer: currentVector.idButtonContainer,
         idButtonSubmit: currentVector.idButtonSubmit,
@@ -693,7 +693,7 @@ class Problem {
   }
 
   getHTMLOneProblemTr(
-    outputRow
+    outputRow,
   ) {
     let thePage = window.calculator.mainPage;
     let nextCell = outputRow.insertCell(- 1);
@@ -725,7 +725,12 @@ class Problem {
       nextElement.className = "problemLinkPractice";
       nextElement.href = `#${this.getAppAnchorRequestFileCourseTopics(false)}`;
       nextElement.innerHTML = "Practice";
-      nextElement.addEventListener("click", window.calculator.problemPage.selectCurrentProblem.bind(null, this.problemId, "exerciseJSON"));
+      nextElement.addEventListener(
+        "click",
+        window.calculator.problemPage.selectCurrentProblem.bind(
+          null, this.problemId, "exerciseJSON",
+        ),
+      );
       nextCell.appendChild(nextElement);
     }
     nextCell = outputRow.insertCell(- 1);
@@ -749,10 +754,11 @@ class Problem {
     for (let counterAnswers = 0; counterAnswers < this.answerPanels.length; counterAnswers++) {
       let answer = this.answerPanels[counterAnswers];
       let answerElement = document.getElementById(answer.input.answerPanelId);
-      answer.writeToElement(answerElement);
+      answer.writeToElement(answerElement, this.outputElement);
     }
     initializeButtons.initializeAccordionButtons();
     typeset.typesetter.typesetSoft(this.outputElement, "");
+    dynamicJavascript.bootstrapAllScripts(this.outputElement);
   }
 
   toStringDeadline() {
@@ -782,16 +788,16 @@ class Problem {
     remainingInHours += 24;
     let resultString = "";
     if (this.isSolvedForSure()) {
-      resultString += `<b style = 'color:green'>${this.deadline.toLocaleDateString()}</b>`;
+      resultString += `<b style='color:green'>${this.deadline.toLocaleDateString()}</b>`;
       return resultString;
     }
     if (remainingInHours < 48 && remainingInHours >= 0) {
-      resultString += `<b style = 'color:red'>${this.deadline.toLocaleDateString()}`;
+      resultString += `<b style='color:red'>${this.deadline.toLocaleDateString()}`;
       resultString += `, ~${remainingInHours.toFixed(1)} hrs left</b>`;
       return resultString;
     }
     if (remainingInHours < 0) {
-      resultString += `<b style = 'color:red'>${this.deadline.toLocaleDateString()}</b>`;
+      resultString += `<b style='color:red'>${this.deadline.toLocaleDateString()}</b>`;
       resultString += ` <b>[passed]</b>`;
       return resultString;
     }

@@ -919,6 +919,8 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
     this->computeAxesAndBoundingBox();
   }
   JSData result;
+  std::string controls = this->getCanvasName() + "Controls";
+  std::string messages = this->getCanvasName() + "Messages";
   if (!this->flagPlotShowJavascriptOnly) {
     out << "<canvas width='" << this->desiredHtmlWidthInPixels
     << "' height='" << this->desiredHtmlHeightInPixels << "' "
@@ -926,19 +928,17 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
     << "name='" << this->getCanvasName() << "'"
     << ">"
     << "Your browser does not support the HTML5 canvas tag.</canvas><br>";
-    std::string controls = this->getCanvasName() + "Controls";
-    std::string messages = this->getCanvasName() + "Messages";
     out << "<span name='" << controls << "'></span>";
     if (!owner.flagPlotNoControls) {
       out << "<br>";
     }
     out << "<span name='" << messages << "'></span>";
-    result[Plot::Labels::graphicsType] = "twoDimensional";
-    result[Plot::Labels::canvasName] = this->getCanvasName();
-    result[Plot::Labels::controlsName] = controls;
-    result[Plot::Labels::messagesName] = messages;
     result["noControls"] = owner.flagPlotNoControls;
   }
+  result[Plot::Labels::canvasName] = this->getCanvasName();
+  result[Plot::Labels::graphicsType] = "twoDimensional";
+  result[Plot::Labels::controlsName] = controls;
+  result[Plot::Labels::messagesName] = messages;
   result["plotUpdaters"].theType = JSData::token::tokenArray;
   for (int i = 0; i < this->boxesThatUpdateMe.size; i ++) {
     InputBox& currentBox = owner.objectContainer.userInputTextBoxesWithValues.getValueCreate(this->boxesThatUpdateMe[i]);

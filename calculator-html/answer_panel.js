@@ -6,6 +6,7 @@ const pathnames = require("./pathnames");
 const ids = require("./ids_dom_elements");
 const answerProcessing = require("./answer_processing").answerProcessing;
 const typeset = require("./math_typeset");
+const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
 
 class AnswerPanel {
   constructor(
@@ -21,6 +22,8 @@ class AnswerPanel {
     this.input = input;
     /**@type{HTMLElement|null} */
     this.element = null;
+    /**@type{HTMLElement|null} */
+    this.problemElement = null;
     /**@type{boolean} */
     this.flagForReal = false;
     if (input["forReal"] === true) {
@@ -73,8 +76,13 @@ class AnswerPanel {
   writeToElement(
     /**@type{HTMLElement} */
     element,
+    /**@type{HTMLElement} Element that contains the entire problem. 
+     * Used to update graphics scripts when the comments in the answer panel dictate it.
+     */
+    problemElement,
   ) {
     this.element = element;
+    this.problemElement = problemElement;
     this.element.textContent = "";
     this.createTable();
     this.input.equationEditorContainer = this.editorSpan;
@@ -251,10 +259,7 @@ class AnswerPanel {
     return result;
   }
 
-  submitOrPreviewAnswersCallback(outputComponent, input) {
-    if (typeof outputComponent === "string") {
-      outputComponent = document.getElementById(outputComponent);
-    }
+  submitOrPreviewAnswersCallback(input) {
     let inputParsed = miscellaneous.jsonUnescapeParse(input);
     let resultHtml = "";
     if (inputParsed.error !== undefined && inputParsed.error !== null && inputParsed.error !== "") {
@@ -279,23 +284,9 @@ class AnswerPanel {
     }
     resultHtml += answerProcessing.htmlUserFriendlyResultComparisonErrorsOnly(inputParsed);
     resultHtml += miscellaneous.htmlFromCommentsAndErrors(inputParsed);
-    outputComponent.innerHTML = resultHtml;
-    let spanVerification = this.verificationSpan;
-    let scripts = spanVerification.getElementsByTagName('script');
-    let theHead = document.getElementsByTagName('head')[0];
-    for (let i = 0; i < this.numInsertedJavascriptChildren; i++) {
-      theHead.removeChild(theHead.lastChild);
-    }
-    this.numInsertedJavascriptChildren = 0;
-    for (let i = 0; i < scripts.length; i++) {
-      let scriptChild = document.createElement('script');
-      scriptChild.innerHTML = scripts[i].innerHTML;
-      scriptChild.type = 'text/javascript';
-      theHead.appendChild(scriptChild);
-      this.numInsertedJavascriptChildren++;
-    }
-    this.javascriptInsertionAlreadyCalled = true;
-    typeset.typesetter.typesetSoft(outputComponent, "");
+    this.verificationSpan.innerHTML = resultHtml;
+    typeset.typesetter.typesetSoft(this.verificationSpan, "");
+    dynamicJavascript.bootstrapAllScripts(this.problemElement);
   }
 
   submitOrPreviewAnswers(
@@ -311,7 +302,9 @@ class AnswerPanel {
     submitRequests.submitGET({
       url: theURL,
       progress: ids.domElements.spanProgressReportGeneral,
-      callback: this.submitOrPreviewAnswersCallback.bind(this, this.verificationSpan),
+      callback: (input) => {
+        this.submitOrPreviewAnswersCallback(input);
+      }
     });
   }
 

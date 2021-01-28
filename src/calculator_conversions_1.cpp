@@ -876,7 +876,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
   output.makeZero();
   ExpressionContext theContext = polyFormE.getContext();
   for (int j = 0; j < polyForm.size(); j ++) {
-    const MonomialP& currentMon = polyForm[j];
+    const MonomialPolynomial& currentMon = polyForm[j];
     int theGenIndex = 0;
     if (!currentMon.isOneLetterFirstDegree(&theGenIndex)) {
       return calculator << "<hr>Failed to convert semisimple Lie algebra input to linear poly: "
@@ -938,7 +938,7 @@ bool CalculatorConversions::innerElementUE(
   ElementUniversalEnveloping<RationalFunction<Rational> > outputUE;
   ElementUniversalEnveloping<RationalFunction<Rational> > currentSummand;
   ElementUniversalEnveloping<RationalFunction<Rational> > currentMultiplicand;
-  MonomialP currentMultiplicandRFpartMon;
+  MonomialPolynomial currentMultiplicandRFpartMon;
   Polynomial<Rational> currentPMultiplicand;
   RationalFunction<Rational>  currentMultiplicandRFpart;
   outputUE.makeZero(owner);
@@ -954,7 +954,7 @@ bool CalculatorConversions::innerElementUE(
   ExpressionContext theContext = polyE.getContext();
   HashedList<Expression> polynomialVariables;
   for (int j = 0; j < theP.size(); j ++) {
-    const MonomialP& currentMon = theP[j];
+    const MonomialPolynomial& currentMon = theP[j];
     currentSummand.makeConstant(theP.coefficients[j], owner);
     currentMultiplicandRFpartMon.makeOne();
     for (int i = 0; i < currentMon.minimalNumberOfVariables(); i ++) {

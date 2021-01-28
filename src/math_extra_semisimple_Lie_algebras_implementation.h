@@ -230,7 +230,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::freudenthalEvalMeDominant
       return false;
     }
     if (localDetail != "") {
-      localDetails << "<br>MonomialP " << i + 1 << " computation details: " << localDetail;
+      localDetails << "<br>MonomialPolynomial " << i + 1 << " computation details: " << localDetail;
     }
     for (int j = 0; j < currentWeights.size; j ++) {
       tempMon.weightFundamentalCoordinates = this->getOwner()->weylGroup.getFundamentalCoordinatesFromSimple(currentWeights[j]);

@@ -22,7 +22,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionRemainder(
     return output.makeError("Failed to extract list of polynomials. ", calculator);
   }
   GroebnerBasisComputation<AlgebraicNumber> computation;
-  computation.polynomialOrder.monomialOrder = MonomialP::orderDefault();
+  computation.polynomialOrder.monomialOrder = MonomialPolynomial::orderDefault();
   computation.flagStoreQuotients = true;
   for (int i = 1; i < polynomials.size; i ++) {
     if (polynomials[i].isEqualToZero()) {
@@ -44,15 +44,15 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerboseGrLex(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   return CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
-    calculator, input, output, &MonomialP::orderDegreeThenLeftLargerWins()
+    calculator, input, output, &MonomialPolynomial::orderDegreeThenLeftLargerWins()
   );
 }
 
 bool CalculatorFunctionsPolynomial::polynomialDivisionVerboseGradedReverseLexicographic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  List<MonomialP>::Comparator order(
-    MonomialP::greaterThan_totalDegree_rightSmallerWins
+  List<MonomialPolynomial>::Comparator order(
+    MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins
   );
   return CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
     calculator, input, output, &order
@@ -63,8 +63,8 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexicographic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPolynomialDivisionVerboseLexicographic");
-  List<MonomialP>::Comparator order(
-    MonomialP::greaterThan_leftLargerWins
+  List<MonomialPolynomial>::Comparator order(
+    MonomialPolynomial::greaterThan_leftLargerWins
   );
   return CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
     calculator,
@@ -77,8 +77,8 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexicographic(
 bool CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexicographicOpposite(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  List<MonomialP>::Comparator order(
-    MonomialP::greaterThan_rightLargerWins
+  List<MonomialPolynomial>::Comparator order(
+    MonomialPolynomial::greaterThan_rightLargerWins
   );
   return CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
     calculator, input, output, &order
@@ -89,7 +89,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  List<MonomialP>::Comparator* monomialOrder
+  List<MonomialPolynomial>::Comparator* monomialOrder
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionVerbose");
   ExpressionContext theContext(calculator);
@@ -152,7 +152,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
   computation.flagDoLogDivision = true;
   computation.flagStoreQuotients = true;
   computation.polynomialOrder.monomialOrder.setComparison(
-    MonomialP::greaterThan_totalDegree_rightSmallerWins
+    MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins
   );
   for (int i = 2; i < polynomialsRational.size; i ++) {
     if (polynomialsRational[i].isEqualToZero()) {
@@ -255,7 +255,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionQuotient(
     return output.makeError("Failed to extract list of polynomials. ", calculator);
   }
   GroebnerBasisComputation<AlgebraicNumber> computation;
-  computation.polynomialOrder.monomialOrder = MonomialP::orderDefault();
+  computation.polynomialOrder.monomialOrder = MonomialPolynomial::orderDefault();
   computation.flagStoreQuotients = true;
   for (int i = 1; i < polynomialsRational.size; i ++) {
     if (polynomialsRational[i].isEqualToZero()) {
@@ -541,7 +541,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
     this->allMonomials.addOnTopNoRepetition(this->owner->theQuotients[i].monomials);
   }
   if (this->owner->remainderDivision.isEqualToZero()) {
-    MonomialP constMon;
+    MonomialPolynomial constMon;
     constMon.makeOne();
     this->allMonomials.addOnTopNoRepetition(constMon);
   }
@@ -734,7 +734,7 @@ std::string PolynomialDivisionReport<Coefficient>::getSpacedMonomialsWithHighlig
     }
     std::stringstream highlightHeadStream;
     std::stringstream highlightTailStream;
-    MonomialP tempM;
+    MonomialPolynomial tempM;
     tempM.makeOne();
     int monIndex = this->allMonomials.getIndex(tempM);
     if (slidesAdditionalHighlight != nullptr && monIndex != - 1) {
@@ -874,7 +874,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     this->uncoverMonsFinalRemainder[theMonIndex] = currentSlideNumber;
     currentSlideNumber ++;
   }
-  MonomialP constMon;
+  MonomialPolynomial constMon;
   constMon.makeOne();
   int zeroMonIndex = this->allMonomials.getIndex(constMon);
   if (this->intermediateRemainders[remainderIndex].isEqualToZero()) {
@@ -898,14 +898,14 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   Polynomial<Coefficient>& currentRemainder = this->intermediateRemainders[remainderIndex];
   int indexCurrentDivisor = this->intermediateSelectedDivisors[remainderIndex];
   Polynomial<Coefficient>& currentDivisor = basis[indexCurrentDivisor].element;
-  MonomialP divisorLeadingMonomial;
+  MonomialPolynomial divisorLeadingMonomial;
   int indexCurrentDivisorLeadingMoN = currentDivisor.getIndexLeadingMonomial(
     &divisorLeadingMonomial, nullptr, &this->owner->polynomialOrder.monomialOrder
   );
   int indexCurrentDivisorLeadingMonInAllMons = this->allMonomials.getIndex(
     divisorLeadingMonomial
   );
-  MonomialP maxMonCurrentRemainder;
+  MonomialPolynomial maxMonCurrentRemainder;
   Coefficient leadingCFCurrentRemainder;
   currentRemainder.getIndexLeadingMonomial(
     &maxMonCurrentRemainder, &leadingCFCurrentRemainder, &this->owner->polynomialOrder.monomialOrder
@@ -1087,7 +1087,7 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
   }
   out << "<br>Relations: ";
   for (int i = 0; i < relations.size; i ++) {
-    relations[i].scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+    relations[i].scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
     out << "<br>" << relations[i].toString(&theFormat);
   }
   return output.assignValue(out.str(), calculator);
@@ -1279,7 +1279,7 @@ bool CalculatorFunctionsPolynomial::groebner(
     );
   }
   for (int i = 0; i < inputVector.size; i ++) {
-    inputVector[i].scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+    inputVector[i].scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   }
   GroebnerBasisComputation<AlgebraicNumber> theGroebnerComputation;
   theContext.getFormat(theGroebnerComputation.theFormat);
@@ -1299,21 +1299,21 @@ bool CalculatorFunctionsPolynomial::groebner(
   List<Polynomial<AlgebraicNumber> > outputGroebner, outputGroebner2;
   outputGroebner = inputVector;
   outputGroebner2 = inputVector;
-  if (order == MonomialP::Order::gradedLexicographic) {
+  if (order == MonomialPolynomial::Order::gradedLexicographic) {
     theGroebnerComputation.polynomialOrder.monomialOrder.setComparison(
-      MonomialP::greaterThan_totalDegree_leftLargerWins
+      MonomialPolynomial::greaterThan_totalDegree_leftLargerWins
     );
-  } else if (order == MonomialP::Order::gradedReverseLexicographic) {
+  } else if (order == MonomialPolynomial::Order::gradedReverseLexicographic) {
     theGroebnerComputation.polynomialOrder.monomialOrder.setComparison(
-      MonomialP::greaterThan_totalDegree_rightSmallerWins
+      MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins
     );
-  } else if (order == MonomialP::Order::lexicographicOpposite) {
+  } else if (order == MonomialPolynomial::Order::lexicographicOpposite) {
     theGroebnerComputation.polynomialOrder.monomialOrder.setComparison(
-      MonomialP::greaterThan_rightLargerWins
+      MonomialPolynomial::greaterThan_rightLargerWins
     );
-  } else if (order == MonomialP::Order::lexicographic){
+  } else if (order == MonomialPolynomial::Order::lexicographic){
     theGroebnerComputation.polynomialOrder.monomialOrder.setComparison(
-      MonomialP::greaterThan_leftLargerWins
+      MonomialPolynomial::greaterThan_leftLargerWins
     );
   } else {
     global.fatal << "Unexpected order value: " << order << global.fatal;

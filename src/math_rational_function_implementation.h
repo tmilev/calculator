@@ -304,7 +304,7 @@ void RationalFunction<Coefficient>::greatestCommonDivisor(
     leastCommonMultipleBuffer,
     output,
     remainderBuffer,
-    &MonomialP::orderForGreatestCommonDivisor()
+    &MonomialPolynomial::orderForGreatestCommonDivisor()
   );
   if (!remainderBuffer.isEqualToZero() || output.isEqualToZero()) {
     global.fatal
@@ -320,7 +320,7 @@ void RationalFunction<Coefficient>::greatestCommonDivisor(
     << ", which is imposible."
     << global.fatal;
   }
-  output.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  output.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
 }
 
 template<class Coefficient>
@@ -403,7 +403,7 @@ void RationalFunction<Coefficient>::leastCommonMultiple(
 }
 
 template<class Coefficient>
-void RationalFunction<Coefficient>::operator*=(const MonomialP& other) {
+void RationalFunction<Coefficient>::operator*=(const MonomialPolynomial& other) {
   Polynomial<Rational> otherP;
   otherP.makeZero();
   otherP.addMonomial(other, 1);
@@ -434,7 +434,7 @@ void RationalFunction<Coefficient>::operator*=(const Polynomial<Coefficient>& ot
   }
   RationalFunction<Coefficient>::greatestCommonDivisor(this->denominator.getElement(), other, commonDivisor);
   this->numerator.getElement() *= other;
-  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderForGreatestCommonDivisor();
+  List<MonomialPolynomial>::Comparator* monomialOrder = &MonomialPolynomial::orderForGreatestCommonDivisor();
   this->numerator.getElement().divideBy(commonDivisor, theResult, tempP, monomialOrder);
   if (!tempP.isEqualToZero()) {
     global.fatal << "Polynomial equal to zero not allowed here. " << global.fatal;
@@ -533,7 +533,7 @@ void RationalFunction<Coefficient>::operator*=(const RationalFunction<Coefficien
   }
   RationalFunction<Coefficient>::greatestCommonDivisor(other.denominator.getElementConst(), this->numerator.getElement(), theGCD1);
   RationalFunction<Coefficient>::greatestCommonDivisor(this->denominator.getElement(), other.numerator.getElementConst(), theGCD2);
-  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderForGreatestCommonDivisor();
+  List<MonomialPolynomial>::Comparator* monomialOrder = &MonomialPolynomial::orderForGreatestCommonDivisor();
   this->numerator.getElement().divideBy(theGCD1, tempP1, tempP2, monomialOrder);
   this->numerator.getElement() = tempP1;
   if (!tempP2.isEqualToZero()) {
@@ -611,10 +611,10 @@ void RationalFunction<Coefficient>::operator+=(const RationalFunction<Coefficien
 template<class Coefficient>
 void RationalFunction<Coefficient>::simplify() {
   MacroRegisterFunctionWithName("RationalFunction::simplify");
-  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderForGreatestCommonDivisor();
+  List<MonomialPolynomial>::Comparator* monomialOrder = &MonomialPolynomial::orderForGreatestCommonDivisor();
   if (this->expressionType == this->typeRationalFunction) {
     if (!this->numerator.getElement().isEqualToZero()) {
-      Polynomial<Coefficient> greatestCommonDivisor, quotientByGCD, remainderByGCD;
+      Polynomial<Coefficient> greatestCommonDivisor, quotientByGreatestCommonDivisor, remainderByGCD;
       this->greatestCommonDivisor(this->numerator.getElement(), this->denominator.getElement(), greatestCommonDivisor);
       if (greatestCommonDivisor.isEqualToZero()) {
         global.fatal << "This is a programing error: "
@@ -622,10 +622,10 @@ void RationalFunction<Coefficient>::simplify() {
         << " and " << this->denominator.getElement().toString()
         << " I got 0, which is impossible. " << global.fatal;
       }
-      this->numerator.getElement().divideBy(greatestCommonDivisor, quotientByGCD, remainderByGCD, monomialOrder);
-      this->numerator.getElement() = quotientByGCD;
-      this->denominator.getElement().divideBy(greatestCommonDivisor, quotientByGCD, remainderByGCD, monomialOrder);
-      this->denominator.getElement() = quotientByGCD;
+      this->numerator.getElement().divideBy(greatestCommonDivisor, quotientByGreatestCommonDivisor, remainderByGCD, monomialOrder);
+      this->numerator.getElement() = quotientByGreatestCommonDivisor;
+      this->denominator.getElement().divideBy(greatestCommonDivisor, quotientByGreatestCommonDivisor, remainderByGCD, monomialOrder);
+      this->denominator.getElement() = quotientByGreatestCommonDivisor;
     }
   }
   this->reduceMemory();
@@ -644,14 +644,14 @@ Rational RationalFunction<Coefficient>::scaleToIntegral() {
     return result;
   }
   if (this->expressionType == this->typePolynomial) {
-    return this->numerator.getElement().scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+    return this->numerator.getElement().scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   }
   if (this->expressionType != this->typeRationalFunction) {
     return Rational::one();
   }
   Rational result;
-  result = this->numerator.getElement().scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
-  result /= this->denominator.getElement().scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  result = this->numerator.getElement().scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
+  result /= this->denominator.getElement().scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   return result;
 }
 
@@ -660,8 +660,8 @@ void RationalFunction<Coefficient>::simplifyLeadingCoefficientOnly() {
   if (this->expressionType != this->typeRationalFunction) {
     return;
   }
-  Coefficient scaleNumerator = this->numerator.getElement().scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
-  Coefficient scaleDenominator = this->denominator.getElement().scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  Coefficient scaleNumerator = this->numerator.getElement().scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
+  Coefficient scaleDenominator = this->denominator.getElement().scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   Coefficient scale = scaleDenominator / scaleNumerator;
   this->denominator.getElement() *= scale.getDenominator();
   this->numerator.getElement() *= scale.getNumerator();
@@ -703,8 +703,8 @@ RationalFunction<Coefficient> RationalFunction<Coefficient>::scaleNormalizeIndex
     RationalFunction<Rational>& current = input[i];
     current.getNumerator(currentNumerator);
     current.getDenominator(currentDenominator);
-    scale = currentNumerator.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
-    scale /= currentDenominator.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+    scale = currentNumerator.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
+    scale /= currentDenominator.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
     scales.addOnTop(scale);
   }
   LargeIntegerUnsigned numeratorContentGreatestCommonDivisor = scales[0].getNumerator().value;
@@ -743,7 +743,7 @@ bool RationalFunction<Coefficient>::greatestCommonDivisorQuick(
     global.fatal << "Greatest common divisor involving zero not allowed. " << global.fatal;
   }
   Polynomial<Coefficient> quotient, remainder;
-  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
+  List<MonomialPolynomial>::Comparator* monomialOrder = &MonomialPolynomial::orderDefault();
   if (left.totalDegree() > right.totalDegree()) {
     left.divideBy(right, quotient, remainder, monomialOrder);
     if (remainder.isEqualToZero()) {
@@ -1186,7 +1186,7 @@ bool RationalFunction<Coefficient>::getRelations(
   }
   GroebnerBasisComputation<Rational> theComputation;
   theComputation.polynomialOrder.monomialOrder.setComparison(
-    MonomialP::greaterThan_leftLargerWins
+    MonomialPolynomial::greaterThan_leftLargerWins
   );
   if (!theComputation.transformToReducedGroebnerBasis(theGroebnerBasis)) {
     comments << "Failed to find Groebner basis";

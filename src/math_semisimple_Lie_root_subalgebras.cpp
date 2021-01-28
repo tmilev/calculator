@@ -2452,7 +2452,7 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWRTSubalgebra(
 
   int halfNumberVariables = rootsInPlay.size;
   int numberVariables = halfNumberVariables*2;
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   tempM.makeOne();
   Matrix<Rational> coeffsF;
   coeffsF.initialize(1, halfNumberVariables);
@@ -2506,7 +2506,7 @@ void SlTwoSubalgebra::initHEFSystemFromECoeffs(
 ) {
   MacroRegisterFunctionWithName("SlTwoSubalgebra::initHEFSystemFromECoeffs");
   Vector<Rational> tempRoot;
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   Rational tempRat;
   HashedList<Vector<Rational> > RootSpacesThatNeedToBeKilled;
   RootSpacesThatNeedToBeKilled.setExpectedSize(this->getOwnerWeyl().rootSystem.size);

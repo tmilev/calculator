@@ -83,7 +83,7 @@ void Test::run() {
     WebAPIResponse::Test::all();
   }
   if (this->shouldTest(Test::Suites::polynomial)) {
-    MonomialP::Test::all();
+    MonomialPolynomial::Test::all();
     Polynomial<Rational>::Test::all();
   }
   if (

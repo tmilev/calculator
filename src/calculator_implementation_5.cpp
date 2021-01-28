@@ -1266,7 +1266,7 @@ bool CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT(
   }
   Polynomial<Rational> polynomial;
   for (int i = thePowers.size() - 1; i >= 1; i --) {
-    MonomialP oneVariable(0, 1);
+    MonomialPolynomial oneVariable(0, 1);
     polynomial *= oneVariable;
     Rational coefficient;
     if (!thePowers[i].isRational(&coefficient)) {

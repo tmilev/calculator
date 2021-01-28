@@ -2752,7 +2752,7 @@ public:
   template <class Coefficient>
   static bool functionExpressionFromPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerExpressionFromUE(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerExpressionFrom(Calculator& calculator, const MonomialP& input, Expression& output);
+  static bool innerExpressionFrom(Calculator& calculator, const MonomialPolynomial& input, Expression& output);
   // TODO: move to calculator conversions.
   template <class theType>
   static bool convertToTypeUsingFunction(
@@ -3345,8 +3345,8 @@ bool CalculatorConversions::expressionFromRationalFunction(
   input.getDenominator(denominator);
   Polynomial<Coefficient> numeratorRescaled = numerator;
   Polynomial<Coefficient> denominatorRescaled = denominator;
-  Coefficient topMultiple = numeratorRescaled.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
-  Coefficient bottomMultiple = denominatorRescaled.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  Coefficient topMultiple = numeratorRescaled.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
+  Coefficient bottomMultiple = denominatorRescaled.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   Coefficient multipleTopBottom = bottomMultiple / topMultiple;
   numeratorRescaled *= multipleTopBottom.getNumerator();
   denominatorRescaled *= multipleTopBottom.getDenominator();

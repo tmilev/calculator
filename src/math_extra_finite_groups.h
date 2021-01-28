@@ -2404,7 +2404,7 @@ template <class Coefficient>
 std::string UDPolynomial<Coefficient>::toString(FormatExpressions* theFormat) const {
   Polynomial<Coefficient> tempP;
   tempP.makeZero();
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   for (int i = 0; i < this->data.size; i ++) {
     tempM.makeEi(0, i, 1);
     tempP.addMonomial(tempM, this->data[i]);

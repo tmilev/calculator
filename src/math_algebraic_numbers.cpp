@@ -357,7 +357,7 @@ bool AlgebraicClosureRationals::reduceMe(
   }
   for (int i = smallestFactorDegree; i < theDim; i ++) {
     zToTheNth.makeMonomial(0, i, 1);
-    zToTheNth.divideBy(smallestFactor, tempP, remainderAfterReduction, &MonomialP::orderDefault());
+    zToTheNth.divideBy(smallestFactor, tempP, remainderAfterReduction, &MonomialPolynomial::orderDefault());
     for (int j = 0; j < remainderAfterReduction.size(); j ++) {
       int theIndex = - 1;
       remainderAfterReduction[j](0).isSmallInteger(&theIndex);
@@ -377,7 +377,7 @@ bool AlgebraicClosureRationals::reduceMe(
       generatorProjected.addMonomial(termBelowMainDiagonal, 1);
     }
     termInLastColumn.makeEij(i, smallestFactorDegree - 1);
-    Rational coefficientLastColumn = - smallestFactor.getCoefficientOf(MonomialP(0, i));
+    Rational coefficientLastColumn = - smallestFactor.getCoefficientOf(MonomialPolynomial(0, i));
     coefficientLastColumn /= leadingCoefficient;
     generatorProjected.addMonomial(termInLastColumn, coefficientLastColumn);
     if (coefficientLastColumn != 0 && generatorProjected.isEqualToZero()) {
@@ -679,7 +679,7 @@ bool AlgebraicClosureRationals::adjoinRootQuadraticPolynomialToQuadraticRadicalE
       minPoly.addMonomial(algNumPoly[i], currentCF);
     }
   }
-  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
+  List<MonomialPolynomial>::Comparator* monomialOrder = &MonomialPolynomial::orderDefault();
   minPoly /= minPoly.getLeadingCoefficient(monomialOrder);
   minPoly.getCoefficientInFrontOfLinearTermVariableIndex(0, theLinearTermCFdividedByTwo);
   theLinearTermCFdividedByTwo /= 2;
@@ -738,7 +738,7 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   }
   Polynomial<AlgebraicNumber> minPoly;
   this->convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail(thePoly, minPoly);
-  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
+  List<MonomialPolynomial>::Comparator* monomialOrder = &MonomialPolynomial::orderDefault();
   AlgebraicNumber leadingCoefficient = minPoly.getLeadingCoefficient(monomialOrder);
   minPoly /= leadingCoefficient;
   AlgebraicClosureRationals backUpCopy;
@@ -778,7 +778,7 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
     }
   }
   Polynomial<AlgebraicNumber> minusMinimalPolynomialMinusMaximalMonomial = minPoly;
-  MonomialP leadingMonomial;
+  MonomialPolynomial leadingMonomial;
   AlgebraicNumber leadingCoefficientModified;
   minusMinimalPolynomialMinusMaximalMonomial.getIndexLeadingMonomial(
     &leadingMonomial, &leadingCoefficientModified, monomialOrder
@@ -789,7 +789,7 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   MatrixTensor<Rational> currentCoeffMatForm;
   for (int i = 0; i < minusMinimalPolynomialMinusMaximalMonomial.size(); i ++) {
     AlgebraicNumber& currentCoeff = minusMinimalPolynomialMinusMaximalMonomial.coefficients[i];
-    const MonomialP& currentMon = minusMinimalPolynomialMinusMaximalMonomial[i];
+    const MonomialPolynomial& currentMon = minusMinimalPolynomialMinusMaximalMonomial[i];
     this->getMultiplicationBy(currentCoeff, currentCoeffMatForm);
     for (int j = 0; j < currentCoeffMatForm.size(); j ++) {
       int relRowIndex = currentCoeffMatForm[j].vIndex;
@@ -1261,7 +1261,7 @@ bool AlgebraicNumber::radicalMeDefault(
   minusOne.assignRational(- 1, this->owner);
   Polynomial<AlgebraicNumber> thePolynomial;
   thePolynomial.addConstant(*this * minusOne);
-  MonomialP leadingMonomial;
+  MonomialPolynomial leadingMonomial;
   leadingMonomial.makeEi(0, radical);
   thePolynomial.addMonomial(leadingMonomial, one);
   if (!this->owner->adjoinRootMinimalPolynomial(
@@ -1701,7 +1701,7 @@ void ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
   MacroRegisterFunctionWithName("ElementZmodP::convertModuloIntegerAfterScalingToIntegral");
   Polynomial<Rational> rescaled;
   rescaled = input;
-  rescaled.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  rescaled.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   output.setExpectedSize(input.size());
   ElementZmodP theCF;
   theCF.modulus = newModulo;

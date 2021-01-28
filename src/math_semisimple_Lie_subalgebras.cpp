@@ -134,7 +134,7 @@ bool SemisimpleLieAlgebra::attemptFindingHEF(
   }
   system.maximumSerreSystemComputationsPreferred = 4001;
   system.groebner.maximumPolynomialComputations = 2001;
-  system.groebner.polynomialOrder.monomialOrder.setComparison(MonomialP::greaterThan_rightLargerWins);
+  system.groebner.polynomialOrder.monomialOrder.setComparison(MonomialPolynomial::greaterThan_rightLargerWins);
   system.solveSerreLikeSystem(theSystem);
   if (!system.flagSystemSolvedOverBaseField) {
     if (logStream != nullptr) {
@@ -4117,7 +4117,7 @@ bool CandidateSemisimpleSubalgebra::attemptToSolveSystem() {
   << " I need to solve the following system." << this->toStringSystemPart2();
   theReport.report(reportstream.str());
   PolynomialSystem<AlgebraicNumber> system;
-  system.groebner.polynomialOrder.monomialOrder.setComparison(MonomialP::greaterThan_totalDegree_rightSmallerWins);
+  system.groebner.polynomialOrder.monomialOrder.setComparison(MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins);
   for (int i = 500; i < 200000; i += 100000) {
     system.groebner.maximumPolynomialComputations = i;
     system.maximumSerreSystemComputationsPreferred = i;
@@ -4205,7 +4205,7 @@ void CandidateSemisimpleSubalgebra::addToSystem(const ElementSemisimpleLieAlgebr
   Polynomial<AlgebraicNumber> thePoly;
   for (int i = 0; i < elementThatMustVanish.size(); i ++) {
     thePoly = elementThatMustVanish.coefficients[i];
-    thePoly.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+    thePoly.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
     this->theSystemToSolve.addOnTopNoRepetition(thePoly);
   }
 }

@@ -90,7 +90,7 @@ public:
   void operator+=(int theConstant);
   void operator*=(const RationalFunction<Coefficient>& other);
   void operator*=(const Polynomial<Coefficient>& other);
-  void operator*=(const MonomialP& other);
+  void operator*=(const MonomialPolynomial& other);
   void operator*=(const Coefficient& other);
   void operator*=(int other);
   bool operator<(const RationalFunction<Rational>& other) const;

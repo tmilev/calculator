@@ -606,7 +606,7 @@ public:
         m *= - 1;
       }
     }
-    MonomialP x;
+    MonomialPolynomial x;
     x.makeEi(0);
     p.addMonomial(x, 1);
     p.addConstant(- m);

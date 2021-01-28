@@ -954,7 +954,7 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
             latexTable2 << " $v_{\\lambda," <<  theIndex- eigenIndexcounter - 1 << "} $&";
             Polynomial<Rational> tempP;
             theG2B3Data.theShapovalovProducts[eigenIndexcounter].getNumerator(tempP);
-            tempP.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+            tempP.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
             latexTable2 << "$\\begin{array}{l}" << tempP.toString(&theG2B3Data.theFormat) << "\\end{array}$ & ";
             if (tempP.findOneVariableRationalRoots(tempList)) {
               tempList2.addOnTopNoRepetition(tempList);
@@ -1611,7 +1611,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     if (theNumVars == 1) {
       scale = theElt.scaleNormalizeLeadingMonomial(nullptr);
       scale.getNumerator(tmpGCD);
-      tmpGCD.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+      tmpGCD.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
       out << "<td>" << HtmlRoutines::getMathNoDisplay(tmpGCD.toString(&tempFormat)) << "</td>";
     }
     out << "<td>" << HtmlRoutines::getMathNoDisplay(theElt.toString(&tempFormat)) << "</td>";

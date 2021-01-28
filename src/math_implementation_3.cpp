@@ -2633,7 +2633,7 @@ FormatExpressions::getMonomialOrder<MonomialWrapper<std::string, MathRoutines::h
 }
 
 template<>
-List<MonomialP>::Comparator* FormatExpressions::getMonomialOrder<MonomialP>() {
+List<MonomialPolynomial>::Comparator* FormatExpressions::getMonomialOrder<MonomialPolynomial>() {
   return &this->monomialOrder;
 }
 
@@ -2744,7 +2744,7 @@ FormatExpressions::FormatExpressions() {
   this->flagSuppressModP = false;
   this->maximumMatrixDisplayedRows = 20;
   this->maximumMatrixLineLength = 20;
-  this->monomialOrder.leftGreaterThanRight = MonomialP::orderDefault().leftGreaterThanRight;
+  this->monomialOrder.leftGreaterThanRight = MonomialPolynomial::orderDefault().leftGreaterThanRight;
 }
 
 std::string FormatExpressions::getPolynomialLetter(int index) const {
@@ -3150,7 +3150,7 @@ bool PartFraction::reduceMeOnce(
     for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
       for (int j = 0; j < this->denominator[IndicesNonZeroMults[i]].multiplicities.size; j ++) {
         this->denominator[IndicesNonZeroMults[i]].GetPolynomialDenominator(denominator, j, startingVectors[IndicesNonZeroMults[i]]);
-        outputCoeff.divideBy(denominator, quotient, remainderDivision, &MonomialP::orderDefault());
+        outputCoeff.divideBy(denominator, quotient, remainderDivision, &MonomialPolynomial::orderDefault());
         if (remainderDivision.isEqualToZero()) {
           this->decreasePowerOneFraction(IndicesNonZeroMults[i], 1);
           outputCoeff = quotient;
@@ -3172,7 +3172,7 @@ void PartFraction::getNElongationPolynomialWithMonomialContribution(
   Polynomial<LargeInteger>& output,
   int theDimension
 ) {
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   tempM.makeOne();
   for (int i = 0; i < theIndex; i ++) {
     int tempI = theSelectedIndices[i];
@@ -3271,7 +3271,7 @@ void PartFraction::applySzenesVergneFormula(
   PartFraction tempFrac;
   tempFrac.RelevanceIsComputed = false;
   Polynomial<LargeInteger> tempP, CoefficientBuffer;
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   output.makeZero();
   int theDim = startingVectors[0].size;
   CoefficientBuffer.makeOne();
@@ -3355,7 +3355,7 @@ void PartFraction::computeIndicesNonZeroMultiplicities() {
 
 void PartFraction::getAlphaMinusNBetaPoly(PartialFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInteger>& output) {
   output.makeZero();
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   tempM.makeOne();
   for (int i = 0; i < n; i ++) {
     for (int j = 0; j < owner.AmbientDimension; j ++) {
@@ -3374,7 +3374,7 @@ void PartFraction::getNElongationPolynomial(
   int theDimension
 ) {
   output.makeZero();
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   tempM.makeOne();
   if (LengthOfGeometricSeries > 0) {
     for (int i = 0; i < LengthOfGeometricSeries; i ++) {
@@ -3396,7 +3396,7 @@ void PartFraction::getNElongationPolynomial(
 }
 
 void PartFraction::makePolynomialFromOneNormal(
-  Vector<Rational>& normal, const MonomialP& shiftRational, int theMult, Polynomial<Rational>& output
+  Vector<Rational>& normal, const MonomialPolynomial& shiftRational, int theMult, Polynomial<Rational>& output
 ) {
   output.makeOne();
   if (theMult == 1) {
@@ -3750,7 +3750,7 @@ void PartFraction::reduceMonomialByMonomial(PartialFractions& owner, int myIndex
   Matrix<Rational> & matColumn = global.matOneColumn.getElement();
   Matrix<Rational> & matLinComb = global.matReduceMonomialByMonomial2.getElement();
   Selection tempSel;
-  MonomialP tempMon;
+  MonomialPolynomial tempMon;
   Vector<Rational> tempRoot;
   tempMat.initialize(owner.AmbientDimension, (int) this->IndicesNonZeroMults.size);
   for (int i = 0; i < this->IndicesNonZeroMults.size; i ++)
@@ -3856,7 +3856,7 @@ void PartFraction::reduceMonomialByMonomialModifyOneMonomial(
   PartialFractions& Accum,
   SelectionWithDifferentMaxMultiplicities& thePowers,
   List<int>& thePowersSigned,
-  MonomialP& input,
+  MonomialPolynomial& input,
   LargeInteger& inputCoeff
 ) {
   (void) Accum; (void) thePowers; (void) thePowersSigned; (void) input; (void) inputCoeff;
@@ -3907,7 +3907,7 @@ void PartFraction::getPolyReduceMonomialByMonomial(
     output.makeOne();
     return;
   }
-  MonomialP tempMon;
+  MonomialPolynomial tempMon;
   tempMon.makeOne();
   output.makeZero();
   LargeInteger theCoeff = 1;
@@ -4368,7 +4368,7 @@ void OnePartialFractionDenominator::GetPolynomialDenominator(
   if (MultiplicityIndex >= this->multiplicities.size) {
     global.fatal << "Bad multiplicity. " << global.fatal;
   }
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   output.makeOne();
   tempM.makeOne();
   for (int i = 0; i < theExponent.size; i ++) {
@@ -8428,7 +8428,7 @@ void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
     return;
   }
   Accum.makeZero();
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   for (int i = 0; i < this->size; i ++) {
     if (this->indexGreaterThanIndex(i, x) && this->indexGEQIndex(y, i)) {
       tempP1.makeZero();
@@ -9192,7 +9192,7 @@ std::string QuasiPolynomial::toString(bool useHtml, bool useLatex, FormatExpress
 }
 
 void QuasiPolynomial::makeFromPolynomialShiftAndLattice(
-  const Polynomial<Rational>& inputPoly, const MonomialP& theShift, const Lattice& theLattice
+  const Polynomial<Rational>& inputPoly, const MonomialPolynomial& theShift, const Lattice& theLattice
 ) {
   this->AmbientLatticeReduced = theLattice;
   this->latticeShifts.setSize(1);
@@ -9261,7 +9261,7 @@ void PartFraction::getRootsFromDenominator(PartialFractions& owner, Vectors<Rati
 }
 
 void PartFraction::computePolynomialCorrespondingToOneMonomial(
-  QuasiPolynomial& outputQP, const MonomialP& theMon, Vectors<Rational>& normals, Lattice& theLattice
+  QuasiPolynomial& outputQP, const MonomialPolynomial& theMon, Vectors<Rational>& normals, Lattice& theLattice
 ) const {
   Polynomial<Rational> tempP, outputPolyPart;
   outputPolyPart.makeOne();
@@ -9750,7 +9750,7 @@ bool Cone::getRootFromLPolynomialConstantTermGoesToLastVariable(Polynomial<Ratio
   output.makeZero(inputLPoly.minimalNumberOfVariables() + 1);
   for (int i = 0; i < inputLPoly.size(); i ++) {
     int theIndex;
-    if (inputLPoly[i].::MonomialP::isOneLetterFirstDegree(&theIndex)) {
+    if (inputLPoly[i].::MonomialPolynomial::isOneLetterFirstDegree(&theIndex)) {
       output[theIndex] = inputLPoly.coefficients[i];
     } else {
       *output.lastObject() = inputLPoly.coefficients[i];
@@ -10036,7 +10036,7 @@ bool SlTwoInSlN::computeInvariantsOfDegree(
   Polynomial<Rational> basisMonsZeroWeight, basisMonsAll;
   basisMonsZeroWeight.makeZero();
   basisMonsAll.makeZero();
-  MonomialP theMon;
+  MonomialPolynomial theMon;
   theMon.makeOne();
   Vector<Rational> theWeight;
   Vector<Rational> theCartanAction;

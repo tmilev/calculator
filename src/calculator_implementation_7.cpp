@@ -1212,7 +1212,7 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   polynomials = polynomialsRational;
   system.groebner.maximumPolynomialComputations = upperLimit;
   system.maximumSerreSystemComputationsPreferred = upperLimit;
-  system.groebner.polynomialOrder.monomialOrder = MonomialP::orderDefault();
+  system.groebner.polynomialOrder.monomialOrder = MonomialPolynomial::orderDefault();
   system.theAlgebraicClosure = &calculator.objectContainer.theAlgebraicClosure;
   system.flagTryDirectlySolutionOverAlgebraicClosure = startWithAlgebraicClosure;
   global.theDefaultFormat.getElement() = system.groebner.theFormat;
@@ -1377,7 +1377,7 @@ void Polynomial<Coefficient>::getPolynomialWithPolynomialCoefficient(
     << "selects the wrong number of variables. " << global.fatal;
   }
   output.makeZero();
-  MonomialP coeffPart, polyPart;
+  MonomialPolynomial coeffPart, polyPart;
   Polynomial<Coefficient> currentCF;
   for (int i = 0; i < this->size(); i ++) {
     coeffPart.makeOne();
@@ -1496,7 +1496,7 @@ bool IntegralRationalFunctionComputation::preparePartialFractionExpressionSumman
   this->thePFSummands.setSize(0);
   Polynomial<AlgebraicNumber> denominatorRescaled, numeratorRescaled;
   AlgebraicNumber currentCoefficient, numScale;
-  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
+  List<MonomialPolynomial>::Comparator* monomialOrder = &MonomialPolynomial::orderDefault();
   for (int i = 0; i < this->theNumerators.size; i ++) {
     for (int j = 0; j < this->theNumerators[i].size; j ++) {
       if (this->theNumerators[i][j].isEqualToZero()) {
@@ -1568,7 +1568,7 @@ bool IntegralRationalFunctionComputation::integrateRationalFunction() {
   this->theIntegralSummands.setSize(0);
   Polynomial<AlgebraicNumber> denRescaled, numRescaled;
   AlgebraicNumber currentCoefficient, numScale;
-  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
+  List<MonomialPolynomial>::Comparator* monomialOrder = &MonomialPolynomial::orderDefault();
   for (int i = 0; i < this->theNumerators.size; i ++) {
     for (int j = 0; j < this->theNumerators[i].size; j ++) {
       if (this->theNumerators[i][j].isEqualToZero()) {
@@ -1718,7 +1718,7 @@ void IntegralRationalFunctionComputation::prepareNumerators() {
   this->remainderRescaledAlgebraic /= additionalMultiple;
   this->numberOfSystemVariables = 0;
   Polynomial<AlgebraicNumber> currentSummand;
-  MonomialP currentMon;
+  MonomialPolynomial currentMon;
   this->thePolyThatMustVanish.makeZero();
   this->thePolyThatMustVanish -= remainderRescaledAlgebraic;
   this->theNumerators.setSize(this->theDenominatorFactorsWithMults.size());
@@ -1838,7 +1838,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
   }
   this->theRF.getDenominator(this->theDen);
   this->theRF.getNumerator(this->theNum);
-  this->theNum *= this->theDen.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  this->theNum *= this->theDen.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationKronecker> factorization;
   if (!factorization.factor(
     this->theDen,
@@ -1875,7 +1875,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     << "degree greater than 2. I surrender. ";
     return false;
   }
-  List<MonomialP>::Comparator monomialOrder = MonomialP::orderDefault();
+  List<MonomialPolynomial>::Comparator monomialOrder = MonomialPolynomial::orderDefault();
   this->currentFormaT.flagUseFrac = true;
   this->theNum.divideBy(
     this->theDen,
@@ -1896,7 +1896,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     GroebnerBasisComputation<Rational> computation;
     computation.flagDoLogDivision = true;
     computation.flagStoreQuotients = true;
-    computation.polynomialOrder.monomialOrder = MonomialP::orderDefault();
+    computation.polynomialOrder.monomialOrder = MonomialPolynomial::orderDefault();
     computation.addBasisElementNoReduction(this->theDen);
     computation.theFormat = this->currentFormaT;
     computation.polynomialOrder.monomialOrder = monomialOrder;
@@ -1946,8 +1946,8 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
       return false;
     }
     theDiscriminantSqrt.checkConsistency();
-    AlgebraicNumber a = currentSecondDegreePoly.getCoefficientOf(MonomialP(0, 2));
-    AlgebraicNumber b = currentSecondDegreePoly.getCoefficientOf(MonomialP(0, 1));
+    AlgebraicNumber a = currentSecondDegreePoly.getCoefficientOf(MonomialPolynomial(0, 2));
+    AlgebraicNumber b = currentSecondDegreePoly.getCoefficientOf(MonomialPolynomial(0, 1));
     a.checkConsistency();
     b.checkConsistency();
     currentLinPoly.makeMonomial(0, 1);
@@ -4508,7 +4508,7 @@ bool CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM(
   newVarE = calculator.getNewAtom();
   newResultE = calculator.getNewAtom();
   for (int i = 0; i < theTrigPoly.size(); i ++) {
-    const MonomialP& currentMon = theTrigPoly[i];
+    const MonomialPolynomial& currentMon = theTrigPoly[i];
     int powerSine = - 1, powerCosine = - 1;
     if (!currentMon(0).isSmallInteger(&powerSine) || !currentMon(1).isSmallInteger(&powerCosine)) {
       return false;
@@ -4645,7 +4645,7 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
   newVarE = calculator.getNewAtom();
   newResultE = calculator.getNewAtom();
   for (int i = 0; i < theTrigPoly.size(); i ++) {
-    const MonomialP& currentMon = theTrigPoly[i];
+    const MonomialPolynomial& currentMon = theTrigPoly[i];
     int powerTan = - 1, powerSec = - 1;
     if (!currentMon(0).isSmallInteger(&powerTan) || !currentMon(1).isSmallInteger(&powerSec)) {
       return false;

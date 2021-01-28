@@ -12,7 +12,7 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    List<MonomialP>::Comparator* monomialOrder
+    List<MonomialPolynomial>::Comparator* monomialOrder
   );
   static bool polynomialDivisionVerboseGrLex(Calculator& calculator, const Expression& input, Expression& output);
   static bool polynomialDivisionVerboseGradedReverseLexicographic(Calculator& calculator, const Expression& input, Expression& output);
@@ -74,19 +74,19 @@ public:
     bool doGCD
   );
   static bool groebnerGradedLexicographic(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorFunctionsPolynomial::groebner(calculator, input, output, MonomialP::Order::gradedLexicographic);
+    return CalculatorFunctionsPolynomial::groebner(calculator, input, output, MonomialPolynomial::Order::gradedLexicographic);
   }
   static bool groebnerGradedReverseLexicographic(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorFunctionsPolynomial::groebner(calculator, input, output, MonomialP::Order::gradedReverseLexicographic);
+    return CalculatorFunctionsPolynomial::groebner(calculator, input, output, MonomialPolynomial::Order::gradedReverseLexicographic);
   }
   static bool groebnerLexicographic(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorFunctionsPolynomial::groebner(calculator, input, output, MonomialP::Order::lexicographic);
+    return CalculatorFunctionsPolynomial::groebner(calculator, input, output, MonomialPolynomial::Order::lexicographic);
   }
   static bool groebnerLexicographicOpposite(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorFunctionsPolynomial::groebner(calculator, input, output, MonomialP::Order::lexicographicOpposite);
+    return CalculatorFunctionsPolynomial::groebner(calculator, input, output, MonomialPolynomial::Order::lexicographicOpposite);
   }
   static bool groebnerModZpLexicographic(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorFunctionsPolynomial::groebner(calculator, input, output, MonomialP::Order::lexicographic, true);
+    return CalculatorFunctionsPolynomial::groebner(calculator, input, output, MonomialPolynomial::Order::lexicographic, true);
   }
   static bool groebner(
     Calculator& calculator,

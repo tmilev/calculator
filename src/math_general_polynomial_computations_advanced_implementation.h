@@ -76,8 +76,8 @@ void GroebnerBasisComputation<Coefficient>::generateOneSymmetricDifferenceCandid
     left.leadingMonomial.minimalNumberOfVariables(),
     right.leadingMonomial.minimalNumberOfVariables()
   );
-  MonomialP leftShift;
-  MonomialP rightShift;
+  MonomialPolynomial leftShift;
+  MonomialPolynomial rightShift;
   for (int k = 0; k < numberOfVariables; k ++) {
     if (left.leadingMonomial(k) > right.leadingMonomial(k)) {
       rightShift.setVariable(k, left.leadingMonomial(k) - right.leadingMonomial(k));
@@ -236,7 +236,7 @@ std::string GroebnerBasisComputation<Coefficient>::toStringLetterOrder(bool addD
   MacroRegisterFunctionWithName("GroebnerBasisComputation::toStringLetterOrder");
   std::stringstream out;
   int numVars = this->minimalNumberOfVariables();
-  List<MonomialP> variables;
+  List<MonomialPolynomial> variables;
   out << "Variable name(s), ascending order: ";
   variables.setSize(numVars);
   for (int i = 0; i < variables.size; i ++) {
@@ -277,15 +277,15 @@ std::string GroebnerBasisComputation<Coefficient>::toStringLetterOrder(bool addD
 template <class Coefficient>
 void GroebnerBasisComputation<Coefficient>::oneDivisonSubStepWithBasis(
   Polynomial<Coefficient>& remainder,
-  const MonomialP& leadingMonomial,
+  const MonomialPolynomial& leadingMonomial,
   const Coefficient& leadingCoefficient,
   int index,
   ProgressReport* theReport
 ) {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::oneDivisonSubStepWithBasis");
-  const MonomialP& leadingMonomialBasis = this->theBasis[index].leadingMonomial;
+  const MonomialPolynomial& leadingMonomialBasis = this->theBasis[index].leadingMonomial;
   const Coefficient& leadingCoefficientBasis = this->theBasis[index].leadingCoefficient;
-  MonomialP quotientMonomial = leadingMonomial;
+  MonomialPolynomial quotientMonomial = leadingMonomial;
   quotientMonomial /= leadingMonomialBasis;
   if (!quotientMonomial.hasPositiveOrZeroExponents()) {
     global.fatal << "The pivot monomial "
@@ -332,7 +332,7 @@ void GroebnerBasisComputation<Coefficient>::oneDivisonSubStepWithBasis(
   this->numberMonomialOperations += buffer.size();
   if (this->flagDoLogDivision) {
     this->divisionReport.getElement().intermediateRemainders.addOnTop(remainder);
-    List<MonomialP> empty;
+    List<MonomialPolynomial> empty;
     this->divisionReport.getElement().intermediateHighlightedMons.addOnTop(empty);
   }
   this->numberMonomialOperations ++;
@@ -346,7 +346,7 @@ bool GroebnerBasisComputation<Coefficient>::oneDivisonStepWithBasis(
   ProgressReport* report
 ) {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::oneDivisonStepWithBasis");
-  MonomialP highestMonomial;
+  MonomialPolynomial highestMonomial;
   Coefficient leadingCoefficient;
   int indexLeadingMonomial = currentRemainder.getIndexLeadingMonomial(
     &highestMonomial,
@@ -462,7 +462,7 @@ bool GroebnerBasisComputation<Coefficient>::addRemainderToBasis() {
   this->remainderDivision.scaleNormalizeLeadingMonomial(
     &this->polynomialOrder.monomialOrder
   );
-  MonomialP newLeadingMonomial;
+  MonomialPolynomial newLeadingMonomial;
   this->remainderDivision.getIndexLeadingMonomial(
     &newLeadingMonomial,
     nullptr,
@@ -470,7 +470,7 @@ bool GroebnerBasisComputation<Coefficient>::addRemainderToBasis() {
   );
   int indexToAddAt = 0;
   for (; indexToAddAt < this->theBasis.size; indexToAddAt ++) {
-    MonomialP& otherLeadingMonomial = this->theBasis[indexToAddAt].leadingMonomial;
+    MonomialPolynomial& otherLeadingMonomial = this->theBasis[indexToAddAt].leadingMonomial;
     if (this->polynomialOrder.monomialOrder.greaterThan(
       otherLeadingMonomial, newLeadingMonomial
     )) {
@@ -604,7 +604,7 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
   PolynomialSubstitution<Coefficient>& outputSub
 ) {
   int numVars = this->systemSolution.size;
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   Polynomial<Coefficient> tempP;
   Coefficient theCF;
   for (int i = 0; i < inputSystem.size; i ++) {
@@ -910,7 +910,7 @@ std::string PolynomialSystem<Coefficient>::toStringImpliedSubstitutions() {
           continue;
         }
       }
-      out << "<br>" << (MonomialP(j)).toString(&this->format()) << "="
+      out << "<br>" << (MonomialPolynomial(j)).toString(&this->format()) << "="
       << this->impliedSubstitutions[i][j].toString(&this->format()) << "; ";
     }
   }
@@ -984,7 +984,7 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
   theSub[theVarIndex] = aValueToTryOnPreferredVariable;
   if (this->groebner.flagDoProgressReport) {
     std::stringstream out;
-    MonomialP theMon(theVarIndex);
+    MonomialPolynomial theMon(theVarIndex);
     out << this->toStringImpliedSubstitutions() << "Attempting an (a priori random) substitution:<br>"
     << theMon.toString(&this->format()) << "=" << aValueToTryOnPreferredVariable << ";";
     theReport1.report(out.str());
@@ -1000,7 +1000,7 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
 
 template <class Coefficient>
 bool PolynomialSystem<Coefficient>::hasSingleMonomialEquation(
-  const List<Polynomial<Coefficient> >& inputSystem, MonomialP& outputMon
+  const List<Polynomial<Coefficient> >& inputSystem, MonomialPolynomial& outputMon
 ) {
   MacroRegisterFunctionWithName("PolynomialSystem::hasSingleMonomialEquation");
   bool result = false;
@@ -1024,7 +1024,7 @@ bool PolynomialSystem<Coefficient>::hasSingleMonomialEquation(
 
 template <class Coefficient>
 void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
-  List<Polynomial<Coefficient> >& inputSystem, const MonomialP& theMon
+  List<Polynomial<Coefficient> >& inputSystem, const MonomialPolynomial& theMon
 ) {
   MacroRegisterFunctionWithName("PolynomialSystem::solveWhenSystemHasSingleMonomial");
   ProgressReport theReport1;
@@ -1036,7 +1036,7 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
     }
     if (this->shouldReport()) {
       std::stringstream out;
-      MonomialP tempMon(i);
+      MonomialPolynomial tempMon(i);
       out << "The system has the single monomial: " << theMon.toString(&this->format())
       << "<br>Trying case:<br>" << tempMon.toString(&this->format()) << "= 0;";
       theReport1.report(out.str());
@@ -1100,7 +1100,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
     theReport2.report(out.str());
   }
   List<Polynomial<Coefficient> > systemBeforeHeuristics = inputSystem;
-  MonomialP singleMonEquation;
+  MonomialPolynomial singleMonEquation;
   if (this->flagUseTheMonomialBranchingOptimization) {
     if (this->hasSingleMonomialEquation(inputSystem, singleMonEquation)) {
       this->solveWhenSystemHasSingleMonomial(inputSystem, singleMonEquation);
@@ -1115,7 +1115,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
     }
     inputSystem = systemBeforeHeuristics;
     if (this->groebner.flagDoProgressReport) {
-      MonomialP monomial(this->getPreferredSerreSystemSubstitutionIndex(inputSystem));
+      MonomialPolynomial monomial(this->getPreferredSerreSystemSubstitutionIndex(inputSystem));
       reportStreamHeuristics << "<br>The substitution  "
       << monomial.toString(&this->groebner.theFormat) << "=" << randomValueItry << ";"
       << " did not produce a solution over the base field ";
@@ -1272,7 +1272,7 @@ bool Polynomial<Coefficient>::leastCommonMultipleOneVariable(
   Polynomial<Coefficient> product = left;
   Polynomial<Coefficient> remainder;
   product *= right;
-  product.divideBy(divisor, output, remainder, &MonomialP::orderDegreeThenLeftLargerWins());
+  product.divideBy(divisor, output, remainder, &MonomialPolynomial::orderDegreeThenLeftLargerWins());
   if (!remainder.isEqualToZero()) {
     global.fatal << "In least common multiple computation: "
     << "remainder when dividing by greatest common divisor not zero." << global.fatal;
@@ -1304,8 +1304,8 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   rightTemp = right;
   Polynomial<Coefficient> oneMinusT;
   List<Polynomial<Coefficient> > theBasis;
-  leftTemp.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
-  rightTemp.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  leftTemp.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
+  rightTemp.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   oneMinusT.makeMonomial(numberOfVariables, 1, one);
   leftTemp *= oneMinusT;
   oneMinusT *= - 1;
@@ -1320,7 +1320,7 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   computation.theFormat.polynomialAlphabet.addOnTop("y");
   computation.theFormat.polynomialAlphabet.addOnTop("z");
   computation.theFormat.polynomialAlphabet.addOnTop("w");
-  computation.polynomialOrder.monomialOrder = MonomialP::orderForGreatestCommonDivisor();
+  computation.polynomialOrder.monomialOrder = MonomialPolynomial::orderForGreatestCommonDivisor();
   computation.maximumPolynomialComputations = - 1;
   if (!computation.transformToReducedGroebnerBasis(theBasis)) {
     if (commentsOnFailure != nullptr) {
@@ -1331,7 +1331,7 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   }
   int maximalMonomialNoTIndex = - 1;
   Rational maximaltotalDegree;
-  MonomialP currentLeading;
+  MonomialPolynomial currentLeading;
   for (int i = theBasis.size - 1; i >= 0; i --) {
     theBasis[i].getIndexLeadingMonomial(
       &currentLeading, nullptr, &computation.polynomialOrder.monomialOrder
@@ -1360,7 +1360,7 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   }
   output = theBasis[maximalMonomialNoTIndex];
   output.setNumberOfVariablesSubstituteDeletedByOne(numberOfVariables);
-  output.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  output.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   return true;
 }
 
@@ -1386,7 +1386,7 @@ bool Polynomial<Coefficient>::greatestCommonDivisorOneVariable(
   // We are re-implementing MathRoutines::greatestCommonDivisor,
   // as this may be a performance-sensitve function.
   while (!rightCopy.isEqualToZero()) {
-    leftCopy.divideBy(rightCopy, quotient, remainder, &MonomialP::orderDegreeThenLeftLargerWins());
+    leftCopy.divideBy(rightCopy, quotient, remainder, &MonomialPolynomial::orderDegreeThenLeftLargerWins());
     if (!remainder.isEqualToZero() && remainder.totalDegree() >= rightCopy.totalDegree()) {
       global.fatal
       << "Univariate polynomial division of "
@@ -1434,7 +1434,7 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
     leastCommonMultipleBuffer,
     output,
     remainderBuffer,
-    &MonomialP::orderForGreatestCommonDivisor()
+    &MonomialPolynomial::orderForGreatestCommonDivisor()
   );
   if (!remainderBuffer.isEqualToZero() || output.isEqualToZero()) {
     FormatExpressions theFormat;
@@ -1454,7 +1454,7 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
     << ", which is imposible."
     << global.fatal;
   }
-  output.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  output.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   return true;
 }
 
@@ -1521,7 +1521,7 @@ bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::factor(
     return true;
   }
   this->current = this->original;
-  this->constantFactor = this->current.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  this->constantFactor = this->current.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   this->constantFactor.invert();
   this->nonReduced.addOnTop(this->current);
   if (!this->basicChecks(commentsOnFailure)) {
@@ -1547,9 +1547,9 @@ bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::accountNon
   Polynomial<Coefficient>& incoming
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationUnivariate::accountNonReducedFactor");
-  incoming.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  incoming.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   Polynomial<Coefficient> quotient, remainder;
-  this->current.divideBy(incoming, quotient, remainder, &MonomialP::orderDefault());
+  this->current.divideBy(incoming, quotient, remainder, &MonomialPolynomial::orderDefault());
   if (!remainder.isEqualToZero()) {
     return false;
   }
@@ -1571,10 +1571,10 @@ bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::accountRed
   if (incoming.isConstant()) {
     global.fatal << "Constant factors are not to be accounted. " << global.fatal;
   }
-  incoming.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  incoming.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   Polynomial<Coefficient> quotient, remainder;
   this->current.divideBy(
-    incoming, quotient, remainder, &MonomialP::orderDefault()
+    incoming, quotient, remainder, &MonomialPolynomial::orderDefault()
   );
   if (!remainder.isEqualToZero()) {
     return false;

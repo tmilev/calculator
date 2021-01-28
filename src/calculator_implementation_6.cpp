@@ -2646,8 +2646,8 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
     << theCurveE.toString() << ", got context: "
     << curveContext.toString();
   }
-  MonomialP leadingMonomial;
-  List<MonomialP>::Comparator monomialOrder(MonomialP::greaterThan_totalDegree_rightSmallerWins);
+  MonomialPolynomial leadingMonomial;
+  List<MonomialPolynomial>::Comparator monomialOrder(MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins);
   thePoly.getIndexLeadingMonomial(&leadingMonomial, nullptr, &monomialOrder);
   int indexX = 0;
   int indexY = 1;
@@ -2669,7 +2669,7 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   if (thePoly.size() > 4) {
     return calculator << "Elliptic curve allowed to have max 4 terms, yours has: " << thePoly.size();
   }
-  MonomialP xCubed, xLinear, ySquared;
+  MonomialPolynomial xCubed, xLinear, ySquared;
   xCubed.makeEi(indexX, 3);
   xLinear.makeEi(indexX, 1);
   ySquared.makeEi(indexY, 2);

@@ -999,7 +999,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolynomialBySmallInteger(
   if (thePower < 0) {
     if (base.size() == 1) {
       Polynomial<Rational> outputPoly;
-      MonomialP theMon = base[0];
+      MonomialPolynomial theMon = base[0];
       Rational theCF = base.coefficients[0];
       theCF.raiseToPower(thePower);
       theMon.raiseToPower(thePower);
@@ -2854,7 +2854,7 @@ bool CalculatorFunctionsBinaryOps::polynomialModPModuloPolynomialModP(
       << left.content.coefficients[0].modulus;
     }
   }
-  ElementZmodP rightLeadingCoefficient = right.content.getLeadingCoefficient(&MonomialP::orderDefault());
+  ElementZmodP rightLeadingCoefficient = right.content.getLeadingCoefficient(&MonomialPolynomial::orderDefault());
   if (!rightLeadingCoefficient.invert()) {
     return calculator
     << "Leading coefficient of quotient "

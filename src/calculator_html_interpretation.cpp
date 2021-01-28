@@ -1005,7 +1005,7 @@ AnswerChecker::AnswerChecker() {
 }
 
 bool AnswerChecker::prepareProblem(
-  const std::string &inputRandomSeed
+  const std::string& inputRandomSeed
 ) {
   MacroRegisterFunctionWithName("AnswerChecker::prepareProblem");
   std::stringstream errorStream, comments;
@@ -1224,13 +1224,13 @@ bool AnswerChecker::checkAnswerHardcoded(
   comparison.compare(
     answer.currentAnswerClean, answer.commandAnswerOnGiveUp, this->checker.interpreter
   );
-  bool correct = comparison.flagAreEqual;
+  this->checker.answerIsCorrect = comparison.flagAreEqual;
   if (outputIsCorrect != nullptr) {
-    *outputIsCorrect = correct;
+    *outputIsCorrect = this->checker.answerIsCorrect ;
   }
   this->result = comparison.toJSON();
   if (this->result.hasKey(WebAPI::result::resultHtml)) {
-    this->checker.verification = this->result.getValue(WebAPI::result::resultHtml).stringValue;
+    this->checker.verification += this->result.getValue(WebAPI::result::resultHtml).stringValue;
   }
   return
   comparison.syntaxErrorsLeftRaw == "" &&
@@ -1251,14 +1251,13 @@ bool AnswerChecker::checkAnswerStandard(
   ProblemData& currentProblemData = this->problem.problemData;
   Answer& answer = currentProblemData.answers.values[this->answerIndex];
 
-  AnswerCheckerNoProblem checker;
-  checker.commandsBeforeAnswer = answer.commandsBeforeAnswer;
-  checker.commandsBeforeAnswerNoEnclosuresForDEBUGGING = answer.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
-  checker.answerId = answer.answerId;
-  checker.answerGiven = answer.currentAnswerClean;
-  checker.commandsCommentsBeforeSubmission = answer.commandsCommentsBeforeSubmission;
-  checker.answerCheck = answer.commandVerificationOnly;
-  return checker.checkAnswer(outputIsCorrect);
+  this->checker.commandsBeforeAnswer = answer.commandsBeforeAnswer;
+  this->checker.commandsBeforeAnswerNoEnclosuresForDEBUGGING = answer.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
+  this->checker.answerId = answer.answerId;
+  this->checker.answerGiven = answer.currentAnswerClean;
+  this->checker.commandsCommentsBeforeSubmission = answer.commandsCommentsBeforeSubmission;
+  this->checker.answerCheck = answer.commandVerificationOnly;
+  return this->checker.checkAnswer(outputIsCorrect);
 }
 
 JSData AnswerCheckerNoProblem::toJSON(bool hideGivenAnswer) {
@@ -1308,11 +1307,11 @@ void AnswerCheckerNoProblem::prepareForEvaluation() {
 bool AnswerCheckerNoProblem::checkAnswer(bool* outputIsCorrect) {
   MacroRegisterFunctionWithName("AnswerCheckerNoProblem::checkAnswer");
   this->prepareForEvaluation();
-
   this->interpreter.initialize(Calculator::Mode::educational);
   this->interpreter.flagWriteLatexPlots = false;
   this->interpreter.flagPlotNoControls = true;
   this->interpreter.evaluate(this->completedProblem);
+  this->answerIsCorrect = false;
   if (this->interpreter.flagAbortComputationASAP || interpreter.syntaxErrors != "") {
     std::stringstream out;
     if (this->interpreter.errorsPublic.str() != "") {
@@ -1384,7 +1383,7 @@ void AnswerCheckerNoProblem::computeVerificationString() {
       << this->interpreter.inputString << "<hr></td></tr>";
     }
   } else {
-    out << "<tr><td><span style =\"color:green\"><b>Correct! </b></span>" << "</td></tr>";
+    out << "<tr><td><b style='color:green'>Correct!</b>" << "</td></tr>";
   }
   if (this->hasCommentsBeforeSubmission) {
     out << "<tr><td>"
@@ -1392,7 +1391,7 @@ void AnswerCheckerNoProblem::computeVerificationString() {
     << "</td></tr>\n";
   }
   out << "<tr><td>Your answer was: ";
-  out << "\\(\\displaystyle ";
+  out << "\\(";
   out << this->answerGiven;
   out << "\\)";
   std::string errorMessage;
@@ -1411,7 +1410,7 @@ void AnswerCheckerNoProblem::computeVerificationString() {
   }
   out << "</td></tr>";
   out << "</table>";
-  this->verification = out.str();
+  this->verification += out.str();
 }
 
 JSData WebAPIResponse::checkAnswer(bool hideDesiredAnswer) {
@@ -1458,13 +1457,12 @@ JSData AnswerChecker::submitAnswersJSON(
     return this->result;
   }
   if (!this->storeInDatabase(*outputIsCorrect)) {
-    global.comments << "return from store in db";
     return this->result;
   }
-
-  result[WebAPI::result::resultHtml] = this->checker.verification;
-  result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
-  return result;
+  global.comments << this->checker.verification + this->storageReport;
+  this->result[WebAPI::result::resultHtml] = this->checker.verification + this->storageReport;
+  this->result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
+  return this->result;
 }
 
 JSData WebAPIResponse::submitAnswersJSON(

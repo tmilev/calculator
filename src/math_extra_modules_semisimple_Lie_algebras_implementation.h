@@ -1494,7 +1494,7 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
         currentShift, j + varShift, oneIndexContribution, negativeExponentDenominatorContribution
       );
       exponentContribution *= oneIndexContribution;
-      theCoeff.divideBy(negativeExponentDenominatorContribution, theCoeff, tempP1, &MonomialP::orderDefault());
+      theCoeff.divideBy(negativeExponentDenominatorContribution, theCoeff, tempP1, &MonomialPolynomial::orderDefault());
       if (!tempP1.isEqualToZero()) {
         global.fatal << "This is a mathematical error! "
         << "Something is very wrong with embedding semisimple Lie algebras in Weyl algebras. "
@@ -1665,7 +1665,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
 
 template <class Coefficient>
 bool ModuleSSalgebra<Coefficient>::getActionEulerOperatorPart(
-  const MonomialP& theCoeff, ElementWeylAlgebra<Rational>& outputDO
+  const MonomialPolynomial& theCoeff, ElementWeylAlgebra<Rational>& outputDO
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra::getActionEulerOperatorPart");
   int powerMonCoeff = 0;

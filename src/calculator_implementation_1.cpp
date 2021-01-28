@@ -598,7 +598,12 @@ JSData PlotObject::toJSONCurveImmersionIn3d() {
   MacroRegisterFunctionWithName("PlotSurfaceIn3d::toJSONCurveImmersionIn3d");
   JSData result;
   this->writeVariables(result);
-  result[PlotObject::Labels::coordinateFunctions] = this->coordinateFunctionsJS;
+  List<std::string> coordinates;
+  coordinates.setSize(this->coordinateFunctionsJS.size);
+  for (int i = 0; i < this->coordinateFunctionsJS.size; i ++) {
+    coordinates[i] = "return " + this->coordinateFunctionsJS[i] + ";";
+  }
+  result[PlotObject::Labels::coordinateFunctions] = coordinates;
   std::stringstream curveInstStream;
   result[PlotObject::Labels::variableRange][0] = this->paramLowJS;
   result[PlotObject::Labels::variableRange][1] = this->paramHighJS;

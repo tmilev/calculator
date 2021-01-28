@@ -13,6 +13,7 @@ class GraphicsSerialization {
       right: "right",
       numberOfSegments: "numberOfSegments",
       color: "color",
+      colorFill: "colorFill",
       colorFront: "colorFront",
       colorBack: "colorBack",
       colorContour: "colorContour",
@@ -105,11 +106,14 @@ class GraphicsSerialization {
     let right = plot[this.labels.right];
     let numberOfSegments = plot[this.labels.numberOfSegments];
     let color = plot[this.labels.color];
+    let colorFill = plot[this.labels.colorFill];
     let lineWidth = plot[this.labels.lineWidth];
     let points = plot[this.labels.points];
     let onePoint = plot[this.labels.onePoint];
     let text = plot[this.labels.text];
     let viewWindow = plot[this.labels.viewWindow];
+    let variableArguments = plot[this.labels.arguments];
+    let variableRanges = plot[this.labels.variableRanges];
     switch (plotType) {
       case "plotFunction":
         canvas.drawFunction(
@@ -121,8 +125,15 @@ class GraphicsSerialization {
           this.interpretStringToNumber(lineWidth),
         );
         return;
+      case "plotFillStart":
+        canvas.plotFillStart(colorFill);
+        return;
+      case "plotFillFinish":
+        canvas.plotFillFinish();
+        return;
       case "axesGrid":
         canvas.drawGrid();
+        return;
       case "coordinateAxes":
         canvas.drawCoordinateAxes();
         return;
@@ -131,6 +142,22 @@ class GraphicsSerialization {
         return;
       case "computeViewWindow":
         canvas.computeViewWindow();
+        return;
+      case "parametricCurve":
+        let coordinateFunctions = [
+          this.functionFromBodyAndArguments(
+            plot.coordinateFunctions[0], variableArguments,
+          ),
+          this.functionFromBodyAndArguments(
+            plot.coordinateFunctions[1], variableArguments,
+          ),
+        ];
+        canvas.drawCurve(
+          coordinateFunctions,
+          this.interpretStringToNumber(variableRanges[0]),
+          this.interpretStringToNumber(variableRanges[1]),
+          numberOfSegments, color, lineWidth,
+        );
         return;
       case "path":
       case "segment":

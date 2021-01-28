@@ -582,12 +582,23 @@ bool AlgebraicNumber::operator==(const Rational& other) const {
 }
 
 AlgebraicNumber AlgebraicNumber::getNumerator() const {
-  AlgebraicNumber result = *this;
+  Rational value;
+  AlgebraicNumber result;
+  if (this->isRational(&value)) {
+    result = value.getNumerator();
+    return result;
+  }
+  result = *this;
   return result;
 }
 
 AlgebraicNumber AlgebraicNumber::getDenominator() const {
+  Rational value;
   AlgebraicNumber result;
+  if (this->isRational(&value)) {
+    result = value.getDenominator();
+    return result;
+  }
   result.assignRational(1, this->owner);
   return result;
 }

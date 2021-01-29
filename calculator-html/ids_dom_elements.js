@@ -103,6 +103,7 @@ let domElements = {
   spanUserExtraInfo: "spanUserExtraInfo",
   spanStudentViewPanel: "spanStudentViewPanel",
   spanStudentViewSectionSelectPanel: "spanStudentViewSectionSelectPanel",
+  divCalculatorMainInputOutput: "divCalculatorMainInputOutput",
   divPerformance: "divPerformance",
   divCurrentCourse: "divCurrentCourse",
   divCurrentCourseBody: "divCurrentCourseBody",

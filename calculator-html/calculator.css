@@ -560,7 +560,6 @@ a.linkProgressReport {
 }
 
 #divCalculatorMainInputOutput{
-  max-width: 70%;
   overflow: auto;
 }
 

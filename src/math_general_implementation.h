@@ -499,23 +499,23 @@ void Matrix<Coefficient>::addTwoRows(int fromRowIndex, int ToRowIndex, int Start
 
 template <typename Coefficient>
 void Matrix<Coefficient>::gaussianEliminationByRows(
-  Matrix<Coefficient>* carbonCopyMat,
+  Matrix<Coefficient>* carbonCopyMatrix,
   Selection* outputNonPivotColumns,
   Selection* outputPivotColumns,
   std::stringstream* humanReadableReport,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
   MacroRegisterFunctionWithName("Matrix::gaussianEliminationByRows");
   if (this->numberOfRows == 0) {
     global.fatal << "Request to do Gaussian elimination on a matrix with "
     << " zero rows. " << global.fatal;
   }
-  if (carbonCopyMat != 0) {
-    if (carbonCopyMat->numberOfRows != this->numberOfRows) {
+  if (carbonCopyMatrix != 0) {
+    if (carbonCopyMatrix->numberOfRows != this->numberOfRows) {
       global.fatal << "Request to do "
       << "Gaussian elimination with carbon copy, however the matrix has "
       << this->numberOfRows << " rows, while the carbon copy has "
-      << carbonCopyMat->numberOfRows << " rows. " << global.fatal;
+      << carbonCopyMatrix->numberOfRows << " rows. " << global.fatal;
     }
   }
   ///////////////////
@@ -529,18 +529,18 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
   if (outputPivotColumns != nullptr) {
     outputPivotColumns->initialize(this->numberOfColumns);
   }
-  bool formatAsLinearSystem = theFormat == nullptr ? false : theFormat->flagFormatMatrixAsLinearSystem;
-  bool useHtmlInReport = theFormat == nullptr ? true : theFormat->flagUseHTML;
+  bool formatAsLinearSystem = format == nullptr ? false : format->flagFormatMatrixAsLinearSystem;
+  bool useHtmlInReport = format == nullptr ? true : format->flagUseHTML;
   ProgressReport theReport(100, GlobalVariables::Response::ReportType::gaussianElimination);
   if (humanReadableReport != nullptr) {
     if (useHtmlInReport) {
-      *humanReadableReport << "\n\n\n\n<table><tr><td style =\"border-bottom:3pt solid black;\">System status</td>"
+      *humanReadableReport << "\n\n\n\n<table><tr><td style='border-bottom:3pt solid black;'>System status</td>"
       << "<td style =\"border-bottom:3pt solid black;\">action</td></tr>";
     } else {
       *humanReadableReport << "\n\n\\begin{longtable}{cc} System status&Action \\\\\\hline\n";
     }
   }
-  //Initialization done! Time to do actual work:
+  // Initialization done! Time to do actual work:
   for (int i = 0; i < this->numberOfColumns; i ++) {
     if (NumFoundPivots == MaxRankMat) {
       if (outputNonPivotColumns != nullptr) {
@@ -559,22 +559,22 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
     }
     if (humanReadableReport != nullptr) {
       if (useHtmlInReport) {
-        *humanReadableReport << "<tr><td style =\"border-bottom:1pt solid black;\">";
+        *humanReadableReport << "<tr><td style='border-bottom:1pt solid black;'>";
         if (formatAsLinearSystem) {
-          *humanReadableReport << HtmlRoutines::getMathNoDisplay(this->toStringSystemLatex(carbonCopyMat, theFormat), - 1);
+          *humanReadableReport << HtmlRoutines::getMathNoDisplay(this->toStringSystemLatex(carbonCopyMatrix, format), - 1);
         } else {
-          *humanReadableReport << HtmlRoutines::getMathNoDisplay(this->toStringLatex(theFormat), - 1);
+          *humanReadableReport << HtmlRoutines::getMathNoDisplay(this->toStringLatex(format), - 1);
         }
-        *humanReadableReport << "</td><td style =\"border-bottom:1pt solid black;\">Selected pivot column "
+        *humanReadableReport << "</td><td style='border-bottom:1pt solid black;'>Selected pivot column "
         << i + 1 << ". ";
         if (NumFoundPivots != tempI) {
           *humanReadableReport << "Swapping rows so the pivot row is number " << NumFoundPivots << ". ";
         }
       } else {
         if (formatAsLinearSystem) {
-          *humanReadableReport << "$" << this->toStringSystemLatex(carbonCopyMat, theFormat) << "$";
+          *humanReadableReport << "\\(" << this->toStringSystemLatex(carbonCopyMatrix, format) << "\\)";
         } else {
-          *humanReadableReport << "$" << this->toStringLatex(theFormat) << "$";
+          *humanReadableReport << "\\(" << this->toStringLatex(format) << "\\)";
         }
         *humanReadableReport << "& Selected pivot column " << i + 1 << ". ";
         if (NumFoundPivots != tempI) {
@@ -586,14 +586,14 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
       outputPivotColumns->addSelectionAppendNewIndex(i);
     }
     this->switchRows(NumFoundPivots, tempI);
-    if (carbonCopyMat != 0) {
-      carbonCopyMat->switchRows(NumFoundPivots, tempI);
+    if (carbonCopyMatrix != 0) {
+      carbonCopyMatrix->switchRows(NumFoundPivots, tempI);
     }
     tempElement = this->elements[NumFoundPivots][i];
     tempElement.invert();
     this->rowTimesScalar(NumFoundPivots, tempElement);
-    if (carbonCopyMat != 0) {
-      carbonCopyMat->rowTimesScalar(NumFoundPivots, tempElement);
+    if (carbonCopyMatrix != 0) {
+      carbonCopyMatrix->rowTimesScalar(NumFoundPivots, tempElement);
     }
     for (int j = 0; j < this->numberOfRows; j ++) {
       if (j != NumFoundPivots) {
@@ -608,8 +608,8 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
             theReport.report(reportStream.str());
           }
           this->addTwoRows(NumFoundPivots, j, i, tempElement);
-          if (carbonCopyMat != 0) {
-            carbonCopyMat->addTwoRows(NumFoundPivots, j, 0, tempElement);
+          if (carbonCopyMatrix != 0) {
+            carbonCopyMatrix->addTwoRows(NumFoundPivots, j, 0, tempElement);
           }
         }
       }
@@ -626,18 +626,18 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
   if (humanReadableReport != nullptr) {
     if (useHtmlInReport) {
       if (formatAsLinearSystem) {
-        *humanReadableReport << "<tr><td>" << HtmlRoutines::getMathNoDisplay(this->toStringSystemLatex(carbonCopyMat, theFormat), - 1)
+        *humanReadableReport << "<tr><td>" << HtmlRoutines::getMathNoDisplay(this->toStringSystemLatex(carbonCopyMatrix, format), - 1)
         << "</td><td> Final result.</td></tr></table>\n\n\n\n";
       } else {
-        *humanReadableReport << "<tr><td>" << HtmlRoutines::getMathNoDisplay(this->toStringLatex(theFormat))
+        *humanReadableReport << "<tr><td>" << HtmlRoutines::getMathNoDisplay(this->toStringLatex(format))
         << "</td><td> Final result.</td></tr></table>\n\n\n\n";
       }
     } else {
       if (formatAsLinearSystem) {
-        *humanReadableReport << "$" << this->toStringSystemLatex(carbonCopyMat, theFormat)
-        << "$& Final result.\\\\\n";
+        *humanReadableReport << "\\(" << this->toStringSystemLatex(carbonCopyMatrix, format)
+        << "\\)& Final result.\\\\\n";
       } else {
-        *humanReadableReport << "$" << this->toStringLatex(theFormat) << "$& Final result.\\\\\n";
+        *humanReadableReport << "\\(" << this->toStringLatex(format) << "\\)& Final result.\\\\\n";
       }
       *humanReadableReport << "\\end{longtable}";
     }

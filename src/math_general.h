@@ -1191,11 +1191,11 @@ public:
   // that do not have a pivot 1 in them.
   // In the above example, the third (index 2) and fifth (index 4) columns do not have a pivot 1 in them.
   void gaussianEliminationByRows(
-    Matrix<Coefficient>* carbonCopyMat = 0,
+    Matrix<Coefficient>* carbonCopyMatrix = 0,
     Selection* outputNonPivotColumns = nullptr,
     Selection* outputPivotColumns = nullptr,
     std::stringstream* humanReadableReport = nullptr,
-    FormatExpressions* theFormat = nullptr
+    FormatExpressions* format = nullptr
   );
   void gaussianEliminationByRowsNoRowSwapPivotPointsByRows(
     int firstNonProcessedRow,

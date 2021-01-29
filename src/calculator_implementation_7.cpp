@@ -2088,29 +2088,29 @@ bool CalculatorFunctions::innerGaussianEliminationMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("innerGaussianEliminationMatrix");
-  Expression theConverted;
+  Expression converted;
   if (!CalculatorConversions::innerMakeMatrix(
-    calculator, input, theConverted
+    calculator, input, converted
   )) {
     return calculator
     << "<hr>Failed to extract algebraic number matrix from "
     << input.toString() << ". ";
   }
-  Matrix<AlgebraicNumber> theMat;
-  if (!calculator.functionGetMatrix(theConverted, theMat)) {
+  Matrix<AlgebraicNumber> matrix;
+  if (!calculator.functionGetMatrix(converted, matrix)) {
     return calculator
     << "<hr>Failed to extract algebraic number matrix, "
     << "got intermediate conversion to: "
-    << theConverted.toString();
+    << converted.toString();
   }
-  if (theMat.numberOfRows < 2) {
+  if (matrix.numberOfRows < 2) {
     return calculator
     << "<hr>The matrix I got as input had only 1 row. Possible user typo?";
   }
   std::stringstream out;
-  FormatExpressions theFormat;
-  theFormat.flagUseFrac = true;
-  theMat.gaussianEliminationByRows(nullptr, nullptr, nullptr, &out, &theFormat);
+  FormatExpressions format;
+  format.flagUseFrac = true;
+  matrix.gaussianEliminationByRows(nullptr, nullptr, nullptr, &out, &format);
   return output.assignValue(out.str(), calculator);
 }
 

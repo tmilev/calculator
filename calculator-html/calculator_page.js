@@ -123,6 +123,8 @@ class Calculator {
       let resultString = `${atomsSorted.length} built-in atoms, ${numHandlers} handlers. `;
       resultString += examplesString;
       document.getElementById(ids.domElements.calculatorExamples).innerHTML = resultString;
+      let calculatorElement = document.getElementById(ids.domElements.divCalculatorMainInputOutput);
+      calculatorElement.style.maxWidth = "70%";
     } catch (e) {
       console.log(`Bad json: ${e}\n Input JSON follows.`);
       console.log(inputJSONtext);
@@ -197,8 +199,21 @@ class Calculator {
     canvas.canvasResetFunction();
   }
 
+  adjustCalculatorPageSize() {
+    miscellaneousFrontend.switchMenu(ids.domElements.calculatorExamples);
+    let element = document.getElementById(ids.domElements.calculatorExamples);
+    let calculatorElement = document.getElementById(ids.domElements.divCalculatorMainInputOutput);
+    if (element.classList.contains("hiddenClass")) {
+      calculatorElement.style.maxWidth = "100%";
+    } else {
+      calculatorElement.style.maxWidth = "70%";
+    }
+  }
 
-  toggleExamples(theButton) {
+  toggleExamples(
+    /**@type{HTMLElement} */
+    button,
+  ) {
     let theExamples = document.getElementById(ids.domElements.calculatorExamples);
     let theURL = "";
     theURL += pathnames.urls.calculatorAPI;
@@ -206,16 +221,18 @@ class Calculator {
     if (theExamples.innerHTML.length < 300) {
       submitRequests.submitGET({
         url: theURL,
-        callback: this.processExamples.bind(this),
+        callback: (input) => {
+          this.processExamples(input);
+        },
         progress: "spanProgressCalculatorExamples"
       });
-      theButton.innerHTML = "&#9660;";
+      button.innerHTML = "&#9660;";
     } else {
-      miscellaneousFrontend.switchMenu(ids.domElements.calculatorExamples);
+      this.adjustCalculatorPageSize();
       if (!theExamples.classList.contains("hiddenClass")) {
-        theButton.innerHTML = "&#9660;";
+        button.innerHTML = "&#9660;";
       } else {
-        theButton.innerHTML = "&#9656;";
+        button.innerHTML = "&#9656;";
       }
     }
   }

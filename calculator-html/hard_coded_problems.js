@@ -47,12 +47,31 @@ class HardCodedProblem {
   }
 
   create() {
+    this.createAnswersHardcoded();
+    this.createAnswersCalculator();
+  }
+
+  createAnswersHardcoded() {
     let answersElements = this.element.querySelectorAll("answer");
+    this.createAnswers(answersElements, true);
+  }
+
+  createAnswersCalculator() {
+    let answersElements = this.element.querySelectorAll("calculatorAnswer");
+    this.createAnswers(answersElements, false);
+  }
+
+  createAnswers(
+    answersElements,
+    /**@type{boolean} */
+    hardCoded,
+  ) {
     for (let i = 0; i < answersElements.length; i++) {
       let answer = new HardCodedAnswer(
         answersElements[i],
         answersElements[i].textContent,
         this.calculatorServer,
+        hardCoded,
       );
       this.answers.push(answer);
       answer.writeToElement();
@@ -69,9 +88,13 @@ class HardCodedAnswer {
     desiredAnswer,
     /**@type{string} */
     calculatorServer,
+    /**@type{boolean} */
+    hardCoded,
   ) {
     /**@type{HTMLElement} */
     this.element = element;
+    /**@type{string|null} */
+    this.answerId = this.element.id;
     /**@type{string} */
     this.calculatorServer = calculatorServer;
     /**@type{boolean} Whether the problem should have an answer/solution button. */
@@ -79,6 +102,11 @@ class HardCodedAnswer {
     let forRealString = this.element.getAttribute("forReal");
     if (forRealString === "true") {
       this.forReal = true;
+    }
+    /**@type{boolean} When true, printouts will contain additional information. */
+    this.debug = false;
+    if (this.element.getAttribute("debug") === "true") {
+      this.debug = true;
     }
     /**@type{string} */
     this.buttonOptions = this.element.getAttribute("buttons");
@@ -98,6 +126,8 @@ class HardCodedAnswer {
     this.verificationSpan = null;
     /**@type{HTMLElement|null} */
     this.solutionSpan = null;
+    /**@type{HTMLElement|null} */
+    this.hardCoded = hardCoded;
   }
 
   writeToElement() {
@@ -130,6 +160,32 @@ class HardCodedAnswer {
   }
 
   submitAnswer() {
+    if (this.hardCoded) {
+      this.submitAnswerHardCoded();
+    } else {
+      this.submitAnswerCalculator();
+    }
+  }
+
+  submitAnswerCalculator() {
+    if (this.id === "" || this.id === null) {
+      this.verificationSpan.innerHTML = "<b style='color:red'>Non-hard-coded calculator answers need id property.</b>";
+      return;
+    }
+    let givenData = this.answerPanel.panel.equationEditor.rootNode.toLatex();
+    let urlRelative = pathnames.addresses.submitAnswerHardcoded(
+      this.answerId, givenData, this.desiredAnswer, false,
+    );
+    let url = this.calculatorServer + urlRelative;
+    submit.submitGET({
+      url: url,
+      callback: (input) => {
+        this.writeResult(input, givenData);
+      },
+    });
+  }
+
+  submitAnswerHardCoded() {
     let givenData = this.answerPanel.panel.equationEditor.rootNode.toLatex();
     let urlRelative = pathnames.addresses.compareExpressions(
       givenData, this.desiredAnswer, false,
@@ -151,7 +207,9 @@ class HardCodedAnswer {
     try {
       let result = miscellaneous.jsonUnescapeParse(input);
       let resultHTML = answerProcessing.answerProcessing.htmlUserFriendlyResult(result);
-      resultHTML += `<br>Your answer: \\(${givenData}\\)`;
+      if (this.hardCoded) {
+        resultHTML += `<br>Your answer: \\(${givenData}\\)`;
+      }
       this.answerPanel.verificationSpan.innerHTML = resultHTML;
       equationEditor.typeset(this.answerPanel.verificationSpan);
     } catch (e) {

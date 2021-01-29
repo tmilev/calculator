@@ -1250,7 +1250,6 @@ bool AnswerChecker::checkAnswerStandard(
   MacroRegisterFunctionWithName("AnswerChecker::checkAnswerStandard");
   ProblemData& currentProblemData = this->problem.problemData;
   Answer& answer = currentProblemData.answers.values[this->answerIndex];
-
   this->checker.commandsBeforeAnswer = answer.commandsBeforeAnswer;
   this->checker.commandsBeforeAnswerNoEnclosuresForDEBUGGING = answer.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
   this->checker.answerId = answer.answerId;
@@ -1261,6 +1260,7 @@ bool AnswerChecker::checkAnswerStandard(
 }
 
 JSData AnswerCheckerNoProblem::toJSON(bool hideGivenAnswer) {
+  (void) hideGivenAnswer;
   JSData result;
   if (this->errorSyntax != "") {
     result[WebAPI::result::resultHtml] =this->errorSyntax;
@@ -1366,7 +1366,7 @@ bool AnswerCheckerNoProblem::checkAnswer(bool* outputIsCorrect) {
 
 void AnswerCheckerNoProblem::computeVerificationString() {
   std::stringstream out;
-  out << "<table style = 'width:300px'>";
+  out << "<table style='width:300px'>";
   if (!this->answerIsCorrect) {
     out << "<tr><td>";
     out << "<b style='color:red'>Your answer appears to be incorrect. </b>";
@@ -1464,6 +1464,23 @@ JSData AnswerChecker::submitAnswersJSON(
   return this->result;
 }
 
+JSData WebAPIResponse::submitAnswersHardcoded(bool hideDesiredAnswer) {
+  double startTime = global.getElapsedSeconds();
+  (void) hideDesiredAnswer;
+  AnswerChecker checker;
+  checker.checker.answerId = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::answerId), false);
+  checker.checker.answerGiven = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::answerValue), false);
+  checker.checker.answerCheck = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::answerCheck), false);
+  checker.checker.commandsBeforeAnswer = "1";
+  bool errorsCheckingAnswer = checker.checker.checkAnswer(&checker.checker.answerIsCorrect);
+  if (!errorsCheckingAnswer) {
+    return checker.checker.toJSON(hideDesiredAnswer);
+  }
+  checker.result[WebAPI::result::resultHtml] = checker.checker.verification + checker.storageReport;
+  checker.result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
+  return checker.result;
+}
+
 JSData WebAPIResponse::submitAnswersJSON(
   const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
 ) {
@@ -1524,7 +1541,7 @@ std::string WebAPIResponse::addTeachersSections() {
     currentTeacher.reset();
     currentTeacher.username = theTeachers[i];
     if (!currentTeacher.loadFromDatabase(&out, &out)) {
-      out << "<span style =\"color:red\">Failed to fetch teacher: " << theTeachers[i] << "</span><br>";
+      out << "<span style='color:red'>Failed to fetch teacher: " << theTeachers[i] << "</span><br>";
       continue;
     }
     currentTeacher.sectionsTaught = desiredSectionsList;
@@ -1536,9 +1553,9 @@ std::string WebAPIResponse::addTeachersSections() {
     QuerySet setQuery;
     setQuery.value[DatabaseStrings::labelSectionsTaught] = desiredSectionsList;
     if (!Database::get().updateOne(findQuery, setQuery, &out)) {
-      out << "<span style =\"color:red\">Failed to store course info of instructor: " << theTeachers[i] << ". </span><br>";
+      out << "<span style='color:red'>Failed to store course info of instructor: " << theTeachers[i] << ". </span><br>";
     } else {
-      out << "<span style =\"color:green\">Assigned " << theTeachers[i] << " to section(s): "
+      out << "<span style='color:green'>Assigned " << theTeachers[i] << " to section(s): "
       << desiredSectionsList << "</span><br>";
     }
   }
@@ -1581,7 +1598,7 @@ std::string WebAPIResponse::addUserEmails(const std::string& hostWebAddressWithP
     inputEmails, userPasswords, userRole, userGroup, comments, numNewUsers, numUpdatedUsers
   );
   if (createdUsers) {
-    out << "<span style =\"color:green\">Success: "
+    out << "<span style='color:green'>Success: "
     << numNewUsers << " new users and " << numUpdatedUsers
     << " user updates.</span> User roles: " << userRole;
   } else
@@ -1590,11 +1607,11 @@ std::string WebAPIResponse::addUserEmails(const std::string& hostWebAddressWithP
     << comments.str() << "<hr>";
   if (doSendEmails) {
     if (sentEmails) {
-      out << "<b style = 'color:green'>"
+      out << "<b style='color:green'>"
       << "Activation emails successfully sent. "
       << "</b>";
     } else {
-      out << "<b style ='color:red'>"
+      out << "<b style='color:red'>"
       << "Failed to send all activation emails. "
       << "</b>";
     }

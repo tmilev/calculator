@@ -55,7 +55,7 @@ public:
     static std::string compareExpressionsInternal;
     static std::string compareExpressionsGiven;
     static std::string compareExpressionsDesired;
-    static std::string checkAnswer;
+    static std::string submitAnswerHardcoded;
     struct slides {
     public:
       static std::string source;

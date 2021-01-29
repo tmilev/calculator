@@ -174,6 +174,8 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     return this->processCompareExpressionsPage(false);
   } else if (global.requestType == WebAPI::request::compareExpressions) {
     return this->processCompareExpressions(true);
+  } else if (global.requestType == WebAPI::request::submitAnswerHardcoded) {
+    return this->processSubmitAnswerHardcoded();
   } else if (global.requestType == WebAPI::request::compareExpressionsInternal) {
     return this->processCompareExpressions(false);
   } else if ("/" + global.requestType == WebAPI::request::onePageJS) {
@@ -741,4 +743,10 @@ bool WebAPIResponse::processSubmitAnswers() {
   MacroRegisterFunctionWithName("WebWorker::processSubmitAnswers");
   this->owner->setHeaderOKNoContentLength("");
   return global.response.writeResponse(WebAPIResponse::submitAnswersJSON());
+}
+
+bool WebAPIResponse::processSubmitAnswerHardcoded() {
+  MacroRegisterFunctionWithName("WebWorker::processSubmitAnswerHardcoded");
+  this->owner->setHeaderOKNoContentLength("");
+  return global.response.writeResponse(WebAPIResponse::submitAnswersHardcoded(true));
 }

@@ -125,7 +125,7 @@ std::string WebAPI::request::compareExpressions           = "compareExpressions"
 std::string WebAPI::request::compareExpressionsInternal   = "compareExpressionsInternal"  ;
 std::string WebAPI::request::compareExpressionsGiven      = "compareExpressionsGiven"     ;
 std::string WebAPI::request::compareExpressionsDesired    = "compareExpressionsDesired"   ;
-std::string WebAPI::request::checkAnswer                  = "checkAnswer"                 ;
+std::string WebAPI::request::submitAnswerHardcoded        = "submitAnswerHardcoded"       ;
 
 std::string WebAPI::request::slides::source               = "slidesSource"                ;
 std::string WebAPI::request::slides::pdfFromSource        = "slidesFromSource"            ;

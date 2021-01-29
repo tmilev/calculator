@@ -4038,6 +4038,7 @@ void WebServer::initializeMainRequests() {
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::compareExpressions);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::userInfoJSON);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::serverStatusJSON);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::submitAnswerHardcoded);
 }
 
 void WebServer::initializeMainAddresses() {

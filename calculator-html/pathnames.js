@@ -19,6 +19,9 @@ const urlFields = {
     indicator: "indicator",
     pause: "pause",
     unpause: "unpause",
+    answerId: "answerId",
+    answerValue: "answerValue",
+    answerCheck: "answerCheck",
     slidesFromSource: "slidesFromSource",
     homeworkFromSource: "homeworkFromSource",
     sourceSlides: "slidesSource",
@@ -37,6 +40,7 @@ const urlFields = {
     calculatorExamplesJSON: "calculatorExamplesJSON",
     solveJSON: "solveJSON",
     compareExpressions: "compareExpressions",
+    submitAnswerHardcoded: "submitAnswerHardcoded",
     expressionGiven: "compareExpressionsGiven",
     expressionDesired: "compareExpressionsDesired",
     calculatorCompute: "compute",
@@ -168,6 +172,32 @@ class Addresses {
     result += `${urlFields.requests.expressionDesired}=${encodedDesired}&`;
     if (debug) {
       result += `${urlFields.debugFlag}=true&`;
+    }
+    return result;
+  }
+
+  submitAnswerHardcoded(
+    /**@type{string} */
+    answerId,
+    /**@type{string} */
+    answerGiven,
+    /**@type{string} */
+    answerCheck,
+    /**@type{boolean} */
+    debug,
+  ) {
+    let result = `${urls.calculatorAPI}?`;
+    result += `${urlFields.request}=${urlFields.requests.submitAnswerHardcoded}&`;
+    let encodedAnswerId = encodeURIComponent(answerId);
+    let encodedGiven = encodeURIComponent(answerGiven);
+    let encodedCheck = encodeURIComponent(answerCheck);
+    result += `${urlFields.requests.answerId}=${encodedAnswerId}&`;
+    result += `${urlFields.requests.answerValue}=${encodedGiven}&`;
+    result += `${urlFields.requests.answerCheck}=${encodedCheck}&`;
+    if (debug) {
+      result += `${urlFields.debugFlag}=true&`;
+    } else {
+      result += `${urlFields.debugFlag}=false&`;
     }
     return result;
   }

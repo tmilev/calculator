@@ -53,6 +53,7 @@ class WebAPIResponse {
   bool processCompute();
   bool processCalculatorExamplesJSON();
   bool processSubmitAnswers();
+  bool processSubmitAnswerHardcoded();
   bool processSubmitAnswersPreview();
   bool processServerStatusJSON();
   bool processSetProblemWeight();
@@ -105,6 +106,7 @@ class WebAPIResponse {
 
   static JSData submitAnswersPreviewJSON();
   static JSData submitAnswersJSON();
+  JSData submitAnswersHardcoded(bool hideDesiredAnswer);
   static JSData getProblemSolutionJSON();
   static JSData getAnswerOnGiveUp();
 

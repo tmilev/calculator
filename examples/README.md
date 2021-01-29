@@ -3304,6 +3304,15 @@ Converts a sum to a sequence containing the summands.
 ```
 Sorts interval union. 
 
+*BelongsTo* [BelongsTo] {CalculatorFunctionsListsAndSets::belongsTo}.
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22BelongsTo%28x%2c%28x%2cy%2cz%29%29%3b%5cnBelongsTo%28x%2c%28w%2cy%2cz%29%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+BelongsTo(x,(x,y,z));
+BelongsTo(x,(w,y,z));
+
+```
+Returns 1 if an element belongs to a list, 0 otherwise. 
+
 *CompareIntervalsNumerically* [CompareIntervalsNumerically] {CalculatorFunctions::innerCompareIntervalsNumerically}.
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25UseBracketForIntervals%5cn%20%20CompareIntervalsNumerically%28%5b3%2c7%29%5c%5ccup%20%5b8%2c9%5d%2c%20%5b3%2c7.00000001%29%5c%5ccup%20%5b7.9999999%2c%209%5d%2c%200.0001%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```

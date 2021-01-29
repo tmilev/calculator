@@ -62,14 +62,28 @@ class HardCodedProblem {
   }
 
   createAnswers(
+    /**@type{HTMLElement[]} */
     answersElements,
     /**@type{boolean} */
     hardCoded,
   ) {
     for (let i = 0; i < answersElements.length; i++) {
+      let element = answersElements[i];
+      let answerString = "";
+      let answerCheck = "";
+      if (hardCoded) {
+        answerString = element.textContent;
+      } else {
+        answerString = element.getAttribute("answer");
+        if (answerString === null || answerString === undefined) {
+          answerString = "";
+        }
+        answerCheck = element.textContent;
+      }
       let answer = new HardCodedAnswer(
-        answersElements[i],
-        answersElements[i].textContent,
+        element,
+        answerString,
+        answerCheck,
         this.calculatorServer,
         hardCoded,
       );
@@ -86,6 +100,8 @@ class HardCodedAnswer {
     element,
     /**@type{string} */
     desiredAnswer,
+    /**@type{string} */
+    answerCheck,
     /**@type{string} */
     calculatorServer,
     /**@type{boolean} */
@@ -112,6 +128,8 @@ class HardCodedAnswer {
     this.buttonOptions = this.element.getAttribute("buttons");
     /**@type{string} */
     this.desiredAnswer = desiredAnswer;
+    /**@type{string} */
+    this.answerCheck = answerCheck;
     /**@type{AnswerPanel|null} */
     this.answerPanel = null;
     /**@type{HTMLElement|null} */
@@ -135,7 +153,7 @@ class HardCodedAnswer {
     this.element.style.display = "";
     // non-null non-undefined means create answer button
     let idButtonAnswer = "";
-    if (this.forReal) {
+    if (this.forReal || this.desiredAnswer == "") {
       idButtonAnswer = null;
     }
     this.answerPanel = new AnswerPanel({
@@ -174,7 +192,7 @@ class HardCodedAnswer {
     }
     let givenData = this.answerPanel.panel.equationEditor.rootNode.toLatex();
     let urlRelative = pathnames.addresses.submitAnswerHardcoded(
-      this.answerId, givenData, this.desiredAnswer, false,
+      this.answerId, givenData, this.answerCheck, false,
     );
     let url = this.calculatorServer + urlRelative;
     submit.submitGET({

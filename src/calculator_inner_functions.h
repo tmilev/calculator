@@ -210,6 +210,7 @@ public:
   static bool unionEmptySet(Calculator& calculator, const Expression& input, Expression& output);
   static bool lastElement(Calculator& calculator, const Expression& input, Expression& output);
   static bool removeLastElement(Calculator& calculator, const Expression& input, Expression& output);
+  static bool belongsTo(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 class CalculatorFunctionsIntervals {

@@ -2409,6 +2409,17 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationHandler(
+    "BelongsTo",
+    CalculatorFunctionsListsAndSets::belongsTo,
+    "",
+    "Returns 1 if an element belongs to a list, 0 otherwise. ",
+    "BelongsTo(x,(x,y,z));\n"
+    "BelongsTo(x,(w,y,z));\n",
+    "CalculatorFunctionsListsAndSets::belongsTo",
+    "BelongsTo",
+    innerStandard
+  );
+  this->addOperationHandler(
     "CompareIntervalsNumerically",
     CalculatorFunctions::innerCompareIntervalsNumerically,
     "",

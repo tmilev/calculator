@@ -2265,6 +2265,24 @@ bool CalculatorFunctionsListsAndSets::listUnion(
   return true;
 }
 
+bool CalculatorFunctionsListsAndSets::belongsTo(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsListsAndSets::listUnion");
+  if (input.size() != 3) {
+    return false;
+  }
+  if (!input[2].isSequenceNElements()) {
+    return false;
+  }
+  for (int i = 1; i < input[2].size(); i ++) {
+    if (input[1] == input[2][i]) {
+      return output.assignValue(1, calculator);
+    }
+  }
+  return output.assignValue(0, calculator);
+}
+
 bool CalculatorFunctionsListsAndSets::unionNoRepetition(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

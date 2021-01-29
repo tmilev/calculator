@@ -2110,6 +2110,7 @@ bool CalculatorFunctions::innerGaussianEliminationMatrix(
   std::stringstream out;
   FormatExpressions format;
   format.flagUseFrac = true;
+  format.flagUseHTML = true;
   matrix.gaussianEliminationByRows(nullptr, nullptr, nullptr, &out, &format);
   return output.assignValue(out.str(), calculator);
 }

@@ -1072,7 +1072,6 @@ class CanvasTwoD {
     /**@type{HTMLElement} */
     messages,
   ) {
-    this.canvasResetFunction = null;
     this.theObjects = [];
     this.surface = null;
     this.canvasContainer = inputCanvas;
@@ -1468,7 +1467,6 @@ class Canvas {
     this.canvasContainer = inputCanvas;
     this.spanControls = controls;
     this.spanMessages = messages;
-    this.canvasResetFunction = null;
     this.theIIIdObjects = {
       thePatches: [],
       theContours: [],

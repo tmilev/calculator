@@ -28,6 +28,7 @@ class GraphicsSerialization {
     };
   }
 
+  /**@returns {CanvasTwoD|CanvasThreeD|null} */
   fromJSON(
     input,
     /**@type{HTMLCanvasElement} */
@@ -40,16 +41,15 @@ class GraphicsSerialization {
     let graphicsType = input["graphicsType"];
     switch (graphicsType) {
       case "twoDimensional":
-        this.twoDimensionalGraphics(input, canvas, controls, messages);
-        return;
+        return this.twoDimensionalGraphics(input, canvas, controls, messages);
       case "threeDimensional":
-        this.threeDimensionalGraphics(input, canvas, controls, messages);
-        return;
+        return this.threeDimensionalGraphics(input, canvas, controls, messages);
       default:
         throw `Unknown graphics type ${graphicsType}.`;
     }
   }
 
+  /**@returns {CanvasTwoD} */
   twoDimensionalGraphics(
     input,
     /**@type{HTMLCanvasElement}*/
@@ -69,8 +69,10 @@ class GraphicsSerialization {
       this.oneTwoDimensionalObject(plotObjects[i], canvas);
     }
     canvas.redraw();
+    return canvas;
   }
 
+  /**@returns{CanvasThreeD} */
   threeDimensionalGraphics(
     input,
     /**@type{HTMLCanvasElement}*/
@@ -93,6 +95,7 @@ class GraphicsSerialization {
       canvas.setBoundingBoxAsDefaultViewWindow();
     }
     canvas.redraw();
+    return canvas;
   }
 
   oneTwoDimensionalObject(

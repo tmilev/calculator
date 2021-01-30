@@ -16,6 +16,37 @@ class ElementWithScripts {
     };
     /**@type{HTMLElement|null} */
     this.element = null;
+    /**@type{Object.<string,HTMLInputElement>} */
+    this.sliders = {};
+  }
+
+  accountOneScript(
+    /**@type{HTMLElement} */
+    script,
+  ) {
+    let content = script.textContent;
+    let scriptType = script.getAttribute("scriptType");
+    if (scriptType in this.scriptContents) {
+      this.scriptContents[scriptType].push(content);
+    } else {
+      throw `Unrecognized script type ${scriptType}.`;
+    }
+    script.setAttribute("scriptType", "processed");
+  }
+
+  accountOneSlider(
+    /**@type{HTMLInputElement} */
+    slider,
+  ) {
+    let sliderName = slider.getAttribute("name");
+    if (sliderName === "" || sliderName === null || sliderName === undefined) {
+      return;
+    }
+    if (sliderName in this.sliders) {
+      console.log(`Slider name ${sliderName} already present in current element.`);
+      return;
+    }
+    this.sliders[sliderName] = slider;
   }
 
   bootstrapAllScripts(
@@ -25,15 +56,11 @@ class ElementWithScripts {
     this.element = element;
     let incomingScripts = this.element.getElementsByTagName("script");
     for (let i = 0; i < incomingScripts.length; i++) {
-      let current = incomingScripts[i];
-      let content = current.textContent;
-      let scriptType = current.getAttribute("scriptType");
-      if (scriptType in this.scriptContents) {
-        this.scriptContents[scriptType].push(content);
-      } else {
-        throw `Unrecognized script type ${scriptType}.`;
-      }
-      current.setAttribute("scriptType", "processed");
+      this.accountOneScript(incomingScripts[i]);
+    }
+    let candidateSliders = this.element.getElementsByTagName("input");
+    for (let i = 0; i < candidateSliders.length; i++) {
+      this.accountOneSlider(candidateSliders[i]);
     }
     this.bootstrapGraphics3d();
     this.bootstrapGraphics();
@@ -67,7 +94,16 @@ class ElementWithScripts {
     console.log("DEBUG: bootstrap graphics: " + JSON.stringify(graphics));
     let canvases = this.element.querySelectorAll(`[name="${canvasName}"]`);
     let controls = this.element.querySelectorAll(`[name="${controlsName}"]`);
-    graphicsSerialization.fromJSON(graphics, canvases[0], controls[0], null);
+    if (canvases.length < 1) {
+      throw "Unexpected missing canvas.";
+    }
+    let canvas = graphicsSerialization.fromJSON(graphics, canvases[0], controls[0], null);
+    for (let label in this.sliders) {
+      let current = this.sliders[label];
+      current.addEventListener("input", () => {
+        canvas.redraw();
+      });
+    }
   }
 
   bootstrapGraphicsNDimensional() {

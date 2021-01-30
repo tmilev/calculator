@@ -83,10 +83,6 @@ class Calculator {
     this.parsedComputation = {};
     /** @type {panels.PanelExpandableData[]}*/
     this.panels = [];
-    this.inputBoxNames = [];
-    this.inputBoxToSliderUpdaters = {};
-    this.scriptContents = {};
-    this.canvases = null;
     this.examples = null;
     this.submissionCalculatorCounter = 0;
     this.lastSubmittedInput = "";
@@ -182,28 +178,11 @@ class Calculator {
       let current = elements[i];
       node.element.addEventListener("input", () => {
         current.value = node.element.value;
-        this.updateGraphics(name);
       });
       current.addEventListener("input", () => {
         node.element.value = current.value;
-        this.updateGraphics(name);
       });
     }
-  }
-
-  updateGraphics(graphicsName) {
-    let plodtId = drawing.plotUpdaters[graphicsName];
-    if (plodtId === undefined) {
-      return;
-    }
-    let canvas = drawing.canvases[plodtId];
-    if (canvas === undefined) {
-      return;
-    }
-    if (canvas.canvasResetFunction === null) {
-      return;
-    }
-    canvas.canvasResetFunction();
   }
 
   adjustCalculatorPageSize() {
@@ -369,7 +348,7 @@ class Calculator {
     if (inputParsed.syntaxErrors !== undefined) {
       buffer.write(inputParsed.syntaxErrors);
     }
-    buffer.write(`<table class = "tableCalculatorOutput"><tr><th>Input</th><th>Output</th></tr>`);
+    buffer.write(`<table class='tableCalculatorOutput'><tr><th>Input</th><th>Output</th></tr>`);
     if (typeof inputParsed.result.input === "string") {
       inputParsed.result.input = [inputParsed.result.input];
     }
@@ -392,8 +371,8 @@ class Calculator {
         ));
       }
       buffer.write(`<tr>`);
-      buffer.write(`<td class = "cellCalculatorInput"><div id = "${inputPanelId}"></div></td>`);
-      buffer.write(`<td class = "cellCalculatorResult"><div id = "${outputPanelId}"></div></td>`);
+      buffer.write(`<td class='cellCalculatorInput'><div id='${inputPanelId}'></div></td>`);
+      buffer.write(`<td class='cellCalculatorResult'><div id='${outputPanelId}'></div></td>`);
       buffer.write(`</tr>`);
     }
     buffer.write(`</table>`);
@@ -403,7 +382,7 @@ class Calculator {
     if (performance !== undefined) {
       let content = performance[pathnames.urlFields.result.comments];
       let label = `<b style='color:blue'>${performance[pathnames.urlFields.result.computationTime]}</b>`;
-      buffer.write(`<div id = '${ids.domElements.divPerformance}'></div>`);
+      buffer.write(`<div id='${ids.domElements.divPerformance}'></div>`);
       panelData.push(new panels.PanelExpandableData(
         content,
         ids.domElements.divPerformance,

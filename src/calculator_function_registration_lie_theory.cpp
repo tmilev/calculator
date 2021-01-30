@@ -16,7 +16,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   Function::Options innerInvisibleExperimental = Function::Options::innerInvisibleExperimental();
   Function::Options innerAdminNoTestExperimental = Function::Options::innerAdminNoTestExperimental();
   Function::Options innerExperimental = Function::Options::experimental();
-  Function::Options innerAdminNoTestInvisibleOffByDefault = Function::Options::innerAdminNoTestInvisibleOffByDefault();
+  Function::Options adminNoTestInvisibleOffByDefault = Function::Options::adminNoTestInvisibleOffByDefault();
+  Function::Options adminNoTestInvisibleExperimental = Function::Options::adminNoTestInvisibleExperimental();
   Function::Options innerInvisibleNoTest = Function::Options::invisibleNoTest();
   Function::Options innerExperimentalNoTest = Function::Options::innerNoTestExperimental();
 
@@ -797,7 +798,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     ")",
     "CalculatorFunctions::innerFindProductDistanceModN",
     "PrintProductDistancesModN",
-    innerAdminNoTestInvisibleOffByDefault
+    adminNoTestInvisibleOffByDefault
   );
   this->addOperationHandler(
     "SolveProductSumEquationOverSetModN",
@@ -810,7 +811,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "theSet = (97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122)) ",
     "CalculatorFunctions::innerFindProductDistanceModN",
     "SolveProductSumEquationOverSetModN",
-    innerAdminNoTestInvisibleOffByDefault
+    adminNoTestInvisibleOffByDefault
   );
   this->addOperationHandler(
     "ComputeFKFT",
@@ -1401,7 +1402,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "HyperOctahedralIrreps(3)",
     "CalculatorFunctionsWeylGroup::hyperOctahedralAllModulesInducedFromSpechtModules",
     "HyperOctahedralIrreps",
-    innerAdminNoTest
+    adminNoTestInvisibleExperimental
   );
   this->addOperationHandler(
     "SpechtModule",
@@ -1421,7 +1422,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "HyperOctahedralRepresentation((1, 1), (1))",
     "CalculatorFunctionsWeylGroup::hyperOctahedralAllModulesInducedFromSpechtModules",
     "HyperOctahedralRepresentation",
-    innerAdminNoTest
+    adminNoTestInvisibleExperimental
   );
   this->addOperationHandler(
     "HyperOctahedralGeneratorPrint",

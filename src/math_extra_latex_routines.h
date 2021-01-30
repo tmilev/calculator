@@ -33,15 +33,13 @@ class LaTeXCrawler {
     bool fromString(const std::string& input, std::stringstream* commentsOnFailure);
   };
   int recursionDepth;
-  std::string theFileNameToCrawlPhysicalNoPathName;
-  std::string theFileNameToCrawlPhysicalWithPath;
-  std::string theFileNameToCrawlRelative;
+  std::string fileNameToCrawlPhysicalNoPathName;
+  std::string fileNameToCrawlPhysicalWithPath;
+  std::string fileNameToCrawlRelative;
   std::string baseFolderStartFilePhysical;
   List<std::string> baseFoldersCrawlableFilesPhysical;
 
-  std::string theFileToCrawlContent;
-  std::string theFileNameWorkingCopy;
-  std::string theFileNameWorkinGCopyPDF;
+  std::string fileNameWorkingCopy;
 
   std::string targetLaTeX;
   std::string targetPDFbinaryContent;

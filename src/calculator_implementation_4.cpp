@@ -1399,7 +1399,7 @@ void Calculator::addOperationHandler(
   this->registerCalculatorFunction(theFun, indexOp);
 }
 
-Function::Options Function::Options::innerAdminNoTestInvisibleOffByDefault() {
+Function::Options Function::Options::adminNoTestInvisibleOffByDefault() {
   Function::Options result;
   result.flagIsInner = true;
   result.dontTestAutomatically = true;
@@ -1496,6 +1496,15 @@ Function::Options Function::Options::innerNoTestExperimental() {
   return result;
 }
 
+Function::Options Function::Options::invisibleExperimentalNoTest() {
+  Function::Options result;
+  result.flagIsInner = true;
+  result.flagIsExperimental = true;
+  result.dontTestAutomatically = true;
+  result.visible = false;
+  return result;
+}
+
 Function::Options Function::Options::outerOffByDefault() {
   Function::Options result;
   result.flagIsInner = false;
@@ -1517,6 +1526,15 @@ Function::Options Function::Options::adminNoTest() {
   result.flagIsInner = true;
   result.dontTestAutomatically = true;
   result.adminOnly = true;
+  return result;
+}
+
+Function::Options Function::Options::adminNoTestInvisibleExperimental() {
+  Function::Options result;
+  result.flagIsInner = true;
+  result.dontTestAutomatically = true;
+  result.adminOnly = true;
+  result.visible = false;
   return result;
 }
 

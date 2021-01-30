@@ -5267,9 +5267,9 @@ BuildFreecalc("freecalc/homework/referenceallproblemsbycourse/calculusiii.tex");
 Builds the freecalc lecture pdfs. This function performs file operations and is allowed only to logged-in administrator accounts. Takes as arguments the lecture folder (within the freecalc project) and the file name. The function assumes the freecalc project is installed in a folder called freecalc, parallel to the calculator project folder (i.e, we have folders /vectorpartition and /freecalc next to one another). The folders are given relative to the /freecalc base.
 
 *BuildFreecalcWithSlides* [BuildFreecalcWithSlides] {CalculatorFunctions::BuildFreecalcWithSlides}.
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22BuildFreecalcWithSlides%28%5c%22freecalc%2flectures%2freferenceallproblemsbycourse%2fcalculusimasterproblemsheet.tex%5c%22%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22BuildFreecalcWithSlides%28%5c%22freecalc%2fhomework%2freferenceallproblemsbycourse%2fcalculusi.tex%5c%22%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-BuildFreecalcWithSlides("freecalc/lectures/referenceallproblemsbycourse/calculusimasterproblemsheet.tex");
+BuildFreecalcWithSlides("freecalc/homework/referenceallproblemsbycourse/calculusi.tex");
 ```
 Same as BuildFreeCalc but attempts to also build individual slides. 
 

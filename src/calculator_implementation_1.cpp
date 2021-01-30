@@ -150,22 +150,25 @@ std::string GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder =
 std::string GlobalVariables::hopefullyPermanent_HTTPS_WebAdressJavascriptFolder =
 "https://calculator-algebra.org/";
 
-std::string Calculator::toStringSemismipleLieAlgebraLinksFromHD(const DynkinType& theType, FormatExpressions* theFormat) {
+std::string Calculator::toStringSemismipleLieAlgebraLinksFromHD(
+  const std::string& prefixFolder,
+  const DynkinType& dynkinType,
+  FormatExpressions* theFormat
+) {
   (void) theFormat;
   std::stringstream out;
   SemisimpleLieAlgebra folderComputer;
-  folderComputer.weylGroup.dynkinType = theType;
-  std::string prefixFolder = "calculator/";
+  folderComputer.weylGroup.dynkinType = dynkinType;
   out << "<tr><td><a href='"
   << folderComputer.toStringDisplayFolderName(prefixFolder)
   << folderComputer.toStringFileNameNoPathStructureConstants()
   << "'>"
-  << theType[0].theLetter << theType[0].theRank << " structure constants</a></td>\n ";
-  if (theType[0].hasPrecomputedSubalgebras()) {
+  << dynkinType[0].theLetter << dynkinType[0].theRank << " structure constants</a></td>\n ";
+  if (dynkinType[0].hasPrecomputedSubalgebras()) {
     out << "<td><a href='"
     << folderComputer.toStringDisplayFolderName(prefixFolder) << folderComputer.toStringFileNameNoPathSemisimpleSubalgebras()
     << "'>"
-    << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a>";
+    << dynkinType[0].theLetter << dynkinType[0].theRank << " semisimple subalgebras</a>";
     out << "</td>\n ";
   } else {
     out << "<td>Not available</td>\n";
@@ -173,12 +176,12 @@ std::string Calculator::toStringSemismipleLieAlgebraLinksFromHD(const DynkinType
   out << "<td><a href=\""
   << folderComputer.toStringDisplayFolderName(prefixFolder)
   << folderComputer.toStringFileNameRelativePathSlTwoSubalgebras() << "\">"
-  << theType[0].theLetter << theType[0].theRank << " sl(2) triples</a></td>\n";
+  << dynkinType[0].theLetter << dynkinType[0].theRank << " sl(2) triples</a></td>\n";
   out << "<td><a href=\""
   << folderComputer.toStringDisplayFolderName(prefixFolder)
   << folderComputer.toStringFileNameNoPathRootSubalgebras()
-  << "\">" << theType[0].theLetter
-  << theType[0].theRank << " root subalgebras</a></td>\n";
+  << "\">" << dynkinType[0].theLetter
+  << dynkinType[0].theRank << " root subalgebras</a></td>\n";
   return out.str();
 }
 

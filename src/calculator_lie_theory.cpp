@@ -2901,7 +2901,7 @@ bool CalculatorLieTheory::getLinksToSimpleLieAlgerbas(Calculator& calculator, co
   List<DynkinType> precomputedTypes;
   DynkinType::getPrecomputedDynkinTypes(precomputedTypes);
   for (int i = 0; i < precomputedTypes.size; i ++) {
-    outFromHD << calculator.toStringSemismipleLieAlgebraLinksFromHD(precomputedTypes[i]);
+    outFromHD << calculator.toStringSemismipleLieAlgebraLinksFromHD("", precomputedTypes[i]);
     if (precomputedTypes[i].hasPrecomputedSubalgebras()) {
       std::stringstream recomputeCommand;
       recomputeCommand << "PrintSemisimpleSubalgebrasRecompute{}("

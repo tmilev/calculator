@@ -1024,8 +1024,8 @@ void FileOperations::initializeFoldersSensitive() {
   folderSubstitutionsSensitive.setKeyValue("/LogFiles/", "LogFiles/");
   folderSubstitutionsSensitive.setKeyValue("configuration/", "configuration/");
   folderSubstitutionsSensitive.setKeyValue("/configuration/", "configuration/");
-  folderSubstitutionsSensitive.setKeyValue("freecalc/", "../freecalc/");
-  folderSubstitutionsSensitive.setKeyValue("/freecalc/", "../freecalc/");
+  folderSubstitutionsSensitive.setKeyValue(Configuration::freecalc, "../freecalc/");
+  folderSubstitutionsSensitive.setKeyValue("/" + Configuration::freecalc, "../freecalc/");
   folderSubstitutionsSensitive.setKeyValue("database_fallback/database.json", "database_fallback/database.json");
   folderSubstitutionsSensitive.setKeyValue("/database_fallback/database.json", "database_fallback/database.json");
 }
@@ -1249,11 +1249,10 @@ bool FileOperations::openFileVirtual(
 #include <unistd.h>
 
 std::string FileOperations::getWouldBeFolderAfterHypotheticalChdirNonThreadSafe(const std::string& wouldBePath) {
+  StateMaintainerCurrentFolder maintainFolder;
   // TODO: Investigate whether this code is safe.
-  std::string currentFolder = FileOperations::getCurrentFolder();
   global.changeDirectory(wouldBePath);
   std::string result = FileOperations::getCurrentFolder();
-  global.changeDirectory(currentFolder);
   return result;
 }
 
@@ -2222,6 +2221,10 @@ std::string StringRoutines::replaceAll(
     }
   }
   return out.str();
+}
+
+bool StringRoutines::stringContains(const std::string& desiredContainer, const std::string& content) {
+  return desiredContainer.find(content) != std::string::npos;
 }
 
 bool StringRoutines::replaceOnce(

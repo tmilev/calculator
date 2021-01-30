@@ -7323,7 +7323,7 @@ bool CalculatorFunctionsFreecalc::crawlTexFile(
   }
   LaTeXCrawler theCrawler;
   theCrawler.ownerCalculator = &calculator;
-  theCrawler.theFileNameToCrawlRelative = argument;
+  theCrawler.fileNameToCrawlRelative = argument;
   theCrawler.crawl();
   return output.assignValue(theCrawler.displayResult.str(), calculator);
 }
@@ -7356,17 +7356,19 @@ bool CalculatorFunctionsFreecalc::buildFreecalcSingleSlides(
     out << "Command available to logged-in admins only. ";
     return output.assignValue(out.str(), calculator);
   }
-  if (!input.isOfType<std::string>()) {
+  if (input.size() != 2) {
+    return false;
+  }
+  if (!input[1].isOfType<std::string>()) {
     return calculator << "<hr>Input " << input.toString() << " is not of type string. ";
   }
-  LaTeXCrawler theCrawler;
-  theCrawler.flagBuildSingleSlides = true;
-  theCrawler.ownerCalculator = &calculator;
-  theCrawler.theFileNameToCrawlRelative = input.getValue<std::string>();
-  std::string startingFolder = FileOperations::getCurrentFolder();
-  theCrawler.buildFreecalc();
-  global.changeDirectory(startingFolder);
-  return output.assignValue(theCrawler.displayResult.str(), calculator);
+  LaTeXCrawler crawler;
+  crawler.flagBuildSingleSlides = true;
+  crawler.ownerCalculator = &calculator;
+  crawler.fileNameToCrawlRelative = input[1].getValue<std::string>();
+  StateMaintainerCurrentFolder maintainFolder;
+  crawler.buildFreecalc();
+  return output.assignValue(crawler.displayResult.str() + crawler.errorStream.str(), calculator);
 }
 
 bool CalculatorFunctionsFreecalc::buildFreecalc(
@@ -7387,7 +7389,7 @@ bool CalculatorFunctionsFreecalc::buildFreecalc(
   LaTeXCrawler crawler;
   crawler.flagBuildSingleSlides = false;
   crawler.ownerCalculator = &calculator;
-  crawler.theFileNameToCrawlRelative = input[1].getValue<std::string>();
+  crawler.fileNameToCrawlRelative = input[1].getValue<std::string>();
   std::string startingFolder = FileOperations::getCurrentFolder();
   crawler.buildFreecalc();
   global.changeDirectory(startingFolder);

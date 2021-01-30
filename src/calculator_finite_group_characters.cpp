@@ -2353,33 +2353,39 @@ bool CalculatorFunctionsWeylGroup::hyperOctahedralAllModulesInducedFromSpechtMod
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::hyperOctahedralAllModulesInducedFromSpechtModules");
-  int theRank = 0;
-  if (!input.isSmallInteger(&theRank)) {
+  if (input.size() != 2) {
     return false;
   }
-  if (theRank < 1|| theRank > 7) {
+  int rank = 0;
+  if (!input[1].isSmallInteger(&rank)) {
+    return false;
+  }
+  if (rank < 1|| rank > 7) {
     return calculator << "Input of hyperoctahedral print function has to be between 1 and 10";
   }
-  HyperoctahedralGroupData G;
-  G.makeHyperoctahedralGroup(theRank);
-  G.allSpechtModules();
-  return output.assignValue(G.theGroup->prettyPrintCharacterTable(), calculator);
+  HyperoctahedralGroupData groupData;
+  groupData.makeHyperoctahedralGroup(rank);
+  groupData.allSpechtModules();
+  return output.assignValue(groupData.theGroup->prettyPrintCharacterTable(), calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::hyperOctahedralPrintGeneratorCommutationRelations(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::hyperOctahedralPrintGeneratorCommutationRelations");
-  int theRank = 0;
-  if (!input.isSmallInteger(&theRank)) {
+  if (input.size() != 2) {
     return false;
   }
-  if (theRank < 1 || theRank > 10) {
+  int rank = 0;
+  if (!input[1].isSmallInteger(&rank)) {
+    return false;
+  }
+  if (rank < 1 || rank > 10) {
     return calculator << "Input of hyperoctahedral print function has to be between 1 and 10";
   }
-  HyperoctahedralGroupData G;
-  G.makeHyperoctahedralGroup(theRank);
-  return output.assignValue(G.theGroup->prettyPrintGeneratorCommutationRelations(), calculator);
+  HyperoctahedralGroupData groupData;
+  groupData.makeHyperoctahedralGroup(rank);
+  return output.assignValue(groupData.theGroup->prettyPrintGeneratorCommutationRelations(), calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::weylGroupElement(

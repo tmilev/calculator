@@ -11,6 +11,7 @@ void Calculator::initializeFunctionsExtra() {
   Function::Options innerNoTest = Function::Options::innerNoTest();
   Function::Options innerAdminNoTest = Function::Options::adminNoTest();
   Function::Options innerInvisibleNoTest = Function::Options::invisibleNoTest();
+  Function::Options innerInvisibleExperimentalNoTest = Function::Options::invisibleNoTest();
   Function::Options innerFreezesArguments = Function::Options::innerFreezesArguments();
   // Function::Options innerNoTestExperimental = Function::Options::innerNoTestExperimental();
   // Function::Options innerExperimental = Function::Options::experimental();
@@ -237,7 +238,7 @@ void Calculator::initializeFunctionsExtra() {
     "FormatCPPCode{}(\"src/database.cpp\")",
     "Calculator::innerFormatCPPSourceCode",
     "FormatCPPCode",
-    innerInvisibleNoTest
+    innerInvisibleExperimentalNoTest
   );
   this->addOperationHandler(
     "formatCPPDirectory",
@@ -349,7 +350,7 @@ void Calculator::initializeFunctionsExtra() {
     CalculatorFunctionsFreecalc::buildFreecalcSingleSlides,
     "",
     "Same as BuildFreeCalc but attempts to also build individual slides. ",
-    "BuildFreecalcWithSlides(\"freecalc/lectures/referenceallproblemsbycourse/calculusimasterproblemsheet.tex\");",
+    "BuildFreecalcWithSlides(\"freecalc/homework/referenceallproblemsbycourse/calculusi.tex\");",
     "CalculatorFunctions::BuildFreecalcWithSlides",
     "BuildFreecalcWithSlides",
     innerAdminNoTest

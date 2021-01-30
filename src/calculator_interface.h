@@ -791,12 +791,13 @@ class Function {
     bool dontTestAutomatically;
     bool adminOnly;
     void reset();
+    static Options adminNoTestInvisibleExperimental();
     static Options adminNoTest();
     static Options innerInvisible();
     static Options standard();
     static Options compositeStandard();
     static Options innerFreezesArguments();
-    static Options innerAdminNoTestInvisibleOffByDefault();
+    static Options adminNoTestInvisibleOffByDefault();
     static Options innerInvisibleExperimental();
     static Options innerAdminNoTestExperimental();
     static Options innerAdminNoTest();
@@ -806,6 +807,7 @@ class Function {
     static Options invisibleNoTest();
     static Options innerNoTest();
     static Options innerNoTestExperimental();
+    static Options invisibleExperimentalNoTest();
     static Options outerOffByDefault();
     Options();
   };
@@ -1451,7 +1453,9 @@ public:
   int addChildExpression(const Expression& child);
   void registerCalculatorFunction(Function& inputFunction, int indexOperation);
   std::string toStringSemismipleLieAlgebraLinksFromHD(
-    const DynkinType& theType, FormatExpressions* theFormat = nullptr
+    const std::string& prefixFolder,
+    const DynkinType& dynkinType,
+    FormatExpressions* theFormat = nullptr
   );
   bool isBoundVariableInContext(int inputOp);
   bool isNonBoundVariableInContext(int inputOp);

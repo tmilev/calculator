@@ -39,6 +39,10 @@ class AtomHandler {
     this.example = input.example;
     this.atom = input.atom;
     this.ruleName = input.ruleName;
+    this.visible = true;
+    if (input.visible === "false") {
+      this.visible = false;
+    }
     if (input.composite === "true" || input.composite === true) {
       this.composite = true;
     } else {
@@ -98,11 +102,14 @@ class Calculator {
 
   processOneFunctionAtom(handlers) {
     let resultStrings = [];
+    console.log("DEBUG: visibility adjust!")
     for (let i = 0; i < handlers.length; i++) {
-      resultStrings.push("<br>");
       let handler = new AtomHandler();
       handler.fromObject(handlers[i], i, handlers.length);
-      resultStrings.push(handler.toString(this));
+      if (handler.visible || true) {
+        resultStrings.push("<br>");
+        resultStrings.push(handler.toString(this));
+      }
     }
     return resultStrings.join("");
   }

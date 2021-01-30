@@ -162,6 +162,7 @@ class GraphicsSerialization {
           numberOfSegments, color, lineWidth,
         );
         return;
+      case "points":
       case "path":
       case "segment":
         canvas.drawPath(points, color, lineWidth);

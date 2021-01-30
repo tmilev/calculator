@@ -841,7 +841,7 @@ JSData PlotObject::toJSON() {
     result = this->toJSONParametricCurveInTwoDimensions();
   } else if (correctedPlotType == "plotDirectionField") {
     result = this->toJSONDirectionFieldInTwoDimensions() ;
-  } else if (correctedPlotType == "points") {
+  } else if (correctedPlotType == PlotObject::Labels::points) {
     result = this->toJSONPoints();
   } else if (correctedPlotType == "label") {
     result = this->toJSONDrawText();

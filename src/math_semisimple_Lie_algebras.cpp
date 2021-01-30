@@ -19,7 +19,7 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* theFormat) {
     hLetter = theFormat->chevalleyHgeneratorLetter;
     gLetter = theFormat->chevalleyGgeneratorLetter;
   }
-  out << "Type " << this->weylGroup.theDynkinType.toString() << ".";
+  out << "Type " << this->weylGroup.dynkinType.toString() << ".";
   out << "The letter " << HtmlRoutines::getMathNoDisplay(hLetter)
   << " stands for elements of the Cartan subalgebra, <br>"
   << " the letter " << HtmlRoutines::getMathNoDisplay(gLetter)
@@ -145,7 +145,7 @@ std::string SemisimpleLieAlgebra::toStringMenuStructurePages(
   } else {
     out << "<b>sl(2)-subalgebras</b>.<br>";
   }
-  if (this->weylGroup.theDynkinType.hasPrecomputedSubalgebras()) {
+  if (this->weylGroup.dynkinType.hasPrecomputedSubalgebras()) {
     if (includeSemisimpleSubalgebras) {
       out
       << "<a href = '" << relativeTo
@@ -174,7 +174,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculator(
   if (!Verbose) {
     out << "<br>To get extra details: ";
     std::stringstream tempStream;
-    tempStream << "PrintSemisimpleLieAlgebra{}(" << theWeyl.theDynkinType << ")";
+    tempStream << "PrintSemisimpleLieAlgebra{}(" << theWeyl.dynkinType << ")";
     out << HtmlRoutines::getCalculatorComputationAnchorNewPage(tempStream.str(), "")
     << "<br>";
   } else {
@@ -269,12 +269,12 @@ std::string SemisimpleLieAlgebra::toHTMLCalculator(
   }
   out << "</table>";
   DynkinSimpleType tempSimpleType;
-  if (theWeyl.theDynkinType.isSimple(
+  if (theWeyl.dynkinType.isSimple(
     &tempSimpleType.theLetter, &tempSimpleType.theRank, &tempSimpleType.CartanSymmetricInverseScale
   )) {
     if (tempSimpleType.CartanSymmetricInverseScale == 1) {
       Matrix<Rational> tempM, tempM2;
-      theWeyl.theDynkinType.getEpsilonMatrix(tempM);
+      theWeyl.dynkinType.getEpsilonMatrix(tempM);
       tempM2 = tempM;
       tempM2.transpose();
       tempM2.multiplyOnTheRight(tempM);
@@ -330,7 +330,7 @@ std::string DynkinType::toStringVirtualNameFolder() const {
 std::string SemisimpleLieAlgebra::toStringFileNameRelativePathSlTwoSubalgebras() const {
   std::stringstream out;
   out << "sl2s/sl2s_"
-  << FileOperations::cleanUpForFileNameUse(this->weylGroup.theDynkinType.toString())
+  << FileOperations::cleanUpForFileNameUse(this->weylGroup.dynkinType.toString())
   << ".html";
   return out.str();
 }
@@ -338,7 +338,7 @@ std::string SemisimpleLieAlgebra::toStringFileNameRelativePathSlTwoSubalgebras()
 std::string SemisimpleLieAlgebra::toStringFileNameNoPathSemisimpleSubalgebras() const {
   std::stringstream theFileName;
   theFileName << "semisimple_subalgebras_"
-  << FileOperations::cleanUpForFileNameUse(this->weylGroup.theDynkinType.toString())
+  << FileOperations::cleanUpForFileNameUse(this->weylGroup.dynkinType.toString())
   << ".html";
   return theFileName.str();
 }
@@ -346,7 +346,7 @@ std::string SemisimpleLieAlgebra::toStringFileNameNoPathSemisimpleSubalgebras() 
 std::string SemisimpleLieAlgebra::toStringFileNameNoPathRootSubalgebras() const {
   std::stringstream theFileName;
   theFileName << "rootSubalgebras_"
-  << FileOperations::cleanUpForFileNameUse(this->weylGroup.theDynkinType.toString())
+  << FileOperations::cleanUpForFileNameUse(this->weylGroup.dynkinType.toString())
   << ".html";
   return theFileName.str();
 }
@@ -354,7 +354,7 @@ std::string SemisimpleLieAlgebra::toStringFileNameNoPathRootSubalgebras() const 
 std::string SemisimpleLieAlgebra::toStringVirtualFolderName() const {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::toStringVirtualFolderName");
   this->checkConsistency();
-  return this->weylGroup.theDynkinType.toStringVirtualNameFolder();
+  return this->weylGroup.dynkinType.toStringVirtualNameFolder();
 }
 
 std::string SemisimpleLieAlgebra::toStringVirtualFileNameWithPathStructureConstants() const {
@@ -368,7 +368,7 @@ std::string SemisimpleLieAlgebra::toStringVirtualFileNameWithPathStructureConsta
 std::string SemisimpleLieAlgebra::toStringDisplayFolderName(const std::string& baseFolder) const {
   std::stringstream out;
   out << baseFolder << "output/semisimple_lie_algebras/"
-  << FileOperations::cleanUpForFileNameUse(this->weylGroup.theDynkinType.toString())
+  << FileOperations::cleanUpForFileNameUse(this->weylGroup.dynkinType.toString())
   << "/";
   return out.str();
 }
@@ -377,7 +377,7 @@ std::string SemisimpleLieAlgebra::toStringFileNameNoPathStructureConstants() con
   std::stringstream theFileName;
   theFileName
   << "structure_constants_notation_"
-  << FileOperations::cleanUpForFileNameUse(this->weylGroup.theDynkinType.toString())
+  << FileOperations::cleanUpForFileNameUse(this->weylGroup.dynkinType.toString())
   << ".html";
   return theFileName.str();
 }

@@ -26,8 +26,9 @@ class TransportLayerSecurityOpenSSL {
 public:
   SSL* sslData;
   X509* peer_certificate;
-  SSL_CTX* context;
-  const SSL_METHOD* theSSLMethod;
+  // One context per program as per ssl documetnation.
+  static SSL_CTX* contextGlobal;
+  static const SSL_METHOD* methodGlobal;
   TransportLayerSecurity* owner;
   std::string name;
   int errorCode;
@@ -39,23 +40,19 @@ public:
   struct errors {
     static std::string errorWantRead;
   };
-  std::string otherCertificateIssuerName, otherCertificateSubjectName;
+  std::string otherCertificateIssuerName;
+  std::string otherCertificateSubjectName;
   TransportLayerSecurityOpenSSL();
   ~TransportLayerSecurityOpenSSL();
-  void freeSSL();
-  void freeContext();
-  void freeEverythingShutdownSSL();
+  // One call per program run.
+  static void freeContextGlobal();
+  void freeSession();
   void initSSLLibrary();
   void initSSLServer();
   void initSSLClient();
   void initSSLCommon(bool isServer);
   void reset();
-  void clearErrorQueue(
-    int errorCode,
-    std::string *outputError,
-    std::stringstream* commentsGeneral,
-    bool includeNoErrorInComments
-  );
+  void clearErrorQueue(int numberOfTransferredBytes);
   bool handShakeIAmClientNoSocketCleanup(
     int inputSocketID,
     std::stringstream* commentsOnFailure,
@@ -542,7 +539,7 @@ public:
   List<char> writeBuffer;
   int readBufferStandardSize;
 
-  static TransportLayerSecurity& DefaultTLS_READ_ONLY();
+  static TransportLayerSecurity& defaultTLS_READ_ONLY();
   static const std::string fileCertificate;
   static const std::string fileKey;
   static const std::string signedFileCertificate1;
@@ -552,7 +549,7 @@ public:
   static void initializeNonThreadSafePartsCommon();
   // First call of function (with any member function) is not thread safe (must be called in a single thread).
   // Once the first function call returns, the function becomes thread-safe for all members.
-  void initializeNonThreadSafeOnFirstCall(bool IamServer);
+  void initializeNonThreadSafeOnFirstCall(bool isServer);
   int readOnce(
     int socket,
     std::string* outputError,

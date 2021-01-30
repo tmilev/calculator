@@ -3002,14 +3002,17 @@ bool CalculatorHtmlFunctions::extractCalculatorExpressionFromHtml(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::extractCalculatorExpressionFromHtml");
-  CalculatorHTML theFile;
-  if (!input.isOfType<std::string>(&theFile.parser.inputHtml)) {
+  if (input.size() != 2) {
+    return  false;
+  }
+  CalculatorHTML interpreter;
+  if (!input[1].isOfType<std::string>(&interpreter.parser.inputHtml)) {
     return calculator << "Extracting calculator expressions from html takes as input strings. ";
   }
-  if (!theFile.parseHTML(&calculator.comments)) {
+  if (!interpreter.parseHTML(&calculator.comments)) {
     return false;
   }
-  return output.assignValue(theFile.toStringExtractedCommands(), calculator);
+  return output.assignValue(interpreter.toStringExtractedCommands(), calculator);
 }
 
 std::string CalculatorHTML::answerLabels::properties = "properties";

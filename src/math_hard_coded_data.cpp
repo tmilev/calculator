@@ -32,7 +32,7 @@ void WeylGroupData::computeOrLoadCharacterTable(std::stringstream* reportStream)
   this->computeOrLoadConjugacyClasses(reportStream);
   if (this->loadCharacterTable()) {
     if (reportStream != nullptr) {
-      *reportStream << "The character table of " << this->theDynkinType.toString()
+      *reportStream << "The character table of " << this->dynkinType.toString()
       << " is precomputed (hard-coded in c++), loading directly. ";
     }
     this->flagCharTableIsComputed = true;
@@ -57,7 +57,7 @@ void WeylGroupData::computeOrLoadConjugacyClasses(std::stringstream* reportStrea
   if (this->loadConjugacyClasses()) {
     if (reportStream != nullptr) {
       *reportStream << "The conjugacy classes of "
-      << this->theDynkinType.toString()
+      << this->dynkinType.toString()
       << " are precomputed (hard-coded in c++), loading directly. ";
     }
     this->theGroup.flagCCRepresentativesComputed = true;
@@ -1173,7 +1173,7 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
     ) {
       global.fatal << "Bad input group. " << global.fatal;
     }
-    if (inputGroup.theDynkinType.toString() == "F^{1}_4") {
+    if (inputGroup.dynkinType.toString() == "F^{1}_4") {
       if (inputGroup.theGroup.conjugacyClassCount() != 25) {
         global.fatal << "Bad f4. " << global.fatal;
       }
@@ -1432,35 +1432,35 @@ bool WeylGroupData::loadSignSignatures(List<SubgroupDataRootReflections>& output
   if (!this->loadCharacterTable()) {
     return false;
   }
-  if (this->theDynkinType.toString() == "F^{1}_4") {
+  if (this->dynkinType.toString() == "F^{1}_4") {
     return LoadSignSignatureF1_4(*this, outputSubgroups);
   }
-  if (this->theDynkinType.toString() == "E^{1}_6") {
+  if (this->dynkinType.toString() == "E^{1}_6") {
     return LoadSignSignatureE1_6(*this, outputSubgroups);
   }
-  if (this->theDynkinType.toString() == "E^{1}_7") {
+  if (this->dynkinType.toString() == "E^{1}_7") {
     return LoadSignSignatureE1_7(*this, outputSubgroups);
   }
-  if (this->theDynkinType.toString() == "E^{1}_8") {
+  if (this->dynkinType.toString() == "E^{1}_8") {
     return LoadSignSignatureE1_8(*this, outputSubgroups);
   }
   return false;
 }
 
 bool WeylGroupData::loadConjugacyClasses() {
-  if (this->theDynkinType.toString() == "G^{1}_2") {
+  if (this->dynkinType.toString() == "G^{1}_2") {
     return LoadConjugacyClassesG1_2(*this);
   }
-  if (this->theDynkinType.toString() == "F^{1}_4") {
+  if (this->dynkinType.toString() == "F^{1}_4") {
     return LoadConjugacyClassesF1_4(*this);
   }
-  if (this->theDynkinType.toString() == "E^{1}_6") {
+  if (this->dynkinType.toString() == "E^{1}_6") {
     return LoadConjugacyClassesE1_6(*this);
   }
-  if (this->theDynkinType.toString() == "E^{1}_7") {
+  if (this->dynkinType.toString() == "E^{1}_7") {
     return LoadConjugacyClassesE1_7(*this);
   }
-  if (this->theDynkinType.toString() == "E^{1}_8") {
+  if (this->dynkinType.toString() == "E^{1}_8") {
     return LoadConjugacyClassesE1_8(*this);
   }
   return false;
@@ -1468,19 +1468,19 @@ bool WeylGroupData::loadConjugacyClasses() {
 
 bool WeylGroupData::loadCharacterTable() {
   bool result = false;
-  if (this->theDynkinType.toString() == "G^{1}_2") {
+  if (this->dynkinType.toString() == "G^{1}_2") {
     result = LoadCharTableG1_2(*this);
   }
-  if (this->theDynkinType.toString() == "F^{1}_4") {
+  if (this->dynkinType.toString() == "F^{1}_4") {
     result = LoadCharTableF1_4(*this);
   }
-  if (this->theDynkinType.toString() == "E^{1}_6") {
+  if (this->dynkinType.toString() == "E^{1}_6") {
     result = LoadCharTableE1_6(*this);
   }
-  if (this->theDynkinType.toString() == "E^{1}_7") {
+  if (this->dynkinType.toString() == "E^{1}_7") {
     result = LoadCharTableE1_7(*this);
   }
-  if (this->theDynkinType.toString() == "E^{1}_8") {
+  if (this->dynkinType.toString() == "E^{1}_8") {
     result = LoadCharTableE1_8(*this);
   }
   if (result) {
@@ -1758,16 +1758,16 @@ bool LoadGAPRootSystemE1_8(HashedList<Vector<Rational> >& outputRootSystem) {
 
 bool WeylGroupData::loadGAPRootSystem(HashedList<Vector<Rational> >& outputPositiveRootSystem) const {
   bool result = false;
-  if (this->theDynkinType.isOfSimpleType('F', 4)) {
+  if (this->dynkinType.isOfSimpleType('F', 4)) {
     result = LoadGAPRootSystemF1_4(outputPositiveRootSystem);
   }
-  if (this->theDynkinType.isOfSimpleType('E', 8)) {
+  if (this->dynkinType.isOfSimpleType('E', 8)) {
     result = LoadGAPRootSystemE1_8(outputPositiveRootSystem);
   }
-  if (this->theDynkinType.isOfSimpleType('E', 7)) {
+  if (this->dynkinType.isOfSimpleType('E', 7)) {
     result = LoadGAPRootSystemE1_7(outputPositiveRootSystem);
   }
-  if (this->theDynkinType.isOfSimpleType('E', 6)) {
+  if (this->dynkinType.isOfSimpleType('E', 6)) {
     result = LoadGAPRootSystemE1_6(outputPositiveRootSystem);
   }
   if (!result) {

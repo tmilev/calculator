@@ -56,7 +56,7 @@ public:
   bool flagDidSendAll;
   List<std::string> theMessageHeaderStrings;
   MapList<std::string, std::string, MathRoutines::hashString> requestHeaders;
-  int ContentLength;
+  int contentLength;
   int requestTypE;
   int connectedSocketID;
   int connectedSocketIDLastValueBeforeRelease;
@@ -327,7 +327,7 @@ public:
   void stop();
   bool restartNeeded();
   std::string toStringWorkerToWorker();
-  std::string toStringLastErrorDescription();
+  static std::string toStringLastErrorDescription();
   std::string toStringStatusActive();
   std::string toStringStatusAll();
   std::string toStringStatusForLogFile();

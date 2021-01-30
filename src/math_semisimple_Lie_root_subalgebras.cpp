@@ -1253,11 +1253,11 @@ void RootSubalgebra::toHTML(int index, FormatExpressions* theFormat) {
   myPath << this->owner->owner->toStringVirtualFolderName();
   myPath << "rootSubalgebra_" << index + 1 << ".html";
   FileOperations::openFileCreateIfNotPresentVirtual(output, myPath.str(), false, true, false);
-  output << "<html><title>" << this->getAmbientWeyl().theDynkinType.toString() << " root subalgebra of type "
+  output << "<html><title>" << this->getAmbientWeyl().dynkinType.toString() << " root subalgebra of type "
   << this->theDynkinDiagram.toString() << "</title>";
-  output << "<meta name = \"keywords\" content = \"" << this->getAmbientWeyl().theDynkinType.toString()
+  output << "<meta name = \"keywords\" content = \"" << this->getAmbientWeyl().dynkinType.toString()
   << " root subsystems, root subsystems, root systems";
-  if (this->getAmbientWeyl().theDynkinType.hasExceptionalComponent()) {
+  if (this->getAmbientWeyl().dynkinType.hasExceptionalComponent()) {
     output << ", exceptional Lie algebra";
   }
   output << " \">";
@@ -2118,7 +2118,7 @@ bool RootSubalgebras::growDynkinType(
   MacroRegisterFunctionWithName("RootSubalgebras::growDynkinType");
   input.grow(this->validScales, this->getOwnerWeyl().getDimension(), output, outputPermutationSimpleRoots);
   char theLetter;
-  if (!this->owner->weylGroup.theDynkinType.isSimple(&theLetter)) {
+  if (!this->owner->weylGroup.dynkinType.isSimple(&theLetter)) {
     return true;
   }
   for (int i = output.size - 1; i >= 0; i --) {
@@ -3034,7 +3034,7 @@ void RootSubalgebras::toHTML(FormatExpressions* theFormat) {
   output << "<meta name = \"keywords\" content = \""
   << this->theSubalgebras[0].theDynkinDiagram.toString()
   << " root subsystems, root subsystems, root systems";
-  if (this->getOwnerWeyl().theDynkinType.hasExceptionalComponent()) {
+  if (this->getOwnerWeyl().dynkinType.hasExceptionalComponent()) {
     output << ", exceptional Lie algebra";
   }
   output << " \">";
@@ -3539,7 +3539,7 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(std::string& output, bo
   int numNonSolvableNonReductive = 0;
   char simpleType;
   int theRank;
-  if (!this->getOwnerWeyl().theDynkinType.isSimple(&simpleType, &theRank)) {
+  if (!this->getOwnerWeyl().dynkinType.isSimple(&simpleType, &theRank)) {
     global.fatal << "toStringConeConditionNotSatisfying "
     << "called on a non-simple Lie algebra. " << global.fatal;
   }
@@ -3636,7 +3636,7 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
   Matrix<int> tempMat;
   char simpleType;
   int theDimension;
-  if (!this->getOwnerWeyl().theDynkinType.isSimple(&simpleType, &theDimension)) {
+  if (!this->getOwnerWeyl().dynkinType.isSimple(&simpleType, &theDimension)) {
     global.fatal << "toStringConeConditionNotSatisfying "
     << "called on a non-simple Lie algebra. " << global.fatal;
   }

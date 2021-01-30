@@ -766,7 +766,7 @@ void WebAPIResponse::getJSDataUserInfo(JSData& outputAppend, const std::string& 
   outputAppend["linkApp"] = WebAPIResponse::youHaveReachedTheBackend;
   outputAppend[WebAPI::result::loginDisabledEveryoneIsAdmin] = global.flagDisableDatabaseLogEveryoneAsAdmin;
   outputAppend[WebAPI::result::useFallbackDatabase] = !global.flagDatabaseCompiled;
-  outputAppend[WebAPI::result::httpsSupport] = global.flagSSLIsAvailable;
+  outputAppend[WebAPI::result::httpsSupport] = global.flagSSLAvailable;
   if (comments != "") {
     outputAppend[WebAPI::result::comments] = HtmlRoutines::convertStringToHtmlString(comments, false);
   }

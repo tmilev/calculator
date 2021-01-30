@@ -576,7 +576,7 @@ public:
   bool flagIrrepsAreComputed;
   bool flagCharTableIsComputed;
 
-  DynkinType theDynkinType;
+  DynkinType dynkinType;
   Matrix<Rational> cartanSymmetric;
   Matrix<Rational> coCartanSymmetric;
   Vector<Rational> rho;
@@ -667,7 +667,7 @@ public:
     this->flagDeallocated = true;
   }
   bool isOfSimpleType(char desiredType, int desiredRank) const {
-    return this->theDynkinType.isOfSimpleType(desiredType, desiredRank);
+    return this->dynkinType.isOfSimpleType(desiredType, desiredRank);
   }
   Matrix<Rational>* getMatrixFundamentalToSimpleCoords() {
     this->computeFundamentalToSimpleMatrices();
@@ -1122,7 +1122,7 @@ void WeylGroupAutomorphisms::actOn(
       this->theWeyl->reflectSimple(currentGenerator.index, outputVector);
     } else {
       if (!this->flagAllOuterAutosComputed) {
-        global.fatal << "Weyl group of type " << this->theWeyl->theDynkinType.toString()
+        global.fatal << "Weyl group of type " << this->theWeyl->dynkinType.toString()
         << " does not have its outer autos computed at a place where it should. " << global.fatal;
       }
       this->theOuterAutos.theGenerators[currentGenerator.index].actOnVectorColumn(outputVector, outputVector);

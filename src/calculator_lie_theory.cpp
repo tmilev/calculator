@@ -1470,8 +1470,8 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     theFDMod.getOwner().getRank() != theFDMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements
   ) {
     global.fatal << "The two modules have owners, "
-    << theFDMod.getOwner().weylGroup.theDynkinType.toString()
-    << " and " << theGenMod.getOwner().weylGroup.theDynkinType.toString() << ", and parabolic selections of max size "
+    << theFDMod.getOwner().weylGroup.dynkinType.toString()
+    << " and " << theGenMod.getOwner().weylGroup.dynkinType.toString() << ", and parabolic selections of max size "
     << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements
     << " and " << theFDMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements << global.fatal;
   }
@@ -2323,7 +2323,7 @@ bool CalculatorLieTheory::growDynkinType(
   tempSas.computeSl2sInitOrbitsForComputationOnDemand();
   if (!tempSas.ranksAndIndicesFit(theSmallDynkinType)) {
     return output.makeError(
-      "Error: type " + theSmallDynkinType.toString() + " does not fit inside " + theSSalg.content->weylGroup.theDynkinType.toString(),
+      "Error: type " + theSmallDynkinType.toString() + " does not fit inside " + theSSalg.content->weylGroup.dynkinType.toString(),
       calculator
     );
   }
@@ -2331,12 +2331,12 @@ bool CalculatorLieTheory::growDynkinType(
   List<List<int> > imagesSimpleRoots;
   if (!tempSas.growDynkinType(theSmallDynkinType, largerTypes, &imagesSimpleRoots)) {
     return output.makeError(
-      "Error: growing type " + theSmallDynkinType.toString() + " inside " + theSSalg.content->weylGroup.theDynkinType.toString() + " failed. ",
+      "Error: growing type " + theSmallDynkinType.toString() + " inside " + theSSalg.content->weylGroup.dynkinType.toString() + " failed. ",
       calculator
     );
   }
   std::stringstream out;
-  out << "Inside " << theSSalg.content->weylGroup.theDynkinType.toString()
+  out << "Inside " << theSSalg.content->weylGroup.dynkinType.toString()
   << ", input type " << theSmallDynkinType.toString();
   if (largerTypes.size == 0) {
     out << " cannot grow any further. ";
@@ -2393,7 +2393,7 @@ bool CalculatorLieTheory::computeSemisimpleSubalgebras(
     out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
   }
   SemisimpleSubalgebras& theSSsubalgebras =
-  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.weylGroup.theDynkinType);
+  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.weylGroup.dynkinType);
   theSSsubalgebras.flagcomputePairingTable = false;
   theSSsubalgebras.flagComputeNilradicals = false;
   theSSsubalgebras.findTheSemisimpleSubalgebrasFromScratch(
@@ -2451,7 +2451,7 @@ bool CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras(
   out << theChains.size << " chains total. <br>";
   for (int i = 0; i < theChains.size; i ++) {
     out << "<br>Chain " << i + 1 << ": LoadSemisimpleSubalgebras{}( "
-    << theSAs.owner->weylGroup.theDynkinType.toString() << ", (";
+    << theSAs.owner->weylGroup.dynkinType.toString() << ", (";
     for (int j = 0; j < theChains[i].size; j ++) {
       CalculatorConversions::innerStoreCandidateSubalgebra(
         calculator, theSAs.theSubalgebras.values[theChains[i][j]], currentChainE
@@ -2992,11 +2992,11 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
     global.fatal << "zero pointer to semisimple Lie algebra: this shouldn't happen. " << global.fatal;
   }
   SemisimpleLieAlgebra& ownerLieAlgebra = *ownerSSPointer;
-  std::string dynkinString = ownerSSPointer->weylGroup.theDynkinType.toString();
+  std::string dynkinString = ownerSSPointer->weylGroup.dynkinType.toString();
   global.relativePhysicalNameOptionalProgressReport = "progress_subalgebras_" + dynkinString;
   global.relativePhysicalNameOptionalResult = "result_subalgebras_" + dynkinString;
   SemisimpleSubalgebras& theSubalgebras =
-  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerLieAlgebra.weylGroup.theDynkinType);
+  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerLieAlgebra.weylGroup.dynkinType);
   theSubalgebras.computeStructureWriteFiles(
     ownerLieAlgebra,
     calculator.objectContainer.theAlgebraicClosure,
@@ -3028,7 +3028,7 @@ bool CalculatorLieTheory::casimir(Calculator& calculator, const Expression& inpu
   SemisimpleLieAlgebra& algebraReference = *algebra.content;
   ElementUniversalEnveloping<RationalFunction<Rational> > theCasimir;
   theCasimir.makeCasimir(algebraReference);
-  calculator << "Context Lie algebra: " << algebraReference.weylGroup.theDynkinType.toString()
+  calculator << "Context Lie algebra: " << algebraReference.weylGroup.dynkinType.toString()
   << ". The coefficient: " << algebraReference.weylGroup.getKillingDividedByTraceRatio().toString()
   <<  ". The Casimir element of the ambient Lie algebra. ";
   ExpressionContext context(calculator);
@@ -3114,7 +3114,7 @@ bool CalculatorLieTheory::chevalleyGenerator(
   theUE.assignElementLieAlgebra(theElt, *theSSalg.content);
   ExpressionContext context(calculator);
   int indexInOwner = calculator.objectContainer.semisimpleLieAlgebras.getIndex(
-    theSSalg.content->weylGroup.theDynkinType
+    theSSalg.content->weylGroup.dynkinType
   );
   context.setIndexAmbientSemisimpleLieAlgebra(indexInOwner);
   return output.assignValueWithContext(theUE, context, calculator);
@@ -3153,7 +3153,7 @@ bool CalculatorLieTheory::cartanGenerator(Calculator& calculator, const Expressi
   ElementUniversalEnveloping<RationalFunction<Rational> > theUE;
   theUE.assignElementLieAlgebra(theElt, *theSSalg.content);
   ExpressionContext theContext(calculator);
-  int theAlgIndex = calculator.objectContainer.semisimpleLieAlgebras.getIndex(theSSalg.content->weylGroup.theDynkinType);
+  int theAlgIndex = calculator.objectContainer.semisimpleLieAlgebras.getIndex(theSSalg.content->weylGroup.dynkinType);
   theContext.setIndexAmbientSemisimpleLieAlgebra(theAlgIndex);
   return output.assignValueWithContext(theUE, theContext, calculator);
 }
@@ -3174,7 +3174,7 @@ bool CalculatorLieTheory::rootSubsystem(Calculator& calculator, const Expression
   Vector<Rational> currentRoot;
   Vectors<Rational> outputRoots;
   WeylGroupData& theWeyl = theSSlieAlg->weylGroup;
-  if (!theWeyl.theDynkinType.isSimple()) {
+  if (!theWeyl.dynkinType.isSimple()) {
     return calculator << "<hr>Function root subsystem works for simple ambient types only. ";
   }
   for (int i = 2; i < input.size(); i ++) {
@@ -3220,7 +3220,7 @@ bool CalculatorLieTheory::writeToHardDiskOrPrintSemisimpleLieAlgebra(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  bool Verbose,
+  bool verbose,
   bool writeToHD
 ) {
   MacroRegisterFunctionWithName("Calculator::writeToHardDiskOrPrintSemisimpleLieAlgebra");
@@ -3228,7 +3228,7 @@ bool CalculatorLieTheory::writeToHardDiskOrPrintSemisimpleLieAlgebra(
     return calculator << "Print semisimple Lie algebras expects 1 argument. ";
   }
   return CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
-    calculator, input[1], output, Verbose, writeToHD
+    calculator, input[1], output, verbose, writeToHD
   );
 }
 
@@ -3236,7 +3236,7 @@ bool CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  bool Verbose,
+  bool verbose,
   bool writeToHD
 ) {
   MacroRegisterFunctionWithName("CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra");
@@ -3252,7 +3252,7 @@ bool CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
   }
   algebraPointer.content->checkConsistency();
   algebraPointer.context.checkInitialization();
-  SemisimpleLieAlgebra& theSSalgebra = *algebraPointer.content;
-  std::string result = theSSalgebra.toHTMLCalculator(Verbose, writeToHD, calculator.flagWriteLatexPlots);
+  SemisimpleLieAlgebra& semisimpleAlgebra = *algebraPointer.content;
+  std::string result = semisimpleAlgebra.toHTMLCalculator(verbose, writeToHD, calculator.flagWriteLatexPlots);
   return output.assignValue(result, calculator);
 }

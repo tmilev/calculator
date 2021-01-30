@@ -207,7 +207,7 @@ int Expression::getTypeOperation<ElementWeylAlgebra<Rational> >() const {
 template < >
 int Expression::getTypeOperation<SemisimpleLieAlgebra*>() const {
   this->checkInitialization();
-  return this->owner->opSemisimpleLieAlgebrA();
+  return this->owner->opSemisimpleLieAlgebra();
 }
 
 template < >
@@ -328,11 +328,11 @@ SemisimpleSubalgebras
 & inputValue) const {
   this->checkInitialization();
   inputValue.checkInitialization();
-  if (!this->owner->objectContainer.theSSSubalgebraS.contains(inputValue.owner->weylGroup.theDynkinType)) {
+  if (!this->owner->objectContainer.semisimpleSubalgebras.contains(inputValue.owner->weylGroup.dynkinType)) {
     global.fatal << "Semisimple subalgebras must be "
     << "allocated directly in the object container. " << global.fatal;
   }
-  return this->owner->objectContainer.theSSSubalgebraS.getIndex(inputValue.owner->weylGroup.theDynkinType);
+  return this->owner->objectContainer.semisimpleSubalgebras.getIndex(inputValue.owner->weylGroup.dynkinType);
 }
 
 template < >
@@ -435,7 +435,7 @@ int Expression::addObjectReturnIndex(const
 MatrixTensor<Rational>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.theMatTensorRats
+  return this->owner->objectContainer.matrixTensorRationals
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -534,10 +534,10 @@ int Expression::addObjectReturnIndex(
 SemisimpleLieAlgebra* const
 & inputValue) const {
   this->checkInitialization();
-  if (!this->owner->objectContainer.semisimpleLieAlgebras.contains(inputValue->weylGroup.theDynkinType)) {
+  if (!this->owner->objectContainer.semisimpleLieAlgebras.contains(inputValue->weylGroup.dynkinType)) {
     global.fatal << "Semisimple Lie algebra must be allocated directly in the object container. " << global.fatal;
   }
-  int index = this->owner->objectContainer.semisimpleLieAlgebras.getIndex(inputValue->weylGroup.theDynkinType);
+  int index = this->owner->objectContainer.semisimpleLieAlgebras.getIndex(inputValue->weylGroup.dynkinType);
   return index;
 }
 
@@ -620,8 +620,8 @@ int Expression::addObjectReturnIndex(const
 WeylGroupData
 & inputValue) const {
   this->checkInitialization();
-  this->owner->objectContainer.getLieAlgebraCreateIfNotPresent(inputValue.theDynkinType);
-  return this->owner->objectContainer.semisimpleLieAlgebras.getIndex(inputValue.theDynkinType);
+  this->owner->objectContainer.getLieAlgebraCreateIfNotPresent(inputValue.dynkinType);
+  return this->owner->objectContainer.semisimpleLieAlgebras.getIndex(inputValue.dynkinType);
 }
 
 template < >
@@ -720,7 +720,7 @@ InputBox& Expression::getValueNonConst() const {
 }
 
 template < >
-GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> & Expression::getValueNonConst() const {
+GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>& Expression::getValueNonConst() const {
   if (!this->isOfType<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >()) {
     global.fatal << "Expression not of required type Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
@@ -884,9 +884,19 @@ CharacterSemisimpleLieAlgebraModule<Rational>& Expression::getValueNonConst() co
 
 template < >
 SemisimpleLieAlgebra*& Expression::getValueNonConst() const {
+  MacroRegisterFunctionWithName("Expression::getValueNonConst(SemisimpleLieAlgebra*)");
   if (!this->isOfType<SemisimpleLieAlgebra*>()) {
     global.fatal << "Expression not of required type "
     << "SemisimpleLieAlgebra. The expression equals " << this->toString() << "." << global.fatal;
+  }
+  for (
+    int i = this->owner->objectContainer.semisimpleLieAlgebraPointers.size;
+    i < this->owner->objectContainer.semisimpleLieAlgebras.size();
+    i ++
+  ) {
+    this->owner->objectContainer.semisimpleLieAlgebraPointers.addOnTop(
+      &this->owner->objectContainer.semisimpleLieAlgebras.values[i]
+    );
   }
   return this->owner->objectContainer.semisimpleLieAlgebraPointers[this->getLastChild().data];
 }
@@ -897,7 +907,7 @@ MatrixTensor<Rational>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "MatrixTensorRational. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->objectContainer.theMatTensorRats.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.matrixTensorRationals.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -906,7 +916,7 @@ SemisimpleSubalgebras& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "SemisimpleSubalgebras. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->objectContainer.theSSSubalgebraS.values[this->getLastChild().data];
+  return this->owner->objectContainer.semisimpleSubalgebras.values[this->getLastChild().data];
 }
 
 template < >
@@ -987,7 +997,7 @@ bool Expression::isMatrix(int* outputNumRows, int* outputNumCols) const {
 //start Expression::convertInternally specializations.
 template< >
 bool Expression::convertInternally<Polynomial<AlgebraicNumber> >(Expression& output) const {
-  MacroRegisterFunctionWithName("ConvertToType_Polynomial_AlgebraicNumber");
+  MacroRegisterFunctionWithName("convertInternally_Polynomial_AlgebraicNumber");
   this->checkInitialization();
   if (this->isOfType<Rational>()) {
     Polynomial<AlgebraicNumber> resultP;
@@ -1294,7 +1304,7 @@ bool Expression::checkConsistency() const {
       if (currentE.startsWith(this->owner->opPolynomialVariables())) {
         isGood = true;
       }
-      if (currentE.startsWith(this->owner->opSemisimpleLieAlgebrA())) {
+      if (currentE.startsWith(this->owner->opSemisimpleLieAlgebra())) {
         isGood = true;
       }
       if (currentE.startsWith(this->owner->opWeylAlgebraVariables())) {
@@ -1483,9 +1493,9 @@ bool Expression::startsWithGivenOperation(const std::string& theOperation, int d
   return (*this)[0].isOperationGiven(theOpIndex);
 }
 
-bool Expression::startsWith(int theOp, int N) const {
-  if (N != - 1) {
-    if (this->children.size != N) {
+bool Expression::startsWith(int operation, int numberOfChildren) const {
+  if (numberOfChildren != - 1) {
+    if (this->children.size != numberOfChildren) {
       return false;
     }
   } else {
@@ -1496,10 +1506,10 @@ bool Expression::startsWith(int theOp, int N) const {
   if (!(*this)[0].isAtom()) {
     return false;
   }
-  if (theOp == - 1) {
+  if (operation == - 1) {
     return true;
   }
-  return (*this)[0].data == theOp;
+  return (*this)[0].data == operation;
 }
 
 bool Expression::getExpressionLeafs(HashedList<Expression>& outputAccumulateLeafs) const {
@@ -2598,9 +2608,10 @@ template<>
 bool Expression::toStringBuiltIn<SemisimpleLieAlgebra*>(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
+  MacroRegisterFunctionWithName("Expression::toStringBuiltIn(SemisimpleLieAlgebra*)");
+  (void) format;
   out << "SSLieAlg{}("
   << input.getValue<SemisimpleLieAlgebra*>()->toStringLieAlgebraName()
   << ")";
@@ -2814,9 +2825,6 @@ bool Expression::toStringBuiltIn<AlgebraicNumber>(
     format.flagUseFrac = true;
   }
   std::string currentString = input.getValue<AlgebraicNumber>().toString(&format);
-  if (currentString.find("<br>") != std::string::npos) {
-    global << Logger::red << "DEBUG: warning: line break in algebraic number" << Logger::endL;
-  }
   if (currentString.size() > 0) {
     if (currentString[0] == '-') {
       currentString = currentString.substr(1);
@@ -2895,20 +2903,20 @@ bool Expression::toStringData(std::stringstream& out, FormatExpressions* theForm
     out << theMat.toString(&format);
     return true;
   }
-  int theType = - 1;
-  if (!this->isBuiltInType(&theType)) {
+  int typeIndex = - 1;
+  if (!this->isBuiltInType(&typeIndex)) {
     return false;
   }
   Calculator& commands = *this->owner;
   // The following handlers are initialized in Calculator::initializeToStringHandlers.
-  if (!commands.toStringDataHandlers.contains(theType)) {
+  if (!commands.toStringDataHandlers.contains(typeIndex)) {
     return false;
   }
   // handler must hold the function pointer:
   // Expression::toStringBuiltIn<builtInType>,
   // where builtInType is one of the types registered in
   // Calculator::initializeToStringHandlers.
-  Expression::ToStringHandler handler = commands.toStringDataHandlers.getValueNoFail(theType);
+  Expression::ToStringHandler handler = commands.toStringDataHandlers.getValueNoFail(typeIndex);
   return handler(*this, out, theFormat);
 }
 

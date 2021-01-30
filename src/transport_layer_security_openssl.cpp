@@ -17,37 +17,30 @@
 std::string TransportLayerSecurityOpenSSL::errors::errorWantRead = "SSL_ERROR_WANT_READ";
 bool TransportLayerSecurityOpenSSL::flagSSLlibraryInitialized = false;
 
+const SSL_METHOD* TransportLayerSecurityOpenSSL::methodGlobal = nullptr;
+SSL_CTX* TransportLayerSecurityOpenSSL::contextGlobal;
+
 TransportLayerSecurityOpenSSL::~TransportLayerSecurityOpenSSL() {
   this->peer_certificate = nullptr;
-  this->theSSLMethod = nullptr;
   this->owner = nullptr;
-  this->freeSSL();
-  this->freeContext();
+  this->freeSession();
 }
 
-void TransportLayerSecurityOpenSSL::freeSSL() {
+void TransportLayerSecurityOpenSSL::freeSession() {
+  if (this->sslData == nullptr) {
+    return;
+  }
 #ifdef MACRO_use_open_ssl
   SSL_free(this->sslData);
   this->sslData = nullptr;
 #endif
 }
 
-void TransportLayerSecurityOpenSSL::freeEverythingShutdownSSL() {
-  if (!global.flagSSLIsAvailable) {
-    return;
-  }
-  global.flagSSLIsAvailable = false;
-  this->freeSSL();
-  this->freeContext();
-}
-
-void TransportLayerSecurityOpenSSL::freeContext() {
+void TransportLayerSecurityOpenSSL::freeContextGlobal() {
 #ifdef MACRO_use_open_ssl
-  // if (this->context != nullptr && this->name != "") {
-  // }
-  SSL_CTX_free(this->context);
+  SSL_CTX_free(TransportLayerSecurityOpenSSL::contextGlobal);
 #endif // MACRO_use_open_ssl
-  this->context = nullptr;
+  TransportLayerSecurityOpenSSL::contextGlobal = nullptr;
 }
 
 void TransportLayerSecurityOpenSSL::initSSLLibrary() {
@@ -68,13 +61,22 @@ void TransportLayerSecurityOpenSSL::initSSLLibrary() {
   if (commentsOnError.str() != "") {
     global << Logger::red << "OpenSSL initialization comments: " << Logger::blue << commentsOnError.str() << Logger::endL;
   }
-#endif // MACRO_use_open_ssl
-}
+  TransportLayerSecurityOpenSSL::methodGlobal = TLS_method();
+  TransportLayerSecurityOpenSSL::contextGlobal = SSL_CTX_new(
+    TransportLayerSecurityOpenSSL::methodGlobal
+  );
 
+  if (TransportLayerSecurityOpenSSL::contextGlobal == nullptr) {
+    global << Logger::red << "Failed to create ssl context. " << Logger::endL;
+    ERR_print_errors_fp(stderr);
+    global.fatal << "Openssl context error.\n" << commentsOnError.str() << global.fatal;
+  }
+  #endif // MACRO_use_open_ssl
+}
 
 bool TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand() {
   MacroRegisterFunctionWithName("TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand");
-  if (!global.flagSSLIsAvailable) {
+  if (!global.flagSSLAvailable) {
     return false;
   }
   if (
@@ -118,7 +120,7 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFiles() {
     !FileOperations::fileExistsVirtual(TransportLayerSecurity::fileCertificate, true, true) ||
     !FileOperations::fileExistsVirtual(TransportLayerSecurity::fileKey, true, true)
   ) {
-    global.flagSSLIsAvailable = false;
+    global.flagSSLAvailable = false;
     return false;
   }
   return true;
@@ -155,24 +157,7 @@ void TransportLayerSecurityOpenSSL::initSSLCommon(bool isServer) {
   this->flagIsServer = isServer;
   this->initSSLLibrary();
   std::stringstream commentsOnError;
-
-#ifdef MACRO_use_open_ssl
-  if (isServer) {
-    this->theSSLMethod = SSLv23_server_method();
-  } else {
-    this->theSSLMethod = SSLv23_client_method();
-  }
-  this->context = SSL_CTX_new(this->theSSLMethod);
-
-  if (this->context == nullptr) {
-    global << Logger::red << "Failed to create ssl context. " << Logger::endL;
-    ERR_print_errors_fp(stderr);
-    global.fatal << "Openssl context error.\n" << commentsOnError.str() << global.fatal;
-  }
-#endif // MACRO_use_open_ssl
   this->flagContextInitialized = true;
-  // Server does not verify client certificate:
-  //SSL_CTX_set_verify(this->context, SSL_VERIFY_NONE, 0);
 }
 
 void TransportLayerSecurityOpenSSL::initSSLServer() {
@@ -227,14 +212,14 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
 #ifdef MACRO_use_open_ssl
   global << Logger::green << "SSL is available." << Logger::endL;
   SSL_CTX_set_ecdh_auto(this->context, 1);
-  if (SSL_CTX_use_certificate_chain_file(this->context, signedFileCertificate3Physical.c_str()) <= 0) {
+  if (SSL_CTX_use_certificate_chain_file(this->contextGlobal, signedFileCertificate3Physical.c_str()) <= 0) {
     global << Logger::purple << "Found no officially signed certificate, trying self-signed certificate. "
     << Logger::endL;
-    if (SSL_CTX_use_certificate_file(this->context, fileCertificatePhysical.c_str(), SSL_FILETYPE_PEM) <= 0) {
+    if (SSL_CTX_use_certificate_file(this->contextGlobal, fileCertificatePhysical.c_str(), SSL_FILETYPE_PEM) <= 0) {
       ERR_print_errors_fp(stderr);
       exit(3);
     }
-    if (SSL_CTX_use_PrivateKey_file(this->context, fileKeyPhysical.c_str(), SSL_FILETYPE_PEM) <= 0) {
+    if (SSL_CTX_use_PrivateKey_file(this->contextGlobal, fileKeyPhysical.c_str(), SSL_FILETYPE_PEM) <= 0) {
       ERR_print_errors_fp(stderr);
       exit(4);
     }
@@ -244,17 +229,17 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
     //{ ERR_print_errors_fp(stderr);
     //  exit(3);
     //}
-    if (SSL_CTX_use_certificate_chain_file(this->context, singedFileCertificate1Physical.c_str()) <= 0) {
+    if (SSL_CTX_use_certificate_chain_file(this->contextGlobal, singedFileCertificate1Physical.c_str()) <= 0) {
       ERR_print_errors_fp(stderr);
       global.fatal << "Failed to user certificate file." << global.fatal;
     }
-    if (SSL_CTX_use_PrivateKey_file(this->context, signedFileKeyPhysical.c_str(), SSL_FILETYPE_PEM) <= 0) {
+    if (SSL_CTX_use_PrivateKey_file(this->contextGlobal, signedFileKeyPhysical.c_str(), SSL_FILETYPE_PEM) <= 0) {
       ERR_print_errors_fp(stderr);
       global.fatal << "Failed to use private key." << global.fatal;
     }
     global.flagCertificatesAreOfficiallySigned = true;
   }
-  if (!SSL_CTX_check_private_key(this->context)) {
+  if (!SSL_CTX_check_private_key(this->contextGlobal)) {
     global << "Private key does not match the certificate public key. ";
     global.fatal << "Private key does not match the certificate public key. " << global.fatal;
   }
@@ -263,86 +248,28 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
 #endif // MACRO_use_open_ssl
 }
 
-void TransportLayerSecurityOpenSSL::clearErrorQueue(
-  int errorCode,
-  std::string* outputError,
-  std::stringstream* commentsGeneral,
-  bool includeNoErrorInComments
-) {
-  MacroRegisterFunctionWithName("TransportLayerSecurity::toStringError");
-  (void) errorCode;
-  (void) outputError;
-  (void) commentsGeneral;
-  (void) includeNoErrorInComments;
-
+void TransportLayerSecurityOpenSSL::clearErrorQueue(int numberOfTransferredBytes) {
+  MacroRegisterFunctionWithName("TransportLayerSecurityOpenSSL::clearErrorQueue");
+  char buffer[200];
 #ifdef MACRO_use_open_ssl
-  int numErrors = 0;
-  ERR_print_errors_fp(stderr);
-  int theCode = SSL_get_error(this->sslData, errorCode);
-  if (theCode == SSL_ERROR_NONE) {
-    if (commentsGeneral != nullptr && includeNoErrorInComments) {
-      *commentsGeneral << "\n<br>\nNo error.\n";
+  if (numberOfTransferredBytes < 0) {
+    int errorCode = SSL_get_error(this->sslData, numberOfTransferredBytes);
+    global << Logger::red << "Error: transferred bytes: "
+    << numberOfTransferredBytes << "; error code: " << errorCode
+    << ". " << strerror(errno) << ". "
+    << Logger::endL;
+    if (this->sslData == nullptr) {
+      global << Logger::yellow << "Ssl data structure is null. " << Logger::endL;
     }
-    return;
   }
-  numErrors ++;
-  int extraErrorCode = 0;
-  switch (theCode) {
-  case SSL_ERROR_ZERO_RETURN:
-    if (outputError != nullptr) {
-      *outputError = "SSL_ERROR_ZERO_RETURN";
+  for (;;) {
+    errorCode = ERR_get_error();
+    if (errorCode == 0) {
+      return;
     }
-    break;
-  case SSL_ERROR_WANT_READ:
-    if (outputError != nullptr) {
-      *outputError = TransportLayerSecurityOpenSSL::errors::errorWantRead;
-    }
-    break;
-  case SSL_ERROR_WANT_WRITE:
-    if (outputError != nullptr) {
-      *outputError = "SSL_ERROR_WANT_WRITE";
-    }
-    break;
-  case SSL_ERROR_WANT_CONNECT:
-    if (outputError != nullptr) {
-      *outputError = "SSL_ERROR_WANT_CONNECT";
-    }
-    break;
-  case SSL_ERROR_WANT_ACCEPT:
-    if (outputError != nullptr) {
-      *outputError = "SSL_ERROR_WANT_ACCEPT";
-    }
-    break;
-  case SSL_ERROR_WANT_X509_LOOKUP:
-    if (outputError != nullptr) {
-      *outputError = "SSL_ERROR_WANT_X509_LOOKUP";
-    }
-    break;
-  case SSL_ERROR_SYSCALL:
-    if (outputError != nullptr) {
-      *outputError = "SSL_ERROR_SYSCALL";
-    }
-    extraErrorCode = static_cast<int>(ERR_get_error());
-    if (extraErrorCode == 0) {
-      if (commentsGeneral != nullptr) {
-        *commentsGeneral << "Bad eof. ";
-      }
-    } else if (extraErrorCode == - 1) {
-      if (commentsGeneral != nullptr) {
-        *commentsGeneral << "I/O error outside of ssl. ";
-      }
-    }
-    break;
-  case SSL_ERROR_SSL:
-    if (outputError != nullptr) {
-      *outputError = "SSL_ERROR_SSL";
-    }
-    break;
-  default:
-    if (outputError != nullptr) {
-      *outputError = "SSL_ERROR_unknown";
-    }
-    break;
+    ERR_error_string(errorCode, buffer);
+    std::string errorString(buffer);
+    global << Logger::red << errorString << Logger::endL;
   }
 #endif // MACRO_use_open_ssl
 }
@@ -373,11 +300,11 @@ bool TransportLayerSecurityOpenSSL::handShakeIAmClientNoSocketCleanup(
   (void) inputSocketID;
   (void) commentsOnFailure;
   (void) commentsGeneral;
-  this->freeSSL();
+  this->freeSession();
   this->initSSLClient();
 #ifdef MACRO_use_open_ssl
 
-  this->sslData = SSL_new(this->context);
+  this->sslData = SSL_new(this->contextGlobal);
   if (this->sslData == nullptr) {
     this->flagSSLHandshakeSuccessful = false;
     global << Logger::red << "Failed to allocate ssl. " << Logger::endL;
@@ -561,9 +488,9 @@ int TransportLayerSecurityOpenSSL::sslRead(
 #ifdef MACRO_use_open_ssl
   ERR_clear_error();
   int result = SSL_read(this->sslData, readBuffer.objects, readBuffer.size);
-  this->clearErrorQueue(
-    result, outputError, commentsGeneral, includeNoErrorInComments
-  );
+  if (result <= 0) {
+    this->clearErrorQueue(result);
+  }
   return result;
 #else
   return - 1;
@@ -591,10 +518,9 @@ int TransportLayerSecurityOpenSSL::sslWrite(
   if (this->sslData == nullptr) {
     global.fatal << "Uninitialized ssl not allowed here. " << global.fatal;
   }
-  int result = SSL_write(this->sslData, writeBuffer.objects, writeBuffer.size);
-  this->clearErrorQueue(
-    result, outputError, commentsOnError, includeNoErrorInComments
-  );
+  int result = 0;
+  result = SSL_write(this->sslData, writeBuffer.objects, writeBuffer.size);
+  this->clearErrorQueue(result);
   return result;
 #else
   return - 1;
@@ -611,7 +537,7 @@ bool TransportLayerSecurityOpenSSL::handShakeIamServer(
     global.fatal << "SSL data expected to be zero. " << global.fatal;
   }
 #ifdef MACRO_use_open_ssl
-  this->sslData = SSL_new(this->context);
+  this->sslData = SSL_new(this->contextGlobal);
   SSL_set_verify(this->sslData, SSL_VERIFY_NONE, nullptr);
   if (this->sslData == nullptr) {
     global.fatal << "Failed to allocate ssl: not supposed to happen. " << global.fatal;
@@ -708,8 +634,6 @@ TransportLayerSecurityOpenSSL::TransportLayerSecurityOpenSSL() {
   this->peer_certificate = nullptr;
   this->sslData = nullptr;
   this->errorCode = - 1;
-  this->theSSLMethod = nullptr;
-  this->context = nullptr;
   this->owner = nullptr;
   this->flagSSLHandshakeSuccessful = false;
   this->flagContextInitialized = false;

@@ -1000,7 +1000,7 @@ void SemisimpleLieAlgebra::orderNilradical(const Selection& parSelZeroMeansLeviP
 }
 
 bool SemisimpleLieAlgebra::hasComputedStructureConstants() {
-  return this->ChevalleyConstants.numberOfRows == this->weylGroup.theDynkinType.getRootSystemSize();
+  return this->ChevalleyConstants.numberOfRows == this->weylGroup.dynkinType.getRootSystemSize();
 }
 
 void SemisimpleLieAlgebra::orderSSalgebraForHWbfComputation() {

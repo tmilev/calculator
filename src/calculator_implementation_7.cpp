@@ -6640,18 +6640,18 @@ bool CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calcula
     out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
   }
   SemisimpleSubalgebras& theSSsubalgebras =
-  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.weylGroup.theDynkinType);
+  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.weylGroup.dynkinType);
   theSSsubalgebras.toStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
 
   out << "Attempting to embed "
-  << smallSubalgebraPointer.content->weylGroup.theDynkinType.toString()
+  << smallSubalgebraPointer.content->weylGroup.dynkinType.toString()
   << " in " << ownerSS.toStringLieAlgebraName();
   theSSsubalgebras.findTheSemisimpleSubalgebrasFromScratch(
     ownerSS,
     calculator.objectContainer.theAlgebraicClosure,
     calculator.objectContainer.semisimpleLieAlgebras,
     calculator.objectContainer.theSltwoSAs,
-    &smallSubalgebraPointer.content->weylGroup.theDynkinType
+    &smallSubalgebraPointer.content->weylGroup.dynkinType
   );
   return output.assignValue(theSSsubalgebras, calculator);
 }

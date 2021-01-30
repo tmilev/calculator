@@ -213,10 +213,10 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
   this->owner->drawRootSystem(collapsed, true, true);
   for (int i = 0; i < theOrbit.size; i ++) {
     LittelmannPath& currentPath = theOrbit[i];
-    animated.drawPath(currentPath.waypoints, "black", 1, this->owner->theDynkinType.toString(), i);
+    animated.drawPath(currentPath.waypoints, "black", 1, this->owner->dynkinType.toString(), i);
     collapsed.drawPath(currentPath.waypoints, "black", 1);
     for (int j = 0; j < currentPath.waypoints.size; j ++) {
-      animated.drawCircleAtVector(currentPath.waypoints[j], "purple", 3, this->owner->theDynkinType.toString(), i);
+      animated.drawCircleAtVector(currentPath.waypoints[j], "purple", 3, this->owner->dynkinType.toString(), i);
       collapsed.drawCircleAtVector(currentPath.waypoints[j], "purple", 3);
     }
   }

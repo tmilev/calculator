@@ -172,7 +172,7 @@ GlobalVariables::GlobalVariables() {
   this->flagLogInAttempted = false;
   this->flagServerDetailedLog = false;
   this->flagUsingSSLinCurrentConnection = false;
-  this->flagSSLIsAvailable = false;
+  this->flagSSLAvailable = false;
 
   this->millisecondsNoPingBeforeChildIsPresumedDead = 10000;
   this->mutexReturnBytes.mutexName = "WriteByteslock";
@@ -6508,7 +6508,7 @@ void WeylGroupData::reset() {
   this->flagIrrepsAreComputed = false;
   this->flagCharTableIsComputed = false;
 
-  this->theDynkinType.makeZero();
+  this->dynkinType.makeZero();
   this->cartanSymmetric.initialize(0, 0);
   this->coCartanSymmetric.initialize(0, 0);
   this->rho.setSize(0);
@@ -6742,7 +6742,7 @@ void WeylGroupData::getWord(int g, List<int>& out) const {
 }
 
 bool WeylGroupData::operator==(const WeylGroupData& other) const {
-  return this->cartanSymmetric == other.cartanSymmetric && this->theDynkinType == other.theDynkinType;
+  return this->cartanSymmetric == other.cartanSymmetric && this->dynkinType == other.dynkinType;
 }
 
 void WeylGroupData::actOnRootByGroupElement(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho) {
@@ -6776,7 +6776,7 @@ void WeylGroupData::generateRootSystem() {
   Vectors<Rational> startRoots;
   HashedList<Vector<Rational> > theRootsFinder;
   startRoots.makeEiBasis(this->getDimension());
-  int estimatedNumRoots = this->theDynkinType.getRootSystemSize();
+  int estimatedNumRoots = this->dynkinType.getRootSystemSize();
   this->generateOrbit(startRoots, false, theRootsFinder, false, estimatedNumRoots);
   this->rootSystem.clear();
   this->rootSystem.setExpectedSize(theRootsFinder.size);
@@ -6841,7 +6841,7 @@ std::string WeylGroupData::toStringCppCharTable(FormatExpressions* theFormat) {
   out << "<br>";
   FormatExpressions theFormatNoDynkinTypePlusesExponents;
   theFormatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent = true;
-  out << "bool loadCharacterTable" << this->theDynkinType.toString(&theFormatNoDynkinTypePlusesExponents) << "(WeylGroup& output)\n<br>{ ";
+  out << "bool loadCharacterTable" << this->dynkinType.toString(&theFormatNoDynkinTypePlusesExponents) << "(WeylGroup& output)\n<br>{ ";
   out << " output.characterTable.setExpectedSize(" << this->theGroup.getSize().toString() << "); output.characterTable.setSize(0);";
   out << "\n<br>&nbsp;&nbsp;ClassFunction&lt;FiniteGroup&lt;ElementWeylGroup&lt;WeylGroup&gt; &gt;, Rational&gt; currentCF;";
   out << "\n<br>&nbsp;&nbsp;currentCF.G = &output;";
@@ -6882,7 +6882,7 @@ std::string WeylGroupData::toStringCppConjugacyClasses(FormatExpressions* theFor
   out << "<br>";
   FormatExpressions theFormatNoDynkinTypePlusesExponents;
   theFormatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent = true;
-  out << "bool loadConjugacyClasses" << this->theDynkinType.toString(&theFormatNoDynkinTypePlusesExponents)
+  out << "bool loadConjugacyClasses" << this->dynkinType.toString(&theFormatNoDynkinTypePlusesExponents)
   << "(WeylGroup& output)\n<br>{ ";
   out << "output.computeRho(true);";
   out << "\n<br>&nbsp;&nbsp;WeylGroup::ConjugacyClass emptyClass;";
@@ -6994,7 +6994,7 @@ bool WeylGroupData::isAddmisibleDynkinType(char candidateLetter, int n) {
 
 void WeylGroupData::computeEpsilonMatrix() {
   if (this->matrixSendsSimpleVectorsToEpsilonVectors.isZeroPointer()) {
-    this->theDynkinType.getEpsilonMatrix(this->matrixSendsSimpleVectorsToEpsilonVectors.getElement());
+    this->dynkinType.getEpsilonMatrix(this->matrixSendsSimpleVectorsToEpsilonVectors.getElement());
   }
 }
 
@@ -7036,7 +7036,7 @@ void WeylGroupData::makeMeFromMyCartanSymmetric() {
   Vectors<Rational> simpleBasis;
   simpleBasis.makeEiBasis(this->cartanSymmetric.numberOfRows);
   theDynkinTypeComputer.computeDiagramTypeModifyInputRelative(simpleBasis, this->rootSystem, this->cartanSymmetric);
-  theDynkinTypeComputer.getDynkinType(this->theDynkinType);
+  theDynkinTypeComputer.getDynkinType(this->dynkinType);
   this->makeFinalSteps();
 }
 
@@ -7057,15 +7057,15 @@ void WeylGroupData::initializeGenerators() {
 
 void WeylGroupData::makeFromDynkinType(const DynkinType& inputType) {
   this->reset();
-  this->theDynkinType = inputType;
-  this->theDynkinType.getCartanSymmetric(this->cartanSymmetric);
-  this->theDynkinType.getCoCartanSymmetric(this->coCartanSymmetric);
+  this->dynkinType = inputType;
+  this->dynkinType.getCartanSymmetric(this->cartanSymmetric);
+  this->dynkinType.getCoCartanSymmetric(this->coCartanSymmetric);
   this->makeFinalSteps();
 
   // eventually, there will be formulas for all classical types
   List<char> letters;
   List<int> ranks;
-  this->theDynkinType.getLettersTypesMultiplicities(&letters, &ranks, nullptr);
+  this->dynkinType.getLettersTypesMultiplicities(&letters, &ranks, nullptr);
   if (letters.size == 1) {
     if (ranks.size == 1) {
       if (letters[0] == 'A') {
@@ -7080,8 +7080,8 @@ void WeylGroupData::makeFromDynkinType(const DynkinType& inputType) {
 
 void WeylGroupData::makeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType) {
   this->reset();
-  this->theDynkinType = inputType;
-  this->theDynkinType.getCartanSymmetricDefaultLengthKeepComponentOrder(this->cartanSymmetric);
+  this->dynkinType = inputType;
+  this->dynkinType.getCartanSymmetricDefaultLengthKeepComponentOrder(this->cartanSymmetric);
   this->makeFinalSteps();
 }
 
@@ -7121,14 +7121,14 @@ void WeylGroupAutomorphisms::computeOuterAutoGenerators() {
   }
   this->checkInitialization();
   List<MatrixTensor<Rational> >& theGens = this->theOuterAutos.theGenerators;
-  this->theWeyl->theDynkinType.getOuterAutosGeneratorsActOnVectorColumn(theGens);
+  this->theWeyl->dynkinType.getOuterAutosGeneratorsActOnVectorColumn(theGens);
   for (int i = 0; i < theGens.size; i ++) {
     if (
       theGens[i].getMinimumNumberOfColumnsNumberOfRows() != this->theWeyl->getDimension() ||
       theGens[i].getMinimalNumberOfColumns() != this->theWeyl->getDimension() ||
       theGens[i].getMinimalNumberOfRows() != this->theWeyl->getDimension()
     ) {
-      global.fatal << "Bad outer automorphisms, type " << this->theWeyl->theDynkinType.toString() << "." << global.fatal;
+      global.fatal << "Bad outer automorphisms, type " << this->theWeyl->dynkinType.toString() << "." << global.fatal;
     }
   }
   this->flagOuterAutosGeneratorsComputed = true;
@@ -7185,7 +7185,7 @@ void WeylGroupData::getEpsilonCoordinates(const List<Vector<Rational> >& input, 
 LargeInteger WeylGroupData::getSizeByFormulaImplementation(FiniteGroup<ElementWeylGroup>& G) {
   WeylGroupData* W = static_cast<WeylGroupData*>(G.specificDataPointer);
   W->checkConsistency();
-  return W->theDynkinType.getWeylGroupSizeByFormula();
+  return W->dynkinType.getWeylGroupSizeByFormula();
 }
 
 void WeylGroupData::getWeylChamber(Cone& output) {
@@ -7535,7 +7535,7 @@ void WeylGroupData::drawRootSystem(
     output.drawHighlightGroup(highlightGroup, highlightLabels, "gray", 5);
   }
   std::stringstream tempStream;
-  tempStream << this->theDynkinType.getWeylGroupName();
+  tempStream << this->dynkinType.getWeylGroupName();
   if (this->getDimension() == 2 && predefinedProjectionPlane != nullptr) {
     theTwoPlane[1][0] = 1;
     theTwoPlane[1][1] = 0;

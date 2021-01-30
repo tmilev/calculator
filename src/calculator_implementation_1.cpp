@@ -154,7 +154,7 @@ std::string Calculator::toStringSemismipleLieAlgebraLinksFromHD(const DynkinType
   (void) theFormat;
   std::stringstream out;
   SemisimpleLieAlgebra folderComputer;
-  folderComputer.weylGroup.theDynkinType = theType;
+  folderComputer.weylGroup.dynkinType = theType;
   std::string prefixFolder = "calculator/";
   out << "<tr><td><a href='"
   << folderComputer.toStringDisplayFolderName(prefixFolder)

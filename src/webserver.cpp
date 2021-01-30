@@ -132,7 +132,7 @@ std::string WebWorker::closeIndentTag(const std::string& theTag) {
 
 void WebServer::initSSL() {
   MacroRegisterFunctionWithName("WebServer::initSSL");
-  if (!global.flagSSLIsAvailable) {
+  if (!global.flagSSLAvailable) {
     global << Logger::red << "SSL is DISABLED." << Logger::endL;
     return;
   }
@@ -141,7 +141,7 @@ void WebServer::initSSL() {
 }
 
 bool WebServer::sslServerSideHandShake(std::stringstream* commentsOnFailure) {
-  if (!global.flagSSLIsAvailable) {
+  if (!global.flagSSLAvailable) {
     return false;
   }
   if (!global.flagUsingSSLinCurrentConnection) {
@@ -208,14 +208,14 @@ bool WebWorker::receiveAll() {
   } else {
     this->displayUserInput = "GET " + this->addressGetOrPost;
   }
-  if (this->ContentLength <= 0) {
+  if (this->contentLength <= 0) {
     return true;
   }
-  if (this->messageBody.size() == static_cast<unsigned>(this->ContentLength)) {
+  if (this->messageBody.size() == static_cast<unsigned>(this->contentLength)) {
     return true;
   }
   this->messageBody.clear(); //<- needed else the length error check will pop.
-  if (this->ContentLength > 10000000) {
+  if (this->contentLength > 10000000) {
     this->checkConsistency();
     error = "Content-length parsed to be more than 10 million bytes, aborting.";
     global << this->error << Logger::endL;
@@ -226,7 +226,7 @@ bool WebWorker::receiveAll() {
   this->sendAllBytesNoHeaders();
   this->remainingBytesToSend.setSize(0);
   std::string bufferString;
-  while (static_cast<signed>(this->messageBody.size()) < this->ContentLength) {
+  while (static_cast<signed>(this->messageBody.size()) < this->contentLength) {
     if (global.getElapsedSeconds() - numSecondsAtStart > 5) {
       this->error = "Receiving bytes timed out (5 seconds).";
       global << this->error << Logger::endL;
@@ -264,14 +264,14 @@ bool WebWorker::receiveAll() {
     bufferString.assign(readBuffer.objects, static_cast<unsigned>(numBytesInBuffer));
     this->messageBody += bufferString;
   }
-  if (static_cast<signed>(this->messageBody.size()) != this->ContentLength) {
+  if (static_cast<signed>(this->messageBody.size()) != this->contentLength) {
     this->messageHead += this->messageBody;
     this->parseMessageHead();
   }
-  if (static_cast<signed>(this->messageBody.size()) != this->ContentLength) {
+  if (static_cast<signed>(this->messageBody.size()) != this->contentLength) {
     std::stringstream out;
     out << "The message-body received by me had length " << this->messageBody.size()
-    << " yet I expected a message of length " << this->ContentLength << ". More details follow. "
+    << " yet I expected a message of length " << this->contentLength << ". More details follow. "
     << this->toStringMessageFull();
     global << out.str() << Logger::endL;
   }
@@ -298,7 +298,7 @@ void WebWorker::sendAllBytesNoHeaders() {
       << Logger::endL;
       return;
     }
-    int numBytesSent = this->parent->theTLS.writeOnce(
+    int bytesSent = this->parent->theTLS.writeOnce(
       this->connectedSocketID,
       this->remainingBytesToSend,
       &errorString,
@@ -306,17 +306,19 @@ void WebWorker::sendAllBytesNoHeaders() {
       &commentsOnError,
       true
     );
-    if (numBytesSent < 0) {
-      global << "WebWorker::SendAllBytes failed: SSL_write error. " << Logger::endL;
+    if (bytesSent < 0) {
+      global << Logger::red << "WebWorker::SendAllBytes: writeOnce failed. " << Logger::blue
+      << "Socket: " << this->connectedSocketID << ". " << Logger::endL;
+      this->parent->theTLS.openSSLData.clearErrorQueue(bytesSent);
       return;
     }
-    if (numBytesSent == 0) {
+    if (bytesSent == 0) {
       numTimesRunWithoutSending ++;
     } else {
       numTimesRunWithoutSending = 0;
     }
-    global << numBytesSent;
-    this->remainingBytesToSend.sliceInPlace(numBytesSent, this->remainingBytesToSend.size - numBytesSent);
+    global << bytesSent;
+    this->remainingBytesToSend.sliceInPlace(bytesSent, this->remainingBytesToSend.size - bytesSent);
     if (this->remainingBytesToSend.size > 0) {
       global << ", ";
     }
@@ -429,7 +431,7 @@ void WebWorker::resetMessageComponentsExceptRawMessage() {
   this->theMessageHeaderStrings.setSize(0);
   this->requestHeaders.clear();
   this->requestTypE = this->requestUnknown;
-  this->ContentLength = - 1;
+  this->contentLength = - 1;
 }
 
 JSData WebWorker::getDatabaseJSON() {
@@ -736,7 +738,7 @@ void WebWorker::parseMessageHead() {
   this->connectionFlags.size = 0;
   this->messageBody = "";
   this->flagKeepAlive = false;
-  this->ContentLength = - 1;
+  this->contentLength = - 1;
   this->addressGetOrPost = "";
   this->hostWithPort = "";
   for (unsigned i = 0; i < this->messageHead.size(); i ++) {
@@ -809,8 +811,8 @@ void WebWorker::parseMessageHead() {
       if (this->theMessageHeaderStrings[i + 1].size() < 10000) {
         LargeIntegerUnsigned theLI;
         if (theLI.assignStringFailureAllowed(this->theMessageHeaderStrings[i + 1], true)) {
-          if (!theLI.isIntegerFittingInInt(&this->ContentLength)) {
-            this->ContentLength = - 1;
+          if (!theLI.isIntegerFittingInInt(&this->contentLength)) {
+            this->contentLength = - 1;
           }
         }
       }
@@ -852,8 +854,8 @@ void WebWorker::parseMessageHead() {
       }
     }
   }
-  if (this->messageBody.size() > 0 && this->ContentLength < 0) {
-    this->ContentLength = static_cast<signed>(this->messageBody.size());
+  if (this->messageBody.size() > 0 && this->contentLength < 0) {
+    this->contentLength = static_cast<signed>(this->messageBody.size());
   }
   global.hostWithPort = this->hostWithPort;
 }
@@ -1772,7 +1774,7 @@ std::string WebAPIResponse::getCaptchaDiv() {
 bool WebWorker::correctRequestsBEFORELoginReturnFalseIfModified() {
   MacroRegisterFunctionWithName("WebWorker::correctRequestsBEFORELoginReturnFalseIfModified");
   bool stateNotModified = true;
-  if (!global.flagSSLIsAvailable) {
+  if (!global.flagSSLAvailable) {
     if (
       this->addressComputed == global.displayNameExecutable &&
       global.requestType == ""
@@ -1848,7 +1850,7 @@ bool WebWorker::correctRequestsAFTERLoginReturnFalseIfModified() {
   if (this->addressComputed == "/" || this->addressComputed == "") {
     shouldFallBackToDefaultPage = true;
   }
-  if (!global.flagSSLIsAvailable) {
+  if (!global.flagSSLAvailable) {
     if (
       this->addressComputed == global.displayNameExecutable &&
       global.requestType == ""
@@ -1945,7 +1947,7 @@ int WebWorker::processLoginNeededOverUnsecureConnection() {
 }
 
 bool WebWorker::requireSSL() {
-  return global.flagSSLIsAvailable;
+  return global.flagSSLAvailable;
 }
 
 int WebWorker::serveClient() {
@@ -2308,6 +2310,7 @@ void WebServer::releaseEverything() {
 
 WebServer::~WebServer() {
   this->flagDeallocated = true;
+  TransportLayerSecurityOpenSSL::freeContextGlobal();
 }
 
 WebServer::WebServer() {
@@ -2336,7 +2339,6 @@ WebServer::WebServer() {
   this->statistics.workersNormallyExited = 0;
   this->statistics.failedSelectsSoFar = 0;
   this->statistics.successfulSelectsSoFar = 0;
-
 }
 
 void WebServer::signal_SIGCHLD_handler(int s) {
@@ -2691,7 +2693,7 @@ void WebServer::stop() {
 
 void WebServer::initPortsITry() {
   this->portHTTP = global.configuration[Configuration::portHTTP].stringValue;
-  if (!global.flagSSLIsAvailable) {
+  if (!global.flagSSLAvailable) {
     return;
   }
   this->portHTTPSOpenSSL = global.configuration[Configuration::portHTTPSOpenSSL].stringValue;
@@ -3075,7 +3077,7 @@ bool WebServer::initBindToPorts() {
       return false;
     }
   }
-  if (global.flagSSLIsAvailable) {
+  if (global.flagSSLAvailable) {
     if (!this->initBindToOnePort(this->portHTTPSOpenSSL, this->listeningSocketHTTPSOpenSSL)) {
       return false;
     }
@@ -3256,7 +3258,7 @@ void Listener::computeUserAddress() {
   this->userAddress = this->userAddressBuffer;
 }
 
-TransportLayerSecurity& TransportLayerSecurity::DefaultTLS_READ_ONLY() {
+TransportLayerSecurity& TransportLayerSecurity::defaultTLS_READ_ONLY() {
   return global.server().theTLS;
 }
 
@@ -3343,7 +3345,7 @@ int WebServer::run() {
 
   // <-Worker log resets are needed, else forked processes reset their common log.
   // <-Resets of the server logs are not needed, but I put them here nonetheless.
-  if (global.flagSSLIsAvailable) {
+  if (global.flagSSLAvailable) {
     // Creates key files if absent. Does not call any openssl functions.
     std::stringstream commentsOnFailure;
     TransportLayerSecurity::initializeNonThreadSafePartsCommon();
@@ -3377,12 +3379,12 @@ int WebServer::run() {
   this->writeVersionJSFile();
   global.initModifiableDatabaseFields();
   HtmlRoutines::loadStrings();
+  this->initSSL();
   this->theTLS.initializeNonThreadSafeOnFirstCall(true);
   if (!this->initPrepareWebServerALL()) {
     return 1;
   }
   global << Logger::purple << "waiting for connections..." << Logger::endL;
-  this->initSSL();
   this->statistics.successfulSelectsSoFar = 0;
   this->statistics.failedSelectsSoFar = 0;
   long long previousReportedNumberOfSelects = 0;
@@ -3555,7 +3557,7 @@ bool WebWorker::runInitialize() {
       return false;
     }
   }
-  if (global.flagSSLIsAvailable && global.flagUsingSSLinCurrentConnection) {
+  if (global.flagSSLAvailable && global.flagUsingSSLinCurrentConnection) {
     global << Logger::green << "ssl success #: "
     << this->parent->statistics.allConnections
     << ". " << Logger::endL;
@@ -3567,7 +3569,7 @@ bool WebWorker::runInitialize() {
 
 bool WebWorker::failReceiveReturnFalse() {
   bool sslWasOK = true;
-  if (global.flagSSLIsAvailable) {
+  if (global.flagSSLAvailable) {
     sslWasOK = (this->error == TransportLayerSecurityOpenSSL::errors::errorWantRead);
   }
   if (this->statistics.allReceives > 0 && sslWasOK) {
@@ -3830,7 +3832,7 @@ void WebServer::initializeBuildFlags() {
   global.flagRunningConsoleRegular = false;
   global.flagRunningConsoleTest = false;
   #ifdef MACRO_use_open_ssl
-  global.flagSSLIsAvailable = true;
+  global.flagSSLAvailable = true;
   #endif
   #ifdef MACRO_use_MongoDB
   global.flagDatabaseCompiled = true;
@@ -4512,7 +4514,9 @@ bool WebWorker::ensureAllBytesSent() {
   ) {
     return true;
   }
-  global << Logger::red << "This should not happen: not all bytes have been processed. " << Logger::endL;
+  global << Logger::red
+  << "This should not happen: not all bytes have been processed. "
+  << Logger::endL;
   global << Logger::red << "Type: " << Logger::blue << global.requestType
   << ", address: " << this->addressComputed << Logger::endL;
   global << Logger::red << "Remaining header: " << Logger::red

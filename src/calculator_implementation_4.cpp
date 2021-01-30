@@ -1708,13 +1708,13 @@ std::string ObjectContainer::toString() {
       }
     }
   }
-  if (this->theSSSubalgebraS.values.size > 0) {
+  if (this->semisimpleSubalgebras.values.size > 0) {
     out << "<br>Lie semisimple subalgebras computation data structures ("
-    << this->theSSSubalgebraS.values.size << " total): ";
-    for (int i = 0; i < this->theSSSubalgebraS.values.size; i ++) {
-      out << " Type " << this->theSSSubalgebraS.values[i].owner->toStringLieAlgebraName() << " with "
-      << this->theSSSubalgebraS.values[i].theSubalgebras.values.size << " candidates";
-      if (i != this->theSSSubalgebraS.values.size - 1) {
+    << this->semisimpleSubalgebras.values.size << " total): ";
+    for (int i = 0; i < this->semisimpleSubalgebras.values.size; i ++) {
+      out << " Type " << this->semisimpleSubalgebras.values[i].owner->toStringLieAlgebraName() << " with "
+      << this->semisimpleSubalgebras.values[i].theSubalgebras.values.size << " candidates";
+      if (i != this->semisimpleSubalgebras.values.size - 1) {
         out << ", ";
       }
     }
@@ -2002,7 +2002,7 @@ std::string Calculator::toStringSyntacticStackHTMLTable(
 
 SemisimpleSubalgebras& ObjectContainer::getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input) {
   MacroRegisterFunctionWithName("ObjectContainer::getSemisimpleSubalgebrasCreateIfNotPresent");
-  SemisimpleSubalgebras& currentSAs = this->theSSSubalgebraS.getValueCreateNoInit(input);
+  SemisimpleSubalgebras& currentSAs = this->semisimpleSubalgebras.getValueCreateNoInit(input);
   return currentSAs;
 }
 
@@ -2012,12 +2012,11 @@ SemisimpleLieAlgebra& ObjectContainer::getLieAlgebraCreateIfNotPresent(const Dyn
   if (!this->semisimpleLieAlgebras.contains(input)) {
     needToInit = true;
   }
-  SemisimpleLieAlgebra& theLA = this->semisimpleLieAlgebras.getValueCreateNoInit(input);
+  SemisimpleLieAlgebra& lieAlgebra = this->semisimpleLieAlgebras.getValueCreateNoInit(input);
   if (needToInit) {
-    this->semisimpleLieAlgebraPointers.addOnTop(&theLA);
-    theLA.weylGroup.makeFromDynkinType(input);
+    lieAlgebra.weylGroup.makeFromDynkinType(input);
   }
-  return theLA;
+  return lieAlgebra;
 }
 
 WeylGroupData& ObjectContainer::getWeylGroupDataCreateIfNotPresent(const DynkinType& input) {
@@ -2094,7 +2093,7 @@ void ObjectContainer::reset() {
   this->theCategoryOmodules.setSize(0);
   this->semisimpleLieAlgebras.clear();
   this->semisimpleLieAlgebraPointers.clear();
-  this->theSSSubalgebraS.clear();
+  this->semisimpleSubalgebras.clear();
   this->theTensorElts.clear();
   this->polynomialsRational.clear();
   this->polynomialsAlgebraic.clear();
@@ -2114,7 +2113,7 @@ void ObjectContainer::reset() {
   this->expressionWithNotation.clear();
   this->constraints.clear();
   this->lakshmibaiSeshadriPaths.clear();
-  this->theMatTensorRats.clear();
+  this->matrixTensorRationals.clear();
   this->theEltsModP.clear();
   this->thePlots.setSize(0);
   this->theAlgebraicClosure.reset();

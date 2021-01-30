@@ -219,7 +219,9 @@ public:
   bool flagLoggedIn;
   bool flagLogInAttempted;
   bool flagUsingSSLinCurrentConnection;
-  bool flagSSLIsAvailable;
+  // Whether we can carry out transport layer security
+  // "ssl" connections.
+  bool flagSSLAvailable;
   bool flagCertificatesAreOfficiallySigned;
   bool flagCrashInitiated;
 

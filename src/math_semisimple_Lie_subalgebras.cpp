@@ -49,23 +49,23 @@ void SemisimpleLieAlgebra::generateLieSubalgebra(
 std::string SemisimpleLieAlgebra::toStringLieAlgebraNameFullHTML() const {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::toStringLieAlgebraNameFullHTML");
   std::stringstream out;
-  if (this->weylGroup.theDynkinType.hasExceptionalComponent()) {
-    out << "<div class='mathcalculator'>" << this->weylGroup.theDynkinType.toString() << "</div>";
+  if (this->weylGroup.dynkinType.hasExceptionalComponent()) {
+    out << "<div class='mathcalculator'>" << this->weylGroup.dynkinType.toString() << "</div>";
     return out.str();
   }
   out << this->toStringLieAlgebraNameNonTechnicalHTML()
-  << ", type \\(" << this->weylGroup.theDynkinType.toString() << "\\)";
+  << ", type \\(" << this->weylGroup.dynkinType.toString() << "\\)";
   return out.str();
 }
 
 std::string SemisimpleLieAlgebra::toStringLieAlgebraName() const {
-  return this->weylGroup.theDynkinType.toString();
+  return this->weylGroup.dynkinType.toString();
 }
 
 std::string SemisimpleLieAlgebra::toStringLieAlgebraNameNonTechnicalHTML() const {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::toStringLieAlgebraNameNonTechnicalHTML");
   std::stringstream out;
-  const DynkinType& theType = this->weylGroup.theDynkinType;
+  const DynkinType& theType = this->weylGroup.dynkinType;
   for (int indexType = 0; indexType < theType.size(); indexType ++) {
     if (!(theType.coefficients[indexType] > 0)) {
       global.fatal << "Simple constituents must appear with positive coefficient. " << global.fatal;
@@ -215,7 +215,7 @@ std::string SubalgebraSemisimpleLieAlgebra::toString(FormatExpressions* theForma
   }
   std::stringstream out;
   out << "A subalgebra of dimension " << this->basis.size << " lying in "
-  << this->owner->weylGroup.theDynkinType.toString() << ".<br>The subalgebra has basis: "
+  << this->owner->weylGroup.dynkinType.toString() << ".<br>The subalgebra has basis: "
   << this->basis.toStringCommaDelimited();
   return out.str();
 }
@@ -233,8 +233,6 @@ bool SubalgebraSemisimpleLieAlgebra::findCartanSubalgebraCandidate(
   const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& currentCentralizer
 ) {
   MacroRegisterFunctionWithName("SubalgebraSemisimpleLieAlgebra::findCartanSubalgebraCandidate");
-  global.comments << "<hr>DEBUG: find cartan in centralizer: " << currentCentralizer.toStringCommaDelimited()
-   << "<br>";
 
   MatrixTensor<AlgebraicNumber> candidateMatrix;
   ElementSemisimpleLieAlgebra<AlgebraicNumber> candidate;
@@ -244,8 +242,6 @@ bool SubalgebraSemisimpleLieAlgebra::findCartanSubalgebraCandidate(
     }
     candidate = currentCentralizer[i];
     if (candidate.linearSpanContains(this->cartanSubalgebra, candidate)) {
-    // global.comments << "DEBUG: Linear span  of: " << currentCentralizer.toStringCommaDelimited()
-      //<< " contains: " << candidate.toString() << "<br>";
       continue;
     }
     outputCandidate = candidate;
@@ -259,8 +255,6 @@ bool SubalgebraSemisimpleLieAlgebra::findCartanSubalgebraCandidate(
       }
       candidate = currentCentralizer[i] + currentCentralizer[j];
       if (candidate.linearSpanContains(this->cartanSubalgebra, candidate)) {
- //       global.comments << "DEBUG: Linear span  of: " << currentCentralizer.toStringCommaDelimited()
-   //     << " contains: " << candidate.toString() << "<br>";
         continue;
       }
       outputCandidate = candidate;
@@ -281,10 +275,7 @@ void SubalgebraSemisimpleLieAlgebra::computeCartanSubalgebra() {
   ProgressReport theReport0, theReport1;
   std::stringstream reportStream0;
   reportStream0 << "Computing Cartan subalgebra of a subalgebra of "
-  << this->owner->weylGroup.theDynkinType.toString()
-  << " with basis " << this->basis.toStringCommaDelimited();
-  global.comments << "DEBUG: Computing Cartan subalgebra of a subalgebra of "
-  << this->owner->weylGroup.theDynkinType.toString()
+  << this->owner->weylGroup.dynkinType.toString()
   << " with basis " << this->basis.toStringCommaDelimited();
   theReport0.report(reportStream0.str());
   while (currentCentralizer.size > this->cartanSubalgebra.size) {
@@ -314,25 +305,20 @@ void SubalgebraSemisimpleLieAlgebra::computeCartanSubalgebra() {
     global.comments << "<br>Found candidate: " << candidateElement.toString() << "<br>";
     this->cartanSubalgebra.addOnTop(candidateElement);
     this->owner->getCommonCentralizer(this->cartanSubalgebra, currentCentralizer);
-    global.comments << "DEBUG: intersect: "
-    << currentCentralizer.toStringCommaDelimited()
-    << " with: " << this->basis.toStringCommaDelimited();
     candidateElement.intersectVectorSpaces(currentCentralizer, this->basis, currentCentralizer, nullptr);
-    global.comments << "<br>DEBUG: to get: "
-    << currentCentralizer.toStringCommaDelimited() << "<hr><hr>";
   }
 }
 
 void WeylGroupData::operator+=(const WeylGroupData& other) {
-  DynkinType theType = this->theDynkinType;
-  theType += other.theDynkinType;
+  DynkinType theType = this->dynkinType;
+  theType += other.dynkinType;
   this->makeFromDynkinType(theType);
 }
 
 int SemisimpleSubalgebras::getIndexFullSubalgebra() const {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::getIndexFullSubalgebra");
   for (int i = 0; i < this->theSubalgebras.values.size; i ++) {
-    if (this->owner->weylGroup.theDynkinType == this->theSubalgebras.values[i].weylNonEmbedded->theDynkinType) {
+    if (this->owner->weylGroup.dynkinType == this->theSubalgebras.values[i].weylNonEmbedded->dynkinType) {
       return i;
     }
   }
@@ -345,9 +331,9 @@ std::string SemisimpleSubalgebras::toStringSubalgebraNumberWithAmbientLink(
   std::stringstream out;
   CandidateSemisimpleSubalgebra& theCandidate = this->theSubalgebras.values[actualindexSubalgebra];
   out << "Subalgebra "
-  << "\\(" << theCandidate.weylNonEmbedded->theDynkinType.toString() << "\\)"
+  << "\\(" << theCandidate.weylNonEmbedded->dynkinType.toString() << "\\)"
   << " &#8618; " << "<a href=\"./" << this->displayNameMainFile1NoPath << "\">"
-  << "\\(" << this->owner->weylGroup.theDynkinType.toString(theFormat) << "\\)" << "</a>";
+  << "\\(" << this->owner->weylGroup.dynkinType.toString(theFormat) << "\\)" << "</a>";
   int displayIndex = this->getDisplayIndexFromActual(actualindexSubalgebra);
   out << "<br>" << displayIndex << " out of " << this->theSubalgebras.size() << "\n";
   return out.str();
@@ -366,7 +352,7 @@ int SemisimpleSubalgebras::getDisplayIndexFromActual(int actualindexSubalgebra) 
 std::string SemisimpleSubalgebras::getRelativePhysicalFileNameSubalgebra(int actualindexSubalgebra) const {
   std::stringstream out;
   out << this->owner->toStringVirtualFolderName();
-  out << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.theDynkinType.toString())
+  out << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString())
   << "_subalgebra_" << this->getDisplayIndexFromActual(actualindexSubalgebra) << ".html";
   return out.str();
 }
@@ -374,7 +360,7 @@ std::string SemisimpleSubalgebras::getRelativePhysicalFileNameSubalgebra(int act
 std::string SemisimpleSubalgebras::getRelativePhysicalFileNameFKFTNilradicals(int actualindexSubalgebra) const {
   std::stringstream out;
   out << this->owner->toStringVirtualFolderName();
-  out << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.theDynkinType.toString())
+  out << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString())
   << "_subalgebra_" << this->getDisplayIndexFromActual(actualindexSubalgebra) << "_FKFTnilradicals.html";
   return out.str();
 }
@@ -383,7 +369,7 @@ std::string SemisimpleSubalgebras::getDisplayFileNameSubalgebraAbsolute(int actu
   std::stringstream out;
   (void) theFormat;//avoid unused parameter warning in a portable way
   out << this->owner->toStringVirtualFolderName();
-  out << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.theDynkinType.toString())
+  out << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString())
   << "_subalgebra_" << this->getDisplayIndexFromActual(actualindexSubalgebra) << ".html";
   return out.str();
 }
@@ -392,7 +378,7 @@ std::string SemisimpleSubalgebras::getDisplayFileNameSubalgebraRelative(int actu
   std::stringstream out;
   (void) theFormat;//avoid unused parameter warning in a portable way
   //out << "./";
-  out << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.theDynkinType.toString())
+  out << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString())
   << "_subalgebra_" << this->getDisplayIndexFromActual(actualindexSubalgebra) << ".html";
   return out.str();
 }
@@ -401,7 +387,7 @@ std::string SemisimpleSubalgebras::getDisplayFileNameFKFTNilradicals(int actuali
   std::stringstream out;
   (void) theFormat;//avoid unused parameter warning in a portable way
   //out << this->owner->toStringVirtualFolderName();
-  out << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.theDynkinType.toString()) << "_subalgebra_"
+  out << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString()) << "_subalgebra_"
   << this->getDisplayIndexFromActual(actualindexSubalgebra) << "_FKFTnilradicals.html";
   return out.str();
 }
@@ -451,7 +437,7 @@ void SemisimpleSubalgebras::writeReportToFiles() {
   );
   std::stringstream commonHead;
   commonHead << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
-  << this->owner->weylGroup.theDynkinType.toString()
+  << this->owner->weylGroup.dynkinType.toString()
   << "</title>";
   commonHead << HtmlRoutines::getCSSLinkLieAlgebrasAndCalculator("../../../");
   commonHead << HtmlRoutines::getJavascriptLinkGraphicsNDimensionsWithPanels("../../../");
@@ -551,8 +537,8 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebrasSummaryLaTeX(For
     out << "<br><span style =\"color:#FF0000\">There are " << numBadParabolics << " bad parabolic subalgebras!</span><br>";
   }
   out << "\n<br>\n\\begin{longtable}{ccp{3cm}p{3cm}cc}";
-  out << "\\caption{Semisimple subalgebras in type $" << this->owner->weylGroup.theDynkinType.toString(theFormat)
-  << "$ \\label{tableSSSubalgerbas" << this->owner->weylGroup.theDynkinType.toString(theFormat) << "}. ";
+  out << "\\caption{Semisimple subalgebras in type $" << this->owner->weylGroup.dynkinType.toString(theFormat)
+  << "$ \\label{tableSSSubalgerbas" << this->owner->weylGroup.dynkinType.toString(theFormat) << "}. ";
   out << "Number of isotypically complete nilradicals: " << numIsotypicallyCompleteNilrads << ", of them "
   << numFailingConeCondition << " fail the cone condition.";
   if (numNoLinfRelFound == 0) {
@@ -571,14 +557,14 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebrasSummaryLaTeX(For
     if (currentSA.flagSystemProvedToHaveNoSolution) {
       continue;
     }
-    out << "$" << currentSA.weylNonEmbedded->theDynkinType.toString(theFormat) << "$";
+    out << "$" << currentSA.weylNonEmbedded->dynkinType.toString(theFormat) << "$";
     if (!currentSA.flagCentralizerIsWellChosen) {
       continue;
     }
     typeCentralizer.makeZero();
     if (currentSA.indexMaxSSContainer != - 1) {
-      typeCentralizer = this->theSubalgebras.values[currentSA.indexMaxSSContainer].weylNonEmbedded->theDynkinType -
-      currentSA.weylNonEmbedded->theDynkinType;
+      typeCentralizer = this->theSubalgebras.values[currentSA.indexMaxSSContainer].weylNonEmbedded->dynkinType -
+      currentSA.weylNonEmbedded->dynkinType;
     }
     out << "& $ ";
     if (!typeCentralizer.isEqualToZero()) {
@@ -768,7 +754,7 @@ std::string SemisimpleSubalgebras::toStringTableSubalgebraLinksTable(FormatExpre
     }
     int displayIndex = this->getDisplayIndexFromActual(i);
     out << "<td>" << displayIndex << ". " << "<a href = \"#semisimple_subalgebra_" << displayIndex
-    << "\">\\(" << theSA.weylNonEmbedded->theDynkinType.toString() << "\\)</a></td>";
+    << "\">\\(" << theSA.weylNonEmbedded->dynkinType.toString() << "\\)</a></td>";
     if (displayedInCurrentRow >= numberOfColumns) {
       out << "</tr>";
       rowStarted = false;
@@ -800,7 +786,7 @@ std::string SemisimpleSubalgebras::toStringPart2(FormatExpressions *theFormat) {
     if (this->theSubalgebras.values[i].amRegularSA()) {
       numRegularSAs ++;
     }
-    if (this->theSubalgebras.values[i].weylNonEmbedded->theDynkinType.isTypeAOne()) {
+    if (this->theSubalgebras.values[i].weylNonEmbedded->dynkinType.isTypeAOne()) {
       numSl2s ++;
     }
   }
@@ -867,9 +853,9 @@ std::string SemisimpleSubalgebras::toStringPart3(FormatExpressions* theFormat) {
     << this->toStringProgressReport(theFormat);
   } else {
     std::string sl2SubalgebraReports = this->owner->toStringVirtualFolderName() + "orbit_computation_information_" +
-    FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.theDynkinType.toString()) + ".html";
+    FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString()) + ".html";
     std::string loadSubalgebrasFile = this->owner->toStringVirtualFolderName() + "load_algebra_" +
-    FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.theDynkinType.toString()) + ".html";
+    FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString()) + ".html";
 
     out << "<a href = '" << sl2SubalgebraReports  << "'>Nilpotent orbit computation summary</a>.";
     out << "<hr><a href = '" << loadSubalgebrasFile  << "'>Calculator input for subalgebras load</a>.";
@@ -971,7 +957,7 @@ bool SemisimpleSubalgebras::loadState(
     }
     CandidateSemisimpleSubalgebra& currentSA = this->theSubalgebras.values[currentChainInt[i]];
     if (!currentSA.computeAndVerifyFromGeneratorsAndHs()) {
-      reportStream << "<hr>Subalgebra " << currentSA.weylNonEmbedded->theDynkinType.toString()
+      reportStream << "<hr>Subalgebra " << currentSA.weylNonEmbedded->dynkinType.toString()
       << " is corrupt. " << currentSA.comments;
       return false;
     }
@@ -995,12 +981,12 @@ bool SemisimpleSubalgebras::loadState(
     }
     if (!isGood) {
       reportStream << "<hr>Subalgebra "
-      << currentSA.weylNonEmbedded->theDynkinType.toString()
+      << currentSA.weylNonEmbedded->dynkinType.toString()
       << " does not appear to be parabolically induced by "
-      << this->baseSubalgebra().weylNonEmbedded->theDynkinType.toString()
-      << ". More precisely, " << currentSA.weylNonEmbedded->theDynkinType.toString()
+      << this->baseSubalgebra().weylNonEmbedded->dynkinType.toString()
+      << ". More precisely, " << currentSA.weylNonEmbedded->dynkinType.toString()
       << " has h-elements " << currentSA.theHs.toString() << " however "
-      << this->baseSubalgebra().weylNonEmbedded->theDynkinType.toString()
+      << this->baseSubalgebra().weylNonEmbedded->dynkinType.toString()
       << " has h-elements in order of creation: "
       << this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation.toString()
       << " and h-elements in order induced by the type: " << this->baseSubalgebra().theHs.toString();
@@ -1046,7 +1032,7 @@ void SemisimpleSubalgebras::findTheSemisimpleSubalgebrasInitialize() {
   }
   if (global.response.monitoringAllowed()) {
     this->fileNameToLogComments = "LogFileComments_" +
-    FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.theDynkinType.toString()) +
+    FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString()) +
     ".html";
     std::fstream LogFile;
     if (!FileOperations::openFileCreateIfNotPresentVirtual(
@@ -1196,9 +1182,9 @@ void CandidateSemisimpleSubalgebra::setUpInjectionHs(
   if (newHScaledToActByTwo != nullptr) {
     this->theHsScaledToActByTwoInOrderOfCreation.addOnTop(*newHScaledToActByTwo);
   }
-  DynkinSimpleType newComponent = this->weylNonEmbedded->theDynkinType.getSmallestSimpleType();
+  DynkinSimpleType newComponent = this->weylNonEmbedded->dynkinType.getSmallestSimpleType();
   this->cartanSubalgebrasByComponentScaledToActByTwo = baseSubalgebra.cartanSubalgebrasByComponentScaledToActByTwo;
-  int indexOffset = this->weylNonEmbedded->theDynkinType.getRank() - newComponent.theRank;
+  int indexOffset = this->weylNonEmbedded->dynkinType.getRank() - newComponent.theRank;
   int newIndexInNewComponent = 0;
 //  if (!newComponent.isEqualToZero())
   newIndexInNewComponent = *theRootInjection.lastObject() - indexOffset;
@@ -1231,11 +1217,11 @@ void CandidateSemisimpleSubalgebra::computeHsAndHsScaledToActByTwoFromComponents
   this->theHsScaledToActByTwo.assignListList(this->cartanSubalgebrasByComponentScaledToActByTwo);
   this->theHs.setSize(this->theHsScaledToActByTwo.size);
   Matrix<Rational> cartanInComponentOrder;
-  this->weylNonEmbedded->theDynkinType.getCartanSymmetricDefaultLengthKeepComponentOrder(cartanInComponentOrder);
+  this->weylNonEmbedded->dynkinType.getCartanSymmetricDefaultLengthKeepComponentOrder(cartanInComponentOrder);
   this->theSubalgebraNonEmbeddedDefaultScale =
   &this->owner->theSubalgebrasNonDefaultCartanAndScale.getValueCreateNoInit(cartanInComponentOrder);
   this->theSubalgebraNonEmbeddedDefaultScale->weylGroup.makeFromDynkinTypeDefaultLengthKeepComponentOrder(
-    this->weylNonEmbedded->theDynkinType
+    this->weylNonEmbedded->dynkinType
   );
   this->theSubalgebraNonEmbeddedDefaultScale->weylGroup.computeRho(true);
   this->theSubalgebraNonEmbeddedDefaultScale->computeChevalleyConstants();
@@ -1243,7 +1229,7 @@ void CandidateSemisimpleSubalgebra::computeHsAndHsScaledToActByTwoFromComponents
   this->owner->theSubalgebrasNonDefaultCartanAndScale.getIndex(cartanInComponentOrder);
   int counter = - 1;
   List<DynkinSimpleType> theTypes;
-  this->weylNonEmbedded->theDynkinType.getTypesWithMults(theTypes);
+  this->weylNonEmbedded->dynkinType.getTypesWithMults(theTypes);
   for (int i = 0; i < this->cartanSubalgebrasByComponentScaledToActByTwo.size; i ++) {
     for (int j = 0; j < this->cartanSubalgebrasByComponentScaledToActByTwo[i].size; j ++) {
       counter ++;
@@ -1285,33 +1271,33 @@ bool CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra(
     return true;
   }
   this->checkFullInitialization();
-  if (!baseSubalgebra.weylNonEmbedded->theDynkinType.isEqualToZero() && baseSubalgebra.indexInOwner == - 1) {
+  if (!baseSubalgebra.weylNonEmbedded->dynkinType.isEqualToZero() && baseSubalgebra.indexInOwner == - 1) {
     global.fatal << "Attempt to induce a subalgebra "
     << "from a non-registered base subalgebra of type "
-    << baseSubalgebra.weylNonEmbedded->theDynkinType.toString() << ". " << global.fatal;
+    << baseSubalgebra.weylNonEmbedded->dynkinType.toString() << ". " << global.fatal;
   }
   ProgressReport theReport;
   if (!this->computeCharacter(false)) {
     if (theReport.tickAndWantReport()) {
-      theReport.report("Candidate " + this->weylNonEmbedded->theDynkinType.toString() + " doesn't have fitting chars.");
+      theReport.report("Candidate " + this->weylNonEmbedded->dynkinType.toString() + " doesn't have fitting chars.");
     }
     return false;
   }
   this->computeSystem(false, false);
   if (this->flagSystemProvedToHaveNoSolution) {
     if (theReport.tickAndWantReport()) {
-      theReport.report("Candidate " + this->weylNonEmbedded->theDynkinType.toString() + " -> no system solution.");
+      theReport.report("Candidate " + this->weylNonEmbedded->dynkinType.toString() + " -> no system solution.");
     }
   }
   for (int i = 0; i < this->owner->theSubalgebras.values.size; i ++) {
-    if (this->weylNonEmbedded->theDynkinType == this->owner->theSubalgebras.values[i].weylNonEmbedded->theDynkinType) {
+    if (this->weylNonEmbedded->dynkinType == this->owner->theSubalgebras.values[i].weylNonEmbedded->dynkinType) {
       if (this->isDirectSummandOf(this->owner->theSubalgebras.values[i])) {
         return false;
       }
     } else {
       if (
-        this->weylNonEmbedded->theDynkinType.toString() ==
-        this->owner->theSubalgebras.values[i].weylNonEmbedded->theDynkinType.toString()
+        this->weylNonEmbedded->dynkinType.toString() ==
+        this->owner->theSubalgebras.values[i].weylNonEmbedded->dynkinType.toString()
       ) {
         global.fatal << "This is not supposed to happen: different Dynkin types with equal toString outputs. "
         << global.fatal;
@@ -1581,12 +1567,12 @@ void SemisimpleSubalgebras::getHCandidates(
 
 const CandidateSemisimpleSubalgebra& SemisimpleSubalgebras::baseSubalgebra() {
   if (
-    !this->currentSubalgebraChain.lastObject()->weylNonEmbedded->theDynkinType.isEqualToZero() &&
+    !this->currentSubalgebraChain.lastObject()->weylNonEmbedded->dynkinType.isEqualToZero() &&
     this->currentSubalgebraChain.lastObject()->indexInOwner == - 1
   ) {
     global.fatal << "Base subalgebra has index in owner equal to - 1 yet "
     << "is of non-zero type: "
-    << this->currentSubalgebraChain.lastObject()->weylNonEmbedded->theDynkinType.toString() << ". "
+    << this->currentSubalgebraChain.lastObject()->weylNonEmbedded->dynkinType.toString() << ". "
     << global.fatal;
   }
   return * this->currentSubalgebraChain.lastObject();
@@ -1800,7 +1786,7 @@ bool SemisimpleSubalgebras::centralizerOfBaseComputedToHaveUnsuitableNilpotentOr
   int stackIndex = this->currentSubalgebraChain.size - 1;
   int typeIndex = this->currentNumLargerTypesExplored[stackIndex];
   DynkinType& currentType = this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex];
-  DynkinType complementNewSummandType = this->baseSubalgebra().weylNonEmbedded->theDynkinType;
+  DynkinType complementNewSummandType = this->baseSubalgebra().weylNonEmbedded->dynkinType;
   DynkinType newSummandType = currentType-complementNewSummandType;
   DynkinType centralizerComplementNewSummandType = this->baseSubalgebra().theCentralizerType;
   if (newSummandType.size() != 1) {
@@ -1893,7 +1879,7 @@ bool SemisimpleSubalgebras::computeCurrentHCandidates() {
   if (theReport0.tickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << " Finding h-candidates for extension of "
-    << this->baseSubalgebra().weylNonEmbedded->theDynkinType.toString()
+    << this->baseSubalgebra().weylNonEmbedded->dynkinType.toString()
     << " to " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].toString()
     << ": " << typeIndex + 1 << " out of "
     << this->currentPossibleLargerDynkinTypes[stackIndex].size << " possibilities. ";
@@ -1950,9 +1936,9 @@ void SemisimpleSubalgebras::addSubalgebraIfNewSetToStackTop(CandidateSemisimpleS
   this->checkConsistencyHs();
   if (this->theSubalgebras.contains(input.theHs)) {
     input = this->theSubalgebras.values[this->theSubalgebras.getIndex(input.theHs)];
-    if (!input.weylNonEmbedded->theDynkinType.isEqualToZero() && input.indexInOwner == - 1) {
+    if (!input.weylNonEmbedded->dynkinType.isEqualToZero() && input.indexInOwner == - 1) {
       global.fatal << "This is not supposed to happen: subalgebra of type "
-      << input.weylNonEmbedded->theDynkinType.toString() << " has index in owner - 1. " << global.fatal;
+      << input.weylNonEmbedded->dynkinType.toString() << " has index in owner - 1. " << global.fatal;
     }
   } else {
     input.indexInOwner = this->theSubalgebras.values.size;
@@ -1966,12 +1952,12 @@ void SemisimpleSubalgebras::addSubalgebraToStack(
   CandidateSemisimpleSubalgebra& input, int inputNumLargerTypesExplored, int inputNumHcandidatesExplored
 ) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::addSubalgebraToStack");
-  if (input.indexInOwner == - 1 && !input.weylNonEmbedded->theDynkinType.isEqualToZero()) {
+  if (input.indexInOwner == - 1 && !input.weylNonEmbedded->dynkinType.isEqualToZero()) {
     global.fatal << "Adding to stack subalgebra with indexInOwner equal to - 1 is forbidden. " << global.fatal;
   }
   if (input.theHs.size != input.theHsScaledToActByTwoInOrderOfCreation.size) {
     global.fatal << "In order to add subalgebra "
-    << input.weylNonEmbedded->theDynkinType.toString()
+    << input.weylNonEmbedded->dynkinType.toString()
     << " to the stack I need to know the order of creation of its h-vectors. "
     << global.fatal;
   }
@@ -1981,7 +1967,7 @@ void SemisimpleSubalgebras::addSubalgebraToStack(
   this->currentRootInjections.setSize(this->currentSubalgebraChain.size);
 
   this->growDynkinType(
-    input.weylNonEmbedded->theDynkinType,
+    input.weylNonEmbedded->dynkinType,
     *this->currentPossibleLargerDynkinTypes.lastObject(),
     this->currentRootInjections.lastObject()
   );
@@ -2004,7 +1990,7 @@ std::string SemisimpleSubalgebras::toStringCurrentChain(FormatExpressions* theFo
   std::stringstream out;
   out << "<br>Current subalgebra chain length: " << this->currentSubalgebraChain.size << "<br>";
   for (int i = 0; i < this->currentSubalgebraChain.size; i ++) {
-    out << this->currentSubalgebraChain[i].weylNonEmbedded->theDynkinType.toString();
+    out << this->currentSubalgebraChain[i].weylNonEmbedded->dynkinType.toString();
     if (i != this->currentSubalgebraChain.size - 1) {
       out << "&lt;";
     }
@@ -2023,7 +2009,7 @@ std::string SemisimpleSubalgebras::toStringState(FormatExpressions* theFormat) {
   out << this->toStringCurrentChain(theFormat);
   out << "<hr>";
   for (int i = 0; i < this->currentSubalgebraChain.size; i ++) {
-    out << "<br>Extensions of " << this->currentSubalgebraChain[i].weylNonEmbedded->theDynkinType.toString()
+    out << "<br>Extensions of " << this->currentSubalgebraChain[i].weylNonEmbedded->dynkinType.toString()
     << ": &nbsp;&nbsp;&nbsp;&nbsp;";
     for (int j = 0; j < this->currentPossibleLargerDynkinTypes[i].size; j ++) {
       if (j == this->currentNumLargerTypesExplored[i]) {
@@ -2070,7 +2056,7 @@ bool SemisimpleSubalgebras::incrementReturnFalseIfPastLast() {
   }
   if (this->baseSubalgebra().theHs.size != this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation.size) {
     global.fatal << " The order of creation of the elements of the Cartan is missing in base subalgebra of type "
-    << this->baseSubalgebra().weylNonEmbedded->theDynkinType.toString()
+    << this->baseSubalgebra().weylNonEmbedded->dynkinType.toString()
     << ", and this order is needed to construct extensions. " << global.fatal;
   }
   ProgressReport theReport1;
@@ -2103,7 +2089,7 @@ bool SemisimpleSubalgebras::incrementReturnFalseIfPastLast() {
     if (!newCandidate.flagSystemSolved && !newCandidate.flagSystemProvedToHaveNoSolution) {
       this->flagRealizedAllCandidates = false;
       std::stringstream out;
-      out << "<hr>Failed to realize type " << newCandidate.weylNonEmbedded->theDynkinType.toString()
+      out << "<hr>Failed to realize type " << newCandidate.weylNonEmbedded->dynkinType.toString()
       << " because I couldn't handle the polynomial system. "
       << "one poly system that governs the embedding follows.<br>" << newCandidate.toStringSystemPart2() << "<hr>";
       this->comments = out.str();
@@ -2359,7 +2345,7 @@ bool CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo(
         canBeRaisingReflection = false;
       }
       if (theScalarProd < 0) {
-        global.fatal << "While trying to realize type " << this->weylNonEmbedded->theDynkinType.toString()
+        global.fatal << "While trying to realize type " << this->weylNonEmbedded->dynkinType.toString()
         << ", the candidate h elements of the semisimple subalgebra are supposed to be maximally dominant, "
         << "however the scalar product of the positive root " << currentPosRoot.toString() << " with the subalgebra root "
         << this->theHsScaledToActByTwoInOrderOfCreation[l].toString()
@@ -2641,11 +2627,11 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(bool AttemptToChooseCenta
     this->theBasis.addListOnTop(this->thePosGens);
     if (this->theBasis.size > 0) {
       this->owner->owner->generateLieSubalgebra(this->theBasis);
-      if (this->theBasis.size != this->weylNonEmbedded->theDynkinType.getLieAlgebraDimension()) {
+      if (this->theBasis.size != this->weylNonEmbedded->dynkinType.getLieAlgebraDimension()) {
         if (!allowNonPolynomialSystemFailure) {
           global.fatal
           << "Lie subalgebra dimension doesn't fit: dimension of generated subalgebra is "
-          << this->theBasis.size << ", must be " << this->weylNonEmbedded->theDynkinType.getLieAlgebraDimension()
+          << this->theBasis.size << ", must be " << this->weylNonEmbedded->dynkinType.getLieAlgebraDimension()
           << ". The subalgebra is " << this->toString() << "<br>Involved generators: "
           << this->theInvolvedNegGenerators.toString()
           << "<br>and<br>" << this->theInvolvedPosGenerators.toString() << global.fatal;
@@ -2741,7 +2727,7 @@ bool CandidateSemisimpleSubalgebra::checkModuleDimensions() const {
     FormatExpressions theFormat;
     theFormat.flagCandidateSubalgebraShortReportOnly = false;
     global.fatal << "<br><b>Fatal error while computing candidate "
-    << this->weylNonEmbedded->theDynkinType.toString() << ": dimensions do not add up correctly. "
+    << this->weylNonEmbedded->dynkinType.toString() << ": dimensions do not add up correctly. "
     << "I am getting total module dimension sum " << totalDimension
     << " instead of " << this->getAmbientSemisimpleLieAlgebra().getNumberOfGenerators()
     << ".</b> Here is a detailed subalgebra printout. " << this->toString(&theFormat) << global.fatal;
@@ -3144,7 +3130,7 @@ void CandidateSemisimpleSubalgebra::computeKsl2Triples() {
 }
 
 int CandidateSemisimpleSubalgebra::getRank() const {
-  return this->weylNonEmbedded->theDynkinType.getRank();
+  return this->weylNonEmbedded->dynkinType.getRank();
 }
 
 int CandidateSemisimpleSubalgebra::getPrimalRank() const {
@@ -3517,7 +3503,7 @@ void CandidateSemisimpleSubalgebra::enumerateAllNilradicals() {
   this->enumerateNilradicalsRecursively(theSel, &out);
   if (this->FKNilradicalCandidates.size < 1) {
     global.fatal << "While enumerating nilradicals of "
-    << this->weylNonEmbedded->theDynkinType.toString()
+    << this->weylNonEmbedded->dynkinType.toString()
     << " got 0 nilradical candidates which is impossible (the zero nilradical is always possible). " << global.fatal;
   }
   for (int i = 0; i < this->FKNilradicalCandidates.size; i ++) {
@@ -4113,7 +4099,7 @@ bool CandidateSemisimpleSubalgebra::attemptToSolveSystem() {
   this->transformedSystem = this->theSystemToSolve;
   ProgressReport theReport;
   std::stringstream reportstream;
-  reportstream << "<hr>In order to realize type " << this->weylNonEmbedded->theDynkinType.toString()
+  reportstream << "<hr>In order to realize type " << this->weylNonEmbedded->dynkinType.toString()
   << " I need to solve the following system." << this->toStringSystemPart2();
   theReport.report(reportstream.str());
   PolynomialSystem<AlgebraicNumber> system;
@@ -4241,7 +4227,7 @@ bool CandidateSemisimpleSubalgebra::computeCharacter(bool allowBadCharacter) {
   this->theCharFundamentalCoordsRelativeToCartan.makeZero();
   this->theCharFundamentalCoordsRelativeToCartan.addMonomial(tempMon, this->getAmbientSemisimpleLieAlgebra().getRank());
   List<DynkinSimpleType> theTypes;
-  this->weylNonEmbedded->theDynkinType.getTypesWithMults(theTypes);
+  this->weylNonEmbedded->dynkinType.getTypesWithMults(theTypes);
 /*  global.Comments << "<br>Cartan symmetric, type  "
   << this->weylNonEmbedded->theDynkinType.toString() << " <br>"
   << this->weylNonEmbedded->cartanSymmetric.toString()
@@ -4579,7 +4565,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
   if (theReport0.tickAndWantReport()) {
     std::stringstream reportStream0;
     reportStream0 << "Finding sl(2)-subalgebras (and thus a full list of the nilpotent orbits) of "
-    << inputOwner.weylGroup.theDynkinType.toString();
+    << inputOwner.weylGroup.dynkinType.toString();
     theReport0.report(reportStream0.str());
   }
   inputOwner.checkConsistency();
@@ -5425,8 +5411,8 @@ std::string CandidateSemisimpleSubalgebra::toStringModuleDecompositionLaTeX(Form
   out << "\\documentclass{article}\\usepackage{amssymb}\\usepackage{longtable}"
   << "\\usepackage{multirow}\\begin{document}" ;
   out << "<br> \\begin{longtable}{c|c|c|c|c|c}\n<br>\n\\caption{Module decomposition of $"
-  << this->owner->owner->weylGroup.theDynkinType.toString() << "$ over $"
-  << this->weylNonEmbedded->theDynkinType.toString()
+  << this->owner->owner->weylGroup.dynkinType.toString() << "$ over $"
+  << this->weylNonEmbedded->dynkinType.toString()
   << " \\oplus \\mathfrak h_c$\\label{tableModuleDecompo} }\\\\"
   << "Component &Module & elements & elt. weights& $h$-element "
   << "$\\mathfrak k-sl(2)$-triple& $f$-element $\\mathfrak k-sl(2)$-triple\\\\";
@@ -6176,7 +6162,7 @@ std::string SemisimpleSubalgebras::toStringAlgebraLink(int actualindexSubalgebra
   if (this->theSubalgebras.values[actualindexSubalgebra].flagSystemProvedToHaveNoSolution) {
     makeLink = false;
   }
-  std::string theTypeString = this->theSubalgebras.values[actualindexSubalgebra].weylNonEmbedded->theDynkinType.toString();
+  std::string theTypeString = this->theSubalgebras.values[actualindexSubalgebra].weylNonEmbedded->dynkinType.toString();
   if (makeLink) {
     out << "<a href=\"" << this->getDisplayFileNameSubalgebraRelative(actualindexSubalgebra, theFormat)
     << "\" id = \"semisimple_subalgebra_" << this->getDisplayIndexFromActual(actualindexSubalgebra)
@@ -6200,10 +6186,10 @@ std::string CandidateSemisimpleSubalgebra::toStringCartanSubalgebra(FormatExpres
   bool useMouseHover = theFormat == nullptr ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
 
   List<DynkinSimpleType> theSimpleTypes;
-  this->weylNonEmbedded->theDynkinType.getTypesWithMults(theSimpleTypes);
+  this->weylNonEmbedded->dynkinType.getTypesWithMults(theSimpleTypes);
   FormatExpressions tempFormat;
-  tempFormat.ambientWeylLetter = this->getAmbientWeyl().theDynkinType[0].theLetter;
-  tempFormat.ambientCartanSymmetricInverseScale = this->getAmbientWeyl().theDynkinType[0].CartanSymmetricInverseScale;
+  tempFormat.ambientWeylLetter = this->getAmbientWeyl().dynkinType[0].theLetter;
+  tempFormat.ambientCartanSymmetricInverseScale = this->getAmbientWeyl().dynkinType[0].CartanSymmetricInverseScale;
   out << "<br>Elements Cartan subalgebra scaled to act by two by components: ";
   for (int i = 0; i < this->cartanSubalgebrasByComponentScaledToActByTwo.size; i ++) {
     if (useLaTeX && useHtml) {
@@ -6304,15 +6290,15 @@ std::string CandidateSemisimpleSubalgebra::toStringCentralizerDebugData(FormatEx
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::toStringCentralizerDebugData");
   (void) theFormat; //avoid unused parameter warning in a portable way.
   std::stringstream out;
-  out << "Subalgebra of type: " << this->weylNonEmbedded->theDynkinType.toString()
+  out << "Subalgebra of type: " << this->weylNonEmbedded->dynkinType.toString()
   << ". this->centralizerRank computed: " << this->centralizerRank.toString()
   << ". this->centralizerDimension: " << this->centralizerDimension.toString()
   << ". The max semisimple subalgebra container computed: "
-  << this->owner->theSubalgebras.values[this->indexMaxSSContainer].weylNonEmbedded->theDynkinType.toString()
+  << this->owner->theSubalgebras.values[this->indexMaxSSContainer].weylNonEmbedded->dynkinType.toString()
   << ". The rank of the ambient Lie algebra is " << this->owner->owner->getRank()
   << ". The indices of the direct containers of the subalgebra are: ";
   for (int k = 0; k < this->indicesDirectSummandSuperAlgebra.size; k ++) {
-    out << this->owner->theSubalgebras.values[this->indicesDirectSummandSuperAlgebra[k]].weylNonEmbedded->theDynkinType.toString()
+    out << this->owner->theSubalgebras.values[this->indicesDirectSummandSuperAlgebra[k]].weylNonEmbedded->dynkinType.toString()
     << ", ";
   }
   return out.str();
@@ -6338,12 +6324,12 @@ void CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen() {
   ProgressReport theReport1;
   DynkinType centralizerTypeAlternative;
   if (this->indexMaxSSContainer != - 1) {
-    centralizerTypeAlternative = this->owner->theSubalgebras.values[this->indexMaxSSContainer].weylNonEmbedded->theDynkinType;
-    centralizerTypeAlternative -= this->weylNonEmbedded->theDynkinType;
+    centralizerTypeAlternative = this->owner->theSubalgebras.values[this->indexMaxSSContainer].weylNonEmbedded->dynkinType;
+    centralizerTypeAlternative -= this->weylNonEmbedded->dynkinType;
     if (theReport1.tickAndWantReport()) {
       std::stringstream reportStream;
       reportStream << "<hr>The centralizer of subalgebra of type "
-      << this->weylNonEmbedded->theDynkinType.toString() << " is of type "
+      << this->weylNonEmbedded->dynkinType.toString() << " is of type "
       << centralizerTypeAlternative.toString();
       theReport1.report(reportStream.str());
     }
@@ -6372,7 +6358,7 @@ void CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen() {
   }
   if (this->indexMaxSSContainer != - 1 && this->flagCentralizerIsWellChosen) {
     for (int i = 0; i < this->owner->theSubalgebras.values.size; i ++) {
-      if (centralizerTypeAlternative == this->owner->theSubalgebras.values[i].weylNonEmbedded->theDynkinType) {
+      if (centralizerTypeAlternative == this->owner->theSubalgebras.values[i].weylNonEmbedded->dynkinType) {
         if (this->owner->theSubalgebras.values[i].indicesDirectSummandSuperAlgebra.contains(this->indexMaxSSContainer)) {
           this->indexSSPartCentralizer = i;
           break;
@@ -6472,7 +6458,7 @@ std::string CandidateSemisimpleSubalgebra::toStringLoadUnknown(FormatExpressions
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::toStringLoadUnknown");
   std::stringstream out;
   out << "(";
-  out << "DynkinType =" << this->weylNonEmbedded->theDynkinType.toString() << "; ElementsCartan =";
+  out << "DynkinType =" << this->weylNonEmbedded->dynkinType.toString() << "; ElementsCartan =";
   out << "(";
   for (int i = 0; i < this->theHs.size; i ++) {
     out << this->theHs[i].toString();
@@ -6493,12 +6479,12 @@ std::string CandidateSemisimpleSubalgebra::toStringLoadUnknown(FormatExpressions
 }
 
 std::string CandidateSemisimpleSubalgebra::toStringType(FormatExpressions* theFormat) const {
-  return this->weylNonEmbedded->theDynkinType.toString(theFormat);
+  return this->weylNonEmbedded->dynkinType.toString(theFormat);
 }
 
 std::string CandidateSemisimpleSubalgebra::toStringTypeAndHs(FormatExpressions* theFormat) const {
   std::stringstream out;
-  out << this->weylNonEmbedded->theDynkinType.toString(theFormat) << ", Cartan: " << this->theHs.toString(theFormat);
+  out << this->weylNonEmbedded->dynkinType.toString(theFormat) << ", Cartan: " << this->theHs.toString(theFormat);
   return out.str();
 }
 
@@ -6767,7 +6753,7 @@ void CandidateSemisimpleSubalgebra::GetHsScaledToActByTwoByType(
 ) const {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::GetHsByType");
   List<DynkinSimpleType> allTypes;
-  this->weylNonEmbedded->theDynkinType.getTypesWithMults(allTypes);
+  this->weylNonEmbedded->dynkinType.getTypesWithMults(allTypes);
   outputHsByType.setSize(0);
   outputTypeList.setSize(0);
   if (allTypes.size != this->cartanSubalgebrasByComponentScaledToActByTwo.size) {
@@ -6827,8 +6813,8 @@ bool CandidateSemisimpleSubalgebra::isDirectSummandOf(const CandidateSemisimpleS
     return false;
   }
   DynkinType theDifference;
-  theDifference = other.weylNonEmbedded->theDynkinType;
-  theDifference -= this->weylNonEmbedded->theDynkinType;
+  theDifference = other.weylNonEmbedded->dynkinType;
+  theDifference -= this->weylNonEmbedded->dynkinType;
   for (int i = 0; i < theDifference.size(); i ++) {
     if (theDifference.coefficients[i] < 0) {
       return false;
@@ -6840,7 +6826,7 @@ bool CandidateSemisimpleSubalgebra::isDirectSummandOf(const CandidateSemisimpleS
   List<List<Vectors<Rational> > > theHsScaledToActByTwoByType;
   other.GetHsScaledToActByTwoByType(theHsScaledToActByTwoByType, isoTypes);
   for (int i = 0; i < isoTypes.size; i ++) {
-    Rational ratMult = this->weylNonEmbedded->theDynkinType.getCoefficientOf(isoTypes[i]);
+    Rational ratMult = this->weylNonEmbedded->dynkinType.getCoefficientOf(isoTypes[i]);
     int intMult = 0;
     if (!ratMult.isSmallInteger(&intMult)) {
       return false;
@@ -6849,7 +6835,7 @@ bool CandidateSemisimpleSubalgebra::isDirectSummandOf(const CandidateSemisimpleS
     selectedTypes.theElements.addOnTop(currentTypeSelection);
   }
   FinitelyGeneratedMatrixMonoid<Rational> theOuterAutos;
-  this->weylNonEmbedded->theDynkinType.getOuterAutosGeneratorsActOnVectorColumn(theOuterAutos.theGenerators);
+  this->weylNonEmbedded->dynkinType.getOuterAutosGeneratorsActOnVectorColumn(theOuterAutos.theGenerators);
   for (int i = 0; i < theOuterAutos.theGenerators.size; i ++) {
     theOuterAutos.theGenerators[i].transpose();
   }
@@ -6870,8 +6856,8 @@ bool CandidateSemisimpleSubalgebra::isDirectSummandOf(const CandidateSemisimpleS
   if (theReport.tickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "Computing whether "
-    << this->weylNonEmbedded->theDynkinType << " is direct summand of "
-    << other.weylNonEmbedded->theDynkinType.toString()
+    << this->weylNonEmbedded->dynkinType << " is direct summand of "
+    << other.weylNonEmbedded->dynkinType.toString()
     << ". The outer automorphisms of the smaller type are: ";
     FormatExpressions theFormat;
     theFormat.flagUseHTML = false;
@@ -7011,8 +6997,8 @@ void SemisimpleSubalgebras::hookUpCentralizers(bool allowNonPolynomialSystemFail
           currentSA.indexMaxSSContainer = j;
         }
         if (
-          this->theSubalgebras.values[currentSA.indexMaxSSContainer].weylNonEmbedded->theDynkinType.getLieAlgebraDimension() <
-          otherSA.weylNonEmbedded->theDynkinType.getLieAlgebraDimension()
+          this->theSubalgebras.values[currentSA.indexMaxSSContainer].weylNonEmbedded->dynkinType.getLieAlgebraDimension() <
+          otherSA.weylNonEmbedded->dynkinType.getLieAlgebraDimension()
         ) {
           currentSA.indexMaxSSContainer = j;
         }
@@ -7078,7 +7064,7 @@ bool DynkinType::operator>(const DynkinType& other) const {
 }
 
 bool CandidateSemisimpleSubalgebra::operator>(const CandidateSemisimpleSubalgebra& other) const {
-  return this->weylNonEmbedded->theDynkinType > other.weylNonEmbedded->theDynkinType;
+  return this->weylNonEmbedded->dynkinType > other.weylNonEmbedded->dynkinType;
 }
 
 void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {

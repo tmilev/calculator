@@ -561,6 +561,7 @@ a.linkProgressReport {
 
 #divCalculatorMainInputOutput{
   overflow: auto;
+  height: 100%;
 }
 
 #divCalculatorExamplesContainer {
@@ -568,10 +569,10 @@ a.linkProgressReport {
   vertical-align:top;
   white-space:nowrap;
   position: absolute; 
-  right:0%;
+  right:2%;
   top: 0%;
-  max-width: 30%;
-  max-height: 93%;
+  max-width: 28%;
+  height: 100%;
 }
 
 #idAutocompletePanel {
@@ -713,10 +714,6 @@ div.divMenuSeparator {
   font-size: small;
   text-align: center;
   border-bottom: 1px solid black;
-}
-
-#divCalculatorExamples {
-  max-height: 850px;
 }
 
 div.headChapter {

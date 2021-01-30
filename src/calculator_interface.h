@@ -179,7 +179,7 @@ private:
   bool startsWithBuiltInAtom() const;
   bool startsWithFunctionWithComplexRange() const;
   bool startsWithArithmeticOperation() const;
-  bool startsWith(int theOp = - 1, int N = - 1) const;
+  bool startsWith(int operation = - 1, int numberOfChildren = - 1) const;
 
   bool startsWithGivenOperation(const std::string& theOperation, int desiredChildren = - 1) const;
   bool isListStartingWithAtom(int operation = - 1) const;
@@ -298,20 +298,20 @@ private:
   const theType& getValue() const {
     return this->getValueNonConst<theType>();
   }
-  template <class theType>
-  theType& getValueNonConst() const;
-  template<class theType>
+  template <class Type>
+  Type& getValueNonConst() const;
+  template<class Type>
   int getTypeOperation() const;
-  template<class theType>
-  int addObjectReturnIndex(const theType& inputValue) const;
+  template<class Type>
+  int addObjectReturnIndex(const Type& inputValue) const;
   // note: the following always returns true:
-  template <class theType>
-  bool assignValue(const theType& inputValue, Calculator& owner);
+  template <class Type>
+  bool assignValue(const Type& inputValue, Calculator& owner);
   // note: the following always returns true:
-  template <class theType>
+  template <class Type>
   bool assignValueWithContext(
-    const theType& inputValue,
-    const ExpressionContext& theContext,
+    const Type& inputValue,
+    const ExpressionContext& context,
     Calculator& owner
   );
   template <class BuiltIn>
@@ -409,7 +409,7 @@ private:
   static bool toStringBuiltIn(
     const Expression& input,
     std::stringstream& out,
-    FormatExpressions* theFormat
+    FormatExpressions* format
   );
 
   bool toStringWithAtomHandler(std::stringstream& out, FormatExpressions* theFormat) const;
@@ -1070,9 +1070,11 @@ class ObjectContainer {
   // by various predefined function handlers.
 public:
   HashedListReferences<ElementWeylGroup> theWeylGroupElements;
-  MapReferences<DynkinType, SemisimpleLieAlgebra> semisimpleLieAlgebras;
+  // Pointers to the values of the semisimpleLieAlgebras map.
+  // Required so we can return references SemisimpleLieAlgebra*&
   ListReferences<SemisimpleLieAlgebra*> semisimpleLieAlgebraPointers;
-  MapReferences<DynkinType, SemisimpleSubalgebras> theSSSubalgebraS;
+  MapReferences<DynkinType, SemisimpleLieAlgebra> semisimpleLieAlgebras;
+  MapReferences<DynkinType, SemisimpleSubalgebras> semisimpleSubalgebras;
   HashedListReferences<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > weylGroupRepresentations;
   HashedListReferences<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > weylGroupVirtualRepresentations;
   ListReferences<ModuleSSalgebra<RationalFunction<Rational> > > theCategoryOmodules;
@@ -1099,7 +1101,7 @@ public:
   HashedListReferences<Expression> expressionWithNotation;
   HashedListReferences<Expression> constraints;
   HashedListReferences<LittelmannPath> lakshmibaiSeshadriPaths;
-  HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
+  HashedListReferences<MatrixTensor<Rational> > matrixTensorRationals;
   HashedListReferences<ElementZmodP> theEltsModP;
   HashedListReferences<Weight<Rational> > theWeights;
   HashedListReferences<Weight<Polynomial<Rational> > > theWeightsPoly;
@@ -1976,7 +1978,7 @@ public:
   int opCharSSAlgMod() {
     return this->operations.getIndexNoFail("CharSSAlgMod");
   }
-  int opSemisimpleLieAlgebrA() {
+  int opSemisimpleLieAlgebra() {
     return this->operations.getIndexNoFail("SemisimpleLieAlg");
   }
   int opSemisimpleSubalgebras() {
@@ -2754,34 +2756,35 @@ public:
   static bool innerExpressionFromUE(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerExpressionFrom(Calculator& calculator, const MonomialPolynomial& input, Expression& output);
   // TODO: move to calculator conversions.
-  template <class theType>
+  template <class Type>
   static bool convertToTypeUsingFunction(
-    Expression::FunctionAddress theFun, const Expression& input, Expression& output
+    Expression::FunctionAddress converter, const Expression& input, Expression& output
   ) {
     MacroRegisterFunctionWithName("Calculator::convertToTypeUsingFunction");
-    if (input.isOfType<theType>()) {
+    if (input.isOfType<Type>()) {
       output = input;
       return true;
     }
-    if (theFun == nullptr) {
+    if (converter == nullptr) {
       return false;
     }
     Calculator& calculator = *input.owner;
-    if (!theFun(calculator, input, output)) {
-      calculator.comments << "<hr>Conversion function failed on " << input.toString() << ". ";
+    if (!converter(calculator, input, output)) {
+      calculator.comments << "<hr>Conversion function failed on "
+      << input.toString() << ". ";
       return false;
     }
-    return output.isOfType<theType>();
+    return output.isOfType<Type>();
   }
-  template <class theType>
+  template <class Type>
   static bool convert(
     const Expression& input,
     Expression::FunctionAddress conversion,
-    WithContext<theType>& output
+    WithContext<Type>& output
   ) {
     MacroRegisterFunctionWithName("CalculatorConversions::convert");
     Expression conversionExpression;
-    if (!CalculatorConversions::convertToTypeUsingFunction<theType>(conversion, input, conversionExpression)) {
+    if (!CalculatorConversions::convertToTypeUsingFunction<Type>(conversion, input, conversionExpression)) {
       return false;
     }
     if (!conversionExpression.isOfType(&output.content)) {
@@ -2792,10 +2795,10 @@ public:
   }
 };
 
-template <class theType>
+template <class Type>
 bool Calculator::getVector(
   const Expression& input,
-  Vector<theType>& output,
+  Vector<Type>& output,
   ExpressionContext* inputOutputStartingContext,
   int targetDimensionNonMandatory,
   Expression::FunctionAddress conversionFunction
@@ -2808,7 +2811,7 @@ bool Calculator::getVector(
   List<Expression> convertedEs;
   convertedEs.setSize(nonConvertedEs.size);
   for (int i = 0; i < nonConvertedEs.size; i ++) {
-    if (!CalculatorConversions::convertToTypeUsingFunction<theType>(
+    if (!CalculatorConversions::convertToTypeUsingFunction<Type>(
       conversionFunction, nonConvertedEs[i], convertedEs[i]
     )) {
       return false;
@@ -2824,7 +2827,7 @@ bool Calculator::getVector(
   }
   output.setSize(convertedEs.size);
   for (int i = 0; i < convertedEs.size; i ++) {
-    output[i] = convertedEs[i].getValue<theType>();
+    output[i] = convertedEs[i].getValue<Type>();
   }
   return true;
 }
@@ -3018,23 +3021,23 @@ int Expression::addObjectReturnIndex(const
 Rational
 & inputValue) const;
 
-template <class theType>
+template <class Type>
 bool Expression::assignValueWithContext(
-  const theType& inputValue,
-  const ExpressionContext& theContext,
+  const Type& inputValue,
+  const ExpressionContext& context,
   Calculator& owner
 ) {
   this->reset(owner, 3);
-  this->addChildAtomOnTop(this->getTypeOperation<theType>());
-  this->addChildOnTop(theContext.toExpression());
+  this->addChildAtomOnTop(this->getTypeOperation<Type>());
+  this->addChildOnTop(context.toExpression());
   return this->addChildAtomOnTop(this->addObjectReturnIndex(inputValue));
 }
 
-template <class theType>
-bool Expression::assignValue(const theType& inputValue, Calculator& owner) {
+template <class Type>
+bool Expression::assignValue(const Type& inputValue, Calculator& owner) {
   Expression typeComputer;
   typeComputer.owner = &owner;
-  int currentType = typeComputer.getTypeOperation<theType>();
+  int currentType = typeComputer.getTypeOperation<Type>();
   if (
     currentType == owner.opEltZmodP() ||
     currentType == owner.opPolynomialRational() ||
@@ -3119,14 +3122,14 @@ bool Calculator::getTypeWeight(
     return false;
   }
   if (!calculator.objectContainer.semisimpleLieAlgebras.contains(
-    ambientSSalgebra->weylGroup.theDynkinType
+    ambientSSalgebra->weylGroup.dynkinType
   )) {
     global.fatal
     << ambientSSalgebra->toStringLieAlgebraName()
     << " contained object container more than once. " << global.fatal;
   }
   int algebraIndex = calculator.objectContainer.semisimpleLieAlgebras.getIndex(
-    ambientSSalgebra->weylGroup.theDynkinType
+    ambientSSalgebra->weylGroup.dynkinType
   );
   outputAmbientSemisimpleLieAlgebra.context.setIndexAmbientSemisimpleLieAlgebra(algebraIndex);
   return true;
@@ -3214,7 +3217,7 @@ bool Calculator::getTypeHighestWeightParabolic(
     }
   }
   if (!calculator.objectContainer.semisimpleLieAlgebras.contains(
-    ambientSSalgebra->weylGroup.theDynkinType
+    ambientSSalgebra->weylGroup.dynkinType
   )) {
     global.fatal
     << ambientSSalgebra->toStringLieAlgebraName()
@@ -3222,7 +3225,7 @@ bool Calculator::getTypeHighestWeightParabolic(
     << global.fatal;
   }
   int algebraIndex = calculator.objectContainer.semisimpleLieAlgebras.getIndex(
-    ambientSSalgebra->weylGroup.theDynkinType
+    ambientSSalgebra->weylGroup.dynkinType
   );
   outputAmbientSSalgebra.context.setIndexAmbientSemisimpleLieAlgebra(algebraIndex);
   return true;

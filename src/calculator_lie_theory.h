@@ -185,10 +185,10 @@ public:
   static bool writeSemisimpleLieAlgebraToHardDisk(Calculator& calculator, const Expression& input, Expression& output);
   static bool printSemisimpleLieAlgebra(Calculator& calculator, const Expression& input, Expression& output, bool Verbose);
   static bool writeToHardDiskOrPrintSemisimpleLieAlgebra(
-    Calculator& calculator, const Expression& input, Expression& output, bool Verbose, bool writeToHD
+    Calculator& calculator, const Expression& input, Expression& output, bool verbose, bool writeToHD
   );
   static bool functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
-    Calculator& calculator, const Expression& input, Expression& output, bool Verbose, bool writeToHD
+    Calculator& calculator, const Expression& input, Expression& output, bool verbose, bool writeToHD
   );
   static bool rootSubsystem(Calculator& calculator, const Expression& input, Expression& output);
 };

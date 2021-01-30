@@ -292,7 +292,7 @@ void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation(
   List<char> letters;
   List<int> ranks;
   WeylGroupData& WD = *(G.generators[0].owner);
-  WD.theDynkinType.getLettersTypesMultiplicities(&letters, &ranks, nullptr);
+  WD.dynkinType.getLettersTypesMultiplicities(&letters, &ranks, nullptr);
   // When WeylGroupRepresentation is merged with GroupRepresentation,
   // and WeylGroupData split from FiniteGroup<ElementWeylGroup<WeylGroup> >
   // theRepresentations will be this->theGroup->irreps
@@ -439,7 +439,7 @@ bool CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant(
   std::stringstream out;
   out << "Input: " << theHWs.toString()
   << ", simultaneously raising to maximally dominant in Weyl group of type "
-  << theSSalgebra->weylGroup.theDynkinType.toString();
+  << theSSalgebra->weylGroup.dynkinType.toString();
   if (!useOuter) {
     theSSalgebra->weylGroup.raiseToMaximallyDominant(theHWs);
   } else {
@@ -461,15 +461,15 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
   if (!input.isListNElements(3)) {
     return output.makeError("weylOrbit takes two arguments", calculator);
   }
-  const Expression& theSSalgebraNode = input[1];
+  const Expression& algebraExpression = input[1];
   const Expression& vectorNode = input[2];
-  DynkinType theType;
-  if (theSSalgebraNode.isOfType<SemisimpleLieAlgebra*>()) {
-    SemisimpleLieAlgebra* theAlgebra = theSSalgebraNode.getValue<SemisimpleLieAlgebra*>();
-    theType = theAlgebra->weylGroup.theDynkinType;
+  DynkinType dynkinType;
+  if (algebraExpression.isOfType<SemisimpleLieAlgebra*>()) {
+    SemisimpleLieAlgebra* algebra = algebraExpression.getValueNonConst<SemisimpleLieAlgebra*>();
+    dynkinType = algebra->weylGroup.dynkinType;
   } else {
     if (!CalculatorConversions::functionDynkinType(
-      calculator, theSSalgebraNode, theType
+      calculator, algebraExpression, dynkinType
     )) {
       return false;
     }
@@ -480,13 +480,13 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
     vectorNode,
     theHWfundCoords,
     &theContext,
-    theType.getRank(),
+    dynkinType.getRank(),
     CalculatorConversions::functionPolynomial<Rational>
   )) {
     return output.makeError("Failed to extract highest weight", calculator);
   }
   WeylGroupData theWeyl;
-  theWeyl.makeFromDynkinType(theType);
+  theWeyl.makeFromDynkinType(dynkinType);
   theHWsimpleCoords = theHWfundCoords;
   theHWfundCoords = theWeyl.getFundamentalCoordinatesFromSimple(theHWsimpleCoords);
   std::stringstream out, latexReport;
@@ -511,7 +511,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
   bool useMathTag = outputOrbit.size < 150;
   Matrix<Rational> epsCoordMat;
   Polynomial<Rational> zero;
-  theWeyl.theDynkinType.getEpsilonMatrix(epsCoordMat);
+  theWeyl.dynkinType.getEpsilonMatrix(epsCoordMat);
   for (int i = 0; i < outputOrbit.size; i ++) {
     theFormat.simpleRootLetter = "\\alpha";
     theFormat.fundamentalWeightLetter = "\\psi";
@@ -624,7 +624,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   LargeInteger tempInt;
   bool useMathTag = outputOrbit.size < 150;
   Matrix<Rational> epsCoordMat;
-  theWeyl.theDynkinType.getEpsilonMatrix(epsCoordMat);
+  theWeyl.dynkinType.getEpsilonMatrix(epsCoordMat);
   GraphWeightedLabeledEdges integralPositiveRootReflectionGraph;
   integralPositiveRootReflectionGraph.numNodes = outputOrbit.size;
   integralPositiveRootReflectionGraph.nodeLabels.setSize(outputOrbit.size);
@@ -774,7 +774,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements
   char theType ='X';
   int theRank = - 1;
   bool hasOuterAutosAndIsSimple = false;
-  if (theGroupData.theDynkinType.isSimple(&theType, &theRank)) {
+  if (theGroupData.dynkinType.isSimple(&theType, &theRank)) {
     if (theType == 'D' || theType == 'A') {
       hasOuterAutosAndIsSimple = true;
     }
@@ -849,7 +849,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesFromAllElements(
   WeylGroupData& theGroupData = output.getValueNonConst<WeylGroupData>();
   if (theGroupData.getDimension() > 7) {
     calculator << "<hr>Loaded Dynkin type "
-    << theGroupData.theDynkinType.toString() << " of rank "
+    << theGroupData.dynkinType.toString() << " of rank "
     << theGroupData.getDimension() << " but I've been told "
     << "not to compute when the rank is larger than 7. ";
     return false;
@@ -873,7 +873,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesRepresentatives(
   WeylGroupData& theGroupData = output.getValueNonConst<WeylGroupData>();
   theGroupData.checkConsistency();
   if (theGroupData.getDimension() > 8) {
-    return calculator << "<hr>Loaded Dynkin type " << theGroupData.theDynkinType.toString()
+    return calculator << "<hr>Loaded Dynkin type " << theGroupData.dynkinType.toString()
     << " of rank " << theGroupData.getDimension() << " but I've been told "
     << "not to compute when the rank is larger than 8. ";
   }
@@ -882,7 +882,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesRepresentatives(
   theGroupData.checkConsistency();
   theGroupData.theGroup.computeConjugacyClassSizesAndRepresentatives();
   calculator << "<hr> Computed conjugacy classes representatives of "
-  << theGroupData.theDynkinType.toString() << " in " << global.getElapsedSeconds()-timeStart1
+  << theGroupData.dynkinType.toString() << " in " << global.getElapsedSeconds()-timeStart1
   << " second(s). ";
   return output.assignValue(theGroupData, calculator);
 }
@@ -1189,7 +1189,7 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(const List<Subgrou
       mainTableStream << "p{0.275cm}";
     }
     mainTableStream << "}\n<br>\n" << "\\caption{\\label{table:SignSignature"
-    << HtmlRoutines::cleanUpForLaTeXLabelUse(this->theDynkinType.toString())
+    << HtmlRoutines::cleanUpForLaTeXLabelUse(this->dynkinType.toString())
     << "}Multiplicity of the sign representation over the classes of root subgroups. "
     << "There are " << numParabolicClasses << " parabolic subgroup classes, " << numNonParabolicPseudoParabolic
     << " pseudo-parabolic subgroup classes that are not parabolic, and "
@@ -1210,7 +1210,7 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(const List<Subgrou
     }
     mainTableStream << "\\\\\n<br>\n";
     mainTableStream << "Irrep label";
-    if (this->theDynkinType.isSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale)) {
+    if (this->dynkinType.isSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale)) {
       for (int i = startIndex; i < startIndexNextCol; i ++) {
         mainTableStream << "&$" << inputSubgroups[i].theDynkinType.toString(&formatSupressUpperIndexOne) << "$";
       }
@@ -1244,7 +1244,7 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(const List<Subgrou
       }
       out << "</tr><tr><td></td><td></td>";
     }
-    if (this->theDynkinType.isSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale)) {
+    if (this->dynkinType.isSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale)) {
       for (int i = 0; i < inputSubgroups.size; i ++) {
         out << "<td>" << inputSubgroups[i].theDynkinType.toString(&formatSupressUpperIndexOne)
         << "</td>";
@@ -1294,7 +1294,7 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(const List<Subgrou
     out << "r";
   }
   out << "}"
-  << "\\caption{\\label{tableIrrepChars" << this->theDynkinType.toString()
+  << "\\caption{\\label{tableIrrepChars" << this->dynkinType.toString()
   << "}\\\\ Irreducible representation characters. Columns are labeled by conjugacy classes.} \\\\";
   out << "<br>\n  & \\multicolumn{"
   << this->theGroup.characterTable[0].data.size
@@ -1314,7 +1314,7 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(const List<Subgrou
   }
   out << "\\end{longtable}\n<br>\n";
   out << "\\begin{longtable}{rrcl}" << "\\caption{\\label{tableConjugacyClassTable"
-  << HtmlRoutines::cleanUpForLaTeXLabelUse(this->theDynkinType.toString()) << "}}\\\\ ";
+  << HtmlRoutines::cleanUpForLaTeXLabelUse(this->dynkinType.toString()) << "}}\\\\ ";
   out << "$\\#$ & Representative & Class size & Root subsystem label\\\\<br>\n";
   for (int i = 0; i < this->theGroup.conjugacyClassCount(); i ++) {
     out << "$" << i + 1 << "$ & " "$" << this->theGroup.conjugacyClasses[i].representative.toString()
@@ -1824,7 +1824,7 @@ bool CalculatorFunctionsWeylGroup::signSignatureRootSubsystemsFromKostkaNumbers(
   }
   char type = 'X';
   int rank = - 1;
-  if (!theWeyl.theDynkinType.isSimple(&type, &rank)) {
+  if (!theWeyl.dynkinType.isSimple(&type, &rank)) {
     return calculator << "This function is implemented for simple classical Weyl groups only.";
   }
   if (type != 'A' && type != 'B' && type != 'C' && type != 'D') {
@@ -2104,7 +2104,7 @@ bool CalculatorFunctionsWeylGroup::macdonaldPolys(Calculator& calculator, const 
       out << "<br>" << theOrbit[j].toString();
     }
   }
-  out << "Type: " << theRootSAs.owner->weylGroup.theDynkinType.toString()
+  out << "Type: " << theRootSAs.owner->weylGroup.dynkinType.toString()
   << ". Number of root subsystems: " << theRootSAs.theSubalgebras.size;
   return output.assignValue(out.str(), calculator);
 }

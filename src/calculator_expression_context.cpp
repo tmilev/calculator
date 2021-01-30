@@ -98,7 +98,7 @@ Expression ExpressionContext::toExpressionDefaultModulus() const {
 
 Expression ExpressionContext::toExpressionSemisimpleLieAlgebra() const {
   Expression algebraContext(*this->owner);
-  algebraContext.addChildAtomOnTop(this->owner->opSemisimpleLieAlgebrA());
+  algebraContext.addChildAtomOnTop(this->owner->opSemisimpleLieAlgebra());
   algebraContext.addChildOnTop(this->indexAmbientSemisimpleLieAlgebra);
   return algebraContext;
 }
@@ -193,7 +193,7 @@ std::string ExpressionContext::toString() const {
   }
   if (this->indexAmbientSemisimpleLieAlgebra != - 1) {
     out << "Ambient semisimple Lie algebra: "
-    << this->getAmbientSemisimpleLieAlgebra()->weylGroup.theDynkinType.toString();
+    << this->getAmbientSemisimpleLieAlgebra()->weylGroup.dynkinType.toString();
   }
   return out.str();
 }
@@ -229,11 +229,11 @@ bool ExpressionContext::setAmbientSemisimpleLieAlgebra(
   this->checkInitialization();
   MapReferences<DynkinType, SemisimpleLieAlgebra>& algebras = this->owner->objectContainer.semisimpleLieAlgebras;
   this->indexAmbientSemisimpleLieAlgebra = algebras.getIndex(
-    algebra.weylGroup.theDynkinType
+    algebra.weylGroup.dynkinType
   );
   if (this->indexAmbientSemisimpleLieAlgebra == - 1) {
     global.fatal << "Attempt to add semisimple algebra of type "
-    << algebra.weylGroup.theDynkinType << " which is unknown to the calculator. "
+    << algebra.weylGroup.dynkinType << " which is unknown to the calculator. "
     << global.fatal;
   }
   return true;
@@ -281,7 +281,7 @@ bool ExpressionContext::fromExpressionOneContext(
   if (input.startsWith(this->owner->opWeylAlgebraVariables())) {
     return this->fromExpressionDifferentialOperatorVariables(input);
   }
-  if (input.startsWith(this->owner->opSemisimpleLieAlgebrA())) {
+  if (input.startsWith(this->owner->opSemisimpleLieAlgebra())) {
     return this->fromExpressionSemisimpleLieAlgebra(input);
   }
   if (input.startsWith(this->owner->opMod())) {

@@ -79,7 +79,7 @@ void Calculator::initializeFunctionsExtra() {
     "the planned span class names are: \"calculator\", "
     "\"calculatorHidden\", \"calculatorAnswer\".",
     "ExtractCalculatorExpressionFromHtml(LoadFileIntoString("
-    "\"problems/Functions-composing-fractional-linear-1.html\"))",
+    "\"problems/default/Functions-composing-fractional-linear-1.html\"))",
     "CalculatorHtmlFunctions::extractCalculatorExpressionFromHtml",
     "ExtractCalculatorExpressionFromHtml",
     innerStandard

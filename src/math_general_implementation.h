@@ -602,9 +602,11 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
           tempElement.negate();
           if (theReport.tickAndWantReport()) {
             std::stringstream reportStream;
-            reportStream << "Gaussian elimination (" << this->numberOfRows << "x" << this->numberOfColumns
+            reportStream << "Gaussian elimination ("
+            << this->numberOfRows << "x" << this->numberOfColumns
             << "): column " << i + 1 << " out of " << this->numberOfColumns
-            << ".\n<br>Pivot row: " << numFoundPivots + 1 << ", eliminating row " << j + 1 << " out of " << this->numberOfRows;
+            << ".\n<br>Pivot row: " << numFoundPivots + 1
+            << ", eliminating row " << j + 1 << " out of " << this->numberOfRows;
             theReport.report(reportStream.str());
           }
           this->addTwoRows(numFoundPivots, j, i, tempElement);

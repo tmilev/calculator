@@ -5106,9 +5106,9 @@ ProblemGiveUp(
 Gives the predefined answer to a problem. First argument must be a string with the problem. The second argument must be the id of the answer. Third argument must be the random seed integer.
 
 *ExtractCalculatorExpressionFromHtml* [ExtractCalculatorExpressionFromHtml] {CalculatorHtmlFunctions::extractCalculatorExpressionFromHtml}.
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ExtractCalculatorExpressionFromHtml%28LoadFileIntoString%28%5c%22problems%2fFunctions-composing-fractional-linear-1.html%5c%22%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ExtractCalculatorExpressionFromHtml%28LoadFileIntoString%28%5c%22problems%2fdefault%2fFunctions-composing-fractional-linear-1.html%5c%22%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-ExtractCalculatorExpressionFromHtml(LoadFileIntoString("problems/Functions-composing-fractional-linear-1.html"))
+ExtractCalculatorExpressionFromHtml(LoadFileIntoString("problems/default/Functions-composing-fractional-linear-1.html"))
 ```
 Reads html and extracts embedded calculator commands. Content enclosed in spans with appropriate class names is interpreted; all other content is copied without any change. At the moment of writing, the planned span class names are: "calculator", "calculatorHidden", "calculatorAnswer".
 

@@ -661,10 +661,10 @@ JSData PlotObject::toJSONSurfaceImmersion() {
   }
   result[PlotObject::Labels::variableRange] = this->theVarRangesJS;
   if (this->numSegmenTsJS.size <= 1) {
-    result[PlotObject::Labels::numberOfSegments] = this->numSegmenTsJS;
-  } else {
     result[PlotObject::Labels::numberOfSegments][0] = 22;
     result[PlotObject::Labels::numberOfSegments][1] = 4;
+  } else {
+    result[PlotObject::Labels::numberOfSegments] = this->numSegmenTsJS;
   }
   result[PlotObject::Labels::colorContour] = "black";
   if (this->colorUV != "") {

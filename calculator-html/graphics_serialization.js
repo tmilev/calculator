@@ -275,10 +275,14 @@ class GraphicsSerialization {
           this.interpretStringToNumber(variableRanges[1][0], parameterValues),
           this.interpretStringToNumber(variableRanges[1][1], parameterValues),
         ]];
+        let convertedSegments = [
+          this.interpretStringToNumber(numberOfSegments[0], parameterValues),
+          this.interpretStringToNumber(numberOfSegments[1], parameterValues),
+        ];
         canvas.drawSurfaceCreate(
           this.functionFromBodyAndArguments(coordinateFunctions, inputArguments, parameterValues),
           convertedRanges,
-          numberOfSegments,
+          convertedSegments,
           colorFront,
           colorBack,
           colorContour,

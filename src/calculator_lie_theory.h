@@ -116,7 +116,11 @@ public:
   );
   static bool splitFDpartB3overG2CharsOnly(Calculator& calculator, const Expression& input, Expression& output);
   static bool rootSAsAndSltwos(
-    Calculator& calculator, const Expression& input, Expression& output, bool showSLtwos, bool MustRecompute
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool showSLtwos,
+    bool mustRecompute
   );
   static bool printRootSAs(Calculator& calculator, const Expression& input, Expression& output) {
     return CalculatorLieTheory::rootSAsAndSltwos(calculator, input, output, false, false);

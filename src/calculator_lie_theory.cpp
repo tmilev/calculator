@@ -1847,60 +1847,59 @@ bool CalculatorLieTheory::splitFDpartB3overG2CharsOnly(
   return CalculatorLieTheory::splitFDpartB3overG2CharsOutput(calculator, input, output, theG2B3Data);
 }
 
-
 bool CalculatorLieTheory::rootSAsAndSltwos(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
   bool showSLtwos,
-  bool MustRecompute
+  bool mustRecompute
 ) {
   MacroRegisterFunctionWithName("CalculatorLieTheory::rootSAsAndSltwos");
   if (input.size() != 2) {
     return calculator << "Root subalgebra / sl(2)-subalgebras function expects 1 argument. ";
   }
-  WithContext<SemisimpleLieAlgebra*> ownerSS;
+  WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (!CalculatorConversions::convert(
     input[1],
     CalculatorConversions::functionSemisimpleLieAlgebra,
-    ownerSS
+    semisimpleLieAlgebra
   )) {
     return output.makeError("Error extracting Lie algebra.", calculator);
   }
-  FormatExpressions theFormat;
-  theFormat.flagUseHTML = true;
-  theFormat.flagUseLatex = false;
-  theFormat.flagUsePNG = true;
+  FormatExpressions format;
+  format.flagUseHTML = true;
+  format.flagUseLatex = false;
+  format.flagUsePNG = true;
 
-  std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile, outSltwoFileDisplayName;
+  std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile;
 
-  std::string displayFolder = ownerSS.content->toStringDisplayFolderName("");
+  std::string displayFolder = semisimpleLieAlgebra.content->toStringDisplayFolderName("");
 
-  outSltwoMainFile << displayFolder << ownerSS.content->toStringFileNameRelativePathSlTwoSubalgebras();
-  outRootHtmlFileName << displayFolder << ownerSS.content->toStringFileNameNoPathRootSubalgebras();
-  outRootHtmlDisplayName << displayFolder << ownerSS.content->toStringFileNameNoPathRootSubalgebras();
+  outSltwoMainFile << displayFolder << semisimpleLieAlgebra.content->toStringFileNameRelativePathSlTwoSubalgebras();
+  outRootHtmlFileName    << displayFolder << semisimpleLieAlgebra.content->toStringFileNameNoPathRootSubalgebras();
+  outRootHtmlDisplayName << displayFolder << semisimpleLieAlgebra.content->toStringFileNameNoPathRootSubalgebras();
   if (
     !FileOperations::fileExistsVirtual(outSltwoMainFile.str()) ||
     !FileOperations::fileExistsVirtual(outRootHtmlFileName.str())
   ) {
-    MustRecompute = true;
+    mustRecompute = true;
   }
   std::stringstream out;
-  if (MustRecompute) {
-    SlTwoSubalgebras theSl2s(*ownerSS.content);
-    theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo = true;
-    ownerSS.content->FindSl2Subalgebras(*ownerSS.content, theSl2s);
-    theSl2s.toHTML(&theFormat);
+  if (mustRecompute) {
+    SlTwoSubalgebras slTwoSubalgebras(*semisimpleLieAlgebra.content);
+    slTwoSubalgebras.rootSubalgebras.flagPrintParabolicPseudoParabolicInfo = true;
+    semisimpleLieAlgebra.content->findSl2Subalgebras(*semisimpleLieAlgebra.content, slTwoSubalgebras);
+    slTwoSubalgebras.writeHTML(&format);
+    semisimpleLieAlgebra.content->writeHTML(true, false);
   } else {
     out << "The table is precomputed and served from the hard disk. <br>";
   }
-  out << "<a href=\""
-  << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str())
-  << "\" target = \"_blank\">"
-  << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str()) << " </a>";
+  out << "<a href='"
+  << (showSLtwos ? outSltwoMainFile.str() : outRootHtmlDisplayName.str())
+  << "' target='_blank'>"
+  << semisimpleLieAlgebra.content->toStringLieAlgebraName() << " </a>";
   return output.assignValue(out.str(), calculator);
 }
-
 
 bool CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart(
   Calculator& calculator, const Expression& input, Expression& output
@@ -2454,7 +2453,7 @@ bool CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras(
     << theSAs.owner->weylGroup.dynkinType.toString() << ", (";
     for (int j = 0; j < theChains[i].size; j ++) {
       CalculatorConversions::innerStoreCandidateSubalgebra(
-        calculator, theSAs.theSubalgebras.values[theChains[i][j]], currentChainE
+        calculator, theSAs.subalgebras.values[theChains[i][j]], currentChainE
       );
       out << currentChainE.toString();
       if (j != theChains[i].size - 1) {
@@ -2719,7 +2718,7 @@ bool CalculatorLieTheory::drawWeightSupportWithMults(
   DrawingVariables theDV;
   std::string report;
   theChar.drawMeWithMultiplicities(report, theDV, 10000);
-  out << report << theDV.getHTMLDiv(theWeyl.getDimension());
+  out << report << theDV.getHTMLDiv(theWeyl.getDimension(), true);
   return output.assignValue(out.str(), calculator);
 }
 
@@ -2762,13 +2761,13 @@ bool CalculatorLieTheory::drawRootSystem(
     }
   }
   std::stringstream out;
-  DrawingVariables theDV;
-  theWeyl.drawRootSystem(theDV, true, false, nullptr, true, nullptr);
+  DrawingVariables drawingVariables;
+  theWeyl.drawRootSystem(drawingVariables, true, false, nullptr, true, nullptr);
   if (hasPreferredProjectionPlane) {
-    theDV.flagFillUserDefinedProjection = true;
-    theDV.FillUserDefinedProjection = preferredProjectionPlane;
+    drawingVariables.flagFillUserDefinedProjection = true;
+    drawingVariables.FillUserDefinedProjection = preferredProjectionPlane;
   }
-  out << theDV.getHTMLDiv(theWeyl.getDimension());
+  out << drawingVariables.getHTMLDiv(theWeyl.getDimension(), true);
   return output.assignValue(out.str(), calculator);
 }
 
@@ -2881,10 +2880,10 @@ bool CalculatorLieTheory::drawWeightSupport(
   std::stringstream out;
   CharacterSemisimpleLieAlgebraModule<Rational> theChar;
   theChar.makeFromWeight(highestWeightSimpleCoords, theAlgPointer.content);
-  DrawingVariables theDV;
+  DrawingVariables drawingVariables;
   std::string report;
-  theChar.drawMeNoMultiplicities(report, theDV, 10000);
-  out << report << theDV.getHTMLDiv(theWeyl.getDimension());
+  theChar.drawMeNoMultiplicities(report, drawingVariables, 10000);
+  out << report << drawingVariables.getHTMLDiv(theWeyl.getDimension(), true);
   out << "<br>A table with the weights of the character follows. <br>";
   out << theChar.toStringFullCharacterWeightsTable();
   return output.assignValue(out.str(), calculator);
@@ -2995,9 +2994,9 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
   std::string dynkinString = ownerSSPointer->weylGroup.dynkinType.toString();
   global.relativePhysicalNameOptionalProgressReport = "progress_subalgebras_" + dynkinString;
   global.relativePhysicalNameOptionalResult = "result_subalgebras_" + dynkinString;
-  SemisimpleSubalgebras& theSubalgebras =
+  SemisimpleSubalgebras& subalgebras =
   calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerLieAlgebra.weylGroup.dynkinType);
-  theSubalgebras.computeStructureWriteFiles(
+  subalgebras.computeStructureWriteFiles(
     ownerLieAlgebra,
     calculator.objectContainer.theAlgebraicClosure,
     calculator.objectContainer.semisimpleLieAlgebras,
@@ -3253,6 +3252,13 @@ bool CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
   algebraPointer.content->checkConsistency();
   algebraPointer.context.checkInitialization();
   SemisimpleLieAlgebra& semisimpleAlgebra = *algebraPointer.content;
-  std::string result = semisimpleAlgebra.toHTMLCalculator(verbose, writeToHD, calculator.flagWriteLatexPlots);
-  return output.assignValue(result, calculator);
+  std::stringstream out;
+  if (writeToHD) {
+    semisimpleAlgebra.writeHTML(verbose, calculator.flagWriteLatexPlots);
+    out << "<a href='"
+    << semisimpleAlgebra.toStringVirtualFileNameWithPathStructureConstants()
+    << "' target='_blank'>hard drive output</a><br>";
+  }
+  out << semisimpleAlgebra.toHTML(verbose, calculator.flagWriteLatexPlots);
+  return output.assignValue(out.str(), calculator);
 }

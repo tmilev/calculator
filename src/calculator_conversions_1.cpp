@@ -586,9 +586,9 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
     return calculator << "<hr>Failed to extract subalgebra generators from expression " << input.toString() << ". ";
   }
   SemisimpleLieAlgebra& currentNonEmbededSA =
-  owner.theSubalgebrasNonEmbedded->getValueCreateNoInit(outputSubalgebra.weylNonEmbedded->dynkinType);
+  owner.subalgebrasNonEmbedded->getValueCreateNoInit(outputSubalgebra.weylNonEmbedded->dynkinType);
   outputSubalgebra.indexNonEmbeddedMeStandard =
-  owner.theSubalgebrasNonEmbedded->getIndex(outputSubalgebra.weylNonEmbedded->dynkinType);
+  owner.subalgebrasNonEmbedded->getIndex(outputSubalgebra.weylNonEmbedded->dynkinType);
   currentNonEmbededSA.weylGroup.computeRho(true);
   outputSubalgebra.weylNonEmbedded->computeRho(true); //<- this line may be unnecessary, the
   //two Weyl groups may coincide depending on some implementation decisions I am about to take
@@ -649,16 +649,16 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
 
   SemisimpleSubalgebras& theSAs =
   calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSemisimple->weylGroup.dynkinType);
-  theSAs.theSubalgebrasNonEmbedded = &calculator.objectContainer.semisimpleLieAlgebras;
+  theSAs.subalgebrasNonEmbedded = &calculator.objectContainer.semisimpleLieAlgebras;
   theSAs.owner = ownerSemisimple;
   reportStream << " Initializing data structures... ";
   theReport.report(reportStream.str());
   reportStream << " done. Fetching subalgebra list ... ";
   theReport.report(reportStream.str());
   theSAsE.sequencefy();
-  theSAs.theSubalgebras.setExpectedSize(theSAsE.children.size - 1);
-  theSAs.theSubalgebras.clear();
-  theSAs.theSubalgebrasNonEmbedded->setExpectedSize(theSAsE.children.size - 1);
+  theSAs.subalgebras.setExpectedSize(theSAsE.children.size - 1);
+  theSAs.subalgebras.clear();
+  theSAs.subalgebrasNonEmbedded->setExpectedSize(theSAsE.children.size - 1);
   theSAs.flagAttemptToSolveSystems = true;
   theSAs.flagcomputeModuleDecompositionsition = true;
   theSAs.flagcomputePairingTable = false;
@@ -684,18 +684,18 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     }
 
     currentCandidate.checkFullInitialization();
-    if (theSAs.theSubalgebras.contains(currentCandidate.theHs)) {
+    if (theSAs.subalgebras.contains(currentCandidate.theHs)) {
       calculator << "<hr>Did not load subalgebra of type "
       << currentCandidate.weylNonEmbedded->toString()
       << " because I've already loaded a subalgebra with "
       << "the same Cartan subalgebra. ";
       continue;
     }
-    theSAs.theSubalgebras.setKeyValue(currentCandidate.theHs, currentCandidate);
-    theSAs.theSubalgebras.values.lastObject().indexInOwner = theSAs.theSubalgebras.values.size - 1;
+    theSAs.subalgebras.setKeyValue(currentCandidate.theHs, currentCandidate);
+    theSAs.subalgebras.values.lastObject().indexInOwner = theSAs.subalgebras.values.size - 1;
   }
   reportStream << "Subalgebra loading done, total "
-  << theSAs.theSubalgebras.values.size << " subalgebras loaded. ";
+  << theSAs.subalgebras.values.size << " subalgebras loaded. ";
   theReport.report(reportStream.str());
   theSAs.toStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
   if (!theSAs.loadState(currentChainInt, numExploredTypes, numExploredHs, calculator.comments)) {
@@ -765,9 +765,9 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(
   theValues.addOnTop(numHsExploredE);
   Expression subalgebrasListE, candidateE;
   subalgebrasListE.makeSequence(calculator);
-  subalgebrasListE.children.reserve(input.theSubalgebras.values.size + 1);
-  for (int i = 0; i < input.theSubalgebras.values.size; i ++) {
-    if (!CalculatorConversions::innerStoreCandidateSubalgebra(calculator, input.theSubalgebras.values[i], candidateE)) {
+  subalgebrasListE.children.reserve(input.subalgebras.values.size + 1);
+  for (int i = 0; i < input.subalgebras.values.size; i ++) {
+    if (!CalculatorConversions::innerStoreCandidateSubalgebra(calculator, input.subalgebras.values[i], candidateE)) {
       return false;
     }
     subalgebrasListE.addChildOnTop(candidateE);

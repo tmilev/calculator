@@ -62,6 +62,10 @@ class ElementWithScripts {
     for (let i = 0; i < incomingScripts.length; i++) {
       this.accountOneScript(incomingScripts[i]);
     }
+    let incomingScriptsInSpans = this.element.querySelectorAll(`[name="script"]`);
+    for (let i = 0; i < incomingScriptsInSpans.length; i++) {
+      this.accountOneScript(incomingScriptsInSpans[i]);
+    }
     let candidateSliders = this.element.getElementsByTagName("input");
     for (let i = 0; i < candidateSliders.length; i++) {
       this.accountOneSlider(candidateSliders[i]);

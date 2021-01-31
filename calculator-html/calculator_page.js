@@ -64,7 +64,7 @@ class AtomHandler {
     }
     let encodedAtom = encodeURIComponent(this.atom);
     currentId += `${encodedAtom}_${this.index}_${this.totalRules}`;
-    resultString += `<a href = '#' class = 'linkInfo' onclick = "window.calculator.miscellaneousFrontend.switchMenu('${currentId}')">info</a>`;
+    resultString += `<button class='accordionLikeIndividual' onclick = "window.calculator.miscellaneousFrontend.switchMenu('${currentId}')">info</button>`;
     resultString += `<calculatorExampleInfo id = "${currentId}" class = "hiddenClass">${this.description}`;
     resultString += `<br><b>Example:</b><br>${this.example}</calculatorExampleInfo>`;
     let theLink = calculator.getComputationLink(this.example);

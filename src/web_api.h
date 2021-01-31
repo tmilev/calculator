@@ -205,7 +205,12 @@ public:
     const std::string& input, int recursionDepth = 0
   );
 
+  // A script tag a that contains a json data structure.
   static std::string scriptFromJSON(const std::string& scriptType, const JSData& scriptContent);
+  // Same as scriptFromJSON but uses a no-display span with name="script".
+  static std::string jsonContainer(
+    const std::string& scriptType, const JSData& scriptContent
+  );
   static void convertURLStringToNormal(
     const std::string& input, std::string& output, bool replacePlusBySpace
   );
@@ -283,15 +288,6 @@ public:
   );
 
   static const std::string& getJavascriptAceEditorScriptWithTags();
-  static const std::string getJavascriptEquationEditorWithTags(const std::string& baseFolder);
-
-  static const std::string getCSSLinkLieAlgebrasAndCalculator(
-    const std::string& relativeTo
-  );
-
-  static const std::string getJavascriptLinkGraphicsNDimensionsWithPanels(
-    const std::string& relativeTo
-  );
 
   static std::string getJavascriptVariable(const std::string& variableName);
 

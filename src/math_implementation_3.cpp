@@ -1516,7 +1516,8 @@ bool FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_Ultr
   );
 }
 
-bool FileOperations::openFileCreateIfNotPresentVirtual(std::fstream& theFile,
+bool FileOperations::openFileCreateIfNotPresentVirtual(
+  std::fstream& theFile,
   const std::string& theFileName,
   bool OpenInAppendMode,
   bool truncate,
@@ -9343,23 +9344,23 @@ std::string PartialFractions::doTheFullComputationReturnLatexFileString(
 ) {
   std::string whatWentWrong;
   global.fatal << "Not implemented yet. " << global.fatal;
-//  this->theChambersOld.theDirections = toBePartitioned;
+  //  this->theChambersOld.theDirections = toBePartitioned;
   this->AmbientDimension = toBePartitioned.getDimension();
-//  this->theChambersOld.AmbientDimension = toBePartitioned.getDimension();
-//  this->theChambersOld.thePauseController.initComputation();
+  //  this->theChambersOld.AmbientDimension = toBePartitioned.getDimension();
+  //  this->theChambersOld.thePauseController.initComputation();
   //this->theChambers.ReadFromDefaultFile();
   std::stringstream out;
   std::stringstream outHtml;
   global.fatal << global.fatal ;
-//  this->theChambersOld.SliceTheEuclideanSpace(false);
-//  this->theChambersOld.quickSortAscending();
-//  this->theChambersOld.LabelChamberIndicesProperly();
-//  this->theChambers.AssignCombinatorialChamberComplex(this->theChambersOld);
-//  this->theChambersOld.drawOutput(global.theDrawingVariables, tempRoot, 0);
-//  this->theChambersOld.thePauseController.exitComputation();
+  //  this->theChambersOld.SliceTheEuclideanSpace(false);
+  //  this->theChambersOld.quickSortAscending();
+  //  this->theChambersOld.LabelChamberIndicesProperly();
+  //  this->theChambers.AssignCombinatorialChamberComplex(this->theChambersOld);
+  //  this->theChambersOld.drawOutput(global.theDrawingVariables, tempRoot, 0);
+  //  this->theChambersOld.thePauseController.exitComputation();
   DrawingVariables theDVs;
   this->theChambers.drawMeProjective(nullptr, true, theDVs, theFormat);
-  outHtml << theDVs.getHTMLDiv(this->AmbientDimension);
+  outHtml << theDVs.getHTMLDiv(this->AmbientDimension, false);
   Vector<Rational> tempRoot;
   tempRoot.makeZero(this->AmbientDimension);
   global.fatal << "not implemented yet" << global.fatal;
@@ -10216,7 +10217,7 @@ std::string ConeComplex::drawMeToHtmlLastCoordAffine(DrawingVariables& theDrawin
   bool isBad = false;
   isBad = this->drawMeLastCoordinateAffine(true, theDrawingVariables, theFormat);
   std::stringstream out;
-  out << theDrawingVariables.getHTMLDiv(this->getDimension() - 1);
+  out << theDrawingVariables.getHTMLDiv(this->getDimension() - 1, false);
   if (isBad) {
     out << "<hr>" << "found cones which I can't draw<hr>";
   }
@@ -10228,7 +10229,7 @@ std::string ConeComplex::drawMeToHtmlProjective(DrawingVariables& theDrawingVari
   bool isGood = true;
   isGood = this->drawMeProjective(nullptr, true, theDrawingVariables, theFormat);
   std::stringstream out;
-  out << theDrawingVariables.getHTMLDiv(this->getDimension());
+  out << theDrawingVariables.getHTMLDiv(this->getDimension(), false);
   if (!isGood) {
     out << "<hr>" << "found cones which I can't draw<hr>";
   }
@@ -10398,7 +10399,7 @@ std::string Cone::drawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariab
   if (foundBadVertex) {
     out << "<br>The cone does not lie in the upper half-space. ";
   } else {
-    out << theDrawingVariables.getHTMLDiv(this->getDimension() - 1);
+    out << theDrawingVariables.getHTMLDiv(this->getDimension() - 1, false);
   }
   out << "<br>" << this->toString(&theFormat);
   return out.str();
@@ -10478,7 +10479,7 @@ std::string Cone::drawMeToHtmlProjective(DrawingVariables& theDrawingVariables, 
   theDrawingVariables.theBuffer.makeMeAStandardBasis(this->getDimension());
   this->drawMeProjective(nullptr, true, theDrawingVariables, theFormat);
   theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->getDimension());
-  out << theDrawingVariables.getHTMLDiv(this->getDimension());
+  out << theDrawingVariables.getHTMLDiv(this->getDimension(), false);
   out << "<br>" << this->toString(&theFormat);
   return out.str();
 }
@@ -11317,7 +11318,7 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(const Vector<Ratio
             tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, "black", 5);
             tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, "black", 10);
             tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, "red", 4);
-            global.comments << tempDV.getHTMLDiv(this->theProjectivizedComplex.getDimension() - 1);
+            global.comments << tempDV.getHTMLDiv(this->theProjectivizedComplex.getDimension() - 1, false);
           }
           firstFail = false;
         }

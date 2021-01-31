@@ -30,6 +30,7 @@ public:
     static std::string onePageJS;
     static std::string onePageJSWithHash;
     static std::string calculatorCSS;
+    static std::string lieAlgebrasCSS;
     static std::string userInfoJSON;
     static std::string editPage;
     static std::string debugFlag;

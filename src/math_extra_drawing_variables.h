@@ -248,7 +248,10 @@ public:
   int getActualPenStyleFromFlagsAnd(int inputPenStyle);
   int getActualTextStyleFromFlagsAnd(int inputTextStyle);
 
-  std::string getHTMLDiv(int theDimension);
+  std::string getHTMLDiv(
+    int dimension,
+    bool useSpanTag
+  );
   void drawString(DrawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle);
   void drawCoordSystemBuffer(DrawingVariables& variables, int theDimension);
   void drawLineDirectly(

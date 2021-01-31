@@ -363,12 +363,12 @@ public:
   AlgebraicClosureRationals* ownerField;
   DynkinType targetDynkinType;
   SlTwoSubalgebras theSl2s;
-  MapReferences<DynkinType, SemisimpleLieAlgebra>* theSubalgebrasNonEmbedded;
-  MapReferences<Matrix<Rational>, SemisimpleLieAlgebra> theSubalgebrasNonDefaultCartanAndScale;
+  MapReferences<DynkinType, SemisimpleLieAlgebra>* subalgebrasNonEmbedded;
+  MapReferences<Matrix<Rational>, SemisimpleLieAlgebra> subalgebrasNonDefaultCartanAndScale;
   List<List<Rational> > cachedDynkinIndicesSl2subalgebrasSimpleTypes;
   HashedList<DynkinSimpleType> cachedDynkinSimpleTypesWithComputedSl2Subalgebras;
   List<OrbitIteratorRootActionWeylGroupAutomorphisms> orbits;
-  HashedList<Rational> theOrbitHelementLengths;
+  HashedList<Rational> orbitHElementLengths;
   HashedList<DynkinSimpleType> theOrbitDynkinIndices;
   // List<HashedList<ElementWeylGroup<WeylGroup> > > theOrbitGeneratingElts;
   // if an entry in orbit sizes is - 1 this means the corresponding orbit size has not been computed yet.
@@ -388,7 +388,7 @@ public:
 
   //end current computation state variables.
 
-  MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra> theSubalgebras; //used to search for subalgebras quickly
+  MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra> subalgebras; //used to search for subalgebras quickly
   bool flagRealizedAllCandidates;
   bool flagAttemptToSolveSystems;
   bool flagcomputePairingTable;

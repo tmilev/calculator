@@ -175,14 +175,14 @@ std::string Calculator::toStringSemismipleLieAlgebraLinksFromHD(
   } else {
     out << "<td>Not available</td>\n";
   }
-  out << "<td><a href=\""
+  out << "<td><a href='"
   << folderComputer.toStringDisplayFolderName(prefixFolder)
-  << folderComputer.toStringFileNameRelativePathSlTwoSubalgebras() << "\">"
+  << folderComputer.toStringFileNameRelativePathSlTwoSubalgebras() << "'>"
   << dynkinType[0].theLetter << dynkinType[0].theRank << " sl(2) triples</a></td>\n";
-  out << "<td><a href=\""
+  out << "<td><a href='"
   << folderComputer.toStringDisplayFolderName(prefixFolder)
   << folderComputer.toStringFileNameNoPathRootSubalgebras()
-  << "\">" << dynkinType[0].theLetter
+  << "'>" << dynkinType[0].theLetter
   << dynkinType[0].theRank << " root subalgebras</a></td>\n";
   return out.str();
 }
@@ -249,6 +249,8 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
       this->findTheSemisimpleSubalgebrasFromScratch(newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras, nullptr);
     }
     this->writeReportToFiles();
+    this->theSl2s.writeHTML();
+    this->owner->writeHTML(true, false);
   } else {
     if (outputStream != nullptr) {
       *outputStream << "Files precomputed, serving from HD. ";

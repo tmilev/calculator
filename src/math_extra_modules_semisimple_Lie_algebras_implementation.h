@@ -365,9 +365,9 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
   }
   out << "<br>Character with respect to Levi part: " << HtmlRoutines::getMathNoDisplay(output.toString());
   if (report != nullptr) {
-    DrawingVariables theDV;
+    DrawingVariables drawingVariables;
     std::string tempS;
-    this->drawMeNoMultiplicities(tempS, theDV, 10000);
+    this->drawMeNoMultiplicities(tempS, drawingVariables, 10000);
     Vector<Rational> tempRoot;
     out << "<hr>In the following weight visualization, "
     << "a yellow line is drawn if the corresponding weights are "
@@ -375,12 +375,12 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
     << "with respect to a simple root of the Levi part of the parabolic subalgebra. ";
     for (int i = 0; i < output.size(); i ++) {
       tempRoot = theWeyL.getSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordinates).getVectorRational();
-      outputWeylSub.drawContour(tempRoot, theDV, "#a0a000", 1000);
+      outputWeylSub.drawContour(tempRoot, drawingVariables, "#a0a000", 1000);
       std::stringstream tempStream;
       tempStream << output.coefficients[i].toString();
-      theDV.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
+      drawingVariables.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
     }
-    out << "<hr>" << theDV.getHTMLDiv(theWeyL.getDimension());
+    out << "<hr>" << drawingVariables.getHTMLDiv(theWeyL.getDimension(), false);
     *report = out.str();
   }
   return true;
@@ -1314,7 +1314,7 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* theFormat)
   DrawingVariables theDV;
   this->theCharOverH.drawMeAssumeCharIsOverCartan(theWeyl, theDV);
   out << " A picture of the weight support follows. "
-  << theDV.getHTMLDiv(theWeyl.getDimension());
+  << theDV.getHTMLDiv(theWeyl.getDimension(), false);
 
   bool isBad = false;
   for (int k = 0; k < this->theBilinearFormsAtEachWeightLevel.size; k ++) {

@@ -1144,9 +1144,9 @@ void WeylGroupData::getSignSignatureAllRootSubsystems(List<SubgroupDataRootRefle
   theRootSAs.owner = &theSSlieAlg;
   theRootSAs.computeAllReductiveRootSubalgebrasUpToIsomorphism();
   List<Vectors<Rational> > theRootSAsBases;
-  theRootSAsBases.setExpectedSize(theRootSAs.theSubalgebras.size);
-  for (int i = theRootSAs.theSubalgebras.size - 1; i >= 0; i --) {
-    theRootSAsBases.addOnTop(theRootSAs.theSubalgebras[i].simpleRootsReductiveSubalgebra);
+  theRootSAsBases.setExpectedSize(theRootSAs.subalgebras.size);
+  for (int i = theRootSAs.subalgebras.size - 1; i >= 0; i --) {
+    theRootSAsBases.addOnTop(theRootSAs.subalgebras[i].simpleRootsReductiveSubalgebra);
   }
   this->getSignSignatureRootSubgroups(outputSubgroups, theRootSAsBases);
 }

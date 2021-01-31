@@ -49,18 +49,6 @@ void HtmlRoutines::loadStrings() {
   HtmlRoutines::getJavascriptAceEditorScriptWithTags();
 }
 
-const std::string HtmlRoutines::getJavascriptEquationEditorWithTags(
-  const std::string& baseFolder
-) {
-  MacroRegisterFunctionWithName("HtmlRoutines::getJavascriptEquationEditorWithTags");
-  std::stringstream out;
-  std::string editorScript = FileOperations::GetVirtualNameWithHash(
-    "calculator-html/equation_editor.js"
-  );
-  out << "<script src =\"" << baseFolder << editorScript << "\"></script>";
-  return out.str();
-}
-
 const std::string& HtmlRoutines::getJavascriptAceEditorScriptWithTags() {
   if (HtmlRoutines::preLoadedFiles().contains("AceEditor")) {
     return HtmlRoutines::preLoadedFiles().getValueCreateNoInit("AceEditor");
@@ -124,18 +112,6 @@ std::string HtmlRoutines::getCSSLink(const std::string& fileNameVirtual) {
 const std::string& HtmlRoutines::getCSSAddStyleTags(const std::string& fileNameVirtual) {
   MacroRegisterFunctionWithName("HtmlRoutines::getCSSAddStyleTags");
   return HtmlRoutines::getFile(fileNameVirtual, "<style>", "</style>");
-}
-
-const std::string HtmlRoutines::getCSSLinkLieAlgebrasAndCalculator(const std::string& relativeTo) {
-  return
-  HtmlRoutines::getCSSLink(relativeTo + WebAPI::request::calculatorCSS.substr(1)) +
-  HtmlRoutines::getCSSLink(relativeTo + "calculator-html/style_lie_algebras.css") ;
-}
-
-const std::string HtmlRoutines::getJavascriptLinkGraphicsNDimensionsWithPanels(const std::string& relativeTo) {
-  return
-  HtmlRoutines::getJavascriptLink(relativeTo + "calculator-html/panels.js") +
-  HtmlRoutines::getJavascriptLink(relativeTo + "calculator-html/graphics_n_dimensions.js");
 }
 
 std::string HtmlRoutines::getCalculatorComputationURL(const std::string& inputNoEncoding) {
@@ -275,10 +251,17 @@ std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(const std::strin
 std::string HtmlRoutines::scriptFromJSON(const std::string& scriptType, const JSData& scriptContent) {
   std::stringstream out;
   out << "<script " << WebAPI::result::scriptType << "='" << scriptType << "'>\n"
-  <<  scriptContent.toString()
+  << scriptContent.toString()
   << "</script>";
   return out.str();
+}
 
+std::string HtmlRoutines::jsonContainer(const std::string &scriptType, const JSData &scriptContent) {
+  std::stringstream out;
+  out << "<span name='script' style='display:none' " << WebAPI::result::scriptType << "='" << scriptType << "'>\n"
+  << scriptContent.toString()
+  << "</span>";
+  return out.str();
 }
 
 std::string HtmlRoutines::convertURLStringToNormal(const std::string& input, bool replacePlusBySpace) {

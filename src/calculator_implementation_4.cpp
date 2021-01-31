@@ -1735,7 +1735,7 @@ std::string ObjectContainer::toString() {
     << this->semisimpleSubalgebras.values.size << " total): ";
     for (int i = 0; i < this->semisimpleSubalgebras.values.size; i ++) {
       out << " Type " << this->semisimpleSubalgebras.values[i].owner->toStringLieAlgebraName() << " with "
-      << this->semisimpleSubalgebras.values[i].theSubalgebras.values.size << " candidates";
+      << this->semisimpleSubalgebras.values[i].subalgebras.values.size << " candidates";
       if (i != this->semisimpleSubalgebras.values.size - 1) {
         out << ", ";
       }

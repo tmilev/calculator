@@ -1317,6 +1317,8 @@ class LaTeXConstants {
       "dots": "\u2026",
       "vdots": "\u22EE",
       "approx": "~",
+      "subset": "\u2282",
+      "supset": "\u2283",
       "lt": "<",
       "gt": ">",
       "to": "\u2192",

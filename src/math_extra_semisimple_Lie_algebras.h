@@ -134,7 +134,12 @@ public:
     bool includeSl2Subalgebras,
     bool includeSemisimpleSubalgebras
   ) const;
-  std::string toHTMLCalculator(bool Verbose, bool writeToHD, bool flagWriteLatexPlots);
+  void writeHTML(bool verbose, bool flagWriteLatexPlots);
+  std::string toHTML(bool verbose, bool flagWriteLatexPlots);
+  static std::string toHTMLCalculatorHeadElements(
+    const std::string& relativeTo = "../../.."
+  );
+  static std::string toHTMLCalculatorBodyOnload();
   std::string getStringFromChevalleyGenerator(int theIndex, FormatExpressions* thePolynomialFormat) const;
   std::string toStringLieAlgebraNameFullHTML() const;
   std::string toStringLieAlgebraName() const;
@@ -251,7 +256,7 @@ public:
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF,
     std::stringstream* logStream = nullptr
   );
-  static void FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, SlTwoSubalgebras& output);
+  static void findSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, SlTwoSubalgebras& output);
   void GetSl2SubalgebraFromRootSA();
   template<class Coefficient>
   void getAdjoint(Matrix<Coefficient>& output, ElementSemisimpleLieAlgebra<Coefficient>& e);

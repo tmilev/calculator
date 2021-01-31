@@ -5,35 +5,41 @@
 #include "math_extra_drawing_variables.h"
 #include "crypto.h"
 
-std::string DrawingVariables::getHTMLDiv(int theDimension) {
-  JSData theData;
-  theData["widthHTML"] = this->defaultHtmlWidth;
-  theData["heightHTML"] = this->defaultHtmlHeight;
-  theData["screenBasis"] = this->theBuffer.BasisProjectionPlane;
-  theData["draggablePoints"] = this->theBuffer.basisToDrawCirclesAt;
-  theData["bilinearForm"] = this->theBuffer.theBilinearForm;
-  theData["graphicsUnit"] = this->theBuffer.graphicsUnit;
-  theData["frameLength"] = this->theBuffer.frameLengthInMilliseconds;
+std::string DrawingVariables::getHTMLDiv(
+  int dimension, bool useSpanTag
+) {
+  JSData data;
+  data["widthHTML"] = this->defaultHtmlWidth;
+  data["heightHTML"] = this->defaultHtmlHeight;
+  data["screenBasis"] = this->theBuffer.BasisProjectionPlane;
+  data["draggablePoints"] = this->theBuffer.basisToDrawCirclesAt;
+  data["bilinearForm"] = this->theBuffer.theBilinearForm;
+  data["graphicsUnit"] = this->theBuffer.graphicsUnit;
+  data["frameLength"] = this->theBuffer.frameLengthInMilliseconds;
   std::string drawObjects = "drawObjects";
-  theData[drawObjects].theType = JSData::token::tokenArray;
-  theData[drawObjects].listObjects = this->theBuffer.theOperations;
-  theData["dimension"] = theDimension;
+  data[drawObjects].theType = JSData::token::tokenArray;
+  data[drawObjects].listObjects = this->theBuffer.theOperations;
+  data["dimension"] = dimension;
 
-  std::string graphicsId = Crypto::convertStringToHex(Crypto::computeSha256(theData.toString()), 0, false);
+  std::string graphicsId = Crypto::convertStringToHex(Crypto::computeSha256(data.toString()), 0, false);
   std::string idCanvas = "idCanvasNDimensionalGraphics" + graphicsId;
   std::string idHighlightInformation = "idHighlightInfoNDimensionalGraphics" + graphicsId;
   std::string idSpanInformation = "idCanvasInfoNDimensionalGraphics" + graphicsId;
-  theData["idCanvas"] = idCanvas;
-  theData["idSpanInformation"] = idSpanInformation;
-  theData["idHighlightInformation"] = idHighlightInformation;
+  data["idCanvas"] = idCanvas;
+  data["idSpanInformation"] = idSpanInformation;
+  data["idHighlightInformation"] = idHighlightInformation;
 
   std::stringstream out;
   std::string graphicsVar = "drawGraphics" + graphicsId;
-  out << "<canvas width = '" << this->defaultHtmlWidth << "' "
+  out << "\n<canvas width = '" << this->defaultHtmlWidth << "' "
   << "height = '" << this->defaultHtmlHeight << "'"
-  << " id = '" << idCanvas << "'>Canvas not supported</canvas><br>";
-  out << "<div id = '" << idHighlightInformation << "'></div><br>";
-  out << "<span id = '" << idSpanInformation << "'></span><br>";
-  out << HtmlRoutines::scriptFromJSON("graphicsNDimensional", theData);
+  << " id = '" << idCanvas << "'>Canvas not supported</canvas>\n<br>\n";
+  out << "<div id = '" << idHighlightInformation << "'></div>\n<br>\n";
+  out << "<span id = '" << idSpanInformation << "'></span>\n<br>\n";
+  if (useSpanTag) {
+    out << HtmlRoutines::jsonContainer("graphicsNDimensional", data) << "\n";
+  } else {
+    out << HtmlRoutines::scriptFromJSON("graphicsNDimensional", data) << "\n";
+  }
   return out.str();
 }

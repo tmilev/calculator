@@ -2724,7 +2724,7 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
   (void) input;
   List<DynkinType> theTypes;
   DynkinType::getPrecomputedDynkinTypes(theTypes);
-  ProgressReport theReport;
+  ProgressReport report;
   std::stringstream out;
   int lastIndexPlusOne = theTypes.size;
   //lastIndexPlusOne = 1;
@@ -2734,22 +2734,24 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
     std::stringstream reportStream;
     reportStream << "Computing structure of subalgebra "
     << theTypes[i].toString() << " (" << i + 1 << " out of " << theTypes.size << ").";
-    theReport.report(reportStream.str());
-    SemisimpleLieAlgebra theAlgebra;
-    theAlgebra.weylGroup.makeFromDynkinType(theTypes[i]);
-    theAlgebra.computeChevalleyConstants();
-    theAlgebra.toHTMLCalculator(true, true, false);
-    SlTwoSubalgebras theSl2s(theAlgebra);
-    theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo = true;
-    theAlgebra.FindSl2Subalgebras(theAlgebra, theSl2s);
-    theSl2s.toHTML();
+    report.report(reportStream.str());
+    SemisimpleLieAlgebra algebra;
+    algebra.weylGroup.makeFromDynkinType(theTypes[i]);
+    algebra.computeChevalleyConstants();
+    algebra.writeHTML(true, false);
+    SlTwoSubalgebras theSl2s(algebra);
+    theSl2s.rootSubalgebras.flagPrintParabolicPseudoParabolicInfo = true;
+    algebra.findSl2Subalgebras(algebra, theSl2s);
+    theSl2s.writeHTML();
+    algebra.writeHTML(true, false);
+
     if ((false)) {
       if (theTypes[i].hasPrecomputedSubalgebras()) {
         SemisimpleSubalgebras theSubalgebras;
         MapReferences<DynkinType, SemisimpleLieAlgebra> subalgebrasContainer;
         ListReferences<SlTwoSubalgebras> sl2Conainer;
         if (!theSubalgebras.computeStructureWriteFiles(
-          theAlgebra,
+          algebra,
           calculator.objectContainer.theAlgebraicClosure,
           subalgebrasContainer,
           sl2Conainer,

@@ -70,6 +70,7 @@ function loadGlobals() {
   calculator.themes = require("./themes");
   //calculator.mathjax = require("./mathjax-calculator-setup");
   calculator.graphicsNDimensions = require("./graphics_n_dimensions");
+  calculator.dynamicJavascript = require("./dynamic_javascript");
   calculator.processMonitoring = require("./process_monitoring");
   calculator.pageNavigation = require("./page_navigation");
   calculator.equationEditor = require("./equation_editor");

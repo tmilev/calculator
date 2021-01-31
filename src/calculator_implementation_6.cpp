@@ -2744,28 +2744,25 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
     algebra.findSl2Subalgebras(algebra, theSl2s);
     theSl2s.writeHTML();
     algebra.writeHTML(true, false);
-
-    if ((false)) {
-      if (theTypes[i].hasPrecomputedSubalgebras()) {
-        SemisimpleSubalgebras theSubalgebras;
-        MapReferences<DynkinType, SemisimpleLieAlgebra> subalgebrasContainer;
-        ListReferences<SlTwoSubalgebras> sl2Conainer;
-        if (!theSubalgebras.computeStructureWriteFiles(
-          algebra,
-          calculator.objectContainer.theAlgebraicClosure,
-          subalgebrasContainer,
-          sl2Conainer,
-          nullptr,
-          false,
-          true,
-          false,
-          true,
-          true,
-          false,
-          true
-        )) {
-          out << "Failed to compute " << theTypes[i].toString();
-        }
+    if (theTypes[i].hasPrecomputedSubalgebras()) {
+      SemisimpleSubalgebras theSubalgebras;
+      MapReferences<DynkinType, SemisimpleLieAlgebra> subalgebrasContainer;
+      ListReferences<SlTwoSubalgebras> sl2Conainer;
+      if (!theSubalgebras.computeStructureWriteFiles(
+        algebra,
+        calculator.objectContainer.theAlgebraicClosure,
+        subalgebrasContainer,
+        sl2Conainer,
+        nullptr,
+        false,
+        true,
+        false,
+        true,
+        true,
+        false,
+        true
+      )) {
+        out << "Failed to compute " << theTypes[i].toString();
       }
     }
     out << theTypes[i].toString();

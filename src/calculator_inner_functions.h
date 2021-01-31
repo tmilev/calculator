@@ -438,8 +438,12 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
 
-  static bool innerMakeJavascriptExpressioN(Calculator& calculator, const Expression& input, Expression& output);
-  static bool functionMakeJavascriptExpression(Calculator& calculator, const Expression& input, Expression& output);
+  static bool makeJavascriptExpression(Calculator& calculator, const Expression& input, Expression& output);
+  static bool functionMakeJavascriptExpression(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output
+  );
   static bool innerContains(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerExpressionLeafs(Calculator& calculator, const Expression& input, Expression& output);
 

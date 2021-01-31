@@ -68,8 +68,8 @@ MeshTriangles::MeshTriangles() {
 
 void MeshTriangles::plotGrid(int theColor) {
   MacroRegisterFunctionWithName("MeshTriangles::plotGrid");
-  this->theGrid.plotObjects.setSize(0);
-  this->theGrid.plotObjects.setExpectedSize(this->theGrid.plotObjects.size + this->theTriangles.size * 3);
+  this->theGrid.clearPlotObjects();
+  this->theGrid.setExpectedPlotObjects(this->theTriangles.size * 3);
   PlotObject currentLinePlot;
   List<Vector<double> >& pointsVector = currentLinePlot.pointsDouble;
   currentLinePlot.pointsDouble.setSize(4);
@@ -79,7 +79,7 @@ void MeshTriangles::plotGrid(int theColor) {
     pointsVector[1] = this->theTriangles[i][1];
     pointsVector[2] = this->theTriangles[i][2];
     pointsVector[3] = this->theTriangles[i][0];
-    this->theGrid.plotObjects.addOnTop(currentLinePlot);
+    this->theGrid.addPlotOnTop(currentLinePlot);
   }
 }
 
@@ -276,7 +276,7 @@ void MeshTriangles::computeImplicitPlotPart2() {
     if (theSegment.size != 2) {
       continue;
     }
-    this->theCurve.plotObjects.addOnTop(currentPlot);
+    this->theCurve.addPlotOnTop(currentPlot);
   }
 }
 
@@ -309,15 +309,15 @@ void MeshTriangles::computeImplicitPlot() {
   }
   if (this->flagShowGrid) {
     this->plotGrid(static_cast<int>(HtmlRoutines::redGreenBlue(240, 240, 0)));
-    this->thePlot.plotObjects.addListOnTop(this->theGrid.plotObjects);
+    this->thePlot.addPlotsOnTop(this->theGrid);
   }
   this->computeImplicitPlotPart2();
   if (this->flagShowGrid) {
     this->plotGrid(static_cast<int>(HtmlRoutines::redGreenBlue(100, 100, 100)));
-    this->thePlot.plotObjects.addListOnTop(this->theGrid.plotObjects);
+    this->thePlot.addPlotsOnTop(this->theGrid);
   }
   // this->theCurve.colorRGB=HtmlRoutines::redGreenBlue(255,0,0);
-  this->thePlot.plotObjects.addListOnTop(this->theCurve.plotObjects);
+  this->thePlot.addPlotsOnTop(this->theCurve);
 }
 
 bool Calculator::getMatrixDoubles(
@@ -367,9 +367,10 @@ bool CalculatorFunctions::innerGetPointsImplicitly(
     return false;
   }
   HashedList<Vector<double>, MathRoutines::hashVectorDoubles> thePoints;
-  for (int i = 0; i < theMesh.theCurve.plotObjects.size; i ++) {
-    thePoints.addOnTopNoRepetition(theMesh.theCurve.plotObjects[i].pointsDouble[0]);
-    thePoints.addOnTopNoRepetition(theMesh.theCurve.plotObjects[i].pointsDouble[1]);
+  List<PlotObject>& plots = theMesh.theCurve.getPlots();
+  for (int i = 0; i < plots.size; i ++) {
+    thePoints.addOnTopNoRepetition(plots[i].pointsDouble[0]);
+    thePoints.addOnTopNoRepetition(plots[i].pointsDouble[1]);
   }
   Matrix<double> theMatrix;
   theMatrix.assignVectorsToRows(thePoints);
@@ -1540,47 +1541,47 @@ bool CalculatorFunctionsPlot::plotPath(Calculator& calculator, const Expression&
     return false;
   }
   const Expression& theMatE = input[1];
-  Matrix<double> theMat;
-  if (!calculator.getMatrixDoubles(theMatE, theMat)) {
+  Matrix<double> matrix;
+  if (!calculator.getMatrixDoubles(theMatE, matrix)) {
     return calculator << "Failed to extract matrix from: " << theMatE.toString();
   }
-  if (theMat.numberOfColumns != 2 && theMat.numberOfColumns != 3) {
+  if (matrix.numberOfColumns != 2 && matrix.numberOfColumns != 3) {
     return calculator << "Only dimensions 2 and 3 are supported at the moment. ";
   }
-  PlotObject theSegment;
+  PlotObject segment;
   if (input.size() >= 3) {
-    theSegment.colorJS = "black";
-    theSegment.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 0));
+    segment.colorJS = "black";
+    segment.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 0));
     const Expression& colorE = input[2];
-    if (!colorE.isOfType<std::string>(&theSegment.colorJS)) {
-      theSegment.colorJS = colorE.toString();
+    if (!colorE.isOfType<std::string>(&segment.colorJS)) {
+      segment.colorJS = colorE.toString();
     }
     if (!DrawingVariables::getColorIntFromColorString(
-      theSegment.colorJS, theSegment.colorRGB
+      segment.colorJS, segment.colorRGB
     )) {
-      calculator << "Unrecognized color: " << theSegment.colorJS;
+      calculator << "Unrecognized color: " << segment.colorJS;
     }
   }
   if (input.size() >= 4) {
     const Expression& lineWidthE = input[3];
-    if (!lineWidthE.evaluatesToDouble(&theSegment.lineWidth)) {
+    if (!lineWidthE.evaluatesToDouble(&segment.lineWidth)) {
       calculator << "Failed to extract line width from: " << lineWidthE.toString();
     }
     std::stringstream lineWidthStream;
     lineWidthStream.precision(4);
-    lineWidthStream << theSegment.lineWidth;
-    theSegment.lineWidthJS = lineWidthStream.str();
+    lineWidthStream << segment.lineWidth;
+    segment.lineWidthJS = lineWidthStream.str();
   }
-  theSegment.plotType = "segmentPath";
-  theSegment.dimension = theMat.numberOfColumns;
-  theMat.getVectorsFromRows(theSegment.pointsDouble);
+  segment.plotType = PlotObject::Labels::path;
+  segment.dimension = matrix.numberOfColumns;
+  matrix.getVectorsFromRows(segment.pointsDouble);
   if (input.size() >= 4) {
-    if (!input[3].evaluatesToDouble(&theSegment.lineWidth)) {
-      theSegment.lineWidth = 1;
+    if (!input[3].evaluatesToDouble(&segment.lineWidth)) {
+      segment.lineWidth = 1;
     }
   }
   Plot thePlot;
-  thePlot += theSegment;
+  thePlot += segment;
   return output.assignValue(thePlot, calculator);
 }
 
@@ -1872,8 +1873,10 @@ bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
 }
 
 std::string InputBox::getSliderName() const {
-  return StringRoutines::convertStringToJSONString(this->name +
-  Crypto::convertStringToHex(Crypto::computeSha256(this->name), 0, false));
+  return StringRoutines::convertStringToJavascriptVariable(
+    this->name +
+    Crypto::convertStringToHex(Crypto::computeSha256(this->name), 0, false)
+  );
 }
 
 std::string InputBox::getUserInputBox() const {
@@ -1892,10 +1895,10 @@ std::string InputBox::getUserInputBox() const {
   return out.str();
 }
 
-bool CalculatorFunctions::innerMakeJavascriptExpressioN(
+bool CalculatorFunctions::makeJavascriptExpression(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerMakeJavascriptExpressioN");
+  MacroRegisterFunctionWithName("CalculatorFunctions::makeJavascriptExpression");
   if (input.size() != 2) {
     return false;
   }
@@ -1903,8 +1906,9 @@ bool CalculatorFunctions::innerMakeJavascriptExpressioN(
 }
 
 bool CalculatorFunctions::functionMakeJavascriptExpression(
-  Calculator& calculator, const Expression& input, Expression& output
-) {
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::functionMakeJavascriptExpression");
   RecursionDepthCounter theCounter(&calculator.recursionDepth);
   if (calculator.recursionDepthExceededHandleRoughly()) {
@@ -1933,9 +1937,10 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
     return output.assignValue(atomString, calculator);
   }
   std::stringstream out;
-  InputBox theBox;
-  if (input.isOfType(&theBox)) {
-    out << "parseFloat(document.getElementsByName('" << theBox.getSliderName() << "')[0].value)";
+  InputBox box;
+  if (input.isOfType(&box)) {
+    std::string name = box.getSliderName();
+    out << name << " ";
     return output.assignValue(out.str(), calculator);
   }
   out.precision(7);
@@ -1963,14 +1968,14 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
     }
     return output.assignValue(out.str(), calculator);
   }
-  Expression opE, leftE, rightE;
+  Expression operation, leftE, rightE;
   if (input.startsWith(calculator.opSequence()) || input.startsWith(calculator.opIntervalOpen())) {
     out << "[";
     for (int i = 1; i < input.size(); i ++) {
-      if (!CalculatorFunctions::functionMakeJavascriptExpression(calculator, input[i], opE)) {
+      if (!CalculatorFunctions::functionMakeJavascriptExpression(calculator, input[i], operation)) {
         return output.assignValue("(Failed to convert " + input[i].toString() + ")", calculator);
       }
-      out << opE.toString();
+      out << operation.toString();
       if (i != input.size() - 1) {
         out << ", ";
       }
@@ -1981,7 +1986,7 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
   std::string opString, leftString, rightString;
   std::stringstream logStream;
   if (input.size() == 3 || input.size() == 2) {
-    Expression* currentE = &opE;
+    Expression* currentE = &operation;
     std::string* currentString = &opString;
     for (int i = 0; i < input.size(); i ++) {
       if (!CalculatorFunctions::functionMakeJavascriptExpression(calculator, input[i], *currentE)) {
@@ -2146,7 +2151,7 @@ bool CalculatorFunctionsPlot::plotSurface(Calculator& calculator, const Expressi
     << ". I've been taught to plot 2d surfaces only. "
     << "Please reduce the number of variables to 2. ";
   }
-  Expression uE,vE;
+  Expression uE, vE;
   uE.makeAtom("u", calculator);
   vE.makeAtom("v", calculator);
   if (thePlot.variablesInPlay.size == 1) {
@@ -2261,9 +2266,9 @@ bool CalculatorFunctionsPlot::plotSurface(Calculator& calculator, const Expressi
   }
   thePlot.plotType = "surface";
   thePlot.dimension = thePlot.coordinateFunctionsE.size;
+  input.hasInputBoxVariables(&thePlot.parametersInPlay, &thePlot.parametersInPlayJS);
   Plot result;
   result += thePlot;
-  input.hasInputBoxVariables(&result.boxesThatUpdateMe);
   return output.assignValue(result, calculator);
 }
 

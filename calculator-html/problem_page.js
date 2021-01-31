@@ -330,12 +330,6 @@ class Problem {
     }
     this.writeToHTML();
     this.scriptIds = [];
-    for (let scriptLabel in problemData.scripts) {
-      let newLabel = encodeURIComponent(this.problemId + "_" + scriptLabel);
-      this.scriptIds.push(newLabel);
-      let scriptContent = decodeURIComponent(problemData.scripts[scriptLabel]);
-      window.calculator.mainPage.scriptInjector.injectScript(newLabel, scriptContent);
-    }
   }
 
   getAppAnchorRequestFileCourseTopics(
@@ -757,7 +751,7 @@ class Problem {
       answer.writeToElement(answerElement, this.outputElement);
     }
     initializeButtons.initializeAccordionButtons();
-    typeset.typesetter.typesetSoft(this.outputElement, "");
+    dynamicJavascript.typeset(this.outputElement)
     dynamicJavascript.bootstrapAllScripts(this.outputElement);
   }
 

@@ -213,7 +213,10 @@ bool Expression::checkInitialization() const {
   return true;
 }
 
-bool Expression::hasInputBoxVariables(HashedList<std::string, MathRoutines::hashString>* boxNames) const {
+bool Expression::hasInputBoxVariables(
+  HashedList<std::string, HashFunctions::hashFunction>* outputBoxNames,
+  HashedList<std::string, HashFunctions::hashFunction>* outputBoxNamesJavascript
+) const {
   MacroRegisterFunctionWithName("Expression::hasInputBoxVariables");
   if (this->owner == nullptr) {
     return false;
@@ -224,23 +227,24 @@ bool Expression::hasInputBoxVariables(HashedList<std::string, MathRoutines::hash
     << "Function hasInputBoxVariables has exceeded "
     << "recursion depth limit. " << global.fatal;
   }
-  bool result = false;
-  InputBox tempBox;
-  if (this->isOfType<InputBox>(&tempBox)) {
-    if (boxNames == nullptr) {
-      return true;
-    } else {
-      result = true;
-      boxNames->addOnTopNoRepetition(tempBox.name);
+  InputBox box;
+  if (this->isOfType<InputBox>(&box)) {
+    if (outputBoxNames != nullptr) {
+      outputBoxNames->addOnTopNoRepetition(box.name);
     }
+    if (outputBoxNamesJavascript != nullptr) {
+      outputBoxNamesJavascript->addOnTopNoRepetition(box.getSliderName());
+    }
+    return true;
   }
+  bool result = false;
   for (int i = 0; i < this->size(); i ++) {
-    if ((*this)[i].hasInputBoxVariables(boxNames)) {
-      if (boxNames == nullptr) {
+    if ((*this)[i].hasInputBoxVariables(outputBoxNames, outputBoxNamesJavascript)) {
+      if (outputBoxNames == nullptr && outputBoxNamesJavascript == nullptr) {
+        // We don't care for the names of all input boxes.
         return true;
-      } else {
-        result = true;
       }
+      result = true;
     }
   }
   return result;

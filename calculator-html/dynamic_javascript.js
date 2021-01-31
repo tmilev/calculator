@@ -2,6 +2,10 @@ const graphicsSerialization = require("./graphics_serialization").graphicsSerial
 const crypto = require("./crypto");
 const graphicsNDimensions = require("./graphics_n_dimensions");
 const pathnames = require("./pathnames");
+const typeset = require("./math_typeset");
+const EquationEditor = require("./equation_editor").EquationEditor;
+const MathNode = require("./equation_editor").MathNode;
+const knownTypes = require("./equation_editor").knownTypes;
 
 class ElementWithScripts {
   constructor() {
@@ -97,11 +101,24 @@ class ElementWithScripts {
     if (canvases.length < 1) {
       throw "Unexpected missing canvas.";
     }
-    let canvas = graphicsSerialization.fromJSON(graphics, canvases[0], controls[0], null);
+    let canvas = graphicsSerialization.fromJSON(
+      graphics,
+      canvases[0],
+      controls[0],
+      null,
+      this.sliders,
+    );
     for (let label in this.sliders) {
       let current = this.sliders[label];
       current.addEventListener("input", () => {
-        canvas.redraw();
+        // reconstruct the entire graphics.
+        canvas = graphicsSerialization.fromJSON(
+          graphics,
+          canvas.canvasContainer,
+          controls[0],
+          null,
+          this.sliders,
+        );
       });
     }
   }
@@ -171,6 +188,17 @@ class DynamicJavascript {
   constructor() {
   }
 
+  typeset(output) {
+    typeset.typesetter.typesetSoft(
+      output,
+      "font-size: 20px; font-family:'Times New Roman'; display:inline-block;",
+      (editor) => {
+        this.bootstrapSlider(editor, output);
+      }
+    );
+    this.flagTypeset = true;
+  }
+
   bootstrapAllScripts(
     /**@type{HTMLElement} */
     element,
@@ -178,6 +206,50 @@ class DynamicJavascript {
     let elementWithScripts = new ElementWithScripts();
     elementWithScripts.bootstrapAllScripts(element);
   }
+
+  bootstrapSlider(
+    /**@type{EquationEditor} */
+    editor,
+    /**@type{HTMLElement} */
+    container,
+  ) {
+    this.processMathNodesRecursive(editor.rootNode, container)
+  }
+
+  processMathNodesRecursive(
+    /**@type{MathNode} */
+    node,
+    /**@type{HTMLElement} */
+    container,
+  ) {
+    for (let i = 0; i < node.children.length; i++) {
+      this.processMathNodesRecursive(node.children[i], container);
+    }
+    this.processOne(node, container);
+  }
+
+  processOne(
+    /**@type{MathNode} */
+    node,
+    /**@type{HTMLElement} */
+    container,
+  ) {
+    if (node.type.type !== knownTypes.formInput.type) {
+      return;
+    }
+    let name = node.name;
+    let elements = container.querySelectorAll(`input[type=range][name="${name}"]`);
+    for (let i = 0; i < elements.length; i++) {
+      let current = elements[i];
+      node.element.addEventListener("input", () => {
+        current.value = node.element.value;
+      });
+      current.addEventListener("input", () => {
+        node.element.value = current.value;
+      });
+    }
+  }
+
 }
 
 let dynamicJavascript = new DynamicJavascript();

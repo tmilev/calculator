@@ -6,6 +6,7 @@
 #include "general_file_operations_encodings.h"
 #include <iomanip>
 #include "string_constants.h"
+#include "general_strings.h"
 
 MapList<std::string, std::string, MathRoutines::hashString>& HtmlRoutines::preLoadedFiles() {
   static MapList<std::string, std::string, MathRoutines::hashString> result;
@@ -14,24 +15,13 @@ MapList<std::string, std::string, MathRoutines::hashString>& HtmlRoutines::preLo
 
 std::string HtmlRoutines::gitRepository = "https://github.com/tmilev/calculator";
 
-std::string HtmlRoutines::getJavascriptVariable(const std::string& theVar) {
-  std::stringstream sanitizer;
-  for (unsigned i = 0; i < theVar.size(); i ++) {
-    if (MathRoutines::isALatinLetter(theVar[i])) {
-      sanitizer << theVar[i];
-      continue;
-    }
-    if (i == 0) {
-      sanitizer << "_";
-    }
-    sanitizer << static_cast<int>(theVar[i]);
-  }
-  return sanitizer.str();
+std::string HtmlRoutines::getJavascriptVariable(const std::string& variableName) {
+  return StringRoutines::convertStringToJavascriptVariable(variableName);
 }
 
 std::string HtmlRoutines::getHtmlLinkToGithubRepository(const std::string& displayString) {
   std::stringstream out;
-  out << "<a href=\"" << HtmlRoutines::gitRepository << "\">" << displayString << "</a>";
+  out << "<a href='" << HtmlRoutines::gitRepository << "'>" << displayString << "</a>";
   return out.str();
 }
 

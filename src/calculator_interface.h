@@ -551,7 +551,10 @@ private:
     const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble = nullptr
   ) const;
   bool hasBoundVariables() const;
-  bool hasInputBoxVariables(HashedList<std::string, MathRoutines::hashString>* boxNames = nullptr) const;
+  bool hasInputBoxVariables(
+    HashedList<std::string, HashFunctions::hashFunction>* outputBoxNames = nullptr,
+    HashedList<std::string, HashFunctions::hashFunction>* outputBoxNamesJavascript = nullptr
+  ) const;
   bool isMeltable(int* numResultingChildren = nullptr) const;
   bool areEqualExcludingChildren(const Expression& other) const {
     return this->owner == other.owner &&
@@ -897,6 +900,7 @@ public:
   public:
     static std::string points;
     static std::string point;
+    static std::string path;
     static std::string functionLabel;
     static std::string coordinateFunctions;
     static std::string left;
@@ -916,6 +920,7 @@ public:
     static std::string body;
     static std::string text;
     static std::string arguments;
+    static std::string parameters;
   };
 
   std::string thePlotString;
@@ -963,6 +968,16 @@ public:
 
   Expression numSegmentsE;
   List<std::string> variablesInPlayJS;
+  // Parameters are user input variables that describe families of curves.
+  // As of writing, parameters are input by the front-end via
+  // inputs/sliders at the hands of the end-user.
+  // Suppose in the function sin(b x), x has been declared a variable and b
+  // - a parameter. Then the frontend may display an input box
+  // that allows to dynamically change b.
+  HashedList<std::string, HashFunctions::hashFunction> parametersInPlay;
+  // The name of the parameter with hash bytes appended to
+  // guarantee the variable will not collide with any programmer-defined variables.
+  HashedList<std::string, HashFunctions::hashFunction> parametersInPlayJS;
   std::string leftPtJS;
   std::string rightPtJS;
   std::string paramLowJS;
@@ -1002,6 +1017,7 @@ private:
   static JSData getCoordinateSystem();
   static JSData getComputeViewWindow();
   JSData getSetViewWindow();
+  List<PlotObject> plotObjects;
 public:
   struct Labels {
   public:
@@ -1013,8 +1029,8 @@ public:
     static std::string graphicsThreeDimensional;
     static std::string plotObjects;
   };
-  List<PlotObject> plotObjects;
-  HashedList<std::string, MathRoutines::hashString> boxesThatUpdateMe;
+  HashedList<std::string, HashFunctions::hashFunction> parameterNames;
+  HashedList<std::string, HashFunctions::hashFunction> parameterNamesJS;
   double theLowerBoundAxes;
   double theUpperBoundAxes;
   double lowBoundY;
@@ -1043,6 +1059,11 @@ public:
   std::string getPlotHtml2d(Calculator& owner);
   std::string getPlotStringAddLatexCommands(bool useHtml);
   bool isOKVector(const Vector<double>& input);
+  void addPlotOnTop(PlotObject& input);
+  void addPlotsOnTop(Plot& input);
+  List<PlotObject>& getPlots();
+  void clearPlotObjects();
+  void setExpectedPlotObjects(int expectedSize);
   Plot();
   void computeAxesAndBoundingBox3d();
   void computeAxesAndBoundingBox();

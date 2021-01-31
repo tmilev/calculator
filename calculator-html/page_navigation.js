@@ -473,10 +473,6 @@ class Page {
     this.scriptInjector.removeScripts(scriptIds);
   }
 
-  injectScript(scriptId, scriptContent) {
-    this.scriptInjector.injectScript(scriptId, scriptContent);
-  }
-
   selectPage(
     /** @type{string} */
     inputPage,

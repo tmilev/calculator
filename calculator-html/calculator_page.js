@@ -7,15 +7,11 @@ const miscellaneousFrontend = require("./miscellaneous_frontend");
 const miscellaneous = require("./miscellaneous_frontend");
 const BufferCalculator = require("./buffer").BufferCalculator;
 const panels = require("./panels");
-const typeset = require("./math_typeset");
 const processMonitoring = require("./process_monitoring");
 const InputPanelData = require("./initialize_buttons").InputPanelData;
 const storage = require("./storage");
 const autocomplete = require("./autocomplete");
 const initializeButtons = require("./initialize_buttons");
-const EquationEditor = require("./equation_editor").EquationEditor;
-const MathNode = require("./equation_editor").MathNode;
-const knownTypes = require("./equation_editor").knownTypes;
 const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
 
 class AtomHandler {
@@ -140,49 +136,6 @@ class Calculator {
     }
     this.submitComputation();
     event.preventDefault();
-  }
-
-  bootstrapSlider(
-    /**@type{EquationEditor} */
-    editor,
-    /**@type{HTMLElement} */
-    container,
-  ) {
-    this.processMathNodesRecursive(editor.rootNode, container)
-  }
-
-  processMathNodesRecursive(
-    /**@type{MathNode} */
-    node,
-    /**@type{HTMLElement} */
-    container,
-  ) {
-    for (let i = 0; i < node.children.length; i++) {
-      this.processMathNodesRecursive(node.children[i], container);
-    }
-    this.processOne(node, container);
-  }
-
-  processOne(
-    /**@type{MathNode} */
-    node,
-    /**@type{HTMLElement} */
-    container,
-  ) {
-    if (node.type.type !== knownTypes.formInput.type) {
-      return;
-    }
-    let name = node.name;
-    let elements = container.querySelectorAll(`input[type=range][name="${name}"]`);
-    for (let i = 0; i < elements.length; i++) {
-      let current = elements[i];
-      node.element.addEventListener("input", () => {
-        current.value = node.element.value;
-      });
-      current.addEventListener("input", () => {
-        node.element.value = current.value;
-      });
-    }
   }
 
   adjustCalculatorPageSize() {
@@ -415,14 +368,7 @@ class Calculator {
     if (this.flagTypeset === true) {
       return;
     }
-    let output = this.getOutputElement();
-    typeset.typesetter.typesetSoft(
-      output,
-      "font-size: 20px; font-family:'Times New Roman'; display:inline-block;",
-      (editor) => {
-        this.bootstrapSlider(editor, output);
-      }
-    );
+    dynamicJavascript.typeset(this.getOutputElement());
     this.flagTypeset = true;
   }
 

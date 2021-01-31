@@ -293,7 +293,7 @@ public:
     const std::string& relativeTo
   );
 
-  static std::string getJavascriptVariable(const std::string& theVar);
+  static std::string getJavascriptVariable(const std::string& variableName);
 
   static std::string getMathDisplayStyle(
     const std::string& input, int upperNumChars = 10000

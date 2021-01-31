@@ -1717,7 +1717,7 @@ void Calculator::initializeFunctionsStandard() {
     "Same as plotImplicit but rather than plotting "
     "the curve returns the (x,y) pairs of points found. "
     "The output given as a nx2 matrix of floating point numbers. ",
-    "PointsImplicitly((x - 1) (y - 1) - ((x - 1) ^ 2 (y - 1) + 1) ^ 2, (- 2, - 2), (2, 2), (10, 10), (400, 400))",
+    "PointsImplicitly((x - 1) (y - 1) - ((x - 1) ^ 2 (y - 1) + 1) ^ 2, (- 2, - 2), (2, 2), (10, 10), 2000)",
     "CalculatorFunctions::innerGetPointsImplicitly",
     "PointsImplicitly",
     innerStandard
@@ -1989,7 +1989,7 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctionsPlot::plotRemoveCoordinateAxes,
     "",
     "Removes the coordinate axes from a plot. ",
-    "PlotRemoveCoordinateAxes{}(0)",
+    "PlotRemoveCoordinateAxes{}(0) + Plot2D(x,-1,1);",
     "CalculatorFunctionsPlot::plotRemoveCoordinateAxes",
     "PlotRemoveCoordinateAxes",
     innerStandard

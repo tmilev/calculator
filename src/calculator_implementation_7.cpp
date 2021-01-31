@@ -5883,17 +5883,17 @@ bool CalculatorFunctionsPlot::plotFill(Calculator& calculator, const Expression&
     calculator << "Failed to extract color from: " << colorE.toString() << "; using default color value. ";
   }
   theFilledPlot.colorFillJS = colorString;
-  for (int i = 0; i < startPlot.plotObjects.size; i ++) {
-    theFilledPlot.pointsDouble.addListOnTop(startPlot.plotObjects[i].pointsDouble);
+  for (int i = 0; i < startPlot.getPlots().size; i ++) {
+    theFilledPlot.pointsDouble.addListOnTop(startPlot.getPlots()[i].pointsDouble);
   }
   theFilledPlot.fillStyle = "filled";
   theFilledPlot.plotType = "plotFillStart";
   outputPlot.desiredHtmlHeightInPixels = startPlot.desiredHtmlHeightInPixels;
   outputPlot.desiredHtmlWidthInPixels = startPlot.desiredHtmlWidthInPixels;
-  outputPlot.plotObjects.addOnTop(theFilledPlot);
+  outputPlot += theFilledPlot;
   outputPlot += startPlot;
   theFilledPlot.plotType = "plotFillFinish";
-  outputPlot.plotObjects.addOnTop(theFilledPlot);
+  outputPlot += theFilledPlot;
   return output.assignValue(outputPlot, calculator);
 }
 
@@ -6026,7 +6026,9 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
     calculator, thePlotObj.coordinateFunctionsE[0], jsConverterE
   )) {
     thePlotObj.coordinateFunctionsJS[0] = jsConverterE.toString();
-    thePlotObj.coordinateFunctionsE[0].hasInputBoxVariables(&thePlot.boxesThatUpdateMe);
+    thePlotObj.coordinateFunctionsE[0].hasInputBoxVariables(
+      &thePlotObj.parametersInPlay, &thePlotObj.parametersInPlayJS
+    );
   } else {
     thePlotObj.plotType = "plotFunctionPrecomputed";
   }
@@ -6034,7 +6036,9 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
     calculator, thePlotObj.leftPtE, jsConverterE
   )) {
     thePlotObj.leftPtJS = jsConverterE.toString();
-    thePlotObj.leftPtE.hasInputBoxVariables(&thePlot.boxesThatUpdateMe);
+    thePlotObj.leftPtE.hasInputBoxVariables(
+      &thePlotObj.parametersInPlay, &thePlotObj.parametersInPlayJS
+    );
   } else {
     thePlotObj.plotType = "plotFunctionPrecomputed";
   }
@@ -6042,7 +6046,9 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
     calculator, thePlotObj.rightPtE, jsConverterE
   )) {
     thePlotObj.rightPtJS = jsConverterE.toString();
-    thePlotObj.rightPtE.hasInputBoxVariables(&thePlot.boxesThatUpdateMe);
+    thePlotObj.rightPtE.hasInputBoxVariables(
+      &thePlotObj.parametersInPlay, &thePlotObj.parametersInPlayJS
+    );
   } else {
     thePlotObj.plotType = "plotFunctionPrecomputed";
   }
@@ -6052,12 +6058,14 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
     calculator, thePlotObj.numSegmentsE, jsConverterE
   )) {
     thePlotObj.numSegmenTsJS[0] = jsConverterE.toString();
-    thePlotObj.numSegmentsE.hasInputBoxVariables(&thePlot.boxesThatUpdateMe);
+    thePlotObj.numSegmentsE.hasInputBoxVariables(
+      &thePlotObj.parametersInPlay, &thePlotObj.parametersInPlayJS
+    );
   } else {
     thePlotObj.plotType = "plotFunctionPrecomputed";
   }
   Vectors<double>& thePointsDouble = thePlotObj.pointsDouble;
-  if (thePlot.boxesThatUpdateMe.size == 0) {
+  if (thePlotObj.parametersInPlay.size == 0) {
     if (!input[1].evaluatesToDoubleInRange(
       theVarString,
       thePlotObj.xLow,
@@ -6098,7 +6106,7 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
     );
     thePlotObj.thePlotStringWithHtml = thePlotObj.thePlotString;
   }
-  thePlot.plotObjects.addOnTop(thePlotObj);
+  thePlot += thePlotObj;
   return output.assignValue(thePlot, calculator);
 }
 
@@ -6131,7 +6139,7 @@ bool CalculatorFunctionsPlot::plotPoint(Calculator& calculator, const Expression
         << thePlot.coordinateFunctionsE[i].toString();
       }
       thePlot.thePointsJS(i, j) = jsConverterE.toString();
-      thePlot.thePointS(i, j).hasInputBoxVariables(&theFinalPlot.boxesThatUpdateMe);
+      thePlot.thePointS(i, j).hasInputBoxVariables(&thePlot.parametersInPlay, &thePlot.parametersInPlayJS);
     }
   }
   thePlot.dimension = theFinalPlot.dimension;
@@ -6141,7 +6149,7 @@ bool CalculatorFunctionsPlot::plotPoint(Calculator& calculator, const Expression
   }
   thePlot.colorJS = input[2].toString();
   thePlot.plotType = "points";
-  theFinalPlot.plotObjects.addOnTop(thePlot);
+  theFinalPlot += thePlot;
   theFinalPlot.desiredHtmlHeightInPixels = 100;
   theFinalPlot.desiredHtmlWidthInPixels = 100;
   return output.assignValue(theFinalPlot, calculator);
@@ -6406,44 +6414,44 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   if (input.hasBoundVariables()) {
     return false;
   }
-  PlotObject thePlot;
+  PlotObject plot;
   if (!input[1].isSequenceNElements()) {
     return calculator
     << "The first argument of parametric curve must be a sequence, instead I got: "
     << input[1].toString();
   }
-  thePlot.dimension = input[1].size() - 1;
-  for (int i = 0; i < thePlot.dimension; i ++) {
-    thePlot.coordinateFunctionsE.addOnTop(input[1][i + 1]);
-    thePlot.coordinateFunctionsE[i].getFreeVariables(thePlot.variablesInPlay, true);
+  plot.dimension = input[1].size() - 1;
+  for (int i = 0; i < plot.dimension; i ++) {
+    plot.coordinateFunctionsE.addOnTop(input[1][i + 1]);
+    plot.coordinateFunctionsE[i].getFreeVariables(plot.variablesInPlay, true);
   }
-  if (thePlot.variablesInPlay.size > 1) {
+  if (plot.variablesInPlay.size > 1) {
     return calculator << "Curve is allowed to depend on at most 1 parameter. "
     << "Instead, your curve: " << input.toString()
     << " depends on "
-    << thePlot.variablesInPlay.size << ", namely: "
-    << thePlot.variablesInPlay.toStringCommaDelimited() << ". ";
+    << plot.variablesInPlay.size << ", namely: "
+    << plot.variablesInPlay.toStringCommaDelimited() << ". ";
   }
-  if (thePlot.variablesInPlay.size == 0) {
+  if (plot.variablesInPlay.size == 0) {
     Expression tempE;
     tempE.makeAtom("t", calculator);
-    thePlot.variablesInPlay.addOnTop(tempE);
+    plot.variablesInPlay.addOnTop(tempE);
   }
-  thePlot.variablesInPlayJS.addOnTop(
-    HtmlRoutines::getJavascriptVariable(thePlot.variablesInPlay[0].toString())
+  plot.variablesInPlayJS.addOnTop(
+    HtmlRoutines::getJavascriptVariable(plot.variablesInPlay[0].toString())
   );
-  thePlot.colorJS = "red";
-  thePlot.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(255, 0, 0));
+  plot.colorJS = "red";
+  plot.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(255, 0, 0));
   if (input.size() >= 5) {
-    if (!input[4].isOfType<std::string>(&thePlot.colorJS)) {
-      thePlot.colorJS = input[4].toString();
+    if (!input[4].isOfType<std::string>(&plot.colorJS)) {
+      plot.colorJS = input[4].toString();
     }
   }
-  DrawingVariables::getColorIntFromColorString(thePlot.colorJS, thePlot.colorRGB);
-  thePlot.lineWidth = 1;
+  DrawingVariables::getColorIntFromColorString(plot.colorJS, plot.colorRGB);
+  plot.lineWidth = 1;
   if (input.size() >= 6) {
-    if (!input[5].evaluatesToDouble(&thePlot.lineWidth)) {
-      thePlot.lineWidth = 1;
+    if (!input[5].evaluatesToDouble(&plot.lineWidth)) {
+      plot.lineWidth = 1;
     }
   }
   int numPoints = 1000;
@@ -6453,7 +6461,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
       calculator << "<hr>Could not extract number of points from "
       << input[6].toString();
     }
-    thePlot.numSegmentsE = input[6];
+    plot.numSegmentsE = input[6];
   }
   if (numPoints < 2 || numPoints > 30000) {
     numPoints = 1000;
@@ -6461,126 +6469,126 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     << " point but that is not valid. Changing to 1000. ";
   }
   if (input.size() < 7) {
-    thePlot.numSegmentsE.assignValue(numPoints, calculator);
+    plot.numSegmentsE.assignValue(numPoints, calculator);
   }
   List<Expression> theConvertedExpressions;
-  theConvertedExpressions.setSize(thePlot.dimension);
-  thePlot.paramLowE = input[2];
-  thePlot.paramHighE = input[3];
+  theConvertedExpressions.setSize(plot.dimension);
+  plot.paramLowE = input[2];
+  plot.paramHighE = input[3];
   if (
-    !thePlot.paramLowE.evaluatesToDouble(&thePlot.paramLow) ||
-    !thePlot.paramHighE.evaluatesToDouble(&thePlot.paramHigh)
+    !plot.paramLowE.evaluatesToDouble(&plot.paramLow) ||
+    !plot.paramHighE.evaluatesToDouble(&plot.paramHigh)
   ) {
     calculator << "Failed to convert "
-    << thePlot.paramLowE.toString() << " and "
-    << thePlot.paramHighE.toString()
+    << plot.paramLowE.toString() << " and "
+    << plot.paramHighE.toString()
     << " to left and right endpoint of parameter interval. ";
   }
   Vectors<double> theXs, theYs;
 
   bool isGoodLatexWise = true;
-  for (int i = 0; i < thePlot.dimension; i ++) {
+  for (int i = 0; i < plot.dimension; i ++) {
     if (!calculator.callCalculatorFunction(
       CalculatorFunctions::innerSuffixNotationForPostScript,
-      thePlot.coordinateFunctionsE[i],
+      plot.coordinateFunctionsE[i],
       theConvertedExpressions[i]
     )) {
       calculator << "Failed to extract suffix notation from argument "
-      << thePlot.coordinateFunctionsE[i].toString();
+      << plot.coordinateFunctionsE[i].toString();
       isGoodLatexWise = false;
       break;
     }
   }
-  if (isGoodLatexWise && thePlot.dimension == 2) {
+  if (isGoodLatexWise && plot.dimension == 2) {
     std::stringstream outLatex, outHtml;
     outLatex << "\\parametricplot[linecolor =\\fcColorGraph, plotpoints =" << numPoints << "]{"
-    << thePlot.paramLow << "}{" << thePlot.paramHigh << "}{"
+    << plot.paramLow << "}{" << plot.paramHigh << "}{"
     << theConvertedExpressions[0].getValue<std::string>()
     << theConvertedExpressions[1].getValue<std::string>() << "}";
     outHtml << "<br>%Calculator input: " << input.toString()
     << "<br>\\parametricplot[linecolor =\\fcColorGraph, plotpoints =" << numPoints << "]{"
-    << thePlot.paramLow << "}{" << thePlot.paramHigh << "}{"
+    << plot.paramLow << "}{" << plot.paramHigh << "}{"
     << theConvertedExpressions[0].getValue<std::string>()
     << theConvertedExpressions[1].getValue<std::string>() << "}";
-    thePlot.thePlotString= outLatex.str();
-    thePlot.thePlotStringWithHtml = outHtml.str();
+    plot.thePlotString= outLatex.str();
+    plot.thePlotStringWithHtml = outHtml.str();
   }
   Expression converterE;
-  thePlot.plotType = "parametricCurve";
-  thePlot.coordinateFunctionsJS.setSize(thePlot.dimension);
-  for (int i = 0; i < thePlot.dimension; i ++) {
+  plot.plotType = "parametricCurve";
+  plot.coordinateFunctionsJS.setSize(plot.dimension);
+  for (int i = 0; i < plot.dimension; i ++) {
     if (CalculatorFunctions::functionMakeJavascriptExpression(
       calculator,
-      thePlot.coordinateFunctionsE[i],
+      plot.coordinateFunctionsE[i],
       converterE
     )) {
-      thePlot.coordinateFunctionsJS[i] = converterE.toString();
+      plot.coordinateFunctionsJS[i] = converterE.toString();
     } else {
-      thePlot.plotType = "parametricCurvePrecomputed";
+      plot.plotType = "parametricCurvePrecomputed";
       calculator << "Failed to convert: "
-      << thePlot.coordinateFunctionsE[i] << " to js. ";
+      << plot.coordinateFunctionsE[i] << " to js. ";
     }
   }
-  thePlot.numSegmenTsJS.setSize(1);
-  thePlot.numSegmenTsJS[0] = "200";
+  plot.numSegmenTsJS.setSize(1);
+  plot.numSegmenTsJS[0] = "200";
   if (CalculatorFunctions::functionMakeJavascriptExpression(
-    calculator, thePlot.numSegmentsE, converterE
+    calculator, plot.numSegmentsE, converterE
   )) {
-    thePlot.numSegmenTsJS[0] = converterE.toString();
+    plot.numSegmenTsJS[0] = converterE.toString();
   } else {
-    thePlot.plotType = "parametricCurvePrecomputMakeBoxed";
+    plot.plotType = "parametricCurvePrecomputMakeBoxed";
     calculator << "Failed to convert: "
-    << thePlot.numSegmentsE << " to js. ";
+    << plot.numSegmentsE << " to js. ";
   }
   if (CalculatorFunctions::functionMakeJavascriptExpression(
-    calculator, thePlot.paramLowE, converterE
+    calculator, plot.paramLowE, converterE
   )) {
-    thePlot.paramLowJS = converterE.toString();
+    plot.paramLowJS = converterE.toString();
   } else {
-    thePlot.plotType = "parametricCurvePrecomputed";
-    calculator << "Failed to convert: " << thePlot.paramLowE << " to js. ";
+    plot.plotType = "parametricCurvePrecomputed";
+    calculator << "Failed to convert: " << plot.paramLowE << " to js. ";
   }
   if (CalculatorFunctions::functionMakeJavascriptExpression(
-    calculator, thePlot.paramHighE, converterE
+    calculator, plot.paramHighE, converterE
   )) {
-    thePlot.paramHighJS = converterE.toString();
+    plot.paramHighJS = converterE.toString();
   } else {
-    thePlot.plotType = "parametricCurvePrecomputed";
-    calculator << "Failed to convert: " << thePlot.paramHighE << " to js. ";
+    plot.plotType = "parametricCurvePrecomputed";
+    calculator << "Failed to convert: " << plot.paramHighE << " to js. ";
   }
-  if (thePlot.dimension == 2) {
-    if (!thePlot.coordinateFunctionsE[0].evaluatesToDoubleInRange(
-      thePlot.variablesInPlay[0].toString(),
-      thePlot.paramLow,
-      thePlot.paramHigh,
+  if (plot.dimension == 2) {
+    if (!plot.coordinateFunctionsE[0].evaluatesToDoubleInRange(
+      plot.variablesInPlay[0].toString(),
+      plot.paramLow,
+      plot.paramHigh,
       numPoints,
-      &thePlot.xLow,
-      &thePlot.xHigh,
+      &plot.xLow,
+      &plot.xHigh,
       &theXs
     )) {
       calculator << "<hr>Failed to evaluate curve function. ";
     }
-    if (!thePlot.coordinateFunctionsE[1].evaluatesToDoubleInRange(
-      thePlot.variablesInPlay[0].toString(),
-      thePlot.paramLow,
-      thePlot.paramHigh,
+    if (!plot.coordinateFunctionsE[1].evaluatesToDoubleInRange(
+      plot.variablesInPlay[0].toString(),
+      plot.paramLow,
+      plot.paramHigh,
       numPoints,
-      &thePlot.yLow,
-      &thePlot.yHigh,
+      &plot.yLow,
+      &plot.yHigh,
       &theYs
     )) {
       calculator << "<hr>Failed to evaluate curve function. ";
     }
-    thePlot.pointsDouble.setSize(theXs.size);
+    plot.pointsDouble.setSize(theXs.size);
     for (int i = 0; i < theXs.size; i ++) {
-      thePlot.pointsDouble[i].setSize(2);
-      thePlot.pointsDouble[i][0] = theXs[i][1];
-      thePlot.pointsDouble[i][1] = theYs[i][1];
+      plot.pointsDouble[i].setSize(2);
+      plot.pointsDouble[i][0] = theXs[i][1];
+      plot.pointsDouble[i][1] = theYs[i][1];
     }
   }
+  input.hasInputBoxVariables(&plot.parametersInPlay, &plot.parametersInPlayJS);
   Plot outputPlot;
-  outputPlot += thePlot;
-  input.hasInputBoxVariables(&outputPlot.boxesThatUpdateMe);
+  outputPlot += plot;
   return output.assignValue(outputPlot, calculator);
 }
 

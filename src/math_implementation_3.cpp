@@ -478,10 +478,13 @@ std::string StringRoutines::convertStringToJavascriptVariable(const std::string&
   MacroRegisterFunctionWithName("StringRoutines::ConvertStringForJavascript");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
+    if (i == 0 && MathRoutines::isADigit(input[i])) {
+      out << "x";
+    }
     if (MathRoutines::isADigit(input[i]) || MathRoutines::isALatinLetter(input[i])) {
       out << input[i];
     } else {
-      out << "_" << StringRoutines::convertByteToHex(static_cast<unsigned char>(input[i]));
+      out << "x" << StringRoutines::convertByteToHex(static_cast<unsigned char>(input[i]));
     }
   }
   return out.str();

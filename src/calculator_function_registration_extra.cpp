@@ -377,12 +377,12 @@ void Calculator::initializeFunctionsExtra() {
   );
   this->addOperationHandler(
     "MakeJavascriptExpression",
-    CalculatorFunctions::innerMakeJavascriptExpressioN,
+    CalculatorFunctions::makeJavascriptExpression,
     "",
     "Attempts to construct a javascript translation of the input. "
     "If not successful leaves the expression unchanged.",
     "MakeJavascriptExpression(a(b+c))",
-    "Calculator::innerMakeJavascriptExpressioN",
+    "Calculator::makeJavascriptExpression",
     "MakeJavascriptExpression",
     innerStandard
   );

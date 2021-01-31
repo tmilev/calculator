@@ -18,6 +18,7 @@
 
 std::string PlotObject::Labels::points              = "points";
 std::string PlotObject::Labels::point               = "point";
+std::string PlotObject::Labels::path                = "path";
 std::string PlotObject::Labels::functionLabel       = "function";
 std::string PlotObject::Labels::coordinateFunctions = "coordinateFunctions";
 std::string PlotObject::Labels::left                = "left";
@@ -36,6 +37,7 @@ std::string PlotObject::Labels::plotType            = "plotType";
 std::string PlotObject::Labels::body                = "body";
 std::string PlotObject::Labels::text                = "text";
 std::string PlotObject::Labels::arguments           = "arguments";
+std::string PlotObject::Labels::parameters           = "parameters";
 std::string PlotObject::Labels::viewWindow          = "viewWindow";
 
 std::string Plot::Labels::canvasName                = "canvasName";
@@ -315,7 +317,7 @@ void Plot::operator+=(const Plot& other) {
   if (!other.flagIncludeCoordinateSystem) {
     this->flagIncludeCoordinateSystem = false;
   }
-  this->boxesThatUpdateMe.addOnTopNoRepetition(other.boxesThatUpdateMe);
+  this->parameterNamesJS.addOnTopNoRepetition(other.parameterNamesJS);
   this->priorityWindow = MathRoutines::maximum(this->priorityWindow, other.priorityWindow);
   this->priorityViewRectangle = MathRoutines::maximum(this->priorityViewRectangle, other.priorityViewRectangle);
 }
@@ -332,7 +334,8 @@ bool Plot::operator==(const Plot& other) const {
   ((this->theLowerBoundAxes - other.theLowerBoundAxes) == 0.0) &&
   ((this->theUpperBoundAxes - other.theUpperBoundAxes) == 0.0) &&
   this->plotObjects == other.plotObjects &&
-  this->boxesThatUpdateMe == other.boxesThatUpdateMe &&
+  this->parameterNames == other.parameterNames &&
+  this->parameterNamesJS == other.parameterNamesJS &&
   this->getCanvasName() == other.getCanvasName() &&
   this->dimension == other.dimension &&
   this->flagIncludeCoordinateSystem == other.flagIncludeCoordinateSystem;
@@ -348,6 +351,8 @@ void Plot::operator+=(const PlotObject& other) {
     this->dimension = other.dimension;
   }
   this->plotObjects.addOnTop(other);
+  this->parameterNames.addOnTopNoRepetition(other.parametersInPlay);
+  this->parameterNamesJS.addOnTopNoRepetition(other.parametersInPlayJS);
   this->setCanvasName("");
 }
 
@@ -394,7 +399,8 @@ bool PlotObject::operator==(const PlotObject& other) const {
   this->colorFillJS                    == other.colorFillJS                  &&
   this->paramLowJS                     == other.paramLowJS                   &&
   this->paramHighJS                    == other.paramHighJS                  &&
-  this->defaultLengthJS                == other.defaultLengthJS
+  this->defaultLengthJS                == other.defaultLengthJS              &&
+  this->parametersInPlayJS             == other.parametersInPlayJS
   ;
 }
 
@@ -511,6 +517,30 @@ void Plot::computeAxesAndBoundingBox3d() {
   }
 }
 
+List<PlotObject>& Plot::getPlots() {
+  return this->plotObjects;
+}
+
+void Plot::addPlotOnTop(PlotObject& input) {
+  *this += input;
+}
+
+void Plot::addPlotsOnTop(Plot& input) {
+  this->plotObjects.addListOnTop(input.plotObjects);
+  this->parameterNames.addOnTopNoRepetition(input.parameterNames);
+  this->parameterNamesJS.addOnTopNoRepetition(input.parameterNamesJS);
+}
+
+void Plot::clearPlotObjects() {
+  this->plotObjects.clear();
+  this->parameterNames.clear();
+  this->parameterNamesJS.clear();
+}
+
+void Plot::setExpectedPlotObjects(int expectedSize) {
+  this->plotObjects.setExpectedSize(expectedSize);
+}
+
 bool Plot::isOKVector(const Vector<double>& input) {
   for (int i = 0; i < input.size; i ++) {
     if (std::isnan(input[i])) {
@@ -544,9 +574,9 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
     result[Plot::Labels::messagesName] = messagesId;
   }
   JSData plotUpdaters;
-  for (int i = 0; i < this->boxesThatUpdateMe.size; i ++) {
+  for (int i = 0; i < this->parameterNames.size; i ++) {
     InputBox& currentBox = owner.objectContainer.
-    userInputTextBoxesWithValues.getValueCreate(this->boxesThatUpdateMe[i]);
+    userInputTextBoxesWithValues.getValueCreate(this->parameterNames[i]);
     plotUpdaters[currentBox.getSliderName()] = this->getCanvasName();
   }
   result["plotUpdaters"] = plotUpdaters;
@@ -665,11 +695,17 @@ std::string Plot::getPlotHtml(Calculator& owner) {
 }
 
 void PlotObject::writeVariables(JSData& output) {
+  MacroRegisterFunctionWithName("PlotObject::writeVariables");
   JSData arguments = JSData::makeEmptyArray();
   for (int i = 0; i < this->variablesInPlayJS.size; i ++) {
     arguments[i] = HtmlRoutines::getJavascriptVariable(this->variablesInPlayJS[i]);
   }
   output[PlotObject::Labels::arguments] = arguments;
+  JSData parameters = JSData::makeEmptyArray();
+  for (int i = 0; i < this->parametersInPlayJS.size; i ++) {
+    parameters[i] = HtmlRoutines::getJavascriptVariable(this->parametersInPlayJS[i]);
+  }
+  output[PlotObject::Labels::parameters] = parameters;
 }
 
 JSData PlotObject::functionFromString(const std::string& input) {
@@ -743,7 +779,7 @@ JSData PlotObject::toJSONParametricCurveInTwoDimensions() {
 }
 
 JSData PlotObject::manifoldImmersionFunctionsJS() {
-  return this->functionFromString(this->manifoldImmersionJS);
+  return this->functionFromString("return " + this->manifoldImmersionJS + ";");
 }
 
 JSData PlotObject::toJSONDirectionFieldInTwoDimensions() {
@@ -756,7 +792,7 @@ JSData PlotObject::toJSONDirectionFieldInTwoDimensions() {
     JSData currentRange = JSData::makeEmptyArray();
     for (int j = 0; j < this->theVarRangesJS.size; j ++) {
       if (i < this->theVarRangesJS[j].size) {
-        currentRange[j] = HtmlRoutines::getJavascriptVariable(this->theVarRangesJS[j][i]);
+        currentRange[j] = this->theVarRangesJS[j][i];
       } else {
         currentRange[j] = "bad_variable_range";
       }
@@ -826,7 +862,6 @@ JSData PlotObject::toJSON() {
   if (correctedPlotType == "") {
     correctedPlotType = "path";
   }
-
   if (correctedPlotType == "setProjectionScreen" ) {
     result = this->toJSONSetProjectionScreen();
   } else if (correctedPlotType == "segment") {
@@ -948,8 +983,8 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   result[Plot::Labels::controlsName] = controls;
   result[Plot::Labels::messagesName] = messages;
   result["plotUpdaters"].theType = JSData::token::tokenArray;
-  for (int i = 0; i < this->boxesThatUpdateMe.size; i ++) {
-    InputBox& currentBox = owner.objectContainer.userInputTextBoxesWithValues.getValueCreate(this->boxesThatUpdateMe[i]);
+  for (int i = 0; i < this->parameterNames.size; i ++) {
+    InputBox& currentBox = owner.objectContainer.userInputTextBoxesWithValues.getValueCreate(this->parameterNames[i]);
     result["plotUpdaters"][i] = currentBox.getSliderName();
   }
   JSData plotObjects = JSData::makeEmptyArray();

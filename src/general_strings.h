@@ -49,6 +49,9 @@ public:
 
   static std::string convertStringToJSONString(const std::string& input);
   static std::string convertStringToJavascriptString(const std::string& input);
+  // Transforms an arbitrary string to a string that is an acceptable javascript variable.
+  // Avoid use of underscores and other characters so as attempt to produce a name that is
+  // in addition a valid latex string and a valid html tag.
   static std::string convertStringToJavascriptVariable(const std::string& input);
   static std::string stringTrimWhiteSpace(const std::string& inputString);
   static void splitStringInTwo(

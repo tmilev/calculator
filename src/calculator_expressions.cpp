@@ -1581,7 +1581,9 @@ bool Expression::allowedAsFreeVariableAtom(const std::string &input) const {
   ;
 }
 
-bool Expression::getFreeVariables(HashedList<Expression>& outputAccumulateFreeVariables, bool excludeNamedConstants) const {
+bool Expression::getFreeVariables(
+  HashedList<Expression>& outputAccumulateFreeVariables, bool excludeNamedConstants
+) const {
   MacroRegisterFunctionWithName("Expression::getFreeVariables");
   if (this->owner == nullptr) {
     return true;
@@ -3185,7 +3187,7 @@ bool CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
 }
 
 std::string Expression::toStringAllSlidersInExpression() const {
-  HashedList<std::string, MathRoutines::hashString> boxNames;
+  HashedList<std::string, HashFunctions::hashFunction> boxNames;
   if (!this->hasInputBoxVariables(&boxNames)) {
     return "";
   }
@@ -3210,9 +3212,9 @@ std::string Expression::toStringAllSlidersInExpression() const {
     this->owner->objectContainer.userInputBoxSliderDisplayed[theIndex] = true;
     InputBox& theBox = theSliders.values[theIndex];
     std::string theSliderName = theBox.getSliderName();
-    out << "<input name =\""
+    out << "<input name='"
     << theSliderName
-    << "\" type='range'";
+    << "' type='range'";
     double theReader = 0;
     out << std::fixed;
     out.precision(4);

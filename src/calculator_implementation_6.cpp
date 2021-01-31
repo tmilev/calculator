@@ -789,7 +789,6 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   }
   if (CalculatorFunctions::functionMakeJavascriptExpression(calculator, thePlotObj.manifoldImmersion, jsConverterE)) {
     thePlotObj.manifoldImmersionJS = jsConverterE.toString();
-    thePlotObj.manifoldImmersion.hasInputBoxVariables(&thePlot.boxesThatUpdateMe);
   } else {
     return calculator << "Failed to extract javascript from " << input[1].toString();
   }
@@ -831,7 +830,8 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
     }
     thePlotObj.numSegmenTsJS[i] = jsConverterE.toString();
   }
-  thePlot.plotObjects.addOnTop(thePlotObj);
+  input.hasInputBoxVariables(&thePlotObj.parametersInPlay, &thePlotObj.parametersInPlayJS);
+  thePlot.addPlotOnTop(thePlotObj);
   return output.assignValue(thePlot, calculator);
 }
 

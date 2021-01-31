@@ -937,6 +937,7 @@ class VectorFieldTwoD {
     inputIsDirectionField,
     inputLowLeft,
     inputHighRight,
+    /**@type{number[]} */
     inputNumSegmentsXY,
     inputDesiredLengthDirectionVectors,
     inputColor,
@@ -1074,7 +1075,7 @@ class CanvasTwoD {
   ) {
     this.theObjects = [];
     this.surface = null;
-    this.canvasContainer = inputCanvas;
+    this.canvasContainer = drawing.resetCanvas(inputCanvas);
 
     this.canvasId = null;
     this.screenBasisOrthonormal = [];
@@ -1140,9 +1141,11 @@ class CanvasTwoD {
 
   drawVectorField(
     inputField,
+    /**@type{boolean} */
     inputIsDirectionField,
     inputLowLeft,
     inputHighRight,
+    /**@type{number[]} */
     inputNumSegmentsXY,
     inputDesiredLengthDirectionVectors,
     inputColor,
@@ -1464,7 +1467,7 @@ class Canvas {
     /**@type{HTMLElement} */
     messages,
   ) {
-    this.canvasContainer = inputCanvas;
+    this.canvasContainer = drawing.resetCanvas(inputCanvas);
     this.spanControls = controls;
     this.spanMessages = messages;
     this.theIIIdObjects = {
@@ -2995,6 +2998,16 @@ class Drawing {
       x: e.clientX,
       y: e.clientY,
     };
+  }
+
+  /**@{HTMLCanvasElement} */
+  resetCanvas(/**@type{HTMLCanvasElement} */ element) {
+    if (element.parentElement === null || element.parentElement == undefined) {
+      return element;
+    }
+    let result = element.cloneNode();
+    element.replaceWith(result);
+    return result;
   }
 }
 

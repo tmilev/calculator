@@ -448,7 +448,9 @@ std::string Crypto::convertStringToBase64URL(const std::string& input) {
   return Crypto::convertListUnsignedCharsToBase64(inputChar, true);
 }
 
-std::string Crypto::convertListUnsignedCharsToBase64(const List<unsigned char>& input, bool useBase64URL) {
+std::string Crypto::convertListUnsignedCharsToBase64(
+  const List<unsigned char>& input, bool useBase64URL
+) {
   MacroRegisterFunctionWithName("Crypto::convertListUnsignedCharsToBase64");
   uint32_t theStack = 0;
   int numBitsInTheStack = 0;

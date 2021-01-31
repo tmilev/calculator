@@ -1637,25 +1637,30 @@ JSData Function::toJSON() const {
     return result;
   }
   if (this->options.visible) {
-    result["visible"] = "true";
+    result["visible"] = true;
   } else {
-    result["visible"] = "false";
+    result["visible"] = false;
   }
   Calculator::OperationHandlers& operationHandlers = this->owner->operations.values[this->indexOperation].getElement();
   result["number"] = this->indexInOperationHandlers + 1;
   if (this->options.flagIsCompositeHandler) {
-    result["composite"] = "true";
+    result["composite"] = true;
     result["total"] = operationHandlers.compositeHandlers.size;
     result["atom"] = this->owner->operations.keys[this->indexOperation];
   } else {
-    result["composite"] = "false";
+    result["composite"] = false;
     result["total"] = operationHandlers.handlers.size;
     result["atom"] = this->owner->operations.keys[this->indexOperation];
   }
   if (this->options.flagIsExperimental) {
-    result["experimental"] = "true";
+    result["experimental"] = true;
   } else {
-    result["experimental"] = "false";
+    result["experimental"] = false;
+  }
+  if (this->options.adminOnly) {
+    result["administrative"] = true;
+  } else {
+    result["administrative"] = false;
   }
   result["description"] = this->theDescription;
   if (this->calculatorIdentifier != "") {
@@ -1668,9 +1673,9 @@ JSData Function::toJSON() const {
   functionAddress << std::hex << reinterpret_cast<unsigned long>(this->theFunction);
   result["memoryAddress"] = functionAddress.str();
   if (this->options.flagIsInner) {
-    result["inner"] = "true";
+    result["inner"] = true;
   } else {
-    result["inner"] = "false";
+    result["inner"] = false;
   }
   if (this->theExample != "") {
     result["example"] = this->theExample;

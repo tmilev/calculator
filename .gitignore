@@ -36,6 +36,7 @@ testFileWritePermissionsSSsas.txt
 *.gz
 results/*
 
+src/calculator.pro.user*
 src/calculator.pro.user
 
 node_modules

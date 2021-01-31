@@ -18,7 +18,7 @@
 
 std::string Calculator::Atoms::setRandomSeed = "SetRandomSeed";
 std::string Calculator::Atoms::commandEnclosure = "CommandEnclosure";
-std::string Calculator::Atoms::setInputBox = "CommandEnclosure";
+std::string Calculator::Atoms::setInputBox = "SetInputBox";
 std::string Calculator::Atoms::sort = "Sort";
 std::string Calculator::Atoms::transpose = "Transpose";
 
@@ -327,7 +327,7 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorHtmlFunctions::setInputBox,
     "",
     "Sets value for input box that overrides the input box (no box is displayed). ",
-    "SetInputBox(name = a, value =  3); "
+    "SetInputBox(name = a, value = 3); "
     "MakeInputBox(name = a)",
     "CalculatorHtmlFunctions::setInputBox",
     Calculator::Atoms::setInputBox,

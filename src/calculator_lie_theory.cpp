@@ -2412,10 +2412,13 @@ bool CalculatorLieTheory::computePairingTablesAndFKFTsubalgebras(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorLieTheory::computePairingTablesAndFKFTsubalgebras");
-  if (!input.isOfType<SemisimpleSubalgebras>()) {
+  if (!global.userDefaultHasAdminRights()) {
+    return calculator << "Function computePairingTablesAndFKFTsubalgebras requires administrative rights. ";
+  }
+  if (!input[1].isOfType<SemisimpleSubalgebras>()) {
     return calculator << "<hr>Input of ComputeFKFT must be of type semisimple subalgebras. ";
   }
-  SemisimpleSubalgebras& theSAs = input.getValueNonConst<SemisimpleSubalgebras>();
+  SemisimpleSubalgebras& theSAs = input[1].getValueNonConst<SemisimpleSubalgebras>();
   theSAs.flagcomputePairingTable = true;
   theSAs.flagComputeNilradicals = true;
   theSAs.computePairingTablesAndFKFTtypes();

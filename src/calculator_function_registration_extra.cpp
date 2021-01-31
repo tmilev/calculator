@@ -106,7 +106,7 @@ void Calculator::initializeFunctionsExtra() {
     CalculatorFunctions::innerTestTopCommand,
     "",
     "(This is not a mathematical function). Tests the top linux command. ",
-    "TestTopOperation(1000)",
+    "TestTopCommand(1000)",
     "CalculatorFunctions::innerTestTopCommand",
     "TestTopCommand",
     innerAdminNoTest
@@ -706,8 +706,8 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     CalculatorFunctionsCrypto::jwtVerifyAgainstKnownKeys,
     "",
     "Tries to verify a Json Web Token.",
-    "%HideLHS JWTverifyAgainstKnownKeys(\"\"); ",
-    "CalculatorFunctionsCrypto::innerJWTverifyAgainstKnownKeys",
+    "%HideLHS JWTVerifyAgainstKnownKeys(\"\"); ",
+    "CalculatorFunctionsCrypto::jwtVerifyAgainstKnownKeys",
     "JWTVerifyAgainstKnownKeys",
     innerAdminNoTest
   );

@@ -2102,8 +2102,8 @@ bool X509Certificate::loadFromASNEncoded(
   const List<unsigned char>& input, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("X509Certificate::loadFromASNEncoded");
-  AbstractSyntaxNotationOneSubsetDecoder theDecoder;
-  if (!theDecoder.decode(input, 0, this->sourceASN, commentsOnFailure)) {
+  AbstractSyntaxNotationOneSubsetDecoder decoder;
+  if (!decoder.decode(input, 0, this->sourceASN, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to asn-decode certificate input. ";
     }

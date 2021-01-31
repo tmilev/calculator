@@ -159,8 +159,11 @@ class GraphicsNDimensions {
   }
 
   writeInfo() {
-    var info = this.getInfoHTML();
-    var panelInfoElement = document.getElementById(this.idPlaneInfo);
+    let info = this.getInfoHTML();
+    let panelInfoElement = document.getElementById(this.idPlaneInfo);
+    if (panelInfoElement === null) {
+      return;
+    }
     panelInfoElement.innerHTML = info;
   }
 

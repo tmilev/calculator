@@ -1,12 +1,17 @@
 "use strict";
 let pathnames = require("./pathnames");
 
-function switchMenu(obj) {
-  let el = document.getElementById(obj);
-  if (el.classList.contains("hiddenClass")) {
-    el.classList.remove("hiddenClass");
+function switchMenu(
+  /**@type{string|HTMLElement} */
+  object,
+) {
+  if (typeof object === "string") {
+    object = document.getElementById(object);
+  }
+  if (object.classList.contains("hiddenClass")) {
+    object.classList.remove("hiddenClass");
   } else {
-    el.classList.add("hiddenClass");
+    object.classList.add("hiddenClass");
   }
 }
 

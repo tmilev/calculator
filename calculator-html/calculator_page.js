@@ -22,6 +22,8 @@ class AtomHandler {
     this.composite = false;
     this.index = - 1;
     this.totalRules = 0;
+    this.administrative = false;
+    this.experimental = false;
   }
 
   fromObject(
@@ -36,7 +38,15 @@ class AtomHandler {
     this.atom = input.atom;
     this.ruleName = input.ruleName;
     this.visible = true;
-    if (input.visible === "false") {
+    this.administrative = false;
+    this.experimental = false;
+    if (input.administrative === "true" || input.administrative === true) {
+      this.administrative = true;
+    }
+    if (input.experimental === "true" || input.experimental === true) {
+      this.experimental = true;
+    }
+    if (input.visible === "false" || input.visible === false) {
       this.visible = false;
     }
     if (input.composite === "true" || input.composite === true) {
@@ -65,8 +75,16 @@ class AtomHandler {
     let encodedAtom = encodeURIComponent(this.atom);
     currentId += `${encodedAtom}_${this.index}_${this.totalRules}`;
     resultString += `<button class='accordionLikeIndividual' onclick = "window.calculator.miscellaneousFrontend.switchMenu('${currentId}')">info</button>`;
-    resultString += `<calculatorExampleInfo id = "${currentId}" class = "hiddenClass">${this.description}`;
-    resultString += `<br><b>Example:</b><br>${this.example}</calculatorExampleInfo>`;
+    resultString += `<calculatorExampleInfo id = "${currentId}" class = "hiddenClass">`;
+    if (this.administrative) {
+      resultString += "<b>(administrative)</b> ";
+    }
+    if (this.experimental) {
+      resultString += "<b>(experimental)</b> ";
+    }
+    resultString += this.description;
+    resultString += `<br><b>Example:</b>`;
+    resultString += `<br>${this.example}</calculatorExampleInfo>`;
     let theLink = calculator.getComputationLink(this.example);
     resultString += `<a href = '#${theLink}' class = "linkInfo">Example</a>`;
     resultString += ` [${this.ruleName}]`;
@@ -94,11 +112,10 @@ class Calculator {
 
   processOneFunctionAtom(handlers) {
     let resultStrings = [];
-    console.log("DEBUG: visibility adjust!")
     for (let i = 0; i < handlers.length; i++) {
       let handler = new AtomHandler();
       handler.fromObject(handlers[i], i, handlers.length);
-      if (handler.visible || true) {
+      if (handler.visible) {
         resultStrings.push("<br>");
         resultStrings.push(handler.toString(this));
       }

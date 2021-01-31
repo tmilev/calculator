@@ -99,7 +99,6 @@ class ElementWithScripts {
     let graphics = JSON.parse(content);
     let canvasName = graphics[pathnames.urlFields.result.canvasName];
     let controlsName = graphics[pathnames.urlFields.result.controlsName];
-    console.log("DEBUG: bootstrap graphics: " + JSON.stringify(graphics));
     let canvases = this.element.querySelectorAll(`[name="${canvasName}"]`);
     let controls = this.element.querySelectorAll(`[name="${controlsName}"]`);
     if (canvases.length < 1) {

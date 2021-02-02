@@ -97,7 +97,13 @@ std::string Calculator::Examples::toStringOneOperationHandler(
   }
   out << " [" << function.calculatorIdentifier << "]";
   if (function.additionalIdentifier != "") {
-    out << " {" << function.additionalIdentifier << "}.";
+    out << " {" << function.additionalIdentifier << "}. ";
+  }
+  if (function.options.adminOnly) {
+    out << "(admin only) ";
+  }
+  if (!function.options.visible) {
+    out << "(invisible) ";
   }
   out << "\n";
   out << "[Example](" << "https://calculator-algebra.org/"

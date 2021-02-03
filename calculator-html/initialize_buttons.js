@@ -437,7 +437,7 @@ class InputPanelData {
     let mqCommentsSpan = document.getElementById(this.idEditorComments);
     if (calculatorRightPosition - calculatorLeftPosition > 1000) {
       this.flagCalculatorMQStringIsOK = false;
-      mqCommentsSpan.innerHTML = "<span style ='color:red'><b>Formula too big </b></span>";
+      mqCommentsSpan.innerHTML = "<b style ='color:red'>Formula too big </b>";
       return;
     }
     this.flagCalculatorMQStringIsOK = true;
@@ -519,7 +519,7 @@ class InputPanelData {
       leftPos = rightPos;
     }
     if (rightPos - leftPos > 1000) {
-      mqProblemSpan.innerHTML = "<span style ='color:red'><b></b></span>"
+      mqProblemSpan.innerHTML = "<b style ='color:red'></b>"
     }
     let startingCharacterSectionUnderMathQuillEdit = '';
     if (calculatorInput.value[leftPos] === '\n' || calculatorInput.value[leftPos] === ' ' ||

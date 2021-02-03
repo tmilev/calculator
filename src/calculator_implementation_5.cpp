@@ -2168,10 +2168,10 @@ bool CalculatorFunctionsPlot::plotSurface(Calculator& calculator, const Expressi
   thePlot.variablesInPlay.quickSortAscending();
   thePlot.coordinateFunctionsE.setSize(thePlot.manifoldImmersion.size() - 1);
   thePlot.coordinateFunctionsJS.setSize(thePlot.coordinateFunctionsE.size);
-  thePlot.theVarRangesJS.setSize(2);
+  thePlot.variableRangesJS.setSize(2);
   thePlot.variablesInPlayJS.setSize(2);
   for (int i = 0; i < 2; i ++) {
-    thePlot.theVarRangesJS[i].setSize(2);
+    thePlot.variableRangesJS[i].setSize(2);
     thePlot.variablesInPlayJS[i] = thePlot.variablesInPlay[i].toString();
   }
   Expression jsConverter;
@@ -2204,7 +2204,7 @@ bool CalculatorFunctionsPlot::plotSurface(Calculator& calculator, const Expressi
           calculator, input[i][2][j + 1], jsConverter
         );
         if (isGood) {
-          isGood = jsConverter.isOfType<std::string>(&thePlot.theVarRangesJS[theIndex][j]);
+          isGood = jsConverter.isOfType<std::string>(&thePlot.variableRangesJS[theIndex][j]);
         }
         if (!isGood) {
           return calculator << "Failed to convert "
@@ -2244,25 +2244,25 @@ bool CalculatorFunctionsPlot::plotSurface(Calculator& calculator, const Expressi
         << " to a javascript expression. ";
       }
     }
-    thePlot.numSegmenTsJS.setSize(2);
+    thePlot.numberOfSegmentsJS.setSize(2);
     if (keysToConvert.getValueCreate("numSegments1") != "") {
-      thePlot.numSegmenTsJS[0] = keysToConvert.getValueCreate("numSegments1");
+      thePlot.numberOfSegmentsJS[0] = keysToConvert.getValueCreate("numSegments1");
     }
     if (keysToConvert.getValueCreate("numSegments2") != "") {
-      thePlot.numSegmenTsJS[1] = keysToConvert.getValueCreate("numSegments2");
+      thePlot.numberOfSegmentsJS[1] = keysToConvert.getValueCreate("numSegments2");
     }
     if (keysToConvert.getValueCreate("lineWidth") != "") {
       thePlot.lineWidthJS = keysToConvert.getValueCreate("lineWidth");
     }
   }
   if (
-    thePlot.theVarRangesJS[0][0] == "" ||
-    thePlot.theVarRangesJS[0][1] == "" ||
-    thePlot.theVarRangesJS[1][0] == "" ||
-    thePlot.theVarRangesJS[1][1] == ""
+    thePlot.variableRangesJS[0][0] == "" ||
+    thePlot.variableRangesJS[0][1] == "" ||
+    thePlot.variableRangesJS[1][0] == "" ||
+    thePlot.variableRangesJS[1][1] == ""
   ) {
     return calculator << "Could not extract variable ranges, got the var ranges: "
-    << thePlot.theVarRangesJS;
+    << thePlot.variableRangesJS;
   }
   thePlot.plotType = "surface";
   thePlot.dimension = thePlot.coordinateFunctionsE.size;

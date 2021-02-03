@@ -497,28 +497,28 @@ public:
   static bool innerFindProductDistanceModN(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerSolveProductSumEquationOverSetModN(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerSolveSerreLikeSystem(
+  static bool solveSerreLikeSystem(
     Calculator& calculator, const Expression& input, Expression& output, bool useUpperLimit, bool startWithAlgebraicClosure
   );
   static bool innerSolveSerreLikeSystemNoUpperLimit(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
-    return CalculatorFunctions::innerSolveSerreLikeSystem(calculator, input, output, false, false);
+    return CalculatorFunctions::solveSerreLikeSystem(calculator, input, output, false, false);
   }
   static bool innerSolveSerreLikeSystemUpperLimit(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
-    return CalculatorFunctions::innerSolveSerreLikeSystem(calculator, input, output, true, false);
+    return CalculatorFunctions::solveSerreLikeSystem(calculator, input, output, true, false);
   }
   static bool innerSolveSerreLikeSystemAlgebraic(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
-    return CalculatorFunctions::innerSolveSerreLikeSystem(calculator, input, output, false, true);
+    return CalculatorFunctions::solveSerreLikeSystem(calculator, input, output, false, true);
   }
   static bool innerSolveSerreLikeSystemAlgebraicUpperLimit(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
-    return CalculatorFunctions::innerSolveSerreLikeSystem(calculator, input, output, true, true);
+    return CalculatorFunctions::solveSerreLikeSystem(calculator, input, output, true, true);
   }
   static bool innerFetchWebPagePOST(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerFetchWebPageGET(Calculator& calculator, const Expression& input, Expression& output);

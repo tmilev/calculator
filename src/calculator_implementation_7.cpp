@@ -1160,10 +1160,14 @@ bool CalculatorFunctions::innerDereferenceSequenceStatements(
   return false;
 }
 
-bool CalculatorFunctions::innerSolveSerreLikeSystem(
-  Calculator& calculator, const Expression& input, Expression& output, bool useUpperLimit, bool startWithAlgebraicClosure
+bool CalculatorFunctions::solveSerreLikeSystem(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool useUpperLimit,
+  bool startWithAlgebraicClosure
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerSolveSerreLikeSystem");
+  MacroRegisterFunctionWithName("Calculator::solveSerreLikeSystem");
   Vector<Polynomial<Rational> > polynomialsRational;
   ExpressionContext theContext(calculator);
   bool useArguments =
@@ -1194,33 +1198,35 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
     }
   }
   PolynomialSystem<AlgebraicNumber> system;
-  theContext.getFormat(system.groebner.theFormat);
-  int upperLimit = 501;
+  theContext.getFormat(system.groebner.format);
+  List<int> upperLimits = List<int>({201, 1000});
   if (useUpperLimit) {
-    Rational upperLimitRat;
-    if (!polynomialsRational[0].isConstant(&upperLimitRat)) {
-      return calculator << "Failed to extract a constant from the first argument "
-      << polynomialsRational[0].toString(&system.format()) << ". ";
+    for (int i = 0; i < 2; i ++) {
+      Rational upperLimitRat;
+      if (!polynomialsRational[0].isConstant(&upperLimitRat)) {
+        return calculator << "Failed to extract a constant from the first argument "
+        << polynomialsRational[0].toString(&system.format()) << ". ";
+      }
+      if (!upperLimitRat.isIntegerFittingInInt(&upperLimits[i])) {
+        return calculator << "Failed to extract a small integer from the first argument "
+        << upperLimitRat.toString(&system.groebner.format) << ". ";
+      }
+      polynomialsRational.popIndexShiftDown(0);
     }
-    if (!upperLimitRat.isIntegerFittingInInt(&upperLimit)) {
-      return calculator << "Failed to extract a small integer from the first argument "
-      << upperLimitRat.toString(&system.groebner.theFormat) << ". ";
-    }
-    polynomialsRational.popIndexShiftDown(0);
   }
   Vector<Polynomial<AlgebraicNumber> > polynomials;
   polynomials = polynomialsRational;
-  system.groebner.maximumPolynomialComputations = upperLimit;
-  system.maximumSerreSystemComputationsPreferred = upperLimit;
+  system.groebner.maximumPolynomialDivisions = upperLimits[0];
+  system.groebner.maximumMonomialOperations = upperLimits[1];
   system.groebner.polynomialOrder.monomialOrder = MonomialPolynomial::orderDefault();
-  system.theAlgebraicClosure = &calculator.objectContainer.theAlgebraicClosure;
+  system.algebraicClosure = &calculator.objectContainer.theAlgebraicClosure;
   system.flagTryDirectlySolutionOverAlgebraicClosure = startWithAlgebraicClosure;
-  global.theDefaultFormat.getElement() = system.groebner.theFormat;
+  global.theDefaultFormat.getElement() = system.groebner.format;
   system.flagUseTheMonomialBranchingOptimization = true;
   system.solveSerreLikeSystem(polynomials);
   std::stringstream out;
   out << "<br>The context vars:<br>" << theContext.toString();
-  out << "<br>The polynomials: " << polynomials.toString(&system.groebner.theFormat);
+  out << "<br>The polynomials: " << polynomials.toString(&system.groebner.format);
   out << "<br>Total number of polynomial computations: "
   << system.numberOfSerreSystemComputations;
   if (system.flagSystemProvenToHaveNoSolution) {
@@ -1898,7 +1904,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     computation.flagStoreQuotients = true;
     computation.polynomialOrder.monomialOrder = MonomialPolynomial::orderDefault();
     computation.addBasisElementNoReduction(this->theDen);
-    computation.theFormat = this->currentFormaT;
+    computation.format = this->currentFormaT;
     computation.polynomialOrder.monomialOrder = monomialOrder;
     Polynomial<Rational> theNumCopy = this->theNum;
     computation.remainderDivisionByBasis(theNumCopy, computation.remainderDivision, - 1);
@@ -6052,12 +6058,12 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
   } else {
     thePlotObj.plotType = "plotFunctionPrecomputed";
   }
-  thePlotObj.numSegmenTsJS.setSize(1);
-  thePlotObj.numSegmenTsJS[0] = "200";
+  thePlotObj.numberOfSegmentsJS.setSize(1);
+  thePlotObj.numberOfSegmentsJS[0] = "200";
   if (CalculatorFunctions::functionMakeJavascriptExpression(
     calculator, thePlotObj.numSegmentsE, jsConverterE
   )) {
-    thePlotObj.numSegmenTsJS[0] = jsConverterE.toString();
+    thePlotObj.numberOfSegmentsJS[0] = jsConverterE.toString();
     thePlotObj.numSegmentsE.hasInputBoxVariables(
       &thePlotObj.parametersInPlay, &thePlotObj.parametersInPlayJS
     );
@@ -6120,26 +6126,26 @@ bool CalculatorFunctionsPlot::plotPoint(Calculator& calculator, const Expression
   }
   Plot theFinalPlot;
   PlotObject thePlot;
-  if (!calculator.getMatrixExpressions(input[1], thePlot.thePointS)) {
+  if (!calculator.getMatrixExpressions(input[1], thePlot.points)) {
     return calculator << "The first argument of PlotPoint is "
     << "expected to be a sequence, instead I had: " << input[1].toString();
   }
-  theFinalPlot.dimension = thePlot.thePointS.numberOfColumns;
+  theFinalPlot.dimension = thePlot.points.numberOfColumns;
   thePlot.dimension = theFinalPlot.dimension;
   thePlot.coordinateFunctionsE.setSize(thePlot.dimension);
   thePlot.coordinateFunctionsJS.setSize(thePlot.dimension);
   Expression jsConverterE;
-  thePlot.thePointsJS.initialize(thePlot.thePointS.numberOfRows, thePlot.thePointS.numberOfColumns);
-  for (int i = 0; i < thePlot.thePointS.numberOfRows; i ++) {
-    for (int j = 0; j < thePlot.thePointS.numberOfColumns; j ++) {
+  thePlot.pointsJS.initialize(thePlot.points.numberOfRows, thePlot.points.numberOfColumns);
+  for (int i = 0; i < thePlot.points.numberOfRows; i ++) {
+    for (int j = 0; j < thePlot.points.numberOfColumns; j ++) {
       if (!CalculatorFunctions::functionMakeJavascriptExpression(
-        calculator, thePlot.thePointS(i, j), jsConverterE
+        calculator, thePlot.points(i, j), jsConverterE
       )) {
         return calculator << "Failed to extract coordinate " << i + 1 << " from: "
         << thePlot.coordinateFunctionsE[i].toString();
       }
-      thePlot.thePointsJS(i, j) = jsConverterE.toString();
-      thePlot.thePointS(i, j).hasInputBoxVariables(&thePlot.parametersInPlay, &thePlot.parametersInPlayJS);
+      thePlot.pointsJS(i, j) = jsConverterE.toString();
+      thePlot.points(i, j).hasInputBoxVariables(&thePlot.parametersInPlay, &thePlot.parametersInPlayJS);
     }
   }
   thePlot.dimension = theFinalPlot.dimension;
@@ -6529,12 +6535,12 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
       << plot.coordinateFunctionsE[i] << " to js. ";
     }
   }
-  plot.numSegmenTsJS.setSize(1);
-  plot.numSegmenTsJS[0] = "200";
+  plot.numberOfSegmentsJS.setSize(1);
+  plot.numberOfSegmentsJS[0] = "200";
   if (CalculatorFunctions::functionMakeJavascriptExpression(
     calculator, plot.numSegmentsE, converterE
   )) {
-    plot.numSegmenTsJS[0] = converterE.toString();
+    plot.numberOfSegmentsJS[0] = converterE.toString();
   } else {
     plot.plotType = "parametricCurvePrecomputMakeBoxed";
     calculator << "Failed to convert: "

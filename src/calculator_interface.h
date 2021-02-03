@@ -944,9 +944,9 @@ public:
   std::string colorUV;
   std::string colorVU;
   std::string lineWidthJS;
-  List<std::string> numSegmenTsJS;
-  Matrix<Expression> thePointS;
-  Matrix<std::string> thePointsJS;
+  List<std::string> numberOfSegmentsJS;
+  Matrix<Expression> points;
+  Matrix<std::string> pointsJS;
   Vectors<double> pointsDouble;
   List<Vectors<double> > theRectangles;
   // Each rectangle is a list of two 2-dim vectors.
@@ -960,7 +960,7 @@ public:
   List<Expression> coordinateFunctionsE;
   List<std::string> coordinateFunctionsJS;
   HashedList<Expression> variablesInPlay;
-  List<List<std::string> > theVarRangesJS;
+  List<List<std::string> > variableRangesJS;
   Expression leftPtE;
   Expression rightPtE;
   Expression paramLowE;
@@ -1313,13 +1313,10 @@ public:
   // similar error message.
   //
   //----------------------------------------------------------
-
-
   // Control sequences parametrize the syntactical elements
   HashedList<std::string, MathRoutines::hashString> controlSequences;
 
   HashedList<ExpressionTripleCrunchers> theCruncherIds;
-  List<Function> theCruncherS;
 
   HashedList<Expression> knownDoubleConstants;
   List<double> knownDoubleConstantValues;

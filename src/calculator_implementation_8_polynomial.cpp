@@ -116,9 +116,9 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
     computation.polynomialOrder.monomialOrder = *monomialOrder;
   }
   computation.remainderDivisionByBasis(polynomialsRational[0], computation.remainderDivision, - 1);
-  theContext.getFormat(computation.theFormat);
-  computation.theFormat.flagUseLatex = true;
-  computation.theFormat.flagUseFrac = true;
+  theContext.getFormat(computation.format);
+  computation.format.flagUseLatex = true;
+  computation.format.flagUseFrac = true;
   std::stringstream latexOutput;
   latexOutput << "<br>In latex: <br>"
   << "\\documentclass{article}\\usepackage{longtable}"
@@ -164,9 +164,9 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
     return calculator << "Failed to extract integer from first argument";
   }
   computation.remainderDivisionByBasis(polynomialsRational[1], computation.remainderDivision, - 1);
-  theContext.getFormat(computation.theFormat);
-  computation.theFormat.flagUseLatex = true;
-  computation.theFormat.flagUseFrac = true;
+  theContext.getFormat(computation.format);
+  computation.format.flagUseLatex = true;
+  computation.format.flagUseFrac = true;
   std::stringstream latexOutput;
   latexOutput
   << "In latex: \r\n \\documentclass{beamer}\n"
@@ -267,10 +267,10 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionQuotient(
   computation.remainderDivisionByBasis(polynomialsRational[0], outputRemainder, - 1);
   Expression currentE, thePolyE;
   List<Expression> theList;
-  for (int i = 0; i < computation.theQuotients.size; i ++) {
+  for (int i = 0; i < computation.quotients.size; i ++) {
     currentE.reset(calculator);
     currentE.addChildAtomOnTop("MakeExpression");
-    thePolyE.assignValueWithContext(computation.theQuotients[i], theContext, calculator);
+    thePolyE.assignValueWithContext(computation.quotients[i], theContext, calculator);
     currentE.addChildOnTop(thePolyE);
     theList.addOnTop(currentE);
   }
@@ -521,8 +521,8 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
   std::stringstream out;
   List<Polynomial<Coefficient> >& theRemainders = this->intermediateRemainders;
   List<Polynomial<Coefficient> >& theSubtracands = this->intermediateSubtractands;
-  this->owner->theFormat.monomialOrder = this->owner->polynomialOrder.monomialOrder;
-  bool oneDivisor = (this->owner->theBasis.size == 1);
+  this->owner->format.monomialOrder = this->owner->polynomialOrder.monomialOrder;
+  bool oneDivisor = (this->owner->basis.size == 1);
   this->allMonomials.clear();
   this->allMonomials.addOnTopNoRepetition(this->startingPolynomial.monomials);
   for (int i = 0; i < theRemainders.size; i ++) {
@@ -531,14 +531,14 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
   for (int i = 0; i < theSubtracands.size; i ++) {
     this->allMonomials.addOnTopNoRepetition(theSubtracands[i].monomials);
   }
-  auto& basis = this->owner->theBasis;
+  auto& basis = this->owner->basis;
   for (int i = 0; i < basis.size; i ++) {
     Polynomial<Coefficient>& current = basis[i].element;
     this->allMonomials.addOnTopNoRepetition(current.monomials);
   }
 
-  for (int i = 0; i < this->owner->theQuotients.size; i ++) {
-    this->allMonomials.addOnTopNoRepetition(this->owner->theQuotients[i].monomials);
+  for (int i = 0; i < this->owner->quotients.size; i ++) {
+    this->allMonomials.addOnTopNoRepetition(this->owner->quotients[i].monomials);
   }
   if (this->owner->remainderDivision.isEqualToZero()) {
     MonomialPolynomial constMon;
@@ -578,7 +578,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
       &this->owner->polynomialOrder.monomialOrder
     );
   }
-  this->owner->theFormat.flagUseLatex = true;
+  this->owner->format.flagUseLatex = true;
   out << "\\renewcommand{\\arraystretch}{1.2}";
   out << "\\begin{longtable}{@{}c";
   for (int i = 0; i < this->allMonomials.size * 2; i ++) {
@@ -607,10 +607,10 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
     << "}"
     << "\\\\";
   }
-  for (int i = 0; i < this->owner->theBasis.size; i ++) {
+  for (int i = 0; i < this->owner->basis.size; i ++) {
     if (!oneDivisor) {
       out << this->getSpacedMonomialsWithHighlightLaTeX(
-        this->owner->theBasis[i].element,
+        this->owner->basis[i].element,
         &this->highlightMonsDivisors[i],
         &this->fcAnswerMonsDivisors[i],
         nullptr,
@@ -628,7 +628,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
     out << "&";
     out << "\\multicolumn{" << this->allMonomials.size * 2 << "}{c}{";
     out << this->getSpacedMonomialsWithHighlightLaTeX(
-      this->owner->theQuotients[i],
+      this->owner->quotients[i],
       &this->highlightMonsQuotients[i],
       &this->fcAnswerMonsQuotients[i],
       nullptr,
@@ -649,7 +649,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
       if (oneDivisor) {
         out << "\\multicolumn{1}{c|}{"
         << this->getSpacedMonomialsWithHighlightLaTeX(
-          this->owner->theBasis[0].element,
+          this->owner->basis[0].element,
           &this->highlightMonsDivisors[0],
           &this->fcAnswerMonsDivisors[i],
           nullptr,
@@ -803,7 +803,7 @@ std::string PolynomialDivisionReport<Coefficient>::getSpacedMonomialsWithHighlig
     countMons ++;
     std::string monWithSign =
     Polynomial<Coefficient>::getBlendCoefficientAndMonomial(
-      thePoly[theIndex], thePoly.coefficients[theIndex], true, &this->owner->theFormat
+      thePoly[theIndex], thePoly.coefficients[theIndex], true, &this->owner->format
     );
     std::string sign = monWithSign.substr(0, 1);
     std::string monNoSign = monWithSign.substr(1);
@@ -852,7 +852,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
 ) {
   MacroRegisterFunctionWithName("PolynomialDivisionReport::computeHighLightsFromRemainder");
   this->checkInitialization();
-  auto& basis = this->owner->theBasis;
+  auto& basis = this->owner->basis;
   if (remainderIndex == 0) {
     for (int i = 0; i < this->allMonomials.size; i ++) {
       this->highlightMonsRemainders[remainderIndex][i].addOnTop(currentSlideNumber);
@@ -918,7 +918,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     this->divisionLog << "$\\vphantom"
     << "{\\frac{x^1}{x^1}}$";
   }
-  FormatExpressions& format = this->owner->theFormat;
+  FormatExpressions& format = this->owner->format;
   this->divisionLog << "\\only<" << currentSlideNumber << ","
   << currentSlideNumber + 1 << "| handout:0>{Divide "
   << "\\alertNoH{"
@@ -948,7 +948,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   this->highlightMonsRemainders[remainderIndex][indexCurrentRemainderLeadingMonInAllMons].addOnTop(currentSlideNumber);
   int indexCurrentQuotientMonInAllMons =
   this->allMonomials.getIndex(this->intermediateHighestMonDivHighestMon[remainderIndex]);
-  Polynomial<Coefficient>& currentQuotient = this->owner->theQuotients[indexCurrentDivisor];
+  Polynomial<Coefficient>& currentQuotient = this->owner->quotients[indexCurrentDivisor];
   int indexCurrentQuotientMoN = currentQuotient.monomials.getIndex(
     this->intermediateHighestMonDivHighestMon[remainderIndex]
   );
@@ -1282,7 +1282,7 @@ bool CalculatorFunctionsPolynomial::groebner(
     inputVector[i].scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   }
   GroebnerBasisComputation<AlgebraicNumber> theGroebnerComputation;
-  theContext.getFormat(theGroebnerComputation.theFormat);
+  theContext.getFormat(theGroebnerComputation.format);
   theContext.getFormat(global.theDefaultFormat.getElement());
   if (useModZp) {
     ElementZmodP tempElt;
@@ -1318,8 +1318,8 @@ bool CalculatorFunctionsPolynomial::groebner(
   } else {
     global.fatal << "Unexpected order value: " << order << global.fatal;
   }
-  theGroebnerComputation.theFormat.monomialOrder = theGroebnerComputation.polynomialOrder.monomialOrder;
-  theGroebnerComputation.maximumPolynomialComputations = upperBoundComputations;
+  theGroebnerComputation.format.monomialOrder = theGroebnerComputation.polynomialOrder.monomialOrder;
+  theGroebnerComputation.maximumMonomialOperations = upperBoundComputations;
   bool success = theGroebnerComputation.transformToReducedGroebnerBasis(outputGroebner);
   std::stringstream out;
   out << theGroebnerComputation.toStringLetterOrder(false);
@@ -1335,7 +1335,7 @@ bool CalculatorFunctionsPolynomial::groebner(
   for (int i = 0; i < inputVector.size; i ++) {
     out << "<br>"
     << HtmlRoutines::getMathNoDisplay(
-      inputVector[i].toString(&theGroebnerComputation.theFormat)
+      inputVector[i].toString(&theGroebnerComputation.format)
     );
   }
   if (success) {
@@ -1346,13 +1346,13 @@ bool CalculatorFunctionsPolynomial::groebner(
     << " polynomial divisions. ";
     for (int i = 0; i < outputGroebner.size; i ++) {
       out << "<br> " << HtmlRoutines::getMathNoDisplay(
-        outputGroebner[i].toString(&theGroebnerComputation.theFormat)
+        outputGroebner[i].toString(&theGroebnerComputation.format)
       );
     }
     out << "<br>Output in calculator-ready format: ";
     out << "<br>(";
     for (int i = 0; i < outputGroebner.size; i ++) {
-      out << outputGroebner[i].toString(&theGroebnerComputation.theFormat);
+      out << outputGroebner[i].toString(&theGroebnerComputation.format);
       if (i != outputGroebner.size - 1) {
         out << ", <br>";
       }
@@ -1363,12 +1363,12 @@ bool CalculatorFunctionsPolynomial::groebner(
     << "exceeded the user-given limit of "
     << upperBoundComputations << " polynomial operations. ";
     out << "<br>An intermediate non-Groebner basis containing total "
-    << theGroebnerComputation.theBasis.size
+    << theGroebnerComputation.basis.size
     << " basis elements: ";
     out << "<br>GroebnerLexUpperLimit{}(10000, <br>";
-    for (int i = 0; i < theGroebnerComputation.theBasis.size; i ++) {
-      out << theGroebnerComputation.theBasis[i].element.toString(&theGroebnerComputation.theFormat);
-      if (i != theGroebnerComputation.theBasis.size - 1) {
+    for (int i = 0; i < theGroebnerComputation.basis.size; i ++) {
+      out << theGroebnerComputation.basis[i].element.toString(&theGroebnerComputation.format);
+      if (i != theGroebnerComputation.basis.size - 1) {
         out << ", <br>";
       }
     }

@@ -1210,7 +1210,7 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(const List<Subgrou
     }
     mainTableStream << "\\\\\n<br>\n";
     mainTableStream << "Irrep label";
-    if (this->dynkinType.isSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale)) {
+    if (this->dynkinType.isSimple(&simpleType.letter, &simpleType.rank, &simpleType.cartanSymmetricInverseScale)) {
       for (int i = startIndex; i < startIndexNextCol; i ++) {
         mainTableStream << "&$" << inputSubgroups[i].theDynkinType.toString(&formatSupressUpperIndexOne) << "$";
       }
@@ -1244,7 +1244,7 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(const List<Subgrou
       }
       out << "</tr><tr><td></td><td></td>";
     }
-    if (this->dynkinType.isSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale)) {
+    if (this->dynkinType.isSimple(&simpleType.letter, &simpleType.rank, &simpleType.cartanSymmetricInverseScale)) {
       for (int i = 0; i < inputSubgroups.size; i ++) {
         out << "<td>" << inputSubgroups[i].theDynkinType.toString(&formatSupressUpperIndexOne)
         << "</td>";

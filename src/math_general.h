@@ -2857,7 +2857,7 @@ public:
     const Coefficient& one,
     std::stringstream* commentsOnFailure
   );
-  bool hasSmallIntegralPositivePowers(int* whichtotalDegree) const;
+  bool hasSmallIntegralPositivePowers(int* whichTotalDegree) const;
   class Test {
   public:
     FormatExpressions format;
@@ -3084,9 +3084,9 @@ class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
     }
     return result;
   }
-  void makeZero(int NumVars) {
+  void makeZero(int numberOfVariables) {
     for (int i = 0; i < this->size; i ++) {
-      this->objects[i].makeZero(NumVars);
+      this->objects[i].makeZero(numberOfVariables);
     }
   }
   std::string toString(int numDisplayedEltsMinus1ForAll = - 1) const {
@@ -3185,22 +3185,21 @@ class GroebnerBasisComputation {
   public:
   PolynomialOrder<Coefficient> polynomialOrder;
   Polynomial<Coefficient> remainderDivision;
-  Polynomial<Coefficient> bufPolyForGaussianElimination;
-  List<Polynomial<Coefficient> > theQuotients;
+  List<Polynomial<Coefficient> > quotients;
   List<Polynomial<Coefficient> > basisCandidates;
   class BasisElement {
   public:
     Polynomial<Coefficient> element;
     MonomialPolynomial leadingMonomial;
     Coefficient leadingCoefficient;
-    std::string toString(FormatExpressions* theFormat) const;
+    std::string toString(FormatExpressions* format) const;
   };
-  List<BasisElement> theBasis;
+  List<BasisElement> basis;
   int numberPolynomialDivisions;
   int numberMonomialOperations;
 
-  int maximumPolynomialComputations;
-  int maximumBasisReductionComputations;
+  int maximumMonomialOperations;
+  int maximumPolynomialDivisions;
   int numberOfIntermediateRemainders;
   int numberOfSymmetricDifferenceRounds;
   bool flagFoundNewBasisElements;
@@ -3208,14 +3207,14 @@ class GroebnerBasisComputation {
   bool flagDoLogDivision;
   bool flagStoreQuotients;
   MemorySaving<PolynomialDivisionReport<Coefficient> > divisionReport;
-  FormatExpressions theFormat;
+  FormatExpressions format;
   void addBasisElementNoReduction(const Polynomial<Coefficient>& input);
   bool limitsExceeded() const;
   bool addAndReducePolynomials();
   bool addAndReduceOnePolynomial();
   bool addRemainderToBasis();
   bool transformToReducedBasis(
-    List<Polynomial<Coefficient> >& inputOutpuT, int upperLimitPolyComputations
+    List<Polynomial<Coefficient> >& inputOutput
   );
   bool transformToReducedGroebnerBasis(List<Polynomial<Coefficient> >& inputOutpuT);
   void generateSymmetricDifferenceCandidates();
@@ -3230,7 +3229,7 @@ class GroebnerBasisComputation {
   int minimalNumberOfVariables() const;
   std::string toStringLetterOrder(bool addDollars) const;
   std::string toStringPolynomialBasisStatus();
-  static int getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(int theVarIndex, List<Polynomial<Coefficient> >& input);
+  static int getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(int variableIndex, List<Polynomial<Coefficient> >& input);
   void remainderDivisionByBasis(
     const Polynomial<Coefficient>& input,
     Polynomial<Coefficient>& outputRemainder,
@@ -3258,7 +3257,6 @@ class GroebnerBasisComputation {
 template<class Coefficient>
 class PolynomialSystem {
 public:
-  int maximumSerreSystemComputationsPreferred;
   int numberOfSerreSystemComputations;
   int numberOfSerreVariablesOneGenerator;
   int recursionCounterSerreLikeSystem;
@@ -3271,7 +3269,7 @@ public:
   bool flagSystemSolvedOverBaseField;
   bool flagUsingAlgebraicClosure;
 
-  AlgebraicClosureRationals* theAlgebraicClosure;
+  AlgebraicClosureRationals* algebraicClosure;
   GroebnerBasisComputation<Coefficient> groebner;
   MemorySaving<PolynomialSystem<Coefficient> > computationUsedInRecursiveCalls;
   List<Coefficient> systemSolution;
@@ -3293,7 +3291,7 @@ public:
   void polynomialSystemSolutionSimplificationPhase(List<Polynomial<Coefficient> >& inputSystem);
   void backSubstituteIntoPolynomialSystem(List<PolynomialSubstitution<Coefficient> >& impliedSubstitutions);
   void backSubstituteIntoSinglePolynomial(
-    Polynomial<Coefficient>& thePoly, int theIndex, PolynomialSubstitution<Coefficient>& theFinalSub
+    Polynomial<Coefficient>& substitution, int index, PolynomialSubstitution<Coefficient>& finalSubstitution
   );
   bool getOneVariablePolynomialSolution(const Polynomial<Coefficient>& thePoly, Coefficient& outputSolution);
   void setSerreLikeSolutionIndex(int theIndex, const Coefficient& theConst);
@@ -5032,9 +5030,9 @@ public:
 class QuasiPolynomial {
 public:
   int minimalNumberOfVariables() const {
-    return this->AmbientLatticeReduced.basis.numberOfRows;
+    return this->ambientLatticeReduced.basis.numberOfRows;
   }
-  Lattice AmbientLatticeReduced;
+  Lattice ambientLatticeReduced;
   Vectors<Rational> latticeShifts;
   List<Polynomial<Rational> > valueOnEachLatticeShift;
   std::string toString(bool useHtml, bool useLatex) {
@@ -5077,7 +5075,7 @@ public:
   }
   void operator*=(const Rational& theConst);
   void operator=(const QuasiPolynomial& other) {
-    this->AmbientLatticeReduced = other.AmbientLatticeReduced;
+    this->ambientLatticeReduced = other.ambientLatticeReduced;
     this->latticeShifts = other.latticeShifts;
     this->valueOnEachLatticeShift = other.valueOnEachLatticeShift;
   }
@@ -5097,7 +5095,7 @@ public:
   bool PowerSeriesCoefficientIsComputed;
   bool IsIrrelevant;
   bool RelevanceIsComputed;
-  List<int> IndicesNonZeroMults;
+  List<int> indicesNonZeroMultiplicities;
   List<OnePartialFractionDenominator> denominator;
   friend std::ostream& operator << (std::ostream& output, const PartFraction& input) {
     (void) input;
@@ -5119,7 +5117,7 @@ public:
     QuasiPolynomial& outputQP,
     const MonomialPolynomial& theMon,
     Vectors<Rational>& normals,
-    Lattice& theLattice
+    Lattice& lattice
   ) const;
   static void evaluateIntegerPolynomial(
     const Polynomial<LargeInteger>& input, const Vector<Rational>& values, Rational& output
@@ -5673,21 +5671,21 @@ class DynkinSimpleType {
     return output;
   }
   public:
-  char theLetter;
-  int theRank;
-  Rational CartanSymmetricInverseScale;
-  DynkinSimpleType(): theLetter('X'), theRank(- 1), CartanSymmetricInverseScale(0) {
+  char letter;
+  int rank;
+  Rational cartanSymmetricInverseScale;
+  DynkinSimpleType(): letter('X'), rank(- 1), cartanSymmetricInverseScale(0) {
   }
   DynkinSimpleType(const DynkinSimpleType& other) {
     *this = other;
   }
   DynkinSimpleType(char inputChar, int inputRank, const Rational& inputScale = 1) :
-    theLetter(inputChar), theRank(inputRank), CartanSymmetricInverseScale(inputScale) {
+    letter(inputChar), rank(inputRank), cartanSymmetricInverseScale(inputScale) {
 
   }
   int getRootSystemSize() const;
   int getLieAlgebraDimension() const {
-    return this->getRootSystemSize() + this->theRank;
+    return this->getRootSystemSize() + this->rank;
   }
   void makeArbitrary(
     char inputLetter,
@@ -5706,18 +5704,18 @@ class DynkinSimpleType {
   void getG2(Matrix<Rational>& output) const;
   void grow(List<DynkinSimpleType>& output, List<List<int> >* outputPermutationRoots) const;
   void operator=(const DynkinSimpleType& other) {
-    this->theLetter = other.theLetter;
-    this->theRank = other.theRank;
-    this->CartanSymmetricInverseScale = other.CartanSymmetricInverseScale;
+    this->letter = other.letter;
+    this->rank = other.rank;
+    this->cartanSymmetricInverseScale = other.cartanSymmetricInverseScale;
   }
   bool operator==(const DynkinSimpleType& other) const {
     return
-    this->theLetter == other.theLetter && this->theRank == other.theRank &&
-    this->CartanSymmetricInverseScale == other.CartanSymmetricInverseScale;
+    this->letter == other.letter && this->rank == other.rank &&
+    this->cartanSymmetricInverseScale == other.cartanSymmetricInverseScale;
   }
   static unsigned int hashFunction(const DynkinSimpleType& input) {
-    return static_cast<unsigned int>(input.theLetter) * 2 +
-    static_cast<unsigned int>(input.theRank) + someRandomPrimes[0] * input.CartanSymmetricInverseScale.hashFunction();
+    return static_cast<unsigned int>(input.letter) * 2 +
+    static_cast<unsigned int>(input.rank) + someRandomPrimes[0] * input.cartanSymmetricInverseScale.hashFunction();
   }
   unsigned int hashFunction() const {
     return this->hashFunction(*this);
@@ -5744,7 +5742,7 @@ class DynkinSimpleType {
   }
   bool hasPrecomputedSubalgebras() const;
   Rational getRatioLongRootToFirst() const {
-    return this->getRatioLongRootToFirst(this->theLetter, this->theRank);
+    return this->getRatioLongRootToFirst(this->letter, this->rank);
   }
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringNonTechnicalName(FormatExpressions* theFormat = nullptr) const;

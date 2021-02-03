@@ -291,7 +291,7 @@ void Polynomial<Coefficient>::setNumberOfVariablesSubstituteDeletedByOne(int new
 
 template <class Coefficient>
 bool Polynomial<Coefficient>::hasSmallIntegralPositivePowers(
-  int* whichtotalDegree
+  int* whichTotalDegree
 ) const {
   int maximum = 0;
   int current = 0;
@@ -301,8 +301,8 @@ bool Polynomial<Coefficient>::hasSmallIntegralPositivePowers(
     }
     maximum = MathRoutines::maximum(maximum, current);
   }
-  if (whichtotalDegree != nullptr) {
-    *whichtotalDegree = maximum;
+  if (whichTotalDegree != nullptr) {
+    *whichTotalDegree = maximum;
   }
   return true;
 }
@@ -1280,7 +1280,7 @@ std::string PolynomialDivisionReport<Coefficient>::getPolynomialStringSpacedMono
       thePoly[theIndex],
       thePoly.coefficients[theIndex],
       found,
-      &this->owner->theFormat
+      &this->owner->format
     );
     found = true;
     if (useHighlightStyle) {
@@ -1304,7 +1304,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringLaTeX() {
   std::stringstream out;
   List<Polynomial<Coefficient> >& theRemainders = this->intermediateRemainders;
   List<Polynomial<Coefficient> >& theSubtracands = this->intermediateSubtractands;
-  this->owner->theFormat.monomialOrder = this->owner->polynomialOrder.monomialOrder;
+  this->owner->format.monomialOrder = this->owner->polynomialOrder.monomialOrder;
   std::string highlightedColor = "red";
   this->allMonomials.addOnTopNoRepetition(this->startingPolynomial.monomials);
   for (int i = 0; i < theRemainders.size; i ++) {
@@ -1316,7 +1316,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringLaTeX() {
   //List<std::string> basisColorStyles;
   //basisColorStyles.setSize(this->theBasis.size);
   this->allMonomials.quickSortDescending(&this->owner->polynomialOrder.monomialOrder);
-  this->owner->theFormat.flagUseLatex = true;
+  this->owner->format.flagUseLatex = true;
   out << this->owner->toStringLetterOrder(true);
   out << theRemainders.size << " division steps total.";
   out << "\\renewcommand{\\arraystretch}{1.2}";
@@ -1335,12 +1335,12 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringLaTeX() {
   out << "\\textbf{Divisor(s)} &" << "\\multicolumn{"
   << this->allMonomials.size << "}{|c|}{\\textbf{Quotient(s)}}"
   << "\\\\";
-  for (int i = 0; i < this->owner->theBasis.size; i ++) {
+  for (int i = 0; i < this->owner->basis.size; i ++) {
     out << "$";
-    out << this->owner->theBasis[i].element.toString(&this->owner->theFormat);
+    out << this->owner->basis[i].element.toString(&this->owner->format);
     out << "$";
     out << "& \\multicolumn{" << this->allMonomials.size << "}{|l|}{";
-    out << "$" << this->owner->theQuotients[i].toString(&this->owner->theFormat) << "$" << "}\\\\\\hline\\hline";
+    out << "$" << this->owner->quotients[i].toString(&this->owner->format) << "$" << "}\\\\\\hline\\hline";
   }
   for (int i = 0; i < theRemainders.size; i ++) {
     if (i < theRemainders.size - 1) {
@@ -1388,12 +1388,12 @@ std::string PolynomialDivisionReport<Coefficient>::getPolynomialStringSpacedMono
     if (useHighlightStyle) {
       out << "<span style ='color:red'>";
     }
-    if (this->owner->theFormat.flagUseLatex) {
+    if (this->owner->format.flagUseLatex) {
       std::string monomialWithCoefficient = Polynomial<Coefficient>::getBlendCoefficientAndMonomial(
         thePoly[theIndex],
         thePoly.coefficients[theIndex],
         found,
-        &this->owner->theFormat
+        &this->owner->format
       );
 
       out << HtmlRoutines::getMathNoDisplay(monomialWithCoefficient);
@@ -1402,7 +1402,7 @@ std::string PolynomialDivisionReport<Coefficient>::getPolynomialStringSpacedMono
         thePoly[theIndex],
         thePoly.coefficients[theIndex],
         found,
-        &this->owner->theFormat
+        &this->owner->format
       );
     }
     found = true;
@@ -1432,7 +1432,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
   std::stringstream out;
   List<Polynomial<Coefficient> >& theRemainders = this->intermediateRemainders;
   List<Polynomial<Coefficient> >& theSubtracands = this->intermediateSubtractands;
-  this->owner->theFormat.monomialOrder = this->owner->polynomialOrder.monomialOrder;
+  this->owner->format.monomialOrder = this->owner->polynomialOrder.monomialOrder;
   std::string underlineStyle = " style ='white-space: nowrap; border-bottom:1px solid black;'";
   this->allMonomials.clear();
   this->allMonomials.addOnTopNoRepetition(this->startingPolynomial.monomials);
@@ -1457,19 +1457,19 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
   out << "<tr><td style ='border-right:1px solid black;'><b>Divisor(s)</b></td><td colspan ='"
   << this->allMonomials.size + 1 << "'><b>Quotient(s) </b></td>"
   << "</tr>";
-  FormatExpressions& format = this->owner->theFormat;
-  for (int i = 0; i < this->owner->theBasis.size; i ++) {
+  FormatExpressions& format = this->owner->format;
+  for (int i = 0; i < this->owner->basis.size; i ++) {
     out << "<tr>";
     out << "<td style ='border-right:1px solid black; border-bottom: 1px solid gray;'>";
-    if (this->owner->theFormat.flagUseLatex) {
-      out << HtmlRoutines::getMathNoDisplay(this->owner->theBasis[i].element.toString(&format), - 1);
+    if (this->owner->format.flagUseLatex) {
+      out << HtmlRoutines::getMathNoDisplay(this->owner->basis[i].element.toString(&format), - 1);
     } else {
-      out << this->owner->theBasis[i].element.toString(&format);
+      out << this->owner->basis[i].element.toString(&format);
     }
     out << "</td>";
     out << "<td style ='border-bottom:1px solid gray;' colspan ='"
     << this->allMonomials.size + 1 << "'>";
-    out << HtmlRoutines::getMathNoDisplay(this->owner->theQuotients[i].toString(&format));
+    out << HtmlRoutines::getMathNoDisplay(this->owner->quotients[i].toString(&format));
     out << "</td></tr>";
   }
   out << "</tr>";

@@ -271,6 +271,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     CalculatorFunctions::innerIsNilpotent,
     "",
     "Computes whether a matrix is nilpotent. "
+    "Recall an object X is nilpotent if there's a positive N with X^N=0. "
     "May/will be extended to work for an arbitrary object "
     "for which the term \"nilpotent\" makes sense. ",
     "isNilpotent{}((0, 1), (0, 0))",
@@ -304,7 +305,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "Therefore a solution over the complex numbers "
     "exists. However, no such solution was found. <br>"
     "Outcome 4. A solution was found and is presented to the user.",
-    "FindOneSolutionSerreLikePolynomialSystem{}("
+    "FindOneSolutionSerreLikePolynomialSystem{}(\n"
     "x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+ 1, "
     "x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21}, "
     "x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21}, "
@@ -335,8 +336,11 @@ void Calculator::initializeFunctionsScientificBasic() {
     "",
     "Same as FindOneSolutionSerreLikePolynomialSystem "
     "but the first argument gives upper limits "
-    "to the number of polynomial computations that can be carried out. ",
-    "FindOneSolutionSerreLikePolynomialSystemUpperLimit{}( 301, "
+    "to the number of polynomial computations that can be carried out, "
+    "and the second number the number of monomial computations. ",
+    "FindOneSolutionSerreLikePolynomialSystemUpperLimit{}(\n"
+    "100,"
+    "10000,\n"
     "x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+ 1, "
     "x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21}, "
     "x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21}, "
@@ -365,7 +369,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "FindOneSolutionSerreLikePolynomialSystemAlgebraic",
     CalculatorFunctions::innerSolveSerreLikeSystemAlgebraic,
     "",
-    "Same as findOneSolutionSerreLikePolynomialSystem "
+    "Same as FindOneSolutionSerreLikePolynomialSystem "
     "but starts directly over algebraic closure. ",
     "FindOneSolutionSerreLikePolynomialSystemAlgebraic"
     "(x^2 + 1, y x z - 1, z^2 x + y - 1, w u)",
@@ -379,9 +383,11 @@ void Calculator::initializeFunctionsScientificBasic() {
     "",
     "Same as FindOneSolutionSerreLikePolynomialSystemAlgebraic "
     "but the first argument gives upper limits to the number of "
-    "polynomial computations that can be carried out.",
-    "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"
-    "(10000, x^2+ 1, y x z - 1, z^2 x +y - 1, w u)",
+    "polynomial computations that can be carried out, and the second argument "
+    "gives upper limit to the number of monomial computations. ",
+    "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit(\n"
+    "10000,10000,\n"
+    "x^2+ 1, y x z - 1, z^2 x +y - 1, w u)",
     "CalculatorFunctions::innerSolveSerreLikeSystemAlgebraicUpperLimit",
     "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit",
     innerStandard

@@ -825,7 +825,7 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
     }
   }
   // so far we made sure the entire component is one properly ordered string, starting with the long root.
-  if (outputType.theLetter == 'G' || outputType.theLetter == 'C' ) {
+  if (outputType.letter == 'G' || outputType.letter == 'C' ) {
     currentComponent.reverseElements(); // <-in G_2 and C_n the short root comes first so we need to reverse elements.
   }
 }
@@ -937,7 +937,7 @@ Rational DynkinDiagramRootSubalgebra::getSizeCorrespondingWeylGroupByFormula() {
   Rational output = 1;
   for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
     output *= WeylGroupData::sizeByFormulaOrNegative1(
-      this->simpleComponentTypes[i].theLetter, this->simpleComponentTypes[i].theRank
+      this->simpleComponentTypes[i].letter, this->simpleComponentTypes[i].rank
     );
   }
   return output;
@@ -1027,11 +1027,11 @@ void DynkinDiagramRootSubalgebra::getAutomorphism(List<List<int> >& output, int 
     thePermutation[i] = i;
   }
   output.addOnTop(thePermutation);
-  if (currentStrinG.theLetter == 'A' && currentComponent.size != 1) {
+  if (currentStrinG.letter == 'A' && currentComponent.size != 1) {
     thePermutation.reverseElements();
     output.addOnTop(thePermutation);
   }
-  if (currentStrinG.theLetter == 'D') {
+  if (currentStrinG.letter == 'D') {
     if (currentComponent.size == 4) {
      //the automorphism group of the Dynkin Diagram is S3
       thePermutation[1] = 2;
@@ -1060,7 +1060,7 @@ void DynkinDiagramRootSubalgebra::getAutomorphism(List<List<int> >& output, int 
       output.addOnTop(thePermutation);
     }
   }
-  if (currentStrinG.theLetter == 'E' && currentStrinG.theRank == 6) {
+  if (currentStrinG.letter == 'E' && currentStrinG.rank == 6) {
     thePermutation[1] = 3;
     thePermutation[2] = 4;
     thePermutation[3] = 1;
@@ -1091,16 +1091,16 @@ int DynkinDiagramRootSubalgebra::numberRootsGeneratedByDiagram() {
   }
   for (int i = 0; i < this->simpleComponentTypes.size; i ++) {
     int Rank = this->simpleBasesConnectedComponents[i].size;
-    if (this->simpleComponentTypes[i].theLetter == 'A') {
+    if (this->simpleComponentTypes[i].letter == 'A') {
       result += Rank * (Rank + 1);
     }
-    if (this->simpleComponentTypes[i].theLetter == 'B' || this->simpleComponentTypes[i].theLetter == 'C') {
+    if (this->simpleComponentTypes[i].letter == 'B' || this->simpleComponentTypes[i].letter == 'C') {
       result += Rank * Rank * 2;
     }
-    if (this->simpleComponentTypes[i].theLetter == 'D') {
+    if (this->simpleComponentTypes[i].letter == 'D') {
       result += Rank * (Rank - 1) * 2;
     }
-    if (this->simpleComponentTypes[i].theLetter == 'E') {
+    if (this->simpleComponentTypes[i].letter == 'E') {
       if (Rank == 6) {
         result += 72;
       }
@@ -1111,10 +1111,10 @@ int DynkinDiagramRootSubalgebra::numberRootsGeneratedByDiagram() {
         result += 240;
       }
     }
-    if (this->simpleComponentTypes[i].theLetter == 'F') {
+    if (this->simpleComponentTypes[i].letter == 'F') {
       result += 48;
     }
-    if (this->simpleComponentTypes[i].theLetter == 'G') {
+    if (this->simpleComponentTypes[i].letter == 'G') {
       result += 12;
     }
   }

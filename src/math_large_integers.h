@@ -187,10 +187,10 @@ public:
 class LargeInteger {
   friend class Rational;
   friend LargeInteger operator*(const LargeInteger& left, const LargeInteger& right) {
-    LargeInteger tempI;
-    tempI = left;
-    tempI *= right;
-    return tempI;
+    LargeInteger result;
+    result = left;
+    result *= right;
+    return result;
   }
   friend bool operator<(int left, const LargeInteger& right) {
     LargeInteger leftCopy = left;
@@ -259,10 +259,10 @@ public:
   void assignInt64(int64_t x);
   void assignUInt64(uint64_t x);
   void addLargeIntUnsigned(const LargeIntegerUnsigned& x);
-  inline void addInt(int x) {
-    LargeInteger tempInt;
-    tempInt.assignInteger(x);
-    *this += (tempInt);
+  void addInt(int x) {
+    LargeInteger converted;
+    converted.assignInteger(x);
+    *this += converted;
   }
   //bool IsGEQ(LargeInt& x);
   bool checkConsistensy();

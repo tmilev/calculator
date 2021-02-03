@@ -4135,7 +4135,7 @@ bool ConeRelation::IsStrictlyWeaklyProhibiting(
   if (this->theDiagram.toString() == "F^{1}_4") {
     return false;
   }
-  if (this->theDiagram.simpleComponentTypes[0].theLetter == 'A' && this->theDiagram.simpleComponentTypes[0].theRank == 1) {
+  if (this->theDiagram.simpleComponentTypes[0].letter == 'A' && this->theDiagram.simpleComponentTypes[0].rank == 1) {
    //  global.fatal << global.fatal;
   }
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms tempSubgroup;
@@ -4182,8 +4182,8 @@ void ConeRelation::makeLookCivilized(RootSubalgebra& owner) {
   tempRoots.addListOnTop(this->Betas);
   this->theDiagram.computeDiagramTypeModifyInput(tempRoots, owner.getAmbientWeyl());
   if (
-    this->theDiagram.simpleComponentTypes[0].theLetter == 'A' &&
-    this->theDiagram.simpleComponentTypes[0].theRank == 1
+    this->theDiagram.simpleComponentTypes[0].letter == 'A' &&
+    this->theDiagram.simpleComponentTypes[0].rank == 1
   ) {
     this->computeDiagramRelationsAndK(owner);
     global.fatal << "Failed to compute diagram relation and k. " << global.fatal;

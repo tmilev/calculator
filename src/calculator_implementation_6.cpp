@@ -771,13 +771,13 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   List<std::string> lowLeftStrings, upRightStrings;
   lowLeft.toListStringsBasicType(lowLeftStrings);
   upRight.toListStringsBasicType(upRightStrings);
-  thePlotObj.theVarRangesJS.setSize(2);
-  thePlotObj.theVarRangesJS[0].setSize(2);
-  thePlotObj.theVarRangesJS[1].setSize(2);
-  thePlotObj.theVarRangesJS[0][0] = lowLeftStrings[0];
-  thePlotObj.theVarRangesJS[0][1] = upRightStrings[0];
-  thePlotObj.theVarRangesJS[1][0] = lowLeftStrings[1];
-  thePlotObj.theVarRangesJS[1][1] = upRightStrings[1];
+  thePlotObj.variableRangesJS.setSize(2);
+  thePlotObj.variableRangesJS[0].setSize(2);
+  thePlotObj.variableRangesJS[1].setSize(2);
+  thePlotObj.variableRangesJS[0][0] = lowLeftStrings[0];
+  thePlotObj.variableRangesJS[0][1] = upRightStrings[0];
+  thePlotObj.variableRangesJS[1][0] = lowLeftStrings[1];
+  thePlotObj.variableRangesJS[1][1] = upRightStrings[1];
   thePlotObj.manifoldImmersion = input[1];
   Expression jsConverterE;
   if (input.size() >= 6) {
@@ -820,7 +820,7 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
     << "<hr>Could not extract a list of elements for the "
     << "number of segments from: " << input[4].toString();
   }
-  thePlotObj.numSegmenTsJS.setSize(2);
+  thePlotObj.numberOfSegmentsJS.setSize(2);
   for (int i = 0; i < 2; i ++) {
     if (!CalculatorFunctions::functionMakeJavascriptExpression(
       calculator, input[4][i + 1], jsConverterE
@@ -828,7 +828,7 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
       return calculator << "Failed to convert "
       << input[4][i + 1].toString() << " to javascript. ";
     }
-    thePlotObj.numSegmenTsJS[i] = jsConverterE.toString();
+    thePlotObj.numberOfSegmentsJS[i] = jsConverterE.toString();
   }
   input.hasInputBoxVariables(&thePlotObj.parametersInPlay, &thePlotObj.parametersInPlayJS);
   thePlot.addPlotOnTop(thePlotObj);
@@ -2721,22 +2721,32 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
   if (!global.response.monitoringAllowed()) {
     global.response.initiate("Triggered by precomputeSemisimpleLieAlgebraStructure.");
   }
-  (void) input;
-  List<DynkinType> theTypes;
-  DynkinType::getPrecomputedDynkinTypes(theTypes);
+  if (!global.userDefaultHasAdminRights()) {
+    return calculator
+    << "Function CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure "
+    << "requires administrator access. "
+    << "To get one, install the calculator on your machine.";
+  }
+  int startingIndex = 0;
+  if (!input[1].isSmallInteger(&startingIndex)) {
+    return calculator << "Argument of precomputeSemisimpleLieAlgebraStructure not a small integer.";
+  }
+  List<DynkinType> allTypes;
+  DynkinType::getPrecomputedDynkinTypes(allTypes);
   ProgressReport report;
   std::stringstream out;
-  int lastIndexPlusOne = theTypes.size;
-  //lastIndexPlusOne = 1;
   out << "Generated structure constants, "
   << "root subalgebras and sl(2) subalgebras for the following. ";
-  for (int i = 0; i < lastIndexPlusOne; i ++) {
+  if (startingIndex <= 0) {
+    startingIndex = 0;
+  }
+  for (int i = startingIndex; i < allTypes.size; i ++) {
     std::stringstream reportStream;
     reportStream << "Computing structure of subalgebra "
-    << theTypes[i].toString() << " (" << i + 1 << " out of " << theTypes.size << ").";
+    << allTypes[i].toString() << " (" << i + 1 << " out of " << allTypes.size << ").";
     report.report(reportStream.str());
     SemisimpleLieAlgebra algebra;
-    algebra.weylGroup.makeFromDynkinType(theTypes[i]);
+    algebra.weylGroup.makeFromDynkinType(allTypes[i]);
     algebra.computeChevalleyConstants();
     algebra.writeHTML(true, false);
     SlTwoSubalgebras theSl2s(algebra);
@@ -2744,7 +2754,7 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
     algebra.findSl2Subalgebras(algebra, theSl2s);
     theSl2s.writeHTML();
     algebra.writeHTML(true, false);
-    if (theTypes[i].hasPrecomputedSubalgebras()) {
+    if (allTypes[i].hasPrecomputedSubalgebras()) {
       SemisimpleSubalgebras theSubalgebras;
       MapReferences<DynkinType, SemisimpleLieAlgebra> subalgebrasContainer;
       ListReferences<SlTwoSubalgebras> sl2Conainer;
@@ -2762,11 +2772,11 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
         false,
         true
       )) {
-        out << "Failed to compute " << theTypes[i].toString();
+        out << "Failed to compute " << allTypes[i].toString();
       }
     }
-    out << theTypes[i].toString();
-    if (i != theTypes.size - 1) {
+    out << allTypes[i].toString();
+    if (i != allTypes.size - 1) {
       out << ", ";
     }
   }

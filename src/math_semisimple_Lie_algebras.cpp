@@ -265,9 +265,9 @@ std::string SemisimpleLieAlgebra::toHTML(
   out << "</table>";
   DynkinSimpleType tempSimpleType;
   if (theWeyl.dynkinType.isSimple(
-    &tempSimpleType.theLetter, &tempSimpleType.theRank, &tempSimpleType.CartanSymmetricInverseScale
+    &tempSimpleType.letter, &tempSimpleType.rank, &tempSimpleType.cartanSymmetricInverseScale
   )) {
-    if (tempSimpleType.CartanSymmetricInverseScale == 1) {
+    if (tempSimpleType.cartanSymmetricInverseScale == 1) {
       Matrix<Rational> tempM, tempM2;
       theWeyl.dynkinType.getEpsilonMatrix(tempM);
       tempM2 = tempM;

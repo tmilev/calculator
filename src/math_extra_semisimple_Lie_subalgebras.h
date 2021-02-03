@@ -101,14 +101,14 @@ class CandidateSemisimpleSubalgebra {
 
 public:
   WeylGroupData* weylNonEmbedded;
-  SemisimpleLieAlgebra* theSubalgebraNonEmbeddedDefaultScale;
-  DynkinDiagramRootSubalgebra theCentralizerSubDiagram;
+  SemisimpleLieAlgebra* subalgebraNonEmbeddedDefaultScale;
+  DynkinDiagramRootSubalgebra centralizerSubDiagram;
   DynkinType theCentralizerType;
 
   List<Vectors<Rational> > cartanSubalgebrasByComponentScaledToActByTwo;
-  List<AlgebraicNumber> RatioKillingsByComponent;
-  Vectors<Rational> theHsScaledToActByTwo;
-  Vectors<Rational> theHs;
+  List<AlgebraicNumber> ratiosKillingsByComponent;
+  Vectors<Rational> cartanElementsScaledToActByTwo;
+  Vectors<Rational> cartanElementsSubalgebra;
   Vectors<Rational> theHsScaledToActByTwoInOrderOfCreation;
   Matrix<Rational> bilinearFormSimplePrimal;
   Matrix<Rational> bilinearFormFundPrimal;
@@ -116,24 +116,24 @@ public:
   Matrix<Rational> inducedEmbeddingPrimalFundCoordsIntoFundAmbientCoords;
   Matrix<Rational> matMultiplyFundCoordsToGetSimple;
 
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > thePosGens;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNegGens;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > positiveGenerators;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > negativeGenerators;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theBasis;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > fullBasisByModules;
   List<int> fullBasisOwnerModules;
-  List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > theUnknownPosGens;
-  List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > theUnknownNegGens;
+  List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > unknownPositiveGenerators;
+  List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > unknownNegativeGenerators;
   List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > theUnknownCartanCentralizerBasis;
 
 //  Vector<Rational> aSolution;
-  List<List<ChevalleyGenerator> > theInvolvedPosGenerators;
-  List<List<ChevalleyGenerator> > theInvolvedNegGenerators;
-  CharacterSemisimpleLieAlgebraModule<Rational> theCharFundamentalCoordsRelativeToCartan;
-  CharacterSemisimpleLieAlgebraModule<Rational> theCharNonPrimalFundCoords;
+  List<List<ChevalleyGenerator> > involvedPositiveGenerators;
+  List<List<ChevalleyGenerator> > involvedNegativeGenerators;
+  CharacterSemisimpleLieAlgebraModule<Rational> characterFundamentalCoordinatesRelativeToCartan;
+  CharacterSemisimpleLieAlgebraModule<Rational> characterNonPrimalFundamentalCoordinates;
   CharacterSemisimpleLieAlgebraModule<Rational> primalCharacter;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
   Vectors<Rational> CartanOfCentralizer;
-  List<Polynomial<AlgebraicNumber> > theSystemToSolve;
+  List<Polynomial<AlgebraicNumber> > systemToSolve;
   List<Polynomial<AlgebraicNumber> > transformedSystem;
   SemisimpleSubalgebras* owner;
   int indexInOwner;
@@ -145,7 +145,7 @@ public:
   int indexMaxSSContainer;
   int indexSSPartCentralizer;
   List<int> indicesDirectSummandSuperAlgebra;
-  MemorySaving<FormatExpressions> charFormaT;
+  MemorySaving<FormatExpressions> characterFormat;
   bool flagSubalgebraPreloadedButNotVerified;
   bool flagSystemSolved;
   bool flagSystemProvedToHaveNoSolution;
@@ -230,9 +230,9 @@ public:
   bool amRegularSA() const;
   bool compareLeftGreaterThanRight(const Vector<Rational>& left, const Vector<Rational>& right);
   void getGenericLinearCombination(
-    int numVars,
-    int varOffset,
-    List<ChevalleyGenerator>& involvedGens,
+    int numberOfVariables,
+    int variableOffset,
+    List<ChevalleyGenerator>& involvedGenerators,
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
   );
   void getGenericLinearCombinationInvolvedPosGens(
@@ -326,6 +326,7 @@ public:
   bool computeSystemPart2(bool AttemptToChooseCentalizer, bool allowNonPolynomialSystemFailure);
   bool computeCharacter(bool allowBadCharacter);
   bool attemptToSolveSystem();
+  bool verifySolution(PolynomialSystem<AlgebraicNumber>& system);
   bool isGoodHNewActingByTwo(
     const Vector<Rational>& HNewActingByTwo,
     const List<int>& theRootInjections
@@ -362,7 +363,7 @@ public:
   SemisimpleLieAlgebra* owner;
   AlgebraicClosureRationals* ownerField;
   DynkinType targetDynkinType;
-  SlTwoSubalgebras theSl2s;
+  SlTwoSubalgebras slTwoSubalgebras;
   MapReferences<DynkinType, SemisimpleLieAlgebra>* subalgebrasNonEmbedded;
   MapReferences<Matrix<Rational>, SemisimpleLieAlgebra> subalgebrasNonDefaultCartanAndScale;
   List<List<Rational> > cachedDynkinIndicesSl2subalgebrasSimpleTypes;

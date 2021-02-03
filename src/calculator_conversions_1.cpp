@@ -255,13 +255,13 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
 bool CalculatorConversions::innerExpressionFromDynkinSimpleType(
   Calculator& calculator, const DynkinSimpleType& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerExpressionFromDynkinSimpleType");
+  MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromDynkinSimpleType");
   Expression letterE, rankE, letterAndIndexE, indexE;
   std::string letterS;
-  letterS = input.theLetter;
+  letterS = input.letter;
   letterE.makeAtom(calculator.addOperationNoRepetitionOrReturnIndexFirst(letterS), calculator);
-  indexE.assignValue(input.CartanSymmetricInverseScale, calculator);
-  rankE.assignValue(input.theRank, calculator);
+  indexE.assignValue(input.cartanSymmetricInverseScale, calculator);
+  rankE.assignValue(input.rank, calculator);
   letterAndIndexE.makeXOX(calculator, calculator.opThePower(), letterE, indexE);
   return output.makeXOX(calculator, calculator.opUnderscore(), letterAndIndexE, rankE);
 }
@@ -269,10 +269,10 @@ bool CalculatorConversions::innerExpressionFromDynkinSimpleType(
 bool CalculatorConversions::innerStoreSemisimpleLieAlgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  if (!input.isOfType<SemisimpleLieAlgebra*>()) {
+  if (!input[1].isOfType<SemisimpleLieAlgebra*>()) {
     return output.makeError("Asking to store non-semisimple Lie algebra as such is not allowed. ", calculator);
   }
-  SemisimpleLieAlgebra* owner = input.getValueNonConst<SemisimpleLieAlgebra*>();
+  SemisimpleLieAlgebra* owner = input[1].getValueNonConst<SemisimpleLieAlgebra*>();
   return CalculatorConversions::innerExpressionFromDynkinType(calculator, owner->weylGroup.dynkinType, output);
 }
 
@@ -358,7 +358,7 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
   DynkinType& theType = output.owner->weylGroup.dynkinType;
   SemisimpleSubalgebras& ownerSubalgebras =
   calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(theType);
-  output.container = &ownerSubalgebras.theSl2s;
+  output.container = &ownerSubalgebras.slTwoSubalgebras;
   return true;
 }
 
@@ -471,20 +471,20 @@ bool CalculatorConversions::innerStoreCandidateSubalgebra(
   keys.addOnTop("DynkinType");
   values.addOnTop(currentE);
   Matrix<Rational> conversionMat;
-  conversionMat.assignVectorsToRows(input.theHsScaledToActByTwo);
+  conversionMat.assignVectorsToRows(input.cartanElementsScaledToActByTwo);
   currentE.assignMatrix(conversionMat, calculator, nullptr, false);
   keys.addOnTop("ElementsCartan");
   values.addOnTop(currentE);
   if (input.flagSystemSolved) {
     Expression listGenerators;
     listGenerators.makeSequence(calculator);
-    for (int i = 0; i < input.theNegGens.size; i ++) {
+    for (int i = 0; i < input.negativeGenerators.size; i ++) {
       CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(
-        calculator, input.theNegGens[i], currentE
+        calculator, input.negativeGenerators[i], currentE
       );
       listGenerators.addChildOnTop(currentE);
       CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(
-        calculator, input.thePosGens[i], currentE
+        calculator, input.positiveGenerators[i], currentE
       );
       listGenerators.addChildOnTop(currentE);
     }
@@ -562,8 +562,8 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
   }
   reportStream << "Extracting generators ... ";
   theReport.report(reportStream.str());
-  outputSubalgebra.thePosGens.setSize(0);
-  outputSubalgebra.theNegGens.setSize(0);
+  outputSubalgebra.positiveGenerators.setSize(0);
+  outputSubalgebra.negativeGenerators.setSize(0);
   if (CalculatorConversions::innerLoadKey(calculator, input, "generators", generatorsE)) {
     generatorsE.sequencefy();
     ElementSemisimpleLieAlgebra<AlgebraicNumber> curGenAlgebraic;
@@ -575,9 +575,9 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
         << generatorsE[i].toString() << ". ";
       }
       if (i % 2 == 1) {
-        outputSubalgebra.theNegGens.addOnTop(curGenAlgebraic);
+        outputSubalgebra.negativeGenerators.addOnTop(curGenAlgebraic);
       } else {
-        outputSubalgebra.thePosGens.addOnTop(curGenAlgebraic);
+        outputSubalgebra.positiveGenerators.addOnTop(curGenAlgebraic);
       }
     }
     outputSubalgebra.flagSystemProvedToHaveNoSolution = false;
@@ -684,14 +684,14 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     }
 
     currentCandidate.checkFullInitialization();
-    if (theSAs.subalgebras.contains(currentCandidate.theHs)) {
+    if (theSAs.subalgebras.contains(currentCandidate.cartanElementsSubalgebra)) {
       calculator << "<hr>Did not load subalgebra of type "
       << currentCandidate.weylNonEmbedded->toString()
       << " because I've already loaded a subalgebra with "
       << "the same Cartan subalgebra. ";
       continue;
     }
-    theSAs.subalgebras.setKeyValue(currentCandidate.theHs, currentCandidate);
+    theSAs.subalgebras.setKeyValue(currentCandidate.cartanElementsSubalgebra, currentCandidate);
     theSAs.subalgebras.values.lastObject().indexInOwner = theSAs.subalgebras.values.size - 1;
   }
   reportStream << "Subalgebra loading done, total "

@@ -93,25 +93,25 @@ bool Calculator::getListPolynomialVariableLabelsLexicographic(
 }
 
 bool DynkinSimpleType:: hasPrecomputedSubalgebras() const {
-  if (this->theLetter == 'F') {
+  if (this->letter == 'F') {
     return true;
   }
-  if (this->theLetter == 'G') {
+  if (this->letter == 'G') {
     return true;
   }
-  if (this->theLetter == 'A' && this->theRank <= 6) {
+  if (this->letter == 'A' && this->rank <= 6) {
     return true;
   }
-  if (this->theLetter == 'B' && this->theRank <= 4) {
+  if (this->letter == 'B' && this->rank <= 4) {
     return true;
   }
-  if (this->theLetter == 'D' && this->theRank <= 4) {
+  if (this->letter == 'D' && this->rank <= 4) {
     return true;
   }
-  if (this->theLetter == 'C' && this->theRank <= 5) {
+  if (this->letter == 'C' && this->rank <= 5) {
     return true;
   }
-  if (this->theLetter == 'E' && this->theRank == 6) {
+  if (this->letter == 'E' && this->rank == 6) {
     return true;
   }
   return false;
@@ -165,12 +165,12 @@ std::string Calculator::toStringSemismipleLieAlgebraLinksFromHD(
   << folderComputer.toStringDisplayFolderName(prefixFolder)
   << folderComputer.toStringFileNameNoPathStructureConstants()
   << "'>"
-  << dynkinType[0].theLetter << dynkinType[0].theRank << " structure constants</a></td>\n ";
+  << dynkinType[0].letter << dynkinType[0].rank << " structure constants</a></td>\n ";
   if (dynkinType[0].hasPrecomputedSubalgebras()) {
     out << "<td><a href='"
     << folderComputer.toStringDisplayFolderName(prefixFolder) << folderComputer.toStringFileNameNoPathSemisimpleSubalgebras()
     << "'>"
-    << dynkinType[0].theLetter << dynkinType[0].theRank << " semisimple subalgebras</a>";
+    << dynkinType[0].letter << dynkinType[0].rank << " semisimple subalgebras</a>";
     out << "</td>\n ";
   } else {
     out << "<td>Not available</td>\n";
@@ -178,12 +178,12 @@ std::string Calculator::toStringSemismipleLieAlgebraLinksFromHD(
   out << "<td><a href='"
   << folderComputer.toStringDisplayFolderName(prefixFolder)
   << folderComputer.toStringFileNameRelativePathSlTwoSubalgebras() << "'>"
-  << dynkinType[0].theLetter << dynkinType[0].theRank << " sl(2) triples</a></td>\n";
+  << dynkinType[0].letter << dynkinType[0].rank << " sl(2) triples</a></td>\n";
   out << "<td><a href='"
   << folderComputer.toStringDisplayFolderName(prefixFolder)
   << folderComputer.toStringFileNameNoPathRootSubalgebras()
-  << "'>" << dynkinType[0].theLetter
-  << dynkinType[0].theRank << " root subalgebras</a></td>\n";
+  << "'>" << dynkinType[0].letter
+  << dynkinType[0].rank << " root subalgebras</a></td>\n";
   return out.str();
 }
 
@@ -249,7 +249,7 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
       this->findTheSemisimpleSubalgebrasFromScratch(newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras, nullptr);
     }
     this->writeReportToFiles();
-    this->theSl2s.writeHTML();
+    this->slTwoSubalgebras.writeHTML();
     this->owner->writeHTML(true, false);
   } else {
     if (outputStream != nullptr) {
@@ -377,17 +377,17 @@ bool PlotObject::operator==(const PlotObject& other) const {
   this->colorVU                        == other.colorVU                      &&
   this->colorJS                        == other.colorJS                      &&
   this->lineWidthJS                    == other.lineWidthJS                  &&
-  this->numSegmenTsJS                  == other.numSegmenTsJS                &&
-  this->thePointS                      == other.thePointS                    &&
+  this->numberOfSegmentsJS                  == other.numberOfSegmentsJS                &&
+  this->points                      == other.points                    &&
   this->pointsDouble                == other.pointsDouble              &&
-  this->thePointsJS                    == other.thePointsJS                  &&
+  this->pointsJS                    == other.pointsJS                  &&
   this->theRectangles                  == other.theRectangles                &&
   this->plotType                    == other.plotType                  &&
   this->manifoldImmersion              == other.manifoldImmersion            &&
   this->coordinateFunctionsE           == other.coordinateFunctionsE         &&
   this->coordinateFunctionsJS          == other.coordinateFunctionsJS        &&
   this->variablesInPlay                == other.variablesInPlay              &&
-  this->theVarRangesJS                 == other.theVarRangesJS               &&
+  this->variableRangesJS                 == other.variableRangesJS               &&
   this->leftPtE                        == other.leftPtE                      &&
   this->rightPtE                       == other.rightPtE                     &&
   this->paramLowE                      == other.paramLowE                    &&
@@ -625,7 +625,7 @@ std::string PlotObject::toStringDebug() {
   out << "colorVU: " << this->colorVU << "<br>";
   out << "Coord f-ns: " << this->coordinateFunctionsE.toStringCommaDelimited() << "<br>";
   out << "Vars: " << this->variablesInPlay << "<br>";
-  out << "Var ranges: " << this->theVarRangesJS << "<br>";
+  out << "Var ranges: " << this->variableRangesJS << "<br>";
   return out.str();
 }
 
@@ -642,8 +642,8 @@ JSData PlotObject::toJSONCurveImmersionIn3d() {
   std::stringstream curveInstStream;
   result[PlotObject::Labels::variableRange][0] = this->paramLowJS;
   result[PlotObject::Labels::variableRange][1] = this->paramHighJS;
-  if (this->numSegmenTsJS.size > 0) {
-    result[PlotObject::Labels::numberOfSegments] = this->numSegmenTsJS[0];
+  if (this->numberOfSegmentsJS.size > 0) {
+    result[PlotObject::Labels::numberOfSegments] = this->numberOfSegmentsJS[0];
   } else {
     result[PlotObject::Labels::numberOfSegments] = 100;
   }
@@ -661,12 +661,12 @@ JSData PlotObject::toJSONSurfaceImmersion() {
   } else {
     result["error"] = "wrong number of coordinates";
   }
-  result[PlotObject::Labels::variableRange] = this->theVarRangesJS;
-  if (this->numSegmenTsJS.size <= 1) {
+  result[PlotObject::Labels::variableRange] = this->variableRangesJS;
+  if (this->numberOfSegmentsJS.size <= 1) {
     result[PlotObject::Labels::numberOfSegments][0] = 22;
     result[PlotObject::Labels::numberOfSegments][1] = 4;
   } else {
-    result[PlotObject::Labels::numberOfSegments] = this->numSegmenTsJS;
+    result[PlotObject::Labels::numberOfSegments] = this->numberOfSegmentsJS;
   }
   result[PlotObject::Labels::colorContour] = "black";
   if (this->colorUV != "") {
@@ -728,8 +728,8 @@ JSData PlotObject::coordinateFunction(int index) {
 }
 
 void PlotObject::writeColorWidthSegments(JSData& output) {
-  if (this->numSegmenTsJS.size > 0) {
-    output[PlotObject::Labels::numberOfSegments] = this->numSegmenTsJS[0];
+  if (this->numberOfSegmentsJS.size > 0) {
+    output[PlotObject::Labels::numberOfSegments] = this->numberOfSegmentsJS[0];
   } else {
     output[PlotObject::Labels::numberOfSegments] = 200;
   }
@@ -792,9 +792,9 @@ JSData PlotObject::toJSONDirectionFieldInTwoDimensions() {
   JSData variableRange = JSData::makeEmptyArray();
   for (int i = 0; i < 2; i ++) {
     JSData currentRange = JSData::makeEmptyArray();
-    for (int j = 0; j < this->theVarRangesJS.size; j ++) {
-      if (i < this->theVarRangesJS[j].size) {
-        currentRange[j] = this->theVarRangesJS[j][i];
+    for (int j = 0; j < this->variableRangesJS.size; j ++) {
+      if (i < this->variableRangesJS[j].size) {
+        currentRange[j] = this->variableRangesJS[j][i];
       } else {
         currentRange[j] = "bad_variable_range";
       }
@@ -803,8 +803,8 @@ JSData PlotObject::toJSONDirectionFieldInTwoDimensions() {
   }
   result[PlotObject::Labels::variableRange] = variableRange;
   JSData segmentRange = JSData::makeEmptyArray();
-  for (int i = 0; i < this->numSegmenTsJS.size; i ++) {
-    segmentRange[i] = this->numSegmenTsJS[i];
+  for (int i = 0; i < this->numberOfSegmentsJS.size; i ++) {
+    segmentRange[i] = this->numberOfSegmentsJS[i];
   }
   result[PlotObject::Labels::numberOfSegments] = segmentRange;
   result[PlotObject::Labels::defaultLength] = this->defaultLengthJS;
@@ -901,10 +901,10 @@ JSData PlotObject::toJSONPoints() {
   MacroRegisterFunctionWithName("PlotSurfaceIn3d::toJSONPoints");
   JSData result;
   JSData points = JSData::makeEmptyArray();
-  for (int i = 0; i < this->thePointsJS.numberOfRows; i ++) {
+  for (int i = 0; i < this->pointsJS.numberOfRows; i ++) {
     JSData onePoint = JSData::makeEmptyArray();
-    for (int j = 0; j < this->thePointsJS.numberOfColumns; j ++) {
-      onePoint[j] = this->thePointsJS(i, j);
+    for (int j = 0; j < this->pointsJS.numberOfColumns; j ++) {
+      onePoint[j] = this->pointsJS(i, j);
     }
     points[i] = onePoint;
   }

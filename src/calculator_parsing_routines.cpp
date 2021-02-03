@@ -146,7 +146,6 @@ void Calculator::reset() {
   this->flagDisplayContext = false;
   this->evaluatedExpressionsStack.clear();
   this->theCruncherIds.clear();
-  this->theCruncherS.setSize(0);
   this->syntaxErrors = "";
   this->evaluationErrors.setSize(0);
   this->currentSyntacticStack = &this->syntacticStack;

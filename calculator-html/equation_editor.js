@@ -2797,20 +2797,35 @@ class EquationEditor {
   }
 
   copyToClipboard() {
-    let latexWithAnnotation = this.rootNode.toLatexWithAnnotation(null);
     let toBeCopied = "";
-    if (latexWithAnnotation.selectionStart === - 1 || latexWithAnnotation.selectionEnd === - 1) {
+    if (this.selectionEndExpanded.element === null || this.selectionStartExpanded.element === null) {
+      let latexWithAnnotation = this.rootNode.toLatexWithAnnotation(null);
       toBeCopied = latexWithAnnotation.latex;
     } else {
-      let start = latexWithAnnotation.selectionStart;
-      let end = latexWithAnnotation.selectionEnd;
-      if (start > end) {
-        let original = start;
-        start = end;
-        end = original;
+      let left = this.selectionStartExpanded.element;
+      let right = this.selectionEndExpanded.element;
+      if (right.isToTheLeftOf(left)) {
+        let copy = right;
+        right = left;
+        left = copy;
       }
-      let sliced = latexWithAnnotation.latex.slice(start, end);
-      toBeCopied = sliced;
+      left = left.beefUpToHorizontalParent();
+      right = right.beefUpToHorizontalParent();
+      /**@type {string[]} */
+      let latexContent = [];
+      /**@type {MathNode} */
+      let current = left;
+      for (; ;) {
+        latexContent.push(current.toLatexWithAnnotation(null).latex);
+        if (current === right) {
+          break;
+        }
+        current = current.horizontalSibling(1);
+        if (current === null) {
+          break;
+        }
+      }
+      toBeCopied = latexContent.join("");
     }
     this.lastCopied = toBeCopied;
     navigator.clipboard.writeText(toBeCopied);
@@ -4438,6 +4453,30 @@ class MathNode {
       return "";
     }
     return this.textContentOrInitialContent();
+  }
+
+  /** @returns {boolean} */
+  isAtomicNonEmptyOrHorizontalMathWithNonEmptyAtomic() {
+    if (this.isAtomic()) {
+      return this.contentIfAtomic() !== "";
+    }
+    if (this.type.type !== knownTypes.horizontalMath.type) {
+      return false;
+    }
+    let numberOfAtomicNonEmpty = 0;
+    for (let i = 0; i < this.children.length; i++) {
+      let child = this.children[i];
+      if (!child.isAtomic()) {
+        return false;
+      }
+      if (child.contentIfAtomic() !== "") {
+        numberOfAtomicNonEmpty++;
+        if (numberOfAtomicNonEmpty > 1) {
+          return false;
+        }
+      }
+    }
+    return numberOfAtomicNonEmpty === 1;
   }
 
   /** @returns {boolean} */
@@ -8038,7 +8077,15 @@ class MathNodeBaseWithSubscript extends MathNode {
     /**@type{ToLatexOptions|null} */
     options,
   ) {
-    return new LatexWithAnnotation(`{${this.children[0].toLatex()}}_{${this.children[1].toLatex()}}`, - 1, - 1);
+    let result = null;
+    let numerator = this.children[0].toLatexWithAnnotation(options);
+    let denominator = this.children[1].toLatexWithAnnotation(options);
+    if (this.children[0].isAtomicNonEmptyOrHorizontalMathWithNonEmptyAtomic()) {
+      result = new LatexWithAnnotation(`${numerator.latex}_{${denominator.latex}}`, - 1, - 1);
+    } else {
+      result = new LatexWithAnnotation(`{${numerator.latex}}_{${denominator.latex}}`, - 1, - 1);
+    }
+    return result;
   }
 
   applyBackspaceToTheRight() {

@@ -61,7 +61,7 @@ void TransportLayerSecurityOpenSSL::initSSLLibrary() {
   if (commentsOnError.str() != "") {
     global << Logger::red << "OpenSSL initialization comments: " << Logger::blue << commentsOnError.str() << Logger::endL;
   }
-  TransportLayerSecurityOpenSSL::methodGlobal = TLS_method();
+  TransportLayerSecurityOpenSSL::methodGlobal = SSLv23_method();
   TransportLayerSecurityOpenSSL::contextGlobal = SSL_CTX_new(
     TransportLayerSecurityOpenSSL::methodGlobal
   );

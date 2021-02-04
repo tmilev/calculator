@@ -116,6 +116,13 @@ class SolverSocratic {
     anchor.textContent = text;
     let encoded = encodeURIComponent(text);
     anchor.setAttribute("href", `https://bloom-autopush.sandbox.google.com/math/solver?q=${encoded}`);
+    let anchorThisPage = document.getElementById(ids.domElements.pages.solveSocratic.anchorThisPage);
+    if (text === "") {
+      anchorThisPage.style.display = "hidden";
+    } else {
+      anchorThisPage.style.display = "";
+    }
+    anchorThisPage.href = window.location;
   }
 }
 

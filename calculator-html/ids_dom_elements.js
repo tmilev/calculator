@@ -21,6 +21,7 @@ let domElements = {
       editorButtonPanel: "editorSolveSocraticButtonPanel",
       input: "inputBoxSolveSocratic",
       div: "divSolveSocraticPage",
+      anchorThisPage: "socraticLinkToThisPage",
       link: "socraticLink",
       editorSolveProblemDebug: "editorSolveProblemSocraticDebug",
     },

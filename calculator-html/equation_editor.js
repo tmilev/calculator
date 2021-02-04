@@ -1612,22 +1612,13 @@ class LaTeXConstants {
   convertUtf16ToLatex(
     /** @type{string} */
     input,
-    /** @type{number} */
-    selectionStart,
-    /** @type{number} */
-    selectionEnd,
     /**@type{number} */
     positionCaret,
   ) {
     this.computeUtf16ToLatexMap();
     let result = [];
-    let lengthSoFar = 0;
-    let startFound = false;
-    let endFound = false;
-
     if (positionCaret === 0) {
       result.push("\\caret ");
-      lengthSoFar += 7;
     }
     for (let i = 0; i < input.length; i++) {
       let current = "";
@@ -1644,21 +1635,11 @@ class LaTeXConstants {
       if (current !== "") {
         result.push(current);
       }
-      if (i === selectionStart && !startFound) {
-        selectionStart = lengthSoFar;
-        startFound = true;
-      }
-      lengthSoFar += current.length;
-      if (i + 1 === selectionEnd && !endFound) {
-        selectionEnd = lengthSoFar;
-        endFound = true;
-      }
       if (i + 1 === positionCaret) {
         result.push("\\caret ");
-        lengthSoFar += 7;
       }
     }
-    return new LatexWithAnnotation(result.join(""), selectionStart, selectionEnd);
+    return new LatexWithAnnotation(result.join(""));
   }
 
   isCharacterReplacingSelection(
@@ -2799,8 +2780,7 @@ class EquationEditor {
   copyToClipboard() {
     let toBeCopied = "";
     if (this.selectionEndExpanded.element === null || this.selectionStartExpanded.element === null) {
-      let latexWithAnnotation = this.rootNode.toLatexWithAnnotation(null);
-      toBeCopied = latexWithAnnotation.latex;
+      toBeCopied = this.rootNode.toLatexWithAnnotation(null).latex;
     } else {
       let left = this.selectionStartExpanded.element;
       let right = this.selectionEndExpanded.element;
@@ -3045,8 +3025,6 @@ class EquationEditor {
       result.push(document.createElement("br"));
       result.push(document.createTextNode(`Last selection action: ${this.lastSelectionAction}`));
     }
-    result.push(document.createElement("br"));
-    result.push(document.createTextNode(`Latex selection: ${latexWithAnnotation.selectionStart}, ${latexWithAnnotation.selectionEnd}`));
     result.push(document.createElement("br"));
     result.push(document.createTextNode(this.toStringSelection()));
     result.push(document.createElement("br"));
@@ -3405,13 +3383,12 @@ class EquationEditor {
     }
     let startAnnotationString = "[expanded selection null]";
     if (this.selectionStartExpanded.element !== null) {
-      let startAnnotation = this.selectionStartExpanded.element.toLatexWithAnnotation(null);
-      startAnnotationString = startAnnotation.toString();
+      startAnnotationString = this.selectionStartExpanded.element.toLatexWithAnnotation(null).latex;
     }
-    let endAnnotation = this.selectionEnd.element.toLatexWithAnnotation(null);
+    let endAnnotationString = this.selectionEnd.element.toLatexWithAnnotation(null).latex;
     let result = `Selection: from: ${this.selectionStartExpanded.toString()} to: ${this.selectionEndExpanded.toString()}.`;
     result += `Actually selected: ${this.selectionStart.toString()} to: ${this.selectionEnd.toString()}.`;
-    result += `Latex from: ${startAnnotationString} to ${endAnnotation.toString()}`;
+    result += `Latex from: ${startAnnotationString} to ${endAnnotationString}`;
     return result;
   }
 
@@ -4000,67 +3977,22 @@ class BoundingBox {
   }
 }
 
+/** Contains latex of a math node with metadata.  
+ * 
+ * Currently, this class contains LaTeX data only. 
+ */
+// This class used to contain more information 
+// than the latex string but
+// that turned out to be bug-prone so 
+// the metadata was removed. We keep the class however, 
+// in case we need to store metada in the future again.
 class LatexWithAnnotation {
   constructor(
     /**@type{string} */
     latex,
-    /**@type{number} */
-    selectionStart,
-    /**@type{number} */
-    selectionEnd,
   ) {
     /** @type {string} */
     this.latex = latex;
-    /** @type {number} */
-    this.selectionStart = selectionStart;
-    /** @type {number} */
-    this.selectionEnd = selectionEnd;
-  }
-
-  /**@returns{LatexWithAnnotation} Accounts start/end of a selection. 
-   * Returns this object.
-   */
-  accountOwner(
-    /** @type{MathNode} */
-    owner,
-  ) {
-    let endSelection = owner.equationEditor.selectionEndExpanded;
-    let endElement = endSelection.element;
-    if (owner === endElement && endSelection.position === -1) {
-      if (owner.equationEditor.selectionStartToTheLeftOfSelectionEnd()) {
-        this.selectionEnd = this.latex.length;
-      } else {
-        this.selectionEnd = 0;
-      }
-    }
-    let startSelection = owner.equationEditor.selectionStartExpanded;
-    let startElement = startSelection.element;
-    if (owner === startElement && startSelection.position === -1) {
-      if (owner.equationEditor.selectionStartToTheLeftOfSelectionEnd()) {
-        this.selectionStart = 0;
-      } else {
-        this.selectionStart = this.latex.length;
-      }
-    }
-    return this;
-  }
-
-  accountChild(
-    /** @type{LatexWithAnnotation} */
-    child,
-    /** @type{number} */
-    shift,
-  ) {
-    if (child.selectionStart !== - 1) {
-      this.selectionStart = shift + child.selectionStart;
-    }
-    if (child.selectionEnd !== - 1) {
-      this.selectionEnd = shift + child.selectionEnd;
-    }
-  }
-
-  toString() {
-    return `${this.latex} [[${this.selectionStart}, ${this.selectionEnd}]]`;
   }
 }
 
@@ -7495,35 +7427,15 @@ class MathNode {
     /**@type{ToLatexOptions|null} */
     options,
   ) {
-    let selectionStart = - 1;
-    let selectionEnd = - 1;
-    if (this === this.equationEditor.selectionStartExpanded.element) {
-      let position = this.equationEditor.selectionStartExpanded.position;
-      if (this.equationEditor.selectionStartToTheLeftOfSelectionEnd()) {
-        selectionStart = position;
-      } else {
-        selectionEnd = position;
-      }
-    }
-    if (this === this.equationEditor.selectionEndExpanded.element) {
-      let position = this.equationEditor.selectionEndExpanded.position;
-      if (this.equationEditor.selectionStartToTheLeftOfSelectionEnd()) {
-        selectionEnd = position;
-      } else {
-        selectionStart = position;
-      }
-    }
     let positionCaret = - 1;
-    if (this.focused && options !== null && options.useCaretCommand) {
-      positionCaret = this.positionCaretBeforeKeyEvents;
+    if (options !== null && options.useCaretCommand) {
+      positionCaret = this.desiredCaretPosition;
     }
     let result = latexConstants.convertUtf16ToLatex(
       this.contentIfAtomic(),
-      selectionStart,
-      selectionEnd,
       positionCaret,
     );
-    return result.accountOwner(this);
+    return result;
   }
 
   /** @returns{string} */
@@ -7537,8 +7449,7 @@ class MathNode {
     options,
   ) {
     let toJoin = [];
-    let charactersSoFar = 0;
-    let result = new LatexWithAnnotation("", - 1, - 1);
+    let result = new LatexWithAnnotation("");
     for (let i = 0; i < this.children.length; i++) {
       let child = this.children[i];
       if (child === null) {
@@ -7546,12 +7457,9 @@ class MathNode {
         continue;
       }
       let childLatex = child.toLatexWithAnnotation(options);
-      result.accountChild(childLatex, charactersSoFar);
       toJoin.push(childLatex.latex);
-      charactersSoFar += childLatex.latex.length;
     }
     result.latex = toJoin.join("");
-    result.accountOwner(this);
     return result;
   }
 
@@ -7682,10 +7590,7 @@ class MathNodeFraction extends MathNode {
   ) {
     let numerator = this.children[0].toLatexWithAnnotation(options);
     let denominator = this.children[1].toLatexWithAnnotation(options);
-    let result = new LatexWithAnnotation(`\\frac{${numerator.latex}}{${denominator.latex}}`, - 1, - 1);
-    result.accountChild(numerator, 6);
-    result.accountChild(denominator, 6 + numerator.latex.length + 2);
-    result.accountOwner(this);
+    let result = new LatexWithAnnotation(`\\frac{${numerator.latex}}{${denominator.latex}}`);
     if (this.children.length <= 2) {
       return result;
     }
@@ -7696,7 +7601,7 @@ class MathNodeFraction extends MathNode {
       result.latex += this.children[i].toLatex();
     }
     result.latex += "]";
-    return result.accountOwner(this);
+    return result;
   }
 
   applyBackspaceToTheRight() {
@@ -7744,24 +7649,16 @@ class MathNodeBaseWithExponent extends MathNode {
     options,
   ) {
     let base = this.children[0];
-    let baseLatex = base.toLatex();
-    let exponent = this.children[1].toLatex();
+    let baseLatex = base.toLatexWithAnnotation(options);
+    let exponentLatex = this.children[1].toLatexWithAnnotation(options);
     let useBracesInBase = false;
     if (base.type.type === knownTypes.fraction.type) {
       useBracesInBase = true;
     }
     if (useBracesInBase) {
-      return new LatexWithAnnotation(
-        `{${baseLatex}}^{${exponent}}`,
-        - 1,
-        - 1,
-      );
+      return new LatexWithAnnotation(`{${baseLatex.latex}}^{${exponentLatex.latex}}`);
     } else {
-      return new LatexWithAnnotation(
-        `${baseLatex}^{${exponent}}`,
-        - 1,
-        - 1,
-      );
+      return new LatexWithAnnotation(`${baseLatex.latex}^{${exponentLatex.latex}}`);
     }
   }
 
@@ -7894,8 +7791,8 @@ class MathNodeCancel extends MathNode {
     /**@type{ToLatexOptions|null} */
     options,
   ) {
-    let childLatex = this.children[1].toLatex();
-    return new LatexWithAnnotation(`\\cancel{${childLatex}}`, - 1, - 1);
+    let childLatex = this.children[1].toLatexWithAnnotation(options);
+    return new LatexWithAnnotation(`\\cancel{${childLatex.latex}}`);
   }
 
   applyBackspaceToTheRight() {
@@ -7967,9 +7864,9 @@ class MathNodeSqrt extends MathNode {
     options,
   ) {
     if (this.element === null) {
-      return new LatexWithAnnotation("[null(]", - 1, - 1);
+      return new LatexWithAnnotation("[null(]");
     }
-    let result = new LatexWithAnnotation("", -1, -1);
+    let result = new LatexWithAnnotation("");
     let exponent = null;
     let underTheRadical = null;
     if (this.children.length > 0) {
@@ -7981,15 +7878,10 @@ class MathNodeSqrt extends MathNode {
     if (exponent !== null) {
       if (exponent.latex !== "") {
         result.latex = `\\sqrt[${exponent.latex}]{${underTheRadical.latex}}`;
-        result.accountChild(exponent, 6);
-        result.accountChild(underTheRadical, exponent.latex.length + 6 + 2);
-        result.accountOwner(this);
         return result;
       }
     }
     result.latex = `\\sqrt{${underTheRadical.latex}}`;
-    result.accountChild(underTheRadical, 6);
-    result.accountOwner(this);
     return result;
   }
   applyBackspaceToTheRight() {
@@ -8081,9 +7973,9 @@ class MathNodeBaseWithSubscript extends MathNode {
     let numerator = this.children[0].toLatexWithAnnotation(options);
     let denominator = this.children[1].toLatexWithAnnotation(options);
     if (this.children[0].isAtomicNonEmptyOrHorizontalMathWithNonEmptyAtomic()) {
-      result = new LatexWithAnnotation(`${numerator.latex}_{${denominator.latex}}`, - 1, - 1);
+      result = new LatexWithAnnotation(`${numerator.latex}_{${denominator.latex}}`);
     } else {
-      result = new LatexWithAnnotation(`{${numerator.latex}}_{${denominator.latex}}`, - 1, - 1);
+      result = new LatexWithAnnotation(`{${numerator.latex}}_{${denominator.latex}}`);
     }
     return result;
   }
@@ -8109,13 +8001,12 @@ class MathNodeLeftDelimiter extends MathNode {
     /**@type{LatexWithAnnotation} */
     let result = null;
     if (this.children.length === 0) {
-      result = new LatexWithAnnotation("\\left.", -1, -1);
+      result = new LatexWithAnnotation("\\left.");
     } else if (this.extraData === "{") {
-      result = new LatexWithAnnotation("\\{", -1, -1);
+      result = new LatexWithAnnotation("\\{");
     } else {
-      result = new LatexWithAnnotation(this.extraData, - 1, - 1);
+      result = new LatexWithAnnotation(this.extraData);
     }
-    result.accountOwner(this);
     return result;
   }
 
@@ -8141,13 +8032,12 @@ class MathNodeRightDelimiter extends MathNode {
     /**@type{LatexWithAnnotation} */
     let result = null;
     if (this.children.length === 0) {
-      result = new LatexWithAnnotation("\\right.", -1, -1);
+      result = new LatexWithAnnotation("\\right.");
     } else if (this.extraData === "{") {
-      result = new LatexWithAnnotation("\\}", -1, -1);
+      result = new LatexWithAnnotation("\\}");
     } else {
-      result = new LatexWithAnnotation(this.extraData, - 1, - 1);
+      result = new LatexWithAnnotation(this.extraData);
     }
-    result.accountOwner(this);
     return result;
   }
 
@@ -8437,7 +8327,7 @@ class MathNodeMatrix extends MathNode {
     options,
   ) {
     if (this.element === null) {
-      return new LatexWithAnnotation("[null)]", - 1, - 1);
+      return new LatexWithAnnotation("[null)]");
     }
     let matrixContent = this.children[0].children[1];
     let result = [];
@@ -8448,13 +8338,13 @@ class MathNodeMatrix extends MathNode {
       let currentRowStrings = [];
       for (let j = 0; j < matrixRow.children.length; j++) {
         let entry = matrixRow.children[j];
-        currentRowStrings.push(entry.toLatex());
+        currentRowStrings.push(entry.toLatexWithAnnotation(options).latex);
       }
       rows.push(currentRowStrings.join("&"));
     }
     result.push(rows.join("\\\\"));
     result.push("\\end{pmatrix}");
-    return new LatexWithAnnotation(result.join(""), - 1, - 1);
+    return new LatexWithAnnotation(result.join(""));
   }
 
   applyBackspaceToTheRight() {
@@ -8528,18 +8418,17 @@ class MathNodeOperatorWithSuperAndSubscript extends MathNode {
   toLatexWithAnnotation(
     /**@type{ToLatexOptions|null} */
     options,
-
   ) {
-    let top = this.children[0].toLatex();
-    let result = this.children[1].toLatex();
-    let bottom = this.children[2].toLatex();
+    let top = this.children[0].toLatexWithAnnotation(options).latex;
+    let result = this.children[1].toLatexWithAnnotation(options).latex;
+    let bottom = this.children[2].toLatexWithAnnotation(options).latex;
     if (bottom !== "") {
       result += `_{${bottom}}`;
     }
     if (top !== "") {
       result += `^{${top}}`;
     }
-    return new LatexWithAnnotation(result, - 1, - 1);
+    return new LatexWithAnnotation(result);
   }
   applyBackspaceToTheRight() {
     return this.applyBackspaceToTheRightAsLeftArrow();
@@ -8564,7 +8453,7 @@ class MathNodeOperatorStandalone extends MathNode {
     if (content in latexConstants.utf16ToLatexMap) {
       return new LatexWithAnnotation(latexConstants.utf16ToLatexMap[content]);
     }
-    return new LatexWithAnnotation(`${content}`, - 1, - 1);
+    return new LatexWithAnnotation(`${content}`);
   }
 }
 

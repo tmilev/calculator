@@ -17,8 +17,12 @@ let domElements = {
       solutionBox: "solutionBox",
     },
     solveSocratic: {
+      editor: "editorSolveProblemSocratc",
+      editorButtonPanel: "editorSolveSocraticButtonPanel",
+      input: "inputBoxSolveSocratic",
       div: "divSolveSocraticPage",
       link: "socraticLink",
+      editorSolveProblemDebug: "editorSolveProblemSocraticDebug",
     },
     privacyPolicy: {
       div: "divPrivacyPolicy",

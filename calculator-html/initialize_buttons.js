@@ -140,7 +140,11 @@ class ButtonCollection {
 }
 
 class InputPanelData {
-  constructor(input) {
+  constructor(
+    /**@type{{
+     * pureLatexElement?:HTMLElement|null,
+     * }} */
+    input) {
     /** @type{string} Id of component where the editor is placed.*/
     this.idEquationEditorElement = input.idEquationEditorElement;
     if (this.idEquationEditorElement === "") {
@@ -411,6 +415,10 @@ class InputPanelData {
     if (this.idEquationEditorElement === ids.domElements.pages.solve.editor) {
       forceShowAll = storage.storage.variables.solve.panel.forceShowAll.isTrue();
       forceShowNone = storage.storage.variables.solve.panel.forceShowNone.isTrue();
+    }
+    if (this.idEquationEditorElement === ids.domElements.pages.solveSocratic.editor) {
+      forceShowAll = storage.storage.variables.solveSocratic.panel.forceShowAll.isTrue();
+      forceShowNone = storage.storage.variables.solveSocratic.panel.forceShowNone.isTrue();
     }
     this.initializePartTwo(forceShowAll, forceShowNone);
     this.renderIfVisible();
@@ -698,6 +706,10 @@ class InputPanelData {
     if (this.idEquationEditorElement === ids.domElements.pages.solve.editor) {
       storage.storage.variables.solve.panel.forceShowAll.setAndStore(forceShowAll);
       storage.storage.variables.solve.panel.forceShowNone.setAndStore(forceShowNone);
+    }
+    if (this.idEquationEditorElement === ids.domElements.pages.solveSocratic.editor) {
+      storage.storage.variables.solveSocratic.panel.forceShowAll.setAndStore(forceShowAll);
+      storage.storage.variables.solveSocratic.panel.forceShowNone.setAndStore(forceShowNone);
     }
     this.computeFlags(forceShowAll);
     this.addButtons(forceShowAll, forceShowNone);

@@ -194,6 +194,26 @@ class StorageCalculator {
           }),
         },
       },
+      solveSocratic: {
+        problemToAutoSolve: new StorageVariable({
+          name: "problemToAutoSolveSocratic",
+          nameURL: "problemToAutoSolveSocratic",
+          nameLocalStorage: "problemToAutoSolveSocratic",
+          showInURLOnPages: {
+            "solveSocratic": true,
+          },
+        }),
+        panel: {
+          forceShowAll: new StorageVariable({
+            name: "solvePanelForceShowAll",
+            nameLocalStorage: "solvePanelForceShowAll",
+          }),
+          forceShowNone: new StorageVariable({
+            name: "solvePanelForceShowNone",
+            nameLocalStorage: "solvePanelForceShowNone",
+          }),
+        },
+      },
       compare: {
         given: new StorageVariable({
           name: "given",

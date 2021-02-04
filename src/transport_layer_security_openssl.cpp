@@ -211,7 +211,7 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
   }
 #ifdef MACRO_use_open_ssl
   global << Logger::green << "SSL is available." << Logger::endL;
-  SSL_CTX_set_ecdh_auto(this->context, 1);
+  SSL_CTX_set_ecdh_auto(this->contextGlobal, 1);
   if (SSL_CTX_use_certificate_chain_file(this->contextGlobal, signedFileCertificate3Physical.c_str()) <= 0) {
     global << Logger::purple << "Found no officially signed certificate, trying self-signed certificate. "
     << Logger::endL;

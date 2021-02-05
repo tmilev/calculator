@@ -961,6 +961,7 @@ bool Calculator::EvaluateLoop::detectLoops() {
   Expression error;
   error.makeError(errorStream.str(), *this->owner);
   this->setOutput(error, nullptr, errorStream.str());
+  this->owner->flagAbortComputationASAP = true;
   return true;
 }
 

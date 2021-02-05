@@ -164,7 +164,6 @@ bool Calculator::checkOperationHandlers() {
 bool Calculator::checkConsistencyAfterInitialization() {
   this->allChildExpressions.grandMasterConsistencyCheck();
   this->evaluatedExpressionsStack.grandMasterConsistencyCheck();
-  this->cachedExpressions.grandMasterConsistencyCheck();
   if (this->numberExpectedExpressionsAtInitialization < 0) {
     this->numberExpectedExpressionsAtInitialization = this->allChildExpressions.size;
   } else if (
@@ -180,16 +179,13 @@ bool Calculator::checkConsistencyAfterInitialization() {
     global.fatal << global.fatal;
   }
   if (
-    this->cachedExpressions.size != 0 ||
-    this->imagesCachedExpressions.size != 0 ||
+    this->cachedExpressions.size() != 0 ||
     this->evaluatedExpressionsStack.size != 0
   ) {
-    global.fatal << "Cached expressions, "
-    << "images cached expressions, expression stack and "
-    << "expression container are supposed to be empty, but "
+    global.fatal << "Cached expressions, evaluatedExpressionsStack "
+    << "are supposed to be empty, but "
     << "instead they contain respectively "
-    << this->cachedExpressions.size << ", "
-    << this->imagesCachedExpressions.size << ", and "
+    << this->cachedExpressions.size() << ", "
     << this->evaluatedExpressionsStack.size
     << " elements. " << global.fatal;
   }
@@ -451,6 +447,7 @@ bool CalculatorBasics::associateTimesDivision(Calculator& calculator, const Expr
 }
 
 bool CalculatorBasics::associate(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorBasics::associate");
   if (input.size() != 3) {
     return false;
   }
@@ -458,10 +455,13 @@ bool CalculatorBasics::associate(Calculator& calculator, const Expression& input
   if (!input[1].startsWith(operation) && !input[2].startsWith(operation)) {
     return false;
   }
+  // int64_t startTime = global.getElapsedMilliseconds();
   List<Expression> multiplicands;
   calculator.collectOpands(input, operation, multiplicands);
+  //  global.comments << "DEBUG: collect opands took: " << global.getElapsedMilliseconds() - startTime << "ms. <hr>";
   Expression result;
   result.makeOXdotsX(calculator, operation, multiplicands);
+  // global.comments << "DEBUG: with construction " << global.getElapsedMilliseconds() - startTime << "ms. <hr>";
   if (result == input) {
     return false;
   }
@@ -1884,7 +1884,7 @@ JSData Calculator::toJSONPerformance() {
 std::string Calculator::toString() {
   MacroRegisterFunctionWithName("Calculator::toString");
   std::stringstream out2;
-  std::string openTag1 = "<span style =\"color:blue\">";
+  std::string openTag1 = "<span style='color:blue'>";
   std::string closeTag1 = "</span>";
   if (global.millisecondsMaxComputation > 0) {
     out2 << "Computation time limit: "
@@ -1940,15 +1940,15 @@ std::string Calculator::toString() {
     out << this->allChildExpressions[i].toString() << ", ";
   }
   out << "<hr>";
-  out << "\n Cached expressions (" << this->cachedExpressions.size << " total):\n<br>\n";
-  numExpressionsToDisplay = this->cachedExpressions.size;
+  out << "\n Cached expressions (" << this->cachedExpressions.size() << " total):\n<br>\n";
+  numExpressionsToDisplay = this->cachedExpressions.size();
   if (numExpressionsToDisplay > 1000) {
     numExpressionsToDisplay = 1000;
     out << "<b>Displaying first " << numExpressionsToDisplay << " expressions only. </b><br>";
   }
   for (int i = 0; i < numExpressionsToDisplay; i ++) {
-    out << this->cachedExpressions[i].toString() << " -> " << this->imagesCachedExpressions[i].toString();
-    if (i != this->cachedExpressions.size - 1) {
+    out << this->cachedExpressions.keys[i].toString() << " -> " << this->cachedExpressions.values[i].reducesTo.toString();
+    if (i != this->cachedExpressions.size() - 1) {
       out << "<br>";
     }
   }

@@ -1151,41 +1151,12 @@ public:
   std::string toStringJavascriptForUserInputBoxes();
 };
 
-class ExpressionTripleCrunchers {
-public:
-  int operation;
-  int leftType;
-  int rightType;
-  bool operator==(const ExpressionTripleCrunchers& other) const {
-    return this->leftType == other.leftType && this->rightType == other.rightType && this->operation == other.operation;
-  }
-  void operator=(const ExpressionTripleCrunchers& other) {
-    this->leftType = other.leftType;
-    this->rightType = other.rightType;
-    this->operation = other.operation;
-  }
-  ExpressionTripleCrunchers(): operation(- 1), leftType(- 1), rightType(- 1) {
-  }
-  ExpressionTripleCrunchers(
-    int inputOperation, int inputLeft, int inputRight
-  ): operation(inputOperation), leftType(inputLeft), rightType(inputRight) {
-
-  }
-  static unsigned int hashFunction(const ExpressionTripleCrunchers& input) {
-    return
-      static_cast<unsigned int>(input.leftType) * someRandomPrimes[0] +
-      static_cast<unsigned int>(input.rightType) * someRandomPrimes[1] +
-      static_cast<unsigned int>(input.operation) * someRandomPrimes[2];
-  }
-};
-
 class StateMaintainerCalculator {
 public:
   Calculator* owner;
-  int startingRuleStackIndex;
   int startingRuleStackSize;
   StateMaintainerCalculator(Calculator& inputBoss);
-  void addRule(const Expression& theRule);
+  void addRule(const Expression& rule);
   ~StateMaintainerCalculator();
 };
 
@@ -1316,8 +1287,6 @@ public:
   // Control sequences parametrize the syntactical elements
   HashedList<std::string, MathRoutines::hashString> controlSequences;
 
-  HashedList<ExpressionTripleCrunchers> theCruncherIds;
-
   HashedList<Expression> knownDoubleConstants;
   List<double> knownDoubleConstantValues;
 
@@ -1326,10 +1295,8 @@ public:
   int depthRecursionReached;
   int maximumAlgebraicTransformationsPerExpression;
   int maximumLatexChars;
-  int maximumCachedExpressionPerRuleStack;
-  int maximumRuleStacksCached;
-  int ruleStackCacheIndex;
   int numberExpectedExpressionsAtInitialization;
+
   class EvaluationStatistics {
   public:
     int expressionsEvaluated;
@@ -1399,15 +1366,22 @@ public:
   List<SyntacticElement>* currrentSyntacticSoup;
   List<SyntacticElement>* currentSyntacticStack;
 
-  HashedList<Expression> cachedExpressions;
-  List<Expression> imagesCachedExpressions;
+  class ExpressionCache {
+  public:
+    int ruleState;
+    bool flagNonCacheable;
+    bool flagFinalized;
+    Expression reducesTo;
+    ExpressionCache();
+  };
+  // Cached expressions per rule stack.
+  MapList<Expression, Calculator::ExpressionCache> cachedExpressions;
   ////
   HashedList<Expression> evaluatedExpressionsStack;
   HashedList<int, HashFunctions::hashFunction> nonBoundVariablesInContext;
   HashedList<int, HashFunctions::hashFunction> boundVariablesInContext;
 
   Expression ruleStack;
-  HashedList<Expression> cachedRuleStacks;
 
   HashedListReferences<Expression> allChildExpressions;
   List<unsigned int> allChildExpressionHashes;
@@ -2252,6 +2226,10 @@ public:
     bool writeTestStrings(std::stringstream* commentsOnFailure);
     bool processOneTest(JSData& input);
     static bool all();
+    static bool cacheWorks();
+    static bool loopDetection();
+    static bool loopDetectionCycle();
+    static bool loopDetectionEverExpanding();
     static bool numberOfTestFunctions(Calculator& ownerInitialized);
     static bool parseDecimal(Calculator& ownerInitialized);
     static bool parseAllExamples(Calculator& ownerInitialized);
@@ -2466,7 +2444,17 @@ public:
     int opIndexParentIfAvailable,
     Expression* outputHistory
   );
+  void storeCache();
   class EvaluateLoop {
+  private:
+    bool detectLoops();
+    void accountIntermediateState();
+    bool reduceUsingCache();
+    bool builtInEvaluation();
+    bool userDefinedEvaluation();
+    bool evaluateChildren(StateMaintainerCalculator& maintainRuleStack);
+    void reportChildEvaluation(Expression& output, int childIndex);
+    void storeCache();
   public:
     Calculator* owner;
     bool flagIsNonCacheable;
@@ -2477,16 +2465,13 @@ public:
     bool reductionOccurred;
     Expression* output;
     Expression* history;
+    HashedList<Expression> intermediateOutputs;
     Expression currentChild;
+    // Reduces expression using a cached value
     bool reduceOnce();
-    bool builtInEvaluation();
-    bool userDefinedEvaluation();
-    void initializeOneRun();
+    void writeCache();
     bool outputHasErrors();
     EvaluateLoop(Calculator& inputOwner);
-    bool evaluateChildren(StateMaintainerCalculator& maintainRuleStack);
-    void reportChildEvaluation(Expression& output, int childIndex);
-    void lookUpCache();
     bool setOutput(
       const Expression& input, Function* handler, const std::string& info
     );
@@ -2496,13 +2481,13 @@ public:
       const Expression& transformedChild, const Expression& childHistory, int childIndex
     );
   };
-
+  void reduce(Calculator::EvaluateLoop& state);
   class ExpressionHistoryEnumerator {
   public:
     Calculator* owner;
     int recursionDepth;
     int maximumRecursionDepth;
-    Expression theHistory;
+    Expression history;
     List<Expression> output;
     List<List<std::string> > rulesNames;
     // List<List<std::string> > rulesDisplayNames;

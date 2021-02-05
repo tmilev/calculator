@@ -21,7 +21,7 @@ bool CalculatorEducationalFunctions::solveJSON(
     problem.finalExpression,
     outputNonCacheable,
     - 1,
-    &history.theHistory
+    &history.history
   );
   history.owner = &calculator;
   std::stringstream commentsOnFailure;

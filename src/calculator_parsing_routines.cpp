@@ -88,8 +88,6 @@ void Calculator::reset() {
   this->statistics.reset();
   this->mode = Calculator::Mode::full;
   this->maximumAlgebraicTransformationsPerExpression = 100;
-  this->maximumRuleStacksCached = 500;
-  this->maximumCachedExpressionPerRuleStack = 100000;
   this->maximumRecursionDepth = 10000;
   this->recursionDepth = 0;
 
@@ -145,17 +143,12 @@ void Calculator::reset() {
   this->flagAbortComputationASAP = false;
   this->flagDisplayContext = false;
   this->evaluatedExpressionsStack.clear();
-  this->theCruncherIds.clear();
   this->syntaxErrors = "";
   this->evaluationErrors.setSize(0);
   this->currentSyntacticStack = &this->syntacticStack;
   this->currrentSyntacticSoup = &this->syntacticSoup;
-  this->cachedExpressions.clear();
-  this->imagesCachedExpressions.setSize(0);
   this->programExpression.reset(*this);
-  this->ruleStackCacheIndex = - 1;
-  this->ruleStack.reset(*this, this->maximumRuleStacksCached);
-  this->cachedRuleStacks.clear();
+  this->cachedExpressions.clear();
   // The expression container must be cleared second to last.
   this->allChildExpressions.clear();
   // The hashes list below is used in computing the hashes of the list above.
@@ -373,9 +366,6 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
 
   this->ruleStack.reset(*this, 100);
   this->ruleStack.addChildAtomOnTop(this->opCommandSequence());
-  this->cachedRuleStacks.clear();
-  this->ruleStackCacheIndex = 0;
-  this->cachedRuleStacks.addOnTop(this->ruleStack);
   this->numberOfPredefinedAtoms = this->operations.size(); //<-operations added up to this point are called ``operations''
   this->checkConsistencyAfterInitialization();
 }

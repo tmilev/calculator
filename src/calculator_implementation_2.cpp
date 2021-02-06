@@ -241,22 +241,22 @@ std::string Calculator::toStringRuleStatusUser() {
   return out.str();
 }
 
-void Calculator::logTime() {
+void Calculator::logTime(int64_t startTime) {
   int64_t currentMilliseconds = global.getElapsedMilliseconds();
   *this << "<br>" << currentMilliseconds - this->statistics.millisecondsLastLog
   << " ms since last log; " << currentMilliseconds - this->statistics.startTimeEvaluationMilliseconds
-  << " ms since start. ";
+  << " ms since start; " << currentMilliseconds - startTime << " ms since last stopwatch. ";
   this->statistics.millisecondsLastLog = currentMilliseconds;
 }
 
-void Calculator::logFunctionWithTime(Function& inputF) {
+void Calculator::logFunctionWithTime(Function& input, int64_t startTime) {
   this->statistics.totalSubstitutions ++;
   if (!this->flagLogEvaluation) {
     return;
   }
   *this << "<hr>Built-in substitution " << this->statistics.totalSubstitutions
-  << ": " << inputF.toStringSummary();
-  this->logTime();
+  << ": " << input.toStringSummary();
+  this->logTime(startTime);
   *this << "Rule stack size: " << this->ruleStack.size();
 }
 
@@ -295,6 +295,10 @@ bool Calculator::outerStandardCompositeHandler(
   int opIndexParentIfAvailable,
   Function** outputHandler
 ) {
+  int64_t start = 0;
+  if (calculator.flagLogEvaluation) {
+    start = global.getElapsedMilliseconds();
+  }
   if (!input.isList()) {
     return false;
   }
@@ -302,17 +306,17 @@ bool Calculator::outerStandardCompositeHandler(
   if (!functionNameNode.startsWith()) {
     return false;
   }
-  const List<Function>* theHandlers = calculator.getOperationCompositeHandlers(functionNameNode[0].data);
-  if (theHandlers == nullptr) {
+  const List<Function>* handlers = calculator.getOperationCompositeHandlers(functionNameNode[0].data);
+  if (handlers == nullptr) {
     return false;
   }
-  for (int i = 0; i < theHandlers->size; i ++) {
-    Function& currentHandler = (*theHandlers)[i];
+  for (int i = 0; i < handlers->size; i ++) {
+    Function& currentHandler = (*handlers)[i];
     if (currentHandler.shouldBeApplied(opIndexParentIfAvailable)) {
       if (currentHandler.apply(
         calculator, input, output, opIndexParentIfAvailable, outputHandler
       )) {
-        calculator.logFunctionWithTime(currentHandler);
+        calculator.logFunctionWithTime(currentHandler, start);
         return true;
       }
     }
@@ -334,17 +338,21 @@ bool Function::apply(
   int opIndexParentIfAvailable,
   Function** outputHandler
 ) {
+  int64_t start = 0;
+  if (this->owner->flagLogEvaluation) {
+    start = global.getElapsedMilliseconds();
+  }
   if (!this->shouldBeApplied(opIndexParentIfAvailable)) {
     return false;
   }
-  if (this->theFunction == nullptr) {
+  if (this->functionAddress == nullptr) {
     global.fatal << "Attempt to apply non-initialized function. " << global.fatal;
   }
   if (!this->options.flagIsInner) {
-    if (this->theFunction(calculator, input, output)) {
+    if (this->functionAddress(calculator, input, output)) {
       if (output != input) {
         output.checkConsistency();
-        calculator.logFunctionWithTime(*this);
+        calculator.logFunctionWithTime(*this, start);
         if (outputHandler != nullptr) {
           *outputHandler = this;
         }
@@ -354,9 +362,9 @@ bool Function::apply(
     return false;
   }
   if (this->inputFitsMyInnerType(input)) {
-    if (this->theFunction(calculator, input, output)) {
+    if (this->functionAddress(calculator, input, output)) {
       output.checkConsistency();
-      calculator.logFunctionWithTime(*this);
+      calculator.logFunctionWithTime(*this, start);
       if (outputHandler != nullptr) {
         *outputHandler = this;
       }
@@ -407,9 +415,9 @@ bool Calculator::outerStandardFunction(
     return false;
   }
   if (calculator.outerStandardCompositeHandler(
-    calculator, input, output, opIndexParentIfAvailable, outputHandler
-  )) {
-    return true;
+     calculator, input, output, opIndexParentIfAvailable, outputHandler
+   )) {
+     return true;
   }
   if (calculator.outerStandardHandler(
     calculator, input, output, opIndexParentIfAvailable, outputHandler
@@ -902,7 +910,7 @@ bool Calculator::EvaluateLoop::userDefinedEvaluation() {
     i ++
   ) {
     const Expression& currentPattern = this->owner->ruleStack[i];
-    this->owner->totalPatternMatchesPerformed ++;
+    this->owner->statistics.totalPatternMatchesPerformed ++;
     if (this->owner->flagLogEvaluation) {
       beforepatternMatch = *this->output;
     }
@@ -977,7 +985,7 @@ bool Calculator::EvaluateLoop::reduceOnce() {
   MacroRegisterFunctionWithName("Calculator::EvaluateLoop::reduceOnce");
   this->checkInitialization();
   this->numberOfTransformations ++;
-  this->owner->totalEvaluationLoops ++;
+  this->owner->statistics.totalEvaluationLoops ++;
   if (this->detectLoops()) {
     return false;
   }
@@ -1284,17 +1292,17 @@ bool Calculator::parseAndExtractExpressions(
 }
 
 void Calculator::EvaluationStatistics::initialize() {
-  this->startTimeEvaluationMilliseconds      = global.getElapsedMilliseconds();
-  this->millisecondsLastLog                  = this->startTimeEvaluationMilliseconds;
-  this->numberOfListsStart                   = static_cast<signed>( GlobalStatistics::numListsCreated    );
-  this->numberListResizesStart               = static_cast<signed>( GlobalStatistics::numListResizesTotal);
-  this->numberHashResizesStart               = static_cast<signed>( GlobalStatistics::numHashResizes     );
-  this->numberOfSmallAdditionsStart          = static_cast<signed>( Rational::totalSmallAdditions         );
-  this->numberOfSmallMultiplicationsStart    = static_cast<signed>( Rational::totalSmallMultiplications   );
-  this->numberOfSmallGreatestCommonDivisorsStart           = static_cast<signed>( Rational::totalSmallGreatestCommonDivisors          );
-  this->numberOfLargeAdditionsStart          = static_cast<signed>( Rational::totalLargeAdditions         );
-  this->numberOfLargeMultiplicationsStart    = static_cast<signed>( Rational::totalLargeMultiplications   );
-  this->numberOfLargeGreatestCommonDivisorsStart           = static_cast<signed>( Rational::totalLargeGreatestCommonDivisors          );
+  this->startTimeEvaluationMilliseconds          = global.getElapsedMilliseconds();
+  this->millisecondsLastLog                      = this->startTimeEvaluationMilliseconds;
+  this->numberOfListsStart                       = static_cast<signed>( GlobalStatistics::numListsCreated         );
+  this->numberListResizesStart                   = static_cast<signed>( GlobalStatistics::numberOfListResizesTotal     );
+  this->numberHashResizesStart                   = static_cast<signed>( GlobalStatistics::numberOfHashResizes          );
+  this->numberOfSmallAdditionsStart              = static_cast<signed>( Rational::totalSmallAdditions             );
+  this->numberOfSmallMultiplicationsStart        = static_cast<signed>( Rational::totalSmallMultiplications       );
+  this->numberOfSmallGreatestCommonDivisorsStart = static_cast<signed>( Rational::totalSmallGreatestCommonDivisors);
+  this->numberOfLargeAdditionsStart              = static_cast<signed>( Rational::totalLargeAdditions             );
+  this->numberOfLargeMultiplicationsStart        = static_cast<signed>( Rational::totalLargeMultiplications       );
+  this->numberOfLargeGreatestCommonDivisorsStart = static_cast<signed>( Rational::totalLargeGreatestCommonDivisors);
 }
 
 void Calculator::evaluate(const std::string& input) {

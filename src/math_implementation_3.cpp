@@ -23,8 +23,8 @@ bool GlobalStatistics::flagUngracefulExitInitiated = false;
 
 long long GlobalStatistics::globalPointerCounter = 0;
 long long GlobalStatistics::pointerCounterPeakRamUse = 0;
-unsigned int GlobalStatistics::numHashResizes = 0;
-unsigned int GlobalStatistics::numListResizesTotal = 0;
+unsigned int GlobalStatistics::numberOfHashResizes = 0;
+unsigned int GlobalStatistics::numberOfListResizesTotal = 0;
 unsigned int GlobalStatistics::numListsCreated = 0;
 
 //CombinatorialChamberContainer GlobalCollectorChambers;

@@ -1054,7 +1054,7 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
   }
   output.reset(calculator);
   for (int i = 1; i < input.size(); i ++) {
-    output.children.addOnTop(input.children[i]);
+    output.addChildOnTop(input.children[i]);
   }
   ExpressionContext theContext(calculator);
   if (!calculator.getVectorFromFunctionArguments<Polynomial<Rational> >(
@@ -1252,7 +1252,7 @@ bool CalculatorFunctionsPolynomial::groebner(
   int upperBoundComputations = int(upperBound.getDoubleValue());
   output.reset(calculator);
   for (int i = 1; i < input.children.size; i ++) {
-    output.children.addOnTop(input.children[i]);
+    output.addChildOnTop(input[i]);
   }
   int theMod = 0;
   if (useModZp) {

@@ -3027,6 +3027,7 @@ void Calculator::initializeFunctionsStandard() {
     "ScaleToLeadingUnit",
     innerStandard
   );
+  List<std::string> additiveOperations = List<std::string>({"+", "-"});
   this->addOperationHandler(
     "+",
     CalculatorFunctions::sortTerms,
@@ -3037,7 +3038,7 @@ void Calculator::initializeFunctionsStandard() {
     "Calculator::sortTerms",
     "SortTerms",
     Function::Options::outerOffByDefault(),
-    "+"
+    &additiveOperations
   );
   this->addOperationHandler(
     "+",
@@ -3050,7 +3051,7 @@ void Calculator::initializeFunctionsStandard() {
     "Calculator::addTerms",
     "AddTerms",
     outerStandard,
-    "+"
+    &additiveOperations
   );
   this->addOperationHandler(
     "+",
@@ -3767,6 +3768,7 @@ void Calculator::initializeFunctionsStandard() {
     "MergeConstantRadicals",
     outerStandard
   );
+  List<std::string> multiplicativeOperations = List<std::string>({"*"});
   this->addOperationHandler(
     "*",
     CalculatorBasics::associate,
@@ -3776,7 +3778,7 @@ void Calculator::initializeFunctionsStandard() {
     "Calculator::outerAssociate",
     "AssociativeRule",
     outerStandard,
-    "*"
+    &multiplicativeOperations
   );
   this->addOperationHandler(
     "*",

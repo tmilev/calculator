@@ -346,7 +346,7 @@ class Calculator {
       buffer.write(`</tr>`);
     }
     buffer.write(`</table>`);
-    buffer.write(`</td><td><div class = "containerComments">`);
+    buffer.write(`</td><td><div class="containerComments">`);
     buffer.write("<small>Double-click formulas: get LaTeX. Double-click back: hide. </small>");
     let performance = inputParsed[pathnames.urlFields.result.performance];
     if (performance !== undefined) {

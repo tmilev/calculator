@@ -585,7 +585,7 @@ bool CalculatorFunctions::innerOperationBinary(
   List<Function>& handlers = theOperation.getElement().handlers;
   for (int i = 0; i < handlers.size; i ++) {
     if (handlers[i].inputFitsMyInnerType(input)) {
-      if (handlers[i].theFunction(calculator, input, output)) {
+      if (handlers[i].functionAddress(calculator, input, output)) {
         return true;
       }
     }

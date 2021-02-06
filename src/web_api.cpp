@@ -362,24 +362,24 @@ void WebAPIResponse::initializeCalculatorComputation() {
 bool WebAPIResponse::processCompute() {
   MacroRegisterFunctionWithName("WebAPIResponse::processCompute");
   this->initializeCalculatorComputation();
-  Calculator& theCalculator = global.calculator().getElement();
-  theCalculator.inputString = HtmlRoutines::convertURLStringToNormal(
+  Calculator& calculator = global.calculator().getElement();
+  calculator.inputString = HtmlRoutines::convertURLStringToNormal(
     global.getWebInput(WebAPI::request::calculatorInput),
     false
   );
   global.initOutputReportAndCrashFileNames(
-    HtmlRoutines::convertStringToURLString(theCalculator.inputString, false),
-    theCalculator.inputString
+    HtmlRoutines::convertStringToURLString(calculator.inputString, false),
+    calculator.inputString
   );
   ////////////////////////////////////////////////
   // the initialization below moved to the start of the web server!
   // theParser.initialize();
   ////////////////////////////////////////////////
   global.response.allowReport();
-  theCalculator.evaluate(theCalculator.inputString);
+  calculator.evaluate(calculator.inputString);
   global.response.disallowReport();
   JSData result;
-  result = theCalculator.toJSONOutputAndSpecials();
+  result = calculator.toJSONOutputAndSpecials();
   result[WebAPI::result::commentsGlobal] = global.comments.getCurrentReset();
   global.response.writeResponse(result, false);
   global.flagComputationComplete = true;

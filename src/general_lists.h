@@ -1435,13 +1435,13 @@ public:
     if (desiredHashSize == static_cast<unsigned>(this->hashBuckets.size)) {
       return;
     }
-    MacroIncrementCounter(GlobalStatistics::numHashResizes);
+    MacroIncrementCounter(GlobalStatistics::numberOfHashResizes);
     List<int> emptyList; //<-empty list has size 0
     this->hashBuckets.initializeFillInObject(desiredHashSize, emptyList);
     if (this->size > 0) {
       for (int i = 0; i < this->size; i ++) {
-        int theIndex = this->getHash((*this)[i]);
-        this->hashBuckets[theIndex].addOnTop(i);
+        int index = this->getHash((*this)[i]);
+        this->hashBuckets[index].addOnTop(i);
       }
     }
   }
@@ -2091,7 +2091,7 @@ void List<Object>::expandArrayOnTop(int increase) {
   if (increase <= 0) {
     return;
   }
-  MacroIncrementCounter(GlobalStatistics::numListResizesTotal);
+  MacroIncrementCounter(GlobalStatistics::numberOfListResizesTotal);
   Object* newArray = 0;
   try {
     newArray = new Object[this->actualSize + increase];

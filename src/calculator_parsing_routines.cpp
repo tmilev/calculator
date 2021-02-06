@@ -72,6 +72,10 @@ void Calculator::EvaluationStatistics::reset() {
   this->maximumCallsBeforeReportGeneration = 5000;
   this->callsSinceReport = 0;
   this->totalSubstitutions = 0;
+  this->totalEvaluationLoops = 0;
+  this->totalPatternMatchesPerformed = 0;
+  this->totalEvaluationLoops = 0;
+
   this->numberOfListsStart = - 1;
   this->numberListResizesStart = - 1;
   this->numberHashResizesStart = - 1;
@@ -82,6 +86,9 @@ void Calculator::EvaluationStatistics::reset() {
   this->numberOfLargeMultiplicationsStart = - 1;
   this->numberOfLargeGreatestCommonDivisorsStart = - 1;
   this->millisecondsLastLog = - 1;
+  this->startTimeEvaluationMilliseconds = - 1;
+  this->startParsing = - 1;
+  this->lastStopwatchParsing = - 1;
 }
 
 void Calculator::reset() {
@@ -90,7 +97,6 @@ void Calculator::reset() {
   this->maximumAlgebraicTransformationsPerExpression = 100;
   this->maximumRecursionDepth = 10000;
   this->recursionDepth = 0;
-  this->totalEvaluationLoops = 0;
 
   this->depthRecursionReached = 0;
   this->flagWriteLatexPlots = false;
@@ -341,7 +347,6 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
   this->controlSequences.addOnTopNoRepetitionMustBeNew("\\text");
 
   this->initializePredefinedStandardOperationsWithoutHandler();
-  this->totalPatternMatchesPerformed = 0;
   this->initializeBuiltInsFreezeArguments();
   this->initializeFunctionsStandard();
   if (this->mode == Calculator::Mode::full) {
@@ -1914,7 +1919,8 @@ bool Calculator::extractExpressions(Expression& outputExpression, std::string* o
   int counterReport = 0;
   int symbolsToIssueReport = 100;
   int minMillisecondsPerReport = 200;
-  int64_t lastMilliseconds = global.getElapsedMilliseconds();
+  this->statistics.startParsing = global.getElapsedMilliseconds();
+  this->statistics.lastStopwatchParsing = this->statistics.startParsing;
   ProgressReport theReport;
   for (
     this->counterInSyntacticSoup = 0;
@@ -1925,8 +1931,8 @@ bool Calculator::extractExpressions(Expression& outputExpression, std::string* o
     if (counterReport >= symbolsToIssueReport) {
       counterReport = 0;
       int64_t currentMilliseconds = global.getElapsedMilliseconds();
-      if (currentMilliseconds - lastMilliseconds > minMillisecondsPerReport) {
-        currentMilliseconds = lastMilliseconds;
+      if (currentMilliseconds - this->statistics.lastStopwatchParsing > minMillisecondsPerReport) {
+        this->statistics.lastStopwatchParsing = currentMilliseconds;
         std::stringstream reportStream;
         reportStream << "Processed " << this->counterInSyntacticSoup << " out of " << (*this->currrentSyntacticSoup).size
         << " syntactic elements. ";
@@ -2081,7 +2087,7 @@ bool Calculator::applyOneRule() {
   if (secondToLastS == "%" && lastS == "LogEvaluation") {
     this->flagLogEvaluation = true;
     *this << "Log evaluation start. ";
-    this->logTime();
+    this->logTime(this->statistics.lastStopwatchParsing);
     this->popTopSyntacticStack();
     return this->popTopSyntacticStack();
   }

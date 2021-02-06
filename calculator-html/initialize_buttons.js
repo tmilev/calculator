@@ -527,7 +527,7 @@ class InputPanelData {
       leftPos = rightPos;
     }
     if (rightPos - leftPos > 1000) {
-      mqProblemSpan.innerHTML = "<b style ='color:red'></b>"
+      console.log(`Latex may be too large for the editor, ${rightPos - leftPos} characters.`);
     }
     let startingCharacterSectionUnderMathQuillEdit = '';
     if (calculatorInput.value[leftPos] === '\n' || calculatorInput.value[leftPos] === ' ' ||

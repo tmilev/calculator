@@ -25,7 +25,6 @@ Calculator::Calculator() {
   this->numberExpectedExpressionsAtInitialization = - 1;
   this->mode = Calculator::Mode::full;
   this->examples.owner = this;
-  this->totalEvaluationLoops = 0;
 }
 
 MemorySaving<Calculator>& GlobalVariables::calculator() {
@@ -1272,7 +1271,7 @@ Function::Function(
   const std::string& inputAdditionalIndentifier,
   const std::string& inputCalculatorIdentifier,
   const Options& inputOptions,
-  int inputIndexParentThatBansHandler
+  const List<int>& inputParentsThatBanHandler
 ) {
   this->owner = nullptr;
   if (&this->options == &inputOptions) {
@@ -1282,15 +1281,15 @@ Function::Function(
   this->reset(inputOwner);
   this->indexOperation = inputIndexOperation;
   this->options = inputOptions;
-  this->theFunction = functionPointer;
+  this->functionAddress = functionPointer;
   this->theDescription = description;
   this->theExample = inputExample;
   this->additionalIdentifier = inputAdditionalIndentifier;
   this->calculatorIdentifier = inputCalculatorIdentifier;
   if (inputArgTypes != nullptr) {
-    this->theArgumentTypes = *inputArgTypes;
+    this->argumentTypes = *inputArgTypes;
   }
-  this->indexOperationParentThatBansHandler = inputIndexParentThatBansHandler;
+  this->parentsThatBanHandler = inputParentsThatBanHandler;
 }
 
 void Calculator::addOperationBinaryInnerHandlerWithTypes(
@@ -1309,6 +1308,7 @@ void Calculator::addOperationBinaryInnerHandlerWithTypes(
     indexOperation = this->operations.size();
     this->operations.getValueCreate(operation);
   }
+  List<int> empty;
   Function innerFunction(
     *this,
     indexOperation,
@@ -1319,11 +1319,11 @@ void Calculator::addOperationBinaryInnerHandlerWithTypes(
     inputAdditionalIdentifier,
     inputCalculatorIdentifier,
     options,
-    - 1
+    empty
   );
-  innerFunction.theArgumentTypes.reset(*this, 2);
-  innerFunction.theArgumentTypes.addChildAtomOnTop(leftType);
-  innerFunction.theArgumentTypes.addChildAtomOnTop(rightType);
+  innerFunction.argumentTypes.reset(*this, 2);
+  innerFunction.argumentTypes.addChildAtomOnTop(leftType);
+  innerFunction.argumentTypes.addChildAtomOnTop(rightType);
   this->registerCalculatorFunction(innerFunction, indexOperation);
 }
 
@@ -1375,20 +1375,26 @@ void Calculator::addOperationHandler(
   const std::string& inputAdditionalIdentifier,
   const std::string& inputCalculatorIdentifier,
   const Function::Options& options,
-  const std::string& parentOpThatBansHandler
+  const List<std::string>* parentsThatBanHandler
 ) {
   if (opArgumentListIgnoredForTheTimeBeing != "") {
     global.fatal << "This section of code is not implemented yet. Crashing to let you know. " << global.fatal;
   }
-  int indexOp = this->operations.getIndex(operation);
-  if (indexOp == - 1) {
-    indexOp = this->operations.size();
+  int indexOperation = this->operations.getIndex(operation);
+  if (indexOperation == - 1) {
+    indexOperation = this->operations.size();
     this->operations.getValueCreate(operation);
   }
-  int indexParentOpThatBansHandler = this->operations.getIndex(parentOpThatBansHandler);
-  Function theFun(
+  List<int> parentOperationsThatBanHandler;
+  if (parentsThatBanHandler != nullptr) {
+    for (int i = 0; i < parentsThatBanHandler->size; i ++) {
+      int atom = this->operations.getIndexNoFail((*parentsThatBanHandler)[i]);
+      parentOperationsThatBanHandler.addOnTop(atom);
+    }
+  }
+  Function functionWrapper(
     *this,
-    indexOp,
+    indexOperation,
     handler,
     nullptr,
     opDescription,
@@ -1396,12 +1402,12 @@ void Calculator::addOperationHandler(
     inputAdditionalIdentifier,
     inputCalculatorIdentifier,
     options,
-    indexParentOpThatBansHandler
+    parentOperationsThatBanHandler
   );
-  if (theFun.theFunction == nullptr || theFun.owner == nullptr) {
+  if (functionWrapper.functionAddress == nullptr || functionWrapper.owner == nullptr) {
     global.fatal << "Function not initialized properly. " << global.fatal;
   }
-  this->registerCalculatorFunction(theFun, indexOp);
+  this->registerCalculatorFunction(functionWrapper, indexOperation);
 }
 
 Function::Options Function::Options::adminNoTestInvisibleOffByDefault() {
@@ -1564,14 +1570,14 @@ bool Function::inputFitsMyInnerType(const Expression& input) {
   if (!this->options.flagIsInner) {
     return false;
   }
-  if (this->theArgumentTypes.children.size != 2) {
+  if (this->argumentTypes.children.size != 2) {
     return true;
   }
   if (input.children.size != 3) {
     return false;
   }
-  bool argument1Good = this->theArgumentTypes[0].data == - 1 ? true : input[1].isListStartingWithAtom(this->theArgumentTypes[0].data);
-  bool argument2Good = this->theArgumentTypes[1].data == - 1 ? true : input[2].isListStartingWithAtom(this->theArgumentTypes[1].data);
+  bool argument1Good = this->argumentTypes[0].data == - 1 ? true : input[1].isListStartingWithAtom(this->argumentTypes[0].data);
+  bool argument2Good = this->argumentTypes[1].data == - 1 ? true : input[2].isListStartingWithAtom(this->argumentTypes[1].data);
   return argument1Good && argument2Good;
 }
 
@@ -1609,15 +1615,11 @@ std::string Function::toStringSummary() const {
   return out.str();
 }
 
-bool Function::shouldBeApplied(int parentOpIfAvailable) {
+bool Function::shouldBeApplied(int parentOperationIfAvailable) {
   if (this->options.disabledByUser) {
     return false;
   }
-  bool parentIsGood = true;
-  if (parentOpIfAvailable >= 0 && this->indexOperationParentThatBansHandler >= 0) {
-    parentIsGood = (this->indexOperationParentThatBansHandler != parentOpIfAvailable);
-  }
-  if (!parentIsGood) {
+  if (this->parentsThatBanHandler.contains(parentOperationIfAvailable)) {
     return false;
   }
   if (this->options.adminOnly) {
@@ -1671,7 +1673,7 @@ JSData Function::toJSON() const {
     result["additionalIdentifier"] = this->additionalIdentifier;
   }
   std::stringstream functionAddress;
-  functionAddress << std::hex << reinterpret_cast<unsigned long>(this->theFunction);
+  functionAddress << std::hex << reinterpret_cast<unsigned long>(this->functionAddress);
   result["memoryAddress"] = functionAddress.str();
   if (this->options.flagIsInner) {
     result["inner"] = true;
@@ -1705,7 +1707,7 @@ std::string Function::toStringFull() const {
     // use of unsigned long is correct on i386 and amd64
     // uintptr_t is only available in c++ 0x
     // Please fix if the following code is not portable:
-    out << "Function memory address: " << std::hex << reinterpret_cast<unsigned long>(this->theFunction) << ". ";
+    out << "Function memory address: " << std::hex << reinterpret_cast<unsigned long>(this->functionAddress) << ". ";
     if (!this->options.flagIsInner) {
       out << "This is a <b>``law''</b> - substitution takes place only if output expression is different from input. ";
     }
@@ -1828,12 +1830,12 @@ JSData Calculator::toJSONPerformance() {
   << waitingMilliseconds << " ms (~"
   << (static_cast<double>(waitingMilliseconds) / 1000)
   << " s).";
-  moreDetails << "<br>Runs of evaluation loop: " << this->totalEvaluationLoops << ". ";
+  moreDetails << "<br>Runs of evaluation loop: " << this->statistics.totalEvaluationLoops << ". ";
   moreDetails << "<br>Expressions generated: " << this->allChildExpressions.size << ". ";
   moreDetails << "<br>Cached expression at last rule stack: " << this->cachedExpressions.size() << ". ";
   moreDetails << "<br>Expressions evaluated: " << this->statistics.expressionsEvaluated << ". ";
   moreDetails << "<br>Total number of pattern matches performed: "
-  << this->totalPatternMatchesPerformed << "";
+  << this->statistics.totalPatternMatchesPerformed << "";
   if (this->depthRecursionReached > 0) {
     moreDetails << "<br>maximum recursion depth reached: " << this->depthRecursionReached << ".";
   }
@@ -1841,11 +1843,11 @@ JSData Calculator::toJSONPerformance() {
   << (GlobalStatistics::numListsCreated - static_cast<unsigned>(this->statistics.numberOfListsStart))
   << ", total: " << GlobalStatistics::numListsCreated;
   moreDetails << "<br> # List resizes: computation: "
-  << (GlobalStatistics::numListResizesTotal - static_cast<unsigned>(this->statistics.numberListResizesStart))
-  << ", total: " << GlobalStatistics::numListResizesTotal
+  << (GlobalStatistics::numberOfListResizesTotal - static_cast<unsigned>(this->statistics.numberListResizesStart))
+  << ", total: " << GlobalStatistics::numberOfListResizesTotal
   << "<br> # hash resizing: computation: "
-  << (GlobalStatistics::numHashResizes - static_cast<unsigned>(this->statistics.numberHashResizesStart))
-  << ", total: " << GlobalStatistics::numHashResizes;
+  << (GlobalStatistics::numberOfHashResizes - static_cast<unsigned>(this->statistics.numberHashResizesStart))
+  << ", total: " << GlobalStatistics::numberOfHashResizes;
   if (Rational::totalSmallAdditions > 0) {
     moreDetails << "<br>Small rational additions: computation: "
     << Rational::totalSmallAdditions - static_cast<unsigned long long>(this->statistics.numberOfSmallAdditionsStart)

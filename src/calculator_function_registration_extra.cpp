@@ -98,8 +98,7 @@ void Calculator::initializeFunctionsExtra() {
     "TestCalculatorIndicator(1000, 200000)",
     "CalculatorFunctions::innerTestIndicator",
     "TestCalculatorIndicator",
-    innerNoTest,
-    ""
+    innerNoTest
   );
   this->addOperationHandler(
     "TestTopCommand",

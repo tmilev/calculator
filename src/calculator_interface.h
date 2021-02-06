@@ -118,7 +118,6 @@ private:
   public:
   Calculator* owner;
   int data;
-  // List<int> children;
   HashedList<int, HashFunctions::hashFunction> children;
   bool flagDeallocated;
 //////
@@ -758,16 +757,35 @@ public:
 };
 
 class Function {
+  private:
+  // Used in constructors.
+  void reset(Calculator& owner) {
+    this->argumentTypes.reset(owner);
+    this->owner = &owner;
+    this->resetExceptOwner();
+  }
+  // Used in constructors.
+  void resetExceptOwner() {
+    this->functionAddress = nullptr;
+    this->indexInOperationHandlers = - 1;
+    this->indexOperation = - 1;
+    this->parentsThatBanHandler.clear();
+    this->options.reset();
+  }
   public:
   Calculator* owner;
-  Expression theArgumentTypes;
+  Expression argumentTypes;
   std::string theDescription;
   std::string theExample;
   std::string calculatorIdentifier;
   std::string additionalIdentifier;
   int indexOperation;
   int indexInOperationHandlers;
-  int indexOperationParentThatBansHandler;
+  // List of direct parent atoms that ban the use of this handler.
+  // We will be looking up entries in this list;
+  // please refactor to a hashed list if its size ever exceeds
+  // 5.
+  List<int> parentsThatBanHandler;
 
   class Options {
   public:
@@ -815,35 +833,22 @@ class Function {
     Options();
   };
   Options options;
-  Expression::FunctionAddress theFunction;
+  Expression::FunctionAddress functionAddress;
 
   std::string toStringShort() const;
   std::string toStringSummary() const;
   std::string toStringFull() const;
   JSData toJSON() const;
-  bool shouldBeApplied(int parentOpIfAvailable);
+  bool shouldBeApplied(int parentOperationIfAvailable);
   bool operator==(const Function& other) const {
     return
-    this->theArgumentTypes == other.theArgumentTypes &&
-    this->theFunction == other.theFunction &&
+    this->argumentTypes == other.argumentTypes &&
+    this->functionAddress == other.functionAddress &&
     this->options.flagIsInner == other.options.flagIsInner;
-  }
-  void reset(Calculator& owner) {
-    this->theArgumentTypes.reset(owner);
-    this->owner = &owner;
-    this->resetExceptOwner();
-  }
-  void resetExceptOwner() {
-    this->theFunction = nullptr;
-    this->indexInOperationHandlers = - 1;
-    this->indexOperation = - 1;
-    this->indexOperationParentThatBansHandler = - 1;
-    this->options.reset();
   }
   bool inputFitsMyInnerType(const Expression& input);
   Function();
-  Function(
-    Calculator& inputOwner,
+  Function(Calculator& inputOwner,
     int inputIndexOperation,
     const Expression::FunctionAddress& functionPointer,
     Expression* inputArgTypes,
@@ -852,13 +857,13 @@ class Function {
     const std::string& inputAdditionalIndentifier,
     const std::string& inputCalculatorIdentifier,
     const Function::Options& inputOptions,
-    int inputIndexParentThatBansHandler = - 1
+    const List<int>& inputParentsThatBanHandler
   );
   static unsigned int hashFunction(const Function& input) {
     return input.hashFunction();
   }
   unsigned int hashFunction() const {
-    return static_cast<unsigned int>(reinterpret_cast<uintptr_t>(this->theFunction));
+    return static_cast<unsigned int>(reinterpret_cast<uintptr_t>(this->functionAddress));
   }
   bool apply(Calculator& calculator, const Expression& input, Expression& output, int opIndexParentIfAvailable, Function** outputHandler);
   bool checkConsistency() const;
@@ -1309,6 +1314,8 @@ public:
     int numberOfListsStart;
     int numberListResizesStart;
     int numberHashResizesStart;
+    int totalPatternMatchesPerformed;
+    int totalEvaluationLoops;
     long long int numberOfSmallAdditionsStart;
     long long int numberOfSmallMultiplicationsStart;
     long long int numberOfSmallGreatestCommonDivisorsStart;
@@ -1317,6 +1324,8 @@ public:
     long long int numberOfLargeGreatestCommonDivisorsStart;
     int64_t millisecondsLastLog;
     int64_t startTimeEvaluationMilliseconds;
+    int64_t startParsing;
+    int64_t lastStopwatchParsing;
     EvaluationStatistics();
     void initialize();
     void reset();
@@ -1356,8 +1365,6 @@ public:
 
   bool flagForkingprocessAllowed;
 
-  int totalPatternMatchesPerformed;
-  int totalEvaluationLoops;
   int numberOfPredefinedAtoms;
   int numEmptyTokensStart;
   Expression programExpression;
@@ -1491,8 +1498,8 @@ public:
   Expression expressionMinusHalf();
   Expression expressionInfinity();
   Expression expressionMinusInfinity();
-  void logFunctionWithTime(Function& inputF);
-  void logTime();
+  void logFunctionWithTime(Function& input, int64_t startTime);
+  void logTime(int64_t startTime);
   void logPublicError(const std::string& theError);
   bool decreaseStackExceptLast(int decrease);
   bool decreaseStackExceptLastTwo(int decrease);
@@ -2395,7 +2402,7 @@ public:
     const std::string& inputAdditionalIdentifier,
     const std::string& inputCalculatorIdentifier,
     const Function::Options& options,
-    const std::string& parentOpThatBansHandler = ""
+    const List<std::string>* parentsThatBanHandler = nullptr
   );
   void addOneStringAtomHandler(
     int atom,

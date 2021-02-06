@@ -111,8 +111,8 @@ public:
   static long long cgiLimitRAMuseNumPointersInList;
   static bool flagUngracefulExitInitiated;
   static unsigned int numListsCreated;
-  static unsigned int numListResizesTotal;
-  static unsigned int numHashResizes;
+  static unsigned int numberOfListResizesTotal;
+  static unsigned int numberOfHashResizes;
 
   static void checkPointerCounters();
 };

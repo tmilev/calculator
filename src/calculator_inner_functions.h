@@ -252,6 +252,9 @@ public:
   static bool turnOffRules(Calculator& calculator, const Expression& input, Expression& output);
   static bool turnOnRules(Calculator& calculator, const Expression& input, Expression& output);
 
+  // Returns false. The purpose of this function is to make the
+  // turnOnApproximations implementation easier.
+  static bool approximationsDummy(Calculator& calculator, const Expression& input, Expression& output);
   static bool turnOnApproximations(Calculator& calculator, const Expression& input, Expression& output);
   static bool turnOffApproximations(Calculator& calculator, const Expression& input, Expression& output);
 

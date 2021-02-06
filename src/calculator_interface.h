@@ -1187,6 +1187,9 @@ public:
     static std::string setRandomSeed;
     static std::string sort;
     static std::string transpose;
+    static std::string approximations;
+    static std::string turnOnRules;
+    static std::string turnOffRules;
   };
 
   // Initialization mode for the calculator.
@@ -1351,8 +1354,6 @@ public:
   bool flagHasGraphics;
   bool flagWriteLatexPlots;
 
-  bool flagNoApproximations;
-
   bool flagForkingprocessAllowed;
 
   int totalPatternMatchesPerformed;
@@ -1405,6 +1406,7 @@ public:
   std::stringstream comments;
   std::stringstream errorsPublic;
   FormatExpressions formatVisibleStrings;
+  bool approximationsBanned();
   std::string toStringRuleStatusUser();
   std::string toString();
   JSData toJSONPerformance();
@@ -1689,7 +1691,7 @@ public:
   int getOperationIndexFromControlIndex(int controlIndex);
   int getExpressionIndex();
   SyntacticElement getEmptySyntacticElement();
-  bool accountRule(const Expression& ruleE, StateMaintainerCalculator& theRuleStackMaintainer);
+  bool accountRule(const Expression& ruleE, StateMaintainerCalculator& ruleStackMaintainer);
   bool applyOneRule();
   void resetStack() {
     SyntacticElement emptyElement = this->getEmptySyntacticElement();
@@ -1787,6 +1789,9 @@ public:
   }
   int opRulesOn() {
     return this->operations.getIndexNoFail("RulesOn");
+  }
+  int opApproximations() {
+    return this->operations.getIndexNoFail(Calculator::Atoms::approximations);
   }
   int opCommandEnclosureStart() {
     return this->operations.getIndexNoFail("CommandEnclosureStart");

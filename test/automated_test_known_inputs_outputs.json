@@ -553,7 +553,7 @@
   },
   {
     "input":" TurnOffApproximations 0; \\sqrt{\\frac{676}{25} ln 3}",
-    "output":"(\"Approximations have been turned off. \";\\frac{26}{5} {\\sqrt{\\log}}{}3)"
+    "output":"(RulesOff{}\\left(\"Approximations\"\\right);\\frac{26}{5} {\\sqrt{\\log}}{}3)"
   },
   {
     "input":"[a+b, c]",
@@ -912,8 +912,12 @@
     "output":"(RulesOff{}\\left(\"sqrt\"\\right);a=\\sqrt[4]{t};RulesOn{}\\left(\"sqrt\"\\right);t^{\\frac{1}{4}})"
   },
   {
+    "input":"TurnOffApproximations(0);\nln(2);\nTurnOnApproximations(0);\nln(2);\n(TurnOffApproximations 0; ln(2));\nln(2)",
+    "output":"(RulesOff{}\\left(\"Approximations\"\\right);\\log{}\\left(2\\right);RulesOn{}\\left(\"Approximations\"\\right);0.69314718;(RulesOff{}\\left(\"Approximations\"\\right);\\log{}\\left(2\\right));0.69314718)"
+  },
+  {
     "input":"TurnOffApproximations(0); ln(2); TurnOnApproximations(0); ln(2)",
-    "output":"(\"Approximations have been turned off. \";\\log{}\\left(2\\right);\"Approximations have been turned on. \";0.69314718)"
+    "output":"(RulesOff{}\\left(\"Approximations\"\\right);\\log{}\\left(2\\right);RulesOn{}\\left(\"Approximations\"\\right);0.69314718)"
   },
   {
     "input":"x = 5;\nleft = a;\nEvaluateSymbols(\"x^x +ax +a x +\\left(left \\right)\")",
@@ -2177,7 +2181,7 @@
   },
   {
     "input":"LispifyFull(e^x)",
-    "output":"\"(20 , 102 , 468 )\""
+    "output":"\"(20 , 102 , 469 )\""
   },
   {
     "input":"TestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog=\");\nTestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog\")",

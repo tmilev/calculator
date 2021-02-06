@@ -1329,18 +1329,14 @@ unsigned int Expression::hashFunction(const Expression& input) {
 }
 
 unsigned int Expression::hashFunction() const {
-  unsigned int result = static_cast<unsigned>(this->data) * someRandomPrimes[0];
+  unsigned int result = static_cast<unsigned>(this->data) * someRandomPrimes[1];
   if (this->owner == nullptr) {
     if (this->children.size == 0) {
       return result;
     }
     global.fatal << "Uninitialized expression. " << global.fatal;
   }
-  int numCycles = MathRoutines::minimum(this->children.size, someRandomPrimesSize - 1);
-  for (int i = 0; i < numCycles; i ++) {
-    result += this->owner->allChildExpressionHashes[this->children[i]] * someRandomPrimes[i + 1];
-  }
-  return result;
+  return this->children.hashFunction();
 }
 
 const Expression& Expression::operator[](int n) const {

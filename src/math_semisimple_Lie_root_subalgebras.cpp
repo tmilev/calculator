@@ -4349,7 +4349,7 @@ bool ConeRelation::generateAutomorphisms(ConeRelation& right) {
 void ConeRelations::addRelationNoRepetition(ConeRelation& input, RootSubalgebras& owners) {
   input.computeRelationString(owners, true, true);
   int i = static_cast<signed>(this->getHash(input));
-  List<int>& theIndices = this->theHashedArrays[i];
+  List<int>& theIndices = this->hashBuckets[i];
   for (int j = 0; j < theIndices.size; j ++) {
     if (this->objects[theIndices[j]].generateAutomorphisms(input)) {
       return;

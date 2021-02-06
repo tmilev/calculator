@@ -106,7 +106,6 @@ void Calculator::reset() {
   this->flagHidePolynomialBuiltInTypeIndicator = false;
   this->flagUseFracInRationalLaTeX = true;
   this->flagForkingprocessAllowed = true;
-  this->flagNoApproximations = false;
   this->flagUsePredefinedWordSplits = true;
   this->flagPlotNoControls = true;
   this->flagPlotShowJavascriptOnly = false;

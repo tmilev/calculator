@@ -957,12 +957,14 @@ public:
   unsigned int hashFunction() const {
     unsigned int result = 0;
     int j = - 1;
+    int k = 0;
     for (int i = 0; i < this->size; i ++) {
       j ++;
+      k ++;
       if (j >= someRandomPrimesSize) {
         j = 0;
       }
-      result += someRandomPrimes[i] * HashFunctions::hashFunction(objects[i]);
+      result += k * someRandomPrimes[i] * HashFunctions::hashFunction(objects[i]);
     }
     return result;
   }
@@ -1130,7 +1132,7 @@ public:
 };
 typedef Pair<int, int, HashFunctions::hashFunction, HashFunctions::hashFunction> PairInts;
 
-template <class Object, class TemplateList, unsigned int hashFunction(const Object&) = Object::hashFunction>
+template <class Object, class TemplateList, unsigned int hashFunctionObject(const Object&) = Object::hashFunction>
 class HashTemplate: public TemplateList {
 private:
   Object popIndexShiftDown(int index);
@@ -1138,11 +1140,16 @@ private:
   void shiftUpExpandOnTop(int startingIndex);
 
 protected:
-  List<List<int> > theHashedArrays;
+  // In the i^th bucket, we store the indices of all objects
+  // for which (hash(object) mod hashBuckets.size) equals i.
+  // To look up whether an object is in the hash list, we
+  // compute the object's hash, then look up the corresponding bucket
+  // and check all entries whose indices are listed in the bucket.
+  List<List<int> > hashBuckets;
 public:
   unsigned int getHash(const Object& input) const {
-    unsigned int result = hashFunction(input);
-    result %= this->theHashedArrays.size;
+    unsigned int result = hashFunctionObject(input);
+    result %= this->hashBuckets.size;
     return result;
   }
   void clear() {
@@ -1155,14 +1162,14 @@ public:
     // detect a faulty hash).
     // If this program ever gets to do some hard-core number crunching, the 20 entries
     // should be increased.
-    if (this->isSparse() && this->theHashedArrays.size > 20) {
+    if (this->isSparse() && this->hashBuckets.size > 20) {
       for (int i = 0; i < this->size; i ++) {
         int hashIndex = this->getHash((*this)[i]);
-        this->theHashedArrays[hashIndex].size = 0;
+        this->hashBuckets[hashIndex].size = 0;
       }
     } else {
-      for (int i = 0; i < this->theHashedArrays.size; i ++) {
-        this->theHashedArrays[i].size = 0;
+      for (int i = 0; i < this->hashBuckets.size; i ++) {
+        this->hashBuckets[i].size = 0;
       }
     }
     this->size = 0;
@@ -1170,12 +1177,12 @@ public:
   std::string getReport() {
     std::stringstream out;
     out << "<br>List size: " << this->size;
-    out << "<br>Hash size: " << this->theHashedArrays.size;
+    out << "<br>Hash size: " << this->hashBuckets.size;
     int maxHashSize = 0;
     int numNonZeroHashes = 0;
-    for (int i = 0; i < this->theHashedArrays.size; i ++) {
-      maxHashSize = MathRoutines::maximum(maxHashSize, this->theHashedArrays[i].size);
-      if (this->theHashedArrays[i].size > 0) {
+    for (int i = 0; i < this->hashBuckets.size; i ++) {
+      maxHashSize = MathRoutines::maximum(maxHashSize, this->hashBuckets[i].size);
+      if (this->hashBuckets[i].size > 0) {
         numNonZeroHashes ++;
       }
     }
@@ -1185,16 +1192,16 @@ public:
   }
   void addOnTop(const Object& o) {
     unsigned int hashIndex = this->getHash(o);
-    this->theHashedArrays[hashIndex].addOnTop(this->size);
+    this->hashBuckets[hashIndex].addOnTop(this->size);
     this->TemplateList::addOnTop(o);
     if (this->size > 1) {
       this->adjustHashes();
     }
   }
-  void addListOnTop(const List<Object>& theList) {
-    this->setExpectedSize(this->size + theList.size);
-    for (int i = 0; i < theList.size; i ++) {
-      this->addOnTop(theList[i]);
+  void addListOnTop(const List<Object>& input) {
+    this->setExpectedSize(this->size + input.size);
+    for (int i = 0; i < input.size; i ++) {
+      this->addOnTop(input[i]);
     }
   }
   void removeFirstOccurenceSwapWithLast(const Object& o) {
@@ -1205,11 +1212,11 @@ public:
     this->removeIndexSwapWithLast(theIndex);
   }
   const List<int>& getHashArray(int hashIndex) const {
-    return this->theHashedArrays[hashIndex];
+    return this->hashBuckets[hashIndex];
   }
   void grandMasterConsistencyCheck() const {
-    for (int i = 0; i < this->theHashedArrays.size; i ++) {
-      List<int>& current = this->theHashedArrays[i];
+    for (int i = 0; i < this->hashBuckets.size; i ++) {
+      List<int>& current = this->hashBuckets[i];
       for (int j = 0; j < current.size; j ++) {
         int index = current[j];
         if (index >= this->size) {
@@ -1226,14 +1233,14 @@ public:
           << index << " is recorded in hash array of index "
           << i << ", however its hash value is instead "
           << this->getHash((*this)[index]) << ". The hash size is "
-          << this->theHashedArrays.size << "<br>hashes of objects: ";
+          << this->hashBuckets.size << "<br>hashes of objects: ";
           for (int l = 0; l < this->size; l ++) {
-            commentsOnCrash << this->getHash((*this)[l]) << "= " << this->getHash((*this)[l]) % this->theHashedArrays.size << ", ";
+            commentsOnCrash << this->getHash((*this)[l]) << "= " << this->getHash((*this)[l]) % this->hashBuckets.size << ", ";
           }
           commentsOnCrash << "<br>hashes recorded: ";
-          for (int l = 0; l < this->theHashedArrays.size; l ++) {
-            for (int k = 0; k < this->theHashedArrays[l].size; k ++) {
-              commentsOnCrash << this->theHashedArrays[l][k] << ", ";
+          for (int l = 0; l < this->hashBuckets.size; l ++) {
+            for (int k = 0; k < this->hashBuckets[l].size; k ++) {
+              commentsOnCrash << this->hashBuckets[l][k] << ", ";
             }
           }
           fatalCrash(commentsOnCrash.str());
@@ -1304,9 +1311,9 @@ public:
       fatalCrash(commentsOnCrash.str());
     }
     int hashIndexPop = this->getHash(this->objects[index]);
-    this->theHashedArrays[hashIndexPop].removeFirstOccurenceSwapWithLast(index);
+    this->hashBuckets[hashIndexPop].removeFirstOccurenceSwapWithLast(index);
     int hashIndexIncoming = this->getHash(theObject);
-    this->theHashedArrays[hashIndexIncoming].addOnTop(index);
+    this->hashBuckets[hashIndexIncoming].addOnTop(index);
     this->objects[index] = theObject;
   }
   void removeIndexSwapWithLast(int index) {
@@ -1319,7 +1326,7 @@ public:
     }
     Object* oPop = &this->objects[index];
     int hashIndexPop = this->getHash(*oPop);
-    this->theHashedArrays[hashIndexPop].removeFirstOccurenceSwapWithLast(index);
+    this->hashBuckets[hashIndexPop].removeFirstOccurenceSwapWithLast(index);
     if (index == this->size - 1) {
       this->size --;
       return;
@@ -1327,21 +1334,21 @@ public:
     int tempI = this->size - 1;
     Object* oTop = &this->objects[tempI];
     int hashIndexTop = this->getHash(*oTop);
-    this->theHashedArrays[hashIndexTop].removeFirstOccurenceSwapWithLast(tempI);
-    this->theHashedArrays[hashIndexTop].addOnTop(index);
+    this->hashBuckets[hashIndexTop].removeFirstOccurenceSwapWithLast(tempI);
+    this->hashBuckets[hashIndexTop].addOnTop(index);
     this->TemplateList::removeIndexSwapWithLast(index);
   }
   void swapTwoIndices(int left, int right) {
     Object tempO;
     int i1Hash = this->getHash(this->objects[left]);
     int i2Hash = this->getHash(this->objects[right]);
-    this->theHashedArrays[i1Hash].removeFirstOccurenceSwapWithLast(left);
-    this->theHashedArrays[i2Hash].removeFirstOccurenceSwapWithLast(right);
+    this->hashBuckets[i1Hash].removeFirstOccurenceSwapWithLast(left);
+    this->hashBuckets[i2Hash].removeFirstOccurenceSwapWithLast(right);
     tempO = this->objects[left];
     this->objects[left] = this->objects[right];
     this->objects[right] = tempO;
-    this->theHashedArrays[i1Hash].addOnTop(right);
-    this->theHashedArrays[i2Hash].addOnTop(left);
+    this->hashBuckets[i1Hash].addOnTop(right);
+    this->hashBuckets[i2Hash].addOnTop(left);
   }
   bool contains(const Object& o) const {
     return this->getIndex(o) != - 1;
@@ -1356,8 +1363,8 @@ public:
   }
   int getIndex(const Object& o) const {
     unsigned int hashIndex = this->getHash(o);
-    for (int i = 0; i < this->theHashedArrays[hashIndex].size; i ++) {
-      int j = this->theHashedArrays[hashIndex].objects[i];
+    for (int i = 0; i < this->hashBuckets[hashIndex].size; i ++) {
+      int j = this->hashBuckets[hashIndex].objects[i];
       if (j >= this->size) {
         std::stringstream commentsOnCrash;
         commentsOnCrash << "Corrupt hash table: at hashindex = "
@@ -1403,7 +1410,7 @@ public:
   }
 
   bool isSparseRelativeToExpectedSize(int expectedSize) const {
-    return expectedSize * 3 < this->theHashedArrays.size;
+    return expectedSize * 3 < this->hashBuckets.size;
   }
   bool isSparse() const {
     return this->isSparseRelativeToExpectedSize(this->size);
@@ -1424,17 +1431,17 @@ public:
   inline void setHashSize(int inputHashSize) {
     return this->setHashSize(static_cast<unsigned>(inputHashSize));
   }
-  void setHashSize(unsigned int HS) {
-    if (HS == static_cast<unsigned>(this->theHashedArrays.size)) {
+  void setHashSize(unsigned int desiredHashSize) {
+    if (desiredHashSize == static_cast<unsigned>(this->hashBuckets.size)) {
       return;
     }
     MacroIncrementCounter(GlobalStatistics::numHashResizes);
     List<int> emptyList; //<-empty list has size 0
-    this->theHashedArrays.initializeFillInObject(HS, emptyList);
+    this->hashBuckets.initializeFillInObject(desiredHashSize, emptyList);
     if (this->size > 0) {
       for (int i = 0; i < this->size; i ++) {
         int theIndex = this->getHash((*this)[i]);
-        this->theHashedArrays[theIndex].addOnTop(i);
+        this->hashBuckets[theIndex].addOnTop(i);
       }
     }
   }
@@ -1459,8 +1466,8 @@ public:
     this->operator=(theList);
   }
   void initializeHashesToOne() {
-    this->theHashedArrays.setSize(1);
-    this->theHashedArrays[0].size = 0;
+    this->hashBuckets.setSize(1);
+    this->hashBuckets[0].size = 0;
   }
   HashTemplate(const HashTemplate& other) {
     this->initializeHashesToOne();
@@ -1475,21 +1482,21 @@ public:
   std::string toString() const {
     return this->::List<Object>::toString();
   }
-  void operator=(const HashedList<Object, hashFunction>& from) {
+  void operator=(const HashedList<Object, hashFunctionObject>& from) {
     if (&from == this) {
       return;
     }
     this->clear();
-    this->setHashSize(from.theHashedArrays.size);
+    this->setHashSize(from.hashBuckets.size);
     this->::List<Object>::operator=(from);
     if (from.isSparse()) {
       for (int i = 0; i < this->size; i ++) {
         unsigned int hashIndex = this->getHash(this->objects[i]);
-        this->theHashedArrays[hashIndex].reserve(from.theHashedArrays[hashIndex].size);
-        this->theHashedArrays[hashIndex].addOnTop(i);
+        this->hashBuckets[hashIndex].reserve(from.hashBuckets[hashIndex].size);
+        this->hashBuckets[hashIndex].addOnTop(i);
       }
     } else {
-      this->theHashedArrays = from.theHashedArrays;
+      this->hashBuckets = from.hashBuckets;
     }
   }
   const Object& operator[](int i) const {

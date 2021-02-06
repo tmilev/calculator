@@ -21,6 +21,9 @@ std::string Calculator::Atoms::commandEnclosure = "CommandEnclosure";
 std::string Calculator::Atoms::setInputBox = "SetInputBox";
 std::string Calculator::Atoms::sort = "Sort";
 std::string Calculator::Atoms::transpose = "Transpose";
+std::string Calculator::Atoms::approximations = "Approximations";
+std::string Calculator::Atoms::turnOnRules = "TurnOnRules";
+std::string Calculator::Atoms::turnOffRules = "TurnOffRules";
 
 void Calculator::initializeAdminFunctions() {
   Function::Options adminDefault, adminDisabled;
@@ -189,12 +192,35 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationHandler(
+    Calculator::Atoms::approximations,
+    CalculatorFunctions::approximationsDummy,
+    "",
+    "A dummy handler, used to make the implementation of"
+    "TurnOnApproximations easier. ",
+    "TurnOffApproximations(0);\n"
+    "ln(2);\n"
+    "TurnOnApproximations(0);\n"
+    "ln(2);\n"
+    "(TurnOffApproximations 0; ln(2));\n"
+    "ln(2)",
+    "CalculatorFunctions::approximationsDummy",
+    Calculator::Atoms::approximations,
+    innerInvisible
+  );
+  this->addOperationHandler(
     "TurnOnApproximations",
     CalculatorFunctions::turnOnApproximations,
     "",
-    "Turns on numerical approximations. Takes as input dummy argument. ",
-    "TurnOffApproximations(0); ln(2); TurnOnApproximations(0); ln(2)",
-    "CalculatorConversions::turnOnRules",
+    "Turns on numerical approximations. "
+    "Will wipe out the expression cache. "
+    "Takes as input dummy argument. ",
+    "TurnOffApproximations(0);\n"
+    "ln(2);\n"
+    "TurnOnApproximations(0);\n"
+    "ln(2);\n"
+    "(TurnOffApproximations 0; ln(2));\n"
+    "ln(2)",
+    "CalculatorFunctions::turnOnRules",
     "TurnOnApproximations",
     innerStandard
   );
@@ -5076,8 +5102,6 @@ void Calculator::initializeAtomsNonCacheable() {
   this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew("RandomInteger");
   this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew("SelectAtRandom");
   this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew("GenerateRandomPrime");
-  this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew("TurnOffApproximations");
-  this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew("TurnOnApproximations");
   this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew("PrintAlgebraicClosureStatus");
 //  this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew("PrintRuleStack");
 }

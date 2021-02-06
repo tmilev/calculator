@@ -2186,12 +2186,29 @@ TurnOffRules("sqrt"); a = \sqrt[4]{t}; TurnOnRules("sqrt"); a
 ```
 Turns on computational rules.
 
-*TurnOnApproximations* [TurnOnApproximations] {CalculatorConversions::turnOnRules}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOffApproximations%280%29%3b%20ln%282%29%3b%20TurnOnApproximations%280%29%3b%20ln%282%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*Approximations* [Approximations] {CalculatorFunctions::approximationsDummy}. (invisible) 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOffApproximations%280%29%3b%5cnln%282%29%3b%5cnTurnOnApproximations%280%29%3b%5cnln%282%29%3b%5cn%28TurnOffApproximations%200%3b%20ln%282%29%29%3b%5cnln%282%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-TurnOffApproximations(0); ln(2); TurnOnApproximations(0); ln(2)
+TurnOffApproximations(0);
+ln(2);
+TurnOnApproximations(0);
+ln(2);
+(TurnOffApproximations 0; ln(2));
+ln(2)
 ```
-Turns on numerical approximations. Takes as input dummy argument. 
+A dummy handler, used to make the implementation ofTurnOnApproximations easier. 
+
+*TurnOnApproximations* [TurnOnApproximations] {CalculatorFunctions::turnOnRules}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOffApproximations%280%29%3b%5cnln%282%29%3b%5cnTurnOnApproximations%280%29%3b%5cnln%282%29%3b%5cn%28TurnOffApproximations%200%3b%20ln%282%29%29%3b%5cnln%282%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+TurnOffApproximations(0);
+ln(2);
+TurnOnApproximations(0);
+ln(2);
+(TurnOffApproximations 0; ln(2));
+ln(2)
+```
+Turns on numerical approximations. Will wipe out the expression cache. Takes as input dummy argument. 
 
 *TurnOffApproximations* [TurnOffApproximations] {CalculatorConversions::turnOnRules}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOffApproximations%280%29%3b%20ln%282%29%3b%20TurnOnApproximations%280%29%3b%20ln%282%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

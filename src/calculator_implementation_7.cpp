@@ -762,7 +762,7 @@ bool CalculatorFunctionsBasic::logarithm(Calculator& calculator, const Expressio
   if (input[1].isEqualToOne()) {
     return output.assignValue(0, calculator);
   }
-  if (calculator.flagNoApproximations) {
+  if (calculator.approximationsBanned()) {
     return false;
   }
   double theArgument;
@@ -824,7 +824,7 @@ bool CalculatorFunctionsTrigonometry::arctan(Calculator& calculator, const Expre
     output *= calculator.expressionMinusOne();
     return true;
   }
-  if (calculator.flagNoApproximations) {
+  if (calculator.approximationsBanned()) {
     return false;
   }
   double theArgument;
@@ -836,7 +836,7 @@ bool CalculatorFunctionsTrigonometry::arctan(Calculator& calculator, const Expre
 
 bool CalculatorFunctionsTrigonometry::arccos(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::arccos");
-  if (calculator.flagNoApproximations) {
+  if (calculator.approximationsBanned()) {
     return false;
   }
   if (input.size() != 2) {
@@ -855,7 +855,7 @@ bool CalculatorFunctionsTrigonometry::arcsin(Calculator& calculator, const Expre
   if (input.size() != 2) {
     return false;
   }
-  if (calculator.flagNoApproximations) {
+  if (calculator.approximationsBanned()) {
     return false;
   }
   double theArgument;
@@ -920,7 +920,7 @@ bool CalculatorFunctionsTrigonometry::sin(Calculator& calculator, const Expressi
       }
     }
   }
-  if (calculator.flagNoApproximations) {
+  if (calculator.approximationsBanned()) {
     return false;
   }
   double theArgument = 0;
@@ -957,7 +957,7 @@ bool CalculatorFunctionsTrigonometry::cos(Calculator& calculator, const Expressi
       }
     }
   }
-  if (calculator.flagNoApproximations) {
+  if (calculator.approximationsBanned()) {
     return false;
   }
   double theArgument = 0;
@@ -8206,13 +8206,25 @@ bool CalculatorFunctions::turnRulesOnOff(
   return true;
 }
 
+bool CalculatorFunctions::approximationsDummy(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  (void) calculator;
+  (void) input;
+  (void) output;
+  return false;
+}
+
 bool CalculatorFunctions::turnOnApproximations(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::turnOnApproximations");
   (void) input;
-  calculator.flagNoApproximations = false;
-  return output.assignValue(std::string("Approximations have been turned on. "), calculator);
+  Expression approximations;
+  approximations.makeAtom(calculator.opApproximations(), calculator);
+  Expression onSwitch;
+  onSwitch.makeOX(calculator, calculator.opTurnOffRules(), approximations);
+  return CalculatorFunctions::turnOnRules(calculator, onSwitch, output);
 }
 
 bool CalculatorFunctions::turnOffApproximations(
@@ -8220,8 +8232,11 @@ bool CalculatorFunctions::turnOffApproximations(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::turnOffApproximations");
   (void) input;
-  calculator.flagNoApproximations = true;
-  return output.assignValue(std::string("Approximations have been turned off. "), calculator);
+  Expression approximations;
+  approximations.makeAtom(calculator.opApproximations(), calculator);
+  Expression offSwitch;
+  offSwitch.makeOX(calculator, calculator.opTurnOffRules(), approximations);
+  return CalculatorFunctions::turnOffRules(calculator, offSwitch, output);
 }
 
 bool CalculatorFunctions::turnOffRules(

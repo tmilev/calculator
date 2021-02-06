@@ -250,8 +250,9 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
 
 void TransportLayerSecurityOpenSSL::clearErrorQueue(int numberOfTransferredBytes) {
   MacroRegisterFunctionWithName("TransportLayerSecurityOpenSSL::clearErrorQueue");
-  char buffer[200];
+  (void) numberOfTransferredBytes;
 #ifdef MACRO_use_open_ssl
+  char buffer[200];
   if (numberOfTransferredBytes < 0) {
     int errorCode = SSL_get_error(this->sslData, numberOfTransferredBytes);
     global << Logger::red << "Error: transferred bytes: "

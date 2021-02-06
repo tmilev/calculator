@@ -582,6 +582,13 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
   this->owner = nullptr;
 }
 
+bool Calculator::approximationsBanned() {
+  Function& approximationsDummyHandler = this->getFunctionHandlerFromNamedRule(
+    Calculator::Atoms::approximations
+  );
+  return approximationsDummyHandler.options.disabledByUser;
+}
+
 Expression Calculator::getNewBoundVariable() {
   Expression result(*this);
   result.addChildAtomOnTop(this->opBind());
@@ -610,7 +617,7 @@ Expression Calculator::getNewAtom() {
 }
 
 bool Calculator::accountRule(
-  const Expression& ruleE, StateMaintainerCalculator& theRuleStackMaintainer
+  const Expression& ruleE, StateMaintainerCalculator& ruleStackMaintainer
 ) {
   MacroRegisterFunctionWithName("Calculator::accountRule");
   RecursionDepthCounter theRecursionCounter(&this->recursionDepth);
@@ -618,7 +625,7 @@ bool Calculator::accountRule(
     return false;
   }
   if (ruleE.isCalculatorStatusChanger()) {
-    theRuleStackMaintainer.addRule(ruleE);
+    ruleStackMaintainer.addRule(ruleE);
   }
   if (!ruleE.isListStartingWithAtom(this->opCommandEnclosure())) {
     return true;
@@ -627,10 +634,10 @@ bool Calculator::accountRule(
     return true;
   }
   if (!ruleE[1].startsWith(this->opCommandSequence())) {
-    return this->accountRule(ruleE[1], theRuleStackMaintainer);
+    return this->accountRule(ruleE[1], ruleStackMaintainer);
   }
   for (int i = 1; i < ruleE[1].size(); i ++) {
-    if (!this->accountRule(ruleE[1][i], theRuleStackMaintainer)) {
+    if (!this->accountRule(ruleE[1][i], ruleStackMaintainer)) {
       return false;
     }
   }

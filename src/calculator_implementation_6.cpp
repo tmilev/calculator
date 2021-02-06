@@ -3204,7 +3204,7 @@ bool CalculatorFunctions::innerJacobiSymbol(Calculator& calculator, const Expres
   global.fatal << "Function not implemented yet." << global.fatal;
   (void) calculator;
   (void) output;
-  if (input.children.size != 3) {
+  if (input.size() != 3) {
     return false;
   }
   const Expression& leftE = input[1];

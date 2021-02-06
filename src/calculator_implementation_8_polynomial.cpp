@@ -310,13 +310,13 @@ bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFields(
   Expression constantFactor;
   constantFactor.assignValue(factorization.constantFactor, calculator);
   resultSequence.addOnTop(constantFactor);
-  Expression polynomialE, expressionE(calculator);
+  Expression polynomialE;
 
   for (int i = 0; i < factorization.reduced.size; i ++) {
+    Expression expressionE(calculator);
     polynomialE.assignValueWithContext(
       factorization.reduced[i], polynomial.context, calculator
     );
-    expressionE.children.clear();
     expressionE.addChildAtomOnTop("MakeExpression");
     expressionE.addChildOnTop(polynomialE);
     resultSequence.addOnTop(expressionE);
@@ -352,12 +352,12 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
   Expression constantFactor;
   constantFactor.assignValue(factorization.constantFactor, calculator);
   resultSequence.addOnTop(constantFactor);
-  Expression polynomialE, expressionE(calculator);
+  Expression polynomialE;
   for (int i = 0; i < factorization.reduced.size; i ++) {
+    Expression expressionE(calculator);
     polynomialE.assignValueWithContext(
       factorization.reduced[i], polynomial.context, calculator
     );
-    expressionE.children.clear();
     expressionE.addChildAtomOnTop("MakeExpression");
     expressionE.addChildOnTop(polynomialE);
     resultSequence.addOnTop(expressionE);
@@ -421,12 +421,12 @@ bool CalculatorFunctionsPolynomial::factorPolynomialProcess(
   Expression constantFactorExpression;
   constantFactorExpression.assignValue(constantFactor, calculator);
   resultSequence.addOnTop(constantFactorExpression);
-  Expression polynomialE, expressionE(calculator);
+  Expression polynomialE;
   for (int i = 0; i < factors.size; i ++) {
+    Expression expressionE(calculator);
     polynomialE.assignValueWithContext(
       factors[i], originalPolynomial.context, calculator
     );
-    expressionE.children.clear();
     expressionE.addChildAtomOnTop("MakeExpression");
     expressionE.addChildOnTop(polynomialE);
     resultSequence.addOnTop(expressionE);
@@ -1054,7 +1054,7 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
   }
   output.reset(calculator);
   for (int i = 1; i < input.size(); i ++) {
-    output.addChildOnTop(input.children[i]);
+    output.addChildOnTop(input[i]);
   }
   ExpressionContext theContext(calculator);
   if (!calculator.getVectorFromFunctionArguments<Polynomial<Rational> >(
@@ -1227,7 +1227,7 @@ bool CalculatorFunctionsPolynomial::groebner(
   MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::groebner");
   Vector<Polynomial<Rational> > inputVector;
   Vector<Polynomial<ElementZmodP> > inputVectorZmodP;
-  ExpressionContext theContext(calculator);
+  ExpressionContext context(calculator);
   if (input.size() < 3) {
     return output.makeError("Function takes at least two arguments. ", calculator);
   }
@@ -1245,31 +1245,32 @@ bool CalculatorFunctionsPolynomial::groebner(
       "Error: your upper limit of polynomial "
       "operations exceeds 1000000, which is too large. "
       "You may use negative or zero number "
-      "give no computation bound, but please don't. ",
+      "give no computation bound. ",
       calculator
     );
   }
   int upperBoundComputations = int(upperBound.getDoubleValue());
   output.reset(calculator);
-  for (int i = 1; i < input.children.size; i ++) {
+  output.checkInitialization();
+  for (int i = 1; i < input.size(); i ++) {
     output.addChildOnTop(input[i]);
   }
-  int theMod = 0;
+  int modulus = 0;
   if (useModZp) {
-    if (!output[1].isSmallInteger(&theMod)) {
+    if (!output[1].isSmallInteger(&modulus)) {
       return output.makeError(
         "Error: failed to extract modulo from the second argument. ",
         calculator
       );
     }
-    if (!MathRoutines::isPrime(theMod)) {
+    if (!MathRoutines::isPrime(modulus)) {
       return output.makeError("Error: modulus not prime. ", calculator);
     }
   }
   if (!calculator.getVectorFromFunctionArguments<Polynomial<Rational> >(
     output,
     inputVector,
-    &theContext,
+    &context,
     - 1,
     CalculatorConversions::functionPolynomial<Rational>
   )) {
@@ -1282,11 +1283,11 @@ bool CalculatorFunctionsPolynomial::groebner(
     inputVector[i].scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   }
   GroebnerBasisComputation<AlgebraicNumber> theGroebnerComputation;
-  theContext.getFormat(theGroebnerComputation.format);
-  theContext.getFormat(global.theDefaultFormat.getElement());
+  context.getFormat(theGroebnerComputation.format);
+  context.getFormat(global.theDefaultFormat.getElement());
   if (useModZp) {
     ElementZmodP tempElt;
-    tempElt.makeMinusOne(static_cast<unsigned>(theMod));
+    tempElt.makeMinusOne(static_cast<unsigned>(modulus));
     inputVectorZmodP.setSize(inputVector.size);
     for (int i = 0; i < inputVector.size; i ++) {
       inputVectorZmodP[i].makeZero();
@@ -1324,9 +1325,9 @@ bool CalculatorFunctionsPolynomial::groebner(
   std::stringstream out;
   out << theGroebnerComputation.toStringLetterOrder(false);
   out << "Letter/expression order: ";
-  int numberOfVariables = theContext.numberOfVariables();
+  int numberOfVariables = context.numberOfVariables();
   for (int i = 0; i < numberOfVariables; i ++) {
-    out << theContext.getVariable(i).toString();
+    out << context.getVariable(i).toString();
     if (i != numberOfVariables - 1) {
       out << "&lt;";
     }

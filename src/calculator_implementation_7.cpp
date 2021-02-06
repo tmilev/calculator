@@ -1328,9 +1328,9 @@ bool CalculatorFunctions::innerCompositeApowerBevaluatedAtC(
   }
   calculator.checkInputNotSameAsOutput(input, output);
   Expression finalBase;
-  finalBase.reset(calculator, input.children.size);
+  finalBase.reset(calculator, input.size());
   finalBase.addChildOnTop(input[0][1]);
-  for (int i = 1; i < input.children.size; i ++) {
+  for (int i = 1; i < input.size(); i ++) {
     finalBase.addChildOnTop(input[i]);
   }
   return output.makeXOX(calculator, calculator.opThePower(), finalBase, input[0][2]);
@@ -2306,27 +2306,29 @@ bool CalculatorFunctionsListsAndSets::unionNoRepetition(
     }
   }
   HashedList<Expression> theList;
-  List<int> theIndices;
+  List<int> indices;
   theList.setExpectedSize(numElts);
   for (int i = 1; i < input.size(); i ++) {
     for (int j = 1; j < input[i].size(); j ++) {
       theList.addOnTopNoRepetition(input[i][j]);
     }
   }
-  theIndices.setSize(theList.size);
+  indices.setSize(theList.size);
   for (int i = 0; i < theList.size; i ++) {
-    theIndices[i] = calculator.addChildExpression(theList[i]);
+    indices[i] = calculator.addChildExpression(theList[i]);
   }
-  output.children.reserve(numElts);
-  output.reset(calculator, theIndices.size + 1);
+  output.setExpectedSize(numElts);
+  output.reset(calculator, indices.size + 1);
   output.addChildAtomOnTop(calculator.opSequence());
-  output.children.addListOnTop(theIndices);
+  output.addChildIndices(indices);
   return true;
 }
 
-bool CalculatorFunctions::innerCrossProduct(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerCrossProduct(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerCrossProduct");
-  if (!input.isListStartingWithAtom(calculator.opCrossProduct()) || input.children.size != 3) {
+  if (!input.isListStartingWithAtom(calculator.opCrossProduct()) || input.size() != 3) {
     return false;
   }
   const Expression& leftE = input[1];
@@ -2943,7 +2945,7 @@ bool CalculatorFunctions::outerCommuteAtimesBifUnivariate(
     return false;
   }
   output = input;
-  output.children.swapTwoIndices(1, 2);
+  output.swapChildren(1, 2);
   return true;
 }
 
@@ -5496,12 +5498,12 @@ bool CalculatorFunctionsListsAndSets::removeLastElement(
     const Expression& sequenceCandidate = input[1];
     if (sequenceCandidate.isSequenceNElements() && sequenceCandidate.size() > 1) {
       output = sequenceCandidate;
-      output.children.removeLastObject();
+      output.removeLastChild();
       return true;
     }
   }
   output = input;
-  output.children.removeLastObject();
+  output.removeLastChild();
   return output.setChildAtomValue(0, calculator.opSequence());
 }
 
@@ -6171,8 +6173,8 @@ bool CalculatorFunctionsPlot::plot2DWithBars(Calculator& calculator, const Expre
     );
   }
   Expression lowerEplot = input, upperEplot = input;
-  lowerEplot.children.removeIndexShiftDown(2);
-  upperEplot.children.removeIndexShiftDown(1);
+  lowerEplot.removeChildShiftDown(2);
+  upperEplot.removeChildShiftDown(1);
   Plot outputPlot;
   outputPlot.dimension = 2;
   bool tempB = CalculatorFunctionsPlot::plot2D(calculator, lowerEplot, output);
@@ -7414,7 +7416,7 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFindProductDistanceModN");
-  if (input.children.size != 3) {
+  if (input.size() != 3) {
     return calculator << "<hr>Product distance f-n takes as input 2 arguments, modulo and a list of integers";
   }
   const Expression& theModuloE = input[1];
@@ -7834,7 +7836,7 @@ public:
         return;
       }
     }
-    for (int i = 0; i < this->getCurrentExpression().children.size; i ++) {
+    for (int i = 0; i < this->getCurrentExpression().size(); i ++) {
       this->currentEchildrenTruncated.addOnTop(this->getCurrentExpression()[i]);
       if (i + 1 + this->indexCurrentChild > this->maximumDisplayedNodes || i > this->maximumAllowedWidth) {
         Expression dotsAtom;

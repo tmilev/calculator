@@ -21,6 +21,7 @@ class ExpressionContext;
 
 class Expression {
 private:
+  HashedList<int, HashFunctions::hashFunction> children;
   void reset() {
     this->owner = nullptr;
     this->children.size = 0;
@@ -118,7 +119,6 @@ private:
   public:
   Calculator* owner;
   int data;
-  HashedList<int, HashFunctions::hashFunction> children;
   bool flagDeallocated;
 //////
   typedef bool (*FunctionAddress) (Calculator& calculator, const Expression& input, Expression& output);
@@ -152,11 +152,17 @@ private:
   void getMultiplicandsDivisorsRecursive(List<Expression>& outputAppendList, int depth = 0) const;
   void getCoefficientMultiplicandForm(Expression& outputCoeff, Expression& outputNoCoeff) const;
   void getCoefficientMultiplicandForm(Rational& outputCoeff, Expression& outputNoCoeff) const;
-  bool setChildAtomValue(int childIndex, const std::string& theAtom);
-  bool setChildAtomValue(int childIndex, int theAtomValue);
+  bool setChildAtomValue(int childIndex, const std::string& atom);
+  bool setChildAtomValue(int childIndex, int atomValue);
+  void swapChildren(int left, int right);
+  void removeLastChild();
   int size() const {
     return this->children.size;
   }
+  void removeChildShiftDown(int childIndex);
+  void setSize(int desiredSize);
+  void setExpectedSize(int expectedSize);
+  void addChildIndices(List<int>& indices);
   bool setChild(int childIndexInMe, const Expression& inputChild);
   bool assignMatrixExpressions(
     const Matrix<Expression>& input,
@@ -2310,20 +2316,23 @@ public:
     Expression::FunctionAddress conversionFunction = nullptr,
     std::stringstream* commentsOnError = nullptr
   );
-  template <class theType>
+  template <class Type>
   bool getVectorFromFunctionArguments(
     const Expression& input,
-    Vector<theType>& output,
+    Vector<Type>& output,
     ExpressionContext* inputOutputStartingContext = nullptr,
     int targetDimNonMandatory = - 1,
     Expression::FunctionAddress conversionFunction = nullptr
   ) {
-    Expression list = input;
-    if (list.isList()) {
-      list.setChildAtomValue(0, this->opSequence());
+    MacroRegisterFunctionWithName("Calculator::getVectorFromFunctionArguments");
+    input.checkInitialization();
+    Expression sequence = input;
+    if (sequence.isList()) {
+      sequence.setChildAtomValue(0, this->opSequence());
     }
+    sequence.checkInitialization();
     return this->getVector(
-      list,
+      sequence,
       output,
       inputOutputStartingContext,
       targetDimNonMandatory,
@@ -2781,6 +2790,7 @@ public:
     Expression::FunctionAddress converter, const Expression& input, Expression& output
   ) {
     MacroRegisterFunctionWithName("Calculator::convertToTypeUsingFunction");
+    input.checkInitialization();
     if (input.isOfType<Type>()) {
       output = input;
       return true;
@@ -2824,30 +2834,32 @@ bool Calculator::getVector(
   Expression::FunctionAddress conversionFunction
 ) {
   MacroRegisterFunctionWithName("Calculator::getVector");
+  input.checkInitialization();
   List<Expression> nonConvertedEs;
   if (!this->getVectorExpressions(input, nonConvertedEs, targetDimensionNonMandatory)) {
     return false;
   }
-  List<Expression> convertedEs;
-  convertedEs.setSize(nonConvertedEs.size);
+  List<Expression> convertedExpressions;
+  convertedExpressions.setSize(nonConvertedEs.size);
   for (int i = 0; i < nonConvertedEs.size; i ++) {
+    nonConvertedEs[i].checkInitialization();
     if (!CalculatorConversions::convertToTypeUsingFunction<Type>(
-      conversionFunction, nonConvertedEs[i], convertedEs[i]
+      conversionFunction, nonConvertedEs[i], convertedExpressions[i]
     )) {
       return false;
     }
   }
-  if (!this->convertExpressionsToCommonContext(convertedEs, inputOutputStartingContext)) {
+  if (!this->convertExpressionsToCommonContext(convertedExpressions, inputOutputStartingContext)) {
     return false;
   }
   if (targetDimensionNonMandatory > 0) {
-    if (convertedEs.size != targetDimensionNonMandatory) {
+    if (convertedExpressions.size != targetDimensionNonMandatory) {
       return false;
     }
   }
-  output.setSize(convertedEs.size);
-  for (int i = 0; i < convertedEs.size; i ++) {
-    output[i] = convertedEs[i].getValue<Type>();
+  output.setSize(convertedExpressions.size);
+  for (int i = 0; i < convertedExpressions.size; i ++) {
+    output[i] = convertedExpressions[i].getValue<Type>();
   }
   return true;
 }

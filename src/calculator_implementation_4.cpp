@@ -84,6 +84,7 @@ int IntIdentity(const int& x) {
 
 bool Calculator::getVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory) {
   MacroRegisterFunctionWithName("Calculator::getVectorExpressions");
+  input.checkInitialization();
   output.reserve(input.size());
   output.setSize(0);
   if (!input.isSequenceNElements() && !input.startsWith(this->opIntervalOpen())) {
@@ -106,7 +107,9 @@ bool Calculator::getVectorExpressions(const Expression& input, List<Expression>&
   }
   targetDimNonMandatory = input.size() - 1;
   for (int i = 0; i < targetDimNonMandatory; i ++) {
-    output.addOnTop(input[i + 1]);
+    const Expression& current = input[i + 1];
+    current.checkInitialization();
+    output.addOnTop(current);
   }
   return true;
 }
@@ -458,10 +461,8 @@ bool CalculatorBasics::associate(Calculator& calculator, const Expression& input
   // int64_t startTime = global.getElapsedMilliseconds();
   List<Expression> multiplicands;
   calculator.collectOpands(input, operation, multiplicands);
-  //  global.comments << "DEBUG: collect opands took: " << global.getElapsedMilliseconds() - startTime << "ms. <hr>";
   Expression result;
   result.makeOXdotsX(calculator, operation, multiplicands);
-  // global.comments << "DEBUG: with construction " << global.getElapsedMilliseconds() - startTime << "ms. <hr>";
   if (result == input) {
     return false;
   }
@@ -566,8 +567,11 @@ bool CalculatorBasics::timesToFunctionApplication(Calculator& calculator, const 
     output = secondElt;
     return output.setChild(0, firstElt);
   }
-  output = input;
-  output.children.removeIndexShiftDown(0);
+  calculator.checkInputNotSameAsOutput(input, output);
+  output.reset(calculator);
+  for (int i = 1; i < input.size(); i ++) {
+    output.addChildOnTop(input[i]);
+  }
   return true;
 }
 
@@ -1570,10 +1574,10 @@ bool Function::inputFitsMyInnerType(const Expression& input) {
   if (!this->options.flagIsInner) {
     return false;
   }
-  if (this->argumentTypes.children.size != 2) {
+  if (this->argumentTypes.size() != 2) {
     return true;
   }
-  if (input.children.size != 3) {
+  if (input.size() != 3) {
     return false;
   }
   bool argument1Good = this->argumentTypes[0].data == - 1 ? true : input[1].isListStartingWithAtom(this->argumentTypes[0].data);
@@ -1898,11 +1902,11 @@ std::string Calculator::toString() {
   } else {
     out2 << "No computation time limit.<hr> ";
   }
-  if (this->ruleStack.children.size > 1) {
+  if (this->ruleStack.size() > 1) {
     out2 << "<b>Predefined rules.</b><br>";
-    for (int i = 1; i < this->ruleStack.children.size; i ++) {
+    for (int i = 1; i < this->ruleStack.size(); i ++) {
       out2 << this->ruleStack[i].toString();
-      if (i != this->ruleStack.children.size - 1) {
+      if (i != this->ruleStack.size() - 1) {
         out2 << "<br>";
       }
     }
@@ -2285,7 +2289,7 @@ bool CalculatorBasics::meltBrackets(Calculator& calculator, const Expression& in
   int tempInt;
   int childIncrease = 0;
   bool found = false;
-  for (int i = 0; i < input.children.size; i ++) {
+  for (int i = 0; i < input.size(); i ++) {
     const Expression& currentChild = input[i];
     if (currentChild.isMeltable(&tempInt)) {
       found = true;
@@ -2295,9 +2299,9 @@ bool CalculatorBasics::meltBrackets(Calculator& calculator, const Expression& in
   if (!found) {
     return false;
   }
-  output.reset(calculator, input.children.size + childIncrease);
+  output.reset(calculator, input.size() + childIncrease);
   output.addChildAtomOnTop(calculator.opCommandSequence());
-  for (int i = 1; i < input.children.size; i ++) {
+  for (int i = 1; i < input.size(); i ++) {
     const Expression& currentChild = input[i];
     if (!currentChild.isMeltable()) {
       output.addChildOnTop(input[i]);
@@ -2307,7 +2311,7 @@ bool CalculatorBasics::meltBrackets(Calculator& calculator, const Expression& in
       output.addChildOnTop(currentChild[1]);
       continue;
     }
-    for (int j = 1; j < currentChild[1].children.size; j ++) {
+    for (int j = 1; j < currentChild[1].size(); j ++) {
       output.addChildOnTop(currentChild[1][j]);
     }
   }

@@ -321,9 +321,9 @@ bool CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraAlgebr
 bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
   Calculator& calculator, const Expression& input, SlTwoSubalgebra& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerLoadFromObject SlTwoSubalgebra");
+  MacroRegisterFunctionWithName("CalculatorConversions::innerSlTwoSubalgebraPrecomputed");
   if (!input.isListNElements(4)) {
-    return calculator << "<hr>input of innerLoadFromObject has " << input.children.size << " children, 4 expected. ";
+    return calculator << "<hr>input of innerLoadFromObject has " << input.size() << " children, 4 expected. ";
   }
   const Expression& theOwnerE = input[1];
   Expression tempE;
@@ -445,7 +445,7 @@ bool CalculatorConversions::innerLoadKey(
   MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKey");
   Expression theKeyE;
   theKeyE.makeAtom(inputKey, calculator);
-  for (int i = 0; i < inputStatementList.children.size; i ++) {
+  for (int i = 0; i < inputStatementList.size(); i ++) {
     if (inputStatementList[i].startsWith(calculator.opDefine(), 3)) {
       if (inputStatementList[i][1] == theKeyE) {
         output = inputStatementList[i][2];
@@ -567,7 +567,7 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
   if (CalculatorConversions::innerLoadKey(calculator, input, "generators", generatorsE)) {
     generatorsE.sequencefy();
     ElementSemisimpleLieAlgebra<AlgebraicNumber> curGenAlgebraic;
-    for (int i = 1; i < generatorsE.children.size; i ++) {
+    for (int i = 1; i < generatorsE.size(); i ++) {
       if (!CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(
         calculator, generatorsE[i], curGenAlgebraic, *owner.owner
       )) {
@@ -656,18 +656,18 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   reportStream << " done. Fetching subalgebra list ... ";
   theReport.report(reportStream.str());
   theSAsE.sequencefy();
-  theSAs.subalgebras.setExpectedSize(theSAsE.children.size - 1);
+  theSAs.subalgebras.setExpectedSize(theSAsE.size() - 1);
   theSAs.subalgebras.clear();
-  theSAs.subalgebrasNonEmbedded->setExpectedSize(theSAsE.children.size - 1);
+  theSAs.subalgebrasNonEmbedded->setExpectedSize(theSAsE.size() - 1);
   theSAs.flagAttemptToSolveSystems = true;
   theSAs.flagcomputeModuleDecompositionsition = true;
   theSAs.flagcomputePairingTable = false;
   theSAs.flagComputeNilradicals = false;
   theSAs.millisecondsComputationStart = global.getElapsedMilliseconds();
-  reportStream << " done. <br>Total subalgebras: " << theSAsE.children.size - 1 << ". ";
+  reportStream << " done. <br>Total subalgebras: " << theSAsE.size() - 1 << ". ";
   theReport.report(reportStream.str());
 
-  for (int i = 1; i < theSAsE.children.size; i ++) {
+  for (int i = 1; i < theSAsE.size(); i ++) {
     std::stringstream reportStream2;
     reportStream2 << reportStream.str() << "Subalgebra "
     << i << " is being loaded from expression "
@@ -765,7 +765,7 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(
   theValues.addOnTop(numHsExploredE);
   Expression subalgebrasListE, candidateE;
   subalgebrasListE.makeSequence(calculator);
-  subalgebrasListE.children.reserve(input.subalgebras.values.size + 1);
+  subalgebrasListE.setExpectedSize(input.subalgebras.values.size + 1);
   for (int i = 0; i < input.subalgebras.values.size; i ++) {
     if (!CalculatorConversions::innerStoreCandidateSubalgebra(calculator, input.subalgebras.values[i], candidateE)) {
       return false;

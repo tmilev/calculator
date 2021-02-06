@@ -209,7 +209,7 @@ bool CalculatorConversions::functionPolynomialWithExponentLimit(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionPolynomialWithExponentLimit");
-  RecursionDepthCounter theRecursionCounter(&calculator.recursionDepth);
+  RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   if (calculator.recursionDepth > calculator.maximumRecursionDepth) {
     return calculator << "Max recursion depth of " << calculator.maximumRecursionDepth
     << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";
@@ -219,10 +219,10 @@ bool CalculatorConversions::functionPolynomialWithExponentLimit(
     return true;
   }
   if (input.isOfType<Polynomial<Rational> >()) {
-    Polynomial<Rational> thePolynomial;
+    Polynomial<Rational> polynomial;
     Polynomial<Coefficient> converted;
-    input.isOfType(&thePolynomial);
-    converted = thePolynomial;
+    input.isOfType(&polynomial);
+    converted = polynomial;
     return output.assignValueWithContext(converted, input.getContext(), calculator);
   }
   if (input.isOfType<Coefficient>() || input.isOfType<Rational>()) {

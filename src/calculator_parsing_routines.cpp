@@ -1015,12 +1015,12 @@ bool Calculator::replaceEXXSequenceXBy_Expression_with_E_instead_of_sequence() {
   SyntacticElement& theFunctionElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 5];
   Expression newExpr;
   newExpr.reset(*this);
-  newExpr.children.reserve(theSequenceElt.theData.children.size);
+  newExpr.setExpectedSize(theSequenceElt.theData.size());
   newExpr.addChildOnTop(theFunctionElt.theData);
   if (theSequenceElt.theData.isAtom()) {
     newExpr.addChildOnTop(theSequenceElt.theData);
   } else {
-    for (int i = 1; i < theSequenceElt.theData.children.size; i ++) {
+    for (int i = 1; i < theSequenceElt.theData.size(); i ++) {
       newExpr.addChildOnTop(theSequenceElt.theData[i]);
     }
   }
@@ -1567,7 +1567,6 @@ bool Calculator::replaceEXdotsXbySsXdotsX(int numDots) {
   }
   Expression newExpr;
   newExpr.reset(*this);
-  newExpr.children.reserve(2);
   newExpr.addChildAtomOnTop(this->opCommandSequence());
   newExpr.addChildOnTop(left.theData);
   left.theData = newExpr;
@@ -1584,8 +1583,8 @@ bool Calculator::replaceSsSsXdotsXbySsXdotsX(int numDots) {
   if (!left.theData.startsWith(this->opCommandSequence())) {
     global.fatal << "replaceSsSsXdotsXbySsXdotsX called but left expression is not EndStatement." << global.fatal;
   }
-  left.theData.children.reserve(left.theData.children.size + right.theData.children.size - 1);
-  for (int i = 1; i < right.theData.children.size; i ++) {
+  left.theData.setExpectedSize(left.theData.size() + right.theData.size() - 1);
+  for (int i = 1; i < right.theData.size(); i ++) {
     left.theData.addChildOnTop(right.theData[i]);
   }
   left.controlIndex = this->conSequenceStatements();

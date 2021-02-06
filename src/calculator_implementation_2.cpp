@@ -582,12 +582,11 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
     }
   }
   if (
-    this->owner->ruleStack.children.size != this->startingRuleStackSize
+    this->owner->ruleStack.size() != this->startingRuleStackSize
   ) {
-    global.comments << "DEBUG: Clear cache.";
     this->owner->cachedExpressions.clear();
   }
-  this->owner->ruleStack.children.setSize(this->startingRuleStackSize);
+  this->owner->ruleStack.setSize(this->startingRuleStackSize);
   this->owner = nullptr;
 }
 

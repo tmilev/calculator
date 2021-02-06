@@ -690,8 +690,8 @@ bool CalculatorLieTheory::LSPath(Calculator& calculator, const Expression& input
   }
   SemisimpleLieAlgebra& ownerSSalgebra = *theSSowner.content;
   Vectors<Rational> waypoints;
-  waypoints.setSize(input.children.size - 2);
-  for (int i = 2; i < input.children.size; i ++) {
+  waypoints.setSize(input.size() - 2);
+  for (int i = 2; i < input.size(); i ++) {
     if (!calculator.getVector<Rational>(
       input[i], waypoints[i - 2], nullptr, ownerSSalgebra.getRank(), nullptr
     )) {
@@ -756,10 +756,10 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperators(
   Selection theParSel;
   WithContext<SemisimpleLieAlgebra*> theSSalgebra;
   Expression truncatedInput = input;
-  if (truncatedInput.children.size > 4) {
-    int numEltsToCut = truncatedInput.children.size - 4;
+  if (truncatedInput.size() > 4) {
+    int numEltsToCut = truncatedInput.size() - 4;
     for (int i = 0; i < numEltsToCut; i ++) {
-      truncatedInput.children.removeLastObject();
+      truncatedInput.removeLastChild();
     }
   }
   if (!calculator.getTypeHighestWeightParabolic<Polynomial<Rational> >(
@@ -779,13 +779,13 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperators(
   std::string letterString = "x";
   std::string partialString = "\\partial";
   std::string exponentLetterString = "a";
-  if (input.children.size > 4) {
+  if (input.size() > 4) {
     letterString = input[4].toString();
   }
-  if (input.children.size > 5) {
+  if (input.size() > 5) {
     partialString = input[5].toString();
   }
-  if (input.children.size > 6) {
+  if (input.size() > 6) {
     exponentLetterString = input[6].toString();
   }
   return CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
@@ -2517,8 +2517,7 @@ bool CalculatorLieTheory::generateVectorSpaceClosedWithRespectToLieBracket(
     << "for the vector space dimension from the first argument. ";
   }
   Expression inputModded = input;
-  inputModded.children.removeIndexShiftDown(1);
-
+  inputModded.removeChildShiftDown(1);
   ExpressionContext context(calculator);
   if (!calculator.getVectorFromFunctionArguments(inputModded, theOps, &context)) {
     Vector<ElementUniversalEnveloping<RationalFunction<Rational> > > theLieAlgElts;

@@ -400,7 +400,7 @@ bool CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant(
   Calculator& calculator, const Expression& input, Expression& output, bool useOuter
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant");
-  if (input.children.size < 2) {
+  if (input.size() < 2) {
     return output.makeError("Raising to maximally dominant takes at least 2 arguments, type and vector", calculator);
   }
   const Expression& semisimpleLieAlgebraNode = input[1];
@@ -414,7 +414,7 @@ bool CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant(
   }
   SemisimpleLieAlgebra* theSSalgebra = semisimpleLieAlgebra.content;
   Vectors<Rational> theHWs;
-  theHWs.setSize(input.children.size - 2);
+  theHWs.setSize(input.size() - 2);
   bool isGood = true;
   for (int i = 2; i < input.size(); i ++) {
     if (!calculator.getVector<Rational>(
@@ -424,7 +424,7 @@ bool CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant(
       break;
     }
   }
-  if (!isGood && input.children.size == 3) {
+  if (!isGood && input.size() == 3) {
     Matrix<Rational> theHWsMatForm;
     if (calculator.functionGetMatrix(
       input[2], theHWsMatForm, nullptr, theSSalgebra->getRank()
@@ -1008,7 +1008,7 @@ bool CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylReps(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylReps");
   Expression theTensor;
-  if (!(input.children.size == 3)) {
+  if (input.size() != 3) {
     return false;
   }
   const Expression& leftE = input[1];

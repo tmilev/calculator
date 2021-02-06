@@ -1389,25 +1389,59 @@ bool Expression::addChildOnTop(const Expression& inputChild) {
   return true;
 }
 
-bool Expression::setChildAtomValue(int childIndex, int theAtomValue) {
+bool Expression::setChildAtomValue(int childIndex, int atomValue) {
   this->checkInitialization();
-  Expression tempE;
-  tempE.makeAtom(theAtomValue, *this->owner);
+  Expression atom;
+  atom.makeAtom(atomValue, *this->owner);
   this->children.setObjectAtIndex(
     childIndex,
-    this->owner->allChildExpressions.addNoRepetitionOrReturnIndexFirst(tempE)
+    this->owner->allChildExpressions.addNoRepetitionOrReturnIndexFirst(atom)
   );
   return true;
 }
 
-bool Expression::setChildAtomValue(int childIndex, const std::string& theAtom) {
+void Expression::removeLastChild() {
+  this->children.removeLastObject();
+}
+
+void Expression::swapChildren(int left, int right) {
+  this->children.swapTwoIndices(left, right);
+}
+
+bool Expression::setChildAtomValue(
+  int childIndex, const std::string& atom
+) {
   this->checkInitialization();
-  Expression tempE;
-  tempE.makeAtom(theAtom, *this->owner);
+  Expression atomExpression;
+  atomExpression.makeAtom(atom, *this->owner);
   this->children.setObjectAtIndex(
-    childIndex, this->owner->addChildExpression(tempE)
+    childIndex, this->owner->addChildExpression(atomExpression)
   );
   return true;
+}
+
+void Expression::addChildIndices(List<int>& indices) {
+  this->children.addListOnTop(indices);
+}
+
+void Expression::setExpectedSize(int expectedSize) {
+  this->children.setExpectedSize(expectedSize);
+}
+
+void Expression::removeChildShiftDown(int childIndex) {
+  this->children.removeIndexShiftDown(childIndex);
+}
+
+void Expression::setSize(int desiredSize) {
+  this->checkInitialization();
+  if (desiredSize > this->size()) {
+    Expression empty(*this->owner);
+    for (int i = this->children.size; i < desiredSize; i ++) {
+      this->addChildOnTop(empty);
+    }
+    return;
+  }
+  this->children.setSize(desiredSize);
 }
 
 bool Expression::setChild(int childIndexInMe, const Expression& inputChild) {

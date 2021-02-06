@@ -751,16 +751,16 @@ bool CalculatorFunctions::innerApplyToSubexpressionsRecurseThroughCalculusFuncti
   ) {
     output.reset(calculator);
     output.addChildOnTop(input[1]);
-    Expression theRecursivelyModifiedE(calculator), nextE(calculator);
-    theRecursivelyModifiedE.addChildOnTop(theArg[0]);
-    nextE.addChildAtomOnTop("ApplyToSubexpressionsRecurseThroughCalculusFunctions");
-    nextE.addChildOnTop(input[1]);
+    Expression recursivelyModifiedExpression(calculator);
+    recursivelyModifiedExpression.addChildOnTop(theArg[0]);
     for (int i = 1; i < theArg.size(); i ++) {
-      nextE.children.setSize(2);
+      Expression nextE(calculator);
+      nextE.addChildAtomOnTop("ApplyToSubexpressionsRecurseThroughCalculusFunctions");
+      nextE.addChildOnTop(input[1]);
       nextE.addChildOnTop(theArg[i]);
-      theRecursivelyModifiedE.addChildOnTop(nextE);
+      recursivelyModifiedExpression.addChildOnTop(nextE);
     }
-    return output.addChildOnTop(theRecursivelyModifiedE);
+    return output.addChildOnTop(recursivelyModifiedExpression);
   }
   output.reset(calculator);
   output.addChildOnTop(input[1]);

@@ -254,7 +254,8 @@ bool CalculatorFunctions::innerZmodP(Calculator& calculator, const Expression& i
 bool CalculatorFunctions::innerConesIntersect(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerConesIntersect");
   if (!input.isListNElements(3)) {
-    return calculator << "Function ConesIntersection expects 2 arguments, got " << input.children.size - 1 << " instead. ";
+    return calculator << "Function ConesIntersection expects 2 arguments, got "
+    << input.size() - 1 << " instead. ";
   }
   Matrix<Rational> coneNonStrictMatForm;
   Matrix<Rational> coneStrictMatForm;
@@ -647,15 +648,15 @@ bool CalculatorBasics::extractBaseMultiplication(
   // handle Anything * Rational = Rational * Anything
   output = input;
   if (output[2].isOfType<Rational>()) {
-    output.children.swapTwoIndices(1, 2);
+    output.swapChildren(1, 2);
     result = true;
   }
   if (output[2].isOfType<double>() && !output[1].isOfType<Rational>()) {
-    output.children.swapTwoIndices(1, 2);
+    output.swapChildren(1, 2);
     result = true;
   }
   if (output[2].isListStartingWithAtom(calculator.opTimes())) {
-    if (output[2].children.size != 3) {
+    if (output[2].size() != 3) {
       return result;
     }
     // handle Anything1 * (Rational * Anything2) = Rational * (Anything1 * Anything2)

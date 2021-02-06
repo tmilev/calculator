@@ -649,7 +649,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPoly
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial");
-  if (input.children.size < 3) {
+  if (input.size() < 3) {
     return false;
   }
   const Expression leftE = input[1];
@@ -1870,7 +1870,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(
     return false;
   }
   output.reset(calculator);
-  output.children.reserve(input[2].size());
+  output.setExpectedSize(input[2].size());
   output.addChildAtomOnTop(calculator.opSequence());
   Expression tempProduct;
   for (int i = 1; i < input[2].size(); i ++) {
@@ -2597,7 +2597,7 @@ bool CalculatorFunctionsBinaryOps::setMinus(
   for (int i = 1; i < leftSetE.size(); i ++) {
     resultEs.addOnTop(leftSetE[i]);
   }
-  for (int i = 1; i < rightSetE.children.size; i ++) {
+  for (int i = 1; i < rightSetE.size(); i ++) {
     if (resultEs.contains(rightSetE[i])) {
       resultEs.removeIndexSwapWithLast(resultEs.getIndex(rightSetE[i]));
     }
@@ -2667,9 +2667,9 @@ bool CalculatorFunctionsBinaryOps::innerMultiplySequenceByAnyScalar(
   if (!input.isListNElements(3)) {
     return false;
   }
-  Expression tempE = input;
-  tempE.children.swapTwoIndices(1, 2);
-  return CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(calculator, tempE, output);
+  Expression swapped = input;
+  swapped.swapChildren(1, 2);
+  return CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(calculator, swapped, output);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(
@@ -2691,7 +2691,7 @@ bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(
     << input[2].size() - 1 << ", possible user typo?";
   }
   output.reset(calculator);
-  output.children.reserve(input[1].size());
+  output.setExpectedSize(input[1].size());
   output.addChildAtomOnTop(calculator.opSequence());
   Expression tempSum;
   for (int i = 1; i < input[2].size(); i ++) {

@@ -90,6 +90,7 @@ void Calculator::reset() {
   this->maximumAlgebraicTransformationsPerExpression = 100;
   this->maximumRecursionDepth = 10000;
   this->recursionDepth = 0;
+  this->totalEvaluationLoops = 0;
 
   this->depthRecursionReached = 0;
   this->flagWriteLatexPlots = false;

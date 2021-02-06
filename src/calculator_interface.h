@@ -1357,6 +1357,7 @@ public:
   bool flagForkingprocessAllowed;
 
   int totalPatternMatchesPerformed;
+  int totalEvaluationLoops;
   int numberOfPredefinedAtoms;
   int numEmptyTokensStart;
   Expression programExpression;

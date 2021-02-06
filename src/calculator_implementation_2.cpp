@@ -576,6 +576,7 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
   if (
     this->owner->ruleStack.children.size != this->startingRuleStackSize
   ) {
+    global.comments << "DEBUG: Clear cache.";
     this->owner->cachedExpressions.clear();
   }
   this->owner->ruleStack.children.setSize(this->startingRuleStackSize);
@@ -976,6 +977,7 @@ bool Calculator::EvaluateLoop::reduceOnce() {
   MacroRegisterFunctionWithName("Calculator::EvaluateLoop::reduceOnce");
   this->checkInitialization();
   this->numberOfTransformations ++;
+  this->owner->totalEvaluationLoops ++;
   if (this->detectLoops()) {
     return false;
   }

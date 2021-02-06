@@ -25,6 +25,7 @@ Calculator::Calculator() {
   this->numberExpectedExpressionsAtInitialization = - 1;
   this->mode = Calculator::Mode::full;
   this->examples.owner = this;
+  this->totalEvaluationLoops = 0;
 }
 
 MemorySaving<Calculator>& GlobalVariables::calculator() {
@@ -1827,7 +1828,9 @@ JSData Calculator::toJSONPerformance() {
   << waitingMilliseconds << " ms (~"
   << (static_cast<double>(waitingMilliseconds) / 1000)
   << " s).";
+  moreDetails << "<br>Runs of evaluation loop: " << this->totalEvaluationLoops << ". ";
   moreDetails << "<br>Expressions generated: " << this->allChildExpressions.size << ". ";
+  moreDetails << "<br>Cached expression at last rule stack: " << this->cachedExpressions.size() << ". ";
   moreDetails << "<br>Expressions evaluated: " << this->statistics.expressionsEvaluated << ". ";
   moreDetails << "<br>Total number of pattern matches performed: "
   << this->totalPatternMatchesPerformed << "";

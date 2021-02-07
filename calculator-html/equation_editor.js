@@ -2422,12 +2422,13 @@ class LaTeXParser {
 class EquationEditorOptions {
   constructor(
     /** @type{{
-     * editable:boolean,
-     * removeDisplayStyle:boolean,
-     * sanitizeLatexSource:boolean,
-     * debugLogContainer:HTMLElement|null,
-     * latexInput:HTMLElement|null,
-     * editHandler:Function|null,
+     * editable?:boolean,
+     * removeDisplayStyle?:boolean,
+     * sanitizeLatexSource?:boolean,
+     * debugLogContainer?:HTMLElement|null,
+     * latexInput?:HTMLElement|null,
+     * editHandler?:Function|null,
+     * allowLineBreak?: boolean,
      * }} */
     options,
   ) {
@@ -2443,8 +2444,16 @@ class EquationEditorOptions {
     this.latexInput = options.latexInput;
     /** @type{boolean} */
     this.logTiming = options.logTiming;
-    /**@type{Function|null} */
-    // Called on modification of the editor. Will provide two arguments: the editor and the MathNode being edited.
+    /**@type{boolean} */
+    this.allowLineBreak = options.allowLineBreak;
+    if (this.allowLineBreak === null || this.allowLineBreak === undefined) {
+      this.allowLineBreak = true;
+    }
+    /**@type{Function|null} 
+     * Called on modification of the editor. 
+     * Will provide two arguments: 
+     * the editor and the MathNode being edited.
+    */
     this.editHandler = options.editHandler;
     if (this.editable === undefined) {
       this.editable = true;
@@ -5062,7 +5071,9 @@ class MathNode {
     // Compute present element height.
     for (let i = 0; i < this.children.length; i++) {
       let child = this.children[i];
-      let heightFromChild = child.boundingBox.height - child.boundingBox.fractionLineHeight + this.boundingBox.fractionLineHeight;
+      let heightFromChild = child.boundingBox.height -
+        child.boundingBox.fractionLineHeight +
+        this.boundingBox.fractionLineHeight;
       this.boundingBox.height = Math.max(this.boundingBox.height, heightFromChild);
     }
   }
@@ -5077,6 +5088,7 @@ class MathNode {
     }
     this.mergeBoundingBoxesHorizontallyAlignedElements();
     this.computeMiddleAlignment();
+    this.computeLineBreaks();
   }
 
   computeMiddleAlignment() {
@@ -5087,6 +5099,54 @@ class MathNode {
         return;
       }
     }
+  }
+
+  computeLineBreaks() {
+    if (this.type.type !== knownTypes.horizontalMath.type) {
+      return;
+    }
+    if (this.parent === null) {
+      return;
+    }
+    if (this.parent.type.type !== knownTypes.root.type) {
+      return;
+    }
+    if (!this.equationEditor.options.allowLineBreak) {
+      return;
+    }
+    let computedStyle = window.getComputedStyle(this.equationEditor.container);
+    if (
+      computedStyle.maxWidth === "" ||
+      computedStyle.maxWidth === "none"
+    ) {
+      return;
+    }
+    let width = this.equationEditor.container.getBoundingClientRect().width;
+    this.computeLineBreaksParthTwo(width);
+  }
+
+  computeLineBreaksParthTwo(
+    /**@type{number} */
+    width,
+  ) {
+    console.log("DEBUG: compute line breaks");
+    let widthBroken = 0;
+    let row = 0;
+    let originalHeight = this.boundingBox.height;
+    for (let i = 0; i < this.children.length; i++) {
+      let child = this.children[i];
+      let widthSoFar = child.boundingBox.left + child.boundingBox.width;
+      let currentLineWidth = widthSoFar - widthBroken;
+      child.boundingBox.top += originalHeight * row;
+      child.boundingBox.left -= widthBroken;
+      if (currentLineWidth > width) {
+        widthBroken = widthSoFar;
+        if (i + 1 < this.children.length) {
+          row++;
+        }
+      }
+    }
+    this.boundingBox.height = originalHeight * (row + 1);
   }
 
   doAlign() {

@@ -14,6 +14,8 @@ class TypeSetter {
     styleOverride,
     /**@type{Function|null} */
     callbackEquationCreation,
+    /**@type{Object<string, string>} */
+    extraAttributes,
   ) {
     if (typeof element === "string") {
       element = document.getElementById(element);
@@ -28,6 +30,7 @@ class TypeSetter {
       true,
       this.logTiming,
       callbackEquationCreation,
+      extraAttributes,
     );
   }
 }

@@ -191,13 +191,22 @@ class DynamicJavascript {
   constructor() {
   }
 
-  typeset(output) {
+  typeset(
+    /**@type{HTMLElement} */
+    output,
+    /**@type{Object<string, string>} */
+    extraAttributes,
+  ) {
+    if (extraAttributes === undefined || extraAttributes === null) {
+      extraAttributes = {};
+    }
     typeset.typesetter.typesetSoft(
       output,
       "font-size: 20px; font-family:'Times New Roman'; display:inline-block;",
       (editor) => {
         this.bootstrapSlider(editor, output);
-      }
+      },
+      extraAttributes,
     );
     this.flagTypeset = true;
   }

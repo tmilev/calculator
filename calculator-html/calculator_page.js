@@ -385,7 +385,9 @@ class Calculator {
     if (this.flagTypeset === true) {
       return;
     }
-    dynamicJavascript.typeset(this.getOutputElement());
+    dynamicJavascript.typeset(this.getOutputElement(), {
+      "lineBreakWidth": 1000,
+    });
     this.flagTypeset = true;
   }
 

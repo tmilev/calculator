@@ -1134,11 +1134,17 @@ function mathFromLatex(
   /**@type{Function|null} callback after the element has been typeset*/
   callback,
 ) {
+  let lineBreakWidthString = container.getAttribute("lineBreakWidth");
+  let lineBreakWidth = 0;
+  if (lineBreakWidthString !== "") {
+    lineBreakWidth = parseInt(lineBreakWidthString);
+  }
   let result = new EquationEditor(container, new EquationEditorOptions({
     editable: editable,
     sanitizeLatexSource: sanitizeLatexSource,
     removeDisplayStyle: removeDisplayStyle,
     logTiming: true,
+    lineBreakWidth: lineBreakWidth,
   }));
   result.writeLatex(latex);
   if (callback !== undefined && callback !== null) {
@@ -2428,7 +2434,7 @@ class EquationEditorOptions {
      * debugLogContainer?:HTMLElement|null,
      * latexInput?:HTMLElement|null,
      * editHandler?:Function|null,
-     * allowLineBreak?: boolean,
+     * lineBreakWidth?: boolean,
      * }} */
     options,
   ) {
@@ -2444,10 +2450,10 @@ class EquationEditorOptions {
     this.latexInput = options.latexInput;
     /** @type{boolean} */
     this.logTiming = options.logTiming;
-    /**@type{boolean} */
-    this.allowLineBreak = options.allowLineBreak;
-    if (this.allowLineBreak === null || this.allowLineBreak === undefined) {
-      this.allowLineBreak = true;
+    /**@type{number} */
+    this.lineBreakWidth = options.lineBreakWidth;
+    if (this.lineBreakWidth === null || this.lineBreakWidth === undefined) {
+      this.lineBreakWidth = 0;
     }
     /**@type{Function|null} 
      * Called on modification of the editor. 
@@ -5111,18 +5117,10 @@ class MathNode {
     if (this.parent.type.type !== knownTypes.root.type) {
       return;
     }
-    if (!this.equationEditor.options.allowLineBreak) {
+    if (this.equationEditor.options.lineBreakWidth <= 0) {
       return;
     }
-    let computedStyle = window.getComputedStyle(this.equationEditor.container);
-    if (
-      computedStyle.maxWidth === "" ||
-      computedStyle.maxWidth === "none"
-    ) {
-      return;
-    }
-    let width = this.equationEditor.container.getBoundingClientRect().width;
-    this.computeLineBreaksParthTwo(width);
+    this.computeLineBreaksParthTwo(this.equationEditor.options.lineBreakWidth);
   }
 
   computeLineBreaksParthTwo(
@@ -5133,10 +5131,12 @@ class MathNode {
     let widthBroken = 0;
     let row = 0;
     let originalHeight = this.boundingBox.height;
+    let finalWidth = 0;
     for (let i = 0; i < this.children.length; i++) {
       let child = this.children[i];
       let widthSoFar = child.boundingBox.left + child.boundingBox.width;
       let currentLineWidth = widthSoFar - widthBroken;
+      finalWidth = Math.max(currentLineWidth, finalWidth);
       child.boundingBox.top += originalHeight * row;
       child.boundingBox.left -= widthBroken;
       if (currentLineWidth > width) {
@@ -5147,6 +5147,7 @@ class MathNode {
       }
     }
     this.boundingBox.height = originalHeight * (row + 1);
+    this.boundingBox.width = finalWidth;
   }
 
   doAlign() {
@@ -8725,6 +8726,8 @@ class MathTagCoverter {
     removeDisplayStyle,
     /**@type{boolean} whether to log timing information. */
     logTiming,
+    /**@type{Object<string,string>} */
+    extraAttributes,
   ) {
     /**@type{HTMLElement|null} */
     this.elementProcessed = null;
@@ -8753,6 +8756,7 @@ class MathTagCoverter {
       verticalAlign: styleComputer.style.verticalAlign,
       marginBottom: styleComputer.style.marginBottom,
     };
+    this.extraAttributes = extraAttributes;
   }
 
   convertTags(
@@ -8783,7 +8787,11 @@ class MathTagCoverter {
       mathTag.style.fontSize = this.style.fontSize;
       mathTag.style.verticalAlign = this.style.verticalAlign;
       mathTag.style.marginBottom = this.style.marginBottom;
+      mathTag.style.maxWidth = this.style.maxWidth;
       newChildren.push(mathTag);
+      for (let label in this.extraAttributes) {
+        mathTag.setAttribute(label, this.extraAttributes[label]);
+      }
     }
     let previousIndex = toBeConverted[toBeConverted.length - 1].closeIndex + 1;
     let remainingContent = content.slice(previousIndex);
@@ -8934,6 +8942,8 @@ function typeset(
   logTiming,
   /**@type{Function|null} */
   callbackEquationCreation,
+  /**@type{Object<string,string>} */
+  extraAttributes,
 ) {
   if (style === "") {
     style = "font-family:'Times New Roman'; display:inline-block;";
@@ -8946,6 +8956,7 @@ function typeset(
     sanitizeLatexSource,
     removeDisplayStyle,
     logTiming,
+    extraAttributes,
   ).typeset(
     toBeModified,
     callbackEquationCreation,

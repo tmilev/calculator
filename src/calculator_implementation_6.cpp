@@ -1533,10 +1533,10 @@ bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
   return false;
 }
 
-bool CalculatorFunctions::innerMatchesPattern(
+bool CalculatorFunctions::matchesPattern(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerMatchesPattern");
+  MacroRegisterFunctionWithName("CalculatorFunctions::matchesPattern");
   if (input.size() != 3) {
     return false;
   }
@@ -2166,10 +2166,10 @@ bool CalculatorFunctions::innerIsLinearOrConstantIn(
   return output.assignValue(1, calculator);
 }
 
-bool CalculatorFunctions::innerIsProductLinearOrConstantTermsIn(
+bool CalculatorFunctions::isProductLinearOrConstantTermsIn(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsProductLinearOrConstantTermsIn");
+  MacroRegisterFunctionWithName("CalculatorFunctions::isProductLinearOrConstantTermsIn");
   if (input.size() < 3) {
     return false;
   }

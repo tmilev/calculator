@@ -581,8 +581,8 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF");
-  if (!CalculatorFunctionsBinaryOps::innerMultiplyTypeByType<RationalFunction<Rational> >(calculator, input, output)) {
-    if (!CalculatorFunctionsBinaryOps::innerMultiplyTypeByType<RationalFunction<AlgebraicNumber> >(calculator, input, output)) {
+  if (!CalculatorFunctionsBinaryOps::multiplyTypeByType<RationalFunction<Rational> >(calculator, input, output)) {
+    if (!CalculatorFunctionsBinaryOps::multiplyTypeByType<RationalFunction<AlgebraicNumber> >(calculator, input, output)) {
       return false;
     }
     RationalFunction<AlgebraicNumber> simplified;
@@ -604,8 +604,8 @@ bool CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRati
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial");
-  if (!CalculatorFunctionsBinaryOps::innerDivideTypeByType<RationalFunction<Rational> >(calculator, input, output)) {
-    if (!CalculatorFunctionsBinaryOps::innerDivideTypeByType<RationalFunction<AlgebraicNumber> >(calculator, input, output)) {
+  if (!CalculatorFunctionsBinaryOps::divideTypeByType<RationalFunction<Rational> >(calculator, input, output)) {
+    if (!CalculatorFunctionsBinaryOps::divideTypeByType<RationalFunction<AlgebraicNumber> >(calculator, input, output)) {
       return false;
     }
     RationalFunction<AlgebraicNumber> simplified;
@@ -645,7 +645,7 @@ bool CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA(
   return CalculatorFunctionsBinaryOps::innerAddTypeToType<ElementWeylAlgebra<Rational> >(calculator, input, output);
 }
 
-bool CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial(
+bool CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial");
@@ -660,9 +660,9 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPoly
     rightE.isOfType<AlgebraicNumber>() ||
     rightE.isOfType<Polynomial<AlgebraicNumber> >()
   ) {
-    return CalculatorFunctionsBinaryOps::innerMultiplyTypeByType<Polynomial<AlgebraicNumber> >(calculator, input, output);
+    return CalculatorFunctionsBinaryOps::multiplyTypeByType<Polynomial<AlgebraicNumber> >(calculator, input, output);
   }
-  return CalculatorFunctionsBinaryOps::innerMultiplyTypeByType<Polynomial<Rational> >(calculator, input, output);
+  return CalculatorFunctionsBinaryOps::multiplyTypeByType<Polynomial<Rational> >(calculator, input, output);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAddUEToAny(Calculator& calculator, const Expression& input, Expression& output) {
@@ -1880,7 +1880,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(
   return true;
 }
 
-bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix(
+bool CalculatorFunctionsBinaryOps::multiplyMatrixByMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix");

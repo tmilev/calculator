@@ -280,7 +280,7 @@ public:
   static bool nistEllipticCurveGenerator(Calculator& calculator, const Expression& input, Expression& output);
   static bool nistEllipticCurveOrder(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerCrossProduct(Calculator& calculator, const Expression& input, Expression& output);
+  static bool crossProduct(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerDistributeExponent(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerDistributeSqrt(Calculator& calculator, const Expression& input, Expression& output);
@@ -292,17 +292,17 @@ public:
   static bool functionFactorInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerFactorOutNumberContent(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerIsProductLinearOrConstantTermsIn(Calculator& calculator, const Expression& input, Expression& output);
+  static bool isProductLinearOrConstantTermsIn(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIsProductTermsUpToPower(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIsLinearOrConstantIn(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCoefficientOf(Calculator& calculator, const Expression& input, Expression& output);
+  static bool coefficientOf(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerConstTermRelative(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerCompositeArithmeticOperationEvaluatedOnArgument(
+  static bool compositeArithmeticOperationEvaluatedOnArgument(
     Calculator& calculator, const Expression& input, Expression& output
   );
 
-  static bool innerMatchesPattern(Calculator& calculator, const Expression& input, Expression& output);
+  static bool matchesPattern(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerThaw(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerGetFreeVariablesIncludeNamedConstants(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerGetFreeVariablesExcludeNamedConstants(Calculator& calculator, const Expression& input, Expression& output);

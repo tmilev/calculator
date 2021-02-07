@@ -1117,11 +1117,11 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "\\times",
-    CalculatorFunctions::innerCrossProduct,
+    CalculatorFunctions::crossProduct,
     "",
     "Cross product in IIId. Returns error if given two non-3d vectors.",
     "(1, - 2, 3) \\times ( 1, - 1, - 1)",
-    "CalculatorFunctions::innerCrossProduct",
+    "CalculatorFunctions::crossProduct",
     "crossProduct",
     innerStandard
   );
@@ -1888,7 +1888,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "MatchesPattern",
-    CalculatorFunctions::innerMatchesPattern,
+    CalculatorFunctions::matchesPattern,
     "",
     "Checks whether the first argument matches the pattern of the second argument. If no, returns 0. "
     "Pattern parametric entries are indicated with the bound variable notation {{a}}. "
@@ -1896,7 +1896,7 @@ void Calculator::initializeFunctionsStandard() {
     "in which each of the variables is freed and assigned the matched value. ",
     "MatchesPattern{}(a = b * 10, a = {{c}} * b); "
     "MatchesPattern{}(a = b * 10, a = b * {{c}})",
-    "CalculatorFunctions::innerMatchesPattern",
+    "CalculatorFunctions::matchesPattern",
     "MatchesPattern",
     innerStandard
   );
@@ -2764,11 +2764,11 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "CoefficientOf",
-    CalculatorFunctions::innerCoefficientOf,
+    CalculatorFunctions::coefficientOf,
     "",
     "Gets the coefficient of the first argument in the second. ",
     "CoefficientOf(y, x * x * y + x * z * y * z + x * y * x)",
-    "CalculatorFunctions::innerCoefficientOf",
+    "CalculatorFunctions::coefficientOf",
     "CoefficientOf",
     innerStandard
   );
@@ -2788,7 +2788,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "IsProductLinearOrConstantTermsIn",
-    CalculatorFunctions::innerIsProductLinearOrConstantTermsIn,
+    CalculatorFunctions::isProductLinearOrConstantTermsIn,
     "",
     "Returns true if the expression is a product of linear or constant terms. "
     "Although this is subject to change, at the moment "
@@ -2799,7 +2799,7 @@ void Calculator::initializeFunctionsStandard() {
     "IsProductLinearOrConstantTermsIn(x, (x- 1)(x + 1));\n"
     "IsProductLinearOrConstantTermsIn(x, (2x + 1)(x \\pi + 1));\n"
     "IsProductLinearOrConstantTermsIn(x, (2x +y)(x \\pi + 1));\n",
-    "CalculatorFunctions::innerIsProductLinearOrConstantTermsIn",
+    "CalculatorFunctions::isProductLinearOrConstantTermsIn",
     "IsProductLinearOrConstantTermsIn",
     innerStandard
   );
@@ -3315,7 +3315,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix,
+    CalculatorFunctionsBinaryOps::multiplyMatrixByMatrix,
     "",
     "Multiplies matrices.",
     "\\begin{pmatrix} 1&  2 \\\\ 3& 5\\end{pmatrix}"
@@ -3557,7 +3557,7 @@ void Calculator::initializeFunctionsStandard() {
 
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial,
     this->opPolynomialRational(),
     this->opRational(),
     "Multiplies polynomial by a rational (polynomial comes first). ",
@@ -3570,7 +3570,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial,
     this->opRational(),
     this->opPolynomialRational(),
     "Multiplies rational by a polynomial (rational comes first). ",
@@ -3583,7 +3583,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial,
     this->opPolynomialRational(),
     this->opPolynomialRational(),
     "Multiplies two polynomials. ",
@@ -3596,7 +3596,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial,
     this->opPolynomialAlgebraicNumbers(),
     this->opPolynomialAlgebraicNumbers(),
     "Multiplies two polynomials over the algebraic numbers. ",
@@ -3637,7 +3637,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial,
     this->opPolynomialAlgebraicNumbers(),
     this->opAlgebraicNumber(),
     "Multiplies two polynomials over the algebraic numbers. ",
@@ -3648,7 +3648,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial,
     this->opAlgebraicNumber(),
     this->opPolynomialAlgebraicNumbers(),
     "Multiplies two polynomials over the algebraic numbers. ",
@@ -3659,7 +3659,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial,
     this->opRational(),
     this->opPolynomialAlgebraicNumbers(),
     "Multiplies two polynomials over the algebraic numbers. ",
@@ -3670,7 +3670,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial,
     this->opPolynomialRational(),
     this->opAlgebraicNumber(),
     "Multiplies two polynomials over the algebraic numbers. ",
@@ -3681,7 +3681,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial,
     this->opAlgebraicNumber(),
     this->opPolynomialRational(),
     "Multiplies two polynomials over the algebraic numbers. ",
@@ -4979,31 +4979,31 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "+",
-    CalculatorFunctions::innerCompositeArithmeticOperationEvaluatedOnArgument,
+    CalculatorFunctions::compositeArithmeticOperationEvaluatedOnArgument,
     "",
     "Equivalent to (a +b){}x = (a{}x) +(b{}x) ",
     "(a +b){}x;",
-    "CalculatorFunctions::innerCompositeArithmeticOperationEvaluatedOnArgument",
+    "CalculatorFunctions::compositeArithmeticOperationEvaluatedOnArgument",
     "CompositeArithmeticOperationEvaluatedOnArgumentAddition",
     compositeStandard
   );
   this->addOperationHandler(
     "*",
-    CalculatorFunctions::innerCompositeArithmeticOperationEvaluatedOnArgument,
+    CalculatorFunctions::compositeArithmeticOperationEvaluatedOnArgument,
     "",
     "Equivalent to (a*b){}x = (a{}x)*(b{}x) ",
     "(a*b){}x;",
-    "CalculatorFunctions::innerCompositeArithmeticOperationEvaluatedOnArgument",
+    "CalculatorFunctions::compositeArithmeticOperationEvaluatedOnArgument",
     "CompositeArithmeticOperationEvaluatedOnArgumentMultiplication",
     compositeStandard
   );
   this->addOperationHandler(
     "/",
-    CalculatorFunctions::innerCompositeArithmeticOperationEvaluatedOnArgument,
+    CalculatorFunctions::compositeArithmeticOperationEvaluatedOnArgument,
     "",
     "Equivalent to (a/b){}x = (a{}x)/(b{}x) ",
     "(a/b){}x;",
-    "CalculatorFunctions::innerCompositeArithmeticOperationEvaluatedOnArgument",
+    "CalculatorFunctions::compositeArithmeticOperationEvaluatedOnArgument",
     "CompositeArithmeticOperationEvaluatedOnArgumentDivision",
     compositeStandard
   );

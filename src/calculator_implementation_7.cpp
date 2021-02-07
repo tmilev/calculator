@@ -1029,8 +1029,8 @@ bool Calculator::getSumProductsExpressions(const Expression& inputSum, List<List
   return true;
 }
 
-bool CalculatorFunctions::innerCoefficientOf(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerCoefficientOf");
+bool CalculatorFunctions::coefficientOf(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::coefficientOf");
   if (input.size() != 3) {
     return false;
   }
@@ -1040,7 +1040,7 @@ bool CalculatorFunctions::innerCoefficientOf(Calculator& calculator, const Expre
   if (input[2].startsWith(calculator.opDivide())) {
     Expression coefficientNumerator = input;
     coefficientNumerator.setChild(2, input[2][1]);
-    if (!CalculatorFunctions::innerCoefficientOf(calculator, coefficientNumerator, output)) {
+    if (!CalculatorFunctions::coefficientOf(calculator, coefficientNumerator, output)) {
       return false;
     }
     return output.makeXOX(calculator, calculator.opDivide(), output, input[2][2]);
@@ -2324,10 +2324,10 @@ bool CalculatorFunctionsListsAndSets::unionNoRepetition(
   return true;
 }
 
-bool CalculatorFunctions::innerCrossProduct(
+bool CalculatorFunctions::crossProduct(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerCrossProduct");
+  MacroRegisterFunctionWithName("CalculatorFunctions::crossProduct");
   if (!input.isListStartingWithAtom(calculator.opCrossProduct()) || input.size() != 3) {
     return false;
   }
@@ -3356,10 +3356,10 @@ bool CalculatorFunctions::innerCompareExpressionsNumerically(
   return output.assignValue(1, calculator);
 }
 
-bool CalculatorFunctions::innerCompositeArithmeticOperationEvaluatedOnArgument(
+bool CalculatorFunctions::compositeArithmeticOperationEvaluatedOnArgument(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerCompositeArithmeticOperationEvaluatedOnArgument");
+  MacroRegisterFunctionWithName("CalculatorFunctions::compositeArithmeticOperationEvaluatedOnArgument");
   if (input.size() != 2) {
     return false;
   }
@@ -4876,7 +4876,7 @@ bool CalculatorFunctionsTrigonometry::eulerFormulaAsLaw(
   currentE.addChildAtomOnTop(calculator.opCoefficientOf());
   currentE.addChildOnTop(iE);
   currentE.addChildOnTop(input[2]);
-  if (!CalculatorFunctions::innerCoefficientOf(calculator, currentE, coefficientOfI)) {
+  if (!CalculatorFunctions::coefficientOf(calculator, currentE, coefficientOfI)) {
     return false;
   }
   if (coefficientOfI.isEqualToZero()) {

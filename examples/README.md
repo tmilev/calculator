@@ -428,7 +428,7 @@ h_{{{i}}} = GetCartanGenerator{}(F_{1}, {{i}});
 ```
 Adds an element of UE (Universal Enveloping algebra) to an element of UE.
 
-*\+* (_composite_) [CompositeArithmeticOperationEvaluatedOnArgumentAddition] {CalculatorFunctions::innerCompositeArithmeticOperationEvaluatedOnArgument}. 
+*\+* (_composite_) [CompositeArithmeticOperationEvaluatedOnArgumentAddition] {CalculatorFunctions::compositeArithmeticOperationEvaluatedOnArgument}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%20%2bb%29%7b%7dx%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (a +b){}x;
@@ -622,7 +622,7 @@ x^2/x;
 ```
 Assumes that the numerator and denominator of a fraction commute. Divides the two expressions under the assumption that both can be converted topolynomials with rational coefficients.
 
-*/* (_composite_) [CompositeArithmeticOperationEvaluatedOnArgumentDivision] {CalculatorFunctions::innerCompositeArithmeticOperationEvaluatedOnArgument}. 
+*/* (_composite_) [CompositeArithmeticOperationEvaluatedOnArgumentDivision] {CalculatorFunctions::compositeArithmeticOperationEvaluatedOnArgument}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%2fb%29%7b%7dx%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (a/b){}x;
@@ -1189,7 +1189,7 @@ Carries out multiplication between a rational or polynomial on left and a weight
 ```
 Carries out multiplication between a rational or polynomial on left and a weight on the right.
 
-*\** (_composite_) [CompositeArithmeticOperationEvaluatedOnArgumentMultiplication] {CalculatorFunctions::innerCompositeArithmeticOperationEvaluatedOnArgument}. 
+*\** (_composite_) [CompositeArithmeticOperationEvaluatedOnArgumentMultiplication] {CalculatorFunctions::compositeArithmeticOperationEvaluatedOnArgument}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%2ab%29%7b%7dx%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (a*b){}x;
@@ -1256,7 +1256,7 @@ a or b; a or a
 ```
 If the two arguments of or are identical, replaces the expression with the argument. Works even if the individual expression cannot be evaluated to 1 or 0. Please note that mathematically equal objects may fail to be identical, for example a rational number 5 and an algebraic number 5. 
 
-*\times* [crossProduct] {CalculatorFunctions::innerCrossProduct}. 
+*\times* [crossProduct] {CalculatorFunctions::crossProduct}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%281%2c%20-%202%2c%203%29%20%5c%5ctimes%20%28%201%2c%20-%201%2c%20-%201%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (1, - 2, 3) \times ( 1, - 1, - 1)
@@ -3047,7 +3047,7 @@ PlotSetId(myId) + PlotCoordinateSystem((- 3, - 2, - 3), (1, 5, 4))
 ```
 Creates an empty plot with a given canvas id. If you add a nameless plot to a named one the the resulting plot acquires the canvas id. 
 
-*MatchesPattern* [MatchesPattern] {CalculatorFunctions::innerMatchesPattern}. 
+*MatchesPattern* [MatchesPattern] {CalculatorFunctions::matchesPattern}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22MatchesPattern%7b%7d%28a%20%3d%20b%20%2a%2010%2c%20a%20%3d%20%7b%7bc%7d%7d%20%2a%20b%29%3b%20MatchesPattern%7b%7d%28a%20%3d%20b%20%2a%2010%2c%20a%20%3d%20b%20%2a%20%7b%7bc%7d%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 MatchesPattern{}(a = b * 10, a = {{c}} * b); MatchesPattern{}(a = b * 10, a = b * {{c}})
@@ -3516,7 +3516,7 @@ ConstantTerm(y,  x y x +3 +2z)
 ```
 Extracts term constant relative to the variable in the first argument. 
 
-*CoefficientOf* [CoefficientOf] {CalculatorFunctions::innerCoefficientOf}. 
+*CoefficientOf* [CoefficientOf] {CalculatorFunctions::coefficientOf}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22CoefficientOf%28y%2c%20x%20%2a%20x%20%2a%20y%20%2b%20x%20%2a%20z%20%2a%20y%20%2a%20z%20%2b%20x%20%2a%20y%20%2a%20x%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 CoefficientOf(y, x * x * y + x * z * y * z + x * y * x)
@@ -3533,7 +3533,7 @@ IsLinearOrConstantIn(x, x \pi + 1);
 ```
 Returns one if the second argument is linear in the first. All variables are treated as non-constants. 
 
-*IsProductLinearOrConstantTermsIn* [IsProductLinearOrConstantTermsIn] {CalculatorFunctions::innerIsProductLinearOrConstantTermsIn}. 
+*IsProductLinearOrConstantTermsIn* [IsProductLinearOrConstantTermsIn] {CalculatorFunctions::isProductLinearOrConstantTermsIn}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOffRules%28%5c%22DistributeMultiplication%5c%22%29%3b%5cnIsProductLinearOrConstantTermsIn%28x%2c%20x%5e2%2b%201%29%3b%5cnIsProductLinearOrConstantTermsIn%28x%2c%20x%5e2-%201%29%3b%5cnIsProductLinearOrConstantTermsIn%28x%2c%20%28x-%201%29%28x%20%2b%201%29%29%3b%5cnIsProductLinearOrConstantTermsIn%28x%2c%20%282x%20%2b%201%29%28x%20%5c%5cpi%20%2b%201%29%29%3b%5cnIsProductLinearOrConstantTermsIn%28x%2c%20%282x%20%2by%29%28x%20%5c%5cpi%20%2b%201%29%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 TurnOffRules("DistributeMultiplication");

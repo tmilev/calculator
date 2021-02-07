@@ -386,7 +386,7 @@ class Calculator {
       return;
     }
     dynamicJavascript.typeset(this.getOutputElement(), {
-      "lineBreakWidth": 1000,
+      "lineBreakWidth": 600,
     });
     this.flagTypeset = true;
   }

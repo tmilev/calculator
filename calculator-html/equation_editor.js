@@ -3949,6 +3949,11 @@ class BoundingBox {
     this.width = 0;
     /** @type{number}*/
     this.height = 0;
+    /** @type{number} 
+     * Used with broken lines to 
+     * indicate the height of the broken line.
+     */
+    this.lineHeight = - 1;
     /** @type{number}*/
     this.fractionLineHeight = 0;
 
@@ -5128,26 +5133,35 @@ class MathNode {
     width,
   ) {
     console.log("DEBUG: compute line breaks");
+    // this.equationEditor.rootNode.boundingBox.needsMiddleAlignment = false;
     let widthBroken = 0;
     let row = 0;
-    let originalHeight = this.boundingBox.height;
+    this.boundingBox.lineHeight = this.boundingBox.height;
     let finalWidth = 0;
+    let hasMoreThanOneLine = false;
+    let lastLineOverFlown = false;
     for (let i = 0; i < this.children.length; i++) {
       let child = this.children[i];
       let widthSoFar = child.boundingBox.left + child.boundingBox.width;
       let currentLineWidth = widthSoFar - widthBroken;
+      if (lastLineOverFlown && currentLineWidth > 0) {
+        hasMoreThanOneLine = true;
+        row++;
+        lastLineOverFlown = false;
+      }
       finalWidth = Math.max(currentLineWidth, finalWidth);
-      child.boundingBox.top += originalHeight * row;
+      child.boundingBox.top += this.boundingBox.lineHeight * row;
       child.boundingBox.left -= widthBroken;
       if (currentLineWidth > width) {
         widthBroken = widthSoFar;
-        if (i + 1 < this.children.length) {
-          row++;
-        }
+        lastLineOverFlown = true;
       }
     }
-    this.boundingBox.height = originalHeight * (row + 1);
+    this.boundingBox.height = this.boundingBox.lineHeight * (row + 1);
     this.boundingBox.width = finalWidth;
+    if (!hasMoreThanOneLine) {
+      this.boundingBox.lineHeight = - 1;
+    }
   }
 
   doAlign() {
@@ -7808,16 +7822,22 @@ class MathNodeRoot extends MathNode {
 
   computeDimensions() {
     this.computeDimensionsStandard();
+    this.boundingBox.lineHeight = this.children[0].boundingBox.lineHeight;
     if (!this.boundingBox.needsMiddleAlignment || this.equationEditor.options.editable) {
       return;
     }
-    let bottomDistance = this.boundingBox.height - this.boundingBox.fractionLineHeight;
+    let lineHeight = this.boundingBox.height;
+    if (this.boundingBox.lineHeight > 0) {
+      // We have a broken-line expression.
+      lineHeight = this.boundingBox.lineHeight;
+    }
+    let bottomDistance = lineHeight - this.boundingBox.fractionLineHeight;
     if (bottomDistance > this.boundingBox.fractionLineHeight) {
-      this.boundingBox.height = bottomDistance * 2;
+      this.boundingBox.height += bottomDistance * 2 - lineHeight;
       this.boundingBox.top += bottomDistance - this.boundingBox.fractionLineHeight;
       this.boundingBox.fractionLineHeight = bottomDistance;
     } else {
-      this.boundingBox.height = this.boundingBox.fractionLineHeight * 2;
+      this.boundingBox.height += this.boundingBox.fractionLineHeight * 2 - lineHeight;
     }
   }
 }

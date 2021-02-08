@@ -20,7 +20,6 @@ public:
   static std::string compareExpressionsPageNoCache;
   struct request {
     static std::string requestAPI;
-    static std::string calculatorPage;
     static std::string database;
     static std::string setProblemWeight;
     static std::string setProblemDeadline;
@@ -31,6 +30,7 @@ public:
     static std::string onePageJS;
     static std::string onePageJSWithHash;
     static std::string calculatorCSS;
+    static std::string lieAlgebrasCSS;
     static std::string userInfoJSON;
     static std::string editPage;
     static std::string debugFlag;
@@ -53,8 +53,10 @@ public:
     static std::string homeworkFromSource;
     static std::string solveRequest;
     static std::string compareExpressions;
+    static std::string compareExpressionsInternal;
     static std::string compareExpressionsGiven;
     static std::string compareExpressionsDesired;
+    static std::string submitAnswerHardcoded;
     struct slides {
     public:
       static std::string source;
@@ -78,7 +80,6 @@ public:
     static std::string login;
     static std::string logout;
     static std::string signUp;
-    static std::string currentPage;
     static std::string addUsers;
     static std::string addEmails;
     static std::string userList;
@@ -98,7 +99,9 @@ public:
     static std::string timeOut;
     static std::string timeOutComments;
     static std::string workerId;
+    static std::string functions;
     static std::string workerIndex;
+    static std::string outputString;
     static std::string error;
     static std::string status;
     static std::string running;
@@ -107,13 +110,28 @@ public:
     static std::string loginDisabledEveryoneIsAdmin;
     static std::string useFallbackDatabase;
     static std::string httpsSupport;
-    static std::string comparison;
+    static std::string scriptType;
     struct ComparisonData {
-      static std::string given;
-      static std::string desired;
+      // The given (student answer) expression string.
       static std::string givenRaw;
+      // The desired (teacher-prodived answer) expression string.
       static std::string desiredRaw;
+      // The given answer as parsed / understood by the calculator.
+      static std::string given;
+      // The desired answer as parsed / understood by the calculator.
+      static std::string desired;
+      // If non-empty, signifies the calculator could not
+      // evaluate one of the answers, for reasons such as division by zero.
+      static std::string errorEvaluation;
+      // If non-empty, signifies the calculator found some
+      // obvious error in the answer such as wrong variable name.
+      static std::string errorInAnswer;
+      // Whether the desired and given answer simplify to
+      // equal mathematical expressions.
       static std::string areEqual;
+      // Whether the desired and given answer
+      // are equal as aswers, i.e., simplify to equal mathematical expressions
+      // under a reduced set of simplification rules.
       static std::string areEqualAsAnswers;
     };
 
@@ -128,6 +146,7 @@ public:
     static std::string problemFileName;
     static std::string problemPage;
     static std::string currentPage;
+    static std::string calculatorPage;
     static std::string exerciseType;
     static std::string scoredQuiz;
     static std::string exercise;
@@ -141,6 +160,9 @@ public:
     static std::string fileNameTarget;
     static std::string fileContent;
     static std::string idProblem; //<- a little more specific than just id, easier to string-search
+    static std::string answerId; //<- a little more specific than just id, easier to string-search
+    static std::string answerValue;
+    static std::string answerCheck;
     static std::string deadlineSingle;
     static std::string failedToLoadProblem;
     static std::string problemLabel;
@@ -149,6 +171,7 @@ public:
     static std::string answerGenerationSuccess;
     static std::string commentsProblem;
     static std::string calculatorAnswerPrefix;
+    static std::string answerWasHardCoded;
   };
   struct databaseParameters {
     static std::string labels;
@@ -179,7 +202,6 @@ public:
   static std::string disableDatabaseLogEveryoneAsAdmin       ;
   static std::string serverDetailedLog                       ;
   static std::string gitRepository                           ;
-  static std::string installMathJax                          ;
   static std::string portHTTP                                ;
   static std::string portHTTPSOpenSSL                        ;
   static std::string portHTTPSBuiltIn                        ;
@@ -187,11 +209,8 @@ public:
   static std::string calculatorHTML            ;
   static std::string HTMLCommon                ;
   static std::string HTMLCommonFonts           ;
-  static std::string HTMLJQueryMinified        ;
   static std::string HTMLAceSrcMin             ;
-  static std::string HTMLJQueryUI              ;
-  static std::string HTMLMathQuill             ;
-  static std::string HTMLMathQuillFonts        ;
+  static std::string examples                  ;
 
   static std::string HTMLCommonFont            ;
   static std::string publicHTML                ;
@@ -200,8 +219,6 @@ public:
   static std::string testFolder                ;
   static std::string outputFolder              ;
   static std::string HTMLGeneral               ;
-  static std::string mathJaxLatestConfiguration;
-  static std::string mathJaxLatest             ;
   static std::string problemsFolder            ;
   static std::string courseTemplates           ;
   static std::string coursesAvailable          ;

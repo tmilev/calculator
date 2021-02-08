@@ -98,7 +98,7 @@ Expression ExpressionContext::toExpressionDefaultModulus() const {
 
 Expression ExpressionContext::toExpressionSemisimpleLieAlgebra() const {
   Expression algebraContext(*this->owner);
-  algebraContext.addChildAtomOnTop(this->owner->opSemisimpleLieAlgebrA());
+  algebraContext.addChildAtomOnTop(this->owner->opSemisimpleLieAlgebra());
   algebraContext.addChildOnTop(this->indexAmbientSemisimpleLieAlgebra);
   return algebraContext;
 }
@@ -175,7 +175,7 @@ SemisimpleLieAlgebra* ExpressionContext::getAmbientSemisimpleLieAlgebra() const 
   if (this->indexAmbientSemisimpleLieAlgebra == - 1) {
     return nullptr;
   }
-  return &this->owner->theObjectContainer.semisimpleLieAlgebras.values[
+  return &this->owner->objectContainer.semisimpleLieAlgebras.values[
     this->indexAmbientSemisimpleLieAlgebra
   ];
 }
@@ -193,7 +193,7 @@ std::string ExpressionContext::toString() const {
   }
   if (this->indexAmbientSemisimpleLieAlgebra != - 1) {
     out << "Ambient semisimple Lie algebra: "
-    << this->getAmbientSemisimpleLieAlgebra()->theWeyl.theDynkinType.toString();
+    << this->getAmbientSemisimpleLieAlgebra()->weylGroup.dynkinType.toString();
   }
   return out.str();
 }
@@ -227,13 +227,13 @@ bool ExpressionContext::setAmbientSemisimpleLieAlgebra(
   SemisimpleLieAlgebra& algebra
 ) {
   this->checkInitialization();
-  MapReferences<DynkinType, SemisimpleLieAlgebra>& algebras = this->owner->theObjectContainer.semisimpleLieAlgebras;
+  MapReferences<DynkinType, SemisimpleLieAlgebra>& algebras = this->owner->objectContainer.semisimpleLieAlgebras;
   this->indexAmbientSemisimpleLieAlgebra = algebras.getIndex(
-    algebra.theWeyl.theDynkinType
+    algebra.weylGroup.dynkinType
   );
   if (this->indexAmbientSemisimpleLieAlgebra == - 1) {
     global.fatal << "Attempt to add semisimple algebra of type "
-    << algebra.theWeyl.theDynkinType << " which is unknown to the calculator. "
+    << algebra.weylGroup.dynkinType << " which is unknown to the calculator. "
     << global.fatal;
   }
   return true;
@@ -281,7 +281,7 @@ bool ExpressionContext::fromExpressionOneContext(
   if (input.startsWith(this->owner->opWeylAlgebraVariables())) {
     return this->fromExpressionDifferentialOperatorVariables(input);
   }
-  if (input.startsWith(this->owner->opSemisimpleLieAlgebrA())) {
+  if (input.startsWith(this->owner->opSemisimpleLieAlgebra())) {
     return this->fromExpressionSemisimpleLieAlgebra(input);
   }
   if (input.startsWith(this->owner->opMod())) {
@@ -597,9 +597,35 @@ template<>
 bool WithContext<Rational>::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ) {
-  (void) commentsOnFailure;
-  this->context = newContext;
-  return true;
+  return this->extendContextTrivially(newContext, commentsOnFailure);
+}
+
+template<>
+bool WithContext<std::string>::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+) {
+  return this->extendContextTrivially(newContext, commentsOnFailure);
+}
+
+template<>
+bool WithContext<ElementWeylGroup>::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+) {
+  return this->extendContextTrivially(newContext, commentsOnFailure);
+}
+
+template<>
+bool WithContext<AlgebraicNumber>::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+) {
+  return this->extendContextTrivially(newContext, commentsOnFailure);
+}
+
+template<>
+bool WithContext<double>::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+) {
+  return this->extendContextTrivially(newContext, commentsOnFailure);
 }
 
 template<>
@@ -614,33 +640,6 @@ bool WithContext<ElementZmodP>::extendContext(
     }
     return false;
   }
-  this->context = newContext;
-  return true;
-}
-
-template<>
-bool WithContext<ElementWeylGroup>::extendContext(
-  ExpressionContext& newContext, std::stringstream* commentsOnFailure
-) {
-  (void) commentsOnFailure;
-  this->context = newContext;
-  return true;
-}
-
-template<>
-bool WithContext<AlgebraicNumber>::extendContext(
-  ExpressionContext& newContext, std::stringstream* commentsOnFailure
-) {
-  (void) commentsOnFailure;
-  this->context = newContext;
-  return true;
-}
-
-template<>
-bool WithContext<double>::extendContext(
-  ExpressionContext& newContext, std::stringstream* commentsOnFailure
-){
-  (void) commentsOnFailure;
   this->context = newContext;
   return true;
 }
@@ -699,7 +698,7 @@ bool WithContext<Polynomial<AlgebraicNumber> >::extendContext(
   this->context.polynomialSubstitutionNoFailure<AlgebraicNumber>(
     newContext,
     substitution,
-    this->context.owner->theObjectContainer.theAlgebraicClosure.one()
+    this->context.owner->objectContainer.theAlgebraicClosure.one()
   );
   if (!this->content.substitution(substitution, Rational::one())) {
     return false;
@@ -758,7 +757,7 @@ bool WithContext<RationalFunction<AlgebraicNumber> >::extendContext(
 ) {
   MacroRegisterFunctionWithName("WithContext_RationalFunction_AlgebraicNumber::extendContext");
   PolynomialSubstitution<AlgebraicNumber> substitution;
-  AlgebraicClosureRationals& closure = this->context.owner->theObjectContainer.theAlgebraicClosure;
+  AlgebraicClosureRationals& closure = this->context.owner->objectContainer.theAlgebraicClosure;
   this->context.polynomialSubstitutionNoFailure(newContext, substitution, closure.one());
   if (!this->content.substitution(substitution, closure.one(), commentsOnFailure)) {
     // This is not supposed to happen.
@@ -780,7 +779,7 @@ bool WithContext<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >:
   (void) commentsOnFailure;
   PolynomialSubstitution<Rational> substitution;
   this->context.polynomialSubstitutionNoFailure(newContext, substitution, Rational::one());
-  this->content.substitution(substitution, this->context.owner->theObjectContainer.theCategoryOmodules);
+  this->content.substitution(substitution, this->context.owner->objectContainer.theCategoryOmodules);
   this->context = newContext;
   return true;
 }
@@ -813,6 +812,10 @@ bool Expression::setContextAtLeastEqualTo(
   WithContext<Rational> rational;
   if (this->isOfTypeWithContext(&rational)) {
     return rational.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
+  }
+  WithContext<std::string> stringValue;
+  if (this->isOfTypeWithContext(&stringValue)) {
+    return stringValue.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
   WithContext<ElementZmodP> modularElement;
   if (this->isOfTypeWithContext(&modularElement)) {

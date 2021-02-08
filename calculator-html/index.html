@@ -35,20 +35,10 @@
       }
     }
   </script>
-
   <script type="text/javascript" src="/html-common/ace/src-min/ace.js" charset="utf-8"
     onerror="errorLoadingScript(this);"></script>
   <script src="/html-common/ace/src-min/ext-language_tools.js" onerror="errorLoadingScript(this);"></script>
   <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
-  <!-- 
-    Upon cached page request of address "/app",
-    the cpp html builder will replace 
-    the following tags with one of the form 
-    "/calculator-html${uniquehash}/javascript_all_in_one.js",
-    likewise for the css file,
-    and will transmit the script with a no-expiration date cache.
-  -->
-  <!-- WARNING: to not change the tag below, it is searched+replaced as an exact match by the cpp builder.-->
   <script type="text/javascript" src="/calculator-html/javascript_all_in_one.js"></script>
   <link type="text/css" rel="stylesheet" href="/calculator-html/calculator.css">
 
@@ -57,6 +47,9 @@
 </head>
 
 <body>
+  <!--If your html page has an element with the following id, the javascript library is allowed to use the local storage.-->
+  <!--If you do not include an element with the id below, the javascript library will abstain from using your local storage.-->
+  <span id="calculatorDefaultsEnabled"></span>
   <div id="divDefaultApplication">
     <div id="divLoginPage" class="divPage">
       <div class="centerHorizontallyInPageContainer">
@@ -70,7 +63,7 @@
               <input class="textInputUsername" type="password" id="inputPassword" name="password" placeholder="password"
                 onkeypress="if (event.keyCode === 13) window.calculator.login.loginCalculator();" autocomplete="on"><br>
             </form>
-            <!--pasword input form-->
+            <!--password input form-->
             <button class="buttonSelectPage" onclick="window.calculator.login.loginCalculator();">Login</button><br>
             <button class="buttonSignUp" onclick="window.calculator.mainPage.selectPage('signUp');">Sign up</button><br>
             <button class="buttonSignUp" onclick="window.calculator.forgotLogin.forgotLoginPage();">Forgot
@@ -176,87 +169,79 @@
     </div>
     <!--divSelectCourse-->
     <div id="divCalculatorPage" class="divPage">
-      <table id="tableCalculatorExamples" class="tableCalculatorInputs">
-        <tr>
-          <td>
-            <table id="tableCalculatorAndOutput" class="tableCalculatorInputs">
-              <tr>
-                <td>
-                  <table class="tableCalculatorInputs">
-                    <tr>
-                      <td>
-                        <input type="hidden" name="request" id="request" value="compute">
-                        <textarea class="textareaCalculatorMain" rows="3" cols="30" id="mainInputID"></textarea>
-                      </td>
-                      <td>
-                        <span id="mqPanelComments" style="white-space:nowrap">Equation assistant</span>
-                        <br>
-                        <div style="font-size: 48px; font-family: 'Times New Roman'; vertical-align:top"
-                          id="mainInputEditorField"></div>
-                      </td>
-                      <td>
-                        <div class="mqButtonPanel" style="vertical-align:top" id="mainInputEditorFieldButtons"
-                          buttons="algebra, logarithms, integrals, matrices"></div>
-                      </td>
-                      <td>
-                        <span id="spanDebugCalculatorPage">
-                        </span>
-                      </td>
-                      <td>
-                        <span id="idAutocompletePanel">
-                          <span id="idAutocompleteHints" style="font-size: x-small">
-                            Ctrl+space = autocomplete<br>
-                            Ctrl+arrow = select
-                          </span>
-                          <br>
-                          <div id="idAutocompleteSpan" style="display:block; overflow:auto;" height="100px"></div>
-                          <span id="idAutocompleteDebug"></span>
-                        </span>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <table>
-                    <tr>
-                      <td>
-                        <button class="buttonPreview" title="Shift + Enter = shortcut from input text box. " name="Go"
-                          onclick="window.calculator.calculator.submitComputation(); event.preventDefault();">
-                          Go
-                        </button>
-                        <span><button class="buttonSubmit" id="buttonPauseToggle">Pause</button></span>
-                        <span id="calculatorInputProgress"></span>
-                        <span id="idProgressReportTimer"></span>
-                        <br>
-                        <span id="spanComputationLink"></span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <span id="spanCalculatorMainOutput"></span>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-            <!--tableCalculatorAndOutput-->
-          </td>
-          <td>
-            <span id="spanCalculatorExamplesContainer">
-              <button onclick="window.calculator.calculator.toggleExamples(this)"
-                class="buttonToggleTopics">&#9656;</button> Examples
-              <span id="spanProgressCalculatorExamples"></span>
-              <div id="divCalculatorExamples">
-              </div>
-              <!--divCalculatorExamples-->
-            </span>
-          </td>
-        </tr>
-      </table>
-      <!--tableCalculatorExamples-->
+      <div id="divCalculatorMainInputOutput">
+        <table id="tableCalculatorAndOutput" class="tableCalculatorInputs">
+          <tr>
+            <td>
+              <table class="tableCalculatorInputs">
+                <tr>
+                  <td>
+                    <input type="hidden" name="request" id="request" value="compute">
+                    <textarea class="textareaCalculatorMain" rows="3" cols="30" id="mainInputID"></textarea>
+                  </td>
+                  <td>
+                    <span id="mqPanelComments" style="white-space:nowrap">Equation assistant</span>
+                    <br>
+                    <div style="font-size: 48px; font-family: 'Times New Roman'; vertical-align:top"
+                      id="mainInputEditorField"></div>
+                  </td>
+                  <td>
+                    <div class="mqButtonPanel" style="vertical-align:top" id="mainInputEditorFieldButtons"
+                      buttons="algebra, logarithms, integrals, matrices"></div>
+                  </td>
+                  <td>
+                    <span id="spanDebugCalculatorPage">
+                    </span>
+                  </td>
+                  <td>
+                    <span id="idAutocompletePanel">
+                      <span id="idAutocompleteHints" style="font-size: x-small">
+                        Ctrl+space = autocomplete<br>
+                        Ctrl+arrow = select
+                      </span>
+                      <br>
+                      <div id="idAutocompleteSpan" style="display:block; overflow:auto;" height="100px"></div>
+                      <span id="idAutocompleteDebug"></span>
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <table>
+                <tr>
+                  <td>
+                    <button class="buttonPreview" title="Shift + Enter = shortcut from input text box. " name="Go"
+                      onclick="window.calculator.calculator.submitComputation(); event.preventDefault();">
+                      Go
+                    </button>
+                    <span><button class="buttonSubmit" id="buttonPauseToggle">Pause</button></span>
+                    <span id="calculatorInputProgress"></span>
+                    <span id="idProgressReportTimer"></span>
+                    <br>
+                    <span id="spanComputationLink"></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span id="spanCalculatorMainOutput"></span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+        <!--tableCalculatorAndOutput-->
+      </div>
+      <div id="divCalculatorExamplesContainer">
+        <button onclick="window.calculator.calculator.toggleExamples(this)" class="buttonToggleTopics">&#9656;</button>
+        Examples
+        <span id="spanProgressCalculatorExamples"></span>
+        <div id="divCalculatorExamples">
+        </div>
+      </div>
     </div>
     <!--divCalculatorPage-->
     <div id="divAboutPage" class="divPage">
@@ -464,7 +449,8 @@
             analytics.js, and dc.js) from sharing information with Google Analytics about visits activity.</p>
           <p>For more information on the privacy practices of Google, please visit the Google Privacy & Terms web
             page:
-            <a href="https://policies.google.com/privacy?hl=en">https://policies.google.com/privacy?hl=en</a></p>
+            <a href="https://policies.google.com/privacy?hl=en">https://policies.google.com/privacy?hl=en</a>
+          </p>
         </li>
       </ul>
 

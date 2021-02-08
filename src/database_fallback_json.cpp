@@ -305,7 +305,7 @@ bool Database::FallBack::storeDatabase(std::stringstream* commentsOnFailure) {
 
 bool Database::FallBack::readDatabase(std::stringstream* commentsOnFailure) {
   std::string theDatabase;
-  if (!FileOperations::loadFiletoStringVirtual(
+  if (!FileOperations::loadFileToStringVirtual(
     Database::FallBack::databaseFilename, theDatabase, true, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {

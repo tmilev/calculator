@@ -132,7 +132,7 @@ std::string WebWorker::closeIndentTag(const std::string& theTag) {
 
 void WebServer::initSSL() {
   MacroRegisterFunctionWithName("WebServer::initSSL");
-  if (!global.flagSSLIsAvailable) {
+  if (!global.flagSSLAvailable) {
     global << Logger::red << "SSL is DISABLED." << Logger::endL;
     return;
   }
@@ -141,7 +141,7 @@ void WebServer::initSSL() {
 }
 
 bool WebServer::sslServerSideHandShake(std::stringstream* commentsOnFailure) {
-  if (!global.flagSSLIsAvailable) {
+  if (!global.flagSSLAvailable) {
     return false;
   }
   if (!global.flagUsingSSLinCurrentConnection) {
@@ -208,14 +208,14 @@ bool WebWorker::receiveAll() {
   } else {
     this->displayUserInput = "GET " + this->addressGetOrPost;
   }
-  if (this->ContentLength <= 0) {
+  if (this->contentLength <= 0) {
     return true;
   }
-  if (this->messageBody.size() == static_cast<unsigned>(this->ContentLength)) {
+  if (this->messageBody.size() == static_cast<unsigned>(this->contentLength)) {
     return true;
   }
   this->messageBody.clear(); //<- needed else the length error check will pop.
-  if (this->ContentLength > 10000000) {
+  if (this->contentLength > 10000000) {
     this->checkConsistency();
     error = "Content-length parsed to be more than 10 million bytes, aborting.";
     global << this->error << Logger::endL;
@@ -226,7 +226,7 @@ bool WebWorker::receiveAll() {
   this->sendAllBytesNoHeaders();
   this->remainingBytesToSend.setSize(0);
   std::string bufferString;
-  while (static_cast<signed>(this->messageBody.size()) < this->ContentLength) {
+  while (static_cast<signed>(this->messageBody.size()) < this->contentLength) {
     if (global.getElapsedSeconds() - numSecondsAtStart > 5) {
       this->error = "Receiving bytes timed out (5 seconds).";
       global << this->error << Logger::endL;
@@ -264,14 +264,14 @@ bool WebWorker::receiveAll() {
     bufferString.assign(readBuffer.objects, static_cast<unsigned>(numBytesInBuffer));
     this->messageBody += bufferString;
   }
-  if (static_cast<signed>(this->messageBody.size()) != this->ContentLength) {
+  if (static_cast<signed>(this->messageBody.size()) != this->contentLength) {
     this->messageHead += this->messageBody;
     this->parseMessageHead();
   }
-  if (static_cast<signed>(this->messageBody.size()) != this->ContentLength) {
+  if (static_cast<signed>(this->messageBody.size()) != this->contentLength) {
     std::stringstream out;
     out << "The message-body received by me had length " << this->messageBody.size()
-    << " yet I expected a message of length " << this->ContentLength << ". More details follow. "
+    << " yet I expected a message of length " << this->contentLength << ". More details follow. "
     << this->toStringMessageFull();
     global << out.str() << Logger::endL;
   }
@@ -298,7 +298,7 @@ void WebWorker::sendAllBytesNoHeaders() {
       << Logger::endL;
       return;
     }
-    int numBytesSent = this->parent->theTLS.writeOnce(
+    int bytesSent = this->parent->theTLS.writeOnce(
       this->connectedSocketID,
       this->remainingBytesToSend,
       &errorString,
@@ -306,17 +306,19 @@ void WebWorker::sendAllBytesNoHeaders() {
       &commentsOnError,
       true
     );
-    if (numBytesSent < 0) {
-      global << "WebWorker::SendAllBytes failed: SSL_write error. " << Logger::endL;
+    if (bytesSent < 0) {
+      global << Logger::red << "WebWorker::SendAllBytes: writeOnce failed. " << Logger::blue
+      << "Socket: " << this->connectedSocketID << ". " << Logger::endL;
+      this->parent->theTLS.openSSLData.clearErrorQueue(bytesSent);
       return;
     }
-    if (numBytesSent == 0) {
+    if (bytesSent == 0) {
       numTimesRunWithoutSending ++;
     } else {
       numTimesRunWithoutSending = 0;
     }
-    global << numBytesSent;
-    this->remainingBytesToSend.sliceInPlace(numBytesSent, this->remainingBytesToSend.size - numBytesSent);
+    global << bytesSent;
+    this->remainingBytesToSend.sliceInPlace(bytesSent, this->remainingBytesToSend.size - bytesSent);
     if (this->remainingBytesToSend.size > 0) {
       global << ", ";
     }
@@ -429,7 +431,7 @@ void WebWorker::resetMessageComponentsExceptRawMessage() {
   this->theMessageHeaderStrings.setSize(0);
   this->requestHeaders.clear();
   this->requestTypE = this->requestUnknown;
-  this->ContentLength = - 1;
+  this->contentLength = - 1;
 }
 
 JSData WebWorker::getDatabaseJSON() {
@@ -736,7 +738,7 @@ void WebWorker::parseMessageHead() {
   this->connectionFlags.size = 0;
   this->messageBody = "";
   this->flagKeepAlive = false;
-  this->ContentLength = - 1;
+  this->contentLength = - 1;
   this->addressGetOrPost = "";
   this->hostWithPort = "";
   for (unsigned i = 0; i < this->messageHead.size(); i ++) {
@@ -809,8 +811,8 @@ void WebWorker::parseMessageHead() {
       if (this->theMessageHeaderStrings[i + 1].size() < 10000) {
         LargeIntegerUnsigned theLI;
         if (theLI.assignStringFailureAllowed(this->theMessageHeaderStrings[i + 1], true)) {
-          if (!theLI.isIntegerFittingInInt(&this->ContentLength)) {
-            this->ContentLength = - 1;
+          if (!theLI.isIntegerFittingInInt(&this->contentLength)) {
+            this->contentLength = - 1;
           }
         }
       }
@@ -852,8 +854,8 @@ void WebWorker::parseMessageHead() {
       }
     }
   }
-  if (this->messageBody.size() > 0 && this->ContentLength < 0) {
-    this->ContentLength = static_cast<signed>(this->messageBody.size());
+  if (this->messageBody.size() > 0 && this->contentLength < 0) {
+    this->contentLength = static_cast<signed>(this->messageBody.size());
   }
   global.hostWithPort = this->hostWithPort;
 }
@@ -1228,7 +1230,7 @@ int WebWorker::processFolder() {
     << " </b>";
     JSData result;
     result[WebAPI::result::error] = outError.str();
-    global.theResponse.writeResponse(result);
+    global.response.writeResponse(result);
     return 0;
   }
   outPage << "Browsing folder: "
@@ -1505,7 +1507,7 @@ std::string WebWorker::mimeTypeFromFileExtension(const std::string& fileExtensio
 int WebWorker::processUnknown() {
   MacroRegisterFunctionWithName("WebWorker::processUnknown");
   this->setHeader("HTTP/1.0 501 Method Not Implemented", "Content-Type: text/html");
-  global.theResponse.writeResponse(WebAPIResponse::getJSONUserInfo("Unknown request"), false);
+  global.response.writeResponse(WebAPIResponse::getJSONUserInfo("Unknown request"), false);
   return 0;
 }
 
@@ -1772,7 +1774,7 @@ std::string WebAPIResponse::getCaptchaDiv() {
 bool WebWorker::correctRequestsBEFORELoginReturnFalseIfModified() {
   MacroRegisterFunctionWithName("WebWorker::correctRequestsBEFORELoginReturnFalseIfModified");
   bool stateNotModified = true;
-  if (!global.flagSSLIsAvailable) {
+  if (!global.flagSSLAvailable) {
     if (
       this->addressComputed == global.displayNameExecutable &&
       global.requestType == ""
@@ -1848,7 +1850,7 @@ bool WebWorker::correctRequestsAFTERLoginReturnFalseIfModified() {
   if (this->addressComputed == "/" || this->addressComputed == "") {
     shouldFallBackToDefaultPage = true;
   }
-  if (!global.flagSSLIsAvailable) {
+  if (!global.flagSSLAvailable) {
     if (
       this->addressComputed == global.displayNameExecutable &&
       global.requestType == ""
@@ -1945,7 +1947,7 @@ int WebWorker::processLoginNeededOverUnsecureConnection() {
 }
 
 bool WebWorker::requireSSL() {
-  return global.flagSSLIsAvailable;
+  return global.flagSSLAvailable;
 }
 
 int WebWorker::serveClient() {
@@ -2112,7 +2114,7 @@ int WebWorker::processFolderOrFile() {
     << "are not allowed to start with dots. There may be additional restrictions "
     << "on file names added for security reasons.";
     result[WebAPI::result::error] = out.str();
-    return global.theResponse.writeResponse(result);
+    return global.response.writeResponse(result);
   }
   if (FileOperations::isFolderUnsecure(this->RelativePhysicalFileNamE)) {
     return this->processFolder();
@@ -2159,14 +2161,14 @@ void WebWorker::getIndicatorOnTimeout(
   output[WebAPI::result::timeOut] = true;
 
   timeOutComments << message;
-  if (global.theResponse.flagBanProcessMonitoring) {
+  if (global.response.flagBanProcessMonitoring) {
     timeOutComments
     << "Monitoring computations is not allowed on this server.<br> "
     << "Please note that monitoring computations "
     << "is the default behavior, so the "
     << "owners of the server must have explicitly banned monitoring. ";
     output[WebAPI::result::timeOutComments] = timeOutComments.str();
-  } else if (!global.theResponse.flagReportDesired){
+  } else if (!global.response.flagReportDesired){
     timeOutComments
     << "Monitoring computations not desired by user. ";
     output[WebAPI::result::timeOutComments] = timeOutComments.str();
@@ -2308,6 +2310,7 @@ void WebServer::releaseEverything() {
 
 WebServer::~WebServer() {
   this->flagDeallocated = true;
+  TransportLayerSecurityOpenSSL::freeContextGlobal();
 }
 
 WebServer::WebServer() {
@@ -2336,7 +2339,6 @@ WebServer::WebServer() {
   this->statistics.workersNormallyExited = 0;
   this->statistics.failedSelectsSoFar = 0;
   this->statistics.successfulSelectsSoFar = 0;
-
 }
 
 void WebServer::signal_SIGCHLD_handler(int s) {
@@ -2691,7 +2693,7 @@ void WebServer::stop() {
 
 void WebServer::initPortsITry() {
   this->portHTTP = global.configuration[Configuration::portHTTP].stringValue;
-  if (!global.flagSSLIsAvailable) {
+  if (!global.flagSSLAvailable) {
     return;
   }
   this->portHTTPSOpenSSL = global.configuration[Configuration::portHTTPSOpenSSL].stringValue;
@@ -2719,7 +2721,8 @@ void WebServer::initListeningSockets() {
       this->theListeningSockets[i], this->highestSocketNumber
     );
     if (listen(this->theListeningSockets[i], WebServer::maxNumPendingConnections) == - 1) {
-      global.fatal << "Listen function failed on socket: " << this->theListeningSockets[i] << global.fatal;
+      global.fatal << "Listen function failed on socket: "
+      << this->theListeningSockets[i] << global.fatal;
     }
   }
 }
@@ -3074,7 +3077,7 @@ bool WebServer::initBindToPorts() {
       return false;
     }
   }
-  if (global.flagSSLIsAvailable) {
+  if (global.flagSSLAvailable) {
     if (!this->initBindToOnePort(this->portHTTPSOpenSSL, this->listeningSocketHTTPSOpenSSL)) {
       return false;
     }
@@ -3255,7 +3258,7 @@ void Listener::computeUserAddress() {
   this->userAddress = this->userAddressBuffer;
 }
 
-TransportLayerSecurity& TransportLayerSecurity::DefaultTLS_READ_ONLY() {
+TransportLayerSecurity& TransportLayerSecurity::defaultTLS_READ_ONLY() {
   return global.server().theTLS;
 }
 
@@ -3342,7 +3345,7 @@ int WebServer::run() {
 
   // <-Worker log resets are needed, else forked processes reset their common log.
   // <-Resets of the server logs are not needed, but I put them here nonetheless.
-  if (global.flagSSLIsAvailable) {
+  if (global.flagSSLAvailable) {
     // Creates key files if absent. Does not call any openssl functions.
     std::stringstream commentsOnFailure;
     TransportLayerSecurity::initializeNonThreadSafePartsCommon();
@@ -3369,20 +3372,19 @@ int WebServer::run() {
   }
   global.logs.logType = GlobalVariables::LogData::type::server;
   this->initializeSignals();
-  global.calculator().getElement().initialize();
+  global.calculator().getElement().initialize(Calculator::Mode::full);
   // Cannot call initializeMutex here: not before we execute fork();
   global.calculator().getElement().computeAutoCompleteKeyWords();
   global.calculator().getElement().writeAutoCompleteKeyWordsToFile();
   this->writeVersionJSFile();
   global.initModifiableDatabaseFields();
   HtmlRoutines::loadStrings();
+  this->initSSL();
   this->theTLS.initializeNonThreadSafeOnFirstCall(true);
-  global.calculator().getElement().flagShowCalculatorExamples = false;
   if (!this->initPrepareWebServerALL()) {
     return 1;
   }
   global << Logger::purple << "waiting for connections..." << Logger::endL;
-  this->initSSL();
   this->statistics.successfulSelectsSoFar = 0;
   this->statistics.failedSelectsSoFar = 0;
   long long previousReportedNumberOfSelects = 0;
@@ -3555,7 +3557,7 @@ bool WebWorker::runInitialize() {
       return false;
     }
   }
-  if (global.flagSSLIsAvailable && global.flagUsingSSLinCurrentConnection) {
+  if (global.flagSSLAvailable && global.flagUsingSSLinCurrentConnection) {
     global << Logger::green << "ssl success #: "
     << this->parent->statistics.allConnections
     << ". " << Logger::endL;
@@ -3567,7 +3569,7 @@ bool WebWorker::runInitialize() {
 
 bool WebWorker::failReceiveReturnFalse() {
   bool sslWasOK = true;
-  if (global.flagSSLIsAvailable) {
+  if (global.flagSSLAvailable) {
     sslWasOK = (this->error == TransportLayerSecurityOpenSSL::errors::errorWantRead);
   }
   if (this->statistics.allReceives > 0 && sslWasOK) {
@@ -3589,7 +3591,7 @@ bool WebWorker::runOnce() {
   }
   if (this->statistics.allReceives > 0) {
     global.calculator().freeMemory();
-    global.calculator().getElement().initialize();
+    global.calculator().getElement().initialize(Calculator::Mode::full);
     global.comments.resetComments();
     global << Logger::blue << "Created new calculator for connection: "
     << this->statistics.allReceives << Logger::endL;
@@ -3609,7 +3611,7 @@ bool WebWorker::runOnce() {
   this->statistics.allReceives ++;
   if (
     (!this->flagKeepAlive) ||
-    global.theResponse.isTimedOut()
+    global.response.isTimedOut()
   ) {
     return false;
   }
@@ -3805,64 +3807,6 @@ void WebServer::checkFreecalcSetup() {
   global.configurationStore();
 }
 
-void WebServer::checkMathJaxSetup() {
-  MacroRegisterFunctionWithName("WebServer::checkMathJaxSetup");
-  if (!global.configuration[
-    Configuration::installMathJax
-  ].isTrueRepresentationInJSON()) {
-    return;
-  }
-  std::string mathjaxBase;
-  std::string mathjaxZipSource;
-  std::string publicHtmlFolder;
-  std::stringstream commentsOnFailure;
-  if (!FileOperations::getPhysicalFileNameFromVirtual(
-    Configuration::mathJaxLatest,
-    mathjaxBase,
-    false,
-    false,
-    &commentsOnFailure
-  )) {
-    global << Logger::red << "Failed to compute mathjax folder. "
-    << Logger::endL << commentsOnFailure.str() << Logger::endL;
-    return;
-  }
-
-  if (FileOperations::fileExistsUnsecure(mathjaxBase)) {
-    // Mathjax folder is there.
-    // We assume it is correctly installed.
-    return;
-  }
-  global << Logger::red << "MathJax not found. "
-  << Logger::green << "Attempting to auto-install it for you. "
-  << Logger::endL;
-  if (!FileOperations::getPhysicalFileNameFromVirtual(
-    Configuration::publicHTML, publicHtmlFolder, false, false, & commentsOnFailure
-  )) {
-    global << Logger::red << "Failed to compute public html folder. "
-    << Logger::endL << commentsOnFailure.str() << Logger::endL;
-    return;
-  }
-  if (!FileOperations::getPhysicalFileNameFromVirtual(
-    Configuration::HTMLCommon + "MathJax-2.7-latest.zip",
-    mathjaxZipSource,
-    false,
-    false,
-    &commentsOnFailure
-  )) {
-    global << Logger::red << "Failed to compute mathjax zip source folder. "
-    << Logger::endL << commentsOnFailure.str() << Logger::endL;
-    return;
-  }
-  global << "Proceeding to unzip MathJax. ";
-  global << "Current folder: " << FileOperations::getCurrentFolder() << Logger::endL;
-  std::stringstream unzipCommand, moveCommand;
-  unzipCommand << "unzip " << mathjaxZipSource << " -d " << publicHtmlFolder;
-  moveCommand << "mv " << publicHtmlFolder << "MathJax-2.7.2 " << publicHtmlFolder << "MathJax-2.7-latest";
-  global.externalCommandNoOutput(unzipCommand.str(), true);
-  global.externalCommandNoOutput(moveCommand.str(), true);
-}
-
 bool WebServer::analyzeMainArgumentsTimeString(const std::string& timeLimitString) {
   if (timeLimitString == "") {
     return false;
@@ -3888,7 +3832,7 @@ void WebServer::initializeBuildFlags() {
   global.flagRunningConsoleRegular = false;
   global.flagRunningConsoleTest = false;
   #ifdef MACRO_use_open_ssl
-  global.flagSSLIsAvailable = true;
+  global.flagSSLAvailable = true;
   #endif
   #ifdef MACRO_use_MongoDB
   global.flagDatabaseCompiled = true;
@@ -4024,8 +3968,7 @@ void WebServer::analyzeMainArguments(int argC, char **argv) {
   arguments.currentIndex = 1;
   arguments.commandLineConfigurations.addListOnTop(List<std::string> ({
     Configuration::portHTTP,
-    Configuration::portHTTPSOpenSSL,
-    Configuration::installMathJax
+    Configuration::portHTTPSOpenSSL
   }));
   for (; arguments.processOneArgument(); arguments.currentIndex ++) {
   }
@@ -4073,7 +4016,6 @@ void WebServer::initializeMainRequests() {
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::forgotLogin);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::compute);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::compareExpressions);
-  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::calculatorPage);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::examplesJSON);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::indicator);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::pause);
@@ -4098,23 +4040,28 @@ void WebServer::initializeMainRequests() {
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::compareExpressions);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::userInfoJSON);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::serverStatusJSON);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::submitAnswerHardcoded);
 }
 
 void WebServer::initializeMainAddresses() {
   MacroRegisterFunctionWithName("WebServer::initializeMainAddresses");
   this->addressStartsNotNeedingLogin.addOnTop("favicon.ico");
   this->addressStartsNotNeedingLogin.addOnTop("/favicon.ico");
-  this->addressStartsNotNeedingLogin.addOnTop("/html-common/");
   this->addressStartsNotNeedingLogin.addOnTop("/calculator-html/");
   this->addressStartsNotNeedingLogin.addOnTop("/src/");
   this->addressStartsNotNeedingLogin.addOnTop("/output/");
   this->addressStartsNotNeedingLogin.addOnTop("/css/");
   this->addressStartsNotNeedingLogin.addOnTop("/javascriptlibs/");
-  this->addressStartsNotNeedingLogin.addOnTop("/MathJax-2.7-latest/");
   this->addressStartsNotNeedingLogin.addOnTop("/login");
   this->addressStartsNotNeedingLogin.addOnTop("/" + WebAPI::app);
   this->addressStartsNotNeedingLogin.addOnTop("/" + WebAPI::appNoCache);
   this->addressStartsNotNeedingLogin.addOnTop(WebAPI::request::onePageJS);
+
+  this->addressStartsNotNeedingLogin.addOnTop(Configuration::HTMLCommon);
+  this->addressStartsNotNeedingLogin.addOnTop("/" + Configuration::HTMLCommon);
+
+  this->addressStartsNotNeedingLogin.addOnTop(Configuration::publicHTML);
+  this->addressStartsNotNeedingLogin.addOnTop("/" + Configuration::publicHTML);
 
   this->addressStartsNotNeedingLogin.addOnTop("/" + WebAPI::compareExpressionsPage);
   this->addressStartsNotNeedingLogin.addOnTop(WebAPI::compareExpressionsPage);
@@ -4144,8 +4091,6 @@ void WebServer::initializeMainAddresses() {
   this->addressStartsNotNeedingLogin.addListOnTop(
     FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash()
   );
-
-  this->addressStartsSentWithCacheMaxAge.addOnTop("/MathJax-2.7-latest/");
   this->addressStartsSentWithCacheMaxAge.addOnTop("/html-common/");
   for (int i = 0; i < FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i ++) {
     this->addressStartsSentWithCacheMaxAge.addOnTop(
@@ -4153,7 +4098,6 @@ void WebServer::initializeMainAddresses() {
       global.buildHeadHashWithServerTime
     );
   }
-
 }
 
 void WebServer::initializeMainFoldersInstructorSpecific() {
@@ -4187,7 +4131,7 @@ extern int mainTest(List<std::string>& remainingArgs);
 
 void WebServer::turnProcessMonitoringOn() {
   MacroRegisterFunctionWithName("WebServer::turnProcessMonitoringOn");
-  global.theResponse.flagBanProcessMonitoring = false;
+  global.response.flagBanProcessMonitoring = false;
   global.configuration[Configuration::processMonitoringBanned] = false;
   global
   << Logger::yellow << "Process monitoring IS ON, reply in: " << Logger::green
@@ -4200,7 +4144,7 @@ void WebServer::turnProcessMonitoringOff() {
   << Logger::green << "************************" << Logger::endL
   << Logger::red << "Process monitoring is now off. " << Logger::endL
   << Logger::green << "************************" << Logger::endL;
-  global.theResponse.flagBanProcessMonitoring = true;
+  global.response.flagBanProcessMonitoring = true;
   global.millisecondsReplyAfterComputation = 0;
   global.configuration[Configuration::processMonitoringBanned] = true;
 }
@@ -4211,7 +4155,7 @@ bool GlobalVariables::configurationLoad() {
   if (this->configurationFileName == "") {
     this->configurationFileName = "/configuration/configuration.json";
   }
-  if (!FileOperations::loadFiletoStringVirtual(
+  if (!FileOperations::loadFileToStringVirtual(
     this->configurationFileName, global.configurationFileContent, true, &out
   )) {
     global << Logger::yellow << "Failed to read configuration file. " << out.str() << Logger::endL;
@@ -4404,7 +4348,6 @@ void WebServer::checkInstallation() {
   global.server().checkSystemInstallationOpenSSL();
   global.server().checkSystemInstallationMongoDatabase();
   global.server().checkMongoDatabaseSetup();
-  global.server().checkMathJaxSetup();
   global.server().checkFreecalcSetup();
 }
 
@@ -4462,11 +4405,6 @@ int WebServer::main(int argc, char **argv) {
     // Uses the configuration file.
     // Calls again global.server().InitializeMainFoldersSensitive();
     global.server().initializeMainAll();
-    global.server().checkMathJaxSetup();
-    bool mathJaxPresent = FileOperations::fileExistsVirtual("/MathJax-2.7-latest/", false);
-    if (!mathJaxPresent && global.flagRunningBuiltInWebServer) {
-      global << Logger::red << "MathJax not available. " << Logger::endL;
-    }
     if (global.flagDaemonMonitor) {
       return global.server().daemon();
     } else if (global.flagRunningBuiltInWebServer) {
@@ -4508,7 +4446,7 @@ int WebServer::mainConsoleHelp() {
 int WebServer::mainCommandLine() {
   MacroRegisterFunctionWithName("WebServer::mainCommandLine");
   Calculator& theCalculator = global.calculator().getElement();
-  theCalculator.initialize();
+  theCalculator.initialize(Calculator::Mode::full);
   if (global.programArguments.size > 1) {
     for (int i = 1; i < global.programArguments.size; i ++) {
       theCalculator.inputString += global.programArguments[i];
@@ -4576,7 +4514,9 @@ bool WebWorker::ensureAllBytesSent() {
   ) {
     return true;
   }
-  global << Logger::red << "This should not happen: not all bytes have been processed. " << Logger::endL;
+  global << Logger::red
+  << "This should not happen: not all bytes have been processed. "
+  << Logger::endL;
   global << Logger::red << "Type: " << Logger::blue << global.requestType
   << ", address: " << this->addressComputed << Logger::endL;
   global << Logger::red << "Remaining header: " << Logger::red

@@ -23,8 +23,8 @@ bool GlobalStatistics::flagUngracefulExitInitiated = false;
 
 long long GlobalStatistics::globalPointerCounter = 0;
 long long GlobalStatistics::pointerCounterPeakRamUse = 0;
-unsigned int GlobalStatistics::numHashResizes = 0;
-unsigned int GlobalStatistics::numListResizesTotal = 0;
+unsigned int GlobalStatistics::numberOfHashResizes = 0;
+unsigned int GlobalStatistics::numberOfListResizesTotal = 0;
 unsigned int GlobalStatistics::numListsCreated = 0;
 
 //CombinatorialChamberContainer GlobalCollectorChambers;
@@ -172,7 +172,7 @@ GlobalVariables::GlobalVariables() {
   this->flagLogInAttempted = false;
   this->flagServerDetailedLog = false;
   this->flagUsingSSLinCurrentConnection = false;
-  this->flagSSLIsAvailable = false;
+  this->flagSSLAvailable = false;
 
   this->millisecondsNoPingBeforeChildIsPresumedDead = 10000;
   this->mutexReturnBytes.mutexName = "WriteByteslock";
@@ -223,7 +223,7 @@ void ProgressReport::report(const std::string& theReport) {
 
 void ProgressReport::initialize() {
   this->flagInitialized = false;
-  if (!global.theResponse.monitoringAllowed()) {
+  if (!global.response.monitoringAllowed()) {
     return;
   }
   if (global.fatal.flagCrashInitiated) {
@@ -299,8 +299,8 @@ int DrawingVariables::getColorFromChamberIndex(int index) {
 }
 
 void DrawingVariables::initDrawingVariables() {
-  this->DefaultHtmlHeight = 400;
-  this->DefaultHtmlWidth = 400;
+  this->defaultHtmlHeight = 400;
+  this->defaultHtmlWidth = 400;
   this->theDrawLineFunction = nullptr;
   this->theDrawTextFunction = nullptr;
   this->theDrawCircleFunction = nullptr;
@@ -478,10 +478,13 @@ std::string StringRoutines::convertStringToJavascriptVariable(const std::string&
   MacroRegisterFunctionWithName("StringRoutines::ConvertStringForJavascript");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
+    if (i == 0 && MathRoutines::isADigit(input[i])) {
+      out << "x";
+    }
     if (MathRoutines::isADigit(input[i]) || MathRoutines::isALatinLetter(input[i])) {
       out << input[i];
     } else {
-      out << "_" << StringRoutines::convertByteToHex(static_cast<unsigned char>(input[i]));
+      out << "x" << StringRoutines::convertByteToHex(static_cast<unsigned char>(input[i]));
     }
   }
   return out.str();
@@ -914,7 +917,7 @@ std::string FileOperations::writeFileReturnHTMLLink(
   return out.str();
 }
 
-bool FileOperations::loadFiletoStringVirtual(
+bool FileOperations::loadFileToStringVirtual(
   const std::string& theFileName,
   std::string& output,
   bool accessSensitiveFolders,
@@ -1024,8 +1027,8 @@ void FileOperations::initializeFoldersSensitive() {
   folderSubstitutionsSensitive.setKeyValue("/LogFiles/", "LogFiles/");
   folderSubstitutionsSensitive.setKeyValue("configuration/", "configuration/");
   folderSubstitutionsSensitive.setKeyValue("/configuration/", "configuration/");
-  folderSubstitutionsSensitive.setKeyValue("freecalc/", "../freecalc/");
-  folderSubstitutionsSensitive.setKeyValue("/freecalc/", "../freecalc/");
+  folderSubstitutionsSensitive.setKeyValue(Configuration::freecalc, "../freecalc/");
+  folderSubstitutionsSensitive.setKeyValue("/" + Configuration::freecalc, "../freecalc/");
   folderSubstitutionsSensitive.setKeyValue("database_fallback/database.json", "database_fallback/database.json");
   folderSubstitutionsSensitive.setKeyValue("/database_fallback/database.json", "database_fallback/database.json");
 }
@@ -1036,11 +1039,8 @@ List<List<std::string> >& FileOperations::initializeFolderVirtualLinksDefaults()
   // substitution order matters, earlier substitutions are processed first.
   // Once a substitution is found, no more substitutions are carried out.
   result = List<List<std::string> >({
-    List<std::string>({Configuration::HTMLMathQuillFonts        , "html-common/mathquill/fonts/"               }),
+    List<std::string>({Configuration::examples                  , "examples/"                                  }),
     List<std::string>({Configuration::HTMLAceSrcMin             , "html-common/ace/src-min/"                   }),
-    List<std::string>({Configuration::HTMLJQueryMinified        , "html-common/jquery/jquery.min.js"           }),
-    List<std::string>({Configuration::HTMLJQueryUI              , "html-common/jquery_ui/"                     }),
-    List<std::string>({Configuration::HTMLMathQuill             , "html-common/mathquill/"                     }),
     List<std::string>({Configuration::HTMLCommonFonts           , "html-common/fonts"                          }),
     List<std::string>({Configuration::HTMLCommonFont            , "html-common/fonts"                          }),
     List<std::string>({Configuration::HTMLCommon                , "html-common/"                               }),
@@ -1051,8 +1051,6 @@ List<List<std::string> >& FileOperations::initializeFolderVirtualLinksDefaults()
     List<std::string>({Configuration::testFolder                , "test/"                                      }),
     List<std::string>({Configuration::outputFolder              , "output/"                                    }),
     List<std::string>({Configuration::HTMLGeneral               , "public_html/"                               }),
-    List<std::string>({Configuration::mathJaxLatestConfiguration, "calculator-html/mathjax-calculator-setup.js"}),
-    List<std::string>({Configuration::mathJaxLatest             , "public_html/MathJax-2.7-latest/"            }),
     List<std::string>({Configuration::problemsFolder            , "../problems/"                               }),
     List<std::string>({Configuration::courseTemplates           , "../coursetemplates/"                        }),
     List<std::string>({Configuration::coursesAvailable          , "../coursesavailable/"                       }),
@@ -1254,11 +1252,10 @@ bool FileOperations::openFileVirtual(
 #include <unistd.h>
 
 std::string FileOperations::getWouldBeFolderAfterHypotheticalChdirNonThreadSafe(const std::string& wouldBePath) {
+  StateMaintainerCurrentFolder maintainFolder;
   // TODO: Investigate whether this code is safe.
-  std::string currentFolder = FileOperations::getCurrentFolder();
   global.changeDirectory(wouldBePath);
   std::string result = FileOperations::getCurrentFolder();
-  global.changeDirectory(currentFolder);
   return result;
 }
 
@@ -1354,7 +1351,7 @@ bool FileOperations::getPhysicalFileNameFromVirtualCustomizedWriteOnly(
   if (!FileOperations::fileExistsVirtual(outputCandidate, false, false)) {
     std::string fileContent;
     std::string inputDefault = inputStart + "default/" + fileEnd;
-    if (FileOperations::loadFiletoStringVirtual(inputDefault, fileContent, false, commentsOnFailure)) {
+    if (FileOperations::loadFileToStringVirtual(inputDefault, fileContent, false, commentsOnFailure)) {
       std::fstream theFile;
       if (FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
         theFile, inputCopy, false, true, false, false
@@ -1519,7 +1516,8 @@ bool FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_Ultr
   );
 }
 
-bool FileOperations::openFileCreateIfNotPresentVirtual(std::fstream& theFile,
+bool FileOperations::openFileCreateIfNotPresentVirtual(
+  std::fstream& theFile,
   const std::string& theFileName,
   bool OpenInAppendMode,
   bool truncate,
@@ -1827,17 +1825,17 @@ std::string StringRoutines::Differ::differenceHTML(
     std::string rightS = this->rightResult[i];
     if (leftS == rightS && leftS.size() != 0) {
       if (leftS.size() > 0) {
-        leftOut << "<span class = 'spanStringEqual'>" << leftS << "</span>";
+        leftOut << "<span class='spanStringEqual'>" << leftS << "</span>";
       }
       if (rightS.size() > 0) {
-        rightOut << "<span class = 'spanStringEqual'>" << rightS << "</span>";
+        rightOut << "<span class='spanStringEqual'>" << rightS << "</span>";
       }
     } else {
       if (leftS.size() > 0) {
-        leftOut << "<span class = 'spanStringDifferent'>" << leftS << "</span>";
+        leftOut << "<span class='spanStringDifferent'>" << leftS << "</span>";
       }
       if (rightS.size() > 0) {
-        rightOut << "<span class = 'spanStringDifferent'>" << rightS << "</span>";
+        rightOut << "<span class='spanStringDifferent'>" << rightS << "</span>";
       }
     }
   }
@@ -1853,7 +1851,7 @@ std::string StringRoutines::Differ::differenceHTMLPartTwo(
 ) {
   std::stringstream out;
   out << preamble;
-  out << "<span class = 'abstractSyntaxOneAnnotation'><b>" << labelLeft << "</b><br>";
+  out << "<span class='abstractSyntaxOneAnnotation'><b>" << labelLeft << "</b><br>";
   out << outputLeft;
   out << "<hr><b>" << labelRight << "</b><br>";
   out << outputRight;
@@ -2229,8 +2227,14 @@ std::string StringRoutines::replaceAll(
   return out.str();
 }
 
+bool StringRoutines::stringContains(const std::string& desiredContainer, const std::string& content) {
+  return desiredContainer.find(content) != std::string::npos;
+}
+
 bool StringRoutines::replaceOnce(
-  std::string& inputOutput, const std::string& subStringToReplace, const std::string& replaceWith
+  std::string& inputOutput,
+  const std::string& subStringToReplace,
+  const std::string& replaceWith
 ) {
 
   auto tagLocation = inputOutput.find(subStringToReplace);
@@ -2636,7 +2640,7 @@ FormatExpressions::getMonomialOrder<MonomialWrapper<std::string, MathRoutines::h
 }
 
 template<>
-List<MonomialP>::Comparator* FormatExpressions::getMonomialOrder<MonomialP>() {
+List<MonomialPolynomial>::Comparator* FormatExpressions::getMonomialOrder<MonomialPolynomial>() {
   return &this->monomialOrder;
 }
 
@@ -2717,7 +2721,7 @@ FormatExpressions::FormatExpressions() {
   this->maximumLineLength = 100;
   this->flagPassCustomCoeffMonSeparatorToCoeffs = false;
   this->flagUseCalculatorFormatForUEOrdered = true;
-  this->flagUseHTML = true;
+  this->flagUseHTML = false;
   this->flagUseLatex = false;
   this->flagUsePNG = false;
   this->flagUsePmatrix = true;
@@ -2747,7 +2751,7 @@ FormatExpressions::FormatExpressions() {
   this->flagSuppressModP = false;
   this->maximumMatrixDisplayedRows = 20;
   this->maximumMatrixLineLength = 20;
-  this->monomialOrder.leftGreaterThanRight = MonomialP::orderDefault().leftGreaterThanRight;
+  this->monomialOrder.leftGreaterThanRight = MonomialPolynomial::orderDefault().leftGreaterThanRight;
 }
 
 std::string FormatExpressions::getPolynomialLetter(int index) const {
@@ -2763,19 +2767,19 @@ std::string FormatExpressions::getPolynomialLetter(int index) const {
 bool PartFraction::reduceOnceTotalOrderMethod(
   LinearCombination<PartFraction, Polynomial<LargeInteger> >& output, PartialFractions& owner
 ) {
-  for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
-    for (int j = 0; j < this->IndicesNonZeroMults.size; j ++) {
-      int AminusBindex = owner.TableAllowedAminusB.elements[this->IndicesNonZeroMults[i]][this->IndicesNonZeroMults[j]];
-      int Aminus2Bindex = owner.TableAllowedAminus2B.elements[this->IndicesNonZeroMults[i]][this->IndicesNonZeroMults[j]];
-      if (AminusBindex != - 1 &&  AminusBindex > this->IndicesNonZeroMults[j]) {
+  for (int i = 0; i < this->indicesNonZeroMultiplicities.size; i ++) {
+    for (int j = 0; j < this->indicesNonZeroMultiplicities.size; j ++) {
+      int AminusBindex = owner.TableAllowedAminusB.elements[this->indicesNonZeroMultiplicities[i]][this->indicesNonZeroMultiplicities[j]];
+      int Aminus2Bindex = owner.TableAllowedAminus2B.elements[this->indicesNonZeroMultiplicities[i]][this->indicesNonZeroMultiplicities[j]];
+      if (AminusBindex != - 1 &&  AminusBindex > this->indicesNonZeroMultiplicities[j]) {
         this->decomposeAMinusNB(
-          this->IndicesNonZeroMults[i], this->IndicesNonZeroMults[j], 1, AminusBindex, output, owner
+          this->indicesNonZeroMultiplicities[i], this->indicesNonZeroMultiplicities[j], 1, AminusBindex, output, owner
         );
         return true;
       }
-      if (Aminus2Bindex != - 1 &&  Aminus2Bindex > this->IndicesNonZeroMults[j]) {
+      if (Aminus2Bindex != - 1 &&  Aminus2Bindex > this->indicesNonZeroMultiplicities[j]) {
         this->decomposeAMinusNB(
-          this->IndicesNonZeroMults[i], this->IndicesNonZeroMults[j], 2, Aminus2Bindex, output, owner
+          this->indicesNonZeroMultiplicities[i], this->indicesNonZeroMultiplicities[j], 2, Aminus2Bindex, output, owner
         );
         return true;
       }
@@ -2790,7 +2794,7 @@ bool PartFraction::reduceOnceGeneralMethodNoOSBasis(
   Vectors<Rational>& bufferVectors,
   Matrix<Rational>& bufferMat
 ) {
-  if (this->IndicesNonZeroMults.size == owner.AmbientDimension) {
+  if (this->indicesNonZeroMultiplicities.size == owner.AmbientDimension) {
     return false;
   }
   Vectors<Rational>& tempRoots = bufferVectors;
@@ -2798,9 +2802,9 @@ bool PartFraction::reduceOnceGeneralMethodNoOSBasis(
   tempRoots.size = 0;
   int IndexInLinRelationOfLastGainingMultiplicityIndex = - 1;
   Vector<Rational> tempRoot;
-  for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
+  for (int i = 0; i < this->indicesNonZeroMultiplicities.size; i ++) {
     tempRoot.setSize(owner.AmbientDimension);
-    int currentIndex = this->IndicesNonZeroMults[i];
+    int currentIndex = this->indicesNonZeroMultiplicities[i];
     if (currentIndex == this->LastDistinguishedIndex) {
       IndexInLinRelationOfLastGainingMultiplicityIndex = i;
     }
@@ -2830,7 +2834,7 @@ bool PartFraction::reduceOnceGeneralMethod(
   Vectors<Rational>& bufferVectors,
   Matrix<Rational>& bufferMat
 ) {
-  if (this->IndicesNonZeroMults.size == owner.AmbientDimension) {
+  if (this->indicesNonZeroMultiplicities.size == owner.AmbientDimension) {
     return false;
   }
   Matrix<Rational>& tempMat = bufferMat;
@@ -2838,9 +2842,9 @@ bool PartFraction::reduceOnceGeneralMethod(
   this->LastDistinguishedIndex = this->getSmallestNonZeroIndexGreaterThanOrEqualTo(owner, this->LastDistinguishedIndex);
   int IndexInLinRelationOfLastGainingMultiplicityIndex = - 1;
   Vector<Rational> tempRoot;
-  for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
+  for (int i = 0; i < this->indicesNonZeroMultiplicities.size; i ++) {
     tempRoot.setSize(owner.AmbientDimension);
-    int currentIndex = this->IndicesNonZeroMults[i];
+    int currentIndex = this->indicesNonZeroMultiplicities[i];
     if (currentIndex == this->LastDistinguishedIndex) {
       IndexInLinRelationOfLastGainingMultiplicityIndex = i;
     }
@@ -2875,7 +2879,7 @@ int PartFraction::sizeWithoutDebugString() const {
   int Accum = 0;
   Accum += static_cast<int>(sizeof(this->denominator));
   Accum += this->denominator.size * static_cast<int>(sizeof(OnePartialFractionDenominator));
-  Accum += static_cast<int>(sizeof(this->IndicesNonZeroMults));
+  Accum += static_cast<int>(sizeof(this->indicesNonZeroMultiplicities));
   return Accum;
 }
 
@@ -2886,7 +2890,7 @@ void PartFraction::assignDenominatorOnly(const PartFraction& p) {
 
 void PartFraction::assign(const PartFraction& p) {
   this->denominator = p.denominator;
-  this->IndicesNonZeroMults = (p.IndicesNonZeroMults);
+  this->indicesNonZeroMultiplicities = (p.indicesNonZeroMultiplicities);
   this->IsIrrelevant = p.IsIrrelevant;
   this->RelevanceIsComputed = p.RelevanceIsComputed;
   this->LastDistinguishedIndex = p.LastDistinguishedIndex;
@@ -2930,9 +2934,9 @@ void PartFraction::computeOneCheckSum(PartialFractions& owner, Rational& output,
   }
   Vector<Rational> CheckSumRoot = OnePartialFractionDenominator::GetCheckSumRoot(owner.AmbientDimension);
   Rational tempRat;
-  for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
-    this->denominator[this->IndicesNonZeroMults[i]].computeOneCheckSum(
-      tempRat, owner.startingVectors[this->IndicesNonZeroMults[i]], theDimension
+  for (int i = 0; i < this->indicesNonZeroMultiplicities.size; i ++) {
+    this->denominator[this->indicesNonZeroMultiplicities[i]].computeOneCheckSum(
+      tempRat, owner.startingVectors[this->indicesNonZeroMultiplicities[i]], theDimension
     );
     output.multiplyBy(tempRat);
   }
@@ -2974,8 +2978,8 @@ bool PartFraction::rootIsInFractionCone(PartialFractions& owner, Vector<Rational
   }
   Cone tempCone;
   Vectors<Rational> tempRoots;
-  for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
-    int tempI = this->IndicesNonZeroMults[i];
+  for (int i = 0; i < this->indicesNonZeroMultiplicities.size; i ++) {
+    int tempI = this->indicesNonZeroMultiplicities[i];
     tempRoots.addOnTop(owner.startingVectors[tempI]);
   }
   tempCone.createFromVertices(tempRoots);
@@ -3024,8 +3028,8 @@ int PartFraction::getNumberProportionalVectorsClassicalRootSystems(PartialFracti
 
 int PartFraction::getSmallestNonZeroIndexGreaterThanOrEqualTo(PartialFractions& owner, int minIndex) {
   int result = owner.startingVectors.size;
-  for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
-    int tempI = this->IndicesNonZeroMults[i];
+  for (int i = 0; i < this->indicesNonZeroMultiplicities.size; i ++) {
+    int tempI = this->indicesNonZeroMultiplicities[i];
     if (this->denominator[tempI].multiplicities.size > 0) {
       if (tempI >= minIndex && tempI < result) {
         result = tempI;
@@ -3048,7 +3052,7 @@ int PartFraction::computeGainingMultiplicityIndexInLinearRelation(
   int result = - 1;
   for (int i = 0; i < theLinearRelation.numberOfRows; i ++) {
     if (!theLinearRelation.elements[i][0].isEqualToZero()) {
-      int currentIndex = this->IndicesNonZeroMults[i];
+      int currentIndex = this->indicesNonZeroMultiplicities[i];
       int candidateDesire;
       if (!flagUsingOrlikSolomon) {
         candidateDesire = this->denominator[currentIndex].getTotalMultiplicity();
@@ -3085,7 +3089,7 @@ bool PartFraction::decomposeFromLinearRelation(
   theCoefficients.size = 0;
   theGreatestElongations.size = 0;
   GainingMultiplicityIndexInLinRelation = this->computeGainingMultiplicityIndexInLinearRelation(flagUsingOSbasis, theLinearRelation);
-  GainingMultiplicityIndex = this->IndicesNonZeroMults[GainingMultiplicityIndexInLinRelation];
+  GainingMultiplicityIndex = this->indicesNonZeroMultiplicities[GainingMultiplicityIndexInLinRelation];
   int tempI = this->denominator[GainingMultiplicityIndex].getLargestElongation();
   theLinearRelation.elements[GainingMultiplicityIndexInLinRelation][0].multiplyByInt(tempI);
   //theLinearRelation.ComputeDebugString();
@@ -3101,7 +3105,7 @@ bool PartFraction::decomposeFromLinearRelation(
   //theLinearRelation.ComputeDebugString();
   for (int i = 0; i < theLinearRelation.numberOfRows; i ++) {
     if (i != GainingMultiplicityIndexInLinRelation && !theLinearRelation.elements[i][0].isEqualToZero()) {
-      int tempI = this->IndicesNonZeroMults[i];
+      int tempI = this->indicesNonZeroMultiplicities[i];
       ParticipatingIndices.addOnTop(tempI);
       theGreatestElongations.addOnTop(this->denominator[tempI].getLargestElongation());
       theCoefficients.addOnTop(theLinearRelation.elements[i][0].numeratorShort);
@@ -3150,12 +3154,12 @@ bool PartFraction::reduceMeOnce(
   Polynomial<LargeInteger> denominator, quotient, remainderDivision;
   while (hasImprovement) {
     hasImprovement = false;
-    for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
-      for (int j = 0; j < this->denominator[IndicesNonZeroMults[i]].multiplicities.size; j ++) {
-        this->denominator[IndicesNonZeroMults[i]].GetPolynomialDenominator(denominator, j, startingVectors[IndicesNonZeroMults[i]]);
-        outputCoeff.divideBy(denominator, quotient, remainderDivision, &MonomialP::orderDefault());
+    for (int i = 0; i < this->indicesNonZeroMultiplicities.size; i ++) {
+      for (int j = 0; j < this->denominator[indicesNonZeroMultiplicities[i]].multiplicities.size; j ++) {
+        this->denominator[indicesNonZeroMultiplicities[i]].GetPolynomialDenominator(denominator, j, startingVectors[indicesNonZeroMultiplicities[i]]);
+        outputCoeff.divideBy(denominator, quotient, remainderDivision, &MonomialPolynomial::orderDefault());
         if (remainderDivision.isEqualToZero()) {
-          this->decreasePowerOneFraction(IndicesNonZeroMults[i], 1);
+          this->decreasePowerOneFraction(indicesNonZeroMultiplicities[i], 1);
           outputCoeff = quotient;
           hasImprovement = true;
           improvedAtLeastOnce = true;
@@ -3175,7 +3179,7 @@ void PartFraction::getNElongationPolynomialWithMonomialContribution(
   Polynomial<LargeInteger>& output,
   int theDimension
 ) {
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   tempM.makeOne();
   for (int i = 0; i < theIndex; i ++) {
     int tempI = theSelectedIndices[i];
@@ -3274,7 +3278,7 @@ void PartFraction::applySzenesVergneFormula(
   PartFraction tempFrac;
   tempFrac.RelevanceIsComputed = false;
   Polynomial<LargeInteger> tempP, CoefficientBuffer;
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   output.makeZero();
   int theDim = startingVectors[0].size;
   CoefficientBuffer.makeOne();
@@ -3348,17 +3352,17 @@ bool PartFraction::decreasePowerOneFraction(int index, int increment) {
 }
 
 void PartFraction::computeIndicesNonZeroMultiplicities() {
-  this->IndicesNonZeroMults.size = 0;
+  this->indicesNonZeroMultiplicities.size = 0;
   for (int i = 0; i < this->denominator.size; i ++) {
     if (this->denominator[i].multiplicities.size > 0) {
-      this->IndicesNonZeroMults.addOnTop(i);
+      this->indicesNonZeroMultiplicities.addOnTop(i);
     }
   }
 }
 
 void PartFraction::getAlphaMinusNBetaPoly(PartialFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInteger>& output) {
   output.makeZero();
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   tempM.makeOne();
   for (int i = 0; i < n; i ++) {
     for (int j = 0; j < owner.AmbientDimension; j ++) {
@@ -3377,7 +3381,7 @@ void PartFraction::getNElongationPolynomial(
   int theDimension
 ) {
   output.makeZero();
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   tempM.makeOne();
   if (LengthOfGeometricSeries > 0) {
     for (int i = 0; i < LengthOfGeometricSeries; i ++) {
@@ -3399,7 +3403,7 @@ void PartFraction::getNElongationPolynomial(
 }
 
 void PartFraction::makePolynomialFromOneNormal(
-  Vector<Rational>& normal, const MonomialP& shiftRational, int theMult, Polynomial<Rational>& output
+  Vector<Rational>& normal, const MonomialPolynomial& shiftRational, int theMult, Polynomial<Rational>& output
 ) {
   output.makeOne();
   if (theMult == 1) {
@@ -3433,7 +3437,7 @@ void PartFraction::computeNormals(PartialFractions& owner, Vectors<Rational>& ou
   dens.size = 0;
   output.size = 0;
   for (int i = 0; i < theDimension; i ++) {
-    tempRoot = owner.startingVectors[this->IndicesNonZeroMults[i]];
+    tempRoot = owner.startingVectors[this->indicesNonZeroMultiplicities[i]];
     dens.addOnTop(tempRoot);
   }
   Rational tempRat;
@@ -3457,8 +3461,8 @@ PartFraction::PartFraction() {
 }
 
 void PartFraction::initialize(int numRoots) {
-  this->IndicesNonZeroMults.reserve(numRoots);
-  this->IndicesNonZeroMults.size = 0;
+  this->indicesNonZeroMultiplicities.reserve(numRoots);
+  this->indicesNonZeroMultiplicities.size = 0;
   this->denominator.setSize(numRoots);
   for (int i = 0; i < this->denominator.size; i ++) {
     this->denominator[i].Elongations.setSize(0);
@@ -3657,7 +3661,7 @@ bool PartialFractions::splitClassicalRootSystem(bool ShouldElongate, Vector<Rati
 
 bool PartialFractions::checkForMinimalityDecompositionWithRespectToRoot(Vector<Rational>* theRoot) {
   for (int i = 0; i < this->size(); i ++) {
-    if ((*this)[i].IndicesNonZeroMults.size > this->AmbientDimension) {
+    if ((*this)[i].indicesNonZeroMultiplicities.size > this->AmbientDimension) {
       if ((*this)[i].rootIsInFractionCone(*this, theRoot)) {
         return false;
       }
@@ -3753,7 +3757,7 @@ void PartFraction::reduceMonomialByMonomial(PartialFractions& owner, int myIndex
   Matrix<Rational> & matColumn = global.matOneColumn.getElement();
   Matrix<Rational> & matLinComb = global.matReduceMonomialByMonomial2.getElement();
   Selection tempSel;
-  MonomialP tempMon;
+  MonomialPolynomial tempMon;
   Vector<Rational> tempRoot;
   tempMat.initialize(owner.AmbientDimension, (int) this->IndicesNonZeroMults.size);
   for (int i = 0; i < this->IndicesNonZeroMults.size; i ++)
@@ -3859,7 +3863,7 @@ void PartFraction::reduceMonomialByMonomialModifyOneMonomial(
   PartialFractions& Accum,
   SelectionWithDifferentMaxMultiplicities& thePowers,
   List<int>& thePowersSigned,
-  MonomialP& input,
+  MonomialPolynomial& input,
   LargeInteger& inputCoeff
 ) {
   (void) Accum; (void) thePowers; (void) thePowersSigned; (void) input; (void) inputCoeff;
@@ -3910,7 +3914,7 @@ void PartFraction::getPolyReduceMonomialByMonomial(
     output.makeOne();
     return;
   }
-  MonomialP tempMon;
+  MonomialPolynomial tempMon;
   tempMon.makeOne();
   output.makeZero();
   LargeInteger theCoeff = 1;
@@ -4081,7 +4085,7 @@ int PartFraction::controlLineSizeStringPolys(std::string& output, FormatExpressi
 }
 
 void PartialFractions::makeProgressReportSplittingMainPart() {
-  if (!global.theResponse.monitoringAllowed()) {
+  if (!global.response.monitoringAllowed()) {
     return;
   }
   std::stringstream out1, out2, out3;
@@ -4113,7 +4117,7 @@ void PartialFractions::makeProgressReportSplittingMainPart() {
 
 void PartialFractions::makeProgressVPFcomputation() {
   this->NumProcessedForVPFfractions ++;
-  if (!global.theResponse.monitoringAllowed()) {
+  if (!global.response.monitoringAllowed()) {
     return;
   }
   std::stringstream out2;
@@ -4266,9 +4270,9 @@ void PartialFractions::computeSupport(List<Vectors<Rational> >& output) {
   output.setExpectedSize(this->size());
   for (int i = 0; i < this->size(); i ++) {
     Vectors<Rational> tempRoots;
-    for (int j = 0; j < (*this)[i].IndicesNonZeroMults.size; j ++) {
+    for (int j = 0; j < (*this)[i].indicesNonZeroMultiplicities.size; j ++) {
       Vector<Rational> tempRoot, tempRoot3;
-      tempRoot = (this->startingVectors[(*this)[i].IndicesNonZeroMults[j]]);
+      tempRoot = (this->startingVectors[(*this)[i].indicesNonZeroMultiplicities[j]]);
       Vector<Rational> tempRoot2;
       tempRoot /= 2;
       tempRoot2 = tempRoot;
@@ -4371,7 +4375,7 @@ void OnePartialFractionDenominator::GetPolynomialDenominator(
   if (MultiplicityIndex >= this->multiplicities.size) {
     global.fatal << "Bad multiplicity. " << global.fatal;
   }
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   output.makeOne();
   tempM.makeOne();
   for (int i = 0; i < theExponent.size; i ++) {
@@ -4912,13 +4916,13 @@ void DynkinType::getOuterAutosGeneratorsOneTypeActOnVectorColumn(
   output.setSize(0);
   MatrixTensor<Rational> directSummand, finalMat;
   if (
-    theType.theLetter == 'D' ||
-    (theType.theLetter == 'A' && theType.theRank > 1) ||
-    (theType.theLetter == 'E' && theType.theRank == 6)
+    theType.letter == 'D' ||
+    (theType.letter == 'A' && theType.rank > 1) ||
+    (theType.letter == 'E' && theType.rank == 6)
   ) {
-    directSummand.makeIdentity(theType.theRank * (multiplicity - 1));
+    directSummand.makeIdentity(theType.rank * (multiplicity - 1));
     int numGens = 1;
-    if (theType.theLetter == 'D' && theType.theRank == 4) {
+    if (theType.letter == 'D' && theType.rank == 4) {
       numGens = 2;
     }
     for (int i = 1; i < numGens + 1; i ++) {
@@ -4932,13 +4936,13 @@ void DynkinType::getOuterAutosGeneratorsOneTypeActOnVectorColumn(
   }
   for (int i = 0; i < multiplicity - 1; i ++) {
     directSummand.makeZero();
-    for (int j = 0; j < theType.theRank; j ++) {
-      directSummand.addMonomial(MonomialMatrix(j, theType.theRank + j), 1);
-      directSummand.addMonomial(MonomialMatrix(theType.theRank + j, j), 1);
+    for (int j = 0; j < theType.rank; j ++) {
+      directSummand.addMonomial(MonomialMatrix(j, theType.rank + j), 1);
+      directSummand.addMonomial(MonomialMatrix(theType.rank + j, j), 1);
     }
-    finalMat.makeIdentity(i * theType.theRank);
+    finalMat.makeIdentity(i * theType.rank);
     finalMat.directSumWith(directSummand);
-    directSummand.makeIdentity((multiplicity - 2 - i) * theType.theRank);
+    directSummand.makeIdentity((multiplicity - 2 - i) * theType.rank);
     finalMat.directSumWith(directSummand);
     output.addOnTop(finalMat);
   }
@@ -4958,14 +4962,14 @@ void DynkinType::getOuterAutosGeneratorsActOnVectorColumn(List<MatrixTensor<Rati
       << "DynkinType::getOuterAutosGeneratorsActOnVectorColumn." << global.fatal;
     }
     this->getOuterAutosGeneratorsOneTypeActOnVectorColumn(intermediateGenerators,(*this)[i], currentMult);
-    matrixToGo.makeIdentity(this->getRank() - numRowsSoFar - currentMult * (*this)[i].theRank);
+    matrixToGo.makeIdentity(this->getRank() - numRowsSoFar - currentMult * (*this)[i].rank);
     for (int j = 0; j < intermediateGenerators.size; j ++) {
       matrixFinal.makeIdentity(numRowsSoFar);
       matrixFinal.directSumWith(intermediateGenerators[j]);
       matrixFinal.directSumWith(matrixToGo);
       output.addOnTop(matrixFinal);
     }
-    numRowsSoFar += currentMult * (*this)[i].theRank;
+    numRowsSoFar += currentMult * (*this)[i].rank;
   }
   if (output.size == 0) {
     output.setSize(1);
@@ -4996,13 +5000,13 @@ void DynkinType::getLettersTypesMultiplicities(
   for (int i = 0; i < componentsSorted.size; i ++) {
     int theIndex = this->monomials.getIndex(componentsSorted[i]);
     if (outputLetters != nullptr) {
-      outputLetters->addOnTop((*this)[theIndex].theLetter);
+      outputLetters->addOnTop((*this)[theIndex].letter);
     }
     if (outputRanks != nullptr) {
-      outputRanks->addOnTop((*this)[theIndex].theRank);
+      outputRanks->addOnTop((*this)[theIndex].rank);
     }
     if (outputFirstCoRootLengthsSquared != nullptr) {
-      outputFirstCoRootLengthsSquared->addOnTop((*this)[theIndex].CartanSymmetricInverseScale);
+      outputFirstCoRootLengthsSquared->addOnTop((*this)[theIndex].cartanSymmetricInverseScale);
     }
     if (outputMults != nullptr) {
       outputMults->addOnTop(this->getMultiplicity(theIndex));
@@ -5156,7 +5160,7 @@ void DynkinType::makeSimpleType(char type, int rank, const Rational* inputFirstC
 
 bool DynkinType::hasExceptionalComponent() const {
   for (int i = 0; i < this->size(); i ++) {
-    if ((*this)[i].theLetter == 'E' || (*this)[i].theLetter == 'F' || (*this)[i].theLetter == 'G') {
+    if ((*this)[i].letter == 'E' || (*this)[i].letter == 'F' || (*this)[i].letter == 'G') {
       return true;
     }
   }
@@ -5165,7 +5169,7 @@ bool DynkinType::hasExceptionalComponent() const {
 
 bool DynkinType::containsType(char theTypeLetter) const {
   for (int i = 0; i < this->size(); i ++) {
-    if ((*this)[i].theLetter == theTypeLetter) {
+    if ((*this)[i].letter == theTypeLetter) {
       return true;
     }
   }
@@ -5181,13 +5185,13 @@ bool DynkinType::isSimple(char* outputtype, int* outputRank, Rational* outputLen
   }
   const DynkinSimpleType& theMon = (*this)[0];
   if (outputtype != nullptr) {
-    *outputtype = theMon.theLetter;
+    *outputtype = theMon.letter;
   }
   if (outputRank != nullptr) {
-    *outputRank = theMon.theRank;
+    *outputRank = theMon.rank;
   }
   if (outputLength != nullptr) {
-    *outputLength = theMon.CartanSymmetricInverseScale;
+    *outputLength = theMon.cartanSymmetricInverseScale;
   }
   return true;
 }
@@ -5195,7 +5199,7 @@ bool DynkinType::isSimple(char* outputtype, int* outputRank, Rational* outputLen
 int DynkinType::getNumberOfSimpleComponentsOfGivenRank(int desiredRank) const {
   Rational result = 0;
   for (int i = 0; i < this->size(); i ++) {
-    if ((*this)[i].theRank == desiredRank) {
+    if ((*this)[i].rank == desiredRank) {
       result += this->coefficients[i];
     }
   }
@@ -5223,7 +5227,7 @@ int DynkinType::getNumberOfSimpleComponents() const {
 Rational DynkinType::getRankRational() const {
   Rational result = 0;
   for (int i = 0; i < this->size(); i ++) {
-    result += this->coefficients[i] * (*this)[i].theRank;
+    result += this->coefficients[i] * (*this)[i].rank;
   }
   return result;
 }
@@ -5248,7 +5252,7 @@ void DynkinType::getEpsilonMatrix(Matrix<Rational>& output) const {
     int theIndex = this->monomials.getIndex(sortedMons[j]);
     int theMult = this->getMultiplicity(theIndex);
     for (int k = 0; k < theMult; k ++) {
-      DynkinSimpleType::getEpsilonMatrix((*this)[theIndex].theLetter, (*this)[theIndex].theRank, curCartan);
+      DynkinSimpleType::getEpsilonMatrix((*this)[theIndex].letter, (*this)[theIndex].rank, curCartan);
       output.directSumWith(curCartan);
     }
   }
@@ -5303,8 +5307,8 @@ void DynkinType::getCartanSymmetricDefaultLengthKeepComponentOrder(Matrix<Ration
   for (int j = 0; j < sortedMons.size; j ++) {
     int theIndex = this->monomials.getIndex(sortedMons[j]);
     int mult = this->getMultiplicity(theIndex);
-    currentType.makeArbitrary(sortedMons[j].theLetter, sortedMons[j].theRank, 1);
-    currentType.CartanSymmetricInverseScale = 1;//= currentType.getDefaultCoRootLengthSquared(0);
+    currentType.makeArbitrary(sortedMons[j].letter, sortedMons[j].rank, 1);
+    currentType.cartanSymmetricInverseScale = 1;//= currentType.getDefaultCoRootLengthSquared(0);
     for (int k = 0; k < mult; k ++) {
       currentType.getCartanSymmetric(curCartan);
       output.directSumWith(curCartan);
@@ -5345,7 +5349,7 @@ LargeInteger DynkinType::getWeylGroupSizeByFormula() const {
   LargeInteger result = 1;
   LargeInteger tempLI;
   for (int i = 0; i < this->size(); i ++) {
-    tempLI = WeylGroupData::sizeByFormulaOrNegative1((*this)[i].theLetter, (*this)[i].theRank);
+    tempLI = WeylGroupData::sizeByFormulaOrNegative1((*this)[i].letter, (*this)[i].rank);
     tempLI.raiseToPower(this->getMultiplicity(i));
     result *= tempLI;
   }
@@ -5357,7 +5361,7 @@ LargeInteger DynkinType::getWeylGroupSizeByFormula() const {
 }
 
 Rational DynkinSimpleType::getLongRootLengthSquared() const {
-  return this->getDefaultLongRootLengthSquared() / this->CartanSymmetricInverseScale;
+  return this->getDefaultLongRootLengthSquared() / this->cartanSymmetricInverseScale;
 }
 
 Rational DynkinSimpleType::getDefaultLongRootLengthSquared() const {
@@ -5369,7 +5373,7 @@ Rational DynkinSimpleType::getEpsilonRealizationLongRootLengthSquared() const {
   //Dynkin's convention says that the default long root length is 2.
   //However, the accepted epsilon coordinate realizations of the root systems
   //of G_2 and C_n do not have long root length of 2.
-  switch (this->theLetter) {
+  switch (this->letter) {
     case 'A':
     case 'B':
     case 'D':
@@ -5391,18 +5395,18 @@ Rational DynkinSimpleType::getEpsilonRealizationLongRootLengthSquared() const {
 std::string DynkinSimpleType::ToStringNonTechnicalName(FormatExpressions* theFormat) const {
   (void) theFormat;
   std::stringstream out;
-  switch (this->theLetter) {
+  switch (this->letter) {
     case 'A':
-      out << "sl(" << this->theRank + 1 << ")";
+      out << "sl(" << this->rank + 1 << ")";
       break;
     case 'B':
-      out << "so(" << 2 * this->theRank + 1 << ")";
+      out << "so(" << 2 * this->rank + 1 << ")";
       break;
     case 'C':
-      out << "sp(" << 2 * this->theRank << ")";
+      out << "sp(" << 2 * this->rank << ")";
       break;
     case 'D':
-      out << "so(" << 2 * this->theRank << ")";
+      out << "so(" << 2 * this->rank << ")";
       break;
     default :
       break;
@@ -5421,24 +5425,24 @@ std::string DynkinSimpleType::toString(FormatExpressions* theFormat) const {
   }
   if (includeTechnicalNames) {
     if (!hasAmbient) {
-      out << theLetter;
-      if (!supressDynkinIndexOne || this->CartanSymmetricInverseScale != 1) {
+      out << letter;
+      if (!supressDynkinIndexOne || this->cartanSymmetricInverseScale != 1) {
         if (usePlusesAndExponents) {
           out << "^{";
         }
-        out << this->CartanSymmetricInverseScale.toString();
+        out << this->cartanSymmetricInverseScale.toString();
         if (usePlusesAndExponents) {
           out << "}";
         }
       }
     } else {
       DynkinSimpleType ambientType;
-      ambientType.theLetter = theFormat->ambientWeylLetter;
-      ambientType.CartanSymmetricInverseScale = theFormat->ambientCartanSymmetricInverseScale;
+      ambientType.letter = theFormat->ambientWeylLetter;
+      ambientType.cartanSymmetricInverseScale = theFormat->ambientCartanSymmetricInverseScale;
       Rational theDynkinIndex = ambientType.getLongRootLengthSquared() / this->getLongRootLengthSquared();
 //      (this->CartanSymmetricInverseScale/this->getDefaultLongRootLengthSquared())/
 //      (ambientType.CartanSymmetricInverseScale/ambientType.getDefaultLongRootLengthSquared());
-      out << theLetter;
+      out << letter;
       if (!supressDynkinIndexOne || theDynkinIndex != 1) {
         if (usePlusesAndExponents) {
           out << "^{" ;
@@ -5449,17 +5453,17 @@ std::string DynkinSimpleType::toString(FormatExpressions* theFormat) const {
         }
       }
     }
-    if (this->theRank >= 10) {
+    if (this->rank >= 10) {
       out << "_";
       if (usePlusesAndExponents) {
         out << "{";
       }
-      out << this->theRank;
+      out << this->rank;
       if (usePlusesAndExponents) {
         out << "}";
       }
     } else {
-      out << "_" << this->theRank;
+      out << "_" << this->rank;
     }
     //out << "[" << this->theLetter << "^{" << this->CartanSymmetricInverseScale << "}_" << this->theRank << "]";
   }
@@ -5495,22 +5499,22 @@ void DynkinSimpleType::makeArbitrary(
   if (inputRank == 1) {
     inputLetter = 'A';
   }
-  this->theRank = inputRank;
-  this->theLetter = inputLetter;
-  this->CartanSymmetricInverseScale = inputLengthFirstCorRootSquared;
+  this->rank = inputRank;
+  this->letter = inputLetter;
+  this->cartanSymmetricInverseScale = inputLengthFirstCorRootSquared;
 }
 
 int DynkinSimpleType::getRootSystemSize() const {
-  switch (this->theLetter) {
+  switch (this->letter) {
     case 'A':
-      return this->theRank * (this->theRank + 1);
+      return this->rank * (this->rank + 1);
     case 'B':
     case 'C':
-      return this->theRank * this->theRank * 2;
+      return this->rank * this->rank * 2;
     case 'D':
-      return this->theRank * (this->theRank - 1) * 2;
+      return this->rank * (this->rank - 1) * 2;
     case 'E':
-      switch(this->theRank) {
+      switch(this->rank) {
         case 6: return 72;
         case 7: return 126;
         case 8: return 240;
@@ -5534,19 +5538,19 @@ Rational DynkinSimpleType::getDefaultCoRootLengthSquared(int rootIndex) const {
 
 Rational DynkinSimpleType::getRatioRootSquaredToFirstSquared(int rootIndex) const {
   Rational result;
-  switch (this->theLetter) {
+  switch (this->letter) {
     case 'A':
     case 'D':
     case 'E':
       return 1;
     case 'B':
-      if (rootIndex == this->theRank - 1) {
+      if (rootIndex == this->rank - 1) {
         result.assignNumeratorAndDenominator(1, 2);
         return result;
       }
       return 1;
     case 'C':
-      if (rootIndex == this->theRank - 1) {
+      if (rootIndex == this->rank - 1) {
         return 2;
       }
       return 1;
@@ -5567,18 +5571,18 @@ Rational DynkinSimpleType::getRatioRootSquaredToFirstSquared(int rootIndex) cons
 }
 
 Rational DynkinSimpleType::getDefaultRootLengthSquared(int rootIndex) const {
-  if (rootIndex >= this->theRank) {
+  if (rootIndex >= this->rank) {
     global.fatal
     << "Attempt to get the squared length of simple root number " << rootIndex + 1
-    << ", however the root system if of rank " << this->theRank << ". " << global.fatal;
+    << ", however the root system if of rank " << this->rank << ". " << global.fatal;
   }
-  switch (this->theLetter) {
+  switch (this->letter) {
     case 'A':
     case 'D':
     case 'E':
       return 2;
     case 'B':
-      if (rootIndex == this->theRank - 1) {
+      if (rootIndex == this->rank - 1) {
         return 1;
       }
       return 2;
@@ -5588,7 +5592,7 @@ Rational DynkinSimpleType::getDefaultRootLengthSquared(int rootIndex) const {
       }
       return 1;
     case 'C':
-      if (rootIndex == this->theRank - 1) {
+      if (rootIndex == this->rank - 1) {
         return 2;
       }
       return 1;
@@ -5765,34 +5769,34 @@ Rational DynkinSimpleType::getDynkinIndexParabolicallyInducingSubalgebra(char in
 
 bool DynkinSimpleType::canBeExtendedParabolicallyTo(const DynkinSimpleType& other) const {
   MacroRegisterFunctionWithName("DynkinSimpleType::canBeExtendedParabolicallyTo");
-  if (other.theRank <= this->theRank) {
+  if (other.rank <= this->rank) {
     return false;
   }
   if (
-    this->CartanSymmetricInverseScale / this->getDynkinIndexParabolicallyInducingSubalgebra(other.theLetter) !=
-    other.CartanSymmetricInverseScale
+    this->cartanSymmetricInverseScale / this->getDynkinIndexParabolicallyInducingSubalgebra(other.letter) !=
+    other.cartanSymmetricInverseScale
   ) {
     return false;
   }
-  if (other.theLetter == 'F') {
-    if (this->theLetter == 'A' && this->theRank < 3) {
+  if (other.letter == 'F') {
+    if (this->letter == 'A' && this->rank < 3) {
       return true;
     }
-    if (this->theLetter == 'B' && this->theRank == 3) {
+    if (this->letter == 'B' && this->rank == 3) {
       return true;
     }
     return false;
   }
-  if (other.theLetter == 'E') {
-    if (this->theRank < 5) {
-      return this->theLetter == 'A';
+  if (other.letter == 'E') {
+    if (this->rank < 5) {
+      return this->letter == 'A';
     }
-    if (this->theRank == 5) {
-      return this->theLetter == 'D';
+    if (this->rank == 5) {
+      return this->letter == 'D';
     }
-    return this->theLetter == 'E';
+    return this->letter == 'E';
   }
-  return this->theLetter == 'A';
+  return this->letter == 'A';
 }
 
 void DynkinSimpleType::grow(List<DynkinSimpleType>& output, List<List<int> >* outputPermutationRoots) const {
@@ -5804,10 +5808,10 @@ void DynkinSimpleType::grow(List<DynkinSimpleType>& output, List<List<int> >* ou
   if (outputPermutationRoots != nullptr) {
     outputPermutationRoots->setSize(0);
   }
-  currentImagesSimpleRootsCurrent.setSize(this->theRank + 1);
+  currentImagesSimpleRootsCurrent.setSize(this->rank + 1);
   DynkinSimpleType newType;
-  if (this->theLetter == 'B' && this->theRank == 3) {
-    newType.makeArbitrary('F', 4, this->CartanSymmetricInverseScale);
+  if (this->letter == 'B' && this->rank == 3) {
+    newType.makeArbitrary('F', 4, this->cartanSymmetricInverseScale);
     output.addOnTop(newType);
     if (outputPermutationRoots != nullptr) {
       for (int i = 0; i < currentImagesSimpleRootsCurrent.size; i ++) {
@@ -5816,8 +5820,8 @@ void DynkinSimpleType::grow(List<DynkinSimpleType>& output, List<List<int> >* ou
       outputPermutationRoots->addOnTop(currentImagesSimpleRootsCurrent);
     }
   }
-  if (this->theLetter == 'D' && this->theRank == 5) {
-    newType.makeArbitrary('E', 6, this->CartanSymmetricInverseScale);
+  if (this->letter == 'D' && this->rank == 5) {
+    newType.makeArbitrary('E', 6, this->cartanSymmetricInverseScale);
     output.addOnTop(newType);
     if (outputPermutationRoots != nullptr) {
       currentImagesSimpleRootsCurrent[0] = 0;
@@ -5829,8 +5833,8 @@ void DynkinSimpleType::grow(List<DynkinSimpleType>& output, List<List<int> >* ou
       outputPermutationRoots->addOnTop(currentImagesSimpleRootsCurrent);
     }
   }
-  if (this->theLetter == 'E' && this->theRank < 8) {
-    newType.makeArbitrary('E', this->theRank + 1, this->CartanSymmetricInverseScale);
+  if (this->letter == 'E' && this->rank < 8) {
+    newType.makeArbitrary('E', this->rank + 1, this->cartanSymmetricInverseScale);
     output.addOnTop(newType);
     if (outputPermutationRoots != nullptr) {
       for (int i = 0; i < currentImagesSimpleRootsCurrent.size; i ++) {
@@ -5839,10 +5843,10 @@ void DynkinSimpleType::grow(List<DynkinSimpleType>& output, List<List<int> >* ou
       outputPermutationRoots->addOnTop(currentImagesSimpleRootsCurrent);
     }
   }
-  if (this->theLetter != 'A') {
+  if (this->letter != 'A') {
     return;
   }
-  newType.makeArbitrary(this->theLetter, this->theRank + 1, this->CartanSymmetricInverseScale);
+  newType.makeArbitrary(this->letter, this->rank + 1, this->cartanSymmetricInverseScale);
   output.addOnTop(newType);
   if (outputPermutationRoots != nullptr) {
     for (int i = 0; i < currentImagesSimpleRootsCurrent.size; i ++) {
@@ -5850,27 +5854,27 @@ void DynkinSimpleType::grow(List<DynkinSimpleType>& output, List<List<int> >* ou
     }
     outputPermutationRoots->addOnTop(currentImagesSimpleRootsCurrent);
   }
-  newType.makeArbitrary('B', this->theRank + 1, this->CartanSymmetricInverseScale);
+  newType.makeArbitrary('B', this->rank + 1, this->cartanSymmetricInverseScale);
   output.addOnTop(newType);
   if (outputPermutationRoots != nullptr) {
     outputPermutationRoots->addOnTop(currentImagesSimpleRootsCurrent);
   }
-  if (this->theRank > 1) {
-    newType.makeArbitrary('C', this->theRank + 1, this->CartanSymmetricInverseScale / 2);
+  if (this->rank > 1) {
+    newType.makeArbitrary('C', this->rank + 1, this->cartanSymmetricInverseScale / 2);
     output.addOnTop(newType);
     if (outputPermutationRoots != nullptr) {
       outputPermutationRoots->addOnTop(currentImagesSimpleRootsCurrent);
     }
   }
-  if (this->theRank > 2) {
-    newType.makeArbitrary('D', this->theRank + 1, this->CartanSymmetricInverseScale);
+  if (this->rank > 2) {
+    newType.makeArbitrary('D', this->rank + 1, this->cartanSymmetricInverseScale);
     output.addOnTop(newType);
     if (outputPermutationRoots != nullptr) {
       outputPermutationRoots->addOnTop(currentImagesSimpleRootsCurrent);
     }
   }
-  if (this->theRank == 1) {
-    newType.makeArbitrary('G', 2, this->CartanSymmetricInverseScale / 3);
+  if (this->rank == 1) {
+    newType.makeArbitrary('G', 2, this->cartanSymmetricInverseScale / 3);
     output.addOnTop(newType);
     if (outputPermutationRoots != nullptr) {
       outputPermutationRoots->addOnTop(currentImagesSimpleRootsCurrent);
@@ -5879,25 +5883,25 @@ void DynkinSimpleType::grow(List<DynkinSimpleType>& output, List<List<int> >* ou
 }
 
 bool DynkinSimpleType::operator>(const DynkinSimpleType& other) const {
-  if (this->theRank > other.theRank) {
+  if (this->rank > other.rank) {
     return true;
   }
-  if (this->theRank < other.theRank) {
+  if (this->rank < other.rank) {
     return false;
   }
-  if (this->CartanSymmetricInverseScale > other.CartanSymmetricInverseScale) {
+  if (this->cartanSymmetricInverseScale > other.cartanSymmetricInverseScale) {
     return true;
   }
-  if (this->CartanSymmetricInverseScale < other.CartanSymmetricInverseScale) {
+  if (this->cartanSymmetricInverseScale < other.cartanSymmetricInverseScale) {
     return false;
   }
-  if ((this->theLetter == 'B' || this->theLetter == 'C') && other.theLetter == 'D') {
+  if ((this->letter == 'B' || this->letter == 'C') && other.letter == 'D') {
     return true;
   }
-  if (this->theLetter == 'D' && (other.theLetter == 'B' ||other.theLetter == 'C')) {
+  if (this->letter == 'D' && (other.letter == 'B' ||other.letter == 'C')) {
     return false;
   }
-  return this->theLetter > other.theLetter;
+  return this->letter > other.letter;
   //  if (this->theLetter>other.theLetter)
   //    return true;
   //  if (this->theLetter<other.theLetter)
@@ -5970,27 +5974,27 @@ Rational DynkinSimpleType::getPrincipalSlTwoCartanSymmetricInverseScale() const 
   MacroRegisterFunctionWithName("DynkinSimpleType::getPrincipalSlTwoCartanSymmetricInverseScale");
   //Reference: Panyushev, On the Dynkin index of a principal sl(2)-subalgebra, Advances in Mathematics, 2008.
   Rational nonScaled = 0;
-  switch(this->theLetter) {
+  switch(this->letter) {
     case 'A':
-      nonScaled = (this->theRank + 2) * (this->theRank + 1) * this->theRank / 6;
+      nonScaled = (this->rank + 2) * (this->rank + 1) * this->rank / 6;
     break;
     case 'B':
-      nonScaled = this->theRank * (this->theRank + 1) * (2 * this->theRank + 1) / 3;
+      nonScaled = this->rank * (this->rank + 1) * (2 * this->rank + 1) / 3;
       break;
     case 'C':
-      nonScaled = (this->theRank * 2 + 1) * (this->theRank * 2) * (this->theRank * 2 - 1) / 6;
+      nonScaled = (this->rank * 2 + 1) * (this->rank * 2) * (this->rank * 2 - 1) / 6;
       break;
     case 'D':
-      nonScaled = (this->theRank - 1) * this->theRank * (2 * this->theRank - 1) / 3;
+      nonScaled = (this->rank - 1) * this->rank * (2 * this->rank - 1) / 3;
     break;
     case 'E':
-      if (this->theRank == 6) {
+      if (this->rank == 6) {
         nonScaled = 156;
       }
-      if (this->theRank == 7) {
+      if (this->rank == 7) {
         nonScaled = 399;
       }
-      if (this->theRank == 8) {
+      if (this->rank == 8) {
         nonScaled = 1240;
       }
     break;
@@ -6005,16 +6009,16 @@ Rational DynkinSimpleType::getPrincipalSlTwoCartanSymmetricInverseScale() const 
       << "from a non-initialized Dynkin simple type. " << global.fatal;
       break;
   }
-  return nonScaled * this->CartanSymmetricInverseScale;
+  return nonScaled * this->cartanSymmetricInverseScale;
 }
 
 void DynkinSimpleType::getCartanSymmetric(Matrix<Rational>& output) const {
-  switch(this->theLetter) {
-    case 'A': this->getAn(this->theRank, output); break;
-    case 'B': this->getBn(this->theRank, output); break;
-    case 'C': this->getCn(this->theRank, output); break;
-    case 'D': this->getDn(this->theRank, output); break;
-    case 'E': this->getEn(this->theRank, output); break;
+  switch(this->letter) {
+    case 'A': this->getAn(this->rank, output); break;
+    case 'B': this->getBn(this->rank, output); break;
+    case 'C': this->getCn(this->rank, output); break;
+    case 'D': this->getDn(this->rank, output); break;
+    case 'E': this->getEn(this->rank, output); break;
     case 'F': this->getF4(output);                break;
     case 'G': this->getG2(output);                break;
     default:
@@ -6022,7 +6026,7 @@ void DynkinSimpleType::getCartanSymmetric(Matrix<Rational>& output) const {
       << "DynkinSimpleType::getCartanSymmetric from a non-initialized Dynkin simple type. " << global.fatal;
       break;
   }
-  output /= this->CartanSymmetricInverseScale;
+  output /= this->cartanSymmetricInverseScale;
 }
 
 Rational DynkinSimpleType::getRatioLongRootToFirst(char inputWeylLetter, int inputRank) {
@@ -6041,46 +6045,46 @@ Rational DynkinSimpleType::getRatioLongRootToFirst(char inputWeylLetter, int inp
 }
 
 void DynkinSimpleType::operator++(int) {
-  if (this->theRank == 1) {
-    this->theRank ++;
+  if (this->rank == 1) {
+    this->rank ++;
     return;
   }
-  if (this->theLetter == 'A') {
-    if (this->theRank >= 4) {
-      this->theLetter = 'D';
+  if (this->letter == 'A') {
+    if (this->rank >= 4) {
+      this->letter = 'D';
     } else {
-      this->theLetter = 'B';
+      this->letter = 'B';
     }
     return;
   }
-  if (this->theLetter == 'D') {
-    this->theLetter = 'B';
+  if (this->letter == 'D') {
+    this->letter = 'B';
     return;
   }
-  if (this->theLetter == 'B') {
-    if (this->theRank >= 3) {
-      this->theLetter = 'C';
+  if (this->letter == 'B') {
+    if (this->rank >= 3) {
+      this->letter = 'C';
     } else {
-      this->theLetter = 'G';
+      this->letter = 'G';
     }
     return;
   }
-  if (this->theLetter == 'C') {
-    if (this->theRank == 4) {
-      this->theLetter = 'F';
+  if (this->letter == 'C') {
+    if (this->rank == 4) {
+      this->letter = 'F';
       return;
     }
-    if (this->theRank == 6 || this->theRank == 7 || this->theRank == 8) {
-      this->theLetter = 'E';
+    if (this->rank == 6 || this->rank == 7 || this->rank == 8) {
+      this->letter = 'E';
       return;
     }
-    this->theLetter = 'A';
-    this->theRank ++;
+    this->letter = 'A';
+    this->rank ++;
     return;
   }
-  if (this->theLetter == 'G' || this->theLetter == 'F' || this->theLetter == 'E') {
-    this->theRank ++;
-    this->theLetter = 'A';
+  if (this->letter == 'G' || this->letter == 'F' || this->letter == 'E') {
+    this->rank ++;
+    this->letter = 'A';
     return;
   }
   global.fatal
@@ -6089,7 +6093,7 @@ void DynkinSimpleType::operator++(int) {
 }
 
 bool DynkinSimpleType::operator<(int otherRank) const {
-  return this->theRank < otherRank;
+  return this->rank < otherRank;
 }
 
 ElementWeylGroupAutomorphisms::ElementWeylGroupAutomorphisms() {
@@ -6511,7 +6515,7 @@ void WeylGroupData::reset() {
   this->flagIrrepsAreComputed = false;
   this->flagCharTableIsComputed = false;
 
-  this->theDynkinType.makeZero();
+  this->dynkinType.makeZero();
   this->cartanSymmetric.initialize(0, 0);
   this->coCartanSymmetric.initialize(0, 0);
   this->rho.setSize(0);
@@ -6745,7 +6749,7 @@ void WeylGroupData::getWord(int g, List<int>& out) const {
 }
 
 bool WeylGroupData::operator==(const WeylGroupData& other) const {
-  return this->cartanSymmetric == other.cartanSymmetric && this->theDynkinType == other.theDynkinType;
+  return this->cartanSymmetric == other.cartanSymmetric && this->dynkinType == other.dynkinType;
 }
 
 void WeylGroupData::actOnRootByGroupElement(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho) {
@@ -6779,7 +6783,7 @@ void WeylGroupData::generateRootSystem() {
   Vectors<Rational> startRoots;
   HashedList<Vector<Rational> > theRootsFinder;
   startRoots.makeEiBasis(this->getDimension());
-  int estimatedNumRoots = this->theDynkinType.getRootSystemSize();
+  int estimatedNumRoots = this->dynkinType.getRootSystemSize();
   this->generateOrbit(startRoots, false, theRootsFinder, false, estimatedNumRoots);
   this->rootSystem.clear();
   this->rootSystem.setExpectedSize(theRootsFinder.size);
@@ -6844,7 +6848,7 @@ std::string WeylGroupData::toStringCppCharTable(FormatExpressions* theFormat) {
   out << "<br>";
   FormatExpressions theFormatNoDynkinTypePlusesExponents;
   theFormatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent = true;
-  out << "bool loadCharacterTable" << this->theDynkinType.toString(&theFormatNoDynkinTypePlusesExponents) << "(WeylGroup& output)\n<br>{ ";
+  out << "bool loadCharacterTable" << this->dynkinType.toString(&theFormatNoDynkinTypePlusesExponents) << "(WeylGroup& output)\n<br>{ ";
   out << " output.characterTable.setExpectedSize(" << this->theGroup.getSize().toString() << "); output.characterTable.setSize(0);";
   out << "\n<br>&nbsp;&nbsp;ClassFunction&lt;FiniteGroup&lt;ElementWeylGroup&lt;WeylGroup&gt; &gt;, Rational&gt; currentCF;";
   out << "\n<br>&nbsp;&nbsp;currentCF.G = &output;";
@@ -6885,7 +6889,7 @@ std::string WeylGroupData::toStringCppConjugacyClasses(FormatExpressions* theFor
   out << "<br>";
   FormatExpressions theFormatNoDynkinTypePlusesExponents;
   theFormatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent = true;
-  out << "bool loadConjugacyClasses" << this->theDynkinType.toString(&theFormatNoDynkinTypePlusesExponents)
+  out << "bool loadConjugacyClasses" << this->dynkinType.toString(&theFormatNoDynkinTypePlusesExponents)
   << "(WeylGroup& output)\n<br>{ ";
   out << "output.computeRho(true);";
   out << "\n<br>&nbsp;&nbsp;WeylGroup::ConjugacyClass emptyClass;";
@@ -6997,7 +7001,7 @@ bool WeylGroupData::isAddmisibleDynkinType(char candidateLetter, int n) {
 
 void WeylGroupData::computeEpsilonMatrix() {
   if (this->matrixSendsSimpleVectorsToEpsilonVectors.isZeroPointer()) {
-    this->theDynkinType.getEpsilonMatrix(this->matrixSendsSimpleVectorsToEpsilonVectors.getElement());
+    this->dynkinType.getEpsilonMatrix(this->matrixSendsSimpleVectorsToEpsilonVectors.getElement());
   }
 }
 
@@ -7039,7 +7043,7 @@ void WeylGroupData::makeMeFromMyCartanSymmetric() {
   Vectors<Rational> simpleBasis;
   simpleBasis.makeEiBasis(this->cartanSymmetric.numberOfRows);
   theDynkinTypeComputer.computeDiagramTypeModifyInputRelative(simpleBasis, this->rootSystem, this->cartanSymmetric);
-  theDynkinTypeComputer.getDynkinType(this->theDynkinType);
+  theDynkinTypeComputer.getDynkinType(this->dynkinType);
   this->makeFinalSteps();
 }
 
@@ -7060,15 +7064,15 @@ void WeylGroupData::initializeGenerators() {
 
 void WeylGroupData::makeFromDynkinType(const DynkinType& inputType) {
   this->reset();
-  this->theDynkinType = inputType;
-  this->theDynkinType.getCartanSymmetric(this->cartanSymmetric);
-  this->theDynkinType.getCoCartanSymmetric(this->coCartanSymmetric);
+  this->dynkinType = inputType;
+  this->dynkinType.getCartanSymmetric(this->cartanSymmetric);
+  this->dynkinType.getCoCartanSymmetric(this->coCartanSymmetric);
   this->makeFinalSteps();
 
   // eventually, there will be formulas for all classical types
   List<char> letters;
   List<int> ranks;
-  this->theDynkinType.getLettersTypesMultiplicities(&letters, &ranks, nullptr);
+  this->dynkinType.getLettersTypesMultiplicities(&letters, &ranks, nullptr);
   if (letters.size == 1) {
     if (ranks.size == 1) {
       if (letters[0] == 'A') {
@@ -7083,8 +7087,8 @@ void WeylGroupData::makeFromDynkinType(const DynkinType& inputType) {
 
 void WeylGroupData::makeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType) {
   this->reset();
-  this->theDynkinType = inputType;
-  this->theDynkinType.getCartanSymmetricDefaultLengthKeepComponentOrder(this->cartanSymmetric);
+  this->dynkinType = inputType;
+  this->dynkinType.getCartanSymmetricDefaultLengthKeepComponentOrder(this->cartanSymmetric);
   this->makeFinalSteps();
 }
 
@@ -7124,14 +7128,14 @@ void WeylGroupAutomorphisms::computeOuterAutoGenerators() {
   }
   this->checkInitialization();
   List<MatrixTensor<Rational> >& theGens = this->theOuterAutos.theGenerators;
-  this->theWeyl->theDynkinType.getOuterAutosGeneratorsActOnVectorColumn(theGens);
+  this->theWeyl->dynkinType.getOuterAutosGeneratorsActOnVectorColumn(theGens);
   for (int i = 0; i < theGens.size; i ++) {
     if (
       theGens[i].getMinimumNumberOfColumnsNumberOfRows() != this->theWeyl->getDimension() ||
       theGens[i].getMinimalNumberOfColumns() != this->theWeyl->getDimension() ||
       theGens[i].getMinimalNumberOfRows() != this->theWeyl->getDimension()
     ) {
-      global.fatal << "Bad outer automorphisms, type " << this->theWeyl->theDynkinType.toString() << "." << global.fatal;
+      global.fatal << "Bad outer automorphisms, type " << this->theWeyl->dynkinType.toString() << "." << global.fatal;
     }
   }
   this->flagOuterAutosGeneratorsComputed = true;
@@ -7161,7 +7165,7 @@ void WeylGroupData::getEpsilonCoordinatesWRTsubalgebra(
   basisChange.resize(0, 0, true);
   for (int i = 0; i < tempDyn.simpleComponentTypes.size; i ++) {
     DynkinSimpleType::getEpsilonMatrix(
-      tempDyn.simpleComponentTypes[i].theLetter, tempDyn.simpleComponentTypes[i].theRank, tempMat
+      tempDyn.simpleComponentTypes[i].letter, tempDyn.simpleComponentTypes[i].rank, tempMat
     );
     basisChange.directSumWith(tempMat, Rational(0));
   }
@@ -7188,7 +7192,7 @@ void WeylGroupData::getEpsilonCoordinates(const List<Vector<Rational> >& input, 
 LargeInteger WeylGroupData::getSizeByFormulaImplementation(FiniteGroup<ElementWeylGroup>& G) {
   WeylGroupData* W = static_cast<WeylGroupData*>(G.specificDataPointer);
   W->checkConsistency();
-  return W->theDynkinType.getWeylGroupSizeByFormula();
+  return W->dynkinType.getWeylGroupSizeByFormula();
 }
 
 void WeylGroupData::getWeylChamber(Cone& output) {
@@ -7538,7 +7542,7 @@ void WeylGroupData::drawRootSystem(
     output.drawHighlightGroup(highlightGroup, highlightLabels, "gray", 5);
   }
   std::stringstream tempStream;
-  tempStream << this->theDynkinType.getWeylGroupName();
+  tempStream << this->dynkinType.getWeylGroupName();
   if (this->getDimension() == 2 && predefinedProjectionPlane != nullptr) {
     theTwoPlane[1][0] = 1;
     theTwoPlane[1][1] = 0;
@@ -8431,7 +8435,7 @@ void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
     return;
   }
   Accum.makeZero();
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   for (int i = 0; i < this->size; i ++) {
     if (this->indexGreaterThanIndex(i, x) && this->indexGEQIndex(y, i)) {
       tempP1.makeZero();
@@ -8949,14 +8953,14 @@ bool Lattice::getAllRepresentativesProjectingDownTo(
 }
 
 void QuasiPolynomial::makeRougherLattice(const Lattice& latticeToRoughenBy) {
-  if (this->AmbientLatticeReduced == latticeToRoughenBy) {
+  if (this->ambientLatticeReduced == latticeToRoughenBy) {
     return;
   }
   Lattice OldLattice;
-  OldLattice = this->AmbientLatticeReduced;
-  this->AmbientLatticeReduced.intersectWith(latticeToRoughenBy);
+  OldLattice = this->ambientLatticeReduced;
+  this->ambientLatticeReduced.intersectWith(latticeToRoughenBy);
   Vectors<Rational> representativesQuotientLattice;
-  OldLattice.getAllRepresentatives(this->AmbientLatticeReduced, representativesQuotientLattice);
+  OldLattice.getAllRepresentatives(this->ambientLatticeReduced, representativesQuotientLattice);
   Vectors<Rational> OldLatticeShifts = this->latticeShifts;
   List<Polynomial<Rational> > oldValues;
   oldValues = this->valueOnEachLatticeShift;
@@ -9075,9 +9079,9 @@ void Lattice::intersectWithBothOfMaximalRank(const Lattice& other) {
 }
 
 void QuasiPolynomial::operator+=(const QuasiPolynomial& other) {
-  this->makeRougherLattice(other.AmbientLatticeReduced);
+  this->makeRougherLattice(other.ambientLatticeReduced);
   QuasiPolynomial tempQP = other;
-  tempQP.makeRougherLattice(this->AmbientLatticeReduced);
+  tempQP.makeRougherLattice(this->ambientLatticeReduced);
   for (int i = 0; i < tempQP.latticeShifts.size; i ++) {
     this->addLatticeShift(tempQP.valueOnEachLatticeShift[i], tempQP.latticeShifts[i]);
   }
@@ -9144,7 +9148,7 @@ std::string QuasiPolynomial::toString(bool useHtml, bool useLatex, FormatExpress
       out << "\n\n";
     }
   }
-  if (!this->AmbientLatticeReduced.basisRationalForm.isIdentity()) {
+  if (!this->ambientLatticeReduced.basisRationalForm.isIdentity()) {
     if (!useLatex) {
       out << ", where L=< ";
     }
@@ -9155,7 +9159,7 @@ std::string QuasiPolynomial::toString(bool useHtml, bool useLatex, FormatExpress
       out << " where $\\Lambda =\\left\\langle\\begin{array}{c}";
     }
     Vectors<Rational> tempRoots;
-    tempRoots.assignMatrixRows(this->AmbientLatticeReduced.basisRationalForm);
+    tempRoots.assignMatrixRows(this->ambientLatticeReduced.basisRationalForm);
     for (int i = 0; i < tempRoots.size; i ++) {
       out << tempRoots[i].toString();
       if (i != tempRoots.size - 1) {
@@ -9195,16 +9199,16 @@ std::string QuasiPolynomial::toString(bool useHtml, bool useLatex, FormatExpress
 }
 
 void QuasiPolynomial::makeFromPolynomialShiftAndLattice(
-  const Polynomial<Rational>& inputPoly, const MonomialP& theShift, const Lattice& theLattice
+  const Polynomial<Rational>& inputPoly, const MonomialPolynomial& theShift, const Lattice& theLattice
 ) {
-  this->AmbientLatticeReduced = theLattice;
+  this->ambientLatticeReduced = theLattice;
   this->latticeShifts.setSize(1);
   Vector<Rational>& firstShift = this->latticeShifts[0];
   firstShift.setSize(theLattice.getDimension());
   for (int i = 0; i < theLattice.getDimension(); i ++) {
     firstShift[i] = theShift(i);
   }
-  this->AmbientLatticeReduced.reduceVector(this->latticeShifts[0]);
+  this->ambientLatticeReduced.reduceVector(this->latticeShifts[0]);
   this->valueOnEachLatticeShift.setSize(1);
   this->valueOnEachLatticeShift[0] = inputPoly;
 }
@@ -9237,7 +9241,7 @@ void Lattice::makeZn(int dimension) {
 }
 
 void QuasiPolynomial::makeZeroOverLattice(Lattice& theLattice) {
-  this->AmbientLatticeReduced = theLattice;
+  this->ambientLatticeReduced = theLattice;
   this->latticeShifts.size = 0;
   this->valueOnEachLatticeShift.size = 0;
 }
@@ -9246,16 +9250,16 @@ void QuasiPolynomial::makeZeroLatticeZn(int theDim) {
   if (theDim <= 0) {
     global.fatal << "Negative dimension not allowed. " << global.fatal;
   }
-  this->AmbientLatticeReduced.makeZn(theDim);
+  this->ambientLatticeReduced.makeZn(theDim);
   this->latticeShifts.size = 0;
   this->valueOnEachLatticeShift.size = 0;
 }
 
 void PartFraction::getRootsFromDenominator(PartialFractions& owner, Vectors<Rational>& output) const {
-  output.setSize(this->IndicesNonZeroMults.size);
-  for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
-    output[i] = owner.startingVectors[this->IndicesNonZeroMults[i]];
-    OnePartialFractionDenominator& current = this->denominator[this->IndicesNonZeroMults[i]];
+  output.setSize(this->indicesNonZeroMultiplicities.size);
+  for (int i = 0; i < this->indicesNonZeroMultiplicities.size; i ++) {
+    output[i] = owner.startingVectors[this->indicesNonZeroMultiplicities[i]];
+    OnePartialFractionDenominator& current = this->denominator[this->indicesNonZeroMultiplicities[i]];
     if (current.Elongations.size != 1) {
       global.fatal << "Elongations expected to have a single element. " << global.fatal;
     }
@@ -9264,7 +9268,7 @@ void PartFraction::getRootsFromDenominator(PartialFractions& owner, Vectors<Rati
 }
 
 void PartFraction::computePolynomialCorrespondingToOneMonomial(
-  QuasiPolynomial& outputQP, const MonomialP& theMon, Vectors<Rational>& normals, Lattice& theLattice
+  QuasiPolynomial& outputQP, const MonomialPolynomial& theMon, Vectors<Rational>& normals, Lattice& lattice
 ) const {
   Polynomial<Rational> tempP, outputPolyPart;
   outputPolyPart.makeOne();
@@ -9272,12 +9276,12 @@ void PartFraction::computePolynomialCorrespondingToOneMonomial(
     this->makePolynomialFromOneNormal(
       normals[i],
       theMon,
-      this->denominator[this->IndicesNonZeroMults[i]].multiplicities[0],
+      this->denominator[this->indicesNonZeroMultiplicities[i]].multiplicities[0],
       tempP
     );
     outputPolyPart *= tempP;
   }
-  outputQP.makeFromPolynomialShiftAndLattice(outputPolyPart, theMon, theLattice);
+  outputQP.makeFromPolynomialShiftAndLattice(outputPolyPart, theMon, lattice);
 }
 
 
@@ -9340,23 +9344,23 @@ std::string PartialFractions::doTheFullComputationReturnLatexFileString(
 ) {
   std::string whatWentWrong;
   global.fatal << "Not implemented yet. " << global.fatal;
-//  this->theChambersOld.theDirections = toBePartitioned;
+  //  this->theChambersOld.theDirections = toBePartitioned;
   this->AmbientDimension = toBePartitioned.getDimension();
-//  this->theChambersOld.AmbientDimension = toBePartitioned.getDimension();
-//  this->theChambersOld.thePauseController.initComputation();
+  //  this->theChambersOld.AmbientDimension = toBePartitioned.getDimension();
+  //  this->theChambersOld.thePauseController.initComputation();
   //this->theChambers.ReadFromDefaultFile();
   std::stringstream out;
   std::stringstream outHtml;
   global.fatal << global.fatal ;
-//  this->theChambersOld.SliceTheEuclideanSpace(false);
-//  this->theChambersOld.quickSortAscending();
-//  this->theChambersOld.LabelChamberIndicesProperly();
-//  this->theChambers.AssignCombinatorialChamberComplex(this->theChambersOld);
-//  this->theChambersOld.drawOutput(global.theDrawingVariables, tempRoot, 0);
-//  this->theChambersOld.thePauseController.exitComputation();
+  //  this->theChambersOld.SliceTheEuclideanSpace(false);
+  //  this->theChambersOld.quickSortAscending();
+  //  this->theChambersOld.LabelChamberIndicesProperly();
+  //  this->theChambers.AssignCombinatorialChamberComplex(this->theChambersOld);
+  //  this->theChambersOld.drawOutput(global.theDrawingVariables, tempRoot, 0);
+  //  this->theChambersOld.thePauseController.exitComputation();
   DrawingVariables theDVs;
   this->theChambers.drawMeProjective(nullptr, true, theDVs, theFormat);
-  outHtml << theDVs.getHTMLDiv(this->AmbientDimension);
+  outHtml << theDVs.getHTMLDiv(this->AmbientDimension, false);
   Vector<Rational> tempRoot;
   tempRoot.makeZero(this->AmbientDimension);
   global.fatal << "not implemented yet" << global.fatal;
@@ -9406,7 +9410,7 @@ void QuasiPolynomial::addLatticeShift(
   const Polynomial<Rational>& input, const Vector<Rational>& inputShift
 ) {
   Vector<Rational> theShift = inputShift;
-  this->AmbientLatticeReduced.reduceVector(theShift);
+  this->ambientLatticeReduced.reduceVector(theShift);
   int index = this->latticeShifts.getIndex(theShift);
   if (index == - 1) {
     index = this->latticeShifts.size;
@@ -9443,10 +9447,10 @@ void QuasiPolynomial::substitution(
   ) {
     global.fatal << "Bad lattice dimensions. " << global.fatal;
   }
-  output.AmbientLatticeReduced = ambientLatticeNewSpace;
-  output.AmbientLatticeReduced.intersectWithPreimageOfLattice(mapFromNewSpaceToOldSpace, this->AmbientLatticeReduced);
+  output.ambientLatticeReduced = ambientLatticeNewSpace;
+  output.ambientLatticeReduced.intersectWithPreimageOfLattice(mapFromNewSpaceToOldSpace, this->ambientLatticeReduced);
   Vectors<Rational> allRepresentatives, imagesAllRepresentatives;
-  bool tempBool = ambientLatticeNewSpace.getAllRepresentatives(output.AmbientLatticeReduced, allRepresentatives);
+  bool tempBool = ambientLatticeNewSpace.getAllRepresentatives(output.ambientLatticeReduced, allRepresentatives);
   if (!tempBool) {
     global.fatal << "Failed to get all representatives. " << global.fatal;
   }
@@ -9490,7 +9494,7 @@ void QuasiPolynomial::substitution(
   }
   Polynomial<Rational> tempP;
   output.makeZeroLatticeZn(this->minimalNumberOfVariables());
-  output.AmbientLatticeReduced = this->AmbientLatticeReduced;
+  output.ambientLatticeReduced = this->ambientLatticeReduced;
   for (int i = 0; i < this->valueOnEachLatticeShift.size; i ++) {
     tempP = this->valueOnEachLatticeShift[i];
     bool tempB = tempP.substitution(theSub, Rational::one());
@@ -9516,12 +9520,12 @@ void QuasiPolynomial::substitution(
 
 bool QuasiPolynomial::substitutionFewerVariables(const PolynomialSubstitution<Rational>& theSub, QuasiPolynomial& output) const {
   Matrix<Rational> theLatticeSub;
-  if (!this->AmbientLatticeReduced.getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(theSub, theLatticeSub)) {
+  if (!this->ambientLatticeReduced.getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(theSub, theLatticeSub)) {
     return false;
   }
   Matrix<Rational> theSubLatticeShift;
-  output.AmbientLatticeReduced = this->AmbientLatticeReduced;
-  if (!output.AmbientLatticeReduced.substitutionHomogeneous(theLatticeSub)) {
+  output.ambientLatticeReduced = this->ambientLatticeReduced;
+  if (!output.ambientLatticeReduced.substitutionHomogeneous(theLatticeSub)) {
     return false;
   }
   theSubLatticeShift.initialize(theLatticeSub.numberOfRows, 1);
@@ -9753,7 +9757,7 @@ bool Cone::getRootFromLPolynomialConstantTermGoesToLastVariable(Polynomial<Ratio
   output.makeZero(inputLPoly.minimalNumberOfVariables() + 1);
   for (int i = 0; i < inputLPoly.size(); i ++) {
     int theIndex;
-    if (inputLPoly[i].::MonomialP::isOneLetterFirstDegree(&theIndex)) {
+    if (inputLPoly[i].::MonomialPolynomial::isOneLetterFirstDegree(&theIndex)) {
       output[theIndex] = inputLPoly.coefficients[i];
     } else {
       *output.lastObject() = inputLPoly.coefficients[i];
@@ -9934,8 +9938,8 @@ bool PartialFractions::removeRedundantShortRootsIndex(int theIndex, Vector<Ratio
     return false;
   }
   bool found = false;
-  for (int k = 0; k < (*this)[theIndex].IndicesNonZeroMults.size; k ++) {
-    int currentIndex = (*this)[theIndex].IndicesNonZeroMults[k];
+  for (int k = 0; k < (*this)[theIndex].indicesNonZeroMultiplicities.size; k ++) {
+    int currentIndex = (*this)[theIndex].indicesNonZeroMultiplicities[k];
     const OnePartialFractionDenominator& currentFrac = (*this)[theIndex].denominator[currentIndex];
     if (currentFrac.Elongations.size > 1) {
       found = true;
@@ -9950,8 +9954,8 @@ bool PartialFractions::removeRedundantShortRootsIndex(int theIndex, Vector<Ratio
   std::string tempS;
   Polynomial<LargeInteger> tempIP, currentCoeff;
   this->popMonomial(theIndex, thePF, currentCoeff);
-  for (int k = 0; k < thePF.IndicesNonZeroMults.size; k ++) {
-    int currentIndex = thePF.IndicesNonZeroMults[k];
+  for (int k = 0; k < thePF.indicesNonZeroMultiplicities.size; k ++) {
+    int currentIndex = thePF.indicesNonZeroMultiplicities[k];
     OnePartialFractionDenominator& currentFrac = thePF.denominator[currentIndex];
     int LCMElongations = currentFrac.getLeastCommonMultipleElongations();
     tempS = this->startingVectors[currentIndex].toString();
@@ -10039,7 +10043,7 @@ bool SlTwoInSlN::computeInvariantsOfDegree(
   Polynomial<Rational> basisMonsZeroWeight, basisMonsAll;
   basisMonsZeroWeight.makeZero();
   basisMonsAll.makeZero();
-  MonomialP theMon;
+  MonomialPolynomial theMon;
   theMon.makeOne();
   Vector<Rational> theWeight;
   Vector<Rational> theCartanAction;
@@ -10213,7 +10217,7 @@ std::string ConeComplex::drawMeToHtmlLastCoordAffine(DrawingVariables& theDrawin
   bool isBad = false;
   isBad = this->drawMeLastCoordinateAffine(true, theDrawingVariables, theFormat);
   std::stringstream out;
-  out << theDrawingVariables.getHTMLDiv(this->getDimension() - 1);
+  out << theDrawingVariables.getHTMLDiv(this->getDimension() - 1, false);
   if (isBad) {
     out << "<hr>" << "found cones which I can't draw<hr>";
   }
@@ -10225,7 +10229,7 @@ std::string ConeComplex::drawMeToHtmlProjective(DrawingVariables& theDrawingVari
   bool isGood = true;
   isGood = this->drawMeProjective(nullptr, true, theDrawingVariables, theFormat);
   std::stringstream out;
-  out << theDrawingVariables.getHTMLDiv(this->getDimension());
+  out << theDrawingVariables.getHTMLDiv(this->getDimension(), false);
   if (!isGood) {
     out << "<hr>" << "found cones which I can't draw<hr>";
   }
@@ -10395,7 +10399,7 @@ std::string Cone::drawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariab
   if (foundBadVertex) {
     out << "<br>The cone does not lie in the upper half-space. ";
   } else {
-    out << theDrawingVariables.getHTMLDiv(this->getDimension() - 1);
+    out << theDrawingVariables.getHTMLDiv(this->getDimension() - 1, false);
   }
   out << "<br>" << this->toString(&theFormat);
   return out.str();
@@ -10475,7 +10479,7 @@ std::string Cone::drawMeToHtmlProjective(DrawingVariables& theDrawingVariables, 
   theDrawingVariables.theBuffer.makeMeAStandardBasis(this->getDimension());
   this->drawMeProjective(nullptr, true, theDrawingVariables, theFormat);
   theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->getDimension());
-  out << theDrawingVariables.getHTMLDiv(this->getDimension());
+  out << theDrawingVariables.getHTMLDiv(this->getDimension(), false);
   out << "<br>" << this->toString(&theFormat);
   return out.str();
 }
@@ -11221,7 +11225,7 @@ void PiecewiseQuasipolynomial::drawMe(
     tempRoot.makeAffineUsingLastCoordinate();
     for (int j = 0; j < this->theQPs[i].latticeShifts.size; j ++) {
       this->theProjectivizedComplex[i].getLatticePointsInCone(
-        this->theQPs[i].AmbientLatticeReduced,
+        this->theQPs[i].ambientLatticeReduced,
         this->theQPs[i].latticeShifts[j],
         numLatticePointsPerDim,
         true,
@@ -11256,7 +11260,7 @@ Rational QuasiPolynomial::evaluate(const Vector<Rational>& input) {
   Vector<Rational> testLatticeBelonging;
   for (int i = 0; i < this->latticeShifts.size; i ++) {
     testLatticeBelonging = this->latticeShifts[i] - input;
-    if (this->AmbientLatticeReduced.isInLattice(testLatticeBelonging)) {
+    if (this->ambientLatticeReduced.isInLattice(testLatticeBelonging)) {
       return this->valueOnEachLatticeShift[i].evaluate(input);
     }
   }
@@ -11314,7 +11318,7 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(const Vector<Ratio
             tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, "black", 5);
             tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, "black", 10);
             tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, "red", 4);
-            global.comments << tempDV.getHTMLDiv(this->theProjectivizedComplex.getDimension() - 1);
+            global.comments << tempDV.getHTMLDiv(this->theProjectivizedComplex.getDimension() - 1, false);
           }
           firstFail = false;
         }

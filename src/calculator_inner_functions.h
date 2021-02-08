@@ -210,6 +210,7 @@ public:
   static bool unionEmptySet(Calculator& calculator, const Expression& input, Expression& output);
   static bool lastElement(Calculator& calculator, const Expression& input, Expression& output);
   static bool removeLastElement(Calculator& calculator, const Expression& input, Expression& output);
+  static bool belongsTo(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 class CalculatorFunctionsIntervals {
@@ -251,6 +252,9 @@ public:
   static bool turnOffRules(Calculator& calculator, const Expression& input, Expression& output);
   static bool turnOnRules(Calculator& calculator, const Expression& input, Expression& output);
 
+  // Returns false. The purpose of this function is to make the
+  // turnOnApproximations implementation easier.
+  static bool approximationsDummy(Calculator& calculator, const Expression& input, Expression& output);
   static bool turnOnApproximations(Calculator& calculator, const Expression& input, Expression& output);
   static bool turnOffApproximations(Calculator& calculator, const Expression& input, Expression& output);
 
@@ -276,7 +280,7 @@ public:
   static bool nistEllipticCurveGenerator(Calculator& calculator, const Expression& input, Expression& output);
   static bool nistEllipticCurveOrder(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerCrossProduct(Calculator& calculator, const Expression& input, Expression& output);
+  static bool crossProduct(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerDistributeExponent(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerDistributeSqrt(Calculator& calculator, const Expression& input, Expression& output);
@@ -288,17 +292,17 @@ public:
   static bool functionFactorInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerFactorOutNumberContent(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerIsProductLinearOrConstantTermsIn(Calculator& calculator, const Expression& input, Expression& output);
+  static bool isProductLinearOrConstantTermsIn(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIsProductTermsUpToPower(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIsLinearOrConstantIn(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCoefficientOf(Calculator& calculator, const Expression& input, Expression& output);
+  static bool coefficientOf(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerConstTermRelative(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerCompositeArithmeticOperationEvaluatedOnArgument(
+  static bool compositeArithmeticOperationEvaluatedOnArgument(
     Calculator& calculator, const Expression& input, Expression& output
   );
 
-  static bool innerMatchesPattern(Calculator& calculator, const Expression& input, Expression& output);
+  static bool matchesPattern(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerThaw(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerGetFreeVariablesIncludeNamedConstants(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerGetFreeVariablesExcludeNamedConstants(Calculator& calculator, const Expression& input, Expression& output);
@@ -377,7 +381,6 @@ public:
   static bool greatestCommonDivisorInteger(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerIsNilpotent(Calculator& calculator, const Expression& input, Expression& output);
-  //static bool innerGramSchmidtVerbose(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerInvertMatrixRFsVerbose(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerInvertMatrix(Calculator& calculator, const Expression& input, Expression& output);
@@ -438,8 +441,12 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
 
-  static bool innerMakeJavascriptExpressioN(Calculator& calculator, const Expression& input, Expression& output);
-  static bool functionMakeJavascriptExpression(Calculator& calculator, const Expression& input, Expression& output);
+  static bool makeJavascriptExpression(Calculator& calculator, const Expression& input, Expression& output);
+  static bool functionMakeJavascriptExpression(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output
+  );
   static bool innerContains(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerExpressionLeafs(Calculator& calculator, const Expression& input, Expression& output);
 
@@ -493,28 +500,28 @@ public:
   static bool innerFindProductDistanceModN(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerSolveProductSumEquationOverSetModN(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerSolveSerreLikeSystem(
+  static bool solveSerreLikeSystem(
     Calculator& calculator, const Expression& input, Expression& output, bool useUpperLimit, bool startWithAlgebraicClosure
   );
   static bool innerSolveSerreLikeSystemNoUpperLimit(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
-    return CalculatorFunctions::innerSolveSerreLikeSystem(calculator, input, output, false, false);
+    return CalculatorFunctions::solveSerreLikeSystem(calculator, input, output, false, false);
   }
   static bool innerSolveSerreLikeSystemUpperLimit(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
-    return CalculatorFunctions::innerSolveSerreLikeSystem(calculator, input, output, true, false);
+    return CalculatorFunctions::solveSerreLikeSystem(calculator, input, output, true, false);
   }
   static bool innerSolveSerreLikeSystemAlgebraic(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
-    return CalculatorFunctions::innerSolveSerreLikeSystem(calculator, input, output, false, true);
+    return CalculatorFunctions::solveSerreLikeSystem(calculator, input, output, false, true);
   }
   static bool innerSolveSerreLikeSystemAlgebraicUpperLimit(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
-    return CalculatorFunctions::innerSolveSerreLikeSystem(calculator, input, output, true, true);
+    return CalculatorFunctions::solveSerreLikeSystem(calculator, input, output, true, true);
   }
   static bool innerFetchWebPagePOST(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerFetchWebPageGET(Calculator& calculator, const Expression& input, Expression& output);

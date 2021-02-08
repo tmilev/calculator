@@ -123,7 +123,7 @@ bool TimeoutThread::HandleComputationTimeout() {
   if (this->elapsedComputationTimeInMilliseconds <= global.millisecondsReplyAfterComputation) {
     return false;
   }
-  global.theResponse.initiate("Triggered by timer thread.");
+  global.response.initiate("Triggered by timer thread.");
   return false;
 }
 

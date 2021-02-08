@@ -1,0 +1,7 @@
+Tricky example.
+<calculatorAnswerOnGiveUp name="asdf">
+a< 0
+</calculatorAnswerOnGiveUp>
+
+<calculatorAnswerOnGiveUp> if (af*ag< 0, \infty,-\infty) </calculatorAnswerOnGiveUp>
+<calculatorAnswerOnGiveUp>ag, y </calculatorAnswerOnGiveUp>

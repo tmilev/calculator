@@ -52,7 +52,7 @@ void JSData::operator=(const JSData& other) {
 JSData& JSData::operator[](int i) {
   this->theType = JSData::token::tokenArray;
   if (this->listObjects.size < i + 1) {
-    this->listObjects.setSize(i + 1);
+    this->listObjects.setSizeAndExpectedSize(i + 1);
   }
   return this->listObjects[i];
 }
@@ -279,6 +279,12 @@ bool JSData::isTrueRepresentationInJSON() {
     return false;
   }
   return this->stringValue == "true";
+}
+
+JSData JSData::makeEmptyArray() {
+  JSData result;
+  result.theType = JSData::token::tokenArray;
+  return result;
 }
 
 bool JSData::isString(std::string* whichString) {

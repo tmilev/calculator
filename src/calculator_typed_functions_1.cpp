@@ -180,12 +180,12 @@ bool CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNum
     if (!input[1].isOfType<Rational>(&tempRat)) {
       return false;
     }
-    leftAN.assignRational(tempRat, &calculator.theObjectContainer.theAlgebraicClosure);
+    leftAN.assignRational(tempRat, &calculator.objectContainer.theAlgebraicClosure);
   } else if (!input[2].isOfType(&rightAN)) {
     if (!input[2].isOfType(&tempRat)) {
       return false;
     }
-    rightAN.assignRational(tempRat, &calculator.theObjectContainer.theAlgebraicClosure);
+    rightAN.assignRational(tempRat, &calculator.objectContainer.theAlgebraicClosure);
   }
   if (rightAN.isEqualToZero()) {
     return output.makeError("Division by zero. ", calculator);
@@ -230,12 +230,12 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber
     if (!input[1].isOfType<Rational>(&rationalValue)) {
       return false;
     }
-    leftAN.assignRational(rationalValue, &calculator.theObjectContainer.theAlgebraicClosure);
+    leftAN.assignRational(rationalValue, &calculator.objectContainer.theAlgebraicClosure);
   } else if (!input[2].isOfType(&rightAN)) {
     if (!input[2].isOfType(&rationalValue)) {
       return false;
     }
-    rightAN.assignRational(rationalValue, &calculator.theObjectContainer.theAlgebraicClosure);
+    rightAN.assignRational(rationalValue, &calculator.objectContainer.theAlgebraicClosure);
   }
   leftAN *= rightAN;
   return output.assignValue(leftAN, calculator);
@@ -257,13 +257,13 @@ bool CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber(
     if (!input[1].isOfType<Rational>(&tempRat)) {
       return false;
     }
-    leftAN.assignRational(tempRat, &calculator.theObjectContainer.theAlgebraicClosure);
+    leftAN.assignRational(tempRat, &calculator.objectContainer.theAlgebraicClosure);
     leftAN.checkConsistency();
   } else if (!input[2].isOfType(&rightAN)) {
     if (!input[2].isOfType(&tempRat)) {
       return false;
     }
-    rightAN.assignRational(tempRat, &calculator.theObjectContainer.theAlgebraicClosure);
+    rightAN.assignRational(tempRat, &calculator.objectContainer.theAlgebraicClosure);
     rightAN.checkConsistency();
   }
   leftAN.checkConsistency();
@@ -304,6 +304,28 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt(
   leftR *= rightR;
   return output.assignValue(leftR, calculator);
 }
+
+bool CalculatorFunctionsBinaryOps::innerPowerWeylGroupElementByInteger(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerWeylGroupElementByInteger");
+  if (input.size() != 3) {
+    return false;
+  }
+  ElementWeylGroup left;
+  if (!input[1].isOfType(&left)) {
+    return false;
+  }
+  LargeInteger power;
+  if (!input[2].isInteger(&power)) {
+    return false;
+  }
+  ElementWeylGroup identity;
+  identity.makeIdentity(*left.owner);
+  MathRoutines::raiseToPower(left, power, identity);
+  return output.assignValue(left, calculator);
+}
+
 
 bool CalculatorFunctionsBinaryOps::innerDivideRatByRat(
   Calculator& calculator, const Expression& input, Expression& output
@@ -426,7 +448,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(
     return false;
   }
   ElementWeylGroup theElt = inputConverted[1].getValue<ElementWeylGroup>();
-  if (theElt.owner != &theWeight.owner->theWeyl) {
+  if (theElt.owner != &theWeight.owner->weylGroup) {
     return calculator << "<hr>Possible user input error: attempting to apply Weyl group "
     << "element to weight corresponding to different Weyl group.";
   }
@@ -559,8 +581,8 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF");
-  if (!CalculatorFunctionsBinaryOps::innerMultiplyTypeByType<RationalFunction<Rational> >(calculator, input, output)) {
-    if (!CalculatorFunctionsBinaryOps::innerMultiplyTypeByType<RationalFunction<AlgebraicNumber> >(calculator, input, output)) {
+  if (!CalculatorFunctionsBinaryOps::multiplyTypeByType<RationalFunction<Rational> >(calculator, input, output)) {
+    if (!CalculatorFunctionsBinaryOps::multiplyTypeByType<RationalFunction<AlgebraicNumber> >(calculator, input, output)) {
       return false;
     }
     RationalFunction<AlgebraicNumber> simplified;
@@ -582,8 +604,8 @@ bool CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRati
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial");
-  if (!CalculatorFunctionsBinaryOps::innerDivideTypeByType<RationalFunction<Rational> >(calculator, input, output)) {
-    if (!CalculatorFunctionsBinaryOps::innerDivideTypeByType<RationalFunction<AlgebraicNumber> >(calculator, input, output)) {
+  if (!CalculatorFunctionsBinaryOps::divideTypeByType<RationalFunction<Rational> >(calculator, input, output)) {
+    if (!CalculatorFunctionsBinaryOps::divideTypeByType<RationalFunction<AlgebraicNumber> >(calculator, input, output)) {
       return false;
     }
     RationalFunction<AlgebraicNumber> simplified;
@@ -623,11 +645,11 @@ bool CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA(
   return CalculatorFunctionsBinaryOps::innerAddTypeToType<ElementWeylAlgebra<Rational> >(calculator, input, output);
 }
 
-bool CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial(
+bool CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial");
-  if (input.children.size < 3) {
+  if (input.size() < 3) {
     return false;
   }
   const Expression leftE = input[1];
@@ -638,9 +660,9 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPoly
     rightE.isOfType<AlgebraicNumber>() ||
     rightE.isOfType<Polynomial<AlgebraicNumber> >()
   ) {
-    return CalculatorFunctionsBinaryOps::innerMultiplyTypeByType<Polynomial<AlgebraicNumber> >(calculator, input, output);
+    return CalculatorFunctionsBinaryOps::multiplyTypeByType<Polynomial<AlgebraicNumber> >(calculator, input, output);
   }
-  return CalculatorFunctionsBinaryOps::innerMultiplyTypeByType<Polynomial<Rational> >(calculator, input, output);
+  return CalculatorFunctionsBinaryOps::multiplyTypeByType<Polynomial<Rational> >(calculator, input, output);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAddUEToAny(Calculator& calculator, const Expression& input, Expression& output) {
@@ -977,7 +999,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolynomialBySmallInteger(
   if (thePower < 0) {
     if (base.size() == 1) {
       Polynomial<Rational> outputPoly;
-      MonomialP theMon = base[0];
+      MonomialPolynomial theMon = base[0];
       Rational theCF = base.coefficients[0];
       theCF.raiseToPower(thePower);
       theMon.raiseToPower(thePower);
@@ -1058,8 +1080,8 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossib
       largePower *= - 1;
     }
     Matrix<AlgebraicNumber> idMat;
-    AlgebraicNumber one = calculator.theObjectContainer.theAlgebraicClosure.one();
-    AlgebraicNumber zero = calculator.theObjectContainer.theAlgebraicClosure.zero();
+    AlgebraicNumber one = calculator.objectContainer.theAlgebraicClosure.one();
+    AlgebraicNumber zero = calculator.objectContainer.theAlgebraicClosure.zero();
 
     idMat.makeIdentityMatrix(baseAlg.numberOfRows, one, zero);
     MathRoutines::raiseToPower(baseAlg, largePower, idMat);
@@ -1108,8 +1130,8 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger(
     return output.assignMatrix(baseRat, calculator);
   }
   Matrix<AlgebraicNumber> baseAlg;
-  AlgebraicNumber one = calculator.theObjectContainer.theAlgebraicClosure.one();
-  AlgebraicNumber zero = calculator.theObjectContainer.theAlgebraicClosure.zero();
+  AlgebraicNumber one = calculator.objectContainer.theAlgebraicClosure.one();
+  AlgebraicNumber zero = calculator.objectContainer.theAlgebraicClosure.zero();
   if (calculator.functionGetMatrix(matrixE, baseAlg)) {
     if (!baseAlg.isSquare() || baseAlg.numberOfColumns == 0) {
       return output.makeError("Exponentiating non-square matrices or matrices with zero rows is not allowed.", calculator);
@@ -1287,18 +1309,18 @@ bool CalculatorFunctionsBinaryOps::innerRadicalAlgebraicNumberPositiveDefault(
     return false;
   }
   AlgebraicClosureRationals fieldCopy;
-  fieldCopy = calculator.theObjectContainer.theAlgebraicClosure;
+  fieldCopy = calculator.objectContainer.theAlgebraicClosure;
   AlgebraicNumber baseCopy;
   baseCopy = base;
   baseCopy.owner = &fieldCopy;
   if (!baseCopy.radicalMeDefault(radical, &calculator.comments)) {
     return false;
   }
-  if (fieldCopy.basisInjections.size != calculator.theObjectContainer.theAlgebraicClosure.basisInjections.size) {
+  if (fieldCopy.basisInjections.size != calculator.objectContainer.theAlgebraicClosure.basisInjections.size) {
     // the radical does not below to the base field;
     return false;
   }
-  baseCopy.owner = &calculator.theObjectContainer.theAlgebraicClosure;
+  baseCopy.owner = &calculator.objectContainer.theAlgebraicClosure;
   MathRoutines::raiseToPower(baseCopy, powerIntegral, baseCopy.owner->one());
   return output.assignValue(baseCopy, calculator);
 }
@@ -1321,7 +1343,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(
       if (base.isRational(&baseRat)) {
         if (base.assignRationalQuadraticRadical(
           baseRat,
-          calculator.theObjectContainer.theAlgebraicClosure,
+          calculator.objectContainer.theAlgebraicClosure,
           &calculator.comments
         )) {
           base.checkConsistency();
@@ -1848,7 +1870,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(
     return false;
   }
   output.reset(calculator);
-  output.children.reserve(input[2].size());
+  output.setExpectedSize(input[2].size());
   output.addChildAtomOnTop(calculator.opSequence());
   Expression tempProduct;
   for (int i = 1; i < input[2].size(); i ++) {
@@ -1858,7 +1880,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(
   return true;
 }
 
-bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix(
+bool CalculatorFunctionsBinaryOps::multiplyMatrixByMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix");
@@ -2575,7 +2597,7 @@ bool CalculatorFunctionsBinaryOps::setMinus(
   for (int i = 1; i < leftSetE.size(); i ++) {
     resultEs.addOnTop(leftSetE[i]);
   }
-  for (int i = 1; i < rightSetE.children.size; i ++) {
+  for (int i = 1; i < rightSetE.size(); i ++) {
     if (resultEs.contains(rightSetE[i])) {
       resultEs.removeIndexSwapWithLast(resultEs.getIndex(rightSetE[i]));
     }
@@ -2645,9 +2667,9 @@ bool CalculatorFunctionsBinaryOps::innerMultiplySequenceByAnyScalar(
   if (!input.isListNElements(3)) {
     return false;
   }
-  Expression tempE = input;
-  tempE.children.swapTwoIndices(1, 2);
-  return CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(calculator, tempE, output);
+  Expression swapped = input;
+  swapped.swapChildren(1, 2);
+  return CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(calculator, swapped, output);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(
@@ -2669,7 +2691,7 @@ bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(
     << input[2].size() - 1 << ", possible user typo?";
   }
   output.reset(calculator);
-  output.children.reserve(input[1].size());
+  output.setExpectedSize(input[1].size());
   output.addChildAtomOnTop(calculator.opSequence());
   Expression tempSum;
   for (int i = 1; i < input[2].size(); i ++) {
@@ -2832,7 +2854,7 @@ bool CalculatorFunctionsBinaryOps::polynomialModPModuloPolynomialModP(
       << left.content.coefficients[0].modulus;
     }
   }
-  ElementZmodP rightLeadingCoefficient = right.content.getLeadingCoefficient(&MonomialP::orderDefault());
+  ElementZmodP rightLeadingCoefficient = right.content.getLeadingCoefficient(&MonomialPolynomial::orderDefault());
   if (!rightLeadingCoefficient.invert()) {
     return calculator
     << "Leading coefficient of quotient "

@@ -14,7 +14,7 @@ class SolverSocratic {
     /**@type{string|null} */
     this.pendingTypeset = null;
     /**@type{HTMLElement} */
-    this.debugDiv = document.getElementById(ids.domElements.pages.solve.editorSolveProblemDebug);
+    this.debugDiv = document.getElementById(ids.domElements.pages.solveSocratic.editorSolveProblemDebug);
     /**@type{HTMLElement} */
     this.flagPendingSolutionTypeset = false;
   }
@@ -23,26 +23,43 @@ class SolverSocratic {
     if (this.equationEditor !== null) {
       return;
     }
+    /**@type{HTMLInputElement} */
+    let latexElement = document.getElementById(ids.domElements.pages.solveSocratic.input);
+    let desiredLatex = storage.variables.solveSocratic.problemToAutoSolve.getValue();
     this.panel = new InputPanelData({
-      idEquationEditorElement: ids.domElements.pages.solve.editor,
+      idEquationEditorElement: ids.domElements.pages.solveSocratic.editor,
       problemId: "",
-      idButtonContainer: ids.domElements.pages.solve.editorButtonPanel,
-      flagCalculatorPanel: true,
+      idButtonContainer: ids.domElements.pages.solveSocratic.editorButtonPanel,
+      flagCalculatorPanel: false,
       buttonsPerLine: 8,
+      pureLatexElement: latexElement,
       valueChangeHandler: (text) => {
         this.valueChange(text);
       }
     });
+    if (latexElement !== null) {
+      latexElement.addEventListener("input", () => {
+        this.valueChange(latexElement.value);
+      });
+      latexElement.addEventListener("change", () => {
+        this.valueChange(latexElement.value);
+      });
+    }
     this.panel.initialize();
     this.equationEditor = this.panel.equationEditor;
     this.setDebugLogContainer();
     this.equationEditor.updateDOM();
     this.equationEditor.rootNode.focus(0);
     this.processPendingTypeset();
+    latexElement.value = desiredLatex;
+    this.equationEditor.writeLatexFromInput();
+    this.setAnchor(desiredLatex);
   }
 
   setDebugLogContainer() {
     let doDebug = storage.variables.flagDebug.isTrue();
+    // TODO(tmilev): For now, disallow debug data.
+    doDebug = false;
     if (doDebug) {
       this.debugDiv.style.display = "";
     } else {
@@ -87,10 +104,25 @@ class SolverSocratic {
     /**@type{string} */
     text,
   ) {
+    this.setAnchor(text);
+    storage.variables.solveSocratic.problemToAutoSolve.setAndStore(text, true, false);
+  }
+
+  setAnchor(
+    /**@type{string} */
+    text,
+  ) {
     let anchor = document.getElementById(ids.domElements.pages.solveSocratic.link);
     anchor.textContent = text;
     let encoded = encodeURIComponent(text);
     anchor.setAttribute("href", `https://bloom-autopush.sandbox.google.com/math/solver?q=${encoded}`);
+    let anchorThisPage = document.getElementById(ids.domElements.pages.solveSocratic.anchorThisPage);
+    if (text === "") {
+      anchorThisPage.style.display = "hidden";
+    } else {
+      anchorThisPage.style.display = "";
+    }
+    anchorThisPage.href = window.location;
   }
 }
 

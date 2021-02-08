@@ -449,18 +449,12 @@ ProblemData::ProblemData() {
   this->flagProblemWeightIsOK = false;
 }
 
-void ProblemData::addEmptyAnswerIdOnTop(const std::string& inputAnswerId) {
-  Answer theAnswer;
-  theAnswer.answerId = inputAnswerId;
-  this->theAnswers.setKeyValue(inputAnswerId, theAnswer);
-}
-
 std::string ProblemData::toStringAvailableAnswerIds() {
   std::stringstream out;
   out << "Available answer ids: ";
-  for (int i = 0; i < this->theAnswers.size(); i ++) {
-    out << this->theAnswers.values[i].answerId;
-    if (i != this->theAnswers.size() - 1) {
+  for (int i = 0; i < this->answers.size(); i ++) {
+    out << this->answers.values[i].answerId;
+    if (i != this->answers.size() - 1) {
       out << ", ";
     }
   }
@@ -491,8 +485,8 @@ std::string ProblemDataAdministrative::toString() const {
 
 bool ProblemData::checkConsistency() const {
   MacroRegisterFunctionWithName("ProblemData::checkConsistency");
-  for (int i = 0; i < this->theAnswers.size(); i ++) {
-    if (StringRoutines::stringTrimWhiteSpace(this->theAnswers.values[i].answerId) == "") {
+  for (int i = 0; i < this->answers.size(); i ++) {
+    if (StringRoutines::stringTrimWhiteSpace(this->answers.values[i].answerId) == "") {
       global.fatal << "This is not supposed to happen: empty answer id." << global.fatal;
     }
   }
@@ -501,11 +495,11 @@ bool ProblemData::checkConsistency() const {
 
 bool ProblemData::checkConsistencyMathQuillIds() const {
   MacroRegisterFunctionWithName("ProblemData::checkConsistencyMathQuillIds");
-  for (int i = 0; i < this->theAnswers.size(); i ++) {
-    if (StringRoutines::stringTrimWhiteSpace(this->theAnswers.values[i].idMQfielD) == "") {
+  for (int i = 0; i < this->answers.size(); i ++) {
+    if (StringRoutines::stringTrimWhiteSpace(this->answers.values[i].idMQField) == "") {
       std::stringstream errorStream;
-      errorStream << "This is not supposed to happen: empty idMQfield. The answer id is: "
-      << this->theAnswers.values[i].answerId << "<br>" << this->toString() << "<hr>Answer information: "
+      errorStream << "This is not supposed to happen: empty idMQField. The answer id is: "
+      << this->answers.values[i].answerId << "<br>" << this->toString() << "<hr>Answer information: "
       << this->toString() << "<br>";
       global.fatal << errorStream.str() << global.fatal;
     }
@@ -521,8 +515,8 @@ std::string ProblemData::toString() const {
     out << " (given)";
   }
   out << ". <br>";
-  for (int i = 0; i < this->theAnswers.size(); i ++) {
-    Answer& currentA = this->theAnswers.values[i];
+  for (int i = 0; i < this->answers.size(); i ++) {
+    Answer& currentA = this->answers.values[i];
     out << "AnswerId: " << currentA.answerId;
     out << ", numCorrectSubmissions: " << currentA.numCorrectSubmissions;
     out << ", numSubmissions: " << currentA.numSubmissions;
@@ -776,8 +770,8 @@ std::string ProblemData::store(){
   if (this->flagRandomSeedGiven) {
     out << "randomSeed=" << this->randomSeed;
   }
-  for (int i = 0; i < this->theAnswers.size(); i ++) {
-    Answer& currentA = this->theAnswers.values[i];
+  for (int i = 0; i < this->answers.size(); i ++) {
+    Answer& currentA = this->answers.values[i];
     if (this->flagRandomSeedGiven || i != 0) {
       out << "&";
     }
@@ -799,8 +793,8 @@ JSData ProblemData::storeJSON() const {
   if (this->flagRandomSeedGiven) {
     result[WebAPI::problem::randomSeed] = static_cast<int>(this->randomSeed);
   }
-  for (int i = 0; i < this->theAnswers.size(); i ++) {
-    Answer& currentA = this->theAnswers.values[i];
+  for (int i = 0; i < this->answers.size(); i ++) {
+    Answer& currentA = this->answers.values[i];
     JSData currentAnswerJSON;
     currentAnswerJSON["numCorrectSubmissions"] = std::to_string(currentA.numCorrectSubmissions);
     currentAnswerJSON["numSubmissions"] = std::to_string(currentA.numSubmissions);
@@ -1008,15 +1002,17 @@ bool ProblemData::loadFromOldFormat(const std::string& inputData, std::stringstr
       this->flagRandomSeedGiven = true;
     }
   }
-  this->theAnswers.clear();
+  this->answers.clear();
   bool result = true;
   MapList<std::string, std::string, MathRoutines::hashString> currentQuestionMap;
   for (int i = 0; i < theMap.size(); i ++) {
     if (theMap.keys[i] == WebAPI::problem::randomSeed) {
       continue;
     }
-    this->addEmptyAnswerIdOnTop(HtmlRoutines::convertURLStringToNormal(theMap.keys[i], false));
-    Answer& currentA = *this->theAnswers.values.lastObject();
+    Answer answer;
+    answer.answerId = theMap.keys[i];
+    this->answers.setKeyValue(answer.answerId, answer);
+    Answer& currentA = *this->answers.values.lastObject();
     std::string currentQuestion = HtmlRoutines::convertURLStringToNormal(theMap.values[i], false);
     result = HtmlRoutines::chopPercentEncodedString(currentQuestion, currentQuestionMap, commentsOnFailure);
     if (!result) {
@@ -1058,14 +1054,16 @@ bool ProblemData::loadFromJSON(const JSData& inputData, std::stringstream& comme
       this->flagRandomSeedGiven = true;
     }
   }
-  this->theAnswers.clear();
+  this->answers.clear();
   bool result = true;
   for (int i = 0; i < inputData.objects.size(); i ++) {
     if (inputData.objects.keys[i] == WebAPI::problem::randomSeed) {
       continue;
     }
-    this->addEmptyAnswerIdOnTop(HtmlRoutines::convertURLStringToNormal(inputData.objects.keys[i], false));
-    Answer& currentA = *this->theAnswers.values.lastObject();
+    Answer newAnswer;
+    newAnswer.answerId = inputData.objects.keys[i];
+    this->answers.setKeyValue(newAnswer.answerId, newAnswer);
+    Answer& currentA = *this->answers.values.lastObject();
     JSData currentQuestionJSON = inputData.objects.values[i];
     if (currentQuestionJSON.objects.contains("numCorrectSubmissions")) {
       currentA.numCorrectSubmissions =

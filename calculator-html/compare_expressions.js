@@ -7,6 +7,7 @@ const miscellaneous = require("./miscellaneous_frontend");
 const equationEditor = require("./equation_editor");
 const submit = require("./submit_requests");
 const jsonToHtml = require("./json_to_html");
+const answerProcessing = require("./answer_processing");
 
 class CompareExpressions {
   constructor() {
@@ -89,8 +90,7 @@ class CompareExpressions {
     this.doCompare();
   }
 
-  doCompare(
-  ) {
+  doCompare() {
     let debug = storage.variables.flagDebug.isTrue();
     submit.submitGET({
       url: pathnames.addresses.compareExpressions(this.givenData, this.desiredData, debug),
@@ -110,7 +110,9 @@ class CompareExpressions {
   ) {
     try {
       let result = miscellaneous.jsonUnescapeParse(input);
-      this.writeUserFriendlyResult(result);
+      let resultHTML = answerProcessing.answerProcessing.htmlUserFriendlyResult(result);
+      this.resultUserFriendly.innerHTML = resultHTML;
+      this.writeCalculatorLink();
       this.resultBoxRaw.textContent = JSON.stringify(result);
       jsonToHtml.writeJSONtoDOMComponent(result, this.resultBoxFormatted);
       equationEditor.typeset(this.resultBoxFormatted);
@@ -124,44 +126,6 @@ class CompareExpressions {
       `CompareExpressionsJSON(${this.givenData},${this.desiredData})`,
     );
     this.calculatorLink.innerHTML = `<a href=${url} target="_blank">calculator link</a>`;
-  }
-
-  writeUserFriendlyResult(input) {
-    this.resultUserFriendly.innerHTML = "";
-    let result = input[pathnames.urlFields.result.result];
-    if (typeof result !== "object") {
-      return;
-    }
-    let syntaxErrors = result[pathnames.urlFields.result.syntaxErrors];
-    if (syntaxErrors === "") {
-      syntaxErrors = result[pathnames.urlFields.result.syntaxErrorsExtra];
-    }
-    if (syntaxErrors !== "" && syntaxErrors !== undefined && syntaxErrors !== null) {
-      this.resultUserFriendly.innerHTML = `<b style='color:red'>?</b><br>${syntaxErrors}`;
-      return;
-    }
-    this.writeCalculatorLink();
-    let comparison = result[pathnames.urlFields.result.comparison.comparison];
-    if (comparison === undefined) {
-      return;
-    }
-    let error = comparison[pathnames.urlFields.result.error];
-    if (error !== "" && error !== undefined && error !== null) {
-      this.resultUserFriendly.innerHTML = `<b style='color:red'>?</b><br>${error}`;
-      return;
-    }
-    let areEqual = comparison[pathnames.urlFields.result.comparison.areEqual];
-    if (areEqual !== true) {
-      this.resultUserFriendly.innerHTML = "<b style='color:red'>&cross;</b>";
-      return;
-    }
-    let areEqualAsAnswers = comparison[pathnames.urlFields.result.comparison.areEqualAsAnswers];
-    if (areEqualAsAnswers !== true) {
-      this.resultUserFriendly.innerHTML = "<b style='color:blue'>&#x2713;</b> [more work needed]";
-      return;
-    }
-    this.resultUserFriendly.innerHTML = "<b style='color:green'>&#x2713;</b>";
-    return;
   }
 }
 

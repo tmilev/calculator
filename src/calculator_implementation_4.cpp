@@ -19,12 +19,12 @@ Calculator::Calculator() {
   this->numOutputFileS = 0;
   this->flagHideLHS = false;
   this->flagUseHtml = true;
-  this->flagShowCalculatorExamples = true;
   this->flagWriteLatexPlots = true;
   this->flagUseLnInsteadOfLog = false;
   this->flagPlotShowJavascriptOnly = false;
   this->numberExpectedExpressionsAtInitialization = - 1;
-  this->flagUseScientificFunctions = true;
+  this->mode = Calculator::Mode::full;
+  this->examples.owner = this;
 }
 
 MemorySaving<Calculator>& GlobalVariables::calculator() {
@@ -84,6 +84,7 @@ int IntIdentity(const int& x) {
 
 bool Calculator::getVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory) {
   MacroRegisterFunctionWithName("Calculator::getVectorExpressions");
+  input.checkInitialization();
   output.reserve(input.size());
   output.setSize(0);
   if (!input.isSequenceNElements() && !input.startsWith(this->opIntervalOpen())) {
@@ -106,7 +107,9 @@ bool Calculator::getVectorExpressions(const Expression& input, List<Expression>&
   }
   targetDimNonMandatory = input.size() - 1;
   for (int i = 0; i < targetDimNonMandatory; i ++) {
-    output.addOnTop(input[i + 1]);
+    const Expression& current = input[i + 1];
+    current.checkInitialization();
+    output.addOnTop(current);
   }
   return true;
 }
@@ -164,7 +167,6 @@ bool Calculator::checkOperationHandlers() {
 bool Calculator::checkConsistencyAfterInitialization() {
   this->allChildExpressions.grandMasterConsistencyCheck();
   this->evaluatedExpressionsStack.grandMasterConsistencyCheck();
-  this->cachedExpressions.grandMasterConsistencyCheck();
   if (this->numberExpectedExpressionsAtInitialization < 0) {
     this->numberExpectedExpressionsAtInitialization = this->allChildExpressions.size;
   } else if (
@@ -180,20 +182,17 @@ bool Calculator::checkConsistencyAfterInitialization() {
     global.fatal << global.fatal;
   }
   if (
-    this->cachedExpressions.size != 0 ||
-    this->imagesCachedExpressions.size != 0 ||
+    this->cachedExpressions.size() != 0 ||
     this->evaluatedExpressionsStack.size != 0
   ) {
-    global.fatal << "Cached expressions, "
-    << "images cached expressions, expression stack and "
-    << "expression container are supposed to be empty, but "
+    global.fatal << "Cached expressions, evaluatedExpressionsStack "
+    << "are supposed to be empty, but "
     << "instead they contain respectively "
-    << this->cachedExpressions.size << ", "
-    << this->imagesCachedExpressions.size << ", and "
+    << this->cachedExpressions.size() << ", "
     << this->evaluatedExpressionsStack.size
     << " elements. " << global.fatal;
   }
-  return this->theObjectContainer.checkConsistencyAfterReset();
+  return this->objectContainer.checkConsistencyAfterReset();
 }
 
 bool Expression::checkInitializationRecursively() const {
@@ -213,7 +212,10 @@ bool Expression::checkInitialization() const {
   return true;
 }
 
-bool Expression::hasInputBoxVariables(HashedList<std::string, MathRoutines::hashString>* boxNames) const {
+bool Expression::hasInputBoxVariables(
+  HashedList<std::string, HashFunctions::hashFunction>* outputBoxNames,
+  HashedList<std::string, HashFunctions::hashFunction>* outputBoxNamesJavascript
+) const {
   MacroRegisterFunctionWithName("Expression::hasInputBoxVariables");
   if (this->owner == nullptr) {
     return false;
@@ -224,23 +226,24 @@ bool Expression::hasInputBoxVariables(HashedList<std::string, MathRoutines::hash
     << "Function hasInputBoxVariables has exceeded "
     << "recursion depth limit. " << global.fatal;
   }
-  bool result = false;
-  InputBox tempBox;
-  if (this->isOfType<InputBox>(&tempBox)) {
-    if (boxNames == nullptr) {
-      return true;
-    } else {
-      result = true;
-      boxNames->addOnTopNoRepetition(tempBox.name);
+  InputBox box;
+  if (this->isOfType<InputBox>(&box)) {
+    if (outputBoxNames != nullptr) {
+      outputBoxNames->addOnTopNoRepetition(box.name);
     }
+    if (outputBoxNamesJavascript != nullptr) {
+      outputBoxNamesJavascript->addOnTopNoRepetition(box.getSliderName());
+    }
+    return true;
   }
+  bool result = false;
   for (int i = 0; i < this->size(); i ++) {
-    if ((*this)[i].hasInputBoxVariables(boxNames)) {
-      if (boxNames == nullptr) {
+    if ((*this)[i].hasInputBoxVariables(outputBoxNames, outputBoxNamesJavascript)) {
+      if (outputBoxNames == nullptr && outputBoxNamesJavascript == nullptr) {
+        // We don't care for the names of all input boxes.
         return true;
-      } else {
-        result = true;
       }
+      result = true;
     }
   }
   return result;
@@ -447,6 +450,7 @@ bool CalculatorBasics::associateTimesDivision(Calculator& calculator, const Expr
 }
 
 bool CalculatorBasics::associate(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorBasics::associate");
   if (input.size() != 3) {
     return false;
   }
@@ -454,6 +458,7 @@ bool CalculatorBasics::associate(Calculator& calculator, const Expression& input
   if (!input[1].startsWith(operation) && !input[2].startsWith(operation)) {
     return false;
   }
+  // int64_t startTime = global.getElapsedMilliseconds();
   List<Expression> multiplicands;
   calculator.collectOpands(input, operation, multiplicands);
   Expression result;
@@ -475,8 +480,8 @@ bool CalculatorBasics::standardIsDenotedBy(Calculator& calculator, const Express
   const Expression& theNotation = input[1];
   calculator << "<br>Registering notation: globally, " << withNotation.toString() << " will be denoted by "
   << theNotation.toString();
-  calculator.theObjectContainer.expressionNotation.addOnTop(theNotation.toString());
-  calculator.theObjectContainer.expressionWithNotation.addOnTop(withNotation);
+  calculator.objectContainer.expressionNotation.addOnTop(theNotation.toString());
+  calculator.objectContainer.expressionWithNotation.addOnTop(withNotation);
   output = input;
   output.setChildAtomValue(0, calculator.opDefine());
   ////
@@ -562,8 +567,11 @@ bool CalculatorBasics::timesToFunctionApplication(Calculator& calculator, const 
     output = secondElt;
     return output.setChild(0, firstElt);
   }
-  output = input;
-  output.children.removeIndexShiftDown(0);
+  calculator.checkInputNotSameAsOutput(input, output);
+  output.reset(calculator);
+  for (int i = 1; i < input.size(); i ++) {
+    output.addChildOnTop(input[i]);
+  }
   return true;
 }
 
@@ -1211,7 +1219,7 @@ SemisimpleLieAlgebra* Expression::getAmbientSemisimpleLieAlgebraNonConstUseWithC
   if (indexSSalg == - 1) {
     return nullptr;
   }
-  return &this->owner->theObjectContainer.semisimpleLieAlgebras.values[indexSSalg];
+  return &this->owner->objectContainer.semisimpleLieAlgebras.values[indexSSalg];
 }
 
 Function& Calculator::getFunctionHandlerFromNamedRule(const std::string& inputNamedRule) {
@@ -1267,7 +1275,7 @@ Function::Function(
   const std::string& inputAdditionalIndentifier,
   const std::string& inputCalculatorIdentifier,
   const Options& inputOptions,
-  int inputIndexParentThatBansHandler
+  const List<int>& inputParentsThatBanHandler
 ) {
   this->owner = nullptr;
   if (&this->options == &inputOptions) {
@@ -1277,15 +1285,15 @@ Function::Function(
   this->reset(inputOwner);
   this->indexOperation = inputIndexOperation;
   this->options = inputOptions;
-  this->theFunction = functionPointer;
+  this->functionAddress = functionPointer;
   this->theDescription = description;
   this->theExample = inputExample;
   this->additionalIdentifier = inputAdditionalIndentifier;
   this->calculatorIdentifier = inputCalculatorIdentifier;
   if (inputArgTypes != nullptr) {
-    this->theArgumentTypes = *inputArgTypes;
+    this->argumentTypes = *inputArgTypes;
   }
-  this->indexOperationParentThatBansHandler = inputIndexParentThatBansHandler;
+  this->parentsThatBanHandler = inputParentsThatBanHandler;
 }
 
 void Calculator::addOperationBinaryInnerHandlerWithTypes(
@@ -1304,6 +1312,7 @@ void Calculator::addOperationBinaryInnerHandlerWithTypes(
     indexOperation = this->operations.size();
     this->operations.getValueCreate(operation);
   }
+  List<int> empty;
   Function innerFunction(
     *this,
     indexOperation,
@@ -1314,11 +1323,11 @@ void Calculator::addOperationBinaryInnerHandlerWithTypes(
     inputAdditionalIdentifier,
     inputCalculatorIdentifier,
     options,
-    - 1
+    empty
   );
-  innerFunction.theArgumentTypes.reset(*this, 2);
-  innerFunction.theArgumentTypes.addChildAtomOnTop(leftType);
-  innerFunction.theArgumentTypes.addChildAtomOnTop(rightType);
+  innerFunction.argumentTypes.reset(*this, 2);
+  innerFunction.argumentTypes.addChildAtomOnTop(leftType);
+  innerFunction.argumentTypes.addChildAtomOnTop(rightType);
   this->registerCalculatorFunction(innerFunction, indexOperation);
 }
 
@@ -1370,20 +1379,26 @@ void Calculator::addOperationHandler(
   const std::string& inputAdditionalIdentifier,
   const std::string& inputCalculatorIdentifier,
   const Function::Options& options,
-  const std::string& parentOpThatBansHandler
+  const List<std::string>* parentsThatBanHandler
 ) {
   if (opArgumentListIgnoredForTheTimeBeing != "") {
     global.fatal << "This section of code is not implemented yet. Crashing to let you know. " << global.fatal;
   }
-  int indexOp = this->operations.getIndex(operation);
-  if (indexOp == - 1) {
-    indexOp = this->operations.size();
+  int indexOperation = this->operations.getIndex(operation);
+  if (indexOperation == - 1) {
+    indexOperation = this->operations.size();
     this->operations.getValueCreate(operation);
   }
-  int indexParentOpThatBansHandler = this->operations.getIndex(parentOpThatBansHandler);
-  Function theFun(
+  List<int> parentOperationsThatBanHandler;
+  if (parentsThatBanHandler != nullptr) {
+    for (int i = 0; i < parentsThatBanHandler->size; i ++) {
+      int atom = this->operations.getIndexNoFail((*parentsThatBanHandler)[i]);
+      parentOperationsThatBanHandler.addOnTop(atom);
+    }
+  }
+  Function functionWrapper(
     *this,
-    indexOp,
+    indexOperation,
     handler,
     nullptr,
     opDescription,
@@ -1391,15 +1406,15 @@ void Calculator::addOperationHandler(
     inputAdditionalIdentifier,
     inputCalculatorIdentifier,
     options,
-    indexParentOpThatBansHandler
+    parentOperationsThatBanHandler
   );
-  if (theFun.theFunction == nullptr || theFun.owner == nullptr) {
+  if (functionWrapper.functionAddress == nullptr || functionWrapper.owner == nullptr) {
     global.fatal << "Function not initialized properly. " << global.fatal;
   }
-  this->registerCalculatorFunction(theFun, indexOp);
+  this->registerCalculatorFunction(functionWrapper, indexOperation);
 }
 
-Function::Options Function::Options::innerAdminNoTestInvisibleOffByDefault() {
+Function::Options Function::Options::adminNoTestInvisibleOffByDefault() {
   Function::Options result;
   result.flagIsInner = true;
   result.dontTestAutomatically = true;
@@ -1410,12 +1425,40 @@ Function::Options Function::Options::innerAdminNoTestInvisibleOffByDefault() {
   return result;
 }
 
+Function::Options Function::Options::compositeStandard() {
+  Function::Options result;
+  result.flagIsCompositeHandler = true;
+  result.flagIsInner = true;
+  return result;
+}
+
+Function::Options Function::Options::innerFreezesArguments() {
+  Function::Options result;
+  result.flagIsInner = true;
+  result.freezesArguments = true;
+  return result;
+}
 
 Function::Options Function::Options::innerAdminNoTest() {
   Function::Options result;
   result.flagIsInner = true;
   result.dontTestAutomatically = true;
   result.adminOnly = true;
+  return result;
+}
+
+Function::Options Function::Options::administrativeExperimentalTested() {
+  Function::Options result;
+  result.flagIsExperimental = true;
+  result.adminOnly = true;
+  result.dontTestAutomatically = false;
+  return result;
+}
+
+Function::Options Function::Options::administrativeTested() {
+  Function::Options result;
+  result.adminOnly = true;
+  result.dontTestAutomatically = false;
   return result;
 }
 
@@ -1460,6 +1503,23 @@ Function::Options Function::Options::innerNoTest() {
   return result;
 }
 
+Function::Options Function::Options::innerNoTestExperimental() {
+  Function::Options result;
+  result.flagIsInner = true;
+  result.dontTestAutomatically = true;
+  result.flagIsExperimental = true;
+  return result;
+}
+
+Function::Options Function::Options::invisibleExperimentalNoTest() {
+  Function::Options result;
+  result.flagIsInner = true;
+  result.flagIsExperimental = true;
+  result.dontTestAutomatically = true;
+  result.visible = false;
+  return result;
+}
+
 Function::Options Function::Options::outerOffByDefault() {
   Function::Options result;
   result.flagIsInner = false;
@@ -1484,6 +1544,15 @@ Function::Options Function::Options::adminNoTest() {
   return result;
 }
 
+Function::Options Function::Options::adminNoTestInvisibleExperimental() {
+  Function::Options result;
+  result.flagIsInner = true;
+  result.dontTestAutomatically = true;
+  result.adminOnly = true;
+  result.visible = false;
+  return result;
+}
+
 void Function::Options::reset() {
   this->flagIsCompositeHandler    = false;
   this->flagIsInner               = true ;
@@ -1505,14 +1574,14 @@ bool Function::inputFitsMyInnerType(const Expression& input) {
   if (!this->options.flagIsInner) {
     return false;
   }
-  if (this->theArgumentTypes.children.size != 2) {
+  if (this->argumentTypes.size() != 2) {
     return true;
   }
-  if (input.children.size != 3) {
+  if (input.size() != 3) {
     return false;
   }
-  bool argument1Good = this->theArgumentTypes[0].data == - 1 ? true : input[1].isListStartingWithAtom(this->theArgumentTypes[0].data);
-  bool argument2Good = this->theArgumentTypes[1].data == - 1 ? true : input[2].isListStartingWithAtom(this->theArgumentTypes[1].data);
+  bool argument1Good = this->argumentTypes[0].data == - 1 ? true : input[1].isListStartingWithAtom(this->argumentTypes[0].data);
+  bool argument2Good = this->argumentTypes[1].data == - 1 ? true : input[2].isListStartingWithAtom(this->argumentTypes[1].data);
   return argument1Good && argument2Good;
 }
 
@@ -1550,15 +1619,11 @@ std::string Function::toStringSummary() const {
   return out.str();
 }
 
-bool Function::shouldBeApplied(int parentOpIfAvailable) {
+bool Function::shouldBeApplied(int parentOperationIfAvailable) {
   if (this->options.disabledByUser) {
     return false;
   }
-  bool parentIsGood = true;
-  if (parentOpIfAvailable >= 0 && this->indexOperationParentThatBansHandler >= 0) {
-    parentIsGood = (this->indexOperationParentThatBansHandler != parentOpIfAvailable);
-  }
-  if (!parentIsGood) {
+  if (this->parentsThatBanHandler.contains(parentOperationIfAvailable)) {
     return false;
   }
   if (this->options.adminOnly) {
@@ -1579,25 +1644,30 @@ JSData Function::toJSON() const {
     return result;
   }
   if (this->options.visible) {
-    result["visible"] = "true";
+    result["visible"] = true;
   } else {
-    result["visible"] = "false";
+    result["visible"] = false;
   }
   Calculator::OperationHandlers& operationHandlers = this->owner->operations.values[this->indexOperation].getElement();
   result["number"] = this->indexInOperationHandlers + 1;
   if (this->options.flagIsCompositeHandler) {
-    result["composite"] = "true";
+    result["composite"] = true;
     result["total"] = operationHandlers.compositeHandlers.size;
     result["atom"] = this->owner->operations.keys[this->indexOperation];
   } else {
-    result["composite"] = "false";
+    result["composite"] = false;
     result["total"] = operationHandlers.handlers.size;
     result["atom"] = this->owner->operations.keys[this->indexOperation];
   }
   if (this->options.flagIsExperimental) {
-    result["experimental"] = "true";
+    result["experimental"] = true;
   } else {
-    result["experimental"] = "false";
+    result["experimental"] = false;
+  }
+  if (this->options.adminOnly) {
+    result["administrative"] = true;
+  } else {
+    result["administrative"] = false;
   }
   result["description"] = this->theDescription;
   if (this->calculatorIdentifier != "") {
@@ -1607,12 +1677,12 @@ JSData Function::toJSON() const {
     result["additionalIdentifier"] = this->additionalIdentifier;
   }
   std::stringstream functionAddress;
-  functionAddress << std::hex << reinterpret_cast<unsigned long>(this->theFunction);
+  functionAddress << std::hex << reinterpret_cast<unsigned long>(this->functionAddress);
   result["memoryAddress"] = functionAddress.str();
   if (this->options.flagIsInner) {
-    result["inner"] = "true";
+    result["inner"] = true;
   } else {
-    result["inner"] = "false";
+    result["inner"] = false;
   }
   if (this->theExample != "") {
     result["example"] = this->theExample;
@@ -1641,7 +1711,7 @@ std::string Function::toStringFull() const {
     // use of unsigned long is correct on i386 and amd64
     // uintptr_t is only available in c++ 0x
     // Please fix if the following code is not portable:
-    out << "Function memory address: " << std::hex << reinterpret_cast<unsigned long>(this->theFunction) << ". ";
+    out << "Function memory address: " << std::hex << reinterpret_cast<unsigned long>(this->functionAddress) << ". ";
     if (!this->options.flagIsInner) {
       out << "This is a <b>``law''</b> - substitution takes place only if output expression is different from input. ";
     }
@@ -1672,13 +1742,13 @@ std::string ObjectContainer::toString() {
       }
     }
   }
-  if (this->theSSSubalgebraS.values.size > 0) {
+  if (this->semisimpleSubalgebras.values.size > 0) {
     out << "<br>Lie semisimple subalgebras computation data structures ("
-    << this->theSSSubalgebraS.values.size << " total): ";
-    for (int i = 0; i < this->theSSSubalgebraS.values.size; i ++) {
-      out << " Type " << this->theSSSubalgebraS.values[i].owner->toStringLieAlgebraName() << " with "
-      << this->theSSSubalgebraS.values[i].theSubalgebras.values.size << " candidates";
-      if (i != this->theSSSubalgebraS.values.size - 1) {
+    << this->semisimpleSubalgebras.values.size << " total): ";
+    for (int i = 0; i < this->semisimpleSubalgebras.values.size; i ++) {
+      out << " Type " << this->semisimpleSubalgebras.values[i].owner->toStringLieAlgebraName() << " with "
+      << this->semisimpleSubalgebras.values[i].subalgebras.values.size << " candidates";
+      if (i != this->semisimpleSubalgebras.values.size - 1) {
         out << ", ";
       }
     }
@@ -1764,10 +1834,12 @@ JSData Calculator::toJSONPerformance() {
   << waitingMilliseconds << " ms (~"
   << (static_cast<double>(waitingMilliseconds) / 1000)
   << " s).";
+  moreDetails << "<br>Runs of evaluation loop: " << this->statistics.totalEvaluationLoops << ". ";
   moreDetails << "<br>Expressions generated: " << this->allChildExpressions.size << ". ";
+  moreDetails << "<br>Cached expression at last rule stack: " << this->cachedExpressions.size() << ". ";
   moreDetails << "<br>Expressions evaluated: " << this->statistics.expressionsEvaluated << ". ";
   moreDetails << "<br>Total number of pattern matches performed: "
-  << this->totalPatternMatchesPerformed << "";
+  << this->statistics.totalPatternMatchesPerformed << "";
   if (this->depthRecursionReached > 0) {
     moreDetails << "<br>maximum recursion depth reached: " << this->depthRecursionReached << ".";
   }
@@ -1775,11 +1847,11 @@ JSData Calculator::toJSONPerformance() {
   << (GlobalStatistics::numListsCreated - static_cast<unsigned>(this->statistics.numberOfListsStart))
   << ", total: " << GlobalStatistics::numListsCreated;
   moreDetails << "<br> # List resizes: computation: "
-  << (GlobalStatistics::numListResizesTotal - static_cast<unsigned>(this->statistics.numberListResizesStart))
-  << ", total: " << GlobalStatistics::numListResizesTotal
+  << (GlobalStatistics::numberOfListResizesTotal - static_cast<unsigned>(this->statistics.numberListResizesStart))
+  << ", total: " << GlobalStatistics::numberOfListResizesTotal
   << "<br> # hash resizing: computation: "
-  << (GlobalStatistics::numHashResizes - static_cast<unsigned>(this->statistics.numberHashResizesStart))
-  << ", total: " << GlobalStatistics::numHashResizes;
+  << (GlobalStatistics::numberOfHashResizes - static_cast<unsigned>(this->statistics.numberHashResizesStart))
+  << ", total: " << GlobalStatistics::numberOfHashResizes;
   if (Rational::totalSmallAdditions > 0) {
     moreDetails << "<br>Small rational additions: computation: "
     << Rational::totalSmallAdditions - static_cast<unsigned long long>(this->statistics.numberOfSmallAdditionsStart)
@@ -1821,7 +1893,7 @@ JSData Calculator::toJSONPerformance() {
 std::string Calculator::toString() {
   MacroRegisterFunctionWithName("Calculator::toString");
   std::stringstream out2;
-  std::string openTag1 = "<span style =\"color:blue\">";
+  std::string openTag1 = "<span style='color:blue'>";
   std::string closeTag1 = "</span>";
   if (global.millisecondsMaxComputation > 0) {
     out2 << "Computation time limit: "
@@ -1830,11 +1902,11 @@ std::string Calculator::toString() {
   } else {
     out2 << "No computation time limit.<hr> ";
   }
-  if (this->ruleStack.children.size > 1) {
+  if (this->ruleStack.size() > 1) {
     out2 << "<b>Predefined rules.</b><br>";
-    for (int i = 1; i < this->ruleStack.children.size; i ++) {
+    for (int i = 1; i < this->ruleStack.size(); i ++) {
       out2 << this->ruleStack[i].toString();
-      if (i != this->ruleStack.children.size - 1) {
+      if (i != this->ruleStack.size() - 1) {
         out2 << "<br>";
       }
     }
@@ -1848,7 +1920,7 @@ std::string Calculator::toString() {
   << "<br><b>Object container information</b>. "
   << "The object container is the data "
   << "structure storing all c++ built-in data types "
-  << "requested by the user<br> " << this->theObjectContainer.toString();
+  << "requested by the user<br> " << this->objectContainer.toString();
   out << "<hr>Control sequences (" << this->controlSequences.size
   << " total):\n<br>\n";
   for (int i = 0; i < this->controlSequences.size; i ++) {
@@ -1877,15 +1949,15 @@ std::string Calculator::toString() {
     out << this->allChildExpressions[i].toString() << ", ";
   }
   out << "<hr>";
-  out << "\n Cached expressions (" << this->cachedExpressions.size << " total):\n<br>\n";
-  numExpressionsToDisplay = this->cachedExpressions.size;
+  out << "\n Cached expressions (" << this->cachedExpressions.size() << " total):\n<br>\n";
+  numExpressionsToDisplay = this->cachedExpressions.size();
   if (numExpressionsToDisplay > 1000) {
     numExpressionsToDisplay = 1000;
     out << "<b>Displaying first " << numExpressionsToDisplay << " expressions only. </b><br>";
   }
   for (int i = 0; i < numExpressionsToDisplay; i ++) {
-    out << this->cachedExpressions[i].toString() << " -> " << this->imagesCachedExpressions[i].toString();
-    if (i != this->cachedExpressions.size - 1) {
+    out << this->cachedExpressions.keys[i].toString() << " -> " << this->cachedExpressions.values[i].reducesTo.toString();
+    if (i != this->cachedExpressions.size() - 1) {
       out << "<br>";
     }
   }
@@ -1894,7 +1966,10 @@ std::string Calculator::toString() {
 }
 
 std::string Calculator::toStringSyntacticStackHTMLSimple() {
-  MacroRegisterFunctionWithName("Calculator::toStringSyntacticStackHTMLTable");
+  MacroRegisterFunctionWithName("Calculator::toStringSyntacticStackHTMLSimple");
+  if (this->currentSyntacticStack->size == 0) {
+    global.fatal << "Unexpected empty syntactic stack." << global.fatal;
+  }
   std::stringstream out;
   bool isBad = ((*this->currentSyntacticStack).size > this->numEmptyTokensStart + 1);
   SyntacticElement& lastSyntacticElt = *(*this->currentSyntacticStack).lastObject();
@@ -1963,7 +2038,7 @@ std::string Calculator::toStringSyntacticStackHTMLTable(
 
 SemisimpleSubalgebras& ObjectContainer::getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input) {
   MacroRegisterFunctionWithName("ObjectContainer::getSemisimpleSubalgebrasCreateIfNotPresent");
-  SemisimpleSubalgebras& currentSAs = this->theSSSubalgebraS.getValueCreateNoInit(input);
+  SemisimpleSubalgebras& currentSAs = this->semisimpleSubalgebras.getValueCreateNoInit(input);
   return currentSAs;
 }
 
@@ -1973,41 +2048,33 @@ SemisimpleLieAlgebra& ObjectContainer::getLieAlgebraCreateIfNotPresent(const Dyn
   if (!this->semisimpleLieAlgebras.contains(input)) {
     needToInit = true;
   }
-  SemisimpleLieAlgebra& theLA = this->semisimpleLieAlgebras.getValueCreateNoInit(input);
+  SemisimpleLieAlgebra& lieAlgebra = this->semisimpleLieAlgebras.getValueCreateNoInit(input);
   if (needToInit) {
-    this->semisimpleLieAlgebraPointers.addOnTop(&theLA);
-    theLA.theWeyl.makeFromDynkinType(input);
+    lieAlgebra.weylGroup.makeFromDynkinType(input);
   }
-  return theLA;
+  return lieAlgebra;
 }
 
 WeylGroupData& ObjectContainer::getWeylGroupDataCreateIfNotPresent(const DynkinType& input) {
   MacroRegisterFunctionWithName("ObjectContainer::getWeylGroupDataCreateIfNotPresent");
-  return this->getLieAlgebraCreateIfNotPresent(input).theWeyl;
+  return this->getLieAlgebraCreateIfNotPresent(input).weylGroup;
 }
 
 std::string ObjectContainer::toStringJavascriptForUserInputBoxes() {
-  std::stringstream out;
-  out << "<script>\n";
-  out << "window.calculator.calculator.inputBoxNames = [";
-  for (int i = 0; i < this->theUserInputTextBoxesWithValues.size(); i ++) {
-    InputBox& currentBox = this->theUserInputTextBoxesWithValues.values[i];
-    out << "'" << currentBox.name << "'";
-    if (i != this->theUserInputTextBoxesWithValues.size() - 1) {
-      out << ", ";
-    }
+  JSData inputBoxes;
+  JSData inputBoxNames = JSData::makeEmptyArray();
+  JSData inputBoxToSliderUpdaters;
+  for (int i = 0; i < this->userInputTextBoxesWithValues.size(); i ++) {
+    InputBox& currentBox = this->userInputTextBoxesWithValues.values[i];
+    inputBoxNames[i] = currentBox.name;
   }
-  out << "];\n";
-  out << "window.calculator.calculator.inputBoxToSliderUpdaters = {};";
-  for (int i = 0; i < this->theUserInputTextBoxesWithValues.size(); i ++) {
-    InputBox& currentBox = this->theUserInputTextBoxesWithValues.values[i];
-    out << "window.calculator.calculator.inputBoxToSliderUpdaters['"
-    << currentBox.name << "'] ='"
-    << currentBox.getSliderName() << "';\n";
+  for (int i = 0; i < this->userInputTextBoxesWithValues.size(); i ++) {
+    InputBox& currentBox = this->userInputTextBoxesWithValues.values[i];
+    inputBoxToSliderUpdaters[currentBox.name] = currentBox.getSliderName();
   }
-  //out << "console.log(window.calculator.calculator.inputBoxNames);\n ";
-  out << "</script>";
-  return out.str();
+  inputBoxes["inputBoxNames"] = inputBoxNames;
+  inputBoxes["inputBoxToSliderUpdaters"] = inputBoxToSliderUpdaters;
+  return HtmlRoutines::scriptFromJSON("userInputBoxes", inputBoxes);
 }
 
 void ObjectContainer::resetPlots() {
@@ -2018,7 +2085,7 @@ void ObjectContainer::resetPlots() {
 }
 
 void ObjectContainer::resetSliders() {
-  this->userInputBoxSliderDisplayed.initializeFillInObject(this->theUserInputTextBoxesWithValues.size(), false);
+  this->userInputBoxSliderDisplayed.initializeFillInObject(this->userInputTextBoxesWithValues.size(), false);
 }
 
 bool ObjectContainer::checkConsistencyAfterReset() {
@@ -2031,13 +2098,13 @@ bool ObjectContainer::checkConsistencyAfterReset() {
     global.fatal << "theSSLieAlgebras expected to be empty, got "
     << this->semisimpleLieAlgebras.size() << " elements. " << global.fatal;
   }
-  if (this->theWeylGroupReps.size != 0) {
+  if (this->weylGroupRepresentations.size != 0) {
     global.fatal << "theWeylGroupReps expected to be empty, got "
-    << this->theWeylGroupReps.size << " elements. " << global.fatal;
+    << this->weylGroupRepresentations.size << " elements. " << global.fatal;
   }
-  if (this->theWeylGroupVirtualReps.size != 0) {
+  if (this->weylGroupVirtualRepresentations.size != 0) {
     global.fatal << "theWeylGroupVirtualReps expected to be empty, got "
-    << this->theWeylGroupVirtualReps.size << " elements. " << global.fatal;
+    << this->weylGroupVirtualRepresentations.size << " elements. " << global.fatal;
   }
   if (this->polynomialsRational.size != 0) {
     global.fatal << "The rational polynomials are expected to be empty, have: " << this->polynomialsRational.size << " elements instead. " << global.fatal;
@@ -2057,12 +2124,12 @@ bool ObjectContainer::checkConsistencyAfterReset() {
 void ObjectContainer::reset() {
   MacroRegisterFunctionWithName("ObjectContainer::reset");
   this->theWeylGroupElements.clear();
-  this->theWeylGroupReps.clear();
-  this->theWeylGroupVirtualReps.clear();
+  this->weylGroupRepresentations.clear();
+  this->weylGroupVirtualRepresentations.clear();
   this->theCategoryOmodules.setSize(0);
   this->semisimpleLieAlgebras.clear();
   this->semisimpleLieAlgebraPointers.clear();
-  this->theSSSubalgebraS.clear();
+  this->semisimpleSubalgebras.clear();
   this->theTensorElts.clear();
   this->polynomialsRational.clear();
   this->polynomialsAlgebraic.clear();
@@ -2081,8 +2148,8 @@ void ObjectContainer::reset() {
   this->expressionNotation.clear();
   this->expressionWithNotation.clear();
   this->constraints.clear();
-  this->theLSpaths.clear();
-  this->theMatTensorRats.clear();
+  this->lakshmibaiSeshadriPaths.clear();
+  this->matrixTensorRationals.clear();
   this->theEltsModP.clear();
   this->thePlots.setSize(0);
   this->theAlgebraicClosure.reset();
@@ -2094,7 +2161,7 @@ void ObjectContainer::reset() {
   this->theHyperOctahedralGroups.setSize(0);
   this->theElementsHyperOctGroup.clear();
   this->pseudoRandom.setRandomSeedSmall(static_cast<uint32_t>(time(nullptr)));
-  this->theUserInputTextBoxesWithValues.clear();
+  this->userInputTextBoxesWithValues.clear();
   this->graphicsScripts.clear();
   this->ellipticCurveElementsZmodP.clear();
   this->ellipticCurveElementsRational.clear();
@@ -2222,7 +2289,7 @@ bool CalculatorBasics::meltBrackets(Calculator& calculator, const Expression& in
   int tempInt;
   int childIncrease = 0;
   bool found = false;
-  for (int i = 0; i < input.children.size; i ++) {
+  for (int i = 0; i < input.size(); i ++) {
     const Expression& currentChild = input[i];
     if (currentChild.isMeltable(&tempInt)) {
       found = true;
@@ -2232,9 +2299,9 @@ bool CalculatorBasics::meltBrackets(Calculator& calculator, const Expression& in
   if (!found) {
     return false;
   }
-  output.reset(calculator, input.children.size + childIncrease);
+  output.reset(calculator, input.size() + childIncrease);
   output.addChildAtomOnTop(calculator.opCommandSequence());
-  for (int i = 1; i < input.children.size; i ++) {
+  for (int i = 1; i < input.size(); i ++) {
     const Expression& currentChild = input[i];
     if (!currentChild.isMeltable()) {
       output.addChildOnTop(input[i]);
@@ -2244,7 +2311,7 @@ bool CalculatorBasics::meltBrackets(Calculator& calculator, const Expression& in
       output.addChildOnTop(currentChild[1]);
       continue;
     }
-    for (int j = 1; j < currentChild[1].children.size; j ++) {
+    for (int j = 1; j < currentChild[1].size(); j ++) {
       output.addChildOnTop(currentChild[1][j]);
     }
   }

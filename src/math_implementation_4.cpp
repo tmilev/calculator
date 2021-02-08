@@ -129,7 +129,7 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
   JSData output;
   output[WebAPI::result::crashReport] = this->crashReportHtml.str();
   output[WebAPI::result::comments] = global.comments.getCurrentReset();
-  global.theResponse.writeResponse(output, true);
+  global.response.writeResponse(output, true);
   assert(false);
   return *this;
 }
@@ -488,7 +488,7 @@ std::string GlobalVariables::getWebInput(const std::string& inputName) {
 
 void GlobalVariables::makeReport() {
   MacroRegisterFunctionWithName("GlobalVariables::makeReport");
-  if (!global.theResponse.monitoringAllowed()) {
+  if (!global.response.monitoringAllowed()) {
     return;
   }
   std::string reportString;
@@ -497,7 +497,7 @@ void GlobalVariables::makeReport() {
   } else {
     reportString = this->toStringProgressReportNoThreadData(true);
   }
-  this->theResponse.report(reportString);
+  this->response.report(reportString);
 }
 
 void GlobalVariables::initOutputReportAndCrashFileNames(
@@ -825,7 +825,7 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
     }
   }
   // so far we made sure the entire component is one properly ordered string, starting with the long root.
-  if (outputType.theLetter == 'G' || outputType.theLetter == 'C' ) {
+  if (outputType.letter == 'G' || outputType.letter == 'C' ) {
     currentComponent.reverseElements(); // <-in G_2 and C_n the short root comes first so we need to reverse elements.
   }
 }
@@ -937,7 +937,7 @@ Rational DynkinDiagramRootSubalgebra::getSizeCorrespondingWeylGroupByFormula() {
   Rational output = 1;
   for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
     output *= WeylGroupData::sizeByFormulaOrNegative1(
-      this->simpleComponentTypes[i].theLetter, this->simpleComponentTypes[i].theRank
+      this->simpleComponentTypes[i].letter, this->simpleComponentTypes[i].rank
     );
   }
   return output;
@@ -1027,11 +1027,11 @@ void DynkinDiagramRootSubalgebra::getAutomorphism(List<List<int> >& output, int 
     thePermutation[i] = i;
   }
   output.addOnTop(thePermutation);
-  if (currentStrinG.theLetter == 'A' && currentComponent.size != 1) {
+  if (currentStrinG.letter == 'A' && currentComponent.size != 1) {
     thePermutation.reverseElements();
     output.addOnTop(thePermutation);
   }
-  if (currentStrinG.theLetter == 'D') {
+  if (currentStrinG.letter == 'D') {
     if (currentComponent.size == 4) {
      //the automorphism group of the Dynkin Diagram is S3
       thePermutation[1] = 2;
@@ -1060,7 +1060,7 @@ void DynkinDiagramRootSubalgebra::getAutomorphism(List<List<int> >& output, int 
       output.addOnTop(thePermutation);
     }
   }
-  if (currentStrinG.theLetter == 'E' && currentStrinG.theRank == 6) {
+  if (currentStrinG.letter == 'E' && currentStrinG.rank == 6) {
     thePermutation[1] = 3;
     thePermutation[2] = 4;
     thePermutation[3] = 1;
@@ -1091,16 +1091,16 @@ int DynkinDiagramRootSubalgebra::numberRootsGeneratedByDiagram() {
   }
   for (int i = 0; i < this->simpleComponentTypes.size; i ++) {
     int Rank = this->simpleBasesConnectedComponents[i].size;
-    if (this->simpleComponentTypes[i].theLetter == 'A') {
+    if (this->simpleComponentTypes[i].letter == 'A') {
       result += Rank * (Rank + 1);
     }
-    if (this->simpleComponentTypes[i].theLetter == 'B' || this->simpleComponentTypes[i].theLetter == 'C') {
+    if (this->simpleComponentTypes[i].letter == 'B' || this->simpleComponentTypes[i].letter == 'C') {
       result += Rank * Rank * 2;
     }
-    if (this->simpleComponentTypes[i].theLetter == 'D') {
+    if (this->simpleComponentTypes[i].letter == 'D') {
       result += Rank * (Rank - 1) * 2;
     }
-    if (this->simpleComponentTypes[i].theLetter == 'E') {
+    if (this->simpleComponentTypes[i].letter == 'E') {
       if (Rank == 6) {
         result += 72;
       }
@@ -1111,10 +1111,10 @@ int DynkinDiagramRootSubalgebra::numberRootsGeneratedByDiagram() {
         result += 240;
       }
     }
-    if (this->simpleComponentTypes[i].theLetter == 'F') {
+    if (this->simpleComponentTypes[i].letter == 'F') {
       result += 48;
     }
-    if (this->simpleComponentTypes[i].theLetter == 'G') {
+    if (this->simpleComponentTypes[i].letter == 'G') {
       result += 12;
     }
   }
@@ -1428,8 +1428,8 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords, Vector<Rational>& parabolicSel
 ) {
   std::stringstream out;
-  WeylGroupData& LargerWeyl = this->theHmm.theRange().theWeyl;
-  WeylGroupData& SmallerWeyl = this->theHmm.theDomain().theWeyl;
+  WeylGroupData& LargerWeyl = this->theHmm.theRange().weylGroup;
+  WeylGroupData& SmallerWeyl = this->theHmm.theDomain().weylGroup;
   if (!LargerWeyl.isOfSimpleType('B', 3)) {
     return "Error: algebra is not so(7).";
   }
@@ -1506,7 +1506,7 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
     Accum += theSubbedPoly;
   }
   Accum.drawMe(drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged);
-  out << drawOps.getHTMLDiv(2);
+  out << drawOps.getHTMLDiv(2, false);
   out << Accum.toString(false, true);
   return out.str();
 }
@@ -1630,9 +1630,9 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
 ) {
   MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::initFromHomomorphism");
   Vectors<Rational> tempRoots;
-  this->weylLarger = &input.theRange().theWeyl;
-  this->weylSmaller = &input.theDomain().theWeyl;
-  WeylGroupData& theWeYl = input.theRange().theWeyl;
+  this->weylLarger = &input.theRange().weylGroup;
+  this->weylSmaller = &input.theDomain().weylGroup;
+  WeylGroupData& theWeYl = input.theRange().weylGroup;
 //  input.projectOntoSmallCartan(theWeyl.RootsOfBorel, tempRoots);
   this->log << "projections: " << tempRoots.toString();
   theWeYl.theGroup.computeAllElements(false);
@@ -1648,7 +1648,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   input.getWeightsGmodKInSimpleCoordinatesK(this->GmodKnegativeWeightS);
 //  this->log << "weights of g mod k: " << this->GmodKnegativeWeights.toString();
   Matrix<Rational> tempMat;
-  tempMat = input.theDomain().theWeyl.cartanSymmetric;
+  tempMat = input.theDomain().weylGroup.cartanSymmetric;
   tempMat.invert();
 //  tempMat.actOnVectorsColumn(this->GmodKnegativeWeightS);
   this->log << this->GmodKnegativeWeightS.toString();
@@ -1762,11 +1762,11 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   }
   Matrix<Polynomial<Rational> > tempMatPoly;
   Vector<Polynomial<Rational> > tempVect, tempVect2;
-  tempVect.setSize(input.theDomain().theWeyl.getDimension() + input.theRange().theWeyl.getDimension());
+  tempVect.setSize(input.theDomain().weylGroup.getDimension() + input.theRange().weylGroup.getDimension());
   for (int i = 0; i < tempVect.size; i ++) {
     tempVect[i].makeMonomial(i, 1, Rational(1));
   }
-  tempMatPoly.initialize(input.theDomain().theWeyl.getDimension(), tempVect.size);
+  tempMatPoly.initialize(input.theDomain().weylGroup.getDimension(), tempVect.size);
   Polynomial<Rational> polyZero;
   polyZero.makeZero();
   theFormat.polynomialAlphabet.setSize(5);
@@ -1835,13 +1835,13 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     }
     this->PreimageWeylChamberLargerAlgebra.normals[i] = tempRoot;
   }
-  tempMat = input.theDomain().theWeyl.cartanSymmetric;
+  tempMat = input.theDomain().weylGroup.cartanSymmetric;
   tempMat.invert();
   tempRoots.size = 0;
   Vector<Rational> ParabolicEvaluationRootSmallerAlgebra;
   ParabolicEvaluationRootSmallerAlgebra = this->ParabolicSelectionSmallerAlgebra;
   for (int i = 0; i < tempMat.numberOfRows; i ++) {
-    input.theDomain().theWeyl.cartanSymmetric.getVectorFromRow(i, tempRoot);
+    input.theDomain().weylGroup.cartanSymmetric.getVectorFromRow(i, tempRoot);
     if (tempRoot.scalarEuclidean(ParabolicEvaluationRootSmallerAlgebra).isEqualToZero()) {
       tempRoots.setSize(tempRoots.size + 1);
       tempMat.getVectorFromRow(i, *tempRoots.lastObject());

@@ -28,7 +28,7 @@ public:
   std::string lastTransactionErrors;
   std::string lastTransaction;
   std::string headerReceived;
-  std::string bodyReceiveD;
+  std::string bodyReceived;
   std::string bodyReceivedWithHeader;
   std::string bodyReceivedOutsideOfExpectedLength;
 
@@ -39,11 +39,12 @@ public:
   List<char> buffer;
   int lastNumBytesRead;
   struct sockaddr_in serverAddress;
-  struct hostent *serverOtherSide;
+  struct hostent* serverOtherSide;
   struct addrinfo hints;
-  struct addrinfo *serverInfo;
+  struct addrinfo* serverInfo;
   WebCrawler();
   ~WebCrawler();
+  void closeEverything();
   void updatePublicKeys(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void fetchWebPagePart2(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void initialize();
@@ -209,6 +210,10 @@ void WebCrawler::initialize() {
 }
 
 WebCrawler::~WebCrawler() {
+  this->closeEverything();
+}
+
+void WebCrawler::closeEverything() {
   if (!this->flagInitialized) {
     return;
   }
@@ -297,7 +302,6 @@ void WebCrawler::pingCalculatorStatus(const std::string& pingAuthentication) {
     if (connectionResult == - 1) {
       reportStream << "<br>Failed to connect: address: " << this->addressToConnectTo << " port: "
       << this->portOrService << ". ";
-//      << explain_errno_connect(this->theSocket, this->serverInfo->ai_addr, this->serverInfo->ai_addrlen);
       this->lastTransactionErrors = reportStream.str();
       close(this->theSocket);
       continue;
@@ -443,7 +447,7 @@ void WebCrawler::fetchWebPage(std::stringstream* commentsOnFailure, std::strings
       }
     }
     this->fetchWebPagePart2(commentsOnFailure, commentsGeneral);
-    global.server().theTLS.removeLastSocket();
+    this->theTSL.removeLastSocket();
     close(this->theSocket);
     break;
   }
@@ -479,7 +483,7 @@ void WebCrawler::fetchWebPagePart2(
     return;
   }
   this->headerReceived = "";
-  this->bodyReceiveD = "";
+  this->bodyReceived = "";
   this->flagContinueWasNeeded = false;
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<hr>";
@@ -550,7 +554,7 @@ void WebCrawler::fetchWebPagePart2(
     return;
   }
   if (expectedLength == this->bodyReceivedWithHeader.size()) {
-    this->bodyReceiveD = this->bodyReceivedWithHeader;
+    this->bodyReceived = this->bodyReceivedWithHeader;
     return;
   }
   this->flagContinueWasNeeded = true;
@@ -575,26 +579,22 @@ void WebCrawler::fetchWebPagePart2(
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>Second part length: " << secondPart.size();
   }
-  this->bodyReceiveD = this->bodyReceivedWithHeader + secondPart;
-  int theSize = 0;
-  this->expectedLength.isIntegerFittingInInt(&theSize);
-  if (static_cast<unsigned>(theSize) < this->bodyReceiveD.size()) {
-    this->bodyReceivedOutsideOfExpectedLength = this->bodyReceiveD.substr(static_cast<unsigned>(theSize));
-    this->bodyReceiveD = this->bodyReceiveD.substr(0, static_cast<unsigned>(theSize));
+  this->bodyReceived = this->bodyReceivedWithHeader + secondPart;
+  int length = 0;
+  this->expectedLength.isIntegerFittingInInt(&length);
+  if (static_cast<unsigned>(length) < this->bodyReceived.size()) {
+    this->bodyReceivedOutsideOfExpectedLength = this->bodyReceived.substr(static_cast<unsigned>(length));
+    this->bodyReceived = this->bodyReceived.substr(0, static_cast<unsigned>(length));
   }
-  //if (!global.server().theSSLdata.SSLreadLoop
-  //    (10,global.server().theSSLdata.sslClient, secondPart, comments, comments, true))
-  //  return;
-  //this->bodyReceived+=secondPart;
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>Body (length: "
-    << this->bodyReceiveD.size()
-    << ")<br>" << this->bodyReceiveD;
+    << this->bodyReceived.size()
+    << ")<br>" << this->bodyReceived;
     if (this->bodyReceivedOutsideOfExpectedLength.size() == 0) {
-      *commentsGeneral << "<br><span style =\"color:green\"><b>No extraneous data received</b></span>";
+      *commentsGeneral << "<br><b style='color:green'>No extraneous data received</b>";
     } else {
-      *commentsGeneral<< "<br><span style =\"color:red\"><b>Received more data than expected "
-      << "(perhaps due to a protocol error?).</b></span>"
+      *commentsGeneral<< "<br><b style='color:red'>Received more data than expected "
+      << "(perhaps due to a protocol error?).</b>"
       << "<br>" << this->bodyReceivedOutsideOfExpectedLength;
     }
   }
@@ -637,31 +637,31 @@ bool CalculatorFunctions::innerFetchWebPagePOST(Calculator& calculator, const Ex
   if (!global.userDefaultHasAdminRights()) {
     return output.assignValue(std::string("Fetching web pages available only for logged-in admins. "), calculator);
   }
-  WebCrawler theCrawler;
+  WebCrawler crawler;
   if (input.size() != 5) {
     return calculator << "Fetching web page expects 4 arguments: server, service/port, webpage and message to post. ";
   }
-  if (!input[1].isOfType(&theCrawler.serverToConnectTo)) {
-    theCrawler.serverToConnectTo = input[1].toString();
+  if (!input[1].isOfType(&crawler.serverToConnectTo)) {
+    crawler.serverToConnectTo = input[1].toString();
   }
-  if (!input[2].isOfType(&theCrawler.portOrService)) {
-    theCrawler.portOrService = input[2].toString();
+  if (!input[2].isOfType(&crawler.portOrService)) {
+    crawler.portOrService = input[2].toString();
   }
-  if (!input[3].isOfType(&theCrawler.addressToConnectTo)) {
-    theCrawler.addressToConnectTo = input[3].toString();
+  if (!input[3].isOfType(&crawler.addressToConnectTo)) {
+    crawler.addressToConnectTo = input[3].toString();
   }
-  if (!input[4].isOfType(&theCrawler.postMessageToSend)) {
-    theCrawler.postMessageToSend = input[4].toString();
+  if (!input[4].isOfType(&crawler.postMessageToSend)) {
+    crawler.postMessageToSend = input[4].toString();
   }
   std::stringstream out;
   out
-  << "Server:  " << theCrawler.serverToConnectTo
-  << " port: " << theCrawler.portOrService
-  << " resource: " << theCrawler.addressToConnectTo
+  << "Server:  " << crawler.serverToConnectTo
+  << " port: " << crawler.portOrService
+  << " resource: " << crawler.addressToConnectTo
   << "<br>";
-  theCrawler.flagDoUseGET = false;
-  theCrawler.fetchWebPage(&out, &out);
-  out << "<br>" << theCrawler.lastTransactionErrors << "<hr>" << theCrawler.lastTransaction;
+  crawler.flagDoUseGET = false;
+  crawler.fetchWebPage(&out, &out);
+  out << "<br>" << crawler.lastTransactionErrors << "<hr>" << crawler.lastTransaction;
   return output.assignValue(out.str(), calculator);
 }
 
@@ -675,14 +675,16 @@ bool CalculatorFunctions::innerFetchKnownPublicKeys(
     out << "You need to be a logged-in administrator to call this function. ";
     return output.assignValue(out.str(), calculator);
   }
-  WebCrawler theCrawler;
-  theCrawler.theTSL.openSSLData.name = "crawler";
-  theCrawler.updatePublicKeys(&out, &out);
+  WebCrawler crawler;
+  crawler.theTSL.openSSLData.name = "crawler";
+  crawler.updatePublicKeys(&out, &out);
+  crawler.closeEverything();
+  global << "Closed web connection." << Logger::endL;
   return output.assignValue(out.str(), calculator);
 }
 
 void WebCrawler::updatePublicKeys(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
-  MacroRegisterFunctionWithName("WebCrawler::UpdatePublicKeys");
+  MacroRegisterFunctionWithName("WebCrawler::updatePublicKeys");
   this->serverToConnectTo  = "www.googleapis.com";
   this->portOrService      = "https";
   this->addressToConnectTo = "https://www.googleapis.com/oauth2/v3/certs";
@@ -691,7 +693,7 @@ void WebCrawler::updatePublicKeys(std::stringstream* commentsOnFailure, std::str
     *commentsGeneral << "<hr>" << "Updating public keys <hr>";
   }
   this->fetchWebPage(commentsOnFailure, commentsGeneral);
-  if (this->bodyReceiveD == "") {
+  if (this->bodyReceived == "") {
     global << Logger::red << "Could not fetch the google public keys ..." << Logger::endL;
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not fetch google certificate list. ";
@@ -700,9 +702,8 @@ void WebCrawler::updatePublicKeys(std::stringstream* commentsOnFailure, std::str
   }
   std::string googleKeysFileName = "certificates-public/google.txt";
   std::string googleKeysDebugFileName = "certificates-public/debug-google.txt";
-  std::fstream googleKeysFile, googleKeysDebugFile;
-  if (!FileOperations::openFileCreateIfNotPresentVirtual(
-    googleKeysFile, googleKeysFileName, false, true, false
+  if (!FileOperations::writeFileVirualWithPermissions(
+    googleKeysFileName, this->bodyReceived, true, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<br>Failed to open: " << googleKeysFileName;
@@ -710,33 +711,32 @@ void WebCrawler::updatePublicKeys(std::stringstream* commentsOnFailure, std::str
     global << Logger::red << "Failed to create google keys file name. " << Logger::endL;
     return;
   }
-  FileOperations::openFileCreateIfNotPresentVirtual(googleKeysDebugFile, googleKeysDebugFileName, false, true, false);
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>Updated file: " << googleKeysFileName;
   }
   global << Logger::green << "Updated public key file: " << googleKeysFileName << Logger::endL;
-  googleKeysFile << this->bodyReceiveD;
-  googleKeysDebugFile
+  std::stringstream debugData;
+  debugData
   << "Expected body length: " << this->expectedLength.toString() << "\n";
   if (this->flagContinueWasNeeded) {
-    googleKeysDebugFile << "Did send a continue message.\n";
+    debugData << "Did send a continue message.\n";
   } else {
-    googleKeysDebugFile << "Did NOT send a continue message.\n";
+    debugData << "Did NOT send a continue message.\n";
   }
-  googleKeysDebugFile << "\nBody received with header, "
+  debugData << "\nBody received with header, "
   << "length: " << this->bodyReceivedWithHeader.size()
   << ":\n"
   << this->bodyReceivedWithHeader
   << "\nBody received, after header "
-  << "length: " << this->bodyReceiveD.size()
+  << "length: " << this->bodyReceived.size()
   << ":\n"
-  << this->bodyReceiveD
+  << this->bodyReceived
   << "\nBody received, beyond expected length: "
   << this->bodyReceivedOutsideOfExpectedLength
   << "\n"
   << "\nHeader:\n "
   << this->headerReceived;
-  googleKeysFile.flush();
+  FileOperations::writeFileVirualWithPermissions(googleKeysDebugFileName, debugData.str(), true, commentsOnFailure);
 }
 
 bool Crypto::verifyJWTagainstKnownKeys(
@@ -869,7 +869,7 @@ bool WebCrawler::verifyRecaptcha(
   this->portOrService = "https";
   this->postMessageToSend = messageToSendStream.str();
   this->fetchWebPage(commentsOnFailure, commentsGeneralSensitive);
-  std::string response = this->bodyReceiveD;
+  std::string response = this->bodyReceived;
   JSData theJSparser;
   if (!theJSparser.readstring(response, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
@@ -924,7 +924,7 @@ bool WebAPIResponse::processForgotLogin() {
   JSData result;
   if (!global.flagDatabaseCompiled) {
     result[WebAPI::result::error] = "Error: database not running. ";
-    return global.theResponse.writeResponse(result, false);
+    return global.response.writeResponse(result, false);
   }
   std::stringstream out;
   if (!global.userDefaultHasAdminRights()) {
@@ -940,21 +940,21 @@ bool WebAPIResponse::processForgotLogin() {
   << "</b><br>\n";
   if (!theCrawler.verifyRecaptcha(&out, &out, nullptr)) {
     result[WebAPI::result::comments] = out.str();
-    return global.theResponse.writeResponse(result, false);
+    return global.response.writeResponse(result, false);
   }
   if (!theUser.exists(&out)) {
     out << "<br><b style ='color:red'>"
     << "We failed to find your email: " << theUser.email << " in our records. "
     << "</b>";
     result[WebAPI::result::comments] = out.str();
-    return global.theResponse.writeResponse(result, false);
+    return global.response.writeResponse(result, false);
   }
   if (!theUser.loadFromDatabase(&out, &out)) {
     out << "<br><b style='color:red'>"
     << "Failed to fetch user info for email: " << theUser.email
     << "</b>";
     result[WebAPI::result::comments] = out.str();
-    return global.theResponse.writeResponse(result, false);
+    return global.response.writeResponse(result, false);
   }
   out << "<b style ='color:green'>"
   << "Your email is on record. "
@@ -967,7 +967,7 @@ bool WebAPIResponse::processForgotLogin() {
   out << "<br>Response time: " << global.getElapsedSeconds() << " second(s); "
   << global.getElapsedSeconds() << " second(s) spent creating account. ";
   result[WebAPI::result::comments] = out.str();
-  return global.theResponse.writeResponse(result, false);
+  return global.response.writeResponse(result, false);
 }
 
 JSData WebWorker::getSignUpRequestResult() {
@@ -1102,17 +1102,17 @@ void GlobalVariables::Response::report(const std::string &input) {
 
 void GlobalVariables::Response::initiate(const std::string& message) {
   // TODO(tmilev): investigate the performance of this snippet
-  if (global.theResponse.flagTimedOut) {
+  if (global.response.flagTimedOut) {
     return;
   }
   MutexlockGuard guard(global.mutexReturnBytes);
   MacroRegisterFunctionWithName("GlobalVariables::Progress::initiate");
-  if (!global.theResponse.monitoringAllowed()) {
+  if (!global.response.monitoringAllowed()) {
     return;
   }
-  if (!global.theResponse.flagReportDesired) {
+  if (!global.response.flagReportDesired) {
     return;
   }
-  global.theResponse.flagTimedOut = true;
+  global.response.flagTimedOut = true;
   global.server().getActiveWorker().writeAfterTimeoutShowIndicator(message);
 }

@@ -1,17 +1,18 @@
 "use strict";
 const submitRequests = require("./submit_requests");
 const pathnames = require("./pathnames");
-const drawing = require("./three-d").drawing;
+const drawing = require("./graphics").drawing;
 const ids = require("./ids_dom_elements");
 const miscellaneousFrontend = require("./miscellaneous_frontend");
 const miscellaneous = require("./miscellaneous_frontend");
 const BufferCalculator = require("./buffer").BufferCalculator;
 const panels = require("./panels");
-const typeset = require("./math_typeset");
 const processMonitoring = require("./process_monitoring");
 const InputPanelData = require("./initialize_buttons").InputPanelData;
 const storage = require("./storage");
 const autocomplete = require("./autocomplete");
+const initializeButtons = require("./initialize_buttons");
+const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
 
 class AtomHandler {
   constructor() {
@@ -21,6 +22,8 @@ class AtomHandler {
     this.composite = false;
     this.index = - 1;
     this.totalRules = 0;
+    this.administrative = false;
+    this.experimental = false;
   }
 
   fromObject(
@@ -34,6 +37,18 @@ class AtomHandler {
     this.example = input.example;
     this.atom = input.atom;
     this.ruleName = input.ruleName;
+    this.visible = true;
+    this.administrative = false;
+    this.experimental = false;
+    if (input.administrative === "true" || input.administrative === true) {
+      this.administrative = true;
+    }
+    if (input.experimental === "true" || input.experimental === true) {
+      this.experimental = true;
+    }
+    if (input.visible === "false" || input.visible === false) {
+      this.visible = false;
+    }
     if (input.composite === "true" || input.composite === true) {
       this.composite = true;
     } else {
@@ -59,9 +74,17 @@ class AtomHandler {
     }
     let encodedAtom = encodeURIComponent(this.atom);
     currentId += `${encodedAtom}_${this.index}_${this.totalRules}`;
-    resultString += `<a href = '#' class = 'linkInfo' onclick = "window.calculator.miscellaneousFrontend.switchMenu('${currentId}')">info</a>`;
-    resultString += `<calculatorExampleInfo id = "${currentId}" class = "hiddenClass">${this.description}`;
-    resultString += `<br><b>Example:</b><br>${this.example}</calculatorExampleInfo>`;
+    resultString += `<button class='accordionLikeIndividual' onclick = "window.calculator.miscellaneousFrontend.switchMenu('${currentId}')">info</button>`;
+    resultString += `<calculatorExampleInfo id = "${currentId}" class = "hiddenClass">`;
+    if (this.administrative) {
+      resultString += "<b>(administrative)</b> ";
+    }
+    if (this.experimental) {
+      resultString += "<b>(experimental)</b> ";
+    }
+    resultString += this.description;
+    resultString += `<br><b>Example:</b>`;
+    resultString += `<br>${this.example}</calculatorExampleInfo>`;
     let theLink = calculator.getComputationLink(this.example);
     resultString += `<a href = '#${theLink}' class = "linkInfo">Example</a>`;
     resultString += ` [${this.ruleName}]`;
@@ -74,9 +97,6 @@ class Calculator {
     this.parsedComputation = {};
     /** @type {panels.PanelExpandableData[]}*/
     this.panels = [];
-    this.inputBoxNames = [];
-    this.inputBoxToSliderUpdaters = {};
-    this.canvases = null;
     this.examples = null;
     this.submissionCalculatorCounter = 0;
     this.lastSubmittedInput = "";
@@ -90,52 +110,15 @@ class Calculator {
     this.calculatorPanel = null;
   }
 
-  updateCalculatorSliderEventHandler(inputBox) {
-    event.preventDefault();
-    let sliderName = this.inputBoxToSliderUpdaters[inputBox.name];
-    let theSliders = document.getElementsByName(sliderName);
-    for (let counterSlider = 0; counterSlider < theSliders.length; counterSlider++) {
-      let currentSlider = theSliders[counterSlider];
-      currentSlider.value = inputBox.value;
-    }
-    this.updateSliderToInputBox(inputBox.name, sliderName);
-  }
-
-  addListenersToInputBoxes() {
-    //let theString=" updating: box names, slider names: ";
-    for (let i = 0; i < this.inputBoxNames.length; i++) {
-      let theBoxes = document.getElementsByName(this.inputBoxNames[i]);
-      for (let j = 0; j < theBoxes.length; j++) {
-        theBoxes[j].addEventListener("input", this.updateCalculatorSliderEventHandler.bind(this, theBoxes[j]));
-      }
-    }
-  }
-
-  updateSliderToInputBox(boxName, sliderName) {
-    let theBoxes = document.getElementsByName(boxName);
-    let theSliders = document.getElementsByName(sliderName);
-    let sliderValue = theSliders[0].value;
-    for (let i = 0; i < theBoxes.length; i++) {
-      theBoxes[i].value = sliderValue;
-    }
-    let plodtId = drawing.plotUpdaters[sliderName];
-    if (plodtId !== undefined) {
-      let theCanvas = drawing.canvases[plodtId];
-      if (theCanvas !== undefined) {
-        if (theCanvas.canvasResetFunction !== null) {
-          theCanvas.canvasResetFunction();
-        }
-      }
-    }
-  }
-
   processOneFunctionAtom(handlers) {
     let resultStrings = [];
     for (let i = 0; i < handlers.length; i++) {
-      resultStrings.push("<br>");
       let handler = new AtomHandler();
       handler.fromObject(handlers[i], i, handlers.length);
-      resultStrings.push(handler.toString(this));
+      if (handler.visible) {
+        resultStrings.push("<br>");
+        resultStrings.push(handler.toString(this));
+      }
     }
     return resultStrings.join("");
   }
@@ -156,6 +139,8 @@ class Calculator {
       let resultString = `${atomsSorted.length} built-in atoms, ${numHandlers} handlers. `;
       resultString += examplesString;
       document.getElementById(ids.domElements.calculatorExamples).innerHTML = resultString;
+      let calculatorElement = document.getElementById(ids.domElements.divCalculatorMainInputOutput);
+      calculatorElement.style.maxWidth = "70%";
     } catch (e) {
       console.log(`Bad json: ${e}\n Input JSON follows.`);
       console.log(inputJSONtext);
@@ -170,7 +155,21 @@ class Calculator {
     event.preventDefault();
   }
 
-  toggleExamples(theButton) {
+  adjustCalculatorPageSize() {
+    miscellaneousFrontend.switchMenu(ids.domElements.calculatorExamples);
+    let element = document.getElementById(ids.domElements.calculatorExamples);
+    let calculatorElement = document.getElementById(ids.domElements.divCalculatorMainInputOutput);
+    if (element.classList.contains("hiddenClass")) {
+      calculatorElement.style.maxWidth = "100%";
+    } else {
+      calculatorElement.style.maxWidth = "70%";
+    }
+  }
+
+  toggleExamples(
+    /**@type{HTMLElement} */
+    button,
+  ) {
     let theExamples = document.getElementById(ids.domElements.calculatorExamples);
     let theURL = "";
     theURL += pathnames.urls.calculatorAPI;
@@ -178,16 +177,18 @@ class Calculator {
     if (theExamples.innerHTML.length < 300) {
       submitRequests.submitGET({
         url: theURL,
-        callback: this.processExamples.bind(this),
+        callback: (input) => {
+          this.processExamples(input);
+        },
         progress: "spanProgressCalculatorExamples"
       });
-      theButton.innerHTML = "&#9660;";
+      button.innerHTML = "&#9660;";
     } else {
-      miscellaneousFrontend.switchMenu(ids.domElements.calculatorExamples);
+      this.adjustCalculatorPageSize();
       if (!theExamples.classList.contains("hiddenClass")) {
-        theButton.innerHTML = "&#9660;";
+        button.innerHTML = "&#9660;";
       } else {
-        theButton.innerHTML = "&#9656;";
+        button.innerHTML = "&#9656;";
       }
     }
   }
@@ -204,6 +205,9 @@ class Calculator {
       idPureLatex: ids.domElements.pages.calculator.inputMain,
       idButtonContainer: 'mainInputEditorFieldButtons',
       flagCalculatorPanel: true,
+      valueChangeHandler: () => {
+        this.equationEditorChangeCallback();
+      },
     });
     this.calculatorPanel.initialize();
     document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle).addEventListener(
@@ -271,7 +275,7 @@ class Calculator {
       inputParsed.error !== null &&
       inputParsed.error !== ""
     ) {
-      buffer.write("<b style = 'color:red'>Error.</b>");
+      buffer.write("<b style ='color:red'>Error.</b>");
       buffer.write(inputParsed.error);
     }
     if (
@@ -314,7 +318,7 @@ class Calculator {
     if (inputParsed.syntaxErrors !== undefined) {
       buffer.write(inputParsed.syntaxErrors);
     }
-    buffer.write(`<table class = "tableCalculatorOutput"><tr><th>Input</th><th>Output</th></tr>`);
+    buffer.write(`<table class='tableCalculatorOutput'><tr><th>Input</th><th>Output</th></tr>`);
     if (typeof inputParsed.result.input === "string") {
       inputParsed.result.input = [inputParsed.result.input];
     }
@@ -337,18 +341,18 @@ class Calculator {
         ));
       }
       buffer.write(`<tr>`);
-      buffer.write(`<td class = "cellCalculatorInput"><div id = "${inputPanelId}"></div></td>`);
-      buffer.write(`<td class = "cellCalculatorResult"><div id = "${outputPanelId}"></div></td>`);
+      buffer.write(`<td class='cellCalculatorInput'><div id='${inputPanelId}'></div></td>`);
+      buffer.write(`<td class='cellCalculatorResult'><div id='${outputPanelId}'></div></td>`);
       buffer.write(`</tr>`);
     }
     buffer.write(`</table>`);
-    buffer.write(`</td><td><div class = "containerComments">`);
+    buffer.write(`</td><td><div class="containerComments">`);
     buffer.write("<small>Double-click formulas: get LaTeX. Double-click back: hide. </small>");
     let performance = inputParsed[pathnames.urlFields.result.performance];
     if (performance !== undefined) {
       let content = performance[pathnames.urlFields.result.comments];
       let label = `<b style='color:blue'>${performance[pathnames.urlFields.result.computationTime]}</b>`;
-      buffer.write(`<div id = '${ids.domElements.divPerformance}'></div>`);
+      buffer.write(`<div id='${ids.domElements.divPerformance}'></div>`);
       panelData.push(new panels.PanelExpandableData(
         content,
         ids.domElements.divPerformance,
@@ -381,10 +385,9 @@ class Calculator {
     if (this.flagTypeset === true) {
       return;
     }
-    typeset.typesetter.typesetSoft(
-      ids.domElements.spanCalculatorMainOutput,
-      "font-size: 20px; font-family:'Times New Roman'; display:inline-block;",
-    );
+    dynamicJavascript.typeset(this.getOutputElement(), {
+      "lineBreakWidth": 600,
+    });
     this.flagTypeset = true;
   }
 
@@ -392,23 +395,13 @@ class Calculator {
     for (let i = 0; i < this.panels.length; i++) {
       panels.makePanelFromData(this.panels[i]);
     }
-    let spanVerification = document.getElementById(ids.domElements.spanCalculatorMainOutput);
-    let incomingScripts = spanVerification.getElementsByTagName("script");
-    let thePage = window.calculator.mainPage;
-    let oldScripts = thePage.pages.calculator.scriptIds;
-    thePage.removeScripts(oldScripts);
-    this.inputBoxNames = [];
-    this.inputBoxToSliderUpdaters = {};
-    this.canvases = {};
-    thePage.pages.calculator.sciptIds = [];
-    for (let i = 0; i < incomingScripts.length; i++) {
-      let newId = `calculatorMainPageId_${i}`;
-      thePage.pages.calculator.sciptIds.push(newId);
-      thePage.injectScript(newId, incomingScripts[i].innerHTML);
-    }
-    this.addListenersToInputBoxes();
     this.flagTypeset = false;
     this.typeset();
+    dynamicJavascript.bootstrapAllScripts(this.getOutputElement());
+  }
+
+  getOutputElement() {
+    return document.getElementById(ids.domElements.spanCalculatorMainOutput);
   }
 
   defaultOnLoadInjectScriptsAndProcessLaTeX(input, output) {
@@ -417,7 +410,9 @@ class Calculator {
     try {
       this.parsedComputation = miscellaneous.jsonUnescapeParse(input);
       let buffer = new BufferCalculator();
-      let progReportTimer = document.getElementById(ids.domElements.pages.calculator.monitoring.progressTimer);
+      let progReportTimer = document.getElementById(
+        ids.domElements.pages.calculator.monitoring.progressTimer,
+      );
       progReportTimer.innerHTML = "";
       this.writeResult(buffer, this.parsedComputation, this.panels);
       inputHtml = buffer.toString();
@@ -425,8 +420,7 @@ class Calculator {
       inputHtml = input + "<br>" + e;
       console.log("Error processing calculator output: " + e);
     }
-    let spanVerification = document.getElementById(ids.domElements.spanCalculatorMainOutput);
-    spanVerification.innerHTML = inputHtml;
+    this.getOutputElement().innerHTML = inputHtml;
     this.afterWriteOutput();
   }
 
@@ -477,6 +471,23 @@ class Calculator {
   submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus) {
     let inputParams = this.getQueryStringSubmitStringAsMainInput(theString, requestType);
     this.submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus);
+  }
+
+  equationEditorChangeCallback() {
+    if (!this.calculatorPanel.flagCalculatorMQStringIsOK) {
+      return;
+    }
+    let theBoxContent = this.equationEditor.rootNode.toLatex();
+    if (this.calculatorLeftString === null || this.calculatorRightString === null) {
+      this.editorHelpCalculator();
+    }
+    let theInserted = initializeButtons.processMathQuillLatex(theBoxContent);
+    if (theInserted.length > 0 && startingCharacterSectionUnderMathQuillEdit.length > 0) {
+      if (theInserted[0] !== ' ') {
+        theInserted = ' ' + theInserted;
+      }
+    }
+    latexBox.value = this.calculatorLeftString + theInserted + this.calculatorRightString;
   }
 }
 

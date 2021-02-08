@@ -212,15 +212,15 @@ bool CalculatorHTML::Test::OneProblemTest::run() {
     return this->flagSuccess;
   }
   std::stringstream randomSeedStream;
-  randomSeedStream << theProblem.theProblemData.randomSeed;
-  this->answers.setSize(theProblem.theProblemData.theAnswers.size());
+  randomSeedStream << theProblem.problemData.randomSeed;
+  this->answers.setSize(theProblem.problemData.answers.size());
   this->flagAllBuiltInAnswersOK = true;
   global.setWebInput(WebAPI::problem::fileName, theProblem.fileName);
   global.setWebInput(WebAPI::problem::randomSeed, randomSeedStream.str());
   this->flagSuccess = true;
   for (int j = 0; j < this->answers.size; j ++) {
     CalculatorHTML::Test::OneProblemTest::OneAnswer& current = this->answers[j];
-    current.answerId = theProblem.theProblemData.theAnswers.values[j].answerId;
+    current.answerId = theProblem.problemData.answers.values[j].answerId;
     current.answerIdWebAPI = WebAPI::problem::calculatorAnswerPrefix + current.answerId;
     global.setWebInput(current.answerIdWebAPI, "1");
     current.builtInAnswerAPICall = WebAPIResponse::getAnswerOnGiveUp(
@@ -277,7 +277,7 @@ std::string CalculatorHTML::Test::toStringSummary() {
   return out.str();
 }
 
-bool CalculatorHTML::Test::BuiltInMultiple(
+bool CalculatorHTML::Test::builtInMultiple(
   int inputFirstFileIndex,
   int inputFilesToInterpret,
   int inputRandomSeed,
@@ -357,7 +357,8 @@ bool CalculatorHTML::Test::builtIn(
     currentTest.randomSeed = this->randomSeed;
     std::stringstream reportStream;
     if (badSoFar > 0) {
-      reportStream << "<b style = 'color:red'>Found " << badSoFar << " bad files so far. </b><br>";
+      reportStream << "<b style = 'color:red'>Found "
+      << badSoFar << " bad files so far. </b><br>";
     }
     reportStream << "File: "
     << i
@@ -381,7 +382,11 @@ bool CalculatorHTML::Test::builtIn(
       if (global.flagRunningConsoleTest) {
         global << Logger::red << "Failure @ index: " << i << ". "
         << "Elapsed ms: " << global.getElapsedMilliseconds() << ". "
-        << Logger::endL;        
+        << Logger::endL;
+        global << Logger::yellow
+        << "https://localhost:8166"
+        << HtmlRoutines::getProblemURLRelative(currentTest.fileName)
+        << Logger::endL;
       }
     } else {
       if (global.flagRunningConsoleTest) {
@@ -477,13 +482,36 @@ bool TopicElementParser::Test::defaultTopicListsOK() {
 }
 
 bool CalculatorHTML::Test::all() {
+  CalculatorHTML::Test::parsingTest();
   CalculatorHTML::Test::builtInCrashOnFailure();
+  return true;
+}
+
+bool CalculatorHTML::Test::parsingTest() {
+  List<std::string> fileNames;
+  FileOperations::getFolderFileNamesVirtual("test/html_parser/", fileNames);
+  for (int i = 0; i < fileNames.size; i ++) {
+    if (fileNames[i] == "." || fileNames[i] == "..") {
+      continue;
+    }
+    std::string currentFileName = "test/html_parser/" + fileNames[i];
+    CalculatorHTML parser;
+    if (!FileOperations::loadFileToStringVirtual(currentFileName, parser.parser.inputHtml, false, nullptr)) {
+      global.fatal << "Failed to load filename: " << currentFileName << "." << global.fatal;
+    }
+    if (!parser.parser.parseHTML(nullptr)) {
+      global.fatal << "Failed to parse: " << currentFileName
+      << ". Calculator link:\n"
+      << "https://localhost:8166" << HtmlRoutines::getProblemURLRelative(currentFileName)
+      << "\n" << global.fatal;
+    }
+  }
   return true;
 }
 
 bool CalculatorHTML::Test::builtInCrashOnFailure() {
   std::stringstream comments;
-  if (!CalculatorHTML::Test::BuiltInMultiple(0, 0, 0, 3, &comments)) {
+  if (!CalculatorHTML::Test::builtInMultiple(0, 0, 0, 3, &comments)) {
     global.fatal << "Built-in problem tests failed. "
     << comments.str() << global.fatal;
   }
@@ -520,11 +548,10 @@ bool CalculatorFunctions::testProblemInterpretation(
     << "1) index of first problem to test, where "
     << "0 = start at beginning, 1 = start at second problem, etc.; "
     << "2) number of problems to test (0 or less = test all); "
-    << "3) starting random seed, set to 0 if you don't know what this is. "
-    ;
+    << "3) starting random seed, set to 0 if you don't know what this is. ";
   }
-  if (global.theResponse.monitoringAllowed()) {
-    global.theResponse.initiate("Triggered by testProblemInterpretation.");
+  if (global.response.monitoringAllowed()) {
+    global.response.initiate("Triggered by testProblemInterpretation.");
   }
   int desiredNumberOfTests = 0;
   int firstFileIndex = 0;
@@ -533,7 +560,7 @@ bool CalculatorFunctions::testProblemInterpretation(
   input[2].isSmallInteger(&desiredNumberOfTests);
   input[3].isSmallInteger(&randomSeed);
   std::stringstream comments;
-  CalculatorHTML::Test::BuiltInMultiple(firstFileIndex, desiredNumberOfTests, randomSeed, 3, &comments);
+  CalculatorHTML::Test::builtInMultiple(firstFileIndex, desiredNumberOfTests, randomSeed, 3, &comments);
   return output.assignValue(comments.str(), calculator);
 }
 
@@ -744,13 +771,13 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   List<std::string> lowLeftStrings, upRightStrings;
   lowLeft.toListStringsBasicType(lowLeftStrings);
   upRight.toListStringsBasicType(upRightStrings);
-  thePlotObj.theVarRangesJS.setSize(2);
-  thePlotObj.theVarRangesJS[0].setSize(2);
-  thePlotObj.theVarRangesJS[1].setSize(2);
-  thePlotObj.theVarRangesJS[0][0] = lowLeftStrings[0];
-  thePlotObj.theVarRangesJS[0][1] = upRightStrings[0];
-  thePlotObj.theVarRangesJS[1][0] = lowLeftStrings[1];
-  thePlotObj.theVarRangesJS[1][1] = upRightStrings[1];
+  thePlotObj.variableRangesJS.setSize(2);
+  thePlotObj.variableRangesJS[0].setSize(2);
+  thePlotObj.variableRangesJS[1].setSize(2);
+  thePlotObj.variableRangesJS[0][0] = lowLeftStrings[0];
+  thePlotObj.variableRangesJS[0][1] = upRightStrings[0];
+  thePlotObj.variableRangesJS[1][0] = lowLeftStrings[1];
+  thePlotObj.variableRangesJS[1][1] = upRightStrings[1];
   thePlotObj.manifoldImmersion = input[1];
   Expression jsConverterE;
   if (input.size() >= 6) {
@@ -762,7 +789,6 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   }
   if (CalculatorFunctions::functionMakeJavascriptExpression(calculator, thePlotObj.manifoldImmersion, jsConverterE)) {
     thePlotObj.manifoldImmersionJS = jsConverterE.toString();
-    thePlotObj.manifoldImmersion.hasInputBoxVariables(&thePlot.boxesThatUpdateMe);
   } else {
     return calculator << "Failed to extract javascript from " << input[1].toString();
   }
@@ -785,7 +811,7 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   for (int i = 0; i < thePlotObj.variablesInPlay.size; i ++) {
     thePlotObj.variablesInPlayJS[i] = thePlotObj.variablesInPlay[i].toString();
   }
-  thePlotObj.thePlotType = "plotDirectionField";
+  thePlotObj.plotType = "plotDirectionField";
   if (
     !input[4].isSequenceNElements(2) &&
     !input[4].startsWith(calculator.opIntervalOpen(), 3)
@@ -794,7 +820,7 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
     << "<hr>Could not extract a list of elements for the "
     << "number of segments from: " << input[4].toString();
   }
-  thePlotObj.numSegmenTsJS.setSize(2);
+  thePlotObj.numberOfSegmentsJS.setSize(2);
   for (int i = 0; i < 2; i ++) {
     if (!CalculatorFunctions::functionMakeJavascriptExpression(
       calculator, input[4][i + 1], jsConverterE
@@ -802,9 +828,10 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
       return calculator << "Failed to convert "
       << input[4][i + 1].toString() << " to javascript. ";
     }
-    thePlotObj.numSegmenTsJS[i] = jsConverterE.toString();
+    thePlotObj.numberOfSegmentsJS[i] = jsConverterE.toString();
   }
-  thePlot.thePlots.addOnTop(thePlotObj);
+  input.hasInputBoxVariables(&thePlotObj.parametersInPlay, &thePlotObj.parametersInPlayJS);
+  thePlot.addPlotOnTop(thePlotObj);
   return output.assignValue(thePlot, calculator);
 }
 
@@ -1398,7 +1425,7 @@ bool CalculatorFunctionsTrigonometry::arccosAlgebraic(Calculator& calculator, co
   if (argumentE.isOfType<AlgebraicNumber>(&argument)) {
     candidate.assignRationalQuadraticRadical(
       Rational(1, 2),
-      calculator.theObjectContainer.theAlgebraicClosure,
+      calculator.objectContainer.theAlgebraicClosure,
       nullptr
     );
     if (candidate == argument) {
@@ -1415,7 +1442,7 @@ bool CalculatorFunctionsTrigonometry::arccosAlgebraic(Calculator& calculator, co
     }
     candidate.assignRationalQuadraticRadical(
       Rational(3, 4),
-      calculator.theObjectContainer.theAlgebraicClosure,
+      calculator.objectContainer.theAlgebraicClosure,
       nullptr
     );
     if (candidate == argument) {
@@ -1472,7 +1499,7 @@ bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
   if (argumentE.isOfType<AlgebraicNumber>(&argument)) {
     candidate.assignRationalQuadraticRadical(
       Rational(1, 2),
-      calculator.theObjectContainer.theAlgebraicClosure,
+      calculator.objectContainer.theAlgebraicClosure,
       nullptr
     );
     if (candidate == argument) {
@@ -1488,7 +1515,7 @@ bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
     }
     candidate.assignRationalQuadraticRadical(
       Rational(3, 4),
-      calculator.theObjectContainer.theAlgebraicClosure,
+      calculator.objectContainer.theAlgebraicClosure,
       nullptr
     );
     if (candidate == argument) {
@@ -1506,10 +1533,10 @@ bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
   return false;
 }
 
-bool CalculatorFunctions::innerMatchesPattern(
+bool CalculatorFunctions::matchesPattern(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerMatchesPattern");
+  MacroRegisterFunctionWithName("CalculatorFunctions::matchesPattern");
   if (input.size() != 3) {
     return false;
   }
@@ -2139,10 +2166,10 @@ bool CalculatorFunctions::innerIsLinearOrConstantIn(
   return output.assignValue(1, calculator);
 }
 
-bool CalculatorFunctions::innerIsProductLinearOrConstantTermsIn(
+bool CalculatorFunctions::isProductLinearOrConstantTermsIn(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsProductLinearOrConstantTermsIn");
+  MacroRegisterFunctionWithName("CalculatorFunctions::isProductLinearOrConstantTermsIn");
   if (input.size() < 3) {
     return false;
   }
@@ -2619,8 +2646,8 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
     << theCurveE.toString() << ", got context: "
     << curveContext.toString();
   }
-  MonomialP leadingMonomial;
-  List<MonomialP>::Comparator monomialOrder(MonomialP::greaterThan_totalDegree_rightSmallerWins);
+  MonomialPolynomial leadingMonomial;
+  List<MonomialPolynomial>::Comparator monomialOrder(MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins);
   thePoly.getIndexLeadingMonomial(&leadingMonomial, nullptr, &monomialOrder);
   int indexX = 0;
   int indexY = 1;
@@ -2642,7 +2669,7 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   if (thePoly.size() > 4) {
     return calculator << "Elliptic curve allowed to have max 4 terms, yours has: " << thePoly.size();
   }
-  MonomialP xCubed, xLinear, ySquared;
+  MonomialPolynomial xCubed, xLinear, ySquared;
   xCubed.makeEi(indexX, 3);
   xLinear.makeEi(indexX, 1);
   ySquared.makeEi(indexY, 2);
@@ -2691,56 +2718,65 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure");
-  if (!global.theResponse.monitoringAllowed()) {
-    global.theResponse.initiate("Triggered by precomputeSemisimpleLieAlgebraStructure.");
+  if (!global.response.monitoringAllowed()) {
+    global.response.initiate("Triggered by precomputeSemisimpleLieAlgebraStructure.");
   }
-  (void) input;
-  List<DynkinType> theTypes;
-  DynkinType::getPrecomputedDynkinTypes(theTypes);
-  ProgressReport theReport;
+  if (!global.userDefaultHasAdminRights()) {
+    return calculator
+    << "Function CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure "
+    << "requires administrator access. "
+    << "To get one, install the calculator on your machine.";
+  }
+  int startingIndex = 0;
+  if (!input[1].isSmallInteger(&startingIndex)) {
+    return calculator << "Argument of precomputeSemisimpleLieAlgebraStructure not a small integer.";
+  }
+  List<DynkinType> allTypes;
+  DynkinType::getPrecomputedDynkinTypes(allTypes);
+  ProgressReport report;
   std::stringstream out;
-  int lastIndexPlusOne = theTypes.size;
-  //lastIndexPlusOne = 1;
   out << "Generated structure constants, "
   << "root subalgebras and sl(2) subalgebras for the following. ";
-  for (int i = 0; i < lastIndexPlusOne; i ++) {
+  if (startingIndex <= 0) {
+    startingIndex = 0;
+  }
+  for (int i = startingIndex; i < allTypes.size; i ++) {
     std::stringstream reportStream;
     reportStream << "Computing structure of subalgebra "
-    << theTypes[i].toString() << " (" << i + 1 << " out of " << theTypes.size << ").";
-    theReport.report(reportStream.str());
-    SemisimpleLieAlgebra theAlgebra;
-    theAlgebra.theWeyl.makeFromDynkinType(theTypes[i]);
-    theAlgebra.computeChevalleyConstants();
-    theAlgebra.toHTMLCalculator(true, true, false);
-    SlTwoSubalgebras theSl2s(theAlgebra);
-    theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo = true;
-    theAlgebra.FindSl2Subalgebras(theAlgebra, theSl2s);
-    theSl2s.toHTML();
-    if ((false)) {
-      if (theTypes[i].hasPrecomputedSubalgebras()) {
-        SemisimpleSubalgebras theSubalgebras;
-        MapReferences<DynkinType, SemisimpleLieAlgebra> subalgebrasContainer;
-        ListReferences<SlTwoSubalgebras> sl2Conainer;
-        if (!theSubalgebras.computeStructureWriteFiles(
-          theAlgebra,
-          calculator.theObjectContainer.theAlgebraicClosure,
-          subalgebrasContainer,
-          sl2Conainer,
-          nullptr,
-          false,
-          true,
-          false,
-          true,
-          true,
-          false,
-          true
-        )) {
-          out << "Failed to compute " << theTypes[i].toString();
-        }
+    << allTypes[i].toString() << " (" << i + 1 << " out of " << allTypes.size << ").";
+    report.report(reportStream.str());
+    SemisimpleLieAlgebra algebra;
+    algebra.weylGroup.makeFromDynkinType(allTypes[i]);
+    algebra.computeChevalleyConstants();
+    algebra.writeHTML(true, false);
+    SlTwoSubalgebras theSl2s(algebra);
+    theSl2s.rootSubalgebras.flagPrintParabolicPseudoParabolicInfo = true;
+    algebra.findSl2Subalgebras(algebra, theSl2s);
+    theSl2s.writeHTML();
+    algebra.writeHTML(true, false);
+    if (allTypes[i].hasPrecomputedSubalgebras()) {
+      SemisimpleSubalgebras theSubalgebras;
+      MapReferences<DynkinType, SemisimpleLieAlgebra> subalgebrasContainer;
+      ListReferences<SlTwoSubalgebras> sl2Conainer;
+      if (!theSubalgebras.computeStructureWriteFiles(
+        algebra,
+        calculator.objectContainer.theAlgebraicClosure,
+        subalgebrasContainer,
+        sl2Conainer,
+        nullptr,
+        false,
+        true,
+        false,
+        true,
+        true,
+        false,
+        true
+      )) {
+        out << "Failed to compute " << allTypes[i].toString();
       }
     }
-    out << theTypes[i].toString();
-    if (i != theTypes.size - 1) {
+    out << allTypes[i].toString();
+    if (i != allTypes.size - 1) {
       out << ", ";
     }
   }
@@ -3087,7 +3123,7 @@ bool CalculatorFunctions::innerFreudenthalFull(Calculator& calculator, const Exp
     return output.makeError("Failed to extract highest weight. ", calculator);
   }
   CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
-  hwSimple = theSSalg.content->theWeyl.getSimpleCoordinatesFromFundamental(hwFundamental, Rational::zero());
+  hwSimple = theSSalg.content->weylGroup.getSimpleCoordinatesFromFundamental(hwFundamental, Rational::zero());
   startingChar.makeFromWeight(hwSimple, theSSalg.content);
   std::string reportString;
   if (!startingChar.freudenthalEvaluateMeFullCharacter(resultChar, 10000, &reportString)) {
@@ -3114,7 +3150,7 @@ bool CalculatorFunctions::innerFreudenthalFormula(Calculator& calculator, const 
     return output.makeError("Failed to extract highest weight. ", calculator);
   }
   CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
-  hwSimple = theSSalg.content->theWeyl.getSimpleCoordinatesFromFundamental(hwFundamental, Rational::zero());
+  hwSimple = theSSalg.content->weylGroup.getSimpleCoordinatesFromFundamental(hwFundamental, Rational::zero());
   startingChar.makeFromWeight(hwSimple, theSSalg.content);
   std::string reportString;
   if (!startingChar.freudenthalEvalMeDominantWeightsOnly(resultChar, 10000, &reportString)) {
@@ -3168,7 +3204,7 @@ bool CalculatorFunctions::innerJacobiSymbol(Calculator& calculator, const Expres
   global.fatal << "Function not implemented yet." << global.fatal;
   (void) calculator;
   (void) output;
-  if (input.children.size != 3) {
+  if (input.size() != 3) {
     return false;
   }
   const Expression& leftE = input[1];

@@ -11,9 +11,6 @@ bool CalculatorFunctionsCrypto::x509CertificateServer(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::x509CertificateServer");
   (void) input;
-  //List<unsigned char> outputChars;
-  //theWebServer.theTLS.theServer.certificate.writeBytesASN1(outputChars);
-  //outputChars = theWebServer.theTLS.theServer.certificate.sourceBinary;
   std::string result = Crypto::convertListUnsignedCharsToBase64(global.server().theTLS.theServer.certificate.sourceBinary, false);
   return output.assignValue(result, calculator);
 }
@@ -23,17 +20,17 @@ bool CalculatorFunctionsCrypto::x509CertificateDecode(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::x509CertificateDecode");
   std::string binary;
-  if (!input.isOfType(&binary)) {
+  if (!input[1].isOfType(&binary)) {
     return output.makeError("Input is not a string. ", calculator);
   }
-  X509Certificate theCertificate;
-  theCertificate.sourceBinary = binary;
+  X509Certificate certificate;
+  certificate.sourceBinary = binary;
   std::stringstream commentsOnError;
-  if (!theCertificate.loadFromASNEncoded(theCertificate.sourceBinary, &commentsOnError)) {
+  if (!certificate.loadFromASNEncoded(certificate.sourceBinary, &commentsOnError)) {
     return output.assignValue(commentsOnError.str(), calculator);
   }
   std::stringstream out;
-  out << theCertificate.toStringTestEncode() << "<br>";
-  out << theCertificate.toString();
+  out << certificate.toStringTestEncode() << "<br>";
+  out << certificate.toString();
   return output.assignValue(out.str(), calculator);
 }

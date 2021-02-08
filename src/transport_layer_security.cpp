@@ -41,13 +41,13 @@ void TransportLayerSecurity::initializeNonThreadSafePartsCommon() {
   ASNObject::initializeNonThreadSafe();
 }
 
-void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool IamServer) {
+void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool isServer) {
   MacroRegisterFunctionWithName("TransportLayerSecurity::initializeNonThreadSafeOnFirstCall");
   if (this->flagInitialized) {
     return;
   }
   this->initializeNonThreadSafePartsCommon();
-  if (IamServer) {
+  if (isServer) {
     this->openSSLData.initSSLServer();
     bool flagBuiltInTLSAvailable = false;
     if (flagBuiltInTLSAvailable) {
@@ -61,7 +61,7 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool IamServer) 
 
 void TransportLayerSecurity::freeEverythingShutdown() {
   MacroRegisterFunctionWithName("TransportLayerSecurity::freeEverythingShutdown");
-  this->openSSLData.freeEverythingShutdownSSL();
+  this->openSSLData.freeSession();
 }
 
 bool TransportLayerSecurity::initSSLKeyFiles(std::stringstream* commentsOnFailure) {
@@ -91,7 +91,7 @@ bool TransportLayerSecurity::sslReadLoop(
   bool includeNoErrorInComments
 ) {
   MacroRegisterFunctionWithName("TransportLayerSecurity::sslReadLoop");
-  if (!global.flagUsingSSLinCurrentConnection || !global.flagSSLIsAvailable) {
+  if (!global.flagUsingSSLinCurrentConnection || !global.flagSSLAvailable) {
     if (commentsGeneral != nullptr) {
       *commentsGeneral << "Error in ssl read loop: ssl not available in current connection. ";
     }
@@ -173,7 +173,7 @@ void TransportLayerSecurityOpenSSL::setSocketAddToStack(int theSocket) {
 }
 
 void TransportLayerSecurity::free() {
-  this->openSSLData.freeSSL();
+  this->openSSLData.freeSession();
   this->flagInitialized = false;
 }
 
@@ -1444,11 +1444,11 @@ JSData serialization::Marker::toJSON() {
 std::string SSLRecord::toHtml(int id) {
   std::stringstream out, spanId;
   spanId << "spanSSLRecord_" << "_" << id;
+  JSData content;
   out << "<div id = '" << spanId.str() << "'></div>";
-  out << "<script>"
-  << "window.calculator.crypto.displaySSLRecord('"
-  << spanId.str() << "', " << this->toJSON() << ");"
-  << "</script>";
+  content["id"] = spanId.str();
+  content["content"] = this->toJSON();
+  out << HtmlRoutines::scriptFromJSON("displaySSLRecord", content);
   return out.str();
 }
 
@@ -1988,9 +1988,7 @@ int TransportLayerSecurity::readOnce(
 ) {
   MacroRegisterFunctionWithName("TransportLayerSecurity::readOnce");
 
-  bool useSSL = global.flagUsingSSLinCurrentConnection && global.flagSSLIsAvailable;
-
-
+  bool useSSL = global.flagUsingSSLinCurrentConnection && global.flagSSLAvailable;
   this->readBuffer.setSize(this->readBufferStandardSize);
   int result = - 1;
 
@@ -2014,7 +2012,7 @@ int TransportLayerSecurity::writeOnce(
   std::stringstream* commentsOnError,
   bool includeNoErrorInComments
 ) {
-  bool useSSL = global.flagUsingSSLinCurrentConnection && global.flagSSLIsAvailable;
+  bool useSSL = global.flagUsingSSLinCurrentConnection && global.flagSSLAvailable;
   if (useSSL) {
     return this->openSSLData.sslWrite(
       writeBuffer,

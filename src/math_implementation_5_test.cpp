@@ -4,14 +4,14 @@
 #include "math_general_polynomial_computations_advanced_implementation.h"
 #include "calculator.h"
 
-bool MonomialP::Test::all() {
-  return MonomialP::Test::testMonomialOrdersSatisfyTheDefinition();
+bool MonomialPolynomial::Test::all() {
+  return MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinition();
 }
 
-bool MonomialP::Test::testMonomialOrdersSatisfyTheDefinitionOne(
-  const MonomialP& mustBeSmaller,
-  const MonomialP& mustBeLarger,
-  List<MonomialP>::Comparator& order
+bool MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinitionOne(
+  const MonomialPolynomial& mustBeSmaller,
+  const MonomialPolynomial& mustBeLarger,
+  List<MonomialPolynomial>::Comparator& order
 ) {
   if (!order.leftGreaterThanRight(mustBeLarger, mustBeSmaller)) {
     global.fatal << "Monomial: "
@@ -24,8 +24,8 @@ bool MonomialP::Test::testMonomialOrdersSatisfyTheDefinitionOne(
   return true;
 }
 
-bool MonomialP::Test::testMonomialOrdersSatisfyTheDefinition() {
-  MonomialP xOne, xTwo, xOneSquared, xTwoSquared, xOneXtwo, one;
+bool MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinition() {
+  MonomialPolynomial xOne, xTwo, xOneSquared, xTwoSquared, xOneXtwo, one;
   one.makeOne();
   xOne.makeEi(0, 1);
   xTwo.makeEi(1, 1);
@@ -33,16 +33,16 @@ bool MonomialP::Test::testMonomialOrdersSatisfyTheDefinition() {
   xTwoSquared.makeEi(1, 2);
   xOneXtwo = xOne;
   xOneXtwo *= xTwo;
-  List<List<MonomialP>::Comparator> allOrders;
-  allOrders.addOnTop(MonomialP::greaterThan_leftLargerWins);
+  List<List<MonomialPolynomial>::Comparator> allOrders;
+  allOrders.addOnTop(MonomialPolynomial::greaterThan_leftLargerWins);
   allOrders.lastObject()->name = "lexicographic";
-  allOrders.addOnTop(MonomialP::greaterThan_rightLargerWins);
+  allOrders.addOnTop(MonomialPolynomial::greaterThan_rightLargerWins);
   allOrders.lastObject()->name = "lexicographic opposite";
-  allOrders.addOnTop(MonomialP::greaterThan_totalDegree_leftLargerWins);
+  allOrders.addOnTop(MonomialPolynomial::greaterThan_totalDegree_leftLargerWins);
   allOrders.lastObject()->name = "graded lexicographic";
-  allOrders.addOnTop(MonomialP::greaterThan_totalDegree_rightSmallerWins);
+  allOrders.addOnTop(MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins);
   allOrders.lastObject()->name = "graded reverse lexicographic";
-  List<List<MonomialP> > elementsIncreasingOrder ({
+  List<List<MonomialPolynomial> > elementsIncreasingOrder ({
     {one, xOne, xOneSquared},
     {one, xTwo, xTwoSquared},
     {one, xOne, xOneXtwo},
@@ -52,7 +52,7 @@ bool MonomialP::Test::testMonomialOrdersSatisfyTheDefinition() {
     for (int j = 0; j < elementsIncreasingOrder.size; j ++) {
       for (int k = 0; k < elementsIncreasingOrder[i].size; k ++) {
         for (int l = k + 1; l < elementsIncreasingOrder[i].size; l ++) {
-          MonomialP::Test::testMonomialOrdersSatisfyTheDefinitionOne(
+          MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinitionOne(
             elementsIncreasingOrder[j][k], elementsIncreasingOrder[j][l], allOrders[i]
           );
         }
@@ -140,7 +140,7 @@ template <>
 Polynomial<Rational> Polynomial<Rational>::Test::fromString(const std::string& input) {
   Calculator parser;
   std::string inputModified = "Polynomial(" + input + ")";
-  parser.initialize();
+  parser.initialize(Calculator::Mode::full);
   parser.evaluate(inputModified);
   if (!parser.programExpression.startsWith(parser.opCommandSequence())) {
     global.fatal
@@ -204,7 +204,7 @@ Vector<Polynomial<Rational> > Polynomial<Rational>::Test::fromStringCommonContex
     }
   }
   inputStream << ")";
-  parser.initialize();
+  parser.initialize(Calculator::Mode::full);
   parser.evaluate(inputStream.str());
   if (!parser.programExpression.startsWith(parser.opCommandSequence())) {
     global.fatal
@@ -310,5 +310,33 @@ bool Polynomial<Rational>::Test::differential() {
   this->oneDifferential("1", "0");
   this->oneDifferential("x+y+z+1", "dx +dy +dz ");
   this->oneDifferential("x^2y^3z^5 + x", "5x^{2}y^{3}z^{4}dz +3x^{2}y^{2}z^{5}dy +2x y^{3}z^{5}dx +dx ");
+  return true;
+}
+
+bool ChevalleyGenerator::Test::all() {
+  ChevalleyGenerator::Test::basic();
+  return true;
+}
+
+bool ChevalleyGenerator::Test::basic() {
+  HashedList<ChevalleyGenerator> allGenerators;
+  SemisimpleLieAlgebra lieAlgebra;
+  lieAlgebra.weylGroup.makeArbitrarySimple('B', 3);
+  lieAlgebra.weylGroup.computeRho(false);
+  for (int i = 0; i < lieAlgebra.getNumberOfGenerators(); i ++) {
+    ChevalleyGenerator generator;
+    generator.makeGenerator(lieAlgebra, i);
+    allGenerators.addOnTopNoRepetitionMustBeNew(generator);
+  }
+  std::string allGeneratorsString = allGenerators.toStringCommaDelimited();
+  std::string expected =
+  "g_{-9}, g_{-8}, g_{-7}, g_{-6}, g_{-5}, g_{-4}, g_{-3}, g_{-2}, g_{-1}, "
+  "h_{1}, h_{2}, h_{3}, "
+  "g_{1}, g_{2}, g_{3}, g_{4}, g_{5}, g_{6}, g_{7}, g_{8}, g_{9}";
+  if (allGeneratorsString != expected) {
+    global << "Expected generator string:" << Logger::endL
+    << expected << "\nbut got:\n" << allGeneratorsString << Logger::endL;
+    global.fatal << "Bad generators. " << global.fatal;
+  }
   return true;
 }

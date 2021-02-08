@@ -925,7 +925,7 @@ void SubgroupDataRootReflections::computeDynkinType() {
   WeylGroupData tempGroup;
   tempGroup.cartanSymmetric = this->SubCartanSymmetric;
   tempGroup.makeMeFromMyCartanSymmetric();
-  this->theDynkinType = tempGroup.theDynkinType;
+  this->theDynkinType = tempGroup.dynkinType;
 }
 
 SubgroupDataWeylGroup::SubgroupDataWeylGroup() {
@@ -1021,7 +1021,7 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
 
 void SubgroupDataRootReflections::computeCCSizesRepresentativesPreimages() {
   MacroRegisterFunctionWithName("SubgroupRootReflections::computeCCSizesRepresentativesPreimages");
-  if (this->theDynkinType == this->theWeylData->theDynkinType && this->theWeylData->theGroup.flagCCRepresentativesComputed) {
+  if (this->theDynkinType == this->theWeylData->dynkinType && this->theWeylData->theGroup.flagCCRepresentativesComputed) {
     this->theSubgroupData.theSubgroup->conjugacyClasses.setSize(this->theSubgroupData.theGroup->conjugacyClasses.size);
     for (int i = 0; i < this->theSubgroupData.theSubgroup->conjugacyClasses.size; i ++) {
       this->theSubgroupData.theSubgroup->conjugacyClasses[i].flagRepresentativeComputed = true;
@@ -1139,14 +1139,14 @@ void WeylGroupData::getSignSignatureAllRootSubsystems(List<SubgroupDataRootRefle
   MacroRegisterFunctionWithName("WeylGroup::getSignSignatureAllRootSubsystems");
   RootSubalgebras theRootSAs;
   SemisimpleLieAlgebra theSSlieAlg;
-  theSSlieAlg.theWeyl.makeFromDynkinType(this->theDynkinType);
+  theSSlieAlg.weylGroup.makeFromDynkinType(this->dynkinType);
 //  theSSlieAlg.computeChevalleyConstants(global);
   theRootSAs.owner = &theSSlieAlg;
   theRootSAs.computeAllReductiveRootSubalgebrasUpToIsomorphism();
   List<Vectors<Rational> > theRootSAsBases;
-  theRootSAsBases.setExpectedSize(theRootSAs.theSubalgebras.size);
-  for (int i = theRootSAs.theSubalgebras.size - 1; i >= 0; i --) {
-    theRootSAsBases.addOnTop(theRootSAs.theSubalgebras[i].simpleRootsReductiveSubalgebra);
+  theRootSAsBases.setExpectedSize(theRootSAs.subalgebras.size);
+  for (int i = theRootSAs.subalgebras.size - 1; i >= 0; i --) {
+    theRootSAsBases.addOnTop(theRootSAs.subalgebras[i].simpleRootsReductiveSubalgebra);
   }
   this->getSignSignatureRootSubgroups(outputSubgroups, theRootSAsBases);
 }

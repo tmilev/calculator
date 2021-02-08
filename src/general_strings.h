@@ -35,6 +35,7 @@ public:
     const List<char>& delimiters,
     List<std::string>& output
   );
+  static bool stringContains(const std::string& desiredContainer, const std::string& content);
   static void stringTrimWhiteSpace(const std::string& inputString, std::string& output);
   static void stringTrimToLengthWithHash(std::string& inputOutput, int desiredLength50AtLeast = 150);
   static std::string stringTrimToLengthForDisplay(const std::string& input, int desiredLength20AtLeast = 50);
@@ -48,6 +49,9 @@ public:
 
   static std::string convertStringToJSONString(const std::string& input);
   static std::string convertStringToJavascriptString(const std::string& input);
+  // Transforms an arbitrary string to a string that is an acceptable javascript variable.
+  // Avoid use of underscores and other characters so as attempt to produce a name that is
+  // in addition a valid latex string and a valid html tag.
   static std::string convertStringToJavascriptVariable(const std::string& input);
   static std::string stringTrimWhiteSpace(const std::string& inputString);
   static void splitStringInTwo(

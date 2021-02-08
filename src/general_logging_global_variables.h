@@ -219,7 +219,9 @@ public:
   bool flagLoggedIn;
   bool flagLogInAttempted;
   bool flagUsingSSLinCurrentConnection;
-  bool flagSSLIsAvailable;
+  // Whether we can carry out transport layer security
+  // "ssl" connections.
+  bool flagSSLAvailable;
   bool flagCertificatesAreOfficiallySigned;
   bool flagCrashInitiated;
 
@@ -305,7 +307,7 @@ public:
     bool isTimedOut();
     Response();
   };
-  Response theResponse;
+  Response response;
   ListReferences<std::thread> theThreads;
   ListReferences<ThreadData> theThreadData;
   ListReferences<ListReferences<StackInfo> > customStackTrace;

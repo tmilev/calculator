@@ -213,17 +213,17 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
   this->owner->drawRootSystem(collapsed, true, true);
   for (int i = 0; i < theOrbit.size; i ++) {
     LittelmannPath& currentPath = theOrbit[i];
-    animated.drawPath(currentPath.waypoints, "black", 1, this->owner->theDynkinType.toString(), i);
+    animated.drawPath(currentPath.waypoints, "black", 1, this->owner->dynkinType.toString(), i);
     collapsed.drawPath(currentPath.waypoints, "black", 1);
     for (int j = 0; j < currentPath.waypoints.size; j ++) {
-      animated.drawCircleAtVector(currentPath.waypoints[j], "purple", 3, this->owner->theDynkinType.toString(), i);
+      animated.drawCircleAtVector(currentPath.waypoints[j], "purple", 3, this->owner->dynkinType.toString(), i);
       collapsed.drawCircleAtVector(currentPath.waypoints[j], "purple", 3);
     }
   }
   out << "<br>Animation of the Littelmann paths follows. ";
-  out << animated.getHTMLDiv(this->owner->getDimension());
+  out << animated.getHTMLDiv(this->owner->getDimension(), false);
   out << "<br>Here are all Littelmann paths drawn simultaneously. ";
-  out << collapsed.getHTMLDiv(this->owner->getDimension());
+  out << collapsed.getHTMLDiv(this->owner->getDimension(), false);
   out << "Littelmann paths in simple coordinates given in the order in which they are generated ("
   << theOrbit.size << " total):<br>";
   out << "<table>";
@@ -295,8 +295,8 @@ void Calculator::makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output) {
   DynkinType b3Type, g2Type;
   b3Type.makeSimpleType('B', 3);
   g2Type.makeSimpleType('G', 2);
-  output.domainAlg = &this->theObjectContainer.getLieAlgebraCreateIfNotPresent(g2Type);
-  output.rangeAlg = &this->theObjectContainer.getLieAlgebraCreateIfNotPresent(b3Type);
+  output.domainAlg = &this->objectContainer.getLieAlgebraCreateIfNotPresent(g2Type);
+  output.rangeAlg = &this->objectContainer.getLieAlgebraCreateIfNotPresent(b3Type);
 
   output.theRange().computeChevalleyConstants();
   output.theDomain().computeChevalleyConstants();
@@ -460,7 +460,7 @@ bool Expression::assignMatrixExpressions(
       theMatType.addChildAtomOnTop(owner.opDouble());
       break;
     case typeAlgebraic:
-      theMatType.addChildAtomOnTop(owner.opAlgNumber());
+      theMatType.addChildAtomOnTop(owner.opAlgebraicNumber());
       break;
     case typePolyRat:
       theMatType.addChildAtomOnTop(owner.opPolynomialRational());
@@ -590,7 +590,7 @@ bool Calculator::Test::loadTestStrings(
     return false;
   }
   std::string testStrings;
-  if (!FileOperations::loadFiletoStringVirtual(
+  if (!FileOperations::loadFileToStringVirtual(
     WebAPI::calculator::testFileNameVirtual,
     testStrings,
     false,

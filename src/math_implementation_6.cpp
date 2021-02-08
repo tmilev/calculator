@@ -271,7 +271,7 @@ bool Polynomial<Coefficient>::isSquareFreeAndUnivariate(
 template<>
 bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) {
   MacroRegisterFunctionWithName("Polynomial::findOneVariableRationalRoots");
-  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
+  List<MonomialPolynomial>::Comparator* monomialOrder = &MonomialPolynomial::orderDefault();
   if (this->minimalNumberOfVariables() > 1) {
     return false;
   }
@@ -281,7 +281,7 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
   }
   Polynomial<Rational> myCopy;
   myCopy = *this;
-  myCopy.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  myCopy.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   Rational lowestTerm, highestCoefficient;
   this->getConstantTerm(lowestTerm);
   if (lowestTerm == 0) {
@@ -530,8 +530,8 @@ bool PolynomialFactorizationKronecker::solvePolynomial(
     }
     return false;
   }
-  MonomialP x(0, 1);
-  MonomialP xSquared(0, 2);
+  MonomialPolynomial x(0, 1);
+  MonomialPolynomial xSquared(0, 2);
   Rational a, b, c;
   for (int i = 0; i < factorization.reduced.size; i ++) {
     Polynomial<Rational>& factor = factorization.reduced[i];
@@ -611,7 +611,7 @@ bool PolynomialFactorizationFiniteFields::oneFactor(
   List<unsigned int> primeFactors;
   LargeIntegerUnsigned::getPrimesEratosthenesSieve(maximumPrimeToTry, primeFactors);
   this->leadingCoefficient = this->current.getLeadingCoefficient(
-    &MonomialP::orderDefault()
+    &MonomialPolynomial::orderDefault()
   ).getNumerator();
   for (int i = 1; i < primeFactors.size; i ++) {
     if (this->leadingCoefficient.value % primeFactors[i] == 0) {
@@ -628,7 +628,7 @@ bool PolynomialFactorizationFiniteFields::oneFactor(
     ) {
       continue;
     }
-    this->modularization.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+    this->modularization.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
     return this->oneFactorFromModularization(comments, commentsOnFailure);
   }
   return false;
@@ -719,7 +719,7 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
   ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
     this->current, this->desiredLift, this->modulusHenselLift
   );
-  this->scaleProductLift = this->desiredLift.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  this->scaleProductLift = this->desiredLift.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   Polynomial<ElementZmodP> newProduct;
   ElementZmodP one;
   one.makeOne(this->modulusHenselLift);
@@ -769,7 +769,7 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
       incoming.modulus = this->modulusHenselLift;
       int index = offset + summandsCurrentFactor - 1 - j;
       incoming.value = coefficientsCorrection[index].value * oldModulus;
-      this->factorsLifted[i].addMonomial(MonomialP(0, j), incoming);
+      this->factorsLifted[i].addMonomial(MonomialPolynomial(0, j), incoming);
     }
     offset += summandsCurrentFactor;
   }

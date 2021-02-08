@@ -10,7 +10,6 @@
   --box-shadow-default: none;
 }
 
-/*styleCalculator.css*/
 calculatorExampleInfo {
   display: block;
   transition: all 1s;
@@ -560,11 +559,20 @@ a.linkProgressReport {
   font-size: small;
 }
 
-#spanCalculatorExamplesContainer {
+#divCalculatorMainInputOutput{
   overflow: auto;
-  display: inline-block;
+  height: 100%;
+}
+
+#divCalculatorExamplesContainer {
+  overflow: auto;
   vertical-align:top;
   white-space:nowrap;
+  position: absolute; 
+  right:2%;
+  top: 0%;
+  max-width: 28%;
+  height: 100%;
 }
 
 #idAutocompletePanel {
@@ -680,6 +688,7 @@ div.divPage {
   width: 90%;
   height: 100%;
   overflow: auto;
+  position: relative;
 }
 
 div.divTheMainMenu {
@@ -705,10 +714,6 @@ div.divMenuSeparator {
   font-size: small;
   text-align: center;
   border-bottom: 1px solid black;
-}
-
-#divCalculatorExamples {
-  max-height: 850px;
 }
 
 div.headChapter {
@@ -1288,9 +1293,9 @@ button.buttonSelectPage {
   box-shadow: var(--box-shadow-buttonSelectPage);
   border: none;
   font-weight: bold;
-  padding: 8px;
-  margin-top: 5px;
-  margin-bottom: 5px;
+  padding: 3px;
+  margin-top: 4px;
+  margin-bottom: 4px;
   font-size: 14px;
   transition: 1.5s;
   width: 100%;
@@ -1531,7 +1536,7 @@ input:checked + .slider:before {
 }
 
 div.containerComments {
-  min-width: 100px;
+  min-width: 400px;
   word-break: break-all;
   width: 30%;
 }

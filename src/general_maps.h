@@ -49,7 +49,7 @@ public:
     }
     return this->values[theIndex];
   }
-  value getValue(const key& input, const value& resultIfMissing) {
+  value getValue(const key& input, const value& resultIfMissing) const {
     int theIndex = this->keys.getIndex(input);
     if (theIndex == - 1) {
       return resultIfMissing;
@@ -67,13 +67,13 @@ public:
     return this->values[theIndex];
   }
   value& getValueCreateNoInit(const key& input) {
-    int theIndex = this->keys.getIndex(input);
-    if (theIndex == - 1) {
-      theIndex = this->keys.size;
+    int index = this->keys.getIndex(input);
+    if (index == - 1) {
+      index = this->keys.size;
       this->keys.addOnTop(input);
       this->values.setSize(this->values.size + 1);
     }
-    return this->values[theIndex];
+    return this->values[index];
   }
   void setKeyValue(const key& inputKey, const value& inputValue) {
     if (this->contains(inputKey)) {

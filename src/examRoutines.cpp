@@ -15,16 +15,30 @@ std::string CalculatorHTML::stringScoredQuizzes = "Quiz";
 std::string CalculatorHTML::stringPracticE = "Practice";
 std::string CalculatorHTML::stringProblemLink = "Problem";
 
+std::string SyntacticElementHTML::Tags::filler = "filler";
+std::string SyntacticElementHTML::Tags::command = "command";
 std::string SyntacticElementHTML::Tags::calculator = "calculator";
 std::string SyntacticElementHTML::Tags::calculatorHidden = "calculatorHidden";
 std::string SyntacticElementHTML::Tags::calculatorSolution = "calculatorSolution";
+std::string SyntacticElementHTML::Tags::calculatorShowToUserOnly = "calculatorShowToUserOnly";
+std::string SyntacticElementHTML::Tags::calculatorSolutionStart = "calculatorSolutionStart";
+std::string SyntacticElementHTML::Tags::calculatorSolutionEnd = "calculatorSolutionEnd";
 std::string SyntacticElementHTML::Tags::calculatorExamProblem = "calculatorExamProblem";
 std::string SyntacticElementHTML::Tags::calculatorAnswer = "calculatorAnswer";
+std::string SyntacticElementHTML::Tags::hardCodedAnswer = "answer";
+std::string SyntacticElementHTML::Tags::answerCalculatorHighlight = "answerCalculatorHighlight";
+std::string SyntacticElementHTML::Tags::answerCalculatorHighlightStart = "answerCalculatorHighlightStart";
+std::string SyntacticElementHTML::Tags::answerCalculatorHighlightEnd = "answerCalculatorHighlightEnd";
+
+HashedList<std::string, HashFunctions::hashFunction> CalculatorHTML::Parser::calculatorClasses;
+HashedList<std::string, HashFunctions::hashFunction> CalculatorHTML::Parser::calculatorClassesAnswerFields;
+
+int SyntacticElementHTML::parsingDummyElements = 8;
 
 CalculatorHTML::CalculatorHTML() {
   this->numberOfInterpretationAttempts = 0;
   this->numberOfAnswerIdsMathquilled = 0;
-  this->MaxInterpretationAttempts = 25;
+  this->maxInterpretationAttempts = 25;
   this->flagLoadedSuccessfully = false;
   this->flagParentInvestigated = false;
   this->numberOfProblemsFound = 0;
@@ -36,9 +50,6 @@ CalculatorHTML::CalculatorHTML() {
   this->flagIsForReal = false;
   this->flagLoadedFromDB = false;
   this->flagLoadedClassDataSuccessfully = false;
-  this->flagTagHeadPresent = false;
-  this->flagTagHtmlPresent = false;
-  this->flagTagBodyPresent = false;
   this->flagDoPrependEditPagePanel = true;
 
   this->flagTopicTableStarted      = false;
@@ -47,10 +58,10 @@ CalculatorHTML::CalculatorHTML() {
   this->flagTopicChapterStarted    = false;
 
   this->timeToParseHtml = 0;
-  this->flagMathQuillWithMatrices = false;
   this->flagSectionsPrepared = false;
   this->topicLectureCounter = 0;
   this->topics.owner = this;
+  this->parser.owner = this;
 }
 
 bool CalculatorHTML::mergeProblemWeight(
@@ -384,7 +395,7 @@ bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
   }
 
   if (this->currentUser.problemData.contains(this->fileName)) {
-    this->theProblemData = this->currentUser.problemData.getValueCreate(this->fileName);
+    this->problemData = this->currentUser.problemData.getValueCreate(this->fileName);
   }
   global.userDefault = this->currentUser;
   return true;
@@ -397,7 +408,7 @@ bool CalculatorHTML::loadMe(
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::loadMe");
   if (!FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
-    this->fileName, this->RelativePhysicalFileNameWithFolder, commentsOnFailure
+    this->fileName, this->relativePhysicalFileNameWithFolder, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to get physical file name from "
@@ -407,7 +418,7 @@ bool CalculatorHTML::loadMe(
   }
   (void) doLoadDatabase;
   if (!FileOperations::loadFiletoStringVirtualCustomizedReadOnly(
-    this->fileName, this->inputHtml, commentsOnFailure
+    this->fileName, this->parser.inputHtml, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<br>User-input file name: [<b>" << this->fileName
@@ -433,11 +444,11 @@ bool CalculatorHTML::loadMe(
       }
     }
   }
-  this->theProblemData.checkConsistency();
+  this->problemData.checkConsistency();
   if (!this->flagIsForReal && inputRandomSeed != "") {
     std::stringstream randSeedStream(inputRandomSeed);
-    randSeedStream >> this->theProblemData.randomSeed;
-    this->theProblemData.flagRandomSeedGiven = true;
+    randSeedStream >> this->problemData.randomSeed;
+    this->problemData.flagRandomSeedGiven = true;
   }
   return true;
 }
@@ -455,7 +466,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(
   if (!this->interpretHtml(commentsOnFailure)) {
     out << "<b>Failed to interpret file: " << this->fileName << "</b>. ";
     out << "<br>We limit the number of generation attemps to "
-    << this->MaxInterpretationAttempts << " for performance reasons; "
+    << this->maxInterpretationAttempts << " for performance reasons; "
     << "with bad luck, some finicky problems require more. "
     << "Random seeds tried: "
     << this->randomSeedPerAttempt.toStringCommaDelimited()
@@ -504,23 +515,40 @@ void CalculatorHTML::loadCurrentProblemItem(
   if (!this->loadMe(needToLoadDatabaseMayIgnore, inputRandomSeed, commentsOnFailure)) {
     this->flagLoadedSuccessfully = false;
   }
-  this->theProblemData.checkConsistency();
+  this->problemData.checkConsistency();
 }
 
-bool CalculatorHTML::isStateModifierApplyIfYes(SyntacticElementHTML& inputElt) {
-  MacroRegisterFunctionWithName("CalculatorHTML::isStateModifierApplyIfYes");
+bool CalculatorHTML::Parser::isStateModifierApplyIfYes(SyntacticElementHTML& inputElt) {
+  MacroRegisterFunctionWithName("CalculatorHTML::Parser::isStateModifierApplyIfYes");
   if (inputElt.syntacticRole != "command") {
     return false;
   }
-  std::string tagClass = inputElt.getKeyValue("class");
+  std::string tagClass = inputElt.getTagClass();
   return false;
+}
+
+bool Answer::hasSolution() const {
+  return this->solutionElements.size > 0;
 }
 
 std::string Answer::toString() {
   MacroRegisterFunctionWithName("Answer::toString");
   std::stringstream out;
   out << "Answer id: " << this->answerId;
-  out << "<br>Answer commands on give-up: " << this->commandsNoEnclosureAnswerOnGiveUpOnly;
+  out << "<br>Answer commands on give-up: " << this->commandAnswerOnGiveUp;
+  return out.str();
+}
+
+std::string Answer::toStringSolutionElements() {
+  MacroRegisterFunctionWithName("Answer::toStringSolutionElements");
+  std::stringstream out;
+  out << this->solutionElements.size << " total solution elements. ";
+  for (int i = 0; i < this->solutionElements.size; i ++) {
+    out << this->solutionElements[i].toStringTagAndContent();
+    if (i != this->solutionElements.size - 1) {
+      out << ", ";
+    }
+  }
   return out.str();
 }
 
@@ -556,7 +584,7 @@ std::string CalculatorHTML::toStringLinkCurrentAdmin(
   out << "fileName=" << urledProblem << "&"
   << global.toStringCalculatorArgumentsNoNavigation(&randomSeedContainer);
   if (includeRandomSeed) {
-    out << "randomSeed=" << this->theProblemData.randomSeed << "&";
+    out << "randomSeed=" << this->problemData.randomSeed << "&";
   }
   if (setDebugFlag) {
     out << "debugFlag=true&";
@@ -633,7 +661,7 @@ std::string CalculatorHTML::toStringProblemInfo(const std::string& theFileName, 
     bool problemAlreadySolved = false;
     if (this->currentUser.problemData.contains(theFileName)) {
       ProblemData& theProbData = this->currentUser.problemData.getValueCreate(theFileName);
-      if (theProbData.numCorrectlyAnswered >= theProbData.theAnswers.size()) {
+      if (theProbData.numCorrectlyAnswered >= theProbData.answers.size()) {
         problemAlreadySolved = true;
       }
     }
@@ -675,11 +703,11 @@ bool CalculatorHtmlFunctions::interpretProblem(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::interpretProblem");
   CalculatorHTML theProblem;
-  if (!input.isOfType<std::string>(&theProblem.inputHtml)) {
+  if (!input.isOfType<std::string>(&theProblem.parser.inputHtml)) {
     return calculator << "Extracting calculator expressions from html takes as input strings. ";
   }
-  theProblem.theProblemData.flagRandomSeedGiven = true;
-  theProblem.theProblemData.randomSeed = calculator.theObjectContainer.pseudoRandom.getRandomSeed();
+  theProblem.problemData.flagRandomSeedGiven = true;
+  theProblem.problemData.randomSeed = calculator.objectContainer.pseudoRandom.getRandomSeed();
   theProblem.interpretHtml(&calculator.comments);
   std::stringstream out;
   out << theProblem.outputHtmlBodyNoTag;
@@ -696,46 +724,49 @@ bool CalculatorHtmlFunctions::interpretProblem(
   return output.assignValue(out.str(), calculator);
 }
 
-std::string CalculatorHTML::ToStringExtractedCommands() {
-  MacroRegisterFunctionWithName("CalculatorHTML::ToStringExtractedCommands");
+std::string CalculatorHTML::toStringExtractedCommands() {
+  MacroRegisterFunctionWithName("CalculatorHTML::toStringExtractedCommands");
   std::stringstream out;
   out << "<hr><b>The commands extracted from the HTML follow.</b><br>";
   out << "<table>";
-  for (int i = 0; i < this->theContent.size; i ++) {
-    if (this->theContent[i].syntacticRole != "") {
-      out << "<tr>" << "<td>" << this->theContent[i].toStringDebug() << "</td>"
+  for (int i = 0; i < this->content.size; i ++) {
+    if (this->content[i].syntacticRole != "") {
+      out << "<tr>" << "<td>"
+      << this->content[i].toStringDebug() << "</td>"
       << "</tr>";
     } else {
       out << "<tr><td></td></tr>";
     }
   }
   out << "</table>";
-  out << "<hr><b>The HTML from which the commands were extracted follows.</b><br>" << this->inputHtml
-  << "<hr><b>The parsing stack follows.</b>" << this->toStringParsingStack(this->eltsStack) << "<hr>";
+  out << "<hr><b>The HTML from which the commands were extracted follows.</b><br>" << this->parser.inputHtml
+  << "<hr><b>The parsing stack follows.</b>" << this->parser.toStringParsingStack(this->parser.elementStack) << "<hr>";
   return out.str();
 }
 
 std::string CalculatorHTML::toStringContent() {
   MacroRegisterFunctionWithName("CalculatorHTML::toStringContent");
   std::stringstream out;
-//  out << "<hr><b>The split strings follow. </b><hr>" << splitStrings.toStringCommaDelimited();
   out << "<hr><b>The extracted commands follow.</b><br>";
-  for (int i = 0; i < this->theContent.size; i ++) {
-    out << this->theContent[i].toStringTagAndContent();
+  for (int i = 0; i < this->content.size; i ++) {
+    out << this->content[i].toStringTagAndContent();
   }
-  out << "<hr><b>The html read follows.</b><br>" << this->inputHtml << "<hr>";
+  out << "<hr><b>The html read follows.</b><br>" << this->parser.inputHtml << "<hr>";
   return out.str();
 }
 
 void SyntacticElementHTML::resetAllExceptContent() {
   this->tag = "";
   this->properties.clear();
+  this->propertiesWithoutValue.clear();
   this->syntacticRole = "";
   this->flagUseDisplaystyleInMathMode = false;
-  this->children.setSize(0);
+  this->errorComment = "";
 }
 
-std::string SyntacticElementHTML::toStringOpenTag(const std::string& overrideTagIfNonEmpty, bool immediatelyClose) {
+std::string SyntacticElementHTML::toStringOpenTag(
+  const std::string& overrideTagIfNonEmpty, bool immediatelyClose
+) const {
   if (this->tag == "" || this->flagUseMathSpan == false) {
     return "";
   }
@@ -746,15 +777,18 @@ std::string SyntacticElementHTML::toStringOpenTag(const std::string& overrideTag
     out << "<" << overrideTagIfNonEmpty;
   }
   for (int i = 0; i < this->properties.size(); i ++) {
-    out << " " << this->properties.keys[i] << "=\"" << this->properties.values[i] << "\"";
+    out << " " << this->properties.keys[i] << "=\""
+    << this->properties.values[i] << "\"";
   }
   for (int i = 0; i < this->defaultKeysIfMissing.size; i ++) {
     if (!this->properties.contains(this->defaultKeysIfMissing[i])) {
       out << " " << this->defaultKeysIfMissing[i] << "=\"" << this->defaultValuesIfMissing[i] << "\"";
     }
   }
-  if (this->tagKeysWithoutValue.size > 0) {
-    out << " " << this->tagKeysWithoutValue[0];
+  if (this->propertiesWithoutValue.size > 0) {
+    for (int i = 0; i < this->propertiesWithoutValue.size; i ++) {
+      out << " " << this->propertiesWithoutValue[i];
+    }
   }
   if (immediatelyClose) {
     out << "/";
@@ -763,7 +797,9 @@ std::string SyntacticElementHTML::toStringOpenTag(const std::string& overrideTag
   return out.str();
 }
 
-std::string SyntacticElementHTML::toStringCloseTag(const std::string& overrideTagIfNonEmpty) {
+std::string SyntacticElementHTML::toStringCloseTag(
+  const std::string& overrideTagIfNonEmpty
+) const {
   if (this->tag == "" || this->flagUseMathSpan == false) {
     return "";
   }
@@ -774,50 +810,43 @@ std::string SyntacticElementHTML::toStringCloseTag(const std::string& overrideTa
   }
 }
 
-std::string SyntacticElementHTML::toStringTagAndContent() {
+std::string SyntacticElementHTML::toStringTagAndContent() const {
   MacroRegisterFunctionWithName("SyntacticElementHTML::toStringTagAndContent");
   if (this->syntacticRole == "") {
     return this->content;
   }
   std::stringstream out;
   out << this->toStringOpenTag("") + this->content + this->toStringCloseTag("");
-  if (this->children.size > 0) {
-    out << "[";
-    for (int i = 0; i < this->children.size; i ++) {
-      out << this->children[i].toStringDebug();
-      if (i != this->children.size - 1) {
-        out << ", ";
-      }
-    }
-    out << "]";
-  }
   return out.str();
 }
 
-std::string SyntacticElementHTML::toStringDebug() {
-  MacroRegisterFunctionWithName("SyntacticElementHTML::toString");
+std::string SyntacticElementHTML::toStringDebug() const {
+  MacroRegisterFunctionWithName("SyntacticElementHTML::toStringDebug");
   if (this->syntacticRole == "") {
     return HtmlRoutines::convertStringToHtmlString(this->toStringTagAndContent(), false);
   }
   std::stringstream out;
-  out << "<span style =\"color:green\">";
+  out << "<span style='color:green'>";
   out << HtmlRoutines::convertStringToHtmlString(this->syntacticRole, false);
   out << "</span>";
   out << "[" << HtmlRoutines::convertStringToHtmlString(this->toStringTagAndContent(), false) << "]";
+  if (this->errorComment != "") {
+    out << "[[<span style='color:red'>" << this->errorComment << "</span>]]";
+  }
   return out.str();
 }
 
-std::string SyntacticElementHTML::getKeyValue(const std::string& theKey) const {
+std::string SyntacticElementHTML::getKeyValue(const std::string& key) const {
   MacroRegisterFunctionWithName("SyntacticElementHTML::getKeyValue");
-  if (!this->properties.contains(theKey)) {
+  if (!this->properties.contains(key)) {
     return "";
   }
-  return this->properties.getValueNoFail(theKey);
+  return this->properties.getValueNoFail(key);
 }
 
-void SyntacticElementHTML::setKeyValue(const std::string& theKey, const std::string& theValue) {
+void SyntacticElementHTML::setKeyValue(const std::string& key, const std::string& value) {
   MacroRegisterFunctionWithName("SyntacticElementHTML::setKeyValue");
-  this->properties.setKeyValue(theKey, theValue);
+  this->properties.setKeyValue(key, value);
 }
 
 std::string SyntacticElementHTML::toStringInterpretedBody() {
@@ -856,78 +885,129 @@ bool SyntacticElementHTML::isInterpretedNotByCalculator() {
   ) {
     return true;
   }
-  std::string tagClass = this->getKeyValue("class");
+  std::string tagClass = this->getTagClass();
   return
-  tagClass == SyntacticElementHTML::Tags::calculatorExamProblem || tagClass == "calculatorExamIntermediate" ||
-  tagClass == SyntacticElementHTML::Tags::calculatorAnswer || tagClass == "calculatorManageClass" ||
-  tagClass == "generateTopicTable" ||
+  tagClass == SyntacticElementHTML::Tags::calculatorExamProblem ||
+  tagClass == "calculatorExamIntermediate" ||
+  tagClass == SyntacticElementHTML::Tags::calculatorAnswer ||
+  tagClass == SyntacticElementHTML::Tags::hardCodedAnswer ||
+  tagClass == "calculatorManageClass" ||
   tagClass == "calculatorJavascript" ||
   tagClass == "accountInformationLinks" ||
-  tagClass == "generateTableOfContents" ||
   tagClass == "calculatorNavigationHere" ||
   tagClass == "calculatorEditPageHere" ||
   this->isAnswerElement(nullptr);
 }
 
-bool SyntacticElementHTML::isInterpretedByCalculatorDuringProblemGeneration() {
-  if (this->syntacticRole != "command") {
+bool SyntacticElementHTML::isInterpretedByCalculatorOnGeneration() const {
+  if (this->syntacticRole != SyntacticElementHTML::Tags::command) {
     return false;
   }
-  std::string tagClass = this->getKeyValue("class");
-  return tagClass == "calculator" || tagClass == "calculatorHidden" ||
-  tagClass == "calculatorShowToUserOnly" ;
+  std::string tagClass = this->getTagClass();
+  return tagClass == SyntacticElementHTML::Tags::calculator ||
+  tagClass == SyntacticElementHTML::Tags::calculatorHidden ||
+  tagClass ==  SyntacticElementHTML::Tags::calculatorShowToUserOnly ;
 }
 
-bool SyntacticElementHTML::isInterpretedByCalculatorDuringSubmission() {
-  if (this->syntacticRole != "command") {
+bool SyntacticElementHTML::isInterpretedByCalculatorOnSubmission() {
+  if (this->syntacticRole != SyntacticElementHTML::Tags::command) {
     return false;
   }
-  std::string tagClass = this->getKeyValue("class");
-  return tagClass == "calculator" || tagClass == "calculatorHidden";
+  std::string tagClass = this->getTagClass();
+  return tagClass == SyntacticElementHTML::Tags::calculator ||
+  tagClass == SyntacticElementHTML::Tags::calculatorHidden;
 }
 
-bool SyntacticElementHTML::isAnswer() {
-  if (this->syntacticRole != "command") {
+bool SyntacticElementHTML::isAnswerStandard() const {
+  if (this->syntacticRole != SyntacticElementHTML::Tags::command) {
     return false;
   }
-  return this->getKeyValue("class") == SyntacticElementHTML::Tags::calculatorAnswer;
+  return this->getTagClass() == SyntacticElementHTML::Tags::calculatorAnswer;
 }
 
-bool SyntacticElementHTML::isCalculatorCommand() {
-  if (this->syntacticRole != "command") {
+bool SyntacticElementHTML::isAnswer() const {
+  return this->isAnswerStandard() || this->isAnswerHardCoded();
+}
+
+bool SyntacticElementHTML::isAnswerHardCoded() const {
+  if (this->syntacticRole != SyntacticElementHTML::Tags::command) {
     return false;
   }
-  return this->getKeyValue("class") == "calculator";
+  return this->getTagClass() == SyntacticElementHTML::Tags::hardCodedAnswer;
+}
+
+bool SyntacticElementHTML::isCalculatorCommand() const {
+  if (this->syntacticRole != SyntacticElementHTML::Tags::command) {
+    return false;
+  }
+  return this->getTagClass() == SyntacticElementHTML::Tags::calculator;
+}
+
+bool SyntacticElementHTML::isCalculatorCommandGenerationOnly() const {
+  if (this->syntacticRole != SyntacticElementHTML::Tags::command) {
+    return false;
+  }
+  return this->getTagClass() == SyntacticElementHTML::Tags::calculatorShowToUserOnly;
 }
 
 bool SyntacticElementHTML::isCalculatorHidden() {
-  if (this->syntacticRole != "command") {
+  if (this->syntacticRole != SyntacticElementHTML::Tags::command) {
     return false;
   }
-  return this->getKeyValue("class") == "calculatorHidden";
+  return this->getTagClass() == SyntacticElementHTML::Tags::calculatorHidden;
 }
 
-bool SyntacticElementHTML::isHidden() {
+bool SyntacticElementHTML::shouldShow() const {
   if (this->syntacticRole != "command") {
-    return false;
+    return true;
   }
-  std::string tagClass = this->getKeyValue("class");
-  return tagClass == "calculatorHidden" || tagClass == "calculatorCommentsBeforeInterpretation";
+  std::string tagClass = this->getTagClass();
+  return
+  tagClass == SyntacticElementHTML::Tags::calculator ||
+  tagClass == SyntacticElementHTML::Tags::calculatorShowToUserOnly ||
+  tagClass == SyntacticElementHTML::Tags::calculatorAnswer ||
+  tagClass == SyntacticElementHTML::Tags::hardCodedAnswer;
 }
 
 bool SyntacticElementHTML::isSolution() {
   if (this->syntacticRole != "command") {
     return false;
   }
-  std::string tagClass = this->getKeyValue("class");
+  std::string tagClass = this->getTagClass();
   return tagClass == SyntacticElementHTML::Tags::calculatorSolution;
+}
+
+std::string SyntacticElementHTML::getAnswerIdOfOwner() const {
+  if (this->syntacticRole != "command") {
+    return "";
+  }
+  return StringRoutines::stringTrimWhiteSpace(this->getKeyValue("name"));
+}
+
+std::string SyntacticElementHTML::answerIdCorrectIfEmpty() {
+  std::string result = this->answerIdIfAnswer();
+  if (this->getKeyValue("id") == "") {
+    this->properties.setKeyValue("id", result);
+  }
+  return result;
+}
+
+std::string SyntacticElementHTML::answerIdIfAnswer() const {
+  if (!this->isAnswer()) {
+    return "";
+  }
+  std::string result = this->getKeyValue("id");
+  if (result == "") {
+    result = "answerIdAutogenerated";
+  }
+  return StringRoutines::stringTrimWhiteSpace(result);
 }
 
 bool SyntacticElementHTML::isAnswerOnGiveUp() {
   if (this->syntacticRole != "command") {
     return false;
   }
-  std::string tagClass = this->getKeyValue("class");
+  std::string tagClass = this->getTagClass();
   return tagClass == "calculatorAnswerOnGiveUp";
 }
 
@@ -935,7 +1015,7 @@ bool SyntacticElementHTML::isCommentBeforeSubmission() {
   if (this->syntacticRole != "command") {
     return false;
   }
-  std::string tagClass = this->getKeyValue("class");
+  std::string tagClass = this->getTagClass();
   return tagClass == "calculatorCommentsBeforeSubmission";
 }
 
@@ -943,7 +1023,7 @@ bool SyntacticElementHTML::isCommentBeforeInterpretation() {
   if (this->syntacticRole != "command") {
     return false;
   }
-  std::string tagClass = this->getKeyValue("class");
+  std::string tagClass = this->getTagClass();
   return tagClass == "calculatorCommentsBeforeInterpretation";
 }
 
@@ -951,7 +1031,7 @@ bool SyntacticElementHTML::isAnswerElement(std::string* desiredAnswerId) {
   if (this->syntacticRole != "command") {
     return false;
   }
-  std::string tagClass = this->getKeyValue("class");
+  std::string tagClass = this->getTagClass();
   bool result = tagClass == "calculatorButtonSubmit" ||
   tagClass == "calculatorButtonInterpret" ||
   tagClass == "calculatorButtonGiveUp" ||
@@ -991,7 +1071,7 @@ std::string CalculatorHTML::getProblemHeaderEnclosure() {
   std::stringstream out;
   out << Calculator::Atoms::commandEnclosure << "{}(";
   out << Calculator::Atoms::setRandomSeed
-  << "{}(" << this->theProblemData.randomSeed << "); ";
+  << "{}(" << this->problemData.randomSeed << "); ";
   out << this->prepareUserInputBoxes();
   out << "); ";
   return out.str();
@@ -1000,7 +1080,7 @@ std::string CalculatorHTML::getProblemHeaderEnclosure() {
 std::string CalculatorHTML::getProblemHeaderWithoutEnclosure() {
   std::stringstream out;
   out << Calculator::Atoms::setRandomSeed
-  << " {}(" << this->theProblemData.randomSeed << "); ";
+  << " {}(" << this->problemData.randomSeed << "); ";
   out << this->prepareUserInputBoxes();
   return out.str();
 }
@@ -1010,35 +1090,36 @@ bool CalculatorHTML::prepareCommandsGenerateProblem(std::stringstream* comments)
   (void) comments;
   std::stringstream streamCommands, streamCommandsNoEnclosures;
   streamCommandsNoEnclosures << this->getProblemHeaderWithoutEnclosure();
-  streamCommands << this->getProblemHeaderEnclosure();//first calculator enclosure contains the header
-  int numCommandsSoFar = 2;//two commands at the start: the opCommandSequence command and
+  streamCommands << this->getProblemHeaderEnclosure();
+  // <-The first calculator enclosure contains the header.
+  int commandCount = 2;
+  // <- Two commands at the start: the opCommandSequence command and
   // the first enclosure.
-  for (int i = 0; i < this->theContent.size; i ++) {
-    SyntacticElementHTML& currentElt = this->theContent[i];
-    if (!currentElt.isInterpretedByCalculatorDuringProblemGeneration()) {
+  for (int i = 0; i < this->content.size; i ++) {
+    SyntacticElementHTML& current = this->content[i];
+    if (!current.isInterpretedByCalculatorOnGeneration()) {
       continue;
     }
-    std::string commandCleaned = this->cleanUpCommandString(currentElt.content);
-    std::string commandEnclosed = Calculator::Atoms::commandEnclosure + "{}( " + commandCleaned + " );";
-    streamCommands << commandEnclosed;
-    streamCommandsNoEnclosures << commandCleaned;
-    currentElt.commandIndex = numCommandsSoFar;
-    numCommandsSoFar ++;
+    streamCommands << current.commandEnclosed();
+    streamCommandsNoEnclosures << current.commandCleaned();
+    current.commandIndex = commandCount;
+    commandCount ++;
   }
-  this->theProblemData.commandsGenerateProblem = streamCommands.str();
-  this->theProblemData.commandsGenerateProblemNoEnclosures = streamCommandsNoEnclosures.str();
+  this->problemData.commandsGenerateProblem = streamCommands.str();
+  this->problemData.commandsGenerateProblemNoEnclosures = streamCommandsNoEnclosures.str();
   std::stringstream debugStream;
   debugStream << "<a href='"
-  << HtmlRoutines::getCalculatorComputationURL(this->theProblemData.commandsGenerateProblemNoEnclosures)
-  << "'>"
+  << HtmlRoutines::getCalculatorComputationURL(
+    this->problemData.commandsGenerateProblemNoEnclosures
+  ) << "'>"
   << "Input link </a>";
-  this->theProblemData.commandsGenerateProblemLink = debugStream.str();
+  this->problemData.commandsGenerateProblemLink = debugStream.str();
   return true;
 }
 
 bool CalculatorHTML::parseHTMLPrepareCommands(std::stringstream* comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::parseHTMLPrepareCommands");
-  if (!this->parseHTML(comments)) {
+  if (!this->parser.parseHTML(comments)) {
     return false;
   }
   return this->prepareCommands(comments);
@@ -1049,200 +1130,288 @@ bool CalculatorHTML::prepareCommands(std::stringstream* comments) {
   if (!this->prepareCommandsGenerateProblem(comments)) {
     return false;
   }
-  for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++) {
-    if (!this->prepareCommandsAnswer(this->theProblemData.theAnswers.values[i], comments)) {
+  for (int i = 0; i < this->problemData.answers.size(); i ++) {
+    Answer& answer = this->problemData.answers.values[i];
+    if (!this->prepareCommandsAnswer(answer, comments)) {
       return false;
     }
-    if (!this->prepareCommandsAnswerOnGiveUp(this->theProblemData.theAnswers.values[i], comments)) {
+    if (!this->prepareCommandsAnswerOnGiveUp(answer, comments)) {
       return false;
     }
-    if (!this->prepareCommandsSolution(this->theProblemData.theAnswers.values[i], comments)) {
+    if (!this->exrtactSolutionCommands(answer, comments)) {
       return false;
     }
-    if (!this->prepareCommentsBeforeSubmission(this->theProblemData.theAnswers.values[i], comments)) {
+    if (!this->prepareCommentsBeforeSubmission(answer, comments)) {
       return false;
     }
-    if (!this->prepareCommentsBeforeInterpretation(this->theProblemData.theAnswers.values[i], comments)) {
+    if (!this->prepareCommentsBeforeInterpretation(answer, comments)) {
       return false;
     }
   }
   return true;
 }
 
-bool CalculatorHTML::prepareCommandsAnswerOnGiveUp(Answer& theAnswer, std::stringstream* comments) {
+bool CalculatorHTML::prepareCommandsAnswerOnGiveUp(
+  Answer& answer, std::stringstream* comments
+) {
   MacroRegisterFunctionWithName("CalculatorHTML::prepareCommandsAnswerOnGiveUp");
+  if (answer.flagAnswerHardcoded) {
+    return true;
+  }
   (void) comments;
   std::stringstream streamCommands;
-  for (int i = 0; i < this->theContent.size; i ++) {
-    SyntacticElementHTML& currentElt = this->theContent[i];
-    if (!currentElt.isAnswerOnGiveUp()) {
+  for (int i = 0; i < this->content.size; i ++) {
+    SyntacticElementHTML& current = this->content[i];
+    if (!current.isAnswerOnGiveUp()) {
       continue;
     }
-    if (currentElt.getKeyValue("name") == theAnswer.answerId) {
-      streamCommands << this->cleanUpCommandString(currentElt.content);
-    }
+    if (current.getKeyValue("name") == answer.answerId) {
+      streamCommands << current.commandCleaned();
+    }    
   }
-  theAnswer.commandsNoEnclosureAnswerOnGiveUpOnly = streamCommands.str();
+  answer.commandAnswerOnGiveUp = streamCommands.str();
   return true;
 }
 
 bool CalculatorHTML::prepareCommentsBeforeSubmission(
-  Answer& theAnswer, std::stringstream* comments
+  Answer& answer, std::stringstream* comments
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::prepareCommentsBeforeSubmission");
   (void) comments;
   std::stringstream streamCommands;
-  for (int i = 0; i < this->theContent.size; i ++) {
-    SyntacticElementHTML& currentElt = this->theContent[i];
-    if (!currentElt.isCommentBeforeSubmission()) {
+  for (int i = 0; i < this->content.size; i ++) {
+    SyntacticElementHTML& current = this->content[i];
+    if (!current.isCommentBeforeSubmission()) {
       continue;
     }
-    if (currentElt.getKeyValue("name") != theAnswer.answerId) {
+    if (current.getKeyValue("name") != answer.answerId) {
       continue;
     }
-    streamCommands << this->cleanUpCommandString(currentElt.content);
+    streamCommands << current.commandCleaned();
   }
-  theAnswer.commandsCommentsBeforeSubmission = streamCommands.str();
+  answer.commandsCommentsBeforeSubmission = streamCommands.str();
   return true;
 }
 
 bool CalculatorHTML::prepareCommentsBeforeInterpretation(
-  Answer& theAnswer, std::stringstream* comments
+  Answer& answer, std::stringstream* comments
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::prepareCommentsBeforeInterpretation");
   (void) comments;
   std::stringstream streamCommands;
-  for (int i = 0; i < this->theContent.size; i ++) {
-    SyntacticElementHTML& currentElt = this->theContent[i];
-    if (!currentElt.isCommentBeforeInterpretation()) {
+  for (int i = 0; i < this->content.size; i ++) {
+    SyntacticElementHTML& current = this->content[i];
+    if (!current.isCommentBeforeInterpretation()) {
       continue;
     }
-    if (currentElt.getKeyValue("name") != theAnswer.answerId) {
+    if (current.getKeyValue("name") != answer.answerId) {
       continue;
     }
-    streamCommands << this->cleanUpCommandString(currentElt.content);
+    streamCommands << current.commandCleaned();
   }
-  theAnswer.commandsCommentsBeforeInterpretatioN = streamCommands.str();
+  answer.commandsCommentsBeforeInterpretation = streamCommands.str();
   return true;
 }
 
-bool CalculatorHTML::prepareCommandsSolution(Answer& theAnswer, std::stringstream* comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::prepareCommandsSolution");
+bool CalculatorHTML::exrtactSolutionCommands(
+  Answer& answer,
+  std::stringstream* comments
+) {
   (void) comments;
   std::stringstream streamCommands;
-  for (int i = 0; i < this->theContent.size; i ++) {
-    SyntacticElementHTML& solutionElt = this->theContent[i];
-    if (!solutionElt.isSolution()) {
-      continue;
-    }
-    if (solutionElt.getKeyValue("name") != theAnswer.answerId) {
-      continue;
-    }
-    int numCommandsSoFar = 2;
-    theAnswer.solutionElements = solutionElt.children;
-    for (int j = 0; j < theAnswer.solutionElements.size; j ++) {
-      SyntacticElementHTML& currentElt = theAnswer.solutionElements[j];
-      if (!currentElt.isCalculatorCommand() && !currentElt.isCalculatorHidden()) {
-        continue;
-      }
-      currentElt.commandIndex = numCommandsSoFar;
-      numCommandsSoFar ++;
-      streamCommands << Calculator::Atoms::commandEnclosure << "{}("
-      << this->cleanUpCommandString(currentElt.content) << "); ";
-    }
-  }
-  theAnswer.commandsSolutionOnly = streamCommands.str();
-  return true;
-}
-
-bool CalculatorHTML::prepareCommandsAnswer(Answer& theAnswer, std::stringstream* comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::prepareCommandsAnswer");
-  std::stringstream streamCommandS;
-  std::stringstream streamCommandsNoEnclosures;
-  streamCommandS << this->getProblemHeaderEnclosure(); // first calculator enclosure contains the header
-  streamCommandsNoEnclosures << this->getProblemHeaderWithoutEnclosure();
-  std::stringstream streamCommandsBody;
-  std::stringstream streamCommandsBodyNoEnclosures;
-  for (int i = 0; i < this->theContent.size; i ++) {
-    SyntacticElementHTML& currentElt = this->theContent[i];
+  int numCommandsSoFar = 2;
+  for (int j = 0; j < answer.solutionElements.size; j ++) {
+    SyntacticElementHTML& current = answer.solutionElements[j];
     if (
-      !currentElt.isCalculatorHidden() && !currentElt.isCalculatorCommand()
-      && !currentElt.isAnswer()
+      !current.isInterpretedByCalculatorOnGeneration()
     ) {
       continue;
     }
-    std::string commandCleaned = this->cleanUpCommandString(this->theContent[i].content);
-    std::string commandEnclosed = Calculator::Atoms::commandEnclosure + "{}( " + commandCleaned + " );";
-    if (currentElt.isAnswer() && currentElt.getKeyValue("id") == theAnswer.answerId) {
-      std::string stringCommandsBody = streamCommandsBody.str();
-      if (stringCommandsBody != "") {
-        streamCommandS << Calculator::Atoms::commandEnclosure << "{}(" << stringCommandsBody << ");\n";
-        streamCommandsNoEnclosures << streamCommandsBodyNoEnclosures.str();
-      }
-      theAnswer.commandsBeforeAnswer = streamCommandS.str();
-      theAnswer.commandsBeforeAnswerNoEnclosuresForDEBUGGING = streamCommandsNoEnclosures.str();
-      theAnswer.commandVerificationOnly = commandCleaned;
+    current.commandIndex = numCommandsSoFar;
+    numCommandsSoFar ++;
+    streamCommands << Calculator::Atoms::commandEnclosure << "{}("
+    << current.commandCleaned() << "); ";
+  }
+  answer.commandsSolutionOnly = streamCommands.str();
+  return true;
+}
+
+Answer::Answer() {
+  this->numSubmissions = 0;
+  this->numCorrectSubmissions = 0;
+  this->flagAutoGenerateSubmitButtons = true;
+  this->flagAutoGenerateMQButtonPanel = true;
+  this->flagAutoGenerateMQfield = true;
+  this->flagAutoGenerateVerificationField = true;
+  this->flagAutoGenerateButtonSolution = true;
+  this->flagAnswerVerificationFound = false;
+  this->flagAnswerHardcoded = false;
+}
+
+bool Answer::prepareAnswer(
+  const SyntacticElementHTML& input,
+  std::stringstream& commands,
+  std::stringstream& commandsBody,
+  std::stringstream& commandsNoEnclosures,
+  std::stringstream& commandsBodyNoEnclosures
+) {
+  if (
+    !input.isAnswer() ||
+    input.answerIdIfAnswer() != this->answerId
+  ) {
+    return false;
+  }
+  if (input.isAnswerStandard()) {
+    return this->prepareAnswerStandard(
+      input,
+      commands,
+      commandsBody,
+      commandsNoEnclosures,
+      commandsBodyNoEnclosures
+    );
+  }
+  return this->prepareAnswerHardCoded(
+    input,
+    commands,
+    commandsBody,
+    commandsNoEnclosures,
+    commandsBodyNoEnclosures
+  );
+}
+
+bool Answer::prepareAnswerStandard(
+  const SyntacticElementHTML &input,
+  std::stringstream& commands,
+  std::stringstream& commandsBody,
+  std::stringstream& commandsNoEnclosures,
+  std::stringstream& commandsBodyNoEnclosures
+) {
+  std::string stringCommandsBody = commandsBody.str();
+  if (stringCommandsBody != "") {
+    commands << Calculator::Atoms::commandEnclosure << "{}(" << stringCommandsBody << ");\n";
+    commandsNoEnclosures << commandsBodyNoEnclosures.str();
+  }
+  this->commandsBeforeAnswer = commands.str();
+  this->commandsBeforeAnswerNoEnclosuresForDEBUGGING = commandsNoEnclosures.str();
+  this->commandVerificationOnly = input.commandCleaned();
+  this->flagAnswerHardcoded = false;
+  return true;
+}
+
+bool Answer::prepareAnswerHardCoded(
+  const SyntacticElementHTML& input,
+  std::stringstream& commands,
+  std::stringstream& commandsBody,
+  std::stringstream& commandsNoEnclosures,
+  std::stringstream& commandsBodyNoEnclosures
+) {
+  std::string stringCommandsBody = commandsBody.str();
+  if (stringCommandsBody != "") {
+    commands << SyntacticElementHTML::cleanUpEncloseCommand(stringCommandsBody);
+    commandsNoEnclosures << commandsBodyNoEnclosures.str();
+  }
+  this->commandsBeforeAnswer = commands.str();
+  this->commandsBeforeAnswerNoEnclosuresForDEBUGGING = commandsNoEnclosures.str();
+  this->commandAnswerOnGiveUp = input.content;
+  this->flagAnswerHardcoded = true;
+  return true;
+}
+
+bool CalculatorHTML::prepareCommandsAnswer(Answer& answer, std::stringstream* comments) {
+  MacroRegisterFunctionWithName("CalculatorHTML::prepareCommandsAnswer");
+  std::stringstream commands;
+  std::stringstream commandsNoEnclosures;
+  commands << this->getProblemHeaderEnclosure(); // first calculator enclosure contains the header
+  commandsNoEnclosures << this->getProblemHeaderWithoutEnclosure();
+  std::stringstream commandsBody;
+  std::stringstream commandsBodyNoEnclosures;
+  for (int i = 0; i < this->content.size; i ++) {
+    SyntacticElementHTML& current = this->content[i];
+    if (
+      !current.isCalculatorHidden() &&
+      !current.isCalculatorCommand() &&
+      !current.isAnswer()
+    ) {
+      continue;
+    }
+    if (answer.prepareAnswer(
+      current,
+      commands,
+      commandsBody,
+      commandsNoEnclosures,
+      commandsBodyNoEnclosures
+    )) {
       return true;
     }
-    if (this->theContent[i].isCalculatorHidden() || this->theContent[i].isCalculatorCommand()) {
-      streamCommandsBody << commandEnclosed;
-      streamCommandsBodyNoEnclosures << commandCleaned;
+    if (this->content[i].isCalculatorHidden() || this->content[i].isCalculatorCommand()) {
+      commandsBody << current.commandEnclosed();
+      commandsBodyNoEnclosures << current.commandCleaned();
     }
   }
   if (comments != nullptr) {
     *comments << "<b>Something is wrong: did not find answer for answer tag: "
-    << theAnswer.answerId << ". </b>";
+    << answer.answerId << ". </b>";
   }
   return false;
 }
 
-bool CalculatorHTML::prepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream* comments) {
+bool CalculatorHTML::prepareAndExecuteCommands(Calculator& interpreter, std::stringstream* comments) {
   MacroRegisterFunctionWithName("Problem::prepareAndExecuteCommands");
   double startTime = global.getElapsedSeconds();
   this->prepareCommands(comments);
 
-  theInterpreter.initialize();
-  theInterpreter.flagWriteLatexPlots = false;
-  theInterpreter.flagPlotNoControls = true;
+  interpreter.initialize(Calculator::Mode::educational);
+  interpreter.flagWriteLatexPlots = false;
+  interpreter.flagPlotNoControls = true;
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds()-startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("calculator initialize time");
   if (global.userDebugFlagOn() && global.userDefaultHasProblemComposingRights()) {
     this->logCommandsProblemGeneratioN << "<b>Input commands:</b> "
-    << this->theProblemData.commandsGenerateProblemLink
+    << this->problemData.commandsGenerateProblemLink
     << "<br>\n"
-    << this->theProblemData.commandsGenerateProblem << "<br>";
+    << this->problemData.commandsGenerateProblem << "<br>";
   }
-  theInterpreter.evaluate(this->theProblemData.commandsGenerateProblem);
+  interpreter.evaluate(this->problemData.commandsGenerateProblem);
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("calculator evaluation time");
-  bool result = !theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors == "";
+  bool result = !interpreter.flagAbortComputationASAP && interpreter.syntaxErrors == "";
   if (!result && comments != nullptr) {
     *comments << "<br>Failed to interpret your file. "
     << HtmlRoutines::getCalculatorComputationAnchorNewPage(
-      this->theProblemData.commandsGenerateProblemNoEnclosures, "Failed commands:"
+      this->problemData.commandsGenerateProblemNoEnclosures, "Failed commands:"
     ) << "<br>"
-    << this->theProblemData.commandsGenerateProblem
+    << this->problemData.commandsGenerateProblem
     << "<br>";
     if (global.userDefaultHasAdminRights()) {
       *comments << "The result of the interpretation attempt is:<br>"
-      << theInterpreter.outputString << "<br><b>Comments</b><br>"
-      << theInterpreter.outputCommentsString;
+      << interpreter.outputString << "<br><b>Comments</b><br>"
+      << interpreter.outputCommentsString;
     } else {
       *comments << "This may be a bug with the problem. "
       << "Feel free to take a screenshot of the issue and "
       << "email it to the site admin(s). ";
     }
   }
-  for (int i = 0; i < theInterpreter.theObjectContainer.theUserInputTextBoxesWithValues.size(); i ++) {
-    this->theProblemData.inputNonAnswerIds.addOnTop(
-      theInterpreter.theObjectContainer.theUserInputTextBoxesWithValues.keys[i]
+  for (int i = 0; i < interpreter.objectContainer.userInputTextBoxesWithValues.size(); i ++) {
+    this->problemData.inputNonAnswerIds.addOnTop(
+      interpreter.objectContainer.userInputTextBoxesWithValues.keys[i]
     );
   }
   return result;
 }
 
-std::string SyntacticElementHTML::gGetTagClass() {
-  return this->getKeyValue("class");
+std::string SyntacticElementHTML::getTagClass() const {
+  std::string className = this->getKeyValue("class");
+  if (this->tag != "") {
+    if (
+      !CalculatorHTML::Parser::calculatorClasses.contains(this->tag) &&
+      CalculatorHTML::Parser::calculatorClasses.contains(className)
+    ) {
+      return className;
+    }
+    return this->tag;
+  }
+  return className;
 }
 
 bool CalculatorHTML::prepareSectionList(std::stringstream& commentsOnFailure) {
@@ -1287,7 +1456,7 @@ void CalculatorHTML::interpretManageClass(SyntacticElementHTML& inputOutput) {
 
 bool CalculatorHTML::computeAnswerRelatedStrings(SyntacticElementHTML& inputOutput) {
   MacroRegisterFunctionWithName("CalculatorHTML::computeAnswerRelatedStrings");
-  std::string desiredAnswerId = inputOutput.getKeyValue("id");
+  std::string desiredAnswerId = inputOutput.answerIdIfAnswer();
   if (desiredAnswerId == "") {
     inputOutput.interpretedCommand = "<b>Error: could not generate submit button: "
     "the answer tag does not have a valid id. Please fix the problem template.</b>";
@@ -1297,9 +1466,9 @@ bool CalculatorHTML::computeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   if (theIndex == - 1) {
     global.fatal << "This is not supposed to happen: problem has syntactic element with answerId: "
     << desiredAnswerId << " but the answerId is missing from the list of known answer ids. "
-    << this->theProblemData.toStringAvailableAnswerIds() << global.fatal;
+    << this->problemData.toStringAvailableAnswerIds() << global.fatal;
   }
-  Answer& currentA = this->theProblemData.theAnswers.values[theIndex];
+  Answer& currentA = this->problemData.answers.values[theIndex];
   if (theIndex < this->answerHighlights.size) {
     currentA.htmlAnswerHighlight = this->answerHighlights[theIndex];
   } else {
@@ -1307,14 +1476,10 @@ bool CalculatorHTML::computeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   }
   std::string& answerId = currentA.answerId;
   currentA.idAnswerPanel = "spanAnswerPanel" + answerId;
-  currentA.varAnswerId = answerId + "spanVariable";
-  currentA.varMQfield = answerId + "MQspanVar";
-  currentA.MQobject = "answerMathQuillObjects[" + std::to_string(this->numberOfAnswerIdsMathquilled) + "]";
   this->numberOfAnswerIdsMathquilled ++;
-  currentA.MQUpdateFunction = answerId + "MQFieldUpdate";
   currentA.idVerificationSpan = "verification" + answerId;
   currentA.idSpanSolution = "solution" + answerId;
-  currentA.idMQfielD = answerId + "MQSpanId";
+  currentA.idMQField = answerId + "MQSpanId";
   currentA.idMQFieldLocation = answerId + "MQSpanIdLocation";
 
   if (currentA.idMQButtonPanelLocation == "") {
@@ -1363,16 +1528,16 @@ void CalculatorHTML::interpretGenerateStudentAnswerButton(SyntacticElementHTML& 
   if (!this->computeAnswerRelatedStrings(inputOutput)) {
     return;
   }
-  Answer& currentA = this->theProblemData.theAnswers.values[this->getAnswerIndex(inputOutput.getKeyValue("id"))];
+  std::string answerId = inputOutput.answerIdIfAnswer();
+  Answer& answer = this->problemData.answers.values[this->getAnswerIndex(answerId)];
   std::stringstream out;
-  out << "<br><span class =\"panelAnswer\" id = \"" << currentA.idAnswerPanel << "\"></span>";
+  out << "<span class='panelAnswer' id='" << answer.idAnswerPanel << "'></span>";
   inputOutput.interpretedCommand = out.str();
 }
 
 void CalculatorHTML::interpretIfAnswer(SyntacticElementHTML& inputOutput) {
   MacroRegisterFunctionWithName("CalculatorHTML::interpretIfAnswer");
-  std::string tagClass = inputOutput.gGetTagClass();
-  if (tagClass != SyntacticElementHTML::Tags::calculatorAnswer) {
+  if (!inputOutput.isAnswer()) {
     return;
   }
   this->interpretGenerateStudentAnswerButton(inputOutput);
@@ -1380,16 +1545,11 @@ void CalculatorHTML::interpretIfAnswer(SyntacticElementHTML& inputOutput) {
 
 void CalculatorHTML::interpretNotByCalculatorNotAnswer(SyntacticElementHTML& inputOutput) {
   MacroRegisterFunctionWithName("CalculatorHTML::interpretNotByCalculatorNotAnswer");
-  std::string tagClass = inputOutput.gGetTagClass();
-  //std::string tag= inputOutput.tag;
+  std::string tagClass = inputOutput.getTagClass();
   if (tagClass == SyntacticElementHTML::Tags::calculatorExamProblem || tagClass == "calculatorExamIntermediate") {
     this->interpretGenerateLink(inputOutput);
   } else if (tagClass == "calculatorManageClass") {
     this->interpretManageClass(inputOutput);
-  } else if (tagClass == "generateTopicTable") {
-    this->interpretTopicList(inputOutput);
-  } else if (tagClass == "generateTableOfContents") {
-    this->interpretTableOfContents(inputOutput);
   } else if (tagClass == "accountInformationLinks") {
     this->interpretAccountInformationLinks(inputOutput);
   } else if (tagClass == "calculatorJavascript") {
@@ -1642,8 +1802,8 @@ std::string CalculatorHTML::toStringInterprettedCommands(Calculator &theInterpre
   int commandCounter = theInterpreter.programExpression.size() - 1;
   for (int eltCounter = theElements.size - 1; eltCounter > 0; eltCounter --) {
     SyntacticElementHTML& currentElt = theElements[eltCounter];
-    std::string currentEltString = currentElt.gGetTagClass() + "[" + currentElt.content.substr(0, 10) + "...]";
-    if (!currentElt.isInterpretedByCalculatorDuringProblemGeneration()) {
+    std::string currentEltString = currentElt.getTagClass() + "[" + currentElt.content.substr(0, 10) + "...]";
+    if (!currentElt.isInterpretedByCalculatorOnGeneration()) {
       out << "<tr><td>" << currentEltString << "</td>"
       << "<td>"
       << theInterpreter.programExpression[commandCounter].toString()
@@ -1664,81 +1824,96 @@ std::string CalculatorHTML::toStringInterprettedCommands(Calculator &theInterpre
   return out.str();
 }
 
-bool CalculatorHTML::interpretProcessExecutedCommands(
-  Calculator &theInterpreter, List<SyntacticElementHTML>& theElements, std::stringstream& comments
+bool CalculatorHTML::processOneExecutedCommand(
+  Calculator& interpreter,
+  SyntacticElementHTML& element,
+  std::stringstream& comments
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::ProcessInterprettedCommands");
   (void) comments;
-  FormatExpressions theFormat;
-  theFormat.flagExpressionIsFinal = true;
-  theFormat.flagMakingExpressionTableWithLatex = true;
-  theFormat.flagIncludeExtraHtmlDescriptionsInPlots = false;
-  theFormat.flagUseQuotes = false;
-  theFormat.flagUseLatex = true;
+  MacroRegisterFunctionWithName("CalculatorHTML::processOneExecutedCommand");
+  if (!element.isInterpretedByCalculatorOnGeneration()) {
+    element.interpretedCommand = "";
+    return true;
+  }
+  if (
+    element.commandIndex >= interpreter.programExpression.size() ||
+    element.commandIndex < 0
+  ) {
+    std::stringstream errorStream;
+    errorStream << "<b>Syntactic element "
+    << element.toStringDebug() << " has wrongly computed commandIndex: "
+    << element.commandIndex << ". "
+    << "Please report this error to the website admins. </b>";
+    element.interpretedCommand = errorStream.str();
+    return false;
+  }
+  if (!interpreter.programExpression[element.commandIndex].startsWith(interpreter.opCommandEnclosure())) {
+    global.fatal << "Element: "
+    << interpreter.programExpression[element.commandIndex].toString()
+    << " in " << interpreter.programExpression.toString()
+    << " is supposed to be a command enclosure but apparently isn't. " << global.fatal;
+  }
+  Expression interpretedExpression = interpreter.programExpression[element.commandIndex][1];
+  if (interpretedExpression.startsWith(interpreter.opCommandSequence()) && interpretedExpression.size() == 2) {
+    interpretedExpression = interpretedExpression[1];
+  }
+  if (interpretedExpression.startsWith(interpreter.opCommandSequence())) {
+    element.flagUseMathMode = false;
+  }
+  FormatExpressions format;
+  format.flagExpressionIsFinal = true;
+  format.flagMakingExpressionTableWithLatex = true;
+  format.flagIncludeExtraHtmlDescriptionsInPlots = false;
+  format.flagUseQuotes = false;
+  format.flagUseLatex = true;
+  format.flagUseQuotes = false;
+  format.flagMakingExpressionTableWithLatex = true;
+  element.interpretedCommand = "";
+  element.interpretedCommand += interpretedExpression.toString(&format);
+  element.flagUseDisplaystyleInMathMode = (element.content.find("\\displaystyle") != std::string::npos);
+  element.flagUseMathMode = true;
+  element.flagUseMathSpan = false;
+  if (
+    interpretedExpression.isOfType<std::string> () ||
+    interpretedExpression.isOfType<Plot>() ||
+    element.getKeyValue("noTags") == "true"
+  ) {
+    element.flagUseMathMode = false;
+  }
+  return true;
+}
+
+bool CalculatorHTML::processExecutedCommands(
+  Calculator& interpreter,
+  List<SyntacticElementHTML>& elements,
+  std::stringstream& comments
+) {
+  MacroRegisterFunctionWithName("CalculatorHTML::processExecutedCommands");
+  (void) comments;
   bool result = true;
-  theInterpreter.theObjectContainer.resetPlots();
-  for (int i = 0; i < theElements.size; i ++) {
-    SyntacticElementHTML& currentElt = theElements[i];
-    if (!currentElt.isInterpretedByCalculatorDuringProblemGeneration()) {
-      currentElt.interpretedCommand = "";
-      continue;
-    }
-    if (
-      currentElt.commandIndex >= theInterpreter.programExpression.size() ||
-      currentElt.commandIndex < 0
-    ) {
-      std::stringstream errorStream;
-      errorStream << "<b>Syntactic element "
-      << currentElt.toStringDebug() << " has wrongly computed commandIndex: "
-      << currentElt.commandIndex << ". "
-      << "Please report this error to the website admins. </b>";
-      currentElt.interpretedCommand = errorStream.str();
-      result = false;
-      continue;
-    }
-    if (!theInterpreter.programExpression[currentElt.commandIndex].startsWith(theInterpreter.opCommandEnclosure())) {
-      global.fatal << "Element: " << theInterpreter.programExpression[currentElt.commandIndex].toString()
-      << " in " << theInterpreter.programExpression.toString()
-      << " is supposed to be a command enclosure but apparently isn't. " << global.fatal;
-    }
-    Expression currentExpr = theInterpreter.programExpression[currentElt.commandIndex][1];
-    if (currentExpr.startsWith(theInterpreter.opCommandSequence()) && currentExpr.size() == 2) {
-      currentExpr = currentExpr[1];
-    }
-    if (currentExpr.startsWith(theInterpreter.opCommandSequence())) {
-      currentElt.flagUseMathMode = false;
-    }
-    theFormat.flagUseQuotes = false;
-    theFormat.flagMakingExpressionTableWithLatex = true;
-    currentElt.interpretedCommand = currentExpr.toString(&theFormat);
-    currentElt.flagUseDisplaystyleInMathMode = (currentElt.content.find("\\displaystyle") != std::string::npos);
-    currentElt.flagUseMathMode = true;
-    currentElt.flagUseMathSpan = false;
-    if (
-      currentExpr.isOfType<std::string> () ||
-      currentExpr.isOfType<Plot>() ||
-      currentElt.getKeyValue("noTags") == "true"
-    ) {
-      currentElt.flagUseMathMode = false;
+  interpreter.objectContainer.resetPlots();
+  for (int i = 0; i < elements.size; i ++) {
+    if (!this->processOneExecutedCommand(interpreter, elements[i], comments)) {
+      result = true;
     }
   }
   return result;
 }
 
-void CalculatorHTML::logProblemGenerationObsolete(Calculator &theInterpreter) {
+void CalculatorHTML::logProblemGenerationObsolete(Calculator& interpreter) {
   if (!global.userDebugFlagOn() || !global.userDefaultHasProblemComposingRights()) {
     return;
   }
   std::stringstream streamLog;
   streamLog << "<table border ='1'>";
-  for (int i = 0; i < theInterpreter.programExpression.size(); i ++) {
+  for (int i = 0; i < interpreter.programExpression.size(); i ++) {
     streamLog << "<tr>";
-    for (int j = 0; j < this->theContent.size; j ++) {
-      if (this->theContent[j].commandIndex == i) {
-        streamLog << "<td>" << this->theContent[j].toStringDebug() << "</td>";
+    for (int j = 0; j < this->content.size; j ++) {
+      if (this->content[j].commandIndex == i) {
+        streamLog << "<td>" << this->content[j].toStringDebug() << "</td>";
       }
     }
-    streamLog << "<td>" << theInterpreter.programExpression[i].toString()
+    streamLog << "<td>" << interpreter.programExpression[i].toString()
     << "</td></tr>";
   }
   streamLog << "</table>";
@@ -1758,20 +1933,20 @@ void CalculatorHTML::figureOutCurrentProblemList(std::stringstream& comments) {
 bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::interpretHtml");
   double startTime = global.getElapsedSeconds();
-  if (!this->parseHTML(comments)) {
+  if (!this->parser.parseHTML(comments)) {
     this->outputHtmlBodyNoTag = "<b>Failed to interpret html input. </b><br>" + this->toStringContent();
     this->timeToParseHtml = global.getElapsedSeconds() - startTime;
     return false;
   }
   this->timeToParseHtml = global.getElapsedSeconds() - startTime;
-  this->MaxInterpretationAttempts = 25;
-  this->randomSeedPerAttempt.setSize(this->MaxInterpretationAttempts);
+  this->maxInterpretationAttempts = 25;
+  this->randomSeedPerAttempt.setSize(this->maxInterpretationAttempts);
   this->randomSeedCurrent = 0;
   UnsecurePseudoRandomGenerator generator;
-  if (!this->theProblemData.flagRandomSeedGiven) {
+  if (!this->problemData.flagRandomSeedGiven) {
     generator.setRandomSeedSmall(static_cast<uint32_t>(time(nullptr)));
   } else {
-    generator.setRandomSeedSmall(this->theProblemData.randomSeed);
+    generator.setRandomSeedSmall(this->problemData.randomSeed);
   }
   this->randomSeedPerAttempt[0] = generator.getRandomSeed();
   for (int i = 1; i < this->randomSeedPerAttempt.size; i ++) {
@@ -1781,22 +1956,22 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
   this->timeIntermediatePerAttempt.setSize(0);
   this->timeIntermediateComments.setSize(0);
   this->numberOfInterpretationAttempts = 0;
-  while (this->numberOfInterpretationAttempts < this->MaxInterpretationAttempts) {
+  while (this->numberOfInterpretationAttempts < this->maxInterpretationAttempts) {
     startTime = global.getElapsedSeconds();
     this->timeIntermediatePerAttempt.setSize(this->timeIntermediatePerAttempt.size + 1);
     this->timeIntermediatePerAttempt.lastObject()->setSize(0);
     this->timeIntermediateComments.setSize(this->timeIntermediateComments.size + 1);
     this->timeIntermediateComments.lastObject()->setSize(0);
-    Calculator theInterpreter;
+    Calculator interpreter;
     this->numberOfInterpretationAttempts ++;
     std::stringstream commentsOnLastFailure;
-    if (this->interpretHtmlOneAttempt(theInterpreter, commentsOnLastFailure)) {
+    if (this->interpretHtmlOneAttempt(interpreter, commentsOnLastFailure)) {
       this->timePerAttempt.addOnTop(global.getElapsedSeconds() - startTime);
-      this->theProblemData.checkConsistency();
+      this->problemData.checkConsistency();
       return true;
     }
     this->timePerAttempt.addOnTop(global.getElapsedSeconds() - startTime);
-    if (this->numberOfInterpretationAttempts >= this->MaxInterpretationAttempts && comments != nullptr) {
+    if (this->numberOfInterpretationAttempts >= this->maxInterpretationAttempts && comments != nullptr) {
       *comments << "Failed attempt " << this->numberOfInterpretationAttempts
       << " to interpret your file. Attempted random seeds: "
       << this->randomSeedPerAttempt.toStringCommaDelimited()
@@ -1814,25 +1989,33 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
       *comments << "<b>Your random seed has been reset due to a finicky problem generation. </b>";
     }
   }
-  this->theProblemData.checkConsistency();
+  this->problemData.checkConsistency();
   return false;
 }
 
-bool CalculatorHTML::isSplittingChar(const std::string& input) {
+bool CalculatorHTML::Parser::isWhiteSpace(const std::string& input) {
+  if (input.size() != 1) {
+    return false;
+  }
+  return input == " " || input == "\n" || input == "\t";
+}
+
+bool CalculatorHTML::Parser::isSplittingChar(const std::string& input) {
   if (input.size() != 1) {
     return false;
   }
   return this->splittingChars.contains(input[0]);
 }
 
-int SyntacticElementHTML::parsingDummyElements = 8;
-std::string CalculatorHTML::toStringParsingStack(List<SyntacticElementHTML>& theStack) {
+std::string CalculatorHTML::Parser::toStringParsingStack(
+  List<SyntacticElementHTML>& stack
+) {
   MacroRegisterFunctionWithName("CalculatorHTML::toStringParsingStack");
   std::stringstream out;
-  out << "#Non-dummy elts: " << theStack.size - SyntacticElementHTML::parsingDummyElements << ". ";
-  for (int i = SyntacticElementHTML::parsingDummyElements; i < theStack.size; i ++) {
-    out << "<span style =\"color:" << ((i % 2 == 0) ? "orange" : "blue") << "\">";
-    std::string theContent = theStack[i].toStringDebug();
+  out << "#Non-dummy elts: " << stack.size - SyntacticElementHTML::parsingDummyElements << ". ";
+  for (int i = SyntacticElementHTML::parsingDummyElements; i < stack.size; i ++) {
+    out << "<span style ='color:" << ((i % 2 == 0) ? "orange" : "blue") << "'>";
+    std::string theContent = stack[i].toStringDebug();
     if (theContent.size() == 0) {
       theContent = "<b>empty</b>";
     } else if (theContent == " ") {
@@ -1844,10 +2027,12 @@ std::string CalculatorHTML::toStringParsingStack(List<SyntacticElementHTML>& the
 }
 
 int CalculatorHTML::getAnswerIndex(const std::string& desiredAnswerId) {
-  return this->theProblemData.theAnswers.getIndex(desiredAnswerId);
+  return this->problemData.answers.getIndex(desiredAnswerId);
 }
 
-bool CalculatorHTML::canBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right) {
+bool CalculatorHTML::Parser::canBeMerged(
+  const SyntacticElementHTML& left, const SyntacticElementHTML& right
+) {
   MacroRegisterFunctionWithName("SyntacticElementHTML::canBeMerged");
   if (left.syntacticRole != "" || right.syntacticRole != "") {
     return false;
@@ -1859,47 +2044,6 @@ bool CalculatorHTML::canBeMerged(const SyntacticElementHTML& left, const Syntact
     return false;
   }
   return true;
-}
-
-bool CalculatorHTML::setTagClassFromCloseTag(SyntacticElementHTML& output) {
-  MacroRegisterFunctionWithName("CalculatorHTML::setTagClassFromCloseTag");
-  std::string& lastTag = output.tag;
-  if (lastTag == "head" || lastTag == "HEAD" || lastTag == "Head") {
-    output.setKeyValue("class", "headFinish");
-    this->flagTagHeadPresent = true;
-    return true;
-  } else if (lastTag == "body" || lastTag == "BODY" || lastTag == "Body") {
-    output.setKeyValue("class", "bodyFinish");
-    this->flagTagBodyPresent = true;
-    return true;
-  } else if (lastTag == "html" || lastTag == "HTML" || lastTag == "html") {
-    output.setKeyValue("class", "htmlFinish");
-    this->flagTagHtmlPresent = true;
-    return true;
-  }
-  return false;
-}
-
-bool CalculatorHTML::setTagClassFromOpenTag(SyntacticElementHTML& output) {
-  MacroRegisterFunctionWithName("CalculatorHTML::setTagClassFromOpenTag");
-  std::string& lastTag = output.tag;
-  if (lastTag == "head" || lastTag == "HEAD" || lastTag == "Head") {
-    output.setKeyValue("class", "headStart");
-    this->flagTagHeadPresent = true;
-    return true;
-  } else if (lastTag == "body" || lastTag == "BODY" || lastTag == "Body") {
-    output.setKeyValue("class", "bodyStart");
-    this->flagTagBodyPresent = true;
-    return true;
-  } else if (lastTag == "html" || lastTag == "HTML" || lastTag == "html") {
-    output.setKeyValue("class", "htmlStart");
-    this->flagTagHtmlPresent = true;
-    return true;
-  } else if (this->calculatorTagsRecordedLiterally.contains(lastTag)) {
-    output.setKeyValue("class", lastTag);
-    return true;
-  }
-  return false;
 }
 
 void TopicElementParser::initializeElementTypes() {
@@ -1948,10 +2092,11 @@ void CalculatorHTML::initAutocompleteExtras() {
 }
 
 void CalculatorHTML::initBuiltInSpanClasses() {
-  MacroRegisterFunctionWithName("CalculatorHTML::initBuiltInSpanClasses");
-  if (this->calculatorTagsRecordedLiterally.size == 0) {
-    this->calculatorTagsRecordedLiterally.addOnTopNoRepetition("answerCalculatorHighlight");
-  }
+  this->parser.initBuiltInSpanClasses();
+}
+
+void CalculatorHTML::Parser::initBuiltInSpanClasses() {
+  MacroRegisterFunctionWithName("CalculatorHTML::Parser::initBuiltInSpanClasses");
   if (this->calculatorClassesAnswerFields.size == 0) {
     this->calculatorClassesAnswerFields.addOnTop("calculatorButtonSubmit");
     this->calculatorClassesAnswerFields.addOnTop("calculatorButtonInterpret");
@@ -1964,11 +2109,12 @@ void CalculatorHTML::initBuiltInSpanClasses() {
   if (this->calculatorClasses.size == 0) {
     this->calculatorClasses.addOnTop("calculator");
     this->calculatorClasses.addOnTop(SyntacticElementHTML::Tags::calculatorSolution);
-    this->calculatorClasses.addOnTop("calculatorShowToUserOnly");
+    this->calculatorClasses.addOnTop(SyntacticElementHTML::Tags::calculatorShowToUserOnly);
     this->calculatorClasses.addOnTop("calculatorHidden");
     this->calculatorClasses.addOnTop("calculatorCommentsBeforeInterpretation");
     this->calculatorClasses.addOnTop("calculatorCommentsBeforeSubmission");
     this->calculatorClasses.addOnTop(SyntacticElementHTML::Tags::calculatorAnswer);
+    this->calculatorClasses.addOnTop(SyntacticElementHTML::Tags::hardCodedAnswer);
     this->calculatorClasses.addOnTop("calculatorAnswerOnGiveUp");
     this->calculatorClasses.addOnTop("calculatorExamIntermediate");
     this->calculatorClasses.addOnTop(SyntacticElementHTML::Tags::calculatorExamProblem);
@@ -1976,381 +2122,540 @@ void CalculatorHTML::initBuiltInSpanClasses() {
     this->calculatorClasses.addOnTop("calculatorProblemNavigationHere");
     this->calculatorClasses.addOnTop("calculatorManageClass");
     this->calculatorClasses.addOnTop("setCalculatorExamHome");
-    this->calculatorClasses.addOnTop("generateTopicTable");
-    this->calculatorClasses.addOnTop("generateTableOfContents");
     this->calculatorClasses.addOnTop("accountInformationLinks");
     this->calculatorClasses.addOnTop("calculatorJavascript");
+    this->calculatorClasses.addOnTop("answerCalculatorHighlight");
     this->calculatorClasses.addListOnTop(this->calculatorClassesAnswerFields);
   }
 }
 
-bool CalculatorHTML::parseHTML(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("Problem::parseHTML");
-  std::stringstream theReader(this->inputHtml);
-  theReader.seekg(0);
+CalculatorHTML::Parser::Parser(){
+  this->owner = nullptr;
+  this->reset();
+}
+
+void CalculatorHTML::Parser::reset() {
+  this->phase = CalculatorHTML::Parser::Phase::none;
+}
+
+bool CalculatorHTML::Parser::parseHTML(std::stringstream* comments) {
+  MacroRegisterFunctionWithName("CalculatorHTML::Parser::parseHTML");
+  this->reset();
+  std::stringstream reader(this->inputHtml);
+  reader.seekg(0);
   std::string word;
   char currentChar;
-  List<SyntacticElementHTML> theElements;
-  theElements.setSize(0);
-  theElements.setExpectedSize(static_cast<int>(theReader.str().size()) / 4);
+  List<SyntacticElementHTML> elements;
+  elements.setSize(0);
+  elements.setExpectedSize(static_cast<int>(reader.str().size()) / 4);
   this->splittingChars.addOnTop('<');
   this->splittingChars.addOnTop('\"');
   this->splittingChars.addOnTop('>');
   this->splittingChars.addOnTop('=');
   this->splittingChars.addOnTop('/');
   this->splittingChars.addOnTop(' ');
-  while (theReader.get(currentChar)) {
+  this->splittingChars.addOnTop('\'');
+  this->splittingChars.addOnTop('\'');
+  this->splittingChars.addOnTop('\t');
+  this->splittingChars.addOnTop('\n');
+  while (reader.get(currentChar)) {
     if (splittingChars.contains(currentChar)) {
       if (word != "") {
-        theElements.addOnTop(word);
+        elements.addOnTop(word);
       }
       std::string charToString;
       charToString.push_back(currentChar);
-      theElements.addOnTop(charToString);
+      SyntacticElementHTML element(charToString);
+      element.syntacticRole = charToString;
+      elements.addOnTop(element);
       word = "";
     } else {
       word.push_back(currentChar);
     }
   }
   if (word != "") {
-    theElements.addOnTop(word);
+    elements.addOnTop(word);
   }
   this->initBuiltInSpanClasses();
-  this->eltsStack.setSize(0);
-  SyntacticElementHTML dummyElt, tempElt;
-  dummyElt.content = "<>";
-  dummyElt.syntacticRole = "filler";
+  this->elementStack.setSize(0);
+  SyntacticElementHTML dummy, tempElt;
+  dummy.content = "";
+  dummy.syntacticRole = SyntacticElementHTML::Tags::filler;
   tempElt.syntacticRole = "command";
   tempElt.tag = "";
   tempElt.content = "";
-  eltsStack.setExpectedSize(theElements.size + SyntacticElementHTML::parsingDummyElements);
+  this->elementStack.setExpectedSize(elements.size + SyntacticElementHTML::parsingDummyElements);
   for (int i = 0; i < SyntacticElementHTML::parsingDummyElements; i ++) {
-    eltsStack.addOnTop(dummyElt);
+    this->elementStack.addOnTop(dummy);
   }
-  int indexInElts = - 1;
-  bool reduced = false;
-  this->flagTagHeadPresent = false;
-  this->flagTagBodyPresent = false;
-  this->flagTagHtmlPresent = false;
-  std::string tagClass, tag;
-  do {
-    if (!reduced) {
-      indexInElts ++;
-      if (indexInElts < theElements.size) {
-        eltsStack.addOnTop(theElements[indexInElts]);
-      }
+  for (int i = 0; i < elements.size; i ++) {
+    this->elementStack.addOnTop(elements[i]);
+    while (this->reduceMore()) {
     }
-    reduced = true;
-    int sizeMinus1 = eltsStack.size - 1;
-    //<- needed to avoid compiler warning:
-    //"warning: assuming signed overflow does not occur when assuming that (X + c) < X is always ..."
-    int sizeMinus2 = eltsStack.size - 2;
-    int sizeMinus3 = eltsStack.size - 3;
-    int sizeMinus4 = eltsStack.size - 4;
-    int sizeMinus5 = eltsStack.size - 5;
-    int sizeMinus6 = eltsStack.size - 6;
-    SyntacticElementHTML& last         = eltsStack[sizeMinus1]; //<- needed to avoid compiler warning
-    SyntacticElementHTML& secondToLast = eltsStack[sizeMinus2];
-    SyntacticElementHTML& thirdToLast  = eltsStack[sizeMinus3];
-    SyntacticElementHTML& fourthToLast = eltsStack[sizeMinus4];
-    SyntacticElementHTML& fifthToLast  = eltsStack[sizeMinus5];
-    SyntacticElementHTML& sixthToLast  = eltsStack[sizeMinus6];
-    //SyntacticElementHTML& seventhToLast = eltsStack[eltsStack.size-7];
-    if (
-      (secondToLast.syntacticRole == "<openTagCalc>" || secondToLast.syntacticRole == "<calculatorSolution>") &&
-      last.syntacticRole == "</closeTag>" &&
-      secondToLast.tag == last.tag
-    ) {
-      secondToLast.syntacticRole = "command";
-      eltsStack.removeLastObject();
-      if (this->isStateModifierApplyIfYes(secondToLast)) {
-        eltsStack.removeLastObject();
-      }
-      continue;
+    if (this->elementStack.lastObject()->syntacticRole == "error") {
+      break;
     }
-    if (
-      thirdToLast.syntacticRole == "<openTag" &&
-      secondToLast == "/" && last.syntacticRole == ">"
-    ) {
-      tagClass = thirdToLast.getKeyValue("class");
-      if (tagClass == SyntacticElementHTML::Tags::calculatorSolution) {
-        thirdToLast.syntacticRole = "<calculatorSolution>";
-      } else if (this->calculatorClasses.contains(tagClass)) {
-        thirdToLast.syntacticRole = "command";
-      } else {
-        thirdToLast.content = thirdToLast.toStringOpenTag("", true);
-        thirdToLast.resetAllExceptContent();
-      }
-      eltsStack.removeLastObject();
-      eltsStack.removeLastObject();
-      if (this->isStateModifierApplyIfYes(thirdToLast)) {
-        eltsStack.removeLastObject();
-      }
-      continue;
-    }
-    if (last.syntacticRole == "</closeTag>" && this->calculatorTagsRecordedLiterally.contains(last.tag)) {
-      last.content = last.toStringCloseTag("");
-      last.syntacticRole = "command";
-      last.tag += "Finish";
-      //this->SetTagClassFromTag(last, true);
-      continue;
-    }
-    if (last.syntacticRole == "</closeTag>") {
-      last.content = last.toStringCloseTag("");
-      last.resetAllExceptContent();
-      //this->SetTagClassFromTag(last, true);
-      continue;
-    }
-    if (thirdToLast.syntacticRole == "<openTagCalc>" && secondToLast == "<" && last == "/") {
-      secondToLast.syntacticRole = "</";
-      eltsStack.removeLastObject();
-      continue;
-    }
-    if (thirdToLast.syntacticRole == "<openTagCalc>" && secondToLast.syntacticRole == "") {
-      thirdToLast.content += secondToLast.content;
-      secondToLast = last;
-      eltsStack.setSize(eltsStack.size - 1);
-      continue;
-    }
-    if (secondToLast.syntacticRole != "<openTagCalc>" && last == "<") {
-      last.content = "";
-      last.syntacticRole = "<";
-      continue;
-    }
-    if (secondToLast.syntacticRole != "<openTagCalc>" && last == ">") {
-      last.content = "";
-      last.syntacticRole = ">";
-      continue;
-    }
-    if (secondToLast.syntacticRole == "<" && last != "/") {
-      secondToLast.tag = last.content;
-      secondToLast.syntacticRole = "<openTag";
-      secondToLast.content = "";
-      eltsStack.removeLastObject();
-      continue;
-    }
-    if (secondToLast.syntacticRole == "" && secondToLast != "\"" && last == "/") {
-      secondToLast.content += last.content;
-      eltsStack.removeLastObject();
-      continue;
-    }
-    if (secondToLast.syntacticRole == "<" && last == "/") {
-      secondToLast.syntacticRole = "</";
-      secondToLast.tag = "";
-      secondToLast.content = "";
-      eltsStack.removeLastObject();
-      continue;
-    }
-    if (secondToLast.syntacticRole == "</" ) {
-      secondToLast.syntacticRole = "</closeTag";
-      secondToLast.tag = last.content;
-      secondToLast.content = "";
-      eltsStack.removeLastObject();
-      continue;
-    }
-    if (secondToLast.syntacticRole == "</closeTag" && last.syntacticRole == ">") {
-      secondToLast.syntacticRole = "</closeTag>";
-      if (this->setTagClassFromCloseTag(secondToLast)) {
-        secondToLast.syntacticRole = "command";
-      }
-      eltsStack.removeLastObject();
-      continue;
-    }
-    if (last == " " &&(
-      secondToLast.syntacticRole == "<openTag" ||
-      thirdToLast.syntacticRole == "<openTag" ||
-      fourthToLast.syntacticRole == "<openTag"
-    )) {
-      eltsStack.removeLastObject();
-      continue;
-    }
-    if (
-      thirdToLast.syntacticRole == "<openTag" &&
-      secondToLast.syntacticRole == "" &&
-      last.syntacticRole == "" &&
-      secondToLast != "=" &&
-      secondToLast != "\"" &&
-      last != "=" &&
-      last != "\""
-    ) {
-      thirdToLast.tagKeysWithoutValue.addOnTop(secondToLast.content);
-      eltsStack[eltsStack.size - 2] = *eltsStack.lastObject();
-      eltsStack.removeLastObject();
-      continue;
-    }
-    if (this->canBeMerged(secondToLast, last)) {
-      secondToLast.content += last.content;
-      eltsStack.removeLastObject();
-      continue;
-    }
-    if (thirdToLast.syntacticRole == "<calculatorSolution>" && (
-      secondToLast.syntacticRole == "" ||
-      secondToLast.syntacticRole == "command" ||
-      secondToLast.syntacticRole == "<"
-    )) {
-      thirdToLast.children.addOnTop(secondToLast);
-      eltsStack[eltsStack.size - 2] = last;
-      eltsStack.removeLastObject();
-      continue;
-    }
-    if (
-      sixthToLast.syntacticRole == "<openTag" &&
-      fourthToLast == "=" &&
-      thirdToLast == "\"" &&
-      last != "\""
-    ) {
-      if (last.syntacticRole != "" && last.content == "") {
-        secondToLast.content += last.syntacticRole;
-      } else {
-        secondToLast.content += last.content;
-      }
-      eltsStack.removeLastObject();
-      continue;
-    }
-    if (thirdToLast == "\"" && secondToLast != "\"" && last != "\"") {
-      if (secondToLast.syntacticRole != "" && secondToLast.content == "") {
-        secondToLast.content = secondToLast.syntacticRole;
-      }
-      if (last.syntacticRole != "" && last.content == "") {
-        last.content = last.syntacticRole;
-      }
-      secondToLast.content += last.content;
-      eltsStack.removeLastObject();
-      continue;
-    }
-    if (
-      sixthToLast.syntacticRole == "<openTag" &&
-      fourthToLast == "=" &&
-      thirdToLast == "\"" &&
-      last == "\""
-    ) {
-      sixthToLast.setKeyValue(fifthToLast.content, secondToLast.content);
-      eltsStack.setSize(eltsStack.size - 5);
-      continue;
-    }
-    if (
-      fifthToLast.syntacticRole == "<openTag" &&
-      thirdToLast == "=" &&
-      secondToLast == "\"" &&
-      last == "\""
-    ) {
-      fifthToLast.setKeyValue(fourthToLast.content, "");
-      eltsStack.setSize(eltsStack.size - 4);
-      continue;
-    }
-    if (thirdToLast == "\"" && secondToLast != "\"" && last == "\"") {
-      thirdToLast.content += secondToLast.content;
-      thirdToLast.content += last.content;
-      eltsStack.setSize(eltsStack.size - 2);
-      continue;
-    }
-    if (
-      thirdToLast.syntacticRole == "<openTag" && secondToLast.syntacticRole == "" && last.syntacticRole == ">"
-    ) {
-      thirdToLast.tagKeysWithoutValue.addOnTop(secondToLast.content);
-      eltsStack[eltsStack.size - 2] = *eltsStack.lastObject();
-      eltsStack.removeLastObject();
-      continue;
-    }
-    if (secondToLast.syntacticRole == "<openTag" && last.syntacticRole == ">") {
-      tagClass = secondToLast.getKeyValue("class");
-      tag = secondToLast.tag;
-      if (
-        tagClass == SyntacticElementHTML::Tags::calculatorSolution ||
-        tag == SyntacticElementHTML::Tags::calculatorSolution
-      ) {
-        secondToLast.syntacticRole = "<calculatorSolution>";
-        secondToLast.setKeyValue("class", SyntacticElementHTML::Tags::calculatorSolution);
-      } else if (this->calculatorClasses.contains(tagClass) || this->calculatorClasses.contains(tag)) {
-        secondToLast.syntacticRole = "<openTagCalc>";
-        if (this->calculatorClasses.contains(tag)) {
-          tagClass = tag;
-          secondToLast.setKeyValue("class", tagClass);
-        }
-      } else if (this->calculatorTagsRecordedLiterally.contains(secondToLast.tag)) {
-        secondToLast.syntacticRole = "command";
-        secondToLast.tag += "Start";
-      } else if (this->setTagClassFromOpenTag(secondToLast)) {
-        secondToLast.syntacticRole = "command";
-      } else {
-        secondToLast.content = secondToLast.toStringOpenTag("");
-        if (global.userDefaultHasProblemComposingRights() && comments != nullptr) {
-          if (StringRoutines::stringBeginsWith(tagClass, "calculator")) {
-            if (!this->calculatorClasses.contains(tagClass)) {
-              *comments
-              << "<hr><b style =\"color:red\">Warning: found class tag: "
-              << tagClass
-              << ". The name of this class starts with calculator yet this is not "
-              << "a calculator class. This may be a typo. "
-              << "</b>";
-            }
-          }
-        }
-        secondToLast.resetAllExceptContent();
-      }
-      eltsStack.removeLastObject();
-      continue;
-    }
-    if (secondToLast.syntacticRole == "" && last.syntacticRole == ">") {
-      secondToLast.content += ">";
-      eltsStack.removeLastObject();
-      continue;
-    }
-    reduced = false;
-  } while (reduced || indexInElts < theElements.size);
-  this->theContent.setSize(0);
+  }
+  return this->owner->processParsedElements(comments);
+}
+
+bool CalculatorHTML::extractContent(std::stringstream* comments) {
+  MacroRegisterFunctionWithName("CalculatorHTML::extractContent");
   bool result = true;
-  for (int i = SyntacticElementHTML::parsingDummyElements; i < eltsStack.size; i ++) {
+  for (int i = SyntacticElementHTML::parsingDummyElements; i < this->parser.elementStack.size; i ++) {
+    const SyntacticElementHTML& current = this->parser.elementStack[i];
     bool needNewTag = false;
     if (i == SyntacticElementHTML::parsingDummyElements) {
       needNewTag = true;
-    } else if (this->theContent.lastObject()->syntacticRole != "") {
+    } else if (this->content.lastObject()->syntacticRole != "") {
       needNewTag = true;
     }
-    if (eltsStack[i].syntacticRole != "") {
+    if (current.syntacticRole != "") {
       needNewTag = true;
     }
-    if (eltsStack[i].gGetTagClass() == SyntacticElementHTML::Tags::calculatorAnswer) {
-      if (eltsStack[i].getKeyValue("mqMatrices") == "true") {
-        this->flagMathQuillWithMatrices = true;
-      }
-    }
-    if (eltsStack[i].syntacticRole != "command" && eltsStack[i].syntacticRole != "") {
+    if (current.syntacticRole != "command" && current.syntacticRole != "") {
       result = false;
       if (comments != nullptr) {
-        *comments << "<br>Syntactic element: " << eltsStack[i].toStringDebug()
+        *comments << "<br>Syntactic element: " << current.toStringDebug()
         << " is not a command but has non-empty syntactic role.";
       }
     }
     if (!needNewTag) {
-      this->theContent.lastObject()->content += eltsStack[i].content;
+      this->content.lastObject()->content += current.content;
     } else {
-      if (this->theContent.size > 0) {
+      if (this->content.size > 0) {
         if (
-          this->theContent.lastObject()->isInterpretedByCalculatorDuringProblemGeneration() &&
-          eltsStack[i].isInterpretedByCalculatorDuringProblemGeneration()
+          this->content.lastObject()->isInterpretedByCalculatorOnGeneration() &&
+          current.isInterpretedByCalculatorOnGeneration()
         ) {
-          SyntacticElementHTML emptyElt;
-          this->theContent.addOnTop(emptyElt);
+          SyntacticElementHTML empty;
+          this->content.addOnTop(empty);
         }
       }
-      this->theContent.addOnTop(eltsStack[i]);
+      this->content.addOnTop(current);
     }
   }
+  return result;
+}
+
+bool CalculatorHTML::processParsedElements(std::stringstream* comments) {
+  this->content.setSize(0);
+  bool result = true;
+  if (!this->extractContent(comments)) {
+    result = false;
+  }
   if (!result && comments != nullptr) {
-    *comments << "<hr>Parsing stack.<hr>" << this->toStringParsingStack(this->eltsStack);
+    *comments << "<hr>Parsing stack.<hr>"
+    << this->parser.toStringParsingStack(this->parser.elementStack);
   }
   if (result) {
     result = this->extractAnswerIds(comments);
   }
-  for (int i = 0; i < this->theContent.size; i ++) {
-    this->theContent[i].indexInOwner = i;
+  if (result) {
+    result = this->processSolutions(comments);
+  }
+  for (int i = 0; i < this->content.size; i ++) {
+    this->content[i].indexInOwner = i;
   }
   if (result) {
     result = this->checkContent(comments);
   }
-  this->theProblemData.checkConsistency();
+  this->problemData.checkConsistency();
   return result;
+}
+
+bool CalculatorHTML::Parser::consumeContentStandard() {
+  SyntacticElementHTML& last = this->elementStack[this->elementStack.size - 1];
+  if (last.syntacticRole == "<") {
+    this->phase = CalculatorHTML::Parser::Phase::leftAngleBracketEncountered;
+    return false;
+  }
+  if (
+    last.syntacticRole != SyntacticElementHTML::Tags::command &&
+    last.syntacticRole != SyntacticElementHTML::Tags::filler
+  ) {
+    last.syntacticRole = "";
+  }
+  SyntacticElementHTML& secondToLast = this->elementStack[this->elementStack.size - 2];
+  if (
+    secondToLast.syntacticRole == SyntacticElementHTML::Tags::filler ||
+    secondToLast.syntacticRole == SyntacticElementHTML::Tags::command
+  ) {
+    return false;
+  }
+  return this->reduceStackMergeContents(1);
+}
+
+bool CalculatorHTML::Parser::setLastToError(const std::string &errorMessage) {
+  SyntacticElementHTML& last = this->elementStack[this->elementStack.size - 1];
+  last.syntacticRole = "error";
+  last.errorComment = errorMessage;
+  this->phase = CalculatorHTML::Parser::Phase::error;
+  return false;
+}
+
+bool CalculatorHTML::Parser::consumeErrorOrMergeInCalculatorTag(
+  int calculatorTagNegativeOffset, const std::string& errorMessage
+) {
+  int startIndex = this->elementStack.size + calculatorTagNegativeOffset;
+  SyntacticElementHTML& calculatorTag = this->elementStack[startIndex];
+  if (calculatorTag.syntacticRole != "<calculatorTag>") {
+    return this->setLastToError(errorMessage);
+  }
+  this->reduceStackMergeContents(- calculatorTagNegativeOffset - 1);
+  this->phase = CalculatorHTML::Parser::Phase::none;
+  return false;
+}
+
+bool CalculatorHTML::Parser::consumeErrorOrMergeInCalculatorTagRetainLast(
+  int calculatorTagNegativeOffset, const std::string& errorMessage
+) {
+  int startIndex = this->elementStack.size + calculatorTagNegativeOffset;
+  SyntacticElementHTML& calculatorTag = this->elementStack[startIndex];
+  if (calculatorTag.syntacticRole != "<calculatorTag>") {
+    return this->setLastToError(errorMessage);
+  }
+  this->reduceStackMergeContentsRetainLast(- calculatorTagNegativeOffset - 2);
+  this->phase = CalculatorHTML::Parser::Phase::none;
+  return false;
+}
+
+bool CalculatorHTML::Parser::reduceStackMergeContents(
+  int numberOfElementsToRemove
+) {
+  SyntacticElementHTML& calculatorTag = this->elementStack[this->elementStack.size - numberOfElementsToRemove - 1];
+  for (int i = this->elementStack.size - numberOfElementsToRemove; i < this->elementStack.size; i ++) {
+    calculatorTag.content.append(this->elementStack[i].content);
+  }
+  this->elementStack.setSize(this->elementStack.size - numberOfElementsToRemove);
+  return false;
+}
+
+bool CalculatorHTML::Parser::reduceStackMergeContentsRetainLast(
+  int numberOfElementsToRemove
+) {
+  SyntacticElementHTML& calculatorTag = this->elementStack[this->elementStack.size - numberOfElementsToRemove - 2];
+  for (int i = this->elementStack.size - numberOfElementsToRemove - 1; i < this->elementStack.size - 1; i ++) {
+    calculatorTag.content.append(this->elementStack[i].content);
+  }
+  this->elementStack[this->elementStack.size - numberOfElementsToRemove - 1] = *this->elementStack.lastObject();
+  this->elementStack.setSize(this->elementStack.size - numberOfElementsToRemove);
+  return false;
+}
+
+bool CalculatorHTML::Parser::consumeAfterLeftAngleBracket() {
+  SyntacticElementHTML& last = this->elementStack[this->elementStack.size - 1];
+  SyntacticElementHTML& secondToLast = this->elementStack[this->elementStack.size - 2];
+  if (secondToLast.syntacticRole != "<") {
+    return this->setLastToError("Unexpected stack state after left angle bracket.");
+  }
+  if (last.syntacticRole == " ") {
+    return  this->reduceStackMergeContents(1);
+  }
+  if (last.syntacticRole == "/") {
+    secondToLast.syntacticRole = "</";
+    this->phase = CalculatorHTML::Parser::Phase::startedCloseTag;
+    return this->reduceStackMergeContents(1);
+  }
+  if (last.syntacticRole == "") {
+    secondToLast.tag = last.content;
+    secondToLast.syntacticRole = "<openTag";
+    this->phase = CalculatorHTML::Parser::Phase::startedOpenTag;
+    return this->reduceStackMergeContents(1);
+  }
+  return this->consumeErrorOrMergeInCalculatorTag(- 3, "Left angle bracket not followed by word forward slash or empty space. ");
+}
+
+bool CalculatorHTML::Parser::isCalculatorTag(
+  const SyntacticElementHTML& input
+) {
+  std::string tagName = input.getTagClass();
+  return this->calculatorClasses.contains(input.getTagClass());
+}
+
+bool CalculatorHTML::Parser::closeOpenTag(int tagOffsetNegative) {
+  SyntacticElementHTML& toBeConverted = this->elementStack[this->elementStack.size + tagOffsetNegative];
+  this->phase = CalculatorHTML::Parser::Phase::none;
+  if (this->isCalculatorTag(toBeConverted)) {
+    toBeConverted.content = "";
+    std::string tagName = toBeConverted.getTagClass();
+    if (tagName == SyntacticElementHTML::Tags::calculatorSolution) {
+      toBeConverted.tag = SyntacticElementHTML::Tags::calculatorSolutionStart;
+      toBeConverted.syntacticRole = "command";
+    } else if (tagName == SyntacticElementHTML::Tags::answerCalculatorHighlight){
+      toBeConverted.tag = SyntacticElementHTML::Tags::answerCalculatorHighlightStart;
+      toBeConverted.syntacticRole = "command";
+    } else {
+      toBeConverted.syntacticRole = "<calculatorTag>";
+    }
+    this->elementStack.setSize(this->elementStack.size + tagOffsetNegative + 1);
+    return false;
+  }
+  toBeConverted.syntacticRole = "";
+  this->reduceStackMergeContents(- tagOffsetNegative - 1);
+  return this->consumeContentStandard();
+}
+
+bool CalculatorHTML::Parser::consumeTagOpened() {
+  SyntacticElementHTML& secondToLast = this->elementStack[this->elementStack.size - 2];
+  if (secondToLast.syntacticRole != "<openTag") {
+    return this->setLastToError("Unexpected stack state after left angle bracket tag.");
+  }
+  SyntacticElementHTML& last = this->elementStack[this->elementStack.size - 1];
+  if (this->isWhiteSpace(last.syntacticRole)) {
+    return this->reduceStackMergeContents(1);
+  }
+  if (last.syntacticRole == "") {
+    last.syntacticRole = "property";
+    this->phase = CalculatorHTML::Parser::Phase::propertyEncountered;
+    return false;
+  }
+  if (last.syntacticRole == ">") {
+    return this->closeOpenTag(- 2);
+  }
+  if (last.syntacticRole == "/") {
+    secondToLast.syntacticRole = "<openTag/";
+    this->phase = CalculatorHTML::Parser::Phase::startedOpenTagGotBackslash;
+    return this->reduceStackMergeContents(1);
+  }
+  if (last.syntacticRole == "<") {
+    this->consumeErrorOrMergeInCalculatorTagRetainLast(
+      - 3, "While constructing your tag, failed to interpret " + last.syntacticRole
+    );
+    // Don't push new elements to be parsed on the stack.
+    return true;
+  }
+  return this->consumeErrorOrMergeInCalculatorTag(
+    - 3, "While constructing your tag, failed to interpret " + last.syntacticRole
+  );
+}
+
+bool CalculatorHTML::Parser::consumeTagOpenedGotBackSlash() {
+  SyntacticElementHTML& secondToLast = this->elementStack[this->elementStack.size - 2];
+  if (secondToLast.syntacticRole != "<openTag/") {
+    return this->setLastToError("Unexpected stack state after left angle bracket tag backslash.");
+  }
+  SyntacticElementHTML& last = this->elementStack[this->elementStack.size - 1];
+  if (last.syntacticRole == " ") {
+    return this->reduceStackMergeContents(1);
+  }
+  if (last.syntacticRole == ">") {
+    this->phase = CalculatorHTML::Parser::Phase::none;
+    this->reduceStackMergeContents(1);
+    last.syntacticRole = "";
+    return this->consumeContentStandard();
+  }
+  return this->consumeErrorOrMergeInCalculatorTag(
+    - 3, "While processing state <openTag/, failed to interpret " + last.syntacticRole
+  );
+}
+
+bool CalculatorHTML::Parser::consumeAfterProperty() {
+  SyntacticElementHTML& secondToLast = this->elementStack[this->elementStack.size - 2];
+  SyntacticElementHTML& thirdToLast = this->elementStack[this->elementStack.size - 3];
+  if (secondToLast.syntacticRole != "property" || thirdToLast.syntacticRole != "<openTag") {
+    return this->setLastToError("Unexpected stack state after property was encountered. ");
+  }
+  SyntacticElementHTML& last = this->elementStack[this->elementStack.size - 1];
+  if (this->isWhiteSpace(last.syntacticRole)) {
+    return this->reduceStackMergeContents(1);
+  }
+  if (last.syntacticRole == "") {
+    thirdToLast.propertiesWithoutValue.addOnTop(StringRoutines::stringTrimWhiteSpace(secondToLast.content));
+    thirdToLast.content.append(secondToLast.content);
+    last.syntacticRole = "property";
+    this->elementStack[this->elementStack.size - 2] = last;
+    this->elementStack.removeLastObject();
+    return false;
+  }
+  if (last.syntacticRole == ">") {
+    thirdToLast.propertiesWithoutValue.addOnTop(StringRoutines::stringTrimWhiteSpace(secondToLast.content));
+    return this->closeOpenTag(- 3);
+  }
+  if (last.syntacticRole == "<") {
+    this->consumeErrorOrMergeInCalculatorTagRetainLast(- 4, "Couldn't continue tag construction after property " + secondToLast.content);
+    return true;
+  }
+  if (last.syntacticRole == "/") {
+    thirdToLast.propertiesWithoutValue.addOnTop(StringRoutines::stringTrimWhiteSpace(secondToLast.content));
+    thirdToLast.syntacticRole = "<openTag/";
+    this->phase = CalculatorHTML::Parser::Phase::startedOpenTagGotBackslash;
+    return this->reduceStackMergeContents(2);
+  }
+  if (last.syntacticRole == "=") {
+    this->phase = CalculatorHTML::Parser::Phase::equalityEncountered;
+    return false;
+  }
+  return this->consumeErrorOrMergeInCalculatorTag(- 4, "Couldn't continue tag construction after property " + secondToLast.content);
+}
+
+bool CalculatorHTML::Parser::consumeAfterEquality() {
+  SyntacticElementHTML& secondToLast = this->elementStack[this->elementStack.size - 2];
+  SyntacticElementHTML& thirdToLast = this->elementStack[this->elementStack.size - 3];
+  SyntacticElementHTML& fourthToLast = this->elementStack[this->elementStack.size - 4];
+  if (
+    secondToLast.syntacticRole != "=" ||
+    thirdToLast.syntacticRole != "property" ||
+    fourthToLast.syntacticRole != "<openTag"
+  ) {
+    return this->setLastToError("Unexpected stack state after equality. ");
+  }
+  SyntacticElementHTML& last = this->elementStack[this->elementStack.size - 1];
+  if (this->isWhiteSpace(last.syntacticRole)) {
+    return this->reduceStackMergeContents(1);
+  }
+  if (last.syntacticRole == "\"") {
+    this->phase = CalculatorHTML::Parser::Phase::doubleQuoteOpened;
+    return false;
+  }
+  if (last.syntacticRole == "'") {
+    this->phase = CalculatorHTML::Parser::Phase::singleQuoteOpened;
+    return false;
+  }
+  return this->consumeErrorOrMergeInCalculatorTag(- 5, "Expected quote after equality. ");
+}
+
+bool CalculatorHTML::Parser::consumeAfterQuote(const std::string& quoteSymbol) {
+  SyntacticElementHTML& secondToLast = this->elementStack[this->elementStack.size - 2];
+  if (secondToLast.syntacticRole != quoteSymbol) {
+    return this->setLastToError("Unexpected stack state after quote. ");
+  }
+  SyntacticElementHTML& last = this->elementStack[this->elementStack.size - 1];
+  if (last.syntacticRole == quoteSymbol) {
+    SyntacticElementHTML& thirdToLast = this->elementStack[this->elementStack.size - 3];
+    SyntacticElementHTML& fourthToLast = this->elementStack[this->elementStack.size - 4];
+    SyntacticElementHTML& fifthToLast = this->elementStack[this->elementStack.size - 5];
+    if (thirdToLast.syntacticRole != "=" || fourthToLast.syntacticRole != "property" || fifthToLast.syntacticRole != "<openTag") {
+      return this->setLastToError("Unexpected stack state after closing single quote. ");
+    }
+    std::string quoteContent = secondToLast.content.substr(1);
+    std::string property = StringRoutines::stringTrimWhiteSpace(fourthToLast.content);
+    fifthToLast.properties.setKeyValue(property, quoteContent);
+    this->phase = CalculatorHTML::Parser::Phase::startedOpenTag;
+    return this->reduceStackMergeContents(4);
+  }
+  return this->reduceStackMergeContents(1);
+}
+
+bool CalculatorHTML::Parser::consumeCloseTagOpened() {
+  SyntacticElementHTML& secondToLast = this->elementStack[this->elementStack.size - 2];
+  if (secondToLast.syntacticRole != "</") {
+    return this->setLastToError("Unexpected stack state after langle forward slash.");
+  }
+  SyntacticElementHTML& last = this->elementStack[this->elementStack.size - 1];
+  if (this->isWhiteSpace(last.syntacticRole)) {
+    return this->reduceStackMergeContents(1);
+  }
+  if (last.syntacticRole == "") {
+    this->phase = CalculatorHTML::Parser::Phase::closeTagWaitingForRightAngleBracket;
+    secondToLast.tag = last.content;
+    secondToLast.syntacticRole = "</closeTag";
+    return this->reduceStackMergeContents(1);
+  }
+  return this->consumeErrorOrMergeInCalculatorTag(- 3, "Bad close tag. ");
+}
+
+bool CalculatorHTML::Parser::consumeCloseTagWaitingForRightAngleBracket() {
+  SyntacticElementHTML& secondToLast = this->elementStack[this->elementStack.size - 2];
+  if (secondToLast.syntacticRole != "</closeTag") {
+    return this->setLastToError("Unexpected stack state after langle forward slash closeTag.");
+  }
+  SyntacticElementHTML& last = this->elementStack[this->elementStack.size - 1];
+  if (this->isWhiteSpace(last.syntacticRole)) {
+    return this->reduceStackMergeContents(1);
+  }
+  if (last.syntacticRole == ">") {
+    SyntacticElementHTML& thirdToLast = this->elementStack[this->elementStack.size - 3];
+    this->phase = CalculatorHTML::Parser::none;
+    if (secondToLast.tag == SyntacticElementHTML::Tags::calculatorSolution) {
+      secondToLast.tag = SyntacticElementHTML::Tags::calculatorSolutionEnd;
+      secondToLast.syntacticRole = "command";
+      return this->reduceStackMergeContents(1);
+    }
+    if (secondToLast.tag == SyntacticElementHTML::Tags::answerCalculatorHighlight) {
+      secondToLast.tag = SyntacticElementHTML::Tags::answerCalculatorHighlightEnd;
+      secondToLast.syntacticRole = "command";
+      return this->reduceStackMergeContents(1);
+    }
+    if (thirdToLast.syntacticRole == "<calculatorTag>" && secondToLast.tag == thirdToLast.tag) {
+      thirdToLast.syntacticRole = "command";
+      this->elementStack.setSize(this->elementStack.size - 2);
+      return false;
+    }
+    secondToLast.syntacticRole = "";
+    this->reduceStackMergeContents(1);
+    return true;
+  }
+  return this->consumeErrorOrMergeInCalculatorTag(- 3, "Unexpected character after langle forward slash closeTag");
+}
+
+std::string CalculatorHTML::Parser::toStringPhaseInfo() {
+  std::stringstream stackTop;
+  int stepsToShow = 5;
+  for (int i = this->elementStack.size - stepsToShow - 1; i < this->elementStack.size; i ++) {
+    SyntacticElementHTML& current = this->elementStack[i];
+    if (
+      current.syntacticRole == SyntacticElementHTML::Tags::filler &&
+      current.content == ""
+    ) {
+      continue;
+    }
+    stackTop << this->elementStack[i].toStringDebug() << " ";
+  }
+  // stackTop << stackContent.str();
+  switch (this->phase) {
+  case CalculatorHTML::Parser::Phase::none:
+    return "Phase::none: " + stackTop.str();
+  case CalculatorHTML::Parser::Phase::leftAngleBracketEncountered:
+    return "Phase::leftAngleBracketEncountered: " + stackTop.str();
+  case CalculatorHTML::Parser::Phase::startedOpenTag:
+    return "Phase::startedOpenTag: " + stackTop.str();
+  case CalculatorHTML::Parser::Phase::startedOpenTagGotBackslash:
+    return "Phase::startedOpenTagGotBackslash: " + stackTop.str();
+  case CalculatorHTML::Parser::Phase::propertyEncountered:
+    return "Phase::propertyEncountered: " + stackTop.str();
+  case CalculatorHTML::Parser::Phase::equalityEncountered:
+    return "Phase::equalityEncountered: " + stackTop.str();
+  case CalculatorHTML::Parser::Phase::singleQuoteOpened:
+    return "Phase::singleQuoteOpened: " + stackTop.str();
+  case CalculatorHTML::Parser::Phase::doubleQuoteOpened:
+    return "Phase::doubleQuoteOpened: " + stackTop.str();
+  case CalculatorHTML::Parser::Phase::startedCloseTag:
+    return "Phase::startedCloseTag: " + stackTop.str();
+  case CalculatorHTML::Parser::Phase::closeTagWaitingForRightAngleBracket:
+    return "Phase::closeTagWaitingForRightAngleBracket: " + stackTop.str();
+  case CalculatorHTML::Parser::Phase::error:
+    return "Phase::error: " + stackTop.str();
+  }
+  return "";
+}
+
+bool CalculatorHTML::Parser::reduceMore() {
+  switch (this->phase) {
+  case CalculatorHTML::Parser::Phase::none:
+    return this->consumeContentStandard();
+  case CalculatorHTML::Parser::Phase::leftAngleBracketEncountered:
+    return this->consumeAfterLeftAngleBracket();
+  case CalculatorHTML::Parser::Phase::startedOpenTag:
+    return this->consumeTagOpened();
+  case CalculatorHTML::Parser::Phase::startedOpenTagGotBackslash:
+    return this->consumeTagOpenedGotBackSlash();
+  case CalculatorHTML::Parser::Phase::propertyEncountered:
+    return this->consumeAfterProperty();
+  case CalculatorHTML::Parser::Phase::equalityEncountered:
+    return this->consumeAfterEquality();
+  case CalculatorHTML::Parser::Phase::singleQuoteOpened:
+    return this->consumeAfterQuote("'");
+  case CalculatorHTML::Parser::Phase::doubleQuoteOpened:
+    return this->consumeAfterQuote("\"");
+  case CalculatorHTML::Parser::Phase::startedCloseTag:
+    return this->consumeCloseTagOpened();
+  case CalculatorHTML::Parser::Phase::closeTagWaitingForRightAngleBracket:
+    return this->consumeCloseTagWaitingForRightAngleBracket();
+  case CalculatorHTML::Parser::Phase::error:
+    return false;
+  }
+  return false;
 }
 
 bool CalculatorHTML::interpretOneAnswerElement(SyntacticElementHTML& inputOutput) {
@@ -2359,19 +2664,19 @@ bool CalculatorHTML::interpretOneAnswerElement(SyntacticElementHTML& inputOutput
   if (!inputOutput.isAnswerElement(&answerId)) {
     return true;
   }
-  int theIndex = this->getAnswerIndex(answerId);
-  std::string tagClass = inputOutput.gGetTagClass();
-  if (theIndex == - 1) {
+  int index = this->getAnswerIndex(answerId);
+  std::string tagClass = inputOutput.getTagClass();
+  if (index == - 1) {
     std::stringstream out;
     out << "<b>Element of class " << tagClass << " has name: "
     << answerId << " but that does not match any answerId value. "
-    << this->theProblemData.toStringAvailableAnswerIds() << ". </b>";
+    << this->problemData.toStringAvailableAnswerIds() << ". </b>";
     inputOutput.interpretedCommand = out.str();
     return true;
   }
-  Answer& currentA = this->theProblemData.theAnswers.values[theIndex];
+  Answer& answer = this->problemData.answers.values[index];
   if (tagClass == "calculatorAnswerVerification") {
-    inputOutput.interpretedCommand = currentA.htmlSpanVerifyAnswer;
+    inputOutput.interpretedCommand = answer.htmlSpanVerifyAnswer;
   }
   return true;
 }
@@ -2381,27 +2686,27 @@ bool CalculatorHTML::interpretAnswerHighlights(std::stringstream& comments) {
   (void) comments;
   this->answerHighlights.setSize(0);
   bool answerHighlightStarted = false;
-  for (int i = 0; i < this->theContent.size; i ++) {
-    if (this->theContent[i].tag == "answerCalculatorHighlightStart") {
+  for (int i = 0; i < this->content.size; i ++) {
+    if (this->content[i].tag == SyntacticElementHTML::Tags::answerCalculatorHighlightStart) {
       answerHighlightStarted = true;
       this->answerHighlights.addOnTop("");
-      this->theContent[i].content = "";
+      this->content[i].content = "";
       continue;
     }
     if (!answerHighlightStarted) {
       continue;
     }
-    if (this->theContent[i].isAnswerElement(nullptr)) {
+    if (this->content[i].isAnswerElement(nullptr)) {
       continue;
     }
-    if (this->theContent[i].tag == "answerCalculatorHighlightFinish") {
+    if (this->content[i].tag == SyntacticElementHTML::Tags::answerCalculatorHighlightEnd) {
       answerHighlightStarted = false;
-      this->theContent[i].content = "";
+      this->content[i].content = "";
       continue;
     }
-    *this->answerHighlights.lastObject() += this->theContent[i].toStringInterpretedBody();
-    this->theContent[i].content = "";
-    this->theContent[i].interpretedCommand = "";
+    *this->answerHighlights.lastObject() += this->content[i].toStringInterpretedBody();
+    this->content[i].content = "";
+    this->content[i].interpretedCommand = "";
   }
   return true;
 }
@@ -2409,8 +2714,8 @@ bool CalculatorHTML::interpretAnswerHighlights(std::stringstream& comments) {
 bool CalculatorHTML::interpretAnswerElements(std::stringstream& comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::interpretAnswerElements");
   (void) comments;
-  for (int i = 0; i < this->theContent.size; i ++) {
-    this->interpretOneAnswerElement(this->theContent[i]);
+  for (int i = 0; i < this->content.size; i ++) {
+    this->interpretOneAnswerElement(this->content[i]);
   }
   return true;
 }
@@ -2419,14 +2724,14 @@ bool CalculatorHTML::prepareAnswerElements(std::stringstream &comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::prepareAnswerElements");
   (void) comments;
   std::string currentId;
-  for (int i = 0; i < this->theContent.size; i ++) {
-    if (this->theContent[i].isAnswerElement(&currentId)) {
+  for (int i = 0; i < this->content.size; i ++) {
+    if (this->content[i].isAnswerElement(&currentId)) {
       int index = this->getAnswerIndex(currentId);
       if (index == - 1) {
         continue;
       }
-      Answer& currentA = this->theProblemData.theAnswers.values[index];
-      std::string tagClass = this->theContent[i].gGetTagClass();
+      Answer& currentA = this->problemData.answers.values[index];
+      std::string tagClass = this->content[i].getTagClass();
       if (
         tagClass == "calculatorButtonSubmit" ||
         tagClass == "calculatorButtonInterpret" ||
@@ -2436,9 +2741,6 @@ bool CalculatorHTML::prepareAnswerElements(std::stringstream &comments) {
       }
       if (tagClass == "calculatorButtonSolution") {
         currentA.flagAutoGenerateButtonSolution = false;
-      }
-      if (tagClass == SyntacticElementHTML::Tags::calculatorSolution) {
-        currentA.flagSolutionFound = true;
       }
       if (tagClass == "calculatorMQField") {
         currentA.flagAutoGenerateMQfield = false;
@@ -2454,49 +2756,115 @@ bool CalculatorHTML::prepareAnswerElements(std::stringstream &comments) {
   return true;
 }
 
-bool CalculatorHTML::extractAnswerIds(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::extractAnswerIds");
-  // we shouldn't clear this->theProblemData.theAnswers: it may contain
-  // outdated information loaded from the database. We don't want to loose that info
-  // (say we renamed an answerId but students have already stored answers using the old answerId...).
-  List<std::string> answerIdsSeenSoFar;
-  for (int i = 0; i < this->theContent.size; i ++) {
-    SyntacticElementHTML& currentE = this->theContent[i];
-    if (currentE.isAnswer()) {
-      std::string currentId = StringRoutines::stringTrimWhiteSpace(currentE.getKeyValue("id"));
-      if (currentId == "") {
-        if (comments != nullptr) {
-          *comments << "The answer element: " << currentE.toStringDebug() << " has empty id. This is not allowed. ";
-        }
-        return false;
-      }
-      int theIndex = this->getAnswerIndex(currentId);
-      if (theIndex == - 1) {
-        this->theProblemData.addEmptyAnswerIdOnTop(currentId);
-      }
-      if (answerIdsSeenSoFar.contains(currentId)) {
-        if (comments != nullptr) {
-          *comments << "<b>Answer with id: "
-          << currentId << " contained more than once. </b>";
-        }
-        return false;
-      }
-      answerIdsSeenSoFar.addOnTopNoRepetition(currentId);
-      this->theProblemData.theAnswers.getValueCreate(currentId).mathQuillPanelOptions =
-      currentE.getKeyValue("buttons");
-      continue;
-    }
-    if (
-      !currentE.isCommentBeforeSubmission() &&
-      !currentE.isCommentBeforeInterpretation() &&
-      !currentE.isAnswerOnGiveUp() &&
-      !currentE.isSolution()
-    ) {
-      continue;
-    }
-    if (answerIdsSeenSoFar.size == 0 && currentE.getKeyValue("name") == "") {
+bool CalculatorHTML::extractOneAnswerId(
+  SyntacticElementHTML& input, std::stringstream* comments
+) {
+  MacroRegisterFunctionWithName("CalculatorHTML::extractOneAnswerId");
+  if (!input.isAnswer()) {
+    return true;
+  }
+  std::string currentId = input.answerIdCorrectIfEmpty();
+  for (unsigned i = 0; i < currentId.size(); i ++) {
+    if (!MathRoutines::isALatinLetter(currentId[i])) {
       if (comments != nullptr) {
-        *comments << "Auxilary answer element: " << currentE.toStringDebug()
+        *comments << "Answer id must contain latin letters only, but was: " << currentId;
+      }
+      return false;
+    }
+  }
+  if (!this->problemData.answers.contains(currentId)) {
+    Answer newAnswer;
+    newAnswer.answerId = currentId;
+    this->problemData.answers.setKeyValue(currentId, newAnswer);
+  }
+  Answer& current = this->problemData.answers.getValueCreate(currentId);
+  if (current.flagAnswerVerificationFound) {
+    if (comments != nullptr) {
+      *comments << "<b>Answer with id: "
+      << currentId << " has more than one answer/verification commands. </b>";
+    }
+    return false;
+  }
+  current.flagAnswerVerificationFound = true;
+  current.mathQuillPanelOptions = input.getKeyValue("buttons");
+  return true;
+}
+
+CalculatorHTML::SolutionProcessor::SolutionProcessor() {
+  this->currentAnswer = nullptr;
+}
+
+bool CalculatorHTML::processOneSolution(
+  SyntacticElementHTML& input,
+  CalculatorHTML::SolutionProcessor& processor,
+  std::stringstream* comments
+) {
+  MacroRegisterFunctionWithName("CalculatorHTML::processOneSolution");
+  std::string tagName = input.getTagClass();
+  if (processor.currentAnswer != nullptr) {
+    if (tagName == SyntacticElementHTML::Tags::calculatorSolutionEnd) {
+      processor.currentAnswer = nullptr;
+      return true;
+    }
+    processor.currentAnswer->solutionElements.addOnTop(input);
+    return true;
+  }
+  if (tagName == SyntacticElementHTML::Tags::calculatorSolutionStart) {
+    std::string answerId = input.getAnswerIdOfOwner();
+    if (answerId == "") {
+      if (this->problemData.answers.size() > 0) {
+        answerId = *this->problemData.answers.keys.lastObject();
+      }
+    }
+    if (answerId == "") {
+      if (comments != nullptr) {
+        *comments << "Solution tag with tag name: " << tagName << " has empty id. ";
+      }
+      return false;
+    }
+    processor.currentAnswer = &this->problemData.answers.getValueCreate(answerId);
+    return true;
+  }
+  processor.contentWithoutSolutionElements.addOnTop(input);
+  return true;
+}
+
+bool CalculatorHTML::processSolutions(std::stringstream* comments) {
+  MacroRegisterFunctionWithName("CalculatorHTML::processSolutions");
+  CalculatorHTML::SolutionProcessor processor;
+  for (int i = 0; i < this->content.size; i ++) {
+    if (!this->processOneSolution(this->content[i], processor, comments)) {
+      return false;
+    }
+  }
+  this->content = processor.contentWithoutSolutionElements;
+  return true;
+}
+
+bool CalculatorHTML::extractAnswerIdsOnce(
+  SyntacticElementHTML& element, std::stringstream* comments
+) {
+  MacroRegisterFunctionWithName("CalculatorHTML::extractAnswerIdsOnce");
+  if (!this->extractOneAnswerId(element, comments)) {
+    return false;
+  }
+  if (element.isAnswer()) {
+    return true;
+  }
+  if (
+    !element.isCommentBeforeSubmission() &&
+    !element.isCommentBeforeInterpretation() &&
+    !element.isAnswerOnGiveUp() &&
+    !element.isSolution()
+  ) {
+    return true;
+  }
+  std::string nameOfTag = element.getAnswerIdOfOwner();
+  if (nameOfTag == "") {
+    int numberOfIdsSoFar = this->problemData.answers.size();
+    if (numberOfIdsSoFar == 0) {
+      if (comments != nullptr) {
+        *comments << "Auxilary answer element: " << element.toStringDebug()
         << " has no name and appears before the first answer tag. "
         << "Auxilary answers apply the answer tag whose id is specified in the name "
         << "tag of the auxilary answer. If the auxilary answer has no "
@@ -2506,27 +2874,48 @@ bool CalculatorHTML::extractAnswerIds(std::stringstream* comments) {
       }
       return false;
     }
-    if (currentE.getKeyValue("name") == "") {
-      currentE.setKeyValue("name", *answerIdsSeenSoFar.lastObject());
+    element.setKeyValue("name", *this->problemData.answers.keys.lastObject());
+    nameOfTag = element.getAnswerIdOfOwner();
+  }
+  if (nameOfTag == "") {
+    global.fatal << "Unexpected empty answer name." << global.fatal;
+  }
+  if (!this->problemData.answers.contains(nameOfTag)) {
+    Answer newAnswer;
+    newAnswer.answerId = nameOfTag;
+    this->problemData.answers.setKeyValue(newAnswer.answerId, newAnswer);
+  }
+  return true;
+}
+
+bool CalculatorHTML::extractAnswerIds(std::stringstream* comments) {
+  MacroRegisterFunctionWithName("CalculatorHTML::extractAnswerIds");
+  // we shouldn't clear this->theProblemData.theAnswers: it may contain
+  // outdated information loaded from the database. We don't want to loose that info
+  // (say we renamed an answerId but students have already stored answers using the old answerId...).
+  for (int i = 0; i < this->content.size; i ++) {
+    if (!this->extractAnswerIdsOnce(this->content[i], comments)) {
+      return false;
     }
   }
-  this->theProblemData.checkConsistency();
+  this->problemData.checkConsistency();
   return true;
 }
 
 bool CalculatorHTML::checkContent(std::stringstream* comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::checkContent");
   bool result = true;
-  for (int i = 0; i < this->theContent.size; i ++) {
-    SyntacticElementHTML& currentElt = this->theContent[i];
+  for (int i = 0; i < this->content.size; i ++) {
+    SyntacticElementHTML& current = this->content[i];
     if (
-      currentElt.syntacticRole == "command" &&
-      currentElt.isAnswer() &&
-      currentElt.getKeyValue("id").find('=') != std::string::npos
+      current.syntacticRole == "command" &&
+      current.isAnswer() &&
+      current.getKeyValue("id").find('=') != std::string::npos
     ) {
       result = false;
       if (comments != nullptr) {
-        *comments << "Error: the id of tag " << currentElt.toStringDebug()
+        *comments << "Error: the id of tag "
+        << current.toStringDebug()
         << " contains the equality sign which is not allowed. ";
       }
     }
@@ -2534,7 +2923,21 @@ bool CalculatorHTML::checkContent(std::stringstream* comments) {
   return result;
 }
 
-std::string CalculatorHTML::cleanUpCommandString(const std::string& inputCommand) {
+std::string SyntacticElementHTML::commandCleaned() const {
+  return SyntacticElementHTML::cleanUpCommandString(this->content);
+}
+
+std::string SyntacticElementHTML::commandEnclosed() const {
+  return SyntacticElementHTML::cleanUpEncloseCommand(this->content);
+}
+
+std::string SyntacticElementHTML::cleanUpEncloseCommand(const std::string& inputCommand) {
+  return Calculator::Atoms::commandEnclosure + "{}( " +
+  SyntacticElementHTML::cleanUpCommandString(inputCommand)
+  + " );";
+}
+
+std::string SyntacticElementHTML::cleanUpCommandString(const std::string& inputCommand) {
   MacroRegisterFunctionWithName("CalculatorHTML::cleanUpCommandString");
   if (inputCommand == "") {
     return "";
@@ -2599,21 +3002,23 @@ bool CalculatorHtmlFunctions::extractCalculatorExpressionFromHtml(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::extractCalculatorExpressionFromHtml");
-  CalculatorHTML theFile;
-  if (!input.isOfType<std::string>(&theFile.inputHtml)) {
+  if (input.size() != 2) {
+    return  false;
+  }
+  CalculatorHTML interpreter;
+  if (!input[1].isOfType<std::string>(&interpreter.parser.inputHtml)) {
     return calculator << "Extracting calculator expressions from html takes as input strings. ";
   }
-  if (!theFile.parseHTML(&calculator.comments)) {
+  if (!interpreter.parseHTML(&calculator.comments)) {
     return false;
   }
-  return output.assignValue(theFile.ToStringExtractedCommands(), calculator);
+  return output.assignValue(interpreter.toStringExtractedCommands(), calculator);
 }
 
 std::string CalculatorHTML::answerLabels::properties = "properties";
 std::string CalculatorHTML::answerLabels::idPanel = "answerPanelId";
 std::string CalculatorHTML::answerLabels::answerHighlight = "answerHighlight";
 std::string CalculatorHTML::answerLabels::idEquationEditorElement = "idEquationEditorElement";
-std::string CalculatorHTML::answerLabels::idEquationEditorElementLocation = "idEquationEditorElementLocation";
 std::string CalculatorHTML::answerLabels::idButtonContainer = "idButtonContainer";
 std::string CalculatorHTML::answerLabels::mathQuillPanelOptions = "mathQuillPanelOptions";
 std::string CalculatorHTML::answerLabels::idPureLatex = "idPureLatex";
@@ -2624,14 +3029,14 @@ std::string CalculatorHTML::answerLabels::idButtonSolution = "idButtonSolution";
 std::string CalculatorHTML::answerLabels::idVerificationSpan = "idVerificationSpan";
 std::string CalculatorHTML::answerLabels::previousAnswers = "previousAnswers";
 
-JSData CalculatorHTML::getJavascriptMathQuillBoxesForJSON() {
-  MacroRegisterFunctionWithName("CalculatorHTML::getJavascriptMathQuillBoxesForJSON");
+JSData CalculatorHTML::getEditorBoxesHTML() {
+  MacroRegisterFunctionWithName("CalculatorHTML::getEditorBoxesHTML");
   ////////////////////////////////////////////////////////////////////
   JSData output;
   output.theType = JSData::token::tokenArray;
-  for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++) {
+  for (int i = 0; i < this->problemData.answers.size(); i ++) {
     JSData currentAnswerJS;
-    Answer& currentAnswer = this->theProblemData.theAnswers.values[i];
+    Answer& currentAnswer = this->problemData.answers.values[i];
     ///////////////
     JSData properties;
     for (int j = 0; j < currentAnswer.properties.size(); j ++) {
@@ -2642,17 +3047,16 @@ JSData CalculatorHTML::getJavascriptMathQuillBoxesForJSON() {
     }
     currentAnswerJS[answerLabels::idPanel] = currentAnswer.idAnswerPanel;
     currentAnswerJS[answerLabels::answerHighlight] = currentAnswer.htmlAnswerHighlight;
-    currentAnswerJS[answerLabels::idEquationEditorElement] = currentAnswer.idMQfielD;
-    currentAnswerJS[answerLabels::idEquationEditorElementLocation] = currentAnswer.idMQFieldLocation;
+    currentAnswerJS[answerLabels::idEquationEditorElement] = currentAnswer.idMQField;
     currentAnswerJS[answerLabels::idButtonContainer] = currentAnswer.idMQButtonPanelLocation;
     currentAnswerJS[answerLabels::mathQuillPanelOptions] = currentAnswer.mathQuillPanelOptions;
     currentAnswerJS[answerLabels::idPureLatex] = currentAnswer.answerId;
     currentAnswerJS[answerLabels::idButtonSubmit] = currentAnswer.idButtonSubmit;
     currentAnswerJS[answerLabels::idButtonInterpret] = currentAnswer.idButtonInterpret;
-    if (currentAnswer.commandsNoEnclosureAnswerOnGiveUpOnly != "") {
+    if (currentAnswer.commandAnswerOnGiveUp != "") {
       currentAnswerJS[answerLabels::idButtonAnswer] = currentAnswer.idButtonAnswer;
     }
-    if (currentAnswer.flagSolutionFound) {
+    if (currentAnswer.hasSolution()) {
       currentAnswerJS[answerLabels::idButtonSolution] = currentAnswer.idButtonSolution;
     }
     currentAnswerJS[answerLabels::idVerificationSpan] = currentAnswer.idVerificationSpan;
@@ -2671,8 +3075,8 @@ bool CalculatorHTML::storeRandomSeedCurrent(std::stringstream* commentsOnFailure
     }
     return false;
   }
-  this->theProblemData.flagRandomSeedGiven = true;
-  this->currentUser.setProblemData(this->fileName, this->theProblemData);
+  this->problemData.flagRandomSeedGiven = true;
+  this->currentUser.setProblemData(this->fileName, this->problemData);
   if (!this->currentUser.storeProblemData(this->fileName, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<b style = 'color:red'>"
@@ -2704,6 +3108,29 @@ void CalculatorHTML::computeProblemLabel() {
   this->outputProblemTitle = current.title;
 }
 
+std::string SyntacticElementHTML::toHTMLElements(
+  const List<SyntacticElementHTML>& input
+) {
+  std::stringstream out;
+  out << input.size << " elements. ";
+  for (int i = 0; i < input.size; i ++) {
+    out << "<br>" << "<span style='color:" << ((i % 2 == 0) ? "orange" : "blue") << "'>";
+    std::string content = input[i].toStringDebug();
+    if (content.size() == 0) {
+      content = "<b>empty</b>";
+    } else if (content == " ") {
+      content = "<b>space</b>";
+    }
+    out << content << "</span>";
+  }
+  return out.str();
+}
+
+std::string CalculatorHTML::toStringParsedElements() const {
+  MacroRegisterFunctionWithName("CalculatorHTML::toStringParsedElements");
+  return SyntacticElementHTML::toHTMLElements(this->content);
+}
+
 void CalculatorHTML::computeBodyDebugString() {
   MacroRegisterFunctionWithName("CalculatorHTML::computeBodyDebugString");
   this->outputDebugInformationBody = "";
@@ -2711,29 +3138,31 @@ void CalculatorHTML::computeBodyDebugString() {
     return;
   }
   std::stringstream out;
-  out << "<hr>Debug information follows. ";
+  out << "<hr><hr><b style='color:blue'>Problem body debug information.</b> ";
   if (this->logCommandsProblemGeneratioN.str() != "") {
     out << "<br>" << this->logCommandsProblemGeneratioN.str() << "<hr>";
   }
   out << "<br>Random seed: "
-  << this->theProblemData.randomSeed
+  << this->problemData.randomSeed
   << "<br>ForReal: " << this->flagIsForReal << "<br>seed given: "
-  << this->theProblemData.flagRandomSeedGiven
+  << this->problemData.flagRandomSeedGiven
   << "<br>flagRandomSeedGiven: "
-  << this->theProblemData.flagRandomSeedGiven
-  << "\n<br>\n"
+  << this->problemData.flagRandomSeedGiven
+  << "\n<hr><hr>\n"
+  << "<b style='color:orange'>Parsing information.</b> "
+  << this->toStringParsedElements()
   << "<hr>"
   << "<hr>"
   << HtmlRoutines::convertStringToHtmlString(this->toStringCalculatorArgumentsForProblem("exercise", "false"), true);
   this->outputDebugInformationBody = out.str();
 }
 
-bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments) {
+bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& interpreter, std::stringstream& comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::interpretHtmlOneAttempt");
   double startTime = global.getElapsedSeconds();
   std::stringstream outBody;
   std::stringstream outHeadPt2;
-  this->theProblemData.randomSeed = this->randomSeedPerAttempt[
+  this->problemData.randomSeed = this->randomSeedPerAttempt[
     this->numberOfInterpretationAttempts - 1
   ];
   this->figureOutCurrentProblemList(comments);
@@ -2741,7 +3170,7 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->timeIntermediateComments.lastObject()->addOnTop("Time before after loading problem list");
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("Time before execution");
-  if (!this->prepareAndExecuteCommands(theInterpreter, &comments)) {
+  if (!this->prepareAndExecuteCommands(interpreter, &comments)) {
     return false;
   }
   //////////////////////////////interpretation takes place before javascript generation as the latter depends on the former.
@@ -2765,19 +3194,36 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       bool problemAlreadySolved = false;
       if (this->currentUser.problemData.contains(this->fileName)) {
         ProblemData& theProbData = this->currentUser.problemData.getValueCreate(this->fileName);
-        if (theProbData.numCorrectlyAnswered >= theProbData.theAnswers.size()) {
+        if (theProbData.numCorrectlyAnswered >= theProbData.answers.size()) {
           problemAlreadySolved = true;
         }
       }
       this->outputDeadlineString = this->toStringDeadline(this->fileName, problemAlreadySolved, true, true);
     }
   }
+  return this->interpretHtmlOneAttemptPartTwo(
+    interpreter,
+    comments,
+    startTime,
+    outBody,
+    outHeadPt2
+  );
+}
+
+bool CalculatorHTML::interpretHtmlOneAttemptPartTwo(
+  Calculator& interpreter,
+  std::stringstream& comments,
+  double startTime,
+  std::stringstream& outBody,
+  std::stringstream& outHeadPt2
+) {
+  MacroRegisterFunctionWithName("CalculatorHTML::interpretHtmlOneAttemptPartTwo");
   //////////////////////////////
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("Time after execution");
   //first command and first syntactic element are the random seed and are ignored.
-  theInterpreter.theObjectContainer.resetSliders();
-  if (!this->interpretProcessExecutedCommands(theInterpreter, this->theContent, comments)) {
+  interpreter.objectContainer.resetSliders();
+  if (!this->processExecutedCommands(interpreter, this->content, comments)) {
     outBody << comments.str();
     this->outputHtmlBodyNoTag = outBody.str();
     return false;
@@ -2786,88 +3232,63 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->timeIntermediateComments.lastObject()->addOnTop("Time before class management routines");
   this->prepareAnswerElements(comments);
   this->numberOfAnswerIdsMathquilled = 0;
-  for (int i = 0; i < this->theContent.size; i ++) {
-    if (this->theContent[i].isInterpretedNotByCalculator()) {
-      this->interpretNotByCalculatorNotAnswer(this->theContent[i]);
+  for (int i = 0; i < this->content.size; i ++) {
+    if (this->content[i].isInterpretedNotByCalculator()) {
+      this->interpretNotByCalculatorNotAnswer(this->content[i]);
     }
   }
   this->interpretAnswerHighlights(comments);
-  for (int i = 0; i < this->theContent.size; i ++) {
-    this->interpretIfAnswer(this->theContent[i]);
+  for (int i = 0; i < this->content.size; i ++) {
+    this->interpretIfAnswer(this->content[i]);
   }
   outHeadPt2 << this->topicListJavascriptWithTag;
   this->interpretAnswerElements(comments);
-  this->theProblemData.checkConsistency();
-  this->theProblemData.checkConsistencyMathQuillIds();
-  bool headFinished = !this->flagTagHeadPresent;
+  this->problemData.checkConsistency();
+  this->problemData.checkConsistencyMathQuillIds();
   std::string tagClass;
-  for (int i = 0; i < this->theContent.size; i ++) {
-    if (!this->theContent[i].isHidden()) {
-      tagClass = this->theContent[i].gGetTagClass();
-      if (tagClass == "headFinish") {
-        headFinished = true;
-        outHeadPt2 << "<!--Tag class: " << tagClass << " replaced by auto-generated one-->";
-        continue;
-      }
-      if (
-        tagClass == "bodyStart" || tagClass == "bodyFinish" ||
-        tagClass == "headStart" || tagClass == "headFinish" ||
-        tagClass == "htmlStart" || tagClass == "htmlFinish"
-      ) {
-        if (headFinished) {
-          outHeadPt2 << "<!--Tag class: " << tagClass << " replaced by auto-generated one-->";
-        } else {
-          outHeadPt2 << "<!--Tag class: " << tagClass << " replaced by auto-generated one-->";
-        }
-        continue;
-      }
-      if (headFinished) {
-        outBody << this->theContent[i].toStringInterpretedBody();
-      } else {
-        outHeadPt2 << this->theContent[i].toStringInterpretedBody();
-      }
+  for (int i = 0; i < this->content.size; i ++) {
+    if (this->content[i].shouldShow()) {
+      tagClass = this->content[i].getTagClass();
+      outBody << this->content[i].toStringInterpretedBody();
     }
   }
-  if (theInterpreter.flagHasGraphics) {
-    MapReferences<std::string, std::string, MathRoutines::hashString>& theScripts =
-    theInterpreter.theObjectContainer.graphicsScripts;
-    for (int i = 0; i < theScripts.size(); i ++) {
-      this->theScripts.setKeyValue(theScripts.keys[i], theScripts.values[i]);
+  if (interpreter.flagHasGraphics) {
+    MapReferences<std::string, std::string, MathRoutines::hashString>& interpreterScripts =
+    interpreter.objectContainer.graphicsScripts;
+    for (int i = 0; i < interpreterScripts.size(); i ++) {
+      this->scripts.setKeyValue(interpreterScripts.keys[i], interpreterScripts.values[i]);
     }
   }
-  ////////////////////////////////////////////////////////////////////
-  //out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
-  //out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
-  //out << "<hr> Between the commands:" << this->betweenTheCommands.toStringCommaDelimited();
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("Time before database storage");
   if (global.flagDatabaseCompiled) {
     bool shouldResetTheRandomSeed = false;
-    if (this->flagIsForReal && !this->theProblemData.flagRandomSeedGiven) {
+    if (this->flagIsForReal && !this->problemData.flagRandomSeedGiven) {
       shouldResetTheRandomSeed = true;
     }
     if (this->flagIsForReal && this->numberOfInterpretationAttempts > 1) {
       shouldResetTheRandomSeed = true;
       outBody
-      << "<hr><b style =\"color:red\">"
+      << "<hr><b style='color:red'>"
       << "Your problem's random seed was just reset. </b> "
       << "You should be seeing this message very rarely, "
       << "<b>ONLY IF</b> your problem was changed by your instructor "
       << "<b>AFTER</b> you started solving it. "
       << "You should not be seeing this message a second time. "
-      << "<b style =\"color:red\">If you see this message every "
+      << "<b style='color:red'>If you see this message every "
       << "time you reload the problem "
-      << "this is a bug. Please take a screenshot and send it to your instructor. </b>";
+      << "this is a bug. "
+      << "Please take a screenshot and send it to your instructor. </b>";
     }
     if (shouldResetTheRandomSeed) {
       bool successStoringSeed = this->storeRandomSeedCurrent(&comments);
       if (!successStoringSeed) {
-        global << Logger::red << "This should not happen: failed to store random seed." << Logger::endL
+        global << Logger::red
+        << "This should not happen: failed to store random seed." << Logger::endL
         << Logger::yellow << comments.str() << Logger::endL;
       }
     }
     this->computeBodyDebugString();
-
   }
   std::stringstream navigationAndEditTagStream;
   this->outputProblemNavigatioN = navigationAndEditTagStream.str();
@@ -2882,7 +3303,7 @@ std::string CalculatorHTML::toStringCalculatorArgumentsForProblem(
   const std::string& studentSection,
   bool includeRandomSeedIfAppropriate
 ) const {
-  MacroRegisterFunctionWithName("WebWorker::toStringCalculatorArgumentsForProblem");
+  MacroRegisterFunctionWithName("CalculatorHTML::toStringCalculatorArgumentsForProblem");
   if (!global.flagLoggedIn && !global.userGuestMode()) {
     return "";
   }
@@ -2904,7 +3325,7 @@ std::string CalculatorHTML::toStringCalculatorArgumentsForProblem(
     out << "studentSection=" << HtmlRoutines::convertStringToURLString(studentSection, false) << "&";
   }
   if (includeRandomSeedIfAppropriate) {
-    out << "randomSeed=" << this->theProblemData.randomSeed << "&";
+    out << "randomSeed=" << this->problemData.randomSeed << "&";
   }
   return out.str();
 }
@@ -2929,22 +3350,22 @@ std::string CalculatorHTML::toStringProblemScoreFull(const std::string& theFileN
       if (!theProbData.adminData.getWeightFromCourse(this->currentUser.courseComputed, currentWeight)) {
         currentWeight = 0;
       }
-      if (theProbData.theAnswers.size() == 1) {
+      if (theProbData.answers.size() == 1) {
         if (theProbData.numCorrectlyAnswered == 1) {
           out << theProbData.totalNumSubmissions << " submission(s), problem correctly answered. ";
         } else {
           out << theProbData.totalNumSubmissions << " submission(s), problem not correctly answered yet. ";
         }
-      } else if (theProbData.theAnswers.size() > 1) {
+      } else if (theProbData.answers.size() > 1) {
         out << theProbData.totalNumSubmissions << " submission(s), " << theProbData.numCorrectlyAnswered
-        << " out of " << theProbData.theAnswers.size() << " subproblems correctly answered. ";
+        << " out of " << theProbData.answers.size() << " subproblems correctly answered. ";
       }
     } else if (theProbData.totalNumSubmissions != 0) {
-      if (theProbData.numCorrectlyAnswered < theProbData.theAnswers.size()) {
+      if (theProbData.numCorrectlyAnswered < theProbData.answers.size()) {
         out << "<b style =\"color:red\">"
         << theProbData.points << " out of "
         << currentWeight << " point(s). </b>";
-      } else if (theProbData.numCorrectlyAnswered == theProbData.theAnswers.size()) {
+      } else if (theProbData.numCorrectlyAnswered == theProbData.answers.size()) {
         out << "<b style =\"color:green\">"
         << theProbData.points << " out of "
         << currentWeight << " point(s). </b> ";
@@ -2977,7 +3398,7 @@ std::string CalculatorHTML::toStringProblemScoreShort(const std::string& theFile
   if (this->currentUser.problemData.contains(theFileName)) {
     theProbData = this->currentUser.problemData.getValueCreate(theFileName);
     Rational percentSolved = 0, totalPoints = 0;
-    percentSolved.assignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.theAnswers.size());
+    percentSolved.assignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.answers.size());
     theProbData.flagProblemWeightIsOK = theProbData.adminData.getWeightFromCourse(
       this->currentUser.courseComputed, currentWeight, &currentWeightAsGivenByInstructor
     );
@@ -3722,77 +4143,6 @@ JSData CalculatorHTML::toStringTopicListJSON(std::stringstream* comments) {
   return output;
 }
 
-void CalculatorHTML::interpretTableOfContents(SyntacticElementHTML& inputOutput) {
-  MacroRegisterFunctionWithName("CalculatorHTML::interpretTableOfContents");
-  std::stringstream out;
-  if (!this->loadAndParseTopicList(out)) {
-    inputOutput.interpretedCommand = out.str();
-    return;
-  }
-  bool sectionStarted = false;
-  bool subSectionStarted = false;
-  bool chapterStarted = false;
-  out << "\n\n\n<!--Topic list automatically generated from topic list: " << this->topicListFileName
-  << ".-->";
-  out << "<a href=\"" << global.displayNameExecutable
-  << "?request=template&fileName=" << this->fileName << "&"
-  << "topicList=" << this->topicListFileName << "&" << "\">All topics</a>";
-  out << "<ul>";
-  for (int i = 0; i < this->topics.theTopics.size(); i ++) {
-    TopicElement& currentElt = this->topics.theTopics.values[i];
-    if (subSectionStarted) {
-      if (
-        currentElt.type == TopicElement::types::topic ||
-        currentElt.type == TopicElement::types::section ||
-        currentElt.type == TopicElement::types::chapter
-      ) {
-        out << "</li>";
-      }
-    }
-    if (sectionStarted) {
-      if (
-        currentElt.type == TopicElement::types::section ||
-        currentElt.type == TopicElement::types::chapter
-      ) {
-        out << "</ul></li>";
-      }
-    }
-    if (chapterStarted) {
-      if (currentElt.type == TopicElement::types::chapter) {
-        out << "</ul></li>";
-      }
-    }
-    if (currentElt.type == TopicElement::types::chapter) {
-      out << "<li>" << "<a href=\"" << global.displayNameExecutable
-      << "?request=template&fileName=" << this->fileName << "&"
-      << "topicList=" << this->topicListFileName << "&" << "chapter =" << currentElt.title
-      << "\">" << currentElt.title << "</a>" << "<br>\n";
-      chapterStarted = true;
-      sectionStarted = false;
-      subSectionStarted = false;
-      out << "<ul>";
-    } else if (currentElt.type == TopicElement::types::section) {
-      out << "<li>" << currentElt.title << "<br>\n";
-      sectionStarted = true;
-      subSectionStarted = false;
-      out << "<ul>";
-    } else if (currentElt.type == TopicElement::types::error) {
-      out << "Error parsing topic list. " << currentElt.error;
-    }
-  }
-  if (subSectionStarted) {
-    out << "</li>";
-  }
-  if (sectionStarted) {
-    out << "</ul></li>";
-  }
-  if (chapterStarted) {
-    out << "</ul></li>";
-  }
-  out << "</ul>";
-  inputOutput.interpretedCommand = out.str();
-}
-
 void CalculatorHTML::interpretJavascripts(SyntacticElementHTML& inputOutput) {
   MacroRegisterFunctionWithName("CalculatorHTML::interpretJavascripts");
   std::string javascriptName = StringRoutines::stringTrimWhiteSpace(inputOutput.content);
@@ -3831,11 +4181,6 @@ bool CalculatorHTML::computeTopicListAndPointsEarned(std::stringstream& comments
   }
   this->topics.initializeElementTypes();
   return true;
-}
-
-void CalculatorHTML::interpretTopicList(SyntacticElementHTML& inputOutput) {
-  MacroRegisterFunctionWithName("CalculatorHTML::interpretTopicList");
-  inputOutput.interpretedCommand = "<topicList></topicList>";
 }
 
 JSData LaTeXCrawler::FileWithOption::toJSON() {
@@ -4125,7 +4470,7 @@ JSData TopicElement::toJSON(CalculatorHTML& owner) {
     if (owner.currentUser.problemData.contains(this->problemFileName)) {
       ProblemData& currentData = owner.currentUser.problemData.getValueCreate(this->problemFileName);
       output["correctlyAnswered"] = currentData.numCorrectlyAnswered;
-      output["totalQuestions"] = currentData.theAnswers.size();
+      output["totalQuestions"] = currentData.answers.size();
       Rational currentWeight;
       std::string currentWeightAsGivenByInstructor;
       currentData.flagProblemWeightIsOK = currentData.adminData.getWeightFromCourse(

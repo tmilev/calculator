@@ -65,7 +65,7 @@ public:
   static std::string writeFileReturnHTMLLink(
     const std::string& fileContent, const std::string& fileNameVirtual, const std::string& linkText
   );
-  static bool loadFiletoStringVirtual(
+  static bool loadFileToStringVirtual(
     const std::string& fileName,
     std::string& output,
     bool accessSensitiveFolders,

@@ -26,19 +26,19 @@ template <class Coefficient>
 void GroebnerBasisComputation<Coefficient>::getBasis(
   List<Polynomial<Coefficient> >& output
 ) {
-  output.setSize(this->theBasis.size);
-  for (int i = 0; i < this->theBasis.size; i ++) {
-    output[i] = this->theBasis[i].element;
+  output.setSize(this->basis.size);
+  for (int i = 0; i < this->basis.size; i ++) {
+    output[i] = this->basis[i].element;
   }
 }
 
 template <class Coefficient>
 bool GroebnerBasisComputation<Coefficient>::transformToReducedBasis(
-  List<Polynomial<Coefficient> >& inputOutpuT, int upperLimitPolyComputations
+  List<Polynomial<Coefficient> >& inputOutput
 ) {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::transformToReducedBasis");
   this->initializeForGroebnerComputation();
-  this->basisCandidates = inputOutpuT;
+  this->basisCandidates = inputOutput;
   ProgressReport report;
   if (this->flagDoProgressReport) {
     std::stringstream reportStream;
@@ -46,16 +46,13 @@ bool GroebnerBasisComputation<Coefficient>::transformToReducedBasis(
     << this->basisCandidates.size << " elements (at the start). ";
     report.report(reportStream.str());
   }
-  int oldMaxNumGBCompos = this->maximumPolynomialComputations;
-  this->maximumPolynomialComputations = upperLimitPolyComputations;
   this->addAndReducePolynomials();
-  this->maximumPolynomialComputations = oldMaxNumGBCompos;
-  if (upperLimitPolyComputations > 0) {
-    if (this->numberPolynomialDivisions > upperLimitPolyComputations) {
-      return this->wrapUpGroebnerOnExceedingComputationLimit(inputOutpuT);
+  if (this->maximumPolynomialDivisions > 0) {
+    if (this->numberPolynomialDivisions > this->maximumPolynomialDivisions) {
+      return this->wrapUpGroebnerOnExceedingComputationLimit(inputOutput);
     }
   }
-  return this->wrapUpOnGroebnerBasisSuccess(inputOutpuT);
+  return this->wrapUpOnGroebnerBasisSuccess(inputOutput);
 }
 
 template <class Coefficient>
@@ -63,7 +60,7 @@ std::string GroebnerBasisComputation<Coefficient>::toStringStatusGroebnerBasisTr
   std::stringstream out;
   out << "Transforming to Groebner basis a system of "
   << this->basisCandidates.size << " elements: "
-  << this->basisCandidates.toStringCommaDelimited(&this->theFormat);
+  << this->basisCandidates.toStringCommaDelimited(&this->format);
   return out.str();
 }
 
@@ -76,8 +73,8 @@ void GroebnerBasisComputation<Coefficient>::generateOneSymmetricDifferenceCandid
     left.leadingMonomial.minimalNumberOfVariables(),
     right.leadingMonomial.minimalNumberOfVariables()
   );
-  MonomialP leftShift;
-  MonomialP rightShift;
+  MonomialPolynomial leftShift;
+  MonomialPolynomial rightShift;
   for (int k = 0; k < numberOfVariables; k ++) {
     if (left.leadingMonomial(k) > right.leadingMonomial(k)) {
       rightShift.setVariable(k, left.leadingMonomial(k) - right.leadingMonomial(k));
@@ -101,21 +98,21 @@ void GroebnerBasisComputation<Coefficient>::generateSymmetricDifferenceCandidate
   MacroRegisterFunctionWithName("GroebnerBasisComputation::generateSymmetricDifferenceCandidates");
   ProgressReport reportProgress("Groebner basis report");
   this->numberOfSymmetricDifferenceRounds ++;
-  for (int i = 0; i < this->theBasis.size; i ++) {
-    for (int j = i + 1; j < this->theBasis.size && i < this->theBasis.size; j ++) {
+  for (int i = 0; i < this->basis.size; i ++) {
+    for (int j = i + 1; j < this->basis.size && i < this->basis.size; j ++) {
       if (reportProgress.tickAndWantReport()) {
         std::stringstream reportStream;
         reportStream << "Computing S-poly of depth " << this->numberOfSymmetricDifferenceRounds
         << ". Taking s-difference of indices " << i + 1 << " and " << j + 1
-        << " out of " << this->theBasis.size
+        << " out of " << this->basis.size
         << ".<br>Before proceding to adjoin candidates, "
         << "I have " << this->basisCandidates.size
         << " candidates and basis of size "
-        << this->theBasis.size << ".";
+        << this->basis.size << ".";
         reportProgress.report(reportStream.str());
       }
       this->generateOneSymmetricDifferenceCandidate(
-        this->theBasis[i], this->theBasis[j]
+        this->basis[i], this->basis[j]
       );
     }
   }
@@ -136,7 +133,7 @@ bool GroebnerBasisComputation<Coefficient>::transformToReducedGroebnerBasis(
   if (this->limitsExceeded()) {
     return this->wrapUpGroebnerOnExceedingComputationLimit(inputOutput);
   }
-  if (this->theBasis.size == 1) {
+  if (this->basis.size == 1) {
     return this->wrapUpOnGroebnerBasisSuccess(inputOutput);
   }
   do {
@@ -155,27 +152,39 @@ std::string GroebnerBasisComputation<Coefficient>::toStringPolynomialBasisStatus
   std::stringstream out;
   out << "There are " << this->basisCandidates.size
   << " candidates left to adjoin. <br>The current polynomial basis has "
-  << theBasis.size << " elements. "
+  << this->basis.size << " elements. "
   << "<br>Number of polynomial divisions: "
   << this->numberPolynomialDivisions
-  << " with a limit of: " << this->maximumPolynomialComputations << " computations. "
-  << "The basis follows.";
-  for (int i = 0; i < this->theBasis.size; i ++) {
-    out << "<br>" << this->theBasis[i].toString(&this->theFormat);
+  << " with a limit of: " << this->maximumPolynomialDivisions << " computations. ";
+  out << "<br>Number of monomial operations: "
+  << this->numberMonomialOperations << ", limit: " << this->maximumMonomialOperations << ". ";
+
+  out << "The basis follows.";
+  for (int i = 0; i < this->basis.size; i ++) {
+    out << "<br>" << this->basis[i].toString(&this->format);
   }
   out << "<br>There are " << this->basisCandidates.size << " candidates. ";
   for (int i = 0; i < this->basisCandidates.size; i ++) {
-    out << "<br>" << this->basisCandidates[i].toString(&this->theFormat);
+    out << "<br>" << this->basisCandidates[i].toString(&this->format);
   }
   return out.str();
 }
 
 template<class Coefficient>
 bool GroebnerBasisComputation<Coefficient>::limitsExceeded() const {
-  if (this->maximumPolynomialComputations <= 0) {
-    return false;
+  if (
+    this->maximumMonomialOperations > 0 &&
+    this->maximumMonomialOperations < this->numberMonomialOperations
+  ) {
+    return true;
   }
-  return this->numberPolynomialDivisions > this->maximumPolynomialComputations;
+  if (
+    this->maximumPolynomialDivisions > 0 &&
+    this->maximumPolynomialDivisions < this->numberPolynomialDivisions
+  ) {
+    return true;
+  }
+  return false;
 }
 
 template<class Coefficient>
@@ -190,12 +199,12 @@ bool GroebnerBasisComputation<Coefficient>::addAndReduceOnePolynomial() {
   if (this->limitsExceeded()) {
     return false;
   }
-  ProgressReport theReport;
+  ProgressReport report;
   if (this->flagDoProgressReport) {
     std::stringstream reportStream;
     reportStream << "Adding remainder: "
-    << this->remainderDivision.toString(&this->theFormat);
-    theReport.report(reportStream.str());
+    << this->remainderDivision.toString(&this->format);
+    report.report(reportStream.str());
   }
   this->basisCandidates.removeLastObject();
   return this->addRemainderToBasis();
@@ -224,8 +233,8 @@ template <class Coefficient>
 int GroebnerBasisComputation<Coefficient>::minimalNumberOfVariables() const {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::minimalNumberOfVariables");
   int result = 0;
-  for (int i = 0; i < this->theBasis.size; i ++) {
-    Polynomial<Coefficient>& current = this->theBasis[i].element;
+  for (int i = 0; i < this->basis.size; i ++) {
+    Polynomial<Coefficient>& current = this->basis[i].element;
     MathRoutines::maximum(current.minimalNumberOfVariables(), result);
   }
   return result;
@@ -236,14 +245,14 @@ std::string GroebnerBasisComputation<Coefficient>::toStringLetterOrder(bool addD
   MacroRegisterFunctionWithName("GroebnerBasisComputation::toStringLetterOrder");
   std::stringstream out;
   int numVars = this->minimalNumberOfVariables();
-  List<MonomialP> variables;
+  List<MonomialPolynomial> variables;
   out << "Variable name(s), ascending order: ";
   variables.setSize(numVars);
   for (int i = 0; i < variables.size; i ++) {
     variables[i].makeEi(i, 1);
   }
   variables.quickSortAscending(&this->polynomialOrder.monomialOrder);
-  FormatExpressions tempFormat = this->theFormat;
+  FormatExpressions tempFormat = this->format;
   if (addDollars) {
     out << "$";
   }
@@ -277,15 +286,15 @@ std::string GroebnerBasisComputation<Coefficient>::toStringLetterOrder(bool addD
 template <class Coefficient>
 void GroebnerBasisComputation<Coefficient>::oneDivisonSubStepWithBasis(
   Polynomial<Coefficient>& remainder,
-  const MonomialP& leadingMonomial,
+  const MonomialPolynomial& leadingMonomial,
   const Coefficient& leadingCoefficient,
   int index,
   ProgressReport* theReport
 ) {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::oneDivisonSubStepWithBasis");
-  const MonomialP& leadingMonomialBasis = this->theBasis[index].leadingMonomial;
-  const Coefficient& leadingCoefficientBasis = this->theBasis[index].leadingCoefficient;
-  MonomialP quotientMonomial = leadingMonomial;
+  const MonomialPolynomial& leadingMonomialBasis = this->basis[index].leadingMonomial;
+  const Coefficient& leadingCoefficientBasis = this->basis[index].leadingCoefficient;
+  MonomialPolynomial quotientMonomial = leadingMonomial;
   quotientMonomial /= leadingMonomialBasis;
   if (!quotientMonomial.hasPositiveOrZeroExponents()) {
     global.fatal << "The pivot monomial "
@@ -297,7 +306,7 @@ void GroebnerBasisComputation<Coefficient>::oneDivisonSubStepWithBasis(
     this->divisionReport.getElement().intermediateSelectedDivisors.addOnTop(index);
   }
   Polynomial<Coefficient> buffer;
-  buffer = this->theBasis[index].element;
+  buffer = this->basis[index].element;
   Coefficient quotientCoefficient = leadingCoefficient;
   quotientCoefficient /= leadingCoefficientBasis;
   if (this->flagDoLogDivision) {
@@ -305,7 +314,7 @@ void GroebnerBasisComputation<Coefficient>::oneDivisonSubStepWithBasis(
   }
   buffer.multiplyBy(quotientMonomial, quotientCoefficient);
   if (this->flagStoreQuotients) {
-    this->theQuotients[index].addMonomial(quotientMonomial, quotientCoefficient);
+    this->quotients[index].addMonomial(quotientMonomial, quotientCoefficient);
   }
   if (this->flagDoLogDivision) {
     this->divisionReport.getElement().intermediateSubtractands.addOnTop(buffer);
@@ -313,8 +322,12 @@ void GroebnerBasisComputation<Coefficient>::oneDivisonSubStepWithBasis(
   if (this->flagDoProgressReport && theReport != nullptr) {
     std::stringstream out;
     out << "Monomial operation count: " << this->numberMonomialOperations;
-    if (this->maximumPolynomialComputations > 0) {
-      out << ", with a limit of " << this->maximumPolynomialComputations;
+    if (this->maximumMonomialOperations > 0) {
+      out << ", with a limit of " << this->maximumMonomialOperations;
+    }
+    out << ". Polynomial divisions: " << this->numberPolynomialDivisions;
+    if (this->maximumPolynomialDivisions > 0) {
+      out << ", with a limit of " << this->maximumPolynomialDivisions;
     }
     out << ".\n";
     out << "<br>Number of intermediate remainders: "
@@ -324,7 +337,7 @@ void GroebnerBasisComputation<Coefficient>::oneDivisonSubStepWithBasis(
     << "Dividing working remainder monomial " << leadingMonomialBasis.toString()
     << " by the leading monomial " << leadingMonomialBasis.toString()
     << " of basis element: " << index + 1
-    << " out of " << this->theBasis.size << "\n<br>"
+    << " out of " << this->basis.size << "\n<br>"
     << remainder.size() << " monomials in current remainder.";
     theReport->report(out.str());
   }
@@ -332,7 +345,7 @@ void GroebnerBasisComputation<Coefficient>::oneDivisonSubStepWithBasis(
   this->numberMonomialOperations += buffer.size();
   if (this->flagDoLogDivision) {
     this->divisionReport.getElement().intermediateRemainders.addOnTop(remainder);
-    List<MonomialP> empty;
+    List<MonomialPolynomial> empty;
     this->divisionReport.getElement().intermediateHighlightedMons.addOnTop(empty);
   }
   this->numberMonomialOperations ++;
@@ -346,7 +359,7 @@ bool GroebnerBasisComputation<Coefficient>::oneDivisonStepWithBasis(
   ProgressReport* report
 ) {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::oneDivisonStepWithBasis");
-  MonomialP highestMonomial;
+  MonomialPolynomial highestMonomial;
   Coefficient leadingCoefficient;
   int indexLeadingMonomial = currentRemainder.getIndexLeadingMonomial(
     &highestMonomial,
@@ -357,11 +370,11 @@ bool GroebnerBasisComputation<Coefficient>::oneDivisonStepWithBasis(
     // Remainder is zero.
     return false;
   }
-  for (int i = 0; i < this->theBasis.size; i ++) {
+  for (int i = 0; i < this->basis.size; i ++) {
     if (i == basisIndexToIgnore) {
       continue;
     }
-    if (!highestMonomial.isDivisibleBy(this->theBasis[i].leadingMonomial)) {
+    if (!highestMonomial.isDivisibleBy(this->basis[i].leadingMonomial)) {
       continue;
     }
     this->numberOfIntermediateRemainders ++;
@@ -396,9 +409,9 @@ void GroebnerBasisComputation<Coefficient>::remainderDivisionByBasis(
   }
   this->numberPolynomialDivisions ++;
   if (this->flagStoreQuotients) {
-    this->theQuotients.setSize(this->theBasis.size);
-    for (int i = 0; i < this->theQuotients.size; i ++) {
-      this->theQuotients[i].makeZero();
+    this->quotients.setSize(this->basis.size);
+    for (int i = 0; i < this->quotients.size; i ++) {
+      this->quotients[i].makeZero();
     }
   }
   ProgressReport reportHeader;
@@ -408,8 +421,8 @@ void GroebnerBasisComputation<Coefficient>::remainderDivisionByBasis(
   if (this->flagDoProgressReport) {
     std::stringstream reportStream;
     reportStream << "Computing remainder of division of "
-    << input.toString(&this->theFormat)
-    << " by " << this->theBasis.toString(&this->theFormat);
+    << input.toString(&this->format)
+    << " by " << this->basis.toString(&this->format);
     reportHeader.report(reportStream.str());
   }
   Polynomial<Coefficient> currentRemainder = input;
@@ -444,9 +457,9 @@ void GroebnerBasisComputation<Coefficient>::remainderDivisionByBasis(
       out << "<br>" << outputRemainder.size()
       << " monomials in the final output remainder.";
       out << "<br>Current basis: "
-      << this->theBasis.toStringCommaDelimited(&this->theFormat);
+      << this->basis.toStringCommaDelimited(&this->format);
       out << "<br>Current remainder: "
-      << currentRemainder.toString(&this->theFormat);
+      << currentRemainder.toString(&this->format);
       reportRemainderSoFar.report(out.str());
     }
   }
@@ -462,25 +475,25 @@ bool GroebnerBasisComputation<Coefficient>::addRemainderToBasis() {
   this->remainderDivision.scaleNormalizeLeadingMonomial(
     &this->polynomialOrder.monomialOrder
   );
-  MonomialP newLeadingMonomial;
+  MonomialPolynomial newLeadingMonomial;
   this->remainderDivision.getIndexLeadingMonomial(
     &newLeadingMonomial,
     nullptr,
     &this->polynomialOrder.monomialOrder
   );
   int indexToAddAt = 0;
-  for (; indexToAddAt < this->theBasis.size; indexToAddAt ++) {
-    MonomialP& otherLeadingMonomial = this->theBasis[indexToAddAt].leadingMonomial;
+  for (; indexToAddAt < this->basis.size; indexToAddAt ++) {
+    MonomialPolynomial& otherLeadingMonomial = this->basis[indexToAddAt].leadingMonomial;
     if (this->polynomialOrder.monomialOrder.greaterThan(
       otherLeadingMonomial, newLeadingMonomial
     )) {
       break;
     }
   }
-  for (int i = this->theBasis.size - 1; i >= indexToAddAt; i --) {
-    this->basisCandidates.addOnTop(this->theBasis[i].element);
+  for (int i = this->basis.size - 1; i >= indexToAddAt; i --) {
+    this->basisCandidates.addOnTop(this->basis[i].element);
   }
-  this->theBasis.setSize(indexToAddAt);
+  this->basis.setSize(indexToAddAt);
   this->addBasisElementNoReduction(this->remainderDivision);
   return true;
 }
@@ -494,8 +507,7 @@ PolynomialDivisionReport<Coefficient>::PolynomialDivisionReport() {
 
 template<class Coefficient>
 PolynomialSystem<Coefficient>::PolynomialSystem() {
-  this->theAlgebraicClosure = nullptr;
-  this->maximumSerreSystemComputationsPreferred = 0;
+  this->algebraicClosure = nullptr;
   this->numberOfSerreSystemComputations = 0;
   this->numberOfSerreVariablesOneGenerator = - 1;
   this->recursionCounterSerreLikeSystem = 0;
@@ -514,8 +526,8 @@ GroebnerBasisComputation<Coefficient>::GroebnerBasisComputation() {
   this->numberPolynomialDivisions = 0;
   this->numberOfIntermediateRemainders = 0;
 
-  this->maximumPolynomialComputations = 0;
-  this->maximumBasisReductionComputations = 10000;
+  this->maximumMonomialOperations = 0;
+  this->maximumPolynomialDivisions = 10000;
 
   this->flagDoLogDivision = false;
   this->flagStoreQuotients = false;
@@ -526,11 +538,11 @@ GroebnerBasisComputation<Coefficient>::GroebnerBasisComputation() {
 
 template <class Coefficient>
 std::string GroebnerBasisComputation<Coefficient>::BasisElement::toString(
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) const {
   std::stringstream out;
-  out << "[" << this->leadingMonomial.toString(theFormat) << "] "
-  << this->element.toString(theFormat);
+  out << "[[" << this->leadingMonomial.toString(format) << "]] "
+  << this->element.toString(format);
   return out.str();
 }
 
@@ -545,8 +557,8 @@ void GroebnerBasisComputation<Coefficient>::addBasisElementNoReduction(
   if (input.isEqualToZero()) {
     return;
   }
-  this->theBasis.setSize(this->theBasis.size + 1);
-  GroebnerBasisComputation<Coefficient>::BasisElement& last = *this->theBasis.lastObject();
+  this->basis.setSize(this->basis.size + 1);
+  GroebnerBasisComputation<Coefficient>::BasisElement& last = *this->basis.lastObject();
   last.element = input;
   last.element.getIndexLeadingMonomial(
     &last.leadingMonomial,
@@ -559,7 +571,7 @@ template <class Coefficient>
 void GroebnerBasisComputation<Coefficient>::initializeForGroebnerComputation() {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::initializeForGroebnerComputation");
   this->basisCandidates.setSize(0);
-  this->theBasis.setSize(0);
+  this->basis.setSize(0);
   this->numberPolynomialDivisions = 0;
   this->numberMonomialOperations = 0;
 }
@@ -586,11 +598,11 @@ bool PolynomialSystem<Coefficient>::getOneVariablePolynomialSolution(
   const Polynomial<Coefficient>& thePoly, Coefficient& outputSolution
 ) {
   AlgebraicNumber number;
-  if (this->theAlgebraicClosure == 0) {
+  if (this->algebraicClosure == 0) {
     return false;
   }
   if (!number.constructFromMinimalPolynomial(
-    thePoly, *this->theAlgebraicClosure, nullptr
+    thePoly, *this->algebraicClosure, nullptr
   )) {
     return false;
   }
@@ -604,7 +616,7 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
   PolynomialSubstitution<Coefficient>& outputSub
 ) {
   int numVars = this->systemSolution.size;
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   Polynomial<Coefficient> tempP;
   Coefficient theCF;
   for (int i = 0; i < inputSystem.size; i ++) {
@@ -636,7 +648,7 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
     }
     int oneVarIndex;
     if (tempP.isOneVariableNonConstantPolynomial(&oneVarIndex)) {
-      if (this->flagUsingAlgebraicClosure && this->theAlgebraicClosure != 0) {
+      if (this->flagUsingAlgebraicClosure && this->algebraicClosure != 0) {
         if (this->getOneVariablePolynomialSolution(tempP, theCF)) {
           outputSub.makeIdentitySubstitution(numVars);
           outputSub[oneVarIndex].makeConstant(theCF);
@@ -662,16 +674,15 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
 }
 
 template <class Coefficient>
-int GroebnerBasisComputation<Coefficient>::getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(
-  int theVarIndex, List<Polynomial<Coefficient> >& input
+int GroebnerBasisComputation<Coefficient>::getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(int variableIndex, List<Polynomial<Coefficient> >& input
 ) {
   int result = 0;
   for (int i = 0; i < input.size; i ++) {
-    Rational degExcludingVar = 0;
+    Rational degreeExcludingVariable = 0;
     for (int j = 0; j < input[i].size(); j ++) {
-      degExcludingVar = MathRoutines::maximum(input[i][j].totalDegree() - input[i][j](theVarIndex), degExcludingVar);
+      degreeExcludingVariable = MathRoutines::maximum(input[i][j].totalDegree() - input[i][j](variableIndex), degreeExcludingVariable);
     }
-    if (degExcludingVar < 2) {
+    if (degreeExcludingVariable < 2) {
       result ++;
     }
   }
@@ -682,24 +693,24 @@ template <class Coefficient>
 int PolynomialSystem<Coefficient>::getPreferredSerreSystemSubstitutionIndex(
   List<Polynomial<Coefficient> >& inputSystem
 ) {
-  Selection varSel;
-  this->getVariablesToSolveFor(inputSystem, varSel);
-  if (varSel.cardinalitySelection == 0) {
+  Selection variableSelection;
+  this->getVariablesToSolveFor(inputSystem, variableSelection);
+  if (variableSelection.cardinalitySelection == 0) {
     return - 1;
   }
-  int championIndex = varSel.elements[0];
+  int championIndex = variableSelection.elements[0];
   int championImprovement = GroebnerBasisComputation<Coefficient>::getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(
     championIndex, inputSystem
   );
-  for (int i = 1; i < varSel.cardinalitySelection; i ++) {
+  for (int i = 1; i < variableSelection.cardinalitySelection; i ++) {
     if (
       GroebnerBasisComputation<Coefficient>::getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(
-        varSel.elements[i], inputSystem
+        variableSelection.elements[i], inputSystem
       ) > championImprovement
     ) {
-      championIndex = varSel.elements[i];
+      championIndex = variableSelection.elements[i];
       championImprovement = GroebnerBasisComputation<Coefficient>::getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(
-        varSel.elements[i], inputSystem
+        variableSelection.elements[i], inputSystem
       );
     }
   }
@@ -708,21 +719,21 @@ int PolynomialSystem<Coefficient>::getPreferredSerreSystemSubstitutionIndex(
 
 template <class Coefficient>
 void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
-  Polynomial<Coefficient>& thePoly,
-  int theIndex,
-  PolynomialSubstitution<Coefficient>& theFinalSub
+  Polynomial<Coefficient>& substitution,
+  int index,
+  PolynomialSubstitution<Coefficient>& finalSubstitution
 ) {
   MacroRegisterFunctionWithName("PolynomialSystem::backSubstituteIntoSinglePolynomial");
   Polynomial<Coefficient> tempP;
-  tempP.makeMonomial(theIndex, 1, 1);
-  if (thePoly == tempP) {
+  tempP.makeMonomial(index, 1, 1);
+  if (substitution == tempP) {
     return;
   }
-  thePoly.substitution(theFinalSub, 1);
+  substitution.substitution(finalSubstitution, 1);
   bool changed = false;
-  for (int i = 0; i < thePoly.size(); i ++) {
-    for (int j = 0; j < thePoly[i].minimalNumberOfVariables(); j ++) {
-      if (thePoly[i](j) != 0) {
+  for (int i = 0; i < substitution.size(); i ++) {
+    for (int j = 0; j < substitution[i].minimalNumberOfVariables(); j ++) {
+      if (substitution[i](j) != 0) {
         if (!this->solutionsFound.selected[j]) {
           this->setSerreLikeSolutionIndex(j, 0);
         } else {
@@ -733,22 +744,22 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
             << "instead it has a non-zero value. " << global.fatal;
           }
         }
-        theFinalSub[j] = 0;
+        finalSubstitution[j] = 0;
         changed = true;
       }
     }
   }
   if (changed) {
-    thePoly.substitution(theFinalSub, 1);
+    substitution.substitution(finalSubstitution, 1);
   }
-  Coefficient tempCF;
-  if (!thePoly.isConstant(&tempCF)) {
+  Coefficient mustBeConstant;
+  if (!substitution.isConstant(&mustBeConstant)) {
     global.fatal << "After carrying all implied substitutions "
     << "the polynomial is not a constant, rather equals "
-    << thePoly.toString() << ". " << global.fatal;
+    << substitution.toString() << ". " << global.fatal;
   }
-  theFinalSub[theIndex] = tempCF;
-  this->setSerreLikeSolutionIndex(theIndex, tempCF);
+  finalSubstitution[index] = mustBeConstant;
+  this->setSerreLikeSolutionIndex(index, mustBeConstant);
 }
 
 template <class Coefficient>
@@ -775,11 +786,11 @@ int PolynomialSystem<Coefficient>::getNumberOfVariablesToSolveFor(const List<Pol
 template <class Coefficient>
 void PolynomialSystem<Coefficient>::getVariablesToSolveFor(const List<Polynomial<Coefficient> >& input, Selection& output) {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::getVariablesToSolveFor");
-  int NumVars = 0;
+  int numberOfVariables = 0;
   for (int i = 0; i < input.size; i ++) {
-    NumVars = MathRoutines::maximum(NumVars, input[i].minimalNumberOfVariables());
+    numberOfVariables = MathRoutines::maximum(numberOfVariables, input[i].minimalNumberOfVariables());
   }
-  output.initialize(NumVars);
+  output.initialize(numberOfVariables);
   for (int i = 0; i < input.size && output.cardinalitySelection < output.numberOfElements; i ++) {
     for (int j = 0; j < input[i].size() && output.cardinalitySelection < output.numberOfElements; j ++) {
       for (int k = 0; k < input[i][j].minimalNumberOfVariables() && output.cardinalitySelection < output.numberOfElements; k ++) {
@@ -806,21 +817,22 @@ void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase(
   List<Polynomial<Coefficient> >& inputSystem
 ) {
   MacroRegisterFunctionWithName("PolynomialSystem::polynomialSystemSolutionSimplificationPhase");
-  ProgressReport theReport1, theReport2, theReport3;
+  ProgressReport report1, report2, report3;
   if (this->groebner.flagDoProgressReport) {
     std::stringstream reportStream;
-    reportStream << "Reducing input system without use of heuristics.";
-    theReport1.report(reportStream.str());
+    reportStream << "Reducing input system without use of heuristics with "
+    << this->groebner.maximumPolynomialDivisions << " maximum polynomial divisions "
+    << " and " << this->groebner.maximumMonomialOperations << " maximum monomial operations.";
+    report1.report(reportStream.str());
   }
   bool changed = true;
-  PolynomialSubstitution<Coefficient> theSub;
+  PolynomialSubstitution<Coefficient> substitution;
   this->impliedSubstitutions.setSize(0);
   this->impliedSubstitutions.reserve(inputSystem.size);
-//  int startingMaxNumSerreSystemComputations = this->MaxNumSerreSystemComputations;
   while (changed) {
     this->groebner.numberPolynomialDivisions = 0;
     List<Polynomial<Coefficient> > oldSystem = inputSystem;
-    bool success = this->groebner.transformToReducedBasis(inputSystem, this->groebner.maximumBasisReductionComputations);
+    bool success = this->groebner.transformToReducedBasis(inputSystem);
     if (!success) {
       inputSystem = oldSystem;
     } else {
@@ -829,7 +841,7 @@ void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase(
     if (this->groebner.flagDoProgressReport) {
       std::stringstream reportStream;
       reportStream << "Attempting to transform system to a groebner basis... ";
-      theReport2.report(reportStream.str());
+      report2.report(reportStream.str());
     }
     if (success && inputSystem.size > 0) {
       this->groebner.numberPolynomialDivisions = 0;
@@ -849,7 +861,7 @@ void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase(
         reportStream << "not successful: computation is too large. In the process I transformed the "
         << "starting system to one with " << inputSystem.size << " elements.";
       }
-      theReport2.report(reportStream.str());
+      report2.report(reportStream.str());
     }
     this->numberOfSerreSystemComputations += this->groebner.numberPolynomialDivisions;
     if (success) {
@@ -868,17 +880,17 @@ void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase(
         }
       }
     }
-    changed = this->hasImpliedSubstitutions(inputSystem, theSub);
+    changed = this->hasImpliedSubstitutions(inputSystem, substitution);
     if (changed) {
       if (this->groebner.flagDoProgressReport) {
         std::stringstream reportStream;
         reportStream << "Found implied substitutions.<br>"
         << this->toStringImpliedSubstitutions();
-        theReport3.report(reportStream.str());
+        report3.report(reportStream.str());
       }
-      this->impliedSubstitutions.addOnTop(theSub);
+      this->impliedSubstitutions.addOnTop(substitution);
       for (int i = 0; i < inputSystem.size; i ++) {
-        inputSystem[i].substitution(theSub, 1);
+        inputSystem[i].substitution(substitution, 1);
       }
     }
   }
@@ -891,7 +903,7 @@ bool PolynomialSystem<Coefficient>::shouldReport() {
 
 template <class Coefficient>
 FormatExpressions& PolynomialSystem<Coefficient>::format() {
-  return this->groebner.theFormat;
+  return this->groebner.format;
 }
 
 template <class Coefficient>
@@ -910,7 +922,7 @@ std::string PolynomialSystem<Coefficient>::toStringImpliedSubstitutions() {
           continue;
         }
       }
-      out << "<br>" << (MonomialP(j)).toString(&this->format()) << "="
+      out << "<br>" << (MonomialPolynomial(j)).toString(&this->format()) << "="
       << this->impliedSubstitutions[i][j].toString(&this->format()) << "; ";
     }
   }
@@ -931,18 +943,17 @@ template <class Coefficient>
 void PolynomialSystem<Coefficient>::setUpRecursiveComputation(
   PolynomialSystem<Coefficient>& toBeModified
 ) {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::setUpRecursiveComputation");
+  MacroRegisterFunctionWithName("PolynomialSystem::setUpRecursiveComputation");
   toBeModified.initializeForSystemSolution();
   toBeModified.recursionCounterSerreLikeSystem = this->recursionCounterSerreLikeSystem;
-  toBeModified.maximumSerreSystemComputationsPreferred = this->maximumSerreSystemComputationsPreferred;
   toBeModified.systemSolution = this->systemSolution;
   toBeModified.solutionsFound = this->solutionsFound;
   toBeModified.flagUseTheMonomialBranchingOptimization = this->flagUseTheMonomialBranchingOptimization;
   toBeModified.flagUsingAlgebraicClosure = this->flagUsingAlgebraicClosure;
-  toBeModified.theAlgebraicClosure = this->theAlgebraicClosure;
-  toBeModified.groebner.maximumPolynomialComputations = this->groebner.maximumPolynomialComputations;
-  toBeModified.groebner.maximumBasisReductionComputations = this->groebner.maximumBasisReductionComputations;
-  toBeModified.groebner.theFormat = this->groebner.theFormat;
+  toBeModified.algebraicClosure = this->algebraicClosure;
+  toBeModified.groebner.maximumMonomialOperations = this->groebner.maximumMonomialOperations;
+  toBeModified.groebner.maximumPolynomialDivisions = this->groebner.maximumPolynomialDivisions;
+  toBeModified.groebner.format = this->groebner.format;
   toBeModified.groebner.polynomialOrder = this->groebner.polynomialOrder;
 }
 
@@ -971,36 +982,36 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
 ) {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::trySettingValueToVariable");
   ProgressReport theReport1;
-  PolynomialSystem<Coefficient>& theHeuristicAttempt = this->computationUsedInRecursiveCalls.getElement();
-  this->setUpRecursiveComputation(theHeuristicAttempt);
-  int theVarIndex = this->getPreferredSerreSystemSubstitutionIndex(inputSystem);
-  if (theVarIndex == - 1) {
+  PolynomialSystem<Coefficient>& heuristicAttempt = this->computationUsedInRecursiveCalls.getElement();
+  this->setUpRecursiveComputation(heuristicAttempt);
+  int variableIndex = this->getPreferredSerreSystemSubstitutionIndex(inputSystem);
+  if (variableIndex == - 1) {
     global.fatal << "Preferred substitution variable index is - 1. "
     << "Input system in calculator-input format: <br>"
     << this->toStringCalculatorInputFromSystem(inputSystem) << "<br>" << global.fatal;
   }
   PolynomialSubstitution<Coefficient> theSub;
   theSub.makeIdentitySubstitution(this->systemSolution.size);
-  theSub[theVarIndex] = aValueToTryOnPreferredVariable;
+  theSub[variableIndex] = aValueToTryOnPreferredVariable;
   if (this->groebner.flagDoProgressReport) {
     std::stringstream out;
-    MonomialP theMon(theVarIndex);
+    MonomialPolynomial monomial(variableIndex);
     out << this->toStringImpliedSubstitutions() << "Attempting an (a priori random) substitution:<br>"
-    << theMon.toString(&this->format()) << "=" << aValueToTryOnPreferredVariable << ";";
+    << monomial.toString(&this->format()) << "=" << aValueToTryOnPreferredVariable << ";";
     theReport1.report(out.str());
   }
-  theHeuristicAttempt.setSerreLikeSolutionIndex(theVarIndex, aValueToTryOnPreferredVariable);
+  heuristicAttempt.setSerreLikeSolutionIndex(variableIndex, aValueToTryOnPreferredVariable);
   for (int i = 0; i < inputSystem.size; i ++) {
     inputSystem[i].substitution(theSub, 1);
   }
-  theHeuristicAttempt.solveSerreLikeSystemRecursively(inputSystem);
-  this->numberOfSerreSystemComputations += theHeuristicAttempt.numberOfSerreSystemComputations;
-  this->processSolvedSubcaseIfSolvedOrProvenToHaveSolution(theHeuristicAttempt);
+  heuristicAttempt.solveSerreLikeSystemRecursively(inputSystem);
+  this->numberOfSerreSystemComputations += heuristicAttempt.numberOfSerreSystemComputations;
+  this->processSolvedSubcaseIfSolvedOrProvenToHaveSolution(heuristicAttempt);
 }
 
 template <class Coefficient>
 bool PolynomialSystem<Coefficient>::hasSingleMonomialEquation(
-  const List<Polynomial<Coefficient> >& inputSystem, MonomialP& outputMon
+  const List<Polynomial<Coefficient> >& inputSystem, MonomialPolynomial& outputMon
 ) {
   MacroRegisterFunctionWithName("PolynomialSystem::hasSingleMonomialEquation");
   bool result = false;
@@ -1024,7 +1035,7 @@ bool PolynomialSystem<Coefficient>::hasSingleMonomialEquation(
 
 template <class Coefficient>
 void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
-  List<Polynomial<Coefficient> >& inputSystem, const MonomialP& theMon
+  List<Polynomial<Coefficient> >& inputSystem, const MonomialPolynomial& theMon
 ) {
   MacroRegisterFunctionWithName("PolynomialSystem::solveWhenSystemHasSingleMonomial");
   ProgressReport theReport1;
@@ -1036,7 +1047,7 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
     }
     if (this->shouldReport()) {
       std::stringstream out;
-      MonomialP tempMon(i);
+      MonomialPolynomial tempMon(i);
       out << "The system has the single monomial: " << theMon.toString(&this->format())
       << "<br>Trying case:<br>" << tempMon.toString(&this->format()) << "= 0;";
       theReport1.report(out.str());
@@ -1044,16 +1055,16 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
     PolynomialSubstitution<Coefficient> theSub;
     theSub.makeIdentitySubstitution(this->systemSolution.size);
     theSub[i] = 0;
-    PolynomialSystem<Coefficient>& theCase = this->computationUsedInRecursiveCalls.getElement();
-    this->setUpRecursiveComputation(theCase);
-    theCase.setSerreLikeSolutionIndex(i, 0);
+    PolynomialSystem<Coefficient>& oneCase = this->computationUsedInRecursiveCalls.getElement();
+    this->setUpRecursiveComputation(oneCase);
+    oneCase.setSerreLikeSolutionIndex(i, 0);
     inputSystem = inputSystemCopy;
     for (int i = 0; i < inputSystem.size; i ++) {
       inputSystem[i].substitution(theSub, 1);
     }
-    theCase.solveSerreLikeSystemRecursively(inputSystem);
-    this->processSolvedSubcaseIfSolvedOrProvenToHaveSolution(theCase);
-    if (!theCase.flagSystemProvenToHaveNoSolution) {
+    oneCase.solveSerreLikeSystemRecursively(inputSystem);
+    this->processSolvedSubcaseIfSolvedOrProvenToHaveSolution(oneCase);
+    if (!oneCase.flagSystemProvenToHaveNoSolution) {
       allProvenToHaveNoSolution = false;
     }
     if (this->flagSystemSolvedOverBaseField) {
@@ -1069,9 +1080,9 @@ template <class Coefficient>
 void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
   List<Polynomial<Coefficient> >& inputSystem
 ) {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::solveSerreLikeSystemRecursively");
-  RecursionDepthCounter theCounter(&this->recursionCounterSerreLikeSystem);
-  ProgressReport theReport1, theReport2, theReport3;
+  MacroRegisterFunctionWithName("PolynomialSystem::solveSerreLikeSystemRecursively");
+  RecursionDepthCounter counter(&this->recursionCounterSerreLikeSystem);
+  ProgressReport report1, report2, report3;
   List<Polynomial<Coefficient> > startingSystemNoModifications = inputSystem;
   this->numberOfVariablesToSolveForStart = this->getNumberOfVariablesToSolveFor(inputSystem);
   if (this->groebner.flagDoProgressReport) {
@@ -1080,7 +1091,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
     << this->numberOfVariablesToSolveForStart
     << " variables at recursion depth: "
     << this->recursionCounterSerreLikeSystem << ". ";
-    theReport1.report(out.str());
+    report1.report(out.str());
   }
   this->polynomialSystemSolutionSimplificationPhase(inputSystem);
   if (this->flagSystemProvenToHaveNoSolution || this->flagSystemSolvedOverBaseField) {
@@ -1097,10 +1108,10 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
     }
     out << "<br>Number of remaining variables to solve for: "
     << this->numberOfVariablesToSolveForAfterReduction;
-    theReport2.report(out.str());
+    report2.report(out.str());
   }
   List<Polynomial<Coefficient> > systemBeforeHeuristics = inputSystem;
-  MonomialP singleMonEquation;
+  MonomialPolynomial singleMonEquation;
   if (this->flagUseTheMonomialBranchingOptimization) {
     if (this->hasSingleMonomialEquation(inputSystem, singleMonEquation)) {
       this->solveWhenSystemHasSingleMonomial(inputSystem, singleMonEquation);
@@ -1115,16 +1126,16 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
     }
     inputSystem = systemBeforeHeuristics;
     if (this->groebner.flagDoProgressReport) {
-      MonomialP monomial(this->getPreferredSerreSystemSubstitutionIndex(inputSystem));
+      MonomialPolynomial monomial(this->getPreferredSerreSystemSubstitutionIndex(inputSystem));
       reportStreamHeuristics << "<br>The substitution  "
-      << monomial.toString(&this->groebner.theFormat) << "=" << randomValueItry << ";"
+      << monomial.toString(&this->groebner.format) << "=" << randomValueItry << ";"
       << " did not produce a solution over the base field ";
       if (this->computationUsedInRecursiveCalls.getElement().flagSystemProvenToHaveNoSolution) {
         reportStreamHeuristics << " as it resulted in a system which has no solution. ";
       } else {
         reportStreamHeuristics << " as it resulted in a system which exceeded the computation limits. ";
       }
-      theReport3.report(reportStreamHeuristics.str());
+      report3.report(reportStreamHeuristics.str());
     }
   }
   inputSystem = startingSystemNoModifications;
@@ -1133,7 +1144,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
 template <class Coefficient>
 std::string GroebnerBasisComputation<Coefficient>::toStringDivision(Polynomial<Coefficient>& toBeDivided) {
   std::stringstream out;
-  out << "Dividing: " << toBeDivided.toString() << "<br>by:<br>" << this->theBasis.toStringCommaDelimited();
+  out << "Dividing: " << toBeDivided.toString() << "<br>by:<br>" << this->basis.toStringCommaDelimited();
   return out.str();
 }
 
@@ -1142,13 +1153,14 @@ std::string PolynomialSystem<Coefficient>::toStringCalculatorInputFromSystem(
   const List<Polynomial<Coefficient> >& inputSystem
 ) {
   std::stringstream out;
-  out << "findOneSolutionSerreLikePolynomialSystem";
+  out << "FindOneSolutionSerreLikePolynomialSystem";
   if (this->flagTryDirectlySolutionOverAlgebraicClosure) {
     out << "Algebraic";
   }
-  out << "UpperLimit{}(" << this->maximumSerreSystemComputationsPreferred << ", ";
+  out << "UpperLimit{}(" << this->groebner.maximumPolynomialDivisions << ", "
+  << this->groebner.maximumMonomialOperations << ", ";
   for (int j = 0; j < inputSystem.size; j ++) {
-    out << inputSystem[j].toString(&this->groebner.theFormat);
+    out << inputSystem[j].toString(&this->groebner.format);
     if (j != inputSystem.size - 1) {
       out << ", ";
     }
@@ -1161,42 +1173,42 @@ template <class Coefficient>
 void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
   List<Polynomial<Coefficient> >& inputSystem
 ) {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::solveSerreLikeSystem");
+  MacroRegisterFunctionWithName("PolynomialSystem::solveSerreLikeSystem");
   this->flagSystemProvenToHaveNoSolution = false;
   this->flagSystemSolvedOverBaseField = false;
   this->flagSystemProvenToHaveSolution = false;
   this->recursionCounterSerreLikeSystem = 0;
   this->groebner.numberPolynomialDivisions = 0;
   this->numberOfSerreSystemComputations = 0;
-  int numVars = 0;
+  int numberOfVariables = 0;
   List<Polynomial<Coefficient> > workingSystem = inputSystem;
   for (int i = 0; i < workingSystem.size; i ++) {
-    numVars = MathRoutines::maximum(numVars, workingSystem[i].minimalNumberOfVariables());
+    numberOfVariables = MathRoutines::maximum(numberOfVariables, workingSystem[i].minimalNumberOfVariables());
   }
-  this->systemSolution.initializeFillInObject(numVars, 0);
-  this->solutionsFound.initialize(numVars);
-  ProgressReport theReport;
+  this->systemSolution.initializeFillInObject(numberOfVariables, 0);
+  this->solutionsFound.initialize(numberOfVariables);
+  ProgressReport report;
   std::stringstream reportStream;
   if (this->groebner.flagDoProgressReport) {
     reportStream << "Solving system " << this->toStringCalculatorInputFromSystem(inputSystem);
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
   }
   this->numberOfSerreVariablesOneGenerator = workingSystem[0].minimalNumberOfVariables() / 2;
-  if (this->theAlgebraicClosure == 0) {
+  if (this->algebraicClosure == 0) {
     this->flagTryDirectlySolutionOverAlgebraicClosure = false;
   }
   if (!this->flagTryDirectlySolutionOverAlgebraicClosure) {
     this->flagUsingAlgebraicClosure = false;
     this->solveSerreLikeSystemRecursively(workingSystem);
   }
-  if (this->theAlgebraicClosure != 0) {
+  if (this->algebraicClosure != 0) {
     if (!this->flagSystemSolvedOverBaseField && !this->flagSystemProvenToHaveNoSolution) {
       if (this->groebner.flagDoProgressReport) {
         if (!this->flagTryDirectlySolutionOverAlgebraicClosure) {
           reportStream << "<br><b>Failed to solve system over the rationals... </b>";
         }
         reportStream << "<br><b>Attempting to solve allowing algebraic extensions.</b> ";
-        theReport.report(reportStream.str());
+        report.report(reportStream.str());
       }
       this->flagUsingAlgebraicClosure = true;
       this->solveSerreLikeSystemRecursively(workingSystem);
@@ -1210,14 +1222,15 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
         }
       }
     }
-    PolynomialSubstitution<Coefficient> theSub;
-    this->getSubstitutionFromPartialSolutionSerreLikeSystem(theSub);
+    PolynomialSubstitution<Coefficient> substitution;
+    this->getSubstitutionFromPartialSolutionSerreLikeSystem(substitution);
     workingSystem = inputSystem;
     for (int i = 0; i < workingSystem.size; i ++) {
-      workingSystem[i].substitution(theSub, 1);
+      workingSystem[i].substitution(substitution, 1);
       if (!workingSystem[i].isEqualToZero()) {
         global.fatal << "<br>"
-        << "Function solveSerreLikeSystem reports to have found a solution over the base field, "
+        << "Function solveSerreLikeSystem reports to "
+        << "have found a solution over the base field, "
         << "but substituting the solution back to the original "
         << "system does not yield a zero system of equations. More precisely, "
         << "the reported solution was " << this->toStringSerreLikeSolution()
@@ -1238,7 +1251,7 @@ std::string PolynomialSystem<Coefficient>::toStringSerreLikeSolution() {
   for (int i = 0; i < this->systemSolution.size; i ++) {
     if (this->solutionsFound.selected[i]) {
       theMon.makeMonomial(i, 1, 1);
-      out << " " << theMon.toString(&this->groebner.theFormat)
+      out << " " << theMon.toString(&this->groebner.format)
       << " = " << this->systemSolution[i] << ";";
     }
   }
@@ -1272,7 +1285,7 @@ bool Polynomial<Coefficient>::leastCommonMultipleOneVariable(
   Polynomial<Coefficient> product = left;
   Polynomial<Coefficient> remainder;
   product *= right;
-  product.divideBy(divisor, output, remainder, &MonomialP::orderDegreeThenLeftLargerWins());
+  product.divideBy(divisor, output, remainder, &MonomialPolynomial::orderDegreeThenLeftLargerWins());
   if (!remainder.isEqualToZero()) {
     global.fatal << "In least common multiple computation: "
     << "remainder when dividing by greatest common divisor not zero." << global.fatal;
@@ -1304,8 +1317,8 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   rightTemp = right;
   Polynomial<Coefficient> oneMinusT;
   List<Polynomial<Coefficient> > theBasis;
-  leftTemp.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
-  rightTemp.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  leftTemp.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
+  rightTemp.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   oneMinusT.makeMonomial(numberOfVariables, 1, one);
   leftTemp *= oneMinusT;
   oneMinusT *= - 1;
@@ -1315,13 +1328,13 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   theBasis.addOnTop(leftTemp);
   theBasis.addOnTop(rightTemp);
   GroebnerBasisComputation<Coefficient> computation;
-  computation.theFormat.flagSuppressModP = true;
-  computation.theFormat.polynomialAlphabet.addOnTop("x");
-  computation.theFormat.polynomialAlphabet.addOnTop("y");
-  computation.theFormat.polynomialAlphabet.addOnTop("z");
-  computation.theFormat.polynomialAlphabet.addOnTop("w");
-  computation.polynomialOrder.monomialOrder = MonomialP::orderForGreatestCommonDivisor();
-  computation.maximumPolynomialComputations = - 1;
+  computation.format.flagSuppressModP = true;
+  computation.format.polynomialAlphabet.addOnTop("x");
+  computation.format.polynomialAlphabet.addOnTop("y");
+  computation.format.polynomialAlphabet.addOnTop("z");
+  computation.format.polynomialAlphabet.addOnTop("w");
+  computation.polynomialOrder.monomialOrder = MonomialPolynomial::orderForGreatestCommonDivisor();
+  computation.maximumMonomialOperations = - 1;
   if (!computation.transformToReducedGroebnerBasis(theBasis)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Unexpected: failed to transform to reduced "
@@ -1331,7 +1344,7 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   }
   int maximalMonomialNoTIndex = - 1;
   Rational maximaltotalDegree;
-  MonomialP currentLeading;
+  MonomialPolynomial currentLeading;
   for (int i = theBasis.size - 1; i >= 0; i --) {
     theBasis[i].getIndexLeadingMonomial(
       &currentLeading, nullptr, &computation.polynomialOrder.monomialOrder
@@ -1350,17 +1363,17 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   if (maximalMonomialNoTIndex == - 1) {
     global.fatal
     << "Failed to obtain the least common multiple of: "
-    << left.toString(&computation.theFormat)
-    << " and " << right.toString(&computation.theFormat) << ". "
+    << left.toString(&computation.format)
+    << " and " << right.toString(&computation.format) << ". "
     << "The list of polynomials is: ";
     for (int i = 0; i < theBasis.size; i ++) {
-      global.fatal << theBasis[i].toString(&computation.theFormat) << ", ";
+      global.fatal << theBasis[i].toString(&computation.format) << ", ";
     }
     global.fatal << global.fatal;
   }
   output = theBasis[maximalMonomialNoTIndex];
   output.setNumberOfVariablesSubstituteDeletedByOne(numberOfVariables);
-  output.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  output.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   return true;
 }
 
@@ -1386,7 +1399,7 @@ bool Polynomial<Coefficient>::greatestCommonDivisorOneVariable(
   // We are re-implementing MathRoutines::greatestCommonDivisor,
   // as this may be a performance-sensitve function.
   while (!rightCopy.isEqualToZero()) {
-    leftCopy.divideBy(rightCopy, quotient, remainder, &MonomialP::orderDegreeThenLeftLargerWins());
+    leftCopy.divideBy(rightCopy, quotient, remainder, &MonomialPolynomial::orderDegreeThenLeftLargerWins());
     if (!remainder.isEqualToZero() && remainder.totalDegree() >= rightCopy.totalDegree()) {
       global.fatal
       << "Univariate polynomial division of "
@@ -1434,7 +1447,7 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
     leastCommonMultipleBuffer,
     output,
     remainderBuffer,
-    &MonomialP::orderForGreatestCommonDivisor()
+    &MonomialPolynomial::orderForGreatestCommonDivisor()
   );
   if (!remainderBuffer.isEqualToZero() || output.isEqualToZero()) {
     FormatExpressions theFormat;
@@ -1454,7 +1467,7 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
     << ", which is imposible."
     << global.fatal;
   }
-  output.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  output.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   return true;
 }
 
@@ -1521,7 +1534,7 @@ bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::factor(
     return true;
   }
   this->current = this->original;
-  this->constantFactor = this->current.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  this->constantFactor = this->current.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   this->constantFactor.invert();
   this->nonReduced.addOnTop(this->current);
   if (!this->basicChecks(commentsOnFailure)) {
@@ -1547,9 +1560,9 @@ bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::accountNon
   Polynomial<Coefficient>& incoming
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationUnivariate::accountNonReducedFactor");
-  incoming.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  incoming.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   Polynomial<Coefficient> quotient, remainder;
-  this->current.divideBy(incoming, quotient, remainder, &MonomialP::orderDefault());
+  this->current.divideBy(incoming, quotient, remainder, &MonomialPolynomial::orderDefault());
   if (!remainder.isEqualToZero()) {
     return false;
   }
@@ -1571,10 +1584,10 @@ bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::accountRed
   if (incoming.isConstant()) {
     global.fatal << "Constant factors are not to be accounted. " << global.fatal;
   }
-  incoming.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  incoming.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   Polynomial<Coefficient> quotient, remainder;
   this->current.divideBy(
-    incoming, quotient, remainder, &MonomialP::orderDefault()
+    incoming, quotient, remainder, &MonomialPolynomial::orderDefault()
   );
   if (!remainder.isEqualToZero()) {
     return false;

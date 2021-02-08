@@ -25,11 +25,6 @@ function toStringVector(vector) {
   return result;
 }
 
-function setBilinearForm(idCanvas, row, column) {
-
-}
-
-
 function getAngleFromXandY(x, y) {
   return Math.atan2(y, x);
 }
@@ -164,8 +159,11 @@ class GraphicsNDimensions {
   }
 
   writeInfo() {
-    var info = this.getInfoHTML();
-    var panelInfoElement = document.getElementById(this.idPlaneInfo);
+    let info = this.getInfoHTML();
+    let panelInfoElement = document.getElementById(this.idPlaneInfo);
+    if (panelInfoElement === null) {
+      return;
+    }
     panelInfoElement.innerHTML = info;
   }
 
@@ -1207,5 +1205,7 @@ if (module === undefined) {
 module.exports = {
   createGraphicsFromObject,
   GraphicsNDimensions,
-  startProjectionPlaneUser
+  startProjectionPlaneUser,
+  testA3,
+  testA4,
 };

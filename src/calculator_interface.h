@@ -21,6 +21,7 @@ class ExpressionContext;
 
 class Expression {
 private:
+  HashedList<int, HashFunctions::hashFunction> children;
   void reset() {
     this->owner = nullptr;
     this->children.size = 0;
@@ -118,8 +119,6 @@ private:
   public:
   Calculator* owner;
   int data;
-  // List<int> children;
-  HashedList<int, HashFunctions::hashFunction> children;
   bool flagDeallocated;
 //////
   typedef bool (*FunctionAddress) (Calculator& calculator, const Expression& input, Expression& output);
@@ -153,11 +152,17 @@ private:
   void getMultiplicandsDivisorsRecursive(List<Expression>& outputAppendList, int depth = 0) const;
   void getCoefficientMultiplicandForm(Expression& outputCoeff, Expression& outputNoCoeff) const;
   void getCoefficientMultiplicandForm(Rational& outputCoeff, Expression& outputNoCoeff) const;
-  bool setChildAtomValue(int childIndex, const std::string& theAtom);
-  bool setChildAtomValue(int childIndex, int theAtomValue);
+  bool setChildAtomValue(int childIndex, const std::string& atom);
+  bool setChildAtomValue(int childIndex, int atomValue);
+  void swapChildren(int left, int right);
+  void removeLastChild();
   int size() const {
     return this->children.size;
   }
+  void removeChildShiftDown(int childIndex);
+  void setSize(int desiredSize);
+  void setExpectedSize(int expectedSize);
+  void addChildIndices(List<int>& indices);
   bool setChild(int childIndexInMe, const Expression& inputChild);
   bool assignMatrixExpressions(
     const Matrix<Expression>& input,
@@ -179,7 +184,7 @@ private:
   bool startsWithBuiltInAtom() const;
   bool startsWithFunctionWithComplexRange() const;
   bool startsWithArithmeticOperation() const;
-  bool startsWith(int theOp = - 1, int N = - 1) const;
+  bool startsWith(int operation = - 1, int numberOfChildren = - 1) const;
 
   bool startsWithGivenOperation(const std::string& theOperation, int desiredChildren = - 1) const;
   bool isListStartingWithAtom(int operation = - 1) const;
@@ -298,20 +303,20 @@ private:
   const theType& getValue() const {
     return this->getValueNonConst<theType>();
   }
-  template <class theType>
-  theType& getValueNonConst() const;
-  template<class theType>
+  template <class Type>
+  Type& getValueNonConst() const;
+  template<class Type>
   int getTypeOperation() const;
-  template<class theType>
-  int addObjectReturnIndex(const theType& inputValue) const;
+  template<class Type>
+  int addObjectReturnIndex(const Type& inputValue) const;
   // note: the following always returns true:
-  template <class theType>
-  bool assignValue(const theType& inputValue, Calculator& owner);
+  template <class Type>
+  bool assignValue(const Type& inputValue, Calculator& owner);
   // note: the following always returns true:
-  template <class theType>
+  template <class Type>
   bool assignValueWithContext(
-    const theType& inputValue,
-    const ExpressionContext& theContext,
+    const Type& inputValue,
+    const ExpressionContext& context,
     Calculator& owner
   );
   template <class BuiltIn>
@@ -409,7 +414,7 @@ private:
   static bool toStringBuiltIn(
     const Expression& input,
     std::stringstream& out,
-    FormatExpressions* theFormat
+    FormatExpressions* format
   );
 
   bool toStringWithAtomHandler(std::stringstream& out, FormatExpressions* theFormat) const;
@@ -498,7 +503,6 @@ private:
     FormatExpressions* theFormat
   ) const;
   bool requiresNoMathTags() const;
-  JSData toJSON(FormatExpressions* theFormat, const Expression& startingExpression) const;
   static unsigned int hashFunction(const Expression& input);
   unsigned int hashFunction() const;
   Expression(): flagDeallocated(false) {
@@ -552,7 +556,10 @@ private:
     const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble = nullptr
   ) const;
   bool hasBoundVariables() const;
-  bool hasInputBoxVariables(HashedList<std::string, MathRoutines::hashString>* boxNames = nullptr) const;
+  bool hasInputBoxVariables(
+    HashedList<std::string, HashFunctions::hashFunction>* outputBoxNames = nullptr,
+    HashedList<std::string, HashFunctions::hashFunction>* outputBoxNamesJavascript = nullptr
+  ) const;
   bool isMeltable(int* numResultingChildren = nullptr) const;
   bool areEqualExcludingChildren(const Expression& other) const {
     return this->owner == other.owner &&
@@ -727,6 +734,11 @@ public:
 template <class BuiltIn>
 class WithContext {
   bool extendContext(ExpressionContext& newContext, std::stringstream* commentsOnFailure);
+  bool extendContextTrivially(ExpressionContext& newContext, std::stringstream* commentsOnFailure) {
+    (void) commentsOnFailure;
+    this->context = newContext;
+    return true;
+  }
 public:
   ExpressionContext context;
   BuiltIn content;
@@ -751,16 +763,35 @@ public:
 };
 
 class Function {
+  private:
+  // Used in constructors.
+  void reset(Calculator& owner) {
+    this->argumentTypes.reset(owner);
+    this->owner = &owner;
+    this->resetExceptOwner();
+  }
+  // Used in constructors.
+  void resetExceptOwner() {
+    this->functionAddress = nullptr;
+    this->indexInOperationHandlers = - 1;
+    this->indexOperation = - 1;
+    this->parentsThatBanHandler.clear();
+    this->options.reset();
+  }
   public:
   Calculator* owner;
-  Expression theArgumentTypes;
+  Expression argumentTypes;
   std::string theDescription;
   std::string theExample;
   std::string calculatorIdentifier;
   std::string additionalIdentifier;
   int indexOperation;
   int indexInOperationHandlers;
-  int indexOperationParentThatBansHandler;
+  // List of direct parent atoms that ban the use of this handler.
+  // We will be looking up entries in this list;
+  // please refactor to a hashed list if its size ever exceeds
+  // 5.
+  List<int> parentsThatBanHandler;
 
   class Options {
   public:
@@ -787,49 +818,43 @@ class Function {
     bool dontTestAutomatically;
     bool adminOnly;
     void reset();
+    static Options adminNoTestInvisibleExperimental();
     static Options adminNoTest();
     static Options innerInvisible();
     static Options standard();
-    static Options innerAdminNoTestInvisibleOffByDefault();
+    static Options compositeStandard();
+    static Options innerFreezesArguments();
+    static Options adminNoTestInvisibleOffByDefault();
     static Options innerInvisibleExperimental();
     static Options innerAdminNoTestExperimental();
     static Options innerAdminNoTest();
+    static Options administrativeExperimentalTested();
+    static Options administrativeTested();
     static Options experimental();
     static Options invisibleNoTest();
     static Options innerNoTest();
+    static Options innerNoTestExperimental();
+    static Options invisibleExperimentalNoTest();
     static Options outerOffByDefault();
     Options();
   };
   Options options;
-  Expression::FunctionAddress theFunction;
+  Expression::FunctionAddress functionAddress;
 
   std::string toStringShort() const;
   std::string toStringSummary() const;
   std::string toStringFull() const;
   JSData toJSON() const;
-  bool shouldBeApplied(int parentOpIfAvailable);
+  bool shouldBeApplied(int parentOperationIfAvailable);
   bool operator==(const Function& other) const {
     return
-    this->theArgumentTypes == other.theArgumentTypes &&
-    this->theFunction == other.theFunction &&
+    this->argumentTypes == other.argumentTypes &&
+    this->functionAddress == other.functionAddress &&
     this->options.flagIsInner == other.options.flagIsInner;
-  }
-  void reset(Calculator& owner) {
-    this->theArgumentTypes.reset(owner);
-    this->owner = &owner;
-    this->resetExceptOwner();
-  }
-  void resetExceptOwner() {
-    this->theFunction = nullptr;
-    this->indexInOperationHandlers = - 1;
-    this->indexOperation = - 1;
-    this->indexOperationParentThatBansHandler = - 1;
-    this->options.reset();
   }
   bool inputFitsMyInnerType(const Expression& input);
   Function();
-  Function(
-    Calculator& inputOwner,
+  Function(Calculator& inputOwner,
     int inputIndexOperation,
     const Expression::FunctionAddress& functionPointer,
     Expression* inputArgTypes,
@@ -838,13 +863,13 @@ class Function {
     const std::string& inputAdditionalIndentifier,
     const std::string& inputCalculatorIdentifier,
     const Function::Options& inputOptions,
-    int inputIndexParentThatBansHandler = - 1
+    const List<int>& inputParentsThatBanHandler
   );
   static unsigned int hashFunction(const Function& input) {
     return input.hashFunction();
   }
   unsigned int hashFunction() const {
-    return static_cast<unsigned int>(reinterpret_cast<uintptr_t>(this->theFunction));
+    return static_cast<unsigned int>(reinterpret_cast<uintptr_t>(this->functionAddress));
   }
   bool apply(Calculator& calculator, const Expression& input, Expression& output, int opIndexParentIfAvailable, Function** outputHandler);
   bool checkConsistency() const;
@@ -871,7 +896,44 @@ class SyntacticElement {
 };
 
 class PlotObject {
+private:
+  JSData coordinateFunction(int index);
+  JSData manifoldImmersionFunctionsJS();
+  void writeColorWidthSegments(JSData& output);
+  void writeColorLineWidth(JSData& output);
+  void writeColor(JSData& output);
+  void writeLineWidth(JSData& output);
+  void writeColorFilled(JSData& output);
+  void writeVariables(JSData& output);
+  JSData functionFromString(const std::string& input);
 public:
+  struct Labels {
+  public:
+    static std::string points;
+    static std::string point;
+    static std::string path;
+    static std::string functionLabel;
+    static std::string coordinateFunctions;
+    static std::string left;
+    static std::string right;
+    static std::string numberOfSegments;
+    static std::string color;
+    static std::string colorFront;
+    static std::string colorBack;
+    static std::string colorContour;
+    static std::string colorFill;
+    static std::string lineWidth;
+    static std::string manifoldImmersion;
+    static std::string variableRange;
+    static std::string defaultLength;
+    static std::string plotType;
+    static std::string viewWindow;
+    static std::string body;
+    static std::string text;
+    static std::string arguments;
+    static std::string parameters;
+  };
+
   std::string thePlotString;
   std::string fillStyle;
   std::string thePlotStringWithHtml;
@@ -893,23 +955,23 @@ public:
   std::string colorUV;
   std::string colorVU;
   std::string lineWidthJS;
-  List<std::string> numSegmenTsJS;
-  Matrix<Expression> thePointS;
-  Matrix<std::string> thePointsJS;
-  Vectors<double> thePointsDouble;
+  List<std::string> numberOfSegmentsJS;
+  Matrix<Expression> points;
+  Matrix<std::string> pointsJS;
+  Vectors<double> pointsDouble;
   List<Vectors<double> > theRectangles;
   // Each rectangle is a list of two 2-dim vectors.
   // The first vector gives the (x, y) - coordinates
   // of the lower left corner of the rectangle.
   // The Second vector gives the (width, height) of the rectangle.
-  std::string thePlotType;
+  std::string plotType;
 
   Expression manifoldImmersion;
   std::string manifoldImmersionJS;
   List<Expression> coordinateFunctionsE;
   List<std::string> coordinateFunctionsJS;
   HashedList<Expression> variablesInPlay;
-  List<List<std::string> > theVarRangesJS;
+  List<List<std::string> > variableRangesJS;
   Expression leftPtE;
   Expression rightPtE;
   Expression paramLowE;
@@ -917,22 +979,25 @@ public:
 
   Expression numSegmentsE;
   List<std::string> variablesInPlayJS;
+  // Parameters are user input variables that describe families of curves.
+  // As of writing, parameters are input by the front-end via
+  // inputs/sliders at the hands of the end-user.
+  // Suppose in the function sin(b x), x has been declared a variable and b
+  // - a parameter. Then the frontend may display an input box
+  // that allows to dynamically change b.
+  HashedList<std::string, HashFunctions::hashFunction> parametersInPlay;
+  // The name of the parameter with hash bytes appended to
+  // guarantee the variable will not collide with any programmer-defined variables.
+  HashedList<std::string, HashFunctions::hashFunction> parametersInPlayJS;
   std::string leftPtJS;
   std::string rightPtJS;
   std::string paramLowJS;
   std::string paramHighJS;
   ////////////////
-  std::string getJavascriptSurfaceImmersion(
-    std::string& outputSurfaceInstantiationJS,
-    const std::string& canvasName,
-    int& funCounter
-  );
-  std::string getJavascriptCurveImmersionIn3d(
-    std::string& outputCurveInstantiationJS, const std::string& canvasName, int& funCounter
-  );
+  JSData toJSONSurfaceImmersion();
+  JSData toJSONCurveImmersionIn3d();
   std::string toStringDebug();
   void computeYBounds();
-  std::string toStringPointsList();
   std::string getPlotStringFromFunctionStringAndRanges(
     bool useHtml,
     const std::string& functionStringPostfixNotation,
@@ -940,18 +1005,18 @@ public:
     double lowerBound,
     double upperBound
   );
-  std::string getJavascript2dPlot(
-    std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter
-  );
-  std::string getJavascriptParametricCurve2D(
-    std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter
-  );
-  std::string getJavascriptPoints(
-    std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter
-  );
-  std::string getJavascriptDirectionField(
-    std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter
-  );
+  JSData toJSON();
+  JSData toJSON2dDrawFunction();
+  JSData toJSONSetProjectionScreen();
+  JSData toJSONSegment();
+  JSData toJSONParametricCurveInTwoDimensions();
+  JSData toJSONPoints();
+  JSData toJSONDirectionFieldInTwoDimensions();
+  JSData toJSONDrawText();
+  JSData toJSONDrawPath();
+  JSData toJSONDrawPathFilled();
+  JSData toJSONPlotFillStart();
+  JSData toJSONPlotFillEnd();
   PlotObject();
   bool operator==(const PlotObject& other) const;
 };
@@ -960,9 +1025,23 @@ public:
 class Plot {
 private:
   std::string canvasNamE;
+  static JSData getCoordinateSystem();
+  static JSData getComputeViewWindow();
+  JSData getSetViewWindow();
+  List<PlotObject> plotObjects;
 public:
-  List<PlotObject> thePlots;
-  HashedList<std::string, MathRoutines::hashString> boxesThatUpdateMe;
+  struct Labels {
+  public:
+    static std::string canvasName;
+    static std::string controlsName;
+    static std::string messagesName;
+    static std::string graphicsType;
+    static std::string graphicsTwoDimensional;
+    static std::string graphicsThreeDimensional;
+    static std::string plotObjects;
+  };
+  HashedList<std::string, HashFunctions::hashFunction> parameterNames;
+  HashedList<std::string, HashFunctions::hashFunction> parameterNamesJS;
   double theLowerBoundAxes;
   double theUpperBoundAxes;
   double lowBoundY;
@@ -987,11 +1066,15 @@ public:
   std::string toStringDebug();
   std::string getPlotHtml(Calculator& owner);
   void computeCanvasNameIfNecessary(int& canvasCounter);
-  std::string commonCanvasSetup();
   std::string getPlotHtml3d(Calculator& owner);
   std::string getPlotHtml2d(Calculator& owner);
   std::string getPlotStringAddLatexCommands(bool useHtml);
   bool isOKVector(const Vector<double>& input);
+  void addPlotOnTop(PlotObject& input);
+  void addPlotsOnTop(Plot& input);
+  List<PlotObject>& getPlots();
+  void clearPlotObjects();
+  void setExpectedPlotObjects(int expectedSize);
   Plot();
   void computeAxesAndBoundingBox3d();
   void computeAxesAndBoundingBox();
@@ -1021,11 +1104,13 @@ class ObjectContainer {
   // by various predefined function handlers.
 public:
   HashedListReferences<ElementWeylGroup> theWeylGroupElements;
-  MapReferences<DynkinType, SemisimpleLieAlgebra> semisimpleLieAlgebras;
+  // Pointers to the values of the semisimpleLieAlgebras map.
+  // Required so we can return references SemisimpleLieAlgebra*&
   ListReferences<SemisimpleLieAlgebra*> semisimpleLieAlgebraPointers;
-  MapReferences<DynkinType, SemisimpleSubalgebras> theSSSubalgebraS;
-  HashedListReferences<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > theWeylGroupReps;
-  HashedListReferences<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > theWeylGroupVirtualReps;
+  MapReferences<DynkinType, SemisimpleLieAlgebra> semisimpleLieAlgebras;
+  MapReferences<DynkinType, SemisimpleSubalgebras> semisimpleSubalgebras;
+  HashedListReferences<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > weylGroupRepresentations;
+  HashedListReferences<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > weylGroupVirtualRepresentations;
   ListReferences<ModuleSSalgebra<RationalFunction<Rational> > > theCategoryOmodules;
   ListReferences<SlTwoSubalgebras> theSltwoSAs;
   HashedListReferences<ElementEllipticCurve<ElementZmodP> > ellipticCurveElementsZmodP;
@@ -1049,15 +1134,15 @@ public:
   HashedListReferences<std::string, MathRoutines::hashString> expressionNotation;
   HashedListReferences<Expression> expressionWithNotation;
   HashedListReferences<Expression> constraints;
-  HashedListReferences<LittelmannPath> theLSpaths;
-  HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
+  HashedListReferences<LittelmannPath> lakshmibaiSeshadriPaths;
+  HashedListReferences<MatrixTensor<Rational> > matrixTensorRationals;
   HashedListReferences<ElementZmodP> theEltsModP;
   HashedListReferences<Weight<Rational> > theWeights;
   HashedListReferences<Weight<Polynomial<Rational> > > theWeightsPoly;
-  ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational > > theHyperoctahedralReps;
+  ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational > > hyperoctahedralRepresentations;
   ListReferences<Plot> thePlots;
   List<bool> userInputBoxSliderDisplayed;
-  MapReferences<std::string, InputBox, MathRoutines::hashString> theUserInputTextBoxesWithValues;
+  MapReferences<std::string, InputBox, MathRoutines::hashString> userInputTextBoxesWithValues;
   MapReferences<std::string, std::string, MathRoutines::hashString> graphicsScripts;
   AlgebraicClosureRationals theAlgebraicClosure;
   HashedList<AlgebraicNumber> theAlgebraicNumbers;
@@ -1077,41 +1162,12 @@ public:
   std::string toStringJavascriptForUserInputBoxes();
 };
 
-class ExpressionTripleCrunchers {
-public:
-  int theOp;
-  int leftType;
-  int rightType;
-  bool operator==(const ExpressionTripleCrunchers& other) const {
-    return this->leftType == other.leftType && this->rightType == other.rightType && this->theOp == other.theOp;
-  }
-  void operator=(const ExpressionTripleCrunchers& other) {
-    this->leftType = other.leftType;
-    this->rightType = other.rightType;
-    this->theOp = other.theOp;
-  }
-  ExpressionTripleCrunchers(): theOp(- 1), leftType(- 1), rightType(- 1) {
-  }
-  ExpressionTripleCrunchers(
-    int inputOp, int inputLeft, int inputRight
-  ): theOp(inputOp), leftType(inputLeft), rightType(inputRight) {
-
-  }
-  static unsigned int hashFunction(const ExpressionTripleCrunchers& input) {
-    return
-      static_cast<unsigned int>(input.leftType) * someRandomPrimes[0] +
-      static_cast<unsigned int>(input.rightType) * someRandomPrimes[1] +
-      static_cast<unsigned int>(input.theOp) * someRandomPrimes[2];
-  }
-};
-
 class StateMaintainerCalculator {
 public:
   Calculator* owner;
-  int startingRuleStackIndex;
   int startingRuleStackSize;
   StateMaintainerCalculator(Calculator& inputBoss);
-  void addRule(const Expression& theRule);
+  void addRule(const Expression& rule);
   ~StateMaintainerCalculator();
 };
 
@@ -1142,7 +1198,27 @@ public:
     static std::string setRandomSeed;
     static std::string sort;
     static std::string transpose;
+    static std::string approximations;
+    static std::string turnOnRules;
+    static std::string turnOffRules;
   };
+
+  // Initialization mode for the calculator.
+  // Allows to avoid bootstrapping a number of
+  // functions/operations.
+  enum Mode {
+    // Run in full scientific mode;
+    // initialize all scientific functions.
+    full,
+    // Initialize only the functions required for
+    // basic mathematics. Integrals and
+    // commutative algebra are included but not
+    // representation theory, Lie theory and other
+    // advanced functions
+    educational
+  };
+
+  Mode mode;
 
   // Operations parametrize the expression elements.
   // Operations are the labels of the atom nodes of the expression tree.
@@ -1222,13 +1298,8 @@ public:
   // similar error message.
   //
   //----------------------------------------------------------
-
-
   // Control sequences parametrize the syntactical elements
   HashedList<std::string, MathRoutines::hashString> controlSequences;
-
-  HashedList<ExpressionTripleCrunchers> theCruncherIds;
-  List<Function> theCruncherS;
 
   HashedList<Expression> knownDoubleConstants;
   List<double> knownDoubleConstantValues;
@@ -1238,10 +1309,8 @@ public:
   int depthRecursionReached;
   int maximumAlgebraicTransformationsPerExpression;
   int maximumLatexChars;
-  int maximumCachedExpressionPerRuleStack;
-  int maximumRuleStacksCached;
-  int ruleStackCacheIndex;
   int numberExpectedExpressionsAtInitialization;
+
   class EvaluationStatistics {
   public:
     int expressionsEvaluated;
@@ -1251,6 +1320,8 @@ public:
     int numberOfListsStart;
     int numberListResizesStart;
     int numberHashResizesStart;
+    int totalPatternMatchesPerformed;
+    int totalEvaluationLoops;
     long long int numberOfSmallAdditionsStart;
     long long int numberOfSmallMultiplicationsStart;
     long long int numberOfSmallGreatestCommonDivisorsStart;
@@ -1259,6 +1330,8 @@ public:
     long long int numberOfLargeGreatestCommonDivisorsStart;
     int64_t millisecondsLastLog;
     int64_t startTimeEvaluationMilliseconds;
+    int64_t startParsing;
+    int64_t lastStopwatchParsing;
     EvaluationStatistics();
     void initialize();
     void reset();
@@ -1293,17 +1366,11 @@ public:
   bool flagUseFracInRationalLaTeX;
   bool flagUseHtml;
   bool flagDisplayContext;
-  bool flagShowCalculatorExamples;
-  bool flagDefaultRulesWereTamperedWith;
   bool flagHasGraphics;
   bool flagWriteLatexPlots;
-  bool flagUseScientificFunctions;
-
-  bool flagNoApproximations;
 
   bool flagForkingprocessAllowed;
 
-  int totalPatternMatchesPerformed;
   int numberOfPredefinedAtoms;
   int numEmptyTokensStart;
   Expression programExpression;
@@ -1314,15 +1381,22 @@ public:
   List<SyntacticElement>* currrentSyntacticSoup;
   List<SyntacticElement>* currentSyntacticStack;
 
-  HashedList<Expression> cachedExpressions;
-  List<Expression> imagesCachedExpressions;
+  class ExpressionCache {
+  public:
+    int ruleState;
+    bool flagNonCacheable;
+    bool flagFinalized;
+    Expression reducesTo;
+    ExpressionCache();
+  };
+  // Cached expressions per rule stack.
+  MapList<Expression, Calculator::ExpressionCache> cachedExpressions;
   ////
   HashedList<Expression> evaluatedExpressionsStack;
   HashedList<int, HashFunctions::hashFunction> nonBoundVariablesInContext;
   HashedList<int, HashFunctions::hashFunction> boundVariablesInContext;
 
   Expression ruleStack;
-  HashedList<Expression> cachedRuleStacks;
 
   HashedListReferences<Expression> allChildExpressions;
   List<unsigned int> allChildExpressionHashes;
@@ -1337,7 +1411,7 @@ public:
 
   std::string outputCommentsString;
   std::string parsingLog;
-  ObjectContainer theObjectContainer;
+  ObjectContainer objectContainer;
 
   std::string javaScriptDisplayingIndicator;
   int numOutputFileS;
@@ -1346,6 +1420,7 @@ public:
   std::stringstream comments;
   std::stringstream errorsPublic;
   FormatExpressions formatVisibleStrings;
+  bool approximationsBanned();
   std::string toStringRuleStatusUser();
   std::string toString();
   JSData toJSONPerformance();
@@ -1353,10 +1428,32 @@ public:
   Expression getNewAtom();
   void computeAutoCompleteKeyWords();
   void writeAutoCompleteKeyWordsToFile();
-  JSData toJSONOutputAndSpecials();
   std::string toStringOutputAndSpecials();
-  JSData toJSONFunctionHandlers();
-  // the purpose of the operator below is to save on typing when returning false with a comment.
+  class Examples {
+    std::string toStringOneOperationHandler(
+      const std::string& escapedAtom,
+      bool isComposite,
+      const Function& function
+    );
+    std::string escape(const std::string& atom);
+  public:
+    Calculator* owner;
+    HashedList<std::string, HashFunctions::hashFunction> toBeEscaped;
+    // Generates a JSON with all functions and their documentation.
+    JSData toJSONFunctionHandlers();
+    // Writes a readme file in folder examples/Readme.md.
+    bool writeExamplesReadme();
+    std::string getExamplesReadmeFragment();
+    Examples();
+    class Test {
+    public:
+      static bool compose();
+      static bool all();
+    };
+  };
+  Examples examples;
+  // The purpose of the operator below is to save on typing
+  // when returning false with a comment.
   operator bool() const {
     return false;
   }
@@ -1364,7 +1461,9 @@ public:
   int addChildExpression(const Expression& child);
   void registerCalculatorFunction(Function& inputFunction, int indexOperation);
   std::string toStringSemismipleLieAlgebraLinksFromHD(
-    const DynkinType& theType, FormatExpressions* theFormat = nullptr
+    const std::string& prefixFolder,
+    const DynkinType& dynkinType,
+    FormatExpressions* theFormat = nullptr
   );
   bool isBoundVariableInContext(int inputOp);
   bool isNonBoundVariableInContext(int inputOp);
@@ -1405,8 +1504,8 @@ public:
   Expression expressionMinusHalf();
   Expression expressionInfinity();
   Expression expressionMinusInfinity();
-  void logFunctionWithTime(Function& inputF);
-  void logTime();
+  void logFunctionWithTime(Function& input, int64_t startTime);
+  void logTime(int64_t startTime);
   void logPublicError(const std::string& theError);
   bool decreaseStackExceptLast(int decrease);
   bool decreaseStackExceptLastTwo(int decrease);
@@ -1606,7 +1705,7 @@ public:
   int getOperationIndexFromControlIndex(int controlIndex);
   int getExpressionIndex();
   SyntacticElement getEmptySyntacticElement();
-  bool accountRule(const Expression& ruleE, StateMaintainerCalculator& theRuleStackMaintainer);
+  bool accountRule(const Expression& ruleE, StateMaintainerCalculator& ruleStackMaintainer);
   bool applyOneRule();
   void resetStack() {
     SyntacticElement emptyElement = this->getEmptySyntacticElement();
@@ -1704,6 +1803,9 @@ public:
   }
   int opRulesOn() {
     return this->operations.getIndexNoFail("RulesOn");
+  }
+  int opApproximations() {
+    return this->operations.getIndexNoFail(Calculator::Atoms::approximations);
   }
   int opCommandEnclosureStart() {
     return this->operations.getIndexNoFail("CommandEnclosureStart");
@@ -1813,7 +1915,7 @@ public:
   int opDouble() {
     return this->operations.getIndexNoFail("Double");
   }
-  int opAlgNumber() {
+  int opAlgebraicNumber() {
     return this->operations.getIndexNoFail("AlgebraicNumber");
   }
   int opElementWeylAlgebra() {
@@ -1891,7 +1993,7 @@ public:
   int opCharSSAlgMod() {
     return this->operations.getIndexNoFail("CharSSAlgMod");
   }
-  int opSemisimpleLieAlgebrA() {
+  int opSemisimpleLieAlgebra() {
     return this->operations.getIndexNoFail("SemisimpleLieAlg");
   }
   int opSemisimpleSubalgebras() {
@@ -2143,6 +2245,10 @@ public:
     bool writeTestStrings(std::stringstream* commentsOnFailure);
     bool processOneTest(JSData& input);
     static bool all();
+    static bool cacheWorks();
+    static bool loopDetection();
+    static bool loopDetectionCycle();
+    static bool loopDetectionEverExpanding();
     static bool numberOfTestFunctions(Calculator& ownerInitialized);
     static bool parseDecimal(Calculator& ownerInitialized);
     static bool parseAllExamples(Calculator& ownerInitialized);
@@ -2210,20 +2316,23 @@ public:
     Expression::FunctionAddress conversionFunction = nullptr,
     std::stringstream* commentsOnError = nullptr
   );
-  template <class theType>
+  template <class Type>
   bool getVectorFromFunctionArguments(
     const Expression& input,
-    Vector<theType>& output,
+    Vector<Type>& output,
     ExpressionContext* inputOutputStartingContext = nullptr,
     int targetDimNonMandatory = - 1,
     Expression::FunctionAddress conversionFunction = nullptr
   ) {
-    Expression list = input;
-    if (list.isList()) {
-      list.setChildAtomValue(0, this->opSequence());
+    MacroRegisterFunctionWithName("Calculator::getVectorFromFunctionArguments");
+    input.checkInitialization();
+    Expression sequence = input;
+    if (sequence.isList()) {
+      sequence.setChildAtomValue(0, this->opSequence());
     }
+    sequence.checkInitialization();
     return this->getVector(
-      list,
+      sequence,
       output,
       inputOutputStartingContext,
       targetDimNonMandatory,
@@ -2302,7 +2411,7 @@ public:
     const std::string& inputAdditionalIdentifier,
     const std::string& inputCalculatorIdentifier,
     const Function::Options& options,
-    const std::string& parentOpThatBansHandler = ""
+    const List<std::string>* parentsThatBanHandler = nullptr
   );
   void addOneStringAtomHandler(
     int atom,
@@ -2320,7 +2429,7 @@ public:
     MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction>& handlerCollection
   );
   void reset();
-  void initialize();
+  void initialize(Calculator::Mode desiredMode);
   void initializeToStringHandlers();
   void initializePredefinedWordSplits();
   void initializeAtomsThatFreezeArguments();
@@ -2334,17 +2443,17 @@ public:
   void initializeBuiltInAtomsWhosePowersAreInterpretedAsFunctions();
   void initializeBuiltInAtomsNotInterpretedAsFunctions();
   void initializeAtomsNotGoodForChainRule();
-  void initializeStandardFunctions();
-  void initializeScientificFunctions();
-  void initializeSemisimpleLieAlgebraFunctions();
+  void initializeFunctionsStandard();
+  void initializeFunctionsScientificBasic();
+  void initializeFunctionsExtra();
+  void initializeFunctionsCryptoAndEncoding();
+  void initializeFunctionsSemisimpleLieAlgebras();
   void initializePredefinedStandardOperationsWithoutHandler();
-  void initCalculusTestingFunctions();
-  void initAdminFunctions();
-  void initPredefinedOperationsComposite();
+  void initializeAdminFunctions();
   bool extractExpressions(Expression& outputExpression, std::string* outputErrors);
+  JSData toJSONOutputAndSpecials();
   void evaluateCommands();
   JSData extractSolution();
-  JSData extractComparison(const std::string& given, const std::string& desired);
   bool isTimedOut();
   static bool evaluateExpression(
     Calculator& calculator, const Expression& input, Expression& output
@@ -2357,7 +2466,17 @@ public:
     int opIndexParentIfAvailable,
     Expression* outputHistory
   );
+  void storeCache();
   class EvaluateLoop {
+  private:
+    bool detectLoops();
+    void accountIntermediateState();
+    bool reduceUsingCache();
+    bool builtInEvaluation();
+    bool userDefinedEvaluation();
+    bool evaluateChildren(StateMaintainerCalculator& maintainRuleStack);
+    void reportChildEvaluation(Expression& output, int childIndex);
+    void storeCache();
   public:
     Calculator* owner;
     bool flagIsNonCacheable;
@@ -2368,16 +2487,13 @@ public:
     bool reductionOccurred;
     Expression* output;
     Expression* history;
+    HashedList<Expression> intermediateOutputs;
     Expression currentChild;
+    // Reduces expression using a cached value
     bool reduceOnce();
-    bool builtInEvaluation();
-    bool userDefinedEvaluation();
-    void initializeOneRun();
+    void writeCache();
     bool outputHasErrors();
     EvaluateLoop(Calculator& inputOwner);
-    bool evaluateChildren(StateMaintainerCalculator& maintainRuleStack);
-    void reportChildEvaluation(Expression& output, int childIndex);
-    void lookUpCache();
     bool setOutput(
       const Expression& input, Function* handler, const std::string& info
     );
@@ -2387,13 +2503,13 @@ public:
       const Expression& transformedChild, const Expression& childHistory, int childIndex
     );
   };
-
+  void reduce(Calculator::EvaluateLoop& state);
   class ExpressionHistoryEnumerator {
   public:
     Calculator* owner;
     int recursionDepth;
     int maximumRecursionDepth;
-    Expression theHistory;
+    Expression history;
     List<Expression> output;
     List<List<std::string> > rulesNames;
     // List<List<std::string> > rulesDisplayNames;
@@ -2416,8 +2532,6 @@ public:
   void evaluate(const std::string& input);
   // Attempts to interpret the input string as a high-school or calculus problem and solve it.
   JSData solve(const std::string& input);
-  // Compares two expressions.
-  JSData compareExpressions(const std::string& given, const std::string& desired);
   bool parseAndExtractExpressions(
     const std::string& input,
     Expression& output,
@@ -2669,36 +2783,38 @@ public:
   template <class Coefficient>
   static bool functionExpressionFromPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerExpressionFromUE(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerExpressionFrom(Calculator& calculator, const MonomialP& input, Expression& output);
+  static bool innerExpressionFrom(Calculator& calculator, const MonomialPolynomial& input, Expression& output);
   // TODO: move to calculator conversions.
-  template <class theType>
+  template <class Type>
   static bool convertToTypeUsingFunction(
-    Expression::FunctionAddress theFun, const Expression& input, Expression& output
+    Expression::FunctionAddress converter, const Expression& input, Expression& output
   ) {
     MacroRegisterFunctionWithName("Calculator::convertToTypeUsingFunction");
-    if (input.isOfType<theType>()) {
+    input.checkInitialization();
+    if (input.isOfType<Type>()) {
       output = input;
       return true;
     }
-    if (theFun == nullptr) {
+    if (converter == nullptr) {
       return false;
     }
     Calculator& calculator = *input.owner;
-    if (!theFun(calculator, input, output)) {
-      calculator.comments << "<hr>Conversion function failed on " << input.toString() << ". ";
+    if (!converter(calculator, input, output)) {
+      calculator.comments << "<hr>Conversion function failed on "
+      << input.toString() << ". ";
       return false;
     }
-    return output.isOfType<theType>();
+    return output.isOfType<Type>();
   }
-  template <class theType>
+  template <class Type>
   static bool convert(
     const Expression& input,
     Expression::FunctionAddress conversion,
-    WithContext<theType>& output
+    WithContext<Type>& output
   ) {
     MacroRegisterFunctionWithName("CalculatorConversions::convert");
     Expression conversionExpression;
-    if (!CalculatorConversions::convertToTypeUsingFunction<theType>(conversion, input, conversionExpression)) {
+    if (!CalculatorConversions::convertToTypeUsingFunction<Type>(conversion, input, conversionExpression)) {
       return false;
     }
     if (!conversionExpression.isOfType(&output.content)) {
@@ -2709,39 +2825,41 @@ public:
   }
 };
 
-template <class theType>
+template <class Type>
 bool Calculator::getVector(
   const Expression& input,
-  Vector<theType>& output,
+  Vector<Type>& output,
   ExpressionContext* inputOutputStartingContext,
   int targetDimensionNonMandatory,
   Expression::FunctionAddress conversionFunction
 ) {
   MacroRegisterFunctionWithName("Calculator::getVector");
+  input.checkInitialization();
   List<Expression> nonConvertedEs;
   if (!this->getVectorExpressions(input, nonConvertedEs, targetDimensionNonMandatory)) {
     return false;
   }
-  List<Expression> convertedEs;
-  convertedEs.setSize(nonConvertedEs.size);
+  List<Expression> convertedExpressions;
+  convertedExpressions.setSize(nonConvertedEs.size);
   for (int i = 0; i < nonConvertedEs.size; i ++) {
-    if (!CalculatorConversions::convertToTypeUsingFunction<theType>(
-      conversionFunction, nonConvertedEs[i], convertedEs[i]
+    nonConvertedEs[i].checkInitialization();
+    if (!CalculatorConversions::convertToTypeUsingFunction<Type>(
+      conversionFunction, nonConvertedEs[i], convertedExpressions[i]
     )) {
       return false;
     }
   }
-  if (!this->convertExpressionsToCommonContext(convertedEs, inputOutputStartingContext)) {
+  if (!this->convertExpressionsToCommonContext(convertedExpressions, inputOutputStartingContext)) {
     return false;
   }
   if (targetDimensionNonMandatory > 0) {
-    if (convertedEs.size != targetDimensionNonMandatory) {
+    if (convertedExpressions.size != targetDimensionNonMandatory) {
       return false;
     }
   }
-  output.setSize(convertedEs.size);
-  for (int i = 0; i < convertedEs.size; i ++) {
-    output[i] = convertedEs[i].getValue<theType>();
+  output.setSize(convertedExpressions.size);
+  for (int i = 0; i < convertedExpressions.size; i ++) {
+    output[i] = convertedExpressions[i].getValue<Type>();
   }
   return true;
 }
@@ -2935,23 +3053,23 @@ int Expression::addObjectReturnIndex(const
 Rational
 & inputValue) const;
 
-template <class theType>
+template <class Type>
 bool Expression::assignValueWithContext(
-  const theType& inputValue,
-  const ExpressionContext& theContext,
+  const Type& inputValue,
+  const ExpressionContext& context,
   Calculator& owner
 ) {
   this->reset(owner, 3);
-  this->addChildAtomOnTop(this->getTypeOperation<theType>());
-  this->addChildOnTop(theContext.toExpression());
+  this->addChildAtomOnTop(this->getTypeOperation<Type>());
+  this->addChildOnTop(context.toExpression());
   return this->addChildAtomOnTop(this->addObjectReturnIndex(inputValue));
 }
 
-template <class theType>
-bool Expression::assignValue(const theType& inputValue, Calculator& owner) {
+template <class Type>
+bool Expression::assignValue(const Type& inputValue, Calculator& owner) {
   Expression typeComputer;
   typeComputer.owner = &owner;
-  int currentType = typeComputer.getTypeOperation<theType>();
+  int currentType = typeComputer.getTypeOperation<Type>();
   if (
     currentType == owner.opEltZmodP() ||
     currentType == owner.opPolynomialRational() ||
@@ -3035,15 +3153,15 @@ bool Calculator::getTypeWeight(
     << middleE.toString() << ".";
     return false;
   }
-  if (!calculator.theObjectContainer.semisimpleLieAlgebras.contains(
-    ambientSSalgebra->theWeyl.theDynkinType
+  if (!calculator.objectContainer.semisimpleLieAlgebras.contains(
+    ambientSSalgebra->weylGroup.dynkinType
   )) {
     global.fatal
     << ambientSSalgebra->toStringLieAlgebraName()
     << " contained object container more than once. " << global.fatal;
   }
-  int algebraIndex = calculator.theObjectContainer.semisimpleLieAlgebras.getIndex(
-    ambientSSalgebra->theWeyl.theDynkinType
+  int algebraIndex = calculator.objectContainer.semisimpleLieAlgebras.getIndex(
+    ambientSSalgebra->weylGroup.dynkinType
   );
   outputAmbientSemisimpleLieAlgebra.context.setIndexAmbientSemisimpleLieAlgebra(algebraIndex);
   return true;
@@ -3130,16 +3248,16 @@ bool Calculator::getTypeHighestWeightParabolic(
       }
     }
   }
-  if (!calculator.theObjectContainer.semisimpleLieAlgebras.contains(
-    ambientSSalgebra->theWeyl.theDynkinType
+  if (!calculator.objectContainer.semisimpleLieAlgebras.contains(
+    ambientSSalgebra->weylGroup.dynkinType
   )) {
     global.fatal
     << ambientSSalgebra->toStringLieAlgebraName()
     << " contained object container more than once. "
     << global.fatal;
   }
-  int algebraIndex = calculator.theObjectContainer.semisimpleLieAlgebras.getIndex(
-    ambientSSalgebra->theWeyl.theDynkinType
+  int algebraIndex = calculator.objectContainer.semisimpleLieAlgebras.getIndex(
+    ambientSSalgebra->weylGroup.dynkinType
   );
   outputAmbientSSalgebra.context.setIndexAmbientSemisimpleLieAlgebra(algebraIndex);
   return true;
@@ -3262,8 +3380,8 @@ bool CalculatorConversions::expressionFromRationalFunction(
   input.getDenominator(denominator);
   Polynomial<Coefficient> numeratorRescaled = numerator;
   Polynomial<Coefficient> denominatorRescaled = denominator;
-  Coefficient topMultiple = numeratorRescaled.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
-  Coefficient bottomMultiple = denominatorRescaled.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  Coefficient topMultiple = numeratorRescaled.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
+  Coefficient bottomMultiple = denominatorRescaled.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   Coefficient multipleTopBottom = bottomMultiple / topMultiple;
   numeratorRescaled *= multipleTopBottom.getNumerator();
   denominatorRescaled *= multipleTopBottom.getDenominator();

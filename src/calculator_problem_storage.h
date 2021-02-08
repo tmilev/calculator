@@ -10,48 +10,67 @@ class SyntacticElementHTML {
 public:
   struct Tags{
   public:
+    static std::string filler;
+    static std::string command;
     static std::string calculator;
     static std::string calculatorHidden;
     static std::string calculatorSolution;
+    static std::string calculatorShowToUserOnly;
+    static std::string calculatorSolutionStart;
+    static std::string calculatorSolutionEnd;
     static std::string calculatorExamProblem;
     static std::string calculatorAnswer;
+    static std::string hardCodedAnswer;
+    static std::string answerCalculatorHighlight;
+    static std::string answerCalculatorHighlightStart;
+    static std::string answerCalculatorHighlightEnd;
   };
   int indexInOwner;
   int commandIndex;
   std::string syntacticRole;
   std::string content;
   std::string tag;
+  std::string errorComment;
   MapList<std::string, std::string, MathRoutines::hashString> properties;
+  List<std::string> propertiesWithoutValue;
   List<std::string> defaultKeysIfMissing;
   List<std::string> defaultValuesIfMissing;
-  List<std::string> tagKeysWithoutValue;
-  List<SyntacticElementHTML> children;
+  // List<SyntacticElementHTML> children;
   bool flagUseDisplaystyleInMathMode;
   bool flagUseMathMode;
   bool flagUseMathSpan;
   std::string interpretedCommand;
   static int parsingDummyElements;
-  bool isInterpretedByCalculatorDuringProblemGeneration();
-  bool isInterpretedByCalculatorDuringSubmission();
+  bool isInterpretedByCalculatorOnGeneration() const;
+  bool isInterpretedByCalculatorOnSubmission();
   bool isInterpretedNotByCalculator();
-  bool isHidden();
+  bool shouldShow() const;
   bool isCalculatorHidden();
-  bool isCalculatorCommand();
-  bool isAnswer();
+  bool isCalculatorCommand() const;
+  bool isCalculatorCommandGenerationOnly() const;
+  bool isAnswerStandard() const;
+  bool isAnswerHardCoded() const;
+  bool isAnswer() const;
   bool isSolution();
+  std::string getAnswerIdOfOwner() const;
+  std::string answerIdIfAnswer() const;
+  std::string answerIdCorrectIfEmpty();
   bool isAnswerElement(std::string* desiredAnswerId);
   bool isCommentBeforeInterpretation();
   bool isCommentBeforeSubmission();
   bool isAnswerOnGiveUp();
-  std::string getKeyValue(const std::string& theKey) const;
-  void setKeyValue(const std::string& theKey, const std::string& theValue);
+  std::string getKeyValue(const std::string& key) const;
+  void setKeyValue(const std::string& key, const std::string& value);
   void resetAllExceptContent();
   std::string toStringInterpretedBody();
-  std::string toStringTagAndContent();
-  std::string toStringOpenTag(const std::string& overrideTagIfNonEmpty, bool immediatelyClose = false);
-  std::string toStringCloseTag(const std::string& overrideTagIfNonEmpty);
-  std::string gGetTagClass();
-  std::string toStringDebug();
+  std::string toStringTagAndContent() const;
+  std::string toStringOpenTag(const std::string& overrideTagIfNonEmpty, bool immediatelyClose = false) const;
+  std::string toStringCloseTag(const std::string& overrideTagIfNonEmpty) const;
+  std::string getTagClass() const;
+  std::string toStringDebug() const;
+  static std::string toHTMLElements(
+    const List<SyntacticElementHTML>& input
+  );
   SyntacticElementHTML() {
     this->flagUseDisplaystyleInMathMode = false;
     this->indexInOwner = - 1;
@@ -73,29 +92,48 @@ public:
   bool operator!=(const std::string& other) {
     return this->content != other;
   }
+  static std::string cleanUpCommandString(const std::string& inputCommand);
+  static std::string cleanUpEncloseCommand(const std::string& inputCommand);
+  std::string commandCleaned() const;
+  std::string commandEnclosed() const;
 };
 
 class Answer {
+private:
+  bool prepareAnswerStandard(
+    const SyntacticElementHTML& input,
+    std::stringstream& commands,
+    std::stringstream& commandsBody,
+    std::stringstream& commandsNoEnclosures,
+    std::stringstream& commandsBodyNoEnclosures
+  );
+  bool prepareAnswerHardCoded(
+    const SyntacticElementHTML& input,
+    std::stringstream& commands,
+    std::stringstream& commandsBody,
+    std::stringstream& commandsNoEnclosures,
+    std::stringstream& commandsBodyNoEnclosures
+  );
 public:
+  bool flagAnswerVerificationFound;
   bool flagAutoGenerateSubmitButtons;
   bool flagAutoGenerateMQButtonPanel;
   bool flagAutoGenerateMQfield;
   bool flagAutoGenerateVerificationField;
   bool flagAutoGenerateButtonSolution;
-  bool flagSolutionFound;
+  bool flagAnswerHardcoded;
   int numSubmissions;
   int numCorrectSubmissions;
   std::string commandsCommentsBeforeSubmission;
-  std::string commandsCommentsBeforeInterpretatioN;
+  std::string commandsCommentsBeforeInterpretation;
   std::string commandsBeforeAnswer;
   std::string commandsBeforeAnswerNoEnclosuresForDEBUGGING;
   std::string commandVerificationOnly;
   std::string commandsSolutionOnly;
-  std::string commandsNoEnclosureAnswerOnGiveUpOnly;
+  std::string commandAnswerOnGiveUp;
   List<SyntacticElementHTML> solutionElements;
   MapList<std::string, std::string, MathRoutines::hashString> properties;
   std::string answerId;
-  std::string varAnswerId;
   std::string idVerificationSpan;
   std::string idAnswerPanel;
   std::string idButtonSubmit;
@@ -109,28 +147,26 @@ public:
   //////////////////////////////////////
   std::string mathQuillPanelOptions;
   //////////////////////////////////////
-  std::string varMQfield;
-  std::string MQobject;
   std::string idSpanSolution;
-  std::string idMQfielD;
+  std::string idMQField;
   std::string idMQFieldLocation;
   std::string idMQButtonPanelLocation;
-  std::string MQUpdateFunction;
   std::string currentAnswerURLed;
   std::string currentAnswerClean;
   std::string firstCorrectAnswerURLed;
   std::string firstCorrectAnswerClean;
-  Answer() {
-    this->numSubmissions = 0;
-    this->numCorrectSubmissions = 0;
-    this->flagAutoGenerateSubmitButtons = true;
-    this->flagAutoGenerateMQButtonPanel = true;
-    this->flagAutoGenerateMQfield = true;
-    this->flagAutoGenerateVerificationField = true;
-    this->flagAutoGenerateButtonSolution = true;
-    this->flagSolutionFound = false;
-  }
+  Answer();
+  // Returns true if answer checking instructions could be extracted from the input.
+  bool prepareAnswer(
+    const SyntacticElementHTML& input,
+    std::stringstream& commands,
+    std::stringstream& commandsBody,
+    std::stringstream& commandsNoEnclosures,
+    std::stringstream& commandsBodyNoEnclosures
+  );
+  bool hasSolution() const;
   std::string toString();
+  std::string toStringSolutionElements();
 };
 
 class ProblemDataAdministrative {
@@ -164,10 +200,9 @@ public:
   std::string commandsGenerateProblem;
   std::string commandsGenerateProblemNoEnclosures;
   std::string commandsGenerateProblemLink;
-  MapList<std::string, Answer, MathRoutines::hashString> theAnswers;
+  MapList<std::string, Answer, MathRoutines::hashString> answers;
   List<std::string> inputNonAnswerIds;
   int getExpectedNumberOfAnswers(const std::string& problemName, std::stringstream& commentsOnFailure);
-  void addEmptyAnswerIdOnTop(const std::string& inputAnswerId);
   ProblemData();
   bool checkConsistency() const;
   bool checkConsistencyMathQuillIds() const;

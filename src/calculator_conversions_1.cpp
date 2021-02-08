@@ -60,8 +60,8 @@ bool CalculatorConversions::innerLoadWeylGroup(Calculator& calculator, const Exp
   if (!CalculatorConversions::innerDynkinTypE(calculator, input, theType)) {
     return false;
   }
-  SemisimpleLieAlgebra& theSA = calculator.theObjectContainer.getLieAlgebraCreateIfNotPresent(theType);
-  return output.assignValue(theSA.theWeyl, calculator);
+  SemisimpleLieAlgebra& theSA = calculator.objectContainer.getLieAlgebraCreateIfNotPresent(theType);
+  return output.assignValue(theSA.weylGroup, calculator);
 }
 
 bool CalculatorConversions::innerDynkinSimpleTypE(
@@ -186,30 +186,30 @@ bool CalculatorConversions::functionDynkinType(
   Calculator& calculator, const Expression& input, DynkinType& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionDynkinType");
-  LinearCombination<Expression, Rational> theType;
-  if (!calculator.functionCollectSummandsCombine(calculator, input, theType)) {
+  LinearCombination<Expression, Rational> typeComputer;
+  if (!calculator.functionCollectSummandsCombine(calculator, input, typeComputer)) {
     return false;
   }
   DynkinSimpleType simpleComponent;
   output.makeZero();
-  for (int i = 0; i < theType.size(); i ++) {
+  for (int i = 0; i < typeComputer.size(); i ++) {
     if (!CalculatorConversions::functionDynkinSimpleType(
-      calculator, theType[i], simpleComponent
+      calculator, typeComputer[i], simpleComponent
     )) {
       return false;
     }
     int theMultiplicity = - 1;
-    if (!theType.coefficients[i].isSmallInteger(&theMultiplicity)) {
+    if (!typeComputer.coefficients[i].isSmallInteger(&theMultiplicity)) {
       theMultiplicity = - 1;
     }
     if (theMultiplicity < 0) {
       return calculator << "<hr>Failed to convert the coefficient "
-      << theType.coefficients[i] << " of " << theType[i].toString()
+      << typeComputer.coefficients[i] << " of " << typeComputer[i].toString()
       << " to a small positive integer. ";
     }
     output.addMonomial(simpleComponent, theMultiplicity);
   }
-  return !theType.isEqualToZero();
+  return !typeComputer.isEqualToZero();
 }
 
 bool CalculatorConversions::functionSemisimpleLieAlgebra(
@@ -218,16 +218,16 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
   Expression& output,
   SemisimpleLieAlgebra*& outputPointer
 ) {
-  RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   MacroRegisterFunctionWithName("Calculator::functionSemisimpleLieAlgebra");
-  DynkinType theDynkinType;
+  RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
+  DynkinType dynkinType;
   outputPointer = nullptr;
   if (!CalculatorConversions::functionDynkinType(
-    calculator, input, theDynkinType
+    calculator, input, dynkinType
   )) {
     return calculator << "Failed to extract Dynkin type from: " << input.toString();
   }
-  if (theDynkinType.getRank() > 20) {
+  if (dynkinType.getRank() > 20) {
     return calculator
     << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. "
     << "If you would like to relax this limitation edit file " << __FILE__
@@ -237,17 +237,17 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
     << "You have been warned. Alternatively, you may want to implement a sparse structure constant table "
     << "(write me an email if you want to do that, I will help you). ";
   }
-  bool newlyCreated = !calculator.theObjectContainer.semisimpleLieAlgebras.contains(theDynkinType);
-  outputPointer = &calculator.theObjectContainer.getLieAlgebraCreateIfNotPresent(theDynkinType);
+  bool newlyCreated = !calculator.objectContainer.semisimpleLieAlgebras.contains(dynkinType);
+  outputPointer = &calculator.objectContainer.getLieAlgebraCreateIfNotPresent(dynkinType);
   outputPointer->checkConsistency();
   output.assignValue(outputPointer, calculator);
   if (newlyCreated) {
     outputPointer->computeChevalleyConstants();
-    Expression tempE;
+    Expression converter;
     CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
-      calculator, output, tempE, false, false
+      calculator, output, converter, false, false
     );
-    calculator << tempE.getValue<std::string>();
+    calculator << converter.getValue<std::string>();
   }
   return true;
 }
@@ -255,31 +255,25 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
 bool CalculatorConversions::innerExpressionFromDynkinSimpleType(
   Calculator& calculator, const DynkinSimpleType& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerExpressionFromDynkinSimpleType");
+  MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromDynkinSimpleType");
   Expression letterE, rankE, letterAndIndexE, indexE;
   std::string letterS;
-  letterS = input.theLetter;
+  letterS = input.letter;
   letterE.makeAtom(calculator.addOperationNoRepetitionOrReturnIndexFirst(letterS), calculator);
-  indexE.assignValue(input.CartanSymmetricInverseScale, calculator);
-  rankE.assignValue(input.theRank, calculator);
+  indexE.assignValue(input.cartanSymmetricInverseScale, calculator);
+  rankE.assignValue(input.rank, calculator);
   letterAndIndexE.makeXOX(calculator, calculator.opThePower(), letterE, indexE);
   return output.makeXOX(calculator, calculator.opUnderscore(), letterAndIndexE, rankE);
 }
 
-template < >
-SemisimpleLieAlgebra*& Expression::getValueNonConst() const;
-
 bool CalculatorConversions::innerStoreSemisimpleLieAlgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  if (!input.isOfType<SemisimpleLieAlgebra*>()) {
+  if (!input[1].isOfType<SemisimpleLieAlgebra*>()) {
     return output.makeError("Asking to store non-semisimple Lie algebra as such is not allowed. ", calculator);
   }
-  SemisimpleLieAlgebra* owner = input.getValueNonConst<SemisimpleLieAlgebra*>();
-  if (owner == nullptr) {
-    global.fatal << "Unexpected null pointer" << global.fatal;
-  }
-  return CalculatorConversions::innerExpressionFromDynkinType(calculator, owner->theWeyl.theDynkinType, output);
+  SemisimpleLieAlgebra* owner = input[1].getValueNonConst<SemisimpleLieAlgebra*>();
+  return CalculatorConversions::innerExpressionFromDynkinType(calculator, owner->weylGroup.dynkinType, output);
 }
 
 bool CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraRationals(
@@ -327,9 +321,9 @@ bool CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraAlgebr
 bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
   Calculator& calculator, const Expression& input, SlTwoSubalgebra& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerLoadFromObject SlTwoSubalgebra");
+  MacroRegisterFunctionWithName("CalculatorConversions::innerSlTwoSubalgebraPrecomputed");
   if (!input.isListNElements(4)) {
-    return calculator << "<hr>input of innerLoadFromObject has " << input.children.size << " children, 4 expected. ";
+    return calculator << "<hr>input of innerLoadFromObject has " << input.size() << " children, 4 expected. ";
   }
   const Expression& theOwnerE = input[1];
   Expression tempE;
@@ -361,10 +355,10 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
   output.theE = eltE;
   output.theF= eltF;
   output.owner = eltE.getOwner();
-  DynkinType& theType = output.owner->theWeyl.theDynkinType;
+  DynkinType& theType = output.owner->weylGroup.dynkinType;
   SemisimpleSubalgebras& ownerSubalgebras =
-  calculator.theObjectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(theType);
-  output.container = &ownerSubalgebras.theSl2s;
+  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(theType);
+  output.container = &ownerSubalgebras.slTwoSubalgebras;
   return true;
 }
 
@@ -451,7 +445,7 @@ bool CalculatorConversions::innerLoadKey(
   MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKey");
   Expression theKeyE;
   theKeyE.makeAtom(inputKey, calculator);
-  for (int i = 0; i < inputStatementList.children.size; i ++) {
+  for (int i = 0; i < inputStatementList.size(); i ++) {
     if (inputStatementList[i].startsWith(calculator.opDefine(), 3)) {
       if (inputStatementList[i][1] == theKeyE) {
         output = inputStatementList[i][2];
@@ -472,25 +466,25 @@ bool CalculatorConversions::innerStoreCandidateSubalgebra(
   List<Expression> values;
   input.checkBasicInitialization();
   CalculatorConversions::innerExpressionFromDynkinType(
-    calculator, input.weylNonEmbedded->theDynkinType, currentE
+    calculator, input.weylNonEmbedded->dynkinType, currentE
   );
   keys.addOnTop("DynkinType");
   values.addOnTop(currentE);
   Matrix<Rational> conversionMat;
-  conversionMat.assignVectorsToRows(input.theHsScaledToActByTwo);
+  conversionMat.assignVectorsToRows(input.cartanElementsScaledToActByTwo);
   currentE.assignMatrix(conversionMat, calculator, nullptr, false);
   keys.addOnTop("ElementsCartan");
   values.addOnTop(currentE);
   if (input.flagSystemSolved) {
     Expression listGenerators;
     listGenerators.makeSequence(calculator);
-    for (int i = 0; i < input.theNegGens.size; i ++) {
+    for (int i = 0; i < input.negativeGenerators.size; i ++) {
       CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(
-        calculator, input.theNegGens[i], currentE
+        calculator, input.negativeGenerators[i], currentE
       );
       listGenerators.addChildOnTop(currentE);
       CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(
-        calculator, input.thePosGens[i], currentE
+        calculator, input.positiveGenerators[i], currentE
       );
       listGenerators.addChildOnTop(currentE);
     }
@@ -534,7 +528,7 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
   reportStream << "Non embedded Dynkin type: " << DynkinTypeE.toString() << ". ";
   theReport.report(reportStream.str());
   outputSubalgebra.weylNonEmbedded = &
-  calculator.theObjectContainer.getWeylGroupDataCreateIfNotPresent(theNonEmbeddedDynkinType);
+  calculator.objectContainer.getWeylGroupDataCreateIfNotPresent(theNonEmbeddedDynkinType);
   outputSubalgebra.weylNonEmbedded->makeFromDynkinType(theNonEmbeddedDynkinType);
   int theRank = owner.owner->getRank();
   reportStream << "Extracting matrix of Cartan elements. ";
@@ -542,16 +536,16 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
   Matrix<Rational> theHs;
   if (!calculator.functionGetMatrix(ElementsCartanE, theHs, nullptr, theRank, nullptr)) {
     return calculator << "<hr>Failed to load Cartan elements for candidate subalgebra of type "
-    << outputSubalgebra.weylNonEmbedded->theDynkinType << "<hr>";
+    << outputSubalgebra.weylNonEmbedded->dynkinType << "<hr>";
   }
   if (theHs.numberOfRows != outputSubalgebra.weylNonEmbedded->getDimension()) {
     return calculator << "<hr>Failed to load Cartan elements: I expected "
     << outputSubalgebra.weylNonEmbedded->getDimension() << " elements, but failed to get them.";
   }
   List<int> theRanks, theMults;
-  outputSubalgebra.weylNonEmbedded->theDynkinType.getLettersTypesMultiplicities(nullptr, &theRanks, &theMults, nullptr);
+  outputSubalgebra.weylNonEmbedded->dynkinType.getLettersTypesMultiplicities(nullptr, &theRanks, &theMults, nullptr);
   outputSubalgebra.cartanSubalgebrasByComponentScaledToActByTwo.setSize(
-    outputSubalgebra.weylNonEmbedded->theDynkinType.getNumberOfSimpleComponents()
+    outputSubalgebra.weylNonEmbedded->dynkinType.getNumberOfSimpleComponents()
   );
   int componentCounter = - 1;
   int counter = - 1;
@@ -568,12 +562,12 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
   }
   reportStream << "Extracting generators ... ";
   theReport.report(reportStream.str());
-  outputSubalgebra.thePosGens.setSize(0);
-  outputSubalgebra.theNegGens.setSize(0);
+  outputSubalgebra.positiveGenerators.setSize(0);
+  outputSubalgebra.negativeGenerators.setSize(0);
   if (CalculatorConversions::innerLoadKey(calculator, input, "generators", generatorsE)) {
     generatorsE.sequencefy();
     ElementSemisimpleLieAlgebra<AlgebraicNumber> curGenAlgebraic;
-    for (int i = 1; i < generatorsE.children.size; i ++) {
+    for (int i = 1; i < generatorsE.size(); i ++) {
       if (!CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(
         calculator, generatorsE[i], curGenAlgebraic, *owner.owner
       )) {
@@ -581,9 +575,9 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
         << generatorsE[i].toString() << ". ";
       }
       if (i % 2 == 1) {
-        outputSubalgebra.theNegGens.addOnTop(curGenAlgebraic);
+        outputSubalgebra.negativeGenerators.addOnTop(curGenAlgebraic);
       } else {
-        outputSubalgebra.thePosGens.addOnTop(curGenAlgebraic);
+        outputSubalgebra.positiveGenerators.addOnTop(curGenAlgebraic);
       }
     }
     outputSubalgebra.flagSystemProvedToHaveNoSolution = false;
@@ -592,10 +586,10 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
     return calculator << "<hr>Failed to extract subalgebra generators from expression " << input.toString() << ". ";
   }
   SemisimpleLieAlgebra& currentNonEmbededSA =
-  owner.theSubalgebrasNonEmbedded->getValueCreateNoInit(outputSubalgebra.weylNonEmbedded->theDynkinType);
+  owner.subalgebrasNonEmbedded->getValueCreateNoInit(outputSubalgebra.weylNonEmbedded->dynkinType);
   outputSubalgebra.indexNonEmbeddedMeStandard =
-  owner.theSubalgebrasNonEmbedded->getIndex(outputSubalgebra.weylNonEmbedded->theDynkinType);
-  currentNonEmbededSA.theWeyl.computeRho(true);
+  owner.subalgebrasNonEmbedded->getIndex(outputSubalgebra.weylNonEmbedded->dynkinType);
+  currentNonEmbededSA.weylGroup.computeRho(true);
   outputSubalgebra.weylNonEmbedded->computeRho(true); //<- this line may be unnecessary, the
   //two Weyl groups may coincide depending on some implementation decisions I am about to take
   //some time soon.
@@ -650,30 +644,30 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     return calculator << "<hr>Error loading semisimple subalgebras: "
     << "failed to extract ambient semisimple Lie algebra. ";
   }
-  reportStream << " type: " << ownerSemisimple->theWeyl.theDynkinType.toString() << ". ";
+  reportStream << " type: " << ownerSemisimple->weylGroup.dynkinType.toString() << ". ";
   theReport.report(reportStream.str());
 
   SemisimpleSubalgebras& theSAs =
-  calculator.theObjectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSemisimple->theWeyl.theDynkinType);
-  theSAs.theSubalgebrasNonEmbedded = &calculator.theObjectContainer.semisimpleLieAlgebras;
+  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSemisimple->weylGroup.dynkinType);
+  theSAs.subalgebrasNonEmbedded = &calculator.objectContainer.semisimpleLieAlgebras;
   theSAs.owner = ownerSemisimple;
   reportStream << " Initializing data structures... ";
   theReport.report(reportStream.str());
   reportStream << " done. Fetching subalgebra list ... ";
   theReport.report(reportStream.str());
   theSAsE.sequencefy();
-  theSAs.theSubalgebras.setExpectedSize(theSAsE.children.size - 1);
-  theSAs.theSubalgebras.clear();
-  theSAs.theSubalgebrasNonEmbedded->setExpectedSize(theSAsE.children.size - 1);
+  theSAs.subalgebras.setExpectedSize(theSAsE.size() - 1);
+  theSAs.subalgebras.clear();
+  theSAs.subalgebrasNonEmbedded->setExpectedSize(theSAsE.size() - 1);
   theSAs.flagAttemptToSolveSystems = true;
   theSAs.flagcomputeModuleDecompositionsition = true;
   theSAs.flagcomputePairingTable = false;
   theSAs.flagComputeNilradicals = false;
   theSAs.millisecondsComputationStart = global.getElapsedMilliseconds();
-  reportStream << " done. <br>Total subalgebras: " << theSAsE.children.size - 1 << ". ";
+  reportStream << " done. <br>Total subalgebras: " << theSAsE.size() - 1 << ". ";
   theReport.report(reportStream.str());
 
-  for (int i = 1; i < theSAsE.children.size; i ++) {
+  for (int i = 1; i < theSAsE.size(); i ++) {
     std::stringstream reportStream2;
     reportStream2 << reportStream.str() << "Subalgebra "
     << i << " is being loaded from expression "
@@ -690,20 +684,20 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     }
 
     currentCandidate.checkFullInitialization();
-    if (theSAs.theSubalgebras.contains(currentCandidate.theHs)) {
+    if (theSAs.subalgebras.contains(currentCandidate.cartanElementsSubalgebra)) {
       calculator << "<hr>Did not load subalgebra of type "
       << currentCandidate.weylNonEmbedded->toString()
       << " because I've already loaded a subalgebra with "
       << "the same Cartan subalgebra. ";
       continue;
     }
-    theSAs.theSubalgebras.setKeyValue(currentCandidate.theHs, currentCandidate);
-    theSAs.theSubalgebras.values.lastObject().indexInOwner = theSAs.theSubalgebras.values.size - 1;
+    theSAs.subalgebras.setKeyValue(currentCandidate.cartanElementsSubalgebra, currentCandidate);
+    theSAs.subalgebras.values.lastObject().indexInOwner = theSAs.subalgebras.values.size - 1;
   }
   reportStream << "Subalgebra loading done, total "
-  << theSAs.theSubalgebras.values.size << " subalgebras loaded. ";
+  << theSAs.subalgebras.values.size << " subalgebras loaded. ";
   theReport.report(reportStream.str());
-  theSAs.ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
+  theSAs.toStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
   if (!theSAs.loadState(currentChainInt, numExploredTypes, numExploredHs, calculator.comments)) {
     return false;
   }
@@ -714,7 +708,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     << "computation aborted. The failure report follows. "
     << theSAs.comments << "<br>The progress report for the "
     << "entire computation follows.<br>"
-    << theSAs.ToStringProgressReport();
+    << theSAs.toStringProgressReport();
     return output.assignValue(out.str(), calculator);
   }
   theSAs.millisecondsComputationEnd = global.getElapsedMilliseconds();
@@ -738,7 +732,7 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(
   List<std::string> theKeys;
   List<Expression> theValues;
   if (!CalculatorConversions::innerExpressionFromDynkinType(
-    calculator, input.owner->theWeyl.theDynkinType, dynkinTypeE
+    calculator, input.owner->weylGroup.dynkinType, dynkinTypeE
   )) {
     return false;
   }
@@ -771,9 +765,9 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(
   theValues.addOnTop(numHsExploredE);
   Expression subalgebrasListE, candidateE;
   subalgebrasListE.makeSequence(calculator);
-  subalgebrasListE.children.reserve(input.theSubalgebras.values.size + 1);
-  for (int i = 0; i < input.theSubalgebras.values.size; i ++) {
-    if (!CalculatorConversions::innerStoreCandidateSubalgebra(calculator, input.theSubalgebras.values[i], candidateE)) {
+  subalgebrasListE.setExpectedSize(input.subalgebras.values.size + 1);
+  for (int i = 0; i < input.subalgebras.values.size; i ++) {
+    if (!CalculatorConversions::innerStoreCandidateSubalgebra(calculator, input.subalgebras.values[i], candidateE)) {
       return false;
     }
     subalgebrasListE.addChildOnTop(candidateE);
@@ -876,7 +870,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
   output.makeZero();
   ExpressionContext theContext = polyFormE.getContext();
   for (int j = 0; j < polyForm.size(); j ++) {
-    const MonomialP& currentMon = polyForm[j];
+    const MonomialPolynomial& currentMon = polyForm[j];
     int theGenIndex = 0;
     if (!currentMon.isOneLetterFirstDegree(&theGenIndex)) {
       return calculator << "<hr>Failed to convert semisimple Lie algebra input to linear poly: "
@@ -910,7 +904,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
       if (theRootIndex < 0) {
         isGood = false;
       } else {
-        currentElt.makeCartanGenerator(owner.theWeyl.rootSystem[theRootIndex], owner);
+        currentElt.makeCartanGenerator(owner.weylGroup.rootSystem[theRootIndex], owner);
         currentElt *= polyForm.coefficients[j];
         output += currentElt;
       }
@@ -938,7 +932,7 @@ bool CalculatorConversions::innerElementUE(
   ElementUniversalEnveloping<RationalFunction<Rational> > outputUE;
   ElementUniversalEnveloping<RationalFunction<Rational> > currentSummand;
   ElementUniversalEnveloping<RationalFunction<Rational> > currentMultiplicand;
-  MonomialP currentMultiplicandRFpartMon;
+  MonomialPolynomial currentMultiplicandRFpartMon;
   Polynomial<Rational> currentPMultiplicand;
   RationalFunction<Rational>  currentMultiplicandRFpart;
   outputUE.makeZero(owner);
@@ -954,7 +948,7 @@ bool CalculatorConversions::innerElementUE(
   ExpressionContext theContext = polyE.getContext();
   HashedList<Expression> polynomialVariables;
   for (int j = 0; j < theP.size(); j ++) {
-    const MonomialP& currentMon = theP[j];
+    const MonomialPolynomial& currentMon = theP[j];
     currentSummand.makeConstant(theP.coefficients[j], owner);
     currentMultiplicandRFpartMon.makeOne();
     for (int i = 0; i < currentMon.minimalNumberOfVariables(); i ++) {
@@ -1218,7 +1212,7 @@ bool CalculatorConversions::innerLoadFileIntoString(
     theRelativeFileName = argument.toString();
   }
   std::string outputString;
-  if (!FileOperations::loadFiletoStringVirtual(
+  if (!FileOperations::loadFileToStringVirtual(
     theRelativeFileName, outputString, false, &calculator.comments
   )) {
     return false;

@@ -17,7 +17,7 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
     int simpleIndex = generatorIndex - this->getNumberOfPositiveRoots();
     outputIndicesFormatAd0Ad1Ad2etc.addOnTop(generatorIndex + this->getRank());
     outputIndicesFormatAd0Ad1Ad2etc.addOnTop(2 * this->getNumberOfPositiveRoots() - 1 - generatorIndex);
-    outputMultiplyLieBracketsToGetGenerator = this->theWeyl.cartanSymmetric.elements[simpleIndex][simpleIndex] / 2;
+    outputMultiplyLieBracketsToGetGenerator = this->weylGroup.cartanSymmetric.elements[simpleIndex][simpleIndex] / 2;
     return;
   }
   Vector<Rational> theWeight = this->getWeightOfGenerator(generatorIndex);
@@ -30,12 +30,12 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
         genWeight.negate();
       }
       newWeight = theWeight + genWeight;
-      if (newWeight.isEqualToZero() || this->theWeyl.isARoot(newWeight)) {
+      if (newWeight.isEqualToZero() || this->weylGroup.isARoot(newWeight)) {
         theWeight = newWeight;
         int theIndex = this->getGeneratorFromRoot(- genWeight);
         outputIndicesFormatAd0Ad1Ad2etc.addOnTop(theIndex);
         if (!theWeight.isEqualToZero()) {
-          int currentIndex = this->theWeyl.rootSystem.getIndex(theWeight);
+          int currentIndex = this->weylGroup.rootSystem.getIndex(theWeight);
           theIndex = this->getRootIndexFromGenerator(theIndex);
           if (!this->Computed.elements[theIndex][currentIndex]) {
             global.fatal
@@ -416,7 +416,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) {
-  WeylGroupData& theWeyl = this->owner->theOwner->theWeyl;
+  WeylGroupData& theWeyl = this->owner->theOwner->weylGroup;
   Vector<Rational> theHWsimpleCoordsTrue = theHWsimpleCoords;
   theWeyl.raiseToDominantWeight(theHWsimpleCoordsTrue);
   Vector<Rational> theHWdualCoords = theWeyl.getDualCoordinatesFromFundamental(
@@ -738,9 +738,9 @@ bool ElementUniversalEnveloping<Coefficient>::convertToRationalCoefficient(Eleme
 
 void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   MacroRegisterFunctionWithName("BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups");
-  this->WeylFDSmallAsSubInLarge.ambientWeyl = &this->theHmm.theRange().theWeyl;
-  this->WeylFDSmall.ambientWeyl = &this->theHmm.theDomain().theWeyl;
-  this->WeylFD.ambientWeyl = &this->theHmm.theRange().theWeyl;
+  this->WeylFDSmallAsSubInLarge.ambientWeyl = &this->theHmm.theRange().weylGroup;
+  this->WeylFDSmall.ambientWeyl = &this->theHmm.theDomain().weylGroup;
+  this->WeylFD.ambientWeyl = &this->theHmm.theRange().weylGroup;
   this->selSmallParSel.initialize(WeylFDSmall.ambientWeyl->getDimension());
   for (int i = 0; i < this->theHmm.ImagesCartanDomain.size; i ++) {
     Vector<Rational>& currentV = this->theHmm.ImagesCartanDomain[i];
@@ -762,8 +762,8 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   this->indicesNilradicalLarge.setSize(0);
   this->indicesNilradicalSmall.setSize(0);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
-  WeylGroupData& theLargeWeyl = this->theHmm.theRange().theWeyl;
-  WeylGroupData& theSmallWeyl = this->theHmm.theDomain().theWeyl;
+  WeylGroupData& theLargeWeyl = this->theHmm.theRange().weylGroup;
+  WeylGroupData& theSmallWeyl = this->theHmm.theDomain().weylGroup;
   int numB3NegGenerators = this->theHmm.theRange().getNumberOfPositiveRoots();
   int numG2NegGenerators = this->theHmm.theDomain().getNumberOfPositiveRoots();
   for (int i = 0; i < numB3NegGenerators; i ++) {
@@ -840,7 +840,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart2Subgroups() {
   this->WeylFDSmall.makeParabolicFromSelectionSimpleRoots(
     *this->WeylFDSmall.ambientWeyl, this->selSmallParSel, 1000
   );
-  this->WeylFD.makeParabolicFromSelectionSimpleRoots(this->theHmm.theRange().theWeyl, this->selInducing, 1000);
+  this->WeylFD.makeParabolicFromSelectionSimpleRoots(this->theHmm.theRange().weylGroup, this->selInducing, 1000);
   this->WeylFD.computeRootSubsystem();
   this->WeylFDSmallAsSubInLarge.computeRootSubsystem();
   this->WeylFDSmall.computeRootSubsystem();

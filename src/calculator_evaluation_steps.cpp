@@ -5,18 +5,7 @@
 void Calculator::ExpressionHistoryEnumerator::initializeComputation() {
   MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::initializeComputation");
   this->output.setSize(0);
-  // this->rulesDisplayNames.setSize(0);
   this->rulesNames.setSize(0);
-  // this->rulesToBeIgnored.clear();
-  // this->rulesToBeIgnored.addOnTop("CommuteIfUnivariate");
-  // this->rulesDisplayNamesMap.clear();
-  // this->rulesDisplayNamesMap.setKeyValue("minus", "");
-  // this->rulesDisplayNamesMap.setKeyValue("DistributeMultiplication", "");
-  // this->rulesDisplayNamesMap.setKeyValue("MultiplyRationals", "");
-  // this->rulesDisplayNamesMap.setKeyValue("ConstantExtraction", "");
-  // this->rulesDisplayNamesMap.setKeyValue("MultiplyByOne", "");
-  // this->rulesDisplayNamesMap.setKeyValue("AddTerms", "");
-  // this->rulesDisplayNamesMap.setKeyValue("AssociativeRule", "");
 }
 
 Calculator::ExpressionHistoryEnumerator::ExpressionHistoryEnumerator() {
@@ -38,18 +27,18 @@ bool Calculator::ExpressionHistoryEnumerator::computeRecursively(
     }
     return false;
   }
-  if (!this->theHistory.startsWith(this->owner->opExpressionHistory())) {
+  if (!this->history.startsWith(this->owner->opExpressionHistory())) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Corrupt expression history does not start with the expected atom: "
-      << this->theHistory.toString();
+      << this->history.toString();
       return false;
     }
   }
   int childrenToAccount = 0;
   int firstNonAccountedChildIndex = - 1;
-  for (int i = 1; i < this->theHistory.size(); i ++) {
-    const Expression& current = this->theHistory[i];
+  for (int i = 1; i < this->history.size(); i ++) {
+    const Expression& current = this->history[i];
     if (current.startsWith(this->owner->opExpressionHistorySetChild())) {
       if (childrenToAccount == 0) {
         firstNonAccountedChildIndex = i;
@@ -57,7 +46,11 @@ bool Calculator::ExpressionHistoryEnumerator::computeRecursively(
       childrenToAccount ++;
       continue;
     }
-    if (!this->processChildrenTransformations(firstNonAccountedChildIndex, childrenToAccount, commentsOnFailure)) {
+    if (!this->processChildrenTransformations(
+      firstNonAccountedChildIndex,
+      childrenToAccount,
+      commentsOnFailure
+    )) {
       return false;
     }
     childrenToAccount = 0;
@@ -65,7 +58,9 @@ bool Calculator::ExpressionHistoryEnumerator::computeRecursively(
       return false;
     }
   }
-  if (!this->processChildrenTransformations(firstNonAccountedChildIndex, childrenToAccount, commentsOnFailure)) {
+  if (!this->processChildrenTransformations(
+    firstNonAccountedChildIndex, childrenToAccount, commentsOnFailure
+  )) {
     return false;
   }
   return true;
@@ -83,7 +78,7 @@ bool Calculator::ExpressionHistoryEnumerator::processChildrenTransformations(
   childrenEnumerators.setSize(numberOfChildren);
   indicesInParent.setSize(numberOfChildren);
   for (int i = 0; i < numberOfChildren; i ++) {
-    const Expression& current = this->theHistory[startIndex + i];
+    const Expression& current = this->history[startIndex + i];
     if (current.size() < 3) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "ExpressionHistorySetChild "
@@ -100,7 +95,7 @@ bool Calculator::ExpressionHistoryEnumerator::processChildrenTransformations(
       return false;
     }
     childrenEnumerators[i].owner = this->owner;
-    childrenEnumerators[i].theHistory = current[2];
+    childrenEnumerators[i].history = current[2];
     if (!childrenEnumerators[i].computeRecursively(
       this->recursionDepth + 1, commentsOnFailure
     )) {
@@ -109,7 +104,7 @@ bool Calculator::ExpressionHistoryEnumerator::processChildrenTransformations(
   }
   if (this->output.size == 0) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Missing starting expression. History: " << this->theHistory.toString();
+      *commentsOnFailure << "Missing starting expression. History: " << this->history.toString();
     }
     return false;
   }
@@ -170,8 +165,8 @@ bool Calculator::ExpressionHistoryEnumerator::processTransformation(
 std::string Calculator::ExpressionHistoryEnumerator::toStringDebug() {
   MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::toStringDebug");
   std::stringstream out;
-  out << "<b>History</b><br>" << this->theHistory.toStringTreeHtml(- 1) << "<hr>";
-  out << "" << this->theHistory.toStringSemiFull() << "<hr>";
+  out << "<b>History</b><br>" << this->history.toStringTreeHtml(- 1) << "<hr>";
+  out << "" << this->history.toStringSemiFull() << "<hr>";
   // out << "Current state: " << this->currentState.toString()
   // << "<br>";
   // out << "Current subtree: " << this->currentSubTree.toString();
@@ -250,7 +245,7 @@ bool CalculatorSteps::innerLogEvaluationStepsHumanReadableMerged(
     outputTransformation,
     notUsed,
     - 1,
-    &history.theHistory
+    &history.history
   );
   std::stringstream out;
   history.owner = &calculator;

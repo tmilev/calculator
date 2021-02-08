@@ -254,7 +254,8 @@ bool CalculatorFunctions::innerZmodP(Calculator& calculator, const Expression& i
 bool CalculatorFunctions::innerConesIntersect(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerConesIntersect");
   if (!input.isListNElements(3)) {
-    return calculator << "Function ConesIntersection expects 2 arguments, got " << input.children.size - 1 << " instead. ";
+    return calculator << "Function ConesIntersection expects 2 arguments, got "
+    << input.size() - 1 << " instead. ";
   }
   Matrix<Rational> coneNonStrictMatForm;
   Matrix<Rational> coneStrictMatForm;
@@ -512,7 +513,7 @@ bool CalculatorFunctions::innerPrintAllVectorPartitions(Calculator& calculator, 
     thePartition[i] = 0;
   }
   Vector<Rational> theWeight, tmpWt;
-  Vectors<Rational>& rootsBorel = theSSalgebra.theWeyl.rootsOfBorel;
+  Vectors<Rational>& rootsBorel = theSSalgebra.weylGroup.rootsOfBorel;
   int counter = 0;
   int totalCycles = 0;
   theWeight.makeZero(theSSalgebra.getRank());
@@ -585,7 +586,7 @@ bool CalculatorFunctions::innerOperationBinary(
   List<Function>& handlers = theOperation.getElement().handlers;
   for (int i = 0; i < handlers.size; i ++) {
     if (handlers[i].inputFitsMyInnerType(input)) {
-      if (handlers[i].theFunction(calculator, input, output)) {
+      if (handlers[i].functionAddress(calculator, input, output)) {
         return true;
       }
     }
@@ -647,15 +648,15 @@ bool CalculatorBasics::extractBaseMultiplication(
   // handle Anything * Rational = Rational * Anything
   output = input;
   if (output[2].isOfType<Rational>()) {
-    output.children.swapTwoIndices(1, 2);
+    output.swapChildren(1, 2);
     result = true;
   }
   if (output[2].isOfType<double>() && !output[1].isOfType<Rational>()) {
-    output.children.swapTwoIndices(1, 2);
+    output.swapChildren(1, 2);
     result = true;
   }
   if (output[2].isListStartingWithAtom(calculator.opTimes())) {
-    if (output[2].children.size != 3) {
+    if (output[2].size() != 3) {
       return result;
     }
     // handle Anything1 * (Rational * Anything2) = Rational * (Anything1 * Anything2)

@@ -116,7 +116,11 @@ public:
   );
   static bool splitFDpartB3overG2CharsOnly(Calculator& calculator, const Expression& input, Expression& output);
   static bool rootSAsAndSltwos(
-    Calculator& calculator, const Expression& input, Expression& output, bool showSLtwos, bool MustRecompute
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool showSLtwos,
+    bool mustRecompute
   );
   static bool printRootSAs(Calculator& calculator, const Expression& input, Expression& output) {
     return CalculatorLieTheory::rootSAsAndSltwos(calculator, input, output, false, false);
@@ -185,10 +189,10 @@ public:
   static bool writeSemisimpleLieAlgebraToHardDisk(Calculator& calculator, const Expression& input, Expression& output);
   static bool printSemisimpleLieAlgebra(Calculator& calculator, const Expression& input, Expression& output, bool Verbose);
   static bool writeToHardDiskOrPrintSemisimpleLieAlgebra(
-    Calculator& calculator, const Expression& input, Expression& output, bool Verbose, bool writeToHD
+    Calculator& calculator, const Expression& input, Expression& output, bool verbose, bool writeToHD
   );
   static bool functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
-    Calculator& calculator, const Expression& input, Expression& output, bool Verbose, bool writeToHD
+    Calculator& calculator, const Expression& input, Expression& output, bool verbose, bool writeToHD
   );
   static bool rootSubsystem(Calculator& calculator, const Expression& input, Expression& output);
 };

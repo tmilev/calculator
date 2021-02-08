@@ -6,6 +6,7 @@
 #include "general_file_operations_encodings.h"
 #include <iomanip>
 #include "string_constants.h"
+#include "general_strings.h"
 
 MapList<std::string, std::string, MathRoutines::hashString>& HtmlRoutines::preLoadedFiles() {
   static MapList<std::string, std::string, MathRoutines::hashString> result;
@@ -14,24 +15,13 @@ MapList<std::string, std::string, MathRoutines::hashString>& HtmlRoutines::preLo
 
 std::string HtmlRoutines::gitRepository = "https://github.com/tmilev/calculator";
 
-std::string HtmlRoutines::getJavascriptVariable(const std::string& theVar) {
-  std::stringstream sanitizer;
-  for (unsigned i = 0; i < theVar.size(); i ++) {
-    if (MathRoutines::isALatinLetter(theVar[i])) {
-      sanitizer << theVar[i];
-      continue;
-    }
-    if (i == 0) {
-      sanitizer << "_";
-    }
-    sanitizer << static_cast<int>(theVar[i]);
-  }
-  return sanitizer.str();
+std::string HtmlRoutines::getJavascriptVariable(const std::string& variableName) {
+  return StringRoutines::convertStringToJavascriptVariable(variableName);
 }
 
 std::string HtmlRoutines::getHtmlLinkToGithubRepository(const std::string& displayString) {
   std::stringstream out;
-  out << "<a href=\"" << HtmlRoutines::gitRepository << "\">" << displayString << "</a>";
+  out << "<a href='" << HtmlRoutines::gitRepository << "'>" << displayString << "</a>";
   return out.str();
 }
 
@@ -57,18 +47,6 @@ void HtmlRoutines::loadStrings() {
     return;
   }
   HtmlRoutines::getJavascriptAceEditorScriptWithTags();
-}
-
-const std::string HtmlRoutines::getJavascriptEquationEditorWithTags(
-  const std::string& baseFolder
-) {
-  MacroRegisterFunctionWithName("HtmlRoutines::getJavascriptEquationEditorWithTags");
-  std::stringstream out;
-  std::string mathjaxSetupScript = FileOperations::GetVirtualNameWithHash(
-    "calculator-html/equation_editor.js"
-  );
-  out << "<script src =\"" << baseFolder << mathjaxSetupScript << "\"></script>";
-  return out.str();
 }
 
 const std::string& HtmlRoutines::getJavascriptAceEditorScriptWithTags() {
@@ -98,7 +76,7 @@ const std::string& HtmlRoutines::getFile(
   }
   std::stringstream out, commentsOnFailure;
   std::string fileReader;
-  if (FileOperations::loadFiletoStringVirtual(fileNameVirtual, fileReader, false, &commentsOnFailure)) {
+  if (FileOperations::loadFileToStringVirtual(fileNameVirtual, fileReader, false, &commentsOnFailure)) {
     out << additionalBeginTag << fileReader << additionalEndTag;
   } else {
     global << Logger::red << "File: "
@@ -136,24 +114,23 @@ const std::string& HtmlRoutines::getCSSAddStyleTags(const std::string& fileNameV
   return HtmlRoutines::getFile(fileNameVirtual, "<style>", "</style>");
 }
 
-const std::string HtmlRoutines::getCSSLinkLieAlgebrasAndCalculator(const std::string& relativeTo) {
-  return
-  HtmlRoutines::getCSSLink(relativeTo + WebAPI::request::calculatorCSS.substr(1)) +
-  HtmlRoutines::getCSSLink(relativeTo + "calculator-html/style_lie_algebras.css") ;
-}
-
-const std::string HtmlRoutines::getJavascriptLinkGraphicsNDimensionsWithPanels(const std::string& relativeTo) {
-  return
-  HtmlRoutines::getJavascriptLink(relativeTo + "calculator-html/panels.js") +
-  HtmlRoutines::getJavascriptLink(relativeTo + "calculator-html/graphics_n_dimensions.js");
-}
-
 std::string HtmlRoutines::getCalculatorComputationURL(const std::string& inputNoEncoding) {
   std::stringstream out;
   JSData theRequest;
   theRequest[DatabaseStrings::labelCalculatorInput] = inputNoEncoding;
-  theRequest[DatabaseStrings::labelCurrentPage] = WebAPI::request::calculatorPage;
+  theRequest[DatabaseStrings::labelCurrentPage] = WebAPI::frontend::calculatorPage;
   out << "#" << HtmlRoutines::convertStringToURLString(theRequest.toString(nullptr), false);
+  return out.str();
+}
+
+std::string HtmlRoutines::getProblemURLRelative(
+  const std::string& problemName
+){
+  std::stringstream out;
+  JSData anchor;
+  anchor[WebAPI::frontend::currentPage] = WebAPI::frontend::problemPage;
+  anchor[WebAPI::frontend::problemFileName] = problemName;
+  out << "/" << WebAPI::appNoCache << "#" << HtmlRoutines::convertStringToURLString(anchor.toString(), false);
   return out.str();
 }
 
@@ -203,7 +180,8 @@ std::string HtmlRoutines::getMathSpan(const std::string& input, int upperNumChar
   std::stringstream out;
   if (input.size() > static_cast<unsigned>(upperNumChars) && upperNumChars > 0) {
     out << "<b>LaTeX output is longer than " << upperNumChars
-    << " characters and I dare not use mathjax. Here is the output as plain LaTeX.</b> " << input;
+    << " characters and I dare not use the equation editor. "
+    << "Here is the output as plain LaTeX.</b> " << input;
     return out.str();
   }
   if (global.flagUseMathTags) {
@@ -267,6 +245,22 @@ std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(const std::strin
     out << "</tr>";
   }
   out << "</table>";
+  return out.str();
+}
+
+std::string HtmlRoutines::scriptFromJSON(const std::string& scriptType, const JSData& scriptContent) {
+  std::stringstream out;
+  out << "<script " << WebAPI::result::scriptType << "='" << scriptType << "'>\n"
+  << scriptContent.toString()
+  << "</script>";
+  return out.str();
+}
+
+std::string HtmlRoutines::jsonContainer(const std::string &scriptType, const JSData &scriptContent) {
+  std::stringstream out;
+  out << "<span name='script' style='display:none' " << WebAPI::result::scriptType << "='" << scriptType << "'>\n"
+  << scriptContent.toString()
+  << "</span>";
   return out.str();
 }
 

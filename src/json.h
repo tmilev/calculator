@@ -71,6 +71,7 @@ public:
 
   void setKeyValue(const std::string& key, const JSData& value);
   int getKeyIndex(const std::string& key) const;
+  static JSData makeEmptyArray();
   JSData();
   ~JSData();
   JSData(const JSData& other);

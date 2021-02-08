@@ -12,7 +12,7 @@ private:
   // <-Too many objects have pointers to it.
 public:
   bool flagAnErrorHasOccurredTimeToPanic;
-  WeylGroupData theWeyl;
+  WeylGroupData weylGroup;
   // We fix the usual linear space basis for our Lie algebra.
   // The basis consists of Chevalley generators (weight elements),
   // indexed by elements of the root system denoted by greek letters:
@@ -58,7 +58,7 @@ public:
     return this->hashFunction(*this);
   }
   static unsigned int hashFunction(const SemisimpleLieAlgebra& input) {
-    return input.theWeyl.hashFunction();
+    return input.weylGroup.hashFunction();
   }
   std::string toStringDisplayFolderName(const std::string& baseFolder) const;
   std::string toStringDisplayFileNameWithPathStructureConstants(const std::string& baseFolder) const;
@@ -108,7 +108,7 @@ public:
   void generateLieSubalgebra(List<ElementSemisimpleLieAlgebra<Coefficient> >& inputOutputGenerators);
   void computeLieBracketTable();
   bool isOfSimpleType(char desiredType, int desiredRank) const {
-    return this->theWeyl.isOfSimpleType(desiredType, desiredRank);
+    return this->weylGroup.isOfSimpleType(desiredType, desiredRank);
   }
   template <class Coefficient>
   void getCommonCentralizer(
@@ -134,19 +134,24 @@ public:
     bool includeSl2Subalgebras,
     bool includeSemisimpleSubalgebras
   ) const;
-  std::string toHTMLCalculator(bool Verbose, bool writeToHD, bool flagWriteLatexPlots);
+  void writeHTML(bool verbose, bool flagWriteLatexPlots);
+  std::string toHTML(bool verbose, bool flagWriteLatexPlots);
+  static std::string toHTMLCalculatorHeadElements(
+    const std::string& relativeTo = "../../.."
+  );
+  static std::string toHTMLCalculatorBodyOnload();
   std::string getStringFromChevalleyGenerator(int theIndex, FormatExpressions* thePolynomialFormat) const;
   std::string toStringLieAlgebraNameFullHTML() const;
   std::string toStringLieAlgebraName() const;
   std::string toStringLieAlgebraNameNonTechnicalHTML() const;
   inline int getNumberOfGenerators() const {
-    return this->theWeyl.cartanSymmetric.numberOfRows + this->theWeyl.rootSystem.size;
+    return this->weylGroup.cartanSymmetric.numberOfRows + this->weylGroup.rootSystem.size;
   }
   inline int getNumberOfPositiveRoots() const {
-    return this->theWeyl.rootsOfBorel.size;
+    return this->weylGroup.rootsOfBorel.size;
   }
   inline int getRank() const {
-    return this->theWeyl.cartanSymmetric.numberOfRows;
+    return this->weylGroup.cartanSymmetric.numberOfRows;
   }
   void orderNilradical(const Selection& parSelZeroMeansLeviPart, bool useNilWeight, bool ascending);
   void orderNilradicalFirstTotalWeightAscending(const Selection& parSelZeroMeansLeviPart);
@@ -158,10 +163,10 @@ public:
 
   void orderSSalgebraForHWbfComputation();
   int getCartanGeneratorIndex(int simpleRootIndex) {
-    return this->theWeyl.rootsOfBorel.size + simpleRootIndex;
+    return this->weylGroup.rootsOfBorel.size + simpleRootIndex;
   }
   int getGeneratorFromRoot(const Vector<Rational>& input) {
-    return this->getGeneratorFromRootIndex(this->theWeyl.rootSystem.getIndex(input));
+    return this->getGeneratorFromRootIndex(this->weylGroup.rootSystem.getIndex(input));
   }
   int getRootIndexFromDisplayIndex(int theIndex);
   int getGeneratorFromDisplayIndex(int theIndex) {
@@ -175,7 +180,7 @@ public:
   //the below function returns an negative number if the chevalley generator is an element of the Cartan subalgebra
   int getRootIndexFromGenerator(int theIndex) const;
   int getCartanIndexFromGenerator(int theIndex) {
-    return theIndex + this->theWeyl.rootsOfBorel.size;
+    return theIndex + this->weylGroup.rootsOfBorel.size;
   }
   int getDisplayIndexFromGenerator(int theIndex) const {
     if (theIndex < this->getNumberOfPositiveRoots()) {
@@ -196,7 +201,7 @@ public:
     }
     int left = this->getRootIndexFromGenerator(leftIndex);
     int right = this->getRootIndexFromGenerator(rightIndex);
-    return (this->theWeyl.rootSystem[left] + this->theWeyl.rootSystem[right]).isEqualToZero();
+    return (this->weylGroup.rootSystem[left] + this->weylGroup.rootSystem[right]).isEqualToZero();
   }
   void computeChevalleyConstants();
   template<class Coefficient>
@@ -225,10 +230,10 @@ public:
   Rational getConstant(const Vector<Rational>& root1, const Vector<Rational>& root2);
   Vector<Rational> getWeightOfGenerator(int index) {
     if (index < this->getNumberOfPositiveRoots()) {
-      return this->theWeyl.rootSystem[index];
+      return this->weylGroup.rootSystem[index];
     }
     if (index >= this->getRank() + this->getNumberOfPositiveRoots()) {
-      return this->theWeyl.rootSystem[index - this->getRank()];
+      return this->weylGroup.rootSystem[index - this->getRank()];
     }
     Vector<Rational> result;
     result.makeZero(this->getRank());
@@ -251,7 +256,7 @@ public:
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF,
     std::stringstream* logStream = nullptr
   );
-  static void FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, SlTwoSubalgebras& output);
+  static void findSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, SlTwoSubalgebras& output);
   void GetSl2SubalgebraFromRootSA();
   template<class Coefficient>
   void getAdjoint(Matrix<Coefficient>& output, ElementSemisimpleLieAlgebra<Coefficient>& e);
@@ -265,7 +270,7 @@ public:
   );
   void computeOneAutomorphism(Matrix<Rational>& outputAuto,  bool useNegativeRootsFirst);
   bool operator==(const SemisimpleLieAlgebra& other) const {
-    return this->theWeyl == other.theWeyl;
+    return this->weylGroup == other.weylGroup;
   }
 };
 

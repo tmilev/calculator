@@ -12,6 +12,10 @@ class TypeSetter {
     element,
     /**@type {string} */
     styleOverride,
+    /**@type{Function|null} */
+    callbackEquationCreation,
+    /**@type{Object<string, string>} */
+    extraAttributes,
   ) {
     if (typeof element === "string") {
       element = document.getElementById(element);
@@ -19,24 +23,15 @@ class TypeSetter {
     if (styleOverride === "") {
       styleOverride = this.defaultStyle;
     }
-    equationEditor.typeset(element, styleOverride, false, true, this.logTiming);
-  }
-
-  typesetHard(
-    /**@type {HTMLElement|string} */
-    element,
-    /**@type {string} */
-    styleOverride,
-  ) {
-    if (typeof element === "string") {
-      element = document.getElementById(element);
-    }
-    // Style overrides works only when transforming \(\) to mathcalculator tags.
-    // Mathcalculator tags are not affected by styleOverride.
-    if (styleOverride === "") {
-      styleOverride = this.defaultStyle;
-    }
-    equationEditor.typeset(element, styleOverride, false, true, this.logTiming);
+    equationEditor.typeset(
+      element,
+      styleOverride,
+      false,
+      true,
+      this.logTiming,
+      callbackEquationCreation,
+      extraAttributes,
+    );
   }
 }
 
@@ -44,4 +39,4 @@ let typesetter = new TypeSetter();
 
 module.exports = {
   typesetter,
-}
+};

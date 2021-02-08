@@ -1,6 +1,7 @@
 "use strict";
 const ids = require("./ids_dom_elements");
 const cookies = require("./cookies");
+const configuration = require("./configuration");
 
 class StorageVariable {
   constructor(
@@ -131,6 +132,9 @@ class StorageVariable {
     }
     let changed = (this.value !== newValue);
     this.value = newValue;
+    if (!configuration.configuration.calculatorDefaultsEnabled) {
+      return;
+    }
     this.storeMe(updateURL, updateAssociatedInput);
     if (!changed) {
       return;
@@ -178,6 +182,26 @@ class StorageCalculator {
           name: "problemToAutoSolve",
           nameURL: "problemToAutoSolve",
           nameLocalStorage: "problemToAutoSolve",
+        }),
+        panel: {
+          forceShowAll: new StorageVariable({
+            name: "solvePanelForceShowAll",
+            nameLocalStorage: "solvePanelForceShowAll",
+          }),
+          forceShowNone: new StorageVariable({
+            name: "solvePanelForceShowNone",
+            nameLocalStorage: "solvePanelForceShowNone",
+          }),
+        },
+      },
+      solveSocratic: {
+        problemToAutoSolve: new StorageVariable({
+          name: "problemToAutoSolveSocratic",
+          nameURL: "problemToAutoSolveSocratic",
+          nameLocalStorage: "problemToAutoSolveSocratic",
+          showInURLOnPages: {
+            "solveSocratic": true,
+          },
         }),
         panel: {
           forceShowAll: new StorageVariable({
@@ -364,6 +388,9 @@ class StorageCalculator {
   }
 
   loadSettings() {
+    if (!configuration.configuration.calculatorDefaultsEnabled) {
+      return;
+    }
     this.parseURL();
     this.loadSettingsRecursively(this.variables, this.urlObject);
   }

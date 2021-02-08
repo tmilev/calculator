@@ -1,10 +1,11 @@
 "use strict";
 
-var stringResources = {
+let stringResources = {
   prefixDeadlineContainer: "deadlinesContainer"
 };
 
-var domElements = {
+let domElements = {
+  calculatorDefaultsEnabled: "calculatorDefaultsEnabled",
   pages: {
     solve: {
       div: "divSolvePage",
@@ -16,8 +17,13 @@ var domElements = {
       solutionBox: "solutionBox",
     },
     solveSocratic: {
+      editor: "editorSolveProblemSocratc",
+      editorButtonPanel: "editorSolveSocraticButtonPanel",
+      input: "inputBoxSolveSocratic",
       div: "divSolveSocraticPage",
+      anchorThisPage: "socraticLinkToThisPage",
       link: "socraticLink",
+      editorSolveProblemDebug: "editorSolveProblemSocraticDebug",
     },
     privacyPolicy: {
       div: "divPrivacyPolicy",
@@ -102,6 +108,7 @@ var domElements = {
   spanUserExtraInfo: "spanUserExtraInfo",
   spanStudentViewPanel: "spanStudentViewPanel",
   spanStudentViewSectionSelectPanel: "spanStudentViewSectionSelectPanel",
+  divCalculatorMainInputOutput: "divCalculatorMainInputOutput",
   divPerformance: "divPerformance",
   divCurrentCourse: "divCurrentCourse",
   divCurrentCourseBody: "divCurrentCourseBody",

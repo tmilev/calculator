@@ -17,8 +17,8 @@ bool CalculatorHtmlFunctions::userInputBox(
     return calculator << "User input name not specified in: " << input.toString();
   }
   std::string boxName = CalculatorHtmlFunctions::getUserInputBoxName(input);
-  if (calculator.theObjectContainer.theUserInputTextBoxesWithValues.contains(boxName)) {
-    return output.assignValue(calculator.theObjectContainer.theUserInputTextBoxesWithValues.getValueCreate(boxName), calculator);
+  if (calculator.objectContainer.userInputTextBoxesWithValues.contains(boxName)) {
+    return output.assignValue(calculator.objectContainer.userInputTextBoxesWithValues.getValueCreate(boxName), calculator);
   }
   InputBox newBox;
   newBox.name = boxName;
@@ -86,27 +86,27 @@ bool CalculatorHtmlFunctions::evaluateSymbols(
 bool CalculatorHtmlFunctions::setInputBox(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorHtmlFunctions::userInputBox");
-  MapList<std::string, Expression, MathRoutines::hashString> theArguments;
+  MacroRegisterFunctionWithName("CalculatorHtmlFunctions::setInputBox");
+  MapList<std::string, Expression, MathRoutines::hashString> arguments;
   if (!CalculatorConversions::innerLoadKeysFromStatementList(
-    calculator, input, theArguments, &calculator.comments
+    calculator, input, arguments, &calculator.comments
   )) {
     return false;
   }
-  if (!theArguments.contains("name")) {
+  if (!arguments.contains("name")) {
     return calculator << "User input name not specified in: " << input.toString();
   }
-  if (!theArguments.contains("value")) {
+  if (!arguments.contains("value")) {
     return calculator << "Input box value not specified in: " << input.toString();
   }
   std::string boxName = CalculatorHtmlFunctions::getUserInputBoxName(input);
-  if (calculator.theObjectContainer.theUserInputTextBoxesWithValues.contains(boxName)) {
+  if (calculator.objectContainer.userInputTextBoxesWithValues.contains(boxName)) {
     return calculator << "Input box with name: " << boxName << " already has value.";
   }
-  InputBox& theBox =
-  calculator.theObjectContainer.theUserInputTextBoxesWithValues.getValueCreate(boxName);
-  theBox.name = boxName;
-  theBox.value = theArguments.getValueCreate("value");
+  InputBox& box =
+  calculator.objectContainer.userInputTextBoxesWithValues.getValueCreate(boxName);
+  box.name = boxName;
+  box.value = arguments.getValueCreate("value");
   std::stringstream out;
   out << "Set value to input box name: " << boxName;
   return output.assignValue(out.str(), calculator);

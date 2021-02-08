@@ -12,6 +12,8 @@ The calculator runs on a math expression substitution and interpretation engine 
 
 More details on the calculator substitution engine can be found [here](wiki/README.md).
 
+A list of all calculator handlers can be found [here](examples/README.md).
+
 ## Check out our new math equation editor
 
 https://calculator-algebra.org:8166/calculator-html/test_equation_editor.html

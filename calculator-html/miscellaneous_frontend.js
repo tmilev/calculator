@@ -1,12 +1,17 @@
 "use strict";
-var pathnames = require("./pathnames");
+let pathnames = require("./pathnames");
 
-function switchMenu(obj) {
-  var el = document.getElementById(obj);
-  if (el.classList.contains("hiddenClass")) {
-    el.classList.remove("hiddenClass");
+function switchMenu(
+  /**@type{string|HTMLElement} */
+  object,
+) {
+  if (typeof object === "string") {
+    object = document.getElementById(object);
+  }
+  if (object.classList.contains("hiddenClass")) {
+    object.classList.remove("hiddenClass");
   } else {
-    el.classList.add("hiddenClass");
+    object.classList.add("hiddenClass");
   }
 }
 
@@ -27,7 +32,7 @@ function appendHtml(
     return;
   }
   if (Array.isArray(contentToAppend)) {
-    for (var i = 0; i < contentToAppend.length; i++) {
+    for (let i = 0; i < contentToAppend.length; i++) {
       appendHtml(targetToAppendTo, contentToAppend[i]);
     }
     return;
@@ -52,7 +57,7 @@ function appendHtmlToArray(
     return;
   }
   if (Array.isArray(contentToAppend)) {
-    for (var i = 0; i < contentToAppend.length; i++) {
+    for (let i = 0; i < contentToAppend.length; i++) {
       appendHtmlToArray(targetArray, contentToAppend[i]);
     }
     return;
@@ -61,11 +66,12 @@ function appendHtmlToArray(
 }
 
 /**@returns{string} */
-function HTMLFromCommentsAndErrors(input) {
+function htmlFromCommentsAndErrors(input) {
   let extraTags = [
     pathnames.urlFields.result.comments,
     pathnames.urlFields.result.error,
     pathnames.urlFields.result.commentsGlobal,
+    pathnames.urlFields.result.crashReport,
   ];
   let resultHTML = "";
   for (let i = 0; i < extraTags.length; i++) {
@@ -79,11 +85,12 @@ function HTMLFromCommentsAndErrors(input) {
 }
 
 /**@returns{HTMLElement[]} */
-function HTMLElementsFromCommentsAndErrors(input) {
+function htmlElementsFromCommentsAndErrors(input) {
   let extraTags = [
     pathnames.urlFields.result.comments,
     pathnames.urlFields.result.error,
     pathnames.urlFields.result.commentsGlobal,
+    pathnames.urlFields.result.crashReport,
   ];
   let result = [];
   for (let i = 0; i < extraTags.length; i++) {
@@ -166,8 +173,8 @@ module.exports = {
   switchMenu,
   appendHtml,
   appendHtmlToArray,
-  HTMLFromCommentsAndErrors,
-  HTMLElementsFromCommentsAndErrors,
+  htmlFromCommentsAndErrors,
+  htmlElementsFromCommentsAndErrors,
   shortenString,
   deepCopy,
   jsonParseGetHtmlStandard,

@@ -5,7 +5,9 @@
 
 bool Calculator::Test::all() {
   Calculator tester;
-  tester.initialize();
+  tester.initialize(Calculator::Mode::full);
+  Calculator::Test::cacheWorks();
+  Calculator::Test::loopDetection();
   Calculator::Test::checkBuiltInInitializations(tester);
   Calculator::Test::parseAllExamples(tester);
   Calculator::Test::numberOfTestFunctions(tester);
@@ -30,6 +32,60 @@ bool Calculator::Test::numberOfTestFunctions(Calculator& ownerInitialized) {
   int numberOfBuiltInFunction = ownerInitialized.getNumberOfBuiltInFunctions();
   if (numberOfBuiltInFunction <= 0) {
     global.fatal << "Calculator built in functions: " << numberOfBuiltInFunction << global.fatal;
+  }
+  return true;
+}
+
+bool Calculator::Test::cacheWorks() {
+  Calculator calculator;
+  calculator.initialize(Calculator::Mode::educational);
+  int64_t startTime = global.getElapsedMilliseconds();
+  calculator.evaluate("f{}0=0;f{}1=1;f{}{{x}}=f{}(x-1)+f{}(x-2);f{}300");
+  int64_t duration = global.getElapsedMilliseconds() - startTime;
+  int64_t maximumDuration = 3000;
+  if (duration > maximumDuration) {
+    global.fatal << "Large cacheable computation took too long: "
+    << duration
+    << " ms, maximum allowed " << maximumDuration << ". "
+    << "Computed: "
+    << calculator.programExpression.toString()
+    << "Perhaps the caches are not functioning correctly?" << global.fatal;
+  }
+  return true;
+}
+
+bool Calculator::Test::loopDetection() {
+  Calculator::Test::loopDetectionCycle();
+  Calculator::Test::loopDetectionEverExpanding();
+  return true;
+}
+
+bool Calculator::Test::loopDetectionEverExpanding() {
+  Calculator calculator;
+  calculator.initialize(Calculator::Mode::educational);
+  calculator.evaluate("x=x+1;x");
+  if (!calculator.flagAbortComputationASAP) {
+    global.fatal
+    << "Expanding cycle did not generate error as expected. "
+    << "Instead, generated result was: " << calculator.programExpression.toString()
+    << global.fatal;
+  }
+  return true;
+}
+
+bool Calculator::Test::loopDetectionCycle() {
+  Calculator calculator;
+  calculator.initialize(Calculator::Mode::educational);
+  calculator.evaluate(
+    "TurnOffRules(CheckAutoEquality);\n"
+    "x=x;\n"
+    "x"
+  );
+  if (!calculator.flagAbortComputationASAP) {
+    global.fatal
+    << "Simple infinite loop did not generate error as expected. Result: "
+    << calculator.programExpression.toString()
+    << global.fatal;
   }
   return true;
 }
@@ -98,5 +154,17 @@ bool Calculator::Test::builtInFunctionsABTest(Calculator& ownerInitialized) {
     << " inconsistencies. See report html in file:\n"
     << "https://localhost:8166/output/crash_test.html\n" << global.fatal;
   }
+  return true;
+}
+
+bool Calculator::Examples::Test::all() {
+  Calculator::Examples::Test::compose();
+  return true;
+}
+
+bool Calculator::Examples::Test::compose() {
+  Calculator calculator;
+  calculator.initialize(Calculator::Mode::full);
+  calculator.examples.writeExamplesReadme();
   return true;
 }

@@ -56,7 +56,7 @@ public:
   bool flagDidSendAll;
   List<std::string> theMessageHeaderStrings;
   MapList<std::string, std::string, MathRoutines::hashString> requestHeaders;
-  int ContentLength;
+  int contentLength;
   int requestTypE;
   int connectedSocketID;
   int connectedSocketIDLastValueBeforeRelease;
@@ -267,7 +267,6 @@ public:
   static void checkSystemInstallationMongoDatabase();
   static void checkSystemInstallationOpenSSL();
   static void checkMongoDatabaseSetup();
-  static void checkMathJaxSetup();
   static void checkFreecalcSetup();
   static void analyzeMainArguments(int argC, char** argv);
   static bool analyzeMainArgumentsTimeString(const std::string& timeLimitString);
@@ -328,7 +327,7 @@ public:
   void stop();
   bool restartNeeded();
   std::string toStringWorkerToWorker();
-  std::string toStringLastErrorDescription();
+  static std::string toStringLastErrorDescription();
   std::string toStringStatusActive();
   std::string toStringStatusAll();
   std::string toStringStatusForLogFile();

@@ -16,10 +16,10 @@ std::string Weight<Coefficient>::toString(FormatExpressions* theFormat) const {
       return this->weightFundamentalCoordinates.toStringLetterFormat("\\psi", theFormat);
     }
     Vector<Coefficient> weightEpsCoords, weightSimpleCoords;
-    weightSimpleCoords = this->owner->theWeyl.getSimpleCoordinatesFromFundamental(
+    weightSimpleCoords = this->owner->weylGroup.getSimpleCoordinatesFromFundamental(
       this->weightFundamentalCoordinates, Coefficient::zero()
     );
-    this->owner->theWeyl.getEpsilonCoordinates(weightSimpleCoords, weightEpsCoords);
+    this->owner->weylGroup.getEpsilonCoordinates(weightSimpleCoords, weightEpsCoords);
     return weightEpsCoords.toStringLetterFormat("\\varepsilon", theFormat);
   }
   bool useOmega = true;
@@ -57,7 +57,7 @@ void Weight<Coefficient>::accountSingleWeight(
   this->checkNonZeroOwner();
   Vector<Rational> dominant = currentWeightSimpleCoords;
   dominant += otherHighestWeightSimpleCoords;
-  WeylGroupData& theWeyl = this->owner->theWeyl;
+  WeylGroupData& theWeyl = this->owner->weylGroup;
   dominant += theWeyl.rho;
   int sign;
   // a weight has no stabilizer if and only if it is not stabilized by all root reflections.
@@ -94,7 +94,7 @@ std::string Weight<Coefficient>::tensorAndDecompose(
   std::stringstream errorLog;
   std::string tempS;
   output.makeZero();
-  WeylGroupData& theWeyl = this->owner->theWeyl;
+  WeylGroupData& theWeyl = this->owner->weylGroup;
   Vector<Rational> leftHWFundCoords;
   leftHWFundCoords = this->weightFundamentalCoordinates;
   Vector<Rational> rightHWFundCoords;
@@ -148,8 +148,8 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::freudenthalEvaluateMeFull
   Weight<Coefficient> tempMon;
   tempMon.owner = nullptr;
   for (int i = 0; i < domChar.size(); i ++) {
-    theVect[0] = this->getOwner()->theWeyl.getSimpleCoordinatesFromFundamental(domChar[i].weightFundamentalCoordinates, Rational::zero());
-    if (!(this->getOwner()->theWeyl.generateOrbit(theVect, false, theOrbit, false, - 1, 0, upperBoundNumDominantWeights))) {
+    theVect[0] = this->getOwner()->weylGroup.getSimpleCoordinatesFromFundamental(domChar[i].weightFundamentalCoordinates, Rational::zero());
+    if (!(this->getOwner()->weylGroup.generateOrbit(theVect, false, theOrbit, false, - 1, 0, upperBoundNumDominantWeights))) {
       if (outputDetails != nullptr) {
         *outputDetails = "failed to generate orbit (possibly too large?)";
       }
@@ -157,7 +157,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::freudenthalEvaluateMeFull
     }
     int orbitSize = theOrbit.size;
     for (int j = 0; j < orbitSize; j ++) {
-      tempMon.weightFundamentalCoordinates = this->getOwner()->theWeyl.getFundamentalCoordinatesFromSimple(theOrbit[j]);
+      tempMon.weightFundamentalCoordinates = this->getOwner()->weylGroup.getFundamentalCoordinatesFromSimple(theOrbit[j]);
       outputCharOwnerSetToZero.addMonomial(tempMon, domChar.coefficients[i]);
     }
   }
@@ -194,7 +194,7 @@ void CharacterSemisimpleLieAlgebraModule<Coefficient>::makeFromWeight(
   Weight<Coefficient> theMon;
   theMon.owner = inputOwner;
   theMon.weightFundamentalCoordinates =
-  inputOwner->theWeyl.getFundamentalCoordinatesFromSimple(inputWeightSimpleCoords);
+  inputOwner->weylGroup.getFundamentalCoordinatesFromSimple(inputWeightSimpleCoords);
   this->addMonomial(theMon, 1);
 }
 
@@ -219,7 +219,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::freudenthalEvalMeDominant
   Coefficient bufferCoeff;
   for (int i = 0; i < this->size(); i ++) {
     currentWeightFundCoords = (*this)[i].weightFundamentalCoordinates;
-    if (!this->getOwner()->theWeyl.freudenthalFormula(
+    if (!this->getOwner()->weylGroup.freudenthalFormula(
       currentWeightFundCoords, currentWeights, currentMults, &localDetail, upperBoundNumDominantWeights
     )) {
       if (outputDetails != nullptr) {
@@ -230,10 +230,10 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::freudenthalEvalMeDominant
       return false;
     }
     if (localDetail != "") {
-      localDetails << "<br>MonomialP " << i + 1 << " computation details: " << localDetail;
+      localDetails << "<br>MonomialPolynomial " << i + 1 << " computation details: " << localDetail;
     }
     for (int j = 0; j < currentWeights.size; j ++) {
-      tempMon.weightFundamentalCoordinates = this->getOwner()->theWeyl.getFundamentalCoordinatesFromSimple(currentWeights[j]);
+      tempMon.weightFundamentalCoordinates = this->getOwner()->weylGroup.getFundamentalCoordinatesFromSimple(currentWeights[j]);
       bufferCoeff = this->coefficients[i];
       bufferCoeff *= currentMults[j];
       outputCharOwnerSetToZero.addMonomial(tempMon, bufferCoeff);
@@ -420,7 +420,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
   CharacterSemisimpleLieAlgebraModule<Coefficient> CharCartan;
   bool result = this->freudenthalEvalMeDominantWeightsOnly(CharCartan, upperBoundWeights, &outputDetails);
   std::stringstream out;
-  WeylGroupData& theWeyl = this->getOwner()->theWeyl;
+  WeylGroupData& theWeyl = this->getOwner()->weylGroup;
   theWeyl.drawRootSystem(theDrawingVars, false, true);
   int totalNumWeights = 0;
   Vectors<Coefficient> dominantWeightsNonHashed;
@@ -525,7 +525,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
     return false;
   }
   this->checkNonZeroOwner();
-  WeylGroupData& theWeyL = this->getOwner()->theWeyl;
+  WeylGroupData& theWeyL = this->getOwner()->weylGroup;
   std::stringstream out;
   std::string tempS;
   inputData.initAssumingParSelAndHmmInitted();
@@ -667,7 +667,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
         theDV1.drawCircleAtVectorBufferRational(tempRoot2, "#a00000", 5);
       }
     }
-    out << "<hr>" << theDV1.getHTMLDiv(WeylFDSmall.ambientWeyl->getDimension());
+    out << "<hr>" << theDV1.getHTMLDiv(WeylFDSmall.ambientWeyl->getDimension(), false);
     *report = out.str();
   }
   return true;

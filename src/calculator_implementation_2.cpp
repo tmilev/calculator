@@ -22,19 +22,116 @@ JSData Calculator::OperationHandlers::toJSON() {
   return result;
 }
 
-JSData Calculator::toJSONFunctionHandlers() {
+Calculator::Examples::Examples() {
+  this->owner = nullptr;
+}
+
+JSData Calculator::Examples::toJSONFunctionHandlers() {
   MacroRegisterFunctionWithName("Calculator::toJSONFunctionHandlers");
   JSData output;
   output.theType = JSData::token::tokenObject;
-  for (int i = 0; i < this->operations.size(); i ++) {
-    if (this->operations.values[i].isZeroPointer()) {
+  MapReferences<std::string, MemorySaving<OperationHandlers>, HashFunctions::hashFunction>&
+  operations = this->owner->operations;
+  for (int i = 0; i < operations.size(); i ++) {
+    if (operations.values[i].isZeroPointer()) {
       continue;
     }
-    const std::string& operationName = this->operations.keys[i];
-    Calculator::OperationHandlers& handlers = this->operations.values[i].getElement();
+    const std::string& operationName = operations.keys[i];
+    Calculator::OperationHandlers& handlers = operations.values[i].getElement();
     output[operationName] = handlers.toJSON();
   }
   return output;
+}
+
+std::string Calculator::Examples::escape(const std::string& atom) {
+  if (this->toBeEscaped.size == 0) {
+    this->toBeEscaped = List<std::string>({
+      "\\", "`", "*", "_",
+      "{", "}", "[", "]", "<", ">", "(", ")",
+      "#", "+", "-", ".", "!", "|"
+    });
+  }
+  if (!this->toBeEscaped.contains(atom)) {
+    return atom;
+  }
+  return "\\" + atom;
+}
+
+std::string Calculator::Examples::getExamplesReadmeFragment() {
+  MacroRegisterFunctionWithName("Calculator::getExamplesReadmeFragment");
+  std::stringstream out;
+
+  MapReferences<std::string, MemorySaving<OperationHandlers>, HashFunctions::hashFunction>&
+  operations = this->owner->operations;
+  for (int i = 0; i < operations.size(); i ++) {
+    if (operations.values[i].isZeroPointer()) {
+      continue;
+    }
+    std::string atomEscaped = this->escape(operations.keys[i]);
+    Calculator::OperationHandlers& handlers = operations.values[i].getElement();
+    int totalHandlers = handlers.handlers.size + handlers.compositeHandlers.size;
+    if (totalHandlers > 1) {
+      out << "\n\nOperator or function " << atomEscaped
+      << " is overloaded with "
+      << totalHandlers << " total handlers.";
+    }
+    for (int j = 0; j < handlers.handlers.size; j ++ ) {
+      out << "\n\n" << this->toStringOneOperationHandler(atomEscaped, false, handlers.handlers[j]);
+    }
+    for (int j = 0; j < handlers.compositeHandlers.size; j ++ ) {
+      out << "\n\n" << this->toStringOneOperationHandler(atomEscaped, true, handlers.compositeHandlers[j]);
+    }
+  }
+  return out.str();
+}
+
+std::string Calculator::Examples::toStringOneOperationHandler(
+  const std::string& escapedAtom,
+  bool isComposite,
+  const Function& function
+) {
+  std::stringstream out;
+  out << "*" << escapedAtom << "*";
+  if (isComposite) {
+    out << " (_composite_)";
+  }
+  out << " [" << function.calculatorIdentifier << "]";
+  if (function.additionalIdentifier != "") {
+    out << " {" << function.additionalIdentifier << "}. ";
+  }
+  if (function.options.adminOnly) {
+    out << "(admin only) ";
+  }
+  if (!function.options.visible) {
+    out << "(invisible) ";
+  }
+  out << "\n";
+  out << "[Example](" << "https://calculator-algebra.org/"
+  << WebAPI::app
+  << HtmlRoutines::getCalculatorComputationURL(function.theExample) << ")\n";
+  out << "```\n";
+  out << function.theExample;
+  out << "\n```";
+  out << "\n";
+  out << function.theDescription;
+  return out.str();
+}
+
+bool Calculator::Examples::writeExamplesReadme() {
+  std::stringstream out;
+  std::string readmeTemplate;
+  if (!FileOperations::loadFileToStringVirtual(
+    "examples/readme_template.md", readmeTemplate, false, nullptr
+  )) {
+    global << Logger::red << "Failed to read readme template." << Logger::endL;
+    return false;
+  }
+  std::string examples = this->getExamplesReadmeFragment();
+  StringRoutines::replaceOnce(readmeTemplate,
+    "${content-inserted-by-calculator-in-Calculator::Examples::writeExamplesReadme}",
+    examples
+  );
+  return FileOperations::writeFileVirual("examples/README.md", readmeTemplate, nullptr);
 }
 
 Calculator::OperationHandlers::OperationHandlers() {
@@ -144,24 +241,23 @@ std::string Calculator::toStringRuleStatusUser() {
   return out.str();
 }
 
-void Calculator::logTime() {
+void Calculator::logTime(int64_t startTime) {
   int64_t currentMilliseconds = global.getElapsedMilliseconds();
   *this << "<br>" << currentMilliseconds - this->statistics.millisecondsLastLog
   << " ms since last log; " << currentMilliseconds - this->statistics.startTimeEvaluationMilliseconds
-  << " ms since start. ";
+  << " ms since start; " << currentMilliseconds - startTime << " ms since last stopwatch. ";
   this->statistics.millisecondsLastLog = currentMilliseconds;
 }
 
-void Calculator::logFunctionWithTime(Function& inputF) {
+void Calculator::logFunctionWithTime(Function& input, int64_t startTime) {
   this->statistics.totalSubstitutions ++;
   if (!this->flagLogEvaluation) {
     return;
   }
   *this << "<hr>Built-in substitution " << this->statistics.totalSubstitutions
-  << ": " << inputF.toStringSummary();
-  this->logTime();
-  *this << "Rule stack id: "
-  << this->ruleStackCacheIndex << ", stack size: " << this->ruleStack.size();
+  << ": " << input.toStringSummary();
+  this->logTime(startTime);
+  *this << "Rule stack size: " << this->ruleStack.size();
 }
 
 const List<Function>* Calculator::getOperationCompositeHandlers(int theOp) {
@@ -199,6 +295,10 @@ bool Calculator::outerStandardCompositeHandler(
   int opIndexParentIfAvailable,
   Function** outputHandler
 ) {
+  int64_t start = 0;
+  if (calculator.flagLogEvaluation) {
+    start = global.getElapsedMilliseconds();
+  }
   if (!input.isList()) {
     return false;
   }
@@ -206,17 +306,17 @@ bool Calculator::outerStandardCompositeHandler(
   if (!functionNameNode.startsWith()) {
     return false;
   }
-  const List<Function>* theHandlers = calculator.getOperationCompositeHandlers(functionNameNode[0].data);
-  if (theHandlers == nullptr) {
+  const List<Function>* handlers = calculator.getOperationCompositeHandlers(functionNameNode[0].data);
+  if (handlers == nullptr) {
     return false;
   }
-  for (int i = 0; i < theHandlers->size; i ++) {
-    Function& currentHandler = (*theHandlers)[i];
+  for (int i = 0; i < handlers->size; i ++) {
+    Function& currentHandler = (*handlers)[i];
     if (currentHandler.shouldBeApplied(opIndexParentIfAvailable)) {
       if (currentHandler.apply(
         calculator, input, output, opIndexParentIfAvailable, outputHandler
       )) {
-        calculator.logFunctionWithTime(currentHandler);
+        calculator.logFunctionWithTime(currentHandler, start);
         return true;
       }
     }
@@ -238,17 +338,21 @@ bool Function::apply(
   int opIndexParentIfAvailable,
   Function** outputHandler
 ) {
+  int64_t start = 0;
+  if (this->owner->flagLogEvaluation) {
+    start = global.getElapsedMilliseconds();
+  }
   if (!this->shouldBeApplied(opIndexParentIfAvailable)) {
     return false;
   }
-  if (this->theFunction == nullptr) {
+  if (this->functionAddress == nullptr) {
     global.fatal << "Attempt to apply non-initialized function. " << global.fatal;
   }
   if (!this->options.flagIsInner) {
-    if (this->theFunction(calculator, input, output)) {
+    if (this->functionAddress(calculator, input, output)) {
       if (output != input) {
         output.checkConsistency();
-        calculator.logFunctionWithTime(*this);
+        calculator.logFunctionWithTime(*this, start);
         if (outputHandler != nullptr) {
           *outputHandler = this;
         }
@@ -258,9 +362,9 @@ bool Function::apply(
     return false;
   }
   if (this->inputFitsMyInnerType(input)) {
-    if (this->theFunction(calculator, input, output)) {
+    if (this->functionAddress(calculator, input, output)) {
       output.checkConsistency();
-      calculator.logFunctionWithTime(*this);
+      calculator.logFunctionWithTime(*this, start);
       if (outputHandler != nullptr) {
         *outputHandler = this;
       }
@@ -311,9 +415,9 @@ bool Calculator::outerStandardFunction(
     return false;
   }
   if (calculator.outerStandardCompositeHandler(
-    calculator, input, output, opIndexParentIfAvailable, outputHandler
-  )) {
-    return true;
+     calculator, input, output, opIndexParentIfAvailable, outputHandler
+   )) {
+     return true;
   }
   if (calculator.outerStandardHandler(
     calculator, input, output, opIndexParentIfAvailable, outputHandler
@@ -401,43 +505,35 @@ bool Calculator::expressionMatchesPattern(
   return true;
 }
 
-void StateMaintainerCalculator::addRule(const Expression& theRule) {
+void StateMaintainerCalculator::addRule(const Expression& rule) {
   if (this->owner == nullptr) {
     global.fatal << "StackMaintainerCalculator has zero owner. " << global.fatal;
   }
-  this->owner->ruleStack.addChildOnTop(theRule);
+  this->owner->ruleStack.addChildOnTop(rule);
+  this->owner->cachedExpressions.clear();
   std::string currentRule;
   if (
-    theRule.startsWith(this->owner->opRulesOn()) ||
-    theRule.startsWith(this->owner->opRulesOff())
+    rule.startsWith(this->owner->opRulesOn()) ||
+    rule.startsWith(this->owner->opRulesOff())
   ) {
-    for (int j = 1; j < theRule.size(); j ++) {
-      if (!theRule[j].isOfType(&currentRule)) {
+    for (int j = 1; j < rule.size(); j ++) {
+      if (!rule[j].isOfType(&currentRule)) {
         continue;
       }
       if (!this->owner->namedRules.contains(currentRule)) {
         continue;
       }
       this->owner->getFunctionHandlerFromNamedRule(currentRule).options.disabledByUser =
-      theRule.startsWith(this->owner->opRulesOff());
-    }
-  }
-  this->owner->ruleStackCacheIndex = this->owner->cachedRuleStacks.getIndex(this->owner->ruleStack);
-  if (this->owner->ruleStackCacheIndex == - 1) {
-    if (this->owner->cachedRuleStacks.size < this->owner->maximumCachedExpressionPerRuleStack) {
-      this->owner->ruleStackCacheIndex = this->owner->cachedRuleStacks.size;
-      this->owner->cachedRuleStacks.addOnTop(this->owner->ruleStack);
+      rule.startsWith(this->owner->opRulesOff());
     }
   }
   if (this->owner->flagLogRules) {
-    *this->owner << "<hr>Added rule " << theRule.toString() << " with state identifier "
-    << this->owner->ruleStackCacheIndex;
+    *this->owner << "<hr>Added rule " << rule.toString();
   }
 }
 
 StateMaintainerCalculator::StateMaintainerCalculator(Calculator& inputBoss) {
   this->owner = &inputBoss;
-  this->startingRuleStackIndex = inputBoss.ruleStackCacheIndex;
   this->startingRuleStackSize = inputBoss.ruleStack.size();
 }
 
@@ -445,16 +541,16 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
   if (this->owner == nullptr) {
     return;
   }
-  Expression& theRuleStack = this->owner->ruleStack;
+  Expression& ruleStack = this->owner->ruleStack;
   std::string currentRuleName;
   bool shouldUpdateRules = false;
-  for (int i = this->startingRuleStackSize; i < theRuleStack.size(); i ++) {
+  for (int i = this->startingRuleStackSize; i < ruleStack.size(); i ++) {
     if (
-      theRuleStack[i].startsWith(this->owner->opRulesOn()) ||
-      theRuleStack[i].startsWith(this->owner->opRulesOff())
+      ruleStack[i].startsWith(this->owner->opRulesOn()) ||
+      ruleStack[i].startsWith(this->owner->opRulesOff())
     ) {
-      for (int j = 1; j < theRuleStack[i].size(); j ++) {
-        if (!theRuleStack[i][j].isOfType<std::string>(&currentRuleName)) {
+      for (int j = 1; j < ruleStack[i].size(); j ++) {
+        if (!ruleStack[i][j].isOfType<std::string>(&currentRuleName)) {
           continue;
         }
         if (!this->owner->namedRules.contains(currentRuleName)) {
@@ -468,26 +564,37 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
   }
   if (shouldUpdateRules) {
     for (int i = 0; i < this->startingRuleStackSize; i ++) {
-      if (theRuleStack[i].startsWith(this->owner->opRulesOn())) {
-        for (int j = 1; j < theRuleStack[i].size(); j ++) {
+      if (ruleStack[i].startsWith(this->owner->opRulesOn())) {
+        for (int j = 1; j < ruleStack[i].size(); j ++) {
           Function& currentFun = this->owner->getFunctionHandlerFromNamedRule(
-            theRuleStack[i][j].getValue<std::string>()
+            ruleStack[i][j].getValue<std::string>()
           );
           currentFun.options.disabledByUser = false;
         }
-      } else if (theRuleStack[i].startsWith(this->owner->opRulesOff())) {
-        for (int j = 1; j < theRuleStack[i].size(); j ++) {
+      } else if (ruleStack[i].startsWith(this->owner->opRulesOff())) {
+        for (int j = 1; j < ruleStack[i].size(); j ++) {
           Function& currentFun = this->owner->getFunctionHandlerFromNamedRule(
-            theRuleStack[i][j].getValue<std::string>()
+            ruleStack[i][j].getValue<std::string>()
           );
           currentFun.options.disabledByUser = true;
         }
       }
     }
   }
-  this->owner->ruleStackCacheIndex = this->startingRuleStackIndex;
-  this->owner->ruleStack.children.setSize(this->startingRuleStackSize);
+  if (
+    this->owner->ruleStack.size() != this->startingRuleStackSize
+  ) {
+    this->owner->cachedExpressions.clear();
+  }
+  this->owner->ruleStack.setSize(this->startingRuleStackSize);
   this->owner = nullptr;
+}
+
+bool Calculator::approximationsBanned() {
+  Function& approximationsDummyHandler = this->getFunctionHandlerFromNamedRule(
+    Calculator::Atoms::approximations
+  );
+  return approximationsDummyHandler.options.disabledByUser;
 }
 
 Expression Calculator::getNewBoundVariable() {
@@ -518,7 +625,7 @@ Expression Calculator::getNewAtom() {
 }
 
 bool Calculator::accountRule(
-  const Expression& ruleE, StateMaintainerCalculator& theRuleStackMaintainer
+  const Expression& ruleE, StateMaintainerCalculator& ruleStackMaintainer
 ) {
   MacroRegisterFunctionWithName("Calculator::accountRule");
   RecursionDepthCounter theRecursionCounter(&this->recursionDepth);
@@ -526,7 +633,7 @@ bool Calculator::accountRule(
     return false;
   }
   if (ruleE.isCalculatorStatusChanger()) {
-    theRuleStackMaintainer.addRule(ruleE);
+    ruleStackMaintainer.addRule(ruleE);
   }
   if (!ruleE.isListStartingWithAtom(this->opCommandEnclosure())) {
     return true;
@@ -535,10 +642,10 @@ bool Calculator::accountRule(
     return true;
   }
   if (!ruleE[1].startsWith(this->opCommandSequence())) {
-    return this->accountRule(ruleE[1], theRuleStackMaintainer);
+    return this->accountRule(ruleE[1], ruleStackMaintainer);
   }
   for (int i = 1; i < ruleE[1].size(); i ++) {
-    if (!this->accountRule(ruleE[1][i], theRuleStackMaintainer)) {
+    if (!this->accountRule(ruleE[1][i], ruleStackMaintainer)) {
       return false;
     }
   }
@@ -659,33 +766,22 @@ bool Calculator::EvaluateLoop::setOutput(
   return true;
 }
 
-void Calculator::EvaluateLoop::initializeOneRun() {
-  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::initializeOneRun");
-  this->numberOfTransformations ++;
+Calculator::ExpressionCache::ExpressionCache() {
+  this->ruleState = - 1;
+  this->flagNonCacheable = false;
+  this->flagFinalized = false;
+}
+
+void Calculator::EvaluateLoop::accountIntermediateState() {
+  MacroRegisterFunctionWithName("Calculator:EvaluateLoop:::accountIntermediateState");
   std::string atomValue;
   if (this->output->isOperation(&atomValue)) {
     if (this->owner->atomsThatMustNotBeCached.contains(atomValue)) {
       this->flagIsNonCacheable = true;
     }
   }
-  // The following code is too
-  // complicated/obfuscated for my taste
-  // and perhaps needs a rewrite.
-  // However, at the moment of writing, I see
-  // no better way of doing this, so here we go.
-  if (this->flagIsNonCacheable) {
-    if (this->indexInCache != - 1) {
-      // We "undo" the caching process by
-      // replacing the cached value with the minusOneExpression,
-      // which, having no context, will never match another expression.
-      this->owner->cachedExpressions.setObjectAtIndex(
-        this->indexInCache, this->owner->expressionMinusOne()
-      );
-    }
-    this->indexInCache = - 1;
-  }
-  if (this->indexInCache != - 1) {
-    this->owner->imagesCachedExpressions[indexInCache] = *(this->output);
+  if (!this->flagIsNonCacheable) {
+    this->intermediateOutputs.addOnTop(*this->output);
   }
 }
 
@@ -718,19 +814,24 @@ void Calculator::EvaluateLoop::reportChildEvaluation(Expression& output, int chi
   if (!this->theReport.tickAndWantReport()) {
     return;
   }
-  std::stringstream reportStream;
-  reportStream << "substitution rules so far:";
+  std::stringstream ruleStream, reportStream;
+  int ruleCount = 0;
   for (int j = 1; j < childIndex; j ++) {
     if (
       output[j].startsWith(this->owner->opDefine()) ||
       output[j].startsWith(this->owner->opDefineConditional())
     ) {
-      reportStream << "<br>" << StringRoutines::stringShortenInsertDots(
+      ruleStream << "<br>" << StringRoutines::stringShortenInsertDots(
         output[j].toString(), 100
       );
+      ruleCount ++;
    }
   }
-  reportStream << "<br>Evaluating:<br><b>"
+  if (ruleCount > 0) {
+    reportStream << ruleCount << " substitution rules so far: "
+    << ruleStream.str() << "<br>";
+  }
+  reportStream << "Evaluating at recursion depth " << this->owner->recursionDepth << ":<br><b>"
   << StringRoutines::stringShortenInsertDots(output[childIndex].toString(), 100) << "</b>";
   theReport.report(reportStream.str());
 }
@@ -808,7 +909,7 @@ bool Calculator::EvaluateLoop::userDefinedEvaluation() {
     i ++
   ) {
     const Expression& currentPattern = this->owner->ruleStack[i];
-    this->owner->totalPatternMatchesPerformed ++;
+    this->owner->statistics.totalPatternMatchesPerformed ++;
     if (this->owner->flagLogEvaluation) {
       beforepatternMatch = *this->output;
     }
@@ -826,8 +927,7 @@ bool Calculator::EvaluateLoop::userDefinedEvaluation() {
       this->reductionOccurred = true;
       if (this->owner->flagLogEvaluation) {
         *this->owner
-        << "<hr>Rule cache index: " << this->owner->ruleStackCacheIndex
-        << "<br>Rule: " << currentPattern.toString() << "<br>"
+        << "<hr>Rule: " << currentPattern.toString() << "<br>"
         << HtmlRoutines::getMathNoDisplay(beforepatternMatch.toString())
         << " -> " << HtmlRoutines::getMathNoDisplay(this->output->toString());
       }
@@ -856,19 +956,43 @@ bool Calculator::EvaluateLoop::builtInEvaluation() {
   }
   this->reductionOccurred = true;
   if (this->owner->flagLogEvaluation) {
-    *(this->owner) << "<br>Rule context identifier: "
-    << this->owner->ruleStackCacheIndex
-    << "<br>" << HtmlRoutines::getMathNoDisplay(this->output->toString())
+    *(this->owner) << "<br>" << HtmlRoutines::getMathNoDisplay(this->output->toString())
     << " -> " << HtmlRoutines::getMathNoDisplay(result.toString());
   }
   return this->setOutput(result, handlerContainer, "");
 }
 
+bool Calculator::EvaluateLoop::detectLoops() {
+  if (!this->intermediateOutputs.contains(*this->output)) {
+    return false;
+  }
+  std::stringstream errorStream;
+  errorStream << "Detected 'infinite' substitution cycle: ";
+  for (int i = 0; i < this->intermediateOutputs.size; i ++) {
+    errorStream << this->intermediateOutputs[i].toString()
+    << " -> ";
+  }
+  errorStream << this->output->toString();
+  Expression error;
+  error.makeError(errorStream.str(), *this->owner);
+  this->setOutput(error, nullptr, errorStream.str());
+  this->owner->flagAbortComputationASAP = true;
+  return true;
+}
+
 bool Calculator::EvaluateLoop::reduceOnce() {
   MacroRegisterFunctionWithName("Calculator::EvaluateLoop::reduceOnce");
-  StateMaintainerCalculator maintainRuleStack(*(this->owner));
   this->checkInitialization();
-  this->initializeOneRun();
+  this->numberOfTransformations ++;
+  this->owner->statistics.totalEvaluationLoops ++;
+  if (this->detectLoops()) {
+    return false;
+  }
+  this->accountIntermediateState();
+  if (this->reduceUsingCache()) {
+    return false;
+  }
+  StateMaintainerCalculator maintainRuleStack(*(this->owner));
   if (this->outputHasErrors()) {
     return false;
   }
@@ -887,41 +1011,40 @@ bool Calculator::EvaluateLoop::reduceOnce() {
   return false;
 }
 
-void Calculator::EvaluateLoop::lookUpCache() {
-  this->owner->evaluatedExpressionsStack.addOnTop(*(this->output));
-  Expression theExpressionWithContext;
-  theExpressionWithContext.reset(*this->owner, 3);
-  theExpressionWithContext.addChildAtomOnTop(this->owner->opSequence());
-  theExpressionWithContext.addChildValueOnTop(this->owner->ruleStackCacheIndex);
-  theExpressionWithContext.addChildOnTop(*(this->output));
-  this->indexInCache = this->owner->cachedExpressions.getIndex(theExpressionWithContext);
-  if (this->indexInCache != - 1) {
-    if (this->owner->flagLogCache) {
-      *this->owner << "<hr>Cache hit with state identifier "
-      << this->owner->ruleStackCacheIndex << ": "
-      << this->output->toString() << " -> "
-      << this->owner->imagesCachedExpressions[this->indexInCache].toString();
-    }
-    std::stringstream comment;
-    if (this->history != nullptr) {
-      comment << "\\text{Previously~computed~that~} "
-      << this->output->toString() << " = "
-      << this->owner->imagesCachedExpressions[this->indexInCache].toString();
-    }
-    this->setOutput(this->owner->imagesCachedExpressions[this->indexInCache], nullptr, comment.str());
-    return;
+bool Calculator::EvaluateLoop::reduceUsingCache() {
+  ExpressionCache& cache = this->owner->cachedExpressions.getValueCreate(*this->output);
+  if (!cache.flagFinalized || cache.flagNonCacheable) {
+    return false;
   }
-  if (
-    this->owner->cachedExpressions.size > this->owner->maximumCachedExpressionPerRuleStack ||
-    this->output->isBuiltInType() ||
-    this->output->isBuiltInAtom()
-  ) {
-    return;
+  if (this->owner->flagLogCache) {
+    *this->owner << "<hr>Cache hit at rule stack size: "
+    << this->owner->ruleStack.size() << ": "
+    << this->output->toString() << " -> "
+    << cache.reducesTo.toString();
   }
-  this->owner->cachedExpressions.addOnTop(theExpressionWithContext);
-  this->indexInCache = this->owner->cachedExpressions.size - 1;
-  this->owner->imagesCachedExpressions.setSize(this->indexInCache + 1);
-  this->owner->imagesCachedExpressions.lastObject()->makeError("Error: not computed yet.", *this->owner);
+  std::stringstream comment;
+  if (this->history != nullptr) {
+    comment << "\\text{Previously~computed~that~} "
+    << this->output->toString() << " = "
+    << cache.reducesTo.toString();
+  }
+  this->setOutput(cache.reducesTo, nullptr, comment.str());
+  return true;
+}
+
+void Calculator::EvaluateLoop::writeCache() {
+  for (int i = 0; i < this->intermediateOutputs.size; i ++) {
+    Calculator::ExpressionCache& cache =
+    this->owner->cachedExpressions.getValueCreate(
+      this->intermediateOutputs[i]
+    );
+    if (this->flagIsNonCacheable) {
+      cache.flagNonCacheable = true;
+    } else {
+      cache.flagFinalized = true;
+      cache.reducesTo = *this->output;
+    }
+  }
 }
 
 bool Calculator::evaluateExpression(
@@ -958,8 +1081,8 @@ bool Calculator::evaluateExpression(
       calculator << "&nbsp&nbsp&nbsp&nbsp";
     }
     calculator << "Evaluating " << input.lispify()
-    << " with rule stack cache index "
-    << calculator.ruleStackCacheIndex; // << this->ruleStack.toString();
+    << " with rule stack size "
+    << calculator.ruleStack.size();
   }
   if (calculator.recursionDepthExceededHandleRoughly()) {
     return calculator << " Evaluating expression: " << input.toString() << " aborted. ";
@@ -979,17 +1102,14 @@ bool Calculator::evaluateExpression(
     errorE.makeError(errorStream.str(), calculator);
     return state.setOutput(errorE, nullptr, "Error");
   }
-  //bool logEvaluationStepsRequested = calculator.logEvaluationSteps.size > 0;
-  state.lookUpCache();
   // reduction phase:
   //////////////////////////////////
   // evaluateExpression is called recursively
   // inside state.evaluateChildren
-  // inside state.reduceOnce.
-  while (state.reduceOnce()) {
-  }
+  // inside state.reduceOnce
+  // inside reduce.
+  calculator.reduce(state);
   outputIsNonCacheable = state.flagIsNonCacheable;
-  calculator.evaluatedExpressionsStack.removeLastObject();
   if (calculator.flagLogFullTreeCrunching && calculator.recursionDepth < 3) {
     calculator << "<br>";
     for (int i = 0; i < calculator.recursionDepth; i ++) {
@@ -998,6 +1118,14 @@ bool Calculator::evaluateExpression(
     calculator << "to get: " << state.output->lispify();
   }
   return true;
+}
+
+void Calculator::reduce(Calculator::EvaluateLoop& state) {
+  this->evaluatedExpressionsStack.addOnTop(*state.output);
+  while (state.reduceOnce()) {
+  }
+  state.writeCache();
+  this->evaluatedExpressionsStack.removeLastObject();
 }
 
 Expression* Calculator::patternMatch(
@@ -1120,9 +1248,8 @@ bool Calculator::parse(
   bool stripCommandSequence,
   Expression& output
 ) {
-  List<SyntacticElement> syntacticSoup, syntacticStack;
   if (!this->parseAndExtractExpressions(
-    input, output, syntacticSoup, syntacticStack, nullptr
+    input, output, this->syntacticSoup, this->syntacticStack, nullptr
   )) {
     return false;
   }
@@ -1164,17 +1291,17 @@ bool Calculator::parseAndExtractExpressions(
 }
 
 void Calculator::EvaluationStatistics::initialize() {
-  this->startTimeEvaluationMilliseconds      = global.getElapsedMilliseconds();
-  this->millisecondsLastLog                  = this->startTimeEvaluationMilliseconds;
-  this->numberOfListsStart                   = static_cast<signed>( GlobalStatistics::numListsCreated    );
-  this->numberListResizesStart               = static_cast<signed>( GlobalStatistics::numListResizesTotal);
-  this->numberHashResizesStart               = static_cast<signed>( GlobalStatistics::numHashResizes     );
-  this->numberOfSmallAdditionsStart          = static_cast<signed>( Rational::totalSmallAdditions         );
-  this->numberOfSmallMultiplicationsStart    = static_cast<signed>( Rational::totalSmallMultiplications   );
-  this->numberOfSmallGreatestCommonDivisorsStart           = static_cast<signed>( Rational::totalSmallGreatestCommonDivisors          );
-  this->numberOfLargeAdditionsStart          = static_cast<signed>( Rational::totalLargeAdditions         );
-  this->numberOfLargeMultiplicationsStart    = static_cast<signed>( Rational::totalLargeMultiplications   );
-  this->numberOfLargeGreatestCommonDivisorsStart           = static_cast<signed>( Rational::totalLargeGreatestCommonDivisors          );
+  this->startTimeEvaluationMilliseconds          = global.getElapsedMilliseconds();
+  this->millisecondsLastLog                      = this->startTimeEvaluationMilliseconds;
+  this->numberOfListsStart                       = static_cast<signed>( GlobalStatistics::numListsCreated         );
+  this->numberListResizesStart                   = static_cast<signed>( GlobalStatistics::numberOfListResizesTotal     );
+  this->numberHashResizesStart                   = static_cast<signed>( GlobalStatistics::numberOfHashResizes          );
+  this->numberOfSmallAdditionsStart              = static_cast<signed>( Rational::totalSmallAdditions             );
+  this->numberOfSmallMultiplicationsStart        = static_cast<signed>( Rational::totalSmallMultiplications       );
+  this->numberOfSmallGreatestCommonDivisorsStart = static_cast<signed>( Rational::totalSmallGreatestCommonDivisors);
+  this->numberOfLargeAdditionsStart              = static_cast<signed>( Rational::totalLargeAdditions             );
+  this->numberOfLargeMultiplicationsStart        = static_cast<signed>( Rational::totalLargeMultiplications       );
+  this->numberOfLargeGreatestCommonDivisorsStart = static_cast<signed>( Rational::totalLargeGreatestCommonDivisors);
 }
 
 void Calculator::evaluate(const std::string& input) {
@@ -1210,26 +1337,6 @@ JSData Calculator::solve(const std::string& input) {
   return this->extractSolution();
 }
 
-JSData Calculator::compareExpressions(const std::string& given, const std::string& desired) {
-  MacroRegisterFunctionWithName("Calculator::solve");
-  this->statistics.initialize();
-  Expression givenExpression, desiredExpression;
-  if (!this->parse(given, true, givenExpression)) {
-    return this->extractComparison(given, desired);
-  }
-  if (!this->parse(desired, true, desiredExpression)) {
-    return this->extractComparison(given, desired);
-  }
-  this->programExpression.makeXOX(
-    *this,
-    this->getOperations().getIndexNoFail("CompareExpressionsJSON"),
-    givenExpression,
-    desiredExpression
-  );
-  this->evaluateCommands();
-  return this->extractComparison(given, desired);
-}
-
 void Calculator::evaluateCommands() {
   MacroRegisterFunctionWithName("Calculator::evaluateCommands");
   std::stringstream out;
@@ -1239,16 +1346,16 @@ void Calculator::evaluateCommands() {
     } else {
       out << Logger::consoleRed() << "Syntax errors encountered: " << Logger::consoleNormal();
     }
-    this->outputJS[WebAPI::result::syntaxErrors] = this->syntaxErrors;
+    this->outputJS[WebAPI::result::syntaxErrors] = this->toStringSyntacticStackHTMLSimple();
     out << this->syntaxErrors;
     out << "<hr>";
   }
   Expression startingExpression = this->programExpression;
   this->flagAbortComputationASAP = false;
   this->comments.clear();
-  ProgressReport theReport;
+  ProgressReport report;
   if (!global.flagRunningConsoleRegular) {
-    theReport.report("Evaluating expressions, current expression stack:\n");
+    report.report("Evaluating expressions, current expression stack:\n");
   }
   this->evaluateExpression(*this, this->programExpression, this->programExpression);
   if (this->recursionDepth != 0) {
@@ -1270,7 +1377,7 @@ void Calculator::evaluateCommands() {
       << startingExpression.toString(&global.theDefaultFormat.getElement()) << std::endl;
     }
     global.theDefaultFormat.getElement().flagExpressionIsFinal = true;
-    this->theObjectContainer.resetSliders();
+    this->objectContainer.resetSliders();
     out << Logger::consoleNormal() << "Output: " << Logger::consoleGreen()
     << this->programExpression.toString(&global.theDefaultFormat.getElement())
     << Logger::consoleNormal() << std::endl;
@@ -1280,9 +1387,9 @@ void Calculator::evaluateCommands() {
       out << badCharsString << "<hr>";
       this->outputJS[WebAPI::result::badInput] = badCharsString;
     }
-    this->theObjectContainer.resetSliders();
-    this->theObjectContainer.resetPlots();
-    std::string javascriptString = this->theObjectContainer.toStringJavascriptForUserInputBoxes();
+    this->objectContainer.resetSliders();
+    this->objectContainer.resetPlots();
+    std::string javascriptString = this->objectContainer.toStringJavascriptForUserInputBoxes();
     if (javascriptString != "") {
       this->outputJS["javascriptForUserInputBoxes"] = javascriptString;
     }
@@ -1300,7 +1407,7 @@ void Calculator::evaluateCommands() {
       out << badCharsString << "<hr>";
       this->outputJS[WebAPI::result::badInput] = badCharsString;
     }
-    this->theObjectContainer.resetSliders();
+    this->objectContainer.resetSliders();
     out << "<hr>Input:<br> " << startingExpression.toStringFull() << "<hr>"
     << "Output:<br>" << this->programExpression.toStringFull();
     this->outputJS[WebAPI::result::resultLabel]["input"] = startingExpression.toStringFull();
@@ -1309,15 +1416,15 @@ void Calculator::evaluateCommands() {
   this->outputString = out.str();
   this->outputJS[WebAPI::result::resultHtml] = out.str();
   std::stringstream commentsStream;
-  if (this->theObjectContainer.theAlgebraicClosure.latestBasis.size > 1) {
+  if (this->objectContainer.theAlgebraicClosure.latestBasis.size > 1) {
     commentsStream << "<b>Algebraic closure status.</b><br>"
-    << this->theObjectContainer.theAlgebraicClosure.toString();
+    << this->objectContainer.theAlgebraicClosure.toString();
   }
-  if (this->theObjectContainer.constraints.size > 0) {
+  if (this->objectContainer.constraints.size > 0) {
     commentsStream << "<b>Constraints.</b><br>";
-    for (int i = 0; i < this->theObjectContainer.constraints.size; i ++) {
+    for (int i = 0; i < this->objectContainer.constraints.size; i ++) {
       commentsStream
-      << HtmlRoutines::getMathNoDisplay(this->theObjectContainer.constraints[i].toString())
+      << HtmlRoutines::getMathNoDisplay(this->objectContainer.constraints[i].toString())
       << "<br>";
     }
   }

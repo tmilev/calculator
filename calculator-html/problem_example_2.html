@@ -1,0 +1,47 @@
+<html>
+<script type="text/javascript" src="javascript_all_in_one.js"></script>
+<link type="text/css" rel="stylesheet" href="calculator.css">
+
+<body onload="window.calculator.hardCodedProblems.create(['problem1'], 'https://calculator-algebra.org')">
+
+  <div id="problem1">
+    Part (a) Given the following DNA sequence, write a possible sequence of a single point mutation:
+    <br>
+    <b style='color:blue'>CGTAATCGG</b>
+    <br>
+    <calculatorAnswer id="answer" style="display:none" buttons="algebra, arithmetic" answer="AGTAATCGG">
+      BelongsTo(answer, (
+      AGTAATCGG, TGTAATCGG, GGTAATCGG, CATAATCGG, CCTAATCGG, CTTAATCGG, CGAAATCGG, CGCAATCGG,CGGAATCGG,
+      CGTCATCGG, CGTTATCGG, CGTGATCGG, CGTACTCGG, CGTATTCGG, CGTAGTCGG, CGTAAACGG, CGTAACCGG, CGTAAGCGG, CGTAATAGG,
+      CGTAATTGG, CGTAATGGG, CGTAATCAG, CGTAATCCG, CGTAATCTG, CGTAATCGA, CGTAATCGC, CGTAATCGT
+      ))
+    </calculatorAnswer>
+    <hr>
+    Part (b)
+    For the above problem, how many single point mutations (excluding the original sequence) are possible within the
+    given DNA sequence?
+    <br>
+    <!--The following show all button groups. You can also use the "all" and "none" groups.-->
+    <answer style="display:none"
+      buttons="algebra, trigonometry, inverse_trigonometry, brackets, logarithms, intervals, variables, complex, infinity, limits, series, angle, matrix, logical, newtonsmethod">
+      27
+    </answer>
+
+
+    <hr>
+    Part (c)
+    For the same given DNA sequence, how many single point mutations had occur for the following new sequence:
+    <br>
+    <b style='color:blue'>CGTAATCGG</b>.
+    <br>
+    <answer style="display:none" buttons="none">
+      2
+    </answer>
+
+
+
+  </div>
+
+</body>
+
+</html>

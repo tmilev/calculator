@@ -7,6 +7,7 @@
 #include "math_general_implementation.h"
 #include "serialization_basic.h"
 #include "transport_layer_security.h"
+#include "string_constants.h"
 
 // Putting this in the header file currently breaks the linking for this particular tag.
 // Appears to be a compiler/linker bug (?).
@@ -904,9 +905,8 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::toStringAnnotateBinary() {
     return "ASN1 not initialized properly. ";
   }
   std::stringstream out;
-  out << "<script>";
-  out << "window.calculator.crypto.abstractSyntaxNotationAnnotate(";
-  out << "'" << Crypto::convertListUnsignedCharsToHex(*this->rawDatA) << "'";
+  out << "<script " << WebAPI::result::scriptType << "='abstractSyntaxNotationAnnotate'>";
+  out << "[\"" << Crypto::convertListUnsignedCharsToHex(*this->rawDatA) << "\"";
   out << ", ";
   out << this->decodedData->toString();
   out << ", ";
@@ -914,9 +914,9 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::toStringAnnotateBinary() {
   Crypto::computeSha256(*this->rawDatA, idNonHexed);
   std::string theID = Crypto::convertListUnsignedCharsToHex(idNonHexed);
   out << "\"" << theID << "\"";
-  out << ");";
+  out << "]";
   out << "</script>";
-  out << "<span id=\"" << theID << "\"></span>";
+  out << "<span id='" << theID << "'></span>";
   return out.str();
 }
 
@@ -1585,7 +1585,7 @@ bool PrivateKeyRSA::loadFromPEMFile(const std::string& input, std::stringstream*
   std::string certificateContent;
   // No access to sensitive folders here, so this cannot be used for the server's private key.
   // For server's certificate, use TransportLayerSecurity::loadPEMPrivateKey.
-  if (!FileOperations::loadFiletoStringVirtual(input, certificateContent, false, commentsOnFailure)) {
+  if (!FileOperations::loadFileToStringVirtual(input, certificateContent, false, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load key file. ";
     }
@@ -1852,7 +1852,7 @@ bool X509Certificate::loadFromPEMFile(const std::string& input, std::stringstrea
   std::string certificateContent;
   // No access to sensitive folders here, so this cannot be used for the server's certificate.
   // For server's certificate, use TransportLayerSecurity::loadPEMCertificate.
-  if (!FileOperations::loadFiletoStringVirtual(
+  if (!FileOperations::loadFileToStringVirtual(
     input, certificateContent, false, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -2102,8 +2102,8 @@ bool X509Certificate::loadFromASNEncoded(
   const List<unsigned char>& input, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("X509Certificate::loadFromASNEncoded");
-  AbstractSyntaxNotationOneSubsetDecoder theDecoder;
-  if (!theDecoder.decode(input, 0, this->sourceASN, commentsOnFailure)) {
+  AbstractSyntaxNotationOneSubsetDecoder decoder;
+  if (!decoder.decode(input, 0, this->sourceASN, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to asn-decode certificate input. ";
     }

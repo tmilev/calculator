@@ -8,11 +8,11 @@
 class CalculatorFunctionsBinaryOps {
 public:
   template <class theType>
-  static bool innerMultiplyTypeByType(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyTypeByType(Calculator& calculator, const Expression& input, Expression& output);
   template <class theType>
   static bool innerAddTypeToType(Calculator& calculator, const Expression& input, Expression& output);
   template <class theType>
-  static bool innerDivideTypeByType(Calculator& calculator, const Expression& input, Expression& output);
+  static bool divideTypeByType(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerAddDoubleOrRationalToDoubleOrRational(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAddRatOrPolyOrEWAToRatOrPolyOrEWA(Calculator& calculator, const Expression& input, Expression& output);
@@ -53,7 +53,7 @@ public:
   static bool innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyPolynomialModPByPolynomialModP(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyNumberOrPolynomialByNumberOrPolynomial(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyNumberOrPolynomialByNumberOrPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerMultiplyLRObyLRO(Calculator& calculator, const Expression& input, Expression& output);
@@ -64,7 +64,7 @@ public:
   static bool innerMultiplySequenceByAnyScalar(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplySequenceByMatrix(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerMultiplyMatrixByMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyMatrixByMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyRatOrAlgebraicByMatRatOrMatAlg(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyMatrixRationalOrRationalByMatrixRational(
@@ -76,6 +76,7 @@ public:
   static bool innerMultiplyRationalByRational(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyDoubleOrRationalByDoubleOrRational(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyCoxeterEltByCoxeterElt(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPowerWeylGroupElementByInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyCharacterByCharacter(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyCharSSLieAlgByCharSSLieAlg(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyAnyByUE(Calculator& calculator, const Expression& input, Expression& output);
@@ -141,54 +142,60 @@ public:
   );
 };
 
-template <class theType>
-bool CalculatorFunctionsBinaryOps::innerMultiplyTypeByType(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyTypeByType");
+template <class Type>
+bool CalculatorFunctionsBinaryOps::multiplyTypeByType(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::multiplyTypeByType");
   if (input.size() != 3) {
     return false;
   }
   Expression inputContextsMerged;
-  if (!input.mergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &calculator.comments)) {
+  if (!input.mergeContextsMyArumentsAndConvertThem<Type>(inputContextsMerged, &calculator.comments)) {
     return false;
   }
-  theType result;
-  result = inputContextsMerged[1].getValue<theType>();
-  result *= inputContextsMerged[2].getValue<theType>();
+  Type result;
+  result = inputContextsMerged[1].getValue<Type>();
+  result *= inputContextsMerged[2].getValue<Type>();
   return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), calculator);
 }
 
-template <class theType>
-bool CalculatorFunctionsBinaryOps::innerAddTypeToType(Calculator& calculator, const Expression& input, Expression& output) {
+template <class Type>
+bool CalculatorFunctionsBinaryOps::innerAddTypeToType(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddTypeToType");
   if (input.size() != 3) {
     return false;
   }
   Expression inputContextsMerged;
-  if (!input.mergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &calculator.comments)) {
+  if (!input.mergeContextsMyArumentsAndConvertThem<Type>(inputContextsMerged, &calculator.comments)) {
     return false;
   }
-  theType result;
-  result = inputContextsMerged[1].getValue<theType>();
-  result += inputContextsMerged[2].getValue<theType>();
+  Type result;
+  result = inputContextsMerged[1].getValue<Type>();
+  result += inputContextsMerged[2].getValue<Type>();
   return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), calculator);
 }
 
-template <class theType>
-bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerDivideTypeByType");
+template <class Type>
+bool CalculatorFunctionsBinaryOps::divideTypeByType(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::divideTypeByType");
   if (input.size() != 3) {
     return false;
   }
   Expression inputContextsMerged;
-  if (!input.mergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &calculator.comments)) {
+  if (!input.mergeContextsMyArumentsAndConvertThem<Type>(inputContextsMerged, &calculator.comments)) {
     return false;
   }
-  if (inputContextsMerged[2].getValue<theType>().isEqualToZero()) {
+  if (inputContextsMerged[2].getValue<Type>().isEqualToZero()) {
     return output.makeError("Division by zero. ", calculator);
   }
-  theType result;
-  result = inputContextsMerged[1].getValue<theType>();
-  result /= inputContextsMerged[2].getValue<theType>();
+  Type result;
+  result = inputContextsMerged[1].getValue<Type>();
+  result /= inputContextsMerged[2].getValue<Type>();
   return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), calculator);
 }
 
@@ -208,7 +215,7 @@ bool CalculatorConversions::functionPolynomialWithExponentLimit(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionPolynomialWithExponentLimit");
-  RecursionDepthCounter theRecursionCounter(&calculator.recursionDepth);
+  RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   if (calculator.recursionDepth > calculator.maximumRecursionDepth) {
     return calculator << "Max recursion depth of " << calculator.maximumRecursionDepth
     << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";
@@ -218,10 +225,10 @@ bool CalculatorConversions::functionPolynomialWithExponentLimit(
     return true;
   }
   if (input.isOfType<Polynomial<Rational> >()) {
-    Polynomial<Rational> thePolynomial;
+    Polynomial<Rational> polynomial;
     Polynomial<Coefficient> converted;
-    input.isOfType(&thePolynomial);
-    converted = thePolynomial;
+    input.isOfType(&polynomial);
+    converted = polynomial;
     return output.assignValueWithContext(converted, input.getContext(), calculator);
   }
   if (input.isOfType<Coefficient>() || input.isOfType<Rational>()) {
@@ -248,7 +255,7 @@ bool CalculatorConversions::functionPolynomialWithExponentLimit(
       computer.addChildOnTop(converted);
     }
     if (input.isListStartingWithAtom(calculator.opTimes())) {
-      if (!CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial(
+      if (!CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial(
         calculator, computer, candidate
       )) {
         return false;
@@ -313,21 +320,21 @@ bool CalculatorConversions::functionPolynomialWithExponentLimit(
       }
       Polynomial<Coefficient> resultP = converted.getValue<Polynomial<Coefficient> >();
       if (power < 0) {
-        Coefficient theConst;
-        if (!resultP.isConstant(&theConst)) {
-          calculator << "<hr>Failed to extract polynomial from  "
+        Coefficient inverted;
+        if (!resultP.isConstant(&inverted)) {
+          calculator << "<hr>Failed to extract polynomial from "
           << input.toString() << " because the exponent was negative. "
           << "Please make sure that this is not a typo. "
           << "I am treating " << input.toString() << " as a single variable. ";
           Polynomial<Coefficient> monomial;
           monomial.makeMonomial(0, 1, 1);
-          ExpressionContext theContext(calculator);
-          theContext.makeOneVariable(input);
-          return output.assignValueWithContext(monomial, theContext, calculator);
+          ExpressionContext context(calculator);
+          context.makeOneVariable(input);
+          return output.assignValueWithContext(monomial, context, calculator);
         }
-        theConst.invert();
+        inverted.invert();
         power *= - 1;
-        resultP = theConst;
+        resultP = inverted;
       }
       resultP.raiseToPower(power, 1);
       return output.assignValueWithContext(resultP, converted.getContext(), calculator);

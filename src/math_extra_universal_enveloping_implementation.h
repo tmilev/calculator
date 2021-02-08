@@ -241,8 +241,8 @@ bool MonomialUniversalEnveloping<Coefficient>::commutingABntoBnAPlusLowerOrderAl
       return true;
     }
   }
-  int numPosRoots = this->getOwner().theWeyl.rootsOfBorel.size;
-  int theDimension = this->getOwner().theWeyl.cartanSymmetric.numberOfRows;
+  int numPosRoots = this->getOwner().weylGroup.rootsOfBorel.size;
+  int theDimension = this->getOwner().weylGroup.cartanSymmetric.numberOfRows;
   if (rightGeneratorIndex >= numPosRoots && rightGeneratorIndex < numPosRoots + theDimension) {
     return this->getOwner().theLiebrackets.elements[leftGeneratorIndex][rightGeneratorIndex].isEqualToZero();
   }
@@ -636,7 +636,7 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(
 ) {
   //std::stringstream out;
   this->makeZero(theOwner);
-  WeylGroupData& theWeyl = this->getOwner().theWeyl;
+  WeylGroupData& theWeyl = this->getOwner().weylGroup;
   int theDimension = theWeyl.cartanSymmetric.numberOfRows;
   Vector<Rational> tempRoot1, tempRoot2;
 //  Matrix<Rational> killingForm;
@@ -876,8 +876,8 @@ void ElementUniversalEnveloping<Coefficient>::makeCartanGenerator(
   MonomialUniversalEnveloping<Coefficient> tempMon;
   this->makeZero(inputOwner);
   tempMon.makeOne(inputOwner);
-  int theDimension = this->getOwner().theWeyl.cartanSymmetric.numberOfRows;
-  int numPosRoots = this->getOwner().theWeyl.rootsOfBorel.size;
+  int theDimension = this->getOwner().weylGroup.cartanSymmetric.numberOfRows;
+  int numPosRoots = this->getOwner().weylGroup.rootsOfBorel.size;
   tempMon.generatorsIndices.setSize(1);
   tempMon.powers.setSize(1);
   Coefficient tempCF;
@@ -1680,8 +1680,8 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::commutingLeftIndexAroundRi
     if (theRightPower.isSmallInteger(&tempInt)) {
       return true;
     }
-    int numPosRoots = this->owner->theOwner->theWeyl.rootsOfBorel.size;
-    int theDimension = this->owner->theOwner->theWeyl.cartanSymmetric.numberOfRows;
+    int numPosRoots = this->owner->theOwner->weylGroup.rootsOfBorel.size;
+    int theDimension = this->owner->theOwner->weylGroup.cartanSymmetric.numberOfRows;
     if (rightGeneratorIndex >= numPosRoots && rightGeneratorIndex < numPosRoots + theDimension) {
       ElementSemisimpleLieAlgebra<Rational> tempElt;
       this->owner->theOwner->lieBracket(

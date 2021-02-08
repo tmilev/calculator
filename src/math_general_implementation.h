@@ -499,29 +499,29 @@ void Matrix<Coefficient>::addTwoRows(int fromRowIndex, int ToRowIndex, int Start
 
 template <typename Coefficient>
 void Matrix<Coefficient>::gaussianEliminationByRows(
-  Matrix<Coefficient>* carbonCopyMat,
+  Matrix<Coefficient>* carbonCopyMatrix,
   Selection* outputNonPivotColumns,
   Selection* outputPivotColumns,
   std::stringstream* humanReadableReport,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
   MacroRegisterFunctionWithName("Matrix::gaussianEliminationByRows");
   if (this->numberOfRows == 0) {
     global.fatal << "Request to do Gaussian elimination on a matrix with "
     << " zero rows. " << global.fatal;
   }
-  if (carbonCopyMat != 0) {
-    if (carbonCopyMat->numberOfRows != this->numberOfRows) {
+  if (carbonCopyMatrix != 0) {
+    if (carbonCopyMatrix->numberOfRows != this->numberOfRows) {
       global.fatal << "Request to do "
       << "Gaussian elimination with carbon copy, however the matrix has "
       << this->numberOfRows << " rows, while the carbon copy has "
-      << carbonCopyMat->numberOfRows << " rows. " << global.fatal;
+      << carbonCopyMatrix->numberOfRows << " rows. " << global.fatal;
     }
   }
   ///////////////////
   int tempI;
-  int NumFoundPivots = 0;
-  int MaxRankMat = MathRoutines::minimum(this->numberOfRows, this->numberOfColumns);
+  int numFoundPivots = 0;
+  int maxRankMat = MathRoutines::minimum(this->numberOfRows, this->numberOfColumns);
   Coefficient tempElement;
   if (outputNonPivotColumns != nullptr) {
     outputNonPivotColumns->initialize(this->numberOfColumns);
@@ -529,20 +529,20 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
   if (outputPivotColumns != nullptr) {
     outputPivotColumns->initialize(this->numberOfColumns);
   }
-  bool formatAsLinearSystem = theFormat == nullptr ? false : theFormat->flagFormatMatrixAsLinearSystem;
-  bool useHtmlInReport = theFormat == nullptr ? true : theFormat->flagUseHTML;
+  bool formatAsLinearSystem = format == nullptr ? false : format->flagFormatMatrixAsLinearSystem;
+  bool useHtmlInReport = format == nullptr ? true : format->flagUseHTML;
   ProgressReport theReport(100, GlobalVariables::Response::ReportType::gaussianElimination);
   if (humanReadableReport != nullptr) {
     if (useHtmlInReport) {
-      *humanReadableReport << "\n\n\n\n<table><tr><td style =\"border-bottom:3pt solid black;\">System status</td>"
-      << "<td style =\"border-bottom:3pt solid black;\">action</td></tr>";
+      *humanReadableReport << "\n\n\n\n<table><tr><td style='border-bottom:3pt solid black;'>System status</td>"
+      << "<td style='border-bottom:3pt solid black;mid-width:100px;'>action</td></tr>";
     } else {
       *humanReadableReport << "\n\n\\begin{longtable}{cc} System status&Action \\\\\\hline\n";
     }
   }
-  //Initialization done! Time to do actual work:
+  // Initialization done! Time to do actual work:
   for (int i = 0; i < this->numberOfColumns; i ++) {
-    if (NumFoundPivots == MaxRankMat) {
+    if (numFoundPivots == maxRankMat) {
       if (outputNonPivotColumns != nullptr) {
         for (int j = i; j < this->numberOfColumns; j ++) {
           outputNonPivotColumns->addSelectionAppendNewIndex(j);
@@ -550,7 +550,7 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
       }
       break;
     }
-    tempI = this->findPivot(i, NumFoundPivots);
+    tempI = this->findPivot(i, numFoundPivots);
     if (tempI == - 1) {
       if (outputNonPivotColumns != nullptr) {
         outputNonPivotColumns->addSelectionAppendNewIndex(i);
@@ -559,85 +559,87 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
     }
     if (humanReadableReport != nullptr) {
       if (useHtmlInReport) {
-        *humanReadableReport << "<tr><td style =\"border-bottom:1pt solid black;\">";
+        *humanReadableReport << "<tr><td style='border-bottom:1pt solid black;'>";
         if (formatAsLinearSystem) {
-          *humanReadableReport << HtmlRoutines::getMathNoDisplay(this->toStringSystemLatex(carbonCopyMat, theFormat), - 1);
+          *humanReadableReport << HtmlRoutines::getMathNoDisplay(this->toStringSystemLatex(carbonCopyMatrix, format), - 1);
         } else {
-          *humanReadableReport << HtmlRoutines::getMathNoDisplay(this->toStringLatex(theFormat), - 1);
+          *humanReadableReport << HtmlRoutines::getMathNoDisplay(this->toStringLatex(format), - 1);
         }
-        *humanReadableReport << "</td><td style =\"border-bottom:1pt solid black;\">Selected pivot column "
+        *humanReadableReport << "</td><td style='border-bottom:1pt solid black;'><div style='display:inline-block;min-width:100px'>Selected pivot column "
         << i + 1 << ". ";
-        if (NumFoundPivots != tempI) {
-          *humanReadableReport << "Swapping rows so the pivot row is number " << NumFoundPivots << ". ";
+        if (numFoundPivots != tempI) {
+          *humanReadableReport << "Swapping rows so the pivot row is number " << numFoundPivots << ". ";
         }
       } else {
         if (formatAsLinearSystem) {
-          *humanReadableReport << "$" << this->toStringSystemLatex(carbonCopyMat, theFormat) << "$";
+          *humanReadableReport << "\\(" << this->toStringSystemLatex(carbonCopyMatrix, format) << "\\)";
         } else {
-          *humanReadableReport << "$" << this->toStringLatex(theFormat) << "$";
+          *humanReadableReport << "\\(" << this->toStringLatex(format) << "\\)";
         }
         *humanReadableReport << "& Selected pivot column " << i + 1 << ". ";
-        if (NumFoundPivots != tempI) {
-          *humanReadableReport << "Swapping rows so the pivot row is number " << NumFoundPivots << ". ";
+        if (numFoundPivots != tempI) {
+          *humanReadableReport << "Swapping rows so the pivot row is number " << numFoundPivots << ". ";
         }
       }
     }
     if (outputPivotColumns != nullptr) {
       outputPivotColumns->addSelectionAppendNewIndex(i);
     }
-    this->switchRows(NumFoundPivots, tempI);
-    if (carbonCopyMat != 0) {
-      carbonCopyMat->switchRows(NumFoundPivots, tempI);
+    this->switchRows(numFoundPivots, tempI);
+    if (carbonCopyMatrix != 0) {
+      carbonCopyMatrix->switchRows(numFoundPivots, tempI);
     }
-    tempElement = this->elements[NumFoundPivots][i];
+    tempElement = this->elements[numFoundPivots][i];
     tempElement.invert();
-    this->rowTimesScalar(NumFoundPivots, tempElement);
-    if (carbonCopyMat != 0) {
-      carbonCopyMat->rowTimesScalar(NumFoundPivots, tempElement);
+    this->rowTimesScalar(numFoundPivots, tempElement);
+    if (carbonCopyMatrix != 0) {
+      carbonCopyMatrix->rowTimesScalar(numFoundPivots, tempElement);
     }
     for (int j = 0; j < this->numberOfRows; j ++) {
-      if (j != NumFoundPivots) {
+      if (j != numFoundPivots) {
         if (!this->elements[j][i].isEqualToZero()) {
           tempElement = this->elements[j][i];
           tempElement.negate();
           if (theReport.tickAndWantReport()) {
             std::stringstream reportStream;
-            reportStream << "Gaussian elimination (" << this->numberOfRows << "x" << this->numberOfColumns
+            reportStream << "Gaussian elimination ("
+            << this->numberOfRows << "x" << this->numberOfColumns
             << "): column " << i + 1 << " out of " << this->numberOfColumns
-            << ".\n<br>Pivot row: " << NumFoundPivots + 1 << ", eliminating row " << j + 1 << " out of " << this->numberOfRows;
+            << ".\n<br>Pivot row: " << numFoundPivots + 1
+            << ", eliminating row " << j + 1 << " out of " << this->numberOfRows;
             theReport.report(reportStream.str());
           }
-          this->addTwoRows(NumFoundPivots, j, i, tempElement);
-          if (carbonCopyMat != 0) {
-            carbonCopyMat->addTwoRows(NumFoundPivots, j, 0, tempElement);
+          this->addTwoRows(numFoundPivots, j, i, tempElement);
+          if (carbonCopyMatrix != 0) {
+            carbonCopyMatrix->addTwoRows(numFoundPivots, j, 0, tempElement);
           }
         }
       }
     }
     if (humanReadableReport != nullptr) {
       if (useHtmlInReport) {
-        *humanReadableReport << "Eliminated the non-zero entries in the pivot column</td></tr>";
+        *humanReadableReport << "Eliminated the non-zero entries in the pivot column</div></td></tr>";
       } else {
         *humanReadableReport << "Eliminated the non-zero entries in the pivot column. \\\\\\hline\n";
       }
     }
-    NumFoundPivots ++;
+    numFoundPivots ++;
   }
   if (humanReadableReport != nullptr) {
     if (useHtmlInReport) {
       if (formatAsLinearSystem) {
-        *humanReadableReport << "<tr><td>" << HtmlRoutines::getMathNoDisplay(this->toStringSystemLatex(carbonCopyMat, theFormat), - 1)
+        *humanReadableReport << "<tr><td>" << HtmlRoutines::getMathNoDisplay(this->toStringSystemLatex(carbonCopyMatrix, format), - 1)
         << "</td><td> Final result.</td></tr></table>\n\n\n\n";
       } else {
-        *humanReadableReport << "<tr><td>" << HtmlRoutines::getMathNoDisplay(this->toStringLatex(theFormat))
+        *humanReadableReport << "<tr><td>" << HtmlRoutines::getMathNoDisplay(this->toStringLatex(format))
         << "</td><td> Final result.</td></tr></table>\n\n\n\n";
       }
     } else {
       if (formatAsLinearSystem) {
-        *humanReadableReport << "$" << this->toStringSystemLatex(carbonCopyMat, theFormat)
-        << "$& Final result.\\\\\n";
+        *humanReadableReport << "\\(" << this->toStringSystemLatex(carbonCopyMatrix, format)
+        << "\\)& Final result.\\\\\n";
       } else {
-        *humanReadableReport << "$" << this->toStringLatex(theFormat) << "$& Final result.\\\\\n";
+        *humanReadableReport << "\\(" << this->toStringLatex(format) << "\\)& Final result.\\\\\n";
       }
       *humanReadableReport << "\\end{longtable}";
     }

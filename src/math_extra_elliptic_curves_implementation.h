@@ -87,12 +87,12 @@ std::string ElementEllipticCurve<Coefficient>::toString(FormatExpressions* theFo
   Polynomial<Rational> leftHandSide, rightHandSide;
   leftHandSide.makeMonomial(1, 2, 1);
   rightHandSide.makeMonomial(0, 3, 1);
-  rightHandSide.addMonomial(MonomialP(0, 1), this->owner.linearCoefficient);
+  rightHandSide.addMonomial(MonomialPolynomial(0, 1), this->owner.linearCoefficient);
   rightHandSide += Rational(this->owner.constantTerm);
   out << "ElementEllipticCurveNormalForm{}(" << leftHandSide.toString(theFormat)
   << " = " << rightHandSide.toString(theFormat) << ", "
-  << MonomialP(0, 1).toString(theFormat) << " = " << this->xCoordinate.toString()
-  << ", " << MonomialP(1, 1).toString(theFormat) << " = " << this->yCoordinate.toString()
+  << MonomialPolynomial(0, 1).toString(theFormat) << " = " << this->xCoordinate.toString()
+  << ", " << MonomialPolynomial(1, 1).toString(theFormat) << " = " << this->yCoordinate.toString()
   << ") ";
   if (this->flagInfinity) {
     out << " Infinity. ";

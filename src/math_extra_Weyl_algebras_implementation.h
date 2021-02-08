@@ -361,11 +361,11 @@ template <class Coefficient>
 bool ElementWeylAlgebra<Coefficient>::actOnPolynomial(Polynomial<Rational>& thePoly) const {
   Polynomial<Rational> result;
   result.makeZero();
-  MonomialP resultMonomial;
+  MonomialPolynomial resultMonomial;
   Rational currentCoefficient;
   for (int i = 0; i < this->size(); i ++) {
     for (int j = 0; j < thePoly.size(); j ++) {
-      const MonomialP& currentMonomial = thePoly[j];
+      const MonomialPolynomial& currentMonomial = thePoly[j];
       const MonomialWeylAlgebra& currentOpMon = (*this)[i];
       resultMonomial = currentMonomial;
       currentCoefficient = thePoly.coefficients[j];

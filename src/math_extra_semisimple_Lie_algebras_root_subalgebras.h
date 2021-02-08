@@ -340,7 +340,7 @@ public:
 
 class RootSubalgebras {
 public:
-  List<RootSubalgebra> theSubalgebras;
+  List<RootSubalgebra> subalgebras;
   ConeRelations badRelations;
   ConeRelations goodRelations;
   ConeRelations theMinRels;
@@ -562,14 +562,12 @@ public:
   List<int> IndicesSl2decompositionFlas;
   Vectors<Rational> BadHCharacteristics;
   int IndexZeroWeight;
-  RootSubalgebras theRootSAs;
-  // bool flagDeallocated;
+  RootSubalgebras rootSubalgebras;
   ~SlTwoSubalgebras() {
-    // this->flagDeallocated = true;
   }
-  SlTwoSubalgebras(): owner(nullptr) /*, flagDeallocated(false)*/ {
+  SlTwoSubalgebras(): owner(nullptr) {
   }
-  SlTwoSubalgebras(SemisimpleLieAlgebra& inputOwner): owner(&inputOwner)/*, flagDeallocated(false)*/ {
+  SlTwoSubalgebras(SemisimpleLieAlgebra& inputOwner): owner(&inputOwner) {
    
   }
   bool operator==(const SlTwoSubalgebras& other) const {
@@ -589,7 +587,7 @@ public:
     }
   }
   WeylGroupData& getOwnerWeyl() const {
-    return this->getOwner().theWeyl;
+    return this->getOwner().weylGroup;
   }
   SemisimpleLieAlgebra& getOwner() const {
     this->checkInitialization();
@@ -599,7 +597,7 @@ public:
   void reset(SemisimpleLieAlgebra& inputOwners);
   bool containsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex);
   bool containsSl2WithGivenHCharacteristic(Vector<Rational>& theHCharacteristic, int* outputIndex);
-  void toHTML(FormatExpressions* theFormat = nullptr);
+  void writeHTML(FormatExpressions* format = nullptr);
   std::string toStringSummary(FormatExpressions* theFormat = nullptr);
   void toStringModuleDecompositionMinimalContainingRegularSAs(std::string& output, bool useLatex, bool useHtml);
   std::string toString(FormatExpressions* theFormat = nullptr);

@@ -448,7 +448,9 @@ std::string Crypto::convertStringToBase64URL(const std::string& input) {
   return Crypto::convertListUnsignedCharsToBase64(inputChar, true);
 }
 
-std::string Crypto::convertListUnsignedCharsToBase64(const List<unsigned char>& input, bool useBase64URL) {
+std::string Crypto::convertListUnsignedCharsToBase64(
+  const List<unsigned char>& input, bool useBase64URL
+) {
   MacroRegisterFunctionWithName("Crypto::convertListUnsignedCharsToBase64");
   uint32_t theStack = 0;
   int numBitsInTheStack = 0;
@@ -1576,7 +1578,7 @@ bool Crypto::loadKnownCertificates(std::stringstream* commentsOnFailure, std::st
       continue;
     }
     std::string currentCert;
-    if (!FileOperations::loadFiletoStringVirtual(
+    if (!FileOperations::loadFileToStringVirtual(
       "certificates-public/" + theFileNames[i], currentCert, false, commentsOnFailure
     )) {
       continue;

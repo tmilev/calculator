@@ -245,9 +245,9 @@ public:
       this->objects[i] *= - 1;
     }
   }
-  void makeEi(int DesiredDimension, int NonZeroIndex) {
-    this->makeZero(DesiredDimension);
-    (*this)[NonZeroIndex] = 1;
+  void makeEi(int desiredDimension, int nonZeroIndex) {
+    this->makeZero(desiredDimension);
+    (*this)[nonZeroIndex] = 1;
   }
   inline static unsigned int hashFunction(const Vector<Coefficient>& input) {
     return input.hashFunction();

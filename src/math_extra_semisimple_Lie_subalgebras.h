@@ -80,11 +80,16 @@ public:
   std::string toString(FormatExpressions* theFormat = nullptr);
   SemisimpleLieAlgebra* owner;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theGenerators;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theBasis;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basis;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > cartanSubalgebra;
   void computeBasis();
   void computeCartanSubalgebra();
   SubalgebraSemisimpleLieAlgebra();
+  bool findCartanSubalgebraCandidate(
+    const List<MatrixTensor<AlgebraicNumber> >& adjointOperators,
+    ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputCandidate,
+    const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& currentCentralizer
+  );
   bool checkInitialization();
 };
 
@@ -96,14 +101,14 @@ class CandidateSemisimpleSubalgebra {
 
 public:
   WeylGroupData* weylNonEmbedded;
-  SemisimpleLieAlgebra* theSubalgebraNonEmbeddedDefaultScale;
-  DynkinDiagramRootSubalgebra theCentralizerSubDiagram;
+  SemisimpleLieAlgebra* subalgebraNonEmbeddedDefaultScale;
+  DynkinDiagramRootSubalgebra centralizerSubDiagram;
   DynkinType theCentralizerType;
 
   List<Vectors<Rational> > cartanSubalgebrasByComponentScaledToActByTwo;
-  List<AlgebraicNumber> RatioKillingsByComponent;
-  Vectors<Rational> theHsScaledToActByTwo;
-  Vectors<Rational> theHs;
+  List<AlgebraicNumber> ratiosKillingsByComponent;
+  Vectors<Rational> cartanElementsScaledToActByTwo;
+  Vectors<Rational> cartanElementsSubalgebra;
   Vectors<Rational> theHsScaledToActByTwoInOrderOfCreation;
   Matrix<Rational> bilinearFormSimplePrimal;
   Matrix<Rational> bilinearFormFundPrimal;
@@ -111,24 +116,24 @@ public:
   Matrix<Rational> inducedEmbeddingPrimalFundCoordsIntoFundAmbientCoords;
   Matrix<Rational> matMultiplyFundCoordsToGetSimple;
 
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > thePosGens;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNegGens;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > positiveGenerators;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > negativeGenerators;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theBasis;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > fullBasisByModules;
   List<int> fullBasisOwnerModules;
-  List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > theUnknownPosGens;
-  List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > theUnknownNegGens;
+  List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > unknownPositiveGenerators;
+  List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > unknownNegativeGenerators;
   List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > theUnknownCartanCentralizerBasis;
 
 //  Vector<Rational> aSolution;
-  List<List<ChevalleyGenerator> > theInvolvedPosGenerators;
-  List<List<ChevalleyGenerator> > theInvolvedNegGenerators;
-  CharacterSemisimpleLieAlgebraModule<Rational> theCharFundamentalCoordsRelativeToCartan;
-  CharacterSemisimpleLieAlgebraModule<Rational> theCharNonPrimalFundCoords;
+  List<List<ChevalleyGenerator> > involvedPositiveGenerators;
+  List<List<ChevalleyGenerator> > involvedNegativeGenerators;
+  CharacterSemisimpleLieAlgebraModule<Rational> characterFundamentalCoordinatesRelativeToCartan;
+  CharacterSemisimpleLieAlgebraModule<Rational> characterNonPrimalFundamentalCoordinates;
   CharacterSemisimpleLieAlgebraModule<Rational> primalCharacter;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
   Vectors<Rational> CartanOfCentralizer;
-  List<Polynomial<AlgebraicNumber> > theSystemToSolve;
+  List<Polynomial<AlgebraicNumber> > systemToSolve;
   List<Polynomial<AlgebraicNumber> > transformedSystem;
   SemisimpleSubalgebras* owner;
   int indexInOwner;
@@ -140,7 +145,7 @@ public:
   int indexMaxSSContainer;
   int indexSSPartCentralizer;
   List<int> indicesDirectSummandSuperAlgebra;
-  MemorySaving<FormatExpressions> charFormaT;
+  MemorySaving<FormatExpressions> characterFormat;
   bool flagSubalgebraPreloadedButNotVerified;
   bool flagSystemSolved;
   bool flagSystemProvedToHaveNoSolution;
@@ -225,9 +230,9 @@ public:
   bool amRegularSA() const;
   bool compareLeftGreaterThanRight(const Vector<Rational>& left, const Vector<Rational>& right);
   void getGenericLinearCombination(
-    int numVars,
-    int varOffset,
-    List<ChevalleyGenerator>& involvedGens,
+    int numberOfVariables,
+    int variableOffset,
+    List<ChevalleyGenerator>& involvedGenerators,
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
   );
   void getGenericLinearCombinationInvolvedPosGens(
@@ -321,6 +326,7 @@ public:
   bool computeSystemPart2(bool AttemptToChooseCentalizer, bool allowNonPolynomialSystemFailure);
   bool computeCharacter(bool allowBadCharacter);
   bool attemptToSolveSystem();
+  bool verifySolution(PolynomialSystem<AlgebraicNumber>& system);
   bool isGoodHNewActingByTwo(
     const Vector<Rational>& HNewActingByTwo,
     const List<int>& theRootInjections
@@ -357,13 +363,13 @@ public:
   SemisimpleLieAlgebra* owner;
   AlgebraicClosureRationals* ownerField;
   DynkinType targetDynkinType;
-  SlTwoSubalgebras theSl2s;
-  MapReferences<DynkinType, SemisimpleLieAlgebra>* theSubalgebrasNonEmbedded;
-  MapReferences<Matrix<Rational>, SemisimpleLieAlgebra> theSubalgebrasNonDefaultCartanAndScale;
+  SlTwoSubalgebras slTwoSubalgebras;
+  MapReferences<DynkinType, SemisimpleLieAlgebra>* subalgebrasNonEmbedded;
+  MapReferences<Matrix<Rational>, SemisimpleLieAlgebra> subalgebrasNonDefaultCartanAndScale;
   List<List<Rational> > cachedDynkinIndicesSl2subalgebrasSimpleTypes;
   HashedList<DynkinSimpleType> cachedDynkinSimpleTypesWithComputedSl2Subalgebras;
   List<OrbitIteratorRootActionWeylGroupAutomorphisms> orbits;
-  HashedList<Rational> theOrbitHelementLengths;
+  HashedList<Rational> orbitHElementLengths;
   HashedList<DynkinSimpleType> theOrbitDynkinIndices;
   // List<HashedList<ElementWeylGroup<WeylGroup> > > theOrbitGeneratingElts;
   // if an entry in orbit sizes is - 1 this means the corresponding orbit size has not been computed yet.
@@ -383,7 +389,7 @@ public:
 
   //end current computation state variables.
 
-  MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra> theSubalgebras; //used to search for subalgebras quickly
+  MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra> subalgebras; //used to search for subalgebras quickly
   bool flagRealizedAllCandidates;
   bool flagAttemptToSolveSystems;
   bool flagcomputePairingTable;
@@ -404,7 +410,7 @@ public:
   // Possible values:
   // 1. nulltpr.
   // 2. CalculatorConversions::innerStringFromSemisimpleSubalgebras.
-  std::string (*ToStringExpressionString)(SemisimpleSubalgebras& input);
+  std::string (*toStringExpressionString)(SemisimpleSubalgebras& input);
   bool loadState(
     List<int>& currentChainInt,
     List<int>& numExploredTypes,
@@ -486,8 +492,8 @@ public:
   bool checkConsistency() const;
   bool checkInitialization() const;
   std::string toStringState(FormatExpressions* theFormat = nullptr);
-  std::string ToStringCurrentChain(FormatExpressions* theFormat = nullptr);
-  std::string ToStringProgressReport(FormatExpressions* theFormat = nullptr);
+  std::string toStringCurrentChain(FormatExpressions* theFormat = nullptr);
+  std::string toStringProgressReport(FormatExpressions* theFormat = nullptr);
   std::string toString(FormatExpressions* theFormat = nullptr);
   std::string toStringPart2(FormatExpressions* theFormat = nullptr);
   std::string toStringTableSubalgebraLinksTable(FormatExpressions* theFormat);

@@ -828,7 +828,7 @@ bool WeylGroupAutomorphisms::generateOuterOrbit(
         std::stringstream reportStream;
         reportStream << "Generating outer orbit, " << output.size
         << " elements found so far, Weyl group type: "
-        << this->theWeyl->theDynkinType.toString() << ". ";
+        << this->theWeyl->dynkinType.toString() << ". ";
         theReport.report(reportStream.str());
       }
     }

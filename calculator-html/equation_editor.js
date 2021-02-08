@@ -158,6 +158,11 @@ const knownTypes = {
     "verticalAlign": "text-bottom",
     "overflow": "hidden",
   }),
+  // An input element: rather than being a contentEditable div,
+  // this is a text-only input box.
+  formInput: new MathNodeType({
+    "type": "formInput",
+  }),
   // A non-editable math expression/operator such as "+" or "-".
   atomImmutable: new MathNodeType({
     "type": "atomImmutable",
@@ -549,6 +554,25 @@ class MathNodeFactory {
     return sqrt;
   }
 
+  formInput(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /** @type {string} */
+    content,
+  ) {
+    let nameAndContent = content.split(",");
+    if (nameAndContent.length < 2) {
+      nameAndContent.push("");
+      nameAndContent.push("");
+    }
+    nameAndContent[0] = nameAndContent[0].trim();
+    nameAndContent[1] = nameAndContent[1].trim();
+    const formInput = new MathNodeFormInput(
+      equationEditor, nameAndContent[0], nameAndContent[1],
+    );
+    return formInput;
+  }
+
   /** @returns {MathNode} */
   overLine(
     /** @type {EquationEditor} */
@@ -919,6 +943,14 @@ class MathNodeWithCaretPosition {
     }
   }
 
+  assign(
+    /**@type{MathNodeWithCaretPosition} */
+    other,
+  ) {
+    this.element = other.element;
+    this.position = other.position;
+  }
+
   /**@returns{number} */
   getPositionWholeItemIfNegative(
     /**@type{number} If position is negative, 
@@ -1070,12 +1102,21 @@ function mathFromElement(
   sanitizeLatexSource,
   /**@type{boolean} whether to remove \\displaystyle from latex source.*/
   removeDisplayStyle,
+  /**@type{Function|null} callback after the element has been typeset.*/
+  callback,
 ) {
   let content = container.textContent;
   if (content === null) {
     content = "";
   }
-  return mathFromLatex(container, content, editable, sanitizeLatexSource, removeDisplayStyle);
+  return mathFromLatex(
+    container,
+    content,
+    editable,
+    sanitizeLatexSource,
+    removeDisplayStyle,
+    callback,
+  );
 }
 
 /** @returns {EquationEditor} Returns typeset math.*/
@@ -1090,14 +1131,25 @@ function mathFromLatex(
   sanitizeLatexSource,
   /**@type{boolean} whether to remove \\displaystyle from latex source.*/
   removeDisplayStyle,
+  /**@type{Function|null} callback after the element has been typeset*/
+  callback,
 ) {
+  let lineBreakWidthString = container.getAttribute("lineBreakWidth");
+  let lineBreakWidth = 0;
+  if (lineBreakWidthString !== "") {
+    lineBreakWidth = parseInt(lineBreakWidthString);
+  }
   let result = new EquationEditor(container, new EquationEditorOptions({
     editable: editable,
     sanitizeLatexSource: sanitizeLatexSource,
     removeDisplayStyle: removeDisplayStyle,
     logTiming: true,
+    lineBreakWidth: lineBreakWidth,
   }));
   result.writeLatex(latex);
+  if (callback !== undefined && callback !== null) {
+    callback(result);
+  }
   return result;
 }
 
@@ -1242,6 +1294,8 @@ class LaTeXConstants {
       // Special command reserved for indicating the 
       // caret position when the latex is used in an editable box.
       "caret": "\\caret",
+      // Special command reserved for generation of input box.
+      "formInput": "\\formInput",
       "end": "\\end",
       "frac": "\\frac",
       "mathcal": "\\mathcal",
@@ -1262,15 +1316,19 @@ class LaTeXConstants {
       "otimes": "\u2297",
       "oplus": "\u2295",
       "times": "\u00D7",
-      "circ": "\u25CB",
+      "circ": "\u2218",
       "cdot": "\u00B7",
       "leq": "\u2264",
       "neq": "\u2260",
       "dots": "\u2026",
       "vdots": "\u22EE",
       "approx": "~",
+      "subset": "\u2282",
+      "supset": "\u2283",
+      "setminus": "\\",
       "lt": "<",
       "gt": ">",
+      "sqcup": "\u2294",
       "to": "\u2192",
       "nwarrow": "\u2196",
       "nearrow": "\u2197",
@@ -1290,7 +1348,6 @@ class LaTeXConstants {
       "arctan": "arctan",
       "arccos": "arccos",
       "arcsin": "arcsin",
-      "emptyset": "\u2205",
       "in": "\u2208",
       "cap": "\u2229",
       "cup": "\u222A",
@@ -1335,6 +1392,7 @@ class LaTeXConstants {
       "theta": "\u03B8",
       "vartheta": "",
       "iota": "\u03B9",
+      "emptyset": "\u2205",
       "kappa": "\u03BA",
       "lambda": "\u03BB",
       "mu": "\u03BC",
@@ -1377,6 +1435,7 @@ class LaTeXConstants {
       "Omega": "\u03A9",
       "infty": "\u221E",
       "S": "\u00A7",
+      "partial": "\u2202",
     };
     /**@type{Object.<string, string>} */
     this.latexBackslashAtomsEditableBackslashed = {};
@@ -1559,22 +1618,13 @@ class LaTeXConstants {
   convertUtf16ToLatex(
     /** @type{string} */
     input,
-    /** @type{number} */
-    selectionStart,
-    /** @type{number} */
-    selectionEnd,
     /**@type{number} */
     positionCaret,
   ) {
     this.computeUtf16ToLatexMap();
     let result = [];
-    let lengthSoFar = 0;
-    let startFound = false;
-    let endFound = false;
-
     if (positionCaret === 0) {
       result.push("\\caret ");
-      lengthSoFar += 7;
     }
     for (let i = 0; i < input.length; i++) {
       let current = "";
@@ -1591,21 +1641,11 @@ class LaTeXConstants {
       if (current !== "") {
         result.push(current);
       }
-      if (i === selectionStart && !startFound) {
-        selectionStart = lengthSoFar;
-        startFound = true;
-      }
-      lengthSoFar += current.length;
-      if (i + 1 === selectionEnd && !endFound) {
-        selectionEnd = lengthSoFar;
-        endFound = true;
-      }
       if (i + 1 === positionCaret) {
         result.push("\\caret ");
-        lengthSoFar += 7;
       }
     }
-    return new LatexWithAnnotation(result.join(""), selectionStart, selectionEnd);
+    return new LatexWithAnnotation(result.join(""));
   }
 
   isCharacterReplacingSelection(
@@ -2190,6 +2230,7 @@ class LaTeXParser {
     if (secondToLast.syntacticRole === "matrixBuilder" && last.syntacticRole === "&") {
       // Modify secondToLast.node in place for performance reasons:
       // copying it may cause unwanted quadratic complexity.
+      this.lastRuleName = "matrix builder ampersand";
       let incomingEntry = mathNodeFactory.matrixRowEntry(this.equationEditor, mathNodeFactory.atom(this.equationEditor, ""));
       secondToLast.node.getLastMatrixRow().appendChild(incomingEntry);
       return this.decreaseParsingStack(1);
@@ -2197,6 +2238,7 @@ class LaTeXParser {
     if (last.syntacticRole === "\\\\" && secondToLast.isExpression() && thirdToLast.syntacticRole === "matrixBuilder") {
       // Modify thirdToLast.node in place for performance reasons:
       // copying it may cause unwanted quadratic complexity.
+      this.lastRuleName = "matrix builder expression double backslash";
       let lastRow = thirdToLast.node.getLastMatrixRow();
       let incomingEntry = mathNodeFactory.matrixRowEntry(this.equationEditor, secondToLast.node);
       lastRow.appendChild(incomingEntry);
@@ -2207,11 +2249,17 @@ class LaTeXParser {
     if (last.syntacticRole === "\\\\" && secondToLast.syntacticRole === "matrixBuilder") {
       // Modify secondToLast.node in place for performance reasons:
       // copying it may cause unwanted quadratic comoplexity.
+      this.lastRuleName = "matrix builder double backslash";
       let lastRow = secondToLast.node.getLastMatrixRow();
       let incomingEntry = mathNodeFactory.matrixRowEntry(this.equationEditor, mathNodeFactory.atom(this.equationEditor, ""));
       lastRow.appendChild(incomingEntry);
       let newRow = mathNodeFactory.matrixRow(this.equationEditor, 0);
       lastRow.parent.appendChild(newRow);
+      return this.decreaseParsingStack(1);
+    }
+    if (last.syntacticRole === "\\\\") {
+      // Double backslah indicates a line break, which we choose to ignore.
+      this.lastRuleName = "remove double backslash";
       return this.decreaseParsingStack(1);
     }
     if (thirdToLast.syntacticRole === "matrixBuilder" && secondToLast.isExpression() && last.isMatrixEnder()) {
@@ -2241,6 +2289,15 @@ class LaTeXParser {
     if (secondToLast.syntacticRole === "\\cancel" && last.isExpression()) {
       this.lastRuleName = "cancel expression";
       let node = mathNodeFactory.cancel(this.equationEditor, last.node);
+      return this.replaceParsingStackTop(node, "", - 2);
+    }
+    if (
+      secondToLast.syntacticRole === "\\formInput" &&
+      last.isExpression() &&
+      !this.equationEditor.options.editable
+    ) {
+      this.lastRuleName = "form input";
+      let node = mathNodeFactory.formInput(this.equationEditor, last.node.toLatex());
       return this.replaceParsingStackTop(node, "", - 2);
     }
     if (secondToLast.syntacticRole === "{" && last.syntacticRole === "}") {
@@ -2290,6 +2347,11 @@ class LaTeXParser {
       let node = mathNodeFactory.baseWithSubscript(this.equationEditor, thirdToLast.node, last.node);
       return this.replaceParsingStackTop(node, "", - 3);
     }
+
+    if (thirdToLast.syntacticRole === "\\frac" && secondToLast.isExpression() && last.isExpression()) {
+      let node = mathNodeFactory.fraction(this.equationEditor, secondToLast.node, last.node);
+      return this.replaceParsingStackTop(node, "", - 3);
+    }
     if (
       last.isExpression() &&
       secondToLast.isExpression() &&
@@ -2317,10 +2379,6 @@ class LaTeXParser {
     if (thirdToLast.isExpression() && secondToLast.syntacticRole === "^" && last.isExpression()) {
       this.lastRuleName = "make exponent";
       let node = mathNodeFactory.baseWithExponent(this.equationEditor, thirdToLast.node, last.node);
-      return this.replaceParsingStackTop(node, "", - 3);
-    }
-    if (thirdToLast.syntacticRole === "\\frac" && secondToLast.isExpression() && last.isExpression()) {
-      let node = mathNodeFactory.fraction(this.equationEditor, secondToLast.node, last.node);
       return this.replaceParsingStackTop(node, "", - 3);
     }
     if (thirdToLast.syntacticRole === "\\binom" && secondToLast.isExpression() && last.isExpression()) {
@@ -2369,7 +2427,15 @@ class LaTeXParser {
 
 class EquationEditorOptions {
   constructor(
-    /** @type{{editable:boolean,removeDisplayStyle:boolean,sanitizeLatexSource:boolean,debugLogContainer:HTMLElement|null,latexInput:HTMLElement|null,editHandler:Function|null}} */
+    /** @type{{
+     * editable?:boolean,
+     * removeDisplayStyle?:boolean,
+     * sanitizeLatexSource?:boolean,
+     * debugLogContainer?:HTMLElement|null,
+     * latexInput?:HTMLElement|null,
+     * editHandler?:Function|null,
+     * lineBreakWidth?: boolean,
+     * }} */
     options,
   ) {
     /** @type{boolean} */
@@ -2386,8 +2452,16 @@ class EquationEditorOptions {
     this.latexInput = options.latexInput;
     /** @type{boolean} */
     this.logTiming = options.logTiming;
-    /**@type{Function|null} */
-    // Called on modification of the editor. Will provide two arguments: the editor and the MathNode being edited.
+    /**@type{number} */
+    this.lineBreakWidth = options.lineBreakWidth;
+    if (this.lineBreakWidth === null || this.lineBreakWidth === undefined) {
+      this.lineBreakWidth = 0;
+    }
+    /**@type{Function|null} 
+     * Called on modification of the editor. 
+     * Will provide two arguments: 
+     * the editor and the MathNode being edited.
+    */
     this.editHandler = options.editHandler;
     if (this.svgContainer === undefined) {
       this.svgContainer = null;
@@ -2531,6 +2605,65 @@ class CircularBuffer {
   }
 }
 
+class FocusInformation {
+  constructor() {
+    /** @type {MathNode|null} Used to write to the last focused node.*/
+    this.lastFocused = null;
+    /** @type{MathNodeWithCaretPosition} */
+    this.lastSelectionStart = new MathNodeWithCaretPosition(null, -1);
+    /** @type{MathNodeWithCaretPosition} */
+    this.lastSelectionStartExpanded = new MathNodeWithCaretPosition(null, - 1);
+    /** @type{MathNodeWithCaretPosition} */
+    this.lastSelectionEnd = new MathNodeWithCaretPosition(null, -1);
+    /** @type{MathNodeWithCaretPosition} */
+    this.lastSelectionEndExpanded = new MathNodeWithCaretPosition(null, -1);
+  }
+
+  setLastFocused(
+    /**@type{MathNode|null} */
+    lastFocused,
+  ) {
+    this.lastFocused = lastFocused;
+  }
+
+  setLastSelection(
+    /**@type{EquationEditor} */
+    editor,
+  ) {
+    this.lastSelectionStart.assign(editor.selectionStart);
+    this.lastSelectionStartExpanded.assign(editor.selectionStartExpanded);
+    this.lastSelectionEnd.assign(editor.selectionEnd);
+    this.lastSelectionEndExpanded.assign(editor.selectionEndExpanded);
+  }
+
+  restoreSelection(
+    /**@type{EquationEditor} */
+    editor,
+  ) {
+    editor.selectionStart.assign(this.lastSelectionStart);
+    editor.selectionStartExpanded.assign(this.lastSelectionStartExpanded);
+    editor.selectionEnd.assign(this.lastSelectionEnd);
+    editor.selectionEndExpanded.assign(this.lastSelectionEndExpanded);
+  }
+
+  /**@returns {HTMLElement[]} */
+  toHtmlDebugData() {
+    let result = [];
+    if (this.lastFocused === null) {
+      return result;
+    }
+    result.push(document.createElement("br"));
+    result.push(document.createTextNode(
+      `Last focused: ${this.lastFocused.toString()}, position: ${this.lastFocused.positionCaretBeforeKeyEvents}`
+    ));
+    if (this.lastFocused.isDetached()) {
+      result.push(document.createElement("br"));
+      result.push(boldElement("Detached last focused.", "red"));
+    }
+    return result;
+  }
+}
+
 class EquationEditor {
   constructor(
     /** @type{HTMLElement} */
@@ -2556,6 +2689,7 @@ class EquationEditor {
       this.rootNode.type.padding = "";
       this.rootNode.type.margin = "";
       this.rootNode.type.cursor = "";
+      this.rootNode.type.minWidth = "";
     } else {
       this.container.style.margin = "2px";
       this.container.style.padding = "2px";
@@ -2605,10 +2739,7 @@ class EquationEditor {
         this.writeLatexFromInput();
       });
     }
-    /** @type {MathNode|null} Used to write to the last focused node.*/
-    this.lastFocused = null;
-    /** @type{number} */
-    this.lastCaretPosition = - 1;
+    this.focusInformation = new FocusInformation();
     /** @type{string} */
     this.lastSelectionAction = "";
     /** @type{number} */
@@ -2667,20 +2798,34 @@ class EquationEditor {
   }
 
   copyToClipboard() {
-    let latexWithAnnotation = this.rootNode.toLatexWithAnnotation(null);
     let toBeCopied = "";
-    if (latexWithAnnotation.selectionStart === - 1 || latexWithAnnotation.selectionEnd === - 1) {
-      toBeCopied = latexWithAnnotation.latex;
+    if (this.selectionEndExpanded.element === null || this.selectionStartExpanded.element === null) {
+      toBeCopied = this.rootNode.toLatexWithAnnotation(null).latex;
     } else {
-      let start = latexWithAnnotation.selectionStart;
-      let end = latexWithAnnotation.selectionEnd;
-      if (start > end) {
-        let original = start;
-        start = end;
-        end = original;
+      let left = this.selectionStartExpanded.element;
+      let right = this.selectionEndExpanded.element;
+      if (right.isToTheLeftOf(left)) {
+        let copy = right;
+        right = left;
+        left = copy;
       }
-      let sliced = latexWithAnnotation.latex.slice(start, end);
-      toBeCopied = sliced;
+      left = left.beefUpToHorizontalParent();
+      right = right.beefUpToHorizontalParent();
+      /**@type {string[]} */
+      let latexContent = [];
+      /**@type {MathNode} */
+      let current = left;
+      for (; ;) {
+        latexContent.push(current.toLatexWithAnnotation(null).latex);
+        if (current === right) {
+          break;
+        }
+        current = current.horizontalSibling(1);
+        if (current === null) {
+          break;
+        }
+      }
+      toBeCopied = latexContent.join("");
     }
     this.lastCopied = toBeCopied;
     navigator.clipboard.writeText(toBeCopied);
@@ -2750,6 +2895,10 @@ class EquationEditor {
     range.setEnd(this.eventCatcher.element, 0);
     window.getSelection().addRange(range);
     this.eventCatcher.focus(1);
+  }
+
+  storeSelection() {
+    this.focusInformation.setLastSelection(this);
   }
 
   updateDOM() {
@@ -2849,7 +2998,7 @@ class EquationEditor {
     /**@type {string} */
     latex,
   ) {
-    if (this.lastFocused === null) {
+    if (this.focusInformation.lastFocused === null) {
       let toWriteTo = this.rootNode.rightmostAtomChild();
       if (toWriteTo === null) {
         console.log("Unexpected failure to find atom child.");
@@ -2859,9 +3008,9 @@ class EquationEditor {
       toWriteTo.writeLatex(latex);
       return;
     }
-    let lastFocusedReference = this.lastFocused;
+    let lastFocusedReference = this.focusInformation.lastFocused;
     // Ensure reference to last modified is wiped early.
-    this.lastFocused = null;
+    this.focusInformation.lastFocused = null;
     lastFocusedReference.writeLatex(latex);
   }
 
@@ -2880,12 +3029,7 @@ class EquationEditor {
     /**@type{MathNode|null} */
     lastFocused,
   ) {
-    this.lastFocused = lastFocused;
-    if (this.lastFocused === null) {
-      this.lastCaretPosition = - 1;
-      return;
-    }
-    this.lastCaretPosition = lastFocused.positionCaretBeforeKeyEvents;
+    this.focusInformation.setLastFocused(lastFocused);
   }
 
   /**@returns {HTMLElement[]} */
@@ -2899,15 +3043,9 @@ class EquationEditor {
       result.push(document.createElement("br"));
       result.push(document.createTextNode(`Last copied: ${this.lastCopied}`))
     }
-    if (this.lastFocused !== null) {
-      result.push(document.createElement("br"));
-      result.push(document.createTextNode(
-        `Last focused: ${this.lastFocused.toString()}, position: ${this.lastFocused.positionCaretBeforeKeyEvents}`
-      ));
-      if (this.lastFocused.isDetached()) {
-        result.push(document.createElement("br"));
-        result.push(boldElement("Detached last focused.", "red"));
-      }
+    let focusInformation = this.focusInformation.toHtmlDebugData();
+    for (let i = 0; i < focusInformation.length; i++) {
+      result.push(focusInformation[i]);
     }
     result.push(document.createElement("br"));
     result.push(document.createTextNode(`History: ${this.toStringHistory()}`));
@@ -2916,7 +3054,7 @@ class EquationEditor {
       result.push(document.createTextNode(`Last selection action: ${this.lastSelectionAction}`));
     }
     result.push(document.createElement("br"));
-    result.push(document.createTextNode(`Latex selection: ${latexWithAnnotation.selectionStart}, ${latexWithAnnotation.selectionEnd}`));
+    result.push(document.createTextNode(this.toStringSelection()));
     result.push(document.createElement("br"));
     result.push(document.createTextNode(`Structure: `));
     let elements = this.rootNode.toHtmlDebugData(0);
@@ -2951,7 +3089,7 @@ class EquationEditor {
     /**@type{string} */
     key,
   ) {
-    let focused = this.resetSelectionFocusBestChoice();
+    let focused = this.restoreSelectionOrFocusBestChoice();
     this.dispatchKeyToNode(focused, key);
   }
 
@@ -2968,21 +3106,26 @@ class EquationEditor {
       focused.focus(0);
       return;
     }
-    focused.handleKeyDownDontComputeCaretPosition(new KeyboardEvent(
+    let event = new KeyboardEvent(
       "keydown", {
       key: key,
-    }));
+    });
+    if (focused === this.eventCatcher) {
+      this.handleKeyDownCatchAll(event);
+      return;
+    }
+    focused.handleKeyDownDontComputeCaretPosition(event);
   }
 
   /**@returns{MathNode} */
   getLastFocused() {
-    if (this.lastFocused === null) {
+    if (this.focusInformation.lastFocused === null) {
       return this.rootNode.rightmostAtomChild();
     }
-    if (this.lastFocused.isDetached()) {
+    if (this.focusInformation.lastFocused.isDetached()) {
       return this.rootNode.rightmostAtomChild();
     }
-    return this.lastFocused;
+    return this.focusInformation.lastFocused;
   }
 
   /**@returns{KeyHandlerResult} */
@@ -2995,6 +3138,15 @@ class EquationEditor {
     this.initializeSelectionStart(target);
     let preventDefault = this.computeSelectionEndFromShiftKey(arrowKey);
     return new KeyHandlerResult(preventDefault, preventDefault);
+  }
+
+  /**@returns{MathNode} The node that was focused or the event catcher. */
+  restoreSelectionOrFocusBestChoice() {
+    if (this.hasSelection()) {
+      this.eventCatcher.focus(0);
+      return this.eventCatcher;
+    }
+    return this.resetSelectionFocusBestChoice();
   }
 
   /**@returns{MathNode} The node that was focused. */
@@ -3020,6 +3172,23 @@ class EquationEditor {
       result.positionCaretBeforeKeyEvents = position;
     }
     return result;
+  }
+
+  makeSqrtFromSelection(
+    /** @type{SplitBySelectionResult} */
+    splitBySelection,
+  ) {
+    let ancestor = splitBySelection.ancestor;
+    ancestor.removeAllChildren();
+    let underTheRadical = mathNodeFactory.horizontalMathFromArray(this, splitBySelection.split);
+    underTheRadical.ensureEditableAtoms();
+    let sqrt = mathNodeFactory.sqrt(this, underTheRadical, null);
+    ancestor.appendChildren(splitBySelection.beforeSplit);
+    ancestor.appendChild(sqrt);
+    ancestor.appendChildren(splitBySelection.afterSplit);
+    ancestor.ensureEditableAtoms();
+    ancestor.updateDOM();
+    sqrt.children[2].focusStandard(0);
   }
 
   makeFractionNumeratorFromSelection(
@@ -3118,6 +3287,13 @@ class EquationEditor {
         return;
       case "/":
         this.makeFractionNumeratorFromSelection(this.splitAtomsBySelection());
+        return;
+      case "\\sqrt":
+        if (!this.hasSelection()) {
+          this.resetSelectionFocusBestChoice().makeSqrt();
+          return;
+        }
+        this.makeSqrtFromSelection(this.splitAtomsBySelection());
         return;
       case "Delete":
       case "Backspace":
@@ -3235,13 +3411,12 @@ class EquationEditor {
     }
     let startAnnotationString = "[expanded selection null]";
     if (this.selectionStartExpanded.element !== null) {
-      let startAnnotation = this.selectionStartExpanded.element.toLatexWithAnnotation(null);
-      startAnnotationString = startAnnotation.toString();
+      startAnnotationString = this.selectionStartExpanded.element.toLatexWithAnnotation(null).latex;
     }
-    let endAnnotation = this.selectionEnd.element.toLatexWithAnnotation(null);
+    let endAnnotationString = this.selectionEnd.element.toLatexWithAnnotation(null).latex;
     let result = `Selection: from: ${this.selectionStartExpanded.toString()} to: ${this.selectionEndExpanded.toString()}.`;
-    result += `<br>Actually selected: ${this.selectionStart.toString()} to: ${this.selectionEnd.toString()}.`;
-    result += `<br>Latex from: ${startAnnotationString} to ${endAnnotation.toString()}`;
+    result += `Actually selected: ${this.selectionStart.toString()} to: ${this.selectionEnd.toString()}.`;
+    result += `Latex from: ${startAnnotationString} to ${endAnnotationString}`;
     return result;
   }
 
@@ -3321,6 +3496,7 @@ class EquationEditor {
     }
     let start = this.selectionStartExpanded;
     let end = this.selectionEndExpanded;
+
     if (end.element.isToTheLeftOf(start.element)) {
       // Swap end and start
       let temporary = start;
@@ -3486,7 +3662,16 @@ class EquationEditor {
       return false;
     }
     this.selectionEnd = newSelection;
-    return this.selectFromElement(newSelection.element);
+    setTimeout(() => {
+      this.selectFromElement(newSelection.element);
+    }, 0);
+    if (this.selectionNoMoreDefault) {
+      return true;
+    }
+    if (newSelection.element !== this.selectionStart.element) {
+      return true;
+    }
+    return false;
   }
 
   /** @returns{boolean} whether the default browser selection action should be prevented. */
@@ -3494,9 +3679,20 @@ class EquationEditor {
     /** @type {MathNode} */
     element,
   ) {
+    this.mouseIgnoreNextClick = true;
     if (element === this.selectionStart.element && !this.selectionNoMoreDefault) {
-      this.selectionStartExpanded.element = this.selectionStart.element;
-      this.selectionStartExpanded.position = this.selectionStart.position;
+      this.selectionStartExpanded.assign(this.selectionStart);
+      this.selectionEnd.element.storeCaretPosition("", false);
+      this.selectionEnd.position = this.selectionEnd.element.positionCaretBeforeKeyEvents;
+      if (
+        this.selectionEnd.position === this.selectionStart.position &&
+        this.selectionEnd.element.selectionLength !== 0
+      ) {
+        this.selectionEnd.position -= this.selectionEnd.element.selectionLength;
+      }
+      this.selectionEndExpanded.assign(this.selectionEnd);
+      this.storeSelection();
+      this.writeDebugInfo(null);
       return false;
     }
     this.preventEditorBlur = true;
@@ -3510,11 +3706,11 @@ class EquationEditor {
     this.selectionEnd.element = element;
     this.selectionEnd.position = - 1;
     this.computeSelectionExpanded();
-    this.mouseIgnoreNextClick = true;
     this.highlightSelectionMouse();
     if (this.options.debugLogContainer !== null) {
       this.lastSelectionAction = `Mouse move selection above ${element.toString()}.`;
     }
+    this.storeSelection();
     this.writeDebugInfo(null);
     this.preventEditorBlur = false;
     return true;
@@ -3701,8 +3897,16 @@ class EquationEditor {
     this.mouseSelectionStarted = true;
     this.mouseSelectionVisible = true;
     if (this.options.debugLogContainer !== null) {
-      this.lastSelectionAction = `Mouse selection start over ${element.toString()}.`;
+      this.lastSelectionAction = `Mouse selection start over ${element.toString()}, position:${element.positionCaretBeforeKeyEvents}.`;
     }
+    // The mouse down event may fire before the built-in element ranges are updated.
+    // So, release the event handling to allow built-in processing to take place, and 
+    // schedule an element update immediately after.
+    setTimeout(() => {
+      element.storeCaretPosition("", false);
+      this.selectionStart.position = element.positionCaretBeforeKeyEvents;
+      this.writeDebugInfo(null);
+    }, 0);
     this.writeDebugInfo(null);
     return;
   }
@@ -3716,6 +3920,7 @@ class EquationEditor {
     }
     this.mouseSelectionStarted = false;
     this.preventEditorBlur = false;
+    this.writeDebugInfo(null);
     e.preventDefault();
     e.stopPropagation();
   }
@@ -3757,6 +3962,11 @@ class BoundingBox {
     this.width = 0;
     /** @type{number}*/
     this.height = 0;
+    /** @type{number} 
+     * Used with broken lines to 
+     * indicate the height of the broken line.
+     */
+    this.lineHeight = - 1;
     /** @type{number}*/
     this.fractionLineHeight = 0;
 
@@ -3800,67 +4010,22 @@ class BoundingBox {
   }
 }
 
+/** Contains latex of a math node with metadata.  
+ * 
+ * Currently, this class contains LaTeX data only. 
+ */
+// This class used to contain more information 
+// than the latex string but
+// that turned out to be bug-prone so 
+// the metadata was removed. We keep the class however, 
+// in case we need to store metada in the future again.
 class LatexWithAnnotation {
   constructor(
     /**@type{string} */
     latex,
-    /**@type{number} */
-    selectionStart,
-    /**@type{number} */
-    selectionEnd,
   ) {
     /** @type {string} */
     this.latex = latex;
-    /** @type {number} */
-    this.selectionStart = selectionStart;
-    /** @type {number} */
-    this.selectionEnd = selectionEnd;
-  }
-
-  /**@returns{LatexWithAnnotation} Accounts start/end of a selection. 
-   * Returns this object.
-   */
-  accountOwner(
-    /** @type{MathNode} */
-    owner,
-  ) {
-    let endSelection = owner.equationEditor.selectionEndExpanded;
-    let endElement = endSelection.element;
-    if (owner === endElement && endSelection.position === -1) {
-      if (owner.equationEditor.selectionStartToTheLeftOfSelectionEnd()) {
-        this.selectionEnd = this.latex.length;
-      } else {
-        this.selectionEnd = 0;
-      }
-    }
-    let startSelection = owner.equationEditor.selectionStartExpanded;
-    let startElement = startSelection.element;
-    if (owner === startElement && startSelection.position === -1) {
-      if (owner.equationEditor.selectionStartToTheLeftOfSelectionEnd()) {
-        this.selectionStart = 0;
-      } else {
-        this.selectionStart = this.latex.length;
-      }
-    }
-    return this;
-  }
-
-  accountChild(
-    /** @type{LatexWithAnnotation} */
-    child,
-    /** @type{number} */
-    shift,
-  ) {
-    if (child.selectionStart !== - 1) {
-      this.selectionStart = shift + child.selectionStart;
-    }
-    if (child.selectionEnd !== - 1) {
-      this.selectionEnd = shift + child.selectionEnd;
-    }
-  }
-
-  toString() {
-    return `${this.latex} [[${this.selectionStart}, ${this.selectionEnd}]]`;
   }
 }
 
@@ -3899,6 +4064,8 @@ class MathNode {
     /** @type {number} */
     this.positionCaretBeforeKeyEvents = - 1;
     /** @type {number} */
+    this.selectionLength = - 1;
+    /** @type {number} */
     this.desiredCaretPosition = - 1;
     /** @type {string} */
     this.initialContent = "";
@@ -3925,7 +4092,11 @@ class MathNode {
       // Element already created;
       return;
     }
-    this.element = document.createElement("div");
+    if (this.type.type === knownTypes.formInput.type) {
+      this.element = document.createElement("input");
+    } else {
+      this.element = document.createElement("div");
+    }
     const fontSize = 20;
     if (
       (this.type.type === knownTypes.eventCatcher.type || this.type.type === knownTypes.atom.type) &&
@@ -4038,7 +4209,11 @@ class MathNode {
       this.element.style.fontSize = `${this.type.fontSizeRatio * 100}%`;
     }
     if (this.initialContent !== "") {
-      this.element.textContent = this.initialContent;
+      if (this.type.type === knownTypes.formInput.type) {
+        this.element.value = this.initialContent;
+      } else {
+        this.element.textContent = this.initialContent;
+      }
     }
     if (this.type.position !== "") {
       this.element.style.position = this.type.position;
@@ -4104,9 +4279,11 @@ class MathNode {
     e.preventDefault();
     if (this.equationEditor.mouseIgnoreNextClick) {
       this.equationEditor.mouseIgnoreNextClick = false;
-      this.equationEditor.resetSelectionDOMSelectEventCatcher();
-      if (this.equationEditor.options.debugLogContainer !== null) {
-        this.equationEditor.lastSelectionAction = "Set mouse ignore next to true.";
+      if (this.equationEditor.selectionEscapedOriginalAtom()) {
+        this.equationEditor.resetSelectionDOMSelectEventCatcher();
+        if (this.equationEditor.options.debugLogContainer !== null) {
+          this.equationEditor.lastSelectionAction = "Set mouse ignore next to true.";
+        }
       }
       this.equationEditor.writeDebugInfo(null);
       return;
@@ -4245,6 +4422,30 @@ class MathNode {
   }
 
   /** @returns {boolean} */
+  isAtomicNonEmptyOrHorizontalMathWithNonEmptyAtomic() {
+    if (this.isAtomic()) {
+      return this.contentIfAtomic() !== "";
+    }
+    if (this.type.type !== knownTypes.horizontalMath.type) {
+      return false;
+    }
+    let numberOfAtomicNonEmpty = 0;
+    for (let i = 0; i < this.children.length; i++) {
+      let child = this.children[i];
+      if (!child.isAtomic()) {
+        return false;
+      }
+      if (child.contentIfAtomic() !== "") {
+        numberOfAtomicNonEmpty++;
+        if (numberOfAtomicNonEmpty > 1) {
+          return false;
+        }
+      }
+    }
+    return numberOfAtomicNonEmpty === 1;
+  }
+
+  /** @returns {boolean} */
   isAtomic() {
     return (
       this.type.type === knownTypes.atom.type ||
@@ -4279,7 +4480,9 @@ class MathNode {
     depth,
   ) {
     if (
-      this.type.type === knownTypes.atom.type
+      this.type.type === knownTypes.atom.type ||
+      this.type.type === knownTypes.atomImmutable.type ||
+      this.type.type === knownTypes.formInput
     ) {
       this.createDOMElementIfMissing();
       return;
@@ -4893,7 +5096,9 @@ class MathNode {
     // Compute present element height.
     for (let i = 0; i < this.children.length; i++) {
       let child = this.children[i];
-      let heightFromChild = child.boundingBox.height - child.boundingBox.fractionLineHeight + this.boundingBox.fractionLineHeight;
+      let heightFromChild = child.boundingBox.height -
+        child.boundingBox.fractionLineHeight +
+        this.boundingBox.fractionLineHeight;
       this.boundingBox.height = Math.max(this.boundingBox.height, heightFromChild);
     }
   }
@@ -4908,6 +5113,7 @@ class MathNode {
     }
     this.mergeBoundingBoxesHorizontallyAlignedElements();
     this.computeMiddleAlignment();
+    this.computeLineBreaks();
   }
 
   computeMiddleAlignment() {
@@ -4917,6 +5123,58 @@ class MathNode {
         this.boundingBox.needsMiddleAlignment = true;
         return;
       }
+    }
+  }
+
+  computeLineBreaks() {
+    if (this.type.type !== knownTypes.horizontalMath.type) {
+      return;
+    }
+    if (this.parent === null) {
+      return;
+    }
+    if (this.parent.type.type !== knownTypes.root.type) {
+      return;
+    }
+    if (this.equationEditor.options.lineBreakWidth <= 0) {
+      return;
+    }
+    this.computeLineBreaksParthTwo(this.equationEditor.options.lineBreakWidth);
+  }
+
+  computeLineBreaksParthTwo(
+    /**@type{number} */
+    width,
+  ) {
+    console.log("DEBUG: compute line breaks");
+    // this.equationEditor.rootNode.boundingBox.needsMiddleAlignment = false;
+    let widthBroken = 0;
+    let row = 0;
+    this.boundingBox.lineHeight = this.boundingBox.height;
+    let finalWidth = 0;
+    let hasMoreThanOneLine = false;
+    let lastLineOverFlown = false;
+    for (let i = 0; i < this.children.length; i++) {
+      let child = this.children[i];
+      let widthSoFar = child.boundingBox.left + child.boundingBox.width;
+      let currentLineWidth = widthSoFar - widthBroken;
+      if (lastLineOverFlown && currentLineWidth > 0) {
+        hasMoreThanOneLine = true;
+        row++;
+        lastLineOverFlown = false;
+      }
+      finalWidth = Math.max(currentLineWidth, finalWidth);
+      child.boundingBox.top += this.boundingBox.lineHeight * row;
+      child.boundingBox.left -= widthBroken;
+      if (currentLineWidth > width) {
+        widthBroken = widthSoFar;
+        lastLineOverFlown = true;
+      }
+    }
+    this.boundingBox.height = this.boundingBox.lineHeight * (row + 1);
+    this.boundingBox.width = finalWidth;
+    if (!hasMoreThanOneLine) {
+      this.boundingBox.lineHeight = - 1;
     }
   }
 
@@ -5013,6 +5271,7 @@ class MathNode {
     // release the thread so the browser can finish computations
     // with the released element. 
     setTimeout(() => {
+      this.equationEditor.storeSelection();
       if (handlerResult.updateAlignment) {
         this.storeCaretPosition(event.key, event.shiftKey);
         this.element.style.maxWidth = "";
@@ -5574,11 +5833,12 @@ class MathNode {
     rangeClone.selectNodeContents(this.element);
     rangeClone.setEnd(range.endContainer, range.endOffset);
     this.positionCaretBeforeKeyEvents = rangeClone.toString().length;// range.endOffset;
+    this.selectionLength = range.toString().length;
     this.equationEditor.setLastFocused(this);
-
     this.equationEditor.positionDebugString = `Computed position: ${this.positionCaretBeforeKeyEvents}.`
     this.equationEditor.positionDebugString += `Range: [${range}], clone: [${rangeClone}], previous position: ${previousPosition}.`;
     this.equationEditor.positionDebugString += `end offset: ${range.endOffset}, start offset: ${range.startOffset}`;
+    this.equationEditor.writeDebugInfo(null);
   }
 
   storeCaretPosition(
@@ -5592,6 +5852,7 @@ class MathNode {
     }
     if (this.type.type !== knownTypes.atom.type) {
       this.positionCaretBeforeKeyEvents = - 1;
+      this.selectionLength = 0;
       this.equationEditor.setLastFocused(null);
       return;
     }
@@ -6187,7 +6448,7 @@ class MathNode {
   makeSqrt() {
     let splitBySelection = this.equationEditor.splitAtomsBySelection();
     if (splitBySelection !== null) {
-      this.makeSqrtFromSelection(splitBySelection);
+      this.equationEditor.makeSqrtFromSelection(splitBySelection);
     } else {
       this.makeSqrtFromCaret(splitBySelection);
     }
@@ -6259,23 +6520,6 @@ class MathNode {
     parent.ensureEditableAtoms();
     parent.updateDOM();
     operatorNode.focus(1);
-  }
-
-  makeSqrtFromSelection(
-    /** @type{SplitBySelectionResult} */
-    splitBySelection,
-  ) {
-    let ancestor = splitBySelection.ancestor;
-    ancestor.removeAllChildren();
-    let underTheRadical = mathNodeFactory.horizontalMathFromArray(this.equationEditor, splitBySelection.split);
-    underTheRadical.ensureEditableAtoms();
-    let sqrt = mathNodeFactory.sqrt(this.equationEditor, underTheRadical, null);
-    ancestor.appendChildren(splitBySelection.beforeSplit);
-    ancestor.appendChild(sqrt);
-    ancestor.appendChildren(splitBySelection.afterSplit);
-    ancestor.ensureEditableAtoms();
-    ancestor.updateDOM();
-    sqrt.children[2].focusStandard(0);
   }
 
   makeCancelFromSplit(
@@ -7303,35 +7547,15 @@ class MathNode {
     /**@type{ToLatexOptions|null} */
     options,
   ) {
-    let selectionStart = - 1;
-    let selectionEnd = - 1;
-    if (this === this.equationEditor.selectionStartExpanded.element) {
-      let position = this.equationEditor.selectionStartExpanded.position;
-      if (this.equationEditor.selectionStartToTheLeftOfSelectionEnd()) {
-        selectionStart = position;
-      } else {
-        selectionEnd = position;
-      }
-    }
-    if (this === this.equationEditor.selectionEndExpanded.element) {
-      let position = this.equationEditor.selectionEndExpanded.position;
-      if (this.equationEditor.selectionStartToTheLeftOfSelectionEnd()) {
-        selectionEnd = position;
-      } else {
-        selectionStart = position;
-      }
-    }
     let positionCaret = - 1;
-    if (this.focused && options !== null && options.useCaretCommand) {
-      positionCaret = this.positionCaretBeforeKeyEvents;
+    if (options !== null && options.useCaretCommand) {
+      positionCaret = this.desiredCaretPosition;
     }
     let result = latexConstants.convertUtf16ToLatex(
       this.contentIfAtomic(),
-      selectionStart,
-      selectionEnd,
       positionCaret,
     );
-    return result.accountOwner(this);
+    return result;
   }
 
   /** @returns{string} */
@@ -7345,8 +7569,7 @@ class MathNode {
     options,
   ) {
     let toJoin = [];
-    let charactersSoFar = 0;
-    let result = new LatexWithAnnotation("", - 1, - 1);
+    let result = new LatexWithAnnotation("");
     for (let i = 0; i < this.children.length; i++) {
       let child = this.children[i];
       if (child === null) {
@@ -7354,12 +7577,9 @@ class MathNode {
         continue;
       }
       let childLatex = child.toLatexWithAnnotation(options);
-      result.accountChild(childLatex, charactersSoFar);
       toJoin.push(childLatex.latex);
-      charactersSoFar += childLatex.latex.length;
     }
     result.latex = toJoin.join("");
-    result.accountOwner(this);
     return result;
   }
 
@@ -7527,10 +7747,7 @@ class MathNodeFraction extends MathNode {
   ) {
     let numerator = this.children[0].toLatexWithAnnotation(options);
     let denominator = this.children[1].toLatexWithAnnotation(options);
-    let result = new LatexWithAnnotation(`\\frac{${numerator.latex}}{${denominator.latex}}`, - 1, - 1);
-    result.accountChild(numerator, 6);
-    result.accountChild(denominator, 6 + numerator.latex.length + 2);
-    result.accountOwner(this);
+    let result = new LatexWithAnnotation(`\\frac{${numerator.latex}}{${denominator.latex}}`);
     if (this.children.length <= 2) {
       return result;
     }
@@ -7541,7 +7758,7 @@ class MathNodeFraction extends MathNode {
       result.latex += this.children[i].toLatex();
     }
     result.latex += "]";
-    return result.accountOwner(this);
+    return result;
   }
 
   applyBackspaceToTheRight() {
@@ -7589,24 +7806,16 @@ class MathNodeBaseWithExponent extends MathNode {
     options,
   ) {
     let base = this.children[0];
-    let baseLatex = base.toLatex();
-    let exponent = this.children[1].toLatex();
+    let baseLatex = base.toLatexWithAnnotation(options);
+    let exponentLatex = this.children[1].toLatexWithAnnotation(options);
     let useBracesInBase = false;
     if (base.type.type === knownTypes.fraction.type) {
       useBracesInBase = true;
     }
     if (useBracesInBase) {
-      return new LatexWithAnnotation(
-        `{${baseLatex}}^{${exponent}}`,
-        - 1,
-        - 1,
-      );
+      return new LatexWithAnnotation(`{${baseLatex.latex}}^{${exponentLatex.latex}}`);
     } else {
-      return new LatexWithAnnotation(
-        `${baseLatex}^{${exponent}}`,
-        - 1,
-        - 1,
-      );
+      return new LatexWithAnnotation(`${baseLatex.latex}^{${exponentLatex.latex}}`);
     }
   }
 
@@ -7711,16 +7920,22 @@ class MathNodeRoot extends MathNode {
 
   computeDimensions() {
     this.computeDimensionsStandard();
+    this.boundingBox.lineHeight = this.children[0].boundingBox.lineHeight;
     if (!this.boundingBox.needsMiddleAlignment || this.equationEditor.options.editable) {
       return;
     }
-    let bottomDistance = this.boundingBox.height - this.boundingBox.fractionLineHeight;
+    let lineHeight = this.boundingBox.height;
+    if (this.boundingBox.lineHeight > 0) {
+      // We have a broken-line expression.
+      lineHeight = this.boundingBox.lineHeight;
+    }
+    let bottomDistance = lineHeight - this.boundingBox.fractionLineHeight;
     if (bottomDistance > this.boundingBox.fractionLineHeight) {
-      this.boundingBox.height = bottomDistance * 2;
+      this.boundingBox.height += bottomDistance * 2 - lineHeight;
       this.boundingBox.top += bottomDistance - this.boundingBox.fractionLineHeight;
       this.boundingBox.fractionLineHeight = bottomDistance;
     } else {
-      this.boundingBox.height = this.boundingBox.fractionLineHeight * 2;
+      this.boundingBox.height += this.boundingBox.fractionLineHeight * 2 - lineHeight;
     }
   }
 }
@@ -7755,8 +7970,8 @@ class MathNodeCancel extends MathNode {
     /**@type{ToLatexOptions|null} */
     options,
   ) {
-    let childLatex = this.children[1].toLatex();
-    return new LatexWithAnnotation(`\\cancel{${childLatex}}`, - 1, - 1);
+    let childLatex = this.children[1].toLatexWithAnnotation(options);
+    return new LatexWithAnnotation(`\\cancel{${childLatex.latex}}`);
   }
 
   applyBackspaceToTheRight() {
@@ -7828,9 +8043,9 @@ class MathNodeSqrt extends MathNode {
     options,
   ) {
     if (this.element === null) {
-      return new LatexWithAnnotation("[null(]", - 1, - 1);
+      return new LatexWithAnnotation("[null(]");
     }
-    let result = new LatexWithAnnotation("", -1, -1);
+    let result = new LatexWithAnnotation("");
     let exponent = null;
     let underTheRadical = null;
     if (this.children.length > 0) {
@@ -7842,15 +8057,10 @@ class MathNodeSqrt extends MathNode {
     if (exponent !== null) {
       if (exponent.latex !== "") {
         result.latex = `\\sqrt[${exponent.latex}]{${underTheRadical.latex}}`;
-        result.accountChild(exponent, 6);
-        result.accountChild(underTheRadical, exponent.latex.length + 6 + 2);
-        result.accountOwner(this);
         return result;
       }
     }
     result.latex = `\\sqrt{${underTheRadical.latex}}`;
-    result.accountChild(underTheRadical, 6);
-    result.accountOwner(this);
     return result;
   }
   applyBackspaceToTheRight() {
@@ -7864,6 +8074,31 @@ class MathNodeOverLine extends MathNode {
     equationEditor,
   ) {
     super(equationEditor, knownTypes.overLinedBox);
+  }
+}
+
+class MathNodeFormInput extends MathNode {
+  constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /**@type{string} */
+    value,
+    /**@type{string} */
+    name,
+  ) {
+    super(equationEditor, knownTypes.formInput);
+    this.value = value;
+    this.name = name;
+    this.initialContent = this.value;
+  }
+  computeDimensions() {
+    this.computeDimensionsStandard();
+    this.boundingBox.height = this.equationEditor.standardAtomHeight;
+    if (this.boundingBox.height === 0) {
+      this.boundingBox.height = 20;
+    }
+    this.boundingBox.width = this.value.length * this.boundingBox.height;
+    this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
   }
 }
 
@@ -7913,7 +8148,15 @@ class MathNodeBaseWithSubscript extends MathNode {
     /**@type{ToLatexOptions|null} */
     options,
   ) {
-    return new LatexWithAnnotation(`{${this.children[0].toLatex()}}_{${this.children[1].toLatex()}}`, - 1, - 1);
+    let result = null;
+    let numerator = this.children[0].toLatexWithAnnotation(options);
+    let denominator = this.children[1].toLatexWithAnnotation(options);
+    if (this.children[0].isAtomicNonEmptyOrHorizontalMathWithNonEmptyAtomic()) {
+      result = new LatexWithAnnotation(`${numerator.latex}_{${denominator.latex}}`);
+    } else {
+      result = new LatexWithAnnotation(`{${numerator.latex}}_{${denominator.latex}}`);
+    }
+    return result;
   }
 
   applyBackspaceToTheRight() {
@@ -7934,13 +8177,16 @@ class MathNodeLeftDelimiter extends MathNode {
     /**@type{ToLatexOptions|null} */
     options,
   ) {
+    /**@type{LatexWithAnnotation} */
+    let result = null;
     if (this.children.length === 0) {
-      return new LatexWithAnnotation("\\left.", -1, -1);
+      result = new LatexWithAnnotation("\\left.");
+    } else if (this.extraData === "{") {
+      result = new LatexWithAnnotation("\\{");
+    } else {
+      result = new LatexWithAnnotation(this.extraData);
     }
-    if (this.extraData === "{") {
-      return new LatexWithAnnotation("\\{", -1, -1);
-    }
-    return new LatexWithAnnotation(this.extraData, - 1, - 1);
+    return result;
   }
 
   /** @returns {boolean} whether reduction occurred. */
@@ -7961,15 +8207,17 @@ class MathNodeRightDelimiter extends MathNode {
   toLatexWithAnnotation(
     /**@type{ToLatexOptions|null} */
     options,
-
   ) {
+    /**@type{LatexWithAnnotation} */
+    let result = null;
     if (this.children.length === 0) {
-      return new LatexWithAnnotation("\\right.", -1, -1);
+      result = new LatexWithAnnotation("\\right.");
+    } else if (this.extraData === "{") {
+      result = new LatexWithAnnotation("\\}");
+    } else {
+      result = new LatexWithAnnotation(this.extraData);
     }
-    if (this.extraData === "}") {
-      return new LatexWithAnnotation("\\}", -1, -1);
-    }
-    return new LatexWithAnnotation(this.extraData, - 1, - 1);
+    return result;
   }
 
   /** @returns {boolean} whether reduction occurred. */
@@ -8258,7 +8506,7 @@ class MathNodeMatrix extends MathNode {
     options,
   ) {
     if (this.element === null) {
-      return new LatexWithAnnotation("[null)]", - 1, - 1);
+      return new LatexWithAnnotation("[null)]");
     }
     let matrixContent = this.children[0].children[1];
     let result = [];
@@ -8269,13 +8517,13 @@ class MathNodeMatrix extends MathNode {
       let currentRowStrings = [];
       for (let j = 0; j < matrixRow.children.length; j++) {
         let entry = matrixRow.children[j];
-        currentRowStrings.push(entry.toLatex());
+        currentRowStrings.push(entry.toLatexWithAnnotation(options).latex);
       }
       rows.push(currentRowStrings.join("&"));
     }
     result.push(rows.join("\\\\"));
     result.push("\\end{pmatrix}");
-    return new LatexWithAnnotation(result.join(""), - 1, - 1);
+    return new LatexWithAnnotation(result.join(""));
   }
 
   applyBackspaceToTheRight() {
@@ -8349,18 +8597,17 @@ class MathNodeOperatorWithSuperAndSubscript extends MathNode {
   toLatexWithAnnotation(
     /**@type{ToLatexOptions|null} */
     options,
-
   ) {
-    let top = this.children[0].toLatex();
-    let result = this.children[1].toLatex();
-    let bottom = this.children[2].toLatex();
+    let top = this.children[0].toLatexWithAnnotation(options).latex;
+    let result = this.children[1].toLatexWithAnnotation(options).latex;
+    let bottom = this.children[2].toLatexWithAnnotation(options).latex;
     if (bottom !== "") {
       result += `_{${bottom}}`;
     }
     if (top !== "") {
       result += `^{${top}}`;
     }
-    return new LatexWithAnnotation(result, - 1, - 1);
+    return new LatexWithAnnotation(result);
   }
   applyBackspaceToTheRight() {
     return this.applyBackspaceToTheRightAsLeftArrow();
@@ -8385,7 +8632,7 @@ class MathNodeOperatorStandalone extends MathNode {
     if (content in latexConstants.utf16ToLatexMap) {
       return new LatexWithAnnotation(latexConstants.utf16ToLatexMap[content]);
     }
-    return new LatexWithAnnotation(`${content}`, - 1, - 1);
+    return new LatexWithAnnotation(`${content}`);
   }
 }
 
@@ -8597,6 +8844,8 @@ class MathTagCoverter {
     removeDisplayStyle,
     /**@type{boolean} whether to log timing information. */
     logTiming,
+    /**@type{Object<string,string>} */
+    extraAttributes,
   ) {
     /**@type{HTMLElement|null} */
     this.elementProcessed = null;
@@ -8625,6 +8874,7 @@ class MathTagCoverter {
       verticalAlign: styleComputer.style.verticalAlign,
       marginBottom: styleComputer.style.marginBottom,
     };
+    this.extraAttributes = extraAttributes;
   }
 
   convertTags(
@@ -8655,7 +8905,11 @@ class MathTagCoverter {
       mathTag.style.fontSize = this.style.fontSize;
       mathTag.style.verticalAlign = this.style.verticalAlign;
       mathTag.style.marginBottom = this.style.marginBottom;
+      mathTag.style.maxWidth = this.style.maxWidth;
       newChildren.push(mathTag);
+      for (let label in this.extraAttributes) {
+        mathTag.setAttribute(label, this.extraAttributes[label]);
+      }
     }
     let previousIndex = toBeConverted[toBeConverted.length - 1].closeIndex + 1;
     let remainingContent = content.slice(previousIndex);
@@ -8723,6 +8977,8 @@ class MathTagCoverter {
   typeset(
     /**@type{HTMLElement|null} */
     toBeModified,
+    /**@type{Function|null} callback after the element has been typeset*/
+    callback,
   ) {
     this.elementProcessed = toBeModified;
     this.startTime = (new Date()).getTime();
@@ -8730,11 +8986,14 @@ class MathTagCoverter {
     if (this.elementProcessed !== null) {
       this.convertTagsRecursive(this.elementProcessed, 0);
     }
-    this.typesetMathTags();
+    this.typesetMathTags(callback);
   }
 
   /**@returns{boolean} */
-  postponeTypeset() {
+  postponeTypeset(
+    /**@type{Function|null} callback after the element has been typeset*/
+    callback,
+  ) {
     let currentTime = (new Date()).getTime();
     let elapsedTime = currentTime - this.lastTimeSample;
     if (
@@ -8744,21 +9003,26 @@ class MathTagCoverter {
       return false;
     }
     this.lastTimeSample = currentTime;
-    setTimeout(this.typesetMathTags.bind(this), 10);
+    setTimeout(() => {
+      this.typesetMathTags(callback);
+    }, 10);
     if (this.logTiming) {
       console.log(`Typeset ${this.typesetTotal} out of ${this.elementsToTypeset} elements.`);
     }
     return true;
   }
 
-  typesetMathTags() {
+  typesetMathTags(
+    /**@type{Function|null} callback after the element has been typeset*/
+    callback,
+  ) {
     let mathElements = document.getElementsByClassName("mathcalculator");
     if (this.elementsToTypeset < 0) {
       this.elementsToTypeset = mathElements.length;
       this.typesetTotal = 0;
     }
     for (; this.typesetTotal < mathElements.length; this.typesetTotal++) {
-      if (this.postponeTypeset()) {
+      if (this.postponeTypeset(callback)) {
         return;
       }
       /** @type {HTMLElement} */
@@ -8768,7 +9032,13 @@ class MathTagCoverter {
       }
       element["typeset"] = "true";
       let startTime = (new Date()).getTime();
-      mathFromElement(element, false, this.sanitizeLatexSource, this.removeDisplayStyle);
+      mathFromElement(
+        element,
+        false,
+        this.sanitizeLatexSource,
+        this.removeDisplayStyle,
+        callback,
+      );
       let typeSetTime = (new Date()).getTime() - startTime;
       if (this.logTiming) {
         console.log(`Typeset of element ${this.typesetTotal + 1} out of ${this.elementsToTypeset} took ${typeSetTime} ms.`);
@@ -8788,6 +9058,10 @@ function typeset(
   removeDisplayStyle,
   /**@type{boolean} whether to log in the console timing statistics.*/
   logTiming,
+  /**@type{Function|null} */
+  callbackEquationCreation,
+  /**@type{Object<string,string>} */
+  extraAttributes,
 ) {
   if (style === "") {
     style = "font-family:'Times New Roman'; display:inline-block;";
@@ -8795,7 +9069,16 @@ function typeset(
   if (logTiming) {
     console.log("Logging parsing speed times; to turn off, set logTiming=false.")
   }
-  new MathTagCoverter(style, sanitizeLatexSource, removeDisplayStyle, logTiming).typeset(toBeModified);
+  new MathTagCoverter(
+    style,
+    sanitizeLatexSource,
+    removeDisplayStyle,
+    logTiming,
+    extraAttributes,
+  ).typeset(
+    toBeModified,
+    callbackEquationCreation,
+  );
 }
 
 class EquationEditorAction {
@@ -8816,6 +9099,7 @@ class EquationEditorAction {
     if (!this.isKeyPress) {
       editor.writeLatexLastFocused(this.command);
     } else {
+      editor.focusInformation.restoreSelection(editor);
       editor.dispatchKey(this.command);
     }
   }
@@ -8832,7 +9116,7 @@ class EquationEditorButtonFactory {
     /**@type{string} */
     additionalStyle,
   ) {
-    /**@type{EquationEditorAction} */
+    /**@type{EquationEditorAction[]} */
     this.commands = [];
     if (command !== "" && command !== null) {
       this.commands.push(new EquationEditorAction(command, isKeyPress));
@@ -8905,7 +9189,7 @@ class EquationEditorButtonFactory {
 }
 
 let buttonFactories = {
-  "sqrt": new EquationEditorButtonFactory("\\sqrt{\\caret}", false, "\u221A", ""),
+  "sqrt": new EquationEditorButtonFactory("\\sqrt", true, "\u221A", ""),
   "fraction": new EquationEditorButtonFactory("\\frac{\\caret}{}", false, "/", ""),
   "divide": new EquationEditorButtonFactory("/", true, "(\u2022)/(\u2022)", ""),
   "exponent": new EquationEditorButtonFactory("^", true, "^", ""),
@@ -8922,4 +9206,6 @@ module.exports = {
   mathFromLatex,
   mathFromElement,
   latexConstants,
+  MathNode,
+  knownTypes,
 };

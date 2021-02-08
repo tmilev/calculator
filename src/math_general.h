@@ -78,6 +78,11 @@ public:
     this->checkConsistencyWithOther(other);
     return this->generatorIndex == other.generatorIndex;
   }
+  class Test {
+  public:
+    static bool all();
+    static bool basic();
+  };
 };
 
 template <class Coefficient, unsigned int inputHashFunction(const Coefficient&) = Coefficient::hashFunction>
@@ -267,7 +272,7 @@ class MonomialWrapper {
   }
 };
 
-class MonomialP {
+class MonomialPolynomial {
 private:
   // monbody contains the exponents of the variables.
   // IMPORTANT. The monBody of a monomial may not be unique.
@@ -275,7 +280,7 @@ private:
   // (but otherwise one monomial might have more entries filled with zeroes)
   // are considered to be equal.
   // Therefore special attention must be paid when performing operations with
-  // MonomialP's, especially with operator== and MonomialP::hashFunction!
+  // MonomialPolynomial's, especially with operator== and MonomialPolynomial::hashFunction!
   // Please modify this class in accordance with what was just explained.
   // Note that by the above token I decided to declare operator[] as non-const
   // function and operator() as a const function but returning a copy of the
@@ -301,18 +306,18 @@ public:
     static const int gradedReverseLexicographic = 3;
   };
 
-  MonomialP(int letterIndex) {
+  MonomialPolynomial(int letterIndex) {
     this->setVariable(letterIndex, Rational::one());
   }
-  MonomialP(int letterIndex, int power) {
+  MonomialPolynomial(int letterIndex, int power) {
     this->setVariable(letterIndex, power);
   }
-  MonomialP(const MonomialP& other) {
+  MonomialPolynomial(const MonomialPolynomial& other) {
     *this = other;
   }
-  MonomialP() {
+  MonomialPolynomial() {
   }
-  friend std::ostream& operator<<(std::ostream& output, const MonomialP& theMon) {
+  friend std::ostream& operator<<(std::ostream& output, const MonomialPolynomial& theMon) {
     output << theMon.toString();
     return output;
   }
@@ -327,7 +332,7 @@ public:
   // Warning: hashFunction must return the same result
   // for equal monomials represented by different monBodies.
   // Two such different representation may differ by extra entries filled in with zeroes.
-  static unsigned int hashFunction(const MonomialP& input) {
+  static unsigned int hashFunction(const MonomialPolynomial& input) {
     unsigned int result = 0;
     int numCycles = MathRoutines::minimum(input.monomialBody.size, someRandomPrimesSize);
     for (int i = 0; i < numCycles; i ++) {
@@ -342,8 +347,8 @@ public:
   void makeEi(int LetterIndex, int Power = 1, int ExpectedNumVars = 0);
   void setVariable(int variableIndex, const Rational& power);
   void trimTrailingZeroes();
-  bool operator>(const MonomialP& other) const;
-  bool isDivisibleBy(const MonomialP& other) const;
+  bool operator>(const MonomialPolynomial& other) const;
+  bool isDivisibleBy(const MonomialPolynomial& other) const;
   int totalDegreeInt() const {
     int result = - 1;
     if (!this->totalDegree().isSmallInteger(&result)) {
@@ -360,10 +365,10 @@ public:
     }
     return result;
   }
-  void multiplyBy(const MonomialP& other) {
+  void multiplyBy(const MonomialPolynomial& other) {
     this->operator*=(other);
   }
-  void divideBy(const MonomialP& other) {
+  void divideBy(const MonomialPolynomial& other) {
     this->operator/=(other);
   }
   bool isLinear() const {
@@ -412,9 +417,9 @@ public:
     const Coefficient& one
   ) const;
 
-  static List<MonomialP>::Comparator& orderDefault();
-  static List<MonomialP>::Comparator& orderForGreatestCommonDivisor();
-  static List<MonomialP>::Comparator& orderDegreeThenLeftLargerWins();
+  static List<MonomialPolynomial>::Comparator& orderDefault();
+  static List<MonomialPolynomial>::Comparator& orderForGreatestCommonDivisor();
+  static List<MonomialPolynomial>::Comparator& orderDegreeThenLeftLargerWins();
 
   // "Graded reverse lexicographic" order.
   // We compare by total degree.
@@ -422,11 +427,11 @@ public:
   // The first unequal power from the right breaks the tie.
   // The monomial with **smaller** power is declared **larger**.
   static bool greaterThan_totalDegree_rightSmallerWins(
-    const MonomialP& left, const MonomialP& right
+    const MonomialPolynomial& left, const MonomialPolynomial& right
   );
 
   // "Graded lexicographic" order.
-  static bool greaterThan_totalDegree_leftLargerWins(const MonomialP& left, const MonomialP& right);
+  static bool greaterThan_totalDegree_leftLargerWins(const MonomialPolynomial& left, const MonomialPolynomial& right);
 
   // "Lexicographic" order.
   // If computing with n variables, the "lexicographic order"
@@ -442,13 +447,13 @@ public:
   // x x x y y y z <  x y y z z z.
   // This has lead to lots of confusion in previous version, so we have dropped the
   // term "lexicographic" in all places except the end-user facing calculator commands.
-  bool greaterThan_leftLargerWins(const MonomialP& other) const;
-  static bool greaterThan_leftLargerWins(const MonomialP& left, const MonomialP& right) {
+  bool greaterThan_leftLargerWins(const MonomialPolynomial& other) const;
+  static bool greaterThan_leftLargerWins(const MonomialPolynomial& left, const MonomialPolynomial& right) {
     return left.greaterThan_leftLargerWins(right);
   }
   // Lexicographic order but with variables ordered in the opposite direction.
-  bool greaterThan_rightLargerWins(const MonomialP& other) const;
-  static bool greaterThan_rightLargerWins(const MonomialP& left, const MonomialP& right) {
+  bool greaterThan_rightLargerWins(const MonomialPolynomial& other) const;
+  static bool greaterThan_rightLargerWins(const MonomialPolynomial& left, const MonomialPolynomial& right) {
     return left.greaterThan_rightLargerWins(right);
   }
 
@@ -470,14 +475,14 @@ public:
   }
   bool hasSmallIntegralPositivePowers(int* whichtotalDegree) const;
   void raiseToPower(const Rational& thePower);
-  void operator*=(const MonomialP& other);
-  void operator/=(const MonomialP& other);
-  bool operator==(const MonomialP& other) const;
+  void operator*=(const MonomialPolynomial& other);
+  void operator/=(const MonomialPolynomial& other);
+  bool operator==(const MonomialPolynomial& other) const;
   template <class Coefficient>
   void operator=(const Vector<Coefficient>& other) {
     this->monomialBody = other;
   }
-  void operator=(const MonomialP& other) {
+  void operator=(const MonomialPolynomial& other) {
     this->monomialBody = other.monomialBody;
   }
   class Test {
@@ -485,9 +490,9 @@ public:
   public:
     static bool all();
     static bool testMonomialOrdersSatisfyTheDefinitionOne(
-      const MonomialP& mustBeSmaller,
-      const MonomialP& mustBeLarger,
-      List<MonomialP>::Comparator& order
+      const MonomialPolynomial& mustBeSmaller,
+      const MonomialPolynomial& mustBeLarger,
+      List<MonomialPolynomial>::Comparator& order
     );
     static bool testMonomialOrdersSatisfyTheDefinition();
   };
@@ -805,7 +810,7 @@ public:
       }
     }
   }
-  void actOnMonomialAsDifferentialOperator(const MonomialP& input, Polynomial<Rational>& output);
+  void actOnMonomialAsDifferentialOperator(const MonomialPolynomial& input, Polynomial<Rational>& output);
   void switchRows(int row1, int row2);
   void switchRowsWithCarbonCopy(int row1, int row2, Matrix<Coefficient>* carbonCopy) {
     this->switchRows(row1, row2);
@@ -1186,11 +1191,11 @@ public:
   // that do not have a pivot 1 in them.
   // In the above example, the third (index 2) and fifth (index 4) columns do not have a pivot 1 in them.
   void gaussianEliminationByRows(
-    Matrix<Coefficient>* carbonCopyMat = 0,
+    Matrix<Coefficient>* carbonCopyMatrix = 0,
     Selection* outputNonPivotColumns = nullptr,
     Selection* outputPivotColumns = nullptr,
     std::stringstream* humanReadableReport = nullptr,
-    FormatExpressions* theFormat = nullptr
+    FormatExpressions* format = nullptr
   );
   void gaussianEliminationByRowsNoRowSwapPivotPointsByRows(
     int firstNonProcessedRow,
@@ -1909,7 +1914,7 @@ public:
   bool flagSuppressModP;
   std::string suffixLinearCombination;
   char ambientWeylLetter;
-  List<MonomialP>::Comparator monomialOrder;
+  List<MonomialPolynomial>::Comparator monomialOrder;
   template <typename TemplateMonomial>
   typename List<TemplateMonomial>::Comparator* getMonomialOrder();
   std::string getPolynomialLetter(int index) const;
@@ -1918,8 +1923,8 @@ public:
 
 class MonomialWeylAlgebra {
   public:
-  MonomialP polynomialPart;
-  MonomialP differentialPart;
+  MonomialPolynomial polynomialPart;
+  MonomialPolynomial differentialPart;
   friend std::ostream& operator << (std::ostream& output, const MonomialWeylAlgebra& theMon) {
     output << theMon.toString();
     return output;
@@ -1994,7 +1999,7 @@ std::ostream& operator<<(
 template <class TemplateMonomial, class Coefficient>
 class LinearCombination {
 private:
-  void addOnTop(const MonomialP& tempP);//<-to guard the now unsafe base class method
+  void addOnTop(const MonomialPolynomial& tempP);//<-to guard the now unsafe base class method
   void clear();//<-to guard the now unsafe base class method
   friend std::ostream& operator<< <TemplateMonomial, Coefficient>(
     std::ostream& output, const LinearCombination<TemplateMonomial, Coefficient>& theCollection
@@ -2171,8 +2176,8 @@ public:
   );
   template <class LinearCombinationTemplate>
   static void gaussianEliminationByRows(
-    List<LinearCombinationTemplate>& theList,
-    bool *IHaveMadeARowSwitch = nullptr,
+    List<LinearCombinationTemplate>& toBeEliminated,
+    bool *madeARowSwitch = nullptr,
     HashedList<TemplateMonomial>* seedMonomials = nullptr,
     Matrix<Coefficient>* carbonCopyMatrix = nullptr,
     List<LinearCombinationTemplate>* carbonCopyList = nullptr
@@ -2595,14 +2600,14 @@ class ElementMonomialAlgebra: public LinearCombination<TemplateMonomial, Coeffic
     const TemplateMonomial& monomial,
     ElementMonomialAlgebra<TemplateMonomial, Coefficient>& output
   ) const;
-  void multiplyBy(const MonomialP& other) {
+  void multiplyBy(const MonomialPolynomial& other) {
     this->multiplyBy(other, *this);
   }
-  void multiplyBy(const MonomialP& other, const Coefficient& theCoeff) {
+  void multiplyBy(const MonomialPolynomial& other, const Coefficient& theCoeff) {
     return this->multiplyBy(other, theCoeff, *this);
   }
   void multiplyBy(
-    const MonomialP& other,
+    const MonomialPolynomial& other,
     const Coefficient& theCoeff,
     ElementMonomialAlgebra<TemplateMonomial, Coefficient>& output
   ) const {
@@ -2644,12 +2649,12 @@ class ElementMonomialAlgebra: public LinearCombination<TemplateMonomial, Coeffic
 template<class Coefficient>
 class PolynomialOrder {
   public:
-  List<MonomialP>::Comparator monomialOrder;
+  List<MonomialPolynomial>::Comparator monomialOrder;
   bool compareLeftGreaterThanRight(const Polynomial<Coefficient>& left, const Polynomial<Coefficient>& right) const;
 };
 
 template<class Coefficient>
-class Polynomial: public ElementMonomialAlgebra<MonomialP, Coefficient> {
+class Polynomial: public ElementMonomialAlgebra<MonomialPolynomial, Coefficient> {
 private:
 public:
   friend std::iostream& operator<< <Coefficient>(std::iostream& output, const Polynomial<Coefficient>& input);
@@ -2661,7 +2666,7 @@ public:
     this->operator=(other);
   }
   unsigned int hashFunction() const {
-    return this->::LinearCombination<MonomialP, Coefficient>::hashFunction();
+    return this->::LinearCombination<MonomialPolynomial, Coefficient>::hashFunction();
   }
   static unsigned int hashFunction(const Polynomial<Coefficient>& input) {
     return input.hashFunction();
@@ -2741,7 +2746,7 @@ public:
   void makeDeterminantFromSquareMatrix(const Matrix<Polynomial<Coefficient> >& theMat);
   void makeConstant(const Coefficient& constant) {
     this->makeZero();
-    MonomialP one;
+    MonomialPolynomial one;
     one.makeOne();
     this->addMonomial(one, constant);
   }
@@ -2762,17 +2767,17 @@ public:
     const Polynomial<Coefficient>& inputDivisor,
     Polynomial<Coefficient>& outputQuotient,
     Polynomial<Coefficient>& outputRemainder,
-    List<MonomialP>::Comparator* monomialOrder
+    List<MonomialPolynomial>::Comparator* monomialOrder
   ) const;
   void addConstant(const Coefficient& theConst) {
-    MonomialP tempMon;
+    MonomialPolynomial tempMon;
     tempMon.makeOne();
     this->addMonomial(tempMon, theConst);
   }
   void shiftVariableIndicesToTheRight(int VarIndexShift);
   void setNumberOfVariablesSubstituteDeletedByOne(int newNumVars);
   int getHighestIndexSuchThatHigherIndexVariablesDontParticipate();
-  void scaleToPositiveMonomialExponents(MonomialP& outputScale);
+  void scaleToPositiveMonomialExponents(MonomialPolynomial& outputScale);
   bool substitution(const List<Polynomial<Coefficient> >& substitution, const Coefficient& one);
   Rational totalDegree() const;
   int totalDegreeInt() const;
@@ -2811,7 +2816,7 @@ public:
   void operator-=(int x);
   void operator-=(const Coefficient& other);
   void operator-=(const Polynomial<Coefficient>& other);
-  void operator*=(const MonomialP& other);
+  void operator*=(const MonomialPolynomial& other);
   void operator*=(const Polynomial<Coefficient>& other);
   Polynomial<Coefficient> operator%(const Polynomial<Coefficient>& other);
   void operator/=(const Polynomial<Coefficient>& other);
@@ -2852,7 +2857,7 @@ public:
     const Coefficient& one,
     std::stringstream* commentsOnFailure
   );
-  bool hasSmallIntegralPositivePowers(int* whichtotalDegree) const;
+  bool hasSmallIntegralPositivePowers(int* whichTotalDegree) const;
   class Test {
   public:
     FormatExpressions format;
@@ -3079,9 +3084,9 @@ class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
     }
     return result;
   }
-  void makeZero(int NumVars) {
+  void makeZero(int numberOfVariables) {
     for (int i = 0; i < this->size; i ++) {
-      this->objects[i].makeZero(NumVars);
+      this->objects[i].makeZero(numberOfVariables);
     }
   }
   std::string toString(int numDisplayedEltsMinus1ForAll = - 1) const {
@@ -3118,10 +3123,10 @@ class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
 template<class Coefficient>
 class PolynomialDivisionReport {
 public:
-  HashedList<MonomialP> allMonomials;
+  HashedList<MonomialPolynomial> allMonomials;
   List<Polynomial<Coefficient> > intermediateRemainders;
-  List<List<MonomialP> > intermediateHighlightedMons;
-  List<MonomialP> intermediateHighestMonDivHighestMon;
+  List<List<MonomialPolynomial> > intermediateHighlightedMons;
+  List<MonomialPolynomial> intermediateHighestMonDivHighestMon;
   List<Coefficient> intermediateCoeffs;
   List<Polynomial<Coefficient> > intermediateSubtractands;
   Polynomial<Coefficient> startingPolynomial;
@@ -3154,7 +3159,7 @@ public:
   std::string getPolynomialStringSpacedMonomialsLaTeX(
     const Polynomial<Coefficient>& thePoly,
     std::string* highlightColor = nullptr,
-    List<MonomialP>* theHighLightedMons = nullptr,
+    List<MonomialPolynomial>* theHighLightedMons = nullptr,
     int* firstNonZeroIndex = nullptr
   );
   std::string getSpacedMonomialsWithHighlightLaTeX(
@@ -3169,7 +3174,7 @@ public:
   std::string getPolynomialStringSpacedMonomialsHtml(
     const Polynomial<Coefficient>& thePoly,
     const std::string& extraStyle,
-    List<MonomialP>* theHighLightedMons = nullptr
+    List<MonomialPolynomial>* theHighLightedMons = nullptr
   );
   void computeHighLightsFromRemainder(int remainderIndex, int& currentSlideNumber);
   PolynomialDivisionReport();
@@ -3180,22 +3185,21 @@ class GroebnerBasisComputation {
   public:
   PolynomialOrder<Coefficient> polynomialOrder;
   Polynomial<Coefficient> remainderDivision;
-  Polynomial<Coefficient> bufPolyForGaussianElimination;
-  List<Polynomial<Coefficient> > theQuotients;
+  List<Polynomial<Coefficient> > quotients;
   List<Polynomial<Coefficient> > basisCandidates;
   class BasisElement {
   public:
     Polynomial<Coefficient> element;
-    MonomialP leadingMonomial;
+    MonomialPolynomial leadingMonomial;
     Coefficient leadingCoefficient;
-    std::string toString(FormatExpressions* theFormat) const;
+    std::string toString(FormatExpressions* format) const;
   };
-  List<BasisElement> theBasis;
+  List<BasisElement> basis;
   int numberPolynomialDivisions;
   int numberMonomialOperations;
 
-  int maximumPolynomialComputations;
-  int maximumBasisReductionComputations;
+  int maximumMonomialOperations;
+  int maximumPolynomialDivisions;
   int numberOfIntermediateRemainders;
   int numberOfSymmetricDifferenceRounds;
   bool flagFoundNewBasisElements;
@@ -3203,14 +3207,14 @@ class GroebnerBasisComputation {
   bool flagDoLogDivision;
   bool flagStoreQuotients;
   MemorySaving<PolynomialDivisionReport<Coefficient> > divisionReport;
-  FormatExpressions theFormat;
+  FormatExpressions format;
   void addBasisElementNoReduction(const Polynomial<Coefficient>& input);
   bool limitsExceeded() const;
   bool addAndReducePolynomials();
   bool addAndReduceOnePolynomial();
   bool addRemainderToBasis();
   bool transformToReducedBasis(
-    List<Polynomial<Coefficient> >& inputOutpuT, int upperLimitPolyComputations
+    List<Polynomial<Coefficient> >& inputOutput
   );
   bool transformToReducedGroebnerBasis(List<Polynomial<Coefficient> >& inputOutpuT);
   void generateSymmetricDifferenceCandidates();
@@ -3225,7 +3229,7 @@ class GroebnerBasisComputation {
   int minimalNumberOfVariables() const;
   std::string toStringLetterOrder(bool addDollars) const;
   std::string toStringPolynomialBasisStatus();
-  static int getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(int theVarIndex, List<Polynomial<Coefficient> >& input);
+  static int getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(int variableIndex, List<Polynomial<Coefficient> >& input);
   void remainderDivisionByBasis(
     const Polynomial<Coefficient>& input,
     Polynomial<Coefficient>& outputRemainder,
@@ -3239,7 +3243,7 @@ class GroebnerBasisComputation {
   );
   void oneDivisonSubStepWithBasis(
     Polynomial<Coefficient>& remainder,
-    const MonomialP& leadingMonomial,
+    const MonomialPolynomial& leadingMonomial,
     const Coefficient& leadingCoefficient,
     int index,
     ProgressReport* theReport
@@ -3253,7 +3257,6 @@ class GroebnerBasisComputation {
 template<class Coefficient>
 class PolynomialSystem {
 public:
-  int maximumSerreSystemComputationsPreferred;
   int numberOfSerreSystemComputations;
   int numberOfSerreVariablesOneGenerator;
   int recursionCounterSerreLikeSystem;
@@ -3266,7 +3269,7 @@ public:
   bool flagSystemSolvedOverBaseField;
   bool flagUsingAlgebraicClosure;
 
-  AlgebraicClosureRationals* theAlgebraicClosure;
+  AlgebraicClosureRationals* algebraicClosure;
   GroebnerBasisComputation<Coefficient> groebner;
   MemorySaving<PolynomialSystem<Coefficient> > computationUsedInRecursiveCalls;
   List<Coefficient> systemSolution;
@@ -3279,16 +3282,16 @@ public:
     List<Polynomial<Coefficient> >& inputSystem,
     PolynomialSubstitution<Coefficient>& outputSub
   );
-  bool hasSingleMonomialEquation(const List<Polynomial<Coefficient> >& inputSystem, MonomialP& outputMon);
+  bool hasSingleMonomialEquation(const List<Polynomial<Coefficient> >& inputSystem, MonomialPolynomial& outputMon);
   void setUpRecursiveComputation(PolynomialSystem<Coefficient>& toBeModified);
   void processSolvedSubcaseIfSolvedOrProvenToHaveSolution(PolynomialSystem<Coefficient>& potentiallySolvedCase);
-  void solveWhenSystemHasSingleMonomial(List<Polynomial<Coefficient> >& inputSystem, const MonomialP& theMon);
+  void solveWhenSystemHasSingleMonomial(List<Polynomial<Coefficient> >& inputSystem, const MonomialPolynomial& theMon);
   int getPreferredSerreSystemSubstitutionIndex(List<Polynomial<Coefficient> >& inputSystem);
   void solveSerreLikeSystemRecursively(List<Polynomial<Coefficient> >& inputSystem);
   void polynomialSystemSolutionSimplificationPhase(List<Polynomial<Coefficient> >& inputSystem);
   void backSubstituteIntoPolynomialSystem(List<PolynomialSubstitution<Coefficient> >& impliedSubstitutions);
   void backSubstituteIntoSinglePolynomial(
-    Polynomial<Coefficient>& thePoly, int theIndex, PolynomialSubstitution<Coefficient>& theFinalSub
+    Polynomial<Coefficient>& substitution, int index, PolynomialSubstitution<Coefficient>& finalSubstitution
   );
   bool getOneVariablePolynomialSolution(const Polynomial<Coefficient>& thePoly, Coefficient& outputSolution);
   void setSerreLikeSolutionIndex(int theIndex, const Coefficient& theConst);
@@ -3396,7 +3399,7 @@ void Polynomial<Coefficient>::makeLinearWithConstantTerm(
   const Vector<Rational>& inputLastCoordinateConstantTerm
 ) {
   this->makeZero();
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   for (int i = 0; i < inputLastCoordinateConstantTerm.size - 1; i ++) {
     tempM.makeEi(i);
     this->addMonomial(tempM, inputLastCoordinateConstantTerm[i]);
@@ -3409,7 +3412,7 @@ void Polynomial<Coefficient>::makeLinearNoConstant(
   const Vector<Rational>& inputCoefficients
 ) {
   this->makeZero();
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   for (int i = 0; i < inputCoefficients.size; i ++) {
     tempM.makeEi(i);
     if (!inputCoefficients[i].isInteger()) {
@@ -3522,29 +3525,29 @@ bool LinearCombination<TemplateMonomial, Coefficient>::linearSpanContainsGetFirs
 template <class TemplateMonomial, class Coefficient>
 template <class LinearCombinationTemplate>
 void LinearCombination<TemplateMonomial, Coefficient>::gaussianEliminationByRows(
-  List<LinearCombinationTemplate>& theList,
-  bool *IHaveMadeARowSwitch,
+  List<LinearCombinationTemplate>& toBeEliminated,
+  bool *madeARowSwitch,
   HashedList<TemplateMonomial>* seedMonomials,
   Matrix<Coefficient>* carbonCopyMatrix,
   List<LinearCombinationTemplate>* carbonCopyList
 ) {
   MacroRegisterFunctionWithName("LinearCombination::gaussianEliminationByRows");
   if (carbonCopyMatrix != 0) {
-    if (carbonCopyMatrix->numberOfRows != theList.size) {
+    if (carbonCopyMatrix->numberOfRows != toBeEliminated.size) {
       global.fatal
       << "Carbon copy matrix has "
       << carbonCopyMatrix->numberOfRows
-      << " rows, while the gaussian-eliminated list has " << theList.size
+      << " rows, while the gaussian-eliminated list has " << toBeEliminated.size
       << " elements; the two numbers must be the same!" << global.fatal;
     }
   }
   if (carbonCopyList != 0) {
-    if (carbonCopyList->size != theList.size) {
+    if (carbonCopyList->size != toBeEliminated.size) {
       global.fatal
       << "Carbon copy list has "
       << carbonCopyList->size
       << " elements, while the gaussian-eliminated list has "
-      << theList.size
+      << toBeEliminated.size
       << " elements; the two numbers must be the same!"
       << global.fatal;
     }
@@ -3553,78 +3556,79 @@ void LinearCombination<TemplateMonomial, Coefficient>::gaussianEliminationByRows
   HashedList<TemplateMonomial>& allMons = seedMonomials == 0 ? bufferMons.getElement() : *seedMonomials;
   if (seedMonomials == 0) {
     int topBoundNumMons = 0;
-    for (int i = 0; i < theList.size; i ++) {
-      topBoundNumMons += theList[i].size();
+    for (int i = 0; i < toBeEliminated.size; i ++) {
+      topBoundNumMons += toBeEliminated[i].size();
     }
     allMons.setExpectedSize(topBoundNumMons);
   }
-  for (int i = 0; i < theList.size; i ++) {
-    allMons.addOnTopNoRepetition(theList[i].monomials);
+  for (int i = 0; i < toBeEliminated.size; i ++) {
+    allMons.addOnTopNoRepetition(toBeEliminated[i].monomials);
   }
   allMons.quickSortAscending();
   FormatExpressions tempFormat;
   tempFormat.flagUseHTML = true;
   tempFormat.flagUseLatex = true;
-  if (IHaveMadeARowSwitch != nullptr) {
-    *IHaveMadeARowSwitch = false;
+  if (madeARowSwitch != nullptr) {
+    *madeARowSwitch = false;
   }
   int currentRowIndex = 0;
-  Coefficient tempCF, tempCF2;
-  for (int i = 0; i < allMons.size && currentRowIndex < theList.size; i ++) {
+  Coefficient accumulator, negated;
+  for (int i = 0; i < allMons.size && currentRowIndex < toBeEliminated.size; i ++) {
     const TemplateMonomial& currentMon = allMons[i];
     int goodRow = currentRowIndex;
-    for (; goodRow < theList.size; goodRow ++) {
-      if (theList[goodRow].monomials.contains(currentMon)) {
+    for (; goodRow < toBeEliminated.size; goodRow ++) {
+      if (toBeEliminated[goodRow].monomials.contains(currentMon)) {
         break;
       }
     }
-    if (goodRow >= theList.size) {
+    if (goodRow >= toBeEliminated.size) {
       continue;
     }
     if (currentRowIndex != goodRow) {
-      theList.swapTwoIndices(currentRowIndex, goodRow);
+      toBeEliminated.swapTwoIndices(currentRowIndex, goodRow);
       if (carbonCopyList != 0) {
         carbonCopyList->swapTwoIndices(currentRowIndex, goodRow);
       }
       if (carbonCopyMatrix != 0) {
         carbonCopyMatrix->switchRows(currentRowIndex, goodRow);
       }
-      if (IHaveMadeARowSwitch != nullptr) {
-        *IHaveMadeARowSwitch = true;
+      if (madeARowSwitch != nullptr) {
+        *madeARowSwitch = true;
       }
     }
-    LinearCombination<TemplateMonomial, Coefficient>& currentPivot = theList[currentRowIndex];
-    int colIndex = currentPivot.monomials.getIndex(currentMon);
-    if (colIndex == - 1) {
+    LinearCombination<TemplateMonomial, Coefficient>& currentPivot = toBeEliminated[currentRowIndex];
+    int columnIndex = currentPivot.monomials.getIndex(currentMon);
+    if (columnIndex == - 1) {
       global.fatal << "An internal check at the "
       << "Gaussian elimination method for monomial collections fails. "
       << "Something is wrong. Here is the List you wanted to perform Gaussian elimination upon. "
-      << theList.toString() << ". " << global.fatal;
+      << toBeEliminated.toString() << ". " << global.fatal;
     }
-    tempCF = currentPivot.coefficients[colIndex];
-    tempCF.invert();
-    currentPivot *= tempCF;
+    accumulator = currentPivot.coefficients[columnIndex];
+    accumulator.invert();
+    currentPivot *= accumulator;
     if (carbonCopyMatrix != 0) {
-      carbonCopyMatrix->rowTimesScalar(currentRowIndex, tempCF);
+      carbonCopyMatrix->rowTimesScalar(currentRowIndex, accumulator);
     }
     if (carbonCopyList != 0) {
-      (*carbonCopyList)[currentRowIndex] *= tempCF;
+      (*carbonCopyList)[currentRowIndex] *= accumulator;
     }
-    for (int j = 0; j < theList.size; j ++) {
-      if (j != currentRowIndex) {
-        LinearCombination<TemplateMonomial, Coefficient>& currentOther = theList[j];
-        int otherColIndex = currentOther.monomials.getIndex(currentMon);
-        if (otherColIndex != - 1) {
-          tempCF = currentOther.coefficients[otherColIndex];
-          currentOther.subtractOtherTimesCoefficient(currentPivot, &tempCF);
-          if (carbonCopyList != 0) {
-            (*carbonCopyList)[j].subtractOtherTimesCoefficient((*carbonCopyList)[currentRowIndex], &tempCF);
-          }
-          if (carbonCopyMatrix != 0) {
-            tempCF2 = tempCF;
-            tempCF2 *= - 1;
-            carbonCopyMatrix->addTwoRows(currentRowIndex, j, 0, tempCF2);
-          }
+    for (int j = 0; j < toBeEliminated.size; j ++) {
+      if (j == currentRowIndex) {
+        continue;
+      }
+      LinearCombination<TemplateMonomial, Coefficient>& currentOther = toBeEliminated[j];
+      int otherColumnIndex = currentOther.monomials.getIndex(currentMon);
+      if (otherColumnIndex != - 1) {
+        accumulator = currentOther.coefficients[otherColumnIndex];
+        currentOther.subtractOtherTimesCoefficient(currentPivot, &accumulator);
+        if (carbonCopyList != 0) {
+          (*carbonCopyList)[j].subtractOtherTimesCoefficient((*carbonCopyList)[currentRowIndex], &accumulator);
+        }
+        if (carbonCopyMatrix != 0) {
+          negated = accumulator;
+          negated *= - 1;
+          carbonCopyMatrix->addTwoRows(currentRowIndex, j, 0, negated);
         }
       }
     }
@@ -3721,7 +3725,7 @@ void PolynomialSubstitution<Coefficient>::makeIdentityLikeInjectionSubstitution(
 template <class Coefficient>
 void PolynomialSubstitution<Coefficient>::makeExponentSubstitution(Matrix<LargeInteger>& substitution) {
   Polynomial<Coefficient> tempP;
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   tempM.makeOne();
   this->size = 0;
   this->setSize(substitution.numberOfColumns);
@@ -4174,7 +4178,7 @@ void Polynomial<Coefficient>::makePolynomialFromDirectionAndNormal(
 ) {
   Rational tempRat2 = Vector<Coefficient>::scalarEuclidean(direction, normal);
   this->makeZero();
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   for (int i = 0; i < direction.size; i ++) {
     tempM.makeEi(i);
     this->addMonomial(tempM, normal.objects[i] / tempRat2);
@@ -4295,12 +4299,12 @@ void Matrix<Coefficient>::getMaxMovementAndLeavingVariableRow(
 
 template <typename Coefficient>
 void Matrix<Coefficient>::actOnMonomialAsDifferentialOperator(
-  const MonomialP& input, Polynomial<Rational>& output
+  const MonomialPolynomial& input, Polynomial<Rational>& output
 ) {
   if (this->numberOfRows != this->numberOfColumns) {
     global.fatal << "Matrix not square as expected. " << global.fatal;
   }
-  MonomialP tempMon;
+  MonomialPolynomial tempMon;
   output.makeZero();
   Rational coeff;
   for (int i = 0; i < this->numberOfRows; i ++) {
@@ -4506,7 +4510,6 @@ std::string MonomialTensor<Coefficient, inputHashFunction>::toString(FormatExpre
   }
   std::string theLetter = format == nullptr ?  "g" : format->chevalleyGgeneratorLetter;
   std::string letters = "abcdefghijklmnopqrstuvwxyz";
-  std::string exponents[10] = {"⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"};
   std::stringstream out;
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
     if (static_cast<unsigned>(generatorsIndices[i]) < letters.size()) {
@@ -4514,27 +4517,7 @@ std::string MonomialTensor<Coefficient, inputHashFunction>::toString(FormatExpre
     } else {
       out << theLetter << "_{" << this->generatorsIndices[i] << "}";
     }
-    if (!(this->powers[i] == 1)) {
-      if (this->powers[i] == 2) {
-        out << exponents[2];
-      } else if (this->powers[i] == 3) {
-        out << exponents[3];
-      } else if (this->powers[i] == 4) {
-        out << exponents[4];
-      } else if (this->powers[i] == 5) {
-        out << exponents[5];
-      } else if (this->powers[i] == 6) {
-        out << exponents[6];
-      } else if (this->powers[i] == 7) {
-        out << exponents[7];
-      } else if (this->powers[i] == 8) {
-        out << exponents[8];
-      } else if (this->powers[i] == 9) {
-        out << exponents[9];
-      } else {
-        out << "^{" << this->powers[i] << "}";
-      }
-    }
+    out << "^{" << this->powers[i] << "}";
   }
   return out.str();
 }
@@ -4877,7 +4860,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
   sortedMons.quickSortDescending(theOrder);
   int cutOffCounter = 0;
   bool useCustomPlus = false;
-  int maximumLineLength = format == nullptr ? 200 : format->maximumLineLength;
+  int maximumLineLength = format == nullptr ? - 1 : format->maximumLineLength;
   int numberOfAmpersandsPerNewLineForLaTeX = (format == nullptr) ? 1 : format->numberOfAmpersandsPerNewLineForLaTeX;
   bool flagUseLaTeX = (format == nullptr) ? false : format->flagUseLatex;
   bool flagUseHTML = (format == nullptr) ? false : format->flagUseHTML;
@@ -5047,9 +5030,9 @@ public:
 class QuasiPolynomial {
 public:
   int minimalNumberOfVariables() const {
-    return this->AmbientLatticeReduced.basis.numberOfRows;
+    return this->ambientLatticeReduced.basis.numberOfRows;
   }
-  Lattice AmbientLatticeReduced;
+  Lattice ambientLatticeReduced;
   Vectors<Rational> latticeShifts;
   List<Polynomial<Rational> > valueOnEachLatticeShift;
   std::string toString(bool useHtml, bool useLatex) {
@@ -5060,7 +5043,7 @@ public:
   void addLatticeShift(const Polynomial<Rational>& input, const Vector<Rational>& inputShift);
   void makeRougherLattice(const Lattice& latticeToRoughenBy);
   void makeFromPolynomialShiftAndLattice(
-    const Polynomial<Rational>& inputPoly, const MonomialP& theShift, const Lattice& theLattice
+    const Polynomial<Rational>& inputPoly, const MonomialPolynomial& theShift, const Lattice& theLattice
   );
   void makeZeroLatticeZn(int theDim);
   void makeZeroOverLattice(Lattice& theLattice);
@@ -5092,7 +5075,7 @@ public:
   }
   void operator*=(const Rational& theConst);
   void operator=(const QuasiPolynomial& other) {
-    this->AmbientLatticeReduced = other.AmbientLatticeReduced;
+    this->ambientLatticeReduced = other.ambientLatticeReduced;
     this->latticeShifts = other.latticeShifts;
     this->valueOnEachLatticeShift = other.valueOnEachLatticeShift;
   }
@@ -5112,7 +5095,7 @@ public:
   bool PowerSeriesCoefficientIsComputed;
   bool IsIrrelevant;
   bool RelevanceIsComputed;
-  List<int> IndicesNonZeroMults;
+  List<int> indicesNonZeroMultiplicities;
   List<OnePartialFractionDenominator> denominator;
   friend std::ostream& operator << (std::ostream& output, const PartFraction& input) {
     (void) input;
@@ -5132,16 +5115,16 @@ public:
   static Vector<Rational> theVectorToBePartitioned;
   void computePolynomialCorrespondingToOneMonomial(
     QuasiPolynomial& outputQP,
-    const MonomialP& theMon,
+    const MonomialPolynomial& theMon,
     Vectors<Rational>& normals,
-    Lattice& theLattice
+    Lattice& lattice
   ) const;
   static void evaluateIntegerPolynomial(
     const Polynomial<LargeInteger>& input, const Vector<Rational>& values, Rational& output
   );
   static void makePolynomialFromOneNormal(
     Vector<Rational>& normal,
-    const MonomialP& shiftRational,
+    const MonomialPolynomial& shiftRational,
     int theMult,
     Polynomial<Rational>& output
   );
@@ -5253,7 +5236,7 @@ public:
     PartialFractions& Accum,
     SelectionWithDifferentMaxMultiplicities& thePowers,
     List<int>& thePowersSigned,
-    MonomialP& input,
+    MonomialPolynomial& input,
     LargeInteger& inputCoeff
   );
   void getAlphaMinusNBetaPoly(PartialFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInteger>& output);
@@ -5688,21 +5671,21 @@ class DynkinSimpleType {
     return output;
   }
   public:
-  char theLetter;
-  int theRank;
-  Rational CartanSymmetricInverseScale;
-  DynkinSimpleType(): theLetter('X'), theRank(- 1), CartanSymmetricInverseScale(0) {
+  char letter;
+  int rank;
+  Rational cartanSymmetricInverseScale;
+  DynkinSimpleType(): letter('X'), rank(- 1), cartanSymmetricInverseScale(0) {
   }
   DynkinSimpleType(const DynkinSimpleType& other) {
     *this = other;
   }
   DynkinSimpleType(char inputChar, int inputRank, const Rational& inputScale = 1) :
-    theLetter(inputChar), theRank(inputRank), CartanSymmetricInverseScale(inputScale) {
+    letter(inputChar), rank(inputRank), cartanSymmetricInverseScale(inputScale) {
 
   }
   int getRootSystemSize() const;
   int getLieAlgebraDimension() const {
-    return this->getRootSystemSize() + this->theRank;
+    return this->getRootSystemSize() + this->rank;
   }
   void makeArbitrary(
     char inputLetter,
@@ -5721,18 +5704,18 @@ class DynkinSimpleType {
   void getG2(Matrix<Rational>& output) const;
   void grow(List<DynkinSimpleType>& output, List<List<int> >* outputPermutationRoots) const;
   void operator=(const DynkinSimpleType& other) {
-    this->theLetter = other.theLetter;
-    this->theRank = other.theRank;
-    this->CartanSymmetricInverseScale = other.CartanSymmetricInverseScale;
+    this->letter = other.letter;
+    this->rank = other.rank;
+    this->cartanSymmetricInverseScale = other.cartanSymmetricInverseScale;
   }
   bool operator==(const DynkinSimpleType& other) const {
     return
-    this->theLetter == other.theLetter && this->theRank == other.theRank &&
-    this->CartanSymmetricInverseScale == other.CartanSymmetricInverseScale;
+    this->letter == other.letter && this->rank == other.rank &&
+    this->cartanSymmetricInverseScale == other.cartanSymmetricInverseScale;
   }
   static unsigned int hashFunction(const DynkinSimpleType& input) {
-    return static_cast<unsigned int>(input.theLetter) * 2 +
-    static_cast<unsigned int>(input.theRank) + someRandomPrimes[0] * input.CartanSymmetricInverseScale.hashFunction();
+    return static_cast<unsigned int>(input.letter) * 2 +
+    static_cast<unsigned int>(input.rank) + someRandomPrimes[0] * input.cartanSymmetricInverseScale.hashFunction();
   }
   unsigned int hashFunction() const {
     return this->hashFunction(*this);
@@ -5759,7 +5742,7 @@ class DynkinSimpleType {
   }
   bool hasPrecomputedSubalgebras() const;
   Rational getRatioLongRootToFirst() const {
-    return this->getRatioLongRootToFirst(this->theLetter, this->theRank);
+    return this->getRatioLongRootToFirst(this->letter, this->rank);
   }
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringNonTechnicalName(FormatExpressions* theFormat = nullptr) const;
@@ -6483,11 +6466,12 @@ public:
     }
   }
   bool isNilpotent() const {
-    MatrixTensor<Coefficient> theMat;
-    theMat = *this;
-    for (int theDim = this->getMinimumNumberOfColumnsNumberOfRows() + 1; theDim > 0; theDim /= 2) {
-      theMat *= theMat;
-      if (theMat.isEqualToZero()) {
+    MatrixTensor<Coefficient> element;
+    element = *this;
+    int dimensionPlusOne = this->getMinimumNumberOfColumnsNumberOfRows() + 1;
+    for (int i = dimensionPlusOne; i > 0; i /= 2) {
+      element *= element;
+      if (element.isEqualToZero()) {
         return true;
       }
     }
@@ -6809,7 +6793,7 @@ void PolynomialSubstitution<Coefficient>::makeLinearSubstitutionConstantTermsLas
   Matrix<Coefficient>& matrix
 ) {
   this->setSize(matrix.numberOfColumns);
-  MonomialP tempM;
+  MonomialPolynomial tempM;
   for (int i = 0; i < this->size; i ++) {
     this->objects[i].makeZero();
     for (int j = 0; j < matrix.numberOfRows - 1; j ++) {

@@ -72,6 +72,10 @@ void Calculator::EvaluationStatistics::reset() {
   this->maximumCallsBeforeReportGeneration = 5000;
   this->callsSinceReport = 0;
   this->totalSubstitutions = 0;
+  this->totalEvaluationLoops = 0;
+  this->totalPatternMatchesPerformed = 0;
+  this->totalEvaluationLoops = 0;
+
   this->numberOfListsStart = - 1;
   this->numberListResizesStart = - 1;
   this->numberHashResizesStart = - 1;
@@ -82,13 +86,15 @@ void Calculator::EvaluationStatistics::reset() {
   this->numberOfLargeMultiplicationsStart = - 1;
   this->numberOfLargeGreatestCommonDivisorsStart = - 1;
   this->millisecondsLastLog = - 1;
+  this->startTimeEvaluationMilliseconds = - 1;
+  this->startParsing = - 1;
+  this->lastStopwatchParsing = - 1;
 }
 
 void Calculator::reset() {
   this->statistics.reset();
+  this->mode = Calculator::Mode::full;
   this->maximumAlgebraicTransformationsPerExpression = 100;
-  this->maximumRuleStacksCached = 500;
-  this->maximumCachedExpressionPerRuleStack = 100000;
   this->maximumRecursionDepth = 10000;
   this->recursionDepth = 0;
 
@@ -107,18 +113,15 @@ void Calculator::reset() {
   this->flagHidePolynomialBuiltInTypeIndicator = false;
   this->flagUseFracInRationalLaTeX = true;
   this->flagForkingprocessAllowed = true;
-  this->flagNoApproximations = false;
-  this->flagDefaultRulesWereTamperedWith = false;
   this->flagUsePredefinedWordSplits = true;
   this->flagPlotNoControls = true;
   this->flagPlotShowJavascriptOnly = false;
   this->flagHasGraphics = false;
   this->flagUseBracketsForIntervals = false;
-  this->flagUseScientificFunctions = true;
 
   this->maximumLatexChars = 2000;
   this->numEmptyTokensStart = 9;
-  this->theObjectContainer.reset();
+  this->objectContainer.reset();
   this->controlSequences.clear();
 
   //this->logEvaluationSteps.setSize(0);
@@ -146,18 +149,12 @@ void Calculator::reset() {
   this->flagAbortComputationASAP = false;
   this->flagDisplayContext = false;
   this->evaluatedExpressionsStack.clear();
-  this->theCruncherIds.clear();
-  this->theCruncherS.setSize(0);
   this->syntaxErrors = "";
   this->evaluationErrors.setSize(0);
   this->currentSyntacticStack = &this->syntacticStack;
   this->currrentSyntacticSoup = &this->syntacticSoup;
-  this->cachedExpressions.clear();
-  this->imagesCachedExpressions.setSize(0);
   this->programExpression.reset(*this);
-  this->ruleStackCacheIndex = - 1;
-  this->ruleStack.reset(*this,this->maximumRuleStacksCached);
-  this->cachedRuleStacks.clear();
+  this->cachedExpressions.clear();
   // The expression container must be cleared second to last.
   this->allChildExpressions.clear();
   // The hashes list below is used in computing the hashes of the list above.
@@ -165,9 +162,10 @@ void Calculator::reset() {
   this->allChildExpressionHashes.clear();
 }
 
-void Calculator::initialize() {
+void Calculator::initialize(Calculator::Mode desiredMode) {
   MacroRegisterFunctionWithName("Calculator::initialize");
   this->reset();
+  this->mode = desiredMode;
 
   this->operations.setExpectedSize(1000);
   this->namedRules.setExpectedSize(500);
@@ -272,7 +270,7 @@ void Calculator::initialize() {
   this->controlSequences.addOnTopNoRepetitionMustBeNew(" ");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("{{}}");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("Variable");
-  this->controlSequences.addListOnTop(this->operations.keys);//all operations defined up to this point are also control sequences
+  this->controlSequences.addListOnTop(this->operations.keys); //all operations defined up to this point are also control sequences
   this->controlSequences.addOnTopNoRepetitionMustBeNew("Expression");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("Integer");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("{}");
@@ -349,12 +347,15 @@ void Calculator::initialize() {
   this->controlSequences.addOnTopNoRepetitionMustBeNew("\\text");
 
   this->initializePredefinedStandardOperationsWithoutHandler();
-  this->totalPatternMatchesPerformed = 0;
   this->initializeBuiltInsFreezeArguments();
-  this->initializeStandardFunctions();
-  this->initializeScientificFunctions();
-  this->initCalculusTestingFunctions();
-  this->initPredefinedOperationsComposite();
+  this->initializeFunctionsStandard();
+  if (this->mode == Calculator::Mode::full) {
+    this->initializeFunctionsCryptoAndEncoding();
+    this->initializeFunctionsScientificBasic();
+    this->initializeFunctionsSemisimpleLieAlgebras();
+    this->initializeAdminFunctions();
+    this->initializeFunctionsExtra();
+  }
   this->initializeAtomsThatAllowCommutingOfArguments();
   this->initializeAtomsThatFreezeArguments();
   this->initializeAtomsNotGoodForChainRule();
@@ -370,9 +371,6 @@ void Calculator::initialize() {
 
   this->ruleStack.reset(*this, 100);
   this->ruleStack.addChildAtomOnTop(this->opCommandSequence());
-  this->cachedRuleStacks.clear();
-  this->ruleStackCacheIndex = 0;
-  this->cachedRuleStacks.addOnTop(this->ruleStack);
   this->numberOfPredefinedAtoms = this->operations.size(); //<-operations added up to this point are called ``operations''
   this->checkConsistencyAfterInitialization();
 }
@@ -1017,12 +1015,12 @@ bool Calculator::replaceEXXSequenceXBy_Expression_with_E_instead_of_sequence() {
   SyntacticElement& theFunctionElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 5];
   Expression newExpr;
   newExpr.reset(*this);
-  newExpr.children.reserve(theSequenceElt.theData.children.size);
+  newExpr.setExpectedSize(theSequenceElt.theData.size());
   newExpr.addChildOnTop(theFunctionElt.theData);
   if (theSequenceElt.theData.isAtom()) {
     newExpr.addChildOnTop(theSequenceElt.theData);
   } else {
-    for (int i = 1; i < theSequenceElt.theData.children.size; i ++) {
+    for (int i = 1; i < theSequenceElt.theData.size(); i ++) {
       newExpr.addChildOnTop(theSequenceElt.theData[i]);
     }
   }
@@ -1569,7 +1567,6 @@ bool Calculator::replaceEXdotsXbySsXdotsX(int numDots) {
   }
   Expression newExpr;
   newExpr.reset(*this);
-  newExpr.children.reserve(2);
   newExpr.addChildAtomOnTop(this->opCommandSequence());
   newExpr.addChildOnTop(left.theData);
   left.theData = newExpr;
@@ -1586,8 +1583,8 @@ bool Calculator::replaceSsSsXdotsXbySsXdotsX(int numDots) {
   if (!left.theData.startsWith(this->opCommandSequence())) {
     global.fatal << "replaceSsSsXdotsXbySsXdotsX called but left expression is not EndStatement." << global.fatal;
   }
-  left.theData.children.reserve(left.theData.children.size + right.theData.children.size - 1);
-  for (int i = 1; i < right.theData.children.size; i ++) {
+  left.theData.setExpectedSize(left.theData.size() + right.theData.size() - 1);
+  for (int i = 1; i < right.theData.size(); i ++) {
     left.theData.addChildOnTop(right.theData[i]);
   }
   left.controlIndex = this->conSequenceStatements();
@@ -1921,7 +1918,8 @@ bool Calculator::extractExpressions(Expression& outputExpression, std::string* o
   int counterReport = 0;
   int symbolsToIssueReport = 100;
   int minMillisecondsPerReport = 200;
-  int64_t lastMilliseconds = global.getElapsedMilliseconds();
+  this->statistics.startParsing = global.getElapsedMilliseconds();
+  this->statistics.lastStopwatchParsing = this->statistics.startParsing;
   ProgressReport theReport;
   for (
     this->counterInSyntacticSoup = 0;
@@ -1932,8 +1930,8 @@ bool Calculator::extractExpressions(Expression& outputExpression, std::string* o
     if (counterReport >= symbolsToIssueReport) {
       counterReport = 0;
       int64_t currentMilliseconds = global.getElapsedMilliseconds();
-      if (currentMilliseconds - lastMilliseconds > minMillisecondsPerReport) {
-        currentMilliseconds = lastMilliseconds;
+      if (currentMilliseconds - this->statistics.lastStopwatchParsing > minMillisecondsPerReport) {
+        this->statistics.lastStopwatchParsing = currentMilliseconds;
         std::stringstream reportStream;
         reportStream << "Processed " << this->counterInSyntacticSoup << " out of " << (*this->currrentSyntacticSoup).size
         << " syntactic elements. ";
@@ -2088,7 +2086,7 @@ bool Calculator::applyOneRule() {
   if (secondToLastS == "%" && lastS == "LogEvaluation") {
     this->flagLogEvaluation = true;
     *this << "Log evaluation start. ";
-    this->logTime();
+    this->logTime(this->statistics.lastStopwatchParsing);
     this->popTopSyntacticStack();
     return this->popTopSyntacticStack();
   }

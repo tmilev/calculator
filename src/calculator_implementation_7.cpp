@@ -119,10 +119,10 @@ bool CalculatorFunctionsCrypto::testTLSMessageSequence(
   std::stringstream spanId;
   spanId << "spanServerSpoofer_" << "_" << global.getElapsedMilliseconds();
   out << "<div id = '" << spanId.str() << "'></div>";
-  out << "<script>"
-  << "window.calculator.crypto.displayTransportLayerSecurity('"
-  << spanId.str() << "', " << spoofServer.toJSON() << ");"
-  << "</script>";
+  JSData script;
+  script["id"] = spanId.str();
+  script["content"] = spoofServer.toJSON();
+  out << HtmlRoutines::scriptFromJSON("displayTransportLayerSecurity", script);
   return output.assignValue(out.str(), calculator);
 }
 
@@ -762,7 +762,7 @@ bool CalculatorFunctionsBasic::logarithm(Calculator& calculator, const Expressio
   if (input[1].isEqualToOne()) {
     return output.assignValue(0, calculator);
   }
-  if (calculator.flagNoApproximations) {
+  if (calculator.approximationsBanned()) {
     return false;
   }
   double theArgument;
@@ -824,7 +824,7 @@ bool CalculatorFunctionsTrigonometry::arctan(Calculator& calculator, const Expre
     output *= calculator.expressionMinusOne();
     return true;
   }
-  if (calculator.flagNoApproximations) {
+  if (calculator.approximationsBanned()) {
     return false;
   }
   double theArgument;
@@ -836,7 +836,7 @@ bool CalculatorFunctionsTrigonometry::arctan(Calculator& calculator, const Expre
 
 bool CalculatorFunctionsTrigonometry::arccos(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::arccos");
-  if (calculator.flagNoApproximations) {
+  if (calculator.approximationsBanned()) {
     return false;
   }
   if (input.size() != 2) {
@@ -855,7 +855,7 @@ bool CalculatorFunctionsTrigonometry::arcsin(Calculator& calculator, const Expre
   if (input.size() != 2) {
     return false;
   }
-  if (calculator.flagNoApproximations) {
+  if (calculator.approximationsBanned()) {
     return false;
   }
   double theArgument;
@@ -911,7 +911,7 @@ bool CalculatorFunctionsTrigonometry::sin(Calculator& calculator, const Expressi
       if (argument[1].isOfType<Rational>(&piProportion)) {
         AlgebraicNumber algOutput;
         Rational ratOutput;
-        if (algOutput.assignSinRationalTimesPi(piProportion, calculator.theObjectContainer.theAlgebraicClosure)) {
+        if (algOutput.assignSinRationalTimesPi(piProportion, calculator.objectContainer.theAlgebraicClosure)) {
           if (algOutput.isRational(&ratOutput)) {
             return output.assignValue(ratOutput, calculator);
           }
@@ -920,7 +920,7 @@ bool CalculatorFunctionsTrigonometry::sin(Calculator& calculator, const Expressi
       }
     }
   }
-  if (calculator.flagNoApproximations) {
+  if (calculator.approximationsBanned()) {
     return false;
   }
   double theArgument = 0;
@@ -948,7 +948,7 @@ bool CalculatorFunctionsTrigonometry::cos(Calculator& calculator, const Expressi
       if (argument[1].isOfType<Rational>(&piProportion)) {
         AlgebraicNumber algOutput;
         Rational ratOutput;
-        if (algOutput.assignCosRationalTimesPi(piProportion, calculator.theObjectContainer.theAlgebraicClosure)) {
+        if (algOutput.assignCosRationalTimesPi(piProportion, calculator.objectContainer.theAlgebraicClosure)) {
           if (algOutput.isRational(&ratOutput)) {
             return output.assignValue(ratOutput, calculator);
           }
@@ -957,7 +957,7 @@ bool CalculatorFunctionsTrigonometry::cos(Calculator& calculator, const Expressi
       }
     }
   }
-  if (calculator.flagNoApproximations) {
+  if (calculator.approximationsBanned()) {
     return false;
   }
   double theArgument = 0;
@@ -1029,8 +1029,8 @@ bool Calculator::getSumProductsExpressions(const Expression& inputSum, List<List
   return true;
 }
 
-bool CalculatorFunctions::innerCoefficientOf(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerCoefficientOf");
+bool CalculatorFunctions::coefficientOf(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::coefficientOf");
   if (input.size() != 3) {
     return false;
   }
@@ -1040,7 +1040,7 @@ bool CalculatorFunctions::innerCoefficientOf(Calculator& calculator, const Expre
   if (input[2].startsWith(calculator.opDivide())) {
     Expression coefficientNumerator = input;
     coefficientNumerator.setChild(2, input[2][1]);
-    if (!CalculatorFunctions::innerCoefficientOf(calculator, coefficientNumerator, output)) {
+    if (!CalculatorFunctions::coefficientOf(calculator, coefficientNumerator, output)) {
       return false;
     }
     return output.makeXOX(calculator, calculator.opDivide(), output, input[2][2]);
@@ -1160,10 +1160,14 @@ bool CalculatorFunctions::innerDereferenceSequenceStatements(
   return false;
 }
 
-bool CalculatorFunctions::innerSolveSerreLikeSystem(
-  Calculator& calculator, const Expression& input, Expression& output, bool useUpperLimit, bool startWithAlgebraicClosure
+bool CalculatorFunctions::solveSerreLikeSystem(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool useUpperLimit,
+  bool startWithAlgebraicClosure
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerSolveSerreLikeSystem");
+  MacroRegisterFunctionWithName("Calculator::solveSerreLikeSystem");
   Vector<Polynomial<Rational> > polynomialsRational;
   ExpressionContext theContext(calculator);
   bool useArguments =
@@ -1194,33 +1198,35 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
     }
   }
   PolynomialSystem<AlgebraicNumber> system;
-  theContext.getFormat(system.groebner.theFormat);
-  int upperLimit = 501;
+  theContext.getFormat(system.groebner.format);
+  List<int> upperLimits = List<int>({201, 1000});
   if (useUpperLimit) {
-    Rational upperLimitRat;
-    if (!polynomialsRational[0].isConstant(&upperLimitRat)) {
-      return calculator << "Failed to extract a constant from the first argument "
-      << polynomialsRational[0].toString(&system.format()) << ". ";
+    for (int i = 0; i < 2; i ++) {
+      Rational upperLimitRat;
+      if (!polynomialsRational[0].isConstant(&upperLimitRat)) {
+        return calculator << "Failed to extract a constant from the first argument "
+        << polynomialsRational[0].toString(&system.format()) << ". ";
+      }
+      if (!upperLimitRat.isIntegerFittingInInt(&upperLimits[i])) {
+        return calculator << "Failed to extract a small integer from the first argument "
+        << upperLimitRat.toString(&system.groebner.format) << ". ";
+      }
+      polynomialsRational.popIndexShiftDown(0);
     }
-    if (!upperLimitRat.isIntegerFittingInInt(&upperLimit)) {
-      return calculator << "Failed to extract a small integer from the first argument "
-      << upperLimitRat.toString(&system.groebner.theFormat) << ". ";
-    }
-    polynomialsRational.popIndexShiftDown(0);
   }
   Vector<Polynomial<AlgebraicNumber> > polynomials;
   polynomials = polynomialsRational;
-  system.groebner.maximumPolynomialComputations = upperLimit;
-  system.maximumSerreSystemComputationsPreferred = upperLimit;
-  system.groebner.polynomialOrder.monomialOrder = MonomialP::orderDefault();
-  system.theAlgebraicClosure = &calculator.theObjectContainer.theAlgebraicClosure;
+  system.groebner.maximumPolynomialDivisions = upperLimits[0];
+  system.groebner.maximumMonomialOperations = upperLimits[1];
+  system.groebner.polynomialOrder.monomialOrder = MonomialPolynomial::orderDefault();
+  system.algebraicClosure = &calculator.objectContainer.theAlgebraicClosure;
   system.flagTryDirectlySolutionOverAlgebraicClosure = startWithAlgebraicClosure;
-  global.theDefaultFormat.getElement() = system.groebner.theFormat;
+  global.theDefaultFormat.getElement() = system.groebner.format;
   system.flagUseTheMonomialBranchingOptimization = true;
   system.solveSerreLikeSystem(polynomials);
   std::stringstream out;
   out << "<br>The context vars:<br>" << theContext.toString();
-  out << "<br>The polynomials: " << polynomials.toString(&system.groebner.theFormat);
+  out << "<br>The polynomials: " << polynomials.toString(&system.groebner.format);
   out << "<br>Total number of polynomial computations: "
   << system.numberOfSerreSystemComputations;
   if (system.flagSystemProvenToHaveNoSolution) {
@@ -1267,7 +1273,7 @@ bool CalculatorFunctionsAlgebraic::printAlgebraicClosureStatus(
   theFormat.flagUseHTML = false;
   theFormat.flagUseLatex = true;
   return output.assignValue(
-    calculator.theObjectContainer.theAlgebraicClosure.toStringFull(&theFormat),
+    calculator.objectContainer.theAlgebraicClosure.toStringFull(&theFormat),
     calculator
   );
 }
@@ -1298,7 +1304,7 @@ bool CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinPoly(
   std::stringstream commentsOnFailure;
   if (!theAN.constructFromMinimalPolynomial(
     polynomial.content,
-    calculator.theObjectContainer.theAlgebraicClosure,
+    calculator.objectContainer.theAlgebraicClosure,
     &commentsOnFailure
   )) {
     return calculator << "Failed to construct minimal polynomial. " << commentsOnFailure.str();
@@ -1322,9 +1328,9 @@ bool CalculatorFunctions::innerCompositeApowerBevaluatedAtC(
   }
   calculator.checkInputNotSameAsOutput(input, output);
   Expression finalBase;
-  finalBase.reset(calculator, input.children.size);
+  finalBase.reset(calculator, input.size());
   finalBase.addChildOnTop(input[0][1]);
-  for (int i = 1; i < input.children.size; i ++) {
+  for (int i = 1; i < input.size(); i ++) {
     finalBase.addChildOnTop(input[i]);
   }
   return output.makeXOX(calculator, calculator.opThePower(), finalBase, input[0][2]);
@@ -1377,7 +1383,7 @@ void Polynomial<Coefficient>::getPolynomialWithPolynomialCoefficient(
     << "selects the wrong number of variables. " << global.fatal;
   }
   output.makeZero();
-  MonomialP coeffPart, polyPart;
+  MonomialPolynomial coeffPart, polyPart;
   Polynomial<Coefficient> currentCF;
   for (int i = 0; i < this->size(); i ++) {
     coeffPart.makeOne();
@@ -1496,7 +1502,7 @@ bool IntegralRationalFunctionComputation::preparePartialFractionExpressionSumman
   this->thePFSummands.setSize(0);
   Polynomial<AlgebraicNumber> denominatorRescaled, numeratorRescaled;
   AlgebraicNumber currentCoefficient, numScale;
-  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
+  List<MonomialPolynomial>::Comparator* monomialOrder = &MonomialPolynomial::orderDefault();
   for (int i = 0; i < this->theNumerators.size; i ++) {
     for (int j = 0; j < this->theNumerators[i].size; j ++) {
       if (this->theNumerators[i][j].isEqualToZero()) {
@@ -1568,7 +1574,7 @@ bool IntegralRationalFunctionComputation::integrateRationalFunction() {
   this->theIntegralSummands.setSize(0);
   Polynomial<AlgebraicNumber> denRescaled, numRescaled;
   AlgebraicNumber currentCoefficient, numScale;
-  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
+  List<MonomialPolynomial>::Comparator* monomialOrder = &MonomialPolynomial::orderDefault();
   for (int i = 0; i < this->theNumerators.size; i ++) {
     for (int j = 0; j < this->theNumerators[i].size; j ++) {
       if (this->theNumerators[i][j].isEqualToZero()) {
@@ -1718,7 +1724,7 @@ void IntegralRationalFunctionComputation::prepareNumerators() {
   this->remainderRescaledAlgebraic /= additionalMultiple;
   this->numberOfSystemVariables = 0;
   Polynomial<AlgebraicNumber> currentSummand;
-  MonomialP currentMon;
+  MonomialPolynomial currentMon;
   this->thePolyThatMustVanish.makeZero();
   this->thePolyThatMustVanish -= remainderRescaledAlgebraic;
   this->theNumerators.setSize(this->theDenominatorFactorsWithMults.size());
@@ -1838,7 +1844,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
   }
   this->theRF.getDenominator(this->theDen);
   this->theRF.getNumerator(this->theNum);
-  this->theNum *= this->theDen.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  this->theNum *= this->theDen.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationKronecker> factorization;
   if (!factorization.factor(
     this->theDen,
@@ -1875,7 +1881,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     << "degree greater than 2. I surrender. ";
     return false;
   }
-  List<MonomialP>::Comparator monomialOrder = MonomialP::orderDefault();
+  List<MonomialPolynomial>::Comparator monomialOrder = MonomialPolynomial::orderDefault();
   this->currentFormaT.flagUseFrac = true;
   this->theNum.divideBy(
     this->theDen,
@@ -1896,9 +1902,9 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     GroebnerBasisComputation<Rational> computation;
     computation.flagDoLogDivision = true;
     computation.flagStoreQuotients = true;
-    computation.polynomialOrder.monomialOrder = MonomialP::orderDefault();
+    computation.polynomialOrder.monomialOrder = MonomialPolynomial::orderDefault();
     computation.addBasisElementNoReduction(this->theDen);
-    computation.theFormat = this->currentFormaT;
+    computation.format = this->currentFormaT;
     computation.polynomialOrder.monomialOrder = monomialOrder;
     Polynomial<Rational> theNumCopy = this->theNum;
     computation.remainderDivisionByBasis(theNumCopy, computation.remainderDivision, - 1);
@@ -1936,7 +1942,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     AlgebraicNumber theDiscriminantSqrt;
     if (!theDiscriminantSqrt.assignRationalQuadraticRadical(
       theDiscriminant,
-      this->owner->theObjectContainer.theAlgebraicClosure,
+      this->owner->objectContainer.theAlgebraicClosure,
       &this->printoutPFsHtml
     )) {
       this->printoutPFsHtml
@@ -1946,8 +1952,8 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
       return false;
     }
     theDiscriminantSqrt.checkConsistency();
-    AlgebraicNumber a = currentSecondDegreePoly.getCoefficientOf(MonomialP(0, 2));
-    AlgebraicNumber b = currentSecondDegreePoly.getCoefficientOf(MonomialP(0, 1));
+    AlgebraicNumber a = currentSecondDegreePoly.getCoefficientOf(MonomialPolynomial(0, 2));
+    AlgebraicNumber b = currentSecondDegreePoly.getCoefficientOf(MonomialPolynomial(0, 1));
     a.checkConsistency();
     b.checkConsistency();
     currentLinPoly.makeMonomial(0, 1);
@@ -2001,7 +2007,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     for (int k = 0; k < theDenominatorFactorsWithMults.coefficients[i]; k ++) {
       this->theNumerators[i][k].substitution(
         substitution,
-        this->owner->theObjectContainer.theAlgebraicClosure.one()
+        this->owner->objectContainer.theAlgebraicClosure.one()
       );
     }
   }
@@ -2088,29 +2094,30 @@ bool CalculatorFunctions::innerGaussianEliminationMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("innerGaussianEliminationMatrix");
-  Expression theConverted;
+  Expression converted;
   if (!CalculatorConversions::innerMakeMatrix(
-    calculator, input, theConverted
+    calculator, input, converted
   )) {
     return calculator
     << "<hr>Failed to extract algebraic number matrix from "
     << input.toString() << ". ";
   }
-  Matrix<AlgebraicNumber> theMat;
-  if (!calculator.functionGetMatrix(theConverted, theMat)) {
+  Matrix<AlgebraicNumber> matrix;
+  if (!calculator.functionGetMatrix(converted, matrix)) {
     return calculator
     << "<hr>Failed to extract algebraic number matrix, "
     << "got intermediate conversion to: "
-    << theConverted.toString();
+    << converted.toString();
   }
-  if (theMat.numberOfRows < 2) {
+  if (matrix.numberOfRows < 2) {
     return calculator
     << "<hr>The matrix I got as input had only 1 row. Possible user typo?";
   }
   std::stringstream out;
-  FormatExpressions theFormat;
-  theFormat.flagUseFrac = true;
-  theMat.gaussianEliminationByRows(nullptr, nullptr, nullptr, &out, &theFormat);
+  FormatExpressions format;
+  format.flagUseFrac = true;
+  format.flagUseHTML = true;
+  matrix.gaussianEliminationByRows(nullptr, nullptr, nullptr, &out, &format);
   return output.assignValue(out.str(), calculator);
 }
 
@@ -2265,6 +2272,24 @@ bool CalculatorFunctionsListsAndSets::listUnion(
   return true;
 }
 
+bool CalculatorFunctionsListsAndSets::belongsTo(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsListsAndSets::listUnion");
+  if (input.size() != 3) {
+    return false;
+  }
+  if (!input[2].isSequenceNElements()) {
+    return false;
+  }
+  for (int i = 1; i < input[2].size(); i ++) {
+    if (input[1] == input[2][i]) {
+      return output.assignValue(1, calculator);
+    }
+  }
+  return output.assignValue(0, calculator);
+}
+
 bool CalculatorFunctionsListsAndSets::unionNoRepetition(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
@@ -2281,27 +2306,29 @@ bool CalculatorFunctionsListsAndSets::unionNoRepetition(
     }
   }
   HashedList<Expression> theList;
-  List<int> theIndices;
+  List<int> indices;
   theList.setExpectedSize(numElts);
   for (int i = 1; i < input.size(); i ++) {
     for (int j = 1; j < input[i].size(); j ++) {
       theList.addOnTopNoRepetition(input[i][j]);
     }
   }
-  theIndices.setSize(theList.size);
+  indices.setSize(theList.size);
   for (int i = 0; i < theList.size; i ++) {
-    theIndices[i] = calculator.addChildExpression(theList[i]);
+    indices[i] = calculator.addChildExpression(theList[i]);
   }
-  output.children.reserve(numElts);
-  output.reset(calculator, theIndices.size + 1);
+  output.setExpectedSize(numElts);
+  output.reset(calculator, indices.size + 1);
   output.addChildAtomOnTop(calculator.opSequence());
-  output.children.addListOnTop(theIndices);
+  output.addChildIndices(indices);
   return true;
 }
 
-bool CalculatorFunctions::innerCrossProduct(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerCrossProduct");
-  if (!input.isListStartingWithAtom(calculator.opCrossProduct()) || input.children.size != 3) {
+bool CalculatorFunctions::crossProduct(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::crossProduct");
+  if (!input.isListStartingWithAtom(calculator.opCrossProduct()) || input.size() != 3) {
     return false;
   }
   const Expression& leftE = input[1];
@@ -2918,7 +2945,7 @@ bool CalculatorFunctions::outerCommuteAtimesBifUnivariate(
     return false;
   }
   output = input;
-  output.children.swapTwoIndices(1, 2);
+  output.swapChildren(1, 2);
   return true;
 }
 
@@ -3329,10 +3356,10 @@ bool CalculatorFunctions::innerCompareExpressionsNumerically(
   return output.assignValue(1, calculator);
 }
 
-bool CalculatorFunctions::innerCompositeArithmeticOperationEvaluatedOnArgument(
+bool CalculatorFunctions::compositeArithmeticOperationEvaluatedOnArgument(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerCompositeArithmeticOperationEvaluatedOnArgument");
+  MacroRegisterFunctionWithName("CalculatorFunctions::compositeArithmeticOperationEvaluatedOnArgument");
   if (input.size() != 2) {
     return false;
   }
@@ -4508,7 +4535,7 @@ bool CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM(
   newVarE = calculator.getNewAtom();
   newResultE = calculator.getNewAtom();
   for (int i = 0; i < theTrigPoly.size(); i ++) {
-    const MonomialP& currentMon = theTrigPoly[i];
+    const MonomialPolynomial& currentMon = theTrigPoly[i];
     int powerSine = - 1, powerCosine = - 1;
     if (!currentMon(0).isSmallInteger(&powerSine) || !currentMon(1).isSmallInteger(&powerCosine)) {
       return false;
@@ -4645,7 +4672,7 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
   newVarE = calculator.getNewAtom();
   newResultE = calculator.getNewAtom();
   for (int i = 0; i < theTrigPoly.size(); i ++) {
-    const MonomialP& currentMon = theTrigPoly[i];
+    const MonomialPolynomial& currentMon = theTrigPoly[i];
     int powerTan = - 1, powerSec = - 1;
     if (!currentMon(0).isSmallInteger(&powerTan) || !currentMon(1).isSmallInteger(&powerSec)) {
       return false;
@@ -4849,7 +4876,7 @@ bool CalculatorFunctionsTrigonometry::eulerFormulaAsLaw(
   currentE.addChildAtomOnTop(calculator.opCoefficientOf());
   currentE.addChildOnTop(iE);
   currentE.addChildOnTop(input[2]);
-  if (!CalculatorFunctions::innerCoefficientOf(calculator, currentE, coefficientOfI)) {
+  if (!CalculatorFunctions::coefficientOf(calculator, currentE, coefficientOfI)) {
     return false;
   }
   if (coefficientOfI.isEqualToZero()) {
@@ -5471,12 +5498,12 @@ bool CalculatorFunctionsListsAndSets::removeLastElement(
     const Expression& sequenceCandidate = input[1];
     if (sequenceCandidate.isSequenceNElements() && sequenceCandidate.size() > 1) {
       output = sequenceCandidate;
-      output.children.removeLastObject();
+      output.removeLastChild();
       return true;
     }
   }
   output = input;
-  output.children.removeLastObject();
+  output.removeLastChild();
   return output.setChildAtomValue(0, calculator.opSequence());
 }
 
@@ -5726,19 +5753,19 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& calculator, const Ex
       }
     }
   }
-  PlotObject thePlot;
+  PlotObject plot;
   Vector<double> currentPt;
   currentPt.setSize(2);
   for (int i = firstGoodXIndex; i <= lastGoodXIndex; i ++) {
     currentPt[0] = XValues[i];
     currentPt[1] = YValues[i];
-    thePlot.thePointsDouble.addOnTop(currentPt);
+    plot.pointsDouble.addOnTop(currentPt);
   }
-  thePlot.xLow = XValues[0];
-  thePlot.xHigh = *XValues.lastObject();
-  thePlot.yLow = - 0.5;
-  thePlot.yHigh = 0.5;
-  thePlot.coordinateFunctionsE.addOnTop(input);
+  plot.xLow = XValues[0];
+  plot.xHigh = *XValues.lastObject();
+  plot.yLow = - 0.5;
+  plot.yHigh = 0.5;
+  plot.coordinateFunctionsE.addOnTop(input);
   std::stringstream outLatex, outHtml;
   outLatex << "\n\n%calculator input:" << input.toString() << "\n\n"
   << "\\psline[linecolor =\\fcColorGraph]";
@@ -5747,12 +5774,13 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& calculator, const Ex
   for (int i = firstGoodXIndex; i <= lastGoodXIndex; i ++) {
     outLatex << std::fixed << "(" << XValues[i] << ", " << YValues[i] << ")";
     outHtml << std::fixed << "(" << XValues[i] << ", " << YValues[i] << ")";
-    thePlot.yLow = MathRoutines::minimum(YValues[i], thePlot.yLow);
-    thePlot.yHigh = MathRoutines::maximum(YValues[i], thePlot.yHigh);
+    plot.yLow = MathRoutines::minimum(YValues[i], plot.yLow);
+    plot.yHigh = MathRoutines::maximum(YValues[i], plot.yHigh);
   }
-  thePlot.thePlotString = outLatex.str();
-  thePlot.thePlotStringWithHtml = outHtml.str();
-  return output.assignValue(thePlot, calculator);
+  plot.thePlotString = outLatex.str();
+  plot.thePlotStringWithHtml = outHtml.str();
+  plot.dimension = 2;
+  return output.assignValue(plot, calculator);
 }
 
 bool CalculatorFunctionsPlot::plotViewWindow(
@@ -5863,17 +5891,17 @@ bool CalculatorFunctionsPlot::plotFill(Calculator& calculator, const Expression&
     calculator << "Failed to extract color from: " << colorE.toString() << "; using default color value. ";
   }
   theFilledPlot.colorFillJS = colorString;
-  for (int i = 0; i < startPlot.thePlots.size; i ++) {
-    theFilledPlot.thePointsDouble.addListOnTop(startPlot.thePlots[i].thePointsDouble);
+  for (int i = 0; i < startPlot.getPlots().size; i ++) {
+    theFilledPlot.pointsDouble.addListOnTop(startPlot.getPlots()[i].pointsDouble);
   }
   theFilledPlot.fillStyle = "filled";
-  theFilledPlot.thePlotType = "plotFillStart";
+  theFilledPlot.plotType = "plotFillStart";
   outputPlot.desiredHtmlHeightInPixels = startPlot.desiredHtmlHeightInPixels;
   outputPlot.desiredHtmlWidthInPixels = startPlot.desiredHtmlWidthInPixels;
-  outputPlot.thePlots.addOnTop(theFilledPlot);
+  outputPlot += theFilledPlot;
   outputPlot += startPlot;
-  theFilledPlot.thePlotType = "plotFillFinish";
-  outputPlot.thePlots.addOnTop(theFilledPlot);
+  theFilledPlot.plotType = "plotFillFinish";
+  outputPlot += theFilledPlot;
   return output.assignValue(outputPlot, calculator);
 }
 
@@ -6001,43 +6029,51 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
   thePlotObj.variablesInPlayJS[0] = thePlotObj.variablesInPlay[0].toString();
   std::string theVarString = thePlotObj.variablesInPlayJS[0];
   Expression jsConverterE;
-  thePlotObj.thePlotType = "plotFunction";
+  thePlotObj.plotType = "plotFunction";
   if (CalculatorFunctions::functionMakeJavascriptExpression(
     calculator, thePlotObj.coordinateFunctionsE[0], jsConverterE
   )) {
     thePlotObj.coordinateFunctionsJS[0] = jsConverterE.toString();
-    thePlotObj.coordinateFunctionsE[0].hasInputBoxVariables(&thePlot.boxesThatUpdateMe);
+    thePlotObj.coordinateFunctionsE[0].hasInputBoxVariables(
+      &thePlotObj.parametersInPlay, &thePlotObj.parametersInPlayJS
+    );
   } else {
-    thePlotObj.thePlotType = "plotFunctionPrecomputed";
+    thePlotObj.plotType = "plotFunctionPrecomputed";
   }
   if (CalculatorFunctions::functionMakeJavascriptExpression(
     calculator, thePlotObj.leftPtE, jsConverterE
   )) {
     thePlotObj.leftPtJS = jsConverterE.toString();
-    thePlotObj.leftPtE.hasInputBoxVariables(&thePlot.boxesThatUpdateMe);
+    thePlotObj.leftPtE.hasInputBoxVariables(
+      &thePlotObj.parametersInPlay, &thePlotObj.parametersInPlayJS
+    );
   } else {
-    thePlotObj.thePlotType = "plotFunctionPrecomputed";
+    thePlotObj.plotType = "plotFunctionPrecomputed";
   }
   if (CalculatorFunctions::functionMakeJavascriptExpression(
     calculator, thePlotObj.rightPtE, jsConverterE
   )) {
     thePlotObj.rightPtJS = jsConverterE.toString();
-    thePlotObj.rightPtE.hasInputBoxVariables(&thePlot.boxesThatUpdateMe);
+    thePlotObj.rightPtE.hasInputBoxVariables(
+      &thePlotObj.parametersInPlay, &thePlotObj.parametersInPlayJS
+    );
   } else {
-    thePlotObj.thePlotType = "plotFunctionPrecomputed";
+    thePlotObj.plotType = "plotFunctionPrecomputed";
   }
-  thePlotObj.numSegmenTsJS.setSize(1);
-  thePlotObj.numSegmenTsJS[0] = "200";
+  thePlotObj.numberOfSegmentsJS.setSize(1);
+  thePlotObj.numberOfSegmentsJS[0] = "200";
   if (CalculatorFunctions::functionMakeJavascriptExpression(
     calculator, thePlotObj.numSegmentsE, jsConverterE
   )) {
-    thePlotObj.numSegmenTsJS[0] = jsConverterE.toString();
-    thePlotObj.numSegmentsE.hasInputBoxVariables(&thePlot.boxesThatUpdateMe);
+    thePlotObj.numberOfSegmentsJS[0] = jsConverterE.toString();
+    thePlotObj.numSegmentsE.hasInputBoxVariables(
+      &thePlotObj.parametersInPlay, &thePlotObj.parametersInPlayJS
+    );
   } else {
-    thePlotObj.thePlotType = "plotFunctionPrecomputed";
+    thePlotObj.plotType = "plotFunctionPrecomputed";
   }
-  Vectors<double>& thePointsDouble = thePlotObj.thePointsDouble;
-  if (thePlot.boxesThatUpdateMe.size == 0) {
+  Vectors<double>& thePointsDouble = thePlotObj.pointsDouble;
+  if (thePlotObj.parametersInPlay.size == 0) {
     if (!input[1].evaluatesToDoubleInRange(
       theVarString,
       thePlotObj.xLow,
@@ -6078,7 +6114,7 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
     );
     thePlotObj.thePlotStringWithHtml = thePlotObj.thePlotString;
   }
-  thePlot.thePlots.addOnTop(thePlotObj);
+  thePlot += thePlotObj;
   return output.assignValue(thePlot, calculator);
 }
 
@@ -6092,26 +6128,26 @@ bool CalculatorFunctionsPlot::plotPoint(Calculator& calculator, const Expression
   }
   Plot theFinalPlot;
   PlotObject thePlot;
-  if (!calculator.getMatrixExpressions(input[1], thePlot.thePointS)) {
+  if (!calculator.getMatrixExpressions(input[1], thePlot.points)) {
     return calculator << "The first argument of PlotPoint is "
     << "expected to be a sequence, instead I had: " << input[1].toString();
   }
-  theFinalPlot.dimension = thePlot.thePointS.numberOfColumns;
+  theFinalPlot.dimension = thePlot.points.numberOfColumns;
   thePlot.dimension = theFinalPlot.dimension;
   thePlot.coordinateFunctionsE.setSize(thePlot.dimension);
   thePlot.coordinateFunctionsJS.setSize(thePlot.dimension);
   Expression jsConverterE;
-  thePlot.thePointsJS.initialize(thePlot.thePointS.numberOfRows, thePlot.thePointS.numberOfColumns);
-  for (int i = 0; i < thePlot.thePointS.numberOfRows; i ++) {
-    for (int j = 0; j < thePlot.thePointS.numberOfColumns; j ++) {
+  thePlot.pointsJS.initialize(thePlot.points.numberOfRows, thePlot.points.numberOfColumns);
+  for (int i = 0; i < thePlot.points.numberOfRows; i ++) {
+    for (int j = 0; j < thePlot.points.numberOfColumns; j ++) {
       if (!CalculatorFunctions::functionMakeJavascriptExpression(
-        calculator, thePlot.thePointS(i, j), jsConverterE
+        calculator, thePlot.points(i, j), jsConverterE
       )) {
         return calculator << "Failed to extract coordinate " << i + 1 << " from: "
         << thePlot.coordinateFunctionsE[i].toString();
       }
-      thePlot.thePointsJS(i, j) = jsConverterE.toString();
-      thePlot.thePointS(i, j).hasInputBoxVariables(&theFinalPlot.boxesThatUpdateMe);
+      thePlot.pointsJS(i, j) = jsConverterE.toString();
+      thePlot.points(i, j).hasInputBoxVariables(&thePlot.parametersInPlay, &thePlot.parametersInPlayJS);
     }
   }
   thePlot.dimension = theFinalPlot.dimension;
@@ -6120,8 +6156,8 @@ bool CalculatorFunctionsPlot::plotPoint(Calculator& calculator, const Expression
     DrawingVariables::getColorIntFromColorString(input[2].getValue<std::string>(), thePlot.colorRGB);
   }
   thePlot.colorJS = input[2].toString();
-  thePlot.thePlotType = "points";
-  theFinalPlot.thePlots.addOnTop(thePlot);
+  thePlot.plotType = "points";
+  theFinalPlot += thePlot;
   theFinalPlot.desiredHtmlHeightInPixels = 100;
   theFinalPlot.desiredHtmlWidthInPixels = 100;
   return output.assignValue(theFinalPlot, calculator);
@@ -6137,8 +6173,8 @@ bool CalculatorFunctionsPlot::plot2DWithBars(Calculator& calculator, const Expre
     );
   }
   Expression lowerEplot = input, upperEplot = input;
-  lowerEplot.children.removeIndexShiftDown(2);
-  upperEplot.children.removeIndexShiftDown(1);
+  lowerEplot.removeChildShiftDown(2);
+  upperEplot.removeChildShiftDown(1);
   Plot outputPlot;
   outputPlot.dimension = 2;
   bool tempB = CalculatorFunctionsPlot::plot2D(calculator, lowerEplot, output);
@@ -6386,44 +6422,44 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   if (input.hasBoundVariables()) {
     return false;
   }
-  PlotObject thePlot;
+  PlotObject plot;
   if (!input[1].isSequenceNElements()) {
     return calculator
     << "The first argument of parametric curve must be a sequence, instead I got: "
     << input[1].toString();
   }
-  thePlot.dimension = input[1].size() - 1;
-  for (int i = 0; i < thePlot.dimension; i ++) {
-    thePlot.coordinateFunctionsE.addOnTop(input[1][i + 1]);
-    thePlot.coordinateFunctionsE[i].getFreeVariables(thePlot.variablesInPlay, true);
+  plot.dimension = input[1].size() - 1;
+  for (int i = 0; i < plot.dimension; i ++) {
+    plot.coordinateFunctionsE.addOnTop(input[1][i + 1]);
+    plot.coordinateFunctionsE[i].getFreeVariables(plot.variablesInPlay, true);
   }
-  if (thePlot.variablesInPlay.size > 1) {
+  if (plot.variablesInPlay.size > 1) {
     return calculator << "Curve is allowed to depend on at most 1 parameter. "
     << "Instead, your curve: " << input.toString()
     << " depends on "
-    << thePlot.variablesInPlay.size << ", namely: "
-    << thePlot.variablesInPlay.toStringCommaDelimited() << ". ";
+    << plot.variablesInPlay.size << ", namely: "
+    << plot.variablesInPlay.toStringCommaDelimited() << ". ";
   }
-  if (thePlot.variablesInPlay.size == 0) {
+  if (plot.variablesInPlay.size == 0) {
     Expression tempE;
     tempE.makeAtom("t", calculator);
-    thePlot.variablesInPlay.addOnTop(tempE);
+    plot.variablesInPlay.addOnTop(tempE);
   }
-  thePlot.variablesInPlayJS.addOnTop(
-    HtmlRoutines::getJavascriptVariable(thePlot.variablesInPlay[0].toString())
+  plot.variablesInPlayJS.addOnTop(
+    HtmlRoutines::getJavascriptVariable(plot.variablesInPlay[0].toString())
   );
-  thePlot.colorJS = "red";
-  thePlot.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(255, 0, 0));
+  plot.colorJS = "red";
+  plot.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(255, 0, 0));
   if (input.size() >= 5) {
-    if (!input[4].isOfType<std::string>(&thePlot.colorJS)) {
-      thePlot.colorJS = input[4].toString();
+    if (!input[4].isOfType<std::string>(&plot.colorJS)) {
+      plot.colorJS = input[4].toString();
     }
   }
-  DrawingVariables::getColorIntFromColorString(thePlot.colorJS, thePlot.colorRGB);
-  thePlot.lineWidth = 1;
+  DrawingVariables::getColorIntFromColorString(plot.colorJS, plot.colorRGB);
+  plot.lineWidth = 1;
   if (input.size() >= 6) {
-    if (!input[5].evaluatesToDouble(&thePlot.lineWidth)) {
-      thePlot.lineWidth = 1;
+    if (!input[5].evaluatesToDouble(&plot.lineWidth)) {
+      plot.lineWidth = 1;
     }
   }
   int numPoints = 1000;
@@ -6433,7 +6469,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
       calculator << "<hr>Could not extract number of points from "
       << input[6].toString();
     }
-    thePlot.numSegmentsE = input[6];
+    plot.numSegmentsE = input[6];
   }
   if (numPoints < 2 || numPoints > 30000) {
     numPoints = 1000;
@@ -6441,126 +6477,126 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     << " point but that is not valid. Changing to 1000. ";
   }
   if (input.size() < 7) {
-    thePlot.numSegmentsE.assignValue(numPoints, calculator);
+    plot.numSegmentsE.assignValue(numPoints, calculator);
   }
   List<Expression> theConvertedExpressions;
-  theConvertedExpressions.setSize(thePlot.dimension);
-  thePlot.paramLowE = input[2];
-  thePlot.paramHighE = input[3];
+  theConvertedExpressions.setSize(plot.dimension);
+  plot.paramLowE = input[2];
+  plot.paramHighE = input[3];
   if (
-    !thePlot.paramLowE.evaluatesToDouble(&thePlot.paramLow) ||
-    !thePlot.paramHighE.evaluatesToDouble(&thePlot.paramHigh)
+    !plot.paramLowE.evaluatesToDouble(&plot.paramLow) ||
+    !plot.paramHighE.evaluatesToDouble(&plot.paramHigh)
   ) {
     calculator << "Failed to convert "
-    << thePlot.paramLowE.toString() << " and "
-    << thePlot.paramHighE.toString()
+    << plot.paramLowE.toString() << " and "
+    << plot.paramHighE.toString()
     << " to left and right endpoint of parameter interval. ";
   }
   Vectors<double> theXs, theYs;
 
   bool isGoodLatexWise = true;
-  for (int i = 0; i < thePlot.dimension; i ++) {
+  for (int i = 0; i < plot.dimension; i ++) {
     if (!calculator.callCalculatorFunction(
       CalculatorFunctions::innerSuffixNotationForPostScript,
-      thePlot.coordinateFunctionsE[i],
+      plot.coordinateFunctionsE[i],
       theConvertedExpressions[i]
     )) {
       calculator << "Failed to extract suffix notation from argument "
-      << thePlot.coordinateFunctionsE[i].toString();
+      << plot.coordinateFunctionsE[i].toString();
       isGoodLatexWise = false;
       break;
     }
   }
-  if (isGoodLatexWise && thePlot.dimension == 2) {
+  if (isGoodLatexWise && plot.dimension == 2) {
     std::stringstream outLatex, outHtml;
     outLatex << "\\parametricplot[linecolor =\\fcColorGraph, plotpoints =" << numPoints << "]{"
-    << thePlot.paramLow << "}{" << thePlot.paramHigh << "}{"
+    << plot.paramLow << "}{" << plot.paramHigh << "}{"
     << theConvertedExpressions[0].getValue<std::string>()
     << theConvertedExpressions[1].getValue<std::string>() << "}";
     outHtml << "<br>%Calculator input: " << input.toString()
     << "<br>\\parametricplot[linecolor =\\fcColorGraph, plotpoints =" << numPoints << "]{"
-    << thePlot.paramLow << "}{" << thePlot.paramHigh << "}{"
+    << plot.paramLow << "}{" << plot.paramHigh << "}{"
     << theConvertedExpressions[0].getValue<std::string>()
     << theConvertedExpressions[1].getValue<std::string>() << "}";
-    thePlot.thePlotString= outLatex.str();
-    thePlot.thePlotStringWithHtml = outHtml.str();
+    plot.thePlotString= outLatex.str();
+    plot.thePlotStringWithHtml = outHtml.str();
   }
   Expression converterE;
-  thePlot.thePlotType = "parametricCurve";
-  thePlot.coordinateFunctionsJS.setSize(thePlot.dimension);
-  for (int i = 0; i < thePlot.dimension; i ++) {
+  plot.plotType = "parametricCurve";
+  plot.coordinateFunctionsJS.setSize(plot.dimension);
+  for (int i = 0; i < plot.dimension; i ++) {
     if (CalculatorFunctions::functionMakeJavascriptExpression(
       calculator,
-      thePlot.coordinateFunctionsE[i],
+      plot.coordinateFunctionsE[i],
       converterE
     )) {
-      thePlot.coordinateFunctionsJS[i] = converterE.toString();
+      plot.coordinateFunctionsJS[i] = converterE.toString();
     } else {
-      thePlot.thePlotType = "parametricCurvePrecomputed";
+      plot.plotType = "parametricCurvePrecomputed";
       calculator << "Failed to convert: "
-      << thePlot.coordinateFunctionsE[i] << " to js. ";
+      << plot.coordinateFunctionsE[i] << " to js. ";
     }
   }
-  thePlot.numSegmenTsJS.setSize(1);
-  thePlot.numSegmenTsJS[0] = "200";
+  plot.numberOfSegmentsJS.setSize(1);
+  plot.numberOfSegmentsJS[0] = "200";
   if (CalculatorFunctions::functionMakeJavascriptExpression(
-    calculator, thePlot.numSegmentsE, converterE
+    calculator, plot.numSegmentsE, converterE
   )) {
-    thePlot.numSegmenTsJS[0] = converterE.toString();
+    plot.numberOfSegmentsJS[0] = converterE.toString();
   } else {
-    thePlot.thePlotType = "parametricCurvePrecomputMakeBoxed";
+    plot.plotType = "parametricCurvePrecomputMakeBoxed";
     calculator << "Failed to convert: "
-    << thePlot.numSegmentsE << " to js. ";
+    << plot.numSegmentsE << " to js. ";
   }
   if (CalculatorFunctions::functionMakeJavascriptExpression(
-    calculator, thePlot.paramLowE, converterE
+    calculator, plot.paramLowE, converterE
   )) {
-    thePlot.paramLowJS = converterE.toString();
+    plot.paramLowJS = converterE.toString();
   } else {
-    thePlot.thePlotType = "parametricCurvePrecomputed";
-    calculator << "Failed to convert: " << thePlot.paramLowE << " to js. ";
+    plot.plotType = "parametricCurvePrecomputed";
+    calculator << "Failed to convert: " << plot.paramLowE << " to js. ";
   }
   if (CalculatorFunctions::functionMakeJavascriptExpression(
-    calculator, thePlot.paramHighE, converterE
+    calculator, plot.paramHighE, converterE
   )) {
-    thePlot.paramHighJS = converterE.toString();
+    plot.paramHighJS = converterE.toString();
   } else {
-    thePlot.thePlotType = "parametricCurvePrecomputed";
-    calculator << "Failed to convert: " << thePlot.paramHighE << " to js. ";
+    plot.plotType = "parametricCurvePrecomputed";
+    calculator << "Failed to convert: " << plot.paramHighE << " to js. ";
   }
-  if (thePlot.dimension == 2) {
-    if (!thePlot.coordinateFunctionsE[0].evaluatesToDoubleInRange(
-      thePlot.variablesInPlay[0].toString(),
-      thePlot.paramLow,
-      thePlot.paramHigh,
+  if (plot.dimension == 2) {
+    if (!plot.coordinateFunctionsE[0].evaluatesToDoubleInRange(
+      plot.variablesInPlay[0].toString(),
+      plot.paramLow,
+      plot.paramHigh,
       numPoints,
-      &thePlot.xLow,
-      &thePlot.xHigh,
+      &plot.xLow,
+      &plot.xHigh,
       &theXs
     )) {
       calculator << "<hr>Failed to evaluate curve function. ";
     }
-    if (!thePlot.coordinateFunctionsE[1].evaluatesToDoubleInRange(
-      thePlot.variablesInPlay[0].toString(),
-      thePlot.paramLow,
-      thePlot.paramHigh,
+    if (!plot.coordinateFunctionsE[1].evaluatesToDoubleInRange(
+      plot.variablesInPlay[0].toString(),
+      plot.paramLow,
+      plot.paramHigh,
       numPoints,
-      &thePlot.yLow,
-      &thePlot.yHigh,
+      &plot.yLow,
+      &plot.yHigh,
       &theYs
     )) {
       calculator << "<hr>Failed to evaluate curve function. ";
     }
-    thePlot.thePointsDouble.setSize(theXs.size);
+    plot.pointsDouble.setSize(theXs.size);
     for (int i = 0; i < theXs.size; i ++) {
-      thePlot.thePointsDouble[i].setSize(2);
-      thePlot.thePointsDouble[i][0] = theXs[i][1];
-      thePlot.thePointsDouble[i][1] = theYs[i][1];
+      plot.pointsDouble[i].setSize(2);
+      plot.pointsDouble[i][0] = theXs[i][1];
+      plot.pointsDouble[i][1] = theYs[i][1];
     }
   }
+  input.hasInputBoxVariables(&plot.parametersInPlay, &plot.parametersInPlayJS);
   Plot outputPlot;
-  outputPlot += thePlot;
-  input.hasInputBoxVariables(&outputPlot.boxesThatUpdateMe);
+  outputPlot += plot;
   return output.assignValue(outputPlot, calculator);
 }
 
@@ -6620,18 +6656,18 @@ bool CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calcula
     out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
   }
   SemisimpleSubalgebras& theSSsubalgebras =
-  calculator.theObjectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
-  theSSsubalgebras.ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
+  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.weylGroup.dynkinType);
+  theSSsubalgebras.toStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
 
   out << "Attempting to embed "
-  << smallSubalgebraPointer.content->theWeyl.theDynkinType.toString()
+  << smallSubalgebraPointer.content->weylGroup.dynkinType.toString()
   << " in " << ownerSS.toStringLieAlgebraName();
   theSSsubalgebras.findTheSemisimpleSubalgebrasFromScratch(
     ownerSS,
-    calculator.theObjectContainer.theAlgebraicClosure,
-    calculator.theObjectContainer.semisimpleLieAlgebras,
-    calculator.theObjectContainer.theSltwoSAs,
-    &smallSubalgebraPointer.content->theWeyl.theDynkinType
+    calculator.objectContainer.theAlgebraicClosure,
+    calculator.objectContainer.semisimpleLieAlgebras,
+    calculator.objectContainer.theSltwoSAs,
+    &smallSubalgebraPointer.content->weylGroup.dynkinType
   );
   return output.assignValue(theSSsubalgebras, calculator);
 }
@@ -6807,7 +6843,7 @@ bool CalculatorFunctions::innerHighestWeightTransposeAntiAutomorphismBilinearFor
   if (algebraIndex == - 1) {
     return output.makeError("I couldn't extract a Lie algebra to compute hwtaabf.", calculator);
   }
-  SemisimpleLieAlgebra& constSSalg = calculator.theObjectContainer.semisimpleLieAlgebras.values[algebraIndex];
+  SemisimpleLieAlgebra& constSSalg = calculator.objectContainer.semisimpleLieAlgebras.values[algebraIndex];
   const Expression& weightExpression = input[3];
   Vector<RationalFunction<Rational> > weight;
   if (!calculator.getVector<RationalFunction<Rational> >(
@@ -6840,7 +6876,7 @@ bool CalculatorFunctions::innerHighestWeightTransposeAntiAutomorphismBilinearFor
   }
   const ElementUniversalEnveloping<RationalFunction<Rational> >& leftUE = leftConverted.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >();
   const ElementUniversalEnveloping<RationalFunction<Rational> >& rightUE = rightConverted.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >();
-  WeylGroupData& theWeyl = constSSalg.theWeyl;
+  WeylGroupData& theWeyl = constSSalg.weylGroup;
   Vector<RationalFunction<Rational> > hwDualCoords;
   constSSalg.orderSSalgebraForHWbfComputation();
   hwDualCoords = theWeyl.getDualCoordinatesFromFundamental(weight);
@@ -7225,12 +7261,12 @@ bool CalculatorFunctions::innerTestIndicator(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTestIndicator");
-  if (global.theResponse.flagBanProcessMonitoring) {
+  if (global.response.flagBanProcessMonitoring) {
     std::stringstream out;
     out << "The server's admins have explicitly banned monitoring. ";
     return output.assignValue(out.str(), calculator);
   }
-  if (!global.theResponse.flagReportDesired) {
+  if (!global.response.flagReportDesired) {
     std::stringstream out;
     out << "Process monitoring turned off by user. ";
     return output.assignValue(out.str(), calculator);
@@ -7269,7 +7305,7 @@ bool CalculatorFunctions::innerTestIndicator(
   for (unsigned i = 0; i < static_cast<unsigned>(dummyCommentSize); i ++) {
     dummyComment[i] = 'a';
   }
-  global.theResponse.initiate("Triggered by test indicator. ");
+  global.response.initiate("Triggered by test indicator. ");
   ProgressReport theReport;
   for (int i = 0; i < numRuns; i ++) {
     std::stringstream reportStream;
@@ -7294,12 +7330,16 @@ bool CalculatorFunctionsFreecalc::crawlTexFile(
     out << "Command available to logged-in admins only. ";
     return output.assignValue(out.str(), calculator);
   }
-  if (!input.isOfType<std::string>()) {
+  if (input.size() != 2) {
+    return calculator << "<hr>Input " << input.toString() << " requires a single argument. ";
+  }
+  std::string argument;
+  if (!input[1].isOfType<std::string>(&argument)) {
     return calculator << "<hr>Input " << input.toString() << " is not of type string. ";
   }
   LaTeXCrawler theCrawler;
   theCrawler.ownerCalculator = &calculator;
-  theCrawler.theFileNameToCrawlRelative = input.getValue<std::string>();
+  theCrawler.fileNameToCrawlRelative = argument;
   theCrawler.crawl();
   return output.assignValue(theCrawler.displayResult.str(), calculator);
 }
@@ -7332,17 +7372,19 @@ bool CalculatorFunctionsFreecalc::buildFreecalcSingleSlides(
     out << "Command available to logged-in admins only. ";
     return output.assignValue(out.str(), calculator);
   }
-  if (!input.isOfType<std::string>()) {
+  if (input.size() != 2) {
+    return false;
+  }
+  if (!input[1].isOfType<std::string>()) {
     return calculator << "<hr>Input " << input.toString() << " is not of type string. ";
   }
-  LaTeXCrawler theCrawler;
-  theCrawler.flagBuildSingleSlides = true;
-  theCrawler.ownerCalculator = &calculator;
-  theCrawler.theFileNameToCrawlRelative = input.getValue<std::string>();
-  std::string startingFolder = FileOperations::getCurrentFolder();
-  theCrawler.buildFreecalc();
-  global.changeDirectory(startingFolder);
-  return output.assignValue(theCrawler.displayResult.str(), calculator);
+  LaTeXCrawler crawler;
+  crawler.flagBuildSingleSlides = true;
+  crawler.ownerCalculator = &calculator;
+  crawler.fileNameToCrawlRelative = input[1].getValue<std::string>();
+  StateMaintainerCurrentFolder maintainFolder;
+  crawler.buildFreecalc();
+  return output.assignValue(crawler.displayResult.str() + crawler.errorStream.str(), calculator);
 }
 
 bool CalculatorFunctionsFreecalc::buildFreecalc(
@@ -7363,7 +7405,7 @@ bool CalculatorFunctionsFreecalc::buildFreecalc(
   LaTeXCrawler crawler;
   crawler.flagBuildSingleSlides = false;
   crawler.ownerCalculator = &calculator;
-  crawler.theFileNameToCrawlRelative = input[1].getValue<std::string>();
+  crawler.fileNameToCrawlRelative = input[1].getValue<std::string>();
   std::string startingFolder = FileOperations::getCurrentFolder();
   crawler.buildFreecalc();
   global.changeDirectory(startingFolder);
@@ -7374,7 +7416,7 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFindProductDistanceModN");
-  if (input.children.size != 3) {
+  if (input.size() != 3) {
     return calculator << "<hr>Product distance f-n takes as input 2 arguments, modulo and a list of integers";
   }
   const Expression& theModuloE = input[1];
@@ -7637,7 +7679,7 @@ bool Calculator::Test::calculatorTestRun() {
     << ", command:\n"
     << currentTest.command << Logger::endL;
     theReport.report(reportStream.str());
-    theTester.initialize();
+    theTester.initialize(Calculator::Mode::full);
     theTester.checkConsistencyAfterInitialization();
     theTester.evaluate(currentTest.command);
     currentTest.actualResult = theTester.programExpression.toString(&theFormat);
@@ -7794,7 +7836,7 @@ public:
         return;
       }
     }
-    for (int i = 0; i < this->getCurrentExpression().children.size; i ++) {
+    for (int i = 0; i < this->getCurrentExpression().size(); i ++) {
       this->currentEchildrenTruncated.addOnTop(this->getCurrentExpression()[i]);
       if (i + 1 + this->indexCurrentChild > this->maximumDisplayedNodes || i > this->maximumAllowedWidth) {
         Expression dotsAtom;
@@ -7965,15 +8007,15 @@ public:
         arrowHead[1] += this->charHeight.getDoubleValue() / 2;
         PlotObject theSegment;
         theSegment.thePlotString = "segment";
-        theSegment.thePointsDouble.addOnTop(arrowBase);
-        theSegment.thePointsDouble.addOnTop(arrowHead);
+        theSegment.pointsDouble.addOnTop(arrowBase);
+        theSegment.pointsDouble.addOnTop(arrowHead);
         theSegment.colorJS = "black";
         this->thePlot += theSegment;
       }
       if (this->displayedExpressionStrings[i] != "") {
         PlotObject theText;
-        theText.thePlotType = "label";
-        theText.thePointsDouble.addOnTop(this->nodePositionsDouble[i]);
+        theText.plotType = "label";
+        theText.pointsDouble.addOnTop(this->nodePositionsDouble[i]);
         theText.colorJS =
         this->displayedStringIsLeaf[i] ? "red" : "gray";
         theText.thePlotString =
@@ -7982,9 +8024,9 @@ public:
         thePlot += theText;
       } else {
         PlotObject thePoint;
-        thePoint.thePlotType = "point";
+        thePoint.plotType = "point";
         thePoint.colorJS = "blue";
-        thePoint.thePointsDouble.addOnTop(this->nodePositionsDouble[i]);
+        thePoint.pointsDouble.addOnTop(this->nodePositionsDouble[i]);
         this->thePlot += thePoint;
       }
     }
@@ -8016,7 +8058,7 @@ bool CalculatorFunctions::setRandomSeed(
     return calculator << "Failed to extract integer random seed. ";
   }
   std::stringstream out;
-  calculator.theObjectContainer.pseudoRandom.setRandomSeedLarge(seedOriginal, &out);
+  calculator.objectContainer.pseudoRandom.setRandomSeedLarge(seedOriginal, &out);
   return output.assignValue(out.str(), calculator);
 }
 
@@ -8166,13 +8208,25 @@ bool CalculatorFunctions::turnRulesOnOff(
   return true;
 }
 
+bool CalculatorFunctions::approximationsDummy(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  (void) calculator;
+  (void) input;
+  (void) output;
+  return false;
+}
+
 bool CalculatorFunctions::turnOnApproximations(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::turnOnApproximations");
   (void) input;
-  calculator.flagNoApproximations = false;
-  return output.assignValue(std::string("Approximations have been turned on. "), calculator);
+  Expression approximations;
+  approximations.makeAtom(calculator.opApproximations(), calculator);
+  Expression onSwitch;
+  onSwitch.makeOX(calculator, calculator.opTurnOffRules(), approximations);
+  return CalculatorFunctions::turnOnRules(calculator, onSwitch, output);
 }
 
 bool CalculatorFunctions::turnOffApproximations(
@@ -8180,8 +8234,11 @@ bool CalculatorFunctions::turnOffApproximations(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::turnOffApproximations");
   (void) input;
-  calculator.flagNoApproximations = true;
-  return output.assignValue(std::string("Approximations have been turned off. "), calculator);
+  Expression approximations;
+  approximations.makeAtom(calculator.opApproximations(), calculator);
+  Expression offSwitch;
+  offSwitch.makeOX(calculator, calculator.opTurnOffRules(), approximations);
+  return CalculatorFunctions::turnOffRules(calculator, offSwitch, output);
 }
 
 bool CalculatorFunctions::turnOffRules(
@@ -8253,7 +8310,7 @@ bool CalculatorFunctions::randomInteger(
     global.fatal << "This shouldn't happen: accum should not be zero at this point. " << global.fatal;
   }
   int generatedRandomInt = static_cast<signed>(
-    calculator.theObjectContainer.pseudoRandom.getRandomNonNegativeLessThanMaximumSeed()
+    calculator.objectContainer.pseudoRandom.getRandomNonNegativeLessThanMaximumSeed()
   );
   generatedRandomInt %= accum;
   int resultRandomValue = theIntervals[0][0];
@@ -8299,7 +8356,7 @@ bool CalculatorFunctions::selectAtRandom(
     return true;
   }
   int randomIndex = static_cast<signed>(
-    (calculator.theObjectContainer.pseudoRandom.getRandomNonNegativeLessThanMaximumSeed()
+    (calculator.objectContainer.pseudoRandom.getRandomNonNegativeLessThanMaximumSeed()
   )) % (input.size() - 1)  + 1;
   if (randomIndex < 0 || randomIndex > input.size() - 1) {
     randomIndex = input.size() - 1;

@@ -108,12 +108,12 @@ std::string Calculator::Examples::toStringOneOperationHandler(
   out << "\n";
   out << "[Example](" << "https://calculator-algebra.org/"
   << WebAPI::app
-  << HtmlRoutines::getCalculatorComputationURL(function.theExample) << ")\n";
+  << HtmlRoutines::getCalculatorComputationURL(function.example) << ")\n";
   out << "```\n";
-  out << function.theExample;
+  out << function.example;
   out << "\n```";
   out << "\n";
-  out << function.theDescription;
+  out << function.description;
   return out.str();
 }
 

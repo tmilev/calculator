@@ -781,8 +781,8 @@ class Function {
   public:
   Calculator* owner;
   Expression argumentTypes;
-  std::string theDescription;
-  std::string theExample;
+  std::string description;
+  std::string example;
   std::string calculatorIdentifier;
   std::string additionalIdentifier;
   int indexOperation;
@@ -857,7 +857,7 @@ class Function {
   Function(Calculator& inputOwner,
     int inputIndexOperation,
     const Expression::FunctionAddress& functionPointer,
-    Expression* inputArgTypes,
+    Expression* inputArgumentTypes,
     const std::string& description,
     const std::string& inputExample,
     const std::string& inputAdditionalIndentifier,

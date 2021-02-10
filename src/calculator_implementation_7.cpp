@@ -7639,7 +7639,7 @@ void Calculator::Test::calculatorTestPrepare() {
           continue;
         }
         Calculator::Test::OneTest oneTest;
-        oneTest.command = currentFunction.theExample;
+        oneTest.command = currentFunction.example;
         oneTest.atom = this->owner->operations.keys[i];
         oneTest.functionAdditionalIdentifier = currentFunction.additionalIdentifier;
         this->commands.setKeyValue(oneTest.command, oneTest);

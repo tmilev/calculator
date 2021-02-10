@@ -1269,7 +1269,7 @@ Function::Function(
   Calculator& inputOwner,
   int inputIndexOperation,
   const Expression::FunctionAddress& functionPointer,
-  Expression* inputArgTypes,
+  Expression* inputArgumentTypes,
   const std::string& description,
   const std::string& inputExample,
   const std::string& inputAdditionalIndentifier,
@@ -1286,12 +1286,12 @@ Function::Function(
   this->indexOperation = inputIndexOperation;
   this->options = inputOptions;
   this->functionAddress = functionPointer;
-  this->theDescription = description;
-  this->theExample = inputExample;
+  this->description = description;
+  this->example = inputExample;
   this->additionalIdentifier = inputAdditionalIndentifier;
   this->calculatorIdentifier = inputCalculatorIdentifier;
-  if (inputArgTypes != nullptr) {
-    this->argumentTypes = *inputArgTypes;
+  if (inputArgumentTypes != nullptr) {
+    this->argumentTypes = *inputArgumentTypes;
   }
   this->parentsThatBanHandler = inputParentsThatBanHandler;
 }
@@ -1669,7 +1669,7 @@ JSData Function::toJSON() const {
   } else {
     result["administrative"] = false;
   }
-  result["description"] = this->theDescription;
+  result["description"] = this->description;
   if (this->calculatorIdentifier != "") {
     result["ruleName"] = this->calculatorIdentifier;
   }
@@ -1684,8 +1684,8 @@ JSData Function::toJSON() const {
   } else {
     result["inner"] = false;
   }
-  if (this->theExample != "") {
-    result["example"] = this->theExample;
+  if (this->example != "") {
+    result["example"] = this->example;
   }
   return result;
 }
@@ -1701,7 +1701,7 @@ std::string Function::toStringFull() const {
   out2 << this->toStringShort();
   if (!this->options.flagIsExperimental) {
     std::stringstream out;
-    out << this->theDescription;
+    out << this->description;
     if (this->calculatorIdentifier != "") {
       out << "Rule name: " << this->calculatorIdentifier << ". ";
     }
@@ -1715,13 +1715,13 @@ std::string Function::toStringFull() const {
     if (!this->options.flagIsInner) {
       out << "This is a <b>``law''</b> - substitution takes place only if output expression is different from input. ";
     }
-    if (this->theExample != "") {
-      out << " <br> " << this->theExample << "&nbsp&nbsp&nbsp";
+    if (this->example != "") {
+      out << " <br> " << this->example << "&nbsp&nbsp&nbsp";
     }
-    if (this->theExample != "") {
+    if (this->example != "") {
       out2 << "<a href=\"" << global.displayNameExecutable
       << "?request=calculator&showExamples = true&mainInput="
-      << HtmlRoutines::convertStringToURLString(this->theExample, false)
+      << HtmlRoutines::convertStringToURLString(this->example, false)
       << "\"> " << " Example" << "</a>" ;
     }
   } else {

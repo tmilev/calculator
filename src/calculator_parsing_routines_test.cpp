@@ -102,15 +102,15 @@ bool Calculator::Test::parseAllExamples(Calculator& ownerInitialized) {
     List<Function> handlers = operationHandlers.mergeHandlers();
     for (int i = 0; i < handlers.size; i ++) {
       Function& currentHandler = handlers[i];
-      if (currentHandler.theExample == "") {
+      if (currentHandler.example == "") {
         global.fatal << "Empty example for operation: "
         << currentHandler.calculatorIdentifier << global.fatal;
       }
       Expression notUsed;
-      if (!ownerInitialized.parse(currentHandler.theExample, false, notUsed)) {
+      if (!ownerInitialized.parse(currentHandler.example, false, notUsed)) {
         global.fatal << "Failed to parse built-in example for rule: "
         << currentHandler.calculatorIdentifier
-        << ". The example was: " << currentHandler.theExample << ". "
+        << ". The example was: " << currentHandler.example << ". "
         << global.fatal;
       }
     }

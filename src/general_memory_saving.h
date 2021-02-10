@@ -10,7 +10,7 @@
 template <class Object>
 class MemorySaving {
 private:
-  Object* theValue;
+  Object* value;
   MemorySaving(const MemorySaving<Object>& other) {
     (void) other;
     fatalCrash("This constructor should not be used. ");
@@ -24,20 +24,20 @@ public:
     }
   }
   const Object& getElementConst() const {
-    if (this->theValue == 0) {
+    if (this->value == 0) {
       fatalCrash("Attempt to access zero pointer. ");
     }
-    return *this->theValue;
+    return *this->value;
   }
   Object& getElement()  {
-    if (this->theValue == 0) {
-      this->theValue = new Object;
+    if (this->value == 0) {
+      this->value = new Object;
       #ifdef AllocationLimitsSafeguard
       GlobalStatistics::globalPointerCounter ++;
       GlobalStatistics::checkPointerCounters();
       #endif
     }
-    return *(this->theValue);
+    return *(this->value);
   }
   bool operator==(const MemorySaving<Object>& other) const {
     if (this->isZeroPointer() != other.isZeroPointer()) {
@@ -58,18 +58,18 @@ public:
     return input.hashFunction();
   }
   bool isZeroPointer() const {
-    return this->theValue == 0;
+    return this->value == 0;
   }
   void freeMemory() {
-    delete this->theValue;
-    this->theValue = 0;
+    delete this->value;
+    this->value = 0;
     #ifdef AllocationLimitsSafeguard
     GlobalStatistics::globalPointerCounter --;
     GlobalStatistics::checkPointerCounters();
     #endif
   }
   MemorySaving() {
-    this->theValue = 0;
+    this->value = 0;
   }
   ~MemorySaving() {
     this->freeMemory();

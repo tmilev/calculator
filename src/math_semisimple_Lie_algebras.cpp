@@ -5,7 +5,7 @@
 #include "math_extra_drawing_variables.h"
 #include "string_constants.h"
 
-std::string SemisimpleLieAlgebra::toString(FormatExpressions* theFormat) {
+std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::toString");
   std::stringstream out;
   std::string tempS;
@@ -16,9 +16,9 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* theFormat) {
 //  out << beginMath << "\\begin{array}{ccc}a& a&a\\\\a&a&a\\end{array}";
   std::string hLetter = "h";
   std::string gLetter = "g";
-  if (theFormat != nullptr) {
-    hLetter = theFormat->chevalleyHgeneratorLetter;
-    gLetter = theFormat->chevalleyGgeneratorLetter;
+  if (format != nullptr) {
+    hLetter = format->chevalleyHgeneratorLetter;
+    gLetter = format->chevalleyGgeneratorLetter;
   }
   out << "Type " << this->weylGroup.dynkinType.toString() << ".";
   out << "The letter " << HtmlRoutines::getMathNoDisplay(hLetter)
@@ -43,7 +43,7 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* theFormat) {
   theTableLateXStream << "\\mathrm{roots~simple~coords}&\\varepsilon-\\mathrm{root~notation}&" << "[\\bullet, \\bullet]\n";
   for (int i = 0; i < numRoots + theDimension; i ++) {
     tempElt1.makeGenerator(i, *this);
-    tempS = tempElt1.toString(theFormat);
+    tempS = tempElt1.toString(format);
     theHtmlStream << "<td>" << tempS << "</td>";
     theTableLateXStream << " & ";
     theTableLateXStream << tempS;
@@ -59,13 +59,13 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* theFormat) {
     theTableLateXStream << tempRoot2.toStringLetterFormat("\\varepsilon") << "&";
     theHtmlStream << "<td>" << tempRoot2.toStringLetterFormat("e") << "</td>";
     tempElt1.makeGenerator(i, *this);
-    tempS = tempElt1.toString(theFormat);
+    tempS = tempElt1.toString(format);
     theTableLateXStream << tempS;
     theHtmlStream << "<td>" << tempS << "</td>";
     for (int j = 0; j < numRoots + theDimension; j ++) {
       tempElt2.makeGenerator(j, *this);
       this->lieBracket(tempElt1, tempElt2, tempElt3);
-      tempS = tempElt3.toString(theFormat);
+      tempS = tempElt3.toString(format);
       theTableLateXStream << "& ";
       theTableLateXStream << tempS;
       theHtmlStream << "<td>" << tempS << "</td>";
@@ -81,16 +81,16 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* theFormat) {
   }
   out << "<br><b> The Lie bracket table is too large to be rendered in LaTeX, displaying in "
   << "html format instead.</b> ";
-  if (theFormat != nullptr) {
-    if (theFormat->flagLatexDetailsInHtml) {
+  if (format != nullptr) {
+    if (format->flagLatexDetailsInHtml) {
       out << "Below you can find the same table in pure LaTeX, "
       << "which you can render in a separate LaTeX session, should "
       << "wish to do so on your own. ";
     }
   }
   out << theHtmlStream.str();
-  if (theFormat != nullptr) {
-    if (theFormat->flagLatexDetailsInHtml) {
+  if (format != nullptr) {
+    if (format->flagLatexDetailsInHtml) {
       out << "The above table in LaTex format follows. <hr>"
       << theTableLateXStream.str() << "<hr>";
     }

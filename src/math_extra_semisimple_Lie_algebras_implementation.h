@@ -8,37 +8,37 @@
 #include "math_extra_drawing_variables.h"
 
 template <class Coefficient>
-std::string Weight<Coefficient>::toString(FormatExpressions* theFormat) const {
+std::string Weight<Coefficient>::toString(FormatExpressions* format) const {
   std::stringstream out;
-  bool formatWeightAsIndexVectorSpace = theFormat == nullptr ? true : theFormat->flagFormatWeightAsVectorSpaceIndex;
+  bool formatWeightAsIndexVectorSpace = format == nullptr ? true : format->flagFormatWeightAsVectorSpaceIndex;
   if (!formatWeightAsIndexVectorSpace) {
     if (this->owner == nullptr) {
-      return this->weightFundamentalCoordinates.toStringLetterFormat("\\psi", theFormat);
+      return this->weightFundamentalCoordinates.toStringLetterFormat("\\psi", format);
     }
     Vector<Coefficient> weightEpsCoords, weightSimpleCoords;
     weightSimpleCoords = this->owner->weylGroup.getSimpleCoordinatesFromFundamental(
       this->weightFundamentalCoordinates, Coefficient::zero()
     );
     this->owner->weylGroup.getEpsilonCoordinates(weightSimpleCoords, weightEpsCoords);
-    return weightEpsCoords.toStringLetterFormat("\\varepsilon", theFormat);
+    return weightEpsCoords.toStringLetterFormat("\\varepsilon", format);
   }
   bool useOmega = true;
   std::string oldCustomPlus;
   std::string VectorSpaceLetter = "V";
-  if (theFormat != nullptr) {
-    useOmega = (theFormat->fundamentalWeightLetter == "");
-    oldCustomPlus = theFormat->customPlusSign;
-    theFormat->customPlusSign = "";
-    VectorSpaceLetter = theFormat->FDrepLetter;
+  if (format != nullptr) {
+    useOmega = (format->fundamentalWeightLetter == "");
+    oldCustomPlus = format->customPlusSign;
+    format->customPlusSign = "";
+    VectorSpaceLetter = format->FDrepLetter;
   }
   if (useOmega) {
-    out << VectorSpaceLetter << "_{" << this->weightFundamentalCoordinates.toStringLetterFormat("\\omega", theFormat) << "}";
+    out << VectorSpaceLetter << "_{" << this->weightFundamentalCoordinates.toStringLetterFormat("\\omega", format) << "}";
   } else {
     out << VectorSpaceLetter << "_{"
-    << this->weightFundamentalCoordinates.toStringLetterFormat(theFormat->fundamentalWeightLetter, theFormat) << "}";
+    << this->weightFundamentalCoordinates.toStringLetterFormat(format->fundamentalWeightLetter, format) << "}";
   }
-  if (theFormat != nullptr) {
-    theFormat->customPlusSign = oldCustomPlus;
+  if (format != nullptr) {
+    format->customPlusSign = oldCustomPlus;
   }
   return out.str();
 }

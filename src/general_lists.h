@@ -296,13 +296,13 @@ public:
     return result;
   }
   template<class Element>
-  static std::string toStringBrackets(const Element& input, FormatExpressions* theFormat) {
+  static std::string toStringBrackets(const Element& input, FormatExpressions* format) {
     if (!input.needsParenthesisForMultiplication()) {
-      return input.toString(theFormat);
+      return input.toString(format);
     }
     std::string result;
     result.append("(");
-    result.append(input.toString(theFormat));
+    result.append(input.toString(format));
     result.append(")");
     return result;
   }

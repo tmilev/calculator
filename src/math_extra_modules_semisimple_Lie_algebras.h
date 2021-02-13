@@ -27,7 +27,7 @@ class MonomialGeneralizedVerma {
     this->theMonCoeffOne = other.theMonCoeffOne;
   }
 
-  std::string toString(FormatExpressions* theFormat = nullptr, bool includeV = true) const;
+  std::string toString(FormatExpressions* format = nullptr, bool includeV = true) const;
   bool operator==(const MonomialGeneralizedVerma<Coefficient>& other) const {
     if (this->indexFDVector == other.indexFDVector && this->owner == other.owner) {
       return this->theMonCoeffOne == other.theMonCoeffOne;
@@ -153,7 +153,7 @@ public:
       this->theMons[i].substitution(theSub, theMods);
     }
   }
-  std::string toString(FormatExpressions* theFormat = nullptr, bool includeV = true) const;
+  std::string toString(FormatExpressions* format = nullptr, bool includeV = true) const;
   MonomialTensorGeneralizedVermas() {
   }
   void operator=(const MonomialTensorGeneralizedVermas<Coefficient>& other) {
@@ -358,13 +358,13 @@ public:
     const Coefficient& ringUnit,
     const Coefficient& ringZero
   );
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
-  std::string elementToStringHWV(FormatExpressions* theFormat = nullptr) const {
+  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string elementToStringHWV(FormatExpressions* format = nullptr) const {
     if (this->highestWeightVectorNotation != "") {
       return this->highestWeightVectorNotation;
     }
     std::stringstream out;
-    out << "v_{" << this->theHWFundamentalCoordsBaseField.toString(theFormat)
+    out << "v_{" << this->theHWFundamentalCoordsBaseField.toString(format)
     << ", " << this->parabolicSelectionNonSelectedAreElementsLevi.toString() << "}";
     return out.str();
     //    return "hwv{}("+ this->getOwner().toStringLieAlgebraName(false) + "," + this->theHWFundamentalCoordsBaseField.toString(theFormat) + ","

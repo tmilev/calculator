@@ -37,8 +37,8 @@ class QuasiDifferentialMononomial {
 template <class Coefficient>
 class QuasiDifferentialOperator : public LinearCombination<QuasiDifferentialMononomial, Coefficient> {
 public:
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
-  void generateBasisLieAlgebra(List<QuasiDifferentialOperator<Coefficient> >& theElts, FormatExpressions* theFormat = nullptr);
+  std::string toString(FormatExpressions* format = nullptr) const;
+  void generateBasisLieAlgebra(List<QuasiDifferentialOperator<Coefficient> >& theElts, FormatExpressions* format = nullptr);
   void operator*=(const QuasiDifferentialOperator<Coefficient>& standsOnTheRight);
   void operator=(const LinearCombination<QuasiDifferentialMononomial, Coefficient>& other) {
     this->LinearCombination<QuasiDifferentialMononomial, Coefficient>::operator=(other);
@@ -84,7 +84,7 @@ void QuasiDifferentialOperator<Coefficient>::getElementWeylAlgebraSetMatrixParts
 
 template <class Coefficient>
 void QuasiDifferentialOperator<Coefficient>::generateBasisLieAlgebra(
-  List<QuasiDifferentialOperator<Coefficient> >& theElts, FormatExpressions* theFormat
+  List<QuasiDifferentialOperator<Coefficient> >& theElts, FormatExpressions* format
 ) {
   MacroRegisterFunctionWithName("QuasiDifferentialOperator::generateBasisLieAlgebra");
   ProgressReport theReport;
@@ -103,11 +103,11 @@ void QuasiDifferentialOperator<Coefficient>::generateBasisLieAlgebra(
         std::stringstream report;
         report << "Lie bracketing elements " << " of indices " << i + 1
         << " and " << j + 1 << " out of " << theEltsConverted.size << "<br> "
-        << tempQDO.toString(theFormat) << "<br> with element <br>"
-        << theEltsConverted[j].toString(theFormat) << " to get <br>";
+        << tempQDO.toString(format) << "<br> with element <br>"
+        << theEltsConverted[j].toString(format) << " to get <br>";
         tempQDO.lieBracketMeOnTheRight(theEltsConverted[j]);
         theReport.report(report.str());
-        report << tempQDO.toString(theFormat);
+        report << tempQDO.toString(format);
         theReport.report(report.str());
         theEltsConverted.addOnTop(tempQDO);
         QuasiDifferentialOperator::gaussianEliminationByRows(theEltsConverted, 0, &bufferMons);
@@ -157,13 +157,13 @@ void QuasiDifferentialOperator<Coefficient>::operator*=(const QuasiDifferentialO
 }
 
 template <class Coefficient>
-std::string QuasiDifferentialOperator<Coefficient>::toString(FormatExpressions* theFormat) const {
+std::string QuasiDifferentialOperator<Coefficient>::toString(FormatExpressions* format) const {
   bool combineWeylPart = true;
-  if (theFormat != nullptr) {
-    combineWeylPart = theFormat->flagQuasiDiffOpCombineWeylPart;
+  if (format != nullptr) {
+    combineWeylPart = format->flagQuasiDiffOpCombineWeylPart;
   }
   if (!combineWeylPart) {
-    return this->LinearCombination<QuasiDifferentialMononomial, Coefficient>::toString(theFormat);
+    return this->LinearCombination<QuasiDifferentialMononomial, Coefficient>::toString(format);
   }
   MatrixTensor<ElementWeylAlgebra<Rational> > reordered;
   reordered.makeZero();
@@ -174,12 +174,12 @@ std::string QuasiDifferentialOperator<Coefficient>::toString(FormatExpressions* 
     tempP.addMonomial(currentMon.theWeylMon, this->coefficients[i]);
     reordered.addMonomial(currentMon.theMatMon, tempP);
   }
-  std::string result = reordered.toString(theFormat);
+  std::string result = reordered.toString(format);
   if (result == "0" && this->size() != 0) {
     global.fatal << "This is likely a programming error (crashing at any rate): "
     << "I have a non-zero quasidifferential operator "
     << " with non-properly formatted LaTeX string "
-    << this->LinearCombination<QuasiDifferentialMononomial, Coefficient>::toString(theFormat)
+    << this->LinearCombination<QuasiDifferentialMononomial, Coefficient>::toString(format)
     << ", however its properly formatted string is 0. "
     << "Probably there is something wrong with the initializations of the monomials of the qdo. " << global.fatal;
   }

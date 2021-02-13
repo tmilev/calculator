@@ -59,8 +59,8 @@ void GraphOLD::treeRecurseCopyDelete(List<int>& l, int v, int m) {
   }
 }
 
-std::string GraphEdge::toString(FormatExpressions* theFormat) const {
-  (void) theFormat;
+std::string GraphEdge::toString(FormatExpressions* format) const {
+  (void) format;
   std::stringstream out;
   out << this->vStart + 1 << "->" << this->vEnd + 1;
   if (this->label != "") {
@@ -241,9 +241,9 @@ double GraphWeightedLabeledEdges::getYNode(int groupIndex, int indexInGroup) {
   return result;
 }
 
-std::string GraphWeightedLabeledEdges::toStringNodesAndEdges(FormatExpressions* theFormat) {
+std::string GraphWeightedLabeledEdges::toStringNodesAndEdges(FormatExpressions* format) {
   MacroRegisterFunctionWithName("Graph::toStringNodesAndEdges");
-  (void) theFormat;
+  (void) format;
   std::stringstream out;
   out << "The graph has " << this->theEdges.size() << " edges: <br>\n";
   for (int i = 0; i < this->theEdges.size(); i ++) {
@@ -265,9 +265,9 @@ std::string GraphWeightedLabeledEdges::toStringNodesAndEdges(FormatExpressions* 
   return out.str();
 }
 
-std::string GraphWeightedLabeledEdges::toStringPsTricksEdge(int fromIndex, int toIndex, FormatExpressions* theFormat) {
+std::string GraphWeightedLabeledEdges::toStringPsTricksEdge(int fromIndex, int toIndex, FormatExpressions* format) {
   MacroRegisterFunctionWithName("Graph::toStringPsTricksEdge");
-  (void) theFormat;
+  (void) format;
   std::stringstream out;
   int startGroupIndex = this->displayGroupIndices[fromIndex];
   int startIndexInGroup = this->positionInDisplayGroup[fromIndex];
@@ -293,7 +293,7 @@ std::string GraphWeightedLabeledEdges::toStringPsTricksEdge(int fromIndex, int t
   return out.str();
 }
 
-std::string GraphWeightedLabeledEdges::toStringPsTricks(FormatExpressions* theFormat) {
+std::string GraphWeightedLabeledEdges::toStringPsTricks(FormatExpressions* format) {
   MacroRegisterFunctionWithName("Graph::toStringPsTricks");
   this->computeEdgesPerNodesNoMultiplicities();
   this->computeConnectedComponentsAndBaseNodeDistances();
@@ -309,7 +309,7 @@ std::string GraphWeightedLabeledEdges::toStringPsTricks(FormatExpressions* theFo
   << "\n<br>\\tiny\n<br>\n";
   for (int i = 0; i < this->edgesPerNodeNoMultiplicities.size; i ++) {
     for (int j = 0; j < this->edgesPerNodeNoMultiplicities[i].size; j ++) {
-      out << this->toStringPsTricksEdge(i, this->edgesPerNodeNoMultiplicities[i][j], theFormat);
+      out << this->toStringPsTricksEdge(i, this->edgesPerNodeNoMultiplicities[i][j], format);
     }
   }
   for (int i = 0; i < this->nodeGroupsForDisplay.size; i ++) {

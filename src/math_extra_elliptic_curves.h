@@ -32,7 +32,7 @@ public:
   void makeOne(const EllipticCurveWeierstrassNormalForm& inputCurve);
   bool operator==(const ElementEllipticCurve& other) const;
   bool operator*=(const ElementEllipticCurve& other);
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   ElementEllipticCurve() {
     this->flagInfinity = true;
   }

@@ -251,8 +251,8 @@ class MonomialWrapper {
   MonomialWrapper(const theType& input) {
     this->theObject = input;
   }
-  std::string toString(FormatExpressions* theFormat = nullptr) const {
-    (void) theFormat;
+  std::string toString(FormatExpressions* format = nullptr) const {
+    (void) format;
     std::stringstream out;
     out << "(" << this->theObject << ")";
     return out.str();
@@ -781,7 +781,7 @@ public:
   std::string toStringLatex(FormatExpressions* format = nullptr) const;
   std::string toStringSystemLatex(
     Matrix<Coefficient>* constTerms = 0,
-    FormatExpressions* theFormat = nullptr
+    FormatExpressions* format = nullptr
   ) const;
   std::string toStringPlainText(bool jsonFormat = false) const;
   std::string toStringOneLine(bool jsonFormat = false) const;
@@ -2541,7 +2541,7 @@ class MonomialVector {
   }
   MonomialVector(int inputIndex): theIndex(inputIndex) {
   }
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   unsigned int hashFunction() const {
     return static_cast<unsigned int>(this->theIndex);
   }
@@ -3018,7 +3018,7 @@ public:
     Polynomial<Coefficient>& incoming, bool accountQuotientAsNonReduced
   );
   bool checkFactorization() const;
-  std::string toStringResult(FormatExpressions* theFormat) const;
+  std::string toStringResult(FormatExpressions* format) const;
   PolynomialFactorizationUnivariate();
 };
 
@@ -4345,15 +4345,15 @@ void Matrix<Coefficient>::getZeroEigenSpaceModifyMe(List<Vector<Coefficient> >& 
 }
 
 template <class Coefficient>
-std::string Vectors<Coefficient>::toString(FormatExpressions* theFormat) const {
+std::string Vectors<Coefficient>::toString(FormatExpressions* format) const {
   std::stringstream out;
   std::string tempS;
   bool useLaTeX = false;
   bool useHtml = false;
   bool makeTable = false;
-  if (theFormat != nullptr) {
-    useLaTeX = theFormat->flagUseLatex;
-    useHtml = theFormat->flagUseHTML;
+  if (format != nullptr) {
+    useLaTeX = format->flagUseLatex;
+    useHtml = format->flagUseHTML;
   }
   if (!useLaTeX && !useHtml) {
     out << this->size << " vectors: \n";
@@ -4365,7 +4365,7 @@ std::string Vectors<Coefficient>::toString(FormatExpressions* theFormat) const {
     out << "<table>";
   }
   for (int i = 0; i < this->size; i ++) {
-    tempS = this->objects[i].toString(theFormat);
+    tempS = this->objects[i].toString(format);
     if (useHtml && makeTable) {
       out << "<tr><td>";
     }
@@ -4422,7 +4422,7 @@ void List<Object>::intersectWith(const List<Object>& other, List<Object>& output
 
 template <class Coefficient>
 std::string Vector<Coefficient>::toStringLetterFormat(
-  const std::string& inputLetter, FormatExpressions* theFormat, bool DontIncludeLastVar
+  const std::string& inputLetter, FormatExpressions* format, bool DontIncludeLastVar
 ) const {
   if (this->isEqualToZero()) {
     return "0";
@@ -4433,8 +4433,8 @@ std::string Vector<Coefficient>::toStringLetterFormat(
   int NumVars = DontIncludeLastVar ? this->size - 1 : this->size;
   for (int i = 0; i < NumVars; i ++) {
     if (!this->objects[i].isEqualToZero()) {
-      tempS = (*this)[i].toString(theFormat);
-      if ((*this)[i].needsParenthesisForMultiplication(theFormat)) {
+      tempS = (*this)[i].toString(format);
+      if ((*this)[i].needsParenthesisForMultiplication(format)) {
         tempS = "(" + tempS + ")";
       }
       if (tempS == "1") {
@@ -4454,9 +4454,9 @@ std::string Vector<Coefficient>::toStringLetterFormat(
       }
       found = true;
       out << tempS;
-      if (theFormat != nullptr) {
-        if (theFormat->vectorSpaceEiBasisNames.size > i) {
-          out << theFormat->vectorSpaceEiBasisNames[i];
+      if (format != nullptr) {
+        if (format->vectorSpaceEiBasisNames.size > i) {
+          out << format->vectorSpaceEiBasisNames[i];
           continue;
         }
       }
@@ -4559,7 +4559,7 @@ std::string Matrix<Coefficient>::toStringLatex(FormatExpressions* format) const 
 
 template <typename Coefficient>
 std::string Matrix<Coefficient>::toStringSystemLatex(
-  Matrix<Coefficient>* constTerms, FormatExpressions* theFormat
+  Matrix<Coefficient>* constTerms, FormatExpressions* format
 ) const {
   std::stringstream out;
   bool constTermsAreGood =
@@ -4576,7 +4576,7 @@ std::string Matrix<Coefficient>::toStringSystemLatex(
     for (int j = 0; j < this->numberOfColumns; j ++) {
       if (!((*this)(i, j) == 0)) {
         theMon.makeMonomial(j, 1, (*this)(i, j));
-        currentEntry = theMon.toString(theFormat);
+        currentEntry = theMon.toString(format);
         if (currentEntry == "") {
           global.fatal << "Empty strings not allowed as result of toString() function call. " << global.fatal;
         }
@@ -4595,7 +4595,7 @@ std::string Matrix<Coefficient>::toStringSystemLatex(
     if (!constTermsAreGood) {
       out << "0";
     } else {
-      out << (*constTerms)(i, 0).toString(theFormat);
+      out << (*constTerms)(i, 0).toString(format);
     }
     out << "\\\\";
   }
@@ -5281,7 +5281,7 @@ public:
   Vectors<Rational> normals;
   int LowestIndexNotCheckedForChopping;
   int LowestIndexNotCheckedForSlicingInDirection;
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   void transformToWeylProjective(ConeComplex& owner);
   std::string drawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
   std::string drawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
@@ -5744,8 +5744,8 @@ class DynkinSimpleType {
   Rational getRatioLongRootToFirst() const {
     return this->getRatioLongRootToFirst(this->letter, this->rank);
   }
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
-  std::string ToStringNonTechnicalName(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string ToStringNonTechnicalName(FormatExpressions* format = nullptr) const;
   void operator++(int);
   bool operator>(const DynkinSimpleType& other) const;
   static void getEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>& output);
@@ -5804,7 +5804,7 @@ public:
   DynkinSimpleType getGreatestSimpleType() const;
   DynkinSimpleType getSmallestSimpleType() const;
   LargeInteger getWeylGroupSizeByFormula() const;
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   void scaleFirstCoRootSquaredLength(const Rational& multiplyCoRootSquaredLengthBy);
   int getMultiplicity(int SimpleTypeIdentifier) const {
     int result = 0;
@@ -5851,7 +5851,7 @@ public:
   void getCartanSymmetric(Matrix<Rational>& output) const;
   void getCartanSymmetricDefaultLengthKeepComponentOrder(Matrix<Rational>& output) const;
   int getCoxeterEdgeWeight(int v, int w);
-  std::string getWeylGroupName(FormatExpressions* theFormat = nullptr) const;
+  std::string getWeylGroupName(FormatExpressions* format = nullptr) const;
   static void getDynkinIndicesSl2SubalgebrasSimpleType(
     const DynkinSimpleType& theType,
     List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
@@ -5889,7 +5889,7 @@ public:
   List<int> indexUniComponent;
   List<int> indexInUniComponent;
   bool checkInitialization() const;
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   int rankTotal();
   int numberRootsGeneratedByDiagram();
   void sort();
@@ -6096,7 +6096,7 @@ public:
   Vectors<Rational> LPtoMaximizeLargerDim;
   Vectors<Rational> LPtoMaximizeSmallerDim;
 
-  std::string toString(FormatExpressions* theFormat = nullptr);
+  std::string toString(FormatExpressions* format = nullptr);
   void initialize(Vector<Rational>& theNEq, Cone& startingCone, Lattice& startingLattice, Vector<Rational>& startingShift);
   void findExtremaParametricStep1(PauseThread& thePauseController);
   void findExtremaParametricStep2TrimChamberForMultOne(PauseThread& thePauseController);
@@ -6216,8 +6216,8 @@ class MonomialMatrix {
     this->dualIndex = - 1;
     this->isIdentity = true;
   }
-  std::string toString(FormatExpressions* theFormat = nullptr) const {
-    (void) theFormat;
+  std::string toString(FormatExpressions* format = nullptr) const {
+    (void) format;
     std::stringstream out;
     if (!this->isIdentity) {
       out << "m_{" << this->vIndex + 1 << "}\\otimes " << "m^*_{" << this->dualIndex + 1 << "}";
@@ -6416,13 +6416,13 @@ public:
     }
     *this = output;
   }
-  std::string toStringMatrixForm(FormatExpressions* theFormat = nullptr) const {
+  std::string toStringMatrixForm(FormatExpressions* format = nullptr) const {
     if (this->isEqualToZero()) {
       return "(0)";
     }
     Matrix<Coefficient> tempMat;
     this->getMatrix(tempMat, this->getMinimumNumberOfColumnsNumberOfRows());
-    return tempMat.toString(theFormat);
+    return tempMat.toString(format);
   }
   void getMatrix(Matrix<Coefficient>& output, int theDim) const {
     theDim = MathRoutines::maximum(theDim, this->getMinimumNumberOfColumnsNumberOfRows());
@@ -6715,12 +6715,12 @@ public:
   bool isMaximalNonExplored(int index);
   bool indexGEQIndex(int a, int b);
   bool indexGreaterThanIndex(int a, int b);
-  std::string toString(FormatExpressions* theFormat = nullptr);
+  std::string toString(FormatExpressions* format = nullptr);
   void mergeBruhatLists(int fromList, int toList);
-  std::string KLPolysToString(FormatExpressions* theFormat = nullptr);
+  std::string KLPolysToString(FormatExpressions* format = nullptr);
   void computeKLCoefficients();
   int chamberIndicatorToIndex(Vector<Rational>& ChamberIndicator);
-  std::string rPolysToString(FormatExpressions* theFormat = nullptr);
+  std::string rPolysToString(FormatExpressions* format = nullptr);
   bool computeKLPolys(WeylGroupData* theWeylGroup);
   void computeRPolys();
   int computeProductfromSimpleReflectionsActionList(int x, int y);

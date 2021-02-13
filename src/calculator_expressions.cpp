@@ -2320,10 +2320,10 @@ template<>
 bool Expression::toStringBuiltIn<std::string>(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  bool useQuotes = theFormat == nullptr ? false : theFormat->flagUseQuotes;
-  bool isFinal = theFormat == nullptr ? true : theFormat->flagExpressionIsFinal;
+  bool useQuotes = format == nullptr ? false : format->flagUseQuotes;
+  bool isFinal = format == nullptr ? true : format->flagExpressionIsFinal;
   if (!useQuotes) {
     if (isFinal) {
       out
@@ -2341,9 +2341,9 @@ template<>
 bool Expression::toStringBuiltIn<JSData>(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
+  (void) format;
   JSData data = input.getValue<JSData>();
   std::string dataString = data.toString(&JSData::PrintOptions::HTML());
   out << dataString;
@@ -2354,9 +2354,9 @@ template<>
 bool Expression::toStringBuiltIn<Rational>(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
+  (void) format;
   if (input.hasNonEmptyContext()) {
     out << "Rational{}(" << input[1].toString() << ", ";
   }
@@ -2375,13 +2375,13 @@ template<>
 bool Expression::toStringBuiltIn<ElementEllipticCurve<Rational> >(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
-  FormatExpressions format;
-  input.getContext().getFormat(format);
-  format.flagUseFrac = true;
-  out << input.getValue<ElementEllipticCurve<Rational> >().toString(&format);
+  (void) format;
+  FormatExpressions formatEllipticCurve;
+  input.getContext().getFormat(formatEllipticCurve);
+  formatEllipticCurve.flagUseFrac = true;
+  out << input.getValue<ElementEllipticCurve<Rational> >().toString(&formatEllipticCurve);
   return true;
 }
 
@@ -2389,13 +2389,13 @@ template<>
 bool Expression::toStringBuiltIn<ElementEllipticCurve<ElementZmodP> >(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
-  FormatExpressions format;
-  input.getContext().getFormat(format);
-  format.flagUseFrac = true;
-  out << input.getValue<ElementEllipticCurve<ElementZmodP> >().toString(&format);
+  (void) format;
+  FormatExpressions formatElementZModP;
+  input.getContext().getFormat(formatElementZModP);
+  formatElementZModP.flagUseFrac = true;
+  out << input.getValue<ElementEllipticCurve<ElementZmodP> >().toString(&formatElementZModP);
   return true;
 }
 
@@ -2403,9 +2403,9 @@ template<>
 bool Expression::toStringBuiltIn<ElementZmodP>(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
+  (void) format;
   out << input.getValue<ElementZmodP>().toString();
   return true;
 }
@@ -2414,9 +2414,9 @@ template<>
 bool Expression::toStringBuiltIn<InputBox>(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
+  (void) format;
   out << input.getValue<InputBox>().getUserInputBox();
   return true;
 }
@@ -2425,9 +2425,9 @@ template<>
 bool Expression::toStringBuiltIn<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
+  (void) format;
   out << input.getValue<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >().toString();
   return true;
 }
@@ -2436,9 +2436,9 @@ template<>
 bool Expression::toStringBuiltIn<ElementHyperoctahedralGroupR2>(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  out << input.getValue<ElementHyperoctahedralGroupR2>().toString(theFormat);
+  out << input.getValue<ElementHyperoctahedralGroupR2>().toString(format);
   return true;
 }
 
@@ -2446,17 +2446,17 @@ template<>
 bool Expression::toStringBuiltIn<Polynomial<Rational> >(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
+  (void) format;
   bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
-  FormatExpressions format;
-  input.getContext().getFormat(format);
-  format.flagUseFrac = true;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
+  formatLocal.flagUseFrac = true;
   if (!input.owner->flagHidePolynomialBuiltInTypeIndicator) {
     out << "Polynomial{}(";
   }
-  out << input.getValue<Polynomial<Rational> >().toString(&format);
+  out << input.getValue<Polynomial<Rational> >().toString(&formatLocal);
   if (!input.owner->flagHidePolynomialBuiltInTypeIndicator) {
     out << ")";
   }
@@ -2470,17 +2470,17 @@ template<>
 bool Expression::toStringBuiltIn<Polynomial<ElementZmodP> >(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
+  (void) format;
   bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
-  FormatExpressions format;
+  FormatExpressions formatLocal;
   const Polynomial<ElementZmodP>& polynomial = input.getValue<Polynomial<ElementZmodP> >();
-  input.getContext().getFormat(format);
-  format.flagSuppressModP = true;
-  format.flagUseFrac = true;
+  input.getContext().getFormat(formatLocal);
+  formatLocal.flagSuppressModP = true;
+  formatLocal.flagUseFrac = true;
   if (!polynomial.isEqualToZero()) {
-    out << polynomial.coefficients[0].toStringPolynomial(polynomial, &format);
+    out << polynomial.coefficients[0].toStringPolynomial(polynomial, &formatLocal);
   } else {
     out << "PolynomialModP(0)";
   }
@@ -2494,15 +2494,15 @@ template<>
 bool Expression::toStringBuiltIn<Polynomial<AlgebraicNumber> >(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
-  FormatExpressions format;
-  input.getContext().getFormat(format);
+  (void) format;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
   bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
-  format.flagUseFrac = true;
+  formatLocal.flagUseFrac = true;
   out << "PolynomialAlgebraicNumbers{}(";
-  std::string currentString = input.getValue<Polynomial<AlgebraicNumber> >().toString(&format);
+  std::string currentString = input.getValue<Polynomial<AlgebraicNumber> >().toString(&formatLocal);
   if (currentString.size() > 0) {
     if (currentString[0] == '-') {
       currentString = currentString.substr(1);
@@ -2527,26 +2527,26 @@ template<>
 bool Expression::toStringBuiltIn<PolynomialModuloPolynomial<ElementZmodP> >(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
-  FormatExpressions format;
-  input.getContext().getFormat(format);
-  format.flagUseFrac = true;
+  (void) format;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
+  formatLocal.flagUseFrac = true;
   const PolynomialModuloPolynomial<ElementZmodP>& element = input.getValue<PolynomialModuloPolynomial<ElementZmodP> >();
   ElementZmodP sample;
-  format.flagSuppressModP = true;
+  formatLocal.flagSuppressModP = true;
   if (!element.modulus.isEqualToZero()) {
     sample = element.modulus.coefficients[0];
     out
-    << sample.toStringPolynomial(element.value, &format)
+    << sample.toStringPolynomial(element.value, &formatLocal)
     << " mod "
-    << sample.toStringPolynomial(element.modulus, &format);
+    << sample.toStringPolynomial(element.modulus, &formatLocal);
   } else {
     out
-    << element.value.toString(&format)
+    << element.value.toString(&formatLocal)
     << " mod "
-    << element.modulus.toString(&format);
+    << element.modulus.toString(&formatLocal);
   }
   return true;
 }
@@ -2555,15 +2555,15 @@ template<>
 bool Expression::toStringBuiltIn<RationalFunction<Rational> >(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
   bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
-  (void) theFormat;
-  FormatExpressions format;
-  input.getContext().getFormat(format);
-  format.flagUseFrac = true;
+  (void) format;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
+  formatLocal.flagUseFrac = true;
   out << "MakeRationalFunction{}("
-  << input.getValue<RationalFunction<Rational> >().toString(&format) << ")";
+  << input.getValue<RationalFunction<Rational> >().toString(&formatLocal) << ")";
   if (showContext) {
     out << "[" << input.getContext().toString() << "]";
   }
@@ -2574,15 +2574,15 @@ template<>
 bool Expression::toStringBuiltIn<RationalFunction<AlgebraicNumber> >(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
   bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
-  (void) theFormat;
-  FormatExpressions format;
-  input.getContext().getFormat(format);
-  format.flagUseFrac = true;
+  (void) format;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
+  formatLocal.flagUseFrac = true;
   out << "MakeRationalFunction{}("
-  << input.getValue<RationalFunction<AlgebraicNumber> >().toString(&format) << ")";
+  << input.getValue<RationalFunction<AlgebraicNumber> >().toString(&formatLocal) << ")";
   if (showContext) {
     out << "[" << input.getContext().toString() << "]";
   }
@@ -2593,28 +2593,28 @@ template<>
 bool Expression::toStringBuiltIn<RationalFunction<ElementZmodP> >(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
   bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
-  (void) theFormat;
-  FormatExpressions format;
-  input.getContext().getFormat(format);
-  format.flagSuppressModP = true;
-  format.flagUseFrac = true;
+  (void) format;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
+  formatLocal.flagSuppressModP = true;
+  formatLocal.flagUseFrac = true;
   const RationalFunction<ElementZmodP>& data = input.getValue<RationalFunction<ElementZmodP> >();
   if (data.expressionType == data.typeRationalFunction) {
     ElementZmodP constantSample = data.numerator.getElementConst().coefficients[0];
     out << "\\frac{"
-    << constantSample.toStringPolynomial(data.numerator.getElementConst(), &format)
+    << constantSample.toStringPolynomial(data.numerator.getElementConst(), &formatLocal)
     << "} {"
-    << constantSample.toStringPolynomial(data.denominator.getElementConst(), &format)
+    << constantSample.toStringPolynomial(data.denominator.getElementConst(), &formatLocal)
     << "}";
   } else if (data.expressionType == data.typePolynomial) {
     ElementZmodP constantSample = data.numerator.getElementConst().coefficients[0];
-    out << constantSample.toStringPolynomial(data.numerator.getElementConst(), &format);
+    out << constantSample.toStringPolynomial(data.numerator.getElementConst(), &formatLocal);
   } else {
     Polynomial<ElementZmodP> zero;
-    out << data.constantValue.toStringPolynomial(zero, &format);
+    out << data.constantValue.toStringPolynomial(zero, &formatLocal);
   }
   if (showContext) {
     out << "[" << input.getContext().toString() << "]";
@@ -2626,13 +2626,13 @@ template<>
 bool Expression::toStringBuiltIn<Weight<Polynomial<Rational> > >(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
-  FormatExpressions format;
-  input.getContext().getFormat(format);
-  format.flagFormatWeightAsVectorSpaceIndex = false;
-  out << input.getValue<Weight<Polynomial<Rational> > >().toString(&format);
+  (void) format;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
+  formatLocal.flagFormatWeightAsVectorSpaceIndex = false;
+  out << input.getValue<Weight<Polynomial<Rational> > >().toString(&formatLocal);
   return true;
 }
 
@@ -2654,13 +2654,13 @@ template<>
 bool Expression::toStringBuiltIn<ElementUniversalEnveloping<RationalFunction<Rational> > >(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
-  FormatExpressions format;
-  input.getContext().getFormat(format);
+  (void) format;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
   out << "UEE{}(" //<< input.getContext().toString() << ", "
-  << input.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >().toString(&format)
+  << input.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >().toString(&formatLocal)
   << ")";
   return true;
 }
@@ -2669,16 +2669,16 @@ template<>
 bool Expression::toStringBuiltIn<MatrixTensor<Rational> >(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
-  FormatExpressions format;
-  input.getContext().getFormat(format);
-  format.flagUseLatex = true;
-  format.flagUseHTML = false;
+  (void) format;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
+  formatLocal.flagUseLatex = true;
+  formatLocal.flagUseHTML = false;
   if (input.getValue<MatrixTensor<Rational> >().getMinimumNumberOfColumnsNumberOfRows() < 20) {
     out << "MatrixRationalsTensorForm{}("
-    << input.getValue<MatrixTensor<Rational> > ().toStringMatrixForm(&format)
+    << input.getValue<MatrixTensor<Rational> > ().toStringMatrixForm(&formatLocal)
     << ")";
   } else {
     out << input.getValue<MatrixTensor<Rational> >().toString();
@@ -2690,13 +2690,13 @@ template<>
 bool Expression::toStringBuiltIn<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
-  FormatExpressions format;
-  input.getContext().getFormat(format);
+  (void) format;
+  FormatExpressions localFormat;
+  input.getContext().getFormat(localFormat);
   out << "ETGVM{}(";
-  out << input.getValue<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >().toString(&format);
+  out << input.getValue<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >().toString(&localFormat);
   out << ")";
   return true;
 }
@@ -2705,12 +2705,12 @@ template<>
 bool Expression::toStringBuiltIn<Plot>(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  bool isFinal = theFormat == nullptr ? true : theFormat->flagExpressionIsFinal;
+  bool isFinal = format == nullptr ? true : format->flagExpressionIsFinal;
   if (isFinal) {
     Plot& thePlot = input.getValueNonConst<Plot>();
-    thePlot.flagIncludeExtraHtmlDescriptions = (theFormat == nullptr) ? true : theFormat->flagIncludeExtraHtmlDescriptionsInPlots;
+    thePlot.flagIncludeExtraHtmlDescriptions = (format == nullptr) ? true : format->flagIncludeExtraHtmlDescriptionsInPlots;
     thePlot.flagPlotShowJavascriptOnly = input.owner->flagPlotShowJavascriptOnly;
     out << thePlot.getPlotHtml(*input.owner);
     if (input.owner->flagWriteLatexPlots) {
@@ -2728,15 +2728,15 @@ template<>
 bool Expression::toStringBuiltIn<WeylGroupData>(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
-  FormatExpressions format;
+  (void) format;
+  FormatExpressions formatLocal;
   WeylGroupData& theGroup = input.getValueNonConst<WeylGroupData>();
-  format.flagUseLatex = true;
-  format.flagUseHTML = false;
-  format.flagUseReflectionNotation = true;
-  out << theGroup.toString(&format);
+  formatLocal.flagUseLatex = true;
+  formatLocal.flagUseHTML = false;
+  formatLocal.flagUseReflectionNotation = true;
+  out << theGroup.toString(&formatLocal);
   return true;
 }
 
@@ -2744,15 +2744,15 @@ template<>
 bool Expression::toStringBuiltIn<ElementWeylGroup >(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
-  FormatExpressions format;
+  (void) format;
+  FormatExpressions localFormat;
   const ElementWeylGroup& theElt = input.getValue<ElementWeylGroup>();
-  format.flagUseLatex = true;
-  format.flagUseHTML = false;
-  format.flagUseReflectionNotation = true;
-  out << theElt.toString(&format);
+  localFormat.flagUseLatex = true;
+  localFormat.flagUseHTML = false;
+  localFormat.flagUseReflectionNotation = true;
+  out << theElt.toString(&localFormat);
   return true;
 }
 
@@ -2760,16 +2760,16 @@ template<>
 bool Expression::toStringBuiltIn<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
-  FormatExpressions format;
+  (void) format;
+  FormatExpressions localFormat;
   const GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& theElt =
   input.getValue<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
-  format.flagUseLatex = true;
-  format.flagUseHTML = false;
-  format.flagUseReflectionNotation = true;
-  out << theElt.toString(&format);
+  localFormat.flagUseLatex = true;
+  localFormat.flagUseHTML = false;
+  localFormat.flagUseReflectionNotation = true;
+  out << theElt.toString(&localFormat);
   return true;
 }
 
@@ -2777,17 +2777,17 @@ template<>
 bool Expression::toStringBuiltIn<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
-  FormatExpressions format;
-  input.getContext().getFormat(format);
+  (void) format;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
   const VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& theElt =
   input.getValue<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
-  format.flagUseLatex = true;
-  format.flagUseHTML = false;
-  format.flagUseReflectionNotation = true;
-  out << theElt.toString(&format);
+  formatLocal.flagUseLatex = true;
+  formatLocal.flagUseHTML = false;
+  formatLocal.flagUseReflectionNotation = true;
+  out << theElt.toString(&formatLocal);
   return true;
 }
 
@@ -2795,9 +2795,9 @@ template<>
 bool Expression::toStringBuiltIn<CharacterSemisimpleLieAlgebraModule<Rational> >(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
+  (void) format;
   CharacterSemisimpleLieAlgebraModule<Rational> theElt = input.getValue<CharacterSemisimpleLieAlgebraModule<Rational> >();
   out << theElt.toString();
   return true;
@@ -2807,17 +2807,17 @@ template<>
 bool Expression::toStringBuiltIn<SemisimpleSubalgebras>(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
-  FormatExpressions format;
+  (void) format;
+  FormatExpressions formatLocal;
   SemisimpleSubalgebras& theSubalgebras = input.getValueNonConst<SemisimpleSubalgebras>();
-  format.flagUseLatex = true;
-  format.flagUseHTML = true;
-  format.flagCandidateSubalgebraShortReportOnly = false;
-  format.flagIncludeMutableInformation = false;
-  format.flagUseMathSpanPureVsMouseHover = false;
-  out << theSubalgebras.toString(&format);
+  formatLocal.flagUseLatex = true;
+  formatLocal.flagUseHTML = true;
+  formatLocal.flagCandidateSubalgebraShortReportOnly = false;
+  formatLocal.flagIncludeMutableInformation = false;
+  formatLocal.flagUseMathSpanPureVsMouseHover = false;
+  out << theSubalgebras.toString(&formatLocal);
   return true;
 }
 
@@ -2825,9 +2825,9 @@ template<>
 bool Expression::toStringBuiltIn<double>(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
+  (void) format;
   std::string currentString = FloatingPoint::doubleToString(input.getValue<double>());
   if (currentString.size() > 0) {
     if (currentString[0] == '-') {
@@ -2849,14 +2849,14 @@ template<>
 bool Expression::toStringBuiltIn<AlgebraicNumber>(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
-  FormatExpressions format;
+  (void) format;
+  FormatExpressions formatLocal;
   if (input.owner->flagUseFracInRationalLaTeX) {
-    format.flagUseFrac = true;
+    formatLocal.flagUseFrac = true;
   }
-  std::string currentString = input.getValue<AlgebraicNumber>().toString(&format);
+  std::string currentString = input.getValue<AlgebraicNumber>().toString(&formatLocal);
   if (currentString.size() > 0) {
     if (currentString[0] == '-') {
       currentString = currentString.substr(1);
@@ -2877,9 +2877,9 @@ template<>
 bool Expression::toStringBuiltIn<LittelmannPath>(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
+  (void) format;
   out << input.getValue<LittelmannPath>().toString();
   return true;
 }
@@ -2888,16 +2888,16 @@ template<>
 bool Expression::toStringBuiltIn<ElementWeylAlgebra<Rational> >(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
-  FormatExpressions format;
+  (void) format;
+  FormatExpressions formatLocal;
   bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
-  input.getContext().getFormat(format);
-  format.flagUseHTML = false;
-  format.flagUseLatex = true;
+  input.getContext().getFormat(formatLocal);
+  formatLocal.flagUseHTML = false;
+  formatLocal.flagUseLatex = true;
   out << "ElementWeylAlgebra{}(";
-  out << input.getValue<ElementWeylAlgebra<Rational> >().toString(&format);
+  out << input.getValue<ElementWeylAlgebra<Rational> >().toString(&formatLocal);
   out << ")";
   if (showContext) {
     out << "[" << input.getContext().toString() << "]";
@@ -2905,7 +2905,7 @@ bool Expression::toStringBuiltIn<ElementWeylAlgebra<Rational> >(
   return true;
 }
 
-bool Expression::toStringData(std::stringstream& out, FormatExpressions* theFormat) const {
+bool Expression::toStringData(std::stringstream& out, FormatExpressions* format) const {
   MacroRegisterFunctionWithName("Expression::toStringData");
   if (this->owner == nullptr) {
     out << "(non-initialized)";
@@ -2949,7 +2949,7 @@ bool Expression::toStringData(std::stringstream& out, FormatExpressions* theForm
   // where builtInType is one of the types registered in
   // Calculator::initializeToStringHandlers.
   Expression::ToStringHandler handler = commands.toStringDataHandlers.getValueNoFail(typeIndex);
-  return handler(*this, out, theFormat);
+  return handler(*this, out, format);
 }
 
 std::string Expression::toStringSemiFull() const {
@@ -3083,7 +3083,7 @@ bool Expression::needsParenthesisForAddition() const {
   return false;
 }
 
-bool Expression::needsParenthesisForMultiplication(FormatExpressions* theFormat) const {
+bool Expression::needsParenthesisForMultiplication(FormatExpressions* format) const {
   if (this->owner == nullptr) {
     return false;
   }
@@ -3115,10 +3115,10 @@ bool Expression::needsParenthesisForMultiplication(FormatExpressions* theFormat)
     }
   }
   if (this->isOfType<Rational>()) {
-    return this->getValue<Rational>().needsParenthesisForMultiplication(theFormat);
+    return this->getValue<Rational>().needsParenthesisForMultiplication(format);
   }
   if (this->isOfType<AlgebraicNumber>()) {
-    return this->getValue<AlgebraicNumber>().needsParenthesisForMultiplication(theFormat);
+    return this->getValue<AlgebraicNumber>().needsParenthesisForMultiplication(format);
   }
   if (this->isAtom() || this->children.size == 0) {
     return false;
@@ -3278,19 +3278,19 @@ bool Expression::requiresNoMathTags() const {
 }
 
 bool Expression::toStringTimes(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opTimes(), 3)) {
     return false;
   }
-  std::string secondE = input[2].toString(theFormat);
+  std::string secondE = input[2].toString(format);
   if (input[1].isOperationGiven(input.owner->opSqrt())) {
     // A malformed expression such as: "\sqrt 3" will be parsed as "sqrt * 3"
     // and later corrected to "\sqrt{3}".
     out << "\\sqrt{" << secondE << "}";
     return true;
   }
-  std::string firstE = input[1].toString(theFormat);
+  std::string firstE = input[1].toString(format);
   bool firstNeedsBrackets = input[1].needsParenthesisForMultiplication();
   bool secondNeedsBrackets = input[2].needsParenthesisForMultiplicationWhenSittingOnTheRightMost(&(input[1]));
   if (secondE.size() > 0) {
@@ -3300,8 +3300,8 @@ bool Expression::toStringTimes(
   }
   bool mustHaveTimes = false;
   bool collapseUnits = true;
-  if (theFormat != nullptr) {
-    collapseUnits = !theFormat->flagDontCollalpseProductsByUnits;
+  if (format != nullptr) {
+    collapseUnits = !format->flagDontCollalpseProductsByUnits;
   }
   if (collapseUnits) {
     if (firstE == "-1" || firstE == "- 1") {
@@ -3347,10 +3347,10 @@ bool Expression::toStringTimes(
 void Expression::toStringOpMultiplicative(
   std::stringstream& out,
   const std::string& operation,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) const {
-  std::string secondE = (*this)[2].toString(theFormat);
-  std::string firstE = (*this)[1].toString(theFormat);
+  std::string secondE = (*this)[2].toString(format);
+  std::string firstE = (*this)[1].toString(format);
   bool firstNeedsBrackets = (*this)[1].needsParenthesisForMultiplication();
   bool secondNeedsBrackets = (*this)[2].needsParenthesisForMultiplication();
   if (firstE == "- 1" || firstE == "-1") {
@@ -3400,7 +3400,7 @@ std::string Expression::toStringTreeHtml(int depth) const {
 bool Expression::toStringDivide(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
   Calculator& commands = *input.owner;
   if (!input.startsWith(commands.opDivide(), 3)) {
@@ -3424,8 +3424,8 @@ bool Expression::toStringDivide(
     }
   }
   if (!doUseFrac) {
-    std::string firstE = input[1].toString(theFormat);
-    std::string secondE = input[2].toString(theFormat);
+    std::string firstE = input[1].toString(format);
+    std::string secondE = input[2].toString(format);
     bool firstNeedsBrackets =
       !(input[1].isListStartingWithAtom(commands.opTimes()) ||
       input[1].isListStartingWithAtom(commands.opDivide()));
@@ -3448,17 +3448,17 @@ bool Expression::toStringDivide(
     }
   } else {
     StateMaintainer<bool> maintain;
-    if (theFormat != nullptr) {
-      maintain.initialize(theFormat->flagExpressionNewLineAllowed);
-      theFormat->flagExpressionNewLineAllowed = false;
+    if (format != nullptr) {
+      maintain.initialize(format->flagExpressionNewLineAllowed);
+      format->flagExpressionNewLineAllowed = false;
     } else {
       // Compilers will complain at certain optimization levels about
       // maintain not being initialized.
       maintain.toMaintain = nullptr;
       maintain.contentAtStart = false;
     }
-    std::string firstE = input[1].toString(theFormat);
-    std::string secondE = input[2].toString(theFormat);
+    std::string firstE = input[1].toString(format);
+    std::string secondE = input[2].toString(format);
     out << "\\frac{" << firstE << "}{" << secondE << "}";
   }
   return true;
@@ -3467,7 +3467,7 @@ bool Expression::toStringDivide(
 bool Expression::toStringPower(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
   Calculator& commands = *input.owner;
   if (!input.startsWith(commands.opThePower(), 3)) {
@@ -3490,14 +3490,14 @@ bool Expression::toStringPower(
       Expression newFunE;
       newFunE.makeXOX(*input.owner, commands.opThePower(), firstE[0], input[2]);
       newFunE.checkConsistency();
-      out << "{" << newFunE.toString(theFormat) << "}{}";
+      out << "{" << newFunE.toString(format) << "}{}";
       if (
         firstE[1].needsParenthesisForMultiplicationWhenSittingOnTheRightMost() ||
         firstE[1].startsWith(commands.opTimes())
       ) {
-        out << "\\left(" << firstE[1].toString(theFormat) << "\\right)";
+        out << "\\left(" << firstE[1].toString(format) << "\\right)";
       } else {
-        out << firstE[1].toString(theFormat);
+        out << firstE[1].toString(format);
       }
     }
   }
@@ -3509,10 +3509,10 @@ bool Expression::toStringPower(
       }
     }
     if (isSqrt) {
-      out << "\\sqrt{" << input[1].toString(theFormat) << "}";
+      out << "\\sqrt{" << input[1].toString(format) << "}";
     } else {
-      std::string secondEstr = input[2].toString(theFormat);
-      std::string firstEstr = input[1].toString(theFormat);
+      std::string secondEstr = input[2].toString(format);
+      std::string firstEstr = input[1].toString(format);
       if (input[1].needsParenthesisForBaseOfExponent()) {
         bool useBigParenthesis = true;
         if (input[1].startsWith(commands.opDivide())) {
@@ -3539,12 +3539,12 @@ bool Expression::toStringPower(
 }
 
 bool Expression::toStringGeneral(
-  std::stringstream& out, FormatExpressions* theFormat
+  std::stringstream& out, FormatExpressions* format
 ) const {
   if (this->size() < 2) {
     return false;
   }
-  out << (*this)[0].toString(theFormat);
+  out << (*this)[0].toString(format);
   bool needParenthesis = true;
   if (this->size() == 2) {
     if ((*this)[0].isAtomWhoseExponentsAreInterpretedAsFunction()) {
@@ -3559,7 +3559,7 @@ bool Expression::toStringGeneral(
     out << "\\left(";
   }
   for (int i = 1; i < this->children.size; i ++) {
-    out << (*this)[i].toString(theFormat);
+    out << (*this)[i].toString(format);
     if (i != this->children.size - 1) {
       out << ", ";
     }
@@ -3574,22 +3574,22 @@ bool Expression::toStringEndStatement(
   std::stringstream& out,
   Expression* startingExpression,
   JSData* outputJS,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) const {
   if (!this->isListStartingWithAtom(this->owner->opCommandSequence())) {
     return false;
   }
   MemorySaving<FormatExpressions> temporaryFormat;
-  if (theFormat == nullptr) {
-    theFormat = &temporaryFormat.getElement();
-    theFormat->flagExpressionIsFinal = true;
+  if (format == nullptr) {
+    format = &temporaryFormat.getElement();
+    format->flagExpressionIsFinal = true;
   }
-  bool isFinal = theFormat->flagExpressionIsFinal;
+  bool isFinal = format->flagExpressionIsFinal;
   bool createTable = (startingExpression != nullptr);
   bool createSingleTable = false;
-  if (createTable == false && theFormat != nullptr && !global.flagRunningConsoleRegular) {
-    createSingleTable = theFormat->flagMakingExpressionTableWithLatex;
-    theFormat->flagMakingExpressionTableWithLatex = false;
+  if (createTable == false && format != nullptr && !global.flagRunningConsoleRegular) {
+    createSingleTable = format->flagMakingExpressionTableWithLatex;
+    format->flagMakingExpressionTableWithLatex = false;
   }
   if (!createSingleTable && !createTable && this->size() > 2) {
     out << "(";
@@ -3608,8 +3608,8 @@ bool Expression::toStringEndStatement(
       out << "<tr><td class = 'cellCalculatorInput'>";
       if (!this->owner->flagHideLHS) {
         if (i < (*startingExpression).size()) {
-          theFormat->flagDontCollalpseProductsByUnits = true;
-          currentInput = HtmlRoutines::getMathNoDisplay((*startingExpression)[i].toString(theFormat));
+          format->flagDontCollalpseProductsByUnits = true;
+          currentInput = HtmlRoutines::getMathNoDisplay((*startingExpression)[i].toString(format));
         } else {
           currentInput = "No matching starting expression - possible use of the Melt keyword.";
         }
@@ -3627,11 +3627,11 @@ bool Expression::toStringEndStatement(
       if ((*this)[i].isOfType<std::string>() && isFinal) {
         currentOutput = StringRoutines::convertStringToCalculatorDisplay(currentE.getValue<std::string>());
       } else if (currentE.requiresNoMathTags() && isFinal) {
-        theFormat->flagDontCollalpseProductsByUnits = false;
-        currentOutput = currentE.toString(theFormat);
+        format->flagDontCollalpseProductsByUnits = false;
+        currentOutput = currentE.toString(format);
       } else {
-        theFormat->flagDontCollalpseProductsByUnits = false;
-        currentOutput = HtmlRoutines::getMathNoDisplay(currentE.toString(theFormat), 1700);
+        format->flagDontCollalpseProductsByUnits = false;
+        currentOutput = HtmlRoutines::getMathNoDisplay(currentE.toString(format), 1700);
       }
       currentOutput += currentE.toStringAllSlidersInExpression();
       if (outputJS != nullptr) {
@@ -3649,7 +3649,7 @@ bool Expression::toStringEndStatement(
           outWithDelimiter << "\\(";
         }
       }
-      outWithDelimiter << currentE.toString(theFormat);
+      outWithDelimiter << currentE.toString(format);
       if (createSingleTable && addLatexDelimiter) {
         outWithDelimiter << "\\)";
       }
@@ -3665,8 +3665,8 @@ bool Expression::toStringEndStatement(
         out << ";";
       }
     }
-    if (theFormat != nullptr) {
-      theFormat->flagExpressionIsFinal = isFinal;
+    if (format != nullptr) {
+      format->flagExpressionIsFinal = isFinal;
     }
   }
   if (createSingleTable) {
@@ -3678,7 +3678,7 @@ bool Expression::toStringEndStatement(
   return true;
 }
 
-bool Expression::toStringPlus(const Expression& input, std::stringstream& out, FormatExpressions* theFormat) {
+bool Expression::toStringPlus(const Expression& input, std::stringstream& out, FormatExpressions* format) {
   if (!input.startsWith(input.owner->opPlus())) {
     return false;
   }
@@ -3690,22 +3690,22 @@ bool Expression::toStringPlus(const Expression& input, std::stringstream& out, F
   const Expression& right = input[2];
   std::string leftString;
   if (left.needsParenthesisForAddition()) {
-    leftString = "\\left(" + left.toString(theFormat) + "\\right)";
+    leftString = "\\left(" + left.toString(format) + "\\right)";
   } else {
-    leftString = left.toString(theFormat);
+    leftString = left.toString(format);
   }
   out << leftString;
   bool allowNewLine = false;
-  if (theFormat != nullptr) {
-    allowNewLine = theFormat->flagExpressionNewLineAllowed;
+  if (format != nullptr) {
+    allowNewLine = format->flagExpressionNewLineAllowed;
   }
   bool useFrac = input.owner->flagUseFracInRationalLaTeX;
   if (allowNewLine && !useFrac && leftString.size() > static_cast<unsigned>(FormatExpressions::ExpressionLineBreak)) {
     out << "\\\\\n";
   }
-  std::string rightString = right.toString(theFormat);
+  std::string rightString = right.toString(format);
   if (right.needsParenthesisForAddition()) {
-    rightString = "\\left(" + right.toString(theFormat) + "\\right)";
+    rightString = "\\left(" + right.toString(format) + "\\right)";
   }
   if (rightString.size() > 0) {
     if (rightString[0] != '-') {
@@ -3716,7 +3716,7 @@ bool Expression::toStringPlus(const Expression& input, std::stringstream& out, F
   return true;
 }
 
-bool Expression::toStringDirectSum(const Expression& input, std::stringstream& out, FormatExpressions* theFormat) {
+bool Expression::toStringDirectSum(const Expression& input, std::stringstream& out, FormatExpressions* format) {
   if (!input.isListStartingWithAtom(input.owner->opDirectSum())) {
     return false;
   }
@@ -3728,21 +3728,21 @@ bool Expression::toStringDirectSum(const Expression& input, std::stringstream& o
   const Expression& right = input[2];
   std::string leftString;
   if (left.needsParenthesisForAddition()) {
-    leftString = "\\left(" + left.toString(theFormat) + "\\right)";
+    leftString = "\\left(" + left.toString(format) + "\\right)";
   } else {
-    leftString = left.toString(theFormat);
+    leftString = left.toString(format);
   }
   out << leftString;
   bool allowNewLine = false;
-  if (theFormat != nullptr) {
-    allowNewLine = theFormat->flagExpressionNewLineAllowed;
+  if (format != nullptr) {
+    allowNewLine = format->flagExpressionNewLineAllowed;
   }
   bool useFrac = input.owner->flagUseFracInRationalLaTeX;
   if (allowNewLine && !useFrac && leftString.size() > static_cast<unsigned>(FormatExpressions::ExpressionLineBreak)) {
     out << "\\\\\n";
   }
   std::string rightString = right.needsParenthesisForAddition() ?
-  ("\\left(" + right.toString(theFormat) + "\\right)") : right.toString(theFormat);
+  ("\\left(" + right.toString(format) + "\\right)") : right.toString(format);
   if (rightString.size() > 0) {
     if (rightString[0] != '-') {
       out << "\\oplus ";
@@ -3753,7 +3753,7 @@ bool Expression::toStringDirectSum(const Expression& input, std::stringstream& o
 }
 
 bool Expression::toStringSequence(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.isListStartingWithAtom(input.owner->opSequence())) {
     return false;
@@ -3764,21 +3764,21 @@ bool Expression::toStringSequence(
   out << "\\left(";
   int charCounter = 0;
   bool allowNewLine = false;
-  if (theFormat != nullptr) {
-    allowNewLine = theFormat->flagExpressionNewLineAllowed;
+  if (format != nullptr) {
+    allowNewLine = format->flagExpressionNewLineAllowed;
   }
   for (int i = 1; i < input.size(); i ++) {
-    std::string currentChildString = input[i].toString(theFormat);
+    std::string currentChildString = input[i].toString(format);
     out << currentChildString;
     charCounter += currentChildString.size();
     if (i != input.children.size - 1) {
       out << ", ";
-      if (theFormat != nullptr) {
+      if (format != nullptr) {
         if (allowNewLine && charCounter > 50) {
-          if (theFormat->flagUseLatex) {
+          if (format->flagUseLatex) {
             out << "\\\\\n";
           }
-          if (theFormat->flagUseHTML) {
+          if (format->flagUseHTML) {
             out << "\n<br>\n";
           }
         }
@@ -3793,14 +3793,14 @@ bool Expression::toStringSequence(
   return true;
 }
 
-bool Expression::toStringMatrix(const Expression& input, std::stringstream& out, FormatExpressions* theFormat) {
+bool Expression::toStringMatrix(const Expression& input, std::stringstream& out, FormatExpressions* format) {
   if (!input.isMatrix()) {
     return false;
   }
-  if (theFormat->flagUseLatex && !theFormat->flagUsePmatrix) {
+  if (format->flagUseLatex && !format->flagUsePmatrix) {
     out << "\\left(";
   }
-  if (!theFormat->flagUsePmatrix) {
+  if (!format->flagUsePmatrix) {
     int numCols = input.getNumberOfColumns();
     out << "\\begin{array}{";
     for (int i = 0; i < numCols; i ++) {
@@ -3812,7 +3812,7 @@ bool Expression::toStringMatrix(const Expression& input, std::stringstream& out,
   }
   for (int i = 1; i < input.size(); i ++) {
     for (int j = 1; j < input[i].size(); j ++) {
-      out << input[i][j].toString(theFormat);
+      out << input[i][j].toString(format);
       if (j != input[i].size() - 1) {
         out << " & ";
       }
@@ -3821,25 +3821,25 @@ bool Expression::toStringMatrix(const Expression& input, std::stringstream& out,
       out << "\\\\ \n";
     }
   }
-  if (theFormat->flagUsePmatrix) {
+  if (format->flagUsePmatrix) {
     out << " \\end{pmatrix}";
   } else {
     out << " \\end{array}";
   }
-  if (theFormat->flagUseLatex && !theFormat->flagUsePmatrix) {
+  if (format->flagUseLatex && !format->flagUsePmatrix) {
     out << "\\right)";
   }
   return true;
 }
 
 bool Expression::toStringDefine(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opDefine(), 3)) {
     return false;
   }
-  std::string firstE  = input[1].toString(theFormat);
-  std::string secondE = input[2].toString(theFormat);
+  std::string firstE  = input[1].toString(format);
+  std::string secondE = input[2].toString(format);
   if (
     input[1].isListStartingWithAtom(input.owner->opDefine()) ||
     input[1].isListStartingWithAtom(input.owner->opGreaterThan()) ||
@@ -3861,7 +3861,7 @@ bool Expression::toStringDefine(
 }
 
 bool Expression::toStringLnAbsoluteInsteadOfLogarithm(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (
     !input.owner->flagUseLnAbsInsteadOfLogForIntegrationNotation ||
@@ -3869,7 +3869,7 @@ bool Expression::toStringLnAbsoluteInsteadOfLogarithm(
   ) {
     return false;
   }
-  std::string theArg = input[1].toString(theFormat);
+  std::string theArg = input[1].toString(format);
   if (!StringRoutines::stringBeginsWith(theArg, "\\left|")) {
     out << "\\ln \\left|" << theArg << "\\right|";
   } else {
@@ -3881,21 +3881,21 @@ bool Expression::toStringLnAbsoluteInsteadOfLogarithm(
 bool Expression::toStringDifferential(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opDifferential())) {
     return false;
   }
   if (input.size() == 2) {
-    return Expression::toStringDifferential2(input, out, theFormat);
+    return Expression::toStringDifferential2(input, out, format);
   }
-  return Expression::toStringDifferential3(input, out, theFormat);
+  return Expression::toStringDifferential3(input, out, format);
 }
 
 bool Expression::toStringDifferential3(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opDifferential(), 3)) {
     return false;
@@ -3906,7 +3906,7 @@ bool Expression::toStringDifferential3(
     needsParen = false;
   }
   bool rightNeedsParen = (!input[1].isAtom()) && (!input[1].isBuiltInType());
-  std::string theCoeff = input[2].toString(theFormat);
+  std::string theCoeff = input[2].toString(format);
   if (theCoeff == "1") {
     needsParen = false;
     theCoeff = "";
@@ -3922,7 +3922,7 @@ bool Expression::toStringDifferential3(
   if (rightNeedsParen) {
     out << "\\left(";
   }
-  out << input[1].toString(theFormat);
+  out << input[1].toString(format);
   if (rightNeedsParen) {
     out << "\\right)";
   }
@@ -3930,25 +3930,25 @@ bool Expression::toStringDifferential3(
 }
 
 bool Expression::toStringDifferentiate(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opDifferentiate(), 3)) {
     return false;
   }
   out << "\\frac{\\text{d} ";
   if (input[2].needsParenthesisForMultiplication()) {
-    out << "\\left(" << input[2].toString(theFormat)
+    out << "\\left(" << input[2].toString(format)
     << "\\right)";
   } else {
-    out << input[2].toString(theFormat);
+    out << input[2].toString(format);
   }
   out << "}{\\text{d} "
-  << input[1].toString(theFormat) << "}";
+  << input[1].toString(format) << "}";
   return true;
 }
 
 bool Expression::toStringDifferential2(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opDifferential(), 2)) {
     return false;
@@ -3958,21 +3958,21 @@ bool Expression::toStringDifferential2(
   if (needsParen) {
     out << "\\left(";
   }
-  out << input[1].toString(theFormat);
+  out << input[1].toString(format);
   if (needsParen) {
     out << "\\right)";
   }
   return true;
 }
 
-bool Expression::toStringFactorial(const Expression& input, std::stringstream& out, FormatExpressions* theFormat) {
+bool Expression::toStringFactorial(const Expression& input, std::stringstream& out, FormatExpressions* format) {
   if (!input.startsWith(input.owner->opFactorial(), 2)) {
     return false;
   }
   if (input[1].needsParenthesisForBaseOfExponent()) {
-    out << "\\left(" << input[1].toString(theFormat) << "\\right) !";
+    out << "\\left(" << input[1].toString(format) << "\\right) !";
   } else {
-    out << input[1].toString(theFormat) << "!";
+    out << input[1].toString(format) << "!";
   }
   return true;
 }
@@ -3980,29 +3980,29 @@ bool Expression::toStringFactorial(const Expression& input, std::stringstream& o
 bool Expression::toStringSqrt(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opSqrt())) {
     return false;
   }
   if (input.size() == 2) {
-    return Expression::toStringSqrt2(input, out, theFormat);
+    return Expression::toStringSqrt2(input, out, format);
   }
-  return Expression::toStringSqrt3(input, out, theFormat);
+  return Expression::toStringSqrt3(input, out, format);
 }
 
 bool Expression::toStringSqrt2(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opSqrt(), 2)) {
     return false;
   }
-  out << "\\sqrt{" << input[1].toString(theFormat) << "}";
+  out << "\\sqrt{" << input[1].toString(format) << "}";
   return true;
 }
 
 bool Expression::toStringSqrt3(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opSqrt(), 3)) {
     return false;
@@ -4013,77 +4013,77 @@ bool Expression::toStringSqrt3(
     hasPowerTwo = (thePower == 2);
   }
   if (hasPowerTwo) {
-    out << "\\sqrt{" << input[2].toString(theFormat) << "}";
+    out << "\\sqrt{" << input[2].toString(format) << "}";
   } else {
-    out << "\\sqrt[" << input[1].toString(theFormat)
-    << "]{" << input[2].toString(theFormat) << "}";
+    out << "\\sqrt[" << input[1].toString(format)
+    << "]{" << input[2].toString(format) << "}";
   }
   return true;
 }
 
 bool Expression::toStringGreaterThan(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.isListStartingWithAtom(input.owner->opGreaterThan())) {
     return false;
   }
-  out << input[1].toString(theFormat) << "&gt;" << input[2].toString(theFormat);
+  out << input[1].toString(format) << "&gt;" << input[2].toString(format);
   return true;
 }
 
 bool Expression::toStringLessThanOrEqualTo(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.isListStartingWithAtom(input.owner->opLessThanOrEqualTo())) {
     return false;
   }
-  out << input[1].toString(theFormat) << "\\leq " << input[2].toString(theFormat);
+  out << input[1].toString(format) << "\\leq " << input[2].toString(format);
   return true;
 }
 
 bool Expression::toStringLessThan(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.isListStartingWithAtom(input.owner->opLessThan())) {
     return false;
   }
-  out << input[1].toString(theFormat) << "&lt;" << input[2].toString(theFormat);
+  out << input[1].toString(format) << "&lt;" << input[2].toString(format);
   return true;
 }
 
 bool Expression::toStringLimitProcess(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.isListStartingWithAtom(input.owner->opLimitProcess())) {
     return false;
   }
-  out << input[1].toString(theFormat) << " \\to " << input[2].toString(theFormat);
+  out << input[1].toString(format) << " \\to " << input[2].toString(format);
   return true;
 }
 
 bool Expression::toStringGreaterThanOrEqualTo(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.isListStartingWithAtom(input.owner->opGreaterThanOrEqualTo())) {
     return false;
   }
-  out << input[1].toString(theFormat) << "\\geq " << input[2].toString(theFormat);
+  out << input[1].toString(format) << "\\geq " << input[2].toString(format);
   return true;
 }
 
 bool Expression::toStringError(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opError(), 2)) {
     return false;
   }
   input.checkInitialization();
-  out << "\\text{Error: " << input[1].toString(theFormat) << "}";
+  out << "\\text{Error: " << input[1].toString(format) << "}";
   return true;
 }
 
 bool Expression::toStringSumOrIntegral(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (
     !input.startsWith(input.owner->opSum()) &&
@@ -4091,14 +4091,14 @@ bool Expression::toStringSumOrIntegral(
   ) {
     return false;
   }
-  std::string opString = input[0].toString(theFormat);
+  std::string opString = input[0].toString(format);
   out << opString << " ";
   int firstIndex = 2;
   if (input.size() >= 2) {
     if (input[1].startsWith(input.owner->opLimitBoundary(), 3)) {
       out
-      << "_{" << input[1][1].toString(theFormat) << "}"
-      << "^{" << input[1][2].toString(theFormat) << "}";
+      << "_{" << input[1][1].toString(format) << "}"
+      << "^{" << input[1][2].toString(format) << "}";
     } else if (input[1].isOperationGiven(input.owner->opIndefiniteIndicator())) {
       firstIndex = 2;
     } else {
@@ -4107,12 +4107,12 @@ bool Expression::toStringSumOrIntegral(
   }
   if (input.size() <= firstIndex + 1) {
     if (input.size() == firstIndex + 1) {
-      out << input[firstIndex].toString(theFormat);
+      out << input[firstIndex].toString(format);
     }
   } else {
     out << "(";
     for (int i = firstIndex; i < input.size(); i ++) {
-      out << input[i].toString(theFormat);
+      out << input[i].toString(format);
       if (i != input.size() - 1) {
         out << ", ";
       }
@@ -4123,68 +4123,68 @@ bool Expression::toStringSumOrIntegral(
 }
 
 bool Expression::toStringLimit(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opLimit(), 3)) {
     return false;
   }
   out << "\\lim_{";
   if (!input[1].isSequenceNElements()) {
-    out << input[1].toString(theFormat);
+    out << input[1].toString(format);
   } else {
     for (int i = 1; i < input[1].size(); i ++) {
-      out << input[1][i].toString(theFormat);
+      out << input[1][i].toString(format);
       if (i != input[1].size() - 1) {
         out << ", ";
       }
     }
   }
-  out << "}" << input[2].toString(theFormat);
+  out << "}" << input[2].toString(format);
   return true;
 }
 
 bool Expression::toStringUnion(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.isListStartingWithAtom(input.owner->opUnion()) || input.size() != 3) {
     return false;
   }
   if (input[1].startsWith(input.owner->opIntersection())) {
-    out << "\\left(" << input[1].toString(theFormat) <<  "\\right)"
-    << "\\cup " << input[2].toString(theFormat);
+    out << "\\left(" << input[1].toString(format) <<  "\\right)"
+    << "\\cup " << input[2].toString(format);
   } else {
-    out << input[1].toString(theFormat) << "\\cup " << input[2].toString(theFormat);
+    out << input[1].toString(format) << "\\cup " << input[2].toString(format);
   }
   return true;
 }
 
 bool Expression::toStringUnionNoRepetition(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.isListStartingWithAtom(input.owner->opUnionNoRepetition())) {
     return false;
   }
-  out << input[1].toString(theFormat) << "\\sqcup " << input[2].toString(theFormat);
+  out << input[1].toString(format) << "\\sqcup " << input[2].toString(format);
   return true;
 }
 
 bool Expression::toStringIntersection(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.isListStartingWithAtom(input.owner->opIntersection()) || input.size() != 3) {
     return false;
   }
   if (input[1].startsWith(input.owner->opUnion())) {
-    out << "\\left(" << input[1].toString(theFormat) << "\\right)"
-    << "\\cap " << input[2].toString(theFormat);
+    out << "\\left(" << input[1].toString(format) << "\\right)"
+    << "\\cap " << input[2].toString(format);
   } else {
-    out << input[1].toString(theFormat) << "\\cap " << input[2].toString(theFormat);
+    out << input[1].toString(format) << "\\cap " << input[2].toString(format);
   }
   return true;
 }
 
 std::string Expression::toStringWithStartingExpression(
-  FormatExpressions* theFormat,
+  FormatExpressions* format,
   Expression* startingExpression,
   std::stringstream& out,
   JSData* outputJS
@@ -4193,22 +4193,22 @@ std::string Expression::toStringWithStartingExpression(
   std::string input, output;
   bool isFinal = true;
   MemorySaving<FormatExpressions> tempFormat;
-  if (theFormat == nullptr) {
-    theFormat = &tempFormat.getElement();
-    theFormat->flagExpressionIsFinal = true;
+  if (format == nullptr) {
+    format = &tempFormat.getElement();
+    format->flagExpressionIsFinal = true;
   }
-  isFinal = theFormat->flagExpressionIsFinal;
+  isFinal = format->flagExpressionIsFinal;
   outTrue << "<table class = 'tableCalculatorOutput'>";
   outTrue << "<tr><th>Input</th><th>Result</th></tr>";
   if (this->isListStartingWithAtom(this->owner->opCommandSequence())) {
     outTrue << out.str();
   } else {
-    if (theFormat != nullptr) {
-      theFormat->flagDontCollalpseProductsByUnits = true;
+    if (format != nullptr) {
+      format->flagDontCollalpseProductsByUnits = true;
     }
-    input = HtmlRoutines::getMathNoDisplay(startingExpression->toString(theFormat), 1700);
-    if (theFormat != nullptr) {
-      theFormat->flagDontCollalpseProductsByUnits = false;
+    input = HtmlRoutines::getMathNoDisplay(startingExpression->toString(format), 1700);
+    if (format != nullptr) {
+      format->flagDontCollalpseProductsByUnits = false;
     }
     outTrue << "<tr><td class = 'cellCalculatorInput'>" << input << "</td>";
     if ((
@@ -4233,7 +4233,7 @@ std::string Expression::toStringWithStartingExpression(
 }
 
 bool Expression::toStringMinus3(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opMinus(), 3)) {
     return false;
@@ -4244,11 +4244,11 @@ bool Expression::toStringMinus3(
     << "instead there are " << input.children.size - 1
     << ". " << global.fatal;
   }
-  out << input[1].toString(theFormat) << "-";
+  out << input[1].toString(format) << "-";
   if (input[2].startsWith(input.owner->opPlus()) || input[2].startsWith(input.owner->opMinus())) {
-    out << "\\left(" << input[2].toString(theFormat) << "\\right)";
+    out << "\\left(" << input[2].toString(format) << "\\right)";
   } else {
-    out << input[2].toString(theFormat);
+    out << input[2].toString(format);
   }
   return true;
 }
@@ -4256,19 +4256,19 @@ bool Expression::toStringMinus3(
 bool Expression::toStringMinus(
   const Expression& input,
   std::stringstream& out,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opMinus())) {
     return false;
   }
   if (input.size() == 2) {
-    return Expression::toStringMinus2(input, out, theFormat);
+    return Expression::toStringMinus2(input, out, format);
   }
-  return Expression::toStringMinus3(input, out, theFormat);
+  return Expression::toStringMinus3(input, out, format);
 }
 
 bool Expression::toStringMinus2(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opMinus(), 2)) {
     return false;
@@ -4277,17 +4277,17 @@ bool Expression::toStringMinus2(
     input[1].startsWith(input.owner->opPlus()) ||
     input[1].startsWith(input.owner->opMinus())
   ) {
-    out << "-\\left(" << input[1].toString(theFormat) << "\\right)";
+    out << "-\\left(" << input[1].toString(format) << "\\right)";
   } else {
-    out << "-" << input[1].toString(theFormat);
+    out << "-" << input[1].toString(format);
   }
   return true;
 }
 
 bool Expression::toStringOr(
-  const Expression &input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression &input, std::stringstream& out, FormatExpressions* format
 ) {
-  (void) theFormat;
+  (void) format;
   if (!input.startsWith(input.owner->opOr(), 3)) {
     return false;
   }
@@ -4306,7 +4306,7 @@ bool Expression::toStringOr(
 }
 
 bool Expression::toStringIntervalOpen(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opIntervalOpen(), 3)) {
     return false;
@@ -4314,45 +4314,45 @@ bool Expression::toStringIntervalOpen(
   if (!input.owner->flagUseBracketsForIntervals) {
     out << "IntervalOpen{}";
   }
-  out << "\\left(" << input[1].toString(theFormat) << ", "
-  << input[2].toString(theFormat) << "\\right)";
+  out << "\\left(" << input[1].toString(format) << ", "
+  << input[2].toString(format) << "\\right)";
   return true;
 }
 
 bool Expression::toStringIntervalLeftClosed(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (input.startsWith(input.owner->opIntervalLeftClosed(), 2)) {
     if (input[1].isSequenceNElements(2)) {
       out << "\\left[" << input[1][1] << ", " << input[1][2] << "\\right)";
     } else {
-      out << input[0].toString(theFormat) << "{}" << input[1].toString(theFormat);
+      out << input[0].toString(format) << "{}" << input[1].toString(format);
     }
     return true;
   }
   if (input.startsWith(input.owner->opIntervalLeftClosed(), 3)) {
-    out << "\\left[" << input[1].toString(theFormat) << ", "
-    << input[2].toString(theFormat) << "\\right)";
+    out << "\\left[" << input[1].toString(format) << ", "
+    << input[2].toString(format) << "\\right)";
     return true;
   }
   return false;
 }
 
 bool Expression::toStringIntervalRightClosed(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (
     input.startsWith(input.owner->opIntervalRightClosed(), 3)
   ) {
-    out << "\\left(" << input[1].toString(theFormat) << ", "
-    << input[2].toString(theFormat) << "\\right]";
+    out << "\\left(" << input[1].toString(format) << ", "
+    << input[2].toString(format) << "\\right]";
     return true;
   }
   if (input.startsWith(input.owner->opIntervalRightClosed(), 2)) {
     if (input[1].isSequenceNElements(2)) {
       out << "\\left(" << input[1][1] << ", " << input[1][2] << "\\right]";
     } else {
-      out << input[0].toString(theFormat) << "{}" << input[1].toString(theFormat);
+      out << input[0].toString(format) << "{}" << input[1].toString(format);
     }
     return true;
   }
@@ -4360,28 +4360,28 @@ bool Expression::toStringIntervalRightClosed(
 }
 
 bool Expression::toStringIntervalClosed(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (input.startsWith(input.owner->opIntervalClosed(), 2)) {
     if (input[1].isSequenceNElements(2)) {
       out << "\\left[" << input[1][1] << ", " << input[1][2] << "\\right]";
     } else {
-      out << input[0].toString(theFormat) << "{}" << input[1].toString(theFormat);
+      out << input[0].toString(format) << "{}" << input[1].toString(format);
     }
     return true;
   }
   if (input.startsWith(input.owner->opIntervalClosed(), 3)) {
-    out << "\\left[" << input[1].toString(theFormat) << ", "
-    << input[2].toString(theFormat) << "\\right]";
+    out << "\\left[" << input[1].toString(format) << ", "
+    << input[2].toString(format) << "\\right]";
     return true;
   }
   return false;
 }
 
 bool Expression::toStringQuote(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
-  (void) theFormat;
+  (void) format;
   if (!input.startsWith(input.owner->opQuote(), 2)) {
     return false;
   }
@@ -4395,63 +4395,63 @@ bool Expression::toStringQuote(
 }
 
 bool Expression::toStringLogBase(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opLogBase(), 3)) {
     return false;
   }
-  out << "\\log_{" << input[1].toString(theFormat) << "}"
-  << "\\left(" << input[2].toString(theFormat) << "\\right)";
+  out << "\\log_{" << input[1].toString(format) << "}"
+  << "\\left(" << input[2].toString(format) << "\\right)";
   return true;
 }
 
 bool Expression::toStringIsDenotedBy(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.isListStartingWithAtom(input.owner->opIsDenotedBy())) {
     return false;
   }
-  out << input[1].toString(theFormat) << "=:" << input[2].toString(theFormat);
+  out << input[1].toString(format) << "=:" << input[2].toString(format);
   return true;
 }
 
 bool Expression::toStringDefineConditional(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opDefineConditional(), 4)) {
     return false;
   }
-  out << input[1].toString(theFormat) << " :if \\left("
-  << input[2].toString(theFormat) << "\\right)="
-  << input[3].toString(theFormat);
+  out << input[1].toString(format) << " :if \\left("
+  << input[2].toString(format) << "\\right)="
+  << input[3].toString(format);
   return true;
 }
 
 bool Expression::toStringTensor(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opTensor(), 3)) {
     return false;
   }
-  input.toStringOpMultiplicative(out, "\\otimes", theFormat);
+  input.toStringOpMultiplicative(out, "\\otimes", format);
   return true;
 }
 
 bool Expression::toStringIn(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opIn(), 3)) {
     return false;
   }
-  out << input[1].toString(theFormat) << "\\in "
-  << input[2].toString(theFormat);
+  out << input[1].toString(format) << "\\in "
+  << input[2].toString(format);
   return true;
 }
 
 bool Expression::toStringAnd(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
-  (void) theFormat;
+  (void) format;
   if (!input.startsWith(input.owner->opAnd(), 3)) {
     return false;
   }
@@ -4461,130 +4461,130 @@ bool Expression::toStringAnd(
 }
 
 bool Expression::toStringBinom(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opBinom(), 3)) {
     return false;
   }
-  out << "\\binom{" << input[1].toString(theFormat) << "}{ "
-  << input[2].toString(theFormat) << "}";
+  out << "\\binom{" << input[1].toString(format) << "}{ "
+  << input[2].toString(format) << "}";
   return true;
 }
 
 bool Expression::toStringUnderscore(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opUnderscore())) {
     return false;
   }
-  out << "{" << input[1].toString(theFormat) << "}_{"
-  << input[2].toString(theFormat) << "}";
+  out << "{" << input[1].toString(format) << "}_{"
+  << input[2].toString(format) << "}";
   return true;
 }
 
 bool Expression::toStringSetMinus(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opSetMinus(), 3)) {
     return false;
   }
-  out << input[1].toString(theFormat) << "\\setminus "
-  << input[2].toString(theFormat);
+  out << input[1].toString(format) << "\\setminus "
+  << input[2].toString(format);
   return true;
 }
 
 bool Expression::toStringLimitBoundary(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opLimitBoundary(), 3)) {
     return false;
   }
-  out << "\\limits_{" << input[1].toString(theFormat)
+  out << "\\limits_{" << input[1].toString(format)
   << "}^{"
-  << input[2].toString(theFormat)
+  << input[2].toString(format)
   << "}";
   return true;
 }
 
 bool Expression::toStringCrossProduct(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opCrossProduct())) {
     return false;
   }
-  input.toStringOpMultiplicative(out, "\\times", theFormat);
+  input.toStringOpMultiplicative(out, "\\times", format);
   return true;
 }
 
 bool Expression::toStringAbsoluteValue(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opAbsoluteValue(), 2)) {
     return false;
   }
-  out << "\\left|" << input[1].toString(theFormat) << "\\right|";
+  out << "\\left|" << input[1].toString(format) << "\\right|";
   return true;
 }
 
 bool Expression::toStringBind(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.startsWith(input.owner->opBind(), 2)) {
     return false;
   }
-  out << "{{" << input[1].toString(theFormat) << "}}";
+  out << "{{" << input[1].toString(format) << "}}";
   return true;
 }
 
 bool Expression::toStringMod(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.isListStartingWithAtom(input.owner->opMod())) {
     return false;
   }
   if (input.size() == 2) {
-    out << " mod " << input[1].toString(theFormat);
+    out << " mod " << input[1].toString(format);
     return true;
   }
   if (input.size() == 3) {
-    out << input[1].toString(theFormat) << " mod " << input[2].toString(theFormat);
+    out << input[1].toString(format) << " mod " << input[2].toString(format);
     return true;
   }
   return false;
 }
 
 bool Expression::toStringLieBracket(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.isListStartingWithAtom(input.owner->opLieBracket())) {
     return false;
   }
-  out << "[" << input[1].toString(theFormat) << "," << input[2].toString(theFormat) << "]";
+  out << "[" << input[1].toString(format) << "," << input[2].toString(format) << "]";
   return true;
 }
 
 bool Expression::toStringEqualEqual(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.isListStartingWithAtom(input.owner->opEqualEqual())) {
     return false;
   }
-  out << input[1].toString(theFormat) << "==" << input[2].toString(theFormat);
+  out << input[1].toString(format) << "==" << input[2].toString(format);
   return true;
 }
 
 bool Expression::toStringEqualEqualEqual(
-  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (!input.isListStartingWithAtom(input.owner->opEqualEqualEqual())) {
     return false;
   }
-  out << input[1].toString(theFormat) << "===" << input[2].toString(theFormat);
+  out << input[1].toString(format) << "===" << input[2].toString(format);
   return true;
 }
 
 bool Expression::toStringWithAtomHandler(
-  std::stringstream& out, FormatExpressions* theFormat
+  std::stringstream& out, FormatExpressions* format
 ) const {
   MacroRegisterFunctionWithName("Expression::toStringWithAtomHandler");
   if (!this->isList()) {
@@ -4597,13 +4597,13 @@ bool Expression::toStringWithAtomHandler(
   if (this->owner->toStringHandlersAtoms.contains(atom)) {
     Expression::ToStringHandler handler =
     this->owner->toStringHandlersAtoms.getValueNoFail(atom);
-    return handler(*this, out, theFormat);
+    return handler(*this, out, format);
   }
   return false;
 }
 
 bool Expression::toStringWithCompositeHandler(
-  std::stringstream& out, FormatExpressions* theFormat
+  std::stringstream& out, FormatExpressions* format
 ) const {
   MacroRegisterFunctionWithName("Expression::toStringWithCompositeHandler");
   if (!this->isList()) {
@@ -4619,7 +4619,7 @@ bool Expression::toStringWithCompositeHandler(
   if (this->owner->toStringHandlersComposite.contains(atom)) {
     Expression::ToStringHandler handler =
     this->owner->toStringHandlersComposite.getValueNoFail(atom);
-    return handler(*this, out, theFormat);
+    return handler(*this, out, format);
   }
   return false;
 }
@@ -5199,10 +5199,10 @@ bool Expression::operator==(const std::string& other) const {
   return this->isOperationGiven(other);
 }
 
-std::string Expression::toUTF8String(FormatExpressions* theFormat) const {
+std::string Expression::toUTF8String(FormatExpressions* format) const {
   MacroRegisterFunctionWithName("Expression::toUTF8String");
   if (this->owner == nullptr) {
-    return this->toString(theFormat);
+    return this->toString(format);
   }
   std::stringstream out;
   Rational theRat;
@@ -5213,14 +5213,14 @@ std::string Expression::toUTF8String(FormatExpressions* theFormat) const {
   } else if (this->isOperationGiven(this->owner->opPi())) {
     return "\\u03C0";
   } else if (this->startsWith(this->owner->opPlus(), 3)) {
-    return (*this)[1].toUTF8String(theFormat) + "+" + (*this)[2].toUTF8String(theFormat);
+    return (*this)[1].toUTF8String(format) + "+" + (*this)[2].toUTF8String(format);
   } else if (this->startsWith(this->owner->opTimes(), 3)) {
-    std::string secondUTF8String = (*this)[2].toUTF8String(theFormat);
-    std::string secondString = (*this)[2].toString(theFormat);
+    std::string secondUTF8String = (*this)[2].toUTF8String(format);
+    std::string secondString = (*this)[2].toString(format);
     if ((*this)[1].isOperationGiven(this->owner->opSqrt())) {
       out << "sqrt(" << secondUTF8String << ")";
     } else {
-      std::string firstE = (*this)[1].toUTF8String(theFormat);
+      std::string firstE = (*this)[1].toUTF8String(format);
       bool firstNeedsBrackets = (*this)[1].needsParenthesisForMultiplication();
       bool secondNeedsBrackets = (*this)[2].needsParenthesisForMultiplicationWhenSittingOnTheRightMost(&((*this)[1]));
       bool mustHaveTimes = false;
@@ -5261,7 +5261,7 @@ std::string Expression::toUTF8String(FormatExpressions* theFormat) const {
   } else if (this->startsWith(this->owner->opSequence())) {
     out << "(";
     for (int i = 1; i < this->size(); i ++) {
-      out << (*this)[i].toUTF8String(theFormat);
+      out << (*this)[i].toUTF8String(format);
       if (i < this->size() - 1) {
         out << ", ";
       }
@@ -5269,5 +5269,5 @@ std::string Expression::toUTF8String(FormatExpressions* theFormat) const {
     out << ")";
     return out.str();
   }
-  return this->toString(theFormat);
+  return this->toString(format);
 }

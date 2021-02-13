@@ -299,8 +299,8 @@ public:
     bool doextractRelations
   );
   void possibleNilradicalComputation(Selection& selKmods, RootSubalgebras& owner, int indexInOwner);
-  std::string toString(FormatExpressions* theFormat = nullptr);
-  void toHTML(int index, FormatExpressions* theFormat);
+  std::string toString(FormatExpressions* format = nullptr);
+  void toHTML(int index, FormatExpressions* format);
   std::string toStringLieBracketTable(bool useLaTeX, bool useHtml, RootSubalgebra& owner);
   bool rootsDefineSubalgebra(Vectors<Rational>& theRoots);
   void generateKModuleLieBracketTable(List<List<List<int> > >& output, List<int>& oppositeKmods);
@@ -410,11 +410,11 @@ public:
   void toStringRootSpaces(std::string& output, bool includeMatrixForm, Vectors<Rational>& input);
   void toStringConeConditionNotSatisfying(std::string& output, bool includeMatrixForm);
   void toStringCentralizerIsomorphisms(std::string& output, bool useLatex, bool useHtml, int fromIndex, int NumToProcess);
-  void toHTML(FormatExpressions* theFormat);
-  std::string toString(FormatExpressions* theFormat);
+  void toHTML(FormatExpressions* format);
+  std::string toString(FormatExpressions* format);
   std::string toStringAlgebraLink(int index);
-  std::string toStringDynkinTableHTML(FormatExpressions* theFormat);
-  std::string toStringDynkinTableFormatToLaTeX(FormatExpressions* theFormat);
+  std::string toStringDynkinTableHTML(FormatExpressions* format);
+  std::string toStringDynkinTableFormatToLaTeX(FormatExpressions* format);
   void computeLProhibitingRelations();
   void computeAllRootSubalgebrasUpToIsomorphism(int StartingIndex, int NumToBeProcessed);
   void makeProgressReportAutomorphisms(
@@ -489,7 +489,7 @@ public:
     }
     return *this->owner;
   }
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   void getInvolvedPositiveGenerators(List<ChevalleyGenerator>& output);
   void getInvolvedNegativeGenerators(List<ChevalleyGenerator>& output);
   void toStringModuleDecompositionMinimalContainingRegularSAs(
@@ -598,9 +598,9 @@ public:
   bool containsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex);
   bool containsSl2WithGivenHCharacteristic(Vector<Rational>& theHCharacteristic, int* outputIndex);
   void writeHTML(FormatExpressions* format = nullptr);
-  std::string toStringSummary(FormatExpressions* theFormat = nullptr);
+  std::string toStringSummary(FormatExpressions* format = nullptr);
   void toStringModuleDecompositionMinimalContainingRegularSAs(std::string& output, bool useLatex, bool useHtml);
-  std::string toString(FormatExpressions* theFormat = nullptr);
+  std::string toString(FormatExpressions* format = nullptr);
 };
 
 #endif

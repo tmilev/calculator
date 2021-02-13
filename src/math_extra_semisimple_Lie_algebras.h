@@ -303,7 +303,7 @@ public:
     CharacterSemisimpleLieAlgebraModule<Coefficient>& output,
     const Coefficient& zero = Coefficient::zero()
   ) const;
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   inline unsigned int hashFunction() const {
     return weightFundamentalCoordinates.hashFunction();
   }

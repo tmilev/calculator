@@ -155,9 +155,9 @@ std::string GlobalVariables::hopefullyPermanent_HTTPS_WebAdressJavascriptFolder 
 std::string Calculator::toStringSemismipleLieAlgebraLinksFromHD(
   const std::string& prefixFolder,
   const DynkinType& dynkinType,
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) {
-  (void) theFormat;
+  (void) format;
   std::stringstream out;
   SemisimpleLieAlgebra folderComputer;
   folderComputer.weylGroup.dynkinType = dynkinType;

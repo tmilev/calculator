@@ -651,8 +651,8 @@ void LargeIntegerUnsigned::divPositive(
   }
 }
 
-std::string LargeIntegerUnsigned::toString(FormatExpressions* theFormat) const {
-  (void) theFormat; //to avoid unused paramater warning
+std::string LargeIntegerUnsigned::toString(FormatExpressions* format) const {
+  (void) format; //to avoid unused paramater warning
   std::string tempS;
   this->toString(tempS);
   return tempS;
@@ -2146,9 +2146,9 @@ bool Rational::isGreaterThanOrEqualTo(const Rational& right) const {
   return tempRat.isPositiveOrZero();
 }
 
-std::string Rational::toString(FormatExpressions* theFormat) const {
-  if (theFormat != nullptr) {
-    if (theFormat->flagUseFrac) {
+std::string Rational::toString(FormatExpressions* format) const {
+  if (format != nullptr) {
+    if (format->flagUseFrac) {
       return this->toStringFrac();
     }
   }

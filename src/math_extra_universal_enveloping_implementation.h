@@ -606,7 +606,7 @@ void MonomialUniversalEnveloping<Coefficient>::setNumberOfVariables(int newNumVa
 }
 
 template <class Coefficient>
-std::string MonomialUniversalEnveloping<Coefficient>::toString(FormatExpressions* theFormat) const {
+std::string MonomialUniversalEnveloping<Coefficient>::toString(FormatExpressions* format) const {
   std::stringstream out;
   std::string tempS;
   if (this->owner == nullptr) {
@@ -618,12 +618,12 @@ std::string MonomialUniversalEnveloping<Coefficient>::toString(FormatExpressions
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
     Coefficient& thePower = this->powers[i];
     int theIndex = this->generatorsIndices[i];
-    tempS = this->getOwner().getStringFromChevalleyGenerator(theIndex, theFormat);
+    tempS = this->getOwner().getStringFromChevalleyGenerator(theIndex, format);
     out << tempS;
     if (!thePower.isEqualToOne()) {
       out << "^";
       out << "{";
-      out << thePower.toString(theFormat);
+      out << thePower.toString(format);
       out << "}";
     }
   }

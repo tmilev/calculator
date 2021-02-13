@@ -122,7 +122,7 @@ private:
   bool flagDeallocated;
 //////
   typedef bool (*FunctionAddress) (Calculator& calculator, const Expression& input, Expression& output);
-  typedef bool (*ToStringHandler) (const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
+  typedef bool (*ToStringHandler) (const Expression& input, std::stringstream& out, FormatExpressions* format);
 //////
   friend std::ostream& operator<<(std::ostream& output, const Expression& element) {
     output << element.toString();
@@ -239,7 +239,7 @@ private:
   bool isError(std::string* outputErrorMessage = nullptr) const;
   bool isContext() const;
   bool needsParenthesisForBaseOfExponent() const;
-  bool needsParenthesisForMultiplication(FormatExpressions* theFormat = nullptr) const;
+  bool needsParenthesisForMultiplication(FormatExpressions* format = nullptr) const;
   bool needsParenthesisForAddition() const;
   bool needsParenthesisForMultiplicationWhenSittingOnTheRightMost(const Expression* leftNeighbor = nullptr) const;
 
@@ -403,12 +403,12 @@ private:
     this->setChild(childIndex, tempE);
   }
   std::string lispify() const;
-  bool toStringData(std::stringstream& out, FormatExpressions* theFormat = nullptr) const;
+  bool toStringData(std::stringstream& out, FormatExpressions* format = nullptr) const;
 
   std::string toStringSemiFull() const;
   std::string toStringFull() const;
   std::string toStringAllSlidersInExpression() const;
-  std::string toUTF8String(FormatExpressions* theFormat = nullptr) const;
+  std::string toUTF8String(FormatExpressions* format = nullptr) const;
 
   template <class builtIn>
   static bool toStringBuiltIn(
@@ -417,67 +417,67 @@ private:
     FormatExpressions* format
   );
 
-  bool toStringWithAtomHandler(std::stringstream& out, FormatExpressions* theFormat) const;
-  bool toStringWithCompositeHandler(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool toStringWithAtomHandler(std::stringstream& out, FormatExpressions* format) const;
+  bool toStringWithCompositeHandler(std::stringstream& out, FormatExpressions* format) const;
 
-  static bool toStringLnAbsoluteInsteadOfLogarithm(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringDifferential(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringDifferential2(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringDifferential3(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringDifferentiate(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringDefine(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringIsDenotedBy(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringLogBase(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringQuote(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringDefineConditional(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringTensor(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringIn(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringAnd(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringBinom(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringUnderscore(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringSetMinus(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringLimitBoundary(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringCrossProduct(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringAbsoluteValue(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringBind(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringMod(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringPlus(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringMatrix(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringSequence(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringLieBracket(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringSumOrIntegral(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringGreaterThan(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringGreaterThanOrEqualTo(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringLessThanOrEqualTo(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringDirectSum(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringLimitProcess(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringLessThan(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringLimit(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringTimes(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringSqrt(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringSqrt2(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringSqrt3(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringOr(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringIntervalOpen(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringIntervalLeftClosed(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringIntervalRightClosed(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringIntervalClosed(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringDivide(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
+  static bool toStringLnAbsoluteInsteadOfLogarithm(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringDifferential(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringDifferential2(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringDifferential3(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringDifferentiate(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringDefine(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringIsDenotedBy(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringLogBase(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringQuote(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringDefineConditional(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringTensor(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringIn(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringAnd(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringBinom(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringUnderscore(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringSetMinus(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringLimitBoundary(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringCrossProduct(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringAbsoluteValue(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringBind(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringMod(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringPlus(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringMatrix(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringSequence(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringLieBracket(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringSumOrIntegral(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringGreaterThan(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringGreaterThanOrEqualTo(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringLessThanOrEqualTo(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringDirectSum(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringLimitProcess(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringLessThan(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringLimit(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringTimes(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringSqrt(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringSqrt2(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringSqrt3(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringOr(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringIntervalOpen(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringIntervalLeftClosed(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringIntervalRightClosed(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringIntervalClosed(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringDivide(const Expression& input, std::stringstream& out, FormatExpressions* format);
 
-  static bool toStringPower(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringFactorial(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringUnion(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringMinus(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringMinus2(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringMinus3(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringIntersection(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringUnionNoRepetition(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringEqualEqual(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool toStringEqualEqualEqual(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
+  static bool toStringPower(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringFactorial(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringUnion(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringMinus(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringMinus2(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringMinus3(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringIntersection(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringUnionNoRepetition(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringEqualEqual(const Expression& input, std::stringstream& out, FormatExpressions* format);
+  static bool toStringEqualEqualEqual(const Expression& input, std::stringstream& out, FormatExpressions* format);
   static bool toStringError(
-    const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
-  void toStringOpMultiplicative(std::stringstream& out, const std::string& operation, FormatExpressions* theFormat) const;
+  void toStringOpMultiplicative(std::stringstream& out, const std::string& operation, FormatExpressions* format) const;
 
   std::string toStringTreeHtml(int depth) const;
   std::string toString(
@@ -488,10 +488,10 @@ private:
   ) const;
   bool toStringGeneral(
     std::stringstream& out,
-    FormatExpressions* theFormat
+    FormatExpressions* format
   ) const;
   std::string toStringWithStartingExpression(
-    FormatExpressions* theFormat,
+    FormatExpressions* format,
     Expression* startingExpression,
     std::stringstream& out,
     JSData* outputJS
@@ -500,7 +500,7 @@ private:
     std::stringstream& out,
     Expression* startingExpression,
     JSData* outputJS,
-    FormatExpressions* theFormat
+    FormatExpressions* format
   ) const;
   bool requiresNoMathTags() const;
   static unsigned int hashFunction(const Expression& input);
@@ -1463,7 +1463,7 @@ public:
   std::string toStringSemismipleLieAlgebraLinksFromHD(
     const std::string& prefixFolder,
     const DynkinType& dynkinType,
-    FormatExpressions* theFormat = nullptr
+    FormatExpressions* format = nullptr
   );
   bool isBoundVariableInContext(int inputOp);
   bool isNonBoundVariableInContext(int inputOp);

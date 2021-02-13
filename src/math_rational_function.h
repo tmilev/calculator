@@ -33,7 +33,7 @@ public:
     typeRationalFunction = 2,
     typeError = 3
   };
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   bool needsParenthesisForMultiplication(FormatExpressions* unused = nullptr) const;
   bool findOneVariableRationalRoots(List<Rational>& output);
   static RationalFunction one();

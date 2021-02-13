@@ -945,9 +945,9 @@ bool SubgroupDataWeylGroup::checkInitialization() {
 }
 
 template <class someGroup, class elementSomeGroup>
-std::string SubgroupData<someGroup, elementSomeGroup>::toString(FormatExpressions* theFormat) {
+std::string SubgroupData<someGroup, elementSomeGroup>::toString(FormatExpressions* format) {
   MacroRegisterFunctionWithName("SubgroupData::toString");
-  (void) theFormat;
+  (void) format;
   if (this->theGroup == nullptr) {
     return "(not initialized (no owner group))";
   }
@@ -962,17 +962,17 @@ std::string SubgroupData<someGroup, elementSomeGroup>::toString(FormatExpression
   return out.str();
 }
 
-std::string SubgroupDataRootReflections::toString(FormatExpressions* theFormat) {
+std::string SubgroupDataRootReflections::toString(FormatExpressions* format) {
   MacroRegisterFunctionWithName("SubgroupDataRootReflections::toString");
   std::stringstream out;
-  out << subGroupDataContainer.toString(theFormat);
+  out << subGroupDataContainer.toString(format);
   return out.str();
 }
 
-std::string SubgroupDataWeylGroup::toString(FormatExpressions* theFormat) {
+std::string SubgroupDataWeylGroup::toString(FormatExpressions* format) {
   MacroRegisterFunctionWithName("SubgroupDataWeylGroup::toString");
   std::stringstream out;
-  out << this->theSubgroupData.toString(theFormat);
+  out << this->theSubgroupData.toString(format);
   return out.str();
 }
 

@@ -1974,7 +1974,7 @@ public:
   bool flagDeallocated;
   MonomialMacdonald(): owner(nullptr), flagDeallocated(false) {
   }
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   bool checkConsistency() {
     if (this->flagDeallocated) {
       global.fatal << "Use after free of MonomialMacdonald. " << global.fatal;
@@ -1997,9 +1997,9 @@ public:
   ~MonomialMacdonald();
 };
 
-std::string MonomialMacdonald::toString(FormatExpressions* theFormat) const {
+std::string MonomialMacdonald::toString(FormatExpressions* format) const {
   MacroRegisterFunctionWithName("MonomialMacdonald::toString");
-  (void) theFormat;
+  (void) format;
   if (this->owner == nullptr) {
     return "(non-initialized)";
   }

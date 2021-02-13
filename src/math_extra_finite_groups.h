@@ -48,7 +48,7 @@ public:
   ClassFunction operator-(const ClassFunction& other) const;
   ClassFunction reducedWithCharacters(const List<ClassFunction>& chars);
   Coefficient& operator[](int i) const;
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   static unsigned int hashFunction(const ClassFunction& input);
   unsigned int hashFunction() const;
   void operator*=(const Coefficient& inputCF) {
@@ -168,8 +168,8 @@ public:
     bool flagElementsComputed;
     bool flagRepresentativeWordComputed;
     List<int> representativeWord;
-    std::string toString(FormatExpressions* theFormat = nullptr) const {
-      (void) theFormat;
+    std::string toString(FormatExpressions* format = nullptr) const {
+      (void) format;
       std::stringstream out;
       out << "Conj. class size: " << this->size.toString();
       return out.str();
@@ -235,16 +235,16 @@ public:
   bool checkConjugacyClassRepresentationsMatchCCSizes();
   bool checkOrthogonalityCharacterTable();
   void initialize();
-  std::string toString(FormatExpressions* theFormat = nullptr) {
+  std::string toString(FormatExpressions* format = nullptr) {
     std::stringstream out;
-    out << this->toStringElements(theFormat);
+    out << this->toStringElements(format);
     if (this->flagCCRepresentativesComputed) {
-      out << this->toStringConjugacyClasses(theFormat);
+      out << this->toStringConjugacyClasses(format);
     }
     return out.str();
   }
-  std::string toStringElements(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringConjugacyClasses(FormatExpressions* theFormat = nullptr);
+  std::string toStringElements(FormatExpressions* format = nullptr) const;
+  std::string toStringConjugacyClasses(FormatExpressions* format = nullptr);
   int conjugacyClassCount() const;
   LargeInteger getSize();
   LargeInteger sizeByFormulaOrNegative1() {
@@ -411,7 +411,7 @@ public:
   void multiplyOnTheRightByOuterAutomorphism(int indexOuterAutomorphism);
   static unsigned int hashFunction(const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& input);
   unsigned int hashFunction() const;
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
 };
 
 class ElementWeylGroup {
@@ -459,8 +459,8 @@ public:
   void makeIdentity(const FiniteGroup<ElementWeylGroup>& inputGroup);
   void makeIdentity(const ElementWeylGroup& initializeFrom);
   bool isIdentity();
-  std::string toStringInvariants(FormatExpressions* theFormat) const;
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toStringInvariants(FormatExpressions* format) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const ElementWeylGroup& input) {
     return input.hashFunction();
@@ -509,7 +509,7 @@ public:
   void multiplyOnTheRightByOuterAuto(int outerAutoIndex);
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const ElementWeylGroupAutomorphisms& input);
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
 };
 
 template <class Coefficient>
@@ -518,7 +518,7 @@ class FinitelyGeneratedMatrixMonoid {
   List<MatrixTensor<Coefficient> > theGenerators;
   HashedList<MatrixTensor<Coefficient> > theElements;
   bool generateElements(int upperBoundNonPositiveMeansNoLimit);
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
 };
 
 template <class Coefficient>
@@ -615,10 +615,10 @@ public:
   );
   void addCharacter(const ClassFunction<WeylGroupData::WeylGroupBase, Rational>& X);
   void computeRho(bool recompute);
-  std::string toStringRootsAndRootReflections(FormatExpressions* theFormat = nullptr);
-  std::string toString(FormatExpressions* theFormat = nullptr);
-  std::string toStringCppConjugacyClasses(FormatExpressions* theFormat = nullptr);
-  std::string toStringCppCharTable(FormatExpressions* theFormat = nullptr);
+  std::string toStringRootsAndRootReflections(FormatExpressions* format = nullptr);
+  std::string toString(FormatExpressions* format = nullptr);
+  std::string toStringCppConjugacyClasses(FormatExpressions* format = nullptr);
+  std::string toStringCppCharTable(FormatExpressions* format = nullptr);
   std::string toStringIrreducibleRepresentationLabel(int irrepIndex);
   std::string toStringSignSignatureRootSubsystem(const List<SubgroupDataRootReflections>& inputSubgroups);
   void makeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared = nullptr);
@@ -1464,7 +1464,7 @@ public:
   }
   void spreadVector(const Vector<Coefficient>& input, Vectors<Coefficient>& outputBasisGeneratedSpace);
   std::string getName() const;
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   Matrix<Coefficient>& getMatrixElement(int groupElementIndex);
   template <typename elementSomeGroup>
   void getMatrixElement(const elementSomeGroup& input, Matrix<Coefficient>& output);
@@ -1639,7 +1639,7 @@ public:
   void computeCosets();
   bool verifyCosets();
   bool verifyNormal();
-  std::string toString(FormatExpressions* theFormat);
+  std::string toString(FormatExpressions* format);
   bool sameCosetAs(elementSomeGroup& g1, elementSomeGroup& g2);
   int getCosetId(elementSomeGroup& g);
   int qIDMul(int i, int j);
@@ -1898,7 +1898,7 @@ public:
   void ComputeTauSignature();
   void getSignCharacter(Vector<Rational>& out);
   SubgroupDataWeylGroup();
-  std::string toString(FormatExpressions* theFormat = nullptr);
+  std::string toString(FormatExpressions* format = nullptr);
 };
 
 class SubgroupDataRootReflections : public SubgroupDataWeylGroup {
@@ -1919,7 +1919,7 @@ public:
   void computeDynkinType();
   void computeCCSizesRepresentativesPreimages();
   SubgroupDataRootReflections();
-  std::string toString(FormatExpressions* theFormat = nullptr);
+  std::string toString(FormatExpressions* format = nullptr);
 };
 
 class SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms {
@@ -2256,7 +2256,7 @@ public:
   Coefficient& operator[](int i) const;
   bool operator<(const UDPolynomial<Coefficient>& right) const;
   bool operator==(int other) const;
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   void assignMinimalPolynomial(const Matrix<Coefficient>& input);
   void assignCharacteristicPolynomial(const Matrix<Coefficient>& input); // method due to Urbain Le Verrier
 };
@@ -2401,7 +2401,7 @@ void UDPolynomial<Coefficient>::operator*=(const Coefficient& right) {
 }
 
 template <class Coefficient>
-std::string UDPolynomial<Coefficient>::toString(FormatExpressions* theFormat) const {
+std::string UDPolynomial<Coefficient>::toString(FormatExpressions* format) const {
   Polynomial<Coefficient> tempP;
   tempP.makeZero();
   MonomialPolynomial tempM;
@@ -2409,7 +2409,7 @@ std::string UDPolynomial<Coefficient>::toString(FormatExpressions* theFormat) co
     tempM.makeEi(0, i, 1);
     tempP.addMonomial(tempM, this->data[i]);
   }
-  return tempP.toString(theFormat);
+  return tempP.toString(format);
 }
 
 template <typename Coefficient>

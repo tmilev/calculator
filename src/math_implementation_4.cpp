@@ -830,13 +830,13 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
   }
 }
 
-std::string DynkinDiagramRootSubalgebra::toString(FormatExpressions* theFormat) const {
+std::string DynkinDiagramRootSubalgebra::toString(FormatExpressions* format) const {
   DynkinType theType;
   theType.makeZero();
   for (int j = 0; j < this->simpleComponentTypes.size; j ++) {
     theType.addMonomial(this->simpleComponentTypes[j], 1);
   }
-  return theType.toString(theFormat);
+  return theType.toString(format);
 }
 
 bool DynkinDiagramRootSubalgebra::checkInitialization() const {

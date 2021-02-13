@@ -9,7 +9,7 @@ template <class Coefficient>
 class MonomialUniversalEnveloping : public MonomialTensor<Coefficient> {
 private:
 public:
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   SemisimpleLieAlgebra* owner;
   // SelectedIndices gives the non-zero powers of the chevalley generators participating in the monomial
   // powers gives the powers of the Chevalley generators in the order they appear in generatorsIndices

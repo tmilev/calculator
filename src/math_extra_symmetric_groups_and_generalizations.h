@@ -297,13 +297,13 @@ class TrivialOuterAutomorphism {
   somestream& intoStream(somestream& out) {
     out << "Identity function";
   }
-  std::string toString(FormatExpressions* theFormat = nullptr) const {
-    (void) theFormat;
+  std::string toString(FormatExpressions* format = nullptr) const {
+    (void) format;
     std::stringstream ss;
     ss << *this;
     return ss.str();
   }
-  friend std::ostream& operator<<(std::ostream& out, const TrivialOuterAutomorphism<helt,kelt>& data) {
+  friend std::ostream& operator<<(std::ostream& out, const TrivialOuterAutomorphism<helt, kelt>& data) {
     out << data.toString();
     return out;
   }

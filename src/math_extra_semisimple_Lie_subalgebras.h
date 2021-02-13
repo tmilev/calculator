@@ -66,7 +66,7 @@ class NilradicalCandidate {
   void computeParabolicACExtendsToParabolicAC();
   bool isCommutingSelectionNilradicalElements(Selection& inputNilradSel);
   void processMe();
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringTableElementWithWeights(
     const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& theElts,
     const Vectors<Rational>& theWeights
@@ -77,7 +77,7 @@ class NilradicalCandidate {
 
 class SubalgebraSemisimpleLieAlgebra {
 public:
-  std::string toString(FormatExpressions* theFormat = nullptr);
+  std::string toString(FormatExpressions* format = nullptr);
   SemisimpleLieAlgebra* owner;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theGenerators;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basis;
@@ -335,25 +335,25 @@ public:
     const Vector<Rational>& primalWeightLeft,
     const Vector<Rational>& primalWeightRight
   ) const;
-  std::string toStringType(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringTypeAndHs(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringGenerators(FormatExpressions* theFormat = nullptr) const;
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringSystem(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringSystemPart2(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringLoadUnknown(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringCentralizer(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringCentralizerDebugData(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringCartanSubalgebra(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringPairingTable(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringPairingTableLaTeX(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringNilradicals(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringNilradicalsSummary(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringModuleDecomposition(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringModuleDecompositionLaTeX(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringDrawWeights(FormatExpressions* theFormat = nullptr) const;
+  std::string toStringType(FormatExpressions* format = nullptr) const;
+  std::string toStringTypeAndHs(FormatExpressions* format = nullptr) const;
+  std::string toStringGenerators(FormatExpressions* format = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toStringSystem(FormatExpressions* format = nullptr) const;
+  std::string toStringSystemPart2(FormatExpressions* format = nullptr) const;
+  std::string toStringLoadUnknown(FormatExpressions* format = nullptr) const;
+  std::string toStringCentralizer(FormatExpressions* format = nullptr) const;
+  std::string toStringCentralizerDebugData(FormatExpressions* format = nullptr) const;
+  std::string toStringCartanSubalgebra(FormatExpressions* format = nullptr) const;
+  std::string toStringPairingTable(FormatExpressions* format = nullptr) const;
+  std::string toStringPairingTableLaTeX(FormatExpressions* format = nullptr) const;
+  std::string toStringNilradicals(FormatExpressions* format = nullptr) const;
+  std::string toStringNilradicalsSummary(FormatExpressions* format = nullptr) const;
+  std::string toStringModuleDecomposition(FormatExpressions* format = nullptr) const;
+  std::string toStringModuleDecompositionLaTeX(FormatExpressions* format = nullptr) const;
+  std::string toStringDrawWeights(FormatExpressions* format = nullptr) const;
   std::string toStringDrawWeightsHelper(int indexModule, const Vector<Rational>& theWeight) const;
-  //std::string ToStringDrawWeightsVersion2(FormatExpressions* theFormat = nullptr) const;
+  //std::string ToStringDrawWeightsVersion2(FormatExpressions* format = nullptr) const;
   bool operator>(const CandidateSemisimpleSubalgebra& other) const;
 };
 
@@ -419,26 +419,26 @@ public:
   );
   int getDisplayIndexFromActual(int actualindexSubalgebra) const;
   std::string toStringSubalgebraNumberWithAmbientLink(
-    int actualindexSubalgebra, FormatExpressions* theFormat
+    int actualindexSubalgebra, FormatExpressions* format
   ) const;
   void computeFolderNames(FormatExpressions& outputFormat);
   void checkFileWritePermissions();
   void writeReportToFiles();
   std::string toStringAlgebraLink(
-    int actualindexSubalgebra, FormatExpressions* theFormat
+    int actualindexSubalgebra, FormatExpressions* format
   ) const;
   std::string getRelativePhysicalFileNameSubalgebra(int actualindexSubalgebra) const;
   std::string getDisplayFileNameSubalgebraRelative(
-    int actualindexSubalgebra, FormatExpressions* theFormat
+    int actualindexSubalgebra, FormatExpressions* format
   ) const;
   std::string getDisplayFileNameSubalgebraAbsolute(
-    int actualindexSubalgebra, FormatExpressions* theFormat
+    int actualindexSubalgebra, FormatExpressions* format
   ) const;
   std::string getRelativePhysicalFileNameFKFTNilradicals(
     int actualindexSubalgebra
   ) const;
   std::string getDisplayFileNameFKFTNilradicals(
-    int actualindexSubalgebra, FormatExpressions* theFormat
+    int actualindexSubalgebra, FormatExpressions* format
   ) const;
   const CandidateSemisimpleSubalgebra& baseSubalgebra();
   bool operator==(const SemisimpleSubalgebras& other) {
@@ -491,19 +491,19 @@ public:
   bool checkConsistencyHs() const;
   bool checkConsistency() const;
   bool checkInitialization() const;
-  std::string toStringState(FormatExpressions* theFormat = nullptr);
-  std::string toStringCurrentChain(FormatExpressions* theFormat = nullptr);
-  std::string toStringProgressReport(FormatExpressions* theFormat = nullptr);
-  std::string toString(FormatExpressions* theFormat = nullptr);
-  std::string toStringPart2(FormatExpressions* theFormat = nullptr);
-  std::string toStringTableSubalgebraLinksTable(FormatExpressions* theFormat);
-  std::string toStringSubalgebrasNoHDWrite(FormatExpressions* theFormat = nullptr);
-  std::string toStringSubalgebrasWithHDWrite(FormatExpressions* theFormat = nullptr);
-  void writeSubalgebraToFile(FormatExpressions* theFormat, int subalgebraIndex);
-  std::string toStringPart3(FormatExpressions* theFormat = nullptr);
-  std::string toStringSl2s(FormatExpressions* theFormat = nullptr);
-  std::string toStringSemisimpleSubalgebrasSummaryLaTeX(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringSemisimpleSubalgebraSummaryHTML(FormatExpressions* theFormat = nullptr) const;
+  std::string toStringState(FormatExpressions* format = nullptr);
+  std::string toStringCurrentChain(FormatExpressions* format = nullptr);
+  std::string toStringProgressReport(FormatExpressions* format = nullptr);
+  std::string toString(FormatExpressions* format = nullptr);
+  std::string toStringPart2(FormatExpressions* format = nullptr);
+  std::string toStringTableSubalgebraLinksTable(FormatExpressions* format);
+  std::string toStringSubalgebrasNoHDWrite(FormatExpressions* format = nullptr);
+  std::string toStringSubalgebrasWithHDWrite(FormatExpressions* format = nullptr);
+  void writeSubalgebraToFile(FormatExpressions* format, int subalgebraIndex);
+  std::string toStringPart3(FormatExpressions* format = nullptr);
+  std::string toStringSl2s(FormatExpressions* format = nullptr);
+  std::string toStringSemisimpleSubalgebrasSummaryLaTeX(FormatExpressions* format = nullptr) const;
+  std::string toStringSemisimpleSubalgebraSummaryHTML(FormatExpressions* format = nullptr) const;
   void computePairingTablesAndFKFTtypes();
   void getCentralizerChains(List<List<int> >& outputChains);
   int getIndexFullSubalgebra() const;

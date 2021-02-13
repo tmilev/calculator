@@ -8,10 +8,10 @@
 
 const int ElementZmodP::maximumModulusForUserFacingPolynomialDivision = 10000;
 
-std::string MonomialVector::toString(FormatExpressions* theFormat) const {
-  if (theFormat != nullptr) {
-    if (this->theIndex < theFormat->vectorSpaceEiBasisNames.size && this->theIndex >= 0) {
-      return theFormat->vectorSpaceEiBasisNames[this->theIndex];
+std::string MonomialVector::toString(FormatExpressions* format) const {
+  if (format != nullptr) {
+    if (this->theIndex < format->vectorSpaceEiBasisNames.size && this->theIndex >= 0) {
+      return format->vectorSpaceEiBasisNames[this->theIndex];
     }
   }
   std::stringstream out;
@@ -1303,7 +1303,7 @@ std::string AlgebraicClosureRationals::toStringQuadraticRadical(
   return HtmlRoutines::getMathNoDisplay(out.str());
 }
 
-std::string AlgebraicClosureRationals::toStringFull(FormatExpressions* theFormat) const {
+std::string AlgebraicClosureRationals::toStringFull(FormatExpressions* format) const {
   std::stringstream out;
   out << "Dimension over the rationals: "
   << this->latestBasis.size << ". Multiplicative basis follows. ";
@@ -1319,7 +1319,7 @@ std::string AlgebraicClosureRationals::toStringFull(FormatExpressions* theFormat
     } else {
       theFlaStream << " e_{" << i + 1 << "}";
     }
-    theFlaStream << "=" << this->latestBasis[i].toStringMatrixForm(theFormat);
+    theFlaStream << "=" << this->latestBasis[i].toStringMatrixForm(format);
     out << HtmlRoutines::getMathNoDisplay(theFlaStream.str());
     if (i != this->latestBasis.size - 1) {
       out << ",  ";
@@ -1329,13 +1329,13 @@ std::string AlgebraicClosureRationals::toStringFull(FormatExpressions* theFormat
     out << "<br>Generating element not selected. ";
   } else {
     out << "<br>Generating element: "
-    << HtmlRoutines::getMathNoDisplay(this->generatingElementMatrixForm.toString(theFormat));
+    << HtmlRoutines::getMathNoDisplay(this->generatingElementMatrixForm.toString(format));
   }
   out << "<br>There are " << this->basisInjections.size << " registered old bases. ";
   for (int i = 0; i < this->basisInjections.size; i ++) {
     out << "<hr>Basis " << i + 1 << " has " << this->basisInjections[i].size << " elements: ";
     for (int j = 0; j < this->basisInjections[i].size; j ++) {
-      out << HtmlRoutines::getMathNoDisplay(this->basisInjections[i][j].toString(theFormat));
+      out << HtmlRoutines::getMathNoDisplay(this->basisInjections[i][j].toString(format));
       if (j != this->basisInjections[i].size - 1) {
         out << ", ";
       }
@@ -1383,9 +1383,9 @@ AlgebraicNumber AlgebraicClosureRationals::fromRational(const Rational& input) {
   return result;
 }
 
-std::string AlgebraicClosureRationals::toString(FormatExpressions* theFormat) const {
+std::string AlgebraicClosureRationals::toString(FormatExpressions* format) const {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::toString");
-  (void) theFormat;
+  (void) format;
   std::stringstream out;
   FormatExpressions tempFormat;
   tempFormat.flagUseHTML = false;
@@ -1421,18 +1421,18 @@ bool AlgebraicNumber::isEqualToZero() const {
   return this->element.isEqualToZero();
 }
 
-std::string AlgebraicNumber::toString(FormatExpressions* theFormat) const {
+std::string AlgebraicNumber::toString(FormatExpressions* format) const {
   if (this->owner == nullptr) {
     if (this->element.isEqualToZero()) {
       return "0";
     }
-    return this->element.coefficients[0].toString(theFormat);
+    return this->element.coefficients[0].toString(format);
   }
   std::stringstream out;
   FormatExpressions tempFormat;
   tempFormat.vectorSpaceEiBasisNames = this->owner->displayNamesBasisElements;
-  if (theFormat != nullptr) {
-    tempFormat.flagUseFrac = theFormat->flagUseFrac;
+  if (format != nullptr) {
+    tempFormat.flagUseFrac = format->flagUseFrac;
   }
   tempFormat.flagUseHTML = false;
   VectorSparse<Rational> theAdditiveVector;
@@ -1444,12 +1444,12 @@ std::string AlgebraicNumber::toString(FormatExpressions* theFormat) const {
   return out.str();
 }
 
-std::string AlgebraicNumber::toStringNonInjected(FormatExpressions* theFormat) const {
+std::string AlgebraicNumber::toStringNonInjected(FormatExpressions* format) const {
   if (this->owner == nullptr) {
     if (this->element.isEqualToZero()) {
       return "0";
     }
-    return this->element.coefficients[0].toString(theFormat);
+    return this->element.coefficients[0].toString(format);
   }
   std::stringstream out;
   FormatExpressions tempFormat;
@@ -1461,8 +1461,8 @@ std::string AlgebraicNumber::toStringNonInjected(FormatExpressions* theFormat) c
     letter << "e_{" << this->basisIndex + 1 << ", " << i+1 << "}";
     tempFormat.vectorSpaceEiBasisNames[i] = letter.str();
   }
-  if (theFormat != nullptr) {
-    tempFormat.flagUseFrac = theFormat->flagUseFrac;
+  if (format != nullptr) {
+    tempFormat.flagUseFrac = format->flagUseFrac;
   }
   out << this->element.toString(&tempFormat); //<< "~ in~ the~ field~ " << this->owner->toString();
   return out.str();
@@ -1528,12 +1528,12 @@ void AlgebraicNumber::operator=(const Rational& other) {
 }
 
 bool ElementZmodP::needsParenthesisForMultiplication(
-  FormatExpressions* theFormat
+  FormatExpressions* format
 ) const {
-  if (theFormat == nullptr) {
+  if (format == nullptr) {
     return true;
   }
-  return !theFormat->flagSuppressModP;
+  return !format->flagSuppressModP;
 }
 
 std::string ElementZmodP::toStringModP() const {
@@ -1554,10 +1554,10 @@ std::string ElementZmodP::toStringPolynomial(
   return out.str();
 }
 
-std::string ElementZmodP::toString(FormatExpressions* theFormat) const {
+std::string ElementZmodP::toString(FormatExpressions* format) const {
   bool suppressModulus = false;
-  if (theFormat != nullptr) {
-    suppressModulus = theFormat->flagSuppressModP;
+  if (format != nullptr) {
+    suppressModulus = format->flagSuppressModP;
   }
   std::stringstream out;
   if (suppressModulus) {

@@ -1228,7 +1228,7 @@ void ElementTensorsGeneralizedVermas<Coefficient>::tensorOnTheRight(
 }
 
 template <class Coefficient>
-std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* theFormat) const {
+std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format) const {
   MacroRegisterFunctionWithName("ModuleSSalgebra::toString");
   if (this->owner == nullptr) {
     return "(Error: module not initialized)";
@@ -1294,7 +1294,7 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* theFormat)
       tempSSElt.makeGenerator(i, theAlgebrA);
       out << "<tr>";
       out << "<td>"
-      << HtmlRoutines::getMathNoDisplay(tempSSElt.toString(theFormat))
+      << HtmlRoutines::getMathNoDisplay(tempSSElt.toString(format))
       << "</td>";
       out << "<td>";
       if (this->getDimension() < 28) {
@@ -1686,7 +1686,7 @@ bool ModuleSSalgebra<Coefficient>::getActionEulerOperatorPart(
 }
 
 template <class Coefficient>
-std::string MonomialTensorGeneralizedVermas<Coefficient>::toString(FormatExpressions* theFormat, bool includeV) const {
+std::string MonomialTensorGeneralizedVermas<Coefficient>::toString(FormatExpressions* format, bool includeV) const {
   std::stringstream out;
   if (this->theMons.size > 1) {
     for (int i = 0; i < this->theMons.size; i ++) {
@@ -1694,7 +1694,7 @@ std::string MonomialTensorGeneralizedVermas<Coefficient>::toString(FormatExpress
       if (!ishwv) {
         out << "(";
       }
-      out << this->theMons[i].toString(theFormat, includeV);
+      out << this->theMons[i].toString(format, includeV);
       if (!ishwv) {
         out  << ")";
       }
@@ -1703,13 +1703,13 @@ std::string MonomialTensorGeneralizedVermas<Coefficient>::toString(FormatExpress
       }
     }
   } else {
-    out << this->theMons[0].toString(theFormat, includeV);
+    out << this->theMons[0].toString(format, includeV);
   }
   return out.str();
 }
 
 template <class Coefficient>
-std::string MonomialGeneralizedVerma<Coefficient>::toString(FormatExpressions* theFormat, bool includeV) const {
+std::string MonomialGeneralizedVerma<Coefficient>::toString(FormatExpressions* format, bool includeV) const {
   if (this->owner == nullptr) {
     global.fatal << "Non-initialized generalized Verma monomial (owner is 0)." << global.fatal;
   }
@@ -1721,7 +1721,7 @@ std::string MonomialGeneralizedVerma<Coefficient>::toString(FormatExpressions* t
   if (tempS == "- 1" || tempS == "-1") {
     tempS = "-";
   }
-  tempS += this->theMonCoeffOne.toString(theFormat);
+  tempS += this->theMonCoeffOne.toString(format);
   if (tempS == "1") {
     tempS = "";
   }
@@ -1731,7 +1731,7 @@ std::string MonomialGeneralizedVerma<Coefficient>::toString(FormatExpressions* t
   bool needsCdot = (tempS != "1" && tempS != "-" && tempS != "");
   std::stringstream out;
   out << tempS;
-  tempS = theMod.theGeneratingWordsNonReduced[this->indexFDVector].toString(theFormat);
+  tempS = theMod.theGeneratingWordsNonReduced[this->indexFDVector].toString(format);
   if (tempS != "1") {
     out << tempS;
   }
@@ -1740,7 +1740,7 @@ std::string MonomialGeneralizedVerma<Coefficient>::toString(FormatExpressions* t
     out << "\\cdot ";
   }
   if (includeV) {
-    out << theMod.elementToStringHWV(theFormat);
+    out << theMod.elementToStringHWV(format);
   }
   return out.str();
 }

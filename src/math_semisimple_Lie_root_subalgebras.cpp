@@ -1245,7 +1245,7 @@ bool RootSubalgebra::isAnIsomorphism(
   return true;
 }
 
-void RootSubalgebra::toHTML(int index, FormatExpressions* theFormat) {
+void RootSubalgebra::toHTML(int index, FormatExpressions* format) {
   MacroRegisterFunctionWithName("RootSubalgebra::toHTML");
   this->checkInitialization();
   std::fstream output;
@@ -1261,13 +1261,13 @@ void RootSubalgebra::toHTML(int index, FormatExpressions* theFormat) {
     output << ", exceptional Lie algebra";
   }
   output << " \">";
-  output << "<body>" << this->toString(theFormat) << "</body></html>";
+  output << "<body>" << this->toString(format) << "</body></html>";
   output.close();
 }
 
-std::string RootSubalgebra::toString(FormatExpressions* theFormat) {
+std::string RootSubalgebra::toString(FormatExpressions* format) {
   MacroRegisterFunctionWithName("RootSubalgebra::toString");
-  (void) theFormat;//taking care of unused parameter warning in a portable way
+  (void) format;//taking care of unused parameter warning in a portable way
   std::stringstream out;
   bool useLatex = false;
   bool useHtml = true;
@@ -3016,7 +3016,7 @@ void RootSubalgebras::sortDescendingOrderBySSRank() {
   }
 }
 
-void RootSubalgebras::toHTML(FormatExpressions* theFormat) {
+void RootSubalgebras::toHTML(FormatExpressions* format) {
   MacroRegisterFunctionWithName("RootSubalgebras::toHTML");
   this->checkInitialization();
   std::string myPathVirtual = this->owner->toStringVirtualFolderName() + this->owner->toStringFileNameNoPathRootSubalgebras();
@@ -3041,18 +3041,18 @@ void RootSubalgebras::toHTML(FormatExpressions* theFormat) {
   output << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements();
   output << SemisimpleLieAlgebra::toHTMLCalculatorBodyOnload()
   << this->owner->toStringHTMLMenuStructureSummary("", true, false, true, true)
-  << this->toString(theFormat)
+  << this->toString(format)
   << "<hr>LaTeX table with root subalgebra details.<br>"
-  << this->toStringDynkinTableFormatToLaTeX(theFormat)
+  << this->toStringDynkinTableFormatToLaTeX(format)
   << "</body></html>";
   output.close();
   for (int i = 0; i < this->subalgebras.size; i ++) {
-    this->subalgebras[i].toHTML(i, theFormat);
+    this->subalgebras[i].toHTML(i, format);
   }
 }
 
-std::string RootSubalgebras::toString(FormatExpressions* theFormat) {
-  return this->toStringDynkinTableHTML(theFormat);
+std::string RootSubalgebras::toString(FormatExpressions* format) {
+  return this->toStringDynkinTableHTML(format);
 }
 
 void RootSubalgebras::toStringCentralizerIsomorphisms(
@@ -3155,9 +3155,9 @@ Vector<Rational> ElementSemisimpleLieAlgebra<Coefficient>::getRootIMustBeWeight(
   return this->getOwner()->getWeightOfGenerator((*this)[0].generatorIndex);
 }
 
-std::string RootSubalgebras::toStringDynkinTableHTML(FormatExpressions* theFormat) {
+std::string RootSubalgebras::toStringDynkinTableHTML(FormatExpressions* format) {
   MacroRegisterFunctionWithName("RootSubalgebras::ToStringDynkinTable");
-  (void) theFormat; //taking care of unused parameter in a portable way.
+  (void) format; //taking care of unused parameter in a portable way.
   std::stringstream out;
   std::string tooltipSAs =
   "h - fixed Cartan subalgebra. k - subalgebra containing h. "
@@ -3272,17 +3272,17 @@ std::string RootSubalgebras::toStringDynkinTableHTML(FormatExpressions* theForma
   return out.str();
 }
 
-std::string RootSubalgebras::toStringDynkinTableFormatToLaTeX(FormatExpressions* theFormat) {
+std::string RootSubalgebras::toStringDynkinTableFormatToLaTeX(FormatExpressions* format) {
   MacroRegisterFunctionWithName("RootSubalgebras::toStringDynkinTableFormatToLaTeX");
   std::stringstream out;
   std::string endline = "\n<br>";
-  if (theFormat != nullptr) {
-    theFormat->flagSupressDynkinIndexOne = true;
+  if (format != nullptr) {
+    format->flagSupressDynkinIndexOne = true;
   }
   out << "\\documentclass{article}" << endline
   << "\\usepackage{longtable, amssymb, lscape}" << endline
   << "\\begin{document}" << endline;
-  out << "Lie algebra type: $" << this->subalgebras[0].theDynkinType.toString(theFormat)
+  out << "Lie algebra type: $" << this->subalgebras[0].theDynkinType.toString(format)
   << "$. There are " << this->subalgebras.size << " table entries (= " << this->subalgebras.size - 2
   << " larger than the Cartan subalgebra + the Cartan subalgebra + the full subalgebra)." << endline
   << "Let $\\mathfrak g$ stand for the type of the regular subalgebra and $C(\\mathfrak g)$ for the type of the centralizer. "
@@ -3294,8 +3294,8 @@ std::string RootSubalgebras::toStringDynkinTableFormatToLaTeX(FormatExpressions*
   out << "$\\mathfrak g$ & $C(\\mathfrak g)$& $p$ & $q$&  $m$& $r$ & $c_r$ \\\\\\endhead" << endline;
   for (int i = 0; i < this->subalgebras.size; i ++) {
     RootSubalgebra& currentSA = this->subalgebras[i];
-    out << "$" << currentSA.theDynkinType.toString(theFormat) << "$&" ;
-    out << "$" << currentSA.theCentralizerDynkinType.toString(theFormat) << "$&" ;
+    out << "$" << currentSA.theDynkinType.toString(format) << "$&" ;
+    out << "$" << currentSA.theCentralizerDynkinType.toString(format) << "$&" ;
     out << "$" << (currentSA.theDynkinType.getRootSystemSize() / 2) << "$&" ;
     out << "$" << (currentSA.theCentralizerDynkinType.getRootSystemSize() / 2)<< "$&" ;
     out << "$" << currentSA.theDynkinType.getNumberOfSimpleComponentsOfGivenRank(1) << "$&" ;

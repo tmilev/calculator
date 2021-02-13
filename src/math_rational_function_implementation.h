@@ -245,7 +245,7 @@ bool RationalFunction<Coefficient>::needsParenthesisForMultiplication(FormatExpr
 }
 
 template<class Coefficient>
-std::string RationalFunction<Coefficient>::toString(FormatExpressions* theFormat) const {
+std::string RationalFunction<Coefficient>::toString(FormatExpressions* format) const {
   if (this->expressionType == this->typeError) {
     return "[error]";
   }
@@ -253,10 +253,10 @@ std::string RationalFunction<Coefficient>::toString(FormatExpressions* theFormat
     return this->constantValue.toString();
   }
   if (this->expressionType == this->typePolynomial) {
-    return this->numerator.getElementConst().toString(theFormat);
+    return this->numerator.getElementConst().toString(format);
   }
   std::stringstream out;
-  bool useFrac = theFormat == nullptr ? false : theFormat->flagUseFrac;
+  bool useFrac = format == nullptr ? false : format->flagUseFrac;
   bool needParenthesis = false;
   if (!useFrac) {
     needParenthesis = this->numerator.getElementConst().needsParenthesisForMultiplication();
@@ -267,7 +267,7 @@ std::string RationalFunction<Coefficient>::toString(FormatExpressions* theFormat
   if (needParenthesis) {
     out << "(";
   }
-  out << this->numerator.getElementConst().toString(theFormat);
+  out << this->numerator.getElementConst().toString(format);
   if (needParenthesis) {
     out << ")";
   }
@@ -276,7 +276,7 @@ std::string RationalFunction<Coefficient>::toString(FormatExpressions* theFormat
   } else {
     out << "/(";
   }
-  out << this->denominator.getElementConst().toString(theFormat);
+  out << this->denominator.getElementConst().toString(format);
   if (useFrac) {
     out << "}";
   } else {

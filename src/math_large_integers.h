@@ -43,8 +43,8 @@ public:
   void subtractSmallerPositive(const LargeIntegerUnsigned& x);
   void toString(std::string& output) const;
   void toStringLargeElementDecimal(std::string& output) const;
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringAbbreviate(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toStringAbbreviate(FormatExpressions* format = nullptr) const;
   void divPositive(const LargeIntegerUnsigned& divisor, LargeIntegerUnsigned& quotientOutput, LargeIntegerUnsigned& remainderOutput) const;
   bool isDivisibleBy(const LargeIntegerUnsigned& divisor);
   void makeOne();
@@ -214,8 +214,8 @@ public:
   }
   void multiplyByInt(int x);
   void toString(std::string& output) const;
-  std::string toString(FormatExpressions* theFormat = nullptr) const {
-    (void) theFormat;
+  std::string toString(FormatExpressions* format = nullptr) const {
+    (void) format;
     std::string tempS;
     this->toString(tempS);
     return tempS;
@@ -615,7 +615,7 @@ public:
     this->extended->denominator.multiplyBy(x);
     this->simplify();
   }
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringFrac() const;
   std::string toStringForFileOperations(FormatExpressions* notUsed = nullptr) const;
   bool isEqualTo(const Rational& r) const;

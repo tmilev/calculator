@@ -32,12 +32,12 @@ public:
   Vector(const Selection& other) {
     *this = other;
   }
-  std::string toString(FormatExpressions* theFormat = nullptr) const {
+  std::string toString(FormatExpressions* format = nullptr) const {
     std::stringstream out;
     out.precision(5);
     out << "(";
     for (int i = 0; i < this->size; i ++) {
-      out << (*this)[i].toString(theFormat);
+      out << (*this)[i].toString(format);
       if (i != this->size - 1) {
         out << ", ";
       }
@@ -54,12 +54,12 @@ public:
       output[i] = out.str();
     }
   }
-  std::string toStringSquareBrackets(FormatExpressions* theFormat = nullptr) const {
+  std::string toStringSquareBrackets(FormatExpressions* format = nullptr) const {
     std::stringstream out;
     out.precision(5);
     out << "[";
     for (int i = 0; i < this->size; i ++) {
-      out << (*this)[i].toString(theFormat);
+      out << (*this)[i].toString(format);
       if (i != this->size - 1) {
         out << ", ";
       }
@@ -67,8 +67,8 @@ public:
     out << "]";
     return out.str();
   }
-  std::string toStringSquareBracketsBasicType(FormatExpressions* theFormat = nullptr) const {
-    (void) theFormat;
+  std::string toStringSquareBracketsBasicType(FormatExpressions* format = nullptr) const {
+    (void) format;
     std::stringstream out;
     out.precision(5);
     out << "[";
@@ -82,10 +82,10 @@ public:
     return out.str();
   }
   std::string toStringLetterFormat(
-    const std::string& inputLetter, FormatExpressions* theFormat = nullptr, bool DontIncludeLastVar = false
+    const std::string& inputLetter, FormatExpressions* format = nullptr, bool DontIncludeLastVar = false
   ) const;
-  std::string toStringEpsilonFormat(FormatExpressions* theFormat = nullptr) const {
-    return this->toStringLetterFormat("\\varepsilon", theFormat);
+  std::string toStringEpsilonFormat(FormatExpressions* format = nullptr) const {
+    return this->toStringLetterFormat("\\varepsilon", format);
   }
   template <class otherType>
   static void scalarProduct(
@@ -709,7 +709,7 @@ class Vectors: public List<Vector<Coefficient> > {
   std::string toInequalitiesString(
     bool useLatex, bool useHtml, bool LastVarIsConstant, FormatExpressions& theFormat
   ) const;
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   bool linearAlgebraForVertexComputation(
     Selection& theSelection,
     Vector<Coefficient>& output,

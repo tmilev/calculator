@@ -35,7 +35,7 @@ public:
   GraphEdge(int inputStart, int inputEnd):vStart(inputStart), vEnd(inputEnd) {}
   GraphEdge(int inputStart, int inputEnd, const std::string& inputLabel)
   : vStart(inputStart), vEnd(inputEnd), label(inputLabel) {}
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   static unsigned int hashFunction(const GraphEdge& input) {
     return input.hashFunction();
   }
@@ -78,9 +78,9 @@ public:
   void computeConnectedComponentsAndBaseNodeDistances();
   void addNodeToComponent(int nodeIndex);
   void addEdge(int i, int j, const std::string& inputLabel);
-  std::string toStringPsTricks(FormatExpressions* theFormat);
-  std::string toStringNodesAndEdges(FormatExpressions* theFormat);
-  std::string toStringPsTricksEdge(int fromIndex, int toIndex, FormatExpressions* theFormat = nullptr);
+  std::string toStringPsTricks(FormatExpressions* format);
+  std::string toStringNodesAndEdges(FormatExpressions* format);
+  std::string toStringPsTricksEdge(int fromIndex, int toIndex, FormatExpressions* format = nullptr);
 };
 
 #endif

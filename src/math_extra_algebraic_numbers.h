@@ -177,8 +177,8 @@ class AlgebraicNumber {
     this->operator*=(Rational(other));
   }
   bool operator>(const AlgebraicNumber& other) const;
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringNonInjected(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toStringNonInjected(FormatExpressions* format = nullptr) const;
   class Test{
   public:
     static bool all();
@@ -250,9 +250,9 @@ public:
     AlgebraicNumber& outputRoot,
     std::stringstream* commentsOnFailure
   );
-  std::string toStringQuadraticRadical(FormatExpressions* theFormat = nullptr) const;
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
-  std::string toStringFull(FormatExpressions* theFormat = nullptr) const;
+  std::string toStringQuadraticRadical(FormatExpressions* format = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toStringFull(FormatExpressions* format = nullptr) const;
   bool splitToPartialFractionsOverRealAlgebraicNumbers(
     RationalFunction<Rational>& inputRF,
     List<Polynomial<AlgebraicNumber> >& outputNumerators,
@@ -332,7 +332,7 @@ public:
   ElementZmodP operator/(const ElementZmodP& other) const;
   ElementZmodP operator*(const Rational& other) const;
   ElementZmodP operator*(const ElementZmodP& other) const;
-  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringModP() const;
   static std::string toStringModP(const LargeIntegerUnsigned& modulus);
   void operator=(const LargeInteger& other);
@@ -340,7 +340,7 @@ public:
   void operator=(const Rational& other);
   bool operator/=(const ElementZmodP& den);
   bool operator/=(const LargeInteger& den);
-  bool needsParenthesisForMultiplication(FormatExpressions* theFormat = nullptr) const;
+  bool needsParenthesisForMultiplication(FormatExpressions* format = nullptr) const;
   static void convertModuloIntegerAfterScalingToIntegral(
     const Polynomial<Rational>& input,
     Polynomial<ElementZmodP>& output,

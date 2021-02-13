@@ -7,7 +7,7 @@
 #include "math_general_polynomial_computations_advanced_implementation.h"
 
 template <class Coefficient>
-std::string FinitelyGeneratedMatrixMonoid<Coefficient>::toString(FormatExpressions* theFormat) const {
+std::string FinitelyGeneratedMatrixMonoid<Coefficient>::toString(FormatExpressions* format) const {
   std::stringstream out;
   out << "Number of generators: " << this->theGenerators.size;
   out << "<br>Number of elements: " << this->theElements.size;
@@ -18,7 +18,7 @@ std::string FinitelyGeneratedMatrixMonoid<Coefficient>::toString(FormatExpressio
     numEltstoDisplay = 100;
   }
   for (int i = 0; i < numEltstoDisplay; i ++) {
-    out << "<br>" << this->theElements[i].toStringMatrixForm(theFormat);
+    out << "<br>" << this->theElements[i].toStringMatrixForm(format);
   }
   return out.str();
 }
@@ -370,9 +370,9 @@ void SubgroupData<someGroup, elementSomeGroup>::computeCCRepresentativesPreimage
 }
 
 template <class elementSomeGroup>
-std::string FiniteGroup<elementSomeGroup>::toStringElements(FormatExpressions* theFormat) const {
+std::string FiniteGroup<elementSomeGroup>::toStringElements(FormatExpressions* format) const {
   MacroRegisterFunctionWithName("FiniteGroup::toStringElements");
-  (void) theFormat;
+  (void) format;
   if (!this->flagAllElementsAreComputed) {
     return "";
   }
@@ -389,7 +389,7 @@ std::string FiniteGroup<elementSomeGroup>::toStringElements(FormatExpressions* t
 }
 
 template <class elementSomeGroup>
-std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(FormatExpressions* theFormat) {
+std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(FormatExpressions* format) {
   MacroRegisterFunctionWithName("Subgroup::toStringConjugacyClasses");
   std::stringstream out;
   out << "<br>Size: " << this->getSize().toString() << "\n";
@@ -401,7 +401,7 @@ std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(FormatExpres
     for (int i = 0; i < this->conjugacyClasses.size; i ++) {
       out << "<hr>Conjugacy class " << i + 1 << ": ";
       if (this->conjugacyClasses[i].flagRepresentativeComputed) {
-        out << " represented by " << this->conjugacyClasses[i].representative.toString(theFormat) << ". ";
+        out << " represented by " << this->conjugacyClasses[i].representative.toString(format) << ". ";
       } else {
         out << " representative not computed. ";
       }
@@ -444,7 +444,7 @@ std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(FormatExpres
         numEltsToDisplay = 10;
       }
       for (int j = 0; j < numEltsToDisplay; j ++) {
-        out << this->conjugacyClasses[i].theElements[j].toString(theFormat);
+        out << this->conjugacyClasses[i].theElements[j].toString(format);
         if (j != numEltsToDisplay - 1) {
           out << ", ";
         }
@@ -1504,13 +1504,13 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::classFunctio
 }
 
 template <typename somegroup, typename Coefficient>
-std::string GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::toString(FormatExpressions* theFormat) const {
+std::string GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::toString(FormatExpressions* format) const {
   if (this->ownerGroup == 0) {
     return "non-initialized representation";
   }
   std::stringstream out;
   if (this->flagCharacterIsComputed) {
-    out << "Character: " << this->theCharacter.toString(theFormat) << " of norm " << this->theCharacter.norm();
+    out << "Character: " << this->theCharacter.toString(format) << " of norm " << this->theCharacter.norm();
   } else {
     out << "Character needs to be computed.";
   }
@@ -1523,7 +1523,7 @@ std::string GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::toStr
   for (int i = 0; i < theRank; i ++) {
     if (i < this->generators.size) {
       std::stringstream tempStream;
-      tempStream << "s_" << i + 1 << "=MatrixRationals{}" << this->generators[i].toString(theFormat) << "; \\\\\n";
+      tempStream << "s_" << i + 1 << "=MatrixRationals{}" << this->generators[i].toString(format) << "; \\\\\n";
       forYourCopyConvenience << tempStream.str();
       out << HtmlRoutines::getMathNoDisplay("\\begin{array}{l}" + tempStream.str() + "\\end{array}", 3000);
     } else {
@@ -1878,8 +1878,8 @@ Coefficient& ClassFunction<someFiniteGroup, Coefficient>::operator[](int i) cons
 }
 
 template<class someFiniteGroup, typename Coefficient>
-std::string ClassFunction<someFiniteGroup, Coefficient>::toString(FormatExpressions* theFormat) const {
-  (void) theFormat;
+std::string ClassFunction<someFiniteGroup, Coefficient>::toString(FormatExpressions* format) const {
+  (void) format;
   if (this->G == 0) {
     return "(not initialized)";
   }

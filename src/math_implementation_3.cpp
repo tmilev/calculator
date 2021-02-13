@@ -5015,8 +5015,8 @@ void DynkinType::getLettersTypesMultiplicities(
 }
 
 
-std::string DynkinType::getWeylGroupName(FormatExpressions* theFormat) const {
-  return this->toString(theFormat);
+std::string DynkinType::getWeylGroupName(FormatExpressions* format) const {
+  return this->toString(format);
 }
 
 bool DynkinType::canBeExtendedParabolicallyOrIsEqualTo(const DynkinType& other) const {
@@ -5392,8 +5392,8 @@ Rational DynkinSimpleType::getEpsilonRealizationLongRootLengthSquared() const {
   return - 1;
 }
 
-std::string DynkinSimpleType::ToStringNonTechnicalName(FormatExpressions* theFormat) const {
-  (void) theFormat;
+std::string DynkinSimpleType::ToStringNonTechnicalName(FormatExpressions* format) const {
+  (void) format;
   std::stringstream out;
   switch (this->letter) {
     case 'A':
@@ -5414,14 +5414,14 @@ std::string DynkinSimpleType::ToStringNonTechnicalName(FormatExpressions* theFor
   return out.str();
 }
 
-std::string DynkinSimpleType::toString(FormatExpressions* theFormat) const {
+std::string DynkinSimpleType::toString(FormatExpressions* format) const {
   std::stringstream out;
-  bool includeTechnicalNames = theFormat == nullptr ? true : theFormat->flagIncludeLieAlgebraTypes;
-  bool usePlusesAndExponents = theFormat == nullptr ? true: !theFormat->flagDynkinTypeDontUsePlusAndExponent;
-  bool supressDynkinIndexOne = theFormat == nullptr ? false : theFormat->flagSupressDynkinIndexOne;
+  bool includeTechnicalNames = format == nullptr ? true : format->flagIncludeLieAlgebraTypes;
+  bool usePlusesAndExponents = format == nullptr ? true: !format->flagDynkinTypeDontUsePlusAndExponent;
+  bool supressDynkinIndexOne = format == nullptr ? false : format->flagSupressDynkinIndexOne;
   bool hasAmbient = false;
-  if (theFormat != nullptr) {
-    hasAmbient = (theFormat->ambientWeylLetter != 'X');
+  if (format != nullptr) {
+    hasAmbient = (format->ambientWeylLetter != 'X');
   }
   if (includeTechnicalNames) {
     if (!hasAmbient) {
@@ -5437,8 +5437,8 @@ std::string DynkinSimpleType::toString(FormatExpressions* theFormat) const {
       }
     } else {
       DynkinSimpleType ambientType;
-      ambientType.letter = theFormat->ambientWeylLetter;
-      ambientType.cartanSymmetricInverseScale = theFormat->ambientCartanSymmetricInverseScale;
+      ambientType.letter = format->ambientWeylLetter;
+      ambientType.cartanSymmetricInverseScale = format->ambientCartanSymmetricInverseScale;
       Rational theDynkinIndex = ambientType.getLongRootLengthSquared() / this->getLongRootLengthSquared();
 //      (this->CartanSymmetricInverseScale/this->getDefaultLongRootLengthSquared())/
 //      (ambientType.CartanSymmetricInverseScale/ambientType.getDefaultLongRootLengthSquared());
@@ -6146,9 +6146,9 @@ unsigned int ElementWeylGroupAutomorphisms::hashFunction() const {
   return this->generatorsLastAppliedFirst.hashFunction();
 }
 
-std::string ElementWeylGroupAutomorphisms::toString(FormatExpressions* theFormat) const {
+std::string ElementWeylGroupAutomorphisms::toString(FormatExpressions* format) const {
   MacroRegisterFunctionWithName("ElementWeylGroupAutomorphisms::toString");
-  (void) theFormat;
+  (void) format;
   if (this->generatorsLastAppliedFirst.size == 0) {
     return "id";
   }
@@ -6182,9 +6182,9 @@ unsigned int ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndA
   return this->generatorsLastAppliedFirst.hashFunction();
 }
 
-std::string ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::toString(FormatExpressions* theFormat) const {
+std::string ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::toString(FormatExpressions* format) const {
   MacroRegisterFunctionWithName("ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::toString");
-  (void) theFormat;
+  (void) format;
   if (this->generatorsLastAppliedFirst.size == 0) {
     return "id";
   }
@@ -6349,9 +6349,9 @@ bool ElementWeylGroup::hasDifferentConjugacyInvariantsFrom(
   return false;
 }
 
-std::string ElementWeylGroup::toStringInvariants(FormatExpressions* theFormat) const {
+std::string ElementWeylGroup::toStringInvariants(FormatExpressions* format) const {
   MacroRegisterFunctionWithName("ElementWeylGroup::getCycleStructure");
-  (void) theFormat;
+  (void) format;
   VectorSparse<Rational> theCycleStructure;
   this->getCycleStructure(theCycleStructure);
   FormatExpressions cycleLetterFormat;
@@ -6403,9 +6403,9 @@ ElementWeylGroup ElementWeylGroup::inverse() const {
   return out;
 }
 
-std::string ElementWeylGroup::toString(FormatExpressions* theFormat) const {
+std::string ElementWeylGroup::toString(FormatExpressions* format) const {
   MacroRegisterFunctionWithName("ElementWeylGroup::toString");
-  (void) theFormat;
+  (void) format;
   if (this->generatorsLastAppliedFirst.size == 0) {
     return "id";
   }
@@ -6837,9 +6837,9 @@ void WeylGroupData::computeRootsOfBorel(Vectors<Rational>& output) {
   output = this->rootsOfBorel;
 }
 
-std::string WeylGroupData::toStringCppCharTable(FormatExpressions* theFormat) {
+std::string WeylGroupData::toStringCppCharTable(FormatExpressions* format) {
   MacroRegisterFunctionWithName("WeylGroup::toStringCppConjugacyClasses");
-  (void) theFormat;//portable way to avoid non-used parameter warning.
+  (void) format;//portable way to avoid non-used parameter warning.
   if (!this->flagCharTableIsComputed) {
     return "<br>Conjugacy classes not computed";
   }
@@ -6878,9 +6878,9 @@ std::string WeylGroupData::toStringCppCharTable(FormatExpressions* theFormat) {
   return out.str();
 }
 
-std::string WeylGroupData::toStringCppConjugacyClasses(FormatExpressions* theFormat) {
+std::string WeylGroupData::toStringCppConjugacyClasses(FormatExpressions* format) {
   MacroRegisterFunctionWithName("WeylGroup::toStringCppConjugacyClasses");
-  (void) theFormat;//portable way to avoid non-used parameter warning.
+  (void) format;//portable way to avoid non-used parameter warning.
   if (!this->theGroup.flagCCRepresentativesComputed) {
     return "";
   }
@@ -6927,9 +6927,9 @@ std::string WeylGroupData::toStringCppConjugacyClasses(FormatExpressions* theFor
   return out.str();
 }
 
-std::string WeylGroupData::toStringRootsAndRootReflections(FormatExpressions* theFormat) {
+std::string WeylGroupData::toStringRootsAndRootReflections(FormatExpressions* format) {
   MacroRegisterFunctionWithName("WeylGroup::toStringRootsAndRootReflections");
-  (void) theFormat;//portable way to avoid non-used parameter warning.
+  (void) format;//portable way to avoid non-used parameter warning.
   std::stringstream out, outLatex;
   out << "<br>The root system has " << this->rootSystem.size << " elements.\n";
   out << "<table><tr><td>Simple basis coordinates</td><td>Epsilon coordinates</td>"
@@ -6955,7 +6955,7 @@ std::string WeylGroupData::toStringRootsAndRootReflections(FormatExpressions* th
   return out.str();
 }
 
-std::string WeylGroupData::toString(FormatExpressions* theFormat) {
+std::string WeylGroupData::toString(FormatExpressions* format) {
   MacroRegisterFunctionWithName("WeylGroup::toString");
   std::stringstream out;
   out << "<br>Size: " << this->theGroup.theElements.size << "\n";
@@ -6967,10 +6967,10 @@ std::string WeylGroupData::toString(FormatExpressions* theFormat) {
     out << "<br>Character table: ";
     out << this->theGroup.prettyPrintCharacterTable();
   }
-  out << this->theGroup.toStringConjugacyClasses(theFormat);
-  out << this->theGroup.toStringElements(theFormat);
-  out << this->toStringCppConjugacyClasses(theFormat);
-  out << this->toStringCppCharTable(theFormat);
+  out << this->theGroup.toStringConjugacyClasses(format);
+  out << this->theGroup.toStringElements(format);
+  out << this->toStringCppConjugacyClasses(format);
+  out << this->toStringCppCharTable(format);
   return out.str();
 }
 
@@ -8141,12 +8141,12 @@ bool KazhdanLusztigPolynomials::isMaximalNonExplored(int index) {
   return true;
 }
 
-std::string KazhdanLusztigPolynomials::toString(FormatExpressions* theFormat) {
+std::string KazhdanLusztigPolynomials::toString(FormatExpressions* format) {
   MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::toString");
   std::stringstream out;
   bool useHtml = false;
-  if (theFormat != nullptr) {
-    useHtml = theFormat->flagUseHTML;
+  if (format != nullptr) {
+    useHtml = format->flagUseHTML;
   }
   if (!useHtml) {
     out << "Next to explore: " << this->NextToExplore << "<br>\n Orbit of rho:<br>\n";
@@ -8167,9 +8167,9 @@ std::string KazhdanLusztigPolynomials::toString(FormatExpressions* theFormat) {
       out << "<br>\n";
     }
   }
-  out << "R Polynomials:<br>" << this->rPolysToString(theFormat);
+  out << "R Polynomials:<br>" << this->rPolysToString(format);
   if (this->theKLcoeffs.size == this->TheWeylGroup->theGroup.theElements.size) {
-    out << "Kazhdan-Lusztig Polynomials:<br>" << this->KLPolysToString(theFormat);
+    out << "Kazhdan-Lusztig Polynomials:<br>" << this->KLPolysToString(format);
     out << "Kazhdan-Lusztig coefficients; the (w_1,w_2)  coefficient is defined as the multiplicity of "
     << HtmlRoutines::getMathNoDisplay("L_{w_2 \\cdot \\lambda}")
     << " in " <<  HtmlRoutines::getMathNoDisplay(" M_{w_1\\cdot \\lambda }  ")
@@ -8521,7 +8521,7 @@ bool KazhdanLusztigPolynomials::computeRxy(int x, int y, int SimpleReflectionInd
   return false;
 }
 
-std::string KazhdanLusztigPolynomials::KLPolysToString(FormatExpressions* theFormat) {
+std::string KazhdanLusztigPolynomials::KLPolysToString(FormatExpressions* format) {
   std::stringstream out;
   out << "<table border =\"1\">";
   out << "<tr><td>Weyl elt.</td>";
@@ -8533,7 +8533,7 @@ std::string KazhdanLusztigPolynomials::KLPolysToString(FormatExpressions* theFor
     if (this->theKLPolys[i].size > 0) {
       out << "<tr><td>" << this->TheWeylGroup->theGroup.theElements[i].toString() << "</td>";
       for (int j = 0; j < this->theKLPolys[i].size; j ++) {
-        out << "<td>" << this->theKLPolys[i][j].toString(theFormat) << "</td>";
+        out << "<td>" << this->theKLPolys[i][j].toString(format) << "</td>";
       }
       out << "</tr>";
     }
@@ -8542,7 +8542,7 @@ std::string KazhdanLusztigPolynomials::KLPolysToString(FormatExpressions* theFor
   return out.str();
 }
 
-std::string KazhdanLusztigPolynomials::rPolysToString(FormatExpressions* theFormat) {
+std::string KazhdanLusztigPolynomials::rPolysToString(FormatExpressions* format) {
   std::stringstream out;
   out << "<table border =\"1\"><tr><td>Weyl elt.</td>";
   for (int i = 0; i < this->TheWeylGroup->theGroup.theElements.size; i ++) {
@@ -8552,7 +8552,7 @@ std::string KazhdanLusztigPolynomials::rPolysToString(FormatExpressions* theForm
   for (int i = 0; i < this->theRPolys.size; i ++) {
     out << "<tr><td>" << this->TheWeylGroup->theGroup.theElements[i].toString() << "</td>";
     for (int j = 0; j < this->theRPolys[i].size; j ++) {
-      out << "<td>" << this->theRPolys[i][j].toString(theFormat) << "</td>\n";
+      out << "<td>" << this->theRPolys[i][j].toString(format) << "</td>\n";
     }
     out << "</tr>";
   }
@@ -10748,8 +10748,8 @@ class ImpreciseDouble {
   double precision;
   double theValue;
   public:
-  std::string toString(FormatExpressions* theFormat = nullptr) const {
-    (void) theFormat;
+  std::string toString(FormatExpressions* format = nullptr) const {
+    (void) format;
     std::stringstream out;
     out << this->theValue;
     return out.str();
@@ -11484,7 +11484,7 @@ void Lattice::applyLinearMap(Matrix<Rational> & theMap, Lattice& output) {
   output.makeFromRoots(tempRoots);
 }
 
-std::string ConeLatticeAndShiftMaxComputation::toString(FormatExpressions* theFormat) {
+std::string ConeLatticeAndShiftMaxComputation::toString(FormatExpressions* format) {
   std::stringstream out;
   out << "<hr>Resulting lattice: " << this->theFinalRougherLattice.toString() << "<hr><hr>";
 /*  if (this->complexStartingPerRepresentative.size >0) {
@@ -11502,18 +11502,18 @@ std::string ConeLatticeAndShiftMaxComputation::toString(FormatExpressions* theFo
     out << "";// << this->theConesLargerDim[i].toString(theFormat);
     //out << "<br>" << this->LPtoMaximizeLargerDim[i].toString();
     theDrawingVariables.theBuffer.initialize();
-    out << "<br>" << this->theConesLargerDim[i].theProjectivizedCone.drawMeToHtmlLastCoordAffine(theDrawingVariables, *theFormat);
+    out << "<br>" << this->theConesLargerDim[i].theProjectivizedCone.drawMeToHtmlLastCoordAffine(theDrawingVariables, *format);
     out << "<br>over " << this->theConesLargerDim[i].theShift.toString() << " + " << this->theConesLargerDim[i].theLattice.toString();
     tempP.makeLinearWithConstantTerm(this->LPtoMaximizeLargerDim[i]);
-    out << "<br>the function we have maxed, as a function of the remaining variables, is: " << tempP.toString(theFormat) << "<hr><hr>";
+    out << "<br>the function we have maxed, as a function of the remaining variables, is: " << tempP.toString(format) << "<hr><hr>";
   }
   if (this->theConesSmallerDim.size > 0) {
     out << "<br>Cones processed: <br>";
     for (int i = 0; i < this->theConesSmallerDim.size; i ++) {
-      out << this->theConesSmallerDim[i].toString(*theFormat);
+      out << this->theConesSmallerDim[i].toString(*format);
       //out << "<br>" << this->LPtoMaximizeSmallerDim[i].toString();
       theDrawingVariables.theBuffer.initialize();
-      out << this->theConesSmallerDim[i].theProjectivizedCone.drawMeToHtmlLastCoordAffine(theDrawingVariables, *theFormat);
+      out << this->theConesSmallerDim[i].theProjectivizedCone.drawMeToHtmlLastCoordAffine(theDrawingVariables, *format);
     }
   }
   return out.str();
@@ -12412,11 +12412,11 @@ void ConeComplex::initFromCones(
   }
 }
 
-std::string Cone::toString(FormatExpressions* theFormat) const {
+std::string Cone::toString(FormatExpressions* format) const {
   std::stringstream out;
-  bool PrepareMathReport = theFormat == nullptr ? false: theFormat->flagUseLatex;
-  bool useHtml = theFormat == nullptr ? false: theFormat->flagUseHTML;
-  bool useLatex = theFormat == nullptr ? false: theFormat->flagUseLatex;
+  bool PrepareMathReport = format == nullptr ? false: format->flagUseLatex;
+  bool useHtml = format == nullptr ? false: format->flagUseHTML;
+  bool useLatex = format == nullptr ? false: format->flagUseLatex;
   bool lastVarIsConstant = false;
   if (this->flagIsTheZeroCone) {
     out << "The cone is the zero cone.";
@@ -12441,10 +12441,10 @@ std::string Cone::toString(FormatExpressions* theFormat) const {
     out << "\\[";
   }
   FormatExpressions tempF;
-  if (theFormat == nullptr) {
-    theFormat = &tempF;
+  if (format == nullptr) {
+    format = &tempF;
   }
-  out << this->normals.toInequalitiesString(useLatex, useHtml, lastVarIsConstant, *theFormat);
+  out << this->normals.toInequalitiesString(useLatex, useHtml, lastVarIsConstant, *format);
   if (useLatex) {
     out << "\\]";
   }

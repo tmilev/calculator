@@ -2014,18 +2014,18 @@ bool Cone::isInCone(const Vector<Rational>& point) const {
   return true;
 }
 
-std::string MonomialPolynomial::toString(FormatExpressions* theFormat) const {
+std::string MonomialPolynomial::toString(FormatExpressions* format) const {
   std::stringstream out;
   MemorySaving<FormatExpressions> tempFormat;
-  if (theFormat == nullptr) {
-    theFormat = &tempFormat.getElement();
+  if (format == nullptr) {
+    format = &tempFormat.getElement();
   }
   if (this->isConstant()) {
     return "1";
   }
   for (int i = 0; i < this->monomialBody.size; i ++) {
     if (!(this->monomialBody[i].isEqualToZero())) {
-      out << theFormat->getPolynomialLetter(i);
+      out << format->getPolynomialLetter(i);
       if (!(this->monomialBody[i] == 1)) {
         out << "^{" << this->monomialBody[i] << "}";
       } else {

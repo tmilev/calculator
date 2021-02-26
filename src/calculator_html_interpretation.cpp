@@ -1651,17 +1651,17 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     *answerGenerationSuccess = false;
   }
   int64_t startTimeInMilliseconds = global.getElapsedMilliseconds();
-  CalculatorHTML theProblem;
+  CalculatorHTML problem;
   std::stringstream errorStream;
-  theProblem.loadCurrentProblemItem(false, inputRandomSeed, &errorStream);
-  if (!theProblem.flagLoadedSuccessfully) {
-    errorStream << "Problem name is: " << theProblem.fileName
+  problem.loadCurrentProblemItem(false, inputRandomSeed, &errorStream);
+  if (!problem.flagLoadedSuccessfully) {
+    errorStream << "Problem name is: " << problem.fileName
     << " <b>Could not load problem, this may be a bug. "
     << CalculatorHTML::bugsGenericMessage << "</b>";
     result[WebAPI::result::error] = errorStream.str();
     return result;
   }
-  if (theProblem.flagIsForReal) {
+  if (problem.flagIsForReal) {
     errorStream << " <b>Not allowed to show answer "
     << "of a problem being tested for real. </b>";
     result[WebAPI::result::error] = errorStream.str();
@@ -1672,7 +1672,8 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     "the exercise problem (missing random seed). </b>";
     return result;
   }
-  if (!theProblem.parseHTMLPrepareCommands(&errorStream)) {
+  result[WebAPI::problem::randomSeed] = inputRandomSeed;
+  if (!problem.parseHTMLPrepareCommands(&errorStream)) {
     errorStream << "<br><b>Problem preparation failed.</b>";
     result[WebAPI::result::error] = errorStream.str();
     return result;
@@ -1686,22 +1687,22 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
       &lastStudentAnswerID
     );
   }
-  int indexLastAnswerId = theProblem.getAnswerIndex(lastStudentAnswerID);
+  int indexLastAnswerId = problem.getAnswerIndex(lastStudentAnswerID);
   std::stringstream out;
   if (indexLastAnswerId == - 1) {
     errorStream << "File: "
-    << theProblem.fileName
+    << problem.fileName
     << "<br><b>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
     << "</b>";
     if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
-      errorStream << "<hr>" << theProblem.problemData.toStringAvailableAnswerIds();
+      errorStream << "<hr>" << problem.problemData.toStringAvailableAnswerIds();
     }
     result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::error] = errorStream.str();
     return result;
   }
-  Answer& currentA = theProblem.problemData.answers.values[indexLastAnswerId];
+  Answer& currentA = problem.problemData.answers.values[indexLastAnswerId];
   if (currentA.commandAnswerOnGiveUp == "") {
     out << "<b>No answer given for "
     << "question (answerID: " << lastStudentAnswerID << ").</b>";

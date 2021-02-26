@@ -310,6 +310,7 @@ class Problem {
       let currentVector = answerVectors[counterAnswers];
       this.answerPanels[counterAnswers] = new AnswerPanel({
         problemId: this.problemId,
+        forReal: this.flagForReal,
         properties: currentVector.properties,
         previousAnswers: currentVector.previousAnswers,
         answerHighlight: currentVector.answerHighlight,

@@ -1438,6 +1438,10 @@ JSData AnswerChecker::submitAnswersJSON(
   if (!this->extractStudentAnswerPartTwo()) {
     return this->result;
   }
+  if (!this->problem.flagIsForReal) {
+    this->result[WebAPI::problem::randomSeed] = inputRandomSeed;
+  }
+
   ProblemData& currentProblemData = this->problem.problemData;
   Answer& currentA = currentProblemData.answers.values[this->answerIndex];
   bool errorsCheckingAnswer = false;

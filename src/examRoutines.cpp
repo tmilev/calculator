@@ -75,7 +75,7 @@ bool CalculatorHTML::mergeProblemWeight(
   if (inputJSON.theType != JSData::token::tokenObject) {
     return true;
   }
-  global << Logger::green << "About to merge problem weight: " << inputJSON.toString() << Logger::endL;
+  // global << Logger::green << "DEBUG: About to merge problem weight: " << inputJSON.toString() << Logger::endL;
   ProblemData emptyData;
   std::string currentCourse = global.userDefault.courseComputed;
   for (int i = 0; i < inputJSON.objects.size(); i ++) {

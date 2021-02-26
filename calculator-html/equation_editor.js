@@ -5146,7 +5146,6 @@ class MathNode {
     /**@type{number} */
     width,
   ) {
-    console.log("DEBUG: compute line breaks");
     // this.equationEditor.rootNode.boundingBox.needsMiddleAlignment = false;
     let widthBroken = 0;
     let row = 0;

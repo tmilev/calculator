@@ -1889,7 +1889,10 @@ bool WebWorker::processRedirectAwayFromWWW() {
     return false;
   }
   std::stringstream newAddressStream, redirectHeaderStream;
-  newAddressStream << "https://" << addressNoWWW;
+  // The address will be quoted in a link below.
+  // Escape quotes, newlines, etc. to prevent injection via malformed url.
+  newAddressStream << "https://"
+  << HtmlRoutines::convertStringEscapeNewLinesQuotesBackslashes(addressNoWWW);
   if (this->addressGetOrPost.size() != 0) {
     if (this->addressGetOrPost[0] != '/') {
       this->addressGetOrPost = '/' + this->addressGetOrPost;
@@ -1901,6 +1904,7 @@ bool WebWorker::processRedirectAwayFromWWW() {
   std::stringstream out;
   out << "<html><body>Please remove the www. "
   << "from the address, it creates issues with authentication services. "
+  // Address is quote-escaped to prevent content injection.
   << "Click <a href=\"" << newAddressStream.str()
   << "\">here</a> if not redirected automatically. ";
   out << "</body></html>";
@@ -1911,7 +1915,10 @@ bool WebWorker::processRedirectAwayFromWWW() {
 int WebWorker::processLoginNeededOverUnsecureConnection() {
   MacroRegisterFunctionWithName("WebWorker::processLoginNeededOverUnsecureConnection");
   std::stringstream redirectStream, newAddressStream;
-  newAddressStream << "https://" << this->hostNoPort;
+  // The address will be included in an href entry enclosed by quotes;
+  // escape quotes to prevent content injection using addresses that contain quotes.
+  newAddressStream << "https://"
+  << HtmlRoutines::convertStringEscapeNewLinesQuotesBackslashes(this->hostNoPort);
   if (this->hostNoPort == "") {
     newAddressStream << "calculator-algebra.org";
   }
@@ -1928,6 +1935,8 @@ int WebWorker::processLoginNeededOverUnsecureConnection() {
     this->setHeader("HTTP/1.0 301 Moved Permanently", redirectStream.str());
     outBody
     << "<html><body>Address available through secure (SSL) connection only. "
+    // The newAddressStream is quote-escaped;
+    // this should prevent content injection in the snippet below.
     << "Click <a href=\"" << newAddressStream.str()
     << "\">here</a> if not redirected automatically. ";
   } else {
@@ -1940,10 +1949,11 @@ int WebWorker::processLoginNeededOverUnsecureConnection() {
     << "as your browser did not tell me "
     << "under what domain name it sees me, and the "
     << "server responds to multiple domain names. ";
-
   }
   outBody << "</body></html>";
-  return this->writeToBody(outBody.str());
+  this->writeToBody(outBody.str());
+  this->sendPending();
+  return 0;
 }
 
 bool WebWorker::requireSSL() {

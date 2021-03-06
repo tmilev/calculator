@@ -2317,9 +2317,9 @@ class LaTeXParser {
       return this.decreaseParsingStack(3);
     }
     if (
-      thirdToLast.syntacticRole in latexConstants.leftDelimiters &&
-      secondToLast.isExpression() &&
-      last.syntacticRole in latexConstants.rightDelimiters
+      secondToLast.isExpression()
+      &&
+      this.areMatchingDelimiters(thirdToLast, last)
     ) {
       this.lastRuleName = "parenthetic expression to expression";
       let leftDelimiter = latexConstants.leftDelimiters[thirdToLast.syntacticRole];
@@ -2422,6 +2422,25 @@ class LaTeXParser {
       }
     }
     return false;
+  }
+
+  /**@returns{boolean} */
+  areMatchingDelimiters(
+    /**@type{SyntancticElement} */
+    left,
+    /**@type{SyntancticElement} */
+    right,
+  ) {
+    if (
+      !(left.syntacticRole in latexConstants.leftDelimiters) ||
+      !(right.syntacticRole in latexConstants.rightDelimiters)
+    ) {
+      return false;
+    }
+    if (left.syntancticRole === "|" || right.syntacticRole === "|") {
+      return left.syntacticRole === right.syntacticRole;
+    }
+    return true;
   }
 }
 

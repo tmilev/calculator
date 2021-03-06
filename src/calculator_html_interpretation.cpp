@@ -983,7 +983,7 @@ public:
   CalculatorHTML problem;
   AnswerCheckerNoProblem checker;
   JSData result;
-  double startTime;
+  int64_t startTimE;
   int answerIndex;
   std::string storageReport;
   JSData submitAnswersJSON(
@@ -995,12 +995,12 @@ public:
   bool storeInDatabase(bool answerIsCorrect);
   bool checkAnswerStandard(bool* outputIsCorrect);
   bool checkAnswerHardcoded(bool* outputIsCorrect);
-  void writeResultHTML(bool correct);
+  void computeResultHTML();
   AnswerChecker();
 };
 
 AnswerChecker::AnswerChecker() {
-  this->startTime = 0;
+  this->startTimE = 0;
   this->answerIndex = - 1;
 }
 
@@ -1009,7 +1009,7 @@ bool AnswerChecker::prepareProblem(
 ) {
   MacroRegisterFunctionWithName("AnswerChecker::prepareProblem");
   std::stringstream errorStream, comments;
-  this->startTime = global.getElapsedSeconds();
+  this->startTimE = global.getElapsedMilliseconds();
   this->problem.loadCurrentProblemItem(
     global.userRequestRequiresLoadingRealExamData(), inputRandomSeed, &errorStream
   );
@@ -1039,11 +1039,11 @@ bool AnswerChecker::extractStudentAnswerPartOne() {
   MacroRegisterFunctionWithName("AnswerChecker::extractStudentAnswerPartOne");
   std::string studentAnswerNameReader;
   this->problem.studentTagsAnswered.initialize(this->problem.problemData.answers.size());
-  MapList<std::string, std::string, MathRoutines::hashString>& theArgs = global.webArguments;
+  MapList<std::string, std::string, MathRoutines::hashString>& webArguments = global.webArguments;
   this->answerIndex = - 1;
-  for (int i = 0; i < theArgs.size(); i ++) {
+  for (int i = 0; i < webArguments.size(); i ++) {
     if (!StringRoutines::stringBeginsWith(
-      theArgs.keys[i], WebAPI::problem::calculatorAnswerPrefix, &studentAnswerNameReader
+      webArguments.keys[i], WebAPI::problem::calculatorAnswerPrefix, &studentAnswerNameReader
     )) {
       continue;
     }
@@ -1072,19 +1072,19 @@ bool AnswerChecker::extractStudentAnswerPartOne() {
       return false;
     }
     Answer& currentProblemData = this->problem.problemData.answers.values[this->answerIndex];
-    currentProblemData.currentAnswerURLed = theArgs.values[i];
+    currentProblemData.currentAnswerURLed = webArguments.values[i];
     if (currentProblemData.currentAnswerURLed == "") {
       std::stringstream out;
       out << "<b> Your answer to tag with id " << studentAnswerNameReader
       << " appears to be empty, please resubmit. </b>";
-      result[WebAPI::result::resultHtml] = out.str();
+      this->result[WebAPI::result::resultHtml] = out.str();
       return false;
     }
   }
   if (this->answerIndex == - 1) {
     std::stringstream out;
     out << "<b>Something is wrong: I found no submitted answers.</b>";
-    result[WebAPI::result::resultHtml] = out.str();
+    this->result[WebAPI::result::resultHtml] = out.str();
     return false;
   }
   return true;
@@ -1147,7 +1147,7 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
         << "<span style='color:red'>" << badDateStream.str() << "</span>"
         << "This should not happen. "
         << CalculatorHTML::bugsGenericMessage << "";
-        result[WebAPI::result::resultHtml] = out.str();
+        this->result[WebAPI::result::resultHtml] = out.str();
         return false;
       }
       now.assignLocalTime();
@@ -1222,7 +1222,9 @@ bool AnswerChecker::checkAnswerHardcoded(
   this->checker.interpreter.flagPlotNoControls = true;
   CompareExpressions comparison(true);
   comparison.compare(
-    answer.currentAnswerClean, answer.commandAnswerOnGiveUp, this->checker.interpreter
+    answer.currentAnswerClean,
+    answer.commandAnswerOnGiveUp,
+    this->checker.interpreter
   );
   this->checker.answerIsCorrect = comparison.flagAreEqual;
   if (outputIsCorrect != nullptr) {
@@ -1256,7 +1258,9 @@ bool AnswerChecker::checkAnswerStandard(
   this->checker.answerGiven = answer.currentAnswerClean;
   this->checker.commandsCommentsBeforeSubmission = answer.commandsCommentsBeforeSubmission;
   this->checker.answerCheck = answer.commandVerificationOnly;
-  return this->checker.checkAnswer(outputIsCorrect);
+  bool result = this->checker.checkAnswer(outputIsCorrect);
+
+  return result;
 }
 
 JSData AnswerCheckerNoProblem::toJSON(bool hideGivenAnswer) {
@@ -1441,7 +1445,6 @@ JSData AnswerChecker::submitAnswersJSON(
   if (!this->problem.flagIsForReal) {
     this->result[WebAPI::problem::randomSeed] = inputRandomSeed;
   }
-
   ProblemData& currentProblemData = this->problem.problemData;
   Answer& currentA = currentProblemData.answers.values[this->answerIndex];
   bool errorsCheckingAnswer = false;
@@ -1458,14 +1461,19 @@ JSData AnswerChecker::submitAnswersJSON(
     errorsCheckingAnswer = this->checkAnswerStandard(outputIsCorrect);
   }
   if (!errorsCheckingAnswer) {
+    this->computeResultHTML();
     return this->result;
   }
   if (!this->storeInDatabase(*outputIsCorrect)) {
     return this->result;
   }
-  this->result[WebAPI::result::resultHtml] = this->checker.verification + this->storageReport;
-  this->result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
+  this->computeResultHTML();
   return this->result;
+}
+
+void AnswerChecker::computeResultHTML() {
+  this->result[WebAPI::result::resultHtml] = this->checker.verification + this->checker.errorSyntax + this->storageReport;
+  this->result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - this->startTimE;
 }
 
 JSData WebAPIResponse::submitAnswersHardcoded(bool hideDesiredAnswer) {

@@ -664,7 +664,7 @@ bool UserCalculatorData::loadFromJSON(JSData& input) {
   this->timeOfActivationTokenCreation     = input[DatabaseStrings::labelTimeOfActivationTokenCreation     ].stringValue;
   this->actualAuthenticationToken         = input[DatabaseStrings::labelAuthenticationToken               ].stringValue;
   this->timeOfAuthenticationTokenCreation = input[DatabaseStrings::labelTimeOfAuthenticationTokenCreation ].stringValue;
-  this->problemDataJSON                   = input[DatabaseStrings::labelProblemDataJSON                   ]          ;
+  this->problemDataJSON                   = input[DatabaseStrings::labelProblemDataJSON                   ]            ;
   this->actualHashedSaltedPassword        = input[DatabaseStrings::labelPassword                          ].stringValue;
   this->userRole                          = input[DatabaseStrings::labelUserRole                          ].stringValue;
   this->instructorInDB                    = input[DatabaseStrings::labelInstructor                        ].stringValue;
@@ -1087,6 +1087,7 @@ bool ProblemData::loadFromJSON(const JSData& inputData, std::stringstream& comme
 
 bool UserCalculator::interpretDatabaseProblemData(const std::string& theInfo, std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::interpretDatabaseProblemData");
+  global.comments << "DEBUG: inside interpret db problem data";
   MapList<std::string, std::string, MathRoutines::hashString> theMap;
   if (!HtmlRoutines::chopPercentEncodedString(theInfo, theMap, commentsOnFailure)) {
     return false;
@@ -1773,6 +1774,7 @@ void UserCalculator::computeHashedSaltedPassword() {
 
 bool UserCalculator::storeToDatabase(bool doSetPassword, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::storeToDatabase");
+ // global.comments << "DEBUG: store to database, stack: " << global.fatal.getStackTraceEtcErrorMessageConsole();
   QueryExact findUser(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, this->username);
   if (this->enteredPassword != "" && doSetPassword) {
     this->computeHashedSaltedPassword();

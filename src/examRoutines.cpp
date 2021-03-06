@@ -359,15 +359,11 @@ bool CalculatorHTML::storeProblemDeadlines(
 
 bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::loadDatabaseInfo");
-  if (!global.flagDatabaseCompiled) {
-    comments << "Database not available (cannot load problem info). ";
-    return false;
-  }
   this->currentUser.::UserCalculatorData::operator=(global.userDefault);
   if (!this->prepareSectionList(comments)) {
     return false;
   }
-  if (this->currentUser.problemDataJSON.objects.size() != 0) {
+  if (this->currentUser.problemDataJSON.objects.size() != 0 || this->currentUser.problemDataStrinG == "") {
     if (!this->currentUser.interpretDatabaseProblemDataJSON(this->currentUser.problemDataJSON, comments)) {
       comments << "Failed to interpret user's problem saved data. ";
       return false;
@@ -427,21 +423,19 @@ bool CalculatorHTML::loadMe(
     return false;
   }
   this->flagIsForReal = global.userRequestRequiresLoadingRealExamData();
-  if (global.flagDatabaseCompiled) {
-    this->topicListFileName = HtmlRoutines::convertURLStringToNormal(
-      global.getWebInput(WebAPI::problem::topicList), false
-    );
-    if (doLoadDatabase) {
-      std::stringstream errorStream;
-      this->loadDatabaseInfo(errorStream);
-      if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << errorStream.str();
-      }
-      for (int i = 0; i < this->topics.theTopics.size(); i ++) {
-        this->computeDeadlinesAllSectionsNoInheritance(
-          this->topics.theTopics.values[i]
-        );
-      }
+  this->topicListFileName = HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput(WebAPI::problem::topicList), false
+  );
+  if (doLoadDatabase) {
+    std::stringstream errorStream;
+    this->loadDatabaseInfo(errorStream);
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << errorStream.str();
+    }
+    for (int i = 0; i < this->topics.theTopics.size(); i ++) {
+      this->computeDeadlinesAllSectionsNoInheritance(
+        this->topics.theTopics.values[i]
+      );
     }
   }
   this->problemData.checkConsistency();
@@ -453,7 +447,7 @@ bool CalculatorHTML::loadMe(
   return true;
 }
 
-std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(
+std::string CalculatorHTML::loadAndInterpretCurrentProblemItemJSON(
   bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON");
@@ -1416,10 +1410,6 @@ std::string SyntacticElementHTML::getTagClass() const {
 
 bool CalculatorHTML::prepareSectionList(std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("CalculatorHTML::prepareSectionList");
-  if (!global.flagDatabaseCompiled) {
-    commentsOnFailure << "Database not running. ";
-    return false;
-  }
   (void) commentsOnFailure;
   if (this->flagSectionsPrepared) {
     return true;
@@ -3069,20 +3059,15 @@ JSData CalculatorHTML::getEditorBoxesHTML() {
 
 bool CalculatorHTML::storeRandomSeedCurrent(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("CalculatorHTML::storeRandomSeedCurrent");
-  if (!global.flagDatabaseCompiled) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Error: database not running. ";
-    }
-    return false;
-  }
   this->problemData.flagRandomSeedGiven = true;
   this->currentUser.setProblemData(this->fileName, this->problemData);
   if (!this->currentUser.storeProblemData(this->fileName, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<b style = 'color:red'>"
       << "Error: failed to store problem in database. "
-      << "If you see this message, please take a screenshot and email your instructor. "
-      << "</b>";
+      << "If you see this message, please take a screenshot and post a bug report in "
+      << HtmlRoutines::getHtmlLinkToGithubRepository("our source code repository")
+      << ".</b>";
     }
     return false;
   }
@@ -3261,35 +3246,34 @@ bool CalculatorHTML::interpretHtmlOneAttemptPartTwo(
   }
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("Time before database storage");
-  if (global.flagDatabaseCompiled) {
-    bool shouldResetTheRandomSeed = false;
-    if (this->flagIsForReal && !this->problemData.flagRandomSeedGiven) {
-      shouldResetTheRandomSeed = true;
-    }
-    if (this->flagIsForReal && this->numberOfInterpretationAttempts > 1) {
-      shouldResetTheRandomSeed = true;
-      outBody
-      << "<hr><b style='color:red'>"
-      << "Your problem's random seed was just reset. </b> "
-      << "You should be seeing this message very rarely, "
-      << "<b>ONLY IF</b> your problem was changed by your instructor "
-      << "<b>AFTER</b> you started solving it. "
-      << "You should not be seeing this message a second time. "
-      << "<b style='color:red'>If you see this message every "
-      << "time you reload the problem "
-      << "this is a bug. "
-      << "Please take a screenshot and send it to your instructor. </b>";
-    }
-    if (shouldResetTheRandomSeed) {
-      bool successStoringSeed = this->storeRandomSeedCurrent(&comments);
-      if (!successStoringSeed) {
-        global << Logger::red
-        << "This should not happen: failed to store random seed." << Logger::endL
-        << Logger::yellow << comments.str() << Logger::endL;
-      }
-    }
-    this->computeBodyDebugString();
+  bool shouldResetTheRandomSeed = false;
+  if (this->flagIsForReal && !this->problemData.flagRandomSeedGiven) {
+    shouldResetTheRandomSeed = true;
   }
+  if (this->flagIsForReal && this->numberOfInterpretationAttempts > 1) {
+    shouldResetTheRandomSeed = true;
+    outBody
+    << "<hr><b style='color:red'>"
+    << "Your problem's random seed was just reset. </b> "
+    << "You should be seeing this message very rarely, "
+    << "<b>ONLY IF</b> your problem was changed by your instructor "
+    << "<b>AFTER</b> you started solving it. "
+    << "You should not be seeing this message a second time. "
+    << "<b style='color:red'>If you see this message every "
+    << "time you reload the problem "
+    << "this is a bug. "
+    << "Please take a screenshot and send it to your instructor. </b>";
+  }
+  if (shouldResetTheRandomSeed) {
+    bool successStoringSeed = this->storeRandomSeedCurrent(&comments);
+    if (!successStoringSeed) {
+      global << Logger::red
+      << "This should not happen: failed to store random seed." << Logger::endL
+      << Logger::yellow << comments.str() << Logger::endL;
+      global.comments << "<b style='color:red'>Failed to store your problem data.</b> " << comments.str();
+    }
+  }
+  this->computeBodyDebugString();
   std::stringstream navigationAndEditTagStream;
   this->outputProblemNavigatioN = navigationAndEditTagStream.str();
   this->outputHtmlBodyNoTag = outBody.str();

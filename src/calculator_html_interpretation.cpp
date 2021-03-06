@@ -848,7 +848,7 @@ JSData WebAPIResponse::getExamPageJSON() {
   }
   CalculatorHTML theFile;
   std::stringstream errorAndDebugStream;
-  std::string problemBody = theFile.LoadAndInterpretCurrentProblemItemJSON(
+  std::string problemBody = theFile.loadAndInterpretCurrentProblemItemJSON(
     global.userRequestRequiresLoadingRealExamData(),
     global.getWebInput(WebAPI::problem::randomSeed),
     &errorAndDebugStream
@@ -1474,6 +1474,7 @@ JSData AnswerChecker::submitAnswersJSON(
 void AnswerChecker::computeResultHTML() {
   this->result[WebAPI::result::resultHtml] = this->checker.verification + this->checker.errorSyntax + this->storageReport;
   this->result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - this->startTimE;
+  this->result[WebAPI::problem::forReal] = this->problem.flagIsForReal;
 }
 
 JSData WebAPIResponse::submitAnswersHardcoded(bool hideDesiredAnswer) {

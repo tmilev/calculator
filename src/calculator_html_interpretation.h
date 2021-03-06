@@ -472,7 +472,7 @@ public:
     bool needToLoadDatabaseMayIgnore, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure
   );
   void figureOutCurrentProblemList(std::stringstream& comments);
-  std::string LoadAndInterpretCurrentProblemItemJSON(
+  std::string loadAndInterpretCurrentProblemItemJSON(
     bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed, std::stringstream* commentsOnFailure
   );
   static unsigned int hashFunction(const CalculatorHTML& input) {

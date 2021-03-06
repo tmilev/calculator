@@ -172,6 +172,7 @@ public:
     static std::string commentsProblem;
     static std::string calculatorAnswerPrefix;
     static std::string answerWasHardCoded;
+    static std::string forReal;
   };
   struct databaseParameters {
     static std::string labels;

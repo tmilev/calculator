@@ -86,6 +86,7 @@ const urlFields = {
     fileNameTarget: "fileNameTarget",
     topicList: "topicList",
     answerWasHardCoded: "answerWasHardCoded",
+    forReal: "forReal",
   },
   teachersAndSections: "teachersAndSections",
   requestEditPage: "editPageJSON",

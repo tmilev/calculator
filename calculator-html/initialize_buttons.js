@@ -144,7 +144,8 @@ class InputPanelData {
     /**@type{{
      * pureLatexElement?:HTMLElement|null,
      * }} */
-    input) {
+    input,
+  ) {
     /** @type{string} Id of component where the editor is placed.*/
     this.idEquationEditorElement = input.idEquationEditorElement;
     if (this.idEquationEditorElement === "") {
@@ -305,6 +306,7 @@ class InputPanelData {
     this.mathQuillPanelOptions = input.mathQuillPanelOptions;
     this.flagAnswerPanel = input.flagAnswerPanel;
     this.flagCalculatorPanel = input.flagCalculatorPanel;
+    this.forReal = (input[pathnames.urlFields.problem.forReal] === true);
     //just in case we forget some entry above:
     for (let key in input) {
       if (!(key in this)) {

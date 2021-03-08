@@ -364,6 +364,8 @@ bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
     return false;
   }
   if (this->currentUser.problemDataJSON.objects.size() != 0 || this->currentUser.problemDataStrinG == "") {
+    // global.comments << "<hr>DEBUG: About to load " << this->fileName << " from: "
+    // << this->currentUser.problemDataJSON.toString() << "<br>";
     if (!this->currentUser.interpretDatabaseProblemDataJSON(this->currentUser.problemDataJSON, comments)) {
       comments << "Failed to interpret user's problem saved data. ";
       return false;
@@ -1105,7 +1107,7 @@ bool CalculatorHTML::prepareCommandsGenerateProblem(std::stringstream* comments)
   debugStream << "<a href='"
   << HtmlRoutines::getCalculatorComputationURL(
     this->problemData.commandsGenerateProblemNoEnclosures
-  ) << "'>"
+  ) << "' target='_blank'>"
   << "Input link </a>";
   this->problemData.commandsGenerateProblemLink = debugStream.str();
   return true;
@@ -1958,8 +1960,10 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
     if (this->interpretHtmlOneAttempt(interpreter, commentsOnLastFailure)) {
       this->timePerAttempt.addOnTop(global.getElapsedSeconds() - startTime);
       this->problemData.checkConsistency();
+      global.comments << "DEBUG: not storing random seed: " << this->randomSeedCurrent;
       return true;
     }
+    global.comments << "DEBUG: interpret failed once.";
     this->timePerAttempt.addOnTop(global.getElapsedSeconds() - startTime);
     if (this->numberOfInterpretationAttempts >= this->maxInterpretationAttempts && comments != nullptr) {
       *comments << "Failed attempt " << this->numberOfInterpretationAttempts
@@ -3059,6 +3063,7 @@ JSData CalculatorHTML::getEditorBoxesHTML() {
 
 bool CalculatorHTML::storeRandomSeedCurrent(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("CalculatorHTML::storeRandomSeedCurrent");
+  global.comments << "DEBUG: About to set prob data.";
   this->problemData.flagRandomSeedGiven = true;
   this->currentUser.setProblemData(this->fileName, this->problemData);
   if (!this->currentUser.storeProblemData(this->fileName, commentsOnFailure)) {

@@ -5,6 +5,7 @@ const pathnames = require("./pathnames");
 const jsonToHtml = require('./json_to_html');
 const miscellaneous = require("./miscellaneous_frontend");
 const panels = require('./panels');
+const storage = require('./storage');
 
 function clickDatabaseTable(currentCollection) {
   window.calculator.mainPage.storage.variables.database.labels.setAndStore(JSON.stringify(currentCollection));
@@ -15,7 +16,6 @@ function callbackFetchProblemData(button, input, output) {
   let inputParsed = JSON.parse(input);
   let panelId = button.getAttribute("panelId");
   let thePanel = new panels.PanelExpandable(panelId);
-  let transformer = new jsonToHtml.JSONToHTML();
   let problemData = [];
   try {
     let inputParsed = JSON.parse(input);
@@ -33,6 +33,7 @@ function callbackFetchProblemData(button, input, output) {
       input: input,
     };
   }
+  let transformer = new jsonToHtml.JSONToHTML();
   let resultHTML = transformer.getTableFromObject(problemData);
   thePanel.setPanelContent(resultHTML);
   thePanel.initialize(true);
@@ -89,7 +90,7 @@ function bounceString(input) {
   return input;
 }
 
-var transformersDatabase = {
+let transformersDatabase = {
   deleteProblemDataItem: {
     clickHandler: deleteDatabaseItem,
   },
@@ -99,7 +100,7 @@ var transformersDatabase = {
   },
 };
 
-var optionsDatabase = {
+let optionsDatabase = {
   transformers: {
     "users.${number}.problemDataJSON": transformersDatabase.fetchProblemData,
     "users.${number}.activationToken": jsonToHtml.transformersStandard.shortener,
@@ -110,8 +111,7 @@ var optionsDatabase = {
 };
 
 function updateDatabasePageCallback(incoming, output) {
-  let thePage = window.calculator.mainPage;
-  let labelString = thePage.storage.variables.database.labels.getValue();
+  let labelString = storage.storage.variables.database.labels.getValue();
   let labels = [];
   try {
     labels = JSON.parse(labelString);
@@ -120,6 +120,7 @@ function updateDatabasePageCallback(incoming, output) {
   }
   let theParsed = miscellaneous.jsonUnescapeParse(incoming);
   let theOutput = document.getElementById(ids.domElements.divDatabaseOutput);
+  theOutput.textContent = "";
   if (
     theParsed.error !== undefined &&
     theParsed.error != null &&
@@ -138,21 +139,19 @@ function updateDatabasePageCallback(incoming, output) {
     for (let counterCollection = 0; counterCollection < theParsed.collections.length; counterCollection++) {
       let currentCollection = theParsed.collections[counterCollection];
       let linkHTML = "";
-      let urlObjectIncoming = miscellaneous.deepCopy(thePage.storage.urlObject);
+      let urlObjectIncoming = miscellaneous.deepCopy(storage.storage.urlObject);
       urlObjectIncoming.databaseLabels = currentCollection;
       linkHTML += `<a href = '#${JSON.stringify(urlObjectIncoming)}' onclick = 'window.calculator.database.clickDatabaseTable(["${currentCollection}"]);'>`;
       linkHTML += `${currentCollection}</a>`;
       theParsed.collections[counterCollection] = linkHTML;
     }
     let transformer = new jsonToHtml.JSONToHTML();
-    theOutput.innerHTML = transformer.getTableFromObject(theParsed.collections);
-    transformer.bindButtons();
+    theOutput.appendChild(transformer.getTableFromObject(theParsed.collections));
   }
 }
 
 function updateDatabasePageResetCurrentTable() {
-  let thePage = window.calculator.mainPage;
-  thePage.storage.variables.database.labels.setAndStore("[]");
+  storage.storage.variables.database.labels.setAndStore("[]");
   updateDatabasePage();
 }
 
@@ -176,7 +175,9 @@ function updateDatabasePage() {
 }
 
 module.exports = {
+  transformersDatabase,
+  optionsDatabase,
   updateDatabasePage,
   clickDatabaseTable,
-  updateDatabasePageResetCurrentTable
+  updateDatabasePageResetCurrentTable,
 };

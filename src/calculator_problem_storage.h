@@ -249,7 +249,7 @@ public:
   );
   void setProblemData(const std::string& problemName, const ProblemData& inputData);
   bool interpretDatabaseProblemData(const std::string& theInfo, std::stringstream& commentsOnFailure);
-  bool interpretDatabaseProblemDataJSON(const JSData& theData, std::stringstream& commentsOnFailure);
+  bool interpretDatabaseProblemDataJSON(const JSData& data, std::stringstream& commentsOnFailure);
   bool storeProblemData(const std::string& fileName, std::stringstream* commentsOnFailure);
   std::string GetSelectedRowEntry(const std::string& theKey);
   std::string GetMySQLclauseIdentifyingUserByEmailOrID();

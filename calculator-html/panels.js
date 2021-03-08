@@ -145,6 +145,7 @@ function PanelExpandableData(
 
 class PanelExpandable {
   constructor(
+    /**@type{HtmlElement|string} */
     container,
   ) {
     this.attributes = {
@@ -179,11 +180,19 @@ class PanelExpandable {
     }
   }
 
-  setPanelContent(input) {
+  setPanelContent(
+    /**@type{HTMLElement|string} */
+    input,
+  ) {
     let thePanel = document.getElementById(this.attributes.panelId);
     thePanel.style.maxHeight = "";
     thePanel.style.maxWidth = "";
-    thePanel.innerHTML = input;
+    if (typeof input === "string") {
+      let element = document.createElement("span");
+      element.innerHTML = input;
+      input = element;
+    }
+    thePanel.appendChild(input);
     let originalHeight = window.getComputedStyle(thePanel).height;
     let originalWidth = window.getComputedStyle(thePanel).width;
     this.container.setAttribute("originalHeight", originalHeight);
@@ -294,8 +303,11 @@ function makePanelFromData(
   }
 }
 
-function doToggleContent(progressId) {
-  let thePanel = new PanelExpandable(progressId);
+function doToggleContent(
+  /**@type{string} */
+  progressId,
+) {
+  let thePanel = new PanelExpandable(document.getElementById(progressId));
   thePanel.initialize(false);
   thePanel.doToggleContent();
 }

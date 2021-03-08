@@ -1048,6 +1048,8 @@ bool ProblemData::loadFromJSON(const JSData& inputData, std::stringstream& comme
   this->flagRandomSeedGiven = false;
   if (global.userRequestRequiresLoadingRealExamData()) {
     if (inputData.objects.contains(WebAPI::problem::randomSeed)) {
+      // global.comments << "DEBUG: got a random seed: "
+      // << inputData.objects.getValueNoFail(WebAPI::problem::randomSeed).stringValue;
       this->randomSeed = static_cast<uint32_t>(atoi(
         inputData.objects.getValueNoFail(WebAPI::problem::randomSeed).stringValue.c_str()
       ));
@@ -1111,20 +1113,23 @@ bool UserCalculator::interpretDatabaseProblemData(const std::string& theInfo, st
   return result;
 }
 
-bool UserCalculator::interpretDatabaseProblemDataJSON(const JSData& theData, std::stringstream& commentsOnFailure) {
+bool UserCalculator::interpretDatabaseProblemDataJSON(
+  const JSData& data, std::stringstream& commentsOnFailure
+) {
   MacroRegisterFunctionWithName("UserCalculator::interpretDatabaseProblemDataJSON");
   this->problemData.clear();
-  this->problemData.setExpectedSize(theData.objects.size());
+  this->problemData.setExpectedSize(data.objects.size());
   bool result = true;
   ProblemData reader;
   std::string problemNameNoWhiteSpace;
-  for (int i = 0; i < theData.objects.size(); i ++) {
-    if (!reader.loadFromJSON(theData.objects.values[i], commentsOnFailure)) {
+  for (int i = 0; i < data.objects.size(); i ++) {
+    if (!reader.loadFromJSON(data.objects.values[i], commentsOnFailure)) {
       result = false;
       continue;
     }
+    // global.comments << "<br>Load data for: " << data.objects.keys[i] << "<br>";
     problemNameNoWhiteSpace = StringRoutines::stringTrimWhiteSpace(
-      theData.objects.keys[i]
+      data.objects.keys[i]
     );
     if (problemNameNoWhiteSpace == "") {
       continue;
@@ -1291,6 +1296,8 @@ bool UserCalculator::storeProblemData(
   QuerySet update;
   update.nestedLabels.addOnTop(DatabaseStrings::labelProblemDataJSON);
   update.value[fileNamE] = problem.storeJSON();
+  global.comments << "DEBUG: about to store json: file: "
+  << fileNamE << ", " << update.value[fileNamE];
   return Database::get().updateOneFromSome(
     this->getFindMeFromUserNameQuery(), update, commentsOnFailure
   );

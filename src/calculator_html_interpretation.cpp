@@ -876,7 +876,7 @@ JSData WebAPIResponse::getExamPageJSON() {
       HtmlRoutines::convertStringToURLString(theFile.scripts.values[i], false);
     }
     output["scripts"] = theScripts;
-    output["forReal"] = theFile.flagIsForReal;
+    output[WebAPI::problem::forReal] = theFile.flagIsForReal;
     if (!theFile.flagIsForReal) {
       std::stringstream randomSeedStream;
       randomSeedStream << theFile.problemData.randomSeed;

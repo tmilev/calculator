@@ -1021,6 +1021,7 @@ bool Database::updateOneFromSome(
   std::stringstream* commentsOnFailure
 ) {
   if (global.flagDatabaseCompiled) {
+    global.comments << "DEBUG: about to update one from some: ...";
     return this->mongoDB.updateOneFromSome(findOrQueries, updateQuery, commentsOnFailure);
   }
   if (commentsOnFailure != nullptr) {
@@ -1034,7 +1035,7 @@ bool Database::Mongo::updateOneFromSome(
   const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::updateOneFromSomeJSON");
+  MacroRegisterFunctionWithName("Database::Mongo::updateOneFromSome");
   std::string queryString;
   if (!this->getOrFindQuery(findOrQueries, queryString, commentsOnFailure)) {
     return false;

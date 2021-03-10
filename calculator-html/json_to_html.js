@@ -101,11 +101,9 @@ class JSONToHTML {
     panelContent.innerHTML = input;
     panelContent.id = panelId;
     let currentPanel = new panels.PanelExpandable(panelContainer);
-    currentPanel.id = panelId;
+    currentPanel.attributes.id = panelId;
     currentPanel.initialize(true);
     currentPanel.setPanelContent(panelContent);
-    currentPanel.setPanelLabel(label);
-    currentPanel.matchPanelStatus();
     return panelContainer;
   }
 

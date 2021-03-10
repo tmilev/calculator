@@ -38,9 +38,6 @@ function callbackFetchProblemData(button, input, output) {
   thePanel.setPanelContent(resultHTML);
   thePanel.initialize(true);
   transformer.bindButtons();
-  //thePanel.attributes.panelStatus = "collapsed";
-  thePanel.doToggleContent();
-  thePanel.matchPanelStatus();
 }
 
 function fetchProblemData() {

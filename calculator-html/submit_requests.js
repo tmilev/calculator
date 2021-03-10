@@ -4,35 +4,6 @@ const miscellaneous = require("./miscellaneous_frontend");
 const ids = require("./ids_dom_elements");
 const panels = require('./panels');
 
-function recordProgressDone(
-  /**@type{HTMLElement|string} */
-  progress,
-  /**@type{number} */
-  timeFinished,
-  /**@type{{dontCollapsePanel:boolean, width:number}|null} */
-  panelOptions,
-) {
-  if (progress === null || progress === undefined || progress === "") {
-    return;
-  }
-  if (typeof progress === "string") {
-    progress = document.getElementById(progress);
-  }
-  if (progress === null) {
-    return;
-  }
-  let timeTotal = timeFinished - progress.getAttribute("timeStarted");
-  let panelLabel = `<b style = 'color:green'>Received</b> ${timeTotal} ms`;
-  let panel = new panels.PanelExpandable(progress);
-  panel.initialize(false);
-  panel.setPanelLabel(panelLabel);
-  if (panelOptions !== null) {
-    if (panelOptions.dontCollapsePanel === true) {
-      panel.doToggleContent();
-    }
-  }
-}
-
 function convertStringToHtml(input) {
   let result = "";
   for (let counter = 0; counter < input.length; counter++) {
@@ -79,32 +50,11 @@ latexifyLink = function (inputURL) {
   return result;
 }
 
-function recordProgressStarted(
-  /**@returns{HTMLElement} */
-  progress,
+function addressToHtml(
+  /**@type{string} */
   address,
-  isPost,
-  timeStarted,
 ) {
-  if (progress === "" || progress === null || progress === undefined) {
-    return;
-  }
-  if (isPost === undefined || isPost === null) {
-    isPost = false;
-  }
-  if (typeof progress === "string") {
-    progress = document.getElementById(progress);
-  }
-  if (progress === null) {
-    return;
-  }
-  let panelWithButton = new panels.PanelExpandable(progress);
-  panelWithButton.initialize(true);
-  panelWithButton.initialize
-  progress.setAttribute("timeStarted", timeStarted);
-  panelWithButton.setPanelLabel(`<b style = "color:orange">Sent</b>`)
-
-  censoredAddressStarts = [
+  let censoredAddressStarts = [
     pathnames.urlFields.newPassword,
     pathnames.urlFields.reenteredPassword,
     pathnames.urlFields.password,
@@ -119,27 +69,12 @@ function recordProgressStarted(
     }
   }
   let content = "";
-  if (!isPost) {
-    content += `<a href='${address}' target ='_blank' class = 'linkProgressReport'>${convertStringToHtml(address)}</a>`;
-  } else {
-    content += address;
-  }
+  content += `<a href='${address}' target ='_blank' class = 'linkProgressReport'>${convertStringToHtml(address)}</a>`;
   if (window.calculator.mainPage.storage.variables.flagDebug.isTrue()) {
     content += `<br> <b>LaTeX link:</b> `;
     content += getLatexLink();
   }
-  panelWithButton.setPanelContent(content);
-  panelWithButton.matchPanelStatus();
-}
-
-function recordResult(resultText, resultSpan) {
-  if (resultSpan === null || resultSpan === undefined) {
-    return;
-  }
-  if (typeof resultSpan === "string") {
-    resultSpan = document.getElementById(resultSpan);
-  }
-  resultSpan.innerHTML = miscellaneous.jsonParseGetHtmlStandard(resultText);
+  return content;
 }
 
 function correctAddress(inputURL) {
@@ -157,6 +92,100 @@ function correctAddress(inputURL) {
     }
   }
   return inputURL;
+}
+
+class RequestWithProgress {
+  constructor(
+    /**@type{string} */
+    address,
+    /**@type{HTMLElement|string} */
+    output,
+    /**@type{boolean} */
+    isPost,
+    /**@type{HtmlElement|string|null} */
+    progress,
+    callback,
+    /**@type{{dontCollapsePanel:boolean, width:number}} */
+    panelOptions,
+  ) {
+    /**@type{XMLHttpRequest|null} */
+    this.xhr = null;
+    this.address = address;
+    this.isPost = isPost;
+    this.progress = progress;
+    if (this.progress === null || this.progress === undefined) {
+      this.progress = document.getElementById(ids.domElements.spanProgressReportGeneral);
+    }
+    this.output = output;
+    // this.progress = progress;
+    this.callback = callback;
+    /**@type{{dontCollapsePanel:boolean, width:number}} */
+    this.panelOptions = panelOptions;
+    /**@type{panels.PanelExpandable|null} */
+    this.panel = new panels.PanelExpandable(progress);
+    this.startTime = 0;
+    this.details = "";
+  }
+
+  sendPrepare() {
+    this.xhr = new XMLHttpRequest()
+    this.xhr.onload = () => {
+      this.responseStandard();
+    }
+  }
+
+  sendGET() {
+    this.sendPrepare();
+    this.xhr.open("GET", this.address, true);
+    this.xhr.setRequestHeader('Accept', 'text/html');
+    this.details = addressToHtml(this.address);
+    this.recordProgressStarted();
+    this.xhr.send();
+  }
+
+  sendPOST(parameters) {
+    this.sendPrepare();
+    this.xhr.open("POST", this.address, true);
+    this.xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    this.details = `POST ${this.address}<br>message: ${miscellaneous.shortenString(200, parameters)}`
+    this.recordProgressStarted();
+    this.xhr.send(parameters);
+  }
+
+  recordProgressStarted() {
+    this.panel.initialize(true);
+    this.startTime = new Date().getTime();
+    this.panel.setPanelLabel(`<b style = "color:orange">Sent</b>`)
+    this.panel.setPanelContent(this.details);
+  }
+
+  responseStandard() {
+    this.recordProgressDone();
+    if (this.callback !== undefined && this.callback !== null) {
+      this.callback(this.xhr.responseText, this.output);
+    } else {
+      this.recordResult();
+    }
+  }
+
+  recordProgressDone() {
+    if (this.progress === null || this.progress === undefined || this.progress === "") {
+      return;
+    }
+    let timeTotal = new Date().getTime() - this.startTime;
+    let panelLabel = `<b style = 'color:green'>Received</b> ${timeTotal} ms`;
+    this.panel.setPanelLabel(panelLabel);
+  }
+
+  recordResult() {
+    if (this.output === null || this.output === undefined) {
+      return;
+    }
+    if (typeof this.output === "string") {
+      this.output = document.getElementById(this.output);
+    }
+    this.output.innerHTML = miscellaneous.jsonParseGetHtmlStandard(resultText);
+  }
 }
 
 /**
@@ -193,32 +222,8 @@ function submitGET(
   if (inputObject.panelOptions !== undefined) {
     panelOptions = inputObject.panelOptions;
   }
-  let xhr = new XMLHttpRequest();
-  recordProgressStarted(progress, theAddress, false, (new Date()).getTime());
-  xhr.open('GET', theAddress, true);
-  xhr.setRequestHeader('Accept', 'text/html');
-  xhr.onload = responseStandard.bind(null, xhr, callback, result, progress, panelOptions);
-  xhr.send();
-}
-
-function responseStandard(
-  /**@type {XMLHttpRequest} */
-  request,
-  /**@type {Function} */
-  callback,
-  /**@type {String|HTMLElement} */
-  result,
-  /**@type {String|HTMLElement} */
-  progress,
-  /**@type{{dontCollapsePanel:boolean, width:number}} */
-  panelOptions,
-) {
-  recordProgressDone(progress, (new Date()).getTime(), panelOptions);
-  if (callback !== undefined && callback !== null) {
-    callback(request.responseText, result);
-  } else {
-    recordResult(request.responseText, result);
-  }
+  let request = new RequestWithProgress(theAddress, result, false, progress, callback, panelOptions);
+  request.sendGET();
 }
 
 function submitPOST(
@@ -229,22 +234,13 @@ function submitPOST(
   let progress = inputObject.progress;
   let result = inputObject.result;
   let callback = inputObject.callback;
-  let https = new XMLHttpRequest();
   let parameters = inputObject.parameters;
-  https.open("POST", theAddress, true);
-  https.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-  if (progress === undefined) {
-    progress = ids.domElements.spanProgressReportGeneral;
+  let panelOptions = null;
+  if (inputObject.panelOptions !== undefined) {
+    panelOptions = inputObject.panelOptions;
   }
-  timeOutCounter = 0;
-
-  let postRequest = `POST ${pathnames.urls.calculatorAPI}<br>message: ${miscellaneous.shortenString(200, parameters)}`;
-  recordProgressStarted(progress, postRequest, true, (new Date()).getTime());
-
-  https.onload = responseStandard.bind(null, https, callback, result, progress);
-  ////////////////////////////////////////////
-  https.send(parameters);
-  ////////////////////////////////////////////
+  let request = new RequestWithProgress(theAddress, result, true, progress, callback, panelOptions);
+  request.sendPOST(parameters);
 }
 
 module.exports = {

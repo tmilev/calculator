@@ -148,17 +148,17 @@ class PanelExpandable {
     /**@type{HtmlElement|string} */
     container,
   ) {
-    this.attributes = {
-      buttonId: null,
-      panelId: null,
-      expandedMarkerId: null,
-      panelLabelId: null,
-      panelStatus: null,
-      originalHeight: "0px",
-      originalWidth: "0px",
-    }
+    this.originalHeight = "0px";
+    this.originalWidth = "0px";
+    this.collapsed = true;
     this.containerId = "";
     this.container = container;
+    /**@type{HtmlElement|null} */
+    this.panelContent = null;
+    /**@type{HtmlElement|null} */
+    this.panelLabel = null;
+    /**@type{HtmlElement|null} */
+    this.button = null;
     if (typeof container === "string") {
       this.containerId = container;
       this.container = document.getElementById(this.containerId);
@@ -168,15 +168,14 @@ class PanelExpandable {
   }
 
   matchPanelStatus() {
-    let thePanel = document.getElementById(this.attributes.panelId);
-    thePanel.style.maxHeight = "";
-    thePanel.style.maxWidth = "";
-    if (this.attributes.panelStatus === "collapsed") {
-      thePanel.style.maxHeight = "0px";
-      thePanel.style.maxWidth = "0px";
+    this.panelContent.style.maxHeight = "";
+    this.panelContent.style.maxWidth = "";
+    if (this.collapsed) {
+      this.panelContent.style.maxHeight = "0px";
+      this.panelContent.style.maxWidth = "0px";
     } else {
-      thePanel.style.maxHeight = this.attributes.originalHeight;
-      thePanel.style.maxWidth = this.attributes.originalWidth;
+      this.panelContent.style.maxHeight = this.originalHeight;
+      this.panelContent.style.maxWidth = this.originalWidth;
     }
   }
 
@@ -184,97 +183,58 @@ class PanelExpandable {
     /**@type{HTMLElement|string} */
     input,
   ) {
-    let thePanel = document.getElementById(this.attributes.panelId);
-    thePanel.style.maxHeight = "";
-    thePanel.style.maxWidth = "";
+    this.panelContent.style.maxHeight = "";
+    this.panelContent.style.maxWidth = "";
     if (typeof input === "string") {
       let element = document.createElement("span");
       element.innerHTML = input;
       input = element;
     }
-    thePanel.appendChild(input);
-    let originalHeight = window.getComputedStyle(thePanel).height;
-    let originalWidth = window.getComputedStyle(thePanel).width;
-    this.container.setAttribute("originalHeight", originalHeight);
-    this.container.setAttribute("originalWidth", originalWidth);
+    this.panelContent.appendChild(input);
+    this.originalHeight = window.getComputedStyle(this.panelContent).height;
+    this.originalWidth = window.getComputedStyle(this.panelContent).width;
+    this.matchPanelStatus();
   }
 
   setPanelLabel(input) {
-    let panelLabel = document.getElementById(this.attributes.panelLabelId);
-    panelLabel.innerHTML = input;
+    this.panelLabel.innerHTML = input;
   }
 
   initialize(
-    /** @type {boolean} */
-    resetPanel,
+    /**@type{boolean} */
+    startsCollapsed,
   ) {
-    if (this.container === null || this.container === undefined || this.container === "") {
-      return this;
-    }
-    if (typeof this.container === "string") {
-      this.container = document.getElementById(this.container);
-    }
-    this.containerId = this.container.id;
-    if (resetPanel !== true) {
-      for (let label in this.attributes) {
-        let incoming = this.container.getAttribute(label);
-        this.attributes[label] = incoming;
-        if (incoming === null || incoming === undefined || incoming === undefined) {
-          resetPanel = true;
-          break;
-        }
-      }
-    }
-    if (resetPanel === true) {
-      numberOfButtonToggleProgressReport++;
-      for (let label in this.attributes) {
-        this.attributes[label] = `progressReport${label}${numberOfButtonToggleProgressReport}`;
-      }
-      this.attributes.panelStatus = "collapsed";
-      this.initializeProgressPanel();
-    }
-  }
-
-  setStatusToBeCalledThroughTimeout() {
-    let panel = document.getElementById(this.attributes.panelId);
-    if (this.attributes.panelStatus === "expanded") {
-      panel.style.maxHeight = this.attributes.originalHeight;
-      panel.style.maxWidth = this.attributes.originalWidth;
-    } else {
-      panel.style.maxHeight = "0px";
-      panel.style.maxWidth = "0px";
-    }
+    this.collapsed = startsCollapsed;
+    let spanContainer = document.createElement("span");
+    this.panelLabel = document.createElement("span");
+    spanContainer.appendChild(this.panelLabel);
+    this.button = document.createElement("button");
+    this.button.textContent = "\u25C2";
+    this.button.className = "buttonProgress";
+    this.button.classList.add("accordionLikeIndividual");
+    this.button.addEventListener("click", () => {
+      this.doToggleContent();
+    });
+    spanContainer.appendChild(this.button);
+    this.panelContent = document.createElement("span");
+    this.panelContent.className = "PanelExpandable";
+    spanContainer.appendChild(this.panelContent);
+    this.container.textContent = "";
+    this.container.appendChild(spanContainer);
   }
 
   doToggleContent() {
-    if (this.attributes.panelStatus === "collapsed") {
-      document.getElementById(this.attributes.expandedMarkerId).innerHTML = "&#9662;";
-      this.attributes.panelStatus = "expanded";
+    if (this.collapsed) {
+      this.button.textContent = "\u25C2";
+      this.collapsed = false;
     } else {
-      document.getElementById(this.attributes.expandedMarkerId).innerHTML = "&#9666;";
-      this.attributes.panelStatus = "collapsed";
+      this.button.textContent = "\u25BC";
+      this.collapsed = true;
     }
-    this.container.setAttribute("panelStatus", this.attributes.panelStatus);
-    setTimeout(this.setStatusToBeCalledThroughTimeout.bind(this), 0);
-  }
-
-  initializeProgressPanel() {
-    for (let label in this.attributes) {
-      this.container.setAttribute(label, this.attributes[label]);
-    }
-    let spanContainer = document.createElement("span");
-    let spanContent = "";
-    spanContent += `<span id = "${this.attributes.panelLabelId}"></span><button id = "${this.attributes.buttonId}" `;
-    spanContent += `class = "buttonProgress accordionLikeIndividual" `;
-    spanContent += `onclick = "window.calculator.panels.doToggleContent('${this.containerId}');">`;
-    spanContent += `<span id = "${this.attributes.expandedMarkerId}">&#9666;</span>`;
-    spanContent += "</button>";
-    spanContent += `<div id = "${this.attributes.panelId}" class = "PanelExpandable"></div>`;
-    spanContainer.innerHTML = spanContent;
-    while (this.container.firstChild) {
-      this.container.removeChild(this.container.firstChild);
-    }
-    this.container.appendChild(spanContainer);
+    this.container.setAttribute("collapsed", `${this.collapsed}`);
+    setTimeout(() => {
+      this.matchPanelStatus();
+    }, 0);
   }
 }
 
@@ -294,22 +254,12 @@ function makePanelFromData(
     if (!data.startHidden) {
       inputPanel.doToggleContent();
     }
-    inputPanel.matchPanelStatus();
   } else {
     let element = document.getElementById(data.id);
     if (element != null) {
       element.innerHTML = data.content;
     }
   }
-}
-
-function doToggleContent(
-  /**@type{string} */
-  progressId,
-) {
-  let thePanel = new PanelExpandable(document.getElementById(progressId));
-  thePanel.initialize(false);
-  thePanel.doToggleContent();
 }
 
 let numberOfButtonToggleProgressReport = 0;
@@ -322,14 +272,9 @@ if (window.calculator.panels === undefined) {
   window.calculator.panels = {};
 }
 
-if (window.calculator.panels.doToggleContent === undefined) {
-  window.calculator.panels.doToggleContent = doToggleContent;
-}
-
 module.exports = {
   modifyHeightForTimeout,
   toggleMenu,
-  doToggleContent,
   PanelExpandable,
   PanelExpandableData,
   makePanelFromData,

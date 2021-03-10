@@ -190,8 +190,6 @@ class GraphicsNDimensions {
       this.panelInfo = new this.PanelExpandable(this.idInfo);
       this.panelInfo.initialize(true);
       this.panelInfo.setPanelContent(infoHTML);
-      this.panelInfo.doToggleContent();
-      this.panelInfo.matchPanelStatus();
     }
   }
 

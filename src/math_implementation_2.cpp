@@ -1713,9 +1713,9 @@ void Rational::assignFractionalValue() {
     this->makeZero();
     return;
   }
-  LargeIntegerUnsigned newNum, tempI;
-  this->extended->numerator.value.divPositive(this->extended->denominator, tempI, newNum);
-  this->extended->numerator.value = newNum;
+  LargeIntegerUnsigned newNumerator, quotient;
+  this->extended->numerator.value.divPositive(this->extended->denominator, quotient, newNumerator);
+  this->extended->numerator.value = newNumerator;
   if (this->extended->numerator.isNegative()) {
     this->extended->numerator.addLargeIntUnsigned(this->extended->denominator);
   }

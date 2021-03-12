@@ -82,7 +82,7 @@ class JSONToHTML {
     let button = document.createElement("button");
     button.textContent = inputTransformed;
     button.setAttribute("panelId", panelId);
-    button.setAttribute("labels", JSON.stringify(currentBinding.labels));
+    button.setAttribute("labels", JSON.stringify(currentLabels));
     button.setAttribute("input", input);
     button.addEventListener("click", () => {
       clickHandler(currentLabels, panelId);
@@ -97,13 +97,10 @@ class JSONToHTML {
     label,
   ) {
     let panelContainer = document.createElement("span");
-    let panelContent = document.createElement("div");
-    panelContent.innerHTML = input;
-    panelContent.id = panelId;
     let currentPanel = new panels.PanelExpandable(panelContainer);
-    currentPanel.attributes.id = panelId;
     currentPanel.initialize(true);
-    currentPanel.setPanelContent(panelContent);
+    currentPanel.setPanelLabel(label);
+    currentPanel.setPanelContent(input);
     return panelContainer;
   }
 

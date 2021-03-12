@@ -37,7 +37,6 @@ function callbackFetchProblemData(button, input, output) {
   let resultHTML = transformer.getTableFromObject(problemData);
   thePanel.setPanelContent(resultHTML);
   thePanel.initialize(true);
-  transformer.bindButtons();
 }
 
 function fetchProblemData() {
@@ -107,7 +106,7 @@ let optionsDatabase = {
   },
 };
 
-function updateDatabasePageCallback(incoming, output) {
+function updateDatabasePageCallback(incoming, unused) {
   let labelString = storage.storage.variables.database.labels.getValue();
   let labels = [];
   try {
@@ -116,22 +115,22 @@ function updateDatabasePageCallback(incoming, output) {
     labels = [""];
   }
   let theParsed = miscellaneous.jsonUnescapeParse(incoming);
-  let theOutput = document.getElementById(ids.domElements.divDatabaseOutput);
-  theOutput.textContent = "";
+  let output = document.getElementById(ids.domElements.divDatabaseOutput);
+  output.textContent = "";
   if (
     theParsed.error !== undefined &&
     theParsed.error != null &&
     theParsed.error != ""
   ) {
-    theOutput.innerHTML = miscellaneous.jsonParseGetHtmlStandard(incoming);
+    output.innerHTML = miscellaneous.jsonParseGetHtmlStandard(incoming);
   } else if ("rows" in theParsed) {
     let transformer = new jsonToHtml.JSONToHTML();
     for (let i = 0; i < theParsed.rows.length; i++) {
       theParsed.rows[i]["problemDataJSON"] = "";
     }
     document.getElementById(ids.domElements.spanDatabaseComments).innerHTML = `${theParsed.rows.length} out of ${theParsed.totalRows} rows displayed.<br> `;
-    theOutput.innerHTML = transformer.getTableFromObject(theParsed.rows, optionsDatabase, { table: labels[0] });
-    transformer.bindButtons();
+    output.textContent = "";
+    output.appendChild(transformer.getTableFromObject(theParsed.rows, optionsDatabase, { table: labels[0] }));
   } else {
     for (let counterCollection = 0; counterCollection < theParsed.collections.length; counterCollection++) {
       let currentCollection = theParsed.collections[counterCollection];
@@ -143,7 +142,7 @@ function updateDatabasePageCallback(incoming, output) {
       theParsed.collections[counterCollection] = linkHTML;
     }
     let transformer = new jsonToHtml.JSONToHTML();
-    theOutput.appendChild(transformer.getTableFromObject(theParsed.collections));
+    output.appendChild(transformer.getTableFromObject(theParsed.collections));
   }
 }
 
@@ -167,7 +166,7 @@ function updateDatabasePage() {
   submitRequests.submitGET({
     url: theUrl,
     progress: ids.domElements.spanProgressReportGeneral,
-    callback: updateDatabasePageCallback
+    callback: updateDatabasePageCallback,
   });
 }
 

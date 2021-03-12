@@ -332,12 +332,12 @@ class Calculator {
       let outputPanelId = `calculatorOutputPanel${this.numberOfCalculatorPanels}`;
       if (i < inputParsed.result.input.length) {
         panelData.push(new panels.PanelExpandableData(
-          inputParsed.result.input[i], inputPanelId, 150,
+          inputParsed.result.input[i], inputPanelId, 150, false, ""
         ));
       }
       if (i < inputParsed.result.output.length) {
         panelData.push(new panels.PanelExpandableData(
-          inputParsed.result.output[i], outputPanelId, 150,
+          inputParsed.result.output[i], outputPanelId, 150, false, ""
         ));
       }
       buffer.write(`<tr>`);
@@ -358,7 +358,7 @@ class Calculator {
         ids.domElements.divPerformance,
         0,
         true,
-        label
+        label,
       ));
       buffer.write("<br>");
     }

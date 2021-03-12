@@ -118,28 +118,30 @@ function toggleMenu() {
   }
 }
 
-function PanelExpandableData(
-  /** @type {string} */
-  content,
-  /** @type {string} */
-  id,
-  /** @type {number} */
-  minimalCharacterLengthForPanel,
-  /** @type {boolean} */
-  startHidden,
-  /** @type {string} */
-  label,
-) {
-  this.content = content;
-  this.id = id;
-  this.minimalCharacterLengthForPanel = minimalCharacterLengthForPanel;
-  this.startHidden = startHidden;
-  this.label = label;
-  if (this.startHidden === undefined) {
-    this.startHidden = false;
-  }
-  if (this.label === undefined) {
-    this.label = "";
+class PanelExpandableData {
+  constructor(
+    /** @type {string} */
+    content,
+    /** @type {string} */
+    id,
+    /** @type {number} */
+    minimalCharacterLengthForPanel,
+    /** @type {boolean} */
+    startHidden,
+    /** @type {string} */
+    label,
+  ) {
+    this.content = content;
+    this.id = id;
+    this.minimalCharacterLengthForPanel = minimalCharacterLengthForPanel;
+    this.startHidden = startHidden;
+    this.label = label;
+    if (this.startHidden === undefined) {
+      this.startHidden = false;
+    }
+    if (this.label === undefined) {
+      this.label = "";
+    }
   }
 }
 
@@ -157,6 +159,8 @@ class PanelExpandable {
     this.panelContent = null;
     /**@type{HtmlElement|null} */
     this.panelLabel = null;
+    /**@type{HtmlElement|null} */
+    this.expandedMark = null;
     /**@type{HtmlElement|null} */
     this.button = null;
     if (typeof container === "string") {
@@ -190,6 +194,7 @@ class PanelExpandable {
       element.innerHTML = input;
       input = element;
     }
+    this.panelContent.textContent = "";
     this.panelContent.appendChild(input);
     this.originalHeight = window.getComputedStyle(this.panelContent).height;
     this.originalWidth = window.getComputedStyle(this.panelContent).width;
@@ -204,37 +209,42 @@ class PanelExpandable {
     /**@type{boolean} */
     startsCollapsed,
   ) {
-    this.collapsed = startsCollapsed;
     let spanContainer = document.createElement("span");
     this.panelLabel = document.createElement("span");
-    spanContainer.appendChild(this.panelLabel);
     this.button = document.createElement("button");
-    this.button.textContent = "\u25C2";
     this.button.className = "buttonProgress";
     this.button.classList.add("accordionLikeIndividual");
     this.button.addEventListener("click", () => {
       this.doToggleContent();
     });
+    this.button.appendChild(this.panelLabel);
+    this.expandedMark = document.createElement("span");
+    this.button.appendChild(this.expandedMark);
     spanContainer.appendChild(this.button);
-    this.panelContent = document.createElement("span");
+    this.panelContent = document.createElement("div");
     this.panelContent.className = "PanelExpandable";
     spanContainer.appendChild(this.panelContent);
     this.container.textContent = "";
     this.container.appendChild(spanContainer);
+    this.setCollapsed(startsCollapsed);
   }
 
-  doToggleContent() {
+  setCollapsed(/**@type{boolean} */ newValue) {
+    this.collapsed = newValue;
     if (this.collapsed) {
-      this.button.textContent = "\u25C2";
-      this.collapsed = false;
+      this.expandedMark.textContent = "\u25C2"; // triangle pointing left
+      this.container.setAttribute("collapsed", `${this.collapsed}`);
     } else {
-      this.button.textContent = "\u25BC";
-      this.collapsed = true;
+      this.expandedMark.textContent = "\u25BC"; // triangle pointing down
+      this.container.setAttribute("collapsed", `${this.collapsed}`);
     }
-    this.container.setAttribute("collapsed", `${this.collapsed}`);
     setTimeout(() => {
       this.matchPanelStatus();
     }, 0);
+  }
+
+  doToggleContent() {
+    this.setCollapsed(!this.collapsed);
   }
 }
 
@@ -248,12 +258,9 @@ function makePanelFromData(
   }
   if (doCreatePanel) {
     let inputPanel = new PanelExpandable(data.id);
-    inputPanel.initialize(true);
+    inputPanel.initialize(data.startHidden);
     inputPanel.setPanelContent(data.content);
     inputPanel.setPanelLabel(data.label);
-    if (!data.startHidden) {
-      inputPanel.doToggleContent();
-    }
   } else {
     let element = document.getElementById(data.id);
     if (element != null) {

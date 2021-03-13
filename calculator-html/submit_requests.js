@@ -128,7 +128,7 @@ class RequestWithProgress {
   }
 
   sendPrepare() {
-    this.xhr = new XMLHttpRequest()
+    this.xhr = new XMLHttpRequest();
     this.xhr.onload = () => {
       this.responseStandard();
     }

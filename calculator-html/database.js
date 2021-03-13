@@ -12,10 +12,13 @@ function clickDatabaseTable(currentCollection) {
   updateDatabasePage();
 }
 
-function callbackFetchProblemData(button, input, output) {
-  let inputParsed = JSON.parse(input);
-  let panelId = button.getAttribute("panelId");
-  let thePanel = new panels.PanelExpandable(panelId);
+function callbackFetchProblemData(
+  /**@type{string} */
+  input,
+  /**@type{HTMLElement} */
+  output,
+) {
+  let outputPanel = new panels.PanelExpandable(output);
   let problemData = [];
   try {
     let inputParsed = JSON.parse(input);
@@ -35,22 +38,28 @@ function callbackFetchProblemData(button, input, output) {
   }
   let transformer = new jsonToHtml.JSONToHTML();
   let resultHTML = transformer.getTableFromObject(problemData);
-  thePanel.setPanelContent(resultHTML);
-  thePanel.initialize(true);
+  outputPanel.initialize(false);
+  outputPanel.setPanelContent(resultHTML);
 }
 
-function fetchProblemData() {
-  let labelsString = this.getAttribute("labels");
+function fetchProblemData(
+  labels,
+  /**@type{HTMLElement} */
+  output,
+) {
   //let labels = JSON.parse(labelsString);
   let theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
   theURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.database}&`;
   theURL += `${pathnames.urlFields.database.operation}=${pathnames.urlFields.database.fetch}&`;
+  let labelsString = JSON.stringify(labels);
   theURL += `${pathnames.urlFields.database.labels}=${labelsString}&`;
   submitRequests.submitGET({
     url: theURL,
     progress: ids.domElements.spanProgressReportGeneral,
-    callback: callbackFetchProblemData.bind(null, this),
+    callback: (input, _) => {
+      callbackFetchProblemData(input, output);
+    },
   });
 }
 

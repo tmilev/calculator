@@ -73,30 +73,26 @@ class JSONToHTML {
 
   getButtonFromLabels(
     input,
-    /**@type {String} */
-    panelId,
     inputTransformed,
     /**@type {String[]} */
     currentLabels,
     /**@type {Function} */
     clickHandler,
   ) {
-    statistics.numberOfButtonsGenerated++;
-    let result = "";
+    statistics.buttonsGenerated++;
+    let result = document.createElement("span");
     let button = document.createElement("button");
+    let panel = document.createElement("div");
     button.textContent = inputTransformed;
-    button.setAttribute("panelId", panelId);
-    button.setAttribute("labels", JSON.stringify(currentLabels));
-    button.setAttribute("input", input);
     button.addEventListener("click", () => {
-      clickHandler(currentLabels, panelId);
+      clickHandler(currentLabels, panel);
     });
+    result.appendChild(button);
+    result.appendChild(panel);
     return result;
   }
 
   getToggleButton(
-    /**@type {String} */
-    panelId,
     input,
     label,
   ) {
@@ -127,18 +123,20 @@ class JSONToHTML {
       inputTransformed = currentOption.transformer(input);
     }
     statistics.toggleButtons++;
-    let panelId = `panelFromJSONFormatter${statistics.toggleButtons}`;
     if (typeof currentOption.clickHandler === "function") {
-      inputTransformed = this.getButtonFromLabels(
-        input, panelId, inputTransformed, currentLabels, currentOption.clickHandler
+      let result = document.createElement("span");
+      let button = this.getButtonFromLabels(
+        input, inputTransformed, currentLabels, currentOption.clickHandler,
       );
+      result.appendChild(button);
+      return result;
     }
     if (inputTransformed === input) {
       let result = document.createElement("span");
       result.innerHTML = `${input}`;
       return result;
     }
-    return this.getToggleButton(panelId, input, inputTransformed);
+    return this.getToggleButton(input, inputTransformed);
   }
 
   /**@returns{HTMLElement} */

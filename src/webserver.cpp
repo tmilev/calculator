@@ -2133,13 +2133,13 @@ int WebWorker::processFolderOrFile() {
 }
 
 void WebWorker::pauseIfRequested() {
-  this->PauseWorker.lock(); // If pause was requested, here we block.
-  this->PauseWorker.unlock();
+  this->pauseWorker.lock(); // If pause was requested, here we block.
+  this->pauseWorker.unlock();
 }
 
 void WebWorker::resetMutexProcesses() {
   MacroRegisterFunctionWithName("WebWorker::resetMutexProcesses");
-  this->PauseWorker.resetNoAllocation();
+  this->pauseWorker.resetNoAllocation();
   this->writingReportFile.resetNoAllocation();
 }
 
@@ -2149,7 +2149,7 @@ void WebWorker::releaseKeepInUseFlag() {
   this->pipeWorkerToServerControls.release();
   this->workerToWorkerRequestIndicator.release();
   this->pipeWorkerToWorkerStatus.release();
-  this->PauseWorker.release();
+  this->pauseWorker.release();
   this->writingReportFile.release();
   this->millisecondsLastPingServerSideOnly = - 1;
   WebServer::release(this->connectedSocketID);
@@ -2278,7 +2278,7 @@ std::string WebWorker::toStringStatus() const {
   << ", " << this->pipeWorkerToServerTimerPing.toString()
   << ", " << this->workerToWorkerRequestIndicator.toString()
   << ", " << this->pipeWorkerToWorkerStatus.toString();
-  out << ". MutexProcesses: " << this->PauseWorker.toString()
+  out << ". MutexProcesses: " << this->pauseWorker.toString()
   << ", " << this->writingReportFile.toString();
   out << ", user address: " << this->userAddress << ".";
   return out.str();

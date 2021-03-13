@@ -217,7 +217,7 @@ bool WebAPIResponse::processUnpauseWorker() {
     return global.response.writeResponse(progressReader, false);
   }
   WebWorker& otherWorker = this->owner->parent->theWorkers[indexWorker];
-  if (!otherWorker.PauseWorker.unlock()) {
+  if (!otherWorker.pauseWorker.unlock()) {
     result[WebAPI::result::error] = "Failed to unpause process";
   } else {
     result[WebAPI::result::status] = "unpaused";
@@ -235,7 +235,7 @@ bool WebAPIResponse::processPauseWorker() {
     return global.response.writeResponse(progressReader, false);
   }
   WebWorker& otherWorker = this->owner->parent->theWorkers[indexWorker];
-  if (otherWorker.PauseWorker.lock()) {
+  if (otherWorker.pauseWorker.lock()) {
     result[WebAPI::result::status] = "paused";
   } else {
     result[WebAPI::result::error] = "Failed to pause process. ";

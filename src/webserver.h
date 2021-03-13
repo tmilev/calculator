@@ -68,7 +68,7 @@ public:
   List<char> remainingHeaderToSend;
   List<char> remainingBodyToSend;
   List<char> bufferFileIO;
-  MutexProcess PauseWorker;
+  MutexProcess pauseWorker;
   MutexProcess writingReportFile;
   PipePrimitive workerToWorkerRequestIndicator;
   PipePrimitive pipeWorkerToWorkerStatus;

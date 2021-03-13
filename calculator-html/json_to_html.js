@@ -31,11 +31,15 @@ function writeJSONtoDOMComponent(
   theDomComponent.innerHTML = transformer.getTableFromObject(copy, null, { forceRowLayout: true });
 }
 
-var counterToggleButtons = 0;
+class Statistics {
+  constructor() {
+    this.toggleButtons = 0;
+    this.databaseTables = 0;
+    this.buttonsGenerated = 0;
+  }
+}
 
-
-var counterDatabaseTables = 0;
-var numberOfButtonsGenerated = 0;
+let statistics = new Statistics();
 
 class JSONToHTML {
   constructor() {
@@ -77,7 +81,7 @@ class JSONToHTML {
     /**@type {Function} */
     clickHandler,
   ) {
-    numberOfButtonsGenerated++;
+    statistics.numberOfButtonsGenerated++;
     let result = "";
     let button = document.createElement("button");
     button.textContent = inputTransformed;
@@ -122,8 +126,8 @@ class JSONToHTML {
     if (typeof currentOption.transformer === "function") {
       inputTransformed = currentOption.transformer(input);
     }
-    counterToggleButtons++;
-    let panelId = `panelFromJSONFormatter${counterToggleButtons}`;
+    statistics.toggleButtons++;
+    let panelId = `panelFromJSONFormatter${statistics.toggleButtons}`;
     if (typeof currentOption.clickHandler === "function") {
       inputTransformed = this.getButtonFromLabels(
         input, panelId, inputTransformed, currentLabels, currentOption.clickHandler
@@ -407,4 +411,5 @@ module.exports = {
   JSONToHTML,
   writeJSONtoDOMComponent,
   transformersStandard,
+  statistics,
 };

@@ -33,7 +33,8 @@ void MutexRecursiveWrapper::checkConsistency() {
   if (this->flagDeallocated) {
     global << Logger::red << "Use after free of mutex. "
     << global.fatal.getStackTraceEtcErrorMessageConsole() << Logger::endL;
-    assert(false);
+    // We are in a highly corrupt state, standard crashing mecahnisms may not work.
+    global.fatal << "Use after free of mutex. " << global.fatal;
   }
 }
 

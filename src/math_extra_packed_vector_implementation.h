@@ -78,7 +78,7 @@ template <typename scalar>
 void PackedVector<scalar>::setSize(int s) {
   if (s > this->size) {
     global.comments << "if this was intentional, recompile PackedVector with size>=" << s << "\n";
-    assert(false);
+    global.fatal << "Bad template argument." << global.fatal;
   }
 }
 

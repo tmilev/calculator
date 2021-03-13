@@ -49,7 +49,6 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
     << "Something is very wrong. "
     << this->crashReportConsolE.str() << std::endl;
     std::exit(- 1);
-    assert(false);
   }
   this->crashReportConsolE << this->crashReport.str();
   this->crashReportHtml << this->crashReport.str();
@@ -130,7 +129,7 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
   output[WebAPI::result::crashReport] = this->crashReportHtml.str();
   output[WebAPI::result::comments] = global.comments.getCurrentReset();
   global.response.writeResponse(output, true);
-  assert(false);
+  std::exit(- 1);
   return *this;
 }
 

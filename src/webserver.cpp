@@ -2042,6 +2042,7 @@ int WebWorker::serveClient() {
     return this->processLoginNeededOverUnsecureConnection();
   }
   if (this->processRedirectAwayFromWWW()) {
+    this->sendPending();
     return 0;
   }
   this->flagArgumentsAreOK = this->loginProcedure(argumentProcessingFailureComments, &comments);
@@ -2050,6 +2051,7 @@ int WebWorker::serveClient() {
     comments << this->toStringAddressRequest() << ": modified after login. ";
   }
   if (this->redirectIfNeeded(argumentProcessingFailureComments)) {
+    this->sendPending();
     return 0;
   }
   theUser.flagStopIfNoLogin = (
@@ -3300,12 +3302,6 @@ int WebServer::daemon() {
         global.externalCommandStream(restartCommand.str());
         return 0;
       }
-      // The child now has a new process group.
-      int error = setgid(0);
-      if (error != 0) {
-        global << Logger::red << "Failed to set process group id." << Logger::endL;
-        global << Logger::orange << "Error: " << strerror(errno) << Logger::endL;
-      }
     }
     int exitStatus = - 1;
     int waitResult = waitpid(pidChild, &exitStatus, WNOHANG);
@@ -3326,7 +3322,7 @@ int WebServer::daemon() {
     if (pidChild > 0 && global.server().restartNeeded()) {
       global << Logger::red << "Restart is needed. " << Logger::endL;
       // Kill the process tree of the child process.
-      int killResult = kill(- pidChild, SIGTERM);
+      int killResult = kill(pidChild, SIGTERM);
       global << Logger::red << "Kill signal sent to child: "
       << pidChild << ". " << Logger::endL;
       if (killResult != 0) {

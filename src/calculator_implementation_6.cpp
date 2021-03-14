@@ -212,7 +212,7 @@ bool CalculatorHTML::Test::OneProblemTest::run() {
     return this->flagSuccess;
   }
   std::stringstream randomSeedStream;
-  randomSeedStream << theProblem.problemData.randomSeed;
+  randomSeedStream << theProblem.problemData.randomSeeD;
   this->answers.setSize(theProblem.problemData.answers.size());
   this->flagAllBuiltInAnswersOK = true;
   global.setWebInput(WebAPI::problem::fileName, theProblem.fileName);

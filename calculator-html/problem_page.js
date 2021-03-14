@@ -126,6 +126,8 @@ class Problem {
     this.totalChildren = 0;
     /** @type{HTMLElement}*/
     this.outputElement = outputElement;
+    /**@type{string} */
+    this.title = "";
   }
 
   setRandomSeed(input) {
@@ -179,7 +181,6 @@ class Problem {
       this.outputElement.textContent = `Error parsing: ${e}. Failed to parse: ${input}`;
       return;
     }
-
     if (problemData.crashReport !== undefined && problemData.crashReport !== null) {
       let html = miscellaneousFrontend.htmlFromCommentsAndErrors(problemData);
       this.outputElement.innerHTML = html;
@@ -291,8 +292,14 @@ class Problem {
   }
 
   initializeProblemContent(problemData) {
-    this.initializeBasic(problemData)
-    this.decodedProblem = decodeURIComponent(problemData[pathnames.urlFields.problem.content]);
+    if (pathnames.standardResponses.isNotLoggedInResponse(problemData)) {
+      this.title = "";
+      this.decodedProblem = "Not logged in. Please select practice mode or login.";
+      this.answerPanels = [];
+    } else {
+      this.initializeBasic(problemData);
+      this.decodedProblem = decodeURIComponent(problemData[pathnames.urlFields.problem.content]);
+    }
     this.commentsProblem = problemData["commentsProblem"];
     if (this.commentsProblem === undefined) {
       this.commentsProblem = "";
@@ -374,7 +381,7 @@ class Problem {
   }
 
   getCalculatorURLInput(
-    inputFileName, inputCourseHome, inputTopicList
+    inputFileName, inputCourseHome, inputTopicList,
   ) {
     let result = "";
     result += `fileName=${inputFileName}&`;
@@ -383,7 +390,10 @@ class Problem {
     return result;
   }
 
-  getCalculatorURLRequestPartOne(isScoredQuiz) {
+  getCalculatorURLRequestPartOne(
+    /** @type{boolean} */
+    isScoredQuiz,
+  ) {
     let thePage = window.calculator.mainPage;
     let result = "";
     if (isScoredQuiz === undefined) {
@@ -513,7 +523,7 @@ class Problem {
       let practiceURL = this.getAppAnchorRequestFileCourseTopics(false, false);
       let practiceTag = document.createElement("a");
       practiceTag.className = "problemLinkPractice";
-      practiceTag.href = `#${practiceURL}`;
+      practiceTag.href = "#" + practiceURL;
       practiceTag.addEventListener("click", window.calculator.problemPage.selectCurrentProblem.bind(null, this.problemId, "exerciseJSON"));
       practiceTag.innerHTML = "Practice";
       result.push(practiceTag);
@@ -528,7 +538,7 @@ class Problem {
       let quizURL = this.getAppAnchorRequestFileCourseTopics(true, false);
       let quizTag = document.createElement("a");
       quizTag.className = "problemLinkQuiz";
-      quizTag.href = `#${quizURL}`;
+      quizTag.href = "#" + quizURL;
       quizTag.addEventListener("click", window.calculator.problemPage.selectCurrentProblem.bind(null, this.problemId, "scoredQuizJSON"));
       quizTag.innerHTML = "Quiz";
       result.push(quizTag);
@@ -551,7 +561,7 @@ class Problem {
       let randomSeedElement = document.createElement("SPAN");
       randomSeedElement.id = ids.domElements.spanProblemLinkWithRandomSeed;
       let randomSeedAnchor = document.createElement("a");
-      randomSeedAnchor.href = `#${this.getAppAnchorRequestFileCourseTopics(false, true)}`;
+      randomSeedAnchor.href = "#" + this.getAppAnchorRequestFileCourseTopics(false, true);
       randomSeedAnchor.innerHTML = this.randomSeed;
       randomSeedElement.appendChild(randomSeedAnchor);
       result.push(randomSeedElement);
@@ -588,7 +598,7 @@ class Problem {
     let result = [];
     let nextElement = document.createElement("div");
     nextElement.className = "headSubsection";
-    nextElement.innerHTML = `${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}`;
+    nextElement.innerHTML = this.problemNumberString + " " + this.title + " " + this.toStringDeadlineContainer();
     result.push(nextElement);
     miscellaneousFrontend.appendHtmlToArray(result, this.getHTMLProblems());
     return result;
@@ -612,7 +622,7 @@ class Problem {
     if (this.type === "Section") {
       let sectionElement = document.createElement("div");
       sectionElement.className = "headSection";
-      sectionElement.innerHTML = `${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}`;
+      sectionElement.innerHTML = this.problemNumberString + " " + this.title + " " + this.toStringDeadlineContainer();
       result.push(sectionElement);
     }
     let nextElement = document.createElement("div");
@@ -638,7 +648,7 @@ class Problem {
     let result = [];
     let headChapterElement = document.createElement("div");
     headChapterElement.className = "headChapter";
-    headChapterElement.innerHTML = `${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}`
+    headChapterElement.innerHTML = this.problemNumberString + " " + this.title + " " + this.toStringDeadlineContainer();
     result.push(headChapterElement);
     let bodyChapterElement = document.createElement("div");
     bodyChapterElement.className = "bodyChapter";
@@ -693,7 +703,7 @@ class Problem {
     let thePage = window.calculator.mainPage;
     let nextCell = outputRow.insertCell(- 1);
     nextCell.className = "topicListTitle";
-    nextCell.innerHTML = `${this.problemNumberString} ${this.title}`;
+    nextCell.innerHTML = this.problemNumberString + " " + this.title;
     nextCell = outputRow.insertCell(- 1);
     nextCell.className = "topicListMaterials";
     let materialLinks = this.getProblemMaterialLinks();
@@ -704,7 +714,7 @@ class Problem {
       if (thePage.user.flagLoggedIn) {
         let nextElement = document.createElement("a");
         nextElement.className = "problemLinkQuiz";
-        nextElement.href = `#${this.getAppAnchorRequestFileCourseTopics(true)}`;
+        nextElement.href = "#" + this.getAppAnchorRequestFileCourseTopics(true);
         nextElement.addEventListener(
           "click",
           window.calculator.problemPage.selectCurrentProblem.bind(
@@ -718,7 +728,7 @@ class Problem {
       }
       let nextElement = document.createElement("a");
       nextElement.className = "problemLinkPractice";
-      nextElement.href = `#${this.getAppAnchorRequestFileCourseTopics(false)}`;
+      nextElement.href = "#" + this.getAppAnchorRequestFileCourseTopics(false);
       nextElement.innerHTML = "Practice";
       nextElement.addEventListener(
         "click",
@@ -783,27 +793,27 @@ class Problem {
     remainingInHours += 24;
     let resultString = "";
     if (this.isSolvedForSure()) {
-      resultString += `<b style='color:green'>${this.deadline.toLocaleDateString()}</b>`;
+      resultString += "<b style='color:green'>" + this.deadline.toLocaleDateString() + "</b>";
       return resultString;
     }
     if (remainingInHours < 48 && remainingInHours >= 0) {
-      resultString += `<b style='color:red'>${this.deadline.toLocaleDateString()}`;
+      resultString += "<b style='color:red'>" + this.deadline.toLocaleDateString();
       resultString += `, ~${remainingInHours.toFixed(1)} hrs left</b>`;
       return resultString;
     }
     if (remainingInHours < 0) {
-      resultString += `<b style='color:red'>${this.deadline.toLocaleDateString()}</b>`;
-      resultString += ` <b>[passed]</b>`;
+      resultString += "<b style='color:red'>" + this.deadline.toLocaleDateString() + "</b>";
+      resultString += "<b>[passed]</b>";
       return resultString;
     }
-    resultString += `<b style>${this.deadline.toLocaleDateString()}</b>`
+    resultString += "<b>" + this.deadline.toLocaleDateString() + "</b>";
     return resultString;
     //  this.deadlines[];
   }
 
   toStringDeadlineContainer() {
     let result = "";
-    result += `<span id = '${this.idDeadlineContainer}' class = '${ids.domElements.classSpanDeadlineContainer}'>${this.toStringDeadlinePanel()}</span>`;
+    result += `<span id='${this.idDeadlineContainer}' class='${ids.domElements.classSpanDeadlineContainer}'>${this.toStringDeadlinePanel()}</span>`;
     return result;
   }
 
@@ -816,15 +826,15 @@ class Problem {
       return "";
     }
     let result = "";
-    result += `<button class = "accordionLike" `;
-    result += `onclick = "window.calculator.coursePage.toggleDeadline('${this.idDeadlinePanel}', '${this.problemId}', this);">`;
+    result += `<button class="accordionLike" `;
+    result += `onclick="window.calculator.coursePage.toggleDeadline('${this.idDeadlinePanel}', '${this.problemId}', this);">`;
     result += `${this.toStringDeadline()} &#9666;</button>`;
-    result += `<span class = "panelDeadlines" id = "${this.idDeadlinePanel}">`;
+    result += `<span class="panelDeadlines" id="${this.idDeadlinePanel}">`;
     result += "<table>";
     result += "<tr><th>Grp.</th><th>Deadline</th></tr>";
     for (let counterGroup = 0; counterGroup < thePage.user.sectionsTaught.length; counterGroup++) {
       result += `<tr><td>${thePage.user.sectionsTaught[counterGroup]}</td>`;
-      result += `<td><input type="date" class = "datePicker" name = "datePicker${this.problemId}" `;
+      result += `<td><input type="date" class="datePicker" name="datePicker${this.problemId}" `;
       if (this.deadlines[counterGroup] !== "" && this.deadlines[counterGroup] !== undefined) {
         let deadline = this.deadlines[counterGroup];
         result += `value = "${deadline}"`;
@@ -834,7 +844,7 @@ class Problem {
     result += "</table>";
     //console.log("Problem data problem: " + JSON.stringify(this.fileName));
     //console.log("Problem data title: " + JSON.stringify(this.title));
-    result += `<button onclick = "window.calculator.coursePage.modifyDeadlines('${this.problemId}')">Set</button>`;
+    result += `<button onclick = "window.calculator.coursePage.modifyDeadlines('${this.problemId}')">Set</button> `;
     result += `<span id = '${this.idModifyReportDeadline}'></span>`;
     result += `</span>`;
     return result;
@@ -842,8 +852,8 @@ class Problem {
 
   toHTMLWeights() {
     let result = "";
-    result += "<span class = 'panelProblemWeights' style = 'opacity: 1; max-height: 200px;'>";
-    result += `Pts: <textarea class = 'textareaStudentPoints' rows = '1' cols = '2' id = '${this.idTextareaPoints}'>`;
+    result += "<span class='panelProblemWeights' style = 'opacity: 1; max-height: 200px;'>";
+    result += `Pts: <textarea class='textareaStudentPoints' rows='1' cols='2' id='${this.idTextareaPoints}'>`;
     if (this.weight !== undefined && this.weight !== null) {
       result += this.weight;
     }
@@ -1266,9 +1276,6 @@ function updateProblemPage() {
   let theURL;
   if (problem !== undefined && problem !== null) {
     let forReal = problem.flagForReal;
-    if (!thePage.user.flagLoggedIn) {
-      forReal = false;
-    }
     theURL = `${pathnames.urls.calculatorAPI}?${problem.getCalculatorURLRequestFileCourseTopics(forReal)}`;
   } else {
     let fileName = thePage.storage.variables.currentCourse.fileName.getValue();

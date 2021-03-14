@@ -124,6 +124,31 @@ const urlFields = {
   userRole: "userRole",
 }
 
+class StandardResponses {
+  constructor() { }
+
+  /**
+   * @returns{boolean} Whether the response indicates that the user is not logged in.
+   * Please note that if this returns false, the user may still be not logged in, if for example,
+   * the request was one that did not require login.
+   * @param responseObjectParsed the js object returned from the calculator, parsed.
+   */
+  isNotLoggedInResponse(responseObjectParsed) {
+    return responseObjectParsed["status"] === "not logged in";
+  }
+  /**
+   * @returns{boolean} Whether the response indicates that the user logged in.
+   * Please note that if this returns false, the user may still be logged in - perhaps the backend 
+   * did not attach the information that the user is logged in to the response.
+   * @param responseObjectParsed the js object returned from the calculator, parsed.
+   */
+  isLoggedInResponse(responseObjectParsed) {
+    return responseObjectParsed["status"] === "logged in";
+  }
+}
+
+let standardResponses = new StandardResponses();
+
 class Addresses {
   constructor() { }
 
@@ -210,4 +235,5 @@ module.exports = {
   urls,
   urlFields,
   addresses,
+  standardResponses,
 };

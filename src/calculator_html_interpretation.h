@@ -208,7 +208,6 @@ public:
   int numberOfSlidesFound;
   int numberOfHandwrittenSolutionsFound;
   int numberOfAnswerIdsMathquilled;
-  uint32_t randomSeedCurrent;
   List<uint32_t> randomSeedPerAttempt;
   bool flagParentInvestigated;
   bool flagIsForReal;

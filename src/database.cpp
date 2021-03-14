@@ -440,7 +440,7 @@ void GlobalVariables::initModifiableDatabaseFields() {
 }
 
 ProblemData::ProblemData() {
-  this->randomSeed = 0;
+  this->randomSeeD = 0;
   this->flagRandomSeedGiven = false;
   this->numCorrectlyAnswered = 0;
   this->totalNumSubmissions = 0;
@@ -510,7 +510,7 @@ bool ProblemData::checkConsistencyMathQuillIds() const {
 std::string ProblemData::toString() const {
   std::stringstream out;
   out << "Problem data. "
-  << "Random seed: " << this->randomSeed;
+  << "Random seed: " << this->randomSeeD;
   if (this->flagRandomSeedGiven) {
     out << " (given)";
   }
@@ -576,7 +576,7 @@ std::string UserCalculator::toString() {
   Rational weightRat;
   for (int i = 0; i < this->problemData.size(); i ++) {
     out << "<br>Problem: " << this->problemData.keys[i] << "; random seed: "
-    << this->problemData.values[i].randomSeed << "; numSubmissions: "
+    << this->problemData.values[i].randomSeeD << "; numSubmissions: "
     << this->problemData.values[i].totalNumSubmissions
     << "; correct: "
     << this->problemData.values[i].numCorrectlyAnswered
@@ -768,7 +768,7 @@ std::string ProblemData::store(){
   MacroRegisterFunctionWithName("ProblemData::store");
   std::stringstream out;
   if (this->flagRandomSeedGiven) {
-    out << "randomSeed=" << this->randomSeed;
+    out << "randomSeed=" << this->randomSeeD;
   }
   for (int i = 0; i < this->answers.size(); i ++) {
     Answer& currentA = this->answers.values[i];
@@ -791,7 +791,7 @@ JSData ProblemData::storeJSON() const {
   JSData result;
   result.theType = JSData::token::tokenObject;
   if (this->flagRandomSeedGiven) {
-    result[WebAPI::problem::randomSeed] = static_cast<int>(this->randomSeed);
+    result[WebAPI::problem::randomSeed] = static_cast<int>(this->randomSeeD);
   }
   for (int i = 0; i < this->answers.size(); i ++) {
     Answer& currentA = this->answers.values[i];
@@ -998,7 +998,8 @@ bool ProblemData::loadFromOldFormat(const std::string& inputData, std::stringstr
   this->flagRandomSeedGiven = false;
   if (global.userRequestRequiresLoadingRealExamData()) {
     if (theMap.contains(WebAPI::problem::randomSeed)) {
-      this->randomSeed = static_cast<uint32_t>(atoi(theMap.getValueCreate(WebAPI::problem::randomSeed).c_str()));
+      global.comments << "Loading random seed from old format.";
+      this->randomSeeD = static_cast<uint32_t>(atoi(theMap.getValueCreate(WebAPI::problem::randomSeed).c_str()));
       this->flagRandomSeedGiven = true;
     }
   }
@@ -1048,9 +1049,7 @@ bool ProblemData::loadFromJSON(const JSData& inputData, std::stringstream& comme
   this->flagRandomSeedGiven = false;
   if (global.userRequestRequiresLoadingRealExamData()) {
     if (inputData.objects.contains(WebAPI::problem::randomSeed)) {
-      // global.comments << "DEBUG: got a random seed: "
-      // << inputData.objects.getValueNoFail(WebAPI::problem::randomSeed).stringValue;
-      this->randomSeed = static_cast<uint32_t>(atoi(
+      this->randomSeeD = static_cast<uint32_t>(atoi(
         inputData.objects.getValueNoFail(WebAPI::problem::randomSeed).stringValue.c_str()
       ));
       this->flagRandomSeedGiven = true;

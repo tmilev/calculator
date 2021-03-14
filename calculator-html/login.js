@@ -132,7 +132,7 @@ function loginWithServerCallback(incomingString, result) {
   let loginErrorMessage = "";
   let parsedAuthentication = JSON.parse(incomingString);
   resetPagesNeedingReload();
-  if (parsedAuthentication["status"] === "logged in") {
+  if (pathnames.standardResponses.isLoggedInResponse(parsedAuthentication)) {
     success = true;
   }
   let loginInfo = "";
@@ -153,14 +153,14 @@ function loginWithServerCallback(incomingString, result) {
     if (loginInfo !== "") {
       loginInfo += "<br>";
     }
-    loginInfo += "<b style = 'color:red'>Https off.</b>";
+    loginInfo += "<b style='color:red'>Https off.</b>";
   }
   if (
     parsedAuthentication[pathnames.urlFields.requests.useFallbackDatabase] === "true" ||
     parsedAuthentication[pathnames.urlFields.requests.useFallbackDatabase] === true
   ) {
     let databaseInfo = document.getElementById(ids.domElements.divLoginPanelDatabaseInfo);
-    databaseInfo.innerHTML = "<b style = 'color:red'>Fallback database.</b>";
+    databaseInfo.innerHTML = "<b style='color:red'>Fallback database.</b>";
   }
   let loginExtraInfo = document.getElementById(ids.domElements.divLoginPanelExtraInfo);
   loginExtraInfo.innerHTML = loginInfo;
@@ -170,7 +170,7 @@ function loginWithServerCallback(incomingString, result) {
     setAdminPanels();
     hideLoginCalculatorButtons();
     showLogoutButton();
-  } else if (parsedAuthentication["status"] === "not logged in") {
+  } else if (pathnames.standardResponses.isNotLoggedInResponse(parsedAuthentication)) {
     if (parsedAuthentication["error"] !== undefined) {
       loginErrorMessage = parsedAuthentication["error"];
     }

@@ -191,7 +191,7 @@ public:
     return output;
   }
   bool flagRandomSeedGiven;
-  uint32_t randomSeed;
+  uint32_t randomSeeD;
   bool flagProblemWeightIsOK;
   Rational points;
   ProblemDataAdministrative adminData;

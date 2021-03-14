@@ -249,7 +249,7 @@ class StorageCalculator {
           name: "fileName",
           nameCookie: "fileName",
           nameURL: "fileName",
-          showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
+          problemPage: pageNamesOnWhichToShowProblemURLs,
         }),
         problemFileName: new StorageVariable({
           name: "problemFileName",
@@ -260,7 +260,10 @@ class StorageCalculator {
         exerciseType: new StorageVariable({
           name: "exerciseType",
           nameLocalStorage: "exerciseType",
-          nameURL: "exerciseType"
+          nameURL: "exerciseType",
+          showInURLOnPages: {
+            problemPage: true,
+          },
         }),
         randomSeed: new StorageVariable({
           name: "randomSeed",

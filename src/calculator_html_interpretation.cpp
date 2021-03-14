@@ -846,40 +846,40 @@ JSData WebAPIResponse::getExamPageJSON() {
     output[WebAPI::result::error] = "Scored quiz requires login";
     return output;
   }
-  CalculatorHTML theFile;
+  CalculatorHTML problem;
   std::stringstream errorAndDebugStream;
-  std::string problemBody = theFile.loadAndInterpretCurrentProblemItemJSON(
+  std::string problemBody = problem.loadAndInterpretCurrentProblemItemJSON(
     global.userRequestRequiresLoadingRealExamData(),
     global.getWebInput(WebAPI::problem::randomSeed),
     &errorAndDebugStream
   );
   //<-must come after theFile.outputHtmlHeadNoTag
-  errorAndDebugStream << theFile.outputDebugInformationBody;
+  errorAndDebugStream << problem.outputDebugInformationBody;
   out << problemBody;
   std::string commentsProblem = errorAndDebugStream.str();
   output[WebAPI::problem::content] = HtmlRoutines::convertStringToURLString(out.str(), false);
   if (commentsProblem != "") {
     output[WebAPI::problem::commentsProblem] = commentsProblem;
   }
-  output[WebAPI::problem::deadlineSingle] = theFile.outputDeadlineString;
-  output[WebAPI::problem::problemLabel] = theFile.outputProblemLabel;
-  output[WebAPI::problem::title] = theFile.outputProblemTitle;
-  output[WebAPI::problem::fileName] = theFile.fileName;
-  output[WebAPI::problem::idProblem] = theFile.fileName;
-  if (theFile.flagLoadedSuccessfully) {
-    output["answers"] = theFile.getEditorBoxesHTML();
+  output[WebAPI::problem::deadlineSingle] = problem.outputDeadlineString;
+  output[WebAPI::problem::problemLabel] = problem.outputProblemLabel;
+  output[WebAPI::problem::title] = problem.outputProblemTitle;
+  output[WebAPI::problem::fileName] = problem.fileName;
+  output[WebAPI::problem::idProblem] = problem.fileName;
+  if (problem.flagLoadedSuccessfully) {
+    output["answers"] = problem.getEditorBoxesHTML();
     JSData theScripts;
     theScripts = JSData::token::tokenArray;
-    theScripts.listObjects.setSize(theFile.scripts.size());
-    for (int i = 0; i < theFile.scripts.size(); i ++) {
-      theScripts[theFile.scripts.keys[i]] =
-      HtmlRoutines::convertStringToURLString(theFile.scripts.values[i], false);
+    theScripts.listObjects.setSize(problem.scripts.size());
+    for (int i = 0; i < problem.scripts.size(); i ++) {
+      theScripts[problem.scripts.keys[i]] =
+      HtmlRoutines::convertStringToURLString(problem.scripts.values[i], false);
     }
     output["scripts"] = theScripts;
-    output[WebAPI::problem::forReal] = theFile.flagIsForReal;
-    if (!theFile.flagIsForReal) {
+    output[WebAPI::problem::forReal] = problem.flagIsForReal;
+    if (!problem.flagIsForReal) {
       std::stringstream randomSeedStream;
-      randomSeedStream << theFile.problemData.randomSeed;
+      randomSeedStream << problem.problemData.randomSeeD;
       output[WebAPI::problem::randomSeed] = randomSeedStream.str();
     }
   }

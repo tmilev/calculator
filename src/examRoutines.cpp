@@ -443,7 +443,7 @@ bool CalculatorHTML::loadMe(
   this->problemData.checkConsistency();
   if (!this->flagIsForReal && inputRandomSeed != "") {
     std::stringstream randSeedStream(inputRandomSeed);
-    randSeedStream >> this->problemData.randomSeed;
+    randSeedStream >> this->problemData.randomSeeD;
     this->problemData.flagRandomSeedGiven = true;
   }
   return true;
@@ -459,6 +459,10 @@ std::string CalculatorHTML::loadAndInterpretCurrentProblemItemJSON(
     return WebAPI::problem::failedToLoadProblem;
   }
   std::stringstream out;
+  global.comments << "DEBUG: before interpret; user: " << global.userDefault.username << "<br>";
+  global.comments << "DEBUG: before interpret; rand seed: " << this->problemData.randomSeeD << "<br>";
+  global.comments << "DEBUG: flag rand seed given: " << this->problemData.flagRandomSeedGiven << "<br>";
+  global.comments << "DEBUG: need real rand seed: " << global.userRequestRequiresLoadingRealExamData() << "<br>";
   if (!this->interpretHtml(commentsOnFailure)) {
     out << "<b>Failed to interpret file: " << this->fileName << "</b>. ";
     out << "<br>We limit the number of generation attemps to "
@@ -580,7 +584,7 @@ std::string CalculatorHTML::toStringLinkCurrentAdmin(
   out << "fileName=" << urledProblem << "&"
   << global.toStringCalculatorArgumentsNoNavigation(&randomSeedContainer);
   if (includeRandomSeed) {
-    out << "randomSeed=" << this->problemData.randomSeed << "&";
+    out << "randomSeed=" << this->problemData.randomSeeD << "&";
   }
   if (setDebugFlag) {
     out << "debugFlag=true&";
@@ -698,25 +702,25 @@ bool CalculatorHtmlFunctions::interpretProblem(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::interpretProblem");
-  CalculatorHTML theProblem;
-  if (!input.isOfType<std::string>(&theProblem.parser.inputHtml)) {
+  CalculatorHTML problem;
+  if (!input.isOfType<std::string>(&problem.parser.inputHtml)) {
     return calculator << "Extracting calculator expressions from html takes as input strings. ";
   }
-  theProblem.problemData.flagRandomSeedGiven = true;
-  theProblem.problemData.randomSeed = calculator.objectContainer.pseudoRandom.getRandomSeed();
-  theProblem.interpretHtml(&calculator.comments);
+  problem.problemData.flagRandomSeedGiven = true;
+  problem.problemData.randomSeeD = calculator.objectContainer.pseudoRandom.getRandomSeed();
+  problem.interpretHtml(&calculator.comments);
   std::stringstream out;
-  out << theProblem.outputHtmlBodyNoTag;
-  out << "<hr>Time to parse html: " << std::fixed << theProblem.timeToParseHtml << " second(s). ";
+  out << problem.outputHtmlBodyNoTag;
+  out << "<hr>Time to parse html: " << std::fixed << problem.timeToParseHtml << " second(s). ";
   out << "<br>Intermediate interpretation times (per attempt): ";
-  for (int i = 0; i < theProblem.timeIntermediatePerAttempt.size; i ++) {
-    for (int j = 0; j < theProblem.timeIntermediateComments[i].size; j ++) {
-      out << "<br>" << theProblem.timeIntermediateComments[i][j]
-      << ": " << theProblem.timeIntermediatePerAttempt[i][j] << " second(s)";
+  for (int i = 0; i < problem.timeIntermediatePerAttempt.size; i ++) {
+    for (int j = 0; j < problem.timeIntermediateComments[i].size; j ++) {
+      out << "<br>" << problem.timeIntermediateComments[i][j]
+      << ": " << problem.timeIntermediatePerAttempt[i][j] << " second(s)";
     }
   }
   out << "<br>Interpretation times (per attempt): "
-  << theProblem.timePerAttempt.toStringCommaDelimited();
+  << problem.timePerAttempt.toStringCommaDelimited();
   return output.assignValue(out.str(), calculator);
 }
 
@@ -1067,7 +1071,7 @@ std::string CalculatorHTML::getProblemHeaderEnclosure() {
   std::stringstream out;
   out << Calculator::Atoms::commandEnclosure << "{}(";
   out << Calculator::Atoms::setRandomSeed
-  << "{}(" << this->problemData.randomSeed << "); ";
+  << "{}(" << this->problemData.randomSeeD << "); ";
   out << this->prepareUserInputBoxes();
   out << "); ";
   return out.str();
@@ -1076,7 +1080,7 @@ std::string CalculatorHTML::getProblemHeaderEnclosure() {
 std::string CalculatorHTML::getProblemHeaderWithoutEnclosure() {
   std::stringstream out;
   out << Calculator::Atoms::setRandomSeed
-  << " {}(" << this->problemData.randomSeed << "); ";
+  << " {}(" << this->problemData.randomSeeD << "); ";
   out << this->prepareUserInputBoxes();
   return out.str();
 }
@@ -1933,12 +1937,13 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
   this->timeToParseHtml = global.getElapsedSeconds() - startTime;
   this->maxInterpretationAttempts = 25;
   this->randomSeedPerAttempt.setSize(this->maxInterpretationAttempts);
-  this->randomSeedCurrent = 0;
   UnsecurePseudoRandomGenerator generator;
   if (!this->problemData.flagRandomSeedGiven) {
+    global.comments << "DEBUG: random seed was NOT GIVEN!!! " << this->problemData.randomSeeD;
     generator.setRandomSeedSmall(static_cast<uint32_t>(time(nullptr)));
   } else {
-    generator.setRandomSeedSmall(this->problemData.randomSeed);
+    global.comments << "DEBUG: random seed was given and is: " << this->problemData.randomSeeD;
+    generator.setRandomSeedSmall(this->problemData.randomSeeD);
   }
   this->randomSeedPerAttempt[0] = generator.getRandomSeed();
   for (int i = 1; i < this->randomSeedPerAttempt.size; i ++) {
@@ -1947,23 +1952,23 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
   this->timePerAttempt.setSize(0);
   this->timeIntermediatePerAttempt.setSize(0);
   this->timeIntermediateComments.setSize(0);
+
   this->numberOfInterpretationAttempts = 0;
-  while (this->numberOfInterpretationAttempts < this->maxInterpretationAttempts) {
+  for (int i = 0; i < this->maxInterpretationAttempts; i ++) {
+    this->problemData.randomSeeD = this->randomSeedPerAttempt[i];
+    this->numberOfInterpretationAttempts = i + 1;
     startTime = global.getElapsedSeconds();
     this->timeIntermediatePerAttempt.setSize(this->timeIntermediatePerAttempt.size + 1);
     this->timeIntermediatePerAttempt.lastObject()->setSize(0);
     this->timeIntermediateComments.setSize(this->timeIntermediateComments.size + 1);
     this->timeIntermediateComments.lastObject()->setSize(0);
     Calculator interpreter;
-    this->numberOfInterpretationAttempts ++;
     std::stringstream commentsOnLastFailure;
     if (this->interpretHtmlOneAttempt(interpreter, commentsOnLastFailure)) {
       this->timePerAttempt.addOnTop(global.getElapsedSeconds() - startTime);
       this->problemData.checkConsistency();
-      global.comments << "DEBUG: not storing random seed: " << this->randomSeedCurrent;
       return true;
     }
-    global.comments << "DEBUG: interpret failed once.";
     this->timePerAttempt.addOnTop(global.getElapsedSeconds() - startTime);
     if (this->numberOfInterpretationAttempts >= this->maxInterpretationAttempts && comments != nullptr) {
       *comments << "Failed attempt " << this->numberOfInterpretationAttempts
@@ -3063,9 +3068,9 @@ JSData CalculatorHTML::getEditorBoxesHTML() {
 
 bool CalculatorHTML::storeRandomSeedCurrent(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("CalculatorHTML::storeRandomSeedCurrent");
-  global.comments << "DEBUG: About to set prob data.";
   this->problemData.flagRandomSeedGiven = true;
   this->currentUser.setProblemData(this->fileName, this->problemData);
+  global.comments << "DEBUG: about to set prob data. rand seed: " << this->problemData.randomSeeD;
   if (!this->currentUser.storeProblemData(this->fileName, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<b style = 'color:red'>"
@@ -3076,6 +3081,7 @@ bool CalculatorHTML::storeRandomSeedCurrent(std::stringstream* commentsOnFailure
     }
     return false;
   }
+  global.comments << "DEBUG: rand seed after set: " << this->problemData.randomSeeD;
   return true;
 }
 
@@ -3133,7 +3139,7 @@ void CalculatorHTML::computeBodyDebugString() {
     out << "<br>" << this->logCommandsProblemGeneratioN.str() << "<hr>";
   }
   out << "<br>Random seed: "
-  << this->problemData.randomSeed
+  << this->problemData.randomSeeD
   << "<br>ForReal: " << this->flagIsForReal << "<br>seed given: "
   << this->problemData.flagRandomSeedGiven
   << "<br>flagRandomSeedGiven: "
@@ -3149,12 +3155,10 @@ void CalculatorHTML::computeBodyDebugString() {
 
 bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& interpreter, std::stringstream& comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::interpretHtmlOneAttempt");
+  global.comments << "DEBUG: intepret html with seed: " << this->problemData.randomSeeD;
   double startTime = global.getElapsedSeconds();
   std::stringstream outBody;
   std::stringstream outHeadPt2;
-  this->problemData.randomSeed = this->randomSeedPerAttempt[
-    this->numberOfInterpretationAttempts - 1
-  ];
   this->figureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("Time before after loading problem list");
@@ -3314,7 +3318,7 @@ std::string CalculatorHTML::toStringCalculatorArgumentsForProblem(
     out << "studentSection=" << HtmlRoutines::convertStringToURLString(studentSection, false) << "&";
   }
   if (includeRandomSeedIfAppropriate) {
-    out << "randomSeed=" << this->problemData.randomSeed << "&";
+    out << "randomSeed=" << this->problemData.randomSeeD << "&";
   }
   return out.str();
 }

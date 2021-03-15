@@ -363,9 +363,8 @@ bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
   if (!this->prepareSectionList(comments)) {
     return false;
   }
+  global.comments << "DEBUG: in loadDatabaseInfo, filename:" << this->fileName << "<br>";
   if (this->currentUser.problemDataJSON.objects.size() != 0 || this->currentUser.problemDataStrinG == "") {
-    // global.comments << "<hr>DEBUG: About to load " << this->fileName << " from: "
-    // << this->currentUser.problemDataJSON.toString() << "<br>";
     if (!this->currentUser.interpretDatabaseProblemDataJSON(this->currentUser.problemDataJSON, comments)) {
       comments << "Failed to interpret user's problem saved data. ";
       return false;
@@ -376,6 +375,7 @@ bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
       return false;
     }
   }
+  global.comments << "DEBUG: before merge weight!!!<br>";
   if (!this->mergeProblemWeight(
     this->currentUser.problemWeights,
     this->currentUser.problemData,
@@ -385,6 +385,7 @@ bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
     comments << "Failed to load problem weights. ";
     return false;
   }
+  global.comments << "DEBUG: before merge deadline!!!<br>";
   if (!this->mergeProblemDeadline(
     this->currentUser.deadlines, this->currentUser.problemData, &comments
   )) {
@@ -393,7 +394,12 @@ bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
   }
 
   if (this->currentUser.problemData.contains(this->fileName)) {
+    global.comments << "DEBUG: File:" << this->fileName << " contained in db.<br>";
     this->problemData = this->currentUser.problemData.getValueCreate(this->fileName);
+    global.comments << "DEBUG: and its value is: " << this->problemData.toString() << "<hr>";
+  } else {
+    global.comments << "DEBUG: File:" << this->fileName << " not! in db.<br>";
+
   }
   global.userDefault = this->currentUser;
   return true;
@@ -425,15 +431,16 @@ bool CalculatorHTML::loadMe(
     return false;
   }
   this->flagIsForReal = global.userRequestRequiresLoadingRealExamData();
+  global.comments << "DEBUG: loading prob: " << this->fileName << ". Need real seed: " << this->flagIsForReal << "<br>";
   this->topicListFileName = HtmlRoutines::convertURLStringToNormal(
     global.getWebInput(WebAPI::problem::topicList), false
   );
   if (doLoadDatabase) {
     std::stringstream errorStream;
-    this->loadDatabaseInfo(errorStream);
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << errorStream.str();
+    if (!this->loadDatabaseInfo(errorStream)) {
+      global.comments << "Error loading your problem from the database. " << errorStream.str();
     }
+    global.comments << "DEBUG: database load here ... " << commentsOnFailure->str() << "<br>";
     for (int i = 0; i < this->topics.theTopics.size(); i ++) {
       this->computeDeadlinesAllSectionsNoInheritance(
         this->topics.theTopics.values[i]

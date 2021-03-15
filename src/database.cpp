@@ -791,7 +791,10 @@ JSData ProblemData::storeJSON() const {
   JSData result;
   result.theType = JSData::token::tokenObject;
   if (this->flagRandomSeedGiven) {
-    result[WebAPI::problem::randomSeed] = static_cast<int>(this->randomSeeD);
+    std::stringstream stringConverter;
+    stringConverter << this->randomSeeD;
+    // Store random seed as string to avoid type conversion issues.
+    result[WebAPI::problem::randomSeed] = stringConverter.str();
   }
   for (int i = 0; i < this->answers.size(); i ++) {
     Answer& currentA = this->answers.values[i];
@@ -1047,6 +1050,8 @@ bool ProblemData::loadFromJSON(const JSData& inputData, std::stringstream& comme
   this->numCorrectlyAnswered = 0;
   this->totalNumSubmissions = 0;
   this->flagRandomSeedGiven = false;
+  this->randomSeeD = -1;
+  global.comments << "DEBUG: inside load from json input: " << inputData.toString() << "<hr>";
   if (global.userRequestRequiresLoadingRealExamData()) {
     if (inputData.objects.contains(WebAPI::problem::randomSeed)) {
       this->randomSeeD = static_cast<uint32_t>(atoi(
@@ -1116,6 +1121,7 @@ bool UserCalculator::interpretDatabaseProblemDataJSON(
   const JSData& data, std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("UserCalculator::interpretDatabaseProblemDataJSON");
+  global.comments << "DEBUG: inside interpretDatabaseProblemDataJSON<br>Data: " << "<br>";
   this->problemData.clear();
   this->problemData.setExpectedSize(data.objects.size());
   bool result = true;
@@ -1126,7 +1132,7 @@ bool UserCalculator::interpretDatabaseProblemDataJSON(
       result = false;
       continue;
     }
-    // global.comments << "<br>Load data for: " << data.objects.keys[i] << "<br>";
+    global.comments << "<br>Load data for: " << data.objects.keys[i] << " rand seed:"  << reader.randomSeeD << "<hr>";
     problemNameNoWhiteSpace = StringRoutines::stringTrimWhiteSpace(
       data.objects.keys[i]
     );

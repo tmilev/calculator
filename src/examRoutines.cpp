@@ -75,7 +75,6 @@ bool CalculatorHTML::mergeProblemWeight(
   if (inputJSON.theType != JSData::token::tokenObject) {
     return true;
   }
-  // global << Logger::green << "DEBUG: About to merge problem weight: " << inputJSON.toString() << Logger::endL;
   ProblemData emptyData;
   std::string currentCourse = global.userDefault.courseComputed;
   for (int i = 0; i < inputJSON.objects.size(); i ++) {
@@ -363,7 +362,6 @@ bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
   if (!this->prepareSectionList(comments)) {
     return false;
   }
-  global.comments << "DEBUG: in loadDatabaseInfo, filename:" << this->fileName << "<br>";
   if (this->currentUser.problemDataJSON.objects.size() != 0 || this->currentUser.problemDataStrinG == "") {
     if (!this->currentUser.interpretDatabaseProblemDataJSON(this->currentUser.problemDataJSON, comments)) {
       comments << "Failed to interpret user's problem saved data. ";
@@ -375,7 +373,6 @@ bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
       return false;
     }
   }
-  global.comments << "DEBUG: before merge weight!!!<br>";
   if (!this->mergeProblemWeight(
     this->currentUser.problemWeights,
     this->currentUser.problemData,
@@ -385,7 +382,6 @@ bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
     comments << "Failed to load problem weights. ";
     return false;
   }
-  global.comments << "DEBUG: before merge deadline!!!<br>";
   if (!this->mergeProblemDeadline(
     this->currentUser.deadlines, this->currentUser.problemData, &comments
   )) {
@@ -394,12 +390,7 @@ bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
   }
 
   if (this->currentUser.problemData.contains(this->fileName)) {
-    global.comments << "DEBUG: File:" << this->fileName << " contained in db.<br>";
     this->problemData = this->currentUser.problemData.getValueCreate(this->fileName);
-    global.comments << "DEBUG: and its value is: " << this->problemData.toString() << "<hr>";
-  } else {
-    global.comments << "DEBUG: File:" << this->fileName << " not! in db.<br>";
-
   }
   global.userDefault = this->currentUser;
   return true;
@@ -431,7 +422,6 @@ bool CalculatorHTML::loadMe(
     return false;
   }
   this->flagIsForReal = global.userRequestRequiresLoadingRealExamData();
-  global.comments << "DEBUG: loading prob: " << this->fileName << ". Need real seed: " << this->flagIsForReal << "<br>";
   this->topicListFileName = HtmlRoutines::convertURLStringToNormal(
     global.getWebInput(WebAPI::problem::topicList), false
   );
@@ -440,7 +430,6 @@ bool CalculatorHTML::loadMe(
     if (!this->loadDatabaseInfo(errorStream)) {
       global.comments << "Error loading your problem from the database. " << errorStream.str();
     }
-    global.comments << "DEBUG: database load here ... " << commentsOnFailure->str() << "<br>";
     for (int i = 0; i < this->topics.theTopics.size(); i ++) {
       this->computeDeadlinesAllSectionsNoInheritance(
         this->topics.theTopics.values[i]
@@ -466,10 +455,6 @@ std::string CalculatorHTML::loadAndInterpretCurrentProblemItemJSON(
     return WebAPI::problem::failedToLoadProblem;
   }
   std::stringstream out;
-  global.comments << "DEBUG: before interpret; user: " << global.userDefault.username << "<br>";
-  global.comments << "DEBUG: before interpret; rand seed: " << this->problemData.randomSeeD << "<br>";
-  global.comments << "DEBUG: flag rand seed given: " << this->problemData.flagRandomSeedGiven << "<br>";
-  global.comments << "DEBUG: need real rand seed: " << global.userRequestRequiresLoadingRealExamData() << "<br>";
   if (!this->interpretHtml(commentsOnFailure)) {
     out << "<b>Failed to interpret file: " << this->fileName << "</b>. ";
     out << "<br>We limit the number of generation attemps to "
@@ -1946,10 +1931,8 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
   this->randomSeedPerAttempt.setSize(this->maxInterpretationAttempts);
   UnsecurePseudoRandomGenerator generator;
   if (!this->problemData.flagRandomSeedGiven) {
-    global.comments << "DEBUG: random seed was NOT GIVEN!!! " << this->problemData.randomSeeD;
     generator.setRandomSeedSmall(static_cast<uint32_t>(time(nullptr)));
   } else {
-    global.comments << "DEBUG: random seed was given and is: " << this->problemData.randomSeeD;
     generator.setRandomSeedSmall(this->problemData.randomSeeD);
   }
   this->randomSeedPerAttempt[0] = generator.getRandomSeed();
@@ -3077,7 +3060,6 @@ bool CalculatorHTML::storeRandomSeedCurrent(std::stringstream* commentsOnFailure
   MacroRegisterFunctionWithName("CalculatorHTML::storeRandomSeedCurrent");
   this->problemData.flagRandomSeedGiven = true;
   this->currentUser.setProblemData(this->fileName, this->problemData);
-  global.comments << "DEBUG: about to set prob data. rand seed: " << this->problemData.randomSeeD;
   if (!this->currentUser.storeProblemData(this->fileName, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<b style = 'color:red'>"
@@ -3088,7 +3070,6 @@ bool CalculatorHTML::storeRandomSeedCurrent(std::stringstream* commentsOnFailure
     }
     return false;
   }
-  global.comments << "DEBUG: rand seed after set: " << this->problemData.randomSeeD;
   return true;
 }
 
@@ -3162,7 +3143,6 @@ void CalculatorHTML::computeBodyDebugString() {
 
 bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& interpreter, std::stringstream& comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::interpretHtmlOneAttempt");
-  global.comments << "DEBUG: intepret html with seed: " << this->problemData.randomSeeD;
   double startTime = global.getElapsedSeconds();
   std::stringstream outBody;
   std::stringstream outHeadPt2;

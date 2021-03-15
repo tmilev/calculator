@@ -1021,7 +1021,6 @@ bool Database::updateOneFromSome(
   std::stringstream* commentsOnFailure
 ) {
   if (global.flagDatabaseCompiled) {
-    global.comments << "DEBUG: about to update one from some: ...";
     return this->mongoDB.updateOneFromSome(findOrQueries, updateQuery, commentsOnFailure);
   }
   if (commentsOnFailure != nullptr) {

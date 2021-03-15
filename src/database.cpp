@@ -1051,7 +1051,6 @@ bool ProblemData::loadFromJSON(const JSData& inputData, std::stringstream& comme
   this->totalNumSubmissions = 0;
   this->flagRandomSeedGiven = false;
   this->randomSeeD = -1;
-  global.comments << "DEBUG: inside load from json input: " << inputData.toString() << "<hr>";
   if (global.userRequestRequiresLoadingRealExamData()) {
     if (inputData.objects.contains(WebAPI::problem::randomSeed)) {
       this->randomSeeD = static_cast<uint32_t>(atoi(
@@ -1093,7 +1092,6 @@ bool ProblemData::loadFromJSON(const JSData& inputData, std::stringstream& comme
 
 bool UserCalculator::interpretDatabaseProblemData(const std::string& theInfo, std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::interpretDatabaseProblemData");
-  global.comments << "DEBUG: inside interpret db problem data";
   MapList<std::string, std::string, MathRoutines::hashString> theMap;
   if (!HtmlRoutines::chopPercentEncodedString(theInfo, theMap, commentsOnFailure)) {
     return false;
@@ -1121,7 +1119,6 @@ bool UserCalculator::interpretDatabaseProblemDataJSON(
   const JSData& data, std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("UserCalculator::interpretDatabaseProblemDataJSON");
-  global.comments << "DEBUG: inside interpretDatabaseProblemDataJSON<br>Data: " << "<br>";
   this->problemData.clear();
   this->problemData.setExpectedSize(data.objects.size());
   bool result = true;
@@ -1301,8 +1298,6 @@ bool UserCalculator::storeProblemData(
   QuerySet update;
   update.nestedLabels.addOnTop(DatabaseStrings::labelProblemDataJSON);
   update.value[fileNamE] = problem.storeJSON();
-  global.comments << "DEBUG: about to store json: file: "
-  << fileNamE << ", " << update.value[fileNamE];
   return Database::get().updateOneFromSome(
     this->getFindMeFromUserNameQuery(), update, commentsOnFailure
   );
@@ -1786,7 +1781,6 @@ void UserCalculator::computeHashedSaltedPassword() {
 
 bool UserCalculator::storeToDatabase(bool doSetPassword, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::storeToDatabase");
- // global.comments << "DEBUG: store to database, stack: " << global.fatal.getStackTraceEtcErrorMessageConsole();
   QueryExact findUser(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, this->username);
   if (this->enteredPassword != "" && doSetPassword) {
     this->computeHashedSaltedPassword();

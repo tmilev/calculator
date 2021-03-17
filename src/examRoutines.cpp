@@ -3294,9 +3294,11 @@ std::string CalculatorHTML::toStringCalculatorArgumentsForProblem(
   out << global.toStringCalculatorArgumentsNoNavigation(&excludedTags)
   << "courseHome=" << global.getWebInput(WebAPI::problem::courseHome) << "&";
   if (this->fileName != "") {
-    out << WebAPI::problem::fileName << "=" << HtmlRoutines::convertStringToURLString(this->fileName, false) << "&";
+    out << WebAPI::problem::fileName << "="
+    << HtmlRoutines::convertStringToURLString(this->fileName, false) << "&";
   } else {
-    out << WebAPI::problem::fileName << "=" << HtmlRoutines::convertStringToURLString(global.getWebInput(WebAPI::problem::fileName), false)
+    out << WebAPI::problem::fileName << "="
+    << HtmlRoutines::convertStringToURLString(global.getWebInput(WebAPI::problem::fileName), false)
     << "&";
   }
   out << "topicList=" << global.getWebInput(WebAPI::problem::topicList) << "&";

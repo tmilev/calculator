@@ -1129,7 +1129,6 @@ bool UserCalculator::interpretDatabaseProblemDataJSON(
       result = false;
       continue;
     }
-    global.comments << "<br>Load data for: " << data.objects.keys[i] << " rand seed:"  << reader.randomSeeD << "<hr>";
     problemNameNoWhiteSpace = StringRoutines::stringTrimWhiteSpace(
       data.objects.keys[i]
     );

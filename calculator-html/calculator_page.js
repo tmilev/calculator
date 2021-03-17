@@ -1,7 +1,6 @@
 "use strict";
 const submitRequests = require("./submit_requests");
 const pathnames = require("./pathnames");
-const drawing = require("./graphics").drawing;
 const ids = require("./ids_dom_elements");
 const miscellaneousFrontend = require("./miscellaneous_frontend");
 const miscellaneous = require("./miscellaneous_frontend");
@@ -108,6 +107,9 @@ class Calculator {
     this.initialized = false;
     /**@type{InputPanelData|null} */
     this.calculatorPanel = null;
+    this.leftString = "";
+    this.middleEditedString = "";
+    this.rightString = "";
   }
 
   processOneFunctionAtom(handlers) {
@@ -193,6 +195,10 @@ class Calculator {
     }
   }
 
+  inputMainTextbox() {
+    return document.getElementById(ids.domElements.pages.calculator.inputMain);
+  }
+
   initialize() {
     if (this.initialized) {
       return;
@@ -215,7 +221,7 @@ class Calculator {
         processMonitoring.monitor.togglePause();
       }
     )
-    let inputMain = document.getElementById(ids.domElements.pages.calculator.inputMain);
+    let inputMain = this.inputMainTextbox();
     inputMain.addEventListener("keypress", (e) => {
       this.submitCalculatorInputOnEnter(e);
     });
@@ -477,17 +483,9 @@ class Calculator {
     if (!this.calculatorPanel.flagCalculatorMQStringIsOK) {
       return;
     }
-    let theBoxContent = this.equationEditor.rootNode.toLatex();
-    if (this.calculatorLeftString === null || this.calculatorRightString === null) {
-      this.editorHelpCalculator();
-    }
-    let theInserted = initializeButtons.processMathQuillLatex(theBoxContent);
-    if (theInserted.length > 0 && startingCharacterSectionUnderMathQuillEdit.length > 0) {
-      if (theInserted[0] !== ' ') {
-        theInserted = ' ' + theInserted;
-      }
-    }
-    latexBox.value = this.calculatorLeftString + theInserted + this.calculatorRightString;
+    let content = this.calculatorPanel.equationEditor.rootNode.toLatex();
+    this.middleEditedString = initializeButtons.processMathQuillLatex(content);
+    this.inputMainTextbox().value = this.leftString + this.middleEditedString + this.rightString;
   }
 }
 

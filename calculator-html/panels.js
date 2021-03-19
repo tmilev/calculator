@@ -178,8 +178,8 @@ class PanelExpandable {
       this.panelContent.style.maxHeight = "0px";
       this.panelContent.style.maxWidth = "0px";
     } else {
-      this.panelContent.style.maxHeight = this.originalHeight;
-      this.panelContent.style.maxWidth = this.originalWidth;
+      this.panelContent.style.maxHeight = `${this.originalHeight + 45}`;
+      this.panelContent.style.maxWidth = `${this.originalWidth + 35}`;
     }
   }
 
@@ -196,8 +196,8 @@ class PanelExpandable {
     }
     this.panelContent.textContent = "";
     this.panelContent.appendChild(input);
-    this.originalHeight = window.getComputedStyle(this.panelContent).height;
-    this.originalWidth = window.getComputedStyle(this.panelContent).width;
+    this.originalHeight = parseInt(window.getComputedStyle(this.panelContent).height);
+    this.originalWidth = parseInt(window.getComputedStyle(this.panelContent).width);
     this.matchPanelStatus();
   }
 

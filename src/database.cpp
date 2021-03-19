@@ -1286,17 +1286,17 @@ List<QueryExact> UserCalculatorData::getFindMeFromUserNameQuery() {
 }
 
 bool UserCalculator::storeProblemData(
-  const std::string& fileNamE, std::stringstream* commentsOnFailure
+  const std::string& fileName, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("UserCalculator::storeProblemData");
-  if (!this->problemData.contains(fileNamE)) {
+  if (!this->problemData.contains(fileName)) {
     global.fatal << "I was asked to store fileName: "
-    << fileNamE << " but I have no record of it in my problem data map. " << global.fatal;
+    << fileName << " but I have no record of it in my problem data map. " << global.fatal;
   }
-  const ProblemData& problem = this->problemData.getValueNoFail(fileNamE);
+  const ProblemData& problem = this->problemData.getValueNoFail(fileName);
   QuerySet update;
   update.nestedLabels.addOnTop(DatabaseStrings::labelProblemDataJSON);
-  update.value[fileNamE] = problem.storeJSON();
+  update.value[fileName] = problem.storeJSON();
   return Database::get().updateOneFromSome(
     this->getFindMeFromUserNameQuery(), update, commentsOnFailure
   );

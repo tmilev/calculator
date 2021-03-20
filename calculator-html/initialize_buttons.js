@@ -142,10 +142,6 @@ class InputPanelData {
     if (input.equationEditorContainer !== undefined) {
       this.equationEditorContainer = input.equationEditorContainer;
     }
-    this.idEditorComments = input.idEditorComments;
-    if (this.idEditorComments === "") {
-      this.idEditorComments = "";
-    }
     this.problemId = input.problemId;
     if (this.problemId === "") {
       this.problemId = "";
@@ -313,9 +309,6 @@ class InputPanelData {
 
     if (this.flagCalculatorPanel === undefined) {
       this.flagCalculatorPanel = false;
-    }
-    if (this.idEditorComments === undefined) {
-      this.idEditorComments = null;
     }
   }
 

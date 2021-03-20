@@ -27,7 +27,6 @@ class CalculatorEquationEditor {
   initialize() {
     this.calculatorPanel = new InputPanelData({
       idEquationEditorElement: "mainInputEditorField",
-      idEditorComments: "mqPanelComments",
       problemId: "",
       idPureLatex: ids.domElements.pages.calculator.inputMain,
       idButtonContainer: 'mainInputEditorFieldButtons',
@@ -103,122 +102,30 @@ class CalculatorEquationEditor {
     return calculatorSeparatorCounts.leftSeparators > calculatorSeparatorCounts.rightSeparators;
   }
 
-
-  getSemiColumnEnclosure() {
-    let startPos = this.selectionEnd;
-    let calculatorInput = this.calculatorPanel.getPureLatexElement();
-    for (; startPos > 0 && startPos < calculatorInput.value.length; startPos--) {
-      if (this.isSeparatorCharacter(calculatorInput.value[startPos])) {
-        break;
-      }
-    }
-    if (startPos >= calculatorInput.value.length) {
-      startPos = calculatorInput.value.length - 1;
-    }
-    let rightPos = startPos;
-    let lastSeparator = startPos;
-    let lastWord = '';
-    let currentChar = 'a';
-    for (; rightPos < calculatorInput.value.length - 1; rightPos++) {
-      currentChar = calculatorInput.value[rightPos];
-      if (currentChar === ';') {
-        if (rightPos > 0) {
-          rightPos--;
-        }
-        break;
-      }
-      if (this.isSeparatorCharacter(currentChar)) {
-        lastWord = '';
-        lastSeparator = rightPos;
-      } else {
-        lastWord += currentChar;
-      }
-      if (lastWord.length > 3) {
-        if (!this.isKeyWordStartKnownToMathQuill(lastWord)) {
-          rightPos = lastSeparator;
-          break;
-        }
-      }
-    }
-    let calculatorSeparatorCounts = {
-      leftSeparators: 0,
-      rightSeparators: 0
-    };
-    let leftPos = rightPos - 1;
-    lastWord = '';
-    lastSeparator = rightPos;
-    for (; leftPos > 0; leftPos--) {
-      currentChar = calculatorInput.value[leftPos];
-      if (currentChar === ';') {
-        leftPos++;
-        break;
-      }
-      if (this.accountCalculatorDelimiterReturnMustEndSelection(calculatorInput.value[leftPos], calculatorSeparatorCounts)) {
-        leftPos++;
-        break;
-      }
-      if (this.isSeparatorCharacter(currentChar)) {
-        lastWord = '';
-        lastSeparator = leftPos;
-      } else {
-        lastWord = currentChar + lastWord;
-      }
-      if (lastWord.length > 3) {
-        if (!this.isKeyWordEndKnownToMathQuill(lastWord)) {
-          leftPos = lastSeparator;
-          break;
-        }
-      }
-    }
-    if (leftPos > rightPos) {
-      leftPos = rightPos;
-    }
-    if (rightPos - leftPos > 1000) {
-      console.log(`Latex may be too large for the editor, ${rightPos - leftPos} characters.`);
-    }
-    let startingCharacterSectionUnderMathQuillEdit = '';
-    if (calculatorInput.value[leftPos] === '\n' || calculatorInput.value[leftPos] === ' ' ||
-      calculatorInput.value[leftPos] === '\t') {
-      startingCharacterSectionUnderMathQuillEdit = calculatorInput.value[leftPos];
-    }
-    this.chopStrings(leftPos, rightPos);
-  }
-
-  chopStrings(
-    /**@type{number} */
-    calculatorLeftPosition,
-    /**@type{number} */
-    calculatorRightPosition,
-  ) {
-    let mqCommentsSpan = document.getElementById(this.calculatorPanel.idEditorComments);
-    if (calculatorRightPosition - calculatorLeftPosition > 1000) {
-      this.flagCalculatorInputOK = false;
-      mqCommentsSpan.innerHTML = "<b style ='color:red'>Formula too big </b>";
-      return;
-    }
-    this.flagCalculatorInputOK = true;
-    mqCommentsSpan.innerHTML = "Equation assistant";
-    this.calculatorPanel.getEditorContainer().style.visibility = "visible";
-    let calculatorInput = this.calculatorPanel.getPureLatexElement();
-    this.theLaTeXString = calculatorInput.value.substring(calculatorLeftPosition, calculatorRightPosition + 1);
-    this.calculatorLeftString = calculatorInput.value.substring(0, calculatorLeftPosition);
-    this.calculatorRightString = calculatorInput.value.substring(calculatorRightPosition + 1);
+  commentsElement() {
+    return document.getElementById(ids.domElements.pages.calculator.editorComments);
   }
 
   writeIntoEquationEditor() {
-    this.getSemiColumnEnclosure();
     if (this.calculatorPanel.equationEditor === null) {
       return;
     }
     this.ignoreNextEditorEvent = true;
-    if (this.flagCalculatorInputOK) {
-      this.calculatorPanel.equationEditor.writeLatex(this.theLaTeXString);
+    let textBox = this.inputMainTextbox();
+    this.selectionEnd = textBox.selectionEnd;
+    this.theLaTeXString = textBox.value;
+    if (this.theLaTeXString.length > 10000) {
+      this.flagCalculatorInputOK = false;
+      this.commentsElement().innerHTML = "<b style ='color:red'>Formula too big </b>";
+      return;
     }
+    this.flagCalculatorInputOK = true;
+    this.calculatorPanel.equationEditor.writeLatex(this.theLaTeXString);
     this.ignoreNextEditorEvent = false;
   }
 
   equationEditorChangeCallback() {
-    if (!this.calculatorPanel.flagCalculatorInputOK) {
+    if (!this.flagCalculatorInputOK) {
       return;
     }
     let content = this.calculatorPanel.equationEditor.rootNode.toLatex();
@@ -226,8 +133,9 @@ class CalculatorEquationEditor {
     this.inputMainTextbox().value = this.leftString + this.middleEditedString + this.rightString;
   }
 
+  /**@returns{HTMLTextAreaElement} */
   inputMainTextbox() {
-    return document.getElementById(ids.domElements.pages.calculator.inputMain);
+    return this.calculatorPanel.getPureLatexElement();
   }
 }
 

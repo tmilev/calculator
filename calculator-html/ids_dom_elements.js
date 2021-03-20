@@ -38,6 +38,8 @@ let domElements = {
       button: "buttonEditPage",
     },
     calculator: {
+      editorComments: "calculatorEditorComments",
+      editorCommentsDebug: "calculatorEditorDebug",
       inputMain: "mainInputID",
       monitoring: {
         progressTimer: "idProgressReportTimer",

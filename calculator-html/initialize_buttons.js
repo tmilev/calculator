@@ -35,10 +35,6 @@ let keyWordsKnownToMathQuill = [
 
 let charsToSplit = ['x', 'y'];
 let panelsCollapseStatus = {};
-let calculatorSeparatorLeftDelimiters = {
-  '(': true,
-  '{': true
-};
 
 function processMathQuillLatex(theText) {
   for (let i = 0; i < theText.length; i++) {

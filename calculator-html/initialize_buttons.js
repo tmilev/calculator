@@ -319,7 +319,6 @@ class InputPanelData {
     this.flagAnswerPanel = input.flagAnswerPanel;
     this.flagInitialized = false;
     this.flagCalculatorPanel = input.flagCalculatorPanel;
-    this.flagCalculatorMQStringIsOK = true;
     this.flagGenerateQuestionAndAnswerField = true;
     this.calculatorLeftString = "";
     this.calculatorRightString = "";
@@ -369,18 +368,6 @@ class InputPanelData {
     this.equationEditor.writeLatex(document.getElementById(this.idPureLatex).value + ' ');
     this.ignoreNextEditorEvent = false;
     this.submitPreviewWithTimeOut();
-  }
-
-  editorHelpCalculator() {
-    this.getSemiColumnEnclosure();
-    if (this.equationEditor === null) {
-      return;
-    }
-    this.ignoreNextEditorEvent = true;
-    if (this.flagCalculatorMQStringIsOK) {
-      this.equationEditor.writeLatex(this.theLaTeXString);
-    }
-    this.ignoreNextEditorEvent = false;
   }
 
   editLatexHook(
@@ -436,107 +423,6 @@ class InputPanelData {
     this.flagRendered = true;
     this.equationEditor.updateDOM();
     this.equationEditor.updateAlignment();
-  }
-
-  chopStrings(
-    /**@type{number} */
-    calculatorLeftPosition,
-    /**@type{number} */
-    calculatorRightPosition,
-  ) {
-    let mqCommentsSpan = document.getElementById(this.idEditorComments);
-    if (calculatorRightPosition - calculatorLeftPosition > 1000) {
-      this.flagCalculatorMQStringIsOK = false;
-      mqCommentsSpan.innerHTML = "<b style ='color:red'>Formula too big </b>";
-      return;
-    }
-    this.flagCalculatorMQStringIsOK = true;
-    mqCommentsSpan.innerHTML = "Equation assistant";
-    this.getEditorContainer().style.visibility = "visible";
-    let calculatorInput = this.getPureLatexElement();
-    this.theLaTeXString = calculatorInput.value.substring(calculatorLeftPosition, calculatorRightPosition + 1);
-    this.calculatorLeftString = calculatorInput.value.substring(0, calculatorLeftPosition);
-    this.calculatorRightString = calculatorInput.value.substring(calculatorRightPosition + 1);
-  }
-
-  getSemiColumnEnclosure() {
-    let startPos = this.selectionEnd;
-    let calculatorInput = this.getPureLatexElement();
-    for (; startPos > 0 && startPos < calculatorInput.value.length; startPos--) {
-      if (isSeparatorCharacter(calculatorInput.value[startPos])) {
-        break;
-      }
-    }
-    if (startPos >= calculatorInput.value.length) {
-      startPos = calculatorInput.value.length - 1;
-    }
-    let rightPos = startPos;
-    let lastSeparator = startPos;
-    let lastWord = '';
-    let currentChar = 'a';
-    for (; rightPos < calculatorInput.value.length - 1; rightPos++) {
-      currentChar = calculatorInput.value[rightPos];
-      if (currentChar === ';') {
-        if (rightPos > 0) {
-          rightPos--;
-        }
-        break;
-      }
-      if (isSeparatorCharacter(currentChar)) {
-        lastWord = '';
-        lastSeparator = rightPos;
-      } else {
-        lastWord += currentChar;
-      }
-      if (lastWord.length > 3) {
-        if (!isKeyWordStartKnownToMathQuill(lastWord)) {
-          rightPos = lastSeparator;
-          break;
-        }
-      }
-    }
-    let calculatorSeparatorCounts = {
-      leftSeparators: 0,
-      rightSeparators: 0
-    };
-    let leftPos = rightPos - 1;
-    lastWord = '';
-    lastSeparator = rightPos;
-    for (; leftPos > 0; leftPos--) {
-      currentChar = calculatorInput.value[leftPos];
-      if (currentChar === ';') {
-        leftPos++;
-        break;
-      }
-      if (accountCalculatorDelimiterReturnMustEndSelection(calculatorInput.value[leftPos], calculatorSeparatorCounts)) {
-        leftPos++;
-        break;
-      }
-      if (isSeparatorCharacter(currentChar)) {
-        lastWord = '';
-        lastSeparator = leftPos;
-      } else {
-        lastWord = currentChar + lastWord;
-      }
-      if (lastWord.length > 3) {
-        if (!isKeyWordEndKnownToMathQuill(lastWord)) {
-          leftPos = lastSeparator;
-          break;
-        }
-      }
-    }
-    if (leftPos > rightPos) {
-      leftPos = rightPos;
-    }
-    if (rightPos - leftPos > 1000) {
-      console.log(`Latex may be too large for the editor, ${rightPos - leftPos} characters.`);
-    }
-    let startingCharacterSectionUnderMathQuillEdit = '';
-    if (calculatorInput.value[leftPos] === '\n' || calculatorInput.value[leftPos] === ' ' ||
-      calculatorInput.value[leftPos] === '\t') {
-      startingCharacterSectionUnderMathQuillEdit = calculatorInput.value[leftPos];
-    }
-    this.chopStrings(leftPos, rightPos);
   }
 
   computeFlags(

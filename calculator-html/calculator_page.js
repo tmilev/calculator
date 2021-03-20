@@ -7,11 +7,9 @@ const miscellaneous = require("./miscellaneous_frontend");
 const BufferCalculator = require("./buffer").BufferCalculator;
 const panels = require("./panels");
 const processMonitoring = require("./process_monitoring");
-const InputPanelData = require("./initialize_buttons").InputPanelData;
 const storage = require("./storage");
-const autocomplete = require("./autocomplete");
-const initializeButtons = require("./initialize_buttons");
 const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
+const calculatorPageEditor = require("./calculator_page_editor");
 
 class AtomHandler {
   constructor() {
@@ -105,11 +103,9 @@ class Calculator {
     this.flagTypeset = false;
     /**@type{boolean} */
     this.initialized = false;
-    /**@type{InputPanelData|null} */
-    this.calculatorPanel = null;
-    this.leftString = "";
-    this.middleEditedString = "";
-    this.rightString = "";
+    this.editor = new calculatorPageEditor.CalculatorEquationEditor((event) => {
+      this.submitCalculatorInputOnEnter(event);
+    });
   }
 
   processOneFunctionAtom(handlers) {
@@ -195,54 +191,14 @@ class Calculator {
     }
   }
 
-  inputMainTextbox() {
-    return document.getElementById(ids.domElements.pages.calculator.inputMain);
-  }
-
   initialize() {
     if (this.initialized) {
       return;
     }
     this.initialized = true;
-    this.calculatorPanel = new InputPanelData({
-      idEquationEditorElement: "mainInputEditorField",
-      idEditorComments: "mqPanelComments",
-      problemId: "",
-      idPureLatex: ids.domElements.pages.calculator.inputMain,
-      idButtonContainer: 'mainInputEditorFieldButtons',
-      flagCalculatorPanel: true,
-      valueChangeHandler: () => {
-        this.equationEditorChangeCallback();
-      },
-    });
-    this.calculatorPanel.initialize();
-    document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle).addEventListener(
-      "click", () => {
-        processMonitoring.monitor.togglePause();
-      }
-    )
-    let inputMain = this.inputMainTextbox();
-    inputMain.addEventListener("keypress", (e) => {
-      this.submitCalculatorInputOnEnter(e);
-    });
-    inputMain.addEventListener("keyup", (e) => {
-      autocomplete.suggestWord();
-      this.calculatorPanel.editorHelpCalculator();
-    });
-    inputMain.addEventListener("keydown", (e) => {
-      autocomplete.suggestWord();
-      this.calculatorPanel.editorHelpCalculator();
-      autocomplete.arrowAction(e);
-    });
-    inputMain.addEventListener("mouseup", (e) => {
-      autocomplete.suggestWord();
-      this.calculatorPanel.editorHelpCalculator();
-    });
-    inputMain.addEventListener("input", (e) => {
-      autocomplete.suggestWord();
-      this.calculatorPanel.editorHelpCalculator();
-    });
+    this.editor.initialize();
   }
+
   selectCalculatorPage() {
     this.initialize();
     this.submitComputation();
@@ -434,7 +390,7 @@ class Calculator {
     if (!this.initialized) {
       return;
     }
-    this.calculatorPanel.editorHelpCalculator();
+    this.editor.writeIntoEquationEditor();
   }
 
   submitComputationPartTwo(input) {
@@ -477,15 +433,6 @@ class Calculator {
   submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus) {
     let inputParams = this.getQueryStringSubmitStringAsMainInput(theString, requestType);
     this.submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus);
-  }
-
-  equationEditorChangeCallback() {
-    if (!this.calculatorPanel.flagCalculatorMQStringIsOK) {
-      return;
-    }
-    let content = this.calculatorPanel.equationEditor.rootNode.toLatex();
-    this.middleEditedString = initializeButtons.processMathQuillLatex(content);
-    this.inputMainTextbox().value = this.leftString + this.middleEditedString + this.rightString;
   }
 }
 

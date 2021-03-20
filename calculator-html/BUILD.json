@@ -48,5 +48,6 @@
   "/calculator-html/hard_coded_problems.js",
   "/calculator-html/answer_panel.js",
   "/calculator-html/graphics_serialization.js",
-  "/calculator-html/dynamic_javascript.js"
+  "/calculator-html/dynamic_javascript.js",
+  "/calculator-html/calculator_page_editor.js"
 ]

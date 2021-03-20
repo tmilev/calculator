@@ -73,16 +73,6 @@ function processMathQuillLatex(theText) {
   return theText;
 }
 
-function accountCalculatorDelimiterReturnMustEndSelection(character, calculatorSeparatorCounts) {
-  if (character in calculatorSeparatorLeftDelimiters) {
-    calculatorSeparatorCounts.leftSeparators++;
-  }
-  if (character in calculatorSeparatorLeftDelimiters) {
-    calculatorSeparatorCounts.rightSeparators++;
-  }
-  return calculatorSeparatorCounts.leftSeparators > calculatorSeparatorCounts.rightSeparators;
-}
-
 function initializeAccordionButtons() {
   ///initializing accordions
   if (localStorage !== undefined) {
@@ -322,8 +312,6 @@ class InputPanelData {
     this.flagGenerateQuestionAndAnswerField = true;
     this.calculatorLeftString = "";
     this.calculatorRightString = "";
-    this.theLaTeXString = null;
-    this.selectionEnd = 0;
     this.javascriptInsertionAlreadyCalled = false;
     this.timerForPreviewAnswers = 0;
 
@@ -688,34 +676,6 @@ class InputPanelData {
     toggle.textContent = "default";
     return toggle;
   }
-}
-
-function isSeparatorCharacter(theChar) {
-  if (theChar[0] >= 'a' && theChar[0] <= 'z') {
-    return false;
-  }
-  if (theChar[0] >= 'A' && theChar[0] <= 'Z') {
-    return false;
-  }
-  return true;
-}
-
-function isKeyWordStartKnownToMathQuill(input) {
-  for (let i = 0; i < keyWordsKnownToMathQuill.length; i++) {
-    if (keyWordsKnownToMathQuill[i].startsWith(input)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function isKeyWordEndKnownToMathQuill(input) {
-  for (let i = 0; i < keyWordsKnownToMathQuill.length; i++) {
-    if (keyWordsKnownToMathQuill[i].endsWith(input)) {
-      return true;
-    }
-  }
-  return false;
 }
 
 module.exports = {

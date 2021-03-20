@@ -17,6 +17,11 @@ class CalculatorEquationEditor {
     this.flagCalculatorInputOK = true;
     this.keyPressHandler = keyPressHandler;
     this.theLaTeXString = null;
+    this.selectionEnd = 0;
+    this.calculatorSeparatorLeftDelimiters = {
+      '(': true,
+      '{': true
+    };
   }
 
   initialize() {
@@ -60,11 +65,50 @@ class CalculatorEquationEditor {
     });
   }
 
+  isSeparatorCharacter(theChar) {
+    if (theChar[0] >= 'a' && theChar[0] <= 'z') {
+      return false;
+    }
+    if (theChar[0] >= 'A' && theChar[0] <= 'Z') {
+      return false;
+    }
+    return true;
+  }
+
+  isKeyWordStartKnownToMathQuill(input) {
+    for (let i = 0; i < keyWordsKnownToMathQuill.length; i++) {
+      if (keyWordsKnownToMathQuill[i].startsWith(input)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  isKeyWordEndKnownToMathQuill(input) {
+    for (let i = 0; i < keyWordsKnownToMathQuill.length; i++) {
+      if (keyWordsKnownToMathQuill[i].endsWith(input)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  accountCalculatorDelimiterReturnMustEndSelection(character, calculatorSeparatorCounts) {
+    if (character in this.calculatorSeparatorLeftDelimiters) {
+      calculatorSeparatorCounts.leftSeparators++;
+    }
+    if (character in this.calculatorSeparatorLeftDelimiters) {
+      calculatorSeparatorCounts.rightSeparators++;
+    }
+    return calculatorSeparatorCounts.leftSeparators > calculatorSeparatorCounts.rightSeparators;
+  }
+
+
   getSemiColumnEnclosure() {
     let startPos = this.selectionEnd;
     let calculatorInput = this.calculatorPanel.getPureLatexElement();
     for (; startPos > 0 && startPos < calculatorInput.value.length; startPos--) {
-      if (isSeparatorCharacter(calculatorInput.value[startPos])) {
+      if (this.isSeparatorCharacter(calculatorInput.value[startPos])) {
         break;
       }
     }
@@ -83,14 +127,14 @@ class CalculatorEquationEditor {
         }
         break;
       }
-      if (isSeparatorCharacter(currentChar)) {
+      if (this.isSeparatorCharacter(currentChar)) {
         lastWord = '';
         lastSeparator = rightPos;
       } else {
         lastWord += currentChar;
       }
       if (lastWord.length > 3) {
-        if (!isKeyWordStartKnownToMathQuill(lastWord)) {
+        if (!this.isKeyWordStartKnownToMathQuill(lastWord)) {
           rightPos = lastSeparator;
           break;
         }
@@ -109,18 +153,18 @@ class CalculatorEquationEditor {
         leftPos++;
         break;
       }
-      if (accountCalculatorDelimiterReturnMustEndSelection(calculatorInput.value[leftPos], calculatorSeparatorCounts)) {
+      if (this.accountCalculatorDelimiterReturnMustEndSelection(calculatorInput.value[leftPos], calculatorSeparatorCounts)) {
         leftPos++;
         break;
       }
-      if (isSeparatorCharacter(currentChar)) {
+      if (this.isSeparatorCharacter(currentChar)) {
         lastWord = '';
         lastSeparator = leftPos;
       } else {
         lastWord = currentChar + lastWord;
       }
       if (lastWord.length > 3) {
-        if (!isKeyWordEndKnownToMathQuill(lastWord)) {
+        if (!this.isKeyWordEndKnownToMathQuill(lastWord)) {
           leftPos = lastSeparator;
           break;
         }

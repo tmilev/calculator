@@ -1272,7 +1272,11 @@ bool UserCalculator::computeAndStoreActivationStats(
 List<QueryExact> UserCalculatorData::getFindMeFromUserNameQuery() {
   List<QueryExact> result;
   if (this->username != "") {
-    QueryExact findByUsername(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, this->username);
+    QueryExact findByUsername(
+      DatabaseStrings::tableUsers,
+      DatabaseStrings::labelUsername,
+      this->username
+    );
     result.addOnTop(findByUsername);
   }
   if (this->email != "") {

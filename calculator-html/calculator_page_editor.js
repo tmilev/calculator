@@ -11,17 +11,10 @@ class CalculatorEquationEditor {
   ) {
     /**@type{InputPanelData|null} */
     this.calculatorPanel = null;
-    this.leftString = "";
-    this.middleEditedString = "";
-    this.rightString = "";
     this.flagCalculatorInputOK = true;
     this.keyPressHandler = keyPressHandler;
     this.theLaTeXString = null;
-    this.selectionEnd = 0;
-    this.calculatorSeparatorLeftDelimiters = {
-      '(': true,
-      '{': true
-    };
+    this.extractor = new EditorInputExtractor();
   }
 
   initialize() {
@@ -103,7 +96,7 @@ class CalculatorEquationEditor {
   }
 
   commentsElement() {
-    return document.getElementById(ids.domElements.pages.calculator.editorComments);
+    return document.getElementById(ids.domElements.pages.calculator.editorCommentsDebug);
   }
 
   writeIntoEquationEditor() {
@@ -112,15 +105,15 @@ class CalculatorEquationEditor {
     }
     this.ignoreNextEditorEvent = true;
     let textBox = this.inputMainTextbox();
-    this.selectionEnd = textBox.selectionEnd;
-    this.theLaTeXString = textBox.value;
-    if (this.theLaTeXString.length > 10000) {
+    if (textBox.value.length > 10000) {
       this.flagCalculatorInputOK = false;
       this.commentsElement().innerHTML = "<b style ='color:red'>Formula too big </b>";
       return;
     }
+    this.commentsElement().textContent = "";
+    this.extractor.extract(textBox.value, textBox.selectionEnd);
     this.flagCalculatorInputOK = true;
-    this.calculatorPanel.equationEditor.writeLatex(this.theLaTeXString);
+    this.calculatorPanel.equationEditor.writeLatex(this.extractor.middleEditedString);
     this.ignoreNextEditorEvent = false;
   }
 
@@ -129,8 +122,8 @@ class CalculatorEquationEditor {
       return;
     }
     let content = this.calculatorPanel.equationEditor.rootNode.toLatex();
-    this.middleEditedString = initializeButtons.processMathQuillLatex(content);
-    this.inputMainTextbox().value = this.leftString + this.middleEditedString + this.rightString;
+    this.extractor.middleEditedString = initializeButtons.processMathQuillLatex(content);
+    this.inputMainTextbox().value = this.leftString + this.extractor.middleEditedString + this.rightString;
   }
 
   /**@returns{HTMLTextAreaElement} */
@@ -138,6 +131,165 @@ class CalculatorEquationEditor {
     return this.calculatorPanel.getPureLatexElement();
   }
 }
+
+class EditorInputExtractor {
+  constructor() {
+    /**@type{string} */
+    this.rawInput = "";
+    /**@type{string} */
+    this.leftString = "";
+    /**@type{string} */
+    this.middleEditedString = "";
+    /**@type{string} */
+    this.rightString = "";
+    /**@type{number} */
+    this.caretPosition = 0;
+
+    /**@type{number} The right end of the selection, equal to the index of the right caret needed to enclose our selection.*/
+    this.rightIndex = - 1;
+    /**@type{number} The left end of the selection, equal to index of the left caret needed to enclose our selection. */
+    this.leftIndex = - 1;
+    /**@type{number}*/
+    this.openLeftDelimiters = 0;
+    /**@type{number}*/
+    this.openRightDelimiters = 0;
+    /**@type{boolean}*/
+    this.foundSemiColumn = false;
+    this.leftDelimiters = {
+      "(": true,
+      "{": true,
+    };
+    this.rightDelimiters = {
+      ")": true,
+      "}": true,
+    }
+  }
+
+  extract(
+    /**@type{string}*/
+    inputLatex,
+    /**@type{number}*/
+    caretPosition,
+  ) {
+    this.rawInput = inputLatex;
+    this.caretPosition = caretPosition;
+    this.doExtract();
+  }
+
+  commentsElement() {
+    return document.getElementById(ids.domElements.pages.calculator.editorCommentsDebug);
+  }
+
+  toStringDebug() {
+    return `caret: ${this.caretPosition}, left: ${this.leftString}, leftIndex: ${this.leftIndex} middle: ${this.middleEditedString}, right: ${this.rightString}, rightIndex: ${this.rightIndex}`;
+  }
+
+  initializeIndices() {
+    this.leftIndex = this.caretPosition;
+    this.rightIndex = this.caretPosition;
+    this.openLeftDelimiters = 0;
+    this.openRightDelimiters = 0;
+    this.foundRightEnd = false;
+  }
+
+  doExtract() {
+    this.initializeIndices();
+    while (this.growReturnFalseWhenDone()) {
+    }
+    this.leftString = this.rawInput.substr(0, this.leftIndex);
+    this.middleEditedString = this.rawInput.substr(this.leftIndex, this.rightIndex);
+    this.rightString = this.rawInput.substr(this.rightIndex);
+    this.commentsElement().innerHTML = this.toStringDebug();
+  }
+
+  growReturnFalseWhenDone() {
+    if (this.openRightDelimiters > this.openLeftDelimiters) {
+      // More open right delimiters than left: we must expand to the left.
+      if (!this.shouldExpandLeft()) {
+        return false;
+      }
+      this.leftIndex--;
+      return true;
+    }
+    if (this.openLeftDelimiters > this.openRightDelimiters) {
+      // More open left delimiters than right: we must expand to the right.
+      if (!this.shouldExpandRight()) {
+        return false;
+      }
+      this.rightIndex++;
+      return true;
+    }
+    if (this.shouldExpandRight()) {
+      this.rightIndex++;
+      return true;
+    }
+    if (this.shouldExpandLeft()) {
+      this.leftIndex--;
+      return true;
+    }
+    return false;
+  }
+
+  shouldExpandRight() {
+    if (this.rightIndex >= this.rawInput.length) {
+      this.foundRightEnd = true
+      return false;
+    }
+    if (this.rightIndex === 0) {
+      return true;
+    }
+    if (this.foundRightEnd) {
+      return false;
+    }
+    let rightCharacter = this.rawInput[this.rightIndex - 1];
+    if (rightCharacter === ";") {
+      this.foundRightEnd = true;
+      return true;
+    }
+    if (rightCharacter in this.rightDelimiters) {
+      if (this.openLeftDelimiters > 0) {
+        this.openLeftDelimiters--;
+      } else {
+        this.openRightDelimiters++;
+      }
+      return true;
+    }
+    if (rightCharacter in this.leftDelimiters) {
+      this.openLeftDelimiters++;
+      return true;
+    }
+    return true;
+  }
+
+  shouldExpandLeft() {
+    if (this.leftIndex - 1 < 0) {
+      return false;
+    }
+    let nextCharacter = this.rawInput[this.leftIndex - 1];
+    if (nextCharacter in this.leftDelimiters) {
+      if (this.foundRightEnd && this.openLeftDelimiters === 0 && this.openRightDelimiters === 0) {
+        return false;
+      }
+      if (this.openRightDelimiters > 0) {
+        this.openRightDelimiters--;
+        return true;
+      }
+      this.openLeftDelimiters++;
+      return true;
+    }
+    if (nextCharacter in this.rightDelimiters) {
+      this.openRightDelimiters++;
+      return true;
+    }
+    if (nextCharacter === ";") {
+      if (this.foundRightEnd && this.openLeftDelimiters === 0 && this.openRightDelimiters === 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+}
+
 
 module.exports = {
   CalculatorEquationEditor,

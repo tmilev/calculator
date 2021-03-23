@@ -123,7 +123,7 @@ class CalculatorEquationEditor {
     }
     let content = this.calculatorPanel.equationEditor.rootNode.toLatex();
     this.extractor.middleEditedString = initializeButtons.processMathQuillLatex(content);
-    this.inputMainTextbox().value = this.leftString + this.extractor.middleEditedString + this.rightString;
+    this.inputMainTextbox().value = this.extractor.leftString + this.extractor.middleEditedString + this.extractor.rightString;
   }
 
   /**@returns{HTMLTextAreaElement} */
@@ -199,51 +199,43 @@ class EditorInputExtractor {
     this.leftString = this.rawInput.substr(0, this.leftIndex);
     this.middleEditedString = this.rawInput.substr(this.leftIndex, this.rightIndex);
     this.rightString = this.rawInput.substr(this.rightIndex);
-    this.commentsElement().innerHTML = this.toStringDebug();
+    this.commentsElement().innerHTML = ""; //this.toStringDebug();
   }
 
   growReturnFalseWhenDone() {
-    if (this.openRightDelimiters > this.openLeftDelimiters) {
+    if (this.openLeftDelimiters > 0) {
       // More open right delimiters than left: we must expand to the left.
-      if (!this.shouldExpandLeft()) {
-        return false;
+      if (this.expandRight()) {
+        return true;
       }
-      this.leftIndex--;
-      return true;
     }
-    if (this.openLeftDelimiters > this.openRightDelimiters) {
+    if (this.openRightDelimiters > 0) {
       // More open left delimiters than right: we must expand to the right.
-      if (!this.shouldExpandRight()) {
-        return false;
+      if (this.expandLeft()) {
+        return true;
       }
-      this.rightIndex++;
+    }
+    if (this.expandRight()) {
       return true;
     }
-    if (this.shouldExpandRight()) {
-      this.rightIndex++;
-      return true;
-    }
-    if (this.shouldExpandLeft()) {
-      this.leftIndex--;
+    if (this.expandLeft()) {
       return true;
     }
     return false;
   }
 
-  shouldExpandRight() {
+  expandRight() {
     if (this.rightIndex >= this.rawInput.length) {
       this.foundRightEnd = true
       return false;
     }
-    if (this.rightIndex === 0) {
-      return true;
-    }
-    if (this.foundRightEnd) {
+    if (this.foundRightEnd && this.openLeftDelimiters <= 0) {
       return false;
     }
-    let rightCharacter = this.rawInput[this.rightIndex - 1];
+    let rightCharacter = this.rawInput[this.rightIndex];
     if (rightCharacter === ";") {
       this.foundRightEnd = true;
+      this.rightIndex++;
       return true;
     }
     if (rightCharacter in this.rightDelimiters) {
@@ -252,16 +244,19 @@ class EditorInputExtractor {
       } else {
         this.openRightDelimiters++;
       }
+      this.rightIndex++;
       return true;
     }
     if (rightCharacter in this.leftDelimiters) {
       this.openLeftDelimiters++;
+      this.rightIndex++;
       return true;
     }
+    this.rightIndex++;
     return true;
   }
 
-  shouldExpandLeft() {
+  expandLeft() {
     if (this.leftIndex - 1 < 0) {
       return false;
     }
@@ -272,12 +267,15 @@ class EditorInputExtractor {
       }
       if (this.openRightDelimiters > 0) {
         this.openRightDelimiters--;
+        this.leftIndex--;
         return true;
       }
+      this.leftIndex--;
       this.openLeftDelimiters++;
       return true;
     }
     if (nextCharacter in this.rightDelimiters) {
+      this.leftIndex--;
       this.openRightDelimiters++;
       return true;
     }
@@ -286,10 +284,10 @@ class EditorInputExtractor {
         return false;
       }
     }
+    this.leftIndex--;
     return true;
   }
 }
-
 
 module.exports = {
   CalculatorEquationEditor,

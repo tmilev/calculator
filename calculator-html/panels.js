@@ -183,6 +183,11 @@ class PanelExpandable {
     }
   }
 
+  computeOriginalDimensions() {
+    this.originalHeight = parseInt(window.getComputedStyle(this.panelContent).height);
+    this.originalWidth = parseInt(window.getComputedStyle(this.panelContent).width);
+  }
+
   setPanelContent(
     /**@type{HTMLElement|string} */
     input,
@@ -196,8 +201,7 @@ class PanelExpandable {
     }
     this.panelContent.textContent = "";
     this.panelContent.appendChild(input);
-    this.originalHeight = parseInt(window.getComputedStyle(this.panelContent).height);
-    this.originalWidth = parseInt(window.getComputedStyle(this.panelContent).width);
+    this.computeOriginalDimensions()
     this.matchPanelStatus();
   }
 
@@ -248,6 +252,7 @@ class PanelExpandable {
   }
 }
 
+/**@returns{PanelExpandable|null} Returns the panel, or null if the content is too small for a panel. */
 function makePanelFromData(
   /** @type {PanelExpandableData} */
   data,
@@ -261,11 +266,13 @@ function makePanelFromData(
     inputPanel.initialize(data.startHidden);
     inputPanel.setPanelContent(data.content);
     inputPanel.setPanelLabel(data.label);
+    return inputPanel;
   } else {
     let element = document.getElementById(data.id);
     if (element != null) {
       element.innerHTML = data.content;
     }
+    return null;
   }
 }
 

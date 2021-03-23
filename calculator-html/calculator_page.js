@@ -10,6 +10,7 @@ const processMonitoring = require("./process_monitoring");
 const storage = require("./storage");
 const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
 const calculatorPageEditor = require("./calculator_page_editor");
+const equationEditor = require("./equation_editor");
 
 class AtomHandler {
   constructor() {
@@ -340,25 +341,67 @@ class Calculator {
     }
   }
 
-  typeset() {
+  typeset(
+    /**@type{Function} */
+    typeSetCallback,
+  ) {
     if (storage.storage.variables.currentPage.getValue() !== "calculator") {
       return;
     }
     if (this.flagTypeset === true) {
       return;
     }
-    dynamicJavascript.typeset(this.getOutputElement(), {
-      "lineBreakWidth": 600,
-    });
+    dynamicJavascript.typeset(
+      this.getOutputElement(),
+      { "lineBreakWidth": 600 },
+      typeSetCallback,
+    );
     this.flagTypeset = true;
   }
 
+  resizePanel(
+    /**@type{equationEditor.EquationEditor} */
+    editor,
+    constructedPanels,
+  ) {
+    let parent = editor.container;
+    for (let i = 0; i < 5; i++) {
+      if (parent === null) {
+        break;
+      }
+      if (parent.id in constructedPanels) {
+        break;
+      }
+      parent = parent.parentElement;
+    }
+    if (parent === null) {
+      return;
+    }
+    if (!(parent.id in constructedPanels)) {
+      return;
+    }
+    /**@type{panels.PanelExpandable} */
+    let panel = constructedPanels[parent.id];
+    panel.computeOriginalDimensions();
+    panel.matchPanelStatus();
+  }
+
   afterWriteOutput() {
+    let constructedPanels = {};
     for (let i = 0; i < this.panels.length; i++) {
-      panels.makePanelFromData(this.panels[i]);
+      let next = panels.makePanelFromData(this.panels[i]);
+      if (next === null) {
+        continue;
+      }
+      constructedPanels[next.containerId] = next;
     }
     this.flagTypeset = false;
-    this.typeset();
+    this.typeset((
+      /**@type{equationEditor.EquationEditor} */
+      editor, unused,
+    ) => {
+      this.resizePanel(editor, constructedPanels);
+    });
     dynamicJavascript.bootstrapAllScripts(this.getOutputElement());
   }
 

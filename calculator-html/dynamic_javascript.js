@@ -6,6 +6,7 @@ const typeset = require("./math_typeset");
 const EquationEditor = require("./equation_editor").EquationEditor;
 const MathNode = require("./equation_editor").MathNode;
 const knownTypes = require("./equation_editor").knownTypes;
+const panels = require("./panels");
 
 class ElementWithScripts {
   constructor() {
@@ -196,6 +197,8 @@ class DynamicJavascript {
     output,
     /**@type{Object<string, string>} */
     extraAttributes,
+    /**@type{Function|null} */
+    typeSetCallback,
   ) {
     if (extraAttributes === undefined || extraAttributes === null) {
       extraAttributes = {};
@@ -205,6 +208,9 @@ class DynamicJavascript {
       "font-size: 20px; font-family:'Times New Roman'; display:inline-block;",
       (editor) => {
         this.bootstrapSlider(editor, output);
+        if (typeSetCallback !== null && typeSetCallback !== undefined) {
+          typeSetCallback(editor, output);
+        }
       },
       extraAttributes,
     );

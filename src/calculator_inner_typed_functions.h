@@ -107,7 +107,7 @@ public:
   );
   static bool innerDivideEltZmodPorRatByEltZmodPorRat(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerPowerMatrixNumbersBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerMatrixBuiltInBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerMatrixExpressionsBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerMatrixNumbersByLargeIntegerIfPossible(Calculator& calculator, const Expression& input, Expression& output);
 

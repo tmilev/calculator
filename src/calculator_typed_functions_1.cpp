@@ -1090,10 +1090,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossib
   return false;
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger(
+bool CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.startsWith(calculator.opThePower(), 3)) {
     return false;
@@ -1102,8 +1102,8 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger(
   if (!matrixE.isMatrix()) {
     return false;
   }
-  int thePower = 0;
-  bool powerIsSmall = input[2].isSmallInteger(&thePower);
+  int power = 0;
+  bool powerIsSmall = input[2].isSmallInteger(&power);
   if (!powerIsSmall) {
     return false;
   }
@@ -1115,18 +1115,18 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger(
       << "Your matrix, " << baseRat.toString() << " is not square. ";
       return output.makeError(errorStream.str(), calculator);
     }
-    if (thePower <= 0) {
+    if (power <= 0) {
       if (baseRat.getDeterminant() == 0) {
         return output.makeError("Division by zero: trying to raise 0 to negative power. ", calculator);
       }
     }
-    if (thePower < 0) {
+    if (power < 0) {
       baseRat.invert();
-      thePower *= - 1;
+      power *= - 1;
     }
     Matrix<Rational> idMat;
     idMat.makeIdentityMatrix(baseRat.numberOfRows, Rational::one(), Rational::zero());
-    MathRoutines::raiseToPower(baseRat, thePower, idMat);
+    MathRoutines::raiseToPower(baseRat, power, idMat);
     return output.assignMatrix(baseRat, calculator);
   }
   Matrix<AlgebraicNumber> baseAlg;
@@ -1136,49 +1136,61 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger(
     if (!baseAlg.isSquare() || baseAlg.numberOfColumns == 0) {
       return output.makeError("Exponentiating non-square matrices or matrices with zero rows is not allowed.", calculator);
     }
-    if (thePower <= 0) {
+    if (power <= 0) {
       if (baseAlg.getDeterminant() == 0) {
         return output.makeError("Division by zero: trying to raise 0 to negative power. ", calculator);
       }
     }
-    if (thePower < 0) {
+    if (power < 0) {
       baseAlg.invert();
-      thePower *= - 1;
+      power *= - 1;
     }
     Matrix<AlgebraicNumber> idMat;
     idMat.makeIdentityMatrix(
       baseAlg.numberOfRows, one, zero
     );
-    MathRoutines::raiseToPower(baseAlg, thePower, idMat);
+    MathRoutines::raiseToPower(baseAlg, power, idMat);
     return output.assignMatrix(baseAlg, calculator);
   }
-  Matrix<RationalFunction<Rational> > baseRF;
-  ExpressionContext theContext(calculator);
-  if (calculator.functionGetMatrix(matrixE, baseRF, &theContext)) {
-    if (!baseRF.isSquare() || baseRF.numberOfColumns == 0) {
+  Matrix<RationalFunction<Rational> > baseRationalFunctionCoefficients;
+  ExpressionContext context(calculator);
+  if (calculator.functionGetMatrix(matrixE, baseRationalFunctionCoefficients, &context)) {
+    if (!baseRationalFunctionCoefficients.isSquare() || baseRationalFunctionCoefficients.numberOfColumns == 0) {
       return output.makeError(
         "Exponentiating non-square matrices or matrices "
         "with zero rows is not allowed.",
         calculator
       );
     }
-    if (thePower <= 0) {
-      if (baseRF.getDeterminant() == 0) {
+    if (power <= 0) {
+      if (context.numberOfVariables() > 1) {
+        return calculator << "Raising matrices of rational functions "
+        << "with 2 or more variables to negative power not implemented yet. "
+        << "Your matrix has " << context.numberOfVariables() << " variables.";
+      }
+    }
+    if (power <= 0) {
+      if (baseRationalFunctionCoefficients.getDeterminant() == 0) {
         return output.makeError(
-          "Division by zero: trying to raise 0 to negative power. ",
+          "Division by zero: request to invert matrix with zero determinant. ",
           calculator
         );
       }
     }
-    if (thePower < 0) {
-      return calculator
-      << "Raising matrices of rational functions to "
-      << "negative powers not implemented yet. ";
+    if (power < 0) {
+      power *= - 1;
+      if (!baseRationalFunctionCoefficients.invert()) {
+        return calculator << "Unexpected failure to invert your matrix: " << baseRationalFunctionCoefficients.toString();
+      }
     }
-    Matrix<RationalFunction<Rational> > idMat;
-    idMat.makeIdentityMatrix(baseRF.numberOfRows, RationalFunction<Rational>::oneRational(), RationalFunction<Rational>::zeroRational());
-    MathRoutines::raiseToPower(baseRF, thePower, idMat);
-    return output.assignMatrix(baseRF, calculator, &theContext);
+    Matrix<RationalFunction<Rational> > identityMatrix;
+    identityMatrix.makeIdentityMatrix(
+      baseRationalFunctionCoefficients.numberOfRows,
+      RationalFunction<Rational>::oneRational(),
+      RationalFunction<Rational>::zeroRational()
+    );
+    MathRoutines::raiseToPower(baseRationalFunctionCoefficients, power, identityMatrix);
+    return output.assignMatrix(baseRationalFunctionCoefficients, calculator, &context);
   }
   return false;
 }

@@ -1458,7 +1458,8 @@ bool EmailRoutines::sendEmailWithMailGun(
     "certificates/mailgun-api.txt", mailGunKey, true, true, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Could not find mailgun key. The key must be located in file: "
+      *commentsOnFailure << "Could not find mailgun key. "
+      << "The key must be located in file: "
       << "<br>\ncertificates/mailgun-api.txt\n<br>\n "
       << "The file must be uploaded manually to the server. ";
     }

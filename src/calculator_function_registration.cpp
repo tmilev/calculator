@@ -4357,18 +4357,29 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger,
+    CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger,
     "",
     "If the base is a matrix and the exponent is a rational number: "
     "1. If the base is not square, returns error. "
-    "2. If the base is square and consists of "
-    "rational or algebraic numbers and the exponent is a "
+    "2. If the base is "
+    "(a) square, "
+    "(b) has a supported built-in coefficient type and "
+    "(c) the exponent is a "
     "small integer, raises the base to the corresponding power. "
     "If the power is 0 or negative and the determinant of "
-    "the matrix is zero, returns error. ",
-    "X =\\begin{pmatrix} 0 & 1 \\\\ 1 &1\\end{pmatrix}; X^5; X^{-5}  ",
+    "the matrix is zero, returns error. "
+    "As of writing, the supported built-in coefficient types are: (1) rational numbers;"
+    "(2) algebraic numbers; "
+    "(3) polynomial and rational functions in one variable.",
+    "X = \\begin{pmatrix} 0 & 1 \\\\ 1 &1\\end{pmatrix};\n"
+    "X^5;\n"
+    "X^{-5};\n"
+    "f{}({{a}}, {{b}})=a Polynomial( x )+b;\n"
+    "a=FunctionToMatrix(f,2,2);\n"
+    "b=a^{-1};\n"
+    "a*b",
     "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger",
-    "PowerMatrixNumbersByInteger",
+    "PowerMatrixBuiltInByInteger",
     innerStandard
   );
   this->addOperationHandler(

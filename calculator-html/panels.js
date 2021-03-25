@@ -130,17 +130,23 @@ class PanelExpandableData {
     startHidden,
     /** @type {string} */
     label,
+    /**@type{boolean} */
+    allowFullExpand,
   ) {
     this.content = content;
     this.id = id;
     this.minimalCharacterLengthForPanel = minimalCharacterLengthForPanel;
     this.startHidden = startHidden;
+    this.allowFullExpand = allowFullExpand;
     this.label = label;
     if (this.startHidden === undefined) {
       this.startHidden = false;
     }
     if (this.label === undefined) {
       this.label = "";
+    }
+    if (this.allowFullExpand === undefined) {
+      this.allowFullExpand = false;
     }
   }
 }
@@ -163,6 +169,10 @@ class PanelExpandable {
     this.expandedMark = null;
     /**@type{HtmlElement|null} */
     this.button = null;
+    /**@type{HtmlElement|null} */
+    this.buttonFullExpand = null;
+    /**@type{boolean} */
+    this.fullyExpanded = false;
     if (typeof container === "string") {
       this.containerId = container;
       this.container = document.getElementById(this.containerId);
@@ -172,14 +182,17 @@ class PanelExpandable {
   }
 
   matchPanelStatus() {
-    this.panelContent.style.maxHeight = "";
-    this.panelContent.style.maxWidth = "";
     if (this.collapsed) {
       this.panelContent.style.maxHeight = "0px";
       this.panelContent.style.maxWidth = "0px";
     } else {
-      this.panelContent.style.maxHeight = `${this.originalHeight + 45}`;
-      this.panelContent.style.maxWidth = `${this.originalWidth + 35}`;
+      if (!this.fullyExpanded) {
+        this.panelContent.style.maxHeight = `${this.originalHeight + 45}`;
+        this.panelContent.style.maxWidth = `${this.originalWidth + 35}`;
+      } else {
+        this.panelContent.style.maxHeight = "";
+        this.panelContent.style.maxWidth = "";
+      }
     }
   }
 
@@ -212,7 +225,12 @@ class PanelExpandable {
   initialize(
     /**@type{boolean} */
     startsCollapsed,
+    /**@type{boolean} */
+    allowFullExpand,
   ) {
+    if (allowFullExpand === null || allowFullExpand === undefined) {
+      allowFullExpand = false;
+    }
     let spanContainer = document.createElement("span");
     this.panelLabel = document.createElement("span");
     this.button = document.createElement("button");
@@ -221,10 +239,22 @@ class PanelExpandable {
     this.button.addEventListener("click", () => {
       this.doToggleContent();
     });
+    this.button.title = "Expand/collapse";
     this.button.appendChild(this.panelLabel);
     this.expandedMark = document.createElement("span");
     this.button.appendChild(this.expandedMark);
     spanContainer.appendChild(this.button);
+    if (allowFullExpand) {
+      this.buttonFullExpand = document.createElement("button");
+      // Character looks like four corners of a screen.
+      this.buttonFullExpand.textContent = "\u26F6";
+      this.buttonFullExpand.title = "toggle full expansion";
+      this.buttonFullExpand.addEventListener("click", () => {
+        this.toggleExpand();
+      })
+      this.buttonFullExpand.className = "buttonProgress";
+      spanContainer.appendChild(this.buttonFullExpand);
+    }
     this.panelContent = document.createElement("div");
     this.panelContent.className = "PanelExpandable";
     spanContainer.appendChild(this.panelContent);
@@ -247,6 +277,11 @@ class PanelExpandable {
     }, 0);
   }
 
+  toggleExpand() {
+    this.fullyExpanded = !this.fullyExpanded;
+    this.matchPanelStatus();
+  }
+
   doToggleContent() {
     this.setCollapsed(!this.collapsed);
   }
@@ -263,7 +298,7 @@ function makePanelFromData(
   }
   if (doCreatePanel) {
     let inputPanel = new PanelExpandable(data.id);
-    inputPanel.initialize(data.startHidden);
+    inputPanel.initialize(data.startHidden, data.allowFullExpand);
     inputPanel.setPanelContent(data.content);
     inputPanel.setPanelLabel(data.label);
     return inputPanel;

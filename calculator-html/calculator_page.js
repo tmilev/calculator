@@ -295,12 +295,22 @@ class Calculator {
       let outputPanelId = `calculatorOutputPanel${this.numberOfCalculatorPanels}`;
       if (i < inputParsed.result.input.length) {
         panelData.push(new panels.PanelExpandableData(
-          inputParsed.result.input[i], inputPanelId, 150, false, ""
+          inputParsed.result.input[i],
+          inputPanelId,
+          150,
+          false,
+          "",
+          true,
         ));
       }
       if (i < inputParsed.result.output.length) {
         panelData.push(new panels.PanelExpandableData(
-          inputParsed.result.output[i], outputPanelId, 150, false, ""
+          inputParsed.result.output[i],
+          outputPanelId,
+          150,
+          false,
+          "",
+          true,
         ));
       }
       buffer.write(`<tr>`);

@@ -16,7 +16,7 @@ public:
 
   static bool innerAddDoubleOrRationalToDoubleOrRational(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAddRatOrPolyOrEWAToRatOrPolyOrEWA(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAddRatOrPolyOrRFToRatOrPolyOrRF(Calculator& calculator, const Expression& input, Expression& output);
+  static bool addRationalOrPolynomialOrRationalFunctionToRationalFunction(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAddUEToAny(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAddEltTensorToEltTensor(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAddNumberOrPolynomialToNumberOrPolynomial(Calculator& calculator, const Expression& input, Expression& output);
@@ -50,7 +50,9 @@ public:
 
   static bool innerMultiplyEltHypOctByEltHypOct(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyPolynomialModPByPolynomialModP(Calculator& calculator, const Expression& input, Expression& output);
   static bool multiplyNumberOrPolynomialByNumberOrPolynomial(Calculator& calculator, const Expression& input, Expression& output);
@@ -377,12 +379,12 @@ bool CalculatorConversions::functionRationalFunction(
     intermediate.addChildOnTop(leftE);
     intermediate.addChildOnTop(rightE);
     if (input.startsWith(calculator.opPlus())) {
-      return CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF(
+      return CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrRationalFunctionToRationalFunction(
         calculator, intermediate, output
       );
     }
     if (input.startsWith(calculator.opTimes())) {
-      return CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(
+      return CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction(
         calculator, intermediate, output
       );
     }

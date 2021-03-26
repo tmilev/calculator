@@ -629,7 +629,7 @@ Assumes that the numerator and denominator of a fraction commute. Divides the tw
 ```
 Equivalent to (a/b){}x = (a{}x)/(b{}x) 
 
-Operator or function \* is overloaded with 67 total handlers.
+Operator or function \* is overloaded with 69 total handlers.
 
 *\** [MultiplyMatrixByMatrix] {CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cbegin%7bpmatrix%7d%201%26%20%202%20%5c%5c%5c%5c%203%26%205%5c%5cend%7bpmatrix%7d%5c%5cbegin%7bpmatrix%7d%201%26%20-2%20%5c%5c%5c%5c%203%26%205%5c%5cend%7bpmatrix%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -958,12 +958,28 @@ Distributive law (left and right), acts only if the multiplicand is a constant. 
 ```
 Rule: (a/x^t)x^s =a x^{s-t}.
 
-*\** [MultiplyRatOrPolyOrRFByRF] {CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF}. 
+*\** [MultiplyRationalByRationalFunction] {CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22WeylDimFormula%7b%7d%28a_2%2c%20%280%2c3%29%29%20%2b%20WeylDimFormula%7b%7d%28a_2%2c%20%283%2c0%29%29%20%2b%204%20WeylDimFormula%7b%7d%28a_2%2c%20%281%2c1%29%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}(a_2, (1,1)) 
 ```
 Multiplies rational number by a rational function.
+
+*\** [MultiplyPolynomialByRationalFunction] {CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Polynomial%7b%7d%28x%20%2b1%29MakeRationalFunction%7b%7d%28%5cu000crac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%3b%5cnMakeRationalFunction%7b%7d%28%5cu000crac%7b-2x%20-2%7d%7bx%5e2-x%20%7d%29MakeRationalFunction%7b%7d%28%5cu000crac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+Polynomial{}(x +1)MakeRationalFunction{}(rac{-2x -2}{x^2+x });
+MakeRationalFunction{}(rac{-2x -2}{x^2-x })MakeRationalFunction{}(rac{-2x -2}{x^2+x })
+```
+Multiplies rational function by a rational function.
+
+*\** [MultiplyRationalFunctionByRationalFunction] {CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Polynomial%7b%7d%28x%20%2b1%29MakeRationalFunction%7b%7d%28%5cu000crac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%3b%5cnMakeRationalFunction%7b%7d%28%5cu000crac%7b-2x%20-2%7d%7bx%5e2-x%20%7d%29MakeRationalFunction%7b%7d%28%5cu000crac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+Polynomial{}(x +1)MakeRationalFunction{}(rac{-2x -2}{x^2+x });
+MakeRationalFunction{}(rac{-2x -2}{x^2-x })MakeRationalFunction{}(rac{-2x -2}{x^2+x })
+```
+Multiplies rational function by a rational function.
 
 *\** [ScalarTimesSequence] {CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22v_%7b1%7d%3d%20%281%2c%202%2c%203%29%3b%5cnv_%7b2%7d%3d%20%281%2c%203%2c%202%29%3b%5cnv_%7b3%7d%3d%20%283%2c%201%2c%201%29%3b%5cnv_%7b4%7d%3d%20%28-2%2c%202%2c%202%29%3b%5cn1%2f2v_%7b1%7d%2b%201%2f2v_%7b2%7d%2b7%2f8v_%7b3%7d%2b%2013%2f16v_%7b4%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -1496,12 +1512,18 @@ X = (1,2)^t; X-Transpose{}(1,2); \begin{pmatrix}1&2\\ 3& 5\end{pmatrix}^t
 ```
 Provided the exponent is t or T, calls the Transpose function on the base.
 
-*^* [PowerMatrixNumbersByInteger] {CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%5c%5cbegin%7bpmatrix%7d%200%20%26%201%20%5c%5c%5c%5c%201%20%261%5c%5cend%7bpmatrix%7d%3b%20X%5e5%3b%20X%5e%7b-5%7d%20%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*^* [PowerMatrixBuiltInByInteger] {CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20%5c%5cbegin%7bpmatrix%7d%200%20%26%201%20%5c%5c%5c%5c%201%20%261%5c%5cend%7bpmatrix%7d%3b%5cnX%5e5%3b%5cnX%5e%7b-5%7d%3b%5cnf%7b%7d%28%7b%7ba%7d%7d%2c%20%7b%7bb%7d%7d%29%3da%20Polynomial%28%20x%20%29%2bb%3b%5cna%3dFunctionToMatrix%28f%2c2%2c2%29%3b%5cnb%3da%5e%7b-1%7d%3b%5cna%2ab%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-X =\begin{pmatrix} 0 & 1 \\ 1 &1\end{pmatrix}; X^5; X^{-5}  
+X = \begin{pmatrix} 0 & 1 \\ 1 &1\end{pmatrix};
+X^5;
+X^{-5};
+f{}({{a}}, {{b}})=a Polynomial( x )+b;
+a=FunctionToMatrix(f,2,2);
+b=a^{-1};
+a*b
 ```
-If the base is a matrix and the exponent is a rational number: 1. If the base is not square, returns error. 2. If the base is square and consists of rational or algebraic numbers and the exponent is a small integer, raises the base to the corresponding power. If the power is 0 or negative and the determinant of the matrix is zero, returns error. 
+If the base is a matrix and the exponent is a rational number: 1. If the base is not square, returns error. 2. If the base is (a) square, (b) has a supported built-in coefficient type and (c) the exponent is a small integer, raises the base to the corresponding power. If the power is 0 or negative and the determinant of the matrix is zero, returns error. As of writing, the supported built-in coefficient types are: (1) rational numbers;(2) algebraic numbers; (3) polynomial and rational functions in one variable.
 
 *^* [PowerMatrixNumbersByLargeIntegerIfPossible] {CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossible}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%5c%5cbegin%7bpmatrix%7d%201%20%26%20-1%20%5c%5c%5c%5c%204%20%26%20-3%5c%5cend%7bpmatrix%7d%3b%20X%5e%7b-55%21-%201%7d%20%20%22%2c%22currentPage%22%3a%22calculator%22%7d)

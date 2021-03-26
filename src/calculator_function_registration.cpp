@@ -3232,7 +3232,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF,
+    CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrRationalFunctionToRationalFunction,
     this->opRationalFunction(),
     this->opRationalFunction(),
     "Adds a rational function to a rational function. ",
@@ -3874,13 +3874,37 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF,
+    CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction,
     this->opRational(),
     this->opRationalFunction(),
     "Multiplies rational number by a rational function.",
     "WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}(a_2, (1,1)) ",
-    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF",
-    "MultiplyRatOrPolyOrRFByRF",
+    "CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction",
+    "MultiplyRationalByRationalFunction",
+    innerStandard
+  );
+  this->addOperationBinaryInnerHandlerWithTypes(
+    "*",
+    CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction,
+    this->opPolynomialRational(),
+    this->opRationalFunction(),
+    "Multiplies rational function by a rational function.",
+    "Polynomial{}(x +1)MakeRationalFunction{}(\frac{-2x -2}{x^2+x });\n"
+    "MakeRationalFunction{}(\frac{-2x -2}{x^2-x })MakeRationalFunction{}(\frac{-2x -2}{x^2+x })",
+    "CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction",
+    "MultiplyPolynomialByRationalFunction",
+    innerStandard
+  );
+  this->addOperationBinaryInnerHandlerWithTypes(
+    "*",
+    CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction,
+    this->opRationalFunction(),
+    this->opRationalFunction(),
+    "Multiplies rational function by a rational function.",
+    "Polynomial{}(x +1)MakeRationalFunction{}(\frac{-2x -2}{x^2+x });\n"
+    "MakeRationalFunction{}(\frac{-2x -2}{x^2-x })MakeRationalFunction{}(\frac{-2x -2}{x^2+x })",
+    "CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction",
+    "MultiplyRationalFunctionByRationalFunction",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(

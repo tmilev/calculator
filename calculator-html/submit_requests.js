@@ -122,7 +122,7 @@ class RequestWithProgress {
     /**@type{{dontCollapsePanel:boolean, width:number}} */
     this.panelOptions = panelOptions;
     /**@type{panels.PanelExpandable|null} */
-    this.panel = new panels.PanelExpandable(progress);
+    this.panel = new panels.PanelExpandable(this.progress);
     this.startTime = 0;
     this.details = "";
   }
@@ -164,7 +164,7 @@ class RequestWithProgress {
     if (this.callback !== undefined && this.callback !== null) {
       this.callback(this.xhr.responseText, this.output);
     } else {
-      this.recordResult();
+      this.recordResult(this.xhr.responseText);
     }
   }
 
@@ -177,7 +177,10 @@ class RequestWithProgress {
     this.panel.setPanelLabel(panelLabel);
   }
 
-  recordResult() {
+  recordResult(
+    /**@type{string} */
+    resultText,
+  ) {
     if (this.output === null || this.output === undefined) {
       return;
     }

@@ -10,7 +10,8 @@ const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
 
 class AnswerPanel {
   constructor(
-    /**@type{{
+    /**
+     * @type{{
      * forReal:boolean,
      * generateInterpretButton:boolean,
      * mathQuillPanelOptions:string,
@@ -74,9 +75,11 @@ class AnswerPanel {
   }
 
   writeToElement(
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     element,
-    /**@type{HTMLElement} Element that contains the entire problem. 
+    /** 
+     * @type{HTMLElement} 
+     * Element that contains the entire problem. 
      * Used to update graphics scripts when the comments in the answer panel dictate it.
      */
     problemElement,
@@ -190,6 +193,7 @@ class AnswerPanel {
     this.editorEnclosure = document.createElement("div");
     this.editorEnclosure.className = "calculatorMQfieldEnclosure";
     this.editorSpan = document.createElement("span");
+    this.editorSpan.style.fontFamily = "Times New Roman";
     this.spanAnswerHighlight = document.createElement("span");
     if (
       this.input.answerHighlight !== undefined &&

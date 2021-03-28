@@ -2446,7 +2446,8 @@ class LaTeXParser {
 
 class EquationEditorOptions {
   constructor(
-    /** @type{{
+    /** 
+     * @type{{
      * editable?:boolean,
      * removeDisplayStyle?:boolean,
      * sanitizeLatexSource?:boolean,
@@ -2476,7 +2477,8 @@ class EquationEditorOptions {
     if (this.lineBreakWidth === null || this.lineBreakWidth === undefined) {
       this.lineBreakWidth = 0;
     }
-    /**@type{Function|null} 
+    /**
+     * @type{Function|null} 
      * Called on modification of the editor. 
      * Will provide two arguments: 
      * the editor and the MathNode being edited.

@@ -4,11 +4,14 @@ const pathnames = require("./pathnames");
 // const calculatorPage = require('./calculator_page');
 const ids = require("./ids_dom_elements");
 const miscellaneous = require("./miscellaneous_frontend");
+const storage = require("./storage");
 
-var staticWordCompleter = {
+let editorAce = null;
+let aceEditorAutoCompletionWordList = {};
+
+let staticWordCompleter = {
   getCompletions: function (editor, session, pos, prefix, callback) {
-    var thePage = window.calculator.mainPage;
-    callback(null, thePage.aceEditorAutoCompletionWordList.map(function (word) {
+    callback(null, aceEditorAutoCompletionWordList.map(function (word) {
       return {
         caption: word,
         value: word,
@@ -39,28 +42,28 @@ function getClonePanel(
   if (fileNameSource === "" || fileNameSource === undefined || fileNameSource === null) {
     return [];
   }
-  var idCloneInput = encodeURIComponent(`cloneButton${fileNameSource}`);
-  var idSpanClonePageReport = encodeURIComponent(`cloneButtonReport${fileNameSource}`);
-  var result = [];
-  var table = document.createElement("table");
-  var row = table.insertRow(- 1);
-  var cellClone = row.insertCell(- 1);
+  let idCloneInput = encodeURIComponent(`cloneButton${fileNameSource}`);
+  let idSpanClonePageReport = encodeURIComponent(`cloneButtonReport${fileNameSource}`);
+  let result = [];
+  let table = document.createElement("table");
+  let row = table.insertRow(- 1);
+  let cellClone = row.insertCell(- 1);
 
   // result += "<table><tr><td>";
-  var buttonClone = document.createElement("button");
+  let buttonClone = document.createElement("button");
   buttonClone.className = "buttonClone";
   buttonClone.style.width = "50px";
   buttonClone.addEventListener("click", window.calculator.editPage.handleClone.bind(null, fileNameSource, idCloneInput, idSpanClonePageReport));
   buttonClone.innerHTML = "Clone";
   cellClone.appendChild(buttonClone)
-  var cellFileInfo = row.insertCell(- 1);
-  var cellFileInfoTable = document.createElement("table");
-  var cellFileInfoTableRow = cellFileInfoTable.insertRow(- 1);
-  var nextCell = cellFileInfoTableRow.insertCell(- 1);
+  let cellFileInfo = row.insertCell(- 1);
+  let cellFileInfoTable = document.createElement("table");
+  let cellFileInfoTableRow = cellFileInfoTable.insertRow(- 1);
+  let nextCell = cellFileInfoTableRow.insertCell(- 1);
   nextCell.innerHTML = "from:";
   nextCell = cellFileInfoTableRow.insertCell(- 1);
   nextCell.innerHTML = `<b style = 'color: green'>${fileNameSource}</b></td>`;
-  var sizeFile = fileNameTarget.length;
+  let sizeFile = fileNameTarget.length;
   cellFileInfoTableRow = cellFileInfoTable.insertRow(- 1);
   nextCell = cellFileInfoTableRow.insertCell(- 1);
   nextCell.innerHTML = "to:";
@@ -68,7 +71,7 @@ function getClonePanel(
   nextCell.innerHTML = `<input type = "text" value = '${fileNameTarget}' size = '${sizeFile}' id = '${idCloneInput}'></input>`;
   cellFileInfo.append(cellFileInfoTable);
   result.push(table);
-  var cloneReport = document.createElement("div");
+  let cloneReport = document.createElement("div");
   cloneReport.id = idSpanClonePageReport;
   result.push(cloneReport);
   return result;
@@ -76,8 +79,8 @@ function getClonePanel(
 
 /**@returns {HTMLElement} */
 function getEditPanel(fileName) {
-  var thePage = window.calculator.mainPage;
-  var doGenerate = !thePage.flagProblemPageOnly;
+  let thePage = window.calculator.mainPage;
+  let doGenerate = !thePage.flagProblemPageOnly;
 
   if (!thePage.flagProblemPageOnly) {
     if (!thePage.user.hasProblemEditRights() || thePage.studentView()) {
@@ -90,24 +93,24 @@ function getEditPanel(fileName) {
   if (fileName === "" || fileName === undefined || fileName === null) {
     return document.createTextNode("");
   }
-  var result = document.createElement("DIV");
+  let result = document.createElement("DIV");
   result.className = "spanFileInfo";
-  var saveEdit = document.createElement("BUTTON");
+  let saveEdit = document.createElement("BUTTON");
   saveEdit.className = "buttonSaveEdit";
   saveEdit.innerHTML = "Edit";
   saveEdit.style.width = "50px";
   saveEdit.addEventListener('click', window.calculator.editPage.selectEditPage.bind(null, fileName));
   result.appendChild(saveEdit);
   result.appendChild(document.createTextNode(` ${fileName} `));
-  var clonePanel = document.createElement("BUTTON");
+  let clonePanel = document.createElement("BUTTON");
   clonePanel.className = "accordionLike";
   clonePanel.innerHTML = "Clone panel &#9666;";
   clonePanel.addEventListener('click', window.calculator.editPage.toggleClonePanel.bind(null, clonePanel));
   result.appendChild(clonePanel);
-  var panelElement = document.createElement("span");
+  let panelElement = document.createElement("span");
   panelElement.className = "panelDeadlines";
-  var panelContent = getClonePanel(fileName, fileName);
-  for (var i = 0; i < panelContent.length; i++) {
+  let panelContent = getClonePanel(fileName, fileName);
+  for (let i = 0; i < panelContent.length; i++) {
     panelElement.appendChild(panelContent[i]);
   }
   result.appendChild(panelElement);
@@ -118,9 +121,9 @@ function callbackClone(input, output) {
   if (typeof output === "string") {
     output = document.getElementById(output);
   }
-  var inputParsed = JSON.parse(input);
-  var errorFound = false;
-  var result = "";
+  let inputParsed = JSON.parse(input);
+  let errorFound = false;
+  let result = "";
   if (inputParsed.error !== undefined && inputParsed.error !== "" && inputParsed !== null) {
     errorFound = true;
     result += `<b style = 'color:red'>Error.</b> ${inputParsed.error}`;
@@ -137,8 +140,8 @@ function callbackClone(input, output) {
 }
 
 function handleClone(fileName, idCloneInput, idSpanClonePageReport) {
-  var newFileName = document.getElementById(idCloneInput).value;
-  var theURL = "";
+  let newFileName = document.getElementById(idCloneInput).value;
+  let theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
   theURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.clonePage}`;
   theURL += `&${pathnames.urlFields.problem.fileNameTarget}=${newFileName}`;
@@ -151,13 +154,12 @@ function handleClone(fileName, idCloneInput, idSpanClonePageReport) {
 }
 
 function storeEditedPage() {
-  var thePage = window.calculator.mainPage;
-  var editor = thePage.pages.editPage.editor;
-  var theURL = "";
+  let thePage = window.calculator.mainPage;
+  let theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
-  var queryParameters = "";
+  let queryParameters = "";
   queryParameters += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.modifyPage}`;
-  var content = encodeURIComponent(editor.getValue());
+  let content = encodeURIComponent(editorAce.getValue());
   queryParameters += `&${pathnames.urlFields.requests.fileContent}=${content}`;
   queryParameters += `&${pathnames.urlFields.problem.fileName}=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}`;
   thePage.pages.problemPage.flagLoaded = false;
@@ -169,31 +171,30 @@ function storeEditedPage() {
 }
 
 function initEditorAce() {
-  var thePage = window.calculator.mainPage;
-  var saveButton = document.getElementById(ids.domElements.buttonSaveEdit);
+  let saveButton = document.getElementById(ids.domElements.buttonSaveEdit);
   saveButton.className = "buttonSaveEdit";
-  saveButton.addEventListener("click", window.calculator.editPage.storeEditedPage);
+  saveButton.addEventListener("click", () => {
+    storeEditedPage();
+  });
   saveButton.innerHTML = "Save";
-  var editor = document.getElementById(ids.domElements.divEditorAce);
-  editor.addEventListener("keydown", window.calculator.editPage.ctrlSPressAceEditorHandler);
-  thePage.pages.editPage.editor = ace.edit(ids.domElements.divEditorAce);
+  let editorElement = document.getElementById(ids.domElements.divEditorAce);
+  editorElement.addEventListener("keydown", window.calculator.editPage.ctrlSPressAceEditorHandler);
+  editorAce = ace.edit(ids.domElements.divEditorAce);
 }
 
 function selectEditPageCallback(input, outputComponent) {
-  var thePage = window.calculator.mainPage;
   try {
-    var parsedInput = miscellaneous.jsonUnescapeParse(input);
+    let parsedInput = miscellaneous.jsonUnescapeParse(input);
     ace.require("ace/ext/language_tools");
-    if (thePage.pages.editPage.editor === null) {
+    if (editorAce === null) {
       initEditorAce();
     }
     if (parsedInput.autoComplete !== null && parsedInput.autoComplete !== undefined) {
-      thePage.aceEditorAutoCompletionWordList = parsedInput.autoComplete;
+      aceEditorAutoCompletionWordList = parsedInput.autoComplete;
     }
-    var editor = thePage.pages.editPage.editor;
-    editor.$blockScrolling = Infinity;
-    var incomingContent = "";
-    var errorSpan = document.getElementById(ids.domElements.spanErrorsEditPage);
+    editorAce.$blockScrolling = Infinity;
+    let incomingContent = "";
+    let errorSpan = document.getElementById(ids.domElements.spanErrorsEditPage);
     if (parsedInput.error !== null && parsedInput.error !== undefined) {
       errorSpan.innerHTML = `<br>${parsedInput.error}`;
     } else {
@@ -202,18 +203,18 @@ function selectEditPageCallback(input, outputComponent) {
     if (parsedInput.content !== null && parsedInput.content !== undefined) {
       incomingContent = decodeURIComponent(parsedInput.content);
     }
-    var problemIdURLed = thePage.storage.variables.editor.currentlyEditedPage.getValue();
-    thePage.storage.variables.currentCourse.fileName.setAndStore(decodeURIComponent(problemIdURLed));
-    editor.getSession().setValue(incomingContent);
-    editor.setTheme("ace/theme/chrome");
-    editor.getSession().setMode("ace/mode/xml");
-    editor.setOptions({
+    let problemIdURLed = storage.storage.variables.editor.currentlyEditedPage.getValue();
+    storage.storage.variables.currentCourse.fileName.setAndStore(decodeURIComponent(problemIdURLed));
+    editorAce.getSession().setValue(incomingContent);
+    editorAce.setTheme("ace/theme/chrome");
+    editorAce.getSession().setMode("ace/mode/xml");
+    editorAce.setOptions({
       enableBasicAutocompletion: true,
       enableLiveAutocompletion: true,
     });
-    editor.completers = [staticWordCompleter];
-    editor.$blockScrolling = Infinity;
-    editor.resize();
+    editorAce.completers = [staticWordCompleter];
+    editorAce.$blockScrolling = Infinity;
+    editorAce.resize();
   } catch (e) {
     console.log(`Error: ${e}`);
   }
@@ -238,7 +239,7 @@ function getNavigationEditButton(problemId, contentHTML) {
   ) {
     return document.createTextNode("");
   }
-  var navigationButton = document.createElement("button");
+  let navigationButton = document.createElement("button");
   navigationButton.addEventListener(
     "click", selectEditPage.bind(null, problemId)
   );
@@ -248,13 +249,13 @@ function getNavigationEditButton(problemId, contentHTML) {
 }
 
 function writeNextPreviousEditButton(currentlyEditedPage) {
-  var thePage = window.calculator.mainPage;
+  let thePage = window.calculator.mainPage;
   let problem = thePage.getProblemByIdOrNull(currentlyEditedPage);
   if (problem === null) {
     return;
   }
-  var previousButtonSpan = document.getElementById(ids.domElements.spanButtonPreviousEdit);
-  var nextButtonSpan = document.getElementById(ids.domElements.spanButtonNextEdit);
+  let previousButtonSpan = document.getElementById(ids.domElements.spanButtonPreviousEdit);
+  let nextButtonSpan = document.getElementById(ids.domElements.spanButtonNextEdit);
   if (previousButtonSpan !== null) {
     previousButtonSpan.innerHTML = "";
     previousButtonSpan.appendChild(getPreviousEditButton(problem.previousProblemId));
@@ -266,16 +267,16 @@ function writeNextPreviousEditButton(currentlyEditedPage) {
 }
 
 function selectEditPage(currentlyEditedPage) {
-  var thePage = window.calculator.mainPage;
-  var storageVariables = thePage.storage.variables;
-  var fileNameSources = [
+  let thePage = window.calculator.mainPage;
+  let storageVariables = thePage.storage.variables;
+  let fileNameSources = [
     storageVariables.editor.currentlyEditedPage,
     storageVariables.currentCourse.problemFileName,
     storageVariables.currentCourse.fileName,
     storageVariables.currentCourse.courseHome,
     storageVariables.currentCourse.topicList,
   ];
-  for (var i = 0; i < fileNameSources.length; i++) {
+  for (let i = 0; i < fileNameSources.length; i++) {
     if (
       (typeof currentlyEditedPage) === "string" &&
       currentlyEditedPage !== ""
@@ -299,11 +300,11 @@ function selectEditPage(currentlyEditedPage) {
     }
   }
   writeNextPreviousEditButton(currentlyEditedPage);
-  var theTopicTextArea = document.getElementById(ids.domElements.textAreaTopicListEntry);
+  let theTopicTextArea = document.getElementById(ids.domElements.textAreaTopicListEntry);
   theTopicTextArea.value = `Title: ${currentlyEditedPage}\nProblem: ${currentlyEditedPage}`;
   theTopicTextArea.cols = currentlyEditedPage.length + 15;
 
-  var theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requestEditPage}&`;
+  let theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requestEditPage}&`;
   theURL += `${pathnames.urlFields.problem.fileName}=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}`;
   submitRequests.submitGET({
     url: theURL,
@@ -313,7 +314,7 @@ function selectEditPage(currentlyEditedPage) {
 }
 
 function toggleClonePanel(button) {
-  var thePanel = button.nextElementSibling;
+  let thePanel = button.nextElementSibling;
   if (thePanel.style.maxHeight === '200px') {
     thePanel.style.opacity = '0';
     thePanel.style.maxHeight = '0';
@@ -326,11 +327,14 @@ function toggleClonePanel(button) {
 }
 
 module.exports = {
+  aceEditorAutoCompletionWordList,
+  editorAce,
   storeEditedPage,
   toggleClonePanel,
   selectEditPage,
   getEditPanel,
   getClonePanel,
   handleClone,
-  ctrlSPressAceEditorHandler
+  ctrlSPressAceEditorHandler,
+  staticWordCompleter,
 };

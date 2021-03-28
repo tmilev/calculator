@@ -7,20 +7,20 @@ const typeset = require("./math_typeset");
 const miscellaneous = require("./miscellaneous_frontend");
 
 function modifyDeadlines(incomingId) {
-  var thePage = window.calculator.mainPage;
-  var nameDatePicker = `datePicker${incomingId}`;
-  var theDates = document.getElementsByName(nameDatePicker);
-  var jsonToSubmit = {};
-  var idDecoded = decodeURIComponent(incomingId);
+  let thePage = window.calculator.mainPage;
+  let nameDatePicker = `datePicker${incomingId}`;
+  let theDates = document.getElementsByName(nameDatePicker);
+  let jsonToSubmit = {};
+  let idDecoded = decodeURIComponent(incomingId);
   jsonToSubmit[idDecoded] = {
     deadlines: {}
   };
 
-  for (var counterDates = 0; counterDates < theDates.length; counterDates++) {
-    var currentSection = thePage.user.sectionsTaught[counterDates];
+  for (let counterDates = 0; counterDates < theDates.length; counterDates++) {
+    let currentSection = thePage.user.sectionsTaught[counterDates];
     jsonToSubmit[idDecoded].deadlines[currentSection] = theDates[counterDates].value;
   }
-  var theURL = "";
+  let theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
   theURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.setProblemDeadline}&`;
   theURL += `${pathnames.urlFields.mainInput}=${encodeURIComponent(JSON.stringify(jsonToSubmit))}`;
@@ -31,11 +31,11 @@ function modifyDeadlines(incomingId) {
   });
 }
 
-var problemWeightsVisible = false;
+let problemWeightsVisible = false;
 
 function toggleDeadline(deadlineId, panelId, button) {
-  var thePanel = document.getElementById(deadlineId);
-  var theProblem = problemPage.allProblems.getProblemById(panelId);
+  let thePanel = document.getElementById(deadlineId);
+  let theProblem = problemPage.allProblems.getProblemById(panelId);
   if (thePanel.style.maxHeight === '200px') {
     thePanel.style.opacity = '0';
     thePanel.style.maxHeight = '0';
@@ -114,18 +114,18 @@ let lastLoadedCourse = {
 };
 
 function selectCurrentCoursePage() {
-  var thePage = window.calculator.mainPage;
-  var storageVariables = thePage.storage.variables;
-  var incomingCourse = storageVariables.currentCourse.courseHome.getValue();
-  var incomingTopicList = storageVariables.currentCourse.topicList.getValue();
+  let thePage = window.calculator.mainPage;
+  let storageVariables = thePage.storage.variables;
+  let incomingCourse = storageVariables.currentCourse.courseHome.getValue();
+  let incomingTopicList = storageVariables.currentCourse.topicList.getValue();
   if (
     incomingCourse === null ||
     incomingCourse === "" ||
     incomingCourse === undefined
   ) {
-    var courseBody = document.getElementById(ids.domElements.divCurrentCourseBody);
-    var temporarySelectCourseId = "buttonTemporarySelectCourse";
-    var courseBodyHTML = `<button id = '${temporarySelectCourseId}' `;
+    let courseBody = document.getElementById(ids.domElements.divCurrentCourseBody);
+    let temporarySelectCourseId = "buttonTemporarySelectCourse";
+    let courseBodyHTML = `<button id = '${temporarySelectCourseId}' `;
     courseBodyHTML += `class = "buttonSelectPage buttonSlowTransition buttonFlash" style = "width:150px" `;
     courseBodyHTML += `onclick = "window.calculator.mainPage.selectPage('selectCourse')">Please select course</button>`;
     courseBody.innerHTML = courseBodyHTML;
@@ -139,11 +139,11 @@ function selectCurrentCoursePage() {
   }
   lastLoadedCourse.courseHome = incomingCourse;
   lastLoadedCourse.topicList = incomingTopicList;
-  var topicRequest = "templateJSONNoLogin";
+  let topicRequest = "templateJSONNoLogin";
   if (thePage.user.flagLoggedIn) {
     topicRequest = "templateJSON";
   }
-  var theURL = "";
+  let theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${topicRequest}&`;
   theURL += `${pathnames.urlFields.problem.courseHome}=${incomingCourse}&`;
   theURL += `${pathnames.urlFields.problem.topicList}=${incomingTopicList}`;

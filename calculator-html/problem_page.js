@@ -347,13 +347,13 @@ class Problem {
     includeRandomSeed,
   ) {
     let thePage = window.calculator.mainPage;
-    let theExerciseType = pathnames.urlFields.exerciseJSON;
+    let exerciseType = pathnames.urlFields.exerciseJSON;
     if (isScoredQuiz && !thePage.user.flagDatabaseInactiveEveryoneIsAdmin) {
-      theExerciseType = pathnames.urlFields.scoredQuizJSON;
+      exerciseType = pathnames.urlFields.scoredQuizJSON;
     }
     let requestJSON = {
       currentPage: thePage.pages.problemPage.name,
-      exerciseType: theExerciseType,
+      exerciseType: exerciseType,
       problemFileName: this.fileName,
       courseHome: thePage.storage.variables.currentCourse.courseHome.getValue(),
       topicList: thePage.storage.variables.currentCourse.topicList.getValue(),
@@ -463,11 +463,9 @@ class Problem {
     nextProblemTag.href = `#${nextURL}`;
     nextProblemTag.addEventListener(
       "click",
-      selectCurrentProblem.bind(
-        null,
-        this.nextProblemId,
-        hints.defaultRequest,
-      )
+      () => {
+        selectCurrentProblem(this.nextProblemId, hints.defaultRequest);
+      }
     );
     nextProblemTag.innerHTML = "&#8594;";
     return nextProblemTag;
@@ -491,11 +489,10 @@ class Problem {
     previousLink.className = hints.linkType;
     previousLink.href = `#${previousURL}`;
     previousLink.addEventListener(
-      "click", window.calculator.problemPage.selectCurrentProblem.bind(
-        null,
-        this.previousProblemId,
-        hints.defaultRequest,
-      )
+      "click",
+      () => {
+        selectCurrentProblem(this.previousProblemId, hints.defaultRequest);
+      }
     );
     previousLink.innerHTML = "&#8592;";
     return previousLink;
@@ -524,7 +521,9 @@ class Problem {
       let practiceTag = document.createElement("a");
       practiceTag.className = "problemLinkPractice";
       practiceTag.href = "#" + practiceURL;
-      practiceTag.addEventListener("click", window.calculator.problemPage.selectCurrentProblem.bind(null, this.problemId, "exerciseJSON"));
+      practiceTag.addEventListener("click", () => {
+        selectCurrentProblem(this.problemId, "exerciseJSON");
+      });
       practiceTag.innerHTML = "Practice";
       result.push(practiceTag);
     } else {
@@ -539,7 +538,12 @@ class Problem {
       let quizTag = document.createElement("a");
       quizTag.className = "problemLinkQuiz";
       quizTag.href = "#" + quizURL;
-      quizTag.addEventListener("click", window.calculator.problemPage.selectCurrentProblem.bind(null, this.problemId, "scoredQuizJSON"));
+      quizTag.addEventListener(
+        "click",
+        () => {
+          selectCurrentProblem(this.problemId, "scoredQuizJSON");
+        }
+      );
       quizTag.innerHTML = "Quiz";
       result.push(quizTag);
     } else {
@@ -717,11 +721,9 @@ class Problem {
         nextElement.href = "#" + this.getAppAnchorRequestFileCourseTopics(true);
         nextElement.addEventListener(
           "click",
-          window.calculator.problemPage.selectCurrentProblem.bind(
-            null,
-            this.problemId,
-            "scoredQuizJSON",
-          ),
+          () => {
+            selectCurrentProblem(this.problemId, "scoredQuizJSON");
+          }
         );
         nextElement.innerHTML = "Quiz";
         nextCell.appendChild(nextElement);
@@ -732,9 +734,9 @@ class Problem {
       nextElement.innerHTML = "Practice";
       nextElement.addEventListener(
         "click",
-        window.calculator.problemPage.selectCurrentProblem.bind(
-          null, this.problemId, "exerciseJSON",
-        ),
+        () => {
+          selectCurrentProblem(this.problemId, "exerciseJSON");
+        }
       );
       nextCell.appendChild(nextElement);
     }

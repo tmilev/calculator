@@ -127,7 +127,8 @@ class ButtonCollection {
 
 class InputPanelData {
   constructor(
-    /**@type{{
+    /**
+     * @type{{
      * pureLatexElement?:HTMLElement|null,
      * }} */
     input,

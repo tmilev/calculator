@@ -934,7 +934,7 @@ public:
     static std::string parameters;
   };
 
-  std::string thePlotString;
+  std::string plotString;
   std::string fillStyle;
   std::string thePlotStringWithHtml;
   double xLow;

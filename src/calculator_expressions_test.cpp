@@ -29,6 +29,7 @@ bool Expression::Test::toStringTestRecode(Calculator& owner) {
   MacroRegisterFunctionWithName("Expression::Test::toStringTestRecode");
   owner.initialize(Calculator::Mode::full);
   Expression::Test::toStringTestRecodeOnce("1+1", owner);
+  Expression::Test::toStringTestRecodeOnce("\"\u00B0\"", owner);
   return true;
 }
 

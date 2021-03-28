@@ -1146,17 +1146,17 @@ bool CalculatorFunctionsPlot::plotLabel(
   if (!calculator.getVectorDoubles(input[1], labelPosition, - 1)) {
     return false;
   }
-  std::string theLabel;
-  if (!input[2].isOfType<std::string>(&theLabel)) {
-    theLabel = input[2].toString();
+  std::string label;
+  if (!input[2].isOfType<std::string>(&label)) {
+    label = input[2].toString();
   }
-  PlotObject thePlot;
-  thePlot.dimension = labelPosition.size;
-  thePlot.thePlotString = theLabel;
-  thePlot.pointsDouble.addOnTop(labelPosition);
-  thePlot.plotType = "label";
-  thePlot.colorJS = "black";
-  return output.assignValue(thePlot, calculator);
+  PlotObject plot;
+  plot.dimension = labelPosition.size;
+  plot.plotString = label;
+  plot.pointsDouble.addOnTop(labelPosition);
+  plot.plotType = "label";
+  plot.colorJS = "black";
+  return output.assignValue(plot, calculator);
 }
 
 bool CalculatorFunctionsPlot::plotRectangle(
@@ -2120,7 +2120,7 @@ bool CalculatorFunctionsPlot::plotCoordinateSystem(Calculator& calculator, const
     plotLabels.pointsDouble[0][i] = corner2[i];
     std::stringstream out;
     out << static_cast<char>('x' + i);
-    plotLabels.thePlotString = out.str();
+    plotLabels.plotString = out.str();
     resultPlot += plotLabels;
   }
   return output.assignValue(resultPlot, calculator);

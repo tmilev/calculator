@@ -367,7 +367,7 @@ bool PlotObject::operator==(const PlotObject& other) const {
   ((this->paramLow  - other.paramLow ) == 0.0)                               &&
   ((this->paramHigh - other.paramHigh) == 0.0)                               &&
   ((this->lineWidth - other.lineWidth) == 0.0)                               &&
-  this->thePlotString                  == other.thePlotString                &&
+  this->plotString                  == other.plotString                &&
   this->fillStyle                      == other.fillStyle                    &&
   this->thePlotStringWithHtml          == other.thePlotStringWithHtml        &&
   this->colorRGB                       == other.colorRGB                     &&
@@ -814,7 +814,7 @@ JSData PlotObject::toJSONDirectionFieldInTwoDimensions() {
 
 JSData PlotObject::toJSONDrawText() {
   JSData result;
-  result[PlotObject::Labels::text] = this->thePlotString;
+  result[PlotObject::Labels::text] = this->plotString;
   this->writeColor(result);
   if (this->pointsDouble.size > 0) {
     result[PlotObject::Labels::point] = this->pointsDouble[0];
@@ -1037,7 +1037,7 @@ std::string Plot::getPlotStringAddLatexCommands(bool useHtml) {
     if (useHtml) {
       resultStream << this->plotObjects[i].thePlotStringWithHtml << lineSeparator;
     } else {
-      resultStream << this->plotObjects[i].thePlotString << lineSeparator;
+      resultStream << this->plotObjects[i].plotString << lineSeparator;
     }
   }
   resultStream << "\\end{pspicture}\n\n" << lineSeparator << "\\end{document}";

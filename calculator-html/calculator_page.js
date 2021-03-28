@@ -242,6 +242,13 @@ class Calculator {
       buffer.write(inputParsed.error);
     }
     if (
+      inputParsed.badInput !== undefined &&
+      inputParsed.badInput !== null &&
+      inputParsed.badInput !== ""
+    ) {
+      buffer.write(inputParsed.badInput);
+    }
+    if (
       inputParsed.crashReport !== undefined &&
       inputParsed.crashReport !== null &&
       inputParsed.crashReport !== ""

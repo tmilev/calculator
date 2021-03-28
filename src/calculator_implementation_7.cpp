@@ -5777,7 +5777,7 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& calculator, const Ex
     plot.yLow = MathRoutines::minimum(YValues[i], plot.yLow);
     plot.yHigh = MathRoutines::maximum(YValues[i], plot.yHigh);
   }
-  plot.thePlotString = outLatex.str();
+  plot.plotString = outLatex.str();
   plot.thePlotStringWithHtml = outHtml.str();
   plot.dimension = 2;
   return output.assignValue(plot, calculator);
@@ -6104,7 +6104,7 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
     calculator << "No LaTeX version: failed to convert: "
     << input[1].toString() << " to postfix notation. ";
   } else {
-    thePlotObj.thePlotString = thePlotObj.
+    thePlotObj.plotString = thePlotObj.
     getPlotStringFromFunctionStringAndRanges(
       false,
       functionSuffixNotationE.toString(),
@@ -6112,7 +6112,7 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
       thePlotObj.xLow,
       thePlotObj.xHigh
     );
-    thePlotObj.thePlotStringWithHtml = thePlotObj.thePlotString;
+    thePlotObj.thePlotStringWithHtml = thePlotObj.plotString;
   }
   thePlot += thePlotObj;
   return output.assignValue(thePlot, calculator);
@@ -6325,7 +6325,7 @@ bool CalculatorFunctionsPlot::plot2DWithBars(Calculator& calculator, const Expre
   }
   outHtml << "<br>";
   PlotObject thePlot;
-  thePlot.thePlotString = outTex.str();
+  thePlot.plotString = outTex.str();
   thePlot.thePlotStringWithHtml = outHtml.str();
   thePlot.xLow = lowerBound;
   thePlot.xHigh = upperBound;
@@ -6518,7 +6518,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     << plot.paramLow << "}{" << plot.paramHigh << "}{"
     << theConvertedExpressions[0].getValue<std::string>()
     << theConvertedExpressions[1].getValue<std::string>() << "}";
-    plot.thePlotString= outLatex.str();
+    plot.plotString= outLatex.str();
     plot.thePlotStringWithHtml = outHtml.str();
   }
   Expression converterE;
@@ -8006,7 +8006,7 @@ public:
         arrowHead = this->nodePositionsDouble[this->arrows[i][j]];
         arrowHead[1] += this->charHeight.getDoubleValue() / 2;
         PlotObject theSegment;
-        theSegment.thePlotString = "segment";
+        theSegment.plotString = "segment";
         theSegment.pointsDouble.addOnTop(arrowBase);
         theSegment.pointsDouble.addOnTop(arrowHead);
         theSegment.colorJS = "black";
@@ -8018,7 +8018,7 @@ public:
         theText.pointsDouble.addOnTop(this->nodePositionsDouble[i]);
         theText.colorJS =
         this->displayedStringIsLeaf[i] ? "red" : "gray";
-        theText.thePlotString =
+        theText.plotString =
         HtmlRoutines::clearNewLines
         (HtmlRoutines::backslashQuotes(HtmlRoutines::doubleBackslashes(this->displayedExpressionStrings[i]) ));
         thePlot += theText;

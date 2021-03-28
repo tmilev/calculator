@@ -6,7 +6,6 @@ const typeset = require("./math_typeset");
 const EquationEditor = require("./equation_editor").EquationEditor;
 const MathNode = require("./equation_editor").MathNode;
 const knownTypes = require("./equation_editor").knownTypes;
-const panels = require("./panels");
 
 class ElementWithScripts {
   constructor() {
@@ -267,7 +266,6 @@ class DynamicJavascript {
       });
     }
   }
-
 }
 
 let dynamicJavascript = new DynamicJavascript();

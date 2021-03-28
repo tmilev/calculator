@@ -440,6 +440,9 @@ public:
   static unsigned int hashFunction(const char& input) {
     return static_cast<unsigned int>(input);
   }
+  static unsigned int hashFunction(const unsigned char& input) {
+    return static_cast<unsigned int>(input);
+  }
 };
 
 // List serves the same purpose as std::vector

@@ -1279,18 +1279,21 @@ bool Calculator::replaceIntegerXbyEX() {
 
 std::string Calculator::toStringIsCorrectAsciiCalculatorString(const std::string& input) {
   std::stringstream out;
-  HashedList<char, HashFunctions::hashFunction> badCharacters;
+  HashedList<unsigned char, HashFunctions::hashFunction> badCharacters;
   for (unsigned i = 0; i < input.size(); i ++) {
-    if (!this->isStandardCalculatorCharacter(static_cast<unsigned char>(input[i]))) {
-      badCharacters.addOnTopNoRepetition(input[i]);
+    unsigned char next = static_cast<unsigned char>(input[i]);
+    if (!this->isStandardCalculatorCharacter(next)) {
+      badCharacters.addOnTopNoRepetition(next);
     }
   }
   if (badCharacters.size > 0) {
     out << "Non-ascii characters detected in your input, namely: "
     << badCharacters.toStringCommaDelimited() << ", ";
-    List<int> ListInt;
-    ListInt = badCharacters;
-    out << "with respective code numbers: " << ListInt.toStringCommaDelimited() << ". ";
+    List<std::string> hexCodes;
+    for (int i = 0; i < badCharacters.size; i ++) {
+      hexCodes.addOnTop(StringRoutines::convertByteToHex(badCharacters[i]));
+    }
+    out << "with byte values: " << hexCodes.toStringCommaDelimited() << ". ";
     out << "Perhaps you copy+pasted from webpage/pdf file or are using non-English keyboard setup? ";
   }
   return out.str();

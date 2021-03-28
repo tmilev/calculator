@@ -468,7 +468,7 @@ std::string StringRoutines::convertStringToJSONString(const std::string &input) 
     } else if (StringRoutines::isASCIICharacterVisible(input[i])) {
       out << input[i];
     } else {
-      out << "\\u00" << StringRoutines::convertByteToHex(static_cast<unsigned char>(input[i]));
+      out << input[i];
     }
   }
   return out.str();

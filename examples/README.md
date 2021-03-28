@@ -966,7 +966,7 @@ WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}
 Multiplies rational number by a rational function.
 
 *\** [MultiplyPolynomialByRationalFunction] {CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Polynomial%7b%7d%28x%20%2b1%29MakeRationalFunction%7b%7d%28%5cu000crac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%3b%5cnMakeRationalFunction%7b%7d%28%5cu000crac%7b-2x%20-2%7d%7bx%5e2-x%20%7d%29MakeRationalFunction%7b%7d%28%5cu000crac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Polynomial%7b%7d%28x%20%2b1%29MakeRationalFunction%7b%7d%28%0crac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%3b%5cnMakeRationalFunction%7b%7d%28%0crac%7b-2x%20-2%7d%7bx%5e2-x%20%7d%29MakeRationalFunction%7b%7d%28%0crac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Polynomial{}(x +1)MakeRationalFunction{}(rac{-2x -2}{x^2+x });
 MakeRationalFunction{}(rac{-2x -2}{x^2-x })MakeRationalFunction{}(rac{-2x -2}{x^2+x })
@@ -974,7 +974,7 @@ MakeRationalFunction{}(rac{-2x -2}{x^2-x })MakeRationalFunction{}(rac{-2x -2}{
 Multiplies rational function by a rational function.
 
 *\** [MultiplyRationalFunctionByRationalFunction] {CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Polynomial%7b%7d%28x%20%2b1%29MakeRationalFunction%7b%7d%28%5cu000crac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%3b%5cnMakeRationalFunction%7b%7d%28%5cu000crac%7b-2x%20-2%7d%7bx%5e2-x%20%7d%29MakeRationalFunction%7b%7d%28%5cu000crac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Polynomial%7b%7d%28x%20%2b1%29MakeRationalFunction%7b%7d%28%0crac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%3b%5cnMakeRationalFunction%7b%7d%28%0crac%7b-2x%20-2%7d%7bx%5e2-x%20%7d%29MakeRationalFunction%7b%7d%28%0crac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Polynomial{}(x +1)MakeRationalFunction{}(rac{-2x -2}{x^2+x });
 MakeRationalFunction{}(rac{-2x -2}{x^2-x })MakeRationalFunction{}(rac{-2x -2}{x^2+x })

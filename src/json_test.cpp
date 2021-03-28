@@ -38,6 +38,9 @@ bool JSData::Test::testRecode() {
   toRecode.addOnTop(List<std::string>({
     "{\"a\":\"\n\"}", "{\"a\":\"\\n\"}"
   }));
+  toRecode.addOnTop(List<std::string>({
+    "\"\u03C0\"", "\"\u03C0\""
+  }));
   std::stringstream commentsOnFailure;
   for (int i = 0; i < toRecode.size; i ++) {
     JSData parser;

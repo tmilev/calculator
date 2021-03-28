@@ -8254,6 +8254,7 @@ class MathNodeDelimiterMark extends MathNode {
     super(equationEditor, left ? knownTypes.leftDelimiterMark : knownTypes.rightDelimiterMark);
     this.parenthesisThickness = 0;
   }
+
   verticallyStretchCommon(
     /** @type {number}*/
     heightToEnclose,
@@ -8311,17 +8312,22 @@ class MathNodeSquareBrackets extends MathNodeDelimiterMark {
     fractionLineHeightEnclosed,
   ) {
     this.verticallyStretchCommon(heightToEnclose, fractionLineHeightEnclosed);
-    let shift = 2;
-    this.boundingBox.width = Math.max(heightToEnclose / 6, 3);
+    this.parenthesisThickness = heightToEnclose / 30;
+    this.parenthesisThickness = Math.max(0.5, this.parenthesisThickness);
+    this.parenthesisThickness = Math.min(3, this.parenthesisThickness);
+    this.boundingBox.width = heightToEnclose / 5;
+    this.boundingBox.width = Math.min(this.boundingBox.width, 10);
+    this.boundingBox.width = Math.max(this.boundingBox.width, 2);
+    let shift = 1;
     if (this.left) {
       this.boundingBox.left = shift;
     } else {
       this.boundingBox.left = - shift;
     }
     if (this.element !== null) {
-      this.element.style.borderWidth = `${this.parenthesisThickness}px`;
       this.element.style.borderTop = `solid`;
       this.element.style.borderBottom = `solid`;
+      this.element.style.borderWidth = `${this.parenthesisThickness}px`;
     }
   }
 }

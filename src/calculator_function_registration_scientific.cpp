@@ -127,7 +127,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationHandler(
     "FourierTransformDO",
-    CalculatorFunctions::innerFourierTransformEWA,
+    CalculatorFunctions::fourierTransformElementWeylAlgebra,
     "",
     "Fourier-transforms an element of a Weyl algebra. "
     "Multiplies each monomial "

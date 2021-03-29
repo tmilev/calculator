@@ -755,9 +755,9 @@ somestream& JSData::intoStream(
       return out;
     case JSData::token::tokenString:
       if (!options.hexEncodeNonAsciiStrings) {
-        out << '"' << StringRoutines::convertStringToJSONString(this->stringValue) << '"';
+        out << '"' << StringRoutines::Conversions::escapeQuotesBackslashesNewLines(this->stringValue) << '"';
       } else {
-        out << '"' << StringRoutines::convertStringToJSONString(
+        out << '"' << StringRoutines::Conversions::escapeQuotesBackslashesNewLines(
           StringRoutines::convertStringToHexIfNonReadable(this->stringValue, 0, false)
         ) << '"';
       }
@@ -785,7 +785,7 @@ somestream& JSData::intoStream(
       out << "{" << newLine;
       for (int i = 0; i < this->objects.size(); i ++) {
         out << whiteSpaceInner << whiteSpaceOuter;
-        out << '"' << StringRoutines::convertStringToJSONString(this->objects.keys[i]) << '"';
+        out << '"' << StringRoutines::Conversions::escapeQuotesBackslashesNewLines(this->objects.keys[i]) << '"';
         out << ':';
         this->objects.values[i].intoStream(out, &options);
         if (i != this->objects.size() - 1) {

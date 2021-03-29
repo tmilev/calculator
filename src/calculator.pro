@@ -131,6 +131,7 @@ SOURCES += \
     database_mongo_calculator.cpp \
     date_time_wrappers.cpp \
     examRoutines.cpp \
+    general_strings_test.cpp \
     global_objects.cpp \
     html_snippets.cpp \
     json.cpp \

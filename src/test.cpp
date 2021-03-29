@@ -60,6 +60,7 @@ void Test::run() {
   if (this->shouldTest(Test::Suites::basic)) {
     AlgebraicNumber::Test::all();
     JSData::Test::all();
+    StringRoutines::Test::all();
     Expression::Test::all();
     LargeIntegerUnsigned::Test::all();
     Rational::Test::all();

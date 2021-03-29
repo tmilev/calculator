@@ -285,7 +285,7 @@ public:
   static bool innerDistributeExponent(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerDistributeSqrt(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerFourierTransformEWA(Calculator& calculator, const Expression& input, Expression& output);
+  static bool fourierTransformElementWeylAlgebra(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerSqrt(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool factorInteger(Calculator& calculator, const Expression& input, Expression& output);

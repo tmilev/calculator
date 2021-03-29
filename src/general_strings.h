@@ -47,7 +47,45 @@ public:
   );
   static std::string convertByteToHex(unsigned char byte);
 
-  static std::string convertStringToJSONString(const std::string& input);
+  class Conversions {
+  public:
+    // Converts an arbitrary string (byte sequence) to a list of unicode code points
+    // that can be recoded back to another format.
+    // If the input is valid utf8 string, will write
+    // the corresponding code points in the output variable and return true;
+    // If the input is invalid, will still read the entire sequence and
+    // write a list of integers, but will return false. In this case, the
+    // list of integers is not guaranteed to be valid code points.
+    static bool utf8StringToUnicodeCodePoints(
+      const std::string& input,
+      List<uint32_t>& output,
+      std::stringstream* commentsOnFailure
+    );
+    // Converts an input utf8 string to a string suited for json notation,
+    // i.e., a utf-16 encoded and then quote, backslash, newline-escaped string.
+    static std::string utf8StringToJSONStringEscaped(
+      const std::string& inputUtf8
+    );
+    // Escapes quotes, backslashes and new lines. Does not do utf16 decoding.
+    static std::string escapeQuotesBackslashesNewLines(const std::string& input);
+    class Test {
+    public:
+      static bool all();
+      static bool utf8StringToJSONStringEscaped();
+      static bool convertStringToJSONStringEscapeOnly();
+      static bool convertUtf8StringToUnicodeCodePoints();
+      static bool oneUtf8ToJSONSuccess(
+        const std::string& givenInput,
+        const std::string& expectedOutput
+      );
+      static bool oneConversionUtf8Success(
+        const std::string& givenInput,
+        uint32_t codePoint1,
+        uint32_t codePoint2 = 0xffffffff,
+        uint32_t codePoint3 = 0xffffffff
+      );
+    };
+  };
   static std::string convertStringToJavascriptString(const std::string& input);
   // Transforms an arbitrary string to a string that is an acceptable javascript variable.
   // Avoid use of underscores and other characters so as attempt to produce a name that is
@@ -112,6 +150,10 @@ public:
     void pushCommonString(int indexLeft, int indexRight);
     std::string toString();
     Differ();
+  };
+  class Test {
+  public:
+    static bool all();
   };
 };
 #endif

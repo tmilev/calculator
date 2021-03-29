@@ -1906,9 +1906,11 @@ If A is a non-typed matrix of expressions that can be converted to a typed matri
 Absolute value function 
 
 *"* [QuoteToString] {CalculatorFunctions::quoteToString}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%22The%20quick%20brown%20fox%20jumps%20over%20the%20lazy%20dog.%5c%22%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%22The%20quick%20brown%20fox%20jumps%20over%20the%20lazy%20dog.%5c%22%3b%5cn%5c%22%5c%5cu00B0%5c%22%3b%5cn%5c%22%5c%5cu00b0%5c%22%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-"The quick brown fox jumps over the lazy dog."
+"The quick brown fox jumps over the lazy dog.";
+"\u00B0";
+"\u00b0"
 ```
 Creates a string. 
 

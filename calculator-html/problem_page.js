@@ -298,7 +298,12 @@ class Problem {
       this.answerPanels = [];
     } else {
       this.initializeBasic(problemData);
-      this.decodedProblem = decodeURIComponent(problemData[pathnames.urlFields.problem.content]);
+      let content = problemData[pathnames.urlFields.problem.content];
+      try {
+        this.decodedProblem = decodeURIComponent(content);
+      } catch (e) {
+        this.decodedProblem = "Failed to decode problem content.";
+      }
     }
     this.commentsProblem = problemData["commentsProblem"];
     if (this.commentsProblem === undefined) {

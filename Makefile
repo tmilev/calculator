@@ -156,6 +156,7 @@ SOURCES_RELATIVE_PATH=\
     html_snippets.cpp \
     json.cpp \
     json_test.cpp \
+    general_strings_test.cpp \
     math_algebraic_numbers.cpp \
     math_algebraic_numbers_test.cpp \
     math_elliptic_curves.cpp \

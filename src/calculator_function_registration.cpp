@@ -454,7 +454,9 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctions::quoteToString,
     "",
     "Creates a string. ",
-    "\"The quick brown fox jumps over the lazy dog.\"",
+    "\"The quick brown fox jumps over the lazy dog.\";\n"
+    "\"\\u00B0\";\n"
+    "\"\\u00b0\"",
     "CalculatorFunctions::quoteToString",
     "QuoteToString",
     innerStandard

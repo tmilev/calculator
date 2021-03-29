@@ -714,7 +714,8 @@ bool CalculatorFunctions::quoteToString(Calculator& calculator, const Expression
     return output.assignValue(input.toString(), calculator);
   }
   if (input[1].isOperation(&operation)) {
-    return output.assignValue(operation, calculator);
+    std::string converted = operation;
+    return output.assignValue(converted, calculator);
   }
   calculator
   << "<b>Warning: this shouldn't happen: quote operation "
@@ -724,10 +725,10 @@ bool CalculatorFunctions::quoteToString(Calculator& calculator, const Expression
   return output.assignValue(input.toString(), calculator);
 }
 
-bool CalculatorFunctions::innerFourierTransformEWA(
+bool CalculatorFunctions::fourierTransformElementWeylAlgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerFourierTransformEWA");
+  MacroRegisterFunctionWithName("CalculatorFunctions::fourierTransformElementWeylAlgebra");
   if (input.size() != 2) {
     return false;
   }

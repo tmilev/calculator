@@ -455,8 +455,119 @@ std::string HtmlRoutines::convertStringEscapeQuotesAndBackslashes(const std::str
   return out.str();
 }
 
-std::string StringRoutines::convertStringToJSONString(const std::string &input) {
-  MacroRegisterFunctionWithName("StringRoutines::convertStringToJSONString");
+bool StringRoutines::Conversions::utf8StringToUnicodeCodePoints(
+  const std::string& input, List<uint32_t>& output, std::stringstream* commentsOnFailure
+) {
+  output.setSize(0);
+  bool result = true;
+  for (unsigned i = 0; i < input.size(); i ++) {
+    unsigned char next = input[i];
+    unsigned char leadingBit = next >> 7;
+    if (leadingBit == 0) {
+      output.addOnTop(next);
+      continue;
+    }
+    unsigned bytesToRead = 0;
+    if ((next >> 5) == 6) {
+      // 6 is the bit sequence 110.
+      // A two-byte utf8 sequence.
+      bytesToRead = 2;
+    } else if ((next >> 4) == 14) {
+      // 14 is the bit sequence 1110.
+      bytesToRead = 3;
+    } else if ((next >> 3) == 30) {
+      // 30 is the bit sequence 11110.
+      bytesToRead = 4;
+    } else {
+      // Invalid utf encoding: does not start with one of:
+      // 0x0, 0x110, 0x1110, 0x11110.
+      if (
+        // Generate an error message for the first error only.
+        result &&
+        commentsOnFailure != nullptr
+      ) {
+        *commentsOnFailure << "Byte " << StringRoutines::convertByteToHex(next)
+        << " with index " << i
+        << " does not start with a valid utf8 sequence.";
+      }
+      output.addOnTop(next);
+      result = false;
+      continue;
+    }
+    // The static cast below ensures that its argument won't be
+    // silently converted to a
+    // 32-bit integer.
+    unsigned char nextContribution = static_cast<unsigned char>(next << (bytesToRead + 1)) >> (bytesToRead + 1);
+    uint32_t codePoint = nextContribution;
+    for (unsigned j = 1; j < bytesToRead; j ++) {
+      if (i + j >= input.size()) {
+        // The bytes promised by the utf8 encoding are missing.
+        if (
+          // Generate an error message for the first error only.
+          result &&
+          commentsOnFailure != nullptr
+        ) {
+          *commentsOnFailure << "Missing bytes at byte: "
+          << StringRoutines::convertByteToHex(next) << " of index " << i << ".";
+        }
+        result = false;
+        break;
+      }
+      // Strip the first two bits.
+      nextContribution = static_cast<unsigned char>(input[i + j] << 2) >> 2;
+      codePoint <<= 6;
+      codePoint += nextContribution;
+    }
+    output.addOnTop(codePoint);
+    i += bytesToRead - 1;
+  }
+  return result;
+}
+
+std::string StringRoutines::Conversions::utf8StringToJSONStringEscaped(
+  const std::string& inputUtf8
+) {
+  List<uint32_t> codePoints;
+  StringRoutines::Conversions::utf8StringToUnicodeCodePoints(inputUtf8, codePoints, nullptr);
+  std::stringstream out;
+  for (int i = 0; i < codePoints.size; i ++) {
+    uint32_t current = codePoints[i];
+    if (current <= 127) {
+      unsigned char currentCharacter = static_cast<char>(current);
+      if (currentCharacter == '\\') {
+        out << "\\\\";
+      } else if (currentCharacter == '\n') {
+        out << "\\n";
+      } else if (currentCharacter == '"') {
+        out << "\\\"";
+      } else {
+        out << currentCharacter;
+      }
+      continue;
+    }
+    if (current <= 0xFFFF) {
+      unsigned char lowByte = static_cast<unsigned char>(current);
+      unsigned char highByte = static_cast<unsigned char>(current >> 8);
+      out << "\\u" << StringRoutines::convertByteToHex(highByte) << StringRoutines::convertByteToHex(lowByte);
+      continue;
+    }
+    unsigned char byte0 = static_cast<unsigned char>(current);
+    unsigned char byte1 = static_cast<unsigned char>(current >> 8);
+    unsigned char byte2 = static_cast<unsigned char>(current >> 16);
+    unsigned char byte3 = static_cast<unsigned char>(current >> 24);
+    out
+    << "\\u"
+    << StringRoutines::convertByteToHex(byte3)
+    << StringRoutines::convertByteToHex(byte2)
+    << "\\u"
+    << StringRoutines::convertByteToHex(byte1)
+    << StringRoutines::convertByteToHex(byte0);
+  }
+  return out.str();
+}
+
+std::string StringRoutines::Conversions::escapeQuotesBackslashesNewLines(const std::string& input) {
+  MacroRegisterFunctionWithName("StringRoutines::escapeQuotesBackslashesNewLines");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (input[i] == '"') {
@@ -488,7 +599,6 @@ std::string StringRoutines::convertStringToJavascriptVariable(const std::string&
     }
   }
   return out.str();
-
 }
 
 std::string StringRoutines::convertStringToJavascriptString(const std::string& input) {

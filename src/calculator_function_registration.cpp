@@ -3336,6 +3336,18 @@ void Calculator::initializeFunctionsStandard() {
     "MultiplySequenceByMatrix",
     innerStandard
   );
+  this->addOperationHandler(
+    "*",
+    CalculatorFunctionsBinaryOps::multiplyMatrixBySequence,
+    "",
+    "Multiplies a matrix standing on the left by a "
+    "sequence/list (matrix-row) standing on the right.\n"
+    "This operation is valid only if the the matrix on the right is a column-vector.",
+    "(1,2)\\begin{pmatrix} 1& 2 \\\\ 3& 5\\end{pmatrix}",
+    "CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix",
+    "MultiplySequenceByMatrix",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddSequenceToSequence,

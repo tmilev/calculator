@@ -493,7 +493,7 @@ bool Calculator::getMatrixExpressionsFromArguments(
 }
 
 bool Calculator::getMatrixExpressions(
-  const Expression& input, Matrix<Expression>& output, int desiredNumRows, int desiredNumCols
+  const Expression& input, Matrix<Expression>& output, int desiredNumberOfRows, int desiredNumberOfColumns
 ) {
   MacroRegisterFunctionWithName("Calculator::getMatrixExpressions");
   if (!input.isSequenceNElements() && !input.isMatrix() && !input.isIntervalRealLine()) {
@@ -509,13 +509,13 @@ bool Calculator::getMatrixExpressions(
     return false;
   }
   if (!input[1].isSequenceNElements() && !input[1].startsWith(this->opIntervalOpen())) {
-    if (desiredNumRows > 0) {
-      if (desiredNumRows != 1) {
+    if (desiredNumberOfRows > 0) {
+      if (desiredNumberOfRows != 1) {
         return false;
       }
     }
-    if (desiredNumCols > 0) {
-      if (desiredNumCols != input.size() - 1) {
+    if (desiredNumberOfColumns > 0) {
+      if (desiredNumberOfColumns != input.size() - 1) {
         return false;
       }
     }
@@ -525,13 +525,13 @@ bool Calculator::getMatrixExpressions(
     }
     return true;
   }
-  if (desiredNumRows > 0) {
-    if (desiredNumRows != input.size() - 1) {
+  if (desiredNumberOfRows > 0) {
+    if (desiredNumberOfRows != input.size() - 1) {
       return false;
     }
   }
-  if (desiredNumCols > 0) {
-    if (desiredNumCols != input[1].size() - 1) {
+  if (desiredNumberOfColumns > 0) {
+    if (desiredNumberOfColumns != input[1].size() - 1) {
       return false;
     }
   }

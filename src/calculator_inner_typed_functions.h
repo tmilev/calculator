@@ -67,6 +67,13 @@ public:
   static bool innerMultiplySequenceByMatrix(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool multiplyMatrixByMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool makeMatrixProduct(
+    Calculator& calculator,
+    const Matrix<Expression>& left,
+    const Matrix<Expression>& right,
+    Expression& output
+  );
+  static bool multiplyMatrixBySequence(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyRatOrAlgebraicByMatRatOrMatAlg(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyMatrixRationalOrRationalByMatrixRational(

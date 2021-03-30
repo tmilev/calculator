@@ -1892,10 +1892,74 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(
   return true;
 }
 
+bool CalculatorFunctionsBinaryOps::multiplyMatrixBySequence(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::multiplyMatrixBySequence");
+    if (!input.startsWith(calculator.opTimes(), 3)) {
+    return false;
+  }
+  int numberOfRows = - 1;
+  int numberOfColumns = - 1;
+  const Expression& left = input[1];
+  const Expression& right = input[2];
+  if (
+    !left.isMatrix(&numberOfRows, &numberOfColumns) ||
+    !right.isSequenceNElements()
+  ) {
+    return false;
+  }
+  if (numberOfColumns != 1 || numberOfRows < 2) {
+    return false;
+  }
+  Matrix<Expression> rightAsMatrix, leftAsMatrix;
+  if (!calculator.getMatrixExpressions(right, rightAsMatrix, 1, numberOfRows)) {
+    return false;
+  }
+  if (!calculator.getMatrixExpressions(
+    left, leftAsMatrix, numberOfRows, numberOfColumns
+  )) {
+    return false;
+  }
+  return CalculatorFunctionsBinaryOps::makeMatrixProduct(calculator, leftAsMatrix, rightAsMatrix, output);
+}
+
+bool CalculatorFunctionsBinaryOps::makeMatrixProduct(
+  Calculator& calculator,
+  const Matrix<Expression>& left,
+  const Matrix<Expression>& right,
+  Expression& output
+) {
+  Matrix<Expression> outputMatrix;
+  if (left.numberOfColumns != right.numberOfRows) {
+    std::stringstream out;
+    out << "Error: multiplication of matrix with " << left.numberOfColumns
+    << " columns by a matrix with "
+    << right.numberOfRows << " rows.";
+    return output.makeError(out.str(), calculator);
+  }
+  outputMatrix.initialize(left.numberOfRows, right.numberOfColumns);
+  Expression leftSummand, rightSummand;
+  for (int i = 0; i < left.numberOfRows; i ++) {
+    for (int j = 0; j < right.numberOfColumns; j ++) {
+      for (int k = 0; k < left.numberOfColumns; k ++) {
+        if (k == 0) {
+          outputMatrix(i, j).makeProduct(calculator, left(i, k), right(k, j));
+        } else {
+          rightSummand = outputMatrix(i, j);
+          leftSummand.makeProduct(calculator, left(i, k), right(k, j));
+          outputMatrix(i, j).makeXOX(calculator, calculator.opPlus(), leftSummand, rightSummand);
+        }
+      }
+    }
+  }
+  return output.assignMatrixExpressions(outputMatrix, calculator, true, true);
+}
+
 bool CalculatorFunctionsBinaryOps::multiplyMatrixByMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::multiplyMatrixByMatrix");
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
@@ -1949,23 +2013,8 @@ bool CalculatorFunctionsBinaryOps::multiplyMatrixByMatrix(
   if (leftMatrix.numberOfColumns != rightMatrix.numberOfRows) {
     return false;
   }
-  Matrix<Expression> outputMat;
-  outputMat.initialize(leftMatrix.numberOfRows, rightMatrix.numberOfColumns);
-  Expression leftSummand, rightSummand;
-  for (int i = 0; i < leftMatrix.numberOfRows; i ++) {
-    for (int j = 0; j < rightMatrix.numberOfColumns; j ++) {
-      for (int k = 0; k < leftMatrix.numberOfColumns; k ++) {
-        if (k == 0) {
-          outputMat(i, j).makeProduct(calculator, leftMatrix(i, k), rightMatrix(k, j));
-        } else {
-          rightSummand = outputMat(i, j);
-          leftSummand.makeProduct(calculator, leftMatrix(i, k), rightMatrix(k, j));
-          outputMat(i, j).makeXOX(calculator, calculator.opPlus(), leftSummand, rightSummand);
-        }
-      }
-    }
-  }
-  return output.assignMatrixExpressions(outputMat, calculator, true, true);
+  CalculatorFunctionsBinaryOps::makeMatrixProduct(calculator, leftMatrix, rightMatrix, output);
+  return true;
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix(

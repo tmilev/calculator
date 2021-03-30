@@ -1690,8 +1690,8 @@ public:
   bool getMatrixExpressions(
     const Expression& input,
     Matrix<Expression>& output,
-    int desiredNumRows = - 1,
-    int desiredNumCols = - 1
+    int desiredNumberOfRows = - 1,
+    int desiredNumberOfColumns = - 1
   );
   bool getMatrixExpressionsFromArguments(
     const Expression& input,

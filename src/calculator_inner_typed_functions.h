@@ -25,7 +25,7 @@ public:
   static bool innerAddMatrixToMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerDirectSumMatrixWithMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAugmentMatrixToTheRight(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAugmentMatrixBelow(Calculator& calculator, const Expression& input, Expression& output);
+  static bool augmentMatrixBelow(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic(
     Calculator& calculator, const Expression& input, Expression& output

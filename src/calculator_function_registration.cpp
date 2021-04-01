@@ -3296,12 +3296,17 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "AugmentMatrixBelow",
-    CalculatorFunctionsBinaryOps::innerAugmentMatrixBelow,
+    CalculatorFunctionsBinaryOps::augmentMatrixBelow,
     "",
     "Augments matrix below by another matrix. "
     "Pastes the content of the second matrix below the first matrix."
     "The matrices must have the same number of columns. ",
-    "AugmentMatrixBelow( ((1,1),(2,2)), ((0,0),(1,1)))",
+    "AugmentMatrixBelow( ((1,1),(2,2)), ((0,0),(1,1)));\n"
+    "a = FunctionToMatrix(3, 2,2);\n"
+    "b = FunctionToMatrix(4, 2,3);\n"
+    "AugmentMatrixBelow(b,a);\n"
+    "AugmentMatrixBelow(a,a);\n"
+    "AugmentMatrixBelow(b,b)",
     "CalculatorFunctionsBinaryOps::innerAugmentMatrixBelow",
     "AugmentMatrixBelow",
     innerStandard

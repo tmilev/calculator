@@ -2516,10 +2516,10 @@ bool CalculatorFunctionsBinaryOps::innerAugmentMatrixToTheRight(
   return output.assignMatrixExpressions(leftMatrix, calculator, false, false);
 }
 
-bool CalculatorFunctionsBinaryOps::innerAugmentMatrixBelow(
+bool CalculatorFunctionsBinaryOps::augmentMatrixBelow(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAugmentMatrixBelow");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::augmentMatrixBelow");
   if (input.size() != 3) {
     return false;
   }
@@ -2530,7 +2530,7 @@ bool CalculatorFunctionsBinaryOps::innerAugmentMatrixBelow(
   ) {
     return false;
   }
-  if (leftMatrix.numberOfRows != rightMatrix.numberOfRows) {
+  if (leftMatrix.numberOfColumns != rightMatrix.numberOfColumns) {
     return calculator
     << "Cannot augment the left matrix with: " << leftMatrix.numberOfRows
     << " rows to the right by a matrix with a different number of rows: "

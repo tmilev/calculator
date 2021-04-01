@@ -3159,19 +3159,13 @@ bool CalculatorFunctions::innerFreudenthalFormula(Calculator& calculator, const 
   return output.assignValue(resultChar, calculator);
 }
 
-std::string StringRoutines::convertStringToCalculatorDisplay(
+std::string StringRoutines::Conversions::stringToCalculatorDisplay(
   const std::string& input
 ) {
-  std::string converted = StringRoutines::convertStringToHexIfNonReadable(input, 100, true);
-  if (converted == input) {
-    return converted;
+  if (StringRoutines::Conversions::isValidUtf8(input)) {
+    return input;
   }
-  std::stringstream out;
-  out << "convertHexToString{}\"" << converted << "\"";
-  out << "<br>\""
-  << StringRoutines::convertStringToJavascriptString(input)
-  << "\"";
-  return out.str();
+  return "\"" + StringRoutines::Conversions::escapeJavascriptLike(input) + "\"";
 }
 
 std::string StringRoutines::convertByteToHex(unsigned char byte) {

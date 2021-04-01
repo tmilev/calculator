@@ -302,7 +302,7 @@ class Problem {
       try {
         this.decodedProblem = decodeURIComponent(content);
       } catch (e) {
-        this.decodedProblem = "Failed to decode problem content.";
+        this.decodedProblem = "Failed to decode problem content. Content follows.<br>" + content;
       }
     }
     this.commentsProblem = problemData["commentsProblem"];

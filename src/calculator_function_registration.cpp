@@ -453,7 +453,9 @@ void Calculator::initializeFunctionsStandard() {
     "\"",
     CalculatorFunctions::quoteToString,
     "",
-    "Creates a string. ",
+    "Creates a string. "
+    "Transforms escape sequences to their byte representations. "
+    "These may be escaped back when returned to the frontend.",
     "\"The quick brown fox jumps over the lazy dog.\";\n"
     "\"\\u00B0\";\n"
     "\"\\u00b0\"",

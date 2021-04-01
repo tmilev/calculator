@@ -714,7 +714,7 @@ bool CalculatorFunctions::quoteToString(Calculator& calculator, const Expression
     return output.assignValue(input.toString(), calculator);
   }
   if (input[1].isOperation(&operation)) {
-    std::string converted = operation;
+    std::string converted = StringRoutines::Conversions::unescapeJavascriptLike(operation);
     return output.assignValue(converted, calculator);
   }
   calculator

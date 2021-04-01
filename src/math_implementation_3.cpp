@@ -455,10 +455,16 @@ std::string HtmlRoutines::convertStringEscapeQuotesAndBackslashes(const std::str
   return out.str();
 }
 
+bool StringRoutines::Conversions::isValidUtf8(const std::string& input) {
+  List<uint32_t> codePoints;
+  return utf8StringToUnicodeCodePoints(input, codePoints, nullptr);
+}
+
 bool StringRoutines::Conversions::utf8StringToUnicodeCodePoints(
   const std::string& input, List<uint32_t>& output, std::stringstream* commentsOnFailure
 ) {
   output.setSize(0);
+  output.setExpectedSize(input.size());
   bool result = true;
   for (unsigned i = 0; i < input.size(); i ++) {
     unsigned char next = input[i];
@@ -524,7 +530,7 @@ bool StringRoutines::Conversions::utf8StringToUnicodeCodePoints(
   return result;
 }
 
-std::string StringRoutines::Conversions::utf8StringToJSONStringEscaped(
+std::string StringRoutines::Conversions::stringToJSONStringEscaped(
   const std::string& inputUtf8
 ) {
   List<uint32_t> codePoints;
@@ -601,8 +607,72 @@ std::string StringRoutines::convertStringToJavascriptVariable(const std::string&
   return out.str();
 }
 
-std::string StringRoutines::convertStringToJavascriptString(const std::string& input) {
-  MacroRegisterFunctionWithName("StringRoutines::ConvertStringForJavascript");
+std::string StringRoutines::Conversions::unescapeJavascriptLike(const std::string& input) {
+  MacroRegisterFunctionWithName("StringRoutines::Conversions::unescapeJavascript");
+  std::stringstream out;
+  for (unsigned i = 0; i < input.size(); i ++) {
+    if (i + 1 >= input.size() || input[i] != '\\') {
+      out << input[i];
+      continue;
+    }
+    char next = input[i + 1];
+    if (next == 'n') {
+      // Sequence "\n".
+      out << "\n";
+      i ++;
+      continue;
+    }
+    if (next == '\\') {
+      // Sequence "\\".
+      out << "\\";
+      i ++;
+      continue;
+    }
+    if (next == '"') {
+      // Sequence "\"".
+      out << "\"";
+      i ++;
+      continue;
+    }
+    if (next == 'x' && i + 3 >= input.size()) {
+      // Sequence "\x??".
+      char left = MathRoutines::convertHumanReadableHexToCharValue(input[i + 2]);
+      char right = MathRoutines::convertHumanReadableHexToCharValue(input[i + 3]);
+      if (left == - 1 || right == - 1) {
+        // Sequence not a byte encoding: "\xPQ".
+        out << "\\";
+        continue;
+      }
+      // The sequence is a byte encoding: "\xAb". Mixed case allowed.
+      char byte = left * 16 + right;
+      out << byte;
+      i += 3;
+      continue;
+    }
+    if (next != 'u' || i + 5 >= input.size()) {
+      out << "\\";
+      continue;
+    }
+    // Sequence "\u????".
+    char hex0 = MathRoutines::convertHumanReadableHexToCharValue(input[i + 2]);
+    char hex1 = MathRoutines::convertHumanReadableHexToCharValue(input[i + 3]);
+    char hex2 = MathRoutines::convertHumanReadableHexToCharValue(input[i + 4]);
+    char hex3 = MathRoutines::convertHumanReadableHexToCharValue(input[i + 5]);
+    if (hex0 == - 1 || hex1 == - 1 || hex2 == - 1 || hex3 == - 1) {
+      // Sequence not a two-byte encoding: "\u010P".
+      out << "\\";
+      continue;
+    }
+    char leftByte = hex0 * 16 + hex1;
+    char rightByte = hex1 * 16 + hex2;
+    out << leftByte << rightByte;
+    i += 5;
+  }
+  return out.str();
+}
+
+std::string StringRoutines::Conversions::escapeJavascriptLike(const std::string& input) {
+  MacroRegisterFunctionWithName("StringRoutines::convertStringToJavascriptString");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (input[i] == '"') {
@@ -614,7 +684,7 @@ std::string StringRoutines::convertStringToJavascriptString(const std::string& i
     } else if (StringRoutines::isASCIICharacterVisible(input[i])) {
       out << input[i];
     } else {
-      out << "\\x" << StringRoutines::convertByteToHex(static_cast<unsigned char>(input[i]));
+      out << "\\u00" << StringRoutines::convertByteToHex(static_cast<unsigned char>(input[i]));
     }
   }
   return out.str();

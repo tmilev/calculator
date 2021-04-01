@@ -2327,12 +2327,12 @@ bool Expression::toStringBuiltIn<std::string>(
   if (!useQuotes) {
     if (isFinal) {
       out
-      << StringRoutines::convertStringToCalculatorDisplay(input.getValue<std::string>());
+      << StringRoutines::Conversions::stringToCalculatorDisplay(input.getValue<std::string>());
     } else {
       out << HtmlRoutines::convertStringToHtmlString(input.getValue<std::string>(), false);
     }
   } else {
-    out << "\"" << StringRoutines::convertStringToJavascriptString(input.getValue<std::string>()) << "\"";
+    out << "\"" << StringRoutines::Conversions::escapeJavascriptLike(input.getValue<std::string>()) << "\"";
   }
   return true;
 }
@@ -3595,7 +3595,7 @@ bool Expression::toStringEndStatement(
     out << "(";
   }
   if (createSingleTable) {
-    out << "<table class =\"tableCalculatorOutput\">";
+    out << "<table class='tableCalculatorOutput'>";
   }
   std::string currentInput, currentOutput;
   if (outputJS != nullptr) {
@@ -3605,7 +3605,7 @@ bool Expression::toStringEndStatement(
   for (int i = 1; i < this->size(); i ++) {
     const Expression currentE = (*this)[i];
     if (createTable) {
-      out << "<tr><td class = 'cellCalculatorInput'>";
+      out << "<tr><td class='cellCalculatorInput'>";
       if (!this->owner->flagHideLHS) {
         if (i < (*startingExpression).size()) {
           format->flagDontCollalpseProductsByUnits = true;
@@ -3623,9 +3623,11 @@ bool Expression::toStringEndStatement(
       if (i != this->size() - 1) {
         out << ";";
       }
-      out << "</td><td class =\"cellCalculatorResult\">";
+      out << "</td><td class='cellCalculatorResult'>";
       if ((*this)[i].isOfType<std::string>() && isFinal) {
-        currentOutput = StringRoutines::convertStringToCalculatorDisplay(currentE.getValue<std::string>());
+        currentOutput = StringRoutines::Conversions::stringToCalculatorDisplay(
+          currentE.getValue<std::string>()
+        );
       } else if (currentE.requiresNoMathTags() && isFinal) {
         format->flagDontCollalpseProductsByUnits = false;
         currentOutput = currentE.toString(format);
@@ -4385,9 +4387,10 @@ bool Expression::toStringQuote(
   if (!input.startsWith(input.owner->opQuote(), 2)) {
     return false;
   }
-  std::string theString;
-  if (input[1].isOperation(&theString)) {
-    out << "\"" << theString << "\"";
+  std::string nonEscaped;
+  if (input[1].isOperation(&nonEscaped)) {
+    std::string escaped = StringRoutines::Conversions::escapeJavascriptLike(nonEscaped);
+    out << "\"" << escaped << "\"";
   } else {
     out << "(Corrupt string)";
   }

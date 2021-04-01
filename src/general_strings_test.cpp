@@ -79,7 +79,7 @@ bool StringRoutines::Conversions::Test::convertUtf8StringToUnicodeCodePoints() {
 bool StringRoutines::Conversions::Test::oneUtf8ToJSONSuccess(
   const std::string& givenInput, const std::string& expected
 ) {
-  std::string result = StringRoutines::Conversions::utf8StringToJSONStringEscaped(givenInput);
+  std::string result = StringRoutines::Conversions::stringToJSONStringEscaped(givenInput);
   if (result != expected) {
     global.fatal << "Converted input: " << givenInput << " to: "
     << result << " but the expected conversion was: "

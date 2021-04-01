@@ -755,7 +755,7 @@ somestream& JSData::intoStream(
       return out;
     case JSData::token::tokenString:
       if (!options.hexEncodeNonAsciiStrings) {
-        out << '"' << StringRoutines::Conversions::escapeQuotesBackslashesNewLines(this->stringValue) << '"';
+        out << '"' << StringRoutines::Conversions::escapeJavascriptLike(this->stringValue) << '"';
       } else {
         out << '"' << StringRoutines::Conversions::escapeQuotesBackslashesNewLines(
           StringRoutines::convertStringToHexIfNonReadable(this->stringValue, 0, false)

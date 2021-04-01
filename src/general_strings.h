@@ -39,9 +39,6 @@ public:
   static void stringTrimWhiteSpace(const std::string& inputString, std::string& output);
   static void stringTrimToLengthWithHash(std::string& inputOutput, int desiredLength50AtLeast = 150);
   static std::string stringTrimToLengthForDisplay(const std::string& input, int desiredLength20AtLeast = 50);
-  static std::string convertStringToCalculatorDisplay(
-    const std::string& input
-  );
   static std::string convertStringToHexIfNonReadable(
     const std::string& input, int lineWidthZeroForNone, bool useHTML
   );
@@ -61,13 +58,33 @@ public:
       List<uint32_t>& output,
       std::stringstream* commentsOnFailure
     );
-    // Converts an input utf8 string to a string suited for json notation,
-    // i.e., a utf-16 encoded and then quote, backslash, newline-escaped string.
-    static std::string utf8StringToJSONStringEscaped(
-      const std::string& inputUtf8
+    // Converts an arbitrary byte sequence to a format suitable for displaying
+    // in a web-browser without additional encoding and that can be
+    // pasted back in the calculator.
+    static std::string stringToCalculatorDisplay(
+      const std::string& input
     );
+    static bool isValidUtf8(const std::string& input);
     // Escapes quotes, backslashes and new lines. Does not do utf16 decoding.
     static std::string escapeQuotesBackslashesNewLines(const std::string& input);
+    // Converts an arbitrary byte sequence to a string suited for json notation:
+    // escapes quote, backslash, newline, and uses \u-notation to encode
+    // utf-16-like two-byte sequences.
+    static std::string stringToJSONStringEscaped(
+      const std::string& inputUtf8
+    );
+    // Similar to utf8StringToJSONStringEscaped but uses
+    // \x-notation to encode arbitrary byte sequences.
+    // The "like" part in the name stands for the fact that we do
+    // not guarantee implementation up to javascript spec.
+    static std::string escapeJavascriptLike(const std::string& input);
+    // Unescapes \n, \\, \", as well as \x- and \u- encoded sequences.
+    // The "like" part in the name stands for the fact that we do
+    // not guarantee implementation up to javascript spec.
+    static std::string unescapeJavascriptLike(const std::string& input);
+    // Transforms an arbitrary string to a string that is an acceptable javascript variable.
+    // Avoid use of underscores and other characters so as attempt to produce a name that is
+    // in addition a valid latex string and a valid html tag.
     class Test {
     public:
       static bool all();
@@ -86,10 +103,6 @@ public:
       );
     };
   };
-  static std::string convertStringToJavascriptString(const std::string& input);
-  // Transforms an arbitrary string to a string that is an acceptable javascript variable.
-  // Avoid use of underscores and other characters so as attempt to produce a name that is
-  // in addition a valid latex string and a valid html tag.
   static std::string convertStringToJavascriptVariable(const std::string& input);
   static std::string stringTrimWhiteSpace(const std::string& inputString);
   static void splitStringInTwo(

@@ -1460,7 +1460,7 @@ public:
   // Adds an expression to the global list of expressions that are children of another expression.
   int addChildExpression(const Expression& child);
   void registerCalculatorFunction(Function& inputFunction, int indexOperation);
-  std::string toStringSemismipleLieAlgebraLinksFromHD(
+  std::string toStringSemismipleLieAlgebraLinksFromHardDrive(
     const std::string& prefixFolder,
     const DynkinType& dynkinType,
     FormatExpressions* format = nullptr

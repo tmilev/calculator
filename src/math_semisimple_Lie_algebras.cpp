@@ -358,9 +358,9 @@ std::string SemisimpleLieAlgebra::toStringVirtualFileNameWithPathStructureConsta
   return fileName.str();
 }
 
-std::string SemisimpleLieAlgebra::toStringDisplayFolderName(const std::string& baseFolder) const {
+std::string SemisimpleLieAlgebra::toStringDisplayFolderNamE(const std::string& baseFolder) const {
   std::stringstream out;
-  out << baseFolder << "output/semisimple_lie_algebras/"
+  out << baseFolder << "semisimple_lie_algebras/"
   << FileOperations::cleanUpForFileNameUse(this->weylGroup.dynkinType.toString())
   << "/";
   return out.str();
@@ -378,7 +378,7 @@ std::string SemisimpleLieAlgebra::toStringFileNameNoPathStructureConstants() con
 std::string SemisimpleLieAlgebra::toStringDisplayFileNameWithPathStructureConstants(const std::string& baseFolder) const {
   std::stringstream fileName;
   fileName
-  << this->toStringDisplayFolderName(baseFolder)
+  << this->toStringDisplayFolderNamE(baseFolder)
   << this->toStringFileNameNoPathStructureConstants();
   return fileName.str();
 }

@@ -203,13 +203,13 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     innerStandard
   );
   this->addOperationHandler(
-    "GetLinks",
+    "GetLinksToSimpleLieAlgebraPrintouts",
     CalculatorLieTheory::getLinksToSimpleLieAlgerbas,
     "",
     "Gets simple Lie algebra links to the calculator.",
-    "GetLinks{}0",
+    "GetLinksToSimpleLieAlgebraPrintouts{}0",
     "Calculator::getLinksToSimpleLieAlgerbas",
-    "GetLinks",
+    "GetLinksToSimpleLieAlgebraPrintouts",
     innerInvisible
   );
   this->addOperationHandler(

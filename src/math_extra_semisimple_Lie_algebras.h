@@ -60,7 +60,7 @@ public:
   static unsigned int hashFunction(const SemisimpleLieAlgebra& input) {
     return input.weylGroup.hashFunction();
   }
-  std::string toStringDisplayFolderName(const std::string& baseFolder) const;
+  std::string toStringDisplayFolderNamE(const std::string& baseFolder) const;
   std::string toStringDisplayFileNameWithPathStructureConstants(const std::string& baseFolder) const;
   std::string toStringVirtualFolderName() const;
   std::string toStringVirtualFileNameWithPathStructureConstants() const;

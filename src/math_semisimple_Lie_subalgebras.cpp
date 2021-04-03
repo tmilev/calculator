@@ -457,7 +457,7 @@ void SemisimpleSubalgebras::computeFolderNames(FormatExpressions& inputFormat) {
   }
 
   this->displayNameMainFile1NoPath = this->owner->toStringFileNameNoPathSemisimpleSubalgebras();
-  this->displayNameMainFile1WithPath = this->owner->toStringDisplayFolderName("../../../") + this->displayNameMainFile1NoPath;
+  this->displayNameMainFile1WithPath = this->owner->toStringDisplayFolderNamE("../../") + this->displayNameMainFile1NoPath;
   this->virtualNameMainFile1 =
   this->owner->toStringVirtualFolderName() + this->displayNameMainFile1NoPath;
 }
@@ -4401,7 +4401,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   bool useHtml = true;
   bool useLatex = false;
   virtualPath = this->owner->toStringVirtualFolderName() + "sl2s/";
-  htmlPathServer = this->owner->toStringDisplayFolderName("../../../") + "sl2s/";
+  htmlPathServer = this->owner->toStringDisplayFolderNamE("../../") + "sl2s/";
   if (virtualPath == "" || htmlPathServer == "") {
     //usePNG = false;
     useHtml = false;

@@ -152,7 +152,7 @@ std::string GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder =
 std::string GlobalVariables::hopefullyPermanent_HTTPS_WebAdressJavascriptFolder =
 "https://calculator-algebra.org/";
 
-std::string Calculator::toStringSemismipleLieAlgebraLinksFromHD(
+std::string Calculator::toStringSemismipleLieAlgebraLinksFromHardDrive(
   const std::string& prefixFolder,
   const DynkinType& dynkinType,
   FormatExpressions* format
@@ -162,13 +162,13 @@ std::string Calculator::toStringSemismipleLieAlgebraLinksFromHD(
   SemisimpleLieAlgebra folderComputer;
   folderComputer.weylGroup.dynkinType = dynkinType;
   out << "<tr><td><a href='"
-  << folderComputer.toStringDisplayFolderName(prefixFolder)
+  << folderComputer.toStringDisplayFolderNamE(prefixFolder)
   << folderComputer.toStringFileNameNoPathStructureConstants()
   << "'>"
   << dynkinType[0].letter << dynkinType[0].rank << " structure constants</a></td>\n ";
   if (dynkinType[0].hasPrecomputedSubalgebras()) {
     out << "<td><a href='"
-    << folderComputer.toStringDisplayFolderName(prefixFolder) << folderComputer.toStringFileNameNoPathSemisimpleSubalgebras()
+    << folderComputer.toStringDisplayFolderNamE(prefixFolder) << folderComputer.toStringFileNameNoPathSemisimpleSubalgebras()
     << "'>"
     << dynkinType[0].letter << dynkinType[0].rank << " semisimple subalgebras</a>";
     out << "</td>\n ";
@@ -176,11 +176,11 @@ std::string Calculator::toStringSemismipleLieAlgebraLinksFromHD(
     out << "<td>Not available</td>\n";
   }
   out << "<td><a href='"
-  << folderComputer.toStringDisplayFolderName(prefixFolder)
+  << folderComputer.toStringDisplayFolderNamE(prefixFolder)
   << folderComputer.toStringFileNameRelativePathSlTwoSubalgebras() << "'>"
   << dynkinType[0].letter << dynkinType[0].rank << " sl(2) triples</a></td>\n";
   out << "<td><a href='"
-  << folderComputer.toStringDisplayFolderName(prefixFolder)
+  << folderComputer.toStringDisplayFolderNamE(prefixFolder)
   << folderComputer.toStringFileNameNoPathRootSubalgebras()
   << "'>" << dynkinType[0].letter
   << dynkinType[0].rank << " root subalgebras</a></td>\n";

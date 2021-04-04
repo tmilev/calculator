@@ -373,13 +373,19 @@ bool JSData::tryToComputeType(std::stringstream* commentsOnFailure) {
   return false;
 }
 
-bool JSData::convertTwoByteHexToChar(
-  char inputLeft, char inputRight, char& output, std::stringstream* commentsOnFailure
+bool JSData::convertTwoByteHexToUnsignedChar(
+  unsigned char inputLeft,
+  unsigned char inputRight,
+  unsigned char& output,
+  std::stringstream* commentsOnFailure
 ) {
-  char leftHex = MathRoutines::convertHumanReadableHexToCharValue(inputLeft);
+  char leftHex = MathRoutines::convertHumanReadableHexToCharValue(
+    static_cast<char>(inputLeft)
+  );
   if (leftHex < 0) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to interpret " << inputLeft << " as a hex digit. ";
+      *commentsOnFailure << "Failed to interpret value " << static_cast<uint>(inputLeft)
+      << " [" << inputLeft << "] as a hex digit. ";
     }
     return false;
   }
@@ -394,33 +400,53 @@ bool JSData::convertTwoByteHexToChar(
   return true;
 }
 
-bool JSData::readstringConsumeFourHexAppendUnicode(
+bool JSData::readstringConsumeUnicodeFourHexAppendUtf8(
   std::string& output,
   unsigned int& currentIndex,
   const std::string& input,
   std::stringstream* commentsOnFailure
 ) {
-  if (currentIndex + 3 >= input.size()) {
+  if ((currentIndex + 4) >= input.size()) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Unicode sequence \\u at position " << currentIndex << " exceeds json boundaries. ";
+      *commentsOnFailure << "Unicode sequence \\u at position "
+      << currentIndex << " exceeds json boundaries. ";
     }
     return false;
   }
+  global << "DEBUG: input.size is: " << input.size() << ", currentIndex: "
+  << currentIndex << ". " << Logger::endL;
+  uint32_t codePoint = 0;
   for (int i = 0; i < 2; i ++) {
-    char left = input[currentIndex];
-    currentIndex ++;
-    char right = input[currentIndex];
-    currentIndex ++;
-    char next = 0;
-    if (!JSData::convertTwoByteHexToChar(left, right, next, commentsOnFailure)) {
+    int leftIndex = currentIndex + 2 * i + 1;
+    int rightIndex = currentIndex + 2 * i + 2;
+    unsigned char left = input[leftIndex];
+    unsigned char right = input[rightIndex];
+    unsigned char next = 0;
+    if (!JSData::convertTwoByteHexToUnsignedChar(left, right, next, commentsOnFailure)) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Failed to read hex characters at positions "
-        << currentIndex - 2 << ", " << currentIndex - 1 << ". ";
+        *commentsOnFailure << "Failed to read hex characters with value: "
+        << static_cast<uint>(left) << ", " << static_cast<uint>(right)
+        << ", ["
+        << left << ", " << right << "] at positions "
+        << leftIndex << ", " << rightIndex << " (currentIndex: "
+        << currentIndex << "). ";
       }
       return false;
     }
-    output.push_back(next);
+    global << "DEBUG: read hex: "
+    << "characters with value: "
+            << static_cast<uint>(left) << ", " << static_cast<uint>(right)
+            << ", ["
+            << left << ", " << right << "] at positions "
+            << leftIndex << ", " << rightIndex << " (currentIndex: "
+            << currentIndex << "), convert to: "<< static_cast<uint>(next) << Logger::endL;
+    codePoint *= 256;
+    codePoint += static_cast<uint32_t>(next);
   }
+  std::string utf8Conversion = StringRoutines::Conversions::codePointToUtf8(codePoint);
+  global << "DEBUG: codepoint: " << codePoint << " converted to: " << utf8Conversion << Logger::endL;
+  output += utf8Conversion;
+  currentIndex += 4;
   return true;
 }
 
@@ -448,8 +474,9 @@ bool JSData::readstringConsumeNextCharacter(
     bool result = true;
     switch (next) {
       case 'u':
-        currentIndex ++;
-        result = JSData::readstringConsumeFourHexAppendUnicode(last.stringValue, currentIndex, input, commentsOnFailure);
+        result = JSData::readstringConsumeUnicodeFourHexAppendUtf8(
+          last.stringValue, currentIndex, input, commentsOnFailure
+        );
         break;
       case 'n':
         last.stringValue.push_back('\n');
@@ -572,16 +599,19 @@ bool JSData::mergeInMe(const JSData& input, std::stringstream* commentsOnFailure
   return true;
 }
 
-bool JSData::readstring(
+bool JSData::parse(
   const std::string& json, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("JSData::readstring");
   this->reset();
-  List<JSData> theTokenS;
-  if (!JSData::tokenizePrependOneDummyElement(json, theTokenS, commentsOnFailure)) {
+  List<JSData> inputTokens;
+  if (!JSData::tokenizePrependOneDummyElement(json, inputTokens, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to tokenize your input: " << json << ".";
+    }
     return false;
   }
-  if (theTokenS.size == 1) {
+  if (inputTokens.size == 1) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "The empty string is not valid json.";
     }
@@ -592,14 +622,14 @@ bool JSData::readstring(
   for (int i = 0; i < this->numEmptyTokensAtStart; i ++) {
     readingStack.addOnTop(emptyElt);
   }
-  readingStack.addOnTop(theTokenS[1]);
+  readingStack.addOnTop(inputTokens[1]);
   for (int i = 1;;) {
     int fourthToLastIndex = readingStack.size - 4; //<- used to avoid compiler warning
     JSData& last = readingStack[fourthToLastIndex + 3];
     JSData& secondToLast = readingStack[fourthToLastIndex + 2];
     JSData& thirdToLast  = readingStack[fourthToLastIndex + 1];
     JSData& fourthToLast = readingStack[fourthToLastIndex];
-    //JSData& fifthToLast = theTokenS[i - 4];
+    //JSData& fifthToLast = inputTokens[i - 4];
     if (
       fourthToLast.theType == JSData::token::tokenOpenBrace && thirdToLast.theType == JSData::token::tokenString &&
       secondToLast.theType == JSData::token::tokenColon && last.isValidElement()
@@ -635,10 +665,10 @@ bool JSData::readstring(
       continue;
     }
     i ++;
-    if (i >= theTokenS.size) {
+    if (i >= inputTokens.size) {
       break;
     }
-    readingStack.addOnTop(theTokenS[i]);
+    readingStack.addOnTop(inputTokens[i]);
   }
   if (readingStack.size != JSData::numEmptyTokensAtStart + 1) {
     if (commentsOnFailure != nullptr) {
@@ -755,7 +785,7 @@ somestream& JSData::intoStream(
       return out;
     case JSData::token::tokenString:
       if (!options.hexEncodeNonAsciiStrings) {
-        out << '"' << StringRoutines::Conversions::escapeJavascriptLike(this->stringValue) << '"';
+        out << '"' << StringRoutines::Conversions::stringToJSONStringEscaped(this->stringValue) << '"';
       } else {
         out << '"' << StringRoutines::Conversions::escapeQuotesBackslashesNewLines(
           StringRoutines::convertStringToHexIfNonReadable(this->stringValue, 0, false)

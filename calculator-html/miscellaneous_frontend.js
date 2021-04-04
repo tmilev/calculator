@@ -169,7 +169,20 @@ function jsonUnescapeParse(input) {
   return JSON.parse(unescaped);
 }
 
+/**@returns{string} */
+function toHex(
+  /**@type{string} */
+  input,
+) {
+  let result = "";
+  for (var i = 0; i < input.length; i++) {
+    result += input.charCodeAt(i).toString(16);
+  }
+  return result;
+}
+
 module.exports = {
+  toHex,
   switchMenu,
   appendHtml,
   appendHtmlToArray,

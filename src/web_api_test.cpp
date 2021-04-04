@@ -160,7 +160,7 @@ bool WebAPIResponse::Test::compareExpressions() {
     << commentsOnFailure.str() << global.fatal;
   }
   JSData comparison;
-  if (!comparison.readstring(comparisonJSON, &commentsOnFailure)) {
+  if (!comparison.parse(comparisonJSON, &commentsOnFailure)) {
     global.fatal << "Failed to parse compare_expressions.json. "
     << commentsOnFailure.str() << global.fatal;
   }

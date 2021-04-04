@@ -969,7 +969,7 @@ bool CalculatorFunctionsEncoding::testJSON(
   }
   JSData theData;
   std::stringstream out;
-  if (!theData.readstring(inputString, &out)) {
+  if (!theData.parse(inputString, &out)) {
     return output.assignValue(out.str(), calculator);
   }
   out << "Input:<br>" << inputString << "<hr>Output: <br>"

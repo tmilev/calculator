@@ -1614,7 +1614,7 @@ bool Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded(
     return false;
   }
   JSData theData;
-  if (!theData.readstring(theToken.claimsJSON, commentsOnFailure)) {
+  if (!theData.parse(theToken.claimsJSON, commentsOnFailure)) {
     return false;
   }
   if (theData.getValue("email").theType != JSData::token::tokenString) {

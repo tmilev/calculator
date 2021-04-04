@@ -198,8 +198,9 @@ public:
     const List<unsigned char>& input, List<uint32_t>& output
   );
   static void convertStringToListUInt32BigendianZeroPad(const std::string& input, List<uint32_t>& output);
-  static void convertUint32ToUcharBigendian(const List<uint32_t>& input, List<unsigned char>& output);
-  static void convertUint32ToString(const List<uint32_t>& input, std::string& output);
+  static void convertUint32ToUcharBigendiaN(uint32_t input, List<unsigned char>& output);
+  static void convertListUint32ToListUcharBigendian(const List<uint32_t>& input, List<unsigned char>& output);
+  static void convertListUint32ToString(const List<uint32_t>& input, std::string& output);
   static bool convertBase64ToBitStream(
     const std::string& input,
     List<unsigned char>& output,

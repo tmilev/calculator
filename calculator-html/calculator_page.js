@@ -3,7 +3,6 @@ const submitRequests = require("./submit_requests");
 const pathnames = require("./pathnames");
 const ids = require("./ids_dom_elements");
 const miscellaneousFrontend = require("./miscellaneous_frontend");
-const miscellaneous = require("./miscellaneous_frontend");
 const BufferCalculator = require("./buffer").BufferCalculator;
 const panels = require("./panels");
 const processMonitoring = require("./process_monitoring");
@@ -124,7 +123,7 @@ class Calculator {
 
   processExamples(inputJSONtext) {
     try {
-      this.examples = miscellaneous.jsonUnescapeParse(inputJSONtext);
+      this.examples = miscellaneousFrontend.jsonUnescapeParse(inputJSONtext);
       let examplesString = "";
       let atomsSorted = Object.keys(this.examples).slice().sort();
       let numHandlers = 0;
@@ -257,6 +256,16 @@ class Calculator {
     }
   }
 
+  printDebugInformation(
+    /**@type{string} */
+    input,
+    /**@type{string} */
+    output,
+  ) {
+    // console.log(`Input string: ${input}, converted to hex: ${miscellaneousFrontend.toHex(input)}`);
+    // console.log(`Output string: ${output}, converted to hex: ${miscellaneousFrontend.toHex(output)}`);
+  }
+
   writeResult(
     /**@type {BufferCalculator} */
     buffer,
@@ -300,9 +309,12 @@ class Calculator {
       this.numberOfCalculatorPanels++;
       let inputPanelId = `calculatorInputPanel${this.numberOfCalculatorPanels}`;
       let outputPanelId = `calculatorOutputPanel${this.numberOfCalculatorPanels}`;
+      let currentInput = inputParsed.result.input[i];
+      let currentOutput = inputParsed.result.output[i];
+      this.printDebugInformation(currentInput, currentOutput);
       if (i < inputParsed.result.input.length) {
         panelData.push(new panels.PanelExpandableData(
-          inputParsed.result.input[i],
+          currentInput,
           inputPanelId,
           150,
           false,
@@ -312,7 +324,7 @@ class Calculator {
       }
       if (i < inputParsed.result.output.length) {
         panelData.push(new panels.PanelExpandableData(
-          inputParsed.result.output[i],
+          currentOutput,
           outputPanelId,
           150,
           false,
@@ -436,7 +448,7 @@ class Calculator {
     let inputHtml = null;
     this.panels.length = 0;
     try {
-      this.parsedComputation = miscellaneous.jsonUnescapeParse(input);
+      this.parsedComputation = miscellaneousFrontend.jsonUnescapeParse(input);
       let buffer = new BufferCalculator();
       let progReportTimer = document.getElementById(
         ids.domElements.pages.calculator.monitoring.progressTimer,

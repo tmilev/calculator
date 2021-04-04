@@ -277,7 +277,7 @@ bool CalculatorHTML::mergeProblemWeightAndStore(
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::MergeProblemInfoInDatabase");
   JSData theProblemJSON;
-  if (!theProblemJSON.readstring(incomingProblemInfo, commentsOnFailure)) {
+  if (!theProblemJSON.parse(incomingProblemInfo, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to parse your input. ";
     }
@@ -298,7 +298,7 @@ bool CalculatorHTML::mergeProblemDeadlineAndStore(
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::mergeProblemDeadlineAndStore");
   JSData theProblemJSON;
-  if (!theProblemJSON.readstring(incomingProblemInfo, commentsOnFailure)) {
+  if (!theProblemJSON.parse(incomingProblemInfo, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to parse your input. ";
     }
@@ -4248,7 +4248,7 @@ bool LaTeXCrawler::Slides::fromString(
   std::string decoded;
   HtmlRoutines::convertURLStringToNormal(input, decoded, false);
   JSData parsed;
-  if (!parsed.readstring(decoded, commentsOnFailure)) {
+  if (!parsed.parse(decoded, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to parse your input in "
       << "LaTeXCrawler::Slides::fromString. ";

@@ -555,7 +555,15 @@ uint64_t Crypto::rightRotateAsIfBigEndian64(uint64_t input, int numBitsToRotate)
   return left | right;
 }
 
-void Crypto::convertUint32ToUcharBigendian(const List<uint32_t>& input, List<unsigned char>& output) {
+void Crypto::convertUint32ToUcharBigendiaN(uint32_t input, List<unsigned char>& output) {
+  output.setSize(4);
+  output[0] = static_cast<unsigned char>( input / 16777216    );
+  output[1] = static_cast<unsigned char>((input / 65536) % 256);
+  output[2] = static_cast<unsigned char>((input / 256) % 256  );
+  output[3] = static_cast<unsigned char>( input % 256         );
+}
+
+void Crypto::convertListUint32ToListUcharBigendian(const List<uint32_t>& input, List<unsigned char>& output) {
   MacroRegisterFunctionWithName("Crypto::convertUint32ToUcharBigendian");
   output.setSize(input.size * 4);
   for (int i = 0; i < input.size; i ++) {
@@ -566,7 +574,7 @@ void Crypto::convertUint32ToUcharBigendian(const List<uint32_t>& input, List<uns
   }
 }
 
-void Crypto::convertUint32ToString(const List<uint32_t>& input, std::string& output) {
+void Crypto::convertListUint32ToString(const List<uint32_t>& input, std::string& output) {
   MacroRegisterFunctionWithName("Crypto::convertUint32ToString");
   output.resize(static_cast<unsigned>(input.size * 4));
   for (unsigned i = 0; i < static_cast<unsigned>(input.size); i ++) {
@@ -1194,7 +1202,7 @@ void Crypto::computeSha256(const std::string& input, std::string& output) {
 void Crypto::computeSha256(const List<unsigned char>& input, List<unsigned char>& output) {
   List<uint32_t> theSha256Uint;
   Crypto::computeSha256(input, theSha256Uint);
-  Crypto::convertUint32ToUcharBigendian(theSha256Uint, output);
+  Crypto::convertListUint32ToListUcharBigendian(theSha256Uint, output);
 }
 
 void Crypto::computeSha256(const List<unsigned char>& input, List<uint32_t>& output) {
@@ -1508,7 +1516,7 @@ bool Crypto::loadOneKnownCertificate(
     *commentsGeneral << "Loading from: " << input;
   }
   JSData certificateJSON;
-  if (!certificateJSON.readstring(input, commentsOnFailure)) {
+  if (!certificateJSON.parse(input, commentsOnFailure)) {
     return false;
   }
   PublicKeyRSA currentCert;

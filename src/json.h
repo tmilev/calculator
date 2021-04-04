@@ -124,10 +124,13 @@ public:
     List<JSData>& output,
     std::stringstream* commentsOnFailure
   );
-  static bool convertTwoByteHexToChar(
-    char inputLeft, char inputRight, char& output, std::stringstream* commentsOnFailure
+  static bool convertTwoByteHexToUnsignedChar(
+    unsigned char inputLeft,
+    unsigned char inputRight,
+    unsigned char& output,
+    std::stringstream* commentsOnFailure
   );
-  static bool readstringConsumeFourHexAppendUnicode(
+  static bool readstringConsumeUnicodeFourHexAppendUtf8(
     std::string& output,
     unsigned& currentIndex,
     const std::string& input,
@@ -140,14 +143,15 @@ public:
     std::stringstream* commentsOnFailure
   );
   bool operator==(const JSData& other) const;
-  bool readstring(const std::string& json, std::stringstream* commentsOnFailure = nullptr);
+  bool parse(const std::string& json, std::stringstream* commentsOnFailure = nullptr);
   bool tryToComputeType(std::stringstream* commentsOnFailure);
   static void filterColumnsJSDataObjectList(List<JSData>& inputOutput, const List<std::string>& columnsToPreserve);
   class Test {
   public:
     static bool all();
-    static bool testRecode();
-    static bool testBadInput();
+    static bool recode();
+    static bool decodeEscapedUnicode();
+    static bool badInput();
   };
 };
 

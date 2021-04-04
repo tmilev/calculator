@@ -1287,8 +1287,7 @@ std::string Calculator::toStringIsCorrectAsciiCalculatorString(const std::string
     }
   }
   if (badCharacters.size > 0) {
-    out << "Non-ascii characters detected in your input, namely: "
-    << badCharacters.toStringCommaDelimited() << ", ";
+    out << "Non-ascii characters detected in your input, ";
     List<std::string> hexCodes;
     for (int i = 0; i < badCharacters.size; i ++) {
       hexCodes.addOnTop(StringRoutines::convertByteToHex(badCharacters[i]));

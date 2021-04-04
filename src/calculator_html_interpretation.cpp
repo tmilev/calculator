@@ -545,7 +545,7 @@ bool BuilderApplication::loadJavascriptFileNames(
     return false;
   }
   JSData reader;
-  if (!reader.readstring(this->buildFile, commentsOnFailure)) {
+  if (!reader.parse(this->buildFile, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to parse build json file. ";
     }
@@ -1512,7 +1512,7 @@ std::string WebAPIResponse::addTeachersSections() {
     global.getWebInput("teachersAndSections"), false
   );
   JSData inputParsed;
-  if (!inputParsed.readstring(input, &out)) {
+  if (!inputParsed.parse(input, &out)) {
     out << "<b style='color:red'>Failed to interpret your input. </b>";
     return out.str();
   }

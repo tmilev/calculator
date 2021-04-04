@@ -58,6 +58,12 @@ public:
       List<uint32_t>& output,
       std::stringstream* commentsOnFailure
     );
+    static uint32_t codePointFromUtf8(
+      const std::string& input,
+      unsigned& indexIncrementedToLastConsumedByte,
+      bool& isValid,
+      std::stringstream* commentsOnFailure
+    );
     // Converts an arbitrary byte sequence to a format suitable for displaying
     // in a web-browser without additional encoding and that can be
     // pasted back in the calculator.
@@ -72,6 +78,12 @@ public:
     // utf-16-like two-byte sequences.
     static std::string stringToJSONStringEscaped(
       const std::string& inputUtf8
+    );
+    static std::string codePointToBackslashEscapedString(
+      uint32_t input
+    );
+    static std::string codePointToUtf8(
+      uint32_t input
     );
     // Similar to utf8StringToJSONStringEscaped but uses
     // \x-notation to encode arbitrary byte sequences.
@@ -89,7 +101,10 @@ public:
     public:
       static bool all();
       static bool utf8StringToJSONStringEscaped();
+      static bool unescapeJavascriptLike();
       static bool convertStringToJSONStringEscapeOnly();
+      static bool codePointToUtf8();
+      static bool oneCodePointToUtf8(uint32_t codePoint, const std::string& expectedHex);
       static bool convertUtf8StringToUnicodeCodePoints();
       static bool oneUtf8ToJSONSuccess(
         const std::string& givenInput,

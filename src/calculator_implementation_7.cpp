@@ -277,7 +277,7 @@ bool CalculatorFunctionsCrypto::functionHashString(
     } else if (hashId == "SHA224") {
       Crypto::computeSha224(inputString, theSha1Uint);
     }
-    Crypto::convertUint32ToUcharBigendian(theSha1Uint, hashUChar);
+    Crypto::convertListUint32ToListUcharBigendian(theSha1Uint, hashUChar);
   } else if (hashId == "SHA3_256") {
     Crypto::computeSha3_256(inputString, hashUChar);
   } else if (hashId == "KECCAK256") {

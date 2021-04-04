@@ -2322,8 +2322,10 @@ bool Expression::toStringBuiltIn<std::string>(
   std::stringstream& out,
   FormatExpressions* format
 ) {
+  global << "DEBUG: STRING HANDLER!" << Logger::endL;
   bool useQuotes = format == nullptr ? false : format->flagUseQuotes;
   bool isFinal = format == nullptr ? true : format->flagExpressionIsFinal;
+  global << "DEBUG: here I am!" << Logger::endL;
   if (!useQuotes) {
     if (isFinal) {
       out
@@ -2911,6 +2913,8 @@ bool Expression::toStringData(std::stringstream& out, FormatExpressions* format)
     out << "(non-initialized)";
     return true;
   }
+  global << "DEBUG: here I am pt 1!" << Logger::endL;
+
   if (this->isAtom()) {
     if (this->isOperationGiven(this->owner->opDifferential())) {
       out << "{\\text{d}}";
@@ -2919,6 +2923,7 @@ bool Expression::toStringData(std::stringstream& out, FormatExpressions* format)
     } else if (this->owner->flagUseLnInsteadOfLog && this->isOperationGiven(this->owner->opLog())) {
       out << "\\ln";
     } else if (this->data < this->owner->getOperations().size && this->data >= 0) {
+      global << "DEBUG: extract operation !" << Logger::endL;
       out << this->owner->getOperations()[this->data];
     } else {
       out << "[unknown atom of value " << this->data << "]";
@@ -2937,6 +2942,8 @@ bool Expression::toStringData(std::stringstream& out, FormatExpressions* format)
   }
   int typeIndex = - 1;
   if (!this->isBuiltInType(&typeIndex)) {
+    global << "DEBUG: not built in!" << Logger::endL;
+
     return false;
   }
   Calculator& commands = *this->owner;
@@ -2949,6 +2956,7 @@ bool Expression::toStringData(std::stringstream& out, FormatExpressions* format)
   // where builtInType is one of the types registered in
   // Calculator::initializeToStringHandlers.
   Expression::ToStringHandler handler = commands.toStringDataHandlers.getValueNoFail(typeIndex);
+  global << "DEBUG: about to call handler!!" << Logger::endL;
   return handler(*this, out, format);
 }
 
@@ -4384,13 +4392,13 @@ bool Expression::toStringQuote(
   const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   (void) format;
+  global << "DEBUG: here I AMMAMAMAMAM!!!" << Logger::endL;
   if (!input.startsWith(input.owner->opQuote(), 2)) {
     return false;
   }
-  std::string nonEscaped;
-  if (input[1].isOperation(&nonEscaped)) {
-    std::string escaped = StringRoutines::Conversions::escapeJavascriptLike(nonEscaped);
-    out << "\"" << escaped << "\"";
+  std::string content;
+  if (input[1].isOperation(&content)) {
+    out << "\"" << content << "\"";
   } else {
     out << "(Corrupt string)";
   }
@@ -4646,7 +4654,7 @@ std::string Expression::toString(
   } else {
     return "(Error:NoOwner)";
   }
-  RecursionDepthCounter theRecursionCounter(&this->owner->recursionDepth);
+  RecursionDepthCounter recursionCounter(&this->owner->recursionDepth);
   this->checkConsistency();
   if (startingExpression != nullptr && unfoldCommandEnclosures) {
     Expression newStart, newMe;

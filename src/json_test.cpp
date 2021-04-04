@@ -3,13 +3,13 @@
 
 bool JSData::Test::all() {
   MacroRegisterFunctionWithName("JSData::Test::all");
-  JSData::Test::testRecode();
-  JSData::Test::testBadInput();
+  JSData::Test::recode();
+  JSData::Test::badInput();
+  JSData::Test::decodeEscapedUnicode();
   return true;
 }
 
-
-bool JSData::Test::testRecode() {
+bool JSData::Test::recode() {
   MacroRegisterFunctionWithName("JSData::Test::testRecode");
   // first element is string input, second element
   // is expected recoded output.
@@ -39,27 +39,43 @@ bool JSData::Test::testRecode() {
     "{\"a\":\"\n\"}", "{\"a\":\"\\n\"}"
   }));
   toRecode.addOnTop(List<std::string>({
-    "\"\u03C0\"", "\"\u03C0\""
+    "\"\u03C0\"", "\"\\u03c0\""
   }));
   std::stringstream commentsOnFailure;
   for (int i = 0; i < toRecode.size; i ++) {
     JSData parser;
     std::string input = toRecode[i][0];
-    if (!parser.readstring(input, &commentsOnFailure)) {
+    if (!parser.parse(input, &commentsOnFailure)) {
       global.fatal << "Failed to decode "<< toRecode[i][0] << global.fatal;
     }
     std::string expectedOutput = toRecode[i][1];
     std::string recoded = parser.toString(nullptr);
     if (recoded != expectedOutput) {
-      global.fatal << "Input " << input << " decoded to " << recoded
+      global.fatal << "Input " << input << " decoded-recoded to " << recoded
       << ". However, I expected: " << expectedOutput << ". " << global.fatal;
     }
-
   }
   return true;
 }
 
-bool JSData::Test::testBadInput() {
+bool JSData::Test::decodeEscapedUnicode() {
+  JSData parser;
+  std::string input = "\"\\u03C0\"";
+  std::string expectedOutput = "\u03C0";
+  std::stringstream commentsOnFailure;
+  if (!parser.parse(input, &commentsOnFailure)) {
+    global.fatal << "In decodeEscapedUnicode: failed to decode " << input
+    << ". The comments: " << commentsOnFailure.str() << global.fatal;
+  }
+  if (parser.stringValue != expectedOutput) {
+    global.fatal << "In decodeEscapedUnicode: input "
+    << input << " decoded to " << parser.stringValue
+    << ". However, I expected: " << expectedOutput << ". " << global.fatal;
+  }
+  return true;
+}
+
+bool JSData::Test::badInput() {
   MacroRegisterFunctionWithName("JSData::Test::testBadInput");
   // first element is string input, second element
   // is expected recoded output.
@@ -71,7 +87,7 @@ bool JSData::Test::testBadInput() {
   for (int i = 0; i < broken.size; i ++) {
     JSData parser;
     std::string input = broken[i];
-    if (parser.readstring(input, &commentsOnFailure)) {
+    if (parser.parse(input, &commentsOnFailure)) {
       global.fatal << "Successfully decoded invalid json: " << input << "." << global.fatal;
     }
   }

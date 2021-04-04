@@ -11,6 +11,7 @@
 #include "math_rational_function.h"
 #include <dirent.h>
 #include "math_extra_modules_semisimple_Lie_algebras.h"
+#include "crypto.h"
 
 // The below gives upper limit to the amount of pointers
 // that are allowed to be allocated by the program. Can be changed dynamically.
@@ -461,73 +462,124 @@ bool StringRoutines::Conversions::isValidUtf8(const std::string& input) {
 }
 
 bool StringRoutines::Conversions::utf8StringToUnicodeCodePoints(
-  const std::string& input, List<uint32_t>& output, std::stringstream* commentsOnFailure
+  const std::string& input,
+  List<uint32_t>& output,
+  std::stringstream* commentsOnFailure
 ) {
   output.setSize(0);
   output.setExpectedSize(input.size());
   bool result = true;
   for (unsigned i = 0; i < input.size(); i ++) {
-    unsigned char next = input[i];
-    unsigned char leadingBit = next >> 7;
-    if (leadingBit == 0) {
-      output.addOnTop(next);
-      continue;
-    }
-    unsigned bytesToRead = 0;
-    if ((next >> 5) == 6) {
-      // 6 is the bit sequence 110.
-      // A two-byte utf8 sequence.
-      bytesToRead = 2;
-    } else if ((next >> 4) == 14) {
-      // 14 is the bit sequence 1110.
-      bytesToRead = 3;
-    } else if ((next >> 3) == 30) {
-      // 30 is the bit sequence 11110.
-      bytesToRead = 4;
-    } else {
-      // Invalid utf encoding: does not start with one of:
-      // 0x0, 0x110, 0x1110, 0x11110.
-      if (
-        // Generate an error message for the first error only.
-        result &&
-        commentsOnFailure != nullptr
-      ) {
-        *commentsOnFailure << "Byte " << StringRoutines::convertByteToHex(next)
-        << " with index " << i
-        << " does not start with a valid utf8 sequence.";
-      }
-      output.addOnTop(next);
+    bool isValid = true;
+    output.addOnTop(StringRoutines::Conversions::codePointFromUtf8(
+      input, i, isValid, commentsOnFailure)
+    );
+    if (!isValid) {
       result = false;
-      continue;
+      // Do not generate more comments on further errors.
+      commentsOnFailure = nullptr;
     }
-    // The static cast below ensures that its argument won't be
-    // silently converted to a
-    // 32-bit integer.
-    unsigned char nextContribution = static_cast<unsigned char>(next << (bytesToRead + 1)) >> (bytesToRead + 1);
-    uint32_t codePoint = nextContribution;
-    for (unsigned j = 1; j < bytesToRead; j ++) {
-      if (i + j >= input.size()) {
-        // The bytes promised by the utf8 encoding are missing.
-        if (
-          // Generate an error message for the first error only.
-          result &&
-          commentsOnFailure != nullptr
-        ) {
-          *commentsOnFailure << "Missing bytes at byte: "
-          << StringRoutines::convertByteToHex(next) << " of index " << i << ".";
-        }
-        result = false;
-        break;
-      }
-      // Strip the first two bits.
-      nextContribution = static_cast<unsigned char>(input[i + j] << 2) >> 2;
-      codePoint <<= 6;
-      codePoint += nextContribution;
-    }
-    output.addOnTop(codePoint);
-    i += bytesToRead - 1;
   }
   return result;
+}
+
+uint32_t StringRoutines::Conversions::codePointFromUtf8(
+  const std::string& input,
+  unsigned& indexIncrementedToLastConsumedByte,
+  bool& isValid,
+  std::stringstream* commentsOnFailure
+) {
+  unsigned char next = input[indexIncrementedToLastConsumedByte];
+  unsigned char leadingBit = next >> 7;
+  isValid = true;
+  if (leadingBit == 0) {
+    return static_cast<uint32_t>(next);
+  }
+  unsigned bytesToRead = 0;
+  if ((next >> 5) == 6) {
+    // 6 is the bit sequence 110.
+    // A two-byte utf8 sequence.
+    bytesToRead = 2;
+  } else if ((next >> 4) == 14) {
+    // 14 is the bit sequence 1110.
+    bytesToRead = 3;
+  } else if ((next >> 3) == 30) {
+    // 30 is the bit sequence 11110.
+    bytesToRead = 4;
+  } else {
+    // Invalid utf encoding: does not start with one of:
+    // 0x0, 0x110, 0x1110, 0x11110.
+    if (
+      commentsOnFailure != nullptr
+    ) {
+      *commentsOnFailure << "Byte " << StringRoutines::convertByteToHex(next)
+      << " with index " << indexIncrementedToLastConsumedByte
+      << " does not start with a valid utf8 sequence.";
+    }
+    isValid = false;
+    return static_cast<uint32_t>(next);
+  }
+  // The static cast below ensures that its argument won't be
+  // silently converted to a
+  // 32-bit integer.
+  unsigned char nextContribution = static_cast<unsigned char>(next << (bytesToRead + 1)) >> (bytesToRead + 1);
+  uint32_t codePoint = nextContribution;
+  for (unsigned j = 1; j < bytesToRead; j ++) {
+    if (indexIncrementedToLastConsumedByte + j >= input.size()) {
+      // The bytes promised by the utf8 encoding are missing.
+      if (
+        // Generate an error message for the first error only.
+        commentsOnFailure != nullptr
+      ) {
+        *commentsOnFailure << "Missing bytes at byte: "
+        << StringRoutines::convertByteToHex(next) << " of index "
+        << indexIncrementedToLastConsumedByte << ".";
+      }
+      isValid = false;
+      return static_cast<uint32_t>(next);
+    }
+    // Strip the first two bits.
+    nextContribution = static_cast<unsigned char>(input[indexIncrementedToLastConsumedByte + j] << 2) >> 2;
+    codePoint <<= 6;
+    codePoint += nextContribution;
+  }
+  indexIncrementedToLastConsumedByte += bytesToRead - 1;
+  return codePoint;
+}
+
+std::string StringRoutines::Conversions::codePointToBackslashEscapedString(uint32_t input) {
+  std::stringstream out;
+  if (input <= 127) {
+    unsigned char currentCharacter = static_cast<char>(input);
+    if (currentCharacter == '\\') {
+      return "\\\\";
+    } else if (currentCharacter == '\n') {
+      return "\\n";
+    } else if (currentCharacter == '"') {
+      return "\\\"";
+    } else {
+      out << currentCharacter;
+      return out.str();
+    }
+  }
+  unsigned char byte0 = static_cast<unsigned char>(input);
+  unsigned char byte1 = static_cast<unsigned char>(input >> 8);
+  if (input <= 0xFFFF) {
+    out << "\\u"
+    << StringRoutines::convertByteToHex(byte1)
+    << StringRoutines::convertByteToHex(byte0);
+    return  out.str();
+  }
+  unsigned char byte2 = static_cast<unsigned char>(input >> 16);
+  unsigned char byte3 = static_cast<unsigned char>(input >> 24);
+  out
+  << "\\u"
+  << StringRoutines::convertByteToHex(byte3)
+  << StringRoutines::convertByteToHex(byte2)
+  << "\\u"
+  << StringRoutines::convertByteToHex(byte1)
+  << StringRoutines::convertByteToHex(byte0);
+  return out.str();
 }
 
 std::string StringRoutines::Conversions::stringToJSONStringEscaped(
@@ -537,37 +589,7 @@ std::string StringRoutines::Conversions::stringToJSONStringEscaped(
   StringRoutines::Conversions::utf8StringToUnicodeCodePoints(inputUtf8, codePoints, nullptr);
   std::stringstream out;
   for (int i = 0; i < codePoints.size; i ++) {
-    uint32_t current = codePoints[i];
-    if (current <= 127) {
-      unsigned char currentCharacter = static_cast<char>(current);
-      if (currentCharacter == '\\') {
-        out << "\\\\";
-      } else if (currentCharacter == '\n') {
-        out << "\\n";
-      } else if (currentCharacter == '"') {
-        out << "\\\"";
-      } else {
-        out << currentCharacter;
-      }
-      continue;
-    }
-    if (current <= 0xFFFF) {
-      unsigned char lowByte = static_cast<unsigned char>(current);
-      unsigned char highByte = static_cast<unsigned char>(current >> 8);
-      out << "\\u" << StringRoutines::convertByteToHex(highByte) << StringRoutines::convertByteToHex(lowByte);
-      continue;
-    }
-    unsigned char byte0 = static_cast<unsigned char>(current);
-    unsigned char byte1 = static_cast<unsigned char>(current >> 8);
-    unsigned char byte2 = static_cast<unsigned char>(current >> 16);
-    unsigned char byte3 = static_cast<unsigned char>(current >> 24);
-    out
-    << "\\u"
-    << StringRoutines::convertByteToHex(byte3)
-    << StringRoutines::convertByteToHex(byte2)
-    << "\\u"
-    << StringRoutines::convertByteToHex(byte1)
-    << StringRoutines::convertByteToHex(byte0);
+    out << StringRoutines::Conversions::codePointToBackslashEscapedString(codePoints[i]);
   }
   return out.str();
 }
@@ -607,8 +629,62 @@ std::string StringRoutines::convertStringToJavascriptVariable(const std::string&
   return out.str();
 }
 
+std::string StringRoutines::Conversions::codePointToUtf8(uint32_t input) {
+  std::stringstream out;
+  if (
+    input >= 2097152 // = 2^21-1
+  ) {
+    // Invalid code point.
+    // A unicode code point must be smaller than 2^21.
+    // It must fit in the largest possible encoding:
+    // b_11110???,b_10??????,b_10??????,b_10??????  (3+3*6=21 payload bits).
+    // We convert the code point to the 4-byte bigendian sequence that represents the integer.
+    List<unsigned char> fourBytes;
+    Crypto::convertUint32ToUcharBigendiaN(input, fourBytes);
+    out << fourBytes[0] << fourBytes[1] << fourBytes[2] << fourBytes[3];
+    return out.str();
+  }
+  if (input < 128) {
+    unsigned char output = input % 256;
+    out << output;
+    return out.str();
+  }
+  if (
+    input < 2048 // = 2^11, encoding fits in b_110?????, b_10??????
+  ) {
+    unsigned char high = input >> 6;
+    high += 128 + 64; // b_11000000
+    unsigned char low = input % 64;
+    low += 128;
+    out << high << low;
+    return out.str();
+  }
+  if (
+    input < 65536 // = 2^16, encoding fits in b_1110????, b_10??????, b_10??????
+  ) {
+    unsigned char high = input >> 12;
+    high += 128 + 64 + 32; // b_11100000
+    unsigned char middle = (input >> 6) % 64;
+    middle += 128;
+    unsigned char low = input % 64;
+    low += 128;
+    out << high << middle << low;
+    return out.str();
+  }
+  unsigned char highest = input >> 18;
+  highest += 128 + 64 + 32 + 16; // 224 = b_11110000
+  unsigned char higher = (input >> 12) % 64;
+  higher += 128;
+  unsigned char lower = (input >> 6) % 64;
+  lower += 128;
+  unsigned char lowest = input % 64;
+  lowest += 128;
+  out << highest << higher << lower << lowest;
+  return out.str();
+}
+
 std::string StringRoutines::Conversions::unescapeJavascriptLike(const std::string& input) {
-  MacroRegisterFunctionWithName("StringRoutines::Conversions::unescapeJavascript");
+  MacroRegisterFunctionWithName("StringRoutines::Conversions::unescapeJavascriptLike");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (i + 1 >= input.size() || input[i] != '\\') {
@@ -644,7 +720,7 @@ std::string StringRoutines::Conversions::unescapeJavascriptLike(const std::strin
         continue;
       }
       // The sequence is a byte encoding: "\xAb". Mixed case allowed.
-      char byte = left * 16 + right;
+      char byte = static_cast<char>(left * 16 + right);
       out << byte;
       i += 3;
       continue;
@@ -663,9 +739,12 @@ std::string StringRoutines::Conversions::unescapeJavascriptLike(const std::strin
       out << "\\";
       continue;
     }
-    char leftByte = hex0 * 16 + hex1;
-    char rightByte = hex1 * 16 + hex2;
-    out << leftByte << rightByte;
+    uint32_t codePoint =
+    static_cast<unsigned>(hex0) * 4096 +
+    static_cast<unsigned>(hex1) * 256 +
+    static_cast<unsigned>(hex2) * 16 +
+    static_cast<unsigned>(hex3);
+    out << StringRoutines::Conversions::codePointToUtf8(codePoint);
     i += 5;
   }
   return out.str();
@@ -674,17 +753,21 @@ std::string StringRoutines::Conversions::unescapeJavascriptLike(const std::strin
 std::string StringRoutines::Conversions::escapeJavascriptLike(const std::string& input) {
   MacroRegisterFunctionWithName("StringRoutines::convertStringToJavascriptString");
   std::stringstream out;
+  bool isValidUtf8 = StringRoutines::Conversions::isValidUtf8(input);
   for (unsigned i = 0; i < input.size(); i ++) {
-    if (input[i] == '"') {
+    unsigned char current = input[i];
+    if (current == '"') {
       out << "\\\"";
-    } else if (input[i] == '\\') {
+    } else if (current == '\\') {
       out << "\\\\";
-    } else if (input[i] == '\n') {
+    } else if (current == '\n') {
       out << "\\n";
-    } else if (StringRoutines::isASCIICharacterVisible(input[i])) {
-      out << input[i];
-    } else {
-      out << "\\u00" << StringRoutines::convertByteToHex(static_cast<unsigned char>(input[i]));
+    } else if (StringRoutines::isASCIICharacterVisible(current)) {
+      out << current;
+    } else if (isValidUtf8) {
+      out << "\\x"
+      << StringRoutines::convertByteToHex(current)
+      << "";
     }
   }
   return out.str();
@@ -9969,7 +10052,7 @@ bool Cone::solveLQuasiPolyEqualsZeroIAmProjective(QuasiPolynomial& inputLQP, Lis
 std::string HtmlRoutines::toHtmlTableRowsFromStringContainingJSON(const std::string& theJSON) {
   MacroRegisterFunctionWithName("HtmlRoutines::ToHtmlTableFromStringContainingJSON");
   JSData parser;
-  if (!parser.readstring(theJSON)) {
+  if (!parser.parse(theJSON)) {
     return StringRoutines::stringTrimToLengthForDisplay(theJSON, 1000);
   }
   return HtmlRoutines::toHtmlTableRowsFromJSON(parser);

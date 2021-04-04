@@ -459,7 +459,7 @@ bool MongoQuery::FindMultiple(
   output.setSize(outputString.size);
   for (int i = 0; i < outputString.size; i ++) {
     JSData encoded;
-    if (!encoded.readstring(outputString[i], commentsOnFailure)) {
+    if (!encoded.parse(outputString[i], commentsOnFailure)) {
       global << Logger::red << "Mongo/JSData error: failed to parse JSON. " << Logger::endL;
       return false;
     }
@@ -550,7 +550,7 @@ bool Database::findFromString(
 #ifdef MACRO_use_MongoDB
   JSData theData;
   //global << Logger::blue << "Query input: " << findQuery << Logger::endL;
-  if (!theData.readstring(findQuery, commentsOnFailure)) {
+  if (!theData.parse(findQuery, commentsOnFailure)) {
     return false;
   }
   return Database::get().findFromJSON(
@@ -1259,7 +1259,7 @@ JSData Database::toJSONDatabaseFetch(const std::string& incomingLabels) {
   JSData result;
   JSData labels;
   std::stringstream commentsOnFailure;
-  if (!labels.readstring(incomingLabels, &commentsOnFailure)) {
+  if (!labels.parse(incomingLabels, &commentsOnFailure)) {
     commentsOnFailure << "Failed to parse labels from: "
     << StringRoutines::stringTrimToLengthForDisplay(incomingLabels, 100);
     result["error"] = commentsOnFailure.str();

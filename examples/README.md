@@ -629,7 +629,7 @@ Assumes that the numerator and denominator of a fraction commute. Divides the tw
 ```
 Equivalent to (a/b){}x = (a{}x)/(b{}x) 
 
-Operator or function \* is overloaded with 69 total handlers.
+Operator or function \* is overloaded with 70 total handlers.
 
 *\** [MultiplyMatrixByMatrix] {CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cbegin%7bpmatrix%7d%201%26%20%202%20%5c%5c%5c%5c%203%26%205%5c%5cend%7bpmatrix%7d%5c%5cbegin%7bpmatrix%7d%201%26%20-2%20%5c%5c%5c%5c%203%26%205%5c%5cend%7bpmatrix%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -644,6 +644,14 @@ Multiplies matrices.
 (1,2)\begin{pmatrix} 1& 2 \\ 3& 5\end{pmatrix}
 ```
 Multiplies matrices.
+
+*\** [MultiplySequenceByMatrix] {CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%281%2c2%29%5c%5cbegin%7bpmatrix%7d%201%26%202%20%5c%5c%5c%5c%203%26%205%5c%5cend%7bpmatrix%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+(1,2)\begin{pmatrix} 1& 2 \\ 3& 5\end{pmatrix}
+```
+Multiplies a matrix standing on the left by a sequence/list (matrix-row) standing on the right.
+This operation is valid only if the the matrix on the right is a column-vector.
 
 *\** [InterpretAsDifferential] {CalculatorFunctions::interpretAsDifferential}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28%5c%5cint%20x%29%20dx%3b%20%5c%5cint%20x%20%281%20%2b%20x%29%20dx%3b%20%5c%5cint_2%5e3%20x%20dx%3b%20%5c%5cint_2%5e3%20x%20%281%20%2b%20x%29%20dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -1912,7 +1920,7 @@ Absolute value function
 "\u00B0";
 "\u00b0"
 ```
-Creates a string. 
+Creates a string. Transforms escape sequences to their byte representations. These may be escaped back when returned to the frontend.
 
 *if* [if] {CalculatorConversions::innerIfFrozen}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22if%20%281%2c%20x%2c%20y%29%3b%5cnif%20%281%2c%20x%2c%201%20%2f%200%29%3b%5cnif%20%282%20-%201%2c%20x%2c%201%20%2f%200%29%3b%5cnif%20%281%20%2b%201%2c%201%20%2f%200%2c%201%20%2f%200%29%3b%5cnif%20%280%2c%20x%2c%201%20%2f%200%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -3599,9 +3607,14 @@ AugmentMatrixToTheRight( ((1,1),(2,2)), ((0,0),(1,1)))
 Augments matrix to the right with another matrix. Pastes the content of the second matrix to the right of the first matrix.The matrices must have the same number of rows. 
 
 *AugmentMatrixBelow* [AugmentMatrixBelow] {CalculatorFunctionsBinaryOps::innerAugmentMatrixBelow}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22AugmentMatrixBelow%28%20%28%281%2c1%29%2c%282%2c2%29%29%2c%20%28%280%2c0%29%2c%281%2c1%29%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22AugmentMatrixBelow%28%20%28%281%2c1%29%2c%282%2c2%29%29%2c%20%28%280%2c0%29%2c%281%2c1%29%29%29%3b%5cna%20%3d%20FunctionToMatrix%283%2c%202%2c2%29%3b%5cnb%20%3d%20FunctionToMatrix%284%2c%202%2c3%29%3b%5cnAugmentMatrixBelow%28b%2ca%29%3b%5cnAugmentMatrixBelow%28a%2ca%29%3b%5cnAugmentMatrixBelow%28b%2cb%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-AugmentMatrixBelow( ((1,1),(2,2)), ((0,0),(1,1)))
+AugmentMatrixBelow( ((1,1),(2,2)), ((0,0),(1,1)));
+a = FunctionToMatrix(3, 2,2);
+b = FunctionToMatrix(4, 2,3);
+AugmentMatrixBelow(b,a);
+AugmentMatrixBelow(a,a);
+AugmentMatrixBelow(b,b)
 ```
 Augments matrix below by another matrix. Pastes the content of the second matrix below the first matrix.The matrices must have the same number of columns. 
 
@@ -4459,10 +4472,10 @@ x * y
 ```
 Creates character of a semisimple Lie algebra finite dimensional irreducible module. First argument gives type, second argument gives highest weight in fundamental coordinates.
 
-*GetLinks* [GetLinks] {Calculator::getLinksToSimpleLieAlgerbas}. (invisible) 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GetLinks%7b%7d0%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*GetLinksToSimpleLieAlgebraPrintouts* [GetLinksToSimpleLieAlgebraPrintouts] {Calculator::getLinksToSimpleLieAlgerbas}. (invisible) 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GetLinksToSimpleLieAlgebraPrintouts%7b%7d0%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-GetLinks{}0
+GetLinksToSimpleLieAlgebraPrintouts{}0
 ```
 Gets simple Lie algebra links to the calculator.
 

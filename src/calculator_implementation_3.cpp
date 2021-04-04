@@ -601,7 +601,7 @@ bool Calculator::Test::loadTestStrings(
     }
     return false;
   }
-  if (!this->storedResults.readstring(testStrings, commentsOnFailure)) {
+  if (!this->storedResults.parse(testStrings, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to parse test json. ";
     }

@@ -324,5 +324,5 @@ bool Database::FallBack::readDatabase(std::stringstream* commentsOnFailure) {
     return false;
   }
   global << "Database size: " << Logger::blue << theDatabase.size() << Logger::endL;
-  return this->reader.readstring(theDatabase, commentsOnFailure);
+  return this->reader.parse(theDatabase, commentsOnFailure);
 }

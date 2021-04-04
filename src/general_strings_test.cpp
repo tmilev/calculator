@@ -3,6 +3,7 @@
 #include "general_strings.h"
 #include "general_logging_global_variables.h"
 #include "crypto.h"
+#include "macros.h"
 
 bool StringRoutines::Test::all() {
   StringRoutines::Conversions::Test::all();
@@ -13,10 +14,13 @@ bool StringRoutines::Conversions::Test::all() {
   StringRoutines::Conversions::Test::convertStringToJSONStringEscapeOnly();
   StringRoutines::Conversions::Test::convertUtf8StringToUnicodeCodePoints();
   StringRoutines::Conversions::Test::utf8StringToJSONStringEscaped();
+  StringRoutines::Conversions::Test::unescapeJavascriptLike();
+  StringRoutines::Conversions::Test::codePointToUtf8();
   return true;
 }
 
 bool StringRoutines::Conversions::Test::convertStringToJSONStringEscapeOnly() {
+  MacroRegisterFunctionWithName("StringRoutines::Conversions::Test::convertStringToJSONStringEscapeOnly");
   List<List<std::string> > conversionPairs;
   conversionPairs.addOnTop(List<std::string>({ "\\\"", "\\\\\\\""}));
   for (int i = 0; i < conversionPairs.size; i ++) {
@@ -36,6 +40,7 @@ bool StringRoutines::Conversions::Test::oneConversionUtf8Success(
   uint32_t codePoint2,
   uint32_t codePoint3
 ) {
+  MacroRegisterFunctionWithName("StringRoutines::Conversions::Test::oneConversionUtf8Success");
   List<uint32_t> expected, computed;
   expected.addOnTop(codePoint1);
   if (codePoint2 != 0xffffffff) {
@@ -84,6 +89,41 @@ bool StringRoutines::Conversions::Test::oneUtf8ToJSONSuccess(
     global.fatal << "Converted input: " << givenInput << " to: "
     << result << " but the expected conversion was: "
     << expected << "." << global.fatal;
+  }
+  return true;
+}
+
+bool StringRoutines::Conversions::Test::oneCodePointToUtf8(
+  uint32_t codePoint, const std::string& expectedHex
+) {
+  MacroRegisterFunctionWithName("StringRoutines::Conversions::Test::oneCodePointToUtf8");
+  std::string converted = StringRoutines::Conversions::codePointToUtf8(codePoint);
+  std::string convertedHex = Crypto::convertStringToHex(converted, 0, false);
+  if (convertedHex != expectedHex) {
+    global.fatal << "Code point: " << codePoint << " converted to hex: "
+    << convertedHex << ", expected: " << expectedHex
+    << global.fatal;
+  }
+  return true;
+}
+
+bool StringRoutines::Conversions::Test::codePointToUtf8() {
+  MacroRegisterFunctionWithName("StringRoutines::Conversions::Test::codePointToUtf8");
+  StringRoutines::Conversions::Test::oneCodePointToUtf8(67, "43");
+  StringRoutines::Conversions::Test::oneCodePointToUtf8(960, "cf80"); // \pi.
+  StringRoutines::Conversions::Test::oneCodePointToUtf8(35000, "e8a2b8"); //
+  StringRoutines::Conversions::Test::oneCodePointToUtf8(68000, "f090a6a0"); // Meroitic Cursive Letter A
+  return true;
+}
+
+bool StringRoutines::Conversions::Test::unescapeJavascriptLike() {
+  std::string input = "\u00a2$\u00a2@\u03c0";
+  std::string unescaped = StringRoutines::Conversions::unescapeJavascriptLike(input);
+  std::string hexUnescaped = Crypto::convertStringToHex(unescaped, 0, false);
+  std::string expected = "c2a224c2a240cf80";
+  if (hexUnescaped != expected) {
+    global.fatal << "Input: " << input << " was javascript-like unescaped to hex: "
+    << hexUnescaped << " but I expected: " << expected << "." << global.fatal;
   }
   return true;
 }

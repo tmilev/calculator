@@ -470,7 +470,7 @@ std::string WebWorker::getDatabaseDeleteOneItem() {
   std::string inputEncoded = global.getWebInput("item");
   std::string inputString = HtmlRoutines::convertURLStringToNormal(inputEncoded, false);
   JSData inputParsed;
-  if (!inputParsed.readstring(inputString, &commentsStream)) {
+  if (!inputParsed.parse(inputString, &commentsStream)) {
     commentsStream << "Failed to parse input string. ";
     return commentsStream.str();
   }
@@ -1065,7 +1065,7 @@ int WebWorker::getIndexIfRunningWorkerId(
     outputComputationStatus[WebAPI::result::error] = commentsOnError.str();
     return - 1;
   }
-  if (!outputComputationStatus.readstring(computationResult)) {
+  if (!outputComputationStatus.parse(computationResult)) {
     commentsOnError << "I found your worker id: "
     << workerId << " but I could not parse its JSON status. "
     << "This is likely an internal server error. ";
@@ -2875,7 +2875,7 @@ void WebServer::processOneChildMessage(int childIndex, int& outputNumInUse) {
   this->markChildNotInUse(childIndex);
   std::stringstream commentsOnFailure;
   JSData workerMessage;
-  if (!workerMessage.readstring(messageString, &commentsOnFailure)) {
+  if (!workerMessage.parse(messageString, &commentsOnFailure)) {
     global << Logger::red << "Worker "
     << childIndex + 1 << " sent corrupted result message: "
     << messageString << ". Marking for reuse. " << Logger::endL;
@@ -4180,7 +4180,7 @@ bool GlobalVariables::configurationLoad() {
     }
     return false;
   }
-  if (!global.configuration.readstring(
+  if (!global.configuration.parse(
     this->configurationFileContent, &out
   )) {
     global << Logger::red << "Failed to read configuration. " << out.str() << Logger::endL;

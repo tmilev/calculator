@@ -413,8 +413,6 @@ bool JSData::readstringConsumeUnicodeFourHexAppendUtf8(
     }
     return false;
   }
-  global << "DEBUG: input.size is: " << input.size() << ", currentIndex: "
-  << currentIndex << ". " << Logger::endL;
   uint32_t codePoint = 0;
   for (int i = 0; i < 2; i ++) {
     int leftIndex = currentIndex + 2 * i + 1;
@@ -433,18 +431,10 @@ bool JSData::readstringConsumeUnicodeFourHexAppendUtf8(
       }
       return false;
     }
-    global << "DEBUG: read hex: "
-    << "characters with value: "
-            << static_cast<uint>(left) << ", " << static_cast<uint>(right)
-            << ", ["
-            << left << ", " << right << "] at positions "
-            << leftIndex << ", " << rightIndex << " (currentIndex: "
-            << currentIndex << "), convert to: "<< static_cast<uint>(next) << Logger::endL;
     codePoint *= 256;
     codePoint += static_cast<uint32_t>(next);
   }
   std::string utf8Conversion = StringRoutines::Conversions::codePointToUtf8(codePoint);
-  global << "DEBUG: codepoint: " << codePoint << " converted to: " << utf8Conversion << Logger::endL;
   output += utf8Conversion;
   currentIndex += 4;
   return true;

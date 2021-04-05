@@ -42,10 +42,7 @@ bool JSData::Test::recode() {
     "\"\u03C0\"", "\"\\u03c0\""
   }));
   toRecode.addOnTop(List<std::string>({
-    "{\"\n\":\"\n\"}", "{\"\\n\":\"\\n\"}"
-  }));
-  toRecode.addOnTop(List<std::string>({
-    "{\"\r\":\"\n\"}", "{\"\\r\":\"\\n\"}"
+    "{\"\n\r\":\"\n\r\"}", "{\"\\n\\r\":\"\\n\\r\"}"
   }));
   toRecode.addOnTop(List<std::string>({
     "{\"resultHtml\":\"&lt;!-- --&gt;\\na\"}", "{\"resultHtml\":\"&lt;!-- --&gt;\\na\"}"
@@ -60,8 +57,8 @@ bool JSData::Test::recode() {
     std::string expectedOutput = toRecode[i][1];
     std::string recoded = parser.toString(nullptr);
     if (recoded != expectedOutput) {
-      global.fatal << "Input " << input << " decoded-recoded to " << recoded
-      << ". However, I expected: " << expectedOutput << ". " << global.fatal;
+      global.fatal << "Input " << input << " decoded-recoded to:\n" << recoded
+      << "\nHowever, I expected:\n" << expectedOutput << ". " << global.fatal;
     }
     std::string recodedSecondTime = parser.toString(nullptr);
     if (recoded != recodedSecondTime) {

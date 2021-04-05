@@ -177,12 +177,12 @@ void CompareExpressions::compare(
 void CompareExpressions::comparePartTwo(Calculator& calculator) {
   MacroRegisterFunctionWithName("Calculator::compareExpressions");
   calculator.statistics.initialize();
-  if (!calculator.parse(this->givenString, true, this->given)) {
+  if (!calculator.parseNoEmbeddingInCommand(this->givenString, this->given)) {
     this->syntaxErrorsLeftRaw = "Error parsing given expression." + calculator.syntaxErrors;
     this->syntaxErrorsLeftFormatted = calculator.toStringSyntacticStackHTMLSimple();
     return;
   }
-  if (!calculator.parse(this->desiredString, true, this->desired)) {
+  if (!calculator.parseNoEmbeddingInCommand(this->desiredString, this->desired)) {
     this->syntaxErrorsRightRaw =  "Error parsing desired expression." + calculator.syntaxErrors;
     this->syntaxErrorsRightFormatted = calculator.toStringSyntacticStackHTMLSimple();
     return;

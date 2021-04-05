@@ -880,7 +880,7 @@ class SyntacticElement {
   int controlIndex;
   int numNonBoundVariablesInherited;
   int numBoundVariablesInherited;
-  Expression theData;
+  Expression data;
   List<Expression> dataList;
   std::string errorString;
   std::string toStringHumanReadable(Calculator& owner, bool includeLispifiedExpressions) const;
@@ -1177,6 +1177,11 @@ class Calculator {
     output.comments << any;
     return output;
   }
+  bool parse(
+    const std::string& input,
+    bool stripCommandSequence,
+    Expression& output
+  );
 public:
   class OperationHandlers {
   public:
@@ -1518,6 +1523,14 @@ public:
     std::string* outputFileNameNoExtension,
     bool useLatexDviPSpsToPNG = false
   );
+  bool parseEmbedInCommandSequence(
+    const std::string& input,
+    Expression& output
+  );
+  bool parseNoEmbeddingInCommand(
+    const std::string& input,
+    Expression& output
+  );
   std::string toStringIsCorrectAsciiCalculatorString(const std::string& input);
   bool isInterpretedAsEmptySpace(const std::string& input);
   bool isInterpretedAsEmptySpace(unsigned char input);
@@ -1749,6 +1762,9 @@ public:
   }
   int conComma() {
     return this->controlSequences.getIndexNoFail(",");
+  }
+  int conQuote() {
+    return this->controlSequences.getIndexNoFail("\"");
   }
   int conDefine() {
     return this->controlSequences.getIndexNoFail("=");
@@ -2251,7 +2267,9 @@ public:
     static bool loopDetectionEverExpanding();
     static bool numberOfTestFunctions(Calculator& ownerInitialized);
     static bool parseDecimal(Calculator& ownerInitialized);
+    static bool parseQuotes(Calculator& ownerInitialized);
     static bool parseAllExamples(Calculator& ownerInitialized);
+    static bool parseConsumeQuote(Calculator& ownerInitialized);
     static bool builtInFunctionsABTest(Calculator& ownerInitialized);
 
     static bool checkBuiltInInitializations(Calculator& ownerInitialized);
@@ -2539,17 +2557,13 @@ public:
     List<SyntacticElement>& outputSynStack,
     std::string* outputSyntacticErrors
   );
-  bool parse(
-    const std::string& input,
-    bool stripCommandSequence,
-    Expression& output
-  );
   // For internal use only; will crash the calculator if the input has syntax errors.
   Expression parseOrCrash(const std::string& input, bool stripCommandSequence);
   bool isLeftSeparator(unsigned char c);
   bool isRightSeparator(unsigned char c);
   bool shouldSplitOutsideQuotes(const std::string& left, char right);
   void parseFillDictionary(const std::string& input, List<SyntacticElement>& output);
+  void parseConsumeQuote(const std::string& input, unsigned int& indexOfLast, List<SyntacticElement>& output);
   void parseFillDictionary(const std::string& input);
 };
 

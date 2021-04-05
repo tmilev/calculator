@@ -59,7 +59,7 @@ bool CalculatorHtmlFunctions::evaluateSymbols(
   for (int i = 0; i < theElts.size; i ++) {
     SyntacticElement& currentElt = theElts[i];
     if (currentElt.controlIndex == calculator.conVariable()) {
-      calculator.evaluateExpression(calculator, currentElt.theData, evaluatedE);
+      calculator.evaluateExpression(calculator, currentElt.data, evaluatedE);
       out << evaluatedE.toString();
       continue;
     }
@@ -67,7 +67,7 @@ bool CalculatorHtmlFunctions::evaluateSymbols(
       if (!previousWasInteger) {
         out << "{";
       }
-      out << currentElt.theData.toString();
+      out << currentElt.data.toString();
       previousWasInteger = true;
       continue;
     }

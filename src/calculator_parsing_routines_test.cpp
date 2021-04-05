@@ -6,6 +6,8 @@
 bool Calculator::Test::all() {
   Calculator tester;
   tester.initialize(Calculator::Mode::full);
+  Calculator::Test::parseConsumeQuote(tester);
+  Calculator::Test::parseQuotes(tester);
   Calculator::Test::cacheWorks();
   Calculator::Test::loopDetection();
   Calculator::Test::checkBuiltInInitializations(tester);
@@ -118,6 +120,39 @@ bool Calculator::Test::parseAllExamples(Calculator& ownerInitialized) {
   return true;
 }
 
+bool Calculator::Test::parseConsumeQuote(Calculator& ownerInitialized) {
+  std::string input = "\"\\\"\\\\\\\"\"";
+  List<SyntacticElement> output;
+  unsigned int index = 0;
+  ownerInitialized.parseConsumeQuote(input, index, output);
+  if (output.size != 3) {
+    global.fatal << "Expected 3 output elements in parseConsumeQuote, got: "
+    << output.size << ". Input: " << input << global.fatal;
+  }
+  std::string result = output[1].data.toString();
+  std::string expected = "\\\"\\\\\\\"";
+  if (result != expected) {
+    global.fatal << "Input: " << input << "; unexpected content of consumed quote:\n" << result
+    << "\nexpected:\n" << expected  << global.fatal;
+  }
+  return true;
+}
+
+bool Calculator::Test::parseQuotes(Calculator& ownerInitialized) {
+  std::string input = "\"\\\"\\\\\\\"\"";
+  std::string expected = "\"\\\"\\\\\\\"\"";
+  Expression output;
+  if (!ownerInitialized.parseNoEmbeddingInCommand(input, output)) {
+    global.fatal << "Failed to parse: " << input << global.fatal;
+  }
+  std::string result = output.toString();
+  if (result != expected) {
+    global.fatal << "Parsing and re-coding of: " << input << " resulted in: "
+    << result << " instead of the expected: " << expected << global.fatal;
+  }
+  return true;
+}
+
 bool Calculator::Test::parseDecimal(Calculator& ownerInitialized) {
   std::string mustEvaluateToZero = "2.01 - 201/100";
   ownerInitialized.evaluate(mustEvaluateToZero);
@@ -133,7 +168,6 @@ bool Calculator::Test::parseDecimal(Calculator& ownerInitialized) {
     global.fatal << "Expression: " << mustEvaluateToOne << " evaluates to: "
     << ownerInitialized.programExpression.toString() << " instead of 1. " << global.fatal;
   }
-
   return true;
 }
 

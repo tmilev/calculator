@@ -1979,7 +1979,7 @@ std::string Calculator::toStringSyntacticStackHTMLSimple() {
     }
   }
   if (!isBad) {
-    out << this->currentSyntacticStack->lastObject()->theData.toString();
+    out << this->currentSyntacticStack->lastObject()->data.toString();
     return out.str();
   }
   for (int i = this->numEmptyTokensStart; i < (*this->currentSyntacticStack).size; i ++) {
@@ -1990,7 +1990,7 @@ std::string Calculator::toStringSyntacticStackHTMLSimple() {
     if (currentElt.controlIndex != this->conExpression()) {
       out << " <b style='color:red'>" << currentElt.toStringSyntaxRole(*this) << "</b> ";
     } else {
-      out << currentElt.theData.toString();
+      out << currentElt.data.toString();
     }
   }
   return out.str();

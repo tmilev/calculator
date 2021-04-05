@@ -753,9 +753,8 @@ std::string StringRoutines::Conversions::unescapeJavascriptLike(const std::strin
 }
 
 std::string StringRoutines::Conversions::escapeJavascriptLike(const std::string& input) {
-  MacroRegisterFunctionWithName("StringRoutines::convertStringToJavascriptString");
+  MacroRegisterFunctionWithName("StringRoutines::Conversions::escapeJavascriptLike");
   std::stringstream out;
-  bool isValidUtf8 = StringRoutines::Conversions::isValidUtf8(input);
   for (unsigned i = 0; i < input.size(); i ++) {
     unsigned char current = input[i];
     if (current == '"') {
@@ -764,9 +763,11 @@ std::string StringRoutines::Conversions::escapeJavascriptLike(const std::string&
       out << "\\\\";
     } else if (current == '\n') {
       out << "\\n";
+    } else if (current == '\r') {
+      out << "\\r";
     } else if (StringRoutines::isASCIICharacterVisible(current)) {
       out << current;
-    } else if (isValidUtf8) {
+    } else {
       out << "\\x"
       << StringRoutines::convertByteToHex(current)
       << "";

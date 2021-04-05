@@ -457,12 +457,14 @@ void SemisimpleSubalgebras::computeFolderNames(FormatExpressions& inputFormat) {
   }
 
   this->displayNameMainFile1NoPath = this->owner->toStringFileNameNoPathSemisimpleSubalgebras();
-  this->displayNameMainFile1WithPath = this->owner->toStringDisplayFolderNamE("../../") + this->displayNameMainFile1NoPath;
+  this->displayNameMainFile1WithPath = this->owner->toStringDisplayFolderNamE("../../output/") + this->displayNameMainFile1NoPath;
   this->virtualNameMainFile1 =
   this->owner->toStringVirtualFolderName() + this->displayNameMainFile1NoPath;
 }
 
-std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML(FormatExpressions* format) const {
+std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML(
+  FormatExpressions* format
+) const {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML");
   (void) format;//avoid unused parameter warning in a portable way
   if (!this->flagComputeNilradicals) {

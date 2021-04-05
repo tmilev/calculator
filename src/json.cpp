@@ -791,7 +791,7 @@ somestream& JSData::intoStream(
       out << "{" << newLine;
       for (int i = 0; i < this->objects.size(); i ++) {
         out << whiteSpaceInner << whiteSpaceOuter;
-        out << '"' << StringRoutines::Conversions::escapeQuotesBackslashesNewLines(this->objects.keys[i]) << '"';
+        out << '"' << StringRoutines::Conversions::stringToJSONStringEscaped(this->objects.keys[i]) << '"';
         out << ':';
         this->objects.values[i].intoStream(out, &options);
         if (i != this->objects.size() - 1) {

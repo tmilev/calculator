@@ -5251,9 +5251,9 @@ StringDifference("XMJYAUZ","MZJAWXU")
 Computes the difference between two strings, provided that the strings are small enough. The algorithm consumes O(leftStringSize * rightStringSize) RAM. For more information, see https://en.wikipedia.org/wiki/Longest_common_subsequence_problem.
 
 *TestJSON* [TestJSON] {CalculatorFunctions::testJSON}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TestJSON%28%5c%22%7ba%3a1%7d%5c%22%29%3b%5cnTestJSON%28%5c%22%7b%5c%5c%5c%22a%5c%5c%5c%22%3a%5c%5c%5c%22%5c%5c%5c%5c%5c%5c%5c%22%5c%5c%5c%22%7d%5c%22%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TestJSON%28%5c%22%7ba%3a1%2c%20b%3a%20false%2c%7d%5c%22%29%3b%5cnTestJSON%28%5c%22%7b%5c%5c%5c%22a%5c%5c%5c%22%3a%5c%5c%5c%22%5c%5c%5c%5c%5c%5c%5c%22%5c%5c%5c%22%7d%5c%22%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-TestJSON("{a:1}");
+TestJSON("{a:1, b: false,}");
 TestJSON("{\"a\":\"\\\"\"}");
 ```
 Tests the JSON parsing mechanism. Input: json string, use backslash escapes for backslashes and quotes.

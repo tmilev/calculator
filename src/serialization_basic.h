@@ -102,15 +102,15 @@ public:
     WriterIntegerWithMarkerTemplate(
       int input,
       List<unsigned char>& output,
-      List<serialization::Marker>* theOutputMarkers,
+      List<serialization::Marker>* outputMarkers,
       const std::string& label
-    ): WriterIntegerWithMarker(numberOfBytesTemplate, input, output, theOutputMarkers, label) {}
+    ): WriterIntegerWithMarker(numberOfBytesTemplate, input, output, outputMarkers, label) {}
     WriterIntegerWithMarkerTemplate(
       unsigned int input,
       List<unsigned char>& output,
-      List<serialization::Marker>* theOutputMarkers,
+      List<serialization::Marker>* outputMarkers,
       const std::string& label
-    ): WriterIntegerWithMarker(numberOfBytes, input, output, theOutputMarkers, label) {}
+    ): WriterIntegerWithMarker(numberOfBytesTemplate, input, output, outputMarkers, label) {}
   };
   typedef WriterIntegerWithMarkerTemplate<1> WriterOneByteInteger;
   typedef WriterIntegerWithMarkerTemplate<2> WriterTwoByteInteger;

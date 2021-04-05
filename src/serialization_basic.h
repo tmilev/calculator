@@ -45,31 +45,32 @@ public:
       int inputNumberOfBytes,
       int input,
       List<unsigned char>& output,
-      List<serialization::Marker>* theOutputMarkers,
+      List<serialization::Marker>* outputMarkers,
       const std::string& label
     ) {
-      this->initialize(inputNumberOfBytes, static_cast<unsigned int>(input), output, theOutputMarkers, label);
+      this->initialize(inputNumberOfBytes, static_cast<unsigned int>(input), output, outputMarkers, label);
     }
     WriterIntegerWithMarker(
       int inputNumberOfBytes,
       unsigned int input,
       List<unsigned char>& output,
-      List<serialization::Marker>* theOutputMarkers,
+      List<serialization::Marker>* outputMarkers,
       const std::string& label
     ) {
-      this->initialize(inputNumberOfBytes, input, output, theOutputMarkers, label);
+      this->initialize(inputNumberOfBytes, input, output, outputMarkers, label);
     }
     inline void initialize(
       int inputNumberOfBytes,
       unsigned int input,
       List<unsigned char>& output,
-      List<serialization::Marker>* theOutputMarkers,
+      List<serialization::Marker>* outputMarkers,
       const std::string& label
     ) {
       this->numberOfBytes  = inputNumberOfBytes;
       this->flagDeallocated = false;
-      this->outputMarkers = theOutputMarkers;
+      this->outputMarkers = outputMarkers;
       this->outputPointer = nullptr;
+      this->markerOffset = 0;
       int notUsed = output.size;
       serialization::writeNByteUnsigned(this->numberOfBytes, input, output, notUsed);
       if (this->outputMarkers == nullptr) {

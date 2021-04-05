@@ -71,6 +71,7 @@ public:
       this->outputMarkers = outputMarkers;
       this->outputPointer = nullptr;
       this->markerOffset = 0;
+      this->offset = 0;
       int notUsed = output.size;
       serialization::writeNByteUnsigned(this->numberOfBytes, input, output, notUsed);
       if (this->outputMarkers == nullptr) {

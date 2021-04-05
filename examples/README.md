@@ -2332,10 +2332,11 @@ ToString( e^x);
 Transforms an arbitrary expression to its string representation. The string representation is (supposed to be) LaTeX-compatible. 
 
 *ToUTF8String* [ToUTF8String] {CalculatorFunctions::expressiontoUTF8String}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22f%20%3d%20%5c%5csin%20%7b%7dx%20%2f%20%5c%5ccos%20%7b%7dx%3b%5cnPlot2D%28f%2c%20-%5c%5cpi%2f4%2c%20%5c%5cpi%2f4%29%20%2b%20PlotLabel%7b%7d%28%281%2c%201%29%2c%20%5c%22y%20%3d%5c%22%20%2b%20ToUTF8String%28f%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22f%20%3d%20%5c%5csin%20%7b%7dx%20%2f%20%5c%5ccos%20%7b%7dx%3b%5cnPlot2D%28f%2c%20-%5c%5cpi%2f4%2c%20%5c%5cpi%2f4%29%20%2b%20PlotLabel%7b%7d%28%281%2c%201%29%2c%20%5c%22y%20%3d%5c%22%20%2b%20ToUTF8String%28f%29%29%3b%5cnToUTF8String%28pi%2f4%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 f = \sin {}x / \cos {}x;
-Plot2D(f, -\pi/4, \pi/4) + PlotLabel{}((1, 1), "y =" + ToUTF8String(f))
+Plot2D(f, -\pi/4, \pi/4) + PlotLabel{}((1, 1), "y =" + ToUTF8String(f));
+ToUTF8String(pi/4);
 ```
 Transforms an arbitrary expression to a utf8-string representation. The string is supposed to look reasonable when drawn on a javascript canvas. 
 

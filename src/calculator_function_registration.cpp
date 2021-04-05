@@ -434,7 +434,8 @@ void Calculator::initializeFunctionsStandard() {
     "Transforms an arbitrary expression to a utf8-string representation. "
     "The string is supposed to look reasonable when drawn on a javascript canvas. ",
     "f = \\sin {}x / \\cos {}x;\n"
-    "Plot2D(f, -\\pi/4, \\pi/4) + PlotLabel{}((1, 1), \"y =\" + ToUTF8String(f))",
+    "Plot2D(f, -\\pi/4, \\pi/4) + PlotLabel{}((1, 1), \"y =\" + ToUTF8String(f));\n"
+    "ToUTF8String(\\pi/4);",
     "CalculatorFunctions::expressiontoUTF8String",
     "ToUTF8String",
     innerStandard

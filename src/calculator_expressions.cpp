@@ -5213,7 +5213,7 @@ std::string Expression::toUTF8String(FormatExpressions* format) const {
     tempFormat.flagUseFrac = false;
     return theRat.toString(&tempFormat);
   } else if (this->isOperationGiven(this->owner->opPi())) {
-    return "\\u03C0";
+    return "\u03C0";
   } else if (this->startsWith(this->owner->opPlus(), 3)) {
     return (*this)[1].toUTF8String(format) + "+" + (*this)[2].toUTF8String(format);
   } else if (this->startsWith(this->owner->opTimes(), 3)) {

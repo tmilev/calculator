@@ -815,16 +815,16 @@ JSData WebAPIResponse::getJSONUserInfo(const std::string& comments) {
 std::string WebAPIResponse::getJSONFromTemplate() {
   MacroRegisterFunctionWithName("WebAPIReponse::getJSONFromTemplate");
   std::stringstream out;
-  CalculatorHTML thePage;
+  CalculatorHTML page;
   std::stringstream comments;
-  thePage.fileName = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::courseHome), false);
-  if (!thePage.loadMe(true, global.getWebInput(WebAPI::problem::randomSeed), &comments)) {
+  page.fileName = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::courseHome), false);
+  if (!page.loadMe(true, global.getWebInput(WebAPI::problem::randomSeed), &comments)) {
     out << "<b>Failed to load file: "
     << global.getWebInput(WebAPI::problem::courseHome) << ". </b>"
     << "<br>Comments:<br> " << comments.str();
     return out.str();
   }
-  if (!thePage.interpretHtml(&comments)) {
+  if (!page.interpretHtml(&comments)) {
     out << "<b>Failed to interpret as template the following file: "
     << global.getWebInput(WebAPI::problem::courseHome) << ". </b>"
     << "<br>Comments:<br> " << comments.str();
@@ -833,7 +833,7 @@ std::string WebAPIResponse::getJSONFromTemplate() {
   out << "<!-- File automatically generated from template: "
   << global.getWebInput(WebAPI::problem::fileName)
   << ".-->\n";
-  out << thePage.outputHtmlBodyNoTag;
+  out << page.outputHtmlBodyNoTag;
   out << "<small>Generated in " << global.getElapsedMilliseconds() << " ms. </small>";
   return out.str();
 }

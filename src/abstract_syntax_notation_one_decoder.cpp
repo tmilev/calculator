@@ -485,7 +485,7 @@ bool ASNElement::isTime() const {
 }
 
 std::string ASNElement::toString() const {
-  return this->toJSON().toString(&JSData::PrintOptions::hexEncodeNonASCII());
+  return this->toJSON().toString();
 }
 
 void ASNElement::writeAnnotations(List<serialization::Marker>& output) {

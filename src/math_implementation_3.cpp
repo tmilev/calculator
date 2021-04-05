@@ -476,7 +476,7 @@ bool StringRoutines::Conversions::utf8StringToUnicodeCodePoints(
     );
     if (!isValid) {
       result = false;
-      // Do not generate more comments on further errors.
+      // Do not generate comments on further errors.
       commentsOnFailure = nullptr;
     }
   }
@@ -550,11 +550,13 @@ uint32_t StringRoutines::Conversions::codePointFromUtf8(
 std::string StringRoutines::Conversions::codePointToBackslashEscapedString(uint32_t input) {
   std::stringstream out;
   if (input <= 127) {
-    unsigned char currentCharacter = static_cast<char>(input);
+    unsigned char currentCharacter = static_cast<unsigned char>(input);
     if (currentCharacter == '\\') {
       return "\\\\";
     } else if (currentCharacter == '\n') {
       return "\\n";
+    } else if (currentCharacter == '\r') {
+      return "\\r";
     } else if (currentCharacter == '"') {
       return "\\\"";
     } else {

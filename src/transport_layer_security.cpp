@@ -1625,7 +1625,7 @@ std::string SSLRecord::toString() const {
     LargeIntegerUnsigned(static_cast<unsigned>(this->version)), 0, hexVersion
   );
   result["version"] = hexVersion;
-  return result.toString(&JSData::PrintOptions::hexEncodeNonASCII());
+  return result.toString();
 }
 
 bool SSLRecord::decode(std::stringstream *commentsOnFailure) {

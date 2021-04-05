@@ -700,13 +700,6 @@ JSData::PrintOptions::PrintOptions() {
   this->useHTML = false;
   this->useNewLine = false;
   this->indentation = 0;
-  this->hexEncodeNonAsciiStrings = false;
-}
-
-const JSData::PrintOptions& JSData::PrintOptions::hexEncodeNonASCII() {
-  static JSData::PrintOptions result;
-  result.hexEncodeNonAsciiStrings = true;
-  return result;
 }
 
 const JSData::PrintOptions& JSData::PrintOptions::newLine() {
@@ -734,7 +727,6 @@ somestream& JSData::intoStream(
     options.useHTML = optionsIncoming->useHTML;
     options.useNewLine = optionsIncoming->useNewLine;
     options.indentation = optionsIncoming->indentation;
-    options.hexEncodeNonAsciiStrings = optionsIncoming->hexEncodeNonAsciiStrings;
   }
 
   for (int i = 0; i < options.indentation; i ++) {
@@ -774,13 +766,7 @@ somestream& JSData::intoStream(
       }
       return out;
     case JSData::token::tokenString:
-      if (!options.hexEncodeNonAsciiStrings) {
-        out << '"' << StringRoutines::Conversions::stringToJSONStringEscaped(this->stringValue) << '"';
-      } else {
-        out << '"' << StringRoutines::Conversions::escapeQuotesBackslashesNewLines(
-          StringRoutines::convertStringToHexIfNonReadable(this->stringValue, 0, false)
-        ) << '"';
-      }
+      out << '"' << StringRoutines::Conversions::stringToJSONStringEscaped(this->stringValue) << '"';
       return out;
     case JSData::token::tokenArray:
       if (this->listObjects.size == 0) {

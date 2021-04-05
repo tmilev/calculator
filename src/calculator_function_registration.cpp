@@ -3352,7 +3352,7 @@ void Calculator::initializeFunctionsStandard() {
     "This operation is valid only if the the matrix on the right is a column-vector.",
     "(1,2)\\begin{pmatrix} 1& 2 \\\\ 3& 5\\end{pmatrix}",
     "CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix",
-    "MultiplySequenceByMatrix",
+    "MultiplyMatrixBySequence",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(

@@ -645,7 +645,7 @@ Multiplies matrices.
 ```
 Multiplies matrices.
 
-*\** [MultiplySequenceByMatrix] {CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix}. 
+*\** [MultiplyMatrixBySequence] {CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%281%2c2%29%5c%5cbegin%7bpmatrix%7d%201%26%202%20%5c%5c%5c%5c%203%26%205%5c%5cend%7bpmatrix%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (1,2)\begin{pmatrix} 1& 2 \\ 3& 5\end{pmatrix}

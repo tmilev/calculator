@@ -516,6 +516,7 @@ bool WebAPIResponse::processTemplateJSON() {
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::resultHtml] = WebAPIResponse::getJSONFromTemplate();
+  global << result.toString() << Logger::endL;
   return global.response.writeResponse(result);
 }
 

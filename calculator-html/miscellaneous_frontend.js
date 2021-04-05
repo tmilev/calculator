@@ -129,7 +129,13 @@ function deepCopy(from) {
 }
 
 /**@returns{string} */
-function jsonParseGetHtmlStandard(input) {
+function jsonParseGetHtmlStandard(
+  /**@type{string} */
+  input,
+) {
+  if (input.search("\n") !== - 1) {
+    throw `Input to json parser has newlines.\n${input}`;
+  }
   let parsed = jsonUnescapeParse(input);
   let result = "";
   if (parsed[pathnames.urlFields.result.resultHtml] !== undefined) {
@@ -164,8 +170,14 @@ function unescapeInequalitiesAmpersands(input) {
 }
 
 /**@returns{Object} */
-function jsonUnescapeParse(input) {
+function jsonUnescapeParse(
+  /**@type{string} */
+  input,
+) {
   let unescaped = unescapeInequalitiesAmpersands(input);
+  if (unescaped.search("\n") !== - 1) {
+    throw `Unexpected newline in input. ${unescaped}`;
+  }
   return JSON.parse(unescaped);
 }
 

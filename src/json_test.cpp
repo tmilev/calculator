@@ -41,6 +41,15 @@ bool JSData::Test::recode() {
   toRecode.addOnTop(List<std::string>({
     "\"\u03C0\"", "\"\\u03c0\""
   }));
+  toRecode.addOnTop(List<std::string>({
+    "{\"\n\":\"\n\"}", "{\"\\n\":\"\\n\"}"
+  }));
+  toRecode.addOnTop(List<std::string>({
+    "{\"\r\":\"\n\"}", "{\"\\r\":\"\\n\"}"
+  }));
+  toRecode.addOnTop(List<std::string>({
+    "{\"resultHtml\":\"&lt;!-- --&gt;\\na\"}", "{\"resultHtml\":\"&lt;!-- --&gt;\\na\"}"
+  }));
   std::stringstream commentsOnFailure;
   for (int i = 0; i < toRecode.size; i ++) {
     JSData parser;
@@ -53,6 +62,15 @@ bool JSData::Test::recode() {
     if (recoded != expectedOutput) {
       global.fatal << "Input " << input << " decoded-recoded to " << recoded
       << ". However, I expected: " << expectedOutput << ". " << global.fatal;
+    }
+    std::string recodedSecondTime = parser.toString(nullptr);
+    if (recoded != recodedSecondTime) {
+      global.fatal << "Input " << input << " recoded to " << recoded
+      << ", but then, the second encoding gave: " << recodedSecondTime << ". " << global.fatal;
+    }
+    if (recodedSecondTime.find('\n') != std::string::npos) {
+      global.fatal << "Input " << input << " recoded to " << recoded
+      << ", but that had new lines in it." << global.fatal;
     }
   }
   return true;

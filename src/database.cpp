@@ -126,10 +126,10 @@ JSData QueryExact::toJSON() const {
   if (!Database::convertJSONToJSONMongo(this->value, encodedKeys)) {
     global << Logger::red
     << "Failed to convert find query to mongoDB encoding. " << Logger::endL;
-    result.theType = JSData::token::tokenNull;
+    result.elementType = JSData::token::tokenNull;
     return result;
   }
-  result.theType = JSData::token::tokenObject;
+  result.elementType = JSData::token::tokenObject;
   result[this->getLabel()] = encodedKeys;
   return result;
 }
@@ -202,8 +202,8 @@ bool Database::convertJSONToJSONEncodeKeys(
     }
     return false;
   }
-  output.reset(input.theType);
-  if (input.theType == JSData::token::tokenArray) {
+  output.reset(input.elementType);
+  if (input.elementType == JSData::token::tokenArray) {
     for (int i = 0; i < input.listObjects.size; i ++) {
       JSData nextItem;
       if (!Database::convertJSONToJSONEncodeKeys(
@@ -219,7 +219,7 @@ bool Database::convertJSONToJSONEncodeKeys(
     }
     return true;
   }
-  if (input.theType == JSData::token::tokenObject) {
+  if (input.elementType == JSData::token::tokenObject) {
     for (int i = 0; i < input.objects.size(); i ++) {
       JSData nextItem;
       if (!Database::convertJSONToJSONEncodeKeys(
@@ -683,7 +683,7 @@ bool UserCalculatorData::loadFromJSON(JSData& input) {
   // have wrong endings.
   this->actualHashedSaltedPassword = HtmlRoutines::convertURLStringToNormal(this->actualHashedSaltedPassword, false);
   JSData sectionsTaughtList = input[DatabaseStrings::labelSectionsTaught];
-  if (sectionsTaughtList.theType == JSData::token::tokenArray) {
+  if (sectionsTaughtList.elementType == JSData::token::tokenArray) {
     for (int i = 0; i < sectionsTaughtList.listObjects.size; i ++) {
       this->sectionsTaught.addOnTop(sectionsTaughtList.listObjects[i].stringValue);
     }
@@ -702,8 +702,8 @@ JSData UserCalculatorData::toJSON() {
   result[DatabaseStrings::labelAuthenticationToken               ] = this->actualAuthenticationToken             ;
   result[DatabaseStrings::labelTimeOfAuthenticationTokenCreation ] = this->timeOfAuthenticationTokenCreation     ;
   result[DatabaseStrings::labelProblemDataJSON                   ] = this->problemDataJSON                       ;
-  if (this->problemDataJSON.theType == JSData::token::tokenUndefined) {
-    result[DatabaseStrings::labelProblemDataJSON].theType = JSData::token::tokenObject;
+  if (this->problemDataJSON.elementType == JSData::token::tokenUndefined) {
+    result[DatabaseStrings::labelProblemDataJSON].elementType = JSData::token::tokenObject;
     result[DatabaseStrings::labelProblemDataJSON].objects.clear();
   }
   result[DatabaseStrings::labelPassword                          ] = this->actualHashedSaltedPassword            ;
@@ -714,14 +714,14 @@ JSData UserCalculatorData::toJSON() {
   result[DatabaseStrings::labelSection                           ] = this->sectionInDB                           ;
   result[DatabaseStrings::labelCurrentCourses                    ] = this->courseInDB                            ;
   JSData sectionsTaughtList;
-  sectionsTaughtList.theType = JSData::token::tokenArray;
+  sectionsTaughtList.elementType = JSData::token::tokenArray;
   for (int i = 0; i < this->sectionsTaught.size; i ++) {
     sectionsTaughtList[i] = this->sectionsTaught[i];
   }
   result[DatabaseStrings::labelSectionsTaught] = sectionsTaughtList;
   for (int i = result.objects.size() - 1; i >= 0; i --) {
     JSData& currentValue = result.objects.values[i];
-    if (currentValue.stringValue == "" && currentValue.theType == JSData::token::tokenString) {
+    if (currentValue.stringValue == "" && currentValue.elementType == JSData::token::tokenString) {
       result.objects.removeKey(result.objects.keys[i]);
     }
   }
@@ -789,7 +789,7 @@ std::string ProblemData::store(){
 JSData ProblemData::storeJSON() const {
   MacroRegisterFunctionWithName("ProblemData::storeJSON");
   JSData result;
-  result.theType = JSData::token::tokenObject;
+  result.elementType = JSData::token::tokenObject;
   if (this->flagRandomSeedGiven) {
     std::stringstream stringConverter;
     stringConverter << this->randomSeeD;
@@ -1617,7 +1617,7 @@ bool Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded(
   if (!theData.parse(theToken.claimsJSON, commentsOnFailure)) {
     return false;
   }
-  if (theData.getValue("email").theType != JSData::token::tokenString) {
+  if (theData.getValue("email").elementType != JSData::token::tokenString) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not find email entry in the json data "
       << theData.toString(nullptr);

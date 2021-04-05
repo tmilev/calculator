@@ -10,7 +10,7 @@ bool JSData::Test::all() {
 }
 
 bool JSData::Test::recode() {
-  MacroRegisterFunctionWithName("JSData::Test::testRecode");
+  MacroRegisterFunctionWithName("JSData::Test::recode");
   // first element is string input, second element
   // is expected recoded output.
   List<List<std::string> > toRecode;
@@ -47,28 +47,49 @@ bool JSData::Test::recode() {
   toRecode.addOnTop(List<std::string>({
     "{\"resultHtml\":\"&lt;!-- --&gt;\\na\"}", "{\"resultHtml\":\"&lt;!-- --&gt;\\na\"}"
   }));
-  std::stringstream commentsOnFailure;
   for (int i = 0; i < toRecode.size; i ++) {
-    JSData parser;
-    std::string input = toRecode[i][0];
-    if (!parser.parse(input, &commentsOnFailure)) {
-      global.fatal << "Failed to decode "<< toRecode[i][0] << global.fatal;
-    }
-    std::string expectedOutput = toRecode[i][1];
-    std::string recoded = parser.toString(nullptr);
-    if (recoded != expectedOutput) {
-      global.fatal << "Input " << input << " decoded-recoded to:\n" << recoded
-      << "\nHowever, I expected:\n" << expectedOutput << ". " << global.fatal;
-    }
-    std::string recodedSecondTime = parser.toString(nullptr);
-    if (recoded != recodedSecondTime) {
-      global.fatal << "Input " << input << " recoded to " << recoded
-      << ", but then, the second encoding gave: " << recodedSecondTime << ". " << global.fatal;
-    }
-    if (recodedSecondTime.find('\n') != std::string::npos) {
-      global.fatal << "Input " << input << " recoded to " << recoded
-      << ", but that had new lines in it." << global.fatal;
-    }
+    JSData::Test::recodeOnce(toRecode[i], false);
+  }
+  return true;
+}
+
+bool JSData::Test::recodeOnce(const List<std::string>& pair, bool relaxedInput) {
+  MacroRegisterFunctionWithName("JSData::Test::recodeOnce");
+  JSData parser;
+  std::string input = pair[0];
+  std::stringstream commentsOnFailure;
+  if (!parser.parse(input, relaxedInput, &commentsOnFailure)) {
+    global.fatal << "Failed to decode "<< pair[0]
+    << "\nComments: " << commentsOnFailure.str() << global.fatal;
+  }
+  std::string expectedOutput = pair[1];
+  std::string recoded = parser.toString(nullptr);
+  if (recoded != expectedOutput) {
+    global.fatal << "Input " << input << " decoded-recoded to:\n" << recoded
+    << "\nHowever, I expected:\n" << expectedOutput << ". " << global.fatal;
+  }
+  std::string recodedSecondTime = parser.toString(nullptr);
+  if (recoded != recodedSecondTime) {
+    global.fatal << "Input " << input << " recoded to " << recoded
+    << ", but then, the second encoding gave: " << recodedSecondTime << ". " << global.fatal;
+  }
+  if (recodedSecondTime.find('\n') != std::string::npos) {
+    global.fatal << "Input " << input << " recoded to " << recoded
+    << ", but that had new lines in it." << global.fatal;
+  }
+  return true;
+}
+
+bool JSData::Test::recodeRelaxed() {
+  MacroRegisterFunctionWithName("JSData::Test::recodeRelaxed");
+  // first element is string input, second element
+  // is expected recoded output.
+  List<List<std::string> > toRecode;
+  toRecode.addOnTop(List<std::string>({
+    "{a: 1}", "{\"a\":1}"
+  }));
+  for (int i = 0; i < toRecode.size; i ++) {
+    JSData::Test::recodeOnce(toRecode[i], true);
   }
   return true;
 }
@@ -78,7 +99,7 @@ bool JSData::Test::decodeEscapedUnicode() {
   std::string input = "\"\\u03C0\"";
   std::string expectedOutput = "\u03C0";
   std::stringstream commentsOnFailure;
-  if (!parser.parse(input, &commentsOnFailure)) {
+  if (!parser.parse(input, false, &commentsOnFailure)) {
     global.fatal << "In decodeEscapedUnicode: failed to decode " << input
     << ". The comments: " << commentsOnFailure.str() << global.fatal;
   }
@@ -102,7 +123,7 @@ bool JSData::Test::badInput() {
   for (int i = 0; i < broken.size; i ++) {
     JSData parser;
     std::string input = broken[i];
-    if (parser.parse(input, &commentsOnFailure)) {
+    if (parser.parse(input, false, &commentsOnFailure)) {
       global.fatal << "Successfully decoded invalid json: " << input << "." << global.fatal;
     }
   }

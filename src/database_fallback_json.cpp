@@ -81,7 +81,7 @@ bool Database::FallBack::updateOneNolocks(
   if (index == - 1) {
     index = this->reader[findQuery.collection].listObjects.size;
     JSData incoming;
-    incoming.theType = JSData::token::tokenObject;
+    incoming.elementType = JSData::token::tokenObject;
     this->reader[findQuery.collection].listObjects.addOnTop(incoming);
   }
   JSData* modified = &(this->reader[findQuery.collection][index]);
@@ -165,7 +165,7 @@ bool Database::FallBack::findIndexOneNolocksMinusOneNotFound(
     return false;
   }
   Database::FallBack::Index& currentIndex = indices.getValueCreate(key);
-  if (query.value.theType != JSData::token::tokenString) {
+  if (query.value.elementType != JSData::token::tokenString) {
     if (commentsOnNotFound != nullptr) {
       *commentsOnNotFound << "At the moment, only string value queries are supported.";
     }
@@ -206,7 +206,7 @@ bool Database::FallBack::hasCollection(
 ) {
   MacroRegisterFunctionWithName("Database::FallBack::hasCollection");
   if (Database::FallBack::knownCollectionS.contains(collection)) {
-    this->reader[collection].theType = JSData::token::tokenArray;
+    this->reader[collection].elementType = JSData::token::tokenArray;
     return true;
   }
   if (this->reader.hasKey(collection)) {
@@ -277,7 +277,7 @@ bool Database::FallBack::readAndIndexDatabase(std::stringstream* commentsOnFailu
 void Database::FallBack::indexOneRecord(
   const JSData& entry, int32_t row, const std::string& collection
 ) {
-  if (entry.theType != JSData::token::tokenObject) {
+  if (entry.elementType != JSData::token::tokenObject) {
     return;
   }
   for (int i = 0; i < entry.objects.size(); i ++) {
@@ -286,7 +286,7 @@ void Database::FallBack::indexOneRecord(
       continue;
     }
     const JSData& keyToIndexBy = entry.objects.values[i];
-    if (keyToIndexBy.theType != JSData::token::tokenString) {
+    if (keyToIndexBy.elementType != JSData::token::tokenString) {
       continue;
     }
     Database::FallBack::Index& currentIndex = this->indices.getValueCreate(indexLabel);
@@ -318,7 +318,7 @@ bool Database::FallBack::readDatabase(std::stringstream* commentsOnFailure) {
       commentsOnFailure
     )) {
       global << Logger::green << "Fallback database file does not exist. Creating ..." << Logger::endL;
-      this->reader.theType = JSData::token::tokenObject;
+      this->reader.elementType = JSData::token::tokenObject;
       return true;
     }
     return false;

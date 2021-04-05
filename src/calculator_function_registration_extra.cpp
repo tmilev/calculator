@@ -222,7 +222,7 @@ void Calculator::initializeFunctionsExtra() {
     "",
     "Tests the JSON parsing mechanism. Input: json string, use backslash escapes for "
     "backslashes and quotes.",
-    "TestJSON(\"{a:1}\");\n"
+    "TestJSON(\"{a:1, b: false,}\");\n"
     "TestJSON(\"{\\\"a\\\":\\\"\\\\\\\"\\\"}\");",
     "CalculatorFunctions::testJSON",
     "TestJSON",

@@ -40,9 +40,9 @@ public:
     static const char tokenQuoteUnclosedStandard    = 17;
     static const char tokenUnknown                  = 18;
   };
-  char theType;
-  bool theBoolean;
-  double theFloat;
+  char elementType;
+  bool booleanValue;
+  double floatValue;
   std::string stringValue;
   MemorySaving<LargeInteger> theInteger;
   ListReferences<JSData> listObjects;
@@ -83,7 +83,7 @@ public:
   template <typename any>
   void operator=(const List<any>& other) {
     this->reset();
-    this->theType = JSData::token::tokenArray;
+    this->elementType = JSData::token::tokenArray;
     this->listObjects.setSize(other.size);
     for (int i = 0; i < other.size; i ++) {
       this->listObjects[i] = other[i];
@@ -120,6 +120,7 @@ public:
   bool tokenizePrependOneDummyElement(
     const std::string& input,
     List<JSData>& output,
+    bool relaxedInput,
     std::stringstream* commentsOnFailure
   );
   static bool convertTwoByteHexToUnsignedChar(
@@ -141,13 +142,15 @@ public:
     std::stringstream* commentsOnFailure
   );
   bool operator==(const JSData& other) const;
-  bool parse(const std::string& json, std::stringstream* commentsOnFailure = nullptr);
+  bool parse(const std::string& json, bool relaxedInput = false, std::stringstream* commentsOnFailure = nullptr);
   bool tryToComputeType(std::stringstream* commentsOnFailure);
   static void filterColumnsJSDataObjectList(List<JSData>& inputOutput, const List<std::string>& columnsToPreserve);
   class Test {
   public:
     static bool all();
     static bool recode();
+    static bool recodeOnce(const List<std::string>& pair, bool relaxedInput);
+    static bool recodeRelaxed();
     static bool decodeEscapedUnicode();
     static bool badInput();
   };

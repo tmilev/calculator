@@ -1638,7 +1638,7 @@ bool Function::shouldBeApplied(int parentOperationIfAvailable) {
 JSData Function::toJSON() const {
   MacroRegisterFunctionWithName("Function::toJSON");
   JSData result;
-  result.theType = JSData::token::tokenObject;
+  result.elementType = JSData::token::tokenObject;
   if (this->owner == nullptr) {
     result[WebAPI::result::error] = "bad_owner";
     return result;

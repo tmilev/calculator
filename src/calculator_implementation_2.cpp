@@ -6,13 +6,13 @@
 JSData Calculator::OperationHandlers::toJSON() {
   JSData result;
   JSData currentFunctionListDirect;
-  currentFunctionListDirect.theType = JSData::token::tokenArray;
+  currentFunctionListDirect.elementType = JSData::token::tokenArray;
   for (int i = 0; i < this->handlers.size; i ++) {
     Function& currentHandler = this->handlers[i];
     currentFunctionListDirect.listObjects.addOnTop(currentHandler.toJSON());
   }
   JSData currentFunctionListComposite;
-  currentFunctionListComposite.theType = JSData::token::tokenArray;
+  currentFunctionListComposite.elementType = JSData::token::tokenArray;
   for (int i = 0; i < this->compositeHandlers.size; i ++) {
     Function& currentHandler = this->compositeHandlers[i];
     currentFunctionListComposite.listObjects.addOnTop(currentHandler.toJSON());
@@ -29,7 +29,7 @@ Calculator::Examples::Examples() {
 JSData Calculator::Examples::toJSONFunctionHandlers() {
   MacroRegisterFunctionWithName("Calculator::toJSONFunctionHandlers");
   JSData output;
-  output.theType = JSData::token::tokenObject;
+  output.elementType = JSData::token::tokenObject;
   MapReferences<std::string, MemorySaving<OperationHandlers>, HashFunctions::hashFunction>&
   operations = this->owner->operations;
   for (int i = 0; i < operations.size(); i ++) {
@@ -1395,7 +1395,7 @@ void Calculator::evaluateCommands() {
     }
     out << javascriptString;
     JSData result;
-    result.theType = JSData::token::tokenObject;
+    result.elementType = JSData::token::tokenObject;
     std::string resultString = this->programExpression.toString(
       &global.theDefaultFormat.getElement(), &startingExpression, true, &result
     );

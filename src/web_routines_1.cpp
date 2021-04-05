@@ -771,7 +771,7 @@ bool Crypto::verifyJWTagainstKnownKeys(
     }
     return false;
   }
-  if (header.theType == JSData::token::tokenObject) {
+  if (header.elementType == JSData::token::tokenObject) {
     if (header.hasKey("kid")) {
       keyIDstring = header.getValue("kid").stringValue;
     }
@@ -892,7 +892,7 @@ bool WebCrawler::verifyRecaptcha(
   }
   JSData theSuccess;
   theSuccess = theJSparser.getValue("success");
-  if (theSuccess.theType != JSData::token::tokenBool || theSuccess.theBoolean != true) {
+  if (theSuccess.elementType != JSData::token::tokenBool || theSuccess.booleanValue != true) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<br><b style =\"color:red\">"
       << "Could not verify your captcha solution. "

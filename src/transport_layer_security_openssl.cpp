@@ -99,8 +99,8 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand() {
   << " -out " << certificatePhysicalName
   << " -days 3001 ";
   if (
-    global.configuration["openSSLSubject"].theType != JSData::token::tokenUndefined &&
-    global.configuration["openSSLSubject"].theType == JSData::token::tokenString
+    global.configuration["openSSLSubject"].elementType != JSData::token::tokenUndefined &&
+    global.configuration["openSSLSubject"].elementType == JSData::token::tokenString
   ) {
     theCommand << "-subj " << global.configuration["openSSLSubject"].stringValue;
     // "/C=CA/ST=ON/L=MyTown/O=MyOrganization/OU=none/CN=localhost/emailAddress=myemail@gmail.com"

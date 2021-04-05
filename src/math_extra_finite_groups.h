@@ -1376,7 +1376,7 @@ JSData GroupRepresentation<someGroup, Coefficient>::toJSON() {
   if (this->flagCharacterIsComputed) {
     out["character"] = this->theCharacter.data;
   } else {
-    out["character"].theType = JSData::token::tokenNull;
+    out["character"].elementType = JSData::token::tokenNull;
   }
   for (int i = 0; i < generators.size; i ++) {
     out["generators"][i] = generators[i];

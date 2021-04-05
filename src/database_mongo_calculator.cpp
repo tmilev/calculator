@@ -30,7 +30,7 @@ bool CalculatorDatabaseFunctions::innerExecuteMongoQuery(
     return output.assignValue(commentsOnFailure.str(), calculator);
   }
   JSData finalOutput;
-  finalOutput.theType = JSData::token::tokenArray;
+  finalOutput.elementType = JSData::token::tokenArray;
   finalOutput.listObjects = outputList;
   return output.assignValue(HtmlRoutines::toHtmlTableRowsFromJSON(finalOutput), calculator);
 }

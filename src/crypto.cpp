@@ -1470,7 +1470,7 @@ bool PublicKeyRSA::loadFromJSON(JSData& input, std::stringstream* commentsOnFail
     *commentsGeneral << "<hr>Loading certificate from: "
     << input.toString(nullptr);
   }
-  if (input.theType != JSData::token::tokenObject) {
+  if (input.elementType != JSData::token::tokenObject) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Can't load certificate: JSON not of type object. ";
     }
@@ -1521,10 +1521,10 @@ bool Crypto::loadOneKnownCertificate(
   }
   PublicKeyRSA currentCert;
   bool isGood = false;
-  if (certificateJSON.theType == JSData::token::tokenObject) {
+  if (certificateJSON.elementType == JSData::token::tokenObject) {
     if (certificateJSON.hasKey("keys")) {
       JSData theKeys = certificateJSON.getValue("keys");
-      if (theKeys.theType == JSData::token::tokenArray) {
+      if (theKeys.elementType == JSData::token::tokenArray) {
         isGood = true;
         for (int i = 0; i < theKeys.listObjects.size; i ++) {
           if (!currentCert.loadFromJSON(theKeys.listObjects[i], commentsOnFailure, commentsGeneral)) {

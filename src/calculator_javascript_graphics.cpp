@@ -17,7 +17,7 @@ std::string DrawingVariables::getHTMLDiv(
   data["graphicsUnit"] = this->theBuffer.graphicsUnit;
   data["frameLength"] = this->theBuffer.frameLengthInMilliseconds;
   std::string drawObjects = "drawObjects";
-  data[drawObjects].theType = JSData::token::tokenArray;
+  data[drawObjects].elementType = JSData::token::tokenArray;
   data[drawObjects].listObjects = this->theBuffer.theOperations;
   data["dimension"] = dimension;
 

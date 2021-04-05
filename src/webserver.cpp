@@ -470,7 +470,7 @@ std::string WebWorker::getDatabaseDeleteOneItem() {
   std::string inputEncoded = global.getWebInput("item");
   std::string inputString = HtmlRoutines::convertURLStringToNormal(inputEncoded, false);
   JSData inputParsed;
-  if (!inputParsed.parse(inputString, &commentsStream)) {
+  if (!inputParsed.parse(inputString, false, &commentsStream)) {
     commentsStream << "Failed to parse input string. ";
     return commentsStream.str();
   }
@@ -2875,7 +2875,7 @@ void WebServer::processOneChildMessage(int childIndex, int& outputNumInUse) {
   this->markChildNotInUse(childIndex);
   std::stringstream commentsOnFailure;
   JSData workerMessage;
-  if (!workerMessage.parse(messageString, &commentsOnFailure)) {
+  if (!workerMessage.parse(messageString, false, &commentsOnFailure)) {
     global << Logger::red << "Worker "
     << childIndex + 1 << " sent corrupted result message: "
     << messageString << ". Marking for reuse. " << Logger::endL;
@@ -2888,8 +2888,8 @@ void WebServer::processOneChildMessage(int childIndex, int& outputNumInUse) {
   outputNumInUse --;
   this->statistics.workersNormallyExited ++;
   if (
-    workerMessage[WebServer::Statististics::allRequestsString].theType == JSData::token::tokenLargeInteger &&
-    workerMessage[WebServer::Statististics::pingRequestsString].theType == JSData::token::tokenLargeInteger
+    workerMessage[WebServer::Statististics::allRequestsString].elementType == JSData::token::tokenLargeInteger &&
+    workerMessage[WebServer::Statististics::pingRequestsString].elementType == JSData::token::tokenLargeInteger
   ) {
     int incomingAllRequests = workerMessage[
       WebServer::Statististics::allRequestsString
@@ -3691,7 +3691,7 @@ void WebServer::checkSystemInstallationOpenSSL() {
   if (!global.flagDatabaseCompiled) {
     return;
   }
-  if (global.configuration["openSSL"].theType != JSData::token::tokenUndefined) {
+  if (global.configuration["openSSL"].elementType != JSData::token::tokenUndefined) {
     return;
   }
   global.configuration["openSSL"] = "Attempted installation";
@@ -3727,7 +3727,7 @@ void WebServer::checkSystemInstallationMongoDatabase() {
   if (global.operatingSystem == "") {
     return;
   }
-  if (global.configuration["mongoDB"].theType != JSData::token::tokenUndefined) {
+  if (global.configuration["mongoDB"].elementType != JSData::token::tokenUndefined) {
     return;
   }
   global.configuration["mongoDB"] = "Attempted installation";
@@ -3759,7 +3759,7 @@ void WebServer::checkMongoDatabaseSetup() {
   } else {
     global << Logger::red << "Compiled without mongo DB support. " << Logger::endL;
   }
-  if (global.configuration["mongoDBSetup"].theType != JSData::token::tokenUndefined) {
+  if (global.configuration["mongoDBSetup"].elementType != JSData::token::tokenUndefined) {
     return;
   }
   global.configuration["mongoDBSetup"] = "Attempting";
@@ -3802,7 +3802,7 @@ void WebServer::checkMongoDatabaseSetup() {
 
 void WebServer::checkFreecalcSetup() {
   MacroRegisterFunctionWithName("WebServer::checkFreecalcSetup");
-  if (global.configuration["freecalcSetup"].theType != JSData::token::tokenUndefined) {
+  if (global.configuration["freecalcSetup"].elementType != JSData::token::tokenUndefined) {
     return;
   }
   global.configuration["freecalcSetup"] = "Setup started";
@@ -4181,7 +4181,7 @@ bool GlobalVariables::configurationLoad() {
     return false;
   }
   if (!global.configuration.parse(
-    this->configurationFileContent, &out
+    this->configurationFileContent, false, &out
   )) {
     global << Logger::red << "Failed to read configuration. " << out.str() << Logger::endL;
     return false;
@@ -4328,7 +4328,7 @@ void GlobalVariables::configurationProcess() {
   } else {
     global.configuration[Configuration::monitorPingTime] = global.server().webServerPingIntervalInSeconds;
   }
-  if (global.configuration[Configuration::gitRepository].theType == JSData::token::tokenString) {
+  if (global.configuration[Configuration::gitRepository].elementType == JSData::token::tokenString) {
     HtmlRoutines::gitRepository = global.configuration[Configuration::gitRepository].stringValue;
   } else {
     global.configuration[Configuration::gitRepository] = HtmlRoutines::gitRepository;

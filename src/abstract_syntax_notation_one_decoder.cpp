@@ -570,7 +570,7 @@ void ASNElement::toJSON(JSData& output) const {
   }
   if (this->isComposite()) {
     JSData children;
-    children.theType = JSData::token::tokenArray;
+    children.elementType = JSData::token::tokenArray;
     children.listObjects.reserve(this->theElements.size);
     for (int i = 0; i < this->theElements.size; i ++) {
       JSData incoming;

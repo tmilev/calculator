@@ -967,13 +967,16 @@ bool CalculatorFunctionsEncoding::testJSON(
   if (!input[1].isOfType(&inputString)) {
     inputString = input[1].toString();
   }
-  JSData theData;
-  std::stringstream out;
-  if (!theData.parse(inputString, &out)) {
-    return output.assignValue(out.str(), calculator);
+  JSData data;
+  std::stringstream comments, out;
+  if (!data.parse(inputString, true, &comments)) {
+    return output.assignValue(comments.str(), calculator);
   }
   out << "Input:<br>" << inputString << "<hr>Output: <br>"
-  << theData.toString(nullptr);
+  << data.toString(nullptr);
+  if (comments.str() != "") {
+    out << "<hr>Extra comments: " << comments.str();
+  }
   return output.assignValue(out.str(), calculator);
 }
 

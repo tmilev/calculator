@@ -984,7 +984,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   result[Plot::Labels::graphicsType] = "twoDimensional";
   result[Plot::Labels::controlsName] = controls;
   result[Plot::Labels::messagesName] = messages;
-  result["plotUpdaters"].theType = JSData::token::tokenArray;
+  result["plotUpdaters"].elementType = JSData::token::tokenArray;
   for (int i = 0; i < this->parameterNames.size; i ++) {
     InputBox& currentBox = owner.objectContainer.userInputTextBoxesWithValues.getValueCreate(this->parameterNames[i]);
     result["plotUpdaters"][i] = currentBox.getSliderName();

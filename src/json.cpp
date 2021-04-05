@@ -6,26 +6,26 @@
 
 void JSData::operator=(const LargeInteger& other) {
   this->reset();
-  this->theType = JSData::token::tokenLargeInteger;
+  this->elementType = JSData::token::tokenLargeInteger;
   this->theInteger.getElement() = other;
 }
 
 void JSData::operator=(int other) {
   this->reset();
-  this->theType = JSData::token::tokenLargeInteger;
+  this->elementType = JSData::token::tokenLargeInteger;
   this->theInteger.getElement() = other;
 }
 
 void JSData::operator=(const bool other) {
   this->reset();
-  this->theType = JSData::token::tokenBool;
-  this->theBoolean = other;
+  this->elementType = JSData::token::tokenBool;
+  this->booleanValue = other;
 }
 
 void JSData::operator=(const double other) {
   this->reset();
-  this->theType = JSData::token::tokenFloat;
-  this->theFloat = other;
+  this->elementType = JSData::token::tokenFloat;
+  this->floatValue = other;
 }
 
 void JSData::operator=(const char* other) {
@@ -35,14 +35,14 @@ void JSData::operator=(const char* other) {
 
 void JSData::operator=(const std::string& other) {
   this->reset();
-  this->theType = JSData::token::tokenString;
+  this->elementType = JSData::token::tokenString;
   this->stringValue = other;
 }
 
 void JSData::operator=(const JSData& other) {
-  this->theType = other.theType;
-  this->theBoolean = other.theBoolean;
-  this->theFloat = other.theFloat;
+  this->elementType = other.elementType;
+  this->booleanValue = other.booleanValue;
+  this->floatValue = other.floatValue;
   this->theInteger = other.theInteger;
   this->stringValue = other.stringValue;
   this->listObjects = other.listObjects;
@@ -50,7 +50,7 @@ void JSData::operator=(const JSData& other) {
 }
 
 JSData& JSData::operator[](int i) {
-  this->theType = JSData::token::tokenArray;
+  this->elementType = JSData::token::tokenArray;
   if (this->listObjects.size < i + 1) {
     this->listObjects.setSizeAndExpectedSize(i + 1);
   }
@@ -63,7 +63,7 @@ JSData JSData::getValue(const std::string& key) {
     return this->objects.values[theIndex];
   }
   JSData result;
-  result.theType = JSData::token::tokenUndefined;
+  result.elementType = JSData::token::tokenUndefined;
   return result;
 }
 
@@ -134,11 +134,11 @@ bool JSData::hasCompositeKeyOfToken(
   if (!JSData::hasCompositeKey(key, whichValue, commentsOnFailure)) {
     return false;
   }
-  if (whichValue->theType != targetType) {
+  if (whichValue->elementType != targetType) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Key: " << key << ", value: "
       << whichValue->toString(nullptr) << " is of type "
-      << static_cast<int>(whichValue->theType)
+      << static_cast<int>(whichValue->elementType)
       << " instead of the target one: " << static_cast<int>(targetType)
       << ". ";
     }
@@ -165,7 +165,7 @@ bool JSData::hasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
     // will not work for integer indices larger than 9
     int theDigit = - 1;
     if (MathRoutines::isADigit(keys[i], &theDigit)) {
-      if (currentData->theType != JSData::token::tokenArray) {
+      if (currentData->elementType != JSData::token::tokenArray) {
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "The sub-object located before the key: " << keys[i] << " [all keys: "
           << keys.toStringCommaDelimited() << "] "
@@ -185,7 +185,7 @@ bool JSData::hasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
       currentData = &currentData->listObjects[theDigit];
       continue;
     }
-    if (currentData->theType != JSData::token::tokenObject) {
+    if (currentData->elementType != JSData::token::tokenObject) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Value preceding key: " << keys[i]
         << " is not of type object: " << currentData->toString(&JSData::PrintOptions::HTML());
@@ -216,19 +216,19 @@ void JSData::setKeyValue(const std::string& key, const JSData& value) {
 }
 
 JSData& JSData::operator[](const std::string& key) {
-  this->theType = JSData::token::tokenObject;
+  this->elementType = JSData::token::tokenObject;
   return this->objects.getValueCreate(key);
 }
 
 void JSData::operator=(const List<unsigned char>& other) {
-  this->theType = JSData::token::tokenString;
+  this->elementType = JSData::token::tokenString;
   this->stringValue = other.toStringConcatenate();
   this->listObjects.setSize(0); ;
   this->objects.clear();
 }
 
 void JSData::operator=(const List<JSData>& other) {
-  this->theType = JSData::token::tokenArray;
+  this->elementType = JSData::token::tokenArray;
   this->listObjects.setSize(other.size);
   for (int i = 0; i < other.size; i ++) {
     this->listObjects[i] = other[i];
@@ -237,21 +237,21 @@ void JSData::operator=(const List<JSData>& other) {
 }
 
 void JSData::operator=(int64_t input) {
-  this->theType = JSData::token::tokenLargeInteger;
+  this->elementType = JSData::token::tokenLargeInteger;
   this->theInteger.getElement().assignInt64(input);
 }
 
 bool JSData::isIntegerFittingInInt(int* whichInteger) {
-  if (this->theType == JSData::token::tokenLargeInteger) {
+  if (this->elementType == JSData::token::tokenLargeInteger) {
     return this->theInteger.getElement().isIntegerFittingInInt(whichInteger);
   }
-  if (this->theType == JSData::token::tokenFloat) {
-    double floatRounded = static_cast<double>(static_cast<int>(this->theFloat));
-    if (floatRounded - this->theFloat != 0.0) {
+  if (this->elementType == JSData::token::tokenFloat) {
+    double floatRounded = static_cast<double>(static_cast<int>(this->floatValue));
+    if (floatRounded - this->floatValue != 0.0) {
       return false;
     }
     if (whichInteger != nullptr) {
-      *whichInteger = static_cast<int>(this->theFloat);
+      *whichInteger = static_cast<int>(this->floatValue);
     }
     return true;
   }
@@ -259,7 +259,7 @@ bool JSData::isIntegerFittingInInt(int* whichInteger) {
 }
 
 bool JSData::isEqualTo(const std::string& other) {
-  if (this->theType != JSData::token::tokenString) {
+  if (this->elementType != JSData::token::tokenString) {
     return false;
   }
   return this->stringValue == other;
@@ -267,15 +267,15 @@ bool JSData::isEqualTo(const std::string& other) {
 
 bool JSData::isNullOrUndefined() {
   return
-    this->theType == JSData::token::tokenNull ||
-    this->theType == JSData::token::tokenUndefined;
+    this->elementType == JSData::token::tokenNull ||
+    this->elementType == JSData::token::tokenUndefined;
 }
 
 bool JSData::isTrueRepresentationInJSON() {
-  if (this->theType == JSData::token::tokenBool) {
-    return this->theBoolean;
+  if (this->elementType == JSData::token::tokenBool) {
+    return this->booleanValue;
   }
-  if (this->theType != JSData::token::tokenString) {
+  if (this->elementType != JSData::token::tokenString) {
     return false;
   }
   return this->stringValue == "true";
@@ -283,12 +283,12 @@ bool JSData::isTrueRepresentationInJSON() {
 
 JSData JSData::makeEmptyArray() {
   JSData result;
-  result.theType = JSData::token::tokenArray;
+  result.elementType = JSData::token::tokenArray;
   return result;
 }
 
 bool JSData::isString(std::string* whichString) {
-  if (this->theType != JSData::token::tokenString) {
+  if (this->elementType != JSData::token::tokenString) {
     return false;
   }
   if (whichString != nullptr) {
@@ -298,11 +298,11 @@ bool JSData::isString(std::string* whichString) {
 }
 
 bool JSData::isListOfStrings(List<std::string>* whichStrings) {
-  if (this->theType != JSData::token::tokenArray) {
+  if (this->elementType != JSData::token::tokenArray) {
     return false;
   }
   for (int i = 0; i < this->listObjects.size; i ++) {
-    if (this->listObjects[i].theType != JSData::token::tokenString) {
+    if (this->listObjects[i].elementType != JSData::token::tokenString) {
       return false;
     }
   }
@@ -317,58 +317,60 @@ bool JSData::isListOfStrings(List<std::string>* whichStrings) {
 
 bool JSData::isValidElement() {
   return
-  this->theType == JSData::token::tokenNull ||
-  this->theType == JSData::token::tokenBool ||
-  this->theType == JSData::token::tokenLargeInteger ||
-  this->theType == JSData::token::tokenFloat ||
-  this->theType == JSData::token::tokenString ||
-  this->theType == JSData::token::tokenArray  ||
-  this->theType == JSData::token::tokenObject;
+  this->elementType == JSData::token::tokenNull ||
+  this->elementType == JSData::token::tokenBool ||
+  this->elementType == JSData::token::tokenLargeInteger ||
+  this->elementType == JSData::token::tokenFloat ||
+  this->elementType == JSData::token::tokenString ||
+  this->elementType == JSData::token::tokenArray  ||
+  this->elementType == JSData::token::tokenObject;
 }
 
 bool JSData::tryToComputeType(std::stringstream* commentsOnFailure) {
-  if (this->theType != JSData::token::tokenUnknown) {
+  if (this->elementType != JSData::token::tokenUnknown) {
     return true;
   }
   if (this->stringValue == "null") {
     this->reset();
-    this->theType = JSData::token::tokenNull;
+    this->elementType = JSData::token::tokenNull;
     return true;
   }
   if (this->stringValue == "true") {
     this->reset();
-    this->theType = JSData::token::tokenBool;
-    this->theBoolean = true;
+    this->elementType = JSData::token::tokenBool;
+    this->booleanValue = true;
     return true;
   }
   if (this->stringValue == "false") {
     this->reset();
-    this->theType = JSData::token::tokenBool;
-    this->theBoolean = false;
+    this->elementType = JSData::token::tokenBool;
+    this->booleanValue = false;
     return true;
   }
   if (this->stringValue.size() > 0) {
     if (this->stringValue[0] == '-' || MathRoutines::isADigit(this->stringValue[0])) {
       this->theInteger.freeMemory();
-      this->theType = JSData::token::tokenUndefined;
+      this->elementType = JSData::token::tokenUndefined;
       Rational parser;
       if (parser.assignStringFailureAllowed(this->stringValue)) {
         LargeInteger theInt;
         if (parser.isInteger(&theInt)) {
-          this->theType = JSData::token::tokenLargeInteger;
+          this->elementType = JSData::token::tokenLargeInteger;
           this->theInteger.getElement() = theInt;
           this->stringValue = "";
           return true;
         }
       }
-      this->theFloat = std::stod(this->stringValue);
-      this->theType = JSData::token::tokenFloat;
+      this->floatValue = std::stod(this->stringValue);
+      this->elementType = JSData::token::tokenFloat;
       this->stringValue = "";
       return true;
     }
   }
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Failed to compute type of JSData element. ";
+    *commentsOnFailure
+    << "Failed to compute the type of the JSData element: "
+    << this->toString() << ". ";
   }
   return false;
 }
@@ -448,19 +450,19 @@ bool JSData::readstringConsumeNextCharacter(
 ) {
   JSData& last = *readingStack.lastObject();
   char next = input[currentIndex];
-  if (last.theType == JSData::token::tokenQuoteUnclosedStandard) {
+  if (last.elementType == JSData::token::tokenQuoteUnclosedStandard) {
     if (next == '\\') {
-      last.theType = JSData::token::tokenQuoteUnclosedEscapeAtEnd;
+      last.elementType = JSData::token::tokenQuoteUnclosedEscapeAtEnd;
       return true;
     }
     if (next == '"') {
-      last.theType = JSData::token::tokenString;
+      last.elementType = JSData::token::tokenString;
       return true;
     }
     last.stringValue.push_back(next);
     return true;
   }
-  if (last.theType == JSData::token::tokenQuoteUnclosedEscapeAtEnd) {
+  if (last.elementType == JSData::token::tokenQuoteUnclosedEscapeAtEnd) {
     bool result = true;
     switch (next) {
       case 'u':
@@ -485,7 +487,7 @@ bool JSData::readstringConsumeNextCharacter(
         last.stringValue.push_back(next);
         break;
     }
-    last.theType = JSData::token::tokenQuoteUnclosedStandard;
+    last.elementType = JSData::token::tokenQuoteUnclosedStandard;
     return result;
   }
   if (next == ' ' || next == '\r' || next == '\n') {
@@ -494,35 +496,35 @@ bool JSData::readstringConsumeNextCharacter(
   }
   JSData incoming;
   if (next == '"') {
-    incoming.theType = JSData::token::tokenQuoteUnclosedStandard;
+    incoming.elementType = JSData::token::tokenQuoteUnclosedStandard;
     readingStack.addOnTop(incoming);
     return true;
   }
   switch (next) {
     case '{':
-      incoming.theType = JSData::token::tokenOpenBrace;
+      incoming.elementType = JSData::token::tokenOpenBrace;
       break;
     case '}':
-      incoming.theType = JSData::token::tokenCloseBrace;
+      incoming.elementType = JSData::token::tokenCloseBrace;
       break;
     case '[':
-      incoming.theType = JSData::token::tokenOpenBracket;
+      incoming.elementType = JSData::token::tokenOpenBracket;
       break;
     case ']':
-      incoming.theType = JSData::token::tokenCloseBracket;
+      incoming.elementType = JSData::token::tokenCloseBracket;
       break;
     case ':':
-      incoming.theType = JSData::token::tokenColon;
+      incoming.elementType = JSData::token::tokenColon;
       break;
     case ',':
-      incoming.theType = JSData::token::tokenComma;
+      incoming.elementType = JSData::token::tokenComma;
       break;
     default:
-      if (last.theType == JSData::token::tokenUnknown) {
+      if (last.elementType == JSData::token::tokenUnknown) {
         last.stringValue.push_back(next);
         return true;
       }
-      incoming.theType = JSData::token::tokenUnknown;
+      incoming.elementType = JSData::token::tokenUnknown;
       incoming.stringValue = next;
       break;
   }
@@ -533,6 +535,7 @@ bool JSData::readstringConsumeNextCharacter(
 bool JSData::tokenizePrependOneDummyElement(
   const std::string& input,
   List<JSData>& output,
+  bool relaxedInput,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("JSData::tokenizePrependOneDummyElement");
@@ -547,7 +550,14 @@ bool JSData::tokenizePrependOneDummyElement(
   }
   for (int i = 1; i < output.size; i ++) {
     if (!output[i].tryToComputeType(commentsOnFailure)) {
-      return false;
+      if (!relaxedInput) {
+        return false;
+      }
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Will attempt to auto-correct your json input. ";
+      }
+      // Do not generate further comments.
+      commentsOnFailure = nullptr;
     }
   }
   return true;
@@ -555,14 +565,14 @@ bool JSData::tokenizePrependOneDummyElement(
 
 bool JSData::mergeInMe(const JSData& input, std::stringstream* commentsOnFailure) {
   if (
-    this->theType != JSData::token::tokenObject
+    this->elementType != JSData::token::tokenObject
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Can only merge in objects. ";
     }
     return false;
   }
-  if (this->theType != input.theType) {
+  if (this->elementType != input.elementType) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Can only merge other objects.";
     }
@@ -575,8 +585,8 @@ bool JSData::mergeInMe(const JSData& input, std::stringstream* commentsOnFailure
       (*this)[key] = value;
     } else {
       if (
-        value.theType != JSData::token::tokenObject ||
-        (*this)[key].theType != JSData::token::tokenObject
+        value.elementType != JSData::token::tokenObject ||
+        (*this)[key].elementType != JSData::token::tokenObject
       ) {
         (*this)[key] = value;
       } else {
@@ -590,16 +600,22 @@ bool JSData::mergeInMe(const JSData& input, std::stringstream* commentsOnFailure
 }
 
 bool JSData::parse(
-  const std::string& json, std::stringstream* commentsOnFailure
+  const std::string& json,
+  bool relaxedInput,
+  std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("JSData::readstring");
   this->reset();
   List<JSData> inputTokens;
-  if (!JSData::tokenizePrependOneDummyElement(json, inputTokens, commentsOnFailure)) {
+  if (!JSData::tokenizePrependOneDummyElement(
+    json, inputTokens, relaxedInput, commentsOnFailure
+  )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to tokenize your input: " << json << ".";
     }
-    return false;
+    if (!relaxedInput) {
+      return false;
+    }
   }
   if (inputTokens.size == 1) {
     if (commentsOnFailure != nullptr) {
@@ -621,36 +637,55 @@ bool JSData::parse(
     JSData& fourthToLast = readingStack[fourthToLastIndex];
     //JSData& fifthToLast = inputTokens[i - 4];
     if (
-      fourthToLast.theType == JSData::token::tokenOpenBrace && thirdToLast.theType == JSData::token::tokenString &&
-      secondToLast.theType == JSData::token::tokenColon && last.isValidElement()
+      fourthToLast.elementType == JSData::token::tokenOpenBrace &&
+      thirdToLast.elementType == JSData::token::tokenString &&
+      secondToLast.elementType == JSData::token::tokenColon &&
+      last.isValidElement()
     ) {
       fourthToLast.objects.setKeyValue(thirdToLast.stringValue, last);
       readingStack.setSize(readingStack.size - 3);
       continue;
     }
-    if (secondToLast.theType == JSData::token::tokenOpenBracket && last.isValidElement()) {
+    if (
+      relaxedInput &&
+      fourthToLast.elementType == JSData::token::tokenOpenBrace &&
+      thirdToLast.elementType == JSData::token::tokenUnknown &&
+      secondToLast.elementType == JSData::token::tokenColon &&
+      last.isValidElement()
+    ) {
+      fourthToLast.objects.setKeyValue(thirdToLast.stringValue, last);
+      readingStack.setSize(readingStack.size - 3);
+      continue;
+    }
+    if (
+      secondToLast.elementType == JSData::token::tokenOpenBracket &&
+      last.isValidElement()
+    ) {
       secondToLast.listObjects.addOnTop(last);
       readingStack.removeLastObject();
       continue;
     }
-    if (secondToLast.theType == JSData::token::tokenOpenBracket && last.theType == JSData::token::tokenComma) {
+    if (secondToLast.elementType == JSData::token::tokenOpenBracket && last.elementType == JSData::token::tokenComma) {
       readingStack.removeLastObject();
       continue;
     }
     if (
-      (secondToLast.theType == JSData::token::tokenOpenBrace || secondToLast.theType == JSData::token::tokenOpenBracket) &&
-      last.theType == JSData::token::tokenComma
+      (secondToLast.elementType == JSData::token::tokenOpenBrace || secondToLast.elementType == JSData::token::tokenOpenBracket) &&
+      last.elementType == JSData::token::tokenComma
     ) {
       readingStack.removeLastObject();
       continue;
     }
-    if (secondToLast.theType == JSData::token::tokenOpenBrace && last.theType == JSData::token::tokenCloseBrace) {
-      secondToLast.theType = JSData::token::tokenObject;
+    if (
+      secondToLast.elementType == JSData::token::tokenOpenBrace &&
+      last.elementType == JSData::token::tokenCloseBrace
+    ) {
+      secondToLast.elementType = JSData::token::tokenObject;
       readingStack.removeLastObject();
       continue;
     }
-    if (secondToLast.theType == JSData::token::tokenOpenBracket && last.theType == JSData::token::tokenCloseBracket) {
-      secondToLast.theType = JSData::token::tokenArray;
+    if (secondToLast.elementType == JSData::token::tokenOpenBracket && last.elementType == JSData::token::tokenCloseBracket) {
+      secondToLast.elementType = JSData::token::tokenArray;
       readingStack.removeLastObject();
       continue;
     }
@@ -748,18 +783,18 @@ somestream& JSData::intoStream(
     newLine = "\n";
   }
   options.indentation ++;
-  switch (this->theType) {
+  switch (this->elementType) {
     case JSData::token::tokenNull:
       out << "null";
       return out;
     case JSData::token::tokenFloat:
-      out << this->theFloat;
+      out << this->floatValue;
       return out;
     case JSData::token::tokenLargeInteger:
       out << this->theInteger.getElementConst().toString();
       return out;
     case JSData::token::tokenBool:
-      if (this->theBoolean == true) {
+      if (this->booleanValue == true) {
         out << "true";
       } else {
         out << "false";
@@ -913,7 +948,7 @@ somestream& JSData::intoStream(
       break;
   }
   //supposed to be unreachable
-  global.fatal << "Unhandled JSData case: " << this->theType << global.fatal;
+  global.fatal << "Unhandled JSData case: " << this->elementType << global.fatal;
   return out;
 }
 
@@ -929,9 +964,9 @@ JSData::~JSData() {
 }
 
 void JSData::reset(char inputType) {
-  this->theType = inputType;
-  this->theBoolean = false;
-  this->theFloat = 0;
+  this->elementType = inputType;
+  this->booleanValue = false;
+  this->floatValue = 0;
   this->stringValue = "";
   this->listObjects.setSize(0);
   this->objects.clear();
@@ -948,7 +983,7 @@ std::string JSData::toString(const JSData::PrintOptions* options) const {
 }
 
 unsigned int JSData::hashFunction() const {
-  switch (this->theType) {
+  switch (this->elementType) {
   case JSData::token::tokenLargeInteger:
     return this->theInteger.getElementConst().hashFunction();
   case JSData::token::tokenArray:
@@ -958,9 +993,9 @@ unsigned int JSData::hashFunction() const {
   case JSData::token::tokenString:
     return HashFunctions::hashFunction(this->stringValue);
   case JSData::token::tokenBool:
-    return HashFunctions::hashFunction(this->theBoolean);
+    return HashFunctions::hashFunction(this->booleanValue);
   case JSData::token::tokenFloat:
-    return HashFunctions::hashFunction(this->theFloat);
+    return HashFunctions::hashFunction(this->floatValue);
   default:
     return 0;
   }

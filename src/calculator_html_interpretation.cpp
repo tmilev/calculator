@@ -551,7 +551,7 @@ bool BuilderApplication::loadJavascriptFileNames(
     }
     return false;
   }
-  if (reader.theType != JSData::token::tokenArray) {
+  if (reader.elementType != JSData::token::tokenArray) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Build json not of type list. ";
     }
@@ -559,7 +559,7 @@ bool BuilderApplication::loadJavascriptFileNames(
   }
   for (int i = 0; i < reader.listObjects.size; i ++) {
     const JSData& current = reader.listObjects[i];
-    if (current.theType != JSData::token::tokenString) {
+    if (current.elementType != JSData::token::tokenString) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Found non-string source javascript file. ";
       }
@@ -715,7 +715,7 @@ JSData CourseList::toJSON() {
   if (this->errorMessage != "") {
     output[WebAPI::result::error] = this->errorMessage;
   }
-  output["courses"].theType = JSData::token::tokenArray;
+  output["courses"].elementType = JSData::token::tokenArray;
   for (int i = 0; i < this->theCourses.size; i ++) {
     Course& currentCourse = this->theCourses[i];
     output["courses"].listObjects.addOnTop(currentCourse.toJSON());
@@ -796,7 +796,7 @@ void WebAPIResponse::getJSDataUserInfo(JSData& outputAppend, const std::string& 
   outputAppend[DatabaseStrings::labelCurrentCourses]      = HtmlRoutines::convertStringToHtmlString(global.userDefault.courseInDB               , false);
   outputAppend[DatabaseStrings::labelDeadlinesSchema]     = HtmlRoutines::convertStringToHtmlString(global.userDefault.deadlineSchema           , false);
   JSData sectionsTaught;
-  sectionsTaught.theType = JSData::token::tokenArray;
+  sectionsTaught.elementType = JSData::token::tokenArray;
   for (int i = 0; i < global.userDefault.sectionsTaught.size; i ++) {
     JSData nextSection;
     nextSection = HtmlRoutines::convertStringToHtmlString(global.userDefault.sectionsTaught[i], false);
@@ -933,7 +933,7 @@ JSData WebAPIResponse::getEditPageJSON() {
     theAutocompleteKeyWords.addOnTopNoRepetition(theFile.autoCompleteExtras);
   }
   JSData theAutoCompleteWordsJS;
-  theAutoCompleteWordsJS.theType = JSData::token::tokenArray;
+  theAutoCompleteWordsJS.elementType = JSData::token::tokenArray;
   for (int i = 0; i < theAutocompleteKeyWords.size; i ++) {
     theAutoCompleteWordsJS[i] = theAutocompleteKeyWords[i];
   }
@@ -1512,15 +1512,15 @@ std::string WebAPIResponse::addTeachersSections() {
     global.getWebInput("teachersAndSections"), false
   );
   JSData inputParsed;
-  if (!inputParsed.parse(input, &out)) {
+  if (!inputParsed.parse(input, false, &out)) {
     out << "<b style='color:red'>Failed to interpret your input. </b>";
     return out.str();
   }
-  if (inputParsed["teachers"].theType != JSData::token::tokenString) {
+  if (inputParsed["teachers"].elementType != JSData::token::tokenString) {
     out << "<b style='color:red'>Failed to extract key 'teachers' from your input. </b>";
     return out.str();
   }
-  if (inputParsed["students"].theType != JSData::token::tokenString) {
+  if (inputParsed["students"].elementType != JSData::token::tokenString) {
     out << "<b style='color:red'>Failed to find key 'students' in your input. </b>";
     return out.str();
   }
@@ -2192,7 +2192,7 @@ int ProblemData::getExpectedNumberOfAnswers(
   }
   if (global.problemExpectedNumberOfAnswers.size() == 0) {
     JSData findProblemInfo;
-    findProblemInfo.theType = JSData::token::tokenArray;
+    findProblemInfo.elementType = JSData::token::tokenArray;
     List<JSData> result;
     List<std::string> fields;
     fields.addOnTop(DatabaseStrings::labelProblemFileName);

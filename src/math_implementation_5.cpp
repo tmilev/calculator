@@ -315,7 +315,7 @@ void DrawOperations::drawLineBuffer(
   (void) lineWidth;
   JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeSegment2DFixed;
-  theOperation[DrawOperations::fieldPoints].theType = JSData::token::tokenArray;
+  theOperation[DrawOperations::fieldPoints].elementType = JSData::token::tokenArray;
   theOperation[DrawOperations::fieldPoints][0][0] = x1;
   theOperation[DrawOperations::fieldPoints][0][1] = y1;
   theOperation[DrawOperations::fieldPoints][1][0] = x2;
@@ -331,7 +331,7 @@ void DrawOperations::drawTextBuffer(
   (void) theTextStyle;
   JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeSegment2DFixed;
-  theOperation[DrawOperations::fieldLocation].theType = JSData::token::tokenArray;
+  theOperation[DrawOperations::fieldLocation].elementType = JSData::token::tokenArray;
   theOperation[DrawOperations::fieldLocation][0] = x1;
   theOperation[DrawOperations::fieldLocation][1] = y1;
   theOperation[DrawOperations::fieldText] = inputText;

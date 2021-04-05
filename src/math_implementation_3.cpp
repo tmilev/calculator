@@ -10063,7 +10063,7 @@ std::string HtmlRoutines::toHtmlTableRowsFromStringContainingJSON(const std::str
 
 std::string HtmlRoutines::toHtmlTableRowsFromJSON(const JSData& input) {
   MacroRegisterFunctionWithName("HtmlRoutines::ToHtmlTableFromJSON");
-  if (input.theType == JSData::token::tokenObject) {
+  if (input.elementType == JSData::token::tokenObject) {
     std::stringstream out;
     out << "<table class = \"tableDatabaseItem\">";
     for (int i = 0; i < input.objects.size(); i ++) {
@@ -10073,7 +10073,7 @@ std::string HtmlRoutines::toHtmlTableRowsFromJSON(const JSData& input) {
     out << "</table>";
     return out.str();
   }
-  if (input.theType == JSData::token::tokenArray) {
+  if (input.elementType == JSData::token::tokenArray) {
     std::stringstream out;
     out << "<table class = \"tableDatabaseItem\">";
     for (int i = 0; i < input.objects.size(); i ++) {

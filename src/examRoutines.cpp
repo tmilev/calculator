@@ -72,7 +72,7 @@ bool CalculatorHTML::mergeProblemWeight(
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemWeightsAppend");
   (void) commentsOnFailure;
-  if (inputJSON.theType != JSData::token::tokenObject) {
+  if (inputJSON.elementType != JSData::token::tokenObject) {
     return true;
   }
   ProblemData emptyData;
@@ -96,11 +96,11 @@ bool CalculatorHTML::mergeProblemWeight(
     }
     ProblemData& currentProblemValue = outputAppendProblemInfo.getValueCreate(currentProblemName);
     JSData& currentWeight = currentProblem[DatabaseStrings::labelProblemWeight];
-    if (currentWeight.theType == JSData::token::tokenString) {
+    if (currentWeight.elementType == JSData::token::tokenString) {
       currentProblemValue.adminData.problemWeightsPerCourse.setKeyValue(currentCourse, currentWeight.stringValue);
-    } else if (currentWeight.theType == JSData::token::tokenObject) {
+    } else if (currentWeight.elementType == JSData::token::tokenObject) {
       for (int i = 0; i < currentWeight.objects.size(); i ++) {
-        if (currentWeight.objects.values[i].theType != JSData::token::tokenString) {
+        if (currentWeight.objects.values[i].elementType != JSData::token::tokenString) {
           if (commentsOnFailure != nullptr) {
             *commentsOnFailure << "Failed to extract weight from: "
             << currentWeight.objects.values[i]
@@ -132,7 +132,7 @@ bool CalculatorHTML::mergeProblemDeadline(
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemWeightsAppend");
   (void) commentsOnFailure;
-  if (inputJSON.theType != JSData::token::tokenObject) {
+  if (inputJSON.elementType != JSData::token::tokenObject) {
     return true;
   }
   ProblemData emptyData;
@@ -147,7 +147,7 @@ bool CalculatorHTML::mergeProblemDeadline(
     }
     ProblemData& currentProblemValue = outputAppendProblemInfo.getValueCreate(currentProbName);
     JSData& currentDeadlines = currentProblem[DatabaseStrings::labelDeadlines];
-    if (currentDeadlines.theType == JSData::token::tokenObject) {
+    if (currentDeadlines.elementType == JSData::token::tokenObject) {
       for (int j = 0; j < currentDeadlines.objects.size(); j ++) {
         currentProblemValue.adminData.deadlinesPerSection.setKeyValue(
           currentDeadlines.objects.keys[j],
@@ -169,7 +169,7 @@ JSData CalculatorHTML::toJSONDeadlines(
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::toJSONDeadlines");
   JSData output;
-  output.theType = JSData::token::tokenObject;
+  output.elementType = JSData::token::tokenObject;
 
   for (int i = 0; i < inputProblemInfo.size(); i ++) {
     ProblemDataAdministrative& currentProblem = inputProblemInfo.values[i].adminData;
@@ -3022,7 +3022,7 @@ JSData CalculatorHTML::getEditorBoxesHTML() {
   MacroRegisterFunctionWithName("CalculatorHTML::getEditorBoxesHTML");
   ////////////////////////////////////////////////////////////////////
   JSData output;
-  output.theType = JSData::token::tokenArray;
+  output.elementType = JSData::token::tokenArray;
   for (int i = 0; i < this->problemData.answers.size(); i ++) {
     JSData currentAnswerJS;
     Answer& currentAnswer = this->problemData.answers.values[i];
@@ -4104,12 +4104,12 @@ JSData CalculatorHTML::toStringTopicListJSON(std::stringstream* comments) {
     output[WebAPI::result::error] = out.str();
     return output;
   }
-  topicBundleFiles.theType = JSData::token::tokenArray;
+  topicBundleFiles.elementType = JSData::token::tokenArray;
   for (int i = 0; i < this->topics.loadedTopicBundleFiles.size; i ++) {
     topicBundleFiles[i] = this->topics.loadedTopicBundleFiles[i];
   }
   output["topicBundleFile"] = topicBundleFiles;
-  output["children"].theType = JSData::token::tokenArray;
+  output["children"].elementType = JSData::token::tokenArray;
   for (int i = 0; i < this->topics.theTopics.size(); i ++) {
     TopicElement& currentElt = this->topics.theTopics.values[i];
     if (currentElt.type == TopicElement::types::chapter) {
@@ -4176,7 +4176,7 @@ JSData LaTeXCrawler::FileWithOption::toJSON() {
 
 bool LaTeXCrawler::FileWithOption::fromJSON(JSData& input, std::stringstream* commentsOnFailure) {
   JSData& file = input[WebAPI::request::slides::slideFilename];
-  if (file.theType != JSData::token::tokenString) {
+  if (file.elementType != JSData::token::tokenString) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "While parsing file, failed to find key: " << WebAPI::request::slides::slideFilename << ". ";
     }
@@ -4200,7 +4200,7 @@ JSData LaTeXCrawler::Slides::toJSON() {
   JSData result;
   result[WebAPI::request::slides::title] = this->title;
   JSData theFiles;
-  theFiles.theType = JSData::token::tokenArray;
+  theFiles.elementType = JSData::token::tokenArray;
   for (int i = 0; i < this->filesToCrawl.size; i ++) {
     theFiles.listObjects.addOnTop(this->filesToCrawl[i].toJSON());
   }
@@ -4218,7 +4218,7 @@ bool LaTeXCrawler::Slides::fromJSON(
     return false;
   }
   JSData& files = input[WebAPI::request::slides::files];
-  if (files.theType != JSData::token::tokenArray) {
+  if (files.elementType != JSData::token::tokenArray) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "files entry missing or not a list. ";
     }
@@ -4420,7 +4420,7 @@ JSData TopicElement::toJSON(CalculatorHTML& owner) {
     elementType = "not documented";
   }
   output["type"] = elementType;
-  output["children"].theType = JSData::token::tokenArray;
+  output["children"].elementType = JSData::token::tokenArray;
   this->computeLinks(owner, true);
   if (this->type == TopicElement::types::problem && this->immediateChildren.size > 0) {
     global.fatal << "Error: Problem " << this->toString() << " reported to have children topic elements: "

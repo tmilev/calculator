@@ -1937,8 +1937,12 @@ void Calculator::initializeFunctionsStandard() {
     "PlotPoint",
     CalculatorFunctionsPlot::plotPoint,
     "",
-    "<b>Calculus teaching function.</b> Plots a point from x and y coordinate. ",
-    "PlotPoint{}((1,2),blue)",
+    "<b>Calculus teaching function.</b> "
+    "Plots a point from x and y coordinate. "
+    "Can also be used for multiple points. "
+    "See the example for how to use for a single and multiple points.",
+    "PlotPoint{}((1, 2\\pi), blue);\n"
+    "PlotPoint{}(((1, 2), (2,3)), blue);\n",
     "CalculatorFunctions::plotPoint",
     "PlotPoint",
     innerStandard

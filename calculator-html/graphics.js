@@ -515,8 +515,12 @@ function colorToHex(color) {
 }
 
 class PointsTwoD {
-  constructor(inputLocation, inputColor) {
-    this.location = inputLocation.slice();
+  constructor(
+    /**@type{number[][]} */
+    inputPoints,
+    inputColor,
+  ) {
+    this.location = inputPoints.slice();
     this.color = colorToRGB(inputColor);
     this.type = "points";
   }
@@ -1120,7 +1124,11 @@ class CanvasTwoD {
     this.flagShowGrid = false;
   }
 
-  drawPoints(inputPoints, inputColor) {
+  drawPoints(
+    /**@type{number[][]} */
+    inputPoints,
+    inputColor,
+  ) {
     this.theObjects.push(new PointsTwoD(inputPoints, inputColor));
   }
 

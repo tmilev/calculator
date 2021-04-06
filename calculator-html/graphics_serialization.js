@@ -192,7 +192,7 @@ class GraphicsSerialization {
         );
         return;
       case "points":
-        canvas.drawPoints(points, color);
+        canvas.drawPoints(this.interpretListListStringsAsNumbers(points), color);
         return;
       case "pathFilled":
         canvas.drawPathFilled(points, color, colorFill);
@@ -294,6 +294,7 @@ class GraphicsSerialization {
     }
   }
 
+  /**@return{number} */
   interpretStringToNumber(
     /**@type{string} */
     input,
@@ -302,6 +303,34 @@ class GraphicsSerialization {
   ) {
     let extraJavascript = this.getParametersJavascript(parameterValues);
     return Function(`"use strict"; ${extraJavascript} return (${input});`)();
+  }
+
+  /**@return{number[]} */
+  interpretListStringsAsNumbers(
+    /**@type{string[]} */
+    input,
+    /**@type{Object<string, string>} */
+    parameterValues,
+  ) {
+    let result = [];
+    for (let i = 0; i < input.length; i++) {
+      result.push(this.interpretStringToNumber(input[i], parameterValues));
+    }
+    return result;
+  }
+
+  /**@return{number[][]} */
+  interpretListListStringsAsNumbers(
+    /**@type{string[][]} */
+    input,
+    /**@type{Object<string, string>} */
+    parameterValues,
+  ) {
+    let result = [];
+    for (let i = 0; i < input.length; i++) {
+      result.push(this.interpretListStringsAsNumbers(input[i], parameterValues));
+    }
+    return result;
   }
 
   functionFromObject(

@@ -3911,8 +3911,8 @@ void Calculator::initializeFunctionsStandard() {
     this->opPolynomialRational(),
     this->opRationalFunction(),
     "Multiplies rational function by a rational function.",
-    "Polynomial{}(x +1)MakeRationalFunction{}(\frac{-2x -2}{x^2+x });\n"
-    "MakeRationalFunction{}(\frac{-2x -2}{x^2-x })MakeRationalFunction{}(\frac{-2x -2}{x^2+x })",
+    "Polynomial{}(x +1)MakeRationalFunction{}(\\frac{-2x -2}{x^2+x });\n"
+    "MakeRationalFunction{}(\\frac{-2x -2}{x^2-x })MakeRationalFunction{}(\\frac{-2x -2}{x^2+x })",
     "CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction",
     "MultiplyPolynomialByRationalFunction",
     innerStandard
@@ -3923,8 +3923,8 @@ void Calculator::initializeFunctionsStandard() {
     this->opRationalFunction(),
     this->opRationalFunction(),
     "Multiplies rational function by a rational function.",
-    "Polynomial{}(x +1)MakeRationalFunction{}(\frac{-2x -2}{x^2+x });\n"
-    "MakeRationalFunction{}(\frac{-2x -2}{x^2-x })MakeRationalFunction{}(\frac{-2x -2}{x^2+x })",
+    "Polynomial{}(x +1)MakeRationalFunction{}(\\frac{-2x -2}{x^2+x });\n"
+    "MakeRationalFunction{}(\\frac{-2x -2}{x^2-x })MakeRationalFunction{}(\\frac{-2x -2}{x^2+x })",
     "CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction",
     "MultiplyRationalFunctionByRationalFunction",
     innerStandard

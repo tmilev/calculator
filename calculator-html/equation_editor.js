@@ -3771,10 +3771,11 @@ class EquationEditor {
     let endElement = this.selectionEndExpanded.element;
     let parent = startElement.parent;
     if (
+      parent === null ||
       parent !== endElement.parent ||
       parent.type.type !== knownTypes.horizontalMath.type
     ) {
-      console.log("Unexpected form of the selection (non-horizontal parent or different parent).");
+      console.log("Unexpected form of the selection (null, non-horizontal parent or different parent).");
       return;
     }
     let left = startElement.indexInParent;

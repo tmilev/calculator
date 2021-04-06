@@ -412,8 +412,8 @@
     "output":"(a x^{-2};a x;a x^{2};a x^{-1})"
   },
   {
-    "input":"Polynomial{}(x +1)MakeRationalFunction{}(rac{-2x -2}{x^2+x });\nMakeRationalFunction{}(rac{-2x -2}{x^2-x })MakeRationalFunction{}(rac{-2x -2}{x^2+x })",
-    "output":"(MakeRationalFunction{}(-2rac x^{4}-6rac x^{3}-6rac x^{2}-2rac x );MakeRationalFunction{}(4rac^{2}x^{6}+8rac^{2}x^{5}-8rac^{2}x^{3}-4rac^{2}x^{2}))"
+    "input":"Polynomial{}(x +1)MakeRationalFunction{}(\\frac{-2x -2}{x^2+x });\nMakeRationalFunction{}(\\frac{-2x -2}{x^2-x })MakeRationalFunction{}(\\frac{-2x -2}{x^2+x })",
+    "output":"(MakeRationalFunction{}(\\frac{-2x -2}{x });MakeRationalFunction{}(\\frac{4x +4}{x^{3}-x^{2}}))"
   },
   {
     "input":"2\\begin{pmatrix}  1& 2& 3\\\\2& 1& 0 \\end{pmatrix}",
@@ -968,8 +968,8 @@
     "output":"(\"e^{x}\";\"e^x\";\"The quick brown fox jumps over the lazy dog.\")"
   },
   {
-    "input":"f = \\sin {}x / \\cos {}x;\nPlot2D(f, -\\pi/4, \\pi/4) + PlotLabel{}((1, 1), \"y =\" + ToUTF8String(f))",
-    "output":"(f=\\frac{\\sin{}x}{\\cos{}x};[plot alredy displayed])"
+    "input":"f = \\sin {}x / \\cos {}x;\nPlot2D(f, -\\pi/4, \\pi/4) + PlotLabel{}((1, 1), \"y =\" + ToUTF8String(f));\nToUTF8String(\\pi/4);",
+    "output":"(f=\\frac{\\sin{}x}{\\cos{}x};[plot alredy displayed];\"1/4 \\xcf\\x80\")"
   },
   {
     "input":"StringToAtom(\"The quick brown fox jumps over the lazy dog.\")",
@@ -1340,8 +1340,8 @@
     "output":"(\\left(x, y, z\\right);\\left(x, y, z, e\\right))"
   },
   {
-    "input":"PlotPoint{}((1,2),blue)",
-    "output":"[plot alredy displayed]"
+    "input":"PlotPoint{}((1, 2\\pi), blue);\nPlotPoint{}(((1, 2), (2,3)), blue);\n",
+    "output":"([plot alredy displayed];[plot alredy displayed])"
   },
   {
     "input":"%UseBracketForIntervals\nPlot2D{}(\\sin{}x +cos{}x, [0, \\pi]\\cup [2\\pi, 3\\pi), \"blue\",2,8)",

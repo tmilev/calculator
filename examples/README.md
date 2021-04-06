@@ -974,18 +974,18 @@ WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}
 Multiplies rational number by a rational function.
 
 *\** [MultiplyPolynomialByRationalFunction] {CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Polynomial%7b%7d%28x%20%2b1%29MakeRationalFunction%7b%7d%28%0crac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%3b%5cnMakeRationalFunction%7b%7d%28%0crac%7b-2x%20-2%7d%7bx%5e2-x%20%7d%29MakeRationalFunction%7b%7d%28%0crac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Polynomial%7b%7d%28x%20%2b1%29MakeRationalFunction%7b%7d%28%5c%5cfrac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%3b%5cnMakeRationalFunction%7b%7d%28%5c%5cfrac%7b-2x%20-2%7d%7bx%5e2-x%20%7d%29MakeRationalFunction%7b%7d%28%5c%5cfrac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-Polynomial{}(x +1)MakeRationalFunction{}(rac{-2x -2}{x^2+x });
-MakeRationalFunction{}(rac{-2x -2}{x^2-x })MakeRationalFunction{}(rac{-2x -2}{x^2+x })
+Polynomial{}(x +1)MakeRationalFunction{}(\frac{-2x -2}{x^2+x });
+MakeRationalFunction{}(\frac{-2x -2}{x^2-x })MakeRationalFunction{}(\frac{-2x -2}{x^2+x })
 ```
 Multiplies rational function by a rational function.
 
 *\** [MultiplyRationalFunctionByRationalFunction] {CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Polynomial%7b%7d%28x%20%2b1%29MakeRationalFunction%7b%7d%28%0crac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%3b%5cnMakeRationalFunction%7b%7d%28%0crac%7b-2x%20-2%7d%7bx%5e2-x%20%7d%29MakeRationalFunction%7b%7d%28%0crac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Polynomial%7b%7d%28x%20%2b1%29MakeRationalFunction%7b%7d%28%5c%5cfrac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%3b%5cnMakeRationalFunction%7b%7d%28%5c%5cfrac%7b-2x%20-2%7d%7bx%5e2-x%20%7d%29MakeRationalFunction%7b%7d%28%5c%5cfrac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-Polynomial{}(x +1)MakeRationalFunction{}(rac{-2x -2}{x^2+x });
-MakeRationalFunction{}(rac{-2x -2}{x^2-x })MakeRationalFunction{}(rac{-2x -2}{x^2+x })
+Polynomial{}(x +1)MakeRationalFunction{}(\frac{-2x -2}{x^2+x });
+MakeRationalFunction{}(\frac{-2x -2}{x^2-x })MakeRationalFunction{}(\frac{-2x -2}{x^2+x })
 ```
 Multiplies rational function by a rational function.
 
@@ -2332,11 +2332,11 @@ ToString( e^x);
 Transforms an arbitrary expression to its string representation. The string representation is (supposed to be) LaTeX-compatible. 
 
 *ToUTF8String* [ToUTF8String] {CalculatorFunctions::expressiontoUTF8String}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22f%20%3d%20%5c%5csin%20%7b%7dx%20%2f%20%5c%5ccos%20%7b%7dx%3b%5cnPlot2D%28f%2c%20-%5c%5cpi%2f4%2c%20%5c%5cpi%2f4%29%20%2b%20PlotLabel%7b%7d%28%281%2c%201%29%2c%20%5c%22y%20%3d%5c%22%20%2b%20ToUTF8String%28f%29%29%3b%5cnToUTF8String%28pi%2f4%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22f%20%3d%20%5c%5csin%20%7b%7dx%20%2f%20%5c%5ccos%20%7b%7dx%3b%5cnPlot2D%28f%2c%20-%5c%5cpi%2f4%2c%20%5c%5cpi%2f4%29%20%2b%20PlotLabel%7b%7d%28%281%2c%201%29%2c%20%5c%22y%20%3d%5c%22%20%2b%20ToUTF8String%28f%29%29%3b%5cnToUTF8String%28%5c%5cpi%2f4%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 f = \sin {}x / \cos {}x;
 Plot2D(f, -\pi/4, \pi/4) + PlotLabel{}((1, 1), "y =" + ToUTF8String(f));
-ToUTF8String(pi/4);
+ToUTF8String(\pi/4);
 ```
 Transforms an arbitrary expression to a utf8-string representation. The string is supposed to look reasonable when drawn on a javascript canvas. 
 
@@ -3102,11 +3102,13 @@ GetVariablesExcludeNamedConstants{}(e^x + x +5 +\arctan x + x *y +x^y+x^{y^z}); 
 Gets the variables on which the expression depends. Includes the named constants. Here, the word ``variables'' is to be thought of as ``free variables'' but the possibility for small distinctions is reserved (to allow dealing with named constants, reserved keywords, etc.). 
 
 *PlotPoint* [PlotPoint] {CalculatorFunctions::plotPoint}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotPoint%7b%7d%28%281%2c2%29%2cblue%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotPoint%7b%7d%28%281%2c%202%5c%5cpi%29%2c%20blue%29%3b%5cnPlotPoint%7b%7d%28%28%281%2c%202%29%2c%20%282%2c3%29%29%2c%20blue%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-PlotPoint{}((1,2),blue)
+PlotPoint{}((1, 2\pi), blue);
+PlotPoint{}(((1, 2), (2,3)), blue);
+
 ```
-<b>Calculus teaching function.</b> Plots a point from x and y coordinate. 
+<b>Calculus teaching function.</b> Plots a point from x and y coordinate. Can also be used for multiple points. See the example for how to use for a single and multiple points.
 
 Operator or function Plot2D is overloaded with 2 total handlers.
 

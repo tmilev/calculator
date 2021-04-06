@@ -1265,6 +1265,8 @@ class LaTeXConstants {
       // A vertically centered small solid dot.
       "\u00B7": "\u00B7",
       "=": "=",
+      ">": ">",
+      "<": "<",
     };
     /**@type{Object.<string, string>} */
     this.operatorsFromUft8 = {

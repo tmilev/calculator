@@ -137,6 +137,7 @@ function selectCurrentCoursePage() {
   if (lastLoadedCourse.courseHome === incomingCourse && lastLoadedCourse.topicList === incomingTopicList) {
     return;
   }
+  // The lastLoadedCourse variable may be reset on successful login. 
   lastLoadedCourse.courseHome = incomingCourse;
   lastLoadedCourse.topicList = incomingTopicList;
   let topicRequest = "templateJSONNoLogin";

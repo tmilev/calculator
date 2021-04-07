@@ -4939,28 +4939,6 @@ class MathNode {
     this.boundingBox.width = left.boundingBox.width + preferredWidth + decoration.boundingBox.width;
   }
 
-  computeDimensionsSqrt() {
-    let radicalExponentBox = this.children[0];
-    let sqrtSign = this.children[1];
-    let underTheRadical = this.children[2];
-    // The proportion of the width of the sqrt sign that overlaps with the radical exponent.
-    let sqrtProportionOverlapped = 0.85;
-    let extraWidth = Math.max(0, radicalExponentBox.boundingBox.width - sqrtSign.boundingBox.width * sqrtProportionOverlapped);
-    // The top of the sqrt sign may not connect perfectly with the overline of the under-the-radical content.
-    // The following variable compensates for that.
-    sqrtSign.verticallyStretchSqrt(underTheRadical.boundingBox.height);
-    radicalExponentBox.boundingBox.top = - 0.15 * radicalExponentBox.boundingBox.height;
-    let widthSqrtSign = 0.99;// 0.92;
-    sqrtSign.boundingBox.left = extraWidth;
-    underTheRadical.boundingBox.left = sqrtSign.boundingBox.left + sqrtSign.boundingBox.width * widthSqrtSign;
-    this.boundingBox = new BoundingBox();
-    this.boundingBox.height = underTheRadical.boundingBox.height * 1.15;
-    this.boundingBox.fractionLineHeight = underTheRadical.boundingBox.fractionLineHeight + 2.2;
-    let extraSpaceAfterRadical = 4;
-    this.boundingBox.width = underTheRadical.boundingBox.left + underTheRadical.boundingBox.width + extraSpaceAfterRadical;
-    this.boundingBox.needsMiddleAlignment = underTheRadical.boundingBox.needsMiddleAlignment;
-  }
-
   computeDimensionsMatrix() {
     this.boundingBox.height = this.children[0].boundingBox.height;
     this.boundingBox.width = this.children[0].boundingBox.width;
@@ -5037,7 +5015,7 @@ class MathNode {
       return;
     }
     if (this.type.type === knownTypes.sqrt.type) {
-      this.computeDimensionsSqrt();
+      throw "This case should be handled by MathNodeSqrt.computeDimensions()";
       return;
     }
     if (this.type.type === knownTypes.sqrtSign.type) {
@@ -8137,6 +8115,29 @@ class MathNodeSqrt extends MathNode {
     result.latex = `\\sqrt{${underTheRadical.latex}}`;
     return result;
   }
+
+  computeDimensions() {
+    let radicalExponentBox = this.children[0];
+    let sqrtSign = this.children[1];
+    let underTheRadical = this.children[2];
+    // The proportion of the width of the sqrt sign that overlaps with the radical exponent.
+    let sqrtProportionOverlapped = 0.7;
+    let extraWidth = Math.max(0, radicalExponentBox.boundingBox.width - sqrtSign.boundingBox.width * sqrtProportionOverlapped);
+    // The top of the sqrt sign may not connect perfectly with the overline of the under-the-radical content.
+    // The following variable compensates for that.
+    sqrtSign.verticallyStretchSqrt(underTheRadical.boundingBox.height);
+    radicalExponentBox.boundingBox.top = - 0.15 * radicalExponentBox.boundingBox.height;
+    let widthSqrtSign = 0.99;// 0.92;
+    sqrtSign.boundingBox.left = extraWidth;
+    underTheRadical.boundingBox.left = sqrtSign.boundingBox.left + sqrtSign.boundingBox.width * widthSqrtSign;
+    this.boundingBox = new BoundingBox();
+    this.boundingBox.height = underTheRadical.boundingBox.height * 1.15;
+    this.boundingBox.fractionLineHeight = underTheRadical.boundingBox.fractionLineHeight + 2.2;
+    let extraSpaceAfterRadical = 4;
+    this.boundingBox.width = underTheRadical.boundingBox.left + underTheRadical.boundingBox.width + extraSpaceAfterRadical;
+    this.boundingBox.needsMiddleAlignment = underTheRadical.boundingBox.needsMiddleAlignment;
+  }
+
   applyBackspaceToTheRight() {
     return this.applyBackspaceToTheRightAsLeftArrow();
   }

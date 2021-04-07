@@ -1261,6 +1261,7 @@ function writeTopicsToCoursePage() {
 
 function updateProblemPage() {
   let thePage = window.calculator.mainPage;
+  window.calculator.coursePage.selectCurrentCoursePage();
   // thePage.pages.problemPage.flagLoaded is modified by the following
   // functions: selectCurrentProblem, logout, callbackClone,
   // the present function updateProblemPage

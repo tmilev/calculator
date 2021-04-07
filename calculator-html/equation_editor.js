@@ -2717,6 +2717,10 @@ class EquationEditor {
       this.container.style.margin = "2px";
       this.container.style.padding = "2px";
     }
+    /**@type{boolean} whether there's a pending writeLatex event to be trigerred when the event is visible. */
+    this.pendingWriteLatex = false;
+    /**@type{IntersectionObserver|null} */
+    this.observer = null;
     /**@type{boolean} */
     this.preventEditorBlur = false;
     /**@type{boolean} */
@@ -2994,6 +2998,52 @@ class EquationEditor {
     /**@type {string} */
     latex,
   ) {
+    if (this.container === null) {
+      throw "Attempt to write to non-initialized equation editor.";
+    }
+    if (this.observer === null) {
+      // Please note: Intersection observer is a recent addition to web browsers.
+      // It "fires events" when the visibility of an element changes. 
+      // The purpose of this snippet is the following. 
+      // Suppose we want to write latex to an element that is nested in another element
+      // with visibility:none. Then the getBoundingClientRect() bounding rectangles 
+      // of all atoms in our editor will have zero dimensions, thus throwing off the 
+      // typesetting computation. 
+      // So, we need to postpone the writeLatex() function to the time when 
+      // the element comes visible, hence the observer below.
+      // Please note: common sense suggests that this.container removed from the DOM tree, 
+      // both this.container and the observer below will be garbage-collected.
+      // However, this has not been 100% tested to be the case. 
+      // Since in most pages this.container will not be removed from the DOM tree, 
+      // it seems that the question of garbage collection correctness 
+      // can be ignored.
+      this.observer = new IntersectionObserver((unused1, unused2) => {
+        this.writeLatexPartTwo(latex);
+      }, {
+        root: document.documentElement,
+      });
+      this.observer.observe(this.container);
+    }
+    this.pendingWriteLatex = true;
+    if (this.container.style.minWidth === "") {
+      this.container.style.minWidth = "1px";
+    }
+    this.writeLatexPartTwo(latex);
+  }
+
+  /**@returns{boolean} */
+  writeLatexPartTwo(
+    /**@type {string} */
+    latex,
+  ) {
+    if (this.pendingWriteLatex !== true) {
+      return;
+    }
+    let boundingRectangle = this.container.getBoundingClientRect();
+    if (boundingRectangle.width === 0) {
+      return false;
+    }
+    this.pendingWriteLatex = false;
     this.latexLastWritten = latex;
     this.rootNode.removeAllChildren();
     if (this.rootNode.element !== null) {
@@ -3015,6 +3065,7 @@ class EquationEditor {
     this.writeDebugInfo(parser);
     this.container.setAttribute("latexsource", latex);
     this.setLastFocused(this.rootNode.rightmostAtomChild());
+    return true;
   }
 
   writeLatexLastFocused(
@@ -9006,7 +9057,7 @@ class MathTagCoverter {
   typeset(
     /**@type{HTMLElement|null} */
     toBeModified,
-    /**@type{Function|null} callback after the element has been typeset*/
+    /**@type{Function|null} callback after the element has been typeset */
     callback,
   ) {
     this.elementProcessed = toBeModified;

@@ -1135,7 +1135,6 @@ let linkSpecs = {
   },
 };
 
-
 let linkSlides = [
   "slidesProjector",
   "slidesPrintable",

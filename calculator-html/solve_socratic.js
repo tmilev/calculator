@@ -5,6 +5,10 @@ const EquationEditor = require("./equation_editor").EquationEditor;
 const storage = require("./storage").storage;
 const InputPanelData = require("./initialize_buttons").InputPanelData;
 
+let idsSocratic = {
+  socraticBackendServer: "socraticBackendServer"
+};
+
 class SolverSocratic {
   constructor() {
     /**@type{EquationEditor|null} */
@@ -17,15 +21,26 @@ class SolverSocratic {
     this.debugDiv = document.getElementById(ids.domElements.pages.solveSocratic.editorSolveProblemDebug);
     /**@type{HTMLElement} */
     this.flagPendingSolutionTypeset = false;
+    /**@type{HTMLOptionElement} */
+    this.backendElement = document.getElementById(idsSocratic.socraticBackendServer);
+    if (this.backendElement !== null) {
+      this.backendElement.addEventListener("change", () => {
+        this.setAnchor(this.inputElement().value);
+      });
+    }
+  }
+
+  /**@returns{HTMLInputElement} */
+  inputElement() {
+    return document.getElementById(ids.domElements.pages.solveSocratic.input);
   }
 
   selectPage() {
     if (this.equationEditor !== null) {
       return;
     }
-    /**@type{HTMLInputElement} */
-    let latexElement = document.getElementById(ids.domElements.pages.solveSocratic.input);
     let desiredLatex = storage.variables.solveSocratic.problemToAutoSolve.getValue();
+    let latexElement = this.inputElement();
     this.panel = new InputPanelData({
       idEquationEditorElement: ids.domElements.pages.solveSocratic.editor,
       problemId: "",
@@ -108,6 +123,11 @@ class SolverSocratic {
     storage.variables.solveSocratic.problemToAutoSolve.setAndStore(text, true, false);
   }
 
+  /**@returns{string} */
+  getBackend() {
+    return this.backendElement.value;
+  }
+
   setAnchor(
     /**@type{string} */
     text,
@@ -115,7 +135,8 @@ class SolverSocratic {
     let anchor = document.getElementById(ids.domElements.pages.solveSocratic.link);
     anchor.textContent = text;
     let encoded = encodeURIComponent(text);
-    anchor.setAttribute("href", `https://bloom-autopush.sandbox.google.com/math/solver?q=${encoded}`);
+    let backend = this.getBackend();
+    anchor.setAttribute("href", `${backend}?q=${encoded}`);
     let anchorThisPage = document.getElementById(ids.domElements.pages.solveSocratic.anchorThisPage);
     if (text === "") {
       anchorThisPage.style.display = "hidden";
@@ -129,5 +150,6 @@ class SolverSocratic {
 const solver = new SolverSocratic();
 
 module.exports = {
+  idsSocratic,
   solver,
 };

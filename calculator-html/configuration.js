@@ -14,4 +14,4 @@ class Configuration {
 let configuration = new Configuration();
 module.exports = {
   configuration,
-}
+};

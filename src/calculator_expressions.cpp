@@ -3633,7 +3633,7 @@ bool Expression::toStringEndStatement(
         currentOutput = currentE.toString(format);
       } else {
         format->flagDontCollalpseProductsByUnits = false;
-        currentOutput = HtmlRoutines::getMathNoDisplay(currentE.toString(format), 1700);
+        currentOutput = HtmlRoutines::getMathNoDisplay(currentE.toString(format), Expression::maximumCharactersInLatexPrintout);
       }
       currentOutput += currentE.toStringAllSlidersInExpression();
       if (outputJS != nullptr) {
@@ -4208,7 +4208,7 @@ std::string Expression::toStringWithStartingExpression(
     if (format != nullptr) {
       format->flagDontCollalpseProductsByUnits = true;
     }
-    input = HtmlRoutines::getMathNoDisplay(startingExpression->toString(format), 1700);
+    input = HtmlRoutines::getMathNoDisplay(startingExpression->toString(format), Expression::maximumCharactersInLatexPrintout);
     if (format != nullptr) {
       format->flagDontCollalpseProductsByUnits = false;
     }
@@ -4222,7 +4222,7 @@ std::string Expression::toStringWithStartingExpression(
     ) {
       output = out.str();
     } else {
-      output = HtmlRoutines::getMathNoDisplay(out.str(), 1700);
+      output = HtmlRoutines::getMathNoDisplay(out.str(), Expression::maximumCharactersInLatexPrintout);
     }
     outTrue << "<td class = 'cellCalculatorResult'>" << output << "</td></tr>";
     if (outputJS != nullptr) {

@@ -122,7 +122,10 @@ class RequestWithProgress {
     /**@type{{dontCollapsePanel:boolean, width:number}} */
     this.panelOptions = panelOptions;
     /**@type{panels.PanelExpandable|null} */
-    this.panel = new panels.PanelExpandable(this.progress);
+    this.panel = null;
+    if (this.progress !== null) {
+      this.panel = new panels.PanelExpandable(this.progress);
+    }
     this.startTime = 0;
     this.details = "";
   }
@@ -153,6 +156,10 @@ class RequestWithProgress {
   }
 
   recordProgressStarted() {
+    if (this.panel === null) {
+      // We don't want any progress report.
+      return;
+    }
     this.panel.initialize(true);
     this.startTime = new Date().getTime();
     this.panel.setPanelLabel(`<b style = "color:orange">Sent</b>`)

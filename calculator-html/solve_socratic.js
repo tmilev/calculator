@@ -4,9 +4,10 @@ const equationEditor = require("./equation_editor");
 const EquationEditor = require("./equation_editor").EquationEditor;
 const storage = require("./storage").storage;
 const InputPanelData = require("./initialize_buttons").InputPanelData;
+const submitRequest = require("./submit_requests");
 
 let idsSocratic = {
-  socraticBackendServer: "socraticBackendServer"
+  socraticBackendServer: "socraticBackendServer",
 };
 
 class SolverSocratic {
@@ -25,6 +26,7 @@ class SolverSocratic {
     this.backendElement = document.getElementById(idsSocratic.socraticBackendServer);
     if (this.backendElement !== null) {
       this.backendElement.addEventListener("change", () => {
+        storage.variables.solveSocratic.backend.setAndStore(this.backendElement.value);
         this.setAnchor(this.inputElement().value);
       });
     }
@@ -41,6 +43,7 @@ class SolverSocratic {
     }
     let desiredLatex = storage.variables.solveSocratic.problemToAutoSolve.getValue();
     let latexElement = this.inputElement();
+    this.backendElement.value = storage.variables.solveSocratic.backend.getValue();
     this.panel = new InputPanelData({
       idEquationEditorElement: ids.domElements.pages.solveSocratic.editor,
       problemId: "",
@@ -128,15 +131,29 @@ class SolverSocratic {
     return this.backendElement.value;
   }
 
+  /**@returns{string} */
+  getSocraticLinkDefault(
+  ) {
+    return this.getSocraticLink(this.inputElement().value);
+  }
+
+  /**@returns{string} */
+  getSocraticLink(
+    /**@type{string} */
+    latex,
+  ) {
+    let encoded = encodeURIComponent(latex);
+    let backend = this.getBackend();
+    return `${backend}?q=${encoded}`;
+  }
+
   setAnchor(
     /**@type{string} */
     text,
   ) {
     let anchor = document.getElementById(ids.domElements.pages.solveSocratic.link);
     anchor.textContent = text;
-    let encoded = encodeURIComponent(text);
-    let backend = this.getBackend();
-    anchor.setAttribute("href", `${backend}?q=${encoded}`);
+    anchor.setAttribute("href", this.getSocraticLink(text));
     let anchorThisPage = document.getElementById(ids.domElements.pages.solveSocratic.anchorThisPage);
     if (text === "") {
       anchorThisPage.style.display = "hidden";

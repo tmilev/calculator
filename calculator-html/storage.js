@@ -213,6 +213,10 @@ class StorageCalculator {
             nameLocalStorage: "solvePanelForceShowNone",
           }),
         },
+        backend: new StorageVariable({
+          name: "socracticBackend",
+          nameLocalStorage: "socracticBackend",
+        }),
       },
       compare: {
         given: new StorageVariable({

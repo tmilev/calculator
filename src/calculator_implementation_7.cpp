@@ -2071,24 +2071,24 @@ bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorith
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals");
-  IntegralRationalFunctionComputation theComputation(&calculator);
-  bool isGood = CalculatorConversions::innerRationalFunction(calculator, input, theComputation.inpuTE);
+  IntegralRationalFunctionComputation computation(&calculator);
+  bool isGood = CalculatorConversions::innerRationalFunction(calculator, input, computation.inpuTE);
   if (isGood) {
-    isGood = theComputation.inpuTE.isOfType<RationalFunction<Rational> >();
+    isGood = computation.inpuTE.isOfType<RationalFunction<Rational> >();
   }
   if (!isGood) {
     return calculator << "CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals: "
     << "Failed to convert "
     << input.toString() << " to rational function. ";
   }
-  theComputation.theRF = theComputation.inpuTE.getValue<RationalFunction<Rational> >();
-  if (theComputation.theRF.minimalNumberOfVariables() > 1) {
+  computation.theRF = computation.inpuTE.getValue<RationalFunction<Rational> >();
+  if (computation.theRF.minimalNumberOfVariables() > 1) {
     return calculator << "The input rational function is of "
-    << theComputation.theRF.minimalNumberOfVariables() << " variables and "
+    << computation.theRF.minimalNumberOfVariables() << " variables and "
     << " I can handle only 1. ";
   }
-  theComputation.computePartialFractionDecomposition();
-  return output.assignValue(theComputation.printoutPFsHtml.str(), calculator);
+  computation.computePartialFractionDecomposition();
+  return output.assignValue(computation.printoutPFsHtml.str(), calculator);
 }
 
 bool CalculatorFunctions::innerGaussianEliminationMatrix(

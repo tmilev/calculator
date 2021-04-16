@@ -489,6 +489,8 @@ public:
     }
     return *this->owner;
   }
+  std::string toStringTriple(FormatExpressions* format) const;
+  std::string toStringTripleVerification(FormatExpressions* format) const;
   std::string toString(FormatExpressions* format = nullptr) const;
   void getInvolvedPositiveGenerators(List<ChevalleyGenerator>& output);
   void getInvolvedNegativeGenerators(List<ChevalleyGenerator>& output);

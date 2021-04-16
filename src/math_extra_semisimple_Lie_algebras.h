@@ -140,6 +140,7 @@ public:
     const std::string& relativeTo = "../../.."
   );
   static std::string toHTMLCalculatorBodyOnload();
+  static std::string toHTMLCalculatorMainDiv();
   std::string getStringFromChevalleyGenerator(int theIndex, FormatExpressions* thePolynomialFormat) const;
   std::string toStringLieAlgebraNameFullHTML() const;
   std::string toStringLieAlgebraName() const;
@@ -272,6 +273,14 @@ public:
   bool operator==(const SemisimpleLieAlgebra& other) const {
     return this->weylGroup == other.weylGroup;
   }
+  // Returns one possible matrix realization of an element for one particular
+  // preferred "standard" representation of the lie algebra.
+  // As of writing, the "standard" representation is only implemented for
+  // sl(n) - the natural (n x n)- matrix realization.
+  bool getElementStandardRepresentation(
+    const ElementSemisimpleLieAlgebra<Rational>& element,
+    Matrix<Rational>& output
+  );
 };
 
 template <class Coefficient>

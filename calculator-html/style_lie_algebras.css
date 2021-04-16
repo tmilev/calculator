@@ -63,6 +63,10 @@ div.divPanelSemisimpleLieAlgebraStructure{
   padding: 10px;
 }
 
+div.divSemisimpleLieAlgebraStructureMainPage {
+  width:90%;
+}
+
 h1 {
   text-align: center;
 }

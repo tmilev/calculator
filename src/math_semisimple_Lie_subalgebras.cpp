@@ -4388,12 +4388,46 @@ bool SlTwoSubalgebra::operator==(const SlTwoSubalgebra& right) const {
   return this->hCharacteristic == right.hCharacteristic;
 }
 
+std::string SlTwoSubalgebra::toStringTripleVerification(FormatExpressions* format) const {
+  std::stringstream out;
+  bool useHtml = format == nullptr ? true : format->flagUseHTML;
+  out << "\nLie brackets of the above elements. ";
+  if (useHtml) {
+    out << "\n<br>\n";
+  }
+  std::stringstream streamEF, streamHE, streamHF;
+  streamEF << "\n[e, f] =" <<  this->bufferEbracketF.toString(format) << "";
+  out << HtmlRoutines::getMathNoDisplay(streamEF.str()) << "\n<br>\n";
+  streamHE << "\n[h, e] =" << this->bufferHbracketE.toString(format) << "";
+  out << HtmlRoutines::getMathNoDisplay(streamHE.str()) << "\n<br>\n";
+  streamHF << "\n[h, f] = " << this->bufferHbracketF.toString(format) << "";
+  out << HtmlRoutines::getMathNoDisplay(streamHF.str()) << "\n<br>\n";
+  //this->theSystemMatrixForm.toString(tempS);
+  //out << "\nSystem matrix form we try to solve:\n" << tempS;
+  //this->theSystemColumnVector.toString(tempS);
+  //out << "\nColumn vector of the system:\n" <<tempS;
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toStringTriple(FormatExpressions* format) const {
+  std::stringstream out;
+  std::stringstream tempStreamH, tempStreamE, tempStreamF;
+  tempStreamH << "h = " << this->theH.toString(format) << "";
+  out << HtmlRoutines::getMathNoDisplay(tempStreamH.str()) << "\n<br>\n";
+  tempStreamE << "e = " << this->theE.toString(format);
+  out << HtmlRoutines::getMathNoDisplay(tempStreamE.str()) << "\n<br>\n";
+  tempStreamF << "f= " << this->theF.toString(format);
+  out << HtmlRoutines::getMathNoDisplay(tempStreamF.str()) << "\n<br>\n";
+  return out.str();
+}
+
 std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   MacroRegisterFunctionWithName("SlTwoSubalgebra::toString");
   if (this->container == nullptr) {
     return "sl(2) subalgebra not initialized.";
   }
-  std::stringstream out;  std::string tempS;
+  std::stringstream out;
+  std::string tempS;
   out << "<a name =\"sl2index" << indexInContainer << "\">h-characteristic: " << this->hCharacteristic.toString() << "</a>";
   out << "<br>Length of the weight dual to h: " << this->LengthHsquared;
   tempS = this->preferredAmbientSimpleBasis.toString();
@@ -4450,13 +4484,8 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   if (useHtml) {
     out << "\n<br>\n";
   }
-  std::stringstream tempStreamH, tempStreamE, tempStreamF;
-  tempStreamH << "h = " << this->theH.toString(format) << "";
-  out << HtmlRoutines::getMathNoDisplay(tempStreamH.str()) << "\n<br>\n";
-  tempStreamE << "e = " << this->theE.toString(format);
-  out << HtmlRoutines::getMathNoDisplay(tempStreamE.str()) << "\n<br>\n";
-  tempStreamF << "f= " << this->theF.toString(format);
-  out << HtmlRoutines::getMathNoDisplay(tempStreamF.str()) << "\n<br>\n";
+  out << this->toStringTriple(format);
+  out << this->toStringTripleVerification(format);
   std::stringstream latexStreamActual;
   latexStreamActual << "\\begin{array}{l}";
   for (int i = 0; i < this->theSystemToBeSolved.size; i ++) {
@@ -4975,7 +5004,7 @@ std::string SlTwoSubalgebras::descriptionModuleDecompositionOverSl2 =
 "The \\(sl(2)\\) submodules of the ambient Lie algebra are parametrized by their "
 "highest weight with respect to the Cartan element h of \\(sl(2)\\). "
 "In turn, the highest weight is a positive integer multiple of the fundamental highest weight \\(\\psi\\). "
-"\\(V_{l\\psi}\\) is \\(l + 1\\)-dimensional. ";
+"\\(V_{k\\psi}\\) is \\(k + 1\\)-dimensional. ";
 
 std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
   MacroRegisterFunctionWithName("SlTwoSubalgebras::toStringSummary");
@@ -5052,18 +5081,18 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
     << "<td>Type of semisimple part of centralizer, if known</td>"
     << "<td>The square of the length of the weight dual to h.</td>"
     << "<td>Dynkin index </td><td>Minimal containing regular semisimple SAs</td><td>"
-    << "<a href = '#idMinimalContainingRegularSA'>Containing regular semisimple SAs in which the sl(2) has no centralizer</a>"
+    << "<a href='#idMinimalContainingRegularSA'>Containing regular semisimple SAs in which the sl(2) has no centralizer</a>"
     << "</td></tr>";
   }
   for (int i = 0; i < this->size; i ++) {
     const SlTwoSubalgebra& currentSubalgebra = (*this)[i];
     if (useHtml) {
       out << "<tr>"
-      << "<td style =\"padding-right:20px\"><a href=\"#sl2index"
-      << i << "\" >\\(A^{" << currentSubalgebra.getDynkinIndex() << "}_1" << "\\)</a></td>";
+      << "<td style='padding-right:20px'><a href='#sl2index"
+      << i << "'>\\(A^{" << currentSubalgebra.getDynkinIndex() << "}_1" << "\\)</a></td>";
       out << "<td>";
     }
-    out << currentSubalgebra.hCharacteristic.toString();
+    out << "\\(" << currentSubalgebra.hCharacteristic.toString() << "\\)";
     if (useHtml) {
       out << "</td>";
       out << "<td style='white-space: nowrap'>";
@@ -5104,22 +5133,26 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
       RootSubalgebra& currentSA = this->rootSubalgebras.subalgebras[currentSubalgebra.indicesMinimalContainingRootSAs[j]];
       out << "<a href=\"" << displayPathAlgebra << "rootSubalgebra_"
       << currentSubalgebra.indicesMinimalContainingRootSAs[j] + 1 << ".html\">"
-      << currentSA.dynkinDiagram.toString() << "</a>" << ";  ";
+      << "\\(" << currentSA.dynkinDiagram.toString() << "\\)"
+      << "</a>";
     }
     if (useHtml) {
       out << "</td><td>";
     }
     for (int j = 0; j < currentSubalgebra.indicesContainingRootSAs.size; j ++) {
       RootSubalgebra& currentSA = this->rootSubalgebras.subalgebras[currentSubalgebra.indicesContainingRootSAs[j]];
-      out << "<a href=\"" <<  displayPathAlgebra << "rootSubalgebra_" << currentSubalgebra.indicesContainingRootSAs[j] + 1 << ".html\">"
-      << currentSA.dynkinDiagram.toString() << "</a>" << ";  ";
+      out << "<a href='" <<  displayPathAlgebra << "rootSubalgebra_" << currentSubalgebra.indicesContainingRootSAs[j] + 1 << ".html'>"
+      << "\\("
+      << currentSA.dynkinDiagram.toString()
+      << "\\)"
+      << "</a>";
     }
     if (useHtml) {
       out << "</td></tr>\n";
     }
   }
   if (useHtml) {
-    out << "</table><HR width =\"100%\">";
+    out << "</table><hr>";
   }
   out << out2.str() << "<hr>";
   return out.str();
@@ -5168,10 +5201,13 @@ void SlTwoSubalgebras::writeHTML(FormatExpressions* format) {
   << this->rootSubalgebras.subalgebras[0].dynkinDiagram.toString()
   << " '>";
   out << SemisimpleLieAlgebra::toHTMLCalculatorBodyOnload();
+  out << this->owner->toHTMLCalculatorMainDiv();
   out << "<h1>\\(sl(2)\\)-subalgebras of " << this->owner->toStringLieAlgebraNameFullHTML() << "</h1>";
   out << this->owner->toStringHTMLMenuStructureSummary("../", true, true, false, true);
   out << this->toString(format);
-  out << "</body></html>";
+  out << "</div>";
+  out << "</body>";
+  out << "</html>";
   std::stringstream commentsOnError;
   if (!FileOperations::writeFileVirual(virtualFileName, out.str(), &commentsOnError)) {
     global.fatal << "Failed to write sl(2)-subalgebras. " << commentsOnError.str() << global.fatal;

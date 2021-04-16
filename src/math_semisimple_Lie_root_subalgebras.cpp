@@ -3041,9 +3041,11 @@ void RootSubalgebras::toHTML(FormatExpressions* format) {
   output << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements();
   output << SemisimpleLieAlgebra::toHTMLCalculatorBodyOnload()
   << this->owner->toStringHTMLMenuStructureSummary("", true, false, true, true)
+  << this->owner->toHTMLCalculatorMainDiv()
   << this->toString(format)
   << "<hr>LaTeX table with root subalgebra details.<br>"
   << this->toStringDynkinTableFormatToLaTeX(format)
+  << "</div>"
   << "</body></html>";
   output.close();
   for (int i = 0; i < this->subalgebras.size; i ++) {

@@ -2,11 +2,9 @@
 // For additional information refer to the file "calculator.h".
 #include "math_general.h"
 #include "math_general_implementation.h"
-#include "math_extra_Lie_theory_extras.h"
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_symmetric_groups_and_generalizations.h"
 #include "math_extra_drawing_variables.h"
-#include <assert.h>
 #include "calculator_interface.h"
 #include "system_functions_global_objects.h"
 #include "string_constants.h"

@@ -2098,7 +2098,7 @@ bool CalculatorFunctionsWeylGroup::macdonaldPolys(Calculator& calculator, const 
     RootSubalgebra& currentRootSA = theRootSAs.subalgebras[i];
     theGenerator.MakeFromRootSubsystem(currentRootSA.positiveRootsReductiveSubalgebra, *algebra.content);
     theGenerator.GenerateMyOrbit(theOrbit);
-    out << "<hr>Root subsystem type " << currentRootSA.theDynkinDiagram.toString();
+    out << "<hr>Root subsystem type " << currentRootSA.dynkinDiagram.toString();
     out << ". Orbit has " << theOrbit.size << " element(s), here they are: ";
     for (int j = 0; j < theOrbit.size; j ++) {
       out << "<br>" << theOrbit[j].toString();

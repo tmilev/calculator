@@ -139,7 +139,7 @@ public:
   List<int> indicesSubalgebrasContainingK;
   List<List<List<int> > > theMultTable;
   List<int> theOppositeKmods;
-  DynkinDiagramRootSubalgebra theDynkinDiagram;
+  DynkinDiagramRootSubalgebra dynkinDiagram;
   DynkinDiagramRootSubalgebra theCentralizerDiagram;
   DynkinType theDynkinType;
   DynkinType theCentralizerDynkinType;
@@ -442,12 +442,12 @@ public:
   Rational LengthHsquared;
   int indexInContainer;
   int dimensionCentralizer;
-  DynkinType CentralizerTypeIfKnown;
+  DynkinType centralizerTypeIfKnown;
   Rational dimCentralizerToralPart;
   bool flagCentralizerTypeComputed;
   bool flagCentralizerIsRegular;
-  List<int> IndicesContainingRootSAs;
-  List<int> IndicesMinimalContainingRootSAs;
+  List<int> indicesContainingRootSAs;
+  List<int> indicesMinimalContainingRootSAs;
   List<CharacterSemisimpleLieAlgebraModule<Rational> > moduleDecompositionMinimalContainingRootSAs;
   Vectors<Rational> preferredAmbientSimpleBasis;
   Vector<Rational> hCharacteristic;

@@ -41,9 +41,9 @@ void RootSubalgebra::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double
   this->computeDynkinDiagramKAndCentralizer();
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms tempGroup;
   int coxeterNumber = 1;
-  for (int i = 0; i < this->theDynkinDiagram.simpleBasesConnectedComponents.size; i ++) {
+  for (int i = 0; i < this->dynkinDiagram.simpleBasesConnectedComponents.size; i ++) {
     tempGroup.ambientWeyl = &this->getAmbientWeyl();
-    tempGroup.simpleRootsInner = this->theDynkinDiagram.simpleBasesConnectedComponents[i];
+    tempGroup.simpleRootsInner = this->dynkinDiagram.simpleBasesConnectedComponents[i];
     tempGroup.computeRootSubsystem();
     Vector<Rational>& lastRoot = *tempGroup.RootSubsystem.lastObject();
     Vector<Rational> lastRootInSimpleCoords;
@@ -96,7 +96,7 @@ void RootSubalgebra::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double
 
 void RootSubalgebra::computeDynkinDiagramKAndCentralizer() {
   this->simpleRootsReductiveSubalgebra = this->genK;
-  this->theDynkinDiagram.computeDiagramTypeModifyInput(this->simpleRootsReductiveSubalgebra, this->getAmbientWeyl());
+  this->dynkinDiagram.computeDiagramTypeModifyInput(this->simpleRootsReductiveSubalgebra, this->getAmbientWeyl());
   this->SimpleBasisCentralizerRoots.size = 0;
   for (int i = 0; i < this->getAmbientWeyl().rootsOfBorel.size; i ++) {
     if (this->rootIsInCentralizer(this->getAmbientWeyl().rootsOfBorel[i])) {
@@ -438,12 +438,12 @@ void RootSubalgebra::makeProgressReportpossibleNilradicalComputation(RootSubalge
   if (this->flagMakingProgressReport) {
     std::stringstream out1, out2, out3, out4, out5;
     if (this->flagFirstRoundCounting) {
-      out1 << "Counting ss part " << this->theDynkinDiagram.toString();
+      out1 << "Counting ss part " << this->dynkinDiagram.toString();
       out2 << "# nilradicals for fixed ss part: " << this->NumTotalSubalgebras;
       owner.NumSubalgebrasCounted ++;
       out3 << owner.NumSubalgebrasCounted << " total subalgebras counted";
     } else {
-      out1 << "Computing ss part " << this->theDynkinDiagram.toString();
+      out1 << "Computing ss part " << this->dynkinDiagram.toString();
       out2 << this->numberOfNilradicalsAllowed << " Nilradicals processed out of " << this->NumTotalSubalgebras;
       owner.NumSubalgebrasProcessed ++;
       out3 << "Total # subalgebras processed: " << owner.NumSubalgebrasProcessed;
@@ -464,7 +464,7 @@ void RootSubalgebra::generateKModuleLieBracketTable(List<List<List<int> > >& out
   int numTotal = this->modules.size * this->modules.size;
   std::stringstream out;
   out << "Computing pairing table for the module decomposition of the root subalgebra of type "
-  << this->theDynkinDiagram.toString()
+  << this->dynkinDiagram.toString()
   << "\n<br>\nwith centralizer " << this->theCentralizerDiagram.toString();
   ProgressReport theReport;
   theReport.report(out.str());
@@ -1124,7 +1124,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
   rightSA.computeEssentials();
   if (RecursionDepth!= 0) {
     if (
-      leftSA.theDynkinDiagram.toString() != rightSA.theDynkinDiagram.toString() ||
+      leftSA.dynkinDiagram.toString() != rightSA.dynkinDiagram.toString() ||
       leftSA.theCentralizerDiagram.toString() != rightSA.theCentralizerDiagram.toString() ||
       rightSA.modules.size != leftSA.modules.size
     ) {
@@ -1254,7 +1254,7 @@ void RootSubalgebra::toHTML(int index, FormatExpressions* format) {
   myPath << "rootSubalgebra_" << index + 1 << ".html";
   FileOperations::openFileCreateIfNotPresentVirtual(output, myPath.str(), false, true, false);
   output << "<html><title>" << this->getAmbientWeyl().dynkinType.toString() << " root subalgebra of type "
-  << this->theDynkinDiagram.toString() << "</title>";
+  << this->dynkinDiagram.toString() << "</title>";
   output << "<meta name = \"keywords\" content = \"" << this->getAmbientWeyl().dynkinType.toString()
   << " root subsystems, root subsystems, root systems";
   if (this->getAmbientWeyl().dynkinType.hasExceptionalComponent()) {
@@ -1280,7 +1280,7 @@ std::string RootSubalgebra::toString(FormatExpressions* format) {
   ) {
     includeKEpsCoords = false;
   }
-  out << "Type: " << HtmlRoutines::getMathNoDisplay(this->theDynkinDiagram.toString());
+  out << "Type: " << HtmlRoutines::getMathNoDisplay(this->dynkinDiagram.toString());
   out << " (Dynkin type computed to be: " << HtmlRoutines::getMathNoDisplay(this->theDynkinType.toString()) << ")";
   out << "\n<br>\nSimple basis: " << this->simpleRootsReductiveSubalgebra.toString();
   out << "\n<br>\nSimple basis epsilon form: "
@@ -1837,7 +1837,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
   theDomainRootSA.computeEssentials();
   theRangeRootSA.computeEssentials();
   if (
-    theDomainRootSA.theDynkinDiagram.toString() != theRangeRootSA.theDynkinDiagram.toString() ||
+    theDomainRootSA.dynkinDiagram.toString() != theRangeRootSA.dynkinDiagram.toString() ||
     theDomainRootSA.theCentralizerDiagram.toString() != theRangeRootSA.theCentralizerDiagram.toString()
   ) {
     if (domainAndRangeGenerateNonIsoSAs != nullptr) {
@@ -1914,7 +1914,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
 bool RootSubalgebra::generateIsomorphismsPreservingBorel(
   RootSubalgebra& right, SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms *outputAutomorphisms
 ) {
-  if (this->theDynkinDiagram.toString() != right.theDynkinDiagram.toString()) {
+  if (this->dynkinDiagram.toString() != right.dynkinDiagram.toString()) {
     return false;
   }
   if (this->theCentralizerDiagram.toString() != right.theCentralizerDiagram.toString()) {
@@ -1930,7 +1930,7 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
   List<int> tempList, tempPermutation1, tempPermutation2;
   SelectionWithDifferentMaxMultiplicities tempAutos, tempAutosCentralizer;
   List<List<List<int> > > DiagramAutomorphisms, CentralizerDiagramAutomorphisms;
-  this->theDynkinDiagram.getAutomorphisms(DiagramAutomorphisms);
+  this->dynkinDiagram.getAutomorphisms(DiagramAutomorphisms);
   this->theCentralizerDiagram.getAutomorphisms(CentralizerDiagramAutomorphisms);
   tempAutos.initPart1(DiagramAutomorphisms.size);
   tempAutosCentralizer.initPart1(CentralizerDiagramAutomorphisms.size);
@@ -1940,10 +1940,10 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
   for (int i = 0; i < CentralizerDiagramAutomorphisms.size; i ++) {
     tempAutosCentralizer.capacities[i] = CentralizerDiagramAutomorphisms[i].size - 1;
   }
-  tempList.setSize(this->theDynkinDiagram.sameTypeComponents.size);
+  tempList.setSize(this->dynkinDiagram.sameTypeComponents.size);
   int tempSize = 0;
-  for (int i = 0; i < this->theDynkinDiagram.sameTypeComponents.size; i ++) {
-    tempList[i] = this->theDynkinDiagram.sameTypeComponents[i].size;
+  for (int i = 0; i < this->dynkinDiagram.sameTypeComponents.size; i ++) {
+    tempList[i] = this->dynkinDiagram.sameTypeComponents[i].size;
     tempSize += tempList[i];
   }
   permComponents.initPermutation(tempList, tempSize);
@@ -1967,8 +1967,8 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
       for (int k = 0; k < NumAutos; k++) {
         for (int l = 0; l < NumAutosCentralizer; l ++) {
           isoDomain.size = 0; isoRange.size = 0;
-          this->theDynkinDiagram.getMapFromPermutation(
-            isoDomain, isoRange, tempPermutation1, DiagramAutomorphisms, tempAutos, right.theDynkinDiagram
+          this->dynkinDiagram.getMapFromPermutation(
+            isoDomain, isoRange, tempPermutation1, DiagramAutomorphisms, tempAutos, right.dynkinDiagram
           );
           this->theCentralizerDiagram.getMapFromPermutation(
             isoDomain,
@@ -2246,10 +2246,10 @@ void RootSubalgebra::computeEssentials() {
   MacroRegisterFunctionWithName("RootSubalgebra::computeEssentials");
   this->simpleRootsReductiveSubalgebra = this->genK;
   this->simpleRootsReductiveSubalgebra.getGramMatrix(this->scalarProdMatrixOrdered, &this->getAmbientWeyl().cartanSymmetric);
-  this->theDynkinDiagram.ambientRootSystem= this->getAmbientWeyl().rootSystem;
-  this->theDynkinDiagram.ambientBilinearForm= this->getAmbientWeyl().cartanSymmetric;
-  this->theDynkinDiagram.computeDiagramInputIsSimple(this->simpleRootsReductiveSubalgebra);
-  this->theDynkinDiagram.getDynkinType(this->theDynkinType);
+  this->dynkinDiagram.ambientRootSystem= this->getAmbientWeyl().rootSystem;
+  this->dynkinDiagram.ambientBilinearForm= this->getAmbientWeyl().cartanSymmetric;
+  this->dynkinDiagram.computeDiagramInputIsSimple(this->simpleRootsReductiveSubalgebra);
+  this->dynkinDiagram.getDynkinType(this->theDynkinType);
   if (this->simpleRootsReductiveSubalgebra.size != 0) {
     if (this->theDynkinType.toString() == "0") {
       global.fatal << "Subalgebra dynkin type computed to be zero while the simple basis is: "
@@ -2334,17 +2334,17 @@ bool RootSubalgebra::computeEssentialsIfNew() {
     reportStream << "...the candidate's roots are maximally dominant... ";
     theReport.report(reportStream.str());
   }
-  this->theDynkinDiagram.ambientBilinearForm = this->getAmbientWeyl().cartanSymmetric;
-  this->theDynkinDiagram.ambientRootSystem = this->getAmbientWeyl().rootSystem;
-  this->theDynkinDiagram.computeDiagramInputIsSimple(this->simpleRootsReductiveSubalgebra);
-  this->theDynkinDiagram.getDynkinType(this->theDynkinType);
+  this->dynkinDiagram.ambientBilinearForm = this->getAmbientWeyl().cartanSymmetric;
+  this->dynkinDiagram.ambientRootSystem = this->getAmbientWeyl().rootSystem;
+  this->dynkinDiagram.computeDiagramInputIsSimple(this->simpleRootsReductiveSubalgebra);
+  this->dynkinDiagram.getDynkinType(this->theDynkinType);
   this->computeKModules();
   this->computeCentralizerFromKModulesAndSortKModules();
   this->computeModuleDecompositionAmbientAlgebraDimensionsOnly();
   this->checkRankInequality();
   for (int i = 0; i < this->owner->subalgebras.size; i ++) {
     if (
-      this->owner->subalgebras[i].theDynkinDiagram == this->theDynkinDiagram &&
+      this->owner->subalgebras[i].dynkinDiagram == this->dynkinDiagram &&
       this->owner->subalgebras[i].theCentralizerDynkinType == this->theCentralizerDynkinType &&
       this->moduleDecompoAmbientAlgebraDimensionsOnly == this->owner->subalgebras[i].moduleDecompoAmbientAlgebraDimensionsOnly
     ) {
@@ -2717,7 +2717,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
       int indexIsoSl2 = - 1;
       theSl2.makeReportPrecomputations(indexRootSAinContainer, *this);
       if (output.containsSl2WithGivenHCharacteristic(theSl2.hCharacteristic, &indexIsoSl2)) {
-        output.getElement(indexIsoSl2).IndicesContainingRootSAs.addOnTop(indexRootSAinContainer);
+        output.getElement(indexIsoSl2).indicesContainingRootSAs.addOnTop(indexRootSAinContainer);
         output.IndicesSl2sContainedInRootSA[indexRootSAinContainer].addOnTop(indexIsoSl2);
       } else {
         output.IndicesSl2sContainedInRootSA[indexRootSAinContainer].addOnTop(output.size);
@@ -2986,8 +2986,8 @@ void RootSubalgebras::sortDescendingOrderBySSRank() {
   }
   for (int i = 0; i < this->subalgebras.size; i ++) {
     for (int j = i + 1; j < this->subalgebras.size; j ++) {
-      if (this->subalgebras[SortingArray[j]].theDynkinDiagram.isGreaterThan(
-        this->subalgebras[SortingArray[i]].theDynkinDiagram
+      if (this->subalgebras[SortingArray[j]].dynkinDiagram.isGreaterThan(
+        this->subalgebras[SortingArray[i]].dynkinDiagram
       )) {
         SortingArray.swapTwoIndices(i, j);
       }
@@ -3029,10 +3029,10 @@ void RootSubalgebras::toHTML(FormatExpressions* format) {
     << global.fatal;
   }
   output << "<html><title> Root subsystems of "
-  << this->subalgebras[0].theDynkinDiagram.toString()
+  << this->subalgebras[0].dynkinDiagram.toString()
   << "</title>";
   output << "<meta name = \"keywords\" content = \""
-  << this->subalgebras[0].theDynkinDiagram.toString()
+  << this->subalgebras[0].dynkinDiagram.toString()
   << " root subsystems, root subsystems, root systems";
   if (this->getOwnerWeyl().dynkinType.hasExceptionalComponent()) {
     output << ", exceptional Lie algebra";
@@ -3083,7 +3083,7 @@ void RootSubalgebras::toStringCentralizerIsomorphisms(
     if (useHtml) {
       out << "<td>";
     }
-    tempS = current.theDynkinDiagram.toString();
+    tempS = current.dynkinDiagram.toString();
     out << tempS;
     if (useHtml) {
       out << "</td><td>";
@@ -3133,7 +3133,7 @@ void RootSubalgebras::toStringCentralizerIsomorphisms(
 std::string RootSubalgebras::toStringAlgebraLink(int index) {
   std::stringstream out;
   out << "<a href = \"rootSubalgebra_" << index + 1 << ".html\">"
-  << this->subalgebras[index].theDynkinDiagram.toString() << "</a>";
+  << this->subalgebras[index].dynkinDiagram.toString() << "</a>";
   return out.str();
 }
 
@@ -3167,7 +3167,7 @@ std::string RootSubalgebras::toStringDynkinTableHTML(FormatExpressions* format) 
   "C(k_{ss}) consists of root spaces with roots strongly orthogonal to \\Delta(k) and a part of the Cartan h";
   int col = 0;
   int row = 0;
-  out << "g: " << this->subalgebras[0].theDynkinDiagram.toString()
+  out << "g: " << this->subalgebras[0].dynkinDiagram.toString()
   << ". There are " << this->subalgebras.size << " root subalgebras entries (= " << this->subalgebras.size - 2
   << " larger than the Cartan subalgebra + the Cartan subalgebra + the full subalgebra).\n\n";
   out << "<table border =\"1\">\n <colgroup>";
@@ -3392,7 +3392,7 @@ void RootSubalgebras::makeProgressReportAutomorphisms(
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms &theSubgroup, RootSubalgebra& theRootSA
 ) {
   std::stringstream out4, out1;
-  out1 << "k_ss: " << theRootSA.theDynkinDiagram.toString() << " C(k_ss): "
+  out1 << "k_ss: " << theRootSA.dynkinDiagram.toString() << " C(k_ss): "
   << theRootSA.theCentralizerDiagram.toString();
   out4 << "Num elements ";
   if (theSubgroup.truncated) {
@@ -3580,7 +3580,7 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(std::string& output, bo
         out << "\\hline\\begin{tabular}{r}";
       }
       out << "$\\Delta(\\mathfrak{k})$ is of type "
-      << currentRootSA.theDynkinDiagram.toString() << "; ";
+      << currentRootSA.dynkinDiagram.toString() << "; ";
       if (!includeMatrixForm) {
         out << "\\\\";
       }
@@ -3846,7 +3846,7 @@ int RootSubalgebras::indexSubalgebra(RootSubalgebra& input) {
   for (int j = 0; j < this->subalgebras.size; j ++) {
     RootSubalgebra& right = this->subalgebras[j];
     if (
-      input.theDynkinDiagram.toString() == right.theDynkinDiagram.toString() &&
+      input.dynkinDiagram.toString() == right.dynkinDiagram.toString() &&
       input.theCentralizerDiagram.toString() == right.theCentralizerDiagram.toString()
     ) {
       if (!this->getOwnerWeyl().isOfSimpleType('E', 7)) {
@@ -3973,16 +3973,16 @@ void ConeRelation::relationOneSideToString(
   }
   List<int> TakenIndices;
   List<int> NumPrimesUniTypicComponent;
-  TakenIndices.initializeFillInObject(owner.theDynkinDiagram.simpleBasesConnectedComponents.size, - 1);
-  NumPrimesUniTypicComponent.initializeFillInObject(owner.theDynkinDiagram.sameTypeComponents.size, - 1);
+  TakenIndices.initializeFillInObject(owner.dynkinDiagram.simpleBasesConnectedComponents.size, - 1);
+  NumPrimesUniTypicComponent.initializeFillInObject(owner.dynkinDiagram.sameTypeComponents.size, - 1);
   for (int i = 0; i < kComponents.size; i ++) {
     if (useLatex) {
       out << "\\tiny{ ";
     }
     for (int j = 0; j < kComponents[i].size; j ++) {
       int index = kComponents[i][j];
-      int indexUniComponent = owner.theDynkinDiagram.indexUniComponent[index];
-      out << owner.theDynkinDiagram.simpleComponentTypes[index].toString();
+      int indexUniComponent = owner.dynkinDiagram.indexUniComponent[index];
+      out << owner.dynkinDiagram.simpleComponentTypes[index].toString();
       if (TakenIndices[index] == - 1) {
         NumPrimesUniTypicComponent[indexUniComponent] ++;
         TakenIndices[index] = NumPrimesUniTypicComponent[indexUniComponent];
@@ -4113,8 +4113,8 @@ void ConeRelation::computeConnectedComponents(Vectors<Rational>& input, RootSuba
   output.setSize(input.size);
   for (int i = 0; i < input.size; i ++) {
     output[i].size = 0;
-    for (int j = 0; j < owner.theDynkinDiagram.simpleBasesConnectedComponents.size; j ++) {
-      if (owner.theDynkinDiagram.simpleBasesConnectedComponents[j].containsVectorNonPerpendicularTo(
+    for (int j = 0; j < owner.dynkinDiagram.simpleBasesConnectedComponents.size; j ++) {
+      if (owner.dynkinDiagram.simpleBasesConnectedComponents[j].containsVectorNonPerpendicularTo(
           input[i], owner.getAmbientWeyl().cartanSymmetric
       )) {
         output[i].addOnTop(j);
@@ -4285,8 +4285,8 @@ void ConeRelation::ComputeKComponents(Vectors<Rational>& input, List<List<int> >
   output.setSize(input.size);
   for (int i = 0; i < input.size; i ++) {
     output[i].size = 0;
-    for (int j = 0; j < owner.theDynkinDiagram.simpleBasesConnectedComponents.size; j ++) {
-      if (owner.theDynkinDiagram.simpleBasesConnectedComponents[j].containsVectorNonPerpendicularTo(
+    for (int j = 0; j < owner.dynkinDiagram.simpleBasesConnectedComponents.size; j ++) {
+      if (owner.dynkinDiagram.simpleBasesConnectedComponents[j].containsVectorNonPerpendicularTo(
         input[i], owner.getAmbientWeyl().cartanSymmetric
       )) {
         output[i].addOnTop(j);
@@ -4356,7 +4356,7 @@ void ConeRelations::addRelationNoRepetition(ConeRelation& input, RootSubalgebras
     }
   }
   if (!this->flagIncludeSmallerRelations) {
-    if (input.theDiagramRelAndK.toString() != owners.subalgebras[0].theDynkinDiagram.toString()) {
+    if (input.theDiagramRelAndK.toString() != owners.subalgebras[0].dynkinDiagram.toString()) {
       return;
     }
   }
@@ -4388,7 +4388,7 @@ void ConeRelations::toString(std::string& output, RootSubalgebras& owners, bool 
       oldIndex = this->objects[i].IndexOwnerRootSubalgebra;
       if (useLatex) {
         out << "\\hline\\multicolumn{5}{c}{$\\mathfrak{k}$-semisimple type: "
-        << owners.subalgebras[oldIndex].theDynkinDiagram.toString()
+        << owners.subalgebras[oldIndex].dynkinDiagram.toString()
         << "}\\\\\n\\hline\\hline";
       }
     }

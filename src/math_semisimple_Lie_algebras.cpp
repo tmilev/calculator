@@ -508,7 +508,7 @@ void SemisimpleLieAlgebra::computeLieBracketTable() {
   int theRank = this->weylGroup.cartanSymmetric.numberOfRows;
   int numRoots = numPosRoots * 2;
   int numGenerators = numRoots + theRank;
-  this->theLiebrackets.initialize(numGenerators, numGenerators);
+  this->lieBrackets.initialize(numGenerators, numGenerators);
   //  this->theLiebracketPairingIndices.initialize(numGenerators, numGenerators);
   this->UEGeneratorOrderIncludingCartanElts.initializeFillInObject(numGenerators, - 1);
   //  this->theLiebracketPairingIndices.makeZero(- 1);
@@ -519,21 +519,21 @@ void SemisimpleLieAlgebra::computeLieBracketTable() {
     for (int j = i; j < numGenerators; j ++) {
       rightWeight = this->getWeightOfGenerator(j);
       if (leftWeight.isEqualToZero() && rightWeight.isEqualToZero()) {
-        this->theLiebrackets.elements[i][j].makeZero();
+        this->lieBrackets.elements[i][j].makeZero();
         continue;
       }
       if (leftWeight.isEqualToZero() && !rightWeight.isEqualToZero()) {
-        this->theLiebrackets.elements[i][j].makeGenerator(j, *this);
+        this->lieBrackets.elements[i][j].makeGenerator(j, *this);
         hRoot.makeEi(theRank, i - numPosRoots);
-        this->theLiebrackets.elements[i][j] *= Vector<Rational>::scalarProduct(
+        this->lieBrackets.elements[i][j] *= Vector<Rational>::scalarProduct(
           hRoot, rightWeight, this->weylGroup.cartanSymmetric
         );
         continue;
       }
       if (!leftWeight.isEqualToZero() && rightWeight.isEqualToZero()) {
-        this->theLiebrackets.elements[i][j].makeGenerator(i, *this);
+        this->lieBrackets.elements[i][j].makeGenerator(i, *this);
         hRoot.makeEi(theRank, j - numPosRoots);
-        this->theLiebrackets.elements[i][j] *= - Vector<Rational>::scalarProduct(
+        this->lieBrackets.elements[i][j] *= - Vector<Rational>::scalarProduct(
           hRoot, leftWeight, this->weylGroup.cartanSymmetric
         );
         continue;
@@ -541,15 +541,15 @@ void SemisimpleLieAlgebra::computeLieBracketTable() {
       if (!leftWeight.isEqualToZero() && !rightWeight.isEqualToZero()) {
         int newIndex = this->getGeneratorFromRoot(leftWeight + rightWeight);
         if (newIndex != - 1) {
-          this->theLiebrackets.elements[i][j].makeGenerator(newIndex, *this);
+          this->lieBrackets.elements[i][j].makeGenerator(newIndex, *this);
           int leftIndex = this->getRootIndexFromGenerator(i);
           int rightIndex = this->getRootIndexFromGenerator(j);
-          this->theLiebrackets.elements[i][j] *= this->ChevalleyConstants.elements[leftIndex][rightIndex];
+          this->lieBrackets.elements[i][j] *= this->ChevalleyConstants.elements[leftIndex][rightIndex];
         } else {
           if (!(leftWeight +rightWeight).isEqualToZero()) {
-            this->theLiebrackets.elements[i][j].makeZero();
+            this->lieBrackets.elements[i][j].makeZero();
           } else {
-            ElementSemisimpleLieAlgebra<Rational>& current = this->theLiebrackets.elements[i][j];
+            ElementSemisimpleLieAlgebra<Rational>& current = this->lieBrackets.elements[i][j];
             current.makeCartanGenerator(leftWeight * 2 / (this->weylGroup.rootScalarCartanRoot(leftWeight, leftWeight)), *this);
           }
         }
@@ -559,8 +559,8 @@ void SemisimpleLieAlgebra::computeLieBracketTable() {
   }
   for (int i = 0; i < numGenerators; i ++) {
     for (int j = i + 1; j < numGenerators; j ++) {
-      this->theLiebrackets.elements[j][i] = this->theLiebrackets.elements[i][j];
-      this->theLiebrackets.elements[j][i] *= - 1;
+      this->lieBrackets.elements[j][i] = this->lieBrackets.elements[i][j];
+      this->lieBrackets.elements[j][i] *= - 1;
     }
   }
   for (int i = 0; i < numGenerators; i ++) {
@@ -751,6 +751,18 @@ bool SemisimpleLieAlgebra::testForConsistency() {
   return true;
 }
 
+Vector<Rational> SemisimpleLieAlgebra::getWeightOfGenerator(int index) {
+  if (index < this->getNumberOfPositiveRoots()) {
+    return this->weylGroup.rootSystem[index];
+  }
+  if (index >= this->getRank() + this->getNumberOfPositiveRoots()) {
+    return this->weylGroup.rootSystem[index - this->getRank()];
+  }
+  Vector<Rational> result;
+  result.makeZero(this->getRank());
+  return result;
+}
+
 Rational SemisimpleLieAlgebra::getConstant(const Vector<Rational>& root1, const Vector<Rational>& root2) {
   int index1 = this->weylGroup.rootSystem.getIndex(root1);
   int index2 = this->weylGroup.rootSystem.getIndex(root2);
@@ -877,8 +889,10 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(Matrix<Rational>& outputAuto, 
   outputAuto.makeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight);
 }
 
-bool SemisimpleLieAlgebra::isInTheWeightSupport(Vector<Rational>& theWeight, Vector<Rational>& highestWeight) {
-  Vector<Rational> correspondingDominant = theWeight;
+bool SemisimpleLieAlgebra::isInTheWeightSupport(
+  Vector<Rational>& weight, Vector<Rational>& highestWeight
+) {
+  Vector<Rational> correspondingDominant = weight;
   this->weylGroup.raiseToDominantWeight(correspondingDominant);
   Vector<Rational> theDiff = highestWeight - correspondingDominant;
   if (!theDiff.isPositiveOrZero())
@@ -1257,6 +1271,33 @@ bool ChevalleyGenerator::checkInitialization() const {
   return true;
 }
 
+bool ChevalleyGenerator::isInCartan(
+  Vector<Rational>* whichElement
+) const {
+  this->checkInitialization();
+  bool result = this->owner->isGeneratorFromCartan(this->generatorIndex);
+  if (result && whichElement != nullptr) {
+    whichElement->makeEi(
+      this->owner->getRank(),
+      this->owner->getCartanCoordinateIndexFromCartanGeneratorIndex(
+        this->generatorIndex
+      )
+    );
+  }
+  return result;
+}
+
+bool ChevalleyGenerator::isInRootSpace(
+  Vector<Rational>* whichRootSpace
+) const {
+  this->checkInitialization();
+  bool result = !this->owner->isGeneratorFromCartan(this->generatorIndex);
+  if (result && whichRootSpace != nullptr) {
+    *whichRootSpace = this->owner->getWeightOfGenerator(this->generatorIndex);
+  }
+  return result;
+}
+
 std::string ChevalleyGenerator::toString(FormatExpressions* inputFormat) const {
   this->checkInitialization();
   return this->owner->getStringFromChevalleyGenerator(this->generatorIndex, inputFormat);
@@ -1382,13 +1423,13 @@ bool SemisimpleLieAlgebra::isGeneratorFromCartan(int index) const {
   return index >= this->getNumberOfPositiveRoots() && index < this->getNumberOfPositiveRoots() + this->getRank();
 }
 
-int SemisimpleLieAlgebra::getRootIndexFromDisplayIndex(int theIndex) {
+int SemisimpleLieAlgebra::getRootIndexFromDisplayIndex(int index) {
   int numPosRoots = this->weylGroup.rootsOfBorel.size;
-  if (theIndex < 0) {
-    return theIndex + numPosRoots;
+  if (index < 0) {
+    return index + numPosRoots;
   }
-  if (theIndex > 0) {
-    return theIndex + numPosRoots - 1;
+  if (index > 0) {
+    return index + numPosRoots - 1;
   }
   return - 1;
 }
@@ -1426,18 +1467,26 @@ int SemisimpleLieAlgebra::getDisplayIndexFromGenerator(int index) const {
   return index - this->getNumberOfPositiveRoots();
 }
 
-int SemisimpleLieAlgebra::getCartanIndexFromGenerator(int index) const {
-  return index + this->weylGroup.rootsOfBorel.size;
+int SemisimpleLieAlgebra::getGeneratorIndexFromNonZeroCoefficientIndexInCartan(
+  int simpleRootIndex
+) const {
+  return simpleRootIndex + this->weylGroup.rootsOfBorel.size;
+}
+
+int SemisimpleLieAlgebra::getCartanCoordinateIndexFromCartanGeneratorIndex(
+  int generatorIndex
+) const {
+  return generatorIndex - this->weylGroup.rootsOfBorel.size;
 }
 
 int SemisimpleLieAlgebra::getRootIndexFromGenerator(int index) const {
-  int numPosRoots = this->weylGroup.rootsOfBorel.size;
-  int theDimension = this->weylGroup.cartanSymmetric.numberOfRows;
-  if (index < numPosRoots) {
+  int numberOfPositiveRoots = this->weylGroup.rootsOfBorel.size;
+  int dimension = this->weylGroup.cartanSymmetric.numberOfRows;
+  if (index < numberOfPositiveRoots) {
     return index;
   }
-  if (index >= numPosRoots + theDimension) {
-    return index - theDimension;
+  if (index >= numberOfPositiveRoots + dimension) {
+    return index - dimension;
   }
   return - 1;
 }
@@ -1446,11 +1495,87 @@ bool SemisimpleLieAlgebra::getElementStandardRepresentation(
   const ElementSemisimpleLieAlgebra<Rational>& element,
   Matrix<Rational>& output
 ) {
-//  if ()
+  char dynkinType = 0;
+  if (!this->weylGroup.dynkinType.isSimple(&dynkinType, nullptr)) {
+    return false;
+  }
+  if (dynkinType != 'A') {
+    // Only type A is supported as of writing.
+    return false;
+  }
+  output.makeZeroMatrix(this->getRank() + 1, 0);
+  for (int i = 0; i < element.size(); i ++) {
+    this->accumulateChevalleyGeneratorStandardRepresentation(
+      element[i],
+      element.coefficients[i],
+      output
+    );
+  }
+  return true;
 }
 
-bool SemisimpleLieAlgebra::getChevalleyGeneratorStandardRepresentation(
-  const ChevalleyGenerator& element, Matrix<Rational>& output
+bool SemisimpleLieAlgebra::accumulateChevalleyGeneratorStandardRepresentation(
+  const ChevalleyGenerator& element,
+  const Rational& coefficient,
+  Matrix<Rational>& output
 ) {
+  char dynkinType = 0;
+  int rank = 0;
+  if (!this->weylGroup.dynkinType.isSimple(&dynkinType, &rank)) {
+    return false;
+  }
+  if (dynkinType != 'A') {
+    // Only type A is supported as of writing.
+    return false;
+  }
+  if (element.owner != this) {
+    global.fatal << "Generator does not belong to this semisimple Lie algebra." << global.fatal;
+  }
+  return accumulateChevalleyGeneratorStandardRepresentationInTypeA(element, coefficient, output);
+}
 
+bool SemisimpleLieAlgebra::accumulateChevalleyGeneratorStandardRepresentationInTypeA(
+  const ChevalleyGenerator& element,
+  const Rational& coefficient,
+  Matrix<Rational>& output
+) {
+  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::accumulateChevalleyGeneratorStandardRepresentationInTypeA");
+  if (element.isInCartan(nullptr)) {
+    int index = this->getCartanCoordinateIndexFromCartanGeneratorIndex(
+      element.generatorIndex
+    );
+    output(index, index) += coefficient;
+    output(index + 1, index + 1) -= coefficient;
+    return true;
+  }
+  Vector<Rational> vector;
+  if (!element.isInRootSpace(&vector)) {
+    global.fatal
+    << "Chevalley generator is neither in a root space nor in the Cartan subalgebra. "
+    << global.fatal;
+  }
+  int firstNonZeroIndex = 0;
+  for (; firstNonZeroIndex < vector.size; firstNonZeroIndex ++) {
+    if (vector[firstNonZeroIndex] != 0) {
+      break;
+    }
+  }
+  int lastNonZeroIndex = firstNonZeroIndex;
+  for (int i = firstNonZeroIndex + 1; i < vector.size; i ++) {
+    if (vector[i] == 0) {
+      break;
+    }
+    lastNonZeroIndex = i;
+  }
+  int rowIndex = 0;
+  int columnIndex = 0;
+  if (vector[firstNonZeroIndex] > 0) {
+    rowIndex = firstNonZeroIndex;
+    columnIndex = lastNonZeroIndex;
+  } else {
+    rowIndex = lastNonZeroIndex;
+    columnIndex = firstNonZeroIndex;
+  }
+  output(rowIndex, columnIndex) += coefficient;
+  return true;
 }

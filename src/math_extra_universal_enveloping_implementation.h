@@ -244,7 +244,7 @@ bool MonomialUniversalEnveloping<Coefficient>::commutingABntoBnAPlusLowerOrderAl
   int numPosRoots = this->getOwner().weylGroup.rootsOfBorel.size;
   int theDimension = this->getOwner().weylGroup.cartanSymmetric.numberOfRows;
   if (rightGeneratorIndex >= numPosRoots && rightGeneratorIndex < numPosRoots + theDimension) {
-    return this->getOwner().theLiebrackets.elements[leftGeneratorIndex][rightGeneratorIndex].isEqualToZero();
+    return this->getOwner().lieBrackets.elements[leftGeneratorIndex][rightGeneratorIndex].isEqualToZero();
   }
   return true;
 }
@@ -256,7 +256,7 @@ bool MonomialUniversalEnveloping<Coefficient>::switchConsecutiveIndicesIfTheyCom
   }
   int leftGenerator = this->generatorsIndices[theLeftIndex];
   int rightGenerator = this->generatorsIndices[theLeftIndex + 1];
-  if (!this->getOwner().theLiebrackets.elements[leftGenerator][rightGenerator].isEqualToZero()) {
+  if (!this->getOwner().lieBrackets.elements[leftGenerator][rightGenerator].isEqualToZero()) {
     return false;
   }
   this->generatorsIndices.swapTwoIndices(theLeftIndex, theLeftIndex + 1);

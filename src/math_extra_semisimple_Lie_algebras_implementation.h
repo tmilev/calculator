@@ -308,7 +308,7 @@ void SemisimpleLieAlgebra::lieBracket(
   ElementSemisimpleLieAlgebra<Coefficient> buffer;
   for (int i = 0; i < g1.size(); i ++) {
     for (int j = 0; j < g2.size(); j ++) {
-      buffer = this->theLiebrackets.elements[g1[i].generatorIndex][g2[j].generatorIndex];
+      buffer = this->lieBrackets.elements[g1[i].generatorIndex][g2[j].generatorIndex];
       theCoeff = g1.coefficients[i];
       theCoeff *= g2.coefficients[j];
       buffer *= theCoeff;
@@ -402,12 +402,18 @@ bool ElementSemisimpleLieAlgebra<Coefficient>::isElementCartan() const {
 }
 
 template <class Coefficient>
-void ElementSemisimpleLieAlgebra<Coefficient>::makeCartanGenerator(const Vector<Coefficient>& theH, SemisimpleLieAlgebra& inputOwner) {
-  ChevalleyGenerator tempGen;
+void ElementSemisimpleLieAlgebra<Coefficient>::makeCartanGenerator(
+  const Vector<Coefficient>& elementH,
+  SemisimpleLieAlgebra& inputOwner
+) {
+  ChevalleyGenerator generator;
   this->makeZero();
-  for (int i = 0; i < theH.size; i ++) {
-    tempGen.makeGenerator(inputOwner, inputOwner.getCartanIndexFromGenerator(i));
-    this->addMonomial(tempGen, theH[i]);
+  for (int i = 0; i < elementH.size; i ++) {
+    generator.makeGenerator(
+      inputOwner,
+      inputOwner.getGeneratorIndexFromNonZeroCoefficientIndexInCartan(i)
+    );
+    this->addMonomial(generator, elementH[i]);
   }
 }
 

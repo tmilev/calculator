@@ -4418,6 +4418,30 @@ std::string SlTwoSubalgebra::toStringTriple(FormatExpressions* format) const {
   return HtmlRoutines::getMathNoDisplay(out.str());
 }
 
+std::string SlTwoSubalgebra::toStringTripleStandardRealization() const {
+  Matrix<Rational> matrixH, matrixE, matrixF;
+  if (
+    !this->owner->getElementStandardRepresentation(this->elementH, matrixH) ||
+    !this->owner->getElementStandardRepresentation(this->elementE, matrixE) ||
+    !this->owner->getElementStandardRepresentation(this->elementF, matrixF)
+  ) {
+    return "";
+  }
+  std::stringstream out;
+  FormatExpressions format;
+  format.flagUseHTML = false;
+  format.flagUseLatex = true;
+  out << "<br>Matrix realizations in a standard representation:";
+  out << " <div class='lieAlgebraPanel'><div>";
+  out << "\\(\\begin{array}{rcl}";
+  out << "h&=&" << matrixH.toString(&format) << "\\\\\n";
+  out << "e&=&" << matrixE.toString(&format) << "\\\\\n";
+  out << "f&=&" << matrixF.toString(&format);
+  out << "\\end{array}\\)";
+  out << "</div></div>";
+  return out.str();
+}
+
 std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   MacroRegisterFunctionWithName("SlTwoSubalgebra::toString");
   if (this->container == nullptr) {
@@ -4482,6 +4506,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
     out << "\n<br>\n";
   }
   out << this->toStringTriple(format);
+  out << this->toStringTripleStandardRealization();
   out << this->toStringTripleVerification(format);
   std::stringstream latexStreamActual;
   latexStreamActual << "\\begin{array}{l}";

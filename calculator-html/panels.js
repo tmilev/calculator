@@ -279,6 +279,10 @@ class PanelExpandable {
 
   toggleExpand() {
     this.fullyExpanded = !this.fullyExpanded;
+    if (this.fullyExpanded) {
+      this.setCollapsed(false);
+      return;
+    }
     this.matchPanelStatus();
   }
 

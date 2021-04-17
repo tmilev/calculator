@@ -45,7 +45,7 @@ public:
   Matrix<bool> Computed;
   //
   // Matrix<int> theLiebracketPairingIndices;
-  Matrix<ElementSemisimpleLieAlgebra<Rational> > theLiebrackets;
+  Matrix<ElementSemisimpleLieAlgebra<Rational> > lieBrackets;
   // List<int> OppositeRootSpaces;
   List<int> UEGeneratorOrderIncludingCartanElts;
   // std::string pathVirtualNameOutput;
@@ -69,14 +69,20 @@ public:
   std::string toStringFileNameNoPathRootSubalgebras() const;
   std::string toStringFileNameRelativePathSlTwoSubalgebras() const;
   template <class Coefficient>
-  void getGenericElementCartan(ElementSemisimpleLieAlgebra<Polynomial<Coefficient> >& output, int indexFirstVar = 0) {
+  void getGenericElementCartan(
+    ElementSemisimpleLieAlgebra<Polynomial<Coefficient> >& output,
+    int indexFirstVariable = 0
+  ) {
     output.makeZero();
-    ChevalleyGenerator theGen;
-    Polynomial<Coefficient> theCf;
+    ChevalleyGenerator generator;
+    Polynomial<Coefficient> coefficient;
     for (int i = 0; i < this->getRank(); i ++) {
-      theGen.makeGenerator(*this, this->getCartanGeneratorIndex(i));
-      theCf.makeMonomial(indexFirstVar + i, 1, 1);
-      output.addMonomial(theGen, theCf);
+      generator.makeGenerator(
+        *this,
+        this->getGeneratorIndexFromNonZeroCoefficientIndexInCartan(i)
+      );
+      coefficient.makeMonomial(indexFirstVariable + i, 1, 1);
+      output.addMonomial(generator, coefficient);
     }
   }
   template <class Coefficient>
@@ -95,6 +101,9 @@ public:
   int getOppositeGeneratorIndex(int theIndex) {
     return this->getNumberOfGenerators() - theIndex - 1;
   }
+  // Returns whether the generator is in a root space that
+  // is a simple one. For sl(n), the simple roots are
+  // e_1-e_2, ..., e_{n-1}-e_n; roots such as e_1-e_3 are not simple.
   bool isSimpleGenerator(int generatorIndex);
   SemisimpleLieAlgebra() {
     this->flagHasNilradicalOrder = false;
@@ -163,24 +172,22 @@ public:
   void orderStandardDescending();
 
   void orderSSalgebraForHWbfComputation();
-  int getCartanGeneratorIndex(int simpleRootIndex) {
-    return this->weylGroup.rootsOfBorel.size + simpleRootIndex;
-  }
   int getGeneratorFromRoot(const Vector<Rational>& input) {
     return this->getGeneratorFromRootIndex(this->weylGroup.rootSystem.getIndex(input));
   }
-  int getRootIndexFromDisplayIndex(int theIndex);
-  int getGeneratorFromDisplayIndex(int theIndex) {
-    if (theIndex < 0) {
-      return theIndex + this->getNumberOfPositiveRoots();
+  int getRootIndexFromDisplayIndex(int index);
+  int getGeneratorFromDisplayIndex(int index) {
+    if (index < 0) {
+      return index + this->getNumberOfPositiveRoots();
     }
-    return theIndex + this->getNumberOfPositiveRoots() + this->getRank() - 1;
+    return index + this->getNumberOfPositiveRoots() + this->getRank() - 1;
   }
   int getGeneratorFromRootIndex(int theIndex) const;
   int GetDisplayIndexFromRootIndex(int theIndex) const;
   //the below function returns an negative number if the chevalley generator is an element of the Cartan subalgebra
   int getRootIndexFromGenerator(int index) const;
-  int getCartanIndexFromGenerator(int index) const;
+  int getGeneratorIndexFromNonZeroCoefficientIndexInCartan(int simpleRootIndex) const;
+  int getCartanCoordinateIndexFromCartanGeneratorIndex(int generatorIndex) const;
   int getDisplayIndexFromGenerator(int index) const;
   bool areOrderedProperly(int leftIndex, int rightIndex);
   bool isGeneratorFromCartan(int index) const;
@@ -217,17 +224,7 @@ public:
   void exploitTheCyclicTrick(int i, int j, int k);
   bool getMaxQForWhichBetaMinusQAlphaisARoot(const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output) const;
   Rational getConstant(const Vector<Rational>& root1, const Vector<Rational>& root2);
-  Vector<Rational> getWeightOfGenerator(int index) {
-    if (index < this->getNumberOfPositiveRoots()) {
-      return this->weylGroup.rootSystem[index];
-    }
-    if (index >= this->getRank() + this->getNumberOfPositiveRoots()) {
-      return this->weylGroup.rootSystem[index - this->getRank()];
-    }
-    Vector<Rational> result;
-    result.makeZero(this->getRank());
-    return result;
-  }
+  Vector<Rational> getWeightOfGenerator(int index);
   //returns true if returning constant, false if returning element of h
   bool getConstantOrHElement(
     const Vector<Rational>& root1, const Vector<Rational>& root2, Rational& outputRat, Vector<Rational>& outputH
@@ -246,13 +243,12 @@ public:
     std::stringstream* logStream = nullptr
   );
   static void findSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, SlTwoSubalgebras& output);
-  void GetSl2SubalgebraFromRootSA();
   template<class Coefficient>
   void getAdjoint(Matrix<Coefficient>& output, ElementSemisimpleLieAlgebra<Coefficient>& e);
   template<class Coefficient>
   void getAdjoint(MatrixTensor<Coefficient>& output, ElementSemisimpleLieAlgebra<Coefficient>& e);
   void makeChevalleyTestReport(int i, int j, int k, int Total);
-  bool isInTheWeightSupport(Vector<Rational>& theWeight, Vector<Rational>& highestWeight);
+  bool isInTheWeightSupport(Vector<Rational>& weight, Vector<Rational>& highestWeight);
   void createEmbeddingFromFDModuleHaving1dimWeightSpaces(Vector<Rational>& theHighestWeight);
   int getLengthStringAlongAlphaThroughBeta(
     Vector<Rational>& alpha, Vector<Rational>& beta, int& distanceToHighestWeight, Vectors<Rational>& weightSupport
@@ -269,8 +265,14 @@ public:
     const ElementSemisimpleLieAlgebra<Rational>& element,
     Matrix<Rational>& output
   );
-  bool getChevalleyGeneratorStandardRepresentation(
+  bool accumulateChevalleyGeneratorStandardRepresentation(
     const ChevalleyGenerator& element,
+    const Rational& coefficient,
+    Matrix<Rational>& output
+  );
+  bool accumulateChevalleyGeneratorStandardRepresentationInTypeA(
+    const ChevalleyGenerator& element,
+    const Rational& coefficient,
     Matrix<Rational>& output
   );
 };

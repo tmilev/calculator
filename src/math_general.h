@@ -78,6 +78,11 @@ public:
     this->checkConsistencyWithOther(other);
     return this->generatorIndex == other.generatorIndex;
   }
+  bool isInCartan(Vector<Rational>* whichElement) const;
+  // Returns the root of the generator if the element
+  // is not in the Cartan subalgebra.
+  // If the element is in the Cartan subalgebra, returns the zero vector.
+  bool isInRootSpace(Vector<Rational>* whichRoot) const;
   class Test {
   public:
     static bool all();
@@ -3974,7 +3979,7 @@ public:
   Vector<Coefficient> getCartanPart() const;
   void makeGGenerator(const Vector<Rational>& theRoot, SemisimpleLieAlgebra& inputOwner);
   bool isElementCartan() const;
-  void makeCartanGenerator(const Vector<Coefficient>& theH, SemisimpleLieAlgebra& inputOwners);
+  void makeCartanGenerator(const Vector<Coefficient>& elementH, SemisimpleLieAlgebra& inputOwners);
   void makeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner);
   void elementToVectorNegativeRootSpacesFirst(Vector<Coefficient>& output) const;
   void assignVectorNegRootSpacesCartanPosRootSpaces(

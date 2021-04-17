@@ -35,6 +35,7 @@ function initializeGlobals() {
     themes: null,
     pageNavigation: null,
     equationEditor: null,
+    lieAlgebras: null,
     hardCodedServerAddress: "",
   };
   if (window.calculator === undefined || window.calculator === null) {
@@ -49,6 +50,7 @@ function initializeGlobals() {
 function loadGlobals() {
   let calculator = window.calculator;
   calculator.login = require("./login");
+  calculator.lieAlgebras = require("./lie_algebras");
   calculator.signUp = require("./signup").signUp;
   calculator.forgotLogin = require("./forgot_password").forgotLogin;
   calculator.calculator = require("./calculator_page").calculator;

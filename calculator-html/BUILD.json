@@ -49,5 +49,6 @@
   "/calculator-html/answer_panel.js",
   "/calculator-html/graphics_serialization.js",
   "/calculator-html/dynamic_javascript.js",
-  "/calculator-html/calculator_page_editor.js"
+  "/calculator-html/calculator_page_editor.js",
+  "/calculator-html/lie_algebras.js"
 ]

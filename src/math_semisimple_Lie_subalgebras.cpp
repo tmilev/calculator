@@ -833,7 +833,7 @@ std::string SemisimpleSubalgebras::toStringSl2s(FormatExpressions *theFormat) {
   << "The h elements and their computed orbit sizes follow. ";
   out << "<table><tr><td>h element</td><td>orbit size</td></tr>";
   for (int i = 0; i < this->orbits.size; i ++) {
-    out << "<tr><td>" << this->slTwoSubalgebras[i].theH.getCartanPart().toString() << "</td>";
+    out << "<tr><td>" << this->slTwoSubalgebras[i].elementH.getCartanPart().toString() << "</td>";
     if (this->orbits[i].orbitSize != - 1) {
       out << "<td>" << this->orbits[i].orbitSize;
       if (this->orbits[i].flagOrbitIsBuffered == 0)
@@ -925,7 +925,7 @@ void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand() {
   for (int i = 0; i < this->slTwoSubalgebras.size; i ++) {
     this->orbitHElementLengths.addOnTop(this->slTwoSubalgebras[i].LengthHsquared);
     this->theOrbitDynkinIndices.addOnTop(DynkinSimpleType('A', 1, this->slTwoSubalgebras[i].LengthHsquared));
-    this->orbits[i].initialize(theGens, this->slTwoSubalgebras[i].theH.getCartanPart());
+    this->orbits[i].initialize(theGens, this->slTwoSubalgebras[i].elementH.getCartanPart());
   }
 }
 
@@ -1521,7 +1521,7 @@ void SemisimpleSubalgebras::getHCandidates(
       reportStreamX << "Trying to realize via orbit number " << j + 1 << ".";
       if (this->slTwoSubalgebras[j].LengthHsquared != desiredHScaledToActByTwoLengthSquared) {
         reportStreamX << " The h element "
-        << this->slTwoSubalgebras[j].theH.getCartanPart().toString() << " of length "
+        << this->slTwoSubalgebras[j].elementH.getCartanPart().toString() << " of length "
         << this->orbitHElementLengths[j].toString()
         << " generating orbit number " << j + 1 << " out of "
         << this->slTwoSubalgebras.size << " does not have the required length of "
@@ -1533,7 +1533,7 @@ void SemisimpleSubalgebras::getHCandidates(
       continue;
     }
     if (baseRank == 0) {
-      outputHCandidatesScaledToActByTwo.addOnTop(this->slTwoSubalgebras[j].theH.getCartanPart());
+      outputHCandidatesScaledToActByTwo.addOnTop(this->slTwoSubalgebras[j].elementH.getCartanPart());
       // Orbit of not generated because that is the very first H element selected.
       continue;
     }
@@ -4391,17 +4391,16 @@ bool SlTwoSubalgebra::operator==(const SlTwoSubalgebra& right) const {
 std::string SlTwoSubalgebra::toStringTripleVerification(FormatExpressions* format) const {
   std::stringstream out;
   bool useHtml = format == nullptr ? true : format->flagUseHTML;
-  out << "\nLie brackets of the above elements. ";
+  out << "<br>Lie brackets of the above elements.<br>";
   if (useHtml) {
     out << "\n<br>\n";
   }
-  std::stringstream streamEF, streamHE, streamHF;
-  streamEF << "\n[e, f] =" <<  this->bufferEbracketF.toString(format) << "";
-  out << HtmlRoutines::getMathNoDisplay(streamEF.str()) << "\n<br>\n";
-  streamHE << "\n[h, e] =" << this->bufferHbracketE.toString(format) << "";
-  out << HtmlRoutines::getMathNoDisplay(streamHE.str()) << "\n<br>\n";
-  streamHF << "\n[h, f] = " << this->bufferHbracketF.toString(format) << "";
-  out << HtmlRoutines::getMathNoDisplay(streamHF.str()) << "\n<br>\n";
+  out << "\\(\\begin{array}{rcl}"
+  << "[e, f]&=&" << this->eBracketF.toString(format) << "\\\\\n"
+  << "[h, e]&=&" << this->hBracketE.toString(format) << "\\\\\n"
+  << "[h, f]&=&" << this->hBracketF.toString(format)
+  << "\\end{array}\\)";
+
   //this->theSystemMatrixForm.toString(tempS);
   //out << "\nSystem matrix form we try to solve:\n" << tempS;
   //this->theSystemColumnVector.toString(tempS);
@@ -4411,14 +4410,12 @@ std::string SlTwoSubalgebra::toStringTripleVerification(FormatExpressions* forma
 
 std::string SlTwoSubalgebra::toStringTriple(FormatExpressions* format) const {
   std::stringstream out;
-  std::stringstream tempStreamH, tempStreamE, tempStreamF;
-  tempStreamH << "h = " << this->theH.toString(format) << "";
-  out << HtmlRoutines::getMathNoDisplay(tempStreamH.str()) << "\n<br>\n";
-  tempStreamE << "e = " << this->theE.toString(format);
-  out << HtmlRoutines::getMathNoDisplay(tempStreamE.str()) << "\n<br>\n";
-  tempStreamF << "f= " << this->theF.toString(format);
-  out << HtmlRoutines::getMathNoDisplay(tempStreamF.str()) << "\n<br>\n";
-  return out.str();
+  out << "\\begin{array}{rcl}";
+  out << "h&=&" << this->elementH.toString(format) << "\\\\\n";
+  out << "e&=&" << this->elementE.toString(format) << "\\\\\n";
+  out << "f&=&" << this->elementF.toString(format);
+  out << "\\end{array}";
+  return HtmlRoutines::getMathNoDisplay(out.str());
 }
 
 std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
@@ -4492,6 +4489,9 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
     latexStreamActual << this->theSystemToBeSolved[i].toString(format) << "~\\\\";
   }
   latexStreamActual << "\\end{array}";
+  if (useHtml) {
+    out << "<br>";
+  }
   out << "\nThe polynomial system that corresponds to finding the h, e, f triple:\n";
   if (useHtml) {
     out << "\n<br>\n";
@@ -4756,7 +4756,7 @@ bool SlTwoSubalgebras::containsSl2WithGivenH(Vector<Rational>& theH, int* output
   this->checkInitialization();
   tempH.makeCartanGenerator(theH, *this->owner);
   for (int i = 0; i < this->size; i ++) {
-    if (this->objects[i].theH == tempH) {
+    if (this->objects[i].elementH == tempH) {
       if (outputIndex != nullptr) {
         *outputIndex = i;
       }
@@ -4850,14 +4850,14 @@ void SlTwoSubalgebra::makeReportPrecomputations(
   this->indicesContainingRootSAs.size = 0;
   Vectors<Rational> tempRoots;
   tempRoots = MinimalContainingRegularSubalgebra.simpleRootsReductiveSubalgebra;
-  this->getOwnerSemisimpleAlgebra().weylGroup.transformToSimpleBasisGeneratorsWithRespectToH(tempRoots, this->theH.getCartanPart());
+  this->getOwnerSemisimpleAlgebra().weylGroup.transformToSimpleBasisGeneratorsWithRespectToH(tempRoots, this->elementH.getCartanPart());
   DynkinDiagramRootSubalgebra theDiagram;
   theDiagram.ambientBilinearForm = this->getOwnerWeyl().cartanSymmetric;
   theDiagram.ambientRootSystem = this->getOwnerWeyl().rootSystem;
   theDiagram.computeDiagramInputIsSimple(tempRoots);
   this->indicesContainingRootSAs.addOnTop(indexMinimalContainingRegularSA);
   tempRoots.makeEiBasis(theDimension);
-  this->getOwnerSemisimpleAlgebra().weylGroup.transformToSimpleBasisGeneratorsWithRespectToH(tempRoots, this->theH.getCartanPart());
+  this->getOwnerSemisimpleAlgebra().weylGroup.transformToSimpleBasisGeneratorsWithRespectToH(tempRoots, this->elementH.getCartanPart());
   DynkinDiagramRootSubalgebra tempDiagram;
   tempDiagram.ambientBilinearForm = this->getOwnerWeyl().cartanSymmetric;
   tempDiagram.ambientRootSystem = this->getOwnerWeyl().rootSystem;
@@ -4866,19 +4866,28 @@ void SlTwoSubalgebra::makeReportPrecomputations(
   this->hCharacteristic.setSize(theDimension);
   for (int i = 0; i < theDimension; i ++) {
     this->hCharacteristic[i] = this->getOwnerSemisimpleAlgebra().weylGroup.rootScalarCartanRoot(
-      this->theH.getCartanPart(), this->preferredAmbientSimpleBasis[i]
+      this->elementH.getCartanPart(), this->preferredAmbientSimpleBasis[i]
     );
   }
   //this->hCharacteristic.ComputeDebugString();
 //  if (this->theE.NonZeroElements.maximumSize == this->owner->theWeyl.RootSystem.size
 //      && this->theF.NonZeroElements.maximumSize == this->owner->theWeyl.RootSystem.size
 //      && this->theH.NonZeroElements.maximumSize == this->owner->theWeyl.RootSystem.size)
-  this->getOwnerSemisimpleAlgebra().lieBracket(this->theE, this->theF, this->bufferEbracketF);
-  this->getOwnerSemisimpleAlgebra().lieBracket(this->theH, this->theE, this->bufferHbracketE);
-  this->getOwnerSemisimpleAlgebra().lieBracket(this->theH, this->theF, this->bufferHbracketF);
+  this->getOwnerSemisimpleAlgebra().lieBracket(this->elementE, this->elementF, this->eBracketF);
+  this->getOwnerSemisimpleAlgebra().lieBracket(this->elementH, this->elementE, this->hBracketE);
+  this->getOwnerSemisimpleAlgebra().lieBracket(this->elementH, this->elementF, this->hBracketF);
 
   //theSl2.hCharacteristic.ComputeDebugString();
 //  this->computePrimalModuleDecomposition();
+}
+
+unsigned int SlTwoSubalgebra::hashFunction() const {
+  int tempI = MathRoutines::minimum(someRandomPrimesSize, this->hCharacteristic.size);
+  unsigned int result = 0;
+  for (int i = 0; i < tempI; i ++) {
+    result += static_cast<unsigned>(this->hCharacteristic[i].numeratorShort) * someRandomPrimes[i];
+  }
+  return result;
 }
 
 //The below code is related to sl(2) subalgebras of simple Lie algebras
@@ -4897,7 +4906,7 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
   int IndexZeroWeight = positiveRootsContainingRegularSA.size * 2;
   outputModuleDimensions.initializeFillInObject(4 * positiveRootsContainingRegularSA.size + 1, 0);
   outputModuleDimensions[IndexZeroWeight] = dimensionContainingRegularSA;
-  List<int> BufferHighestWeights;
+  List<int> bufferHighestWeights;
   Rational tempRat;
   Vectors<Rational> coordsInPreferredSimpleBasis;
   positiveRootsContainingRegularSA.getCoordinatesInBasis(
@@ -4908,7 +4917,7 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
     if (tempRat.denominatorShort != 1) {
       global.fatal << "Characteristic must be integer. " << global.fatal;
     }
-    if (tempRat>positiveRootsContainingRegularSA.size * 2) {
+    if (tempRat > positiveRootsContainingRegularSA.size * 2) {
       global.fatal << "The scalar product of the h-Characteristic "
       << this->hCharacteristic.toString()
       << " with the simple root " << coordsInPreferredSimpleBasis[k].toString()
@@ -4919,13 +4928,13 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
     outputModuleDimensions[IndexZeroWeight + tempRat.numeratorShort] ++;
     outputModuleDimensions[IndexZeroWeight - tempRat.numeratorShort] ++;
   }
-  BufferHighestWeights = (outputModuleDimensions);
-  outputHWs.setExpectedSize( positiveRootsContainingRegularSA.size * 2);
+  bufferHighestWeights = (outputModuleDimensions);
+  outputHWs.setExpectedSize(positiveRootsContainingRegularSA.size * 2);
   outputHWs.makeZero();
   Weight<Rational> currentHW;
   currentHW.weightFundamentalCoordinates.makeEi(1, 0);
-  for (int j = BufferHighestWeights.size - 1; j >= IndexZeroWeight; j --) {
-    int topMult = BufferHighestWeights[j];
+  for (int j = bufferHighestWeights.size - 1; j >= IndexZeroWeight; j --) {
+    int topMult = bufferHighestWeights[j];
     if (topMult < 0) {
       global.fatal << "The sl(2)-module decomposition shows an sl(2)-module with highest weight "
       << topMult << " which is impossible. Here is the sl(2) subalgebra. " << this->toString() << "." << global.fatal;
@@ -4934,14 +4943,14 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
       currentHW.weightFundamentalCoordinates[0] = j - IndexZeroWeight;
       outputHWs.addMonomial(currentHW, topMult);
       if (j != IndexZeroWeight) {
-        BufferHighestWeights[IndexZeroWeight * 2 - j] -= topMult;
+        bufferHighestWeights[IndexZeroWeight * 2 - j] -= topMult;
       }
       for (int k = j - 2; k >= IndexZeroWeight; k -= 2) {
-        BufferHighestWeights[k] -= topMult;
+        bufferHighestWeights[k] -= topMult;
         if (k != IndexZeroWeight) {
-          BufferHighestWeights[IndexZeroWeight * 2 - k] -= topMult;
+          bufferHighestWeights[IndexZeroWeight * 2 - k] -= topMult;
         }
-        if (BufferHighestWeights[k] < 0 || !(BufferHighestWeights[k] == BufferHighestWeights[IndexZeroWeight * 2 - k])) {
+        if (bufferHighestWeights[k] < 0 || !(bufferHighestWeights[k] == bufferHighestWeights[IndexZeroWeight * 2 - k])) {
           std::stringstream crashStream;
           crashStream
           << "An error check has failed. While trying to decompose with respect to  h-characteristic <br> "
@@ -5031,7 +5040,7 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
     for (int i = 0; i < this->BadHCharacteristics.size; i ++) {
       bool isGoodInItsbadness = false;
       for (int j = 0; j < this->size; j ++) {
-        if (this->BadHCharacteristics[i] == (*this)[j].theH.getCartanPart()) {
+        if (this->BadHCharacteristics[i] == (*this)[j].elementH.getCartanPart()) {
           isGoodInItsbadness = true;
           break;
         }
@@ -5097,8 +5106,8 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
       out << "</td>";
       out << "<td style='white-space: nowrap'>";
     }
-    out << currentSubalgebra.theH.getCartanPart().toString();
-    if (!this->getOwnerWeyl().isDominantWeight(currentSubalgebra.theH.getCartanPart())) {
+    out << currentSubalgebra.elementH.getCartanPart().toString();
+    if (!this->getOwnerWeyl().isDominantWeight(currentSubalgebra.elementH.getCartanPart())) {
       out << "<b>Something has gone very wrong! The h is not dual to a dominant weight. This shouldn't happen: "
       << "this is either a programming or mathematical error. </b>";
     }

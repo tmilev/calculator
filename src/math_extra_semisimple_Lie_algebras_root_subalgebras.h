@@ -435,8 +435,8 @@ public:
 /////////////////////////////////////////////
   CharacterSemisimpleLieAlgebraModule<Rational> moduleDecompositionAmbientSA;
   List<int> moduleDimensions;
-  ElementSemisimpleLieAlgebra<Rational> theH, theE, theF;
-  ElementSemisimpleLieAlgebra<Rational> bufferHbracketE, bufferHbracketF, bufferEbracketF;
+  ElementSemisimpleLieAlgebra<Rational> elementH, elementE, elementF;
+  ElementSemisimpleLieAlgebra<Rational> hBracketE, hBracketF, eBracketF;
   SemisimpleLieAlgebra* owner;
   SlTwoSubalgebras* container;
   Rational LengthHsquared;
@@ -538,14 +538,7 @@ public:
   void toHTML(std::string& filePath);
   bool operator==(const SlTwoSubalgebra& right) const;
   bool operator>(const SlTwoSubalgebra& right) const;
-  unsigned int hashFunction() const {
-    int tempI = MathRoutines::minimum(someRandomPrimesSize, this->hCharacteristic.size);
-    unsigned int result = 0;
-    for (int i = 0; i < tempI; i ++) {
-      result += static_cast<unsigned>(this->hCharacteristic[i].numeratorShort) * someRandomPrimes[i];
-    }
-    return result;
-  }
+  unsigned int hashFunction() const;
   static inline unsigned int hashFunction(const SlTwoSubalgebra& input) {
     return input.hashFunction();
   }

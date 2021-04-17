@@ -179,23 +179,11 @@ public:
   int getGeneratorFromRootIndex(int theIndex) const;
   int GetDisplayIndexFromRootIndex(int theIndex) const;
   //the below function returns an negative number if the chevalley generator is an element of the Cartan subalgebra
-  int getRootIndexFromGenerator(int theIndex) const;
-  int getCartanIndexFromGenerator(int theIndex) {
-    return theIndex + this->weylGroup.rootsOfBorel.size;
-  }
-  int getDisplayIndexFromGenerator(int theIndex) const {
-    if (theIndex < this->getNumberOfPositiveRoots()) {
-      return theIndex - this->getNumberOfPositiveRoots();
-    }
-    if (theIndex >= this->getNumberOfPositiveRoots() + this->getRank()) {
-      return theIndex + 1 - this->getNumberOfPositiveRoots() - this->getRank();
-    }
-    return theIndex - this->getNumberOfPositiveRoots();
-  }
+  int getRootIndexFromGenerator(int index) const;
+  int getCartanIndexFromGenerator(int index) const;
+  int getDisplayIndexFromGenerator(int index) const;
   bool areOrderedProperly(int leftIndex, int rightIndex);
-  bool isGeneratorFromCartan(int theIndex) const {
-    return theIndex >= this->getNumberOfPositiveRoots() && theIndex < this->getNumberOfPositiveRoots() + this->getRank();
-  }
+  bool isGeneratorFromCartan(int index) const;
   bool areOppositeRootSpaces(int leftIndex, int rightIndex) {
     if (this->isGeneratorFromCartan(leftIndex) || this->isGeneratorFromCartan(rightIndex)) {
       return false;
@@ -279,6 +267,10 @@ public:
   // sl(n) - the natural (n x n)- matrix realization.
   bool getElementStandardRepresentation(
     const ElementSemisimpleLieAlgebra<Rational>& element,
+    Matrix<Rational>& output
+  );
+  bool getChevalleyGeneratorStandardRepresentation(
+    const ChevalleyGenerator& element,
     Matrix<Rational>& output
   );
 };

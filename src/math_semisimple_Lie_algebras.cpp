@@ -177,6 +177,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculatorBodyOnload() {
   out << "<body onload='"
   << "window.calculator.equationEditor.typeset(document.body, null); "
   << "window.calculator.dynamicJavascript.dynamicJavascript.bootstrapAllScripts(document.body);"
+  << "window.calculator.lieAlgebras.bootstrap();"
   << "'>";
   return out.str();
 }
@@ -1353,8 +1354,8 @@ bool SemisimpleLieAlgebra::hasComputedStructureConstants() {
 }
 
 void SemisimpleLieAlgebra::orderSSalgebraForHWbfComputation() {
-  int numPosRoots = this->getNumberOfPositiveRoots();
-  for (int i = 0; i < numPosRoots; i ++) {
+  int numberOfPositiveRoots = this->getNumberOfPositiveRoots();
+  for (int i = 0; i < numberOfPositiveRoots; i ++) {
     this->UEGeneratorOrderIncludingCartanElts[i] = - 1;
   }
 }
@@ -1375,6 +1376,10 @@ void SemisimpleLieAlgebra::orderStandardDescending() {
 
 bool SemisimpleLieAlgebra::areOrderedProperly(int leftIndex, int rightIndex) {
   return this->UEGeneratorOrderIncludingCartanElts[leftIndex] <= this->UEGeneratorOrderIncludingCartanElts[rightIndex];
+}
+
+bool SemisimpleLieAlgebra::isGeneratorFromCartan(int index) const {
+  return index >= this->getNumberOfPositiveRoots() && index < this->getNumberOfPositiveRoots() + this->getRank();
 }
 
 int SemisimpleLieAlgebra::getRootIndexFromDisplayIndex(int theIndex) {
@@ -1411,14 +1416,28 @@ int SemisimpleLieAlgebra::getGeneratorFromRootIndex(int theIndex) const {
   return theIndex;
 }
 
-int SemisimpleLieAlgebra::getRootIndexFromGenerator(int theIndex) const {
+int SemisimpleLieAlgebra::getDisplayIndexFromGenerator(int index) const {
+  if (index < this->getNumberOfPositiveRoots()) {
+    return index - this->getNumberOfPositiveRoots();
+  }
+  if (index >= this->getNumberOfPositiveRoots() + this->getRank()) {
+    return index + 1 - this->getNumberOfPositiveRoots() - this->getRank();
+  }
+  return index - this->getNumberOfPositiveRoots();
+}
+
+int SemisimpleLieAlgebra::getCartanIndexFromGenerator(int index) const {
+  return index + this->weylGroup.rootsOfBorel.size;
+}
+
+int SemisimpleLieAlgebra::getRootIndexFromGenerator(int index) const {
   int numPosRoots = this->weylGroup.rootsOfBorel.size;
   int theDimension = this->weylGroup.cartanSymmetric.numberOfRows;
-  if (theIndex < numPosRoots) {
-    return theIndex;
+  if (index < numPosRoots) {
+    return index;
   }
-  if (theIndex >= numPosRoots + theDimension) {
-    return theIndex - theDimension;
+  if (index >= numPosRoots + theDimension) {
+    return index - theDimension;
   }
   return - 1;
 }
@@ -1427,6 +1446,11 @@ bool SemisimpleLieAlgebra::getElementStandardRepresentation(
   const ElementSemisimpleLieAlgebra<Rational>& element,
   Matrix<Rational>& output
 ) {
-  return false;
+//  if ()
+}
+
+bool SemisimpleLieAlgebra::getChevalleyGeneratorStandardRepresentation(
+  const ChevalleyGenerator& element, Matrix<Rational>& output
+) {
 
 }

@@ -2699,17 +2699,17 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
         << global.fatal;
       }
     }
-    theSl2.theH.makeCartanGenerator(characteristicH, theLieAlgebra);
+    theSl2.elementH.makeCartanGenerator(characteristicH, theLieAlgebra);
     theSl2.LengthHsquared = theSl2.getOwnerSemisimpleAlgebra().weylGroup.rootScalarCartanRoot(characteristicH, characteristicH);
-    theSl2.theE.makeZero();
-    theSl2.theF.makeZero();
+    theSl2.elementE.makeZero();
+    theSl2.elementF.makeZero();
     if (theSl2.attemptExtendingHFtoHEFWRTSubalgebra(
       theSl2.RootsWithScalar2WithH,
       selectionRootsWithZeroCharacteristic,
       reflectedSimpleBasisK,
       characteristicH,
-      theSl2.theE,
-      theSl2.theF,
+      theSl2.elementE,
+      theSl2.elementF,
       theSl2.theSystemMatrixForm,
       theSl2.theSystemToBeSolved,
       theSl2.theSystemColumnVector

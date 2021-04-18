@@ -1174,30 +1174,40 @@ bool Calculator::replaceXdotsXByMatrixStart(int numXes) {
 }
 
 bool Calculator::replaceMatrixXByE() {
-  SyntacticElement& theMatElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
-  Matrix<Expression> theMat;
-  int numRows = theMatElt.dataList.size;
-  int numCols = 0;
-  for (int i = 0; i < theMatElt.dataList.size; i ++) {
-    numCols = MathRoutines::maximum(theMatElt.dataList[i].size() - 1, numCols);
+  SyntacticElement& matrixElement = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
+  Matrix<Expression> matrix;
+  int numberOfColumns = 0;
+  for (int i = 0; i < matrixElement.dataList.size; i ++) {
+    numberOfColumns = MathRoutines::maximum(matrixElement.dataList[i].size() - 1, numberOfColumns);
   }
-  if (numCols > 0 && numRows > 0) {
-    theMat.initialize(numRows, numCols);
-    for (int i = 0; i < numRows; i ++) {
-      for (int j = 0; j < numCols; j ++) {
-        if (j + 1 >= theMatElt.dataList[i].size()) {
-          theMat.elements[i][j].assignValue(0, *this);
+  if (matrixElement.dataList.size > 1) {
+    if (matrixElement.dataList.lastObject()->size() - 1 == 0) {
+      // We have an empty last row.
+      // This is obtained for example when parsing the following.
+      // \begin{array}{cc} 1&1\\ 2&3\\ \end{array}
+      // where the last \\ creates an empty last row (in our set of parsing rules).
+      // We trim that last row.
+      matrixElement.dataList.setSize(matrixElement.dataList.size - 1);
+    }
+  }
+  int numberOfRows = matrixElement.dataList.size;
+  if (numberOfColumns > 0 && numberOfRows > 0) {
+    matrix.initialize(numberOfRows, numberOfColumns);
+    for (int i = 0; i < numberOfRows; i ++) {
+      for (int j = 0; j < numberOfRows; j ++) {
+        if (j + 1 >= matrixElement.dataList[i].size()) {
+          matrix.elements[i][j].assignValue(0, *this);
           continue;
         }
-        theMat.elements[i][j] = theMatElt.dataList[i][j + 1];
+        matrix.elements[i][j] = matrixElement.dataList[i][j + 1];
       }
     }
-    theMatElt.data.assignMatrixExpressions(theMat, *this, true, true);
+    matrixElement.data.assignMatrixExpressions(matrix, *this, true, true);
   } else {
-    theMatElt.data.makeMatrix(*this);
+    matrixElement.data.makeMatrix(*this);
   }
-  theMatElt.dataList.setSize(0);
-  theMatElt.controlIndex = this->conExpression();
+  matrixElement.dataList.setSize(0);
+  matrixElement.controlIndex = this->conExpression();
   if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::replaceMatrixXByE]";
   }

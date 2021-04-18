@@ -95,12 +95,13 @@ public:
   static bool innerMultiplyRatOrPolyByWeightPoly(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyWeylGroupEltByWeightPoly(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerLieBracketExtractConstant(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerLieBracketDistribute(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerLieBracketRatOrUEWithRatOrUE(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerLieBracketSwapTermsIfNeeded(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerLieBracketJacobiIdentityIfNeeded(Calculator& calculator, const Expression& input, Expression& output);
+  static bool lieBracketOfMatrices(Calculator& calculator, const Expression& input, Expression& output);
+  static bool lieBracketExtractConstant(Calculator& calculator, const Expression& input, Expression& output);
+  static bool lieBracketDistribute(Calculator& calculator, const Expression& input, Expression& output);
+  static bool lieBracketRatOrUEWithRatOrUE(Calculator& calculator, const Expression& input, Expression& output);
+  static bool lieBracketRatPolyOrEWAWithRatPolyOrEWA(Calculator& calculator, const Expression& input, Expression& output);
+  static bool lieBracketSwapTermsIfNeeded(Calculator& calculator, const Expression& input, Expression& output);
+  static bool lieBracketJacobiIdentityIfNeeded(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerDivideRatByRat(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerDivideDoubleByDouble(Calculator& calculator, const Expression& input, Expression& output);

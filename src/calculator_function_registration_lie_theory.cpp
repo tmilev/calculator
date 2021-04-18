@@ -1787,7 +1787,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "[]",
-    CalculatorFunctionsBinaryOps::innerLieBracketDistribute,
+    CalculatorFunctionsBinaryOps::lieBracketDistribute,
     "",
     "Implementation of the rules [{{a}}+{{b}},{{c}}] = [a, c] +[b, c] "
     "and [{{c}},{{a}}+{{b}}] =[c,a] +[c,b]",
@@ -1798,7 +1798,32 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "[]",
-    CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant,
+    CalculatorFunctionsBinaryOps::lieBracketOfMatrices,
+    "",
+    "Matrix lie bracket. ",
+    "h=\\begin{pmatrix}3 & 0 & 0 & 0\\\\\n"
+    "0 & 1 & 0 & 0\\\\"
+    "0 & 0 & -1 & 0\\\\"
+    "0 & 0 & 0 & -3\\\\"
+    "\\end{pmatrix};"
+    "e=\\begin{pmatrix}0 & 3 & 0 & 0\\\\"
+    "0 & 0 & 2 & 0\\\\"
+    "0 & 0 & 0 & 3/5\\\\"
+    "0 & 0 & 0 & 0\\\\"
+    "\\end{pmatrix};"
+    "f=\\begin{pmatrix}0 & 0 & 0 & 0\\\\"
+    "1 & 0 & 0 & 0\\\\"
+    "0 & 2 & 0 & 0\\\\"
+    "0 & 0 & 5 & 0\\\\"
+    "\\end{pmatrix};",
+    "CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant",
+    "LieBracketConstants",
+    innerStandard
+  );
+
+  this->addOperationHandler(
+    "[]",
+    CalculatorFunctionsBinaryOps::lieBracketExtractConstant,
     "",
     "Extracts constants from Lie brackets. ",
     "[2a, 3b]",
@@ -1808,7 +1833,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "[]",
-    CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA,
+    CalculatorFunctionsBinaryOps::lieBracketRatPolyOrEWAWithRatPolyOrEWA,
     "",
     "Lie bracket of elements of Weyl algebras = differential operators with polynomial coefficients. ",
     "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
@@ -1819,7 +1844,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "[]",
-    CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE,
+    CalculatorFunctionsBinaryOps::lieBracketRatOrUEWithRatOrUE,
     "",
     "Lie bracket of elements of semisimple Lie algebra. ",
     "X =A_1;\ng_{{i}}= GetChevalleyGenerator{}(X,i);\n"
@@ -1831,7 +1856,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "[]",
-    CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded,
+    CalculatorFunctionsBinaryOps::lieBracketSwapTermsIfNeeded,
     "",
     "Swaps terms in Lie brackets if needed. ",
     "[b, a]",
@@ -1841,7 +1866,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "[]",
-    CalculatorFunctionsBinaryOps::innerLieBracketJacobiIdentityIfNeeded,
+    CalculatorFunctionsBinaryOps::lieBracketJacobiIdentityIfNeeded,
     "",
     "Extracts constants from Lie brackets. ",
     "[2a,3b] ",

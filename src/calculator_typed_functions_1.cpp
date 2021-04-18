@@ -2289,7 +2289,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTe
   return output.assignValue(result, calculator);
 }
 
-bool CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant(
+bool CalculatorFunctionsBinaryOps::lieBracketExtractConstant(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant");
@@ -2325,7 +2325,7 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant(
   return true;
 }
 
-bool CalculatorFunctionsBinaryOps::innerLieBracketDistribute(
+bool CalculatorFunctionsBinaryOps::lieBracketDistribute(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerLieBracketDistribute");
@@ -2334,7 +2334,7 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketDistribute(
   );
 }
 
-bool CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE(
+bool CalculatorFunctionsBinaryOps::lieBracketRatOrUEWithRatOrUE(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE");
@@ -2364,10 +2364,10 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE(
   return false;
 }
 
-bool CalculatorFunctionsBinaryOps::innerLieBracketJacobiIdentityIfNeeded(
+bool CalculatorFunctionsBinaryOps::lieBracketJacobiIdentityIfNeeded(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerLieBracketJacobiIdentityIfNeeded");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::lieBracketJacobiIdentityIfNeeded");
   if (!input.startsWith(calculator.opLieBracket(), 3)) {
     return false;
   }
@@ -2390,10 +2390,10 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketJacobiIdentityIfNeeded(
   return true;
 }
 
-bool CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded(
+bool CalculatorFunctionsBinaryOps::lieBracketSwapTermsIfNeeded(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::lieBracketSwapTermsIfNeeded");
   if (!input.startsWith(calculator.opLieBracket(), 3)) {
     return false;
   }
@@ -2412,10 +2412,44 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded(
   return true;
 }
 
-bool CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(
+bool CalculatorFunctionsBinaryOps::lieBracketOfMatrices(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::lieBracketOfMatrices");
+  (void) calculator;
+  if (input.size() != 3) {
+    return false;
+  }
+  const Expression left = input[1];
+  const Expression right = input[2];
+  int leftRowCount = 0;
+  int leftColumnCount = 0;
+  int rightRowCount = 0;
+  int rightColumnCount = 0;
+  if (
+    !left.isMatrix(&leftRowCount, &leftColumnCount) ||
+    !right.isMatrix(&rightRowCount, &rightColumnCount)
+  ) {
+    return false;
+  }
+  if (
+    leftRowCount < 2 ||
+    leftRowCount != leftColumnCount ||
+    leftRowCount != rightRowCount ||
+    leftRowCount != rightColumnCount
+  ) {
+    return false;
+  }
+  output = left * right - right * left;
+  return true;
+}
+
+bool CalculatorFunctionsBinaryOps::lieBracketRatPolyOrEWAWithRatPolyOrEWA(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::lieBracketRatPolyOrEWAWithRatPolyOrEWA");
   if (!input.isListNElements(3)) {
     return false;
   }

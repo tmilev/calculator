@@ -2315,7 +2315,7 @@ bool CalculatorLieTheory::growDynkinType(
   SemisimpleSubalgebras tempSas;
   tempSas.initHookUpPointers(
     *theSSalg.content,
-    &calculator.objectContainer.theAlgebraicClosure,
+    &calculator.objectContainer.algebraicClosure,
     &calculator.objectContainer.semisimpleLieAlgebras,
     &calculator.objectContainer.theSltwoSAs
   );
@@ -2397,7 +2397,7 @@ bool CalculatorLieTheory::computeSemisimpleSubalgebras(
   theSSsubalgebras.flagComputeNilradicals = false;
   theSSsubalgebras.findTheSemisimpleSubalgebrasFromScratch(
     ownerSS,
-    calculator.objectContainer.theAlgebraicClosure,
+    calculator.objectContainer.algebraicClosure,
     calculator.objectContainer.semisimpleLieAlgebras,
     calculator.objectContainer.theSltwoSAs,
     nullptr
@@ -3000,7 +3000,7 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
   calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerLieAlgebra.weylGroup.dynkinType);
   subalgebras.computeStructureWriteFiles(
     ownerLieAlgebra,
-    calculator.objectContainer.theAlgebraicClosure,
+    calculator.objectContainer.algebraicClosure,
     calculator.objectContainer.semisimpleLieAlgebras,
     calculator.objectContainer.theSltwoSAs,
     &out,

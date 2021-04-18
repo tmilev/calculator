@@ -2109,14 +2109,14 @@ bool ObjectContainer::checkConsistencyAfterReset() {
   if (this->polynomialsRational.size != 0) {
     global.fatal << "The rational polynomials are expected to be empty, have: " << this->polynomialsRational.size << " elements instead. " << global.fatal;
   }
-  if (this->theRationals.size != 0) {
-    global.fatal << "Rationals expected to be empty, have: " << this->theRationals.size << " elements instead. " << global.fatal;
+  if (this->allRationals.size != 0) {
+    global.fatal << "Rationals expected to be empty, have: " << this->allRationals.size << " elements instead. " << global.fatal;
   }
   if (this->theDoubles.size != 1) {
     global.fatal << "Doubles expected to be have exactly 1 element (namely, nan), have: " << this->theDoubles.size << " elements instead. " << global.fatal;
   }
-  if (this->theAlgebraicNumbers.size != 0) {
-    global.fatal << "Algebraic numbers expected to be empty, have: " << this->theAlgebraicNumbers.size << " elements instead. " << global.fatal;
+  if (this->allAlgebraicNumbers.size != 0) {
+    global.fatal << "Algebraic numbers expected to be empty, have: " << this->allAlgebraicNumbers.size << " elements instead. " << global.fatal;
   }
   return true;
 }
@@ -2134,12 +2134,12 @@ void ObjectContainer::reset() {
   this->polynomialsRational.clear();
   this->polynomialsAlgebraic.clear();
   this->polynomialsModular.clear();
-  this->theWeylAlgebraElements.clear();
-  this->theUEs.clear();
+  this->weylAlgebraElements.clear();
+  this->universalEnvelopingAlgebraElements.clear();
   this->rationalFunctions.clear();
   this->rationalFunctionsAlgebraic.clear();
   this->rationalFunctionsModular.clear();
-  this->theRationals.clear();
+  this->allRationals.clear();
   this->theCharsSSLieAlgFD.clear();
   this->theDoubles.clear();
   this->theDoubles.addOnTop(std::nan(""));
@@ -2150,10 +2150,10 @@ void ObjectContainer::reset() {
   this->constraints.clear();
   this->lakshmibaiSeshadriPaths.clear();
   this->matrixTensorRationals.clear();
-  this->theEltsModP.clear();
+  this->elementsModP.clear();
   this->thePlots.setSize(0);
-  this->theAlgebraicClosure.reset();
-  this->theAlgebraicNumbers.clear();
+  this->algebraicClosure.reset();
+  this->allAlgebraicNumbers.clear();
   this->theLittelmannOperators.clear();
   this->theSltwoSAs.setSize(0);
   this->theWeights.clear();

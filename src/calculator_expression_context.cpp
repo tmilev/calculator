@@ -698,7 +698,7 @@ bool WithContext<Polynomial<AlgebraicNumber> >::extendContext(
   this->context.polynomialSubstitutionNoFailure<AlgebraicNumber>(
     newContext,
     substitution,
-    this->context.owner->objectContainer.theAlgebraicClosure.one()
+    this->context.owner->objectContainer.algebraicClosure.one()
   );
   if (!this->content.substitution(substitution, Rational::one())) {
     return false;
@@ -757,7 +757,7 @@ bool WithContext<RationalFunction<AlgebraicNumber> >::extendContext(
 ) {
   MacroRegisterFunctionWithName("WithContext_RationalFunction_AlgebraicNumber::extendContext");
   PolynomialSubstitution<AlgebraicNumber> substitution;
-  AlgebraicClosureRationals& closure = this->context.owner->objectContainer.theAlgebraicClosure;
+  AlgebraicClosureRationals& closure = this->context.owner->objectContainer.algebraicClosure;
   this->context.polynomialSubstitutionNoFailure(newContext, substitution, closure.one());
   if (!this->content.substitution(substitution, closure.one(), commentsOnFailure)) {
     // This is not supposed to happen.

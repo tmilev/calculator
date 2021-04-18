@@ -1279,7 +1279,7 @@ bool CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT(
   if (PolynomialFactorizationKronecker::solvePolynomial(
     polynomial,
     solutions,
-    calculator.objectContainer.theAlgebraicClosure,
+    calculator.objectContainer.algebraicClosure,
     &calculator.comments
   )) {
     output.makeSequence(calculator);
@@ -1459,7 +1459,7 @@ bool CalculatorFunctions::innerSqrt(
   AlgebraicNumber theNumber;
   if (!theNumber.assignRationalQuadraticRadical(
     rationalValue,
-    calculator.objectContainer.theAlgebraicClosure,
+    calculator.objectContainer.algebraicClosure,
     &calculator.comments
   )) {
     return false;

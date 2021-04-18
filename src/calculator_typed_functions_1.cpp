@@ -180,12 +180,12 @@ bool CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNum
     if (!input[1].isOfType<Rational>(&tempRat)) {
       return false;
     }
-    leftAN.assignRational(tempRat, &calculator.objectContainer.theAlgebraicClosure);
+    leftAN.assignRational(tempRat, &calculator.objectContainer.algebraicClosure);
   } else if (!input[2].isOfType(&rightAN)) {
     if (!input[2].isOfType(&tempRat)) {
       return false;
     }
-    rightAN.assignRational(tempRat, &calculator.objectContainer.theAlgebraicClosure);
+    rightAN.assignRational(tempRat, &calculator.objectContainer.algebraicClosure);
   }
   if (rightAN.isEqualToZero()) {
     return output.makeError("Division by zero. ", calculator);
@@ -230,12 +230,12 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber
     if (!input[1].isOfType<Rational>(&rationalValue)) {
       return false;
     }
-    leftAN.assignRational(rationalValue, &calculator.objectContainer.theAlgebraicClosure);
+    leftAN.assignRational(rationalValue, &calculator.objectContainer.algebraicClosure);
   } else if (!input[2].isOfType(&rightAN)) {
     if (!input[2].isOfType(&rationalValue)) {
       return false;
     }
-    rightAN.assignRational(rationalValue, &calculator.objectContainer.theAlgebraicClosure);
+    rightAN.assignRational(rationalValue, &calculator.objectContainer.algebraicClosure);
   }
   leftAN *= rightAN;
   return output.assignValue(leftAN, calculator);
@@ -257,13 +257,13 @@ bool CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber(
     if (!input[1].isOfType<Rational>(&tempRat)) {
       return false;
     }
-    leftAN.assignRational(tempRat, &calculator.objectContainer.theAlgebraicClosure);
+    leftAN.assignRational(tempRat, &calculator.objectContainer.algebraicClosure);
     leftAN.checkConsistency();
   } else if (!input[2].isOfType(&rightAN)) {
     if (!input[2].isOfType(&tempRat)) {
       return false;
     }
-    rightAN.assignRational(tempRat, &calculator.objectContainer.theAlgebraicClosure);
+    rightAN.assignRational(tempRat, &calculator.objectContainer.algebraicClosure);
     rightAN.checkConsistency();
   }
   leftAN.checkConsistency();
@@ -1080,8 +1080,8 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossib
       largePower *= - 1;
     }
     Matrix<AlgebraicNumber> idMat;
-    AlgebraicNumber one = calculator.objectContainer.theAlgebraicClosure.one();
-    AlgebraicNumber zero = calculator.objectContainer.theAlgebraicClosure.zero();
+    AlgebraicNumber one = calculator.objectContainer.algebraicClosure.one();
+    AlgebraicNumber zero = calculator.objectContainer.algebraicClosure.zero();
 
     idMat.makeIdentityMatrix(baseAlg.numberOfRows, one, zero);
     MathRoutines::raiseToPower(baseAlg, largePower, idMat);
@@ -1130,8 +1130,8 @@ bool CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger(
     return output.assignMatrix(baseRat, calculator);
   }
   Matrix<AlgebraicNumber> baseAlg;
-  AlgebraicNumber one = calculator.objectContainer.theAlgebraicClosure.one();
-  AlgebraicNumber zero = calculator.objectContainer.theAlgebraicClosure.zero();
+  AlgebraicNumber one = calculator.objectContainer.algebraicClosure.one();
+  AlgebraicNumber zero = calculator.objectContainer.algebraicClosure.zero();
   if (calculator.functionGetMatrix(matrixE, baseAlg)) {
     if (!baseAlg.isSquare() || baseAlg.numberOfColumns == 0) {
       return output.makeError("Exponentiating non-square matrices or matrices with zero rows is not allowed.", calculator);
@@ -1321,18 +1321,18 @@ bool CalculatorFunctionsBinaryOps::innerRadicalAlgebraicNumberPositiveDefault(
     return false;
   }
   AlgebraicClosureRationals fieldCopy;
-  fieldCopy = calculator.objectContainer.theAlgebraicClosure;
+  fieldCopy = calculator.objectContainer.algebraicClosure;
   AlgebraicNumber baseCopy;
   baseCopy = base;
   baseCopy.owner = &fieldCopy;
   if (!baseCopy.radicalMeDefault(radical, &calculator.comments)) {
     return false;
   }
-  if (fieldCopy.basisInjections.size != calculator.objectContainer.theAlgebraicClosure.basisInjections.size) {
+  if (fieldCopy.basisInjections.size != calculator.objectContainer.algebraicClosure.basisInjections.size) {
     // the radical does not below to the base field;
     return false;
   }
-  baseCopy.owner = &calculator.objectContainer.theAlgebraicClosure;
+  baseCopy.owner = &calculator.objectContainer.algebraicClosure;
   MathRoutines::raiseToPower(baseCopy, powerIntegral, baseCopy.owner->one());
   return output.assignValue(baseCopy, calculator);
 }
@@ -1355,7 +1355,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(
       if (base.isRational(&baseRat)) {
         if (base.assignRationalQuadraticRadical(
           baseRat,
-          calculator.objectContainer.theAlgebraicClosure,
+          calculator.objectContainer.algebraicClosure,
           &calculator.comments
         )) {
           base.checkConsistency();

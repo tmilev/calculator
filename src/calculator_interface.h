@@ -1122,12 +1122,12 @@ public:
   HashedListReferences<Polynomial<ElementZmodP> > polynomialsModular;
   HashedListReferences<PolynomialModuloPolynomial<ElementZmodP> > polynomialQuotientsModular;
 
-  HashedListReferences<ElementWeylAlgebra<Rational> > theWeylAlgebraElements;
-  HashedListReferences<ElementUniversalEnveloping<RationalFunction<Rational> > > theUEs;
+  HashedListReferences<ElementWeylAlgebra<Rational> > weylAlgebraElements;
+  HashedListReferences<ElementUniversalEnveloping<RationalFunction<Rational> > > universalEnvelopingAlgebraElements;
   HashedListReferences<RationalFunction<Rational> > rationalFunctions;
   HashedListReferences<RationalFunction<AlgebraicNumber> > rationalFunctionsAlgebraic;
   HashedListReferences<RationalFunction<ElementZmodP> > rationalFunctionsModular;
-  HashedListReferences<Rational> theRationals;
+  HashedListReferences<Rational> allRationals;
   HashedListReferences<CharacterSemisimpleLieAlgebraModule<Rational> > theCharsSSLieAlgFD;
   HashedListReferences<double, MathRoutines::hashDouble> theDoubles;
   HashedListReferences<std::string, MathRoutines::hashString> theStrings;
@@ -1137,7 +1137,7 @@ public:
   HashedListReferences<Expression> constraints;
   HashedListReferences<LittelmannPath> lakshmibaiSeshadriPaths;
   HashedListReferences<MatrixTensor<Rational> > matrixTensorRationals;
-  HashedListReferences<ElementZmodP> theEltsModP;
+  HashedListReferences<ElementZmodP> elementsModP;
   HashedListReferences<Weight<Rational> > theWeights;
   HashedListReferences<Weight<Polynomial<Rational> > > theWeightsPoly;
   ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational > > hyperoctahedralRepresentations;
@@ -1145,8 +1145,8 @@ public:
   List<bool> userInputBoxSliderDisplayed;
   MapReferences<std::string, InputBox, MathRoutines::hashString> userInputTextBoxesWithValues;
   MapReferences<std::string, std::string, MathRoutines::hashString> graphicsScripts;
-  AlgebraicClosureRationals theAlgebraicClosure;
-  HashedList<AlgebraicNumber> theAlgebraicNumbers;
+  AlgebraicClosureRationals algebraicClosure;
+  HashedList<AlgebraicNumber> allAlgebraicNumbers;
   HashedListReferences<ElementHyperoctahedralGroupR2> theElementsHyperOctGroup;
   ListReferences<HyperoctahedralGroupData> theHyperOctahedralGroups;
   HashedListReferences<MonomialTensor<int, HashFunctions::hashFunction> > theLittelmannOperators;

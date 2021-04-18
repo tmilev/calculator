@@ -1428,7 +1428,7 @@ bool CalculatorFunctionsTrigonometry::arccosAlgebraic(Calculator& calculator, co
   if (argumentE.isOfType<AlgebraicNumber>(&argument)) {
     candidate.assignRationalQuadraticRadical(
       Rational(1, 2),
-      calculator.objectContainer.theAlgebraicClosure,
+      calculator.objectContainer.algebraicClosure,
       nullptr
     );
     if (candidate == argument) {
@@ -1445,7 +1445,7 @@ bool CalculatorFunctionsTrigonometry::arccosAlgebraic(Calculator& calculator, co
     }
     candidate.assignRationalQuadraticRadical(
       Rational(3, 4),
-      calculator.objectContainer.theAlgebraicClosure,
+      calculator.objectContainer.algebraicClosure,
       nullptr
     );
     if (candidate == argument) {
@@ -1502,7 +1502,7 @@ bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
   if (argumentE.isOfType<AlgebraicNumber>(&argument)) {
     candidate.assignRationalQuadraticRadical(
       Rational(1, 2),
-      calculator.objectContainer.theAlgebraicClosure,
+      calculator.objectContainer.algebraicClosure,
       nullptr
     );
     if (candidate == argument) {
@@ -1518,7 +1518,7 @@ bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
     }
     candidate.assignRationalQuadraticRadical(
       Rational(3, 4),
-      calculator.objectContainer.theAlgebraicClosure,
+      calculator.objectContainer.algebraicClosure,
       nullptr
     );
     if (candidate == argument) {
@@ -2763,7 +2763,7 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
       ListReferences<SlTwoSubalgebras> sl2Conainer;
       if (!theSubalgebras.computeStructureWriteFiles(
         algebra,
-        calculator.objectContainer.theAlgebraicClosure,
+        calculator.objectContainer.algebraicClosure,
         subalgebrasContainer,
         sl2Conainer,
         nullptr,

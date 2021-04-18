@@ -387,7 +387,7 @@ int Expression::addObjectReturnIndex(const
 Rational
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.theRationals
+  return this->owner->objectContainer.allRationals
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -444,7 +444,7 @@ int Expression::addObjectReturnIndex(const
 ElementUniversalEnveloping<RationalFunction<Rational> >
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.theUEs
+  return this->owner->objectContainer.universalEnvelopingAlgebraElements
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -471,7 +471,7 @@ int Expression::addObjectReturnIndex(const
 int
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.theRationals
+  return this->owner->objectContainer.allRationals
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -480,7 +480,7 @@ int Expression::addObjectReturnIndex(const
 LargeIntegerUnsigned
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.theRationals
+  return this->owner->objectContainer.allRationals
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -525,7 +525,7 @@ int Expression::addObjectReturnIndex(const
 ElementWeylAlgebra<Rational>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.theWeylAlgebraElements
+  return this->owner->objectContainer.weylAlgebraElements
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -546,7 +546,7 @@ int Expression::addObjectReturnIndex(const
 AlgebraicNumber
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.theAlgebraicNumbers
+  return this->owner->objectContainer.allAlgebraicNumbers
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -555,7 +555,7 @@ int Expression::addObjectReturnIndex(const
 ElementZmodP
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.theEltsModP
+  return this->owner->objectContainer.elementsModP
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -660,7 +660,7 @@ Rational& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->objectContainer.theRationals.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.allRationals.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -733,7 +733,7 @@ ElementZmodP& Expression::getValueNonConst() const {
   if (!this->isOfType<ElementZmodP>())
     global.fatal << "Expression not of required type ElementZmodP. "
     << "The expression equals " << this->toString() << "." << global.fatal;
-  return this->owner->objectContainer.theEltsModP.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.elementsModP.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -742,7 +742,7 @@ AlgebraicNumber& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type AlgebraicNumber. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->objectContainer.theAlgebraicNumbers.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.allAlgebraicNumbers.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -807,7 +807,7 @@ ElementUniversalEnveloping<RationalFunction<Rational> >& Expression::getValueNon
     global.fatal << "Expression not of required type "
     << "ElementUniversalEnveloping_RationalFunctionOld. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->objectContainer.theUEs.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.universalEnvelopingAlgebraElements.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -834,7 +834,7 @@ ElementWeylAlgebra<Rational>& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "ElementWeylAlgebra_Rational. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->objectContainer.theWeylAlgebraElements.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.weylAlgebraElements.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -1100,7 +1100,7 @@ template< >
 bool Expression::convertInternally<RationalFunction<AlgebraicNumber> >(Expression& output) const {
   MacroRegisterFunctionWithName("Expression::converInternally_RationalFunction_AlgebraicNumber");
   this->checkInitialization();
-  AlgebraicClosureRationals* closure = &this->owner->objectContainer.theAlgebraicClosure;
+  AlgebraicClosureRationals* closure = &this->owner->objectContainer.algebraicClosure;
   if (this->isOfType<Rational>()) {
     RationalFunction<AlgebraicNumber> result;
     AlgebraicNumber value;

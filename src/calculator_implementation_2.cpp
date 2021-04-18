@@ -1416,9 +1416,9 @@ void Calculator::evaluateCommands() {
   this->outputString = out.str();
   this->outputJS[WebAPI::result::resultHtml] = out.str();
   std::stringstream commentsStream;
-  if (this->objectContainer.theAlgebraicClosure.latestBasis.size > 1) {
+  if (this->objectContainer.algebraicClosure.latestBasis.size > 1) {
     commentsStream << "<b>Algebraic closure status.</b><br>"
-    << this->objectContainer.theAlgebraicClosure.toString();
+    << this->objectContainer.algebraicClosure.toString();
   }
   if (this->objectContainer.constraints.size > 0) {
     commentsStream << "<b>Constraints.</b><br>";

@@ -76,7 +76,7 @@ bool Calculator::getListPolynomialVariableLabelsLexicographic(
   theVars.quickSortAscending();
   PolynomialSubstitution<AlgebraicNumber> substitution;
   substitution.setSize(numVars);
-  const AlgebraicNumber& one = this->objectContainer.theAlgebraicClosure.one();
+  const AlgebraicNumber& one = this->objectContainer.algebraicClosure.one();
   for (int i = 0; i < substitution.size; i ++) {
     int currentIndex = theVars.getIndex(theContextStart.getVariable(i));
     substitution[i].makeMonomial(

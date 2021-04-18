@@ -912,7 +912,7 @@ bool CalculatorFunctionsTrigonometry::sin(Calculator& calculator, const Expressi
       if (argument[1].isOfType<Rational>(&piProportion)) {
         AlgebraicNumber algOutput;
         Rational ratOutput;
-        if (algOutput.assignSinRationalTimesPi(piProportion, calculator.objectContainer.theAlgebraicClosure)) {
+        if (algOutput.assignSinRationalTimesPi(piProportion, calculator.objectContainer.algebraicClosure)) {
           if (algOutput.isRational(&ratOutput)) {
             return output.assignValue(ratOutput, calculator);
           }
@@ -949,7 +949,7 @@ bool CalculatorFunctionsTrigonometry::cos(Calculator& calculator, const Expressi
       if (argument[1].isOfType<Rational>(&piProportion)) {
         AlgebraicNumber algOutput;
         Rational ratOutput;
-        if (algOutput.assignCosRationalTimesPi(piProportion, calculator.objectContainer.theAlgebraicClosure)) {
+        if (algOutput.assignCosRationalTimesPi(piProportion, calculator.objectContainer.algebraicClosure)) {
           if (algOutput.isRational(&ratOutput)) {
             return output.assignValue(ratOutput, calculator);
           }
@@ -1220,7 +1220,7 @@ bool CalculatorFunctions::solveSerreLikeSystem(
   system.groebner.maximumPolynomialDivisions = upperLimits[0];
   system.groebner.maximumMonomialOperations = upperLimits[1];
   system.groebner.polynomialOrder.monomialOrder = MonomialPolynomial::orderDefault();
-  system.algebraicClosure = &calculator.objectContainer.theAlgebraicClosure;
+  system.algebraicClosure = &calculator.objectContainer.algebraicClosure;
   system.flagTryDirectlySolutionOverAlgebraicClosure = startWithAlgebraicClosure;
   global.theDefaultFormat.getElement() = system.groebner.format;
   system.flagUseTheMonomialBranchingOptimization = true;
@@ -1274,7 +1274,7 @@ bool CalculatorFunctionsAlgebraic::printAlgebraicClosureStatus(
   theFormat.flagUseHTML = false;
   theFormat.flagUseLatex = true;
   return output.assignValue(
-    calculator.objectContainer.theAlgebraicClosure.toStringFull(&theFormat),
+    calculator.objectContainer.algebraicClosure.toStringFull(&theFormat),
     calculator
   );
 }
@@ -1305,7 +1305,7 @@ bool CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinPoly(
   std::stringstream commentsOnFailure;
   if (!theAN.constructFromMinimalPolynomial(
     polynomial.content,
-    calculator.objectContainer.theAlgebraicClosure,
+    calculator.objectContainer.algebraicClosure,
     &commentsOnFailure
   )) {
     return calculator << "Failed to construct minimal polynomial. " << commentsOnFailure.str();
@@ -1943,7 +1943,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     AlgebraicNumber theDiscriminantSqrt;
     if (!theDiscriminantSqrt.assignRationalQuadraticRadical(
       theDiscriminant,
-      this->owner->objectContainer.theAlgebraicClosure,
+      this->owner->objectContainer.algebraicClosure,
       &this->printoutPFsHtml
     )) {
       this->printoutPFsHtml
@@ -2008,7 +2008,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     for (int k = 0; k < theDenominatorFactorsWithMults.coefficients[i]; k ++) {
       this->theNumerators[i][k].substitution(
         substitution,
-        this->owner->objectContainer.theAlgebraicClosure.one()
+        this->owner->objectContainer.algebraicClosure.one()
       );
     }
   }
@@ -6665,7 +6665,7 @@ bool CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calcula
   << " in " << ownerSS.toStringLieAlgebraName();
   theSSsubalgebras.findTheSemisimpleSubalgebrasFromScratch(
     ownerSS,
-    calculator.objectContainer.theAlgebraicClosure,
+    calculator.objectContainer.algebraicClosure,
     calculator.objectContainer.semisimpleLieAlgebras,
     calculator.objectContainer.theSltwoSAs,
     &smallSubalgebraPointer.content->weylGroup.dynkinType

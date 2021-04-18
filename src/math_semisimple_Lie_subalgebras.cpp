@@ -3787,13 +3787,13 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecompositionHighestWeigh
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& currentVector = this->highestVectorsNonSorted[i];
     for (int j = 0; j< currentVector.size(); j ++) {
       currentRootSpace = this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(currentVector[j].generatorIndex);
-      currentWeight.setSize(this->cartanElementsSubalgebra.size + this->CartanOfCentralizer.size);
+      currentWeight.setSize(this->cartanElementsSubalgebra.size + this->cartanOfCentralizer.size);
       for (int k = 0; k < this->cartanElementsSubalgebra.size; k ++) {
         currentWeight[k] = this->getAmbientWeyl().rootScalarCartanRoot(currentRootSpace, this->cartanElementsSubalgebra[k]);
       }
-      for (int k = 0; k < this->CartanOfCentralizer.size; k ++) {
+      for (int k = 0; k < this->cartanOfCentralizer.size; k ++) {
         currentWeight[k+this->cartanElementsSubalgebra.size] = this->getAmbientWeyl().rootScalarCartanRoot(
-          currentRootSpace, this->CartanOfCentralizer[k]
+          currentRootSpace, this->cartanOfCentralizer[k]
         );
       }
       outputHWsDualCoords.addOnTopNoRepetition(currentWeight);
@@ -3845,14 +3845,14 @@ void CandidateSemisimpleSubalgebra::getPrimalWeightProjectionFundamentalCoordina
 ) const {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::getPrimalWeightProjectionFundamentalCoordinates");
   this->checkFullInitialization();
-  output.setSize(this->cartanElementsSubalgebra.size +this->CartanOfCentralizer.size);
+  output.setSize(this->cartanElementsSubalgebra.size +this->cartanOfCentralizer.size);
   for (int j = 0; j < this->cartanElementsSubalgebra.size; j ++) {
     output[j] = this->getAmbientWeyl().rootScalarCartanRoot(inputAmbientweight, this->cartanElementsSubalgebra[j]) * 2 /
     this->subalgebraNonEmbeddedDefaultScale->weylGroup.cartanSymmetric(j, j);
   }
-  for (int j = 0; j < this->CartanOfCentralizer.size; j ++) {
+  for (int j = 0; j < this->cartanOfCentralizer.size; j ++) {
     output[j + this->cartanElementsSubalgebra.size] = this->getAmbientWeyl().rootScalarCartanRoot(
-      inputAmbientweight, this->CartanOfCentralizer[j]
+      inputAmbientweight, this->cartanOfCentralizer[j]
     ) * 2;
   }
 }
@@ -3964,14 +3964,14 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecompositionHWsHWVsOnlyL
   this->subalgebraModules = this->primalSubalgebraModules;
   this->characterFormat.getElement().customPlusSign = "\\oplus ";
   int theRank = this->weylNonEmbedded->getDimension();
-  this->characterFormat.getElement().vectorSpaceEiBasisNames.setSize(theRank + this->CartanOfCentralizer.size);
+  this->characterFormat.getElement().vectorSpaceEiBasisNames.setSize(theRank + this->cartanOfCentralizer.size);
   for (int i = 0; i < this->characterFormat.getElement().vectorSpaceEiBasisNames.size; i ++) {
     std::stringstream tempStream;
     if (i < theRank) {
       tempStream << "\\omega_{" << i + 1 << "}";
     } else {
       tempStream << "\\psi";
-      if (this->CartanOfCentralizer.size > 1) {
+      if (this->cartanOfCentralizer.size > 1) {
         tempStream << "_{" << i - theRank + 1 << "}";
       }
     }
@@ -4010,7 +4010,7 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecompositionHWVsOnly(
   ElementSemisimpleLieAlgebra<AlgebraicNumber> element;
   Vectors<Rational> allHs;
   allHs.addListOnTop(this->cartanElementsSubalgebra);
-  allHs.addListOnTop(this->CartanOfCentralizer);
+  allHs.addListOnTop(this->cartanOfCentralizer);
   theAdsOfHs.setSize(allHs.size);
   for (int j = 0; j < allHs.size; j ++) {
     element.makeCartanGenerator(allHs[j], this->getAmbientSemisimpleLieAlgebra());
@@ -4432,13 +4432,24 @@ std::string SlTwoSubalgebra::toStringTripleStandardRealization() const {
   format.flagUseHTML = false;
   format.flagUseLatex = true;
   out << "<br>Matrix realizations in a standard representation:";
-  out << " <div class='lieAlgebraPanel'><div>";
+  out << " <div class='lieAlgebraPanel'>";
+  out << "<div>";
   out << "\\(\\begin{array}{rcl}";
   out << "h&=&" << matrixH.toString(&format) << "\\\\\n";
   out << "e&=&" << matrixE.toString(&format) << "\\\\\n";
   out << "f&=&" << matrixF.toString(&format);
   out << "\\end{array}\\)";
-  out << "</div></div>";
+  out << "<br>";
+  std::stringstream calculatorLink;
+  calculatorLink
+  << "h=" << matrixH.toString(&format) << ";\n"
+  << "e=" << matrixE.toString(&format) << ";\n"
+  << "f=" << matrixF.toString(&format) << ";\n"
+  ;
+  out << "Calculator link: "
+  << HtmlRoutines::getCalculatorComputationAnchorThisServer(calculatorLink.str(), "");
+  out << "</div>";
+  out << "</div>";
   return out.str();
 }
 
@@ -6345,14 +6356,14 @@ std::string CandidateSemisimpleSubalgebra::toStringCentralizer(FormatExpressions
     out << "<br><b style = 'color:red'>The Cartan of the centralizer "
     << "does not lie in the ambient Cartan (the computation was too large?).</b> "
     << "The intersection of the ambient Cartan with the centralizer is of dimension "
-    << this->CartanOfCentralizer.size << " instead of the desired dimension "
+    << this->cartanOfCentralizer.size << " instead of the desired dimension "
     << this->centralizerRank.toString() << ". ";
     //else
     //  out << "<br><span style =\"color:#FF0000\"><b>I was unable to compute the centralizer (not all subalgebras were computed?).</b></span> ";
   }
   if (this->centralizerRank != 0) {
     out << "<br>Basis of Cartan of centralizer: ";
-    out << this->CartanOfCentralizer.toString();
+    out << this->cartanOfCentralizer.toString();
   }
   return out.str();
 }
@@ -6423,7 +6434,7 @@ void CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen() {
       global.fatal << "Something is wrong. " << this->toStringCentralizerDebugData() << global.fatal;
     }
   }
-  this->flagCentralizerIsWellChosen = (this->centralizerRank == this->CartanOfCentralizer.size);
+  this->flagCentralizerIsWellChosen = (this->centralizerRank == this->cartanOfCentralizer.size);
   if (this->flagCentralizerIsWellChosen) {
     this->flagCentralizerTypeIsComputed = true;
   }
@@ -6707,7 +6718,7 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* format) c
   } else {
     out << this->characterNonPrimalFundamentalCoordinates.toString(&charFormatNonConst);
   }
-  if (this->CartanOfCentralizer.size > 0) {
+  if (this->cartanOfCentralizer.size > 0) {
     out << "<br>Primal decomposition of the ambient Lie algebra. "
     << "This decomposition refines the above decomposition (please note the order is not the same as above). ";
     if (useLaTeX) {
@@ -6738,7 +6749,7 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* format) c
     << "vectors of the decomposition of "
     << " the ambient Lie algebra as a module over the semisimple part. The second row indicates "
     << " weights of the highest weight vectors relative to the Cartan of the semisimple subalgebra. ";
-    if (this->flagCentralizerIsWellChosen && this->CartanOfCentralizer.size > 0) {
+    if (this->flagCentralizerIsWellChosen && this->cartanOfCentralizer.size > 0) {
       out << "As the centralizer is well-chosen and the centralizer of our subalgebra is "
       << "non-trivial, we may in addition split highest weight vectors"
       << " with the same weight over the semisimple part over the centralizer "
@@ -6774,7 +6785,7 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* format) c
       << "\\)</td>";
     }
     out << "</tr>";
-    if (this->flagCentralizerIsWellChosen && this->CartanOfCentralizer.size > 0) {
+    if (this->flagCentralizerIsWellChosen && this->cartanOfCentralizer.size > 0) {
       out << "<tr><td>weights rel. to Cartan of (centralizer+semisimple s.a.). </td>";
       for (int i = 0; i < this->highestWeightsPrimalNonSorted.size; i ++) {
         out << "<td>\\("
@@ -7157,24 +7168,24 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
   Vectors<AlgebraicNumber> outputCartanCentralizer;
   Vector<AlgebraicNumber> theCentralizerH;
   theHWsNonSorted.intersectTwoLinearSpaces(theHWsNonSorted, theCartan, outputCartanCentralizer);
-  this->CartanOfCentralizer.setSize(outputCartanCentralizer.size);
+  this->cartanOfCentralizer.setSize(outputCartanCentralizer.size);
   AlgebraicNumber theFirstNonZeroCoeff;
-  for (int i = 0; i < this->CartanOfCentralizer.size; i ++) {
+  for (int i = 0; i < this->cartanOfCentralizer.size; i ++) {
     tempElt.assignVectorNegRootSpacesCartanPosRootSpaces(outputCartanCentralizer[i], *this->owner->owner);
     theCentralizerH = tempElt.getCartanPart();
     theFirstNonZeroCoeff = theCentralizerH[theCentralizerH.getIndexFirstNonZeroCoordinate()];
     if (!theFirstNonZeroCoeff.isRational()) {
       theCentralizerH /= theFirstNonZeroCoeff;
     }
-    this->CartanOfCentralizer[i] = theCentralizerH;
-    this->CartanOfCentralizer[i].scaleNormalizeFirstNonZero();
+    this->cartanOfCentralizer[i] = theCentralizerH;
+    this->cartanOfCentralizer[i].scaleNormalizeFirstNonZero();
   }
   ////////////////
   this->bilinearFormSimplePrimal = this->weylNonEmbedded->cartanSymmetric;
   Matrix<Rational> centralizerPart, matFundCoordsSimple, diagMat, diagMatrix2, bilinearFormInverted;
   // global.Comments << "<hr>Cartan of Centralizer: " << this->CartanOfCentralizer.toString() << "<br>Cartan symmetric: "
   // << this->owner->owner->theWeyl.cartanSymmetric.toString();
-  this->CartanOfCentralizer.getGramMatrix(centralizerPart, &this->owner->owner->weylGroup.cartanSymmetric);
+  this->cartanOfCentralizer.getGramMatrix(centralizerPart, &this->owner->owner->weylGroup.cartanSymmetric);
   this->bilinearFormSimplePrimal.directSumWith(centralizerPart);
   bilinearFormInverted = this->bilinearFormSimplePrimal;
   bilinearFormInverted.invert();

@@ -182,9 +182,10 @@ public:
     }
     return index + this->getNumberOfPositiveRoots() + this->getRank() - 1;
   }
-  int getGeneratorFromRootIndex(int theIndex) const;
-  int GetDisplayIndexFromRootIndex(int theIndex) const;
-  //the below function returns an negative number if the chevalley generator is an element of the Cartan subalgebra
+  int getGeneratorFromRootIndex(int index) const;
+  int getDisplayIndexFromRootIndex(int index) const;
+  // The function below returns an negative number if the chevalley generator
+  // is an element of the Cartan subalgebra.
   int getRootIndexFromGenerator(int index) const;
   int getGeneratorIndexFromNonZeroCoefficientIndexInCartan(int simpleRootIndex) const;
   int getCartanCoordinateIndexFromCartanGeneratorIndex(int generatorIndex) const;

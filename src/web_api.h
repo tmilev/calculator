@@ -190,7 +190,7 @@ public:
   static MapList<std::string, std::string, MathRoutines::hashString>& preLoadedFiles();
   static std::stringstream outputStream;
   static int globalMathSpanID;
-  static int GlobalGeneralPurposeID;
+  static int globalGeneralPurposeID;
   static int numLinesAll;
   static int numRegularLines;
   static int numDashedLines;
@@ -250,12 +250,16 @@ public:
   static std::string getCalculatorComputationAnchorSamePage(
     const std::string& inputNoEncoding
   );
-  static std::string getCalculatorComputationAnchorNewPage(
+  static std::string getCalculatorComputationAnchorSameURL(
     const std::string& inputNoEncoding,
     const std::string& desiredAnchorTextEmptyForDefault
   );
 
-  static std::string getCalculatorComputationNewPage(
+  static std::string getCalculatorComputationAnchorThisServer(
+    const std::string& inputNoEncoding,
+    const std::string& desiredAnchorTextEmptyForDefault
+  );
+  static std::string getCalculatorComputationAnchorRelativeAppAddress(
     const std::string& inputNoEncoding,
     const std::string& desiredAnchorTextEmptyForDefault
   );

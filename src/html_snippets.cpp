@@ -158,14 +158,14 @@ std::string HtmlRoutines::getCalculatorComputationAnchor(
   return out.str();
 }
 
-std::string HtmlRoutines::getCalculatorComputationAnchorNewPage(
+std::string HtmlRoutines::getCalculatorComputationAnchorSameURL(
   const std::string& inputNoEncoding,
   const std::string& desiredAnchorTextEmptyForDefault
 ) {
   return HtmlRoutines::getCalculatorComputationAnchor("", inputNoEncoding, desiredAnchorTextEmptyForDefault);
 }
 
-std::string HtmlRoutines::getCalculatorComputationNewPage(
+std::string HtmlRoutines::getCalculatorComputationAnchorThisServer(
   const std::string& inputNoEncoding,
   const std::string& desiredAnchorTextEmptyForDefault
 ) {

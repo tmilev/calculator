@@ -1369,7 +1369,7 @@ bool CalculatorHTML::prepareAndExecuteCommands(Calculator& interpreter, std::str
   bool result = !interpreter.flagAbortComputationASAP && interpreter.syntaxErrors == "";
   if (!result && comments != nullptr) {
     *comments << "<br>Failed to interpret your file. "
-    << HtmlRoutines::getCalculatorComputationAnchorNewPage(
+    << HtmlRoutines::getCalculatorComputationAnchorSameURL(
       this->problemData.commandsGenerateProblemNoEnclosures, "Failed commands:"
     ) << "<br>"
     << this->problemData.commandsGenerateProblem

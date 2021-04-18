@@ -117,7 +117,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   }
   if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
     out << "<hr>"
-    << HtmlRoutines::getCalculatorComputationAnchorNewPage(
+    << HtmlRoutines::getCalculatorComputationAnchorSameURL(
       answerCommandsNoEnclosures.str(), "Input link"
     ) << "<br>" << interpreter.outputString
     << "<hr>" << interpreter.outputCommentsString
@@ -348,7 +348,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   }
   std::stringstream problemLinkStream;
   problemLinkStream
-  << HtmlRoutines::getCalculatorComputationAnchorNewPage(
+  << HtmlRoutines::getCalculatorComputationAnchorSameURL(
     calculatorInputStreamNoEnclosures.str(), "Input link"
   );
   interpreterWithAdvice.evaluate(calculatorInputStream.str());
@@ -1300,7 +1300,7 @@ void AnswerCheckerNoProblem::prepareForEvaluation() {
   completedProblemStreamNoEnclosures << SyntacticElementHTML::cleanUpCommandString(this->answerCheck);
 
   if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
-    this->administratorViewInternals += HtmlRoutines::getCalculatorComputationAnchorNewPage(
+    this->administratorViewInternals += HtmlRoutines::getCalculatorComputationAnchorSameURL(
       completedProblemStreamNoEnclosures.str(), "Input, no enclosures. "
     );
   }
@@ -1736,7 +1736,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     out << "<b style ='color:red'>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b>";
     if (global.userDefaultHasProblemComposingRights()) {
-      out << HtmlRoutines::getCalculatorComputationAnchorNewPage(
+      out << HtmlRoutines::getCalculatorComputationAnchorSameURL(
         answerCommandsNoEnclosure.str(), "Calculator input no enclosures"
       );
     }
@@ -1751,7 +1751,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     out << "<b style = 'color:red'>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b>";
     if (global.userDefaultHasProblemComposingRights()) {
-      out << HtmlRoutines::getCalculatorComputationAnchorNewPage(
+      out << HtmlRoutines::getCalculatorComputationAnchorSameURL(
         answerCommandsNoEnclosure.str(), "Calculator input no enclosures"
       );
     }
@@ -1828,13 +1828,13 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
     out
     << "<hr>"
-    << HtmlRoutines::getCalculatorComputationAnchorNewPage(
+    << HtmlRoutines::getCalculatorComputationAnchorSameURL(
       answerCommandsNoEnclosure.str(),
       "Calculator input no enclosures"
     );
     out << interpreter.outputString << "<hr>"
     << interpreter.outputCommentsString
-    << "<hr>" << HtmlRoutines::getCalculatorComputationAnchorNewPage(
+    << "<hr>" << HtmlRoutines::getCalculatorComputationAnchorSameURL(
       interpreter.inputString, "Raw calculator input"
     );
   }

@@ -2908,7 +2908,7 @@ bool CalculatorLieTheory::getLinksToSimpleLieAlgerbas(Calculator& calculator, co
       recomputeCommand << "PrintSemisimpleSubalgebrasRecompute{}("
       << precomputedTypes[i].toString() << ")";
       outRecomputeLinks << "<br>"
-      << HtmlRoutines::getCalculatorComputationAnchorNewPage(recomputeCommand.str(), "");
+      << HtmlRoutines::getCalculatorComputationAnchorSameURL(recomputeCommand.str(), "");
     }
   }
   outFromHD << "</table></p>";

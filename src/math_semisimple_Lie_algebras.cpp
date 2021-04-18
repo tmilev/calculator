@@ -201,7 +201,7 @@ std::string SemisimpleLieAlgebra::toHTML(
     out << "<br>To get extra details: ";
     std::stringstream tempStream;
     tempStream << "PrintSemisimpleLieAlgebra{}(" << theWeyl.dynkinType << ")";
-    out << HtmlRoutines::getCalculatorComputationAnchorNewPage(tempStream.str(), "")
+    out << HtmlRoutines::getCalculatorComputationAnchorSameURL(tempStream.str(), "")
     << "<br>";
   } else {
     DrawingVariables drawingVariables;
@@ -1373,7 +1373,9 @@ void SemisimpleLieAlgebra::orderNilradicalNilWeightDescending(const Selection& p
   }
 }
 
-void SemisimpleLieAlgebra::orderNilradical(const Selection& parSelZeroMeansLeviPart, bool useNilWeight, bool ascending) {
+void SemisimpleLieAlgebra::orderNilradical(
+  const Selection& parSelZeroMeansLeviPart, bool useNilWeight, bool ascending
+) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::orderNilradical");
   if (useNilWeight) {
     if (ascending) {
@@ -1434,27 +1436,27 @@ int SemisimpleLieAlgebra::getRootIndexFromDisplayIndex(int index) {
   return - 1;
 }
 
-int SemisimpleLieAlgebra::GetDisplayIndexFromRootIndex(int theIndex) const {
+int SemisimpleLieAlgebra::getDisplayIndexFromRootIndex(int index) const {
   int numPosRoots = this->weylGroup.rootsOfBorel.size;
-  if (theIndex >= numPosRoots) {
-    return theIndex - numPosRoots + 1;
+  if (index >= numPosRoots) {
+    return index - numPosRoots + 1;
   }
-  if (theIndex < numPosRoots) {
-    return theIndex - numPosRoots;
+  if (index < numPosRoots) {
+    return index - numPosRoots;
   }
   return - 10000000;
 }
 
-int SemisimpleLieAlgebra::getGeneratorFromRootIndex(int theIndex) const {
-  if (theIndex < 0 || theIndex >= this->weylGroup.rootSystem.size) {
+int SemisimpleLieAlgebra::getGeneratorFromRootIndex(int index) const {
+  if (index < 0 || index >= this->weylGroup.rootSystem.size) {
     return - 1;
   }
-  int theDimension = this->weylGroup.cartanSymmetric.numberOfRows;
+  int dimension = this->weylGroup.cartanSymmetric.numberOfRows;
   int numPosRoots = this->weylGroup.rootsOfBorel.size;
-  if (theIndex >= numPosRoots) {
-    return theIndex + theDimension;
+  if (index >= numPosRoots) {
+    return index + dimension;
   }
-  return theIndex;
+  return index;
 }
 
 int SemisimpleLieAlgebra::getDisplayIndexFromGenerator(int index) const {
@@ -1561,11 +1563,10 @@ bool SemisimpleLieAlgebra::accumulateChevalleyGeneratorStandardRepresentationInT
     }
   }
   int lastNonZeroIndex = firstNonZeroIndex;
-  for (int i = firstNonZeroIndex + 1; i < vector.size; i ++) {
-    if (vector[i] == 0) {
+  for (; lastNonZeroIndex < vector.size; lastNonZeroIndex ++) {
+    if (vector[lastNonZeroIndex] == 0) {
       break;
     }
-    lastNonZeroIndex = i;
   }
   int rowIndex = 0;
   int columnIndex = 0;

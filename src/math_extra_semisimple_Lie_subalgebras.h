@@ -132,7 +132,7 @@ public:
   CharacterSemisimpleLieAlgebraModule<Rational> characterNonPrimalFundamentalCoordinates;
   CharacterSemisimpleLieAlgebraModule<Rational> primalCharacter;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
-  Vectors<Rational> CartanOfCentralizer;
+  Vectors<Rational> cartanOfCentralizer;
   List<Polynomial<AlgebraicNumber> > systemToSolve;
   List<Polynomial<AlgebraicNumber> > transformedSystem;
   SemisimpleSubalgebras* owner;

@@ -186,11 +186,11 @@ std::string HtmlRoutines::getSliderSpanStartsHidden(
 ) {
   (void) label;
   std::stringstream out;
-  HtmlRoutines::GlobalGeneralPurposeID ++;
+  HtmlRoutines::globalGeneralPurposeID ++;
   std::stringstream idStringStream;
   idStringStream << desiredID;
   if (desiredID == "") {
-    idStringStream << "UnnamedSpan" << HtmlRoutines::GlobalGeneralPurposeID;
+    idStringStream << "UnnamedSpan" << HtmlRoutines::globalGeneralPurposeID;
   }
   out << "<a href=\"javascript:;\" onmusedown =\"document.getElementById('"
   << idStringStream.str() << "').slideToggle('slow');\">Expand/collapse</a>";
@@ -723,7 +723,7 @@ bool Calculator::Test::processResults() {
     currentLine << "<td style = 'min-width:45px;'>" << currentTest.atom << "</td>";
     currentLineConsole << "Ran:\n" << this->commands.keys[i] << "\n";
     currentLine << "<td style = 'min-width:200px;'>"
-    << HtmlRoutines::getCalculatorComputationNewPage(
+    << HtmlRoutines::getCalculatorComputationAnchorThisServer(
       this->commands.keys[i], this->commands.keys[i]
     ) << "</td>";
     bool isBad = false;

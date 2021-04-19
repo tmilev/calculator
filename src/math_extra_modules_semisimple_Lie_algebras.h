@@ -404,7 +404,7 @@ public:
   );
   void getGenericUnMinusElt(
     bool shiftPowersByNumVarsBaseField,
-    ElementUniversalEnveloping<RationalFunction<Rational> >& output,
+    ElementUniversalEnveloping<RationalFraction<Rational> >& output,
     bool useNilWeight,
     bool ascending
   );

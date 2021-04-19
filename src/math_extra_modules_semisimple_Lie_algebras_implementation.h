@@ -1385,16 +1385,16 @@ bool ModuleSSalgebra<Coefficient>::isNotInLevi(int theGeneratorIndex) {
 template <class Coefficient>
 void ModuleSSalgebra<Coefficient>::getGenericUnMinusElt(
   bool shiftPowersByNumVarsBaseField,
-  ElementUniversalEnveloping<RationalFunction<Rational> >& output,
+  ElementUniversalEnveloping<RationalFraction<Rational> >& output,
   bool useNilWeight,
   bool ascending
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra::getGenericUnMinusElt");
   List<ElementUniversalEnveloping<Coefficient> > eltsNilrad;
   this->getElementsNilradical(eltsNilrad, true, useNilWeight, ascending);
-  RationalFunction<Rational> tempRF;
+  RationalFraction<Rational> tempRF;
   output.makeZero(*this->theAlgebras, this->indexAlgebra);
-  MonomialUniversalEnveloping<RationalFunction<Rational> > tempMon;
+  MonomialUniversalEnveloping<RationalFraction<Rational> > tempMon;
   tempMon.makeConstant(*this->theAlgebras, this->indexAlgebra);
   int varShift = 0;
   if (shiftPowersByNumVarsBaseField) {
@@ -1455,7 +1455,7 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
   result.simplify(onePolynomial);
   MatrixTensor<Polynomial<Rational> > endoPart, tempMT, idMT;
   idMT.makeIdentitySpecial();
-  MatrixTensor<RationalFunction<Rational> > tempMat1;
+  MatrixTensor<RationalFraction<Rational> > tempMat1;
 
   int varShift = this->minimalNumberOfVariables();
   ElementWeylAlgebra<Rational> weylPartSummand, exponentContribution, oneIndexContribution,
@@ -1477,7 +1477,7 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
       tempMat1 = this->getActionGeneratorIndex(currentMon.generatorsIndices[j]);
       tempMT.makeZero();
       for (int k = 0; k < tempMat1.size(); k ++) {
-        if (tempMat1.coefficients[k].expressionType == RationalFunction<Rational>::typeRationalFunction) {
+        if (tempMat1.coefficients[k].expressionType == RationalFraction<Rational>::typeRationalFunction) {
           return false;
         }
         tempMat1.coefficients[k].getNumerator(tempP1);

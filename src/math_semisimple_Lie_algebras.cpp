@@ -1084,13 +1084,13 @@ void HomomorphismSemisimpleLieAlgebra::projectOntoSmallCartan(Vector<Rational>& 
 }
 
 bool HomomorphismSemisimpleLieAlgebra::applyHomomorphism(
-  const MonomialUniversalEnveloping<RationalFunction<Rational> >& input,
-  const RationalFunction<Rational>& theCoeff,
-  ElementUniversalEnveloping<RationalFunction<Rational> >& output
+  const MonomialUniversalEnveloping<RationalFraction<Rational> >& input,
+  const RationalFraction<Rational>& theCoeff,
+  ElementUniversalEnveloping<RationalFraction<Rational> >& output
 ) {
-  ElementUniversalEnveloping<RationalFunction<Rational> > tempElt;
+  ElementUniversalEnveloping<RationalFraction<Rational> > tempElt;
   output.makeZero(this->theRange());
-  RationalFunction<Rational> polyOne;
+  RationalFraction<Rational> polyOne;
   polyOne.makeOne();
   output.makeConstant(theCoeff, this->theRange());
   for (int i = 0; i < input.generatorsIndices.size; i ++) {
@@ -1102,7 +1102,7 @@ bool HomomorphismSemisimpleLieAlgebra::applyHomomorphism(
       this->theRange(),
       polyOne
     );
-    RationalFunction<Rational>& thePower = input.powers[i];
+    RationalFraction<Rational>& thePower = input.powers[i];
     int theIntegralPower;
     if (!thePower.isSmallInteger(&theIntegralPower)) {
       return false;
@@ -1139,14 +1139,14 @@ void HomomorphismSemisimpleLieAlgebra::getMapSmallCartanDualToLargeCartanDual(Ma
 }
 
 bool HomomorphismSemisimpleLieAlgebra::applyHomomorphism(
-  const ElementUniversalEnveloping<RationalFunction<Rational> >& input,
-  ElementUniversalEnveloping<RationalFunction<Rational> >& output
+  const ElementUniversalEnveloping<RationalFraction<Rational> >& input,
+  ElementUniversalEnveloping<RationalFraction<Rational> >& output
 ) {
   if (&output == &input) {
     global.fatal << "Output must be different from input. " << global.fatal;
   }
   output.makeZero(this->theRange());
-  ElementUniversalEnveloping<RationalFunction<Rational> > tempElt;
+  ElementUniversalEnveloping<RationalFraction<Rational> > tempElt;
   for (int i = 0; i < input.size(); i ++) {
     if (!this->applyHomomorphism(input[i], input.coefficients[i], tempElt)) {
       return false;

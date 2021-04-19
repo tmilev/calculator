@@ -414,8 +414,8 @@ bool CalculatorConversions::functionRationalFunction(
       if (leftE.isError()) {
         return calculator << "<hr>Conversion of " << input[1].toString() << " returned error: " << leftE.toString();
       }
-      RationalFunction<Coefficient> rationalFunction;
-      rationalFunction = leftE.getValue<RationalFunction<Coefficient> >();
+      RationalFraction<Coefficient> rationalFunction;
+      rationalFunction = leftE.getValue<RationalFraction<Coefficient> >();
       rationalFunction.raiseToPower(theSmallPower);
       return output.assignValueWithContext(rationalFunction, leftE.getContext(), calculator);
     }
@@ -425,7 +425,7 @@ bool CalculatorConversions::functionRationalFunction(
     << "I am treating " << input.toString()
     << " as a single variable: please make sure that is what you want. ";
   }
-  if (input.isOfType<RationalFunction<Coefficient> >()) {
+  if (input.isOfType<RationalFraction<Coefficient> >()) {
     output = input;
     return true;
   }
@@ -434,18 +434,18 @@ bool CalculatorConversions::functionRationalFunction(
     input.isOfType<Coefficient>() ||
     input.isOfType<Rational>()
   ) {
-    return input.convertInternally<RationalFunction<Coefficient> >(output);
+    return input.convertInternally<RationalFraction<Coefficient> >(output);
   }
   if (input.isOfType<AlgebraicNumber>()) {
     Expression potentialOutput;
-    if (input.convertInternally<RationalFunction<Coefficient> > (potentialOutput)) {
+    if (input.convertInternally<RationalFraction<Coefficient> > (potentialOutput)) {
       output = potentialOutput;
       return true;
     }
   }
   ExpressionContext theContext(calculator);
   theContext.makeOneVariable(input);
-  RationalFunction<Coefficient> rationalFunction;
+  RationalFraction<Coefficient> rationalFunction;
   rationalFunction.makeOneLetterMonomial(0, Coefficient::oneStatic());
   return output.assignValueWithContext(rationalFunction, theContext, calculator);
 }

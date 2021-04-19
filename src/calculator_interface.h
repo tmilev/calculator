@@ -1112,21 +1112,21 @@ public:
   MapReferences<DynkinType, SemisimpleSubalgebras> semisimpleSubalgebras;
   HashedListReferences<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > weylGroupRepresentations;
   HashedListReferences<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > weylGroupVirtualRepresentations;
-  ListReferences<ModuleSSalgebra<RationalFunction<Rational> > > theCategoryOmodules;
+  ListReferences<ModuleSSalgebra<RationalFraction<Rational> > > theCategoryOmodules;
   ListReferences<SlTwoSubalgebras> theSltwoSAs;
   HashedListReferences<ElementEllipticCurve<ElementZmodP> > ellipticCurveElementsZmodP;
   HashedListReferences<ElementEllipticCurve<Rational> > ellipticCurveElementsRational;
-  HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > > theTensorElts;
+  HashedListReferences<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > > theTensorElts;
   HashedListReferences<Polynomial<Rational> > polynomialsRational;
   HashedListReferences<Polynomial<AlgebraicNumber> > polynomialsAlgebraic;
   HashedListReferences<Polynomial<ElementZmodP> > polynomialsModular;
   HashedListReferences<PolynomialModuloPolynomial<ElementZmodP> > polynomialQuotientsModular;
 
   HashedListReferences<ElementWeylAlgebra<Rational> > weylAlgebraElements;
-  HashedListReferences<ElementUniversalEnveloping<RationalFunction<Rational> > > universalEnvelopingAlgebraElements;
-  HashedListReferences<RationalFunction<Rational> > rationalFunctions;
-  HashedListReferences<RationalFunction<AlgebraicNumber> > rationalFunctionsAlgebraic;
-  HashedListReferences<RationalFunction<ElementZmodP> > rationalFunctionsModular;
+  HashedListReferences<ElementUniversalEnveloping<RationalFraction<Rational> > > universalEnvelopingAlgebraElements;
+  HashedListReferences<RationalFraction<Rational> > rationalFunctions;
+  HashedListReferences<RationalFraction<AlgebraicNumber> > rationalFunctionsAlgebraic;
+  HashedListReferences<RationalFraction<ElementZmodP> > rationalFunctionsModular;
   HashedListReferences<Rational> allRationals;
   HashedListReferences<CharacterSemisimpleLieAlgebraModule<Rational> > theCharsSSLieAlgFD;
   HashedListReferences<double, MathRoutines::hashDouble> theDoubles;
@@ -2659,7 +2659,7 @@ public:
   static bool innerDynkinSimpleTypE(Calculator& calculator, const Expression& input, DynkinSimpleType& output);
   static bool functionDynkinSimpleType(Calculator& calculator, const Expression& input, DynkinSimpleType& output);
   static bool innerSlTwoSubalgebraPrecomputed(Calculator& calculator, const Expression& input, SlTwoSubalgebra& output);
-  static bool innerLoadFromObject(Calculator& calculator, const Expression& input, RationalFunction<Rational>& output);
+  static bool innerLoadFromObject(Calculator& calculator, const Expression& input, RationalFraction<Rational>& output);
   static bool innerAlgebraicNumber(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPolynomialModuloInteger(Calculator& calculator, const Expression& input, Expression& output);
   template <class Coefficient>
@@ -2709,7 +2709,7 @@ public:
   template <class Coefficient>
   static bool expressionFromRationalFunction(
     Calculator& calculator,
-    const RationalFunction<Coefficient>& input,
+    const RationalFraction<Coefficient>& input,
     Expression& output,
     ExpressionContext* inputContext = nullptr
   );
@@ -2747,7 +2747,7 @@ public:
   );
   static bool innerExpressionFromUE(
     Calculator& calculator,
-    const ElementUniversalEnveloping<RationalFunction<Rational> >& input,
+    const ElementUniversalEnveloping<RationalFraction<Rational> >& input,
     Expression& output,
     ExpressionContext* inputContext = nullptr
   );
@@ -2789,7 +2789,7 @@ public:
   );
   static bool innerExpressionFromMonomialUE(
     Calculator& calculator,
-    const MonomialUniversalEnveloping<RationalFunction<Rational> >& input,
+    const MonomialUniversalEnveloping<RationalFraction<Rational> >& input,
     Expression& output,
     ExpressionContext* inputContext = nullptr
   );
@@ -3363,10 +3363,10 @@ bool CalculatorConversions::expressionFromRationalFunction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::expressionFromRationalFunction");
-  if (!input.isOfType<RationalFunction<Coefficient> >()) {
+  if (!input.isOfType<RationalFraction<Coefficient> >()) {
     return false;
   }
-  const RationalFunction<Coefficient>& rationalFunction = input.getValue<RationalFunction<Coefficient> >();
+  const RationalFraction<Coefficient>& rationalFunction = input.getValue<RationalFraction<Coefficient> >();
   ExpressionContext context = input.getContext();
   return CalculatorConversions::expressionFromRationalFunction<Coefficient>(
     calculator, rationalFunction, output, &context
@@ -3376,7 +3376,7 @@ bool CalculatorConversions::expressionFromRationalFunction(
 template <class Coefficient>
 bool CalculatorConversions::expressionFromRationalFunction(
   Calculator& calculator,
-  const RationalFunction<Coefficient>& input,
+  const RationalFraction<Coefficient>& input,
   Expression& output,
   ExpressionContext* inputContext
 ) {

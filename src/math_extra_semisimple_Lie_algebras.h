@@ -475,13 +475,13 @@ public:
   bool checkClosednessLieBracket();
   void applyHomomorphism(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output);
   bool applyHomomorphism(
-    const ElementUniversalEnveloping<RationalFunction<Rational> >& input,
-    ElementUniversalEnveloping<RationalFunction<Rational> >& output
+    const ElementUniversalEnveloping<RationalFraction<Rational> >& input,
+    ElementUniversalEnveloping<RationalFraction<Rational> >& output
   );
   bool applyHomomorphism(
-    const MonomialUniversalEnveloping<RationalFunction<Rational> >& input,
-    const RationalFunction<Rational>& theCoeff,
-    ElementUniversalEnveloping<RationalFunction<Rational> >& output
+    const MonomialUniversalEnveloping<RationalFraction<Rational> >& input,
+    const RationalFraction<Rational>& theCoeff,
+    ElementUniversalEnveloping<RationalFraction<Rational> >& output
   );
 };
 

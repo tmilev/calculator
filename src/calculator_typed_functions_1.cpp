@@ -12,7 +12,7 @@
 #include "math_rational_function_implementation.h"
 
 template <>
-bool Expression::convertInternally<RationalFunction<Rational> >(Expression& output) const;
+bool Expression::convertInternally<RationalFraction<Rational> >(Expression& output) const;
 
 template <>
 bool Expression::convertInternally<ElementWeylAlgebra<Rational> >(Expression& output) const;
@@ -382,14 +382,14 @@ bool CalculatorFunctionsBinaryOps::tensorElementTensorByElementTensor(
     return false;
   }
   Expression inputConverted;
-  if (!input.mergeContextsMyArumentsAndConvertThem<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >(
+  if (!input.mergeContextsMyArumentsAndConvertThem<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >(
     inputConverted, &calculator.comments
   )) {
     return false;
   }
-  ElementTensorsGeneralizedVermas<RationalFunction<Rational> > resultTensor;
-  resultTensor = inputConverted[1].getValue<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >();
-  resultTensor.tensorOnTheRight(inputConverted[2].getValue<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >());
+  ElementTensorsGeneralizedVermas<RationalFraction<Rational> > resultTensor;
+  resultTensor = inputConverted[1].getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >();
+  resultTensor.tensorOnTheRight(inputConverted[2].getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >());
   return output.assignValueWithContext(resultTensor, inputConverted[1].getContext(), calculator);
 }
 
@@ -503,7 +503,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElementsZmodP(
 }
 
 template <>
-bool Expression::convertInternally<ElementUniversalEnveloping<RationalFunction<Rational> > >(Expression& output) const;
+bool Expression::convertInternally<ElementUniversalEnveloping<RationalFraction<Rational> > >(Expression& output) const;
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
   Calculator& calculator, const Expression& input, Expression& output
@@ -517,30 +517,30 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
   if (!input.mergeContextsMyAruments(inputConverted, &calculator.comments)) {
     return false;
   }
-  if (!inputConverted[2].isOfType<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >()) {
+  if (!inputConverted[2].isOfType<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >()) {
     return false;
   }
   SemisimpleLieAlgebra& theSSalg =
-  inputConverted[2].getValue<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >().getOwnerSemisimple();
+  inputConverted[2].getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >().getOwnerSemisimple();
   Expression leftE;
   inputConverted[1].checkConsistency();
   input[1].checkConsistency();
   input[2].checkConsistency();
-  if (!inputConverted[1].convertInternally<ElementUniversalEnveloping<RationalFunction<Rational> > >(leftE)) {
+  if (!inputConverted[1].convertInternally<ElementUniversalEnveloping<RationalFraction<Rational> > >(leftE)) {
     return false;
   }
-  const ElementTensorsGeneralizedVermas<RationalFunction<Rational> >& rightEltETGVM =
-  inputConverted[2].getValue<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >();
-  ElementTensorsGeneralizedVermas<RationalFunction<Rational> > outputElt;
+  const ElementTensorsGeneralizedVermas<RationalFraction<Rational> >& rightEltETGVM =
+  inputConverted[2].getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >();
+  ElementTensorsGeneralizedVermas<RationalFraction<Rational> > outputElt;
   if (rightEltETGVM.isEqualToZero()) {
     output = inputConverted[2];
     return true;
   }
   theSSalg.orderNilradicalNilWeightAscending(rightEltETGVM.getOwnerModule().parabolicSelectionNonSelectedAreElementsLevi);
   theSSalg.flagHasNilradicalOrder = true;
-  RationalFunction<Rational> one(Rational::one());
+  RationalFraction<Rational> one(Rational::one());
   if (!rightEltETGVM.multiplyOnTheLeft(
-    leftE.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >(),
+    leftE.getValue<ElementUniversalEnveloping<RationalFraction<Rational> > >(),
     outputElt,
     theSSalg,
     one
@@ -581,18 +581,18 @@ bool CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctio
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction");
-  if (!CalculatorFunctionsBinaryOps::multiplyTypeByType<RationalFunction<Rational> >(calculator, input, output)) {
-    if (!CalculatorFunctionsBinaryOps::multiplyTypeByType<RationalFunction<AlgebraicNumber> >(calculator, input, output)) {
+  if (!CalculatorFunctionsBinaryOps::multiplyTypeByType<RationalFraction<Rational> >(calculator, input, output)) {
+    if (!CalculatorFunctionsBinaryOps::multiplyTypeByType<RationalFraction<AlgebraicNumber> >(calculator, input, output)) {
       return false;
     }
-    RationalFunction<AlgebraicNumber> simplified;
+    RationalFraction<AlgebraicNumber> simplified;
     if (!output.isOfType(&simplified)) {
       return false;
     }
     simplified.simplify();
     return output.assignValueWithContext(simplified, output.getContext(), calculator);
   }
-  RationalFunction<Rational> simplified;
+  RationalFraction<Rational> simplified;
   if (!output.isOfType(&simplified)) {
     return false;
   }
@@ -604,18 +604,18 @@ bool CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRati
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial");
-  if (!CalculatorFunctionsBinaryOps::divideTypeByType<RationalFunction<Rational> >(calculator, input, output)) {
-    if (!CalculatorFunctionsBinaryOps::divideTypeByType<RationalFunction<AlgebraicNumber> >(calculator, input, output)) {
+  if (!CalculatorFunctionsBinaryOps::divideTypeByType<RationalFraction<Rational> >(calculator, input, output)) {
+    if (!CalculatorFunctionsBinaryOps::divideTypeByType<RationalFraction<AlgebraicNumber> >(calculator, input, output)) {
       return false;
     }
-    RationalFunction<AlgebraicNumber> simplified;
+    RationalFraction<AlgebraicNumber> simplified;
     if (!output.isOfType(&simplified)) {
       return false;
     }
     simplified.simplify();
     return output.assignValueWithContext(simplified, output.getContext(), calculator);
   }
-  RationalFunction<Rational> simplified;
+  RationalFraction<Rational> simplified;
   if (!output.isOfType(&simplified)) {
     return false;
   }
@@ -627,10 +627,10 @@ bool CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrRationalFunctionToRa
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrRationalFunctionToRationalFunction");
-  if (CalculatorFunctionsBinaryOps::innerAddTypeToType<RationalFunction<Rational> >(calculator, input, output)) {
+  if (CalculatorFunctionsBinaryOps::innerAddTypeToType<RationalFraction<Rational> >(calculator, input, output)) {
     return true;
   }
-  if (CalculatorFunctionsBinaryOps::innerAddTypeToType<RationalFunction<AlgebraicNumber> >(
+  if (CalculatorFunctionsBinaryOps::innerAddTypeToType<RationalFraction<AlgebraicNumber> >(
     calculator, input, output
   )) {
     return true;
@@ -667,7 +667,7 @@ bool CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomia
 
 bool CalculatorFunctionsBinaryOps::innerAddUEToAny(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddUEToAny");
-  return CalculatorFunctionsBinaryOps::innerAddTypeToType<ElementUniversalEnveloping<RationalFunction<Rational> > >(
+  return CalculatorFunctionsBinaryOps::innerAddTypeToType<ElementUniversalEnveloping<RationalFraction<Rational> > >(
     calculator, input, output
   );
 }
@@ -679,14 +679,14 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE(Calculator& calculator, 
     return false;
   }
   Expression inputContextsMerged;
-  if (!input.mergeContextsMyArumentsAndConvertThem<ElementUniversalEnveloping<RationalFunction<Rational> > >(
+  if (!input.mergeContextsMyArumentsAndConvertThem<ElementUniversalEnveloping<RationalFraction<Rational> > >(
     inputContextsMerged, &calculator.comments
   )) {
     return false;
   }
-  ElementUniversalEnveloping<RationalFunction<Rational> > result = inputContextsMerged[1].getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >();
-  result *= inputContextsMerged[2].getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >();
-  result.simplify(RationalFunction<Rational>::oneRational());
+  ElementUniversalEnveloping<RationalFraction<Rational> > result = inputContextsMerged[1].getValue<ElementUniversalEnveloping<RationalFraction<Rational> > >();
+  result *= inputContextsMerged[2].getValue<ElementUniversalEnveloping<RationalFraction<Rational> > >();
+  result.simplify(RationalFraction<Rational>::oneRational());
   return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), calculator);
 }
 
@@ -766,7 +766,7 @@ bool CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor");
-  return CalculatorFunctionsBinaryOps::innerAddTypeToType<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >(
+  return CalculatorFunctionsBinaryOps::innerAddTypeToType<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >(
     calculator, input, output
   );
 }
@@ -904,7 +904,7 @@ bool CalculatorFunctionsBinaryOps::innerDividePolynomialModuloIntegerByPolynomia
     return calculator
     << "Polynomial division is currently only implemented over prime moduli. ";
   }
-  RationalFunction<ElementZmodP> result;
+  RationalFraction<ElementZmodP> result;
   result = left;
   result /= right;
   return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), calculator);
@@ -1008,7 +1008,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolynomialBySmallInteger(
       return output.assignValueWithContext(outputPoly, input[1].getContext(), calculator);
     }
     base.raiseToPower(- thePower, 1);
-    RationalFunction<Rational> theRF;
+    RationalFraction<Rational> theRF;
     theRF = base;
     theRF.invert();
     return output.assignValueWithContext(theRF, input[1].getContext(), calculator);
@@ -1152,7 +1152,7 @@ bool CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger(
     MathRoutines::raiseToPower(baseAlg, power, idMat);
     return output.assignMatrix(baseAlg, calculator);
   }
-  Matrix<RationalFunction<Rational> > baseRationalFunctionCoefficients;
+  Matrix<RationalFraction<Rational> > baseRationalFunctionCoefficients;
   ExpressionContext context(calculator);
   if (calculator.functionGetMatrix(matrixE, baseRationalFunctionCoefficients, &context)) {
     if (!baseRationalFunctionCoefficients.isSquare() || baseRationalFunctionCoefficients.numberOfColumns == 0) {
@@ -1183,11 +1183,11 @@ bool CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger(
         return calculator << "Unexpected failure to invert your matrix: " << baseRationalFunctionCoefficients.toString();
       }
     }
-    Matrix<RationalFunction<Rational> > identityMatrix;
+    Matrix<RationalFraction<Rational> > identityMatrix;
     identityMatrix.makeIdentityMatrix(
       baseRationalFunctionCoefficients.numberOfRows,
-      RationalFunction<Rational>::oneRational(),
-      RationalFunction<Rational>::zeroRational()
+      RationalFraction<Rational>::oneRational(),
+      RationalFraction<Rational>::zeroRational()
     );
     MathRoutines::raiseToPower(baseRationalFunctionCoefficients, power, identityMatrix);
     return output.assignMatrix(baseRationalFunctionCoefficients, calculator, &context);
@@ -1495,10 +1495,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(
   if (!input.mergeContextsMyAruments(inputConverted, &calculator.comments)) {
     return false;
   }
-  ElementUniversalEnveloping<RationalFunction<Rational> > theUE;
+  ElementUniversalEnveloping<RationalFraction<Rational> > theUE;
   Expression copyExponent = inputConverted[2];
   Expression copyBase = inputConverted[1];
-  if (!copyBase.isOfType<ElementUniversalEnveloping<RationalFunction<Rational> > >(&theUE)) {
+  if (!copyBase.isOfType<ElementUniversalEnveloping<RationalFraction<Rational> > >(&theUE)) {
     return false;
   }
   if (!theUE.isPowerOfSingleGenerator()) {
@@ -1510,13 +1510,13 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(
     return output.assignValueWithContext(theUE, copyBase.getContext(), calculator);
   }
   Expression exponentConverted;
-  if (!copyExponent.convertInternally<RationalFunction<Rational> >(exponentConverted)) {
+  if (!copyExponent.convertInternally<RationalFraction<Rational> >(exponentConverted)) {
     return false;
   }
-  MonomialUniversalEnveloping<RationalFunction<Rational> > theMon;
+  MonomialUniversalEnveloping<RationalFraction<Rational> > theMon;
   theMon = theUE[0];
-  theMon.powers[0] *= exponentConverted.getValue<RationalFunction<Rational> >();
-  ElementUniversalEnveloping<RationalFunction<Rational> > outputUE;
+  theMon.powers[0] *= exponentConverted.getValue<RationalFraction<Rational> >();
+  ElementUniversalEnveloping<RationalFraction<Rational> > outputUE;
   outputUE.makeZero(*theUE.owner);
   outputUE.addMonomial(theMon, 1);
   return output.assignValueWithContext(outputUE, copyBase.getContext(), calculator);
@@ -1995,9 +1995,9 @@ bool CalculatorFunctionsBinaryOps::multiplyMatrixByMatrix(
     return CalculatorFunctionsBinaryOps::innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg(calculator, input, output);
   }
   bool invokeRFMultiplication =
-  (left.isMatrixOfType<RationalFunction<Rational> >() && right.isMatrixOfType<Rational>()) ||
-  (left.isMatrixOfType<Rational>()         && right.isMatrixOfType<RationalFunction<Rational> >()) ||
-  (left.isMatrixOfType<RationalFunction<Rational> >() && right.isMatrixOfType<RationalFunction<Rational> >() );
+  (left.isMatrixOfType<RationalFraction<Rational> >() && right.isMatrixOfType<Rational>()) ||
+  (left.isMatrixOfType<Rational>()         && right.isMatrixOfType<RationalFraction<Rational> >()) ||
+  (left.isMatrixOfType<RationalFraction<Rational> >() && right.isMatrixOfType<RationalFraction<Rational> >() );
   if (invokeRFMultiplication) {
     return CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
       calculator, input, output
@@ -2222,11 +2222,11 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
   Expression leftE = input[1];
   Expression rightE = input[2];
   if (
-    !rightE.isMatrixOfType<RationalFunction<Rational> >() || !(
+    !rightE.isMatrixOfType<RationalFraction<Rational> >() || !(
       leftE.isOfType<Rational>() ||
       leftE.isOfType<Polynomial<Rational> >() ||
-      leftE.isOfType<RationalFunction<Rational> >() ||
-      leftE.isMatrixOfType<RationalFunction<Rational> >()
+      leftE.isOfType<RationalFraction<Rational> >() ||
+      leftE.isMatrixOfType<RationalFraction<Rational> >()
     )
   ) {
     return false;
@@ -2236,17 +2236,17 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
     << leftE.toString() << " and " << rightE.toString()
     << " to common context. ";
   }
-  Matrix<RationalFunction<Rational> > leftMatrix, rightMatrix;
+  Matrix<RationalFraction<Rational> > leftMatrix, rightMatrix;
   if (!calculator.functionGetMatrix(rightE, rightMatrix)) {
     return false;
   }
-  if (!leftE.isMatrixOfType<RationalFunction<Rational> >()) {
+  if (!leftE.isMatrixOfType<RationalFraction<Rational> >()) {
     Expression leftErfForm;
-    if (!leftE.convertInternally<RationalFunction<Rational> >(leftErfForm)) {
+    if (!leftE.convertInternally<RationalFraction<Rational> >(leftErfForm)) {
       return calculator << "Failed to convert "
       << leftE.toString() << " to rational function. ";
     }
-    RationalFunction<Rational> theScalar = leftErfForm.getValue<RationalFunction<Rational> >();
+    RationalFraction<Rational> theScalar = leftErfForm.getValue<RationalFraction<Rational> >();
     rightMatrix *= theScalar;
     ExpressionContext contextE = leftE.getContext();
     return output.assignMatrix(rightMatrix, calculator, &contextE);
@@ -2351,14 +2351,14 @@ bool CalculatorFunctionsBinaryOps::lieBracketRatOrUEWithRatOrUE(
     return output.assignValueWithContext(0, leftE.getContext() , calculator);
   }
   if (
-    leftE.isOfType<ElementUniversalEnveloping<RationalFunction<Rational> > >() &&
-    rightE.isOfType<ElementUniversalEnveloping<RationalFunction<Rational> > >()
+    leftE.isOfType<ElementUniversalEnveloping<RationalFraction<Rational> > >() &&
+    rightE.isOfType<ElementUniversalEnveloping<RationalFraction<Rational> > >()
   ) {
-    ElementUniversalEnveloping<RationalFunction<Rational> > result;
-    leftE.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >().lieBracketOnTheRight(
-      rightE.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >(), result
+    ElementUniversalEnveloping<RationalFraction<Rational> > result;
+    leftE.getValue<ElementUniversalEnveloping<RationalFraction<Rational> > >().lieBracketOnTheRight(
+      rightE.getValue<ElementUniversalEnveloping<RationalFraction<Rational> > >(), result
     );
-    result.simplify(RationalFunction<Rational>::one());
+    result.simplify(RationalFraction<Rational>::one());
     return output.assignValueWithContext(result, leftE.getContext(), calculator);
   }
   return false;
@@ -2711,15 +2711,15 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs(
   Expression leftE = input[1];
   Expression rightE = input[2];
   if (
-    !rightE.isMatrixOfType<RationalFunction<Rational> >() ||
-    !leftE.isMatrixOfType<RationalFunction<Rational> >()
+    !rightE.isMatrixOfType<RationalFraction<Rational> >() ||
+    !leftE.isMatrixOfType<RationalFraction<Rational> >()
   ) {
     return false;
   }
   if (!leftE.mergeContexts(leftE, rightE)) {
     return false;
   }
-  Matrix<RationalFunction<Rational> > leftMatrix, rightMatrix;
+  Matrix<RationalFraction<Rational> > leftMatrix, rightMatrix;
   if (!calculator.functionGetMatrix(leftE, leftMatrix)) {
     return false;
   }

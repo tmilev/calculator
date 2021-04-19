@@ -311,7 +311,7 @@ bool ElementZmodP::Test::scale() {
 }
 
 template<>
-RationalFunction<Rational> RationalFunction<Rational>::Test::fromString(const std::string& input) {
+RationalFraction<Rational> RationalFraction<Rational>::Test::fromString(const std::string& input) {
   Calculator parser;
   std::string inputModified = "MakeRationalFunction(" + input + ")";
   parser.initialize(Calculator::Mode::full);
@@ -323,7 +323,7 @@ RationalFunction<Rational> RationalFunction<Rational>::Test::fromString(const st
     << " which was not expected. This function is not allowed to fail. "
     << global.fatal;
   }
-  RationalFunction<Rational> result;
+  RationalFraction<Rational> result;
   if (!parser.programExpression[1].isOfType(&result)) {
     global.fatal << "RationalFunction::fromString did not "
     << "produce a rational function, but instead: "
@@ -334,18 +334,18 @@ RationalFunction<Rational> RationalFunction<Rational>::Test::fromString(const st
 }
 
 template<>
-bool RationalFunction<Rational>::Test::all() {
-  RationalFunction<Rational>::Test::fromStringTest();
-  RationalFunction<Rational>::Test::scaleNormalizeIndex();
+bool RationalFraction<Rational>::Test::all() {
+  RationalFraction<Rational>::Test::fromStringTest();
+  RationalFraction<Rational>::Test::scaleNormalizeIndex();
   return true;
 }
 
 template<>
-bool RationalFunction<Rational>::Test::fromStringTest() {
+bool RationalFraction<Rational>::Test::fromStringTest() {
   MacroRegisterFunctionWithName("RationalFunction::Test::fromString");
   std::string input = "(a^2+7b)/(2+d*c)";
   std::string expected = "(x_{1}^{2}+7x_{2} )/(x_{3} x_{4} +2)";
-  RationalFunction<Rational> underTest = RationalFunction<Rational>::Test::fromString(input);
+  RationalFraction<Rational> underTest = RationalFraction<Rational>::Test::fromString(input);
   if (underTest.toString() != expected) {
     global.fatal << "Input: " << input << " parsed as: "
     << underTest.toString() << ", expected: "
@@ -355,11 +355,11 @@ bool RationalFunction<Rational>::Test::fromStringTest() {
 }
 
 template<>
-bool RationalFunction<Rational>::Test::scaleNormalizeIndex() {
-  RationalFunction<Rational> a = RationalFunction<Rational>::Test::fromString("(a+1/2)/(b+1/3)");
-  RationalFunction<Rational> b = RationalFunction<Rational>::Test::fromString("2a/5");
-  RationalFunction<Rational> c = RationalFunction<Rational>::Test::fromString("3a/(7x)");
-  List<List<RationalFunction<Rational> > > toScale = {
+bool RationalFraction<Rational>::Test::scaleNormalizeIndex() {
+  RationalFraction<Rational> a = RationalFraction<Rational>::Test::fromString("(a+1/2)/(b+1/3)");
+  RationalFraction<Rational> b = RationalFraction<Rational>::Test::fromString("2a/5");
+  RationalFraction<Rational> c = RationalFraction<Rational>::Test::fromString("3a/(7x)");
+  List<List<RationalFraction<Rational> > > toScale = {
     {a},
     {a, b},
     {a, b, c}
@@ -371,7 +371,7 @@ bool RationalFunction<Rational>::Test::scaleNormalizeIndex() {
   };
   for (int i = 0; i < toScale.size; i ++) {
     std::string atStart = toScale[i].toStringCommaDelimited();
-    RationalFunction::scaleNormalizeIndex(toScale[i], 0);
+    RationalFraction::scaleNormalizeIndex(toScale[i], 0);
     if (toScale[i].toStringCommaDelimited() != expected[i]) {
       global.fatal << "Scaling rational functions: " << atStart
       << " produced: " << toScale[i].toStringCommaDelimited()

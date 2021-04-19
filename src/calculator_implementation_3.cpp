@@ -18,13 +18,13 @@
 // - Try moving template generics into .h files.
 
 template <>
-bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::isDominantWithRespectToGenerator<RationalFunction<Rational> >(
-  const Vector<RationalFunction<Rational> >& theWeight, int generatorIndex
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::isDominantWithRespectToGenerator<RationalFraction<Rational> >(
+  const Vector<RationalFraction<Rational> >& theWeight, int generatorIndex
 ) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::isDominantWithRespectToGenerator");
   this->checkInitialization();
-  Vector<RationalFunction<Rational> > tempVect;
-  RationalFunction<Rational> tempRF;
+  Vector<RationalFraction<Rational> > tempVect;
+  RationalFraction<Rational> tempRF;
   tempVect = this->simpleRootsInner[generatorIndex].getVectorRational();
   tempRF = this->ambientWeyl->rootScalarCartanRoot(theWeight, tempVect);
   if (tempRF.expressionType != tempRF.typeConstant) {
@@ -58,11 +58,11 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::i
 }
 
 template <>
-bool WeylGroupData::isDominantWithRespectToGenerator<RationalFunction<Rational> >(
-  const Vector<RationalFunction<Rational> >& theWeight, int generatorIndex
+bool WeylGroupData::isDominantWithRespectToGenerator<RationalFraction<Rational> >(
+  const Vector<RationalFraction<Rational> >& theWeight, int generatorIndex
 ) {
   Vector<Rational> tempVect;
-  RationalFunction<Rational> tempRF;
+  RationalFraction<Rational> tempRF;
   tempVect.makeEi(this->getDimension(), generatorIndex);
   tempRF = this->rootScalarCartanRoot(theWeight, tempVect);
   if (tempRF.expressionType != tempRF.typeConstant) {
@@ -396,7 +396,7 @@ bool Expression::assignMatrixExpressions(
         inType = typePolyRat;
       } else if (input(i, j).isOfType<Polynomial<AlgebraicNumber> >()) {
         inType = typeAlgebraic;
-      } else if (input(i, j).isOfType<RationalFunction<Rational> >()) {
+      } else if (input(i, j).isOfType<RationalFraction<Rational> >()) {
         inType = typeRF;
       } else {
         inType = typeExpression;

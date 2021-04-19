@@ -485,10 +485,10 @@ bool CalculatorBasics::standardIsDenotedBy(Calculator& calculator, const Express
   output = input;
   output.setChildAtomValue(0, calculator.opDefine());
   ////
-  if (withNotation.isOfType<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >()) {
-    if (withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >().isHWV()) {
-      MonomialGeneralizedVerma<RationalFunction<Rational> >& theElt =
-      withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >()[0].theMons[0];
+  if (withNotation.isOfType<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >()) {
+    if (withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >().isHWV()) {
+      MonomialGeneralizedVerma<RationalFraction<Rational> >& theElt =
+      withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >()[0].theMons[0];
       theElt.getOwner().highestWeightVectorNotation = theNotation.toString();
     }
   }

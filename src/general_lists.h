@@ -62,7 +62,7 @@ template<class Base>
 class Complex;
 class AlgebraicNumber;
 template <class Coefficient>
-class RationalFunction;
+class RationalFraction;
 class SemisimpleLieAlgebra;
 class RootSubalgebra;
 class RootSubalgebras;

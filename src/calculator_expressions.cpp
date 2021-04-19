@@ -67,19 +67,19 @@ int Expression::getTypeOperation<ElementEllipticCurve<ElementZmodP> >() const {
 }
 
 template < >
-int Expression::getTypeOperation<RationalFunction<Rational> >() const {
+int Expression::getTypeOperation<RationalFraction<Rational> >() const {
   this->checkInitialization();
   return this->owner->opRationalFunction();
 }
 
 template < >
-int Expression::getTypeOperation<RationalFunction<AlgebraicNumber> >() const {
+int Expression::getTypeOperation<RationalFraction<AlgebraicNumber> >() const {
   this->checkInitialization();
   return this->owner->opRationalFunctionAlgebraicCoefficients();
 }
 
 template < >
-int Expression::getTypeOperation<RationalFunction<ElementZmodP> >() const {
+int Expression::getTypeOperation<RationalFraction<ElementZmodP> >() const {
   this->checkInitialization();
   return this->owner->opRationalFunctionModuloInteger();
 }
@@ -133,7 +133,7 @@ int Expression::getTypeOperation<ElementZmodP>() const {
 }
 
 template < >
-int Expression::getTypeOperation<ElementUniversalEnveloping<RationalFunction<Rational> > >() const {
+int Expression::getTypeOperation<ElementUniversalEnveloping<RationalFraction<Rational> > >() const {
   this->checkInitialization();
   return this->owner->opElementUEOverRF();
 }
@@ -223,7 +223,7 @@ int Expression::getTypeOperation<MonomialTensor<int, HashFunctions::hashFunction
 }
 
 template < >
-int Expression::getTypeOperation<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >() const {
+int Expression::getTypeOperation<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >() const {
   this->checkInitialization();
   return this->owner->opElementTensorGVM();
 }
@@ -286,8 +286,8 @@ bool Expression::convertsInternally(
   if (this->owner == nullptr) {
     return false;
   }
-  ElementUniversalEnveloping<RationalFunction<Rational> > element;
-  if (!this->isOfType<ElementUniversalEnveloping<RationalFunction<Rational> > >(&element)) {
+  ElementUniversalEnveloping<RationalFraction<Rational> > element;
+  if (!this->isOfType<ElementUniversalEnveloping<RationalFraction<Rational> > >(&element)) {
     return false;
   }
   ElementSemisimpleLieAlgebra<Rational> elementSemisimple;
@@ -405,7 +405,7 @@ double
 
 template < >
 int Expression::addObjectReturnIndex(const
-RationalFunction<Rational>
+RationalFraction<Rational>
 & inputValue) const {
   this->checkInitialization();
   return this->owner->objectContainer.rationalFunctions
@@ -414,7 +414,7 @@ RationalFunction<Rational>
 
 template < >
 int Expression::addObjectReturnIndex(const
-RationalFunction<AlgebraicNumber>
+RationalFraction<AlgebraicNumber>
 & inputValue) const {
   this->checkInitialization();
   return this->owner->objectContainer.rationalFunctionsAlgebraic
@@ -423,7 +423,7 @@ RationalFunction<AlgebraicNumber>
 
 template < >
 int Expression::addObjectReturnIndex(const
-RationalFunction<ElementZmodP>
+RationalFraction<ElementZmodP>
 & inputValue) const {
   this->checkInitialization();
   return this->owner->objectContainer.rationalFunctionsModular
@@ -441,7 +441,7 @@ MatrixTensor<Rational>
 
 template < >
 int Expression::addObjectReturnIndex(const
-ElementUniversalEnveloping<RationalFunction<Rational> >
+ElementUniversalEnveloping<RationalFraction<Rational> >
 & inputValue) const {
   this->checkInitialization();
   return this->owner->objectContainer.universalEnvelopingAlgebraElements
@@ -570,7 +570,7 @@ MonomialTensor<int, HashFunctions::hashFunction>
 
 template < >
 int Expression::addObjectReturnIndex(const
-ElementTensorsGeneralizedVermas<RationalFunction<Rational> >
+ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
 & inputValue) const {
   this->checkInitialization();
   return this->owner->objectContainer.theTensorElts
@@ -775,8 +775,8 @@ JSData& Expression::getValueNonConst() const {
 }
 
 template < >
-RationalFunction<Rational>& Expression::getValueNonConst() const {
-  if (!this->isOfType<RationalFunction<Rational> >()) {
+RationalFraction<Rational>& Expression::getValueNonConst() const {
+  if (!this->isOfType<RationalFraction<Rational> >()) {
     global.fatal << "Expression not of required type RationalFunction_Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -784,8 +784,8 @@ RationalFunction<Rational>& Expression::getValueNonConst() const {
 }
 
 template < >
-RationalFunction<AlgebraicNumber>& Expression::getValueNonConst() const {
-  if (!this->isOfType<RationalFunction<AlgebraicNumber> >()) {
+RationalFraction<AlgebraicNumber>& Expression::getValueNonConst() const {
+  if (!this->isOfType<RationalFraction<AlgebraicNumber> >()) {
     global.fatal << "Expression not of required type RationalFunction_AlgebraicNumber. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -793,8 +793,8 @@ RationalFunction<AlgebraicNumber>& Expression::getValueNonConst() const {
 }
 
 template < >
-RationalFunction<ElementZmodP>& Expression::getValueNonConst() const {
-  if (!this->isOfType<RationalFunction<ElementZmodP> >()) {
+RationalFraction<ElementZmodP>& Expression::getValueNonConst() const {
+  if (!this->isOfType<RationalFraction<ElementZmodP> >()) {
     global.fatal << "Expression not of required type RationalFunctionOld. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -802,8 +802,8 @@ RationalFunction<ElementZmodP>& Expression::getValueNonConst() const {
 }
 
 template < >
-ElementUniversalEnveloping<RationalFunction<Rational> >& Expression::getValueNonConst() const {
-  if (!this->isOfType<ElementUniversalEnveloping<RationalFunction<Rational> > >()) {
+ElementUniversalEnveloping<RationalFraction<Rational> >& Expression::getValueNonConst() const {
+  if (!this->isOfType<ElementUniversalEnveloping<RationalFraction<Rational> > >()) {
     global.fatal << "Expression not of required type "
     << "ElementUniversalEnveloping_RationalFunctionOld. The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -865,8 +865,8 @@ MonomialTensor<int, HashFunctions::hashFunction>& Expression::getValueNonConst()
 }
 
 template < >
-ElementTensorsGeneralizedVermas<RationalFunction<Rational> >& Expression::getValueNonConst() const {
-  if (!this->isOfType<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >()) {
+ElementTensorsGeneralizedVermas<RationalFraction<Rational> >& Expression::getValueNonConst() const {
+  if (!this->isOfType<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >()) {
     global.fatal << "Expression not of "
     << "required type ElementTGVM_RationalFunctionOld. The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -1060,11 +1060,11 @@ bool Expression::convertInternally<PolynomialModuloPolynomial<ElementZmodP> >(Ex
 }
 
 template< >
-bool Expression::convertInternally<RationalFunction<Rational> >(Expression& output) const {
+bool Expression::convertInternally<RationalFraction<Rational> >(Expression& output) const {
   MacroRegisterFunctionWithName("Expression::convertInternally_RationalFunction_Rational");
   this->checkInitialization();
   if (this->isOfType<Rational>()) {
-    RationalFunction<Rational> resultRF;
+    RationalFraction<Rational> resultRF;
     resultRF.makeConstant(this->getValue<Rational>());
     return output.assignValueWithContext(
       resultRF, this->getContext(), *this->owner
@@ -1075,18 +1075,18 @@ bool Expression::convertInternally<RationalFunction<Rational> >(Expression& outp
     if (!this->getValue<AlgebraicNumber>().isRational(&rationalValue)) {
       return false;
     }
-    RationalFunction<Rational> result;
+    RationalFraction<Rational> result;
     result.makeConstant(rationalValue);
     return output.assignValueWithContext(result, this->getContext(), *this->owner);
   }
   if (this->isOfType<Polynomial<Rational> >()) {
-    RationalFunction<Rational> result;
+    RationalFraction<Rational> result;
     result = this->getValue<Polynomial<Rational> >();
     return output.assignValueWithContext(
       result, this->getContext(), *this->owner
     );
   }
-  if (this->isOfType<RationalFunction<Rational> >()) {
+  if (this->isOfType<RationalFraction<Rational> >()) {
     output = *this;
     return true;
   }
@@ -1097,12 +1097,12 @@ bool Expression::convertInternally<RationalFunction<Rational> >(Expression& outp
 }
 
 template< >
-bool Expression::convertInternally<RationalFunction<AlgebraicNumber> >(Expression& output) const {
+bool Expression::convertInternally<RationalFraction<AlgebraicNumber> >(Expression& output) const {
   MacroRegisterFunctionWithName("Expression::converInternally_RationalFunction_AlgebraicNumber");
   this->checkInitialization();
   AlgebraicClosureRationals* closure = &this->owner->objectContainer.algebraicClosure;
   if (this->isOfType<Rational>()) {
-    RationalFunction<AlgebraicNumber> result;
+    RationalFraction<AlgebraicNumber> result;
     AlgebraicNumber value;
     value.assignRational(this->getValue<Rational>(), closure);
     result.makeConstant(value);
@@ -1111,7 +1111,7 @@ bool Expression::convertInternally<RationalFunction<AlgebraicNumber> >(Expressio
     );
   }
   if (this->isOfType<AlgebraicNumber>()) {
-    RationalFunction<AlgebraicNumber> result;
+    RationalFraction<AlgebraicNumber> result;
     result.makeConstant(this->getValue<AlgebraicNumber>());
     return output.assignValueWithContext(
       result, this->getContext(), *this->owner
@@ -1119,13 +1119,13 @@ bool Expression::convertInternally<RationalFunction<AlgebraicNumber> >(Expressio
   }
   // TODO(tmilev): please implement conversion from Polynomial<Rational> to Polynomial<AlgebraicNumber>.
   if (this->isOfType<Polynomial<AlgebraicNumber> >()) {
-    RationalFunction<AlgebraicNumber> result;
+    RationalFraction<AlgebraicNumber> result;
     result = this->getValue<Polynomial<AlgebraicNumber> >();
     return output.assignValueWithContext(
       result, this->getContext(), *this->owner
     );
   }
-  if (this->isOfType<RationalFunction<AlgebraicNumber> >()) {
+  if (this->isOfType<RationalFraction<AlgebraicNumber> >()) {
     output = *this;
     return true;
   }
@@ -1168,12 +1168,12 @@ bool Expression::convertInternally<Weight<Polynomial<Rational> > >(Expression& o
 }
 
 template< >
-bool Expression::convertInternally<ElementUniversalEnveloping<RationalFunction<Rational> > >(Expression& output) const {
+bool Expression::convertInternally<ElementUniversalEnveloping<RationalFraction<Rational> > >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
   this->checkInitialization();
   if (!this->isBuiltInType())
     return false;
-  if (this->isOfType<ElementUniversalEnveloping<RationalFunction<Rational> > >()) {
+  if (this->isOfType<ElementUniversalEnveloping<RationalFraction<Rational> > >()) {
     output = *this;
     return true;
   }
@@ -1183,17 +1183,17 @@ bool Expression::convertInternally<ElementUniversalEnveloping<RationalFunction<R
     << ") to element of universal enveloping -  failed to extract ambient Lie algebra. ";
     return false;
   }
-  ElementUniversalEnveloping<RationalFunction<Rational> > outputUE;
+  ElementUniversalEnveloping<RationalFraction<Rational> > outputUE;
   if (this->isOfType<Rational>()) {
     outputUE.makeConstant(this->getValue<Rational>(), *theOwner);
     return output.assignValueWithContext(outputUE, this->getContext(), *this->owner);
   } else if (this->isOfType<Polynomial<Rational> >()) {
-    RationalFunction<Rational> tempRF;
+    RationalFraction<Rational> tempRF;
     tempRF = this->getValue<Polynomial<Rational> >();
     outputUE.makeConstant(tempRF, *theOwner);
     return output.assignValueWithContext(outputUE, this->getContext(), *this->owner);
-  } else if (this->isOfType<RationalFunction<Rational> >()) {
-    outputUE.makeConstant(this->getValue<RationalFunction<Rational> >(), *theOwner);
+  } else if (this->isOfType<RationalFraction<Rational> >()) {
+    outputUE.makeConstant(this->getValue<RationalFraction<Rational> >(), *theOwner);
     return output.assignValueWithContext(outputUE, this->getContext(), *this->owner);
   }
   return *this->owner << "<hr>Failed to convert " << this->toString()
@@ -1201,10 +1201,10 @@ bool Expression::convertInternally<ElementUniversalEnveloping<RationalFunction<R
 }
 
 template< >
-bool Expression::convertInternally<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >(Expression& output) const {
+bool Expression::convertInternally<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
   this->checkInitialization();
-  if (this->isOfType<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >()) {
+  if (this->isOfType<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >()) {
     output = *this;
     return true;
   }
@@ -1909,8 +1909,8 @@ bool Expression::isEqualToZero() const {
   if (this->isOfType<Polynomial<Rational> >()) {
     return this->getValue<Polynomial<Rational> >().isEqualToZero();
   }
-  if (this->isOfType<RationalFunction<Rational> >()) {
-    return this->getValue<RationalFunction<Rational> >().isEqualToZero();
+  if (this->isOfType<RationalFraction<Rational> >()) {
+    return this->getValue<RationalFraction<Rational> >().isEqualToZero();
   }
   return false;
 }
@@ -2552,7 +2552,7 @@ bool Expression::toStringBuiltIn<PolynomialModuloPolynomial<ElementZmodP> >(
 }
 
 template<>
-bool Expression::toStringBuiltIn<RationalFunction<Rational> >(
+bool Expression::toStringBuiltIn<RationalFraction<Rational> >(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format
@@ -2563,7 +2563,7 @@ bool Expression::toStringBuiltIn<RationalFunction<Rational> >(
   input.getContext().getFormat(formatLocal);
   formatLocal.flagUseFrac = true;
   out << "MakeRationalFunction{}("
-  << input.getValue<RationalFunction<Rational> >().toString(&formatLocal) << ")";
+  << input.getValue<RationalFraction<Rational> >().toString(&formatLocal) << ")";
   if (showContext) {
     out << "[" << input.getContext().toString() << "]";
   }
@@ -2571,7 +2571,7 @@ bool Expression::toStringBuiltIn<RationalFunction<Rational> >(
 }
 
 template<>
-bool Expression::toStringBuiltIn<RationalFunction<AlgebraicNumber> >(
+bool Expression::toStringBuiltIn<RationalFraction<AlgebraicNumber> >(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format
@@ -2582,7 +2582,7 @@ bool Expression::toStringBuiltIn<RationalFunction<AlgebraicNumber> >(
   input.getContext().getFormat(formatLocal);
   formatLocal.flagUseFrac = true;
   out << "MakeRationalFunction{}("
-  << input.getValue<RationalFunction<AlgebraicNumber> >().toString(&formatLocal) << ")";
+  << input.getValue<RationalFraction<AlgebraicNumber> >().toString(&formatLocal) << ")";
   if (showContext) {
     out << "[" << input.getContext().toString() << "]";
   }
@@ -2590,7 +2590,7 @@ bool Expression::toStringBuiltIn<RationalFunction<AlgebraicNumber> >(
 }
 
 template<>
-bool Expression::toStringBuiltIn<RationalFunction<ElementZmodP> >(
+bool Expression::toStringBuiltIn<RationalFraction<ElementZmodP> >(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format
@@ -2601,7 +2601,7 @@ bool Expression::toStringBuiltIn<RationalFunction<ElementZmodP> >(
   input.getContext().getFormat(formatLocal);
   formatLocal.flagSuppressModP = true;
   formatLocal.flagUseFrac = true;
-  const RationalFunction<ElementZmodP>& data = input.getValue<RationalFunction<ElementZmodP> >();
+  const RationalFraction<ElementZmodP>& data = input.getValue<RationalFraction<ElementZmodP> >();
   if (data.expressionType == data.typeRationalFunction) {
     ElementZmodP constantSample = data.numerator.getElementConst().coefficients[0];
     out << "\\frac{"
@@ -2651,7 +2651,7 @@ bool Expression::toStringBuiltIn<SemisimpleLieAlgebra*>(
 }
 
 template<>
-bool Expression::toStringBuiltIn<ElementUniversalEnveloping<RationalFunction<Rational> > >(
+bool Expression::toStringBuiltIn<ElementUniversalEnveloping<RationalFraction<Rational> > >(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format
@@ -2660,7 +2660,7 @@ bool Expression::toStringBuiltIn<ElementUniversalEnveloping<RationalFunction<Rat
   FormatExpressions formatLocal;
   input.getContext().getFormat(formatLocal);
   out << "UEE{}(" //<< input.getContext().toString() << ", "
-  << input.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >().toString(&formatLocal)
+  << input.getValue<ElementUniversalEnveloping<RationalFraction<Rational> > >().toString(&formatLocal)
   << ")";
   return true;
 }
@@ -2687,7 +2687,7 @@ bool Expression::toStringBuiltIn<MatrixTensor<Rational> >(
 }
 
 template<>
-bool Expression::toStringBuiltIn<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >(
+bool Expression::toStringBuiltIn<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format
@@ -2696,7 +2696,7 @@ bool Expression::toStringBuiltIn<ElementTensorsGeneralizedVermas<RationalFunctio
   FormatExpressions localFormat;
   input.getContext().getFormat(localFormat);
   out << "ETGVM{}(";
-  out << input.getValue<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >().toString(&localFormat);
+  out << input.getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >().toString(&localFormat);
   out << ")";
   return true;
 }
@@ -2925,12 +2925,12 @@ bool Expression::toStringData(std::stringstream& out, FormatExpressions* format)
     }
     return true;
   }
-  if (this->isMatrixOfType<RationalFunction<Rational> >()) {
+  if (this->isMatrixOfType<RationalFraction<Rational> >()) {
     FormatExpressions format;
     this->getContext().getFormat(format);
     format.flagUseHTML = false;
     format.flagUseLatex = true;
-    Matrix<RationalFunction<Rational> > theMat;
+    Matrix<RationalFraction<Rational> > theMat;
     this->owner->functionGetMatrix(*this, theMat);
     out << theMat.toString(&format);
     return true;
@@ -5004,7 +5004,7 @@ bool Expression::isCacheableExpression() const {
 
 bool Expression::isBuiltInScalar() const {
   return this->isOfType<Rational>() || this->isOfType<Polynomial<Rational> >() ||
-  this->isOfType<RationalFunction<Rational> >() || this->isOfType<double>() || this->isOfType<AlgebraicNumber>();
+  this->isOfType<RationalFraction<Rational> >() || this->isOfType<double>() || this->isOfType<AlgebraicNumber>();
 }
 
 bool Expression::isElementaryObject() const {

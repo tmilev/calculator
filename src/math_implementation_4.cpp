@@ -597,8 +597,8 @@ std::string UserCalculatorData::toStringUnsecure() {
 }
 
 template<>
-List<Weight<RationalFunction<Rational> > >::Comparator*
-FormatExpressions::getMonomialOrder<Weight<RationalFunction<Rational> > >() {
+List<Weight<RationalFraction<Rational> > >::Comparator*
+FormatExpressions::getMonomialOrder<Weight<RationalFraction<Rational> > >() {
   return nullptr;
 }
 

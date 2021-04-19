@@ -1078,10 +1078,10 @@ void ElementUniversalEnveloping<Coefficient>::raiseToPower(int thePower) {
 template<class Coefficient>
 void ElementVermaModuleOrdered<Coefficient>::getBasisFromSpanOfElements(
   List<ElementVermaModuleOrdered>& theElements,
-  Vectors<RationalFunction<Rational> >& outputCoordinates,
+  Vectors<RationalFraction<Rational> >& outputCoordinates,
   List<ElementVermaModuleOrdered>& outputTheBasis,
-  const RationalFunction<Rational>& RFOne,
-  const RationalFunction<Rational>& RFZero
+  const RationalFraction<Rational>& RFOne,
+  const RationalFraction<Rational>& RFZero
 ) {
   List<ElementUniversalEnvelopingOrdered<Coefficient> > theEltsUEform;
   theEltsUEform.setSize(theElements.size);

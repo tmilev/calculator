@@ -3987,7 +3987,8 @@ public:
     SemisimpleLieAlgebra& owner
   );
   bool getCoordinatesInBasis(
-    const List<ElementSemisimpleLieAlgebra<Coefficient> >& basis, Vector<Coefficient>& output
+    const List<ElementSemisimpleLieAlgebra<Coefficient> >& basis,
+    Vector<Coefficient>& output
   ) const;
   SemisimpleLieAlgebra* getOwner() const {
     this->checkConsistency();
@@ -3997,10 +3998,11 @@ public:
     return (*this)[0].owner;
   }
   bool getCoordinatesInBasis(
-    const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<RationalFunction<Rational> >& output
+    const List<ElementSemisimpleLieAlgebra>& basis,
+    Vector<RationalFraction<Rational> >& output
   ) const {
     Vector<Rational> tempVect;
-    if (!this->getCoordinatesInBasis(theBasis, tempVect)) {
+    if (!this->getCoordinatesInBasis(basis, tempVect)) {
       return false;
     }
     output.setSize(tempVect.size);
@@ -4019,8 +4021,8 @@ public:
     const ElementSemisimpleLieAlgebra& theElt,
     ElementSemisimpleLieAlgebra& output,
     SemisimpleLieAlgebra& owner,
-    const RationalFunction<Rational>& ringUnit,
-    const RationalFunction<Rational>& ringZero
+    const RationalFraction<Rational>& ringUnit,
+    const RationalFraction<Rational>& ringZero
   );
   bool isCoefficientOneChevalleyGenerator();
   bool isProportionalTo(const ElementSemisimpleLieAlgebra& other) const {

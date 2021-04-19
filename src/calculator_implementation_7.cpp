@@ -26,7 +26,7 @@ bool Expression::convertInternally<ElementWeylAlgebra<Rational> >(Expression& ou
 template <>
 bool Expression::convertInternally<Polynomial<Rational> >(Expression& output) const;
 template <>
-bool Expression::convertInternally<ElementUniversalEnveloping<RationalFunction<Rational> > >(Expression& output) const;
+bool Expression::convertInternally<ElementUniversalEnveloping<RationalFraction<Rational> > >(Expression& output) const;
 
 bool CalculatorFunctionsCrypto::testLoadPEMCertificates(
   Calculator& calculator, const Expression& input, Expression& output
@@ -1445,13 +1445,13 @@ bool Polynomial<Coefficient>::getLinearSystemFromLinearPolynomials(
 
 class IntegralRationalFunctionComputation {
 public:
-  RationalFunction<Rational> theRF;
+  RationalFraction<Rational> theRF;
   Polynomial<Rational> theDen, theNum;
   Polynomial<Rational> quotientRat, remainderRat;
   List<Polynomial<Rational> > theFactors;
   Polynomial<AlgebraicNumber> thePolyThatMustVanish;
   Polynomial<AlgebraicNumber> remainderRescaledAlgebraic;
-  RationalFunction<Rational> transformedRF;
+  RationalFraction<Rational> transformedRF;
   FormatExpressions currentFormaT;
   Expression integrationSetE;
   ExpressionContext context;
@@ -2042,14 +2042,14 @@ bool CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals(
   IntegralRationalFunctionComputation theComputation(&calculator);
   bool isGood = CalculatorConversions::functionRationalFunction<Rational>(calculator, input, theComputation.inpuTE);
   if (isGood) {
-    isGood = theComputation.inpuTE.isOfType<RationalFunction<Rational> >();
+    isGood = theComputation.inpuTE.isOfType<RationalFraction<Rational> >();
   }
   if (!isGood) {
     return calculator << "CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals: "
     << "Failed to convert "
     << input.toString() << " to rational function. ";
   }
-  theComputation.theRF = theComputation.inpuTE.getValue<RationalFunction<Rational> >();
+  theComputation.theRF = theComputation.inpuTE.getValue<RationalFraction<Rational> >();
   if (theComputation.theRF.minimalNumberOfVariables() > 1) {
     return calculator << "The input rational function is of "
     << theComputation.theRF.minimalNumberOfVariables() << " variables and "
@@ -2074,14 +2074,14 @@ bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorith
   IntegralRationalFunctionComputation computation(&calculator);
   bool isGood = CalculatorConversions::innerRationalFunction(calculator, input, computation.inpuTE);
   if (isGood) {
-    isGood = computation.inpuTE.isOfType<RationalFunction<Rational> >();
+    isGood = computation.inpuTE.isOfType<RationalFraction<Rational> >();
   }
   if (!isGood) {
     return calculator << "CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals: "
     << "Failed to convert "
     << input.toString() << " to rational function. ";
   }
-  computation.theRF = computation.inpuTE.getValue<RationalFunction<Rational> >();
+  computation.theRF = computation.inpuTE.getValue<RationalFraction<Rational> >();
   if (computation.theRF.minimalNumberOfVariables() > 1) {
     return calculator << "The input rational function is of "
     << computation.theRF.minimalNumberOfVariables() << " variables and "
@@ -2491,7 +2491,7 @@ bool CalculatorFunctionsDifferentiation::differentiateTrigAndInverseTrig(
   }
   if (theArgument.isOperationGiven(calculator.opArcTan())) {
     Polynomial<Rational> onePlusXsquared;
-    RationalFunction<Rational> oneOverOnePlusXsquared;
+    RationalFraction<Rational> oneOverOnePlusXsquared;
     onePlusXsquared.makeMonomial(0, 2);
     onePlusXsquared += Rational::one();
     oneOverOnePlusXsquared.makeOne();
@@ -2504,7 +2504,7 @@ bool CalculatorFunctionsDifferentiation::differentiateTrigAndInverseTrig(
     Expression denE;
     ExpressionContext context(calculator);
     context.makeOneVariableFromString("x");
-    RationalFunction<Rational> oneMinusXsquared;
+    RationalFraction<Rational> oneMinusXsquared;
     oneMinusXsquared.makeMonomial(0, 2);
     oneMinusXsquared *= - 1;
     oneMinusXsquared += 1;
@@ -2515,7 +2515,7 @@ bool CalculatorFunctionsDifferentiation::differentiateTrigAndInverseTrig(
     Expression denE;
     ExpressionContext context;
     context.makeOneVariableFromString("x");
-    RationalFunction<Rational> oneMinusXsquared;
+    RationalFraction<Rational> oneMinusXsquared;
     oneMinusXsquared.makeMonomial(0, 2);
     oneMinusXsquared *= - 1;
     oneMinusXsquared += 1;
@@ -3572,16 +3572,16 @@ bool CalculatorFunctions::innerRationalFunctionSubstitution(
   if (input.size() != 2) {
     return false;
   }
-  if (!input[0].isOfType<RationalFunction<Rational> >()) {
+  if (!input[0].isOfType<RationalFraction<Rational> >()) {
     return false;
   }
-  if (input[0].getValue<RationalFunction<Rational> >().minimalNumberOfVariables() > 1) {
+  if (input[0].getValue<RationalFraction<Rational> >().minimalNumberOfVariables() > 1) {
     return false;
   }
   Expression resultRationalForm;
   ExpressionContext finalContext(calculator);
   finalContext.makeOneVariable(input[1]);
-  resultRationalForm.assignValueWithContext(input[0].getValue<RationalFunction<Rational> >(), finalContext, calculator);
+  resultRationalForm.assignValueWithContext(input[0].getValue<RationalFraction<Rational> >(), finalContext, calculator);
   return CalculatorConversions::expressionFromRationalFunction<Rational>(calculator, resultRationalForm, output);
 }
 
@@ -3589,7 +3589,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerInvertMatrixVerbose");
-  Matrix<RationalFunction<Rational> > theMatrix, outputMat, extendedMatrix;
+  Matrix<RationalFraction<Rational> > theMatrix, outputMat, extendedMatrix;
   Expression converted;
   if (!CalculatorConversions::innerMatrixRationalFunction(
     calculator, input, converted
@@ -3608,12 +3608,12 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
     return output.makeError(out.str(), calculator);
   }
   outputMat.makeIdentityMatrix(
-  theMatrix.numberOfRows,RationalFunction<Rational>::oneRational(), RationalFunction<Rational>::zeroRational());
+  theMatrix.numberOfRows,RationalFraction<Rational>::oneRational(), RationalFraction<Rational>::zeroRational());
   int tempI;
   int NumFoundPivots = 0;
   std::stringstream out, outLaTeX;
 
-  RationalFunction<Rational> tempElement;
+  RationalFraction<Rational> tempElement;
   FormatExpressions theFormat;
   theContext.getFormat(theFormat);
   theFormat.flagUseLatex = true;
@@ -3856,7 +3856,7 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionSplitToBuidingBloc
     << "failed, input was: "
     << theFunctionE.toString();
   }
-  if (!theComputation.inpuTE.isOfType<RationalFunction<Rational> >()) {
+  if (!theComputation.inpuTE.isOfType<RationalFraction<Rational> >()) {
     return calculator
     << "<hr>CalculatorFunctions::integrateRationalFunctionSplitToBuidingBlocks: "
     << "failed to convert "
@@ -3880,7 +3880,7 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionSplitToBuidingBloc
     }
   }
   theComputation.integrationSetE = integrationSetE;
-  theComputation.theRF = theComputation.inpuTE.getValue<RationalFunction<Rational> >();
+  theComputation.theRF = theComputation.inpuTE.getValue<RationalFraction<Rational> >();
   theComputation.theRF.getDenominator(theComputation.theDen);
   theComputation.theRF.getNumerator(theComputation.theNum);
   if (theComputation.theDen.totalDegree() < 1) {
@@ -5396,7 +5396,7 @@ bool CalculatorFunctions::innerTrace(
     }
     return output.assignValue(matrix.getTrace(), calculator);
   }
-  Matrix<RationalFunction<Rational> > matrixRationalFunction;
+  Matrix<RationalFraction<Rational> > matrixRationalFunction;
   if (calculator.functionGetMatrix(input[1], matrixRationalFunction)) {
     if (!matrixRationalFunction.isSquare()) {
       return output.makeError(
@@ -6817,7 +6817,7 @@ bool CalculatorFunctions::innerDeterminant(
   )) {
     return true;
   }
-  if (CalculatorFunctions::functionDeterminant<RationalFunction<Rational> >(
+  if (CalculatorFunctions::functionDeterminant<RationalFraction<Rational> >(
     calculator, argument, output, CalculatorConversions::functionRationalFunction<Rational>, 10
   )) {
     return true;
@@ -6846,8 +6846,8 @@ bool CalculatorFunctions::innerHighestWeightTransposeAntiAutomorphismBilinearFor
   }
   SemisimpleLieAlgebra& constSSalg = calculator.objectContainer.semisimpleLieAlgebras.values[algebraIndex];
   const Expression& weightExpression = input[3];
-  Vector<RationalFunction<Rational> > weight;
-  if (!calculator.getVector<RationalFunction<Rational> >(
+  Vector<RationalFraction<Rational> > weight;
+  if (!calculator.getVector<RationalFraction<Rational> >(
     weightExpression,
     weight,
     &finalContext,
@@ -6869,19 +6869,19 @@ bool CalculatorFunctions::innerHighestWeightTransposeAntiAutomorphismBilinearFor
     );
   }
   Expression leftConverted, rightConverted;
-  if (!leftMerged.convertInternally<ElementUniversalEnveloping<RationalFunction<Rational> > >(leftConverted)) {
+  if (!leftMerged.convertInternally<ElementUniversalEnveloping<RationalFraction<Rational> > >(leftConverted)) {
     return false;
   }
-  if (!rightMerged.convertInternally<ElementUniversalEnveloping<RationalFunction<Rational> > >(rightConverted)) {
+  if (!rightMerged.convertInternally<ElementUniversalEnveloping<RationalFraction<Rational> > >(rightConverted)) {
     return false;
   }
-  const ElementUniversalEnveloping<RationalFunction<Rational> >& leftUE = leftConverted.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >();
-  const ElementUniversalEnveloping<RationalFunction<Rational> >& rightUE = rightConverted.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >();
+  const ElementUniversalEnveloping<RationalFraction<Rational> >& leftUE = leftConverted.getValue<ElementUniversalEnveloping<RationalFraction<Rational> > >();
+  const ElementUniversalEnveloping<RationalFraction<Rational> >& rightUE = rightConverted.getValue<ElementUniversalEnveloping<RationalFraction<Rational> > >();
   WeylGroupData& theWeyl = constSSalg.weylGroup;
-  Vector<RationalFunction<Rational> > hwDualCoords;
+  Vector<RationalFraction<Rational> > hwDualCoords;
   constSSalg.orderSSalgebraForHWbfComputation();
   hwDualCoords = theWeyl.getDualCoordinatesFromFundamental(weight);
-  RationalFunction<Rational> outputRF;
+  RationalFraction<Rational> outputRF;
   if (!leftUE.highestWeightTransposeAntiAutomorphismBilinearForm(rightUE, outputRF, &hwDualCoords, 1, 0, &calculator.comments)) {
     return output.makeError("Error: couldn't compute Shapovalov form, see comments.", calculator);
   }

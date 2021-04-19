@@ -10,7 +10,7 @@
 #include "calculator_lie_theory.h"
 
 template <>
-bool Expression::convertInternally<RationalFunction<Rational> >(Expression& output) const;
+bool Expression::convertInternally<RationalFraction<Rational> >(Expression& output) const;
 
 bool CalculatorConversions::innerExpressionFromChevalleyGenerator(
   Calculator& calculator, const ChevalleyGenerator& input, Expression& output
@@ -779,7 +779,7 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(
 
 bool CalculatorConversions::innerExpressionFromMonomialUE(
   Calculator& calculator,
-  const MonomialUniversalEnveloping<RationalFunction<Rational> >& input,
+  const MonomialUniversalEnveloping<RationalFraction<Rational> >& input,
   Expression& output,
   ExpressionContext* inputContext
 ) {
@@ -803,12 +803,12 @@ bool CalculatorConversions::innerExpressionFromMonomialUE(
 
 bool CalculatorConversions::innerExpressionFromUE(
   Calculator& calculator,
-  const ElementUniversalEnveloping<RationalFunction<Rational> >& input,
+  const ElementUniversalEnveloping<RationalFraction<Rational> >& input,
   Expression& output,
   ExpressionContext* inputContext
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromUE");
-  LinearCombination<Expression, RationalFunction<Rational> > theUEE;
+  LinearCombination<Expression, RationalFraction<Rational> > theUEE;
   theUEE.makeZero();
   Expression currentMonE;
   for (int i = 0; i < input.size(); i ++) {
@@ -929,12 +929,12 @@ bool CalculatorConversions::innerElementUE(
   }
   ChevalleyGenerator theChevGen;
   theChevGen.owner = &owner;
-  ElementUniversalEnveloping<RationalFunction<Rational> > outputUE;
-  ElementUniversalEnveloping<RationalFunction<Rational> > currentSummand;
-  ElementUniversalEnveloping<RationalFunction<Rational> > currentMultiplicand;
+  ElementUniversalEnveloping<RationalFraction<Rational> > outputUE;
+  ElementUniversalEnveloping<RationalFraction<Rational> > currentSummand;
+  ElementUniversalEnveloping<RationalFraction<Rational> > currentMultiplicand;
   MonomialPolynomial currentMultiplicandRFpartMon;
   Polynomial<Rational> currentPMultiplicand;
-  RationalFunction<Rational>  currentMultiplicandRFpart;
+  RationalFraction<Rational>  currentMultiplicandRFpart;
   outputUE.makeZero(owner);
   Expression polyE;
   if (!CalculatorConversions::functionPolynomial<Rational>(calculator, input[1], polyE)) {
@@ -1041,10 +1041,10 @@ bool CalculatorConversions::functionExpressionFromBuiltInType(
   if (input.isOfType<Polynomial<AlgebraicNumber> >()) {
     return CalculatorConversions::functionExpressionFromPolynomial<AlgebraicNumber>(calculator, input, output);
   }
-  if (input.isOfType<RationalFunction<Rational> >()) {
+  if (input.isOfType<RationalFraction<Rational> >()) {
     return CalculatorConversions::expressionFromRationalFunction<Rational>(calculator, input, output);
   }
-  if (input.isOfType<RationalFunction<AlgebraicNumber> >()) {
+  if (input.isOfType<RationalFraction<AlgebraicNumber> >()) {
     return CalculatorConversions::expressionFromRationalFunction<AlgebraicNumber>(calculator, input, output);
   }
   return false;
@@ -1052,8 +1052,8 @@ bool CalculatorConversions::functionExpressionFromBuiltInType(
 
 bool CalculatorConversions::innerExpressionFromUE(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromUE");
-  ElementUniversalEnveloping<RationalFunction<Rational> > theUE;
-  if (!input.isOfType<ElementUniversalEnveloping<RationalFunction<Rational> > >(&theUE)) {
+  ElementUniversalEnveloping<RationalFraction<Rational> > theUE;
+  if (!input.isOfType<ElementUniversalEnveloping<RationalFraction<Rational> > >(&theUE)) {
     return calculator << "<hr>Expression " << input.toString()
     << " is not an element of universal enveloping, can't convert to expression";
   }
@@ -1181,7 +1181,7 @@ bool CalculatorConversions::functionMatrixRationalFunction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionMatrixRationalFunction");
-  Matrix<RationalFunction<Rational> > outputMat;
+  Matrix<RationalFraction<Rational> > outputMat;
   ExpressionContext context(calculator);
   if (!calculator.functionGetMatrix(
     input,

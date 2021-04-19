@@ -1077,7 +1077,7 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
       theFormat.polynomialAlphabet.addOnTop(currentStr);
     }
   }
-  if (!RationalFunction<Rational>::getRelations(inputVector, theGens, relations, calculator.comments)) {
+  if (!RationalFraction<Rational>::getRelations(inputVector, theGens, relations, calculator.comments)) {
     return calculator << "Failed to extract relations. ";
   }
   std::stringstream out;
@@ -1397,7 +1397,7 @@ bool CalculatorFunctionsPolynomial::combineFractionsCommutativeWithInternalLibra
   if (!CalculatorConversions::functionRationalFunction<AlgebraicNumber>(calculator, input, converted)) {
     return false;
   }
-  WithContext<RationalFunction<AlgebraicNumber> > rationalFunction;
+  WithContext<RationalFraction<AlgebraicNumber> > rationalFunction;
   if (!converted.isOfTypeWithContext(&rationalFunction)) {
     return false;
   }
@@ -1443,7 +1443,7 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
       return false;
     }
   }
-  RationalFunction<AlgebraicNumber> result;
+  RationalFraction<AlgebraicNumber> result;
   result = numerator.content;
   result /= denominator.content;
   Polynomial<AlgebraicNumber> simplifiedNumerator;
@@ -1452,7 +1452,7 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
     // Nothing was cancelled.
     return false;
   }
-  WithContext<RationalFunction<AlgebraicNumber> > simplified;
+  WithContext<RationalFraction<AlgebraicNumber> > simplified;
   simplified.context = numerator.context;
   simplified.content = result;
   Expression simplifiedExpression;

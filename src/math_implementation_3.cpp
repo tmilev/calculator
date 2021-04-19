@@ -2928,14 +2928,14 @@ FormatExpressions::getMonomialOrder<MonomialWeylAlgebra>() {
 }
 
 template<>
-List<MonomialUniversalEnveloping<RationalFunction<Rational> > >::Comparator*
-FormatExpressions::getMonomialOrder<MonomialUniversalEnveloping<RationalFunction<Rational> > >() {
+List<MonomialUniversalEnveloping<RationalFraction<Rational> > >::Comparator*
+FormatExpressions::getMonomialOrder<MonomialUniversalEnveloping<RationalFraction<Rational> > >() {
   return nullptr;
 }
 
 template<>
-List<MonomialGeneralizedVerma<RationalFunction<Rational> > >::Comparator*
-FormatExpressions::getMonomialOrder<MonomialGeneralizedVerma<RationalFunction<Rational> > >() {
+List<MonomialGeneralizedVerma<RationalFraction<Rational> > >::Comparator*
+FormatExpressions::getMonomialOrder<MonomialGeneralizedVerma<RationalFraction<Rational> > >() {
   return nullptr;
 }
 
@@ -2958,8 +2958,8 @@ FormatExpressions::getMonomialOrder<MonomialUniversalEnveloping<Rational> >() {
 }
 
 template<>
-List<MonomialTensorGeneralizedVermas<RationalFunction<Rational> > >::Comparator*
-FormatExpressions::getMonomialOrder<MonomialTensorGeneralizedVermas<RationalFunction<Rational> > >() {
+List<MonomialTensorGeneralizedVermas<RationalFraction<Rational> > >::Comparator*
+FormatExpressions::getMonomialOrder<MonomialTensorGeneralizedVermas<RationalFraction<Rational> > >() {
   return nullptr;
 }
 

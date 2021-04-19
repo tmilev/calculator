@@ -645,7 +645,7 @@ bool WithContext<ElementZmodP>::extendContext(
 }
 
 template<>
-bool WithContext<ElementUniversalEnveloping<RationalFunction<Rational> > >::extendContext(
+bool WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ){
   (void) commentsOnFailure;
@@ -732,7 +732,7 @@ bool WithContext<ElementWeylAlgebra<Rational> >::extendContext(
 }
 
 template<>
-bool WithContext<RationalFunction<Rational> >::extendContext(
+bool WithContext<RationalFraction<Rational> >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("WithContext_RationalFunction_Rational::extendContext");
@@ -752,7 +752,7 @@ bool WithContext<RationalFunction<Rational> >::extendContext(
 }
 
 template<>
-bool WithContext<RationalFunction<AlgebraicNumber> >::extendContext(
+bool WithContext<RationalFraction<AlgebraicNumber> >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("WithContext_RationalFunction_AlgebraicNumber::extendContext");
@@ -773,7 +773,7 @@ bool WithContext<RationalFunction<AlgebraicNumber> >::extendContext(
 }
 
 template<>
-bool WithContext<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >::extendContext(
+bool WithContext<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ) {
   (void) commentsOnFailure;
@@ -835,7 +835,7 @@ bool Expression::setContextAtLeastEqualTo(
   if (this->isOfTypeWithContext(&algebraicNumber)) {
     return algebraicNumber.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
-  WithContext<ElementUniversalEnveloping<RationalFunction<Rational> > > elementUniversalEnveloping;
+  WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > > elementUniversalEnveloping;
   if (this->isOfTypeWithContext(&elementUniversalEnveloping)) {
     return elementUniversalEnveloping.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
@@ -851,11 +851,11 @@ bool Expression::setContextAtLeastEqualTo(
   if (this->isOfTypeWithContext(&polynomialAlgebraic)) {
     return polynomialAlgebraic.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
-  WithContext<RationalFunction<Rational> > rationalFunction;
+  WithContext<RationalFraction<Rational> > rationalFunction;
   if (this->isOfTypeWithContext(&rationalFunction)) {
     return rationalFunction.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
-  WithContext<RationalFunction<AlgebraicNumber> > rationalFunctionAlgebraic;
+  WithContext<RationalFraction<AlgebraicNumber> > rationalFunctionAlgebraic;
   if (this->isOfTypeWithContext(&rationalFunctionAlgebraic)) {
     return rationalFunctionAlgebraic.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
@@ -863,7 +863,7 @@ bool Expression::setContextAtLeastEqualTo(
   if (this->isOfTypeWithContext(&elementWeylAlgebra)) {
     return elementWeylAlgebra.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
-  WithContext<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > > elementTensorProductGeneralizedVermaModules;
+  WithContext<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > > elementTensorProductGeneralizedVermaModules;
   if (this->isOfTypeWithContext(&elementTensorProductGeneralizedVermaModules)) {
     return elementTensorProductGeneralizedVermaModules.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
@@ -871,7 +871,7 @@ bool Expression::setContextAtLeastEqualTo(
   if (this->isOfTypeWithContext(&weightPolynomial)) {
     return weightPolynomial.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
-  if (this->isMatrixOfType<RationalFunction<Rational> >()) {
+  if (this->isMatrixOfType<RationalFraction<Rational> >()) {
     ExpressionContext newContext(*this->owner);
     ExpressionContext oldContext = this->getContext();
     if (!oldContext.mergeContexts(inputOutputMinContext, newContext)) {
@@ -881,7 +881,7 @@ bool Expression::setContextAtLeastEqualTo(
       return true;
     }
     inputOutputMinContext = newContext;
-    Matrix<RationalFunction<Rational> > newMat;
+    Matrix<RationalFraction<Rational> > newMat;
     this->owner->functionGetMatrix(*this, newMat, &newContext);
     PolynomialSubstitution<Rational> substitution;
     oldContext.polynomialSubstitutionNoFailure<Rational>(newContext, substitution, Rational::one());

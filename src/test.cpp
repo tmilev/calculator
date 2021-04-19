@@ -65,7 +65,7 @@ void Test::run() {
     LargeIntegerUnsigned::Test::all();
     Rational::Test::all();
     ElementZmodP::Test::all();
-    RationalFunction<Rational>::Test::all();
+    RationalFraction<Rational>::Test::all();
     Selection::Test::all();
     // Also tested in calculator test suite.
     Calculator::Examples::Test::all();

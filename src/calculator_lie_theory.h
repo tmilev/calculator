@@ -16,7 +16,7 @@ public:
   static bool testMonomialBaseConjecture(Calculator& calculator, const Expression& input, Expression& output);
   static bool highestWeightVectorCommon(Calculator& calculator,
     Expression& output,
-    Vector<RationalFunction<Rational> >& highestWeightFundCoords,
+    Vector<RationalFraction<Rational> >& highestWeightFundCoords,
     Selection& selectionParSel,
     ExpressionContext& hwContext,
     SemisimpleLieAlgebra* owner,
@@ -53,7 +53,7 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    Vectors<RationalFunction<Rational> >& theHWs,
+    Vectors<RationalFraction<Rational> >& theHWs,
     BranchingData& theG2B3Data,
     ExpressionContext &theContext
   );
@@ -64,7 +64,7 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    Vectors<RationalFunction<Rational> >& outputHWs,
+    Vectors<RationalFraction<Rational> >& outputHWs,
     BranchingData& theG2B3Data,
     ExpressionContext &theContext
   );

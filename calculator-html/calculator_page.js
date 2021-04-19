@@ -25,8 +25,10 @@ class AtomHandler {
 
   fromObject(
     input,
-    /**@type {number}*/ index,
-    /**@type {number}*/ totalRules,
+    /**@type {number}*/
+    index,
+    /**@type {number}*/
+    totalRules,
   ) {
     this.index = index;
     this.totalRules = totalRules;

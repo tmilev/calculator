@@ -197,7 +197,7 @@ class EditorInputExtractor {
     while (this.growReturnFalseWhenDone()) {
     }
     this.leftString = this.rawInput.substr(0, this.leftIndex);
-    this.middleEditedString = this.rawInput.substr(this.leftIndex, this.rightIndex);
+    this.middleEditedString = this.rawInput.substr(this.leftIndex, this.rightIndex - this.leftIndex);
     this.rightString = this.rawInput.substr(this.rightIndex);
     this.commentsElement().innerHTML = ""; //this.toStringDebug();
   }

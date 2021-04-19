@@ -1971,9 +1971,9 @@ std::string Calculator::toStringSyntacticStackHTMLSimple() {
     global.fatal << "Unexpected empty syntactic stack." << global.fatal;
   }
   std::stringstream out;
-  bool isBad = ((*this->currentSyntacticStack).size > this->numEmptyTokensStart + 1);
+  bool isBad = ((*this->currentSyntacticStack).size > this->numberOfEmptyTokensStart + 1);
   SyntacticElement& lastSyntacticElt = *(*this->currentSyntacticStack).lastObject();
-  if ((*this->currentSyntacticStack).size == this->numEmptyTokensStart + 1) {
+  if ((*this->currentSyntacticStack).size == this->numberOfEmptyTokensStart + 1) {
     if (lastSyntacticElt.controlIndex != this->conExpression()) {
       isBad = true;
     }
@@ -1982,7 +1982,7 @@ std::string Calculator::toStringSyntacticStackHTMLSimple() {
     out << this->currentSyntacticStack->lastObject()->data.toString();
     return out.str();
   }
-  for (int i = this->numEmptyTokensStart; i < (*this->currentSyntacticStack).size; i ++) {
+  for (int i = this->numberOfEmptyTokensStart; i < (*this->currentSyntacticStack).size; i ++) {
     SyntacticElement& currentElt = (*this->currentSyntacticStack)[i];
     if (currentElt.isCommandEnclosure()) {
       continue;
@@ -2001,13 +2001,13 @@ std::string Calculator::toStringSyntacticStackHTMLTable(
 ) {
   MacroRegisterFunctionWithName("Calculator::toStringSyntacticStackHTMLTable");
   std::stringstream out;
-  if ((*this->currentSyntacticStack).size < this->numEmptyTokensStart) {
+  if ((*this->currentSyntacticStack).size < this->numberOfEmptyTokensStart) {
     return
     "Not enough empty tokens in the start of the syntactic stack.";
   }
-  bool isBad = ((*this->currentSyntacticStack).size > this->numEmptyTokensStart + 1);
+  bool isBad = ((*this->currentSyntacticStack).size > this->numberOfEmptyTokensStart + 1);
   SyntacticElement& lastSyntacticElt = *(*this->currentSyntacticStack).lastObject();
-  if ((*this->currentSyntacticStack).size == this->numEmptyTokensStart + 1) {
+  if ((*this->currentSyntacticStack).size == this->numberOfEmptyTokensStart + 1) {
     if (lastSyntacticElt.controlIndex != this->conExpression()) {
       isBad = true;
     }
@@ -2018,7 +2018,7 @@ std::string Calculator::toStringSyntacticStackHTMLTable(
   }
   out << "<table style =\"vertical-align:top;border-spacing:0px 0px;\"><tr>";
   int counter = 0;
-  for (int i = this->numEmptyTokensStart; i < (*this->currentSyntacticStack).size; i ++) {
+  for (int i = this->numberOfEmptyTokensStart; i < (*this->currentSyntacticStack).size; i ++) {
     SyntacticElement& currentElt = (*this->currentSyntacticStack)[i];
     if (ignoreCommandEnclosures) {
       if (currentElt.isCommandEnclosure()) {
@@ -2079,8 +2079,8 @@ std::string ObjectContainer::toStringJavascriptForUserInputBoxes() {
 
 void ObjectContainer::resetPlots() {
   this->canvasPlotCounter = 0;
-  for (int i = 0; i < this->thePlots.size; i ++) {
-    this->thePlots[i].flagDivAlreadyDisplayed = false;
+  for (int i = 0; i < this->allPlots.size; i ++) {
+    this->allPlots[i].flagDivAlreadyDisplayed = false;
   }
 }
 
@@ -2151,15 +2151,15 @@ void ObjectContainer::reset() {
   this->lakshmibaiSeshadriPaths.clear();
   this->matrixTensorRationals.clear();
   this->elementsModP.clear();
-  this->thePlots.setSize(0);
+  this->allPlots.setSize(0);
   this->algebraicClosure.reset();
   this->allAlgebraicNumbers.clear();
-  this->theLittelmannOperators.clear();
+  this->littelmannOperators.clear();
   this->theSltwoSAs.setSize(0);
   this->theWeights.clear();
   this->theWeightsPoly.clear();
-  this->theHyperOctahedralGroups.setSize(0);
-  this->theElementsHyperOctGroup.clear();
+  this->hyperOctahedralGroups.setSize(0);
+  this->elementsHyperOctGroup.clear();
   this->pseudoRandom.setRandomSeedSmall(static_cast<uint32_t>(time(nullptr)));
   this->userInputTextBoxesWithValues.clear();
   this->graphicsScripts.clear();

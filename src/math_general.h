@@ -5078,7 +5078,7 @@ public:
   QuasiPolynomial(const QuasiPolynomial& other) {
     this->operator=(other);
   }
-  void operator*=(const Rational& theConst);
+  void operator*=(const Rational& scalar);
   void operator=(const QuasiPolynomial& other) {
     this->ambientLatticeReduced = other.ambientLatticeReduced;
     this->latticeShifts = other.latticeShifts;
@@ -5086,7 +5086,7 @@ public:
   }
 };
 
-class PartFraction {
+class OnePartialFraction {
 private:
   void findPivot();
   void findInitialPivot();
@@ -5102,7 +5102,7 @@ public:
   bool RelevanceIsComputed;
   List<int> indicesNonZeroMultiplicities;
   List<OnePartialFractionDenominator> denominator;
-  friend std::ostream& operator << (std::ostream& output, const PartFraction& input) {
+  friend std::ostream& operator << (std::ostream& output, const OnePartialFraction& input) {
     (void) input;
     global.fatal << " Not implemented, please fix. " << global.fatal;
     return output;
@@ -5150,12 +5150,12 @@ public:
     int indexB,
     int n,
     int indexAminusNB,
-    LinearCombination<PartFraction, Polynomial<LargeInteger> >& output,
+    LinearCombination<OnePartialFraction, Polynomial<LargeInteger> >& output,
     PartialFractions& owner
   );
   bool decomposeFromLinearRelation(
     Matrix<Rational>& theLinearRelation,
-    LinearCombination<PartFraction, Polynomial<LargeInteger> >& output,
+    LinearCombination<OnePartialFraction, Polynomial<LargeInteger> >& output,
     bool flagUsingOSbasis,
     List<Vector<Rational> >& startingVectors
   );
@@ -5174,7 +5174,7 @@ public:
     List<int>& theElongations,
     int GainingMultiplicityIndex,
     int ElongationGainingMultiplicityIndex,
-    LinearCombination<PartFraction, Polynomial<LargeInteger> >& output
+    LinearCombination<OnePartialFraction, Polynomial<LargeInteger> >& output
   );
   void applyGeneralizedSzenesVergneFormula(
     List<int>& theSelectedIndices,
@@ -5182,30 +5182,30 @@ public:
     List<int>& theCoefficients,
     int GainingMultiplicityIndex,
     int ElongationGainingMultiplicityIndex,
-    LinearCombination<PartFraction,
+    LinearCombination<OnePartialFraction,
     Polynomial<LargeInteger> >& output,
     List<Vector<Rational> >& startingVectors
   );
   bool checkForOrlikSolomonAdmissibility(List<int>& theSelectedIndices);
   bool reduceOnceTotalOrderMethod(
-    LinearCombination<PartFraction, Polynomial<LargeInteger> >& output, PartialFractions& owner
+    LinearCombination<OnePartialFraction, Polynomial<LargeInteger> >& output, PartialFractions& owner
   );
   bool reduceOnceGeneralMethodNoOSBasis(
     PartialFractions& owner,
-    LinearCombination<PartFraction,
+    LinearCombination<OnePartialFraction,
     Polynomial<LargeInteger> >& output,
     Vectors<Rational>& bufferVectors,
     Matrix<Rational>& bufferMat
   );
   bool reduceOnceGeneralMethod(
     PartialFractions& owner,
-    LinearCombination<PartFraction,
+    LinearCombination<OnePartialFraction,
     Polynomial<LargeInteger> >& output,
     Vectors<Rational>& bufferVectors,
     Matrix<Rational>& bufferMat
   );
   unsigned int hashFunction() const;
-  static unsigned int hashFunction(const PartFraction& input) {
+  static unsigned int hashFunction(const OnePartialFraction& input) {
     return input.hashFunction();
   }
   void initialize(int numRoots);
@@ -5216,19 +5216,19 @@ public:
     int indexB,
     int AminusNBindex,
     bool indexAisNullified,
-    PartFraction& output,
+    OnePartialFraction& output,
     Polynomial<LargeInteger>& AminusNbetaPoly,
     Polynomial<LargeInteger>& outputCommonCoeff
   );
-  void assign(const PartFraction& p);
-  void assignDenominatorOnly(const PartFraction& p);
-  void assignNoIndicesNonZeroMults(PartFraction& p);
+  void assign(const OnePartialFraction& p);
+  void assignDenominatorOnly(const OnePartialFraction& p);
+  void assignNoIndicesNonZeroMults(OnePartialFraction& p);
   int getSmallestNonZeroIndexGreaterThanOrEqualTo(PartialFractions& owner, int minIndex);
   int controlLineSizeFracs(std::string& output, FormatExpressions& PolyFormatLocal);
   int controlLineSizeStringPolys(std::string& output, FormatExpressions& PolyFormatLocal);
   //void swap(int indexA, int indexB);
-  PartFraction();
-  ~PartFraction();
+  OnePartialFraction();
+  ~OnePartialFraction();
   void getPolyReduceMonomialByMonomial(
     PartialFractions& owner,
     Vector<Rational>& theExponent,
@@ -5264,8 +5264,8 @@ public:
   );
   static void getNElongationPolynomial(Vector<Rational>& exponent, int n, Polynomial<LargeInteger>& output, int theDimension);
   int getNumberProportionalVectorsClassicalRootSystems(PartialFractions& owner);
-  bool operator==(const PartFraction& right) const;
-  void operator=(const PartFraction& right);
+  bool operator==(const OnePartialFraction& right) const;
+  void operator=(const OnePartialFraction& right);
   bool initFromRoots(PartialFractions& owner, Vectors<Rational>& input);
   std::string toString(bool LatexFormat, FormatExpressions& PolyFormatLocal, int& NumLinesUsed);
   void readFromFile(PartialFractions& owner, std::fstream& input);
@@ -5554,7 +5554,7 @@ public:
   }
 };
 
-class PartialFractions: public LinearCombination<PartFraction, Polynomial<LargeInteger> > {
+class PartialFractions: public LinearCombination<OnePartialFraction, Polynomial<LargeInteger> > {
   bool splitPartial();
   void initCommon();
 public:

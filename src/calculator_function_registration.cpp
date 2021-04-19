@@ -1689,15 +1689,15 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "GaussianElimination",
-    CalculatorFunctions::innerGaussianEliminationMatrix,
+    CalculatorFunctions::gaussianEliminationMatrix,
     "",
     "Gaussian elimination of a matrix. Prints a detailed string "
     "that shows the Gaussian elimination of a matrix.",
     "GaussianElimination(\\begin{array}{cccccc} "
-    "sqrt 1 & sqrt 2 & sqrt 3 & 1 & 0 & 0\\\\ "
-    "sqrt 4 & sqrt 5 & sqrt 6 & 0 & 1 & 0\\\\ "
-    "sqrt 7 & sqrt 8 & sqrt 9 & 0 & 0 & 1 \\end{array})",
-    "CalculatorFunctions::innerGaussianEliminationMatrix",
+    "\\sqrt 1 & \\sqrt 2 & \\sqrt 3 & 1 & 0 & 0\\\\ "
+    "\\sqrt 4 & \\sqrt 5 & \\sqrt 6 & 0 & 1 & 0\\\\ "
+    "\\sqrt 7 & \\sqrt 8 & \\sqrt 9 & 0 & 0 & 1\\end{array})",
+    "CalculatorFunctions::gaussianEliminationMatrix",
     "GaussianElimination",
     innerStandard
   );

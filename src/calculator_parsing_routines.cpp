@@ -120,7 +120,7 @@ void Calculator::reset() {
   this->flagUseBracketsForIntervals = false;
 
   this->maximumLatexChars = 2000;
-  this->numEmptyTokensStart = 9;
+  this->numberOfEmptyTokensStart = 9;
   this->objectContainer.reset();
   this->controlSequences.clear();
 
@@ -1194,7 +1194,7 @@ bool Calculator::replaceMatrixXByE() {
   if (numberOfColumns > 0 && numberOfRows > 0) {
     matrix.initialize(numberOfRows, numberOfColumns);
     for (int i = 0; i < numberOfRows; i ++) {
-      for (int j = 0; j < numberOfRows; j ++) {
+      for (int j = 0; j < numberOfColumns; j ++) {
         if (j + 1 >= matrixElement.dataList[i].size()) {
           matrix.elements[i][j].assignValue(0, *this);
           continue;
@@ -1227,9 +1227,9 @@ bool Calculator::replaceMatrixEXByMatrixNewRow() {
 }
 
 bool Calculator::replaceMatrixEXByMatrix() {
-  SyntacticElement& theMatElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3];
+  SyntacticElement& matrixElement = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3];
   SyntacticElement& theElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
-  theMatElt.dataList.lastObject()->addChildOnTop(theElt.data);
+  matrixElement.dataList.lastObject()->addChildOnTop(theElt.data);
   if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::replaceMatrixEXByMatrix]";
   }
@@ -1924,9 +1924,9 @@ bool Calculator::extractExpressions(Expression& outputExpression, std::string* o
   MacroRegisterFunctionWithName("Calculator::extractExpressions");
   //std::string lookAheadToken;
   std::stringstream errorLog;
-  (*this->currentSyntacticStack).reserve((*this->currrentSyntacticSoup).size + this->numEmptyTokensStart);
-  (*this->currentSyntacticStack).setSize(this->numEmptyTokensStart);
-  for (int i = 0; i < this->numEmptyTokensStart; i ++) {
+  (*this->currentSyntacticStack).reserve((*this->currrentSyntacticSoup).size + this->numberOfEmptyTokensStart);
+  (*this->currentSyntacticStack).setSize(this->numberOfEmptyTokensStart);
+  for (int i = 0; i < this->numberOfEmptyTokensStart; i ++) {
     (*this->currentSyntacticStack)[i] = this->getEmptySyntacticElement();
   }
   this->parsingLog = "";
@@ -1978,10 +1978,10 @@ bool Calculator::extractExpressions(Expression& outputExpression, std::string* o
     }
   }
   bool success = false;
-  if ((*this->currentSyntacticStack).size == this->numEmptyTokensStart) {
+  if ((*this->currentSyntacticStack).size == this->numberOfEmptyTokensStart) {
     errorLog << "Non-meaningful/empty input detected (spacebar, enter characters only?).";
-  } else if ((*this->currentSyntacticStack).size == this->numEmptyTokensStart + 1) {
-    SyntacticElement& result = (*this->currentSyntacticStack)[this->numEmptyTokensStart];
+  } else if ((*this->currentSyntacticStack).size == this->numberOfEmptyTokensStart + 1) {
+    SyntacticElement& result = (*this->currentSyntacticStack)[this->numberOfEmptyTokensStart];
     if (result.errorString == "" && result.controlIndex == this->conExpression()) {
       outputExpression = result.data;
       success = true;
@@ -2003,7 +2003,7 @@ bool Calculator::extractExpressions(Expression& outputExpression, std::string* o
 
 bool Calculator::applyOneRule() {
   MacroRegisterFunctionWithName("Calculator::applyOneRule");
-  if (this->currentSyntacticStack->size <= this->numEmptyTokensStart) {
+  if (this->currentSyntacticStack->size <= this->numberOfEmptyTokensStart) {
     return false;
   }
   const SyntacticElement& lastE = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1];
@@ -2019,7 +2019,7 @@ bool Calculator::applyOneRule() {
   if (
     lastS == " " &&
     secondToLastS == "\\" &&
-    this->currentSyntacticStack->size >= this->numEmptyTokensStart + 2
+    this->currentSyntacticStack->size >= this->numberOfEmptyTokensStart + 2
   ) {
     this->popTopSyntacticStack();
     if (this->flagLogSyntaxRules) {

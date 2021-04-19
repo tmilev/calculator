@@ -2287,24 +2287,24 @@ bool CalculatorFunctionsWeylGroup::hyperOctahedralGetOneRepresentation(
   //out << "Left partition is: " << partitionLeft.toString() << ", created from: " << inputLeft;
   //out << "Right partition is: " << partitionRight.toString() << ", created from: " << inputRight;
   int index = 0;
-  for (; index < calculator.objectContainer.theHyperOctahedralGroups.size; index ++) {
+  for (; index < calculator.objectContainer.hyperOctahedralGroups.size; index ++) {
     if (
-      calculator.objectContainer.theHyperOctahedralGroups[index].flagIsEntireHyperoctahedralGroup &&
-      calculator.objectContainer.theHyperOctahedralGroups[index].N == partitionLeft.n + partitionRight.n
+      calculator.objectContainer.hyperOctahedralGroups[index].flagIsEntireHyperoctahedralGroup &&
+      calculator.objectContainer.hyperOctahedralGroups[index].N == partitionLeft.n + partitionRight.n
     ) {
       break;
     }
   }
-  if (index == calculator.objectContainer.theHyperOctahedralGroups.size) {
-    calculator.objectContainer.theHyperOctahedralGroups.setSize(
-      calculator.objectContainer.theHyperOctahedralGroups.size + 1
+  if (index == calculator.objectContainer.hyperOctahedralGroups.size) {
+    calculator.objectContainer.hyperOctahedralGroups.setSize(
+      calculator.objectContainer.hyperOctahedralGroups.size + 1
     );
-    calculator.objectContainer.theHyperOctahedralGroups[index].makeHyperoctahedralGroup(
+    calculator.objectContainer.hyperOctahedralGroups[index].makeHyperoctahedralGroup(
       partitionLeft.n + partitionRight.n
     );
   }
   //<-may be broken if copying of groups doesn't work!!!!!!!!
-  HyperoctahedralGroupData& HD = calculator.objectContainer.theHyperOctahedralGroups[index];
+  HyperoctahedralGroupData& HD = calculator.objectContainer.hyperOctahedralGroups[index];
   GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> R;
   HD.spechtModuleOfPartititons(partitionLeft, partitionRight, R);
   //out << R;

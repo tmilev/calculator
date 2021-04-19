@@ -1817,7 +1817,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "0 & 0 & 5 & 0\\\\"
     "\\end{pmatrix};",
     "CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant",
-    "LieBracketConstants",
+    "LieBracketOfMatrices",
     innerStandard
   );
 

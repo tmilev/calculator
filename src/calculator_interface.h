@@ -1141,15 +1141,15 @@ public:
   HashedListReferences<Weight<Rational> > theWeights;
   HashedListReferences<Weight<Polynomial<Rational> > > theWeightsPoly;
   ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational > > hyperoctahedralRepresentations;
-  ListReferences<Plot> thePlots;
+  ListReferences<Plot> allPlots;
   List<bool> userInputBoxSliderDisplayed;
   MapReferences<std::string, InputBox, MathRoutines::hashString> userInputTextBoxesWithValues;
   MapReferences<std::string, std::string, MathRoutines::hashString> graphicsScripts;
   AlgebraicClosureRationals algebraicClosure;
   HashedList<AlgebraicNumber> allAlgebraicNumbers;
-  HashedListReferences<ElementHyperoctahedralGroupR2> theElementsHyperOctGroup;
-  ListReferences<HyperoctahedralGroupData> theHyperOctahedralGroups;
-  HashedListReferences<MonomialTensor<int, HashFunctions::hashFunction> > theLittelmannOperators;
+  HashedListReferences<ElementHyperoctahedralGroupR2> elementsHyperOctGroup;
+  ListReferences<HyperoctahedralGroupData> hyperOctahedralGroups;
+  HashedListReferences<MonomialTensor<int, HashFunctions::hashFunction> > littelmannOperators;
   WeylGroupData& getWeylGroupDataCreateIfNotPresent(const DynkinType& input);
   SemisimpleLieAlgebra& getLieAlgebraCreateIfNotPresent(const DynkinType& input);
   SemisimpleSubalgebras& getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input);
@@ -1378,7 +1378,7 @@ public:
   bool flagForkingprocessAllowed;
 
   int numberOfPredefinedAtoms;
-  int numEmptyTokensStart;
+  int numberOfEmptyTokensStart;
   Expression programExpression;
   int counterInSyntacticSoup;
   List<SyntacticElement> syntacticSoup;
@@ -1723,7 +1723,7 @@ public:
   bool applyOneRule();
   void resetStack() {
     SyntacticElement emptyElement = this->getEmptySyntacticElement();
-    (*this->currentSyntacticStack).initializeFillInObject(this->numEmptyTokensStart, emptyElement);
+    (*this->currentSyntacticStack).initializeFillInObject(this->numberOfEmptyTokensStart, emptyElement);
   }
   int conError() {
     return this->controlSequences.getIndexNoFail("Error");

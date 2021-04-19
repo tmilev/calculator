@@ -1380,7 +1380,7 @@ Square root of a rational, implemented as algebraic extension of the rationals.
 ```
 If a is a positive constant, substitutes sqrt(a b) by sqrt(a) sqrt(b).
 
-Operator or function [] is overloaded with 6 total handlers.
+Operator or function [] is overloaded with 7 total handlers.
 
 *[]* [LieBracketDistribute] {CalculatorFunctionsBinaryOps::innerLieBracketDistribute}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5ba%2bb%2c%20c%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -1388,6 +1388,14 @@ Operator or function [] is overloaded with 6 total handlers.
 [a+b, c]
 ```
 Implementation of the rules [{{a}}+{{b}},{{c}}] = [a, c] +[b, c] and [{{c}},{{a}}+{{b}}] =[c,a] +[c,b]
+
+*[]* [LieBracketOfMatrices] {CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22h%3d%5c%5cbegin%7bpmatrix%7d3%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%201%20%26%200%20%26%200%5c%5c%5c%5c0%20%26%200%20%26%20-1%20%26%200%5c%5c%5c%5c0%20%26%200%20%26%200%20%26%20-3%5c%5c%5c%5c%5c%5cend%7bpmatrix%7d%3be%3d%5c%5cbegin%7bpmatrix%7d0%20%26%203%20%26%200%20%26%200%5c%5c%5c%5c0%20%26%200%20%26%202%20%26%200%5c%5c%5c%5c0%20%26%200%20%26%200%20%26%203%2f5%5c%5c%5c%5c0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5c%5cend%7bpmatrix%7d%3bf%3d%5c%5cbegin%7bpmatrix%7d0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c1%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c0%20%26%202%20%26%200%20%26%200%5c%5c%5c%5c0%20%26%200%20%26%205%20%26%200%5c%5c%5c%5c%5c%5cend%7bpmatrix%7d%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+h=\begin{pmatrix}3 & 0 & 0 & 0\\
+0 & 1 & 0 & 0\\0 & 0 & -1 & 0\\0 & 0 & 0 & -3\\\end{pmatrix};e=\begin{pmatrix}0 & 3 & 0 & 0\\0 & 0 & 2 & 0\\0 & 0 & 0 & 3/5\\0 & 0 & 0 & 0\\\end{pmatrix};f=\begin{pmatrix}0 & 0 & 0 & 0\\1 & 0 & 0 & 0\\0 & 2 & 0 & 0\\0 & 0 & 5 & 0\\\end{pmatrix};
+```
+Matrix lie bracket. 
 
 *[]* [LieBracketConstants] {CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5b2a%2c%203b%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -2958,10 +2966,10 @@ PlotPolarExtended((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) )
 ```
 <b>Calculus teaching function.</b> Same as PlotPolar but also produces a graph in the (rho,theta)-plane. 
 
-*GaussianElimination* [GaussianElimination] {CalculatorFunctions::innerGaussianEliminationMatrix}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GaussianElimination%28%5c%5cbegin%7barray%7d%7bcccccc%7d%20sqrt%201%20%26%20sqrt%202%20%26%20sqrt%203%20%26%201%20%26%200%20%26%200%5c%5c%5c%5c%20sqrt%204%20%26%20sqrt%205%20%26%20sqrt%206%20%26%200%20%26%201%20%26%200%5c%5c%5c%5c%20sqrt%207%20%26%20sqrt%208%20%26%20sqrt%209%20%26%200%20%26%200%20%26%201%20%5c%5cend%7barray%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*GaussianElimination* [GaussianElimination] {CalculatorFunctions::gaussianEliminationMatrix}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GaussianElimination%28%5c%5cbegin%7barray%7d%7bcccccc%7d%20%5c%5csqrt%201%20%26%20%5c%5csqrt%202%20%26%20%5c%5csqrt%203%20%26%201%20%26%200%20%26%200%5c%5c%5c%5c%20%5c%5csqrt%204%20%26%20%5c%5csqrt%205%20%26%20%5c%5csqrt%206%20%26%200%20%26%201%20%26%200%5c%5c%5c%5c%20%5c%5csqrt%207%20%26%20%5c%5csqrt%208%20%26%20%5c%5csqrt%209%20%26%200%20%26%200%20%26%201%5c%5cend%7barray%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-GaussianElimination(\begin{array}{cccccc} sqrt 1 & sqrt 2 & sqrt 3 & 1 & 0 & 0\\ sqrt 4 & sqrt 5 & sqrt 6 & 0 & 1 & 0\\ sqrt 7 & sqrt 8 & sqrt 9 & 0 & 0 & 1 \end{array})
+GaussianElimination(\begin{array}{cccccc} \sqrt 1 & \sqrt 2 & \sqrt 3 & 1 & 0 & 0\\ \sqrt 4 & \sqrt 5 & \sqrt 6 & 0 & 1 & 0\\ \sqrt 7 & \sqrt 8 & \sqrt 9 & 0 & 0 & 1\end{array})
 ```
 Gaussian elimination of a matrix. Prints a detailed string that shows the Gaussian elimination of a matrix.
 

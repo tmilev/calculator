@@ -340,7 +340,7 @@ int Expression::addObjectReturnIndex(const
 ElementHyperoctahedralGroupR2
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.theElementsHyperOctGroup
+  return this->owner->objectContainer.elementsHyperOctGroup
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -564,7 +564,7 @@ int Expression::addObjectReturnIndex(const
 MonomialTensor<int, HashFunctions::hashFunction>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.theLittelmannOperators
+  return this->owner->objectContainer.littelmannOperators
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -600,7 +600,7 @@ int Expression::addObjectReturnIndex(const
 Plot
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.thePlots
+  return this->owner->objectContainer.allPlots
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -611,7 +611,7 @@ PlotObject
   this->checkInitialization();
   Plot plotContainer;
   plotContainer += inputValue;
-  return this->owner->objectContainer.thePlots
+  return this->owner->objectContainer.allPlots
   .addNoRepetitionOrReturnIndexFirst(plotContainer);
 }
 
@@ -707,7 +707,7 @@ ElementHyperoctahedralGroupR2& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->objectContainer.theElementsHyperOctGroup.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.elementsHyperOctGroup.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -861,7 +861,7 @@ MonomialTensor<int, HashFunctions::hashFunction>& Expression::getValueNonConst()
     global.fatal << "Expression not of required type "
     << "MonomialTensor. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->objectContainer.theLittelmannOperators.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.littelmannOperators.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -925,7 +925,7 @@ Plot& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "Plot. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->objectContainer.thePlots[this->getLastChild().data];
+  return this->owner->objectContainer.allPlots[this->getLastChild().data];
 }
 
 template < >

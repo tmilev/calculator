@@ -2091,10 +2091,10 @@ bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorith
   return output.assignValue(computation.printoutPFsHtml.str(), calculator);
 }
 
-bool CalculatorFunctions::innerGaussianEliminationMatrix(
+bool CalculatorFunctions::gaussianEliminationMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("innerGaussianEliminationMatrix");
+  MacroRegisterFunctionWithName("gaussianEliminationMatrix");
   Expression converted;
   if (!CalculatorConversions::innerMakeMatrix(
     calculator, input, converted

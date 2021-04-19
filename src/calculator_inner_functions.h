@@ -489,7 +489,7 @@ public:
 
   static bool innerIsReal(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIsConstant(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGaussianEliminationMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool gaussianEliminationMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerSplitToPartialFractionsOverAlgebraicRealsAlgorithm(
     Calculator& calculator, const Expression& input, Expression& output
   );

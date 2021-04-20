@@ -1597,6 +1597,7 @@ public:
   bool replaceOXEXEXXByEXX();
   bool replaceOXEXEXEXByE ();
   bool replaceEOEXByEX    ();
+  bool replaceEPowerMinusEXByEX();
   bool replaceUnderscoreEPowerEbyLimits();
   bool replacePowerEUnderScoreEbyLimits();
   bool replaceXEEXBy_OofEE_X(int inputOperation);

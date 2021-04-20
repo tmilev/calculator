@@ -4149,18 +4149,18 @@ Matrix<Coefficient> Matrix<Coefficient>::operator*(const Matrix<Coefficient>& ri
 
 template <class Coefficient>
 Vector<Coefficient> Matrix<Coefficient>::operator*(const Vector<Coefficient>& v) const {
-  if (v.size != numberOfColumns) {
+  if (v.size != this->numberOfColumns) {
     global.fatal
     << "Matrix application mismatch: matrix with "
-    << numberOfColumns
+    << this->numberOfColumns
     << " columns attempted to multiply vector of length "
     << v.size << ". " << global.fatal;
   }
   Vector<Coefficient> out;
-  out.makeZero(numberOfRows);
-  for (int i = 0; i < numberOfRows; i ++) {
-    for (int j = 0; j < numberOfColumns; j ++) {
-      out[i] += elements[i][j] * v[j];
+  out.makeZero(this->numberOfRows);
+  for (int i = 0; i < this->numberOfRows; i ++) {
+    for (int j = 0; j < this->numberOfColumns; j ++) {
+      out[i] += this->elements[i][j] * v[j];
     }
   }
   return out;
@@ -4168,13 +4168,13 @@ Vector<Coefficient> Matrix<Coefficient>::operator*(const Vector<Coefficient>& v)
 
 template <class Coefficient>
 void Matrix<Coefficient>::assignMatrixIntegerWithDenominator(
-  Matrix<LargeInteger>& theMat, const LargeIntegerUnsigned& Den
+  Matrix<LargeInteger>& matrix, const LargeIntegerUnsigned& denominator
 ) {
-  this->initialize(theMat.numberOfRows, theMat.numberOfColumns);
+  this->initialize(matrix.numberOfRows, matrix.numberOfColumns);
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
-      this->elements[i][j] = theMat.elements[i][j];
-      this->elements[i][j] /= Den;
+      this->elements[i][j] = matrix.elements[i][j];
+      this->elements[i][j] /= denominator;
     }
   }
 }

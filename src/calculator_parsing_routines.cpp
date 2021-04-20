@@ -1658,6 +1658,19 @@ bool Calculator::replaceXXYbyOY(int theOperation) {
   return this->decreaseStackExceptLast(1);
 }
 
+bool Calculator::replaceEPowerMinusEXByEX() {
+  SyntacticElement& base = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 5];
+  SyntacticElement& minusExponent = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
+  if (this->flagLogSyntaxRules) {
+    this->parsingLog += "[Rule: Calculator::replaceEPowerMinusEXByEX]";
+  }
+  Expression exponent;
+  exponent.makeOX(*this, this->opMinus(), minusExponent.data);
+  Expression incoming;
+  incoming.makeXOX(*this, this->opThePower(), base.data, exponent);
+  base.data = incoming;
+  return this->decreaseStackExceptLast(3);
+}
 
 bool Calculator::replaceEOEXByEX() {
   SyntacticElement& middle = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3];
@@ -2330,14 +2343,29 @@ bool Calculator::applyOneRule() {
     return this->replaceEOEXByEX();
   }
   if (
-    secondToLastS == "Expression" && thirdToLastS == "-" &&
-    fourthToLastS == "Expression" && this->allowsPlusInPreceding(lastS)
+    fifthToLastS == "Expression" &&
+    fourthToLastS == "^" &&
+    thirdToLastS == "-" &&
+    secondToLastS == "Expression" && (
+      lastS == "Expression" ||
+      lastS == "Variable"
+  )) {
+    return this->replaceEPowerMinusEXByEX();
+  }
+  if (
+    thirdToLastS == "-" &&
+    secondToLastS == "Expression" &&
+    fourthToLastS == "Expression" &&
+    this->allowsPlusInPreceding(lastS)
   ) {
     return this->replaceEOEXByEX();
   }
   if (
-    secondToLastS == "Expression" && thirdToLastS == "-" &&
-    fourthToLastS == "Expression" && lastS == "|" && fifthToLastS == "|"
+    thirdToLastS == "-" &&
+    secondToLastS == "Expression" &&
+    fourthToLastS == "Expression" &&
+    lastS == "|" &&
+    fifthToLastS == "|"
   ) {
     return this->replaceEOEXByEX();
   }

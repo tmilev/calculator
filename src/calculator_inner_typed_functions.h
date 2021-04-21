@@ -64,7 +64,7 @@ public:
   static bool innerMultiplyAnyScalarByMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyAnyScalarBySequence(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplySequenceByAnyScalar(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplySequenceByMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplySequenceByMatrix(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool multiplyMatrixByMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool makeMatrixProduct(

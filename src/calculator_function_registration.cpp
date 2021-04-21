@@ -3340,7 +3340,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix,
+    CalculatorFunctionsBinaryOps::multiplySequenceByMatrix,
     "",
     "Multiplies matrices.",
     "(1,2)\\begin{pmatrix} 1& 2 \\\\ 3& 5\\end{pmatrix}",

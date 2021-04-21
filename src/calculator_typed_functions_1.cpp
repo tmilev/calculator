@@ -2017,10 +2017,10 @@ bool CalculatorFunctionsBinaryOps::multiplyMatrixByMatrix(
   return true;
 }
 
-bool CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix(
+bool CalculatorFunctionsBinaryOps::multiplySequenceByMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::multiplySequenceByMatrix");
   if (!input.startsWith(calculator.opTimes())) {
     return false;
   }
@@ -2031,18 +2031,18 @@ bool CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix(
   if (input[1].size() - 1 != matRows) {
     return false;
   }
-  List<Expression> theResult;
-  theResult.setSize(matCols);
-  for (int i = 0; i < theResult.size; i ++) {
+  List<Expression> result;
+  result.setSize(matCols);
+  for (int i = 0; i < result.size; i ++) {
     for (int j = 0; j < matRows; j ++) {
       if (j == 0) {
-        theResult[i] = input[1][j + 1] * input[2][j + 1][i + 1];
+        result[i] = input[1][j + 1] * input[2][j + 1][i + 1];
       } else {
-        theResult[i] += input[1][j + 1] * input[2][j + 1][i + 1];
+        result[i] += input[1][j + 1] * input[2][j + 1][i + 1];
       }
     }
   }
-  return output.makeSequence(calculator, &theResult);
+  return output.makeSequence(calculator, &result);
 }
 
 bool CalculatorFunctionsBinaryOps::tensorMatrixByMatrix(

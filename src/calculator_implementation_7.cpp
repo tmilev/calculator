@@ -1445,22 +1445,22 @@ bool Polynomial<Coefficient>::getLinearSystemFromLinearPolynomials(
 
 class IntegralRationalFunctionComputation {
 public:
-  RationalFraction<Rational> theRF;
-  Polynomial<Rational> theDen, theNum;
+  RationalFraction<Rational> rationalFraction;
+  Polynomial<Rational> denominator, numerator;
   Polynomial<Rational> quotientRat, remainderRat;
-  List<Polynomial<Rational> > theFactors;
-  Polynomial<AlgebraicNumber> thePolyThatMustVanish;
+  List<Polynomial<Rational> > allFactors;
+  Polynomial<AlgebraicNumber> polynomialThatMustVanish;
   Polynomial<AlgebraicNumber> remainderRescaledAlgebraic;
-  RationalFraction<Rational> transformedRF;
+  RationalFraction<Rational> transformedRationalFraction;
   FormatExpressions currentFormaT;
   Expression integrationSetE;
   ExpressionContext context;
-  Expression inpuTE;
+  Expression inputExpression;
   Expression outputIntegralE;
   AlgebraicNumber additionalMultiple;
   Calculator* owner;
   bool allFactorsAreOfDegree2orless;
-  bool needPolyDivision;
+  bool needPolynomialDivision;
   int numberOfSystemVariables;
   std::stringstream printoutPFsHtml;
   std::stringstream printoutPFsLatex;
@@ -1648,7 +1648,7 @@ bool IntegralRationalFunctionComputation::integrateRationalFunction() {
 void IntegralRationalFunctionComputation::prepareFormatExpressions() {
   MacroRegisterFunctionWithName("IntegralRationalFunctionComputation::prepareFormatExpressions");
   std::stringstream rfStream, polyStream;
-  rfStream << transformedRF.toString(&this->currentFormaT) << " = ";
+  rfStream << transformedRationalFraction.toString(&this->currentFormaT) << " = ";
   polyStream << remainderRescaledAlgebraic.toString(&this->currentFormaT) << " = ";
   int varCounter = 0;
   for (int i = 0; i < this->theDenominatorFactorsWithMults.size(); i ++) {
@@ -1719,15 +1719,15 @@ void IntegralRationalFunctionComputation::prepareFormatExpressions() {
 
 void IntegralRationalFunctionComputation::prepareNumerators() {
   MacroRegisterFunctionWithName("IntegralRationalFunctionComputation::prepareNumerators");
-  this->transformedRF = this->remainderRat;
-  this->transformedRF /= this->theDen;
+  this->transformedRationalFraction = this->remainderRat;
+  this->transformedRationalFraction /= this->denominator;
   this->remainderRescaledAlgebraic = this->remainderRat;
   this->remainderRescaledAlgebraic /= additionalMultiple;
   this->numberOfSystemVariables = 0;
   Polynomial<AlgebraicNumber> currentSummand;
   MonomialPolynomial currentMon;
-  this->thePolyThatMustVanish.makeZero();
-  this->thePolyThatMustVanish -= remainderRescaledAlgebraic;
+  this->polynomialThatMustVanish.makeZero();
+  this->polynomialThatMustVanish -= remainderRescaledAlgebraic;
   this->theNumerators.setSize(this->theDenominatorFactorsWithMults.size());
   for (int i = 0; i < this->theDenominatorFactorsWithMults.size(); i ++) {
     int tempSize = - 1;
@@ -1755,7 +1755,7 @@ void IntegralRationalFunctionComputation::prepareNumerators() {
           currentSummand *= this->theDenominatorFactorsWithMults[j];
         }
       }
-      this->thePolyThatMustVanish += currentSummand;
+      this->polynomialThatMustVanish += currentSummand;
     }
   }
 }
@@ -1783,10 +1783,10 @@ void IntegralRationalFunctionComputation::prepareFinalAnswer() {
     }
   }
   this->stringRationalFunctionPartialFractionLatex = rfComputedStream.str();
-  answerFinalStream << this->theRF.toString(&this->currentFormaT) << "=";
+  answerFinalStream << this->rationalFraction.toString(&this->currentFormaT) << "=";
   if (!this->quotientRat.isEqualToZero()) {
     answerFinalStream << this->quotientRat.toString(&this->currentFormaT) << "+ ";
-    answerFinalStream << this->transformedRF.toString(&this->currentFormaT) << "=";
+    answerFinalStream << this->transformedRationalFraction.toString(&this->currentFormaT) << "=";
   }
   if (!this->quotientRat.isEqualToZero()) {
     answerFinalStream << this->quotientRat.toString(&this->currentFormaT) << "+ ";
@@ -1798,29 +1798,29 @@ void IntegralRationalFunctionComputation::prepareFinalAnswer() {
 void IntegralRationalFunctionComputation::prepareDenominatorFactors() {
   MacroRegisterFunctionWithName("IntegralRationalFunctionComputation::prepareDenominatorFactors");
   this->printoutPFsHtml << "The rational function is: " << HtmlRoutines::getMathNoDisplay(
-    "\\frac{" + this->theNum.toString(&this->currentFormaT) + "}{" + this->theDen.toString(&this->currentFormaT) + "}"
+    "\\frac{" + this->numerator.toString(&this->currentFormaT) + "}{" + this->denominator.toString(&this->currentFormaT) + "}"
   )
   << ".";
   this->printoutPFsHtml << "<br>The denominator factors are: ";
   this->printoutPFsLatex << "We aim to decompose into partial fractions the following function "
   << "(the denominator has been factored). \\[\\frac{"
-  << this->theNum.toString(&this->currentFormaT) << "}{" << this->theDen.toString(&this->currentFormaT) << "}="
-  << "\\frac{" << this->theNum.toString(&this->currentFormaT)  << "}{ ";
+  << this->numerator.toString(&this->currentFormaT) << "}{" << this->denominator.toString(&this->currentFormaT) << "}="
+  << "\\frac{" << this->numerator.toString(&this->currentFormaT)  << "}{ ";
   this->allFactorsAreOfDegree2orless = true;
-  for (int i = 0; i < this->theFactors.size; i ++) {
-    this->printoutPFsHtml << HtmlRoutines::getMathNoDisplay(this->theFactors[i].toString(&this->currentFormaT));
-    bool needsParenthesis = this->theFactors[i].needsParenthesisForMultiplication();
+  for (int i = 0; i < this->allFactors.size; i ++) {
+    this->printoutPFsHtml << HtmlRoutines::getMathNoDisplay(this->allFactors[i].toString(&this->currentFormaT));
+    bool needsParenthesis = this->allFactors[i].needsParenthesisForMultiplication();
     if (needsParenthesis) {
       this->printoutPFsLatex << "\\left(";
     }
-    this->printoutPFsLatex << this->theFactors[i].toString(&this->currentFormaT);
+    this->printoutPFsLatex << this->allFactors[i].toString(&this->currentFormaT);
     if (needsParenthesis) {
       this->printoutPFsLatex << "\\right)";
     }
-    if (i != this->theFactors.size - 1) {
+    if (i != this->allFactors.size - 1) {
       this->printoutPFsHtml << ", ";
     }
-    if (this->theFactors[i].totalDegree() > 2) {
+    if (this->allFactors[i].totalDegree() > 2) {
       allFactorsAreOfDegree2orless = false;
     }
   }
@@ -1832,23 +1832,23 @@ void IntegralRationalFunctionComputation::prepareDenominatorFactors() {
 bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() {
   MacroRegisterFunctionWithName("IntegralRationalFunctionComputation::computePartialFractionDecomposition");
   this->checkConsistency();
-  this->context = this->inpuTE.getContext();
+  this->context = this->inputExpression.getContext();
   this->context.getFormat(this->currentFormaT);
   if (
-    this->theRF.minimalNumberOfVariables() < 1 ||
-    this->theRF.expressionType == this->theRF.typeConstant ||
-    this->theRF.expressionType == this->theRF.typePolynomial
+    this->rationalFraction.minimalNumberOfVariables() < 1 ||
+    this->rationalFraction.expressionType == this->rationalFraction.typeConstant ||
+    this->rationalFraction.expressionType == this->rationalFraction.typePolynomial
   ) {
-    this->printoutPFsHtml << this->theRF.toString(&this->currentFormaT)
+    this->printoutPFsHtml << this->rationalFraction.toString(&this->currentFormaT)
     << " is already split into partial fractions. ";
     return true;
   }
-  this->theRF.getDenominator(this->theDen);
-  this->theRF.getNumerator(this->theNum);
-  this->theNum *= this->theDen.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
+  this->rationalFraction.getDenominator(this->denominator);
+  this->rationalFraction.getNumerator(this->numerator);
+  this->numerator *= this->denominator.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationKronecker> factorization;
   if (!factorization.factor(
-    this->theDen,
+    this->denominator,
     &this->printoutPFsHtml,
     &this->printoutPFsHtml
   )) {
@@ -1857,20 +1857,20 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     << "of the rational function, I surrender. ";
     return false;
   }
-  this->theNum /= factorization.constantFactor;
-  this->theDen /= factorization.constantFactor;
-  this->theFactors = factorization.reduced;
+  this->numerator /= factorization.constantFactor;
+  this->denominator /= factorization.constantFactor;
+  this->allFactors = factorization.reduced;
   Polynomial<Rational> tempP;
   tempP.makeConstant(1);
-  for (int i = 0; i < this->theFactors.size; i ++) {
-    tempP *= this->theFactors[i];
+  for (int i = 0; i < this->allFactors.size; i ++) {
+    tempP *= this->allFactors[i];
   }
-  if (tempP != this->theDen) {
+  if (tempP != this->denominator) {
     global.fatal
     << "Something is very wrong: product of denominator factors is "
     << tempP.toString(&this->currentFormaT)
     << ", but the denominator equals: "
-    << this->theDen.toString(&this->currentFormaT) << ". " << global.fatal;
+    << this->denominator.toString(&this->currentFormaT) << ". " << global.fatal;
   }
   this->printoutPFsLatex
   << "\\documentclass{article}\\usepackage{longtable}\\usepackage{xcolor}\\usepackage{multicol} "
@@ -1884,18 +1884,18 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
   }
   List<MonomialPolynomial>::Comparator monomialOrder = MonomialPolynomial::orderDefault();
   this->currentFormaT.flagUseFrac = true;
-  this->theNum.divideBy(
-    this->theDen,
+  this->numerator.divideBy(
+    this->denominator,
     this->quotientRat,
     this->remainderRat,
    & monomialOrder
   );
-  needPolyDivision = !this->quotientRat.isEqualToZero();
-  if (needPolyDivision) {
+  this->needPolynomialDivision = !this->quotientRat.isEqualToZero();
+  if (this->needPolynomialDivision) {
     this->printoutPFsHtml << "<br>The numerator "
-    << HtmlRoutines::getMathNoDisplay(this->theNum.toString(&this->currentFormaT))
+    << HtmlRoutines::getMathNoDisplay(this->numerator.toString(&this->currentFormaT))
     << " divided by the denominator "
-    << HtmlRoutines::getMathNoDisplay(theDen.toString(&this->currentFormaT))
+    << HtmlRoutines::getMathNoDisplay(denominator.toString(&this->currentFormaT))
     << " yields "
     << HtmlRoutines::getMathNoDisplay(this->quotientRat.toString(&this->currentFormaT))
     << " with remainder "
@@ -1904,66 +1904,66 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     computation.flagDoLogDivision = true;
     computation.flagStoreQuotients = true;
     computation.polynomialOrder.monomialOrder = MonomialPolynomial::orderDefault();
-    computation.addBasisElementNoReduction(this->theDen);
+    computation.addBasisElementNoReduction(this->denominator);
     computation.format = this->currentFormaT;
     computation.polynomialOrder.monomialOrder = monomialOrder;
-    Polynomial<Rational> theNumCopy = this->theNum;
+    Polynomial<Rational> theNumCopy = this->numerator;
     computation.remainderDivisionByBasis(theNumCopy, computation.remainderDivision, - 1);
     this->printoutPFsLatex << "Here is a detailed long polynomial division. ";
     this->printoutPFsLatex << computation.divisionReport.getElement().getDivisionStringLaTeX();
     this->printoutPFsHtml << "<br>Here is a detailed long polynomial division:<br> ";
     this->printoutPFsHtml << computation.divisionReport.getElement().getDivisionStringHtml();
   }
-  LinearCombination<Polynomial<Rational>, Rational> theDenominatorFactorsWithMultsCopy;
-  theDenominatorFactorsWithMultsCopy.makeZero();
-  for (int i = 0; i < this->theFactors.size; i ++) {
-    theDenominatorFactorsWithMultsCopy.addMonomial(this->theFactors[i], 1);
+  LinearCombination<Polynomial<Rational>, Rational> denominatorFactorsWithMultiplicities;
+  denominatorFactorsWithMultiplicities.makeZero();
+  for (int i = 0; i < this->allFactors.size; i ++) {
+    denominatorFactorsWithMultiplicities.addMonomial(this->allFactors[i], 1);
   }
-  theDenominatorFactorsWithMultsCopy.quickSortAscending();
+  denominatorFactorsWithMultiplicities.quickSortAscending();
   Polynomial<Rational> currentSecondDegreePoly;
   this->theDenominatorFactorsWithMults.makeZero();
   Polynomial<AlgebraicNumber> currentLinPoly, currentSecondDegreePolyAlgebraic;
   this->additionalMultiple = 1;
-  for (int i = 0; i < theDenominatorFactorsWithMultsCopy.size(); i ++) {
-    currentSecondDegreePoly = theDenominatorFactorsWithMultsCopy[i];
+  for (int i = 0; i < denominatorFactorsWithMultiplicities.size(); i ++) {
+    currentSecondDegreePoly = denominatorFactorsWithMultiplicities[i];
     currentSecondDegreePolyAlgebraic = currentSecondDegreePoly;
     if (currentSecondDegreePoly.totalDegree() != 2) {
       this->theDenominatorFactorsWithMults.addMonomial(
-        currentSecondDegreePolyAlgebraic, theDenominatorFactorsWithMultsCopy.coefficients[i]
+        currentSecondDegreePolyAlgebraic, denominatorFactorsWithMultiplicities.coefficients[i]
       );
       continue;
     }
-    Rational theDiscriminant = currentSecondDegreePoly.getDiscriminant();
-    if (theDiscriminant < 0) {
+    Rational discriminant = currentSecondDegreePoly.getDiscriminant();
+    if (discriminant < 0) {
       this->theDenominatorFactorsWithMults.addMonomial(
-        currentSecondDegreePolyAlgebraic, theDenominatorFactorsWithMultsCopy.coefficients[i]
+        currentSecondDegreePolyAlgebraic, denominatorFactorsWithMultiplicities.coefficients[i]
       );
       continue;
     }
-    AlgebraicNumber theDiscriminantSqrt;
-    if (!theDiscriminantSqrt.assignRationalQuadraticRadical(
-      theDiscriminant,
+    AlgebraicNumber discriminantSqrt;
+    if (!discriminantSqrt.assignRationalQuadraticRadical(
+      discriminant,
       this->owner->objectContainer.algebraicClosure,
       &this->printoutPFsHtml
     )) {
       this->printoutPFsHtml
       << "Failed to take radical of "
-      << theDiscriminant.toString()
+      << discriminant.toString()
       << " (radical too large?).";
       return false;
     }
-    theDiscriminantSqrt.checkConsistency();
+    discriminantSqrt.checkConsistency();
     AlgebraicNumber a = currentSecondDegreePoly.getCoefficientOf(MonomialPolynomial(0, 2));
     AlgebraicNumber b = currentSecondDegreePoly.getCoefficientOf(MonomialPolynomial(0, 1));
     a.checkConsistency();
     b.checkConsistency();
     currentLinPoly.makeMonomial(0, 1);
-    currentLinPoly -= (- b + theDiscriminantSqrt) / (a * 2);
-    this->theDenominatorFactorsWithMults.addMonomial(currentLinPoly, theDenominatorFactorsWithMultsCopy.coefficients[i]);
+    currentLinPoly -= (- b + discriminantSqrt) / (a * 2);
+    this->theDenominatorFactorsWithMults.addMonomial(currentLinPoly, denominatorFactorsWithMultiplicities.coefficients[i]);
     currentLinPoly.makeMonomial(0, 1);
-    currentLinPoly -= (- b - theDiscriminantSqrt) / (a * 2);
-    this->theDenominatorFactorsWithMults.addMonomial(currentLinPoly, theDenominatorFactorsWithMultsCopy.coefficients[i]);
-    additionalMultiple *= a;
+    currentLinPoly -= (- b - discriminantSqrt) / (a * 2);
+    this->theDenominatorFactorsWithMults.addMonomial(currentLinPoly, denominatorFactorsWithMultiplicities.coefficients[i]);
+    this->additionalMultiple *= a;
   }
   this->theDenominatorFactorsWithMults.quickSortAscending();
   this->printoutPFsHtml << "<br><br>I need to find "
@@ -1979,7 +1979,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
   this->printoutPFsHtml << "<br><br>" << HtmlRoutines::getMathNoDisplay(this->stringPolyIndentityNonSimplifiedLatex, - 1);
   this->printoutPFsLatex << "\\[" << this->stringPolyIndentityNonSimplifiedLatex << "\\]";
   Polynomial<Polynomial<AlgebraicNumber> > univariateThatMustDie;
-  thePolyThatMustVanish.getPolynomialUnivariateWithPolynomialCoefficients(0, univariateThatMustDie);
+  polynomialThatMustVanish.getPolynomialUnivariateWithPolynomialCoefficients(0, univariateThatMustDie);
   this->printoutPFsHtml << "<br><br>After rearranging we get that the following polynomial must vanish: "
   << HtmlRoutines::getMathNoDisplay(univariateThatMustDie.toString(&this->currentFormaT));
   this->printoutPFsLatex << "After rearranging we get that the following polynomial must vanish. Here, by ``vanish'' "
@@ -2040,19 +2040,19 @@ bool CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals");
   IntegralRationalFunctionComputation theComputation(&calculator);
-  bool isGood = CalculatorConversions::functionRationalFunction<Rational>(calculator, input, theComputation.inpuTE);
+  bool isGood = CalculatorConversions::functionRationalFunction<Rational>(calculator, input, theComputation.inputExpression);
   if (isGood) {
-    isGood = theComputation.inpuTE.isOfType<RationalFraction<Rational> >();
+    isGood = theComputation.inputExpression.isOfType<RationalFraction<Rational> >();
   }
   if (!isGood) {
     return calculator << "CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals: "
     << "Failed to convert "
     << input.toString() << " to rational function. ";
   }
-  theComputation.theRF = theComputation.inpuTE.getValue<RationalFraction<Rational> >();
-  if (theComputation.theRF.minimalNumberOfVariables() > 1) {
+  theComputation.rationalFraction = theComputation.inputExpression.getValue<RationalFraction<Rational> >();
+  if (theComputation.rationalFraction.minimalNumberOfVariables() > 1) {
     return calculator << "The input rational function is of "
-    << theComputation.theRF.minimalNumberOfVariables() << " variables and "
+    << theComputation.rationalFraction.minimalNumberOfVariables() << " variables and "
     << " I can handle only 1.";
   }
   if (!theComputation.computePartialFractionDecomposition()) {
@@ -2072,19 +2072,19 @@ bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorith
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals");
   IntegralRationalFunctionComputation computation(&calculator);
-  bool isGood = CalculatorConversions::innerRationalFunction(calculator, input, computation.inpuTE);
+  bool isGood = CalculatorConversions::innerRationalFunction(calculator, input, computation.inputExpression);
   if (isGood) {
-    isGood = computation.inpuTE.isOfType<RationalFraction<Rational> >();
+    isGood = computation.inputExpression.isOfType<RationalFraction<Rational> >();
   }
   if (!isGood) {
     return calculator << "CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals: "
     << "Failed to convert "
     << input.toString() << " to rational function. ";
   }
-  computation.theRF = computation.inpuTE.getValue<RationalFraction<Rational> >();
-  if (computation.theRF.minimalNumberOfVariables() > 1) {
+  computation.rationalFraction = computation.inputExpression.getValue<RationalFraction<Rational> >();
+  if (computation.rationalFraction.minimalNumberOfVariables() > 1) {
     return calculator << "The input rational function is of "
-    << computation.theRF.minimalNumberOfVariables() << " variables and "
+    << computation.rationalFraction.minimalNumberOfVariables() << " variables and "
     << " I can handle only 1. ";
   }
   computation.computePartialFractionDecomposition();
@@ -3849,41 +3849,41 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionSplitToBuidingBloc
   }
   IntegralRationalFunctionComputation theComputation(&calculator);
   if (!CalculatorConversions::functionRationalFunction<Rational>(
-    calculator, theFunctionE, theComputation.inpuTE
+    calculator, theFunctionE, theComputation.inputExpression
   )) {
     return calculator
     << "<hr>Call of function CalculatorConversions::innerRationalFunction<Rational> "
     << "failed, input was: "
     << theFunctionE.toString();
   }
-  if (!theComputation.inpuTE.isOfType<RationalFraction<Rational> >()) {
+  if (!theComputation.inputExpression.isOfType<RationalFraction<Rational> >()) {
     return calculator
     << "<hr>CalculatorFunctions::integrateRationalFunctionSplitToBuidingBlocks: "
     << "failed to convert "
     << theFunctionE.toString() << " to rational function. "
-    << "Attempt to converted expression yielded: " << theComputation.inpuTE.toString();
+    << "Attempt to converted expression yielded: " << theComputation.inputExpression.toString();
   }
-  ExpressionContext context = theComputation.inpuTE.getContext();
+  ExpressionContext context = theComputation.inputExpression.getContext();
   if (context.numberOfVariables() > 1) {
     return calculator << "<hr>I converted " << theFunctionE.toString()
     << " to rational function, but it is of "
     << context.numberOfVariables()
     << " variables. I have been taught to work with 1 variable only. "
     << "<br>The context of the rational function is: "
-    << theComputation.inpuTE.getContext().toString();
+    << theComputation.inputExpression.getContext().toString();
   }
   if (context.numberOfVariables() == 1) {
     if (context.getVariable(0) != theVariableE) {
       return calculator << "<hr>The univariate rational function was in variable "
-      << theComputation.inpuTE.getContext().toString()
+      << theComputation.inputExpression.getContext().toString()
       << " but the variable of integration is " << theVariableE.toString();
     }
   }
   theComputation.integrationSetE = integrationSetE;
-  theComputation.theRF = theComputation.inpuTE.getValue<RationalFraction<Rational> >();
-  theComputation.theRF.getDenominator(theComputation.theDen);
-  theComputation.theRF.getNumerator(theComputation.theNum);
-  if (theComputation.theDen.totalDegree() < 1) {
+  theComputation.rationalFraction = theComputation.inputExpression.getValue<RationalFraction<Rational> >();
+  theComputation.rationalFraction.getDenominator(theComputation.denominator);
+  theComputation.rationalFraction.getNumerator(theComputation.numerator);
+  if (theComputation.denominator.totalDegree() < 1) {
     return false;
   }
   if (!theComputation.integrateRationalFunction()) {

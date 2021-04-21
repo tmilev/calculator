@@ -1946,8 +1946,8 @@ bool CalculatorFunctionsBinaryOps::makeMatrixProduct(
         if (k == 0) {
           outputMatrix(i, j).makeProduct(calculator, left(i, k), right(k, j));
         } else {
-          rightSummand = outputMatrix(i, j);
-          leftSummand.makeProduct(calculator, left(i, k), right(k, j));
+          leftSummand = outputMatrix(i, j);
+          rightSummand.makeProduct(calculator, left(i, k), right(k, j));
           outputMatrix(i, j).makeXOX(calculator, calculator.opPlus(), leftSummand, rightSummand);
         }
       }

@@ -518,7 +518,7 @@ bool CalculatorFunctionsIntegration::integrateSqrtOneMinusXsquared(
   }
   Expression theFunCoeff, theFunNoCoeff;
   theFunctionE.getCoefficientMultiplicandForm(theFunCoeff, theFunNoCoeff);
-  if (!theFunNoCoeff.startsWith(calculator.opThePower(), 3)) {
+  if (!theFunNoCoeff.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   if (!theFunNoCoeff[2].isEqualToHalf()) {
@@ -572,7 +572,7 @@ bool CalculatorFunctionsIntegration::integrateXpowerNePowerAx(
   bool isGood = false;
   for (int i = 0; i < 2; i ++) {
     MathRoutines::swap(exponentPartE, polyPartE);
-    if (!exponentPartE.startsWith(calculator.opThePower(), 3)) {
+    if (!exponentPartE.startsWith(calculator.opPower(), 3)) {
       continue;
     }
     if (!exponentPartE[1].isOperationGiven(calculator.opE())) {
@@ -586,7 +586,7 @@ bool CalculatorFunctionsIntegration::integrateXpowerNePowerAx(
       continue;
     }
     if (polyPartE != theVariableE) {
-      if (!polyPartE.startsWith(calculator.opThePower(), 3)) {
+      if (!polyPartE.startsWith(calculator.opPower(), 3)) {
         continue;
       }
       if (polyPartE[1] != theVariableE) {
@@ -609,7 +609,7 @@ bool CalculatorFunctionsIntegration::integrateXpowerNePowerAx(
   }
   Expression remainingIntegrand, integralPart;
   remainingIntegrand.makeXOX(
-    calculator, calculator.opThePower(), theVariableE, powerOfXE - calculator.expressionOne()
+    calculator, calculator.opPower(), theVariableE, powerOfXE - calculator.expressionOne()
   );
   remainingIntegrand *= exponentPartE;
   integralPart.makeIntegral(calculator, theSetE,remainingIntegrand, theVariableE);
@@ -627,7 +627,7 @@ bool CalculatorFunctionsIntegration::integrateSqrtXsquaredMinusOne(
   }
   Expression theFunCoeff, theFunNoCoeff;
   theFunctionE.getCoefficientMultiplicandForm(theFunCoeff, theFunNoCoeff);
-  if (!theFunNoCoeff.startsWith(calculator.opThePower(), 3)) {
+  if (!theFunNoCoeff.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   if (!theFunNoCoeff[2].isEqualToHalf()) {
@@ -742,7 +742,7 @@ bool CalculatorFunctions::innerApplyToSubexpressionsRecurseThroughCalculusFuncti
     theArg.startsWith(calculator.opPlus()) ||
     theArg.startsWith(calculator.opMinus()) ||
     theArg.startsWith(calculator.opTimes()) ||
-    theArg.startsWith(calculator.opThePower()) ||
+    theArg.startsWith(calculator.opPower()) ||
     theArg.startsWith(calculator.opDivide()) ||
     theArg.startsWith(calculator.opSequence()) ||
     theArg.startsWith(calculator.opSqrt()) ||
@@ -813,7 +813,7 @@ bool CalculatorFunctions::innerHandleUnderscorePowerLimits(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerHandleUnderscorePowerLimits");
   if (
-    !input.startsWith(calculator.opThePower(), 3) &&
+    !input.startsWith(calculator.opPower(), 3) &&
     !input.startsWith(calculator.opUnderscore(), 3)
   ) {
     return false;
@@ -825,7 +825,7 @@ bool CalculatorFunctions::innerHandleUnderscorePowerLimits(
   for (int i = output.size(); i < 3; i ++) {
     output.addChildAtomOnTop(calculator.opIndefiniteIndicator());
   }
-  if (input.startsWith(calculator.opThePower())) {
+  if (input.startsWith(calculator.opPower())) {
     return output.setChild(2, input[2]);
   } else {
     return output.setChild(1, input[2]);
@@ -1297,7 +1297,7 @@ bool CalculatorFunctions::innerOperatorBounds(
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPowerIntToAny");
   if (
     !input.startsWith(calculator.opUnderscore(), 3) &&
-    !input.startsWith(calculator.opThePower(), 3)
+    !input.startsWith(calculator.opPower(), 3)
   ) {
     return false;
   }
@@ -1344,7 +1344,7 @@ bool CalculatorFunctions::innerPowerExponentToLog(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPowerExponentToLog");
-  if (!input.startsWith(calculator.opThePower(), 3)) {
+  if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   const Expression& baseE = input[1];
@@ -1362,7 +1362,7 @@ bool CalculatorFunctions::innerDistributeExponent(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerDistributeExponent");
-  if (!input.startsWith(calculator.opThePower(), 3)) {
+  if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   const Expression& base = input[1];
@@ -1393,8 +1393,8 @@ bool CalculatorFunctions::innerDistributeExponent(
     return false;
   }
   Expression leftE, rightE;
-  leftE.makeXOX(calculator, calculator.opThePower(), input[1][1], input[2]);
-  rightE.makeXOX(calculator, calculator.opThePower(), input[1][2], input[2]);
+  leftE.makeXOX(calculator, calculator.opPower(), input[1][1], input[2]);
+  rightE.makeXOX(calculator, calculator.opPower(), input[1][2], input[2]);
   return output.makeXOX(calculator, calculator.opTimes(), leftE, rightE);
 }
 
@@ -1411,7 +1411,7 @@ bool CalculatorFunctions::innerSqrt(
       Expression powerE, powerEreduced, theExponentE;
       ratPower.invert();
       theExponentE.assignValue(ratPower, calculator);
-      powerE.makeXOX(calculator,calculator.opThePower(), input[2], theExponentE);
+      powerE.makeXOX(calculator,calculator.opPower(), input[2], theExponentE);
       if (CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors(
         calculator, powerE, powerEreduced
       )) {
@@ -1434,7 +1434,7 @@ bool CalculatorFunctions::innerSqrt(
     Expression theExponent;
     Rational thePowerRat(1, thePower);
     theExponent.assignValue(thePowerRat, calculator);
-    return output.makeXOX(calculator, calculator.opThePower(), input[2], theExponent);
+    return output.makeXOX(calculator, calculator.opPower(), input[2], theExponent);
   }
   if (thePower > 0 && input[2].isEqualToZero()) {
     return output.assignValue(0, calculator);

@@ -2739,7 +2739,7 @@ public:
     Coefficient& Correction
   );
   static bool getLinearSystemFromLinearPolynomials(
-    const List<Polynomial<Coefficient> >& theLinPolys,
+    const List<Polynomial<Coefficient> >& linearPolynomials,
     Matrix<Coefficient>& homogenousPart,
     Matrix<Coefficient>& constTerms
   );
@@ -2760,7 +2760,7 @@ public:
     Selection& theNonCoefficientVariables, Polynomial<Polynomial<Coefficient> >& output
   ) const;
   void getPolynomialUnivariateWithPolynomialCoefficients(
-    int theVar,
+    int variableIndex,
     Polynomial<Polynomial<Coefficient> >& output
   ) const;
   // Multivariable polynomial division with remainder.

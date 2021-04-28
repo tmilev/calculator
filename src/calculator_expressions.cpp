@@ -1961,7 +1961,7 @@ bool Expression::divisionByMeShouldBeWrittenInExponentForm() const {
       }
     }
   }
-  if (this->startsWith(this->owner->opThePower(), 3)) {
+  if (this->startsWith(this->owner->opPower(), 3)) {
     return (*this)[1].divisionByMeShouldBeWrittenInExponentForm();
   }
   if (this->startsWith(this->owner->opPlus())) {
@@ -2040,7 +2040,7 @@ bool Expression::isAlgebraicRadical() const {
     }
     return true;
   }
-  if (this->startsWith(this->owner->opThePower(), 3)) {
+  if (this->startsWith(this->owner->opPower(), 3)) {
     if (!(*this)[2].isRational()) {
       return false;
     }
@@ -2098,7 +2098,7 @@ bool Expression::makeAtom(const std::string& atomName, Calculator& newBoss) {
 
 void Expression::getBaseExponentForm(Expression& outputBase, Expression& outputExponent) const {
   this->checkInitialization();
-  if (this->startsWith(this->owner->opThePower(), 3)) {
+  if (this->startsWith(this->owner->opPower(), 3)) {
     outputBase = (*this)[1];
     outputExponent = (*this)[2];
     return;
@@ -3061,7 +3061,7 @@ bool Expression::needsParenthesisForMultiplicationWhenSittingOnTheRightMost(cons
       (*this)[1].needsParenthesisForMultiplicationWhenSittingOnTheRightMost() ||
       (*this)[1].needsParenthesisForMultiplication();
     }
-    if (firstE.isOperationGiven(this->owner->opThePower())) {
+    if (firstE.isOperationGiven(this->owner->opPower())) {
       return false;
     }
     if (this->startsWith(this->owner->opBind())) {
@@ -3131,7 +3131,7 @@ bool Expression::needsParenthesisForMultiplication(FormatExpressions* format) co
     if (firstE.isOperationGiven(this->owner->opTimes())) {
       return false;
     }
-    if (firstE.isOperationGiven(this->owner->opThePower())) {
+    if (firstE.isOperationGiven(this->owner->opPower())) {
       const Expression& base = (*this)[1];
       if (base.children.size > 0) {
         if (base[0].isAtomWhoseExponentsAreInterpretedAsFunction()) {
@@ -3470,7 +3470,7 @@ bool Expression::toStringPower(
   FormatExpressions* format
 ) {
   Calculator& commands = *input.owner;
-  if (!input.startsWith(commands.opThePower(), 3)) {
+  if (!input.startsWith(commands.opPower(), 3)) {
     return false;
   }
   bool involvesExponentsInterpretedAsFunctions = false;
@@ -3488,7 +3488,7 @@ bool Expression::toStringPower(
     if (shouldProceed) {
       involvesExponentsInterpretedAsFunctions = true;
       Expression newFunE;
-      newFunE.makeXOX(*input.owner, commands.opThePower(), firstE[0], input[2]);
+      newFunE.makeXOX(*input.owner, commands.opPower(), firstE[0], input[2]);
       newFunE.checkConsistency();
       out << "{" << newFunE.toString(format) << "}{}";
       if (
@@ -4793,7 +4793,7 @@ bool Expression::isPowerOfAtomWhoseExponentsAreInterpretedAsFunction() const {
   if (this->owner == nullptr) {
     return false;
   }
-  if (!this->startsWith(this->owner->opThePower(), 3)) {
+  if (!this->startsWith(this->owner->opPower(), 3)) {
     return false;
   }
   return (*this)[1].isAtomWhoseExponentsAreInterpretedAsFunction();

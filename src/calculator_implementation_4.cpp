@@ -320,11 +320,11 @@ bool CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY(
   const Expression* right = &input[2];
   if (*left == *right) {
     constPower.assignValue(2, calculator);
-    output.makeXOX(calculator, calculator.opThePower(), *left, constPower);
+    output.makeXOX(calculator, calculator.opPower(), *left, constPower);
     return true;
   }
   for (int i = 0; i < 2; i ++, MathRoutines::swap(left, right)) {
-    if (right->startsWith(calculator.opThePower(), 3)) {
+    if (right->startsWith(calculator.opPower(), 3)) {
       if ((*right)[1] == (*left)) {
         bool isGood = true;
         if ((*right)[2].isOfType<Rational>()) {
@@ -339,10 +339,10 @@ bool CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY(
         }
         if (isGood) {
           thePower.makeXOX(calculator, calculator.opPlus(), (*right)[2], calculator.expressionOne());
-          return output.makeXOX(calculator, calculator.opThePower(), *left, thePower);
+          return output.makeXOX(calculator, calculator.opPower(), *left, thePower);
         }
       }
-      if (left->startsWith(calculator.opThePower(), 3)) {
+      if (left->startsWith(calculator.opPower(), 3)) {
         if ((*left)[1] == (*right)[1]) {
           bool isGood = (*left)[2].isInteger() || (*right)[2].isInteger();
           if (!isGood) {
@@ -366,7 +366,7 @@ bool CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY(
             continue;
           }
           thePower.makeXOX(calculator, calculator.opPlus(), (*left)[2], (*right)[2]);
-          return output.makeXOX(calculator, calculator.opThePower(), (*left)[1], thePower);
+          return output.makeXOX(calculator, calculator.opPower(), (*left)[1], thePower);
         }
       }
     }
@@ -552,7 +552,7 @@ bool CalculatorBasics::timesToFunctionApplication(Calculator& calculator, const 
   }
   const Expression& firstElt = input[1];
   if (!firstElt.isBuiltInAtom()) {
-    if (!firstElt.startsWith(calculator.opThePower(), 3)) {
+    if (!firstElt.startsWith(calculator.opPower(), 3)) {
       return false;
     }
     if (!firstElt[1].isAtomWhoseExponentsAreInterpretedAsFunction()) {
@@ -709,7 +709,7 @@ bool Calculator::collectCoefficientsPowersVariables(
         found = true;
         break;
       }
-      if (currentE.startsWith(calculator.opThePower(), 3)) {
+      if (currentE.startsWith(calculator.opPower(), 3)) {
         int thePower;
         if (currentE[1] == theVariable) {
           if (currentE[2].isSmallInteger(&thePower)) {
@@ -865,7 +865,7 @@ bool Calculator::functionCollectSummandsCombine(
 
 bool CalculatorBasics::associateExponentExponent(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerAssociateExponentExponent");
-  int opPower = calculator.opThePower();
+  int opPower = calculator.opPower();
   if (!input.startsWith(opPower, 3)) {
     return false;
   }
@@ -898,7 +898,7 @@ bool CalculatorBasics::associateExponentExponent(Calculator& calculator, const E
 
 bool Calculator::outerPowerRaiseToFirst(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::outerPowerRaiseToFirst");
-  if (!input.startsWith(calculator.opThePower(), 3)) {
+  if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   if (

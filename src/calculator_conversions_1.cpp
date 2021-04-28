@@ -82,13 +82,13 @@ bool CalculatorConversions::functionDynkinSimpleType(
   if (input.startsWith(calculator.opUnderscore(), 3)) {
     rankE = input[2];
     typeLetterE = input[1];
-    if (typeLetterE.startsWith(calculator.opThePower(),3)) {
+    if (typeLetterE.startsWith(calculator.opPower(),3)) {
       scaleE = typeLetterE[2];
       typeLetterE = typeLetterE[1];
     } else {
       scaleE.assignValue(1, calculator);
     }
-  } else if (input.startsWith(calculator.opThePower(), 3)) {
+  } else if (input.startsWith(calculator.opPower(), 3)) {
     scaleE = input[2];
     if (!input[1].startsWith(calculator.opUnderscore(), 3)) {
       return calculator << "<hr>Failed to extract rank, type from "
@@ -262,7 +262,7 @@ bool CalculatorConversions::innerExpressionFromDynkinSimpleType(
   letterE.makeAtom(calculator.addOperationNoRepetitionOrReturnIndexFirst(letterS), calculator);
   indexE.assignValue(input.cartanSymmetricInverseScale, calculator);
   rankE.assignValue(input.rank, calculator);
-  letterAndIndexE.makeXOX(calculator, calculator.opThePower(), letterE, indexE);
+  letterAndIndexE.makeXOX(calculator, calculator.opPower(), letterE, indexE);
   return output.makeXOX(calculator, calculator.opUnderscore(), letterAndIndexE, rankE);
 }
 
@@ -795,7 +795,7 @@ bool CalculatorConversions::innerExpressionFromMonomialUE(
     theGen.generatorIndex = input.generatorsIndices[i];
     CalculatorConversions::innerExpressionFromChevalleyGenerator(calculator, theGen, chevGenE);
     CalculatorConversions::expressionFromRationalFunction<Rational>(calculator, input.powers[i], powerE, inputContext);
-    termE.makeXOX(calculator, calculator.opThePower(), chevGenE, powerE);
+    termE.makeXOX(calculator, calculator.opPower(), chevGenE, powerE);
     theTerms.addOnTop(termE);
   }
   return output.makeProduct(calculator, theTerms);

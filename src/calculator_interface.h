@@ -1846,7 +1846,7 @@ public:
   int opDefineConditional() {
     return this->operations.getIndexNoFail("if=");
   }
-  int opThePower() {
+  int opPower() {
     return this->operations.getIndexNoFail("^");
   }
   int opUnderscore() {
@@ -3343,7 +3343,7 @@ bool CalculatorConversions::expressionFromPolynomial(
         } else {
           currentPower.assignValue(input[i](j), calculator);
           currentMultTermE.makeXOX(
-            calculator, calculator.opThePower(), currentBase, currentPower
+            calculator, calculator.opPower(), currentBase, currentPower
           );
         }
         if (!found) {

@@ -5368,7 +5368,7 @@ void Calculator::initializeToStringHandlers() {
   this->addOneStringAtomHandler(this->opSqrt()                  , Expression::toStringSqrt                        );
   this->addOneStringAtomHandler(this->opFactorial()             , Expression::toStringFactorial                   );
   this->addOneStringAtomHandler(this->opAbsoluteValue()         , Expression::toStringAbsoluteValue               );
-  this->addOneStringAtomHandler(this->opThePower()              , Expression::toStringPower                       );
+  this->addOneStringAtomHandler(this->opPower()              , Expression::toStringPower                       );
   this->addOneStringAtomHandler(this->opPlus()                  , Expression::toStringPlus                        );
   this->addOneStringAtomHandler(this->opDirectSum()             , Expression::toStringDirectSum                   );
   this->addOneStringAtomHandler(this->opMinus()                 , Expression::toStringMinus                       );

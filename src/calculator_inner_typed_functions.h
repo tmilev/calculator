@@ -313,7 +313,7 @@ bool CalculatorConversions::functionPolynomialWithExponentLimit(
   }
 
   int power = - 1;
-  if (input.startsWith(calculator.opThePower(), 3)) {
+  if (input.startsWith(calculator.opPower(), 3)) {
     if (input[2].isSmallInteger(&power)) {
       if (!CalculatorConversions::functionPolynomialWithExponentLimit<Coefficient, MaximumPower, MaximumVariables>(calculator, input[1], converted)) {
         return calculator
@@ -404,7 +404,7 @@ bool CalculatorConversions::functionRationalFunction(
     global.fatal << "This line of code should never be reached, something has gone wrong." << global.fatal;
   }
   int theSmallPower = - 1;
-  if (input.startsWith(calculator.opThePower(), 3) ) {
+  if (input.startsWith(calculator.opPower(), 3) ) {
     if (input[2].isSmallInteger(&theSmallPower)) {
       Expression leftE;
       if (!CalculatorConversions::functionRationalFunction<Coefficient>(calculator, input[1], leftE)) {

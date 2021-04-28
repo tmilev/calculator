@@ -1021,7 +1021,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossib
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossible");
-  if (!input.startsWith(calculator.opThePower(), 3)) {
+  if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   if (!input[1].isMatrix()) {
@@ -1095,7 +1095,7 @@ bool CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger");
   calculator.checkInputNotSameAsOutput(input, output);
-  if (!input.startsWith(calculator.opThePower(), 3)) {
+  if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   const Expression& matrixE = input[1];
@@ -1365,7 +1365,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(
           newBase.assignValue(base, calculator);
           return output.makeXOX(
             calculator,
-            calculator.opThePower(),
+            calculator.opPower(),
             newBase,
             newPower
           );
@@ -1527,7 +1527,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixExpressionsBySmallInteger(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerMatrixExpressionsBySmallInteger");
   calculator.checkInputNotSameAsOutput(input, output);
-  if (!input.startsWith(calculator.opThePower(), 3)) {
+  if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   if (!input[1].isMatrix()) {
@@ -1570,7 +1570,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors");
-  if (!input.startsWith(calculator.opThePower(), 3)) {
+  if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   Rational base, exponentWorking, exponentStarting;
@@ -1590,7 +1590,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
     if (base.getNumerator() == 1) {
       Expression theDenBase, theDenominator;
       theDenBase.assignValue(Rational(base.getDenominator()), calculator);
-      theDenominator.makeXOX(calculator, calculator.opThePower(), theDenBase, input[2]);
+      theDenominator.makeXOX(calculator, calculator.opPower(), theDenBase, input[2]);
       output = calculator.expressionOne() / theDenominator;
       return true;
     }
@@ -1721,7 +1721,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
   theRadicalCFE.assignValue(outsideOfTheRadical, calculator);
   insideTheRadicalE.assignValue(insideTheRadical, calculator);
   exponentE.assignValue(exponentWorking, calculator);
-  theRadicalE.makeXOX(calculator, calculator.opThePower(), insideTheRadicalE, exponentE);
+  theRadicalE.makeXOX(calculator, calculator.opPower(), insideTheRadicalE, exponentE);
   return output.makeProduct(calculator, theRadicalCFE, theRadicalE);
 }
 
@@ -2829,7 +2829,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger");
-  if (!input.startsWith(calculator.opThePower(), 3)) {
+  if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   const Expression& leftE = input[1];
@@ -2860,7 +2860,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveRationalElementByInteg
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerEllipticCurveRationalElementByInteger");
-  if (!input.startsWith(calculator.opThePower(), 3)) {
+  if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   const Expression& leftE = input[1];
@@ -2887,7 +2887,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger");
-  if (!input.startsWith(calculator.opThePower(), 3)) {
+  if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   const Expression& leftE = input[1];

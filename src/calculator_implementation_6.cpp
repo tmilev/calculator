@@ -1575,7 +1575,7 @@ bool CalculatorFunctions::innerDegreesToRadians(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerDegreesToRadians");
-  if (!input.startsWith(calculator.opThePower(), 3)) {
+  if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   if (!input[2].isOperationGiven("\\circ")) {
@@ -2404,7 +2404,7 @@ bool CalculatorFunctions::innerIsProductTermsUpToPower(
   Expression theBase;
   theBase = input[1];
   LargeInteger desiredMaxPower = 1;
-  if (theBase.startsWith(calculator.opThePower(), 3)) {
+  if (theBase.startsWith(calculator.opPower(), 3)) {
     if (theBase[2].isInteger(&desiredMaxPower)) {
       if (desiredMaxPower > 0) {
         theBase = input[1][1];
@@ -2434,7 +2434,7 @@ bool CalculatorFunctions::innerIsProductTermsUpToPower(
           foundPower ++;
           continue;
         }
-        if (theSummands[i][j].startsWith(calculator.opThePower(), 3)) {
+        if (theSummands[i][j].startsWith(calculator.opPower(), 3)) {
           if (theSummands[i][j][1] == theBase) {
             LargeInteger localPower;
             if (theSummands[i][j][2].isInteger(&localPower)) {
@@ -2471,7 +2471,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors");
-  if (!input.startsWith(calculator.opThePower(), 3)) {
+  if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   Rational exponent;
@@ -2494,7 +2494,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic(
   }
   Expression theIntegerPower;
   theIntegerPower.assignValue(Rational(exponent.getNumerator()), calculator);
-  return output.makeXOX(calculator, calculator.opThePower(),reduced, theIntegerPower);
+  return output.makeXOX(calculator, calculator.opPower(),reduced, theIntegerPower);
 }
 
 bool CalculatorFunctions::innerNewtonsMethod(Calculator& calculator, const Expression& input, Expression& output) {
@@ -3062,7 +3062,7 @@ bool CalculatorFunctions::innerSuffixNotationForPostScript(Calculator& calculato
   Expression currentE;
   bool useUsualOrder =
     !input[0].isOperationGiven(calculator.opDivide()) &&
-    !input[0].isOperationGiven(calculator.opThePower());
+    !input[0].isOperationGiven(calculator.opPower());
   if (useUsualOrder) {
     for (int i = input.size() - 1; i >= 1; i --) {
       if (!CalculatorFunctions::innerSuffixNotationForPostScript(calculator, input[i], currentE)) {

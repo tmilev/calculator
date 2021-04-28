@@ -1321,7 +1321,7 @@ bool CalculatorFunctions::innerCompositeApowerBevaluatedAtC(
     return false;
   }
   const Expression& firstE = input[0];
-  if (!firstE.startsWith(calculator.opThePower(), 3)) {
+  if (!firstE.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   if (firstE[1].isSequenceNElements()) {
@@ -1334,7 +1334,7 @@ bool CalculatorFunctions::innerCompositeApowerBevaluatedAtC(
   for (int i = 1; i < input.size(); i ++) {
     finalBase.addChildOnTop(input[i]);
   }
-  return output.makeXOX(calculator, calculator.opThePower(), finalBase, input[0][2]);
+  return output.makeXOX(calculator, calculator.opPower(), finalBase, input[0][2]);
 }
 
 bool CalculatorFunctions::innerConstantFunction(Calculator& calculator, const Expression& input, Expression& output) {
@@ -1376,64 +1376,66 @@ bool CalculatorFunctions::combineFractionsCommutative(
 
 template<class Coefficient>
 void Polynomial<Coefficient>::getPolynomialWithPolynomialCoefficient(
-  Selection& theNonCoefficientVariables, Polynomial<Polynomial<Coefficient> >& output
+  Selection& nonCoefficientVariables, Polynomial<Polynomial<Coefficient> >& output
 ) const {
   MacroRegisterFunctionWithName("Polynomial::getPolynomialWithPolynomialCoefficient");
-  if (theNonCoefficientVariables.numberOfElements != this->minimalNumberOfVariables()) {
+  if (nonCoefficientVariables.numberOfElements != this->minimalNumberOfVariables()) {
     global.fatal << "getPolynomialWithPolynomialCoefficient called with selection which has "
     << "selects the wrong number of variables. " << global.fatal;
   }
   output.makeZero();
-  MonomialPolynomial coeffPart, polyPart;
-  Polynomial<Coefficient> currentCF;
+  MonomialPolynomial coefficientPart, polynomialPart;
+  Polynomial<Coefficient> currentCoefficient;
   for (int i = 0; i < this->size(); i ++) {
-    coeffPart.makeOne();
-    polyPart.makeOne();
+    coefficientPart.makeOne();
+    polynomialPart.makeOne();
     for (int j = 0; j < (*this)[i].minimalNumberOfVariables(); j ++) {
-      if (theNonCoefficientVariables.selected[j]) {
-        polyPart.setVariable(j, (*this)[i](j));
+      if (nonCoefficientVariables.selected[j]) {
+        polynomialPart.setVariable(j, (*this)[i](j));
       } else {
-        coeffPart.setVariable(j, (*this)[i](j));
+        coefficientPart.setVariable(j, (*this)[i](j));
       }
     }
-    currentCF.makeZero();
-    currentCF.addMonomial(coeffPart, this->coefficients[i]);
-    output.addMonomial(polyPart, currentCF);
+    currentCoefficient.makeZero();
+    currentCoefficient.addMonomial(coefficientPart, this->coefficients[i]);
+    output.addMonomial(polynomialPart, currentCoefficient);
   }
 }
 
 template<class Coefficient>
 void Polynomial<Coefficient>::getPolynomialUnivariateWithPolynomialCoefficients(
-  int theVar, Polynomial<Polynomial<Coefficient> >& output
+  int variableIndex, Polynomial<Polynomial<Coefficient> >& output
 ) const {
-  Selection theVars;
-  theVars.initialize(this->minimalNumberOfVariables());
-  theVars.addSelectionAppendNewIndex(theVar);
-  this->getPolynomialWithPolynomialCoefficient(theVars, output);
+  Selection variables;
+  variables.initialize(this->minimalNumberOfVariables());
+  variables.addSelectionAppendNewIndex(variableIndex);
+  this->getPolynomialWithPolynomialCoefficient(variables, output);
 }
 
 template <class Coefficient>
 bool Polynomial<Coefficient>::getLinearSystemFromLinearPolynomials(
-  const List<Polynomial<Coefficient> >& theLinPolys,
+  const List<Polynomial<Coefficient> >& linearPolynomials,
   Matrix<Coefficient>& homogenousPart,
   Matrix<Coefficient>& constTerms
 ) {
   MacroRegisterFunctionWithName("Polynomial::getLinearSystemFromLinearPolynomials");
-  int theLetter;
-  int numVars = 0;
-  for (int i = 0; i < theLinPolys.size; i ++) {
-    numVars = MathRoutines::maximum(theLinPolys[i].minimalNumberOfVariables(), numVars);
+  int theLetter = 0;
+  int numberOfVariables = 0;
+  for (int i = 0; i < linearPolynomials.size; i ++) {
+    numberOfVariables = MathRoutines::maximum(
+      linearPolynomials[i].minimalNumberOfVariables(), numberOfVariables
+    );
   }
-  homogenousPart.initialize(theLinPolys.size, numVars);
+  homogenousPart.initialize(linearPolynomials.size, numberOfVariables);
   homogenousPart.makeZero();
-  constTerms.initialize(theLinPolys.size, 1);
+  constTerms.initialize(linearPolynomials.size, 1);
   constTerms.makeZero();
-  for (int i = 0; i < theLinPolys.size; i ++) {
-    for (int j = 0; j < theLinPolys[i].size(); j ++) {
-      if (theLinPolys[i][j].isLinearNoConstantTerm(&theLetter)) {
-        homogenousPart(i, theLetter) = theLinPolys[i].coefficients[j];
-      } else if (theLinPolys[i][j].isConstant()) {
-        constTerms(i, 0) = theLinPolys[i].coefficients[j];
+  for (int i = 0; i < linearPolynomials.size; i ++) {
+    for (int j = 0; j < linearPolynomials[i].size(); j ++) {
+      if (linearPolynomials[i][j].isLinearNoConstantTerm(&theLetter)) {
+        homogenousPart(i, theLetter) = linearPolynomials[i].coefficients[j];
+      } else if (linearPolynomials[i][j].isConstant()) {
+        constTerms(i, 0) = linearPolynomials[i].coefficients[j];
         constTerms(i, 0) *= - 1;
       } else {
         return false;
@@ -1447,12 +1449,12 @@ class IntegralRationalFunctionComputation {
 public:
   RationalFraction<Rational> rationalFraction;
   Polynomial<Rational> denominator, numerator;
-  Polynomial<Rational> quotientRat, remainderRat;
+  Polynomial<Rational> quotient, remainder;
   List<Polynomial<Rational> > allFactors;
   Polynomial<AlgebraicNumber> polynomialThatMustVanish;
   Polynomial<AlgebraicNumber> remainderRescaledAlgebraic;
   RationalFraction<Rational> transformedRationalFraction;
-  FormatExpressions currentFormaT;
+  FormatExpressions currentFormat;
   Expression integrationSetE;
   ExpressionContext context;
   Expression inputExpression;
@@ -1470,11 +1472,11 @@ public:
   std::string stringRationalFunctionPartialFractionLatex;
   std::string stringFinalAnswer;
   std::string stringDenominatorFactors;
-  LinearCombination<Polynomial<AlgebraicNumber>, Rational> theDenominatorFactorsWithMults;
-  List<List<Polynomial<AlgebraicNumber> > > theNumerators;
-  List<Expression> thePFSummands;
-  List<Expression> theIntegralSummands;
-  Expression theIntegralSum;
+  LinearCombination<Polynomial<AlgebraicNumber>, Rational> denominatorFactorsWithMultiplicities;
+  List<List<Polynomial<AlgebraicNumber> > > numerators;
+  List<Expression> partialFractionSummands;
+  List<Expression> integralSummands;
+  Expression integralSum;
   bool computePartialFractionDecomposition();
   void prepareFormatExpressions();
   void prepareDenominatorFactors();
@@ -1500,17 +1502,17 @@ bool IntegralRationalFunctionComputation::preparePartialFractionExpressionSumman
   Expression polyE, currentNum, denExpE, currentDenNoPowerMonic,
   currentDen, currentPFnoCoeff, currentPFWithCoeff,
   coeffE;
-  this->thePFSummands.setSize(0);
+  this->partialFractionSummands.setSize(0);
   Polynomial<AlgebraicNumber> denominatorRescaled, numeratorRescaled;
   AlgebraicNumber currentCoefficient, numScale;
   List<MonomialPolynomial>::Comparator* monomialOrder = &MonomialPolynomial::orderDefault();
-  for (int i = 0; i < this->theNumerators.size; i ++) {
-    for (int j = 0; j < this->theNumerators[i].size; j ++) {
-      if (this->theNumerators[i][j].isEqualToZero()) {
+  for (int i = 0; i < this->numerators.size; i ++) {
+    for (int j = 0; j < this->numerators[i].size; j ++) {
+      if (this->numerators[i][j].isEqualToZero()) {
         continue;
       }
-      denominatorRescaled = this->theDenominatorFactorsWithMults[i];
-      numeratorRescaled = this->theNumerators[i][j];
+      denominatorRescaled = this->denominatorFactorsWithMultiplicities[i];
+      numeratorRescaled = this->numerators[i][j];
       denominatorRescaled.getIndexLeadingMonomial(nullptr, &currentCoefficient, monomialOrder);
       currentCoefficient.invert();
       denominatorRescaled *= currentCoefficient;
@@ -1528,7 +1530,7 @@ bool IntegralRationalFunctionComputation::preparePartialFractionExpressionSumman
       }
       if (j != 0) {
         denExpE.assignValue(j + 1, *this->owner);
-        currentDen.makeXOX(*this->owner, this->owner->opThePower(), currentDenNoPowerMonic, denExpE);
+        currentDen.makeXOX(*this->owner, this->owner->opPower(), currentDenNoPowerMonic, denExpE);
       } else {
         currentDen = currentDenNoPowerMonic;
       }
@@ -1537,13 +1539,13 @@ bool IntegralRationalFunctionComputation::preparePartialFractionExpressionSumman
       coeffE.assignValue(currentCoefficient, *this->owner);
       currentPFWithCoeff = coeffE * currentPFnoCoeff;
       currentPFWithCoeff.checkConsistencyRecursively();
-      this->thePFSummands.addOnTop(currentPFWithCoeff);
+      this->partialFractionSummands.addOnTop(currentPFWithCoeff);
     }
   }
-  if (!this->quotientRat.isEqualToZero()) {
+  if (!this->quotient.isEqualToZero()) {
     Expression currentPFpolyForm;
     currentPFpolyForm.assignValueWithContext(
-      this->quotientRat, this->context, *this->owner
+      this->quotient, this->context, *this->owner
     );
     if (!CalculatorConversions::functionExpressionFromPolynomial<Rational>(
       *this->owner, currentPFpolyForm, currentPFWithCoeff
@@ -1555,7 +1557,7 @@ bool IntegralRationalFunctionComputation::preparePartialFractionExpressionSumman
       return false;
     }
     currentPFWithCoeff.checkConsistencyRecursively();
-    this->thePFSummands.addOnTop(currentPFWithCoeff);
+    this->partialFractionSummands.addOnTop(currentPFWithCoeff);
   }
   return true;
 }
@@ -1572,17 +1574,17 @@ bool IntegralRationalFunctionComputation::integrateRationalFunction() {
   printoutIntegration << this->printoutPFsHtml.str();
   Expression polyE, currentNum, denExpE, currentDenNoPowerMonic, currentDen, currentIntegrand,
   currentIntegralNoCoeff, currentIntegralWithCoeff, coeffE;
-  this->theIntegralSummands.setSize(0);
+  this->integralSummands.setSize(0);
   Polynomial<AlgebraicNumber> denRescaled, numRescaled;
   AlgebraicNumber currentCoefficient, numScale;
   List<MonomialPolynomial>::Comparator* monomialOrder = &MonomialPolynomial::orderDefault();
-  for (int i = 0; i < this->theNumerators.size; i ++) {
-    for (int j = 0; j < this->theNumerators[i].size; j ++) {
-      if (this->theNumerators[i][j].isEqualToZero()) {
+  for (int i = 0; i < this->numerators.size; i ++) {
+    for (int j = 0; j < this->numerators[i].size; j ++) {
+      if (this->numerators[i][j].isEqualToZero()) {
         continue;
       }
-      denRescaled = this->theDenominatorFactorsWithMults[i];
-      numRescaled = this->theNumerators[i][j];
+      denRescaled = this->denominatorFactorsWithMultiplicities[i];
+      numRescaled = this->numerators[i][j];
       currentCoefficient = denRescaled.getLeadingCoefficient(monomialOrder);
       currentCoefficient.invert();
       denRescaled *= currentCoefficient;
@@ -1600,7 +1602,7 @@ bool IntegralRationalFunctionComputation::integrateRationalFunction() {
       }
       if (j != 0) {
         denExpE.assignValue(j + 1, *this->owner);
-        currentDen.makeXOX(*this->owner, this->owner->opThePower(), currentDenNoPowerMonic, denExpE);
+        currentDen.makeXOX(*this->owner, this->owner->opPower(), currentDenNoPowerMonic, denExpE);
       } else {
         currentDen = currentDenNoPowerMonic;
       }
@@ -1615,13 +1617,13 @@ bool IntegralRationalFunctionComputation::integrateRationalFunction() {
       coeffE.assignValue(currentCoefficient, *this->owner);
       currentIntegralWithCoeff = coeffE * currentIntegralNoCoeff;
       currentIntegralWithCoeff.checkConsistencyRecursively();
-      this->theIntegralSummands.addOnTop(currentIntegralWithCoeff);
+      this->integralSummands.addOnTop(currentIntegralWithCoeff);
     }
   }
-  if (!this->quotientRat.isEqualToZero()) {
+  if (!this->quotient.isEqualToZero()) {
     Expression currentIntegrandPolyForm;
     currentIntegrandPolyForm.assignValueWithContext(
-      this->quotientRat, this->context, *this->owner
+      this->quotient, this->context, *this->owner
     );
     if (!CalculatorConversions::functionExpressionFromPolynomial<Rational>(
       *this->owner, currentIntegrandPolyForm, currentIntegrand
@@ -1638,121 +1640,121 @@ bool IntegralRationalFunctionComputation::integrateRationalFunction() {
       this->context.getVariable(0)
     );
     currentIntegralWithCoeff.checkConsistencyRecursively();
-    this->theIntegralSummands.addOnTop(currentIntegralWithCoeff);
+    this->integralSummands.addOnTop(currentIntegralWithCoeff);
   }
-  this->theIntegralSum.makeSum(*this->owner, this->theIntegralSummands);
-  this->theIntegralSum.checkConsistencyRecursively();
+  this->integralSum.makeSum(*this->owner, this->integralSummands);
+  this->integralSum.checkConsistencyRecursively();
   return true;
 }
 
 void IntegralRationalFunctionComputation::prepareFormatExpressions() {
   MacroRegisterFunctionWithName("IntegralRationalFunctionComputation::prepareFormatExpressions");
-  std::stringstream rfStream, polyStream;
-  rfStream << transformedRationalFraction.toString(&this->currentFormaT) << " = ";
-  polyStream << remainderRescaledAlgebraic.toString(&this->currentFormaT) << " = ";
-  int varCounter = 0;
-  for (int i = 0; i < this->theDenominatorFactorsWithMults.size(); i ++) {
+  std::stringstream rationalFractionStream, polyStream;
+  rationalFractionStream << transformedRationalFraction.toString(&this->currentFormat) << " = ";
+  polyStream << remainderRescaledAlgebraic.toString(&this->currentFormat) << " = ";
+  int variableCounter = 0;
+  for (int i = 0; i < this->denominatorFactorsWithMultiplicities.size(); i ++) {
     int tempSize = - 1;
-    this->theDenominatorFactorsWithMults.coefficients[i].isSmallInteger(&tempSize);
-    for (int k = 0; k < this->theDenominatorFactorsWithMults.coefficients[i]; k ++) {
-      rfStream << "\\frac{";
-      if (this->theDenominatorFactorsWithMults[i].totalDegree() > 1) {
+    this->denominatorFactorsWithMultiplicities.coefficients[i].isSmallInteger(&tempSize);
+    for (int k = 0; k < this->denominatorFactorsWithMultiplicities.coefficients[i]; k ++) {
+      rationalFractionStream << "\\frac{";
+      if (this->denominatorFactorsWithMultiplicities[i].totalDegree() > 1) {
         polyStream << "(";
       }
-      for (int j = 0; j < this->theDenominatorFactorsWithMults[i].totalDegree(); j ++) {
-        varCounter ++;
+      for (int j = 0; j < this->denominatorFactorsWithMultiplicities[i].totalDegree(); j ++) {
+        variableCounter ++;
         std::stringstream varNameStream;
-        varNameStream << "A_{" << varCounter << "} ";
-        rfStream << varNameStream.str();
+        varNameStream << "A_{" << variableCounter << "} ";
+        rationalFractionStream << varNameStream.str();
         polyStream << varNameStream.str();
-        this->currentFormaT.polynomialAlphabet.addOnTop(varNameStream.str());
+        this->currentFormat.polynomialAlphabet.addOnTop(varNameStream.str());
         if (j > 0) {
-          rfStream << "x";
+          rationalFractionStream << "x";
           polyStream << "x";
         }
         if (j > 1) {
-          rfStream << "^{" << j << "}";
+          rationalFractionStream << "^{" << j << "}";
           polyStream << "^{" << j << "}";
         }
-        if ((this->theDenominatorFactorsWithMults[i].totalDegree() - 1) != j) {
-          rfStream << " + ";
+        if ((this->denominatorFactorsWithMultiplicities[i].totalDegree() - 1) != j) {
+          rationalFractionStream << " + ";
           polyStream << " + ";
         }
       }
-      if (this->theDenominatorFactorsWithMults[i].totalDegree() > 1) {
+      if (this->denominatorFactorsWithMultiplicities[i].totalDegree() > 1) {
         polyStream << ")";
       }
-      for (int j = 0; j < this->theDenominatorFactorsWithMults.size(); j ++) {
-        Rational theExp = this->theDenominatorFactorsWithMults.coefficients[j];
+      for (int j = 0; j < this->denominatorFactorsWithMultiplicities.size(); j ++) {
+        Rational exponent = this->denominatorFactorsWithMultiplicities.coefficients[j];
         if (j == i) {
-          theExp -= k + 1;
+          exponent -= k + 1;
         }
-        if (theExp == 0) {
+        if (exponent == 0) {
           continue;
         }
-        polyStream << "(" << this->theDenominatorFactorsWithMults[j].toString(&this->currentFormaT) << ")";
-        if (theExp > 1) {
-          polyStream << "^{" << theExp << "}";
+        polyStream << "(" << this->denominatorFactorsWithMultiplicities[j].toString(&this->currentFormat) << ")";
+        if (exponent > 1) {
+          polyStream << "^{" << exponent << "}";
         }
       }
-      rfStream << "}{";
+      rationalFractionStream << "}{";
       if (k > 0) {
-        rfStream << "(";
+        rationalFractionStream << "(";
       }
-      rfStream << this->theDenominatorFactorsWithMults[i].toString(&this->currentFormaT);
+      rationalFractionStream << this->denominatorFactorsWithMultiplicities[i].toString(&this->currentFormat);
       if (k > 0) {
-        rfStream << ")^{" << k + 1 << "}";
+        rationalFractionStream << ")^{" << k + 1 << "}";
       }
-      rfStream << "}";
+      rationalFractionStream << "}";
       if (
-        ((this->theDenominatorFactorsWithMults.coefficients[i] - 1) != k) ||
-        (i != this->theDenominatorFactorsWithMults.size() - 1)
+        ((this->denominatorFactorsWithMultiplicities.coefficients[i] - 1) != k) ||
+        (i != this->denominatorFactorsWithMultiplicities.size() - 1)
       ) {
-        rfStream << "+";
+        rationalFractionStream << "+";
         polyStream << "+";
       }
     }
   }
-  this->stringRationalFunctionLatex = rfStream.str();
+  this->stringRationalFunctionLatex = rationalFractionStream.str();
   this->stringPolyIndentityNonSimplifiedLatex = polyStream.str();
 }
 
 void IntegralRationalFunctionComputation::prepareNumerators() {
   MacroRegisterFunctionWithName("IntegralRationalFunctionComputation::prepareNumerators");
-  this->transformedRationalFraction = this->remainderRat;
+  this->transformedRationalFraction = this->remainder;
   this->transformedRationalFraction /= this->denominator;
-  this->remainderRescaledAlgebraic = this->remainderRat;
+  this->remainderRescaledAlgebraic = this->remainder;
   this->remainderRescaledAlgebraic /= additionalMultiple;
   this->numberOfSystemVariables = 0;
   Polynomial<AlgebraicNumber> currentSummand;
   MonomialPolynomial currentMon;
   this->polynomialThatMustVanish.makeZero();
   this->polynomialThatMustVanish -= remainderRescaledAlgebraic;
-  this->theNumerators.setSize(this->theDenominatorFactorsWithMults.size());
-  for (int i = 0; i < this->theDenominatorFactorsWithMults.size(); i ++) {
+  this->numerators.setSize(this->denominatorFactorsWithMultiplicities.size());
+  for (int i = 0; i < this->denominatorFactorsWithMultiplicities.size(); i ++) {
     int tempSize = - 1;
-    this->theDenominatorFactorsWithMults.coefficients[i].isSmallInteger(&tempSize);
-    this->theNumerators[i].setSize(tempSize);
-    for (int k = 0; k < this->theDenominatorFactorsWithMults.coefficients[i]; k ++) {
+    this->denominatorFactorsWithMultiplicities.coefficients[i].isSmallInteger(&tempSize);
+    this->numerators[i].setSize(tempSize);
+    for (int k = 0; k < this->denominatorFactorsWithMultiplicities.coefficients[i]; k ++) {
       currentSummand.makeZero();
-      this->theNumerators[i][k].makeZero();
-      for (int j = 0; j < this->theDenominatorFactorsWithMults[i].totalDegree(); j ++) {
+      this->numerators[i][k].makeZero();
+      for (int j = 0; j < this->denominatorFactorsWithMultiplicities[i].totalDegree(); j ++) {
         this->numberOfSystemVariables ++;
         currentMon.makeEi(this->numberOfSystemVariables);
         currentMon.setVariable(0, j);
-        this->theNumerators[i][k].addMonomial(currentMon, 1);
+        this->numerators[i][k].addMonomial(currentMon, 1);
         currentSummand.addMonomial(currentMon, 1);
       }
-      for (int j = 0; j < this->theDenominatorFactorsWithMults.size(); j ++) {
-        Rational theExp = this->theDenominatorFactorsWithMults.coefficients[j];
+      for (int j = 0; j < this->denominatorFactorsWithMultiplicities.size(); j ++) {
+        Rational exponent = this->denominatorFactorsWithMultiplicities.coefficients[j];
         if (j == i) {
-          theExp -= k + 1;
+          exponent -= k + 1;
         }
-        if (theExp == 0) {
+        if (exponent == 0) {
           continue;
         }
-        for (int p = 0; p < theExp; p ++) {
-          currentSummand *= this->theDenominatorFactorsWithMults[j];
+        for (int p = 0; p < exponent; p ++) {
+          currentSummand *= this->denominatorFactorsWithMultiplicities[j];
         }
       }
       this->polynomialThatMustVanish += currentSummand;
@@ -1762,34 +1764,34 @@ void IntegralRationalFunctionComputation::prepareNumerators() {
 
 void IntegralRationalFunctionComputation::prepareFinalAnswer() {
   MacroRegisterFunctionWithName("IntegralRationalFunctionComputation::prepareFinalAnswer");
-  std::stringstream rfComputedStream, answerFinalStream;
-  for (int i = 0; i < theDenominatorFactorsWithMults.size(); i ++) {
-    for (int k = 0; k < theDenominatorFactorsWithMults.coefficients[i]; k ++) {
-      rfComputedStream << "\\frac{"
-      << this->theNumerators[i][k].toString(&this->currentFormaT) << "}";
-      rfComputedStream << "{";
-      rfComputedStream << "("
-      << theDenominatorFactorsWithMults[i].toString(&this->currentFormaT) << ")";
+  std::stringstream rationalFractionStream, answerFinalStream;
+  for (int i = 0; i < denominatorFactorsWithMultiplicities.size(); i ++) {
+    for (int k = 0; k < denominatorFactorsWithMultiplicities.coefficients[i]; k ++) {
+      rationalFractionStream << "\\frac{"
+      << this->numerators[i][k].toString(&this->currentFormat) << "}";
+      rationalFractionStream << "{";
+      rationalFractionStream << "("
+      << denominatorFactorsWithMultiplicities[i].toString(&this->currentFormat) << ")";
       if (k > 0) {
-        rfComputedStream << "^{" << k + 1 << "}";
+        rationalFractionStream << "^{" << k + 1 << "}";
       }
-      rfComputedStream << "}";
+      rationalFractionStream << "}";
       if (
-        ((theDenominatorFactorsWithMults.coefficients[i] - 1) != k) ||
-        (i != theDenominatorFactorsWithMults.size() - 1)
+        ((denominatorFactorsWithMultiplicities.coefficients[i] - 1) != k) ||
+        (i != denominatorFactorsWithMultiplicities.size() - 1)
       ) {
-        rfComputedStream << "+";
+        rationalFractionStream << "+";
       }
     }
   }
-  this->stringRationalFunctionPartialFractionLatex = rfComputedStream.str();
-  answerFinalStream << this->rationalFraction.toString(&this->currentFormaT) << "=";
-  if (!this->quotientRat.isEqualToZero()) {
-    answerFinalStream << this->quotientRat.toString(&this->currentFormaT) << "+ ";
-    answerFinalStream << this->transformedRationalFraction.toString(&this->currentFormaT) << "=";
+  this->stringRationalFunctionPartialFractionLatex = rationalFractionStream.str();
+  answerFinalStream << this->rationalFraction.toString(&this->currentFormat) << "=";
+  if (!this->quotient.isEqualToZero()) {
+    answerFinalStream << this->quotient.toString(&this->currentFormat) << "+ ";
+    answerFinalStream << this->transformedRationalFraction.toString(&this->currentFormat) << "=";
   }
-  if (!this->quotientRat.isEqualToZero()) {
-    answerFinalStream << this->quotientRat.toString(&this->currentFormaT) << "+ ";
+  if (!this->quotient.isEqualToZero()) {
+    answerFinalStream << this->quotient.toString(&this->currentFormat) << "+ ";
   }
   answerFinalStream << this->stringRationalFunctionPartialFractionLatex;
   this->stringFinalAnswer = answerFinalStream.str();
@@ -1798,22 +1800,22 @@ void IntegralRationalFunctionComputation::prepareFinalAnswer() {
 void IntegralRationalFunctionComputation::prepareDenominatorFactors() {
   MacroRegisterFunctionWithName("IntegralRationalFunctionComputation::prepareDenominatorFactors");
   this->printoutPFsHtml << "The rational function is: " << HtmlRoutines::getMathNoDisplay(
-    "\\frac{" + this->numerator.toString(&this->currentFormaT) + "}{" + this->denominator.toString(&this->currentFormaT) + "}"
+    "\\frac{" + this->numerator.toString(&this->currentFormat) + "}{" + this->denominator.toString(&this->currentFormat) + "}"
   )
   << ".";
   this->printoutPFsHtml << "<br>The denominator factors are: ";
   this->printoutPFsLatex << "We aim to decompose into partial fractions the following function "
   << "(the denominator has been factored). \\[\\frac{"
-  << this->numerator.toString(&this->currentFormaT) << "}{" << this->denominator.toString(&this->currentFormaT) << "}="
-  << "\\frac{" << this->numerator.toString(&this->currentFormaT)  << "}{ ";
+  << this->numerator.toString(&this->currentFormat) << "}{" << this->denominator.toString(&this->currentFormat) << "}="
+  << "\\frac{" << this->numerator.toString(&this->currentFormat)  << "}{ ";
   this->allFactorsAreOfDegree2orless = true;
   for (int i = 0; i < this->allFactors.size; i ++) {
-    this->printoutPFsHtml << HtmlRoutines::getMathNoDisplay(this->allFactors[i].toString(&this->currentFormaT));
+    this->printoutPFsHtml << HtmlRoutines::getMathNoDisplay(this->allFactors[i].toString(&this->currentFormat));
     bool needsParenthesis = this->allFactors[i].needsParenthesisForMultiplication();
     if (needsParenthesis) {
       this->printoutPFsLatex << "\\left(";
     }
-    this->printoutPFsLatex << this->allFactors[i].toString(&this->currentFormaT);
+    this->printoutPFsLatex << this->allFactors[i].toString(&this->currentFormat);
     if (needsParenthesis) {
       this->printoutPFsLatex << "\\right)";
     }
@@ -1833,13 +1835,13 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
   MacroRegisterFunctionWithName("IntegralRationalFunctionComputation::computePartialFractionDecomposition");
   this->checkConsistency();
   this->context = this->inputExpression.getContext();
-  this->context.getFormat(this->currentFormaT);
+  this->context.getFormat(this->currentFormat);
   if (
     this->rationalFraction.minimalNumberOfVariables() < 1 ||
     this->rationalFraction.expressionType == this->rationalFraction.typeConstant ||
     this->rationalFraction.expressionType == this->rationalFraction.typePolynomial
   ) {
-    this->printoutPFsHtml << this->rationalFraction.toString(&this->currentFormaT)
+    this->printoutPFsHtml << this->rationalFraction.toString(&this->currentFormat)
     << " is already split into partial fractions. ";
     return true;
   }
@@ -1860,17 +1862,17 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
   this->numerator /= factorization.constantFactor;
   this->denominator /= factorization.constantFactor;
   this->allFactors = factorization.reduced;
-  Polynomial<Rational> tempP;
-  tempP.makeConstant(1);
+  Polynomial<Rational> denominatorProduct;
+  denominatorProduct.makeConstant(1);
   for (int i = 0; i < this->allFactors.size; i ++) {
-    tempP *= this->allFactors[i];
+    denominatorProduct *= this->allFactors[i];
   }
-  if (tempP != this->denominator) {
+  if (denominatorProduct != this->denominator) {
     global.fatal
     << "Something is very wrong: product of denominator factors is "
-    << tempP.toString(&this->currentFormaT)
+    << denominatorProduct.toString(&this->currentFormat)
     << ", but the denominator equals: "
-    << this->denominator.toString(&this->currentFormaT) << ". " << global.fatal;
+    << this->denominator.toString(&this->currentFormat) << ". " << global.fatal;
   }
   this->printoutPFsLatex
   << "\\documentclass{article}\\usepackage{longtable}\\usepackage{xcolor}\\usepackage{multicol} "
@@ -1883,29 +1885,29 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     return false;
   }
   List<MonomialPolynomial>::Comparator monomialOrder = MonomialPolynomial::orderDefault();
-  this->currentFormaT.flagUseFrac = true;
+  this->currentFormat.flagUseFrac = true;
   this->numerator.divideBy(
     this->denominator,
-    this->quotientRat,
-    this->remainderRat,
+    this->quotient,
+    this->remainder,
    & monomialOrder
   );
-  this->needPolynomialDivision = !this->quotientRat.isEqualToZero();
+  this->needPolynomialDivision = !this->quotient.isEqualToZero();
   if (this->needPolynomialDivision) {
     this->printoutPFsHtml << "<br>The numerator "
-    << HtmlRoutines::getMathNoDisplay(this->numerator.toString(&this->currentFormaT))
+    << HtmlRoutines::getMathNoDisplay(this->numerator.toString(&this->currentFormat))
     << " divided by the denominator "
-    << HtmlRoutines::getMathNoDisplay(denominator.toString(&this->currentFormaT))
+    << HtmlRoutines::getMathNoDisplay(denominator.toString(&this->currentFormat))
     << " yields "
-    << HtmlRoutines::getMathNoDisplay(this->quotientRat.toString(&this->currentFormaT))
+    << HtmlRoutines::getMathNoDisplay(this->quotient.toString(&this->currentFormat))
     << " with remainder "
-    << HtmlRoutines::getMathNoDisplay(this->remainderRat.toString(&this->currentFormaT)) << ". ";
+    << HtmlRoutines::getMathNoDisplay(this->remainder.toString(&this->currentFormat)) << ". ";
     GroebnerBasisComputation<Rational> computation;
     computation.flagDoLogDivision = true;
     computation.flagStoreQuotients = true;
     computation.polynomialOrder.monomialOrder = MonomialPolynomial::orderDefault();
     computation.addBasisElementNoReduction(this->denominator);
-    computation.format = this->currentFormaT;
+    computation.format = this->currentFormat;
     computation.polynomialOrder.monomialOrder = monomialOrder;
     Polynomial<Rational> theNumCopy = this->numerator;
     computation.remainderDivisionByBasis(theNumCopy, computation.remainderDivision, - 1);
@@ -1920,22 +1922,22 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     denominatorFactorsWithMultiplicities.addMonomial(this->allFactors[i], 1);
   }
   denominatorFactorsWithMultiplicities.quickSortAscending();
-  Polynomial<Rational> currentSecondDegreePoly;
-  this->theDenominatorFactorsWithMults.makeZero();
+  Polynomial<Rational> currentSecondDegreePolynomial;
+  this->denominatorFactorsWithMultiplicities.makeZero();
   Polynomial<AlgebraicNumber> currentLinPoly, currentSecondDegreePolyAlgebraic;
   this->additionalMultiple = 1;
   for (int i = 0; i < denominatorFactorsWithMultiplicities.size(); i ++) {
-    currentSecondDegreePoly = denominatorFactorsWithMultiplicities[i];
-    currentSecondDegreePolyAlgebraic = currentSecondDegreePoly;
-    if (currentSecondDegreePoly.totalDegree() != 2) {
-      this->theDenominatorFactorsWithMults.addMonomial(
+    currentSecondDegreePolynomial = denominatorFactorsWithMultiplicities[i];
+    currentSecondDegreePolyAlgebraic = currentSecondDegreePolynomial;
+    if (currentSecondDegreePolynomial.totalDegree() != 2) {
+      this->denominatorFactorsWithMultiplicities.addMonomial(
         currentSecondDegreePolyAlgebraic, denominatorFactorsWithMultiplicities.coefficients[i]
       );
       continue;
     }
-    Rational discriminant = currentSecondDegreePoly.getDiscriminant();
+    Rational discriminant = currentSecondDegreePolynomial.getDiscriminant();
     if (discriminant < 0) {
-      this->theDenominatorFactorsWithMults.addMonomial(
+      this->denominatorFactorsWithMultiplicities.addMonomial(
         currentSecondDegreePolyAlgebraic, denominatorFactorsWithMultiplicities.coefficients[i]
       );
       continue;
@@ -1953,19 +1955,19 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
       return false;
     }
     discriminantSqrt.checkConsistency();
-    AlgebraicNumber a = currentSecondDegreePoly.getCoefficientOf(MonomialPolynomial(0, 2));
-    AlgebraicNumber b = currentSecondDegreePoly.getCoefficientOf(MonomialPolynomial(0, 1));
+    AlgebraicNumber a = currentSecondDegreePolynomial.getCoefficientOf(MonomialPolynomial(0, 2));
+    AlgebraicNumber b = currentSecondDegreePolynomial.getCoefficientOf(MonomialPolynomial(0, 1));
     a.checkConsistency();
     b.checkConsistency();
     currentLinPoly.makeMonomial(0, 1);
     currentLinPoly -= (- b + discriminantSqrt) / (a * 2);
-    this->theDenominatorFactorsWithMults.addMonomial(currentLinPoly, denominatorFactorsWithMultiplicities.coefficients[i]);
+    this->denominatorFactorsWithMultiplicities.addMonomial(currentLinPoly, denominatorFactorsWithMultiplicities.coefficients[i]);
     currentLinPoly.makeMonomial(0, 1);
     currentLinPoly -= (- b - discriminantSqrt) / (a * 2);
-    this->theDenominatorFactorsWithMults.addMonomial(currentLinPoly, denominatorFactorsWithMultiplicities.coefficients[i]);
+    this->denominatorFactorsWithMultiplicities.addMonomial(currentLinPoly, denominatorFactorsWithMultiplicities.coefficients[i]);
     this->additionalMultiple *= a;
   }
-  this->theDenominatorFactorsWithMults.quickSortAscending();
+  this->denominatorFactorsWithMultiplicities.quickSortAscending();
   this->printoutPFsHtml << "<br><br>I need to find "
   << HtmlRoutines::getMathNoDisplay("A_i")
   << "'s so that I have the equality of rational functions: ";
@@ -1978,35 +1980,37 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
   this->printoutPFsLatex << "After clearing denominators, we get the following equality. ";
   this->printoutPFsHtml << "<br><br>" << HtmlRoutines::getMathNoDisplay(this->stringPolyIndentityNonSimplifiedLatex, - 1);
   this->printoutPFsLatex << "\\[" << this->stringPolyIndentityNonSimplifiedLatex << "\\]";
-  Polynomial<Polynomial<AlgebraicNumber> > univariateThatMustDie;
-  polynomialThatMustVanish.getPolynomialUnivariateWithPolynomialCoefficients(0, univariateThatMustDie);
+  Polynomial<Polynomial<AlgebraicNumber> > univariateThatMustVanish;
+  polynomialThatMustVanish.getPolynomialUnivariateWithPolynomialCoefficients(0, univariateThatMustVanish);
   this->printoutPFsHtml << "<br><br>After rearranging we get that the following polynomial must vanish: "
-  << HtmlRoutines::getMathNoDisplay(univariateThatMustDie.toString(&this->currentFormaT));
+  << HtmlRoutines::getMathNoDisplay(univariateThatMustVanish.toString(&this->currentFormat));
   this->printoutPFsLatex << "After rearranging we get that the following polynomial must vanish. Here, by ``vanish'' "
   << "we mean that the coefficients of the powers of $x$ must be equal to zero."
-  << "\\[" << univariateThatMustDie.toString(&this->currentFormaT) << "\\]";
+  << "\\[" << univariateThatMustVanish.toString(&this->currentFormat) << "\\]";
   this->printoutPFsHtml << "<br>Here, by ``vanish'', we mean that the coefficients in front of the powers of x must vanish.";
-  Matrix<AlgebraicNumber> theSystemHomogeneous, theSystemHomogeneousForLaTeX, theConstTerms, theConstTermsForLaTeX;
-  Polynomial<AlgebraicNumber>::getLinearSystemFromLinearPolynomials(univariateThatMustDie.coefficients, theSystemHomogeneous, theConstTerms);
-  theSystemHomogeneousForLaTeX = theSystemHomogeneous;
+  Matrix<AlgebraicNumber> homogenousSystem, theSystemHomogeneousForLaTeX, theConstTerms, theConstTermsForLaTeX;
+  Polynomial<AlgebraicNumber>::getLinearSystemFromLinearPolynomials(
+    univariateThatMustVanish.coefficients, homogenousSystem, theConstTerms
+  );
+  theSystemHomogeneousForLaTeX = homogenousSystem;
   theConstTermsForLaTeX = theConstTerms;
-  this->currentFormaT.flagFormatMatrixAsLinearSystem = true;
+  this->currentFormat.flagFormatMatrixAsLinearSystem = true;
   this->printoutPFsHtml << "<br>In other words, we need to solve the system: "
-  << HtmlRoutines::getMathNoDisplay(theSystemHomogeneous.toStringSystemLatex(&theConstTerms, &this->currentFormaT), - 1);
+  << HtmlRoutines::getMathNoDisplay(homogenousSystem.toStringSystemLatex(&theConstTerms, &this->currentFormat), - 1);
   this->printoutPFsLatex << "In other words, we need to solve the following system. "
-  << "\\[" << theSystemHomogeneous.toStringSystemLatex(&theConstTerms, &this->currentFormaT) << "\\]";
-  this->currentFormaT.flagUseHTML = true;
-  theSystemHomogeneous.gaussianEliminationByRows(&theConstTerms, nullptr, nullptr, &this->printoutPFsHtml, &this->currentFormaT);
-  this->currentFormaT.flagUseHTML = false;
-  theSystemHomogeneousForLaTeX.gaussianEliminationByRows(&theConstTermsForLaTeX, nullptr, nullptr, &this->printoutPFsLatex, &this->currentFormaT);
+  << "\\[" << homogenousSystem.toStringSystemLatex(&theConstTerms, &this->currentFormat) << "\\]";
+  this->currentFormat.flagUseHTML = true;
+  homogenousSystem.gaussianEliminationByRows(&theConstTerms, nullptr, nullptr, &this->printoutPFsHtml, &this->currentFormat);
+  this->currentFormat.flagUseHTML = false;
+  theSystemHomogeneousForLaTeX.gaussianEliminationByRows(&theConstTermsForLaTeX, nullptr, nullptr, &this->printoutPFsLatex, &this->currentFormat);
   PolynomialSubstitution<AlgebraicNumber> substitution;
   substitution.makeIdentitySubstitution(this->numberOfSystemVariables + 1);
   for (int i = 1; i < substitution.size; i ++) {
     substitution[i].makeConstant(theConstTerms(i - 1, 0));
   }
-  for (int i = 0; i < theDenominatorFactorsWithMults.size(); i ++) {
-    for (int k = 0; k < theDenominatorFactorsWithMults.coefficients[i]; k ++) {
-      this->theNumerators[i][k].substitution(
+  for (int i = 0; i < denominatorFactorsWithMultiplicities.size(); i ++) {
+    for (int k = 0; k < denominatorFactorsWithMultiplicities.coefficients[i]; k ++) {
+      this->numerators[i][k].substitution(
         substitution,
         this->owner->objectContainer.algebraicClosure.one()
       );
@@ -2064,7 +2068,7 @@ bool CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals(
     << "while splitting "
     << input.toString() << " into partial fractions. ";
   }
-  return output.makeSequence(calculator, &theComputation.thePFSummands);
+  return output.makeSequence(calculator, &theComputation.partialFractionSummands);
 }
 
 bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorithm(
@@ -2361,7 +2365,7 @@ bool CalculatorFunctionsDifferentiation::differentiateConstPower(Calculator& cal
   const Expression& theDOvar = input[1];
   const Expression& theArgument = input[2];
   //////////////////////
-  if (!theArgument.startsWith(calculator.opThePower(), 3)) {
+  if (!theArgument.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   if (!theArgument[2].isConstantNumber()) {
@@ -2370,7 +2374,7 @@ bool CalculatorFunctionsDifferentiation::differentiateConstPower(Calculator& cal
   Expression theMonomial, theTerm, theExponent, basePrime, minusOne;
   minusOne.assignValue<Rational>(- 1, calculator);
   theExponent.makeXOX(calculator, calculator.opPlus(), theArgument[2], minusOne);
-  theMonomial.makeXOX(calculator, calculator.opThePower(), theArgument[1], theExponent);
+  theMonomial.makeXOX(calculator, calculator.opPower(), theArgument[1], theExponent);
   basePrime.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, theArgument[1]);
   theTerm.makeXOX(calculator, calculator.opTimes(), theArgument[2], theMonomial);
   return output.makeXOX(calculator, calculator.opTimes(), theTerm, basePrime);
@@ -2390,7 +2394,7 @@ bool CalculatorFunctionsDifferentiation::differentiateAPowerB(Calculator& calcul
   const Expression& theArgument = input[2];
   //////////////////////
   // d/dx a^b= d/dx(e^{b\\ln a}) = a^b d/dx(b\\log a)
-  if (!theArgument.startsWith(calculator.opThePower(), 3)) {
+  if (!theArgument.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   Expression logarithmBase, exponentTimesLogBase, derivativeExponentTimesLogBase;
@@ -2465,13 +2469,13 @@ bool CalculatorFunctionsDifferentiation::differentiateTrigAndInverseTrig(
     Expression secE, twoE;
     secE.makeAtom(calculator.opSec(), calculator);
     twoE.assignValue(2, calculator);
-    return output.makeXOX(calculator, calculator.opThePower(), secE, twoE);
+    return output.makeXOX(calculator, calculator.opPower(), secE, twoE);
   }
   if (theArgument.isOperationGiven(calculator.opCot())) {
     Expression cscE, twoE, cscSquared, mOneE;
     cscE.makeAtom(calculator.opCsc(), calculator);
     twoE.assignValue(2, calculator);
-    cscSquared.makeXOX(calculator, calculator.opThePower(), cscE, twoE);
+    cscSquared.makeXOX(calculator, calculator.opPower(), cscE, twoE);
     mOneE.assignValue(- 1, calculator);
     return output.makeXOX(calculator, calculator.opTimes(), mOneE, cscSquared);
   }
@@ -2509,7 +2513,7 @@ bool CalculatorFunctionsDifferentiation::differentiateTrigAndInverseTrig(
     oneMinusXsquared *= - 1;
     oneMinusXsquared += 1;
     denE.assignValueWithContext(oneMinusXsquared, context, calculator);
-    return output.makeXOX(calculator, calculator.opThePower(), denE, calculator.expressionMinusHalf());
+    return output.makeXOX(calculator, calculator.opPower(), denE, calculator.expressionMinusHalf());
   }
   if (theArgument.isOperationGiven(calculator.opArcCos())) {
     Expression denE;
@@ -2520,7 +2524,7 @@ bool CalculatorFunctionsDifferentiation::differentiateTrigAndInverseTrig(
     oneMinusXsquared *= - 1;
     oneMinusXsquared += 1;
     denE.assignValueWithContext(oneMinusXsquared, context, calculator);
-    output.makeXOX(calculator, calculator.opThePower(), denE, calculator.expressionMinusHalf());
+    output.makeXOX(calculator, calculator.opPower(), denE, calculator.expressionMinusHalf());
     output *= - 1;
     return true;
   }
@@ -2676,7 +2680,7 @@ bool CalculatorFunctions::outerAssociateAdivBdivCpowerD(
   if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
   }
-  if (!input[2].startsWith(calculator.opThePower(), 3)) {
+  if (!input[2].startsWith(calculator.opPower(), 3)) {
     return false;
   }
   if (!input[2][1].startsWith(calculator.opDivide(), 3)) {
@@ -2685,9 +2689,9 @@ bool CalculatorFunctions::outerAssociateAdivBdivCpowerD(
   calculator.checkInputNotSameAsOutput(input, output);
   Expression numeratorE, numeratorLeftE, denominatorE;
   output.reset(calculator, 3);
-  numeratorLeftE.makeXOX(calculator, calculator.opThePower(), input[2][1][2], input[2][2]);
+  numeratorLeftE.makeXOX(calculator, calculator.opPower(), input[2][1][2], input[2][2]);
   numeratorE.makeXOX(calculator, calculator.opTimes(), input[1], numeratorLeftE);
-  denominatorE.makeXOX(calculator, calculator.opThePower(), input[2][1][1], input[2][2]);
+  denominatorE.makeXOX(calculator, calculator.opPower(), input[2][1][1], input[2][2]);
   return output.makeXOX(calculator, calculator.opDivide(), numeratorE, denominatorE);
 }
 
@@ -2818,7 +2822,7 @@ bool CalculatorFunctionsDifferentiation::differentiateAtimesB(
 
 bool CalculatorFunctions::innerPowerAnyToZero(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPowerAnyToZero");
-  if (!input.startsWith(calculator.opThePower(), 3)) {
+  if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   if (!input[2].isEqualToZero()) {
@@ -2871,7 +2875,7 @@ bool CalculatorFunctionsDifferentiation::differentiateAdivideBCommutative(
   leftSummand, rightSummand, theDenominatorFinal, numerator;
   eOne.assignValue(1, calculator);
   bool denBaseFound = false;
-  if (theArgument[2].startsWith(calculator.opThePower(), 3)) {
+  if (theArgument[2].startsWith(calculator.opPower(), 3)) {
     if (theArgument[2][2].isConstantNumber()) {
       denBaseFound = true;
       theDenominatorBase = theArgument[2][1];
@@ -2884,7 +2888,7 @@ bool CalculatorFunctionsDifferentiation::differentiateAdivideBCommutative(
     theDenominatorExponentPlusOne.assignValue(2, calculator);
     theDenominatorExponent.assignValue(1, calculator);
   }
-  theDenominatorFinal.makeXOX(calculator, calculator.opThePower(), theDenominatorBase, theDenominatorExponentPlusOne);
+  theDenominatorFinal.makeXOX(calculator, calculator.opPower(), theDenominatorBase, theDenominatorExponentPlusOne);
   changedMultiplicand.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, theArgument[1]);
   leftSummand.makeXOX(calculator, calculator.opTimes(), changedMultiplicand, theDenominatorBase);
   rightSummand.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, theDenominatorBase);
@@ -2920,7 +2924,7 @@ bool CalculatorFunctionsDifferentiation::differentiateAdivideBNONCommutative(
   changedMultiplicand.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, theArgument[1]);
   leftSummand.makeXOX(calculator, calculator.opDivide(), changedMultiplicand, theArgument[2]);
   bPrime.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, theArgument[2]);
-  bInverse.makeXOX(calculator, calculator.opThePower(), theArgument[2], eMOne);
+  bInverse.makeXOX(calculator, calculator.opPower(), theArgument[2], eMOne);
   rightSummand.makeXOX(calculator, calculator.opTimes(), bPrime, bInverse); //rightSummand = b' b^{- 1}
   changedMultiplicand.makeXOX(calculator, calculator.opTimes(), bInverse, rightSummand); //changedMultiplicand = b^- 1 b' b^- 1
   rightSummand.makeXOX(calculator, calculator.opTimes(), theArgument[1], changedMultiplicand);
@@ -3889,8 +3893,8 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionSplitToBuidingBloc
   if (!theComputation.integrateRationalFunction()) {
     return calculator << theComputation.printoutIntegration.str();
   }
-  theComputation.theIntegralSum.checkConsistencyRecursively();
-  output = theComputation.theIntegralSum;
+  theComputation.integralSum.checkConsistencyRecursively();
+  output = theComputation.integralSum;
   if (output.startsWith(calculator.opIntegral())) {
     if (output[1] == input) {
       return false;
@@ -4000,7 +4004,7 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIb(
   if (!A.isConstantNumber()) {
     return false;
   }
-  if (!axPlusbPowerN.startsWith(calculator.opThePower(), 3)) {
+  if (!axPlusbPowerN.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   Expression N = axPlusbPowerN[2];
@@ -4019,7 +4023,7 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIb(
   OneMinusN = N;
   OneMinusN += - 1;
   OneMinusN *= - 1;
-  base.makeXOX(calculator, calculator.opThePower(), axPlusb, OneMinusN);
+  base.makeXOX(calculator, calculator.opPower(), axPlusb, OneMinusN);
   output = A;
   output /= a;
   output /= OneMinusN;
@@ -4134,9 +4138,9 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIaand
   oneE.assignValue(1, calculator);
   twoE.assignValue(2, calculator);
   fourE.assignValue(4, calculator);
-  xSquared.makeXOX(calculator, calculator.opThePower(), x, twoE);
-  bSquared.makeXOX(calculator, calculator.opThePower(), b, twoE);
-  aSquared.makeXOX(calculator, calculator.opThePower(), a, twoE);
+  xSquared.makeXOX(calculator, calculator.opPower(), x, twoE);
+  bSquared.makeXOX(calculator, calculator.opPower(), b, twoE);
+  aSquared.makeXOX(calculator, calculator.opPower(), a, twoE);
 
   Expression theQuadraticDiva = xSquared + (b / a) * x + c / a;
   Expression xplusbdiv2a = x + b / (twoE * a);
@@ -4168,7 +4172,7 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIIb(
   if (!theFunctionE.startsWith(calculator.opDivide(), 3)) {
     return false;
   }
-  if (!theFunctionE[2].startsWith(calculator.opThePower(), 3)) {
+  if (!theFunctionE[2].startsWith(calculator.opPower(), 3)) {
     return false;
   }
   Expression numPowerE = theFunctionE[2][2];
@@ -4208,14 +4212,14 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIIb(
   threeE.assignValue(3, calculator);
   fourE.assignValue(4, calculator);
 
-  xSquared.makeXOX(calculator, calculator.opThePower(), x, twoE);
-  bSquared.makeXOX(calculator, calculator.opThePower(), b, twoE);
+  xSquared.makeXOX(calculator, calculator.opPower(), x, twoE);
+  bSquared.makeXOX(calculator, calculator.opPower(), b, twoE);
 
   Expression theMonicQuadratic = xSquared + b * x + c;
   Expression D = c - bSquared / fourE;
   Expression remainingIntegral, functionRemainingToIntegrate, theQuadraticPowerOneMinusN, theQuadraticPowerNMinusOne;
-  theQuadraticPowerOneMinusN.makeXOX(calculator, calculator.opThePower(), theMonicQuadratic, oneE - numPowerE);
-  theQuadraticPowerNMinusOne.makeXOX(calculator, calculator.opThePower(), theMonicQuadratic, numPowerE - oneE);
+  theQuadraticPowerOneMinusN.makeXOX(calculator, calculator.opPower(), theMonicQuadratic, oneE - numPowerE);
+  theQuadraticPowerNMinusOne.makeXOX(calculator, calculator.opPower(), theMonicQuadratic, numPowerE - oneE);
   functionRemainingToIntegrate = oneE / theQuadraticPowerNMinusOne;
   remainingIntegral.makeIntegral(calculator, integrationSetE, functionRemainingToIntegrate, x);
   output = oneE / D *
@@ -4237,7 +4241,7 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIb(
   if (!theFunctionE.startsWith(calculator.opDivide(), 3)) {
     return false;
   }
-  if (!theFunctionE[2].startsWith(calculator.opThePower(), 3)) {
+  if (!theFunctionE[2].startsWith(calculator.opPower(), 3)) {
     return false;
   }
   Expression nE = theFunctionE[2][2];
@@ -4283,13 +4287,13 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIb(
   oneE.assignValue(1, calculator);
   twoE.assignValue(2, calculator);
   fourE.assignValue(4, calculator);
-  apowerN.makeXOX(calculator, calculator.opThePower(), a, nE);
-  xSquared.makeXOX(calculator, calculator.opThePower(), x, twoE);
-  bSquared.makeXOX(calculator, calculator.opThePower(), b, twoE);
-  aSquared.makeXOX(calculator, calculator.opThePower(), a, twoE);
+  apowerN.makeXOX(calculator, calculator.opPower(), a, nE);
+  xSquared.makeXOX(calculator, calculator.opPower(), x, twoE);
+  bSquared.makeXOX(calculator, calculator.opPower(), b, twoE);
+  aSquared.makeXOX(calculator, calculator.opPower(), a, twoE);
   Expression theQuadraticDiva = xSquared + (b / a) * x + c / a;
-  quadraticPowerN.makeXOX(calculator, calculator.opThePower(), theQuadraticDiva, nE);
-  quadraticPowerOneMinusN.makeXOX(calculator, calculator.opThePower(), theQuadraticDiva, oneE - nE);
+  quadraticPowerN.makeXOX(calculator, calculator.opPower(), theQuadraticDiva, nE);
+  quadraticPowerOneMinusN.makeXOX(calculator, calculator.opPower(), theQuadraticDiva, oneE - nE);
   remainingFunctionToIntegrate = oneE / quadraticPowerN;
   remainingIntegral.makeIntegral(calculator, integrationSetE, remainingFunctionToIntegrate, x);
   Expression C = B - (A * b) / (twoE * a);
@@ -4315,7 +4319,7 @@ bool CalculatorFunctionsIntegration::integratePowerByUncoveringParenthesisFirst(
   if (!input.isIndefiniteIntegralFdx(&theVariableE, &theFunctionE, &integrationSetE)) {
     return false;
   }
-  if (!theFunctionE.startsWith(calculator.opThePower())) {
+  if (!theFunctionE.startsWith(calculator.opPower())) {
     return false;
   }
   if (!CalculatorFunctions::functionPolynomialize(calculator, theFunctionE, integrandE)) {
@@ -4438,7 +4442,7 @@ bool CalculatorFunctionsIntegration::integrateXnDiffX(Calculator& calculator, co
     output /= 2;
     return true;
   }
-  if (!theFunNoCoeff.startsWith(calculator.opThePower(), 3)) {
+  if (!theFunNoCoeff.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   if (theFunNoCoeff[1] != theVariableE) {
@@ -4456,7 +4460,7 @@ bool CalculatorFunctionsIntegration::integrateXnDiffX(Calculator& calculator, co
   }
   Expression outputPower = theFunNoCoeff[2];
   outputPower += 1;
-  outputNoCoeff.makeXOX(calculator, calculator.opThePower(), theVariableE, outputPower);
+  outputNoCoeff.makeXOX(calculator, calculator.opPower(), theVariableE, outputPower);
   outputNoCoeff /= outputPower;
   output = theFunCoeff * outputNoCoeff;
   output.checkConsistency();
@@ -4550,28 +4554,28 @@ bool CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM(
     if (powerSine % 2 == 1) {
       currentE = oneE - newVarE * newVarE;
       powerE.assignValue((powerSine - 1) / 2, calculator);
-      currentIntegrandSinePart.makeXOX(calculator, calculator.opThePower(), currentE, powerE);
+      currentIntegrandSinePart.makeXOX(calculator, calculator.opPower(), currentE, powerE);
       powerE.assignValue(powerCosine, calculator);
-      currentIntegrandCosinePart.makeXOX(calculator, calculator.opThePower(), newVarE, powerE);
+      currentIntegrandCosinePart.makeXOX(calculator, calculator.opPower(), newVarE, powerE);
       currentCF.assignValue(- theTrigPoly.coefficients[i], calculator);
       currentCF /= theTrigArgCoeff;
       currentSubE.makeXOX(calculator, calculator.opDefine(), newVarE, theCosE);
     } else if (powerCosine % 2 == 1) {
       currentE = oneE - newVarE * newVarE;
       powerE.assignValue((powerCosine - 1) / 2, calculator);
-      currentIntegrandCosinePart.makeXOX(calculator, calculator.opThePower(), currentE, powerE);
+      currentIntegrandCosinePart.makeXOX(calculator, calculator.opPower(), currentE, powerE);
       powerE.assignValue(powerSine, calculator);
-      currentIntegrandSinePart.makeXOX(calculator, calculator.opThePower(), newVarE, powerE);
+      currentIntegrandSinePart.makeXOX(calculator, calculator.opPower(), newVarE, powerE);
       currentCF.assignValue(theTrigPoly.coefficients[i], calculator);
       currentCF /= theTrigArgCoeff;
       currentSubE.makeXOX(calculator, calculator.opDefine(), newVarE, theSinE);
     } else {
       currentE = (oneE - theCosDoubleE) / twoE;
       powerE.assignValue(powerSine / 2, calculator);
-      currentIntegrandSinePart.makeXOX(calculator, calculator.opThePower(), currentE, powerE);
+      currentIntegrandSinePart.makeXOX(calculator, calculator.opPower(), currentE, powerE);
       currentE = (oneE + theCosDoubleE) / twoE;
       powerE.assignValue(powerCosine / 2, calculator);
-      currentIntegrandCosinePart.makeXOX(calculator, calculator.opThePower(), currentE, powerE);
+      currentIntegrandCosinePart.makeXOX(calculator, calculator.opPower(), currentE, powerE);
       currentCF.assignValue(theTrigPoly.coefficients[i], calculator);
       currentIntegrandNonPolynomializedE = currentCF * currentIntegrandSinePart * currentIntegrandCosinePart;
       currentIntegrandE.reset(calculator);
@@ -4687,18 +4691,18 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
     if (powerTan % 2 == 1 && powerSec > 0) {
       currentE = newVarE * newVarE - oneE;
       powerE.assignValue((powerTan - 1) / 2, calculator);
-      currentIntegrandTanPart.makeXOX(calculator, calculator.opThePower(), currentE, powerE);
+      currentIntegrandTanPart.makeXOX(calculator, calculator.opPower(), currentE, powerE);
       powerE.assignValue(powerSec - 1, calculator);
-      currentIntegrandSecPart.makeXOX(calculator, calculator.opThePower(), newVarE, powerE);
+      currentIntegrandSecPart.makeXOX(calculator, calculator.opPower(), newVarE, powerE);
       currentCF.assignValue(theTrigPoly.coefficients[i], calculator);
       currentCF /= theTrigArgCoeff;
       currentSubE.makeXOX(calculator, calculator.opDefine(), newVarE, theSecE);
     } else if (powerSec % 2 == 0) {
       currentE = oneE + newVarE * newVarE;
       powerE.assignValue((powerSec - 2) / 2, calculator);
-      currentIntegrandSecPart.makeXOX(calculator, calculator.opThePower(), currentE, powerE);
+      currentIntegrandSecPart.makeXOX(calculator, calculator.opPower(), currentE, powerE);
       powerE.assignValue(powerTan, calculator);
-      currentIntegrandTanPart.makeXOX(calculator, calculator.opThePower(), newVarE, powerE);
+      currentIntegrandTanPart.makeXOX(calculator, calculator.opPower(), newVarE, powerE);
       currentCF.assignValue(theTrigPoly.coefficients[i], calculator);
       currentCF /= theTrigArgCoeff;
       currentSubE.makeXOX(calculator, calculator.opDefine(), newVarE, theTanE);
@@ -4804,8 +4808,8 @@ bool CalculatorFunctionsTrigonometry::convertSineToExponent(
   iE.makeAtom(calculator.opImaginaryUnit(), calculator);
   exponentArgument = iE * argument;
   minusExponentArgument = exponentArgument * (- 1);
-  leftE.makeXOX(calculator, calculator.opThePower(), eE, exponentArgument);
-  rightE.makeXOX(calculator, calculator.opThePower(), eE, minusExponentArgument);
+  leftE.makeXOX(calculator, calculator.opPower(), eE, exponentArgument);
+  rightE.makeXOX(calculator, calculator.opPower(), eE, minusExponentArgument);
   output = (iE * (- 1)) * (leftE - rightE) / 2;
   return true;
 }
@@ -4823,15 +4827,15 @@ bool CalculatorFunctionsTrigonometry::convertCosineToExponent(
   iE.makeAtom(calculator.opImaginaryUnit(), calculator);
   exponentArgument = iE * argument;
   minusExponentArgument = exponentArgument * (- 1);
-  leftE.makeXOX(calculator, calculator.opThePower(), eE, exponentArgument);
-  rightE.makeXOX(calculator, calculator.opThePower(), eE, minusExponentArgument);
+  leftE.makeXOX(calculator, calculator.opPower(), eE, exponentArgument);
+  rightE.makeXOX(calculator, calculator.opPower(), eE, minusExponentArgument);
   output = (leftE + rightE) / 2;
   return true;
 }
 
 bool CalculatorFunctions::innerPowerImaginaryUnit(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPowerImaginaryUnit");
-  if (!input.startsWith(calculator.opThePower(), 3)) {
+  if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   if (!input[1].isOperationGiven(calculator.opImaginaryUnit())) {
@@ -4864,7 +4868,7 @@ bool CalculatorFunctionsTrigonometry::eulerFormulaAsLaw(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::eulerFormulaAsLaw");
-  if (!input.startsWith(calculator.opThePower(), 3)) {
+  if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   if (!input[1].isOperationGiven(calculator.opE())) {
@@ -4900,7 +4904,7 @@ bool CalculatorFunctionsIntegration::integrateEpowerAxDiffX(
   }
   Expression theFunCoeff, theFunNoCoeff;
   theFunctionE.getCoefficientMultiplicandForm(theFunCoeff, theFunNoCoeff);
-  if (!theFunNoCoeff.startsWith(calculator.opThePower(), 3)) {
+  if (!theFunNoCoeff.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   if (!theFunNoCoeff[1].isOperationGiven(calculator.opE())) {
@@ -5055,8 +5059,8 @@ bool CalculatorFunctions::outerMergeConstantRadicals(
     return false;
   }
   if (
-    !input[1].startsWith(calculator.opThePower(), 3) ||
-    !input[2].startsWith(calculator.opThePower(), 3)
+    !input[1].startsWith(calculator.opPower(), 3) ||
+    !input[2].startsWith(calculator.opPower(), 3)
   ) {
     return false;
   }
@@ -5078,7 +5082,7 @@ bool CalculatorFunctions::outerMergeConstantRadicals(
   }
   Expression theProduct;
   theProduct.makeProduct(calculator, input[1][1], input[2][1]);
-  return output.makeXOX(calculator, calculator.opThePower(), theProduct, input[1][2]);
+  return output.makeXOX(calculator, calculator.opPower(), theProduct, input[1][2]);
 }
 
 bool CalculatorFunctions::outerCommuteConstants(Calculator& calculator, const Expression& input, Expression& output) {
@@ -5117,7 +5121,7 @@ bool CalculatorFunctions::outerDivideReplaceAdivBpowerItimesBpowerJ(
   calculator.checkInputNotSameAsOutput(input, output);
   Expression rightMultiplicand, rightMultiplicandExponent;
   rightMultiplicandExponent.makeXOX(calculator, calculator.opMinus(), numeratorExponent, denominatorExponent);
-  rightMultiplicand.makeXOX(calculator, calculator.opThePower(), denominatorBase, rightMultiplicandExponent);
+  rightMultiplicand.makeXOX(calculator, calculator.opPower(), denominatorBase, rightMultiplicandExponent);
   return output.makeXOX(calculator, calculator.opTimes(), input[1][1], rightMultiplicand);
 }
 
@@ -5168,7 +5172,7 @@ bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
     if (numerators[i].isConstantNumber()) {
       newNumSummandRightPart.makeXOX(
         calculator,
-        calculator.opThePower(),
+        calculator.opPower(),
         denominatorBase,
         mOneE * denominatorExponent
       );
@@ -5179,7 +5183,7 @@ bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
     numerators[i].getBaseExponentForm(numeratorBaseRight, numeratorExponentRight);
     if (numeratorBaseRight == denominatorBase) {
       newNumExponent.makeXOX(calculator, calculator.opMinus(), numeratorExponentRight, denominatorExponent);
-      newNumSummand.makeXOX(calculator, calculator.opThePower(), denominatorBase, newNumExponent);
+      newNumSummand.makeXOX(calculator, calculator.opPower(), denominatorBase, newNumExponent);
       numeratorsNew.addMonomial(newNumSummand, numerators.coefficients[i]);
       continue;
     }
@@ -5190,7 +5194,7 @@ bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
         continue;
       }
       newNumExponent.makeXOX(calculator, calculator.opMinus(), numeratorExponentRight, denominatorExponent);
-      newNumSummandRightPart.makeXOX(calculator, calculator.opThePower(), denominatorBase, newNumExponent);
+      newNumSummandRightPart.makeXOX(calculator, calculator.opPower(), denominatorBase, newNumExponent);
       newNumSummand.makeXOX(calculator, calculator.opTimes(), numeratorMultiplicandLeft, newNumSummandRightPart);
       numeratorsNew.addMonomial(newNumSummand, numerators.coefficients[i]);
       isGood = true;
@@ -7014,7 +7018,7 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
   this->startsWith(calculator.opTimes(), 3) ||
   this->startsWith(calculator.opPlus(), 3) ||
   this->startsWith(calculator.opMinus(), 3) ||
-  this->startsWith(calculator.opThePower(), 3) ||
+  this->startsWith(calculator.opPower(), 3) ||
   this->startsWith(calculator.opDivide(), 3) ||
   this->startsWith(calculator.opSqrt(), 3) ||
   this->startsWith(calculator.opLogBase(), 3);
@@ -7056,7 +7060,7 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
       }
       return true;
     }
-    if ((*this).startsWith(calculator.opThePower(), 3)) {
+    if ((*this).startsWith(calculator.opPower(), 3)) {
       bool signChange = false;
       if (leftD < 0) {
         Rational theRat;
@@ -7772,7 +7776,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT");
   calculator.checkInputNotSameAsOutput(input, output);
-  if (!input.startsWith(calculator.opThePower(), 3)) {
+  if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   if (!input[1].isSequenceNElements() && !input[1].isMatrix()) {

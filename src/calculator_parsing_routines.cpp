@@ -1667,7 +1667,7 @@ bool Calculator::replaceEPowerMinusEXByEX() {
   Expression exponent;
   exponent.makeOX(*this, this->opMinus(), minusExponent.data);
   Expression incoming;
-  incoming.makeXOX(*this, this->opThePower(), base.data, exponent);
+  incoming.makeXOX(*this, this->opPower(), base.data, exponent);
   base.data = incoming;
   return this->decreaseStackExceptLast(3);
 }

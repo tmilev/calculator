@@ -2897,7 +2897,7 @@ unsigned int Selection::hashFunction() const {
   return result;
 }
 
-//Format expression monomial orders (for the toString() function follow.
+//Format expression monomial orders for the toString() function follow.
 
 template<>
 List<MonomialWrapper<std::string, MathRoutines::hashString> >::Comparator*
@@ -11736,17 +11736,17 @@ void ConeLatticeAndShiftMaxComputation::initialize(
   this->isInfinity.initializeFillInObject(1, false);
 }
 
-void Cone::sliceInDirection(Vector<Rational>& theDirection, ConeComplex& output) {
+void Cone::sliceInDirection(Vector<Rational>& direction, ConeComplex& output) {
   output.initialize();
   output.addNonRefinedChamberOnTopNoRepetition(*this);
-  output.slicingDirections.addOnTop(theDirection);
+  output.slicingDirections.addOnTop(direction);
   output.refine();
 }
 
-void Lattice::applyLinearMap(Matrix<Rational> & theMap, Lattice& output) {
+void Lattice::applyLinearMap(Matrix<Rational>& linearMap, Lattice& output) {
   Vectors<Rational> tempRoots;
   tempRoots.assignMatrixRows(this->basisRationalForm);
-  theMap.actOnVectorsColumn(tempRoots);
+  linearMap.actOnVectorsColumn(tempRoots);
   output.makeFromRoots(tempRoots);
 }
 

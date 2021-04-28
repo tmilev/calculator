@@ -28,6 +28,12 @@ bool Expression::convertInternally<Polynomial<Rational> >(Expression& output) co
 template <>
 bool Expression::convertInternally<ElementUniversalEnveloping<RationalFraction<Rational> > >(Expression& output) const;
 
+template<>
+List<Polynomial<Rational> >::Comparator*
+FormatExpressions::getMonomialOrder<Polynomial<Rational> >() {
+  return nullptr;
+}
+
 bool CalculatorFunctionsCrypto::testLoadPEMCertificates(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
@@ -1416,7 +1422,7 @@ template <class Coefficient>
 bool Polynomial<Coefficient>::getLinearSystemFromLinearPolynomials(
   const List<Polynomial<Coefficient> >& linearPolynomials,
   Matrix<Coefficient>& homogenousPart,
-  Matrix<Coefficient>& constTerms
+  Matrix<Coefficient>& constantTerms
 ) {
   MacroRegisterFunctionWithName("Polynomial::getLinearSystemFromLinearPolynomials");
   int theLetter = 0;
@@ -1428,15 +1434,15 @@ bool Polynomial<Coefficient>::getLinearSystemFromLinearPolynomials(
   }
   homogenousPart.initialize(linearPolynomials.size, numberOfVariables);
   homogenousPart.makeZero();
-  constTerms.initialize(linearPolynomials.size, 1);
-  constTerms.makeZero();
+  constantTerms.initialize(linearPolynomials.size, 1);
+  constantTerms.makeZero();
   for (int i = 0; i < linearPolynomials.size; i ++) {
     for (int j = 0; j < linearPolynomials[i].size(); j ++) {
       if (linearPolynomials[i][j].isLinearNoConstantTerm(&theLetter)) {
         homogenousPart(i, theLetter) = linearPolynomials[i].coefficients[j];
       } else if (linearPolynomials[i][j].isConstant()) {
-        constTerms(i, 0) = linearPolynomials[i].coefficients[j];
-        constTerms(i, 0) *= - 1;
+        constantTerms(i, 0) = linearPolynomials[i].coefficients[j];
+        constantTerms(i, 0) *= - 1;
       } else {
         return false;
       }
@@ -1472,7 +1478,8 @@ public:
   std::string stringRationalFunctionPartialFractionLatex;
   std::string stringFinalAnswer;
   std::string stringDenominatorFactors;
-  LinearCombination<Polynomial<AlgebraicNumber>, Rational> denominatorFactorsWithMultiplicities;
+  LinearCombination<Polynomial<AlgebraicNumber>, Rational> denominatorFactorsAlgebraicWithMultiplicities;
+  LinearCombination<Polynomial<Rational>, Rational> denominatorFactorsRationalWithMultiplicities;
   List<List<Polynomial<AlgebraicNumber> > > numerators;
   List<Expression> partialFractionSummands;
   List<Expression> integralSummands;
@@ -1511,7 +1518,7 @@ bool IntegralRationalFunctionComputation::preparePartialFractionExpressionSumman
       if (this->numerators[i][j].isEqualToZero()) {
         continue;
       }
-      denominatorRescaled = this->denominatorFactorsWithMultiplicities[i];
+      denominatorRescaled = this->denominatorFactorsAlgebraicWithMultiplicities[i];
       numeratorRescaled = this->numerators[i][j];
       denominatorRescaled.getIndexLeadingMonomial(nullptr, &currentCoefficient, monomialOrder);
       currentCoefficient.invert();
@@ -1583,7 +1590,7 @@ bool IntegralRationalFunctionComputation::integrateRationalFunction() {
       if (this->numerators[i][j].isEqualToZero()) {
         continue;
       }
-      denRescaled = this->denominatorFactorsWithMultiplicities[i];
+      denRescaled = this->denominatorFactorsAlgebraicWithMultiplicities[i];
       numRescaled = this->numerators[i][j];
       currentCoefficient = denRescaled.getLeadingCoefficient(monomialOrder);
       currentCoefficient.invert();
@@ -1653,15 +1660,15 @@ void IntegralRationalFunctionComputation::prepareFormatExpressions() {
   rationalFractionStream << transformedRationalFraction.toString(&this->currentFormat) << " = ";
   polyStream << remainderRescaledAlgebraic.toString(&this->currentFormat) << " = ";
   int variableCounter = 0;
-  for (int i = 0; i < this->denominatorFactorsWithMultiplicities.size(); i ++) {
+  for (int i = 0; i < this->denominatorFactorsAlgebraicWithMultiplicities.size(); i ++) {
     int tempSize = - 1;
-    this->denominatorFactorsWithMultiplicities.coefficients[i].isSmallInteger(&tempSize);
-    for (int k = 0; k < this->denominatorFactorsWithMultiplicities.coefficients[i]; k ++) {
+    this->denominatorFactorsAlgebraicWithMultiplicities.coefficients[i].isSmallInteger(&tempSize);
+    for (int k = 0; k < this->denominatorFactorsAlgebraicWithMultiplicities.coefficients[i]; k ++) {
       rationalFractionStream << "\\frac{";
-      if (this->denominatorFactorsWithMultiplicities[i].totalDegree() > 1) {
+      if (this->denominatorFactorsAlgebraicWithMultiplicities[i].totalDegree() > 1) {
         polyStream << "(";
       }
-      for (int j = 0; j < this->denominatorFactorsWithMultiplicities[i].totalDegree(); j ++) {
+      for (int j = 0; j < this->denominatorFactorsAlgebraicWithMultiplicities[i].totalDegree(); j ++) {
         variableCounter ++;
         std::stringstream varNameStream;
         varNameStream << "A_{" << variableCounter << "} ";
@@ -1676,23 +1683,23 @@ void IntegralRationalFunctionComputation::prepareFormatExpressions() {
           rationalFractionStream << "^{" << j << "}";
           polyStream << "^{" << j << "}";
         }
-        if ((this->denominatorFactorsWithMultiplicities[i].totalDegree() - 1) != j) {
+        if ((this->denominatorFactorsAlgebraicWithMultiplicities[i].totalDegree() - 1) != j) {
           rationalFractionStream << " + ";
           polyStream << " + ";
         }
       }
-      if (this->denominatorFactorsWithMultiplicities[i].totalDegree() > 1) {
+      if (this->denominatorFactorsAlgebraicWithMultiplicities[i].totalDegree() > 1) {
         polyStream << ")";
       }
-      for (int j = 0; j < this->denominatorFactorsWithMultiplicities.size(); j ++) {
-        Rational exponent = this->denominatorFactorsWithMultiplicities.coefficients[j];
+      for (int j = 0; j < this->denominatorFactorsAlgebraicWithMultiplicities.size(); j ++) {
+        Rational exponent = this->denominatorFactorsAlgebraicWithMultiplicities.coefficients[j];
         if (j == i) {
           exponent -= k + 1;
         }
         if (exponent == 0) {
           continue;
         }
-        polyStream << "(" << this->denominatorFactorsWithMultiplicities[j].toString(&this->currentFormat) << ")";
+        polyStream << "(" << this->denominatorFactorsAlgebraicWithMultiplicities[j].toString(&this->currentFormat) << ")";
         if (exponent > 1) {
           polyStream << "^{" << exponent << "}";
         }
@@ -1701,14 +1708,14 @@ void IntegralRationalFunctionComputation::prepareFormatExpressions() {
       if (k > 0) {
         rationalFractionStream << "(";
       }
-      rationalFractionStream << this->denominatorFactorsWithMultiplicities[i].toString(&this->currentFormat);
+      rationalFractionStream << this->denominatorFactorsAlgebraicWithMultiplicities[i].toString(&this->currentFormat);
       if (k > 0) {
         rationalFractionStream << ")^{" << k + 1 << "}";
       }
       rationalFractionStream << "}";
       if (
-        ((this->denominatorFactorsWithMultiplicities.coefficients[i] - 1) != k) ||
-        (i != this->denominatorFactorsWithMultiplicities.size() - 1)
+        ((this->denominatorFactorsAlgebraicWithMultiplicities.coefficients[i] - 1) != k) ||
+        (i != this->denominatorFactorsAlgebraicWithMultiplicities.size() - 1)
       ) {
         rationalFractionStream << "+";
         polyStream << "+";
@@ -1730,23 +1737,23 @@ void IntegralRationalFunctionComputation::prepareNumerators() {
   MonomialPolynomial currentMon;
   this->polynomialThatMustVanish.makeZero();
   this->polynomialThatMustVanish -= remainderRescaledAlgebraic;
-  this->numerators.setSize(this->denominatorFactorsWithMultiplicities.size());
-  for (int i = 0; i < this->denominatorFactorsWithMultiplicities.size(); i ++) {
+  this->numerators.setSize(this->denominatorFactorsAlgebraicWithMultiplicities.size());
+  for (int i = 0; i < this->denominatorFactorsAlgebraicWithMultiplicities.size(); i ++) {
     int tempSize = - 1;
-    this->denominatorFactorsWithMultiplicities.coefficients[i].isSmallInteger(&tempSize);
+    this->denominatorFactorsAlgebraicWithMultiplicities.coefficients[i].isSmallInteger(&tempSize);
     this->numerators[i].setSize(tempSize);
-    for (int k = 0; k < this->denominatorFactorsWithMultiplicities.coefficients[i]; k ++) {
+    for (int k = 0; k < this->denominatorFactorsAlgebraicWithMultiplicities.coefficients[i]; k ++) {
       currentSummand.makeZero();
       this->numerators[i][k].makeZero();
-      for (int j = 0; j < this->denominatorFactorsWithMultiplicities[i].totalDegree(); j ++) {
+      for (int j = 0; j < this->denominatorFactorsAlgebraicWithMultiplicities[i].totalDegree(); j ++) {
         this->numberOfSystemVariables ++;
         currentMon.makeEi(this->numberOfSystemVariables);
         currentMon.setVariable(0, j);
         this->numerators[i][k].addMonomial(currentMon, 1);
         currentSummand.addMonomial(currentMon, 1);
       }
-      for (int j = 0; j < this->denominatorFactorsWithMultiplicities.size(); j ++) {
-        Rational exponent = this->denominatorFactorsWithMultiplicities.coefficients[j];
+      for (int j = 0; j < this->denominatorFactorsAlgebraicWithMultiplicities.size(); j ++) {
+        Rational exponent = this->denominatorFactorsAlgebraicWithMultiplicities.coefficients[j];
         if (j == i) {
           exponent -= k + 1;
         }
@@ -1754,7 +1761,7 @@ void IntegralRationalFunctionComputation::prepareNumerators() {
           continue;
         }
         for (int p = 0; p < exponent; p ++) {
-          currentSummand *= this->denominatorFactorsWithMultiplicities[j];
+          currentSummand *= this->denominatorFactorsAlgebraicWithMultiplicities[j];
         }
       }
       this->polynomialThatMustVanish += currentSummand;
@@ -1765,20 +1772,20 @@ void IntegralRationalFunctionComputation::prepareNumerators() {
 void IntegralRationalFunctionComputation::prepareFinalAnswer() {
   MacroRegisterFunctionWithName("IntegralRationalFunctionComputation::prepareFinalAnswer");
   std::stringstream rationalFractionStream, answerFinalStream;
-  for (int i = 0; i < denominatorFactorsWithMultiplicities.size(); i ++) {
-    for (int k = 0; k < denominatorFactorsWithMultiplicities.coefficients[i]; k ++) {
+  for (int i = 0; i < this->denominatorFactorsAlgebraicWithMultiplicities.size(); i ++) {
+    for (int k = 0; k < this->denominatorFactorsAlgebraicWithMultiplicities.coefficients[i]; k ++) {
       rationalFractionStream << "\\frac{"
       << this->numerators[i][k].toString(&this->currentFormat) << "}";
       rationalFractionStream << "{";
       rationalFractionStream << "("
-      << denominatorFactorsWithMultiplicities[i].toString(&this->currentFormat) << ")";
+      << this->denominatorFactorsAlgebraicWithMultiplicities[i].toString(&this->currentFormat) << ")";
       if (k > 0) {
         rationalFractionStream << "^{" << k + 1 << "}";
       }
       rationalFractionStream << "}";
       if (
-        ((denominatorFactorsWithMultiplicities.coefficients[i] - 1) != k) ||
-        (i != denominatorFactorsWithMultiplicities.size() - 1)
+        ((this->denominatorFactorsAlgebraicWithMultiplicities.coefficients[i] - 1) != k) ||
+        (i != this->denominatorFactorsAlgebraicWithMultiplicities.size() - 1)
       ) {
         rationalFractionStream << "+";
       }
@@ -1916,29 +1923,28 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     this->printoutPFsHtml << "<br>Here is a detailed long polynomial division:<br> ";
     this->printoutPFsHtml << computation.divisionReport.getElement().getDivisionStringHtml();
   }
-  LinearCombination<Polynomial<Rational>, Rational> denominatorFactorsWithMultiplicities;
-  denominatorFactorsWithMultiplicities.makeZero();
+  this->denominatorFactorsRationalWithMultiplicities.makeZero();
   for (int i = 0; i < this->allFactors.size; i ++) {
-    denominatorFactorsWithMultiplicities.addMonomial(this->allFactors[i], 1);
+    this->denominatorFactorsRationalWithMultiplicities.addMonomial(this->allFactors[i], 1);
   }
-  denominatorFactorsWithMultiplicities.quickSortAscending();
+  this->denominatorFactorsRationalWithMultiplicities.quickSortAscending();
   Polynomial<Rational> currentSecondDegreePolynomial;
-  this->denominatorFactorsWithMultiplicities.makeZero();
+  this->denominatorFactorsAlgebraicWithMultiplicities.makeZero();
   Polynomial<AlgebraicNumber> currentLinPoly, currentSecondDegreePolyAlgebraic;
   this->additionalMultiple = 1;
-  for (int i = 0; i < denominatorFactorsWithMultiplicities.size(); i ++) {
-    currentSecondDegreePolynomial = denominatorFactorsWithMultiplicities[i];
+  for (int i = 0; i < this->denominatorFactorsRationalWithMultiplicities.size(); i ++) {
+    currentSecondDegreePolynomial = this->denominatorFactorsRationalWithMultiplicities[i];
     currentSecondDegreePolyAlgebraic = currentSecondDegreePolynomial;
     if (currentSecondDegreePolynomial.totalDegree() != 2) {
-      this->denominatorFactorsWithMultiplicities.addMonomial(
-        currentSecondDegreePolyAlgebraic, denominatorFactorsWithMultiplicities.coefficients[i]
+      this->denominatorFactorsAlgebraicWithMultiplicities.addMonomial(
+        currentSecondDegreePolyAlgebraic, this->denominatorFactorsRationalWithMultiplicities.coefficients[i]
       );
       continue;
     }
     Rational discriminant = currentSecondDegreePolynomial.getDiscriminant();
     if (discriminant < 0) {
-      this->denominatorFactorsWithMultiplicities.addMonomial(
-        currentSecondDegreePolyAlgebraic, denominatorFactorsWithMultiplicities.coefficients[i]
+      this->denominatorFactorsAlgebraicWithMultiplicities.addMonomial(
+        currentSecondDegreePolyAlgebraic, this->denominatorFactorsRationalWithMultiplicities.coefficients[i]
       );
       continue;
     }
@@ -1961,13 +1967,18 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     b.checkConsistency();
     currentLinPoly.makeMonomial(0, 1);
     currentLinPoly -= (- b + discriminantSqrt) / (a * 2);
-    this->denominatorFactorsWithMultiplicities.addMonomial(currentLinPoly, denominatorFactorsWithMultiplicities.coefficients[i]);
+    Rational currentCoefficient = this->denominatorFactorsRationalWithMultiplicities.coefficients[i];
+    this->denominatorFactorsAlgebraicWithMultiplicities.addMonomial(
+      currentLinPoly, currentCoefficient
+    );
     currentLinPoly.makeMonomial(0, 1);
     currentLinPoly -= (- b - discriminantSqrt) / (a * 2);
-    this->denominatorFactorsWithMultiplicities.addMonomial(currentLinPoly, denominatorFactorsWithMultiplicities.coefficients[i]);
+    this->denominatorFactorsAlgebraicWithMultiplicities.addMonomial(
+      currentLinPoly, currentCoefficient
+    );
     this->additionalMultiple *= a;
   }
-  this->denominatorFactorsWithMultiplicities.quickSortAscending();
+  this->denominatorFactorsAlgebraicWithMultiplicities.quickSortAscending();
   this->printoutPFsHtml << "<br><br>I need to find "
   << HtmlRoutines::getMathNoDisplay("A_i")
   << "'s so that I have the equality of rational functions: ";
@@ -2008,8 +2019,8 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
   for (int i = 1; i < substitution.size; i ++) {
     substitution[i].makeConstant(theConstTerms(i - 1, 0));
   }
-  for (int i = 0; i < denominatorFactorsWithMultiplicities.size(); i ++) {
-    for (int k = 0; k < denominatorFactorsWithMultiplicities.coefficients[i]; k ++) {
+  for (int i = 0; i < this->denominatorFactorsAlgebraicWithMultiplicities.size(); i ++) {
+    for (int k = 0; k < this->denominatorFactorsAlgebraicWithMultiplicities.coefficients[i]; k ++) {
       this->numerators[i][k].substitution(
         substitution,
         this->owner->objectContainer.algebraicClosure.one()

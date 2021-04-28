@@ -452,17 +452,17 @@ void Vectors<Coefficient>::selectBasisInSubspace(
     << " generators in dimension " << theDim << "... " ;
     reportTask.report(reportStream.str());
   }
-  Matrix<Coefficient> theMat;
+  Matrix<Coefficient> matrix;
   int MaxNumRows = MathRoutines::minimum(input.size, theDim);
-  theMat.initialize(MaxNumRows, theDim);
+  matrix.initialize(MaxNumRows, theDim);
   int currentRow = 0;
   for (int i = 0; i < input.size; i ++) {
     for (int j = 0; j < theDim; j ++) {
-      theMat(currentRow, j) = input[i][j];
+      matrix(currentRow, j) = input[i][j];
     }
     currentRow ++;
     if (currentRow == MaxNumRows || i == input.size - 1) {
-      theMat.gaussianEliminationByRows(0, 0, &outputSelectedPivotColumns);
+      matrix.gaussianEliminationByRows(0, 0, &outputSelectedPivotColumns);
       currentRow = outputSelectedPivotColumns.cardinalitySelection;
     }
     if (currentRow == MaxNumRows) {
@@ -471,7 +471,7 @@ void Vectors<Coefficient>::selectBasisInSubspace(
   }
   output.setSize(outputSelectedPivotColumns.cardinalitySelection);
   for (int i = 0; i < output.size; i ++) {
-    theMat.getVectorFromRow(i, output[i]);
+    matrix.getVectorFromRow(i, output[i]);
   }
   if (reportProgress.tickAndWantReport()) {
     std::stringstream reportStream;
@@ -482,18 +482,20 @@ void Vectors<Coefficient>::selectBasisInSubspace(
 }
 
 template <typename Coefficient>
-void Matrix<Coefficient>::addTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const Coefficient& scalar) {
-  ProgressReport theReport (10, GlobalVariables::Response::ReportType::gaussianElimination);
-  Coefficient tempElement;
-  for (int i = StartColIndex; i < this->numberOfColumns; i ++) {
-    tempElement = this->elements[fromRowIndex][i];
-    tempElement *= scalar;
+void Matrix<Coefficient>::addTwoRows(
+  int fromRowIndex, int toRowIndex, int startColumnIndex, const Coefficient& scalar
+) {
+  ProgressReport theReport(10, GlobalVariables::Response::ReportType::gaussianElimination);
+  Coefficient coefficient;
+  for (int i = startColumnIndex; i < this->numberOfColumns; i ++) {
+    coefficient = this->elements[fromRowIndex][i];
+    coefficient *= scalar;
     if (theReport.tickAndWantReport()) {
       std::stringstream out;
       out << "Processing row, element " << i + 1 << " out of " << this->numberOfColumns;
       theReport.report(out.str());
     }
-    this->elements[ToRowIndex][i] += tempElement;
+    this->elements[toRowIndex][i] += coefficient;
   }
 }
 

@@ -567,10 +567,10 @@ public:
       return;
     }
     if (standsOnTheRight.numberOfRows < this->numberOfRows) {
-      Coefficient theZero;
-      theZero = 0;
+      Coefficient zero;
+      zero = 0;
       Matrix<Coefficient> standsOnTheRightNew = standsOnTheRight;
-      standsOnTheRightNew.resize(this->numberOfRows, standsOnTheRight.numberOfColumns, true, &theZero);
+      standsOnTheRightNew.resize(this->numberOfRows, standsOnTheRight.numberOfColumns, true, &zero);
       this->appendMatrixOnTheRight(standsOnTheRightNew);
       return;
     }
@@ -579,11 +579,11 @@ public:
       zero = 0;
       this->resize(standsOnTheRight.numberOfRows, this->numberOfColumns, true, &zero);
     }
-    int oldNumCols = this->numberOfColumns;
-    this->resize(this->numberOfRows, standsOnTheRight.numberOfColumns + oldNumCols, true);
+    int oldNumberOfColumns = this->numberOfColumns;
+    this->resize(this->numberOfRows, standsOnTheRight.numberOfColumns + oldNumberOfColumns, true);
     for (int i = 0; i < this->numberOfRows; i ++) {
-      for (int j = oldNumCols; j < this->numberOfColumns; j ++) {
-        this->elements[i][j] = standsOnTheRight.elements[i][j - oldNumCols];
+      for (int j = oldNumberOfColumns; j < this->numberOfColumns; j ++) {
+        this->elements[i][j] = standsOnTheRight.elements[i][j - oldNumberOfColumns];
       }
     }
   }
@@ -911,13 +911,13 @@ public:
     this->transpose();
   }
   void rowTimesScalar(int rowIndex, const Coefficient& scalar);
-  void rowTimesScalarWithCarbonCopy(int rowIndex, const Coefficient& scalar, Matrix<Coefficient>* theCarbonCopy) {
+  void rowTimesScalarWithCarbonCopy(int rowIndex, const Coefficient& scalar, Matrix<Coefficient>* carbonCopy) {
     this->rowTimesScalar(rowIndex, scalar);
-    if (theCarbonCopy != 0) {
-      theCarbonCopy->rowTimesScalar(rowIndex, scalar);
+    if (carbonCopy != 0) {
+      carbonCopy->rowTimesScalar(rowIndex, scalar);
     }
   }
-  void addTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const Coefficient& scalar);
+  void addTwoRows(int fromRowIndex, int toRowIndex, int startColumnIndex, const Coefficient& scalar);
   void addTwoRowsWithCarbonCopy(
     int fromRowIndex,
     int toRowIndex,
@@ -4967,7 +4967,7 @@ public:
     Vectors<Rational>& movementInDirectionPerRepresentative,
     Lattice& outputRougherLattice
   );
-  void applyLinearMap(Matrix<Rational>& theMap, Lattice& output);
+  void applyLinearMap(Matrix<Rational>& linearMap, Lattice& output);
   void intersectWithBothOfMaximalRank(const Lattice& other);
   void getDualLattice(Lattice& output) const;
   bool isInLattice(const Vector<Rational>& theVector) const {
@@ -5365,7 +5365,7 @@ public:
     }
     return this->normals[0].size;
   }
-  void sliceInDirection(Vector<Rational>& theDirection, ConeComplex& output);
+  void sliceInDirection(Vector<Rational>& direction, ConeComplex& output);
   bool createFromNormals(
     Vectors<Rational>& inputNormals,
     bool useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices

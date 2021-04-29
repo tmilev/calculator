@@ -144,7 +144,7 @@ private:
   static Expression zeroStatic();
   bool addChildRationalOnTop(const Rational& inputRat);
   bool addChildOnTop(const Expression& inputChild);
-  bool addChildAtomOnTop(const std::string& theOperationString);
+  bool addChildAtomOnTop(const std::string& operationString);
   bool addChildAtomOnTop(int theOp);
   void getBlocksOfCommutativity(HashedListSpecialized<Expression>& inputOutputList) const;
   bool splitProduct(int numDesiredMultiplicandsLeft, Expression& outputLeftMultiplicand, Expression& outputRightMultiplicand) const;
@@ -187,7 +187,7 @@ private:
   bool startsWithArithmeticOperation() const;
   bool startsWith(int operation = - 1, int numberOfChildren = - 1) const;
 
-  bool startsWithGivenOperation(const std::string& theOperation, int desiredChildren = - 1) const;
+  bool startsWithGivenOperation(const std::string& operation, int desiredChildren = - 1) const;
   bool isListStartingWithAtom(int operation = - 1) const;
   bool isListOfTwoAtomsStartingWith(int theOp) const;
   bool isFrozen() const;
@@ -1471,8 +1471,8 @@ public:
     const DynkinType& dynkinType,
     FormatExpressions* format = nullptr
   );
-  bool isBoundVariableInContext(int inputOp);
-  bool isNonBoundVariableInContext(int inputOp);
+  bool isBoundVariableInContext(int inputOperation);
+  bool isNonBoundVariableInContext(int inputOperation);
   Function& getFunctionHandlerFromNamedRule(const std::string& inputRuleName);
   bool checkPredefinedFunctionNameRepetitions();
   bool checkOperationHandlers();
@@ -1484,8 +1484,8 @@ public:
   const HashedList<std::string, MathRoutines::hashString>& getBuiltInTypes() {
     return this->builtInTypes;
   }
-  const List<Function>* getOperationHandlers(int theOp);
-  const List<Function>* getOperationCompositeHandlers(int theOp);
+  const List<Function>* getOperationHandlers(int operation);
+  const List<Function>* getOperationCompositeHandlers(int operation);
   SyntacticElement getSyntacticElementEnd() {
     SyntacticElement result;
     result.controlIndex = this->controlSequences.getIndex(";");
@@ -1564,20 +1564,20 @@ public:
     (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size - 1);
     return true;
   }
-  bool replaceEXXEXEBy_CofEEE(int theOp);
-  bool replaceEXXEXEXBy_CofEEE_X(int theOp);
+  bool replaceEXXEXEBy_CofEEE(int controlIndex);
+  bool replaceEXXEXEXBy_CofEEE_X(int controlIndex);
   bool replaceEOXbyEX();
-  bool replaceEEBy_CofEE(int theControlIndex);
-  bool replaceEEXBy_CofEE_X(int theControlIndex);
+  bool replaceEEBy_CofEE(int controlIndex);
+  bool replaceEEXBy_CofEE_X(int controlIndex);
   bool replaceOOEEXbyEXpowerLike();
   bool replaceEEByE();
   bool replaceEXEXByEX();
-  bool replaceEXEXBy_OofEE_X(int theOp);
-  bool replaceSsSsXdotsXbySsXdotsX(int numDots);
-  bool replaceEXdotsXbySsXdotsX(int numDots);
-  bool replaceEXdotsXBySs(int numDots) {
-    this->replaceEXdotsXbySsXdotsX(numDots);
-    return this->decreaseStackSetCharacterRanges(numDots);
+  bool replaceEXEXBy_OofEE_X(int operation);
+  bool replaceSsSsXdotsXbySsXdotsX(int numberOfDots);
+  bool replaceEXdotsXbySsXdotsX(int numberOfDots);
+  bool replaceEXdotsXBySs(int numberOfDots) {
+    this->replaceEXdotsXbySsXdotsX(numberOfDots);
+    return this->decreaseStackSetCharacterRanges(numberOfDots);
   }
   bool replaceOEXByE();
   bool replaceOEXByEX();
@@ -1603,15 +1603,15 @@ public:
   bool replaceXEEXBy_OofEE_X(int inputOperation);
   bool replaceXEEBy_OofEE(int inputOperation);
   bool replaceECByC();
-  bool replaceEXEBySequence(int theControlIndex);
-  bool replaceYXBySequenceX(int theControlIndex);
+  bool replaceEXEBySequence(int controlIndex);
+  bool replaceYXBySequenceX(int controlIndex);
   bool replaceXXXbyE();
-  bool replaceYBySequenceY(int theControlIndex);
-  bool replaceXXYBySequenceY(int theControlIndex);
-  bool replaceXXYXBySequenceYX(int theControlIndex);
-  bool replaceYXdotsXBySequenceYXdotsX(int theControlIndex, int numXs = 0);
-  bool replaceSequenceXEBySequence    (int theControlIndex);
-  bool replaceSequenceUXEYBySequenceZY(int theControlIndex);
+  bool replaceYBySequenceY(int controlIndex);
+  bool replaceXXYBySequenceY(int controlIndex);
+  bool replaceXXYXBySequenceYX(int controlIndex);
+  bool replaceYXdotsXBySequenceYXdotsX(int controlIndex, int numberOfXs = 0);
+  bool replaceSequenceXEBySequence    (int controlIndex);
+  bool replaceSequenceUXEYBySequenceZY(int controlIndex);
   bool replaceCEByC();
   bool replaceCCByC();
   bool replaceEOEByE() {
@@ -1623,34 +1623,34 @@ public:
   bool replaceMatrixXByE();
   bool replaceCXByE();
   bool replaceCXByEX();
-  bool replaceXEXEXBy_CofEE(int theOperation);
-  bool replaceEXEByCofEE  (int theOperation);
-  bool replaceXYByConY(int theCon) {
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2].controlIndex = theCon;
+  bool replaceXEXEXBy_CofEE(int operation);
+  bool replaceEXEByCofEE  (int operation);
+  bool replaceXYByConY(int controlIndex) {
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2].controlIndex = controlIndex;
     return true;
   }
-  bool replaceXYYByConYY(int theCon) {
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3].controlIndex = theCon;
+  bool replaceXYYByConYY(int controlIndex) {
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3].controlIndex = controlIndex;
     return true;
   }
-  bool replaceXYYYByConYYY(int theCon) {
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4].controlIndex = theCon;
+  bool replaceXYYYByConYYY(int controlIndex) {
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4].controlIndex = controlIndex;
     return true;
   }
-  bool replaceXXByCon(int theCon) {
-    this->replaceXYByConY(theCon);
+  bool replaceXXByCon(int controlIndex) {
+    this->replaceXYByConY(controlIndex);
     return this->decreaseStackSetCharacterRanges(1);
   }
-  bool replaceXByCon(int theCon);
-  bool replaceXByO(int theOperation);
-  bool replaceXByConCon(int con1, int con2);
-  bool replaceXXXByCon(int theCon);
-  bool replaceXXXByConCon(int con1, int con2);
-  bool replaceXXXXXByCon(int theCon);
-  bool replaceXXXXXByConCon(int con1, int con2);
-  bool replaceXXXXByConCon (int con1, int con2);
-  bool replaceXdotsXByMatrixStart(int numXes);
-  bool replaceXXXXByCon(int con1);
+  bool replaceXByCon(int controlIndex);
+  bool replaceXByO(int operation);
+  bool replaceXByConCon(int controlIndex1, int controlIndex2);
+  bool replaceXXXByCon(int controlIndex);
+  bool replaceXXXByConCon(int controlIndex1, int controlIndex2);
+  bool replaceXXXXXByCon(int controlIndex);
+  bool replaceXXXXXByConCon(int controlIndex1, int controlIndex2);
+  bool replaceXXXXByConCon (int controlIndex1, int controlIndex2);
+  bool replaceXdotsXByMatrixStart(int numberOfXs);
+  bool replaceXXXXByCon(int controlIndex1);
   bool replaceXXYByY() {
     (*this->currentSyntacticStack)[this->currentSyntacticStack->size - 3] =
     (*this->currentSyntacticStack)[this->currentSyntacticStack->size - 1];
@@ -1692,12 +1692,12 @@ public:
   bool replaceIntegerXbyEX();
   bool replaceIntegerDotIntegerByE();
   bool replaceXXByEEmptySequence();
-  bool replaceOXdotsXbyEXdotsX(int numXs);
+  bool replaceOXdotsXbyEXdotsX(int numberOfXs);
   bool replaceOXbyEX();
   bool replaceObyE();
   bool replaceXXbyEX();
-  bool replaceXXbyO(int theOperation);
-  bool replaceXXYbyOY(int theOperation);
+  bool replaceXXbyO(int operation);
+  bool replaceXXYbyOY(int operation);
   bool replaceXEXByEContainingOE(int inputOpIndex);
   bool replaceXXByEmptyString();
   bool replaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
@@ -1715,8 +1715,8 @@ public:
     int desiredNumCols = - 1
   );
   void makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);
-  bool replaceXXVXdotsXbyE_BOUND_XdotsX(int numXs);
-  bool replaceVXdotsXbyE_NONBOUND_XdotsX(int numXs);
+  bool replaceXXVXdotsXbyE_BOUND_XdotsX(int numberOfXs);
+  bool replaceVXdotsXbyE_NONBOUND_XdotsX(int numberOfXs);
   int getOperationIndexFromControlIndex(int controlIndex);
   int getExpressionIndex();
   SyntacticElement getEmptySyntacticElement();
@@ -2180,24 +2180,24 @@ public:
     return this->operations.getIndexNoFail("ProblemGiveUp");
   }
   bool appendOpandsReturnTrueIfOrderNonCanonical(const Expression& input, List<Expression>& output, int operation);
-  bool appendMultiplicandsReturnTrueIfOrderNonCanonical(Expression& theExpression, List<Expression>& output) {
-    return this->appendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opTimes());
+  bool appendMultiplicandsReturnTrueIfOrderNonCanonical(Expression& expression, List<Expression>& output) {
+    return this->appendOpandsReturnTrueIfOrderNonCanonical(expression, output, this->opTimes());
   }
-  bool appendSummandsReturnTrueIfOrderNonCanonical(const Expression& theExpression, List<Expression>& output) {
-    return this->appendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opPlus());
+  bool appendSummandsReturnTrueIfOrderNonCanonical(const Expression& expression, List<Expression>& output) {
+    return this->appendOpandsReturnTrueIfOrderNonCanonical(expression, output, this->opPlus());
   }
   void specializeBoundVariables(Expression& toBeSubbedIn, MapList<Expression, Expression>& matchedPairs);
   Expression* patternMatch(
-    const Expression& thePattern,
+    const Expression& pattern,
     Expression& theExpression,
     MapList<Expression, Expression>& bufferPairs,
     const Expression* condition = nullptr,
-    std::stringstream* theLog = nullptr
+    std::stringstream* logStream = nullptr
   );
   bool processOneExpressionOnePatternOneSub(
-    const Expression& thePattern,
-    Expression& theExpression,
-    MapList<Expression, Expression>& bufferPairs, std::stringstream* theLog = nullptr
+    const Expression& pattern,
+    Expression& expression,
+    MapList<Expression, Expression>& bufferPairs, std::stringstream* logStream = nullptr
   );
   static void checkInputNotSameAsOutput(const Expression& input, const Expression& output) {
     if (&input == &output) {
@@ -2327,10 +2327,10 @@ public:
     const Expression& input,
     LinearCombination<Expression, Rational>& outputSum
   );
-  template<class theType>
+  template<class Type>
   bool functionGetMatrix(
     const Expression& input,
-    Matrix<theType>& outputMatrix,
+    Matrix<Type>& outputMatrix,
     ExpressionContext* inputOutputStartingContext = nullptr,
     int targetNumColsNonMandatory = - 1,
     Expression::FunctionAddress conversionFunction = nullptr,
@@ -2947,10 +2947,10 @@ bool Expression::isOfTypeWithContext(WithContext<theType>* whichElement) const {
   return true;
 }
 
-template <class theType>
+template <class Type>
 bool Calculator::functionGetMatrix(
   const Expression& input,
-  Matrix<theType>& outputMatrix,
+  Matrix<Type>& outputMatrix,
   ExpressionContext* inputOutputStartingContext,
   int targetNumColsNonMandatory,
   Expression::FunctionAddress conversionFunction,
@@ -2974,10 +2974,10 @@ bool Calculator::functionGetMatrix(
   }
   for (int i = 0; i < nonConvertedEs.numberOfRows; i ++) {
     for (int j = 0; j < nonConvertedEs.numberOfColumns; j ++) {
-      if (!CalculatorConversions::convertToTypeUsingFunction<theType>(
+      if (!CalculatorConversions::convertToTypeUsingFunction<Type>(
         conversionFunction, nonConvertedEs(i, j), convertedEs(i, j)
       )) {
-        if (!nonConvertedEs(i, j).convertInternally<theType>(convertedEs.elements[i][j])) {
+        if (!nonConvertedEs(i, j).convertInternally<Type>(convertedEs.elements[i][j])) {
           if (commentsOnError != nullptr) {
             *commentsOnError << "Failed to convert matrix element: "
             << "row: " << i << ", column: "
@@ -3008,7 +3008,7 @@ bool Calculator::functionGetMatrix(
   outputMatrix.initialize(convertedEs.numberOfRows, convertedEs.numberOfColumns);
   for (int i = 0; i < convertedEs.numberOfRows; i ++) {
     for (int j = 0; j < convertedEs.numberOfColumns; j ++) {
-      outputMatrix(i, j) = convertedEs(i, j).getValue<theType>();
+      outputMatrix(i, j) = convertedEs(i, j).getValue<Type>();
     }
   }
   if (inputOutputStartingContext != nullptr) {

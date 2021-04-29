@@ -9139,10 +9139,10 @@ bool Lattice::getAllRepresentatives(const Lattice& rougherLattice, Vectors<Ratio
     }
     currentPeriod = rougherLattice.basisRationalForm.elements[i][col] / this->basisRationalForm.elements[i][col];
     currentPeriodInt = currentPeriod.getNumerator();
-    if (currentPeriodInt.value.theDigits.size > 1) {
+    if (currentPeriodInt.value.digits.size > 1) {
       return false;
     } else {
-      thePeriods[i] = currentPeriodInt.value.theDigits[0];
+      thePeriods[i] = currentPeriodInt.value.digits[0];
     }
     this->basisRationalForm.getVectorFromRow(i, thePeriodVectors[i]);
     rougherLattice.basisRationalForm.getVectorFromRow(i, tempRoot2);

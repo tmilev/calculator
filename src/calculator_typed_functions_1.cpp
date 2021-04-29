@@ -1316,7 +1316,7 @@ bool CalculatorFunctionsBinaryOps::innerRadicalAlgebraicNumberPositiveDefault(
     << maximumRadicalAllowed << ". ";
     return false;
   }
-  if (powerIntegral > LargeIntegerUnsigned::SquareRootOfCarryOverBound) {
+  if (powerIntegral > LargeIntegerUnsigned::squareRootOfCarryOverBound) {
     // power too large
     return false;
   }

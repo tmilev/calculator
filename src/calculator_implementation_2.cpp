@@ -260,32 +260,32 @@ void Calculator::logFunctionWithTime(Function& input, int64_t startTime) {
   *this << "Rule stack size: " << this->ruleStack.size();
 }
 
-const List<Function>* Calculator::getOperationCompositeHandlers(int theOp) {
-  if (theOp < 0 || theOp >= this->operations.size()) {
+const List<Function>* Calculator::getOperationCompositeHandlers(int operation) {
+  if (operation < 0 || operation >= this->operations.size()) {
     // Instead of crashing, we may instead return nullptr.
     // TODO(tmilev): document why we are so harsh
     // in the crash message.
     // [note: I no longer remember the orginal rationale, if any].
-    global.fatal << "Corrupt atom index: " << theOp << global.fatal;
+    global.fatal << "Corrupt atom index: " << operation << global.fatal;
   }
-  if (this->operations.values[theOp].isZeroPointer()) {
+  if (this->operations.values[operation].isZeroPointer()) {
     return nullptr;
   }
-  return &this->operations.values[theOp].getElementConst().compositeHandlers;
+  return &this->operations.values[operation].getElementConst().compositeHandlers;
 }
 
-const List<Function>* Calculator::getOperationHandlers(int theOp) {
-  if (theOp < 0 || theOp >= this->operations.size()) {
+const List<Function>* Calculator::getOperationHandlers(int operation) {
+  if (operation < 0 || operation >= this->operations.size()) {
     // Instead of crashing, we may instead return nullptr.
     // TODO(tmilev): document why we are so harsh
     // in the crash message.
     // [note: I no longer remember the original rationale, if any].
-    global.fatal << "Corrupt atom index: " << theOp << global.fatal;
+    global.fatal << "Corrupt atom index: " << operation << global.fatal;
   }
-  if (this->operations.values[theOp].isZeroPointer()) {
+  if (this->operations.values[operation].isZeroPointer()) {
     return nullptr;
   }
-  return &this->operations.values[theOp].getElementConst().handlers;
+  return &this->operations.values[operation].getElementConst().handlers;
 }
 
 bool Calculator::outerStandardCompositeHandler(
@@ -1129,11 +1129,11 @@ void Calculator::reduce(Calculator::EvaluateLoop& state) {
 }
 
 Expression* Calculator::patternMatch(
-  const Expression& thePattern,
+  const Expression& pattern,
   Expression& theExpression,
   MapList<Expression, Expression>& bufferPairs,
   const Expression* condition,
-  std::stringstream* theLog
+  std::stringstream* logStream
 ) {
   MacroRegisterFunctionWithName("Calculator::patternMatch");
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
@@ -1145,34 +1145,34 @@ Expression* Calculator::patternMatch(
     theExpression.makeError(out.str(), *this);
     return nullptr;
   }
-  thePattern.checkInitialization();
+  pattern.checkInitialization();
   theExpression.checkInitialization();
   if (!this->expressionMatchesPattern(
-    thePattern, theExpression, bufferPairs, theLog
+    pattern, theExpression, bufferPairs, logStream
   )) {
     return nullptr;
   }
-  if (theLog != nullptr) {
-    (*theLog) << "<hr>found pattern: " << theExpression.toString() << " -> "
-    << thePattern.toString() << " with " << bufferPairs.toStringHtml();
+  if (logStream != nullptr) {
+    (*logStream) << "<hr>found pattern: " << theExpression.toString() << " -> "
+    << pattern.toString() << " with " << bufferPairs.toStringHtml();
   }
   if (condition == nullptr) {
     return &theExpression;
   }
   Expression tempExp = *condition;
   tempExp.checkInitialization();
-  if (theLog != nullptr) {
-    (*theLog) << "<hr>Specializing condition pattern: " << tempExp.toString();
+  if (logStream != nullptr) {
+    (*logStream) << "<hr>Specializing condition pattern: " << tempExp.toString();
   }
   this->specializeBoundVariables(tempExp, bufferPairs);
   tempExp.checkInitialization();
-  if (theLog != nullptr) {
-    (*theLog) << "<hr>Specialized condition: " << tempExp.toString() << "; evaluating...";
+  if (logStream != nullptr) {
+    (*logStream) << "<hr>Specialized condition: " << tempExp.toString() << "; evaluating...";
   }
   Expression conditionResult;
   this->evaluateExpression(*this, tempExp, conditionResult);
-  if (theLog != nullptr) {
-    (*theLog) << "<hr>The evaluated specialized condition: " << conditionResult.toString()
+  if (logStream != nullptr) {
+    (*logStream) << "<hr>The evaluated specialized condition: " << conditionResult.toString()
     << "; evaluating...";
   }
   if (conditionResult.isEqualToOne()) {
@@ -1201,43 +1201,43 @@ void Calculator::specializeBoundVariables(Expression& toBeSubbedIn, MapList<Expr
 }
 
 bool Calculator::processOneExpressionOnePatternOneSub(
-  const Expression& thePattern,
-  Expression& theExpression,
+  const Expression& pattern,
+  Expression& expression,
   MapList<Expression, Expression>& bufferPairs,
-  std::stringstream* theLog
+  std::stringstream* logStream
 ) {
   MacroRegisterFunctionWithName("Calculator::processOneExpressionOnePatternOneSub");
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
   if (
-    !thePattern.startsWith(this->opDefine(), 3) &&
-    !thePattern.startsWith(this->opDefineConditional(), 4)
+    !pattern.startsWith(this->opDefine(), 3) &&
+    !pattern.startsWith(this->opDefineConditional(), 4)
   ) {
     return false;
   }
-  if (theLog != nullptr) {
-    (*theLog) << "<hr>attempting to reduce expression " << theExpression.toString();
-    (*theLog) << " by pattern " << thePattern.toString();
+  if (logStream != nullptr) {
+    (*logStream) << "<hr>attempting to reduce expression " << expression.toString();
+    (*logStream) << " by pattern " << pattern.toString();
   }
-  theExpression.checkInitialization();
-  const Expression& currentPattern = thePattern[1];
-  const Expression* theCondition = nullptr;
-  bool isConditionalDefine = thePattern.startsWith(this->opDefineConditional(), 4);
+  expression.checkInitialization();
+  const Expression& currentPattern = pattern[1];
+  const Expression* condition = nullptr;
+  bool isConditionalDefine = pattern.startsWith(this->opDefineConditional(), 4);
   if (isConditionalDefine) {
-    theCondition = &thePattern[2];
+    condition = &pattern[2];
   }
   Expression* toBeSubbed = this->patternMatch(
-    currentPattern, theExpression, bufferPairs, theCondition, theLog
+    currentPattern, expression, bufferPairs, condition, logStream
   );
   if (toBeSubbed == nullptr) {
     return false;
   }
-  if (theLog != nullptr) {
-    *theLog << "<br><b>found a match!</b>";
+  if (logStream != nullptr) {
+    *logStream << "<br><b>found a match!</b>";
   }
   if (isConditionalDefine) {
-    *toBeSubbed = thePattern[3];
+    *toBeSubbed = pattern[3];
   } else {
-    *toBeSubbed = thePattern[2];
+    *toBeSubbed = pattern[2];
   }
   this->specializeBoundVariables(*toBeSubbed, bufferPairs);
   return true;

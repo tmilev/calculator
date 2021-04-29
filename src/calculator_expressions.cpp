@@ -1504,14 +1504,14 @@ bool Expression::startsWithFunctionWithComplexRange() const {
   return (*this)[0].isKnownFunctionWithComplexRange();
 }
 
-bool Expression::startsWithGivenOperation(const std::string& theOperation, int desiredChildren) const {
+bool Expression::startsWithGivenOperation(const std::string& operation, int desiredChildren) const {
   if (this->owner == nullptr) {
     return false;
   }
   if (this->size() == 0) {
     return false;
   }
-  int theOpIndex = this->owner->operations.getIndex(theOperation);
+  int theOpIndex = this->owner->operations.getIndex(operation);
   if (theOpIndex == - 1) {
     return false;
   }

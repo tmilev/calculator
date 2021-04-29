@@ -65,14 +65,14 @@ LargeIntegerUnsigned LargeIntegerUnsigned::operator/(unsigned int x) const {
   LargeIntegerUnsigned remainder;
   LargeIntegerUnsigned tempX;
   tempX.assignShiftedUInt(x, 0);
-  this->divPositive(tempX, result, remainder);
+  this->dividePositive(tempX, result, remainder);
   return result;
 }
 
 LargeIntegerUnsigned LargeIntegerUnsigned::operator/(const LargeIntegerUnsigned& x) const {
   LargeIntegerUnsigned result;
   LargeIntegerUnsigned remainder;
-  this->divPositive(x, result, remainder);
+  this->dividePositive(x, result, remainder);
   return result;
 }
 
@@ -81,7 +81,7 @@ int LargeIntegerUnsigned::operator%(unsigned int x) {
   LargeIntegerUnsigned remainder;
   LargeIntegerUnsigned divisor;
   divisor.assignShiftedUInt(x, 0);
-  this->divPositive(divisor, quotient, remainder);
+  this->dividePositive(divisor, quotient, remainder);
   int result = 0;
   remainder.isIntegerFittingInInt(&result);
   return result;
@@ -161,25 +161,25 @@ void LargeIntegerUnsigned::writeBigEndianBytes(
 }
 
 void LargeIntegerUnsigned::makeOne() {
-  this->theDigits.setSize(1);
-  this->theDigits[0] = 1;
+  this->digits.setSize(1);
+  this->digits[0] = 1;
 }
 
 void LargeIntegerUnsigned::makeZero() {
-  this->theDigits.setSize(1);
-  this->theDigits[0] = 0;
+  this->digits.setSize(1);
+  this->digits[0] = 0;
 }
 
 void LargeIntegerUnsigned::multiplyByUInt(unsigned int x) {
-  LargeIntegerUnsigned tempLI;
-  tempLI.assignShiftedUInt(x, 0);
-  this->multiplyBy(tempLI);
+  LargeIntegerUnsigned otherCopy;
+  otherCopy.assignShiftedUInt(x, 0);
+  this->multiplyBy(otherCopy);
 }
 
 void LargeIntegerUnsigned::multiplyBy(const LargeIntegerUnsigned& x) {
-  LargeIntegerUnsigned tempInt;
-  this->multiplyBy(x, tempInt);
-  *this = tempInt;
+  LargeIntegerUnsigned result;
+  this->multiplyBy(x, result);
+  *this = result;
 }
 
 void LargeIntegerUnsigned::addUInt(unsigned int x) {
@@ -220,25 +220,25 @@ bool LargeIntegerUnsigned::isIntegerFittingInInt(int* whichInt) const {
     return true;
   }
   *whichInt = 0;
-  for (int i = this->theDigits.size - 1; i >= 0; i --) {
-    *whichInt *= LargeIntegerUnsigned::CarryOverBound;
-    *whichInt += this->theDigits[i];
+  for (int i = this->digits.size - 1; i >= 0; i --) {
+    *whichInt *= LargeIntegerUnsigned::carryOverBound;
+    *whichInt += this->digits[i];
   }
   return true;
 }
 
 bool LargeIntegerUnsigned::isGreaterThanOrEqualTo(const LargeIntegerUnsigned& x) const {
-  if (this->theDigits.size > x.theDigits.size) {
+  if (this->digits.size > x.digits.size) {
     return true;
   }
-  if (this->theDigits.size < x.theDigits.size) {
+  if (this->digits.size < x.digits.size) {
     return false;
   }
-  for (int i = this->theDigits.size - 1; i >= 0; i --) {
-    if (x.theDigits[i] > this->theDigits[i]) {
+  for (int i = this->digits.size - 1; i >= 0; i --) {
+    if (x.digits[i] > this->digits[i]) {
       return false;
     }
-    if (x.theDigits[i] < this->theDigits[i]) {
+    if (x.digits[i] < this->digits[i]) {
       return true;
     }
   }
@@ -246,31 +246,31 @@ bool LargeIntegerUnsigned::isGreaterThanOrEqualTo(const LargeIntegerUnsigned& x)
 }
 
 bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabinOnce(
-  unsigned int theBase,
-  int theExponentOfThePowerTwoFactorOfNminusOne,
-  const LargeIntegerUnsigned& theOddFactorOfNminusOne,
+  unsigned int base,
+  int exponentOfThePowerTwoFactorOfNminusOne,
+  const LargeIntegerUnsigned& oddFactorOfNminusOne,
   std::stringstream* comments
 ) {
   MacroRegisterFunctionWithName("LargeIntUnsigned::isPossiblyPrimeMillerRabinOnce");
-  if (*this == theBase) {
+  if (*this == base) {
     return true;
   }
   if (this->isEqualToOne()) {
     return false;
   }
-  ElementZmodP thePower, one;
-  thePower.modulus = *this;
-  thePower = LargeIntegerUnsigned(theBase);
+  ElementZmodP power, one;
+  power.modulus = *this;
+  power = LargeIntegerUnsigned(base);
   one.makeOne(*this);
-  MathRoutines::raiseToPower(thePower, theOddFactorOfNminusOne, one);
-  if (thePower == 1) {
+  MathRoutines::raiseToPower(power, oddFactorOfNminusOne, one);
+  if (power == 1) {
     return true;
   }
-  for (int i = 0; i < theExponentOfThePowerTwoFactorOfNminusOne; i ++) {
-    if (thePower == - 1) {
+  for (int i = 0; i < exponentOfThePowerTwoFactorOfNminusOne; i ++) {
+    if (power == - 1) {
       return true;
     }
-    if (i == theExponentOfThePowerTwoFactorOfNminusOne - 1) {
+    if (i == exponentOfThePowerTwoFactorOfNminusOne - 1) {
       if (comments != nullptr) {
         std::stringstream theTwoPowerContraStream, theTwoPowerStream;
         if (i > 0) {
@@ -280,21 +280,21 @@ bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabinOnce(
           }
         }
         theTwoPowerStream << "2";
-        if (theExponentOfThePowerTwoFactorOfNminusOne > 1) {
-          theTwoPowerStream << "^{" << theExponentOfThePowerTwoFactorOfNminusOne << "}";
+        if (exponentOfThePowerTwoFactorOfNminusOne > 1) {
+          theTwoPowerStream << "^{" << exponentOfThePowerTwoFactorOfNminusOne << "}";
         }
-        *comments << this->toString() << " is not prime because \\(" << theBase << "^{"
+        *comments << this->toString() << " is not prime because \\(" << base << "^{"
         << theTwoPowerContraStream.str()
-        << theOddFactorOfNminusOne.toString() << "} = " << thePower.value.toString() << " ~ mod ~"
+        << oddFactorOfNminusOne.toString() << "} = " << power.value.toString() << " ~ mod ~"
         << this->toString() << " \\)"
         << "<br>If " << this->toString() << " were prime, we'd have to have that \\("
-        << theBase << "^{" << theTwoPowerStream.str() << "\\cdot" << theOddFactorOfNminusOne
-        << "} = " << theBase << "^{" << this->toString() << " - 1} = 1 ~mod ~" << this->toString() << "\\)"
+        << base << "^{" << theTwoPowerStream.str() << "\\cdot" << oddFactorOfNminusOne
+        << "} = " << base << "^{" << this->toString() << " - 1} = 1 ~mod ~" << this->toString() << "\\)"
         << "<br> which can be reasoned to contradict the first equality.";
       }
       return false;
     }
-    thePower *= thePower;
+    power *= power;
   }
   if (comments != nullptr) {
     *comments << "It appears your number is even. ";
@@ -336,8 +336,10 @@ bool LargeIntegerUnsigned::tryIsPower(
   return true;
 }
 
-bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabin(int numberOfTries, std::stringstream* comments) {
-  return this->isPossiblyPrime(numberOfTries, false, comments);
+bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabin(
+  int numberOfTimesToRun, std::stringstream* comments
+) {
+  return this->isPossiblyPrime(numberOfTimesToRun, false, comments);
 }
 
 bool LargeIntegerUnsigned::isCompositePrimeDivision(
@@ -416,12 +418,12 @@ bool LargeIntegerUnsigned::isPossiblyPrime(
   if (millerRabinTries > aFewPrimes.size) {
     millerRabinTries = aFewPrimes.size;
   }
-  LargeIntegerUnsigned theOddFactorOfNminusOne = *this;
-  int theExponentOfThePowerTwoFactorOfNminusOne = 0;
-  theOddFactorOfNminusOne --;
-  while (theOddFactorOfNminusOne.isEven()) {
-    theOddFactorOfNminusOne /= 2;
-    theExponentOfThePowerTwoFactorOfNminusOne ++;
+  LargeIntegerUnsigned oddFactorOfNminusOne = *this;
+  int exponentOfThePowerTwoFactorOfNminusOne = 0;
+  oddFactorOfNminusOne --;
+  while (oddFactorOfNminusOne.isEven()) {
+    oddFactorOfNminusOne /= 2;
+    exponentOfThePowerTwoFactorOfNminusOne ++;
   }
   ProgressReport theReport;
   for (int i = 0; i < millerRabinTries; i ++) {
@@ -434,8 +436,8 @@ bool LargeIntegerUnsigned::isPossiblyPrime(
     }
     if (!this->isPossiblyPrimeMillerRabinOnce(
       aFewPrimes[i],
-      theExponentOfThePowerTwoFactorOfNminusOne,
-      theOddFactorOfNminusOne,
+      exponentOfThePowerTwoFactorOfNminusOne,
+      oddFactorOfNminusOne,
       comments
     )) {
       return false;
@@ -447,34 +449,34 @@ bool LargeIntegerUnsigned::isPossiblyPrime(
 void LargeIntegerUnsigned::getPrimesEratosthenesSieve(
   unsigned int primesUpToInclusive, List<unsigned int>& output
 ) {
-  List<int> theSieve;
-  theSieve.initializeFillInObject(static_cast<signed>(primesUpToInclusive) + 1, 1);
+  List<int> sieve;
+  sieve.initializeFillInObject(static_cast<signed>(primesUpToInclusive) + 1, 1);
   output.reserve(primesUpToInclusive / 2);
   output.size = 0;
   for (unsigned int i = 2; i <= primesUpToInclusive; i ++) {
-    if (theSieve[static_cast<signed>(i)] == 0) {
+    if (sieve[static_cast<signed>(i)] == 0) {
       continue;
     }
     output.addOnTop(i);
     for (unsigned int j = i; j <= primesUpToInclusive; j += i) {
-      theSieve[static_cast<signed>(j)] = 0;
+      sieve[static_cast<signed>(j)] = 0;
     }
   }
 }
 
 LargeIntegerUnsigned LargeIntegerUnsigned::getOne() {
-  LargeIntegerUnsigned tempI;
-  tempI.makeOne();
-  return tempI;
+  LargeIntegerUnsigned result;
+  result.makeOne();
+  return result;
 }
 
 bool LargeIntegerUnsigned::operator<(int other) const {
   if (other < 0) {
     return false;
   }
-  LargeIntegerUnsigned tempUI;
-  tempUI = static_cast<unsigned>(other);
-  return *this < tempUI;
+  LargeIntegerUnsigned copyOther;
+  copyOther = static_cast<unsigned>(other);
+  return *this < copyOther;
 }
 
 bool LargeIntegerUnsigned::operator<=(int other) const {
@@ -485,9 +487,9 @@ bool LargeIntegerUnsigned::operator>(int other) const {
   if (other < 0) {
     return true;
   }
-  LargeIntegerUnsigned tempUI;
-  tempUI = static_cast<unsigned>(other);
-  return *this > tempUI;
+  LargeIntegerUnsigned copyOther;
+  copyOther = static_cast<unsigned>(other);
+  return *this > copyOther;
 }
 
 bool LargeIntegerUnsigned::operator<(const LargeIntegerUnsigned& other) const {
@@ -510,15 +512,15 @@ bool LargeIntegerUnsigned::operator>(const LargeIntegerUnsigned& other) const {
 }
 
 bool LargeIntegerUnsigned::isEven() const {
-  if (LargeIntegerUnsigned::CarryOverBound % 2 == 0) {
-    bool result = (this->theDigits[0] % 2) == 0;
+  if (LargeIntegerUnsigned::carryOverBound % 2 == 0) {
+    bool result = (this->digits[0] % 2) == 0;
     return result;
   }
   return ((*this) % 2) == 0;
 }
 
 bool LargeIntegerUnsigned::operator==(const LargeIntegerUnsigned& other) const {
-  return this->theDigits == other.theDigits;
+  return this->digits == other.digits;
 }
 
 bool LargeIntegerUnsigned::operator!=(const LargeIntegerUnsigned& other) const {
@@ -540,7 +542,7 @@ void LargeIntegerUnsigned::operator%=(const LargeIntegerUnsigned& other) {
   }
   LargeIntegerUnsigned copyMe = *this;
   LargeIntegerUnsigned temp1;
-  copyMe.divPositive(other, temp1, *this);
+  copyMe.dividePositive(other, temp1, *this);
 }
 
 void LargeIntegerUnsigned::operator/=(const LargeIntegerUnsigned& other) {
@@ -550,7 +552,7 @@ void LargeIntegerUnsigned::operator/=(const LargeIntegerUnsigned& other) {
   }
   LargeIntegerUnsigned copyMe = *this;
   LargeIntegerUnsigned temp1;
-  copyMe.divPositive(other, *this, temp1);
+  copyMe.dividePositive(other, *this, temp1);
 }
 
 void LargeIntegerUnsigned::toString(std::string& output) const {
@@ -558,12 +560,12 @@ void LargeIntegerUnsigned::toString(std::string& output) const {
     output = "0";
     return;
   }
-  if (this->theDigits.size > 1) {
+  if (this->digits.size > 1) {
     this->toStringLargeElementDecimal(output);
     return;
   }
   std::stringstream out;
-  out << this->theDigits[0];
+  out << this->digits[0];
   output = out.str();
 }
 
@@ -572,11 +574,11 @@ bool LargeIntegerUnsigned::isDivisibleBy(const LargeIntegerUnsigned& divisor) {
     return false;
   }
   LargeIntegerUnsigned quotient, remainder;
-  this->divPositive(divisor, quotient, remainder);
+  this->dividePositive(divisor, quotient, remainder);
   return remainder.isEqualToZero();
 }
 
-void LargeIntegerUnsigned::divPositive(
+void LargeIntegerUnsigned::dividePositive(
   const LargeIntegerUnsigned& divisor,
   LargeIntegerUnsigned& quotientOutput,
   LargeIntegerUnsigned& remainderOutput
@@ -584,9 +586,9 @@ void LargeIntegerUnsigned::divPositive(
   if (divisor.isEqualToZero()) {
     global.fatal << "Division by zero. " << global.fatal;
   }
-  if (divisor.theDigits.size == 1 && this->theDigits.size == 1) {
-    unsigned quotientDigit = static_cast<unsigned>(this->theDigits[0] / divisor.theDigits[0]);
-    unsigned remainderDigit = static_cast<unsigned>(this->theDigits[0] % divisor.theDigits[0]);
+  if (divisor.digits.size == 1 && this->digits.size == 1) {
+    unsigned quotientDigit = static_cast<unsigned>(this->digits[0] / divisor.digits[0]);
+    unsigned remainderDigit = static_cast<unsigned>(this->digits[0] % divisor.digits[0]);
     quotientOutput.assignShiftedUInt(quotientDigit, 0);
     remainderOutput.assignShiftedUInt(remainderDigit, 0);
     return;
@@ -599,34 +601,34 @@ void LargeIntegerUnsigned::divPositive(
   ) {
     LargeIntegerUnsigned divisorCopy = divisor;
     LargeIntegerUnsigned thisCopy = *this;
-    thisCopy.divPositive(divisorCopy, quotientOutput, remainderOutput);
+    thisCopy.dividePositive(divisorCopy, quotientOutput, remainderOutput);
     return;
   }
   remainderOutput = *this;
   quotientOutput.makeZero();
   int currentQuotientDigit = 0;
-  int divisorLeadingDigit = *divisor.theDigits.lastObject();
+  int divisorLeadingDigit = *divisor.digits.lastObject();
   int lastRemainderSize = - 1;
   int numRunsNoDigitImprovement = 0;
   LargeIntegerUnsigned remainderBackup;
-  int upperlimitNoImprovementRounds = this->SquareRootOfCarryOverBound * 2;
+  int upperlimitNoImprovementRounds = this->squareRootOfCarryOverBound * 2;
   while (remainderOutput.isGreaterThanOrEqualTo(divisor)) {
-    int quotientDigitIndex = remainderOutput.theDigits.size - divisor.theDigits.size;
-    long long remainderLeadingDigit = *remainderOutput.theDigits.lastObject();
+    int quotientDigitIndex = remainderOutput.digits.size - divisor.digits.size;
+    long long remainderLeadingDigit = *remainderOutput.digits.lastObject();
     int divisorLeadingDigitPlusSlack = divisorLeadingDigit;
     for (;;) {
       if (remainderLeadingDigit < divisorLeadingDigitPlusSlack) {
         quotientDigitIndex --;
-        remainderLeadingDigit *= LargeIntegerUnsigned::CarryOverBound;
-        if (remainderOutput.theDigits.size > 1) {
-          remainderLeadingDigit += remainderOutput.theDigits[remainderOutput.theDigits.size - 2];
+        remainderLeadingDigit *= LargeIntegerUnsigned::carryOverBound;
+        if (remainderOutput.digits.size > 1) {
+          remainderLeadingDigit += remainderOutput.digits[remainderOutput.digits.size - 2];
         }
       }
       currentQuotientDigit = static_cast<int>(remainderLeadingDigit / divisorLeadingDigitPlusSlack);
       ///////////////////////////////////////////////////////////
       remainderBackup = remainderOutput;
       remainderOutput.addLargeIntegerUnsignedShiftedTimesDigit(divisor, quotientDigitIndex, - currentQuotientDigit);
-      if (*remainderOutput.theDigits.lastObject() >= 0) {
+      if (*remainderOutput.digits.lastObject() >= 0) {
         quotientOutput.addShiftedUIntSmallerThanCarryOverBound(static_cast<unsigned>(currentQuotientDigit), quotientDigitIndex);
         break;
       }
@@ -636,12 +638,12 @@ void LargeIntegerUnsigned::divPositive(
         global.fatal << "Bad division algorithm: could not figure out currentQuotientDigit for more than 2 runs. " << global.fatal;
       }
     }
-    if (lastRemainderSize == remainderOutput.theDigits.size && lastRemainderSize != 1) {
+    if (lastRemainderSize == remainderOutput.digits.size && lastRemainderSize != 1) {
       numRunsNoDigitImprovement ++;
     } else {
       numRunsNoDigitImprovement = 0;
     }
-    lastRemainderSize = remainderOutput.theDigits.size;
+    lastRemainderSize = remainderOutput.digits.size;
     if (numRunsNoDigitImprovement > upperlimitNoImprovementRounds) {
       global.fatal << "Bad division: while dividing " << this->toString() << " by "
       << divisor.toString()
@@ -660,22 +662,22 @@ std::string LargeIntegerUnsigned::toString(FormatExpressions* format) const {
 
 void LargeIntegerUnsigned::toStringLargeElementDecimal(std::string& output) const {
   std::stringstream out;
-  if (this->CarryOverBound == 1000000000  || this->CarryOverBound == 10) {
+  if (this->carryOverBound == 1000000000  || this->carryOverBound == 10) {
     std::string tempS;
     int numZeroesInCarryOver = 9;
-    if (this->CarryOverBound == 10) {
+    if (this->carryOverBound == 10) {
       numZeroesInCarryOver = 1;
     }
-    if (*this->theDigits.lastObject() < 0) {
+    if (*this->digits.lastObject() < 0) {
       out << "[";
     }
-    out << (*this->theDigits.lastObject());
-    if (*this->theDigits.lastObject() < 0) {
+    out << (*this->digits.lastObject());
+    if (*this->digits.lastObject() < 0) {
       out << "]";
     }
-    for (int i = this->theDigits.size - 2; i >= 0; i --) {
+    for (int i = this->digits.size - 2; i >= 0; i --) {
       std::stringstream tempStream;
-      tempStream << this->theDigits[i];
+      tempStream << this->digits[i];
       tempS = tempStream.str();
       if (tempS[0] == '-') {
         out << "[";
@@ -695,19 +697,19 @@ void LargeIntegerUnsigned::toStringLargeElementDecimal(std::string& output) cons
   unsigned int base = 10;
   int MaxNumIntegersPerCarryOverBound = 11;
   List<LargeIntegerUnsigned> bufferPowersOfBase;
-  int initialNumDigitsEstimate = MaxNumIntegersPerCarryOverBound*this->theDigits.size;
+  int initialNumDigitsEstimate = MaxNumIntegersPerCarryOverBound*this->digits.size;
   int sizeBufferPowersOfBase = MathRoutines::minimum(initialNumDigitsEstimate, 10000);
   bufferPowersOfBase.setSize(sizeBufferPowersOfBase);
   LargeIntegerUnsigned currentPower;
-  LargeIntegerUnsigned Remainder = *this;
+  LargeIntegerUnsigned remainder = *this;
   int numRemainingDigits;
-  while (!Remainder.isEqualToZero()) {
+  while (!remainder.isEqualToZero()) {
     currentPower.makeOne();
     numRemainingDigits = 0;
     int highestBufferIndex = - 1;
     bufferPowersOfBase.objects[0].makeOne();
     bool bufferFilled = false;
-    while (Remainder.isGreaterThanOrEqualTo(currentPower)) {
+    while (remainder.isGreaterThanOrEqualTo(currentPower)) {
       numRemainingDigits ++;
       highestBufferIndex ++;
       highestBufferIndex %= sizeBufferPowersOfBase;
@@ -721,7 +723,7 @@ void LargeIntegerUnsigned::toStringLargeElementDecimal(std::string& output) cons
     do {
       currentPower = bufferPowersOfBase.objects[highestBufferIndex];
       unsigned int theDigit = 0;
-      while (Remainder.isGreaterThanOrEqualTo(currentPower)) {
+      while (remainder.isGreaterThanOrEqualTo(currentPower)) {
         theDigit ++;
         currentPower += bufferPowersOfBase[highestBufferIndex];
       }
@@ -730,7 +732,7 @@ void LargeIntegerUnsigned::toStringLargeElementDecimal(std::string& output) cons
       if (theDigit != 1) {
         bufferPowersOfBase[highestBufferIndex] *= theDigit;
       }
-      Remainder.subtractSmallerPositive(bufferPowersOfBase[highestBufferIndex]);
+      remainder.subtractSmallerPositive(bufferPowersOfBase[highestBufferIndex]);
       highestBufferIndex --;
       if (highestBufferIndex == - 1) {
         highestBufferIndex = sizeBufferPowersOfBase - 1;
@@ -747,8 +749,8 @@ void LargeIntegerUnsigned::toStringLargeElementDecimal(std::string& output) cons
 }
 
 LargeIntegerUnsigned::LargeIntegerUnsigned() {
-  this->theDigits.setSize(1);
-  this->theDigits[0] = 0;
+  this->digits.setSize(1);
+  this->digits[0] = 0;
 }
 
 LargeIntegerUnsigned::LargeIntegerUnsigned(unsigned int x) {
@@ -760,20 +762,20 @@ LargeIntegerUnsigned::LargeIntegerUnsigned(const LargeIntegerUnsigned& x) {
 }
 
 void LargeIntegerUnsigned::addShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift) {
-  if (!(x < LargeIntegerUnsigned::CarryOverBound)) {
+  if (!(x < LargeIntegerUnsigned::carryOverBound)) {
     global.fatal << "Digit too large. " << global.fatal;
   }
   while (x > 0) {
-    if (shift >= this->theDigits.size) {
-      int oldsize = this->theDigits.size;
-      this->theDigits.setSize(shift + 1);
-      for (int i = oldsize; i < this->theDigits.size; i ++) {
-        this->theDigits[i] = 0;
+    if (shift >= this->digits.size) {
+      int oldsize = this->digits.size;
+      this->digits.setSize(shift + 1);
+      for (int i = oldsize; i < this->digits.size; i ++) {
+        this->digits[i] = 0;
       }
     }
-    this->theDigits[shift] += x;
-    if (this->theDigits[shift] >= LargeIntegerUnsigned::CarryOverBound) {
-      this->theDigits[shift] -= LargeIntegerUnsigned::CarryOverBound;
+    this->digits[shift] += x;
+    if (this->digits[shift] >= LargeIntegerUnsigned::carryOverBound) {
+      this->digits[shift] -= LargeIntegerUnsigned::carryOverBound;
       x = 1;
       shift ++;
     } else {
@@ -782,20 +784,20 @@ void LargeIntegerUnsigned::addShiftedUIntSmallerThanCarryOverBound(unsigned int 
   }
 }
 
-unsigned int LargeIntegerUnsigned::logarithmBaseNCeiling(unsigned int theBase) const {
+unsigned int LargeIntegerUnsigned::logarithmBaseNCeiling(unsigned int base) const {
   if (this->isEqualToZero()) {
     return 0;
   }
-  if (theBase <= 1) {
+  if (base <= 1) {
     global.fatal << "Base of logarithm needs to be larger than one. " << global.fatal;
   }
   LargeIntegerUnsigned current;
   List<LargeIntegerUnsigned> baseRaisedTo2ToPowerIndex;
   List<unsigned int> powersOfTwo;
-  current = theBase;
+  current = base;
   baseRaisedTo2ToPowerIndex.addOnTop(current);
   powersOfTwo.addOnTop(1);
-  while(true) {
+  while (true) {
     current *= current;
     if (current > *this) {
       break;
@@ -818,11 +820,11 @@ unsigned int LargeIntegerUnsigned::logarithmBaseNCeiling(unsigned int theBase) c
 }
 
 void LargeIntegerUnsigned::assignUInt64(uint64_t x) {
-  this->theDigits.setSize(0);
+  this->digits.setSize(0);
   while (x > 0) {
-    uint64_t nextDigit = x % LargeIntegerUnsigned::CarryOverBound;
-    this->theDigits.addOnTop(static_cast<int>(nextDigit));
-    x /= LargeIntegerUnsigned::CarryOverBound;
+    uint64_t nextDigit = x % LargeIntegerUnsigned::carryOverBound;
+    this->digits.addOnTop(static_cast<int>(nextDigit));
+    x /= LargeIntegerUnsigned::carryOverBound;
   }
 }
 
@@ -835,36 +837,36 @@ void LargeIntegerUnsigned::assignShiftedUInt(unsigned int x, int shift) {
     this->makeZero();
     return;
   }
-  this->theDigits.initializeFillInObject(shift, 0);
+  this->digits.initializeFillInObject(shift, 0);
   while (x != 0) {
-    unsigned int tempX = x % LargeIntegerUnsigned::CarryOverBound;
-    this->theDigits.addOnTop(static_cast<int>(tempX));
-    x = x / LargeIntegerUnsigned::CarryOverBound;
+    unsigned int tempX = x % LargeIntegerUnsigned::carryOverBound;
+    this->digits.addOnTop(static_cast<int>(tempX));
+    x = x / LargeIntegerUnsigned::carryOverBound;
   }
 }
 
 void LargeIntegerUnsigned::addNoFitSize(const LargeIntegerUnsigned& x) {
   MacroIncrementCounter(Rational::totalLargeAdditions);
-  int oldsize = this->theDigits.size;
-  this->theDigits.setSize(MathRoutines::maximum(this->theDigits.size, x.theDigits.size) + 1);
-  for (int i = oldsize; i < this->theDigits.size; i ++) {
-    this->theDigits[i] = 0;
+  int oldsize = this->digits.size;
+  this->digits.setSize(MathRoutines::maximum(this->digits.size, x.digits.size) + 1);
+  for (int i = oldsize; i < this->digits.size; i ++) {
+    this->digits[i] = 0;
   }
-  int CarryOver = 0;
-  for (int i = 0; i < x.theDigits.size; i ++) {
-    this->theDigits[i] += x.theDigits[i] + CarryOver;
-    if (this->theDigits[i] >= LargeIntegerUnsigned::CarryOverBound) {
-      this->theDigits[i] -= LargeIntegerUnsigned::CarryOverBound;
-      CarryOver = 1;
+  int carryOver = 0;
+  for (int i = 0; i < x.digits.size; i ++) {
+    this->digits[i] += x.digits[i] + carryOver;
+    if (this->digits[i] >= LargeIntegerUnsigned::carryOverBound) {
+      this->digits[i] -= LargeIntegerUnsigned::carryOverBound;
+      carryOver = 1;
     } else {
-      CarryOver = 0;
+      carryOver = 0;
     }
   }
-  if (CarryOver != 0) {
-    for (int i = x.theDigits.size; i < this->theDigits.size; i ++) {
-      this->theDigits[i] += 1;
-      if (this->theDigits[i] >= LargeIntegerUnsigned::CarryOverBound) {
-        this->theDigits[i] -= LargeIntegerUnsigned::CarryOverBound;
+  if (carryOver != 0) {
+    for (int i = x.digits.size; i < this->digits.size; i ++) {
+      this->digits[i] += 1;
+      if (this->digits[i] >= LargeIntegerUnsigned::carryOverBound) {
+        this->digits[i] -= LargeIntegerUnsigned::carryOverBound;
       } else {
         break;
       }
@@ -884,9 +886,9 @@ LargeIntegerUnsigned LargeIntegerUnsigned::operator-(const LargeIntegerUnsigned&
   return result;
 }
 
-std::string LargeIntegerUnsigned::toStringAbbreviate(FormatExpressions *theFormat) const {
-  (void) theFormat;
-  std::string result = this->toString(theFormat);
+std::string LargeIntegerUnsigned::toStringAbbreviate(FormatExpressions* format) const {
+  (void) format;
+  std::string result = this->toString(format);
   if (result.size() > 100) {
     std::stringstream out;
     out << result.substr(0, 40)
@@ -898,66 +900,68 @@ std::string LargeIntegerUnsigned::toStringAbbreviate(FormatExpressions *theForma
 }
 
 void LargeIntegerUnsigned::padWithZeroesToAtLeastNDigits(int desiredMinNumDigits) {
-  if (this->theDigits.size >= desiredMinNumDigits) {
+  if (this->digits.size >= desiredMinNumDigits) {
     return;
   }
-  int i = this->theDigits.size;
-  this->theDigits.setSize(desiredMinNumDigits);
+  int i = this->digits.size;
+  this->digits.setSize(desiredMinNumDigits);
   for (; i < desiredMinNumDigits; i ++) {
-    this->theDigits[i] = 0;
+    this->digits[i] = 0;
   }
 }
 
-void LargeIntegerUnsigned::addLargeIntegerUnsignedShiftedTimesDigit(const LargeIntegerUnsigned& other, int digitShift, int theConst) {
-  if (theConst >= this->CarryOverBound || (- theConst) <= (- this->CarryOverBound)) {
-    global.fatal << "Digit: " << theConst << " is too large" << global.fatal;
+void LargeIntegerUnsigned::addLargeIntegerUnsignedShiftedTimesDigit(
+  const LargeIntegerUnsigned& other, int digitShift, int constantTerm
+) {
+  if (constantTerm >= this->carryOverBound || (- constantTerm) <= (- this->carryOverBound)) {
+    global.fatal << "Digit: " << constantTerm << " is too large" << global.fatal;
   }
-  int numDigits = MathRoutines::maximum(other.theDigits.size + 1 + digitShift, this->theDigits.size + 1);
+  int numDigits = MathRoutines::maximum(other.digits.size + 1 + digitShift, this->digits.size + 1);
   this->padWithZeroesToAtLeastNDigits(numDigits);
   long long nextDigit = 0;
-  for (int j = 0; j < other.theDigits.size; j ++) {
+  for (int j = 0; j < other.digits.size; j ++) {
     int currentIndex = j + digitShift;
     int nextIndex = currentIndex + 1;
-    nextDigit = other.theDigits[j];
-    nextDigit *= theConst;
-    nextDigit += this->theDigits[currentIndex];
-    this->theDigits[currentIndex] = (nextDigit % this->CarryOverBound);
-    this->theDigits[nextIndex] += (nextDigit / this->CarryOverBound);
-    if (this->theDigits[currentIndex] < 0) {
-      this->theDigits[currentIndex] += this->CarryOverBound;
-      this->theDigits[nextIndex] --;
+    nextDigit = other.digits[j];
+    nextDigit *= constantTerm;
+    nextDigit += this->digits[currentIndex];
+    this->digits[currentIndex] = (nextDigit % this->carryOverBound);
+    this->digits[nextIndex] += (nextDigit / this->carryOverBound);
+    if (this->digits[currentIndex] < 0) {
+      this->digits[currentIndex] += this->carryOverBound;
+      this->digits[nextIndex] --;
     }
-    if (this->theDigits[currentIndex] < 0) {
+    if (this->digits[currentIndex] < 0) {
       global.fatal << "Non-positive non-leading digit." << global.fatal;
     }
   }
   this->fitSize();
-  int lastDigit =* this->theDigits.lastObject();
-  if (lastDigit >= this->CarryOverBound || (- lastDigit) <= (- this->CarryOverBound)) {
+  int lastDigit =* this->digits.lastObject();
+  if (lastDigit >= this->carryOverBound || (- lastDigit) <= (- this->carryOverBound)) {
     global.fatal << "Leading digit: " << lastDigit << " is too large" << global.fatal;
   }
 }
 
 void LargeIntegerUnsigned::subtractSmallerPositive(const LargeIntegerUnsigned& x) {
-  int CarryOver = 0;
-  for (int i = 0; i < x.theDigits.size; i ++) {
-    int nextDigit = x.theDigits[i] + CarryOver;
-    if (this->theDigits[i] < nextDigit) {
-      this->theDigits[i] += LargeIntegerUnsigned::CarryOverBound;
-      this->theDigits[i] -= nextDigit;
-      CarryOver = 1;
+  int carryOver = 0;
+  for (int i = 0; i < x.digits.size; i ++) {
+    int nextDigit = x.digits[i] + carryOver;
+    if (this->digits[i] < nextDigit) {
+      this->digits[i] += LargeIntegerUnsigned::carryOverBound;
+      this->digits[i] -= nextDigit;
+      carryOver = 1;
     } else {
-      this->theDigits[i] -= nextDigit;
-      CarryOver = 0;
+      this->digits[i] -= nextDigit;
+      carryOver = 0;
     }
   }
-  if (CarryOver != 0) {
-    for (int i = x.theDigits.size; i < this->theDigits.size; i ++) {
-      if (this->theDigits[i] > 0) {
-        this->theDigits[i] --;
+  if (carryOver != 0) {
+    for (int i = x.digits.size; i < this->digits.size; i ++) {
+      if (this->digits[i] > 0) {
+        this->digits[i] --;
         break;
       } else {
-        this->theDigits[i] = LargeIntegerUnsigned::CarryOverBound - 1;
+        this->digits[i] = LargeIntegerUnsigned::carryOverBound - 1;
       }
     }
   }
@@ -971,14 +975,14 @@ void LargeIntegerUnsigned::multiplyBy(const LargeIntegerUnsigned& x, LargeIntege
     return thisCopy.multiplyBy(xCopy, output);
   }
   MacroIncrementCounter(Rational::totalLargeMultiplications);
-  output.theDigits.setSize(x.theDigits.size + this->theDigits.size);
-  for (int i = 0; i < output.theDigits.size; i ++) {
-    output.theDigits[i] = 0;
+  output.digits.setSize(x.digits.size + this->digits.size);
+  for (int i = 0; i < output.digits.size; i ++) {
+    output.digits[i] = 0;
   }
   unsigned long long numCycles = 0;
   bool doReport = false;
   signed ticksPerReport = 1024;
-  unsigned long long totalCycles = static_cast<unsigned long long>(this->theDigits.size) * static_cast<unsigned long long>(x.theDigits.size);
+  unsigned long long totalCycles = static_cast<unsigned long long>(this->digits.size) * static_cast<unsigned long long>(x.digits.size);
   MemorySaving<ProgressReport> report1, report2;
   if (totalCycles >= static_cast<unsigned>(ticksPerReport)) {
     doReport = true;
@@ -990,13 +994,13 @@ void LargeIntegerUnsigned::multiplyBy(const LargeIntegerUnsigned& x, LargeIntege
     report1.getElement().report(reportStream.str());
     report2.getElement().ticksPerReport = ticksPerReport;
   }
-  for (int i = 0; i < this->theDigits.size; i ++) {
-    for (int j = 0; j < x.theDigits.size; j ++) {
-      unsigned long long tempLong = static_cast<unsigned>(this->theDigits[i]);
-      unsigned long long tempLong2 = static_cast<unsigned>(x.theDigits[j]);
+  for (int i = 0; i < this->digits.size; i ++) {
+    for (int j = 0; j < x.digits.size; j ++) {
+      unsigned long long tempLong = static_cast<unsigned>(this->digits[i]);
+      unsigned long long tempLong2 = static_cast<unsigned>(x.digits[j]);
       tempLong = tempLong * tempLong2;
-      unsigned long long lowPart = tempLong % LargeIntegerUnsigned::CarryOverBound;
-      unsigned long long highPart = tempLong / LargeIntegerUnsigned::CarryOverBound;
+      unsigned long long lowPart = tempLong % LargeIntegerUnsigned::carryOverBound;
+      unsigned long long highPart = tempLong / LargeIntegerUnsigned::carryOverBound;
       output.addShiftedUIntSmallerThanCarryOverBound(static_cast<unsigned int>(lowPart), i + j);
       output.addShiftedUIntSmallerThanCarryOverBound(static_cast<unsigned int>(highPart), i + j + 1);
       if (doReport) {
@@ -1004,8 +1008,8 @@ void LargeIntegerUnsigned::multiplyBy(const LargeIntegerUnsigned& x, LargeIntege
           std::stringstream out;
           out << "<br>Crunching " << numCycles << " out of " << totalCycles
           << " pairs of large integer ``digits'' = "
-          << this->theDigits.size << " x " << x.theDigits.size
-          << " digits (base " << LargeIntegerUnsigned::CarryOverBound << ").";
+          << this->digits.size << " x " << x.digits.size
+          << " digits (base " << LargeIntegerUnsigned::carryOverBound << ").";
           report2.getElement().report(out.str());
         }
       }
@@ -1016,23 +1020,25 @@ void LargeIntegerUnsigned::multiplyBy(const LargeIntegerUnsigned& x, LargeIntege
 
 LargeIntegerUnsigned LargeIntegerUnsigned::operator%(const LargeIntegerUnsigned& other) const {
   LargeIntegerUnsigned result, temp;
-  this->divPositive(other, temp, result);
+  this->dividePositive(other, temp, result);
   return result;
 }
 
 int LargeIntegerUnsigned::getUnsignedIntValueTruncated() {
-  return this->theDigits[0];
+  return this->digits[0];
 }
 
 double LargeIntegerUnsigned::getDoubleValue() const {
   double result = 0;
-  for (int i = this->theDigits.size - 1; i >= 0; i --) {
-    result = result * LargeIntegerUnsigned::CarryOverBound + this->theDigits[i];
+  for (int i = this->digits.size - 1; i >= 0; i --) {
+    result = result * LargeIntegerUnsigned::carryOverBound + this->digits[i];
   }
   return result;
 }
 
-LargeIntegerUnsigned LargeIntegerUnsigned::leastCommonMultiple(const LargeIntegerUnsigned &a, const LargeIntegerUnsigned &b) {
+LargeIntegerUnsigned LargeIntegerUnsigned::leastCommonMultiple(
+  const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b
+) {
   LargeIntegerUnsigned output;
   LargeIntegerUnsigned::leastCommonMultiple(a, b, output);
   return output;
@@ -1054,7 +1060,7 @@ void LargeIntegerUnsigned::greatestCommonDivisor(
   dividend = a;
   divisor = b;
   while (!divisor.isEqualToZero()) {
-    dividend.divPositive(divisor, temporary, remainder);
+    dividend.dividePositive(divisor, temporary, remainder);
     dividend = divisor;
     divisor = remainder;
   }
@@ -1062,15 +1068,15 @@ void LargeIntegerUnsigned::greatestCommonDivisor(
 }
 
 void LargeIntegerUnsigned::fitSize() {
-  int newSize = this->theDigits.size;
-  for (int i = this->theDigits.size - 1; i >= 1; i --) {
-    if (this->theDigits[i] == 0) {
+  int newSize = this->digits.size;
+  for (int i = this->digits.size - 1; i >= 1; i --) {
+    if (this->digits[i] == 0) {
       newSize --;
     } else {
       break;
     }
   }
-  this->theDigits.setSize(newSize);
+  this->digits.setSize(newSize);
 }
 
 void LargeIntegerUnsigned::accountFactor(
@@ -1120,9 +1126,9 @@ bool LargeIntegerUnsigned::factor(
   int numberMillerRabinRuns,
   std::stringstream* commentsOnFailure
 ) const {
-  MacroRegisterFunctionWithName("LargeIntUnsigned::factor");
+  MacroRegisterFunctionWithName("LargeIntegerUnsigned::factor");
   int maximumNumberOfDigits = 1000;
-  if (this->theDigits.size > maximumNumberOfDigits) {
+  if (this->digits.size > maximumNumberOfDigits) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Number has too many digits: maximum "
       << maximumNumberOfDigits
@@ -1184,14 +1190,14 @@ void LargeIntegerUnsigned::leastCommonMultiple(
   LargeIntegerUnsigned::greatestCommonDivisor(a, b, tempUI);
   a.multiplyBy(b, tempUI2);
   output = tempUI2;
-  output.divPositive(tempUI, output, tempUI2);
+  output.dividePositive(tempUI, output, tempUI2);
   if (output.isEqualToZero()) {
     global.fatal << "Least common multiple not allowed to be zero. " << global.fatal;
   }
 }
 
 void LargeIntegerUnsigned::operator=(const LargeIntegerUnsigned& x) {
-  this->theDigits = x.theDigits;
+  this->digits = x.digits;
 }
 
 void LargeIntegerUnsigned::operator=(unsigned int x) {
@@ -1199,24 +1205,24 @@ void LargeIntegerUnsigned::operator=(unsigned int x) {
 }
 
 unsigned int LargeIntegerUnsigned::hashFunction() const {
-  int numCycles = MathRoutines::minimum(this->theDigits.size, someRandomPrimesSize);
+  int numCycles = MathRoutines::minimum(this->digits.size, someRandomPrimesSize);
   unsigned int result = 0;
   for (int i = 0; i < numCycles; i ++) {
-    result += static_cast<unsigned>(this->theDigits[i]) * someRandomPrimes[i];
+    result += static_cast<unsigned>(this->digits[i]) * someRandomPrimes[i];
   }
   return result;
 }
 
 bool LargeIntegerUnsigned::isPositive() const {
-  return this->theDigits.size > 1 || this->theDigits[0] > 0;
+  return this->digits.size > 1 || this->digits[0] > 0;
 }
 
 bool LargeIntegerUnsigned::isEqualToOne() const {
-  return this->theDigits.size == 1 && this->theDigits[0] == 1;
+  return this->digits.size == 1 && this->digits[0] == 1;
 }
 
 bool LargeIntegerUnsigned::isEqualToZero() const {
-  return this->theDigits.size == 1 && this->theDigits[0] == 0;
+  return this->digits.size == 1 && this->digits[0] == 0;
 }
 
 void LargeIntegerUnsigned::assignFactorial(unsigned int x) {
@@ -1352,8 +1358,8 @@ bool LargeInteger::checkConsistensy() {
   if (this->sign != - 1 && this->sign != 1) {
     return false;
   }
-  for (int i = 0; i < this->value.theDigits.size; i ++) {
-    if (this->value.theDigits[i] >= LargeIntegerUnsigned::CarryOverBound) {
+  for (int i = 0; i < this->value.digits.size; i ++) {
+    if (this->value.digits[i] >= LargeIntegerUnsigned::carryOverBound) {
       return false;
     }
   }
@@ -1407,10 +1413,10 @@ void LargeInteger::assignInteger(int x) {
 }
 
 bool LargeInteger::getDivisors(List<int>& output, bool includeNegative) {
-  if (this->value.theDigits.size > 1) {
+  if (this->value.digits.size > 1) {
     return false;
   }
-  int val = this->value.theDigits[0];
+  int val = this->value.digits[0];
   if (val > 50000) {
     return false;
   }
@@ -1485,7 +1491,7 @@ LargeInteger LargeInteger::operator/(int x) const {
     absX = - absX;
   }
   tempX.assignShiftedUInt(static_cast<unsigned>(absX), 0);
-  this->value.divPositive(tempX, result.value, remainder);
+  this->value.dividePositive(tempX, result.value, remainder);
   result.sign = this->sign * signX;
   return result;
 }
@@ -1493,7 +1499,7 @@ LargeInteger LargeInteger::operator/(int x) const {
 LargeInteger LargeInteger::operator/(LargeInteger& x) const {
   LargeInteger result;
   LargeInteger remainder;
-  this->value.divPositive(x.value, result.value, remainder.value);
+  this->value.dividePositive(x.value, result.value, remainder.value);
   result.sign = this->sign * x.sign;
   if (!result.checkConsistensy()) {
     global.fatal << "Large integer corrupt. " << global.fatal;
@@ -1512,14 +1518,14 @@ int LargeInteger::operator%(int x) {
     x = - x;
   }
   tempX.assignShiftedUInt(static_cast<unsigned>(x), 0);
-  this->value.divPositive(tempX, result, remainder);
-  if (remainder.theDigits.size == 0) {
+  this->value.dividePositive(tempX, result, remainder);
+  if (remainder.digits.size == 0) {
     return 0;
   } else {
     if (this->sign == - 1) {
-      return x - remainder.theDigits[0];
+      return x - remainder.digits[0];
     } else {
-      return remainder.theDigits[0];
+      return remainder.digits[0];
     }
   }
 }
@@ -1714,7 +1720,7 @@ void Rational::assignFractionalValue() {
     return;
   }
   LargeIntegerUnsigned newNumerator, quotient;
-  this->extended->numerator.value.divPositive(this->extended->denominator, quotient, newNumerator);
+  this->extended->numerator.value.dividePositive(this->extended->denominator, quotient, newNumerator);
   this->extended->numerator.value = newNumerator;
   if (this->extended->numerator.isNegative()) {
     this->extended->numerator.addLargeIntUnsigned(this->extended->denominator);
@@ -1820,10 +1826,10 @@ bool Rational::tryToAddQuickly(int otherNumerator, int otherDenominator) {
   }
   if (
     this->extended != nullptr ||
-    thisNumAbs >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-    this->denominatorShort >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-    otherNumeratorAbsoluteValue >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-    otherDenominator >= LargeIntegerUnsigned::SquareRootOfCarryOverBound
+    thisNumAbs >= LargeIntegerUnsigned::squareRootOfCarryOverBound ||
+    this->denominatorShort >= LargeIntegerUnsigned::squareRootOfCarryOverBound ||
+    otherNumeratorAbsoluteValue >= LargeIntegerUnsigned::squareRootOfCarryOverBound ||
+    otherDenominator >= LargeIntegerUnsigned::squareRootOfCarryOverBound
   ) {
     return false;
   }
@@ -1870,10 +1876,10 @@ bool Rational::tryToMultiplyQuickly(int otherNumerator, int otherDenominator) {
   }
   if (
     this->extended != nullptr ||
-    thisNumAbs >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-    this->denominatorShort >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-    otherNumeratorAbsoluteValue >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-    otherDenominator >= LargeIntegerUnsigned::SquareRootOfCarryOverBound
+    thisNumAbs >= LargeIntegerUnsigned::squareRootOfCarryOverBound ||
+    this->denominatorShort >= LargeIntegerUnsigned::squareRootOfCarryOverBound ||
+    otherNumeratorAbsoluteValue >= LargeIntegerUnsigned::squareRootOfCarryOverBound ||
+    otherDenominator >= LargeIntegerUnsigned::squareRootOfCarryOverBound
   ) {
     return false;
   }
@@ -1992,10 +1998,10 @@ bool Rational::shrinkExtendedPartIfPossible() {
     return true;
   }
   if (
-    this->extended->numerator.value.theDigits.size > 1 ||
-    this->extended->denominator.theDigits.size > 1 ||
-    this->extended->numerator.value.theDigits[0] >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-    this->extended->denominator.theDigits[0] >= LargeIntegerUnsigned::SquareRootOfCarryOverBound
+    this->extended->numerator.value.digits.size > 1 ||
+    this->extended->denominator.digits.size > 1 ||
+    this->extended->numerator.value.digits[0] >= LargeIntegerUnsigned::squareRootOfCarryOverBound ||
+    this->extended->denominator.digits[0] >= LargeIntegerUnsigned::squareRootOfCarryOverBound
   ) {
     return false;
   }
@@ -2109,8 +2115,8 @@ void Rational::simplify() {
       this->toString(tempS2);
     }*/
     LargeIntegerUnsigned tempI2;
-    this->extended->denominator.divPositive(tempI, this->extended->denominator, tempI2);
-    this->extended->numerator.value.divPositive(tempI, this->extended->numerator.value, tempI2);
+    this->extended->denominator.dividePositive(tempI, this->extended->denominator, tempI2);
+    this->extended->numerator.value.dividePositive(tempI, this->extended->numerator.value, tempI2);
   }
   this->shrinkExtendedPartIfPossible();
 }

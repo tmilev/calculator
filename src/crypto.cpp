@@ -1106,7 +1106,7 @@ void Crypto::convertLargeIntUnsignedToBase58SignificantDigitsLAST(
   while (copy > 0) {
     LargeIntegerUnsigned nextDigitLIU = static_cast<unsigned int>(copy % 58);
     copy /= 58;
-    int32_t nextDigitInt = nextDigitLIU.theDigits[0];
+    int32_t nextDigitInt = nextDigitLIU.digits[0];
     char next = '#';
     Crypto::getCharFromBase58(static_cast<uint32_t>(nextDigitInt), next);
     output.push_back(next);

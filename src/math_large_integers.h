@@ -20,32 +20,38 @@ public:
   ////////////////////////////////////////////////////////
   // On a 32 bit machine any number smaller than or equal to 2^30 will work.
   // If you got no clue what to put just leave CarryOverBound as it is below.
-  List<int32_t> theDigits;
+  List<int32_t> digits;
   // static const int CarryOverBound =10; //<-for extreme "corner case" testing
-  static const int CarryOverBound = 1000000000;
+  static const int carryOverBound = 1000000000;
   // the above choice of CarryOverBound facilitates very quick conversions of Large integers into decimal, with
   // relatively small loss of speed and RAM memory.
   // static const unsigned int CarryOverBound =2147483648UL; //=2^31
   // The following must be less than or equal to the square root of CarryOverBound.
   // It is used for quick multiplication of Rational-s.
   // static const int SquareRootOfCarryOverBound =3;//<-for extreme "corner case" testing
-  static const int SquareRootOfCarryOverBound = 31000; //31000*31000=961000000<1000000000
+  static const int squareRootOfCarryOverBound = 31000; //31000*31000=961000000<1000000000
   // static const int SquareRootOfCarryOverBound =32768; //=2^15
   friend bool operator<(int left, const LargeIntegerUnsigned& right) {
     return right > left;
   }
-  friend std::ostream& operator<<(std::ostream& output, const LargeIntegerUnsigned& theLIU) {
-    output << theLIU.toString();
+  friend std::ostream& operator<<(std::ostream& output, const LargeIntegerUnsigned& largeIntegerUnsigned) {
+    output << largeIntegerUnsigned.toString();
     return output;
   }
   void padWithZeroesToAtLeastNDigits(int desiredMinNumDigits);
-  void addLargeIntegerUnsignedShiftedTimesDigit(const LargeIntegerUnsigned& other, int digitShift, int theConst);
+  void addLargeIntegerUnsignedShiftedTimesDigit(
+    const LargeIntegerUnsigned& other, int digitShift, int constantTerm
+  );
   void subtractSmallerPositive(const LargeIntegerUnsigned& x);
   void toString(std::string& output) const;
   void toStringLargeElementDecimal(std::string& output) const;
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringAbbreviate(FormatExpressions* format = nullptr) const;
-  void divPositive(const LargeIntegerUnsigned& divisor, LargeIntegerUnsigned& quotientOutput, LargeIntegerUnsigned& remainderOutput) const;
+  void dividePositive(
+    const LargeIntegerUnsigned& divisor,
+    LargeIntegerUnsigned& quotientOutput,
+    LargeIntegerUnsigned& remainderOutput
+  ) const;
   bool isDivisibleBy(const LargeIntegerUnsigned& divisor);
   void makeOne();
   void addUInt(unsigned int x);
@@ -59,12 +65,18 @@ public:
     bool& outputGuaranteedPrime,
     std::stringstream* comments
   );
-  bool isPossiblyPrime(int millerRabinTries, bool tryDivisionSetTrueFaster = true, std::stringstream* comments = nullptr);
-  bool isPossiblyPrimeMillerRabin(int numTimesToRun = 1, std::stringstream* comments = nullptr);
+  bool isPossiblyPrime(
+    int millerRabinTries,
+    bool tryDivisionSetTrueFaster = true,
+    std::stringstream* comments = nullptr
+  );
+  bool isPossiblyPrimeMillerRabin(
+    int numberOfTimesToRun = 1, std::stringstream* comments = nullptr
+  );
   bool isPossiblyPrimeMillerRabinOnce(
-    unsigned int theBase,
-    int theExponentOfThePowerTwoFactorOfNminusOne,
-    const LargeIntegerUnsigned& theOddFactorOfNminusOne,
+    unsigned int base,
+    int exponentOfThePowerTwoFactorOfNminusOne,
+    const LargeIntegerUnsigned& oddFactorOfNminusOne,
     std::stringstream* comments
   );
   bool isEqualToOne() const;
@@ -92,7 +104,7 @@ public:
   void assignUInt64(uint64_t x);
   // returns ceiling of the logarithm base two of the number,
   // i.e., the smallest x such that this <= 2^x.
-  unsigned int logarithmBaseNCeiling(unsigned int theBase) const;
+  unsigned int logarithmBaseNCeiling(unsigned int base) const;
 
   int maximumDivisorToTryWhenFactoring(int desiredByUser) const;
 
@@ -197,12 +209,12 @@ class LargeInteger {
     return right > leftCopy;
   }
   friend LargeInteger operator*(const LargeInteger& left, const LargeIntegerUnsigned& right) {
-    LargeInteger tempI;
-    tempI = right;
-    return left * tempI;
+    LargeInteger rightCopy;
+    rightCopy = right;
+    return left * rightCopy;
   }
-  friend std::ostream& operator << (std::ostream& output, const LargeInteger& theLI) {
-    output << theLI.toString();
+  friend std::ostream& operator << (std::ostream& output, const LargeInteger& largeInteger) {
+    output << largeInteger.toString();
     return output;
   }
 public:
@@ -351,10 +363,10 @@ public:
     return false;
   }
   inline LargeInteger operator+(const LargeInteger& other) const {
-    LargeInteger tempInt;
-    tempInt = *this;
-    tempInt += other;
-    return tempInt;
+    LargeInteger result;
+    result = *this;
+    result += other;
+    return result;
   }
   inline LargeInteger operator-(const LargeInteger& other) const {
     LargeInteger result = *this;
@@ -379,7 +391,7 @@ public:
     }
     this->sign*= other.sign;
     LargeIntegerUnsigned quotient, remainder;
-    this->value.divPositive(other.value, quotient, remainder);
+    this->value.dividePositive(other.value, quotient, remainder);
     this->value =quotient;
   }
   inline bool operator>(const LargeInteger& other) const {
@@ -390,7 +402,7 @@ public:
       return;
     }
     LargeIntegerUnsigned quotient, remainder;
-    this->value.divPositive(other.value, quotient, remainder);
+    this->value.dividePositive(other.value, quotient, remainder);
     this->value = remainder;
     if (this->isNegative()) {
       *this += other.value;
@@ -481,7 +493,7 @@ private:
 public:
   int numeratorShort;
   int denominatorShort;
-  LargeRationalExtended *extended;
+  LargeRationalExtended* extended;
   static unsigned long long int totalSmallAdditions;
   static unsigned long long int totalLargeAdditions;
   static unsigned long long int totalSmallMultiplications;
@@ -529,9 +541,9 @@ public:
   static Rational oneStatic();
   void assignFractionalValue();
   void assignFloor() {
-    Rational tempRat = *this;
-    tempRat.assignFractionalValue();
-    *this -= tempRat;
+    Rational result = *this;
+    result.assignFractionalValue();
+    *this -= result;
   }
   void multiplyBy(const Rational& r);
   // The Hash function of zero must be equal to zero.
@@ -541,7 +553,8 @@ public:
       if (this->numeratorShort == 0) {
         return 0;
       }
-      return static_cast<unsigned int>(this->numeratorShort) * someRandomPrimes[0] + static_cast<unsigned int>(this->denominatorShort) * ::someRandomPrimes[1];
+      return static_cast<unsigned int>(this->numeratorShort) * someRandomPrimes[0] +
+      static_cast<unsigned int>(this->denominatorShort) * ::someRandomPrimes[1];
     }
     return this->extended->numerator.hashFunction() * someRandomPrimes[0] +
     this->extended->denominator.hashFunction() * someRandomPrimes[1];
@@ -588,7 +601,8 @@ public:
   }
   void divideBy(const Rational& r);
   void divideByInteger(int x) {
-    int tempDen; signed char tempSign;
+    int tempDen;
+    signed char tempSign;
     if (x < 0) {
       tempDen = - x;
       tempSign = - 1;
@@ -621,9 +635,9 @@ public:
   bool isEqualTo(const Rational& r) const;
   bool isGreaterThanOrEqualTo(const Rational& right) const;
   bool isEven() const {
-    Rational tempRat = *this;
-    tempRat /= 2;
-    return tempRat.isInteger();
+    Rational thisCopy = *this;
+    thisCopy /= 2;
+    return thisCopy.isInteger();
   }
   inline bool isEqualToOne() const {
     if (this->extended == nullptr) {
@@ -770,9 +784,9 @@ public:
   }
   void operator=(const AlgebraicNumber& other);
   void operator=(const LargeIntegerUnsigned& right) {
-    LargeInteger tempI;
-    tempI = right;
-    this->operator=(tempI);
+    LargeInteger rightCopy;
+    rightCopy = right;
+    this->operator=(rightCopy);
   }
   void operator=(const Rational& right) {
     this->assign(right);
@@ -799,15 +813,15 @@ public:
     }
     MacroIncrementCounter(Rational::totalLargeAdditions);
     this->initializeExtendedFromShortIfNeeded();
-    Rational tempRat;
-    tempRat.assign(r);
-    tempRat.initializeExtendedFromShortIfNeeded();
-    LargeInteger tempI;
-    tempI = tempRat.extended->numerator;
-    tempI.value.multiplyBy(this->extended->denominator);
-    this->extended->numerator.value.multiplyBy(tempRat.extended->denominator);
-    this->extended->numerator += (tempI);
-    this->extended->denominator.multiplyBy(tempRat.extended->denominator);
+    Rational rightCopy;
+    rightCopy.assign(r);
+    rightCopy.initializeExtendedFromShortIfNeeded();
+    LargeInteger numeratorCopy;
+    numeratorCopy = rightCopy.extended->numerator;
+    numeratorCopy.value.multiplyBy(this->extended->denominator);
+    this->extended->numerator.value.multiplyBy(rightCopy.extended->denominator);
+    this->extended->numerator += numeratorCopy;
+    this->extended->denominator.multiplyBy(rightCopy.extended->denominator);
     this->simplify();
   }
   inline void operator-=(const Rational& right) {
@@ -837,16 +851,16 @@ public:
     *this += 1;
   }
   Rational operator*(int right) const {
-    Rational tempRat;
-    tempRat.assign(*this);
-    tempRat.multiplyByInt(right);
-    return tempRat;
+    Rational rightCopy;
+    rightCopy.assign(*this);
+    rightCopy.multiplyByInt(right);
+    return rightCopy;
   }
   Rational operator/(int right) const {
-    Rational tempRat;
-    tempRat.assign(*this);
-    tempRat.divideByInteger(right);
-    return tempRat;
+    Rational rightCopy;
+    rightCopy.assign(*this);
+    rightCopy.divideByInteger(right);
+    return rightCopy;
   }
   Vector<Rational> operator*(const Vector<Rational>& right) const;
   Rational operator+(const Rational& right) const;
@@ -865,17 +879,17 @@ public:
     return right.isGreaterThan(*this);
   }
   inline bool operator>(const int right) const {
-    Rational tempRat;
-    tempRat.assignInteger(right);
-    return this->isGreaterThan(tempRat);
+    Rational rightCopy;
+    rightCopy.assignInteger(right);
+    return this->isGreaterThan(rightCopy);
   }
   inline bool operator>=(const Rational& right) const {
     return this->isGreaterThanOrEqualTo(right);
   }
   inline bool operator<(const int right) const {
-    Rational tempRat;
-    tempRat.assignInteger(right);
-    return tempRat.isGreaterThan(*this);
+    Rational rightCopy;
+    rightCopy.assignInteger(right);
+    return rightCopy.isGreaterThan(*this);
   }
   class Test {
   public:

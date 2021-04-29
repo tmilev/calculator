@@ -15,7 +15,7 @@ public:
   List<List<int> > BetaKComponents;
   int IndexOwnerRootSubalgebra;
   bool generateAutomorphisms(ConeRelation& right);
-  DynkinDiagramRootSubalgebra theDiagram;
+  DynkinDiagramRootSubalgebra diagram;
   DynkinDiagramRootSubalgebra theDiagramRelAndK;
   std::string relationString;
   std::string stringConnectedComponents;
@@ -100,8 +100,8 @@ public:
 };
 
 class RootSubalgebra {
-  friend std::ostream& operator << (std::ostream& output, RootSubalgebra& theSA) {
-    output << theSA.toString();
+  friend std::ostream& operator << (std::ostream& output, RootSubalgebra& subalgebra) {
+    output << subalgebra.toString();
     return output;
   }
 public:
@@ -150,13 +150,12 @@ public:
   FinitelyGeneratedMatrixMonoid<Rational> outerSAautos;
   Vectors<Rational> genK;
   Vectors<Rational> simpleRootsReductiveSubalgebra;
-  Vectors<Rational> SimpleBasisKScaledToActByTwo;
-  Vectors<Rational> SimpleBasisKinOrderOfGeneration;
+  Vectors<Rational> simpleBasisKScaledToActByTwo;
+  Vectors<Rational> simpleBasisKinOrderOfGeneration;
   Vectors<Rational> positiveRootsReductiveSubalgebra;
   HashedList<Vector<Rational> > allRootsSubalgebra;
-  Selection NilradicalKmods;
-  Selection CentralizerKmods;
-  Vectors<Rational> HighestRootsK;
+  Selection nilradicalKmodules;
+  Selection centralizerKmodules;
   Vectors<Rational> testedRootsAlpha;
   Vectors<Rational> CentralizerRoots;
   Vectors<Rational> SimpleBasisCentralizerRoots;
@@ -252,7 +251,11 @@ public:
   void computeModuleDecompositionAmbientAlgebraDimensionsOnly();
   void computeCentralizerFromKModulesAndSortKModules();
   void matrixToRelation(
-    ConeRelation& output, Matrix<Rational>& matA, Matrix<Rational>& matX, int theDimension, Vectors<Rational>& NilradicalRoots
+    ConeRelation& output,
+    Matrix<Rational>& matA,
+    Matrix<Rational>& matX,
+    int dimension,
+    Vectors<Rational>& nilradicalRoots
   );
   void doKRootsEnumerationRecursively(int indexEnumeration);
   void makeProgressReportpossibleNilradicalComputation(RootSubalgebras& owner);

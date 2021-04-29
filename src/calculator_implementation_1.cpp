@@ -369,7 +369,7 @@ bool PlotObject::operator==(const PlotObject& other) const {
   ((this->lineWidth - other.lineWidth) == 0.0)                               &&
   this->plotString                  == other.plotString                &&
   this->fillStyle                      == other.fillStyle                    &&
-  this->thePlotStringWithHtml          == other.thePlotStringWithHtml        &&
+  this->plotStringWithHtml          == other.plotStringWithHtml        &&
   this->colorRGB                       == other.colorRGB                     &&
   this->colorFillRGB                   == other.colorFillRGB                 &&
   this->dimension                      == other.dimension                    &&
@@ -1035,7 +1035,7 @@ std::string Plot::getPlotStringAddLatexCommands(bool useHtml) {
   << FloatingPoint::doubleToString(highBoundY + 0.15) << "}" << lineSeparator;
   for (int i = 0; i < this->plotObjects.size; i ++) {
     if (useHtml) {
-      resultStream << this->plotObjects[i].thePlotStringWithHtml << lineSeparator;
+      resultStream << this->plotObjects[i].plotStringWithHtml << lineSeparator;
     } else {
       resultStream << this->plotObjects[i].plotString << lineSeparator;
     }

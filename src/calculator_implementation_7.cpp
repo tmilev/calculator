@@ -1470,8 +1470,8 @@ public:
   bool allFactorsAreOfDegree2orless;
   bool needPolynomialDivision;
   int numberOfSystemVariables;
-  std::stringstream printoutPFsHtml;
-  std::stringstream printoutPFsLatex;
+  std::stringstream printoutPartialFractionsHtml;
+  std::stringstream printoutPartialFractionsLatex;
   std::stringstream printoutIntegration;
   std::string stringPolyIndentityNonSimplifiedLatex;
   std::string stringRationalFunctionLatex;
@@ -1506,8 +1506,8 @@ bool IntegralRationalFunctionComputation::checkConsistency() const {
 bool IntegralRationalFunctionComputation::preparePartialFractionExpressionSummands() {
   MacroRegisterFunctionWithName("IntegralRationalFunctionComputation::preparePartialFractionExpressionSummands");
   this->checkConsistency();
-  Expression polyE, currentNum, denExpE, currentDenNoPowerMonic,
-  currentDen, currentPFnoCoeff, currentPFWithCoeff,
+  Expression polyE, currentNumerator, denominatorExponent, currentDenominatorNoPowerMonic,
+  currentDen, currentPartialFractionNoCoefficient, currentPFWithCoeff,
   coeffE;
   this->partialFractionSummands.setSize(0);
   Polynomial<AlgebraicNumber> denominatorRescaled, numeratorRescaled;
@@ -1528,23 +1528,23 @@ bool IntegralRationalFunctionComputation::preparePartialFractionExpressionSumman
       numeratorRescaled /= numScale;
       currentCoefficient *= numScale;
       polyE.assignValueWithContext(numeratorRescaled, this->context, *this->owner);
-      if (!CalculatorConversions::functionExpressionFromBuiltInType(*this->owner, polyE, currentNum)) {
+      if (!CalculatorConversions::functionExpressionFromBuiltInType(*this->owner, polyE, currentNumerator)) {
         return false;
       }
       polyE.assignValueWithContext(denominatorRescaled, this->context, *this->owner);
-      if (!CalculatorConversions::functionExpressionFromBuiltInType(*this->owner, polyE, currentDenNoPowerMonic)) {
+      if (!CalculatorConversions::functionExpressionFromBuiltInType(*this->owner, polyE, currentDenominatorNoPowerMonic)) {
         return false;
       }
       if (j != 0) {
-        denExpE.assignValue(j + 1, *this->owner);
-        currentDen.makeXOX(*this->owner, this->owner->opPower(), currentDenNoPowerMonic, denExpE);
+        denominatorExponent.assignValue(j + 1, *this->owner);
+        currentDen.makeXOX(*this->owner, this->owner->opPower(), currentDenominatorNoPowerMonic, denominatorExponent);
       } else {
-        currentDen = currentDenNoPowerMonic;
+        currentDen = currentDenominatorNoPowerMonic;
       }
-      currentPFnoCoeff = currentNum;
-      currentPFnoCoeff /= currentDen;
+      currentPartialFractionNoCoefficient = currentNumerator;
+      currentPartialFractionNoCoefficient /= currentDen;
       coeffE.assignValue(currentCoefficient, *this->owner);
-      currentPFWithCoeff = coeffE * currentPFnoCoeff;
+      currentPFWithCoeff = coeffE * currentPartialFractionNoCoefficient;
       currentPFWithCoeff.checkConsistencyRecursively();
       this->partialFractionSummands.addOnTop(currentPFWithCoeff);
     }
@@ -1575,11 +1575,11 @@ bool IntegralRationalFunctionComputation::integrateRationalFunction() {
   if (!this->computePartialFractionDecomposition()) {
     printoutIntegration
     << "Failed to decompose rational function into partial fractions. "
-    << this->printoutPFsHtml.str();
+    << this->printoutPartialFractionsHtml.str();
     return false;
   }
-  printoutIntegration << this->printoutPFsHtml.str();
-  Expression polyE, currentNum, denExpE, currentDenNoPowerMonic, currentDen, currentIntegrand,
+  printoutIntegration << this->printoutPartialFractionsHtml.str();
+  Expression polyE, currentNumerator, denExpE, currentDenominatorNoPowerMonic, currentDen, currentIntegrand,
   currentIntegralNoCoeff, currentIntegralWithCoeff, coeffE;
   this->integralSummands.setSize(0);
   Polynomial<AlgebraicNumber> denRescaled, numRescaled;
@@ -1600,20 +1600,20 @@ bool IntegralRationalFunctionComputation::integrateRationalFunction() {
       numRescaled /= numScale;
       currentCoefficient *= numScale;
       polyE.assignValueWithContext(numRescaled, this->context, *this->owner);
-      if (!CalculatorConversions::functionExpressionFromBuiltInType(*this->owner, polyE, currentNum)) {
+      if (!CalculatorConversions::functionExpressionFromBuiltInType(*this->owner, polyE, currentNumerator)) {
         return false;
       }
       polyE.assignValueWithContext(denRescaled, this->context, *this->owner);
-      if (!CalculatorConversions::functionExpressionFromBuiltInType(*this->owner, polyE, currentDenNoPowerMonic)) {
+      if (!CalculatorConversions::functionExpressionFromBuiltInType(*this->owner, polyE, currentDenominatorNoPowerMonic)) {
         return false;
       }
       if (j != 0) {
         denExpE.assignValue(j + 1, *this->owner);
-        currentDen.makeXOX(*this->owner, this->owner->opPower(), currentDenNoPowerMonic, denExpE);
+        currentDen.makeXOX(*this->owner, this->owner->opPower(), currentDenominatorNoPowerMonic, denExpE);
       } else {
-        currentDen = currentDenNoPowerMonic;
+        currentDen = currentDenominatorNoPowerMonic;
       }
-      currentIntegrand = currentNum;
+      currentIntegrand = currentNumerator;
       currentIntegrand /= currentDen;
       currentIntegralNoCoeff.makeIntegral(
         *this->owner,
@@ -1806,36 +1806,36 @@ void IntegralRationalFunctionComputation::prepareFinalAnswer() {
 
 void IntegralRationalFunctionComputation::prepareDenominatorFactors() {
   MacroRegisterFunctionWithName("IntegralRationalFunctionComputation::prepareDenominatorFactors");
-  this->printoutPFsHtml << "The rational function is: " << HtmlRoutines::getMathNoDisplay(
+  this->printoutPartialFractionsHtml << "The rational function is: " << HtmlRoutines::getMathNoDisplay(
     "\\frac{" + this->numerator.toString(&this->currentFormat) + "}{" + this->denominator.toString(&this->currentFormat) + "}"
   )
   << ".";
-  this->printoutPFsHtml << "<br>The denominator factors are: ";
-  this->printoutPFsLatex << "We aim to decompose into partial fractions the following function "
+  this->printoutPartialFractionsHtml << "<br>The denominator factors are: ";
+  this->printoutPartialFractionsLatex << "We aim to decompose into partial fractions the following function "
   << "(the denominator has been factored). \\[\\frac{"
   << this->numerator.toString(&this->currentFormat) << "}{" << this->denominator.toString(&this->currentFormat) << "}="
   << "\\frac{" << this->numerator.toString(&this->currentFormat)  << "}{ ";
   this->allFactorsAreOfDegree2orless = true;
   for (int i = 0; i < this->allFactors.size; i ++) {
-    this->printoutPFsHtml << HtmlRoutines::getMathNoDisplay(this->allFactors[i].toString(&this->currentFormat));
+    this->printoutPartialFractionsHtml << HtmlRoutines::getMathNoDisplay(this->allFactors[i].toString(&this->currentFormat));
     bool needsParenthesis = this->allFactors[i].needsParenthesisForMultiplication();
     if (needsParenthesis) {
-      this->printoutPFsLatex << "\\left(";
+      this->printoutPartialFractionsLatex << "\\left(";
     }
-    this->printoutPFsLatex << this->allFactors[i].toString(&this->currentFormat);
+    this->printoutPartialFractionsLatex << this->allFactors[i].toString(&this->currentFormat);
     if (needsParenthesis) {
-      this->printoutPFsLatex << "\\right)";
+      this->printoutPartialFractionsLatex << "\\right)";
     }
     if (i != this->allFactors.size - 1) {
-      this->printoutPFsHtml << ", ";
+      this->printoutPartialFractionsHtml << ", ";
     }
     if (this->allFactors[i].totalDegree() > 2) {
       allFactorsAreOfDegree2orless = false;
     }
   }
-  this->printoutPFsLatex << "}";
-  this->printoutPFsLatex << "\\]";
-  this->printoutPFsHtml << ". <br>";
+  this->printoutPartialFractionsLatex << "}";
+  this->printoutPartialFractionsLatex << "\\]";
+  this->printoutPartialFractionsHtml << ". <br>";
 }
 
 bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() {
@@ -1848,7 +1848,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     this->rationalFraction.expressionType == this->rationalFraction.typeConstant ||
     this->rationalFraction.expressionType == this->rationalFraction.typePolynomial
   ) {
-    this->printoutPFsHtml << this->rationalFraction.toString(&this->currentFormat)
+    this->printoutPartialFractionsHtml << this->rationalFraction.toString(&this->currentFormat)
     << " is already split into partial fractions. ";
     return true;
   }
@@ -1858,10 +1858,10 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
   PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationKronecker> factorization;
   if (!factorization.factor(
     this->denominator,
-    &this->printoutPFsHtml,
-    &this->printoutPFsHtml
+    &this->printoutPartialFractionsHtml,
+    &this->printoutPartialFractionsHtml
   )) {
-    this->printoutPFsHtml
+    this->printoutPartialFractionsHtml
     << "<hr>Failed to factor the denominator "
     << "of the rational function, I surrender. ";
     return false;
@@ -1881,12 +1881,12 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     << ", but the denominator equals: "
     << this->denominator.toString(&this->currentFormat) << ". " << global.fatal;
   }
-  this->printoutPFsLatex
+  this->printoutPartialFractionsLatex
   << "\\documentclass{article}\\usepackage{longtable}\\usepackage{xcolor}\\usepackage{multicol} "
   << "\\begin{document}";
   this->prepareDenominatorFactors();
   if (!allFactorsAreOfDegree2orless) {
-    this->printoutPFsHtml
+    this->printoutPartialFractionsHtml
     << "There were factors (over the rationals) of "
     << "degree greater than 2. I surrender. ";
     return false;
@@ -1901,7 +1901,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
   );
   this->needPolynomialDivision = !this->quotient.isEqualToZero();
   if (this->needPolynomialDivision) {
-    this->printoutPFsHtml << "<br>The numerator "
+    this->printoutPartialFractionsHtml << "<br>The numerator "
     << HtmlRoutines::getMathNoDisplay(this->numerator.toString(&this->currentFormat))
     << " divided by the denominator "
     << HtmlRoutines::getMathNoDisplay(denominator.toString(&this->currentFormat))
@@ -1918,10 +1918,10 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     computation.polynomialOrder.monomialOrder = monomialOrder;
     Polynomial<Rational> theNumCopy = this->numerator;
     computation.remainderDivisionByBasis(theNumCopy, computation.remainderDivision, - 1);
-    this->printoutPFsLatex << "Here is a detailed long polynomial division. ";
-    this->printoutPFsLatex << computation.divisionReport.getElement().getDivisionStringLaTeX();
-    this->printoutPFsHtml << "<br>Here is a detailed long polynomial division:<br> ";
-    this->printoutPFsHtml << computation.divisionReport.getElement().getDivisionStringHtml();
+    this->printoutPartialFractionsLatex << "Here is a detailed long polynomial division. ";
+    this->printoutPartialFractionsLatex << computation.divisionReport.getElement().getDivisionStringLaTeX();
+    this->printoutPartialFractionsHtml << "<br>Here is a detailed long polynomial division:<br> ";
+    this->printoutPartialFractionsHtml << computation.divisionReport.getElement().getDivisionStringHtml();
   }
   this->denominatorFactorsRationalWithMultiplicities.makeZero();
   for (int i = 0; i < this->allFactors.size; i ++) {
@@ -1952,9 +1952,9 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     if (!discriminantSqrt.assignRationalQuadraticRadical(
       discriminant,
       this->owner->objectContainer.algebraicClosure,
-      &this->printoutPFsHtml
+      &this->printoutPartialFractionsHtml
     )) {
-      this->printoutPFsHtml
+      this->printoutPartialFractionsHtml
       << "Failed to take radical of "
       << discriminant.toString()
       << " (radical too large?).";
@@ -1979,26 +1979,26 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     this->additionalMultiple *= a;
   }
   this->denominatorFactorsAlgebraicWithMultiplicities.quickSortAscending();
-  this->printoutPFsHtml << "<br><br>I need to find "
+  this->printoutPartialFractionsHtml << "<br><br>I need to find "
   << HtmlRoutines::getMathNoDisplay("A_i")
   << "'s so that I have the equality of rational functions: ";
-  this->printoutPFsLatex
+  this->printoutPartialFractionsLatex
   << "We need to find $A_i$'s so that we have the following equality of rational functions. ";
   this->prepareNumerators();
   this->prepareFormatExpressions();
-  this->printoutPFsHtml << HtmlRoutines::getMathNoDisplay(this->stringRationalFunctionLatex, - 1);
-  this->printoutPFsHtml << "<br><br>After clearing denominators, we get the equality: ";
-  this->printoutPFsLatex << "After clearing denominators, we get the following equality. ";
-  this->printoutPFsHtml << "<br><br>" << HtmlRoutines::getMathNoDisplay(this->stringPolyIndentityNonSimplifiedLatex, - 1);
-  this->printoutPFsLatex << "\\[" << this->stringPolyIndentityNonSimplifiedLatex << "\\]";
+  this->printoutPartialFractionsHtml << HtmlRoutines::getMathNoDisplay(this->stringRationalFunctionLatex, - 1);
+  this->printoutPartialFractionsHtml << "<br><br>After clearing denominators, we get the equality: ";
+  this->printoutPartialFractionsLatex << "After clearing denominators, we get the following equality. ";
+  this->printoutPartialFractionsHtml << "<br><br>" << HtmlRoutines::getMathNoDisplay(this->stringPolyIndentityNonSimplifiedLatex, - 1);
+  this->printoutPartialFractionsLatex << "\\[" << this->stringPolyIndentityNonSimplifiedLatex << "\\]";
   Polynomial<Polynomial<AlgebraicNumber> > univariateThatMustVanish;
   polynomialThatMustVanish.getPolynomialUnivariateWithPolynomialCoefficients(0, univariateThatMustVanish);
-  this->printoutPFsHtml << "<br><br>After rearranging we get that the following polynomial must vanish: "
+  this->printoutPartialFractionsHtml << "<br><br>After rearranging we get that the following polynomial must vanish: "
   << HtmlRoutines::getMathNoDisplay(univariateThatMustVanish.toString(&this->currentFormat));
-  this->printoutPFsLatex << "After rearranging we get that the following polynomial must vanish. Here, by ``vanish'' "
+  this->printoutPartialFractionsLatex << "After rearranging we get that the following polynomial must vanish. Here, by ``vanish'' "
   << "we mean that the coefficients of the powers of $x$ must be equal to zero."
   << "\\[" << univariateThatMustVanish.toString(&this->currentFormat) << "\\]";
-  this->printoutPFsHtml << "<br>Here, by ``vanish'', we mean that the coefficients in front of the powers of x must vanish.";
+  this->printoutPartialFractionsHtml << "<br>Here, by ``vanish'', we mean that the coefficients in front of the powers of x must vanish.";
   Matrix<AlgebraicNumber> homogenousSystem, theSystemHomogeneousForLaTeX, theConstTerms, theConstTermsForLaTeX;
   Polynomial<AlgebraicNumber>::getLinearSystemFromLinearPolynomials(
     univariateThatMustVanish.coefficients, homogenousSystem, theConstTerms
@@ -2006,14 +2006,14 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
   theSystemHomogeneousForLaTeX = homogenousSystem;
   theConstTermsForLaTeX = theConstTerms;
   this->currentFormat.flagFormatMatrixAsLinearSystem = true;
-  this->printoutPFsHtml << "<br>In other words, we need to solve the system: "
+  this->printoutPartialFractionsHtml << "<br>In other words, we need to solve the system: "
   << HtmlRoutines::getMathNoDisplay(homogenousSystem.toStringSystemLatex(&theConstTerms, &this->currentFormat), - 1);
-  this->printoutPFsLatex << "In other words, we need to solve the following system. "
+  this->printoutPartialFractionsLatex << "In other words, we need to solve the following system. "
   << "\\[" << homogenousSystem.toStringSystemLatex(&theConstTerms, &this->currentFormat) << "\\]";
   this->currentFormat.flagUseHTML = true;
-  homogenousSystem.gaussianEliminationByRows(&theConstTerms, nullptr, nullptr, &this->printoutPFsHtml, &this->currentFormat);
+  homogenousSystem.gaussianEliminationByRows(&theConstTerms, nullptr, nullptr, &this->printoutPartialFractionsHtml, &this->currentFormat);
   this->currentFormat.flagUseHTML = false;
-  theSystemHomogeneousForLaTeX.gaussianEliminationByRows(&theConstTermsForLaTeX, nullptr, nullptr, &this->printoutPFsLatex, &this->currentFormat);
+  theSystemHomogeneousForLaTeX.gaussianEliminationByRows(&theConstTermsForLaTeX, nullptr, nullptr, &this->printoutPartialFractionsLatex, &this->currentFormat);
   PolynomialSubstitution<AlgebraicNumber> substitution;
   substitution.makeIdentitySubstitution(this->numberOfSystemVariables + 1);
   for (int i = 1; i < substitution.size; i ++) {
@@ -2028,14 +2028,14 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     }
   }
   this->prepareFinalAnswer();
-  this->printoutPFsHtml << "<br>Therefore, the final partial fraction decomposition is: "
+  this->printoutPartialFractionsHtml << "<br>Therefore, the final partial fraction decomposition is: "
   << HtmlRoutines::getMathNoDisplay(this->stringFinalAnswer);
-  this->printoutPFsLatex << "Therefore, the final partial fraction decomposition is the following. "
+  this->printoutPartialFractionsLatex << "Therefore, the final partial fraction decomposition is the following. "
   << "\\[" << this->stringFinalAnswer << "\\]";
-  this->printoutPFsLatex << "\\end{document}";
-  this->printoutPFsHtml << "<hr>The present printout, in latex format, in ready form "
+  this->printoutPartialFractionsLatex << "\\end{document}";
+  this->printoutPartialFractionsHtml << "<hr>The present printout, in latex format, in ready form "
   << "for copy + paste to your latex editor, follows<hr> ";
-  this->printoutPFsHtml << this->printoutPFsLatex.str();
+  this->printoutPartialFractionsHtml << this->printoutPartialFractionsLatex.str();
   return true;
 }
 
@@ -2103,7 +2103,7 @@ bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorith
     << " I can handle only 1. ";
   }
   computation.computePartialFractionDecomposition();
-  return output.assignValue(computation.printoutPFsHtml.str(), calculator);
+  return output.assignValue(computation.printoutPartialFractionsHtml.str(), calculator);
 }
 
 bool CalculatorFunctions::gaussianEliminationMatrix(
@@ -3256,18 +3256,18 @@ bool CalculatorFunctions::innerCompareExpressionsNumerically(
   }
   Expression theFunE = input[1];
   theFunE -= input[2];
-  HashedList<Expression> theVars;
-  if (!theFunE.getFreeVariables(theVars, true)) {
+  HashedList<Expression> variables;
+  if (!theFunE.getFreeVariables(variables, true)) {
     return calculator << "Was not able to extract the function argument of your function. " ;
   }
-  if (theVars.size <= 0) {
+  if (variables.size <= 0) {
     Expression zeroE;
     zeroE.assignValue(0, calculator);
     return output.makeXOX(calculator, calculator.opEqualEqual(), theFunE, zeroE);
   }
   List<double> leftBoundaries;
   List<double> rightBoundaries;
-  HashedList<Expression> theBoundaryVars;
+  HashedList<Expression> boundaryVariables;
   List<int> numSamples;
   for (int i = 4; i < input.size(); i += 2) {
     const Expression& currentIntervalWithVariable = input[i];
@@ -3285,45 +3285,45 @@ bool CalculatorFunctions::innerCompareExpressionsNumerically(
     if (!currentIntervalWithVariable[2][2].evaluatesToDouble(&currentRight)) {
       return calculator << "Could not get a double from " << currentIntervalWithVariable[2][2].toString();
     }
-    if (theBoundaryVars.contains(currentIntervalWithVariable[1])) {
+    if (boundaryVariables.contains(currentIntervalWithVariable[1])) {
       return calculator << "Expression " << currentIntervalWithVariable[1].toString()
       << " specified an interval range more than once. ";
     }
-    theBoundaryVars.addOnTop(currentIntervalWithVariable[1]);
+    boundaryVariables.addOnTop(currentIntervalWithVariable[1]);
     leftBoundaries.addOnTop(currentLeft);
     rightBoundaries.addOnTop(currentRight);
     numSamples.addOnTop(10);
-    int currentNumSamplingPoints = 0;
+    int currentNumberOfSamplingPoints = 0;
     if (i + 1 < input.size()) {
-      if (input[i + 1].isSmallInteger(&currentNumSamplingPoints)) {
-        *numSamples.lastObject() = currentNumSamplingPoints;
+      if (input[i + 1].isSmallInteger(&currentNumberOfSamplingPoints)) {
+        *numSamples.lastObject() = currentNumberOfSamplingPoints;
       } else {
         return calculator << "Failed to extract a small integer for the number of sampling points from: "
         << input[i + 1].toString();
       }
       if (*numSamples.lastObject() > 1000) {
         return calculator << *numSamples.lastObject() << " sampling points requested for variable/expression "
-        << theBoundaryVars.lastObject()->toString() << "; this exceeds the hard-coded limit of 1000. ";
+        << boundaryVariables.lastObject()->toString() << "; this exceeds the hard-coded limit of 1000. ";
       }
       if (*numSamples.lastObject() < 1) {
         return calculator << *numSamples.lastObject() << " sampling points requested for variable/expression "
-        << theBoundaryVars.lastObject()->toString() << "; this is not allowed. ";
+        << boundaryVariables.lastObject()->toString() << "; this is not allowed. ";
       }
     }
   }
-  for (int i = 0; i < theVars.size; i ++) {
-    if (!theBoundaryVars.contains(theVars[i])) {
-      return calculator << "Could not find an interval for variable/expression: " << theVars[i].toString();
+  for (int i = 0; i < variables.size; i ++) {
+    if (!boundaryVariables.contains(variables[i])) {
+      return calculator << "Could not find an interval for variable/expression: " << variables[i].toString();
     }
   }
   HashedList<Expression> knownEs = calculator.knownDoubleConstants;
   List<double> knownValues = calculator.knownDoubleConstantValues;
-  for (int i = 0; i < theBoundaryVars.size; i ++) {
-    if (knownEs.contains(theBoundaryVars[i])) {
-      return calculator << theBoundaryVars[i]
+  for (int i = 0; i < boundaryVariables.size; i ++) {
+    if (knownEs.contains(boundaryVariables[i])) {
+      return calculator << boundaryVariables[i]
       << " is an already known constant and cannot be used as a variable in this context. ";
     } else {
-      knownEs.addOnTop(theBoundaryVars[i]);
+      knownEs.addOnTop(boundaryVariables[i]);
     }
   }
   knownValues.setSize(knownEs.size);
@@ -5794,7 +5794,7 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& calculator, const Ex
     plot.yHigh = MathRoutines::maximum(YValues[i], plot.yHigh);
   }
   plot.plotString = outLatex.str();
-  plot.thePlotStringWithHtml = outHtml.str();
+  plot.plotStringWithHtml = outHtml.str();
   plot.dimension = 2;
   return output.assignValue(plot, calculator);
 }
@@ -5976,127 +5976,127 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
   if (input.hasBoundVariables()) {
     return false;
   }
-  Plot thePlot;
-  thePlot.dimension = 2;
-  PlotObject thePlotObj;
-  thePlotObj.leftPtE = input[2];
-  thePlotObj.rightPtE = input[3];
+  Plot plot;
+  plot.dimension = 2;
+  PlotObject plotObject;
+  plotObject.leftPtE = input[2];
+  plotObject.rightPtE = input[3];
   if (input.size() >= 5) {
-    if (!input[4].isOfType<std::string>(&thePlotObj.colorJS)) {
-      thePlotObj.colorJS = input[4].toString();
+    if (!input[4].isOfType<std::string>(&plotObject.colorJS)) {
+      plotObject.colorJS = input[4].toString();
     }
   } else {
-    thePlotObj.colorJS = "red";
+    plotObject.colorJS = "red";
   }
-  thePlotObj.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(255, 0, 0));
-  DrawingVariables::getColorIntFromColorString(thePlotObj.colorJS, thePlotObj.colorRGB);
-  thePlotObj.lineWidth = 1;
+  plotObject.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(255, 0, 0));
+  DrawingVariables::getColorIntFromColorString(plotObject.colorJS, plotObject.colorRGB);
+  plotObject.lineWidth = 1;
   if (input.size() >= 6) {
-    input[5].evaluatesToDouble(&thePlotObj.lineWidth);
+    input[5].evaluatesToDouble(&plotObject.lineWidth);
   }
   if (input.size() >= 7) {
-    thePlotObj.numSegmentsE = input[6];
+    plotObject.numSegmentsE = input[6];
   } else {
-    thePlotObj.numSegmentsE.assignValue(500, calculator);
+    plotObject.numSegmentsE.assignValue(500, calculator);
   }
   int numIntervals = - 1;
-  if (!thePlotObj.numSegmentsE.isSmallInteger(&numIntervals)) {
+  if (!plotObject.numSegmentsE.isSmallInteger(&numIntervals)) {
     numIntervals = 500;
   }
   if (numIntervals < 2) {
     numIntervals = 2;
   }
-  bool leftIsDouble = thePlotObj.leftPtE.evaluatesToDouble(&thePlotObj.xLow);
-  bool rightIsDouble = thePlotObj.rightPtE.evaluatesToDouble(&thePlotObj.xHigh);
+  bool leftIsDouble = plotObject.leftPtE.evaluatesToDouble(&plotObject.xLow);
+  bool rightIsDouble = plotObject.rightPtE.evaluatesToDouble(&plotObject.xHigh);
   if (!leftIsDouble) {
-    if (thePlotObj.leftPtE != calculator.expressionMinusInfinity()) {
+    if (plotObject.leftPtE != calculator.expressionMinusInfinity()) {
       return calculator
       << "Couldn't convert left boundary "
-      << thePlotObj.leftPtE.toString() << " to floating point number. ";
+      << plotObject.leftPtE.toString() << " to floating point number. ";
     } else {
-      thePlotObj.leftBoundaryIsMinusInfinity = true;
+      plotObject.leftBoundaryIsMinusInfinity = true;
     }
   }
   if (!rightIsDouble) {
-    if (thePlotObj.rightPtE != calculator.expressionInfinity()) {
+    if (plotObject.rightPtE != calculator.expressionInfinity()) {
       return calculator
       << "Couldn't convert right boundary "
-      << thePlotObj.rightPtE.toString() << " to floating point number. ";
+      << plotObject.rightPtE.toString() << " to floating point number. ";
     } else {
-      thePlotObj.rightBoundaryIsMinusInfinity = true;
+      plotObject.rightBoundaryIsMinusInfinity = true;
     }
   }
-  thePlotObj.coordinateFunctionsE.addOnTop(input[1]);
-  thePlotObj.coordinateFunctionsJS.setSize(1);
-  thePlotObj.coordinateFunctionsE[0].getFreeVariables(thePlotObj.variablesInPlay, true);
-  if (thePlotObj.variablesInPlay.size > 1) {
+  plotObject.coordinateFunctionsE.addOnTop(input[1]);
+  plotObject.coordinateFunctionsJS.setSize(1);
+  plotObject.coordinateFunctionsE[0].getFreeVariables(plotObject.variablesInPlay, true);
+  if (plotObject.variablesInPlay.size > 1) {
     return calculator << "Got a function with "
-    << thePlotObj.variablesInPlay.size
+    << plotObject.variablesInPlay.size
     << " variables, namely: "
-    << thePlotObj.variablesInPlay.toStringCommaDelimited()
+    << plotObject.variablesInPlay.toStringCommaDelimited()
     << ". I was expecting a single variable. ";
   }
-  if (thePlotObj.variablesInPlay.size == 0) {
+  if (plotObject.variablesInPlay.size == 0) {
     Expression xE;
     xE.makeAtom("x", calculator);
-    thePlotObj.variablesInPlay.addOnTop(xE);
+    plotObject.variablesInPlay.addOnTop(xE);
   }
-  thePlotObj.variablesInPlayJS.setSize(thePlotObj.variablesInPlay.size);
-  thePlotObj.variablesInPlayJS[0] = thePlotObj.variablesInPlay[0].toString();
-  std::string theVarString = thePlotObj.variablesInPlayJS[0];
+  plotObject.variablesInPlayJS.setSize(plotObject.variablesInPlay.size);
+  plotObject.variablesInPlayJS[0] = plotObject.variablesInPlay[0].toString();
+  std::string variableString = plotObject.variablesInPlayJS[0];
   Expression jsConverterE;
-  thePlotObj.plotType = "plotFunction";
+  plotObject.plotType = "plotFunction";
   if (CalculatorFunctions::functionMakeJavascriptExpression(
-    calculator, thePlotObj.coordinateFunctionsE[0], jsConverterE
+    calculator, plotObject.coordinateFunctionsE[0], jsConverterE
   )) {
-    thePlotObj.coordinateFunctionsJS[0] = jsConverterE.toString();
-    thePlotObj.coordinateFunctionsE[0].hasInputBoxVariables(
-      &thePlotObj.parametersInPlay, &thePlotObj.parametersInPlayJS
+    plotObject.coordinateFunctionsJS[0] = jsConverterE.toString();
+    plotObject.coordinateFunctionsE[0].hasInputBoxVariables(
+      &plotObject.parametersInPlay, &plotObject.parametersInPlayJS
     );
   } else {
-    thePlotObj.plotType = "plotFunctionPrecomputed";
+    plotObject.plotType = "plotFunctionPrecomputed";
   }
   if (CalculatorFunctions::functionMakeJavascriptExpression(
-    calculator, thePlotObj.leftPtE, jsConverterE
+    calculator, plotObject.leftPtE, jsConverterE
   )) {
-    thePlotObj.leftPtJS = jsConverterE.toString();
-    thePlotObj.leftPtE.hasInputBoxVariables(
-      &thePlotObj.parametersInPlay, &thePlotObj.parametersInPlayJS
+    plotObject.leftPtJS = jsConverterE.toString();
+    plotObject.leftPtE.hasInputBoxVariables(
+      &plotObject.parametersInPlay, &plotObject.parametersInPlayJS
     );
   } else {
-    thePlotObj.plotType = "plotFunctionPrecomputed";
+    plotObject.plotType = "plotFunctionPrecomputed";
   }
   if (CalculatorFunctions::functionMakeJavascriptExpression(
-    calculator, thePlotObj.rightPtE, jsConverterE
+    calculator, plotObject.rightPtE, jsConverterE
   )) {
-    thePlotObj.rightPtJS = jsConverterE.toString();
-    thePlotObj.rightPtE.hasInputBoxVariables(
-      &thePlotObj.parametersInPlay, &thePlotObj.parametersInPlayJS
+    plotObject.rightPtJS = jsConverterE.toString();
+    plotObject.rightPtE.hasInputBoxVariables(
+      &plotObject.parametersInPlay, &plotObject.parametersInPlayJS
     );
   } else {
-    thePlotObj.plotType = "plotFunctionPrecomputed";
+    plotObject.plotType = "plotFunctionPrecomputed";
   }
-  thePlotObj.numberOfSegmentsJS.setSize(1);
-  thePlotObj.numberOfSegmentsJS[0] = "200";
+  plotObject.numberOfSegmentsJS.setSize(1);
+  plotObject.numberOfSegmentsJS[0] = "200";
   if (CalculatorFunctions::functionMakeJavascriptExpression(
-    calculator, thePlotObj.numSegmentsE, jsConverterE
+    calculator, plotObject.numSegmentsE, jsConverterE
   )) {
-    thePlotObj.numberOfSegmentsJS[0] = jsConverterE.toString();
-    thePlotObj.numSegmentsE.hasInputBoxVariables(
-      &thePlotObj.parametersInPlay, &thePlotObj.parametersInPlayJS
+    plotObject.numberOfSegmentsJS[0] = jsConverterE.toString();
+    plotObject.numSegmentsE.hasInputBoxVariables(
+      &plotObject.parametersInPlay, &plotObject.parametersInPlayJS
     );
   } else {
-    thePlotObj.plotType = "plotFunctionPrecomputed";
+    plotObject.plotType = "plotFunctionPrecomputed";
   }
-  Vectors<double>& thePointsDouble = thePlotObj.pointsDouble;
-  if (thePlotObj.parametersInPlay.size == 0) {
+  Vectors<double>& thePointsDouble = plotObject.pointsDouble;
+  if (plotObject.parametersInPlay.size == 0) {
     if (!input[1].evaluatesToDoubleInRange(
-      theVarString,
-      thePlotObj.xLow,
-      thePlotObj.xHigh,
+      variableString,
+      plotObject.xLow,
+      plotObject.xHigh,
       numIntervals,
-      &thePlotObj.yLow,
-      &thePlotObj.yHigh,
+      &plotObject.yLow,
+      &plotObject.yHigh,
       &thePointsDouble
     )) {
       bool hasOneGoodPoint = false;
@@ -6120,18 +6120,18 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
     calculator << "No LaTeX version: failed to convert: "
     << input[1].toString() << " to postfix notation. ";
   } else {
-    thePlotObj.plotString = thePlotObj.
+    plotObject.plotString = plotObject.
     getPlotStringFromFunctionStringAndRanges(
       false,
       functionSuffixNotationE.toString(),
-      thePlotObj.coordinateFunctionsE[0].toString(),
-      thePlotObj.xLow,
-      thePlotObj.xHigh
+      plotObject.coordinateFunctionsE[0].toString(),
+      plotObject.xLow,
+      plotObject.xHigh
     );
-    thePlotObj.thePlotStringWithHtml = thePlotObj.plotString;
+    plotObject.plotStringWithHtml = plotObject.plotString;
   }
-  thePlot += thePlotObj;
-  return output.assignValue(thePlot, calculator);
+  plot += plotObject;
+  return output.assignValue(plot, calculator);
 }
 
 bool CalculatorFunctionsPlot::plotPoint(Calculator& calculator, const Expression& input, Expression& output) {
@@ -6342,7 +6342,7 @@ bool CalculatorFunctionsPlot::plot2DWithBars(Calculator& calculator, const Expre
   outHtml << "<br>";
   PlotObject thePlot;
   thePlot.plotString = outTex.str();
-  thePlot.thePlotStringWithHtml = outHtml.str();
+  thePlot.plotStringWithHtml = outHtml.str();
   thePlot.xLow = lowerBound;
   thePlot.xHigh = upperBound;
   thePlot.yLow = yMin;
@@ -6535,7 +6535,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     << theConvertedExpressions[0].getValue<std::string>()
     << theConvertedExpressions[1].getValue<std::string>() << "}";
     plot.plotString= outLatex.str();
-    plot.thePlotStringWithHtml = outHtml.str();
+    plot.plotStringWithHtml = outHtml.str();
   }
   Expression converterE;
   plot.plotType = "parametricCurve";

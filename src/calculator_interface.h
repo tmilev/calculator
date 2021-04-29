@@ -937,7 +937,7 @@ public:
 
   std::string plotString;
   std::string fillStyle;
-  std::string thePlotStringWithHtml;
+  std::string plotStringWithHtml;
   double xLow;
   double xHigh;
   double yLow;

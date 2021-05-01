@@ -53,7 +53,7 @@ public:
   // needed
   List<Vector<Rational> > characterTable;
 
-  AnotherWeylGroup():sizePrivate(- 1){}
+  AnotherWeylGroup() : sizePrivate(- 1){}
   int getRank() const; // idk lol
   void simpleReflection(int i, const templateVector& v, templateVector& out) const;
   void simpleReflection(int i, templateVector& v) const;
@@ -78,7 +78,7 @@ public:
   Matrix<Rational>& getClassMatrix(int cc);
   void computeClassMatrices(); // O(W.size)
   void computeTauSignatures();
-  Rational getHermitianProduct(const Vector<Rational>& X1, const Vector<Rational>& X2) const;
+  Rational getHermitianProduct(const Vector<Rational>& left, const Vector<Rational>& right) const;
 
   int getRootReflection(int i) const;
   void getSignCharacter(Vector<Rational>& out);
@@ -401,16 +401,15 @@ void AnotherWeylGroup<scalar, templateVector>::getSignCharacter(Vector<Rational>
 
 // there are like 3 copies of this function with slightly different argument types
 template <typename scalar, typename templateVector>
-Rational AnotherWeylGroup<scalar, templateVector>::getHermitianProduct(const Vector<Rational>& X1, const Vector<Rational>& X2) const {
+Rational AnotherWeylGroup<scalar, templateVector>::getHermitianProduct(const Vector<Rational>& left, const Vector<Rational>& right) const {
   Rational acc = 0;
-  for (int i = 0; i < X1.size; i ++) {
-    acc += X1[i].getComplexConjugate() * X2[i] * this->conjugacyClasses[i].size;
+  for (int i = 0; i < left.size; i ++) {
+    acc += left[i].getComplexConjugate() * right[i] * this->conjugacyClasses[i].size;
   }
   return acc / this->size();
 }
 
 List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkDivisorsOf = 0);
-
 
 template <typename Coefficient>
 List<VectorSpace<Coefficient> > getEigenspaces(const Matrix<Coefficient>& M) {
@@ -595,7 +594,7 @@ void getTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup>
     bool notFound = true;
     for (int ci = 0; notFound && ci < G.theGroup.conjugacyClassCount(); ci ++) {
       for (int cj = 0; notFound && cj < G.theGroup.conjugacyClasses[ci].size; cj ++) {
-        if (G.theGroup.conjugacyClasses[ci].theElements[cj] == H.conjugacyClasses[i].representative) {
+        if (G.theGroup.conjugacyClasses[ci].elements[cj] == H.conjugacyClasses[i].representative) {
           ccPreimages[i] = ci;
           notFound = false;
         }

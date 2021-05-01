@@ -82,7 +82,7 @@ public:
     return out.str();
   }
   std::string toStringLetterFormat(
-    const std::string& inputLetter, FormatExpressions* format = nullptr, bool DontIncludeLastVar = false
+    const std::string& inputLetter, FormatExpressions* format = nullptr, bool dontIncludeLastVar = false
   ) const;
   std::string toStringEpsilonFormat(FormatExpressions* format = nullptr) const {
     return this->toStringLetterFormat("\\varepsilon", format);
@@ -707,7 +707,7 @@ class Vectors: public List<Vector<Coefficient> > {
     return out.str();
   }
   std::string toInequalitiesString(
-    bool useLatex, bool useHtml, bool LastVarIsConstant, FormatExpressions& theFormat
+    bool useLatex, bool useHtml, bool lastVariableIsConstant, FormatExpressions& format
   ) const;
   std::string toString(FormatExpressions* format = nullptr) const;
   bool linearAlgebraForVertexComputation(

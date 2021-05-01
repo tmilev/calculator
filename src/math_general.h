@@ -145,7 +145,7 @@ public:
   }
   bool simplifyEqualConsecutiveGenerators(int lowestNonReducedIndex);
   void multiplyByGeneratorPowerOnTheRight(int generatorIndex, const Coefficient& power);
-  void multiplyByGeneratorPowerOnTheLeft(int theGeneratorIndexStandsToTheLeft, const Coefficient& thePower);
+  void multiplyByGeneratorPowerOnTheLeft(int generatorIndexStandsToTheLeft, const Coefficient& power);
   unsigned int hashFunction() const {
     int top = MathRoutines::minimum(someRandomPrimesSize, this->generatorsIndices.size);
     unsigned int result = 0;
@@ -785,7 +785,7 @@ public:
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringLatex(FormatExpressions* format = nullptr) const;
   std::string toStringSystemLatex(
-    Matrix<Coefficient>* constTerms = 0,
+    Matrix<Coefficient>* constantTerms = 0,
     FormatExpressions* format = nullptr
   ) const;
   std::string toStringPlainText(bool jsonFormat = false) const;
@@ -3977,7 +3977,7 @@ public:
   }
   bool needsParenthesisForMultiplication() const;
   Vector<Coefficient> getCartanPart() const;
-  void makeGGenerator(const Vector<Rational>& theRoot, SemisimpleLieAlgebra& inputOwner);
+  void makeGGenerator(const Vector<Rational>& root, SemisimpleLieAlgebra& inputOwner);
   bool isElementCartan() const;
   void makeCartanGenerator(const Vector<Coefficient>& elementH, SemisimpleLieAlgebra& inputOwners);
   void makeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner);
@@ -4009,16 +4009,16 @@ public:
     return true;
   }
   static void getBasisFromSpanOfElements(
-    List<ElementSemisimpleLieAlgebra>& theElements,
-    List<ElementSemisimpleLieAlgebra>& outputTheBasis
+    List<ElementSemisimpleLieAlgebra>& elements,
+    List<ElementSemisimpleLieAlgebra>& outputBasis
   );
   void actOnMe(
-    const ElementSemisimpleLieAlgebra& theElt,
+    const ElementSemisimpleLieAlgebra& element,
     ElementSemisimpleLieAlgebra& output,
     SemisimpleLieAlgebra& owner
   );
   void actOnMe(
-    const ElementSemisimpleLieAlgebra& theElt,
+    const ElementSemisimpleLieAlgebra& element,
     ElementSemisimpleLieAlgebra& output,
     SemisimpleLieAlgebra& owner,
     const RationalFraction<Rational>& ringUnit,
@@ -4026,10 +4026,10 @@ public:
   );
   bool isCoefficientOneChevalleyGenerator();
   bool isProportionalTo(const ElementSemisimpleLieAlgebra& other) const {
-    Vector<Rational> tempRoot1, tempRoot2;
-    this->elementToVectorNegativeRootSpacesFirst(tempRoot1);
-    other.elementToVectorNegativeRootSpacesFirst(tempRoot2);
-    return tempRoot1.isProportionalTo(tempRoot2);
+    Vector<Rational> left, right;
+    this->elementToVectorNegativeRootSpacesFirst(left);
+    other.elementToVectorNegativeRootSpacesFirst(right);
+    return left.isProportionalTo(right);
   }
   bool isProportionalTo(const ElementSemisimpleLieAlgebra& other, Rational& outputTimesMeEqualsInput) const {
     Vector<Rational> tempRoot1, tempRoot2;
@@ -4141,10 +4141,10 @@ Coefficient Matrix<Coefficient>::getTrace() const {
 
 template <class Coefficient>
 Matrix<Coefficient> Matrix<Coefficient>::operator*(const Matrix<Coefficient>& right) const {
-  Matrix<Coefficient> tempMat;
-  tempMat = right;
-  tempMat.multiplyOnTheLeft(*this);
-  return tempMat;
+  Matrix<Coefficient> matrix;
+  matrix = right;
+  matrix.multiplyOnTheLeft(*this);
+  return matrix;
 }
 
 template <class Coefficient>
@@ -4335,15 +4335,15 @@ void Matrix<Coefficient>::getZeroEigenSpaceModifyMe(List<Vector<Coefficient> >& 
     }
     return;
   }
-  Selection nonPivotPts;
-  this->gaussianEliminationByRows(0, &nonPivotPts);
-  output.setSize(nonPivotPts.cardinalitySelection);
-  for (int i = 0; i < nonPivotPts.cardinalitySelection; i ++) {
-    int currentPivotIndex = nonPivotPts.elements[i];
+  Selection nonPivotPoints;
+  this->gaussianEliminationByRows(0, &nonPivotPoints);
+  output.setSize(nonPivotPoints.cardinalitySelection);
+  for (int i = 0; i < nonPivotPoints.cardinalitySelection; i ++) {
+    int currentPivotIndex = nonPivotPoints.elements[i];
     output[i].makeEi(this->numberOfColumns, currentPivotIndex);
     int rowCounter = 0;
     for (int j = 0; j < this->numberOfColumns; j ++) {
-      if (!nonPivotPts.selected[j]) {
+      if (!nonPivotPoints.selected[j]) {
         output[i][j] -= this->elements[rowCounter][currentPivotIndex];
         rowCounter ++;
       }
@@ -4397,15 +4397,15 @@ std::string Vectors<Coefficient>::toString(FormatExpressions* format) const {
 }
 
 template <class Object>
-void List<Object>::subSelection(const Selection& theSelection, List<Object>& output) {
+void List<Object>::subSelection(const Selection& selection, List<Object>& output) {
   if (&output == this) {
     List<Object> thisCopy = *this;
-    thisCopy.subSelection(theSelection, output);
+    thisCopy.subSelection(selection, output);
     return;
   }
-  output.setSize(theSelection.cardinalitySelection);
-  for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
-    output[i] = (*this)[theSelection.elements[i]];
+  output.setSize(selection.cardinalitySelection);
+  for (int i = 0; i < selection.cardinalitySelection; i ++) {
+    output[i] = (*this)[selection.elements[i]];
   }
 }
 
@@ -4429,7 +4429,7 @@ void List<Object>::intersectWith(const List<Object>& other, List<Object>& output
 
 template <class Coefficient>
 std::string Vector<Coefficient>::toStringLetterFormat(
-  const std::string& inputLetter, FormatExpressions* format, bool DontIncludeLastVar
+  const std::string& inputLetter, FormatExpressions* format, bool dontIncludeLastVar
 ) const {
   if (this->isEqualToZero()) {
     return "0";
@@ -4437,8 +4437,8 @@ std::string Vector<Coefficient>::toStringLetterFormat(
   std::stringstream out;
   std::string tempS;
   bool found = false;
-  int NumVars = DontIncludeLastVar ? this->size - 1 : this->size;
-  for (int i = 0; i < NumVars; i ++) {
+  int numberOfVariables = dontIncludeLastVar ? this->size - 1 : this->size;
+  for (int i = 0; i < numberOfVariables; i ++) {
     if (!this->objects[i].isEqualToZero()) {
       tempS = (*this)[i].toString(format);
       if ((*this)[i].needsParenthesisForMultiplication(format)) {
@@ -4475,17 +4475,17 @@ std::string Vector<Coefficient>::toStringLetterFormat(
 
 template <class Coefficient, unsigned int inputHashFunction(const Coefficient&)>
 void MonomialTensor<Coefficient, inputHashFunction>::multiplyByGeneratorPowerOnTheLeft(
-  int theGeneratorIndexStandsOnTheLeft, const Coefficient& thePower
+  int generatorIndexStandsToTheLeft, const Coefficient& power
 ) {
-  if (thePower == 0) {
+  if (power == 0) {
     return;
   }
   List<int> newGeneratorIndices;
   List<Coefficient> newPowers;
   newGeneratorIndices.setExpectedSize(this->generatorsIndices.size + 1);
   newPowers.setExpectedSize(this->generatorsIndices.size + 1);
-  newGeneratorIndices.addOnTop(theGeneratorIndexStandsOnTheLeft);
-  newPowers.addOnTop(thePower);
+  newGeneratorIndices.addOnTop(generatorIndexStandsToTheLeft);
+  newPowers.addOnTop(power);
   newGeneratorIndices.addListOnTop(this->generatorsIndices);
   newPowers.addListOnTop(this->powers);
   this->generatorsIndices = newGeneratorIndices;
@@ -4566,11 +4566,11 @@ std::string Matrix<Coefficient>::toStringLatex(FormatExpressions* format) const 
 
 template <typename Coefficient>
 std::string Matrix<Coefficient>::toStringSystemLatex(
-  Matrix<Coefficient>* constTerms, FormatExpressions* format
+  Matrix<Coefficient>* constantTerms, FormatExpressions* format
 ) const {
   std::stringstream out;
   bool constTermsAreGood =
-  (constTerms == 0) ? false : (constTerms->numberOfRows == this->numberOfRows && constTerms->numberOfColumns > 0);
+  (constantTerms == 0) ? false : (constantTerms->numberOfRows == this->numberOfRows && constantTerms->numberOfColumns > 0);
   out << "\\begin{array}{l";
   for (int j = 0; j < this->numberOfColumns; j ++) {
     out << "l";
@@ -4602,7 +4602,7 @@ std::string Matrix<Coefficient>::toStringSystemLatex(
     if (!constTermsAreGood) {
       out << "0";
     } else {
-      out << (*constTerms)(i, 0).toString(format);
+      out << (*constantTerms)(i, 0).toString(format);
     }
     out << "\\\\";
   }
@@ -4959,10 +4959,10 @@ public:
     Vector<Rational>& input, Vector<Rational>& output
   );
   void getRougherLatticeFromAffineHyperplaneDirectionAndLattice(
-    const Vector<Rational>& theDirection,
+    const Vector<Rational>& direction,
     Vector<Rational>& outputDirectionMultipleOnLattice,
-    Vector<Rational>& theShift,
-    Vector<Rational>& theAffineHyperplane,
+    Vector<Rational>& shift,
+    Vector<Rational>& affineHyperplane,
     Vectors<Rational>& outputRepresentatives,
     Vectors<Rational>& movementInDirectionPerRepresentative,
     Lattice& outputRougherLattice
@@ -6664,7 +6664,10 @@ public:
   std::string ElementModuleIndexToString(int input, bool useHtml);
   std::string GetNotationString(bool useHtml);
   bool computeInvariantsOfDegree(
-    List<int>& decompositionDimensions, int theDegree, List<Polynomial<Rational> >& output, std::string& outputError
+    List<int>& decompositionDimensions,
+    int degree,
+    List<Polynomial<Rational> >& output,
+    std::string& outputError
   );
   std::string pairTwoIndices(List<int>& output, int leftIndex, int rightIndex, bool useHtml);
   void extractHighestWeightVectorsFromVector(
@@ -6698,21 +6701,21 @@ void Matrix<Coefficient>::getVectorFromColumn(int columnIndex, Vector<Coefficien
 
 class KazhdanLusztigPolynomials: public HashedList<Vector<Rational> > {
 public:
-  WeylGroupData* TheWeylGroup;
-  List<int> TheMultiplicities;
-  List<bool> Explored;
-  int NextToExplore;
-  int LowestNonExplored;
-  List<List<int> > BruhatOrder;
-  List<List<int> > SimpleReflectionsActionList;
-  List<List<int> > InverseBruhatOrder;
-  List<List<Polynomial<Rational> > > theKLPolys;
-  List<List<Polynomial<Rational> > > theRPolys;
-  List<List<Rational> > theKLcoeffs;
-  void KLcoeffsToString(List<int>& theKLCoeffs, std::string& output);
+  WeylGroupData* weylGroup;
+  List<int> multiplicities;
+  List<bool> explored;
+  int nextToExplore;
+  int lowestNonExplored;
+  List<List<int> > bruhatOrder;
+  List<List<int> > simpleReflectionsActionList;
+  List<List<int> > inverseBruhatOrder;
+  List<List<Polynomial<Rational> > > kazhdanLuzstigPolynomials;
+  List<List<Polynomial<Rational> > > rPolynomials;
+  List<List<Rational> > kazhdanLuzstigCoefficients;
+  void kazhdanLuzstigCoefficientsToString(List<int>& kazhdanLuzstigCoefficients, std::string& output);
   void findNextToExplore();
-  int findMinimalBruhatNonExplored(List<bool>& theExplored);
-  int findMaximalBruhatNonExplored(List<bool>& theExplored);
+  int findMinimalBruhatNonExplored(List<bool>& explored);
+  int findMaximalBruhatNonExplored(List<bool>& explored);
   void initTheMults();
   void compute(int x);
   void check();
@@ -6735,7 +6738,7 @@ public:
   //returns the topIndex of the KL coefficients
   int readKLCoeffsFromFile(std::fstream& input, List<int>& output);
   KazhdanLusztigPolynomials() {
-    this->TheWeylGroup = nullptr;
+    this->weylGroup = nullptr;
   }
   void generatePartialBruhatOrder();
   void initFromWeyl(WeylGroupData* theWeylGroup);
@@ -6800,13 +6803,13 @@ void PolynomialSubstitution<Coefficient>::makeLinearSubstitutionConstantTermsLas
   Matrix<Coefficient>& matrix
 ) {
   this->setSize(matrix.numberOfColumns);
-  MonomialPolynomial tempM;
+  MonomialPolynomial monomial;
   for (int i = 0; i < this->size; i ++) {
     this->objects[i].makeZero();
     for (int j = 0; j < matrix.numberOfRows - 1; j ++) {
-      tempM.makeOne();
-      tempM.setVariable(j, 1);
-      this->objects[i].addMonomial(tempM, matrix.elements[j][i]);
+      monomial.makeOne();
+      monomial.setVariable(j, 1);
+      this->objects[i].addMonomial(monomial, matrix.elements[j][i]);
     }
     this->objects[i] += matrix.elements[matrix.numberOfRows - 1][i];
   }
@@ -6826,19 +6829,19 @@ void Vectors<Coefficient>::intersectTwoLinearSpaces(
     output.size = 0;
     return;
   }
-  int theDim = firstReduced[0].size;
-  Matrix<Coefficient> theMat;
-  theMat.initialize(theDim, firstReduced.size + secondReduced.size);
-  for (int i = 0; i < theDim; i ++) {
+  int dimension = firstReduced[0].size;
+  Matrix<Coefficient> matrix;
+  matrix.initialize(dimension, firstReduced.size + secondReduced.size);
+  for (int i = 0; i < dimension; i ++) {
     for (int j = 0; j < firstReduced.size; j ++) {
-      theMat(i, j) = firstReduced[j][i];
+      matrix(i, j) = firstReduced[j][i];
     }
     for (int j = 0; j < secondReduced.size; j ++) {
-      theMat(i, firstReduced.size + j) = 0;
-      theMat(i, firstReduced.size + j) -= secondReduced[j][i];
+      matrix(i, firstReduced.size + j) = 0;
+      matrix(i, firstReduced.size + j) -= secondReduced[j][i];
     }
   }
-  theMat.gaussianEliminationByRows(0, &tempSel);
+  matrix.gaussianEliminationByRows(0, &tempSel);
   output.reserve(tempSel.cardinalitySelection);
   output.size = 0;
   Vector<Coefficient> nextIntersection;
@@ -6847,10 +6850,10 @@ void Vectors<Coefficient>::intersectTwoLinearSpaces(
     if (currentIndex < firstReduced.size) {
       global.fatal << "Unexpected condition in Vectors::intersectTwoLinearSpaces. " << global.fatal;
     }
-    nextIntersection.makeZero(theDim);
+    nextIntersection.makeZero(dimension);
     for (int j = 0; j < firstReduced.size; j ++) {
       if (!tempSel.selected[j]) {
-        nextIntersection += firstReduced[j] * theMat.elements[j][currentIndex];
+        nextIntersection += firstReduced[j] * matrix.elements[j][currentIndex];
       }
     }
     output.addOnTop(nextIntersection);
@@ -6863,17 +6866,17 @@ bool Matrix<Coefficient>::isPositiveDefinite() {
     global.fatal << "Attempting to evaluate whether a matrix "
     << "is positive definite, but the matrix is not square. " << global.fatal;
   }
-  Coefficient det;
-  Matrix<Coefficient> tempMat;
+  Coefficient determinant;
+  Matrix<Coefficient> topLeftCorner;
   for (int i = 0; i < this->numberOfRows; i ++) {
-    tempMat.initialize(i + 1, i + 1);
-    for (int j = 0; j < tempMat.numberOfColumns; j ++) {
-      for (int k = 0; k < tempMat.numberOfColumns; k ++) {
-        tempMat.elements[j][k] = this->elements[j][k];
+    topLeftCorner.initialize(i + 1, i + 1);
+    for (int j = 0; j < topLeftCorner.numberOfColumns; j ++) {
+      for (int k = 0; k < topLeftCorner.numberOfColumns; k ++) {
+        topLeftCorner.elements[j][k] = this->elements[j][k];
       }
     }
-    det = tempMat.getDeterminant();
-    if (det <= 0) {
+    determinant = topLeftCorner.getDeterminant();
+    if (determinant <= 0) {
       return false;
     }
   }
@@ -6912,7 +6915,7 @@ void ElementSemisimpleLieAlgebra<Coefficient>::makeGenerator(int generatorIndex,
 
 template <class Coefficient>
 std::string Vectors<Coefficient>::toInequalitiesString(
-  bool useLatex, bool useHtml, bool LastVarIsConstant, FormatExpressions& theFormat
+  bool useLatex, bool useHtml, bool lastVariableIsConstant, FormatExpressions& format
 ) const {
   std::stringstream out;
   std::string tempS;
@@ -6921,12 +6924,12 @@ std::string Vectors<Coefficient>::toInequalitiesString(
   }
   for (int i = 0; i < this->size; i ++) {
     Vector<Rational>& current = (*this)[i];
-    tempS = current.toStringLetterFormat(theFormat.polyDefaultLetter, &theFormat, LastVarIsConstant);
+    tempS = current.toStringLetterFormat(format.polyDefaultLetter, &format, lastVariableIsConstant);
     if (tempS == "") {
       out << "(0";
     }
     out << tempS;
-    if (!LastVarIsConstant) {
+    if (!lastVariableIsConstant) {
       if (useLatex) {
         out << "\\geq 0\\\\";
       } else {

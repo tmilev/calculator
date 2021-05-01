@@ -45,7 +45,7 @@ ElementWeylGroup WeylGroupData::simpleConjugation(int i, const ElementWeylGroup&
   (void) vv;
   ElementWeylGroup eltSimpleReflection;
   eltSimpleReflection.makeSimpleReflection(i, *this);
-  return eltSimpleReflection * this->theGroup.theElements[i] * eltSimpleReflection;
+  return eltSimpleReflection * this->theGroup.elements[i] * eltSimpleReflection;
 }
 
 template <typename elementSomeGroup>
@@ -875,8 +875,8 @@ Matrix<Rational> matrixInBasis(
     for (int i2 = 0; i2 < X.G->conjugacyClasses[i1].size; i2 ++) {
       for (int j = 0; j < X.G->getSize(); j ++) {
         for (int k = 0; k < B.size; k ++) {
-          int l = X.G->theElements.getIndex(
-            X.G->conjugacyClasses[i1].theElements[i2] * X.G->theElements[j]
+          int l = X.G->elements.getIndex(
+            X.G->conjugacyClasses[i1].elements[i2] * X.G->elements[j]
           );
           rows[k][l] = X.data[i1] * B[k][j];
         }
@@ -900,7 +900,7 @@ ElementMonomialAlgebra<ElementWeylGroup, Rational> FromClassFunction(
   ElementMonomialAlgebra<ElementWeylGroup, Rational> out;
   for (int i = 0; i < X.G->conjugacyClassCount(); i ++) {
     for (int j = 0; j < X.G->conjugacyClasses[i].size; j ++) {
-      out.addMonomial(X.G->conjugacyClasses[i].theElements[j], X.data[i]);
+      out.addMonomial(X.G->conjugacyClasses[i].elements[j], X.data[i]);
     }
   }
   return out;
@@ -1058,7 +1058,7 @@ void SubgroupDataRootReflections::initializeGenerators() {
   ElementWeylGroup currentReflection;
   for (int i = 0; i < d; i ++) {
     currentReflection.MakeRootReflection(this->generatingSimpleRoots[i], *this->theWeylData);
-    this->theSubgroupData.generatorPreimages[i] = this->theSubgroupData.theGroup->theElements.getIndex(currentReflection);
+    this->theSubgroupData.generatorPreimages[i] = this->theSubgroupData.theGroup->elements.getIndex(currentReflection);
     this->theSubgroupData.theSubgroup->generators[i] = currentReflection;
   }
 }

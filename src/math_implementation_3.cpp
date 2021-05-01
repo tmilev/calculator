@@ -6769,7 +6769,7 @@ void WeylGroupData::simpleReflectionRootPolynomial(
 
 Matrix<Rational> WeylGroupData::getMatrixStandardRepresentation(int elementIndex) const {
   Matrix<Rational> result;
-  this->getMatrixStandardRepresentation(this->theGroup.theElements[elementIndex], result);
+  this->getMatrixStandardRepresentation(this->theGroup.elements[elementIndex], result);
   return result;
 }
 
@@ -6803,16 +6803,16 @@ void WeylGroupData::reset() {
 void WeylGroupData::actOnAffineHyperplaneByGroupElement(
   int index, AffineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho
 ) {
-  int numGens = this->theGroup.theElements[index].generatorsLastAppliedFirst.size;
+  int numGens = this->theGroup.elements[index].generatorsLastAppliedFirst.size;
   for (int i = numGens - 1; i >= 0; i --) {
     this->reflectSimple(
-      this->theGroup.theElements[index].generatorsLastAppliedFirst[i].index,
+      this->theGroup.elements[index].generatorsLastAppliedFirst[i].index,
       output.affinePoint,
       RhoAction,
       UseMinusRho
     );
     this->simpleReflectionDualSpace(
-      this->theGroup.theElements[index].generatorsLastAppliedFirst[numGens - i - 1].index,
+      this->theGroup.elements[index].generatorsLastAppliedFirst[numGens - i - 1].index,
       output.normal
     );
   }
@@ -7008,9 +7008,9 @@ LargeInteger WeylGroupData::sizeByFormulaOrNegative1(char weylLetter, int theDim
 }
 
 void WeylGroupData::getWord(int g, List<int>& out) const {
-  out.setSize(this->theGroup.theElements[g].generatorsLastAppliedFirst.size);
-  for (int i = 0; i < this->theGroup.theElements[g].generatorsLastAppliedFirst.size; i ++) {
-    out[i] = this->theGroup.theElements[g].generatorsLastAppliedFirst[i].index;
+  out.setSize(this->theGroup.elements[g].generatorsLastAppliedFirst.size);
+  for (int i = 0; i < this->theGroup.elements[g].generatorsLastAppliedFirst.size; i ++) {
+    out[i] = this->theGroup.elements[g].generatorsLastAppliedFirst[i].index;
   }
 }
 
@@ -7019,7 +7019,7 @@ bool WeylGroupData::operator==(const WeylGroupData& other) const {
 }
 
 void WeylGroupData::actOnRootByGroupElement(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho) {
-  const ElementWeylGroup& currentElt = this->theGroup.theElements[index];
+  const ElementWeylGroup& currentElt = this->theGroup.elements[index];
   for (int i = currentElt.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
     this->reflectSimple(
       currentElt.generatorsLastAppliedFirst[i].index,
@@ -7070,8 +7070,8 @@ void WeylGroupData::generateRootSystem() {
 }
 
 void WeylGroupData::actOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction) {
-  for (int i = this->theGroup.theElements[index].generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
-    this->simpleReflectionRootPolynomial(this->theGroup.theElements[index].generatorsLastAppliedFirst[i].index, theRoot, RhoAction);
+  for (int i = this->theGroup.elements[index].generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
+    this->simpleReflectionRootPolynomial(this->theGroup.elements[index].generatorsLastAppliedFirst[i].index, theRoot, RhoAction);
   }
 }
 
@@ -7224,7 +7224,7 @@ std::string WeylGroupData::toStringRootsAndRootReflections(FormatExpressions* fo
 std::string WeylGroupData::toString(FormatExpressions* format) {
   MacroRegisterFunctionWithName("WeylGroup::toString");
   std::stringstream out;
-  out << "<br>Size: " << this->theGroup.theElements.size << "\n";
+  out << "<br>Size: " << this->theGroup.elements.size << "\n";
   out << "Number of Vectors: " << this->rootSystem.size << "\n";
   out << "<br>Half-sum positive roots:" << this->rho.toString() << "\n";
   out << this->toStringRootsAndRootReflections();
@@ -7906,7 +7906,7 @@ bool WeylGroupData::isElementWeylGroup(const MatrixTensor<Rational>& input) {
 }
 
 bool WeylGroupData::containsRootNonStronglyPerpendicularTo(Vectors<Rational>& theVectors, Vector<Rational>& input) {
-  for (int i = 0; i < this->theGroup.theElements.size; i ++) {
+  for (int i = 0; i < this->theGroup.elements.size; i ++) {
     if (this->isARoot(theVectors[i] + input)) {
       return true;
     }
@@ -7929,7 +7929,7 @@ void WeylGroupData::getMatrixStandardRepresentation(const ElementWeylGroup& inpu
 
 int WeylGroupData::numberOfRootsConnectedTo(Vectors<Rational>& theVectors, Vector<Rational>& input) {
   int result = 0;
-  for (int i = 0; i < this->theGroup.theElements.size; i ++) {
+  for (int i = 0; i < this->theGroup.elements.size; i ++) {
     if (!Vector<Rational>::scalarProduct(theVectors[i], input, this->cartanSymmetric).isEqualToZero()) {
       result ++;
     }
@@ -8190,7 +8190,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
   for (int i = 0; i < this->RepresentativesQuotientAmbientOrder.size; i ++) {
     tempRoot = this->ambientWeyl->rho;
     this->ambientWeyl->actOnRootByGroupElement(
-      this->ambientWeyl->theGroup.theElements.getIndex(this->RepresentativesQuotientAmbientOrder[i]), tempRoot, false, false
+      this->ambientWeyl->theGroup.elements.getIndex(this->RepresentativesQuotientAmbientOrder[i]), tempRoot, false, false
     );
   }
   arrows.setSize(Layers.size);
@@ -8220,8 +8220,8 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::f
   this->ambientWeyl->theGroup.computeAllElements(UpperLimit);
   Vector<Rational> image1;
   this->RepresentativesQuotientAmbientOrder.size = 0;
-  this->RepresentativesQuotientAmbientOrder.reserve(this->ambientWeyl->theGroup.theElements.size);
-  for (int i = 0; i < this->ambientWeyl->theGroup.theElements.size; i ++) {
+  this->RepresentativesQuotientAmbientOrder.reserve(this->ambientWeyl->theGroup.elements.size);
+  for (int i = 0; i < this->ambientWeyl->theGroup.elements.size; i ++) {
     image1 = this->ambientWeyl->rho;
     this->ambientWeyl->actOnRootByGroupElement(i, image1, false, false);
     bool isGood = true;
@@ -8232,7 +8232,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::f
       }
     }
     if (isGood) {
-      this->RepresentativesQuotientAmbientOrder.addOnTop(this->ambientWeyl->theGroup.theElements[i]);
+      this->RepresentativesQuotientAmbientOrder.addOnTop(this->ambientWeyl->theGroup.elements[i]);
     }
   }
 }
@@ -8323,7 +8323,7 @@ void KazhdanLusztigPolynomials::writeKLCoeffsToFile(std::fstream& output, List<i
   output.clear();
   output << "Top_index: " << topIndex << "\n";
   std::string tempS;
-  this->KLcoeffsToString(KLcoeff,  tempS);
+  this->kazhdanLuzstigCoefficientsToString(KLcoeff, tempS);
   output << tempS;
 }
 
@@ -8338,23 +8338,25 @@ int KazhdanLusztigPolynomials::readKLCoeffsFromFile(std::fstream& input, List<in
   return topIndex;
 }
 
-void KazhdanLusztigPolynomials::KLcoeffsToString(List<int>& theKLCoeffs, std::string& output) {
+void KazhdanLusztigPolynomials::kazhdanLuzstigCoefficientsToString(
+  List<int>& kazhdanLuzstigCoefficients, std::string& output
+) {
   std::stringstream out;
-  for (int i = 0; i < theKLCoeffs.size; i ++) {
-    out << i << ".  " << theKLCoeffs[i] << "\n";
+  for (int i = 0; i < kazhdanLuzstigCoefficients.size; i ++) {
+    out << i << ".  " << kazhdanLuzstigCoefficients[i] << "\n";
   }
   output = out.str();
 }
 
 void KazhdanLusztigPolynomials::initTheMults() {
-  this->TheMultiplicities.setSize(this->size);
-  this->Explored.setSize(this->size);
+  this->multiplicities.setSize(this->size);
+  this->explored.setSize(this->size);
   for (int i = 0; i < this->size; i ++) {
-    this->TheMultiplicities[i] = 0;
-    this->Explored[i] = false;
+    this->multiplicities[i] = 0;
+    this->explored[i] = false;
   }
-  this->NextToExplore = 0;
-  this->LowestNonExplored = 0;
+  this->nextToExplore = 0;
+  this->lowestNonExplored = 0;
 }
 
 void KazhdanLusztigPolynomials::check() {
@@ -8365,41 +8367,41 @@ void KazhdanLusztigPolynomials::check() {
 
 void KazhdanLusztigPolynomials::compute(int x) {
   this->initTheMults();
-  this->TheMultiplicities[x] = 1;
-  while (this->NextToExplore != - 1) {
-    for (int i = 0; i < this->BruhatOrder[this->NextToExplore].size; i ++) {
-      int a = this->BruhatOrder[this->NextToExplore][i];
-      this->TheMultiplicities[a] -= this->TheMultiplicities[this->NextToExplore];
+  this->multiplicities[x] = 1;
+  while (this->nextToExplore != - 1) {
+    for (int i = 0; i < this->bruhatOrder[this->nextToExplore].size; i ++) {
+      int a = this->bruhatOrder[this->nextToExplore][i];
+      this->multiplicities[a] -= this->multiplicities[this->nextToExplore];
     }
-    this->Explored[this->NextToExplore] = true;
+    this->explored[this->nextToExplore] = true;
     this->findNextToExplore();
   }
 }
 
 void KazhdanLusztigPolynomials::findNextToExplore() {
   bool foundNonExplored = false;
-  for (int i = this->LowestNonExplored; i < this->size; i ++) {
-    if (!this->Explored[i]) {
+  for (int i = this->lowestNonExplored; i < this->size; i ++) {
+    if (!this->explored[i]) {
       if (!foundNonExplored) {
-        this->LowestNonExplored = i;
+        this->lowestNonExplored = i;
         foundNonExplored = true;
       }
       if (this->isMaximalNonExplored(i)) {
-        this->NextToExplore = i;
+        this->nextToExplore = i;
         return;
       }
     }
   }
-  this->NextToExplore = - 1;
+  this->nextToExplore = - 1;
 }
 
 bool KazhdanLusztigPolynomials::isMaximalNonExplored(int index) {
-  for (int i = this->LowestNonExplored; i < this->size; i ++) {
-    if (!this->Explored[i] && i != index) {
-      Vector<Rational> tempRoot;
-      tempRoot = (*this)[i];
-      tempRoot -= (*this)[index];
-      if (tempRoot.isPositiveOrZero()) {
+  for (int i = this->lowestNonExplored; i < this->size; i ++) {
+    if (!this->explored[i] && i != index) {
+      Vector<Rational> difference;
+      difference = (*this)[i];
+      difference -= (*this)[index];
+      if (difference.isPositiveOrZero()) {
         return false;
       }
     }
@@ -8415,10 +8417,10 @@ std::string KazhdanLusztigPolynomials::toString(FormatExpressions* format) {
     useHtml = format->flagUseHTML;
   }
   if (!useHtml) {
-    out << "Next to explore: " << this->NextToExplore << "<br>\n Orbit of rho:<br>\n";
+    out << "Next to explore: " << this->nextToExplore << "<br>\n Orbit of rho:<br>\n";
     for (int i = 0; i < this->size; i ++) {
-      out << this->objects[i].toString() << "   :  " << this->TheMultiplicities[i];
-      if (this->Explored[i]) {
+      out << this->objects[i].toString() << "   :  " << this->multiplicities[i];
+      if (this->explored[i]) {
         out << " Explored<br>\n";
       } else {
         out << " not Explored<br>\n";
@@ -8427,14 +8429,14 @@ std::string KazhdanLusztigPolynomials::toString(FormatExpressions* format) {
     out << "Bruhat order:<br>\n";
     for (int i = 0; i < this->size; i ++) {
       out << i << ".   ";
-      for (int j = 0; j < this->BruhatOrder[i].size; j ++) {
-        out << this->BruhatOrder[i][j] << ", ";
+      for (int j = 0; j < this->bruhatOrder[i].size; j ++) {
+        out << this->bruhatOrder[i][j] << ", ";
       }
       out << "<br>\n";
     }
   }
   out << "R Polynomials:<br>" << this->rPolysToString(format);
-  if (this->theKLcoeffs.size == this->TheWeylGroup->theGroup.theElements.size) {
+  if (this->kazhdanLuzstigCoefficients.size == this->weylGroup->theGroup.elements.size) {
     out << "Kazhdan-Lusztig Polynomials:<br>" << this->KLPolysToString(format);
     out << "Kazhdan-Lusztig coefficients; the (w_1,w_2)  coefficient is defined as the multiplicity of "
     << HtmlRoutines::getMathNoDisplay("L_{w_2 \\cdot \\lambda}")
@@ -8443,15 +8445,15 @@ std::string KazhdanLusztigPolynomials::toString(FormatExpressions* format) {
     << " of the Weyl group, \\lambda is a dominant integral weight, M_{\\lambda} stands for Verma module "
     << "of highest weight \\lambda, L_\\lambda stands for irreducible highest "
     << "weight of highest weight \\lambda: <br><table border =\"1\"><tr><td>Weyl elt.</td>";
-    for (int i = 0; i < this->TheWeylGroup->theGroup.theElements.size; i ++) {
-      out << "<td>" << this->TheWeylGroup->theGroup.theElements[i].toString() << "</td>";
+    for (int i = 0; i < this->weylGroup->theGroup.elements.size; i ++) {
+      out << "<td>" << this->weylGroup->theGroup.elements[i].toString() << "</td>";
     }
     out << "</tr>";
-    for (int i = 0; i < this->TheWeylGroup->theGroup.theElements.size; i ++) {
-      if (this->theKLPolys[i].size > 0) {
-        out << "<tr>" << "<td>" << this->TheWeylGroup->theGroup.theElements[i].toString()  << "</td>";
-        for (int j = 0; j < this->theKLcoeffs[i].size; j ++) {
-          out << "<td>" << theKLcoeffs[i][j].toString() << "</td>";
+    for (int i = 0; i < this->weylGroup->theGroup.elements.size; i ++) {
+      if (this->kazhdanLuzstigPolynomials[i].size > 0) {
+        out << "<tr>" << "<td>" << this->weylGroup->theGroup.elements[i].toString()  << "</td>";
+        for (int j = 0; j < this->kazhdanLuzstigCoefficients[i].size; j ++) {
+          out << "<td>" << kazhdanLuzstigCoefficients[i][j].toString() << "</td>";
         }
         out << "</tr>";
       }
@@ -8465,19 +8467,19 @@ std::string KazhdanLusztigPolynomials::toString(FormatExpressions* format) {
 
 void KazhdanLusztigPolynomials::generatePartialBruhatOrder() {
   MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::generatePartialBruhatOrder");
-  int theDimension = this->TheWeylGroup->cartanSymmetric.numberOfRows;
+  int theDimension = this->weylGroup->cartanSymmetric.numberOfRows;
   Vector<Rational> ZeroRoot;
   ZeroRoot.makeZero(theDimension);
-  this->BruhatOrder.setSize(this->size);
-  this->InverseBruhatOrder.setSize(this->size);
-  this->SimpleReflectionsActionList.setSize(this->size);
+  this->bruhatOrder.setSize(this->size);
+  this->inverseBruhatOrder.setSize(this->size);
+  this->simpleReflectionsActionList.setSize(this->size);
   for (int i = 0; i < this->size; i ++) {
-    this->SimpleReflectionsActionList[i].reserve(theDimension);
+    this->simpleReflectionsActionList[i].reserve(theDimension);
     for (int j = 0; j < theDimension; j ++) {
       Vector<Rational> tempRoot, tempRoot2;
       tempRoot = (*this)[i];
       tempRoot2 = (*this)[i];
-      this->TheWeylGroup->reflectSimple(j, tempRoot, false, false);
+      this->weylGroup->reflectSimple(j, tempRoot, false, false);
       int x = this->getIndex(tempRoot);
       if (x == - 1) {
         global.fatal << "Something wrong has happened. "
@@ -8485,20 +8487,20 @@ void KazhdanLusztigPolynomials::generatePartialBruhatOrder() {
         << "be in a certain Weyl group orbit isn't there. "
         << "There is an error in the code, crashing accordingly. " << global.fatal;
       }
-      this->SimpleReflectionsActionList[i].addOnTop(x);
+      this->simpleReflectionsActionList[i].addOnTop(x);
       tempRoot2 -= tempRoot;
       if (tempRoot2.isPositiveOrZero() && !tempRoot2.isEqualToZero()) {
-        this->BruhatOrder[i].addOnTop(x);
-        this->InverseBruhatOrder[x].addOnTop(i);
+        this->bruhatOrder[i].addOnTop(x);
+        this->inverseBruhatOrder[x].addOnTop(i);
       }
     }
   }
 }
 
-int KazhdanLusztigPolynomials::findMinimalBruhatNonExplored(List<bool>& theExplored) {
+int KazhdanLusztigPolynomials::findMinimalBruhatNonExplored(List<bool>& explored) {
   int lowestIndex = - 1;
   for (int i = 0; i < this->size; i ++) {
-    if (!theExplored[i]) {
+    if (!explored[i]) {
       if (lowestIndex == - 1) {
         lowestIndex = i;
       } else {
@@ -8511,10 +8513,10 @@ int KazhdanLusztigPolynomials::findMinimalBruhatNonExplored(List<bool>& theExplo
   return lowestIndex;
 }
 
-int KazhdanLusztigPolynomials::findMaximalBruhatNonExplored(List<bool>& theExplored) {
+int KazhdanLusztigPolynomials::findMaximalBruhatNonExplored(List<bool>& explored) {
   int highestIndex = - 1;
   for (int i = 0; i < this->size; i ++) {
-    if (!theExplored[i]) {
+    if (!explored[i]) {
       if (highestIndex == - 1) {
         highestIndex = i;
       } else {
@@ -8528,36 +8530,36 @@ int KazhdanLusztigPolynomials::findMaximalBruhatNonExplored(List<bool>& theExplo
 }
 
 void KazhdanLusztigPolynomials::mergeBruhatLists(int fromList, int toList) {
-  for (int i = 0; i < this->BruhatOrder[fromList].size; i ++) {
+  for (int i = 0; i < this->bruhatOrder[fromList].size; i ++) {
     bool found = false;
-    for (int j = 0; j < this->BruhatOrder[toList].size; j ++) {
-      if (this->BruhatOrder[toList][j] == this->BruhatOrder[fromList][i]) {
+    for (int j = 0; j < this->bruhatOrder[toList].size; j ++) {
+      if (this->bruhatOrder[toList][j] == this->bruhatOrder[fromList][i]) {
         found = true;
         break;
       }
     }
     if (!found) {
-      this->BruhatOrder[toList].addOnTop(this->BruhatOrder[fromList][i]);
+      this->bruhatOrder[toList].addOnTop(this->bruhatOrder[fromList][i]);
     }
   }
 }
 
 int KazhdanLusztigPolynomials::chamberIndicatorToIndex(Vector<Rational>& ChamberIndicator) {
-  int theDimension = this->TheWeylGroup->cartanSymmetric.numberOfRows;
+  int theDimension = this->weylGroup->cartanSymmetric.numberOfRows;
   Vector<Rational> tempRoot;
   tempRoot.setSize(theDimension);
   Vector<Rational> ChamberIndicatorPlusRho;
   ChamberIndicatorPlusRho = (ChamberIndicator);
-  ChamberIndicatorPlusRho += this->TheWeylGroup->rho;
+  ChamberIndicatorPlusRho += this->weylGroup->rho;
   for (int i = 0; i < this->size; i ++) {
     Rational tempRat1, tempRat2;
     bool tempBool1, tempBool2;
     bool haveSameSigns = true;
-    for (int j = 0; j < this->TheWeylGroup->rootSystem.size; j ++) {
-      this->TheWeylGroup->rootScalarCartanRoot(ChamberIndicatorPlusRho, this->TheWeylGroup->rootSystem[j], tempRat1);
+    for (int j = 0; j < this->weylGroup->rootSystem.size; j ++) {
+      this->weylGroup->rootScalarCartanRoot(ChamberIndicatorPlusRho, this->weylGroup->rootSystem[j], tempRat1);
       tempRoot = (*this)[i];
-      tempRoot += (this->TheWeylGroup->rho);
-      this->TheWeylGroup->rootScalarCartanRoot(tempRoot, this->TheWeylGroup->rootSystem[j], tempRat2);
+      tempRoot += (this->weylGroup->rho);
+      this->weylGroup->rootScalarCartanRoot(tempRoot, this->weylGroup->rootSystem[j], tempRat2);
       tempBool1 = tempRat1.isPositive();
       tempBool2 = tempRat2.isPositive();
       if (tempRat1.isEqualToZero() || tempRat2.isEqualToZero()) {
@@ -8577,15 +8579,15 @@ int KazhdanLusztigPolynomials::chamberIndicatorToIndex(Vector<Rational>& Chamber
 
 void KazhdanLusztigPolynomials::computeKLCoefficients() {
   MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::computeKLCoefficients");
-  this->theKLcoeffs.setSize(this->theKLPolys.size);
-  for (int i = 0; i < this->theKLPolys.size; i ++) {
-    this->theKLcoeffs[i].setSize(this->theKLPolys[i].size);
-    for (int j = 0; j < this->theKLcoeffs[i].size; j ++) {
-      Polynomial<Rational>& currentPoly = this->theKLPolys[i][j];
-      this->theKLcoeffs[i][j] = 0;
+  this->kazhdanLuzstigCoefficients.setSize(this->kazhdanLuzstigPolynomials.size);
+  for (int i = 0; i < this->kazhdanLuzstigPolynomials.size; i ++) {
+    this->kazhdanLuzstigCoefficients[i].setSize(this->kazhdanLuzstigPolynomials[i].size);
+    for (int j = 0; j < this->kazhdanLuzstigCoefficients[i].size; j ++) {
+      Polynomial<Rational>& currentPoly = this->kazhdanLuzstigPolynomials[i][j];
+      this->kazhdanLuzstigCoefficients[i][j] = 0;
       if (this->indexGEQIndex(j, i)) {
         for (int k = 0; k < currentPoly.size(); k ++) {
-          this->theKLcoeffs[i][j] += currentPoly.coefficients[k];
+          this->kazhdanLuzstigCoefficients[i][j] += currentPoly.coefficients[k];
         }
       }
     }
@@ -8593,11 +8595,11 @@ void KazhdanLusztigPolynomials::computeKLCoefficients() {
 }
 
 void KazhdanLusztigPolynomials::initFromWeyl(WeylGroupData* theWeylGroup) {
-  this->TheWeylGroup = theWeylGroup;
+  this->weylGroup = theWeylGroup;
   Vectors<Rational> tempRoots;
-  this->TheWeylGroup->computeRho(true);
-  tempRoots.addOnTop(this->TheWeylGroup->rho);
-  this->TheWeylGroup->generateOrbit(tempRoots, false, *this, false);
+  this->weylGroup->computeRho(true);
+  tempRoots.addOnTop(this->weylGroup->rho);
+  this->weylGroup->generateOrbit(tempRoots, false, *this, false);
   this->initTheMults();
 }
 
@@ -8609,20 +8611,20 @@ bool KazhdanLusztigPolynomials::computeKLPolys(WeylGroupData* theWeylGroup) {
   FormatExpressions PolyFormatLocal;
   PolyFormatLocal.polyDefaultLetter = "q";
   this->computeRPolys();
-  this->theKLPolys.setSize(this->size);
-  this->theKLcoeffs.setSize(this->size);
-  this->Explored.initializeFillInObject(this->size, false);
-  for (int i = 0; i < this->theKLPolys.size; i ++) {
-    this->theKLPolys[i].setSize(this->size);
-    this->theKLcoeffs[i].setSize(this->size);
+  this->kazhdanLuzstigPolynomials.setSize(this->size);
+  this->kazhdanLuzstigCoefficients.setSize(this->size);
+  this->explored.initializeFillInObject(this->size, false);
+  for (int i = 0; i < this->kazhdanLuzstigPolynomials.size; i ++) {
+    this->kazhdanLuzstigPolynomials[i].setSize(this->size);
+    this->kazhdanLuzstigCoefficients[i].setSize(this->size);
   }
   for (int i = 0; i < this->size; i ++) {
-    this->Explored.initializeFillInObject(this->size, false);
-    int highestNonExplored = this->findMaximalBruhatNonExplored(this->Explored);
+    this->explored.initializeFillInObject(this->size, false);
+    int highestNonExplored = this->findMaximalBruhatNonExplored(this->explored);
     while (highestNonExplored != - 1) {
       this->computeKLxy(highestNonExplored, i);
-      this->Explored[highestNonExplored] = true;
-      highestNonExplored = this->findMaximalBruhatNonExplored(this->Explored);
+      this->explored[highestNonExplored] = true;
+      highestNonExplored = this->findMaximalBruhatNonExplored(this->explored);
     }
   }
   this->computeKLCoefficients();
@@ -8631,16 +8633,16 @@ bool KazhdanLusztigPolynomials::computeKLPolys(WeylGroupData* theWeylGroup) {
 
 void KazhdanLusztigPolynomials::computeRPolys() {
   MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::computeRPolys");
-  int theDimension = this->TheWeylGroup->getDimension();
-  this->theRPolys.setSize(this->size);
+  int theDimension = this->weylGroup->getDimension();
+  this->rPolynomials.setSize(this->size);
   for (int i = 0; i < this->size; i ++) {
-    this->Explored[i] = false;
-    this->theRPolys[i].setSize(this->size);
+    this->explored[i] = false;
+    this->rPolynomials[i].setSize(this->size);
   }
-  this->LowestNonExplored = this->findMinimalBruhatNonExplored(this->Explored);
+  this->lowestNonExplored = this->findMinimalBruhatNonExplored(this->explored);
   List<bool> ExploredFromTop;
   ExploredFromTop.setSize(this->size);
-  while (this->LowestNonExplored != - 1) {
+  while (this->lowestNonExplored != - 1) {
     for (int i = 0; i < this->size; i ++) {
       ExploredFromTop[i] = false;
     }
@@ -8648,7 +8650,7 @@ void KazhdanLusztigPolynomials::computeRPolys() {
     while (a != - 1) {
       bool tempBool = false;
       for (int j = 0; j < theDimension; j ++) {
-        if (this->computeRxy(a, this->LowestNonExplored, j)) {
+        if (this->computeRxy(a, this->lowestNonExplored, j)) {
           tempBool = true;
           break;
         }
@@ -8659,8 +8661,8 @@ void KazhdanLusztigPolynomials::computeRPolys() {
       ExploredFromTop[a] = true;
       a = this->findMaximalBruhatNonExplored(ExploredFromTop);
     }
-    this->Explored[this->LowestNonExplored] = true;
-    this->LowestNonExplored = this->findMinimalBruhatNonExplored(this->Explored);
+    this->explored[this->lowestNonExplored] = true;
+    this->lowestNonExplored = this->findMinimalBruhatNonExplored(this->explored);
   }
   //this->ComputeDebugString();
 }
@@ -8681,10 +8683,10 @@ bool KazhdanLusztigPolynomials::indexGreaterThanIndex(int a, int b) {
 
 int KazhdanLusztigPolynomials::computeProductfromSimpleReflectionsActionList(int x, int y) {
   int start = y;
-  const ElementWeylGroup& currentElement = this->TheWeylGroup->theGroup.theElements[x];
+  const ElementWeylGroup& currentElement = this->weylGroup->theGroup.elements[x];
   for (int i = currentElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
-    start = this->SimpleReflectionsActionList[start][
-      this->TheWeylGroup->theGroup.theElements[x].generatorsLastAppliedFirst[i].index
+    start = this->simpleReflectionsActionList[start][
+      this->weylGroup->theGroup.elements[x].generatorsLastAppliedFirst[i].index
     ];
   }
   return start;
@@ -8693,11 +8695,11 @@ int KazhdanLusztigPolynomials::computeProductfromSimpleReflectionsActionList(int
 void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
   Polynomial<Rational> Accum, tempP1, tempP2;
   if (x == y) {
-    this->theKLPolys[x][y].makeOne();
+    this->kazhdanLuzstigPolynomials[x][y].makeOne();
     return;
   }
   if (!this->indexGEQIndex(y, x)) {
-    this->theKLPolys[x][y].makeZero();
+    this->kazhdanLuzstigPolynomials[x][y].makeZero();
     return;
   }
   Accum.makeZero();
@@ -8705,29 +8707,29 @@ void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
   for (int i = 0; i < this->size; i ++) {
     if (this->indexGreaterThanIndex(i, x) && this->indexGEQIndex(y, i)) {
       tempP1.makeZero();
-      for (int j = 0; j < this->theRPolys[x][i].size(); j ++) {
-        tempM = this->theRPolys[x][i][j];
+      for (int j = 0; j < this->rPolynomials[x][i].size(); j ++) {
+        tempM = this->rPolynomials[x][i][j];
         tempM.invert();
-        tempP1.addMonomial(tempM, this->theRPolys[x][i].coefficients[j]);
+        tempP1.addMonomial(tempM, this->rPolynomials[x][i].coefficients[j]);
       }
       int tempI;
       if ((
-          this->TheWeylGroup->theGroup.theElements[x].generatorsLastAppliedFirst.size +
-          this->TheWeylGroup->theGroup.theElements[i].generatorsLastAppliedFirst.size
+          this->weylGroup->theGroup.elements[x].generatorsLastAppliedFirst.size +
+          this->weylGroup->theGroup.elements[i].generatorsLastAppliedFirst.size
         ) % 2 == 0
       ) {
         tempI = 1;
       } else {
         tempI = - 1;
       }
-      Rational powerQ = - this->TheWeylGroup->theGroup.theElements[x].generatorsLastAppliedFirst.size +
-      2 * this->TheWeylGroup->theGroup.theElements[i].generatorsLastAppliedFirst.size -
-      this->TheWeylGroup->theGroup.theElements[y].generatorsLastAppliedFirst.size;
+      Rational powerQ = - this->weylGroup->theGroup.elements[x].generatorsLastAppliedFirst.size +
+      2 * this->weylGroup->theGroup.elements[i].generatorsLastAppliedFirst.size -
+      this->weylGroup->theGroup.elements[y].generatorsLastAppliedFirst.size;
       powerQ /= 2;
       tempP2.makeMonomial(0, powerQ, tempI);
       tempP1 *= tempP2;
-      tempP1 *= this->theKLPolys[i][y];
-      if (!this->Explored[i]) {
+      tempP1 *= this->kazhdanLuzstigPolynomials[i][y];
+      if (!this->explored[i]) {
         global.fatal << "An internal check during the "
         << "Kazhdan-Lusztig polynomial computation fails. More precisely, while computing "
         << "KL poly of indices " << x << ", " << y
@@ -8737,16 +8739,16 @@ void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
       Accum += tempP1;
     }
   }
-  this->theKLPolys[x][y].makeZero();
-  Rational lengthDiff = this->TheWeylGroup->theGroup.theElements[y].generatorsLastAppliedFirst.size -
-  this->TheWeylGroup->theGroup.theElements[x].generatorsLastAppliedFirst.size;
+  this->kazhdanLuzstigPolynomials[x][y].makeZero();
+  Rational lengthDiff = this->weylGroup->theGroup.elements[y].generatorsLastAppliedFirst.size -
+  this->weylGroup->theGroup.elements[x].generatorsLastAppliedFirst.size;
   lengthDiff /= 2;
   for (int i = 0; i < Accum.size(); i ++) {
     if (Accum[i].hasPositiveOrZeroExponents()) {
       tempM = Accum[i];
       tempM.setVariable(0, tempM[0] * - 1);
       tempM.multiplyByVariable(0, lengthDiff);
-      this->theKLPolys[x][y].addMonomial(tempM, Accum.coefficients[i]);
+      this->kazhdanLuzstigPolynomials[x][y].addMonomial(tempM, Accum.coefficients[i]);
     }
   }
 }
@@ -8754,34 +8756,34 @@ void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
 bool KazhdanLusztigPolynomials::computeRxy(int x, int y, int SimpleReflectionIndex) {
   MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::computeRxy");
   if (x == y) {
-    this->theRPolys[x][y].makeOne();
+    this->rPolynomials[x][y].makeOne();
     return true;
   }
   if (this->indexGreaterThanIndex(x, y)) {
-    this->theRPolys[x][y].makeZero();
+    this->rPolynomials[x][y].makeZero();
     return true;
   }
-  int sx = this->SimpleReflectionsActionList[x][SimpleReflectionIndex];
-  int sy = this->SimpleReflectionsActionList[y][SimpleReflectionIndex];
+  int sx = this->simpleReflectionsActionList[x][SimpleReflectionIndex];
+  int sy = this->simpleReflectionsActionList[y][SimpleReflectionIndex];
   bool boolX, boolY;
   boolX = this->indexGreaterThanIndex(x, sx);
   boolY = this->indexGreaterThanIndex(y, sy);
   if (boolX && boolY) {
-    if (!this->Explored[sy]) {
+    if (!this->explored[sy]) {
       global.fatal << "The computaion of R-polynomials "
       << "is attempting to use a non-computed R-polynomial. " << global.fatal;
     }
-    this->theRPolys[x][y] = this->theRPolys[sx][sy];
+    this->rPolynomials[x][y] = this->rPolynomials[sx][sy];
     return true;
   }
   if (!boolX && boolY) {
     Polynomial<Rational> qMinus1;
     qMinus1.makeMonomial(0, 1, 1);
-    this->theRPolys[x][y] = qMinus1;
-    this->theRPolys[x][y] *= (this->theRPolys[sx][sy]);
+    this->rPolynomials[x][y] = qMinus1;
+    this->rPolynomials[x][y] *= (this->rPolynomials[sx][sy]);
     qMinus1 -= 1;
-    qMinus1 *= this->theRPolys[sx][y];
-    this->theRPolys[x][y] += qMinus1;
+    qMinus1 *= this->rPolynomials[sx][y];
+    this->rPolynomials[x][y] += qMinus1;
     return true;
   }
   return false;
@@ -8791,15 +8793,15 @@ std::string KazhdanLusztigPolynomials::KLPolysToString(FormatExpressions* format
   std::stringstream out;
   out << "<table border =\"1\">";
   out << "<tr><td>Weyl elt.</td>";
-  for (int i = 0; i < this->TheWeylGroup->theGroup.theElements.size; i ++) {
-    out << "<td>" << this->TheWeylGroup->theGroup.theElements[i].toString() << "</td>";
+  for (int i = 0; i < this->weylGroup->theGroup.elements.size; i ++) {
+    out << "<td>" << this->weylGroup->theGroup.elements[i].toString() << "</td>";
   }
   out << "</tr>";
-  for (int i = 0; i < this->theKLPolys.size; i ++) {
-    if (this->theKLPolys[i].size > 0) {
-      out << "<tr><td>" << this->TheWeylGroup->theGroup.theElements[i].toString() << "</td>";
-      for (int j = 0; j < this->theKLPolys[i].size; j ++) {
-        out << "<td>" << this->theKLPolys[i][j].toString(format) << "</td>";
+  for (int i = 0; i < this->kazhdanLuzstigPolynomials.size; i ++) {
+    if (this->kazhdanLuzstigPolynomials[i].size > 0) {
+      out << "<tr><td>" << this->weylGroup->theGroup.elements[i].toString() << "</td>";
+      for (int j = 0; j < this->kazhdanLuzstigPolynomials[i].size; j ++) {
+        out << "<td>" << this->kazhdanLuzstigPolynomials[i][j].toString(format) << "</td>";
       }
       out << "</tr>";
     }
@@ -8811,14 +8813,14 @@ std::string KazhdanLusztigPolynomials::KLPolysToString(FormatExpressions* format
 std::string KazhdanLusztigPolynomials::rPolysToString(FormatExpressions* format) {
   std::stringstream out;
   out << "<table border =\"1\"><tr><td>Weyl elt.</td>";
-  for (int i = 0; i < this->TheWeylGroup->theGroup.theElements.size; i ++) {
-    out << "<td>" << this->TheWeylGroup->theGroup.theElements[i].toString() << "</td>";
+  for (int i = 0; i < this->weylGroup->theGroup.elements.size; i ++) {
+    out << "<td>" << this->weylGroup->theGroup.elements[i].toString() << "</td>";
   }
   out << "</tr>";
-  for (int i = 0; i < this->theRPolys.size; i ++) {
-    out << "<tr><td>" << this->TheWeylGroup->theGroup.theElements[i].toString() << "</td>";
-    for (int j = 0; j < this->theRPolys[i].size; j ++) {
-      out << "<td>" << this->theRPolys[i][j].toString(format) << "</td>\n";
+  for (int i = 0; i < this->rPolynomials.size; i ++) {
+    out << "<tr><td>" << this->weylGroup->theGroup.elements[i].toString() << "</td>";
+    for (int j = 0; j < this->rPolynomials[i].size; j ++) {
+      out << "<td>" << this->rPolynomials[i][j].toString(format) << "</td>\n";
     }
     out << "</tr>";
   }
@@ -10249,59 +10251,62 @@ bool PartialFractions::removeRedundantShortRootsIndex(int theIndex, Vector<Ratio
 }
 
 void Lattice::getRougherLatticeFromAffineHyperplaneDirectionAndLattice(
-  const Vector<Rational>& theDirection,
+  const Vector<Rational>& direction,
   Vector<Rational>& outputDirectionMultipleOnLattice,
-  Vector<Rational>& theShift,
-  Vector<Rational>& theAffineHyperplane,
+  Vector<Rational>& shift,
+  Vector<Rational>& affineHyperplane,
   Vectors<Rational>& outputRepresentatives,
   Vectors<Rational>& movementInDirectionPerRepresentative,
   Lattice& outputRougherLattice
 ) {
-  Vector<Rational> theNormal = theAffineHyperplane;
-  theNormal.setSize(theNormal.size - 1);
-  if (theDirection.scalarEuclidean(theNormal).isEqualToZero()) {
+  Vector<Rational> normal = affineHyperplane;
+  normal.setSize(normal.size - 1);
+  if (direction.scalarEuclidean(normal).isEqualToZero()) {
     return;
   }
-  Rational theConstOnTheOtherSide = - *theAffineHyperplane.lastObject();
-  Vectors<Rational> theBasis;
-  theBasis.assignMatrixRows(this->basisRationalForm);
+  Rational theConstOnTheOtherSide = - *affineHyperplane.lastObject();
+  Vectors<Rational> basis;
+  basis.assignMatrixRows(this->basisRationalForm);
   Lattice theHyperplaneLatticeNoShift, theDirectionLattice;//, normalProjectionLattice, theTrueProjectionLattice;
   Vectors<Rational> tempRoots; //Vector<Rational> tempRoot;
-  tempRoots.addOnTop(theDirection);
+  tempRoots.addOnTop(direction);
   theDirectionLattice = *this;
   theDirectionLattice.intersectWithLinearSubspaceSpannedBy(tempRoots);
   theDirectionLattice.basisRationalForm.getVectorFromRow(0, outputDirectionMultipleOnLattice);
   theHyperplaneLatticeNoShift = *this;
-  theHyperplaneLatticeNoShift.intersectWithLinearSubspaceGivenByNormal(theNormal);
+  theHyperplaneLatticeNoShift.intersectWithLinearSubspaceGivenByNormal(normal);
   tempRoots.assignMatrixRows(theHyperplaneLatticeNoShift.basisRationalForm);
   tempRoots.addOnTop(outputDirectionMultipleOnLattice);
   outputRougherLattice.makeFromRoots(tempRoots);
   this->getAllRepresentatives(outputRougherLattice, outputRepresentatives);
   for (int i = 0; i < outputRepresentatives.size; i ++) {
-    outputRepresentatives[i] += theShift;
+    outputRepresentatives[i] += shift;
     outputRougherLattice.reduceVector(outputRepresentatives[i]);
   }
   Rational theShiftedConst, unitMovement, tempRat;
-  unitMovement = theNormal.scalarEuclidean(outputDirectionMultipleOnLattice);
+  unitMovement = normal.scalarEuclidean(outputDirectionMultipleOnLattice);
   movementInDirectionPerRepresentative.setSize(outputRepresentatives.size);
   for (int i = 0; i < outputRepresentatives.size; i ++) {
-    tempRat = (theNormal.scalarEuclidean(outputRepresentatives[i]) - theConstOnTheOtherSide) / unitMovement;
+    tempRat = (normal.scalarEuclidean(outputRepresentatives[i]) - theConstOnTheOtherSide) / unitMovement;
     tempRat.assignFractionalValue();
     theShiftedConst = theConstOnTheOtherSide + tempRat;
     Vector<Rational>& currentMovement =movementInDirectionPerRepresentative[i];
-    currentMovement = theAffineHyperplane;
+    currentMovement = affineHyperplane;
     *currentMovement.lastObject() = theShiftedConst;
   }
 }
 
 bool SlTwoInSlN::computeInvariantsOfDegree(
-  List<int>& decompositionDimensions, int theDegree, List<Polynomial<Rational> >& output, std::string& outputError
+  List<int>& decompositionDimensions,
+  int degree,
+  List<Polynomial<Rational> >& output,
+  std::string& outputError
 ) {
   this->initFromModuleDecomposition(decompositionDimensions, false, false);
   SelectionWithMaxMultiplicity theSel;
-  theSel.initMaxMultiplicity(this->theDimension, theDegree);
+  theSel.initMaxMultiplicity(this->theDimension, degree);
   outputError = "";
-  LargeInteger numberOfCycles = theSel.numberOfCombinationsOfCardinality(theDegree);
+  LargeInteger numberOfCycles = theSel.numberOfCombinationsOfCardinality(degree);
   if (numberOfCycles > 1000000) {
     outputError = " Computation too large. ";
     return false;
@@ -10318,9 +10323,9 @@ bool SlTwoInSlN::computeInvariantsOfDegree(
   for (int j = 0; j < this->theDimension; j ++) {
     theCartanAction[j] = this->theH.elements[j][j];
   }
-  theSel.incrementSubsetFixedCardinality(theDegree);
+  theSel.incrementSubsetFixedCardinality(degree);
   Rational theMonCoeff = 1;
-  for (int i = 0; i < numberOfCycles; i ++, theSel.incrementSubsetFixedCardinality(theDegree)) {
+  for (int i = 0; i < numberOfCycles; i ++, theSel.incrementSubsetFixedCardinality(degree)) {
     for (int j = 0; j < this->theDimension; j ++) {
       theMon.setVariable(j, theSel.multiplicities[j]);
       theWeight[j] = theMon[j];

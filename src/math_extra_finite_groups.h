@@ -147,7 +147,7 @@ public:
   SubgroupData<FiniteGroup<elementSomeGroup>, elementSomeGroup>* parentRelationship;
 
   List<elementSomeGroup> generators;
-  HashedList<elementSomeGroup> theElements;
+  HashedList<elementSomeGroup> elements;
   HashedList<elementSomeGroup> unionGeneratorsCC;
   struct ConjugacyClass {
     friend std::ostream& operator << (std::ostream& output, const ConjugacyClass& theClass) {
@@ -162,7 +162,7 @@ public:
     LargeInteger size;
     List<int> indicesEltsInOwner;
     int representativeIndex;
-    List<elementSomeGroup> theElements;
+    List<elementSomeGroup> elements;
     elementSomeGroup representative;
     bool flagRepresentativeComputed;
     bool flagElementsComputed;
@@ -197,7 +197,7 @@ public:
 
   Matrix<int> generatorCommutationRelations;
 
-  List<List<int> > theWords;
+  List<List<int> > words;
 
   // <-The character polynomials in the ``standard representation''.
   // The ``standard representation'' is specified by the elementSomeGroup class.
@@ -334,7 +334,7 @@ void FiniteGroup<elementSomeGroup>::initialize() {
   this->generators.setSize(0);
   this->conjugacyClasses.setSize(0);
   this->squaresCCReps.setSize(0);
-  this->theElements.clear();
+  this->elements.clear();
   this->flagAllElementsAreComputed = false;
   this->flagCCsComputed = false;
   this->flagCCRepresentativesComputed = false;
@@ -905,7 +905,7 @@ public:
   }
   template <class Coefficient>
   void actOn(int indexOfWeylElement, Vector<Coefficient>& theVector) const {
-    this->actOn(this->theGroup.theElements[indexOfWeylElement], theVector, theVector);
+    this->actOn(this->theGroup.elements[indexOfWeylElement], theVector, theVector);
   }
   template <class Coefficient>
   void actOn(
@@ -928,7 +928,7 @@ public:
   }
   template <class Coefficient>
   void actOnRhoModified(int indexOfWeylElement, Vector<Coefficient>& theVector) const {
-    this->actOnRhoModified(this->theGroup.theElements[indexOfWeylElement], theVector);
+    this->actOnRhoModified(this->theGroup.elements[indexOfWeylElement], theVector);
   }
   template <class Coefficient>
   void actOnDual(int index,Vector<Coefficient>& theVector, bool RhoAction, const Coefficient& ringZero);
@@ -1205,14 +1205,14 @@ public:
 
   bool verifyRepresentationExpensive() {
     List<Matrix<Coefficient> > repms;
-    repms.setSize(this->ownerGroup->theElements.size);
-    for (int i = 0; i < this->ownerGroup->theElements.size; i ++) {
-      this->getMatrixOfElement(this->ownerGroup->theElements[i], repms[i]);
+    repms.setSize(this->ownerGroup->elements.size);
+    for (int i = 0; i < this->ownerGroup->elements.size; i ++) {
+      this->getMatrixOfElement(this->ownerGroup->elements[i], repms[i]);
     }
-    for (int i = 0; i < this->ownerGroup->theElements.size; i ++) {
-      for (int j = 0; j < this->ownerGroup->theElements.size; j ++) {
-        if (repms[i] * repms[j] != repms[this->ownerGroup->theElements.getIndex(
-          this->ownerGroup->theElements[i] * this->ownerGroup->theElements[j])]
+    for (int i = 0; i < this->ownerGroup->elements.size; i ++) {
+      for (int j = 0; j < this->ownerGroup->elements.size; j ++) {
+        if (repms[i] * repms[j] != repms[this->ownerGroup->elements.getIndex(
+          this->ownerGroup->elements[i] * this->ownerGroup->elements[j])]
         ) {
           global.fatal << "Bad representation. " << global.fatal;
         }
@@ -1392,7 +1392,7 @@ class GroupRepresentationCarriesAllMatrices {
   }
 public:
   List<Matrix<Coefficient> > theElementImages;
-  List<bool> theElementIsComputed;
+  List<bool> elementIsComputed;
   ClassFunction<somegroup, Coefficient> theCharacter;
   List<Matrix<Coefficient> > classFunctionMatrices;
   List<bool> classFunctionMatricesComputed;
@@ -1472,7 +1472,7 @@ public:
   Matrix<Coefficient> getMatrixElement(const elementSomeGroup& input);
   void setElementImage(int elementIndex, const Matrix<Coefficient>& input) {
     this->theElementImages[elementIndex] = input;
-    this->theElementIsComputed[elementIndex] = true;
+    this->elementIsComputed[elementIndex] = true;
   }
   void setGenerator(int generatorIndex, const Matrix<Coefficient>& input) {
     this->generators[generatorIndex] = input;
@@ -1737,7 +1737,7 @@ int SubgroupData<someGroup, elementSomeGroup>::getCosetId(elementSomeGroup& g) {
     if (!flagCosetSetsComputed) {
       this->computeCosets();
     }
-    gi = this->theGroup->theElements.getIndex(g);
+    gi = this->theGroup->elements.getIndex(g);
   }
   for (int i = 0; i < this->cosets.size; i ++) {
     if (this->sameCosetAsByFormula) {
@@ -2062,7 +2062,7 @@ std::ostream& operator<<(std::ostream& out, const ElementWeylGroupRing<Coefficie
 template <typename Coefficient>
 void ElementWeylGroupRing<Coefficient>::makeEi(WeylGroupData* GG, int i) {
   ElementWeylGroup theMon;
-  theMon = GG->theGroup.theElements[i];
+  theMon = GG->theGroup.elements[i];
   *this = theMon;
 }
 
@@ -2082,7 +2082,7 @@ void ElementWeylGroupRing<Coefficient>::makeFromClassFunction(WeylGroupData* GG,
   for (int i = 0; i < GG->theGroup.conjugacyClassCount(); i ++) {
     if (l[i] != 0) {
       for (int j = 0; j < GG->theGroup.conjugacyClasses.size; j ++) {
-        this->addMonomial(GG->theGroup.conjugacyClasses[i].theElements[j], l[i]);
+        this->addMonomial(GG->theGroup.conjugacyClasses[i].elements[j], l[i]);
       }
     }
   }
@@ -2422,12 +2422,12 @@ std::ostream& operator<<(std::ostream& out, const UDPolynomial<Coefficient>& p) 
 
 template <typename elementSomeGroup>
 int FiniteGroup<elementSomeGroup>::multiplyElements(int indexLeft, int indexRight) const {
-  return this->theElements.getIndex(this->theElements[indexLeft] * this->theElements[indexRight]);
+  return this->elements.getIndex(this->elements[indexLeft] * this->elements[indexRight]);
 }
 
 template <typename elementSomeGroup>
 int FiniteGroup<elementSomeGroup>::invert(int g) const {
-  return this->theElements.getIndex(this->theElements[g].inverse());
+  return this->elements.getIndex(this->elements[g].inverse());
 }
 
 template <class elementSomeGroup>
@@ -2470,11 +2470,11 @@ bool FiniteGroup<elementSomeGroup>::getWord(const elementSomeGroup& g, List<int>
   if (!this->flagWordsComputed) {
     this->computeAllElementsLargeGroup(true);
   }
-  int index = this->theElements.getIndex(g);
+  int index = this->elements.getIndex(g);
   if (index == - 1) {
     return false;
   }
-  word = this->theWords[index];
+  word = this->words[index];
   return true;
 }
 
@@ -2500,7 +2500,7 @@ bool FiniteGroup<elementSomeGroup>::checkInitializationConjugacyClasses() const 
     << "conjugacy classes and/or elements have not been computed. "
     << "The group reports to have "
     << this->conjugacyClassCount() << " conjugacy classes and "
-    << this->theElements.size << " elements. "
+    << this->elements.size << " elements. "
     << global.fatal;
     return false;
   }

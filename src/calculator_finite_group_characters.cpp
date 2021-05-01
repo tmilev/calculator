@@ -30,10 +30,10 @@ bool WeylGroupData::checkConsistency() const {
 
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::checkInitializationFiniteDimensionalRepresentationComputation() const {
-  if (this->theElements.size == 0) {
+  if (this->elements.size == 0) {
     global.fatal << "Request to compute character hermitian product in a group whose "
     << "conjugacy classes and/or elements have not been computed. The group reports to have "
-    << this->conjugacyClassCount() << " conjugacy classes and " << this->theElements.size << " elements. "
+    << this->conjugacyClassCount() << " conjugacy classes and " << this->elements.size << " elements. "
     << global.fatal;
     return false;
   }
@@ -121,9 +121,9 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::computeAllEl
   MacroRegisterFunctionWithName("GroupRepresentationCarriesAllMatrices::ComputeAllGeneratorImagesFromSimple");
   this->checkInitialization();
   this->ownerGroup->checkInitializationFiniteDimensionalRepresentationComputation();
-  auto elementsExplored = this->ownerGroup->theElements;
+  auto elementsExplored = this->ownerGroup->elements;
   elementsExplored.clear();
-  elementsExplored.setExpectedSize(this->ownerGroup->theElements.size);
+  elementsExplored.setExpectedSize(this->ownerGroup->elements.size);
   this->theElementImages[0].makeIdentityMatrix(this->getDimension());
   auto currentElt = this->ownerGroup->generators[0];
   currentElt.makeIdentity(this->ownerGroup->generators[0]);
@@ -132,12 +132,12 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::computeAllEl
 
   elementsExplored.addOnTop(currentElt);
   for (int i = 0; i < elementsExplored.size; i ++) {
-    int indexParentElement = this->ownerGroup->theElements.getIndex(elementsExplored[i]);
+    int indexParentElement = this->ownerGroup->elements.getIndex(elementsExplored[i]);
     for (int j = 0; j < theRank; j ++) {
       currentElt = theGens[j] * elementsExplored[i];
       if (!elementsExplored.contains(currentElt)) {
-        int indexCurrentElt = this->ownerGroup->theElements.getIndex(currentElt);
-        this->theElementIsComputed[indexCurrentElt] = true;
+        int indexCurrentElt = this->ownerGroup->elements.getIndex(currentElt);
+        this->elementIsComputed[indexCurrentElt] = true;
         this->theElementImages[indexParentElement].multiplyOnTheLeft(this->generators[j], this->theElementImages[indexCurrentElt]);
         elementsExplored.addOnTop(currentElt);
       }
@@ -177,9 +177,9 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::operator*=(
     output.generators[i].assignTensorProduct(this->generators[i], other.generators[i]);
   }
   for (int i = 0; i < output.theElementImages.size; i ++) {
-    if (this->theElementIsComputed[i] && other.theElementIsComputed[i]) {
+    if (this->elementIsComputed[i] && other.elementIsComputed[i]) {
       output.theElementImages[i].assignTensorProduct(this->theElementImages[i], other.theElementImages[i]);
-      output.theElementIsComputed[i] = true;
+      output.elementIsComputed[i] = true;
     }
   }
   *this = output;
@@ -828,7 +828,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements
       conjugatedMat *= invertedOuterAuto;
       int found = - 1;
       for (int k = 0; k<groupNoOuterAutos.conjugacyClasses.size; k ++) {
-        if (groupNoOuterAutos.conjugacyClasses[k].theElements.contains(conjugatedMat)) {
+        if (groupNoOuterAutos.conjugacyClasses[k].elements.contains(conjugatedMat)) {
           found = k;
           break;
         }

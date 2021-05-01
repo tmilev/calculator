@@ -218,8 +218,8 @@ void Partition::testAllSpechtModules(int n) {
     outg.computeConjugacyClassSizesAndRepresentatives();
     std::cout << "got to here10\n";
     std::cout << "got to here11\n";
-    if (outg.theElements.size != 0) {
-      if ((fac % outg.theElements.size) != 0) {
+    if (outg.elements.size != 0) {
+      if ((fac % outg.elements.size) != 0) {
         global.fatal << "invalid elements count" << global.fatal;
       }
     }

@@ -2061,7 +2061,7 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(Calculator& calculator,
   << theSubgroup.RepresentativesQuotientAmbientOrder.size;
   out << "<br>Number of elements of the Weyl group of the Levi part: " << theSubgroup.allElements.size;
   out << "<br>Number of elements of the ambient Weyl: "
-  << theSubgroup.ambientWeyl->theGroup.theElements.size;
+  << theSubgroup.ambientWeyl->theGroup.elements.size;
   FormatExpressions theFormat;
   theSSalgPointer.context.getFormat(theFormat);
   if (theSubgroup.allElements.size > 498) {
@@ -2184,7 +2184,7 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
   Vector<RationalFraction<Rational> > currentHW;
   out << "<br>Orbit modified with small rho: "
   << "<table><tr><td>Simple coords</td><td>Fund coords</td></tr>";
-  for (int i = 0; i < theWeyl.theGroup.theElements.size; i ++) {
+  for (int i = 0; i < theWeyl.theGroup.elements.size; i ++) {
     currentHW = theHWsimpCoords;
     currentHW += theSub.getRho();
     theWeyl.actOn(i, currentHW);
@@ -2208,12 +2208,12 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
   formatChars.fundamentalWeightLetter = "\\omega";
   formatChars.flagUseLatex = true;
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSubgroup;
-  theSubgroup.ambientWeyl = theKLpolys.TheWeylGroup;
+  theSubgroup.ambientWeyl = theKLpolys.weylGroup;
   for (int i = 0; i < theWeylElements.size; i ++) {
     ElementWeylGroup& currentElement = theWeylElements[i];
     out << "<tr><td>" << currentElement.toString() << "</td>";
 
-    int indexInWeyl = theKLpolys.TheWeylGroup->theGroup.theElements.getIndex(currentElement);
+    int indexInWeyl = theKLpolys.weylGroup->theGroup.elements.getIndex(currentElement);
     if (indexInWeyl == - 1) {
       global.fatal << "Something is wrong: "
       << "I am getting that an element of the Weyl group of the Levi part of "
@@ -2222,13 +2222,13 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
     }
     currentChar.makeZero();
     theMon.owner = theSSlieAlg.content;
-    for (int j = 0; j < theKLpolys.theKLcoeffs[indexInWeyl].size; j ++) {
-      if (!theKLpolys.theKLcoeffs[indexInWeyl][j].isEqualToZero()) {
+    for (int j = 0; j < theKLpolys.kazhdanLuzstigCoefficients[indexInWeyl].size; j ++) {
+      if (!theKLpolys.kazhdanLuzstigCoefficients[indexInWeyl][j].isEqualToZero()) {
         currentHW = theHWsimpCoords;
         theWeyl.actOnRhoModified(j, currentHW);
         theMon.weightFundamentalCoordinates = theWeyl.getFundamentalCoordinatesFromSimple(currentHW);
-        int sign = (currentElement.generatorsLastAppliedFirst.size - theWeyl.theGroup.theElements[j].generatorsLastAppliedFirst.size) % 2 == 0 ? 1 : - 1;
-        currentChar.addMonomial(theMon, theKLpolys.theKLcoeffs[indexInWeyl][j] * sign);
+        int sign = (currentElement.generatorsLastAppliedFirst.size - theWeyl.theGroup.elements[j].generatorsLastAppliedFirst.size) % 2 == 0 ? 1 : - 1;
+        currentChar.addMonomial(theMon, theKLpolys.kazhdanLuzstigCoefficients[indexInWeyl][j] * sign);
       }
     }
     currentHW = theHWsimpCoords;

@@ -2217,7 +2217,7 @@ public:
     return !output.isError();
   }
   bool expressionMatchesPattern(
-    const Expression& thePattern,
+    const Expression& pattern,
     const Expression& input,
     MapList<Expression, Expression>& matchedExpressions,
     std::stringstream* commentsGeneral = nullptr

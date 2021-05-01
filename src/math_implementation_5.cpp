@@ -689,13 +689,13 @@ void HomomorphismSemisimpleLieAlgebra::getWeightsWrtKInSimpleCoordinatesK(
 
 template <class Coefficient>
 void ElementSemisimpleLieAlgebra<Coefficient>::getBasisFromSpanOfElements(
-  List<ElementSemisimpleLieAlgebra>& theElements,
-  List<ElementSemisimpleLieAlgebra>& outputTheBasis
+  List<ElementSemisimpleLieAlgebra>& elements,
+  List<ElementSemisimpleLieAlgebra>& outputBasis
 ) {
   Vectors<Rational> theRootForm;
-  theRootForm.setSize(theElements.size);
-  for (int i = 0; i < theElements.size; i ++) {
-    ElementSemisimpleLieAlgebra& currentElt = theElements[i];
+  theRootForm.setSize(elements.size);
+  for (int i = 0; i < elements.size; i ++) {
+    ElementSemisimpleLieAlgebra& currentElt = elements[i];
     currentElt.elementToVectorNegativeRootSpacesFirst(theRootForm[i]);
   }
 //  int theRank = 0; int numRoots = 0;
@@ -704,9 +704,9 @@ void ElementSemisimpleLieAlgebra<Coefficient>::getBasisFromSpanOfElements(
 //    numRoots = theElements.objects[0].coeffsRootSpaces.size;
 //  }
   theRootForm.chooseABasis();
-  outputTheBasis.setSize(theRootForm.size);
+  outputBasis.setSize(theRootForm.size);
   for (int i = 0; i < theRootForm.size; i ++) {
-    ElementSemisimpleLieAlgebra& currentElt = outputTheBasis[i];
+    ElementSemisimpleLieAlgebra& currentElt = outputBasis[i];
     currentElt.assignVectorNegRootSpacesCartanPosRootSpaces(
       theRootForm[i], (*currentElt.ownerArray)[currentElt.indexOfOwnerAlgebra]
     );

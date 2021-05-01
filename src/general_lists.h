@@ -654,7 +654,7 @@ public:
     return result;
   }
   // The function below is required to reserve the order of elements given by theSelection.elements.
-  void subSelection(const Selection& theSelection, List<Object>& output);
+  void subSelection(const Selection& selection, List<Object>& output);
   // If comparison function is not specified, quickSortAscending uses operator >, else it uses the given
   // comparison function
   template <class otherType = Object>

@@ -366,9 +366,9 @@ void ElementSemisimpleLieAlgebra<Coefficient>::elementToVectorNegativeRootSpaces
 
 template <class Coefficient>
 void ElementSemisimpleLieAlgebra<Coefficient>::makeGGenerator(
-  const Vector<Rational>& theRoot, SemisimpleLieAlgebra& inputOwner
+  const Vector<Rational>& root, SemisimpleLieAlgebra& inputOwner
 ) {
-  this->makeGenerator(inputOwner.getGeneratorFromRoot(theRoot), inputOwner);
+  this->makeGenerator(inputOwner.getGeneratorFromRoot(root), inputOwner);
 }
 
 template <class Coefficient>
@@ -667,7 +667,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
       std::stringstream tempStream;
       tempStream << output.coefficients[i].toString();
       theDV1.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
-      for (int j = 1; j < WeylFDSmall.ambientWeyl->theGroup.theElements.size; j ++) {
+      for (int j = 1; j < WeylFDSmall.ambientWeyl->theGroup.elements.size; j ++) {
         tempRoot2 = tempRoot;
         WeylFDSmall.ambientWeyl->actOnRhoModified(j, tempRoot2);
         theDV1.drawCircleAtVectorBufferRational(tempRoot2, "#a00000", 5);

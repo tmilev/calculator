@@ -428,7 +428,7 @@ bool Calculator::outerStandardFunction(
 }
 
 bool Calculator::expressionMatchesPattern(
-  const Expression& thePattern,
+  const Expression& pattern,
   const Expression& input,
   MapList<Expression, Expression>& matchedExpressions,
   std::stringstream* commentsGeneral
@@ -436,33 +436,35 @@ bool Calculator::expressionMatchesPattern(
   MacroRegisterFunctionWithName("Calculator::expressionMatchesPattern");
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  if (!(thePattern.owner == this && input.owner == this)) {
+  if (!(pattern.owner == this && input.owner == this)) {
     global.fatal
     << "Either a pattern or an input has a wrongly  initialized owner: the pattern is "
-    << thePattern.toString() << " and the input is "
+    << pattern.toString() << " and the input is "
     << input.toString() << ". The error is certainly in the preceding code; here "
     << "is a stack trace, however beware that the error "
     << "might be in code preceding the stack loading. "
     << global.fatal;
   }
   if (commentsGeneral != nullptr) {
-    *commentsGeneral << " <hr> current input: " << input.toString() << "<br>current pattern: " << thePattern.toString();
+    *commentsGeneral << " <hr> current input: "
+    << input.toString() << "<br>current pattern: "
+    << pattern.toString();
     *commentsGeneral << "<br> current matched expressions: " << matchedExpressions.toStringHtml();
   }
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (this->recursionDepth>this->maximumRecursionDepth) {
     std::stringstream out;
     out << "Max recursion depth of " << this->maximumRecursionDepth << " exceeded whlie trying to match expression pattern "
-    << thePattern.toString() << " onto expression " << input.toString();
+    << pattern.toString() << " onto expression " << input.toString();
     this->evaluationErrors.addOnTop(out.str());
     return false;
   }
-  int opVarB = this->opBind();
-  if (thePattern.isListStartingWithAtom(opVarB)) {
-    if (!matchedExpressions.contains(thePattern)) {
-      matchedExpressions.setKeyValue(thePattern, input);
+  int bindOperation = this->opBind();
+  if (pattern.isListStartingWithAtom(bindOperation)) {
+    if (!matchedExpressions.contains(pattern)) {
+      matchedExpressions.setKeyValue(pattern, input);
     }
-    if (matchedExpressions.getValueCreate(thePattern) != input) {
+    if (matchedExpressions.getValueCreate(pattern) != input) {
       return false;
     }
     if (commentsGeneral != nullptr) {
@@ -470,13 +472,13 @@ bool Calculator::expressionMatchesPattern(
     }
     return true;
   }
-  if (thePattern.data != input.data || thePattern.size() != input.size()) {
+  if (pattern.data != input.data || pattern.size() != input.size()) {
     return false;
   }
   bool isGoodRegularOrder = true;
   int numMatchedExpressionsAtStart = matchedExpressions.size();
-  for (int i = 0; i < thePattern.size(); i ++) {
-    if (!(this->expressionMatchesPattern(thePattern[i], input[i], matchedExpressions, commentsGeneral))) {
+  for (int i = 0; i < pattern.size(); i ++) {
+    if (!(this->expressionMatchesPattern(pattern[i], input[i], matchedExpressions, commentsGeneral))) {
       if (i == 0) {
         return false;
       }
@@ -486,14 +488,14 @@ bool Calculator::expressionMatchesPattern(
   }
 
   if (!isGoodRegularOrder) {
-    if (!input.startsWith(thePattern.owner->opPlus())) {
+    if (!input.startsWith(pattern.owner->opPlus())) {
       return false;
     }
     matchedExpressions.values.setSize(numMatchedExpressionsAtStart);
     matchedExpressions.keys.setSize(numMatchedExpressionsAtStart);
-    for (int i = 1; i < thePattern.size(); i ++) {
+    for (int i = 1; i < pattern.size(); i ++) {
       if (!(this->expressionMatchesPattern(
-        thePattern[i], input[thePattern.size() - i], matchedExpressions, commentsGeneral
+        pattern[i], input[pattern.size() - i], matchedExpressions, commentsGeneral
       ))) {
         return false;
       }

@@ -48,33 +48,33 @@ bool FiniteGroup<elementSomeGroup>::computeAllElementsLargeGroup(bool andWords, 
     global.fatal << "Groups with zero generators are not allowed: if you wanted to create a trivial group, "
     << " trivial groups are assumed to have a generator (the identity). " << global.fatal;
   }
-  this->theElements.clear();
+  this->elements.clear();
   elementSomeGroup currentElement;
   currentElement.makeIdentity(this->generators[0]);
-  this->theElements.addOnTop(currentElement);
-  this->theWords.setSize(0);
+  this->elements.addOnTop(currentElement);
+  this->words.setSize(0);
   if (andWords) {
-    this->theWords.setSize(1);
-    this->theWords.lastObject()->setSize(0);
+    this->words.setSize(1);
+    this->words.lastObject()->setSize(0);
   }
   ProgressReport theReport(1000, GlobalVariables::Response::ReportType::general);
   // Warning: not checking whether the generators have repetitions.
-  for (int j = 0; j < this->theElements.size; j ++) {
+  for (int j = 0; j < this->elements.size; j ++) {
     for (int i = 0; i < this->generators.size; i ++) {
-      currentElement = this->generators[i] * this->theElements[j];
-      if (this->theElements.addOnTopNoRepetition(currentElement) && andWords) {
+      currentElement = this->generators[i] * this->elements[j];
+      if (this->elements.addOnTopNoRepetition(currentElement) && andWords) {
         if (this->getWordByFormula == 0) {
-          this->theWords.addOnTop(this->theWords[j]);
-          this->theWords.lastObject()->addOnTop(i);
+          this->words.addOnTop(this->words[j]);
+          this->words.lastObject()->addOnTop(i);
         } else {
-          this->theWords.setSize(this->theWords.size + 1);
-          this->getWordByFormula(*this, currentElement, *this->theWords.lastObject());
+          this->words.setSize(this->words.size + 1);
+          this->getWordByFormula(*this, currentElement, *this->words.lastObject());
         }
       }
       if (theReport.tickAndWantReport()) {
         std::stringstream reportStream;
         LargeInteger sizeByFla = this->sizeByFormulaOrNegative1();
-        reportStream << "So far, generated " << this->theElements.size << " elements";
+        reportStream << "So far, generated " << this->elements.size << " elements";
         if (sizeByFla > 0) {
           reportStream << " out of " << sizeByFla.toString();
         }
@@ -82,7 +82,7 @@ bool FiniteGroup<elementSomeGroup>::computeAllElementsLargeGroup(bool andWords, 
         theReport.report(reportStream.str());
       }
       if (maximumElements > 0) {
-        if (this->theElements.size > maximumElements) {
+        if (this->elements.size > maximumElements) {
           return false;
         }
       }
@@ -91,10 +91,10 @@ bool FiniteGroup<elementSomeGroup>::computeAllElementsLargeGroup(bool andWords, 
   theReport.ticksPerReport = 1;
   if (theReport.tickAndWantReport()) {
     std::stringstream reportStream;
-    reportStream << "Generated group with a total of " << this->theElements.size << " elements. ";
+    reportStream << "Generated group with a total of " << this->elements.size << " elements. ";
     theReport.report(reportStream.str());
   }
-  this->sizePrivate = this->theElements.size;
+  this->sizePrivate = this->elements.size;
   this->flagAllElementsAreComputed = true;
   if (andWords) {
     this->flagWordsComputed = true;
@@ -266,7 +266,7 @@ bool FiniteGroup<elementSomeGroup>::hasElement(const elementSomeGroup& g) {
   if (!this->flagAllElementsAreComputed) {
     this->computeAllElements(false);
   }
-  return this->theElements.contains(g);
+  return this->elements.contains(g);
 }
 
 template <class elementSomeGroup>
@@ -377,10 +377,10 @@ std::string FiniteGroup<elementSomeGroup>::toStringElements(FormatExpressions* f
     return "";
   }
   std::stringstream out;
-  out << "<br>Elements of the group(" << this->theElements.size << " total):\n ";
-  if (this->theElements.size <= 100) {
-    for (int i = 0; i < this->theElements.size; i ++) {
-      out << i << ". " << this->theElements[i].toString() << "\n";
+  out << "<br>Elements of the group(" << this->elements.size << " total):\n ";
+  if (this->elements.size <= 100) {
+    for (int i = 0; i < this->elements.size; i ++) {
+      out << i << ". " << this->elements[i].toString() << "\n";
     }
   } else {
     out << "... too many, not displaying. ";
@@ -438,13 +438,13 @@ std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(FormatExpres
         continue;
       }
       out << " The elements of the class are: ";
-      int numEltsToDisplay = this->conjugacyClasses[i].theElements.size;
-      if (this->conjugacyClasses[i].theElements.size > 10) {
+      int numEltsToDisplay = this->conjugacyClasses[i].elements.size;
+      if (this->conjugacyClasses[i].elements.size > 10) {
         out << " too many, displaying the first 10 elements only: ";
         numEltsToDisplay = 10;
       }
       for (int j = 0; j < numEltsToDisplay; j ++) {
-        out << this->conjugacyClasses[i].theElements[j].toString(format);
+        out << this->conjugacyClasses[i].elements[j].toString(format);
         if (j != numEltsToDisplay - 1) {
           out << ", ";
         }
@@ -524,17 +524,17 @@ void FiniteGroup<elementSomeGroup>::computeCCSizeOrCCFromRepresentative(
   theOrbitIterator.initialize(this->generators, inputOutputClass.representative, theOrbitIterator.theGroupAction);
   inputOutputClass.size = 1;
   if (storeCC) {
-    inputOutputClass.theElements.setSize(0);
-    inputOutputClass.theElements.addOnTop(inputOutputClass.representative);
+    inputOutputClass.elements.setSize(0);
+    inputOutputClass.elements.addOnTop(inputOutputClass.representative);
   }
   while (theOrbitIterator.incrementReturnFalseIfPastLast()) {
     inputOutputClass.size ++;
     if (storeCC) {
-      if (inputOutputClass.theElements.contains(theOrbitIterator.getCurrentElement())) {
+      if (inputOutputClass.elements.contains(theOrbitIterator.getCurrentElement())) {
         global.fatal << " !element " << theOrbitIterator.getCurrentElement().toString()
         << " already contained !" << global.fatal;
       }
-      inputOutputClass.theElements.addOnTop(theOrbitIterator.getCurrentElement());
+      inputOutputClass.elements.addOnTop(theOrbitIterator.getCurrentElement());
     }
   }
 }
@@ -676,11 +676,11 @@ void FiniteGroup<elementSomeGroup>::computeConjugacyClassesFromConjugacyClassInd
   for (int i = 0; i < ccIndices.size; i ++) {
     this->conjugacyClasses[i].size = ccIndices[i].size;
     this->conjugacyClasses[i].indicesEltsInOwner = ccIndices[i];
-    this->conjugacyClasses[i].theElements.setSize(ccIndices[i].size);
+    this->conjugacyClasses[i].elements.setSize(ccIndices[i].size);
     for (int j = 0; j < ccIndices[i].size; j ++) {
-      this->conjugacyClasses[i].theElements[j] = this->theElements[ccIndices[i][j]];
+      this->conjugacyClasses[i].elements[j] = this->elements[ccIndices[i][j]];
     }
-    this->conjugacyClasses[i].representative = this->theElements[ccIndices[i][0]];
+    this->conjugacyClasses[i].representative = this->elements[ccIndices[i][0]];
     this->conjugacyClasses[i].flagRepresentativeComputed = true;
     this->conjugacyClasses[i].flagElementsComputed = true;
   }
@@ -694,9 +694,9 @@ void FiniteGroup<elementSomeGroup>::computeConjugacyClassesFromAllElements() {
   MacroRegisterFunctionWithName("FiniteGroup::computeConjugacyClassesFromAllElements");
   this->computeAllElements(false, - 1);
   List<bool> Accounted;
-  Accounted.initializeFillInObject(this->theElements.size, false);
+  Accounted.initializeFillInObject(this->elements.size, false);
   HashedList<int, HashFunctions::hashFunction> theStack;
-  theStack.setExpectedSize(this->theElements.size);
+  theStack.setExpectedSize(this->elements.size);
   List<elementSomeGroup> inversesOfGenerators;
   inversesOfGenerators.setSize(this->generators.size);
   for (int i = 0; i < this->generators.size; i ++) {
@@ -705,14 +705,14 @@ void FiniteGroup<elementSomeGroup>::computeConjugacyClassesFromAllElements() {
   elementSomeGroup currentElement;
   List<List<int> > ccIndices;
   ccIndices.reserve(120);
-  for (int i = 0; i < this->theElements.size; i ++) {
+  for (int i = 0; i < this->elements.size; i ++) {
     if (!Accounted[i]) {
       theStack.clear();
       theStack.addOnTop(i);
       for (int j = 0; j < theStack.size; j ++) {
         for (int k = 0; k < this->generators.size; k ++) {
-          currentElement = inversesOfGenerators[k] * this->theElements[theStack[j]] * this->generators[k];
-          int accountedIndex = this->theElements.getIndexNoFail(currentElement);
+          currentElement = inversesOfGenerators[k] * this->elements[theStack[j]] * this->generators[k];
+          int accountedIndex = this->elements.getIndexNoFail(currentElement);
           theStack.addOnTopNoRepetition(accountedIndex);
           Accounted[accountedIndex] = true;
         }
@@ -1327,8 +1327,8 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::initialize(s
   this->ownerGroup = &inputOwner;
   this->ownerGroup->checkInitializationConjugacyClasses();
   this->generators.setSize(this->ownerGroup->generators.size);
-  this->theElementImages.setSize(this->ownerGroup->theElements.size);
-  this->theElementIsComputed.initializeFillInObject(this->ownerGroup->theElements.size, false);
+  this->theElementImages.setSize(this->ownerGroup->elements.size);
+  this->elementIsComputed.initializeFillInObject(this->ownerGroup->elements.size, false);
   this->classFunctionMatrices.setSize(this->ownerGroup->conjugacyClassCount());
   this->classFunctionMatricesComputed.initializeFillInObject(this->ownerGroup->conjugacyClassCount(), false);
   this->checkInitialization();
@@ -1355,11 +1355,11 @@ unsigned int GroupRepresentation<somegroup, Coefficient>::hashFunction() const {
 template <typename somegroup, typename Coefficient>
 Matrix<Coefficient>& GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getMatrixElement(int groupElementIndex) {
   Matrix<Coefficient>& theMat = this->theElementImages[groupElementIndex];
-  if (this->theElementIsComputed[groupElementIndex]) {
+  if (this->elementIsComputed[groupElementIndex]) {
     return theMat;
   }
   const ElementWeylGroup& theElt = this->ownerGroup->theElements[groupElementIndex];
-  this->theElementIsComputed[groupElementIndex] = true;
+  this->elementIsComputed[groupElementIndex] = true;
   this->getMatrixElement(theElt, theMat);
   return theMat;
 }
@@ -1447,8 +1447,8 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getClassFunc
       } else {
         auto& currentCC = this->ownerGroup->conjugacyClasses[cci];
         this->classFunctionMatrices[cci].makeZeroMatrix(this->getDimension());
-        for (int i = 0; i < currentCC.theElements.size; i ++) {
-          if (!this->theElementIsComputed[currentCC.indicesEltsInOwner[i]]) {
+        for (int i = 0; i < currentCC.elements.size; i ++) {
+          if (!this->elementIsComputed[currentCC.indicesEltsInOwner[i]]) {
             this->computeAllElementImages();
           }
           this->classFunctionMatrices[cci] += this->theElementImages[currentCC.indicesEltsInOwner[i]];
@@ -1962,12 +1962,12 @@ void SubgroupData<someGroup, elementSomeGroup>::computeCosets() {
   }
   this->theSubgroup->computeAllElements(true);
   this->theGroup->computeAllElements(true);
-  GraphOLD orbitg = GraphOLD(this->theGroup->theElements.size, this->theSubgroup->generators.size);
-  for (int i = 0; i < this->theGroup->theElements.size; i ++) {
+  GraphOLD orbitg = GraphOLD(this->theGroup->elements.size, this->theSubgroup->generators.size);
+  for (int i = 0; i < this->theGroup->elements.size; i ++) {
     for (int j = 0; j < this->theSubgroup->generators.size; j ++) {
       orbitg.addEdge(
-        this->theGroup->theElements.getIndex(
-          this->theGroup->theElements[i] * this->theSubgroup->generators[j]
+        this->theGroup->elements.getIndex(
+          this->theGroup->elements[i] * this->theSubgroup->generators[j]
         ), i
       );
     }
@@ -1977,8 +1977,8 @@ void SubgroupData<someGroup, elementSomeGroup>::computeCosets() {
   this->cosets.setSize(orbits.size);
   for (int i = 0; i < orbits.size; i ++) {
     cosets[i].supergroupIndices = orbits[i];
-    cosets[i].representative = this->theGroup->theElements[orbits[i][0]];
-    this->theGroup->getWord(this->theGroup->theElements[orbits[i][0]], cosets[i].representativeWord);
+    cosets[i].representative = this->theGroup->elements[orbits[i][0]];
+    this->theGroup->getWord(this->theGroup->elements[orbits[i][0]], cosets[i].representativeWord);
   }
   this->flagCosetSetsComputed = true;
   this->flagCosetRepresentativesComputed = true;
@@ -2005,7 +2005,7 @@ bool SubgroupData<someGroup, elementSomeGroup>::verifyCosets() {
       auto g = this->cosets[cs].representative;
       g.invert();
       for (int i = 0; i < this->cosets[cs].supergroupIndices.size; i ++) {
-        auto g2 = this->theGroup->theElements[this->cosets[cs].supergroupIndices[i]];
+        auto g2 = this->theGroup->elements[this->cosets[cs].supergroupIndices[i]];
         auto g3 = g * g2;
         if (!this->theSubgroup->hasElement(g3)) {
           global.fatal << "Error: coset " << cs << " has representative " << this->cosets[cs].representative
@@ -2089,7 +2089,7 @@ void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentationsTodorsVersi
   }
   int initialcount = appendOnlyIrrepsList.size;
 
-  if (this->theElements.size == 0) {
+  if (this->elements.size == 0) {
     this->computeConjugacyClassesFromAllElements();
   }
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational> newRep;
@@ -2311,7 +2311,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::decomposeTod
   startingVector.makeEi(this->getDimension(), 0);
   average.makeZero(this->getDimension());
   for (int i = 0; i < this->theElementImages.size; i ++) {
-    if (!this->theElementIsComputed[i]) {
+    if (!this->elementIsComputed[i]) {
       global.fatal << "<hr>An internal check failed. " << global.fatal;
     }
     this->theElementImages[i].actOnVectorColumn(startingVector, tempV);

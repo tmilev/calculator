@@ -2608,8 +2608,8 @@ class ElementMonomialAlgebra: public LinearCombination<TemplateMonomial, Coeffic
   void multiplyBy(const MonomialPolynomial& other) {
     this->multiplyBy(other, *this);
   }
-  void multiplyBy(const MonomialPolynomial& other, const Coefficient& theCoeff) {
-    return this->multiplyBy(other, theCoeff, *this);
+  void multiplyBy(const MonomialPolynomial& other, const Coefficient& coefficient) {
+    return this->multiplyBy(other, coefficient, *this);
   }
   void multiplyBy(
     const MonomialPolynomial& other,
@@ -2623,15 +2623,15 @@ class ElementMonomialAlgebra: public LinearCombination<TemplateMonomial, Coeffic
   void multiplyOnTheLeft(
     const ElementMonomialAlgebra<TemplateMonomial, Coefficient>& standsOnTheLeft
   ) {
-    ElementMonomialAlgebra<TemplateMonomial, Coefficient> tempMat, bufferPoly;
+    ElementMonomialAlgebra<TemplateMonomial, Coefficient> matrix, bufferPoly;
     TemplateMonomial bufferMon;
-    standsOnTheLeft.multiplyBy(*this, tempMat, bufferPoly, bufferMon);
-    *this = tempMat;
+    standsOnTheLeft.multiplyBy(*this, matrix, bufferPoly, bufferMon);
+    *this = matrix;
   }
   void operator*=(const ElementMonomialAlgebra<TemplateMonomial, Coefficient>& other) {
-    ElementMonomialAlgebra<TemplateMonomial, Coefficient> bufferPoly;
-    TemplateMonomial bufferMon;
-    this->multiplyBy(other, *this, bufferPoly, bufferMon);
+    ElementMonomialAlgebra<TemplateMonomial, Coefficient> bufferPolynomial;
+    TemplateMonomial bufferMonomial;
+    this->multiplyBy(other, *this, bufferPolynomial, bufferMonomial);
   }
   void operator*=(const Coefficient& other) {
     this->::LinearCombination<TemplateMonomial, Coefficient>::operator*=(other);
@@ -2645,9 +2645,9 @@ class ElementMonomialAlgebra: public LinearCombination<TemplateMonomial, Coeffic
     if (d == 1) {
       return;
     }
-    ElementMonomialAlgebra<TemplateMonomial, Coefficient> theOne;
-    theOne.makeConstant(1);
-    MathRoutines::raiseToPower(*this, d, theOne);
+    ElementMonomialAlgebra<TemplateMonomial, Coefficient> one;
+    one.makeConstant(1);
+    MathRoutines::raiseToPower(*this, d, one);
   }
 };
 
@@ -2681,9 +2681,9 @@ public:
   }
   void assignMinimalPolynomial(const Matrix<Coefficient>& input);
   void assignCharacteristicPolynomial(const Matrix<Coefficient>& input);
-  void assignMonomialWithExponent(Vector<Rational>& r, const Coefficient& theCoeff = 1) {
+  void assignMonomialWithExponent(Vector<Rational>& r, const Coefficient& coefficient = 1) {
     this->makeZero();
-    this->addMonomial(r, theCoeff);
+    this->addMonomial(r, coefficient);
   }
   void getConstantTerm(Coefficient& output, const Coefficient& ringZero = 0) const;
   Coefficient getConstantTerm(const Coefficient& ringZero = 0) const {
@@ -2748,7 +2748,7 @@ public:
   Polynomial<Coefficient> one() const;
   static Polynomial<Coefficient> zero();
   Rational rationalValue();
-  void makeDeterminantFromSquareMatrix(const Matrix<Polynomial<Coefficient> >& theMat);
+  void makeDeterminantFromSquareMatrix(const Matrix<Polynomial<Coefficient> >& matrix);
   void makeConstant(const Coefficient& constant) {
     this->makeZero();
     MonomialPolynomial one;

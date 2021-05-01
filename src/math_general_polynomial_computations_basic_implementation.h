@@ -107,25 +107,25 @@ bool Polynomial<Coefficient>::isOneVariablePolynomial(int* whichVariable) const 
 
 template <class Coefficient>
 void Polynomial<Coefficient>::makeDeterminantFromSquareMatrix(
-  const Matrix<Polynomial<Coefficient> >& theMat
+  const Matrix<Polynomial<Coefficient> >& matrix
 ) {
-  if (theMat.numberOfColumns != theMat.numberOfRows) {
+  if (matrix.numberOfColumns != matrix.numberOfRows) {
     global.fatal << "Cannot compute determinant: matrix has "
-    << theMat.numberOfRows << " rows and " << theMat.numberOfColumns
+    << matrix.numberOfRows << " rows and " << matrix.numberOfColumns
     << " columns. " << global.fatal;
   }
-  Permutation thePerm;
-  thePerm.initPermutation(theMat.numberOfRows);
-  int numCycles = thePerm.getNumberOfPermutations();
+  Permutation permutation;
+  permutation.initPermutation(matrix.numberOfRows);
+  int numCycles = permutation.getNumberOfPermutations();
   List<int> permutationIndices;
-  thePerm.getPermutationLthElementIsTheImageofLthIndex(permutationIndices);
-  Polynomial<Coefficient> result, theMonomial;
+  permutation.getPermutationLthElementIsTheImageofLthIndex(permutationIndices);
+  Polynomial<Coefficient> result, monomial;
   result.makeZero();
   result.setExpectedSize(numCycles);
-  for (int i = 0; i < numCycles; i ++, thePerm.incrementAndGetPermutation(permutationIndices)) {
-    theMonomial.makeOne();
+  for (int i = 0; i < numCycles; i ++, permutation.incrementAndGetPermutation(permutationIndices)) {
+    monomial.makeOne();
     for (int j = 0; j < permutationIndices.size; j ++) {
-      theMonomial *= theMat(j, permutationIndices[j]);
+      monomial *= matrix(j, permutationIndices[j]);
     }
     // The following can be made much faster, but no need right now as it won't be a bottleneck.
     int sign = 1;
@@ -136,8 +136,8 @@ void Polynomial<Coefficient>::makeDeterminantFromSquareMatrix(
         }
       }
     }
-    theMonomial *= sign;
-    result += theMonomial;
+    monomial *= sign;
+    result += monomial;
   }
   *this = result;
 }

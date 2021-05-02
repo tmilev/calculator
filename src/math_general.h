@@ -2779,8 +2779,8 @@ public:
     tempMon.makeOne();
     this->addMonomial(tempMon, theConst);
   }
-  void shiftVariableIndicesToTheRight(int VarIndexShift);
-  void setNumberOfVariablesSubstituteDeletedByOne(int newNumVars);
+  void shiftVariableIndicesToTheRight(int variableIndexShift);
+  void setNumberOfVariablesSubstituteDeletedByOne(int newNumberOfVariables);
   int getHighestIndexSuchThatHigherIndexVariablesDontParticipate();
   void scaleToPositiveMonomialExponents(MonomialPolynomial& outputScale);
   bool substitution(const List<Polynomial<Coefficient> >& substitution, const Coefficient& one);
@@ -2899,7 +2899,7 @@ class SylvesterMatrix {
   // Generalization of sylvester matrix for multiple polynomials.
   // Similar to the Sylvester matrix
   // but with coefficient parallelogram for each polynomial.
-  static bool sylvesterMatrixMulti(
+  static bool sylvesterMatrixMultiple(
     const List<Polynomial<Coefficient> >& polynomials,
     int dimension,
     Matrix<Coefficient>& output

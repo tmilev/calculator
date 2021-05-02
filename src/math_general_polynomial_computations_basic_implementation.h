@@ -233,8 +233,8 @@ Coefficient Polynomial<Coefficient>::evaluate(const Vector<Coefficient>& input, 
   Coefficient output = zero;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialPolynomial& currentMon = (*this)[i];
-    Coefficient accum = this->coefficients[i];
-    Coefficient tempElt;
+    Coefficient accumulator = this->coefficients[i];
+    Coefficient converted;
     for (int j = 0; j < currentMon.minimalNumberOfVariables(); j ++) {
       int numCycles = 0;
       if (!(*this)[i](j).isSmallInteger(&numCycles)) {
@@ -252,28 +252,28 @@ Coefficient Polynomial<Coefficient>::evaluate(const Vector<Coefficient>& input, 
       if (numCycles < 0) {
         numCycles = - numCycles;
       }
-      tempElt = input[j];
-      MathRoutines::raiseToPower(tempElt, numCycles, zero.one());
+      converted = input[j];
+      MathRoutines::raiseToPower(converted, numCycles, zero.one());
       if (!isPositive) {
-        tempElt.invert();
+        converted.invert();
       }
-      accum *= tempElt;
+      accumulator *= converted;
     }
-    output += accum;
+    output += accumulator;
   }
   return output;
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::setNumberOfVariablesSubstituteDeletedByOne(int newNumVars) {
+void Polynomial<Coefficient>::setNumberOfVariablesSubstituteDeletedByOne(int newNumberOfVariables) {
   MacroRegisterFunctionWithName("Polynomial_CoefficientType::setNumberOfVariablesSubstituteDeletedByOne");
-  if (newNumVars >= this->minimalNumberOfVariables()) {
+  if (newNumberOfVariables >= this->minimalNumberOfVariables()) {
     return;
   }
-  if (newNumVars < 0) {
+  if (newNumberOfVariables < 0) {
     global.fatal
     << "Requesting negative number of variables (more precisely, "
-    << newNumVars << ") is not allowed. " << global.fatal;
+    << newNumberOfVariables << ") is not allowed. " << global.fatal;
   }
   Polynomial<Coefficient> accumulator;
   accumulator.makeZero();
@@ -281,7 +281,7 @@ void Polynomial<Coefficient>::setNumberOfVariablesSubstituteDeletedByOne(int new
   MonomialPolynomial monomial;
   for (int i = 0; i < this->size(); i ++) {
     monomial.makeOne();
-    for (int j = 0; j < newNumVars; j ++) {
+    for (int j = 0; j < newNumberOfVariables; j ++) {
       monomial.setVariable(j, (*this)[i](j));
     }
     accumulator.addMonomial(monomial, this->coefficients[i]);
@@ -308,35 +308,35 @@ bool Polynomial<Coefficient>::hasSmallIntegralPositivePowers(
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::shiftVariableIndicesToTheRight(int VarIndexShift) {
-  if (VarIndexShift < 0) {
+void Polynomial<Coefficient>::shiftVariableIndicesToTheRight(int variableIndexShift) {
+  if (variableIndexShift < 0) {
     global.fatal
     << "Requesting negative variable shift (more precisely, "
-    << VarIndexShift << ") not allowed. " << global.fatal;
+    << variableIndexShift << ") not allowed. " << global.fatal;
   }
-  if (VarIndexShift == 0) {
+  if (variableIndexShift == 0) {
     return;
   }
   int oldNumVars = this->minimalNumberOfVariables();
-  Polynomial<Coefficient> Accum;
-  Accum.makeZero();
-  Accum.setExpectedSize(this->size());
-  MonomialPolynomial tempM;
+  Polynomial<Coefficient> accumulator;
+  accumulator.makeZero();
+  accumulator.setExpectedSize(this->size());
+  MonomialPolynomial monomial;
   for (int i = 0; i < this->size(); i ++) {
-    tempM.makeOne();
+    monomial.makeOne();
     for (int j = 0; j < oldNumVars; j ++) {
-      tempM.setVariable(j + VarIndexShift, (*this)[i](j));
+      monomial.setVariable(j + variableIndexShift, (*this)[i](j));
     }
-    Accum.addMonomial(tempM, this->coefficients[i]);
+    accumulator.addMonomial(monomial, this->coefficients[i]);
   }
-  *this = Accum;
+  *this = accumulator;
 }
 
 template <class Coefficient>
 bool Polynomial<Coefficient>::isEqualToOne() const {
-  Coefficient tempC;
-  if (this->isConstant(&tempC)) {
-    return tempC.isEqualToOne();
+  Coefficient coefficient;
+  if (this->isConstant(&coefficient)) {
+    return coefficient.isEqualToOne();
   }
   return false;
 }
@@ -371,8 +371,8 @@ bool Polynomial<Coefficient>::isConstant(Coefficient* whichConstant) const {
   if (whichConstant != nullptr) {
     *whichConstant = this->coefficients[0];
   }
-  const MonomialPolynomial& theMon = (*this)[0];
-  return theMon.isConstant();
+  const MonomialPolynomial& monomial = (*this)[0];
+  return monomial.isConstant();
 }
 
 template <class Coefficient>
@@ -479,7 +479,7 @@ bool SylvesterMatrix<Coefficient>::sylvesterMatrixProduct(
     }
     products.addOnTop(product);
   }
-  return SylvesterMatrix<Coefficient>::sylvesterMatrixMulti(products, dimension, output);
+  return SylvesterMatrix<Coefficient>::sylvesterMatrixMultiple(products, dimension, output);
 }
 
 template <class Coefficient>
@@ -498,7 +498,7 @@ bool SylvesterMatrix<Coefficient>::sylvesterMatrix(
 
 
 template <class Coefficient>
-bool SylvesterMatrix<Coefficient>::sylvesterMatrixMulti(
+bool SylvesterMatrix<Coefficient>::sylvesterMatrixMultiple(
   const List<Polynomial<Coefficient> >& polynomials,
   int dimension,
   Matrix<Coefficient>& output

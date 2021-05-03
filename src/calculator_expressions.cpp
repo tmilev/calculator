@@ -360,7 +360,7 @@ int Expression::addObjectReturnIndex(const
 std::string
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.theStrings
+  return this->owner->objectContainer.allStrings
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -399,7 +399,7 @@ double
   if (std::isnan(inputValue)) {
     return 0;
   }
-  return this->owner->objectContainer.theDoubles
+  return this->owner->objectContainer.doubleNumbers
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -573,7 +573,7 @@ int Expression::addObjectReturnIndex(const
 ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.theTensorElts
+  return this->owner->objectContainer.tensorElements
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -582,7 +582,7 @@ int Expression::addObjectReturnIndex(const
 CharacterSemisimpleLieAlgebraModule<Rational>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.theCharsSSLieAlgFD
+  return this->owner->objectContainer.charactersSemisimpleLieAlgebraFiniteDimensional
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -647,7 +647,7 @@ int Expression::addObjectReturnIndex(const
 ElementWeylGroup
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.theWeylGroupElements
+  return this->owner->objectContainer.weylGroupElements
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -751,7 +751,7 @@ double& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type double. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->objectContainer.theDoubles.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.doubleNumbers.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -761,7 +761,7 @@ std::string& Expression::getValueNonConst() const {
     << "The expression equals " << this->toString() << ". Comments so far: "
     << this->owner->comments.str() << global.fatal;
   }
-  return this->owner->objectContainer.theStrings.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.allStrings.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -870,7 +870,7 @@ ElementTensorsGeneralizedVermas<RationalFraction<Rational> >& Expression::getVal
     global.fatal << "Expression not of "
     << "required type ElementTGVM_RationalFunctionOld. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->objectContainer.theTensorElts.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.tensorElements.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -879,7 +879,7 @@ CharacterSemisimpleLieAlgebraModule<Rational>& Expression::getValueNonConst() co
     global.fatal << "Expression not of required type "
     << "charSSAlgMod_Rational. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->objectContainer.theCharsSSLieAlgFD.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.charactersSemisimpleLieAlgebraFiniteDimensional.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -955,7 +955,7 @@ ElementWeylGroup& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "ElementWeylGroup. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->objectContainer.theWeylGroupElements.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.weylGroupElements.getElement(this->getLastChild().data);
 }
 
 template < >

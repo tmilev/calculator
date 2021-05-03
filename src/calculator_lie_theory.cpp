@@ -2317,7 +2317,7 @@ bool CalculatorLieTheory::growDynkinType(
     *theSSalg.content,
     &calculator.objectContainer.algebraicClosure,
     &calculator.objectContainer.semisimpleLieAlgebras,
-    &calculator.objectContainer.theSltwoSAs
+    &calculator.objectContainer.slTwoSubalgebras
   );
   tempSas.computeSl2sInitOrbitsForComputationOnDemand();
   if (!tempSas.ranksAndIndicesFit(theSmallDynkinType)) {
@@ -2399,7 +2399,7 @@ bool CalculatorLieTheory::computeSemisimpleSubalgebras(
     ownerSS,
     calculator.objectContainer.algebraicClosure,
     calculator.objectContainer.semisimpleLieAlgebras,
-    calculator.objectContainer.theSltwoSAs,
+    calculator.objectContainer.slTwoSubalgebras,
     nullptr
   );
   return output.assignValue(theSSsubalgebras, calculator);
@@ -3002,7 +3002,7 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
     ownerLieAlgebra,
     calculator.objectContainer.algebraicClosure,
     calculator.objectContainer.semisimpleLieAlgebras,
-    calculator.objectContainer.theSltwoSAs,
+    calculator.objectContainer.slTwoSubalgebras,
     &out,
     doForceRecompute,
     !isAlreadySubalgebrasObject,

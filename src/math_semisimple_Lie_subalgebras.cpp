@@ -907,25 +907,25 @@ void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand() {
   this->orbitHElementLengths.setExpectedSize(this->slTwoSubalgebras.size);
   this->theOrbitDynkinIndices.setExpectedSize(this->slTwoSubalgebras.size);
   this->orbits.setSize(this->slTwoSubalgebras.size);
-  List<ElementWeylGroupAutomorphisms> theGens;
+  List<ElementWeylGroupAutomorphisms> generators;
   WeylGroupAutomorphisms& theWeylAutomorphisms = this->slTwoSubalgebras.rootSubalgebras.theWeylGroupAutomorphisms;
   theWeylAutomorphisms.computeOuterAutoGenerators();
-  ElementWeylGroupAutomorphisms theElt;
+  ElementWeylGroupAutomorphisms element;
   for (int i = 0; i < this->owner->getRank(); i ++) {
-    theElt.makeSimpleReflection(i, theWeylAutomorphisms);
-    theGens.addOnTop(theElt);
+    element.makeSimpleReflection(i, theWeylAutomorphisms);
+    generators.addOnTop(element);
   }
   List<MatrixTensor<Rational> >& outerAutos = theWeylAutomorphisms.theOuterAutos.theGenerators;
   for (int i = 0; i < outerAutos.size; i ++) {
     if (!outerAutos[i].isIdentity()) {
-      theElt.makeOuterAuto(i, theWeylAutomorphisms);
-      theGens.addOnTop(theElt);
+      element.makeOuterAuto(i, theWeylAutomorphisms);
+      generators.addOnTop(element);
     }
   }
   for (int i = 0; i < this->slTwoSubalgebras.size; i ++) {
     this->orbitHElementLengths.addOnTop(this->slTwoSubalgebras[i].LengthHsquared);
     this->theOrbitDynkinIndices.addOnTop(DynkinSimpleType('A', 1, this->slTwoSubalgebras[i].LengthHsquared));
-    this->orbits[i].initialize(theGens, this->slTwoSubalgebras[i].elementH.getCartanPart());
+    this->orbits[i].initialize(generators, this->slTwoSubalgebras[i].elementH.getCartanPart());
   }
 }
 
@@ -4616,9 +4616,9 @@ void SlTwoSubalgebra::toHTML(std::string& filePath) {
 
 void SlTwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner) {
   MacroRegisterFunctionWithName("SlTwoSubalgebras::reset");
-  this->IndicesSl2sContainedInRootSA.setSize(0);
-  this->IndicesSl2decompositionFlas.setSize(0);
-  this->BadHCharacteristics.setSize(0);
+  this->indicesSl2sContainedInRootSA.setSize(0);
+  this->indicesSl2decompositionFlas.setSize(0);
+  this->badHCharacteristics.setSize(0);
   this->IndexZeroWeight = - 1;
   this->owner = & inputOwner;
   this->rootSubalgebras.owner = &inputOwner;
@@ -4640,18 +4640,18 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
   output.rootSubalgebras.owner = &inputOwner;
   output.rootSubalgebras.computeAllReductiveRootSubalgebrasUpToIsomorphism();
   //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, global);
-  output.IndicesSl2sContainedInRootSA.setSize(output.rootSubalgebras.subalgebras.size);
-  output.IndicesSl2sContainedInRootSA.reserve(output.rootSubalgebras.subalgebras.size * 2);
-  for (int i = 0; i < output.IndicesSl2sContainedInRootSA.size; i ++) {
-    output.IndicesSl2sContainedInRootSA[i].size = 0;
+  output.indicesSl2sContainedInRootSA.setSize(output.rootSubalgebras.subalgebras.size);
+  output.indicesSl2sContainedInRootSA.reserve(output.rootSubalgebras.subalgebras.size * 2);
+  for (int i = 0; i < output.indicesSl2sContainedInRootSA.size; i ++) {
+    output.indicesSl2sContainedInRootSA[i].size = 0;
   }
-  ProgressReport theReport;
+  ProgressReport report;
   for (int i = 0; i < output.rootSubalgebras.subalgebras.size; i ++) {
     std::stringstream tempStream;
     tempStream << "\nExploring root subalgebra "
     << output.rootSubalgebras.subalgebras[i].dynkinDiagram.toString()
     << " (" << (i + 1) << " out of " << output.rootSubalgebras.subalgebras.size << ")\n";
-    theReport.report(tempStream.str());
+    report.report(tempStream.str());
     output.rootSubalgebras.subalgebras[i].getSsl2SubalgebrasAppendListNoRepetition(output, i);
   }
   //sort subalgebras by dynkin index
@@ -4665,9 +4665,9 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
   for (int i = 0; i < theIndexMap.size; i ++) {
     theIndexMap[thePermutation[i]] = i;
   }
-  for (int j = 0; j < output.IndicesSl2sContainedInRootSA.size; j ++) {
-    for (int k = 0; k < output.IndicesSl2sContainedInRootSA[j].size; k ++) {
-      output.IndicesSl2sContainedInRootSA[j][k] = theIndexMap[output.IndicesSl2sContainedInRootSA[j][k]];
+  for (int j = 0; j < output.indicesSl2sContainedInRootSA.size; j ++) {
+    for (int k = 0; k < output.indicesSl2sContainedInRootSA[j].size; k ++) {
+      output.indicesSl2sContainedInRootSA[j][k] = theIndexMap[output.indicesSl2sContainedInRootSA[j][k]];
     }
   }
   inputOwner.checkConsistency();
@@ -4906,15 +4906,15 @@ void SlTwoSubalgebra::makeReportPrecomputations(
     );
   }
   //this->hCharacteristic.ComputeDebugString();
-//  if (this->theE.NonZeroElements.maximumSize == this->owner->theWeyl.RootSystem.size
-//      && this->theF.NonZeroElements.maximumSize == this->owner->theWeyl.RootSystem.size
-//      && this->theH.NonZeroElements.maximumSize == this->owner->theWeyl.RootSystem.size)
+  //  if (this->theE.NonZeroElements.maximumSize == this->owner->theWeyl.RootSystem.size
+  //      && this->theF.NonZeroElements.maximumSize == this->owner->theWeyl.RootSystem.size
+  //      && this->theH.NonZeroElements.maximumSize == this->owner->theWeyl.RootSystem.size)
   this->getOwnerSemisimpleAlgebra().lieBracket(this->elementE, this->elementF, this->eBracketF);
   this->getOwnerSemisimpleAlgebra().lieBracket(this->elementH, this->elementE, this->hBracketE);
   this->getOwnerSemisimpleAlgebra().lieBracket(this->elementH, this->elementF, this->hBracketF);
 
   //theSl2.hCharacteristic.ComputeDebugString();
-//  this->computePrimalModuleDecomposition();
+  //  this->computePrimalModuleDecomposition();
 }
 
 unsigned int SlTwoSubalgebra::hashFunction() const {
@@ -4928,71 +4928,71 @@ unsigned int SlTwoSubalgebra::hashFunction() const {
 
 //The below code is related to sl(2) subalgebras of simple Lie algebras
 void SlTwoSubalgebra::computeModuleDecompositionsition(
-  const Vectors<Rational>& positiveRootsContainingRegularSA,
-  int dimensionContainingRegularSA,
+  const Vectors<Rational>& positiveRootsContainingRegularSubalgebra,
+  int dimensionContainingRegularSubalgebra,
   CharacterSemisimpleLieAlgebraModule<Rational>& outputHWs,
   List<int>& outputModuleDimensions
 ) {
   MacroRegisterFunctionWithName("SlTwoSubalgebra::computePrimalModuleDecomposition");
   this->checkConsistency();
-  positiveRootsContainingRegularSA.checkConsistency();
-  if (positiveRootsContainingRegularSA.size <= 0) {
+  positiveRootsContainingRegularSubalgebra.checkConsistency();
+  if (positiveRootsContainingRegularSubalgebra.size <= 0) {
     global.fatal << "positiveRootsContainingRegularSA has less than one element. " << global.fatal;
   }
-  int IndexZeroWeight = positiveRootsContainingRegularSA.size * 2;
-  outputModuleDimensions.initializeFillInObject(4 * positiveRootsContainingRegularSA.size + 1, 0);
-  outputModuleDimensions[IndexZeroWeight] = dimensionContainingRegularSA;
+  int indexZeroWeight = positiveRootsContainingRegularSubalgebra.size * 2;
+  outputModuleDimensions.initializeFillInObject(4 * positiveRootsContainingRegularSubalgebra.size + 1, 0);
+  outputModuleDimensions[indexZeroWeight] = dimensionContainingRegularSubalgebra;
   List<int> bufferHighestWeights;
   Rational tempRat;
   Vectors<Rational> coordsInPreferredSimpleBasis;
-  positiveRootsContainingRegularSA.getCoordinatesInBasis(
+  positiveRootsContainingRegularSubalgebra.getCoordinatesInBasis(
     this->preferredAmbientSimpleBasis, coordsInPreferredSimpleBasis
   );
-  for (int k = 0; k < positiveRootsContainingRegularSA.size; k ++) {
+  for (int k = 0; k < positiveRootsContainingRegularSubalgebra.size; k ++) {
     tempRat = this->hCharacteristic.scalarEuclidean(coordsInPreferredSimpleBasis[k]);
     if (tempRat.denominatorShort != 1) {
       global.fatal << "Characteristic must be integer. " << global.fatal;
     }
-    if (tempRat > positiveRootsContainingRegularSA.size * 2) {
+    if (tempRat > positiveRootsContainingRegularSubalgebra.size * 2) {
       global.fatal << "The scalar product of the h-Characteristic "
       << this->hCharacteristic.toString()
       << " with the simple root " << coordsInPreferredSimpleBasis[k].toString()
-      << " is larger than " << positiveRootsContainingRegularSA.size * 2
+      << " is larger than " << positiveRootsContainingRegularSubalgebra.size * 2
       << ". The affected sl(2) subalgebra is " << this->toString() << ". " << global.fatal;
       break;
     }
-    outputModuleDimensions[IndexZeroWeight + tempRat.numeratorShort] ++;
-    outputModuleDimensions[IndexZeroWeight - tempRat.numeratorShort] ++;
+    outputModuleDimensions[indexZeroWeight + tempRat.numeratorShort] ++;
+    outputModuleDimensions[indexZeroWeight - tempRat.numeratorShort] ++;
   }
   bufferHighestWeights = (outputModuleDimensions);
-  outputHWs.setExpectedSize(positiveRootsContainingRegularSA.size * 2);
+  outputHWs.setExpectedSize(positiveRootsContainingRegularSubalgebra.size * 2);
   outputHWs.makeZero();
   Weight<Rational> currentHW;
   currentHW.weightFundamentalCoordinates.makeEi(1, 0);
-  for (int j = bufferHighestWeights.size - 1; j >= IndexZeroWeight; j --) {
+  for (int j = bufferHighestWeights.size - 1; j >= indexZeroWeight; j --) {
     int topMult = bufferHighestWeights[j];
     if (topMult < 0) {
       global.fatal << "The sl(2)-module decomposition shows an sl(2)-module with highest weight "
       << topMult << " which is impossible. Here is the sl(2) subalgebra. " << this->toString() << "." << global.fatal;
     }
     if (topMult > 0) {
-      currentHW.weightFundamentalCoordinates[0] = j - IndexZeroWeight;
+      currentHW.weightFundamentalCoordinates[0] = j - indexZeroWeight;
       outputHWs.addMonomial(currentHW, topMult);
-      if (j != IndexZeroWeight) {
-        bufferHighestWeights[IndexZeroWeight * 2 - j] -= topMult;
+      if (j != indexZeroWeight) {
+        bufferHighestWeights[indexZeroWeight * 2 - j] -= topMult;
       }
-      for (int k = j - 2; k >= IndexZeroWeight; k -= 2) {
+      for (int k = j - 2; k >= indexZeroWeight; k -= 2) {
         bufferHighestWeights[k] -= topMult;
-        if (k != IndexZeroWeight) {
-          bufferHighestWeights[IndexZeroWeight * 2 - k] -= topMult;
+        if (k != indexZeroWeight) {
+          bufferHighestWeights[indexZeroWeight * 2 - k] -= topMult;
         }
-        if (bufferHighestWeights[k] < 0 || !(bufferHighestWeights[k] == bufferHighestWeights[IndexZeroWeight * 2 - k])) {
+        if (bufferHighestWeights[k] < 0 || !(bufferHighestWeights[k] == bufferHighestWeights[indexZeroWeight * 2 - k])) {
           std::stringstream crashStream;
           crashStream
           << "An error check has failed. While trying to decompose with respect to  h-characteristic <br> "
           << this->hCharacteristic.toString()
           << ". The positive root system of the containing root subalgebra is <br>"
-          << positiveRootsContainingRegularSA.toString()
+          << positiveRootsContainingRegularSubalgebra.toString()
           << ". <br>The preferred simple basis is <br>" << this->preferredAmbientSimpleBasis.toString()
           << ". The coordinates relative to the preferred simple basis are<br>"
           << coordsInPreferredSimpleBasis.toString() << " The starting weights list is <br>"
@@ -5071,22 +5071,22 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
   << "characteristic 2 for all simple roots of P lying in P_0, then "
   << "e(P, P_0)= 0. ";
 
-  if (this->BadHCharacteristics.size > 0) {
+  if (this->badHCharacteristics.size > 0) {
     bool allbadAreGoodInTheirBadness = true;
-    for (int i = 0; i < this->BadHCharacteristics.size; i ++) {
+    for (int i = 0; i < this->badHCharacteristics.size; i ++) {
       bool isGoodInItsbadness = false;
       for (int j = 0; j < this->size; j ++) {
-        if (this->BadHCharacteristics[i] == (*this)[j].elementH.getCartanPart()) {
+        if (this->badHCharacteristics[i] == (*this)[j].elementH.getCartanPart()) {
           isGoodInItsbadness = true;
           break;
         }
       }
       if (!isGoodInItsbadness) {
         allbadAreGoodInTheirBadness = false;
-        out << "<b>Bad characteristic: " << this->BadHCharacteristics[i] << "</b>";
+        out << "<b>Bad characteristic: " << this->badHCharacteristics[i] << "</b>";
       } else {
         out2 << "<br><b>It turns out that in the current case of Cartan element h = "
-        << this->BadHCharacteristics[i] << " we have that, for a certain P, "
+        << this->badHCharacteristics[i] << " we have that, for a certain P, "
         << " e(P, P_0) equals 0, but I failed to realize the corresponding sl(2) as a subalgebra of that P. "
         << "However, it turns out that h "
         << " is indeed an S-subalgebra of a smaller root subalgebra P'.</b>";

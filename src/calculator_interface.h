@@ -1104,7 +1104,7 @@ class ObjectContainer {
   // These objects are dynamically allocated and used by the calculator as requested
   // by various predefined function handlers.
 public:
-  HashedListReferences<ElementWeylGroup> theWeylGroupElements;
+  HashedListReferences<ElementWeylGroup> weylGroupElements;
   // Pointers to the values of the semisimpleLieAlgebras map.
   // Required so we can return references SemisimpleLieAlgebra*&
   ListReferences<SemisimpleLieAlgebra*> semisimpleLieAlgebraPointers;
@@ -1113,10 +1113,10 @@ public:
   HashedListReferences<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > weylGroupRepresentations;
   HashedListReferences<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > weylGroupVirtualRepresentations;
   ListReferences<ModuleSSalgebra<RationalFraction<Rational> > > theCategoryOmodules;
-  ListReferences<SlTwoSubalgebras> theSltwoSAs;
+  ListReferences<SlTwoSubalgebras> slTwoSubalgebras;
   HashedListReferences<ElementEllipticCurve<ElementZmodP> > ellipticCurveElementsZmodP;
   HashedListReferences<ElementEllipticCurve<Rational> > ellipticCurveElementsRational;
-  HashedListReferences<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > > theTensorElts;
+  HashedListReferences<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > > tensorElements;
   HashedListReferences<Polynomial<Rational> > polynomialsRational;
   HashedListReferences<Polynomial<AlgebraicNumber> > polynomialsAlgebraic;
   HashedListReferences<Polynomial<ElementZmodP> > polynomialsModular;
@@ -1128,9 +1128,9 @@ public:
   HashedListReferences<RationalFraction<AlgebraicNumber> > rationalFunctionsAlgebraic;
   HashedListReferences<RationalFraction<ElementZmodP> > rationalFunctionsModular;
   HashedListReferences<Rational> allRationals;
-  HashedListReferences<CharacterSemisimpleLieAlgebraModule<Rational> > theCharsSSLieAlgFD;
-  HashedListReferences<double, MathRoutines::hashDouble> theDoubles;
-  HashedListReferences<std::string, MathRoutines::hashString> theStrings;
+  HashedListReferences<CharacterSemisimpleLieAlgebraModule<Rational> > charactersSemisimpleLieAlgebraFiniteDimensional;
+  HashedListReferences<double, MathRoutines::hashDouble> doubleNumbers;
+  HashedListReferences<std::string, MathRoutines::hashString> allStrings;
   HashedListReferences<JSData> jsonObjects;
   HashedListReferences<std::string, MathRoutines::hashString> expressionNotation;
   HashedListReferences<Expression> expressionWithNotation;

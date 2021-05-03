@@ -6682,7 +6682,7 @@ bool CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calcula
     ownerSS,
     calculator.objectContainer.algebraicClosure,
     calculator.objectContainer.semisimpleLieAlgebras,
-    calculator.objectContainer.theSltwoSAs,
+    calculator.objectContainer.slTwoSubalgebras,
     &smallSubalgebraPointer.content->weylGroup.dynkinType
   );
   return output.assignValue(theSSsubalgebras, calculator);

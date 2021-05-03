@@ -502,8 +502,8 @@ public:
     bool useLatex, bool useHtml, SlTwoSubalgebras& owner, std::string& output
   ) const;
   void computeModuleDecompositionsition(
-    const Vectors<Rational>& positiveRootsContainingRegularSA,
-    int dimensionContainingRegularSA,
+    const Vectors<Rational>& positiveRootsContainingRegularSubalgebra,
+    int dimensionContainingRegularSubalgebra,
     CharacterSemisimpleLieAlgebraModule<Rational>& outputHWs,
     List<int>& outputModuleDimensions
   );
@@ -557,9 +557,9 @@ public:
   static std::string descriptionHRealization;
   static std::string descriptionMinimalContainingRegularSubalgebras;
 
-  List<List<int> > IndicesSl2sContainedInRootSA;
-  List<int> IndicesSl2decompositionFlas;
-  Vectors<Rational> BadHCharacteristics;
+  List<List<int> > indicesSl2sContainedInRootSA;
+  List<int> indicesSl2decompositionFlas;
+  Vectors<Rational> badHCharacteristics;
   int IndexZeroWeight;
   RootSubalgebras rootSubalgebras;
   ~SlTwoSubalgebras() {
@@ -567,7 +567,6 @@ public:
   SlTwoSubalgebras(): owner(nullptr) {
   }
   SlTwoSubalgebras(SemisimpleLieAlgebra& inputOwner): owner(&inputOwner) {
-   
   }
   bool operator==(const SlTwoSubalgebras& other) const {
     if (this->owner == nullptr) {

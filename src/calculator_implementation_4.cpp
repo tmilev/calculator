@@ -2090,9 +2090,9 @@ void ObjectContainer::resetSliders() {
 
 bool ObjectContainer::checkConsistencyAfterReset() {
   MacroRegisterFunctionWithName("ObjectContainer::checkConsistencyAfterReset");
-  if (this->theWeylGroupElements.size != 0) {
+  if (this->weylGroupElements.size != 0) {
     global.fatal << "WeylGroupElements expected to be empty, got "
-    << this->theWeylGroupElements.size << " elements. " << global.fatal;
+    << this->weylGroupElements.size << " elements. " << global.fatal;
   }
   if (this->semisimpleLieAlgebras.size() != 0) {
     global.fatal << "theSSLieAlgebras expected to be empty, got "
@@ -2112,8 +2112,8 @@ bool ObjectContainer::checkConsistencyAfterReset() {
   if (this->allRationals.size != 0) {
     global.fatal << "Rationals expected to be empty, have: " << this->allRationals.size << " elements instead. " << global.fatal;
   }
-  if (this->theDoubles.size != 1) {
-    global.fatal << "Doubles expected to be have exactly 1 element (namely, nan), have: " << this->theDoubles.size << " elements instead. " << global.fatal;
+  if (this->doubleNumbers.size != 1) {
+    global.fatal << "Doubles expected to be have exactly 1 element (namely, nan), have: " << this->doubleNumbers.size << " elements instead. " << global.fatal;
   }
   if (this->allAlgebraicNumbers.size != 0) {
     global.fatal << "Algebraic numbers expected to be empty, have: " << this->allAlgebraicNumbers.size << " elements instead. " << global.fatal;
@@ -2123,14 +2123,14 @@ bool ObjectContainer::checkConsistencyAfterReset() {
 
 void ObjectContainer::reset() {
   MacroRegisterFunctionWithName("ObjectContainer::reset");
-  this->theWeylGroupElements.clear();
+  this->weylGroupElements.clear();
   this->weylGroupRepresentations.clear();
   this->weylGroupVirtualRepresentations.clear();
   this->theCategoryOmodules.setSize(0);
   this->semisimpleLieAlgebras.clear();
   this->semisimpleLieAlgebraPointers.clear();
   this->semisimpleSubalgebras.clear();
-  this->theTensorElts.clear();
+  this->tensorElements.clear();
   this->polynomialsRational.clear();
   this->polynomialsAlgebraic.clear();
   this->polynomialsModular.clear();
@@ -2140,10 +2140,10 @@ void ObjectContainer::reset() {
   this->rationalFunctionsAlgebraic.clear();
   this->rationalFunctionsModular.clear();
   this->allRationals.clear();
-  this->theCharsSSLieAlgFD.clear();
-  this->theDoubles.clear();
-  this->theDoubles.addOnTop(std::nan(""));
-  this->theStrings.clear();
+  this->charactersSemisimpleLieAlgebraFiniteDimensional.clear();
+  this->doubleNumbers.clear();
+  this->doubleNumbers.addOnTop(std::nan(""));
+  this->allStrings.clear();
   this->jsonObjects.clear();
   this->expressionNotation.clear();
   this->expressionWithNotation.clear();
@@ -2155,7 +2155,7 @@ void ObjectContainer::reset() {
   this->algebraicClosure.reset();
   this->allAlgebraicNumbers.clear();
   this->littelmannOperators.clear();
-  this->theSltwoSAs.setSize(0);
+  this->slTwoSubalgebras.setSize(0);
   this->theWeights.clear();
   this->theWeightsPoly.clear();
   this->hyperOctahedralGroups.setSize(0);

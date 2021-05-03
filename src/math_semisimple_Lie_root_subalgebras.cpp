@@ -2718,14 +2718,14 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
       theSl2.makeReportPrecomputations(indexRootSAinContainer, *this);
       if (output.containsSl2WithGivenHCharacteristic(theSl2.hCharacteristic, &indexIsoSl2)) {
         output.getElement(indexIsoSl2).indicesContainingRootSAs.addOnTop(indexRootSAinContainer);
-        output.IndicesSl2sContainedInRootSA[indexRootSAinContainer].addOnTop(indexIsoSl2);
+        output.indicesSl2sContainedInRootSA[indexRootSAinContainer].addOnTop(indexIsoSl2);
       } else {
-        output.IndicesSl2sContainedInRootSA[indexRootSAinContainer].addOnTop(output.size);
+        output.indicesSl2sContainedInRootSA[indexRootSAinContainer].addOnTop(output.size);
         theSl2.indexInContainer = output.size;
         output.addOnTop(theSl2);
       }
     } else {
-      output.BadHCharacteristics.addOnTop(characteristicH);
+      output.badHCharacteristics.addOnTop(characteristicH);
       DynkinType tempType;
       diagramZeroCharRoots.getDynkinType(tempType);
       global.comments

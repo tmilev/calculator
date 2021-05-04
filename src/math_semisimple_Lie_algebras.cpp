@@ -4,6 +4,7 @@
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_universal_enveloping_implementation.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
+#include "math_rational_function_implementation.h"
 #include "math_extra_drawing_variables.h"
 #include "string_constants.h"
 

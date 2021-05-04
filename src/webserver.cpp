@@ -1719,6 +1719,8 @@ std::string WebAPIResponse::modifyProblemReport() {
   std::string mainInput = HtmlRoutines::convertURLStringToNormal(
     global.getWebInput(WebAPI::problem::fileContent), false
   );
+  mainInput = StringRoutines::replaceAll(mainInput, "\r", "");
+  mainInput = StringRoutines::replaceAll(mainInput, "\t", " ");
   std::string fileName = HtmlRoutines::convertURLStringToNormal(
     global.getWebInput(WebAPI::problem::fileName), false
   );
@@ -1726,25 +1728,25 @@ std::string WebAPIResponse::modifyProblemReport() {
   bool fileExists = FileOperations::fileExistsVirtualCustomizedReadOnly(
     fileName, &commentsOnFailure
   );
-  std::fstream theFile;
+  std::fstream file;
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     global.userDefault.instructorComputed = "default";
   }
   if (!FileOperations::openFileVirtualCustomizedWriteOnly(
-    theFile, fileName, false, true, false, &commentsOnFailure
+    file, fileName, false, true, false, &commentsOnFailure
   )) {
     commentsOnFailure
-    << "<b style =\"color:red\">Failed to open/create file: "
+    << "<b style ='color:red'>Failed to open/create file: "
     << fileName << ". </b>";
     return commentsOnFailure.str();
   }
-  theFile << mainInput;
-  theFile.close();
+  file << mainInput;
+  file.close();
   std::stringstream out;
   if (!fileExists) {
     out << "File " << fileName << " didn't previously exist: just created it for you. ";
   }
-  out << "<b style =\"color:green\">Wrote " << mainInput.size() << " bytes to file: "
+  out << "<b style='color:green'>Wrote " << mainInput.size() << " bytes to file: "
   << fileName << ". </b>";
   return out.str();
 }

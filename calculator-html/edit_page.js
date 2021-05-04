@@ -78,7 +78,10 @@ function getClonePanel(
 }
 
 /**@returns {HTMLElement} */
-function getEditPanel(fileName) {
+function getEditPanel(
+  /**@type{string} */
+  fileName,
+) {
   let thePage = window.calculator.mainPage;
   let doGenerate = !thePage.flagProblemPageOnly;
 
@@ -99,7 +102,9 @@ function getEditPanel(fileName) {
   saveEdit.className = "buttonSaveEdit";
   saveEdit.innerHTML = "Edit";
   saveEdit.style.width = "50px";
-  saveEdit.addEventListener('click', window.calculator.editPage.selectEditPage.bind(null, fileName));
+  saveEdit.addEventListener('click', () => {
+    selectEditPage(fileName);
+  });
   result.appendChild(saveEdit);
   result.appendChild(document.createTextNode(` ${fileName} `));
   let clonePanel = document.createElement("BUTTON");

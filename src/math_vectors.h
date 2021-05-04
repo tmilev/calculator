@@ -1176,7 +1176,7 @@ int Vectors<Coefficient>::arrangeFirstVectorsBeOfMaxPossibleRank(Matrix<Coeffici
   if (this->size == 0) {
     return 0;
   }
-  int theDimension = this->getDimensionOfElements();
+  int dimension = this->getDimensionOfElements();
   Vectors<Rational> tempRoots;
   int oldRank = 0;
   for (int i = 0; i < this->size; i ++) {
@@ -1191,8 +1191,8 @@ int Vectors<Coefficient>::arrangeFirstVectorsBeOfMaxPossibleRank(Matrix<Coeffici
       }
       oldRank = newRank;
     }
-    if (oldRank == theDimension) {
-      return theDimension;
+    if (oldRank == dimension) {
+      return dimension;
     }
   }
   return oldRank;

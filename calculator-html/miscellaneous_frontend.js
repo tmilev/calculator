@@ -178,7 +178,15 @@ function jsonUnescapeParse(
   if (unescaped.search("\n") !== - 1) {
     throw `Unexpected newline in input. ${unescaped}`;
   }
-  return JSON.parse(unescaped);
+  try {
+    return JSON.parse(unescaped);
+  } catch (e) {
+    console.log("Bad unescaped input, content follows.");
+    console.log(unescaped);
+    return {
+      error: e + "<hr>" + unescaped,
+    };
+  }
 }
 
 /**@returns{string} */

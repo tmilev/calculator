@@ -60,7 +60,7 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimirWRTLeviParabolic(
       continue;
     }
     theMon.makeOne(theOwner);
-    int indexOpposite = theOwner.getGeneratorFromRoot(- theWeightLeft);
+    int indexOpposite = theOwner.getGeneratorIndexFromRoot(- theWeightLeft);
     theMon.generatorsIndices.addOnTop(i);
     theMon.generatorsIndices.addOnTop(indexOpposite);
     theMon.powers.addOnTop(1);

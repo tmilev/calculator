@@ -400,7 +400,7 @@ public:
 
   void computeAllReductiveRootSAsInit();
   void computeAllReductiveRootSubalgebrasUpToIsomorphism();
-  void computeAllReductiveRootSubalgebrasUpToIsomorphismOLD(bool sort, bool computeEpsCoords);
+  void computeAllReductiveRootSubalgebrasUpToIsomorphismOLD(bool sort, bool computeEpsilonCoordinates);
   void computeParabolicPseudoParabolicNeitherOrder();
   bool isNewSubalgebra(RootSubalgebra& input);
   int getindexSubalgebraIsomorphicTo(RootSubalgebra& input);
@@ -431,8 +431,8 @@ public:
 class SlTwoSubalgebra {
 public:
 /////////////////////////////////////////////
-  friend std::ostream& operator << (std::ostream& output, const SlTwoSubalgebra& theSl2) {
-    output << theSl2.toString();
+  friend std::ostream& operator << (std::ostream& output, const SlTwoSubalgebra& sl2) {
+    output << sl2.toString();
     return output;
   }
 /////////////////////////////////////////////
@@ -442,7 +442,7 @@ public:
   ElementSemisimpleLieAlgebra<Rational> hBracketE, hBracketF, eBracketF;
   SemisimpleLieAlgebra* owner;
   SlTwoSubalgebras* container;
-  Rational LengthHsquared;
+  Rational lengthHSquared;
   int indexInContainer;
   int dimensionCentralizer;
   DynkinType centralizerTypeIfKnown;
@@ -456,14 +456,13 @@ public:
   Vector<Rational> hCharacteristic;
   Vector<Rational> hElementCorrespondingToCharacteristic;
   Vectors<Rational> hCommutingRootSpaces;
-  Vectors<Rational> RootsWithScalar2WithH;
-  DynkinDiagramRootSubalgebra DiagramM;
+  Vectors<Rational> rootsWithScalar2WithH;
+  DynkinDiagramRootSubalgebra diagramM;
   //  DynkinDiagramRootSubalgebra CentralizerDiagram;
-  PolynomialSubstitution<Rational> theSystemToBeSolved;
-  Matrix<Rational> theSystemMatrixForm;
-  Matrix<Rational> theSystemColumnVector;
-  bool DifferenceTwoHsimpleRootsisARoot;
-  int DynkinsEpsilon;
+  PolynomialSubstitution<Rational> systemToSolve;
+  Matrix<Rational> systemMatrixForm;
+  Matrix<Rational> systemColumnVector;
+  int dynkinsEpsilon;
   bool flagDeallocated;
   void initialize();
   SlTwoSubalgebra() {
@@ -504,15 +503,15 @@ public:
   void computeModuleDecompositionsition(
     const Vectors<Rational>& positiveRootsContainingRegularSubalgebra,
     int dimensionContainingRegularSubalgebra,
-    CharacterSemisimpleLieAlgebraModule<Rational>& outputHWs,
+    CharacterSemisimpleLieAlgebraModule<Rational>& outputHighestWeights,
     List<int>& outputModuleDimensions
   );
   Rational getDynkinIndex() const;
   void computeModuleDecompositionsitionAmbientLieAlgebra();
   bool attemptToComputeCentralizer();
   bool attemptExtendingHFtoHEFWRTSubalgebra(
-    Vectors<Rational>& RootsWithCharacteristic2,
-    Selection& theZeroCharacteristics,
+    Vectors<Rational>& rootsWithCharacteristic2,
+    Selection& zeroCharacteristics,
     Vectors<Rational>& simpleBasisSA,
     Vector<Rational>& h,
     ElementSemisimpleLieAlgebra<Rational>& outputE,
@@ -521,24 +520,31 @@ public:
     PolynomialSubstitution<Rational>& outputSystemToBeSolved,
     Matrix<Rational>& outputSystemColumnVector
   );
-  void initHEFSystemFromECoeffs(
+  void initHEFSystemFromECoefficients(
     Vectors<Rational>& rootsInPlay,
     int numberVariables,
     int halfNumberVariables,
     Vector<Rational>& targetH,
-    Matrix<Rational>& inputFCoeffs,
+    Matrix<Rational>& inputFCoefficients,
     Matrix<Rational>& outputMatrixSystemToBeSolved,
     Matrix<Rational>& outputSystemColumnVector,
-    PolynomialSubstitution<Rational>& outputSystemToBeSolved
+    PolynomialSubstitution<Rational>& outputSystemToBeSolved,
+    LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionPreservedByEMinusF
   );
+  // Whether the ambient Lie algebra has a Cartan involution that has been implemented.
+  bool hasImplementedStandardCartanInvolution(LinearMapSemisimpleLieAlgebra<Rational>* whichInvolution);
   void computeModuleDecompositionsitionOfMinimalContainingRegularSAs(SlTwoSubalgebras& owner);
   bool moduleDecompositionFitsInto(const SlTwoSubalgebra& other) const;
   static bool moduleDecompositionLeftFitsIntoRight(
-    const CharacterSemisimpleLieAlgebraModule<Rational>& moduleDecompoLeft, const CharacterSemisimpleLieAlgebraModule<Rational>& moduleDecompoRight
+    const CharacterSemisimpleLieAlgebraModule<Rational>& moduleDecompoLeft,
+    const CharacterSemisimpleLieAlgebraModule<Rational>& moduleDecompoRight
   );
-  void makeReportPrecomputations(int indexMinimalContainingRegularSA, RootSubalgebra& MinimalContainingRegularSubalgebra);
+  void makeReportPrecomputations(
+    int indexMinimalContainingRegularSA,
+    RootSubalgebra& minimalContainingRegularSubalgebra
+  );
   //the below is outdated, must be deleted as soon as equivalent code is written.
-  void computeDynkinsEpsilon(WeylGroupData& theWeyl);
+  void computeDynkinsEpsilon(WeylGroupData& weyl);
   void toHTML(std::string& filePath);
   bool operator==(const SlTwoSubalgebra& right) const;
   bool operator>(const SlTwoSubalgebra& right) const;
@@ -560,7 +566,7 @@ public:
   List<List<int> > indicesSl2sContainedInRootSA;
   List<int> indicesSl2decompositionFlas;
   Vectors<Rational> badHCharacteristics;
-  int IndexZeroWeight;
+  int indexZeroWeight;
   RootSubalgebras rootSubalgebras;
   ~SlTwoSubalgebras() {
   }

@@ -89,12 +89,12 @@ template <class Coefficient>
 Vector<Coefficient> BranchingData::projectWeight(Vector<Coefficient>& input) {
   Vector<Coefficient> result;
   Vector<Coefficient> fundCoordsSmaller;
-  fundCoordsSmaller.makeZero(this->theHmm.theDomain().getRank());
-  for (int j = 0; j < this->theHmm.theDomain().getRank(); j ++) {
-    fundCoordsSmaller[j] = this->theHmm.theRange().weylGroup.rootScalarCartanRoot(input, theHmm.ImagesCartanDomain[j]);
-    fundCoordsSmaller[j] /= this->theHmm.theDomain().weylGroup.cartanSymmetric.elements[j][j] / 2;
+  fundCoordsSmaller.makeZero(this->theHmm.domain().getRank());
+  for (int j = 0; j < this->theHmm.domain().getRank(); j ++) {
+    fundCoordsSmaller[j] = this->theHmm.range().weylGroup.rootScalarCartanRoot(input, theHmm.ImagesCartanDomain[j]);
+    fundCoordsSmaller[j] /= this->theHmm.domain().weylGroup.cartanSymmetric.elements[j][j] / 2;
   }
-  result = this->theHmm.theDomain().weylGroup.getSimpleCoordinatesFromFundamental(
+  result = this->theHmm.domain().weylGroup.getSimpleCoordinatesFromFundamental(
     fundCoordsSmaller, Coefficient::zero()
   );
   return result;

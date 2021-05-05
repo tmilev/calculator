@@ -108,10 +108,10 @@ bool LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
       << millerRabinTries << ". "
       << global.fatal;
     }
-    int64_t ellapsed = global.getElapsedMilliseconds() - millisecondsStart;
-    if (ellapsed > maximumRunningTimeMilliseconds) {
+    int64_t elapsed = global.getElapsedMilliseconds() - millisecondsStart;
+    if (elapsed > maximumRunningTimeMilliseconds) {
       global.fatal << "It took longer than " << maximumRunningTimeMilliseconds
-      << " to determine " << input[i] << " is prime."
+      << "ms to determine whether " << input[i] << " is prime."
       << global.fatal;
     }
   }

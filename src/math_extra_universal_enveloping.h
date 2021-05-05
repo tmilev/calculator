@@ -180,7 +180,9 @@ public:
   void makeOneGeneratorCoefficientOne(
     const Vector<Rational>& rootSpace, SemisimpleLieAlgebra& inputOwner, const Coefficient& ringUnit = 1
   ) {
-    this->makeOneGeneratorCoefficientOne(inputOwner.getGeneratorFromRoot(rootSpace), inputOwner, ringUnit);
+    this->makeOneGeneratorCoefficientOne(
+      inputOwner.getGeneratorIndexFromRoot(rootSpace), inputOwner, ringUnit
+    );
   }
   Coefficient getKillingFormProduct(const ElementUniversalEnveloping<Coefficient>& right) const;
   void makeZero(SemisimpleLieAlgebra& inputOwner);

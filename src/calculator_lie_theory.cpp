@@ -350,7 +350,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
   MacroRegisterFunctionWithName("Calculator::splitFDpartB3overG2inner");
   ModuleSSalgebra<RationalFraction<Rational> > theModCopy;
   theModCopy.makeFromHW(
-    theG2B3Data.theHmm.theRange(),
+    theG2B3Data.theHmm.range(),
     theG2B3Data.theWeightFundCoords,
     theG2B3Data.selInducing,
     Rational::one(),
@@ -387,9 +387,9 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
   theG2B3Data.g2Weights.setSize(theG2B3Data.outputWeightsFundCoordS.size);
   theG2B3Data.g2DualWeights.setSize(theG2B3Data.outputWeightsFundCoordS.size);
   Matrix<Rational> invertedG2cartanMat;
-  invertedG2cartanMat = theG2B3Data.theHmm.theDomain().weylGroup.cartanSymmetric;
+  invertedG2cartanMat = theG2B3Data.theHmm.domain().weylGroup.cartanSymmetric;
   invertedG2cartanMat.invert();
-  WeylGroupData& rangeWeyl = theG2B3Data.theHmm.theRange().weylGroup;
+  WeylGroupData& rangeWeyl = theG2B3Data.theHmm.range().weylGroup;
   RationalFraction<Rational> zero(Rational::zero());
   RationalFraction<Rational> one(Rational::one());
   theG2B3Data.outputWeightsSimpleCoords = rangeWeyl.getSimpleCoordinatesFromFundamental(
@@ -399,7 +399,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
   weightSimpleCoordinates = rangeWeyl.getSimpleCoordinatesFromFundamental(
     theG2B3Data.theWeightFundCoords, zero
   );
-  theG2B3Data.theAmbientChar.makeFromWeight(weightSimpleCoordinates, &theG2B3Data.theHmm.theRange());
+  theG2B3Data.theAmbientChar.makeFromWeight(weightSimpleCoordinates, &theG2B3Data.theHmm.range());
   theG2B3Data.theSmallCharFDpart.makeZero();
   CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > tempMon;
   for (int i = 0; i < theG2B3Data.outputWeightsSimpleCoords.size; i ++) {
@@ -407,20 +407,20 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
     Vector<RationalFraction<Rational> >& currentG2Weight = theG2B3Data.g2Weights[i];
     Vector<RationalFraction<Rational> >& currentG2DualWeight = theG2B3Data.g2DualWeights[i];
     currentG2DualWeight.setSize(2);
-    currentG2DualWeight[0] = theG2B3Data.theHmm.theRange().weylGroup.rootScalarCartanRoot(
+    currentG2DualWeight[0] = theG2B3Data.theHmm.range().weylGroup.rootScalarCartanRoot(
       currentWeight, theG2B3Data.theHmm.ImagesCartanDomain[0]
     );
     //<-note: implicit type conversion: the return type is the left coefficient type.
-    currentG2DualWeight[1] = theG2B3Data.theHmm.theRange().weylGroup.rootScalarCartanRoot(
+    currentG2DualWeight[1] = theG2B3Data.theHmm.range().weylGroup.rootScalarCartanRoot(
       currentWeight, theG2B3Data.theHmm.ImagesCartanDomain[1]
     );
     //<-note: implicit type conversion: the return type is the left coefficient type.
     invertedG2cartanMat.actOnVectorColumn(currentG2DualWeight, currentG2Weight, zero);//<-g2weight is now computed;
-    tempMon.makeFromWeight(currentG2Weight, &theG2B3Data.theHmm.theDomain());
+    tempMon.makeFromWeight(currentG2Weight, &theG2B3Data.theHmm.domain());
     theG2B3Data.theSmallCharFDpart += tempMon;
   }
   ElementUniversalEnveloping<RationalFraction<Rational> > theG2Casimir, theG2CasimirCopy, imageCasimirInB3, tempElt;
-  theG2Casimir.makeCasimir(theG2B3Data.theHmm.theDomain());
+  theG2Casimir.makeCasimir(theG2B3Data.theHmm.domain());
 
   theG2B3Data.theChars.setSize(theG2B3Data.outputWeightsFundCoordS.size);
   for (int i = 0; i < theG2B3Data.outputWeightsSimpleCoords.size; i ++) {
@@ -447,7 +447,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
   theG2Casimir.checkConsistency();
   imageCasimirInB3.checkConsistency();
   RationalFraction<Rational> charDiff;
-  theG2B3Data.theHmm.theRange().orderNilradical(
+  theG2B3Data.theHmm.range().orderNilradical(
     theMod.parabolicSelectionNonSelectedAreElementsLevi,
     theG2B3Data.flagUseNilWeightGeneratorOrder,
     theG2B3Data.flagAscendingGeneratorOrder
@@ -464,7 +464,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
         weightDifference = theG2B3Data.g2Weights[j] - theG2B3Data.g2Weights[k];
         if (weightDifference.isPositive()) {
           theG2CasimirCopy = imageCasimirInB3;
-          tempElt.makeConstant(theG2B3Data.theChars[j], theG2B3Data.theHmm.theRange());
+          tempElt.makeConstant(theG2B3Data.theChars[j], theG2B3Data.theHmm.range());
           theG2CasimirCopy -= tempElt;
           theG2CasimirCopy *= Rational(12);
           currentTensorEltEigen.multiplyMeByUEEltOnTheLeft(theG2CasimirCopy);
@@ -1070,14 +1070,14 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(Calculator& calculato
   ElementUniversalEnveloping<RationalFraction<Rational> > theCasimir, theCentralCharacter, resultChar;
   RationalFraction<Rational> minusOne(Rational(- 1));
   HashedList<ElementUniversalEnveloping<RationalFraction<Rational> > > theCentralChars;
-  theCasimir.makeCasimir(theg2b3data.theHmm.theDomain());
-  WeylGroupData& smallWeyl = theg2b3data.theHmm.theDomain().weylGroup;
+  theCasimir.makeCasimir(theg2b3data.theHmm.domain());
+  WeylGroupData& smallWeyl = theg2b3data.theHmm.domain().weylGroup;
   for (int k = 0; k < theHWs.size; k ++) {
     theCharacter.makeFromWeight(
-      theg2b3data.theHmm.theRange().weylGroup.getSimpleCoordinatesFromFundamental(
+      theg2b3data.theHmm.range().weylGroup.getSimpleCoordinatesFromFundamental(
         theHWs[k], RationalFraction<Rational>::zeroRational()
       ),
-      &theg2b3data.theHmm.theRange()
+      &theg2b3data.theHmm.range()
     );
     theCharacter.splitCharacterOverReductiveSubalgebra(nullptr, outputChar, theg2b3data);
     theg2b3data.theFormat.fundamentalWeightLetter = "\\omega";
@@ -1715,7 +1715,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2old(
     out << "<tr><td>" << theG2B3Data.outputEigenWords[i].toString() << "</td><td> "
     << currentWeightSimpleB3coords.toString() << "</td><td> " << currentWeightFundB3coords.toString()
     << "</td><td>" << currentG2Weight.toStringLetterFormat("\\alpha") << "</td><td> "
-    << theG2B3Data.theHmm.theDomain().weylGroup.getFundamentalCoordinatesFromSimple(currentG2Weight).toString()
+    << theG2B3Data.theHmm.domain().weylGroup.getFundamentalCoordinatesFromSimple(currentG2Weight).toString()
     << "</td><td> " << currentG2DualWeight.toString() << "</td>";
     out << "<td>" << HtmlRoutines::getMathNoDisplay(theG2B3Data.theChars[i].toString()) << "</td>";
     out << "</tr>";
@@ -1792,11 +1792,11 @@ bool CalculatorLieTheory::splitFDpartB3overG2CharsOutput(
   CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > tempChar;
   CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > startingChar;
   Vector<RationalFraction<Rational> > simpleWeight;
-  simpleWeight = theG2B3Data.theHmm.theRange().weylGroup.getSimpleCoordinatesFromFundamental(
+  simpleWeight = theG2B3Data.theHmm.range().weylGroup.getSimpleCoordinatesFromFundamental(
     theG2B3Data.theWeightFundCoords,
     RationalFraction<Rational>::zeroRational()
   );
-  startingChar.makeFromWeight(simpleWeight, &theG2B3Data.theHmm.theRange());
+  startingChar.makeFromWeight(simpleWeight, &theG2B3Data.theHmm.range());
   startingChar.splitCharacterOverReductiveSubalgebra(&report, tempChar, theG2B3Data);
   out << report;
   return output.assignValue(out.str(), calculator);
@@ -3059,7 +3059,7 @@ bool CalculatorLieTheory::embedG2InB3(Calculator& calculator, const Expression& 
   }
   outputUE.simplify(RationalFraction<Rational>::oneRational());
   ExpressionContext context(calculator);
-  context.setAmbientSemisimpleLieAlgebra(theHmm.theRange());
+  context.setAmbientSemisimpleLieAlgebra(theHmm.range());
   return output.assignValueWithContext(outputUE, context, calculator);
 }
 

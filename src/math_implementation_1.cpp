@@ -32,16 +32,16 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
       newWeight = theWeight + genWeight;
       if (newWeight.isEqualToZero() || this->weylGroup.isARoot(newWeight)) {
         theWeight = newWeight;
-        int theIndex = this->getGeneratorFromRoot(- genWeight);
+        int theIndex = this->getGeneratorIndexFromRoot(- genWeight);
         outputIndicesFormatAd0Ad1Ad2etc.addOnTop(theIndex);
         if (!theWeight.isEqualToZero()) {
           int currentIndex = this->weylGroup.rootSystem.getIndex(theWeight);
           theIndex = this->getRootIndexFromGenerator(theIndex);
-          if (!this->Computed.elements[theIndex][currentIndex]) {
+          if (!this->computedChevalleyConstants.elements[theIndex][currentIndex]) {
             global.fatal
             << "For some reason I am not computed. Here is me: " << this->toString() << global.fatal;
           }
-          outputMultiplyLieBracketsToGetGenerator /= this->ChevalleyConstants.elements[theIndex][currentIndex];
+          outputMultiplyLieBracketsToGetGenerator /= this->chevalleyConstants.elements[theIndex][currentIndex];
         }
         break;
       }
@@ -738,9 +738,9 @@ bool ElementUniversalEnveloping<Coefficient>::convertToRationalCoefficient(Eleme
 
 void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   MacroRegisterFunctionWithName("BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups");
-  this->WeylFDSmallAsSubInLarge.ambientWeyl = &this->theHmm.theRange().weylGroup;
-  this->WeylFDSmall.ambientWeyl = &this->theHmm.theDomain().weylGroup;
-  this->WeylFD.ambientWeyl = &this->theHmm.theRange().weylGroup;
+  this->WeylFDSmallAsSubInLarge.ambientWeyl = &this->theHmm.range().weylGroup;
+  this->WeylFDSmall.ambientWeyl = &this->theHmm.domain().weylGroup;
+  this->WeylFD.ambientWeyl = &this->theHmm.range().weylGroup;
   this->selSmallParSel.initialize(WeylFDSmall.ambientWeyl->getDimension());
   for (int i = 0; i < this->theHmm.ImagesCartanDomain.size; i ++) {
     Vector<Rational>& currentV = this->theHmm.ImagesCartanDomain[i];
@@ -762,10 +762,10 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   this->indicesNilradicalLarge.setSize(0);
   this->indicesNilradicalSmall.setSize(0);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
-  WeylGroupData& theLargeWeyl = this->theHmm.theRange().weylGroup;
-  WeylGroupData& theSmallWeyl = this->theHmm.theDomain().weylGroup;
-  int numB3NegGenerators = this->theHmm.theRange().getNumberOfPositiveRoots();
-  int numG2NegGenerators = this->theHmm.theDomain().getNumberOfPositiveRoots();
+  WeylGroupData& theLargeWeyl = this->theHmm.range().weylGroup;
+  WeylGroupData& theSmallWeyl = this->theHmm.domain().weylGroup;
+  int numB3NegGenerators = this->theHmm.range().getNumberOfPositiveRoots();
+  int numG2NegGenerators = this->theHmm.domain().getNumberOfPositiveRoots();
   for (int i = 0; i < numB3NegGenerators; i ++) {
     const Vector<Rational>& currentWeight = theLargeWeyl.rootSystem[i];
     bool isInNilradical = false;
@@ -777,7 +777,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
     }
     if (isInNilradical) {
       this->weightsNilradicalLarge.addOnTop(currentWeight);
-      tempElt.makeGenerator(i, this->theHmm.theRange());
+      tempElt.makeGenerator(i, this->theHmm.range());
       this->nilradicalLarge.addOnTop(tempElt);
       this->indicesNilradicalLarge.addOnTop(i);
     }
@@ -793,7 +793,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
     }
     if (isInNilradical) {
       this->weightsNilradicalSmall.addOnTop(currentWeight);
-      tempElt.makeGenerator(i, this->theHmm.theDomain());
+      tempElt.makeGenerator(i, this->theHmm.domain());
       this->nilradicalSmall.addOnTop(tempElt);
       this->indicesNilradicalSmall.addOnTop(i);
     }
@@ -840,7 +840,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart2Subgroups() {
   this->WeylFDSmall.makeParabolicFromSelectionSimpleRoots(
     *this->WeylFDSmall.ambientWeyl, this->selSmallParSel, 1000
   );
-  this->WeylFD.makeParabolicFromSelectionSimpleRoots(this->theHmm.theRange().weylGroup, this->selInducing, 1000);
+  this->WeylFD.makeParabolicFromSelectionSimpleRoots(this->theHmm.range().weylGroup, this->selInducing, 1000);
   this->WeylFD.computeRootSubsystem();
   this->WeylFDSmallAsSubInLarge.computeRootSubsystem();
   this->WeylFDSmall.computeRootSubsystem();

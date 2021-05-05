@@ -2267,7 +2267,7 @@ bool RootSubalgebra::computeEssentialsIfNew() {
   MacroRegisterFunctionWithName("RootSubalgebra::computeEssentialsIfNew");
   this->genK = this->simpleRootsReductiveSubalgebra;
   this->checkInitialization();
-  ProgressReport theReport;
+  ProgressReport report;
   std::stringstream reportStream;
   this->simpleBasisKScaledToActByTwo = this->simpleRootsReductiveSubalgebra;
   for (int i = 0; i < this->simpleRootsReductiveSubalgebra.size; i ++) {
@@ -2275,9 +2275,9 @@ bool RootSubalgebra::computeEssentialsIfNew() {
       this->simpleRootsReductiveSubalgebra[i], this->simpleRootsReductiveSubalgebra[i]
     );
   }
-  if (theReport.tickAndWantReport()) {
+  if (report.tickAndWantReport()) {
     reportStream << "Computing root subalgebra... ";
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
   }
   if (this->indexInducingSubalgebra != - 1) {
     this->simpleRootsReductiveSubalgebra.getGramMatrix(this->scalarProdMatrixPermuted, &this->getAmbientWeyl().cartanSymmetric);
@@ -2311,9 +2311,9 @@ bool RootSubalgebra::computeEssentialsIfNew() {
   } else {
     this->simpleRootsReductiveSubalgebra.getGramMatrix(this->scalarProdMatrixOrdered, &this->getAmbientWeyl().cartanSymmetric);
   }
-  if (theReport.tickAndWantReport()) {
+  if (report.tickAndWantReport()) {
     reportStream << "...found a candidate type... ";
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
   }
   if (this->simpleRootsReductiveSubalgebra.getRankElementSpan() != this->simpleRootsReductiveSubalgebra.size) {
     global.fatal << "<br>simple basis vectors not linearly independent! " << global.fatal;
@@ -2330,9 +2330,9 @@ bool RootSubalgebra::computeEssentialsIfNew() {
     }
     return false;
   }
-  if (theReport.tickAndWantReport()) {
+  if (report.tickAndWantReport()) {
     reportStream << "...the candidate's roots are maximally dominant... ";
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
   }
   this->dynkinDiagram.ambientBilinearForm = this->getAmbientWeyl().cartanSymmetric;
   this->dynkinDiagram.ambientRootSystem = this->getAmbientWeyl().rootSystem;
@@ -2354,13 +2354,13 @@ bool RootSubalgebra::computeEssentialsIfNew() {
       return false;
     }
   }
-  if (theReport.tickAndWantReport()) {
+  if (report.tickAndWantReport()) {
     reportStream << "...module decomposition computed, subalgebra type: "
     << this->theDynkinType.toString()
     << ", centralizer type: " << this->theCentralizerDynkinType.toString()
     << ". Computing outer automorphisms that "
     << "have zero action on centralizer and extend to ambient automorphisms... ";
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
   }
   return true;
 }
@@ -2380,7 +2380,9 @@ void RootSubalgebra::generateAutomorphismsPreservingBorel(
   this->generateIsomorphismsPreservingBorel(*this, &outputAutomorphisms);
 }
 
-void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphismOLD(bool sort, bool computeEpsCoords) {
+void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphismOLD(
+  bool sort, bool computeEpsilonCoordinates
+) {
   MacroRegisterFunctionWithName("RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphismOLD");
   this->subalgebras.size = 0;
   this->getOwnerWeyl().computeRho(true);
@@ -2394,16 +2396,52 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphismOLD(bool 
   if (sort) {
     this->sortDescendingOrderBySSRank();
   }
-  if (computeEpsCoords) {
+  if (computeEpsilonCoordinates) {
     for (int i = 0; i < this->subalgebras.size; i ++) {
       this->subalgebras[i].computeEpsilonCoordinatesWithRespectToSubalgebra();
     }
   }
 }
 
+bool SlTwoSubalgebra::hasImplementedStandardCartanInvolution(
+  LinearMapSemisimpleLieAlgebra<Rational>* whichInvolution
+) {
+  char dynkinType = 0;
+  if (!this->owner->weylGroup.dynkinType.isSimple(&dynkinType)) {
+    return false;
+  }
+  if (dynkinType != 'A') {
+    return false;
+  }
+  if (whichInvolution == nullptr) {
+    return true;
+  }
+  whichInvolution->imagesChevalleyGenerators.setSize(
+    this->owner->getNumberOfGenerators()
+  );
+  int numberOfPositiveRoots = this->owner->getNumberOfPositiveRoots();
+  int rank = this->owner->getRank();
+  for (int i = 0; i < numberOfPositiveRoots; i ++) {
+    Vector<Rational> root = this->owner->weylGroup.rootsOfBorel[i];
+    whichInvolution->imagesChevalleyGenerators[i].makeGGenerator(- root, *this->owner);
+    whichInvolution->imagesChevalleyGenerators[i] *= - 1;
+    int oppositeGenerator = numberOfPositiveRoots * 2 - i + rank - 1;
+    whichInvolution->imagesChevalleyGenerators[oppositeGenerator].makeGGenerator(root, *this->owner);
+    whichInvolution->imagesChevalleyGenerators[oppositeGenerator] *= - 1;
+  }
+  for (int i = 0; i < rank; i ++) {
+    ElementSemisimpleLieAlgebra<Rational>& current =
+    whichInvolution->imagesChevalleyGenerators[numberOfPositiveRoots + i];
+    Vector<Rational> root;
+    root.makeEi(rank, i);
+    current.makeCartanGenerator(root, *this->owner);
+  }
+  return true;
+}
+
 bool SlTwoSubalgebra::attemptExtendingHFtoHEFWRTSubalgebra(
-  Vectors<Rational>& RootsWithCharacteristic2,
-  Selection& theZeroCharacteristics,
+  Vectors<Rational>& rootsWithCharacteristic2,
+  Selection& zeroCharacteristics,
   Vectors<Rational>& simpleBasisSA,
   Vector<Rational>& h,
   ElementSemisimpleLieAlgebra<Rational>& outputE,
@@ -2413,22 +2451,22 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWRTSubalgebra(
   Matrix<Rational>& outputSystemColumnVector
 ) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::attemptExtendingHFtoHEFWRTSubalgebra");
-  if (theZeroCharacteristics.cardinalitySelection == theZeroCharacteristics.numberOfElements) {
+  if (zeroCharacteristics.cardinalitySelection == zeroCharacteristics.numberOfElements) {
     return false;
   }
   Vectors<Rational> rootsInPlay;
   rootsInPlay.size = 0;
-  int theRelativeDimension = simpleBasisSA.size;
+  int relativeDimension = simpleBasisSA.size;
 //  int theDimension = this->theWeyl.cartanSymmetric.numberOfRows;
-  if (theRelativeDimension != theZeroCharacteristics.numberOfElements) {
+  if (relativeDimension != zeroCharacteristics.numberOfElements) {
     global.fatal << "Relative dimension is incorrect. " << global.fatal;
   }
-  //format. We are looking for an sl(2) for which e = a_0 g^\alpha_0+... a_kg^\alpha_k, and
+  // Format. We are looking for an sl(2) for which e = a_0 g^\alpha_0+... a_kg^\alpha_k, and
   // f=b_0 g^{-\alpha_0}+... +b_kg^{-\alpha_k}
-  //where the first \alpha's are ordered as in rootsInPlay.
-  //Those are ordered as follows. First come the simple roots of characteristic 2,
-  //and the last \alpha's are the members of SelectedExtraPositiveRoots
-  //(i.e. root equal to the sum of one simple root
+  // where the first \alpha's are ordered as in rootsInPlay.
+  // Those are ordered as follows. First come the simple roots of characteristic 2,
+  // and the last \alpha's are the members of SelectedExtraPositiveRoots
+  // (i.e. root equal to the sum of one simple root
   // of characteristic 2 with a simple roots of characteristic 0).
   // Then the first k variables of the polynomials below will be a_0, ..., a_k., and
   // the last k variables will be the b_i's
@@ -2436,105 +2474,115 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWRTSubalgebra(
   // l/2 is the index of the root
   // of SelectedExtraPositiveRoots, if l is even, and to the
   // coefficient of  g^{-\alpha_{(l+ 1)/2}} otherwise
-  for (int i = 0; i < theRelativeDimension; i ++) {
-    if (!theZeroCharacteristics.selected[i]) {
+  for (int i = 0; i < relativeDimension; i ++) {
+    if (!zeroCharacteristics.selected[i]) {
       rootsInPlay.addOnTop(simpleBasisSA[i]);
     }
   }
-  Vectors<Rational> SelectedExtraPositiveRoots;
-  for (int i = 0; i <RootsWithCharacteristic2.size; i ++) {
-    if (!simpleBasisSA.contains(RootsWithCharacteristic2[i])) {
-      SelectedExtraPositiveRoots.addOnTop(RootsWithCharacteristic2[i]);
+  Vectors<Rational> selectedExtraPositiveRoots;
+  for (int i = 0; i < rootsWithCharacteristic2.size; i ++) {
+    if (!simpleBasisSA.contains(rootsWithCharacteristic2[i])) {
+      selectedExtraPositiveRoots.addOnTop(rootsWithCharacteristic2[i]);
     }
   }
   int numRootsChar2 = rootsInPlay.size;
-  rootsInPlay.addListOnTop(SelectedExtraPositiveRoots);
+  rootsInPlay.addListOnTop(selectedExtraPositiveRoots);
 
   int halfNumberVariables = rootsInPlay.size;
   int numberVariables = halfNumberVariables*2;
   MonomialPolynomial tempM;
   tempM.makeOne();
-  Matrix<Rational> coeffsF;
-  coeffsF.initialize(1, halfNumberVariables);
+  Matrix<Rational> coefficientsF;
+  coefficientsF.initialize(1, halfNumberVariables);
   for (int i = 0; i < numRootsChar2; i ++) {
-    coeffsF.elements[0][i] = i * i + 1; //(i%2== 0)? 1: 2;
+    global.comments << "DEBUG: element is: " << i + i + 1;
+    coefficientsF.elements[0][i] = i * i + 1; //(i % 2== 0)? 1: 2;
   }
-  for (int i = numRootsChar2; i < coeffsF.numberOfColumns; i ++) {
-    coeffsF.elements[0][i] = i * i + 1;
+  for (int i = numRootsChar2; i < coefficientsF.numberOfColumns; i ++) {
+    coefficientsF.elements[0][i] = i * i + 1;
   }
-  this->initHEFSystemFromECoeffs(
+  LinearMapSemisimpleLieAlgebra<Rational> cartanInvolutionStandard;
+  LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionToRespect = nullptr;
+  if (this->hasImplementedStandardCartanInvolution(&cartanInvolutionStandard)) {
+    cartanInvolutionToRespect = &cartanInvolutionStandard;
+  }
+  this->initHEFSystemFromECoefficients(
     rootsInPlay,
     numberVariables,
     halfNumberVariables,
     h,
-    coeffsF,
+    coefficientsF,
     outputMatrixSystemToBeSolved,
     outputSystemColumnVector,
-    outputSystemToBeSolved
+    outputSystemToBeSolved,
+    cartanInvolutionToRespect
   );
   Matrix<Rational> tempMat, tempMatColumn, tempMatResult;
   tempMat = outputMatrixSystemToBeSolved;
   tempMatColumn = outputSystemColumnVector;
   outputF.makeZero();
   outputE.makeZero();
-  ChevalleyGenerator tempGen;
+  ChevalleyGenerator generator;
   if (Matrix<Rational>::solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(
     tempMat, tempMatColumn, tempMatResult
   )) {
-    for (int i = 0; i <rootsInPlay.size; i ++) {
-      tempGen.makeGenerator(
-        this->getOwnerSemisimpleAlgebra(), this->getOwnerSemisimpleAlgebra().getGeneratorFromRoot(- rootsInPlay[i])
+    for (int i = 0; i < rootsInPlay.size; i ++) {
+      generator.makeGenerator(
+        this->getOwnerSemisimpleAlgebra(), this->getOwnerSemisimpleAlgebra().getGeneratorIndexFromRoot(- rootsInPlay[i])
       );
-      outputF.addMonomial(tempGen, coeffsF.elements[0][i]);
-      tempGen.makeGenerator(this->getOwnerSemisimpleAlgebra(), this->getOwnerSemisimpleAlgebra().getGeneratorFromRoot(rootsInPlay[i]));
-      outputE.addMonomial(tempGen, tempMatResult.elements[i][0]);
+      outputF.addMonomial(generator, coefficientsF.elements[0][i]);
+      generator.makeGenerator(this->getOwnerSemisimpleAlgebra(), this->getOwnerSemisimpleAlgebra().getGeneratorIndexFromRoot(rootsInPlay[i]));
+      outputE.addMonomial(generator, tempMatResult.elements[i][0]);
     }
     return true;
   }
   return false;
 }
 
-void SlTwoSubalgebra::initHEFSystemFromECoeffs(
+void SlTwoSubalgebra::initHEFSystemFromECoefficients(
   Vectors<Rational>& rootsInPlay,
   int numberVariables,
   int halfNumberVariables,
   Vector<Rational>& targetH,
-  Matrix<Rational>& inputFCoeffs,
+  Matrix<Rational>& inputFCoefficients,
   Matrix<Rational>& outputMatrixSystemToBeSolved,
   Matrix<Rational>& outputSystemColumnVector,
-  PolynomialSubstitution<Rational>& outputSystemToBeSolved
+  PolynomialSubstitution<Rational>& outputSystemToBeSolved,
+  LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionPreservedByEMinusF
 ) {
-  MacroRegisterFunctionWithName("SlTwoSubalgebra::initHEFSystemFromECoeffs");
-  Vector<Rational> tempRoot;
-  MonomialPolynomial tempM;
-  Rational tempRat;
-  HashedList<Vector<Rational> > RootSpacesThatNeedToBeKilled;
-  RootSpacesThatNeedToBeKilled.setExpectedSize(this->getOwnerWeyl().rootSystem.size);
+  MacroRegisterFunctionWithName("SlTwoSubalgebra::initHEFSystemFromECoefficients");
+  MonomialPolynomial monomial;
+  HashedList<Vector<Rational> > rootSpacesToVanish;
+  rootSpacesToVanish.setExpectedSize(this->getOwnerWeyl().rootSystem.size);
   outputSystemToBeSolved.size = 0;
   outputMatrixSystemToBeSolved.initialize(0, numberVariables);
   for (int i = 0; i < rootsInPlay.size; i ++) {
     if (this->getOwnerWeyl().rootScalarCartanRoot(targetH, rootsInPlay[i]) != 2) {
-      global.fatal << "The scalar product of the h element: " << targetH.toString()
-      << " and the root in play " << rootsInPlay[i].toString() << " must be 2, but equals instead "
-      << this->getOwnerWeyl().rootScalarCartanRoot(targetH, rootsInPlay[i]).toString() << global.fatal;
+      global.fatal << "The scalar product of the h element: "
+      << targetH.toString()
+      << " and the root in play " << rootsInPlay[i].toString()
+      << " must be 2, but equals instead "
+      << this->getOwnerWeyl().rootScalarCartanRoot(targetH, rootsInPlay[i]).toString()
+      << global.fatal;
     }
   }
+  Vector<Rational> difference;
   for (int i = 0; i < rootsInPlay.size; i ++) {
     for (int j = 0; j < rootsInPlay.size; j ++) {
-      tempRoot = rootsInPlay[i] - rootsInPlay[j];
-      if (this->getOwnerWeyl().isARoot(tempRoot)) {
-        int indexEquation = RootSpacesThatNeedToBeKilled.getIndex(tempRoot);
+      difference = rootsInPlay[i] - rootsInPlay[j];
+      if (this->getOwnerWeyl().isARoot(difference)) {
+        int indexEquation = rootSpacesToVanish.getIndex(difference);
         if (indexEquation == - 1) {
-          RootSpacesThatNeedToBeKilled.addOnTop(tempRoot);
+          rootSpacesToVanish.addOnTop(difference);
           indexEquation = outputSystemToBeSolved.size;
           outputSystemToBeSolved.setSize(outputSystemToBeSolved.size + 1);
           outputSystemToBeSolved.lastObject()->makeZero();
         }
-        tempM.makeOne();
-        tempM.setVariable(i, 1);
-        tempM.setVariable(j + halfNumberVariables, 1);
-        Rational tempCoeff = this->getOwnerSemisimpleAlgebra().getConstant(rootsInPlay[i], - rootsInPlay[j]);
-        outputSystemToBeSolved[indexEquation].addMonomial(tempM, tempCoeff);
+        monomial.makeOne();
+        monomial.setVariable(i, 1);
+        monomial.setVariable(j + halfNumberVariables, 1);
+        Rational coefficient = this->getOwnerSemisimpleAlgebra().getConstant(rootsInPlay[i], - rootsInPlay[j]);
+        outputSystemToBeSolved[indexEquation].addMonomial(monomial, coefficient);
       }
     }
   }
@@ -2543,16 +2591,17 @@ void SlTwoSubalgebra::initHEFSystemFromECoeffs(
   for (int i = oldSize; i < outputSystemToBeSolved.size; i ++) {
     outputSystemToBeSolved[i].makeZero();
   }
+  Rational tempRat;
   for (int i = 0; i < rootsInPlay.size; i ++) {
     if (rootsInPlay.size != halfNumberVariables) {
       global.fatal << "Roots in play must be half the number of variables. " << global.fatal;
     }
-    this->getOwnerSemisimpleAlgebra().getConstantOrHElement(rootsInPlay[i], - rootsInPlay[i], tempRat, tempRoot);
+    this->getOwnerSemisimpleAlgebra().getConstantOrHElement(rootsInPlay[i], - rootsInPlay[i], tempRat, difference);
     for (int j = 0; j < this->getOwnerSemisimpleAlgebra().getRank(); j ++) {
-      tempM.makeOne();
-      tempM.setVariable(i, 1);
-      tempM.setVariable(i + halfNumberVariables, 1);
-      outputSystemToBeSolved[j+oldSize].addMonomial(tempM, tempRoot[j]);
+      monomial.makeOne();
+      monomial.setVariable(i, 1);
+      monomial.setVariable(i + halfNumberVariables, 1);
+      outputSystemToBeSolved[j + oldSize].addMonomial(monomial, difference[j]);
     }
   }
   for (int i = 0; i < this->getOwnerSemisimpleAlgebra().getRank(); i ++) {
@@ -2566,10 +2615,10 @@ void SlTwoSubalgebra::initHEFSystemFromECoeffs(
     for (int j = 0; j < outputSystemToBeSolved[i].size(); j ++) {
       int lowerIndex = - 1;
       int higherIndex = - 1;
-      Polynomial<Rational>& currentPoly = outputSystemToBeSolved[i];
-      Rational& currentCoeff = currentPoly.coefficients[j];
+      Polynomial<Rational>& currentPolynomial = outputSystemToBeSolved[i];
+      Rational& currentCoefficient = currentPolynomial.coefficients[j];
       for (int k = 0; k < numberVariables; k ++) {
-        if (currentPoly[j](k) == 1) {
+        if (currentPolynomial[j](k) == 1) {
           if (k < halfNumberVariables) {
             lowerIndex = k;
           } else {
@@ -2579,10 +2628,10 @@ void SlTwoSubalgebra::initHEFSystemFromECoeffs(
         }
       }
       if (lowerIndex == - 1) {
-        outputSystemColumnVector.elements[i][0] = currentCoeff * (- 1);
+        outputSystemColumnVector.elements[i][0] = currentCoefficient * (- 1);
       } else {
-        outputMatrixSystemToBeSolved.elements[i][lowerIndex] = currentCoeff *
-        inputFCoeffs.elements[0][higherIndex - halfNumberVariables];
+        outputMatrixSystemToBeSolved.elements[i][lowerIndex] = currentCoefficient *
+        inputFCoefficients.elements[0][higherIndex - halfNumberVariables];
       }
     }
   }
@@ -2593,8 +2642,8 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
 ) {
   MacroRegisterFunctionWithName("RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition");
   //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1 - 10.4
-  int theRelativeDimension = this->simpleRootsReductiveSubalgebra.size;
-  if (theRelativeDimension == 0) {
+  int relativeDimension = this->simpleRootsReductiveSubalgebra.size;
+  if (relativeDimension == 0) {
     return;
   }
   Selection selectionRootsWithZeroCharacteristic;
@@ -2603,63 +2652,68 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
   Vectors<Rational> reflectedSimpleBasisK;
   rootsScalarProduct2HnonRaised.reserve(this->positiveRootsReductiveSubalgebra.size);
   ElementWeylGroup raisingElt;
-  selectionRootsWithZeroCharacteristic.initialize(theRelativeDimension);
-  Matrix<Rational> InvertedRelativeKillingForm;
-  InvertedRelativeKillingForm.initialize(theRelativeDimension, theRelativeDimension);
-  for (int k = 0; k < theRelativeDimension; k ++) {
-    for (int j = 0; j < theRelativeDimension; j ++) {
-      InvertedRelativeKillingForm(k, j) = this->getAmbientWeyl().rootScalarCartanRoot(
+  selectionRootsWithZeroCharacteristic.initialize(relativeDimension);
+  Matrix<Rational> invertedRelativeKillingForm;
+  invertedRelativeKillingForm.initialize(relativeDimension, relativeDimension);
+  for (int k = 0; k < relativeDimension; k ++) {
+    for (int j = 0; j < relativeDimension; j ++) {
+      invertedRelativeKillingForm(k, j) = this->getAmbientWeyl().rootScalarCartanRoot(
         this->simpleRootsReductiveSubalgebra[k], this->simpleRootsReductiveSubalgebra[j]
       );
     }
   }
-  InvertedRelativeKillingForm.invert();
-  int numCycles = MathRoutines::twoToTheNth(selectionRootsWithZeroCharacteristic.numberOfElements);
+  invertedRelativeKillingForm.invert();
+  int numberOfCycles = MathRoutines::twoToTheNth(selectionRootsWithZeroCharacteristic.numberOfElements);
   ProgressReport theReport;
   Vectors<Rational> rootsZeroChar;
   rootsZeroChar.reserve(selectionRootsWithZeroCharacteristic.numberOfElements);
   Vectors<Rational> relativeRootSystem;
   this->positiveRootsReductiveSubalgebra.getCoordinatesInBasis(this->simpleRootsReductiveSubalgebra, relativeRootSystem);
-  SlTwoSubalgebra theSl2;
-  theSl2.container = &output;
-  theSl2.owner = &this->getOwnerLieAlgebra();
-  SemisimpleLieAlgebra& theLieAlgebra = this->getOwnerLieAlgebra();
+  SlTwoSubalgebra sl2;
+  sl2.container = &output;
+  sl2.owner = &this->getOwnerLieAlgebra();
+  SemisimpleLieAlgebra& lieAlgebra = this->getOwnerLieAlgebra();
   DynkinDiagramRootSubalgebra diagramZeroCharRoots;
-  for (int cyclecounter = 0; cyclecounter<numCycles; cyclecounter ++, selectionRootsWithZeroCharacteristic.incrementSelection()) {
+  for (
+    int cycleCounter = 0;
+    cycleCounter < numberOfCycles;
+    cycleCounter ++,
+    selectionRootsWithZeroCharacteristic.incrementSelection()
+  ) {
     this->simpleRootsReductiveSubalgebra.subSelection(selectionRootsWithZeroCharacteristic, rootsZeroChar);
     diagramZeroCharRoots.computeDiagramTypeModifyInput(rootsZeroChar, this->getAmbientWeyl());
-    int theSlack = 0;
+    int slack = 0;
     rootsScalarProduct2HnonRaised.size = 0;
     simpleRootsChar2 = selectionRootsWithZeroCharacteristic;
     simpleRootsChar2.invertSelection();
-    Vector<Rational> simpleRootsChar2Vect;
-    simpleRootsChar2Vect = simpleRootsChar2;
+    Vector<Rational> simpleRootsChar2Vector;
+    simpleRootsChar2Vector = simpleRootsChar2;
     for (int j = 0; j < relativeRootSystem.size; j ++) {
-      if (simpleRootsChar2Vect.scalarEuclidean(relativeRootSystem[j]) == 1) {
-        theSlack ++;
+      if (simpleRootsChar2Vector.scalarEuclidean(relativeRootSystem[j]) == 1) {
+        slack ++;
         rootsScalarProduct2HnonRaised.addOnTop(this->positiveRootsReductiveSubalgebra[j]);
       }
     }
-    int theDynkinEpsilon = diagramZeroCharRoots.numberRootsGeneratedByDiagram() + theRelativeDimension - theSlack;
+    int dynkinEpsilon = diagramZeroCharRoots.numberRootsGeneratedByDiagram() + relativeDimension - slack;
     //if Dynkin's epsilon is not zero the subalgebra cannot be an S sl(2) subalgebra.
     //otherwise, as far as I understand, it always is //
     //except for G_2 (go figure!).
     //(but selectionRootsWithZeroCharacteristic still have to be found)
     //this is done in the below code.
-    if (theDynkinEpsilon != 0) {
+    if (dynkinEpsilon != 0) {
       continue;
     }
     Vector<Rational> relativeCharacteristic, relativeSimpleCoords;
-    relativeCharacteristic.makeZero(theRelativeDimension);
-    for (int k = 0; k < theRelativeDimension; k ++) {
+    relativeCharacteristic.makeZero(relativeDimension);
+    for (int k = 0; k < relativeDimension; k ++) {
       if (!selectionRootsWithZeroCharacteristic.selected[k]) {
         relativeCharacteristic[k] = 2;
       }
     }
-    InvertedRelativeKillingForm.actOnVectorColumn(relativeCharacteristic, relativeSimpleCoords);
+    invertedRelativeKillingForm.actOnVectorColumn(relativeCharacteristic, relativeSimpleCoords);
     Vector<Rational> characteristicH;
-    characteristicH.makeZero(theLieAlgebra.getRank());
-    for (int j = 0; j < theRelativeDimension; j ++) {
+    characteristicH.makeZero(lieAlgebra.getRank());
+    for (int j = 0; j < relativeDimension; j ++) {
       characteristicH += this->simpleRootsReductiveSubalgebra[j] * relativeSimpleCoords[j];
     }
     for (int k = 0; k < rootsScalarProduct2HnonRaised.size; k ++) {
@@ -2677,52 +2731,52 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
     for (int k = 0; k < reflectedSimpleBasisK.size; k ++) {
       this->getAmbientWeyl().actOn(raisingElt, reflectedSimpleBasisK[k]);
     }
-    theSl2.RootsWithScalar2WithH = rootsScalarProduct2HnonRaised;
-    for (int k = 0; k < theSl2.RootsWithScalar2WithH.size; k ++) {
-      this->getAmbientWeyl().actOn(raisingElt, theSl2.RootsWithScalar2WithH[k]);
+    sl2.rootsWithScalar2WithH = rootsScalarProduct2HnonRaised;
+    for (int k = 0; k < sl2.rootsWithScalar2WithH.size; k ++) {
+      this->getAmbientWeyl().actOn(raisingElt, sl2.rootsWithScalar2WithH[k]);
     }
-    for (int i = 0; i < theSl2.RootsWithScalar2WithH.size; i ++) {
-      if (this->getAmbientWeyl().rootScalarCartanRoot(characteristicH, theSl2.RootsWithScalar2WithH[i]) != 2) {
+    for (int i = 0; i < sl2.rootsWithScalar2WithH.size; i ++) {
+      if (this->getAmbientWeyl().rootScalarCartanRoot(characteristicH, sl2.rootsWithScalar2WithH[i]) != 2) {
         global.fatal << "Bad scalar product after raising: raised characteristic: "
         << characteristicH.toString()
         << " simplebasisK: " << this->simpleRootsReductiveSubalgebra.toString()
         << "raised by: " << raisingElt.toString()
         << " to get: " << reflectedSimpleBasisK.toString()
         << " theSl2.RootsWithScalar2WithH: "
-        << theSl2.RootsWithScalar2WithH.toString()
+        << sl2.rootsWithScalar2WithH.toString()
         << ", theSl2.RootsWithScalar2WithH[i]: "
-        << theSl2.RootsWithScalar2WithH[i].toString()
+        << sl2.rootsWithScalar2WithH[i].toString()
         << " scalar product: "
-        << this->getAmbientWeyl().rootScalarCartanRoot(characteristicH, theSl2.RootsWithScalar2WithH[i]).toString()
-        << ". The inverted relative cartan: " << InvertedRelativeKillingForm.toString()
+        << this->getAmbientWeyl().rootScalarCartanRoot(characteristicH, sl2.rootsWithScalar2WithH[i]).toString()
+        << ". The inverted relative cartan: " << invertedRelativeKillingForm.toString()
         << ". The cartan: " << this->getAmbientWeyl().cartanSymmetric.toString() << ". "
         << global.fatal;
       }
     }
-    theSl2.elementH.makeCartanGenerator(characteristicH, theLieAlgebra);
-    theSl2.LengthHsquared = theSl2.getOwnerSemisimpleAlgebra().weylGroup.rootScalarCartanRoot(characteristicH, characteristicH);
-    theSl2.elementE.makeZero();
-    theSl2.elementF.makeZero();
-    if (theSl2.attemptExtendingHFtoHEFWRTSubalgebra(
-      theSl2.RootsWithScalar2WithH,
+    sl2.elementH.makeCartanGenerator(characteristicH, lieAlgebra);
+    sl2.lengthHSquared = sl2.getOwnerSemisimpleAlgebra().weylGroup.rootScalarCartanRoot(characteristicH, characteristicH);
+    sl2.elementE.makeZero();
+    sl2.elementF.makeZero();
+    if (sl2.attemptExtendingHFtoHEFWRTSubalgebra(
+      sl2.rootsWithScalar2WithH,
       selectionRootsWithZeroCharacteristic,
       reflectedSimpleBasisK,
       characteristicH,
-      theSl2.elementE,
-      theSl2.elementF,
-      theSl2.theSystemMatrixForm,
-      theSl2.theSystemToBeSolved,
-      theSl2.theSystemColumnVector
+      sl2.elementE,
+      sl2.elementF,
+      sl2.systemMatrixForm,
+      sl2.systemToSolve,
+      sl2.systemColumnVector
     )) {
       int indexIsoSl2 = - 1;
-      theSl2.makeReportPrecomputations(indexRootSAinContainer, *this);
-      if (output.containsSl2WithGivenHCharacteristic(theSl2.hCharacteristic, &indexIsoSl2)) {
+      sl2.makeReportPrecomputations(indexRootSAinContainer, *this);
+      if (output.containsSl2WithGivenHCharacteristic(sl2.hCharacteristic, &indexIsoSl2)) {
         output.getElement(indexIsoSl2).indicesContainingRootSAs.addOnTop(indexRootSAinContainer);
         output.indicesSl2sContainedInRootSA[indexRootSAinContainer].addOnTop(indexIsoSl2);
       } else {
         output.indicesSl2sContainedInRootSA[indexRootSAinContainer].addOnTop(output.size);
-        theSl2.indexInContainer = output.size;
-        output.addOnTop(theSl2);
+        sl2.indexInContainer = output.size;
+        output.addOnTop(sl2);
       }
     } else {
       output.badHCharacteristics.addOnTop(characteristicH);
@@ -2732,13 +2786,15 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
       << "<br>obtained bad characteristic " << characteristicH.toString()
       << ". The zero char root diagram is "
       << tempType.toString() << "; the Dynkin epsilon is "
-      << theDynkinEpsilon << "= the num roots generated by diagram "
+      << dynkinEpsilon << "= the num roots generated by diagram "
       << diagramZeroCharRoots.numberRootsGeneratedByDiagram()
-      << " + the relative dimension " << theRelativeDimension
-      << " - the slack " << theSlack << "<br>The relative root system is: " << relativeRootSystem.toString();
+      << " + the relative dimension " << relativeDimension
+      << " - the slack " << slack
+      << "<br>The relative root system is: " << relativeRootSystem.toString();
     }
     std::stringstream out;
-    out << "Exploring Dynkin characteristics case " << cyclecounter + 1 << " out of " << numCycles;
+    out << "Exploring Dynkin characteristics case "
+    << cycleCounter + 1 << " out of " << numberOfCycles;
     theReport.report(out.str());
   }
 }

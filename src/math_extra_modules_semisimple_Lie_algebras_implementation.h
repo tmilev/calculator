@@ -1554,7 +1554,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   }
   out << "<br>Parabolic selection: " << LeviInSmall.toString();
   std::stringstream tempStream1;
-  tempStream1 << "Started splitting the f.d. part of the " << theHmm.theRange().toStringLieAlgebraName() << "-module with highest weight in fund coords "
+  tempStream1 << "Started splitting the f.d. part of the " << theHmm.range().toStringLieAlgebraName() << "-module with highest weight in fund coords "
   << this->theChaR[0].weightFundamentalCoordinates.toString();
   ProgressReport theReport;
   theReport.report(tempStream1.str());
@@ -1631,7 +1631,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
         lastNonZeroIndex = i;
       }
     }
-    currentWeight = theHmm.theRange().weylGroup.getFundamentalCoordinatesFromSimple(
+    currentWeight = theHmm.range().weylGroup.getFundamentalCoordinatesFromSimple(
       this->theGeneratingWordsWeightsPlusWeightFDpart[lastNonZeroIndex]
     );//<-implicit type conversion here
     currentWeight += hwFundCoordsNilPart;

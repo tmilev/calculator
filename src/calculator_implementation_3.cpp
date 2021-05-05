@@ -298,16 +298,16 @@ void Calculator::makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output) {
   output.domainAlg = &this->objectContainer.getLieAlgebraCreateIfNotPresent(g2Type);
   output.rangeAlg = &this->objectContainer.getLieAlgebraCreateIfNotPresent(b3Type);
 
-  output.theRange().computeChevalleyConstants();
-  output.theDomain().computeChevalleyConstants();
+  output.range().computeChevalleyConstants();
+  output.domain().computeChevalleyConstants();
   ElementSemisimpleLieAlgebra<Rational> g_2, g_1plusg_3, g_m2, g_m1plusg_m3, tempElt;
-  g_2.makeGenerator         (13, output.theRange());
-  g_m2.makeGenerator        (7,  output.theRange());
-  g_1plusg_3.makeGenerator  (12, output.theRange());
-  tempElt.makeGenerator     (14, output.theRange());
+  g_2.makeGenerator         (13, output.range());
+  g_m2.makeGenerator        (7,  output.range());
+  g_1plusg_3.makeGenerator  (12, output.range());
+  tempElt.makeGenerator     (14, output.range());
   g_1plusg_3 += tempElt;
-  g_m1plusg_m3.makeGenerator(6, output.theRange());
-  tempElt.makeGenerator     (8, output.theRange());
+  g_m1plusg_m3.makeGenerator(6, output.range());
+  tempElt.makeGenerator     (8, output.range());
   g_m1plusg_m3 += tempElt;
   output.imagesSimpleChevalleyGenerators.setSize(4);
   output.imagesSimpleChevalleyGenerators[0] = g_1plusg_3;

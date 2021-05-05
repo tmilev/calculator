@@ -1615,7 +1615,7 @@ std::string WebAPIResponse::addUserEmails(const std::string& hostWebAddressWithP
     << numNewUsers << " new users and " << numUpdatedUsers
     << " user updates.</span> User roles: " << userRole;
   } else
-    out << "<b style = 'color:red'>Failed to add all users.</b> "
+    out << "<b style='color:red'>Failed to add all users.</b> "
     << "Errors follow.<hr>"
     << comments.str() << "<hr>";
   if (doSendEmails) {
@@ -1688,10 +1688,10 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     return result;
   }
   std::string lastStudentAnswerID;
-  MapList<std::string, std::string, MathRoutines::hashString>& theArgs = global.webArguments;
-  for (int i = 0; i < theArgs.size(); i ++) {
+  MapList<std::string, std::string, MathRoutines::hashString>& arguments = global.webArguments;
+  for (int i = 0; i < arguments.size(); i ++) {
     StringRoutines::stringBeginsWith(
-      theArgs.keys[i],
+      arguments.keys[i],
       WebAPI::problem::calculatorAnswerPrefix,
       &lastStudentAnswerID
     );
@@ -1733,7 +1733,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   answerCommandsNoEnclosure << currentA.commandAnswerOnGiveUp;
   interpreter.evaluate(answerCommands.str());
   if (interpreter.syntaxErrors != "") {
-    out << "<b style ='color:red'>Failed to evaluate the default answer. "
+    out << "<b style='color:red'>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b>";
     if (global.userDefaultHasProblemComposingRights()) {
       out << HtmlRoutines::getCalculatorComputationAnchorSameURL(
@@ -1743,12 +1743,12 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     out << "<br>" << CalculatorHTML::bugsGenericMessage << "<br>Details: <br>"
     << interpreter.toStringSyntacticStackHTMLSimple();
     result[WebAPI::result::resultHtml] = out.str();
-    int64_t ellapsedTime = global.getElapsedMilliseconds() - startTimeInMilliseconds;
-    result[WebAPI::result::millisecondsComputation] = ellapsedTime;
+    int64_t elapsedTime = global.getElapsedMilliseconds() - startTimeInMilliseconds;
+    result[WebAPI::result::millisecondsComputation] = elapsedTime;
     return result;
   }
   if (interpreter.flagAbortComputationASAP) {
-    out << "<b style = 'color:red'>Failed to evaluate the default answer. "
+    out << "<b style='color:red'>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b>";
     if (global.userDefaultHasProblemComposingRights()) {
       out << HtmlRoutines::getCalculatorComputationAnchorSameURL(
@@ -1759,25 +1759,25 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     << interpreter.outputString
     << interpreter.outputCommentsString
     << "<hr>Input: <br>" << interpreter.inputString;
-    int64_t ellapsedTime = global.getElapsedMilliseconds() - startTimeInMilliseconds;
-    result[WebAPI::result::millisecondsComputation] = ellapsedTime;
+    int64_t elapsedTime = global.getElapsedMilliseconds() - startTimeInMilliseconds;
+    result[WebAPI::result::millisecondsComputation] = elapsedTime;
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
-  FormatExpressions theFormat;
-  theFormat.flagExpressionIsFinal = true;
-  theFormat.flagIncludeExtraHtmlDescriptionsInPlots = false;
-  theFormat.flagUseQuotes = false;
-  theFormat.flagUseLatex = true;
-  theFormat.flagUsePmatrix = true;
+  FormatExpressions format;
+  format.flagExpressionIsFinal = true;
+  format.flagIncludeExtraHtmlDescriptionsInPlots = false;
+  format.flagUseQuotes = false;
+  format.flagUseLatex = true;
+  format.flagUsePmatrix = true;
   bool isFirst = true;
   const Expression& currentE = interpreter.programExpression[
     interpreter.programExpression.size() - 1
   ][1];
   if (!currentE.startsWith(interpreter.opCommandSequence())) {
-    out << "\\(\\displaystyle " << currentE.toString(&theFormat) << "\\)";
+    out << "\\(\\displaystyle " << currentE.toString(&format) << "\\)";
     if (outputNakedAnswer != nullptr) {
-      *outputNakedAnswer = currentE.toString(&theFormat);
+      *outputNakedAnswer = currentE.toString(&format);
     }
     result[WebAPI::problem::answerGenerationSuccess] = "true";
     if (answerGenerationSuccess != nullptr) {
@@ -1800,18 +1800,18 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
       if (!isFirst) {
         out << "<br>";
       }
-      theFormat.flagExpressionIsFinal = true;
-      theFormat.flagIncludeExtraHtmlDescriptionsInPlots = false;
-      theFormat.flagUseQuotes = false;
-      theFormat.flagUseLatex = true;
+      format.flagExpressionIsFinal = true;
+      format.flagIncludeExtraHtmlDescriptionsInPlots = false;
+      format.flagUseQuotes = false;
+      format.flagUseLatex = true;
       if (currentE[j].isOfType<std::string>()) {
         out << currentE[j].getValue<std::string>();
       } else {
-        out << "\\(\\displaystyle " << currentE[j].toString(&theFormat) << "\\)";
+        out << "\\(\\displaystyle " << currentE[j].toString(&format) << "\\)";
       }
       if (isFirst) {
         if (outputNakedAnswer != nullptr) {
-          *outputNakedAnswer = currentE[j].toString(&theFormat);
+          *outputNakedAnswer = currentE[j].toString(&format);
         }
         result[WebAPI::problem::answerGenerationSuccess] = "true";
         if (answerGenerationSuccess != nullptr) {
@@ -1822,8 +1822,8 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     }
   }
   if (doIncludeTimeStats) {
-    int64_t ellapsedTime = global.getElapsedMilliseconds() - startTimeInMilliseconds;
-    result[WebAPI::result::millisecondsComputation] = ellapsedTime;
+    int64_t elapsedTime = global.getElapsedMilliseconds() - startTimeInMilliseconds;
+    result[WebAPI::result::millisecondsComputation] = elapsedTime;
   }
   if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
     out
@@ -2039,7 +2039,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
     if (currentUser.actualActivationToken != "activated" && currentUser.actualActivationToken != "error") {
       isActivated = false;
       numActivatedUsers ++;
-      oneTableLineStream << "<td><span style =\"color:red\">not activated</span></td>";
+      oneTableLineStream << "<td><span style ='color:red'>not activated</span></td>";
       if (currentUser.actualActivationToken != "") {
         oneTableLineStream << "<td>"
         << "<a href=\""
@@ -2051,7 +2051,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
       }
       oneTableLineStream << "<td>";
       oneTableLineStream
-      << "<a href=\"mailto:" << currentUser.email
+      << "<a href='mailto:" << currentUser.email
       << "?subject =Math 140 Homework account activation&";
 
       oneTableLineStream << "body =";
@@ -2074,12 +2074,12 @@ std::string WebAPIResponse::toStringUserDetailsTable(
       << webAddress
       << HtmlRoutines::convertStringToURLString("\n\n", false)
       << "Best regards, \ncalculator-algebra.org.";
-      oneTableLineStream << emailBody.str() << "\">Send email manually.</a> ";
+      oneTableLineStream << emailBody.str() << "'>Send email manually.</a> ";
       oneTableLineStream << "</td>";
     } else if (currentUser.actualActivationToken == "error") {
       oneTableLineStream << "<td>error</td><td></td>";
     } else {
-      oneTableLineStream << "<td><span style =\"color:green\">activated</span></td><td></td><td></td>";
+      oneTableLineStream << "<td><span style='color:green'>activated</span></td><td></td><td></td>";
     }
     std::stringstream oneLink;
     oneLink << "<a href=\"" << global.displayNameExecutable << "?request=login&username="
@@ -2146,7 +2146,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
   }
   out << "\n" << theUsers.size << " user(s)";
   if (numActivatedUsers > 0) {
-    out << ", <span style =\"color:red\">" << numActivatedUsers
+    out << ", <span style='color:red'>" << numActivatedUsers
     << " have not activated their accounts. </span>";
   }
   out << tableStream.str() << preFilledLoginLinks.str();

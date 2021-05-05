@@ -41,8 +41,8 @@ public:
   // We put first the generators corresponding to the negative roots in ascending order,
   // we put second the elements of the Cartan
   // we put last the positive roots in ascending order.
-  Matrix<Rational> ChevalleyConstants;
-  Matrix<bool> Computed;
+  Matrix<Rational> chevalleyConstants;
+  Matrix<bool> computedChevalleyConstants;
   //
   // Matrix<int> theLiebracketPairingIndices;
   Matrix<ElementSemisimpleLieAlgebra<Rational> > lieBrackets;
@@ -172,7 +172,7 @@ public:
   void orderStandardDescending();
 
   void orderSSalgebraForHWbfComputation();
-  int getGeneratorFromRoot(const Vector<Rational>& input) {
+  int getGeneratorIndexFromRoot(const Vector<Rational>& input) {
     return this->getGeneratorFromRootIndex(this->weylGroup.rootSystem.getIndex(input));
   }
   int getRootIndexFromDisplayIndex(int index);
@@ -419,26 +419,26 @@ class HomomorphismSemisimpleLieAlgebra {
 public:
   SemisimpleLieAlgebra* domainAlg;
   SemisimpleLieAlgebra* rangeAlg;
-  //Let rk=Rank(Domain)
-  //format of ImagesSimpleChevalleyGenerators: the first rk elements give
-  //the images of the Chevalley generators corresponding to simple positive roots
-  //the second rk elements give the images of the Chevalley generators corresponding to simple
-  //negative roots
+  // Let rk=Rank(Domain)
+  // format of ImagesSimpleChevalleyGenerators: the first rk elements give
+  // the images of the Chevalley generators corresponding to simple positive roots
+  // the second rk elements give the images of the Chevalley generators corresponding to simple
+  // negative roots
   List<ElementSemisimpleLieAlgebra<Rational> > imagesSimpleChevalleyGenerators;
-  //format of ImagesAllChevalleyGenerators: the Generators are given in the same order as
-  //the one used in MonomialUniversalEnveloping
+  // format of ImagesAllChevalleyGenerators: the Generators are given in the same order as
+  // the one used in MonomialUniversalEnveloping
   List<ElementSemisimpleLieAlgebra<Rational> > imagesAllChevalleyGenerators;
   List<ElementSemisimpleLieAlgebra<Rational> > domainAllChevalleyGenerators;
   List<ElementSemisimpleLieAlgebra<Rational> > GmodK;
   Vectors<Rational> RestrictedRootSystem;
   Vectors<Rational> ImagesCartanDomain;
-  SemisimpleLieAlgebra& theDomain() {
+  SemisimpleLieAlgebra& domain() {
     if (this->domainAlg == nullptr) {
       global.fatal << "Non-initialized HomomorphismSemisimpleLieAlgebra. " << global.fatal;
     }
     return *this->domainAlg;
   }
-  SemisimpleLieAlgebra& theRange() {
+  SemisimpleLieAlgebra& range() {
     if (this->rangeAlg == nullptr) {
       global.fatal << "Non-initialized HomomorphismSemisimpleLieAlgebra. " << global.fatal;
     }

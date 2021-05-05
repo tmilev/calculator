@@ -753,7 +753,7 @@ class Vectors: public List<Vector<Coefficient> > {
     }
     return out.str();
   }
-  int arrangeFirstVectorsBeOfMaxPossibleRank(Matrix<Coefficient>& bufferMat, Selection& bufferSel);
+  int arrangeFirstVectorsBeOfMaxPossibleRank(Matrix<Coefficient>& bufferMatrix, Selection& bufferSelection);
   static unsigned int hashFunction(const Vectors<Coefficient>& input) {
     return input.hashFunction();
   }
@@ -923,7 +923,7 @@ class Vectors: public List<Vector<Coefficient> > {
   //the below function returns a n row 1 column matrix with the coefficients in the obvious order
   bool getLinearDependence(Matrix<Coefficient>& outputTheLinearCombination);
   void getLinearDependenceRunTheLinearAlgebra(Matrix<Coefficient>& outputTheSystem, Selection& outputNonPivotPoints);
-  bool containsVectorNonPerpendicularTo(const Vector<Coefficient>& input, const Matrix<Coefficient>& theBilinearForm);
+  bool containsVectorNonPerpendicularTo(const Vector<Coefficient>& input, const Matrix<Coefficient>& bilinearForm);
   bool containsOppositeRoots() {
     if (this->size < 10) {
       Vector<Rational> tempRoot;
@@ -1161,10 +1161,10 @@ void Vectors<Coefficient>::getGramMatrix(Matrix<Coefficient>& output, const Matr
 
 template<class Coefficient>
 bool Vectors<Coefficient>::containsVectorNonPerpendicularTo(
-  const Vector<Coefficient>& input, const Matrix<Coefficient>& theBilinearForm
+  const Vector<Coefficient>& input, const Matrix<Coefficient>& bilinearForm
 ) {
   for (int i = 0; i < this->size; i ++) {
-    if (!Vector<Coefficient>::scalarProduct(this->objects[i], input, theBilinearForm).isEqualToZero()) {
+    if (!Vector<Coefficient>::scalarProduct(this->objects[i], input, bilinearForm).isEqualToZero()) {
       return true;
     }
   }
@@ -1172,7 +1172,9 @@ bool Vectors<Coefficient>::containsVectorNonPerpendicularTo(
 }
 
 template<class Coefficient>
-int Vectors<Coefficient>::arrangeFirstVectorsBeOfMaxPossibleRank(Matrix<Coefficient>& bufferMat, Selection& bufferSel) {
+int Vectors<Coefficient>::arrangeFirstVectorsBeOfMaxPossibleRank(
+  Matrix<Coefficient>& bufferMatrix, Selection& bufferSelection
+) {
   if (this->size == 0) {
     return 0;
   }
@@ -1181,7 +1183,7 @@ int Vectors<Coefficient>::arrangeFirstVectorsBeOfMaxPossibleRank(Matrix<Coeffici
   int oldRank = 0;
   for (int i = 0; i < this->size; i ++) {
     tempRoots.addOnTop(this->objects[i]);
-    int newRank = tempRoots.getRankElementSpan(bufferMat, bufferSel);
+    int newRank = tempRoots.getRankElementSpan(bufferMatrix, bufferSelection);
     if (newRank == oldRank) {
       tempRoots.removeIndexSwapWithLast(tempRoots.size - 1);
     } else {

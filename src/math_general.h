@@ -3954,8 +3954,10 @@ bool Complex<Coefficient>::isEqualToZero() const {
     return this->imaginaryPart == 0 && this->realPart == 0;
   } else {
     return
-    this->imaginaryPart<Complex<Coefficient>::equalityPrecision && - this->imaginaryPart<Complex<Coefficient>::equalityPrecision &&
-    this->realPart<Complex<Coefficient>::equalityPrecision && - this->realPart<Complex<Coefficient>::equalityPrecision;
+    this->imaginaryPart < Complex<Coefficient>::equalityPrecision &&
+    - this->imaginaryPart < Complex<Coefficient>::equalityPrecision &&
+    this->realPart < Complex<Coefficient>::equalityPrecision &&
+    - this->realPart < Complex<Coefficient>::equalityPrecision;
   }
 }
 
@@ -3998,7 +4000,7 @@ public:
     return (*this)[0].owner;
   }
   bool getCoordinatesInBasis(
-    const List<ElementSemisimpleLieAlgebra>& basis,
+    const List<ElementSemisimpleLieAlgebra<Coefficient> >& basis,
     Vector<RationalFraction<Rational> >& output
   ) const {
     Vector<Rational> tempVect;
@@ -4013,25 +4015,28 @@ public:
     List<ElementSemisimpleLieAlgebra>& outputBasis
   );
   void actOnMe(
-    const ElementSemisimpleLieAlgebra& element,
-    ElementSemisimpleLieAlgebra& output,
+    const ElementSemisimpleLieAlgebra<Coefficient>& element,
+    ElementSemisimpleLieAlgebra<Coefficient>& output,
     SemisimpleLieAlgebra& owner
   );
   void actOnMe(
-    const ElementSemisimpleLieAlgebra& element,
-    ElementSemisimpleLieAlgebra& output,
+    const ElementSemisimpleLieAlgebra<Coefficient>& element,
+    ElementSemisimpleLieAlgebra<Coefficient>& output,
     SemisimpleLieAlgebra& owner,
     const RationalFraction<Rational>& ringUnit,
     const RationalFraction<Rational>& ringZero
   );
   bool isCoefficientOneChevalleyGenerator();
-  bool isProportionalTo(const ElementSemisimpleLieAlgebra& other) const {
+  bool isProportionalTo(const ElementSemisimpleLieAlgebra<Coefficient>& other) const {
     Vector<Rational> left, right;
     this->elementToVectorNegativeRootSpacesFirst(left);
     other.elementToVectorNegativeRootSpacesFirst(right);
     return left.isProportionalTo(right);
   }
-  bool isProportionalTo(const ElementSemisimpleLieAlgebra& other, Rational& outputTimesMeEqualsInput) const {
+  bool isProportionalTo(
+    const ElementSemisimpleLieAlgebra<Coefficient>& other,
+    Rational& outputTimesMeEqualsInput
+  ) const {
     Vector<Rational> tempRoot1, tempRoot2;
     this->elementToVectorNegativeRootSpacesFirst(tempRoot1);
     other.elementToVectorNegativeRootSpacesFirst(tempRoot2);
@@ -4041,7 +4046,7 @@ public:
     return this->indexOfOwnerAlgebra * someRandomPrimes[0] +
     this->::LinearCombination<ChevalleyGenerator, Rational>::hashFunction() * someRandomPrimes[1];
   }
-  static unsigned int hashFunction(const ElementSemisimpleLieAlgebra& input) {
+  static unsigned int hashFunction(const ElementSemisimpleLieAlgebra<Coefficient>& input) {
     return input.hashFunction();
   }
   template<class otherElement>
@@ -4049,6 +4054,16 @@ public:
     this->::LinearCombination<ChevalleyGenerator, Coefficient>::operator=(other);
   }
   Vector<Rational> getRootIMustBeWeight() const;
+};
+
+template <class Coefficient>
+class LinearMapSemisimpleLieAlgebra {
+public:
+  List<ElementSemisimpleLieAlgebra<Coefficient> > imagesChevalleyGenerators;
+  void applyTo(
+    const ElementSemisimpleLieAlgebra<Coefficient>& input,
+    ElementSemisimpleLieAlgebra<Coefficient>& output
+  );
 };
 
 template <class Coefficient>
@@ -4074,14 +4089,16 @@ LargeIntegerUnsigned Matrix<Coefficient>::findPositiveLCMCoefficientDenominators
 }
 
 template <class Coefficient>
-void Matrix<Coefficient>::getMatrixIntegerWithDenominator(Matrix<LargeInteger>& outputMat, LargeIntegerUnsigned& outputDen) {
-  outputDen = this->findPositiveLCMCoefficientDenominators();
+void Matrix<Coefficient>::getMatrixIntegerWithDenominator(
+  Matrix<LargeInteger>& outputMat, LargeIntegerUnsigned& outputDenominator
+) {
+  outputDenominator = this->findPositiveLCMCoefficientDenominators();
   outputMat.initialize(this->numberOfRows, this->numberOfColumns);
-  Rational tempRat;
+  Rational product;
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
-      tempRat = this->elements[i][j] * outputDen;
-      outputMat(i, j) = tempRat.getDenominator();
+      product = this->elements[i][j] * outputDenominator;
+      outputMat(i, j) = product.getDenominator();
     }
   }
 }

@@ -94,8 +94,8 @@ public:
 };
 
 class CandidateSemisimpleSubalgebra {
-  friend std::ostream& operator << (std::ostream& output, const CandidateSemisimpleSubalgebra& theCandidate) {
-    output << theCandidate.toString();
+  friend std::ostream& operator << (std::ostream& output, const CandidateSemisimpleSubalgebra& candidate) {
+    output << candidate.toString();
     return output;
   }
 
@@ -118,12 +118,12 @@ public:
 
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > positiveGenerators;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > negativeGenerators;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theBasis;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basis;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > fullBasisByModules;
   List<int> fullBasisOwnerModules;
   List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > unknownPositiveGenerators;
   List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > unknownNegativeGenerators;
-  List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > theUnknownCartanCentralizerBasis;
+  List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > unknownCartanCentralizerBasis;
 
 //  Vector<Rational> aSolution;
   List<List<ChevalleyGenerator> > involvedPositiveGenerators;
@@ -153,7 +153,7 @@ public:
   bool flagCentralizerIsWellChosen;
   bool flagCentralizerTypeIsComputed;
   bool flagUsedInducingSubalgebraRealization;
-  int RecursionDepthCounterForNilradicalGeneration;
+  int recursionDepthCounterForNilradicalGeneration;
   int totalNumUnknownsNoCentralizer;
   int totalNumUnknownsWithCentralizer;
   long long int totalArithmeticOpsToSolveSystem;
@@ -174,22 +174,22 @@ public:
 
   List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > modules;
   List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > modulesSl2opposite;
-  List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > ModulesIsotypicallyMerged;
+  List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > modulesIsotypicallyMerged;
 //  List<List<ElementSemisimpleLieAlgebra<Rational> > > ModulesSemisimpleSubalgebra;
 
-  List<Vectors<Rational> > WeightsModulesNONprimal;
-  List<Vectors<Rational> > WeightsModulesPrimal;
-  List<CharacterSemisimpleLieAlgebraModule<Rational> > CharsPrimalModules;
-  List<CharacterSemisimpleLieAlgebraModule<Rational> > CharsPrimalModulesMerged;
-  HashedList<Vector<Rational> > RootSystemCentralizerPrimalCoords;
-  HashedList<Vector<Rational> > RootSystemSubalgebraPrimalCoords;
+  List<Vectors<Rational> > weightsModulesNONprimal;
+  List<Vectors<Rational> > weightsModulesPrimal;
+  List<CharacterSemisimpleLieAlgebraModule<Rational> > charactersPrimalModules;
+  List<CharacterSemisimpleLieAlgebraModule<Rational> > charactersPrimalModulesMerged;
+  HashedList<Vector<Rational> > rootSystemCentralizerPrimalCoordinates;
+  HashedList<Vector<Rational> > rootSystemSubalgebraPrimalCoordinates;
 
-  List<List<List<int> > > NilradicalPairingTable;
+  List<List<List<int> > > nilradicalPairingTable;
   List<int> subalgebraModules;
   List<int> centralizerSubalgebraModules;
   List<int> primalSubalgebraModules;
-  List<List<int> > OppositeModulesByStructure;
-  List<List<int> > OppositeModulesByChar;
+  List<List<int> > oppositeModulesByStructure;
+  List<List<int> > oppositeModulesByChar;
 
   HashedList<int, HashFunctions::hashFunction> modulesWithZeroWeights;
   std::string comments;
@@ -219,7 +219,7 @@ public:
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
   );
   void getGenericPositiveGeneratorLinearCombination(
-    int indexPosGens,
+    int indexPositiveGenerators,
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
   );
   bool isExtremeWeight(int moduleIndex, int indexInIsoComponent) const;

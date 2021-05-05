@@ -1425,8 +1425,8 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords, Vector<Rational>& parabolicSel
 ) {
   std::stringstream out;
-  WeylGroupData& LargerWeyl = this->theHmm.theRange().weylGroup;
-  WeylGroupData& SmallerWeyl = this->theHmm.theDomain().weylGroup;
+  WeylGroupData& LargerWeyl = this->theHmm.range().weylGroup;
+  WeylGroupData& SmallerWeyl = this->theHmm.domain().weylGroup;
   if (!LargerWeyl.isOfSimpleType('B', 3)) {
     return "Error: algebra is not so(7).";
   }
@@ -1627,9 +1627,9 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
 ) {
   MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::initFromHomomorphism");
   Vectors<Rational> tempRoots;
-  this->weylLarger = &input.theRange().weylGroup;
-  this->weylSmaller = &input.theDomain().weylGroup;
-  WeylGroupData& theWeYl = input.theRange().weylGroup;
+  this->weylLarger = &input.range().weylGroup;
+  this->weylSmaller = &input.domain().weylGroup;
+  WeylGroupData& theWeYl = input.range().weylGroup;
 //  input.projectOntoSmallCartan(theWeyl.RootsOfBorel, tempRoots);
   this->log << "projections: " << tempRoots.toString();
   theWeYl.theGroup.computeAllElements(false);
@@ -1645,7 +1645,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   input.getWeightsGmodKInSimpleCoordinatesK(this->GmodKnegativeWeightS);
 //  this->log << "weights of g mod k: " << this->GmodKnegativeWeights.toString();
   Matrix<Rational> tempMat;
-  tempMat = input.theDomain().weylGroup.cartanSymmetric;
+  tempMat = input.domain().weylGroup.cartanSymmetric;
   tempMat.invert();
 //  tempMat.actOnVectorsColumn(this->GmodKnegativeWeightS);
   this->log << this->GmodKnegativeWeightS.toString();
@@ -1676,9 +1676,9 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     }
   }
   this->log << "\nNegative weights after basis change: " << this->GmodKNegWeightsBasisChanged.toString();
-  theProjectionBasisChanged.initialize(input.theDomain().getRank(), input.theRange().getRank());
-  for (int i = 0; i < input.theRange().getRank(); i ++) {
-    startingWeight.makeEi(input.theRange().getRank(), i);
+  theProjectionBasisChanged.initialize(input.domain().getRank(), input.range().getRank());
+  for (int i = 0; i < input.range().getRank(); i ++) {
+    startingWeight.makeEi(input.range().getRank(), i);
     input.projectOntoSmallCartan(startingWeight, projectedWeight);
     this->preferredBasisChangeInversE.actOnVectorColumn(projectedWeight);
     for (int j = 0; j < projectedWeight.size; j ++) {
@@ -1691,8 +1691,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   input.getMapSmallCartanDualToLargeCartanDual(DualCartanEmbedding);
   Vector<Rational> ParabolicEvaluationRootImage, tempRoot;
   ParabolicEvaluationRootImage = this->ParabolicLeviPartRootSpacesZeroStandsForSelected;
-  this->ParabolicSelectionSmallerAlgebra.initialize(input.theDomain().getRank());
-  for (int i = 0; i < input.theDomain().getRank(); i ++) {
+  this->ParabolicSelectionSmallerAlgebra.initialize(input.domain().getRank());
+  for (int i = 0; i < input.domain().getRank(); i ++) {
     DualCartanEmbedding.getVectorFromColumn(i, tempRoot);
     if (ParabolicEvaluationRootImage.scalarEuclidean(tempRoot).isPositive()) {
       this->ParabolicSelectionSmallerAlgebra.addSelectionAppendNewIndex(i);
@@ -1759,11 +1759,11 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   }
   Matrix<Polynomial<Rational> > tempMatPoly;
   Vector<Polynomial<Rational> > tempVect, tempVect2;
-  tempVect.setSize(input.theDomain().weylGroup.getDimension() + input.theRange().weylGroup.getDimension());
+  tempVect.setSize(input.domain().weylGroup.getDimension() + input.range().weylGroup.getDimension());
   for (int i = 0; i < tempVect.size; i ++) {
     tempVect[i].makeMonomial(i, 1, Rational(1));
   }
-  tempMatPoly.initialize(input.theDomain().weylGroup.getDimension(), tempVect.size);
+  tempMatPoly.initialize(input.domain().weylGroup.getDimension(), tempVect.size);
   Polynomial<Rational> polyZero;
   polyZero.makeZero();
   theFormat.polynomialAlphabet.setSize(5);
@@ -1800,7 +1800,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
 //  this->log << "\n\n\nThere are " << tempList.size << " different operators.";
   Lattice tempLattice;
   theWeYl.getIntegralLatticeInSimpleCoordinates(tempLattice);
-  this->theExtendedIntegralLatticeMatForM.basisRationalForm.makeIdentityMatrix(input.theDomain().getRank());
+  this->theExtendedIntegralLatticeMatForM.basisRationalForm.makeIdentityMatrix(input.domain().getRank());
   this->theExtendedIntegralLatticeMatForM.basisRationalForm.directSumWith(tempLattice.basisRationalForm, Rational(0));
   this->theExtendedIntegralLatticeMatForM.makeFromMatrix(this->theExtendedIntegralLatticeMatForM.basisRationalForm);
   tempMat = theWeYl.cartanSymmetric;
@@ -1818,7 +1818,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   << WallsWeylChamberLargerAlgebra.toString();
   this->log << "\n**************\n\n";
   Vectors<Rational> rootsGeneratingExtendedLattice;
-  int totalDim = input.theRange().getRank() + input.theDomain().getRank();
+  int totalDim = input.range().getRank() + input.domain().getRank();
   rootsGeneratingExtendedLattice.setSize(totalDim);
   this->log << "\n" << tempMat.toString(&global.theDefaultFormat.getElement()) << "\n";
   this->log << this->theExtendedIntegralLatticeMatForM.toString();
@@ -1826,19 +1826,19 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->WeylChamberSmallerAlgebra.toString(&theFormat) << "\n";
   this->PreimageWeylChamberSmallerAlgebra.normals = this->WeylChamberSmallerAlgebra.normals;
   for (int i = 0; i < this->PreimageWeylChamberLargerAlgebra.normals.size; i ++) {
-    tempRoot.makeZero(input.theRange().getRank() + input.theDomain().getRank() + 1);
-    for (int j = 0; j < input.theRange().getRank(); j ++) {
-      tempRoot[j + input.theDomain().getRank()] = this->PreimageWeylChamberLargerAlgebra.normals[i][j];
+    tempRoot.makeZero(input.range().getRank() + input.domain().getRank() + 1);
+    for (int j = 0; j < input.range().getRank(); j ++) {
+      tempRoot[j + input.domain().getRank()] = this->PreimageWeylChamberLargerAlgebra.normals[i][j];
     }
     this->PreimageWeylChamberLargerAlgebra.normals[i] = tempRoot;
   }
-  tempMat = input.theDomain().weylGroup.cartanSymmetric;
+  tempMat = input.domain().weylGroup.cartanSymmetric;
   tempMat.invert();
   tempRoots.size = 0;
   Vector<Rational> ParabolicEvaluationRootSmallerAlgebra;
   ParabolicEvaluationRootSmallerAlgebra = this->ParabolicSelectionSmallerAlgebra;
   for (int i = 0; i < tempMat.numberOfRows; i ++) {
-    input.theDomain().weylGroup.cartanSymmetric.getVectorFromRow(i, tempRoot);
+    input.domain().weylGroup.cartanSymmetric.getVectorFromRow(i, tempRoot);
     if (tempRoot.scalarEuclidean(ParabolicEvaluationRootSmallerAlgebra).isEqualToZero()) {
       tempRoots.setSize(tempRoots.size + 1);
       tempMat.getVectorFromRow(i, *tempRoots.lastObject());
@@ -1863,8 +1863,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     *this->PreimageWeylChamberSmallerAlgebra.objects[i].lastObject()= 0;
   }*/
   for (int i = 0; i < this->PreimageWeylChamberSmallerAlgebra.normals.size; i ++) {
-    tempRoot.makeZero(input.theRange().getRank() + input.theDomain().getRank() + 1);
-    for (int j = 0; j < input.theDomain().getRank(); j ++) {
+    tempRoot.makeZero(input.range().getRank() + input.domain().getRank() + 1);
+    for (int j = 0; j < input.domain().getRank(); j ++) {
       tempRoot[j] = this->PreimageWeylChamberSmallerAlgebra.normals[i][j];
     }
   //  for (int j = 0; j < input.theRange.getRank(); j ++)
@@ -1873,8 +1873,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   }
 
   tempRoot.makeEi(
-    input.theRange().getRank() + input.theDomain().getRank() + 1,
-    input.theRange().getRank() + input.theDomain().getRank()
+    input.range().getRank() + input.domain().getRank() + 1,
+    input.range().getRank() + input.domain().getRank()
   );
   this->PreimageWeylChamberLargerAlgebra.normals.addOnTop(tempRoot);
   this->log << "\nPreimage Weyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.toString(&theFormat) << "\n";

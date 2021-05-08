@@ -646,26 +646,26 @@ void ElementHyperoctahedralGroupR2::makeFromString(const std::string& in);
 
 class HyperoctahedralGroupData {
 public:
-  int N;
+  int dimension;
   bool flagIsEntireHyperoctahedralGroup;
   bool flagIsEntireDn;
-  FiniteGroup<ElementHyperoctahedralGroupR2>* theGroup;
+  FiniteGroup<ElementHyperoctahedralGroupR2>* group;
   FiniteGroup<ElementHyperoctahedralGroupR2> theGroupMayBeHereNameIsLongToDiscourageUse;
 
   void makeHyperoctahedralGroup(int n) {
-    this->theGroup = &theGroupMayBeHereNameIsLongToDiscourageUse;
-    this->theGroup->specificDataPointer = this;
-    this->N = n;
-    this->theGroup->generators.setSize(n - 1 + n);
+    this->group = &theGroupMayBeHereNameIsLongToDiscourageUse;
+    this->group->specificDataPointer = this;
+    this->dimension = n;
+    this->group->generators.setSize(n - 1 + n);
     for (int i = 0; i < n - 1; i ++) {
-      this->theGroup->generators[i].h.addTransposition(i, i + 1);
+      this->group->generators[i].h.addTransposition(i, i + 1);
     }
     for (int i = 0; i < n; i ++) {
-      this->theGroup->generators[n - 1 + i].k.toggleBit(i);
+      this->group->generators[n - 1 + i].k.toggleBit(i);
     }
     this->flagIsEntireHyperoctahedralGroup = true;
-    this->theGroup->getWordByFormula = this->getWordByFormulaImplementation;
-    this->theGroup->getSizeByFormula = this->getSizeByFormulaImplementation;
+    this->group->getWordByFormula = this->getWordByFormulaImplementation;
+    this->group->getSizeByFormula = this->getSizeByFormulaImplementation;
   }
 
   static bool getWordByFormulaImplementation(
@@ -682,7 +682,7 @@ public:
     if (!this->flagIsEntireHyperoctahedralGroup || !other.flagIsEntireHyperoctahedralGroup) {
       return false;
     }
-    return this->N == other.N;
+    return this->dimension == other.dimension;
   }
   std::string toString() const;
   template <typename somestream>
@@ -1835,11 +1835,11 @@ std::string GroupRepresentation<somegroup, Coefficient>::describeAsDirectSum() {
 template <typename somestream>
 somestream& HyperoctahedralGroupData::intoStream(somestream& out) const {
   if (this->flagIsEntireHyperoctahedralGroup) {
-    out << "Hyperoctahedral group with " << this->theGroup->getSizeByFormula(*(this->theGroup)) << " elements";
+    out << "Hyperoctahedral group with " << this->group->getSizeByFormula(*(this->group)) << " elements";
   } else if (this->flagIsEntireDn) {
-    out << "Half hyperoctahedral group with " << this->theGroup->getSizeByFormula(*(this->theGroup)) << " elemets";
+    out << "Half hyperoctahedral group with " << this->group->getSizeByFormula(*(this->group)) << " elemets";
   } else {
-    out << this->theGroup;
+    out << this->group;
   }
   return out;
 }

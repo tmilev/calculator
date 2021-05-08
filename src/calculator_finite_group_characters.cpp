@@ -325,16 +325,16 @@ void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation(
       phi.generatorImages.lastObject()->k.toggleBit(i);
     }
     global << "Generator commutation relations of groups\n";
-    global << HOG.theGroup->prettyPrintGeneratorCommutationRelations();
+    global << HOG.group->prettyPrintGeneratorCommutationRelations();
     FiniteGroup<ElementHyperoctahedralGroupR2> phiG;
     phiG.generators = phi.generatorImages;
     global << phiG.prettyPrintGeneratorCommutationRelations();
     global << G.prettyPrintGeneratorCommutationRelations();
     global << "pulling back irreps:\n";
-    for (int i = 0; i < HOG.theGroup->irreps.size; i ++) {
-      auto irrep = phi.pullbackRepresentation(HOG.theGroup->irreps[i]);
+    for (int i = 0; i < HOG.group->irreps.size; i ++) {
+      auto irrep = phi.pullbackRepresentation(HOG.group->irreps[i]);
       irrep.computeCharacter();
-      global << HOG.theGroup->irreps[i].theCharacter << "->" << irrep.theCharacter << '\n';
+      global << HOG.group->irreps[i].theCharacter << "->" << irrep.theCharacter << '\n';
       G.addIrreducibleRepresentation(irrep);
     }
   } else if ((letters.size == 1) && (letters[0] == 'D')) {
@@ -356,7 +356,7 @@ void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation(
 
     FiniteGroup<ElementHyperoctahedralGroupR2> imG;
     imG.generators = inclusionMap.generatorImages;
-    global << HOG.theGroup->prettyPrintGeneratorCommutationRelations() << '\n';
+    global << HOG.group->prettyPrintGeneratorCommutationRelations() << '\n';
     global << imG.prettyPrintGeneratorCommutationRelations();
     global << G.prettyPrintGeneratorCommutationRelations() << '\n';
   }
@@ -2290,7 +2290,7 @@ bool CalculatorFunctionsWeylGroup::hyperOctahedralGetOneRepresentation(
   for (; index < calculator.objectContainer.hyperOctahedralGroups.size; index ++) {
     if (
       calculator.objectContainer.hyperOctahedralGroups[index].flagIsEntireHyperoctahedralGroup &&
-      calculator.objectContainer.hyperOctahedralGroups[index].N == partitionLeft.n + partitionRight.n
+      calculator.objectContainer.hyperOctahedralGroups[index].dimension == partitionLeft.n + partitionRight.n
     ) {
       break;
     }
@@ -2366,7 +2366,7 @@ bool CalculatorFunctionsWeylGroup::hyperOctahedralAllModulesInducedFromSpechtMod
   HyperoctahedralGroupData groupData;
   groupData.makeHyperoctahedralGroup(rank);
   groupData.allSpechtModules();
-  return output.assignValue(groupData.theGroup->prettyPrintCharacterTable(), calculator);
+  return output.assignValue(groupData.group->prettyPrintCharacterTable(), calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::hyperOctahedralPrintGeneratorCommutationRelations(
@@ -2385,7 +2385,7 @@ bool CalculatorFunctionsWeylGroup::hyperOctahedralPrintGeneratorCommutationRelat
   }
   HyperoctahedralGroupData groupData;
   groupData.makeHyperoctahedralGroup(rank);
-  return output.assignValue(groupData.theGroup->prettyPrintGeneratorCommutationRelations(), calculator);
+  return output.assignValue(groupData.group->prettyPrintGeneratorCommutationRelations(), calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::weylGroupElement(

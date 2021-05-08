@@ -11017,26 +11017,26 @@ void DrawOperations::changeBasisPReserveAngles(double newX, double newY) {
 class ImpreciseDouble {
   private:
   double precision;
-  double theValue;
+  double value;
   public:
   std::string toString(FormatExpressions* format = nullptr) const {
     (void) format;
     std::stringstream out;
-    out << this->theValue;
+    out << this->value;
     return out.str();
   }
   void operator=(const ImpreciseDouble& other) {
-    this->theValue = other.theValue;
+    this->value = other.value;
     this->precision = other.precision;
   }
   void operator=(double other) {
-    this->theValue = other;
+    this->value = other;
   }
   ImpreciseDouble(const ImpreciseDouble& other) {
     this->operator=(other);
   }
   ImpreciseDouble() {
-    this->theValue = 0;
+    this->value = 0;
     this->precision = 0.1;
   }
   ImpreciseDouble(double other) {
@@ -11044,28 +11044,28 @@ class ImpreciseDouble {
   }
   void operator+=(const ImpreciseDouble& other) {
     if (!other.isEqualToZero()) {
-      this->theValue += other.theValue;
+      this->value += other.value;
     }
   }
   void operator-=(const ImpreciseDouble& other) {
     if (!other.isEqualToZero()) {
-      this->theValue -= other.theValue;
+      this->value -= other.value;
     }
   }
   void operator=(const Rational& other) {
-    this->theValue = other.getDoubleValue();
+    this->value = other.getDoubleValue();
   }
   bool isEqualToZero() const {
-    if (this->theValue < 0) {
-      return (- theValue) < this->precision;
+    if (this->value < 0) {
+      return (- value) < this->precision;
     }
-    return this->theValue < this->precision;
+    return this->value < this->precision;
   }
   bool operator<=(const ImpreciseDouble& other) {
     return ! (other<*this);
   }
   bool isPositive() const {
-    return this->theValue > this->precision;
+    return this->value > this->precision;
   }
   bool isNegative() const {
     return *this < this->GetZero();
@@ -11076,7 +11076,7 @@ class ImpreciseDouble {
     return temp.isPositive();
   }
   void assignFloor() {
-    this->theValue = FloatingPoint::floorFloating(this->theValue);
+    this->value = FloatingPoint::floorFloating(this->value);
   }
   void operator/=(const ImpreciseDouble& other) {
     ImpreciseDouble copyMe;
@@ -11091,33 +11091,33 @@ class ImpreciseDouble {
       // avoid this->theValue / 0;
       // If the user attempts to divide by zero,
       // I want a regular division by zero exception to be generated.
-      result.theValue = this->theValue / (other.theValue - other.theValue);
+      result.value = this->value / (other.value - other.value);
       return result;
     }
-    result.theValue /= other.theValue;
+    result.value /= other.value;
     return result;
   }
   void operator*=(const ImpreciseDouble& other) {
     if (!other.isEqualToZero()) {
-      this->theValue *= other.theValue;
+      this->value *= other.value;
     } else {
-      this->theValue = 0;
+      this->value = 0;
     }
   }
   bool operator==(const ImpreciseDouble& other) const {
-    double diff = this->theValue - other.theValue;
-    if (diff < 0) {
-      diff = - diff;
+    double difference = this->value - other.value;
+    if (difference < 0) {
+      difference = - difference;
     }
-    return diff < this->precision;
+    return difference < this->precision;
   }
-  static ImpreciseDouble GetMinusOne() {
+  static ImpreciseDouble minusOne() {
     return - 1;
   }
   static ImpreciseDouble getOne() {
     return 1;
   }
-  static ImpreciseDouble GetZero() {
+  static ImpreciseDouble zero() {
     return 0;
   }
 };
@@ -11135,7 +11135,7 @@ void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& th
   ProgressReport theReport;
   std::stringstream out;
   out << "before elimination:\n" << theMat.toString();
-  theMat.gaussianEliminationEuclideanDomain(nullptr, ImpreciseDouble::GetMinusOne(), ImpreciseDouble::getOne());
+  theMat.gaussianEliminationEuclideanDomain(nullptr, ImpreciseDouble::minusOne(), ImpreciseDouble::getOne());
   out << "after elimination:\n" << theMat.toString();
   theReport.report(out.str());
 }

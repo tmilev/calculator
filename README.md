@@ -105,9 +105,8 @@ calculator-algebra.org runs Ubuntu and compiles out of the box. We expect all ve
 - The calculator was successfully built and ran on a Windows 10 Linux subsystem. This was a single run on localhost.
 - We will add your Linux flavor upon request. We may need your help with your package manager. 
 2. **git**. needed to download the source. 
-3. **unzip**. Used to unzip [Mathjax](https://www.mathjax.org/), a method to display math formulas in the web browser. Without this, math formulas will not display correctly.
-4. [Optional] **mongoDB development libraries**. Without [mongoDB](https://www.mongodb.com/), the calculator will not be able to provide any login services, and some "administator-only" functions may be missing.
-5. [Optional] **openssl development libraries**. Without [openSSL](https://www.openssl.org/), the calculator will not be able to provide any login services, and some "administator-only" functions may be missing.
+3. [Optional] **mongoDB development libraries**. Without [mongoDB](https://www.mongodb.com/), the calculator will not be able to provide any login services, and some "administator-only" functions may be missing.
+4. [Optional] **openssl development libraries**. Without [openSSL](https://www.openssl.org/), the calculator will not be able to provide any login services, and some "administator-only" functions may be missing.
 
 ### Port redirect with ip tables
 

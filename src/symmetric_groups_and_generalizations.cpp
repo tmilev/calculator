@@ -1249,13 +1249,13 @@ void HyperoctahedralGroupData::spechtModuleOfPartititons(
   positive.spechtModuleMatricesOfTranspositionsjjplusone(pozm);
   negative.spechtModuleMatricesOfTranspositionsjjplusone(negm);
   List<int> subgenids;
-  for (int i = 0; i < this->theGroup->generators.size; i ++) {
+  for (int i = 0; i < this->group->generators.size; i ++) {
     subgenids.addOnTop(i);
   }
   if ((positive.n > 0) && (negative.n > 0)) {
     subgenids.removeIndexShiftDown(positive.n - 1);
   }
-  auto PxM = this->theGroup->parabolicKindaSubgroupGeneratorSubset(subgenids);
+  auto PxM = this->group->parabolicKindaSubgroupGeneratorSubset(subgenids);
   auto pxmr = PxM.theSubgroup->getEmptyRationalRepresentation();
   pxmr.generators.setExpectedSize(PxM.theSubgroup->generators.size);
   pxmr.generators.addListOnTop(pozm);
@@ -1266,7 +1266,7 @@ void HyperoctahedralGroupData::spechtModuleOfPartititons(
   if (repRank == 0) {
     repRank = 1;
   }
-  for (int i = 0; i < this->N; i ++) {
+  for (int i = 0; i < this->dimension; i ++) {
     if (i < positive.n) {
       pxmr.generators[cur + i].makeIdentityMatrix(repRank);
     } else {
@@ -1278,7 +1278,7 @@ void HyperoctahedralGroupData::spechtModuleOfPartititons(
     global.fatal << "Representation not verified. " << global.fatal;
   }
   out = PxM.induceRepresentation(pxmr);
-  out.ownerGroup = this->theGroup;
+  out.ownerGroup = this->group;
   std::stringstream ids;
   ids << negative << ", " << positive;
   out.identifyingString = ids.str();
@@ -1378,22 +1378,22 @@ void HyperoctahedralGroup::allSpechtModules() {
 }*/
 
 void HyperoctahedralGroupData::allSpechtModules() {
-  for (int p = 0; p <= this->N; p ++) {
+  for (int p = 0; p <= this->dimension; p ++) {
     List<Partition> nps;
     Partition::GetPartitions(nps, p);
     for (int npi = 0; npi < nps.size; npi ++) {
       List<Partition> pps;
-      Partition::GetPartitions(pps, this->N - p);
+      Partition::GetPartitions(pps, this->dimension - p);
       for (int ppi = 0; ppi < pps.size; ppi ++) {
         GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> sm;
         //global.Comments << "Computing representation {" << nps[npi] << "}, {" << pps[ppi] << "}\n";
         this->spechtModuleOfPartititons(pps[ppi], nps[npi], sm);
         //sm.verifyRepresentation();
-        this->theGroup->addIrreducibleRepresentation(sm);
+        this->group->addIrreducibleRepresentation(sm);
       }
     }
   }
-  global.comments << this->theGroup->prettyPrintCharacterTable() << '\n';
+  global.comments << this->group->prettyPrintCharacterTable() << '\n';
   //this->theGroup->representationDataIntoJS().writefile("representations_hyperoctahedral_group");
 }
 
@@ -1418,10 +1418,10 @@ LargeInteger HyperoctahedralGroupData::getSizeByFormulaImplementation(FiniteGrou
     global.fatal << "Consistency error. " << global.fatal;
   }
   if (HD->flagIsEntireHyperoctahedralGroup) {
-    return MathRoutines::factorial(HD->N) * (1 << HD->N);
+    return MathRoutines::factorial(HD->dimension) * (1 << HD->dimension);
   }
   if (HD->flagIsEntireDn) {
-    return MathRoutines::factorial(HD->N) * (1 << HD->N) / 2;
+    return MathRoutines::factorial(HD->dimension) * (1 << HD->dimension) / 2;
   }
   global.fatal << "This method should not have been called. " << global.fatal;
   // control reaches end of non-void function
@@ -1452,7 +1452,7 @@ bool HyperoctahedralGroupData::getWordByFormulaImplementation(
     g.h.getWordjjPlus1(word);
     for (int i = 0; i < g.k.bits.size; i ++) {
       if (g.k.bits[i]) {
-        word.addOnTop(HD->N - 1+ i);
+        word.addOnTop(HD->dimension - 1+ i);
       }
     }
     return true;

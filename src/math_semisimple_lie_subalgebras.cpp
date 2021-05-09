@@ -833,7 +833,7 @@ std::string SemisimpleSubalgebras::toStringSl2s(FormatExpressions* format) {
   << "The h elements and their computed orbit sizes follow. ";
   out << "<table><tr><td>h element</td><td>orbit size</td></tr>";
   for (int i = 0; i < this->orbits.size; i ++) {
-    out << "<tr><td>" << this->slTwoSubalgebras[i].elementH.getCartanPart().toString() << "</td>";
+    out << "<tr><td>" << this->slTwoSubalgebras[i].hElement.getCartanPart().toString() << "</td>";
     if (this->orbits[i].orbitSize != - 1) {
       out << "<td>" << this->orbits[i].orbitSize;
       if (this->orbits[i].flagOrbitIsBuffered == 0)
@@ -901,7 +901,11 @@ void SemisimpleSubalgebras::getCentralizerChains(List<List<int> >& outputChains)
 
 void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand() {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand");
-  this->getSemisimpleOwner().findSl2Subalgebras(this->getSemisimpleOwner(), this->slTwoSubalgebras);
+  this->getSemisimpleOwner().findSl2Subalgebras(
+    this->getSemisimpleOwner(),
+    this->slTwoSubalgebras,
+    this->ownerField
+  );
   this->orbitHElementLengths.clear();
   this->theOrbitDynkinIndices.clear();
   this->orbitHElementLengths.setExpectedSize(this->slTwoSubalgebras.size);
@@ -925,7 +929,7 @@ void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand() {
   for (int i = 0; i < this->slTwoSubalgebras.size; i ++) {
     this->orbitHElementLengths.addOnTop(this->slTwoSubalgebras[i].lengthHSquared);
     this->theOrbitDynkinIndices.addOnTop(DynkinSimpleType('A', 1, this->slTwoSubalgebras[i].lengthHSquared));
-    this->orbits[i].initialize(generators, this->slTwoSubalgebras[i].elementH.getCartanPart());
+    this->orbits[i].initialize(generators, this->slTwoSubalgebras[i].hElement.getCartanPart());
   }
 }
 
@@ -1521,7 +1525,7 @@ void SemisimpleSubalgebras::getHCandidates(
       reportStreamX << "Trying to realize via orbit number " << j + 1 << ".";
       if (this->slTwoSubalgebras[j].lengthHSquared != desiredHScaledToActByTwoLengthSquared) {
         reportStreamX << " The h element "
-        << this->slTwoSubalgebras[j].elementH.getCartanPart().toString() << " of length "
+        << this->slTwoSubalgebras[j].hElement.getCartanPart().toString() << " of length "
         << this->orbitHElementLengths[j].toString()
         << " generating orbit number " << j + 1 << " out of "
         << this->slTwoSubalgebras.size << " does not have the required length of "
@@ -1533,7 +1537,7 @@ void SemisimpleSubalgebras::getHCandidates(
       continue;
     }
     if (baseRank == 0) {
-      outputHCandidatesScaledToActByTwo.addOnTop(this->slTwoSubalgebras[j].elementH.getCartanPart());
+      outputHCandidatesScaledToActByTwo.addOnTop(this->slTwoSubalgebras[j].hElement.getCartanPart());
       // Orbit of not generated because that is the very first H element selected.
       continue;
     }
@@ -1619,41 +1623,45 @@ bool SemisimpleSubalgebras::getCentralizerTypeIfComputableAndKnown(const DynkinT
 }
 
 void DynkinType::getDynkinIndicesSl2SubalgebrasSimpleType(
-  const DynkinSimpleType& theType,
+  const DynkinSimpleType& desiredType,
   List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
   HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
-  HashedList<Rational>& outputDynkinIndices
+  HashedList<Rational>& outputDynkinIndices,
+  AlgebraicClosureRationals* algebraicClosure
 ) {
   MacroRegisterFunctionWithName("DynkinType::getDynkinIndicesSl2SubalgebrasSimpleType");
-  DynkinSimpleType theTypeDefaultScale(theType.letter, theType.rank, 1);
-  if (!dynkinSimpleTypesWithComputedSl2Subalgebras.contains(theTypeDefaultScale)) {
+  DynkinSimpleType typeDefaultScale(desiredType.letter, desiredType.rank, 1);
+  if (!dynkinSimpleTypesWithComputedSl2Subalgebras.contains(typeDefaultScale)) {
     HashedList<Rational> outputIndicesDefaultScale;
     SemisimpleLieAlgebra simpleAlgebra;
-    SlTwoSubalgebras theSl2s;
-    simpleAlgebra.weylGroup.makeArbitrarySimple(theTypeDefaultScale.letter, theTypeDefaultScale.rank);
+    SlTwoSubalgebras sl2s;
+    simpleAlgebra.weylGroup.makeArbitrarySimple(typeDefaultScale.letter, typeDefaultScale.rank);
     simpleAlgebra.computeChevalleyConstants();
-    simpleAlgebra.findSl2Subalgebras(simpleAlgebra, theSl2s);
-    dynkinSimpleTypesWithComputedSl2Subalgebras.addOnTop(theTypeDefaultScale);
-    outputIndicesDefaultScale.setExpectedSize(theSl2s.size);
-    for (int i = 0; i < theSl2s.size; i ++) {
-      outputIndicesDefaultScale.addOnTopNoRepetition(theSl2s[i].lengthHSquared / 2);
+    simpleAlgebra.findSl2Subalgebras(
+      simpleAlgebra, sl2s, algebraicClosure
+    );
+    dynkinSimpleTypesWithComputedSl2Subalgebras.addOnTop(typeDefaultScale);
+    outputIndicesDefaultScale.setExpectedSize(sl2s.size);
+    for (int i = 0; i < sl2s.size; i ++) {
+      outputIndicesDefaultScale.addOnTopNoRepetition(sl2s[i].lengthHSquared / 2);
     }
     precomputedDynkinIndicesSl2subalgebrasSimpleTypes.addOnTop(outputIndicesDefaultScale);
   }
   List<Rational>& outputIndicesDefaultScale = precomputedDynkinIndicesSl2subalgebrasSimpleTypes[
-    dynkinSimpleTypesWithComputedSl2Subalgebras.getIndex(theTypeDefaultScale)
+    dynkinSimpleTypesWithComputedSl2Subalgebras.getIndex(typeDefaultScale)
   ];
   outputDynkinIndices.setExpectedSize(outputIndicesDefaultScale.size);
   outputDynkinIndices.clear();
   for (int i = 0; i <outputIndicesDefaultScale.size; i ++) {
-    outputDynkinIndices.addOnTop(outputIndicesDefaultScale[i] * theType.cartanSymmetricInverseScale);
+    outputDynkinIndices.addOnTop(outputIndicesDefaultScale[i] * desiredType.cartanSymmetricInverseScale);
   }
 }
 
 void DynkinType::getDynkinIndicesSl2Subalgebras(
   List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
   HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
-  HashedList<Rational>& outputDynkinIndices
+  HashedList<Rational>& outputDynkinIndices,
+  AlgebraicClosureRationals* algebraicClosure
 ) {
   MacroRegisterFunctionWithName("DynkinType::getDynkinIndicesSl2Subalgebras");
   List<DynkinSimpleType> theTypes;
@@ -1665,7 +1673,8 @@ void DynkinType::getDynkinIndicesSl2Subalgebras(
       theTypes[i],
       precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
       dynkinSimpleTypesWithComputedSl2Subalgebras,
-      bufferIndices
+      bufferIndices,
+      algebraicClosure
     );
     DynkinIndicesPerType.setSize(DynkinIndicesPerType.size + 1);
     DynkinIndicesPerType.lastObject()->addOnTop(0);
@@ -1694,21 +1703,21 @@ bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits(
   int typeIndex = this->currentNumLargerTypesExplored[stackIndex];
   DynkinType& currentType = this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex];
   SelectionWithDifferentMaxMultiplicities simpleSummandSelection;
-  List<int> theMults;
-  theMults.setSize(currentType.size());
+  List<int> multiplicities;
+  multiplicities.setSize(currentType.size());
   for (int i = 0; i < currentType.size(); i ++) {
-    if (!currentType.coefficients[i].isSmallInteger(& theMults[i])) {
+    if (!currentType.coefficients[i].isSmallInteger(&multiplicities[i])) {
       global.fatal << "This is not supposed to happen: "
       << "Dynkin type with multiplicity that doesn't fit in a small int. "
       << global.fatal;
     }
   }
-  simpleSummandSelection.initFromInts(theMults);
+  simpleSummandSelection.initFromInts(multiplicities);
   DynkinType currentComplementSummand, centralizerOfComplementOfCurrentSummand, currentSummand;
   HashedList<Rational> theDynkinIndicesCurrentSummand, theDynkinIndicesCentralizerComplementCurrentSummand;
   while (simpleSummandSelection.incrementReturnFalseIfPastLast()) {
     currentComplementSummand.makeZero();
-    for (int i = 0; i <simpleSummandSelection.multiplicities.size; i ++) {
+    for (int i = 0; i < simpleSummandSelection.multiplicities.size; i ++) {
       currentComplementSummand.addMonomial(currentType[i], simpleSummandSelection.multiplicities[i]);
     }
     if (this->getCentralizerTypeIfComputableAndKnown(currentComplementSummand, centralizerOfComplementOfCurrentSummand)) {
@@ -1716,12 +1725,14 @@ bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits(
       currentSummand.getDynkinIndicesSl2Subalgebras(
         this->cachedDynkinIndicesSl2subalgebrasSimpleTypes,
         this->cachedDynkinSimpleTypesWithComputedSl2Subalgebras,
-        theDynkinIndicesCurrentSummand
+        theDynkinIndicesCurrentSummand,
+        this->ownerField
       );
       centralizerOfComplementOfCurrentSummand.getDynkinIndicesSl2Subalgebras(
         this->cachedDynkinIndicesSl2subalgebrasSimpleTypes,
         this->cachedDynkinSimpleTypesWithComputedSl2Subalgebras,
-        theDynkinIndicesCentralizerComplementCurrentSummand
+        theDynkinIndicesCentralizerComplementCurrentSummand,
+        this->ownerField
       );
       if (!theDynkinIndicesCentralizerComplementCurrentSummand.contains(theDynkinIndicesCurrentSummand)) {
         std::stringstream reportStream;
@@ -1774,11 +1785,11 @@ bool CandidateSemisimpleSubalgebra::computeCentralizerTypeFailureAllowed() {
     << "subalgebra is of rank 1, hence an sl(2) subalgebra, yet "
     << "I can't find its H element in the list of sl(2) subalgebras. " << global.fatal;
   }
-  const SlTwoSubalgebra& theSl2 = this->owner->slTwoSubalgebras[indexSl2];
-  if (!theSl2.flagCentralizerTypeComputed) {
+  const SlTwoSubalgebra& sl2 = this->owner->slTwoSubalgebras[indexSl2];
+  if (!sl2.flagCentralizerTypeComputed) {
     return false;
   }
-  this->theCentralizerType = theSl2.centralizerTypeIfKnown;
+  this->theCentralizerType = sl2.centralizerTypeIfKnown;
   this->flagCentralizerTypeIsComputed = true;
   return true;
 }
@@ -1801,12 +1812,14 @@ bool SemisimpleSubalgebras::centralizerOfBaseComputedToHaveUnsuitableNilpotentOr
   centralizerComplementNewSummandType.getDynkinIndicesSl2Subalgebras(
     this->cachedDynkinIndicesSl2subalgebrasSimpleTypes,
     this->cachedDynkinSimpleTypesWithComputedSl2Subalgebras,
-    DynkinIndicesTheyGotToFitIn
+    DynkinIndicesTheyGotToFitIn,
+    this->ownerField
   );
   newSummandType.getDynkinIndicesSl2Subalgebras(
     this->cachedDynkinIndicesSl2subalgebrasSimpleTypes,
     this->cachedDynkinSimpleTypesWithComputedSl2Subalgebras,
-    theDynkinIndicesNewSummand
+    theDynkinIndicesNewSummand,
+    this->ownerField
   );
   if (DynkinIndicesTheyGotToFitIn.contains(theDynkinIndicesNewSummand)) {
     return false;
@@ -4381,7 +4394,7 @@ bool SlTwoSubalgebra::operator>(const SlTwoSubalgebra& right) const {
 }
 
 bool SlTwoSubalgebra::operator==(const SlTwoSubalgebra& right) const {
- // See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, chapter 7- 10
+ // See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, chapter 7-10
   if (this->owner != right.owner) {
     global.fatal << "Comparing sl(2) "
     << "subalgebras that have different ambient Lie algebras. " << global.fatal;
@@ -4402,19 +4415,76 @@ std::string SlTwoSubalgebra::toStringTripleVerification(FormatExpressions* forma
   << "[h, f]&=&" << this->hBracketF.toString(format)
   << "\\end{array}\\)";
 
-  //this->theSystemMatrixForm.toString(tempS);
-  //out << "\nSystem matrix form we try to solve:\n" << tempS;
-  //this->theSystemColumnVector.toString(tempS);
-  //out << "\nColumn vector of the system:\n" <<tempS;
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toStringTripleArbitrary(FormatExpressions* format) const {
+  std::stringstream out;
+  out << "Starting h, e, f triple. H is computed according to Dynkin, "
+  << "and the coefficients of f are arbitrarily chosen. "
+  << "More precisely, the chevalley generators participating in f are ordered in the order "
+  << "in which their roots appear, and the coefficients are chosen to be the increasing odd "
+  << "numbers 1, 3, 5, ...."
+  << "This arbitrary (but well-defined) choice of "
+  << "f guarantees that the computation is linear and fast. <br>\n";
+  out << "\\(\\begin{array}{rcl}"
+  << "h&=&" << this->hPolynomialRational.toString(format) << "\\\\"
+  << "e&=&" << this->eArbitraryUnknown.toString(format) << "\\\\"
+  << "f&=&" << this->fArbitrary.toString(format)
+  << "\\end{array}\\)";
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toStringTripleArbitraryMatrix(FormatExpressions* format) const {
+  std::stringstream out;
+  out << "<br>Matrix form of the system we are trying to solve:\n";
+  FormatExpressions formatLatex;
+  formatLatex.flagUseLatex = true;
+  formatLatex.flagUseHTML = false;
+  out << "\\("
+  << this->systemArbitraryMatrix.toString(&formatLatex)
+  << "[col. vect.]"
+  << "="
+  << this->systemArbitraryColumnVector.toString(&formatLatex)
+  << "\\)"
+  ;
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toStringTripleUnknowns(FormatExpressions* format) const {
+  std::stringstream out;
+  out << "<hr>Unknown elements.<br>";
+  out << "\\(\\begin{array}{rcl}"
+  << "h&=&" << this->hPolynomialRational.toString(format) << "\\\\\n"
+  << "e&=&" << this->eUnknown.toString(format) << "\\\\\n"
+  << "f&=&" << this->fUnknown.toString(format)
+  << "\\end{array}\\)";
+  out << "<br>Lie brackets of the unknowns.<br>";
+  out << "\\([e,f] - h = "
+  << this->eBracketFMinusHUnknown.toString(format)
+  << "\\)";
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toStringTripleUnknownsPolynomialSystem(FormatExpressions* format) const {
+  std::stringstream out;
+  out << "<br>The polynomial system that corresponds to finding the h, e, f triple:<br>\n";
+  std::stringstream latexStreamActual;
+  latexStreamActual << "\\begin{array}{rcl}";
+  for (int i = 0; i < this->systemToSolve.size; i ++) {
+    latexStreamActual << this->systemToSolve[i].toString(format) << "&=&0\\\\";
+  }
+  latexStreamActual << "\\end{array}";
+  out << HtmlRoutines::getMathNoDisplay(latexStreamActual.str()) << "\n<br>\n";
   return out.str();
 }
 
 std::string SlTwoSubalgebra::toStringTriple(FormatExpressions* format) const {
   std::stringstream out;
   out << "\\begin{array}{rcl}";
-  out << "h&=&" << this->elementH.toString(format) << "\\\\\n";
-  out << "e&=&" << this->elementE.toString(format) << "\\\\\n";
-  out << "f&=&" << this->elementF.toString(format);
+  out << "h&=&" << this->hElement.toString(format) << "\\\\\n";
+  out << "e&=&" << this->eElement.toString(format) << "\\\\\n";
+  out << "f&=&" << this->fElement.toString(format);
   out << "\\end{array}";
   return HtmlRoutines::getMathNoDisplay(out.str());
 }
@@ -4422,9 +4492,9 @@ std::string SlTwoSubalgebra::toStringTriple(FormatExpressions* format) const {
 std::string SlTwoSubalgebra::toStringTripleStandardRealization() const {
   Matrix<Rational> matrixH, matrixE, matrixF;
   if (
-    !this->owner->getElementStandardRepresentation(this->elementH, matrixH) ||
-    !this->owner->getElementStandardRepresentation(this->elementE, matrixE) ||
-    !this->owner->getElementStandardRepresentation(this->elementF, matrixF)
+    !this->owner->getElementStandardRepresentation(this->hElement, matrixH) ||
+    !this->owner->getElementStandardRepresentation(this->eElement, matrixE) ||
+    !this->owner->getElementStandardRepresentation(this->fElement, matrixF)
   ) {
     return "";
   }
@@ -4520,24 +4590,15 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   out << this->toStringTriple(format);
   out << this->toStringTripleStandardRealization();
   out << this->toStringTripleVerification(format);
-  std::stringstream latexStreamActual;
-  latexStreamActual << "\\begin{array}{l}";
-  for (int i = 0; i < this->systemToSolve.size; i ++) {
-    latexStreamActual << this->systemToSolve[i].toString(format) << "~\\\\";
-  }
-  latexStreamActual << "\\end{array}";
-  if (useHtml) {
-    out << "<br>";
-  }
-  out << "\nThe polynomial system that corresponds to finding the h, e, f triple:\n";
-  if (useHtml) {
-    out << "\n<br>\n";
-  }
-  out << HtmlRoutines::getMathNoDisplay(latexStreamActual.str()) << "\n<br>\n";
+  out << this->toStringTripleUnknowns(format);
+  out << this->toStringTripleUnknownsPolynomialSystem(format);
+  out << this->toStringTripleArbitrary(format);
+  out << this->toStringTripleArbitraryMatrix(format);
   return out.str();
 }
 
 void SlTwoSubalgebra::initialize() {
+  this->algebraicClosure = nullptr;
   this->owner = nullptr;
   this->container = nullptr;
   this->indexInContainer = - 1;
@@ -4626,7 +4687,11 @@ void SlTwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner) {
   this->rootSubalgebras.owner = &inputOwner;
 }
 
-void SemisimpleLieAlgebra::findSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, SlTwoSubalgebras& output) {
+void SemisimpleLieAlgebra::findSl2Subalgebras(
+  SemisimpleLieAlgebra& inputOwner,
+  SlTwoSubalgebras& output,
+  AlgebraicClosureRationals* algebraicClosure
+) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::findSl2Subalgebras");
   ProgressReport theReport0;
   if (theReport0.tickAndWantReport()) {
@@ -4654,7 +4719,7 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
     << output.rootSubalgebras.subalgebras[i].dynkinDiagram.toString()
     << " (" << (i + 1) << " out of " << output.rootSubalgebras.subalgebras.size << ")\n";
     report.report(tempStream.str());
-    output.rootSubalgebras.subalgebras[i].getSsl2SubalgebrasAppendListNoRepetition(output, i);
+    output.rootSubalgebras.subalgebras[i].getSsl2SubalgebrasAppendListNoRepetition(output, i, algebraicClosure);
   }
   //sort subalgebras by dynkin index
   List<int> thePermutation, theIndexMap;
@@ -4794,7 +4859,7 @@ bool SlTwoSubalgebras::containsSl2WithGivenH(Vector<Rational>& elementH, int* ou
   this->checkInitialization();
   tempH.makeCartanGenerator(elementH, *this->owner);
   for (int i = 0; i < this->size; i ++) {
-    if (this->objects[i].elementH == tempH) {
+    if (this->objects[i].hElement == tempH) {
       if (outputIndex != nullptr) {
         *outputIndex = i;
       }
@@ -4891,14 +4956,14 @@ void SlTwoSubalgebra::makeReportPrecomputations(
   this->indicesContainingRootSubalgebras.size = 0;
   Vectors<Rational> tempRoots;
   tempRoots = minimalContainingRegularSubalgebra.simpleRootsReductiveSubalgebra;
-  this->getOwnerSemisimpleAlgebra().weylGroup.transformToSimpleBasisGeneratorsWithRespectToH(tempRoots, this->elementH.getCartanPart());
+  this->getOwnerSemisimpleAlgebra().weylGroup.transformToSimpleBasisGeneratorsWithRespectToH(tempRoots, this->hElement.getCartanPart());
   DynkinDiagramRootSubalgebra diagram;
   diagram.ambientBilinearForm = this->getOwnerWeyl().cartanSymmetric;
   diagram.ambientRootSystem = this->getOwnerWeyl().rootSystem;
   diagram.computeDiagramInputIsSimple(tempRoots);
   this->indicesContainingRootSubalgebras.addOnTop(indexMinimalContainingRegularSA);
   tempRoots.makeEiBasis(theDimension);
-  this->getOwnerSemisimpleAlgebra().weylGroup.transformToSimpleBasisGeneratorsWithRespectToH(tempRoots, this->elementH.getCartanPart());
+  this->getOwnerSemisimpleAlgebra().weylGroup.transformToSimpleBasisGeneratorsWithRespectToH(tempRoots, this->hElement.getCartanPart());
   DynkinDiagramRootSubalgebra tempDiagram;
   tempDiagram.ambientBilinearForm = this->getOwnerWeyl().cartanSymmetric;
   tempDiagram.ambientRootSystem = this->getOwnerWeyl().rootSystem;
@@ -4907,16 +4972,16 @@ void SlTwoSubalgebra::makeReportPrecomputations(
   this->hCharacteristic.setSize(theDimension);
   for (int i = 0; i < theDimension; i ++) {
     this->hCharacteristic[i] = this->getOwnerSemisimpleAlgebra().weylGroup.rootScalarCartanRoot(
-      this->elementH.getCartanPart(), this->preferredAmbientSimpleBasis[i]
+      this->hElement.getCartanPart(), this->preferredAmbientSimpleBasis[i]
     );
   }
   //this->hCharacteristic.ComputeDebugString();
   //  if (this->theE.NonZeroElements.maximumSize == this->owner->theWeyl.RootSystem.size
   //      && this->theF.NonZeroElements.maximumSize == this->owner->theWeyl.RootSystem.size
   //      && this->theH.NonZeroElements.maximumSize == this->owner->theWeyl.RootSystem.size)
-  this->getOwnerSemisimpleAlgebra().lieBracket(this->elementE, this->elementF, this->eBracketF);
-  this->getOwnerSemisimpleAlgebra().lieBracket(this->elementH, this->elementE, this->hBracketE);
-  this->getOwnerSemisimpleAlgebra().lieBracket(this->elementH, this->elementF, this->hBracketF);
+  this->getOwnerSemisimpleAlgebra().lieBracket(this->eElement, this->fElement, this->eBracketF);
+  this->getOwnerSemisimpleAlgebra().lieBracket(this->hElement, this->eElement, this->hBracketE);
+  this->getOwnerSemisimpleAlgebra().lieBracket(this->hElement, this->fElement, this->hBracketF);
 
   //theSl2.hCharacteristic.ComputeDebugString();
   //  this->computePrimalModuleDecomposition();
@@ -5081,14 +5146,14 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
     for (int i = 0; i < this->badHCharacteristics.size; i ++) {
       bool isGoodInItsbadness = false;
       for (int j = 0; j < this->size; j ++) {
-        if (this->badHCharacteristics[i] == (*this)[j].elementH.getCartanPart()) {
+        if (this->badHCharacteristics[i] == (*this)[j].hElement.getCartanPart()) {
           isGoodInItsbadness = true;
           break;
         }
       }
       if (!isGoodInItsbadness) {
         allbadAreGoodInTheirBadness = false;
-        out << "<b>Bad characteristic: " << this->badHCharacteristics[i] << "</b>";
+        out << "<br><b>Bad characteristic: " << this->badHCharacteristics[i] << "</b>";
       } else {
         out2 << "<br><b>It turns out that in the current case of Cartan element h = "
         << this->badHCharacteristics[i] << " we have that, for a certain P, "
@@ -5098,7 +5163,7 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
       }
     }
     if (!allbadAreGoodInTheirBadness) {
-      out << "<b>found bad characteristics!</b>";
+      out << "<br><b>Found bad characteristics!</b><br>";
     }
   } else {
     out2 << "It turns out by direct computation that, in the current case of "
@@ -5147,8 +5212,8 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
       out << "</td>";
       out << "<td style='white-space: nowrap'>";
     }
-    out << currentSubalgebra.elementH.getCartanPart().toString();
-    if (!this->getOwnerWeyl().isDominantWeight(currentSubalgebra.elementH.getCartanPart())) {
+    out << currentSubalgebra.hElement.getCartanPart().toString();
+    if (!this->getOwnerWeyl().isDominantWeight(currentSubalgebra.hElement.getCartanPart())) {
       out << "<b>Something has gone very wrong! "
       << "The h is not dual to a dominant weight. "
       << "This shouldn't happen: "

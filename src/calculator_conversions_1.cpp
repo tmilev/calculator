@@ -352,8 +352,8 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
     << "More precisely, the owner of e is "
     << eltE.getOwner()->toString() << " and the owner of f is " << eltF.getOwner()->toString();
   }
-  output.elementE = eltE;
-  output.elementF= eltF;
+  output.eElement = eltE;
+  output.fElement= eltF;
   output.owner = eltE.getOwner();
   DynkinType& theType = output.owner->weylGroup.dynkinType;
   SemisimpleSubalgebras& ownerSubalgebras =

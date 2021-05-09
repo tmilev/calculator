@@ -1418,39 +1418,6 @@ void Polynomial<Coefficient>::getPolynomialUnivariateWithPolynomialCoefficients(
   this->getPolynomialWithPolynomialCoefficient(variables, output);
 }
 
-template <class Coefficient>
-bool Polynomial<Coefficient>::getLinearSystemFromLinearPolynomials(
-  const List<Polynomial<Coefficient> >& linearPolynomials,
-  Matrix<Coefficient>& homogenousPart,
-  Matrix<Coefficient>& constantTerms
-) {
-  MacroRegisterFunctionWithName("Polynomial::getLinearSystemFromLinearPolynomials");
-  int theLetter = 0;
-  int numberOfVariables = 0;
-  for (int i = 0; i < linearPolynomials.size; i ++) {
-    numberOfVariables = MathRoutines::maximum(
-      linearPolynomials[i].minimalNumberOfVariables(), numberOfVariables
-    );
-  }
-  homogenousPart.initialize(linearPolynomials.size, numberOfVariables);
-  homogenousPart.makeZero();
-  constantTerms.initialize(linearPolynomials.size, 1);
-  constantTerms.makeZero();
-  for (int i = 0; i < linearPolynomials.size; i ++) {
-    for (int j = 0; j < linearPolynomials[i].size(); j ++) {
-      if (linearPolynomials[i][j].isLinearNoConstantTerm(&theLetter)) {
-        homogenousPart(i, theLetter) = linearPolynomials[i].coefficients[j];
-      } else if (linearPolynomials[i][j].isConstant()) {
-        constantTerms(i, 0) = linearPolynomials[i].coefficients[j];
-        constantTerms(i, 0) *= - 1;
-      } else {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
 class IntegralRationalFunctionComputation {
 public:
   RationalFraction<Rational> rationalFraction;

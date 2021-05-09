@@ -195,7 +195,9 @@ public:
   void getCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2);
   void getCoxeterElement(Matrix<Rational>& output);
   void computePotentialExtensions();
-  void getSsl2SubalgebrasAppendListNoRepetition(SlTwoSubalgebras& output, int indexRootSAinContainer);
+  void getSsl2SubalgebrasAppendListNoRepetition(
+    SlTwoSubalgebras& output, int indexRootSAinContainer, AlgebraicClosureRationals* algebraicClosure
+  );
   bool isEquivalentToByDiagramsAndDimensions(const RootSubalgebra& other) const;
   void computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators();
   bool isGeneratingSingularVectors(int indexKmod, Vectors<Rational>& NilradicalRoots);
@@ -433,24 +435,15 @@ public:
 
 class SlTwoSubalgebra {
 public:
-/////////////////////////////////////////////
   friend std::ostream& operator << (std::ostream& output, const SlTwoSubalgebra& sl2) {
     output << sl2.toString();
     return output;
   }
-/////////////////////////////////////////////
-  CharacterSemisimpleLieAlgebraModule<Rational> moduleDecompositionAmbientSubalgebra;
-  List<int> moduleDimensions;
-  ElementSemisimpleLieAlgebra<Rational> elementH, elementE, elementF;
-  ElementSemisimpleLieAlgebra<Rational> hBracketE, hBracketF, eBracketF;
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > hUnknown;
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > eUnknown;
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > fUnknown;
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > hBracketEUnknown;
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > hBracketFUnknown;
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > eBracketFUnknown;
   SemisimpleLieAlgebra* owner;
   SlTwoSubalgebras* container;
+  AlgebraicClosureRationals* algebraicClosure;
+  CharacterSemisimpleLieAlgebraModule<Rational> moduleDecompositionAmbientSubalgebra;
+  List<int> moduleDimensions;
   Rational lengthHSquared;
   int indexInContainer;
   int dimensionCentralizer;
@@ -460,23 +453,102 @@ public:
   bool flagCentralizerIsRegular;
   List<int> indicesContainingRootSubalgebras;
   List<int> indicesMinimalContainingRootSubalgebras;
-  List<CharacterSemisimpleLieAlgebraModule<Rational> > moduleDecompositionMinimalContainingRootSubalgebras;
   Vectors<Rational> preferredAmbientSimpleBasis;
+
+  Vectors<Rational> participatingPositiveRoots;
+
+  ElementSemisimpleLieAlgebra<Rational> hElement;
+  // Mathematically equal to the previous.
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> hAlgebraic;
+  // Mathematically equal to the previous.
+  ElementSemisimpleLieAlgebra<Polynomial<Rational> > hPolynomialRational;
+  // Mathematically equal to the previous.
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > hPolynomialAlgebraic;
+
+  // One possible element e for which [e, f] = h
+  // [h, e] = 2e.
+  ElementSemisimpleLieAlgebra<Rational> eElement;
+  // One possible element f for which [e, f] = h
+  // [h, f] = -2f.
+  ElementSemisimpleLieAlgebra<Rational> fElement;
+
+  ElementSemisimpleLieAlgebra<Polynomial<Rational> > eUnknown;
+  ElementSemisimpleLieAlgebra<Polynomial<Rational> > fUnknown;
+  ElementSemisimpleLieAlgebra<Polynomial<Rational> > eBracketFMinusHUnknown;
+  // The polynomial system required to solve to find e, f.
+  PolynomialSubstitution<Rational> systemToSolve;
+
+  // Used to check our work over the rationals
+  ElementSemisimpleLieAlgebra<Rational> hBracketE, hBracketF, eBracketF;
+
+  // The following describes an optional Cartan involution.
+  // A map \theta is a Cartan involution if the following hold.
+  // \theta is linear
+  // \theta^2 = id.
+  // \theta is a lie bracket automorphism, i.e., [\theta(a), \theta(b)] = \theta([a,b]).
+  // Here, if theta is not null, we request that it
+  // correspond to the maximally compact real form and have the property
+  // \theta(h) = -h.
+  // TODO(tmilev): does the property above need to be tweaked when
+  // we compute outside of the maximally compact real form?
+  LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionPreservedByEMinusF;
+
+  // Fix one Cartan involution theta for which theta(h) = -h.
+  //
+  // The following element has all properties that the rational element e has,
+  // as well as the following additional property:
+  //
+  // 1) e - f is invariant with respect the cartan involution, i.e., theta(e-f)=e-f.
+  //
+  // An h, e, f-triple as above is called a Kostant-Sekiguchi sl(2)-triple.
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> eKostantSekiguchi;
+  // F element of the Kostant-Sekiguchi sl(2)-triple.
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> fKostantSekiguchi;
+
+  // Same as hKostantSekiguchi but with polynomial coefficients.
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > hKnownKostantSekiguchi;
+  // An element of the form x_1 g_{k_1} + ... + x_s g_{k_s} where
+  // x_1, ..., x_s are unknowns and g_{?} are the Chevalley generators
+  // of the root spaces given by participatingPositiveRoots.
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > eUnknownKostantSekiguchi;
+  // An element of the form x_1 g_{-k_1} + ... + x_s g_{-k_s} where
+  // x_1, ..., x_s are unknowns and g_{-?} are the Chevalley generators
+  // of the root spaces given by the negatives of the participatingPositiveRoots.
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > fUnknownKostantSekiguchi;
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > eBracketFMinusHUnknownKostantSekiguchi;
+
+  // The polynomial system required to solve to find a Kostant-sekiguchi triple e, f, h.
+  // Here, we assume that theta(h) = - h is already satisfied.
+  PolynomialSubstitution<AlgebraicNumber> systemToSolveKostantSekiguchi;
+
+  // Arbitrarily chosen coefficients of the F element over the rationals.
+  // This arbitrary choice of F allows to reduce
+  // the polynomial system needed to realize the E and F
+  // to a linear one.
+  // The rationale for this arbitrary choice:
+  // 1) Speed (linear systems are easer to solve than polynomial systems).
+  // 2) Algorithmic simplicity. When this function was first designed,
+  // we did not have machinery for solving polynomial systems
+  // so this used to be an algorithmic necessity.
+  //
+  // Here, we recall that the element H is known and computed by algorithms
+  // following Dynkin.
+  ElementSemisimpleLieAlgebra<Polynomial<Rational> > fArbitrary;
+  ElementSemisimpleLieAlgebra<Polynomial<Rational> > eArbitraryUnknown;
+  ElementSemisimpleLieAlgebra<Polynomial<Rational> > eBracketFMinusHArbitraryUnknown;
+  // The polynomial (actually, linear) system required to solve for eArbitraryUnknown.
+  PolynomialSubstitution<Rational> systemToSolveArbitrary;
+  // The matrix of the linear system given by systemToSolveArbitrary.
+  Matrix<Rational> systemArbitraryMatrix;
+  // The column-vector of the linear system given by systemToSolveArbitrary.
+  Matrix<Rational> systemArbitraryColumnVector;
+
+  List<CharacterSemisimpleLieAlgebraModule<Rational> > moduleDecompositionMinimalContainingRootSubalgebras;
   Vector<Rational> hCharacteristic;
   Vector<Rational> hElementCorrespondingToCharacteristic;
   Vectors<Rational> hCommutingRootSpaces;
   Vectors<Rational> rootsWithScalar2WithH;
   DynkinDiagramRootSubalgebra diagramM;
-  //  DynkinDiagramRootSubalgebra CentralizerDiagram;
-  PolynomialSubstitution<Rational> systemToSolve;
-  Matrix<Rational> systemMatrixForm;
-  Matrix<Rational> systemColumnVector;
-  // Arbitrarily chosen coefficients of the F element
-  // used to convert the polynomial system needed to realize the E and F
-  // to a linear one.
-  // Here, the element H is fixed, computed by algorithms in other functions
-  // (following Dynkin).
-  Matrix<Rational> arbitrarilyChosenCoefficientsF;
   int dynkinsEpsilon;
   bool flagDeallocated;
   void initialize();
@@ -509,6 +581,10 @@ public:
   std::string toStringTriple(FormatExpressions* format) const;
   std::string toStringTripleStandardRealization() const;
   std::string toStringTripleVerification(FormatExpressions* format) const;
+  std::string toStringTripleUnknowns(FormatExpressions* format) const;
+  std::string toStringTripleUnknownsPolynomialSystem(FormatExpressions* format = nullptr) const;
+  std::string toStringTripleArbitrary(FormatExpressions* format) const;
+  std::string toStringTripleArbitraryMatrix(FormatExpressions* format) const;
   std::string toString(FormatExpressions* format = nullptr) const;
   void getInvolvedPositiveGenerators(List<ChevalleyGenerator>& output);
   void getInvolvedNegativeGenerators(List<ChevalleyGenerator>& output);
@@ -528,18 +604,23 @@ public:
     Vectors<Rational>& rootsWithCharacteristic2,
     Selection& zeroCharacteristics,
     Vectors<Rational>& simpleBasisSubalgebras,
-    Vector<Rational>& h
+    Vector<Rational>& h,
+    AlgebraicClosureRationals* inputAlgebraicClosure
   );
-  void initializeHEFSystemFromECoefficients(
-    Vectors<Rational>& rootsInPlay,
-    int numberVariables,
-    int halfNumberVariables,
-    Vector<Rational>& targetH,
+  bool checkConsistencyParticipatingRoots(const Vector<Rational>& targetH);
+  // Initializes the h,e,f computation with f arbitrarily chosen.
+  // See the preceding comments on why f is chosen arbitrarily.
+  void initializeUnknownTriples(const Vector<Rational>& targetH);
+  void computePolynomialSystems();
+  void adjoinKostantSekiguchiRelationsToPolynomialSystem(
     LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionPreservedByEMinusF
   );
-  void initializeHEFSystemFromECoefficientsPartTwo(
-    int numberVariables,
-    int halfNumberVariables,
+  void computeLieBracketsUnknowns();
+  void initializeHEFSystemFromFCoefficients(
+    const Vector<Rational>& targetH,
+    LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionPreservedByEMinusF
+  );
+  void initializeHEFSystemFromFCoefficientsPartTwo(
     LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionPreservedByEMinusF
   );
   // Whether the ambient Lie algebra has a Cartan involution that has been implemented.

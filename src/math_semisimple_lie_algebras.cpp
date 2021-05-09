@@ -1258,6 +1258,18 @@ bool HomomorphismSemisimpleLieAlgebra::checkClosednessLieBracket() {
   return true;
 }
 
+void ChevalleyGenerator::makeGeneratorRootSpace(
+  SemisimpleLieAlgebra& inputOwner,
+  const Vector<Rational>& root
+) {
+  this->makeGenerator(inputOwner, inputOwner.getGeneratorIndexFromRoot(root));
+}
+
+void ChevalleyGenerator::makeGenerator(SemisimpleLieAlgebra &inputOwner, int inputGeneratorIndex) {
+  this->owner = &inputOwner;
+  this->generatorIndex = inputGeneratorIndex;
+}
+
 void ChevalleyGenerator::checkConsistencyWithOther(const ChevalleyGenerator& other) const {
   if (this->owner != other.owner) {
     global.fatal << "Attempt to compare Chevalley generators of different Lie algebras. " << global.fatal;

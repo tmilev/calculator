@@ -63,10 +63,10 @@ public:
   unsigned int hashFunction() const {
     return this->hashFunction(*this);
   }
-  void makeGenerator(SemisimpleLieAlgebra& inputOwner, int inputGeneratorIndex) {
-    this->owner = &inputOwner;
-    this->generatorIndex = inputGeneratorIndex;
-  }
+  void makeGenerator(SemisimpleLieAlgebra& inputOwner, int inputGeneratorIndex);
+  void makeGeneratorRootSpace(
+    SemisimpleLieAlgebra& inputOwner, const Vector<Rational>& root
+  );
   void operator=(const ChevalleyGenerator& other) {
     this->owner = other.owner;
     this->generatorIndex = other.generatorIndex;
@@ -2738,10 +2738,12 @@ public:
     Vector<Coefficient>& normal,
     Coefficient& Correction
   );
+  // Constructs a linear system from a system of linear polynomials equal to zero.
+  // Returns false if the polynomials are not linear.
   static bool getLinearSystemFromLinearPolynomials(
     const List<Polynomial<Coefficient> >& linearPolynomials,
-    Matrix<Coefficient>& homogenousPart,
-    Matrix<Coefficient>& constTerms
+    Matrix<Coefficient>& outputHomogenousPart,
+    Matrix<Coefficient>& outputConstantTerms
   );
   bool isOneVariablePolynomial(int* whichVariable = nullptr) const;
   bool isOneVariableNonConstantPolynomial(int* whichVariable = nullptr) const;
@@ -2774,10 +2776,10 @@ public:
     Polynomial<Coefficient>& outputRemainder,
     List<MonomialPolynomial>::Comparator* monomialOrder
   ) const;
-  void addConstant(const Coefficient& theConst) {
+  void addConstant(const Coefficient& constantTerm) {
     MonomialPolynomial tempMon;
     tempMon.makeOne();
-    this->addMonomial(tempMon, theConst);
+    this->addMonomial(tempMon, constantTerm);
   }
   void shiftVariableIndicesToTheRight(int variableIndexShift);
   void setNumberOfVariablesSubstituteDeletedByOne(int newNumberOfVariables);
@@ -3123,6 +3125,13 @@ class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
     output = out.str();
   }
   void makeLinearSubstitutionConstantTermsLastRow(Matrix<Coefficient>& matrix);
+  // Interprets the polynomials in the substitution as a system of linear polynomial equations
+  // and converts them to a linear system.
+  // Will crash if the polynomials are not linear.
+  void getLinearSystemFromLinearPolynomials(
+    Matrix<Coefficient>& outputHomogenousPart,
+    Matrix<Coefficient>& outputConstantTerms
+  );
 };
 
 template<class Coefficient>
@@ -3397,6 +3406,39 @@ template <class TemplateMonomial, class Coefficient>
 void LinearCombination<TemplateMonomial, Coefficient>::getVectorMonomialsDescending(Vector<Coefficient>& result) {
   this->quickSortDescending();
   result = this->coefficients;
+}
+
+template <class Coefficient>
+bool Polynomial<Coefficient>::getLinearSystemFromLinearPolynomials(
+  const List<Polynomial<Coefficient> >& linearPolynomials,
+  Matrix<Coefficient>& outputHomogenousPart,
+  Matrix<Coefficient>& outputConstantTerms
+) {
+  MacroRegisterFunctionWithName("Polynomial::getLinearSystemFromLinearPolynomials");
+  int letter = 0;
+  int numberOfVariables = 0;
+  for (int i = 0; i < linearPolynomials.size; i ++) {
+    numberOfVariables = MathRoutines::maximum(
+      linearPolynomials[i].minimalNumberOfVariables(), numberOfVariables
+    );
+  }
+  outputHomogenousPart.initialize(linearPolynomials.size, numberOfVariables);
+  outputHomogenousPart.makeZero();
+  outputConstantTerms.initialize(linearPolynomials.size, 1);
+  outputConstantTerms.makeZero();
+  for (int i = 0; i < linearPolynomials.size; i ++) {
+    for (int j = 0; j < linearPolynomials[i].size(); j ++) {
+      if (linearPolynomials[i][j].isLinearNoConstantTerm(&letter)) {
+        outputHomogenousPart(i, letter) = linearPolynomials[i].coefficients[j];
+      } else if (linearPolynomials[i][j].isConstant()) {
+        outputConstantTerms(i, 0) = linearPolynomials[i].coefficients[j];
+        outputConstantTerms(i, 0) *= - 1;
+      } else {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 template <class Coefficient>
@@ -5877,15 +5919,17 @@ public:
   int getCoxeterEdgeWeight(int v, int w);
   std::string getWeylGroupName(FormatExpressions* format = nullptr) const;
   static void getDynkinIndicesSl2SubalgebrasSimpleType(
-    const DynkinSimpleType& theType,
+    const DynkinSimpleType& desiredType,
     List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
     HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
-    HashedList<Rational>& outputDynkinIndices
+    HashedList<Rational>& outputDynkinIndices,
+    AlgebraicClosureRationals* algebraicClosure
   );
   void getDynkinIndicesSl2Subalgebras(
     List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
     HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
-    HashedList<Rational>& outputDynkinIndices
+    HashedList<Rational>& outputDynkinIndices,
+    AlgebraicClosureRationals* algebraicClosure
   );
   bool hasExceptionalComponent() const;
   bool operator>(const DynkinType& other) const;
@@ -6829,6 +6873,24 @@ void PolynomialSubstitution<Coefficient>::makeLinearSubstitutionConstantTermsLas
       this->objects[i].addMonomial(monomial, matrix.elements[j][i]);
     }
     this->objects[i] += matrix.elements[matrix.numberOfRows - 1][i];
+  }
+}
+
+template <class Coefficient>
+void PolynomialSubstitution<Coefficient>::getLinearSystemFromLinearPolynomials(
+  Matrix<Coefficient>& outputHomogenousPart,
+  Matrix<Coefficient>& outputConstantTerms
+) {
+  bool mustBeTrue = Polynomial<Coefficient>::getLinearSystemFromLinearPolynomials(
+    *this,
+    outputHomogenousPart,
+    outputConstantTerms
+  );
+  if (!mustBeTrue) {
+    global.fatal
+    << "Function PolynomialSubstitution::getLinearSystemFromLinearPolynomialsSystem "
+    << "was called with non-linear inputs: "
+    << this->toString() << "." << global.fatal;
   }
 }
 

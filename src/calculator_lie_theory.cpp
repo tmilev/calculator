@@ -1888,7 +1888,11 @@ bool CalculatorLieTheory::rootSAsAndSltwos(
   if (mustRecompute) {
     SlTwoSubalgebras slTwoSubalgebras(*semisimpleLieAlgebra.content);
     slTwoSubalgebras.rootSubalgebras.flagPrintParabolicPseudoParabolicInfo = true;
-    semisimpleLieAlgebra.content->findSl2Subalgebras(*semisimpleLieAlgebra.content, slTwoSubalgebras);
+    semisimpleLieAlgebra.content->findSl2Subalgebras(
+      *semisimpleLieAlgebra.content,
+      slTwoSubalgebras,
+      &calculator.objectContainer.algebraicClosure
+    );
     slTwoSubalgebras.writeHTML(&format);
     semisimpleLieAlgebra.content->writeHTML(true, false);
   } else {
@@ -2482,12 +2486,12 @@ bool CalculatorLieTheory::getDynkinIndicesSlTwoSubalgebras(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::getDynkinIndicesSlTwoSubalgebras");
-  DynkinType theType;
-  if (!CalculatorConversions::innerDynkinTypE(calculator, input, theType)) {
+  DynkinType dynkinType;
+  if (!CalculatorConversions::innerDynkinTypE(calculator, input, dynkinType)) {
     return calculator << "Failed to convert "
     << input.toString() << " to DynkinType.";
   }
-  if (theType.getRank() > 20) {
+  if (dynkinType.getRank() > 20) {
     return calculator
     << "Getting absolute Dynkin indices of sl(2)-subalgebras "
     << "is restricted up to rank 20 "
@@ -2495,11 +2499,13 @@ bool CalculatorLieTheory::getDynkinIndicesSlTwoSubalgebras(
   }
   List<List<Rational> > bufferIndices;
   HashedList<DynkinSimpleType> bufferTypes;
-  HashedList<Rational> theIndices;
-  theType.getDynkinIndicesSl2Subalgebras(bufferIndices, bufferTypes, theIndices);
+  HashedList<Rational> indices;
+  dynkinType.getDynkinIndicesSl2Subalgebras(
+    bufferIndices, bufferTypes, indices, &calculator.objectContainer.algebraicClosure
+  );
   std::stringstream out;
-  out << "There are " << theIndices.size << " absolute Dynkin indices. The indices are: "
-  << theIndices.toStringCommaDelimited();
+  out << "There are " << indices.size << " absolute Dynkin indices. The indices are: "
+  << indices.toStringCommaDelimited();
   return output.assignValue(out.str(), calculator);
 }
 

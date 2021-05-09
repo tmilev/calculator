@@ -7,7 +7,7 @@
 #include "math_rational_function_implementation.h"
 #include "math_extra_drawing_variables.h"
 #include "string_constants.h"
-
+#include "math_extra_algebraic_numbers.h"
 
 std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::toString");
@@ -27,9 +27,9 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {
   out << "Type " << this->weylGroup.dynkinType.toString() << ".";
   out << "The letter " << HtmlRoutines::getMathNoDisplay(hLetter)
   << " stands for elements of the Cartan subalgebra, <br>"
-  << " the letter " << HtmlRoutines::getMathNoDisplay(gLetter)
+  << "the letter " << HtmlRoutines::getMathNoDisplay(gLetter)
   << " stands for the Chevalley (root space) generators of non-zero weight. <br>"
-  << " The generator " << HtmlRoutines::getMathNoDisplay(hLetter + "_i")
+  << "The generator " << HtmlRoutines::getMathNoDisplay(hLetter + "_i")
   << " is the element of the Cartan subalgebra dual to the <br>"
   << "i^th simple root, that is, "
   << HtmlRoutines::getMathNoDisplay("[" + hLetter + "_i, g] =\\langle \\alpha_i , \\gamma\\rangle g")

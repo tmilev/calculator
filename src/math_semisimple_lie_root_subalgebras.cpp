@@ -2440,22 +2440,17 @@ bool SlTwoSubalgebra::hasImplementedStandardCartanInvolution(
 bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
   Vectors<Rational>& rootsWithCharacteristic2,
   Selection& zeroCharacteristics,
-  Vectors<Rational>& simpleBasisSA,
-  Vector<Rational>& h,
-  ElementSemisimpleLieAlgebra<Rational>& outputE,
-  ElementSemisimpleLieAlgebra<Rational>& outputF,
-  Matrix<Rational>& outputMatrixSystemToBeSolved,
-  PolynomialSubstitution<Rational>& outputSystemToBeSolved,
-  Matrix<Rational>& outputSystemColumnVector
+  Vectors<Rational>& simpleBasisSubalgebras,
+  Vector<Rational>& h
 ) {
-  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::attemptExtendingHFtoHEFWRTSubalgebra");
+  MacroRegisterFunctionWithName("SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra");
   if (zeroCharacteristics.cardinalitySelection == zeroCharacteristics.numberOfElements) {
     return false;
   }
   Vectors<Rational> rootsInPlay;
   rootsInPlay.size = 0;
-  int relativeDimension = simpleBasisSA.size;
-//  int dimension = this->theWeyl.cartanSymmetric.numberOfRows;
+  int relativeDimension = simpleBasisSubalgebras.size;
+  // int dimension = this->theWeyl.cartanSymmetric.numberOfRows;
   if (relativeDimension != zeroCharacteristics.numberOfElements) {
     global.fatal << "Relative dimension is incorrect. " << global.fatal;
   }
@@ -2474,12 +2469,12 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
   // coefficient of  g^{-\alpha_{(l+ 1)/2}} otherwise
   for (int i = 0; i < relativeDimension; i ++) {
     if (!zeroCharacteristics.selected[i]) {
-      rootsInPlay.addOnTop(simpleBasisSA[i]);
+      rootsInPlay.addOnTop(simpleBasisSubalgebras[i]);
     }
   }
   Vectors<Rational> selectedExtraPositiveRoots;
   for (int i = 0; i < rootsWithCharacteristic2.size; i ++) {
-    if (!simpleBasisSA.contains(rootsWithCharacteristic2[i])) {
+    if (!simpleBasisSubalgebras.contains(rootsWithCharacteristic2[i])) {
       selectedExtraPositiveRoots.addOnTop(rootsWithCharacteristic2[i]);
     }
   }
@@ -2490,14 +2485,12 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
   int numberVariables = halfNumberVariables*2;
   MonomialPolynomial tempM;
   tempM.makeOne();
-  Matrix<Rational> coefficientsF;
-  coefficientsF.initialize(1, halfNumberVariables);
+  this->arbitrarilyChosenCoefficientsF.initialize(1, halfNumberVariables);
   for (int i = 0; i < numRootsChar2; i ++) {
-    global.comments << "DEBUG: element is: " << i + i + 1;
-    coefficientsF.elements[0][i] = i * i + 1; //(i % 2== 0)? 1: 2;
+    this->arbitrarilyChosenCoefficientsF.elements[0][i] = i * i + 1; //(i % 2== 0)? 1: 2;
   }
-  for (int i = numRootsChar2; i < coefficientsF.numberOfColumns; i ++) {
-    coefficientsF.elements[0][i] = i * i + 1;
+  for (int i = numRootsChar2; i < this->arbitrarilyChosenCoefficientsF.numberOfColumns; i ++) {
+    this->arbitrarilyChosenCoefficientsF.elements[0][i] = i * i + 1;
   }
   LinearMapSemisimpleLieAlgebra<Rational> cartanInvolutionStandard;
   LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionToRespect = nullptr;
@@ -2509,17 +2502,13 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
     numberVariables,
     halfNumberVariables,
     h,
-    coefficientsF,
-    outputMatrixSystemToBeSolved,
-    outputSystemColumnVector,
-    outputSystemToBeSolved,
     cartanInvolutionToRespect
   );
   Matrix<Rational> tempMat, tempMatColumn, tempMatResult;
-  tempMat = outputMatrixSystemToBeSolved;
-  tempMatColumn = outputSystemColumnVector;
-  outputF.makeZero();
-  outputE.makeZero();
+  tempMat = this->systemMatrixForm;
+  tempMatColumn = this->systemColumnVector;
+  this->elementF.makeZero();
+  this->elementE.makeZero();
   ChevalleyGenerator generator;
   if (Matrix<Rational>::solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(
     tempMat, tempMatColumn, tempMatResult
@@ -2528,9 +2517,9 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
       generator.makeGenerator(
         this->getOwnerSemisimpleAlgebra(), this->getOwnerSemisimpleAlgebra().getGeneratorIndexFromRoot(- rootsInPlay[i])
       );
-      outputF.addMonomial(generator, coefficientsF.elements[0][i]);
+      this->elementF.addMonomial(generator, this->arbitrarilyChosenCoefficientsF.elements[0][i]);
       generator.makeGenerator(this->getOwnerSemisimpleAlgebra(), this->getOwnerSemisimpleAlgebra().getGeneratorIndexFromRoot(rootsInPlay[i]));
-      outputE.addMonomial(generator, tempMatResult.elements[i][0]);
+      this->elementE.addMonomial(generator, tempMatResult.elements[i][0]);
     }
     return true;
   }
@@ -2542,18 +2531,14 @@ void SlTwoSubalgebra::initializeHEFSystemFromECoefficients(
   int numberVariables,
   int halfNumberVariables,
   Vector<Rational>& targetH,
-  Matrix<Rational>& inputFCoefficients,
-  Matrix<Rational>& outputMatrixSystemToBeSolved,
-  Matrix<Rational>& outputSystemColumnVector,
-  PolynomialSubstitution<Rational>& outputSystemToBeSolved,
   LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionPreservedByEMinusF
 ) {
   MacroRegisterFunctionWithName("SlTwoSubalgebra::initializeHEFSystemFromECoefficients");
   MonomialPolynomial monomial;
   HashedList<Vector<Rational> > rootSpacesToVanish;
   rootSpacesToVanish.setExpectedSize(this->getOwnerWeyl().rootSystem.size);
-  outputSystemToBeSolved.size = 0;
-  outputMatrixSystemToBeSolved.initialize(0, numberVariables);
+  this->systemToSolve.size = 0;
+  this->systemMatrixForm.initialize(0, numberVariables);
   for (int i = 0; i < rootsInPlay.size; i ++) {
     if (this->getOwnerWeyl().rootScalarCartanRoot(targetH, rootsInPlay[i]) != 2) {
       global.fatal << "The scalar product of the h element: "
@@ -2572,22 +2557,22 @@ void SlTwoSubalgebra::initializeHEFSystemFromECoefficients(
         int indexEquation = rootSpacesToVanish.getIndex(difference);
         if (indexEquation == - 1) {
           rootSpacesToVanish.addOnTop(difference);
-          indexEquation = outputSystemToBeSolved.size;
-          outputSystemToBeSolved.setSize(outputSystemToBeSolved.size + 1);
-          outputSystemToBeSolved.lastObject()->makeZero();
+          indexEquation = this->systemToSolve.size;
+          this->systemToSolve.setSize(this->systemToSolve.size + 1);
+          this->systemToSolve.lastObject()->makeZero();
         }
         monomial.makeOne();
         monomial.setVariable(i, 1);
         monomial.setVariable(j + halfNumberVariables, 1);
         Rational coefficient = this->getOwnerSemisimpleAlgebra().getConstant(rootsInPlay[i], - rootsInPlay[j]);
-        outputSystemToBeSolved[indexEquation].addMonomial(monomial, coefficient);
+        this->systemToSolve[indexEquation].addMonomial(monomial, coefficient);
       }
     }
   }
-  int oldSize = outputSystemToBeSolved.size;
-  outputSystemToBeSolved.setSize(oldSize + this->getOwnerWeyl().cartanSymmetric.numberOfRows);
-  for (int i = oldSize; i < outputSystemToBeSolved.size; i ++) {
-    outputSystemToBeSolved[i].makeZero();
+  int oldSize = this->systemToSolve.size;
+  this->systemToSolve.setSize(oldSize + this->getOwnerWeyl().cartanSymmetric.numberOfRows);
+  for (int i = oldSize; i < this->systemToSolve.size; i ++) {
+    this->systemToSolve[i].makeZero();
   }
   for (int i = 0; i < rootsInPlay.size; i ++) {
     if (rootsInPlay.size != halfNumberVariables) {
@@ -2601,21 +2586,32 @@ void SlTwoSubalgebra::initializeHEFSystemFromECoefficients(
       monomial.makeOne();
       monomial.setVariable(i, 1);
       monomial.setVariable(i + halfNumberVariables, 1);
-      outputSystemToBeSolved[j + oldSize].addMonomial(monomial, difference[j]);
+      this->systemToSolve[j + oldSize].addMonomial(monomial, difference[j]);
     }
   }
   for (int i = 0; i < this->getOwnerSemisimpleAlgebra().getRank(); i ++) {
-    outputSystemToBeSolved[i + oldSize].addConstant(targetH[i] * (- 1));
+    this->systemToSolve[i + oldSize].addConstant(targetH[i] * (- 1));
   }
-  outputMatrixSystemToBeSolved.initialize(outputSystemToBeSolved.size, halfNumberVariables);
-  outputSystemColumnVector.initialize(outputSystemToBeSolved.size, 1);
-  outputMatrixSystemToBeSolved.makeZero();
-  outputSystemColumnVector.makeZero();
-  for (int i = 0; i < outputSystemToBeSolved.size; i ++) {
-    for (int j = 0; j < outputSystemToBeSolved[i].size(); j ++) {
+  this->initializeHEFSystemFromECoefficientsPartTwo(
+    numberVariables, halfNumberVariables, cartanInvolutionPreservedByEMinusF
+  );
+}
+
+void SlTwoSubalgebra::initializeHEFSystemFromECoefficientsPartTwo(
+  int numberVariables,
+  int halfNumberVariables,
+  LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionPreservedByEMinusF
+) {
+  MacroRegisterFunctionWithName("SlTwoSubalgebra::initializeHEFSystemFromECoefficientsPartTwo");
+  this->systemMatrixForm.initialize(this->systemToSolve.size, halfNumberVariables);
+  this->systemColumnVector.initialize(this->systemToSolve.size, 1);
+  this->systemMatrixForm.makeZero();
+  this->systemColumnVector.makeZero();
+  for (int i = 0; i < this->systemToSolve.size; i ++) {
+    for (int j = 0; j < this->systemToSolve[i].size(); j ++) {
       int lowerIndex = - 1;
       int higherIndex = - 1;
-      Polynomial<Rational>& currentPolynomial = outputSystemToBeSolved[i];
+      Polynomial<Rational>& currentPolynomial = this->systemToSolve[i];
       Rational& currentCoefficient = currentPolynomial.coefficients[j];
       for (int k = 0; k < numberVariables; k ++) {
         if (currentPolynomial[j](k) == 1) {
@@ -2628,10 +2624,10 @@ void SlTwoSubalgebra::initializeHEFSystemFromECoefficients(
         }
       }
       if (lowerIndex == - 1) {
-        outputSystemColumnVector.elements[i][0] = currentCoefficient * (- 1);
+        this->systemColumnVector.elements[i][0] = currentCoefficient * (- 1);
       } else {
-        outputMatrixSystemToBeSolved.elements[i][lowerIndex] = currentCoefficient *
-        inputFCoefficients.elements[0][higherIndex - halfNumberVariables];
+        this->systemMatrixForm.elements[i][lowerIndex] = currentCoefficient *
+        this->arbitrarilyChosenCoefficientsF.elements[0][higherIndex - halfNumberVariables];
       }
     }
   }
@@ -2761,12 +2757,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
       sl2.rootsWithScalar2WithH,
       selectionRootsWithZeroCharacteristic,
       reflectedSimpleBasisK,
-      characteristicH,
-      sl2.elementE,
-      sl2.elementF,
-      sl2.systemMatrixForm,
-      sl2.systemToSolve,
-      sl2.systemColumnVector
+      characteristicH
     )) {
       int indexIsoSl2 = - 1;
       sl2.makeReportPrecomputations(indexRootSAinContainer, *this);

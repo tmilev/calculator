@@ -471,6 +471,12 @@ public:
   PolynomialSubstitution<Rational> systemToSolve;
   Matrix<Rational> systemMatrixForm;
   Matrix<Rational> systemColumnVector;
+  // Arbitrarily chosen coefficients of the F element
+  // used to convert the polynomial system needed to realize the E and F
+  // to a linear one.
+  // Here, the element H is fixed, computed by algorithms in other functions
+  // (following Dynkin).
+  Matrix<Rational> arbitrarilyChosenCoefficientsF;
   int dynkinsEpsilon;
   bool flagDeallocated;
   void initialize();
@@ -521,23 +527,19 @@ public:
   bool attemptExtendingHFtoHEFWithRespectToSubalgebra(
     Vectors<Rational>& rootsWithCharacteristic2,
     Selection& zeroCharacteristics,
-    Vectors<Rational>& simpleBasisSA,
-    Vector<Rational>& h,
-    ElementSemisimpleLieAlgebra<Rational>& outputE,
-    ElementSemisimpleLieAlgebra<Rational>& outputF,
-    Matrix<Rational>& outputMatrixSystemToBeSolved,
-    PolynomialSubstitution<Rational>& outputSystemToBeSolved,
-    Matrix<Rational>& outputSystemColumnVector
+    Vectors<Rational>& simpleBasisSubalgebras,
+    Vector<Rational>& h
   );
   void initializeHEFSystemFromECoefficients(
     Vectors<Rational>& rootsInPlay,
     int numberVariables,
     int halfNumberVariables,
     Vector<Rational>& targetH,
-    Matrix<Rational>& inputFCoefficients,
-    Matrix<Rational>& outputMatrixSystemToBeSolved,
-    Matrix<Rational>& outputSystemColumnVector,
-    PolynomialSubstitution<Rational>& outputSystemToBeSolved,
+    LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionPreservedByEMinusF
+  );
+  void initializeHEFSystemFromECoefficientsPartTwo(
+    int numberVariables,
+    int halfNumberVariables,
     LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionPreservedByEMinusF
   );
   // Whether the ambient Lie algebra has a Cartan involution that has been implemented.

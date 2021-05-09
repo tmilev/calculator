@@ -11,9 +11,9 @@ std::string DrawingVariables::getHTMLDiv(
   JSData data;
   data["widthHTML"] = this->defaultHtmlWidth;
   data["heightHTML"] = this->defaultHtmlHeight;
-  data["screenBasis"] = this->theBuffer.BasisProjectionPlane;
+  data["screenBasis"] = this->theBuffer.basisProjectionPlane;
   data["draggablePoints"] = this->theBuffer.basisToDrawCirclesAt;
-  data["bilinearForm"] = this->theBuffer.theBilinearForm;
+  data["bilinearForm"] = this->theBuffer.bilinearForm;
   data["graphicsUnit"] = this->theBuffer.graphicsUnit;
   data["frameLength"] = this->theBuffer.frameLengthInMilliseconds;
   std::string drawObjects = "drawObjects";

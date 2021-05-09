@@ -1309,11 +1309,11 @@ void AffineHyperplane<Coefficient>::toString(std::string& output) {
 template <class Coefficient>
 unsigned int AffineHyperplane<Coefficient>::hashFunction() const {
   // warning: if normal gets streched, the hashfunction should not change!
-  Vector<Rational> tempNormal;
-  tempNormal = this->normal;
-  tempNormal.scaleNormalizeFirstNonZero();
-  Rational tempRat = this->normal.scalarEuclidean(this->affinePoint);
-  return this->normal.hashFunction() + tempRat.hashFunction();
+  Vector<Rational> rescaledNormal;
+  rescaledNormal = this->normal;
+  rescaledNormal.scaleNormalizeFirstNonZero();
+  Rational scalarProduct = this->normal.scalarEuclidean(this->affinePoint);
+  return this->normal.hashFunction() + scalarProduct.hashFunction();
 }
 
 class AffineHyperplanes: public List<AffineHyperplane<Rational> > {
@@ -1323,7 +1323,7 @@ public:
 
 class AffineCone {
 public:
-  AffineHyperplanes theWalls;
+  AffineHyperplanes walls;
   unsigned int hashFunction() const;
   inline static unsigned int hashFunction(const AffineCone& input) {
     return input.hashFunction();

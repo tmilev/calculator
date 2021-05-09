@@ -30,7 +30,7 @@ HEADERS += \
     calculator_inner_functions.h \
     calculator_inner_typed_functions.h \
     calculator_interface.h \
-    calculator_Weyl_group_characters.h \
+    calculator_weyl_group_characters.h \
     crypto.h \
     database.h \
     general_database_system_independent.h \
@@ -68,7 +68,7 @@ HEADERS += \
     math_extra_universal_enveloping.h \
     math_extra_universal_enveloping_implementation.h \
     math_extra_vector_space.h \
-    math_extra_Weyl_algebras_implementation.h \
+    math_extra_weyl_algebras_implementation.h \
     math_general.h \
     math_general_implementation.h \
     math_general_polynomial_computations_advanced_implementation.h \

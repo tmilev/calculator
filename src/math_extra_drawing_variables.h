@@ -11,11 +11,11 @@ private:
 public:
   List<JSData> theOperations;
   List<List<double> > projectionsEiVectors;
-  Vectors<double> BasisProjectionPlane;
-  static const int GraphicsUnitDefault = 100;
-  int SelectedCircleMinus2noneMinus1Center; //-2= none, - 1= center of coordinate system, nonnegative integers = selectedindex
+  Vectors<double> basisProjectionPlane;
+  static const int graphicsUnitDefault = 100;
+  int selectedCircleMinus2noneMinus1Center; //-2= none, - 1= center of coordinate system, nonnegative integers = selectedindex
   Vectors<double> basisToDrawCirclesAt;
-  Matrix<double> theBilinearForm;
+  Matrix<double> bilinearForm;
   MapList<std::string, List<int>, MathRoutines::hashString> frames;
   double clickToleranceX;
   double clickToleranceY;
@@ -29,16 +29,16 @@ public:
   std::string DebugString;
   int indexStartingModifiableTextCommands;
   void (*specialOperationsOnBasisChange)(DrawOperations& theOps);
-  static void projectionMultiplicityMergeOnBasisChange(DrawOperations& theOps);
+  static void projectionMultiplicityMergeOnBasisChange(DrawOperations& operations);
   void makeMeAStandardBasis(int theDim);
   void operator+=(const DrawOperations& other);
   void initDimensions(Matrix<double>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane) {
-    this->theBilinearForm = bilinearForm;
+    this->bilinearForm = bilinearForm;
     this->basisToDrawCirclesAt = draggableBasis;
-    this->BasisProjectionPlane = startingPlane;
+    this->basisProjectionPlane = startingPlane;
     this->centerX = 300;
     this->centerY = 300;
-    this->graphicsUnit = DrawOperations::GraphicsUnitDefault;
+    this->graphicsUnit = DrawOperations::graphicsUnitDefault;
     this->computeProjectionsEiVectors();
   }
   void initDimensions(Matrix<Rational>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane) {
@@ -55,8 +55,8 @@ public:
   int getDimensionFirstDimensionDependentOperation();
   int getDimensionFromBilinearForm();
   void getCoordsDrawingComputeAll(Vector<double>& input, double& X1, double& Y1) {
-    X1 = this->theBilinearForm.scalarProduct(input, this->BasisProjectionPlane[0]);
-    Y1 = this->theBilinearForm.scalarProduct(input, this->BasisProjectionPlane[1]);
+    X1 = this->bilinearForm.scalarProduct(input, this->basisProjectionPlane[0]);
+    Y1 = this->bilinearForm.scalarProduct(input, this->basisProjectionPlane[1]);
     X1 = X1 * this->graphicsUnit + this->centerX;
     Y1 = Y1 * this->graphicsUnit + this->centerY;
   }
@@ -99,15 +99,15 @@ public:
     return x1 <= this->clickToleranceX && y1 <= this->clickToleranceY;
   }
   bool mouseMoveRedraw(int x, int y) {
-    if (this->SelectedCircleMinus2noneMinus1Center == - 2) {
+    if (this->selectedCircleMinus2noneMinus1Center == - 2) {
       return false;
     }
-    if (this->SelectedCircleMinus2noneMinus1Center == - 1) {
+    if (this->selectedCircleMinus2noneMinus1Center == - 1) {
       this->centerX = x;
       this->centerY = y;
       return true;
     }
-    if (this->SelectedCircleMinus2noneMinus1Center >= 0) {
+    if (this->selectedCircleMinus2noneMinus1Center >= 0) {
       if (this->flagRotatingPreservingAngles) {
         this->changeBasisPReserveAngles(static_cast<double>(x), static_cast<double>(y));
         return true;
@@ -142,7 +142,7 @@ public:
   void drawCircleAtVectorBufferDouble(const Vector<double>& input, const std::string& color, double radius);
   double getAngleFromXandY(double x, double y);
   void scaleToUnitLength(Vector<double>& theRoot) {
-    double theLength = this->theBilinearForm.scalarProduct(theRoot, theRoot);
+    double theLength = this->bilinearForm.scalarProduct(theRoot, theRoot);
     theLength = FloatingPoint::sqrtFloating(theLength);
     theRoot /= theLength;
   }

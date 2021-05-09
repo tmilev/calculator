@@ -5378,10 +5378,10 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(FormatExpressions
 
   Vectors<Rational> basisToDrawCirclesAt;
   DrawingVariables theDV;
-  theDV.theBuffer.theBilinearForm.initialize(thePrimalRank, thePrimalRank);
+  theDV.theBuffer.bilinearForm.initialize(thePrimalRank, thePrimalRank);
   for (int i = 0; i < thePrimalRank; i ++) {
     for (int j = 0; j < thePrimalRank; j ++) {
-      theDV.theBuffer.theBilinearForm(i, j) = this->bilinearFormFundPrimal(i, j).getDoubleValue();
+      theDV.theBuffer.bilinearForm(i, j) = this->bilinearFormFundPrimal(i, j).getDoubleValue();
     }
   }
   Vector<Rational> zeroVector;
@@ -5472,7 +5472,7 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(FormatExpressions
     }
     theDV.drawCircleAtVectorBufferRational(basisToDrawCirclesAt[i], "red", 4);
   }
-  theDV.theBuffer.BasisProjectionPlane.makeEiBasis(thePrimalRank);
+  theDV.theBuffer.basisProjectionPlane.makeEiBasis(thePrimalRank);
   out << theDV.getHTMLDiv(thePrimalRank, true);
   return out.str();
 }

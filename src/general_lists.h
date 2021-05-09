@@ -101,8 +101,8 @@ template <class Coefficient>
 class AffineHyperplane;
 class AffineCones;
 
-//Hybrid classes that serve both memory-management and mathematical purposes
-//(Matrices, Vectors, PolynomialSubstitution, etc.)
+// Hybrid classes that serve both memory-management and mathematical purposes
+// (Matrices, Vectors, PolynomialSubstitution, etc.)
 template <class ObjectType1, class ObjectType2, unsigned int hashFunction1(const ObjectType1&) = ObjectType1::hashFunction, unsigned int hashFunction2(const ObjectType2&)=ObjectType2::hashFunction>
 class Pair;
 template <class Object>

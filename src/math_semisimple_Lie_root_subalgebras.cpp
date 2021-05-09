@@ -71,7 +71,7 @@ void RootSubalgebra::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double
   tempDO.initDimensions(theDimension);
   for (int i = 0; i < theDimension; i ++) {
     for (int j = 0; j < theDimension; j ++) {
-      tempDO.theBilinearForm.elements[i][j] =
+      tempDO.bilinearForm.elements[i][j] =
       this->getAmbientWeyl().cartanSymmetric.elements[i][j].getDoubleValue();
     }
   }
@@ -2591,12 +2591,14 @@ void SlTwoSubalgebra::initHEFSystemFromECoefficients(
   for (int i = oldSize; i < outputSystemToBeSolved.size; i ++) {
     outputSystemToBeSolved[i].makeZero();
   }
-  Rational tempRat;
   for (int i = 0; i < rootsInPlay.size; i ++) {
     if (rootsInPlay.size != halfNumberVariables) {
       global.fatal << "Roots in play must be half the number of variables. " << global.fatal;
     }
-    this->getOwnerSemisimpleAlgebra().getConstantOrHElement(rootsInPlay[i], - rootsInPlay[i], tempRat, difference);
+    Rational chevalleyConstant;
+    this->getOwnerSemisimpleAlgebra().getConstantOrHElement(
+      rootsInPlay[i], - rootsInPlay[i], chevalleyConstant, difference
+    );
     for (int j = 0; j < this->getOwnerSemisimpleAlgebra().getRank(); j ++) {
       monomial.makeOne();
       monomial.setVariable(i, 1);

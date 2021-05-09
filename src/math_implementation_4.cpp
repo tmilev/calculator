@@ -1186,17 +1186,17 @@ bool AffineCone::wallIsInternalInCone(AffineHyperplane<Rational>& theKillerCandi
 }
 
 int AffineCone::getDimension() {
-  if (this->theWalls.size == 0) {
+  if (this->walls.size == 0) {
     return 0;
   }
-  return this->theWalls.objects[0].affinePoint.size;
+  return this->walls.objects[0].affinePoint.size;
 }
 
 unsigned int AffineCone::hashFunction() const {
-  int tempMin = MathRoutines::minimum(this->theWalls.size, ::someRandomPrimesSize);
+  int tempMin = MathRoutines::minimum(this->walls.size, ::someRandomPrimesSize);
   unsigned int result = 0;
   for (int i = 0; i < tempMin; i ++) {
-    result += this->theWalls[i].hashFunction() * ::someRandomPrimes[i];
+    result += this->walls[i].hashFunction() * ::someRandomPrimes[i];
   }
   return result;
 }
@@ -1446,12 +1446,12 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   tmpWeyl.makeArbitrarySimple('A', 2);
   drawOps.theBuffer.initDimensions(tmpWeyl.cartanSymmetric, theDraggableBasis, theDraggableBasis);
   FormatExpressions theFormat;
-  drawOps.theBuffer.BasisProjectionPlane[0][0] = 1;
-  drawOps.theBuffer.BasisProjectionPlane[0][1] = 0;
-  drawOps.theBuffer.BasisProjectionPlane[1][0] = 1;
-  drawOps.theBuffer.BasisProjectionPlane[1][1] = 1;
+  drawOps.theBuffer.basisProjectionPlane[0][0] = 1;
+  drawOps.theBuffer.basisProjectionPlane[0][1] = 0;
+  drawOps.theBuffer.basisProjectionPlane[1][0] = 1;
+  drawOps.theBuffer.basisProjectionPlane[1][1] = 1;
   drawOps.theBuffer.modifyToOrthonormalNoShiftSecond
-  (drawOps.theBuffer.BasisProjectionPlane[1], drawOps.theBuffer.BasisProjectionPlane[0]);
+  (drawOps.theBuffer.basisProjectionPlane[1], drawOps.theBuffer.basisProjectionPlane[0]);
   drawOps.theBuffer.graphicsUnit = 50;
   PiecewiseQuasipolynomial theStartingPoly, theSubbedPoly, Accum;
   std::string tempS;

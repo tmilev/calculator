@@ -1248,7 +1248,7 @@ void RootSubalgebra::toHTML(int index, FormatExpressions* format) {
   this->checkInitialization();
   std::fstream output;
   std::stringstream myPath;
-  myPath << this->owner->owner->toStringVirtualFolderName();
+  myPath << this->owner->owner->fileNames.toStringVirtualFolderName();
   myPath << "rootSubalgebra_" << index + 1 << ".html";
   FileOperations::openFileCreateIfNotPresentVirtual(output, myPath.str(), false, true, false);
   output << "<html><title>" << this->getAmbientWeyl().dynkinType.toString() << " root subalgebra of type "
@@ -3075,7 +3075,7 @@ void RootSubalgebras::sortDescendingOrderBySSRank() {
 void RootSubalgebras::toHTML(FormatExpressions* format) {
   MacroRegisterFunctionWithName("RootSubalgebras::toHTML");
   this->checkInitialization();
-  std::string myPathVirtual = this->owner->toStringVirtualFolderName() + this->owner->toStringFileNameNoPathRootSubalgebras();
+  std::string myPathVirtual = this->owner->fileNames.toStringVirtualFolderName() + this->owner->fileNames.toStringFileNameNoPathRootSubalgebras();
   std::fstream output;
   FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(output, myPathVirtual, false, true, false);
   if (!FileOperations::fileExistsVirtual(myPathVirtual)) {

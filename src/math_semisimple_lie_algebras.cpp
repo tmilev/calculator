@@ -130,14 +130,14 @@ std::string SemisimpleLieAlgebra::toStringMenuStructurePages(
   std::stringstream out;
   if (includeStructureConstants) {
     out
-    << "<a href = '" << relativeTo << this->toStringFileNameNoPathStructureConstants()
+    << "<a href = '" << relativeTo << this->fileNames.toStringFileNameNoPathStructureConstants()
     << "'>Structure constants and notation</a>.<br>";
   } else {
     out << "<b>Structure constants and notation</b>.<br>";
   }
   if (includeRootSubalgebras) {
     out
-    << "<a href = '" << relativeTo << this->toStringFileNameNoPathRootSubalgebras()
+    << "<a href = '" << relativeTo << this->fileNames.toStringFileNameNoPathRootSubalgebras()
     << "'>Root subalgebras / root subsystems</a>.<br>";
   } else {
     out << "<b>Root subalgebras / root subsystems</b>.<br>";
@@ -145,7 +145,7 @@ std::string SemisimpleLieAlgebra::toStringMenuStructurePages(
   if (includeSl2Subalgebras) {
     out
     << "<a href = '" << relativeTo
-    << this->toStringFileNameRelativePathSlTwoSubalgebras()
+    << this->fileNames.fileNameRelativePathSlTwoSubalgebras()
     << "'>sl(2)-subalgebras</a>.<br>";
   } else {
     out << "<b>sl(2)-subalgebras</b>.<br>";
@@ -154,7 +154,7 @@ std::string SemisimpleLieAlgebra::toStringMenuStructurePages(
     if (includeSemisimpleSubalgebras) {
       out
       << "<a href = '" << relativeTo
-      << this->toStringFileNameNoPathSemisimpleSubalgebras()
+      << this->fileNames.toStringFileNameNoPathSemisimpleSubalgebras()
       << "'>Semisimple subalgebras</a>.<br>";
     } else {
       out
@@ -316,7 +316,7 @@ void SemisimpleLieAlgebra::writeHTML(bool verbose, bool flagWriteLatexPlots) {
   outFile << "</body>";
   outFile << "</html>";
   FileOperations::writeFileVirual(
-    this->toStringVirtualFileNameWithPathStructureConstants(),
+    this->fileNames.toStringVirtualFileNameWithPathStructureConstants(),
     outFile.str(),
     &outFile
   );
@@ -336,37 +336,37 @@ std::string DynkinType::toStringVirtualNameFolder() const {
   return out.str();
 }
 
-std::string SemisimpleLieAlgebra::toStringFileNameRelativePathSlTwoSubalgebras() const {
+std::string SemisimpleLieAlgebra::FileNames::fileNameRelativePathSlTwoSubalgebras() const {
   std::stringstream out;
   out << "sl2s/sl2s_"
-  << FileOperations::cleanUpForFileNameUse(this->weylGroup.dynkinType.toString())
+  << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString())
   << ".html";
   return out.str();
 }
 
-std::string SemisimpleLieAlgebra::toStringFileNameNoPathSemisimpleSubalgebras() const {
+std::string SemisimpleLieAlgebra::FileNames::toStringFileNameNoPathSemisimpleSubalgebras() const {
   std::stringstream theFileName;
   theFileName << "semisimple_subalgebras_"
-  << FileOperations::cleanUpForFileNameUse(this->weylGroup.dynkinType.toString())
+  << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString())
   << ".html";
   return theFileName.str();
 }
 
-std::string SemisimpleLieAlgebra::toStringFileNameNoPathRootSubalgebras() const {
+std::string SemisimpleLieAlgebra::FileNames::toStringFileNameNoPathRootSubalgebras() const {
   std::stringstream theFileName;
   theFileName << "rootSubalgebras_"
-  << FileOperations::cleanUpForFileNameUse(this->weylGroup.dynkinType.toString())
+  << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString())
   << ".html";
   return theFileName.str();
 }
 
-std::string SemisimpleLieAlgebra::toStringVirtualFolderName() const {
+std::string SemisimpleLieAlgebra::FileNames::toStringVirtualFolderName() const {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::toStringVirtualFolderName");
-  this->checkConsistency();
-  return this->weylGroup.dynkinType.toStringVirtualNameFolder();
+  this->owner->checkConsistency();
+  return this->owner->weylGroup.dynkinType.toStringVirtualNameFolder();
 }
 
-std::string SemisimpleLieAlgebra::toStringVirtualFileNameWithPathStructureConstants() const {
+std::string SemisimpleLieAlgebra::FileNames::toStringVirtualFileNameWithPathStructureConstants() const {
   std::stringstream fileName;
   fileName
   << this->toStringVirtualFolderName()
@@ -374,27 +374,27 @@ std::string SemisimpleLieAlgebra::toStringVirtualFileNameWithPathStructureConsta
   return fileName.str();
 }
 
-std::string SemisimpleLieAlgebra::toStringDisplayFolderNamE(const std::string& baseFolder) const {
+std::string SemisimpleLieAlgebra::FileNames::displayFolderName(const std::string& baseFolder) const {
   std::stringstream out;
   out << baseFolder << "semisimple_lie_algebras/"
-  << FileOperations::cleanUpForFileNameUse(this->weylGroup.dynkinType.toString())
+  << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString())
   << "/";
   return out.str();
 }
 
-std::string SemisimpleLieAlgebra::toStringFileNameNoPathStructureConstants() const {
+std::string SemisimpleLieAlgebra::FileNames::toStringFileNameNoPathStructureConstants() const {
   std::stringstream fileName;
   fileName
   << "structure_constants_notation_"
-  << FileOperations::cleanUpForFileNameUse(this->weylGroup.dynkinType.toString())
+  << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString())
   << ".html";
   return fileName.str();
 }
 
-std::string SemisimpleLieAlgebra::toStringDisplayFileNameWithPathStructureConstants(const std::string& baseFolder) const {
+std::string SemisimpleLieAlgebra::FileNames::fileNameWithPathStructureConstants(const std::string& baseFolder) const {
   std::stringstream fileName;
   fileName
-  << this->toStringDisplayFolderNamE(baseFolder)
+  << this->displayFolderName(baseFolder)
   << this->toStringFileNameNoPathStructureConstants();
   return fileName.str();
 }

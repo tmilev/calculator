@@ -1873,11 +1873,11 @@ bool CalculatorLieTheory::rootSAsAndSltwos(
 
   std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile;
 
-  std::string displayFolder = semisimpleLieAlgebra.content->toStringDisplayFolderNamE("output/");
+  std::string displayFolder = semisimpleLieAlgebra.content->fileNames.displayFolderName("output/");
 
-  outSltwoMainFile << displayFolder << semisimpleLieAlgebra.content->toStringFileNameRelativePathSlTwoSubalgebras();
-  outRootHtmlFileName    << displayFolder << semisimpleLieAlgebra.content->toStringFileNameNoPathRootSubalgebras();
-  outRootHtmlDisplayName << displayFolder << semisimpleLieAlgebra.content->toStringFileNameNoPathRootSubalgebras();
+  outSltwoMainFile << displayFolder << semisimpleLieAlgebra.content->fileNames.fileNameRelativePathSlTwoSubalgebras();
+  outRootHtmlFileName    << displayFolder << semisimpleLieAlgebra.content->fileNames.toStringFileNameNoPathRootSubalgebras();
+  outRootHtmlDisplayName << displayFolder << semisimpleLieAlgebra.content->fileNames.toStringFileNameNoPathRootSubalgebras();
   if (
     !FileOperations::fileExistsVirtual(outSltwoMainFile.str()) ||
     !FileOperations::fileExistsVirtual(outRootHtmlFileName.str())
@@ -3258,7 +3258,7 @@ bool CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
   if (writeToHD) {
     semisimpleAlgebra.writeHTML(verbose, calculator.flagWriteLatexPlots);
     out << "<a href='"
-    << semisimpleAlgebra.toStringVirtualFileNameWithPathStructureConstants()
+    << semisimpleAlgebra.fileNames.toStringVirtualFileNameWithPathStructureConstants()
     << "' target='_blank'>hard drive output</a><br>";
   }
   out << semisimpleAlgebra.toHTML(verbose, calculator.flagWriteLatexPlots);

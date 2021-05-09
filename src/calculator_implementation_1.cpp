@@ -162,13 +162,14 @@ std::string Calculator::toStringSemismipleLieAlgebraLinksFromHardDrive(
   SemisimpleLieAlgebra folderComputer;
   folderComputer.weylGroup.dynkinType = dynkinType;
   out << "<tr><td><a href='"
-  << folderComputer.toStringDisplayFolderNamE(prefixFolder)
-  << folderComputer.toStringFileNameNoPathStructureConstants()
+  << folderComputer.fileNames.displayFolderName(prefixFolder)
+  << folderComputer.fileNames.toStringFileNameNoPathStructureConstants()
   << "'>"
   << dynkinType[0].letter << dynkinType[0].rank << " structure constants</a></td>\n ";
   if (dynkinType[0].hasPrecomputedSubalgebras()) {
     out << "<td><a href='"
-    << folderComputer.toStringDisplayFolderNamE(prefixFolder) << folderComputer.toStringFileNameNoPathSemisimpleSubalgebras()
+    << folderComputer.fileNames.displayFolderName(prefixFolder)
+    << folderComputer.fileNames.toStringFileNameNoPathSemisimpleSubalgebras()
     << "'>"
     << dynkinType[0].letter << dynkinType[0].rank << " semisimple subalgebras</a>";
     out << "</td>\n ";
@@ -176,12 +177,12 @@ std::string Calculator::toStringSemismipleLieAlgebraLinksFromHardDrive(
     out << "<td>Not available</td>\n";
   }
   out << "<td><a href='"
-  << folderComputer.toStringDisplayFolderNamE(prefixFolder)
-  << folderComputer.toStringFileNameRelativePathSlTwoSubalgebras() << "'>"
+  << folderComputer.fileNames.displayFolderName(prefixFolder)
+  << folderComputer.fileNames.fileNameRelativePathSlTwoSubalgebras() << "'>"
   << dynkinType[0].letter << dynkinType[0].rank << " sl(2) triples</a></td>\n";
   out << "<td><a href='"
-  << folderComputer.toStringDisplayFolderNamE(prefixFolder)
-  << folderComputer.toStringFileNameNoPathRootSubalgebras()
+  << folderComputer.fileNames.displayFolderName(prefixFolder)
+  << folderComputer.fileNames.toStringFileNameNoPathRootSubalgebras()
   << "'>" << dynkinType[0].letter
   << dynkinType[0].rank << " root subalgebras</a></td>\n";
   return out.str();
@@ -257,9 +258,14 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
     }
   }
   if (outputStream != nullptr) {
-    *outputStream << "<br>Output file: <a href='"
+    *outputStream << "<hr>Semisimple subalgebras: <a href='"
     << this->displayNameMainFile1WithPath << "' target = '_blank'>"
-    << this->displayNameMainFile1NoPath << "</a>";
+    << this->displayNameMainFile1NoPath << "</a>"
+    << "<hr>"
+    << "<a href='"
+    << this->owner->fileNames.displayFolderName("../../output/")
+    << this->owner->fileNames.fileNameRelativePathSlTwoSubalgebras()
+    << "'>sl(2)-sublagberas</a>";
   }
   return true;
 }

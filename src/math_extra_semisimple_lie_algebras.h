@@ -60,14 +60,19 @@ public:
   static unsigned int hashFunction(const SemisimpleLieAlgebra& input) {
     return input.weylGroup.hashFunction();
   }
-  std::string toStringDisplayFolderNamE(const std::string& baseFolder) const;
-  std::string toStringDisplayFileNameWithPathStructureConstants(const std::string& baseFolder) const;
-  std::string toStringVirtualFolderName() const;
-  std::string toStringVirtualFileNameWithPathStructureConstants() const;
-  std::string toStringFileNameNoPathStructureConstants() const;
-  std::string toStringFileNameNoPathSemisimpleSubalgebras() const;
-  std::string toStringFileNameNoPathRootSubalgebras() const;
-  std::string toStringFileNameRelativePathSlTwoSubalgebras() const;
+  class FileNames {
+  public:
+    SemisimpleLieAlgebra* owner;
+    std::string displayFolderName(const std::string& baseFolder) const;
+    std::string fileNameWithPathStructureConstants(const std::string& baseFolder) const;
+    std::string toStringVirtualFolderName() const;
+    std::string toStringVirtualFileNameWithPathStructureConstants() const;
+    std::string toStringFileNameNoPathStructureConstants() const;
+    std::string toStringFileNameNoPathSemisimpleSubalgebras() const;
+    std::string toStringFileNameNoPathRootSubalgebras() const;
+    std::string fileNameRelativePathSlTwoSubalgebras() const;
+  };
+  SemisimpleLieAlgebra::FileNames fileNames;
   template <class Coefficient>
   void getGenericElementCartan(
     ElementSemisimpleLieAlgebra<Polynomial<Coefficient> >& output,
@@ -108,8 +113,10 @@ public:
   SemisimpleLieAlgebra() {
     this->flagHasNilradicalOrder = false;
     this->flagDeallocated = false;
+    this->fileNames.owner = this;
   }
   ~SemisimpleLieAlgebra() {
+    this->fileNames.owner = nullptr;
     this->flagDeallocated = true;
   }
   bool checkConsistency() const;

@@ -350,7 +350,7 @@ int SemisimpleSubalgebras::getDisplayIndexFromActual(int actualindexSubalgebra) 
 
 std::string SemisimpleSubalgebras::getRelativePhysicalFileNameSubalgebra(int actualindexSubalgebra) const {
   std::stringstream out;
-  out << this->owner->toStringVirtualFolderName();
+  out << this->owner->fileNames.toStringVirtualFolderName();
   out << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString())
   << "_subalgebra_" << this->getDisplayIndexFromActual(actualindexSubalgebra) << ".html";
   return out.str();
@@ -358,7 +358,7 @@ std::string SemisimpleSubalgebras::getRelativePhysicalFileNameSubalgebra(int act
 
 std::string SemisimpleSubalgebras::getRelativePhysicalFileNameFKFTNilradicals(int actualindexSubalgebra) const {
   std::stringstream out;
-  out << this->owner->toStringVirtualFolderName();
+  out << this->owner->fileNames.toStringVirtualFolderName();
   out << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString())
   << "_subalgebra_" << this->getDisplayIndexFromActual(actualindexSubalgebra) << "_FKFTnilradicals.html";
   return out.str();
@@ -367,7 +367,7 @@ std::string SemisimpleSubalgebras::getRelativePhysicalFileNameFKFTNilradicals(in
 std::string SemisimpleSubalgebras::getDisplayFileNameSubalgebraAbsolute(int actualindexSubalgebra, FormatExpressions* format) const {
   std::stringstream out;
   (void) format;//avoid unused parameter warning in a portable way
-  out << this->owner->toStringVirtualFolderName();
+  out << this->owner->fileNames.toStringVirtualFolderName();
   out << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString())
   << "_subalgebra_" << this->getDisplayIndexFromActual(actualindexSubalgebra) << ".html";
   return out.str();
@@ -401,10 +401,10 @@ void SemisimpleSubalgebras::checkFileWritePermissions() {
   this->computeFolderNames(this->currentFormat);
   std::fstream testFile;
   std::string testFileNameRelative =
-  this->owner->toStringVirtualFolderName() + "testFileWritePermissionsSSsas.txt";
+  this->owner->fileNames.toStringVirtualFolderName() + "testFileWritePermissionsSSsas.txt";
   std::string testFileFolderPhysical;
   FileOperations::getPhysicalFileNameFromVirtual(
-    this->owner->toStringVirtualFolderName(), testFileFolderPhysical, false, false, nullptr
+    this->owner->fileNames.toStringVirtualFolderName(), testFileFolderPhysical, false, false, nullptr
   );
   global.externalCommandNoOutput("mkdir " + testFileFolderPhysical, true);
 
@@ -456,10 +456,10 @@ void SemisimpleSubalgebras::computeFolderNames(FormatExpressions& inputFormat) {
     << "you need to specify the ambient Lie algebra. " << global.fatal;
   }
 
-  this->displayNameMainFile1NoPath = this->owner->toStringFileNameNoPathSemisimpleSubalgebras();
-  this->displayNameMainFile1WithPath = this->owner->toStringDisplayFolderNamE("../../output/") + this->displayNameMainFile1NoPath;
+  this->displayNameMainFile1NoPath = this->owner->fileNames.toStringFileNameNoPathSemisimpleSubalgebras();
+  this->displayNameMainFile1WithPath = this->owner->fileNames.displayFolderName("../../output/") + this->displayNameMainFile1NoPath;
   this->virtualNameMainFile1 =
-  this->owner->toStringVirtualFolderName() + this->displayNameMainFile1NoPath;
+  this->owner->fileNames.toStringVirtualFolderName() + this->displayNameMainFile1NoPath;
 }
 
 std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML(
@@ -857,9 +857,9 @@ std::string SemisimpleSubalgebras::toStringPart3(FormatExpressions* format) {
     out << "<hr>Calculator input for loading subalgebras directly without recomputation. "
     << this->toStringProgressReport(format);
   } else {
-    std::string sl2SubalgebraReports = this->owner->toStringVirtualFolderName() + "orbit_computation_information_" +
+    std::string sl2SubalgebraReports = this->owner->fileNames.toStringVirtualFolderName() + "orbit_computation_information_" +
     FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString()) + ".html";
-    std::string loadSubalgebrasFile = this->owner->toStringVirtualFolderName() + "load_algebra_" +
+    std::string loadSubalgebrasFile = this->owner->fileNames.toStringVirtualFolderName() + "load_algebra_" +
     FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString()) + ".html";
 
     out << "<a href = '" << sl2SubalgebraReports  << "'>Nilpotent orbit computation summary</a>.";
@@ -1041,7 +1041,7 @@ void SemisimpleSubalgebras::findTheSemisimpleSubalgebrasInitialize() {
     ".html";
     std::fstream LogFile;
     if (!FileOperations::openFileCreateIfNotPresentVirtual(
-      LogFile, this->owner->toStringVirtualFolderName() + this->fileNameToLogComments, true, false, false
+      LogFile, this->owner->fileNames.toStringVirtualFolderName() + this->fileNameToLogComments, true, false, false
     )) {
       global.fatal << "Failed to open/create log file " << this->fileNameToLogComments
       << ". This is not fatal but I am crashing to let you know. ";
@@ -1744,14 +1744,14 @@ bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits(
         << "the original summand I computed to be:<br> "
         << theDynkinIndicesCurrentSummand.toStringCommaDelimited() << ". ";
         this->comments += reportStream.str();
-        std::fstream theLogFile;
+        std::fstream logFile;
         if (!FileOperations::openFileCreateIfNotPresentVirtual(
-          theLogFile, this->owner->toStringVirtualFolderName() + this->fileNameToLogComments, true, false, false
+          logFile, this->owner->fileNames.toStringVirtualFolderName() + this->fileNameToLogComments, true, false, false
         )) {
           global.fatal << "Failed to open log file: " << this->fileNameToLogComments << ". This is not fatal but "
           << " I am crashing to let you know. " << global.fatal;
         }
-        theLogFile << reportStream.str();
+        logFile << reportStream.str();
         global.comments << reportStream.str();
         return true;
       }
@@ -1811,9 +1811,9 @@ bool SemisimpleSubalgebras::centralizerOfBaseComputedToHaveUnsuitableNilpotentOr
   if (DynkinIndicesTheyGotToFitIn.contains(theDynkinIndicesNewSummand)) {
     return false;
   }
-  std::fstream theLogFile;
+  std::fstream logFile;
   if (!FileOperations::openFileCreateIfNotPresentVirtual(
-    theLogFile, this->owner->toStringVirtualFolderName() + this->fileNameToLogComments, true, false, false
+    logFile, this->owner->fileNames.toStringVirtualFolderName() + this->fileNameToLogComments, true, false, false
   )) {
     global.fatal << "Failed to open log file: " << this->fileNameToLogComments << ". This is not fatal but "
     << " I am crashing to let you know. " << global.fatal;
@@ -1833,7 +1833,7 @@ bool SemisimpleSubalgebras::centralizerOfBaseComputedToHaveUnsuitableNilpotentOr
   << "I can therefore conclude that the Dynkin type " << currentType.toString() << " is not realizable. "
   << "The absolute Dynkin indices of the sl(2) subalgebras of the original summand I computed to be:<br> "
   << theDynkinIndicesNewSummand.toStringCommaDelimited() << ". ";
-  theLogFile << reportStream.str();
+  logFile << reportStream.str();
   global.comments << reportStream.str();
   return true;
 }
@@ -4469,8 +4469,8 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   //bool usePNG = false;
   bool useHtml = true;
   bool useLatex = false;
-  virtualPath = this->owner->toStringVirtualFolderName() + "sl2s/";
-  htmlPathServer = this->owner->toStringDisplayFolderNamE("../../") + "sl2s/";
+  virtualPath = this->owner->fileNames.toStringVirtualFolderName() + "sl2s/";
+  htmlPathServer = this->owner->fileNames.displayFolderName("../../") + "sl2s/";
   if (virtualPath == "" || htmlPathServer == "") {
     //usePNG = false;
     useHtml = false;
@@ -5236,7 +5236,7 @@ std::string SlTwoSubalgebras::toString(FormatExpressions* format) {
 
 void SlTwoSubalgebras::writeHTML(FormatExpressions* format) {
   MacroRegisterFunctionWithName("SlTwoSubalgebras::toHTML");
-  std::string virtualFileName = this->owner->toStringVirtualFolderName() + this->owner->toStringFileNameRelativePathSlTwoSubalgebras();
+  std::string virtualFileName = this->owner->fileNames.toStringVirtualFolderName() + this->owner->fileNames.fileNameRelativePathSlTwoSubalgebras();
   ProgressReport theReport;
   theReport.report("Preparing html pages for sl(2) subalgebras. This might take a while.");
   this->rootSubalgebras.toHTML(format);

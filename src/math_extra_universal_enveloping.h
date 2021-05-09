@@ -3,7 +3,7 @@
 #ifndef vpfHeader1_HeaderUniversalEnveloping
 #define vpfHeader1_HeaderUniversalEnveloping
 #include "math_general.h"
-#include "math_extra_Lie_theory_extras.h"
+#include "math_extra_lie_theory_extras.h"
 
 template <class Coefficient>
 class MonomialUniversalEnveloping : public MonomialTensor<Coefficient> {

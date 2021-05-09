@@ -5,11 +5,11 @@
 #include "calculator_inner_functions.h"
 #include "calculator_inner_typed_functions.h"
 #include "math_extra_universal_enveloping_implementation.h"
-#include "math_extra_modules_semisimple_Lie_algebras_implementation.h"
-#include "math_extra_semisimple_Lie_algebras_implementation.h"
+#include "math_extra_modules_semisimple_lie_algebras_implementation.h"
+#include "math_extra_semisimple_lie_algebras_implementation.h"
 #include "math_general.h"
 #include "math_rational_function_implementation.h"
-#include "math_extra_Weyl_algebras_implementation.h"
+#include "math_extra_weyl_algebras_implementation.h"
 
 template<class Element>
 bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(

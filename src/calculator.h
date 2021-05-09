@@ -30,7 +30,7 @@
 #include "general_lists.h"
 #include "math_general.h"
 // #include "math_extra_algebraic_numbers.h"
-#include "math_extra_semisimple_Lie_algebras.h"
+#include "math_extra_semisimple_lie_algebras.h"
 #include "math_extra_finite_groups.h"
 #include "calculator_interface.h"
 #endif

@@ -2,8 +2,8 @@
 // For additional information refer to the file "calculator.h".
 #include "calculator_interface.h"
 #include "math_extra_universal_enveloping_implementation.h"
-#include "math_extra_Weyl_algebras_implementation.h"
-#include "math_extra_modules_semisimple_Lie_algebras_implementation.h"
+#include "math_extra_weyl_algebras_implementation.h"
+#include "math_extra_modules_semisimple_lie_algebras_implementation.h"
 #include "math_rational_function_implementation.h"
 
 ExpressionContext::ExpressionContext(Calculator& inputOwner) {

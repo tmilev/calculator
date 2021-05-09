@@ -3,8 +3,8 @@
 #ifndef vpfImplementationHeaderSemisimpleLieAlgebrasIncluded
 #define vpfImplementationHeaderSemisimpleLieAlgebrasIncluded
 
-#include "math_extra_semisimple_Lie_algebras.h"
-#include "math_extra_Lie_theory_extras.h" // error: invalid use of incomplete type ‘struct BranchingData’
+#include "math_extra_semisimple_lie_algebras.h"
+#include "math_extra_lie_theory_extras.h" // error: invalid use of incomplete type ‘struct BranchingData’
 #include "math_extra_drawing_variables.h"
 
 template <class Coefficient>

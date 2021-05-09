@@ -3,7 +3,7 @@
 #ifndef vpfHeader_HeaderModulesSSLiealgebras
 #define vpfHeader_HeaderModulesSSLiealgebras
 #include "math_general.h"
-#include "math_extra_semisimple_Lie_algebras.h"
+#include "math_extra_semisimple_lie_algebras.h"
 
 template<class Coefficient>
 class MonomialGeneralizedVerma {

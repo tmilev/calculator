@@ -3,10 +3,10 @@
 #include "calculator.h"
 #include "calculator_inner_typed_functions.h"
 #include "math_general_implementation.h"
-#include "math_extra_Weyl_algebras_implementation.h"
+#include "math_extra_weyl_algebras_implementation.h"
 #include "math_extra_universal_enveloping_implementation.h"
-#include "math_extra_semisimple_Lie_algebras_implementation.h"
-#include "math_extra_modules_semisimple_Lie_algebras_implementation.h"
+#include "math_extra_semisimple_lie_algebras_implementation.h"
+#include "math_extra_modules_semisimple_lie_algebras_implementation.h"
 #include "math_general_polynomial_computations_basic_implementation.h" //undefined reference to Polynomial<AlgebraicNumber>::makeOne(int)
 #include "math_extra_finite_groups_implementation.h" // undefined reference to `void WeylGroup::raiseToDominantWeight<Rational>(Vector<Rational>&, int*, bool*, ElementWeylGroup<WeylGroup>*)
 #include "math_rational_function_implementation.h"

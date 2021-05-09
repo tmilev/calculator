@@ -54,15 +54,15 @@ HEADERS += \
     math_extra_finite_groups_implementation.h \
     math_extra_graph.h \
     math_extra_latex_routines.h \
-    math_extra_Lie_theory_extras.h \
-    math_extra_modules_semisimple_Lie_algebras.h \
-    math_extra_modules_semisimple_Lie_algebras_implementation.h \
+    math_extra_lie_theory_extras.h \
+    math_extra_modules_semisimple_lie_algebras.h \
+    math_extra_modules_semisimple_lie_algebras_implementation.h \
     math_extra_packed_vector.h \
     math_extra_packed_vector_implementation.h \
-    math_extra_semisimple_Lie_algebras.h \
-    math_extra_semisimple_Lie_algebras_implementation.h \
-    math_extra_semisimple_Lie_algebras_root_subalgebras.h \
-    math_extra_semisimple_Lie_subalgebras.h \
+    math_extra_semisimple_lie_algebras.h \
+    math_extra_semisimple_lie_algebras_implementation.h \
+    math_extra_semisimple_lie_algebras_root_subalgebras.h \
+    math_extra_semisimple_lie_subalgebras.h \
     math_extra_symmetric_groups_and_generalizations.h \
     math_extra_tree.h \
     math_extra_universal_enveloping.h \
@@ -149,9 +149,9 @@ SOURCES += \
     math_implementation_5.cpp \
     math_implementation_5_test.cpp \
     math_implementation_6.cpp \
-    math_semisimple_Lie_algebras.cpp \
-    math_semisimple_Lie_root_subalgebras.cpp \
-    math_semisimple_Lie_subalgebras.cpp \
+    math_semisimple_lie_algebras.cpp \
+    math_semisimple_lie_root_subalgebras.cpp \
+    math_semisimple_lie_subalgebras.cpp \
     multiprocessing.cpp \
     multitasking.cpp \
     random.cpp \

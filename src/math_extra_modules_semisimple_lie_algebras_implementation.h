@@ -2,7 +2,7 @@
 // For additional information refer to the file "calculator.h".
 #ifndef vpfHeader_ImplementationHeaderModulesSSLielgebras
 #define vpfHeader_ImplementationHeaderModulesSSLielgebras
-#include "math_extra_modules_semisimple_Lie_algebras.h"
+#include "math_extra_modules_semisimple_lie_algebras.h"
 #include "math_extra_drawing_variables.h"
 #include "math_extra_differential_operators.h"
 
@@ -12,7 +12,7 @@ Rational ModuleSSalgebra<Coefficient>::hwTrace(
   MonomialTensor<int, HashFunctions::hashFunction> >& thePair,
   ProgressReport* theProgressReport
 ) {
-  MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::hwTrace");
+  MacroRegisterFunctionWithName("ModuleSSalgebra::hwTrace");
   int indexInCache = this->cachedPairs.getIndex(thePair);
   if (indexInCache != - 1) {
     return this->cachedTraces[indexInCache];

@@ -10,7 +10,7 @@
 #include "string_constants.h"
 #include "math_rational_function.h"
 #include <dirent.h>
-#include "math_extra_modules_semisimple_Lie_algebras.h"
+#include "math_extra_modules_semisimple_lie_algebras.h"
 #include "crypto.h"
 
 // The below gives upper limit to the amount of pointers

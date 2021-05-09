@@ -3,7 +3,7 @@
 #ifndef vpfHeaderSemisimpleLieAlgebrasRootSubalgebras
 #define vpfHeaderSemisimpleLieAlgebrasRootSubalgebras
 
-#include "math_extra_semisimple_Lie_algebras.h"
+#include "math_extra_semisimple_lie_algebras.h"
 
 class ConeRelation {
 public:

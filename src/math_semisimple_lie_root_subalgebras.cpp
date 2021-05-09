@@ -1,8 +1,8 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_general_implementation.h"
-#include "math_extra_semisimple_Lie_algebras_root_subalgebras.h"
-#include "math_extra_semisimple_Lie_algebras_implementation.h"
+#include "math_extra_semisimple_lie_algebras_root_subalgebras.h"
+#include "math_extra_semisimple_lie_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
 
 void RootSubalgebra::getCoxeterElement(Matrix<Rational>& output) {

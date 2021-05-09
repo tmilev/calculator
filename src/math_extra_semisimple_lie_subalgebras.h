@@ -4,7 +4,7 @@
 #define vpfHeaderSemisimpleLieSubalgebrasIncluded
 
 #include "math_general.h"
-#include "math_extra_semisimple_Lie_algebras_root_subalgebras.h"
+#include "math_extra_semisimple_lie_algebras_root_subalgebras.h"
 
 class SemisimpleSubalgebras;
 class CandidateSemisimpleSubalgebra;

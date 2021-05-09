@@ -3,7 +3,7 @@
 #include "calculator.h"
 #include "calculator_lie_theory.h"
 #include "math_general_implementation.h"
-#include "calculator_Weyl_group_characters.h"
+#include "calculator_weyl_group_characters.h"
 #include "calculator_inner_typed_functions.h"
 #include "calculator_inner_functions.h"
 #include "calculator_functions_polynomial.h"

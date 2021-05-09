@@ -4,14 +4,14 @@
 #include "calculator_inner_functions.h"
 #include "calculator_inner_typed_functions.h"
 #include "math_general_implementation.h"
-#include "math_extra_Weyl_algebras_implementation.h"
+#include "math_extra_weyl_algebras_implementation.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "math_general_polynomial_computations_advanced_implementation.h"
 #include "math_extra_universal_enveloping_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
-#include "math_extra_modules_semisimple_Lie_algebras_implementation.h"
+#include "math_extra_modules_semisimple_lie_algebras_implementation.h"
 #include "crypto.h"
-#include "math_extra_semisimple_Lie_algebras_implementation.h" // undefined reference to `CharacterSemisimpleLieAlgebraModule<RationalFunctionOld>::splitCharacterOverReductiveSubalgebra(std::string*, CharacterSemisimpleLieAlgebraModule<RationalFunctionOld>&, BranchingData&, GlobalVariables&)'
+#include "math_extra_semisimple_lie_algebras_implementation.h" // undefined reference to `CharacterSemisimpleLieAlgebraModule<RationalFunctionOld>::splitCharacterOverReductiveSubalgebra(std::string*, CharacterSemisimpleLieAlgebraModule<RationalFunctionOld>&, BranchingData&, GlobalVariables&)'
 #include "web_api.h"
 #include "math_extra_latex_routines.h"
 #include "source_code_formatter.h"

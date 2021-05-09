@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#include "math_extra_semisimple_Lie_algebras_root_subalgebras.h"
-#include "math_extra_semisimple_Lie_algebras_implementation.h"
+#include "math_extra_semisimple_lie_algebras_root_subalgebras.h"
+#include "math_extra_semisimple_lie_algebras_implementation.h"
 #include "math_extra_universal_enveloping_implementation.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "math_rational_function_implementation.h"

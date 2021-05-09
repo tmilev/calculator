@@ -15,7 +15,7 @@
 #include "transport_layer_security.h"
 #include "string_constants.h"
 #include <iomanip>
-#include "math_extra_semisimple_Lie_algebras_implementation.h"
+#include "math_extra_semisimple_lie_algebras_implementation.h"
 
 CalculatorHTML::Test::Test() {
   this->filesToInterpret = 0;

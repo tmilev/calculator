@@ -9,16 +9,16 @@
 template <class Coefficient>
 std::string FinitelyGeneratedMatrixMonoid<Coefficient>::toString(FormatExpressions* format) const {
   std::stringstream out;
-  out << "Number of generators: " << this->theGenerators.size;
-  out << "<br>Number of elements: " << this->theElements.size;
+  out << "Number of generators: " << this->generators.size;
+  out << "<br>Number of elements: " << this->elements.size;
   out << "<br>The elements follow.";
-  int numEltstoDisplay = this->theElements.size;
+  int numEltstoDisplay = this->elements.size;
   if (numEltstoDisplay > 100) {
     out << "<b>Displaying only the first " << 100 << " elements.</b>";
     numEltstoDisplay = 100;
   }
   for (int i = 0; i < numEltstoDisplay; i ++) {
-    out << "<br>" << this->theElements[i].toStringMatrixForm(format);
+    out << "<br>" << this->elements[i].toStringMatrixForm(format);
   }
   return out.str();
 }
@@ -749,7 +749,7 @@ LargeInteger WeylGroupData::getOrbitSize(Vector<Coefficient>& theWeight) {
   theStabilizerSubsystem.computeDiagramTypeModifyInput(theStabilizingRoots, *this);
   DynkinType theStabilizerDynkinType;
   theStabilizerSubsystem.getDynkinType(theStabilizerDynkinType);
-  Rational resultRat = this->theGroup.getSize();
+  Rational resultRat = this->group.getSize();
   resultRat /= theStabilizerDynkinType.getWeylGroupSizeByFormula();
   LargeInteger result;
   if (!resultRat.isInteger(&result)) {
@@ -784,7 +784,7 @@ bool WeylGroupAutomorphisms::generateOuterOrbit(
   MacroRegisterFunctionWithName("WeylGroup::generateOuterOrbit");
   this->checkInitialization();
   this->computeOuterAutoGenerators();
-  List<MatrixTensor<Rational> > theOuterGens = this->theOuterAutos.theGenerators;
+  List<MatrixTensor<Rational> > theOuterGens = this->outerAutomorphisms.generators;
   output.clear();
   for (int i = 0; i < theWeights.size; i ++) {
     output.addOnTop(theWeights[i]);
@@ -918,7 +918,7 @@ bool WeylGroupData::generateOrbit(
   Vector<Coefficient> currentRoot;
   ElementWeylGroup currentElt;
   if (expectedOrbitSize <= 0) {
-    if (!this->theGroup.getSize().isIntegerFittingInInt(&expectedOrbitSize)) {
+    if (!this->group.getSize().isIntegerFittingInInt(&expectedOrbitSize)) {
       expectedOrbitSize = - 1;
     }
   }
@@ -2486,7 +2486,7 @@ void WeylGroupAutomorphisms::raiseToMaximallyDominant(List<Vector<Coefficient> >
       }
       Vector<Rational> zeroWeight;
       zeroWeight.makeZero(this->theWeyl->getDimension());
-      HashedList<MatrixTensor<Rational> >& outerAutos = this->theOuterAutos.theElements;
+      HashedList<MatrixTensor<Rational> >& outerAutos = this->outerAutomorphisms.elements;
       for (int j = 0; j < outerAutos.size; j ++) {
         theWeightsCopy = theWeights;
         outerAutos[j].actOnVectorsColumn(theWeightsCopy);

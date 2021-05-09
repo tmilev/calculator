@@ -1304,9 +1304,9 @@ bool WeylGroupAutomorphisms::areMaximallyDominantGroupOuter(List<Vector<Rational
         }
       }
     }
-    for (int j = 0; j < this->theOuterAutos.theElements.size; j ++) {
+    for (int j = 0; j < this->outerAutomorphisms.elements.size; j ++) {
       theWeightsCopy.getElement() = theWeights;
-      this->theOuterAutos.theElements[j].actOnVectorsColumn(theWeightsCopy.getElement());
+      this->outerAutomorphisms.elements[j].actOnVectorsColumn(theWeightsCopy.getElement());
       bool isGood = true;
       for (int k = 0; k < i; k ++) {
         if (!(theWeightsCopy.getElement()[k] - theWeights[k]).isPositiveOrZero()) {
@@ -1632,7 +1632,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   WeylGroupData& theWeYl = input.range().weylGroup;
 //  input.projectOntoSmallCartan(theWeyl.RootsOfBorel, tempRoots);
   this->log << "projections: " << tempRoots.toString();
-  theWeYl.theGroup.computeAllElements(false);
+  theWeYl.group.computeAllElements(false);
   this->NonIntegralOriginModificationBasisChanged ="(1/2,1/2)";
   Matrix<Rational> theProjectionBasisChanged;
   Vector<Rational> startingWeight, projectedWeight;

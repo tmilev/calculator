@@ -238,7 +238,7 @@ public:
     std::stringstream* logStream = nullptr
   );
   bool attemptExtendingEtoHEFwithHinCartan(
-    ElementSemisimpleLieAlgebra<AlgebraicNumber>& theE,
+    ElementSemisimpleLieAlgebra<AlgebraicNumber>& elementE,
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputH,
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF,
     std::stringstream* logStream = nullptr

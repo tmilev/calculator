@@ -197,7 +197,7 @@ std::string SemisimpleLieAlgebra::toHTML(
   latexFormat.flagUseLatex = true;
   latexFormat.flagUseHTML = false;
   out << "<h1>Lie algebra " << this->toStringLieAlgebraNameFullHTML() << "</h1>";
-  out << "<br>Weyl group size: " << theWeyl.theGroup.getSize().toString() << ".<br>";
+  out << "<br>Weyl group size: " << theWeyl.group.getSize().toString() << ".<br>";
   if (!verbose) {
     out << "<br>To get extra details: ";
     std::stringstream tempStream;

@@ -21,8 +21,8 @@ bool WeylGroupData::checkConsistency() const {
   if (this->flagDeallocated) {
     global.fatal << "Use after free of WeylGroup. " << global.fatal;
   }
-  for (int i = 0; i < this->theGroup.generators.size; i ++) {
-    this->theGroup.generators[i].checkConsistency();
+  for (int i = 0; i < this->group.generators.size; i ++) {
+    this->group.generators[i].checkConsistency();
   }
   this->rootsOfBorel.checkConsistency();
   return true;
@@ -798,8 +798,8 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements
   //if (false)
   Matrix<Rational> currentAuto;
   List<Matrix<Rational> > outerAutos;
-  for (int i = 0; i < theAutomorphismGroup.theOuterAutos.theGenerators.size; i ++) {
-    theAutomorphismGroup.theOuterAutos.theGenerators[i].getMatrix(currentAuto, theGroupData.getDimension());
+  for (int i = 0; i < theAutomorphismGroup.outerAutomorphisms.generators.size; i ++) {
+    theAutomorphismGroup.outerAutomorphisms.generators[i].getMatrix(currentAuto, theGroupData.getDimension());
     outerAutos.addOnTop(currentAuto);
   }
   std::stringstream out;
@@ -855,7 +855,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesFromAllElements(
     return false;
   }
   double timeStart1 = global.getElapsedSeconds();
-  theGroupData.theGroup.computeConjugacyClassesFromAllElements();
+  theGroupData.group.computeConjugacyClassesFromAllElements();
   //std::stringstream out;
   calculator << "<hr>Computed conjugacy classes of "
   << theGroupData.toString() << " in " << global.getElapsedSeconds() - timeStart1
@@ -880,7 +880,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesRepresentatives(
   theGroupData.checkConsistency();
   double timeStart1 = global.getElapsedSeconds();
   theGroupData.checkConsistency();
-  theGroupData.theGroup.computeConjugacyClassSizesAndRepresentatives();
+  theGroupData.group.computeConjugacyClassSizesAndRepresentatives();
   calculator << "<hr> Computed conjugacy classes representatives of "
   << theGroupData.dynkinType.toString() << " in " << global.getElapsedSeconds()-timeStart1
   << " second(s). ";
@@ -899,16 +899,16 @@ bool CalculatorFunctionsWeylGroup::weylGroupIrrepsAndCharTableComputeFromScratch
   }
   WeylGroupData& theGroupData = output.getValueNonConst<WeylGroupData>();
   theGroupData.computeInitialIrreducibleRepresentations();
-  theGroupData.theGroup.computeIrreducibleRepresentationsTodorsVersion();
+  theGroupData.group.computeIrreducibleRepresentationsTodorsVersion();
   FormatExpressions tempFormat;
   tempFormat.flagUseLatex = true;
   tempFormat.flagUseHTML = false;
   std::stringstream out;
   out << "Character table: ";
-  out << theGroupData.theGroup.prettyPrintCharacterTable();
+  out << theGroupData.group.prettyPrintCharacterTable();
   out << "<br>Explicit realizations of each representation follow.";
-  for (int i = 0; i < theGroupData.theGroup.irreps.size; i ++) {
-    out << "<hr>" << theGroupData.theGroup.irreps[i].toString(&tempFormat);
+  for (int i = 0; i < theGroupData.group.irreps.size; i ++) {
+    out << "<hr>" << theGroupData.group.irreps[i].toString(&tempFormat);
   }
   out << theGroupData.toString(&tempFormat);
   return output.assignValue(out.str(), calculator);
@@ -924,20 +924,20 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint(
   }
   std::stringstream out, outCommand;
   FinitelyGeneratedMatrixMonoid<Rational> groupGeneratedByMatrices;
-  theType.getOuterAutosGeneratorsActOnVectorColumn(groupGeneratedByMatrices.theGenerators);
+  theType.getOuterAutosGeneratorsActOnVectorColumn(groupGeneratedByMatrices.generators);
   FormatExpressions tempFormat;
   tempFormat.flagUseLatex = true;
   tempFormat.flagUseHTML = false;
-  for (int i = 0; i <groupGeneratedByMatrices.theGenerators.size; i ++) {
+  for (int i = 0; i <groupGeneratedByMatrices.generators.size; i ++) {
     outCommand << "<br>s_{" << i + 1
-    << "}=MatrixRationals" << groupGeneratedByMatrices.theGenerators[i].toStringMatrixForm(&tempFormat) << ";";
+    << "}=MatrixRationals" << groupGeneratedByMatrices.generators[i].toStringMatrixForm(&tempFormat) << ";";
     out << "<br>s_" << i + 1 << " = "
-    << HtmlRoutines::getMathNoDisplay(groupGeneratedByMatrices.theGenerators[i].toStringMatrixForm(&tempFormat));
+    << HtmlRoutines::getMathNoDisplay(groupGeneratedByMatrices.generators[i].toStringMatrixForm(&tempFormat));
   }
   outCommand << "<br>GenerateFiniteMultiplicativelyClosedSet(1000, ";
-  for (int i = 0; i < groupGeneratedByMatrices.theGenerators.size; i ++) {
+  for (int i = 0; i < groupGeneratedByMatrices.generators.size; i ++) {
     outCommand << "s_{" << i + 1 << "}";
-    if (i != groupGeneratedByMatrices.theGenerators.size - 1) {
+    if (i != groupGeneratedByMatrices.generators.size - 1) {
       outCommand << ", ";
     }
   }
@@ -947,16 +947,16 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint(
   if (!success) {
     out << "<br>Did not succeed to generate all elements of the group - the group is of size larger than 10000";
   } else {
-    out << "<br>The group generated by the outer automorphisms is of size " << groupGeneratedByMatrices.theElements.size;
-    if (groupGeneratedByMatrices.theElements.size > 100) {
+    out << "<br>The group generated by the outer automorphisms is of size " << groupGeneratedByMatrices.elements.size;
+    if (groupGeneratedByMatrices.elements.size > 100) {
       out << "<br>As the group has more than 100 elements, I shall abstain from printing them. ";
     } else {
       out << "<table><tr><td>Element</td><td>Matrix</td></tr>";
-      for (int i = 0; i < groupGeneratedByMatrices.theElements.size; i ++) {
+      for (int i = 0; i < groupGeneratedByMatrices.elements.size; i ++) {
         std::stringstream elementNameStream;
         elementNameStream << "t_" << i + 1;
         out << "<tr><td>" << HtmlRoutines::getMathNoDisplay(elementNameStream.str())<< "</td><td>"
-        << HtmlRoutines::getMathNoDisplay(groupGeneratedByMatrices.theElements[i].toStringMatrixForm(&tempFormat)) << "</td></tr>";
+        << HtmlRoutines::getMathNoDisplay(groupGeneratedByMatrices.elements[i].toStringMatrixForm(&tempFormat)) << "</td></tr>";
       }
       out << "</table>";
     }
@@ -1063,10 +1063,10 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(const List<Subgrou
 
   //check for repeating signatures
   List<List<Rational> > pseudoSignSig, fullSignSig, parabolicSignSig;
-  fullSignSig.setSize(this->theGroup.conjugacyClassCount());
-  pseudoSignSig.setSize(this->theGroup.conjugacyClassCount());
-  parabolicSignSig.setSize(this->theGroup.conjugacyClassCount());
-  for (int i = 0; i < this->theGroup.conjugacyClassCount(); i ++) {
+  fullSignSig.setSize(this->group.conjugacyClassCount());
+  pseudoSignSig.setSize(this->group.conjugacyClassCount());
+  parabolicSignSig.setSize(this->group.conjugacyClassCount());
+  for (int i = 0; i < this->group.conjugacyClassCount(); i ++) {
     fullSignSig[i].setSize(inputSubgroups.size);
     pseudoSignSig[i].setSize(numParabolicClasses+numNonParabolicPseudoParabolic);
     parabolicSignSig[i].setSize(numParabolicClasses);
@@ -1219,7 +1219,7 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(const List<Subgrou
         mainTableStream << "&$" << inputSubgroups[i].theDynkinType.toString() << "$";
       }
     }
-    for (int i = 0; i < this->theGroup.conjugacyClassCount(); i ++) {
+    for (int i = 0; i < this->group.conjugacyClassCount(); i ++) {
       mainTableStream << "\\\\";
       if (i == 0) {
         mainTableStream << "\\hline";
@@ -1255,14 +1255,14 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(const List<Subgrou
       }
     }
     out << "</tr>";
-    for (int i = 0; i < this->theGroup.conjugacyClassCount(); i ++) {
+    for (int i = 0; i < this->group.conjugacyClassCount(); i ++) {
       out << "<tr>";
       if (i < this->irrepsCarterLabels.size) {
         out << "<td>" << this->irrepsCarterLabels[i] << "</td>";
       } else {
         out << "<td></td>";
       }
-      out << "<td>" << this->theGroup.characterTable[i].toString() << "</td>";
+      out << "<td>" << this->group.characterTable[i].toString() << "</td>";
       if (s == 0) {
         for (int j = 0; j < inputSubgroups.size; j ++) {
           out << "<td>" << inputSubgroups[j].tauSignature[i].toString() << "</td>";
@@ -1289,7 +1289,7 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(const List<Subgrou
   << " \\begin{document}\\begin{landscape}\n<br>\n\n<br>\n\n<br>\n\n<br>\n";
   out << "{\\tiny \n<br>\n \\renewcommand{\\arraystretch}{0}%\n<br>\n";
   out << "\\begin{longtable}{r|";
-  int numIrreps = this->theGroup.characterTable[0].data.size;
+  int numIrreps = this->group.characterTable[0].data.size;
   for (int i = 0; i < numIrreps; i ++) {
     out << "r";
   }
@@ -1297,7 +1297,7 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(const List<Subgrou
   << "\\caption{\\label{tableIrrepChars" << this->dynkinType.toString()
   << "}\\\\ Irreducible representation characters. Columns are labeled by conjugacy classes.} \\\\";
   out << "<br>\n  & \\multicolumn{"
-  << this->theGroup.characterTable[0].data.size
+  << this->group.characterTable[0].data.size
   << "}{c}{Conjugacy class $\\#$}\\\\<br>\n";
 
   out << "Irrep label";
@@ -1305,10 +1305,10 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(const List<Subgrou
     out << "&$" << i + 1 << "$";
   }
   out << "\\\\\\hline<br>\n";
-  for (int i = 0; i < this->theGroup.characterTable.size; i ++) {
+  for (int i = 0; i < this->group.characterTable.size; i ++) {
     out << "$" << this->toStringIrreducibleRepresentationLabel(i) << "$";
-    for (int j = 0; j < this->theGroup.characterTable[i].data.size; j ++) {
-      out << "&$" << this->theGroup.characterTable[i].data[j].toString() << "$";
+    for (int j = 0; j < this->group.characterTable[i].data.size; j ++) {
+      out << "&$" << this->group.characterTable[i].data[j].toString() << "$";
     }
     out << "\\\\<br>\n";
   }
@@ -1316,9 +1316,9 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(const List<Subgrou
   out << "\\begin{longtable}{rrcl}" << "\\caption{\\label{tableConjugacyClassTable"
   << HtmlRoutines::cleanUpForLaTeXLabelUse(this->dynkinType.toString()) << "}}\\\\ ";
   out << "$\\#$ & Representative & Class size & Root subsystem label\\\\<br>\n";
-  for (int i = 0; i < this->theGroup.conjugacyClassCount(); i ++) {
-    out << "$" << i + 1 << "$ & " "$" << this->theGroup.conjugacyClasses[i].representative.toString()
-    << "$&$ " << this->theGroup.conjugacyClasses[i].size.toString() << "$";
+  for (int i = 0; i < this->group.conjugacyClassCount(); i ++) {
+    out << "$" << i + 1 << "$ & " "$" << this->group.conjugacyClasses[i].representative.toString()
+    << "$&$ " << this->group.conjugacyClasses[i].size.toString() << "$";
     if (i < this->ccCarterLabels.size) {
       out << "&$" << this->ccCarterLabels[i] << "$";
     }
@@ -1961,7 +1961,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupNaturalRep(Calculator& calculator, c
   }
   WeylGroupData& theGroup = output.getValueNonConst<WeylGroupData>();
   theGroup.computeInitialIrreducibleRepresentations();
-  theGroup.theGroup.computeIrreducibleRepresentationsTodorsVersion();
+  theGroup.group.computeIrreducibleRepresentationsTodorsVersion();
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational> tempRep;
   theGroup.getStandardRepresentation(tempRep);
   return output.assignValue(tempRep.makeOtherGroupRepresentationClass(), calculator);
@@ -2478,13 +2478,13 @@ bool CalculatorFunctionsWeylGroup::makeVirtualWeylRep(
   WeylGroupData* theWeylData = inputRep.ownerGroup->generators[0].owner;
   if (
     inputRep.ownerGroup->irreps.size<inputRep.ownerGroup->conjugacyClassCount() &&
-    theWeylData->theGroup.ComputeIrreducibleRepresentationsWithFormulas
+    theWeylData->group.ComputeIrreducibleRepresentationsWithFormulas
   ) {
-    theWeylData->theGroup.ComputeIrreducibleRepresentationsWithFormulas(theWeylData->theGroup);
+    theWeylData->group.ComputeIrreducibleRepresentationsWithFormulas(theWeylData->group);
   }
   if (inputRep.ownerGroup->irreps.size<inputRep.ownerGroup->conjugacyClassCount()) {
     theWeylData->computeInitialIrreducibleRepresentations();
-    theWeylData->theGroup.computeIrreducibleRepresentationsTodorsVersion();
+    theWeylData->group.computeIrreducibleRepresentationsTodorsVersion();
   }
   VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> outputRep;
   outputRep.assignRepresentation(inputRep);

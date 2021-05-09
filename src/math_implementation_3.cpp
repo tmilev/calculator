@@ -6769,7 +6769,7 @@ void WeylGroupData::simpleReflectionRootPolynomial(
 
 Matrix<Rational> WeylGroupData::getMatrixStandardRepresentation(int elementIndex) const {
   Matrix<Rational> result;
-  this->getMatrixStandardRepresentation(this->theGroup.elements[elementIndex], result);
+  this->getMatrixStandardRepresentation(this->group.elements[elementIndex], result);
   return result;
 }
 
@@ -6791,28 +6791,28 @@ void WeylGroupData::reset() {
   this->ccCarterLabels.setSize(0);
   this->irrepsCarterLabels.setSize(0);
 
-  this->theGroup.initialize();
-  this->theGroup.specificDataPointer = this;
-  this->theGroup.getWordByFormula = this->getWordByFormulaImplementation;
-  this->theGroup.getSizeByFormula = this->getSizeByFormulaImplementation;
-  this->theGroup.computeConjugacyClassSizesAndRepresentativesByFormula = nullptr;
-  this->theGroup.areConjugateByFormula = nullptr;
-  this->theGroup.ComputeIrreducibleRepresentationsWithFormulas = nullptr;
+  this->group.initialize();
+  this->group.specificDataPointer = this;
+  this->group.getWordByFormula = this->getWordByFormulaImplementation;
+  this->group.getSizeByFormula = this->getSizeByFormulaImplementation;
+  this->group.computeConjugacyClassSizesAndRepresentativesByFormula = nullptr;
+  this->group.areConjugateByFormula = nullptr;
+  this->group.ComputeIrreducibleRepresentationsWithFormulas = nullptr;
 }
 
 void WeylGroupData::actOnAffineHyperplaneByGroupElement(
   int index, AffineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho
 ) {
-  int numGens = this->theGroup.elements[index].generatorsLastAppliedFirst.size;
+  int numGens = this->group.elements[index].generatorsLastAppliedFirst.size;
   for (int i = numGens - 1; i >= 0; i --) {
     this->reflectSimple(
-      this->theGroup.elements[index].generatorsLastAppliedFirst[i].index,
+      this->group.elements[index].generatorsLastAppliedFirst[i].index,
       output.affinePoint,
       RhoAction,
       UseMinusRho
     );
     this->simpleReflectionDualSpace(
-      this->theGroup.elements[index].generatorsLastAppliedFirst[numGens - i - 1].index,
+      this->group.elements[index].generatorsLastAppliedFirst[numGens - i - 1].index,
       output.normal
     );
   }
@@ -6830,12 +6830,12 @@ bool WeylGroupData::getWordByFormulaImplementation(
 }
 
 void WeylGroupData::getSignCharacter(Vector<Rational>& out) {
-  if (!this->theGroup.flagCCRepresentativesComputed) {
-    this->theGroup.computeConjugacyClassSizesAndRepresentatives();
+  if (!this->group.flagCCRepresentativesComputed) {
+    this->group.computeConjugacyClassSizesAndRepresentatives();
   }
-  out.setSize(this->theGroup.conjugacyClassCount());
-  for (int i = 0; i < this->theGroup.conjugacyClassCount(); i ++) {
-    out[i] = this->theGroup.conjugacyClasses[i].representative.sign();
+  out.setSize(this->group.conjugacyClassCount());
+  for (int i = 0; i < this->group.conjugacyClassCount(); i ++) {
+    out[i] = this->group.conjugacyClasses[i].representative.sign();
   }
 }
 
@@ -6856,8 +6856,8 @@ void WeylGroupData::getTrivialRepresentation(
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational>& output
 ) {
   MacroRegisterFunctionWithName("WeylGroup::getTrivialRepresentation");
-  this->theGroup.checkInitializationConjugacyClasses();
-  output.initialize(this->theGroup);
+  this->group.checkInitializationConjugacyClasses();
+  output.initialize(this->group);
   output.basis.makeEiBasis(1);
   for (int i = 0; i < this->getDimension(); i ++) {
     output.generators[i].makeIdentityMatrix(1, Rational::one(), Rational::zero());
@@ -6869,8 +6869,8 @@ void WeylGroupData::getSignRepresentation(
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational>& output
 ) {
   MacroRegisterFunctionWithName("WeylGroup::getSignRepresentation");
-  this->theGroup.checkInitializationConjugacyClasses();
-  output.initialize(this->theGroup);
+  this->group.checkInitializationConjugacyClasses();
+  output.initialize(this->group);
   output.basis.makeEiBasis(1);
   ElementWeylGroup currentElt;
   for (int i = 0; i < this->getDimension(); i ++) {
@@ -6885,8 +6885,8 @@ void WeylGroupData::getStandardRepresentation(
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational>& output
 ) {
   MacroRegisterFunctionWithName("WeylGroup::getStandardRepresentation");
-  this->theGroup.checkInitializationConjugacyClasses();
-  output.initialize(this->theGroup);
+  this->group.checkInitializationConjugacyClasses();
+  output.initialize(this->group);
   output.basis.makeEiBasis(this->getDimension());
   for (int i = 0; i < this->getDimension(); i ++) {
     this->getSimpleReflectionMatrix(i, output.generators[i]);
@@ -7008,9 +7008,9 @@ LargeInteger WeylGroupData::sizeByFormulaOrNegative1(char weylLetter, int theDim
 }
 
 void WeylGroupData::getWord(int g, List<int>& out) const {
-  out.setSize(this->theGroup.elements[g].generatorsLastAppliedFirst.size);
-  for (int i = 0; i < this->theGroup.elements[g].generatorsLastAppliedFirst.size; i ++) {
-    out[i] = this->theGroup.elements[g].generatorsLastAppliedFirst[i].index;
+  out.setSize(this->group.elements[g].generatorsLastAppliedFirst.size);
+  for (int i = 0; i < this->group.elements[g].generatorsLastAppliedFirst.size; i ++) {
+    out[i] = this->group.elements[g].generatorsLastAppliedFirst[i].index;
   }
 }
 
@@ -7019,7 +7019,7 @@ bool WeylGroupData::operator==(const WeylGroupData& other) const {
 }
 
 void WeylGroupData::actOnRootByGroupElement(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho) {
-  const ElementWeylGroup& currentElt = this->theGroup.elements[index];
+  const ElementWeylGroup& currentElt = this->group.elements[index];
   for (int i = currentElt.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
     this->reflectSimple(
       currentElt.generatorsLastAppliedFirst[i].index,
@@ -7070,13 +7070,13 @@ void WeylGroupData::generateRootSystem() {
 }
 
 void WeylGroupData::actOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction) {
-  for (int i = this->theGroup.elements[index].generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
-    this->simpleReflectionRootPolynomial(this->theGroup.elements[index].generatorsLastAppliedFirst[i].index, theRoot, RhoAction);
+  for (int i = this->group.elements[index].generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
+    this->simpleReflectionRootPolynomial(this->group.elements[index].generatorsLastAppliedFirst[i].index, theRoot, RhoAction);
   }
 }
 
 void WeylGroupData::computeWeylGroupAndRootsOfBorel(Vectors<Rational>& output) {
-  this->theGroup.computeAllElements(false);
+  this->group.computeAllElements(false);
   output.size = 0;
   output.reserve(this->rootSystem.size / 2);
   for (int i = 0; i < this->rootSystem.size; i ++) {
@@ -7115,20 +7115,20 @@ std::string WeylGroupData::toStringCppCharTable(FormatExpressions* format) {
   FormatExpressions theFormatNoDynkinTypePlusesExponents;
   theFormatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent = true;
   out << "bool loadCharacterTable" << this->dynkinType.toString(&theFormatNoDynkinTypePlusesExponents) << "(WeylGroup& output)\n<br>{ ";
-  out << " output.characterTable.setExpectedSize(" << this->theGroup.getSize().toString() << "); output.characterTable.setSize(0);";
+  out << " output.characterTable.setExpectedSize(" << this->group.getSize().toString() << "); output.characterTable.setSize(0);";
   out << "\n<br>&nbsp;&nbsp;ClassFunction&lt;FiniteGroup&lt;ElementWeylGroup&lt;WeylGroup&gt; &gt;, Rational&gt; currentCF;";
   out << "\n<br>&nbsp;&nbsp;currentCF.G = &output;";
-  for (int i = 0; i < this->theGroup.characterTable.size; i ++) {
+  for (int i = 0; i < this->group.characterTable.size; i ++) {
     out << "\n<br>&nbsp;&nbsp;currentCF.data.assignString(\"";
     out << "(";
     //Print vector ensuring every number is at least 3 characters wide. (3 should suffice for E8... or does it?)
-    for (int j = 0; j < this->theGroup.characterTable[i].data.size; j ++) {
-      std::string theNumber = this->theGroup.characterTable[i].data[j].toString();
+    for (int j = 0; j < this->group.characterTable[i].data.size; j ++) {
+      std::string theNumber = this->group.characterTable[i].data[j].toString();
       out << theNumber;
       for (size_t k = theNumber.size(); k < 3; k ++) {
         out << "&nbsp;";
       }
-      if (j != this->theGroup.characterTable[i].data.size - 1) {
+      if (j != this->group.characterTable[i].data.size - 1) {
         out << ", ";
       }
     }
@@ -7147,7 +7147,7 @@ std::string WeylGroupData::toStringCppCharTable(FormatExpressions* format) {
 std::string WeylGroupData::toStringCppConjugacyClasses(FormatExpressions* format) {
   MacroRegisterFunctionWithName("WeylGroup::toStringCppConjugacyClasses");
   (void) format;//portable way to avoid non-used parameter warning.
-  if (!this->theGroup.flagCCRepresentativesComputed) {
+  if (!this->group.flagCCRepresentativesComputed) {
     return "";
   }
   std::stringstream out;
@@ -7161,27 +7161,27 @@ std::string WeylGroupData::toStringCppConjugacyClasses(FormatExpressions* format
   out << "\n<br>&nbsp;&nbsp;WeylGroup::ConjugacyClass emptyClass;";
   out << "\n<br>&nbsp;&nbsp;emptyClass.flagRepresentativeComputed = true;";
   out << "\n<br>&nbsp;&nbsp;output.conjugacyClasses.initializeFillInObject("
-  << this->theGroup.conjugacyClasses.size << ", emptyClass);";
-  for (int i = 0; i < this->theGroup.conjugacyClassCount(); i ++) {
+  << this->group.conjugacyClasses.size << ", emptyClass);";
+  for (int i = 0; i < this->group.conjugacyClassCount(); i ++) {
     out << "\n<br>&nbsp;&nbsp;output.conjugacyClasses[" << i;
     for (size_t j = (Rational(i)).toString().size(); j < 3; j ++) { //<-if the index i is smaller than 100, make sure it takes
       out << "&nbsp;"; // making sure index has width exactly 3 spaces
     }
     out << "].representative.makeFromReadableReflections(output, false, \"";
-    for (int j = 0; j < this->theGroup.conjugacyClasses[i].representative.generatorsLastAppliedFirst.size; j ++) {
-      out << this->theGroup.conjugacyClasses[i].representative.generatorsLastAppliedFirst[j].index + 1;
-      if (j != this->theGroup.conjugacyClasses[i].representative.generatorsLastAppliedFirst.size - 1) {
+    for (int j = 0; j < this->group.conjugacyClasses[i].representative.generatorsLastAppliedFirst.size; j ++) {
+      out << this->group.conjugacyClasses[i].representative.generatorsLastAppliedFirst[j].index + 1;
+      if (j != this->group.conjugacyClasses[i].representative.generatorsLastAppliedFirst.size - 1) {
         out << ",";
       }
     }
     out << "\");";
   }
-  for (int i = 0; i < this->theGroup.conjugacyClassCount(); i ++) {
+  for (int i = 0; i < this->group.conjugacyClassCount(); i ++) {
     out << "\n<br>&nbsp;&nbsp;output.conjugacyClasses[" << i;
     for (size_t j = (Rational(i)).toString().size(); j < 3; j ++) { //<-if the index i is smaller than 100, make sure it takes
       out << "&nbsp;"; // making sure index has width exactly 3 spaces
     }
-    out  << "].size =" << this->theGroup.conjugacyClasses[i].size.toString() << ";";
+    out  << "].size =" << this->group.conjugacyClasses[i].size.toString() << ";";
   }
   out << "\n<br>&nbsp;&nbsp;output.ccCarterLabels.setSize(0);";
   for (int i = 0; i < this->ccCarterLabels.size; i ++) {
@@ -7224,17 +7224,17 @@ std::string WeylGroupData::toStringRootsAndRootReflections(FormatExpressions* fo
 std::string WeylGroupData::toString(FormatExpressions* format) {
   MacroRegisterFunctionWithName("WeylGroup::toString");
   std::stringstream out;
-  out << "<br>Size: " << this->theGroup.elements.size << "\n";
+  out << "<br>Size: " << this->group.elements.size << "\n";
   out << "Number of Vectors: " << this->rootSystem.size << "\n";
   out << "<br>Half-sum positive roots:" << this->rho.toString() << "\n";
   out << this->toStringRootsAndRootReflections();
   out << "<br>Symmetric cartan: " << this->cartanSymmetric.toString();
   if (this->flagCharTableIsComputed) {
     out << "<br>Character table: ";
-    out << this->theGroup.prettyPrintCharacterTable();
+    out << this->group.prettyPrintCharacterTable();
   }
-  out << this->theGroup.toStringConjugacyClasses(format);
-  out << this->theGroup.toStringElements(format);
+  out << this->group.toStringConjugacyClasses(format);
+  out << this->group.toStringElements(format);
   out << this->toStringCppConjugacyClasses(format);
   out << this->toStringCppCharTable(format);
   return out.str();
@@ -7318,13 +7318,13 @@ void WeylGroupData::makeFinalSteps() {
 }
 
 void WeylGroupData::initializeGenerators() {
-  this->theGroup.generators.setSize(this->getDimension());
+  this->group.generators.setSize(this->getDimension());
   if (this->getDimension() == 0) {
-    this->theGroup.generators.setSize(1);
-    this->theGroup.generators[0].makeIdentity(*this);
+    this->group.generators.setSize(1);
+    this->group.generators[0].makeIdentity(*this);
   }
   for (int i = 0; i < this->getDimension(); i ++) {
-    this->theGroup.generators[i].makeSimpleReflection(i, *this);
+    this->group.generators[i].makeSimpleReflection(i, *this);
   }
 }
 
@@ -7342,13 +7342,13 @@ void WeylGroupData::makeFromDynkinType(const DynkinType& inputType) {
   if (letters.size == 1) {
     if (ranks.size == 1) {
       if (letters[0] == 'A') {
-        this->theGroup.ComputeIrreducibleRepresentationsWithFormulas =
+        this->group.ComputeIrreducibleRepresentationsWithFormulas =
         this->computeIrreducibleRepresentationsWithFormulasImplementation;
       }
     }
   }
   this->initializeGenerators();
-  this->theGroup.checkInitialization();
+  this->group.checkInitialization();
 }
 
 void WeylGroupData::makeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType) {
@@ -7383,7 +7383,7 @@ void WeylGroupAutomorphisms::computeOuterAutomorphisms() {
     return;
   }
   this->computeOuterAutoGenerators();
-  this->theOuterAutos.generateElements(0);
+  this->outerAutomorphisms.generateElements(0);
   this->flagAllOuterAutosComputed = true;
 }
 
@@ -7393,7 +7393,7 @@ void WeylGroupAutomorphisms::computeOuterAutoGenerators() {
     return;
   }
   this->checkInitialization();
-  List<MatrixTensor<Rational> >& theGens = this->theOuterAutos.theGenerators;
+  List<MatrixTensor<Rational> >& theGens = this->outerAutomorphisms.generators;
   this->theWeyl->dynkinType.getOuterAutosGeneratorsActOnVectorColumn(theGens);
   for (int i = 0; i < theGens.size; i ++) {
     if (
@@ -7577,30 +7577,30 @@ LargeInteger WeylGroupAutomorphisms::getOrbitSize(Vector<Rational>& theWeight) {
   MacroRegisterFunctionWithName("WeylGroupAutomorphisms::getOrbitSize");
   this->checkInitialization();
   HashedList<Vector<Rational> > highestWeights;
-  for (int i = 0; i < this->theOuterAutos.theElements.size; i ++) {
+  for (int i = 0; i < this->outerAutomorphisms.elements.size; i ++) {
     Vector<Rational> candidate;
-    this->theOuterAutos.theElements[i].actOnVectorColumn(theWeight, candidate);
+    this->outerAutomorphisms.elements[i].actOnVectorColumn(theWeight, candidate);
     this->theWeyl->raiseToDominantWeight(candidate);
     highestWeights.addOnTopNoRepetition(candidate);
   }
   return this->theWeyl->getOrbitSize(theWeight) * highestWeights.size;
 }
 
-bool WeylGroupAutomorphisms::isElementWeylGroupOrOuterAutomorphisms(const MatrixTensor<Rational>& input) {
+bool WeylGroupAutomorphisms::isElementWeylGroupOrOuterAutomorphisms(const MatrixTensor<Rational>& matrix) {
   MacroRegisterFunctionWithName("WeylGroup::IsElementGroupOrOuterAuto");
   this->computeOuterAutomorphisms();
   Vector<Rational> theRhoImage;
-  input.actOnVectorColumn(this->theWeyl->rho, theRhoImage);
+  matrix.actOnVectorColumn(this->theWeyl->rho, theRhoImage);
   ElementWeylGroup theElementCandidate;
   this->theWeyl->raiseToDominantWeight(theRhoImage, nullptr, nullptr, &theElementCandidate);
   Matrix<Rational> theCandidateMat;
-  MatrixTensor<Rational> theCandidateMatTensorForm, theCandidateMatWithOuterAuto;
+  MatrixTensor<Rational> candidateMatrixTensorForm, candidateMatrixWithOuterAutomorphisms;
   this->theWeyl->getMatrixStandardRepresentation(theElementCandidate, theCandidateMat);
-  theCandidateMatTensorForm = theCandidateMat;
-  for (int i = 0; i < this->theOuterAutos.theElements.size; i ++) {
-    theCandidateMatWithOuterAuto = this->theOuterAutos.theElements[i];
-    theCandidateMatWithOuterAuto *= theCandidateMatTensorForm;
-    if (theCandidateMatWithOuterAuto == input) {
+  candidateMatrixTensorForm = theCandidateMat;
+  for (int i = 0; i < this->outerAutomorphisms.elements.size; i ++) {
+    candidateMatrixWithOuterAutomorphisms = this->outerAutomorphisms.elements[i];
+    candidateMatrixWithOuterAutomorphisms *= candidateMatrixTensorForm;
+    if (candidateMatrixWithOuterAutomorphisms == matrix) {
       return true;
     }
   }
@@ -7609,9 +7609,9 @@ bool WeylGroupAutomorphisms::isElementWeylGroupOrOuterAutomorphisms(const Matrix
 
 void WeylGroupData::getMatrixReflection(Vector<Rational>& reflectionRoot, Matrix<Rational>& output) {
   Vectors<Rational> basis;
-  int theDim = this->getDimension();
-  basis.makeEiBasis(theDim);
-  for (int i = 0; i < theDim; i ++) {
+  int dimension = this->getDimension();
+  basis.makeEiBasis(dimension);
+  for (int i = 0; i < dimension; i ++) {
     this->reflectBetaWithRespectToAlpha(reflectionRoot, basis[i], false, basis[i]);
   }
   output.assignVectorsToRows(basis);
@@ -7621,12 +7621,10 @@ void WeylGroupData::getMatrixReflection(Vector<Rational>& reflectionRoot, Matrix
 void WeylGroupData::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2) {
   MacroRegisterFunctionWithName("WeylGroup::getCoxeterPlane");
   this->computeRho(true);
-  Vector<Rational> ZeroRoot;
   int theDimension = this->getDimension();
   if (theDimension < 2) {
     return;
   }
-  ZeroRoot.makeZero(theDimension);
   ElementWeylGroup tempElt;
   this->getCoxeterElement(tempElt);
   Matrix<Rational> matCoxeterElt, tempMat;
@@ -7685,7 +7683,7 @@ void WeylGroupData::drawRootSystem(
   bool wipeCanvas,
   bool drawWeylChamber,
   Vector<Rational>* bluePoint,
-  bool LabelDynkinDiagramVertices,
+  bool labelDynkinDiagramVertices,
   Vectors<Rational>* predefinedProjectionPlane
 ) {
   MacroRegisterFunctionWithName("WeylGroup::drawRootSystem");
@@ -7791,7 +7789,7 @@ void WeylGroupData::drawRootSystem(
     output.drawCircleAtVectorBufferRational(tempRootRat, "red", 1);
     output.drawCircleAtVectorBufferRational(tempRootRat, "red", 3);
     output.drawCircleAtVectorBufferRational(tempRootRat, "red", 4);
-    if (LabelDynkinDiagramVertices) {
+    if (labelDynkinDiagramVertices) {
       Vector<Rational>& current = epsNotationSimpleBasis[i];
       output.drawTextAtVectorBufferRational(tempRootRat, current.toStringLetterFormat("e"), "black", 10);
     }
@@ -7831,7 +7829,7 @@ std::string WeylGroupData::generateWeightSupportMethod1(
 ) {
   HashedList<Vector<Rational> > theDominantWeights;
   (void) upperBoundWeights;//portable way to avoid non-used parameter warning.
-  double upperBoundDouble = 100000 / (Rational(this->theGroup.getSize())).getDoubleValue();
+  double upperBoundDouble = 100000 / (Rational(this->group.getSize())).getDoubleValue();
   int upperBoundInt = MathRoutines::maximum(static_cast<int>(upperBoundDouble), 10000);
   //int upperBoundInt = 10000;
   Vector<Rational> highestWeightTrue = highestWeightSimpleCoords;
@@ -7851,7 +7849,7 @@ std::string WeylGroupData::generateWeightSupportMethod1(
     out << "Number of (non-strictly) dominant weights: " << theDominantWeights.size << "<br>";
   }
   HashedList<Vector<Rational> > finalWeights;
-  int estimatedNumWeights = static_cast<int>((Rational(this->theGroup.getSize())).getDoubleValue() * theDominantWeights.size);
+  int estimatedNumWeights = static_cast<int>((Rational(this->group.getSize())).getDoubleValue() * theDominantWeights.size);
   estimatedNumWeights = MathRoutines::minimum(10000, estimatedNumWeights);
   finalWeights.reserve(estimatedNumWeights);
   finalWeights.setHashSize(estimatedNumWeights);
@@ -7899,14 +7897,14 @@ bool WeylGroupData::isElementWeylGroup(const MatrixTensor<Rational>& input) {
   input.actOnVectorColumn(this->rho, theRhoImage);
   ElementWeylGroup theElementCandidate;
   this->raiseToDominantWeight(theRhoImage, nullptr, nullptr, &theElementCandidate);
-  Matrix<Rational> theCandidateMat, inputMat;
-  input.getMatrix(inputMat, this->getDimension());
-  this->getMatrixStandardRepresentation(theElementCandidate, theCandidateMat);
-  return theCandidateMat == inputMat;
+  Matrix<Rational> candidateMatrix, inputMatrix;
+  input.getMatrix(inputMatrix, this->getDimension());
+  this->getMatrixStandardRepresentation(theElementCandidate, candidateMatrix);
+  return candidateMatrix == inputMatrix;
 }
 
 bool WeylGroupData::containsRootNonStronglyPerpendicularTo(Vectors<Rational>& theVectors, Vector<Rational>& input) {
-  for (int i = 0; i < this->theGroup.elements.size; i ++) {
+  for (int i = 0; i < this->group.elements.size; i ++) {
     if (this->isARoot(theVectors[i] + input)) {
       return true;
     }
@@ -7929,7 +7927,7 @@ void WeylGroupData::getMatrixStandardRepresentation(const ElementWeylGroup& inpu
 
 int WeylGroupData::numberOfRootsConnectedTo(Vectors<Rational>& theVectors, Vector<Rational>& input) {
   int result = 0;
-  for (int i = 0; i < this->theGroup.elements.size; i ++) {
+  for (int i = 0; i < this->group.elements.size; i ++) {
     if (!Vector<Rational>::scalarProduct(theVectors[i], input, this->cartanSymmetric).isEqualToZero()) {
       result ++;
     }
@@ -8190,7 +8188,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
   for (int i = 0; i < this->RepresentativesQuotientAmbientOrder.size; i ++) {
     tempRoot = this->ambientWeyl->rho;
     this->ambientWeyl->actOnRootByGroupElement(
-      this->ambientWeyl->theGroup.elements.getIndex(this->RepresentativesQuotientAmbientOrder[i]), tempRoot, false, false
+      this->ambientWeyl->group.elements.getIndex(this->RepresentativesQuotientAmbientOrder[i]), tempRoot, false, false
     );
   }
   arrows.setSize(Layers.size);
@@ -8217,11 +8215,11 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::findQuotientRepresentatives(int UpperLimit) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::findQuotientRepresentatives");
   this->checkInitialization();
-  this->ambientWeyl->theGroup.computeAllElements(UpperLimit);
+  this->ambientWeyl->group.computeAllElements(UpperLimit);
   Vector<Rational> image1;
   this->RepresentativesQuotientAmbientOrder.size = 0;
-  this->RepresentativesQuotientAmbientOrder.reserve(this->ambientWeyl->theGroup.elements.size);
-  for (int i = 0; i < this->ambientWeyl->theGroup.elements.size; i ++) {
+  this->RepresentativesQuotientAmbientOrder.reserve(this->ambientWeyl->group.elements.size);
+  for (int i = 0; i < this->ambientWeyl->group.elements.size; i ++) {
     image1 = this->ambientWeyl->rho;
     this->ambientWeyl->actOnRootByGroupElement(i, image1, false, false);
     bool isGood = true;
@@ -8232,7 +8230,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::f
       }
     }
     if (isGood) {
-      this->RepresentativesQuotientAmbientOrder.addOnTop(this->ambientWeyl->theGroup.elements[i]);
+      this->RepresentativesQuotientAmbientOrder.addOnTop(this->ambientWeyl->group.elements[i]);
     }
   }
 }
@@ -8436,7 +8434,7 @@ std::string KazhdanLusztigPolynomials::toString(FormatExpressions* format) {
     }
   }
   out << "R Polynomials:<br>" << this->rPolysToString(format);
-  if (this->kazhdanLuzstigCoefficients.size == this->weylGroup->theGroup.elements.size) {
+  if (this->kazhdanLuzstigCoefficients.size == this->weylGroup->group.elements.size) {
     out << "Kazhdan-Lusztig Polynomials:<br>" << this->KLPolysToString(format);
     out << "Kazhdan-Lusztig coefficients; the (w_1,w_2)  coefficient is defined as the multiplicity of "
     << HtmlRoutines::getMathNoDisplay("L_{w_2 \\cdot \\lambda}")
@@ -8445,13 +8443,13 @@ std::string KazhdanLusztigPolynomials::toString(FormatExpressions* format) {
     << " of the Weyl group, \\lambda is a dominant integral weight, M_{\\lambda} stands for Verma module "
     << "of highest weight \\lambda, L_\\lambda stands for irreducible highest "
     << "weight of highest weight \\lambda: <br><table border =\"1\"><tr><td>Weyl elt.</td>";
-    for (int i = 0; i < this->weylGroup->theGroup.elements.size; i ++) {
-      out << "<td>" << this->weylGroup->theGroup.elements[i].toString() << "</td>";
+    for (int i = 0; i < this->weylGroup->group.elements.size; i ++) {
+      out << "<td>" << this->weylGroup->group.elements[i].toString() << "</td>";
     }
     out << "</tr>";
-    for (int i = 0; i < this->weylGroup->theGroup.elements.size; i ++) {
+    for (int i = 0; i < this->weylGroup->group.elements.size; i ++) {
       if (this->kazhdanLuzstigPolynomials[i].size > 0) {
-        out << "<tr>" << "<td>" << this->weylGroup->theGroup.elements[i].toString()  << "</td>";
+        out << "<tr>" << "<td>" << this->weylGroup->group.elements[i].toString()  << "</td>";
         for (int j = 0; j < this->kazhdanLuzstigCoefficients[i].size; j ++) {
           out << "<td>" << kazhdanLuzstigCoefficients[i][j].toString() << "</td>";
         }
@@ -8605,7 +8603,7 @@ void KazhdanLusztigPolynomials::initFromWeyl(WeylGroupData* theWeylGroup) {
 
 bool KazhdanLusztigPolynomials::computeKLPolys(WeylGroupData* theWeylGroup) {
   MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::computeKLPolys");
-  theWeylGroup->theGroup.computeAllElements(- 1);
+  theWeylGroup->group.computeAllElements(- 1);
   this->initFromWeyl(theWeylGroup);
   this->generatePartialBruhatOrder();
   FormatExpressions PolyFormatLocal;
@@ -8683,10 +8681,10 @@ bool KazhdanLusztigPolynomials::indexGreaterThanIndex(int a, int b) {
 
 int KazhdanLusztigPolynomials::computeProductfromSimpleReflectionsActionList(int x, int y) {
   int start = y;
-  const ElementWeylGroup& currentElement = this->weylGroup->theGroup.elements[x];
+  const ElementWeylGroup& currentElement = this->weylGroup->group.elements[x];
   for (int i = currentElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
     start = this->simpleReflectionsActionList[start][
-      this->weylGroup->theGroup.elements[x].generatorsLastAppliedFirst[i].index
+      this->weylGroup->group.elements[x].generatorsLastAppliedFirst[i].index
     ];
   }
   return start;
@@ -8714,17 +8712,17 @@ void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
       }
       int tempI;
       if ((
-          this->weylGroup->theGroup.elements[x].generatorsLastAppliedFirst.size +
-          this->weylGroup->theGroup.elements[i].generatorsLastAppliedFirst.size
+          this->weylGroup->group.elements[x].generatorsLastAppliedFirst.size +
+          this->weylGroup->group.elements[i].generatorsLastAppliedFirst.size
         ) % 2 == 0
       ) {
         tempI = 1;
       } else {
         tempI = - 1;
       }
-      Rational powerQ = - this->weylGroup->theGroup.elements[x].generatorsLastAppliedFirst.size +
-      2 * this->weylGroup->theGroup.elements[i].generatorsLastAppliedFirst.size -
-      this->weylGroup->theGroup.elements[y].generatorsLastAppliedFirst.size;
+      Rational powerQ = - this->weylGroup->group.elements[x].generatorsLastAppliedFirst.size +
+      2 * this->weylGroup->group.elements[i].generatorsLastAppliedFirst.size -
+      this->weylGroup->group.elements[y].generatorsLastAppliedFirst.size;
       powerQ /= 2;
       tempP2.makeMonomial(0, powerQ, tempI);
       tempP1 *= tempP2;
@@ -8740,8 +8738,8 @@ void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
     }
   }
   this->kazhdanLuzstigPolynomials[x][y].makeZero();
-  Rational lengthDiff = this->weylGroup->theGroup.elements[y].generatorsLastAppliedFirst.size -
-  this->weylGroup->theGroup.elements[x].generatorsLastAppliedFirst.size;
+  Rational lengthDiff = this->weylGroup->group.elements[y].generatorsLastAppliedFirst.size -
+  this->weylGroup->group.elements[x].generatorsLastAppliedFirst.size;
   lengthDiff /= 2;
   for (int i = 0; i < Accum.size(); i ++) {
     if (Accum[i].hasPositiveOrZeroExponents()) {
@@ -8793,13 +8791,13 @@ std::string KazhdanLusztigPolynomials::KLPolysToString(FormatExpressions* format
   std::stringstream out;
   out << "<table border =\"1\">";
   out << "<tr><td>Weyl elt.</td>";
-  for (int i = 0; i < this->weylGroup->theGroup.elements.size; i ++) {
-    out << "<td>" << this->weylGroup->theGroup.elements[i].toString() << "</td>";
+  for (int i = 0; i < this->weylGroup->group.elements.size; i ++) {
+    out << "<td>" << this->weylGroup->group.elements[i].toString() << "</td>";
   }
   out << "</tr>";
   for (int i = 0; i < this->kazhdanLuzstigPolynomials.size; i ++) {
     if (this->kazhdanLuzstigPolynomials[i].size > 0) {
-      out << "<tr><td>" << this->weylGroup->theGroup.elements[i].toString() << "</td>";
+      out << "<tr><td>" << this->weylGroup->group.elements[i].toString() << "</td>";
       for (int j = 0; j < this->kazhdanLuzstigPolynomials[i].size; j ++) {
         out << "<td>" << this->kazhdanLuzstigPolynomials[i][j].toString(format) << "</td>";
       }
@@ -8813,12 +8811,12 @@ std::string KazhdanLusztigPolynomials::KLPolysToString(FormatExpressions* format
 std::string KazhdanLusztigPolynomials::rPolysToString(FormatExpressions* format) {
   std::stringstream out;
   out << "<table border =\"1\"><tr><td>Weyl elt.</td>";
-  for (int i = 0; i < this->weylGroup->theGroup.elements.size; i ++) {
-    out << "<td>" << this->weylGroup->theGroup.elements[i].toString() << "</td>";
+  for (int i = 0; i < this->weylGroup->group.elements.size; i ++) {
+    out << "<td>" << this->weylGroup->group.elements[i].toString() << "</td>";
   }
   out << "</tr>";
   for (int i = 0; i < this->rPolynomials.size; i ++) {
-    out << "<tr><td>" << this->weylGroup->theGroup.elements[i].toString() << "</td>";
+    out << "<tr><td>" << this->weylGroup->group.elements[i].toString() << "</td>";
     for (int j = 0; j < this->rPolynomials[i].size; j ++) {
       out << "<td>" << this->rPolynomials[i][j].toString(format) << "</td>\n";
     }

@@ -658,7 +658,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
     std::string tempS;
     output.drawMeNoMultiplicities(tempS, theDV1, 10000);
     Vector<Rational> tempRoot, tempRoot2;
-    WeylFDSmall.ambientWeyl->theGroup.computeAllElements(false, 20);
+    WeylFDSmall.ambientWeyl->group.computeAllElements(false, 20);
     out << "<hr>";
     for (int i = 0; i < output.size(); i ++) {
       tempRoot = WeylFDSmall.ambientWeyl->getSimpleCoordinatesFromFundamental(
@@ -667,7 +667,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
       std::stringstream tempStream;
       tempStream << output.coefficients[i].toString();
       theDV1.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
-      for (int j = 1; j < WeylFDSmall.ambientWeyl->theGroup.elements.size; j ++) {
+      for (int j = 1; j < WeylFDSmall.ambientWeyl->group.elements.size; j ++) {
         tempRoot2 = tempRoot;
         WeylFDSmall.ambientWeyl->actOnRhoModified(j, tempRoot2);
         theDV1.drawCircleAtVectorBufferRational(tempRoot2, "#a00000", 5);

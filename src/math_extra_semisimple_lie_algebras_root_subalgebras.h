@@ -428,6 +428,9 @@ public:
   RootSubalgebras();
 };
 
+// template <>
+// class ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >;
+
 class SlTwoSubalgebra {
 public:
 /////////////////////////////////////////////
@@ -436,10 +439,16 @@ public:
     return output;
   }
 /////////////////////////////////////////////
-  CharacterSemisimpleLieAlgebraModule<Rational> moduleDecompositionAmbientSA;
+  CharacterSemisimpleLieAlgebraModule<Rational> moduleDecompositionAmbientSubalgebra;
   List<int> moduleDimensions;
   ElementSemisimpleLieAlgebra<Rational> elementH, elementE, elementF;
   ElementSemisimpleLieAlgebra<Rational> hBracketE, hBracketF, eBracketF;
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > hUnknown;
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > eUnknown;
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > fUnknown;
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > hBracketEUnknown;
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > hBracketFUnknown;
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > eBracketFUnknown;
   SemisimpleLieAlgebra* owner;
   SlTwoSubalgebras* container;
   Rational lengthHSquared;
@@ -449,9 +458,9 @@ public:
   Rational dimCentralizerToralPart;
   bool flagCentralizerTypeComputed;
   bool flagCentralizerIsRegular;
-  List<int> indicesContainingRootSAs;
-  List<int> indicesMinimalContainingRootSAs;
-  List<CharacterSemisimpleLieAlgebraModule<Rational> > moduleDecompositionMinimalContainingRootSAs;
+  List<int> indicesContainingRootSubalgebras;
+  List<int> indicesMinimalContainingRootSubalgebras;
+  List<CharacterSemisimpleLieAlgebraModule<Rational> > moduleDecompositionMinimalContainingRootSubalgebras;
   Vectors<Rational> preferredAmbientSimpleBasis;
   Vector<Rational> hCharacteristic;
   Vector<Rational> hElementCorrespondingToCharacteristic;
@@ -509,7 +518,7 @@ public:
   Rational getDynkinIndex() const;
   void computeModuleDecompositionsitionAmbientLieAlgebra();
   bool attemptToComputeCentralizer();
-  bool attemptExtendingHFtoHEFWRTSubalgebra(
+  bool attemptExtendingHFtoHEFWithRespectToSubalgebra(
     Vectors<Rational>& rootsWithCharacteristic2,
     Selection& zeroCharacteristics,
     Vectors<Rational>& simpleBasisSA,
@@ -520,7 +529,7 @@ public:
     PolynomialSubstitution<Rational>& outputSystemToBeSolved,
     Matrix<Rational>& outputSystemColumnVector
   );
-  void initHEFSystemFromECoefficients(
+  void initializeHEFSystemFromECoefficients(
     Vectors<Rational>& rootsInPlay,
     int numberVariables,
     int halfNumberVariables,
@@ -599,8 +608,8 @@ public:
   }
   void computeModuleDecompositionsitionsOfAmbientLieAlgebra();
   void reset(SemisimpleLieAlgebra& inputOwners);
-  bool containsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex);
-  bool containsSl2WithGivenHCharacteristic(Vector<Rational>& theHCharacteristic, int* outputIndex);
+  bool containsSl2WithGivenH(Vector<Rational>& elementH, int* outputIndex);
+  bool containsSl2WithGivenHCharacteristic(Vector<Rational>& hCharacteristic, int* outputIndex);
   void writeHTML(FormatExpressions* format = nullptr);
   std::string toStringSummary(FormatExpressions* format = nullptr);
   void toStringModuleDecompositionMinimalContainingRegularSAs(std::string& output, bool useLatex, bool useHtml);

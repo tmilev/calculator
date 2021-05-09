@@ -721,11 +721,11 @@ bool CalculatorLieTheory::kazhdanLuzstigCoeffificents(Calculator& calculator, co
   }
   std::stringstream out;
   WeylGroupData& theWeyl = theSSalgebra.content->weylGroup;
-  if (theWeyl.theGroup.getSize() > 192) {
+  if (theWeyl.group.getSize() > 192) {
     out << "I have been instructed to run only for Weyl groups that"
     << " have at most 192 elements (i.e. no larger than D_4). "
     << theSSalgebra.content->toStringLieAlgebraName()
-    << " has " << theWeyl.theGroup.getSize().toString() << ".";
+    << " has " << theWeyl.group.getSize().toString() << ".";
     return output.assignValue(out.str(), calculator);
   }
   FormatExpressions theFormat;
@@ -2061,11 +2061,11 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(Calculator& calculator,
   << theSubgroup.RepresentativesQuotientAmbientOrder.size;
   out << "<br>Number of elements of the Weyl group of the Levi part: " << theSubgroup.allElements.size;
   out << "<br>Number of elements of the ambient Weyl: "
-  << theSubgroup.ambientWeyl->theGroup.elements.size;
+  << theSubgroup.ambientWeyl->group.elements.size;
   FormatExpressions theFormat;
   theSSalgPointer.context.getFormat(theFormat);
   if (theSubgroup.allElements.size > 498) {
-    if (theSubgroup.ambientWeyl->sizeByFormulaOrNegative1('E', 6) <= theSubgroup.ambientWeyl->theGroup.getSize()) {
+    if (theSubgroup.ambientWeyl->sizeByFormulaOrNegative1('E', 6) <= theSubgroup.ambientWeyl->group.getSize()) {
       out << "Weyl group is too large. <br>";
     } else {
       out << "Weyl group is too large for LaTeX. <br>";
@@ -2184,7 +2184,7 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
   Vector<RationalFraction<Rational> > currentHW;
   out << "<br>Orbit modified with small rho: "
   << "<table><tr><td>Simple coords</td><td>Fund coords</td></tr>";
-  for (int i = 0; i < theWeyl.theGroup.elements.size; i ++) {
+  for (int i = 0; i < theWeyl.group.elements.size; i ++) {
     currentHW = theHWsimpCoords;
     currentHW += theSub.getRho();
     theWeyl.actOn(i, currentHW);
@@ -2213,7 +2213,7 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
     ElementWeylGroup& currentElement = theWeylElements[i];
     out << "<tr><td>" << currentElement.toString() << "</td>";
 
-    int indexInWeyl = theKLpolys.weylGroup->theGroup.elements.getIndex(currentElement);
+    int indexInWeyl = theKLpolys.weylGroup->group.elements.getIndex(currentElement);
     if (indexInWeyl == - 1) {
       global.fatal << "Something is wrong: "
       << "I am getting that an element of the Weyl group of the Levi part of "
@@ -2227,7 +2227,7 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
         currentHW = theHWsimpCoords;
         theWeyl.actOnRhoModified(j, currentHW);
         theMon.weightFundamentalCoordinates = theWeyl.getFundamentalCoordinatesFromSimple(currentHW);
-        int sign = (currentElement.generatorsLastAppliedFirst.size - theWeyl.theGroup.elements[j].generatorsLastAppliedFirst.size) % 2 == 0 ? 1 : - 1;
+        int sign = (currentElement.generatorsLastAppliedFirst.size - theWeyl.group.elements[j].generatorsLastAppliedFirst.size) % 2 == 0 ? 1 : - 1;
         currentChar.addMonomial(theMon, theKLpolys.kazhdanLuzstigCoefficients[indexInWeyl][j] * sign);
       }
     }

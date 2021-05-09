@@ -6,37 +6,35 @@
 #include "math_extra_finite_groups_implementation.h"
 
 void RootSubalgebra::getCoxeterElement(Matrix<Rational>& output) {
-  int theDim = this->getAmbientWeyl().getDimension();
-  output.makeIdentityMatrix(theDim);
-  Matrix<Rational> tempMat;
+  int dimension = this->getAmbientWeyl().getDimension();
+  output.makeIdentityMatrix(dimension);
+  Matrix<Rational> matrix;
   for (int i = 0; i < this->simpleRootsReductiveSubalgebra.size; i ++) {
-    this->getAmbientWeyl().getMatrixReflection(this->simpleRootsReductiveSubalgebra[i], tempMat);
-    output.multiplyOnTheLeft(tempMat);
+    this->getAmbientWeyl().getMatrixReflection(this->simpleRootsReductiveSubalgebra[i], matrix);
+    output.multiplyOnTheLeft(matrix);
   }
 }
 
 void RootSubalgebra::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2) {
   //this->computeRho(true);
-  int theDimension = this->getAmbientWeyl().getDimension();
-  if (theDimension < 2) {
+  int dimension = this->getAmbientWeyl().getDimension();
+  if (dimension < 2) {
     return;
   }
   if (this->simpleRootsReductiveSubalgebra.size < 2) {
     if (this->simpleRootsReductiveSubalgebra.size == 1) {
       outputBasis1 = this->simpleRootsReductiveSubalgebra[0].getVectorDouble();
     } else {
-      outputBasis1.makeEi(theDimension, 0);
+      outputBasis1.makeEi(dimension, 0);
     }
     if (outputBasis1[0] == 0.0) {
-      outputBasis2.makeEi(theDimension, 0);
+      outputBasis2.makeEi(dimension, 0);
     } else {
-      outputBasis2.makeEi(theDimension, 1);
+      outputBasis2.makeEi(dimension, 1);
     }
     return;
   }
-  Vector<Rational> ZeroRoot;
-  ZeroRoot.makeZero(theDimension);
-  Matrix<Rational>  matCoxeterElt;
+  Matrix<Rational> matCoxeterElt;
   this->getCoxeterElement(matCoxeterElt);
   this->computeDynkinDiagramKAndCentralizer();
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms tempGroup;
@@ -68,24 +66,24 @@ void RootSubalgebra::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double
   Vectors<Complex<double> > theEigenSpace;
   theEigenSpace.operator=(theEigenSpaceList);
   DrawOperations tempDO;
-  tempDO.initDimensions(theDimension);
-  for (int i = 0; i < theDimension; i ++) {
-    for (int j = 0; j < theDimension; j ++) {
+  tempDO.initDimensions(dimension);
+  for (int i = 0; i < dimension; i ++) {
+    for (int j = 0; j < dimension; j ++) {
       tempDO.bilinearForm.elements[i][j] =
       this->getAmbientWeyl().cartanSymmetric.elements[i][j].getDoubleValue();
     }
   }
-  outputBasis1.setSize(theDimension);
-  outputBasis2.setSize(theDimension);
+  outputBasis1.setSize(dimension);
+  outputBasis2.setSize(dimension);
   if (theEigenSpace.size > 0) {
     if (coxeterNumber > 2) {
-      for (int j = 0; j < theDimension; j ++) {
+      for (int j = 0; j < dimension; j ++) {
         outputBasis1[j] = theEigenSpace[0][j].realPart;
         outputBasis2[j] = theEigenSpace[0][j].imaginaryPart;
       }
       tempDO.modifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
     } else if (coxeterNumber <= 2 && theEigenSpace.size > 1) {
-      for (int j = 0; j < theDimension; j ++) {
+      for (int j = 0; j < dimension; j ++) {
         outputBasis1[j] = theEigenSpace[0][j].realPart;
         outputBasis2[j] = theEigenSpace[1][j].realPart;
       }
@@ -856,9 +854,9 @@ void RootSubalgebra::extractRelations(
   int indexInOwner,
   Vectors<Rational>& Ksingular
 ) {
-  int theDimension = this->getOwnerLieAlgebra().getRank();
+  int dimension = this->getOwnerLieAlgebra().getRank();
   Vector<Rational> tempRoot;
-  tempRoot.makeZero(theDimension);
+  tempRoot.makeZero(dimension);
   ConeRelation theRel; theRel.IndexOwnerRootSubalgebra = indexInOwner;
   if (owner.flagLookingForMinimalRels) {
     theRel.FixRightHandSide(*this, NilradicalRoots);
@@ -872,7 +870,7 @@ void RootSubalgebra::extractRelations(
     owner.goodRelations.addRelationNoRepetition(theRel, owner);
   } else {
     //if (!this->checkForSmallRelations(theRel, NilradicalRoots))
-    this->matrixToRelation(theRel, matA, matX, theDimension, NilradicalRoots);
+    this->matrixToRelation(theRel, matA, matX, dimension, NilradicalRoots);
     this->makeGeneratingSingularVectors(theRel, NilradicalRoots);
     theRel.FixRightHandSide(*this, NilradicalRoots);
     theRel.makeLookCivilized(*this);
@@ -1034,10 +1032,10 @@ void RootSubalgebra::computeEpsilonCoordinatesWithRespectToSubalgebra() {
   this->kModulesgEpsCoords.setSize(this->modules.size);
   Vectors<Rational> EpsCoordsWRTk;
   Vectors<Rational> simpleBasisG;
-  int theDimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
-  simpleBasisG.setSize(theDimension);
-  for (int i = 0; i < theDimension; i ++) {
-    simpleBasisG[i].makeZero(theDimension);
+  int dimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
+  simpleBasisG.setSize(dimension);
+  for (int i = 0; i < dimension; i ++) {
+    simpleBasisG[i].makeZero(dimension);
     simpleBasisG[i][i] = 1;
   }
   Vector<Rational> tempRoot, tempRoot2, tempRoot3;
@@ -1204,20 +1202,20 @@ bool RootSubalgebra::isAnIsomorphism(
 ) {
   Matrix<Rational> matB;
   Vectors<Rational> tempRoots;
-  int theDimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
-  tempRoots.setSize(theDimension);
-  matB.initialize(theDimension, theDimension);
-  for (int i = 0; i < theDimension; i ++) {
-    for (int j = 0; j < theDimension; j ++) {
+  int dimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
+  tempRoots.setSize(dimension);
+  matB.initialize(dimension, dimension);
+  for (int i = 0; i < dimension; i ++) {
+    for (int j = 0; j < dimension; j ++) {
       matB.elements[i][j] = domain[i][j];
     }
-    tempRoots[i].makeZero(theDimension);
+    tempRoots[i].makeZero(dimension);
   }
   matB.invert();
   Rational tempRat2;
-  for (int k = 0; k < theDimension; k ++) {
-    for (int i = 0; i < theDimension; i ++) {
-      for (int j = 0; j < theDimension; j ++) {
+  for (int k = 0; k < dimension; k ++) {
+    for (int i = 0; i < dimension; i ++) {
+      for (int j = 0; j < dimension; j ++) {
         tempRat2 = range[j][k];
         tempRat2.multiplyBy(matB.elements[i][j]);
         tempRoots[i][k] += tempRat2;
@@ -1288,9 +1286,9 @@ std::string RootSubalgebra::toString(FormatExpressions* format) {
   out << "\n<br>\nSimple basis epsilon form with respect to k: "
   << this->SimpleBasisKEpsCoords.toStringEpsilonForm(useLatex, useHtml, false);
   out << "<br>Number of outer autos with trivial action on orthogonal complement and extending to autos of ambient algebra: "
-  << this->outerSAautosExtendingToAmbientAutosGenerators.theElements.size;
+  << this->outerSAautosExtendingToAmbientAutosGenerators.elements.size;
   out << "<br>Number of outer autos with trivial action on orthogonal complement: "
-  << this->outerSAautos.theElements.size << ". ";
+  << this->outerSAautos.elements.size << ". ";
   out << "<br>\nC(k_{ss})_{ss}: " << this->theCentralizerDiagram.toString();
   out << "<br>\n simple basis centralizer: " << this->SimpleBasisCentralizerRoots.toString();
   out << "<hr>\n Number of k-submodules of g: " << this->modules.size;
@@ -1414,7 +1412,7 @@ void RootSubalgebra::makeGeneratingSingularVectors(ConeRelation& theRelation, Ve
 }
 
 void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnumeration) {
-  int theDimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
+  int dimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
   std::stringstream out2;
   std::stringstream out;
   out2 << this->toString() << "\n";
@@ -1426,9 +1424,9 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
   for (int i = 0; i <AllRoots.size; i ++) {
     Vector<Rational> linComb;
     if (this->allRootsSubalgebra.getIndex(AllRoots[i]) == - 1) {
-      for (int j = 0; j < theDimension; j ++) {
+      for (int j = 0; j < dimension; j ++) {
         linComb[j].makeZero();
-        for (int k = 0; k < theDimension; k++) {
+        for (int k = 0; k < dimension; k++) {
           Rational tempRat;
           tempRat.assign(tempMat.elements[k][j]);
           tempRat.multiplyBy(AllRoots[i][k]);
@@ -1458,7 +1456,7 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
 }
 
 void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
-  int theDimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
+  int dimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
   std::stringstream out;
   out << this->toString() << "\n\n";
   Vector<Rational> tempRoot;
@@ -1479,9 +1477,9 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
       for (int i = 0; i <AllRoots.size; i ++) {
         Vector<Rational> linComb;
         if (this->allRootsSubalgebra.getIndex(AllRoots.objects[i]) == - 1) {
-          for (int j = 0; j < theDimension; j ++) {
+          for (int j = 0; j < dimension; j ++) {
             linComb[j].makeZero();
-            for (int k = 0; k < theDimension; k++) {
+            for (int k = 0; k < dimension; k++) {
               Rational tempRat;
               tempRat.assign(tempMat.elements[k][j]);
               tempRat.multiplyBy(AllRoots[i][k]);
@@ -1505,15 +1503,15 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
 bool RootSubalgebra::linearCombinationToString(
   const Vector<Rational>& alphaRoot, int coeff, Vector<Rational>& linComb, std::string& output
 ) {
-  int theDimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
+  int dimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
   if (coeff == 1) {
     return false;
   }
   std::stringstream out;
   std::string tempS = alphaRoot.toString();
   out << "(" << tempS << ")&$";
-  out << coeff << "\\alpha_" << theDimension + 1;
-  for (int i = 0; i < theDimension; i ++) {
+  out << coeff << "\\alpha_" << dimension + 1;
+  for (int i = 0; i < dimension; i ++) {
      //if (linComb.coordinates[i].isEqualToZero())
     //  return false;
     tempS = linComb[i].toString();
@@ -1690,15 +1688,15 @@ WeylGroupAutomorphisms& RootSubalgebra::getAmbientWeylAutomorphisms() const {
 bool RootSubalgebra::linearCombinationToStringDistinguishedIndex(
   int distinguished, Vector<Rational>& alphaRoot, int coeff, Vector<Rational>& linComb, std::string& output
 ) {
-  int theDimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
+  int dimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
   if (coeff == 1) {
     return false;
   }
   std::stringstream out;
   std::string tempS = alphaRoot.toString();
   out << "(" << tempS << ")&$";
-  out << coeff << "\\alpha_" << theDimension + 1;
-  for (int i = 0; i < theDimension; i ++) {
+  out << coeff << "\\alpha_" << dimension + 1;
+  for (int i = 0; i < dimension; i ++) {
     tempS = linComb.objects[i].toString();
     if (tempS != "0") {
       if (tempS == "- 1" || tempS == "-1") {
@@ -2032,14 +2030,14 @@ void RootSubalgebra::doKRootsEnumerationRecursively(int indexEnumeration) {
 }
 
 void RootSubalgebra::subalgebraEnumerationsToLinearCombinations() {
-  int theDimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
+  int dimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
   Matrix<Rational> tempMat;
   Selection tempSelection;
-  tempMat.initialize(theDimension, theDimension);
+  tempMat.initialize(dimension, dimension);
   int counter = 0;
   for (int i = 0; i < this->positiveRootsKConnectedComponents.size; i ++) {
     this->positiveRootsKConnectedComponents[i].selectionToMatrixAppend(
-      this->theKEnumerations[i], theDimension, tempMat, counter
+      this->theKEnumerations[i], dimension, tempMat, counter
     );
     counter += this->theKComponentRanks[i];
   }
@@ -2049,9 +2047,9 @@ void RootSubalgebra::subalgebraEnumerationsToLinearCombinations() {
     for (int l = 0; l < this->testedRootsAlpha.size; l ++) {
       Vector<Rational> linComb;
       Vector<Rational>& TestedRootAlpha = this->testedRootsAlpha[l];
-      for (int j = 0; j < theDimension; j ++) {
+      for (int j = 0; j < dimension; j ++) {
         linComb[j].makeZero();
-        for (int k = 0; k < theDimension; k ++) {
+        for (int k = 0; k < dimension; k ++) {
           Rational tempRat;
           tempRat.assign(tempMat.elements[k][j]);
           tempRat.multiplyBy(TestedRootAlpha[k]);
@@ -2061,7 +2059,7 @@ void RootSubalgebra::subalgebraEnumerationsToLinearCombinations() {
       int x = linComb.findLeastCommonMultipleDenominatorsTruncateToInt();
       linComb *= - x;
       bool foundBadCombination = true;
-      for (int i = 0; i < theDimension; i ++) {
+      for (int i = 0; i < dimension; i ++) {
         if (linComb[i].numeratorShort == - 1 || linComb[i].numeratorShort == 1) {
           foundBadCombination = false;
           break;
@@ -2200,19 +2198,19 @@ void RootSubalgebra::computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomo
   Matrix<Rational> basisMatrixInverted, resultingOperator;
   basisMatrixInverted.assignVectorsToColumns(weightBasis);
   basisMatrixInverted.invert();
-  this->outerSAautos.theGenerators.setSize(outerAutos.size);
+  this->outerSAautos.generators.setSize(outerAutos.size);
   for (int i = 0; i < outerAutos.size; i ++) {
     outerAutos[i].actOnVectorROWSOnTheLeft(this->simpleRootsReductiveSubalgebra, imagesWeightBasis);
     imagesWeightBasis.addListOnTop(basisOrthogonalRoots);
     resultingOperator.assignVectorsToColumns(imagesWeightBasis);
     resultingOperator *= basisMatrixInverted;
-    this->outerSAautos.theGenerators[i] = resultingOperator;
+    this->outerSAautos.generators[i] = resultingOperator;
   }
   this->outerSAautos.generateElements(0);
-  this->outerSAautosExtendingToAmbientAutosGenerators.theElements.clear();
-  for (int i = 0; i < this->outerSAautos.theElements.size; i ++) {
-    if (this->getAmbientWeylAutomorphisms().isElementWeylGroupOrOuterAutomorphisms(this->outerSAautos.theElements[i])) {
-      this->outerSAautosExtendingToAmbientAutosGenerators.theElements.addOnTop(this->outerSAautos.theElements[i]);
+  this->outerSAautosExtendingToAmbientAutosGenerators.elements.clear();
+  for (int i = 0; i < this->outerSAautos.elements.size; i ++) {
+    if (this->getAmbientWeylAutomorphisms().isElementWeylGroupOrOuterAutomorphisms(this->outerSAautos.elements[i])) {
+      this->outerSAautosExtendingToAmbientAutosGenerators.elements.addOnTop(this->outerSAautos.elements[i]);
     }
   }
 }
@@ -2220,10 +2218,10 @@ void RootSubalgebra::computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomo
 bool RootSubalgebra::checkForMaximalDominanceCartanSubalgebra() {
   MacroRegisterFunctionWithName("RootSubalgebra::checkForMaximalDominanceCartanSubalgebra");
   Vectors<Rational> simpleBasisOriginalOrderCopy;
-  for (int i = 0; i < this->outerSAautos.theElements.size; i ++) {
-    if (!this->outerSAautos.theElements[i].isIdentity()) {
+  for (int i = 0; i < this->outerSAautos.elements.size; i ++) {
+    if (!this->outerSAautos.elements[i].isIdentity()) {
       simpleBasisOriginalOrderCopy = this->simpleBasisKinOrderOfGeneration;
-      this->outerSAautos.theElements[i].actOnVectorsColumn(simpleBasisOriginalOrderCopy);
+      this->outerSAautos.elements[i].actOnVectorsColumn(simpleBasisOriginalOrderCopy);
       this->getAmbientWeylAutomorphisms().raiseToMaximallyDominant(simpleBasisOriginalOrderCopy);
       for (int j = 0; j < simpleBasisOriginalOrderCopy.size; j ++) {
         if (simpleBasisOriginalOrderCopy[j] != this->simpleBasisKinOrderOfGeneration[j]) {
@@ -2439,7 +2437,7 @@ bool SlTwoSubalgebra::hasImplementedStandardCartanInvolution(
   return true;
 }
 
-bool SlTwoSubalgebra::attemptExtendingHFtoHEFWRTSubalgebra(
+bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
   Vectors<Rational>& rootsWithCharacteristic2,
   Selection& zeroCharacteristics,
   Vectors<Rational>& simpleBasisSA,
@@ -2457,7 +2455,7 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWRTSubalgebra(
   Vectors<Rational> rootsInPlay;
   rootsInPlay.size = 0;
   int relativeDimension = simpleBasisSA.size;
-//  int theDimension = this->theWeyl.cartanSymmetric.numberOfRows;
+//  int dimension = this->theWeyl.cartanSymmetric.numberOfRows;
   if (relativeDimension != zeroCharacteristics.numberOfElements) {
     global.fatal << "Relative dimension is incorrect. " << global.fatal;
   }
@@ -2506,7 +2504,7 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWRTSubalgebra(
   if (this->hasImplementedStandardCartanInvolution(&cartanInvolutionStandard)) {
     cartanInvolutionToRespect = &cartanInvolutionStandard;
   }
-  this->initHEFSystemFromECoefficients(
+  this->initializeHEFSystemFromECoefficients(
     rootsInPlay,
     numberVariables,
     halfNumberVariables,
@@ -2539,7 +2537,7 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWRTSubalgebra(
   return false;
 }
 
-void SlTwoSubalgebra::initHEFSystemFromECoefficients(
+void SlTwoSubalgebra::initializeHEFSystemFromECoefficients(
   Vectors<Rational>& rootsInPlay,
   int numberVariables,
   int halfNumberVariables,
@@ -2550,7 +2548,7 @@ void SlTwoSubalgebra::initHEFSystemFromECoefficients(
   PolynomialSubstitution<Rational>& outputSystemToBeSolved,
   LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionPreservedByEMinusF
 ) {
-  MacroRegisterFunctionWithName("SlTwoSubalgebra::initHEFSystemFromECoefficients");
+  MacroRegisterFunctionWithName("SlTwoSubalgebra::initializeHEFSystemFromECoefficients");
   MonomialPolynomial monomial;
   HashedList<Vector<Rational> > rootSpacesToVanish;
   rootSpacesToVanish.setExpectedSize(this->getOwnerWeyl().rootSystem.size);
@@ -2759,7 +2757,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
     sl2.lengthHSquared = sl2.getOwnerSemisimpleAlgebra().weylGroup.rootScalarCartanRoot(characteristicH, characteristicH);
     sl2.elementE.makeZero();
     sl2.elementF.makeZero();
-    if (sl2.attemptExtendingHFtoHEFWRTSubalgebra(
+    if (sl2.attemptExtendingHFtoHEFWithRespectToSubalgebra(
       sl2.rootsWithScalar2WithH,
       selectionRootsWithZeroCharacteristic,
       reflectedSimpleBasisK,
@@ -2773,7 +2771,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
       int indexIsoSl2 = - 1;
       sl2.makeReportPrecomputations(indexRootSAinContainer, *this);
       if (output.containsSl2WithGivenHCharacteristic(sl2.hCharacteristic, &indexIsoSl2)) {
-        output.getElement(indexIsoSl2).indicesContainingRootSAs.addOnTop(indexRootSAinContainer);
+        output.getElement(indexIsoSl2).indicesContainingRootSubalgebras.addOnTop(indexRootSAinContainer);
         output.indicesSl2sContainedInRootSA[indexRootSAinContainer].addOnTop(indexIsoSl2);
       } else {
         output.indicesSl2sContainedInRootSA[indexRootSAinContainer].addOnTop(output.size);
@@ -3693,15 +3691,15 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
   Vectors<Rational> epsCoords;
   Matrix<int> tempMat;
   char simpleType;
-  int theDimension;
-  if (!this->getOwnerWeyl().dynkinType.isSimple(&simpleType, &theDimension)) {
+  int dimension = - 1;
+  if (!this->getOwnerWeyl().dynkinType.isSimple(&simpleType, &dimension)) {
     global.fatal << "toStringConeConditionNotSatisfying "
     << "called on a non-simple Lie algebra. " << global.fatal;
   }
   if (simpleType == 'B') {
     this->getOwnerWeyl().getEpsilonCoordinates(input, epsCoords);
-    tempMat.makeIdentityMatrix(theDimension * 2 + 1, 1, 0);
-    tempMat.elements[theDimension][theDimension] = 0;
+    tempMat.makeIdentityMatrix(dimension * 2 + 1, 1, 0);
+    tempMat.elements[dimension][dimension] = 0;
     for (int i = 0; i < epsCoords.size; i ++) {
       bool isShort = false;
       int firstIndex = - 1;
@@ -3709,7 +3707,7 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
       bool firstSignIsPositive = true;
       bool secondSignIsPositive = true;
       Vector<Rational>& currentRoot = epsCoords[i];
-      for (int j = 0; j < theDimension; j ++) {
+      for (int j = 0; j < dimension; j ++) {
         if (currentRoot[j] != 0) {
           isShort = !isShort;
           if (isShort) {
@@ -3741,30 +3739,30 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
             negativeIndex = firstIndex;
           }
           tempMat.elements[positiveIndex][negativeIndex] = 1;
-          tempMat.elements[theDimension + 1 + negativeIndex][theDimension + 1 + positiveIndex] = - 1;
+          tempMat.elements[dimension + 1 + negativeIndex][dimension + 1 + positiveIndex] = - 1;
         } else {
           if (firstSignIsPositive) {
-            tempMat.elements[firstIndex][secondIndex + theDimension + 1] = 1;
-            tempMat.elements[secondIndex][firstIndex + theDimension + 1] = - 1;
+            tempMat.elements[firstIndex][secondIndex + dimension + 1] = 1;
+            tempMat.elements[secondIndex][firstIndex + dimension + 1] = - 1;
           } else {
-            tempMat.elements[theDimension + 1 + firstIndex][secondIndex] = 1;
-            tempMat.elements[theDimension + 1 + secondIndex][firstIndex] = - 1;
+            tempMat.elements[dimension + 1 + firstIndex][secondIndex] = 1;
+            tempMat.elements[dimension + 1 + secondIndex][firstIndex] = - 1;
           }
         }
       } else {
         if (firstSignIsPositive) {
-          tempMat.elements[firstIndex][theDimension] = 1;
-          tempMat.elements[theDimension][theDimension + 1 + firstIndex] = - 1;
+          tempMat.elements[firstIndex][dimension] = 1;
+          tempMat.elements[dimension][dimension + 1 + firstIndex] = - 1;
         } else {
-          tempMat.elements[theDimension][firstIndex] = 1;
-          tempMat.elements[firstIndex + 1 + theDimension][theDimension] = - 1;
+          tempMat.elements[dimension][firstIndex] = 1;
+          tempMat.elements[firstIndex + 1 + dimension][dimension] = - 1;
         }
       }
     }
   }
   if (simpleType == 'C') {
     this->getOwnerWeyl().getEpsilonCoordinates(input, epsCoords);
-    tempMat.makeIdentityMatrix(theDimension * 2, 1, 0);
+    tempMat.makeIdentityMatrix(dimension * 2, 1, 0);
     for (int i = 0; i < epsCoords.size; i ++) {
       bool isLong= false;
       int firstIndex = - 1;
@@ -3772,7 +3770,7 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
       bool firstSignIsPositive = true;
       bool secondSignIsPositive = true;
       Vector<Rational>& currentRoot = epsCoords[i];
-      for (int j = 0; j < theDimension; j ++) {
+      for (int j = 0; j < dimension; j ++) {
         if (currentRoot[j] != 0) {
           isLong = !isLong;
           if (isLong) {
@@ -3804,21 +3802,21 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
             negativeIndex = firstIndex;
           }
           tempMat.elements[positiveIndex][negativeIndex] = 1;
-          tempMat.elements[theDimension + negativeIndex][theDimension + positiveIndex] = - 1;
+          tempMat.elements[dimension + negativeIndex][dimension + positiveIndex] = - 1;
         } else {
           if (firstSignIsPositive) {
-            tempMat.elements[firstIndex][secondIndex + theDimension] = 1;
-            tempMat.elements[secondIndex][firstIndex + theDimension] = 1;
+            tempMat.elements[firstIndex][secondIndex + dimension] = 1;
+            tempMat.elements[secondIndex][firstIndex + dimension] = 1;
           } else {
-            tempMat.elements[theDimension + firstIndex][secondIndex] = 1;
-            tempMat.elements[theDimension + secondIndex][firstIndex] = 1;
+            tempMat.elements[dimension + firstIndex][secondIndex] = 1;
+            tempMat.elements[dimension + secondIndex][firstIndex] = 1;
           }
         }
       } else {
         if (firstSignIsPositive) {
-          tempMat.elements[firstIndex][theDimension + firstIndex] = 1;
+          tempMat.elements[firstIndex][dimension + firstIndex] = 1;
         } else {
-          tempMat.elements[theDimension + firstIndex][firstIndex] = 1;
+          tempMat.elements[dimension + firstIndex][firstIndex] = 1;
         }
       }
     }
@@ -3848,13 +3846,13 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
     out << "\\end{tabular} & $\\mathfrak{l}=\\left(\\begin{array}{";
     for (int i = 0; i < tempMat.numberOfColumns; i ++) {
       out << "c";
-      if (simpleType == 'B' && (i == theDimension - 1 || i == theDimension)) {
+      if (simpleType == 'B' && (i == dimension - 1 || i == dimension)) {
         out << "|";
       }
     }
     out << "}";
     for (int i = 0; i < tempMat.numberOfRows; i ++) {
-      if (simpleType == 'B' && (i == theDimension || i == theDimension + 1)) {
+      if (simpleType == 'B' && (i == dimension || i == dimension + 1)) {
         out << "\\hline";
       }
       for (int j = 0; j < tempMat.numberOfColumns; j ++) {
@@ -4302,11 +4300,11 @@ bool ConeRelation::checkForBugs(RootSubalgebra& owner, Vectors<Rational>& Nilrad
   return true;
 }
 
-void ConeRelation::getSumAlphas(Vector<Rational>& output, int theDimension) {
+void ConeRelation::getSumAlphas(Vector<Rational>& output, int dimension) {
   if (this->AlphaCoeffs.size != this->Alphas.size) {
     global.fatal << "Wrong number of alpha coefficients" << global.fatal;
   }
-  output.makeZero(theDimension);
+  output.makeZero(dimension);
   Vector<Rational> tempRoot;
   for (int i = 0; i < this->Alphas.size; i ++) {
     tempRoot = this->Alphas[i];

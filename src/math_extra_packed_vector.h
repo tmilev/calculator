@@ -582,7 +582,7 @@ void getTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup>
   H.getSignCharacter(HXs);*/
 
   SubgroupData<FiniteGroup<ElementWeylGroup>, ElementWeylGroup> HD;
-  HD.initFromGroupAndGenerators(G.theGroup, gens);
+  HD.initFromGroupAndGenerators(G.group, gens);
   FiniteGroup<ElementWeylGroup>& H = *HD.theSubgroup;
   H.computeAllElements(true, - 1);
   Vector<Rational> HXs;
@@ -592,9 +592,9 @@ void getTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup>
   ccPreimages.setSize(H.conjugacyClassCount());
   for (int i = 0; i < H.conjugacyClassCount(); i ++) {
     bool notFound = true;
-    for (int ci = 0; notFound && ci < G.theGroup.conjugacyClassCount(); ci ++) {
-      for (int cj = 0; notFound && cj < G.theGroup.conjugacyClasses[ci].size; cj ++) {
-        if (G.theGroup.conjugacyClasses[ci].elements[cj] == H.conjugacyClasses[i].representative) {
+    for (int ci = 0; notFound && ci < G.group.conjugacyClassCount(); ci ++) {
+      for (int cj = 0; notFound && cj < G.group.conjugacyClasses[ci].size; cj ++) {
+        if (G.group.conjugacyClasses[ci].elements[cj] == H.conjugacyClasses[i].representative) {
           ccPreimages[i] = ci;
           notFound = false;
         }
@@ -604,11 +604,11 @@ void getTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup>
       global.fatal << "Something went very wrong: couldn't find preimage of conjugacy class of subgroup. " << global.fatal;
     }
   }
-  out.setSize(G.theGroup.characterTable.size);
+  out.setSize(G.group.characterTable.size);
   Vector<Rational> HXi;
   HXi.setSize(H.conjugacyClassCount());
-  for (int i = 0; i < G.theGroup.characterTable.size; i ++) {
-    Vector<Rational> GXi = G.theGroup.characterTable[i].data;
+  for (int i = 0; i < G.group.characterTable.size; i ++) {
+    Vector<Rational> GXi = G.group.characterTable[i].data;
     for (int j = 0; j < HXi.size; j ++) {
       HXi[j] = GXi[ccPreimages[j]];
     }
@@ -638,9 +638,9 @@ void computeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
   Vector<Rational> Xs;
   G->getSignCharacter(Xs);
   List<bool> tsg;
-  tsg.setSize(G->theGroup.characterTable.size);
-  for (int i = 0; i < G->theGroup.characterTable.size; i ++) {
-    tsg[i] = G->theGroup.characterTable[i].data == Xs;
+  tsg.setSize(G->group.characterTable.size);
+  for (int i = 0; i < G->group.characterTable.size; i ++) {
+    tsg[i] = G->group.characterTable[i].data == Xs;
   }
   tss.addOnTop(tsg);
 
@@ -664,16 +664,16 @@ void computeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
   // we will need the sign character for the group
 
 
-  tauSignatures.setSize(G->theGroup.characterTable.size);
-  for (int i = 0; i < G->theGroup.characterTable.size; i ++) {
+  tauSignatures.setSize(G->group.characterTable.size);
+  for (int i = 0; i < G->group.characterTable.size; i ++) {
     tauSignatures[i].setSize(tss.size + 1);
     tauSignatures[i][0] = 1;
     for (int j = 1; j < tss.size + 1; j ++) {
       tauSignatures[i][j] = tss[j - 1][i];
     }
   }
-  for (int i = 0; i < G->theGroup.characterTable.size; i ++) {
-    global.comments << G->theGroup.characterTable[i] << "\n";
+  for (int i = 0; i < G->group.characterTable.size; i ++) {
+    global.comments << G->group.characterTable[i] << "\n";
     for (int j = 0; j < tauSignatures[i].size; j ++) {
       global.comments << tauSignatures[i][j] << ' ';
     }
@@ -716,7 +716,7 @@ void ExportCharTable(FiniteGroup<elementSomeGroup>& G, JSData& data) {
 }
 
 void exportTauSignatures(WeylGroupData& G, const List<List<bool> >& ts, JSData &data) {
-  ExportCharTable(G.theGroup, data["chartable"]);
+  ExportCharTable(G.group, data["chartable"]);
   for (int i = 0; i < ts.size; i ++) {
     for (int j = 0; j < ts[i].size; j ++) {
       data["tausigs"][i][j] = ts[i][j];

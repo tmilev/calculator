@@ -51,12 +51,12 @@ public:
   std::string toString(FormatExpressions* format = nullptr) const;
   static unsigned int hashFunction(const ClassFunction& input);
   unsigned int hashFunction() const;
-  void operator*=(const Coefficient& inputCF) {
-    this->data *= inputCF;
+  void operator*=(const Coefficient& inputCoefficient) {
+    this->data *= inputCoefficient;
   }
-  ClassFunction operator*(const Coefficient& inputCF) const {
+  ClassFunction operator*(const Coefficient& inputCoefficient) const {
     ClassFunction result = *this;
-    result.data *= inputCF;
+    result.data *= inputCoefficient;
     return result;
   }
   void operator+= (const ClassFunction& right) {
@@ -150,8 +150,8 @@ public:
   HashedList<elementSomeGroup> elements;
   HashedList<elementSomeGroup> unionGeneratorsCC;
   struct ConjugacyClass {
-    friend std::ostream& operator << (std::ostream& output, const ConjugacyClass& theClass) {
-      output << theClass.toString();
+    friend std::ostream& operator << (std::ostream& output, const ConjugacyClass& conjugacyClasses) {
+      output << conjugacyClasses.toString();
       return output;
     }
   public:
@@ -415,8 +415,8 @@ public:
 };
 
 class ElementWeylGroup {
-  friend std::ostream& operator << (std::ostream& output, const ElementWeylGroup& theElement) {
-    output << theElement.toString();
+  friend std::ostream& operator << (std::ostream& output, const ElementWeylGroup& element) {
+    output << element.toString();
     return output;
   }
 public:
@@ -515,8 +515,8 @@ public:
 template <class Coefficient>
 class FinitelyGeneratedMatrixMonoid {
   public:
-  List<MatrixTensor<Coefficient> > theGenerators;
-  HashedList<MatrixTensor<Coefficient> > theElements;
+  List<MatrixTensor<Coefficient> > generators;
+  HashedList<MatrixTensor<Coefficient> > elements;
   bool generateElements(int upperBoundNonPositiveMeansNoLimit);
   std::string toString(FormatExpressions* format = nullptr) const;
 };
@@ -524,16 +524,16 @@ class FinitelyGeneratedMatrixMonoid {
 template <class Coefficient>
 bool FinitelyGeneratedMatrixMonoid<Coefficient>::generateElements(int upperBoundNonPositiveMeansNoLimit) {
   MacroRegisterFunctionWithName("FinitelyGeneratedMatrixMonoid::generateElements");
-  this->theElements.clear();
-  this->theElements.addOnTopNoRepetition(theGenerators);
+  this->elements.clear();
+  this->elements.addOnTopNoRepetition(generators);
   MatrixTensor<Coefficient> currentElement;
-  for (int i = 0; i < this->theElements.size; i ++) {
-    for (int j = 0; j < this->theGenerators.size; j ++) {
-      currentElement = this->theGenerators[j];
-      currentElement *= this->theElements[i];
-      this->theElements.addOnTopNoRepetition(currentElement);
+  for (int i = 0; i < this->elements.size; i ++) {
+    for (int j = 0; j < this->generators.size; j ++) {
+      currentElement = this->generators[j];
+      currentElement *= this->elements[i];
+      this->elements.addOnTopNoRepetition(currentElement);
       if (upperBoundNonPositiveMeansNoLimit > 0) {
-        if (this->theElements.size > upperBoundNonPositiveMeansNoLimit) {
+        if (this->elements.size > upperBoundNonPositiveMeansNoLimit) {
           return false;
         }
       }
@@ -583,7 +583,7 @@ public:
   HashedList<Vector<Rational> > rhoOrbit;
   HashedList<Vector<Rational> > rootSystem;
   Vectors<Rational> rootsOfBorel;
-  FiniteGroup<ElementWeylGroup> theGroup;
+  FiniteGroup<ElementWeylGroup> group;
 
   List<std::string> ccCarterLabels;
   List<std::string> irrepsCarterLabels;
@@ -756,7 +756,7 @@ public:
     bool wipeCanvas,
     bool drawWeylChamber,
     Vector<Rational>* bluePoint = nullptr,
-    bool LabelDynkinDiagramVertices = false,
+    bool labelDynkinDiagramVertices = false,
     Vectors<Rational>* predefinedProjectionPlane = nullptr
   );
   bool hasStronglyPerpendicularDecompositionWRT(
@@ -905,7 +905,7 @@ public:
   }
   template <class Coefficient>
   void actOn(int indexOfWeylElement, Vector<Coefficient>& theVector) const {
-    this->actOn(this->theGroup.elements[indexOfWeylElement], theVector, theVector);
+    this->actOn(this->group.elements[indexOfWeylElement], theVector, theVector);
   }
   template <class Coefficient>
   void actOn(
@@ -928,7 +928,7 @@ public:
   }
   template <class Coefficient>
   void actOnRhoModified(int indexOfWeylElement, Vector<Coefficient>& theVector) const {
-    this->actOnRhoModified(this->theGroup.elements[indexOfWeylElement], theVector);
+    this->actOnRhoModified(this->group.elements[indexOfWeylElement], theVector);
   }
   template <class Coefficient>
   void actOnDual(int index,Vector<Coefficient>& theVector, bool RhoAction, const Coefficient& ringZero);
@@ -1064,7 +1064,7 @@ public:
   bool flagAllOuterAutosComputed;
   bool flagDeallocated;
   WeylGroupData* theWeyl;
-  FinitelyGeneratedMatrixMonoid<Rational> theOuterAutos;
+  FinitelyGeneratedMatrixMonoid<Rational> outerAutomorphisms;
   HashedList<ElementWeylGroupAutomorphisms> allElements;
   void computeOuterAutoGenerators();
   void computeOuterAutomorphisms();
@@ -1078,7 +1078,7 @@ public:
     int upperLimitNumberOfElements = - 1
   );
   LargeInteger getOrbitSize(Vector<Rational>& theWeight);
-  bool isElementWeylGroupOrOuterAutomorphisms(const MatrixTensor<Rational>& theMat);
+  bool isElementWeylGroupOrOuterAutomorphisms(const MatrixTensor<Rational>& matrix);
   bool areMaximallyDominantGroupOuter(List<Vector<Rational> >& theWeights);
   bool checkInitialization() const;
 
@@ -1125,7 +1125,7 @@ void WeylGroupAutomorphisms::actOn(
         global.fatal << "Weyl group of type " << this->theWeyl->dynkinType.toString()
         << " does not have its outer autos computed at a place where it should. " << global.fatal;
       }
-      this->theOuterAutos.theGenerators[currentGenerator.index].actOnVectorColumn(outputVector, outputVector);
+      this->outerAutomorphisms.generators[currentGenerator.index].actOnVectorColumn(outputVector, outputVector);
     }
   }
 }
@@ -2062,7 +2062,7 @@ std::ostream& operator<<(std::ostream& out, const ElementWeylGroupRing<Coefficie
 template <typename Coefficient>
 void ElementWeylGroupRing<Coefficient>::makeEi(WeylGroupData* GG, int i) {
   ElementWeylGroup theMon;
-  theMon = GG->theGroup.elements[i];
+  theMon = GG->group.elements[i];
   *this = theMon;
 }
 
@@ -2079,10 +2079,10 @@ void ElementWeylGroupRing<Coefficient>::makeFromClassFunction(WeylGroupData* GG,
   }
   this->makeZero();
   ElementWeylGroup theMon;
-  for (int i = 0; i < GG->theGroup.conjugacyClassCount(); i ++) {
+  for (int i = 0; i < GG->group.conjugacyClassCount(); i ++) {
     if (l[i] != 0) {
-      for (int j = 0; j < GG->theGroup.conjugacyClasses.size; j ++) {
-        this->addMonomial(GG->theGroup.conjugacyClasses[i].elements[j], l[i]);
+      for (int j = 0; j < GG->group.conjugacyClasses.size; j ++) {
+        this->addMonomial(GG->group.conjugacyClasses[i].elements[j], l[i]);
       }
     }
   }

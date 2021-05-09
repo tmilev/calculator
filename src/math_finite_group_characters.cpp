@@ -45,7 +45,7 @@ ElementWeylGroup WeylGroupData::simpleConjugation(int i, const ElementWeylGroup&
   (void) vv;
   ElementWeylGroup eltSimpleReflection;
   eltSimpleReflection.makeSimpleReflection(i, *this);
-  return eltSimpleReflection * this->theGroup.elements[i] * eltSimpleReflection;
+  return eltSimpleReflection * this->group.elements[i] * eltSimpleReflection;
 }
 
 template <typename elementSomeGroup>
@@ -64,25 +64,25 @@ void FiniteGroup<elementSomeGroup>::computeSquaresCCReps() {
 
 void WeylGroupData::computeInitialIrreducibleRepresentations() {
   MacroRegisterFunctionWithName("WeylGroup::computeInitialIrreducibleRepresentations");
-  if (!this->theGroup.flagCCsComputed) {
-    this->theGroup.computeConjugacyClassesFromAllElements();
+  if (!this->group.flagCCsComputed) {
+    this->group.computeConjugacyClassesFromAllElements();
   }
-  if (this->theGroup.squaresCCReps.size == 0) {
-    this->theGroup.computeSquaresCCReps();
+  if (this->group.squaresCCReps.size == 0) {
+    this->group.computeSquaresCCReps();
   }
-  this->theGroup.irreps.setSize(0);
-  this->theGroup.characterTable.setSize(0);
-  this->theGroup.irreps_grcam.setSize(0);
-  this->theGroup.characterTable.setExpectedSize(this->theGroup.conjugacyClassCount());
-  this->theGroup.irreps.setExpectedSize(this->theGroup.conjugacyClassCount());
-  this->theGroup.irreps_grcam.setExpectedSize(this->theGroup.conjugacyClassCount());
+  this->group.irreps.setSize(0);
+  this->group.characterTable.setSize(0);
+  this->group.irreps_grcam.setSize(0);
+  this->group.characterTable.setExpectedSize(this->group.conjugacyClassCount());
+  this->group.irreps.setExpectedSize(this->group.conjugacyClassCount());
+  this->group.irreps_grcam.setExpectedSize(this->group.conjugacyClassCount());
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational> trivialRep, signRep, standardRep;
   this->getTrivialRepresentation(trivialRep);
   this->getSignRepresentation(signRep);
   this->getStandardRepresentation(standardRep);
-  this->theGroup.addIrreducibleRepresentation(trivialRep);
-  this->theGroup.addIrreducibleRepresentation(signRep);
-  this->theGroup.addIrreducibleRepresentation(standardRep);
+  this->group.addIrreducibleRepresentation(trivialRep);
+  this->group.addIrreducibleRepresentation(signRep);
+  this->group.addIrreducibleRepresentation(standardRep);
 }
 
 // This is dumb, but i couldnt figure out what else to do
@@ -831,10 +831,10 @@ bool is_isotypic_component(WeylGroupData& G, const List<Vector<Coefficient> >& V
   }
   // more expensive test: character of V has unit norm
   ClassFunction<FiniteGroup<ElementWeylGroup>, Coefficient> X;
-  X.G = &G.theGroup;
-  X.data.setSize(G.theGroup.conjugacyClassCount());
-  for (int i = 0; i < G.theGroup.conjugacyClassCount(); i ++) {
-    ElementWeylGroup& g = G.theGroup.conjugacyClasses[i].representative;
+  X.G = &G.group;
+  X.data.setSize(G.group.conjugacyClassCount());
+  for (int i = 0; i < G.group.conjugacyClassCount(); i ++) {
+    ElementWeylGroup& g = G.group.conjugacyClasses[i].representative;
     Coefficient tr = 0;
     for (int j = 0; j < V.size; j ++) {
       Vector<Coefficient> v = ActOnGroupRing(g, V[j]);
@@ -1005,7 +1005,7 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
   XiS.makeZero(this->theSubgroupData.theSubgroup->conjugacyClasses.size);
   for (int i = 0; i < this->theSubgroupData.theGroup->conjugacyClasses.size; i ++) {
     ClassFunction<FiniteGroup<ElementWeylGroup>, Rational>& XiG =
-    this->theWeylData->theGroup.characterTable[i];
+    this->theWeylData->group.characterTable[i];
     //global.Comments << "Restricting character: " << Xip.toString() << "<br>";
     for (int j = 0; j < this->theSubgroupData.theSubgroup->conjugacyClasses.size; j ++) {
       XiS[j] = XiG[this->theSubgroupData.ccRepresentativesPreimages[j]];
@@ -1021,7 +1021,7 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
 
 void SubgroupDataRootReflections::computeCCSizesRepresentativesPreimages() {
   MacroRegisterFunctionWithName("SubgroupRootReflections::computeCCSizesRepresentativesPreimages");
-  if (this->theDynkinType == this->theWeylData->dynkinType && this->theWeylData->theGroup.flagCCRepresentativesComputed) {
+  if (this->theDynkinType == this->theWeylData->dynkinType && this->theWeylData->group.flagCCRepresentativesComputed) {
     this->theSubgroupData.theSubgroup->conjugacyClasses.setSize(this->theSubgroupData.theGroup->conjugacyClasses.size);
     for (int i = 0; i < this->theSubgroupData.theSubgroup->conjugacyClasses.size; i ++) {
       this->theSubgroupData.theSubgroup->conjugacyClasses[i].flagRepresentativeComputed = true;
@@ -1067,7 +1067,7 @@ void SubgroupDataRootReflections::makeParabolicSubgroup(WeylGroupData& G, const 
   MacroRegisterFunctionWithName("SubgroupDataRootReflections::makeParabolicSubgroup");
   G.checkConsistency();
   this->theWeylData = &G;
-  this->theSubgroupData.makeSubgroupOf(G.theGroup);
+  this->theSubgroupData.makeSubgroupOf(G.group);
   this->checkInitialization();
   this->flagIsParabolic = true;
   this->simpleRootsInLeviParabolic = inputGeneratingSimpleRoots;
@@ -1089,7 +1089,7 @@ void SubgroupDataRootReflections::makeParabolicSubgroup(WeylGroupData& G, const 
 
 void SubgroupDataRootReflections::makeFromRoots(WeylGroupData& G, const Vectors<Rational>& inputRootReflections) {
   MacroRegisterFunctionWithName("SubgroupDataRootReflections::makeFromRoots");
-  this->theSubgroupData.makeSubgroupOf(G.theGroup);
+  this->theSubgroupData.makeSubgroupOf(G.group);
   this->theWeylData = &G;
   this->generatingSimpleRoots = inputRootReflections;
   DynkinDiagramRootSubalgebra theDiagram;
@@ -1156,7 +1156,7 @@ void WeylGroupData::getSignSignatureParabolics(List<SubgroupDataRootReflections>
 //  this->computeIrreducibleRepresentationsThomasVersion();
   this->computeOrLoadCharacterTable();
   ClassFunction<WeylGroupData::WeylGroupBase, Rational> signRep;
-  signRep.G = &(this->theGroup);
+  signRep.G = &(this->group);
   this->getSignCharacter(signRep.data);
   Selection sel;
   sel.initialize(this->getDimension());
@@ -1174,7 +1174,7 @@ void WeylGroupData::getSignSignatureParabolics(List<SubgroupDataRootReflections>
     // as characterTable[1]
     //global.Comments << "<hr>before compute initial irreps";
   }
-  this->theGroup.checkConjugacyClassRepresentationsMatchCCSizes();
+  this->group.checkConjugacyClassRepresentationsMatchCCSizes();
   for (int j = 0; j < outputSubgroups.size; j ++) {
     outputSubgroups[j].ComputeTauSignature();
   }
@@ -1185,7 +1185,7 @@ void WeylGroupData::getSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
 //  this->computeIrreducibleRepresentationsThomasVersion();
   this->computeOrLoadCharacterTable();
   ClassFunction<WeylGroupData::WeylGroupBase, Rational> signRep;
-  signRep.G = &(this->theGroup);
+  signRep.G = &(this->group);
   this->getSignCharacter(signRep.data);
   Selection parSelrootsAreInLevi;
   parSelrootsAreInLevi.initialize(this->getDimension() + 1);
@@ -1207,7 +1207,7 @@ void WeylGroupData::getSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
   for (int i = 0; i < outputSubgroups.size; i ++) {
     outputSubgroups[i].computeCCSizesRepresentativesPreimages();
   }
-  this->theGroup.checkConjugacyClassRepresentationsMatchCCSizes();
+  this->group.checkConjugacyClassRepresentationsMatchCCSizes();
   for (int j = 0; j < outputSubgroups.size; j ++) {
     outputSubgroups[j].ComputeTauSignature();
   }
@@ -1219,7 +1219,7 @@ void WeylGroupData::getSignSignatureRootSubgroups(
   MacroRegisterFunctionWithName("WeylGroup::getSignSignatureRootSubgroups");
   this->computeOrLoadCharacterTable();
   ClassFunction<WeylGroupData::WeylGroupBase, Rational> signRep;
-  signRep.G = &(this->theGroup);
+  signRep.G = &(this->group);
   this->getSignCharacter(signRep.data);
   outputSubgroups.setSize(rootsGeneratingReflections.size);
   ElementWeylGroup g;
@@ -1229,8 +1229,8 @@ void WeylGroupData::getSignSignatureRootSubgroups(
     currentParabolic.makeFromRoots(*this, rootsGeneratingReflections[i]);
     currentParabolic.computeCCSizesRepresentativesPreimages();
   }
-  this->theGroup.checkConjugacyClassRepresentationsMatchCCSizes();
-  this->theGroup.checkOrthogonalityCharacterTable();
+  this->group.checkConjugacyClassRepresentationsMatchCCSizes();
+  this->group.checkOrthogonalityCharacterTable();
   for (int j = 0; j < outputSubgroups.size; j ++) {
     outputSubgroups[j].ComputeTauSignature();
   }

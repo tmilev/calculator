@@ -2489,19 +2489,27 @@ std::string SlTwoSubalgebra::toStringTripleUnknowns(FormatExpressions* format) c
   return out.str();
 }
 
+std::string SlTwoSubalgebra::toStringKostantSekiguchiTriple(
+  FormatExpressions* format
+) const {
+  if (this->eKostantSekiguchi.isEqualToZero()) {
+    return "";
+  }
+  std::stringstream out;
+  out << "<br>Kostant-Sekiguchi elements.<br>";
+  out << "\\(";
+  out << "\\begin{array}{rcl}";
+  out << "h&=&" << this->hPolynomialAlgebraic.toString(format) << "\\\\\n";
+  out << "e&=&" << this->eKostantSekiguchi.toString(format) << "\\\\\n";
+  out << "f&=&" << this->fKostantSekiguchi.toString(format);
+  out << "\\end{array}\\)";
+  return out.str();
+}
+
 std::string SlTwoSubalgebra::toStringKostantSekiguchiTripleInternals(
   FormatExpressions* format
 ) const {
   std::stringstream out;
-  if (this->eKostantSekiguchi.size() > 0) {
-    out << "<br>Kostant-Sekiguchi elements.<br>";
-    out << "\\(";
-    out << "\\begin{array}{rcl}";
-    out << "h&=&" << this->hPolynomialAlgebraic.toString(format) << "\\\\\n";
-    out << "e&=&" << this->eKostantSekiguchi.toString(format) << "\\\\\n";
-    out << "f&=&" << this->fKostantSekiguchi.toString(format);
-    out << "\\end{array}\\)";
-  }
   out << "<br>The unknown Kostant-Sekiguchi elements.<br>";
   std::stringstream tripleSystem;
   tripleSystem << "\\begin{array}{rcl}";

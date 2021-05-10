@@ -4414,6 +4414,41 @@ std::string SlTwoSubalgebra::toStringTripleStandardRealization() const {
   return out.str();
 }
 
+std::string SlTwoSubalgebra::toStringKostantSekiguchiTripleStandardRealization() const {
+  Matrix<AlgebraicNumber> matrixH, matrixE, matrixF;
+  if (
+    !this->owner->getElementStandardRepresentation(this->hAlgebraic, matrixH) ||
+    !this->owner->getElementStandardRepresentation(this->eKostantSekiguchi, matrixE) ||
+    !this->owner->getElementStandardRepresentation(this->fKostantSekiguchi, matrixF)
+  ) {
+    return "";
+  }
+  std::stringstream out;
+  FormatExpressions format;
+  format.flagUseHTML = false;
+  format.flagUseLatex = true;
+  out << "<br>Matrix realizations in a standard representation:";
+  out << " <div class='lieAlgebraPanel'>";
+  out << "<div>";
+  out << "\\(\\begin{array}{rcl}";
+  out << "h&=&" << matrixH.toString(&format) << "\\\\\n";
+  out << "e&=&" << matrixE.toString(&format) << "\\\\\n";
+  out << "f&=&" << matrixF.toString(&format);
+  out << "\\end{array}\\)";
+  out << "<br>";
+  std::stringstream calculatorLink;
+  calculatorLink
+  << "h=" << matrixH.toString(&format) << ";\n"
+  << "e=" << matrixE.toString(&format) << ";\n"
+  << "f=" << matrixF.toString(&format) << ";\n"
+  ;
+  out << "Calculator link: "
+  << HtmlRoutines::getCalculatorComputationAnchorThisServer(calculatorLink.str(), "");
+  out << "</div>";
+  out << "</div>";
+  return out.str();
+}
+
 std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   MacroRegisterFunctionWithName("SlTwoSubalgebra::toString");
   if (this->container == nullptr) {
@@ -4479,6 +4514,9 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   }
   out << this->toStringTriple(format);
   out << this->toStringTripleStandardRealization();
+  out << this->toStringKostantSekiguchiTriple(format);
+  out << this->toStringKostantSekiguchiTripleInternals(format);
+  out << this->toStringKostantSekiguchiTripleStandardRealization();
   out << this->toStringTripleVerification(format);
   out << "<br>Unfold the hidden panel for more information.<br>";
   out << "<div class='lieAlgebraPanel'><div>";
@@ -4486,7 +4524,6 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   out << this->toStringTripleUnknownsPolynomialSystem(format);
   out << this->toStringTripleArbitrary(format);
   out << this->toStringTripleArbitraryMatrix();
-  out << this->toStringKostantSekiguchiTripleInternals(format);
   out << "</div></div>";
   return out.str();
 }

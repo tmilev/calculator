@@ -595,6 +595,8 @@ public:
   std::string toStringTripleArbitraryMatrix() const;
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringKostantSekiguchiTripleInternals(FormatExpressions* format) const;
+  std::string toStringKostantSekiguchiTriple(FormatExpressions* format) const;
+  std::string toStringKostantSekiguchiTripleStandardRealization() const;
   void getInvolvedPositiveGenerators(List<ChevalleyGenerator>& output);
   void getInvolvedNegativeGenerators(List<ChevalleyGenerator>& output);
   void toStringModuleDecompositionMinimalContainingRegularSAs(

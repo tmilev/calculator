@@ -698,4 +698,95 @@ Coefficient SemisimpleLieAlgebra::getKillingForm(
   }
   return result;
 }
+
+template <typename Coefficient>
+bool SemisimpleLieAlgebra::getElementStandardRepresentation(
+  const ElementSemisimpleLieAlgebra<Coefficient>& element,
+  Matrix<Coefficient>& output
+) {
+  char dynkinType = 0;
+  if (!this->weylGroup.dynkinType.isSimple(&dynkinType, nullptr)) {
+    return false;
+  }
+  if (dynkinType != 'A') {
+    // Only type A is supported as of writing.
+    return false;
+  }
+  output.makeZeroMatrix(this->getRank() + 1, 0);
+  for (int i = 0; i < element.size(); i ++) {
+    this->accumulateChevalleyGeneratorStandardRepresentation(
+      element[i],
+      element.coefficients[i],
+      output
+    );
+  }
+  return true;
+}
+
+template <typename Coefficient>
+bool SemisimpleLieAlgebra::accumulateChevalleyGeneratorStandardRepresentation(
+  const ChevalleyGenerator& element,
+  const Coefficient& coefficient,
+  Matrix<Coefficient>& output
+) {
+  char dynkinType = 0;
+  int rank = 0;
+  if (!this->weylGroup.dynkinType.isSimple(&dynkinType, &rank)) {
+    return false;
+  }
+  if (dynkinType != 'A') {
+    // Only type A is supported as of writing.
+    return false;
+  }
+  if (element.owner != this) {
+    global.fatal << "Generator does not belong to this semisimple Lie algebra." << global.fatal;
+  }
+  return accumulateChevalleyGeneratorStandardRepresentationInTypeA(element, coefficient, output);
+}
+
+template <typename Coefficient>
+bool SemisimpleLieAlgebra::accumulateChevalleyGeneratorStandardRepresentationInTypeA(
+  const ChevalleyGenerator& element,
+  const Coefficient& coefficient,
+  Matrix<Coefficient>& output
+) {
+  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::accumulateChevalleyGeneratorStandardRepresentationInTypeA");
+  if (element.isInCartan(nullptr)) {
+    int index = this->getCartanCoordinateIndexFromCartanGeneratorIndex(
+      element.generatorIndex
+    );
+    output(index, index) += coefficient;
+    output(index + 1, index + 1) -= coefficient;
+    return true;
+  }
+  Vector<Rational> vector;
+  if (!element.isInRootSpace(&vector)) {
+    global.fatal
+    << "Chevalley generator is neither in a root space nor in the Cartan subalgebra. "
+    << global.fatal;
+  }
+  int firstNonZeroIndex = 0;
+  for (; firstNonZeroIndex < vector.size; firstNonZeroIndex ++) {
+    if (vector[firstNonZeroIndex] != 0) {
+      break;
+    }
+  }
+  int lastNonZeroIndex = firstNonZeroIndex;
+  for (; lastNonZeroIndex < vector.size; lastNonZeroIndex ++) {
+    if (vector[lastNonZeroIndex] == 0) {
+      break;
+    }
+  }
+  int rowIndex = 0;
+  int columnIndex = 0;
+  if (vector[firstNonZeroIndex] > 0) {
+    rowIndex = firstNonZeroIndex;
+    columnIndex = lastNonZeroIndex;
+  } else {
+    rowIndex = lastNonZeroIndex;
+    columnIndex = firstNonZeroIndex;
+  }
+  output(rowIndex, columnIndex) += coefficient;
+  return true;
+}
 #endif

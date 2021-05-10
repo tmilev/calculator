@@ -2392,8 +2392,6 @@ bool CalculatorLieTheory::computeSemisimpleSubalgebras(
     out << "<b>This code is completely experimental and has been set to run up to rank 6. "
     << "As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
     return output.assignValue(out.str(), calculator);
-  } else {
-    out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
   }
   SemisimpleSubalgebras& theSSsubalgebras =
   calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.weylGroup.dynkinType);
@@ -2985,12 +2983,9 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
     }
     ownerSSPointer = ownerAlgebra.content;
     if (ownerSSPointer->getRank() > 8) {
-      out << "<b>This code is completely experimental and has been set to run up to rank 6. "
+      out << "<b>This code is has been set to run up to rank 6. "
       << "As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
       return output.assignValue(out.str(), calculator);
-    } else {
-      out << "<b>This code is completely experimental. "
-      << "Use the following printouts on your own risk.</b><br>";
     }
   } else {
     ownerSSPointer = input[1].getValue<SemisimpleSubalgebras>().owner;

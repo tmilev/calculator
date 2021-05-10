@@ -273,19 +273,22 @@ public:
   // preferred "standard" representation of the lie algebra.
   // As of writing, the "standard" representation is only implemented for
   // sl(n) - the natural (n x n)- matrix realization.
+  template<typename Coefficient>
   bool getElementStandardRepresentation(
-    const ElementSemisimpleLieAlgebra<Rational>& element,
-    Matrix<Rational>& output
+    const ElementSemisimpleLieAlgebra<Coefficient>& element,
+    Matrix<Coefficient>& output
   );
+  template<typename Coefficient>
   bool accumulateChevalleyGeneratorStandardRepresentation(
     const ChevalleyGenerator& element,
-    const Rational& coefficient,
-    Matrix<Rational>& output
+    const Coefficient& coefficient,
+    Matrix<Coefficient>& output
   );
+  template <typename Coefficient>
   bool accumulateChevalleyGeneratorStandardRepresentationInTypeA(
     const ChevalleyGenerator& element,
-    const Rational& coefficient,
-    Matrix<Rational>& output
+    const Coefficient& coefficient,
+    Matrix<Coefficient>& output
   );
 };
 

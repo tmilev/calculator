@@ -627,15 +627,15 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
   MonomialUniversalEnveloping<Coefficient> constMon;
   constMon.makeConstant();
   if (logStream != nullptr) {
-    *logStream << "backtraced elt: " << MTright.toString(&global.theDefaultFormat.getElement()) << "<br>";
-    *logStream << "this element: " << this->toString(&global.theDefaultFormat.getElement()) << "<br>";
+    *logStream << "backtraced elt: " << MTright.toString(&global.defaultFormat.getElement()) << "<br>";
+    *logStream << "this element: " << this->toString(&global.defaultFormat.getElement()) << "<br>";
   }
   for (int j = 0; j < right.size; j ++) {
     intermediateAccum = *this;
     intermediateAccum.simplify(global, ringUnit, ringZero);
     if (logStream != nullptr) {
       *logStream << "intermediate after simplification: "
-      << intermediateAccum.toString(&global.theDefaultFormat.getElement()) << "<br>";
+      << intermediateAccum.toString(&global.defaultFormat.getElement()) << "<br>";
     }
     intermediateAccum.modOutVermaRelations(&global, substitutionHiGoesToIthElement, ringUnit, ringZero);
     MonomialUniversalEnveloping<Coefficient>& rightMon = MTright[j];
@@ -647,24 +647,24 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
           tempElt.makeOneGenerator(rightMon.generatorsIndices[i], *this->owners, this->indexInOwners, ringUnit);
           MathRoutines::swap(tempElt, intermediateAccum);
           if (logStream != nullptr) {
-            *logStream << "tempElt before mult: " << tempElt.toString(&global.theDefaultFormat) << "<br>";
+            *logStream << "tempElt before mult: " << tempElt.toString(&global.defaultFormat) << "<br>";
             *logStream << "intermediate before mult: "
-            << intermediateAccum.toString(&global.theDefaultFormat.getElement()) << "<br>";
+            << intermediateAccum.toString(&global.defaultFormat.getElement()) << "<br>";
           }
           intermediateAccum *= (tempElt);
           if (logStream != nullptr) {
             *logStream << "intermediate before simplification: "
-            << intermediateAccum.toString(&global.theDefaultFormat.getElement()) << "<br>";
+            << intermediateAccum.toString(&global.defaultFormat.getElement()) << "<br>";
           }
           intermediateAccum.simplify(ringUnit);
           if (logStream != nullptr) {
             *logStream << "intermediate after simplification: "
-            << intermediateAccum.toString(&global.theDefaultFormat.getElement()) << "<br>";
+            << intermediateAccum.toString(&global.defaultFormat.getElement()) << "<br>";
           }
           intermediateAccum.modOutVermaRelations(substitutionHiGoesToIthElement, ringUnit, ringZero);
           if (logStream != nullptr) {
             *logStream << "intermediate after Verma rels: "
-            << intermediateAccum.toString(&global.theDefaultFormat.getElement()) << "<br>";
+            << intermediateAccum.toString(&global.defaultFormat.getElement()) << "<br>";
           }
         }
       } else {
@@ -679,7 +679,7 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
     }
   }
   if (logStream != nullptr) {
-    *logStream << "final UE element: " << Accum.toString(&global.theDefaultFormat.getElement());
+    *logStream << "final UE element: " << Accum.toString(&global.defaultFormat.getElement());
   }
   return true;
 }
@@ -708,7 +708,7 @@ std::string ElementUniversalEnveloping<Coefficient>::isInProperSubmodule(
   }
   for (int i = 0; i < theOrbit.size; i ++) {
     ElementUniversalEnveloping<Coefficient>& current = theOrbit[i];
-    out << "<br>" << current.toString(&global.theDefaultFormat.getElement());
+    out << "<br>" << current.toString(&global.defaultFormat.getElement());
   }
   return out.str();
 }

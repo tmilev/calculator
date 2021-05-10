@@ -495,7 +495,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
     if (outputWeightsFundCoords != 0) {
       outputWeightsFundCoords->addOnTop(currentWeight);
     }
-    out << currentElt.toString(&global.theDefaultFormat.getElement());
+    out << currentElt.toString(&global.defaultFormat.getElement());
     if (currentElt.size() > 1) {
       out << ")";
     }
@@ -730,7 +730,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
           }
           tempSSElt.makeGenerator(theIndex, this->getOwner());
           if (outputReport != nullptr) {
-            out2 << "<hr>Simple generator: " << tempSSElt.toString(&global.theDefaultFormat.getElement());
+            out2 << "<hr>Simple generator: " << tempSSElt.toString(&global.defaultFormat.getElement());
           }
           MatrixTensor<Coefficient>& theMatrix = this->getActionGeneratorIndex(theIndex);
           std::stringstream tempStream;
@@ -1275,7 +1275,7 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format) co
         tempWelt.generatorsLastAppliedFirst[k] = aGen;
       }
       out << "<tr><td>m_{ " << wordCounter << "} </td><td>"
-      << currentList[j].toString(&global.theDefaultFormat.getElement())
+      << currentList[j].toString(&global.defaultFormat.getElement())
       << "  v_\\lambda</td><td>" << tempWelt.toString() << "</td> </tr>";
     }
   }
@@ -1325,10 +1325,10 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format) co
     for (int i = 0; i < currentList.size; i ++) {
       MonomialUniversalEnveloping<Coefficient>& currentElt = currentList[i];
       out << "<br>monomial " << i + 1 << ": "
-      << currentElt.toString(&global.theDefaultFormat.getElement());
+      << currentElt.toString(&global.defaultFormat.getElement());
     }
     out << "; Matrix of Shapovalov form associated to current weight level: <br> "
-    << theBF.toString(&global.theDefaultFormat.getElement());
+    << theBF.toString(&global.defaultFormat.getElement());
 /*    if (!theBF.isPositiveDefinite()) {
       monomialDetailStream << "<b>Is not positive definite!</b>";
       this->flagConjectureCholds = false;
@@ -1342,7 +1342,7 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format) co
     }
     out << " corresonding inverted matrix:<br>";
     if (theBFinverted.numberOfRows > 0) {
-      out << theBFinverted.toString(&global.theDefaultFormat.getElement());
+      out << theBFinverted.toString(&global.defaultFormat.getElement());
     } else {
       out << "<b>The matrix of the bilinear form is not invertible!</b>";
       isBad = true;
@@ -1645,7 +1645,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
     if (outputWeightsFundCoords != nullptr) {
       outputWeightsFundCoords->addOnTop(currentWeight);
     }
-    out << currentElt.toString(&global.theDefaultFormat.getElement());
+    out << currentElt.toString(&global.defaultFormat.getElement());
     if (currentElt.size() > 1) {
       out << ")";
     }

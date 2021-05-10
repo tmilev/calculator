@@ -2401,8 +2401,155 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphismOLD(
   }
 }
 
+
+bool SlTwoSubalgebra::operator>(const SlTwoSubalgebra& right) const {
+  MacroRegisterFunctionWithName("SlTwoSubalgebra::operatorGreaterThan");
+  if (this->owner != right.owner) {
+    global.fatal << "Error: comparing sl(2) subalgebras with different owners." << global.fatal;
+  }
+  if ( this->lengthHSquared > right.lengthHSquared) {
+    return true;
+  }
+  if (right.lengthHSquared > this->lengthHSquared) {
+    return false;
+  }
+  return this->hCharacteristic > right.hCharacteristic;
+}
+
+bool SlTwoSubalgebra::operator==(const SlTwoSubalgebra& right) const {
+ // See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, chapter 7-10
+  if (this->owner != right.owner) {
+    global.fatal << "Comparing sl(2) "
+    << "subalgebras that have different ambient Lie algebras. " << global.fatal;
+  }
+  return this->hCharacteristic == right.hCharacteristic;
+}
+
+std::string SlTwoSubalgebra::toStringTripleVerification(FormatExpressions* format) const {
+  std::stringstream out;
+  bool useHtml = format == nullptr ? true : format->flagUseHTML;
+  out << "<br>Lie brackets of the above elements.<br>";
+  if (useHtml) {
+    out << "\n<br>\n";
+  }
+  out << "\\(\\begin{array}{rcl}"
+  << "[e, f]&=&" << this->eBracketF.toString(format) << "\\\\\n"
+  << "[h, e]&=&" << this->hBracketE.toString(format) << "\\\\\n"
+  << "[h, f]&=&" << this->hBracketF.toString(format)
+  << "\\end{array}\\)";
+
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toStringTripleArbitrary(FormatExpressions* format) const {
+  std::stringstream out;
+  out << "Starting h, e, f triple. H is computed according to Dynkin, "
+  << "and the coefficients of f are arbitrarily chosen. "
+  << "<br>More precisely, the chevalley generators participating in f are ordered in the order "
+  << "in which their roots appear, and the coefficients are chosen to be the increasing odd "
+  << "numbers 1, 3, 5, ....<br>"
+  << "This arbitrary (but well-defined) choice of "
+  << "f guarantees that the computation is linear and fast. <br>\n";
+  out << "\\(\\begin{array}{rcl}"
+  << "h&=&" << this->hPolynomialRational.toString(format) << "\\\\"
+  << "e&=&" << this->eArbitraryUnknown.toString(format) << "\\\\"
+  << "f&=&" << this->fArbitrary.toString(format)
+  << "\\end{array}\\)";
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toStringTripleArbitraryMatrix() const {
+  std::stringstream out;
+  out << "<br>Matrix form of the system we are trying to solve:\n";
+  FormatExpressions formatLatex;
+  formatLatex.flagUseLatex = true;
+  formatLatex.flagUseHTML = false;
+  out << "\\("
+  << this->systemArbitraryMatrix.toString(&formatLatex)
+  << "[col. vect.]"
+  << "="
+  << this->systemArbitraryColumnVector.toString(&formatLatex)
+  << "\\)"
+  ;
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toStringTripleUnknowns(FormatExpressions* format) const {
+  std::stringstream out;
+  out << "<hr>Unknown elements.<br>";
+  out << "\\(\\begin{array}{rcl}"
+  << "h&=&" << this->hPolynomialRational.toString(format) << "\\\\\n"
+  << "e&=&" << this->eUnknown.toString(format) << "\\\\\n"
+  << "f&=&" << this->fUnknown.toString(format)
+  << "\\end{array}\\)";
+  out << "<br>Lie brackets of the unknowns.<br>";
+  out << "\\([e,f] - h = "
+  << this->eBracketFMinusHUnknown.toString(format)
+  << "\\)";
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toStringKostantSekiguchiTripleInternals(
+  FormatExpressions* format
+) const {
+  std::stringstream out;
+  if (this->eKostantSekiguchi.size() > 0) {
+    out << "<br>Kostant-Sekiguchi elements.<br>";
+    out << "\\(";
+    out << "\\begin{array}{rcl}";
+    out << "h&=&" << this->hPolynomialAlgebraic.toString(format) << "\\\\\n";
+    out << "e&=&" << this->eKostantSekiguchi.toString(format) << "\\\\\n";
+    out << "f&=&" << this->fKostantSekiguchi.toString(format);
+    out << "\\end{array}\\)";
+  }
+  out << "<br>The unknown Kostant-Sekiguchi elements.<br>";
+  std::stringstream tripleSystem;
+  tripleSystem << "\\begin{array}{rcl}";
+  tripleSystem << "h&=&" << this->hPolynomialAlgebraic.toString(format) << "\\\\\n";
+  tripleSystem << "e&=&" << this->eKostantSekiguchiUnknown.toString(format) << "\\\\\n";
+  tripleSystem << "f&=&" << this->fKostantSekiguchiUnknown.toString(format);
+  tripleSystem << "\\end{array}";
+  out << HtmlRoutines::getMathNoDisplay(tripleSystem.str());
+  out << "<br>\\(e-f=" << this->eMinusFUnknown.toString(format) << "\\)";
+  out << "<br>\\(\\theta(e-f)=" << this->involutionAppliedToEMinusF.toString(format) << "\\)";
+  out << "<br>The polynomial system we need to solve.<br>";
+  out << this->toStringPolynomialSystem(this->systemToSolveKostantSekiguchi, format);
+  return out.str();
+}
+
+template <typename Coefficient>
+std::string SlTwoSubalgebra::toStringPolynomialSystem(
+ const PolynomialSubstitution<Coefficient>& system,
+  FormatExpressions* format
+) const {
+  std::stringstream latexStreamActual;
+  latexStreamActual << "\\begin{array}{rcl}";
+  for (int i = 0; i < system.size; i ++) {
+    latexStreamActual << system[i].toString(format) << "&=&0\\\\";
+  }
+  latexStreamActual << "\\end{array}";
+  return HtmlRoutines::getMathNoDisplay(latexStreamActual.str()) ;
+}
+
+std::string SlTwoSubalgebra::toStringTripleUnknownsPolynomialSystem(FormatExpressions* format) const {
+  std::stringstream out;
+  out << "<br>The polynomial system that corresponds to finding the h, e, f triple:<br>\n";
+  out << this->toStringPolynomialSystem(this->systemToSolve, format) << "\n<br>\n";
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toStringTriple(FormatExpressions* format) const {
+  std::stringstream out;
+  out << "\\begin{array}{rcl}";
+  out << "h&=&" << this->hElement.toString(format) << "\\\\\n";
+  out << "e&=&" << this->eElement.toString(format) << "\\\\\n";
+  out << "f&=&" << this->fElement.toString(format);
+  out << "\\end{array}";
+  return HtmlRoutines::getMathNoDisplay(out.str());
+}
+
 bool SlTwoSubalgebra::hasImplementedStandardCartanInvolution(
-  LinearMapSemisimpleLieAlgebra<Rational>* whichInvolution
+  LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >* whichInvolution
 ) {
   char dynkinType = 0;
   if (!this->owner->weylGroup.dynkinType.isSimple(&dynkinType)) {
@@ -2420,15 +2567,18 @@ bool SlTwoSubalgebra::hasImplementedStandardCartanInvolution(
   int numberOfPositiveRoots = this->owner->getNumberOfPositiveRoots();
   int rank = this->owner->getRank();
   for (int i = 0; i < numberOfPositiveRoots; i ++) {
-    Vector<Rational> root = this->owner->weylGroup.rootsOfBorel[i];
-    whichInvolution->imagesChevalleyGenerators[i].makeGGenerator(- root, *this->owner);
-    whichInvolution->imagesChevalleyGenerators[i] *= - 1;
-    int oppositeGenerator = numberOfPositiveRoots * 2 - i + rank - 1;
-    whichInvolution->imagesChevalleyGenerators[oppositeGenerator].makeGGenerator(root, *this->owner);
-    whichInvolution->imagesChevalleyGenerators[oppositeGenerator] *= - 1;
+    const Vector<Rational>& root = this->owner->weylGroup.rootsOfBorel[i];
+    ChevalleyGenerator positive;
+    positive.makeGeneratorRootSpace(*this->owner, root);
+    ChevalleyGenerator negative;
+    negative.makeGeneratorRootSpace(*this->owner, - root);
+    whichInvolution->imagesChevalleyGenerators[positive.generatorIndex].makeGGenerator(- root, *this->owner);
+    whichInvolution->imagesChevalleyGenerators[positive.generatorIndex] *= - 1;
+    whichInvolution->imagesChevalleyGenerators[negative.generatorIndex].makeGGenerator(root, *this->owner);
+    whichInvolution->imagesChevalleyGenerators[negative.generatorIndex] *= - 1;
   }
   for (int i = 0; i < rank; i ++) {
-    ElementSemisimpleLieAlgebra<Rational>& current =
+    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& current =
     whichInvolution->imagesChevalleyGenerators[numberOfPositiveRoots + i];
     Vector<Rational> root;
     root.makeEi(rank, i);
@@ -2480,8 +2630,8 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
     }
   }
   this->participatingPositiveRoots.addListOnTop(selectedExtraPositiveRoots);
-  LinearMapSemisimpleLieAlgebra<Rational> cartanInvolutionStandard;
-  LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionToRespect = nullptr;
+  LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > cartanInvolutionStandard;
+  LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >* cartanInvolutionToRespect = nullptr;
   if (this->hasImplementedStandardCartanInvolution(&cartanInvolutionStandard)) {
     cartanInvolutionToRespect = &cartanInvolutionStandard;
   }
@@ -2508,6 +2658,32 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
     );
     this->eElement.addMonomial(generator, result.elements[i][0]);
   }
+  this->attemptRealizingKostantSekiguchi();
+  return true;
+}
+
+bool SlTwoSubalgebra::attemptRealizingKostantSekiguchi() {
+  MacroRegisterFunctionWithName("SlTwoSubalgebra::attemptRealizingKostantSekiguchi");
+  PolynomialSystem<AlgebraicNumber> computation;
+  computation.algebraicClosure = this->algebraicClosure;
+  computation.initializeForSystemSolution();
+  computation.groebner.polynomialOrder.monomialOrder = MonomialPolynomial::orderDefault();
+  computation.solveSerreLikeSystem(this->systemToSolveKostantSekiguchi);
+  if (!computation.flagSystemSolvedOverBaseField) {
+    return false;
+  }
+  List<Polynomial<AlgebraicNumber> > solution;
+  solution.setSize(computation.systemSolution.size);
+  for (int i = 0; i < solution.size; i ++) {
+    solution[i].makeConstant(computation.systemSolution[i]);
+  }
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > eSolved, fSolved;
+  eSolved = this->eKostantSekiguchiUnknown;
+  fSolved = this->fKostantSekiguchiUnknown;
+  eSolved.substitutionCoefficients(solution);
+  fSolved.substitutionCoefficients(solution);
+  this->eKostantSekiguchi = eSolved;
+  this->fKostantSekiguchi = fSolved;
   return true;
 }
 
@@ -2521,9 +2697,12 @@ bool SlTwoSubalgebra::checkConsistencyParticipatingRoots(
     }
     global.fatal << "The scalar product of the h element: "
     << targetH.toString()
-    << " and the root in play " << this->participatingPositiveRoots[i].toString()
+    << " and the root in play "
+    << this->participatingPositiveRoots[i].toString()
     << " must be 2, but equals instead "
-    << this->getOwnerWeyl().rootScalarCartanRoot(targetH, this->participatingPositiveRoots[i]).toString()
+    << this->getOwnerWeyl().rootScalarCartanRoot(
+      targetH, this->participatingPositiveRoots[i]
+    ).toString()
     << global.fatal;
   }
   return true;
@@ -2550,8 +2729,8 @@ void SlTwoSubalgebra::initializeUnknownTriples(const Vector<Rational>& targetH) 
   this->fUnknown.makeZero();
   ///
   // Zero e  and f for the Kostant-Sekiguchi computation.
-  this->eUnknownKostantSekiguchi.makeZero();
-  this->fUnknownKostantSekiguchi.makeZero();
+  this->eKostantSekiguchiUnknown.makeZero();
+  this->fKostantSekiguchiUnknown.makeZero();
 
   for (int i = 0; i < this->participatingPositiveRoots.size; i ++) {
     // Initialize arbitrary triple
@@ -2573,9 +2752,9 @@ void SlTwoSubalgebra::initializeUnknownTriples(const Vector<Rational>& targetH) 
 
     Polynomial<AlgebraicNumber> unknownCoefficientAlgebraic;
     unknownCoefficientAlgebraic.makeMonomial(i, 1, this->algebraicClosure->one());
-    this->eUnknownKostantSekiguchi.addMonomial(positive, unknownCoefficientAlgebraic);
+    this->eKostantSekiguchiUnknown.addMonomial(positive, unknownCoefficientAlgebraic);
     unknownCoefficientAlgebraic.makeMonomial(i + this->participatingPositiveRoots.size, 1, this->algebraicClosure->one());
-    this->fUnknownKostantSekiguchi.addMonomial(negative, unknownCoefficientAlgebraic);
+    this->fKostantSekiguchiUnknown.addMonomial(negative, unknownCoefficientAlgebraic);
   }
 }
 
@@ -2589,8 +2768,9 @@ void SlTwoSubalgebra::computeLieBracketsUnknowns() {
   );
   this->eBracketFMinusHUnknown -= this->hPolynomialRational;
   this->getOwnerSemisimpleAlgebra().lieBracket(
-    this->eUnknownKostantSekiguchi, this->fUnknownKostantSekiguchi, this->eBracketFMinusHUnknownKostantSekiguchi
+    this->eKostantSekiguchiUnknown, this->fKostantSekiguchiUnknown, this->eBracketFMinusHUnknownKostantSekiguchi
   );
+  this->eBracketFMinusHUnknownKostantSekiguchi -= this->hPolynomialAlgebraic;
 }
 
 void SlTwoSubalgebra::computePolynomialSystems() {
@@ -2610,15 +2790,29 @@ void SlTwoSubalgebra::computePolynomialSystems() {
   }
 }
 
-void SlTwoSubalgebra:: adjoinKostantSekiguchiRelationsToPolynomialSystem(
-  LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionPreservedByEMinusF
+void SlTwoSubalgebra::adjoinKostantSekiguchiRelationsToPolynomialSystem(
+  LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >* cartanInvolutionPreservedByEMinusF
 ) {
-
+  MacroRegisterFunctionWithName("SlTwoSubalgebra::adjoinKostantSekiguchiRelationsToPolynomialSystem");
+  if (cartanInvolutionPreservedByEMinusF == nullptr) {
+    return;
+  }
+  this->eMinusFUnknown = this->eKostantSekiguchiUnknown - this->fKostantSekiguchiUnknown;
+  cartanInvolutionPreservedByEMinusF->applyTo(
+    this->eMinusFUnknown, this->involutionAppliedToEMinusF
+  );
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > mustBeZero;
+  mustBeZero = this->eMinusFUnknown - this->involutionAppliedToEMinusF;
+  for (int i = 0; i < mustBeZero.size(); i ++) {
+    this->systemToSolveKostantSekiguchi.addOnTop(
+      mustBeZero.coefficients[i]
+    );
+  }
 }
 
 void SlTwoSubalgebra::initializeHEFSystemFromFCoefficients(
   const Vector<Rational>& targetH,
-  LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionPreservedByEMinusF
+  LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >* cartanInvolutionPreservedByEMinusF
 ) {
   MacroRegisterFunctionWithName("SlTwoSubalgebra::initializeHEFSystemFromFCoefficients");
   this->checkConsistencyParticipatingRoots(targetH);
@@ -2628,14 +2822,10 @@ void SlTwoSubalgebra::initializeHEFSystemFromFCoefficients(
   this->adjoinKostantSekiguchiRelationsToPolynomialSystem(
     cartanInvolutionPreservedByEMinusF
   );
-  this->initializeHEFSystemFromFCoefficientsPartTwo(
-    cartanInvolutionPreservedByEMinusF
-  );
+  this->initializeHEFSystemFromFCoefficientsPartTwo();
 }
 
-void SlTwoSubalgebra::initializeHEFSystemFromFCoefficientsPartTwo(
-  LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionPreservedByEMinusF
-) {
+void SlTwoSubalgebra::initializeHEFSystemFromFCoefficientsPartTwo() {
   MacroRegisterFunctionWithName("SlTwoSubalgebra::initializeHEFSystemFromECoefficientsPartTwo");
   this->systemArbitraryMatrix.initialize(this->systemToSolve.size, this->participatingPositiveRoots.size);
   this->systemArbitraryColumnVector.initialize(this->systemToSolve.size, 1);

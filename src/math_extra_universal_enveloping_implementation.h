@@ -460,19 +460,19 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightTransposeAntiAutomorp
   constMon.makeOne(this->getOwner());
   if (logStream != nullptr) {
     *logStream << "left eltement transposed: "
-    << TAleft.toString(&global.theDefaultFormat.getElement()) << "<br>";
-    *logStream << "right element: " << right.toString(&global.theDefaultFormat.getElement()) << "<br>";
+    << TAleft.toString(&global.defaultFormat.getElement()) << "<br>";
+    *logStream << "right element: " << right.toString(&global.defaultFormat.getElement()) << "<br>";
   }
   startingElt = right;
   startingElt.simplify(ringUnit);
   if (logStream != nullptr) {
     *logStream << "right element after simplification: "
-    << startingElt.toString(&global.theDefaultFormat.getElement()) << "<br>";
+    << startingElt.toString(&global.defaultFormat.getElement()) << "<br>";
   }
   startingElt.modOutVermaRelations(substitutionHiGoesToIthElement, ringUnit);
   if (logStream != nullptr) {
     *logStream << "right element after Verma rels: "
-    << startingElt.toString(&global.theDefaultFormat.getElement()) << "<br>";
+    << startingElt.toString(&global.defaultFormat.getElement()) << "<br>";
   }
   Coefficient leftMonCoeff;
   for (int j = 0; j < TAleft.size(); j ++) {
@@ -488,22 +488,22 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightTransposeAntiAutomorp
           if (logStream != nullptr) {
             //*logStream << "tempElt before mult: " << tempElt.toString(global, tempFormat) << "<br>";
             *logStream << "intermediate before mult: "
-            << intermediateAccum.toString(&global.theDefaultFormat.getElement()) << "<br>";
+            << intermediateAccum.toString(&global.defaultFormat.getElement()) << "<br>";
           }
           intermediateAccum *= tempElt;
           if (logStream != nullptr) {
             *logStream << "intermediate before simplification: "
-            << intermediateAccum.toString(&global.theDefaultFormat.getElement()) << "<br>";
+            << intermediateAccum.toString(&global.defaultFormat.getElement()) << "<br>";
           }
           intermediateAccum.simplify(ringUnit);
           if (logStream != nullptr) {
             *logStream << "intermediate after simplification: "
-            << intermediateAccum.toString(&global.theDefaultFormat.getElement()) << "<br>";
+            << intermediateAccum.toString(&global.defaultFormat.getElement()) << "<br>";
           }
           intermediateAccum.modOutVermaRelations(substitutionHiGoesToIthElement, ringUnit, ringZero);
           if (logStream != nullptr) {
             *logStream << "intermediate after Verma rels: "
-            << intermediateAccum.toString(&global.theDefaultFormat.getElement()) << "<br>";
+            << intermediateAccum.toString(&global.defaultFormat.getElement()) << "<br>";
           }
         }
       } else {
@@ -519,7 +519,7 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightTransposeAntiAutomorp
     }
   }
   if (logStream != nullptr) {
-    *logStream << "final UE element: " << Accum.toString(&global.theDefaultFormat.getElement());
+    *logStream << "final UE element: " << Accum.toString(&global.defaultFormat.getElement());
   }
   this->getOwner().UEGeneratorOrderIncludingCartanElts = oldOrder;
   return true;

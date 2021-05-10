@@ -1284,7 +1284,7 @@ bool CalculatorFunctionsPolynomial::groebner(
   }
   GroebnerBasisComputation<AlgebraicNumber> theGroebnerComputation;
   context.getFormat(theGroebnerComputation.format);
-  context.getFormat(global.theDefaultFormat.getElement());
+  context.getFormat(global.defaultFormat.getElement());
   if (useModZp) {
     ElementZmodP tempElt;
     tempElt.makeMinusOne(static_cast<unsigned>(modulus));

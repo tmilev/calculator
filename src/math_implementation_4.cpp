@@ -1699,7 +1699,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     }
   }
   this->log << "\nDual cartan embedding smaller into larger:\n" <<
-  DualCartanEmbedding.toString(&global.theDefaultFormat.getElement());
+  DualCartanEmbedding.toString(&global.defaultFormat.getElement());
   this->log << "\nParabolic subalgebra large algebra: " << this->ParabolicLeviPartRootSpacesZeroStandsForSelected.toString();
   tempRoot = this->ParabolicSelectionSmallerAlgebra;
   this->log << "\nParabolic subalgebra smaller algebra: " << tempRoot.toString();
@@ -1718,7 +1718,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     Matrix<Rational>& currentLinearOperator = this->theLinearOperators[i];
     theSubgroup.getMatrixOfElement(theSubgroup.allElements[i], currentLinearOperator);
 //    currentLinearOperator.multiplyOnTheLeft(preferredBasisChangeInverse);
-    this->log << "\n" << currentLinearOperator.toString(&global.theDefaultFormat.getElement());
+    this->log << "\n" << currentLinearOperator.toString(&global.defaultFormat.getElement());
     currentLinearOperator.actOnVectorColumn(theSubgroup.getRho(), this->theTranslationS[i]);
     this->theTranslationS[i] -= theSubgroup.getRho();
     this->theTranslationS[i].negate();
@@ -1730,7 +1730,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     }
   }
   this->log << "\n\n\nMatrix of the projection operator (basis-changed):\n"
-  << theProjectionBasisChanged.toString(&global.theDefaultFormat.getElement());
+  << theProjectionBasisChanged.toString(&global.defaultFormat.getElement());
   this->log << "\n\n\nMatrix form of the operators $u_w$, "
   << "the translations $\tau_w$ and their projections (" << this->theLinearOperatorsExtended.size << "):";
   //List<Matrix<Rational> > tempList;
@@ -1747,7 +1747,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
         currentLOExtended.elements[i][j + currentLO.numberOfRows] = currentLO.elements[i][j];
       }
     }
-    this->log << "\n\n" << currentLOExtended.toString(&global.theDefaultFormat.getElement());
+    this->log << "\n\n" << currentLOExtended.toString(&global.defaultFormat.getElement());
     this->log << this->theTranslationS[k].toString() << ";   " << this->theTranslationsProjectedBasisChanged[k].toString();
   }
 
@@ -1820,7 +1820,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   Vectors<Rational> rootsGeneratingExtendedLattice;
   int totalDim = input.range().getRank() + input.domain().getRank();
   rootsGeneratingExtendedLattice.setSize(totalDim);
-  this->log << "\n" << tempMat.toString(&global.theDefaultFormat.getElement()) << "\n";
+  this->log << "\n" << tempMat.toString(&global.defaultFormat.getElement()) << "\n";
   this->log << this->theExtendedIntegralLatticeMatForM.toString();
   this->WeylChamberSmallerAlgebra.createFromNormals(WallsWeylChamberLargerAlgebra);
   this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->WeylChamberSmallerAlgebra.toString(&theFormat) << "\n";
@@ -1852,9 +1852,9 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << "\nWeyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.toString(&theFormat) << "\n";
   this->log << "**********************\n\n\n";
   this->log << "\nThe first operator extended:\n"
-  << this->theLinearOperatorsExtended[0].toString(&global.theDefaultFormat.getElement()) << "\n";
+  << this->theLinearOperatorsExtended[0].toString(&global.defaultFormat.getElement()) << "\n";
   this->log << "\nThe second operator extended:\n"
-  << this->theLinearOperatorsExtended[1].toString(&global.theDefaultFormat.getElement()) << "\n";
+  << this->theLinearOperatorsExtended[1].toString(&global.defaultFormat.getElement()) << "\n";
   /*tempMat = this->theLinearOperatorsExtended.objects[0];
   tempMat.transpose();
   tempMat.actOnVectorsColumn(this->PreimageWeylChamberSmallerAlgebra);

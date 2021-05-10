@@ -4379,116 +4379,6 @@ const WeylGroupData& SlTwoSubalgebra::getOwnerWeyl() const {
   return this->owner->weylGroup;
 }
 
-bool SlTwoSubalgebra::operator>(const SlTwoSubalgebra& right) const {
-  MacroRegisterFunctionWithName("SlTwoSubalgebra::operatorGreaterThan");
-  if (this->owner != right.owner) {
-    global.fatal << "Error: comparing sl(2) subalgebras with different owners." << global.fatal;
-  }
-  if ( this->lengthHSquared > right.lengthHSquared) {
-    return true;
-  }
-  if (right.lengthHSquared > this->lengthHSquared) {
-    return false;
-  }
-  return this->hCharacteristic > right.hCharacteristic;
-}
-
-bool SlTwoSubalgebra::operator==(const SlTwoSubalgebra& right) const {
- // See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, chapter 7-10
-  if (this->owner != right.owner) {
-    global.fatal << "Comparing sl(2) "
-    << "subalgebras that have different ambient Lie algebras. " << global.fatal;
-  }
-  return this->hCharacteristic == right.hCharacteristic;
-}
-
-std::string SlTwoSubalgebra::toStringTripleVerification(FormatExpressions* format) const {
-  std::stringstream out;
-  bool useHtml = format == nullptr ? true : format->flagUseHTML;
-  out << "<br>Lie brackets of the above elements.<br>";
-  if (useHtml) {
-    out << "\n<br>\n";
-  }
-  out << "\\(\\begin{array}{rcl}"
-  << "[e, f]&=&" << this->eBracketF.toString(format) << "\\\\\n"
-  << "[h, e]&=&" << this->hBracketE.toString(format) << "\\\\\n"
-  << "[h, f]&=&" << this->hBracketF.toString(format)
-  << "\\end{array}\\)";
-
-  return out.str();
-}
-
-std::string SlTwoSubalgebra::toStringTripleArbitrary(FormatExpressions* format) const {
-  std::stringstream out;
-  out << "Starting h, e, f triple. H is computed according to Dynkin, "
-  << "and the coefficients of f are arbitrarily chosen. "
-  << "More precisely, the chevalley generators participating in f are ordered in the order "
-  << "in which their roots appear, and the coefficients are chosen to be the increasing odd "
-  << "numbers 1, 3, 5, ...."
-  << "This arbitrary (but well-defined) choice of "
-  << "f guarantees that the computation is linear and fast. <br>\n";
-  out << "\\(\\begin{array}{rcl}"
-  << "h&=&" << this->hPolynomialRational.toString(format) << "\\\\"
-  << "e&=&" << this->eArbitraryUnknown.toString(format) << "\\\\"
-  << "f&=&" << this->fArbitrary.toString(format)
-  << "\\end{array}\\)";
-  return out.str();
-}
-
-std::string SlTwoSubalgebra::toStringTripleArbitraryMatrix(FormatExpressions* format) const {
-  std::stringstream out;
-  out << "<br>Matrix form of the system we are trying to solve:\n";
-  FormatExpressions formatLatex;
-  formatLatex.flagUseLatex = true;
-  formatLatex.flagUseHTML = false;
-  out << "\\("
-  << this->systemArbitraryMatrix.toString(&formatLatex)
-  << "[col. vect.]"
-  << "="
-  << this->systemArbitraryColumnVector.toString(&formatLatex)
-  << "\\)"
-  ;
-  return out.str();
-}
-
-std::string SlTwoSubalgebra::toStringTripleUnknowns(FormatExpressions* format) const {
-  std::stringstream out;
-  out << "<hr>Unknown elements.<br>";
-  out << "\\(\\begin{array}{rcl}"
-  << "h&=&" << this->hPolynomialRational.toString(format) << "\\\\\n"
-  << "e&=&" << this->eUnknown.toString(format) << "\\\\\n"
-  << "f&=&" << this->fUnknown.toString(format)
-  << "\\end{array}\\)";
-  out << "<br>Lie brackets of the unknowns.<br>";
-  out << "\\([e,f] - h = "
-  << this->eBracketFMinusHUnknown.toString(format)
-  << "\\)";
-  return out.str();
-}
-
-std::string SlTwoSubalgebra::toStringTripleUnknownsPolynomialSystem(FormatExpressions* format) const {
-  std::stringstream out;
-  out << "<br>The polynomial system that corresponds to finding the h, e, f triple:<br>\n";
-  std::stringstream latexStreamActual;
-  latexStreamActual << "\\begin{array}{rcl}";
-  for (int i = 0; i < this->systemToSolve.size; i ++) {
-    latexStreamActual << this->systemToSolve[i].toString(format) << "&=&0\\\\";
-  }
-  latexStreamActual << "\\end{array}";
-  out << HtmlRoutines::getMathNoDisplay(latexStreamActual.str()) << "\n<br>\n";
-  return out.str();
-}
-
-std::string SlTwoSubalgebra::toStringTriple(FormatExpressions* format) const {
-  std::stringstream out;
-  out << "\\begin{array}{rcl}";
-  out << "h&=&" << this->hElement.toString(format) << "\\\\\n";
-  out << "e&=&" << this->eElement.toString(format) << "\\\\\n";
-  out << "f&=&" << this->fElement.toString(format);
-  out << "\\end{array}";
-  return HtmlRoutines::getMathNoDisplay(out.str());
-}
-
 std::string SlTwoSubalgebra::toStringTripleStandardRealization() const {
   Matrix<Rational> matrixH, matrixE, matrixF;
   if (
@@ -4590,10 +4480,14 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   out << this->toStringTriple(format);
   out << this->toStringTripleStandardRealization();
   out << this->toStringTripleVerification(format);
+  out << "<br>Unfold the hidden panel for more information.<br>";
+  out << "<div class='lieAlgebraPanel'><div>";
   out << this->toStringTripleUnknowns(format);
   out << this->toStringTripleUnknownsPolynomialSystem(format);
   out << this->toStringTripleArbitrary(format);
-  out << this->toStringTripleArbitraryMatrix(format);
+  out << this->toStringTripleArbitraryMatrix();
+  out << this->toStringKostantSekiguchiTripleInternals(format);
+  out << "</div></div>";
   return out.str();
 }
 
@@ -4618,7 +4512,6 @@ bool SlTwoSubalgebra::checkConsistency() const {
 }
 
 void SlTwoSubalgebra::computeDynkinsEpsilon(WeylGroupData& weyl) {
- //outdates, must be erased as soon as I implement an equivalent
   this->dynkinsEpsilon = this->diagramM.numberRootsGeneratedByDiagram() + this->diagramM.rankTotal();
   int r = 0;
   for (int i = 0; i < this->hCharacteristic.size; i ++) {

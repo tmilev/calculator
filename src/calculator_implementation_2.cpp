@@ -1365,23 +1365,23 @@ void Calculator::evaluateCommands() {
     << "depth before evaluation was 0, but after evaluation it is "
     << this->recursionDepth << "." << global.fatal;
   }
-  global.theDefaultFormat.getElement().flagMakingExpressionTableWithLatex = true;
-  global.theDefaultFormat.getElement().flagUseLatex = true;
-  global.theDefaultFormat.getElement().flagExpressionNewLineAllowed = true;
-  global.theDefaultFormat.getElement().flagIncludeExtraHtmlDescriptionsInPlots = !this->flagPlotNoControls;
-  global.theDefaultFormat.getElement().flagLatexDetailsInHtml = this->flagWriteLatexPlots;
-  global.theDefaultFormat.getElement().flagExpressionIsFinal = true;
+  global.defaultFormat.getElement().flagMakingExpressionTableWithLatex = true;
+  global.defaultFormat.getElement().flagUseLatex = true;
+  global.defaultFormat.getElement().flagExpressionNewLineAllowed = true;
+  global.defaultFormat.getElement().flagIncludeExtraHtmlDescriptionsInPlots = !this->flagPlotNoControls;
+  global.defaultFormat.getElement().flagLatexDetailsInHtml = this->flagWriteLatexPlots;
+  global.defaultFormat.getElement().flagExpressionIsFinal = true;
   if (global.flagRunningConsoleRegular) {
-    global.theDefaultFormat.getElement().flagUseQuotes = false;
-    global.theDefaultFormat.getElement().flagExpressionIsFinal = true;
+    global.defaultFormat.getElement().flagUseQuotes = false;
+    global.defaultFormat.getElement().flagExpressionIsFinal = true;
     if (global.programArguments.size > 1) {
       out << "Input: " << Logger::consoleYellow()
-      << startingExpression.toString(&global.theDefaultFormat.getElement()) << std::endl;
+      << startingExpression.toString(&global.defaultFormat.getElement()) << std::endl;
     }
-    global.theDefaultFormat.getElement().flagExpressionIsFinal = true;
+    global.defaultFormat.getElement().flagExpressionIsFinal = true;
     this->objectContainer.resetSliders();
     out << Logger::consoleNormal() << "Output: " << Logger::consoleGreen()
-    << this->programExpression.toString(&global.theDefaultFormat.getElement())
+    << this->programExpression.toString(&global.defaultFormat.getElement())
     << Logger::consoleNormal() << std::endl;
   } else if (!this->flagDisplayFullExpressionTree) {
     std::string badCharsString = this->toStringIsCorrectAsciiCalculatorString(this->inputString);
@@ -1399,7 +1399,7 @@ void Calculator::evaluateCommands() {
     JSData result;
     result.elementType = JSData::token::tokenObject;
     std::string resultString = this->programExpression.toString(
-      &global.theDefaultFormat.getElement(), &startingExpression, true, &result
+      &global.defaultFormat.getElement(), &startingExpression, true, &result
     );
     this->outputJS[WebAPI::result::resultLabel] = result;
     out << resultString;

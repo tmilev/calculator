@@ -257,8 +257,7 @@ public:
   // Not allowed to extract more than this many random bytes at once.
   const unsigned int maximumExtractedRandomBytes = 32; // = 256 bits
 
-  MemorySaving<FormatExpressions> theDefaultFormat;
-  MemorySaving<FormatExpressions> thePolyFormat;
+  MemorySaving<FormatExpressions> defaultFormat;
   //status flags:
   bool flagComputationComplete;
   bool flagComputationStarted;

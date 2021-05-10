@@ -1228,7 +1228,7 @@ bool CalculatorFunctions::solveSerreLikeSystem(
   system.groebner.polynomialOrder.monomialOrder = MonomialPolynomial::orderDefault();
   system.algebraicClosure = &calculator.objectContainer.algebraicClosure;
   system.flagTryDirectlySolutionOverAlgebraicClosure = startWithAlgebraicClosure;
-  global.theDefaultFormat.getElement() = system.groebner.format;
+  global.defaultFormat.getElement() = system.groebner.format;
   system.flagUseTheMonomialBranchingOptimization = true;
   system.solveSerreLikeSystem(polynomials);
   std::stringstream out;

@@ -428,8 +428,8 @@ void RationalFraction<Coefficient>::operator*=(const Polynomial<Coefficient>& ot
   ProgressReport theReport;
   if (theReport.tickAndWantReport()) {
     std::stringstream out;
-    out << "Multiplying " << this->toString(&global.theDefaultFormat.getElement()) << " by "
-    << other.toString(&global.theDefaultFormat.getElement());
+    out << "Multiplying " << this->toString(&global.defaultFormat.getElement()) << " by "
+    << other.toString(&global.defaultFormat.getElement());
     theReport.report(out.str());
   }
   RationalFraction<Coefficient>::greatestCommonDivisor(this->denominator.getElement(), other, commonDivisor);
@@ -449,8 +449,8 @@ void RationalFraction<Coefficient>::operator*=(const Polynomial<Coefficient>& ot
   this->simplifyLeadingCoefficientOnly();
   if (theReport.tickAndWantReport()) {
     std::stringstream out;
-    out << "Multiplying " << this->toString(&global.theDefaultFormat.getElement()) << " by "
-    << other.toString(&global.theDefaultFormat.getElement());
+    out << "Multiplying " << this->toString(&global.defaultFormat.getElement()) << " by "
+    << other.toString(&global.defaultFormat.getElement());
     out << " and the result is:\n" << this->toString();
     theReport.report(out.str());
   }

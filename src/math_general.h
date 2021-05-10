@@ -2297,18 +2297,18 @@ public:
     }
   }
   template<class baseType>
-  void substitutionCoefficients(const List<Polynomial<baseType> >& theSub) {
+  void substitutionCoefficients(const List<Polynomial<baseType> >& substitution) {
     MacroRegisterFunctionWithName("Polynomial::substitutionCoefficients");
-    Coefficient newCoeff;
+    Coefficient newCoefficient;
     for (int i = 0; i < this->size(); i ++) {
-      newCoeff = this->coefficients[i];
-      newCoeff.substitution(theSub, 1);
-      if (newCoeff.isEqualToZero()) {
+      newCoefficient = this->coefficients[i];
+      newCoefficient.substitution(substitution, 1);
+      if (newCoefficient.isEqualToZero()) {
         this->popMonomial(i);
         i --;
         continue;
       }
-      this->coefficients[i] = newCoeff;
+      this->coefficients[i] = newCoefficient;
     }
   }
   void subtractMonomial(const TemplateMonomial& inputMon, const Coefficient& inputCoeff) {
@@ -3243,7 +3243,9 @@ class GroebnerBasisComputation {
   int minimalNumberOfVariables() const;
   std::string toStringLetterOrder(bool addDollars) const;
   std::string toStringPolynomialBasisStatus();
-  static int getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(int variableIndex, List<Polynomial<Coefficient> >& input);
+  static int getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(
+    int variableIndex, List<Polynomial<Coefficient> >& input
+  );
   void remainderDivisionByBasis(
     const Polynomial<Coefficient>& input,
     Polynomial<Coefficient>& outputRemainder,
@@ -4107,6 +4109,28 @@ public:
     ElementSemisimpleLieAlgebra<Coefficient>& output
   );
 };
+
+template <class Coefficient>
+void LinearMapSemisimpleLieAlgebra<Coefficient>::applyTo(
+  const ElementSemisimpleLieAlgebra<Coefficient>& input,
+  ElementSemisimpleLieAlgebra<Coefficient>& output
+) {
+  MacroRegisterFunctionWithName("LinearMapSemisimpleLieAlgebra::applyTo");
+  if (&input == &output) {
+    ElementSemisimpleLieAlgebra<Coefficient> copy = input;
+    this->applyTo(copy, output);
+    return;
+  }
+  output.makeZero();
+  ElementSemisimpleLieAlgebra<Coefficient> contribution;
+  for (int i = 0; i < input.size(); i ++) {
+    const ChevalleyGenerator& current = input.monomials[i];
+    ElementSemisimpleLieAlgebra<Coefficient> contribution =
+    this->imagesChevalleyGenerators[current.generatorIndex];
+    contribution *= input.coefficients[i];
+    output += contribution;
+  }
+}
 
 template <class Coefficient>
 int Matrix<Coefficient>::findPositiveLCMCoefficientDenominatorsTruncated() {

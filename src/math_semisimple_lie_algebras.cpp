@@ -214,7 +214,7 @@ std::string SemisimpleLieAlgebra::toHTML(
     << drawingVariables.getHTMLDiv(theWeyl.getDimension(), true);
     out << theWeyl.toStringRootsAndRootReflections();
     out << " The resulting Lie bracket pairing table follows. <hr> "
-    << this->toString(&global.theDefaultFormat.getElement());
+    << this->toString(&global.defaultFormat.getElement());
     if (flagWriteLatexPlots) {
       out << "Ready for LaTeX consumption version of the first three columns: ";
       out << "<br>%Add to preamble: <br>\\usepackage{longtable} <br>%Add to body: <br>"
@@ -714,7 +714,7 @@ void SemisimpleLieAlgebra::computeOneChevalleyConstant(
 
 bool SemisimpleLieAlgebra::testForConsistency() {
   //HashedList<Vector<Rational> >& theRoots = this->theWeyl.RootSystem;
-  FormatExpressions& theFormat = global.theDefaultFormat.getElement();
+  FormatExpressions& theFormat = global.defaultFormat.getElement();
   ElementSemisimpleLieAlgebra<Rational> g1, g2, g3, g23, g31, g12, g123, g231, g312, temp;
   //this->ComputeDebugString(false, false, global);
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
@@ -1200,15 +1200,15 @@ void HomomorphismSemisimpleLieAlgebra::toString(std::string& output, bool useHtm
     out << "<br>";
   }
   for (int i = 0; i < this->imagesSimpleChevalleyGenerators.size; i ++) {
-    out << this->imagesSimpleChevalleyGenerators[i].toString(&global.theDefaultFormat.getElement()) << "\n\n";
+    out << this->imagesSimpleChevalleyGenerators[i].toString(&global.defaultFormat.getElement()) << "\n\n";
     if (useHtml) {
       out << "<br>";
     }
   }
   out << "Maps of Chevalley generators:\n\n";
   for (int i = 0; i < this->domainAllChevalleyGenerators.size; i ++) {
-    out << "<br>" << this->domainAllChevalleyGenerators[i].toString(&global.theDefaultFormat.getElement())
-    << " \\mapsto " << this->imagesAllChevalleyGenerators[i].toString(&global.theDefaultFormat.getElement());
+    out << "<br>" << this->domainAllChevalleyGenerators[i].toString(&global.defaultFormat.getElement())
+    << " \\mapsto " << this->imagesAllChevalleyGenerators[i].toString(&global.defaultFormat.getElement());
   }
   output = out.str();
 }

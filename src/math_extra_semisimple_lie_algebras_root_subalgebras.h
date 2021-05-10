@@ -510,12 +510,15 @@ public:
   // An element of the form x_1 g_{k_1} + ... + x_s g_{k_s} where
   // x_1, ..., x_s are unknowns and g_{?} are the Chevalley generators
   // of the root spaces given by participatingPositiveRoots.
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > eUnknownKostantSekiguchi;
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > eKostantSekiguchiUnknown;
   // An element of the form x_1 g_{-k_1} + ... + x_s g_{-k_s} where
   // x_1, ..., x_s are unknowns and g_{-?} are the Chevalley generators
   // of the root spaces given by the negatives of the participatingPositiveRoots.
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > fUnknownKostantSekiguchi;
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > fKostantSekiguchiUnknown;
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > eBracketFMinusHUnknownKostantSekiguchi;
+
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > eMinusFUnknown;
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > involutionAppliedToEMinusF;
 
   // The polynomial system required to solve to find a Kostant-sekiguchi triple e, f, h.
   // Here, we assume that theta(h) = - h is already satisfied.
@@ -583,9 +586,15 @@ public:
   std::string toStringTripleVerification(FormatExpressions* format) const;
   std::string toStringTripleUnknowns(FormatExpressions* format) const;
   std::string toStringTripleUnknownsPolynomialSystem(FormatExpressions* format = nullptr) const;
+  template<typename Coefficient>
+  std::string toStringPolynomialSystem(
+    const PolynomialSubstitution<Coefficient>& system,
+    FormatExpressions* format = nullptr
+  ) const;
   std::string toStringTripleArbitrary(FormatExpressions* format) const;
-  std::string toStringTripleArbitraryMatrix(FormatExpressions* format) const;
+  std::string toStringTripleArbitraryMatrix() const;
   std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toStringKostantSekiguchiTripleInternals(FormatExpressions* format) const;
   void getInvolvedPositiveGenerators(List<ChevalleyGenerator>& output);
   void getInvolvedNegativeGenerators(List<ChevalleyGenerator>& output);
   void toStringModuleDecompositionMinimalContainingRegularSAs(
@@ -607,24 +616,25 @@ public:
     Vector<Rational>& h,
     AlgebraicClosureRationals* inputAlgebraicClosure
   );
+  bool attemptRealizingKostantSekiguchi();
   bool checkConsistencyParticipatingRoots(const Vector<Rational>& targetH);
   // Initializes the h,e,f computation with f arbitrarily chosen.
   // See the preceding comments on why f is chosen arbitrarily.
   void initializeUnknownTriples(const Vector<Rational>& targetH);
   void computePolynomialSystems();
   void adjoinKostantSekiguchiRelationsToPolynomialSystem(
-    LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionPreservedByEMinusF
+    LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >* cartanInvolutionPreservedByEMinusF
   );
   void computeLieBracketsUnknowns();
   void initializeHEFSystemFromFCoefficients(
     const Vector<Rational>& targetH,
-    LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionPreservedByEMinusF
+    LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >* cartanInvolutionPreservedByEMinusF
   );
-  void initializeHEFSystemFromFCoefficientsPartTwo(
-    LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionPreservedByEMinusF
-  );
+  void initializeHEFSystemFromFCoefficientsPartTwo();
   // Whether the ambient Lie algebra has a Cartan involution that has been implemented.
-  bool hasImplementedStandardCartanInvolution(LinearMapSemisimpleLieAlgebra<Rational>* whichInvolution);
+  bool hasImplementedStandardCartanInvolution(
+    LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >* whichInvolution
+  );
   void computeModuleDecompositionsitionOfMinimalContainingRegularSAs(SlTwoSubalgebras& owner);
   bool moduleDecompositionFitsInto(const SlTwoSubalgebra& other) const;
   static bool moduleDecompositionLeftFitsIntoRight(

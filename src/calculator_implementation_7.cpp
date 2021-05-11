@@ -5843,9 +5843,9 @@ bool CalculatorFunctionsPlot::plotViewRectangle(
   }
   Plot emptyPlot;
   emptyPlot.dimension = 2;
-  emptyPlot.theLowerBoundAxes = lowerLeft[0];
+  emptyPlot.lowerBoundAxes = lowerLeft[0];
   emptyPlot.lowBoundY = lowerLeft[1];
-  emptyPlot.theUpperBoundAxes = upperRight[0];
+  emptyPlot.upperBoundAxes = upperRight[0];
   emptyPlot.highBoundY = upperRight[1];
   emptyPlot.priorityViewRectangle = 1;
   emptyPlot.desiredHtmlHeightInPixels = 100;
@@ -5946,8 +5946,8 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
   Plot plot;
   plot.dimension = 2;
   PlotObject plotObject;
-  plotObject.leftPtE = input[2];
-  plotObject.rightPtE = input[3];
+  plotObject.leftPoint = input[2];
+  plotObject.rightPoint = input[3];
   if (input.size() >= 5) {
     if (!input[4].isOfType<std::string>(&plotObject.colorJS)) {
       plotObject.colorJS = input[4].toString();
@@ -5973,22 +5973,22 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
   if (numIntervals < 2) {
     numIntervals = 2;
   }
-  bool leftIsDouble = plotObject.leftPtE.evaluatesToDouble(&plotObject.xLow);
-  bool rightIsDouble = plotObject.rightPtE.evaluatesToDouble(&plotObject.xHigh);
+  bool leftIsDouble = plotObject.leftPoint.evaluatesToDouble(&plotObject.xLow);
+  bool rightIsDouble = plotObject.rightPoint.evaluatesToDouble(&plotObject.xHigh);
   if (!leftIsDouble) {
-    if (plotObject.leftPtE != calculator.expressionMinusInfinity()) {
+    if (plotObject.leftPoint != calculator.expressionMinusInfinity()) {
       return calculator
       << "Couldn't convert left boundary "
-      << plotObject.leftPtE.toString() << " to floating point number. ";
+      << plotObject.leftPoint.toString() << " to floating point number. ";
     } else {
       plotObject.leftBoundaryIsMinusInfinity = true;
     }
   }
   if (!rightIsDouble) {
-    if (plotObject.rightPtE != calculator.expressionInfinity()) {
+    if (plotObject.rightPoint != calculator.expressionInfinity()) {
       return calculator
       << "Couldn't convert right boundary "
-      << plotObject.rightPtE.toString() << " to floating point number. ";
+      << plotObject.rightPoint.toString() << " to floating point number. ";
     } else {
       plotObject.rightBoundaryIsMinusInfinity = true;
     }
@@ -6024,20 +6024,20 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
     plotObject.plotType = "plotFunctionPrecomputed";
   }
   if (CalculatorFunctions::functionMakeJavascriptExpression(
-    calculator, plotObject.leftPtE, jsConverterE
+    calculator, plotObject.leftPoint, jsConverterE
   )) {
     plotObject.leftPtJS = jsConverterE.toString();
-    plotObject.leftPtE.hasInputBoxVariables(
+    plotObject.leftPoint.hasInputBoxVariables(
       &plotObject.parametersInPlay, &plotObject.parametersInPlayJS
     );
   } else {
     plotObject.plotType = "plotFunctionPrecomputed";
   }
   if (CalculatorFunctions::functionMakeJavascriptExpression(
-    calculator, plotObject.rightPtE, jsConverterE
+    calculator, plotObject.rightPoint, jsConverterE
   )) {
     plotObject.rightPtJS = jsConverterE.toString();
-    plotObject.rightPtE.hasInputBoxVariables(
+    plotObject.rightPoint.hasInputBoxVariables(
       &plotObject.parametersInPlay, &plotObject.parametersInPlayJS
     );
   } else {

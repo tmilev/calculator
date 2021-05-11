@@ -934,8 +934,8 @@ public:
   void actOnDual(int index,Vector<Coefficient>& theVector, bool RhoAction, const Coefficient& ringZero);
   //theRoot is a list of the simple coordinates of the Vector<Rational>
   //theRoot serves as both input and output
-  void actOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction);
-  void actOnRootByGroupElement(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho);
+  void actOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& root, bool rhoAction);
+  void actOnRootByGroupElement(int index, Vector<Rational>& root, bool rhoAction, bool useMinusRho);
   // Simple reflection with respect to vector alpha.
   // If neither rhoAction nor minusRho is set, this is equivalent to
   // the transformation v -> v - 2 * <alpha, v> / <alpha, alpha> alpha,
@@ -950,9 +950,9 @@ public:
   // Simple reflection with respect to the simple root with given index.
   // Acts on the second argument in place.
   template <class Coefficient>
-  void reflectSimple(int index, Vector<Coefficient>& theVector) const;
+  void reflectSimple(int index, Vector<Coefficient>& vector) const;
   template <class Coefficient>
-  void reflectRhoSimple(int index, Vector<Coefficient>& theVector) const;
+  void reflectRhoSimple(int index, Vector<Coefficient>& vector) const;
   template <class Coefficient>
   void reflectMinusRhoSimple(int index, Vector<Coefficient>& theVector) const;
   ElementWeylGroup getRootReflection(int rootIndex);
@@ -970,8 +970,8 @@ public:
     this->getMatrixStandardRepresentation(input, result);
     return result;
   }
-  void simpleReflectionDualSpace(int index, Vector<Rational>& DualSpaceElement);
-  void simpleReflectionRootPolynomial(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction);
+  void simpleReflectionDualSpace(int index, Vector<Rational>& dualSpaceElement);
+  void simpleReflectionRootPolynomial(int index, PolynomialSubstitution<Rational>& root, bool rhoAction);
   bool isPositiveOrPerpWithRespectToH(const Vector<Rational>& input, const Vector<Rational>& theH) {
     return this->rootScalarCartanRoot(input, theH).isPositiveOrZero();
   }

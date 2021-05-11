@@ -246,18 +246,18 @@ private:
 
   int getExpressionTreeSize() const;
 
-  template <class theType>
+  template <class Type>
   bool convertInternally(Expression& output) const;
-  template <class theType>
-  bool convertsInternally(WithContext<theType>* whichElement = nullptr) const;
+  template <class Type>
+  bool convertsInternally(WithContext<Type>* whichElement = nullptr) const;
 
-  template <class theType>
+  template <class Type>
   bool isOfType() const {
     MacroRegisterFunctionWithName("Expression::isOfType");
     if (this->owner == nullptr) {
       return false;
     }
-    if (!this->startsWith(this->getTypeOperation<theType>())) {
+    if (!this->startsWith(this->getTypeOperation<Type>())) {
       return false;
     }
     if (this->children.size < 2 || !this->getLastChild().isAtom()) {
@@ -265,28 +265,28 @@ private:
     }
     return true;
   }
-  template <class theType>
+  template <class Type>
   bool hasType() const {
-    if (this->isOfType<theType>()) {
+    if (this->isOfType<Type>()) {
       return true;
     }
     if (this->isElementaryObject()) {
       return false;
     }
     for (int i = 0; i < this->size(); i ++) {
-      if ((*this)[i].hasType<theType>()) {
+      if ((*this)[i].hasType<Type>()) {
         return true;
       }
     }
     return false;
   }
-  template <class theType>
-  bool isOfType(theType* whichElement) const {
+  template <class Type>
+  bool isOfType(Type* whichElement) const {
     MacroRegisterFunctionWithName("Expression::isOfType");
     if (this->owner == nullptr) {
       return false;
     }
-    if (!this->startsWith(this->getTypeOperation<theType>())) {
+    if (!this->startsWith(this->getTypeOperation<Type>())) {
       return false;
     }
     if (this->children.size < 2 || !this->getLastChild().isAtom()) {
@@ -295,14 +295,14 @@ private:
     if (whichElement == 0) {
       return true;
     }
-    *whichElement = this->getValue<theType>();
+    *whichElement = this->getValue<Type>();
     return true;
   }
-  template <class theType>
-  bool isOfTypeWithContext(WithContext<theType>* whichElement) const;
-  template <class theType>
-  const theType& getValue() const {
-    return this->getValueNonConst<theType>();
+  template <class Type>
+  bool isOfTypeWithContext(WithContext<Type>* whichElement) const;
+  template <class Type>
+  const Type& getValue() const {
+    return this->getValueNonConst<Type>();
   }
   template <class Type>
   Type& getValueNonConst() const;
@@ -327,13 +327,13 @@ private:
   ) {
     return this->assignValueWithContext(input.content, input.context, owner);
   }
-  template <class theType>
-  bool addChildValueOnTop(const theType& inputValue) {
+  template <class Type>
+  bool addChildValueOnTop(const Type& inputValue) {
     this->checkInitialization();
-    Expression tempE;
-    tempE.assignValue(inputValue, *this->owner);
-    tempE.checkConsistency();
-    return this->addChildOnTop(tempE);
+    Expression child;
+    child.assignValue(inputValue, *this->owner);
+    child.checkConsistency();
+    return this->addChildOnTop(child);
   }
   bool setContextAtLeastEqualTo(
     ExpressionContext& inputOutputMinContext, std::stringstream* commentsOnFailure
@@ -344,7 +344,7 @@ private:
   bool getContext(ExpressionContext& output) const;
   static bool mergeContexts(Expression& leftE, Expression& rightE);
   bool mergeContextsMyAruments(Expression& output, std::stringstream* commentsOnFailure) const;
-  template <class theType>
+  template <class Type>
   bool mergeContextsMyArumentsAndConvertThem(Expression& output, std::stringstream* commentsOnFailure) const;
 
   bool containsAsSubExpressionNoBuiltInTypes(const Expression& input) const;
@@ -362,7 +362,6 @@ private:
   bool makeAtom(int input, Calculator& newBoss);
   // TODO(tmilev): rename to MakeOperation
   bool makeAtom(const std::string& atomName, Calculator& newBoss);
-  Expression::FunctionAddress GetHandlerFunctionIamNonBoundVar();
   bool makeIntegral(
     Calculator& calculator,
     const Expression& integrationSet,
@@ -390,8 +389,10 @@ private:
   bool isSuitableForSubstitution() const;
   bool isSuitableForRecursion() const;
 
-  void substituteRecursively(const Expression& toBeSubbed, const Expression& toBeSubbedWith);
-  void substituteRecursivelyInChildren(const Expression& toBeSubbed, const Expression& toBeSubbedWith);
+  void substituteRecursively(const Expression& toBeSubstituted, const Expression& substituteWith);
+  void substituteRecursivelyInChildren(
+    const Expression& toBeSubstituted, const Expression& substituteWith
+  );
   void assignXOXToChild(
     int childIndex,
     Calculator& owner,
@@ -620,8 +621,8 @@ private:
   // void operator=(const Expression& other);
   bool operator>(const Expression& other) const;
   bool greaterThanNoCoefficient(const Expression& other) const;
-  void substituteRecursively(MapList<Expression, Expression>& theSubs);
-  void substituteRecursivelyInChildren(MapList<Expression, Expression>& theSubs);
+  void substituteRecursively(MapList<Expression, Expression>& substitutions);
+  void substituteRecursivelyInChildren(MapList<Expression, Expression>& substitutions);
   class Test {
   public:
     static bool all();
@@ -973,8 +974,8 @@ public:
   List<std::string> coordinateFunctionsJS;
   HashedList<Expression> variablesInPlay;
   List<List<std::string> > variableRangesJS;
-  Expression leftPtE;
-  Expression rightPtE;
+  Expression leftPoint;
+  Expression rightPoint;
   Expression paramLowE;
   Expression paramHighE;
 
@@ -1043,8 +1044,8 @@ public:
   };
   HashedList<std::string, HashFunctions::hashFunction> parameterNames;
   HashedList<std::string, HashFunctions::hashFunction> parameterNamesJS;
-  double theLowerBoundAxes;
-  double theUpperBoundAxes;
+  double lowerBoundAxes;
+  double upperBoundAxes;
   double lowBoundY;
   double highBoundY;
   int desiredHtmlHeightInPixels;
@@ -1173,8 +1174,8 @@ public:
 };
 
 class Calculator {
-  template<typename anyType>
-  friend Calculator& operator<<(Calculator& output, const anyType& any) {
+  template<typename AnyType>
+  friend Calculator& operator<<(Calculator& output, const AnyType& any) {
     output.comments << any;
     return output;
   }

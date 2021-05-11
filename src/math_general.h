@@ -5838,7 +5838,7 @@ class DynkinSimpleType {
   std::string ToStringNonTechnicalName(FormatExpressions* format = nullptr) const;
   void operator++(int);
   bool operator>(const DynkinSimpleType& other) const;
-  static void getEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>& output);
+  static void getEpsilonMatrix(char weylLetter, int weylRank, Matrix<Rational>& output);
   bool operator<(const DynkinSimpleType& other) const {
     return other > *this;
   }
@@ -5867,7 +5867,9 @@ public:
     return currentType == inputType && currentRank == inputRank;
   }
   static void getOuterAutosGeneratorsOneTypeActOnVectorColumn(
-    List<MatrixTensor<Rational> >& output, const DynkinSimpleType& theType, int multiplicity
+    List<MatrixTensor<Rational> >& output,
+    const DynkinSimpleType& dynkinType,
+    int multiplicity
   );
   unsigned int hashFunction() const {
     return this->LinearCombination<DynkinSimpleType, Rational>::hashFunction();
@@ -5882,7 +5884,7 @@ public:
   void sortDynkinTypes();
   bool grow(
     const List<Rational>& allowedInverseScales,
-    int AmbientWeylDim,
+    int ambientWeylDimension,
     List<DynkinType>& output,
     List<List<int> >* outputPermutationRoots
   ) const;
@@ -5935,7 +5937,7 @@ public:
   static int GetIndexPreimageFromRootInjection(int inputIndex, const List<int>& inputRootInjection);
   bool canBeExtendedParabolicallyTo(const DynkinType& other) const;
   bool canBeExtendedParabolicallyOrIsEqualTo(const DynkinType& other) const;
-  void makeSimpleType(char type, int rank, const Rational* inputFirstCoRootSqLength = nullptr);
+  void makeSimpleType(char type, int rank, const Rational* inputFirstCoRootSquareLength = nullptr);
   void getEpsilonMatrix(Matrix<Rational>& output) const;
   void getCoCartanSymmetric(Matrix<Rational>& output) const;
   void getCartanSymmetric(Matrix<Rational>& output) const;

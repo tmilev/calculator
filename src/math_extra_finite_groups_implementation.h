@@ -887,17 +887,17 @@ void WeylGroupData::raiseToDominantWeight(
 }
 
 template <class Coefficient>
-void WeylGroupData::reflectRhoSimple(int index, Vector<Coefficient>& theVector) const {
+void WeylGroupData::reflectRhoSimple(int index, Vector<Coefficient>& vector) const {
   Coefficient alphaShift, tempRat;
   alphaShift = 0;
   for (int i = 0; i < this->cartanSymmetric.numberOfColumns; i ++) {
-    tempRat = theVector[i];
+    tempRat = vector[i];
     tempRat *= this->cartanSymmetric.elements[index][i] * (- 2);
     alphaShift += tempRat;
   }
   alphaShift /= this->cartanSymmetric.elements[index][index];
   alphaShift -= 1;
-  theVector[index] += alphaShift;
+  vector[index] += alphaShift;
 }
 
 template <class Coefficient>
@@ -994,7 +994,7 @@ void WeylGroupData::reflectMinusRhoSimple(int index, Vector<Coefficient>& theVec
 }
 
 template <class Coefficient>
-void WeylGroupData::reflectSimple(int index, Vector<Coefficient>& theVector) const {
+void WeylGroupData::reflectSimple(int index, Vector<Coefficient>& vector) const {
   if (index < 0 || index >= this->cartanSymmetric.numberOfColumns) {
     global.fatal << "Simple reflection with respect to index "
     << index + 1 << " in a Weyl group of rank "
@@ -1003,13 +1003,13 @@ void WeylGroupData::reflectSimple(int index, Vector<Coefficient>& theVector) con
   Coefficient alphaShift, tempRat;
   alphaShift = 0;
   for (int i = 0; i < this->cartanSymmetric.numberOfColumns; i ++) {
-    tempRat = theVector[i];
+    tempRat = vector[i];
     tempRat *= this->cartanSymmetric.elements[index][i];
     alphaShift += tempRat;
   }
   alphaShift *= - 2;
   alphaShift /= this->cartanSymmetric.elements[index][index];
-  theVector[index] += alphaShift;
+  vector[index] += alphaShift;
 }
 
 template <class Coefficient>

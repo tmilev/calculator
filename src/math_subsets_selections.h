@@ -58,11 +58,11 @@ public:
   }
   int selectionToIndex();
   void expandMaxSize();
-  LargeInteger getNumberOfCombinationsFixedCardinality(int theCardinality) {
-    return MathRoutines::nChooseK(this->numberOfElements, theCardinality);
+  LargeInteger getNumberOfCombinationsFixedCardinality(int cardinality) {
+    return MathRoutines::nChooseK(this->numberOfElements, cardinality);
   }
   void shrinkMaxSize();
-  void makeSubSelection(Selection& theSelection, Selection& theSubSelection);
+  void makeSubSelection(Selection& selection, Selection& subSelection);
   void initSelectionFixedCardinality(int card);
   void incrementSelectionFixedCardinality(int card);
   void invertSelection() {
@@ -135,7 +135,7 @@ public:
   }
   bool incrementReturnFalseIfPastLast();
   void incrementSubset();
-  void incrementSubsetFixedCardinality(int Cardinality);
+  void incrementSubsetFixedCardinality(int cardinality);
   bool hasMultiplicitiesZeroAndOneOnly();
   int maximumCardinalityWithMultiplicities() {
     return this->maximumMultiplicity * this->multiplicities.size;

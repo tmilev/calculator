@@ -225,7 +225,7 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
   ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
   std::stringstream* outputStream,
   bool forceRecompute,
-  bool doFullInit,
+  bool doFullInitialization,
   bool computeNilradicals,
   bool computeModuleDecomposition,
   bool attemptToSolveSystems,
@@ -237,7 +237,7 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
   this->owner = &newOwner;
   this->computeFolderNames(this->currentFormat);
   if (!FileOperations::fileExistsVirtual(this->virtualNameMainFile1) || forceRecompute) {
-    if (doFullInit) {
+    if (doFullInitialization) {
       this->millisecondsComputationStart = global.getElapsedMilliseconds();
     }
     this->flagComputeNilradicals = computeNilradicals;
@@ -246,8 +246,10 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
     this->flagcomputePairingTable = computePairingTable;
     this->flagAttemptToAdjustCentralizers = adjustCentralizers;
     this->checkFileWritePermissions();
-    if (doFullInit) {
-      this->findTheSemisimpleSubalgebrasFromScratch(newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras, nullptr);
+    if (doFullInitialization) {
+      this->findTheSemisimpleSubalgebrasFromScratch(
+        newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras, nullptr
+      );
     }
     this->writeReportToFiles();
     this->slTwoSubalgebras.writeHTML();
@@ -265,7 +267,7 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
     << "<a href='"
     << this->owner->fileNames.displayFolderName("../../output/")
     << this->owner->fileNames.fileNameRelativePathSlTwoSubalgebras()
-    << "'>sl(2)-sublagberas</a>";
+    << "' target='_blank'>sl(2)-sublagberas</a>";
   }
   return true;
 }
@@ -301,14 +303,14 @@ void Plot::operator+=(const Plot& other) {
   if (other.priorityViewRectangle > this->priorityViewRectangle) {
     this->highBoundY = other.highBoundY;
     this->lowBoundY = other.lowBoundY;
-    this->theLowerBoundAxes = other.theLowerBoundAxes;
-    this->theUpperBoundAxes = other.theUpperBoundAxes;
+    this->lowerBoundAxes = other.lowerBoundAxes;
+    this->upperBoundAxes = other.upperBoundAxes;
   }
   if (other.priorityViewRectangle == this->priorityViewRectangle) {
     this->highBoundY = MathRoutines::maximum(this->highBoundY, other.highBoundY);
     this->lowBoundY = MathRoutines::minimum(this->lowBoundY,  other.lowBoundY);
-    this->theUpperBoundAxes = MathRoutines::maximum(this->theUpperBoundAxes, other.theUpperBoundAxes);
-    this->theLowerBoundAxes = MathRoutines::minimum(this->theLowerBoundAxes, other.theLowerBoundAxes);
+    this->upperBoundAxes = MathRoutines::maximum(this->upperBoundAxes, other.upperBoundAxes);
+    this->lowerBoundAxes = MathRoutines::minimum(this->lowerBoundAxes, other.lowerBoundAxes);
   }
   this->plotObjects.addListOnTop(other.plotObjects);
   if (other.priorityWindow > this->priorityWindow) {
@@ -339,8 +341,8 @@ bool Plot::operator==(const Plot& other) const {
   this->desiredHtmlWidthInPixels == other.desiredHtmlWidthInPixels &&
   ((this->highBoundY        - other.highBoundY       ) == 0.0) &&
   ((this->lowBoundY         - other.lowBoundY        ) == 0.0) &&
-  ((this->theLowerBoundAxes - other.theLowerBoundAxes) == 0.0) &&
-  ((this->theUpperBoundAxes - other.theUpperBoundAxes) == 0.0) &&
+  ((this->lowerBoundAxes - other.lowerBoundAxes) == 0.0) &&
+  ((this->upperBoundAxes - other.upperBoundAxes) == 0.0) &&
   this->plotObjects == other.plotObjects &&
   this->parameterNames == other.parameterNames &&
   this->parameterNamesJS == other.parameterNamesJS &&
@@ -373,9 +375,9 @@ bool PlotObject::operator==(const PlotObject& other) const {
   ((this->paramLow  - other.paramLow ) == 0.0)                               &&
   ((this->paramHigh - other.paramHigh) == 0.0)                               &&
   ((this->lineWidth - other.lineWidth) == 0.0)                               &&
-  this->plotString                  == other.plotString                &&
+  this->plotString                     == other.plotString                   &&
   this->fillStyle                      == other.fillStyle                    &&
-  this->plotStringWithHtml          == other.plotStringWithHtml        &&
+  this->plotStringWithHtml             == other.plotStringWithHtml           &&
   this->colorRGB                       == other.colorRGB                     &&
   this->colorFillRGB                   == other.colorFillRGB                 &&
   this->dimension                      == other.dimension                    &&
@@ -383,19 +385,19 @@ bool PlotObject::operator==(const PlotObject& other) const {
   this->colorVU                        == other.colorVU                      &&
   this->colorJS                        == other.colorJS                      &&
   this->lineWidthJS                    == other.lineWidthJS                  &&
-  this->numberOfSegmentsJS                  == other.numberOfSegmentsJS                &&
-  this->points                      == other.points                    &&
-  this->pointsDouble                == other.pointsDouble              &&
-  this->pointsJS                    == other.pointsJS                  &&
+  this->numberOfSegmentsJS             == other.numberOfSegmentsJS           &&
+  this->points                         == other.points                       &&
+  this->pointsDouble                   == other.pointsDouble                 &&
+  this->pointsJS                       == other.pointsJS                     &&
   this->theRectangles                  == other.theRectangles                &&
-  this->plotType                    == other.plotType                  &&
+  this->plotType                       == other.plotType                     &&
   this->manifoldImmersion              == other.manifoldImmersion            &&
   this->coordinateFunctionsE           == other.coordinateFunctionsE         &&
   this->coordinateFunctionsJS          == other.coordinateFunctionsJS        &&
   this->variablesInPlay                == other.variablesInPlay              &&
-  this->variableRangesJS                 == other.variableRangesJS               &&
-  this->leftPtE                        == other.leftPtE                      &&
-  this->rightPtE                       == other.rightPtE                     &&
+  this->variableRangesJS               == other.variableRangesJS             &&
+  this->leftPoint                        == other.leftPoint                      &&
+  this->rightPoint                       == other.rightPoint                     &&
   this->paramLowE                      == other.paramLowE                    &&
   this->paramHighE                     == other.paramHighE                   &&
   this->numSegmentsE                   == other.numSegmentsE                 &&
@@ -458,8 +460,8 @@ std::string PlotObject::getPlotStringFromFunctionStringAndRanges(
 }
 
 Plot::Plot() {
-  this->theLowerBoundAxes = - 0.5;
-  this->theUpperBoundAxes = 1;
+  this->lowerBoundAxes = - 0.5;
+  this->upperBoundAxes = 1;
   this->lowBoundY = - 0.5;
   this->highBoundY = 0.5;
   this->flagIncludeExtraHtmlDescriptions = true;
@@ -477,14 +479,14 @@ Plot::Plot() {
 
 void Plot::computeAxesAndBoundingBox() {
   MacroRegisterFunctionWithName("Plot::computeAxesAndBoundingBox");
-  this->theLowerBoundAxes = - 0.5;
-  this->theUpperBoundAxes = 1.1;
+  this->lowerBoundAxes = - 0.5;
+  this->upperBoundAxes = 1.1;
   this->lowBoundY = - 0.5;
   this->highBoundY = 1.1;
   for (int k = 0; k < this->plotObjects.size; k ++) {
     this->plotObjects[k].computeYBounds();
-    this->theLowerBoundAxes = MathRoutines::minimum(this->plotObjects[k].xLow, theLowerBoundAxes);
-    this->theUpperBoundAxes = MathRoutines::maximum(this->plotObjects[k].xHigh, theUpperBoundAxes);
+    this->lowerBoundAxes = MathRoutines::minimum(this->plotObjects[k].xLow, lowerBoundAxes);
+    this->upperBoundAxes = MathRoutines::maximum(this->plotObjects[k].xHigh, upperBoundAxes);
     this->lowBoundY = MathRoutines::minimum(this->plotObjects[k].yLow, this->lowBoundY);
     this->highBoundY = MathRoutines::maximum(this->plotObjects[k].yHigh, this->highBoundY);
     for (int j = 0; j < this->plotObjects[k].pointsDouble.size; j ++) {
@@ -492,8 +494,8 @@ void Plot::computeAxesAndBoundingBox() {
       if (!this->isOKVector(currentPoint)) {
         continue;
       }
-      this->theLowerBoundAxes = MathRoutines::minimum(this->theLowerBoundAxes, currentPoint[0]);
-      this->theUpperBoundAxes = MathRoutines::maximum(this->theUpperBoundAxes, currentPoint[0]);
+      this->lowerBoundAxes = MathRoutines::minimum(this->lowerBoundAxes, currentPoint[0]);
+      this->upperBoundAxes = MathRoutines::maximum(this->upperBoundAxes, currentPoint[0]);
       this->lowBoundY = MathRoutines::minimum (currentPoint[1], this->lowBoundY);
       this->highBoundY = MathRoutines::maximum (currentPoint[1], this->highBoundY);
     }
@@ -502,14 +504,14 @@ void Plot::computeAxesAndBoundingBox() {
 
 void Plot::computeAxesAndBoundingBox3d() {
   MacroRegisterFunctionWithName("Plot::computeAxesAndBoundingBox3d");
-  this->theLowerBoundAxes = - 0.5;
-  this->theUpperBoundAxes = 1.1;
+  this->lowerBoundAxes = - 0.5;
+  this->upperBoundAxes = 1.1;
   this->lowBoundY = - 0.5;
   this->highBoundY = 1.1;
   for (int k = 0; k < this->plotObjects.size; k ++) {
     this->plotObjects[k].computeYBounds();
-    this->theLowerBoundAxes = MathRoutines::minimum(this->plotObjects[k].xLow, theLowerBoundAxes);
-    this->theUpperBoundAxes = MathRoutines::maximum(this->plotObjects[k].xHigh, theUpperBoundAxes);
+    this->lowerBoundAxes = MathRoutines::minimum(this->plotObjects[k].xLow, lowerBoundAxes);
+    this->upperBoundAxes = MathRoutines::maximum(this->plotObjects[k].xHigh, upperBoundAxes);
     this->lowBoundY = MathRoutines::minimum(this->plotObjects[k].yLow, this->lowBoundY);
     this->highBoundY = MathRoutines::maximum(this->plotObjects[k].yHigh, this->highBoundY);
     for (int j = 0; j < this->plotObjects[k].pointsDouble.size; j ++) {
@@ -517,8 +519,8 @@ void Plot::computeAxesAndBoundingBox3d() {
       if (!this->isOKVector(currentPoint)) {
         continue;
       }
-      this->theLowerBoundAxes = MathRoutines::minimum(this->theLowerBoundAxes, currentPoint[0]);
-      this->theUpperBoundAxes = MathRoutines::maximum(this->theUpperBoundAxes, currentPoint[0]);
+      this->lowerBoundAxes = MathRoutines::minimum(this->lowerBoundAxes, currentPoint[0]);
+      this->upperBoundAxes = MathRoutines::maximum(this->upperBoundAxes, currentPoint[0]);
       this->lowBoundY = MathRoutines::minimum(currentPoint[1], this->lowBoundY);
       this->highBoundY = MathRoutines::maximum(currentPoint[1], this->highBoundY);
     }
@@ -946,9 +948,9 @@ JSData Plot::getSetViewWindow() {
   result[PlotObject::Labels::plotType] = "setViewWindow";
   JSData lowLeft = JSData::makeEmptyArray();
   JSData topRight = JSData::makeEmptyArray();
-  lowLeft[0] = this->theLowerBoundAxes * 1.10;
+  lowLeft[0] = this->lowerBoundAxes * 1.10;
   lowLeft[1] = this->lowBoundY * 1.10;
-  topRight[0] = this->theUpperBoundAxes * 1.10;
+  topRight[0] = this->upperBoundAxes * 1.10;
   topRight[1] = this->highBoundY * 1.10;
   JSData window = JSData::makeEmptyArray();
   window[0] = lowLeft;
@@ -1030,14 +1032,14 @@ std::string Plot::getPlotStringAddLatexCommands(bool useHtml) {
   << "\\psaxes[ticks = none, labels = none]{<->}(0,0)(#1, #2)(#3, #4)\\fcLabels{#3}{#4}}"
   << lineSeparator << " \\psset{xunit =1cm, yunit =1cm}";
   resultStream << lineSeparator;
-  resultStream << "\\begin{pspicture}(" << FloatingPoint::doubleToString(theLowerBoundAxes - 0.4) << ", "
+  resultStream << "\\begin{pspicture}(" << FloatingPoint::doubleToString(lowerBoundAxes - 0.4) << ", "
   << FloatingPoint::doubleToString(lowBoundY - 0.4) << ")("
-  << FloatingPoint::doubleToString(theUpperBoundAxes + 0.4)
+  << FloatingPoint::doubleToString(upperBoundAxes + 0.4)
   << "," << FloatingPoint::doubleToString(highBoundY + 0.5) << ")\n\n";
   resultStream << lineSeparator << "\\tiny\n" << lineSeparator;
-  resultStream << " \\fcAxesStandard{" << FloatingPoint::doubleToString(theLowerBoundAxes - 0.15)
+  resultStream << " \\fcAxesStandard{" << FloatingPoint::doubleToString(lowerBoundAxes - 0.15)
   << "}{" << FloatingPoint::doubleToString(lowBoundY - 0.15) << "}{"
-  << FloatingPoint::doubleToString(theUpperBoundAxes + 0.15) << "}{"
+  << FloatingPoint::doubleToString(upperBoundAxes + 0.15) << "}{"
   << FloatingPoint::doubleToString(highBoundY + 0.15) << "}" << lineSeparator;
   for (int i = 0; i < this->plotObjects.size; i ++) {
     if (useHtml) {
@@ -1103,25 +1105,29 @@ bool Expression::isSuitableForRecursion() const {
   return true;
 }
 
-void Expression::substituteRecursively(MapList<Expression, Expression>& theSubs) {
-  if (theSubs.contains(*this)) {
-    (*this) = theSubs.getValueCreate(*this);
+void Expression::substituteRecursively(
+  MapList<Expression, Expression>& substitutions
+) {
+  if (substitutions.contains(*this)) {
+    (*this) = substitutions.getValueCreate(*this);
     return;
   }
-  this->substituteRecursivelyInChildren(theSubs);
+  this->substituteRecursivelyInChildren(substitutions);
 }
 
-void Expression::substituteRecursivelyInChildren(MapList<Expression, Expression>& theSubs) {
+void Expression::substituteRecursivelyInChildren(
+  MapList<Expression, Expression>& substitutions
+) {
   if (!this->isSuitableForSubstitution()) {
     return;
   }
   Expression tempE;
   for (int i = 0; i < this->size(); i ++) {
-    if (theSubs.contains((*this)[i])) {
-      this->setChild(i, theSubs.getValueCreate((*this)[i]));
+    if (substitutions.contains((*this)[i])) {
+      this->setChild(i, substitutions.getValueCreate((*this)[i]));
     } else {
       tempE = (*this)[i];
-      tempE.substituteRecursivelyInChildren(theSubs);
+      tempE.substituteRecursivelyInChildren(substitutions);
       if (!(tempE == (*this)[i])) {
         this->setChild(i, tempE);
       }
@@ -1129,25 +1135,29 @@ void Expression::substituteRecursivelyInChildren(MapList<Expression, Expression>
   }
 }
 
-void Expression::substituteRecursively(const Expression& toBeSubbed, const Expression& toBeSubbedWith) {
-  if ((*this) == toBeSubbed) {
-    (*this) = toBeSubbedWith;
+void Expression::substituteRecursively(
+  const Expression& toBeSubstituted, const Expression& substituteWith
+) {
+  if ((*this) == toBeSubstituted) {
+    (*this) = substituteWith;
     return;
   }
-  this->substituteRecursivelyInChildren(toBeSubbed, toBeSubbedWith);
+  this->substituteRecursivelyInChildren(toBeSubstituted, substituteWith);
 }
 
-void Expression::substituteRecursivelyInChildren(const Expression& toBeSubbed, const Expression& toBeSubbedWith) {
+void Expression::substituteRecursivelyInChildren(
+  const Expression& toBeSubstituted, const Expression& substituteWith
+) {
   if (!this->isSuitableForSubstitution()) {
     return;
   }
   Expression tempE;
   for (int i = 0; i < this->size(); i ++) {
-    if (toBeSubbed == (*this)[i]) {
-      this->setChild(i, toBeSubbedWith);
+    if (toBeSubstituted == (*this)[i]) {
+      this->setChild(i, substituteWith);
     } else {
       tempE = (*this)[i];
-      tempE.substituteRecursivelyInChildren(toBeSubbed, toBeSubbedWith);
+      tempE.substituteRecursivelyInChildren(toBeSubstituted, substituteWith);
       if (!(tempE == (*this)[i])) {
         this->setChild(i, tempE);
       }

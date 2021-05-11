@@ -4515,7 +4515,6 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   out << this->toStringTriple(format);
   out << this->toStringTripleStandardRealization();
   out << this->toStringKostantSekiguchiTriple(format);
-  out << this->toStringKostantSekiguchiTripleInternals(format);
   out << this->toStringKostantSekiguchiTripleStandardRealization();
   out << this->toStringTripleVerification(format);
   out << "<br>Unfold the hidden panel for more information.<br>";
@@ -4524,6 +4523,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   out << this->toStringTripleUnknownsPolynomialSystem(format);
   out << this->toStringTripleArbitrary(format);
   out << this->toStringTripleArbitraryMatrix();
+  out << this->toStringKostantSekiguchiTripleInternals(format);
   out << "</div></div>";
   return out.str();
 }

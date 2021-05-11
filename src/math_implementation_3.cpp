@@ -2872,10 +2872,10 @@ void Selection::computeIndicesFromSelection() {
   }
 }
 
-void Selection::makeSubSelection(Selection &theSelection, Selection &theSubSelection) {
-  this->initialize(theSelection.numberOfElements);
-  for (int i = 0; i < theSubSelection.cardinalitySelection; i ++) {
-    this->addSelectionAppendNewIndex(theSelection.elements[theSubSelection.elements[i]]);
+void Selection::makeSubSelection(Selection& selection, Selection& subSelection) {
+  this->initialize(selection.numberOfElements);
+  for (int i = 0; i < subSelection.cardinalitySelection; i ++) {
+    this->addSelectionAppendNewIndex(selection.elements[subSelection.elements[i]]);
   }
 }
 
@@ -4983,27 +4983,27 @@ bool SelectionWithMaxMultiplicity::hasMultiplicitiesZeroAndOneOnly() {
   return true;
 }
 
-void SelectionWithMaxMultiplicity::incrementSubsetFixedCardinality(int Cardinality) {
-  if (Cardinality < 1 || Cardinality > this->maximumMultiplicity * this->multiplicities.size) {
+void SelectionWithMaxMultiplicity::incrementSubsetFixedCardinality(int cardinality) {
+  if (cardinality < 1 || cardinality > this->maximumMultiplicity * this->multiplicities.size) {
     return;
   }
-  if (this->cardinalitySelectionWithMultiplicities() != Cardinality) {
+  if (this->cardinalitySelectionWithMultiplicities() != cardinality) {
     this->multiplicities.initializeFillInObject(this->multiplicities.size, 0);
   }
   if (this->cardinalitySelectionWithMultiplicities() == 0) {
-    for (int i = this->multiplicities.size - 1; Cardinality > 0; i --) {
-      if (Cardinality >= this->maximumMultiplicity) {
+    for (int i = this->multiplicities.size - 1; cardinality > 0; i --) {
+      if (cardinality >= this->maximumMultiplicity) {
         this->multiplicities[i] = this->maximumMultiplicity;
       } else {
-        this->multiplicities[i] = Cardinality;
+        this->multiplicities[i] = cardinality;
       }
-      Cardinality -= this->multiplicities[i];
+      cardinality -= this->multiplicities[i];
     }
     this->computeElements();
     return;
   }
   int firstNonZeroMult;
-  int currentCardinality = Cardinality;
+  int currentCardinality = cardinality;
   for (firstNonZeroMult = this->multiplicities.size - 1; firstNonZeroMult >= 0; firstNonZeroMult --) {
     if (this->multiplicities[firstNonZeroMult] > 0) {
       break;
@@ -5024,14 +5024,14 @@ void SelectionWithMaxMultiplicity::incrementSubsetFixedCardinality(int Cardinali
       currentCardinality -= this->maximumMultiplicity;
     }
   }
-  for (int i = this->multiplicities.size - 1; currentCardinality < Cardinality; i --) {
+  for (int i = this->multiplicities.size - 1; currentCardinality < cardinality; i --) {
     if (this->multiplicities[i] != 0) {
       global.fatal << "Non-zero multiplicities not implemented here. " << global.fatal;
     }
-    if (Cardinality - currentCardinality >= this->maximumMultiplicity) {
+    if (cardinality - currentCardinality >= this->maximumMultiplicity) {
       this->multiplicities[i] = this->maximumMultiplicity;
     } else {
-      this->multiplicities[i] = Cardinality - currentCardinality;
+      this->multiplicities[i] = cardinality - currentCardinality;
     }
     currentCardinality += this->multiplicities[i];
   }
@@ -5176,23 +5176,25 @@ void DynkinType::getTypesWithMults(List<DynkinSimpleType>& output) const {
 }
 
 void DynkinType::getOuterAutosGeneratorsOneTypeActOnVectorColumn(
-  List<MatrixTensor<Rational> >& output, const DynkinSimpleType& theType, int multiplicity
+  List<MatrixTensor<Rational> >& output,
+  const DynkinSimpleType& dynkinType,
+  int multiplicity
 ) {
   MacroRegisterFunctionWithName("DynkinType::getOuterAutosGeneratorsOneTypeActOnVectorColumn");
   output.setSize(0);
   MatrixTensor<Rational> directSummand, finalMat;
   if (
-    theType.letter == 'D' ||
-    (theType.letter == 'A' && theType.rank > 1) ||
-    (theType.letter == 'E' && theType.rank == 6)
+    dynkinType.letter == 'D' ||
+    (dynkinType.letter == 'A' && dynkinType.rank > 1) ||
+    (dynkinType.letter == 'E' && dynkinType.rank == 6)
   ) {
-    directSummand.makeIdentity(theType.rank * (multiplicity - 1));
+    directSummand.makeIdentity(dynkinType.rank * (multiplicity - 1));
     int numGens = 1;
-    if (theType.letter == 'D' && theType.rank == 4) {
+    if (dynkinType.letter == 'D' && dynkinType.rank == 4) {
       numGens = 2;
     }
     for (int i = 1; i < numGens + 1; i ++) {
-      theType.getAutomorphismActingOnVectorColumn(finalMat, i);
+      dynkinType.getAutomorphismActingOnVectorColumn(finalMat, i);
       finalMat.directSumWith(directSummand);
       output.addOnTop(finalMat);
     }
@@ -5202,13 +5204,13 @@ void DynkinType::getOuterAutosGeneratorsOneTypeActOnVectorColumn(
   }
   for (int i = 0; i < multiplicity - 1; i ++) {
     directSummand.makeZero();
-    for (int j = 0; j < theType.rank; j ++) {
-      directSummand.addMonomial(MonomialMatrix(j, theType.rank + j), 1);
-      directSummand.addMonomial(MonomialMatrix(theType.rank + j, j), 1);
+    for (int j = 0; j < dynkinType.rank; j ++) {
+      directSummand.addMonomial(MonomialMatrix(j, dynkinType.rank + j), 1);
+      directSummand.addMonomial(MonomialMatrix(dynkinType.rank + j, j), 1);
     }
-    finalMat.makeIdentity(i * theType.rank);
+    finalMat.makeIdentity(i * dynkinType.rank);
     finalMat.directSumWith(directSummand);
-    directSummand.makeIdentity((multiplicity - 2 - i) * theType.rank);
+    directSummand.makeIdentity((multiplicity - 2 - i) * dynkinType.rank);
     finalMat.directSumWith(directSummand);
     output.addOnTop(finalMat);
   }
@@ -5320,7 +5322,7 @@ bool DynkinType::canBeExtendedParabolicallyTo(const DynkinType& other) const {
 
 bool DynkinType::grow(
   const List<Rational>& allowedInverseScales,
-  int AmbientWeylDim,
+  int ambientWeylDimension,
   List<DynkinType>& output, List<List<int> >* outputPermutationRoots
 ) const {
   MacroRegisterFunctionWithName("DynkinType::grow");
@@ -5328,7 +5330,7 @@ bool DynkinType::grow(
   if (outputPermutationRoots != nullptr) {
     outputPermutationRoots->setSize(0);
   }
-  if (this->getRank() >= AmbientWeylDim) {
+  if (this->getRank() >= ambientWeylDimension) {
     return true;
   }
   if (this->isEqualToZero()) {
@@ -5348,20 +5350,20 @@ bool DynkinType::grow(
   // Rational minCoRootLengthSquared = - 1;
   // growth is allowed from the minimal component only
   DynkinSimpleType minComponent;
-  Rational coeffMinCompo;
+  Rational coefficientMinimalComponent;
   List<int> currentRootInjection;
-  this->getMinimalMonomial(minComponent, coeffMinCompo);
-  if (coeffMinCompo == 1) {
+  this->getMinimalMonomial(minComponent, coefficientMinimalComponent);
+  if (coefficientMinimalComponent == 1) {
     DynkinType typeMinusMin = (*this);
     typeMinusMin.subtractMonomial(minComponent, 1);
-    List<DynkinSimpleType> theSimpleTypes;
+    List<DynkinSimpleType> simpleTypes;
     List<List<int> > lastComponentRootInjections;
-    minComponent.grow(theSimpleTypes, &lastComponentRootInjections);
+    minComponent.grow(simpleTypes, &lastComponentRootInjections);
     currentRootInjection.setSize(this->getRank() + 1);
-    for (int i = 0; i < theSimpleTypes.size; i ++) {
+    for (int i = 0; i < simpleTypes.size; i ++) {
       bool isGood = true;
       for (int j = 0; j < typeMinusMin.size(); j ++) {
-        if (theSimpleTypes[i] > typeMinusMin[j]) {
+        if (simpleTypes[i] > typeMinusMin[j]) {
           isGood = false;
           break;
         }
@@ -5370,7 +5372,7 @@ bool DynkinType::grow(
         continue;
       }
       output.addOnTop(typeMinusMin);
-      output.lastObject()->addMonomial(theSimpleTypes[i], 1);
+      output.lastObject()->addMonomial(simpleTypes[i], 1);
       if (outputPermutationRoots != nullptr) {
         int baseTypeRank = typeMinusMin.getRank();
         for (int j = 0; j < baseTypeRank; j ++) {
@@ -5416,12 +5418,12 @@ int DynkinType::GetIndexPreimageFromRootInjection(int inputIndex, const List<int
   return - 1;
 }
 
-void DynkinType::makeSimpleType(char type, int rank, const Rational* inputFirstCoRootSqLength) {
-  DynkinSimpleType theMon;
-  Rational cartanSymmetricInvScale = (inputFirstCoRootSqLength == nullptr ? 1 : *inputFirstCoRootSqLength);
-  theMon.makeArbitrary(type, rank, cartanSymmetricInvScale);
+void DynkinType::makeSimpleType(char type, int rank, const Rational* inputFirstCoRootSquareLength) {
+  DynkinSimpleType dynkinType;
+  Rational cartanSymmetricInvScale = (inputFirstCoRootSquareLength == nullptr ? 1 : *inputFirstCoRootSquareLength);
+  dynkinType.makeArbitrary(type, rank, cartanSymmetricInvScale);
   this->makeZero();
-  this->addMonomial(theMon, 1);
+  this->addMonomial(dynkinType, 1);
 }
 
 bool DynkinType::hasExceptionalComponent() const {
@@ -5449,15 +5451,15 @@ bool DynkinType::isSimple(char* outputtype, int* outputRank, Rational* outputLen
   if (this->coefficients[0] != 1) {
     return false;
   }
-  const DynkinSimpleType& theMon = (*this)[0];
+  const DynkinSimpleType& dynkinType = (*this)[0];
   if (outputtype != nullptr) {
-    *outputtype = theMon.letter;
+    *outputtype = dynkinType.letter;
   }
   if (outputRank != nullptr) {
-    *outputRank = theMon.rank;
+    *outputRank = dynkinType.rank;
   }
   if (outputLength != nullptr) {
-    *outputLength = theMon.cartanSymmetricInverseScale;
+    *outputLength = dynkinType.cartanSymmetricInverseScale;
   }
   return true;
 }
@@ -5510,15 +5512,15 @@ int DynkinType::getRank() const {
 }
 
 void DynkinType::getEpsilonMatrix(Matrix<Rational>& output) const {
-  output.initialize(0,0);
+  output.initialize(0, 0);
   Matrix<Rational> curCartan;
   List<DynkinSimpleType> sortedMons;
   this->getSortedDynkinTypes(sortedMons);
   for (int j = 0; j < sortedMons.size; j ++) {
-    int theIndex = this->monomials.getIndex(sortedMons[j]);
-    int theMult = this->getMultiplicity(theIndex);
-    for (int k = 0; k < theMult; k ++) {
-      DynkinSimpleType::getEpsilonMatrix((*this)[theIndex].letter, (*this)[theIndex].rank, curCartan);
+    int index = this->monomials.getIndex(sortedMons[j]);
+    int multiplicity = this->getMultiplicity(index);
+    for (int k = 0; k < multiplicity; k ++) {
+      DynkinSimpleType::getEpsilonMatrix((*this)[index].letter, (*this)[index].rank, curCartan);
       output.directSumWith(curCartan);
     }
   }
@@ -5543,15 +5545,15 @@ void DynkinType::getSortedDynkinTypes(List<DynkinSimpleType>& output) const {
 void DynkinType::getCartanSymmetric(Matrix<Rational>& output) const {
   MacroRegisterFunctionWithName("DynkinType::getCartanSymmetric");
   output.initialize(0, 0);
-  Matrix<Rational> curCartan;
+  Matrix<Rational> currentCartan;
   List<DynkinSimpleType> sortedMons;
   this->getSortedDynkinTypes(sortedMons);
   for (int j = 0; j < sortedMons.size; j ++) {
-    int theIndex = this->monomials.getIndex(sortedMons[j]);
-    int mult = this->getMultiplicity(theIndex);
-    for (int k = 0; k < mult; k ++) {
-      (*this)[theIndex].getCartanSymmetric(curCartan);
-      output.directSumWith(curCartan);
+    int index = this->monomials.getIndex(sortedMons[j]);
+    int multiplicity = this->getMultiplicity(index);
+    for (int k = 0; k < multiplicity; k ++) {
+      (*this)[index].getCartanSymmetric(currentCartan);
+      output.directSumWith(currentCartan);
     }
   }
 }
@@ -5591,7 +5593,7 @@ int DynkinType::getCoxeterEdgeWeight(int v, int w) {
   if (M(v, w) == 0) {
     return 2;
   }
-  Rational c2 = M(v, w) * M(v, w) / M(v, v) / M(w,w);
+  Rational c2 = M(v, w) * M(v, w) / M(v, v) / M(w, w);
   c2 = 3 / c2;
   if (c2 == 12) {
     return 3;
@@ -5705,15 +5707,15 @@ std::string DynkinSimpleType::toString(FormatExpressions* format) const {
       DynkinSimpleType ambientType;
       ambientType.letter = format->ambientWeylLetter;
       ambientType.cartanSymmetricInverseScale = format->ambientCartanSymmetricInverseScale;
-      Rational theDynkinIndex = ambientType.getLongRootLengthSquared() / this->getLongRootLengthSquared();
+      Rational dynkinIndex = ambientType.getLongRootLengthSquared() / this->getLongRootLengthSquared();
 //      (this->CartanSymmetricInverseScale/this->getDefaultLongRootLengthSquared())/
 //      (ambientType.CartanSymmetricInverseScale/ambientType.getDefaultLongRootLengthSquared());
       out << letter;
-      if (!supressDynkinIndexOne || theDynkinIndex != 1) {
+      if (!supressDynkinIndexOne || dynkinIndex != 1) {
         if (usePlusesAndExponents) {
           out << "^{" ;
         }
-        out << theDynkinIndex.toString();
+        out << dynkinIndex.toString();
         if (usePlusesAndExponents) {
           out << "}";
         }
@@ -5875,51 +5877,53 @@ Rational DynkinSimpleType::getDefaultRootLengthSquared(int rootIndex) const {
   }
 }
 
-void DynkinSimpleType::getEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>& output) {
-  if (WeylLetter == 'A') {
-    output.initialize(WeylRank + 1, WeylRank);
+void DynkinSimpleType::getEpsilonMatrix(
+  char weylLetter, int weylRank, Matrix<Rational>& output
+) {
+  if (weylLetter == 'A') {
+    output.initialize(weylRank + 1, weylRank);
     output.makeZero();
-    for (int i = 0; i < WeylRank; i ++) {
+    for (int i = 0; i < weylRank; i ++) {
       output(i, i) = 1;
       output(i + 1, i) = - 1;
     }
-    output(WeylRank, WeylRank - 1) = - 1;
+    output(weylRank, weylRank - 1) = - 1;
   }
-  if (WeylLetter == 'B') {
-    output.initialize(WeylRank, WeylRank);
+  if (weylLetter == 'B') {
+    output.initialize(weylRank, weylRank);
     output.makeZero();
-    for (int i = 0; i < WeylRank - 1; i ++) {
+    for (int i = 0; i < weylRank - 1; i ++) {
       output(i, i) = 1;
       output(i + 1, i) = - 1;
     }
-    output(WeylRank - 1, WeylRank - 1) = 1;
+    output(weylRank - 1, weylRank - 1) = 1;
   }
-  if (WeylLetter == 'C') {
-    output.initialize(WeylRank, WeylRank);
+  if (weylLetter == 'C') {
+    output.initialize(weylRank, weylRank);
     output.makeZero();
-    for (int i = 0; i < WeylRank - 1; i ++) {
+    for (int i = 0; i < weylRank - 1; i ++) {
       output(i, i) = 1;
       output(i + 1, i) = - 1;
     }
-    output(WeylRank - 1, WeylRank - 1) = 2;
+    output(weylRank - 1, weylRank - 1) = 2;
   }
-  if (WeylLetter == 'D') {
-    output.initialize(WeylRank, WeylRank);
+  if (weylLetter == 'D') {
+    output.initialize(weylRank, weylRank);
     output.makeZero();
-    for (int i = 0; i < WeylRank - 1; i ++) {
+    for (int i = 0; i < weylRank - 1; i ++) {
       output(i, i) = 1;
       output(i + 1, i) = - 1;
     }
-    output(WeylRank - 1, WeylRank - 1) = 1;
-    output(WeylRank - 2, WeylRank - 1) = 1;
+    output(weylRank - 1, weylRank - 1) = 1;
+    output(weylRank - 2, weylRank - 1) = 1;
   }
   Rational RHalf(1, 2);
   Rational RMHalf(- 1, 2);
-  if (WeylLetter == 'E') {
+  if (weylLetter == 'E') {
     //Epsilon convention taken with slight modification from
     //Humpreys, Introduction to Lie algebras and representation theory, page 65
     //first comes first root, then the sticky part, then string with the rest of the roots.
-    output.initialize(8, WeylRank);
+    output.initialize(8, weylRank);
     output.makeZero();
     //first simple root: - 1/2e_1- 1/2e_8+ 1/2e_2+ 1/2e_3+ 1/2e_4+ 1/2e_5+ 1/2e_6+ 1/2e_7
     output(0, 0) = RMHalf;
@@ -5945,18 +5949,18 @@ void DynkinSimpleType::getEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
     //6th simple root: e_4-e_5
     output(3, 5) = 1;
     output(4, 5) = - 1;
-    if (WeylRank > 6) {
+    if (weylRank > 6) {
      //7th simple root: e_5-e_6
       output(4, 6) = 1;
       output(5, 6) = - 1;
     }
-    if (WeylRank > 7) {
+    if (weylRank > 7) {
      //8th simple root: e_6-e_7
       output(5, 7) = 1;
       output(6, 7) = - 1;
     }
   }
-  if (WeylLetter == 'F') {
+  if (weylLetter == 'F') {
     //as of May 11 2013 the convention has been changed to coincide with that of
     //Wikipedia
     output.initialize(4, 4);
@@ -5978,7 +5982,7 @@ void DynkinSimpleType::getEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
     //eps_2:
     //eps_4:
   }
-  if (WeylLetter == 'G') {
+  if (weylLetter == 'G') {
     //taken from Humpreys, Introduction to Lie algebras and representation theory, page 65
     // the long root has the higher index
     output.initialize(3, 2);
@@ -6065,10 +6069,13 @@ bool DynkinSimpleType::canBeExtendedParabolicallyTo(const DynkinSimpleType& othe
   return this->letter == 'A';
 }
 
-void DynkinSimpleType::grow(List<DynkinSimpleType>& output, List<List<int> >* outputPermutationRoots) const {
+void DynkinSimpleType::grow(
+  List<DynkinSimpleType>& output,
+  List<List<int> >* outputPermutationRoots
+) const {
   MacroRegisterFunctionWithName("DynkinSimpleType::grow");
-  //almost all simple types are grown from type A. Exceptions only for types F4 (grown from B_3),
-  //E6 (grown from D_5), E7 (grown from E6) and E8 (grown from E7).
+  // Almost all simple types are grown from type A. Exceptions only for types F4 (grown from B_3),
+  // E6 (grown from D_5), E7 (grown from E6) and E8 (grown from E7).
   output.setSize(0);
   List<int> currentImagesSimpleRootsCurrent;
   if (outputPermutationRoots != nullptr) {
@@ -6280,13 +6287,27 @@ Rational DynkinSimpleType::getPrincipalSlTwoCartanSymmetricInverseScale() const 
 
 void DynkinSimpleType::getCartanSymmetric(Matrix<Rational>& output) const {
   switch(this->letter) {
-    case 'A': this->getAn(this->rank, output); break;
-    case 'B': this->getBn(this->rank, output); break;
-    case 'C': this->getCn(this->rank, output); break;
-    case 'D': this->getDn(this->rank, output); break;
-    case 'E': this->getEn(this->rank, output); break;
-    case 'F': this->getF4(output);                break;
-    case 'G': this->getG2(output);                break;
+    case 'A':
+      this->getAn(this->rank, output);
+      break;
+    case 'B':
+      this->getBn(this->rank, output);
+      break;
+    case 'C':
+      this->getCn(this->rank, output);
+      break;
+    case 'D':
+      this->getDn(this->rank, output);
+      break;
+    case 'E':
+      this->getEn(this->rank, output);
+      break;
+    case 'F':
+      this->getF4(output);
+      break;
+    case 'G':
+      this->getG2(output);
+      break;
     default:
       global.fatal << "Request "
       << "DynkinSimpleType::getCartanSymmetric from a non-initialized Dynkin simple type. " << global.fatal;
@@ -6298,13 +6319,20 @@ void DynkinSimpleType::getCartanSymmetric(Matrix<Rational>& output) const {
 Rational DynkinSimpleType::getRatioLongRootToFirst(char inputWeylLetter, int inputRank) {
   (void) inputRank;
   switch (inputWeylLetter) {
-    case 'A': return 1;
-    case 'B': return 1;
-    case 'C': return 2;
-    case 'D': return 1;
-    case 'E': return 1;
-    case 'F': return 1;
-    case 'G': return 3;
+    case 'A':
+      return 1;
+    case 'B':
+      return 1;
+    case 'C':
+      return 2;
+    case 'D':
+      return 1;
+    case 'E':
+      return 1;
+    case 'F':
+      return 1;
+    case 'G':
+      return 3;
     default:
       return - 1;
   }
@@ -6563,14 +6591,14 @@ void ElementWeylGroup::makeFromRhoImage(const Vector<Rational>& inputRhoImage, W
   this->owner = &inputWeyl;
   int theRank = this->owner->getDimension();
   this->generatorsLastAppliedFirst.setSize(0);
-  Vector<Rational> theVector = inputRhoImage;
-  SimpleReflection theGen;
-  while (theVector != this->owner->rho) {
+  Vector<Rational> rhoImage = inputRhoImage;
+  SimpleReflection generator;
+  while (rhoImage != this->owner->rho) {
     for (int i = 0; i < theRank; i ++) {
-      if (this->owner->getScalarProductSimpleRoot(theVector, i) < 0) {
-        this->owner->reflectSimple(i, theVector);
-        theGen.makeSimpleReflection(i);
-        this->generatorsLastAppliedFirst.addOnTop(theGen);
+      if (this->owner->getScalarProductSimpleRoot(rhoImage, i) < 0) {
+        this->owner->reflectSimple(i, rhoImage);
+        generator.makeSimpleReflection(i);
+        this->generatorsLastAppliedFirst.addOnTop(generator);
         break;
       }
     }
@@ -6633,12 +6661,12 @@ void ElementWeylGroup::getCycleStructure(
   MacroRegisterFunctionWithName("ElementWeylGroup::getCycleStructure");
   this->checkInitialization();
   outputIndexIsCycleSizeCoordinateIsCycleMult.makeZero();
-  List<bool> Explored;
+  List<bool> explored;
   HashedList<Vector<Rational> >& theRootSystem = this->owner->rootSystem;
-  Explored.initializeFillInObject(theRootSystem.size, false);
+  explored.initializeFillInObject(theRootSystem.size, false);
   Vector<Rational> currentRoot;
-  for (int i = 0; i < Explored.size; i ++) {
-    if (!Explored[i]) {
+  for (int i = 0; i < explored.size; i ++) {
+    if (!explored[i]) {
       int currentCycleSize = 1;
       currentRoot = theRootSystem[i];
       for (
@@ -6647,7 +6675,7 @@ void ElementWeylGroup::getCycleStructure(
         this->owner->actOn(*this, currentRoot, currentRoot)
       ) {
         currentCycleSize ++;
-        Explored[theRootSystem.getIndex(currentRoot)] = true;
+        explored[theRootSystem.getIndex(currentRoot)] = true;
       }
       outputIndexIsCycleSizeCoordinateIsCycleMult.addMonomial(MonomialVector(currentCycleSize - 1), 1);
     }
@@ -6704,14 +6732,14 @@ void ElementWeylGroup::multiplyOnTheRightBySimpleReflection(int reflectionIndex)
   this->generatorsLastAppliedFirst.addOnTop(theGen);
 }
 
-void WeylGroupData::simpleReflectionDualSpace(int index, Vector<Rational>& DualSpaceElement) {
+void WeylGroupData::simpleReflectionDualSpace(int index, Vector<Rational>& dualSpaceElement) {
   Rational coefficient, tempRat;
-  coefficient.assign(DualSpaceElement[index]);
+  coefficient.assign(dualSpaceElement[index]);
   coefficient.divideBy(this->cartanSymmetric.elements[index][index]);
   for (int i = 0; i < this->cartanSymmetric.numberOfColumns; i ++) {
     tempRat.assign(coefficient);
     tempRat.multiplyBy(this->cartanSymmetric.elements[index][i] * (- 2));
-    DualSpaceElement[i] += (tempRat);
+    dualSpaceElement[i] += (tempRat);
   }
 }
 
@@ -6748,22 +6776,22 @@ void WeylGroupData::reflectSimple(
 }
 
 void WeylGroupData::simpleReflectionRootPolynomial(
-  int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction
+  int index, PolynomialSubstitution<Rational>& root, bool rhoAction
 ) {
   int lengthA = this->cartanSymmetric.elements[index][index].numeratorShort;
-  Polynomial<Rational> AscalarB, tempP;
-  AscalarB.makeZero();
+  Polynomial<Rational> aScalarB, tempP;
+  aScalarB.makeZero();
   for (int i = 0; i < this->cartanSymmetric.numberOfColumns; i ++) {
     tempP.makeZero();
-    tempP = theRoot[i];
+    tempP = root[i];
     tempP *= cartanSymmetric.elements[index][i];
-    AscalarB += (tempP);
+    aScalarB += (tempP);
   }
-  AscalarB *= - 2;
-  AscalarB /= lengthA;
-  theRoot[index] += AscalarB;
-  if (RhoAction) {
-    theRoot[index] += Rational(- 1);
+  aScalarB *= - 2;
+  aScalarB /= lengthA;
+  root[index] += aScalarB;
+  if (rhoAction) {
+    root[index] += Rational(- 1);
   }
 }
 
@@ -7018,14 +7046,14 @@ bool WeylGroupData::operator==(const WeylGroupData& other) const {
   return this->cartanSymmetric == other.cartanSymmetric && this->dynkinType == other.dynkinType;
 }
 
-void WeylGroupData::actOnRootByGroupElement(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho) {
+void WeylGroupData::actOnRootByGroupElement(int index, Vector<Rational>& root, bool rhoAction, bool useMinusRho) {
   const ElementWeylGroup& currentElt = this->group.elements[index];
   for (int i = currentElt.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
     this->reflectSimple(
       currentElt.generatorsLastAppliedFirst[i].index,
-      theRoot,
-      RhoAction,
-      UseMinusRho
+      root,
+      rhoAction,
+      useMinusRho
     );
   }
 }
@@ -7047,17 +7075,17 @@ void WeylGroupData::getCoCartanSymmetric(const Matrix<Rational>& input, Matrix<R
 
 void WeylGroupData::generateRootSystem() {
   Vectors<Rational> startRoots;
-  HashedList<Vector<Rational> > theRootsFinder;
+  HashedList<Vector<Rational> > rootsFinder;
   startRoots.makeEiBasis(this->getDimension());
   int estimatedNumRoots = this->dynkinType.getRootSystemSize();
-  this->generateOrbit(startRoots, false, theRootsFinder, false, estimatedNumRoots);
+  this->generateOrbit(startRoots, false, rootsFinder, false, estimatedNumRoots);
   this->rootSystem.clear();
-  this->rootSystem.setExpectedSize(theRootsFinder.size);
+  this->rootSystem.setExpectedSize(rootsFinder.size);
   this->rootsOfBorel.setSize(0);
-  this->rootsOfBorel.reserve(theRootsFinder.size / 2);
-  for (int i = 0; i < theRootsFinder.size; i ++) {
-    if (theRootsFinder[i].isPositiveOrZero()) {
-      this->rootsOfBorel.addOnTop(theRootsFinder[i]);
+  this->rootsOfBorel.reserve(rootsFinder.size / 2);
+  for (int i = 0; i < rootsFinder.size; i ++) {
+    if (rootsFinder[i].isPositiveOrZero()) {
+      this->rootsOfBorel.addOnTop(rootsFinder[i]);
     }
   }
   this->rootsOfBorel.quickSortAscending();
@@ -7069,9 +7097,11 @@ void WeylGroupData::generateRootSystem() {
   }
 }
 
-void WeylGroupData::actOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction) {
+void WeylGroupData::actOnRootAlgByGroupElement(
+  int index, PolynomialSubstitution<Rational>& root, bool rhoAction
+) {
   for (int i = this->group.elements[index].generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
-    this->simpleReflectionRootPolynomial(this->group.elements[index].generatorsLastAppliedFirst[i].index, theRoot, RhoAction);
+    this->simpleReflectionRootPolynomial(this->group.elements[index].generatorsLastAppliedFirst[i].index, root, rhoAction);
   }
 }
 
@@ -7112,9 +7142,9 @@ std::string WeylGroupData::toStringCppCharTable(FormatExpressions* format) {
   std::stringstream out;
   out << "<hr>Here is the c++ input code for the char table.";
   out << "<br>";
-  FormatExpressions theFormatNoDynkinTypePlusesExponents;
-  theFormatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent = true;
-  out << "bool loadCharacterTable" << this->dynkinType.toString(&theFormatNoDynkinTypePlusesExponents) << "(WeylGroup& output)\n<br>{ ";
+  FormatExpressions formatNoDynkinTypePlusesExponents;
+  formatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent = true;
+  out << "bool loadCharacterTable" << this->dynkinType.toString(&formatNoDynkinTypePlusesExponents) << "(WeylGroup& output)\n<br>{ ";
   out << " output.characterTable.setExpectedSize(" << this->group.getSize().toString() << "); output.characterTable.setSize(0);";
   out << "\n<br>&nbsp;&nbsp;ClassFunction&lt;FiniteGroup&lt;ElementWeylGroup&lt;WeylGroup&gt; &gt;, Rational&gt; currentCF;";
   out << "\n<br>&nbsp;&nbsp;currentCF.G = &output;";
@@ -7206,8 +7236,10 @@ std::string WeylGroupData::toStringRootsAndRootReflections(FormatExpressions* fo
   for (int i = 0; i < this->rootSystem.size; i ++) {
     const Vector<Rational>& current = this->rootSystem[i];
     currentRootReflection.MakeRootReflection(current, *this);
-    out << "<tr><td>" << current.toString() << "</td><td>" << rootSystemEpsCoords[i].toStringLetterFormat("e") << "</td>"
-    << "<td>" << HtmlRoutines::getMathNoDisplay(currentRootReflection.toString()) << "</td>" << "</tr>";
+    out << "<tr><td>" << current.toString() << "</td><td>"
+    << rootSystemEpsCoords[i].toStringLetterFormat("e") << "</td>"
+    << "<td>" << HtmlRoutines::getMathNoDisplay(currentRootReflection.toString())
+    << "</td>" << "</tr>";
   }
   out << "</table>";
   out << "Comma delimited list of roots: ";
@@ -7222,7 +7254,7 @@ std::string WeylGroupData::toStringRootsAndRootReflections(FormatExpressions* fo
 }
 
 std::string WeylGroupData::toString(FormatExpressions* format) {
-  MacroRegisterFunctionWithName("WeylGroup::toString");
+  MacroRegisterFunctionWithName("WeylGroupData::toString");
   std::stringstream out;
   out << "<br>Size: " << this->group.elements.size << "\n";
   out << "Number of Vectors: " << this->rootSystem.size << "\n";

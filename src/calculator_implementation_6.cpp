@@ -742,8 +742,8 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   Plot thePlot;
   thePlot.dimension = 2;
   PlotObject thePlotObj;
-  thePlotObj.leftPtE = input[2];
-  thePlotObj.rightPtE = input[3];
+  thePlotObj.leftPoint = input[2];
+  thePlotObj.rightPoint = input[3];
   if (input.size() >= 7) {
     if (!input[6].isOfType<std::string>(&thePlotObj.colorJS)) {
       thePlotObj.colorJS = input[6].toString();

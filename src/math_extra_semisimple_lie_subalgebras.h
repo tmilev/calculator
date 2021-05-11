@@ -536,7 +536,7 @@ public:
     ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
     std::stringstream* outputStream,
     bool forceRecompute,
-    bool doFullInit,
+    bool doFullInitialization,
     bool computeNilradicals,
     bool computeModuleDecomposition,
     bool attemptToSolveSystems,

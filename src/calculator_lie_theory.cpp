@@ -2957,10 +2957,12 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
   bool doComputeNilradicals,
   bool doAdjustCentralizers
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::innerPrintSSsubalgebras");
+  MacroRegisterFunctionWithName("CalculatorLieTheory::printSemisimpleSubalgebras");
   if (doForceRecompute) {
     if (!global.userDefaultHasAdminRights()) {
-      return calculator << "Only logged-in admins allowed to force-recompute semisimple subalgebras. ";
+      return calculator
+      << "Only logged-in admins allowed to "
+      << "force-recompute semisimple subalgebras. ";
     }
   }
   if (global.response.monitoringAllowed()) {
@@ -2973,6 +2975,10 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
   WithContext<SemisimpleLieAlgebra*> ownerAlgebra;
   SemisimpleLieAlgebra* ownerSSPointer = nullptr;
   bool isAlreadySubalgebrasObject = input[1].isOfType<SemisimpleSubalgebras>();
+  int maximumRank = 8;
+  if (global.userDefaultHasAdminRights()) {
+    maximumRank = 12;
+  }
   if (!isAlreadySubalgebrasObject) {
     if (!CalculatorConversions::convert(
       input[1],
@@ -2982,16 +2988,20 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
       return output.makeError("Error extracting Lie algebra.", calculator);
     }
     ownerSSPointer = ownerAlgebra.content;
-    if (ownerSSPointer->getRank() > 8) {
-      out << "<b>This code is has been set to run up to rank 6. "
-      << "As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
+    if (ownerSSPointer->getRank() > maximumRank) {
+      out << "<b>This code is has been set to run up to rank "
+      << maximumRank << ". "
+      << "As soon as the algorithms are mature enough, "
+      << "higher ranks will be allowed. </b>";
       return output.assignValue(out.str(), calculator);
     }
   } else {
     ownerSSPointer = input[1].getValue<SemisimpleSubalgebras>().owner;
   }
   if (ownerSSPointer == nullptr) {
-    global.fatal << "zero pointer to semisimple Lie algebra: this shouldn't happen. " << global.fatal;
+    global.fatal
+    << "Zero pointer to semisimple Lie algebra: this shouldn't happen. "
+    << global.fatal;
   }
   SemisimpleLieAlgebra& ownerLieAlgebra = *ownerSSPointer;
   std::string dynkinString = ownerSSPointer->weylGroup.dynkinType.toString();
@@ -3046,8 +3056,8 @@ bool CalculatorLieTheory::embedG2InB3(Calculator& calculator, const Expression& 
   if (!output.isOfType < ElementUniversalEnveloping<RationalFraction<Rational> > >()) {
     return output.makeError("Failed to convert argument to element of the Universal enveloping algebra. ", calculator);
   }
-  SemisimpleLieAlgebra& ownerSS = *output.getAmbientSemisimpleLieAlgebraNonConstUseWithCaution();
-  if (!ownerSS.isOfSimpleType('G', 2)) {
+  SemisimpleLieAlgebra& ownerSemisimple = *output.getAmbientSemisimpleLieAlgebraNonConstUseWithCaution();
+  if (!ownerSemisimple.isOfSimpleType('G', 2)) {
     return output.makeError("Error: embedding of G_2 in B_3 takes elements of U(G_2) as arguments.", calculator);
   }
   HomomorphismSemisimpleLieAlgebra theHmm;
@@ -3066,12 +3076,12 @@ bool CalculatorLieTheory::embedG2InB3(Calculator& calculator, const Expression& 
 
 bool CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::characterSemisimpleLieAlgebraFiniteDimensional");
-  Vector<Rational> theHW;
+  Vector<Rational> highestWeight;
   Selection parSel;
   WithContext<SemisimpleLieAlgebra*> ownerSSLiealg;
   Expression tempE, tempE2;
   if (!calculator.getTypeHighestWeightParabolic(
-    calculator, input, output, theHW, parSel, ownerSSLiealg, nullptr
+    calculator, input, output, highestWeight, parSel, ownerSSLiealg, nullptr
   )) {
     return false;
   }
@@ -3079,11 +3089,18 @@ bool CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional(Calcula
     return true;
   }
   if (parSel.cardinalitySelection != 0) {
-    return output.makeError("I know only to compute with finite dimensional characters, for the time being. ", calculator);
+    return output.makeError(
+      "I know only to compute with finite "
+      "dimensional characters, for the time being. ",
+      calculator
+    );
   }
-  CharacterSemisimpleLieAlgebraModule<Rational> theElt;
-  theElt.makeFromWeight(ownerSSLiealg.content->weylGroup.getSimpleCoordinatesFromFundamental(theHW), ownerSSLiealg.content);
-  return output.assignValue(theElt, calculator);
+  CharacterSemisimpleLieAlgebraModule<Rational> element;
+  element.makeFromWeight(
+    ownerSSLiealg.content->weylGroup.getSimpleCoordinatesFromFundamental(highestWeight),
+    ownerSSLiealg.content
+  );
+  return output.assignValue(element, calculator);
 }
 
 bool CalculatorLieTheory::chevalleyGenerator(
@@ -3093,33 +3110,37 @@ bool CalculatorLieTheory::chevalleyGenerator(
   if (input.size() != 3) {
     return false;
   }
-  WithContext<SemisimpleLieAlgebra*> theSSalg;
+  WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (!CalculatorConversions::convert(
-    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, theSSalg
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, semisimpleLieAlgebra
   )) {
     return output.makeError("Error extracting Lie algebra.", calculator);
   }
-  int theIndex;
-  if (!input[2].isSmallInteger(&theIndex)) {
+  int generatorIndex = - 1;
+  if (!input[2].isSmallInteger(&generatorIndex)) {
     return false;
   }
-  if (theIndex > theSSalg.content->getNumberOfPositiveRoots() || theIndex == 0 || theIndex < - theSSalg.content->getNumberOfPositiveRoots()) {
+  if (
+    generatorIndex > semisimpleLieAlgebra.content->getNumberOfPositiveRoots() ||
+    generatorIndex == 0 ||
+    generatorIndex < - semisimpleLieAlgebra.content->getNumberOfPositiveRoots()
+  ) {
     return output.makeError("Bad Chevalley-Weyl generator index.", calculator);
   }
   ElementSemisimpleLieAlgebra<Rational> theElt;
-  if (theIndex > 0) {
-    theIndex += theSSalg.content->getRank() - 1;
+  if (generatorIndex > 0) {
+    generatorIndex += semisimpleLieAlgebra.content->getRank() - 1;
   }
-  theIndex += theSSalg.content->getNumberOfPositiveRoots();
-  theElt.makeGenerator(theIndex, *theSSalg.content);
-  ElementUniversalEnveloping<RationalFraction<Rational> > theUE;
-  theUE.assignElementLieAlgebra(theElt, *theSSalg.content);
+  generatorIndex += semisimpleLieAlgebra.content->getNumberOfPositiveRoots();
+  theElt.makeGenerator(generatorIndex, *semisimpleLieAlgebra.content);
+  ElementUniversalEnveloping<RationalFraction<Rational> > element;
+  element.assignElementLieAlgebra(theElt, *semisimpleLieAlgebra.content);
   ExpressionContext context(calculator);
   int indexInOwner = calculator.objectContainer.semisimpleLieAlgebras.getIndex(
-    theSSalg.content->weylGroup.dynkinType
+    semisimpleLieAlgebra.content->weylGroup.dynkinType
   );
   context.setIndexAmbientSemisimpleLieAlgebra(indexInOwner);
-  return output.assignValueWithContext(theUE, context, calculator);
+  return output.assignValueWithContext(element, context, calculator);
 }
 
 bool CalculatorLieTheory::cartanGenerator(Calculator& calculator, const Expression& input, Expression& output) {

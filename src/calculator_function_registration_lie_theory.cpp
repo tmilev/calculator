@@ -669,7 +669,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     CalculatorLieTheory::rootSubsystem,
     "",
     "Generates a root subsystem of a simple type. "
-    "First argument indicates simple type, second, third,... arguments "
+    "First argument indicates simple type, second, third, ... arguments "
     "give the generating roots. ",
     "RootSubsystem(F_4, (0, 1, 0, 0), (0, 0, 1, 0), (1, 1, 2, 2))",
     "Calculator::rootSubsystem",

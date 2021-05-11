@@ -191,30 +191,30 @@ std::string Calculator::toStringSemismipleLieAlgebraLinksFromHardDrive(
 void DynkinType::getPrecomputedDynkinTypes(List<DynkinType>& output) {
   MacroRegisterFunctionWithName("DynkinType::getPrecomputedDynkinTypes");
   output.setSize(0);
-  DynkinType theType;
-  theType.makeSimpleType('F', 4);
-  output.addOnTop(theType);
+  DynkinType dynkinType;
+  dynkinType.makeSimpleType('F', 4);
+  output.addOnTop(dynkinType);
   for (int i = 6; i <= 8; i ++) {
-    theType.makeSimpleType('E', i);
-    output.addOnTop(theType);
+    dynkinType.makeSimpleType('E', i);
+    output.addOnTop(dynkinType);
   }
-  theType.makeSimpleType('G', 2);
-  output.addOnTop(theType);
-  for (int i = 1; i <= 8; i ++) {
-    theType.makeSimpleType('A', i);
-    output.addOnTop(theType);
+  dynkinType.makeSimpleType('G', 2);
+  output.addOnTop(dynkinType);
+  for (int i = 1; i <= 11; i ++) {
+    dynkinType.makeSimpleType('A', i);
+    output.addOnTop(dynkinType);
   }
   for (int i = 4; i <= 8; i ++) {
-    theType.makeSimpleType('D', i);
-    output.addOnTop(theType);
+    dynkinType.makeSimpleType('D', i);
+    output.addOnTop(dynkinType);
   }
   for (int i = 2; i <= 8; i ++) {
-    theType.makeSimpleType('B', i);
-    output.addOnTop(theType);
+    dynkinType.makeSimpleType('B', i);
+    output.addOnTop(dynkinType);
   }
   for (int i = 3; i <= 8; i ++) {
-    theType.makeSimpleType('C', i);
-    output.addOnTop(theType);
+    dynkinType.makeSimpleType('C', i);
+    output.addOnTop(dynkinType);
   }
 }
 

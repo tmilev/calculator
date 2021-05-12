@@ -2607,6 +2607,7 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
     return false;
   }
   this->algebraicClosure = inputAlgebraicClosure;
+  this->hAlgebraic.makeCartanGenerator(h, this->getOwnerSemisimpleAlgebra());
   this->participatingPositiveRoots.size = 0;
   int relativeDimension = simpleBasisSubalgebras.size;
   // int dimension = this->theWeyl.cartanSymmetric.numberOfRows;
@@ -2723,7 +2724,7 @@ void SlTwoSubalgebra::initializeUnknownTriples(const Vector<Rational>& targetH) 
   // Set the h element.
   this->hPolynomialRational.makeZero();
   this->hPolynomialRational.makeCartanGenerator(targetH, this->getOwnerSemisimpleAlgebra());
-  // SEt the h element but over the algebraic numbers.
+  // Set the h element but over the algebraic numbers.
   this->hPolynomialAlgebraic.makeZero();
   this->hPolynomialAlgebraic.makeCartanGenerator(targetH, this->getOwnerSemisimpleAlgebra());
   ///
@@ -2976,9 +2977,9 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
       sl2.makeReportPrecomputations(indexRootSAinContainer, *this);
       if (output.containsSl2WithGivenHCharacteristic(sl2.hCharacteristic, &indexIsoSl2)) {
         output.getElement(indexIsoSl2).indicesContainingRootSubalgebras.addOnTop(indexRootSAinContainer);
-        output.indicesSl2sContainedInRootSA[indexRootSAinContainer].addOnTop(indexIsoSl2);
+        output.indicesSl2sContainedInRootSubalgebras[indexRootSAinContainer].addOnTop(indexIsoSl2);
       } else {
-        output.indicesSl2sContainedInRootSA[indexRootSAinContainer].addOnTop(output.size);
+        output.indicesSl2sContainedInRootSubalgebras[indexRootSAinContainer].addOnTop(output.size);
         sl2.indexInContainer = output.size;
         output.addOnTop(sl2);
       }

@@ -2895,7 +2895,9 @@ bool CalculatorLieTheory::drawWeightSupport(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorLieTheory::getLinksToSimpleLieAlgerbas(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorLieTheory::getLinksToSimpleLieAlgerbas(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   (void) input;
   std::stringstream outFromHD, outRecomputeLinks;
 

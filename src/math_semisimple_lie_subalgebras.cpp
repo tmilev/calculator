@@ -4609,8 +4609,8 @@ void SlTwoSubalgebra::toHTML(std::string& filePath) {
 
 void SlTwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner) {
   MacroRegisterFunctionWithName("SlTwoSubalgebras::reset");
-  this->indicesSl2sContainedInRootSA.setSize(0);
-  this->indicesSl2decompositionFlas.setSize(0);
+  this->indicesSl2sContainedInRootSubalgebras.setSize(0);
+  this->indicesSl2DecompositionFormulas.setSize(0);
   this->badHCharacteristics.setSize(0);
   this->indexZeroWeight = - 1;
   this->owner = & inputOwner;
@@ -4637,10 +4637,10 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(
   output.rootSubalgebras.owner = &inputOwner;
   output.rootSubalgebras.computeAllReductiveRootSubalgebrasUpToIsomorphism();
   //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, global);
-  output.indicesSl2sContainedInRootSA.setSize(output.rootSubalgebras.subalgebras.size);
-  output.indicesSl2sContainedInRootSA.reserve(output.rootSubalgebras.subalgebras.size * 2);
-  for (int i = 0; i < output.indicesSl2sContainedInRootSA.size; i ++) {
-    output.indicesSl2sContainedInRootSA[i].size = 0;
+  output.indicesSl2sContainedInRootSubalgebras.setSize(output.rootSubalgebras.subalgebras.size);
+  output.indicesSl2sContainedInRootSubalgebras.reserve(output.rootSubalgebras.subalgebras.size * 2);
+  for (int i = 0; i < output.indicesSl2sContainedInRootSubalgebras.size; i ++) {
+    output.indicesSl2sContainedInRootSubalgebras[i].size = 0;
   }
   ProgressReport report;
   for (int i = 0; i < output.rootSubalgebras.subalgebras.size; i ++) {
@@ -4662,9 +4662,9 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(
   for (int i = 0; i < theIndexMap.size; i ++) {
     theIndexMap[thePermutation[i]] = i;
   }
-  for (int j = 0; j < output.indicesSl2sContainedInRootSA.size; j ++) {
-    for (int k = 0; k < output.indicesSl2sContainedInRootSA[j].size; k ++) {
-      output.indicesSl2sContainedInRootSA[j][k] = theIndexMap[output.indicesSl2sContainedInRootSA[j][k]];
+  for (int j = 0; j < output.indicesSl2sContainedInRootSubalgebras.size; j ++) {
+    for (int k = 0; k < output.indicesSl2sContainedInRootSubalgebras[j].size; k ++) {
+      output.indicesSl2sContainedInRootSubalgebras[j][k] = theIndexMap[output.indicesSl2sContainedInRootSubalgebras[j][k]];
     }
   }
   inputOwner.checkConsistency();

@@ -667,8 +667,8 @@ public:
   static std::string descriptionHRealization;
   static std::string descriptionMinimalContainingRegularSubalgebras;
 
-  List<List<int> > indicesSl2sContainedInRootSA;
-  List<int> indicesSl2decompositionFlas;
+  List<List<int> > indicesSl2sContainedInRootSubalgebras;
+  List<int> indicesSl2DecompositionFormulas;
   Vectors<Rational> badHCharacteristics;
   int indexZeroWeight;
   RootSubalgebras rootSubalgebras;

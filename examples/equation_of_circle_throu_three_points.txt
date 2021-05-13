@@ -1,0 +1,11 @@
+x_1 = Polynomial(x_1);
+x_2 = Polynomial(x_2);
+x_3 = Polynomial(x_3);
+y_1 = Polynomial(y_1);
+y_2 = Polynomial(y_2);
+y_3 = Polynomial(y_3);
+
+a=2\begin{pmatrix}x _{1}-x _{2}&y _{1}-y _{2}\\ x _{2}-x _{3}&y _{2}-y _{3}\end{pmatrix};
+a^-1;
+b=\begin{pmatrix}x_2^2+y_2^2-x_1^2-y_1^2 \\ x_3^2+y_3^2-x_2^2-y_2^2\end{pmatrix};
+a^-1 b

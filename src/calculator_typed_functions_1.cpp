@@ -1162,10 +1162,12 @@ bool CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger(
         calculator
       );
     }
+    int maximumDimensions = 4;
     if (power <= 0) {
-      if (context.numberOfVariables() > 1) {
+      if (context.numberOfVariables() > 1 && baseRationalFunctionCoefficients.numberOfColumns > maximumDimensions) {
         return calculator << "Raising matrices of rational functions "
-        << "with 2 or more variables to negative power not implemented yet. "
+        << "with 2 or more variables and more than " << maximumDimensions
+        << " rows to negative power not implemented yet. "
         << "Your matrix has " << context.numberOfVariables() << " variables.";
       }
     }
@@ -1195,10 +1197,10 @@ bool CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger(
   return false;
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberPolynomialBySmallInteger(
+bool CalculatorFunctionsBinaryOps::powerAlgebraicNumberPolynomialBySmallInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberPolynomialBySmallInteger");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::powerAlgebraicNumberPolynomialBySmallInteger");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
@@ -1215,6 +1217,29 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberPolynomialBySmallInt
     return output.makeError("Division by zero: trying to raise 0 to negative power. ", calculator);
   }
   base.raiseToPower(thePower, 1);
+  return output.assignValueWithContext(base, input[1].getContext(), calculator);
+}
+
+bool CalculatorFunctionsBinaryOps::powerRationalFractionBySmallInteger(
+  Calculator &calculator, const Expression &input, Expression &output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::powerRationalFractionBySmallInteger");
+  calculator.checkInputNotSameAsOutput(input, output);
+  if (!input.isListNElements(3)) {
+    return false;
+  }
+  RationalFraction<Rational> base;
+  int power = 0;
+  if (!input[1].isOfType(&base)|| !input[2].isSmallInteger(&power)) {
+    return false;
+  }
+  if (power < 0) {
+    return false;
+  }
+  if (base.isEqualToZero() && power <= 0) {
+    return output.makeError("Division by zero: trying to raise 0 to negative power. ", calculator);
+  }
+  base.raiseToPower(power);
   return output.assignValueWithContext(base, input[1].getContext(), calculator);
 }
 

@@ -4495,7 +4495,7 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctionsBinaryOps::innerPowerPolynomialBySmallInteger,
     this->opPolynomialRational(),
     this->opRational(),
-    "Raises poly to small integer power. ",
+    "Raises polynomial to small integer power. ",
     "x = Polynomial{}x; y = Polynomial{}y;(x +2y+x y+x^2+3y^2)^3",
     "CalculatorFunctionsBinaryOps::innerPowerPolynomialBySmallInteger",
     "PowerPolynomialBySmallInteger",
@@ -4503,13 +4503,28 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberPolynomialBySmallInteger,
+    CalculatorFunctionsBinaryOps::powerAlgebraicNumberPolynomialBySmallInteger,
     this->opPolynomialAlgebraicNumbers(),
     this->opRational(),
-    "Raises polynomial over algebraic numbers to small integer power. ",
-    "x = Polynomial{}x; y = Polynomial{}y;(x +\\sqrt{2}y+x y+x^2+\\sqrt{3}y^2)^3",
+    "Raises a polynomial over the algebraic numbers to small integer power. ",
+    "x = Polynomial{}x;\n"
+    "y = Polynomial{}y;\n"
+    "(x +\\sqrt{2}y+x y+x^2+\\sqrt{3}y^2)^3",
     "CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberPolynomialBySmallInteger",
     "PowerPolynomialAlgebraicNumbersBySmallInteger",
+    innerStandard
+  );
+  this->addOperationBinaryInnerHandlerWithTypes(
+    "^",
+    CalculatorFunctionsBinaryOps::powerRationalFractionBySmallInteger,
+    this->opRationalFunction(),
+    this->opRational(),
+    "Raises rational function to small integer power. ",
+    "x = RationalFunction{}x;\n"
+    "y = RationalFunction{}y;\n"
+    "(x/y)^3",
+    "CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberPolynomialBySmallInteger",
+    "PowerRationalFractionByInteger",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(

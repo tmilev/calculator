@@ -54,7 +54,7 @@ public:
   RationalFraction(int other);
   RationalFraction(const Coefficient& other);
   Rational rationalValue() const;
-  void raiseToPower(int thePower);
+  void raiseToPower(int power);
   void reduceMemory();
   void operator=(const Polynomial<Coefficient>& other);
   unsigned int hashFunction() const;
@@ -100,6 +100,7 @@ public:
   void invert();
   void makeOne();
   void makeZero();
+
   void makeMonomial(
     int letterIndex,
     const Rational& power,

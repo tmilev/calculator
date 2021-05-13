@@ -125,7 +125,8 @@ public:
   static bool innerPowerRationalByRationalReducePrimeFactors(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerRationalByInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerPolynomialBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPowerAlgebraicNumberPolynomialBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerAlgebraicNumberPolynomialBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerRationalFractionBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerPolynomialModuloIntegerBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerPolynomialModPModuloPolynomialModPBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
 

@@ -763,27 +763,27 @@ bool RationalFraction<Coefficient>::greatestCommonDivisorQuick(
 }
 
 template<class Coefficient>
-void RationalFraction<Coefficient>::raiseToPower(int thePower) {
-  MacroRegisterFunctionWithName("RationalFunctionOld::raiseToPower");
+void RationalFraction<Coefficient>::raiseToPower(int power) {
+  MacroRegisterFunctionWithName("RationalFraction::raiseToPower");
   this->checkConsistency();
-  if (thePower < 0) {
+  if (power < 0) {
     this->invert();
-    thePower = - thePower;
+    power = - power;
   }
-  if (thePower == 0) {
+  if (power == 0) {
     this->makeOne();
     return;
   }
   switch (this->expressionType) {
     case RationalFraction::typeConstant:
-      MathRoutines::raiseToPower(this->constantValue, thePower, this->constantValue.one());
+      MathRoutines::raiseToPower(this->constantValue, power, this->constantValue.one());
       break;
     case RationalFraction::typePolynomial:
-      this->numerator.getElement().raiseToPower(thePower, this->constantValue.one());
+      this->numerator.getElement().raiseToPower(power, this->constantValue.one());
       break;
     case RationalFraction::typeRationalFunction:
-      this->numerator.getElement().raiseToPower(thePower, this->constantValue.one());
-      this->denominator.getElement().raiseToPower(thePower, this->constantValue.one());
+      this->numerator.getElement().raiseToPower(power, this->constantValue.one());
+      this->denominator.getElement().raiseToPower(power, this->constantValue.one());
       break;
   }
   this->checkConsistency();

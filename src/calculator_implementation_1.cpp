@@ -163,13 +163,13 @@ std::string Calculator::toStringSemismipleLieAlgebraLinksFromHardDrive(
   folderComputer.weylGroup.dynkinType = dynkinType;
   out << "<tr><td><a href='"
   << folderComputer.fileNames.displayFolderName(prefixFolder)
-  << folderComputer.fileNames.toStringFileNameNoPathStructureConstants()
+  << folderComputer.fileNames.fileNameNoPathStructureConstants()
   << "'>"
   << dynkinType[0].letter << dynkinType[0].rank << " structure constants</a></td>\n ";
   if (dynkinType[0].hasPrecomputedSubalgebras()) {
     out << "<td><a href='"
     << folderComputer.fileNames.displayFolderName(prefixFolder)
-    << folderComputer.fileNames.toStringFileNameNoPathSemisimpleSubalgebras()
+    << folderComputer.fileNames.fileNameNoPathSemisimpleSubalgebras()
     << "'>"
     << dynkinType[0].letter << dynkinType[0].rank << " semisimple subalgebras</a>";
     out << "</td>\n ";
@@ -182,7 +182,7 @@ std::string Calculator::toStringSemismipleLieAlgebraLinksFromHardDrive(
   << dynkinType[0].letter << dynkinType[0].rank << " sl(2) triples</a></td>\n";
   out << "<td><a href='"
   << folderComputer.fileNames.displayFolderName(prefixFolder)
-  << folderComputer.fileNames.toStringFileNameNoPathRootSubalgebras()
+  << folderComputer.fileNames.fileNameNoPathRootSubalgebras()
   << "'>" << dynkinType[0].letter
   << dynkinType[0].rank << " root subalgebras</a></td>\n";
   return out.str();
@@ -270,6 +270,13 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
     << "' target='_blank'>sl(2)-sublagberas</a>";
   }
   return true;
+}
+
+bool SemisimpleSubalgebras::computeStructureRealFormsWriteFiles(
+  SemisimpleLieAlgebra &newOwner, AlgebraicClosureRationals &ownerField, MapReferences<DynkinType, SemisimpleLieAlgebra> &containerSubalgebras, ListReferences<SlTwoSubalgebras> &containerSl2Subalgebras, std::stringstream *outputStream
+) {
+
+
 }
 
 bool MathRoutines::isPrime(int input) {

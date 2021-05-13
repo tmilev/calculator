@@ -1510,12 +1510,12 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
       weylPartSummand *= theCoeff.coefficients[l];
       for (int j = 0; j < weylPartSummand.size(); j ++) {
         for (int k = 0; k < endoPart.size(); k ++) {
-          monQDO.theMatMon = endoPart[k];
-          monQDO.theWeylMon = weylPartSummand[j];
+          monQDO.matrixMonomial = endoPart[k];
+          monQDO.weylMonomial = weylPartSummand[j];
           Polynomial<Rational>& currentEndoCoeff = endoPart.coefficients[k];
           for (int m = 0; m < currentEndoCoeff.size(); m ++) {
             monQDO2 = monQDO;
-            monQDO2.theWeylMon.polynomialPart *= currentEndoCoeff[m];
+            monQDO2.weylMonomial.polynomialPart *= currentEndoCoeff[m];
             tempRat = currentEndoCoeff.coefficients[m];
             tempRat *= weylPartSummand.coefficients[j];
             output.addMonomial(monQDO2, tempRat);

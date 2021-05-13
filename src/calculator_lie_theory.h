@@ -115,7 +115,7 @@ public:
     Calculator& calculator, const Expression& input, Expression& output, BranchingData& theG2B3Data
   );
   static bool splitFDpartB3overG2CharsOnly(Calculator& calculator, const Expression& input, Expression& output);
-  static bool rootSAsAndSltwos(
+  static bool rootSubalgebrasAndSlTwos(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
@@ -123,13 +123,13 @@ public:
     bool mustRecompute
   );
   static bool printRootSAs(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorLieTheory::rootSAsAndSltwos(calculator, input, output, false, false);
+    return CalculatorLieTheory::rootSubalgebrasAndSlTwos(calculator, input, output, false, false);
   }
-  static bool printRootSAsForceRecompute(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorLieTheory::rootSAsAndSltwos(calculator, input, output, false, true);
+  static bool printRootSubalgebrasForceRecompute(Calculator& calculator, const Expression& input, Expression& output) {
+    return CalculatorLieTheory::rootSubalgebrasAndSlTwos(calculator, input, output, false, true);
   }
-  static bool printSltwos(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorLieTheory::rootSAsAndSltwos(calculator, input, output, true, false);
+  static bool printSlTwos(Calculator& calculator, const Expression& input, Expression& output) {
+    return CalculatorLieTheory::rootSubalgebrasAndSlTwos(calculator, input, output, true, false);
   }
   static bool weylDimFormula(Calculator& calculator, const Expression& input, Expression& output);
   static bool decomposeCharGenVerma(Calculator& calculator, const Expression& input, Expression& output);
@@ -160,6 +160,7 @@ public:
   static bool embedG2InB3(Calculator& calculator, const Expression& input, Expression& output);
   static bool casimir(Calculator& calculator, const Expression& input, Expression& output);
   static bool getLinksToSimpleLieAlgerbas(Calculator& calculator, const Expression& input, Expression& output);
+  static bool slTwoRealFormStructure(Calculator& calculator, const Expression& input, Expression& output);
   static bool characterSemisimpleLieAlgebraFiniteDimensional(Calculator& calculator, const Expression& input, Expression& output);
   static bool printSemisimpleSubalgebras(
     Calculator& calculator,

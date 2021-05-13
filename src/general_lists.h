@@ -250,7 +250,7 @@ public:
   static int kToTheNth(int k, int n);
   static void kToTheNth(int k, int n, LargeInteger& output);
   inline static int parity(int n);
-  static int binomialCoefficientMultivariate(int N, List<int>& theChoices);
+  static int binomialCoefficientMultivariate(int N, List<int>& choices);
   static bool isPrime(int input);
   template <class Coefficient, typename theIntegerType>
   static void raiseToPower(

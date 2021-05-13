@@ -370,14 +370,13 @@ public:
   HashedList<DynkinSimpleType> cachedDynkinSimpleTypesWithComputedSl2Subalgebras;
   List<OrbitIteratorRootActionWeylGroupAutomorphisms> orbits;
   HashedList<Rational> orbitHElementLengths;
-  HashedList<DynkinSimpleType> theOrbitDynkinIndices;
-  // List<HashedList<ElementWeylGroup<WeylGroup> > > theOrbitGeneratingElts;
+  HashedList<DynkinSimpleType> orbitDynkinIndices;
   // if an entry in orbit sizes is - 1 this means the corresponding orbit size has not been computed yet.
   int maxStoredOrbitSize;
   std::string comments;
   std::string fileNameToLogComments;
 
-  //current computation state:
+  // current computation state:
   // state that gets stored to hd:
   List<CandidateSemisimpleSubalgebra> currentSubalgebraChain;
   List<int> currentNumLargerTypesExplored;
@@ -386,10 +385,14 @@ public:
   List<List<DynkinType> > currentPossibleLargerDynkinTypes;
   List<List<List<int> > > currentRootInjections;
   List<Vectors<Rational> > currentHCandidatesScaledToActByTwo;
-
   //end current computation state variables.
 
-  MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra> subalgebras; //used to search for subalgebras quickly
+  // The map keys are used to search for subalgebras quickly.
+  MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra> slTwoSubalgebrasRealForm;
+
+  // All found subalgebras are here.
+  // The keys are their embedded symmetric Cartan matrices.
+  MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra> subalgebras;
   bool flagRealizedAllCandidates;
   bool flagAttemptToSolveSystems;
   bool flagcomputePairingTable;
@@ -542,6 +545,13 @@ public:
     bool attemptToSolveSystems,
     bool computePairingTable,
     bool adjustCentralizers
+  );
+  bool computeStructureRealFormsWriteFiles(
+    SemisimpleLieAlgebra& newOwner,
+    AlgebraicClosureRationals& ownerField,
+    MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
+    ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
+    std::stringstream* outputStream
   );
   void findTheSemisimpleSubalgebrasInitialize();
   bool findTheSemisimpleSubalgebrasContinue();

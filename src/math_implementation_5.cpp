@@ -38,8 +38,8 @@ std::string MonomialWeylAlgebra::toString(FormatExpressions* format) const {
 
 std::string QuasiDifferentialMononomial::toString(FormatExpressions* format) const {
   std::stringstream out;
-  out << this->theWeylMon.toString(format) << "\\otimes ";
-  out << this->theMatMon.toString(format);
+  out << this->weylMonomial.toString(format) << "\\otimes ";
+  out << this->matrixMonomial.toString(format);
   return out.str();
 }
 

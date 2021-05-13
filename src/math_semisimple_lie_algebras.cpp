@@ -130,14 +130,14 @@ std::string SemisimpleLieAlgebra::toStringMenuStructurePages(
   std::stringstream out;
   if (includeStructureConstants) {
     out
-    << "<a href = '" << relativeTo << this->fileNames.toStringFileNameNoPathStructureConstants()
+    << "<a href = '" << relativeTo << this->fileNames.fileNameNoPathStructureConstants()
     << "'>Structure constants and notation</a>.<br>";
   } else {
     out << "<b>Structure constants and notation</b>.<br>";
   }
   if (includeRootSubalgebras) {
     out
-    << "<a href = '" << relativeTo << this->fileNames.toStringFileNameNoPathRootSubalgebras()
+    << "<a href = '" << relativeTo << this->fileNames.fileNameNoPathRootSubalgebras()
     << "'>Root subalgebras / root subsystems</a>.<br>";
   } else {
     out << "<b>Root subalgebras / root subsystems</b>.<br>";
@@ -154,7 +154,7 @@ std::string SemisimpleLieAlgebra::toStringMenuStructurePages(
     if (includeSemisimpleSubalgebras) {
       out
       << "<a href = '" << relativeTo
-      << this->fileNames.toStringFileNameNoPathSemisimpleSubalgebras()
+      << this->fileNames.fileNameNoPathSemisimpleSubalgebras()
       << "'>Semisimple subalgebras</a>.<br>";
     } else {
       out
@@ -316,7 +316,7 @@ void SemisimpleLieAlgebra::writeHTML(bool verbose, bool flagWriteLatexPlots) {
   outFile << "</body>";
   outFile << "</html>";
   FileOperations::writeFileVirual(
-    this->fileNames.toStringVirtualFileNameWithPathStructureConstants(),
+    this->fileNames.virtualFileNameWithPathStructureConstants(),
     outFile.str(),
     &outFile
   );
@@ -344,15 +344,21 @@ std::string SemisimpleLieAlgebra::FileNames::fileNameRelativePathSlTwoSubalgebra
   return out.str();
 }
 
-std::string SemisimpleLieAlgebra::FileNames::toStringFileNameNoPathSemisimpleSubalgebras() const {
-  std::stringstream theFileName;
-  theFileName << "semisimple_subalgebras_"
-  << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString())
-  << ".html";
-  return theFileName.str();
+std::string SemisimpleLieAlgebra::FileNames::fileNameSlTwoRealFormSubalgebraStructure() const {
+  std::stringstream out;
+  out << "kostant_sekiguchi_" << this->fileNameNoPathSemisimpleSubalgebras();
+  return out.str();
 }
 
-std::string SemisimpleLieAlgebra::FileNames::toStringFileNameNoPathRootSubalgebras() const {
+std::string SemisimpleLieAlgebra::FileNames::fileNameNoPathSemisimpleSubalgebras() const {
+  std::stringstream out;
+  out << "semisimple_subalgebras_"
+  << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString())
+  << ".html";
+  return out.str();
+}
+
+std::string SemisimpleLieAlgebra::FileNames::fileNameNoPathRootSubalgebras() const {
   std::stringstream theFileName;
   theFileName << "rootSubalgebras_"
   << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString())
@@ -360,17 +366,17 @@ std::string SemisimpleLieAlgebra::FileNames::toStringFileNameNoPathRootSubalgebr
   return theFileName.str();
 }
 
-std::string SemisimpleLieAlgebra::FileNames::toStringVirtualFolderName() const {
+std::string SemisimpleLieAlgebra::FileNames::virtualFolderName() const {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::toStringVirtualFolderName");
   this->owner->checkConsistency();
   return this->owner->weylGroup.dynkinType.toStringVirtualNameFolder();
 }
 
-std::string SemisimpleLieAlgebra::FileNames::toStringVirtualFileNameWithPathStructureConstants() const {
+std::string SemisimpleLieAlgebra::FileNames::virtualFileNameWithPathStructureConstants() const {
   std::stringstream fileName;
   fileName
-  << this->toStringVirtualFolderName()
-  << this->toStringFileNameNoPathStructureConstants();
+  << this->virtualFolderName()
+  << this->fileNameNoPathStructureConstants();
   return fileName.str();
 }
 
@@ -382,7 +388,7 @@ std::string SemisimpleLieAlgebra::FileNames::displayFolderName(const std::string
   return out.str();
 }
 
-std::string SemisimpleLieAlgebra::FileNames::toStringFileNameNoPathStructureConstants() const {
+std::string SemisimpleLieAlgebra::FileNames::fileNameNoPathStructureConstants() const {
   std::stringstream fileName;
   fileName
   << "structure_constants_notation_"
@@ -395,7 +401,7 @@ std::string SemisimpleLieAlgebra::FileNames::fileNameWithPathStructureConstants(
   std::stringstream fileName;
   fileName
   << this->displayFolderName(baseFolder)
-  << this->toStringFileNameNoPathStructureConstants();
+  << this->fileNameNoPathStructureConstants();
   return fileName.str();
 }
 

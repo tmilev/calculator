@@ -10,26 +10,26 @@ class QuasiDifferentialMononomial {
     return output;
   }
   public:
-  MonomialWeylAlgebra theWeylMon;
-  MonomialMatrix theMatMon;
+  MonomialWeylAlgebra weylMonomial;
+  MonomialMatrix matrixMonomial;
   static unsigned int hashFunction(const QuasiDifferentialMononomial& input) {
-    return input.theWeylMon.hashFunction() * someRandomPrimes[0] + input.theMatMon.hashFunction() * someRandomPrimes[1];
+    return input.weylMonomial.hashFunction() * someRandomPrimes[0] + input.matrixMonomial.hashFunction() * someRandomPrimes[1];
   }
   unsigned int hashFunction() const {
     return hashFunction(*this);
   }
   bool operator==(const QuasiDifferentialMononomial& other) const {
-    return this->theWeylMon == other.theWeylMon && this->theMatMon == other.theMatMon;
+    return this->weylMonomial == other.weylMonomial && this->matrixMonomial == other.matrixMonomial;
   }
   void operator=(const QuasiDifferentialMononomial& other) {
-    this->theWeylMon = other.theWeylMon;
-    this->theMatMon = other.theMatMon;
+    this->weylMonomial = other.weylMonomial;
+    this->matrixMonomial = other.matrixMonomial;
   }
   bool operator>(const QuasiDifferentialMononomial& other) const {
-    if (this->theMatMon == other.theMatMon) {
-      return this->theWeylMon>other.theWeylMon;
+    if (this->matrixMonomial == other.matrixMonomial) {
+      return this->weylMonomial>other.weylMonomial;
     }
-    return this->theMatMon>other.theMatMon;
+    return this->matrixMonomial>other.matrixMonomial;
   }
   std::string toString(FormatExpressions* format = nullptr) const;
 };
@@ -38,7 +38,7 @@ template <class Coefficient>
 class QuasiDifferentialOperator : public LinearCombination<QuasiDifferentialMononomial, Coefficient> {
 public:
   std::string toString(FormatExpressions* format = nullptr) const;
-  void generateBasisLieAlgebra(List<QuasiDifferentialOperator<Coefficient> >& theElts, FormatExpressions* format = nullptr);
+  void generateBasisLieAlgebra(List<QuasiDifferentialOperator<Coefficient> >& inputElements, FormatExpressions* format = nullptr);
   void operator*=(const QuasiDifferentialOperator<Coefficient>& standsOnTheRight);
   void operator=(const LinearCombination<QuasiDifferentialMononomial, Coefficient>& other) {
     this->LinearCombination<QuasiDifferentialMononomial, Coefficient>::operator=(other);
@@ -60,16 +60,16 @@ void QuasiDifferentialOperator<Coefficient>::fourierTransformDifferentialPartOnl
     return;
   }
   output.makeZero();
-  ElementWeylAlgebra<Coefficient> startDO, finalDO;
-  QuasiDifferentialMononomial theMon;
+  ElementWeylAlgebra<Coefficient> startDifferentialOperator, finalDifferentialOperator;
+  QuasiDifferentialMononomial monomial;
   for (int i = 0; i < this->size(); i ++) {
-    startDO.makeZero();
-    startDO.addMonomial((*this)[i].theWeylMon, this->coefficients[i]);
-    startDO.fourierTransform(finalDO);
-    for (int j = 0; j < finalDO.size(); j ++) {
-      theMon.theMatMon = (*this)[i].theMatMon;
-      theMon.theWeylMon = finalDO[j];
-      output.addMonomial(theMon, finalDO.coefficients[j]);
+    startDifferentialOperator.makeZero();
+    startDifferentialOperator.addMonomial((*this)[i].weylMonomial, this->coefficients[i]);
+    startDifferentialOperator.fourierTransform(finalDifferentialOperator);
+    for (int j = 0; j < finalDifferentialOperator.size(); j ++) {
+      monomial.matrixMonomial = (*this)[i].matrixMonomial;
+      monomial.weylMonomial = finalDifferentialOperator[j];
+      output.addMonomial(monomial, finalDifferentialOperator.coefficients[j]);
     }
   }
 }
@@ -78,46 +78,47 @@ template <class Coefficient>
 void QuasiDifferentialOperator<Coefficient>::getElementWeylAlgebraSetMatrixPartsToId(ElementWeylAlgebra<Coefficient>& output) const {
   output.makeZero();
   for (int i = 0; i < this->size(); i ++) {
-    output.addMonomial((*this)[i].theWeylMon, this->coefficients[i]);
+    output.addMonomial((*this)[i].weylMonomial, this->coefficients[i]);
   }
 }
 
 template <class Coefficient>
 void QuasiDifferentialOperator<Coefficient>::generateBasisLieAlgebra(
-  List<QuasiDifferentialOperator<Coefficient> >& theElts, FormatExpressions* format
+  List<QuasiDifferentialOperator<Coefficient> >& inputElements,
+  FormatExpressions* format
 ) {
   MacroRegisterFunctionWithName("QuasiDifferentialOperator::generateBasisLieAlgebra");
   ProgressReport theReport;
   HashedList<QuasiDifferentialMononomial> bufferMons;
-  List< LinearCombination<QuasiDifferentialMononomial, Coefficient> > theEltsConverted;
-  theEltsConverted = theElts;
-  this->gaussianEliminationByRows(theEltsConverted);
+  List< LinearCombination<QuasiDifferentialMononomial, Coefficient> > elementsConverted;
+  elementsConverted = inputElements;
+  this->gaussianEliminationByRows(elementsConverted);
   QuasiDifferentialOperator tempQDO;
   bool foundNew = true;
   int numTimesEliminationWasExecuted = 0;
   while (foundNew) {
     foundNew = false;
-    for (int i = 0; i < theEltsConverted.size; i ++) {
-      for (int j = i + 1; j < theEltsConverted.size; j ++) {
-        tempQDO = theEltsConverted[i];
+    for (int i = 0; i < elementsConverted.size; i ++) {
+      for (int j = i + 1; j < elementsConverted.size; j ++) {
+        tempQDO = elementsConverted[i];
         std::stringstream report;
         report << "Lie bracketing elements " << " of indices " << i + 1
-        << " and " << j + 1 << " out of " << theEltsConverted.size << "<br> "
+        << " and " << j + 1 << " out of " << elementsConverted.size << "<br> "
         << tempQDO.toString(format) << "<br> with element <br>"
-        << theEltsConverted[j].toString(format) << " to get <br>";
-        tempQDO.lieBracketMeOnTheRight(theEltsConverted[j]);
+        << elementsConverted[j].toString(format) << " to get <br>";
+        tempQDO.lieBracketMeOnTheRight(elementsConverted[j]);
         theReport.report(report.str());
         report << tempQDO.toString(format);
         theReport.report(report.str());
-        theEltsConverted.addOnTop(tempQDO);
-        QuasiDifferentialOperator::gaussianEliminationByRows(theEltsConverted, 0, &bufferMons);
+        elementsConverted.addOnTop(tempQDO);
+        QuasiDifferentialOperator::gaussianEliminationByRows(elementsConverted, 0, &bufferMons);
         numTimesEliminationWasExecuted ++;
-        if (!theEltsConverted.lastObject()->isEqualToZero()) {
+        if (!elementsConverted.lastObject()->isEqualToZero()) {
           foundNew = true;
         }
-        for (int k = theEltsConverted.size - 1; k >= 0; k --) {
-          if (theEltsConverted[k].isEqualToZero()) {
-            theEltsConverted.removeIndexSwapWithLast(k);
+        for (int k = elementsConverted.size - 1; k >= 0; k --) {
+          if (elementsConverted[k].isEqualToZero()) {
+            elementsConverted.removeIndexSwapWithLast(k);
           } else {
             break;
           }
@@ -125,11 +126,10 @@ void QuasiDifferentialOperator<Coefficient>::generateBasisLieAlgebra(
       }
     }
   }
-  theElts.setSize(theEltsConverted.size);
-  for (int i = 0; i < theEltsConverted.size; i ++) {
-    theElts[i] = theEltsConverted[i];
+  inputElements.setSize(elementsConverted.size);
+  for (int i = 0; i < elementsConverted.size; i ++) {
+    inputElements[i] = elementsConverted[i];
   }
-
 }
 
 template <class Coefficient>
@@ -144,11 +144,11 @@ void QuasiDifferentialOperator<Coefficient>::operator*=(const QuasiDifferentialO
     for (int i = 0; i < this->size(); i ++) {
       leftElt.makeZero();
       leftElt.addMonomial((*this)[i].theWeylMon, this->coefficients[i]);
-      outputMon.theMatMon = (*this)[i].theMatMon;
-      outputMon.theMatMon *= standsOnTheRight[j].theMatMon;
+      outputMon.matrixMonomial = (*this)[i].theMatMon;
+      outputMon.matrixMonomial *= standsOnTheRight[j].theMatMon;
       leftElt *= rightElt;
       for (int k = 0; k < leftElt.size(); k ++) {
-        outputMon.theWeylMon = leftElt[k];
+        outputMon.weylMonomial = leftElt[k];
         output.addMonomial(outputMon, leftElt.coefficients[k]);
       }
     }
@@ -171,8 +171,8 @@ std::string QuasiDifferentialOperator<Coefficient>::toString(FormatExpressions* 
   for (int i = 0; i < this->size(); i ++) {
     const QuasiDifferentialMononomial& currentMon = (*this)[i];
     tempP.makeZero();
-    tempP.addMonomial(currentMon.theWeylMon, this->coefficients[i]);
-    reordered.addMonomial(currentMon.theMatMon, tempP);
+    tempP.addMonomial(currentMon.weylMonomial, this->coefficients[i]);
+    reordered.addMonomial(currentMon.matrixMonomial, tempP);
   }
   std::string result = reordered.toString(format);
   if (result == "0" && this->size() != 0) {

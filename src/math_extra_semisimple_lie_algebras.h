@@ -65,12 +65,13 @@ public:
     SemisimpleLieAlgebra* owner;
     std::string displayFolderName(const std::string& baseFolder) const;
     std::string fileNameWithPathStructureConstants(const std::string& baseFolder) const;
-    std::string toStringVirtualFolderName() const;
-    std::string toStringVirtualFileNameWithPathStructureConstants() const;
-    std::string toStringFileNameNoPathStructureConstants() const;
-    std::string toStringFileNameNoPathSemisimpleSubalgebras() const;
-    std::string toStringFileNameNoPathRootSubalgebras() const;
+    std::string virtualFolderName() const;
+    std::string virtualFileNameWithPathStructureConstants() const;
+    std::string fileNameNoPathStructureConstants() const;
+    std::string fileNameNoPathSemisimpleSubalgebras() const;
+    std::string fileNameNoPathRootSubalgebras() const;
     std::string fileNameRelativePathSlTwoSubalgebras() const;
+    std::string fileNameSlTwoRealFormSubalgebraStructure() const;
   };
   SemisimpleLieAlgebra::FileNames fileNames;
   template <class Coefficient>

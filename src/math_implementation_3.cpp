@@ -2707,17 +2707,17 @@ Vector<double> MathRoutines::getVectorDouble(Vector<Rational>& input) {
   return result;
 }
 
-int MathRoutines::binomialCoefficientMultivariate(int N, List<int>& theChoices) {
-  int ChoiceIndex = 0;
+int MathRoutines::binomialCoefficientMultivariate(int N, List<int>& choices) {
+  int choiceIndex = 0;
   int denominator = 1;
   int result = 0;
   for ( int i = N; i > 0; i --) {
     result *= i;
     result /= denominator;
     denominator ++;
-    if (denominator > theChoices[ChoiceIndex]) {
+    if (denominator > choices[choiceIndex]) {
       denominator = 1;
-      ChoiceIndex ++;
+      choiceIndex ++;
     }
   }
   return result;

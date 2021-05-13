@@ -1847,7 +1847,61 @@ bool CalculatorLieTheory::splitFDpartB3overG2CharsOnly(
   return CalculatorLieTheory::splitFDpartB3overG2CharsOutput(calculator, input, output, theG2B3Data);
 }
 
-bool CalculatorLieTheory::rootSAsAndSltwos(
+bool CalculatorLieTheory::slTwoRealFormStructure(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::slTwoRealFormStructure");
+  if (input.size() != 2) {
+    return calculator << "Root subalgebra / sl(2)-subalgebras function expects 1 argument. ";
+  }
+  WithContext<SemisimpleLieAlgebra*> ownerLieAlgebra;
+  if (!CalculatorConversions::convert(
+    input[1],
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    ownerLieAlgebra
+  )) {
+    return output.makeError("Error extracting Lie algebra.", calculator);
+  }
+  FormatExpressions format;
+  format.flagUseHTML = true;
+  format.flagUseLatex = false;
+  format.flagUsePNG = true;
+
+  std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile, outKostantSekiguchi;
+
+  std::string displayFolder = ownerLieAlgebra.content->fileNames.displayFolderName("output/");
+
+  outSltwoMainFile << displayFolder << ownerLieAlgebra.content->fileNames.fileNameRelativePathSlTwoSubalgebras();
+  outRootHtmlFileName    << displayFolder << ownerLieAlgebra.content->fileNames.fileNameNoPathRootSubalgebras();
+  outRootHtmlDisplayName << displayFolder << ownerLieAlgebra.content->fileNames.fileNameNoPathRootSubalgebras();
+  outKostantSekiguchi << displayFolder << ownerLieAlgebra.content->fileNames.fileNameSlTwoRealFormSubalgebraStructure();
+  std::stringstream out;
+  out << "<a href='"
+  << outKostantSekiguchi.str()
+  << "' target='_blank'>"
+  << ownerLieAlgebra.content->toStringLieAlgebraName() << " </a>";
+  if (!FileOperations::fileExistsVirtual(outKostantSekiguchi.str())) {
+    out << "The table is precomputed and served from the hard disk. <br>";
+    return output.assignValue(out.str(), calculator);
+  }
+
+  SemisimpleSubalgebras& subalgebras =
+  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(
+    ownerLieAlgebra.content->weylGroup.dynkinType
+  );
+  subalgebras.computeStructureRealFormsWriteFiles(
+    *ownerLieAlgebra.content,
+    calculator.objectContainer.algebraicClosure,
+    calculator.objectContainer.semisimpleLieAlgebras,
+    calculator.objectContainer.slTwoSubalgebras,
+    &out
+  );
+  return output.assignValue(out.str(), calculator);
+}
+
+bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
@@ -1876,8 +1930,8 @@ bool CalculatorLieTheory::rootSAsAndSltwos(
   std::string displayFolder = semisimpleLieAlgebra.content->fileNames.displayFolderName("output/");
 
   outSltwoMainFile << displayFolder << semisimpleLieAlgebra.content->fileNames.fileNameRelativePathSlTwoSubalgebras();
-  outRootHtmlFileName    << displayFolder << semisimpleLieAlgebra.content->fileNames.toStringFileNameNoPathRootSubalgebras();
-  outRootHtmlDisplayName << displayFolder << semisimpleLieAlgebra.content->fileNames.toStringFileNameNoPathRootSubalgebras();
+  outRootHtmlFileName    << displayFolder << semisimpleLieAlgebra.content->fileNames.fileNameNoPathRootSubalgebras();
+  outRootHtmlDisplayName << displayFolder << semisimpleLieAlgebra.content->fileNames.fileNameNoPathRootSubalgebras();
   if (
     !FileOperations::fileExistsVirtual(outSltwoMainFile.str()) ||
     !FileOperations::fileExistsVirtual(outRootHtmlFileName.str())
@@ -3282,7 +3336,7 @@ bool CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
   if (writeToHD) {
     semisimpleAlgebra.writeHTML(verbose, calculator.flagWriteLatexPlots);
     out << "<a href='"
-    << semisimpleAlgebra.fileNames.toStringVirtualFileNameWithPathStructureConstants()
+    << semisimpleAlgebra.fileNames.virtualFileNameWithPathStructureConstants()
     << "' target='_blank'>hard drive output</a><br>";
   }
   out << semisimpleAlgebra.toHTML(verbose, calculator.flagWriteLatexPlots);

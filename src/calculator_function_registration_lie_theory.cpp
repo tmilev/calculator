@@ -213,6 +213,17 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     innerInvisible
   );
   this->addOperationHandler(
+    "SlTwoRealFormStructure",
+    CalculatorLieTheory::slTwoRealFormStructure,
+    "",
+    "Computes the Lie algebra structure over Kostant-Sekiguchi sl twos "
+    "w.r.t. maximally compact real form.",
+    "SlTwoRealFormStructure{}(a_3)",
+    "Calculator::getLinksToSimpleLieAlgerbas",
+    "GetLinksToSimpleLieAlgebraPrintouts",
+    innerInvisible
+  );
+  this->addOperationHandler(
     "ConesIntersection",
     CalculatorFunctions::innerConesIntersect,
     "",
@@ -689,7 +700,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "PrintRootSubalgebrasRecompute",
-    CalculatorLieTheory::printRootSAsForceRecompute,
+    CalculatorLieTheory::printRootSubalgebrasForceRecompute,
     "",
     "Same as printRootSubalgebras but forces recomputation. "
     "Use to recompute obsolete or interrupted output files.",
@@ -700,7 +711,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "PrintSlTwoSubalgebras",
-    CalculatorLieTheory::printSltwos,
+    CalculatorLieTheory::printSlTwos,
     "",
     "Prints sl(2) subalgebras and root subalgebras. "
     "The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",

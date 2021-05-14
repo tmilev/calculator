@@ -3564,7 +3564,7 @@ bool CalculatorFunctions::innerRationalFunctionSubstitution(
   ExpressionContext finalContext(calculator);
   finalContext.makeOneVariable(input[1]);
   resultRationalForm.assignValueWithContext(input[0].getValue<RationalFraction<Rational> >(), finalContext, calculator);
-  return CalculatorConversions::expressionFromRationalFunction<Rational>(calculator, resultRationalForm, output);
+  return CalculatorConversions::expressionFromRationalFraction<Rational>(calculator, resultRationalForm, output);
 }
 
 bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
@@ -6109,41 +6109,41 @@ bool CalculatorFunctionsPlot::plotPoint(Calculator& calculator, const Expression
       calculator
     );
   }
-  Plot theFinalPlot;
-  PlotObject thePlot;
-  if (!calculator.getMatrixExpressions(input[1], thePlot.points)) {
+  PlotObject plot;
+  if (!calculator.getMatrixExpressions(input[1], plot.points)) {
     return calculator << "The first argument of PlotPoint is "
     << "expected to be a sequence, instead I had: " << input[1].toString();
   }
-  theFinalPlot.dimension = thePlot.points.numberOfColumns;
-  thePlot.dimension = theFinalPlot.dimension;
-  thePlot.coordinateFunctionsE.setSize(thePlot.dimension);
-  thePlot.coordinateFunctionsJS.setSize(thePlot.dimension);
+  plot.dimension = plot.points.numberOfColumns;
+  plot.coordinateFunctionsE.setSize(plot.dimension);
+  plot.coordinateFunctionsJS.setSize(plot.dimension);
   Expression jsConverterE;
-  thePlot.pointsJS.initialize(thePlot.points.numberOfRows, thePlot.points.numberOfColumns);
-  for (int i = 0; i < thePlot.points.numberOfRows; i ++) {
-    for (int j = 0; j < thePlot.points.numberOfColumns; j ++) {
+  plot.pointsJS.initialize(plot.points.numberOfRows, plot.points.numberOfColumns);
+  for (int i = 0; i < plot.points.numberOfRows; i ++) {
+    for (int j = 0; j < plot.points.numberOfColumns; j ++) {
       if (!CalculatorFunctions::functionMakeJavascriptExpression(
-        calculator, thePlot.points(i, j), jsConverterE
+        calculator, plot.points(i, j), jsConverterE
       )) {
         return calculator << "Failed to extract coordinate " << i + 1 << " from: "
-        << thePlot.coordinateFunctionsE[i].toString();
+        << plot.coordinateFunctionsE[i].toString();
       }
-      thePlot.pointsJS(i, j) = jsConverterE.toString();
-      thePlot.points(i, j).hasInputBoxVariables(&thePlot.parametersInPlay, &thePlot.parametersInPlayJS);
+      plot.pointsJS(i, j) = jsConverterE.toString();
+      plot.points(i, j).hasInputBoxVariables(&plot.parametersInPlay, &plot.parametersInPlayJS);
     }
   }
-  thePlot.dimension = theFinalPlot.dimension;
-  thePlot.colorRGB =static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 0));
+  plot.dimension = plot.dimension;
+  plot.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 0));
   if (input[2].isOfType<std::string>()) {
-    DrawingVariables::getColorIntFromColorString(input[2].getValue<std::string>(), thePlot.colorRGB);
+    DrawingVariables::getColorIntFromColorString(input[2].getValue<std::string>(), plot.colorRGB);
   }
-  thePlot.colorJS = input[2].toString();
-  thePlot.plotType = "points";
-  theFinalPlot += thePlot;
-  theFinalPlot.desiredHtmlHeightInPixels = 100;
-  theFinalPlot.desiredHtmlWidthInPixels = 100;
-  return output.assignValue(theFinalPlot, calculator);
+  plot.colorJS = input[2].toString();
+  plot.plotType = "points";
+  Plot finalPlot;
+  finalPlot.dimension = plot.dimension;
+  finalPlot += plot;
+  finalPlot.desiredHtmlHeightInPixels = 100;
+  finalPlot.desiredHtmlWidthInPixels = 100;
+  return output.assignValue(finalPlot, calculator);
 }
 
 bool CalculatorFunctionsPlot::plot2DWithBars(Calculator& calculator, const Expression& input, Expression& output) {

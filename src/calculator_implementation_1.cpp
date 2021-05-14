@@ -37,7 +37,7 @@ std::string PlotObject::Labels::plotType            = "plotType";
 std::string PlotObject::Labels::body                = "body";
 std::string PlotObject::Labels::text                = "text";
 std::string PlotObject::Labels::arguments           = "arguments";
-std::string PlotObject::Labels::parameters           = "parameters";
+std::string PlotObject::Labels::parameters          = "parameters";
 std::string PlotObject::Labels::viewWindow          = "viewWindow";
 
 std::string Plot::Labels::canvasName                = "canvasName";
@@ -273,10 +273,37 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
 }
 
 bool SemisimpleSubalgebras::computeStructureRealFormsWriteFiles(
-  SemisimpleLieAlgebra &newOwner, AlgebraicClosureRationals &ownerField, MapReferences<DynkinType, SemisimpleLieAlgebra> &containerSubalgebras, ListReferences<SlTwoSubalgebras> &containerSl2Subalgebras, std::stringstream *outputStream
+  SemisimpleLieAlgebra& newOwner,
+  AlgebraicClosureRationals& ownerField,
+  MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
+  ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
+  std::stringstream* outputStream
 ) {
+  this->computeStructureRealForms(newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras, outputStream);
+  this->writeFilesRealForms();
+  return true;
+}
 
+bool SemisimpleSubalgebras::computeStructureRealForms(
+  SemisimpleLieAlgebra& newOwner,
+  AlgebraicClosureRationals& ownerField,
+  MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
+  ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
+  std::stringstream* outputStream
+) {
+  if (this->subalgebrasNonEmbedded == nullptr || this->owner == nullptr) {
+    this->initHookUpPointers(newOwner, &ownerField, &containerSubalgebras, &containerSl2Subalgebras);
+  }
 
+  this->checkInitialization();
+  this->owner->computeChevalleyConstants();
+  this->targetDynkinType.makeZero();
+  this->owner->findSl2Subalgebras(newOwner, this->slTwoSubalgebras, &ownerField);
+  return true;
+}
+
+bool SemisimpleSubalgebras::writeFilesRealForms() {
+  global.fatal << "Not implemented yet." << global.fatal;
 }
 
 bool MathRoutines::isPrime(int input) {
@@ -913,7 +940,7 @@ JSData PlotObject::toJSON() {
 }
 
 JSData PlotObject::toJSONPoints() {
-  MacroRegisterFunctionWithName("PlotSurfaceIn3d::toJSONPoints");
+  MacroRegisterFunctionWithName("PlotObject::toJSONPoints");
   JSData result;
   JSData points = JSData::makeEmptyArray();
   for (int i = 0; i < this->pointsJS.numberOfRows; i ++) {
@@ -925,6 +952,7 @@ JSData PlotObject::toJSONPoints() {
   }
   result[PlotObject::Labels::points] = points;
   result[PlotObject::Labels::color] = this->colorJS;
+  this->writeVariables(result);
   return result;
 }
 

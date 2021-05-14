@@ -602,7 +602,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "MakeExpression",
-    CalculatorConversions::innerExpressionFromBuiltInType,
+    CalculatorConversions::expressionFromBuiltInType,
     "",
     "Creates expression from built-in polynomial. ",
     "MakeExpression(Polynomial{}((x - 2y + z - 1)^2(x + y - z)));\n"
@@ -1942,7 +1942,10 @@ void Calculator::initializeFunctionsStandard() {
     "Can also be used for multiple points. "
     "See the example for how to use for a single and multiple points.",
     "PlotPoint{}((1, 2\\pi), blue);\n"
-    "PlotPoint{}(((1, 2), (2,3)), blue);\n",
+    "PlotPoint{}(((1, 2), (2,3)), blue);\n"
+    "a = MakeInputBox(name = a, value = 3);\n"
+    "a = MakeInputBox(name = b, value = 5);\n"
+    "PlotPoint((a, b), red)",
     "CalculatorFunctions::plotPoint",
     "PlotPoint",
     innerStandard

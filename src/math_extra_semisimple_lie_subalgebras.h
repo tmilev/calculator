@@ -553,6 +553,14 @@ public:
     ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
     std::stringstream* outputStream
   );
+  bool computeStructureRealForms(
+    SemisimpleLieAlgebra& newOwner,
+    AlgebraicClosureRationals& ownerField,
+    MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
+    ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
+    std::stringstream* outputStream
+  );
+  bool writeFilesRealForms();
   void findTheSemisimpleSubalgebrasInitialize();
   bool findTheSemisimpleSubalgebrasContinue();
 

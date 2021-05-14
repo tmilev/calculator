@@ -1401,7 +1401,7 @@ bool CalculatorFunctionsPolynomial::combineFractionsCommutativeWithInternalLibra
   if (!converted.isOfTypeWithContext(&rationalFunction)) {
     return false;
   }
-  return CalculatorConversions::expressionFromRationalFunction(calculator, rationalFunction.content, output, &rationalFunction.context);
+  return CalculatorConversions::expressionFromRationalFraction(calculator, rationalFunction.content, output, &rationalFunction.context);
 }
 
 bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(

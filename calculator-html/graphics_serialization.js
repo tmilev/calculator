@@ -132,7 +132,7 @@ class GraphicsSerialization {
     let parameterValues = null;
     switch (plotType) {
       case "plotFunction":
-        let functionConstructed = this.functionFromObject(functionObject, this.sliders);
+        let functionConstructed = this.functionFromObject(functionObject, sliders);
         parameterValues = this.getSliderValuesFromInput(sliders, functionObject);
         canvas.drawFunction(
           functionConstructed,
@@ -192,7 +192,8 @@ class GraphicsSerialization {
         );
         return;
       case "points":
-        canvas.drawPoints(this.interpretListListStringsAsNumbers(points), color);
+        parameterValues = this.getSliderValuesFromInput(sliders, plot);
+        canvas.drawPoints(this.interpretListListStringsAsNumbers(points, parameterValues), color);
         return;
       case "pathFilled":
         canvas.drawPathFilled(points, color, colorFill);

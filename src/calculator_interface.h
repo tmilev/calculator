@@ -2709,14 +2709,14 @@ public:
     ExpressionContext* inputContext = nullptr
   );
   template <class Coefficient>
-  static bool expressionFromRationalFunction(
+  static bool expressionFromRationalFraction(
     Calculator& calculator,
     const RationalFraction<Coefficient>& input,
     Expression& output,
     ExpressionContext* inputContext = nullptr
   );
   template <class Coefficient>
-  static bool expressionFromRationalFunction(
+  static bool expressionFromRationalFraction(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool innerLoadKey(
@@ -2796,7 +2796,7 @@ public:
     ExpressionContext* inputContext = nullptr
   );
   static bool functionExpressionFromBuiltInType(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerExpressionFromBuiltInType(Calculator& calculator, const Expression& input, Expression& output);
+  static bool expressionFromBuiltInType(Calculator& calculator, const Expression& input, Expression& output);
   template <class Coefficient>
   static bool functionExpressionFromPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerExpressionFromUE(Calculator& calculator, const Expression& input, Expression& output);
@@ -3361,28 +3361,28 @@ bool CalculatorConversions::expressionFromPolynomial(
 }
 
 template <class Coefficient>
-bool CalculatorConversions::expressionFromRationalFunction(
+bool CalculatorConversions::expressionFromRationalFraction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::expressionFromRationalFunction");
+  MacroRegisterFunctionWithName("CalculatorConversions::expressionFromRationalFraction");
   if (!input.isOfType<RationalFraction<Coefficient> >()) {
     return false;
   }
   const RationalFraction<Coefficient>& rationalFunction = input.getValue<RationalFraction<Coefficient> >();
   ExpressionContext context = input.getContext();
-  return CalculatorConversions::expressionFromRationalFunction<Coefficient>(
+  return CalculatorConversions::expressionFromRationalFraction<Coefficient>(
     calculator, rationalFunction, output, &context
   );
 }
 
 template <class Coefficient>
-bool CalculatorConversions::expressionFromRationalFunction(
+bool CalculatorConversions::expressionFromRationalFraction(
   Calculator& calculator,
   const RationalFraction<Coefficient>& input,
   Expression& output,
   ExpressionContext* inputContext
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::expressionFromRationalFunction");
+  MacroRegisterFunctionWithName("CalculatorConversions::expressionFromRationalFraction");
   Rational aConst;
   if (input.isConstant(&aConst)) {
     return output.assignValue(aConst, calculator);

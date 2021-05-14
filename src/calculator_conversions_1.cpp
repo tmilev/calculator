@@ -794,7 +794,7 @@ bool CalculatorConversions::innerExpressionFromMonomialUE(
   for (int i = 0; i < input.generatorsIndices.size; i ++) {
     theGen.generatorIndex = input.generatorsIndices[i];
     CalculatorConversions::innerExpressionFromChevalleyGenerator(calculator, theGen, chevGenE);
-    CalculatorConversions::expressionFromRationalFunction<Rational>(calculator, input.powers[i], powerE, inputContext);
+    CalculatorConversions::expressionFromRationalFraction<Rational>(calculator, input.powers[i], powerE, inputContext);
     termE.makeXOX(calculator, calculator.opPower(), chevGenE, powerE);
     theTerms.addOnTop(termE);
   }
@@ -1018,7 +1018,7 @@ bool CalculatorConversions::innerElementUE(
   return output.assignValueWithContext(outputUE, outputContext, calculator);
 }
 
-bool CalculatorConversions::innerExpressionFromBuiltInType(
+bool CalculatorConversions::expressionFromBuiltInType(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   if (input.size() != 2) {
@@ -1042,10 +1042,10 @@ bool CalculatorConversions::functionExpressionFromBuiltInType(
     return CalculatorConversions::functionExpressionFromPolynomial<AlgebraicNumber>(calculator, input, output);
   }
   if (input.isOfType<RationalFraction<Rational> >()) {
-    return CalculatorConversions::expressionFromRationalFunction<Rational>(calculator, input, output);
+    return CalculatorConversions::expressionFromRationalFraction<Rational>(calculator, input, output);
   }
   if (input.isOfType<RationalFraction<AlgebraicNumber> >()) {
-    return CalculatorConversions::expressionFromRationalFunction<AlgebraicNumber>(calculator, input, output);
+    return CalculatorConversions::expressionFromRationalFraction<AlgebraicNumber>(calculator, input, output);
   }
   return false;
 }

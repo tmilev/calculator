@@ -114,6 +114,7 @@ class CompareExpressions {
       this.resultUserFriendly.innerHTML = resultHTML;
       this.writeCalculatorLink();
       this.resultBoxRaw.textContent = JSON.stringify(result);
+      this.resultBoxFormatted.textContent = "";
       jsonToHtml.writeJSONtoDOMComponent(result, this.resultBoxFormatted);
       equationEditor.typeset(this.resultBoxFormatted);
     } catch (e) {

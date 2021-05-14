@@ -20,15 +20,15 @@ function writeJSONtoDOMComponent(
   /**@type{Object} */
   inputObject,
   /**@type{HTMLElement|string} */
-  theDomComponent,
+  domComponent,
 ) {
-  if (typeof theDomComponent === "string") {
-    theDomComponent = document.getElementById(theDomComponent);
+  if (typeof domComponent === "string") {
+    domComponent = document.getElementById(domComponent);
   }
   let transformer = new JSONToHTML();
   let copy = miscellaneous.deepCopy(inputObject);
 
-  theDomComponent.innerHTML = transformer.getTableFromObject(copy, null, { forceRowLayout: true });
+  domComponent.appendChild(transformer.getTableFromObject(copy, null, { forceRowLayout: true }));
 }
 
 class Statistics {

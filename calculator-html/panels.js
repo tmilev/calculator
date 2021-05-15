@@ -197,8 +197,9 @@ class PanelExpandable {
   }
 
   computeOriginalDimensions() {
-    this.originalHeight = parseInt(window.getComputedStyle(this.panelContent).height);
-    this.originalWidth = parseInt(window.getComputedStyle(this.panelContent).width);
+    let computedStyle = window.getComputedStyle(this.panelContent);
+    this.originalHeight = Math.max(parseInt(computedStyle.height), this.panelContent.scrollHeight);
+    this.originalWidth = Math.max(parseInt(computedStyle.width), this.panelContent.scrollWidth);
   }
 
   setPanelContent(

@@ -30,18 +30,18 @@ public:
   static bool innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerAddMatrixRFsToMatrixRFs(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAddMatrixTensorToMatrixTensor(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAddRatToRat(Calculator& calculator, const Expression& input, Expression& output);
+  static bool addMatrixRationalFractionsToMatrixRationalFractions(Calculator& calculator, const Expression& input, Expression& output);
+  static bool addMatrixTensorToMatrixTensor(Calculator& calculator, const Expression& input, Expression& output);
+  static bool addRationalToRational(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAddStringToString(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAddElementZModPOrRationalToElementZModPOrRational(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAddPolynomialModuloIntegerToPolynomialModuloInteger(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerAddPolynomialModuloIntegerToInteger(
+  static bool addPolynomialModuloIntegerToInteger(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerAddPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger(
+  static bool addPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger(
     Calculator& calculator, const Expression& input, Expression& output
   );
 
@@ -53,7 +53,9 @@ public:
   static bool multiplyRationalOrPolynomialOrRationalFunctionByRationalFraction(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool multiplyRationalOrPolynomialOrElementWeylAlgebraByRationalOrPolynomialOrElementWeylAlgebra(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyRationalOrPolynomialOrElementWeylAlgebraByRationalOrPolynomialOrElementWeylAlgebra(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool multiplyPolynomialModPByPolynomialModP(Calculator& calculator, const Expression& input, Expression& output);
   static bool multiplyNumberOrPolynomialByNumberOrPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP(Calculator& calculator, const Expression& input, Expression& output);

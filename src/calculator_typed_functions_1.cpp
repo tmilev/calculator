@@ -136,7 +136,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat(
   return false;
 }
 
-bool CalculatorFunctionsBinaryOps::innerAddRatToRat(
+bool CalculatorFunctionsBinaryOps::addRationalToRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddRatToRat");
@@ -791,7 +791,7 @@ bool CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomia
   return CalculatorFunctionsBinaryOps::innerAddTypeToType<Polynomial<Rational> >(calculator, input, output);
 }
 
-bool CalculatorFunctionsBinaryOps::innerAddPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger(
+bool CalculatorFunctionsBinaryOps::addPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger");
@@ -815,7 +815,7 @@ bool CalculatorFunctionsBinaryOps::innerAddPolynomialModuloPolynomialModuloInteg
   return output.assignValueWithContext(left, inputContextsMerged[1].getContext(), calculator);
 }
 
-bool CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToInteger(
+bool CalculatorFunctionsBinaryOps::addPolynomialModuloIntegerToInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToInteger");
@@ -2726,7 +2726,7 @@ bool CalculatorFunctionsBinaryOps::setMinus(
   return output.makeSequence(calculator, &resultEs);
 }
 
-bool CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs(
+bool CalculatorFunctionsBinaryOps::addMatrixRationalFractionsToMatrixRationalFractions(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs");
@@ -2762,7 +2762,7 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs(
   return output.assignMatrix(leftMatrix, calculator, &theContext);
 }
 
-bool CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor(
+bool CalculatorFunctionsBinaryOps::addMatrixTensorToMatrixTensor(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   if (!input.isListNElements(3)) {

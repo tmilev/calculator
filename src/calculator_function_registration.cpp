@@ -2888,7 +2888,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddRatToRat,
+    CalculatorFunctionsBinaryOps::addRationalToRational,
     this->opRational(),
     this->opRational(),
     "Adds two rational numbers. ",
@@ -2945,7 +2945,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToInteger,
+    CalculatorFunctionsBinaryOps::addPolynomialModuloIntegerToInteger,
     this->opPolynomialModuloInteger(),
     this->opRational(),
     "Adds polynomials modulo integers. ",
@@ -2958,7 +2958,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger,
+    CalculatorFunctionsBinaryOps::addPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger,
     this->opPolynomialModuloPolynomialModuloInteger(),
     this->opPolynomialModuloPolynomialModuloInteger(),
     "Adds polynomials modulo integers. ",
@@ -3382,7 +3382,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor,
+    CalculatorFunctionsBinaryOps::addMatrixTensorToMatrixTensor,
     this->opMatrixTensorRational(),
     this->opMatrixTensorRational(),
     "Adds two matrices.",

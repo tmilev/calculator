@@ -414,7 +414,7 @@ class Calculator {
     /**@type{panels.PanelExpandable} */
     let panel = constructedPanels[parent.id];
     panel.computeOriginalDimensions();
-    if (panel.originalWidth > 1000) {
+    if (panel.originalWidth > 1500) {
       panel.originalWidth = 1000
     }
     if (panel.originalHeight > 1000) {

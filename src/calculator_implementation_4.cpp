@@ -488,7 +488,7 @@ bool CalculatorBasics::standardIsDenotedBy(Calculator& calculator, const Express
   if (withNotation.isOfType<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >()) {
     if (withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >().isHWV()) {
       MonomialGeneralizedVerma<RationalFraction<Rational> >& theElt =
-      withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >()[0].theMons[0];
+      withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >()[0].monomials[0];
       theElt.getOwner().highestWeightVectorNotation = theNotation.toString();
     }
   }

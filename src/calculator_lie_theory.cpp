@@ -1199,7 +1199,7 @@ bool CalculatorLieTheory::printGeneralizedVermaModule(
   }
   ElementTensorsGeneralizedVermas<RationalFraction<Rational> > theElt;
   theElt = output.getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >();
-  ModuleSSalgebra<RationalFraction<Rational> >& theModule = *theElt[0].theMons[0].owner;
+  ModuleSSalgebra<RationalFraction<Rational> >& theModule = *theElt[0].monomials[0].owner;
   return output.assignValue(theModule.toString(), calculator);
 }
 
@@ -1462,8 +1462,8 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   const ElementTensorsGeneralizedVermas<RationalFraction<Rational> >& theHWfd =
   hwvFD.getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >();
 
-  ModuleSSalgebra<RationalFraction<Rational> >& theGenMod = theHWgenVerma[0].theMons[0].getOwner();
-  ModuleSSalgebra<RationalFraction<Rational> >& theFDMod = theHWfd[0].theMons[0].getOwner();
+  ModuleSSalgebra<RationalFraction<Rational> >& theGenMod = theHWgenVerma[0].monomials[0].getOwner();
+  ModuleSSalgebra<RationalFraction<Rational> >& theFDMod = theHWfd[0].monomials[0].getOwner();
   if (
     theGenMod.owner != theFDMod.owner ||
     theGenMod.getOwner().getRank() != theGenMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements ||
@@ -2318,11 +2318,11 @@ bool CalculatorLieTheory::constructCartanSubalgebra(
   SubalgebraSemisimpleLieAlgebra theSA;
   WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> > element;
   if (input.convertsInternally(&element)) {
-    theSA.theGenerators.addOnTop(element.content);
+    theSA.generators.addOnTop(element.content);
   } else {
     for (int i = 1; i < input.size(); i ++) {
       if (input[i].convertsInternally(&element)) {
-        theSA.theGenerators.addOnTop(element.content);
+        theSA.generators.addOnTop(element.content);
       } else {
         return calculator
         << "Failed to extract element of a semisimple Lie algebra from "
@@ -2330,15 +2330,15 @@ bool CalculatorLieTheory::constructCartanSubalgebra(
       }
     }
   }
-  for (int i = 0; i < theSA.theGenerators.size; i ++) {
-    if (!theSA.theGenerators[i].isEqualToZero()) {
+  for (int i = 0; i < theSA.generators.size; i ++) {
+    if (!theSA.generators[i].isEqualToZero()) {
       if (theSA.owner != nullptr) {
-        if (theSA.owner != theSA.theGenerators[i].getOwner()) {
+        if (theSA.owner != theSA.generators[i].getOwner()) {
           return calculator << "The input elements in " << input.toString()
           << " belong to different semisimple Lie algebras";
         }
       }
-      theSA.owner = theSA.theGenerators[i].getOwner();
+      theSA.owner = theSA.generators[i].getOwner();
     }
   }
   if (theSA.owner == nullptr) {
@@ -2414,7 +2414,7 @@ bool CalculatorLieTheory::growDynkinType(
         }
       }
       out << "</td><td>";
-      Vector<Rational> currentHighestWeight = tempSas.getHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot(
+      Vector<Rational> currentHighestWeight = tempSas.getHighestWeightFundamentalNewComponentFromImagesOldSimpleRootsAndNewRoot(
         largerTypes[i], imagesSimpleRoots[i], tempCandidate
       );
       out << HtmlRoutines::getMathNoDisplay(

@@ -284,28 +284,6 @@ bool SemisimpleSubalgebras::computeStructureRealFormsWriteFiles(
   return true;
 }
 
-bool SemisimpleSubalgebras::computeStructureRealForms(
-  SemisimpleLieAlgebra& newOwner,
-  AlgebraicClosureRationals& ownerField,
-  MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
-  ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
-  std::stringstream* outputStream
-) {
-  if (this->subalgebrasNonEmbedded == nullptr || this->owner == nullptr) {
-    this->initHookUpPointers(newOwner, &ownerField, &containerSubalgebras, &containerSl2Subalgebras);
-  }
-
-  this->checkInitialization();
-  this->owner->computeChevalleyConstants();
-  this->targetDynkinType.makeZero();
-  this->owner->findSl2Subalgebras(newOwner, this->slTwoSubalgebras, &ownerField);
-  return true;
-}
-
-bool SemisimpleSubalgebras::writeFilesRealForms() {
-  global.fatal << "Not implemented yet." << global.fatal;
-}
-
 bool MathRoutines::isPrime(int input) {
   if (input <= 1) {
     return false;

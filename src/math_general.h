@@ -5890,7 +5890,7 @@ public:
   ) const;
   bool hasPrecomputedSubalgebras() const;
   std::string toStringVirtualNameFolder() const;
-  bool containsType(char theTypeLetter) const;
+  bool containsType(char typeLetter) const;
   void getDynkinTypeWithDefaultScales(DynkinType& output) const;
   static void getPrecomputedDynkinTypes(List<DynkinType>& output);
   DynkinSimpleType getGreatestSimpleType() const;
@@ -5934,7 +5934,7 @@ public:
     return intResult;
   }
   bool isTypeAOne() const;
-  static int GetIndexPreimageFromRootInjection(int inputIndex, const List<int>& inputRootInjection);
+  static int getIndexPreimageFromRootInjection(int inputIndex, const List<int>& inputRootInjection);
   bool canBeExtendedParabolicallyTo(const DynkinType& other) const;
   bool canBeExtendedParabolicallyOrIsEqualTo(const DynkinType& other) const;
   void makeSimpleType(char type, int rank, const Rational* inputFirstCoRootSquareLength = nullptr);

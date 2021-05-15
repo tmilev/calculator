@@ -702,7 +702,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     return false;
   }
   theSAs.flagAttemptToAdjustCentralizers = false;
-  if (!theSAs.findTheSemisimpleSubalgebrasContinue()) {
+  if (!theSAs.findSemisimpleSubalgebrasContinue()) {
     std::stringstream out;
     out << "<br>Failed to realize all subalgebras, "
     << "computation aborted. The failure report follows. "
@@ -749,16 +749,16 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(
   theValues.addOnTop(currentChainE);
   Expression numTypesExploredE;
   numTypesExploredE.makeSequence(calculator);
-  for (int i = 0; i < input.currentNumLargerTypesExplored.size; i ++) {
-    numericalConvertorE = input.currentNumLargerTypesExplored[i];
+  for (int i = 0; i < input.currentNumberOfLargerTypesExplored.size; i ++) {
+    numericalConvertorE = input.currentNumberOfLargerTypesExplored[i];
     numTypesExploredE.addChildOnTop(numericalConvertorE);
   }
   theKeys.addOnTop("NumExploredTypes");
   theValues.addOnTop(numTypesExploredE);
   Expression numHsExploredE;
   numHsExploredE.makeSequence(calculator);
-  for (int i = 0; i < input.currentNumHcandidatesExplored.size; i ++) {
-    numericalConvertorE = input.currentNumHcandidatesExplored[i];
+  for (int i = 0; i < input.currentNumberOfHCandidatesExplored.size; i ++) {
+    numericalConvertorE = input.currentNumberOfHCandidatesExplored[i];
     numHsExploredE.addChildOnTop(numericalConvertorE);
   }
   theKeys.addOnTop("NumExploredHs");

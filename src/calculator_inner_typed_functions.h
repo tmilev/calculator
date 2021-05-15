@@ -50,11 +50,11 @@ public:
 
   static bool innerMultiplyEltHypOctByEltHypOct(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction(
+  static bool multiplyRationalOrPolynomialOrRationalFunctionByRationalFraction(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyPolynomialModPByPolynomialModP(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyRationalOrPolynomialOrElementWeylAlgebraByRationalOrPolynomialOrElementWeylAlgebra(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyPolynomialModPByPolynomialModP(Calculator& calculator, const Expression& input, Expression& output);
   static bool multiplyNumberOrPolynomialByNumberOrPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP(Calculator& calculator, const Expression& input, Expression& output);
 
@@ -393,7 +393,7 @@ bool CalculatorConversions::functionRationalFunction(
       );
     }
     if (input.startsWith(calculator.opTimes())) {
-      return CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction(
+      return CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFraction(
         calculator, intermediate, output
       );
     }

@@ -550,7 +550,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
   return output.assignValueWithContext(outputElt, inputConverted[2].getContext(), calculator);
 }
 
-bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(
+bool CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrElementWeylAlgebraByRationalOrPolynomialOrElementWeylAlgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
@@ -577,7 +577,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(
   return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), calculator);
 }
 
-bool CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction(
+bool CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFraction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction");
@@ -910,7 +910,7 @@ bool CalculatorFunctionsBinaryOps::innerDividePolynomialModuloIntegerByPolynomia
   return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), calculator);
 }
 
-bool CalculatorFunctionsBinaryOps::innerMultiplyPolynomialModPByPolynomialModP(
+bool CalculatorFunctionsBinaryOps::multiplyPolynomialModPByPolynomialModP(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyPolynomialModPByPolynomialModP");

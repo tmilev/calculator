@@ -564,7 +564,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA,
+    CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrElementWeylAlgebraByRationalOrPolynomialOrElementWeylAlgebra,
     this->opRational(),
     this->opElementWeylAlgebra(),
     "Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. ",
@@ -577,7 +577,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA,
+    CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrElementWeylAlgebraByRationalOrPolynomialOrElementWeylAlgebra,
     this->opPolynomialRational(),
     this->opElementWeylAlgebra(),
     "Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. ",
@@ -590,7 +590,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA,
+    CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrElementWeylAlgebraByRationalOrPolynomialOrElementWeylAlgebra,
     this->opElementWeylAlgebra(),
     this->opElementWeylAlgebra(),
     "Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. ",
@@ -604,7 +604,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA,
+    CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrElementWeylAlgebraByRationalOrPolynomialOrElementWeylAlgebra,
     this->opElementWeylAlgebra(),
     this->opPolynomialRational(),
     "Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. ",

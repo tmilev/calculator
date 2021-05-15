@@ -5404,8 +5404,8 @@ bool DynkinType::grow(
   return true;
 }
 
-int DynkinType::GetIndexPreimageFromRootInjection(int inputIndex, const List<int>& inputRootInjection) {
-  MacroRegisterFunctionWithName("DynkinType::GetIndexPreimageFromRootInjection");
+int DynkinType::getIndexPreimageFromRootInjection(int inputIndex, const List<int>& inputRootInjection) {
+  MacroRegisterFunctionWithName("DynkinType::getIndexPreimageFromRootInjection");
   for (int i = 0; i < inputRootInjection.size; i ++) {
     if (inputRootInjection[i] == inputIndex) {
       return i;
@@ -5413,8 +5413,8 @@ int DynkinType::GetIndexPreimageFromRootInjection(int inputIndex, const List<int
   }
   global.fatal << "Asking to find the preimage of root index "
   << inputIndex << " w.r.t. root injection "
-  << inputRootInjection << " - the root index has no preimage. This function is not allowed to fail. ";
-  global.fatal << global.fatal;
+  << inputRootInjection << " - the root index has no preimage. This function is not allowed to fail. "
+  << global.fatal;
   return - 1;
 }
 
@@ -5435,9 +5435,9 @@ bool DynkinType::hasExceptionalComponent() const {
   return false;
 }
 
-bool DynkinType::containsType(char theTypeLetter) const {
+bool DynkinType::containsType(char typeLetter) const {
   for (int i = 0; i < this->size(); i ++) {
-    if ((*this)[i].letter == theTypeLetter) {
+    if ((*this)[i].letter == typeLetter) {
       return true;
     }
   }

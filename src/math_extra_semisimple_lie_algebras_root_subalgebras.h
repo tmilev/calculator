@@ -562,6 +562,7 @@ public:
   ~SlTwoSubalgebra() {
     this->flagDeallocated = true;
   }
+  void dynkinTypeEmbedded(DynkinType& output) const;
   bool checkConsistency() const;
 
   SlTwoSubalgebras& getContainerSl2s() {

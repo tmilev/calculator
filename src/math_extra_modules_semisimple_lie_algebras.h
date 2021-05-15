@@ -112,7 +112,7 @@ public:
 template <class Coefficient>
 class MonomialTensorGeneralizedVermas {
 public:
-  List<MonomialGeneralizedVerma<Coefficient> > theMons;
+  List<MonomialGeneralizedVerma<Coefficient> > monomials;
   friend std::ostream& operator<<(std::ostream& output, const MonomialTensorGeneralizedVermas<Coefficient>& input) {
     output << input.toString();
     return output;
@@ -124,16 +124,16 @@ public:
       *this *= tempMon1;
       return;
     }
-    this->theMons.addListOnTop(other.theMons);
+    this->monomials.addListOnTop(other.monomials);
   }
   void operator*=(const MonomialGeneralizedVerma<Coefficient>& other) {
-    this->theMons.addOnTop(other);
+    this->monomials.addOnTop(other);
   }
   unsigned int hashFunction() const {
-    int numCycles = MathRoutines::minimum(someRandomPrimesSize, this->theMons.size);
+    int numCycles = MathRoutines::minimum(someRandomPrimesSize, this->monomials.size);
     unsigned int result = 0;
     for (int i = 0; i < numCycles; i ++) {
-      result += someRandomPrimes[i] * this->theMons[i].hashFunction();
+      result += someRandomPrimes[i] * this->monomials[i].hashFunction();
     }
     return result;
   }
@@ -141,47 +141,47 @@ public:
     return input.hashFunction();
   }
   void setNumberOfVariables(int goalNumVars) {
-    for (int i = 0; i < this->theMons.size; i ++) {
-      this->theMons[i].setNumberOfVariables(goalNumVars);
+    for (int i = 0; i < this->monomials.size; i ++) {
+      this->monomials[i].setNumberOfVariables(goalNumVars);
     }
   }
   void substitution(
     const PolynomialSubstitution<Rational>& theSub,
     ListReferences<ModuleSSalgebra<Coefficient> >& theMods
   ) {
-    for (int i = 0; i < this->theMons.size; i ++) {
-      this->theMons[i].substitution(theSub, theMods);
+    for (int i = 0; i < this->monomials.size; i ++) {
+      this->monomials[i].substitution(theSub, theMods);
     }
   }
   std::string toString(FormatExpressions* format = nullptr, bool includeV = true) const;
   MonomialTensorGeneralizedVermas() {
   }
   void operator=(const MonomialTensorGeneralizedVermas<Coefficient>& other) {
-    this->theMons = other.theMons;
+    this->monomials = other.monomials;
   }
   void operator=(const MonomialGeneralizedVerma<Coefficient>& other);
   bool operator==(const MonomialTensorGeneralizedVermas<Coefficient>& other) const {
-    if (this->theMons.size != other.theMons.size) {
+    if (this->monomials.size != other.monomials.size) {
       return false;
     }
-    for (int i = 0; i < this->theMons.size; i ++) {
-      if (!(this->theMons[i] == other.theMons[i])) {
+    for (int i = 0; i < this->monomials.size; i ++) {
+      if (!(this->monomials[i] == other.monomials[i])) {
         return false;
       }
     }
     return true;
   }
   bool isHWV() const {
-    if (this->theMons.size != 1) {
+    if (this->monomials.size != 1) {
       return false;
     }
-    return this->theMons[0].isHWV();
+    return this->monomials[0].isHWV();
   }
   bool operator>(const MonomialTensorGeneralizedVermas<Coefficient>& other) const {
-    if (this->theMons.size > other.theMons.size) {
+    if (this->monomials.size > other.monomials.size) {
       return true;
     }
-    if (other.theMons.size > this->theMons.size) {
+    if (other.monomials.size > this->monomials.size) {
       return false;
     }
     ///This might need a rewrite. As it is, it will cause monomials to be sorted according to the
@@ -196,12 +196,12 @@ class ModuleSSalgebra {
   List<MatrixTensor<Coefficient> > actionsGeneratorsMaT;
   List<List<List<ElementUniversalEnveloping<Coefficient> > > > actionsGeneratorS;
   Selection ComputedGeneratorActions;
-  Rational hwtaabfSimpleGensOnly(
+  Rational highestWeightTransposeAntiAutomorphismBilinearFormSimpleGeneratorsOnly(
     const MonomialTensor<int, HashFunctions::hashFunction>& leftMon,
     const MonomialTensor<int, HashFunctions::hashFunction>& rightMon,
     ProgressReport* theProgressReport = nullptr
   );
-  Rational hwTrace(
+  Rational highestWeightTrace(
     const Pair<MonomialTensor<int, HashFunctions::hashFunction>,
     MonomialTensor<int, HashFunctions::hashFunction> >& thePair,
     ProgressReport* theProgressReport = nullptr
@@ -222,14 +222,14 @@ public:
   // List<ElementUniversalEnveloping<Coefficient> > theSimpleGens;
   // List<List<List<ElementUniversalEnveloping<Coefficient> > > > actionsSimpleGens;
   // List<Matrix<Coefficient> > actionsSimpleGensMatrixForM;
-  List<Matrix<Coefficient> > theBilinearFormsAtEachWeightLevel;
-  List<Matrix<Coefficient> > theBilinearFormsInverted;
+  List<Matrix<Coefficient> > bilinearFormsAtEachWeightLevel;
+  List<Matrix<Coefficient> > bilinearFormsInverted;
   // Vectors<Rational> weightsSimpleGens;
   Vector<Coefficient> theHWDualCoordsBaseFielD;
   Vector<Coefficient> theHWSimpleCoordSBaseField;
   Vector<Coefficient> theHWFundamentalCoordsBaseField;
-  Vector<Rational> theHWFDpartDualCoords;
-  Vector<Rational> theHWFDpartSimpleCoordS;
+  Vector<Rational> highestWeightFiniteDimensionalPartDualCoordinates;
+  Vector<Rational> highestWeightFiniteDimensionalPartSimpleCoordinates;
   Vector<Rational> theHWFDpartFundamentalCoordS;
   // List<List<Matrix<Coefficient> > >
   HashedList<Vector<Rational> > theModuleWeightsSimpleCoords;
@@ -285,7 +285,7 @@ public:
     }
     return result;
   }
-  void applyTAA(MonomialTensor<int, HashFunctions::hashFunction>& theMon);
+  void applyTransposeAntiAutomorphism(MonomialTensor<int, HashFunctions::hashFunction>& monomial);
   void getFDchar(CharacterSemisimpleLieAlgebraModule<Coefficient>& output);
   void substitution(const PolynomialSubstitution<Rational>& theSub);
 //  List<ElementUniversalEnveloping<Coefficient> > theGeneratingWordsLittelmannForm;
@@ -394,8 +394,8 @@ public:
     bool useNilWeight,
     bool ascending
   );
-  bool isNotInLevi(int theGeneratorIndex);
-  bool isNotInParabolic(int theGeneratorIndex);
+  bool isNotInLevi(int generatorIndex);
+  bool isNotInParabolic(int generatorIndex);
   void getGenericUnMinusElt(
     bool shiftPowersByNumVarsBaseField,
     ElementUniversalEnveloping<Polynomial<Rational> >& output,
@@ -417,12 +417,14 @@ public:
     bool useNilWeight,
     bool ascending
   );
-  bool getActionEulerOperatorPart(const MonomialPolynomial& theCoeff, ElementWeylAlgebra<Rational>& outputDO);
+  bool getActionEulerOperatorPart(const MonomialPolynomial& coefficient, ElementWeylAlgebra<Rational>& outputDO);
   ModuleSSalgebra() : owner(nullptr), flagIsInitialized(false), flagDeallocated(false), MaxNumCachedPairs(1000000) {
   }
   ~ModuleSSalgebra() {
     this->flagDeallocated = true;
   }
+  List<Matrix<Coefficient> > getTheBilinearFormsInverted() const;
+  void setTheBilinearFormsInverted(const List<Matrix<Coefficient> >& value);
 };
 
 template<class Coefficient>
@@ -430,7 +432,7 @@ class ElementTensorsGeneralizedVermas :
 public LinearCombination<MonomialTensorGeneralizedVermas<Coefficient>, Coefficient> {
 public:
   bool multiplyOnTheLeft(
-    const ElementUniversalEnveloping<Coefficient>& theUE,
+    const ElementUniversalEnveloping<Coefficient>& element,
     ElementTensorsGeneralizedVermas<Coefficient>& output,
     SemisimpleLieAlgebra& ownerAlgebra,
     const Coefficient& ringUnit
@@ -477,26 +479,26 @@ public:
       << "This is not allowed as the index of "
       << "the owner modules are stored in the monomials. " << global.fatal;
     }
-    const MonomialTensorGeneralizedVermas<Coefficient>& theMon = (*this)[0];
-    if (theMon.theMons.size <= 0) {
+    const MonomialTensorGeneralizedVermas<Coefficient>& monomial = (*this)[0];
+    if (monomial.monomials.size <= 0) {
       global.fatal << "Calling getOwnerModule() "
       << "on a tensor element which has a constant monomial. "
       << "This is not allowed: constant monomials do not have owners. " << global.fatal;
     }
-    MonomialGeneralizedVerma<Coefficient>& theGmon = theMon.theMons[0];
-    return *theGmon.owner;
+    MonomialGeneralizedVerma<Coefficient>& gMonomial = monomial.monomials[0];
+    return *gMonomial.owner;
   }
   int minimalNumberOfVariables() {
     if (this->size == 0) {
       return - 1;
     }
-    int theAnswer = this->objects[0].minimalNumberOfVariables();
+    int answer = this->objects[0].minimalNumberOfVariables();
     for (int i = 1; i < this->size; i ++) {
-      if (theAnswer != this->objects[i].minimalNumberOfVariables()) {
+      if (answer != this->objects[i].minimalNumberOfVariables()) {
         return - 1;
       }
     }
-    return theAnswer;
+    return answer;
   }
   unsigned int hashFunction() const {
     return this->::LinearCombination<MonomialTensorGeneralizedVermas<Coefficient>, Coefficient>::hashFunction();
@@ -512,4 +514,3 @@ public:
 };
 
 #endif
-

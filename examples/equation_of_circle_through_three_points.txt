@@ -1,15 +1,14 @@
-a_1 = Polynomial(x_1);
-a_2 = Polynomial(x_2);
-a_3 = Polynomial(x_3);
-b_1 = Polynomial(y_1);
-b_2 = Polynomial(y_2);
-b_3 = Polynomial(y_3);
-c=-2\begin{pmatrix}a_{1}-a_{2}&b_{1}-b_{2}\\ a_{2}-a_{3}&b_{2}-b_{3}\end{pmatrix};
+a_1 = MakeRationalFunction(x_1);
+a_2 = MakeRationalFunction(x_2);
+a_3 = MakeRationalFunction(x_3);
+b_1 = MakeRationalFunction(y_1);
+b_2 = MakeRationalFunction(y_2);
+b_3 = MakeRationalFunction(y_3);c=-2\begin{pmatrix}a_{1}-a_{2}&b_{1}-b_{2}\\ a_{2}-a_{3}&b_{2}-b_{3}\end{pmatrix};
 d=\begin{pmatrix}a_2^2+b_2^2-a_1^2-b_1^2 \\ a_3^2+b_3^2-a_2^2-b_2^2\end{pmatrix};
-ci = c^-1;
-s = ci d;
+ci=c^-1;
+s=ci d;
 p = MakeExpression ( (s_1)_1);
-q = MakeExpression((s_2)_1);
+q= MakeExpression((s_2)_1);
 (
 x_1 = 1 ;
 y_1 = 1;

@@ -222,7 +222,7 @@ std::string SubalgebraSemisimpleLieAlgebra::toString(FormatExpressions* format) 
 void SubalgebraSemisimpleLieAlgebra::computeBasis() {
   MacroRegisterFunctionWithName("SubalgebraSemisimpleLieAlgebra::computeBasis");
   this->checkInitialization();
-  this->basis = this->theGenerators;
+  this->basis = this->generators;
   this->owner->generateLieSubalgebra(this->basis);
 }
 
@@ -477,7 +477,7 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML(
   int numNonCentralizerConditionWithConeCondition = 0;
   int numBadParabolics = 0;
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
-    numIsotypicallyCompleteNilrads += this->subalgebras.values[i].FKNilradicalCandidates.size;
+    numIsotypicallyCompleteNilrads += this->subalgebras.values[i].fernandoKacNilradicalCandidates.size;
     numFailingConeCondition += this->subalgebras.values[i].NumConeIntersections;
     numNoLinfRelFound += this->subalgebras.values[i].NumCasesNoLinfiniteRelationFound;
     numNonCentralizerConditionWithConeCondition += this->subalgebras.values[i].NumCentralizerConditionFailsconeConditionHolds;
@@ -528,7 +528,7 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebrasSummaryLaTeX(For
   int numBadParabolics = 0;
 
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
-    numIsotypicallyCompleteNilrads += this->subalgebras.values[i].FKNilradicalCandidates.size;
+    numIsotypicallyCompleteNilrads += this->subalgebras.values[i].fernandoKacNilradicalCandidates.size;
     numFailingConeCondition += this->subalgebras.values[i].NumConeIntersections;
     numNoLinfRelFound += this->subalgebras.values[i].NumCasesNoLinfiniteRelationFound;
     numNonCentralizerConditionWithConeCondition += this->subalgebras.values[i].NumCentralizerConditionFailsconeConditionHolds;
@@ -583,7 +583,7 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebrasSummaryLaTeX(For
     }
     out << "&$" << currentSA.characterNonPrimalFundamentalCoordinates.toString(&tempCharFormat) << "$ ";
     out << "&$" << currentSA.primalCharacter.toString(&tempCharFormat) << "$ ";
-    out << "& " << currentSA.FKNilradicalCandidates.size << "&" << currentSA.NumConeIntersections;
+    out << "& " << currentSA.fernandoKacNilradicalCandidates.size << "&" << currentSA.NumConeIntersections;
     out << "\\\\ \\hline \n<br>\n";
   }
   out << "\\end{longtable}\n<br>\n";
@@ -882,18 +882,18 @@ std::string SemisimpleSubalgebras::toStringPart3(FormatExpressions* format) {
 void SemisimpleSubalgebras::getCentralizerChains(List<List<int> >& outputChains) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::getCentralizerChains");
   outputChains.setSize(0);
-  Selection Explored;
-  Explored.initialize(this->subalgebras.values.size);
+  Selection explored;
+  explored.initialize(this->subalgebras.values.size);
   outputChains.reserve(this->subalgebras.values.size);
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
-    if (!Explored.selected[i]) {
+    if (!explored.selected[i]) {
       outputChains.setSize(outputChains.size + 1);
       outputChains.lastObject()->setSize(0);
       outputChains.lastObject()->addOnTop(i);
       int maxSScontainer = this->subalgebras.values[i].indexMaxSSContainer;
       if (maxSScontainer != - 1) {
         outputChains.lastObject()->addOnTop(maxSScontainer);
-        Explored.addSelectionAppendNewIndex(maxSScontainer);
+        explored.addSelectionAppendNewIndex(maxSScontainer);
       }
     }
   }
@@ -940,7 +940,7 @@ bool SemisimpleSubalgebras::loadState(
   std::stringstream& reportStream
 ) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::loadState");
-  this->findTheSemisimpleSubalgebrasInitialize();
+  this->findSemisimpleSubalgebrasInitialize();
   if (currentChainInt.size != numExploredTypes.size || currentChainInt.size != numExploredHs.size) {
     reportStream << "<hr>Input state is corrupt: currentChainInt.size: "
     << currentChainInt.size << ", numExploredTypes.size: "
@@ -948,8 +948,8 @@ bool SemisimpleSubalgebras::loadState(
     return false;
   }
   this->currentHCandidatesScaledToActByTwo.setSize(0);
-  this->currentNumHcandidatesExplored.setSize(0);
-  this->currentNumLargerTypesExplored.setSize(0);
+  this->currentNumberOfHCandidatesExplored.setSize(0);
+  this->currentNumberOfLargerTypesExplored.setSize(0);
   this->currentPossibleLargerDynkinTypes.setSize(0);
   this->currentRootInjections.setSize(0);
   this->currentSubalgebraChain.setSize(0);
@@ -971,14 +971,14 @@ bool SemisimpleSubalgebras::loadState(
       return false;
     }
     bool isGood = true;
-    if (!currentSA.cartanElementsSubalgebra.containsAtLeastOneCopyOfEach(this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation)) {
+    if (!currentSA.cartanElementsSubalgebra.containsAtLeastOneCopyOfEach(this->baseSubalgebra().hsScaledToActByTwoInOrderOfCreation)) {
       isGood = false;
     } else {
-      currentSA.theHsScaledToActByTwoInOrderOfCreation = this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation;
+      currentSA.hsScaledToActByTwoInOrderOfCreation = this->baseSubalgebra().hsScaledToActByTwoInOrderOfCreation;
       for (int i = 0; i < currentSA.cartanElementsSubalgebra.size; i ++) {
-        if (! this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation.contains(currentSA.cartanElementsSubalgebra[i])) {
-          currentSA.theHsScaledToActByTwoInOrderOfCreation.addOnTop(currentSA.cartanElementsSubalgebra[i]);
-          if (currentSA.theHsScaledToActByTwoInOrderOfCreation.size > currentSA.cartanElementsSubalgebra.size) {
+        if (! this->baseSubalgebra().hsScaledToActByTwoInOrderOfCreation.contains(currentSA.cartanElementsSubalgebra[i])) {
+          currentSA.hsScaledToActByTwoInOrderOfCreation.addOnTop(currentSA.cartanElementsSubalgebra[i]);
+          if (currentSA.hsScaledToActByTwoInOrderOfCreation.size > currentSA.cartanElementsSubalgebra.size) {
             isGood = false;
             break;
           }
@@ -997,7 +997,7 @@ bool SemisimpleSubalgebras::loadState(
       << " has h-elements " << currentSA.cartanElementsSubalgebra.toString() << " however "
       << this->baseSubalgebra().weylNonEmbedded->dynkinType.toString()
       << " has h-elements in order of creation: "
-      << this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation.toString()
+      << this->baseSubalgebra().hsScaledToActByTwoInOrderOfCreation.toString()
       << " and h-elements in order induced by the type: " << this->baseSubalgebra().cartanElementsSubalgebra.toString();
       return false;
     }
@@ -1006,24 +1006,25 @@ bool SemisimpleSubalgebras::loadState(
   return true;
 }
 
-bool SemisimpleSubalgebras::findTheSemisimpleSubalgebrasContinue() {
+bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::findTheSemisimpleSubalgebrasContinue");
-  ProgressReport theReport;
+  ProgressReport report;
   std::stringstream reportstream;
   reportstream << "State at beginning of computation: " << this->toStringProgressReport();
-  theReport.report(reportstream.str());
+  report.report(reportstream.str());
   while (this->incrementReturnFalseIfPastLast()) {
-    theReport.report(this->toStringProgressReport());
+    report.report(this->toStringProgressReport());
     if (!this->flagRealizedAllCandidates) {
       this->comments = this->comments + "Failed to realize all candidates, aborting computation.";
       return false;
     }
   }
-  ProgressReport theReport2;
+  ProgressReport report2;
   std::stringstream reportStream2;
-  reportStream2 << "Found a total of " << this->subalgebras.values.size << " subalgebras. Proceding to"
+  reportStream2 << "Found a total of "
+  << this->subalgebras.values.size << " subalgebras. Proceding to"
   << " adjust centralizers. ";
-  theReport2.report(reportStream2.str());
+  report2.report(reportStream2.str());
   if (this->targetDynkinType.isEqualToZero()) {
     this->hookUpCentralizers(false);
     if (this->flagComputeNilradicals) {
@@ -1033,24 +1034,24 @@ bool SemisimpleSubalgebras::findTheSemisimpleSubalgebrasContinue() {
   return true;
 }
 
-void SemisimpleSubalgebras::findTheSemisimpleSubalgebrasInitialize() {
+void SemisimpleSubalgebras::findSemisimpleSubalgebrasInitialize() {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::findTheSemisimpleSubalgebrasInitialize");
   this->checkConsistency();
   if (this->owner == nullptr) {
-    global.fatal << "<hr>Owner of semisimple subalgebras is zero" << global.fatal;
+    global.fatal << "<hr>Owner of semisimple subalgebras is zero." << global.fatal;
   }
   if (global.response.monitoringAllowed()) {
     this->fileNameToLogComments = "LogFileComments_" +
     FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString()) +
     ".html";
-    std::fstream LogFile;
+    std::fstream logFile;
     if (!FileOperations::openFileCreateIfNotPresentVirtual(
-      LogFile, this->owner->fileNames.virtualFolderName() + this->fileNameToLogComments, true, false, false
+      logFile, this->owner->fileNames.virtualFolderName() + this->fileNameToLogComments, true, false, false
     )) {
       global.fatal << "Failed to open/create log file " << this->fileNameToLogComments
       << ". This is not fatal but I am crashing to let you know. ";
     }
-    LogFile.close();
+    logFile.close();
   }
   this->computeSl2sInitOrbitsForComputationOnDemand();
   this->currentSubalgebraChain.setExpectedSize(this->owner->getRank() + 2);
@@ -1061,25 +1062,85 @@ void SemisimpleSubalgebras::makeEmptyCandidateSubalgebra(CandidateSemisimpleSuba
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::makeEmptyCandidateSubalgebra");
   DynkinType zeroType;
   this->makeCandidateSubalgebra(zeroType, output);
-  Matrix<Rational> theZeroCartan;
+  Matrix<Rational> zeroCartan;
   output.subalgebraNonEmbeddedDefaultScale =
-  &this->subalgebrasNonDefaultCartanAndScale.getValueCreateNoInit(theZeroCartan);
+  &this->subalgebrasNonDefaultCartanAndScale.getValueCreateNoInit(zeroCartan);
   output.indexNonEmbeddedMeNonStandardCartan =
-  this->subalgebrasNonDefaultCartanAndScale.getIndex(theZeroCartan);
+  this->subalgebrasNonDefaultCartanAndScale.getIndex(zeroCartan);
 }
 
-void SemisimpleSubalgebras::makeCandidateSubalgebra(const DynkinType& input, CandidateSemisimpleSubalgebra& output) {
+void SemisimpleSubalgebras::makeCandidateSubalgebra(
+  const DynkinType& input, CandidateSemisimpleSubalgebra& output
+) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::makeCandidateSubalgebra");
   output.owner = this;
-  bool needsInit = false;
+  bool needsInitialization = false;
   if (!this->subalgebrasNonEmbedded->contains(input)) {
-    needsInit = true;
+    needsInitialization = true;
   }
   output.weylNonEmbedded = &this->subalgebrasNonEmbedded->getValueCreateNoInit(input).weylGroup;
   output.indexNonEmbeddedMeStandard = this->subalgebrasNonEmbedded->getIndex(input);
-  if (needsInit) {
+  if (needsInitialization) {
     output.weylNonEmbedded->makeFromDynkinType(input);
   }
+}
+
+bool SemisimpleSubalgebras::computeStructureRealFormsInitialize(
+  SemisimpleLieAlgebra& newOwner,
+  AlgebraicClosureRationals& ownerField,
+  MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
+  ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras
+) {
+  if (this->subalgebrasNonEmbedded == nullptr || this->owner == nullptr) {
+    this->initHookUpPointers(newOwner, &ownerField, &containerSubalgebras, &containerSl2Subalgebras);
+  }
+
+  this->checkInitialization();
+  this->owner->computeChevalleyConstants();
+  this->targetDynkinType.makeZero();
+  return true;
+}
+
+bool SemisimpleSubalgebras::computeStructureRealForms(
+  SemisimpleLieAlgebra& newOwner,
+  AlgebraicClosureRationals& ownerField,
+  MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
+  ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
+  std::stringstream* outputStream
+) {
+  this->computeStructureRealFormsInitialize(
+    newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras
+  );
+  this->owner->findSl2Subalgebras(newOwner, this->slTwoSubalgebras, &ownerField);
+  this->computeStructureRealFormsSlTwos(outputStream);
+  return true;
+}
+
+bool SemisimpleSubalgebras::computeStructureRealFormsSlTwos(
+  std::stringstream* outputStream
+) {
+  CandidateSemisimpleSubalgebra emptyCandidate;
+  this->makeEmptyCandidateSubalgebra(emptyCandidate);
+  this->addSubalgebraToStack(emptyCandidate, 0, 0);
+  for (int i = 0; i < this->slTwoSubalgebras.size; i ++) {
+    this->computeStructureRealFormOneSlTwo(this->slTwoSubalgebras[i], outputStream);
+  }
+  return true;
+}
+
+bool SemisimpleSubalgebras::computeStructureRealFormOneSlTwo(
+  const SlTwoSubalgebra& input, std::stringstream* outputStream
+) {
+  CandidateSemisimpleSubalgebra candidate;
+  candidate.indexIamInducedFrom = 0;
+  DynkinType incomingType;
+  input.dynkinTypeEmbedded(incomingType);
+  this->makeCandidateSubalgebra(incomingType, candidate);
+  return true;
+}
+
+bool SemisimpleSubalgebras::writeFilesRealForms() {
+  return false;
 }
 
 bool SemisimpleSubalgebras::findTheSemisimpleSubalgebrasFromScratch(
@@ -1100,11 +1161,11 @@ bool SemisimpleSubalgebras::findTheSemisimpleSubalgebrasFromScratch(
   if (targetType != nullptr) {
     this->targetDynkinType = *targetType;
   }
-  this->findTheSemisimpleSubalgebrasInitialize();
+  this->findSemisimpleSubalgebrasInitialize();
   CandidateSemisimpleSubalgebra emptyCandidate;
   this->makeEmptyCandidateSubalgebra(emptyCandidate);
   this->addSubalgebraToStack(emptyCandidate, 0, 0);
-  return this->findTheSemisimpleSubalgebrasContinue();
+  return this->findSemisimpleSubalgebrasContinue();
 }
 
 bool SemisimpleSubalgebras::ranksAndIndicesFit(const DynkinType& input) const {
@@ -1123,80 +1184,81 @@ bool SemisimpleSubalgebras::growDynkinType(
   const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputImagesSimpleRoots
 ) const {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::growDynkinType");
-  HashedList<Rational> theLengths;
-  theLengths.setExpectedSize(this->orbitHElementLengths.size);
+  HashedList<Rational> lengths;
+  lengths.setExpectedSize(this->orbitHElementLengths.size);
   for (int i = 0; i < this->orbitHElementLengths.size; i ++) {
-    theLengths.addOnTopNoRepetition(this->orbitHElementLengths[i] / 2);
+    lengths.addOnTopNoRepetition(this->orbitHElementLengths[i] / 2);
   }
   output.setSize(0);
   if (outputImagesSimpleRoots != nullptr) {
     outputImagesSimpleRoots->setSize(0);
   }
-  return input.grow(theLengths, this->owner->getRank(), output, outputImagesSimpleRoots);
+  return input.grow(lengths, this->owner->getRank(), output, outputImagesSimpleRoots);
 }
 
-Vector<Rational> SemisimpleSubalgebras::getHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot(
+Vector<Rational> SemisimpleSubalgebras::getHighestWeightFundamentalNewComponentFromImagesOldSimpleRootsAndNewRoot(
   const DynkinType& input,
   const List<int>& imagesOldSimpleRootsAndNewRoot,
-  CandidateSemisimpleSubalgebra& theSSSubalgebraToBeModified
+  CandidateSemisimpleSubalgebra& subalgebraToBeModified
 ) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::getHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot");
-  theSSSubalgebraToBeModified.owner = this;
+  subalgebraToBeModified.owner = this;
   Vector<Rational> result;
   if (input.isEqualToZero()) {
-    this->makeEmptyCandidateSubalgebra(theSSSubalgebraToBeModified);
+    this->makeEmptyCandidateSubalgebra(subalgebraToBeModified);
     result.makeZero(0);
     return result;
   } else {
-    this->makeCandidateSubalgebra(input, theSSSubalgebraToBeModified);
+    this->makeCandidateSubalgebra(input, subalgebraToBeModified);
   }
   Vector<Rational> newSimpleRoot, highestRootInSimpleRootModuleSimpleCoords;
-  WeylGroupData& theWeyl = *theSSSubalgebraToBeModified.weylNonEmbedded;
-  theWeyl.computeRho(true);
-  theSSSubalgebraToBeModified.checkCandidateInitialization();
+  WeylGroupData& weyl = *subalgebraToBeModified.weylNonEmbedded;
+  weyl.computeRho(true);
+  subalgebraToBeModified.checkCandidateInitialization();
   int newIndex = *imagesOldSimpleRootsAndNewRoot.lastObject();
-  int newRank = theWeyl.getDimension();
+  int newRank = weyl.getDimension();
   newSimpleRoot.makeEi(newRank, newIndex);
   Vectors<Rational> simpleBasisOld;
   simpleBasisOld.setSize(newRank - 1);
   if (imagesOldSimpleRootsAndNewRoot.size != newRank) {
     global.fatal << "The root images must be "
-    << newRank << " but there are " << imagesOldSimpleRootsAndNewRoot.size << " elements instead. "
+    << newRank << " but there are "
+    << imagesOldSimpleRootsAndNewRoot.size << " elements instead. "
     << "The type is " << input.toString() << ". " << global.fatal;
   }
   for (int i = 0; i < newRank - 1; i ++) {
     simpleBasisOld[i].makeEi(newRank, imagesOldSimpleRootsAndNewRoot[i]);
   }
-  theWeyl.computeExtremeRootInTheSameKMod(simpleBasisOld, newSimpleRoot, highestRootInSimpleRootModuleSimpleCoords, true);
+  weyl.computeExtremeRootInTheSameKMod(simpleBasisOld, newSimpleRoot, highestRootInSimpleRootModuleSimpleCoords, true);
   result.setSize(newRank - 1);
   for (int i = 0; i < simpleBasisOld.size; i ++) {
-    result[i] = theWeyl.rootScalarCartanRoot(highestRootInSimpleRootModuleSimpleCoords, simpleBasisOld[i]) * 2 /
-    theWeyl.rootScalarCartanRoot(simpleBasisOld[i], simpleBasisOld[i]);
+    result[i] = weyl.rootScalarCartanRoot(highestRootInSimpleRootModuleSimpleCoords, simpleBasisOld[i]) * 2 /
+    weyl.rootScalarCartanRoot(simpleBasisOld[i], simpleBasisOld[i]);
   }
   return result;
 }
 
 void CandidateSemisimpleSubalgebra::setUpInjectionHs(
   const CandidateSemisimpleSubalgebra& baseSubalgebra,
-  const DynkinType& theNewType,
-  const List<int>& theRootInjection,
+  const DynkinType& newType,
+  const List<int>& rootInjection,
   Vector<Rational>* newHScaledToActByTwo
 ) {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::setUpInjectionHs");
   this->reset(baseSubalgebra.owner);
-  this->owner->makeCandidateSubalgebra(theNewType, *this);
+  this->owner->makeCandidateSubalgebra(newType, *this);
   this->checkCandidateInitialization();
-  this->theHsScaledToActByTwoInOrderOfCreation.reserve(baseSubalgebra.theHsScaledToActByTwoInOrderOfCreation.size + 1);
-  this->theHsScaledToActByTwoInOrderOfCreation = baseSubalgebra.theHsScaledToActByTwoInOrderOfCreation;
+  this->hsScaledToActByTwoInOrderOfCreation.reserve(baseSubalgebra.hsScaledToActByTwoInOrderOfCreation.size + 1);
+  this->hsScaledToActByTwoInOrderOfCreation = baseSubalgebra.hsScaledToActByTwoInOrderOfCreation;
   if (newHScaledToActByTwo != nullptr) {
-    this->theHsScaledToActByTwoInOrderOfCreation.addOnTop(*newHScaledToActByTwo);
+    this->hsScaledToActByTwoInOrderOfCreation.addOnTop(*newHScaledToActByTwo);
   }
   DynkinSimpleType newComponent = this->weylNonEmbedded->dynkinType.getSmallestSimpleType();
   this->cartanSubalgebrasByComponentScaledToActByTwo = baseSubalgebra.cartanSubalgebrasByComponentScaledToActByTwo;
   int indexOffset = this->weylNonEmbedded->dynkinType.getRank() - newComponent.rank;
   int newIndexInNewComponent = 0;
 //  if (!newComponent.isEqualToZero())
-  newIndexInNewComponent = *theRootInjection.lastObject() - indexOffset;
+  newIndexInNewComponent = *rootInjection.lastObject() - indexOffset;
   if (newComponent.rank == 1) {
     this->cartanSubalgebrasByComponentScaledToActByTwo.setSize(this->cartanSubalgebrasByComponentScaledToActByTwo.size + 1);
     this->cartanSubalgebrasByComponentScaledToActByTwo.lastObject()->setSize(1);
@@ -1210,7 +1272,7 @@ void CandidateSemisimpleSubalgebra::setUpInjectionHs(
     Vectors<Rational>& currentHsScaledToActByTwo = *this->cartanSubalgebrasByComponentScaledToActByTwo.lastObject();
     currentHsScaledToActByTwo.setSize(currentHsScaledToActByTwo.size + 1);
     for (int i = 0; i < newComponent.rank - 1; i ++) {
-      currentHsScaledToActByTwo[theRootInjection[indexOffset + i] - indexOffset] = oldComponentHs[i];
+      currentHsScaledToActByTwo[rootInjection[indexOffset + i] - indexOffset] = oldComponentHs[i];
     }
     if (newHScaledToActByTwo != nullptr) {
       currentHsScaledToActByTwo[newIndexInNewComponent] = *newHScaledToActByTwo;
@@ -1247,34 +1309,36 @@ void CandidateSemisimpleSubalgebra::computeHsAndHsScaledToActByTwoFromComponents
   }
 }
 
-bool SemisimpleSubalgebras::setUpParabolicInductionDataPrecomputedSubalgebra(CandidateSemisimpleSubalgebra& theCandidate) {
+bool SemisimpleSubalgebras::setUpParabolicInductionDataPrecomputedSubalgebra(
+  CandidateSemisimpleSubalgebra& candidate
+) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::setUpParabolicInductionDataPrecomputedSubalgebra");
-  int indexPrecomputed = this->subalgebras.getIndex(theCandidate.cartanElementsSubalgebra);
+  int indexPrecomputed = this->subalgebras.getIndex(candidate.cartanElementsSubalgebra);
   if (indexPrecomputed == - 1)
     return false;
   if (
-    this->subalgebras.values[indexPrecomputed].theHsScaledToActByTwoInOrderOfCreation.size !=
-    theCandidate.cartanElementsSubalgebra.size
+    this->subalgebras.values[indexPrecomputed].hsScaledToActByTwoInOrderOfCreation.size !=
+    candidate.cartanElementsSubalgebra.size
   ) {
-    this->subalgebras.values[indexPrecomputed].theHsScaledToActByTwoInOrderOfCreation =
-    theCandidate.theHsScaledToActByTwoInOrderOfCreation;
+    this->subalgebras.values[indexPrecomputed].hsScaledToActByTwoInOrderOfCreation =
+    candidate.hsScaledToActByTwoInOrderOfCreation;
   }
-  this->subalgebras.values[indexPrecomputed].indexIamInducedFrom = theCandidate.indexIamInducedFrom;
-  this->subalgebras.values[indexPrecomputed].rootInjectionsFromInducer = theCandidate.rootInjectionsFromInducer;
-  theCandidate = this->subalgebras.values[indexPrecomputed];
-  return theCandidate.computeAndVerifyFromGeneratorsAndHs();
+  this->subalgebras.values[indexPrecomputed].indexIamInducedFrom = candidate.indexIamInducedFrom;
+  this->subalgebras.values[indexPrecomputed].rootInjectionsFromInducer = candidate.rootInjectionsFromInducer;
+  candidate = this->subalgebras.values[indexPrecomputed];
+  return candidate.computeAndVerifyFromGeneratorsAndHs();
 }
 
 bool CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra(
   const CandidateSemisimpleSubalgebra& baseSubalgebra,
   Vector<Rational>& newHrescaledToActByTwo,
-  const DynkinType& theNewType,
-  const List<int>& theRootInjection
+  const DynkinType& newType,
+  const List<int>& rootInjection
 ) {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra");
-  this->setUpInjectionHs(baseSubalgebra, theNewType, theRootInjection, &newHrescaledToActByTwo);
+  this->setUpInjectionHs(baseSubalgebra, newType, rootInjection, &newHrescaledToActByTwo);
   this->indexIamInducedFrom = baseSubalgebra.indexInOwner;
-  this->rootInjectionsFromInducer = theRootInjection;
+  this->rootInjectionsFromInducer = rootInjection;
   //induction history is complete.
   if (this->owner->setUpParabolicInductionDataPrecomputedSubalgebra(*this)) {
     return true;
@@ -1285,17 +1349,17 @@ bool CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra(
     << "from a non-registered base subalgebra of type "
     << baseSubalgebra.weylNonEmbedded->dynkinType.toString() << ". " << global.fatal;
   }
-  ProgressReport theReport;
+  ProgressReport report;
   if (!this->computeCharacter(false)) {
-    if (theReport.tickAndWantReport()) {
-      theReport.report("Candidate " + this->weylNonEmbedded->dynkinType.toString() + " doesn't have fitting chars.");
+    if (report.tickAndWantReport()) {
+      report.report("Candidate " + this->weylNonEmbedded->dynkinType.toString() + " doesn't have fitting chars.");
     }
     return false;
   }
   this->computeSystem(false, false);
   if (this->flagSystemProvedToHaveNoSolution) {
-    if (theReport.tickAndWantReport()) {
-      theReport.report("Candidate " + this->weylNonEmbedded->dynkinType.toString() + " -> no system solution.");
+    if (report.tickAndWantReport()) {
+      report.report("Candidate " + this->weylNonEmbedded->dynkinType.toString() + " -> no system solution.");
     }
   }
   for (int i = 0; i < this->owner->subalgebras.values.size; i ++) {
@@ -1584,15 +1648,15 @@ const CandidateSemisimpleSubalgebra& SemisimpleSubalgebras::baseSubalgebra() {
     << this->currentSubalgebraChain.lastObject()->weylNonEmbedded->dynkinType.toString() << ". "
     << global.fatal;
   }
-  return * this->currentSubalgebraChain.lastObject();
+  return *this->currentSubalgebraChain.lastObject();
 }
 
 bool SemisimpleSubalgebras::removeLastSubalgebra() {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::removeLastSubalgebra");
   this->currentSubalgebraChain.setSize(this->currentSubalgebraChain.size- 1);
   this->currentPossibleLargerDynkinTypes.setSize(this->currentSubalgebraChain.size);
-  this->currentNumLargerTypesExplored.setSize(this->currentSubalgebraChain.size);
-  this->currentNumHcandidatesExplored.setSize(this->currentSubalgebraChain.size);
+  this->currentNumberOfLargerTypesExplored.setSize(this->currentSubalgebraChain.size);
+  this->currentNumberOfHCandidatesExplored.setSize(this->currentSubalgebraChain.size);
   this->currentHCandidatesScaledToActByTwo.setSize(this->currentSubalgebraChain.size);
   this->currentRootInjections.setSize(this->currentSubalgebraChain.size);
   return this->currentSubalgebraChain.size > 0;
@@ -1700,7 +1764,7 @@ void DynkinType::getDynkinIndicesSl2Subalgebras(
 bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits() {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits");
   int stackIndex = this->currentSubalgebraChain.size - 1;
-  int typeIndex = this->currentNumLargerTypesExplored[stackIndex];
+  int typeIndex = this->currentNumberOfLargerTypesExplored[stackIndex];
   DynkinType& currentType = this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex];
   SelectionWithDifferentMaxMultiplicities simpleSummandSelection;
   List<int> multiplicities;
@@ -1800,7 +1864,7 @@ bool SemisimpleSubalgebras::centralizerOfBaseComputedToHaveUnsuitableNilpotentOr
     return false;
   }
   int stackIndex = this->currentSubalgebraChain.size - 1;
-  int typeIndex = this->currentNumLargerTypesExplored[stackIndex];
+  int typeIndex = this->currentNumberOfLargerTypesExplored[stackIndex];
   DynkinType& currentType = this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex];
   DynkinType complementNewSummandType = this->baseSubalgebra().weylNonEmbedded->dynkinType;
   DynkinType newSummandType = currentType-complementNewSummandType;
@@ -1854,7 +1918,7 @@ bool SemisimpleSubalgebras::centralizerOfBaseComputedToHaveUnsuitableNilpotentOr
 bool SemisimpleSubalgebras::combinatorialCriteriaAllowRealization() {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::combinatorialCriteriaAllowRealization");
   int stackIndex = this->currentSubalgebraChain.size - 1;
-  int typeIndex = this->currentNumLargerTypesExplored[stackIndex];
+  int typeIndex = this->currentNumberOfLargerTypesExplored[stackIndex];
   if (typeIndex>= this->currentPossibleLargerDynkinTypes[stackIndex].size) {
     return false;
   }
@@ -1875,7 +1939,7 @@ bool SemisimpleSubalgebras::combinatorialCriteriaAllowRealization() {
 bool SemisimpleSubalgebras::computeCurrentHCandidates() {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::computeCurrentHCandidates");
   int stackIndex = this->currentSubalgebraChain.size - 1;
-  int typeIndex = this->currentNumLargerTypesExplored[stackIndex];
+  int typeIndex = this->currentNumberOfLargerTypesExplored[stackIndex];
   this->currentHCandidatesScaledToActByTwo[stackIndex].setSize(0);
   if (typeIndex >= this->currentPossibleLargerDynkinTypes[stackIndex].size) {
     return true;
@@ -1907,7 +1971,7 @@ bool SemisimpleSubalgebras::computeCurrentHCandidates() {
   newCandidate.owner = this;
   if (this->baseSubalgebra().getRank() != 0) {
     Vector<Rational> weightHElementWeAreLookingFor =
-    this->getHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot(
+    this->getHighestWeightFundamentalNewComponentFromImagesOldSimpleRootsAndNewRoot(
       this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
       this->currentRootInjections[stackIndex][typeIndex],
       newCandidate
@@ -1973,7 +2037,7 @@ void SemisimpleSubalgebras::addSubalgebraToStack(
   if (input.indexInOwner == - 1 && !input.weylNonEmbedded->dynkinType.isEqualToZero()) {
     global.fatal << "Adding to stack subalgebra with indexInOwner equal to - 1 is forbidden. " << global.fatal;
   }
-  if (input.cartanElementsSubalgebra.size != input.theHsScaledToActByTwoInOrderOfCreation.size) {
+  if (input.cartanElementsSubalgebra.size != input.hsScaledToActByTwoInOrderOfCreation.size) {
     global.fatal << "In order to add subalgebra "
     << input.weylNonEmbedded->dynkinType.toString()
     << " to the stack I need to know the order of creation of its h-vectors. "
@@ -1990,14 +2054,14 @@ void SemisimpleSubalgebras::addSubalgebraToStack(
     this->currentRootInjections.lastObject()
   );
   ///////////
-  this->currentNumLargerTypesExplored.addOnTop(inputNumLargerTypesExplored);
+  this->currentNumberOfLargerTypesExplored.addOnTop(inputNumLargerTypesExplored);
   // global.Comments << "<hr>" << this->currentPossibleLargerDynkinTypes.lastObject()->size
   // << " possible extensions of " << input.weylNonEmbedded->theDynkinType.toString() << ": ";
   // for (int i = 0; i < this->currentPossibleLargerDynkinTypes.lastObject()->size; i ++)
   //   global.Comments << (*this->currentPossibleLargerDynkinTypes.lastObject())[i].toString() << ", ";
   ///////////
   this->currentHCandidatesScaledToActByTwo.setSize(this->currentSubalgebraChain.size);
-  this->currentNumHcandidatesExplored.addOnTop(inputNumHcandidatesExplored);
+  this->currentNumberOfHCandidatesExplored.addOnTop(inputNumHcandidatesExplored);
 
   this->computeCurrentHCandidates();
 }
@@ -2030,25 +2094,25 @@ std::string SemisimpleSubalgebras::toStringState(FormatExpressions* format) {
     out << "<br>Extensions of " << this->currentSubalgebraChain[i].weylNonEmbedded->dynkinType.toString()
     << ": &nbsp;&nbsp;&nbsp;&nbsp;";
     for (int j = 0; j < this->currentPossibleLargerDynkinTypes[i].size; j ++) {
-      if (j == this->currentNumLargerTypesExplored[i]) {
+      if (j == this->currentNumberOfLargerTypesExplored[i]) {
         out << "<b>";
       }
       out << this->currentPossibleLargerDynkinTypes[i][j].toString();
-      if (j == this->currentNumLargerTypesExplored[i]) {
+      if (j == this->currentNumberOfLargerTypesExplored[i]) {
         out << "</b>";
       }
       if (j != this->currentPossibleLargerDynkinTypes[i].size - 1) {
         out << ", ";
       }
     }
-    out << "<br> " << this->currentNumLargerTypesExplored[i] << " out of "
+    out << "<br> " << this->currentNumberOfLargerTypesExplored[i] << " out of "
     << this->currentPossibleLargerDynkinTypes[i].size << " types explored, current type: ";
-    if (this->currentNumLargerTypesExplored[i] < this->currentPossibleLargerDynkinTypes[i].size) {
-      out << "<b>" << this->currentPossibleLargerDynkinTypes[i][this->currentNumLargerTypesExplored[i]] << "</b>";
+    if (this->currentNumberOfLargerTypesExplored[i] < this->currentPossibleLargerDynkinTypes[i].size) {
+      out << "<b>" << this->currentPossibleLargerDynkinTypes[i][this->currentNumberOfLargerTypesExplored[i]] << "</b>";
     } else {
       out << "<b>All types explored.</b>";
     }
-    out << "<br>Explored " << this->currentNumHcandidatesExplored[i] << " out of "
+    out << "<br>Explored " << this->currentNumberOfHCandidatesExplored[i] << " out of "
     << this->currentHCandidatesScaledToActByTwo[i].size << " h-candidates. ";
   }
   return out.str();
@@ -2072,26 +2136,31 @@ bool SemisimpleSubalgebras::incrementReturnFalseIfPastLast() {
   if (this->currentSubalgebraChain.size == 0) {
     return false;
   }
-  if (this->baseSubalgebra().cartanElementsSubalgebra.size != this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation.size) {
+  if (
+    this->baseSubalgebra().cartanElementsSubalgebra.size !=
+    this->baseSubalgebra().hsScaledToActByTwoInOrderOfCreation.size
+  ) {
     global.fatal << " The order of creation of the elements of the Cartan is missing in base subalgebra of type "
     << this->baseSubalgebra().weylNonEmbedded->dynkinType.toString()
     << ", and this order is needed to construct extensions. " << global.fatal;
   }
-  ProgressReport theReport1;
   if (this->baseSubalgebra().getRank() >= this->owner->getRank()) {
     return this->removeLastSubalgebra();
   }
   int stackIndex = this->currentSubalgebraChain.size - 1;
-  if (this->currentNumHcandidatesExplored[stackIndex] >= this->currentHCandidatesScaledToActByTwo[stackIndex].size) {
-    this->currentNumLargerTypesExplored[stackIndex] ++;
-    if (this->currentNumLargerTypesExplored[stackIndex] >= this->currentPossibleLargerDynkinTypes[stackIndex].size) {
+  if (
+    this->currentNumberOfHCandidatesExplored[stackIndex] >=
+    this->currentHCandidatesScaledToActByTwo[stackIndex].size
+  ) {
+    this->currentNumberOfLargerTypesExplored[stackIndex] ++;
+    if (this->currentNumberOfLargerTypesExplored[stackIndex] >= this->currentPossibleLargerDynkinTypes[stackIndex].size) {
       return this->removeLastSubalgebra();
     }
-    this->currentNumHcandidatesExplored[stackIndex] = 0;
+    this->currentNumberOfHCandidatesExplored[stackIndex] = 0;
     return this->computeCurrentHCandidates();
   }
-  int typeIndex = this->currentNumLargerTypesExplored[stackIndex];
-  int hIndex = this->currentNumHcandidatesExplored[stackIndex];
+  int typeIndex = this->currentNumberOfLargerTypesExplored[stackIndex];
+  int hIndex = this->currentNumberOfHCandidatesExplored[stackIndex];
   CandidateSemisimpleSubalgebra newCandidate;
   newCandidate.owner = this;
 
@@ -2114,14 +2183,15 @@ bool SemisimpleSubalgebras::incrementReturnFalseIfPastLast() {
       return true;
     }
   }
-  this->currentNumHcandidatesExplored[stackIndex] ++;
+  this->currentNumberOfHCandidatesExplored[stackIndex] ++;
+  ProgressReport report1;
   if (newSubalgebraCreated) {
     this->addSubalgebraIfNewSetToStackTop(newCandidate);
   } else {
     std::stringstream reportstream;
     reportstream << "h element " << hIndex + 1 << " out of " << this->currentHCandidatesScaledToActByTwo[stackIndex][hIndex].size
     << ": did not succeed extending. ";
-    theReport1.report(reportstream.str());
+    report1.report(reportstream.str());
   }
   return true;
 }
@@ -2328,63 +2398,63 @@ SemisimpleLieAlgebra& CandidateSemisimpleSubalgebra::getAmbientSemisimpleLieAlge
   return this->owner->getSemisimpleOwner();
 }
 
-void CandidateSemisimpleSubalgebra::addHIncomplete(const Vector<Rational>& theH) {
+void CandidateSemisimpleSubalgebra::addHIncomplete(const Vector<Rational>& hElement) {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::addHIncomplete");
   this->checkBasicInitialization();
   if (this->cartanSubalgebrasByComponentScaledToActByTwo.size == 1) {
     if (this->cartanSubalgebrasByComponentScaledToActByTwo.lastObject()->size == 0) {
-      this->PosRootsPerpendicularPrecedingWeights = this->getAmbientWeyl().rootsOfBorel;
+      this->posistiveRootsPerpendicularToPrecedingWeights = this->getAmbientWeyl().rootsOfBorel;
     }
   }
-  for (int i = 0; i < this->PosRootsPerpendicularPrecedingWeights.size; i ++) {
-    if (this->getAmbientWeyl().rootScalarCartanRoot(this->PosRootsPerpendicularPrecedingWeights[i], theH) != 0) {
-      this->PosRootsPerpendicularPrecedingWeights.removeIndexShiftDown(i);
+  for (int i = 0; i < this->posistiveRootsPerpendicularToPrecedingWeights.size; i ++) {
+    if (this->getAmbientWeyl().rootScalarCartanRoot(this->posistiveRootsPerpendicularToPrecedingWeights[i], hElement) != 0) {
+      this->posistiveRootsPerpendicularToPrecedingWeights.removeIndexShiftDown(i);
       i --;
     }
   }
-  this->cartanSubalgebrasByComponentScaledToActByTwo.lastObject()->addOnTop(theH);
+  this->cartanSubalgebrasByComponentScaledToActByTwo.lastObject()->addOnTop(hElement);
 }
 
 bool CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo(
-  const Vector<Rational>& HNewActingByTwo, const List<int>& theRootInjections
+  const Vector<Rational>& hNewActingByTwo, const List<int>& rootInjections
 ) const {
-  MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::isGoodHnew");
+  MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo");
   //check if input weight is maximally dominant:
-  Rational theScalarProd;
-  int indexHneW = *theRootInjections.lastObject();
+  Rational scalarProduct;
+  int indexHneW = *rootInjections.lastObject();
   for  (int i = 0; i < this->getAmbientWeyl().rootsOfBorel.size; i ++) {
     Vector<Rational>& currentPosRoot = this->getAmbientWeyl().rootsOfBorel[i];
     bool canBeRaisingReflection = true;
-    for (int l = 0; l< this->theHsScaledToActByTwoInOrderOfCreation.size && canBeRaisingReflection; l ++) {
-      theScalarProd = this->getAmbientWeyl().rootScalarCartanRoot(
-        currentPosRoot, this->theHsScaledToActByTwoInOrderOfCreation[l]
+    for (int l = 0; l < this->hsScaledToActByTwoInOrderOfCreation.size && canBeRaisingReflection; l ++) {
+      scalarProduct = this->getAmbientWeyl().rootScalarCartanRoot(
+        currentPosRoot, this->hsScaledToActByTwoInOrderOfCreation[l]
       );
-      if (theScalarProd > 0) {
+      if (scalarProduct > 0) {
         canBeRaisingReflection = false;
       }
-      if (theScalarProd < 0) {
+      if (scalarProduct < 0) {
         global.fatal << "While trying to realize type " << this->weylNonEmbedded->dynkinType.toString()
         << ", the candidate h elements of the semisimple subalgebra are supposed to be maximally dominant, "
         << "however the scalar product of the positive root " << currentPosRoot.toString() << " with the subalgebra root "
-        << this->theHsScaledToActByTwoInOrderOfCreation[l].toString()
+        << this->hsScaledToActByTwoInOrderOfCreation[l].toString()
         << " is negative, while the very same positive root has had zero scalar products with all "
-        << " preceding roots. Hnew equals: " << HNewActingByTwo.toString() << " Here are all preceding roots: "
-        << this->theHsScaledToActByTwoInOrderOfCreation.toString() << global.fatal;
+        << " preceding roots. Hnew equals: " << hNewActingByTwo.toString() << " Here are all preceding roots: "
+        << this->hsScaledToActByTwoInOrderOfCreation.toString() << global.fatal;
       }
     }
     if (canBeRaisingReflection) {
-      if (this->getAmbientWeyl().rootScalarCartanRoot(currentPosRoot, HNewActingByTwo)<0) {
+      if (this->getAmbientWeyl().rootScalarCartanRoot(currentPosRoot, hNewActingByTwo) < 0) {
         return false;
       }
     }
   }
   for (int i = 0; i < this->cartanElementsScaledToActByTwo.size; i ++) {
     if (i != indexHneW) {
-      theScalarProd = this->getAmbientWeyl().rootScalarCartanRoot(HNewActingByTwo, this->cartanElementsScaledToActByTwo[i]);
+      scalarProduct = this->getAmbientWeyl().rootScalarCartanRoot(hNewActingByTwo, this->cartanElementsScaledToActByTwo[i]);
     } else {
-      theScalarProd = this->getAmbientWeyl().rootScalarCartanRoot(HNewActingByTwo, HNewActingByTwo);
+      scalarProduct = this->getAmbientWeyl().rootScalarCartanRoot(hNewActingByTwo, hNewActingByTwo);
     }
-    if (theScalarProd != this->weylNonEmbedded->coCartanSymmetric(indexHneW, i)) {
+    if (scalarProduct != this->weylNonEmbedded->coCartanSymmetric(indexHneW, i)) {
       return false;
     }
   }
@@ -2392,16 +2462,18 @@ bool CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo(
 }
 
 template <class Coefficient>
-int CharacterSemisimpleLieAlgebraModule<Coefficient>::getIndexExtremeWeightRelativeToWeyl(WeylGroupData& theWeyl) const {
+int CharacterSemisimpleLieAlgebraModule<Coefficient>::getIndexExtremeWeightRelativeToWeyl(
+  WeylGroupData& weyl
+) const {
   HashedList<Vector<Coefficient> > weightsSimpleCoords;
   weightsSimpleCoords.setExpectedSize(this->size());
   for (int i = 0; i < this->size(); i ++) {
-    weightsSimpleCoords.addOnTop(theWeyl.getSimpleCoordinatesFromFundamental((*this)[i].weightFundamentalCoordinates));
+    weightsSimpleCoords.addOnTop(weyl.getSimpleCoordinatesFromFundamental((*this)[i].weightFundamentalCoordinates));
   }
-  for (int i = 0; i <weightsSimpleCoords.size; i ++) {
+  for (int i = 0; i < weightsSimpleCoords.size; i ++) {
     bool isGood = true;
-    for (int j = 0; j < theWeyl.rootsOfBorel.size; j ++) {
-      if (weightsSimpleCoords.contains((weightsSimpleCoords[i] + theWeyl.rootsOfBorel[j]))) {
+    for (int j = 0; j < weyl.rootsOfBorel.size; j ++) {
+      if (weightsSimpleCoords.contains((weightsSimpleCoords[i] + weyl.rootsOfBorel[j]))) {
         isGood = false;
         break;
       }
@@ -2413,11 +2485,11 @@ int CharacterSemisimpleLieAlgebraModule<Coefficient>::getIndexExtremeWeightRelat
   return - 1;
 }
 
-bool CandidateSemisimpleSubalgebra::isWeightSystemSpaceIndex(int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace) {
+bool CandidateSemisimpleSubalgebra::isWeightSystemSpaceIndex(int index, const Vector<Rational>& ambientRootTestedForWeightSpace) {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::isWeightSystemSpaceIndex");
   for (int k = 0; k < this->cartanElementsSubalgebra.size; k ++) {
-    Rational desiredScalarProd = this->subalgebraNonEmbeddedDefaultScale->weylGroup.cartanSymmetric(theIndex, k);
-    Rational actualScalar = this->getAmbientWeyl().rootScalarCartanRoot(this->cartanElementsSubalgebra[k], AmbientRootTestedForWeightSpace);
+    Rational desiredScalarProd = this->subalgebraNonEmbeddedDefaultScale->weylGroup.cartanSymmetric(index, k);
+    Rational actualScalar = this->getAmbientWeyl().rootScalarCartanRoot(this->cartanElementsSubalgebra[k], ambientRootTestedForWeightSpace);
     if (desiredScalarProd != actualScalar) {
       return false;
     }
@@ -2425,7 +2497,7 @@ bool CandidateSemisimpleSubalgebra::isWeightSystemSpaceIndex(int theIndex, const
   return true;
 }
 
-bool CandidateSemisimpleSubalgebra::computeSystem(bool AttemptToChooseCentalizer, bool allowNonPolynomialSystemFailure) {
+bool CandidateSemisimpleSubalgebra::computeSystem(bool attemptToChooseCentalizer, bool allowNonPolynomialSystemFailure) {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::computeSystem");
   ChevalleyGenerator currentGen, currentOpGen;
   this->involvedNegativeGenerators.setSize(this->cartanElementsScaledToActByTwo.size);
@@ -2457,7 +2529,7 @@ bool CandidateSemisimpleSubalgebra::computeSystem(bool AttemptToChooseCentalizer
     }
   }
   this->flagUsedInducingSubalgebraRealization = true;
-  return this->computeSystemPart2(AttemptToChooseCentalizer, allowNonPolynomialSystemFailure);
+  return this->computeSystemPart2(attemptToChooseCentalizer, allowNonPolynomialSystemFailure);
 }
 
 bool CandidateSemisimpleSubalgebra::checkGeneratorsBracketToHs() {
@@ -2477,7 +2549,7 @@ bool CandidateSemisimpleSubalgebra::checkGeneratorsBracketToHs() {
   return true;
 }
 
-bool CandidateSemisimpleSubalgebra::computeSystemPart2(bool AttemptToChooseCentalizer, bool allowNonPolynomialSystemFailure) {
+bool CandidateSemisimpleSubalgebra::computeSystemPart2(bool attemptToChooseCentalizer, bool allowNonPolynomialSystemFailure) {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::computeSystemPart2");
   systemToSolve.setSize(0);
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > lieBracketMinusGoalValue, goalValue;
@@ -2503,7 +2575,7 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(bool AttemptToChooseCenta
   this->totalNumUnknownsWithCentralizer = this->totalNumUnknownsNoCentralizer;
   this->unknownNegativeGenerators.setSize(this->involvedNegativeGenerators.size);
   this->unknownPositiveGenerators.setSize(this->involvedPositiveGenerators.size);
-  if (!AttemptToChooseCentalizer) {
+  if (!attemptToChooseCentalizer) {
     this->unknownCartanCentralizerBasis.setSize(0);
   } else {
     int rankCentralizer = - 1;
@@ -2542,11 +2614,11 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(bool AttemptToChooseCenta
   for (int i = 0; i < this->involvedNegativeGenerators.size; i ++) {
     bool seedsHaveBeenSown = false;
     if (this->flagUsedInducingSubalgebraRealization) {
-      CandidateSemisimpleSubalgebra& theInducer = this->owner->subalgebras.values[this->indexIamInducedFrom];
-      if (theInducer.flagSystemSolved && i != indexNewRoot) {
-        int preimageIndex = DynkinType::GetIndexPreimageFromRootInjection(i, this->rootInjectionsFromInducer);
-        this->unknownNegativeGenerators[i] = theInducer.negativeGenerators[preimageIndex];//<-implicit type conversion from base field to polynomial here
-        this->unknownPositiveGenerators[i] = theInducer.positiveGenerators[preimageIndex];//<-implicit type conversion from base field to polynomial here
+      CandidateSemisimpleSubalgebra& inducer = this->owner->subalgebras.values[this->indexIamInducedFrom];
+      if (inducer.flagSystemSolved && i != indexNewRoot) {
+        int preimageIndex = DynkinType::getIndexPreimageFromRootInjection(i, this->rootInjectionsFromInducer);
+        this->unknownNegativeGenerators[i] = inducer.negativeGenerators[preimageIndex];//<-implicit type conversion from base field to polynomial here
+        this->unknownPositiveGenerators[i] = inducer.positiveGenerators[preimageIndex];//<-implicit type conversion from base field to polynomial here
         seedsHaveBeenSown = true;
       }
     }
@@ -2557,16 +2629,16 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(bool AttemptToChooseCenta
     this->getGenericPositiveGeneratorLinearCombination(i, this->unknownPositiveGenerators[i]);
   }
   if (this->unknownCartanCentralizerBasis.size > 0) {
-    Matrix<Polynomial<AlgebraicNumber> > theCentralizerCartanVars;
-    Vectors<Polynomial<AlgebraicNumber> > theCentralizerCartanElts;
-    theCentralizerCartanElts.setSize(this->unknownCartanCentralizerBasis.size);
+    Matrix<Polynomial<AlgebraicNumber> > centralizerCartanVars;
+    Vectors<Polynomial<AlgebraicNumber> > centralizerCartanElts;
+    centralizerCartanElts.setSize(this->unknownCartanCentralizerBasis.size);
     for (int i = 0; i < this->unknownCartanCentralizerBasis.size; i ++) {
       this->getGenericCartanCentralizerLinearCombination(i, this->unknownCartanCentralizerBasis[i]);
-      theCentralizerCartanElts[i] = this->unknownCartanCentralizerBasis[i].getCartanPart();
+      centralizerCartanElts[i] = this->unknownCartanCentralizerBasis[i].getCartanPart();
     }
-    theCentralizerCartanElts.getGramMatrix(theCentralizerCartanVars, &this->getAmbientWeyl().cartanSymmetric);
+    centralizerCartanElts.getGramMatrix(centralizerCartanVars, &this->getAmbientWeyl().cartanSymmetric);
     Polynomial<AlgebraicNumber> theDeterminant, theDetMultiplier;
-    theDeterminant.makeDeterminantFromSquareMatrix(theCentralizerCartanVars);
+    theDeterminant.makeDeterminantFromSquareMatrix(centralizerCartanVars);
     theDetMultiplier.makeMonomial(this->totalNumUnknownsWithCentralizer - 1, 1, 1);
     theDeterminant *= theDetMultiplier;
     theDeterminant += - Rational(1);
@@ -2616,7 +2688,7 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(bool AttemptToChooseCenta
     }
   }
   this->flagSystemSolved = false;
-  if (!AttemptToChooseCentalizer) {
+  if (!attemptToChooseCentalizer) {
     this->flagSystemSolved = this->checkGeneratorsBracketToHs();
   }
   if (!this->flagSystemSolved) {
@@ -2634,7 +2706,7 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(bool AttemptToChooseCenta
   if (!this->flagSystemSolved && this->flagUsedInducingSubalgebraRealization) {
     //bool seedHadNoSolution = this->flagSystemProvedToHaveNoSolution;
     this->flagUsedInducingSubalgebraRealization = false;
-    bool result = this->computeSystemPart2(AttemptToChooseCentalizer, allowNonPolynomialSystemFailure);
+    bool result = this->computeSystemPart2(attemptToChooseCentalizer, allowNonPolynomialSystemFailure);
     return result;
   }
   if (this->flagSystemProvedToHaveNoSolution) {
@@ -2756,24 +2828,24 @@ bool CandidateSemisimpleSubalgebra::checkModuleDimensions() const {
 void CandidateSemisimpleSubalgebra::computeRatioKillingsByComponent() {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::computeRatioKillingsByComponent");
   ElementSemisimpleLieAlgebra<AlgebraicNumber> currentElt, adActionElt, adadActionElt;
-  Vector<AlgebraicNumber> theLinearCombi;
+  Vector<AlgebraicNumber> linearCombination;
   this->ratiosKillingsByComponent.setSize(this->cartanSubalgebrasByComponentScaledToActByTwo.size);
-  Matrix<AlgebraicNumber> theAdMat;
+  Matrix<AlgebraicNumber> adMatrix;
   for (int i = 0; i < this->cartanSubalgebrasByComponentScaledToActByTwo.size; i ++) {
     currentElt.makeCartanGenerator(this->cartanSubalgebrasByComponentScaledToActByTwo[i][0], this->getAmbientSemisimpleLieAlgebra());
     AlgebraicNumber result = 0;
     for (int k = 0; k < this->basis.size; k ++) {
       this->getAmbientSemisimpleLieAlgebra().lieBracket(currentElt, this->basis[k], adActionElt);
       this->getAmbientSemisimpleLieAlgebra().lieBracket(currentElt, adActionElt, adadActionElt);
-      bool tempB= currentElt.linearSpanContainsGetFirstLinearCombination(this->basis, adadActionElt, theLinearCombi);
+      bool tempB = currentElt.linearSpanContainsGetFirstLinearCombination(this->basis, adadActionElt, linearCombination);
       if (!tempB) {
         global.fatal << "Candidate subalgebra not closed under Lie bracket. " << global.fatal;
       }
-      result += theLinearCombi[k];
+      result += linearCombination[k];
     }
-    this->getAmbientSemisimpleLieAlgebra().getAdjoint(theAdMat, currentElt);
-    theAdMat *= theAdMat;
-    this->ratiosKillingsByComponent[i] = theAdMat.getTrace();
+    this->getAmbientSemisimpleLieAlgebra().getAdjoint(adMatrix, currentElt);
+    adMatrix *= adMatrix;
+    this->ratiosKillingsByComponent[i] = adMatrix.getTrace();
     this->ratiosKillingsByComponent[i] /= result;
   }
 }
@@ -2823,7 +2895,7 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecomposition() {
   }
   this->weightsModulesNONprimal.setSize(this->modules.size);
   this->weightsModulesPrimal.setSize(this->modules.size);
-  Vector<Rational> theProjection, thePrimalProjection;
+  Vector<Rational> projection, primalProjection;
   for (int i = 0; i < this->modules.size; i ++) {
     for (int k = 0; k < this->modules[i].size; k ++) {
       if (k == 0) {
@@ -2833,13 +2905,13 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecomposition() {
       for (int j = 0; j < this->modules[i][k].size; j ++) {
         ElementSemisimpleLieAlgebra<AlgebraicNumber>& currentElt = this->modules[i][k][j];
         Vector<Rational> currentRoot = this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(currentElt[0].generatorIndex);
-        this->getWeightProjectionFundamentalCoordinates(currentRoot, theProjection);
-        this->getPrimalWeightProjectionFundamentalCoordinates(currentRoot, thePrimalProjection);
+        this->getWeightProjectionFundamentalCoordinates(currentRoot, projection);
+        this->getPrimalWeightProjectionFundamentalCoordinates(currentRoot, primalProjection);
         if (k == 0) {
-          this->weightsModulesNONprimal[i][j] = theProjection;
-          this->weightsModulesPrimal[i][j] = thePrimalProjection;
+          this->weightsModulesNONprimal[i][j] = projection;
+          this->weightsModulesPrimal[i][j] = primalProjection;
         } else {
-          if (this->weightsModulesNONprimal[i][j] != theProjection || this->weightsModulesPrimal[i][j] != thePrimalProjection) {
+          if (this->weightsModulesNONprimal[i][j] != projection || this->weightsModulesPrimal[i][j] != primalProjection) {
             global.fatal << "This is a programming or mathematical error. Given two isomorphic modules over "
             << "the semisimple subalgebra (i.e., same highest weights), "
             << "and the same order of generation of weights, I got different order "
@@ -2921,7 +2993,7 @@ void CandidateSemisimpleSubalgebra::computePairKWeightElementAndModule(
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::computePairKWeightElementAndModule");
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& rightModule = this->modulesIsotypicallyMerged[rightIndex];
   ElementSemisimpleLieAlgebra<AlgebraicNumber> theLieBracket;
-  ProgressReport theReport;
+  ProgressReport report;
   Vector<AlgebraicNumber> coordsInFullBasis;
   output.setSize(0);
   if (this->fullBasisByModules.size != this->getAmbientSemisimpleLieAlgebra().getNumberOfGenerators()) {
@@ -2929,10 +3001,10 @@ void CandidateSemisimpleSubalgebra::computePairKWeightElementAndModule(
   }
   for (int j = 0; j < rightModule.size; j ++) {
     this->getAmbientSemisimpleLieAlgebra().lieBracket(leftKweightElt, rightModule[j], theLieBracket);
-    if (theReport.tickAndWantReport()) {
+    if (report.tickAndWantReport()) {
       std::stringstream reportStream;
       reportStream << "Bracketing index " << j + 1 << " with input element. ";
-      theReport.report(reportStream.str());
+      report.report(reportStream.str());
     }
     bool tempbool = theLieBracket.getCoordinatesInBasis(this->fullBasisByModules, coordsInFullBasis);
     if (!tempbool) {
@@ -2953,12 +3025,12 @@ void CandidateSemisimpleSubalgebra::computeSinglePair(int leftIndex, int rightIn
   output.setSize(0);
   List<int> tempList;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& leftModule = this->modulesIsotypicallyMerged[leftIndex];
-  ProgressReport theReport;
+  ProgressReport report;
   for (int i = 0; i < leftModule.size; i ++) {
-    if (theReport.tickAndWantReport()) {
+    if (report.tickAndWantReport()) {
       std::stringstream reportStream;
       reportStream << "Bracketing element number " << i + 1 << " out of " << leftModule.size << " with other module. ";
-      theReport.report(reportStream.str());
+      report.report(reportStream.str());
     }
     this->computePairKWeightElementAndModule(leftModule[i], rightIndex, tempList);
     output.addOnTopNoRepetition(tempList);
@@ -2969,18 +3041,18 @@ void CandidateSemisimpleSubalgebra::computePairingTable() {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::computePairingTable");
   if (!this->flagCentralizerIsWellChosen)
     return;
-  ProgressReport theReport;
+  ProgressReport report;
   this->nilradicalPairingTable.setSize(this->modulesIsotypicallyMerged.size);
   for (int i = 0; i < this->nilradicalPairingTable.size; i ++) {
     this->nilradicalPairingTable[i].setSize(this->modulesIsotypicallyMerged.size);
   }
   for (int i = 0; i < this->nilradicalPairingTable.size; i ++) {
     for (int j = i; j < this->nilradicalPairingTable[i].size; j ++) {
-      if (theReport.tickAndWantReport()) {
+      if (report.tickAndWantReport()) {
         std::stringstream reportStream;
         reportStream << "Pairing indices " << i + 1 << " and " << j + 1 << " out of "
         << this->nilradicalPairingTable.size << ".";
-        theReport.report(reportStream.str());
+        report.report(reportStream.str());
       }
       this->computeSinglePair(i, j, this->nilradicalPairingTable[i][j]);
       if (j > i) {
@@ -3049,44 +3121,46 @@ void CandidateSemisimpleSubalgebra::computeCharactersPrimalModules() {
 }
 
 void CandidateSemisimpleSubalgebra::computeKsl2TriplesGetOppositeElementsInOppositeModule(
-  const Vector<Rational>& theElementWeight,
+  const Vector<Rational>& weight,
   const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& inputOppositeModule,
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElts
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
 ) {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::computeKsl2TriplesGetOppositeElementsInOppositeModule");
-  outputElts.setSize(0);
+  outputElements.setSize(0);
   for (int i = 0; i < inputOppositeModule.size; i ++) {
-    if ((this->getPrimalWeightFirstGen(inputOppositeModule[i]) +theElementWeight).isEqualToZero()) {
-      outputElts.addOnTop(inputOppositeModule[i]);
+    if ((this->getPrimalWeightFirstGen(inputOppositeModule[i]) +weight).isEqualToZero()) {
+      outputElements.addOnTop(inputOppositeModule[i]);
     }
   }
 }
 
 Vector<Rational> CandidateSemisimpleSubalgebra::getPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input) const {
   Vector<Rational> output;
-  Vector<Rational> theRoot = this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(input[0].generatorIndex);
-  this->getPrimalWeightProjectionFundamentalCoordinates(theRoot, output);
+  Vector<Rational> root = this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(input[0].generatorIndex);
+  this->getPrimalWeightProjectionFundamentalCoordinates(root, output);
   return output;
 }
 
-Vector<Rational> CandidateSemisimpleSubalgebra::getNonPrimalWeightFirstGenerator(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input) const {
+Vector<Rational> CandidateSemisimpleSubalgebra::getNonPrimalWeightFirstGenerator(
+  const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input
+) const {
   Vector<Rational> output;
-  Vector<Rational> theRoot = this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(input[0].generatorIndex);
-  this->getWeightProjectionFundamentalCoordinates(theRoot, output);
+  Vector<Rational> root = this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(input[0].generatorIndex);
+  this->getWeightProjectionFundamentalCoordinates(root, output);
   return output;
 }
 
 void CandidateSemisimpleSubalgebra::computeKsl2TriplesGetOppositeElementsAll(
-  const Vector<Rational>& theElementWeight, List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElts
+  const Vector<Rational>& weight, List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
 ) {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::computeKsl2TriplesGetOppositeElementsAll");
-  outputElts.setSize(0);
+  outputElements.setSize(0);
   for (int i = 0; i < this->modules.size; i ++) {
     for (int j = 0; j < this->weightsModulesPrimal[i].size; j ++) {
-      if ((theElementWeight + this->weightsModulesPrimal[i][j]).isEqualToZero()) {
+      if ((weight + this->weightsModulesPrimal[i][j]).isEqualToZero()) {
         for (int k = 0; k < this->modules[i].size; k ++) {
-          outputElts.addOnTop(this->modules[i][k][j]);
-          if (!(theElementWeight + this->getPrimalWeightFirstGen(this->modules[i][k][j])).isEqualToZero()) {
+          outputElements.addOnTop(this->modules[i][k][j]);
+          if (!(weight + this->getPrimalWeightFirstGen(this->modules[i][k][j])).isEqualToZero()) {
             global.fatal << "Element this->modules[i][k][j] does not have the primal weight it is supposed to have. "
             << global.fatal;
           }
@@ -3096,27 +3170,27 @@ void CandidateSemisimpleSubalgebra::computeKsl2TriplesGetOppositeElementsAll(
   }
 }
 
-bool CandidateSemisimpleSubalgebra::computeKsl2TriplesetUpAndSolveSystem(
-  const ElementSemisimpleLieAlgebra<AlgebraicNumber>& theE,
-  const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& FisLinearCombiOf,
+bool CandidateSemisimpleSubalgebra::computeKsl2TripleSetUpAndSolveSystem(
+  const ElementSemisimpleLieAlgebra<AlgebraicNumber>& element,
+  const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& fIsLinearCombinationOf,
   ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF
 ) {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::computeKsl2TriplesetUpAndSolveSystem");
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > Ecopy, theH, theF, tempElt;
-  Ecopy = theE;
-  this->getAmbientSemisimpleLieAlgebra().getGenericElementCartan(theH, 0);
-  theF.makeZero();
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > eCopy, hElement, fElement, tempElt;
+  eCopy = element;
+  this->getAmbientSemisimpleLieAlgebra().getGenericElementCartan(eCopy, 0);
+  fElement.makeZero();
   Polynomial<AlgebraicNumber> tempP;
-  for (int i = 0; i < FisLinearCombiOf.size; i ++) {
-    tempElt = FisLinearCombiOf[i];
+  for (int i = 0; i < fIsLinearCombinationOf.size; i ++) {
+    tempElt = fIsLinearCombinationOf[i];
     tempP.makeMonomial(i + this->getAmbientSemisimpleLieAlgebra().getRank(), 1, 1);
     tempElt *= tempP;
-    theF += tempElt;
+    fElement += tempElt;
   }
-  if (!this->getAmbientSemisimpleLieAlgebra().attemptFindingHEF(theH, Ecopy, theF, nullptr)) {
+  if (!this->getAmbientSemisimpleLieAlgebra().attemptFindingHEF(eCopy, eCopy, fElement, nullptr)) {
     return false;
   }
-  outputF = theF;
+  outputF = fElement;
   return true;
 }
 
@@ -3126,7 +3200,7 @@ void CandidateSemisimpleSubalgebra::computeKsl2Triples() {
     return;
   }
   this->modulesSl2opposite.setSize(this->modules.size);
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > FmustBeAlinCombiOf;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > fMustBeLinearCombinationOf;
   for (int i = 0; i < this->modules.size; i ++) {
     this->modulesSl2opposite[i].setSize(this->modules[i].size);
     for (int j = 0; j < this->modules[i].size; j ++) {
@@ -3135,13 +3209,13 @@ void CandidateSemisimpleSubalgebra::computeKsl2Triples() {
         this->computeKsl2TriplesGetOppositeElementsInOppositeModule(
           this->weightsModulesPrimal[i][k],
           this->modulesIsotypicallyMerged[this->oppositeModulesByChar[i][0]],
-          FmustBeAlinCombiOf
+          fMustBeLinearCombinationOf
         );
-        if (this->computeKsl2TriplesetUpAndSolveSystem(this->modules[i][j][k], FmustBeAlinCombiOf, this->modulesSl2opposite[i][j][k])) {
+        if (this->computeKsl2TripleSetUpAndSolveSystem(this->modules[i][j][k], fMustBeLinearCombinationOf, this->modulesSl2opposite[i][j][k])) {
           continue;
         }
-        this->computeKsl2TriplesGetOppositeElementsAll(this->weightsModulesPrimal[i][k], FmustBeAlinCombiOf);
-        this->computeKsl2TriplesetUpAndSolveSystem(this->modules[i][j][k], FmustBeAlinCombiOf, this->modulesSl2opposite[i][j][k]);
+        this->computeKsl2TriplesGetOppositeElementsAll(this->weightsModulesPrimal[i][k], fMustBeLinearCombinationOf);
+        this->computeKsl2TripleSetUpAndSolveSystem(this->modules[i][j][k], fMustBeLinearCombinationOf, this->modulesSl2opposite[i][j][k]);
       }
     }
   }
@@ -3155,11 +3229,11 @@ int CandidateSemisimpleSubalgebra::getPrimalRank() const {
   if (!this->flagCentralizerIsWellChosen) {
     return - 1;
   }
-  int theRank = 0;
-  if (!this->centralizerRank.isSmallInteger(&theRank)) {
+  int rank = 0;
+  if (!this->centralizerRank.isSmallInteger(&rank)) {
     return - 1;
   }
-  return theRank+this->weylNonEmbedded->getDimension();
+  return rank + this->weylNonEmbedded->getDimension();
 }
 
 void NilradicalCandidate::checkInitialization() const {
@@ -3169,27 +3243,29 @@ void NilradicalCandidate::checkInitialization() const {
 }
 
 Vector<Rational> NilradicalCandidate::getConeStrongIntersectionWeight() const {
-  Vector<Rational> theWeight;
-  theWeight.makeZero(this->owner->getPrimalRank());
-  for (int i = 0; i < this->theNilradicalWeights.size; i ++) {
-    theWeight += this->theNilradicalWeights[i] * this->ConeStrongIntersection[i];
+  Vector<Rational> weight;
+  weight.makeZero(this->owner->getPrimalRank());
+  for (int i = 0; i < this->nilradicalWeights.size; i ++) {
+    weight += this->nilradicalWeights[i] * this->ConeStrongIntersection[i];
   }
-  return theWeight;
+  return weight;
 }
 
-bool NilradicalCandidate::isCommutingSelectionNilradicalElements(Selection& inputNilradSel) {
-  if (inputNilradSel.cardinalitySelection == 1) {
+bool NilradicalCandidate::isCommutingSelectionNilradicalElements(
+  Selection& inputNilradSelection
+) {
+  if (inputNilradSelection.cardinalitySelection == 1) {
     return true;
   }
   ElementSemisimpleLieAlgebra<AlgebraicNumber> mustBeZero;
-  for (int i = 0; i < inputNilradSel.cardinalitySelection; i ++) {
-    ElementSemisimpleLieAlgebra<AlgebraicNumber>& leftElt = this->theNilradical[inputNilradSel.elements[i]];
-    for (int j = 0; j < inputNilradSel.cardinalitySelection; j ++) {
+  for (int i = 0; i < inputNilradSelection.cardinalitySelection; i ++) {
+    ElementSemisimpleLieAlgebra<AlgebraicNumber>& leftElt = this->theNilradical[inputNilradSelection.elements[i]];
+    for (int j = 0; j < inputNilradSelection.cardinalitySelection; j ++) {
       if (i == j) {
         continue;
       }
-      ElementSemisimpleLieAlgebra<AlgebraicNumber>& rightEltPositive = this->theNilradical[inputNilradSel.elements[j]];
-      ElementSemisimpleLieAlgebra<AlgebraicNumber>& rightEltNegative = this->theNilradicalElementOpposites[inputNilradSel.elements[j]];
+      ElementSemisimpleLieAlgebra<AlgebraicNumber>& rightEltPositive = this->theNilradical[inputNilradSelection.elements[j]];
+      ElementSemisimpleLieAlgebra<AlgebraicNumber>& rightEltNegative = this->theNilradicalElementOpposites[inputNilradSelection.elements[j]];
       this->owner->getAmbientSemisimpleLieAlgebra().lieBracket(leftElt, rightEltPositive, mustBeZero);
       if (!mustBeZero.isEqualToZero()) {
         return false;
@@ -3203,10 +3279,10 @@ bool NilradicalCandidate::isCommutingSelectionNilradicalElements(Selection& inpu
       }
     }
   }
-  for (int i = 0; i < inputNilradSel.cardinalitySelection; i ++) {
-    for (int j = i + 1; j < inputNilradSel.cardinalitySelection; j ++) {
+  for (int i = 0; i < inputNilradSelection.cardinalitySelection; i ++) {
+    for (int j = i + 1; j < inputNilradSelection.cardinalitySelection; j ++) {
       if (this->owner->getScalarSubalgebra(
-          this->theNilradicalWeights[inputNilradSel.elements[i]], this->theNilradicalWeights[inputNilradSel.elements[j]]
+          this->nilradicalWeights[inputNilradSelection.elements[i]], this->nilradicalWeights[inputNilradSelection.elements[j]]
         ) < 0
       ) {
         /*global.fatal << "<br>This is either a programming error, or I am missing some mathematical phenomenon: k-sl(2)-triples are "
@@ -3229,47 +3305,47 @@ bool NilradicalCandidate::isCommutingSelectionNilradicalElements(Selection& inpu
 }
 
 Vector<Rational> NilradicalCandidate::getNilradicalLinearCombination() const {
-  Vector<Rational> theNilradLinCombi = this->ConeStrongIntersection;
-  theNilradLinCombi.setSize(this->theNilradicalWeights.size);
-  return theNilradLinCombi;
+  Vector<Rational> nilradLinearCombination = this->ConeStrongIntersection;
+  nilradLinearCombination.setSize(this->nilradicalWeights.size);
+  return nilradLinearCombination;
 }
 
 void NilradicalCandidate::computeParabolicACExtendsToParabolicAC() {
   MacroRegisterFunctionWithName("NilradicalCandidate::computeParabolicACExtendsToParabolicAC");
   Vector<Rational> projectionRoot;
-  WeylGroupData& theWeyl = this->owner->owner->owner->weylGroup;
-  this->leviRootsAmbienT.reserve(theWeyl.rootSystem.size);
-  this->leviRootsSmallPrimalFundCoords.reserve(theWeyl.rootSystem.size);
+  WeylGroupData& weyl = this->owner->owner->owner->weylGroup;
+  this->leviRootsAmbienT.reserve(weyl.rootSystem.size);
+  this->leviRootsSmallPrimalFundCoords.reserve(weyl.rootSystem.size);
   Vectors<Rational> rootSystemProjections;
   Vectors<Rational> conesCombination;
-  rootSystemProjections.setSize(theWeyl.rootSystem.size);
-  for (int i = 0; i < theWeyl.rootSystem.size; i ++) {
-    this->owner->getPrimalWeightProjectionFundamentalCoordinates(theWeyl.rootSystem[i], rootSystemProjections[i]);
+  rootSystemProjections.setSize(weyl.rootSystem.size);
+  for (int i = 0; i < weyl.rootSystem.size; i ++) {
+    this->owner->getPrimalWeightProjectionFundamentalCoordinates(weyl.rootSystem[i], rootSystemProjections[i]);
   }
-  conesCombination = this->theNilradicalWeights;
+  conesCombination = this->nilradicalWeights;
   for (int i = 0; i < this->theNonFKhws.size; i ++) {
     conesCombination.addOnTop(-this->theNonFKhws[i]);
   }
   this->ConeSeparatingNormal.perturbNormalRelativeToVectorsInGeneralPosition(conesCombination, rootSystemProjections);
-  for (int i = 0; i < theWeyl.rootSystem.size; i ++) {
-    this->owner->getPrimalWeightProjectionFundamentalCoordinates(theWeyl.rootSystem[i], projectionRoot);
+  for (int i = 0; i < weyl.rootSystem.size; i ++) {
+    this->owner->getPrimalWeightProjectionFundamentalCoordinates(weyl.rootSystem[i], projectionRoot);
     if (projectionRoot.scalarEuclidean(this->ConeSeparatingNormal) == 0) {
-      this->leviRootsAmbienT.addOnTop(theWeyl.rootSystem[i]);
+      this->leviRootsAmbienT.addOnTop(weyl.rootSystem[i]);
       if (this->owner->rootSystemCentralizerPrimalCoordinates.contains(projectionRoot)) {
         this->leviRootsSmallPrimalFundCoords.addOnTop(projectionRoot);
       }
     }
   }
   Vectors<Rational> tempVs = this->leviRootsAmbienT;
-  this->theLeviDiagramAmbienT.computeDiagramTypeModifyInput(tempVs, theWeyl);
-  this->theLeviDiagramSmalL.computeDiagramTypeModifyInputRelative(
+  this->leviDiagramAmbient.computeDiagramTypeModifyInput(tempVs, weyl);
+  this->leviDiagramSmall.computeDiagramTypeModifyInputRelative(
     this->leviRootsSmallPrimalFundCoords,
     this->owner->rootSystemCentralizerPrimalCoordinates,
     this->owner->bilinearFormFundPrimal
   );
   bool ambientLeviHasBDGE = false;
-  for (int i = 0; i < this->theLeviDiagramAmbienT.simpleComponentTypes.size; i ++) {
-    DynkinSimpleType& currentType = this->theLeviDiagramAmbienT.simpleComponentTypes[i];
+  for (int i = 0; i < this->leviDiagramAmbient.simpleComponentTypes.size; i ++) {
+    DynkinSimpleType& currentType = this->leviDiagramAmbient.simpleComponentTypes[i];
     if (
       currentType.letter == 'D' ||
       currentType.letter == 'G' ||
@@ -3285,8 +3361,8 @@ void NilradicalCandidate::computeParabolicACExtendsToParabolicAC() {
     }
   }
   bool smallLeviHasBDGE = false;
-  for (int i = 0; i < this->theLeviDiagramSmalL.simpleComponentTypes.size; i ++) {
-    DynkinSimpleType& currentType = this->theLeviDiagramSmalL.simpleComponentTypes[i];
+  for (int i = 0; i < this->leviDiagramSmall.simpleComponentTypes.size; i ++) {
+    DynkinSimpleType& currentType = this->leviDiagramSmall.simpleComponentTypes[i];
     if (
       currentType.letter == 'D' ||
       currentType.letter == 'G' ||
@@ -3322,30 +3398,30 @@ bool NilradicalCandidate::tryFindingLInfiniteRelations() {
   //  return true;
 //  Vectors<Rational> curentNilradicalCone;
   Vector<Rational> betterIntersection;
-  this->theNilradSubsel.initialize(this->theNilradicalWeights.size);
+  this->nilradicalSubselection.initialize(this->nilradicalWeights.size);
   this->flagComputedRelativelyStrongIntersections = false;
-  for (int i = 1; i < this->theNilradicalWeights.size && i < 5; i ++) {
-    LargeInteger numberOfCycles = MathRoutines::nChooseK(this->theNilradicalWeights.size, i);
-    this->theNilradSubsel.initSelectionFixedCardinality(i);
-    for (int j = 0; j < numberOfCycles; j ++, this->theNilradSubsel.incrementSelectionFixedCardinality(i)) {
-      if (this->isCommutingSelectionNilradicalElements(this->theNilradSubsel)) {
-        this->theNilradicalWeights.subSelection(this->theNilradSubsel, this->theNilradicalSubsetWeights);
+  for (int i = 1; i < this->nilradicalWeights.size && i < 5; i ++) {
+    LargeInteger numberOfCycles = MathRoutines::nChooseK(this->nilradicalWeights.size, i);
+    this->nilradicalSubselection.initSelectionFixedCardinality(i);
+    for (int j = 0; j < numberOfCycles; j ++, this->nilradicalSubselection.incrementSelectionFixedCardinality(i)) {
+      if (this->isCommutingSelectionNilradicalElements(this->nilradicalSubselection)) {
+        this->nilradicalWeights.subSelection(this->nilradicalSubselection, this->theNilradicalSubsetWeights);
         if (this->theNilradicalSubsetWeights.conesIntersect(
           this->theNilradicalSubsetWeights, this->theNonFKhwsStronglyTwoSided, &betterIntersection, nullptr
         )) {
           betterIntersection.scaleNormalizeFirstNonZero();
-          this->ConeStrongIntersection.makeZero(this->theNilradicalWeights.size +this->theNonFKhwsStronglyTwoSided.size);
+          this->ConeStrongIntersection.makeZero(this->nilradicalWeights.size +this->theNonFKhwsStronglyTwoSided.size);
           this->ConeRelativelyStrongIntersection.setSize(0);
-          for (int k = 0; k < this->theNilradSubsel.cardinalitySelection; k ++) {
-            this->ConeStrongIntersection[this->theNilradSubsel.elements[k]] = betterIntersection[k];
+          for (int k = 0; k < this->nilradicalSubselection.cardinalitySelection; k ++) {
+            this->ConeStrongIntersection[this->nilradicalSubselection.elements[k]] = betterIntersection[k];
             this->ConeRelativelyStrongIntersection.addOnTop(betterIntersection[k]);
           }
-          this->theNilradical.subSelection(this->theNilradSubsel, this->theNilradicalSubset);
-          this->theNilradicalWeights.subSelection(this->theNilradSubsel, this->theNilradicalSubsetWeights);
+          this->theNilradical.subSelection(this->nilradicalSubselection, this->theNilradicalSubset);
+          this->nilradicalWeights.subSelection(this->nilradicalSubselection, this->theNilradicalSubsetWeights);
           this->theNonFKhwVectorsStrongRelativeToSubset.setSize(0);
           this->theNonFKhwVectorsStrongRelativeToSubsetWeights.setSize(0);
           for (int k = 0; k < this->theNonFKhwsStronglyTwoSided.size; k ++) {
-            this->ConeStrongIntersection[k + this->theNilradicalWeights.size] = betterIntersection[k + i];
+            this->ConeStrongIntersection[k + this->nilradicalWeights.size] = betterIntersection[k + i];
             if (betterIntersection[k + i] != 0) {
               this->theNonFKhwVectorsStrongRelativeToSubset.addOnTop(this->theNonFKHVectorsStronglyTwoSided[k]);
               this->theNonFKhwVectorsStrongRelativeToSubsetWeights.addOnTop(this->theNonFKhwsStronglyTwoSided[k]);
@@ -3360,16 +3436,16 @@ bool NilradicalCandidate::tryFindingLInfiniteRelations() {
 //  this->ConeStrongIntersection.makeZero(this->ConeStrongIntersection.size);
   ProgressReport theReport;
   this->flagComputedRelativelyStrongIntersections = true;
-  for (int i = 1; i < this->theNilradicalWeights.size + 1 && i < 5; i ++) {
-    LargeInteger numberOfCycles = MathRoutines::nChooseK(this->theNilradicalWeights.size, i);
-    this->theNilradSubsel.initSelectionFixedCardinality(i);
+  for (int i = 1; i < this->nilradicalWeights.size + 1 && i < 5; i ++) {
+    LargeInteger numberOfCycles = MathRoutines::nChooseK(this->nilradicalWeights.size, i);
+    this->nilradicalSubselection.initSelectionFixedCardinality(i);
 //    this->FKnilradicalLog+= out.str();
-    for (int j = 0; j < numberOfCycles; j ++, this->theNilradSubsel.incrementSelectionFixedCardinality(i)) {
+    for (int j = 0; j < numberOfCycles; j ++, this->nilradicalSubselection.incrementSelectionFixedCardinality(i)) {
       std::stringstream out;
       out << "<br>Trying " << i + 1 << "-tuples (up to 5-tuples): "
       << j + 1 << " out of " << numberOfCycles << " cycles to process. ";
       theReport.report(out.str());
-      if (this->isCommutingSelectionNilradicalElements(this->theNilradSubsel)) {
+      if (this->isCommutingSelectionNilradicalElements(this->nilradicalSubselection)) {
         this->computeTheTwoConesRelativeToNilradicalSubset();
         if (this->theNilradicalSubsetWeights.conesIntersect(
           this->theNilradicalSubsetWeights,
@@ -3390,10 +3466,10 @@ bool NilradicalCandidate::tryFindingLInfiniteRelations() {
 
 bool NilradicalCandidate::isStronglySingular(int moduleIndex) {
   this->checkInitialization();
-  for (int i = 0; i < this->theNilradicalSelection.size; i ++) {
-    if (this->theNilradicalSelection[i] == 1 && !this->owner->primalSubalgebraModules.contains(i)) {
+  for (int i = 0; i < this->nilradicalSelection.size; i ++) {
+    if (this->nilradicalSelection[i] == 1 && !this->owner->primalSubalgebraModules.contains(i)) {
       for (int j = 0; j < this->owner->nilradicalPairingTable[moduleIndex][i].size; j ++) {
-        if (this->theNilradicalSelection[this->owner->nilradicalPairingTable[moduleIndex][i][j]] != 1) {
+        if (this->nilradicalSelection[this->owner->nilradicalPairingTable[moduleIndex][i][j]] != 1) {
           return false;
         }
         if (this->owner->primalSubalgebraModules.contains(this->owner->nilradicalPairingTable[moduleIndex][i][j])) {
@@ -3409,9 +3485,9 @@ bool NilradicalCandidate::isStronglySingularRelativeToSubset(int nonFKweightInde
   MacroRegisterFunctionWithName("NilradicalCandidate::isStronglySingularRelativeToSubset");
   this->checkInitialization();
   ElementSemisimpleLieAlgebra<AlgebraicNumber> mustBeZero;
-  for (int j = 0; j < this->theNilradSubsel.cardinalitySelection; j ++) {
+  for (int j = 0; j < this->nilradicalSubselection.cardinalitySelection; j ++) {
     this->owner->owner->owner->lieBracket(
-      this->theNilradical[this->theNilradSubsel.elements[j]],
+      this->theNilradical[this->nilradicalSubselection.elements[j]],
       this->theNonFKhwVectors[nonFKweightIndex],
       mustBeZero
     );
@@ -3430,7 +3506,7 @@ NilradicalCandidate::NilradicalCandidate() {
 }
 
 void NilradicalCandidate::reset() {
-  this->theNilradicalWeights.setSize(0);
+  this->nilradicalWeights.setSize(0);
   this->theNonFKhws.setSize(0);
   this->theNonFKhwsStronglyTwoSided.setSize(0);
   this->theNonFKHVectorsStronglyTwoSided.setSize(0);
@@ -3438,7 +3514,7 @@ void NilradicalCandidate::reset() {
   this->theNilradicalElementOpposites.setSize(0);
   this->ownerModulesNilradicalElements.setSize(0);
   this->ownerModulestheNonFKhwVectors.setSize(0);
-  this->theNilradSubsel.initialize(0);
+  this->nilradicalSubselection.initialize(0);
   this->theNilradicalSubset.setSize(0);
   this->theNonFKhwVectorsStrongRelativeToSubset.setSize(0);
   this->theNilradicalSubsetWeights.setSize(0);
@@ -3447,8 +3523,8 @@ void NilradicalCandidate::reset() {
 
 void NilradicalCandidate::computeTheTwoConesRelativeToNilradicalSubset() {
   MacroRegisterFunctionWithName("NilradicalCandidate::computeTheTwoConesRelativeToNilradicalSubset");
-  this->theNilradical.subSelection(this->theNilradSubsel, this->theNilradicalSubset);
-  this->theNilradicalWeights.subSelection(this->theNilradSubsel, this->theNilradicalSubsetWeights);
+  this->theNilradical.subSelection(this->nilradicalSubselection, this->theNilradicalSubset);
+  this->nilradicalWeights.subSelection(this->nilradicalSubselection, this->theNilradicalSubsetWeights);
   this->theNonFKhwVectorsStrongRelativeToSubset.setSize(0);
   this->theNonFKhwVectorsStrongRelativeToSubsetWeights.setSize(0);
   for (int i = 0; i < this->theNonFKhws.size; i ++) {
@@ -3463,9 +3539,9 @@ void NilradicalCandidate::computeTheTwoCones() {
   MacroRegisterFunctionWithName("NilradicalCandidate::computeTheTwoCones");
   this->checkInitialization();
   this->reset();
-  for (int i = 0; i < this->theNilradicalSelection.size; i ++) {
+  for (int i = 0; i < this->nilradicalSelection.size; i ++) {
     if (!this->owner->primalSubalgebraModules.contains(i)) {
-      if (this->theNilradicalSelection[i] == 0) {
+      if (this->nilradicalSelection[i] == 0) {
         for (int k = 0; k < this->owner->modules[i].size; k ++) {
           this->theNonFKhws.addOnTop(this->owner->highestWeightsPrimal[i]);
           this->theNonFKhwVectors.addOnTop(this->owner->highestVectors[i][k]);
@@ -3475,9 +3551,9 @@ void NilradicalCandidate::computeTheTwoCones() {
             this->theNonFKHVectorsStronglyTwoSided.addOnTop(this->owner->highestVectors[i][k]);
           }
         }
-      } else if (this->theNilradicalSelection[i] == 1) {
+      } else if (this->nilradicalSelection[i] == 1) {
         for (int k = 0; k < this->owner->modules[i].size; k ++) {
-          this->theNilradicalWeights.addListOnTop(this->owner->weightsModulesPrimal[i]);
+          this->nilradicalWeights.addListOnTop(this->owner->weightsModulesPrimal[i]);
           this->theNilradical.addListOnTop(this->owner->modules[i][k]);
           this->theNilradicalElementOpposites.addListOnTop(this->owner->modulesSl2opposite[i][k]);
           for (int l = 0; l < this->owner->modules[i][k].size; l ++) {
@@ -3503,7 +3579,7 @@ void CandidateSemisimpleSubalgebra::enumerateAllNilradicals() {
   std::stringstream reportStream;
   reportStream << "Enumerating recursively nilradicals of type " << this->toStringTypeAndHs() << "...";
   theReport.report(reportStream.str());
-  this->FKNilradicalCandidates.setSize(0);
+  this->fernandoKacNilradicalCandidates.setSize(0);
   List<int> theSel;
   this->recursionDepthCounterForNilradicalGeneration = 0;
   //0 stands for not selected, 1 for selected from nilradical, 3 for selected from semisimple part, 2 stands for unknown.
@@ -3519,32 +3595,32 @@ void CandidateSemisimpleSubalgebra::enumerateAllNilradicals() {
     << " elements." << global.fatal;
   }
   this->enumerateNilradicalsRecursively(theSel, &out);
-  if (this->FKNilradicalCandidates.size < 1) {
+  if (this->fernandoKacNilradicalCandidates.size < 1) {
     global.fatal << "While enumerating nilradicals of "
     << this->weylNonEmbedded->dynkinType.toString()
     << " got 0 nilradical candidates which is impossible (the zero nilradical is always possible). " << global.fatal;
   }
-  for (int i = 0; i < this->FKNilradicalCandidates.size; i ++) {
+  for (int i = 0; i < this->fernandoKacNilradicalCandidates.size; i ++) {
     std::stringstream reportStream2;
-    reportStream2 << "Processing nilradical: " << i + 1 << " out of " << this->FKNilradicalCandidates.size;
+    reportStream2 << "Processing nilradical: " << i + 1 << " out of " << this->fernandoKacNilradicalCandidates.size;
     theReport2.report(reportStream2.str());
-    this->FKNilradicalCandidates[i].processMe();
+    this->fernandoKacNilradicalCandidates[i].processMe();
   }
   this->NumConeIntersections = 0;
   this->NumCasesNoLinfiniteRelationFound = 0;
   this->NumBadParabolics = 0;
   this->NumCentralizerConditionFailsconeConditionHolds = 0;
-  for (int i = 0; i < this->FKNilradicalCandidates.size; i ++) {
-    if (this->FKNilradicalCandidates[i].flagNilradicalConesIntersect) {
+  for (int i = 0; i < this->fernandoKacNilradicalCandidates.size; i ++) {
+    if (this->fernandoKacNilradicalCandidates[i].flagNilradicalConesIntersect) {
       this->NumConeIntersections ++;
-      if (!this->FKNilradicalCandidates[i].flagLinfiniteRelFound) {
+      if (!this->fernandoKacNilradicalCandidates[i].flagLinfiniteRelFound) {
         this->NumCasesNoLinfiniteRelationFound ++;
       }
     } else {
-      if (!this->FKNilradicalCandidates[i].flagParabolicACextendsToParabolicAC) {
+      if (!this->fernandoKacNilradicalCandidates[i].flagParabolicACextendsToParabolicAC) {
         this->NumBadParabolics ++;
       }
-      if (!this->FKNilradicalCandidates[i].flagRestrictedCentralizerConditionHoldS) {
+      if (!this->fernandoKacNilradicalCandidates[i].flagRestrictedCentralizerConditionHoldS) {
         this->NumCentralizerConditionFailsconeConditionHolds ++;
       }
     }
@@ -3631,12 +3707,12 @@ void NilradicalCandidate::processMe() {
   this->flagRestrictedCentralizerConditionHoldS = false;
   this->flagParabolicACextendsToParabolicAC = true;
   this->computeTheTwoCones();
-  this->flagNilradicalConesIntersect = this->theNilradicalWeights.conesIntersect(
-    this->theNilradicalWeights, this->theNonFKhws, &this->ConeIntersection, &this->ConeSeparatingNormal
+  this->flagNilradicalConesIntersect = this->nilradicalWeights.conesIntersect(
+    this->nilradicalWeights, this->theNonFKhws, &this->ConeIntersection, &this->ConeSeparatingNormal
   );
   this->flagLinfiniteRelFound = false;
   if (!this->flagNilradicalConesIntersect) {
-    if (this->theNonFKhws.size == 0 && this->theNilradicalWeights.size == 0) {
+    if (this->theNonFKhws.size == 0 && this->nilradicalWeights.size == 0) {
       this->flagRestrictedCentralizerConditionHoldS = true;
       this->flagParabolicACextendsToParabolicAC = true;
       return;
@@ -3644,24 +3720,24 @@ void NilradicalCandidate::processMe() {
     this->computeParabolicACExtendsToParabolicAC();
     return;
   }
-  this->flagNilradicalConesStronglyIntersect = this->theNilradicalWeights.conesIntersect(
-    this->theNilradicalWeights, this->theNonFKhwsStronglyTwoSided, &this->ConeStrongIntersection, nullptr
+  this->flagNilradicalConesStronglyIntersect = this->nilradicalWeights.conesIntersect(
+    this->nilradicalWeights, this->theNonFKhwsStronglyTwoSided, &this->ConeStrongIntersection, nullptr
   );
   if (this->flagNilradicalConesStronglyIntersect) {
     this->flagLinfiniteRelFound = this->tryFindingLInfiniteRelations();
   }
 }
 
-std::string CandidateSemisimpleSubalgebra::toStringNilradicalSelection(const List<int>& theSelection) {
+std::string CandidateSemisimpleSubalgebra::toStringNilradicalSelection(const List<int>& selection) {
   Vector<Rational> undecided, included, excluded, tempV;
   included.makeZero(this->nilradicalPairingTable.size);
   undecided.makeZero(this->nilradicalPairingTable.size);
   excluded.makeZero(this->nilradicalPairingTable.size);
-  for (int i = 0; i < theSelection.size; i ++) {
+  for (int i = 0; i < selection.size; i ++) {
     tempV.makeEi(this->nilradicalPairingTable.size, i);
-    if (theSelection[i] == 0) {
+    if (selection[i] == 0) {
       excluded += tempV;
-    } else if (theSelection[i] == 1) {
+    } else if (selection[i] == 1) {
       included += tempV;
     } else {
       undecided += tempV;
@@ -3674,10 +3750,9 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicalSelection(const Lis
   return out.str();
 }
 
-bool CandidateSemisimpleSubalgebra::isPossibleNilradicalCarryOutSelectionImplications(
-  List<int>& theSelection, std::stringstream* logStream
+bool CandidateSemisimpleSubalgebra::isPossibleNilradicalCarryOutSelectionImplications(List<int>& selection, std::stringstream* logStream
 ) {
-  if (this->FKNilradicalCandidates.size > 100) {
+  if (this->fernandoKacNilradicalCandidates.size > 100) {
     if (logStream != nullptr) {
       std::string tempS = logStream->str();
       if (tempS.size() > 2) {
@@ -3689,23 +3764,23 @@ bool CandidateSemisimpleSubalgebra::isPossibleNilradicalCarryOutSelectionImplica
     logStream = nullptr;
   }
   if (logStream != nullptr) {
-    *logStream << "<br>********Considering selection " << this->toStringNilradicalSelection(theSelection) << "********";
+    *logStream << "<br>********Considering selection " << this->toStringNilradicalSelection(selection) << "********";
   }
   HashedList<int, HashFunctions::hashFunction> selectedIndices;
-  for (int i = 0; i < theSelection.size; i ++) {
-    if (theSelection[i] == 1) {
+  for (int i = 0; i < selection.size; i ++) {
+    if (selection[i] == 1) {
       selectedIndices.addOnTop(i);
     }
   }
   MemorySaving<List<int> > oldSelection;
   if (logStream != nullptr) {
-    oldSelection.getElement() = theSelection;
+    oldSelection.getElement() = selection;
   }
   this->extendNilradicalSelectionToMultFreeOverSemisimplePartSubalgebra(selectedIndices);
-  for (int i = 0; i < theSelection.size; i ++) {
-    if (theSelection[i] == 0 && selectedIndices.contains(i)) {
+  for (int i = 0; i < selection.size; i ++) {
+    if (selection[i] == 0 && selectedIndices.contains(i)) {
       if (logStream != nullptr) {
-        *logStream << " <br>The selection " << this->toStringNilradicalSelection(theSelection)
+        *logStream << " <br>The selection " << this->toStringNilradicalSelection(selection)
         << " is contradictory, as the only way to extend it to a subalgebra "
         << "(i.e., closed under Lie bracket) is by requesting that module V_{"
         << i + 1 << "} be included, but at the same time we have already "
@@ -3715,25 +3790,25 @@ bool CandidateSemisimpleSubalgebra::isPossibleNilradicalCarryOutSelectionImplica
     }
   }
   for (int i = 0; i <selectedIndices.size; i ++) {
-    theSelection[selectedIndices[i]] = 1;
+    selection[selectedIndices[i]] = 1;
   }
   if (logStream != nullptr) {
-    if (oldSelection.getElement() != theSelection) {
+    if (oldSelection.getElement() != selection) {
       *logStream << "<br>In order to be closed w.r.t. the Lie bracket, I extend the nilradical selection "
       << this->toStringNilradicalSelection(oldSelection.getElement()) << " to the following. "
-      << this->toStringNilradicalSelection(theSelection);
+      << this->toStringNilradicalSelection(selection);
     }
   }
   for (int i = 0; i <selectedIndices.size; i ++) {
     for (int j = 0; j < this->oppositeModulesByStructure[selectedIndices[i]].size; j ++) {
-      if (theSelection[this->oppositeModulesByStructure[selectedIndices[i]][j]] == 1) {
+      if (selection[this->oppositeModulesByStructure[selectedIndices[i]][j]] == 1) {
         if (logStream != nullptr) {
-          *logStream << "<br>The subalgebra selection " << this->toStringNilradicalSelection(theSelection)
+          *logStream << "<br>The subalgebra selection " << this->toStringNilradicalSelection(selection)
           << " contains opposite modules and is therefore not allowed. ";
         }
         return false;
       }
-      theSelection[this->oppositeModulesByStructure[selectedIndices[i]][j]] = 0;
+      selection[this->oppositeModulesByStructure[selectedIndices[i]][j]] = 0;
     }
   }
   return true;
@@ -3751,7 +3826,9 @@ void CandidateSemisimpleSubalgebra::extendNilradicalSelectionToMultFreeOverSemis
   }
 }
 
-void CandidateSemisimpleSubalgebra::enumerateNilradicalsRecursively(List<int>& theSelection, std::stringstream* logStream) {
+void CandidateSemisimpleSubalgebra::enumerateNilradicalsRecursively(
+  List<int>& selection, std::stringstream* logStream
+) {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::enumerateNilradicalsRecursively");
   RecursionDepthCounter theCounter(&this->recursionDepthCounterForNilradicalGeneration);
   if (this->recursionDepthCounterForNilradicalGeneration>this->nilradicalPairingTable.size + 1) {
@@ -3759,24 +3836,24 @@ void CandidateSemisimpleSubalgebra::enumerateNilradicalsRecursively(List<int>& t
     << "depth cannot exceed the number of nilradicals! "
     << global.fatal;
   }
-  ProgressReport theReport;
-  if (theReport.tickAndWantReport()) {
+  ProgressReport report;
+  if (report.tickAndWantReport()) {
     std::stringstream out;
-    out << "Enumerating nilradicals: " << this->FKNilradicalCandidates.size << " found so far. ";
-    theReport.report(out.str());
+    out << "Enumerating nilradicals: " << this->fernandoKacNilradicalCandidates.size << " found so far. ";
+    report.report(out.str());
   }
-  if (!this->isPossibleNilradicalCarryOutSelectionImplications(theSelection, logStream)) {
+  if (!this->isPossibleNilradicalCarryOutSelectionImplications(selection, logStream)) {
     return;
   }
   List<int> newSelection;
   bool found = false;
-  for (int i = 0; i < theSelection.size; i ++) {
-    if (theSelection[i] == 2) {
+  for (int i = 0; i < selection.size; i ++) {
+    if (selection[i] == 2) {
       found = true;
-      newSelection = theSelection;
+      newSelection = selection;
       newSelection[i] = 0;
       this->enumerateNilradicalsRecursively(newSelection, logStream);
-      newSelection = theSelection;
+      newSelection = selection;
       newSelection[i] = 1;
       this->enumerateNilradicalsRecursively(newSelection, logStream);
       break;
@@ -3786,10 +3863,10 @@ void CandidateSemisimpleSubalgebra::enumerateNilradicalsRecursively(List<int>& t
   if (found) {
     return;
   }
-  NilradicalCandidate tempCandidate;
-  tempCandidate.owner = this;
-  tempCandidate.theNilradicalSelection = theSelection;
-  this->FKNilradicalCandidates.addOnTop(tempCandidate);
+  NilradicalCandidate candidate;
+  candidate.owner = this;
+  candidate.nilradicalSelection = selection;
+  this->fernandoKacNilradicalCandidates.addOnTop(candidate);
 }
 
 void CandidateSemisimpleSubalgebra::computePrimalModuleDecompositionHighestWeightsOnly(HashedList<Vector<Rational> >& outputHWsDualCoords) {
@@ -4461,13 +4538,13 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   tempS = this->preferredAmbientSimpleBasis.toString();
   std::string virtualPath = "";
   std::string htmlPathServer = "";
-  //bool usePNG = false;
+  // bool usePNG = false;
   bool useHtml = true;
   bool useLatex = false;
   virtualPath = this->owner->fileNames.virtualFolderName() + "sl2s/";
   htmlPathServer = this->owner->fileNames.displayFolderName("../../") + "sl2s/";
   if (virtualPath == "" || htmlPathServer == "") {
-    //usePNG = false;
+    // usePNG = false;
     useHtml = false;
   }
   if (useHtml) {
@@ -4536,6 +4613,10 @@ void SlTwoSubalgebra::initialize() {
   this->flagCentralizerTypeComputed = false;
   this->flagCentralizerIsRegular = false;
   this->dimensionCentralizer = - 1;
+}
+
+void SlTwoSubalgebra::dynkinTypeEmbedded(DynkinType& output) const {
+  output.makeSimpleType('A', 1, &this->lengthHSquared);
 }
 
 bool SlTwoSubalgebra::checkConsistency() const {
@@ -5232,8 +5313,8 @@ std::string SlTwoSubalgebras::toString(FormatExpressions* format) {
 void SlTwoSubalgebras::writeHTML(FormatExpressions* format) {
   MacroRegisterFunctionWithName("SlTwoSubalgebras::toHTML");
   std::string virtualFileName = this->owner->fileNames.virtualFolderName() + this->owner->fileNames.fileNameRelativePathSlTwoSubalgebras();
-  ProgressReport theReport;
-  theReport.report("Preparing html pages for sl(2) subalgebras. This might take a while.");
+  ProgressReport report;
+  report.report("Preparing html pages for sl(2) subalgebras. This might take a while.");
   this->rootSubalgebras.toHTML(format);
   std::stringstream out;
   out << "<html><title>sl(2)-subalgebras of "
@@ -5758,16 +5839,16 @@ std::string NilradicalCandidate::toString(FormatExpressions* format) const {
   std::stringstream out;
   out << this->FKnilradicalLog;
   Vector<Rational> currentNilrad;
-  currentNilrad = this->theNilradicalSelection;
+  currentNilrad = this->nilradicalSelection;
   out << currentNilrad.toStringLetterFormat("W");
   if (this->flagNilradicalConesIntersect) {
     out << ". Cones intersect. ";
   } else {
     out << ". Cones don't intersect. ";
   }
-  if (this->theNilradicalWeights.size > 0) {
+  if (this->nilradicalWeights.size > 0) {
     out << "<br>Nilradical cone: <br>"
-    << this->toStringTableElementWithWeights(this->theNilradical, this->theNilradicalWeights);
+    << this->toStringTableElementWithWeights(this->theNilradical, this->nilradicalWeights);
   }
   out << "<br> Highest weight cone:<br> " << this->toStringTableElementWithWeights(this->theNonFKhwVectors, this->theNonFKhws);
   if (this->flagNilradicalConesIntersect) {
@@ -5776,27 +5857,27 @@ std::string NilradicalCandidate::toString(FormatExpressions* format) const {
     out << "<br> ";
     FormatExpressions tempFormat;
     tempFormat.vectorSpaceEiBasisNames.setSize(this->ConeIntersection.size);
-    for (int j = 0; j < this->theNilradicalWeights.size; j ++) {
-      tempFormat.vectorSpaceEiBasisNames[j] = this->theNilradicalWeights[j].toString();
+    for (int j = 0; j < this->nilradicalWeights.size; j ++) {
+      tempFormat.vectorSpaceEiBasisNames[j] = this->nilradicalWeights[j].toString();
     }
     for (int j = 0; j < this->theNonFKhws.size; j ++) {
-      tempFormat.vectorSpaceEiBasisNames[j + this->theNilradicalWeights.size] = this->theNonFKhws[j].toString();
+      tempFormat.vectorSpaceEiBasisNames[j + this->nilradicalWeights.size] = this->theNonFKhws[j].toString();
     }
     out << this->ConeIntersection.toStringLetterFormat("w", &tempFormat);
     if (this->flagNilradicalConesStronglyIntersect) {
       for (int j = 0; j < this->theNonFKhwsStronglyTwoSided.size; j ++) {
-        tempFormat.vectorSpaceEiBasisNames[j + this->theNilradicalWeights.size] = this->theNonFKhwsStronglyTwoSided[j].toString();
+        tempFormat.vectorSpaceEiBasisNames[j + this->nilradicalWeights.size] = this->theNonFKhwsStronglyTwoSided[j].toString();
       }
       out << "<br>In addition, the nilradical cones intersect strongly "
       << "at weight " << this->getConeStrongIntersectionWeight().toString();
       out << "<br>" << this->ConeStrongIntersection.toStringLetterFormat("w", &tempFormat);
       out << "<br>The involved nilradical elements: " << "<br><table><tr>";
-      for (int i = 0; i < this->theNilradicalWeights.size; i ++) {
+      for (int i = 0; i < this->nilradicalWeights.size; i ++) {
         if (this->ConeStrongIntersection[i] != 0) {
-          Vector<Rational>& currentNilradWeight = this->theNilradicalWeights[i];
+          Vector<Rational>& currentNilradWeight = this->nilradicalWeights[i];
           out << "<td><table border =\"1\"><tr><td>" << currentNilradWeight.toString() << "</td></tr>";
-          for (int j = 0; j < this->theNilradicalWeights.size; j ++) {
-            if (currentNilradWeight == this->theNilradicalWeights[j]) {
+          for (int j = 0; j < this->nilradicalWeights.size; j ++) {
+            if (currentNilradWeight == this->nilradicalWeights[j]) {
               out << "<tr><td>" << this->theNilradical[j].toString() << "</td></tr>";
               out << "<tr><td>" << this->theNilradicalElementOpposites[j].toString() << "</td></tr>";
             }
@@ -5839,10 +5920,10 @@ std::string NilradicalCandidate::toString(FormatExpressions* format) const {
     }
     out << "<br>Levi roots primal fundamental coordinates: " << this->leviRootsSmallPrimalFundCoords.toString()
     << "<br>Levi components in centralizer: "
-    << this->theLeviDiagramSmalL.toString()
+    << this->leviDiagramSmall.toString()
     << "<br>Levi roots containing parabolic: " << this->leviRootsAmbienT.toString()
     << "<br>Levi components containing parabolic: "
-    << this->theLeviDiagramAmbienT.toString();
+    << this->leviDiagramAmbient.toString();
     out << "<br>Separating hyperplane: " << this->ConeSeparatingNormal.toStringLetterFormat("u");
   }
   return out.str();
@@ -5878,15 +5959,15 @@ void NilradicalCandidate::getModGeneratedByNonHighestWeightVectorAndNilradElemen
 std::string CandidateSemisimpleSubalgebra::toStringNilradicalsSummary(FormatExpressions* format) const {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::toStringNilradicalsSummary");
   (void) format; //avoid unused parameter warning in a portable way.
-  if (this->FKNilradicalCandidates.size == 0) {
+  if (this->fernandoKacNilradicalCandidates.size == 0) {
     return "";
   }
   std::stringstream out;
-  out << "<br>There are " << this->FKNilradicalCandidates.size
+  out << "<br>There are " << this->fernandoKacNilradicalCandidates.size
   << " possible isotypic nilradical extensions of the primal subalgebra. Of them "
   << this->NumConeIntersections << " have intersecting cones. Of the remaining "
-  << this->FKNilradicalCandidates.size - this->NumConeIntersections << " nilradical extensions with non-intersecting cones, "
-  << this->FKNilradicalCandidates.size - this->NumConeIntersections - this->NumCentralizerConditionFailsconeConditionHolds
+  << this->fernandoKacNilradicalCandidates.size - this->NumConeIntersections << " nilradical extensions with non-intersecting cones, "
+  << this->fernandoKacNilradicalCandidates.size - this->NumConeIntersections - this->NumCentralizerConditionFailsconeConditionHolds
   << " satisfy the centralizer condition and " << this->NumCentralizerConditionFailsconeConditionHolds
   << " fail the centralizer condition.";
   if (this->NumBadParabolics > 0) {
@@ -5896,7 +5977,7 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicalsSummary(FormatExpr
     << "For these subalgebras the PSZ construction is not proven to hold. </span>";
   } else {
     out << "<br><span style =\"color:#0000FF\"> In each of "
-    << this->FKNilradicalCandidates.size - this->NumConeIntersections - this->NumCentralizerConditionFailsconeConditionHolds
+    << this->fernandoKacNilradicalCandidates.size - this->NumConeIntersections - this->NumCentralizerConditionFailsconeConditionHolds
     << " case(s) when the centralizer condition holds, "
     << "the parabolic subalgebra in the centralizer with Levi types A and C extends "
     << "to parabolic subalgebra of the ambient Lie algebra whose Levi types are A and C only. </span>";
@@ -5915,7 +5996,7 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicalsSummary(FormatExpr
 
 std::string CandidateSemisimpleSubalgebra::toStringNilradicals(FormatExpressions* format) const {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::toStringNilradicals");
-  if (this->FKNilradicalCandidates.size == 0) {
+  if (this->fernandoKacNilradicalCandidates.size == 0) {
     if (this->owner->flagComputeNilradicals) {
       if (this->amRegularSA()) {
         return "Nilradicals not computed, but that is OK because this a root subalgebra. ";
@@ -5929,7 +6010,7 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(FormatExpressions
   std::stringstream out;
   out << this->toStringNilradicalsSummary(format);
   Vector<Rational> primalBase;
-  primalBase = this->FKNilradicalCandidates[0].theNilradicalSelection;
+  primalBase = this->fernandoKacNilradicalCandidates[0].nilradicalSelection;
   out << "<br>The primal extension of the semisimple subalgerba equals: " << primalBase.toStringLetterFormat("W");
   if (this->owner->flagProduceLaTeXtables) {
     Vector<Rational> currentNilradVector;
@@ -5940,9 +6021,9 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(FormatExpressions
       tempFormat = this->characterFormat.getElementConst();
     }
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > RelevantBracketsLeft, RelevantBracketsRight, RelevantBrackets;
-    for (int i = 0; i < this->FKNilradicalCandidates.size; i ++) {
-      const NilradicalCandidate& currentNilrad = this->FKNilradicalCandidates[i];
-      currentNilradVector = currentNilrad.theNilradicalSelection;
+    for (int i = 0; i < this->fernandoKacNilradicalCandidates.size; i ++) {
+      const NilradicalCandidate& currentNilrad = this->fernandoKacNilradicalCandidates[i];
+      currentNilradVector = currentNilrad.nilradicalSelection;
       for (int j = 0; j < this->primalSubalgebraModules.size; j ++) {
         currentNilradVector[this->primalSubalgebraModules[j]] -= 1;
       }
@@ -6002,7 +6083,7 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(FormatExpressions
           out << " & &";
         }
         for (int j = 0; j < currentNilrad.theNilradicalSubset.size; j ++) {
-          out << "$" << currentNilrad.theNilradicalElementOpposites[currentNilrad.theNilradSubsel.elements[j]].toString() << "$";
+          out << "$" << currentNilrad.theNilradicalElementOpposites[currentNilrad.nilradicalSubselection.elements[j]].toString() << "$";
           out << " & ";
           if (j != currentNilrad.theNilradicalSubset.size - 1) {
             out << " &";
@@ -6024,11 +6105,11 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(FormatExpressions
             if (k != j) {
               this->owner->owner->lieBracket(
                 currentNilrad.theNilradicalSubset[j],
-                currentNilrad.theNilradicalElementOpposites[currentNilrad.theNilradSubsel.elements[k]],
+                currentNilrad.theNilradicalElementOpposites[currentNilrad.nilradicalSubselection.elements[k]],
                 tempElt
               );
               tempStream << "$[" << currentNilrad.theNilradicalSubset[j].toString() << ", "
-              << currentNilrad.theNilradicalElementOpposites[currentNilrad.theNilradSubsel.elements[k]].toString()
+              << currentNilrad.theNilradicalElementOpposites[currentNilrad.nilradicalSubselection.elements[k]].toString()
               << "] =" << tempElt.toString() << ", ";
             }
           }
@@ -6046,8 +6127,8 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(FormatExpressions
     }
     out << "\\end{longtable}";
   }
-  for (int i = 0; i < this->FKNilradicalCandidates.size; i ++) {
-    out << "<hr>Subalgebra " << i + 1 << ": " << this->FKNilradicalCandidates[i].toString(format);
+  for (int i = 0; i < this->fernandoKacNilradicalCandidates.size; i ++) {
+    out << "<hr>Subalgebra " << i + 1 << ": " << this->fernandoKacNilradicalCandidates[i].toString(format);
   }
   if (this->nilradicalGenerationLog != "") {
     out << "<br>Nilradical generation log:" << this->nilradicalGenerationLog;
@@ -6498,9 +6579,9 @@ std::string CandidateSemisimpleSubalgebra::toStringSystem(FormatExpressions* for
     }
   }
   out << "Positive weight subsystem: " << this->weylNonEmbedded->rootsOfBorel.toString();
-  if (this->PosRootsPerpendicularPrecedingWeights.size > 0) {
+  if (this->posistiveRootsPerpendicularToPrecedingWeights.size > 0) {
     out << " Positive roots that commute with the weight subsystem: "
-    << this->PosRootsPerpendicularPrecedingWeights.toString();
+    << this->posistiveRootsPerpendicularToPrecedingWeights.toString();
   }
   out << "<br>Symmetric Cartan default scale: "
   << this->subalgebraNonEmbeddedDefaultScale->weylGroup.cartanSymmetric.toString(format);
@@ -6832,7 +6913,7 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* format) c
   return out.str();
 }
 
-void CandidateSemisimpleSubalgebra::GetHsScaledToActByTwoByType(
+void CandidateSemisimpleSubalgebra::getHsScaledToActByTwoByType(
   List<List<Vectors<Rational> > >& outputHsByType, List<DynkinSimpleType>& outputTypeList
 ) const {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::GetHsByType");
@@ -6908,7 +6989,7 @@ bool CandidateSemisimpleSubalgebra::isDirectSummandOf(const CandidateSemisimpleS
   List<DynkinSimpleType> isoTypes;
   SelectionFixedRank currentTypeSelection;
   List<List<Vectors<Rational> > > theHsScaledToActByTwoByType;
-  other.GetHsScaledToActByTwoByType(theHsScaledToActByTwoByType, isoTypes);
+  other.getHsScaledToActByTwoByType(theHsScaledToActByTwoByType, isoTypes);
   for (int i = 0; i < isoTypes.size; i ++) {
     Rational ratMult = this->weylNonEmbedded->dynkinType.getCoefficientOf(isoTypes[i]);
     int intMult = 0;

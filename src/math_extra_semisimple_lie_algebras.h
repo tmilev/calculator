@@ -415,7 +415,7 @@ class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coef
     const Selection& ParSelFDInducingPart,
     SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& outputWeylSub
   );
-  int getIndexExtremeWeightRelativeToWeyl(WeylGroupData& theWeyl) const;
+  int getIndexExtremeWeightRelativeToWeyl(WeylGroupData& weyl) const;
   void makeTrivial(SemisimpleLieAlgebra& inputOwner);
   std::string multiplyBy(const CharacterSemisimpleLieAlgebraModule& other);
   std::string operator*=(const CharacterSemisimpleLieAlgebraModule& other);

@@ -3571,26 +3571,26 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerInvertMatrixVerbose");
-  Matrix<RationalFraction<Rational> > theMatrix, outputMat, extendedMatrix;
+  Matrix<RationalFraction<Rational> > matrix, outputMat, extendedMatrix;
   Expression converted;
   if (!CalculatorConversions::innerMatrixRationalFunction(
     calculator, input, converted
   )) {
     return output.makeError("Failed to extract matrix. ", calculator);
   }
-  if (calculator.functionGetMatrix(converted, theMatrix)) {
+  if (calculator.functionGetMatrix(converted, matrix)) {
     return calculator << "Failed to get matrix of rational functions. ";
   }
   ExpressionContext theContext = converted.getContext();
-  if (theMatrix.numberOfRows != theMatrix.numberOfColumns || theMatrix.numberOfColumns < 1) {
+  if (matrix.numberOfRows != matrix.numberOfColumns || matrix.numberOfColumns < 1) {
     std::stringstream out;
-    out << "The matrix " << theMatrix.toString( ) << " has "
-    << theMatrix.numberOfColumns << " columns and " << theMatrix.numberOfRows << " rows. "
+    out << "The matrix " << matrix.toString( ) << " has "
+    << matrix.numberOfColumns << " columns and " << matrix.numberOfRows << " rows. "
     << "The matrix is not square.";
     return output.makeError(out.str(), calculator);
   }
   outputMat.makeIdentityMatrix(
-  theMatrix.numberOfRows,RationalFraction<Rational>::oneRational(), RationalFraction<Rational>::zeroRational());
+  matrix.numberOfRows,RationalFraction<Rational>::oneRational(), RationalFraction<Rational>::zeroRational());
   int tempI;
   int NumFoundPivots = 0;
   std::stringstream out, outLaTeX;
@@ -3601,29 +3601,29 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   theFormat.flagUseLatex = true;
   theFormat.flagUseHTML = false;
   theFormat.flagUseFrac = true;
-  theFormat.matrixColumnVerticalLineIndex = theMatrix.numberOfColumns - 1;
+  theFormat.matrixColumnVerticalLineIndex = matrix.numberOfColumns - 1;
   out << "Computing "
-  << HtmlRoutines::getMathNoDisplay(theMatrix.toString(&theFormat) + "^{- 1}");
-  extendedMatrix = theMatrix;
+  << HtmlRoutines::getMathNoDisplay(matrix.toString(&theFormat) + "^{- 1}");
+  extendedMatrix = matrix;
   extendedMatrix.appendMatrixOnTheRight(outputMat);
   out << "<br>" << HtmlRoutines::getMathNoDisplay(extendedMatrix.toString(&theFormat)) ;
   outLaTeX << "\\begin{tabular}{ll}";
   outLaTeX << "$" << extendedMatrix.toString(& theFormat) << "$";
 
-  for (int i = 0; i < theMatrix.numberOfColumns; i ++) {
-    tempI = theMatrix.findPivot(i, NumFoundPivots);
+  for (int i = 0; i < matrix.numberOfColumns; i ++) {
+    tempI = matrix.findPivot(i, NumFoundPivots);
     if (tempI != - 1) {
       if (tempI != NumFoundPivots) {
-        theMatrix.switchRows(NumFoundPivots, tempI);
+        matrix.switchRows(NumFoundPivots, tempI);
         outputMat.switchRows (NumFoundPivots, tempI);
         out << "<br>Swap row " << NumFoundPivots + 1 << " and row " << tempI + 1 << ": ";
         outLaTeX << "& Swap row " << NumFoundPivots + 1 << " and row " << tempI + 1 << ". ";
-        extendedMatrix = theMatrix;
+        extendedMatrix = matrix;
         extendedMatrix.appendMatrixOnTheRight(outputMat);
         out << "<br>" << HtmlRoutines::getMathNoDisplay(outputMat.toString(&theFormat));
         outLaTeX << "\\\\" << "$" << outputMat.toString(&theFormat) << "$";
       }
-      tempElement = theMatrix(NumFoundPivots, i);
+      tempElement = matrix(NumFoundPivots, i);
       tempElement.invert();
       if (tempElement != 1) {
         out << "<br> multiply row number " << NumFoundPivots + 1 << " by "
@@ -3631,21 +3631,21 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
         outLaTeX << "& multiply row number " << NumFoundPivots + 1 << " by $"
         << tempElement.toString(&theFormat) << "$. \\\\";
       }
-      theMatrix.rowTimesScalar(NumFoundPivots, tempElement);
+      matrix.rowTimesScalar(NumFoundPivots, tempElement);
       outputMat.rowTimesScalar(NumFoundPivots, tempElement);
       if (tempElement != 1) {
-        extendedMatrix = theMatrix;
+        extendedMatrix = matrix;
         extendedMatrix.appendMatrixOnTheRight(outputMat);
         out << HtmlRoutines::getMathNoDisplay(extendedMatrix.toString(&theFormat));
         outLaTeX << "$" << extendedMatrix.toString(&theFormat) << "$";
       }
       bool found = false;
-      for (int j = 0; j < theMatrix.numberOfRows; j ++) {
+      for (int j = 0; j < matrix.numberOfRows; j ++) {
         if (j != NumFoundPivots) {
-          if (!theMatrix.elements[j][i].isEqualToZero()) {
-            tempElement = theMatrix.elements[j][i];
+          if (!matrix.elements[j][i].isEqualToZero()) {
+            tempElement = matrix.elements[j][i];
             tempElement.negate();
-            theMatrix.addTwoRows(NumFoundPivots, j, i, tempElement);
+            matrix.addTwoRows(NumFoundPivots, j, i, tempElement);
             outputMat.addTwoRows(NumFoundPivots, j, 0, tempElement);
             if (!found) {
               out << "<br>";
@@ -3667,7 +3667,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
         out << ": <br> ";
         outLaTeX << "\\end{tabular}";
         outLaTeX << "\\\\";
-        extendedMatrix = theMatrix;
+        extendedMatrix = matrix;
         extendedMatrix.appendMatrixOnTheRight(outputMat);
         out << HtmlRoutines::getMathNoDisplay(extendedMatrix.toString(&theFormat));
         outLaTeX << "$" << extendedMatrix.toString(&theFormat) << "$";
@@ -3677,7 +3677,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   }
   outLaTeX << "\\end{tabular}";
   theFormat.matrixColumnVerticalLineIndex = - 1;
-  if (NumFoundPivots < theMatrix.numberOfRows) {
+  if (NumFoundPivots < matrix.numberOfRows) {
     out << "<br>Matrix to the right of the vertical line not "
     << "transformed to the identity matrix => "
     << "starting matrix is not invertible. ";
@@ -5208,16 +5208,16 @@ void Expression::getBlocksOfCommutativity(HashedListSpecialized<Expression>& inp
   inputOutputList.addOnTopNoRepetition(*this);
 }
 
-bool Expression::makeMatrix(Calculator& owner, Matrix<Expression>* inputMat) {
+bool Expression::makeMatrix(Calculator& owner, Matrix<Expression>* inputMatrix) {
   MacroRegisterFunctionWithName("Expression::makeMatrix");
-  if (inputMat == nullptr) {
+  if (inputMatrix == nullptr) {
     this->reset(owner);
-    Expression theMatID(owner);
-    theMatID.addChildAtomOnTop(owner.opMatrix());
-    this->addChildOnTop(theMatID);
+    Expression matrixID(owner);
+    matrixID.addChildAtomOnTop(owner.opMatrix());
+    this->addChildOnTop(matrixID);
     return true;
   }
-  return this->assignMatrixExpressions(*inputMat, owner, true, true);
+  return this->assignMatrixExpressions(*inputMatrix, owner, true, true);
 }
 
 bool Expression::makeSequence(Calculator& owner, List<Expression>* inputSequence) {
@@ -5302,20 +5302,20 @@ bool CalculatorFunctionsLinearAlgebra::minimalPolynomialMatrix(
   )) {
     return false;
   }
-  Matrix<Rational> theMat;
-  if (!calculator.functionGetMatrix(argument, theMat)) {
+  Matrix<Rational> matrix;
+  if (!calculator.functionGetMatrix(argument, matrix)) {
     return calculator
     << "<hr>Minimal poly computation: could not convert "
     << argument.toString() << " to rational matrix.";
   }
-  if (theMat.numberOfRows != theMat.numberOfColumns || theMat.numberOfRows <= 0) {
+  if (matrix.numberOfRows != matrix.numberOfColumns || matrix.numberOfRows <= 0) {
     return output.makeError("Error: matrix is not square.", calculator);
   }
   FormatExpressions tempF;
   tempF.polynomialAlphabet.setSize(1);
   tempF.polynomialAlphabet[0] = "q";
   Polynomial<Rational> theMinPoly;
-  theMinPoly.assignMinimalPolynomial(theMat);
+  theMinPoly.assignMinimalPolynomial(matrix);
   return output.assignValue(theMinPoly.toString(&tempF), calculator);
 }
 
@@ -5558,12 +5558,12 @@ bool CalculatorFunctions::innerIsNilpotent(
     return false;
   }
   bool found = false;
-  Matrix<Rational> theMat;
-  MatrixTensor<Rational> theMatTensor;
-  if (calculator.functionGetMatrix(converted, theMat)) {
+  Matrix<Rational> matrix;
+  MatrixTensor<Rational> matrixTensor;
+  if (calculator.functionGetMatrix(converted, matrix)) {
     found = true;
-    theMatTensor = theMat;
-  } else if (input.isOfType<MatrixTensor<Rational> >(&theMatTensor)) {
+    matrixTensor = matrix;
+  } else if (input.isOfType<MatrixTensor<Rational> >(&matrixTensor)) {
     found = true;
   }
   if (!found) {
@@ -5571,7 +5571,7 @@ bool CalculatorFunctions::innerIsNilpotent(
       "Failed to extract matrix with rational coefficients", calculator
     );
   }
-  if (theMatTensor.isNilpotent()) {
+  if (matrixTensor.isNilpotent()) {
     return output.assignValue(1, calculator);
   }
   return output.assignValue(0, calculator);
@@ -5579,36 +5579,36 @@ bool CalculatorFunctions::innerIsNilpotent(
 
 bool CalculatorFunctions::innerInvertMatrix(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerInvertMatrix");
-  Matrix<Rational> theMat;
+  Matrix<Rational> matrix;
   Expression converted;
   if (!CalculatorConversions::innerMakeMatrix(
     calculator, input, converted
   )) {
     return calculator << "Failed to extract matrix from input. ";
   }
-  if (calculator.functionGetMatrix(converted, theMat)) {
-    if (theMat.numberOfRows != theMat.numberOfColumns || theMat.numberOfColumns < 1) {
+  if (calculator.functionGetMatrix(converted, matrix)) {
+    if (matrix.numberOfRows != matrix.numberOfColumns || matrix.numberOfColumns < 1) {
       return output.makeError("The matrix is not square", calculator);
     }
-    if (theMat.getDeterminant() == 0) {
+    if (matrix.getDeterminant() == 0) {
       return output.makeError("Matrix determinant is zero.", calculator);
     }
-    theMat.invert();
-    return output.assignMatrix(theMat, calculator);
+    matrix.invert();
+    return output.assignMatrix(matrix, calculator);
   }
-  Matrix<AlgebraicNumber> theMatAlg;
-  if (calculator.functionGetMatrix(input, theMatAlg)) {
+  Matrix<AlgebraicNumber> matrixAlg;
+  if (calculator.functionGetMatrix(input, matrixAlg)) {
     return calculator << "<hr>Failed to extract algebraic number matrix from: "
     << input.toString();
   }
-  if (theMatAlg.numberOfRows != theMatAlg.numberOfColumns || theMatAlg.numberOfColumns < 1) {
+  if (matrixAlg.numberOfRows != matrixAlg.numberOfColumns || matrixAlg.numberOfColumns < 1) {
     return output.makeError("The matrix is not square", calculator);
   }
-  if (theMatAlg.getDeterminant() == 0) {
+  if (matrixAlg.getDeterminant() == 0) {
     return output.makeError("Matrix determinant is zero.", calculator);
   }
-  theMatAlg.invert();
-  return output.assignMatrix(theMatAlg, calculator);
+  matrixAlg.invert();
+  return output.assignMatrix(matrixAlg, calculator);
 }
 
 bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& calculator, const Expression& input, Expression& output) {
@@ -7731,20 +7731,20 @@ bool CalculatorFunctions::transpose(Calculator& calculator, const Expression& in
   ) {
     return false;
   }
-  Matrix<Expression> theMat;
+  Matrix<Expression> matrix;
   if (input.startsWithGivenOperation(Calculator::Atoms::transpose)) {
-    calculator.getMatrixExpressionsFromArguments(input, theMat);
+    calculator.getMatrixExpressionsFromArguments(input, matrix);
   } else {
-    calculator.getMatrixExpressions(input, theMat);
+    calculator.getMatrixExpressions(input, matrix);
   }
   // The commented code used to be here. I don't remember why I added it, perhaps there was a solid reason?
   // If the code is uncommented, then ((1,2),(3,5))^t will not be transposed according to expectation.
   // If the commented code needs to be restored, please document why.
   // if (input.isSequenceNElements())
-  //   if (theMat.numberOfRows !=1)
+  //   if (matrix.numberOfRows !=1)
   //     return false;
-  theMat.transpose();
-  return output.assignMatrixExpressions(theMat, calculator, true, true);
+  matrix.transpose();
+  return output.assignMatrixExpressions(matrix, calculator, true, true);
 }
 
 bool CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT(
@@ -8261,21 +8261,21 @@ bool CalculatorFunctions::randomInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::randomInteger");
-  Matrix<Expression> theMat;
-  if (!calculator.getMatrixExpressionsFromArguments(input, theMat, - 1, 2)) {
+  Matrix<Expression> matrix;
+  if (!calculator.getMatrixExpressionsFromArguments(input, matrix, - 1, 2)) {
     return calculator << "<hr>Failed to extract a Nx2 matrix giving the integer intervals";
   }
-  if (theMat.numberOfRows == 0) {
+  if (matrix.numberOfRows == 0) {
     return calculator << "<hr>Failed to extract a Nx2 matrix giving the integer intervals";
   }
   List<List<int> > theIntervals;
-  theIntervals.setSize(theMat.numberOfRows);
-  for (int i = 0; i < theMat.numberOfRows; i ++) {
-    theIntervals[i].setSize(theMat.numberOfColumns);
-    for (int j = 0; j < theMat.numberOfColumns; j ++) {
-      if (!theMat(i, j).isIntegerFittingInInt(&theIntervals[i][j])) {
+  theIntervals.setSize(matrix.numberOfRows);
+  for (int i = 0; i < matrix.numberOfRows; i ++) {
+    theIntervals[i].setSize(matrix.numberOfColumns);
+    for (int j = 0; j < matrix.numberOfColumns; j ++) {
+      if (!matrix(i, j).isIntegerFittingInInt(&theIntervals[i][j])) {
         return calculator << "<hr>Failed to convert "
-        << theMat(i, j).toString() << " to an integer. ";
+        << matrix(i, j).toString() << " to an integer. ";
       }
     }
   }

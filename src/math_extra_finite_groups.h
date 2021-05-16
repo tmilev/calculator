@@ -185,7 +185,7 @@ public:
   // All of these lists will be expected to be sorted at all times, so please
   // insert using .BSInsertDontDup() if you for some reason can't use the friendly
   // insertion methods provided.
-  List<GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational> > irreps;
+  List<GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational> > irreducibleRepresentations;
   List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > irreps_grcam;
   List<ClassFunction<FiniteGroup<elementSomeGroup>, Rational> > characterTable;
 
@@ -791,7 +791,7 @@ public:
   bool isStronglyPerpendicularTo(const Vector<Rational>& input, const Vectors<Rational>& others);
   void getEpsilonCoordinatesWRTsubalgebra(Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output);
   bool leftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, ElementWeylGroup& right);
-  bool isElementWeylGroup(const MatrixTensor<Rational>& theMat);
+  bool isElementWeylGroup(const MatrixTensor<Rational>& matrix);
   void getMatrixReflection(Vector<Rational>& reflectionRoot, Matrix<Rational>& output);
   template <class Coefficient>
   bool getAllDominantWeightsHWFDIM(
@@ -1175,7 +1175,7 @@ class GroupRepresentation {
 public:
   someGroup* ownerGroup;
   List<Matrix<Coefficient> > generators;
-  mutable ClassFunction<someGroup, Coefficient> theCharacter;
+  mutable ClassFunction<someGroup, Coefficient> character;
   mutable bool flagCharacterIsComputed;
   std::string identifyingString; // in Python, this would be an anonymous object
 
@@ -1192,7 +1192,7 @@ public:
   void computeCharacter() const;
   ClassFunction<someGroup, Coefficient> getCharacter() {
     this->computeCharacter();
-    return this->theCharacter;
+    return this->character;
   }
 
   bool operator>(const GroupRepresentation& right) const;
@@ -1248,7 +1248,7 @@ public:
   }
   GroupRepresentation(const GroupRepresentationCarriesAllMatrices<someGroup, Coefficient>& in) {
     this->generators = in.generators;
-    this->theCharacter = in.theCharacter;
+    this->character = in.theCharacter;
     this->flagCharacterIsComputed = in.flagCharacterIsComputed;
   }
   GroupRepresentationCarriesAllMatrices<someGroup, Coefficient> makeGRCAM() const {
@@ -1258,7 +1258,7 @@ public:
     if (this->identifyingString.size() > 0) {
       out.names.addOnTop(this->identifyingString);
     }
-    out.theCharacter = this->theCharacter;
+    out.theCharacter = this->character;
     return out;
   }
   // Note: the group representation types compute the hash value from the character,
@@ -1302,8 +1302,8 @@ void GroupRepresentation<someGroup, Coefficient>::computeCharacter() const {
   if (!this->ownerGroup->flagCCsComputed) {
     this->ownerGroup->computeConjugacyClassSizesAndRepresentatives();
   }
-  this->theCharacter.G = ownerGroup;
-  this->theCharacter.data.setSize(this->ownerGroup->conjugacyClasses.size);
+  this->character.G = ownerGroup;
+  this->character.data.setSize(this->ownerGroup->conjugacyClasses.size);
   for (int cci = 0; cci < this->ownerGroup->conjugacyClasses.size; cci ++) {
     Matrix<Coefficient> M;
     M.makeIdentity(this->generators[0]);
@@ -1313,9 +1313,9 @@ void GroupRepresentation<someGroup, Coefficient>::computeCharacter() const {
     for (int i = 0; i < ccirWord.size; i ++) {
       M *= this->generators[ccirWord[i]];
     }
-    this->theCharacter.data[cci] = M.getTrace();
+    this->character.data[cci] = M.getTrace();
   }
-  this->theCharacter.G = ownerGroup;
+  this->character.G = ownerGroup;
   this->flagCharacterIsComputed = true;
 }
 
@@ -1329,7 +1329,7 @@ bool GroupRepresentation<someGroup, Coefficient>::operator>(const GroupRepresent
   if (!right.flagCharacterIsComputed) {
     right.computeCharacter();
   }
-  return this->theCharacter > right.theCharacter;
+  return this->character > right.character;
 }
 
 template <typename someGroup, typename Coefficient>
@@ -1357,7 +1357,7 @@ somestream& GroupRepresentation<someGroup, Coefficient>::intoStream(somestream& 
   if (!this->identifyingString.empty()) {
     out << "identified as " << identifyingString;
   }
-  out << " with character " << this->theCharacter;
+  out << " with character " << this->character;
   return out;
 }
 
@@ -1374,7 +1374,7 @@ JSData GroupRepresentation<someGroup, Coefficient>::toJSON() {
   JSData out;
   out["identifyingString"] = identifyingString;
   if (this->flagCharacterIsComputed) {
-    out["character"] = this->theCharacter.data;
+    out["character"] = this->character.data;
   } else {
     out["character"].elementType = JSData::token::tokenNull;
   }
@@ -2504,8 +2504,8 @@ bool FiniteGroup<elementSomeGroup>::checkInitializationConjugacyClasses() const 
     << global.fatal;
     return false;
   }
-  for (int i = 0; i < this->irreps.size; i ++) {
-    if (this->irreps[i].theCharacter.data.isEqualToZero()) {
+  for (int i = 0; i < this->irreducibleRepresentations.size; i ++) {
+    if (this->irreducibleRepresentations[i].character.data.isEqualToZero()) {
       global.fatal << "Irrep number "
       << i + 1 << " has zero character!" << global.fatal;
       return false;

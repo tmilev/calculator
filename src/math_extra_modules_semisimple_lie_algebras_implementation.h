@@ -736,7 +736,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
           if (outputReport != nullptr) {
             out2 << "<hr>Simple generator: " << tempSSElt.toString(&global.defaultFormat.getElement());
           }
-          MatrixTensor<Coefficient>& theMatrix = this->getActionGeneratorIndex(theIndex);
+          MatrixTensor<Coefficient>& matrix = this->getActionGeneratorIndex(theIndex);
           std::stringstream tempStream;
           tempStream << "computing action simple generator index " << (2 * k - 1) * (j + 1) << " ... ";
           theReport.report(tempStream.str());
@@ -744,9 +744,9 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
           theReport.report(tempStream.str());
           if (outputReport != nullptr) {
             if (this->getDimension() < 50) {
-              out2 << "<br>Matrix of elemenent in the m_i basis:<br>" << HtmlRoutines::getMathNoDisplay(theMatrix.toString(), 5000);
+              out2 << "<br>Matrix of elemenent in the m_i basis:<br>" << HtmlRoutines::getMathNoDisplay(matrix.toString(), 5000);
             } else {
-              out2 << "<br>Matrix of elemenent in the m_i basis:<br>" << theMatrix.toString();
+              out2 << "<br>Matrix of elemenent in the m_i basis:<br>" << matrix.toString();
             }
           }
       /*    for (int j = 0; j < this->actionsSimpleGens[i].size; j ++)

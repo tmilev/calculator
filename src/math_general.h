@@ -504,13 +504,13 @@ public:
 };
 
 template <typename Coefficient>
-std::ostream& operator<<(std::ostream& output, const Matrix<Coefficient>& theMat);
+std::ostream& operator<<(std::ostream& output, const Matrix<Coefficient>& matrix);
 
 template <typename Coefficient>
 class Matrix {
-  //friend std::iostream& operator<< <Coefficient>(std::iostream& output, const Matrix<Coefficient>& theMat);
-  friend std::ostream& operator<< <Coefficient>(std::ostream& output, const Matrix<Coefficient>& theMat);
-  //friend std::iostream& operator>> <Coefficient>(std::iostream& input, Matrix<Coefficient>& theMat);
+  //friend std::iostream& operator<< <Coefficient>(std::iostream& output, const Matrix<Coefficient>& matrix);
+  friend std::ostream& operator<< <Coefficient>(std::ostream& output, const Matrix<Coefficient>& matrix);
+  //friend std::iostream& operator>> <Coefficient>(std::iostream& input, Matrix<Coefficient>& matrix);
 public:
   int numberOfRows;
   int actualNumberOfRows;
@@ -1218,7 +1218,7 @@ public:
   );
   Coefficient getDeterminant();
   Coefficient getTrace() const;
-  void assignMatrixIntegerWithDenominator(Matrix<LargeInteger>& theMat, const LargeIntegerUnsigned& Den);
+  void assignMatrixIntegerWithDenominator(Matrix<LargeInteger>& matrix, const LargeIntegerUnsigned& Den);
   void scaleToIntegralForMinimalRationalHeightNoSignChange();
   void getMatrixIntegerWithDenominator(Matrix<LargeInteger>& outputMat, LargeIntegerUnsigned& outputDen);
   void lieBracketWith(const Matrix<Coefficient>& right);
@@ -1453,12 +1453,12 @@ void Vectors<Coefficient>::getOrthogonalComplement(Vectors<Coefficient>& output,
     global.fatal << "Finding orthogonal complement of zero vectors without specifying a bilinear form is "
     << " forbidden: I can't determine the dimension of the ambient vector space. " << global.fatal;
   }
-  Matrix<Coefficient> theMatrix;
-  theMatrix.assignVectorsToRows(*this);
+  Matrix<Coefficient> matrix;
+  matrix.assignVectorsToRows(*this);
   if (bilinearForm != nullptr) {
-    theMatrix *= *bilinearForm;
+    matrix *= *bilinearForm;
   }
-  theMatrix.getZeroEigenSpaceModifyMe(output);
+  matrix.getZeroEigenSpaceModifyMe(output);
 }
 
 template <typename Coefficient>
@@ -3102,9 +3102,9 @@ class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
     return tempS;
   }
   bool operator==(const PolynomialSubstitution& right);
-  void makeSubstitutionFromMatrixIntegerAndDenominator(Matrix<LargeInteger>& theMat, LargeIntegerUnsigned& Den) {
+  void makeSubstitutionFromMatrixIntegerAndDenominator(Matrix<LargeInteger>& matrix, LargeIntegerUnsigned& Den) {
     Matrix<Rational> tempMat;
-    tempMat.assignMatrixIntegerWithDenominator(theMat, Den);
+    tempMat.assignMatrixIntegerWithDenominator(matrix, Den);
     this->makeLinearSubstitutionConstantTermsLastRow(tempMat);
   }
   void toString(std::string& output, int numDisplayedEltsMinus1ForAll) const {
@@ -6385,9 +6385,9 @@ public:
     return result + 1;
   }
   Coefficient getDeterminant() const {
-    Matrix<Coefficient> theMat;
-    this->getMatrix(theMat, this->getMinimumNumberOfColumnsNumberOfRows());
-    return theMat.getDeterminant();
+    Matrix<Coefficient> matrix;
+    this->getMatrix(matrix, this->getMinimumNumberOfColumnsNumberOfRows());
+    return matrix.getDeterminant();
   }
   void directSumWith(const MatrixTensor<Coefficient>& other);
   void raiseToPower(int power);

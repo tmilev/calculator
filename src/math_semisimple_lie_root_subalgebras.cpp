@@ -764,7 +764,7 @@ bool RootSubalgebra::checkRankInequality() const {
   return true;
 }
 
-bool RootSubalgebra::checkForSmallRelations(ConeRelation& theRel, Vectors<Rational>& nilradicalRoots) {
+bool RootSubalgebra::checkForSmallRelations(ConeRelation& relation, Vectors<Rational>& nilradicalRoots) {
   MacroRegisterFunctionWithName("RootSubalgebra::checkForSmallRelations");
   Vector<Rational> weightSum;
   bool tempBool;
@@ -776,28 +776,28 @@ bool RootSubalgebra::checkForSmallRelations(ConeRelation& theRel, Vectors<Ration
           weightSum = this->highestWeightsPrimalSimple[i];
           weightSum += this->highestWeightsPrimalSimple[j];
           if (!weightSum.isEqualToZero()) {
-            theRel.BetaCoeffs.setSize(0);
-            theRel.Betas.setSize(0);
+            relation.BetaCoeffs.setSize(0);
+            relation.Betas.setSize(0);
             tempI = nilradicalRoots.getIndex(weightSum);
             if (tempI != - 1) {
               tempBool = true;
-              theRel.BetaCoeffs.setSize(1);
-              theRel.Betas.setSize(1);
-              theRel.BetaCoeffs[0].makeOne();
-              theRel.Betas[0] =(nilradicalRoots[tempI]);
+              relation.BetaCoeffs.setSize(1);
+              relation.Betas.setSize(1);
+              relation.BetaCoeffs[0].makeOne();
+              relation.Betas[0] =(nilradicalRoots[tempI]);
             } else {
               tempBool =
               this->getAmbientWeyl().hasStronglyPerpendicularDecompositionWRT(
-                weightSum, - 1, nilradicalRoots, theRel.Betas, theRel.BetaCoeffs, true
+                weightSum, - 1, nilradicalRoots, relation.Betas, relation.BetaCoeffs, true
               );
             }
             if (tempBool) {
-              theRel.Alphas.size = 0;
-              theRel.AlphaCoeffs.size = 0;
-              theRel.Alphas.addOnTop(this->highestWeightsPrimalSimple[i]);
-              theRel.Alphas.addOnTop(this->highestWeightsPrimalSimple[j]);
-              theRel.AlphaCoeffs.addOnTop(1);
-              theRel.AlphaCoeffs.addOnTop(1);
+              relation.Alphas.size = 0;
+              relation.AlphaCoeffs.size = 0;
+              relation.Alphas.addOnTop(this->highestWeightsPrimalSimple[i]);
+              relation.Alphas.addOnTop(this->highestWeightsPrimalSimple[j]);
+              relation.AlphaCoeffs.addOnTop(1);
+              relation.AlphaCoeffs.addOnTop(1);
               return true;
             }
           }
@@ -919,21 +919,21 @@ bool RootSubalgebra::attemptTheTripleTrickWRTSubalgebra(
   ConeRelation& theRel, Vectors<Rational>& highestWeightsAllowed, Vectors<Rational>& NilradicalRoots
 ) {
   Vector<Rational> tempRoot, Accum;
-  SelectionWithMaxMultiplicity tempSel;
+  SelectionWithMaxMultiplicity selection;
   Vectors<Rational> chosenAlphas;
   int theRank = this->getOwnerLieAlgebra().getRank();
   DynkinDiagramRootSubalgebra theDiagram;
   for (int i = 2; i <= MathRoutines::maximum(highestWeightsAllowed.size, theRank); i ++) {
-    tempSel.initMaxMultiplicity(highestWeightsAllowed.size, i);
-    LargeInteger numberOfElements = tempSel.numberOfCombinationsOfCardinality(i);
+    selection.initMaxMultiplicity(highestWeightsAllowed.size, i);
+    LargeInteger numberOfElements = selection.numberOfCombinationsOfCardinality(i);
     for (int j = 0; j < numberOfElements; j ++) {
-      tempSel.incrementSubsetFixedCardinality(i);
+      selection.incrementSubsetFixedCardinality(i);
       Accum.makeZero(this->getAmbientWeyl().cartanSymmetric.numberOfRows);
       chosenAlphas.size = 0;
-      for (int k = 0; k < tempSel.elements.size; k ++) {
-        tempRoot = highestWeightsAllowed[tempSel.elements[k]];
+      for (int k = 0; k < selection.elements.size; k ++) {
+        tempRoot = highestWeightsAllowed[selection.elements[k]];
         chosenAlphas.addOnTop(tempRoot);
-        tempRoot *= tempSel.multiplicities[tempSel.elements[k]];
+        tempRoot *= selection.multiplicities[selection.elements[k]];
         Accum += tempRoot;
       }
       theRel.Betas.size = 0; theRel.BetaCoeffs.size = 0;
@@ -959,11 +959,11 @@ bool RootSubalgebra::attemptTheTripleTrickWRTSubalgebra(
               }
             }
           }
-          theRel.Alphas.setSize(tempSel.cardinalitySelectionWithoutMultiplicities());
-          theRel.AlphaCoeffs.setSize(tempSel.elements.size);
-          for (int k = 0; k < tempSel.elements.size; k ++) {
-            theRel.Alphas[k] = highestWeightsAllowed[tempSel.elements[k]];
-            theRel.AlphaCoeffs[k] = tempSel.multiplicities[tempSel.elements[k]];
+          theRel.Alphas.setSize(selection.cardinalitySelectionWithoutMultiplicities());
+          theRel.AlphaCoeffs.setSize(selection.elements.size);
+          for (int k = 0; k < selection.elements.size; k ++) {
+            theRel.Alphas[k] = highestWeightsAllowed[selection.elements[k]];
+            theRel.AlphaCoeffs[k] = selection.multiplicities[selection.elements[k]];
           }
           return true;
         }
@@ -973,30 +973,30 @@ bool RootSubalgebra::attemptTheTripleTrickWRTSubalgebra(
   return false;
 }
 
-void RootSubalgebra::ensureAlphasDontSumToRoot(ConeRelation& theRel, Vectors<Rational>& NilradicalRoots) {
+void RootSubalgebra::ensureAlphasDontSumToRoot(ConeRelation& relation, Vectors<Rational>& nilradicalRoots) {
   Vector<Rational> alpha1, alpha2, beta1, tempRoot;
   bool madeChange = true;
   while (madeChange) {
     madeChange = false;
-    for (int i = 0; i < theRel.Alphas.size; i ++) {
-      for (int j = i + 1; j < theRel.Alphas.size; j ++) {
-        beta1 = theRel.Alphas[i];
-        beta1 += theRel.Alphas[j];
+    for (int i = 0; i < relation.Alphas.size; i ++) {
+      for (int j = i + 1; j < relation.Alphas.size; j ++) {
+        beta1 = relation.Alphas[i];
+        beta1 += relation.Alphas[j];
         if (this->isARootOrZero(beta1)) {
           this->computeHighestWeightInTheSameKModule(beta1, tempRoot);
-          if (NilradicalRoots.contains(beta1)) {
-            alpha1 = theRel.Alphas[i];
-            alpha2 = theRel.Alphas[j];
-            theRel.Alphas.setSize(2);
-            theRel.AlphaCoeffs.setSize(2);
-            theRel.Alphas[0] = alpha1;
-            theRel.Alphas[1] = alpha2;
-            theRel.AlphaCoeffs[0] = 1;
-            theRel.AlphaCoeffs[1] = 1;
-            theRel.Betas.setSize(1);
-            theRel.BetaCoeffs.setSize(1);
-            theRel.BetaCoeffs[0] = 1;
-            theRel.Betas[0] = beta1;
+          if (nilradicalRoots.contains(beta1)) {
+            alpha1 = relation.Alphas[i];
+            alpha2 = relation.Alphas[j];
+            relation.Alphas.setSize(2);
+            relation.AlphaCoeffs.setSize(2);
+            relation.Alphas[0] = alpha1;
+            relation.Alphas[1] = alpha2;
+            relation.AlphaCoeffs[0] = 1;
+            relation.AlphaCoeffs[1] = 1;
+            relation.Betas.setSize(1);
+            relation.BetaCoeffs.setSize(1);
+            relation.BetaCoeffs[0] = 1;
+            relation.Betas[0] = beta1;
             madeChange = false;
             break;
           } else {
@@ -1006,19 +1006,19 @@ void RootSubalgebra::ensureAlphasDontSumToRoot(ConeRelation& theRel, Vectors<Rat
               changedIndex = j;
               otherIndex = i;
             }
-            alpha1coeff = theRel.AlphaCoeffs[changedIndex];
-            alpha2coeff = theRel.AlphaCoeffs[otherIndex];
-            alpha2 = theRel.Alphas[otherIndex];
+            alpha1coeff = relation.AlphaCoeffs[changedIndex];
+            alpha2coeff = relation.AlphaCoeffs[otherIndex];
+            alpha2 = relation.Alphas[otherIndex];
             alpha2coeff.subtract(alpha1coeff);
             madeChange = true;
-            theRel.Alphas[changedIndex] = beta1;
-            theRel.AlphaCoeffs[changedIndex] = alpha1coeff;
+            relation.Alphas[changedIndex] = beta1;
+            relation.AlphaCoeffs[changedIndex] = alpha1coeff;
             if (alpha2coeff.isEqualToZero()) {
-              theRel.Alphas.removeIndexSwapWithLast(otherIndex);
-              theRel.AlphaCoeffs.removeIndexSwapWithLast(otherIndex);
+              relation.Alphas.removeIndexSwapWithLast(otherIndex);
+              relation.AlphaCoeffs.removeIndexSwapWithLast(otherIndex);
             } else {
-              theRel.Alphas[otherIndex] = alpha2;
-              theRel.AlphaCoeffs[otherIndex] = alpha2coeff;
+              relation.Alphas[otherIndex] = alpha2;
+              relation.AlphaCoeffs[otherIndex] = alpha2coeff;
             }
           }
         }
@@ -1030,7 +1030,7 @@ void RootSubalgebra::ensureAlphasDontSumToRoot(ConeRelation& theRel, Vectors<Rat
 void RootSubalgebra::computeEpsilonCoordinatesWithRespectToSubalgebra() {
   this->kModulesKepsCoords.setSize(this->modules.size);
   this->kModulesgEpsCoords.setSize(this->modules.size);
-  Vectors<Rational> EpsCoordsWRTk;
+  Vectors<Rational> epsilonCoordinatesWithRespectToK;
   Vectors<Rational> simpleBasisG;
   int dimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
   simpleBasisG.setSize(dimension);
@@ -1041,7 +1041,7 @@ void RootSubalgebra::computeEpsilonCoordinatesWithRespectToSubalgebra() {
   Vector<Rational> tempRoot, tempRoot2, tempRoot3;
   for (int i = 0; i < this->modules.size; i ++) {
     if (this->simpleRootsReductiveSubalgebra.size > 0) {
-      EpsCoordsWRTk.size = 0;
+      epsilonCoordinatesWithRespectToK.size = 0;
       for (int j = 0; j < this->modules[i].size; j ++) {
         tempRoot.setSize(this->simpleRootsReductiveSubalgebra.size);
         for (int k = 0; k< this->simpleRootsReductiveSubalgebra.size; k ++) {
@@ -1054,10 +1054,10 @@ void RootSubalgebra::computeEpsilonCoordinatesWithRespectToSubalgebra() {
         for (int j = 0; j < this->simpleRootsReductiveSubalgebra.size; j ++) {
           tempRoot2 += this->simpleRootsReductiveSubalgebra[j] * tempRoot3[j];
         }
-        EpsCoordsWRTk.addOnTop(tempRoot2);
+        epsilonCoordinatesWithRespectToK.addOnTop(tempRoot2);
       }
       this->getAmbientWeyl().getEpsilonCoordinatesWRTsubalgebra(
-        this->simpleRootsReductiveSubalgebra, EpsCoordsWRTk, this->kModulesKepsCoords[i]
+        this->simpleRootsReductiveSubalgebra, epsilonCoordinatesWithRespectToK, this->kModulesKepsCoords[i]
       );
       this->getAmbientWeyl().getEpsilonCoordinatesWRTsubalgebra(
         simpleBasisG, this->WeightsModulesPrimalSimple[i], this->kModulesgEpsCoords[i]
@@ -1330,7 +1330,7 @@ std::string RootSubalgebra::toString(FormatExpressions* format) {
     out << "</tr>";
   }
   out << "</table>";
-  if (this->theMultTable.size != 0) {
+  if (this->pairingTable.size != 0) {
     if (useHtml) {
       out << "\n\n Pairing table:\n\n";
     }
@@ -1364,11 +1364,11 @@ bool RootSubalgebra::isGeneratingSingularVectors(int indexKmod, Vectors<Rational
   if (currentRoot.isEqualToZero()) {
     return false;
   }
-  Vector<Rational> theSum;
+  Vector<Rational> sum;
   for (int i = 0; i < NilradicalRoots.size; i ++) {
-    theSum = currentRoot + NilradicalRoots[i];
-    if (this->isARootOrZero(theSum)) {
-      if (!NilradicalRoots.contains(theSum)) {
+    sum = currentRoot + NilradicalRoots[i];
+    if (this->isARootOrZero(sum)) {
+      if (!NilradicalRoots.contains(sum)) {
         return false;
       }
     }
@@ -1376,32 +1376,32 @@ bool RootSubalgebra::isGeneratingSingularVectors(int indexKmod, Vectors<Rational
   return true;
 }
 
-void RootSubalgebra::makeGeneratingSingularVectors(ConeRelation& theRelation, Vectors<Rational>& nilradicalRoots) {
+void RootSubalgebra::makeGeneratingSingularVectors(ConeRelation& relation, Vectors<Rational>& nilradicalRoots) {
   bool isMaximal = false;
   Vector<Rational> tempRoot;
   while (!isMaximal) {
     isMaximal = true;
-    for (int i = 0; i < theRelation.AlphaCoeffs.size; i ++) {
+    for (int i = 0; i < relation.AlphaCoeffs.size; i ++) {
       for (int j = 0; j < nilradicalRoots.size; j ++) {
-        tempRoot = theRelation.Alphas[i];
+        tempRoot = relation.Alphas[i];
         tempRoot += nilradicalRoots[j];
         if ((this->isARoot(tempRoot) || tempRoot.isEqualToZero()) &&(!nilradicalRoots.contains(tempRoot))) {
           this->computeHighestWeightInTheSameKModule(tempRoot, tempRoot);
-          tempRoot -= theRelation.Alphas[i];
-          theRelation.Alphas[i] += tempRoot;
-          int tempI = theRelation.Betas.getIndex(tempRoot);
+          tempRoot -= relation.Alphas[i];
+          relation.Alphas[i] += tempRoot;
+          int tempI = relation.Betas.getIndex(tempRoot);
           if (tempI == - 1) {
-            theRelation.Betas.addOnTop(tempRoot);
-            theRelation.BetaCoeffs.addOnTop(theRelation.AlphaCoeffs[i]);
+            relation.Betas.addOnTop(tempRoot);
+            relation.BetaCoeffs.addOnTop(relation.AlphaCoeffs[i]);
           } else {
-            theRelation.BetaCoeffs[tempI] += theRelation.AlphaCoeffs[i];
+            relation.BetaCoeffs[tempI] += relation.AlphaCoeffs[i];
           }
           isMaximal = false;
           break;
         }
-        if (theRelation.Alphas[i].isEqualToZero()) {
-          theRelation.Alphas.removeIndexSwapWithLast(i);
-          theRelation.AlphaCoeffs.removeIndexSwapWithLast(i);
+        if (relation.Alphas[i].isEqualToZero()) {
+          relation.Alphas.removeIndexSwapWithLast(i);
+          relation.AlphaCoeffs.removeIndexSwapWithLast(i);
           i --;
           isMaximal = false;
           break;
@@ -1563,7 +1563,7 @@ std::string RootSubalgebra::toStringLieBracketTable(bool useLaTeX, bool useHtml,
   std::stringstream out;
   out << "\t";
   if (!(useLaTeX||useHtml)) {
-    for (int i = 0; i < this->theMultTable.size; i ++) {
+    for (int i = 0; i < this->pairingTable.size; i ++) {
       out << i << "\t";
     }
   } else {
@@ -1572,12 +1572,12 @@ std::string RootSubalgebra::toStringLieBracketTable(bool useLaTeX, bool useHtml,
     }
     if (useLaTeX) {
       out << "\\begin{tabular}{c|";
-      for (int i = 0; i < this->theMultTable.size; i ++) {
+      for (int i = 0; i < this->pairingTable.size; i ++) {
         out << "c";
       }
       out << "|} & ";
     }
-    for (int i = 0; i < this->theMultTable.size; i ++) {
+    for (int i = 0; i < this->pairingTable.size; i ++) {
       if (useHtml) {
         out << "<th>";
       }
@@ -1585,7 +1585,7 @@ std::string RootSubalgebra::toStringLieBracketTable(bool useLaTeX, bool useHtml,
       if (useHtml) {
         out << "</th>";
       } else {
-        if (i != this->theMultTable.size - 1) {
+        if (i != this->pairingTable.size - 1) {
           out << "&";
         }
       }
@@ -1597,7 +1597,7 @@ std::string RootSubalgebra::toStringLieBracketTable(bool useLaTeX, bool useHtml,
       out << "\\\\\\hline";
     }
   }
-  for (int i = 0; i < this->theMultTable.size; i ++) {
+  for (int i = 0; i < this->pairingTable.size; i ++) {
     if (useHtml) {
       out << "\n<tr><td>";
     }
@@ -1608,7 +1608,7 @@ std::string RootSubalgebra::toStringLieBracketTable(bool useLaTeX, bool useHtml,
     if (useHtml) {
       out << "</td>";
     }
-    for (int j = 0; j < this->theMultTable[i].size; j ++) {
+    for (int j = 0; j < this->pairingTable[i].size; j ++) {
       if ((j == owner.CentralizerRoots.size - 1) && (i <= owner.CentralizerRoots.size - 1)) {
         if (useLaTeX) {
           out << "\\multicolumn{1}{c|}{";
@@ -1621,14 +1621,14 @@ std::string RootSubalgebra::toStringLieBracketTable(bool useLaTeX, bool useHtml,
           out << "<td>";
         }
       }
-      for (int k = 0; k < this->theMultTable[i][j].size; k ++) {
-        out << this->theMultTable[i][j][k] << ", ";
+      for (int k = 0; k < this->pairingTable[i][j].size; k ++) {
+        out << this->pairingTable[i][j][k] << ", ";
       }
       if (useLaTeX) {
         if ((j == owner.CentralizerRoots.size - 1) && (i <= owner.CentralizerRoots.size - 1)) {
           out << "}";
         }
-        if (j != this->theMultTable[i].size - 1) {
+        if (j != this->pairingTable[i].size - 1) {
           out << " & ";
         }
       }
@@ -1759,7 +1759,7 @@ void RootSubalgebra::generatePossibleNilradicals(
   RootSubalgebras& owner,
   int indexInOwner
 ) {
-  this->generateKModuleLieBracketTable(this->theMultTable, this->theOppositeKmods);
+  this->generateKModuleLieBracketTable(this->pairingTable, this->theOppositeKmods);
   this->NumTotalSubalgebras = 0;
   Selection emptySel;
   emptySel.initialize(this->SimpleBasisCentralizerRoots.size);
@@ -1799,7 +1799,7 @@ void RootSubalgebra::generatePossibleNilradicals(
         owner.CountersNilradicalsGeneration[0] = this->CentralizerRoots.size;
       }
       this->generatePossibleNilradicalsRecursive(
-        PauseMutex, this->theMultTable, impliedSelections, this->theOppositeKmods, owner, indexInOwner
+        PauseMutex, this->pairingTable, impliedSelections, this->theOppositeKmods, owner, indexInOwner
       );
     }
   } else {
@@ -1808,7 +1808,7 @@ void RootSubalgebra::generatePossibleNilradicals(
     owner.RecursionDepthNilradicalsGeneration = 0;
     owner.CountersNilradicalsGeneration[0] = 0;
     this->generatePossibleNilradicalsRecursive(
-      PauseMutex, this->theMultTable, impliedSelections, this->theOppositeKmods, owner, indexInOwner
+      PauseMutex, this->pairingTable, impliedSelections, this->theOppositeKmods, owner, indexInOwner
     );
   }
 }
@@ -2091,9 +2091,9 @@ bool RootSubalgebra::checkInitialization() const {
 }
 
 bool RootSubalgebra::checkScalarProductMatrixOrdered() const {
-  Matrix<Rational> theMat;
-  this->simpleRootsReductiveSubalgebra.getGramMatrix(theMat, &this->getAmbientWeyl().cartanSymmetric);
-  if (theMat != this->scalarProdMatrixOrdered) {
+  Matrix<Rational> matrix;
+  this->simpleRootsReductiveSubalgebra.getGramMatrix(matrix, &this->getAmbientWeyl().cartanSymmetric);
+  if (matrix != this->scalarProdMatrixOrdered) {
     global.fatal << "Bilinear product matrix does not match the stored value. " << global.fatal;
   }
   return true;
@@ -3574,7 +3574,7 @@ std::string RootSubalgebras::toStringDynkinTableFormatToLaTeX(FormatExpressions*
 void RootSubalgebras::computeKmodMultTables() {
   for (int i = 0; i < this->subalgebras.size; i ++) {
     this->subalgebras[i].generateKModuleLieBracketTable(
-      this->subalgebras[i].theMultTable, this->subalgebras[i].theOppositeKmods
+      this->subalgebras[i].pairingTable, this->subalgebras[i].theOppositeKmods
     );
   }
 }

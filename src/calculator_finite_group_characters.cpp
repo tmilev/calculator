@@ -204,8 +204,8 @@ void GroupRepresentation<somegroup, Coefficient>::operator*=(const GroupRepresen
   }
   GroupRepresentation<somegroup, Coefficient> output;
   output.ownerGroup = this->ownerGroup;
-  output.theCharacter = this->theCharacter;
-  output.theCharacter *= other.theCharacter;
+  output.character = this->character;
+  output.character *= other.character;
   for (int i = 0; i < output.generators.size; i ++) {
     output.generators[i].assignTensorProduct(this->generators[i], other.generators[i]);
   }
@@ -250,8 +250,8 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::decomposeTod
   this->ownerGroup->checkInitializationFiniteDimensionalRepresentationComputation();
   outputIrrepMults.makeZero();
   List<GroupRepresentation<somegroup, Coefficient> > appendOnlyIrrepsList;
-  for (int i = 0; i < this->ownerGroup->irreps.size; i ++) {
-    appendOnlyIrrepsList.addOnTop(this->ownerGroup->irreps[i]);
+  for (int i = 0; i < this->ownerGroup->irreducibleRepresentations.size; i ++) {
+    appendOnlyIrrepsList.addOnTop(this->ownerGroup->irreducibleRepresentations[i]);
   }
   return this->decomposeTodorsVersionRecursive(outputIrrepMults, appendOnlyIrrepsList, appendOnlyGRCAMSList);
 }
@@ -331,10 +331,10 @@ void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation(
     global << phiG.prettyPrintGeneratorCommutationRelations();
     global << G.prettyPrintGeneratorCommutationRelations();
     global << "pulling back irreps:\n";
-    for (int i = 0; i < HOG.group->irreps.size; i ++) {
-      auto irrep = phi.pullbackRepresentation(HOG.group->irreps[i]);
+    for (int i = 0; i < HOG.group->irreducibleRepresentations.size; i ++) {
+      auto irrep = phi.pullbackRepresentation(HOG.group->irreducibleRepresentations[i]);
       irrep.computeCharacter();
-      global << HOG.group->irreps[i].theCharacter << "->" << irrep.theCharacter << '\n';
+      global << HOG.group->irreducibleRepresentations[i].character << "->" << irrep.character << '\n';
       G.addIrreducibleRepresentation(irrep);
     }
   } else if ((letters.size == 1) && (letters[0] == 'D')) {
@@ -771,14 +771,14 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements
     return false;
   }
   WeylGroupData& theGroupData = output.getValueNonConst<WeylGroupData>();
-  char theType ='X';
+  char dynkinType ='X';
   int theRank = - 1;
   bool hasOuterAutosAndIsSimple = false;
-  if (theGroupData.dynkinType.isSimple(&theType, &theRank)) {
-    if (theType == 'D' || theType == 'A') {
+  if (theGroupData.dynkinType.isSimple(&dynkinType, &theRank)) {
+    if (dynkinType == 'D' || dynkinType == 'A') {
       hasOuterAutosAndIsSimple = true;
     }
-    if (theType == 'E' && theRank == 6) {
+    if (dynkinType == 'E' && theRank == 6) {
       hasOuterAutosAndIsSimple = true;
     }
   }
@@ -907,8 +907,8 @@ bool CalculatorFunctionsWeylGroup::weylGroupIrrepsAndCharTableComputeFromScratch
   out << "Character table: ";
   out << theGroupData.group.prettyPrintCharacterTable();
   out << "<br>Explicit realizations of each representation follow.";
-  for (int i = 0; i < theGroupData.group.irreps.size; i ++) {
-    out << "<hr>" << theGroupData.group.irreps[i].toString(&tempFormat);
+  for (int i = 0; i < theGroupData.group.irreducibleRepresentations.size; i ++) {
+    out << "<hr>" << theGroupData.group.irreducibleRepresentations[i].toString(&tempFormat);
   }
   out << theGroupData.toString(&tempFormat);
   return output.assignValue(out.str(), calculator);
@@ -918,13 +918,13 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint");
-  DynkinType theType;
-  if (!CalculatorConversions::innerDynkinTypE(calculator, input, theType)) {
+  DynkinType dynkinType;
+  if (!CalculatorConversions::innerDynkinTypE(calculator, input, dynkinType)) {
     return output.makeError("Failed to extract Dynkin type from argument. ", calculator);
   }
   std::stringstream out, outCommand;
   FinitelyGeneratedMatrixMonoid<Rational> groupGeneratedByMatrices;
-  theType.getOuterAutosGeneratorsActOnVectorColumn(groupGeneratedByMatrices.generators);
+  dynkinType.getOuterAutosGeneratorsActOnVectorColumn(groupGeneratedByMatrices.generators);
   FormatExpressions tempFormat;
   tempFormat.flagUseLatex = true;
   tempFormat.flagUseHTML = false;
@@ -1567,23 +1567,23 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
   theFormat.flagSupressDynkinIndexOne = true;
   for (int i = 0; i < partitionsParabolics.size; i ++) {
     int typeBsize = rank - partitionsParabolics[i].n;
-    DynkinType theType;
+    DynkinType dynkinType;
     DynkinSimpleType theSimpleType;
     for (int j = 0; j < partitionsParabolics[i].p.size; j ++) {
       if (partitionsParabolics[i].p[j] <= 1) {
         continue;
       }
       theSimpleType.makeArbitrary('A', partitionsParabolics[i].p[j] - 1, 1);
-      theType.addMonomial(theSimpleType, 1);
+      dynkinType.addMonomial(theSimpleType, 1);
     }
     if (typeBsize == 1) {
       theSimpleType.makeArbitrary('A', 1, 2);
-      theType.addMonomial(theSimpleType,1);
+      dynkinType.addMonomial(theSimpleType,1);
     } else if (typeBsize > 1) {
       theSimpleType.makeArbitrary('B', typeBsize, 1);
-      theType.addMonomial(theSimpleType, 1);
+      dynkinType.addMonomial(theSimpleType, 1);
     }
-    outLaTeX << "&$" << theType.toString(&theFormat) << "$";
+    outLaTeX << "&$" << dynkinType.toString(&theFormat) << "$";
   }
   outLaTeX << "\\\\";
   ///////////////////////////////////////
@@ -1925,26 +1925,28 @@ bool CalculatorFunctionsWeylGroup::isOuterAutoWeylGroup(
   if (input.size() != 3) {
     return calculator << "<hr>IsOuterAuto expects 2 arguments.";
   }
-  DynkinType theType;
-  if (!CalculatorConversions::functionDynkinType(calculator, input[1], theType)) {
+  DynkinType dynkinType;
+  if (!CalculatorConversions::functionDynkinType(calculator, input[1], dynkinType)) {
     return calculator << "<hr>Failed to get Dynkin type from argument. " << input[1].toString();
   }
-  Matrix<Rational> theMat;
-  if (!calculator.functionGetMatrix(input[2], theMat)) {
+  Matrix<Rational> matrix;
+  if (!calculator.functionGetMatrix(input[2], matrix)) {
     return calculator << "<hr>Failed to get matrix from argument. " << input[2].toString();
   }
-  if (theMat.numberOfColumns != theMat.numberOfRows || theMat.numberOfColumns != theType.getRank()) {
-    calculator << "<hr>Extracted Dynkin type " << theType.toString() << " is of rank " << theType.getRank()
-    << " but extracted linear operator has " << theMat.numberOfColumns << " columns and " << theMat.numberOfRows << " rows.";
+  if (matrix.numberOfColumns != matrix.numberOfRows || matrix.numberOfColumns != dynkinType.getRank()) {
+    calculator << "<hr>Extracted Dynkin type "
+    << dynkinType.toString() << " is of rank " << dynkinType.getRank()
+    << " but extracted linear operator has " << matrix.numberOfColumns
+    << " columns and " << matrix.numberOfRows << " rows.";
     return false;
   }
   WeylGroupData theWeyl;
-  theWeyl.makeFromDynkinType(theType);
+  theWeyl.makeFromDynkinType(dynkinType);
   theWeyl.computeRho(true);
   WeylGroupAutomorphisms theAutomorphisms;
   theAutomorphisms.theWeyl = &theWeyl;
   MatrixTensor<Rational> theOp;
-  theOp = theMat;
+  theOp = matrix;
   if (theAutomorphisms.isElementWeylGroupOrOuterAutomorphisms(theOp)) {
     return output.assignValue(1, calculator);
   }
@@ -2458,7 +2460,7 @@ void VirtualRepresentation<somegroup, Coefficient>::assignRepresentation(
 template <typename somegroup, typename Coefficient>
 void VirtualRepresentation<somegroup, Coefficient>::assignRepresentation(const GroupRepresentation<somegroup, Rational>& other) {
   VirtualRepresentation<somegroup, Coefficient> out;
-  out.addMonomial(other.theCharacter, 1);
+  out.addMonomial(other.character, 1);
 //  otherCopy.decomposeTodorsVersion(this->coefficientsIrreps, global);
 }
 
@@ -2477,12 +2479,12 @@ bool CalculatorFunctionsWeylGroup::makeVirtualWeylRep(
   input.getValueNonConst<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
   WeylGroupData* theWeylData = inputRep.ownerGroup->generators[0].owner;
   if (
-    inputRep.ownerGroup->irreps.size<inputRep.ownerGroup->conjugacyClassCount() &&
+    inputRep.ownerGroup->irreducibleRepresentations.size<inputRep.ownerGroup->conjugacyClassCount() &&
     theWeylData->group.ComputeIrreducibleRepresentationsWithFormulas
   ) {
     theWeylData->group.ComputeIrreducibleRepresentationsWithFormulas(theWeylData->group);
   }
-  if (inputRep.ownerGroup->irreps.size<inputRep.ownerGroup->conjugacyClassCount()) {
+  if (inputRep.ownerGroup->irreducibleRepresentations.size<inputRep.ownerGroup->conjugacyClassCount()) {
     theWeylData->computeInitialIrreducibleRepresentations();
     theWeylData->group.computeIrreducibleRepresentationsTodorsVersion();
   }

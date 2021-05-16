@@ -376,7 +376,7 @@ private:
   int getNumberOfColumns() const;
   bool makeSequenceCommands(Calculator& owner, List<std::string>& inputKeys, List<Expression>& inputValues);
   bool makeSequenceStatements(Calculator& owner, List<Expression>* inputStatements = nullptr);
-  bool makeMatrix(Calculator& owner, Matrix<Expression>* inputMat = nullptr);
+  bool makeMatrix(Calculator& owner, Matrix<Expression>* inputMatrix = nullptr);
   bool makeSequence(Calculator& owner, List<Expression>* inputSequence = nullptr);
   bool makeXOX(Calculator& owner, int theOp, const Expression& left, const Expression& right);
   bool makeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex = 2);
@@ -2195,7 +2195,7 @@ public:
     const Expression* condition = nullptr,
     std::stringstream* logStream = nullptr
   );
-  bool processOneExpressionOnePatternOneSub(
+  bool processOneExpressionOnePatternOneSubstitution(
     const Expression& pattern,
     Expression& expression,
     MapList<Expression, Expression>& bufferPairs, std::stringstream* logStream = nullptr
@@ -3288,8 +3288,8 @@ bool Expression::assignMatrix(
   bool reduceOneRowToSequenceAndOneByOneToNonMatrix
 ) {
   MacroRegisterFunctionWithName("Expression::assignMatrix");
-  Matrix<Expression> theMatEs;
-  theMatEs.initialize(input.numberOfRows, input.numberOfColumns);
+  Matrix<Expression> matrixEs;
+  matrixEs.initialize(input.numberOfRows, input.numberOfColumns);
   Expression currentElt;
   for (int i = 0; i < input.numberOfRows; i ++) {
     for (int j = 0; j < input.numberOfColumns; j ++) {
@@ -3298,11 +3298,11 @@ bool Expression::assignMatrix(
       } else {
         currentElt.assignValueWithContext(input(i, j), *inputContext, owner);
       }
-      theMatEs(i, j) = currentElt;
+      matrixEs(i, j) = currentElt;
     }
   }
   return this->assignMatrixExpressions(
-    theMatEs, owner, reduceOneRowToSequenceAndOneByOneToNonMatrix, false
+    matrixEs, owner, reduceOneRowToSequenceAndOneByOneToNonMatrix, false
   );
 }
 

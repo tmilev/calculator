@@ -373,11 +373,11 @@ bool Expression::assignMatrixExpressions(
     return true;
   }
   this->reset(owner, input.numberOfRows + 1);
-  Expression theMatType(owner);
-  theMatType.addChildAtomOnTop(owner.opMatrix());
-  this->addChildOnTop(theMatType);
-  enum matrixType {typeUnknown, typeRat, typeDouble, typeAlgebraic, typePolyRat, typePolyAlg, typeRF, typeExpression};
-  matrixType outType = typeUnknown;
+  Expression matrixType(owner);
+  matrixType.addChildAtomOnTop(owner.opMatrix());
+  this->addChildOnTop(matrixType);
+  enum MatrixType {typeUnknown, typeRat, typeDouble, typeAlgebraic, typePolyRat, typePolyAlg, typeRF, typeExpression};
+  MatrixType outType = typeUnknown;
   Expression currentRow;
   for (int i = 0; i < input.numberOfRows; i ++) {
     currentRow.reset(owner);
@@ -385,7 +385,7 @@ bool Expression::assignMatrixExpressions(
     currentRow.addChildAtomOnTop(owner.opSequence());
     for (int j = 0; j < input.numberOfColumns; j ++) {
       currentRow.addChildOnTop(input(i, j));
-      matrixType inType;
+      MatrixType inType;
       if (input(i, j).isOfType<Rational>()) {
         inType = typeRat;
       } else if (input(i, j).isOfType<AlgebraicNumber>()) {
@@ -454,28 +454,28 @@ bool Expression::assignMatrixExpressions(
   }
   switch(outType) {
     case typeRat:
-      theMatType.addChildAtomOnTop(owner.opRational());
+      matrixType.addChildAtomOnTop(owner.opRational());
       break;
     case typeDouble:
-      theMatType.addChildAtomOnTop(owner.opDouble());
+      matrixType.addChildAtomOnTop(owner.opDouble());
       break;
     case typeAlgebraic:
-      theMatType.addChildAtomOnTop(owner.opAlgebraicNumber());
+      matrixType.addChildAtomOnTop(owner.opAlgebraicNumber());
       break;
     case typePolyRat:
-      theMatType.addChildAtomOnTop(owner.opPolynomialRational());
+      matrixType.addChildAtomOnTop(owner.opPolynomialRational());
       break;
     case typePolyAlg:
-      theMatType.addChildAtomOnTop(owner.opPolynomialAlgebraicNumbers());
+      matrixType.addChildAtomOnTop(owner.opPolynomialAlgebraicNumbers());
       break;
     case typeRF:
-      theMatType.addChildAtomOnTop(owner.opRationalFunction());
+      matrixType.addChildAtomOnTop(owner.opRationalFunction());
       break;
     default:
       break;
   }
   if (outType != typeUnknown && outType != typeExpression && !dontReduceTypes) {
-    this->setChild(0, theMatType);
+    this->setChild(0, matrixType);
   }
   return true;
 }

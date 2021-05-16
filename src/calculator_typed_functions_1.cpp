@@ -1565,30 +1565,30 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixExpressionsBySmallInteger(
   if (thePower <= 0) {
     return false;
   }
-  Matrix<Expression> theMat;
-  if (!calculator.getMatrixExpressions(input[1], theMat)) {
+  Matrix<Expression> matrix;
+  if (!calculator.getMatrixExpressions(input[1], matrix)) {
     return false;
   }
-  if (!theMat.isSquare()) {
+  if (!matrix.isSquare()) {
     return output.makeError("Attempting to raise non-square matrix to power", calculator);
   }
   LargeInteger expectedNumTerms;
-  expectedNumTerms = theMat.numberOfColumns;
+  expectedNumTerms = matrix.numberOfColumns;
   expectedNumTerms.raiseToPower(thePower);
   if (expectedNumTerms > 10000) {
     return calculator
     << "The expected number terms in the result of the exponentiation "
-    << theMat.toString() << " to the power of "
+    << matrix.toString() << " to the power of "
     << thePower << " is approximately ("
-    << theMat.numberOfColumns << ")^" << thePower
+    << matrix.numberOfColumns << ")^" << thePower
     << "=" << expectedNumTerms
     << ". I have been instructed to proceed only "
     << "if the expected number of terms is fewer than 10000. ";
   }
   Matrix<Expression> idMatE;
-  idMatE.makeIdentityMatrix(theMat.numberOfRows, calculator.expressionOne(), calculator.expressionZero());
-  MathRoutines::raiseToPower(theMat, thePower, idMatE);
-  return output.assignMatrixExpressions(theMat, calculator, true, true);
+  idMatE.makeIdentityMatrix(matrix.numberOfRows, calculator.expressionOne(), calculator.expressionZero());
+  MathRoutines::raiseToPower(matrix, thePower, idMatE);
+  return output.assignMatrixExpressions(matrix, calculator, true, true);
 }
 
 bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors(
@@ -1877,20 +1877,20 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarByMatrix(
   if (!theScalarE.isBuiltInScalar()) {
     return false;
   }
-  const Expression& theMatE = input[2];
-  if (!theMatE.isMatrix()) {
+  const Expression& matrixE = input[2];
+  if (!matrixE.isMatrix()) {
     return false;
   }
-  Matrix<Expression> theMat;
-  if (!calculator.getMatrixExpressions(theMatE, theMat)) {
+  Matrix<Expression> matrix;
+  if (!calculator.getMatrixExpressions(matrixE, matrix)) {
     return false;
   }
-  for (int i = 0; i < theMat.numberOfRows; i ++) {
-    for (int j = 0; j < theMat.numberOfColumns; j ++) {
-      theMat(i, j) = theScalarE * theMat(i, j);
+  for (int i = 0; i < matrix.numberOfRows; i ++) {
+    for (int j = 0; j < matrix.numberOfColumns; j ++) {
+      matrix(i, j) = theScalarE * matrix(i, j);
     }
   }
-  return output.assignMatrixExpressions(theMat, calculator, false, true);
+  return output.assignMatrixExpressions(matrix, calculator, false, true);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(
@@ -2142,14 +2142,14 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg(
   ) {
     return false;
   }
-  Matrix<AlgebraicNumber> theMatAlg;
+  Matrix<AlgebraicNumber> matrixAlg;
   AlgebraicNumber theScalar;
-  Matrix<Rational> theMatRat;
+  Matrix<Rational> matrixRat;
   Rational theScalarRat;
-  if (calculator.functionGetMatrix(*matE, theMatRat)) {
-    theMatAlg = theMatRat;
+  if (calculator.functionGetMatrix(*matE, matrixRat)) {
+    matrixAlg = matrixRat;
   } else {
-    if (!calculator.functionGetMatrix(*matE, theMatAlg)) {
+    if (!calculator.functionGetMatrix(*matE, matrixAlg)) {
       return false;
     }
   }
@@ -2160,8 +2160,8 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg(
       return false;
     }
   }
-  theMatAlg *= theScalar;
-  return output.assignMatrix(theMatAlg, calculator);
+  matrixAlg *= theScalar;
+  return output.assignMatrix(matrixAlg, calculator);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg(

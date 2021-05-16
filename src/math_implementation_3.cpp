@@ -2148,19 +2148,19 @@ std::string StringRoutines::Differ::toString() {
 
 void StringRoutines::Differ::computeBestStartingIndices(int& outputIndexLeft, int& outputIndexRight) {
   MacroRegisterFunctionWithName("StringRoutines::Differ::computeBestStartingIndices");
-  Matrix<int> theMatrix = this->matrixLongestCommonSubsequence.getElement();
-  outputIndexLeft = theMatrix.numberOfRows - 1;
-  outputIndexRight = theMatrix.numberOfColumns - 1;
+  Matrix<int> matrix = this->matrixLongestCommonSubsequence.getElement();
+  outputIndexLeft = matrix.numberOfRows - 1;
+  outputIndexRight = matrix.numberOfColumns - 1;
   int bestSoFar = 0;
-  for (int i = 1; i < theMatrix.numberOfRows; i ++) {
-    for (int j = 1; j < theMatrix.numberOfColumns; j ++) {
+  for (int i = 1; i < matrix.numberOfRows; i ++) {
+    for (int j = 1; j < matrix.numberOfColumns; j ++) {
       if (
         this->left[static_cast<unsigned>(i - 1)] !=
         this->right[static_cast<unsigned>(j - 1)]
       ) {
         continue;
       }
-      int current = theMatrix(i, j);
+      int current = matrix(i, j);
       bool isBetter = false;
       if (current > bestSoFar) {
         isBetter = true;
@@ -2181,22 +2181,22 @@ void StringRoutines::Differ::computeLongestSubsequenceMatrix() {
   MacroRegisterFunctionWithName("StringRoutines::Differ::computeLongestSubsequenceMatrix");
   unsigned numberOfRows = static_cast<unsigned>(left.size()) + 1;
   unsigned numberOfColumns = static_cast<unsigned>(right.size()) + 1;
-  Matrix<int>& theMatrix = this->matrixLongestCommonSubsequence.getElement();
-  theMatrix.initialize(
+  Matrix<int>& matrix = this->matrixLongestCommonSubsequence.getElement();
+  matrix.initialize(
     static_cast<int>(numberOfRows), static_cast<int>(numberOfColumns)
   );
-  for (int j = 0; j < theMatrix.numberOfColumns; j ++) {
-    theMatrix(0, j) = 0;
+  for (int j = 0; j < matrix.numberOfColumns; j ++) {
+    matrix(0, j) = 0;
   }
-  for (int i = 0; i < theMatrix.numberOfRows; i ++) {
-    theMatrix(i, 0) = 0;
+  for (int i = 0; i < matrix.numberOfRows; i ++) {
+    matrix(i, 0) = 0;
   }
   for (unsigned i = 1; i < numberOfRows; i ++) {
     for (unsigned j = 1; j < numberOfColumns; j ++) {
       if (this->left[i - 1] == this->right[j - 1]) {
-        theMatrix(i, j) = theMatrix(i - 1, j - 1) + 1;
+        matrix(i, j) = matrix(i - 1, j - 1) + 1;
       } else {
-        theMatrix(i, j) = MathRoutines::maximum(theMatrix(i - 1, j), theMatrix(i, j - 1));
+        matrix(i, j) = MathRoutines::maximum(matrix(i - 1, j), matrix(i, j - 1));
       }
     }
   }
@@ -2243,9 +2243,9 @@ void StringRoutines::Differ::extractCommonStrings(int indexLeft, int indexRight)
       continue;
     }
     this->pushCommonString(previousLeft, previousRight);
-    Matrix<int>& theMatrix = this->matrixLongestCommonSubsequence.getElement();
+    Matrix<int>& matrix = this->matrixLongestCommonSubsequence.getElement();
     if (
-      theMatrix(indexLeft - 1, indexRight) > theMatrix(indexLeft, indexRight - 1)
+      matrix(indexLeft - 1, indexRight) > matrix(indexLeft, indexRight - 1)
     ) {
       indexLeft --;
     } else {
@@ -7923,14 +7923,14 @@ Rational WeylGroupData::getLongestRootLengthSquared() const {
   return result;
 }
 
-bool WeylGroupData::isElementWeylGroup(const MatrixTensor<Rational>& input) {
+bool WeylGroupData::isElementWeylGroup(const MatrixTensor<Rational>& matrix) {
   MacroRegisterFunctionWithName("WeylGroup::isElementWeylGroup");
   Vector<Rational> theRhoImage;
-  input.actOnVectorColumn(this->rho, theRhoImage);
+  matrix.actOnVectorColumn(this->rho, theRhoImage);
   ElementWeylGroup theElementCandidate;
   this->raiseToDominantWeight(theRhoImage, nullptr, nullptr, &theElementCandidate);
   Matrix<Rational> candidateMatrix, inputMatrix;
-  input.getMatrix(inputMatrix, this->getDimension());
+  matrix.getMatrix(inputMatrix, this->getDimension());
   this->getMatrixStandardRepresentation(theElementCandidate, candidateMatrix);
   return candidateMatrix == inputMatrix;
 }
@@ -9938,9 +9938,9 @@ void Lattice::intersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& t
 
 void Lattice::intersectWithLinearSubspaceSpannedBy(const Vectors<Rational>& theSubspaceBasis) {
   Vectors<Rational> theNormals;
-  Matrix<Rational> theMat;
-  theSubspaceBasis.getMatrixRootsToRows(theMat);
-  theMat.getZeroEigenSpace(theNormals);
+  Matrix<Rational> matrix;
+  theSubspaceBasis.getMatrixRootsToRows(matrix);
+  matrix.getZeroEigenSpace(theNormals);
   this->intersectWithLinearSubspaceGivenByNormals(theNormals);
 }
 
@@ -9974,17 +9974,17 @@ bool Lattice::substitutionHomogeneous(const Matrix<Rational>& theSub) {
     return false;
   }
   int startingDim = this->getDimension();
-  Matrix<Rational> theMat, oldBasisTransformed, matRelationBetweenStartingVariables;
-  theMat = theSub;
+  Matrix<Rational> matrix, oldBasisTransformed, matRelationBetweenStartingVariables;
+  matrix = theSub;
   oldBasisTransformed = this->basisRationalForm;
   oldBasisTransformed.transpose();
   Selection nonPivotPoints;
-  theMat.gaussianEliminationByRows(&oldBasisTransformed, &nonPivotPoints);
+  matrix.gaussianEliminationByRows(&oldBasisTransformed, &nonPivotPoints);
   if (nonPivotPoints.cardinalitySelection != 0) {
     return false;
   }
   int numNonZeroRows = nonPivotPoints.numberOfElements;
-  int numZeroRows = theMat.numberOfRows-numNonZeroRows;
+  int numZeroRows = matrix.numberOfRows-numNonZeroRows;
   matRelationBetweenStartingVariables.initialize(numZeroRows, startingDim);
   for (int i = 0; i < numZeroRows; i ++) {
     for (int j = 0; j < startingDim; j ++) {
@@ -12408,19 +12408,19 @@ void Cone::computeVerticesFromNormalsNoFakeVertices() {
     }
     return;
   }
-  Matrix<Rational> theMat;
+  Matrix<Rational> matrix;
   Vector<Rational> tempRoot;
-  theMat.initialize(theDim - 1, theDim);
+  matrix.initialize(theDim - 1, theDim);
   for (int i = 0; i < numCycles; i ++) {
     theSel.incrementSelectionFixedCardinality(theDim - 1);
     for (int j = 0; j < theSel.cardinalitySelection; j ++) {
       for (int k = 0; k < theDim; k ++) {
-        theMat.elements[j][k] = this->normals[theSel.elements[j]][k];
+        matrix.elements[j][k] = this->normals[theSel.elements[j]][k];
       }
     }
-    theMat.gaussianEliminationByRows(nullptr, &nonPivotPoints);
+    matrix.gaussianEliminationByRows(nullptr, &nonPivotPoints);
     if (nonPivotPoints.cardinalitySelection == 1) {
-      theMat.nonPivotPointsToEigenVector(nonPivotPoints, tempRoot);
+      matrix.nonPivotPointsToEigenVector(nonPivotPoints, tempRoot);
       bool tempBool = this->isInCone(tempRoot);
       if (!tempBool) {
         tempRoot.negate();

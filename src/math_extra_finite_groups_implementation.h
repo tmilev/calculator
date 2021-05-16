@@ -1348,20 +1348,20 @@ unsigned int GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::hash
 template <typename somegroup, typename Coefficient>
 unsigned int GroupRepresentation<somegroup, Coefficient>::hashFunction() const {
   unsigned int result = 0;
-  result += this->theCharacter.hashFunction();
+  result += this->character.hashFunction();
   return result;
 }
 
 template <typename somegroup, typename Coefficient>
 Matrix<Coefficient>& GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getMatrixElement(int groupElementIndex) {
-  Matrix<Coefficient>& theMat = this->theElementImages[groupElementIndex];
+  Matrix<Coefficient>& matrix = this->theElementImages[groupElementIndex];
   if (this->elementIsComputed[groupElementIndex]) {
-    return theMat;
+    return matrix;
   }
   const ElementWeylGroup& theElt = this->ownerGroup->theElements[groupElementIndex];
   this->elementIsComputed[groupElementIndex] = true;
-  this->getMatrixElement(theElt, theMat);
-  return theMat;
+  this->getMatrixElement(theElt, matrix);
+  return matrix;
 }
 
 template <typename somegroup, typename Coefficient>
@@ -2034,8 +2034,8 @@ void FiniteGroup<elementSomeGroup>::addIrreducibleRepresentation(
   GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational>& p
 ) {
   p.computeCharacter();
-  this->irreps.BSInsertDontDup(p);
-  this->characterTable.BSInsertDontDup(p.theCharacter);
+  this->irreducibleRepresentations.BSInsertDontDup(p);
+  this->characterTable.BSInsertDontDup(p.character);
 }
 
 template <typename elementSomeGroup>
@@ -2066,11 +2066,11 @@ template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentationsTodorsVersion() {
   MacroRegisterFunctionWithName("FiniteGroup::computeIrreducibleRepresentationsTodorsVersion");
   if (this->irreps_grcam.size == 0) {
-    if (this->irreps.size == 0) {
+    if (this->irreducibleRepresentations.size == 0) {
       global.fatal << "Need an initial irrep.  check up the call chain and find out where it should be provided" << global.fatal;
     }
-    for (int i = 0; i < this->irreps.size; i ++) {
-      this->irreps_grcam.addOnTop(irreps[i].makeGRCAM());
+    for (int i = 0; i < this->irreducibleRepresentations.size; i ++) {
+      this->irreps_grcam.addOnTop(irreducibleRepresentations[i].makeGRCAM());
     }
   }
   List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > appendOnlyIrrepsList;
@@ -2098,11 +2098,11 @@ void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentationsTodorsVersi
   ProgressReport theReport1;
   //  int indexFirstPredefinedRep = 1; //<-this should be the index of the sign rep.
   //  int indexLastPredefinedrep = 2; //<-this should be the index of the standard rep.
-  for (int i = 0; i < appendOnlyIrrepsList.size && this->irreps.size != NumClasses; i ++) {
+  for (int i = 0; i < appendOnlyIrrepsList.size && this->irreducibleRepresentations.size != NumClasses; i ++) {
     for (int j = 0; j < initialcount; j ++) {
       if (theReport1.tickAndWantReport()) {
         std::stringstream reportStream;
-        reportStream << this->irreps.size << " irreducible representations found so far. ";
+        reportStream << this->irreducibleRepresentations.size << " irreducible representations found so far. ";
         reportStream << "<br>Decomposing " << appendOnlyIrrepsList[j].theCharacter
         << " * " << appendOnlyIrrepsList[i].theCharacter << "\n";
         theReport1.report(reportStream.str());
@@ -2118,12 +2118,12 @@ void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentationsTodorsVersi
   if (theReport1.tickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "Irrep table:";
-    for (int i = 0; i < this->irreps.size; i ++) {
-      reportStream << "\n<br>\n" << this->irreps[i].theCharacter.toString();
+    for (int i = 0; i < this->irreducibleRepresentations.size; i ++) {
+      reportStream << "\n<br>\n" << this->irreducibleRepresentations[i].character.toString();
     }
     FormatExpressions tempFormat;
     tempFormat.flagUseLatex = true;
-    for (int i = 0; i < this->irreps.size; i ++) {
+    for (int i = 0; i < this->irreducibleRepresentations.size; i ++) {
       reportStream << "<hr>irrep " << i + 1 << "<br>" << this->irreps_grcam[i].toString(&tempFormat);
     }
     theReport1.report(reportStream.str());
@@ -2133,7 +2133,7 @@ void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentationsTodorsVersi
   if (this->characterTable.size < this->conjugacyClasses.size) {
     global.fatal << "Character table size does not equal the number of conjugacy classes. " << global.fatal;
   }
-  if (this->irreps.size < this->conjugacyClasses.size) {
+  if (this->irreducibleRepresentations.size < this->conjugacyClasses.size) {
     global.fatal << "Bad number of irreducible representations. " << global.fatal;
   }
 }
@@ -2229,12 +2229,12 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::decomposeTod
       this->ownerGroup->checkInitializationFiniteDimensionalRepresentationComputation();
       {
         std::stringstream reportStream;
-        reportStream << "<hr>\ncontains irrep " << appendOnlyIrrepsList[i].theCharacter.toString() << " with multiplicity "
+        reportStream << "<hr>\ncontains irrep " << appendOnlyIrrepsList[i].character.toString() << " with multiplicity "
         << NumIrrepsOfType << "\n";
-        reportStream << "<hr>\nGetting class f-n matrix from character: " << appendOnlyIrrepsList[i].theCharacter;
+        reportStream << "<hr>\nGetting class f-n matrix from character: " << appendOnlyIrrepsList[i].character;
         Report2.report(reportStream.str());
       }
-      this->getClassFunctionMatrix(appendOnlyIrrepsList[i].theCharacter, splittingOperatorMatrix);
+      this->getClassFunctionMatrix(appendOnlyIrrepsList[i].character, splittingOperatorMatrix);
       {
         std::stringstream reportStream;
         reportStream << "<br>class f-n matrix: " << splittingOperatorMatrix.toString() << "\n <br>\n"
@@ -2248,9 +2248,9 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::decomposeTod
       // I'm not sure how much of a good idea it is to ensure that outputIrrepMults only takes monomials
       // from ownerGroup->characterTable, it might be better to add the character from irreps pointed to
       // by the appendOnlyIrrepsList[i]
-      int ci = this->ownerGroup->characterTable.BSGetIndex(appendOnlyIrrepsList[i].theCharacter);
+      int ci = this->ownerGroup->characterTable.BSGetIndex(appendOnlyIrrepsList[i].character);
       outputIrrepMults.addMonomial(this->ownerGroup->characterTable[ci], NumIrrepsOfType);
-      remainingCharacter -= appendOnlyIrrepsList[i].theCharacter*NumIrrepsOfType;
+      remainingCharacter -= appendOnlyIrrepsList[i].character*NumIrrepsOfType;
       {
         std::stringstream reportStream;
         reportStream << "<br>Intersecting kernel of class f-n matrix" << splittingMatrixKernel.toString() << " with "
@@ -2334,7 +2334,7 @@ GroupRepresentation<somegroup, Coefficient> GroupRepresentationCarriesAllMatrice
     }
   }
   out.identifyingString = s.str();
-  out.theCharacter = this->theCharacter;
+  out.character = this->theCharacter;
   return out;
 }
 
@@ -2347,8 +2347,8 @@ void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentationsThomasVersi
     if (this->irreps_grcam.size != 0) {
       startingIrrep = &(this->irreps_grcam[0]);
     } else {
-      if (this->irreps.size != 0) {
-        startingIrrep = &(this->irreps[0].makeGRCAM());
+      if (this->irreducibleRepresentations.size != 0) {
+        startingIrrep = &(this->irreducibleRepresentations[0].makeGRCAM());
       }
     }
     if (!startingIrrep || (startingIrrep->generators.size > 0 && startingIrrep->generators[0].numberOfRows == 1)) {
@@ -2412,11 +2412,11 @@ void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentationsThomasVersi
     }
   }
   this->irreps_grcam.quickSortAscending();
-  this->irreps.setSize(0);
+  this->irreducibleRepresentations.setSize(0);
   this->characterTable.setSize(0);
   for (int i = 0; i < irreps_grcam.size; i ++) {
-    this->irreps.addOnTop(this->irreps_grcam[i].makeOtherGroupRepresentationClass());
-    this->characterTable.addOnTop(&(this->irreps[i].theCharacter));
+    this->irreducibleRepresentations.addOnTop(this->irreps_grcam[i].makeOtherGroupRepresentationClass());
+    this->characterTable.addOnTop(&(this->irreducibleRepresentations[i].character));
   }
   this->theGroup.flagCharTableIsComputed = true;
   this->theGroup.flagIrrepsAreComputed = true;
@@ -2426,7 +2426,7 @@ template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentations() {
   if (this->ComputeIrreducibleRepresentationsWithFormulas) {
     this->ComputeIrreducibleRepresentationsWithFormulas(*this);
-  } else if (this->irreps_grcam.size != 0 || this->irreps.size != 0) {
+  } else if (this->irreps_grcam.size != 0 || this->irreducibleRepresentations.size != 0) {
     this->computeIrreducibleRepresentationsTodorsVersion();
   } else {
     global.fatal << "FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentations: "

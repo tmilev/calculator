@@ -918,7 +918,7 @@ bool Calculator::EvaluateLoop::userDefinedEvaluation() {
     MapList<Expression, Expression> bufferPairs;
     std::stringstream* theLog = this->owner->flagLogpatternMatching ? &this->owner->comments : nullptr;
     afterpatternMatch = *(this->output);
-    if (this->owner->processOneExpressionOnePatternOneSub(
+    if (this->owner->processOneExpressionOnePatternOneSubstitution(
       currentPattern, afterpatternMatch, bufferPairs, theLog
     )) {
       std::stringstream substitutionComment;
@@ -1202,7 +1202,7 @@ void Calculator::specializeBoundVariables(Expression& toBeSubbedIn, MapList<Expr
 //  this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+ 1, MaxRecursionDepth);
 }
 
-bool Calculator::processOneExpressionOnePatternOneSub(
+bool Calculator::processOneExpressionOnePatternOneSubstitution(
   const Expression& pattern,
   Expression& expression,
   MapList<Expression, Expression>& bufferPairs,
@@ -1384,10 +1384,10 @@ void Calculator::evaluateCommands() {
     << this->programExpression.toString(&global.defaultFormat.getElement())
     << Logger::consoleNormal() << std::endl;
   } else if (!this->flagDisplayFullExpressionTree) {
-    std::string badCharsString = this->toStringIsCorrectAsciiCalculatorString(this->inputString);
-    if (badCharsString != "") {
-      out << badCharsString << "<hr>";
-      this->outputJS[WebAPI::result::badInput] = badCharsString;
+    std::string badCharactersString = this->toStringIsCorrectAsciiCalculatorString(this->inputString);
+    if (badCharactersString != "") {
+      out << badCharactersString << "<hr>";
+      this->outputJS[WebAPI::result::badInput] = badCharactersString;
     }
     this->objectContainer.resetSliders();
     this->objectContainer.resetPlots();

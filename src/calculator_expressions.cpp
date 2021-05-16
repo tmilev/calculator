@@ -2930,9 +2930,9 @@ bool Expression::toStringData(std::stringstream& out, FormatExpressions* format)
     this->getContext().getFormat(format);
     format.flagUseHTML = false;
     format.flagUseLatex = true;
-    Matrix<RationalFraction<Rational> > theMat;
-    this->owner->functionGetMatrix(*this, theMat);
-    out << theMat.toString(&format);
+    Matrix<RationalFraction<Rational> > matrix;
+    this->owner->functionGetMatrix(*this, matrix);
+    out << matrix.toString(&format);
     return true;
   }
   int typeIndex = - 1;

@@ -445,20 +445,20 @@ bool CalculatorFunctions::innerPerturbSplittingNormal(Calculator& calculator, co
   if (!calculator.getVector(input[1], splittingNormal, nullptr)) {
     return output.makeError("Failed to extract normal from first argument. ", calculator);
   }
-  Matrix<Rational> theMat;
+  Matrix<Rational> matrix;
   Vectors<Rational> nonStrictCone, vectorsToPerturbRelativeTo;
   if (!calculator.functionGetMatrix(
-    input[2], theMat, nullptr, splittingNormal.size, nullptr
+    input[2], matrix, nullptr, splittingNormal.size, nullptr
   )) {
     return output.makeError("Failed to extract matrix from second argument. ", calculator);
   }
-  nonStrictCone.assignMatrixRows(theMat);
+  nonStrictCone.assignMatrixRows(matrix);
   if (!calculator.functionGetMatrix(
-    input[3], theMat, nullptr, splittingNormal.size, nullptr
+    input[3], matrix, nullptr, splittingNormal.size, nullptr
   )) {
     return output.makeError("Failed to extract matrix from third argument. ", calculator);
   }
-  vectorsToPerturbRelativeTo.assignMatrixRows(theMat);
+  vectorsToPerturbRelativeTo.assignMatrixRows(matrix);
   for (int i = 0; i < nonStrictCone.size; i ++) {
     if (splittingNormal.scalarEuclidean(nonStrictCone[i]) < 0) {
       std::stringstream out;

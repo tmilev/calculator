@@ -41,7 +41,7 @@ void WeylGroupData::computeOrLoadCharacterTable(std::stringstream* reportStream)
   if (this->group.ComputeIrreducibleRepresentationsWithFormulas) {
     this->group.ComputeIrreducibleRepresentationsWithFormulas(this->group);
   }
-  if (this->group.irreps.size < this->group.conjugacyClasses.size) {
+  if (this->group.irreducibleRepresentations.size < this->group.conjugacyClasses.size) {
     this->computeInitialIrreducibleRepresentations();
     this->group.computeIrreducibleRepresentationsTodorsVersion();
   }

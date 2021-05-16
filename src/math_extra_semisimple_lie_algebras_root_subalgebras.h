@@ -137,7 +137,7 @@ public:
 
   CharacterSemisimpleLieAlgebraModule<Rational> ModuleDecompoHighestWeights;
   List<int> indicesSubalgebrasContainingK;
-  List<List<List<int> > > theMultTable;
+  List<List<List<int> > > pairingTable;
   List<int> theOppositeKmods;
   DynkinDiagramRootSubalgebra dynkinDiagram;
   DynkinDiagramRootSubalgebra theCentralizerDiagram;
@@ -225,7 +225,7 @@ public:
   void generateAutomorphismsPreservingBorel(
     SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& outputAutomorphisms
   );
-  void makeGeneratingSingularVectors(ConeRelation& theRelation, Vectors<Rational>& nilradicalRoots);
+  void makeGeneratingSingularVectors(ConeRelation& relation, Vectors<Rational>& nilradicalRoots);
   bool attemptExtensionToIsomorphismNoCentralizer(
     Vectors<Rational>& Domain,
     Vectors<Rational>& Range,
@@ -243,9 +243,9 @@ public:
     RootSubalgebras& inputOwner,
     bool* domainAndRangeGenerateNonIsoSAs
   );
-  bool checkForSmallRelations(ConeRelation& theRel, Vectors<Rational>& nilradicalRoots);
+  bool checkForSmallRelations(ConeRelation& relation, Vectors<Rational>& nilradicalRoots);
   int numberOfRootsInNilradical();
-  void ensureAlphasDontSumToRoot(ConeRelation& theRel, Vectors<Rational>& NilradicalRoots);
+  void ensureAlphasDontSumToRoot(ConeRelation& relation, Vectors<Rational>& nilradicalRoots);
   bool isARoot(const Vector<Rational>& input);
   bool isARootOrZero(const Vector<Rational>& input);
   void subalgebraEnumerationsToLinearCombinations();

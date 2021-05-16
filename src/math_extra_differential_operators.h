@@ -144,8 +144,8 @@ void QuasiDifferentialOperator<Coefficient>::operator*=(const QuasiDifferentialO
     for (int i = 0; i < this->size(); i ++) {
       leftElt.makeZero();
       leftElt.addMonomial((*this)[i].theWeylMon, this->coefficients[i]);
-      outputMon.matrixMonomial = (*this)[i].theMatMon;
-      outputMon.matrixMonomial *= standsOnTheRight[j].theMatMon;
+      outputMon.matrixMonomial = (*this)[i].matrixMon;
+      outputMon.matrixMonomial *= standsOnTheRight[j].matrixMon;
       leftElt *= rightElt;
       for (int k = 0; k < leftElt.size(); k ++) {
         outputMon.weylMonomial = leftElt[k];

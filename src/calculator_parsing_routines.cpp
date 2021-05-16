@@ -1215,11 +1215,11 @@ bool Calculator::replaceMatrixXByE() {
 }
 
 bool Calculator::replaceMatrixEXByMatrixNewRow() {
-  SyntacticElement& theMatElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3];
+  SyntacticElement& matrixElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3];
   SyntacticElement& theElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
-  theMatElt.dataList.lastObject()->addChildOnTop(theElt.data);
-  theMatElt.dataList.setSize(theMatElt.dataList.size + 1);
-  theMatElt.dataList.lastObject()->makeSequence(*this);
+  matrixElt.dataList.lastObject()->addChildOnTop(theElt.data);
+  matrixElt.dataList.setSize(matrixElt.dataList.size + 1);
+  matrixElt.dataList.lastObject()->makeSequence(*this);
   if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::replaceMatrixEXByMatrixNewRow]";
   }
@@ -1237,9 +1237,9 @@ bool Calculator::replaceMatrixEXByMatrix() {
 }
 
 bool Calculator::replaceMatrixEXByMatrixX() {
-  SyntacticElement& theMatElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3];
+  SyntacticElement& matrixElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3];
   SyntacticElement& theElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
-  theMatElt.dataList.lastObject()->addChildOnTop(theElt.data);
+  matrixElt.dataList.lastObject()->addChildOnTop(theElt.data);
   if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::replaceMatrixEXByMatrixX]";
   }

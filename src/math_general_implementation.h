@@ -65,43 +65,43 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
 }
 
 template<class Coefficient>
-std::ostream& operator<< (std::ostream& output, const Matrix<Coefficient>& theMat) {
+std::ostream& operator<< (std::ostream& output, const Matrix<Coefficient>& matrix) {
   output << "\\left(\\begin{array}{";
-  for (int j = 0; j < theMat.numberOfColumns; j ++) {
+  for (int j = 0; j < matrix.numberOfColumns; j ++) {
     output << "c";
   }
   output << "}";
-  int firstMatRowIndexToHide = theMat.numberOfRows;
-  int lastMatRowIndexToHide = theMat.numberOfRows;
-  int firstMatColIndexToHide = theMat.numberOfColumns;
-  int lastMatColIndexToHide = theMat.numberOfColumns;
+  int firstMatRowIndexToHide = matrix.numberOfRows;
+  int lastMatRowIndexToHide = matrix.numberOfRows;
+  int firstMatColIndexToHide = matrix.numberOfColumns;
+  int lastMatColIndexToHide = matrix.numberOfColumns;
   FormatExpressions& theFormat = global.defaultFormat.getElement();
   if (theFormat.flagSuppressLongMatrices) {
-    if (theMat.numberOfRows > theFormat.maximumMatrixDisplayedRows) {
+    if (matrix.numberOfRows > theFormat.maximumMatrixDisplayedRows) {
       firstMatRowIndexToHide = theFormat.maximumMatrixDisplayedRows / 2;
-      lastMatRowIndexToHide = theMat.numberOfRows - 1 - theFormat.maximumMatrixDisplayedRows / 2;
+      lastMatRowIndexToHide = matrix.numberOfRows - 1 - theFormat.maximumMatrixDisplayedRows / 2;
     }
-    if (theMat.numberOfColumns > theFormat.maximumMatrixLineLength) {
+    if (matrix.numberOfColumns > theFormat.maximumMatrixLineLength) {
       firstMatColIndexToHide = theFormat.maximumMatrixLineLength / 2;
-      lastMatColIndexToHide = theMat.numberOfColumns - 1 - theFormat.maximumMatrixLineLength / 2;
+      lastMatColIndexToHide = matrix.numberOfColumns - 1 - theFormat.maximumMatrixLineLength / 2;
     }
   }
-  for (int i = 0; i < theMat.numberOfRows; i ++) {
+  for (int i = 0; i < matrix.numberOfRows; i ++) {
     if (firstMatRowIndexToHide <= i && i <= lastMatRowIndexToHide) {
       if (firstMatRowIndexToHide == i) {
         output << "...\\\\\n";
       }
       continue;
     }
-    for (int j = 0; j < theMat.numberOfColumns; j ++) {
+    for (int j = 0; j < matrix.numberOfColumns; j ++) {
       if (firstMatColIndexToHide <= j && j <= lastMatColIndexToHide) {
         if (firstMatColIndexToHide == j) {
           output << "...&";
         }
         continue;
       }
-      output << theMat(i, j);
-      if (j != theMat.numberOfColumns - 1) {
+      output << matrix(i, j);
+      if (j != matrix.numberOfColumns - 1) {
         output << " & ";
       } else {
         output << "\\\\";

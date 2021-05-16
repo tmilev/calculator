@@ -1126,12 +1126,12 @@ bool CalculatorConversions::outerMatrixExpressionsToMatrixOfType(
   if (input[0][0].data != calculator.opMatrix()) {
     return false;
   }
-  Matrix<Expression> theMatrix;
-  if (!calculator.getMatrixExpressionsFromArguments(input, theMatrix)) {
+  Matrix<Expression> matrix;
+  if (!calculator.getMatrixExpressionsFromArguments(input, matrix)) {
     return false;
   }
   Expression conversionAttempt;
-  conversionAttempt.assignMatrixExpressions(theMatrix, calculator, true, false);
+  conversionAttempt.assignMatrixExpressions(matrix, calculator, true, false);
   if (!conversionAttempt.isMatrix()) {
     output = conversionAttempt;
     return true;

@@ -905,13 +905,13 @@ public:
   };
   List<struct frame> stack;
   int frame_pointer;
-  void initialize(List<GeneratorPermutationR2sOnIndices> theGenerators) {
-    if (theGenerators.size == 0) {
+  void initialize(const List<GeneratorPermutationR2sOnIndices>& inputGenerators) {
+    if (inputGenerators.size == 0) {
       frame_pointer = - 1;
       return;
     }
-    generators = theGenerators;
-    stack.setSize(generators.size);
+    this->generators = inputGenerators;
+    stack.setSize(this->generators.size);
     frame_pointer = 0;
     stack[frame_pointer].program_counter = pcpositions::beginning;
     ++ (*this);
@@ -924,21 +924,21 @@ public:
       }
       switch (stack[frame_pointer].program_counter) {
       case pcpositions::beginning:
-        generators[frame_pointer].ResetIteration();
+        this->generators[frame_pointer].ResetIteration();
           break;
       case pcpositions::loop:
-        if (generators[frame_pointer].doneIterating()) {
+        if (this->generators[frame_pointer].doneIterating()) {
           stack[frame_pointer].program_counter = pcpositions::end;
           break;
         }
         {
-          PermutationR2 permi = *(generators[frame_pointer]);
+          PermutationR2 permi = *(this->generators[frame_pointer]);
           if (frame_pointer == 0) {
             stack[frame_pointer].subprod = permi;
           } else {
             stack[frame_pointer].subprod.makeFromMultiplicities(stack[frame_pointer - 1].subprod, permi);
           }
-          if (frame_pointer == generators.size - 1) {
+          if (frame_pointer == this->generators.size - 1) {
             stack[frame_pointer].program_counter = pcpositions::midloop;
             return *this;
           } else {
@@ -949,7 +949,7 @@ public:
           }
         }
         case pcpositions::midloop:
-          ++ generators[frame_pointer];
+          ++ this->generators[frame_pointer];
           stack[frame_pointer].program_counter = pcpositions::loop;
           break;
         case pcpositions::end:
@@ -1010,7 +1010,7 @@ class ElementFiniteGroup: public GroupConjugacyImplementation<ElementFiniteGroup
     this->inv = nullptr;
   }
 
-  ElementFiniteGroup operator*(ElementFiniteGroup right) {
+  ElementFiniteGroup operator*(const ElementFiniteGroup& right) {
     ElementFiniteGroup out;
     out.data = this->mul(this->data, right.data);
     out.mul = this->mul;
@@ -1036,8 +1036,8 @@ class ElementFiniteGroup: public GroupConjugacyImplementation<ElementFiniteGroup
 
 class PermutationGroupData {
 public:
-  FiniteGroup<PermutationR2>* theGroup;
-  FiniteGroup<PermutationR2> theGroupMayBeHereNameIsLongToDiscourageUse;
+  FiniteGroup<PermutationR2>* group;
+  FiniteGroup<PermutationR2> groupMayBeHereNameIsLongToDiscourageUse;
   bool flagIsSymmetricGroup;
   bool flagHasGenerators1j;
   bool flagHasGeneratorsjjPlus1;
@@ -1424,8 +1424,8 @@ std::string FiniteGroup<elementSomeGroup>::prettyPrintGeneratorCommutationRelati
 
 template <typename elementSomeGroup>
 std::string FiniteGroup<elementSomeGroup>::prettyPrintCharacterTable(bool andPrint) {
-  for (int i = 0; i < this->irreps.size; i ++) {
-    this->irreps[i].computeCharacter();
+  for (int i = 0; i < this->irreducibleRepresentations.size; i ++) {
+    this->irreducibleRepresentations[i].computeCharacter();
   }
   std::stringstream out;
   out << this->getSize() << " elements. Representatives and sizes are ";
@@ -1441,7 +1441,7 @@ std::string FiniteGroup<elementSomeGroup>::prettyPrintCharacterTable(bool andPri
   // pad the numbers out front
   List<std::string> numbers;
   int numpad = 0;
-  for (int i = 0; i < this->irreps.size; i ++) {
+  for (int i = 0; i < this->irreducibleRepresentations.size; i ++) {
     std::stringstream ns;
     ns << i;
     numbers.addOnTop(ns.str());
@@ -1453,12 +1453,12 @@ std::string FiniteGroup<elementSomeGroup>::prettyPrintCharacterTable(bool andPri
 
   // pad the character values
   List<List<std::string> > values;
-  values.setSize(this->irreps.size);
+  values.setSize(this->irreducibleRepresentations.size);
   int columnsPerElement = 0;
-  for (int i = 0; i < this->irreps.size; i ++) {
-    values[i].setSize(this->irreps[i].theCharacter.data.size);
-    for (int j = 0; j < this->irreps[i].theCharacter.data.size; j ++) {
-      values[i][j] = irreps[i].theCharacter.data[j].toString();
+  for (int i = 0; i < this->irreducibleRepresentations.size; i ++) {
+    values[i].setSize(this->irreducibleRepresentations[i].character.data.size);
+    for (int j = 0; j < this->irreducibleRepresentations[i].character.data.size; j ++) {
+      values[i][j] = irreducibleRepresentations[i].character.data[j].toString();
       int vijcols = static_cast<int>(values[i][j].length());
       if (vijcols > columnsPerElement) {
         columnsPerElement = vijcols;
@@ -1483,22 +1483,22 @@ std::string FiniteGroup<elementSomeGroup>::prettyPrintCharacterTable(bool andPri
       }
       out << values[i][j];
     }
-    Rational x = this->irreps[i].theCharacter.norm();
+    Rational x = this->irreducibleRepresentations[i].character.norm();
     if (x != 1) {
       out << "][" << x;
     }
-    out << "] " << this->irreps[i].identifyingString;
+    out << "] " << this->irreducibleRepresentations[i].identifyingString;
     out << '\n';
   }
   Rational x = 0;
-  for (int i = 0; i < this->irreps.size; i ++) {
-    x += irreps[i].theCharacter.data[0] * irreps[i].theCharacter.data[0];
+  for (int i = 0; i < this->irreducibleRepresentations.size; i ++) {
+    x += this->irreducibleRepresentations[i].character.data[0] * this->irreducibleRepresentations[i].character.data[0];
   }
   out << "Sum of squares of first column: " << x << '\n';
   // print information about if anything's wrong
-  for (int i = 0; i < this->irreps.size; i ++) {
-    for (int j = i + 1; j < this->irreps.size; j ++) {
-      Rational x = this->irreps[i].theCharacter.innerProduct(this->irreps[j].theCharacter);
+  for (int i = 0; i < this->irreducibleRepresentations.size; i ++) {
+    for (int j = i + 1; j < this->irreducibleRepresentations.size; j ++) {
+      Rational x = this->irreducibleRepresentations[i].character.innerProduct(this->irreducibleRepresentations[j].character);
       if (x != 0) {
         out << "characters " << i << ", " << j << " have inner product " << x << '\n';
       }
@@ -1568,8 +1568,8 @@ std::string FiniteGroup<elementSomeGroup>::prettyPrintCCRepsSizes(bool andPrint)
 template <typename elementSomeGroup>
 JSData FiniteGroup<elementSomeGroup>::representationDataIntoJS() {
   JSData out;
-  for (int i = 0; i < irreps.size; i ++) {
-    out[i] = irreps[i].toJSON();
+  for (int i = 0; i < irreducibleRepresentations.size; i ++) {
+    out[i] = irreducibleRepresentations[i].toJSON();
   }
   return out;
 }
@@ -1674,22 +1674,22 @@ somestream& FiniteGroup<elementSomeGroup>::intoStream(somestream& out) const {
 template <typename somestream>
 somestream& PermutationGroupData::intoStream(somestream& out) {
   if (!this->flagIsSymmetricGroup) {
-    out << "Permutation Group with " << this->theGroup->elements.size << " elements, generated by: ";
-    for (int i = 0; i < this->theGroup->generators.size; i ++) {
-      out << this->theGroup->generators[i];
-      if (i != this->theGroup->generators.size - 1) {
+    out << "Permutation Group with " << this->group->elements.size << " elements, generated by: ";
+    for (int i = 0; i < this->group->generators.size; i ++) {
+      out << this->group->generators[i];
+      if (i != this->group->generators.size - 1) {
         out << ", ";
       }
     }
   }
-  out << "Symmetric Group on " << this->theGroup->generators.size + 1 << " letters (";
+  out << "Symmetric Group on " << this->group->generators.size + 1 << " letters (";
   if (this->flagHasGenerators1j) {
     out << "generators are (1 j))";
   }
   if (this->flagHasGeneratorsjjPlus1) {
     out << "generators are (j j+ 1))";
   }
-  out << " thus having " << this->theGroup->getSize() << " elements.";
+  out << " thus having " << this->group->getSize() << " elements.";
   return out;
 }
 
@@ -1706,8 +1706,8 @@ template <typename Coefficient>
 void PermutationGroupData::spechtModuleOfPartition(
   const Partition& p, GroupRepresentation<FiniteGroup<PermutationR2>, Coefficient>& rep
 ) {
-  p.spechtModuleMatricesOfPermutations(rep.generators, this->theGroup->generators);
-  rep.ownerGroup = this->theGroup;
+  p.spechtModuleMatricesOfPermutations(rep.generators, this->group->generators);
+  rep.ownerGroup = this->group;
 }
 
 /*
@@ -1819,7 +1819,7 @@ std::string GroupRepresentation<somegroup, Coefficient>::describeAsDirectSum() {
   for (int i = 0; i < this->ownerGroup->irreps.size; i ++) {
     this->ownerGroup->irreps[i].computeCharacter();
     Coefficient x;
-    x = this->theCharacter.innerProduct(this->ownerGroup->irreps[i].theCharacter);
+    x = this->character.innerProduct(this->ownerGroup->irreps[i].theCharacter);
     if (x != 0) {
       if (firstone) {
         firstone = false;

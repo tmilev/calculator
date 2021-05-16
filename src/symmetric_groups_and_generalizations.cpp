@@ -788,32 +788,32 @@ void PermutationR2::getWordjjPlus1(List<int>& word) const {
 }
 
 void PermutationGroupData::makeSymmetricGroup(int n) {
-  this->theGroup = &this->theGroupMayBeHereNameIsLongToDiscourageUse;
-  this->theGroup->generators.setSize(n - 1);
+  this->group = &this->groupMayBeHereNameIsLongToDiscourageUse;
+  this->group->generators.setSize(n - 1);
   for (int i = 0; i < n - 1; i ++) {
-    this->theGroup->generators[i].addTransposition(0, i + 1);
+    this->group->generators[i].addTransposition(0, i + 1);
   }
   this->flagIsSymmetricGroup = true;
   this->flagHasGenerators1j = true;
-  this->theGroup->computeConjugacyClassSizesAndRepresentativesByFormula = PermutationGroupData::computeCCSizesAndRepresentativesByFormulaImplementation;
-  this->theGroup->areConjugateByFormula = PermutationR2::areConjugate;
-  this->theGroup->getSizeByFormula = PermutationGroupData::getSizeByFormulaImplementation;
-  this->theGroup->specificDataPointer = this;
+  this->group->computeConjugacyClassSizesAndRepresentativesByFormula = PermutationGroupData::computeCCSizesAndRepresentativesByFormulaImplementation;
+  this->group->areConjugateByFormula = PermutationR2::areConjugate;
+  this->group->getSizeByFormula = PermutationGroupData::getSizeByFormulaImplementation;
+  this->group->specificDataPointer = this;
 }
 
 void PermutationGroupData::makeSymmetricGroupGeneratorsjjPlus1(int n) {
-  this->theGroup = &this->theGroupMayBeHereNameIsLongToDiscourageUse;
-  this->theGroup->generators.setSize(n - 1);
+  this->group = &this->groupMayBeHereNameIsLongToDiscourageUse;
+  this->group->generators.setSize(n - 1);
   for (int i = 0; i < n - 1; i ++) {
-    this->theGroup->generators[i].addTransposition(i, i + 1);
+    this->group->generators[i].addTransposition(i, i + 1);
   }
   this->flagIsSymmetricGroup = true;
   this->flagHasGeneratorsjjPlus1 = true;
-  this->theGroup->computeConjugacyClassSizesAndRepresentativesByFormula = PermutationGroupData::computeCCSizesAndRepresentativesByFormulaImplementation;
-  this->theGroup->areConjugateByFormula = PermutationR2::areConjugate;
-  this->theGroup->getSizeByFormula = PermutationGroupData::getSizeByFormulaImplementation;
-  this->theGroup->getWordByFormula = PermutationGroupData::getWordjjPlus1Implementation;
-  this->theGroup->specificDataPointer = this;
+  this->group->computeConjugacyClassSizesAndRepresentativesByFormula = PermutationGroupData::computeCCSizesAndRepresentativesByFormulaImplementation;
+  this->group->areConjugateByFormula = PermutationR2::areConjugate;
+  this->group->getSizeByFormula = PermutationGroupData::getSizeByFormulaImplementation;
+  this->group->getWordByFormula = PermutationGroupData::getWordjjPlus1Implementation;
+  this->group->specificDataPointer = this;
 }
 
 /*bool PermutationGroup::areConjugate(const PermutationR2& x, const PermutationR2& y) {
@@ -868,11 +868,11 @@ std::string PermutationGroupData::toString() {
 
 void PermutationGroupData::computeSpechtModules() {
   List<Partition> ps;
-  Partition::GetPartitions(ps,this->theGroup->generators.size + 1);
-  this->theGroup->irreps.setSize(ps.size);
+  Partition::GetPartitions(ps,this->group->generators.size + 1);
+  this->group->irreducibleRepresentations.setSize(ps.size);
   for (int i = 0; i < ps.size; i ++)
-    this->spechtModuleOfPartition(ps[i], this->theGroup->irreps[i]);
-  this->theGroup->irreps.quickSortAscending();
+    this->spechtModuleOfPartition(ps[i], this->group->irreducibleRepresentations[i]);
+  this->group->irreducibleRepresentations.quickSortAscending();
 }
 
 /*

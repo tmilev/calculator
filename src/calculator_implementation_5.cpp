@@ -372,9 +372,9 @@ bool CalculatorFunctions::innerGetPointsImplicitly(
     thePoints.addOnTopNoRepetition(plots[i].pointsDouble[0]);
     thePoints.addOnTopNoRepetition(plots[i].pointsDouble[1]);
   }
-  Matrix<double> theMatrix;
-  theMatrix.assignVectorsToRows(thePoints);
-  return output.assignMatrix(theMatrix, calculator);
+  Matrix<double> matrix;
+  matrix.assignVectorsToRows(thePoints);
+  return output.assignMatrix(matrix, calculator);
 }
 
 bool CalculatorFunctionsPlot::plotImplicitFunction(
@@ -476,17 +476,17 @@ bool CalculatorConversions::functionMatrixDouble(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionMatrixDouble");
-  Matrix<double> theMat;
+  Matrix<double> matrix;
   if (!calculator.functionGetMatrix(
     input,
-    theMat,
+    matrix,
     nullptr,
     0,
     CalculatorFunctions::functionEvaluateToDouble
   )) {
     return calculator << "<br>Failed to get matrix of doubles. ";
   }
-  return output.assignMatrix(theMat, calculator);
+  return output.assignMatrix(matrix, calculator);
 }
 
 bool CalculatorFunctionsIntegration::integratePullConstant(
@@ -1540,10 +1540,10 @@ bool CalculatorFunctionsPlot::plotPath(Calculator& calculator, const Expression&
   if (input.size() < 3) {
     return false;
   }
-  const Expression& theMatE = input[1];
+  const Expression& matrixE = input[1];
   Matrix<double> matrix;
-  if (!calculator.getMatrixDoubles(theMatE, matrix)) {
-    return calculator << "Failed to extract matrix from: " << theMatE.toString();
+  if (!calculator.getMatrixDoubles(matrixE, matrix)) {
+    return calculator << "Failed to extract matrix from: " << matrixE.toString();
   }
   if (matrix.numberOfColumns != 2 && matrix.numberOfColumns != 3) {
     return calculator << "Only dimensions 2 and 3 are supported at the moment. ";

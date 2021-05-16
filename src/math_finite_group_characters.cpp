@@ -70,11 +70,11 @@ void WeylGroupData::computeInitialIrreducibleRepresentations() {
   if (this->group.squaresCCReps.size == 0) {
     this->group.computeSquaresCCReps();
   }
-  this->group.irreps.setSize(0);
+  this->group.irreducibleRepresentations.setSize(0);
   this->group.characterTable.setSize(0);
   this->group.irreps_grcam.setSize(0);
   this->group.characterTable.setExpectedSize(this->group.conjugacyClassCount());
-  this->group.irreps.setExpectedSize(this->group.conjugacyClassCount());
+  this->group.irreducibleRepresentations.setExpectedSize(this->group.conjugacyClassCount());
   this->group.irreps_grcam.setExpectedSize(this->group.conjugacyClassCount());
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational> trivialRep, signRep, standardRep;
   this->getTrivialRepresentation(trivialRep);

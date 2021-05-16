@@ -117,7 +117,7 @@ public:
   static bool fileExistsVirtualCustomizedReadOnly(const std::string& theFileName, std::stringstream* commentsOnFailure);
   static bool isFolderUnsecure(const std::string& theFolderName);
   static bool getFolderFileNamesUnsecure(
-    const std::string& theFolderName,
+    const std::string& folderName,
     List<std::string>& outputFileNamesNoPath,
     List<std::string>* outputFileTypesWithDot = nullptr
   );

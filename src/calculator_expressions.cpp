@@ -2798,8 +2798,8 @@ bool Expression::toStringBuiltIn<CharacterSemisimpleLieAlgebraModule<Rational> >
   FormatExpressions* format
 ) {
   (void) format;
-  CharacterSemisimpleLieAlgebraModule<Rational> theElt = input.getValue<CharacterSemisimpleLieAlgebraModule<Rational> >();
-  out << theElt.toString();
+  CharacterSemisimpleLieAlgebraModule<Rational> element = input.getValue<CharacterSemisimpleLieAlgebraModule<Rational> >();
+  out << element.toString();
   return true;
 }
 
@@ -2811,13 +2811,13 @@ bool Expression::toStringBuiltIn<SemisimpleSubalgebras>(
 ) {
   (void) format;
   FormatExpressions formatLocal;
-  SemisimpleSubalgebras& theSubalgebras = input.getValueNonConst<SemisimpleSubalgebras>();
+  SemisimpleSubalgebras& subalgebras = input.getValueNonConst<SemisimpleSubalgebras>();
   formatLocal.flagUseLatex = true;
   formatLocal.flagUseHTML = true;
   formatLocal.flagCandidateSubalgebraShortReportOnly = false;
   formatLocal.flagIncludeMutableInformation = false;
   formatLocal.flagUseMathSpanPureVsMouseHover = false;
-  out << theSubalgebras.toString(&formatLocal);
+  out << subalgebras.toString(&formatLocal, false);
   return true;
 }
 

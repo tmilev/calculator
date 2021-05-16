@@ -95,7 +95,7 @@ public:
 
 class CandidateSemisimpleSubalgebra {
   friend std::ostream& operator << (std::ostream& output, const CandidateSemisimpleSubalgebra& candidate) {
-    output << candidate.toString();
+    output << candidate.toString(nullptr, false);
     return output;
   }
 
@@ -312,7 +312,7 @@ public:
   void computePrimalModuleDecompositionHWsHWVsOnly();
   void computePrimalModuleDecompositionHWVsOnly(HashedList<Vector<Rational> >& inputHighestWeights);
   void computePrimalModuleDecompositionHighestWeightsOnly(HashedList<Vector<Rational> >& outputHWsCoords);
-  void computePrimalModuleDecompositionHWsHWVsOnlyLastPart();
+  void computePrimalModuleDecompositionHighestWeightsOnlyLastPart();
   void getPrimalWeightProjectionFundamentalCoordinates(
     const Vector<Rational>& inputAmbientWeight,
     Vector<Rational>& output
@@ -337,12 +337,12 @@ public:
   ) const;
   std::string toStringType(FormatExpressions* format = nullptr) const;
   std::string toStringTypeAndHs(FormatExpressions* format = nullptr) const;
-  std::string toStringGenerators(FormatExpressions* format = nullptr) const;
-  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toStringGenerators(FormatExpressions* format, bool writeToHardDisk) const;
+  std::string toString(FormatExpressions* format, bool writeToHardDisk) const;
   std::string toStringSystem(FormatExpressions* format = nullptr) const;
   std::string toStringSystemPart2(FormatExpressions* format = nullptr) const;
   std::string toStringLoadUnknown(FormatExpressions* format = nullptr) const;
-  std::string toStringCentralizer(FormatExpressions* format = nullptr) const;
+  std::string toStringCentralizer(FormatExpressions* format, bool writeToHardDisk) const;
   std::string toStringCentralizerDebugData(FormatExpressions* format = nullptr) const;
   std::string toStringCartanSubalgebra(FormatExpressions* format = nullptr) const;
   std::string toStringPairingTable(FormatExpressions* format = nullptr) const;
@@ -375,6 +375,8 @@ public:
   int maxStoredOrbitSize;
   std::string comments;
   std::string fileNameToLogComments;
+
+  std::string fileNamePrefix;
 
   // current computation state:
   // state that gets stored to hd:
@@ -428,7 +430,9 @@ public:
   void checkFileWritePermissions();
   void writeReportToFiles();
   std::string toStringAlgebraLink(
-    int actualindexSubalgebra, FormatExpressions* format
+    int actualindexSubalgebra,
+    FormatExpressions* format,
+    bool writeToHardDisk
   ) const;
   std::string getRelativePhysicalFileNameSubalgebra(int actualindexSubalgebra) const;
   std::string getDisplayFileNameSubalgebraRelative(
@@ -473,7 +477,7 @@ public:
   bool computeCurrentHCandidates();
   void initHookUpPointers(
     SemisimpleLieAlgebra& inputOwner,
-    AlgebraicClosureRationals* theField,
+    AlgebraicClosureRationals* field,
     MapReferences<DynkinType, SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
     ListReferences<SlTwoSubalgebras>* inputSl2sOfSubalgebras
   );
@@ -497,13 +501,14 @@ public:
   std::string toStringState(FormatExpressions* format = nullptr);
   std::string toStringCurrentChain(FormatExpressions* format = nullptr);
   std::string toStringProgressReport(FormatExpressions* format = nullptr);
-  std::string toString(FormatExpressions* format = nullptr);
-  std::string toStringPart2(FormatExpressions* format = nullptr);
+  std::string toStringHTML();
+  std::string toString(FormatExpressions* format, bool writeToHardDisk);
+  std::string toStringPart2(FormatExpressions* format, bool writeToHardDisk);
   std::string toStringTableSubalgebraLinksTable(FormatExpressions* format);
   std::string toStringSubalgebrasNoHDWrite(FormatExpressions* format = nullptr);
   std::string toStringSubalgebrasWithHDWrite(FormatExpressions* format = nullptr);
   void writeSubalgebraToFile(FormatExpressions* format, int subalgebraIndex);
-  std::string toStringPart3(FormatExpressions* format = nullptr);
+  std::string toStringPart3(FormatExpressions* format, bool writeToHardDisk);
   std::string toStringSl2s(FormatExpressions* format = nullptr);
   std::string toStringSemisimpleSubalgebrasSummaryLaTeX(FormatExpressions* format = nullptr) const;
   std::string toStringSemisimpleSubalgebraSummaryHTML(FormatExpressions* format = nullptr) const;

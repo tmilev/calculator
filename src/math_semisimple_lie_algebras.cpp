@@ -346,7 +346,7 @@ std::string SemisimpleLieAlgebra::FileNames::fileNameRelativePathSlTwoSubalgebra
 
 std::string SemisimpleLieAlgebra::FileNames::fileNameSlTwoRealFormSubalgebraStructure() const {
   std::stringstream out;
-  out << "kostant_sekiguchi_" << this->fileNameNoPathSemisimpleSubalgebras();
+  out << "real_form_" << this->fileNameNoPathSemisimpleSubalgebras();
   return out.str();
 }
 

@@ -1263,7 +1263,7 @@ bool CalculatorFunctionsPolynomial::groebner(
         calculator
       );
     }
-    if (!MathRoutines::isPrime(modulus)) {
+    if (!MathRoutines::isPrimeSimple(modulus)) {
       return output.makeError("Error: modulus not prime. ", calculator);
     }
   }
@@ -1282,8 +1282,8 @@ bool CalculatorFunctionsPolynomial::groebner(
   for (int i = 0; i < inputVector.size; i ++) {
     inputVector[i].scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   }
-  GroebnerBasisComputation<AlgebraicNumber> theGroebnerComputation;
-  context.getFormat(theGroebnerComputation.format);
+  GroebnerBasisComputation<AlgebraicNumber> groebnerComputation;
+  context.getFormat(groebnerComputation.format);
   context.getFormat(global.defaultFormat.getElement());
   if (useModZp) {
     ElementZmodP tempElt;
@@ -1301,29 +1301,29 @@ bool CalculatorFunctionsPolynomial::groebner(
   outputGroebner = inputVector;
   outputGroebner2 = inputVector;
   if (order == MonomialPolynomial::Order::gradedLexicographic) {
-    theGroebnerComputation.polynomialOrder.monomialOrder.setComparison(
+    groebnerComputation.polynomialOrder.monomialOrder.setComparison(
       MonomialPolynomial::greaterThan_totalDegree_leftLargerWins
     );
   } else if (order == MonomialPolynomial::Order::gradedReverseLexicographic) {
-    theGroebnerComputation.polynomialOrder.monomialOrder.setComparison(
+    groebnerComputation.polynomialOrder.monomialOrder.setComparison(
       MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins
     );
   } else if (order == MonomialPolynomial::Order::lexicographicOpposite) {
-    theGroebnerComputation.polynomialOrder.monomialOrder.setComparison(
+    groebnerComputation.polynomialOrder.monomialOrder.setComparison(
       MonomialPolynomial::greaterThan_rightLargerWins
     );
   } else if (order == MonomialPolynomial::Order::lexicographic){
-    theGroebnerComputation.polynomialOrder.monomialOrder.setComparison(
+    groebnerComputation.polynomialOrder.monomialOrder.setComparison(
       MonomialPolynomial::greaterThan_leftLargerWins
     );
   } else {
     global.fatal << "Unexpected order value: " << order << global.fatal;
   }
-  theGroebnerComputation.format.monomialOrder = theGroebnerComputation.polynomialOrder.monomialOrder;
-  theGroebnerComputation.maximumMonomialOperations = upperBoundComputations;
-  bool success = theGroebnerComputation.transformToReducedGroebnerBasis(outputGroebner);
+  groebnerComputation.format.monomialOrder = groebnerComputation.polynomialOrder.monomialOrder;
+  groebnerComputation.maximumMonomialOperations = upperBoundComputations;
+  bool success = groebnerComputation.transformToReducedGroebnerBasis(outputGroebner);
   std::stringstream out;
-  out << theGroebnerComputation.toStringLetterOrder(false);
+  out << groebnerComputation.toStringLetterOrder(false);
   out << "Letter/expression order: ";
   int numberOfVariables = context.numberOfVariables();
   for (int i = 0; i < numberOfVariables; i ++) {
@@ -1336,24 +1336,24 @@ bool CalculatorFunctionsPolynomial::groebner(
   for (int i = 0; i < inputVector.size; i ++) {
     out << "<br>"
     << HtmlRoutines::getMathNoDisplay(
-      inputVector[i].toString(&theGroebnerComputation.format)
+      inputVector[i].toString(&groebnerComputation.format)
     );
   }
   if (success) {
     out << "<br>Minimal Groebner basis with "
     << outputGroebner.size
     << " elements, computed using algorithm 1, using "
-    << theGroebnerComputation.numberPolynomialDivisions
+    << groebnerComputation.numberPolynomialDivisions
     << " polynomial divisions. ";
     for (int i = 0; i < outputGroebner.size; i ++) {
       out << "<br> " << HtmlRoutines::getMathNoDisplay(
-        outputGroebner[i].toString(&theGroebnerComputation.format)
+        outputGroebner[i].toString(&groebnerComputation.format)
       );
     }
     out << "<br>Output in calculator-ready format: ";
     out << "<br>(";
     for (int i = 0; i < outputGroebner.size; i ++) {
-      out << outputGroebner[i].toString(&theGroebnerComputation.format);
+      out << outputGroebner[i].toString(&groebnerComputation.format);
       if (i != outputGroebner.size - 1) {
         out << ", <br>";
       }
@@ -1364,12 +1364,12 @@ bool CalculatorFunctionsPolynomial::groebner(
     << "exceeded the user-given limit of "
     << upperBoundComputations << " polynomial operations. ";
     out << "<br>An intermediate non-Groebner basis containing total "
-    << theGroebnerComputation.basis.size
+    << groebnerComputation.basis.size
     << " basis elements: ";
     out << "<br>GroebnerLexUpperLimit{}(10000, <br>";
-    for (int i = 0; i < theGroebnerComputation.basis.size; i ++) {
-      out << theGroebnerComputation.basis[i].element.toString(&theGroebnerComputation.format);
-      if (i != theGroebnerComputation.basis.size - 1) {
+    for (int i = 0; i < groebnerComputation.basis.size; i ++) {
+      out << groebnerComputation.basis[i].element.toString(&groebnerComputation.format);
+      if (i != groebnerComputation.basis.size - 1) {
         out << ", <br>";
       }
     }

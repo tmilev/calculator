@@ -279,12 +279,18 @@ bool SemisimpleSubalgebras::computeStructureRealFormsWriteFiles(
   ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
   std::stringstream* outputStream
 ) {
-  this->computeStructureRealForms(newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras, outputStream);
+  this->computeStructureRealForms(
+    newOwner,
+    ownerField,
+    containerSubalgebras,
+    containerSl2Subalgebras,
+    outputStream
+  );
   this->writeFilesRealForms(outputStream);
   return true;
 }
 
-bool MathRoutines::isPrime(int input) {
+bool MathRoutines::isPrimeSimple(int input) {
   if (input <= 1) {
     return false;
   }
@@ -408,8 +414,8 @@ bool PlotObject::operator==(const PlotObject& other) const {
   this->coordinateFunctionsJS          == other.coordinateFunctionsJS        &&
   this->variablesInPlay                == other.variablesInPlay              &&
   this->variableRangesJS               == other.variableRangesJS             &&
-  this->leftPoint                        == other.leftPoint                      &&
-  this->rightPoint                       == other.rightPoint                     &&
+  this->leftPoint                      == other.leftPoint                    &&
+  this->rightPoint                     == other.rightPoint                   &&
   this->paramLowE                      == other.paramLowE                    &&
   this->paramHighE                     == other.paramHighE                   &&
   this->numSegmentsE                   == other.numSegmentsE                 &&

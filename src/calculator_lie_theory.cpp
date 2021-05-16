@@ -2491,21 +2491,21 @@ bool CalculatorLieTheory::computePairingTablesAndFKFTsubalgebras(
   if (!input[1].isOfType<SemisimpleSubalgebras>()) {
     return calculator << "<hr>Input of ComputeFKFT must be of type semisimple subalgebras. ";
   }
-  SemisimpleSubalgebras& theSAs = input[1].getValueNonConst<SemisimpleSubalgebras>();
-  theSAs.flagcomputePairingTable = true;
-  theSAs.flagComputeNilradicals = true;
-  theSAs.computePairingTablesAndFKFTtypes();
+  SemisimpleSubalgebras& subalgebras = input[1].getValueNonConst<SemisimpleSubalgebras>();
+  subalgebras.flagcomputePairingTable = true;
+  subalgebras.flagComputeNilradicals = true;
+  subalgebras.computePairingTablesAndFKFTtypes();
   output = input;
-  std::fstream theFile;
-  std::string theFileName;
-  theFileName = "FKFTcomputation.html";
+  std::fstream file;
+  std::string fileName;
+  fileName = "FKFTcomputation.html";
   FormatExpressions tempFormat;
   tempFormat.flagUseHTML = true;
   tempFormat.flagUseLatex = true;
   tempFormat.flagUseHTML = true;
   tempFormat.flagCandidateSubalgebraShortReportOnly = false;
-  FileOperations::openFileCreateIfNotPresentVirtual(theFile, "output/" + theFileName, false, true, false);
-  theFile << theSAs.toString(&tempFormat);
+  FileOperations::openFileCreateIfNotPresentVirtual(file, "output/" + fileName, false, true, false);
+  file << subalgebras.toString(&tempFormat, false);
   std::stringstream out;
   out << "<a href=\"" << global.displayPathOutputFolder << "FKFTcomputation.html\">FKFTcomputation.html</a>";
   return output.assignValue(out.str(), calculator);
@@ -2518,21 +2518,21 @@ bool CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras(
   if (!input.isOfType<SemisimpleSubalgebras>()) {
     return calculator << "<hr>Input of getCentralizerChains must be of type semisimple subalgebras. ";
   }
-  SemisimpleSubalgebras& theSAs = input.getValueNonConst<SemisimpleSubalgebras>();
-  List<List<int> > theChains;
+  SemisimpleSubalgebras& subalgebras = input.getValueNonConst<SemisimpleSubalgebras>();
+  List<List<int> > chains;
   std::stringstream out;
-  theSAs.getCentralizerChains(theChains);
+  subalgebras.getCentralizerChains(chains);
   Expression currentChainE;
-  out << theChains.size << " chains total. <br>";
-  for (int i = 0; i < theChains.size; i ++) {
+  out << chains.size << " chains total. <br>";
+  for (int i = 0; i < chains.size; i ++) {
     out << "<br>Chain " << i + 1 << ": LoadSemisimpleSubalgebras{}( "
-    << theSAs.owner->weylGroup.dynkinType.toString() << ", (";
-    for (int j = 0; j < theChains[i].size; j ++) {
+    << subalgebras.owner->weylGroup.dynkinType.toString() << ", (";
+    for (int j = 0; j < chains[i].size; j ++) {
       CalculatorConversions::innerStoreCandidateSubalgebra(
-        calculator, theSAs.subalgebras.values[theChains[i][j]], currentChainE
+        calculator, subalgebras.subalgebras.values[chains[i][j]], currentChainE
       );
       out << currentChainE.toString();
-      if (j != theChains[i].size - 1) {
+      if (j != chains[i].size - 1) {
         out << ", ";
       }
     }

@@ -1896,7 +1896,6 @@ public:
   bool flagUsePmatrix;
   bool flagUsePNG;
   bool flagUseHTML;
-  bool flagUseHtmlAndStoreToHD;
   bool flagUseMathSpanPureVsMouseHover;
   bool flagDynkinTypeDontUsePlusAndExponent;
   bool flagUseCalculatorFormatForUEOrdered;

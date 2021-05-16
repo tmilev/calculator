@@ -1057,50 +1057,50 @@ bool FileOperations::getFolderFileNamesVirtual(
 }
 
 bool FileOperations::getFolderFileNamesUnsecure(
-  const std::string& theFolderName,
+  const std::string& folderName,
   List<std::string>& outputFileNamesNoPath,
   List<std::string>* outputFileTypesWithDot
 ) {
   MacroRegisterFunctionWithName("FileOperations::getFolderFileNamesUnsecure");
-  DIR *theDirectory = opendir(theFolderName.c_str());
-  if (theDirectory == nullptr) {
+  DIR *directory = opendir(folderName.c_str());
+  if (directory == nullptr) {
     return false;
   }
   outputFileNamesNoPath.reserve(1000);
   if (outputFileTypesWithDot != nullptr) {
     outputFileTypesWithDot->reserve(1000);
   }
-  std::string fileNameNoPath, fullName, theExtension;
+  std::string fileNameNoPath, fullName, extension;
   for (
-    dirent *fileOrFolder = readdir(theDirectory);
+    dirent *fileOrFolder = readdir(directory);
     fileOrFolder != nullptr;
-    fileOrFolder = readdir(theDirectory)
+    fileOrFolder = readdir(directory)
   ) {
     outputFileNamesNoPath.addOnTop(fileOrFolder->d_name);
     if (outputFileTypesWithDot != nullptr) {
       fileNameNoPath = fileOrFolder->d_name;
-      fullName = theFolderName + fileNameNoPath;
+      fullName = folderName + fileNameNoPath;
       if (FileOperations::isFolderUnsecure(fullName)) {
         outputFileTypesWithDot->addOnTop(".d");
       } else {
-        theExtension = FileOperations::getFileExtensionWithDot(fileNameNoPath);
-        if (theExtension == ".d") {
-          theExtension = "";
+        extension = FileOperations::getFileExtensionWithDot(fileNameNoPath);
+        if (extension == ".d") {
+          extension = "";
         }
-        outputFileTypesWithDot->addOnTop(theExtension);
+        outputFileTypesWithDot->addOnTop(extension);
       }
     }
   }
-  closedir (theDirectory);
+  closedir(directory);
   return true;
 }
 
 bool FileOperations::loadFiletoStringVirtualCustomizedReadOnly(
-  const std::string& theFileName,
+  const std::string& fileName,
   std::string& output,
   std::stringstream* commentsOnFailure
 ) {
-  if (theFileName == "") {
+  if (fileName == "") {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Empty file name not allowed. ";
     }
@@ -1108,12 +1108,12 @@ bool FileOperations::loadFiletoStringVirtualCustomizedReadOnly(
   }
   std::string computedFileName;
   if (!FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
-    theFileName, computedFileName, commentsOnFailure
+    fileName, computedFileName, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Failed to extract physical file name from the virtual file name: "
-      << theFileName;
+      << fileName;
     }
     return false;
   }
@@ -1150,9 +1150,9 @@ bool FileOperations::writeFileVirualWithPermissions_AccessUltraSensitiveFoldersI
   bool accessUltraSensistiveFolders,
   std::stringstream* commentsOnError
 ) {
-  std::fstream theFile;
+  std::fstream file;
   if (!FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_UltraSensitiveOptions(
-    theFile,
+    file,
     fileNameVirtual,
     false,
     true,
@@ -1165,7 +1165,7 @@ bool FileOperations::writeFileVirualWithPermissions_AccessUltraSensitiveFoldersI
     }
     return false;
   }
-  theFile << fileContent;
+  file << fileContent;
   return true;
 }
 
@@ -3000,7 +3000,6 @@ FormatExpressions::FormatExpressions() {
   this->flagExpressionNewLineAllowed = false;
   this->flagIncludeLieAlgebraTypes = true;
   this->flagUseReflectionNotation = false;
-  this->flagUseHtmlAndStoreToHD = false;
   this->flagIncludeMutableInformation = true;
   this->flagUseMathSpanPureVsMouseHover = false;
   this->flagDynkinTypeDontUsePlusAndExponent = false;

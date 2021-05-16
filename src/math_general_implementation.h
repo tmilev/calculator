@@ -113,12 +113,11 @@ std::ostream& operator<< (std::ostream& output, const Matrix<Coefficient>& matri
   return output;
 }
 
-template <class Coefficient, typename theIntegerType>
-void MathRoutines::raiseToPower(
-  Coefficient& theElement, const theIntegerType& thePower, const Coefficient& ringUnit
+template <class Coefficient, typename IntegerType>
+void MathRoutines::raiseToPower(Coefficient& theElement, const IntegerType& thePower, const Coefficient& ringUnit
 ) {
   MacroRegisterFunctionWithName("MathRoutines::raiseToPower");
-  theIntegerType thePowerCopy;
+  IntegerType thePowerCopy;
   thePowerCopy = thePower;
   if (thePowerCopy < 0) {
     return;
@@ -135,7 +134,7 @@ void MathRoutines::raiseToPower(
   Coefficient squares;
   squares = theElement;
   if (thePowerCopy < 4) {
-    for (theIntegerType i = 1; i < thePowerCopy; i ++) {
+    for (IntegerType i = 1; i < thePowerCopy; i ++) {
       theElement *= squares;
     }
     return;

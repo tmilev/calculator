@@ -1278,7 +1278,7 @@ bool ASNObject::loadFromASN(
     }
     return false;
   }
-  *this = ASNObject::objectIdsToNames().getValueCreateNoInit(this->objectId.ASNAtom);
+  *this = ASNObject::objectIdsToNames().getValueCreateNoInitialization(this->objectId.ASNAtom);
   const ASNElement& second = internal.theElements[1];
   if (second.isComposite()) {
     if (commentsOnFailure != nullptr) {

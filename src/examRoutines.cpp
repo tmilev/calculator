@@ -1590,7 +1590,7 @@ std::string CalculatorHTML::getDeadlineNoInheritance(const std::string& id) {
   if (!this->currentUser.problemData.contains(id)) {
     return "";
   }
-  ProblemDataAdministrative& currentProb = this->currentUser.problemData.getValueCreateNoInit((id)).adminData;
+  ProblemDataAdministrative& currentProb = this->currentUser.problemData.getValueCreateNoInitialization((id)).adminData;
   if (!currentProb.deadlinesPerSection.contains(this->currentUser.sectionComputed)) {
     return "";
   }
@@ -1618,7 +1618,7 @@ std::string CalculatorHTML::getDeadline(
     const std::string& containerName = this->topics.theTopics.keys[currentTopic.parentTopics[i]];
     if (this->currentUser.problemData.contains(containerName)) {
       ProblemDataAdministrative& currentProblem =
-      this->currentUser.problemData.getValueCreateNoInit(containerName).adminData;
+      this->currentUser.problemData.getValueCreateNoInitialization(containerName).adminData;
       result = currentProblem.deadlinesPerSection.getValueCreate(sectionNumber);
       if (StringRoutines::stringTrimWhiteSpace(result) != "") {
         outputIsInherited = (containerName != problemName);
@@ -1777,7 +1777,7 @@ void CalculatorHTML::computeDeadlinesAllSectionsNoInheritance(TopicElement& inpu
   inputOutput.deadlinesPerSectioN.initializeFillInObject(this->databaseStudentSections.size, "");
   for (int i = 0; i < this->databaseStudentSections.size; i ++) {
     ProblemDataAdministrative& currentProb =
-    this->currentUser.problemData.getValueCreateNoInit(inputOutput.id).adminData;
+    this->currentUser.problemData.getValueCreateNoInitialization(inputOutput.id).adminData;
     inputOutput.deadlinesPerSectioN[i] =
     currentProb.deadlinesPerSection.getValueCreate(this->databaseStudentSections[i]);
   }

@@ -4263,7 +4263,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "/",
-    CalculatorFunctionsBinaryOps::innerDivideRatByRat,
+    CalculatorFunctionsBinaryOps::divideRationalByRational,
     this->opRational(),
     this->opRational(),
     "Divides two rational numbers. ",

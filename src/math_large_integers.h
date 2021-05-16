@@ -443,8 +443,8 @@ private:
   };
   friend Rational operator-(const Rational& argument);
   friend Rational operator/(int left, const Rational& right);
-  friend std::ostream& operator << (std::ostream& output, const Rational& theRat) {
-    output << theRat.toString();
+  friend std::ostream& operator << (std::ostream& output, const Rational& rational) {
+    output << rational.toString();
     return output;
   }
   friend Rational operator*(int left, const Rational& right) {
@@ -569,12 +569,12 @@ public:
   void assign(const Rational& r);
   void assignInteger(int x);
   bool isInteger(LargeInteger* whichInteger = nullptr) const;
-  bool isIntegerFittingInInt(int* whichInt) const {
-    LargeInteger theInt;
-    if (!this->isInteger(&theInt)) {
+  bool isIntegerFittingInInt(int* whichInteger) const {
+    LargeInteger resultInteger;
+    if (!this->isInteger(&resultInteger)) {
       return false;
     }
-    return theInt.isIntegerFittingInInt(whichInt);
+    return resultInteger.isIntegerFittingInInt(whichInteger);
   }
   bool isSmallInteger(int* whichInteger = nullptr) const {
     if (this->extended != nullptr) {
@@ -601,20 +601,20 @@ public:
   }
   void divideBy(const Rational& r);
   void divideByInteger(int x) {
-    int tempDen;
+    int denominator = 0;
     signed char tempSign;
     if (x < 0) {
-      tempDen = - x;
+      denominator = - x;
       tempSign = - 1;
     } else {
-      tempDen = x;
+      denominator = x;
       tempSign = 1;
     }
-    if (this->tryToMultiplyQuickly(tempSign, tempDen)) {
+    if (this->tryToMultiplyQuickly(tempSign, denominator)) {
       return;
     }
     this->initializeExtendedFromShortIfNeeded();
-    this->extended->denominator.multiplyByUInt(static_cast<unsigned int>(tempDen));
+    this->extended->denominator.multiplyByUInt(static_cast<unsigned int>(denominator));
     this->extended->numerator.sign *= tempSign;
     this->simplify();
   }

@@ -280,7 +280,7 @@ bool SemisimpleSubalgebras::computeStructureRealFormsWriteFiles(
   std::stringstream* outputStream
 ) {
   this->computeStructureRealForms(newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras, outputStream);
-  this->writeFilesRealForms();
+  this->writeFilesRealForms(outputStream);
   return true;
 }
 

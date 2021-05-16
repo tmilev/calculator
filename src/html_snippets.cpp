@@ -51,7 +51,7 @@ void HtmlRoutines::loadStrings() {
 
 const std::string& HtmlRoutines::getJavascriptAceEditorScriptWithTags() {
   if (HtmlRoutines::preLoadedFiles().contains("AceEditor")) {
-    return HtmlRoutines::preLoadedFiles().getValueCreateNoInit("AceEditor");
+    return HtmlRoutines::preLoadedFiles().getValueCreateNoInitialization("AceEditor");
   }
   std::stringstream out;
   out << "<script type =\"text/javascript\" src =\""
@@ -59,7 +59,7 @@ const std::string& HtmlRoutines::getJavascriptAceEditorScriptWithTags() {
   << "\" charset =\"utf-8\"></script>";
   out << HtmlRoutines::getJavascriptAddScriptTags("/html-common/ace-editor-settings.js");
   HtmlRoutines::preLoadedFiles().setKeyValue("AceEditor", out.str());
-  return HtmlRoutines::preLoadedFiles().getValueCreateNoInit("AceEditor");
+  return HtmlRoutines::preLoadedFiles().getValueCreateNoInitialization("AceEditor");
 }
 
 const std::string& HtmlRoutines::getFile(
@@ -85,7 +85,7 @@ const std::string& HtmlRoutines::getFile(
     << "]. Comments: " << commentsOnFailure.str() << "</b>";
   }
   HtmlRoutines::preLoadedFiles().setKeyValue(theID, out.str());
-  return HtmlRoutines::preLoadedFiles().getValueCreateNoInit(theID);
+  return HtmlRoutines::preLoadedFiles().getValueCreateNoInitialization(theID);
 }
 
 const std::string& HtmlRoutines::getJavascriptAddScriptTags(const std::string& fileNameVirtual) {

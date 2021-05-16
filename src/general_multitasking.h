@@ -110,7 +110,7 @@ public:
   static long long pointerCounterPeakRamUse;
   static long long cgiLimitRAMuseNumPointersInList;
   static bool flagUngracefulExitInitiated;
-  static unsigned int numListsCreated;
+  static unsigned int numberOfListsCreated;
   static unsigned int numberOfListResizesTotal;
   static unsigned int numberOfHashResizes;
 

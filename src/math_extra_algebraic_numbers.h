@@ -7,8 +7,8 @@
 
 class AlgebraicClosureRationals;
 class AlgebraicNumber {
-  friend std::ostream& operator<<(std::ostream& output, const AlgebraicNumber& theNumber) {
-    output << theNumber.toString();
+  friend std::ostream& operator<<(std::ostream& output, const AlgebraicNumber& number) {
+    output << number.toString();
     return output;
   }
   friend AlgebraicNumber operator-(const AlgebraicNumber& argument) {
@@ -70,17 +70,17 @@ class AlgebraicNumber {
     List<AlgebraicNumber>& output, int indexNonZeroElement
   );
   bool isPositive() {
-    Rational ratPart;
-    if (this->isRational(&ratPart)) {
-      return ratPart.isPositive();
+    Rational rationalPart;
+    if (this->isRational(&rationalPart)) {
+      return rationalPart.isPositive();
     }
     return false;
   }
   bool isRational(Rational* whichRational = nullptr) const;
   bool isNegative() const {
-    Rational therationalValue;
-    if (this->isRational(&therationalValue)) {
-      return therationalValue.isNegative();
+    Rational rationalValue;
+    if (this->isRational(&rationalValue)) {
+      return rationalValue.isNegative();
     }
     return false;
   }
@@ -98,12 +98,12 @@ class AlgebraicNumber {
     *this = Rational(other);
   }
   bool constructFromMinimalPolynomial(
-    const Polynomial<AlgebraicNumber>& thePoly,
+    const Polynomial<AlgebraicNumber>& polynomial,
     AlgebraicClosureRationals& inputOwner,
     std::stringstream* commentsOnFailure
   );
   bool constructFromMinimalPolynomial(
-    const Polynomial<Rational>& thePoly,
+    const Polynomial<Rational>& polynomial,
     AlgebraicClosureRationals& inputOwner,
     std::stringstream* commentsOnFailure
   );
@@ -115,18 +115,18 @@ class AlgebraicNumber {
   void assignRational(const Rational& input, AlgebraicClosureRationals* inputOwner);
   void squareRootDefault(std::stringstream* commentsOnError);
   bool isSmallInteger(int* whichInteger) const {
-    Rational theRat;
-    if (!this->isRational(&theRat)) {
+    Rational rational;
+    if (!this->isRational(&rational)) {
       return false;
     }
-    return theRat.isSmallInteger(whichInteger);
+    return rational.isSmallInteger(whichInteger);
   }
   bool isInteger(LargeInteger* whichInteger) const {
-    Rational theRat;
-    if (!this->isRational(&theRat)) {
+    Rational rational;
+    if (!this->isRational(&rational)) {
       return false;
     }
-    return theRat.isInteger(whichInteger);
+    return rational.isInteger(whichInteger);
   }
   bool radicalMeDefault(int radical, std::stringstream* commentsOnError);
   void invert();
@@ -208,10 +208,10 @@ public:
   MatrixTensor<Rational> generatingElementTensorForm;
   Matrix<Rational> generatingElementMatrixForm;
   AlgebraicNumber generatingElement;
-  Vectors<Rational> theGeneratingElementPowersBasis;
+  Vectors<Rational> generatingElementPowersBasis;
 
   bool flagIsQuadraticRadicalExtensionRationals;
-  HashedList<LargeInteger> theQuadraticRadicals;
+  HashedList<LargeInteger> quadraticRadicals;
   List<std::string> displayNamesBasisElements;
   void injectOldBases(const MatrixTensor<Rational>* injectionNullForIdentity);
   void appendAdditiveEiBasis();
@@ -221,7 +221,7 @@ public:
   AlgebraicClosureRationals() {
     this->reset();
   }
-  bool mergeRadicals(const List<LargeInteger>& theRadicals);
+  bool mergeRadicals(const List<LargeInteger>& radicals);
   bool chooseGeneratingElement(int attemptsLimitZeroForNone, std::stringstream* commentsOnFailure);
   bool reduceMe(std::stringstream* commentsOnFailure);
   void contractBasesIfRedundant(
@@ -229,11 +229,11 @@ public:
     AlgebraicNumber* outputImageGenerator
   );
   void computeDisplayStringsFromRadicals();
-  bool getRadicalSelectionFromIndex(int inputIndex, Selection& theSel);
-  int getDimensionOverTheRationals() const;
-  static int getIndexFromRadicalSelection(const Selection& theSel);
+  bool getRadicalSelectionFromIndex(int inputIndex, Selection& selection);
+  int getDimensionOverRationals() const;
+  static int getIndexFromRadicalSelection(const Selection& selection);
   void getMultiplicativeOperatorFromRadicalSelection(
-    const Selection& theSel, MatrixTensor<Rational>& outputOp
+    const Selection& selection, MatrixTensor<Rational>& output
   );
   void getMultiplicationBy(const AlgebraicNumber& input, MatrixTensor<Rational>& output);
   void getAdditionTo(const AlgebraicNumber& input, VectorSparse<Rational>& output);
@@ -241,24 +241,18 @@ public:
     const Polynomial<AlgebraicNumber>& input, Polynomial<AlgebraicNumber>& output
   );
   bool adjoinRootMinimalPolynomial(
-    const Polynomial<AlgebraicNumber>& thePoly,
+    const Polynomial<AlgebraicNumber>& polynomial,
     AlgebraicNumber& outputRoot,
     std::stringstream* commentsOnFailure
   );
   bool adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
-    const Polynomial<AlgebraicNumber>& thePoly,
+    const Polynomial<AlgebraicNumber>& polynomial,
     AlgebraicNumber& outputRoot,
     std::stringstream* commentsOnFailure
   );
   std::string toStringQuadraticRadical(FormatExpressions* format = nullptr) const;
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringFull(FormatExpressions* format = nullptr) const;
-  bool splitToPartialFractionsOverRealAlgebraicNumbers(
-    RationalFraction<Rational>& inputRF,
-    List<Polynomial<AlgebraicNumber> >& outputNumerators,
-    List<Polynomial<AlgebraicNumber> >& outputDenominators,
-    std::stringstream* reportStream = nullptr
-  );
   AlgebraicNumber one();
   AlgebraicNumber zero();
   AlgebraicNumber fromRational(const Rational& input);

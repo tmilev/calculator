@@ -316,9 +316,9 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
       tempV[0].assignNumeratorAndDenominator(divisorsS[j], divisorsH[i]);
       val = myCopy.evaluate(tempV);
       if (val == 0) {
-        Polynomial<Rational> divisor, tempP;
+        Polynomial<Rational> divisor, remainder;
         divisor.makeDegreeOne(1, 0, 1, - tempV[0]);
-        myCopy.divideBy(divisor, myCopy, tempP, monomialOrder);
+        myCopy.divideBy(divisor, myCopy, remainder, monomialOrder);
         output.addOnTop(tempV[0]);
         List<Rational> tempList;
         bool result = myCopy.findOneVariableRationalRoots(tempList);
@@ -374,23 +374,23 @@ bool PolynomialFactorizationKronecker::oneFactor(
     return false;
   }
   int degreeLeft = degree / 2;
-  Vector<Rational> AllPointsOfEvaluation;
-  List<List<LargeInteger> > thePrimeFactorsAtPoints;
+  Vector<Rational> allPointsOfEvaluation;
+  List<List<LargeInteger> > primeFactorsAtPoints;
   List<List<int> > thePrimeFactorsMults;
-  Vector<Rational> theValuesAtPoints, theValuesAtPointsLeft;
-  AllPointsOfEvaluation.setSize(degree + 1);
-  thePrimeFactorsAtPoints.setSize(degreeLeft + 1);
+  Vector<Rational> theValuesAtPoints, valuesAtRemainingPoints;
+  allPointsOfEvaluation.setSize(degree + 1);
+  primeFactorsAtPoints.setSize(degreeLeft + 1);
   thePrimeFactorsMults.setSize(degreeLeft + 1);
-  AllPointsOfEvaluation[0] = 0;
-  for (int i = 1; i < AllPointsOfEvaluation.size; i ++) {
-    AllPointsOfEvaluation[i] = (i % 2 == 1) ? i / 2 + 1 : - (i / 2);
+  allPointsOfEvaluation[0] = 0;
+  for (int i = 1; i < allPointsOfEvaluation.size; i ++) {
+    allPointsOfEvaluation[i] = (i % 2 == 1) ? i / 2 + 1 : - (i / 2);
   }
   Vector<Rational> theArgument;
   theArgument.setSize(1);
-  theValuesAtPoints.setSize(AllPointsOfEvaluation.size);
+  theValuesAtPoints.setSize(allPointsOfEvaluation.size);
   LargeInteger tempLI;
-  for (int i = 0; i < AllPointsOfEvaluation.size; i ++) {
-    theArgument[0] = AllPointsOfEvaluation[i];
+  for (int i = 0; i < allPointsOfEvaluation.size; i ++) {
+    theArgument[0] = allPointsOfEvaluation[i];
     theValuesAtPoints[i] = this->current.evaluate(theArgument);
     if (theValuesAtPoints[i].isEqualToZero()) {
       Polynomial<Rational> incomingFactor;
@@ -403,7 +403,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
     }
     theValuesAtPoints[i].isInteger(&tempLI);
     if (!tempLI.value.factor(
-      thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i], 0, 3, commentsOnFailure
+      primeFactorsAtPoints[i], thePrimeFactorsMults[i], 0, 3, commentsOnFailure
     )) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
@@ -414,7 +414,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
       }
       return false;
     }
-    thePrimeFactorsAtPoints[i].addOnTop(- 1);
+    primeFactorsAtPoints[i].addOnTop(- 1);
     thePrimeFactorsMults[i].addOnTop(1);
   }
   Incrementable<Incrementable<SelectionOneItem> > divisorSelection;
@@ -423,21 +423,21 @@ bool PolynomialFactorizationKronecker::oneFactor(
   PointsOfInterpolationLeft.reserve(degreeLeft + 1);
   Rational currentPrimePowerContribution, currentPointContribution;
   for (int i = 0; i <= degreeLeft; i ++) {
-    PointsOfInterpolationLeft.addOnTop(AllPointsOfEvaluation[i]);
+    PointsOfInterpolationLeft.addOnTop(allPointsOfEvaluation[i]);
   }
   divisorSelection.initFromMults(thePrimeFactorsMults);
   valuesLeftInterpolands.setSize(degreeLeft + 1);
   Polynomial<Rational>::getValuesLagrangeInterpolands(
-    PointsOfInterpolationLeft, AllPointsOfEvaluation, valuesLeftInterpolands
+    PointsOfInterpolationLeft, allPointsOfEvaluation, valuesLeftInterpolands
   );
-  ProgressReport theReport(1000, GlobalVariables::Response::ReportType::general);
+  ProgressReport report(1000, GlobalVariables::Response::ReportType::general);
   LargeInteger total = divisorSelection.totalCombinations();
   do {
-    if (theReport.tickAndWantReport()) {
-      std::stringstream report;
-      report << "Trying divisor combination "
-      << theReport.ticks << " out of " << total.toString();
-      theReport.report(report.str());
+    if (report.tickAndWantReport()) {
+      std::stringstream reportStream;
+      reportStream << "Trying divisor combination "
+      << report.ticks << " out of " << total.toString();
+      report.report(reportStream.str());
     }
     this->output->computations ++;
     if (
@@ -454,13 +454,13 @@ bool PolynomialFactorizationKronecker::oneFactor(
       }
       return false;
     }
-    theValuesAtPointsLeft.makeZero(theValuesAtPoints.size);
+    valuesAtRemainingPoints.makeZero(theValuesAtPoints.size);
     Rational firstValue;
     bool isGood = false; //<-we shall first check if the divisor is constant.
     for (int j = 0; j < divisorSelection.theElements.size; j ++) {
       currentPointContribution = 1;
       for (int k = 0; k < divisorSelection[j].theElements.size; k ++) {
-        currentPrimePowerContribution = thePrimeFactorsAtPoints[j][k];
+        currentPrimePowerContribution = primeFactorsAtPoints[j][k];
         currentPrimePowerContribution.raiseToPower(divisorSelection[j][k].amount);
         currentPointContribution *= currentPrimePowerContribution;
       }
@@ -473,17 +473,17 @@ bool PolynomialFactorizationKronecker::oneFactor(
           }
         }
       }
-      theValuesAtPointsLeft += valuesLeftInterpolands[j] * currentPointContribution;
+      valuesAtRemainingPoints += valuesLeftInterpolands[j] * currentPointContribution;
     }
     if (!isGood) {
       continue;
     }
-    for (int j = 0; j < AllPointsOfEvaluation.size; j ++) {
-      if (theValuesAtPointsLeft[j].isEqualToZero()) {
+    for (int j = 0; j < allPointsOfEvaluation.size; j ++) {
+      if (valuesAtRemainingPoints[j].isEqualToZero()) {
         isGood = false;
         break;
       }
-      currentPointContribution = theValuesAtPoints[j] / theValuesAtPointsLeft[j];
+      currentPointContribution = theValuesAtPoints[j] / valuesAtRemainingPoints[j];
       if (!currentPointContribution.isInteger()) {
         isGood = false;
         break;
@@ -495,7 +495,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
     Polynomial<Rational> incoming;
     incoming.interpolate(
       PointsOfInterpolationLeft,
-      theValuesAtPointsLeft
+      valuesAtRemainingPoints
     );
     if (this->output->accountNonReducedFactor(incoming)) {
       return true;

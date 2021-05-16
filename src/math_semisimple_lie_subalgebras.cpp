@@ -478,8 +478,8 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML(
   int numBadParabolics = 0;
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
     numIsotypicallyCompleteNilrads += this->subalgebras.values[i].fernandoKacNilradicalCandidates.size;
-    numFailingConeCondition += this->subalgebras.values[i].NumConeIntersections;
-    numNoLinfRelFound += this->subalgebras.values[i].NumCasesNoLinfiniteRelationFound;
+    numFailingConeCondition += this->subalgebras.values[i].numberOfConeIntersections;
+    numNoLinfRelFound += this->subalgebras.values[i].numberOfCasesNoLInfiniteRelationFound;
     numNonCentralizerConditionWithConeCondition += this->subalgebras.values[i].NumCentralizerConditionFailsconeConditionHolds;
     numBadParabolics += this->subalgebras.values[i].NumBadParabolics;
   }
@@ -529,8 +529,8 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebrasSummaryLaTeX(For
 
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
     numIsotypicallyCompleteNilrads += this->subalgebras.values[i].fernandoKacNilradicalCandidates.size;
-    numFailingConeCondition += this->subalgebras.values[i].NumConeIntersections;
-    numNoLinfRelFound += this->subalgebras.values[i].NumCasesNoLinfiniteRelationFound;
+    numFailingConeCondition += this->subalgebras.values[i].numberOfConeIntersections;
+    numNoLinfRelFound += this->subalgebras.values[i].numberOfCasesNoLInfiniteRelationFound;
     numNonCentralizerConditionWithConeCondition += this->subalgebras.values[i].NumCentralizerConditionFailsconeConditionHolds;
     numBadParabolics += this->subalgebras.values[i].NumBadParabolics;
   }
@@ -583,7 +583,7 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebrasSummaryLaTeX(For
     }
     out << "&$" << currentSA.characterNonPrimalFundamentalCoordinates.toString(&tempCharFormat) << "$ ";
     out << "&$" << currentSA.primalCharacter.toString(&tempCharFormat) << "$ ";
-    out << "& " << currentSA.fernandoKacNilradicalCandidates.size << "&" << currentSA.NumConeIntersections;
+    out << "& " << currentSA.fernandoKacNilradicalCandidates.size << "&" << currentSA.numberOfConeIntersections;
     out << "\\\\ \\hline \n<br>\n";
   }
   out << "\\end{longtable}\n<br>\n";
@@ -663,7 +663,7 @@ std::string SemisimpleSubalgebras::toStringSubalgebrasNoHDWrite(FormatExpression
   return out.str();
 }
 
-void SemisimpleSubalgebras::writeSubalgebraToFile(FormatExpressions *theFormat, int subalgebraIndex) {
+void SemisimpleSubalgebras::writeSubalgebraToFile(FormatExpressions* format, int subalgebraIndex) {
   CandidateSemisimpleSubalgebra& currentSubalgebra = this->subalgebras.values[subalgebraIndex];
   if (currentSubalgebra.flagSystemProvedToHaveNoSolution) {
     return;
@@ -685,12 +685,12 @@ void SemisimpleSubalgebras::writeSubalgebraToFile(FormatExpressions *theFormat, 
   outputFileSubalgebra << "<html>"
   << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements()
   << SemisimpleLieAlgebra::toHTMLCalculatorBodyOnload();
-  outputFileSubalgebra << this->toStringSubalgebraNumberWithAmbientLink(subalgebraIndex, theFormat);
+  outputFileSubalgebra << this->toStringSubalgebraNumberWithAmbientLink(subalgebraIndex, format);
   outputFileSubalgebra << "<div class='divSubalgebraInformation'>";
   outputFileSubalgebra << "Computations done by the " << HtmlRoutines::getHtmlLinkToGithubRepository("calculator project");
   outputFileSubalgebra << ".</div>";
   outputFileSubalgebra
-  << "<br>" <<  currentSubalgebra.toString(theFormat);
+  << "<br>" <<  currentSubalgebra.toString(format);
   if (this->flagComputeNilradicals) {
     std::fstream outputFileFKFTnilradicals;
     std::string fileName = this->getRelativePhysicalFileNameFKFTNilradicals(subalgebraIndex);
@@ -715,13 +715,13 @@ void SemisimpleSubalgebras::writeSubalgebraToFile(FormatExpressions *theFormat, 
     outputFileFKFTnilradicals << "<html>"
     << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements()
     << "<body>"
-    << this->toStringAlgebraLink(subalgebraIndex, theFormat)
-    << currentSubalgebra.toStringNilradicals(theFormat) << "\n</body></html>";
+    << this->toStringAlgebraLink(subalgebraIndex, format)
+    << currentSubalgebra.toStringNilradicals(format) << "\n</body></html>";
   }
   outputFileSubalgebra << "\n</body></html>\n ";
 }
 
-std::string SemisimpleSubalgebras::toStringSubalgebrasWithHDWrite(FormatExpressions *format) {
+std::string SemisimpleSubalgebras::toStringSubalgebrasWithHDWrite(FormatExpressions* format) {
   std::stringstream out;
   if (format != nullptr) {
     format->flagCandidateSubalgebraShortReportOnly = true;
@@ -788,7 +788,7 @@ std::string SemisimpleSubalgebras::toStringPart2(FormatExpressions* format) {
   int numRegularSAs = 0;
   int numSl2s = 0;
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
-    if (this->subalgebras.values[i].amRegularSA()) {
+    if (this->subalgebras.values[i].isRegularSubalgebra()) {
       numRegularSAs ++;
     }
     if (this->subalgebras.values[i].weylNonEmbedded->dynkinType.isTypeAOne()) {
@@ -1064,7 +1064,7 @@ void SemisimpleSubalgebras::makeEmptyCandidateSubalgebra(CandidateSemisimpleSuba
   this->makeCandidateSubalgebra(zeroType, output);
   Matrix<Rational> zeroCartan;
   output.subalgebraNonEmbeddedDefaultScale =
-  &this->subalgebrasNonDefaultCartanAndScale.getValueCreateNoInit(zeroCartan);
+  &this->subalgebrasNonDefaultCartanAndScale.getValueCreateNoInitialization(zeroCartan);
   output.indexNonEmbeddedMeNonStandardCartan =
   this->subalgebrasNonDefaultCartanAndScale.getIndex(zeroCartan);
 }
@@ -1078,7 +1078,7 @@ void SemisimpleSubalgebras::makeCandidateSubalgebra(
   if (!this->subalgebrasNonEmbedded->contains(input)) {
     needsInitialization = true;
   }
-  output.weylNonEmbedded = &this->subalgebrasNonEmbedded->getValueCreateNoInit(input).weylGroup;
+  output.weylNonEmbedded = &this->subalgebrasNonEmbedded->getValueCreateNoInitialization(input).weylGroup;
   output.indexNonEmbeddedMeStandard = this->subalgebrasNonEmbedded->getIndex(input);
   if (needsInitialization) {
     output.weylNonEmbedded->makeFromDynkinType(input);
@@ -1134,13 +1134,17 @@ bool SemisimpleSubalgebras::computeStructureRealFormOneSlTwo(
   CandidateSemisimpleSubalgebra candidate;
   candidate.indexIamInducedFrom = 0;
   DynkinType incomingType;
-  input.dynkinTypeEmbedded(incomingType);
+  input.computeDynkinTypeEmbedded(incomingType);
   this->makeCandidateSubalgebra(incomingType, candidate);
   return true;
 }
 
-bool SemisimpleSubalgebras::writeFilesRealForms() {
-  return false;
+bool SemisimpleSubalgebras::writeFilesRealForms(std::stringstream* outputStream) {
+  std::string content = this->toStringSubalgebrasWithHDWrite(nullptr);
+  std::string fileName = this->owner->fileNames.virtualFolderName() +
+  this->owner->fileNames.fileNameSlTwoRealFormSubalgebraStructure();
+  global.comments << "DEBUG: about to write to file: " << fileName;
+  return FileOperations::writeFileVirual(fileName, content, outputStream);
 }
 
 bool SemisimpleSubalgebras::findTheSemisimpleSubalgebrasFromScratch(
@@ -1290,7 +1294,7 @@ void CandidateSemisimpleSubalgebra::computeHsAndHsScaledToActByTwoFromComponents
   Matrix<Rational> cartanInComponentOrder;
   this->weylNonEmbedded->dynkinType.getCartanSymmetricDefaultLengthKeepComponentOrder(cartanInComponentOrder);
   this->subalgebraNonEmbeddedDefaultScale =
-  &this->owner->subalgebrasNonDefaultCartanAndScale.getValueCreateNoInit(cartanInComponentOrder);
+  &this->owner->subalgebrasNonDefaultCartanAndScale.getValueCreateNoInitialization(cartanInComponentOrder);
   this->subalgebraNonEmbeddedDefaultScale->weylGroup.makeFromDynkinTypeDefaultLengthKeepComponentOrder(
     this->weylNonEmbedded->dynkinType
   );
@@ -2941,7 +2945,7 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecomposition() {
   Vectors<Rational> simpleSubSystem;
   simpleSubSystem = this->rootSystemCentralizerPrimalCoordinates;
   this->centralizerSubDiagram.computeDiagramTypeModifyInputRelative(
-    simpleSubSystem, this->rootSystemCentralizerPrimalCoordinates, this->bilinearFormFundPrimal
+    simpleSubSystem, this->rootSystemCentralizerPrimalCoordinates, this->bilinearFormFundamentalPrimal
   );
   this->centralizerSubDiagram.getDynkinType(this->theCentralizerType);
   this->flagCentralizerTypeIsComputed = true;
@@ -2969,8 +2973,8 @@ void CandidateSemisimpleSubalgebra::reset(SemisimpleSubalgebras* inputOwner) {
   this->totalNumUnknownsNoCentralizer = 0;
   this->totalNumUnknownsWithCentralizer = 0;
   this->totalArithmeticOpsToSolveSystem = 0;
-  this->NumConeIntersections = - 1;
-  this->NumCasesNoLinfiniteRelationFound = - 1;
+  this->numberOfConeIntersections = - 1;
+  this->numberOfCasesNoLInfiniteRelationFound = - 1;
   this->NumBadParabolics = 0;
   this->NumCentralizerConditionFailsconeConditionHolds = 0;
   this->centralizerRank = - 1;
@@ -3341,7 +3345,7 @@ void NilradicalCandidate::computeParabolicACExtendsToParabolicAC() {
   this->leviDiagramSmall.computeDiagramTypeModifyInputRelative(
     this->leviRootsSmallPrimalFundCoords,
     this->owner->rootSystemCentralizerPrimalCoordinates,
-    this->owner->bilinearFormFundPrimal
+    this->owner->bilinearFormFundamentalPrimal
   );
   bool ambientLeviHasBDGE = false;
   for (int i = 0; i < this->leviDiagramAmbient.simpleComponentTypes.size; i ++) {
@@ -3606,15 +3610,15 @@ void CandidateSemisimpleSubalgebra::enumerateAllNilradicals() {
     theReport2.report(reportStream2.str());
     this->fernandoKacNilradicalCandidates[i].processMe();
   }
-  this->NumConeIntersections = 0;
-  this->NumCasesNoLinfiniteRelationFound = 0;
+  this->numberOfConeIntersections = 0;
+  this->numberOfCasesNoLInfiniteRelationFound = 0;
   this->NumBadParabolics = 0;
   this->NumCentralizerConditionFailsconeConditionHolds = 0;
   for (int i = 0; i < this->fernandoKacNilradicalCandidates.size; i ++) {
     if (this->fernandoKacNilradicalCandidates[i].flagNilradicalConesIntersect) {
-      this->NumConeIntersections ++;
+      this->numberOfConeIntersections ++;
       if (!this->fernandoKacNilradicalCandidates[i].flagLinfiniteRelFound) {
-        this->NumCasesNoLinfiniteRelationFound ++;
+        this->numberOfCasesNoLInfiniteRelationFound ++;
       }
     } else {
       if (!this->fernandoKacNilradicalCandidates[i].flagParabolicACextendsToParabolicAC) {
@@ -4615,7 +4619,7 @@ void SlTwoSubalgebra::initialize() {
   this->dimensionCentralizer = - 1;
 }
 
-void SlTwoSubalgebra::dynkinTypeEmbedded(DynkinType& output) const {
+void SlTwoSubalgebra::computeDynkinTypeEmbedded(DynkinType& output) const {
   output.makeSimpleType('A', 1, &this->lengthHSquared);
 }
 
@@ -5361,7 +5365,7 @@ bool CandidateSemisimpleSubalgebra::isExtremeWeight(int moduleIndex, int indexIn
 Rational CandidateSemisimpleSubalgebra::getScalarSubalgebra(
   const Vector<Rational>& primalWeightLeft, const Vector<Rational>& primalWeightRight
 ) const {
-  return primalWeightLeft.scalarProduct(primalWeightRight, this->bilinearFormFundPrimal);
+  return primalWeightLeft.scalarProduct(primalWeightRight, this->bilinearFormFundamentalPrimal);
 }
 
 std::string CandidateSemisimpleSubalgebra::toStringDrawWeightsHelper(int indexModule, const Vector<Rational>& theWeight) const {
@@ -5443,11 +5447,11 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(FormatExpressions
     return "";
   }
   std::stringstream out;
-  if (thePrimalRank != this->bilinearFormFundPrimal.numberOfColumns) {
+  if (thePrimalRank != this->bilinearFormFundamentalPrimal.numberOfColumns) {
     out << "<br>The primal rank was computed to be " << thePrimalRank
     << " but the bilinear form in fundamental coordinates relative to "
     << " the subalgebra was not computed: this->bilinearFormFundPrimal has "
-    << this->bilinearFormFundPrimal.numberOfRows << " rows. ";
+    << this->bilinearFormFundamentalPrimal.numberOfRows << " rows. ";
     return out.str();
   }
   out << "<br>Weight diagram. The coordinates corresponding to the simple roots of the "
@@ -5459,7 +5463,7 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(FormatExpressions
   theDV.theBuffer.bilinearForm.initialize(thePrimalRank, thePrimalRank);
   for (int i = 0; i < thePrimalRank; i ++) {
     for (int j = 0; j < thePrimalRank; j ++) {
-      theDV.theBuffer.bilinearForm(i, j) = this->bilinearFormFundPrimal(i, j).getDoubleValue();
+      theDV.theBuffer.bilinearForm(i, j) = this->bilinearFormFundamentalPrimal(i, j).getDoubleValue();
     }
   }
   Vector<Rational> zeroVector;
@@ -5503,7 +5507,7 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(FormatExpressions
         Rational tempRat = Vector<Rational>::scalarProduct(
           cornerWeights[k] - cornerWeights[j],
           cornerWeights[k] - cornerWeights[j],
-          this->bilinearFormFundPrimal
+          this->bilinearFormFundamentalPrimal
         );
         if (minDist == 0) {
           minDist = tempRat;
@@ -5515,7 +5519,7 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(FormatExpressions
         if (minDist == Vector<Rational>::scalarProduct(
           cornerWeights[k] - cornerWeights[j],
           cornerWeights[k] - cornerWeights[j],
-          this->bilinearFormFundPrimal
+          this->bilinearFormFundamentalPrimal
         )) {
           theDV.drawLineBetweenTwoVectorsBufferRational(cornerWeights[k], cornerWeights[j], color, 1);
         }
@@ -5965,9 +5969,9 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicalsSummary(FormatExpr
   std::stringstream out;
   out << "<br>There are " << this->fernandoKacNilradicalCandidates.size
   << " possible isotypic nilradical extensions of the primal subalgebra. Of them "
-  << this->NumConeIntersections << " have intersecting cones. Of the remaining "
-  << this->fernandoKacNilradicalCandidates.size - this->NumConeIntersections << " nilradical extensions with non-intersecting cones, "
-  << this->fernandoKacNilradicalCandidates.size - this->NumConeIntersections - this->NumCentralizerConditionFailsconeConditionHolds
+  << this->numberOfConeIntersections << " have intersecting cones. Of the remaining "
+  << this->fernandoKacNilradicalCandidates.size - this->numberOfConeIntersections << " nilradical extensions with non-intersecting cones, "
+  << this->fernandoKacNilradicalCandidates.size - this->numberOfConeIntersections - this->NumCentralizerConditionFailsconeConditionHolds
   << " satisfy the centralizer condition and " << this->NumCentralizerConditionFailsconeConditionHolds
   << " fail the centralizer condition.";
   if (this->NumBadParabolics > 0) {
@@ -5977,17 +5981,17 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicalsSummary(FormatExpr
     << "For these subalgebras the PSZ construction is not proven to hold. </span>";
   } else {
     out << "<br><span style =\"color:#0000FF\"> In each of "
-    << this->fernandoKacNilradicalCandidates.size - this->NumConeIntersections - this->NumCentralizerConditionFailsconeConditionHolds
+    << this->fernandoKacNilradicalCandidates.size - this->numberOfConeIntersections - this->NumCentralizerConditionFailsconeConditionHolds
     << " case(s) when the centralizer condition holds, "
     << "the parabolic subalgebra in the centralizer with Levi types A and C extends "
     << "to parabolic subalgebra of the ambient Lie algebra whose Levi types are A and C only. </span>";
   }
-  if (this->NumConeIntersections > 0) {
-    if (this->NumCasesNoLinfiniteRelationFound > 0) {
-      out << "<br><span style =\"color:#FF0000\">In " << this->NumCasesNoLinfiniteRelationFound
+  if (this->numberOfConeIntersections > 0) {
+    if (this->numberOfCasesNoLInfiniteRelationFound > 0) {
+      out << "<br><span style =\"color:#FF0000\">In " << this->numberOfCasesNoLInfiniteRelationFound
       << " cases no L-infinite relation was found. </span>";
     } else {
-      out << "<br><span style =\"color:#0000FF\"> In each of " << this->NumConeIntersections
+      out << "<br><span style =\"color:#0000FF\"> In each of " << this->numberOfConeIntersections
       << " case(s) of intersecting cones, an L-infinite relation was found. </span>";
     }
   }
@@ -5998,7 +6002,7 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(FormatExpressions
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::toStringNilradicals");
   if (this->fernandoKacNilradicalCandidates.size == 0) {
     if (this->owner->flagComputeNilradicals) {
-      if (this->amRegularSA()) {
+      if (this->isRegularSubalgebra()) {
         return "Nilradicals not computed, but that is OK because this a root subalgebra. ";
       } else {
         return "<b>Nilradicals not computed AND this is not a root subalgebra.</b>";
@@ -6697,7 +6701,7 @@ std::string CandidateSemisimpleSubalgebra::toStringGenerators(FormatExpressions*
   return out.str();
 }
 
-bool CandidateSemisimpleSubalgebra::amRegularSA() const {
+bool CandidateSemisimpleSubalgebra::isRegularSubalgebra() const {
   for (int i = 0; i < this->negativeGenerators.size; i ++) {
     if (this->negativeGenerators[i].size() > 1 || this->positiveGenerators[i].size() > 1) {
       return false;
@@ -6717,7 +6721,7 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* format) c
   out << "Subalgebra type: " << this->owner->toStringAlgebraLink(this->indexInOwner, format)
   << " (click on type for detailed printout).\n";
   out << this->comments;
-  if (this->amRegularSA()) {
+  if (this->isRegularSubalgebra()) {
     out << "<br>The subalgebra is regular (= the semisimple part of a root subalgebra). ";
   }
   if (this->indexIamInducedFrom != - 1) {
@@ -7096,7 +7100,7 @@ void SemisimpleSubalgebras::computePairingTablesAndFKFTtypes() {
       << ". The subalgebra is of type " << this->subalgebras.values[i].toStringTypeAndHs() << "... ";
       theReport.report(reportStream2.str());
     }
-    if (currentSA.amRegularSA()) {
+    if (currentSA.isRegularSubalgebra()) {
       continue;
     }
     currentSA.computePairingTable();
@@ -7108,7 +7112,7 @@ void SemisimpleSubalgebras::computePairingTablesAndFKFTtypes() {
       << "... DONE. Computing Fernando-Kac subalgebra candidates.";
       theReport.report(reportStream2.str());
     }
-    if (this->flagComputeNilradicals && !this->subalgebras.values[i].amRegularSA()) {
+    if (this->flagComputeNilradicals && !this->subalgebras.values[i].isRegularSubalgebra()) {
       currentSA.enumerateAllNilradicals();
     }
   }
@@ -7289,10 +7293,10 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
   matFundCoordsSimple *= diagMat;
   this->matMultiplyFundCoordsToGetSimple = bilinearFormInverted;
   this->matMultiplyFundCoordsToGetSimple *= diagMatrix2;
-  this->bilinearFormFundPrimal = matFundCoordsSimple;
-  this->bilinearFormFundPrimal.transpose();
-  this->bilinearFormFundPrimal *= this->bilinearFormSimplePrimal;
-  this->bilinearFormFundPrimal *= matFundCoordsSimple;
+  this->bilinearFormFundamentalPrimal = matFundCoordsSimple;
+  this->bilinearFormFundamentalPrimal.transpose();
+  this->bilinearFormFundamentalPrimal *= this->bilinearFormSimplePrimal;
+  this->bilinearFormFundamentalPrimal *= matFundCoordsSimple;
 /*  this->inducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.initialize(this->getAmbientWeyl().getDimension(), this->getPrimalRank());
   for (int i = 0; i < this->getRank(); i ++)
     this->inducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.assignVectorToColumnKeepOtherColsIntactNoInit

@@ -878,12 +878,12 @@ bool CalculatorFunctionsBasic::absoluteValue(Calculator& calculator, const Expre
     return false;
   }
   const Expression& argument = input[1];
-  Rational theRat;
-  if (argument.isRational(&theRat)) {
-    if (theRat < 0) {
-      return output.assignValue(- theRat, calculator);
+  Rational rational;
+  if (argument.isRational(&rational)) {
+    if (rational < 0) {
+      return output.assignValue(- rational, calculator);
     }
-    return output.assignValue(theRat, calculator);
+    return output.assignValue(rational, calculator);
   }
   double theDouble = 0;
   if (argument.evaluatesToDouble(&theDouble)) {
@@ -1259,14 +1259,14 @@ bool CalculatorFunctionsAlgebraic::convertAlgebraicNumberToMatrix(
     return false;
   }
   const Expression& argument = input[1];
-  AlgebraicNumber theNumber;
-  if (!argument.isOfType(&theNumber)) {
+  AlgebraicNumber algebraicNumber;
+  if (!argument.isOfType(&algebraicNumber)) {
     return calculator << "Failed to convert "
     << argument.toString() << " to algebraic number. ";
   }
-  int dimension = theNumber.owner->getDimensionOverTheRationals();
+  int dimension = algebraicNumber.owner->getDimensionOverRationals();
   MatrixTensor<Rational> numberMatrixTensor;
-  theNumber.owner->getMultiplicationBy(theNumber, numberMatrixTensor);
+  algebraicNumber.owner->getMultiplicationBy(algebraicNumber, numberMatrixTensor);
   Matrix<Rational> result;
   numberMatrixTensor.getMatrix(result, dimension);
   return output.assignMatrix(result, calculator);
@@ -2540,14 +2540,14 @@ bool CalculatorFunctions::divideByNumber(
   if (input[2].isEqualToZero()) {
     return output.makeError("Division by zero. ", calculator);
   }
-  Rational theRatValue;
+  Rational rationalValue;
   AlgebraicNumber theAlgValue;
   double theDoubleValue;
   Expression theInvertedE;
   bool result = false;
-  if (input[2].isOfType<Rational>(&theRatValue)) {
-    theRatValue.invert();
-    theInvertedE.assignValue(theRatValue, calculator);
+  if (input[2].isOfType<Rational>(&rationalValue)) {
+    rationalValue.invert();
+    theInvertedE.assignValue(rationalValue, calculator);
     result = true;
   }
   if (input[2].isOfType<AlgebraicNumber>(&theAlgValue)) {
@@ -4737,11 +4737,11 @@ bool CalculatorFunctionsTrigonometry::exploitCosineEvenness(
   const Expression& argument = input[1];
   Expression cfE, nonCFpart;
   argument.getCoefficientMultiplicandForm(cfE, nonCFpart);
-  Rational theRat;
-  if (!cfE.isRational(&theRat)) {
+  Rational rational;
+  if (!cfE.isRational(&rational)) {
     return false;
   }
-  if (theRat >= 0) {
+  if (rational >= 0) {
     return false;
   }
   Expression moneE;
@@ -4759,11 +4759,11 @@ bool CalculatorFunctionsTrigonometry::exploitSineOddness(
   const Expression& argument = input[1];
   Expression cfE, nonCFpart;
   argument.getCoefficientMultiplicandForm(cfE, nonCFpart);
-  Rational theRat;
-  if (!cfE.isRational(&theRat)) {
+  Rational rational;
+  if (!cfE.isRational(&rational)) {
     return false;
   }
-  if (theRat >= 0) {
+  if (rational >= 0) {
     return false;
   }
   Expression moneE, sinE;
@@ -5790,12 +5790,12 @@ bool CalculatorFunctionsPlot::plotViewWindow(
       isGood = false;
     } else {
       if (theMap.contains("width")) {
-        if (!theMap.getValueCreateNoInit("width").evaluatesToDouble(&widthHeight[0])) {
+        if (!theMap.getValueCreateNoInitialization("width").evaluatesToDouble(&widthHeight[0])) {
           isGood = false;
         }
       }
       if (theMap.contains("height")) {
-        if (!theMap.getValueCreateNoInit("height").evaluatesToDouble(&widthHeight[1])) {
+        if (!theMap.getValueCreateNoInitialization("height").evaluatesToDouble(&widthHeight[1])) {
           isGood = false;
         }
       }
@@ -7039,10 +7039,10 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
     if ((*this).startsWith(calculator.opPower(), 3)) {
       bool signChange = false;
       if (leftD < 0) {
-        Rational theRat;
-        if ((*this)[2].isRational(&theRat)) {
-          if (!theRat.getDenominator().isEven()) {
-            if (!theRat.getNumerator().isEven()) {
+        Rational rational;
+        if ((*this)[2].isRational(&rational)) {
+          if (!rational.getDenominator().isEven()) {
+            if (!rational.getNumerator().isEven()) {
               signChange = true;
             }
             leftD *= - 1;
@@ -7069,10 +7069,10 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
     if ((*this).startsWith(calculator.opSqrt(), 3)) {
       bool signChange = false;
       if (rightD < 0) {
-        Rational theRat;
-        if ((*this)[1].isRational(&theRat)) {
-          if (!theRat.getNumerator().isEven()) {
-            if (!theRat.getDenominator().isEven()) {
+        Rational rational;
+        if ((*this)[1].isRational(&rational)) {
+          if (!rational.getNumerator().isEven()) {
+            if (!rational.getDenominator().isEven()) {
               signChange = true;
             }
             rightD *= - 1;

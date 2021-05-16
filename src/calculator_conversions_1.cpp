@@ -586,7 +586,7 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
     return calculator << "<hr>Failed to extract subalgebra generators from expression " << input.toString() << ". ";
   }
   SemisimpleLieAlgebra& currentNonEmbededSA =
-  owner.subalgebrasNonEmbedded->getValueCreateNoInit(outputSubalgebra.weylNonEmbedded->dynkinType);
+  owner.subalgebrasNonEmbedded->getValueCreateNoInitialization(outputSubalgebra.weylNonEmbedded->dynkinType);
   outputSubalgebra.indexNonEmbeddedMeStandard =
   owner.subalgebrasNonEmbedded->getIndex(outputSubalgebra.weylNonEmbedded->dynkinType);
   currentNonEmbededSA.weylGroup.computeRho(true);

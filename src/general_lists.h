@@ -365,28 +365,28 @@ public:
 
 class RecursionDepthCounter {
 public:
-  int* theCounter;
-  RecursionDepthCounter(int* inputCounter): theCounter(nullptr) {
+  int* counter;
+  RecursionDepthCounter(int* inputCounter): counter(nullptr) {
     if (inputCounter == nullptr) {
       return;
     }
-    this->theCounter = inputCounter;
-    (*this->theCounter) ++;
+    this->counter = inputCounter;
+    (*this->counter) ++;
   }
   ~RecursionDepthCounter() {
-    if (this->theCounter != nullptr) {
-      (*this->theCounter) --;
+    if (this->counter != nullptr) {
+      (*this->counter) --;
     }
-    this->theCounter = nullptr;
+    this->counter = nullptr;
   }
 };
 
 template <class Object>
-std::ostream& operator<<(std::ostream& output, const List<Object>& theList) {
-  output << theList.size << " elements: \n";
-  for (int i = 0; i < theList.size; i ++) {
-    output << theList[i];
-    if (i != theList.size - 1) {
+std::ostream& operator<<(std::ostream& output, const List<Object>& input) {
+  output << input.size << " elements: \n";
+  for (int i = 0; i < input.size; i ++) {
+    output << input[i];
+    if (i != input.size - 1) {
       output << ", ";
     }
   }
@@ -394,16 +394,16 @@ std::ostream& operator<<(std::ostream& output, const List<Object>& theList) {
 }
 
 template <class Object>
-std::iostream& operator>>(std::iostream& input, List<Object>& theList) {
+std::iostream& operator>>(std::iostream& input, List<Object>& outputList) {
   std::string tempS;
   int tempI;
   input >> tempS >> tempI;
   if (tempS != "size:") {
     fatalCrash("Failed reading list from stream. ");
   }
-  theList.setSize(tempI);
-  for (int i = 0; i < theList.size; i ++) {
-    input >> theList[i];
+  outputList.setSize(tempI);
+  for (int i = 0; i < outputList.size; i ++) {
+    input >> outputList[i];
   }
   return input;
 }
@@ -450,8 +450,8 @@ public:
 // Lists are used in the implementation of mutexes!!!
 template <class Object>
 class List {
-  friend std::ostream& operator<< <Object>(std::ostream& output, const List<Object>& theList);
-  friend std::iostream& operator>> <Object>(std::iostream& input, List<Object>& theList);
+  friend std::ostream& operator<< <Object>(std::ostream& output, const List<Object>& input);
+  friend std::iostream& operator>> <Object>(std::iostream& input, List<Object>& inputList);
 public:
   class Comparator {
   public:
@@ -494,7 +494,7 @@ private:
   void expandArrayOnTop(int increase);
   template <class compareClass, class carbonCopyType>
   bool quickSortAscendingCustomRecursive(
-    int bottomIndex, int topIndex, compareClass& theComparator, List<carbonCopyType>* carbonCopy
+    int bottomIndex, int topIndex, compareClass& comparator, List<carbonCopyType>* carbonCopy
   );
   void quickSortDescending(int bottomIndex, int topIndex);
   inline void initConstructorCallOnly() {
@@ -502,7 +502,7 @@ private:
     this->actualSize = 0;
     this->size = 0;
     this->flagDeallocated = false;
-    MacroIncrementCounter(GlobalStatistics::numListsCreated);
+    MacroIncrementCounter(GlobalStatistics::numberOfListsCreated);
   }
   int actualSize;
 public:
@@ -524,8 +524,8 @@ public:
     this->initConstructorCallOnly();
     *this = other;
   }
-  List<Object> sliceCopy(int StartingIndex, int SizeOfSlice) const;
-  void sliceInPlace(int StartingIndex, int SizeOfSlice);
+  List<Object> sliceCopy(int startingIndex, int sizeOfSlice) const;
+  void sliceInPlace(int startingIndex, int sizeOfSlice);
   void slice(int startingIndex, int sizeOfSlice, List<Object>& output) const;
   ~List();
   bool checkConsistency() const {
@@ -544,10 +544,10 @@ public:
     }
     return (expectedSize * 4) / 3 + 1;
   }
-  void setExpectedSize(int theSize) {
+  void setExpectedSize(int desiredSize) {
     // <-Registering stack trace forbidden! Multithreading deadlock alert.
-    if ((this->actualSize * 5 / 6) < theSize) {
-      this->reserve(this->getNewSizeRelativeToExpectedSize(theSize));
+    if ((this->actualSize * 5 / 6) < desiredSize) {
+      this->reserve(this->getNewSizeRelativeToExpectedSize(desiredSize));
     }
   }
   void expandOnTop(int increase) {
@@ -581,7 +581,7 @@ public:
     (*this)[desiredIndex] = o;
   }
   void addOnTop(const Object& o);
-  void addListOnTop(const List<Object>& theList);
+  void addListOnTop(const List<Object>& incoming);
   bool addOnTopNoRepetition(const Object& o);
   void addOnTopNoRepetition(const List<Object>& other) {
     this->setExpectedSize(this->size + other.size);
@@ -611,11 +611,11 @@ public:
   }
   void removeIndexSwapWithLast(int index);
   void removeLastObject();
-  void removeObjectsShiftDown(const List<Object>& theList) {
+  void removeObjectsShiftDown(const List<Object>& toBeRemoved) {
     int currentIndex = 0;
     for (int i = 0; i < this->size; i ++) {
-      if (!theList.contains((*this)[i])) {
-        theList.swapTwoIndices(i, currentIndex);
+      if (!toBeRemoved.contains((*this)[i])) {
+        toBeRemoved.swapTwoIndices(i, currentIndex);
         currentIndex ++;
       }
     }
@@ -641,12 +641,12 @@ public:
   }
   // The following function returns false if the comparison operator failed!!!!
   template <class compareClass, class carbonCopyType = Object>
-  bool quickSortAscendingCustom(compareClass& theCompareror, List<carbonCopyType>* carbonCopy = nullptr) {
-    return this->quickSortAscendingCustomRecursive(0, this->size - 1, theCompareror, carbonCopy);
+  bool quickSortAscendingCustom(compareClass& comparator, List<carbonCopyType>* carbonCopy = nullptr) {
+    return this->quickSortAscendingCustomRecursive(0, this->size - 1, comparator, carbonCopy);
   }
   template <class compareClass, class carbonCopyType = Object>
-  bool quickSortDescendingCustom(compareClass& theCompareror, List<carbonCopyType>* carbonCopy = nullptr) {
-    bool result = this->quickSortAscendingCustomRecursive(0, this->size - 1, theCompareror, carbonCopy);
+  bool quickSortDescendingCustom(compareClass& comparator, List<carbonCopyType>* carbonCopy = nullptr) {
+    bool result = this->quickSortAscendingCustomRecursive(0, this->size - 1, comparator, carbonCopy);
     this->reverseElements();
     if (carbonCopy != 0) {
       carbonCopy->reverseElements();
@@ -659,18 +659,18 @@ public:
   // comparison function
   template <class otherType = Object>
   void quickSortAscending(
-    const List<Object>::Comparator* theOrder = nullptr,
+    const List<Object>::Comparator* order = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
-    List<Object>::quickSortAscending<List<Object>, List<otherType> >(*this, theOrder, carbonCopy);
+    List<Object>::quickSortAscending<List<Object>, List<otherType> >(*this, order, carbonCopy);
   }
 
   template <class otherType = Object>
   void quickSortDescending(
-    const List<Object>::Comparator* theOrder = nullptr,
+    const List<Object>::Comparator* order = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
-    List<Object>::quickSortDescending<List<Object>, List<otherType> >(*this, theOrder, carbonCopy);
+    List<Object>::quickSortDescending<List<Object>, List<otherType> >(*this, order, carbonCopy);
   }
 
   template <class templateList, class otherList>
@@ -766,7 +766,7 @@ public:
   }
   template <class templateList, class otherList>
   static void quickSortAscendingNoOrder(
-    templateList& theList,
+    templateList& input,
     int bottomIndex,
     int topIndex,
     otherList* carbonCopy
@@ -776,8 +776,8 @@ public:
     }
     int highIndex = topIndex;
     for (int lowIndex = bottomIndex + 1; lowIndex <= highIndex; lowIndex ++) {
-      if (theList[lowIndex] > theList[bottomIndex]) {
-        theList.swapTwoIndices(lowIndex, highIndex);
+      if (input[lowIndex] > input[bottomIndex]) {
+        input.swapTwoIndices(lowIndex, highIndex);
         if (carbonCopy != 0) {
           carbonCopy->swapTwoIndices(lowIndex, highIndex);
         }
@@ -785,15 +785,15 @@ public:
         highIndex --;
       }
     }
-    if (theList[highIndex] > theList[bottomIndex]) {
+    if (input[highIndex] > input[bottomIndex]) {
       highIndex --;
     }
-    theList.swapTwoIndices(bottomIndex, highIndex);
+    input.swapTwoIndices(bottomIndex, highIndex);
     if (carbonCopy != 0) {
       carbonCopy->swapTwoIndices(bottomIndex, highIndex);
     }
-    List<Object>::quickSortAscendingNoOrder(theList, bottomIndex, highIndex - 1, carbonCopy);
-    List<Object>::quickSortAscendingNoOrder(theList, highIndex + 1, topIndex, carbonCopy);
+    List<Object>::quickSortAscendingNoOrder(input, bottomIndex, highIndex - 1, carbonCopy);
+    List<Object>::quickSortAscendingNoOrder(input, highIndex + 1, topIndex, carbonCopy);
   }
   bool hasCommonElementWith(List<Object>& right);
   void swapTwoIndices(int index1, int index2);
@@ -839,15 +839,15 @@ public:
     int start = 0;
     int end = this->size;
     while (true) {
-      int halflength = (end - start) / 2;
-      if (halflength == 0) {
+      int halfLength = (end - start) / 2;
+      if (halfLength == 0) {
         if ((start == this->size ) || (o > this->objects[start])) {
           return end;
         } else {
           return start;
         }
       }
-      int n = start + halflength;
+      int n = start + halfLength;
       if (o > this->objects[n]) {
         start = n + 1;
       } else {
@@ -1356,9 +1356,9 @@ public:
   bool contains(const Object& o) const {
     return this->getIndex(o) != - 1;
   }
-  bool contains(const List<Object>& theList) const {
-    for (int i = 0; i < theList.size; i ++) {
-      if (this->getIndex(theList[i]) == - 1) {
+  bool contains(const List<Object>& input) const {
+    for (int i = 0; i < input.size; i ++) {
+      if (this->getIndex(input[i]) == - 1) {
         return false;
       }
     }
@@ -1450,23 +1450,23 @@ public:
   }
   template<typename otherType = int>
   void quickSortAscending(
-    typename List<Object>::Comparator* theOrder = nullptr,
+    typename List<Object>::Comparator* order = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
-    List<Object> theList;
-    theList = *this;
-    theList.quickSortAscending(theOrder, carbonCopy);
-    this->operator=(theList);
+    List<Object> myCopy;
+    myCopy = *this;
+    myCopy.quickSortAscending(order, carbonCopy);
+    this->operator=(myCopy);
   }
   template<typename otherType>
   void quickSortDescending(
-    typename List<Object>::Comparator* theOrder = nullptr,
+    typename List<Object>::Comparator* order = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
-    List<Object> theList;
-    theList = *this;
-    theList.quickSortDescending(theOrder, carbonCopy);
-    this->operator=(theList);
+    List<Object> myCopy;
+    myCopy = *this;
+    myCopy.quickSortDescending(order, carbonCopy);
+    this->operator=(myCopy);
   }
   void initializeHashesToOne() {
     this->hashBuckets.setSize(1);
@@ -1537,8 +1537,8 @@ public:
   // Note The following function specializations are declared entirely in order to
   // facilitate autocomplete in my current IDE. If I find a better autocompletion
   // IDE the following should be removed.
-  void addOnTopNoRepetition(const List<Object>& theList) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::addOnTopNoRepetition(theList);
+  void addOnTopNoRepetition(const List<Object>& input) {
+    this->::HashTemplate<Object, List<Object>, hashFunction>::addOnTopNoRepetition(input);
   }
   bool addOnTopNoRepetition(const Object& o) {
     return this->::HashTemplate<Object, List<Object>, hashFunction>::addOnTopNoRepetition(o);
@@ -1546,14 +1546,14 @@ public:
   void addOnTop(const Object& o) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::addOnTop(o);
   }
-  void addListOnTop(const List<Object>& theList) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::addListOnTop(theList);
+  void addListOnTop(const List<Object>& input) {
+    this->::HashTemplate<Object, List<Object>, hashFunction>::addListOnTop(input);
   }
   bool contains(const Object& o) const {
     return this->::HashTemplate<Object, List<Object>, hashFunction>::contains(o);
   }
-  bool contains(const List<Object>& theList) const {
-    return this->::HashTemplate<Object, List<Object>, hashFunction>::contains(theList);
+  bool contains(const List<Object>& input) const {
+    return this->::HashTemplate<Object, List<Object>, hashFunction>::contains(input);
   }
   Object& getElement(int objectIndex) const {
     return this->::HashTemplate<Object, List<Object>, hashFunction>::getElement(objectIndex);
@@ -1578,17 +1578,17 @@ public:
   }
   template <typename otherType = int>
   void quickSortAscending(
-    typename List<Object>::Comparator* theOrder = nullptr,
+    typename List<Object>::Comparator* order = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::quickSortAscending(theOrder, carbonCopy);
+    this->::HashTemplate<Object, List<Object>, hashFunction>::quickSortAscending(order, carbonCopy);
   }
   template <typename otherType = int>
   void quickSortDescending(
-    typename List<Object>::Comparator* theOrder = nullptr,
+    typename List<Object>::Comparator* order = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::quickSortDescending(theOrder, carbonCopy);
+    this->::HashTemplate<Object, List<Object>, hashFunction>::quickSortDescending(order, carbonCopy);
   }
   void setExpectedSize(int expectedSize) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::setExpectedSize(expectedSize);
@@ -1700,7 +1700,7 @@ template <class compareClass, class carbonCopyType>
 bool List<Object>::quickSortAscendingCustomRecursive(
   int bottomIndex,
   int topIndex,
-  compareClass& theComparator,
+  compareClass& comparator,
   List<carbonCopyType>* carbonCopy
 ) {
   if (topIndex <= bottomIndex) {
@@ -1708,7 +1708,7 @@ bool List<Object>::quickSortAscendingCustomRecursive(
   }
   int highIndex = topIndex;
   for (int lowIndex = bottomIndex + 1; lowIndex <= highIndex; lowIndex ++) {
-    if (theComparator.compareLeftGreaterThanRight(
+    if (comparator.compareLeftGreaterThanRight(
       this->objects[lowIndex], this->objects[bottomIndex]
     )) {
       if (carbonCopy != nullptr) {
@@ -1719,29 +1719,29 @@ bool List<Object>::quickSortAscendingCustomRecursive(
       highIndex --;
     }
   }
-  if (theComparator.compareLeftGreaterThanRight(this->objects[highIndex], this->objects[bottomIndex])) {
+  if (comparator.compareLeftGreaterThanRight(this->objects[highIndex], this->objects[bottomIndex])) {
     highIndex --;
   }
   if (carbonCopy != nullptr) {
     carbonCopy->swapTwoIndices(bottomIndex, highIndex);
   }
   this->swapTwoIndices(bottomIndex, highIndex);
-  if (!this->quickSortAscendingCustomRecursive(bottomIndex, highIndex - 1, theComparator, carbonCopy)) {
+  if (!this->quickSortAscendingCustomRecursive(bottomIndex, highIndex - 1, comparator, carbonCopy)) {
     return false;
   }
-  if (!this->quickSortAscendingCustomRecursive(highIndex + 1, topIndex, theComparator, carbonCopy)) {
+  if (!this->quickSortAscendingCustomRecursive(highIndex + 1, topIndex, comparator, carbonCopy)) {
     return false;
   }
   return true;
 }
 
 template <class Object>
-void List<Object>::addListOnTop(const List<Object>& other) {
+void List<Object>::addListOnTop(const List<Object>& incoming) {
   int oldsize = this->size;
-  int otherSize = other.size;
+  int otherSize = incoming.size;
   this->setSize(oldsize + otherSize);
   for (int i = 0; i < otherSize; i ++) {
-    this->objects[i + oldsize] = other.objects[i];
+    this->objects[i + oldsize] = incoming.objects[i];
   }
 }
 
@@ -1882,14 +1882,14 @@ void List<Object>::shiftUpExpandOnTopRepeated(int StartingIndex, int numberOfNew
 }
 
 template <class Object>
-void List<Object>::sliceInPlace(int StartingIndex, int SizeOfSlice) {
-  this->slice(StartingIndex, SizeOfSlice, *this);
+void List<Object>::sliceInPlace(int startingIndex, int sizeOfSlice) {
+  this->slice(startingIndex, sizeOfSlice, *this);
 }
 
 template <class Object>
-List<Object> List<Object>::sliceCopy(int StartingIndex, int SizeOfSlice) const {
+List<Object> List<Object>::sliceCopy(int startingIndex, int sizeOfSlice) const {
   List<Object> result;
-  this->slice(StartingIndex, SizeOfSlice, result);
+  this->slice(startingIndex, sizeOfSlice, result);
   return result;
 }
 

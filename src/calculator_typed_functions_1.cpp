@@ -327,7 +327,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerWeylGroupElementByInteger(
 }
 
 
-bool CalculatorFunctionsBinaryOps::innerDivideRatByRat(
+bool CalculatorFunctionsBinaryOps::divideRationalByRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerDivideRatByRat");

@@ -1847,10 +1847,27 @@ bool CalculatorLieTheory::splitFDpartB3overG2CharsOnly(
   return CalculatorLieTheory::splitFDpartB3overG2CharsOutput(calculator, input, output, theG2B3Data);
 }
 
-bool CalculatorLieTheory::slTwoRealFormStructure(
+bool CalculatorLieTheory::slTwoRealFormStructureForceRecompute(
   Calculator& calculator,
   const Expression& input,
   Expression& output
+) {
+  return CalculatorLieTheory::slTwoRealFormStructure(calculator, input, output, true);
+}
+
+bool CalculatorLieTheory::slTwoRealFormStructureComputeOnDemand(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output
+) {
+  return CalculatorLieTheory::slTwoRealFormStructure(calculator, input, output, false);
+}
+
+bool CalculatorLieTheory::slTwoRealFormStructure(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool forceRecompute
 ) {
   MacroRegisterFunctionWithName("CalculatorLieTheory::slTwoRealFormStructure");
   if (input.size() != 2) {
@@ -1882,7 +1899,7 @@ bool CalculatorLieTheory::slTwoRealFormStructure(
   << outKostantSekiguchi.str()
   << "' target='_blank'>"
   << ownerLieAlgebra.content->toStringLieAlgebraName() << " </a>";
-  if (!FileOperations::fileExistsVirtual(outKostantSekiguchi.str())) {
+  if (!FileOperations::fileExistsVirtual(outKostantSekiguchi.str()) && !forceRecompute) {
     out << "The table is precomputed and served from the hard disk. <br>";
     return output.assignValue(out.str(), calculator);
   }
@@ -2949,7 +2966,7 @@ bool CalculatorLieTheory::drawWeightSupport(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorLieTheory::getLinksToSimpleLieAlgerbas(
+bool CalculatorLieTheory::getLinksToSimpleLieAlgebras(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   (void) input;

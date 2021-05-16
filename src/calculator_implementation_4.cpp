@@ -509,16 +509,16 @@ bool CalculatorBasics::multiplyByOne(Calculator& calculator, const Expression& i
 
 bool Calculator::getVectorLargeIntegerFromFunctionArguments(const Expression& input, List<LargeInteger>& output) {
   MacroRegisterFunctionWithName("Calculator::getVectorLargeIntegerFromFunctionArguments");
-  Vector<Rational> theRats;
-  if (!this->getVectorFromFunctionArguments(input, theRats)) {
+  Vector<Rational> rationals;
+  if (!this->getVectorFromFunctionArguments(input, rationals)) {
     return false;
   }
-  output.initializeFillInObject(theRats.size, 0);
-  for (int i = 0; i < theRats.size; i ++) {
-    if (!theRats[i].isInteger(&output[i])) {
+  output.initializeFillInObject(rationals.size, 0);
+  for (int i = 0; i < rationals.size; i ++) {
+    if (!rationals[i].isInteger(&output[i])) {
       return *this << "<hr>Succeeded to convert "
       << input.toString() << " to the vector of rationals: "
-      << theRats.toString() << " but failed to convert that to list of integers. ";
+      << rationals.toString() << " but failed to convert that to list of integers. ";
     }
   }
   return true;
@@ -526,16 +526,16 @@ bool Calculator::getVectorLargeIntegerFromFunctionArguments(const Expression& in
 
 bool Calculator::getVectorInt(const Expression& input, List<int>& output) {
   MacroRegisterFunctionWithName("Calculator::getVectorInt");
-  Vector<Rational> theRats;
-  if (!this->getVector(input, theRats)) {
+  Vector<Rational> rationals;
+  if (!this->getVector(input, rationals)) {
     return false;
   }
-  output.initializeFillInObject(theRats.size,0);
-  for (int i = 0; i < theRats.size; i ++) {
-    if (!theRats[i].isSmallInteger(&output[i])) {
+  output.initializeFillInObject(rationals.size,0);
+  for (int i = 0; i < rationals.size; i ++) {
+    if (!rationals[i].isSmallInteger(&output[i])) {
       return *this << "<hr>Succeeded to convert "
       << input.toString() << " to the vector of rationals: "
-      << theRats.toString()
+      << rationals.toString()
       << " but failed to convert that to list of small integers. ";
     }
   }
@@ -1166,16 +1166,16 @@ bool Expression::isEqualToMathematically(const Expression& other) const {
   if (*this == other) {
     return true;
   }
-  Rational theRat, theRatTwo;
+  Rational rational, rationalTwo;
   AlgebraicNumber theAlgebraic;
-  if (this->isOfType(&theRat) && other.isOfType(&theRatTwo)) {
-    return theRat == theRatTwo;
+  if (this->isOfType(&rational) && other.isOfType(&rationalTwo)) {
+    return rational == rationalTwo;
   }
-  if (this->isOfType(&theRat) && other.isOfType(&theAlgebraic)) {
-    return theAlgebraic == theRat;
+  if (this->isOfType(&rational) && other.isOfType(&theAlgebraic)) {
+    return theAlgebraic == rational;
   }
-  if (other.isOfType(&theRat) && this->isOfType(&theAlgebraic)) {
-    return theAlgebraic == theRat;
+  if (other.isOfType(&rational) && this->isOfType(&theAlgebraic)) {
+    return theAlgebraic == rational;
   }
   double leftD = - 1, rightD = - 1;
   if (this->evaluatesToDouble(&leftD) && other.evaluatesToDouble(&rightD)) {
@@ -1844,8 +1844,8 @@ JSData Calculator::toJSONPerformance() {
     moreDetails << "<br>maximum recursion depth reached: " << this->depthRecursionReached << ".";
   }
   moreDetails << "<br>Lists created: " << "computation: "
-  << (GlobalStatistics::numListsCreated - static_cast<unsigned>(this->statistics.numberOfListsStart))
-  << ", total: " << GlobalStatistics::numListsCreated;
+  << (GlobalStatistics::numberOfListsCreated - static_cast<unsigned>(this->statistics.numberOfListsStart))
+  << ", total: " << GlobalStatistics::numberOfListsCreated;
   moreDetails << "<br> # List resizes: computation: "
   << (GlobalStatistics::numberOfListResizesTotal - static_cast<unsigned>(this->statistics.numberListResizesStart))
   << ", total: " << GlobalStatistics::numberOfListResizesTotal
@@ -2038,7 +2038,7 @@ std::string Calculator::toStringSyntacticStackHTMLTable(
 
 SemisimpleSubalgebras& ObjectContainer::getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input) {
   MacroRegisterFunctionWithName("ObjectContainer::getSemisimpleSubalgebrasCreateIfNotPresent");
-  SemisimpleSubalgebras& currentSAs = this->semisimpleSubalgebras.getValueCreateNoInit(input);
+  SemisimpleSubalgebras& currentSAs = this->semisimpleSubalgebras.getValueCreateNoInitialization(input);
   return currentSAs;
 }
 
@@ -2048,7 +2048,7 @@ SemisimpleLieAlgebra& ObjectContainer::getLieAlgebraCreateIfNotPresent(const Dyn
   if (!this->semisimpleLieAlgebras.contains(input)) {
     needToInit = true;
   }
-  SemisimpleLieAlgebra& lieAlgebra = this->semisimpleLieAlgebras.getValueCreateNoInit(input);
+  SemisimpleLieAlgebra& lieAlgebra = this->semisimpleLieAlgebras.getValueCreateNoInitialization(input);
   if (needToInit) {
     lieAlgebra.weylGroup.makeFromDynkinType(input);
   }

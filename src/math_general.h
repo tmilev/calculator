@@ -2713,7 +2713,7 @@ public:
   bool differential(
     Vector<Polynomial<Coefficient> >& output, std::stringstream* comments
   ) const;
-  void interpolate(const Vector<Coefficient>& thePoints, const Vector<Coefficient>& valuesAtThePoints);
+  void interpolate(const Vector<Coefficient>& points, const Vector<Coefficient>& valuesAtPoints);
   bool findOneVariableRationalRoots(List<Rational>& output);
   Coefficient getDiscriminant();
   void getCoefficientInFrontOfLinearTermVariableIndex(int index, Coefficient& output);
@@ -3171,9 +3171,9 @@ public:
   std::string getDivisionStringLaTeX();
   std::string getDivisionLaTeXSlide();
   std::string getPolynomialStringSpacedMonomialsLaTeX(
-    const Polynomial<Coefficient>& thePoly,
+    const Polynomial<Coefficient>& polynomial,
     std::string* highlightColor = nullptr,
-    List<MonomialPolynomial>* theHighLightedMons = nullptr,
+    List<MonomialPolynomial>* highlightedMonomials = nullptr,
     int* firstNonZeroIndex = nullptr
   );
   std::string getSpacedMonomialsWithHighlightLaTeX(
@@ -3186,9 +3186,9 @@ public:
     bool useColumnSeparator
   );
   std::string getPolynomialStringSpacedMonomialsHtml(
-    const Polynomial<Coefficient>& thePoly,
+    const Polynomial<Coefficient>& polynomial,
     const std::string& extraStyle,
-    List<MonomialPolynomial>* theHighLightedMons = nullptr
+    List<MonomialPolynomial>* highlightedMonomials = nullptr
   );
   void computeHighLightsFromRemainder(int remainderIndex, int& currentSlideNumber);
   PolynomialDivisionReport();

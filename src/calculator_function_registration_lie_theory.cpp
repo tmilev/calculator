@@ -204,23 +204,33 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "GetLinksToSimpleLieAlgebraPrintouts",
-    CalculatorLieTheory::getLinksToSimpleLieAlgerbas,
+    CalculatorLieTheory::getLinksToSimpleLieAlgebras,
     "",
     "Gets simple Lie algebra links to the calculator.",
     "GetLinksToSimpleLieAlgebraPrintouts{}0",
-    "Calculator::getLinksToSimpleLieAlgerbas",
+    "Calculator::getLinksToSimpleLieAlgebras",
     "GetLinksToSimpleLieAlgebraPrintouts",
     innerInvisible
   );
   this->addOperationHandler(
     "SlTwoRealFormStructure",
-    CalculatorLieTheory::slTwoRealFormStructure,
+    CalculatorLieTheory::slTwoRealFormStructureComputeOnDemand,
     "",
     "Computes the Lie algebra structure over Kostant-Sekiguchi sl twos "
     "w.r.t. maximally compact real form.",
     "SlTwoRealFormStructure{}(a_3)",
-    "Calculator::getLinksToSimpleLieAlgerbas",
-    "GetLinksToSimpleLieAlgebraPrintouts",
+    "Calculator::slTwoRealFormStructureComputeOnDemand",
+    "SlTwoRealFormStructure",
+    innerInvisible
+  );
+  this->addOperationHandler(
+    "SlTwoRealFormStructureForceRecompute",
+    CalculatorLieTheory::slTwoRealFormStructureForceRecompute,
+    "",
+    "Same as SlTwoRealFormStructure but forces a recompute. ",
+    "SlTwoRealFormStructureForceRecompute{}(a_3)",
+    "Calculator::slTwoRealFormStructureForceRecompute",
+    "SlTwoRealFormStructureForceRecompute",
     innerInvisible
   );
   this->addOperationHandler(

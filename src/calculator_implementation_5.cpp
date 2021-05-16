@@ -774,9 +774,9 @@ bool CalculatorFunctions::innerNumerator(Calculator& calculator, const Expressio
     return false;
   }
   const Expression& argument = input[1];
-  Rational theRat;
-  if (argument.isRational(&theRat)) {
-    return output.assignValue(Rational(theRat.getNumerator()), calculator);
+  Rational rational;
+  if (argument.isRational(&rational)) {
+    return output.assignValue(Rational(rational.getNumerator()), calculator);
   }
   if (argument.startsWith(calculator.opDivide())) {
     if (argument.size() > 1) {
@@ -794,9 +794,9 @@ bool CalculatorFunctions::innerDenominator(Calculator& calculator, const Express
     return false;
   }
   const Expression& argument = input[1];
-  Rational theRat, theDen;
-  if (argument.isRational(&theRat)) {
-    theDen = theRat.getDenominator();
+  Rational rational, theDen;
+  if (argument.isRational(&rational)) {
+    theDen = rational.getDenominator();
     return output.assignValue(theDen, calculator);
   }
   if (argument.startsWith(calculator.opDivide())) {
@@ -1474,10 +1474,10 @@ bool CalculatorFunctionsBasic::floor(
   if (input.size() != 2) {
     return false;
   }
-  Rational theRat;
-  if (input[1].isOfType<Rational>(&theRat)) {
-    theRat.assignFloor();
-    return output.assignValue(theRat, calculator);
+  Rational rational;
+  if (input[1].isOfType<Rational>(&rational)) {
+    rational.assignFloor();
+    return output.assignValue(rational, calculator);
   }
   double theDouble = 0;
   if (input[1].evaluatesToDouble(&theDouble)) {
@@ -1517,11 +1517,11 @@ bool CalculatorFunctionsBasic::round(
   if (input.size() != 2) {
     return false;
   }
-  Rational theRat;
-  if (input[1].isOfType<Rational>(&theRat)) {
-    Rational result = theRat;
+  Rational rational;
+  if (input[1].isOfType<Rational>(&rational)) {
+    Rational result = rational;
     result.assignFloor();
-    if (theRat - result >= Rational(1, 2)) {
+    if (rational - result >= Rational(1, 2)) {
       result ++;
     }
     return output.assignValue(result, calculator);

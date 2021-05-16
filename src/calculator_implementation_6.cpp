@@ -1399,25 +1399,25 @@ bool CalculatorFunctionsTrigonometry::arccosAlgebraic(Calculator& calculator, co
     return false;
   }
   const Expression& argumentE = input[1];
-  Rational theRat;
-  if (argumentE.isRational(&theRat)) {
-    if (theRat == 1) {
+  Rational rational;
+  if (argumentE.isRational(&rational)) {
+    if (rational == 1) {
       return output.assignValue(0, calculator);
     }
-    if (theRat == 0) {
+    if (rational == 0) {
       output.makeAtom(calculator.opPi(), calculator);
       output /= 2;
       return true;
     }
-    if (theRat == - 1) {
+    if (rational == - 1) {
       return output.makeAtom(calculator.opPi(), calculator);
     }
-    if (theRat == Rational(1, 2)) {
+    if (rational == Rational(1, 2)) {
       output.makeAtom(calculator.opPi(), calculator);
       output /= 3;
       return true;
     }
-    if (theRat == Rational(- 1, 2)) {
+    if (rational == Rational(- 1, 2)) {
       output.makeAtom(calculator.opPi(), calculator);
       output *= 2;
       output /= 3;
@@ -1472,27 +1472,27 @@ bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
     return false;
   }
   const Expression& argumentE = input[1];
-  Rational theRat;
-  if (argumentE.isRational(&theRat)) {
-    if (theRat == 1) {
+  Rational rational;
+  if (argumentE.isRational(&rational)) {
+    if (rational == 1) {
       output.makeAtom(calculator.opPi(), calculator);
       output /= 2;
       return true;
     }
-    if (theRat == 0) {
+    if (rational == 0) {
       return output.assignValue(0, calculator);
     }
-    if (theRat == - 1) {
+    if (rational == - 1) {
       output.makeAtom(calculator.opPi(), calculator);
       output /= - 2;
       return true;
     }
-    if (theRat == Rational(1, 2)) {
+    if (rational == Rational(1, 2)) {
       output.makeAtom(calculator.opPi(), calculator);
       output /= 6;
       return true;
     }
-    if (theRat == Rational(- 1, 2)) {
+    if (rational == Rational(- 1, 2)) {
       output.makeAtom(calculator.opPi(), calculator);
       output /= - 6;
       return true;
@@ -2974,7 +2974,7 @@ bool CalculatorFunctionsLinearAlgebra::functionToMatrix(Calculator& calculator, 
 bool CalculatorFunctions::innerSuffixNotationForPostScript(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerSuffixNotationForPostScript");
   RecursionDepthCounter theCounter(&calculator.recursionDepth);
-  if (*theCounter.theCounter == calculator.maximumRecursionDepth - 2) {
+  if (*theCounter.counter == calculator.maximumRecursionDepth - 2) {
     return output.assignValue(std::string("..."), calculator);
   }
   std::string currentString;
@@ -3036,13 +3036,13 @@ bool CalculatorFunctions::innerSuffixNotationForPostScript(Calculator& calculato
   out.precision(7);
   bool hasDoubleValue = false;
   double theDoubleValue = - 1;
-  Rational theRat;
-  if (input.isOfType<Rational>(&theRat)) {
+  Rational rational;
+  if (input.isOfType<Rational>(&rational)) {
     if (
-      theRat.getDenominator().isIntegerFittingInInt(nullptr) &&
-      theRat.getNumerator().isIntegerFittingInInt(nullptr)
+      rational.getDenominator().isIntegerFittingInInt(nullptr) &&
+      rational.getNumerator().isIntegerFittingInInt(nullptr)
     ) {
-      out << " " << theRat.getNumerator().toString() << " " << theRat.getDenominator() << " div ";
+      out << " " << rational.getNumerator().toString() << " " << rational.getDenominator() << " div ";
       return output.assignValue(out.str(), calculator);
     }
     hasDoubleValue = true;

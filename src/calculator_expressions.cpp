@@ -1241,11 +1241,11 @@ bool Expression::convertInternally<AlgebraicNumber>(Expression& output) const {
     output = *this;
     return true;
   }
-  Rational theRat;
-  if (!this->isOfType<Rational>(&theRat)) {
+  Rational rational;
+  if (!this->isOfType<Rational>(&rational)) {
     return false;
   }
-  AlgebraicNumber outRat = theRat;
+  AlgebraicNumber outRat = rational;
   return output.assignValue(outRat, *this->owner);
 }
 
@@ -1833,10 +1833,10 @@ bool Expression::isEqualToTwo() const {
 }
 
 bool Expression::isEqualToHalf() const {
-  Rational theRat;
-  if (this->isRational(&theRat)) {
+  Rational rational;
+  if (this->isRational(&rational)) {
     Rational half(1, 2);
-    return theRat == half;
+    return rational == half;
   }
   return false;
 }
@@ -1871,9 +1871,9 @@ bool Expression::isNegativeConstant() const {
   if (this->owner == nullptr) {
     return false;
   }
-  Rational theRat;
-  if (this->isOfType<Rational>(&theRat)) {
-    return theRat.isNegative();
+  Rational rational;
+  if (this->isOfType<Rational>(&rational)) {
+    return rational.isNegative();
   }
   if (!this->isConstantNumber()) {
     return false;
@@ -1924,9 +1924,9 @@ bool Expression::makeError(const std::string& theError, Calculator& owner) {
 }
 
 bool Expression::isSmallInteger(int* whichInteger) const {
-  Rational theRat;
-  if (this->isOfType<Rational>(&theRat)) {
-    return theRat.isSmallInteger(whichInteger);
+  Rational rational;
+  if (this->isOfType<Rational>(&rational)) {
+    return rational.isSmallInteger(whichInteger);
   }
   AlgebraicNumber theAlgNum;
   if (this->isOfType<AlgebraicNumber>(&theAlgNum)) {
@@ -1972,9 +1972,9 @@ bool Expression::divisionByMeShouldBeWrittenInExponentForm() const {
 
 bool Expression::isPositiveNumber() const {
   MacroRegisterFunctionWithName("Expression::isPositiveNumber");
-  Rational theRat;
-  if (this->isOfType<Rational>(&theRat)) {
-    return theRat.isPositive();
+  Rational rational;
+  if (this->isOfType<Rational>(&rational)) {
+    return rational.isPositive();
   }
   double theDouble = - 1;
   if (!this->evaluatesToDouble(&theDouble)) {
@@ -2056,26 +2056,26 @@ bool Expression::isAlgebraicRadical() const {
 }
 
 bool Expression::isInteger(LargeInteger* whichInteger) const {
-  Rational theRat;
-  if (!this->isOfType<Rational>(&theRat)) {
+  Rational rational;
+  if (!this->isOfType<Rational>(&rational)) {
     return false;
   }
-  return theRat.isInteger(whichInteger);
+  return rational.isInteger(whichInteger);
 }
 
 bool Expression::isIntegerNonNegative(LargeIntegerUnsigned* whichInteger) const {
-  Rational theRat;
-  if (!this->isOfType<Rational>(&theRat)) {
+  Rational rational;
+  if (!this->isOfType<Rational>(&rational)) {
     return false;
   }
-  if (theRat.isNonPositive()) {
+  if (rational.isNonPositive()) {
     return false;
   }
   if (whichInteger == nullptr) {
-    return theRat.isInteger();
+    return rational.isInteger();
   }
   LargeInteger container;
-  if (!theRat.isInteger(&container)) {
+  if (!rational.isInteger(&container)) {
     return false;
   }
   *whichInteger = container.value;
@@ -2083,11 +2083,11 @@ bool Expression::isIntegerNonNegative(LargeIntegerUnsigned* whichInteger) const 
 }
 
 bool Expression::isIntegerFittingInInt(int* whichInteger) const {
-  Rational theRat;
-  if (!this->isOfType<Rational>(&theRat)) {
+  Rational rational;
+  if (!this->isOfType<Rational>(&rational)) {
     return false;
   }
-  return theRat.isIntegerFittingInInt(whichInteger);
+  return rational.isIntegerFittingInInt(whichInteger);
 }
 
 bool Expression::makeAtom(const std::string& atomName, Calculator& newBoss) {
@@ -5207,11 +5207,11 @@ std::string Expression::toUTF8String(FormatExpressions* format) const {
     return this->toString(format);
   }
   std::stringstream out;
-  Rational theRat;
-  if (this->isOfType<Rational>(&theRat)) {
+  Rational rational;
+  if (this->isOfType<Rational>(&rational)) {
     FormatExpressions tempFormat;
     tempFormat.flagUseFrac = false;
-    return theRat.toString(&tempFormat);
+    return rational.toString(&tempFormat);
   } else if (this->isOperationGiven(this->owner->opPi())) {
     return "\u03C0";
   } else if (this->startsWith(this->owner->opPlus(), 3)) {

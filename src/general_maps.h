@@ -66,7 +66,7 @@ public:
     }
     return this->values[theIndex];
   }
-  value& getValueCreateNoInit(const key& input) {
+  value& getValueCreateNoInitialization(const key& input) {
     int index = this->keys.getIndex(input);
     if (index == - 1) {
       index = this->keys.size;

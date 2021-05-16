@@ -105,7 +105,7 @@ public:
   static bool lieBracketSwapTermsIfNeeded(Calculator& calculator, const Expression& input, Expression& output);
   static bool lieBracketJacobiIdentityIfNeeded(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerDivideRatByRat(Calculator& calculator, const Expression& input, Expression& output);
+  static bool divideRationalByRational(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerDivideDoubleByDouble(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat(
     Calculator& calculator, const Expression& input, Expression& output

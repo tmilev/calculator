@@ -1036,21 +1036,21 @@ int Polynomial<Coefficient>::getMaximumPowerOfVariableIndex(int VariableIndex) {
 
 template <class Coefficient>
 void Polynomial<Coefficient>::interpolate(
-  const Vector<Coefficient>& thePoints, const Vector<Coefficient>& valuesAtThePoints
+  const Vector<Coefficient>& points, const Vector<Coefficient>& valuesAtPoints
 ) {
   Polynomial<Coefficient> lagrangeInterpolator, accumulator;
   this->makeZero();
-  for (int i = 0; i < thePoints.size; i ++) {
+  for (int i = 0; i < points.size; i ++) {
     lagrangeInterpolator.makeConstant(1);
-    for (int j = 0; j < thePoints.size; j ++) {
+    for (int j = 0; j < points.size; j ++) {
       if (i == j) {
         continue;
       }
-      accumulator.makeDegreeOne(1, 0, 1, - thePoints[j]);
-      accumulator /= thePoints[i] - thePoints[j];
+      accumulator.makeDegreeOne(1, 0, 1, - points[j]);
+      accumulator /= points[i] - points[j];
       lagrangeInterpolator *= accumulator;
     }
-    lagrangeInterpolator *= valuesAtThePoints[i];
+    lagrangeInterpolator *= valuesAtPoints[i];
     *this += lagrangeInterpolator;
   }
 }
@@ -1238,9 +1238,9 @@ bool PolynomialOrder<Coefficient>::compareLeftGreaterThanRight(
 
 template<class Coefficient>
 std::string PolynomialDivisionReport<Coefficient>::getPolynomialStringSpacedMonomialsLaTeX(
-  const Polynomial<Coefficient>& thePoly,
+  const Polynomial<Coefficient>& polynomial,
   std::string* highlightColor,
-  List<MonomialPolynomial>* theHighLightedMons,
+  List<MonomialPolynomial>* highlightedMonomials,
   int* firstNonZeroIndex
 ) {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::getPolynomialStringSpacedMonomialsLaTeX");
@@ -1251,8 +1251,8 @@ std::string PolynomialDivisionReport<Coefficient>::getPolynomialStringSpacedMono
     *firstNonZeroIndex = - 1;
   }
   for (int i = 0; i < this->allMonomials.size; i ++) {
-    int theIndex = thePoly.monomials.getIndex(this->allMonomials[i]);
-    if (theIndex == - 1) {
+    int index = polynomial.monomials.getIndex(this->allMonomials[i]);
+    if (index == - 1) {
       if (i != this->allMonomials.size - 1) {
         out << "&";
       }
@@ -1266,8 +1266,8 @@ std::string PolynomialDivisionReport<Coefficient>::getPolynomialStringSpacedMono
     countMons ++;
     bool useHighlightStyle = false;
     if (highlightColor != nullptr) {
-      if (theHighLightedMons != nullptr) {
-        if (theHighLightedMons->contains(this->allMonomials[i])) {
+      if (highlightedMonomials != nullptr) {
+        if (highlightedMonomials->contains(this->allMonomials[i])) {
           useHighlightStyle = true;
         }
       }
@@ -1277,8 +1277,8 @@ std::string PolynomialDivisionReport<Coefficient>::getPolynomialStringSpacedMono
       out << "\\color{" << *highlightColor << "}{";
     }
     out << Polynomial<Coefficient>::getBlendCoefficientAndMonomial(
-      thePoly[theIndex],
-      thePoly.coefficients[theIndex],
+      polynomial[index],
+      polynomial.coefficients[index],
       found,
       &this->owner->format
     );
@@ -1291,7 +1291,7 @@ std::string PolynomialDivisionReport<Coefficient>::getPolynomialStringSpacedMono
       out << "& ";
     }
   }
-  if (countMons != thePoly.size()) {
+  if (countMons != polynomial.size()) {
     out << " Programming ERROR!";
   }
   return out.str();
@@ -1302,23 +1302,23 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringLaTeX() {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::getDivisionStringLaTeX");
   this->checkInitialization();
   std::stringstream out;
-  List<Polynomial<Coefficient> >& theRemainders = this->intermediateRemainders;
-  List<Polynomial<Coefficient> >& theSubtracands = this->intermediateSubtractands;
+  List<Polynomial<Coefficient> >& remainders = this->intermediateRemainders;
+  List<Polynomial<Coefficient> >& subtracands = this->intermediateSubtractands;
   this->owner->format.monomialOrder = this->owner->polynomialOrder.monomialOrder;
   std::string highlightedColor = "red";
   this->allMonomials.addOnTopNoRepetition(this->startingPolynomial.monomials);
-  for (int i = 0; i < theRemainders.size; i ++) {
-    this->allMonomials.addOnTopNoRepetition(theRemainders[i].monomials);
+  for (int i = 0; i < remainders.size; i ++) {
+    this->allMonomials.addOnTopNoRepetition(remainders[i].monomials);
   }
-  for (int i = 0; i < theSubtracands.size; i ++) {
-    this->allMonomials.addOnTopNoRepetition(theSubtracands[i].monomials);
+  for (int i = 0; i < subtracands.size; i ++) {
+    this->allMonomials.addOnTopNoRepetition(subtracands[i].monomials);
   }
   //List<std::string> basisColorStyles;
   //basisColorStyles.setSize(this->theBasis.size);
   this->allMonomials.quickSortDescending(&this->owner->polynomialOrder.monomialOrder);
   this->owner->format.flagUseLatex = true;
   out << this->owner->toStringLetterOrder(true);
-  out << theRemainders.size << " division steps total.";
+  out << remainders.size << " division steps total.";
   out << "\\renewcommand{\\arraystretch}{1.2}";
   out << "\\begin{longtable}{|c";
   for (int i = 0; i < this->allMonomials.size; i ++) {
@@ -1342,18 +1342,18 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringLaTeX() {
     out << "& \\multicolumn{" << this->allMonomials.size << "}{|l|}{";
     out << "$" << this->owner->quotients[i].toString(&this->owner->format) << "$" << "}\\\\\\hline\\hline";
   }
-  for (int i = 0; i < theRemainders.size; i ++) {
-    if (i < theRemainders.size - 1) {
+  for (int i = 0; i < remainders.size; i ++) {
+    if (i < remainders.size - 1) {
       out << "$\\underline{~}$";
     }
     out << "&"
     << this->getPolynomialStringSpacedMonomialsLaTeX(
-      theRemainders[i], &highlightedColor, &this->intermediateHighlightedMons[i]
+      remainders[i], &highlightedColor, &this->intermediateHighlightedMons[i]
     ) << "\\\\\n";
-    if (i < theSubtracands.size) {
+    if (i < subtracands.size) {
       out << "&";
       out << this->getPolynomialStringSpacedMonomialsLaTeX(
-        theSubtracands[i], &highlightedColor
+        subtracands[i], &highlightedColor
       ) << "\\\\\\cline{2-" << this->allMonomials.size + 1 << "}";
     }
   }
@@ -1364,23 +1364,23 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringLaTeX() {
 
 template<class Coefficient>
 std::string PolynomialDivisionReport<Coefficient>::getPolynomialStringSpacedMonomialsHtml(
-  const Polynomial<Coefficient>& thePoly,
+  const Polynomial<Coefficient>& polynomial,
   const std::string& extraStyle,
-  List<MonomialPolynomial>* theHighLightedMons
+  List<MonomialPolynomial>* highlightedMonomials
 ) {
   std::stringstream out;
   bool found = false;
-  int countMons = 0;
+  int monomialCount = 0;
   for (int i = 0; i < this->allMonomials.size; i ++) {
-    int theIndex = thePoly.monomials.getIndex(this->allMonomials[i]);
-    if (theIndex == - 1) {
+    int index = polynomial.monomials.getIndex(this->allMonomials[i]);
+    if (index == - 1) {
       out << "<td" << extraStyle << ">" << "</td>";
       continue;
     }
-    countMons ++;
+    monomialCount ++;
     bool useHighlightStyle = false;
-    if (theHighLightedMons != nullptr) {
-      if (theHighLightedMons->contains(this->allMonomials[i])) {
+    if (highlightedMonomials != nullptr) {
+      if (highlightedMonomials->contains(this->allMonomials[i])) {
         useHighlightStyle = true;
       }
     }
@@ -1390,8 +1390,8 @@ std::string PolynomialDivisionReport<Coefficient>::getPolynomialStringSpacedMono
     }
     if (this->owner->format.flagUseLatex) {
       std::string monomialWithCoefficient = Polynomial<Coefficient>::getBlendCoefficientAndMonomial(
-        thePoly[theIndex],
-        thePoly.coefficients[theIndex],
+        polynomial[index],
+        polynomial.coefficients[index],
         found,
         &this->owner->format
       );
@@ -1399,8 +1399,8 @@ std::string PolynomialDivisionReport<Coefficient>::getPolynomialStringSpacedMono
       out << HtmlRoutines::getMathNoDisplay(monomialWithCoefficient);
     } else {
       out << Polynomial<Coefficient>::getBlendCoefficientAndMonomial(
-        thePoly[theIndex],
-        thePoly.coefficients[theIndex],
+        polynomial[index],
+        polynomial.coefficients[index],
         found,
         &this->owner->format
       );
@@ -1411,7 +1411,7 @@ std::string PolynomialDivisionReport<Coefficient>::getPolynomialStringSpacedMono
     }
     out << "</td>";
   }
-  if (countMons != thePoly.size()) {
+  if (monomialCount != polynomial.size()) {
     out << "<td><b>Programming ERROR!</b></td>";
   }
   return out.str();
@@ -1430,16 +1430,16 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::getDivisionStringHtml");
   this->checkInitialization();
   std::stringstream out;
-  List<Polynomial<Coefficient> >& theRemainders = this->intermediateRemainders;
-  List<Polynomial<Coefficient> >& theSubtracands = this->intermediateSubtractands;
+  List<Polynomial<Coefficient> >& remainders = this->intermediateRemainders;
+  List<Polynomial<Coefficient> >& subtracands = this->intermediateSubtractands;
   this->owner->format.monomialOrder = this->owner->polynomialOrder.monomialOrder;
   std::string underlineStyle = " style ='white-space: nowrap; border-bottom:1px solid black;'";
   this->allMonomials.clear();
   this->allMonomials.addOnTopNoRepetition(this->startingPolynomial.monomials);
-  for (int i = 0; i < theRemainders.size; i ++) {
-    this->allMonomials.addOnTopNoRepetition(theRemainders[i].monomials);
-    if (i < theSubtracands.size) {
-      this->allMonomials.addOnTopNoRepetition(theSubtracands[i].monomials);
+  for (int i = 0; i < remainders.size; i ++) {
+    this->allMonomials.addOnTopNoRepetition(remainders[i].monomials);
+    if (i < subtracands.size) {
+      this->allMonomials.addOnTopNoRepetition(subtracands[i].monomials);
     }
   }
   //List<std::string> basisColorStyles;
@@ -1447,7 +1447,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
   this->allMonomials.quickSortDescending(&this->owner->polynomialOrder.monomialOrder);
   out << this->owner->toStringLetterOrder(false);
   out << "<br>";
-  out << theRemainders.size << " division steps total.<br>";
+  out << remainders.size << " division steps total.<br>";
   out << "<table style ='white-space: nowrap; border:1px solid black;'>";
   out << "<tr><td " << underlineStyle << "><b>Remainder:</b></td>";
   out << this->getPolynomialStringSpacedMonomialsHtml(
@@ -1473,22 +1473,22 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
     out << "</td></tr>";
   }
   out << "</tr>";
-  if (theRemainders.size != this->intermediateHighlightedMons.size) {
-    global.fatal << "Should have as many remainders: " << theRemainders.size
+  if (remainders.size != this->intermediateHighlightedMons.size) {
+    global.fatal << "Should have as many remainders: " << remainders.size
     << " as intermediate highlighted mons: "
     << this->intermediateHighlightedMons.size << global.fatal;
   }
-  if (theRemainders.size != theSubtracands.size + 1) {
+  if (remainders.size != subtracands.size + 1) {
     global.fatal << "Remainders should equal subtracands plus one. " << global.fatal;
   }
-  for (int i = 0; i < theRemainders.size; i ++) {
+  for (int i = 0; i < remainders.size; i ++) {
     out << "<tr><td></td>"
     << this->getPolynomialStringSpacedMonomialsHtml(
-      theRemainders[i], "", &this->intermediateHighlightedMons[i]
+      remainders[i], "", &this->intermediateHighlightedMons[i]
     ) << "</tr>";
-    if (i < theSubtracands.size) {
+    if (i < subtracands.size) {
       out << "<tr><td>-</td></tr>";
-      out << "<tr><td></td>" << this->getPolynomialStringSpacedMonomialsHtml(theSubtracands[i], underlineStyle)
+      out << "<tr><td></td>" << this->getPolynomialStringSpacedMonomialsHtml(subtracands[i], underlineStyle)
       << "</tr>";
     }
   }

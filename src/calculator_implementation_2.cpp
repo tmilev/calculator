@@ -1295,7 +1295,7 @@ bool Calculator::parseAndExtractExpressions(
 void Calculator::EvaluationStatistics::initialize() {
   this->startTimeEvaluationMilliseconds          = global.getElapsedMilliseconds();
   this->millisecondsLastLog                      = this->startTimeEvaluationMilliseconds;
-  this->numberOfListsStart                       = static_cast<signed>( GlobalStatistics::numListsCreated         );
+  this->numberOfListsStart                       = static_cast<signed>( GlobalStatistics::numberOfListsCreated         );
   this->numberListResizesStart                   = static_cast<signed>( GlobalStatistics::numberOfListResizesTotal     );
   this->numberHashResizesStart                   = static_cast<signed>( GlobalStatistics::numberOfHashResizes          );
   this->numberOfSmallAdditionsStart              = static_cast<signed>( Rational::totalSmallAdditions             );

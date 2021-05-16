@@ -1169,7 +1169,7 @@ void HomomorphismSemisimpleLieAlgebra::makeGinGWithIdentity(
   MacroRegisterFunctionWithName("HomomorphismSemisimpleLieAlgebra::makeGinGWithIdentity");
   DynkinType theType;
   theType.makeSimpleType(theWeylLetter, theWeylDim);
-  this->domainAlg = &ownerOfAlgebras.getValueCreateNoInit(theType);
+  this->domainAlg = &ownerOfAlgebras.getValueCreateNoInitialization(theType);
   this->rangeAlg = this->domainAlg;
   this->domainAlg->weylGroup.makeArbitrarySimple(theWeylLetter, theWeylDim);
   this->domain().computeChevalleyConstants();

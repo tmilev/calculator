@@ -111,7 +111,7 @@ public:
   Vectors<Rational> cartanElementsSubalgebra;
   Vectors<Rational> hsScaledToActByTwoInOrderOfCreation;
   Matrix<Rational> bilinearFormSimplePrimal;
-  Matrix<Rational> bilinearFormFundPrimal;
+  Matrix<Rational> bilinearFormFundamentalPrimal;
   Matrix<Rational> inducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords;
   Matrix<Rational> inducedEmbeddingPrimalFundCoordsIntoFundAmbientCoords;
   Matrix<Rational> matMultiplyFundCoordsToGetSimple;
@@ -159,8 +159,8 @@ public:
   long long int totalArithmeticOpsToSolveSystem;
 
   List<NilradicalCandidate> fernandoKacNilradicalCandidates;
-  int NumConeIntersections;
-  int NumCasesNoLinfiniteRelationFound;
+  int numberOfConeIntersections;
+  int numberOfCasesNoLInfiniteRelationFound;
   int NumBadParabolics;
   int NumCentralizerConditionFailsconeConditionHolds;
   // The highest weight vectors are by definition cartan-centralizer-split
@@ -227,7 +227,7 @@ public:
     int indexNegGens,
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
   );
-  bool amRegularSA() const;
+  bool isRegularSubalgebra() const;
   bool compareLeftGreaterThanRight(const Vector<Rational>& left, const Vector<Rational>& right);
   void getGenericLinearCombination(
     int numberOfVariables,
@@ -572,7 +572,7 @@ public:
     MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
     ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras
   );
-  bool writeFilesRealForms();
+  bool writeFilesRealForms(std::stringstream* outputStream);
   void findSemisimpleSubalgebrasInitialize();
   bool findSemisimpleSubalgebrasContinue();
 

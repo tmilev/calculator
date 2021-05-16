@@ -2099,11 +2099,11 @@ bool ObjectContainer::checkConsistencyAfterReset() {
     << this->semisimpleLieAlgebras.size() << " elements. " << global.fatal;
   }
   if (this->weylGroupRepresentations.size != 0) {
-    global.fatal << "theWeylGroupReps expected to be empty, got "
+    global.fatal << "weylGroupRepresentations expected to be empty, got "
     << this->weylGroupRepresentations.size << " elements. " << global.fatal;
   }
   if (this->weylGroupVirtualRepresentations.size != 0) {
-    global.fatal << "theWeylGroupVirtualReps expected to be empty, got "
+    global.fatal << "weylGroupVirtualRepresentations expected to be empty, got "
     << this->weylGroupVirtualRepresentations.size << " elements. " << global.fatal;
   }
   if (this->polynomialsRational.size != 0) {
@@ -2170,16 +2170,16 @@ void ObjectContainer::reset() {
   this->resetSliders();
 }
 
-bool Expression::isMeltable(int* numResultingChildren) const {
+bool Expression::isMeltable(int* numberOfResultingChildren) const {
   this->checkInitialization();
   if (!this->startsWith(this->owner->opMelt(), 2)) {
     return false;
   }
-  if (numResultingChildren != nullptr) {
+  if (numberOfResultingChildren != nullptr) {
     if (!(*this)[1].startsWith(this->owner->opCommandSequence())) {
-      *numResultingChildren = 1;
+      *numberOfResultingChildren = 1;
     } else {
-      *numResultingChildren = (*this)[1].children.size - 1;
+      *numberOfResultingChildren = (*this)[1].children.size - 1;
     }
   }
   return true;

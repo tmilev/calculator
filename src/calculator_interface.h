@@ -195,9 +195,9 @@ private:
   bool isAtomWhoseExponentsAreInterpretedAsFunction(std::string* outputWhichAtom = nullptr) const;
   bool isPowerOfAtomWhoseExponentsAreInterpretedAsFunction() const;
   bool isAtomNotInterpretedAsFunction(std::string* outputWhichAtom = nullptr) const;
-  bool isMatrix(int* outputNumRows = nullptr, int* outputNumCols = nullptr) const;
+  bool isMatrix(int* outputNumberOfRows = nullptr, int* outputNumberOfColumns = nullptr) const;
   template<class theType>
-  bool isMatrixOfType(int* outputNumRows = nullptr, int* outputNumCols = nullptr) const;
+  bool isMatrixOfType(int* outputNumberOfRows = nullptr, int* outputNumberOfColumns = nullptr) const;
 
   bool isAtom() const;
   bool isAtomUserDefined() const;
@@ -562,7 +562,7 @@ private:
     HashedList<std::string, HashFunctions::hashFunction>* outputBoxNames = nullptr,
     HashedList<std::string, HashFunctions::hashFunction>* outputBoxNamesJavascript = nullptr
   ) const;
-  bool isMeltable(int* numResultingChildren = nullptr) const;
+  bool isMeltable(int* numberOfResultingChildren = nullptr) const;
   bool areEqualExcludingChildren(const Expression& other) const {
     return this->owner == other.owner &&
     this->data == other.data &&
@@ -2556,8 +2556,8 @@ public:
   bool parseAndExtractExpressions(
     const std::string& input,
     Expression& output,
-    List<SyntacticElement>& outputSynSoup,
-    List<SyntacticElement>& outputSynStack,
+    List<SyntacticElement>& outputAllSyntacticElements,
+    List<SyntacticElement>& outputSyntacticStack,
     std::string* outputSyntacticErrors
   );
   // For internal use only; will crash the calculator if the input has syntax errors.
@@ -2895,7 +2895,7 @@ bool CalculatorConversions::functionExpressionFromPolynomial(
 }
 
 template <class theType>
-bool Expression::isMatrixOfType(int* outputNumRows, int* outputNumCols) const {
+bool Expression::isMatrixOfType(int* outputNumberOfRows, int* outputNumberOfColumns) const {
   if (!this->isMatrix()) {
     return false;
   }
@@ -2919,11 +2919,11 @@ bool Expression::isMatrixOfType(int* outputNumRows, int* outputNumCols) const {
   if (firstRow.size() < 2) {
     return false;
   }
-  if (outputNumRows != nullptr) {
-    *outputNumRows = rows.size() - 1;
+  if (outputNumberOfRows != nullptr) {
+    *outputNumberOfRows = rows.size() - 1;
   }
-  if (outputNumCols != nullptr) {
-    *outputNumCols = firstRow.size() - 1;
+  if (outputNumberOfColumns != nullptr) {
+    *outputNumberOfColumns = firstRow.size() - 1;
   }
   return true;
 }
@@ -2969,9 +2969,9 @@ bool Calculator::functionGetMatrix(
     return false;
   }
   convertedEs.initialize(nonConvertedEs.numberOfRows, nonConvertedEs.numberOfColumns);
-  ExpressionContext theContext(*this);
+  ExpressionContext context(*this);
   if (inputOutputStartingContext != nullptr) {
-    theContext = *inputOutputStartingContext;
+    context = *inputOutputStartingContext;
   }
   for (int i = 0; i < nonConvertedEs.numberOfRows; i ++) {
     for (int j = 0; j < nonConvertedEs.numberOfColumns; j ++) {
@@ -2988,12 +2988,12 @@ bool Calculator::functionGetMatrix(
           return false;
         }
       }
-      theContext.mergeContexts(convertedEs(i, j).getContext(), theContext);
+      context.mergeContexts(convertedEs(i, j).getContext(), context);
     }
   }
   for (int i = 0; i < convertedEs.numberOfRows; i ++) {
     for (int j = 0; j < convertedEs.numberOfColumns; j ++) {
-      if (!convertedEs(i, j).setContextAtLeastEqualTo(theContext, commentsOnError)) {
+      if (!convertedEs(i, j).setContextAtLeastEqualTo(context, commentsOnError)) {
         if (commentsOnError != nullptr) {
           *commentsOnError
           << "Failed to set context to matrix element: "
@@ -3013,7 +3013,7 @@ bool Calculator::functionGetMatrix(
     }
   }
   if (inputOutputStartingContext != nullptr) {
-    *inputOutputStartingContext = theContext;
+    *inputOutputStartingContext = context;
   }
   return true;
 }
@@ -3314,7 +3314,7 @@ bool CalculatorConversions::expressionFromPolynomial(
   ExpressionContext* inputContext
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::expressionFromPolynomial");
-  LinearCombination<Expression, Coefficient> theTerms;
+  LinearCombination<Expression, Coefficient> terms;
   Expression currentBase, currentPower, currentTerm, currentMultTermE;
   if (!input.isConstant() && inputContext == nullptr) {
     calculator << "While converting polynomial to expression, "
@@ -3326,7 +3326,7 @@ bool CalculatorConversions::expressionFromPolynomial(
   for (int i = 0; i < input.size(); i ++) {
     if (input[i].isConstant()) {
       currentTerm.assignValue(1, calculator);
-      theTerms.addMonomial(currentTerm, input.coefficients[i]);
+      terms.addMonomial(currentTerm, input.coefficients[i]);
       continue;
     }
     bool found = false;
@@ -3355,9 +3355,9 @@ bool CalculatorConversions::expressionFromPolynomial(
         found = true;
       }
     }
-    theTerms.addMonomial(currentTerm, input.coefficients[i]);
+    terms.addMonomial(currentTerm, input.coefficients[i]);
   }
-  return output.makeSum(calculator, theTerms);
+  return output.makeSum(calculator, terms);
 }
 
 template <class Coefficient>

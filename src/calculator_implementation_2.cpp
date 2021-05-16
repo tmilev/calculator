@@ -1278,13 +1278,13 @@ Expression Calculator::parseOrCrash(
 bool Calculator::parseAndExtractExpressions(
   const std::string& input,
   Expression& output,
-  List<SyntacticElement>& outputSynSoup,
-  List<SyntacticElement>& outputSynStack,
+  List<SyntacticElement>& outputAllSyntacticElements,
+  List<SyntacticElement>& outputSyntacticStack,
   std::string* outputSyntacticErrors
 ) {
   MacroRegisterFunctionWithName("Calculator::parseAndExtractExpressions");
-  this->currentSyntacticStack = &outputSynStack;
-  this->currrentSyntacticSoup = &outputSynSoup;
+  this->currentSyntacticStack = &outputSyntacticStack;
+  this->currrentSyntacticSoup = &outputAllSyntacticElements;
   this->parseFillDictionary(input);
   bool result = this->extractExpressions(output, outputSyntacticErrors);
   this->currentSyntacticStack = &this->syntacticStack;

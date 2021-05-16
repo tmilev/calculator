@@ -912,7 +912,7 @@ void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand() {
   this->orbitDynkinIndices.setExpectedSize(this->slTwoSubalgebras.size);
   this->orbits.setSize(this->slTwoSubalgebras.size);
   List<ElementWeylGroupAutomorphisms> generators;
-  WeylGroupAutomorphisms& weylAutomorphisms = this->slTwoSubalgebras.rootSubalgebras.theWeylGroupAutomorphisms;
+  WeylGroupAutomorphisms& weylAutomorphisms = this->slTwoSubalgebras.rootSubalgebras.weylGroupAutomorphisms;
   weylAutomorphisms.computeOuterAutoGenerators();
   ElementWeylGroupAutomorphisms element;
   for (int i = 0; i < this->owner->getRank(); i ++) {
@@ -2389,7 +2389,7 @@ bool CandidateSemisimpleSubalgebra::checkFullInitialization() const {
 
 WeylGroupAutomorphisms& CandidateSemisimpleSubalgebra::getAmbientWeylAutomorphisms() const {
   this->checkBasicInitialization();
-  return this->owner->slTwoSubalgebras.rootSubalgebras.theWeylGroupAutomorphisms;
+  return this->owner->slTwoSubalgebras.rootSubalgebras.weylGroupAutomorphisms;
 }
 
 WeylGroupData& CandidateSemisimpleSubalgebra::getAmbientWeyl() const {

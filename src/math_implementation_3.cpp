@@ -2672,7 +2672,7 @@ int MathRoutines::leastCommonMultiple(int a, int b) {
   if (b < 0) {
     b = - b;
   }
-  return ((a * b) / Rational::gcdSigned(a, b));
+  return ((a * b) / Rational::greatestCommonDivisorSigned(a, b));
 }
 
 int MathRoutines::twoToTheNth(int n) {
@@ -8624,8 +8624,8 @@ void KazhdanLusztigPolynomials::computeKLCoefficients() {
   }
 }
 
-void KazhdanLusztigPolynomials::initFromWeyl(WeylGroupData* theWeylGroup) {
-  this->weylGroup = theWeylGroup;
+void KazhdanLusztigPolynomials::initFromWeyl(WeylGroupData* weylGroup) {
+  this->weylGroup = weylGroup;
   Vectors<Rational> tempRoots;
   this->weylGroup->computeRho(true);
   tempRoots.addOnTop(this->weylGroup->rho);
@@ -8633,10 +8633,10 @@ void KazhdanLusztigPolynomials::initFromWeyl(WeylGroupData* theWeylGroup) {
   this->initTheMults();
 }
 
-bool KazhdanLusztigPolynomials::computeKLPolys(WeylGroupData* theWeylGroup) {
+bool KazhdanLusztigPolynomials::computeKLPolys(WeylGroupData* weylGroup) {
   MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::computeKLPolys");
-  theWeylGroup->group.computeAllElements(- 1);
-  this->initFromWeyl(theWeylGroup);
+  weylGroup->group.computeAllElements(- 1);
+  this->initFromWeyl(weylGroup);
   this->generatePartialBruhatOrder();
   FormatExpressions PolyFormatLocal;
   PolyFormatLocal.polyDefaultLetter = "q";

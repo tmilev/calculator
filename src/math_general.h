@@ -4137,7 +4137,7 @@ int Matrix<Coefficient>::findPositiveLCMCoefficientDenominatorsTruncated() {
   int result = 1;
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
-      result *= this->elements[i][j].denominatorShort / Rational::gcdSigned(result, this->elements[i][j].denominatorShort);
+      result *= this->elements[i][j].denominatorShort / Rational::greatestCommonDivisorSigned(result, this->elements[i][j].denominatorShort);
     }
   }
   return result;
@@ -4175,7 +4175,7 @@ int Matrix<Coefficient>::findPositiveGCDCoefficientNumeratorsTruncated() {
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
       if (this->elements[i][j].numeratorShort != 0) {
-        result = Rational::gcdSigned(result, this->elements[i][j].numeratorShort);
+        result = Rational::greatestCommonDivisorSigned(result, this->elements[i][j].numeratorShort);
       }
     }
   }
@@ -6818,7 +6818,7 @@ public:
   void computeKLCoefficients();
   int chamberIndicatorToIndex(Vector<Rational>& ChamberIndicator);
   std::string rPolysToString(FormatExpressions* format = nullptr);
-  bool computeKLPolys(WeylGroupData* theWeylGroup);
+  bool computeKLPolys(WeylGroupData* weylGroup);
   void computeRPolys();
   int computeProductfromSimpleReflectionsActionList(int x, int y);
   void writeKLCoeffsToFile(std::fstream& output, List<int>& KLcoeff, int topIndex);
@@ -6828,7 +6828,7 @@ public:
     this->weylGroup = nullptr;
   }
   void generatePartialBruhatOrder();
-  void initFromWeyl(WeylGroupData* theWeylGroup);
+  void initFromWeyl(WeylGroupData* weylGroup);
 };
 
 

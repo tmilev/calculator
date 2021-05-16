@@ -1682,7 +1682,7 @@ WeylGroupData& RootSubalgebra::getAmbientWeyl() const {
 
 WeylGroupAutomorphisms& RootSubalgebra::getAmbientWeylAutomorphisms() const {
   this->checkInitialization();
-  return this->owner->theWeylGroupAutomorphisms;
+  return this->owner->weylGroupAutomorphisms;
 }
 
 bool RootSubalgebra::linearCombinationToStringDistinguishedIndex(
@@ -3011,7 +3011,7 @@ void RootSubalgebras::computeAllReductiveRootSAsInit() {
   for (int i = 0; i < this->owner->getRank(); i ++) {
     this->validScales.addOnTopNoRepetition(2 / this->owner->weylGroup.cartanSymmetric(i, i));
   }
-  this->theWeylGroupAutomorphisms.theWeyl = &this->getOwnerWeyl();
+  this->weylGroupAutomorphisms.theWeyl = &this->getOwnerWeyl();
 }
 
 void RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder() {

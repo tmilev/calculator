@@ -968,7 +968,7 @@ VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::getV
   return this->owner->objectContainer.weylGroupVirtualRepresentations.getElement(this->getLastChild().data);
 }
 
-bool Expression::isMatrix(int* outputNumRows, int* outputNumCols) const {
+bool Expression::isMatrix(int* outputNumberOfRows, int* outputNumberOfColumns) const {
   MacroRegisterFunctionWithName("Expression::isMatrix");
   if (this->owner == nullptr) {
     return false;
@@ -980,14 +980,14 @@ bool Expression::isMatrix(int* outputNumRows, int* outputNumCols) const {
   if (!isGood) {
     return false;
   }
-  if (outputNumRows != nullptr) {
-    *outputNumRows = this->size() - 1;
+  if (outputNumberOfRows != nullptr) {
+    *outputNumberOfRows = this->size() - 1;
   }
-  if (outputNumCols != nullptr) {
+  if (outputNumberOfColumns != nullptr) {
     if (this->size() <= 1) {
-      *outputNumCols = 0;
+      *outputNumberOfColumns = 0;
     } else {
-      *outputNumCols = (*this)[1].size() - 1;
+      *outputNumberOfColumns = (*this)[1].size() - 1;
     }
   }
   return true;

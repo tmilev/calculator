@@ -767,7 +767,7 @@ public:
     MacroIncrementCounter(Rational::totalSmallGreatestCommonDivisors);
     return MathRoutines::greatestCommonDivisor(a, b);
   }
-  static int gcdSigned(int a, int b) {
+  static int greatestCommonDivisorSigned(int a, int b) {
     if (a < 0) {
       a *= - 1;
     }

@@ -357,7 +357,7 @@ public:
   List<List<List<int> > > storedNilradicals;
   HashedList<Rational> validScales;
   SemisimpleLieAlgebra* owner;
-  WeylGroupAutomorphisms theWeylGroupAutomorphisms;
+  WeylGroupAutomorphisms weylGroupAutomorphisms;
   int parabolicsCounterNilradicalGeneration;
   List<int> numNilradicalsBySA;
   int IndexCurrentSANilradicalsGeneration;

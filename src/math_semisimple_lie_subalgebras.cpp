@@ -65,19 +65,19 @@ std::string SemisimpleLieAlgebra::toStringLieAlgebraName() const {
 std::string SemisimpleLieAlgebra::toStringLieAlgebraNameNonTechnicalHTML() const {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::toStringLieAlgebraNameNonTechnicalHTML");
   std::stringstream out;
-  const DynkinType& theType = this->weylGroup.dynkinType;
-  for (int indexType = 0; indexType < theType.size(); indexType ++) {
-    if (!(theType.coefficients[indexType] > 0)) {
+  const DynkinType& dynkinType = this->weylGroup.dynkinType;
+  for (int indexType = 0; indexType < dynkinType.size(); indexType ++) {
+    if (!(dynkinType.coefficients[indexType] > 0)) {
       global.fatal << "Simple constituents must appear with positive coefficient. " << global.fatal;
     }
-    const DynkinSimpleType& currentSimpleType = theType[indexType];
-    for (int indexIsotypic = 0; indexIsotypic < theType.coefficients[indexType]; indexIsotypic ++) {
+    const DynkinSimpleType& currentSimpleType = dynkinType[indexType];
+    for (int indexIsotypic = 0; indexIsotypic < dynkinType.coefficients[indexType]; indexIsotypic ++) {
       out << currentSimpleType.ToStringNonTechnicalName(nullptr);
-      if (indexIsotypic + 1 < theType.coefficients[indexType]) {
+      if (indexIsotypic + 1 < dynkinType.coefficients[indexType]) {
         out << "\\oplus";
       }
     }
-    if (indexType != theType.size() - 1) {
+    if (indexType != dynkinType.size() - 1) {
       out << "\\oplus";
     }
   }
@@ -309,9 +309,9 @@ void SubalgebraSemisimpleLieAlgebra::computeCartanSubalgebra() {
 }
 
 void WeylGroupData::operator+=(const WeylGroupData& other) {
-  DynkinType theType = this->dynkinType;
-  theType += other.dynkinType;
-  this->makeFromDynkinType(theType);
+  DynkinType currentType = this->dynkinType;
+  currentType += other.dynkinType;
+  this->makeFromDynkinType(currentType);
 }
 
 int SemisimpleSubalgebras::getIndexFullSubalgebra() const {
@@ -1859,13 +1859,13 @@ void DynkinType::getDynkinIndicesSl2Subalgebras(
   AlgebraicClosureRationals* algebraicClosure
 ) {
   MacroRegisterFunctionWithName("DynkinType::getDynkinIndicesSl2Subalgebras");
-  List<DynkinSimpleType> theTypes;
-  this->getTypesWithMults(theTypes);
+  List<DynkinSimpleType> dynkinTypes;
+  this->getTypesWithMults(dynkinTypes);
   List<List<Rational> > DynkinIndicesPerType;
   HashedList<Rational> bufferIndices;
-  for (int i = 0; i < theTypes.size; i ++) {
+  for (int i = 0; i < dynkinTypes.size; i ++) {
     this->getDynkinIndicesSl2SubalgebrasSimpleType(
-      theTypes[i],
+      dynkinTypes[i],
       precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
       dynkinSimpleTypesWithComputedSl2Subalgebras,
       bufferIndices,
@@ -1877,7 +1877,7 @@ void DynkinType::getDynkinIndicesSl2Subalgebras(
   }
   SelectionWithDifferentMaxMultiplicities dynkinIndexSelector;
   List<int> theMults;
-  theMults.setSize(theTypes.size);
+  theMults.setSize(dynkinTypes.size);
   for (int i = 0; i < theMults.size; i ++) {
     theMults[i] = DynkinIndicesPerType[i].size - 1;
   }
@@ -2324,7 +2324,8 @@ bool SemisimpleSubalgebras::incrementReturnFalseIfPastLast() {
     this->addSubalgebraIfNewSetToStackTop(newCandidate);
   } else {
     std::stringstream reportstream;
-    reportstream << "h element " << hIndex + 1 << " out of " << this->currentHCandidatesScaledToActByTwo[stackIndex][hIndex].size
+    reportstream << "h element " << hIndex + 1 << " out of "
+    << this->currentHCandidatesScaledToActByTwo[stackIndex][hIndex].size
     << ": did not succeed extending. ";
     report1.report(reportstream.str());
   }
@@ -4473,8 +4474,8 @@ bool CandidateSemisimpleSubalgebra::computeCharacter(bool allowBadCharacter) {
   tempMon.owner = nullptr;
   this->characterFundamentalCoordinatesRelativeToCartan.makeZero();
   this->characterFundamentalCoordinatesRelativeToCartan.addMonomial(tempMon, this->getAmbientSemisimpleLieAlgebra().getRank());
-  List<DynkinSimpleType> theTypes;
-  this->weylNonEmbedded->dynkinType.getTypesWithMults(theTypes);
+  List<DynkinSimpleType> dynkinTypes;
+  this->weylNonEmbedded->dynkinType.getTypesWithMults(dynkinTypes);
 /*  global.Comments << "<br>Cartan symmetric, type  "
   << this->weylNonEmbedded->theDynkinType.toString() << " <br>"
   << this->weylNonEmbedded->cartanSymmetric.toString()
@@ -4535,7 +4536,7 @@ bool CandidateSemisimpleSubalgebra::computeCharacter(bool allowBadCharacter) {
       }
     }
     freudenthalChar.makeZero();
-    tempMon =accumChar[currentIndex];
+    tempMon = accumChar[currentIndex];
     tempMon.owner = nonEmbeddedMe;
     freudenthalChar.addMonomial(tempMon, accumChar.coefficients[currentIndex]);
     this->characterNonPrimalFundamentalCoordinates.addMonomial(accumChar[currentIndex], accumChar.coefficients[currentIndex]);
@@ -4564,9 +4565,9 @@ void SlTwoSubalgebra::toStringModuleDecompositionMinimalContainingRegularSAs(
   if (useHtml) {
     out << "<table><tr><td align='center'>Char.</td>";
     for (int i = 0; i < this->indicesMinimalContainingRootSubalgebras.size; i ++) {
-      RootSubalgebra& theSA = owner.rootSubalgebras.subalgebras[this->indicesMinimalContainingRootSubalgebras[i]];
+      RootSubalgebra& subalgebra = owner.rootSubalgebras.subalgebras[this->indicesMinimalContainingRootSubalgebras[i]];
       out << "<td align='center'>Decomp. "
-      << theSA.dynkinDiagram.toString() << "</td>";
+      << subalgebra.dynkinDiagram.toString() << "</td>";
     }
     out << "</tr>\n";
   }
@@ -4876,15 +4877,15 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(
     output.rootSubalgebras.subalgebras[i].getSsl2SubalgebrasAppendListNoRepetition(output, i, algebraicClosure);
   }
   //sort subalgebras by dynkin index
-  List<int> thePermutation, theIndexMap;
-  thePermutation.setSize(output.size);
-  theIndexMap.setSize(thePermutation.size);
-  for (int i = 0; i < thePermutation.size; i ++) {
-    thePermutation[i] = i;
+  List<int> permutation, theIndexMap;
+  permutation.setSize(output.size);
+  theIndexMap.setSize(permutation.size);
+  for (int i = 0; i < permutation.size; i ++) {
+    permutation[i] = i;
   }
-  output.quickSortDescending(nullptr, &thePermutation);
+  output.quickSortDescending(nullptr, &permutation);
   for (int i = 0; i < theIndexMap.size; i ++) {
-    theIndexMap[thePermutation[i]] = i;
+    theIndexMap[permutation[i]] = i;
   }
   for (int j = 0; j < output.indicesSl2sContainedInRootSubalgebras.size; j ++) {
     for (int k = 0; k < output.indicesSl2sContainedInRootSubalgebras[j].size; k ++) {

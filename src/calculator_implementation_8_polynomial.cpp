@@ -32,11 +32,11 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionRemainder(
   }
   Polynomial<AlgebraicNumber> outputRemainder;
   computation.remainderDivisionByBasis(polynomials[0], outputRemainder, - 1);
-  Expression thePolyE;
-  thePolyE.assignValueWithContext(outputRemainder, theContext, calculator);
+  Expression polynomialExpression;
+  polynomialExpression.assignValueWithContext(outputRemainder, theContext, calculator);
   output.reset(calculator);
   output.addChildAtomOnTop("MakeExpression");
-  output.addChildOnTop(thePolyE);
+  output.addChildOnTop(polynomialExpression);
   return true;
 }
 
@@ -265,13 +265,13 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionQuotient(
   }
   Polynomial<AlgebraicNumber> outputRemainder;
   computation.remainderDivisionByBasis(polynomialsRational[0], outputRemainder, - 1);
-  Expression currentE, thePolyE;
+  Expression currentE, polynomialExpression;
   List<Expression> theList;
   for (int i = 0; i < computation.quotients.size; i ++) {
     currentE.reset(calculator);
     currentE.addChildAtomOnTop("MakeExpression");
-    thePolyE.assignValueWithContext(computation.quotients[i], theContext, calculator);
-    currentE.addChildOnTop(thePolyE);
+    polynomialExpression.assignValueWithContext(computation.quotients[i], theContext, calculator);
+    currentE.addChildOnTop(polynomialExpression);
     theList.addOnTop(currentE);
   }
   if (theList.size == 1) {
@@ -713,7 +713,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
 
 template <class Coefficient>
 std::string PolynomialDivisionReport<Coefficient>::getSpacedMonomialsWithHighlightLaTeX(
-  const Polynomial<Coefficient>& thePoly,
+  const Polynomial<Coefficient>& polynomial,
   List<List<int> >* slidesToHighlightMon,
   List<int>* slidesToFcAnswer,
   List<int>* slidesToUncover,
@@ -726,7 +726,7 @@ std::string PolynomialDivisionReport<Coefficient>::getSpacedMonomialsWithHighlig
   std::stringstream out;
   bool found = false;
   int countMons = 0;
-  if (thePoly.isEqualToZero()) {
+  if (polynomial.isEqualToZero()) {
     if (useColumnSeparator) {
       for (int i = 0; i < this->allMonomials.size * 2 - 1; i ++) {
         out << "&";
@@ -756,7 +756,7 @@ std::string PolynomialDivisionReport<Coefficient>::getSpacedMonomialsWithHighlig
     return out.str();
   }
   for (int i = 0; i < this->allMonomials.size; i ++) {
-    int theIndex = thePoly.monomials.getIndex(this->allMonomials[i]);
+    int theIndex = polynomial.monomials.getIndex(this->allMonomials[i]);
     if (theIndex == - 1) {
       if (useColumnSeparator) {
         if (i != this->allMonomials.size - 1) {
@@ -803,7 +803,7 @@ std::string PolynomialDivisionReport<Coefficient>::getSpacedMonomialsWithHighlig
     countMons ++;
     std::string monWithSign =
     Polynomial<Coefficient>::getBlendCoefficientAndMonomial(
-      thePoly[theIndex], thePoly.coefficients[theIndex], true, &this->owner->format
+      polynomial[theIndex], polynomial.coefficients[theIndex], true, &this->owner->format
     );
     std::string sign = monWithSign.substr(0, 1);
     std::string monNoSign = monWithSign.substr(1);
@@ -840,7 +840,7 @@ std::string PolynomialDivisionReport<Coefficient>::getSpacedMonomialsWithHighlig
       }
     }
   }
-  if (countMons != thePoly.size()) {
+  if (countMons != polynomial.size()) {
     out << " Programming ERROR!";
   }
   return out.str();

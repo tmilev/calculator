@@ -5041,12 +5041,12 @@ bool Expression::isBuiltInType(std::string* outputWhichOperation) const {
 }
 
 bool Expression::isBuiltInType(int* outputWhichType) const {
-  std::string theType;
-  if (!this->isBuiltInType(&theType)) {
+  std::string typeName;
+  if (!this->isBuiltInType(&typeName)) {
     return false;
   }
   if (outputWhichType != nullptr) {
-    *outputWhichType = this->owner->getOperations().getIndex(theType);
+    *outputWhichType = this->owner->getOperations().getIndex(typeName);
   }
   return true;
 }

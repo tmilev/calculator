@@ -158,7 +158,7 @@ public:
   );
   static std::string toHTMLCalculatorBodyOnload();
   static std::string toHTMLCalculatorMainDiv();
-  std::string getStringFromChevalleyGenerator(int theIndex, FormatExpressions* thePolynomialFormat) const;
+  std::string getStringFromChevalleyGenerator(int index, FormatExpressions* polynomialFormat) const;
   std::string toStringLieAlgebraNameFullHTML() const;
   std::string toStringLieAlgebraName() const;
   std::string toStringLieAlgebraNameNonTechnicalHTML() const;
@@ -475,7 +475,7 @@ public:
   }
   void toString(std::string& output, bool useHtml);
   void makeGinGWithIdentity(
-    char theWeylLetter, int theWeylDim, MapReferences<DynkinType, SemisimpleLieAlgebra>& ownerOfAlgebras
+    char weylLetter, int weylDimension, MapReferences<DynkinType, SemisimpleLieAlgebra>& ownerOfAlgebras
   );
   void projectOntoSmallCartan(Vector<Rational>& input, Vector<Rational> & output);
   void projectOntoSmallCartan(Vectors<Rational>& input, Vectors<Rational>& output);

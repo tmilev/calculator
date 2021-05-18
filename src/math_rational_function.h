@@ -12,7 +12,7 @@ private:
   void addHonestRationalFunction(const RationalFraction<Coefficient>& other);
   void reduceRationalFunctionToPolynomial();
   void reducePolynomialToRational();
-  bool convertToType(int theType);
+  bool convertToType(int inputExpressionType);
   static bool greatestCommonDivisorQuick(
     const Polynomial<Coefficient>& left,
     const Polynomial<Coefficient>& right,

@@ -441,7 +441,7 @@ TransportLayerSecurityServer& SSLContent::GetServer() const {
 }
 
 void SSLContent::resetExceptOwner() {
-  this->theType           = 0;
+  this->contentType           = 0;
   this->length            = 0;
   this->version           = 0;
   this->cipherSpecLength  = 0;
@@ -565,7 +565,7 @@ void SSLRecord::writeBytes(List<unsigned char>& output, List<serialization::Mark
 }
 
 void SSLContent::writeBytes(List<unsigned char>& output, List<serialization::Marker>* annotations) const {
-  switch (this->theType) {
+  switch (this->contentType) {
     case SSLContent::tokens::clientHello:
       return SSLContent::writeBytesHandshakeClientHello(output, annotations);
     case SSLContent::tokens::serverHello:
@@ -581,7 +581,7 @@ void SSLContent::writeBytesHandshakeServerHello(
   List<unsigned char>& output, List<serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLHello::writeBytesHandshakeServerHello");
-  if (this->theType != SSLContent::tokens::serverHello) {
+  if (this->contentType != SSLContent::tokens::serverHello) {
     global.fatal << "Not allowed to serialize non server-hello content as server hello. " << global.fatal;
   }
   this->WriteType(output, annotations);
@@ -648,9 +648,9 @@ void SSLContent::WriteType(
   List<unsigned char>& output, List<serialization::Marker>* annotations
 ) const {
   if (annotations != nullptr) {
-    annotations->addOnTop(serialization::Marker(output.size, 1, this->getType(this->theType)));
+    annotations->addOnTop(serialization::Marker(output.size, 1, this->getType(this->contentType)));
   }
-  output.addOnTop(this->theType);
+  output.addOnTop(this->contentType);
 }
 
 void SSLContent::WriteVersion(
@@ -663,7 +663,7 @@ void SSLContent::writeBytesHandshakeCertificate(
   List<unsigned char>& output, List<serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLHello::writeBytesHandshakeCertificate");
-  if (this->theType != SSLContent::tokens::certificate) {
+  if (this->contentType != SSLContent::tokens::certificate) {
     global.fatal << "Not allowed to serialize non-certificate content as certificate. " << global.fatal;
   }
   this->WriteType(output, annotations);
@@ -677,7 +677,7 @@ void SSLContent::writeBytesHandshakeSecretExchange(
 ) const {
   MacroRegisterFunctionWithName("SSLContent::writeBytesHandshakeSecretExchange");
   this->checkInitialization();
-  if (this->theType != SSLContent::tokens::serverKeyExchange) {
+  if (this->contentType != SSLContent::tokens::serverKeyExchange) {
     global.fatal << "Not allowed to serialize non-server key exchange as such. " << global.fatal;
   }
   this->WriteType(output, annotations);
@@ -689,7 +689,7 @@ void SSLContent::writeBytesHandshakeClientHello(
   List<unsigned char>& output, List<serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLHello::writeBytesHandshakeClientHello");
-  if (this->theType != SSLContent::tokens::clientHello) {
+  if (this->contentType != SSLContent::tokens::clientHello) {
     global.fatal << "Not allowed to serialize non client-hello content as client hello. " << global.fatal;
   }
   this->WriteType(output, annotations);
@@ -817,11 +817,11 @@ bool SSLContent::decode(std::stringstream* commentsOnFailure) {
     }
     return false;
   }
-  this->theType = this->owner->incomingBytes[this->owner->offsetDecoded];
+  this->contentType = this->owner->incomingBytes[this->owner->offsetDecoded];
   this->owner->offsetDecoded ++;
   if (
-    this->theType != SSLContent::tokens::clientHello &&
-    this->theType != SSLContent::tokens::serverHello
+    this->contentType != SSLContent::tokens::clientHello &&
+    this->contentType != SSLContent::tokens::serverHello
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Message does not appear to be a client/server hello. ";
@@ -929,7 +929,7 @@ bool SSLContent::decodeExtensions(std::stringstream *commentsOnFailure) {
     if (!serialization::readTwoByteInt(
       this->owner->incomingBytes,
       this->owner->offsetDecoded,
-      incoming.theType,
+      incoming.extensionType,
       commentsOnFailure
     )) {
       return false;
@@ -950,32 +950,32 @@ bool SSLContent::decodeExtensions(std::stringstream *commentsOnFailure) {
 
 SSLHelloExtension::SSLHelloExtension() {
   this->owner = nullptr;
-  this->theType = 0;
+  this->extensionType = 0;
 }
 
 void SSLHelloExtension::writeBytes(
   List<unsigned char>& output,
   List<serialization::Marker>* annotations
 ) {
-  serialization::WriterTwoByteInteger writer(this->theType, output, annotations, "ssl hello extension type");
+  serialization::WriterTwoByteInteger writer(this->extensionType, output, annotations, "ssl hello extension type");
   serialization::writeTwoByteLengthFollowedByBytes(this->content, output, annotations, "ssl hello extension content");
 }
 
 void SSLHelloExtension::makeGrease(SSLContent* inputOwner) {
   this->owner = inputOwner;
   this->content.setSize(0);
-  this->theType = (13 * 16 + 10) * 256 + (13 * 16 + 10); // 0xdada;
+  this->extensionType = (13 * 16 + 10) * 256 + (13 * 16 + 10); // 0xdada;
 }
 
 void SSLHelloExtension::makeExtendedMasterSecret(SSLContent* inputOwner) {
   this->owner = inputOwner;
   this->content.setSize(0);
-  this->theType = SSLContent::tokensExtension::extendedMasterSecret;
+  this->extensionType = SSLContent::tokensExtension::extendedMasterSecret;
 }
 
 void SSLHelloExtension::makeEllipticCurvePointFormat(SSLContent* inputOwner) {
   this->owner = inputOwner;
-  this->theType = SSLContent::tokensExtension::ellipticCurvePointFormat;
+  this->extensionType = SSLContent::tokensExtension::ellipticCurvePointFormat;
   this->content.setSize(0);
   this->content.addOnTop(0);
   this->content.addOnTop(4);
@@ -997,7 +997,7 @@ JSData SSLHelloExtension::toJSON() {
   result.elementType = JSData::token::tokenObject;
   result["name"] = this->name();
   std::stringstream hex;
-  hex << std::hex << std::setfill('0') << std::setw(4) << this->theType;
+  hex << std::hex << std::setfill('0') << std::setw(4) << this->extensionType;
   result["type"] = hex.str();
   result["data"] = Crypto::convertListUnsignedCharsToHex(this->content);
   return result;
@@ -1005,8 +1005,8 @@ JSData SSLHelloExtension::toJSON() {
 
 std::string SSLHelloExtension::name() {
   this->checkInitialization();
-  if (this->owner->owner->owner->extensionNames.contains(this->theType)) {
-    return this->owner->owner->owner->extensionNames.getValueNoFail(this->theType);
+  if (this->owner->owner->owner->extensionNames.contains(this->extensionType)) {
+    return this->owner->owner->owner->extensionNames.getValueNoFail(this->extensionType);
   }
   return "unknown";
 }
@@ -1098,7 +1098,7 @@ bool SSLHelloExtension::processSignatureAlgorithms(std::stringstream* commentsOn
 }
 
 bool SSLHelloExtension::processMe(std::stringstream* commentsOnError) {
-  switch (this->theType) {
+  switch (this->extensionType) {
   case SSLContent::tokensExtension::renegotiateConnection:
     return this->processRenegotiateConnection(commentsOnError);
   case SSLContent::tokensExtension::serverName:
@@ -1411,7 +1411,7 @@ bool SSLRecord::checkInitialization() const {
 }
 
 SSLRecord::SSLRecord() {
-  this->theType = SSLRecord::tokens::unknown;
+  this->recordType = SSLRecord::tokens::unknown;
   this->length = 0;
   this->version = 0;
   this->offsetDecoded = 0;
@@ -1593,7 +1593,7 @@ JSData SSLRecord::toJSONSerialization() {
 }
 
 std::string SSLRecord::toStringType() const {
-  switch (this->theType) {
+  switch (this->recordType) {
   case SSLRecord::tokens::alert:
     return "alert";
   case SSLRecord::tokens::applicationData:
@@ -1608,7 +1608,7 @@ std::string SSLRecord::toStringType() const {
     break;
   }
   std::stringstream out;
-  out << "unknown type: " << static_cast<int>(this->theType);
+  out << "unknown type: " << static_cast<int>(this->recordType);
   return out.str();
 }
 
@@ -1617,7 +1617,7 @@ std::string SSLRecord::toString() const {
   result["length"] = this->length;
   result["incomingBytes"] = Crypto::convertListUnsignedCharsToHexFormat(this->incomingBytes, 50, false);
   result["type"] = this->toStringType();
-  if (this->theType == SSLRecord::tokens::handshake) {
+  if (this->recordType == SSLRecord::tokens::handshake) {
     result["hello"] = this->content.toJSON();
   }
   std::string hexVersion;
@@ -1638,16 +1638,16 @@ bool SSLRecord::decode(std::stringstream *commentsOnFailure) {
     }
     return false;
   }
-  this->theType = this->incomingBytes[this->offsetDecoded];
+  this->recordType = this->incomingBytes[this->offsetDecoded];
   this->offsetDecoded ++;
   if (
-    this->theType != SSLRecord::tokens::handshake
+    this->recordType != SSLRecord::tokens::handshake
   //&&
-//    this->theType != SSLRecord::tokens::alert &&
-//    this->theType != SSLRecord::tokens::applicationData &&
-//    this->theType != SSLRecord::tokens::changeCipherSpec
+//    this->recordType != SSLRecord::tokens::alert &&
+//    this->recordType != SSLRecord::tokens::applicationData &&
+//    this->recordType != SSLRecord::tokens::changeCipherSpec
   ) {
-    this->theType = SSLRecord::tokens::unknown;
+    this->recordType = SSLRecord::tokens::unknown;
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Unknown record type: "
       << static_cast<int>(this->incomingBytes[this->offsetDecoded]) << ". ";
@@ -1676,14 +1676,14 @@ bool SSLRecord::decode(std::stringstream *commentsOnFailure) {
 }
 
 bool SSLRecord::decodeBody(std::stringstream *commentsOnFailure) {
-  switch (this->theType) {
+  switch (this->recordType) {
     case SSLRecord::tokens::handshake:
       return this->content.decode(commentsOnFailure);
     default:
       break;
   }
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Unrecognized ssl record type: " << static_cast<int>(this->theType) << ". ";
+    *commentsOnFailure << "Unrecognized ssl record type: " << static_cast<int>(this->recordType) << ". ";
   }
   return false;
 }
@@ -1737,7 +1737,7 @@ void SSLContent::prepareServerHello2Certificate() {
   MacroRegisterFunctionWithName("SSLContent::prepareServerHello2Certificate");
   this->checkInitialization();
   this->version = 3 * 256 + 3;
-  this->theType = SSLContent::tokens::certificate;
+  this->contentType = SSLContent::tokens::certificate;
 }
 
 bool TransportLayerSecurityServer::Session::computeAndSignEphemerealKey(std::stringstream* commentsOnError) {
@@ -1762,7 +1762,7 @@ bool TransportLayerSecurityServer::Session::computeAndSignEphemerealKey(std::str
 // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art060
 bool SSLContent::prepareServerHello3ServerKeyExchange(std::stringstream* commentsOnError) {
   MacroRegisterFunctionWithName("SSLContent::PrepareServerHello3SecretNegotiation");
-  this->theType = SSLContent::tokens::serverKeyExchange;
+  this->contentType = SSLContent::tokens::serverKeyExchange;
   if (this->owner->owner->session.ephemerealPrivateKey != 0) {
     if (commentsOnError != nullptr) {
       *commentsOnError << "Private key already generated for this session. "
@@ -1804,7 +1804,7 @@ void SSLContent::prepareServerHello1Start(SSLContent& clientHello) {
   MacroRegisterFunctionWithName("SSLContent::prepareServerHello1Start");
   this->checkInitialization();
   this->version = 3 * 256 + 3;
-  this->theType = SSLContent::tokens::serverHello;
+  this->contentType = SSLContent::tokens::serverHello;
   this->compressionMethod = clientHello.compressionMethod;
   Crypto::computeSha256(
     this->owner->owner->session.myRandomBytes, this->sessionId
@@ -1828,7 +1828,7 @@ void SSLRecord::prepareServerHello1Start(
   SSLRecord& clientHello
 ) {
   this->resetExceptOwner();
-  this->theType = SSLRecord::tokens::handshake;
+  this->recordType = SSLRecord::tokens::handshake;
   this->version = 3 * 256 + 1;
   this->content.prepareServerHello1Start(clientHello.content);
   this->owner->outgoingRecords.addOnTop(*this);
@@ -1836,7 +1836,7 @@ void SSLRecord::prepareServerHello1Start(
 
 void SSLRecord::prepareServerHello2Certificate() {
   this->resetExceptOwner();
-  this->theType = SSLRecord::tokens::handshake;
+  this->recordType = SSLRecord::tokens::handshake;
   this->version = 3 * 256 + 1;
   this->content.prepareServerHello2Certificate();
   this->owner->outgoingRecords.addOnTop(*this);
@@ -1855,7 +1855,7 @@ bool SSLRecord::prepareServerHello3SecretExchange(std::stringstream* commentsOnF
     }
   }
   this->resetExceptOwner();
-  this->theType = SSLRecord::tokens::handshake;
+  this->recordType = SSLRecord::tokens::handshake;
   this->version = 3 * 256 + 1;
   bool success = this->content.prepareServerHello3ServerKeyExchange(commentsOnFailure);
   this->owner->outgoingRecords.addOnTop(*this);

@@ -56,11 +56,11 @@ bool CalculatorConversions::innerSemisimpleLieAlgebra(
 
 bool CalculatorConversions::innerLoadWeylGroup(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerLoadWeylGroup");
-  DynkinType theType;
-  if (!CalculatorConversions::innerDynkinTypE(calculator, input, theType)) {
+  DynkinType dynkinType;
+  if (!CalculatorConversions::innerDynkinTypE(calculator, input, dynkinType)) {
     return false;
   }
-  SemisimpleLieAlgebra& theSA = calculator.objectContainer.getLieAlgebraCreateIfNotPresent(theType);
+  SemisimpleLieAlgebra& theSA = calculator.objectContainer.getLieAlgebraCreateIfNotPresent(dynkinType);
   return output.assignValue(theSA.weylGroup, calculator);
 }
 
@@ -111,16 +111,16 @@ bool CalculatorConversions::functionDynkinSimpleType(
     return calculator << "<hr>Couldn't extract first co-root length: "
     << theScale.toString() << " is non-positive.";
   }
-  std::string theTypeName;
-  if (!typeLetterE.isOperation(&theTypeName)) {
+  std::string typeName;
+  if (!typeLetterE.isOperation(&typeName)) {
     return calculator << "I couldn't extract a type letter from " << typeLetterE.toString();
   }
-  if (theTypeName.size() != 1) {
+  if (typeName.size() != 1) {
     return calculator << "<hr>Error while extracting Dynkin simple type: "
     << "the type of a simple Lie algebra must be the letter A, B, C, D, E, F or G. "
-    << "Instead, it is " << theTypeName + ". Error encountered while processing " << input.toString();
+    << "Instead, it is " << typeName + ". Error encountered while processing " << input.toString();
   }
-  char theWeylLetter = theTypeName[0];
+  char theWeylLetter = typeName[0];
   if (theWeylLetter == 'a') {
     theWeylLetter ='A';
   }
@@ -355,9 +355,9 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
   output.eElement = eltE;
   output.fElement= eltF;
   output.owner = eltE.getOwner();
-  DynkinType& theType = output.owner->weylGroup.dynkinType;
+  DynkinType& dynkinType = output.owner->weylGroup.dynkinType;
   SemisimpleSubalgebras& ownerSubalgebras =
-  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(theType);
+  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(dynkinType);
   output.container = &ownerSubalgebras.slTwoSubalgebras;
   return true;
 }

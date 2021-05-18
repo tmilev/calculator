@@ -7,11 +7,11 @@
 
 class CalculatorFunctionsBinaryOps {
 public:
-  template <class theType>
+  template <class Type>
   static bool multiplyTypeByType(Calculator& calculator, const Expression& input, Expression& output);
-  template <class theType>
+  template <class Type>
   static bool innerAddTypeToType(Calculator& calculator, const Expression& input, Expression& output);
-  template <class theType>
+  template <class Type>
   static bool divideTypeByType(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerAddDoubleOrRationalToDoubleOrRational(Calculator& calculator, const Expression& input, Expression& output);

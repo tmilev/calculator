@@ -221,18 +221,18 @@ public:
   static bool hasDecimalDigitsOnly(const std::string& input);
   static bool isHexDigit(char digitCandidate);
   static bool isADigit(char theChar, int* whichDigit = nullptr);
-  template <class theType>
-  static bool generateVectorSpaceClosedWithRespectToLieBracket(List<theType>& inputOutputElts, int upperDimensionBound) {
+  template <class Type>
+  static bool generateVectorSpaceClosedWithRespectToLieBracket(List<Type>& inputOutputElts, int upperDimensionBound) {
     return MathRoutines::generateVectorSpaceClosedWRTOperation(
-      inputOutputElts, upperDimensionBound, theType::lieBracket
+      inputOutputElts, upperDimensionBound, Type::lieBracket
     );
   }
   static Vector<double> getVectorDouble(Vector<Rational>& input);
-  template <class theType>
+  template <class Type>
   static bool generateVectorSpaceClosedWRTOperation(
-    List<theType>& inputOutputElts,
+    List<Type>& inputOutputElts,
     int upperDimensionBound,
-    void (*theBinaryOperation)(const theType& left, const theType& right, theType& output)
+    void (*theBinaryOperation)(const Type& left, const Type& right, Type& output)
   );
 
   static char convertHumanReadableHexToCharValue(char input);

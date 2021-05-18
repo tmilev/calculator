@@ -2543,12 +2543,12 @@ bool CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras(
 
 bool CalculatorLieTheory::getPrincipalSl2Index(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::getPrincipalSl2Index");
-  DynkinType theType;
-  if (!CalculatorConversions::innerDynkinTypE(calculator, input, theType)) {
+  DynkinType dynkinType;
+  if (!CalculatorConversions::innerDynkinTypE(calculator, input, dynkinType)) {
     return calculator << "Failed to convert "
     << input.toString() << " to DynkinType.";
   }
-  return output.assignValue(theType.getPrincipalSlTwoCartanSymmetricInverseScale(), calculator);
+  return output.assignValue(dynkinType.getPrincipalSlTwoCartanSymmetricInverseScale(), calculator);
 }
 
 bool CalculatorLieTheory::getDynkinIndicesSlTwoSubalgebras(
@@ -2689,38 +2689,38 @@ bool CalculatorLieTheory::casimirWithRespectToLevi(
   return output.assignValueWithContext(theCasimir, contextE, calculator);
 }
 
-template <class theType>
+template <class Type>
 bool MathRoutines::generateVectorSpaceClosedWRTOperation(
-  List<theType>& inputOutputElts,
+  List<Type>& inputOutputElts,
   int upperDimensionBound,
-  void (*theBinaryOperation)(const theType& left, const theType& right, theType& output)
+  void (*theBinaryOperation)(const Type& left, const Type& right, Type& output)
 ) {
   MacroRegisterFunctionWithName("MathRoutines::generateVectorSpaceClosedWRTOperation");
   inputOutputElts[0].gaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
-  theType theOpResult;
-  ProgressReport theReport1(1, GlobalVariables::Response::ReportType::gaussianElimination);
-  ProgressReport theReport2(20, GlobalVariables::Response::ReportType::gaussianElimination);
-  if (theReport1.tickAndWantReport()) {
-    theReport1.report("Extending vector space to closed with respect to binary operation. ");
+  Type operationResult;
+  ProgressReport report1(1, GlobalVariables::Response::ReportType::gaussianElimination);
+  ProgressReport report2(20, GlobalVariables::Response::ReportType::gaussianElimination);
+  if (report1.tickAndWantReport()) {
+    report1.report("Extending vector space to closed with respect to binary operation. ");
   }
-  List<theType> theEltsForGaussianElimination = inputOutputElts;
+  List<Type> eltementsForGaussianElimination = inputOutputElts;
   for (int i = 0; i < inputOutputElts.size; i ++) {
     for (int j = i; j < inputOutputElts.size; j ++) {
-      theBinaryOperation(inputOutputElts[i], inputOutputElts[j], theOpResult);
+      theBinaryOperation(inputOutputElts[i], inputOutputElts[j], operationResult);
       //int oldNumElts = inputOutputElts.size;
-      theEltsForGaussianElimination.addOnTop(theOpResult);
-      theEltsForGaussianElimination[0].gaussianEliminationByRowsDeleteZeroRows(theEltsForGaussianElimination);
-      if (theEltsForGaussianElimination.size > inputOutputElts.size) {
-        inputOutputElts.addOnTop(theOpResult);
+      eltementsForGaussianElimination.addOnTop(operationResult);
+      eltementsForGaussianElimination[0].gaussianEliminationByRowsDeleteZeroRows(eltementsForGaussianElimination);
+      if (eltementsForGaussianElimination.size > inputOutputElts.size) {
+        inputOutputElts.addOnTop(operationResult);
       }
       if (upperDimensionBound > 0 && inputOutputElts.size > upperDimensionBound) {
         return false;
       }
-      if (theReport2.tickAndWantReport()) {
+      if (report2.tickAndWantReport()) {
         std::stringstream reportStream;
         reportStream << "Accounted operation between elements " << i + 1
         << " and " << j + 1 << " out of " << inputOutputElts.size;
-        theReport2.report(reportStream.str());
+        report2.report(reportStream.str());
       }
     }
   }
@@ -2747,14 +2747,14 @@ bool CalculatorLieTheory::canBeExtendedParabolicallyTo(
 
 bool CalculatorLieTheory::getSymmetricCartan(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorLieTheory::getSymmetricCartan");
-  DynkinType theType;
-  if (!CalculatorConversions::innerDynkinTypE(calculator, input, theType)) {
+  DynkinType dynkinType;
+  if (!CalculatorConversions::innerDynkinTypE(calculator, input, dynkinType)) {
     return calculator << "Failed to convert " << input.toString() << " to DynkinType.";
   }
   std::stringstream out;
   Matrix<Rational> outputMat, outputCoMat;
-  theType.getCartanSymmetric(outputMat);
-  theType.getCoCartanSymmetric(outputCoMat);
+  dynkinType.getCartanSymmetric(outputMat);
+  dynkinType.getCoCartanSymmetric(outputCoMat);
   out << "Symmetric Cartan matrix: " << HtmlRoutines::getMathNoDisplay(outputMat.toStringLatex(), 10000)
   << "<br>Co-symmetric Cartan matrix: " << HtmlRoutines::getMathNoDisplay(outputCoMat.toStringLatex(), 10000);
   return output.assignValue(out.str(), calculator);

@@ -247,33 +247,33 @@ public:
   }
 };
 
-template<typename theType, unsigned int objectHashFunction(const theType&) = theType::hashFunction>
+template<typename Type, unsigned int objectHashFunction(const Type&) = Type::hashFunction>
 class MonomialWrapper {
   public:
-  theType theObject;
+  Type content;
   MonomialWrapper() {
   }
-  MonomialWrapper(const theType& input) {
-    this->theObject = input;
+  MonomialWrapper(const Type& input) {
+    this->content = input;
   }
   std::string toString(FormatExpressions* format = nullptr) const {
     (void) format;
     std::stringstream out;
-    out << "(" << this->theObject << ")";
+    out << "(" << this->content << ")";
     return out.str();
   }
   bool operator>(const MonomialWrapper& other) const {
-    return this->theObject > other.theObject;
+    return this->content > other.content;
   }
   friend std::ostream& operator << (std::ostream& output, const MonomialWrapper& monomial) {
-    output << monomial.theObject;
+    output << monomial.content;
     return output;
   }
   static unsigned int hashFunction(const MonomialWrapper& input) {
-    return objectHashFunction(input.theObject);
+    return objectHashFunction(input.content);
   }
   bool operator==(const MonomialWrapper& other) const {
-    return this->theObject == other.theObject;
+    return this->content == other.content;
   }
 };
 
@@ -333,7 +333,7 @@ public:
     return this->monomialBody.hashFunction();
   }
   bool hasPositiveOrZeroExponents() const;
-  void exponentMeBy(const Rational& theExp);
+  void exponentMeBy(const Rational& exponent);
   // Warning: hashFunction must return the same result
   // for equal monomials represented by different monBodies.
   // Two such different representation may differ by extra entries filled in with zeroes.
@@ -345,11 +345,11 @@ public:
     }
     return result;
   }
-  std::string toString(FormatExpressions* PolyFormat = nullptr) const;
+  std::string toString(FormatExpressions* polynomialFormat = nullptr) const;
   void makeOne() {
     this->monomialBody.setSize(0);
   }
-  void makeEi(int LetterIndex, int Power = 1, int ExpectedNumVars = 0);
+  void makeEi(int letterIndex, int power = 1, int expectedNumberOfVariables = 0);
   void setVariable(int variableIndex, const Rational& power);
   void trimTrailingZeroes();
   bool operator>(const MonomialPolynomial& other) const;
@@ -3176,7 +3176,7 @@ public:
     int* firstNonZeroIndex = nullptr
   );
   std::string getSpacedMonomialsWithHighlightLaTeX(
-    const Polynomial<Coefficient>& thePoly,
+    const Polynomial<Coefficient>& polynomial,
     List<List<int> >* slidesToHighlightMon,
     List<int>* slidesToFcAnswer,
     List<int>* slidesToUncover,
@@ -3308,7 +3308,7 @@ public:
   void backSubstituteIntoSinglePolynomial(
     Polynomial<Coefficient>& substitution, int index, PolynomialSubstitution<Coefficient>& finalSubstitution
   );
-  bool getOneVariablePolynomialSolution(const Polynomial<Coefficient>& thePoly, Coefficient& outputSolution);
+  bool getOneVariablePolynomialSolution(const Polynomial<Coefficient>& polynomial, Coefficient& outputSolution);
   void setSerreLikeSolutionIndex(int theIndex, const Coefficient& theConst);
   void getSubstitutionFromPartialSolutionSerreLikeSystem(PolynomialSubstitution<Coefficient>& outputSub);
   std::string toStringSerreLikeSolution();
@@ -3323,7 +3323,6 @@ public:
   bool shouldReport();
   FormatExpressions& format();
 };
-
 
 template <class TemplateMonomial, class Coefficient>
 bool LinearCombination<TemplateMonomial, Coefficient>::operator==(int x) const {
@@ -5813,8 +5812,8 @@ class DynkinSimpleType {
   Rational getDefaultLongRootLengthSquared() const;
   Rational getEpsilonRealizationLongRootLengthSquared() const;
   static Rational getDefaultLongRootLengthSquared(char theInputType) {
-    DynkinSimpleType theType(theInputType, 2);
-    return theType.getDefaultLongRootLengthSquared();
+    DynkinSimpleType dynkinType(theInputType, 2);
+    return dynkinType.getDefaultLongRootLengthSquared();
   }
   Rational getLongRootLengthSquared() const;
   Rational getRatioRootSquaredToFirstSquared(int rootIndex) const;
@@ -6072,7 +6071,7 @@ public:
     Polynomial<Rational>& outputDenominator
   );
   void fourierTransform(ElementWeylAlgebra<Coefficient>& output) const;
-  bool actOnPolynomial(Polynomial<Rational>& thePoly) const;
+  bool actOnPolynomial(Polynomial<Rational>& poly) const;
   void setNumberOfVariables(int newNumVars);
   void multiplyOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft);
   static void lieBracket(const ElementWeylAlgebra& left, const ElementWeylAlgebra& right, ElementWeylAlgebra& output);

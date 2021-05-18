@@ -18,7 +18,7 @@ public:
       output << line.toString();
       return output;
     }
-    int theType;
+    int topicType;
     std::string tag;
     std::string contentTrimmedWhiteSpace;
     void makeError(const std::string& message);

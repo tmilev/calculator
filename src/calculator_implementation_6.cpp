@@ -2628,30 +2628,30 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
       return calculator << "The two base coordinates have different moduli. ";
     }
   }
-  Expression theCurveE;
-  if (!CalculatorFunctions::functionEqualityToArithmeticExpression(calculator, input[1], theCurveE)) {
+  Expression curveE;
+  if (!CalculatorFunctions::functionEqualityToArithmeticExpression(calculator, input[1], curveE)) {
     return calculator << "Could not get arithmetic expression from: " << input[1].toString()
     << ". I was expecting a cubic equality.";
   }
-  Expression thePolyE;
-  Polynomial<Rational> thePoly;
+  Expression polynomialE;
+  Polynomial<Rational> polynomial;
   if (!CalculatorConversions::functionPolynomial<Rational>(
-    calculator, theCurveE, thePolyE
+    calculator, curveE, polynomialE
   )) {
-    return calculator << "Could not get polynomial from " << theCurveE.toString();
+    return calculator << "Could not get polynomial from " << curveE.toString();
   }
-  if (!thePolyE.isOfType(&thePoly)) {
-    return calculator << "Could not convert to polynomial: " << thePolyE.toString();
+  if (!polynomialE.isOfType(&polynomial)) {
+    return calculator << "Could not convert to polynomial: " << polynomialE.toString();
   }
-  ExpressionContext curveContext = thePolyE.getContext();
+  ExpressionContext curveContext = polynomialE.getContext();
   if (curveContext.numberOfVariables() != 2) {
     return calculator << "Expected 2 context variables in "
-    << theCurveE.toString() << ", got context: "
+    << curveE.toString() << ", got context: "
     << curveContext.toString();
   }
   MonomialPolynomial leadingMonomial;
   List<MonomialPolynomial>::Comparator monomialOrder(MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins);
-  thePoly.getIndexLeadingMonomial(&leadingMonomial, nullptr, &monomialOrder);
+  polynomial.getIndexLeadingMonomial(&leadingMonomial, nullptr, &monomialOrder);
   int indexX = 0;
   int indexY = 1;
   if (leadingMonomial[indexX] != 3) {
@@ -2667,25 +2667,25 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
     << curveContext.getVariable(1).toString()
     << " not equal to " << yE.toString();
   }
-  calculator << "Created elliptic curve " << thePolyE.toString()
+  calculator << "Created elliptic curve " << polynomialE.toString()
   << " = 0. The variables are assumed to be: x = " << xE.toString() << ", y = " << yE.toString();
-  if (thePoly.size() > 4) {
-    return calculator << "Elliptic curve allowed to have max 4 terms, yours has: " << thePoly.size();
+  if (polynomial.size() > 4) {
+    return calculator << "Elliptic curve allowed to have max 4 terms, yours has: " << polynomial.size();
   }
   MonomialPolynomial xCubed, xLinear, ySquared;
   xCubed.makeEi(indexX, 3);
   xLinear.makeEi(indexX, 1);
   ySquared.makeEi(indexY, 2);
-  Rational coefficientY = thePoly.getCoefficientOf(ySquared);
-  Rational coefficientXcubed = - thePoly.getCoefficientOf(xCubed);
+  Rational coefficientY = polynomial.getCoefficientOf(ySquared);
+  Rational coefficientXcubed = - polynomial.getCoefficientOf(xCubed);
   if (coefficientY == 0) {
     return calculator << "Did not find square term in your curve.";
   }
   if (coefficientXcubed == 0) {
     return calculator << "Did not find cube term in your curve.";
   }
-  Rational coefficientXlinear = - thePoly.getCoefficientOf(xLinear);
-  Rational constCoefficient = - thePoly.getConstantTerm();
+  Rational coefficientXlinear = - polynomial.getCoefficientOf(xLinear);
+  Rational constCoefficient = - polynomial.getConstantTerm();
   EllipticCurveWeierstrassNormalForm& curveConstants = isRational ? eltRational.owner : eltZmodP.owner;
   if (
     !coefficientXlinear.isInteger(&curveConstants.linearCoefficient) ||
@@ -2701,8 +2701,8 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   if (constCoefficient != 0) {
     numNonZeroGoodCoeffs ++;
   }
-  if (numNonZeroGoodCoeffs != thePoly.size()) {
-    return calculator << "It appears your curve: " << theCurveE.toString()
+  if (numNonZeroGoodCoeffs != polynomial.size()) {
+    return calculator << "It appears your curve: " << curveE.toString()
     << " is not of the form y^2 = x^3 + ax + b. ";
   }
   ExpressionContext theContext(calculator);
@@ -2753,10 +2753,10 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
     algebra.weylGroup.makeFromDynkinType(allTypes[i]);
     algebra.computeChevalleyConstants();
     algebra.writeHTML(true, false);
-    SlTwoSubalgebras theSl2s(algebra);
-    theSl2s.rootSubalgebras.flagPrintParabolicPseudoParabolicInfo = true;
-    algebra.findSl2Subalgebras(algebra, theSl2s, &calculator.objectContainer.algebraicClosure);
-    theSl2s.writeHTML();
+    SlTwoSubalgebras slTwoSubalgebras(algebra);
+    slTwoSubalgebras.rootSubalgebras.flagPrintParabolicPseudoParabolicInfo = true;
+    algebra.findSl2Subalgebras(algebra, slTwoSubalgebras, &calculator.objectContainer.algebraicClosure);
+    slTwoSubalgebras.writeHTML();
     algebra.writeHTML(true, false);
     if (allTypes[i].hasPrecomputedSubalgebras()) {
       SemisimpleSubalgebras subalgebras;

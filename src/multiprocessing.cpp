@@ -835,17 +835,17 @@ void Logger::StringHighligher::reset() {
 }
 
 Logger::StringHighligher::Section::Section(int inputLength) {
-  this->theType = "";
+  this->sectionType = "";
   this->length = inputLength;
 }
 
 Logger::StringHighligher::Section::Section(const std::string& input) {
-  this->theType = input;
+  this->sectionType = input;
   this->length = 0;
 }
 
 Logger::StringHighligher::Section::Section() {
-  this->theType = "";
+  this->sectionType = "";
   this->length = 0;
 }
 
@@ -865,16 +865,16 @@ Logger::StringHighligher::StringHighligher(const std::string& input) {
     std::string current = StringRoutines::stringTrimWhiteSpace(inputStrings[i]);
     Logger::StringHighligher::Section incoming;
     if (current == "|") {
-      incoming.theType = "|";
+      incoming.sectionType = "|";
       this->sections.addOnTop(incoming);
       continue;
     }
     if (current == "||") {
-      incoming.theType = "||";
+      incoming.sectionType = "||";
       this->sections.addOnTop(incoming);
       continue;
     }
-    incoming.theType = "";
+    incoming.sectionType = "";
     LargeInteger theLI;
     theLI.assignString(current);
     if (!theLI.isIntegerFittingInInt(&incoming.length)) {
@@ -942,8 +942,8 @@ Logger& Logger::operator<<(const std::string& input) {
     i ++
   ) {
     Logger::StringHighligher::Section& currentSection = this->nextHighlighter.sections[i];
-    if (currentSection.theType != "") {
-      chunks.addOnTop(currentSection.theType);
+    if (currentSection.sectionType != "") {
+      chunks.addOnTop(currentSection.sectionType);
       continue;
     }
     int nextSectionLength = currentSection.length;

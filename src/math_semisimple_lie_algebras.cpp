@@ -1164,29 +1164,29 @@ bool HomomorphismSemisimpleLieAlgebra::applyHomomorphism(
 }
 
 void HomomorphismSemisimpleLieAlgebra::makeGinGWithIdentity(
-  char theWeylLetter, int theWeylDim, MapReferences<DynkinType, SemisimpleLieAlgebra>& ownerOfAlgebras
+  char weylLetter, int weylDimension, MapReferences<DynkinType, SemisimpleLieAlgebra>& ownerOfAlgebras
 ) {
   MacroRegisterFunctionWithName("HomomorphismSemisimpleLieAlgebra::makeGinGWithIdentity");
-  DynkinType theType;
-  theType.makeSimpleType(theWeylLetter, theWeylDim);
-  this->domainAlg = &ownerOfAlgebras.getValueCreateNoInitialization(theType);
+  DynkinType dynkinType;
+  dynkinType.makeSimpleType(weylLetter, weylDimension);
+  this->domainAlg = &ownerOfAlgebras.getValueCreateNoInitialization(dynkinType);
   this->rangeAlg = this->domainAlg;
-  this->domainAlg->weylGroup.makeArbitrarySimple(theWeylLetter, theWeylDim);
+  this->domainAlg->weylGroup.makeArbitrarySimple(weylLetter, weylDimension);
   this->domain().computeChevalleyConstants();
   int numPosRoots = this->domain().weylGroup.rootsOfBorel.size;
-  this->imagesAllChevalleyGenerators.setSize(numPosRoots * 2 + theWeylDim);
-  this->domainAllChevalleyGenerators.setSize(numPosRoots * 2 + theWeylDim);
-  this->imagesSimpleChevalleyGenerators.setSize(theWeylDim * 2);
-  for (int i = 0; i < 2 * numPosRoots + theWeylDim; i ++) {
+  this->imagesAllChevalleyGenerators.setSize(numPosRoots * 2 + weylDimension);
+  this->domainAllChevalleyGenerators.setSize(numPosRoots * 2 + weylDimension);
+  this->imagesSimpleChevalleyGenerators.setSize(weylDimension * 2);
+  for (int i = 0; i < 2 * numPosRoots + weylDimension; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& tempElt1 = this->imagesAllChevalleyGenerators[i];
     ElementSemisimpleLieAlgebra<Rational>& tempElt2 = this->domainAllChevalleyGenerators[i];
     tempElt2.makeGenerator(i, this->domain());
     tempElt1.makeGenerator(i, this->range());
   }
-  for (int i = 0; i < theWeylDim; i ++) {
+  for (int i = 0; i < weylDimension; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& tempElt1 = this->imagesSimpleChevalleyGenerators[i];
     tempElt1.makeGenerator(i, this->range());
-    ElementSemisimpleLieAlgebra<Rational>& tempElt2 = this->imagesSimpleChevalleyGenerators[theWeylDim + i];
+    ElementSemisimpleLieAlgebra<Rational>& tempElt2 = this->imagesSimpleChevalleyGenerators[weylDimension + i];
     tempElt2.makeGenerator(i + numPosRoots, this->range());
   }
 }
@@ -1327,21 +1327,21 @@ bool ChevalleyGenerator::operator>(const ChevalleyGenerator& other) const {
 }
 
 std::string SemisimpleLieAlgebra::getStringFromChevalleyGenerator(
-  int theIndex, FormatExpressions* thePolynomialFormat
+  int index, FormatExpressions* polynomialFormat
 ) const {
   std::stringstream out;
   MemorySaving<FormatExpressions> tempFormat;
-  if (thePolynomialFormat == nullptr) {
-    thePolynomialFormat = &tempFormat.getElement();
+  if (polynomialFormat == nullptr) {
+    polynomialFormat = &tempFormat.getElement();
   }
-  if (this->isGeneratorFromCartan(theIndex)) {
-    out << thePolynomialFormat->chevalleyHgeneratorLetter << "_{" << theIndex - this->getNumberOfPositiveRoots() + 1 << "}";
+  if (this->isGeneratorFromCartan(index)) {
+    out << polynomialFormat->chevalleyHgeneratorLetter << "_{" << index - this->getNumberOfPositiveRoots() + 1 << "}";
   } else {
-    out << thePolynomialFormat->chevalleyGgeneratorLetter << "_{";
-    if (theIndex >= this->getNumberOfPositiveRoots()) {
-      out << theIndex - this->getNumberOfPositiveRoots() - this->getRank() + 1;
+    out << polynomialFormat->chevalleyGgeneratorLetter << "_{";
+    if (index >= this->getNumberOfPositiveRoots()) {
+      out << index - this->getNumberOfPositiveRoots() - this->getRank() + 1;
     } else {
-      out << theIndex - this->getNumberOfPositiveRoots();
+      out << index - this->getNumberOfPositiveRoots();
     }
     out << "}";
   }

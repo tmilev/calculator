@@ -1098,13 +1098,13 @@ std::string SlTwoInSlN::pairTwoIndices(List<int>& output, int leftIndex, int rig
   return out.str();
 }
 
-void MonomialPolynomial::makeEi(int LetterIndex, int Power, int ExpectedNumVars) {
-  (void) ExpectedNumVars;
+void MonomialPolynomial::makeEi(int letterIndex, int power, int expectedNumberOfVariables) {
+  (void) expectedNumberOfVariables;
   this->makeOne();
-  if (Power == 0) {
+  if (power == 0) {
     return;
   }
-  this->setVariable(LetterIndex, Power);
+  this->setVariable(letterIndex, power);
 }
 
 void MonomialPolynomial::setVariable(int variableIndex, const Rational& power) {
@@ -1158,9 +1158,9 @@ bool MonomialPolynomial::hasPositiveOrZeroExponents() const {
   return true;
 }
 
-void MonomialPolynomial::exponentMeBy(const Rational& theExp) {
+void MonomialPolynomial::exponentMeBy(const Rational& exponent) {
   for (int i = 0; i < this->monomialBody.size; i ++) {
-    this->monomialBody[i] *= theExp;
+    this->monomialBody[i] *= exponent;
   }
 }
 
@@ -1378,18 +1378,18 @@ bool Cone::isInCone(const Vector<Rational>& point) const {
   return true;
 }
 
-std::string MonomialPolynomial::toString(FormatExpressions* format) const {
+std::string MonomialPolynomial::toString(FormatExpressions* polynomialFormat) const {
   std::stringstream out;
   MemorySaving<FormatExpressions> tempFormat;
-  if (format == nullptr) {
-    format = &tempFormat.getElement();
+  if (polynomialFormat == nullptr) {
+    polynomialFormat = &tempFormat.getElement();
   }
   if (this->isConstant()) {
     return "1";
   }
   for (int i = 0; i < this->monomialBody.size; i ++) {
     if (!(this->monomialBody[i].isEqualToZero())) {
-      out << format->getPolynomialLetter(i);
+      out << polynomialFormat->getPolynomialLetter(i);
       if (!(this->monomialBody[i] == 1)) {
         out << "^{" << this->monomialBody[i] << "}";
       } else {

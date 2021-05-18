@@ -196,7 +196,7 @@ private:
   bool isPowerOfAtomWhoseExponentsAreInterpretedAsFunction() const;
   bool isAtomNotInterpretedAsFunction(std::string* outputWhichAtom = nullptr) const;
   bool isMatrix(int* outputNumberOfRows = nullptr, int* outputNumberOfColumns = nullptr) const;
-  template<class theType>
+  template<class Type>
   bool isMatrixOfType(int* outputNumberOfRows = nullptr, int* outputNumberOfColumns = nullptr) const;
 
   bool isAtom() const;
@@ -349,7 +349,7 @@ private:
 
   bool containsAsSubExpressionNoBuiltInTypes(const Expression& input) const;
   bool containsAsSubExpressionNoBuiltInTypes(int inputAtom) const;
-  bool contextSetDifferentialOperatorVariable(const Expression& thePolyVar, const Expression& theDiffOpVar);
+  bool contextSetDifferentialOperatorVariable(const Expression& polynomialVariable, const Expression& differentialOperatorVariable);
   SemisimpleLieAlgebra* getAmbientSemisimpleLieAlgebraNonConstUseWithCaution() const;
   bool isEqualToZero() const;
   bool isEqualToOne() const;
@@ -2374,10 +2374,10 @@ public:
   bool getVectorDoublesFromFunctionArguments(
     const Expression& input, Vector<double>& output, int desiredDimensionNonMandatory = - 1
   );
-  template <class theType>
+  template <class Type>
   bool getVector(
     const Expression& input,
-    Vector<theType>& output,
+    Vector<Type>& output,
     ExpressionContext* inputOutputStartingContext = nullptr,
     int targetDimensionNonMandatory = - 1,
     Expression::FunctionAddress conversionFunction = nullptr
@@ -2894,7 +2894,7 @@ bool CalculatorConversions::functionExpressionFromPolynomial(
   return CalculatorConversions::expressionFromPolynomial(calculator, polynomial, output, &context);
 }
 
-template <class theType>
+template <class Type>
 bool Expression::isMatrixOfType(int* outputNumberOfRows, int* outputNumberOfColumns) const {
   if (!this->isMatrix()) {
     return false;
@@ -2902,7 +2902,7 @@ bool Expression::isMatrixOfType(int* outputNumberOfRows, int* outputNumberOfColu
   if (!(*this)[0].startsWith(this->owner->opMatrix(), 2)) {
     return false;
   }
-  if (!(*this)[0][1].isOperationGiven(this->getTypeOperation<theType>())) {
+  if (!(*this)[0][1].isOperationGiven(this->getTypeOperation<Type>())) {
     return false;
   }
   const Expression& rows = (*this)[1];
@@ -2928,13 +2928,13 @@ bool Expression::isMatrixOfType(int* outputNumberOfRows, int* outputNumberOfColu
   return true;
 }
 
-template <class theType>
-bool Expression::isOfTypeWithContext(WithContext<theType>* whichElement) const {
+template <class Type>
+bool Expression::isOfTypeWithContext(WithContext<Type>* whichElement) const {
   MacroRegisterFunctionWithName("Expression::isOfTypeWithContext");
   if (this->owner == nullptr) {
     return false;
   }
-  if (!this->startsWith(this->getTypeOperation<theType>())) {
+  if (!this->startsWith(this->getTypeOperation<Type>())) {
     return false;
   }
   if (this->size() < 2 || !this->getLastChild().isAtom()) {
@@ -2944,7 +2944,7 @@ bool Expression::isOfTypeWithContext(WithContext<theType>* whichElement) const {
     return true;
   }
   whichElement->context = this->getContext();
-  whichElement->content = this->getValue<theType>();
+  whichElement->content = this->getValue<Type>();
   return true;
 }
 
@@ -3106,7 +3106,7 @@ bool Expression::assignValue(const Type& inputValue, Calculator& owner) {
   return this->assignValueWithContext(inputValue, emptyContext, owner);
 }
 
-template <class theType>
+template <class Type>
 bool Expression::mergeContextsMyArumentsAndConvertThem(
   Expression& output, std::stringstream* commentsOnFailure
 ) const {
@@ -3120,7 +3120,7 @@ bool Expression::mergeContextsMyArumentsAndConvertThem(
   output.addChildOnTop((*this)[0]);
   Expression convertedExpression;
   for (int i = 1; i < mergedContexts.size(); i ++) {
-    if (!mergedContexts[i].convertInternally<theType>(convertedExpression)) {
+    if (!mergedContexts[i].convertInternally<Type>(convertedExpression)) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "<hr>Failed to convert "
         << mergedContexts[i].toString() << " to the desired type. ";

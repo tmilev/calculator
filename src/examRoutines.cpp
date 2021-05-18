@@ -3662,13 +3662,13 @@ bool TopicElementParser::checkInitialization() {
 void TopicElementParser::TopicLine::makeError(const std::string& message) {
   this->contentTrimmedWhiteSpace = StringRoutines::stringTrimWhiteSpace(message);
   this->tag = "Error";
-  this->theType = TopicElement::types::error;
+  this->topicType = TopicElement::types::error;
 }
 
 void TopicElementParser::TopicLine::MakeEmpty() {
   this->contentTrimmedWhiteSpace = "";
   this->tag = "";
-  this->theType = TopicElement::types::empty;
+  this->topicType = TopicElement::types::empty;
 }
 
 void TopicElementParser::insertTopicBundle(TopicElementParser::TopicLine& input) {
@@ -3715,9 +3715,9 @@ void TopicElementParser::loadTopicBundleFile(
   std::stringstream bundleReader(newTopicBundles);
   while (std::getline(bundleReader, currentLineString, '\n')) {
     TopicElementParser::TopicLine currentLine = this->extractLine(currentLineString);
-    if (currentLine.theType == TopicElement::types::bundleBegin) {
+    if (currentLine.topicType == TopicElement::types::bundleBegin) {
       bundleNameStack.addOnTop(currentLine.contentTrimmedWhiteSpace);
-    } else if (currentLine.theType == TopicElement::types::bundleEnd) {
+    } else if (currentLine.topicType == TopicElement::types::bundleEnd) {
       if (bundleNameStack.size > 0) {
         bundleNameStack.removeLastObject();
       } else {
@@ -3745,7 +3745,7 @@ TopicElementParser::TopicLine TopicElementParser::extractLine(const std::string&
     result.MakeEmpty();
     return result;
   }
-  result.theType = TopicElement::types::unknown;
+  result.topicType = TopicElement::types::unknown;
   for (unsigned i = 0; i < input.size(); i ++) {
     char current = input[i];
     if (current == ':') {
@@ -3761,7 +3761,7 @@ TopicElementParser::TopicLine TopicElementParser::extractLine(const std::string&
   }
   int indexElement = this->elementTypes.getIndex(result.tag);
   if (indexElement >= 0) {
-    result.theType = this->elementTypes.values[indexElement];
+    result.topicType = this->elementTypes.values[indexElement];
   }
   return result;
 }
@@ -3777,11 +3777,11 @@ void TopicElementParser::exhaustCrawlStack() {
       return;
     }
     TopicElementParser::TopicLine nextLine = bundleStack.popLastObject();
-    if (nextLine.theType == TopicElement::types::loadTopicBundles) {
+    if (nextLine.topicType == TopicElement::types::loadTopicBundles) {
       this->loadTopicBundleFile(nextLine);
       continue;
     }
-    if (nextLine.theType == TopicElement::types::topicBundle) {
+    if (nextLine.topicType == TopicElement::types::topicBundle) {
       this->insertTopicBundle(nextLine);
       continue;
     }
@@ -3812,11 +3812,11 @@ void TopicElementParser::crawl(const std::string& inputString) {
 }
 
 bool TopicElementParser::TopicLine::accountIfStateChanger(CalculatorHTML& owner) const {
-  if (this->theType == TopicElement::types::slidesSourceHeader) {
+  if (this->topicType == TopicElement::types::slidesSourceHeader) {
     owner.slidesSourcesHeaders.addOnTop(this->contentTrimmedWhiteSpace);
     return true;
   }
-  if (this->theType == TopicElement::types::homeworkSourceHeader){
+  if (this->topicType == TopicElement::types::homeworkSourceHeader){
     owner.sourcesHomeworkHeaders.addOnTop(this->contentTrimmedWhiteSpace);
     return true;
   }
@@ -3837,7 +3837,7 @@ bool TopicElement::mergeTopicLine(
   if (this->type != TopicElement::types::problem) {
     return false;
   }
-  if (input.theType == TopicElement::types::problem) {
+  if (input.topicType == TopicElement::types::problem) {
     if (this->problemFileName == "") {
       this->problemFileName = input.contentTrimmedWhiteSpace;
       return true;
@@ -3845,7 +3845,7 @@ bool TopicElement::mergeTopicLine(
       return false;
     }
   }
-  switch (input.theType) {
+  switch (input.topicType) {
   case TopicElement::types::video:
     this->video = input.contentTrimmedWhiteSpace;
     return true;
@@ -3886,20 +3886,20 @@ std::string TopicElementParser::TopicLine::toString() const {
 TopicElement TopicElementParser::TopicLine::toTopicElement() const {
   TopicElement result;
   result.type = TopicElement::types::empty;
-  if (this->theType == TopicElement::types::problem) {
+  if (this->topicType == TopicElement::types::problem) {
     result.problemFileName = this->contentTrimmedWhiteSpace;
     result.type = TopicElement::types::problem;
   }
-  if (this->theType == TopicElement::types::title) {
+  if (this->topicType == TopicElement::types::title) {
     result.type = TopicElement::types::problem;
     result.title = this->contentTrimmedWhiteSpace;
   }
   if (
-    this->theType == TopicElement::types::chapter ||
-    this->theType == TopicElement::types::section ||
-    this->theType == TopicElement::types::topic
+    this->topicType == TopicElement::types::chapter ||
+    this->topicType == TopicElement::types::section ||
+    this->topicType == TopicElement::types::topic
   ) {
-    result.type = this->theType;
+    result.type = this->topicType;
     result.title = this->contentTrimmedWhiteSpace;
   }
   return result;

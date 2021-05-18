@@ -217,7 +217,7 @@ class SSLHelloExtension {
 public:
   SSLContent* owner;
   List<unsigned char> content;
-  int theType;
+  int extensionType;
   std::string name();
   SSLHelloExtension();
   JSData toJSON();
@@ -251,7 +251,7 @@ public:
 class SSLContent {
 public:
   SSLRecord* owner;
-  unsigned char theType;
+  unsigned char contentType;
   int length;
   int version;
   int cipherSpecLength;
@@ -390,7 +390,7 @@ public:
     static bool serializationClientHello(TransportLayerSecurityServer& testServer);
   };
   int offsetDecoded;
-  unsigned char theType;
+  unsigned char recordType;
   int version;
   int length;
   List<unsigned char> incomingBytes;

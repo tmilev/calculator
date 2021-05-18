@@ -595,14 +595,14 @@ void PolynomialSystem<Coefficient>::getSubstitutionFromPartialSolutionSerreLikeS
 
 template <class Coefficient>
 bool PolynomialSystem<Coefficient>::getOneVariablePolynomialSolution(
-  const Polynomial<Coefficient>& thePoly, Coefficient& outputSolution
+  const Polynomial<Coefficient>& polynomial, Coefficient& outputSolution
 ) {
   AlgebraicNumber number;
   if (this->algebraicClosure == 0) {
     return false;
   }
   if (!number.constructFromMinimalPolynomial(
-    thePoly, *this->algebraicClosure, nullptr
+    polynomial, *this->algebraicClosure, nullptr
   )) {
     return false;
   }
@@ -618,7 +618,7 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
   int numVars = this->systemSolution.size;
   MonomialPolynomial tempM;
   Polynomial<Coefficient> tempP;
-  Coefficient theCF;
+  Coefficient coefficient;
   for (int i = 0; i < inputSystem.size; i ++) {
     tempP = inputSystem[i];
     for (int j = 0; j < numVars; j ++) {
@@ -627,13 +627,13 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
       if (indexTempM == - 1) {
         continue;
       }
-      theCF = tempP.coefficients[indexTempM];
-      tempP.subtractMonomial(tempM, theCF);
+      coefficient = tempP.coefficients[indexTempM];
+      tempP.subtractMonomial(tempM, coefficient);
       bool isGood = true;
       for (int k = 0; k < tempP.size(); k ++) {
         if (!(tempP[k](j) == 0)) {
           isGood = false;
-          tempP.addMonomial(tempM, theCF);
+          tempP.addMonomial(tempM, coefficient);
           break;
         }
       }
@@ -642,16 +642,16 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
       }
       outputSub.makeIdentitySubstitution(numVars);
       outputSub[j] = tempP;
-      theCF *= - 1;
-      outputSub[j] /= theCF;
+      coefficient *= - 1;
+      outputSub[j] /= coefficient;
       return true;
     }
     int oneVarIndex;
     if (tempP.isOneVariableNonConstantPolynomial(&oneVarIndex)) {
       if (this->flagUsingAlgebraicClosure && this->algebraicClosure != 0) {
-        if (this->getOneVariablePolynomialSolution(tempP, theCF)) {
+        if (this->getOneVariablePolynomialSolution(tempP, coefficient)) {
           outputSub.makeIdentitySubstitution(numVars);
-          outputSub[oneVarIndex].makeConstant(theCF);
+          outputSub[oneVarIndex].makeConstant(coefficient);
           //check our work:
           tempP.substitution(outputSub, 1);
           if (!tempP.isEqualToZero()) {
@@ -674,7 +674,8 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
 }
 
 template <class Coefficient>
-int GroebnerBasisComputation<Coefficient>::getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(int variableIndex, List<Polynomial<Coefficient> >& input
+int GroebnerBasisComputation<Coefficient>::getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(
+  int variableIndex, List<Polynomial<Coefficient> >& input
 ) {
   int result = 0;
   for (int i = 0; i < input.size; i ++) {
@@ -908,7 +909,7 @@ FormatExpressions& PolynomialSystem<Coefficient>::format() {
 
 template <class Coefficient>
 std::string PolynomialSystem<Coefficient>::toStringImpliedSubstitutions() {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::toStringImpliedSubstitutions");
+  MacroRegisterFunctionWithName("PolynomialSystem::toStringImpliedSubstitutions");
   if (this->impliedSubstitutions.size == 0) {
     return "";
   }

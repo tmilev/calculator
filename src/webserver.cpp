@@ -3468,7 +3468,7 @@ int WebServer::run() {
     // <-cannot set earlier as the active worker may change after recycling.
     this->statistics.allConnections ++;
     this->getActiveWorker().connectionID = this->statistics.allConnections;
-    this->getActiveWorker().userAddress.theObject = theListener.userAddress;
+    this->getActiveWorker().userAddress.content = theListener.userAddress;
     this->currentlyConnectedAddresses.addMonomial(this->getActiveWorker().userAddress, 1);
     /////////////
     if (global.flagServerDetailedLog) {

@@ -358,17 +358,17 @@ void ElementWeylAlgebra<Coefficient>::fourierTransform(ElementWeylAlgebra<Coeffi
 }
 
 template <class Coefficient>
-bool ElementWeylAlgebra<Coefficient>::actOnPolynomial(Polynomial<Rational>& thePoly) const {
+bool ElementWeylAlgebra<Coefficient>::actOnPolynomial(Polynomial<Rational>& poly) const {
   Polynomial<Rational> result;
   result.makeZero();
   MonomialPolynomial resultMonomial;
   Rational currentCoefficient;
   for (int i = 0; i < this->size(); i ++) {
-    for (int j = 0; j < thePoly.size(); j ++) {
-      const MonomialPolynomial& currentMonomial = thePoly[j];
+    for (int j = 0; j < poly.size(); j ++) {
+      const MonomialPolynomial& currentMonomial = poly[j];
       const MonomialWeylAlgebra& currentOpMon = (*this)[i];
       resultMonomial = currentMonomial;
-      currentCoefficient = thePoly.coefficients[j];
+      currentCoefficient = poly.coefficients[j];
       currentCoefficient *= this->coefficients[i];
       for (int k = 0; k < currentOpMon.minimalNumberOfVariables(); k ++) {
         int numDiff = 0;
@@ -390,7 +390,7 @@ bool ElementWeylAlgebra<Coefficient>::actOnPolynomial(Polynomial<Rational>& theP
       result.addMonomial(resultMonomial, currentCoefficient);
     }
   }
-  thePoly = result;
+  poly = result;
   return true;
 }
 

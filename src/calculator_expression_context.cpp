@@ -239,7 +239,9 @@ bool ExpressionContext::setAmbientSemisimpleLieAlgebra(
   return true;
 }
 
-bool Expression::contextSetDifferentialOperatorVariable(const Expression& thePolyVar, const Expression& theDiffOpVar) {
+bool Expression::contextSetDifferentialOperatorVariable(
+  const Expression& polynomialVariable, const Expression& differentialOperatorVariable
+) {
   if (!this->isContext()) {
     global.fatal
     << "Calling Expression::contextSetDifferentialOperatorVariable on a non-context expression. "
@@ -248,10 +250,10 @@ bool Expression::contextSetDifferentialOperatorVariable(const Expression& thePol
   Expression diffVarsE, polyVarsE;
   diffVarsE.reset(*this->owner, 2);
   diffVarsE.addChildAtomOnTop(this->owner->opWeylAlgebraVariables());
-  diffVarsE.addChildOnTop(theDiffOpVar);
+  diffVarsE.addChildOnTop(differentialOperatorVariable);
   polyVarsE.reset(*this->owner, 2);
   polyVarsE.addChildAtomOnTop(this->owner->opPolynomialVariables());
-  polyVarsE.addChildOnTop(thePolyVar);
+  polyVarsE.addChildOnTop(polynomialVariable);
   bool foundDiffVarsE = false;
   bool foundPolyVarsE = false;
   for (int i = 0; i < this->children.size; i ++) {

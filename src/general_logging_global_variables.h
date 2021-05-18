@@ -35,7 +35,7 @@ class Logger {
     class Section {
     public:
       int length;
-      std::string theType;
+      std::string sectionType;
       Section();
       Section(int inputLength);
       Section(const std::string& input);
@@ -80,12 +80,12 @@ class Logger {
   Logger& operator<<(const std::string& input);
   Logger& operator<<(const loggerSpecialSymbols& input);
   void flush();
-  template <typename theType>
-  Logger& operator<<(const theType& toBePrinted) {
+  template <typename Type>
+  Logger& operator<<(const Type& toBePrinted) {
     return this->doTheLogging(toBePrinted);
   }
-  template <typename theType>
-  Logger& doTheLogging(const theType& toBePrinted);
+  template <typename Type>
+  Logger& doTheLogging(const Type& toBePrinted);
 };
 
 // All global objects are either
@@ -162,8 +162,8 @@ public:
     std::string toStringProcessType() const;
   };
   LogData logs;
-  template <typename theType>
-  GlobalVariables& operator<<(const theType& toBePrinted) {
+  template <typename Type>
+  GlobalVariables& operator<<(const Type& toBePrinted) {
     switch (this->logs.logType) {
     case GlobalVariables::LogData::type::server:
       this->logs.server << toBePrinted;
@@ -399,8 +399,8 @@ public:
   class CommentsCurrentConnection {
     MemorySaving<std::stringstream> container;
   public:
-    template <typename theType>
-    CommentsCurrentConnection& operator<<(const theType& comment) {
+    template <typename Type>
+    CommentsCurrentConnection& operator<<(const Type& comment) {
       this->container.getElement() << comment;
       return *this;
     }
@@ -470,8 +470,8 @@ public:
   /// @endcond
 };
 
-template <typename theType>
-Logger& Logger::doTheLogging(const theType& toBePrinted) {
+template <typename Type>
+Logger& Logger::doTheLogging(const Type& toBePrinted) {
   this->initializeIfNeeded();
   std::stringstream out;
   out << toBePrinted;

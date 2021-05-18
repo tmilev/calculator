@@ -7,19 +7,19 @@
 
 
 template<class Coefficient>
-bool RationalFraction<Coefficient>::convertToType(int theType) {
+bool RationalFraction<Coefficient>::convertToType(int inputExpressionType) {
   MacroRegisterFunctionWithName("RationalFunction::convertToType");
-  if (theType < this->expressionType) {
+  if (inputExpressionType < this->expressionType) {
     return false;
   }
-  if (theType == this->expressionType) {
+  if (inputExpressionType == this->expressionType) {
     return true;
   }
-  if (this->expressionType == this->typeConstant && this->expressionType < theType) {
+  if (this->expressionType == this->typeConstant && this->expressionType < inputExpressionType) {
     this->expressionType = this->typePolynomial;
     this->numerator.getElement().makeConstant(this->constantValue);
   }
-  if (this->expressionType == this->typePolynomial && this->expressionType < theType) {
+  if (this->expressionType == this->typePolynomial && this->expressionType < inputExpressionType) {
     this->expressionType = this->typeRationalFunction;
     this->denominator.getElement().makeConstant(this->constantValue.one());
   }

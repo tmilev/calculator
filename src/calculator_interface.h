@@ -2739,10 +2739,10 @@ public:
     std::stringstream* commentsOnFailure = nullptr,
     bool allowFailure = false
   );
-  static bool innerStoreSemisimpleSubalgebras(
+  static bool storeSemisimpleSubalgebras(
     Calculator& calculator, const SemisimpleSubalgebras& input, Expression& output
   );
-  static std::string innerStringFromSemisimpleSubalgebras(SemisimpleSubalgebras& input);
+  static std::string stringFromSemisimpleSubalgebras(SemisimpleSubalgebras& input);
 
   static bool innerExpressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(
     Calculator& calculator, const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input, Expression& output
@@ -2781,7 +2781,7 @@ public:
     SemisimpleSubalgebras& owner
   );
   static bool innerLoadWeylGroup(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerStoreSemisimpleSubalgebras(
+  static bool storeSemisimpleSubalgebras(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool innerSlTwoSubalgebraPrecomputed(Calculator& calculator, const Expression& input, Expression& output);

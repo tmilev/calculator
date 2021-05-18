@@ -5,8 +5,8 @@
 #include "math_general.h"
 
 class QuasiDifferentialMononomial {
-  friend std::ostream& operator << (std::ostream& output, const QuasiDifferentialMononomial& theMon) {
-    output << theMon.toString();
+  friend std::ostream& operator << (std::ostream& output, const QuasiDifferentialMononomial& monomial) {
+    output << monomial.toString();
     return output;
   }
   public:

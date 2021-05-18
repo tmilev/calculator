@@ -280,42 +280,42 @@ bool CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraRation
   Calculator& calculator, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerStoreElementSemisimpleLieAlgebraRational");
-  LinearCombination<Expression, Rational> theMons;
-  theMons.makeZero();
+  LinearCombination<Expression, Rational> monomials;
+  monomials.makeZero();
   Expression currentMon;
   for (int i = 0; i < input.size(); i ++) {
     CalculatorConversions::innerExpressionFromChevalleyGenerator(calculator, input[i], currentMon);
-    theMons.addMonomial(currentMon, input.coefficients[i]);
+    monomials.addMonomial(currentMon, input.coefficients[i]);
   }
-  return output.makeSum(calculator, theMons);
+  return output.makeSum(calculator, monomials);
 }
 
 bool CalculatorConversions::innerExpressionFromDynkinType(
   Calculator& calculator, const DynkinType& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromDynkinType");
-  LinearCombination<Expression, AlgebraicNumber> theMons;
-  theMons.makeZero();
+  LinearCombination<Expression, AlgebraicNumber> monomials;
+  monomials.makeZero();
   Expression currentMon;
   for (int i = 0; i < input.size(); i ++) {
     CalculatorConversions::innerExpressionFromDynkinSimpleType(calculator, input[i], currentMon);
-    theMons.addMonomial(currentMon, input.coefficients[i]);
+    monomials.addMonomial(currentMon, input.coefficients[i]);
   }
-  return output.makeSum(calculator, theMons);
+  return output.makeSum(calculator, monomials);
 }
 
 bool CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(
   Calculator& calculator, const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraAlgebraicNumbers");
-  LinearCombination<Expression, AlgebraicNumber> theMons;
-  theMons.makeZero();
+  LinearCombination<Expression, AlgebraicNumber> monomials;
+  monomials.makeZero();
   Expression currentMon;
   for (int i = 0; i < input.size(); i ++) {
     CalculatorConversions::innerExpressionFromChevalleyGenerator(calculator, input[i], currentMon);
-    theMons.addMonomial(currentMon, input.coefficients[i]);
+    monomials.addMonomial(currentMon, input.coefficients[i]);
   }
-  return output.makeSum(calculator, theMons);
+  return output.makeSum(calculator, monomials);
 }
 
 bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
@@ -697,7 +697,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   reportStream << "Subalgebra loading done, total "
   << theSAs.subalgebras.values.size << " subalgebras loaded. ";
   theReport.report(reportStream.str());
-  theSAs.toStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
+  theSAs.toStringExpressionString = CalculatorConversions::stringFromSemisimpleSubalgebras;
   if (!theSAs.loadState(currentChainInt, numExploredTypes, numExploredHs, calculator.comments)) {
     return false;
   }
@@ -715,29 +715,29 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   return output.assignValue(theSAs, calculator);
 }
 
-std::string CalculatorConversions::innerStringFromSemisimpleSubalgebras(SemisimpleSubalgebras& input) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerStringFromSemisimpleSubalgebras");
+std::string CalculatorConversions::stringFromSemisimpleSubalgebras(SemisimpleSubalgebras& input) {
+  MacroRegisterFunctionWithName("CalculatorConversions::stringFromSemisimpleSubalgebras");
   Expression tempE;
-  FormatExpressions theFormat;
-  CalculatorConversions::innerStoreSemisimpleSubalgebras(global.calculator().getElement(), input, tempE);
-  theFormat.flagUseHTML = true;
-  return tempE.toString(&theFormat);
+  FormatExpressions format;
+  CalculatorConversions::storeSemisimpleSubalgebras(global.calculator().getElement(), input, tempE);
+  format.flagUseHTML = true;
+  return tempE.toString(&format);
 }
 
-bool CalculatorConversions::innerStoreSemisimpleSubalgebras(
+bool CalculatorConversions::storeSemisimpleSubalgebras(
   Calculator& calculator, const SemisimpleSubalgebras& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerStoreSemisimpleSubalgebras");
+  MacroRegisterFunctionWithName("CalculatorConversions::storeSemisimpleSubalgebras");
   Expression dynkinTypeE;
-  List<std::string> theKeys;
-  List<Expression> theValues;
+  List<std::string> keys;
+  List<Expression> values;
   if (!CalculatorConversions::innerExpressionFromDynkinType(
     calculator, input.owner->weylGroup.dynkinType, dynkinTypeE
   )) {
     return false;
   }
-  theKeys.addOnTop("AmbientDynkinType");
-  theValues.addOnTop(dynkinTypeE);
+  keys.addOnTop("AmbientDynkinType");
+  values.addOnTop(dynkinTypeE);
 
   Expression currentChainE, numericalConvertorE(calculator);
   currentChainE.makeSequence(calculator);
@@ -745,24 +745,24 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(
     numericalConvertorE = input.currentSubalgebraChain[i].indexInOwner;
     currentChainE.addChildOnTop(numericalConvertorE);
   }
-  theKeys.addOnTop("CurrentChain");
-  theValues.addOnTop(currentChainE);
+  keys.addOnTop("CurrentChain");
+  values.addOnTop(currentChainE);
   Expression numTypesExploredE;
   numTypesExploredE.makeSequence(calculator);
   for (int i = 0; i < input.currentNumberOfLargerTypesExplored.size; i ++) {
     numericalConvertorE = input.currentNumberOfLargerTypesExplored[i];
     numTypesExploredE.addChildOnTop(numericalConvertorE);
   }
-  theKeys.addOnTop("NumExploredTypes");
-  theValues.addOnTop(numTypesExploredE);
+  keys.addOnTop("NumExploredTypes");
+  values.addOnTop(numTypesExploredE);
   Expression numHsExploredE;
   numHsExploredE.makeSequence(calculator);
   for (int i = 0; i < input.currentNumberOfHCandidatesExplored.size; i ++) {
     numericalConvertorE = input.currentNumberOfHCandidatesExplored[i];
     numHsExploredE.addChildOnTop(numericalConvertorE);
   }
-  theKeys.addOnTop("NumExploredHs");
-  theValues.addOnTop(numHsExploredE);
+  keys.addOnTop("NumExploredHs");
+  values.addOnTop(numHsExploredE);
   Expression subalgebrasListE, candidateE;
   subalgebrasListE.makeSequence(calculator);
   subalgebrasListE.setExpectedSize(input.subalgebras.values.size + 1);
@@ -772,9 +772,9 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(
     }
     subalgebrasListE.addChildOnTop(candidateE);
   }
-  theKeys.addOnTop("Subalgebras");
-  theValues.addOnTop(subalgebrasListE);
-  return output.makeSequenceCommands(calculator, theKeys, theValues);
+  keys.addOnTop("Subalgebras");
+  values.addOnTop(subalgebrasListE);
+  return output.makeSequenceCommands(calculator, keys, values);
 }
 
 bool CalculatorConversions::innerExpressionFromMonomialUE(

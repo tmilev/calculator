@@ -182,7 +182,7 @@ MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionGeneratorIndex
   MatrixTensor<Coefficient>& output = this->actionsGeneratorsMaT[generatorIndex];
   if (this->getOwner().isGeneratorFromCartan(generatorIndex)) {
     output.makeZero();
-    MonomialMatrix theMon;
+    MonomialMatrix monomial;
     Vector<Coefficient> weightH;
     Coefficient tempCF, hwCFshift;
     weightH.makeEi(this->getOwner().getRank(), generatorIndex - this->getOwner().getNumberOfPositiveRoots());
@@ -192,10 +192,10 @@ MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionGeneratorIndex
       Vector<Rational>& theWeight = this->theGeneratingWordsWeightsPlusWeightFDpart[i];
       tempCF = this->getOwner().weylGroup.rootScalarCartanRoot(weightH, theWeight);
       tempCF += hwCFshift;
-      theMon.isIdentity = false;
-      theMon.vIndex = i;
-      theMon.dualIndex = i;
-      output.addMonomial(theMon, tempCF);
+      monomial.isIdentity = false;
+      monomial.vIndex = i;
+      monomial.dualIndex = i;
+      output.addMonomial(monomial, tempCF);
     }
     return output;
   }
@@ -1085,10 +1085,10 @@ ElementTensorsGeneralizedVermas<Coefficient>& ElementTensorsGeneralizedVermas<
   Coefficient
 >::operator=(const ElementSumGeneralizedVermas<Coefficient>& other) {
   this->makeZero();
-  MonomialTensorGeneralizedVermas<Coefficient> theMon;
+  MonomialTensorGeneralizedVermas<Coefficient> monomial;
   for (int i = 0; i < other.size(); i ++) {
-    theMon = other[i];
-    this->addMonomial(theMon, other.coefficients[i]);
+    monomial = other[i];
+    this->addMonomial(monomial, other.coefficients[i]);
   }
   return *this;
 }
@@ -1135,9 +1135,9 @@ void ElementTensorsGeneralizedVermas<Coefficient>::makeHWV(
   Coefficient currentCoeff;
   currentCoeff = ringUnit;
   tensorMon.monomials.setSize(1);
-  MonomialGeneralizedVerma<Coefficient>& theMon = tensorMon.monomials[0];
-  theMon.indexFDVector = theOwner.theGeneratingWordsNonReduced.size - 1;
-  theMon.makeConstant(theOwner);
+  MonomialGeneralizedVerma<Coefficient>& monomial = tensorMon.monomials[0];
+  monomial.indexFDVector = theOwner.theGeneratingWordsNonReduced.size - 1;
+  monomial.makeConstant(theOwner);
   this->makeZero();
   this->addMonomial(tensorMon, ringUnit);
 }
@@ -1727,7 +1727,7 @@ std::string MonomialGeneralizedVerma<Coefficient>::toString(FormatExpressions* f
   if (tempS == "- 1" || tempS == "-1") {
     tempS = "-";
   }
-  tempS += this->theMonCoeffOne.toString(format);
+  tempS += this->monomialCoefficientOne.toString(format);
   if (tempS == "1") {
     tempS = "";
   }
@@ -1755,7 +1755,7 @@ template <class Coefficient>
 void MonomialGeneralizedVerma<Coefficient>::substitution(
   const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<Coefficient> >& theMods
 ) {
-  this->theMonCoeffOne.substitution(theSub);
+  this->monomialCoefficientOne.substitution(theSub);
   ModuleSSalgebra<Coefficient> newOwner;
   newOwner = *this->owner;
   newOwner.substitution(theSub);
@@ -1784,8 +1784,8 @@ void MonomialGeneralizedVerma<Coefficient>::multiplyMeByUEEltOnTheLeft(
     << global.fatal;
   }
   for (int j = 0; j < theUE.size(); j ++) {
-    currentMon.theMonCoeffOne = theUE[j];
-    currentMon.theMonCoeffOne *= this->theMonCoeffOne;
+    currentMon.monomialCoefficientOne = theUE[j];
+    currentMon.monomialCoefficientOne *= this->monomialCoefficientOne;
     currentMon.owner = this->owner;
     currentMon.indexFDVector = this->indexFDVector;
     currentMon.owner = this->owner;
@@ -1824,7 +1824,7 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
   ModuleSSalgebra<Coefficient>& theMod = *this->owner;
   output.makeZero();
   MonomialUniversalEnveloping<Coefficient> tempMon;
-  tempMon = this->theMonCoeffOne;
+  tempMon = this->monomialCoefficientOne;
   tempMon *= theMod.theGeneratingWordsNonReduced[this->indexFDVector];
   int indexCheck = theMod.theGeneratingWordsNonReduced.getIndex(tempMon);
   if (!this->owner->owner->flagHasNilradicalOrder) {
@@ -1839,7 +1839,7 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
   }
   ElementUniversalEnveloping<Coefficient> theUEelt;
   theUEelt.makeZero(*this->getOwner().owner);
-  theUEelt.addMonomial(this->theMonCoeffOne, 1);
+  theUEelt.addMonomial(this->monomialCoefficientOne, 1);
   theUEelt.simplify();
 
   MonomialUniversalEnveloping<Coefficient> currentMon;
@@ -1884,7 +1884,7 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
         otherIndex = this->indexFDVector;
       }
       if (otherIndex != - 1) {
-        newMon.theMonCoeffOne = currentMon;
+        newMon.monomialCoefficientOne = currentMon;
         newMon.indexFDVector = otherIndex;
         theCF = theUEelt.coefficients[l];
         theCF *= tempMat1.coefficients[i];
@@ -1900,11 +1900,11 @@ void ElementSumGeneralizedVermas<Coefficient>::makeHWV(
   ModuleSSalgebra<Coefficient>& theOwner, const Coefficient& ringUnit
 ) {
   this->makeZero();
-  MonomialGeneralizedVerma<Coefficient> theMon;
-  theMon.indexFDVector = theOwner.theGeneratingWordsNonReduced.size - 1;
-  theMon.theMonCoeffOne.makeOne(theOwner.getOwner());
-  theMon.owner = &theOwner;
-  this->addMonomial(theMon, ringUnit);
+  MonomialGeneralizedVerma<Coefficient> monomial;
+  monomial.indexFDVector = theOwner.theGeneratingWordsNonReduced.size - 1;
+  monomial.monomialCoefficientOne.makeOne(theOwner.getOwner());
+  monomial.owner = &theOwner;
+  this->addMonomial(monomial, ringUnit);
 }
 
 template<class Coefficient>
@@ -1922,7 +1922,7 @@ bool ElementSumGeneralizedVermas<Coefficient>::extractElementUniversalEnveloping
     if (currentMon.owner != theModPtr) {
       return false;
     }
-    tempMon = currentMon.theMonCoeffOne;
+    tempMon = currentMon.monomialCoefficientOne;
     tempMon *= currentMon.getOwner().theGeneratingWordsNonReduced[currentMon.indexFDVector];
     output.addMonomial(tempMon, this->coefficients[i]);
   }

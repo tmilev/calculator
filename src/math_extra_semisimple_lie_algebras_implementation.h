@@ -191,11 +191,11 @@ void CharacterSemisimpleLieAlgebraModule<Coefficient>::makeFromWeight(
     << inputWeightSimpleCoords.size << " coordinates) while the owner semisimple "
     << " Lie algebra is of rank " << (inputOwner->getRank()) << global.fatal;
   }
-  Weight<Coefficient> theMon;
-  theMon.owner = inputOwner;
-  theMon.weightFundamentalCoordinates =
+  Weight<Coefficient> monomial;
+  monomial.owner = inputOwner;
+  monomial.weightFundamentalCoordinates =
   inputOwner->weylGroup.getFundamentalCoordinatesFromSimple(inputWeightSimpleCoords);
-  this->addMonomial(theMon, 1);
+  this->addMonomial(monomial, 1);
 }
 
 template <class Coefficient>

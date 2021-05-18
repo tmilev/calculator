@@ -9,7 +9,7 @@ template<class Coefficient>
 class MonomialGeneralizedVerma {
   public:
   ModuleSSalgebra<Coefficient>* owner;
-  MonomialUniversalEnveloping<Coefficient> theMonCoeffOne;
+  MonomialUniversalEnveloping<Coefficient> monomialCoefficientOne;
   int indexFDVector;
   MonomialGeneralizedVerma(): owner(nullptr), indexFDVector(- 1) {
   }
@@ -24,13 +24,13 @@ class MonomialGeneralizedVerma {
   void operator=(const MonomialGeneralizedVerma<Coefficient>& other) {
     this->owner = other.owner;
     this->indexFDVector = other.indexFDVector;
-    this->theMonCoeffOne = other.theMonCoeffOne;
+    this->monomialCoefficientOne = other.monomialCoefficientOne;
   }
 
   std::string toString(FormatExpressions* format = nullptr, bool includeV = true) const;
   bool operator==(const MonomialGeneralizedVerma<Coefficient>& other) const {
     if (this->indexFDVector == other.indexFDVector && this->owner == other.owner) {
-      return this->theMonCoeffOne == other.theMonCoeffOne;
+      return this->monomialCoefficientOne == other.monomialCoefficientOne;
     }
     return false;
   }
@@ -38,7 +38,7 @@ class MonomialGeneralizedVerma {
     if (this->owner->size <= this->indexInOwner) {
       global.fatal << "Crash in setNumberOfVariables: bad number of variables. " << global.fatal;
     }
-    this->theMonCoeffOne.setNumberOfVariables(goalNumVars);
+    this->monomialCoefficientOne.setNumberOfVariables(goalNumVars);
     this->owner->objects[this->indexInOwner].setNumberOfVariables(goalNumVars);
   }
   void substitution(
@@ -57,18 +57,18 @@ class MonomialGeneralizedVerma {
     if (this->indexFDVector != other.indexFDVector) {
       return this->indexFDVector > other.indexFDVector;
     }
-    return this->theMonCoeffOne > other.theMonCoeffOne;
+    return this->monomialCoefficientOne > other.monomialCoefficientOne;
   }
   void reduceMe(ElementSumGeneralizedVermas<Coefficient>& output) const;
   bool isHWV() const {
-    if (!this->theMonCoeffOne.isEqualToOne()) {
+    if (!this->monomialCoefficientOne.isEqualToOne()) {
       return false;
     }
     return this->getOwner().getDimension() - 1 == this->indexFDVector;
   }
   void makeConstant(ModuleSSalgebra<Coefficient>& inputOwner) {
     this->owner = &inputOwner;
-    this->theMonCoeffOne.makeOne(*inputOwner.owner);
+    this->monomialCoefficientOne.makeOne(*inputOwner.owner);
   }
   ModuleSSalgebra<Coefficient>& getOwner() const {
     return *this->owner;

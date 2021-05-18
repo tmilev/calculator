@@ -2746,7 +2746,8 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
   for (int i = startingIndex; i < allTypes.size; i ++) {
     std::stringstream reportStream;
     reportStream << "Computing structure of subalgebra "
-    << allTypes[i].toString() << " (" << i + 1 << " out of " << allTypes.size << ").";
+    << allTypes[i].toString() << " (" << i + 1
+    << " out of " << allTypes.size << ").";
     report.report(reportStream.str());
     SemisimpleLieAlgebra algebra;
     algebra.weylGroup.makeFromDynkinType(allTypes[i]);
@@ -2758,14 +2759,15 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
     theSl2s.writeHTML();
     algebra.writeHTML(true, false);
     if (allTypes[i].hasPrecomputedSubalgebras()) {
-      SemisimpleSubalgebras theSubalgebras;
+      SemisimpleSubalgebras subalgebras;
       MapReferences<DynkinType, SemisimpleLieAlgebra> subalgebrasContainer;
       ListReferences<SlTwoSubalgebras> sl2Conainer;
-      if (!theSubalgebras.computeStructureWriteFiles(
+      if (!subalgebras.computeStructureWriteFiles(
         algebra,
         calculator.objectContainer.algebraicClosure,
         subalgebrasContainer,
         sl2Conainer,
+        CalculatorConversions::stringFromSemisimpleSubalgebras,
         nullptr,
         false,
         true,

@@ -48,7 +48,7 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimirWRTLeviParabolic(
   Vector<Rational> rootsNotInLeviVectorForm = rootsNotInLEvi;
   Vector<Rational> theWeightLeft, theWeightRight;
   this->makeZero(theOwner);
-  MonomialUniversalEnveloping<Coefficient> theMon;
+  MonomialUniversalEnveloping<Coefficient> monomial;
   Rational theCF;
   //Coefficient theCFconverted;
   for (int i = 0; i < theOwner.getNumberOfGenerators(); i ++) {
@@ -59,17 +59,17 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimirWRTLeviParabolic(
     if (theWeightLeft.isEqualToZero()) {
       continue;
     }
-    theMon.makeOne(theOwner);
+    monomial.makeOne(theOwner);
     int indexOpposite = theOwner.getGeneratorIndexFromRoot(- theWeightLeft);
-    theMon.generatorsIndices.addOnTop(i);
-    theMon.generatorsIndices.addOnTop(indexOpposite);
-    theMon.powers.addOnTop(1);
-    theMon.powers.addOnTop(1);
+    monomial.generatorsIndices.addOnTop(i);
+    monomial.generatorsIndices.addOnTop(indexOpposite);
+    monomial.powers.addOnTop(1);
+    monomial.powers.addOnTop(1);
     leftE.makeGenerator(i, theOwner);
     rightE.makeGenerator(indexOpposite, theOwner);
     theCF = theOwner.getKillingFormProductWRTLevi(leftE, rightE, rootsNotInLEvi);
     theCF.invert();
-    this->addMonomial(theMon, theCF);
+    this->addMonomial(monomial, theCF);
   }
   Matrix<Rational> killingRestrictedToCartan;
   killingRestrictedToCartan.initialize(theLeviRoots.cardinalitySelection, theLeviRoots.cardinalitySelection);
@@ -572,14 +572,14 @@ void ElementUniversalEnveloping<Coefficient>::substitution(
 ) {
   ElementUniversalEnveloping<Coefficient> output;
   output.makeZero(*this->owner);
-  MonomialUniversalEnveloping<Coefficient> theMon;
+  MonomialUniversalEnveloping<Coefficient> monomial;
   Coefficient tempCF;
   for (int i = 0; i < this->size(); i ++) {
-    theMon = (*this)[i];
-    theMon.substitution(theSub);
+    monomial = (*this)[i];
+    monomial.substitution(theSub);
     tempCF = this->coefficients[i];
     tempCF.substitution(theSub, 1, nullptr);
-    output.addMonomial(theMon, tempCF);
+    output.addMonomial(monomial, tempCF);
   }
   *this = output;
 }
@@ -1353,16 +1353,16 @@ bool ElementUniversalEnvelopingOrdered<Coefficient>::isProportionalTo(
   if (other.size != this->size) {
     return false;
   }
-  MonomialUniversalEnvelopingOrdered<Coefficient>& theMon = (*this)[0];
-  int theIndex = other.getIndex(theMon);
+  MonomialUniversalEnvelopingOrdered<Coefficient>& monomial = (*this)[0];
+  int theIndex = other.getIndex(monomial);
   if (theIndex == - 1) {
     return false;
   }
   MonomialUniversalEnvelopingOrdered<Coefficient>& otherMon = other[theIndex];
-  theMon.ComputeDebugString();
+  monomial.ComputeDebugString();
   otherMon.ComputeDebugString();
   outputTimesMeEqualsOther = otherMon.theCoefficient;
-  outputTimesMeEqualsOther /= theMon.theCoefficient;
+  outputTimesMeEqualsOther /= monomial.theCoefficient;
   ElementUniversalEnvelopingOrdered<Coefficient> tempElt;
 
   tempElt = *this;
@@ -1864,7 +1864,7 @@ bool ElementUniversalEnvelopingOrdered<Coefficient>::assignMonomialUniversalEnve
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) {
-  ElementUniversalEnvelopingOrdered theMon;
+  ElementUniversalEnvelopingOrdered monomial;
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   Coefficient theCoeff;
   theCoeff = inputCoeff;
@@ -1876,12 +1876,12 @@ bool ElementUniversalEnvelopingOrdered<Coefficient>::assignMonomialUniversalEnve
       tempElt.makeGenerator(
         input.generatorsIndices.objects[i], *input.owners, input.indexInOwners
       );
-      theMon.assignElementLieAlgebra(tempElt, ringUnit, ringZero, owner);
-      theMon.raiseToPower(thePower, ringUnit);
+      monomial.assignElementLieAlgebra(tempElt, ringUnit, ringZero, owner);
+      monomial.raiseToPower(thePower, ringUnit);
     } else {
       return false;
     }
-    this->multiplyBy(theMon);
+    this->multiplyBy(monomial);
   }
   return true;
 }

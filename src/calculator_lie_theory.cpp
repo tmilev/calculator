@@ -2276,7 +2276,7 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
   invertedParSel = parSel;
   invertedParSel.invertSelection();
   CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > theChar, currentChar;
-  Weight<RationalFraction<Rational> > theMon;
+  Weight<RationalFraction<Rational> > monomial;
   theChar.makeZero();
   FormatExpressions formatChars;
   formatChars.FDrepLetter = "L";
@@ -2296,14 +2296,14 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
       << "There is a bug somewhere; crashing in accordance. " << global.fatal;
     }
     currentChar.makeZero();
-    theMon.owner = theSSlieAlg.content;
+    monomial.owner = theSSlieAlg.content;
     for (int j = 0; j < theKLpolys.kazhdanLuzstigCoefficients[indexInWeyl].size; j ++) {
       if (!theKLpolys.kazhdanLuzstigCoefficients[indexInWeyl][j].isEqualToZero()) {
         currentHW = theHWsimpCoords;
         theWeyl.actOnRhoModified(j, currentHW);
-        theMon.weightFundamentalCoordinates = theWeyl.getFundamentalCoordinatesFromSimple(currentHW);
+        monomial.weightFundamentalCoordinates = theWeyl.getFundamentalCoordinatesFromSimple(currentHW);
         int sign = (currentElement.generatorsLastAppliedFirst.size - theWeyl.group.elements[j].generatorsLastAppliedFirst.size) % 2 == 0 ? 1 : - 1;
-        currentChar.addMonomial(theMon, theKLpolys.kazhdanLuzstigCoefficients[indexInWeyl][j] * sign);
+        currentChar.addMonomial(monomial, theKLpolys.kazhdanLuzstigCoefficients[indexInWeyl][j] * sign);
       }
     }
     currentHW = theHWsimpCoords;
@@ -3087,6 +3087,7 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
     calculator.objectContainer.algebraicClosure,
     calculator.objectContainer.semisimpleLieAlgebras,
     calculator.objectContainer.slTwoSubalgebras,
+    CalculatorConversions::stringFromSemisimpleSubalgebras,
     &out,
     doForceRecompute,
     !isAlreadySubalgebrasObject,

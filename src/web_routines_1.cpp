@@ -70,8 +70,8 @@ public:
 };
 
 void monitorWebServer(int pidServer, const std::string& pingAuthentication) {
-  WebServerMonitor theMonitor;
-  theMonitor.monitor(pidServer, pingAuthentication);
+  WebServerMonitor monitor;
+  monitor.monitor(pidServer, pingAuthentication);
 }
 
 WebServerMonitor::WebServerMonitor() {

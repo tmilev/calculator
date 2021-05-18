@@ -430,8 +430,8 @@ void SemisimpleSubalgebras::checkFileWritePermissions() {
 
 void SemisimpleSubalgebras::writeReportToFiles() {
   this->millisecondsComputationEnd = global.getElapsedMilliseconds();
-  this->numAdditions = Rational::totalSmallAdditions + Rational::totalLargeAdditions;
-  this->numMultiplications = Rational::totalSmallMultiplications + Rational::totalLargeMultiplications;
+  this->numberOfAdditions = Rational::totalSmallAdditions + Rational::totalLargeAdditions;
+  this->numberOfMultiplications = Rational::totalSmallMultiplications + Rational::totalLargeMultiplications;
   this->currentFormat.flagUseHTML = true;
   this->currentFormat.flagUseLatex = true;
   this->currentFormat.flagUseMathSpanPureVsMouseHover = true;
@@ -451,7 +451,7 @@ std::string SemisimpleSubalgebras::toStringHTML() {
   out << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements();
   out << SemisimpleLieAlgebra::toHTMLCalculatorBodyOnload() ;
 
-  out<< this->toString(&this->currentFormat, true);
+  out << this->toString(&this->currentFormat, true);
   out << "</body></html>";
   return out.str();
 }
@@ -653,10 +653,10 @@ std::string SemisimpleSubalgebras::toString(FormatExpressions* format, bool writ
       << this->millisecondsComputationEnd - this->millisecondsComputationStart << ".";
     }
   }
-  if (this->numAdditions > 0) {
-    out << "<br>" << this->numAdditions + this->numMultiplications << " total arithmetic operations performed = "
-    << this->numAdditions << " additions and "
-    << this->numMultiplications << " multiplications. ";
+  if (this->numberOfAdditions > 0) {
+    out << "<br>" << this->numberOfAdditions + this->numberOfMultiplications << " total arithmetic operations performed = "
+    << this->numberOfAdditions << " additions and "
+    << this->numberOfMultiplications << " multiplications. ";
   }
   out << this->toStringPart2(format, writeToHardDisk);
   return out.str();
@@ -934,9 +934,9 @@ void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand() {
     element.makeSimpleReflection(i, weylAutomorphisms);
     generators.addOnTop(element);
   }
-  List<MatrixTensor<Rational> >& outerAutos = weylAutomorphisms.outerAutomorphisms.generators;
-  for (int i = 0; i < outerAutos.size; i ++) {
-    if (!outerAutos[i].isIdentity()) {
+  List<MatrixTensor<Rational> >& outerAutomorphisms = weylAutomorphisms.outerAutomorphisms.generators;
+  for (int i = 0; i < outerAutomorphisms.size; i ++) {
+    if (!outerAutomorphisms[i].isIdentity()) {
       element.makeOuterAuto(i, weylAutomorphisms);
       generators.addOnTop(element);
     }
@@ -950,16 +950,16 @@ void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand() {
 
 bool SemisimpleSubalgebras::loadState(
   List<int>& currentChainInt,
-  List<int>& numExploredTypes,
-  List<int>& numExploredHs,
+  List<int>& numberOfExploredTypes,
+  List<int>& numberOfExploredHs,
   std::stringstream& reportStream
 ) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::loadState");
   this->findSemisimpleSubalgebrasInitialize();
-  if (currentChainInt.size != numExploredTypes.size || currentChainInt.size != numExploredHs.size) {
+  if (currentChainInt.size != numberOfExploredTypes.size || currentChainInt.size != numberOfExploredHs.size) {
     reportStream << "<hr>Input state is corrupt: currentChainInt.size: "
     << currentChainInt.size << ", numExploredTypes.size: "
-    << numExploredTypes.size << ", numExploredHs.size: " << numExploredHs.size;
+    << numberOfExploredTypes.size << ", numExploredHs.size: " << numberOfExploredHs.size;
     return false;
   }
   this->currentHCandidatesScaledToActByTwo.setSize(0);
@@ -972,7 +972,7 @@ bool SemisimpleSubalgebras::loadState(
     if (currentChainInt[i] == - 1 && i == 0) {
       CandidateSemisimpleSubalgebra emptySA;
       this->makeEmptyCandidateSubalgebra(emptySA);
-      this->addSubalgebraToStack(emptySA, numExploredTypes[i], numExploredHs[i]);
+      this->addSubalgebraToStack(emptySA, numberOfExploredTypes[i], numberOfExploredHs[i]);
       continue;
     }
     if (currentChainInt[i] < 0 || currentChainInt[i] >= this->subalgebras.values.size) {
@@ -1016,7 +1016,7 @@ bool SemisimpleSubalgebras::loadState(
       << " and h-elements in order induced by the type: " << this->baseSubalgebra().cartanElementsSubalgebra.toString();
       return false;
     }
-    this->addSubalgebraToStack(currentSA, numExploredTypes[i], numExploredHs[i]);
+    this->addSubalgebraToStack(currentSA, numberOfExploredTypes[i], numberOfExploredHs[i]);
   }
   return true;
 }
@@ -1100,6 +1100,108 @@ void SemisimpleSubalgebras::makeCandidateSubalgebra(
   }
 }
 
+void DynkinType::getPrecomputedDynkinTypes(List<DynkinType>& output) {
+  MacroRegisterFunctionWithName("DynkinType::getPrecomputedDynkinTypes");
+  output.setSize(0);
+  DynkinType dynkinType;
+  dynkinType.makeSimpleType('F', 4);
+  output.addOnTop(dynkinType);
+  for (int i = 6; i <= 8; i ++) {
+    dynkinType.makeSimpleType('E', i);
+    output.addOnTop(dynkinType);
+  }
+  dynkinType.makeSimpleType('G', 2);
+  output.addOnTop(dynkinType);
+  for (int i = 1; i <= 11; i ++) {
+    dynkinType.makeSimpleType('A', i);
+    output.addOnTop(dynkinType);
+  }
+  for (int i = 4; i <= 8; i ++) {
+    dynkinType.makeSimpleType('D', i);
+    output.addOnTop(dynkinType);
+  }
+  for (int i = 2; i <= 8; i ++) {
+    dynkinType.makeSimpleType('B', i);
+    output.addOnTop(dynkinType);
+  }
+  for (int i = 3; i <= 8; i ++) {
+    dynkinType.makeSimpleType('C', i);
+    output.addOnTop(dynkinType);
+  }
+}
+
+bool SemisimpleSubalgebras::computeStructureWriteFiles(
+  SemisimpleLieAlgebra& newOwner,
+  AlgebraicClosureRationals& ownerField,
+  MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
+  ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
+  std::string (*toStringExpression)(SemisimpleSubalgebras&),
+  std::stringstream* outputStream,
+  bool forceRecompute,
+  bool doFullInitialization,
+  bool computeNilradicals,
+  bool computeModuleDecomposition,
+  bool attemptToSolveSystems,
+  bool computePairingTable,
+  bool adjustCentralizers
+) {
+  MacroRegisterFunctionWithName("SemisimpleSubalgebras::computeStructureWriteFiles");
+  this->toStringExpressionString = toStringExpression;
+  this->owner = &newOwner;
+  this->computeFolderNames(this->currentFormat);
+  if (!FileOperations::fileExistsVirtual(this->virtualNameMainFile1) || forceRecompute) {
+    if (doFullInitialization) {
+      this->millisecondsComputationStart = global.getElapsedMilliseconds();
+    }
+    this->flagComputeNilradicals = computeNilradicals;
+    this->flagcomputeModuleDecompositionsition = computeModuleDecomposition;
+    this->flagAttemptToSolveSystems = attemptToSolveSystems;
+    this->flagcomputePairingTable = computePairingTable;
+    this->flagAttemptToAdjustCentralizers = adjustCentralizers;
+    this->checkFileWritePermissions();
+    if (doFullInitialization) {
+      this->findTheSemisimpleSubalgebrasFromScratch(
+        newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras, nullptr
+      );
+    }
+    this->writeReportToFiles();
+    this->slTwoSubalgebras.writeHTML();
+    this->owner->writeHTML(true, false);
+  } else {
+    if (outputStream != nullptr) {
+      *outputStream << "Files precomputed, serving from HD. ";
+    }
+  }
+  if (outputStream != nullptr) {
+    *outputStream << "<hr>Semisimple subalgebras: <a href='"
+    << this->displayNameMainFile1WithPath << "' target = '_blank'>"
+    << this->displayNameMainFile1NoPath << "</a>"
+    << "<hr>"
+    << "<a href='"
+    << this->owner->fileNames.displayFolderName("../../output/")
+    << this->owner->fileNames.fileNameRelativePathSlTwoSubalgebras()
+    << "' target='_blank'>sl(2)-sublagberas</a>";
+  }
+  return true;
+}
+
+bool SemisimpleSubalgebras::computeStructureRealFormsWriteFiles(
+  SemisimpleLieAlgebra& newOwner,
+  AlgebraicClosureRationals& ownerField,
+  MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
+  ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
+  std::stringstream* outputStream
+) {
+  this->computeStructureRealForms(
+    newOwner,
+    ownerField,
+    containerSubalgebras,
+    containerSl2Subalgebras
+  );
+  this->writeFilesRealForms(outputStream);
+  return true;
+}
+
 bool SemisimpleSubalgebras::computeStructureRealFormsInitialize(
   SemisimpleLieAlgebra& newOwner,
   AlgebraicClosureRationals& ownerField,
@@ -1120,37 +1222,36 @@ bool SemisimpleSubalgebras::computeStructureRealForms(
   SemisimpleLieAlgebra& newOwner,
   AlgebraicClosureRationals& ownerField,
   MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
-  ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
-  std::stringstream* outputStream
+  ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras
 ) {
   this->computeStructureRealFormsInitialize(
     newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras
   );
   this->owner->findSl2Subalgebras(newOwner, this->slTwoSubalgebras, &ownerField);
-  this->computeStructureRealFormsSlTwos(outputStream);
+  this->computeStructureRealFormsSlTwos();
   return true;
 }
 
-bool SemisimpleSubalgebras::computeStructureRealFormsSlTwos(
-  std::stringstream* outputStream
-) {
+bool SemisimpleSubalgebras::computeStructureRealFormsSlTwos() {
   CandidateSemisimpleSubalgebra emptyCandidate;
   this->makeEmptyCandidateSubalgebra(emptyCandidate);
   this->addSubalgebraToStack(emptyCandidate, 0, 0);
   for (int i = 0; i < this->slTwoSubalgebras.size; i ++) {
-    this->computeStructureRealFormOneSlTwo(this->slTwoSubalgebras[i], outputStream);
+    this->computeStructureRealFormOneSlTwo(this->slTwoSubalgebras[i]);
   }
   return true;
 }
 
 bool SemisimpleSubalgebras::computeStructureRealFormOneSlTwo(
-  const SlTwoSubalgebra& input, std::stringstream* outputStream
+  const SlTwoSubalgebra& input
 ) {
   CandidateSemisimpleSubalgebra candidate;
-  candidate.indexIamInducedFrom = 0;
+  candidate.indexInducedFrom = 0;
   DynkinType incomingType;
   input.computeDynkinTypeEmbedded(incomingType);
   this->makeCandidateSubalgebra(incomingType, candidate);
+  this->addSubalgebraIfNewSetToStackTop(candidate);
+  this->removeLastSubalgebraFromStack();
   return true;
 }
 
@@ -1158,10 +1259,18 @@ bool SemisimpleSubalgebras::writeFilesRealForms(std::stringstream* outputStream)
   this->fileNamePrefix = "real_form_";
   FormatExpressions format;
   this->computeFolderNames(format);
-  std::string content = this->toStringHTML();
+  std::stringstream content;
+  content << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
+  << this->owner->weylGroup.dynkinType.toString()
+  << "</title>";
+  content << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements();
+  content << SemisimpleLieAlgebra::toHTMLCalculatorBodyOnload() ;
+
+  content << this->toString(&this->currentFormat, true);
+  content << "</body></html>";
   std::string fileName = this->owner->fileNames.virtualFolderName() +
   this->owner->fileNames.fileNameSlTwoRealFormSubalgebraStructure();
-  return FileOperations::writeFileVirual(fileName, content, outputStream);
+  return FileOperations::writeFileVirual(fileName, content.str(), outputStream);
 }
 
 bool SemisimpleSubalgebras::findTheSemisimpleSubalgebrasFromScratch(
@@ -1305,7 +1414,7 @@ void CandidateSemisimpleSubalgebra::setUpInjectionHs(
 }
 
 void CandidateSemisimpleSubalgebra::computeHsAndHsScaledToActByTwoFromComponents() {
-  MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::ComputeHsScaledToActByTwo");
+  MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::computeHsAndHsScaledToActByTwoFromComponents");
   this->cartanElementsScaledToActByTwo.assignListList(this->cartanSubalgebrasByComponentScaledToActByTwo);
   this->cartanElementsSubalgebra.setSize(this->cartanElementsScaledToActByTwo.size);
   Matrix<Rational> cartanInComponentOrder;
@@ -1320,12 +1429,12 @@ void CandidateSemisimpleSubalgebra::computeHsAndHsScaledToActByTwoFromComponents
   this->indexNonEmbeddedMeNonStandardCartan =
   this->owner->subalgebrasNonDefaultCartanAndScale.getIndex(cartanInComponentOrder);
   int counter = - 1;
-  List<DynkinSimpleType> theTypes;
-  this->weylNonEmbedded->dynkinType.getTypesWithMults(theTypes);
+  List<DynkinSimpleType> dynkinTypes;
+  this->weylNonEmbedded->dynkinType.getTypesWithMults(dynkinTypes);
   for (int i = 0; i < this->cartanSubalgebrasByComponentScaledToActByTwo.size; i ++) {
     for (int j = 0; j < this->cartanSubalgebrasByComponentScaledToActByTwo[i].size; j ++) {
       counter ++;
-      this->cartanElementsSubalgebra[counter] = (this->cartanElementsScaledToActByTwo[counter] * theTypes[i].getDefaultRootLengthSquared(j)) / 2;
+      this->cartanElementsSubalgebra[counter] = (this->cartanElementsScaledToActByTwo[counter] * dynkinTypes[i].getDefaultRootLengthSquared(j)) / 2;
     }
   }
 }
@@ -1335,8 +1444,9 @@ bool SemisimpleSubalgebras::setUpParabolicInductionDataPrecomputedSubalgebra(
 ) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::setUpParabolicInductionDataPrecomputedSubalgebra");
   int indexPrecomputed = this->subalgebras.getIndex(candidate.cartanElementsSubalgebra);
-  if (indexPrecomputed == - 1)
+  if (indexPrecomputed == - 1) {
     return false;
+  }
   if (
     this->subalgebras.values[indexPrecomputed].hsScaledToActByTwoInOrderOfCreation.size !=
     candidate.cartanElementsSubalgebra.size
@@ -1344,7 +1454,7 @@ bool SemisimpleSubalgebras::setUpParabolicInductionDataPrecomputedSubalgebra(
     this->subalgebras.values[indexPrecomputed].hsScaledToActByTwoInOrderOfCreation =
     candidate.hsScaledToActByTwoInOrderOfCreation;
   }
-  this->subalgebras.values[indexPrecomputed].indexIamInducedFrom = candidate.indexIamInducedFrom;
+  this->subalgebras.values[indexPrecomputed].indexInducedFrom = candidate.indexInducedFrom;
   this->subalgebras.values[indexPrecomputed].rootInjectionsFromInducer = candidate.rootInjectionsFromInducer;
   candidate = this->subalgebras.values[indexPrecomputed];
   return candidate.computeAndVerifyFromGeneratorsAndHs();
@@ -1358,7 +1468,7 @@ bool CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra(
 ) {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra");
   this->setUpInjectionHs(baseSubalgebra, newType, rootInjection, &newHrescaledToActByTwo);
-  this->indexIamInducedFrom = baseSubalgebra.indexInOwner;
+  this->indexInducedFrom = baseSubalgebra.indexInOwner;
   this->rootInjectionsFromInducer = rootInjection;
   //induction history is complete.
   if (this->owner->setUpParabolicInductionDataPrecomputedSubalgebra(*this)) {
@@ -1672,8 +1782,8 @@ const CandidateSemisimpleSubalgebra& SemisimpleSubalgebras::baseSubalgebra() {
   return *this->currentSubalgebraChain.lastObject();
 }
 
-bool SemisimpleSubalgebras::removeLastSubalgebra() {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::removeLastSubalgebra");
+bool SemisimpleSubalgebras::removeLastSubalgebraFromStack() {
+  MacroRegisterFunctionWithName("SemisimpleSubalgebras::removeLastSubalgebraFromStack");
   this->currentSubalgebraChain.setSize(this->currentSubalgebraChain.size- 1);
   this->currentPossibleLargerDynkinTypes.setSize(this->currentSubalgebraChain.size);
   this->currentNumberOfLargerTypesExplored.setSize(this->currentSubalgebraChain.size);
@@ -2052,7 +2162,9 @@ void SemisimpleSubalgebras::addSubalgebraIfNewSetToStackTop(CandidateSemisimpleS
 }
 
 void SemisimpleSubalgebras::addSubalgebraToStack(
-  CandidateSemisimpleSubalgebra& input, int inputNumLargerTypesExplored, int inputNumHcandidatesExplored
+  CandidateSemisimpleSubalgebra& input,
+  int inputNumberOfLargerTypesExplored,
+  int inputNumberOfHCandidatesExplored
 ) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::addSubalgebraToStack");
   if (input.indexInOwner == - 1 && !input.weylNonEmbedded->dynkinType.isEqualToZero()) {
@@ -2075,14 +2187,14 @@ void SemisimpleSubalgebras::addSubalgebraToStack(
     this->currentRootInjections.lastObject()
   );
   ///////////
-  this->currentNumberOfLargerTypesExplored.addOnTop(inputNumLargerTypesExplored);
+  this->currentNumberOfLargerTypesExplored.addOnTop(inputNumberOfLargerTypesExplored);
   // global.Comments << "<hr>" << this->currentPossibleLargerDynkinTypes.lastObject()->size
   // << " possible extensions of " << input.weylNonEmbedded->theDynkinType.toString() << ": ";
   // for (int i = 0; i < this->currentPossibleLargerDynkinTypes.lastObject()->size; i ++)
   //   global.Comments << (*this->currentPossibleLargerDynkinTypes.lastObject())[i].toString() << ", ";
   ///////////
   this->currentHCandidatesScaledToActByTwo.setSize(this->currentSubalgebraChain.size);
-  this->currentNumberOfHCandidatesExplored.addOnTop(inputNumHcandidatesExplored);
+  this->currentNumberOfHCandidatesExplored.addOnTop(inputNumberOfHCandidatesExplored);
 
   this->computeCurrentHCandidates();
 }
@@ -2166,7 +2278,7 @@ bool SemisimpleSubalgebras::incrementReturnFalseIfPastLast() {
     << ", and this order is needed to construct extensions. " << global.fatal;
   }
   if (this->baseSubalgebra().getRank() >= this->owner->getRank()) {
-    return this->removeLastSubalgebra();
+    return this->removeLastSubalgebraFromStack();
   }
   int stackIndex = this->currentSubalgebraChain.size - 1;
   if (
@@ -2174,8 +2286,10 @@ bool SemisimpleSubalgebras::incrementReturnFalseIfPastLast() {
     this->currentHCandidatesScaledToActByTwo[stackIndex].size
   ) {
     this->currentNumberOfLargerTypesExplored[stackIndex] ++;
-    if (this->currentNumberOfLargerTypesExplored[stackIndex] >= this->currentPossibleLargerDynkinTypes[stackIndex].size) {
-      return this->removeLastSubalgebra();
+    if (
+      this->currentNumberOfLargerTypesExplored[stackIndex] >= this->currentPossibleLargerDynkinTypes[stackIndex].size
+    ) {
+      return this->removeLastSubalgebraFromStack();
     }
     this->currentNumberOfHCandidatesExplored[stackIndex] = 0;
     return this->computeCurrentHCandidates();
@@ -2627,7 +2741,7 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(bool attemptToChooseCenta
     this->totalNumUnknownsWithCentralizer += rankCentralizer * this->getAmbientWeyl().getDimension() + 1;
     this->unknownCartanCentralizerBasis.setSize(rankCentralizer);
   }
-  if (this->indexIamInducedFrom == - 1) {
+  if (this->indexInducedFrom == - 1) {
     this->flagUsedInducingSubalgebraRealization = false;
   }
   int indexNewRoot = - 1;
@@ -2637,7 +2751,7 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(bool attemptToChooseCenta
   for (int i = 0; i < this->involvedNegativeGenerators.size; i ++) {
     bool seedsHaveBeenSown = false;
     if (this->flagUsedInducingSubalgebraRealization) {
-      CandidateSemisimpleSubalgebra& inducer = this->owner->subalgebras.values[this->indexIamInducedFrom];
+      CandidateSemisimpleSubalgebra& inducer = this->owner->subalgebras.values[this->indexInducedFrom];
       if (inducer.flagSystemSolved && i != indexNewRoot) {
         int preimageIndex = DynkinType::getIndexPreimageFromRootInjection(i, this->rootInjectionsFromInducer);
         this->unknownNegativeGenerators[i] = inducer.negativeGenerators[preimageIndex];
@@ -2980,7 +3094,7 @@ void CandidateSemisimpleSubalgebra::reset(SemisimpleSubalgebras* inputOwner) {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::reset");
   this->owner = inputOwner;
   this->indexInOwner = - 1;
-  this->indexIamInducedFrom = - 1;
+  this->indexInducedFrom = - 1;
   this->indexNonEmbeddedMeNonStandardCartan = - 1;
   this->indexNonEmbeddedMeStandard = - 1;
   this->indexHcandidateBeingGrown = - 1;
@@ -4212,8 +4326,8 @@ void SemisimpleSubalgebras::reset() {
   this->flagAttemptToAdjustCentralizers = true;
   this->millisecondsComputationStart = - 1;
   this->millisecondsComputationEnd = - 1;
-  this->numAdditions = 0;
-  this->numMultiplications = 0;
+  this->numberOfAdditions = 0;
+  this->numberOfMultiplications = 0;
   this->subalgebrasNonEmbedded = nullptr;
 }
 
@@ -6752,9 +6866,9 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* format, b
   if (this->isRegularSubalgebra()) {
     out << "<br>The subalgebra is regular (= the semisimple part of a root subalgebra). ";
   }
-  if (this->indexIamInducedFrom != - 1) {
+  if (this->indexInducedFrom != - 1) {
     out << "<br>Subalgebra is (parabolically) induced from "
-    << this->owner->toStringAlgebraLink(this->indexIamInducedFrom, format, writeToHardDisk) << ". ";
+    << this->owner->toStringAlgebraLink(this->indexInducedFrom, format, writeToHardDisk) << ". ";
   }
   if (!this->flagCentralizerIsWellChosen) {
     out << "<br>The dimension of the centralizer is: " << this->centralizerDimension.toString();
@@ -7180,7 +7294,7 @@ void SemisimpleSubalgebras::hookUpCentralizers(bool allowNonPolynomialSystemFail
     << ". The subalgebra is of type " << currentSA.toStringTypeAndHs() << ". ";
     theReport2.report(reportStream2.str());
     currentSA.indexInOwner = i;
-    currentSA.indexIamInducedFrom = theCandidatePermutationHashed.getIndex(currentSA.indexIamInducedFrom);
+    currentSA.indexInducedFrom = theCandidatePermutationHashed.getIndex(currentSA.indexInducedFrom);
     currentSA.indicesDirectSummandSuperAlgebra.setSize(0);
     currentSA.indexMaxSSContainer = - 1;
     for (int j = 0; j < this->subalgebras.values.size; j ++) {

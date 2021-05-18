@@ -298,7 +298,7 @@ bool ElementWeylAlgebra<Coefficient>::substitution(
 ) {
   MacroRegisterFunctionWithName("ElementWeylAlgebra::substitution");
   Polynomial<Rational> differentialOperatorPart, polyPart;
-  MonomialWeylAlgebra theMon;
+  MonomialWeylAlgebra monomial;
   ElementWeylAlgebra output;
   output.makeZero();
   Coefficient theNewCoeff;
@@ -316,12 +316,12 @@ bool ElementWeylAlgebra<Coefficient>::substitution(
     }
     for (int j = 0; j < polyPart.size(); j ++) {
       for (int k = 0; k < differentialOperatorPart.size(); k ++) {
-        theMon.polynomialPart = polyPart[j];
-        theMon.differentialPart = differentialOperatorPart[k];
+        monomial.polynomialPart = polyPart[j];
+        monomial.differentialPart = differentialOperatorPart[k];
         theNewCoeff = this->coefficients[i];
         theNewCoeff *= polyPart.coefficients[j];
         theNewCoeff *= differentialOperatorPart.coefficients[k];
-        output.addMonomial(theMon, theNewCoeff);
+        output.addMonomial(monomial, theNewCoeff);
       }
     }
   }
@@ -340,20 +340,20 @@ void ElementWeylAlgebra<Coefficient>::fourierTransform(ElementWeylAlgebra<Coeffi
   LargeInteger totalDeg;
   Coefficient theCoeff;
   output.makeZero();
-  MonomialWeylAlgebra theMon;
+  MonomialWeylAlgebra monomial;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialWeylAlgebra& currentMon = (*this)[i];
     if (!(currentMon.polynomialPart.totalDegree() + currentMon.differentialPart.totalDegree()).isInteger(&totalDeg)) {
       global.fatal << "Calling Fourier transoform "
       << "on differential operator with non-integral exponents is not allowed. " << global.fatal;
     }
-    theMon.differentialPart = currentMon.polynomialPart;
-    theMon.polynomialPart = currentMon.differentialPart;
+    monomial.differentialPart = currentMon.polynomialPart;
+    monomial.polynomialPart = currentMon.differentialPart;
     theCoeff = this->coefficients[i];
     if (totalDeg.isEven()) {
       theCoeff *= - 1;
     }
-    output.addMonomial(theMon, theCoeff);
+    output.addMonomial(monomial, theCoeff);
   }
 }
 

@@ -265,8 +265,8 @@ class MonomialWrapper {
   bool operator>(const MonomialWrapper& other) const {
     return this->theObject > other.theObject;
   }
-  friend std::ostream& operator << (std::ostream& output, const MonomialWrapper& theMon) {
-    output << theMon.theObject;
+  friend std::ostream& operator << (std::ostream& output, const MonomialWrapper& monomial) {
+    output << monomial.theObject;
     return output;
   }
   static unsigned int hashFunction(const MonomialWrapper& input) {
@@ -322,8 +322,8 @@ public:
   }
   MonomialPolynomial() {
   }
-  friend std::ostream& operator<<(std::ostream& output, const MonomialPolynomial& theMon) {
-    output << theMon.toString();
+  friend std::ostream& operator<<(std::ostream& output, const MonomialPolynomial& monomial) {
+    output << monomial.toString();
     return output;
   }
   void multiplyByVariable(int variableIndex, const Rational& variablePower);
@@ -1929,8 +1929,8 @@ class MonomialWeylAlgebra {
   public:
   MonomialPolynomial polynomialPart;
   MonomialPolynomial differentialPart;
-  friend std::ostream& operator << (std::ostream& output, const MonomialWeylAlgebra& theMon) {
-    output << theMon.toString();
+  friend std::ostream& operator << (std::ostream& output, const MonomialWeylAlgebra& monomial) {
+    output << monomial.toString();
     return output;
   }
   bool isConstant() const {
@@ -2568,9 +2568,9 @@ class VectorSparse : public LinearCombination<MonomialVector, Coefficient> {
   public:
   void makeEi(int nonZeroIndex, const Coefficient& coefficient = 1) {
     this->makeZero();
-    MonomialVector theMon;
-    theMon.makeEi(nonZeroIndex);
-    this->addMonomial(theMon, coefficient);
+    MonomialVector monomial;
+    monomial.makeEi(nonZeroIndex);
+    this->addMonomial(monomial, coefficient);
   }
   int getLargestParticipatingBasisIndex() {
     int result = - 1;
@@ -3300,7 +3300,7 @@ public:
   bool hasSingleMonomialEquation(const List<Polynomial<Coefficient> >& inputSystem, MonomialPolynomial& outputMon);
   void setUpRecursiveComputation(PolynomialSystem<Coefficient>& toBeModified);
   void processSolvedSubcaseIfSolvedOrProvenToHaveSolution(PolynomialSystem<Coefficient>& potentiallySolvedCase);
-  void solveWhenSystemHasSingleMonomial(List<Polynomial<Coefficient> >& inputSystem, const MonomialPolynomial& theMon);
+  void solveWhenSystemHasSingleMonomial(List<Polynomial<Coefficient> >& inputSystem, const MonomialPolynomial& monomial);
   int getPreferredSerreSystemSubstitutionIndex(List<Polynomial<Coefficient> >& inputSystem);
   void solveSerreLikeSystemRecursively(List<Polynomial<Coefficient> >& inputSystem);
   void polynomialSystemSolutionSimplificationPhase(List<Polynomial<Coefficient> >& inputSystem);
@@ -4659,13 +4659,13 @@ std::string Matrix<Coefficient>::toStringSystemLatex(
   }
   out << "}";
   std::string currentEntry;
-  Polynomial<Coefficient> theMon;
+  Polynomial<Coefficient> monomial;
   for (int i = 0; i < this->numberOfRows; i ++) {
     bool foundNonZeroEntry = false;
     for (int j = 0; j < this->numberOfColumns; j ++) {
       if (!((*this)(i, j) == 0)) {
-        theMon.makeMonomial(j, 1, (*this)(i, j));
-        currentEntry = theMon.toString(format);
+        monomial.makeMonomial(j, 1, (*this)(i, j));
+        currentEntry = monomial.toString(format);
         if (currentEntry == "") {
           global.fatal << "Empty strings not allowed as result of toString() function call. " << global.fatal;
         }
@@ -5204,7 +5204,7 @@ public:
   static Vector<Rational> theVectorToBePartitioned;
   void computePolynomialCorrespondingToOneMonomial(
     QuasiPolynomial& outputQP,
-    const MonomialPolynomial& theMon,
+    const MonomialPolynomial& monomial,
     Vectors<Rational>& normals,
     Lattice& lattice
   ) const;
@@ -5535,7 +5535,7 @@ class ConeLatticeAndShift {
     Matrix<Rational>& theProjectionLatticeLevel
   );
   bool readFromFile(std::fstream& input);
-  std::string toString(FormatExpressions& theFormat);
+  std::string toString(FormatExpressions& format);
   int getDimensionProjectivized() {
     return this->theProjectivizedCone.getDimension();
   }
@@ -5574,14 +5574,14 @@ public:
   void translateMeMyLastCoordinateAffinization(Vector<Rational> & theTranslationVector);
   void initializeFromDirectionsAndRefine(Vectors<Rational>& inputVectors);
   void initializeFromAffineDirectionsAndRefine(Vectors<Rational>& inputDirections, Vectors<Rational>& inputAffinePoints);
-  std::string drawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
+  std::string drawMeToHtmlLastCoordAffine(DrawingVariables& drawingVariables, FormatExpressions& format);
   bool drawMeProjective(
     Vector<Rational>* coordCenterTranslation,
     bool InitDrawVars,
     DrawingVariables& theDrawingVariables,
     FormatExpressions& theFormat
   );
-  std::string drawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
+  std::string drawMeToHtmlProjective(DrawingVariables& drawingVariables, FormatExpressions& format);
   std::string toString(bool useHtml = false);
   int getLowestIndexChamberContaining(const Vector<Rational>& theRoot) const {
     for (int i = 0; i < this->size; i ++) {
@@ -5626,8 +5626,6 @@ public:
     this->flagChambersHaveTooFewVertices = false;
     this->flagIsRefined = false;
   }
-  void writeToFile(std::fstream& output, int UpperLimit = - 1);
-  bool readFromFile(std::fstream& input, int UpperLimitDebugPurposes = - 1);
   void operator=(const ConeComplex& other) {
     this->::HashedList<Cone>::operator=(other);
     this->splittingNormals = other.splittingNormals;
@@ -5683,13 +5681,13 @@ public:
   Matrix<int> TableAllowedAminus2B;
   Selection IndicesRedundantShortRoots;
   List<int> IndicesDoublesOfRedundantShortRoots;
-  int NumNonRedundantShortRoots;
+  int numberOfNonRedundantShortRoots;
   Vector<Rational> weights;
-  void initFromRoots(Vectors<Rational>& theAlgorithmBasis, Vector<Rational>* theWeights);
-  int addRootAndSort(Vector<Rational>& theRoot);
-  int getIndex(const Vector<Rational>& TheRoot);
-  int getIndexDoubleOfARoot(const Vector<Rational>& TheRoot);
-  void computeTable(int theDimension);
+  void initFromRoots(Vectors<Rational>& algorithmBasis, Vector<Rational>* weights);
+  int addRootAndSort(Vector<Rational>& root);
+  int getIndex(const Vector<Rational>& root);
+  int getIndexDoubleOfARoot(const Vector<Rational>& root);
+  void computeTable(int dimension);
   void prepareCheckSums();
   std::string doTheFullComputationReturnLatexFileString(
     Vectors<Rational>& toBePartitioned, FormatExpressions& theFormat, std::string* outputHtml
@@ -5755,8 +5753,8 @@ public:
 };
 
 class DynkinSimpleType {
-  friend std::ostream& operator << (std::ostream& output, const DynkinSimpleType& theMon) {
-    output << theMon.toString();
+  friend std::ostream& operator << (std::ostream& output, const DynkinSimpleType& monomial) {
+    output << monomial.toString();
     return output;
   }
   public:
@@ -6347,17 +6345,17 @@ class MatrixTensor: public LinearCombination<MonomialMatrix, Coefficient> {
 public:
   void makeIdentitySpecial() {
     this->makeZero();
-    MonomialMatrix theMon;
-    theMon.makeIdentitySpecial();
-    this->addMonomial(theMon, 1);
+    MonomialMatrix monomial;
+    monomial.makeIdentitySpecial();
+    this->addMonomial(monomial, 1);
   }
   void makeIdentity(int numVars) {
     this->makeZero();
-    MonomialMatrix theMon;
+    MonomialMatrix monomial;
     for (int i = 0; i < numVars; i ++) {
-      theMon.dualIndex = i;
-      theMon.vIndex = i;
-      this->addMonomial(theMon, 1);
+      monomial.dualIndex = i;
+      monomial.vIndex = i;
+      this->addMonomial(monomial, 1);
     }
   }
   void invert();
@@ -6419,13 +6417,13 @@ public:
   }
   void operator=(const Matrix<Coefficient>& other) {
     this->makeZero();
-    MonomialMatrix theMon;
+    MonomialMatrix monomial;
     for (int i = 0; i < other.numberOfRows; i ++) {
       for (int j = 0; j < other.numberOfColumns; j ++) {
         if (!other.elements[i][j].isEqualToZero()) {
-          theMon.dualIndex = j;
-          theMon.vIndex = i;
-          this->addMonomial(theMon, other.elements[i][j]);
+          monomial.dualIndex = j;
+          monomial.vIndex = i;
+          this->addMonomial(monomial, other.elements[i][j]);
         }
       }
     }
@@ -6468,12 +6466,12 @@ public:
   }
   void transpose() {
     MatrixTensor<Coefficient> output;
-    MonomialMatrix theMon;
+    MonomialMatrix monomial;
     output.makeZero();
     for (int i = 0; i < this->size(); i ++) {
-      theMon = (*this)[i];
-      theMon.transpose();
-      output.addMonomial(theMon, this->coefficients[i]);
+      monomial = (*this)[i];
+      monomial.transpose();
+      output.addMonomial(monomial, this->coefficients[i]);
     }
     *this = output;
   }
@@ -6490,7 +6488,7 @@ public:
   void lieBracketOnTheLeft(const MatrixTensor<Coefficient>& standsOnTheLeft) {
     MacroRegisterFunctionWithName("MatrixTensor<Coefficient>::lieBracketOnTheLeft");
     MatrixTensor<Coefficient> output;
-    MonomialMatrix theMon;
+    MonomialMatrix monomial;
     output.makeZero();
     output.setExpectedSize(this->size() * standsOnTheLeft.size() * 2);
     Coefficient tempCF;
@@ -6498,13 +6496,13 @@ public:
       for (int j = 0; j < standsOnTheLeft.size(); j ++) {
         tempCF = this->coefficients[i];
         tempCF *= standsOnTheLeft.coefficients[j];
-        theMon = standsOnTheLeft[j];
-        theMon *= (*this)[i];
-        output.addMonomial(theMon, tempCF);
+        monomial = standsOnTheLeft[j];
+        monomial *= (*this)[i];
+        output.addMonomial(monomial, tempCF);
         tempCF *= - 1;
-        theMon = (*this)[i];
-        theMon *= standsOnTheLeft[j];
-        output.addMonomial(theMon, tempCF);
+        monomial = (*this)[i];
+        monomial *= standsOnTheLeft[j];
+        output.addMonomial(monomial, tempCF);
       }
     }
     *this = output;
@@ -6725,24 +6723,24 @@ class PolynomialOverModule;
 
 class SlTwoInSlN {
   int getModuleIndexFromHighestWeightVector(const Matrix<Rational>& input) {
-    Rational tempRat;
-    for (int i = 0; i < this->theHighestWeightVectors.size; i ++) {
-      if (this->theHighestWeightVectors.objects[i].isProportionalTo(input, tempRat)) {
+    Rational scale;
+    for (int i = 0; i < this->highestWeightVectors.size; i ++) {
+      if (this->highestWeightVectors.objects[i].isProportionalTo(input, scale)) {
         return i;
       }
     }
     return - 1;
   }
 public:
-  int theDimension;
-  Matrix<Rational> theH;
-  Matrix<Rational> theE;
-  Matrix<Rational> theF;
+  int dimension;
+  Matrix<Rational> hElement;
+  Matrix<Rational> eElement;
+  Matrix<Rational> fElement;
   List<int> thePartition;
-  List<Matrix<Rational> > theProjectors;
-  List<Matrix<Rational> > theHighestWeightVectors;
-  List<List<Matrix<Rational> > > theGmodKModules;
-  List<List<List<int> > > PairingTable;
+  List<Matrix<Rational> > projectors;
+  List<Matrix<Rational> > highestWeightVectors;
+  List<List<Matrix<Rational> > > gModKModules;
+  List<List<List<int> > > pairingTable;
   void getIsPlusKIndexingFrom(int input, int& s, int& k);
   std::string elementMatrixToTensorString(const Matrix<Rational> & input, bool useHtml);
   std::string initFromModuleDecomposition(List<int>& decompositionDimensions, bool useHtml, bool computePairingTable);
@@ -6854,8 +6852,8 @@ std::ostream& operator<<(std::ostream& output, const LinearCombination<TemplateM
   for (int i = 0; i < sortedMons.size; i ++) {
     TemplateMonomial& currentMon = sortedMons[i];
     std::stringstream tempStream;
-    Coefficient& currentCoeff = collection.coefficients[collection.monomials.getIndex(currentMon)];
-    tempStream << currentCoeff;
+    Coefficient& coefficient = collection.coefficients[collection.monomials.getIndex(currentMon)];
+    tempStream << coefficient;
     tempS1 = tempStream.str();
     tempS2 = currentMon.toString();
     if (tempS1 == "1" && tempS2 != "1") {
@@ -6926,9 +6924,9 @@ void Vectors<Coefficient>::intersectTwoLinearSpaces(
   List<Vector<Coefficient> >& output
 ) {
   Vectors<Coefficient> firstReduced, secondReduced;
-  Selection tempSel;
-  Vectors<Coefficient>::selectBasisInSubspace(firstSpace, firstReduced, tempSel);
-  Vectors<Coefficient>::selectBasisInSubspace(secondSpace, secondReduced, tempSel);
+  Selection selection;
+  Vectors<Coefficient>::selectBasisInSubspace(firstSpace, firstReduced, selection);
+  Vectors<Coefficient>::selectBasisInSubspace(secondSpace, secondReduced, selection);
   if (firstReduced.size == 0 || secondReduced.size == 0) {
     output.size = 0;
     return;
@@ -6945,18 +6943,18 @@ void Vectors<Coefficient>::intersectTwoLinearSpaces(
       matrix(i, firstReduced.size + j) -= secondReduced[j][i];
     }
   }
-  matrix.gaussianEliminationByRows(0, &tempSel);
-  output.reserve(tempSel.cardinalitySelection);
+  matrix.gaussianEliminationByRows(0, &selection);
+  output.reserve(selection.cardinalitySelection);
   output.size = 0;
   Vector<Coefficient> nextIntersection;
-  for (int i = 0; i < tempSel.cardinalitySelection; i ++) {
-    int currentIndex = tempSel.elements[i];
+  for (int i = 0; i < selection.cardinalitySelection; i ++) {
+    int currentIndex = selection.elements[i];
     if (currentIndex < firstReduced.size) {
       global.fatal << "Unexpected condition in Vectors::intersectTwoLinearSpaces. " << global.fatal;
     }
     nextIntersection.makeZero(dimension);
     for (int j = 0; j < firstReduced.size; j ++) {
-      if (!tempSel.selected[j]) {
+      if (!selection.selected[j]) {
         nextIntersection += firstReduced[j] * matrix.elements[j][currentIndex];
       }
     }
@@ -6967,7 +6965,7 @@ void Vectors<Coefficient>::intersectTwoLinearSpaces(
 template<class Coefficient>
 bool Matrix<Coefficient>::isPositiveDefinite() {
   if (this->numberOfRows != this->numberOfColumns) {
-    global.fatal << "Attempting to evaluate whether a matrix "
+    global.fatal << "Attempt to evaluate whether a matrix "
     << "is positive definite, but the matrix is not square. " << global.fatal;
   }
   Coefficient determinant;

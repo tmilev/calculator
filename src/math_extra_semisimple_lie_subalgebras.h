@@ -137,7 +137,7 @@ public:
   List<Polynomial<AlgebraicNumber> > transformedSystem;
   SemisimpleSubalgebras* owner;
   int indexInOwner;
-  int indexIamInducedFrom;
+  int indexInducedFrom;
   List<int> rootInjectionsFromInducer;
   int indexNonEmbeddedMeStandard;
   int indexNonEmbeddedMeNonStandardCartan;
@@ -404,8 +404,8 @@ public:
   bool flagAttemptToAdjustCentralizers;
   int64_t millisecondsComputationStart;
   int64_t millisecondsComputationEnd;
-  unsigned long long int numAdditions;
-  unsigned long long int numMultiplications;
+  unsigned long long int numberOfAdditions;
+  unsigned long long int numberOfMultiplications;
   bool flagDeallocated;
   std::string displayNameMainFile1NoPath;
   std::string displayNameMainFile1WithPath;
@@ -418,8 +418,8 @@ public:
   std::string (*toStringExpressionString)(SemisimpleSubalgebras& input);
   bool loadState(
     List<int>& currentChainInt,
-    List<int>& numExploredTypes,
-    List<int>& numExploredHs,
+    List<int>& numberOfExploredTypes,
+    List<int>& numberOfExploredHs,
     std::stringstream& reportStream
   );
   int getDisplayIndexFromActual(int actualindexSubalgebra) const;
@@ -468,7 +468,7 @@ public:
   void makeEmptyCandidateSubalgebra(CandidateSemisimpleSubalgebra& output);
   void makeCandidateSubalgebra(const DynkinType& input, CandidateSemisimpleSubalgebra& output);
   bool incrementReturnFalseIfPastLast();
-  bool removeLastSubalgebra();
+  bool removeLastSubalgebraFromStack();
   bool getCentralizerTypeIfComputableAndKnown(const DynkinType& input, DynkinType& output);
   bool combinatorialCriteriaAllowRealization();
   bool centralizersComputedToHaveUnsuitableNilpotentOrbits();
@@ -491,8 +491,8 @@ public:
   void addSubalgebraIfNewSetToStackTop(CandidateSemisimpleSubalgebra& input);
   void addSubalgebraToStack(
     CandidateSemisimpleSubalgebra& input,
-    int inputNumLargerTypesExplored,
-    int inputNumHcandidatesExplored
+    int inputNumberOfLargerTypesExplored,
+    int inputNumberOfHCandidatesExplored
   );
   bool setUpParabolicInductionDataPrecomputedSubalgebra(CandidateSemisimpleSubalgebra& candidate);
   bool checkConsistencyHs() const;
@@ -541,6 +541,7 @@ public:
     AlgebraicClosureRationals& ownerField,
     MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
     ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
+    std::string (*toStringExpression)(SemisimpleSubalgebras&),
     std::stringstream* outputStream,
     bool forceRecompute,
     bool doFullInitialization,
@@ -561,15 +562,11 @@ public:
     SemisimpleLieAlgebra& newOwner,
     AlgebraicClosureRationals& ownerField,
     MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
-    ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
-    std::stringstream* outputStream
+    ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras
   );
-  bool computeStructureRealFormsSlTwos(
-    std::stringstream* outputStream
-  );
+  bool computeStructureRealFormsSlTwos();
   bool computeStructureRealFormOneSlTwo(
-    const SlTwoSubalgebra& input,
-    std::stringstream* outputStream
+    const SlTwoSubalgebra& input
   );
   bool computeStructureRealFormsInitialize(
     SemisimpleLieAlgebra& newOwner,

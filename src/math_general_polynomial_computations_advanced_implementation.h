@@ -1035,20 +1035,20 @@ bool PolynomialSystem<Coefficient>::hasSingleMonomialEquation(
 
 template <class Coefficient>
 void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
-  List<Polynomial<Coefficient> >& inputSystem, const MonomialPolynomial& theMon
+  List<Polynomial<Coefficient> >& inputSystem, const MonomialPolynomial& monomial
 ) {
   MacroRegisterFunctionWithName("PolynomialSystem::solveWhenSystemHasSingleMonomial");
   ProgressReport theReport1;
   List<Polynomial<Coefficient> > inputSystemCopy = inputSystem;
   bool allProvenToHaveNoSolution = true;
-  for (int i = 0; i < theMon.minimalNumberOfVariables(); i ++) {
-    if (theMon(i) == 0) {
+  for (int i = 0; i < monomial.minimalNumberOfVariables(); i ++) {
+    if (monomial(i) == 0) {
       continue;
     }
     if (this->shouldReport()) {
       std::stringstream out;
       MonomialPolynomial tempMon(i);
-      out << "The system has the single monomial: " << theMon.toString(&this->format())
+      out << "The system has the single monomial: " << monomial.toString(&this->format())
       << "<br>Trying case:<br>" << tempMon.toString(&this->format()) << "= 0;";
       theReport1.report(out.str());
     }
@@ -1247,11 +1247,11 @@ template <class Coefficient>
 std::string PolynomialSystem<Coefficient>::toStringSerreLikeSolution() {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::toStringSerreLikeSolution");
   std::stringstream out;
-  Polynomial<Rational> theMon;
+  Polynomial<Rational> monomial;
   for (int i = 0; i < this->systemSolution.size; i ++) {
     if (this->solutionsFound.selected[i]) {
-      theMon.makeMonomial(i, 1, 1);
-      out << " " << theMon.toString(&this->groebner.format)
+      monomial.makeMonomial(i, 1, 1);
+      out << " " << monomial.toString(&this->groebner.format)
       << " = " << this->systemSolution[i] << ";";
     }
   }

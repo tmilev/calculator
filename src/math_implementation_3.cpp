@@ -2698,6 +2698,18 @@ void MathRoutines::kToTheNth(int k, int n, LargeInteger& output) {
   }
 }
 
+bool MathRoutines::isPrimeSimple(int input) {
+  if (input <= 1) {
+    return false;
+  }
+  for (int i = 2; i * i <= input; i += 2) {
+    if (input % i == 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
 Vector<double> MathRoutines::getVectorDouble(Vector<Rational>& input) {
   Vector<double> result;
   result.setSize(input.size);
@@ -2762,7 +2774,7 @@ void Selection::removeLastSelection() {
 
 int Selection::selectionToIndex() {
   int result = 0;
-  for (int i = 0; i < numberOfElements; i ++) {
+  for (int i = 0; i < this->numberOfElements; i ++) {
     result *= 2;
     if (this->selected[i]) {
       result += 1;
@@ -2772,9 +2784,9 @@ int Selection::selectionToIndex() {
 }
 
 void Selection::shrinkMaxSize() {
-  numberOfElements --;
-  if (selected[numberOfElements]) {
-    cardinalitySelection --;
+  this->numberOfElements --;
+  if (this->selected[this->numberOfElements]) {
+    this->cardinalitySelection --;
   }
 }
 
@@ -4861,37 +4873,39 @@ bool OnePartialFractionDenominator::operator==(OnePartialFractionDenominator& ri
   return true;
 }
 
-void PartialFractions::initFromRoots(Vectors<Rational>& theAlgorithmBasis, Vector<Rational>* theWeights) {
-  if (theAlgorithmBasis.size == 0) {
+void PartialFractions::initFromRoots(
+  Vectors<Rational>& algorithmBasis, Vector<Rational>* weights
+) {
+  if (algorithmBasis.size == 0) {
     return;
   }
-  int theDimension = theAlgorithmBasis[0].size;
-  if (theWeights != nullptr) {
-    this->weights = *theWeights;
+  int dimension = algorithmBasis[0].size;
+  if (weights != nullptr) {
+    this->weights = *weights;
   }
   this->startingVectors.clear();
-  for (int i = 0; i < theAlgorithmBasis.size; i ++) {
-    this->addRootAndSort(theAlgorithmBasis[i]);
+  for (int i = 0; i < algorithmBasis.size; i ++) {
+    this->addRootAndSort(algorithmBasis[i]);
   }
-  if (theWeights != nullptr) {
+  if (weights != nullptr) {
     this->startingVectors.quickSortAscending();
   }
-  this->NumNonRedundantShortRoots = this->size();
-  this->computeTable(theDimension);
+  this->numberOfNonRedundantShortRoots = this->size();
+  this->computeTable(dimension);
 }
 
-void PartialFractions::computeTable(int theDimension) {
+void PartialFractions::computeTable(int dimension) {
   Vector<Rational> tempR, tempR2, tempR3;
-  tempR.setSize(theDimension);
-  tempR2.setSize(theDimension);
-  tempR3.setSize(theDimension);
+  tempR.setSize(dimension);
+  tempR2.setSize(dimension);
+  tempR3.setSize(dimension);
   this->IndicesRedundantShortRoots.initialize(this->size());
   this->IndicesDoublesOfRedundantShortRoots.setSize(this->size());
   this->TableAllowedAminus2B.initialize(this->size(), this->size());
   this->TableAllowedAminusB.initialize(this->size(), this->size());
   for (int i = 0; i < this->size(); i ++) {
     for (int j = 0; j < this->size(); j ++) {
-      for (int k = 0; k < theDimension; k ++) {
+      for (int k = 0; k < dimension; k ++) {
         tempR[k] = this->startingVectors[i][k] - this->startingVectors[j][k];
         tempR2[k] = this->startingVectors[i][k] - this->startingVectors[j][k] * 2;
       }
@@ -4907,17 +4921,17 @@ void PartialFractions::computeTable(int theDimension) {
   }
 }
 
-int PartialFractions::addRootAndSort(Vector<Rational>& theRoot) {
+int PartialFractions::addRootAndSort(Vector<Rational>& root) {
   List<Vector<Rational> > tempList;
   tempList = this->startingVectors;
   int index = 0;
   for (index = 0; index < tempList.size; index ++) {
-    if (this->isHigherThanWithRespectToWeight(theRoot, tempList[index], this->weights)) {
+    if (this->isHigherThanWithRespectToWeight(root, tempList[index], this->weights)) {
       break;
     }
   }
   tempList.shiftUpExpandOnTop(index);
-  tempList[index] = theRoot;
+  tempList[index] = root;
   this->startingVectors.clear();
   for (int i = 0; i < tempList.size; i ++) {
     this->startingVectors.addOnTop(tempList[i]);
@@ -4925,12 +4939,12 @@ int PartialFractions::addRootAndSort(Vector<Rational>& theRoot) {
   return index;
 }
 
-int PartialFractions::getIndex(const Vector<Rational>& TheRoot) {
-  return this->startingVectors.getIndex(TheRoot);
+int PartialFractions::getIndex(const Vector<Rational>& root) {
+  return this->startingVectors.getIndex(root);
 }
 
-int PartialFractions::getIndexDoubleOfARoot(const Vector<Rational>& TheRoot) {
-  return this->getIndex(TheRoot * 2);
+int PartialFractions::getIndexDoubleOfARoot(const Vector<Rational>& root) {
+  return this->getIndex(root * 2);
 }
 
 void SelectionWithDifferentMaxMultiplicities::initPart1(int numElements) {
@@ -5090,7 +5104,7 @@ int SelectionWithDifferentMaxMultiplicities::totalNumberSubsetsSmallInt() {
       global.fatal << "I was asked to enumerate "
       << "all subsets of a multi-set, however the number of subsets is larger than  "
       << "the maximum value allowed for int on the system "
-      << "(on a 32 bit machine that is around  2 billion). "
+      << "(on a 32 bit machine that is around 2 billion). "
       << "This can be fixed, however I do not have time at the moment. If you "
       << "encounter this error, write me an email and I will take the time to fix this issue. "
       << global.fatal;
@@ -9565,20 +9579,20 @@ void OnePartialFraction::getRootsFromDenominator(PartialFractions& owner, Vector
 }
 
 void OnePartialFraction::computePolynomialCorrespondingToOneMonomial(
-  QuasiPolynomial& outputQP, const MonomialPolynomial& theMon, Vectors<Rational>& normals, Lattice& lattice
+  QuasiPolynomial& outputQP, const MonomialPolynomial& monomial, Vectors<Rational>& normals, Lattice& lattice
 ) const {
   Polynomial<Rational> tempP, outputPolyPart;
   outputPolyPart.makeOne();
-  for (int i = 0; i < theMon.minimalNumberOfVariables(); i ++) {
+  for (int i = 0; i < monomial.minimalNumberOfVariables(); i ++) {
     this->makePolynomialFromOneNormal(
       normals[i],
-      theMon,
+      monomial,
       this->denominator[this->indicesNonZeroMultiplicities[i]].multiplicities[0],
       tempP
     );
     outputPolyPart *= tempP;
   }
-  outputQP.makeFromPolynomialShiftAndLattice(outputPolyPart, theMon, lattice);
+  outputQP.makeFromPolynomialShiftAndLattice(outputPolyPart, monomial, lattice);
 }
 
 
@@ -10332,10 +10346,10 @@ bool SlTwoInSlN::computeInvariantsOfDegree(
   std::string& outputError
 ) {
   this->initFromModuleDecomposition(decompositionDimensions, false, false);
-  SelectionWithMaxMultiplicity theSel;
-  theSel.initMaxMultiplicity(this->theDimension, degree);
+  SelectionWithMaxMultiplicity selection;
+  selection.initMaxMultiplicity(this->dimension, degree);
   outputError = "";
-  LargeInteger numberOfCycles = theSel.numberOfCombinationsOfCardinality(degree);
+  LargeInteger numberOfCycles = selection.numberOfCombinationsOfCardinality(degree);
   if (numberOfCycles > 1000000) {
     outputError = " Computation too large. ";
     return false;
@@ -10343,25 +10357,25 @@ bool SlTwoInSlN::computeInvariantsOfDegree(
   Polynomial<Rational> basisMonsZeroWeight, basisMonsAll;
   basisMonsZeroWeight.makeZero();
   basisMonsAll.makeZero();
-  MonomialPolynomial theMon;
-  theMon.makeOne();
+  MonomialPolynomial monomial;
+  monomial.makeOne();
   Vector<Rational> theWeight;
   Vector<Rational> theCartanAction;
-  theCartanAction.setSize(this->theDimension);
-  theWeight.setSize(this->theDimension);
-  for (int j = 0; j < this->theDimension; j ++) {
-    theCartanAction[j] = this->theH.elements[j][j];
+  theCartanAction.setSize(this->dimension);
+  theWeight.setSize(this->dimension);
+  for (int j = 0; j < this->dimension; j ++) {
+    theCartanAction[j] = this->hElement.elements[j][j];
   }
-  theSel.incrementSubsetFixedCardinality(degree);
-  Rational theMonCoeff = 1;
-  for (int i = 0; i < numberOfCycles; i ++, theSel.incrementSubsetFixedCardinality(degree)) {
-    for (int j = 0; j < this->theDimension; j ++) {
-      theMon.setVariable(j, theSel.multiplicities[j]);
-      theWeight[j] = theMon[j];
+  selection.incrementSubsetFixedCardinality(degree);
+  Rational monomialCoeff = 1;
+  for (int i = 0; i < numberOfCycles; i ++, selection.incrementSubsetFixedCardinality(degree)) {
+    for (int j = 0; j < this->dimension; j ++) {
+      monomial.setVariable(j, selection.multiplicities[j]);
+      theWeight[j] = monomial[j];
     }
-    basisMonsAll.addMonomial(theMon, theMonCoeff);
+    basisMonsAll.addMonomial(monomial, monomialCoeff);
     if (theWeight.scalarEuclidean(theCartanAction).isEqualToZero()) {
-      basisMonsZeroWeight.addMonomial(theMon, theMonCoeff);
+      basisMonsZeroWeight.addMonomial(monomial, monomialCoeff);
     }
   }
   Matrix<Rational> tempMat;
@@ -10370,9 +10384,9 @@ bool SlTwoInSlN::computeInvariantsOfDegree(
   for (int l = 0; l < 2; l ++) {
     for (int k = 0; k < basisMonsZeroWeight.size(); k ++) {
       if (l == 0) {
-        this->theE.actOnMonomialAsDifferentialOperator(basisMonsZeroWeight[k], tempP);
+        this->eElement.actOnMonomialAsDifferentialOperator(basisMonsZeroWeight[k], tempP);
       } else {
-        this->theF.actOnMonomialAsDifferentialOperator(basisMonsZeroWeight[k], tempP);
+        this->fElement.actOnMonomialAsDifferentialOperator(basisMonsZeroWeight[k], tempP);
       }
       for (int j = 0; j < basisMonsAll.size(); j ++) {
         int indexInResult = tempP.monomials.getIndex(basisMonsAll[j]);
@@ -10393,8 +10407,8 @@ bool SlTwoInSlN::computeInvariantsOfDegree(
     current.makeZero();
     for (int j = 0; j < basisMonsZeroWeight.size(); j ++) {
       if (!tempRoots[i][j].isEqualToZero()) {
-        theMon = basisMonsZeroWeight[j];
-        current.addMonomial(theMon, tempRoots[i][j]);
+        monomial = basisMonsZeroWeight[j];
+        current.addMonomial(monomial, tempRoots[i][j]);
       }
     }
   }
@@ -10456,24 +10470,24 @@ std::string DrawingVariables::getColorHtmlFromColorIndex(int colorIndex) {
   return out.str();
 }
 
-std::string ConeLatticeAndShift::toString(FormatExpressions& theFormat) {
+std::string ConeLatticeAndShift::toString(FormatExpressions& format) {
   std::stringstream out;
-  out << this->theProjectivizedCone.toString(&theFormat);
+  out << this->theProjectivizedCone.toString(&format);
   out << "<br>Shift +lattice: " << this->theShift.toString() << " + " << this->theLattice.toString();
   return out.str();
 }
 
-void DrawOperations::makeMeAStandardBasis(int theDim) {
-  if (theDim < 1) {
+void DrawOperations::makeMeAStandardBasis(int dimension) {
+  if (dimension < 1) {
     return;
   }
-  if (theDim > 3) {
-    this->projectionsEiVectors.setSizeMakeMatrix(theDim, 2);
-    for (int i = 0; i < theDim; i ++) {
-      this->projectionsEiVectors[i][0] = FloatingPoint::sinFloating(static_cast<double>(i) / static_cast<double>(theDim * MathRoutines::pi()));
-      this->projectionsEiVectors[i][1] = FloatingPoint::cosFloating(static_cast<double>(i) / static_cast<double>(theDim * MathRoutines::pi()));
+  if (dimension > 3) {
+    this->projectionsEiVectors.setSizeMakeMatrix(dimension, 2);
+    for (int i = 0; i < dimension; i ++) {
+      this->projectionsEiVectors[i][0] = FloatingPoint::sinFloating(static_cast<double>(i) / static_cast<double>(dimension * MathRoutines::pi()));
+      this->projectionsEiVectors[i][1] = FloatingPoint::cosFloating(static_cast<double>(i) / static_cast<double>(dimension * MathRoutines::pi()));
     }
-  } else if (theDim == 3) {
+  } else if (dimension == 3) {
     this->projectionsEiVectors.setSizeMakeMatrix(3, 2);
     this->projectionsEiVectors[0][0] = 1;
     this->projectionsEiVectors[0][1] = - 0.2;
@@ -10490,16 +10504,16 @@ void DrawOperations::makeMeAStandardBasis(int theDim) {
   }
   if (this->basisProjectionPlane.size < 1)
     this->basisProjectionPlane.setSize(1);
-  this->basisProjectionPlane.makeEiBasis(theDim);
+  this->basisProjectionPlane.makeEiBasis(dimension);
   this->basisProjectionPlane.setSize(2);
-  if (theDim != 3) {
+  if (dimension != 3) {
     for (int i = 0; i < this->basisProjectionPlane[1].size; i ++) {
       this->basisProjectionPlane[1][i] = 2 * i + 1;
     }
     for (int i = 0; i < this->basisProjectionPlane[0].size; i ++) {
       this->basisProjectionPlane[0][i] = 3 * i + 2;
     }
-  } else if (theDim == 3) {//<-if not needed but good for documentation purposes
+  } else if (dimension == 3) {//<-if not needed but good for documentation purposes
     this->basisProjectionPlane[0][0] = 0.6;
     this->basisProjectionPlane[0][1] = 0.4;
     this->basisProjectionPlane[0][2] = 0;
@@ -10508,16 +10522,16 @@ void DrawOperations::makeMeAStandardBasis(int theDim) {
     this->basisProjectionPlane[1][2] = 1;
   }
 
-  if (this->bilinearForm.numberOfRows != theDim) {
-    this->bilinearForm.makeIdentityMatrix(theDim, 1, 0);
+  if (this->bilinearForm.numberOfRows != dimension) {
+    this->bilinearForm.makeIdentityMatrix(dimension, 1, 0);
   }
 }
 
-std::string ConeComplex::drawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat) {
+std::string ConeComplex::drawMeToHtmlLastCoordAffine(DrawingVariables& drawingVariables, FormatExpressions& format) {
   bool isBad = false;
-  isBad = this->drawMeLastCoordinateAffine(true, theDrawingVariables, theFormat);
+  isBad = this->drawMeLastCoordinateAffine(true, drawingVariables, format);
   std::stringstream out;
-  out << theDrawingVariables.getHTMLDiv(this->getDimension() - 1, false);
+  out << drawingVariables.getHTMLDiv(this->getDimension() - 1, false);
   if (isBad) {
     out << "<hr>" << "found cones which I can't draw<hr>";
   }
@@ -10525,11 +10539,13 @@ std::string ConeComplex::drawMeToHtmlLastCoordAffine(DrawingVariables& theDrawin
   return out.str();
 }
 
-std::string ConeComplex::drawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat) {
+std::string ConeComplex::drawMeToHtmlProjective(
+  DrawingVariables& drawingVariables, FormatExpressions& format
+) {
   bool isGood = true;
-  isGood = this->drawMeProjective(nullptr, true, theDrawingVariables, theFormat);
+  isGood = this->drawMeProjective(nullptr, true, drawingVariables, format);
   std::stringstream out;
-  out << theDrawingVariables.getHTMLDiv(this->getDimension(), false);
+  out << drawingVariables.getHTMLDiv(this->getDimension(), false);
   if (!isGood) {
     out << "<hr>" << "found cones which I can't draw<hr>";
   }

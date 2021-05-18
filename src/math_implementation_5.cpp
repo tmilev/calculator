@@ -727,7 +727,7 @@ void SlTwoInSlN::climbDownFromHighestWeightAlongSl2String(
     global.fatal << "Input coincides with output. " << global.fatal;
   }
   Rational currentWeight;
-  Matrix<Rational>::lieBracket(this->theH, input, output);
+  Matrix<Rational>::lieBracket(this->hElement, input, output);
   bool tempBool = input.isProportionalTo(output, currentWeight);
   if (!tempBool) {
     global.comments << "<br>Climbing down does not work as expected!";
@@ -740,7 +740,7 @@ void SlTwoInSlN::climbDownFromHighestWeightAlongSl2String(
     RaiseCoeff += currentWeight;
     currentWeight -= 2;
     outputCoeff *= RaiseCoeff;
-    Matrix<Rational>::lieBracket(this->theF, output, output);
+    Matrix<Rational>::lieBracket(this->fElement, output, output);
   }
 }
 
@@ -755,8 +755,8 @@ std::string SlTwoInSlN::ElementModuleIndexToString(int input, bool useHtml) {
     endMath = "$";
     newLine = "\n\n\n";
   }
-  Matrix<Rational>& currentHW = this->theHighestWeightVectors.objects[input];
-  int currentEtaHw = this->theGmodKModules.objects[input].size - 1;
+  Matrix<Rational>& currentHW = this->highestWeightVectors.objects[input];
+  int currentEtaHw = this->gModKModules.objects[input].size - 1;
   //currentEtaHw-= currentEtaHw/2;
   int firstNonZeroRow = - 1, firstNonZeroColumn = - 1;
   bool found = false;
@@ -794,7 +794,7 @@ std::string SlTwoInSlN::ElementModuleIndexToString(int input, bool useHtml) {
 void SlTwoInSlN::getIsPlusKIndexingFrom(int input, int& s, int& k) {
   s = 0;
   k = input;
-  if (input >= this->theDimension || input < 0) {
+  if (input >= this->dimension || input < 0) {
     return;
   }
   for (int offset = 0; offset <= input; offset += this->thePartition[s - 1]) {
@@ -869,8 +869,8 @@ void SlTwoInSlN::extractHighestWeightVectorsFromVector(
   while (!remainder.isEqualToZero() ) {
     this->climbUpFromVector(remainder, highestWeightVector, largestPowerNotKillingInput);
     this->climbDownFromHighestWeightAlongSl2String(highestWeightVector, component, theCoeff, largestPowerNotKillingInput);
-    for (int i = 0; i < this->theProjectors.size; i ++) {
-      Matrix<Rational>& currentProjector = this->theProjectors[i];
+    for (int i = 0; i < this->projectors.size; i ++) {
+      Matrix<Rational>& currentProjector = this->projectors[i];
       tempMat = highestWeightVector;
       tempMat.multiplyOnTheLeft(currentProjector);
       if (!tempMat.isEqualToZero()) {
@@ -898,9 +898,9 @@ void SlTwoInSlN::climbUpFromVector(Matrix<Rational>& input, Matrix<Rational>& ou
   outputLastNonZero = input;
   largestPowerNotKillingInput = 0;
   for (
-    Matrix<Rational>::lieBracket(this->theE, outputLastNonZero, tempMat);
+    Matrix<Rational>::lieBracket(this->eElement, outputLastNonZero, tempMat);
     !tempMat.isEqualToZero();
-    Matrix<Rational>::lieBracket(this->theE, outputLastNonZero, tempMat)
+    Matrix<Rational>::lieBracket(this->eElement, outputLastNonZero, tempMat)
   ) {
     largestPowerNotKillingInput ++;
     outputLastNonZero = tempMat;
@@ -936,17 +936,17 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
   std::stringstream out;
   this->thePartition = decompositionDimensions;
   this->thePartition.quickSortDescending();
-  this->theDimension = 0;
+  this->dimension = 0;
   for (int i = 0; i < this->thePartition.size; i ++) {
-    this->theDimension += this->thePartition[i];
+    this->dimension += this->thePartition[i];
   }
-  theH.initialize(this->theDimension, this->theDimension);
-  theH.makeZero();
-  theE.initialize(this->theDimension, this->theDimension);
-  theE.makeZero();
-  theF.initialize(this->theDimension, this->theDimension);
-  theF.makeZero();
-  this->theProjectors.setSize(this->thePartition.size);
+  hElement.initialize(this->dimension, this->dimension);
+  hElement.makeZero();
+  eElement.initialize(this->dimension, this->dimension);
+  eElement.makeZero();
+  fElement.initialize(this->dimension, this->dimension);
+  fElement.makeZero();
+  this->projectors.setSize(this->thePartition.size);
   int currentOffset = 0;
   std::string beginMath, endMath, newLine;
   if (useHtml) {
@@ -959,39 +959,39 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
     newLine = "\n\n\n";
   }
   for (int i = 0; i < this->thePartition.size; i ++) {
-    this->theProjectors[i].initialize(this->theDimension, this->theDimension);
-    this->theProjectors[i].makeZero();
+    this->projectors[i].initialize(this->dimension, this->dimension);
+    this->projectors[i].makeZero();
     for (int j = 0; j < this->thePartition[i]; j ++) {
-      theH.elements[currentOffset + j][currentOffset + j] = this->thePartition[i] - 1 - 2 * j;
-      this->theProjectors[i].elements[currentOffset + j][currentOffset + j] = 1;
+      hElement.elements[currentOffset + j][currentOffset + j] = this->thePartition[i] - 1 - 2 * j;
+      this->projectors[i].elements[currentOffset + j][currentOffset + j] = 1;
       if (j != this->thePartition[i] - 1) {
-        theF.elements[currentOffset + j + 1][currentOffset + j] = 1;
-        theE.elements[currentOffset + j][currentOffset + j + 1] = (j + 1) * (this->thePartition[i] - j - 1);
+        fElement.elements[currentOffset + j + 1][currentOffset + j] = 1;
+        eElement.elements[currentOffset + j][currentOffset + j + 1] = (j + 1) * (this->thePartition[i] - j - 1);
       }
     }
     currentOffset += this->thePartition[i];
   }
-  out << newLine << beginMath << "h =" << this->elementMatrixToTensorString(this->theH, useHtml) << "="
-  << this->theH.toStringWithBlocks(this->thePartition) << endMath;
-  out << newLine << beginMath << "e =" << this->elementMatrixToTensorString(this->theE, useHtml) << "="
-  << this->theE.toStringWithBlocks(this->thePartition) << endMath;
-  out << newLine << beginMath << "f =" << this->elementMatrixToTensorString(this->theF, useHtml) << "="
-  << this->theF.toStringWithBlocks(this->thePartition) << endMath;
+  out << newLine << beginMath << "h =" << this->elementMatrixToTensorString(this->hElement, useHtml) << "="
+  << this->hElement.toStringWithBlocks(this->thePartition) << endMath;
+  out << newLine << beginMath << "e =" << this->elementMatrixToTensorString(this->eElement, useHtml) << "="
+  << this->eElement.toStringWithBlocks(this->thePartition) << endMath;
+  out << newLine << beginMath << "f =" << this->elementMatrixToTensorString(this->fElement, useHtml) << "="
+  << this->fElement.toStringWithBlocks(this->thePartition) << endMath;
   Matrix<Rational>  tempMat;
-  tempMat.initialize(this->theDimension, this->theDimension);
+  tempMat.initialize(this->dimension, this->dimension);
   List<Matrix<Rational> > Decomposition, theHwCandidatesBeforeProjection, theHwCandidatesProjected;
-  this->theHighestWeightVectors.size = 0;
-  this->theGmodKModules.size = 0;
-  for (int i = 0; i < this->theDimension; i ++) {
-    for (int j = 0; j < this->theDimension; j ++) {
+  this->highestWeightVectors.size = 0;
+  this->gModKModules.size = 0;
+  for (int i = 0; i < this->dimension; i ++) {
+    for (int j = 0; j < this->dimension; j ++) {
       tempMat.makeZero();
       tempMat.elements[i][j] = 1;
       this->extractHighestWeightVectorsFromVector(tempMat, Decomposition, theHwCandidatesBeforeProjection);
       theHwCandidatesProjected.size = 0;
       for (int k = 0; k < theHwCandidatesBeforeProjection.size; k ++) {
-        for (int l = 0; l < this->theProjectors.size; l ++) {
+        for (int l = 0; l < this->projectors.size; l ++) {
           tempMat = theHwCandidatesBeforeProjection[k];
-          tempMat.multiplyOnTheLeft(this->theProjectors[l]);
+          tempMat.multiplyOnTheLeft(this->projectors[l]);
           if (!tempMat.isEqualToZero()) {
             theHwCandidatesProjected.addOnTop(tempMat);
           }
@@ -1000,14 +1000,14 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
       for (int k = 0; k < theHwCandidatesProjected.size; k ++) {
         if (this->getModuleIndexFromHighestWeightVector(theHwCandidatesProjected[k]) == - 1) {
           Matrix<Rational>& currentHighest = theHwCandidatesProjected[k];
-          this->theHighestWeightVectors.addOnTop(currentHighest);
-          this->theGmodKModules.expandOnTop(1);
-          List<Matrix<Rational> >& currentMod = *this->theGmodKModules.lastObject();
+          this->highestWeightVectors.addOnTop(currentHighest);
+          this->gModKModules.expandOnTop(1);
+          List<Matrix<Rational> >& currentMod = *this->gModKModules.lastObject();
           currentMod.size = 0;
           for (
             tempMat = currentHighest;
             !tempMat.isEqualToZero();
-            Matrix<Rational>::lieBracket(this->theF, tempMat, tempMat)
+            Matrix<Rational>::lieBracket(this->fElement, tempMat, tempMat)
           ) {
             currentMod.addOnTop(tempMat);
           }
@@ -1017,9 +1017,9 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
   }
   out << this->GetNotationString(useHtml);
   out << newLine << "...and the highest weights of the module decomposition are ("
-  << this->theHighestWeightVectors.size << " modules):";
-  for (int i = 0; i < this->theHighestWeightVectors.size; i ++) {
-    out << newLine << beginMath << this->elementMatrixToTensorString(theHighestWeightVectors[i], useHtml)
+  << this->highestWeightVectors.size << " modules):";
+  for (int i = 0; i < this->highestWeightVectors.size; i ++) {
+    out << newLine << beginMath << this->elementMatrixToTensorString(highestWeightVectors[i], useHtml)
     << endMath << ", highest weight of ";
     out << beginMath << this->ElementModuleIndexToString(i, useHtml) << endMath;
   }
@@ -1031,11 +1031,11 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
 
 std::string SlTwoInSlN::initPairingTable(bool useHtml) {
   std::stringstream out;
-  this->PairingTable.setSize(this->theHighestWeightVectors.size);
-  for (int i = 0; i < this->PairingTable.size; i ++) {
-    this->PairingTable[i].setSize(this->theHighestWeightVectors.size);
-    for (int j = 0; j < this->PairingTable[i].size; j ++) {
-      List<int>& currentPairing = this->PairingTable[i][j];
+  this->pairingTable.setSize(this->highestWeightVectors.size);
+  for (int i = 0; i < this->pairingTable.size; i ++) {
+    this->pairingTable[i].setSize(this->highestWeightVectors.size);
+    for (int j = 0; j < this->pairingTable[i].size; j ++) {
+      List<int>& currentPairing = this->pairingTable[i][j];
       out << this->pairTwoIndices(currentPairing, i, j, useHtml);
     }
   }
@@ -1058,8 +1058,8 @@ std::string SlTwoInSlN::pairTwoIndices(List<int>& output, int leftIndex, int rig
   }
   std::stringstream out;
   output.size = 0;
-  List<Matrix<Rational> >& leftElements = this->theGmodKModules[leftIndex];
-  List<Matrix<Rational> >& rightElements = this->theGmodKModules[rightIndex];
+  List<Matrix<Rational> >& leftElements = this->gModKModules[leftIndex];
+  List<Matrix<Rational> >& rightElements = this->gModKModules[rightIndex];
   Matrix<Rational> tempMat;
   List<Matrix<Rational> > HighestWeightsContainingModules;
   List<Matrix<Rational> > tempDecomposition;
@@ -1091,7 +1091,7 @@ std::string SlTwoInSlN::pairTwoIndices(List<int>& output, int leftIndex, int rig
   if (output.size > 0) {
     out << "  hw vectors: ";
     for (int i = 0; i < output.size; i ++) {
-      out << beginMath << this->elementMatrixToTensorString(this->theHighestWeightVectors[output[i]], useHtml)
+      out << beginMath << this->elementMatrixToTensorString(this->highestWeightVectors[output[i]], useHtml)
       << endMath << ",";
     }
   }

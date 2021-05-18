@@ -2349,12 +2349,12 @@ bool CalculatorFunctionsDifferentiation::differentiateConstPower(Calculator& cal
   if (!theArgument[2].isConstantNumber()) {
     return false;
   }
-  Expression theMonomial, theTerm, theExponent, basePrime, minusOne;
+  Expression monomial, theTerm, theExponent, basePrime, minusOne;
   minusOne.assignValue<Rational>(- 1, calculator);
   theExponent.makeXOX(calculator, calculator.opPlus(), theArgument[2], minusOne);
-  theMonomial.makeXOX(calculator, calculator.opPower(), theArgument[1], theExponent);
+  monomial.makeXOX(calculator, calculator.opPower(), theArgument[1], theExponent);
   basePrime.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, theArgument[1]);
-  theTerm.makeXOX(calculator, calculator.opTimes(), theArgument[2], theMonomial);
+  theTerm.makeXOX(calculator, calculator.opTimes(), theArgument[2], monomial);
   return output.makeXOX(calculator, calculator.opTimes(), theTerm, basePrime);
 }
 
@@ -4120,7 +4120,7 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIaand
   bSquared.makeXOX(calculator, calculator.opPower(), b, twoE);
   aSquared.makeXOX(calculator, calculator.opPower(), a, twoE);
 
-  Expression theQuadraticDiva = xSquared + (b / a) * x + c / a;
+  Expression quadraticDividedByA = xSquared + (b / a) * x + c / a;
   Expression xplusbdiv2a = x + b / (twoE * a);
   Expression F = (fourE * a * c - bSquared) / (fourE * aSquared);
   Expression sqrtF;
@@ -4131,7 +4131,7 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIaand
   theArcTan.addChildOnTop(arcTanArgument);
   Expression theLog(calculator);
   theLog.addChildAtomOnTop(calculator.opLog());
-  theLog.addChildOnTop(theQuadraticDiva);
+  theLog.addChildOnTop(quadraticDividedByA);
   Expression C = B - (A * b) / (twoE * a);
   output = (oneE / a) * ((A / twoE) * theLog + (C / sqrtF) * theArcTan);
   output.checkConsistencyRecursively();
@@ -4193,11 +4193,11 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIIb(
   xSquared.makeXOX(calculator, calculator.opPower(), x, twoE);
   bSquared.makeXOX(calculator, calculator.opPower(), b, twoE);
 
-  Expression theMonicQuadratic = xSquared + b * x + c;
+  Expression monicQuadratic = xSquared + b * x + c;
   Expression D = c - bSquared / fourE;
   Expression remainingIntegral, functionRemainingToIntegrate, theQuadraticPowerOneMinusN, theQuadraticPowerNMinusOne;
-  theQuadraticPowerOneMinusN.makeXOX(calculator, calculator.opPower(), theMonicQuadratic, oneE - numPowerE);
-  theQuadraticPowerNMinusOne.makeXOX(calculator, calculator.opPower(), theMonicQuadratic, numPowerE - oneE);
+  theQuadraticPowerOneMinusN.makeXOX(calculator, calculator.opPower(), monicQuadratic, oneE - numPowerE);
+  theQuadraticPowerNMinusOne.makeXOX(calculator, calculator.opPower(), monicQuadratic, numPowerE - oneE);
   functionRemainingToIntegrate = oneE / theQuadraticPowerNMinusOne;
   remainingIntegral.makeIntegral(calculator, integrationSetE, functionRemainingToIntegrate, x);
   output = oneE / D *
@@ -4269,9 +4269,9 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIb(
   xSquared.makeXOX(calculator, calculator.opPower(), x, twoE);
   bSquared.makeXOX(calculator, calculator.opPower(), b, twoE);
   aSquared.makeXOX(calculator, calculator.opPower(), a, twoE);
-  Expression theQuadraticDiva = xSquared + (b / a) * x + c / a;
-  quadraticPowerN.makeXOX(calculator, calculator.opPower(), theQuadraticDiva, nE);
-  quadraticPowerOneMinusN.makeXOX(calculator, calculator.opPower(), theQuadraticDiva, oneE - nE);
+  Expression quadraticDividedByA = xSquared + (b / a) * x + c / a;
+  quadraticPowerN.makeXOX(calculator, calculator.opPower(), quadraticDividedByA, nE);
+  quadraticPowerOneMinusN.makeXOX(calculator, calculator.opPower(), quadraticDividedByA, oneE - nE);
   remainingFunctionToIntegrate = oneE / quadraticPowerN;
   remainingIntegral.makeIntegral(calculator, integrationSetE, remainingFunctionToIntegrate, x);
   Expression C = B - (A * b) / (twoE * a);
@@ -6638,7 +6638,7 @@ bool CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calcula
   }
   SemisimpleSubalgebras& theSSsubalgebras =
   calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.weylGroup.dynkinType);
-  theSSsubalgebras.toStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
+  theSSsubalgebras.toStringExpressionString = CalculatorConversions::stringFromSemisimpleSubalgebras;
 
   out << "Attempting to embed "
   << smallSubalgebraPointer.content->weylGroup.dynkinType.toString()

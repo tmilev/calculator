@@ -2061,9 +2061,9 @@ std::ostream& operator<<(std::ostream& out, const ElementWeylGroupRing<Coefficie
 
 template <typename Coefficient>
 void ElementWeylGroupRing<Coefficient>::makeEi(WeylGroupData* GG, int i) {
-  ElementWeylGroup theMon;
-  theMon = GG->group.elements[i];
-  *this = theMon;
+  ElementWeylGroup monomial;
+  monomial = GG->group.elements[i];
+  *this = monomial;
 }
 
 template <typename Coefficient>
@@ -2078,7 +2078,7 @@ void ElementWeylGroupRing<Coefficient>::makeFromClassFunction(WeylGroupData* GG,
     global.fatal << "Weyl group pointer not allowed to be zero. " << global.fatal;
   }
   this->makeZero();
-  ElementWeylGroup theMon;
+  ElementWeylGroup monomial;
   for (int i = 0; i < GG->group.conjugacyClassCount(); i ++) {
     if (l[i] != 0) {
       for (int j = 0; j < GG->group.conjugacyClasses.size; j ++) {

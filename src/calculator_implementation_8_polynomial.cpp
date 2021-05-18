@@ -866,12 +866,12 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     }
   }
   for (int i = 0; i < this->intermediateHighlightedMons[remainderIndex].size; i ++) {
-    int theMonIndex = this->allMonomials.getIndex(
+    int monomialIndex = this->allMonomials.getIndex(
       this->intermediateHighlightedMons[remainderIndex][i]
     );
-    this->additionalHighlightRemainders[remainderIndex][theMonIndex] = currentSlideNumber;
-    this->additionalHighlightFinalRemainder[theMonIndex] = currentSlideNumber;
-    this->uncoverMonsFinalRemainder[theMonIndex] = currentSlideNumber;
+    this->additionalHighlightRemainders[remainderIndex][monomialIndex] = currentSlideNumber;
+    this->additionalHighlightFinalRemainder[monomialIndex] = currentSlideNumber;
+    this->uncoverMonsFinalRemainder[monomialIndex] = currentSlideNumber;
     currentSlideNumber ++;
   }
   MonomialPolynomial constMon;

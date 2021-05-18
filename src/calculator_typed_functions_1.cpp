@@ -999,12 +999,12 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolynomialBySmallInteger(
   if (thePower < 0) {
     if (base.size() == 1) {
       Polynomial<Rational> outputPoly;
-      MonomialPolynomial theMon = base[0];
+      MonomialPolynomial monomial = base[0];
       Rational theCF = base.coefficients[0];
       theCF.raiseToPower(thePower);
-      theMon.raiseToPower(thePower);
+      monomial.raiseToPower(thePower);
       outputPoly.makeZero();
-      outputPoly.addMonomial(theMon, theCF);
+      outputPoly.addMonomial(monomial, theCF);
       return output.assignValueWithContext(outputPoly, input[1].getContext(), calculator);
     }
     base.raiseToPower(- thePower, 1);
@@ -1448,11 +1448,11 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(
       << "small integer and the base is not a coefficient one monomial. ";
     }
     ElementWeylAlgebra<Rational> finalOutput;
-    MonomialWeylAlgebra theMon = base[0];
-    theMon.polynomialPart.raiseToPower(powerRat);
-    theMon.differentialPart.raiseToPower(powerRat);
-    for (int i = 0; i < theMon.polynomialPart.minimalNumberOfVariables(); i ++) {
-      if (theMon.polynomialPart(i) != 0 && theMon.differentialPart(i) != 0) {
+    MonomialWeylAlgebra monomial = base[0];
+    monomial.polynomialPart.raiseToPower(powerRat);
+    monomial.differentialPart.raiseToPower(powerRat);
+    for (int i = 0; i < monomial.polynomialPart.minimalNumberOfVariables(); i ++) {
+      if (monomial.polynomialPart(i) != 0 && monomial.differentialPart(i) != 0) {
         return calculator << "<hr>Failed to raise " << base.toString() << " to power "
         << powerRat.toString() << ": the exponent is not a "
         << "small integer, the base is a monomial, however the monomial "
@@ -1460,7 +1460,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(
       }
     }
     finalOutput.makeZero();
-    finalOutput.addMonomial(theMon, 1);
+    finalOutput.addMonomial(monomial, 1);
     return output.assignValueWithContext(finalOutput, input[1].getContext(), calculator);
   }
 
@@ -1538,12 +1538,12 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(
   if (!copyExponent.convertInternally<RationalFraction<Rational> >(exponentConverted)) {
     return false;
   }
-  MonomialUniversalEnveloping<RationalFraction<Rational> > theMon;
-  theMon = theUE[0];
-  theMon.powers[0] *= exponentConverted.getValue<RationalFraction<Rational> >();
+  MonomialUniversalEnveloping<RationalFraction<Rational> > monomial;
+  monomial = theUE[0];
+  monomial.powers[0] *= exponentConverted.getValue<RationalFraction<Rational> >();
   ElementUniversalEnveloping<RationalFraction<Rational> > outputUE;
   outputUE.makeZero(*theUE.owner);
-  outputUE.addMonomial(theMon, 1);
+  outputUE.addMonomial(monomial, 1);
   return output.assignValueWithContext(outputUE, copyBase.getContext(), calculator);
 }
 

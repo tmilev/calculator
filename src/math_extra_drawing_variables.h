@@ -30,7 +30,7 @@ public:
   int indexStartingModifiableTextCommands;
   void (*specialOperationsOnBasisChange)(DrawOperations& theOps);
   static void projectionMultiplicityMergeOnBasisChange(DrawOperations& operations);
-  void makeMeAStandardBasis(int theDim);
+  void makeMeAStandardBasis(int dimension);
   void operator+=(const DrawOperations& other);
   void initDimensions(Matrix<double>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane) {
     this->bilinearForm = bilinearForm;

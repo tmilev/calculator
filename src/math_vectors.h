@@ -188,25 +188,25 @@ public:
     }
     return result;
   }
-  template <class otherType>
-  otherType scalarEuclidean(const Vector<otherType>& other) const {
-    otherType output;
+  template <class Type>
+  Type scalarEuclidean(const Vector<Type>& other) const {
+    Type output;
     this->scalarEuclidean(other, output);
     return output;
   }
-  template <class otherType>
-  void scalarEuclidean(const Vector<otherType>& other, otherType& output) const {
+  template <class Type>
+  void scalarEuclidean(const Vector<Type>& other, Type& output) const {
     if (this->size != other.size) {
       global.fatal << "Attempt to take scalar product of elements of different dimensions: "
       << *this << " and " << other << ". "
       << global.fatal;
     }
-    otherType tempElt;
+    Type element;
     output = 0;
     for (int i = 0; i < this->size; i ++) {
-      tempElt = other[i];
-      tempElt *= this->objects[i];
-      output += tempElt;
+      element = other[i];
+      element *= this->objects[i];
+      output += element;
     }
   }
   static void projectOntoHyperPlane(

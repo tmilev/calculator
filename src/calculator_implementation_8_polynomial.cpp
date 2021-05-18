@@ -1286,14 +1286,14 @@ bool CalculatorFunctionsPolynomial::groebner(
   context.getFormat(groebnerComputation.format);
   context.getFormat(global.defaultFormat.getElement());
   if (useModZp) {
-    ElementZmodP tempElt;
-    tempElt.makeMinusOne(static_cast<unsigned>(modulus));
+    ElementZmodP element;
+    element.makeMinusOne(static_cast<unsigned>(modulus));
     inputVectorZmodP.setSize(inputVector.size);
     for (int i = 0; i < inputVector.size; i ++) {
       inputVectorZmodP[i].makeZero();
       for (int j = 0; j < inputVector[i].size(); j ++) {
-        tempElt = inputVector[i].coefficients[j];
-        inputVectorZmodP[i].addMonomial(inputVector[i][j], tempElt);
+        element = inputVector[i].coefficients[j];
+        inputVectorZmodP[i].addMonomial(inputVector[i][j], element);
       }
     }
   }

@@ -58,15 +58,15 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::checkReprese
   HashedList<Matrix<Rational> > tempList;
   tempList.addOnTop(this->theElementImages);
   Matrix<Rational> tempMat;
-  ElementWeylGroup tempElt;
+  ElementWeylGroup element;
   for (int i = 0; i < tempList.size; i ++) {
     for (int j = 0; j < tempList.size; j ++) {
       tempMat = tempList[i];
       tempMat.multiplyOnTheLeft(tempList[j]);
-      tempElt = this->ownerGroup->theElements[j];
-      tempElt *= this->ownerGroup->theElements[i];
-      tempElt.makeCanonical();
-      int targetIndex = this->ownerGroup->theElements.getIndex(tempElt);
+      element = this->ownerGroup->theElements[j];
+      element *= this->ownerGroup->theElements[i];
+      element.makeCanonical();
+      int targetIndex = this->ownerGroup->theElements.getIndex(element);
       if (!(tempMat == this->theElementImages[targetIndex])) {
         global.fatal << "this is a programming error: element " << i + 1 << " times element "
         << j + 1 << " is outside of the set, i.e.,  "

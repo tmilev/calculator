@@ -315,7 +315,7 @@ bool CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY(
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
-  Expression constPower, thePower;
+  Expression constPower, power;
   const Expression* left = &input[1];
   const Expression* right = &input[2];
   if (*left == *right) {
@@ -338,8 +338,8 @@ bool CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY(
           }
         }
         if (isGood) {
-          thePower.makeXOX(calculator, calculator.opPlus(), (*right)[2], calculator.expressionOne());
-          return output.makeXOX(calculator, calculator.opPower(), *left, thePower);
+          power.makeXOX(calculator, calculator.opPlus(), (*right)[2], calculator.expressionOne());
+          return output.makeXOX(calculator, calculator.opPower(), *left, power);
         }
       }
       if (left->startsWith(calculator.opPower(), 3)) {
@@ -365,8 +365,8 @@ bool CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY(
           if (!isGood) {
             continue;
           }
-          thePower.makeXOX(calculator, calculator.opPlus(), (*left)[2], (*right)[2]);
-          return output.makeXOX(calculator, calculator.opPower(), (*left)[1], thePower);
+          power.makeXOX(calculator, calculator.opPlus(), (*left)[2], (*right)[2]);
+          return output.makeXOX(calculator, calculator.opPower(), (*left)[1], power);
         }
       }
     }
@@ -710,10 +710,10 @@ bool Calculator::collectCoefficientsPowersVariables(
         break;
       }
       if (currentE.startsWith(calculator.opPower(), 3)) {
-        int thePower;
+        int power;
         if (currentE[1] == theVariable) {
-          if (currentE[2].isSmallInteger(&thePower)) {
-            outputPositionIiscoeffXtoIth.addMonomial(MonomialVector(thePower), currentCoeff);
+          if (currentE[2].isSmallInteger(&power)) {
+            outputPositionIiscoeffXtoIth.addMonomial(MonomialVector(power), currentCoeff);
             found = true;
             break;
           }

@@ -4048,10 +4048,10 @@ void OnePartialFraction::reduceMonomialByMonomial(PartialFractions& owner, int m
   if (this->flagAnErrorHasOccurredTimeToPanic) {
 
   }
-  SelectionWithDifferentMaxMultiplicities thePowers;
-  List<int> thePowersSigned;
-  thePowersSigned.setSize(this->IndicesNonZeroMults.size);
-  thePowers.initIncomplete(this->IndicesNonZeroMults.size);
+  SelectionWithDifferentMaxMultiplicities powers;
+  List<int> powersSigned;
+  powersSigned.setSize(this->IndicesNonZeroMults.size);
+  powers.initIncomplete(this->IndicesNonZeroMults.size);
   for (int k = 0; k< this->Coefficient.size; k++) {
     this->Coefficient[k].MonomialExponentToColumnMatrix(matColumn);
     if (this->flagAnErrorHasOccurredTimeToPanic) {
@@ -4070,26 +4070,26 @@ void OnePartialFraction::reduceMonomialByMonomial(PartialFractions& owner, int m
 
       }
       for (int i = 0; i <matLinComb.numberOfRows; i ++) {
-        thePowers.capacities[i] = 0;
+        powers.capacities[i] = 0;
         if (matLinComb.elements[i][0].isGreaterThanOrEqualTo(1) || matLinComb.elements[i][0].isNegative()) {
           int tempI = matLinComb.elements[i][0].floorIfSmall();
-          thePowersSigned[i] = tempI;
+          powersSigned[i] = tempI;
           if (tempI<0)
-            thePowers.capacities[i] = this->objects[this->IndicesNonZeroMults[i]].getMultiplicityLargestElongation();
+            powers.capacities[i] = this->objects[this->IndicesNonZeroMults[i]].getMultiplicityLargestElongation();
           else
-            thePowers.capacities[i] =MathRoutines::minimum(tempI, this->objects[this->IndicesNonZeroMults[i]].getMultiplicityLargestElongation());
+            powers.capacities[i] =MathRoutines::minimum(tempI, this->objects[this->IndicesNonZeroMults[i]].getMultiplicityLargestElongation());
           tempRoot = owner.startingVectors[this->IndicesNonZeroMults[i]];
-          tempRoot*=(thePowersSigned[i]*this->objects[this->IndicesNonZeroMults[i]].getLargestElongation());
+          tempRoot*=(powersSigned[i]*this->objects[this->IndicesNonZeroMults[i]].getLargestElongation());
           tempMon-= tempRoot;
           if (this->flagAnErrorHasOccurredTimeToPanic)
             tempMon.ComputeDebugString();
         } else {
-          thePowers.multiplicities[i] = 0;
-          thePowersSigned[i] = 0;
+          powers.multiplicities[i] = 0;
+          powersSigned[i] = 0;
         }
       }
-      thePowers.computeElements();
-      int numSummands = thePowers.totalNumberSubsetsSmallInt();
+      powers.computeElements();
+      int numSummands = powers.totalNumberSubsetsSmallInt();
       if (numSummands ==1)
         owner.AddAlreadyReduced(tempFrac, Indicator);
       else {
@@ -4105,15 +4105,15 @@ void OnePartialFraction::reduceMonomialByMonomial(PartialFractions& owner, int m
         for (int l = 0; l < numSummands; l ++) {
           tempFrac.assignDenominatorOnly(*this);
           if (this->flagAnErrorHasOccurredTimeToPanic)
-            thePowers.ComputeDebugString();
+            powers.ComputeDebugString();
           tempFrac.reduceMonomialByMonomialModifyOneMonomial
-          (owner, thePowers, thePowersSigned, tempMon, this->Coefficient.theCoeffs[k]);
+          (owner, powers, powersSigned, tempMon, this->Coefficient.theCoeffs[k]);
           if (this->flagAnErrorHasOccurredTimeToPanic)
             tempFrac.ComputeDebugString(owner);
           tempFrac.reduceMonomialByMonomial(owner, - 1, Indicator);
           if (this->flagAnErrorHasOccurredTimeToPanic)
             tempFrac.reduceMonomialByMonomial(tempFracs, - 1, Indicator);
-          thePowers.incrementSubset();
+          powers.incrementSubset();
         }
         if (this->flagAnErrorHasOccurredTimeToPanic) {
           Rational tempFracsCheckSum;
@@ -4138,31 +4138,31 @@ void OnePartialFraction::reduceMonomialByMonomial(PartialFractions& owner, int m
 
 void OnePartialFraction::reduceMonomialByMonomialModifyOneMonomial(
   PartialFractions& Accum,
-  SelectionWithDifferentMaxMultiplicities& thePowers,
-  List<int>& thePowersSigned,
+  SelectionWithDifferentMaxMultiplicities& powers,
+  List<int>& powersSigned,
   MonomialPolynomial& input,
   LargeInteger& inputCoeff
 ) {
-  (void) Accum; (void) thePowers; (void) thePowersSigned; (void) input; (void) inputCoeff;
+  (void) Accum; (void) powers; (void) powersSigned; (void) input; (void) inputCoeff;
   /*Polynomial<LargeInt>& theNumerator = global.PolyLargeIntPartFracBuffer5.getElement();
   Polynomial<LargeInt>& tempP = global.PolyLargeIntPartFracBuffer6.getElement();
   theNumerator.makeZero(Accum.AmbientDimension);
   theNumerator.addMonomial(input, inputCoeff);
-  if (thePowersSigned.size != thePowers.multiplicities.size)
+  if (powersSigned.size != powers.multiplicities.size)
     global.fatal << global.fatal;
   if (this->flagAnErrorHasOccurredTimeToPanic) {
    // theNumerator.ComputeDebugString();
   }
-  for (int j = 0; j < thePowers.multiplicities.size; j ++) {
+  for (int j = 0; j < powers.multiplicities.size; j ++) {
     int currentIndexInFraction = this->IndicesNonZeroMults[j];
     int currentElongation = this->objects[currentIndexInFraction].getLargestElongation();
-    int MultChange = thePowers.multiplicities[j];
+    int MultChange = powers.multiplicities[j];
     int MaxMultchange = this->objects[currentIndexInFraction].getMultiplicityLargestElongation();
     Vector<Rational> tempRoot;
     tempRoot = Accum.startingVectors[currentIndexInFraction];
     tempRoot*=(currentElongation);
     this->getPolyReduceMonomialByMonomial
-    (Accum, tempRoot, thePowersSigned[j], MultChange, MaxMultchange, tempP);
+    (Accum, tempRoot, powersSigned[j], MultChange, MaxMultchange, tempP);
     if (this->flagAnErrorHasOccurredTimeToPanic) {
      // tempP.ComputeDebugString();
     }
@@ -7670,10 +7670,10 @@ void WeylGroupData::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double>
   if (theDimension < 2) {
     return;
   }
-  ElementWeylGroup tempElt;
-  this->getCoxeterElement(tempElt);
+  ElementWeylGroup element;
+  this->getCoxeterElement(element);
   Matrix<Rational> matCoxeterElt, tempMat;
-  this->getMatrixStandardRepresentation(tempElt, matCoxeterElt);
+  this->getMatrixStandardRepresentation(element, matCoxeterElt);
   tempMat = matCoxeterElt;
   int coxeterNumber = this->rootSystem.lastObject()->sumCoordinates().numeratorShort + 1;
   for (int i = 0; i < coxeterNumber - 1; i ++) {
@@ -7916,10 +7916,10 @@ std::string WeylGroupData::generateWeightSupportMethod1(
 }
 
 bool WeylGroupData::isEigenSpaceGeneratorCoxeterElement(Vector<Rational>& input) {
-  ElementWeylGroup tempElt;
-  this->getCoxeterElement(tempElt);
+  ElementWeylGroup element;
+  this->getCoxeterElement(element);
   Matrix<Rational> matCoxeterElt;
-  this->getMatrixStandardRepresentation(tempElt, matCoxeterElt);
+  this->getMatrixStandardRepresentation(element, matCoxeterElt);
   Vector<Rational> tempRoot = input;
   for (int i = 0; i < this->getDimension(); i ++) {
     matCoxeterElt.actOnVectorColumn(tempRoot);

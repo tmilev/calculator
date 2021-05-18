@@ -199,8 +199,8 @@ public:
     const MonomialUniversalEnveloping<Coefficient>& other,
     ElementUniversalEnvelopingOrdered<Coefficient>& output
   );
-  void multiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const Coefficient& thePower);
-  void multiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, int thePower);
+  void multiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const Coefficient& power);
+  void multiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, int power);
   void multiplyByNoSimplify(const MonomialUniversalEnvelopingOrdered& other);
   void makeZero(int numVars, SemisimpleLieAlgebraOrdered& theOwner);
   void makeZero(const Coefficient& ringZero, SemisimpleLieAlgebraOrdered& theOwner);
@@ -405,7 +405,7 @@ public:
     Vector<Polynomial<Coefficient> >& input,
     SemisimpleLieAlgebraOrdered& owner
   );
-  void raiseToPower(int thePower, const Coefficient& ringUnit);
+  void raiseToPower(int power, const Coefficient& ringUnit);
   bool isPowerOfSingleGenerator() {
     if (this->size != 1) {
       return false;

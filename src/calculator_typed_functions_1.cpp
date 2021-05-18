@@ -989,31 +989,31 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolynomialBySmallInteger(
     return false;
   }
   Polynomial<Rational> base;
-  int thePower = 0;
-  if (!input[1].isOfType(&base) || !input[2].isSmallInteger(&thePower)) {
+  int power = 0;
+  if (!input[1].isOfType(&base) || !input[2].isSmallInteger(&power)) {
     return false;
   }
-  if (base.isEqualToZero() && thePower <= 0) {
+  if (base.isEqualToZero() && power <= 0) {
     return output.makeError("Division by zero: trying to raise 0 to negative power. ", calculator);
   }
-  if (thePower < 0) {
+  if (power < 0) {
     if (base.size() == 1) {
       Polynomial<Rational> outputPoly;
       MonomialPolynomial monomial = base[0];
       Rational theCF = base.coefficients[0];
-      theCF.raiseToPower(thePower);
-      monomial.raiseToPower(thePower);
+      theCF.raiseToPower(power);
+      monomial.raiseToPower(power);
       outputPoly.makeZero();
       outputPoly.addMonomial(monomial, theCF);
       return output.assignValueWithContext(outputPoly, input[1].getContext(), calculator);
     }
-    base.raiseToPower(- thePower, 1);
+    base.raiseToPower(- power, 1);
     RationalFraction<Rational> theRF;
     theRF = base;
     theRF.invert();
     return output.assignValueWithContext(theRF, input[1].getContext(), calculator);
   }
-  base.raiseToPower(thePower, 1);
+  base.raiseToPower(power, 1);
   return output.assignValueWithContext(base, input[1].getContext(), calculator);
 }
 
@@ -1206,17 +1206,17 @@ bool CalculatorFunctionsBinaryOps::powerAlgebraicNumberPolynomialBySmallInteger(
     return false;
   }
   Polynomial<AlgebraicNumber> base;
-  int thePower = 0;
-  if (!input[1].isOfType(&base)|| !input[2].isSmallInteger(&thePower)) {
+  int power = 0;
+  if (!input[1].isOfType(&base)|| !input[2].isSmallInteger(&power)) {
     return false;
   }
-  if (thePower < 0) {
+  if (power < 0) {
     return false;
   }
-  if (base.isEqualToZero() && thePower <= 0) {
+  if (base.isEqualToZero() && power <= 0) {
     return output.makeError("Division by zero: trying to raise 0 to negative power. ", calculator);
   }
-  base.raiseToPower(thePower, 1);
+  base.raiseToPower(power, 1);
   return output.assignValueWithContext(base, input[1].getContext(), calculator);
 }
 
@@ -1252,23 +1252,23 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolynomialModuloIntegerBySmallInteg
     return false;
   }
   Polynomial<ElementZmodP> base;
-  int thePower = 0;
-  if (!input[1].isOfType(&base)|| !input[2].isSmallInteger(&thePower)) {
+  int power = 0;
+  if (!input[1].isOfType(&base)|| !input[2].isSmallInteger(&power)) {
     return false;
   }
-  if (thePower < 0) {
+  if (power < 0) {
     return false;
   }
   if (base.isEqualToZero()) {
-    if (thePower < 0) {
+    if (power < 0) {
       return output.makeError("Division by zero: trying to raise 0 to negative power. ", calculator);
     }
-    if (thePower == 0) {
+    if (power == 0) {
       return false;
     }
     return output.assignValueWithContext(base, input[1].getContext(), calculator);
   }
-  base.raiseToPower(thePower, base.coefficients[0].one());
+  base.raiseToPower(power, base.coefficients[0].one());
   return output.assignValueWithContext(base, input[1].getContext(), calculator);
 }
 
@@ -1281,20 +1281,20 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolynomialModPModuloPolynomialModPB
     return false;
   }
   PolynomialModuloPolynomial<ElementZmodP> base;
-  LargeIntegerUnsigned thePower = 0;
-  if (!input[1].isOfType(&base) || !input[2].isIntegerNonNegative(&thePower)) {
+  LargeIntegerUnsigned power = 0;
+  if (!input[1].isOfType(&base) || !input[2].isIntegerNonNegative(&power)) {
     return false;
   }
   if (base.isEqualToZero()) {
-    if (thePower < 0) {
+    if (power < 0) {
       return output.makeError("Division by zero: trying to raise 0 to negative power. ", calculator);
     }
-    if (thePower == 0) {
+    if (power == 0) {
       return false;
     }
     return output.assignValueWithContext(base, input[1].getContext(), calculator);
   }
-  MathRoutines::raiseToPower(base, thePower, base.one());
+  MathRoutines::raiseToPower(base, power, base.one());
   return output.assignValueWithContext(base, input[1].getContext(), calculator);
 }
 
@@ -1398,21 +1398,21 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(
       }
     }
   }
-  int thePower = 0;
-  if (!input[2].isSmallInteger(&thePower)) {
+  int power = 0;
+  if (!input[2].isSmallInteger(&power)) {
     return false;
   }
-  if (base.isEqualToZero() && thePower < 0) {
+  if (base.isEqualToZero() && power < 0) {
     return output.makeError("Division by zero: trying to raise 0 to negative power. ", calculator);
   }
-  if (base.isEqualToZero() && thePower == 0) {
+  if (base.isEqualToZero() && power == 0) {
     return output.assignValue(1, calculator);
   }
-  if (thePower < 0) {
-    thePower *= - 1;
+  if (power < 0) {
+    power *= - 1;
     base.invert();
   }
-  MathRoutines::raiseToPower(base, thePower, AlgebraicNumber(1));
+  MathRoutines::raiseToPower(base, power, AlgebraicNumber(1));
   return output.assignValueWithContext(base, input[1].getContext(), calculator);
 }
 
@@ -1425,13 +1425,13 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(
     return false;
   }
   ElementWeylAlgebra<Rational> base;
-  int thePower = 0;
+  int power = 0;
   if (!input[1].isOfType(&base)) {
     return false;
   }
   bool mustCheckForRationalPower = false;
-  mustCheckForRationalPower = !input[2].isSmallInteger(&thePower);
-  if (mustCheckForRationalPower || thePower < 0) {
+  mustCheckForRationalPower = !input[2].isSmallInteger(&power);
+  if (mustCheckForRationalPower || power < 0) {
     Rational powerRat;
     if (!input[2].isOfType<Rational>(&powerRat)) {
       return false;
@@ -1465,14 +1465,14 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(
   }
 
   if (base.isEqualToZero()) {
-    if (thePower < 0) {
+    if (power < 0) {
       return output.makeError("Division by zero: trying to raise 0 to negative power. ", calculator);
     }
-    if (thePower == 0) {
+    if (power == 0) {
       return output.assignValue(1, calculator);
     }
   }
-  base.raiseToPower(thePower);
+  base.raiseToPower(power);
   return output.assignValueWithContext(base, input[1].getContext(), calculator);
 }
 
@@ -1494,17 +1494,17 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByInteger(
   if (!input[2].isRational(&exp)) {
     return false;
   }
-  int thePower;
-  if (!exp.isSmallInteger(&thePower)) {
+  int power;
+  if (!exp.isSmallInteger(&power)) {
     return false;
   }
-  if (base == 0 && thePower == 0) {
+  if (base == 0 && power == 0) {
     return output.assignValue(1, calculator);
   }
-  if (base == 0 && thePower < 0) {
+  if (base == 0 && power < 0) {
     return output.makeError("Division by zero: trying to raise 0 to negative or zero power. ", calculator);
   }
-  base.raiseToPower(thePower);
+  base.raiseToPower(power);
   return output.assignValue(base, calculator);
 }
 
@@ -1558,11 +1558,11 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixExpressionsBySmallInteger(
   if (!input[1].isMatrix()) {
     return false;
   }
-  int thePower = 0;
-  if (!input[2].isSmallInteger(&thePower)) {
+  int power = 0;
+  if (!input[2].isSmallInteger(&power)) {
     return false;
   }
-  if (thePower <= 0) {
+  if (power <= 0) {
     return false;
   }
   Matrix<Expression> matrix;
@@ -1574,20 +1574,20 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixExpressionsBySmallInteger(
   }
   LargeInteger expectedNumTerms;
   expectedNumTerms = matrix.numberOfColumns;
-  expectedNumTerms.raiseToPower(thePower);
+  expectedNumTerms.raiseToPower(power);
   if (expectedNumTerms > 10000) {
     return calculator
     << "The expected number terms in the result of the exponentiation "
     << matrix.toString() << " to the power of "
-    << thePower << " is approximately ("
-    << matrix.numberOfColumns << ")^" << thePower
+    << power << " is approximately ("
+    << matrix.numberOfColumns << ")^" << power
     << "=" << expectedNumTerms
     << ". I have been instructed to proceed only "
     << "if the expected number of terms is fewer than 10000. ";
   }
   Matrix<Expression> idMatE;
   idMatE.makeIdentityMatrix(matrix.numberOfRows, calculator.expressionOne(), calculator.expressionZero());
-  MathRoutines::raiseToPower(matrix, thePower, idMatE);
+  MathRoutines::raiseToPower(matrix, power, idMatE);
   return output.assignMatrixExpressions(matrix, calculator, true, true);
 }
 
@@ -1774,12 +1774,12 @@ bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRationalToDoubleOrRational(
     if (!input[2].isRational()) {
       return false;
     }
-    int thePower = 0;
+    int power = 0;
     if (exp.isEven()) {
-      if (!exp.isSmallInteger(&thePower)) {
+      if (!exp.isSmallInteger(&power)) {
         return false;
       }
-      return output.assignValue(FloatingPoint::power(- baseDouble, thePower), calculator);
+      return output.assignValue(FloatingPoint::power(- baseDouble, power), calculator);
     }
     baseDouble *= - 1;
     return output.assignValue(- FloatingPoint::power(baseDouble, expDouble), calculator);
@@ -2863,19 +2863,19 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger(
   if (!leftE.isOfType(&theElt)) {
     return false;
   }
-  LargeInteger thePower = 0;
-  if (!rightE.isInteger(&thePower)) {
+  LargeInteger power = 0;
+  if (!rightE.isInteger(&power)) {
     return false;
   }
-  if (thePower < 0) {
+  if (power < 0) {
     ElementZmodP copy = theElt;
     theElt.makeOne(theElt.modulus);
     theElt /= copy;
-    thePower *= - 1;
+    power *= - 1;
   }
   ElementZmodP unit;
   unit.makeOne(theElt.modulus);
-  MathRoutines::raiseToPower(theElt, thePower, unit);
+  MathRoutines::raiseToPower(theElt, power, unit);
   ExpressionContext context(calculator);
   context.setDefaultModulus(theElt.modulus);
   return output.assignValueWithContext(theElt, context, calculator);
@@ -2894,17 +2894,17 @@ bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveRationalElementByInteg
   if (!leftE.isOfType(&theElt)) {
     return false;
   }
-  int thePower = 0;
-  if (!rightE.isSmallInteger(& thePower)) {
+  int power = 0;
+  if (!rightE.isSmallInteger(& power)) {
     return false;
   }
-  if (thePower < 0) {
+  if (power < 0) {
     theElt.invert();
-    thePower *= - 1;
+    power *= - 1;
   }
   ElementEllipticCurve<Rational> unit;
   unit.makeOne(theElt.owner);
-  MathRoutines::raiseToPower(theElt, thePower, unit);
+  MathRoutines::raiseToPower(theElt, power, unit);
   return output.assignValueWithContext(theElt, input[1].getContext(), calculator);
 }
 
@@ -2921,17 +2921,17 @@ bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger(
   if (!leftE.isOfType(&theElt)) {
     return false;
   }
-  LargeInteger thePower = 0;
-  if (!rightE.isInteger(& thePower)) {
+  LargeInteger power = 0;
+  if (!rightE.isInteger(& power)) {
     return false;
   }
-  if (thePower < 0) {
+  if (power < 0) {
     theElt.invert();
-    thePower *= - 1;
+    power *= - 1;
   }
   ElementEllipticCurve<ElementZmodP> unit;
   unit.makeOne(theElt.owner);
-  MathRoutines::raiseToPower(theElt, thePower, unit);
+  MathRoutines::raiseToPower(theElt, power, unit);
   return output.assignValueWithContext(theElt, input[1].getContext(), calculator);
 }
 

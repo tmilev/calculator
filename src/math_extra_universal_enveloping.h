@@ -160,10 +160,10 @@ public:
     const Coefficient& ringZero,
     std::stringstream* logStream = nullptr
   ) const {
-    ElementUniversalEnveloping<Coefficient> tempElt;
-    tempElt.makeZero(*this->owner);
-    tempElt.addMonomial(right, ringUnit);
-    return this->highestWeightTransposeAntiAutomorphismBilinearForm(tempElt, output, substitutionHiGoesToIthElement, ringUnit, ringZero, logStream);
+    ElementUniversalEnveloping<Coefficient> element;
+    element.makeZero(*this->owner);
+    element.addMonomial(right, ringUnit);
+    return this->highestWeightTransposeAntiAutomorphismBilinearForm(element, output, substitutionHiGoesToIthElement, ringUnit, ringZero, logStream);
   }
   bool needsBracketForMultiplication() {
     return this->size > 1;
@@ -239,7 +239,7 @@ public:
   void assignFromCoordinateFormWithRespectToBasis(
     List<ElementUniversalEnveloping<Coefficient> >& theBasis, Vector<Coefficient>& input, SemisimpleLieAlgebra& owner
   );
-  void raiseToPower(int thePower);
+  void raiseToPower(int power);
   bool isPowerOfSingleGenerator() const {
     if (this->size() != 1) {
       return false;

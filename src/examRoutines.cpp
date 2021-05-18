@@ -2167,12 +2167,12 @@ bool CalculatorHTML::Parser::parseHTML(std::stringstream* comments) {
   }
   this->initBuiltInSpanClasses();
   this->elementStack.setSize(0);
-  SyntacticElementHTML dummy, tempElt;
+  SyntacticElementHTML dummy, element;
   dummy.content = "";
   dummy.syntacticRole = SyntacticElementHTML::Tags::filler;
-  tempElt.syntacticRole = "command";
-  tempElt.tag = "";
-  tempElt.content = "";
+  element.syntacticRole = "command";
+  element.tag = "";
+  element.content = "";
   this->elementStack.setExpectedSize(elements.size + SyntacticElementHTML::parsingDummyElements);
   for (int i = 0; i < SyntacticElementHTML::parsingDummyElements; i ++) {
     this->elementStack.addOnTop(dummy);

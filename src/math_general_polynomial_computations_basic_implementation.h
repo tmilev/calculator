@@ -570,7 +570,7 @@ Matrix<Coefficient> Polynomial<Coefficient>::evaluateUnivariatePolynomial(
 ) {
   // for univariate polynomials only
   MacroRegisterFunctionWithName("Polynomial::evaluateUnivariatePolynomial");
-  Matrix<Coefficient> output, tempElt, idMat;
+  Matrix<Coefficient> output, element, idMat;
   idMat.makeIdentityMatrix(input.numberOfColumns);
   output.makeZeroMatrix(input.numberOfColumns);
   for (int i = 0; i < this->size; i ++) {
@@ -592,13 +592,13 @@ Matrix<Coefficient> Polynomial<Coefficient>::evaluateUnivariatePolynomial(
     if (numCycles < 0) {
       numCycles = - numCycles;
     }
-    tempElt = input;
-    MathRoutines::raiseToPower(tempElt, numCycles, idMat);
+    element = input;
+    MathRoutines::raiseToPower(element, numCycles, idMat);
     if (!isPositive) {
-      tempElt.invert();
+      element.invert();
     }
-    tempElt *= this->coefficients[i];
-    output += tempElt;
+    element *= this->coefficients[i];
+    output += element;
   }
   return output;
 }

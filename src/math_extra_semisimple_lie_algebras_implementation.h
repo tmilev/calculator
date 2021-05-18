@@ -686,14 +686,14 @@ Coefficient SemisimpleLieAlgebra::getKillingForm(
 ) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::getKillingForm");
   Coefficient result = 0;
-  ElementSemisimpleLieAlgebra<Coefficient> adadAppliedToMon, tempElt;
+  ElementSemisimpleLieAlgebra<Coefficient> adadAppliedToMon, element;
   ChevalleyGenerator baseGen;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
     baseGen.makeGenerator(*this, i);
     adadAppliedToMon.makeZero();
     adadAppliedToMon.addMonomial(baseGen, 1);
-    this->lieBracket(right, adadAppliedToMon, tempElt);
-    this->lieBracket(left, tempElt, adadAppliedToMon);
+    this->lieBracket(right, adadAppliedToMon, element);
+    this->lieBracket(left, element, adadAppliedToMon);
     result += adadAppliedToMon.getCoefficientOf(baseGen);
   }
   return result;

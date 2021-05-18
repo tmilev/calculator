@@ -4819,23 +4819,23 @@ bool CalculatorFunctions::innerPowerImaginaryUnit(Calculator& calculator, const 
   if (!input[1].isOperationGiven(calculator.opImaginaryUnit())) {
     return false;
   }
-  LargeInteger thePower;
-  if (!input[2].isInteger(&thePower)) {
+  LargeInteger power;
+  if (!input[2].isInteger(&power)) {
     return false;
   }
   Expression iE;
   iE.makeAtom(calculator.opImaginaryUnit(), calculator);
-  if (thePower % 4 == 0) {
+  if (power % 4 == 0) {
     return output.assignValue(1, calculator);
   }
-  if (thePower % 4 == 1) {
+  if (power % 4 == 1) {
     output = iE;
     return true;
   }
-  if (thePower % 4 == 2) {
+  if (power % 4 == 2) {
     return output.assignValue(- 1, calculator);
   }
-  if (thePower % 4 == 3) {
+  if (power % 4 == 3) {
     output = iE * (- 1);
     return true;
   }
@@ -4888,15 +4888,15 @@ bool CalculatorFunctionsIntegration::integrateEpowerAxDiffX(
   if (!theFunNoCoeff[1].isOperationGiven(calculator.opE())) {
     return false;
   }
-  Expression thePowerCoeff, thePowerNoCoeff;
-  theFunNoCoeff[2].getCoefficientMultiplicandForm(thePowerCoeff, thePowerNoCoeff);
-  if (thePowerNoCoeff != theVariableE) {
-    if (thePowerNoCoeff.startsWith(calculator.opTimes(), 3)) {
+  Expression powerCoefficient, powerNoCoefficient;
+  theFunNoCoeff[2].getCoefficientMultiplicandForm(powerCoefficient, powerNoCoefficient);
+  if (powerNoCoefficient != theVariableE) {
+    if (powerNoCoefficient.startsWith(calculator.opTimes(), 3)) {
       if (
-        thePowerNoCoeff[1].isOperationGiven(calculator.opImaginaryUnit()) &&
-        thePowerNoCoeff[2] == theVariableE
+        powerNoCoefficient[1].isOperationGiven(calculator.opImaginaryUnit()) &&
+        powerNoCoefficient[2] == theVariableE
       ) {
-        output = thePowerNoCoeff[1] * (- 1) * functionExpression / thePowerCoeff;
+        output = powerNoCoefficient[1] * (- 1) * functionExpression / powerCoefficient;
         output.checkConsistency();
         output.checkInitializationRecursively();
         return true;
@@ -4905,7 +4905,7 @@ bool CalculatorFunctionsIntegration::integrateEpowerAxDiffX(
     return false;
   }
   output = functionExpression;
-  output /= thePowerCoeff;
+  output /= powerCoefficient;
   output.checkConsistency();
   output.checkInitializationRecursively();
   return true;
@@ -5492,10 +5492,10 @@ bool CalculatorFunctionsListsAndSets::removeLastElement(
 
 bool ElementZmodP::operator==(int other) const {
   this->checkIamInitialized();
-  ElementZmodP tempElt;
-  tempElt.modulus = this->modulus;
-  tempElt = LargeInteger(other);
-  return *this == tempElt;
+  ElementZmodP element;
+  element.modulus = this->modulus;
+  element = LargeInteger(other);
+  return *this == element;
 }
 
 bool ElementZmodP::operator==(const ElementZmodP& other) const {

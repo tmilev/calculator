@@ -479,7 +479,7 @@ public:
     }
   }
   bool hasSmallIntegralPositivePowers(int* whichtotalDegree) const;
-  void raiseToPower(const Rational& thePower);
+  void raiseToPower(const Rational& power);
   void operator*=(const MonomialPolynomial& other);
   void operator/=(const MonomialPolynomial& other);
   bool operator==(const MonomialPolynomial& other) const;
@@ -5322,8 +5322,8 @@ public:
   );
   void reduceMonomialByMonomialModifyOneMonomial(
     PartialFractions& Accum,
-    SelectionWithDifferentMaxMultiplicities& thePowers,
-    List<int>& thePowersSigned,
+    SelectionWithDifferentMaxMultiplicities& powers,
+    List<int>& powersSigned,
     MonomialPolynomial& input,
     LargeInteger& inputCoeff
   );
@@ -6092,7 +6092,7 @@ public:
   }
   bool isPolynomial(Polynomial<Coefficient>* whichPoly = 0) const;
   bool hasNonSmallPositiveIntegerDerivation() const;
-  void raiseToPower(int thePower);
+  void raiseToPower(int power);
   void multiplyTwoMonomials(
     const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output
   ) const;
@@ -6622,15 +6622,15 @@ public:
   void actOnVectorColumn(VectorSparse<otherType>& inputOutput) const {
     VectorSparse<otherType> output;
     output.makeZero();
-    otherType tempElt;
+    otherType element;
     MonomialVector tempVM;
     for (int i = 0; i < this->size(); i ++) {
       for (int j = 0; j < inputOutput.size(); j ++) {
         if ((*this)[i].dualIndex == inputOutput[j].theIndex) {
           tempVM.theIndex = (*this)[i].vIndex;
-          tempElt = this->coefficients[i];
-          tempElt *= inputOutput.coefficients[j];
-          output.addMonomial(tempVM, tempElt);
+          element = this->coefficients[i];
+          element *= inputOutput.coefficients[j];
+          output.addMonomial(tempVM, element);
         }
       }
     }

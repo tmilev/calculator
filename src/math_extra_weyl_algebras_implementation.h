@@ -162,10 +162,10 @@ void ElementWeylAlgebra<Coefficient>::operator*=(const ElementWeylAlgebra& stand
 }
 
 template <class Coefficient>
-void ElementWeylAlgebra<Coefficient>::raiseToPower(int thePower) {
+void ElementWeylAlgebra<Coefficient>::raiseToPower(int power) {
   ElementWeylAlgebra WeylOne;
   WeylOne.makeOne();
-  MathRoutines::raiseToPower(*this, thePower, WeylOne);
+  MathRoutines::raiseToPower(*this, power, WeylOne);
 }
 
 template <class Coefficient>

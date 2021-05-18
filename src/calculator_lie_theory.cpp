@@ -419,7 +419,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
     tempMon.makeFromWeight(currentG2Weight, &theG2B3Data.theHmm.domain());
     theG2B3Data.theSmallCharFDpart += tempMon;
   }
-  ElementUniversalEnveloping<RationalFraction<Rational> > theG2Casimir, theG2CasimirCopy, imageCasimirInB3, tempElt;
+  ElementUniversalEnveloping<RationalFraction<Rational> > theG2Casimir, theG2CasimirCopy, imageCasimirInB3, element;
   theG2Casimir.makeCasimir(theG2B3Data.theHmm.domain());
 
   theG2B3Data.theChars.setSize(theG2B3Data.outputWeightsFundCoordS.size);
@@ -464,8 +464,8 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
         weightDifference = theG2B3Data.g2Weights[j] - theG2B3Data.g2Weights[k];
         if (weightDifference.isPositive()) {
           theG2CasimirCopy = imageCasimirInB3;
-          tempElt.makeConstant(theG2B3Data.theChars[j], theG2B3Data.theHmm.range());
-          theG2CasimirCopy -= tempElt;
+          element.makeConstant(theG2B3Data.theChars[j], theG2B3Data.theHmm.range());
+          theG2CasimirCopy -= element;
           theG2CasimirCopy *= Rational(12);
           currentTensorEltEigen.multiplyMeByUEEltOnTheLeft(theG2CasimirCopy);
           charDiff = theG2B3Data.theChars[j];
@@ -1538,7 +1538,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   }
   out << "</table>";
   latexReport1 << "\\end{longtable}<br>";
-  ElementTensorsGeneralizedVermas<RationalFraction<Rational> > tempElt, tempElt2;
+  ElementTensorsGeneralizedVermas<RationalFraction<Rational> > element, element2;
   theFDMod.highestWeightVectorNotation = "v";
   theGenMod.highestWeightVectorNotation = "w";
   out << "Let w be the highest weight vector of the generalized Verma component, and let v be the highest weight vector of the finite dimensional component";
@@ -1562,10 +1562,10 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     theSSalgebra.content->weylGroup.getSimpleCoordinatesFromFundamental(
       theEigenVectorWeightsFund[i], RationalFraction<Rational>::zeroRational()
     );
-    tempElt.makeHWV(theFDMod, RFOne);
-    tempElt.multiplyOnTheLeft(theLeviEigenVectors[i], theElt, *theSSalgebra.content, RFOne);
-    tempElt.makeHWV(theGenMod, RFOne);
-    theElt.tensorOnTheRight(tempElt);
+    element.makeHWV(theFDMod, RFOne);
+    element.multiplyOnTheLeft(theLeviEigenVectors[i], theElt, *theSSalgebra.content, RFOne);
+    element.makeHWV(theGenMod, RFOne);
+    theElt.tensorOnTheRight(element);
     theElt *= - 1;
     std::string startingEltString = theElt.toString(&tempFormat);
     std::stringstream tempStream, tempStream2;
@@ -1579,8 +1579,8 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
       if ((otherWeightSimpleCoords - currentWeightSimpleCoords).isPositive()) {
         theCasimirMinusChar = theCasimir;
         theCasimirMinusChar -= theCentralCharacters[j];
-        theElt.multiplyOnTheLeft(theCasimirMinusChar, tempElt2, *theSSalgebra.content, RFOne);
-        theElt = tempElt2;
+        theElt.multiplyOnTheLeft(theCasimirMinusChar, element2, *theSSalgebra.content, RFOne);
+        theElt = element2;
         tempStream << "(i(\\bar c)- (" << theCentralCharacters[j].toString() << ") )\\\\";
         tempStream2 << " $(\\bar c-p_" << j + 1 << ") $ ";
         found = true;

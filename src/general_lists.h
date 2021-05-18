@@ -255,7 +255,7 @@ public:
   template <class Coefficient, typename IntegerType>
   static void raiseToPower(
     Coefficient& theElement,
-    const IntegerType& thePower,
+    const IntegerType& power,
     const Coefficient& ringUnit
   );
   template <typename Coefficient>

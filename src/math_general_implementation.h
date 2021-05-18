@@ -114,18 +114,19 @@ std::ostream& operator<< (std::ostream& output, const Matrix<Coefficient>& matri
 }
 
 template <class Coefficient, typename IntegerType>
-void MathRoutines::raiseToPower(Coefficient& theElement, const IntegerType& thePower, const Coefficient& ringUnit
+void MathRoutines::raiseToPower(
+  Coefficient& theElement, const IntegerType& power, const Coefficient& ringUnit
 ) {
   MacroRegisterFunctionWithName("MathRoutines::raiseToPower");
-  IntegerType thePowerCopy;
-  thePowerCopy = thePower;
-  if (thePowerCopy < 0) {
+  IntegerType powerCopy;
+  powerCopy = power;
+  if (powerCopy < 0) {
     return;
   }
-  if (thePowerCopy == 1) {
+  if (powerCopy == 1) {
     return;
   }
-  if (thePowerCopy == 0) {
+  if (powerCopy == 0) {
     theElement = ringUnit;
     return;
   }
@@ -133,8 +134,8 @@ void MathRoutines::raiseToPower(Coefficient& theElement, const IntegerType& theP
   ProgressReport reportTwo(32, GlobalVariables::Response::ReportType::general);
   Coefficient squares;
   squares = theElement;
-  if (thePowerCopy < 4) {
-    for (IntegerType i = 1; i < thePowerCopy; i ++) {
+  if (powerCopy < 4) {
+    for (IntegerType i = 1; i < powerCopy; i ++) {
       theElement *= squares;
     }
     return;
@@ -142,26 +143,26 @@ void MathRoutines::raiseToPower(Coefficient& theElement, const IntegerType& theP
   if (reportOne.tickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "Raising " << theElement.toString()
-    << " to power: " << thePowerCopy;
+    << " to power: " << powerCopy;
     reportOne.report(reportStream.str());
   }
   theElement = ringUnit;
-  while (thePowerCopy > 0) {
-    if (thePowerCopy % 2 == 1) {
+  while (powerCopy > 0) {
+    if (powerCopy % 2 == 1) {
       if (reportTwo.tickAndWantReport()) {
         std::stringstream reportStream2;
-        reportStream2 << "Remaining exponent: " << thePowerCopy << "<br>";
+        reportStream2 << "Remaining exponent: " << powerCopy << "<br>";
         reportStream2 << "Multiplying " << theElement.toString()
         << " by " << squares.toString();
         reportTwo.report(reportStream2.str());
       }
       theElement *= squares;
     }
-    thePowerCopy /= 2;
-    if (thePowerCopy > 0) {
+    powerCopy /= 2;
+    if (powerCopy > 0) {
       if (reportTwo.tickAndWantReport()) {
         std::stringstream reportStream2;
-        reportStream2 << "Remaining exponent: " << thePowerCopy << "<br>";
+        reportStream2 << "Remaining exponent: " << powerCopy << "<br>";
         reportStream2 << "Squaring: " << squares.toString();
         reportTwo.report(reportStream2.str());
       }
@@ -322,7 +323,7 @@ void Matrix<Coefficient>::gaussianEliminationEuclideanDomain(
     << "(most probably this is a wrong pointer typo). " << global.fatal;
   }
   int col = 0;
-  Coefficient tempElt;
+  Coefficient element;
   int row = 0;
   while (row < this->numberOfRows && col < this->numberOfColumns) {
     int foundPivotRow = - 1;
@@ -345,18 +346,18 @@ void Matrix<Coefficient>::gaussianEliminationEuclideanDomain(
           << ExploringRow + 1 << "; total rows: " << this->numberOfRows;
           theReport.report(out.str());
         }
-        Coefficient& PivotElt = this->elements[row][col];
+        Coefficient& pivotElement = this->elements[row][col];
         Coefficient& otherElt = this->elements[ExploringRow][col];
         if (otherElt.isNegative()) {
           this->rowTimesScalarWithCarbonCopy(ExploringRow, theRingMinusUnit, otherMatrix);
         }
-        bool isSmallerOrEqualTo = comparisonGEQFunction == 0 ? PivotElt <= otherElt :
-        comparisonGEQFunction(otherElt, PivotElt);
+        bool isSmallerOrEqualTo = comparisonGEQFunction == 0 ? pivotElement <= otherElt :
+        comparisonGEQFunction(otherElt, pivotElement);
         if (isSmallerOrEqualTo) {
-          tempElt = otherElt;
-          tempElt /= PivotElt;
-          tempElt.assignFloor();
-          this->subtractRowsWithCarbonCopy(ExploringRow, row, 0, tempElt, otherMatrix);
+          element = otherElt;
+          element /= pivotElement;
+          element.assignFloor();
+          this->subtractRowsWithCarbonCopy(ExploringRow, row, 0, element, otherMatrix);
         }
         if (this->elements[ExploringRow][col].isEqualToZero()) {
           ExploringRow ++;
@@ -364,12 +365,12 @@ void Matrix<Coefficient>::gaussianEliminationEuclideanDomain(
           this->switchRowsWithCarbonCopy(ExploringRow, row, otherMatrix);
         }
       }
-      Coefficient& PivotElt = this->elements[row][col];
+      Coefficient& pivotElement = this->elements[row][col];
       for (int i = 0; i < row; i ++) {
-        tempElt = this->elements[i][col];
-        tempElt /= PivotElt;
-        tempElt.assignFloor();
-        this->subtractRowsWithCarbonCopy(i, row, 0, tempElt, otherMatrix);
+        element = this->elements[i][col];
+        element /= pivotElement;
+        element.assignFloor();
+        this->subtractRowsWithCarbonCopy(i, row, 0, element, otherMatrix);
         if (this->elements[i][col].isNegative()) {
           this->addTwoRowsWithCarbonCopy(row, i, 0, ringUnit, otherMatrix);
         }

@@ -1233,14 +1233,14 @@ void LargeIntegerUnsigned::assignFactorial(unsigned int x) {
   tempOne.makeOne();
   for (int i = 0; i < primesBelowX.size; i ++) {
     unsigned int thePrime = primesBelowX.objects[i];
-    unsigned int thePowerOfThePrime = 0;
+    unsigned int powerOfThePrime = 0;
     unsigned int currentPower = thePrime;
     do {
-      thePowerOfThePrime += x / currentPower;
+      powerOfThePrime += x / currentPower;
       currentPower *= thePrime;
     } while (currentPower <= x);
     tempInt.assignShiftedUInt(thePrime, 0);
-    MathRoutines::raiseToPower(tempInt, thePowerOfThePrime, tempOne);
+    MathRoutines::raiseToPower(tempInt, powerOfThePrime, tempOne);
     *this *= tempInt;
   }
 }
@@ -1305,8 +1305,8 @@ bool LargeInteger::assignStringFailureAllowed(
   return true;
 }
 
-void LargeInteger::raiseToPower(int thePower) {
-  MathRoutines::raiseToPower(*this, thePower, LargeInteger(1));
+void LargeInteger::raiseToPower(int power) {
+  MathRoutines::raiseToPower(*this, power, LargeInteger(1));
 }
 
 bool LargeInteger::isIntegerFittingInInt(int* whichInt) {

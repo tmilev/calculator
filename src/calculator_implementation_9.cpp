@@ -197,14 +197,14 @@ bool CalculatorFunctions::innerAdCommonEigenSpaces(Calculator& calculator, const
   SemisimpleLieAlgebra* ownerSemisimple = algebra.content;
   List<ElementSemisimpleLieAlgebra<Rational> > theOperators, outputElts;
   theOperators.reserve(input.size() - 2);
-  ElementSemisimpleLieAlgebra<Rational> tempElt;
+  ElementSemisimpleLieAlgebra<Rational> element;
   for (int i = 2; i < input.size(); i ++) {
     if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(
-      calculator, input[i], tempElt, *ownerSemisimple
+      calculator, input[i], element, *ownerSemisimple
     )) {
       return output.makeError("Failed to extract element of semisimple Lie algebra. ", calculator);
     }
-    theOperators.addOnTop(tempElt);
+    theOperators.addOnTop(element);
   }
   ownerSemisimple->getCommonCentralizer(theOperators, outputElts);
   std::stringstream out;

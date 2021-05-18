@@ -571,12 +571,12 @@ void ElementUniversalEnveloping<Coefficient>::assignFromCoordinateFormWithRespec
   List<ElementUniversalEnveloping<Coefficient> >& theBasis, Vector<Coefficient>& input, SemisimpleLieAlgebra& owner
 ) {
   this->makeZero(owner);
-  ElementUniversalEnveloping<Coefficient> tempElt;
+  ElementUniversalEnveloping<Coefficient> element;
   for (int i = 0; i < input.size; i ++) {
     if (!input[i].isEqualToZero()) {
-      tempElt.operator=(theBasis[i]);
-      tempElt.operator*=(input[i]);
-      this->operator+=(tempElt);
+      element.operator=(theBasis[i]);
+      element.operator*=(input[i]);
+      this->operator+=(element);
     }
   }
 }
@@ -1330,9 +1330,9 @@ bool MonomialPolynomial::hasSmallIntegralPositivePowers(int* whichtotalDegree) c
   return this->totalDegree().isIntegerFittingInInt(whichtotalDegree);
 }
 
-void MonomialPolynomial::raiseToPower(const Rational& thePower) {
+void MonomialPolynomial::raiseToPower(const Rational& power) {
   for (int i = 0; i < this->monomialBody.size; i ++) {
-    this->monomialBody[i] *= thePower;
+    this->monomialBody[i] *= power;
   }
   this->trimTrailingZeroes();
 }

@@ -1211,10 +1211,10 @@ bool CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT(
   if (input[2].hasBoundVariables()) {
     return false;
   }
-  Expression thePowers;
+  Expression powers;
   Expression modifiedInput = input;
   if (!modifiedInput[2].startsWith(calculator.opDefine())) {
-    if (!CalculatorFunctions::innerCoefficientsPowersOf(calculator, modifiedInput, thePowers)) {
+    if (!CalculatorFunctions::innerCoefficientsPowersOf(calculator, modifiedInput, powers)) {
       return calculator << "Failed to extract the coefficients of " << modifiedInput[1].toString()
       << " in " << modifiedInput[2].toString();
     }
@@ -1227,32 +1227,32 @@ bool CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT(
       return calculator << "Failed to simplify: " << convertedEqualityE.toString();
     }
     modifiedInput.setChild(2, convertedSimplifiedEqualityE);
-    if (!CalculatorFunctions::innerCoefficientsPowersOf(calculator, modifiedInput, thePowers)) {
+    if (!CalculatorFunctions::innerCoefficientsPowersOf(calculator, modifiedInput, powers)) {
       return calculator << "Failed to extract the coefficients of " << modifiedInput[1].toString()
       << " in " << modifiedInput[2].toString() << " which was obtained from the equality "
       << input[2].toString();
     }
   }
-  if (!thePowers.isSequenceNElements()) {
+  if (!powers.isSequenceNElements()) {
     return calculator << "This is not supposed to happen: expression "
-    << thePowers.toString() << " should be a list. This may be a programming bug. ";
+    << powers.toString() << " should be a list. This may be a programming bug. ";
   }
-  if (thePowers.size() == 2) {
+  if (powers.size() == 2) {
     return calculator << "Cannot solve: " << modifiedInput[2].toString()
     << ". The expression does not depend on " << modifiedInput[1].toString()
     << ". The coefficients of "
-    << modifiedInput[1].toString() << " are: " << thePowers.toString();
+    << modifiedInput[1].toString() << " are: " << powers.toString();
   }
-  if (thePowers.size() == 3) {
-    output = thePowers[1];
+  if (powers.size() == 3) {
+    output = powers[1];
     output *= - 1;
-    output /= thePowers[2];
+    output /= powers[2];
     return true;
   }
-  if (thePowers.size() == 4) {
-    const Expression& a = thePowers[3];
-    const Expression& b = thePowers[2];
-    const Expression& c = thePowers[1];
+  if (powers.size() == 4) {
+    const Expression& a = powers[3];
+    const Expression& b = powers[2];
+    const Expression& c = powers[1];
     output.makeSequence(calculator);
     Expression currentRoot;
     Expression theDiscriminant;
@@ -1266,11 +1266,11 @@ bool CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT(
     return true;
   }
   Polynomial<Rational> polynomial;
-  for (int i = thePowers.size() - 1; i >= 1; i --) {
+  for (int i = powers.size() - 1; i >= 1; i --) {
     MonomialPolynomial oneVariable(0, 1);
     polynomial *= oneVariable;
     Rational coefficient;
-    if (!thePowers[i].isRational(&coefficient)) {
+    if (!powers[i].isRational(&coefficient)) {
       return false;
     }
     polynomial += coefficient;
@@ -1425,35 +1425,35 @@ bool CalculatorFunctions::innerSqrt(
   if (input[2].isEqualToOne()) {
     return output.assignValue(1, calculator);
   }
-  int thePower = 0;
-  if (!input[1].isSmallInteger(&thePower)) {
+  int power = 0;
+  if (!input[1].isSmallInteger(&power)) {
     return false;
   }
   if (!input[2].isRational() ) {
     calculator.checkInputNotSameAsOutput(input, output);
     Expression theExponent;
-    Rational thePowerRat(1, thePower);
-    theExponent.assignValue(thePowerRat, calculator);
+    Rational powerRational(1, power);
+    theExponent.assignValue(powerRational, calculator);
     return output.makeXOX(calculator, calculator.opPower(), input[2], theExponent);
   }
-  if (thePower > 0 && input[2].isEqualToZero()) {
+  if (power > 0 && input[2].isEqualToZero()) {
     return output.assignValue(0, calculator);
   }
-  if (thePower == 0 && input[2].isEqualToZero()) {
+  if (power == 0 && input[2].isEqualToZero()) {
     return output.assignValue(1, calculator);
   }
   Rational rationalValue;
   if (!input[2].isRational(&rationalValue)) {
     return false;
   }
-  if (thePower < 0) {
+  if (power < 0) {
     if (rationalValue.isEqualToZero()) {
       return output.makeError("Division by zero in expression: " + input.toString(), calculator);
     }
-    thePower *= - 1;
+    power *= - 1;
     rationalValue.invert();
   }
-  if (thePower != 2) {
+  if (power != 2) {
     return false;
   }
   AlgebraicNumber theNumber;

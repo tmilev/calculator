@@ -952,14 +952,14 @@ bool CalculatorConversions::innerElementUE(
     currentSummand.makeConstant(theP.coefficients[j], owner);
     currentMultiplicandRFpartMon.makeOne();
     for (int i = 0; i < currentMon.minimalNumberOfVariables(); i ++) {
-      int thePower = - 1;
-      if (!currentMon(i).isSmallInteger(&thePower)) {
+      int power = - 1;
+      if (!currentMon(i).isSmallInteger(&power)) {
         return calculator
         << "<hr>Failed to convert one of the exponents appearing in "
         << input[1].toString()
         << " to  a small integer polynomial.<hr>";
       }
-      if (thePower == 0) {
+      if (power == 0) {
         continue;
       }
       Expression singleChevGenE = theContext.getVariable(i);
@@ -999,11 +999,11 @@ bool CalculatorConversions::innerElementUE(
       }
       if (isHonestElementUE) {
         currentMultiplicand.makeOneGenerator(theChevGen.generatorIndex, owner, Rational::one());
-        currentMultiplicand.raiseToPower(thePower);
+        currentMultiplicand.raiseToPower(power);
         currentSummand*= currentMultiplicand;
       } else {
         int variableIndex = polynomialVariables.addNoRepetitionOrReturnIndexFirst(singleChevGenE);
-        currentMultiplicandRFpartMon.setVariable(variableIndex, thePower);
+        currentMultiplicandRFpartMon.setVariable(variableIndex, power);
       }
     }
     currentPMultiplicand.makeZero();

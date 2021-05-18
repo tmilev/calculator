@@ -142,8 +142,8 @@ public:
   int indexNonEmbeddedMeStandard;
   int indexNonEmbeddedMeNonStandardCartan;
   int indexHcandidateBeingGrown;
-  int indexMaxSSContainer;
-  int indexSSPartCentralizer;
+  int indexMaximalSemisimpleContainer;
+  int indexSemisimplePartCentralizer;
   List<int> indicesDirectSummandSuperAlgebra;
   MemorySaving<FormatExpressions> characterFormat;
   bool flagSubalgebraPreloadedButNotVerified;
@@ -161,8 +161,8 @@ public:
   List<NilradicalCandidate> fernandoKacNilradicalCandidates;
   int numberOfConeIntersections;
   int numberOfCasesNoLInfiniteRelationFound;
-  int NumBadParabolics;
-  int NumCentralizerConditionFailsconeConditionHolds;
+  int numberOfBadParabolics;
+  int numberOfCentralizerConditionFailsConeConditionHolds;
   // The highest weight vectors are by definition cartan-centralizer-split
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > highestVectorsNonSorted;
   List<Vector<Rational> > highestWeightsPrimalNonSorted;
@@ -173,7 +173,7 @@ public:
   List<Vector<Rational> > highestWeightsNonPrimal;
 
   List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > modules;
-  List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > modulesSl2opposite;
+  List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > modulesSl2Opposite;
   List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > modulesIsotypicallyMerged;
   // List<List<ElementSemisimpleLieAlgebra<Rational> > > ModulesSemisimpleSubalgebra;
 

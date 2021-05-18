@@ -440,13 +440,13 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
     if (!currentElt.getCartanPart().isEqualToZero() || currentElt.size() > 1) {
       return false;
     }
-    int thePower = 0;
-    if (!this->powers[k].isSmallInteger(thePower)) {
+    int power = 0;
+    if (!this->powers[k].isSmallInteger(power)) {
       return false;
     }
     int rootIndex = this->owner->theOwner->getRootIndexFromGenerator(currentElt[0].generatorIndex);
     const Vector<Rational>& currentRoot = theWeyl.rootSystem[rootIndex];
-    for (int j = 0; j < thePower; j ++) {
+    for (int j = 0; j < power; j ++) {
       currentWeight += currentRoot;
       testWeight = currentWeight;
       theWeyl.raiseToDominantWeight(testWeight);
@@ -487,11 +487,11 @@ bool ElementUniversalEnveloping<Coefficient>::getCoordinatesInBasis(
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) const {
-  List<ElementUniversalEnveloping<Coefficient> > tempBasis, tempElts;
+  List<ElementUniversalEnveloping<Coefficient> > tempBasis, elements;
   tempBasis = theBasis;
   tempBasis.addOnTop(*this);
   Vectors<Coefficient> tempCoords;
-  if (!this->getBasisFromSpanOfElements(tempBasis, tempCoords, tempElts, ringUnit, ringZero)) {
+  if (!this->getBasisFromSpanOfElements(tempBasis, tempCoords, elements, ringUnit, ringZero)) {
     return false;
   }
   Vector<Coefficient> tempRoot;
@@ -586,8 +586,8 @@ bool ElementUniversalEnveloping<Coefficient>::applyMinusTransposeAutoOnMe() {
     tempMon.powers.size = 0;
     tempMon.generatorsIndices.size = 0;
     for (int j = 0; j < currentMon.powers.size; j ++) {
-      int thePower;
-      if (!currentMon.powers[j].isSmallInteger(&thePower)) {
+      int power;
+      if (!currentMon.powers[j].isSmallInteger(&power)) {
         return false;
       }
       int theGenerator = currentMon.generatorsIndices[j];
@@ -597,7 +597,7 @@ bool ElementUniversalEnveloping<Coefficient>::applyMinusTransposeAutoOnMe() {
         theGenerator = - theGenerator + 2 * numPosRoots + theRank - 1;
       }
       tempMon.multiplyByGeneratorPowerOnTheRight(theGenerator, currentMon.powers[j]);
-      if (thePower % 2 == 1) {
+      if (power % 2 == 1) {
         theCoeff *= - 1;
       }
     }
@@ -622,7 +622,7 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
   if (!MTright.applyMinusTransposeAutoOnMe()) {
     return false;
   }
-  ElementUniversalEnveloping<Coefficient> Accum, intermediateAccum, tempElt;
+  ElementUniversalEnveloping<Coefficient> Accum, intermediateAccum, element;
   Accum.makeZero(*this->owners, this->indexInOwners);
   MonomialUniversalEnveloping<Coefficient> constMon;
   constMon.makeConstant();
@@ -640,18 +640,18 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
     intermediateAccum.modOutVermaRelations(&global, substitutionHiGoesToIthElement, ringUnit, ringZero);
     MonomialUniversalEnveloping<Coefficient>& rightMon = MTright[j];
     Coefficient& rightMonCoeff = MTright.coefficients[j];
-    int thePower;
+    int power;
     for (int i = rightMon.powers.size - 1; i >= 0; i --) {
-      if (rightMon.powers[i].isSmallInteger(&thePower)) {
-        for (int k = 0; k < thePower; k ++) {
-          tempElt.makeOneGenerator(rightMon.generatorsIndices[i], *this->owners, this->indexInOwners, ringUnit);
-          MathRoutines::swap(tempElt, intermediateAccum);
+      if (rightMon.powers[i].isSmallInteger(&power)) {
+        for (int k = 0; k < power; k ++) {
+          element.makeOneGenerator(rightMon.generatorsIndices[i], *this->owners, this->indexInOwners, ringUnit);
+          MathRoutines::swap(element, intermediateAccum);
           if (logStream != nullptr) {
-            *logStream << "tempElt before mult: " << tempElt.toString(&global.defaultFormat) << "<br>";
+            *logStream << "element before mult: " << element.toString(&global.defaultFormat) << "<br>";
             *logStream << "intermediate before mult: "
             << intermediateAccum.toString(&global.defaultFormat.getElement()) << "<br>";
           }
-          intermediateAccum *= (tempElt);
+          intermediateAccum *= (element);
           if (logStream != nullptr) {
             *logStream << "intermediate before simplification: "
             << intermediateAccum.toString(&global.defaultFormat.getElement()) << "<br>";
@@ -761,7 +761,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   this->weightsNilModPreNil.setSize(0);
   this->indicesNilradicalLarge.setSize(0);
   this->indicesNilradicalSmall.setSize(0);
-  ElementSemisimpleLieAlgebra<Rational> tempElt;
+  ElementSemisimpleLieAlgebra<Rational> element;
   WeylGroupData& theLargeWeyl = this->theHmm.range().weylGroup;
   WeylGroupData& theSmallWeyl = this->theHmm.domain().weylGroup;
   int numB3NegGenerators = this->theHmm.range().getNumberOfPositiveRoots();
@@ -777,8 +777,8 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
     }
     if (isInNilradical) {
       this->weightsNilradicalLarge.addOnTop(currentWeight);
-      tempElt.makeGenerator(i, this->theHmm.range());
-      this->nilradicalLarge.addOnTop(tempElt);
+      element.makeGenerator(i, this->theHmm.range());
+      this->nilradicalLarge.addOnTop(element);
       this->indicesNilradicalLarge.addOnTop(i);
     }
   }
@@ -793,8 +793,8 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
     }
     if (isInNilradical) {
       this->weightsNilradicalSmall.addOnTop(currentWeight);
-      tempElt.makeGenerator(i, this->theHmm.domain());
-      this->nilradicalSmall.addOnTop(tempElt);
+      element.makeGenerator(i, this->theHmm.domain());
+      this->nilradicalSmall.addOnTop(element);
       this->indicesNilradicalSmall.addOnTop(i);
     }
   }

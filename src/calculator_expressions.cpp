@@ -4009,10 +4009,10 @@ bool Expression::toStringSqrt3(
   if (!input.startsWith(input.owner->opSqrt(), 3)) {
     return false;
   }
-  int thePower = 0;
-  bool hasPowerTwo = input[1].isSmallInteger(&thePower);
+  int power = 0;
+  bool hasPowerTwo = input[1].isSmallInteger(&power);
   if (hasPowerTwo) {
-    hasPowerTwo = (thePower == 2);
+    hasPowerTwo = (power == 2);
   }
   if (hasPowerTwo) {
     out << "\\sqrt{" << input[2].toString(format) << "}";

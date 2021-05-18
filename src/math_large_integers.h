@@ -408,7 +408,7 @@ public:
       *this += other.value;
     }
   }
-  void raiseToPower(int thePower);
+  void raiseToPower(int power);
   LargeInteger operator%(const LargeInteger& other) const {
     LargeInteger result = *this;
     result %= other;

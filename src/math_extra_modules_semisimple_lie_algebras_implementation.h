@@ -469,7 +469,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
   Vector<Coefficient> hwFundCoordsNilPart;
   hwFundCoordsNilPart = this->theHWFundamentalCoordsBaseField;
   hwFundCoordsNilPart -= this->theHWFDpartFundamentalCoordS;
-  ElementUniversalEnveloping<Coefficient> currentElt, tempElt;
+  ElementUniversalEnveloping<Coefficient> currentElt, element;
   for (int j = 0; j < theFinalEigenSpace.size; j ++) {
     out << "<tr><td>";
     currentElt.makeZero(this->getOwner());
@@ -477,10 +477,10 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
     int lastNonZeroIndex = - 1;
     for (int i = 0; i < currentVect.size; i ++) {
       if (!(currentVect[i].isEqualToZero())) {
-        tempElt.makeZero(this->getOwner());
-        tempElt.addMonomial(this->theGeneratingWordsNonReduced[i], 1);
-        tempElt *= currentVect[i];
-        currentElt += tempElt;
+        element.makeZero(this->getOwner());
+        element.addMonomial(this->theGeneratingWordsNonReduced[i], 1);
+        element *= currentVect[i];
+        currentElt += element;
         lastNonZeroIndex = i;
       }
     }
@@ -961,12 +961,12 @@ void ModuleSSalgebra<Coefficient>::expressAsLinearCombinationHomogenousElement(
   }
   this->bilinearFormsInverted[indexInputBasis].actOnVectorColumn(theScalarProducts, ringZero);
   outputHomogeneous.makeZero(*this->theAlgebras, this->indexAlgebra);
-  ElementUniversalEnveloping<Coefficient> tempElt;
+  ElementUniversalEnveloping<Coefficient> element;
   for (int i = 0; i < theScalarProducts.size; i ++) {
-    tempElt.makeZero(*this->theAlgebras, this->indexAlgebra);
-    tempElt.addMonomial(this->theGeneratingWordsGrouppedByWeight[indexInputBasis][i], ringUnit);
-    tempElt *= theScalarProducts[i];
-    outputHomogeneous += tempElt;
+    element.makeZero(*this->theAlgebras, this->indexAlgebra);
+    element.addMonomial(this->theGeneratingWordsGrouppedByWeight[indexInputBasis][i], ringUnit);
+    element *= theScalarProducts[i];
+    outputHomogeneous += element;
   }
 }
 
@@ -1156,12 +1156,12 @@ bool ElementTensorsGeneralizedVermas<Coefficient>::multiplyOnTheLeft(
   output = *this;
   ElementTensorsGeneralizedVermas<Coefficient> buffer;
   for (int i = theUE.powers.size - 1; i >= 0; i --) {
-    int thePower;
-    if (!theUE.powers[i].isSmallInteger(&thePower)) {
+    int power;
+    if (!theUE.powers[i].isSmallInteger(&power)) {
       return false;
     }
     int theIndex = theUE.generatorsIndices[i];
-    for (int j = 0; j < thePower; j ++) {
+    for (int j = 0; j < power; j ++) {
       output.multiplyByElementLieAlg(buffer, ownerAlgebra, theIndex, ringUnit);
       output = buffer;
     }
@@ -1178,7 +1178,7 @@ void ElementTensorsGeneralizedVermas<Coefficient>::multiplyByElementLieAlg(
 ) const {
   output.makeZero();
   MonomialTensorGeneralizedVermas<Coefficient> accumMon, monActedOn;
-  ElementSumGeneralizedVermas<Coefficient> tempElt;
+  ElementSumGeneralizedVermas<Coefficient> element;
   ElementUniversalEnveloping<Coefficient> theGenerator;
   theGenerator.makeOneGenerator(indexGenerator, ownerAlgebra, ringUnit);
   Coefficient currentCoeff;
@@ -1186,14 +1186,14 @@ void ElementTensorsGeneralizedVermas<Coefficient>::multiplyByElementLieAlg(
     const MonomialTensorGeneralizedVermas<Coefficient>& currentMon = (*this)[i];
     accumMon.monomials.setSize(0);
     for (int j = 0; j < currentMon.monomials.size; j ++) {
-      tempElt.makeZero();
-      tempElt.addMonomial(currentMon.monomials[j], ringUnit);
-      tempElt.multiplyMeByUEEltOnTheLeft(theGenerator);
-      for (int k = 0; k < tempElt.size(); k ++) {
+      element.makeZero();
+      element.addMonomial(currentMon.monomials[j], ringUnit);
+      element.multiplyMeByUEEltOnTheLeft(theGenerator);
+      for (int k = 0; k < element.size(); k ++) {
         currentCoeff = this->coefficients[i];
-        currentCoeff *= tempElt.coefficients[k];
+        currentCoeff *= element.coefficients[k];
         monActedOn = accumMon;
-        monActedOn *= tempElt[k];
+        monActedOn *= element[k];
         for (int l = j + 1; l < currentMon.monomials.size; l ++) {
           monActedOn *= currentMon.monomials[l];
         }
@@ -1476,8 +1476,8 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
     const MonomialUniversalEnveloping<Polynomial<Rational> >& currentMon = result[i];
     endoPart = idMT;
     for (int j = currentMon.powers.size - 1; j >= indicesNilrad.size; j --) {
-      int thePower = 0;
-      if (!currentMon.powers[j].isSmallInteger(&thePower)) {
+      int power = 0;
+      if (!currentMon.powers[j].isSmallInteger(&power)) {
         return false;
       }
       tempMat1 = this->getActionGeneratorIndex(currentMon.generatorsIndices[j]);
@@ -1489,7 +1489,7 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
         tempMat1.coefficients[k].getNumerator(tempP1);
         tempMT.addMonomial(tempMat1[k], tempP1);
       }
-      MathRoutines::raiseToPower(tempMT, thePower, idMT);
+      MathRoutines::raiseToPower(tempMT, power, idMT);
       endoPart *= tempMT;
     }
     exponentContribution.makeOne();
@@ -1619,7 +1619,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   Vector<Coefficient> hwFundCoordsNilPart;
   hwFundCoordsNilPart = this->theHWFundamentalCoordsBaseField;
   hwFundCoordsNilPart -= this->theHWFDpartFundamentalCoordS;
-  ElementUniversalEnveloping<Coefficient> currentElt, tempElt;
+  ElementUniversalEnveloping<Coefficient> currentElt, element;
   if (outputEigenVectors != nullptr) {
     outputEigenVectors->setSize(0);
   }
@@ -1630,10 +1630,10 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
     int lastNonZeroIndex = - 1;
     for (int i = 0; i < currentVect.size; i ++) {
       if (!(currentVect[i].isEqualToZero())) {
-        tempElt.makeZero(this->getOwner());
-        tempElt.addMonomial(this->theGeneratingWordsNonReduced[i], 1);
-        tempElt *= currentVect[i];
-        currentElt += tempElt;
+        element.makeZero(this->getOwner());
+        element.addMonomial(this->theGeneratingWordsNonReduced[i], 1);
+        element *= currentVect[i];
+        currentElt += element;
         lastNonZeroIndex = i;
       }
     }
@@ -1857,8 +1857,8 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
       << theUEelt.size() << " and letter index " << currentMon.powers.size - k
       << " out of " << currentMon.powers.size << "...";
       theReport.report(reportStream.str());
-      int thePower = - 1;
-      if (!currentMon.powers[k].isSmallInteger(&thePower)) {
+      int power = - 1;
+      if (!currentMon.powers[k].isSmallInteger(&power)) {
         break;
       }
       int theIndex = currentMon.generatorsIndices[k];
@@ -1867,7 +1867,7 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
       }
       tempMat2 = tempMat1;
       tempMat1 = theMod.getActionGeneratorIndex(theIndex);
-      tempMat1.raiseToPower(thePower);
+      tempMat1.raiseToPower(power);
       tempMat1 *= tempMat2;
       currentMon.powers.size --;
       currentMon.generatorsIndices.size --;

@@ -1014,8 +1014,8 @@ void WeylGroupData::reflectSimple(int index, Vector<Coefficient>& vector) const 
 
 template <class Coefficient>
 bool WeylGroupData::isDominantWeight(const Vector<Coefficient>& theWeight) {
-  int theDimension = this->getDimension();
-  for (int i = 0; i < theDimension; i ++) {
+  int dimension = this->getDimension();
+  for (int i = 0; i < dimension; i ++) {
     if (!this->isDominantWithRespectToGenerator(theWeight, i)) {
       return false;
     }

@@ -1395,9 +1395,9 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
       this->getProjection(k, this->projectivizedChambeR.objects[i].getInternalPoint(), tempRoot);
       tempRoot -= this->NonIntegralOriginModificationBasisChanged;
       global.fatal << global.fatal ;
-      int theIndex = - 1;//= this->thePfs.theChambersOld.GetFirstChamberIndexContainingPoint(tempRoot);
-      if (theIndex != - 1) {
-        tempQP = this->theQPsSubstituted[theIndex][k];
+      int index = - 1;//= this->thePfs.theChambersOld.GetFirstChamberIndexContainingPoint(tempRoot);
+      if (index != - 1) {
+        tempQP = this->theQPsSubstituted[index][k];
         tempQP *= this->theCoeffs[k];
         currentSum += tempQP;
       }

@@ -37,11 +37,11 @@ void ElementWeylAlgebra<Coefficient>::multiplyTwoMonomials(
   const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output
 ) const {
   SelectionWithDifferentMaxMultiplicities tempSel;
-  int theDimensioN = MathRoutines::maximum(left.minimalNumberOfVariables(), right.minimalNumberOfVariables());
-  tempSel.multiplicities.initializeFillInObject(theDimensioN, 0);
-  tempSel.capacities.setSize(theDimensioN);
+  int dimension = MathRoutines::maximum(left.minimalNumberOfVariables(), right.minimalNumberOfVariables());
+  tempSel.multiplicities.initializeFillInObject(dimension, 0);
+  tempSel.capacities.setSize(dimension);
   int theExpectedSize = 1;
-  for (int i = 0; i < theDimensioN; i ++) {
+  for (int i = 0; i < dimension; i ++) {
     int powerDiffOp = 0;
     if (!left.differentialPart(i).isSmallInteger(&powerDiffOp)) {
       global.fatal << "Requested operations with elements of Weyl algebra "
@@ -53,7 +53,7 @@ void ElementWeylAlgebra<Coefficient>::multiplyTwoMonomials(
     tempSel.capacities[i] = powerDiffOp;
     theExpectedSize *= powerDiffOp;
   }
-  tempSel.elements.initializeFillInObject(theDimensioN, 0);
+  tempSel.elements.initializeFillInObject(dimension, 0);
   MonomialWeylAlgebra buffer;
   buffer.makeOne();
   output.makeZero();
@@ -62,7 +62,7 @@ void ElementWeylAlgebra<Coefficient>::multiplyTwoMonomials(
   output.setExpectedSize(theExpectedSize);
   for (int i = 0; i < numCycles; i ++) {
     coeffBuff = 1;
-    for (int k = 0; k<theDimensioN; k ++) {
+    for (int k = 0; k < dimension; k ++) {
       int multDrop = tempSel.multiplicities[k];
       Rational theDOPower = left.differentialPart(k);
       Rational thePolPower = right.polynomialPart(k);

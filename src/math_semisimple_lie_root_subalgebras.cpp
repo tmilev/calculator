@@ -3058,13 +3058,13 @@ void RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder() {
           << " and simple basis k is: " << currentSA.simpleRootsReductiveSubalgebra.toString() << global.fatal;
         }
       }
-      int theIndex = this->getIndexUpToEquivalenceByDiagramsAndDimensions(currentSA);
-      if (theIndex == - 1) {
+      int index = this->getIndexUpToEquivalenceByDiagramsAndDimensions(currentSA);
+      if (index == - 1) {
         global.fatal << "Experimental code has failed an internal check on currentSA: " << currentSA.toString() << global.fatal;
       }
-      if (!Explored[theIndex]) {
-        currentList.addOnTop(this->subalgebras[theIndex]);
-        Explored[theIndex] = true;
+      if (!Explored[index]) {
+        currentList.addOnTop(this->subalgebras[index]);
+        Explored[index] = true;
         if (i == 0) {
           this->NumParabolic ++;
         } else {
@@ -3484,11 +3484,11 @@ std::string RootSubalgebras::toStringDynkinTableHTML(FormatExpressions* format) 
         out << "\"" << currentSA.theDynkinType.toString() << "\", ";
         out << "[";
         for (int j = 0; j < currentSA.simpleRootsReductiveSubalgebra.size; j ++) {
-          int theIndex = GAPPosRootSystem.getIndex(currentSA.simpleRootsReductiveSubalgebra[j]);
-          if (theIndex == - 1) {
-            theIndex = GAPPosRootSystem.getIndex(- currentSA.simpleRootsReductiveSubalgebra[j]);
+          int index = GAPPosRootSystem.getIndex(currentSA.simpleRootsReductiveSubalgebra[j]);
+          if (index == - 1) {
+            index = GAPPosRootSystem.getIndex(- currentSA.simpleRootsReductiveSubalgebra[j]);
           }
-          out << theIndex + 1;
+          out << index + 1;
           if (j != currentSA.simpleRootsReductiveSubalgebra.size - 1) {
             out << ", ";
           }

@@ -560,10 +560,10 @@ std::string VectorPartition::toStringAllPartitions(bool useHtml) {
   return out.str();
 }
 
-void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, Polynomial<Rational>& output) {
+void RootIndexToPoly(int index, SemisimpleLieAlgebra& theAlgebra, Polynomial<Rational>& output) {
   int theRank = theAlgebra.weylGroup.cartanSymmetric.numberOfRows;
   int numPosRoots = theAlgebra.weylGroup.rootsOfBorel.size;
-  output.makeDegreeOne(theRank + numPosRoots, theIndex + theRank, Rational(1));
+  output.makeDegreeOne(theRank + numPosRoots, index + theRank, Rational(1));
 }
 
 template <class Coefficient>
@@ -597,8 +597,8 @@ void SemisimpleLieAlgebraOrdered::getLinearCombinationFrom(
   this->checkInitialization();
   theCoeffs.makeZero(this->theOwner->getNumberOfGenerators());
   for (int i = 0; i < input.size(); i ++) {
-    int theIndex = input[i].generatorIndex;
-    theCoeffs[this->theOwner->getGeneratorFromRootIndex(theIndex)] = input.coefficients[i];
+    int index = input[i].generatorIndex;
+    theCoeffs[this->theOwner->getGeneratorFromRootIndex(index)] = input.coefficients[i];
   }
   int numPosRoots = this->theOwner->getNumberOfPositiveRoots();
   Vector<Rational> tempH = input.getCartanPart();

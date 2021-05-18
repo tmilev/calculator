@@ -1804,20 +1804,20 @@ bool SemisimpleSubalgebras::getCentralizerTypeIfComputableAndKnown(const DynkinT
   if (!input.isSimple()) {
     return false;
   }
-  int theIndex = - 1;
+  int index = - 1;
   for (int i = 0; i < this->slTwoSubalgebras.rootSubalgebras.subalgebras.size; i ++) {
     if (this->slTwoSubalgebras.rootSubalgebras.subalgebras[i].theDynkinType == input) {
-      if (theIndex != - 1) {
-        theIndex = - 1;
+      if (index != - 1) {
+        index = - 1;
         break;
       }
-      theIndex = i;
+      index = i;
     }
   }
-  if (theIndex == - 1) {
+  if (index == - 1) {
     return false;
   }
-  output = this->slTwoSubalgebras.rootSubalgebras.subalgebras[theIndex].theCentralizerDynkinType;
+  output = this->slTwoSubalgebras.rootSubalgebras.subalgebras[index].theCentralizerDynkinType;
   return true;
 }
 
@@ -4927,19 +4927,19 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(
     output.rootSubalgebras.subalgebras[i].getSsl2SubalgebrasAppendListNoRepetition(output, i, algebraicClosure);
   }
   //sort subalgebras by dynkin index
-  List<int> permutation, theIndexMap;
+  List<int> permutation, indexMap;
   permutation.setSize(output.size);
-  theIndexMap.setSize(permutation.size);
+  indexMap.setSize(permutation.size);
   for (int i = 0; i < permutation.size; i ++) {
     permutation[i] = i;
   }
   output.quickSortDescending(nullptr, &permutation);
-  for (int i = 0; i < theIndexMap.size; i ++) {
-    theIndexMap[permutation[i]] = i;
+  for (int i = 0; i < indexMap.size; i ++) {
+    indexMap[permutation[i]] = i;
   }
   for (int j = 0; j < output.indicesSl2sContainedInRootSubalgebras.size; j ++) {
     for (int k = 0; k < output.indicesSl2sContainedInRootSubalgebras[j].size; k ++) {
-      output.indicesSl2sContainedInRootSubalgebras[j][k] = theIndexMap[output.indicesSl2sContainedInRootSubalgebras[j][k]];
+      output.indicesSl2sContainedInRootSubalgebras[j][k] = indexMap[output.indicesSl2sContainedInRootSubalgebras[j][k]];
     }
   }
   inputOwner.checkConsistency();
@@ -5157,7 +5157,7 @@ void SlTwoSubalgebra::makeReportPrecomputations(
   RootSubalgebra& minimalContainingRegularSubalgebra
 ) {
   MacroRegisterFunctionWithName("SlTwoSubalgebra::makeReportPrecomputations");
-  int theDimension = this->getOwnerSemisimpleAlgebra().getRank();
+  int dimension = this->getOwnerSemisimpleAlgebra().getRank();
   this->indicesContainingRootSubalgebras.size = 0;
   Vectors<Rational> tempRoots;
   tempRoots = minimalContainingRegularSubalgebra.simpleRootsReductiveSubalgebra;
@@ -5167,15 +5167,15 @@ void SlTwoSubalgebra::makeReportPrecomputations(
   diagram.ambientRootSystem = this->getOwnerWeyl().rootSystem;
   diagram.computeDiagramInputIsSimple(tempRoots);
   this->indicesContainingRootSubalgebras.addOnTop(indexMinimalContainingRegularSA);
-  tempRoots.makeEiBasis(theDimension);
+  tempRoots.makeEiBasis(dimension);
   this->getOwnerSemisimpleAlgebra().weylGroup.transformToSimpleBasisGeneratorsWithRespectToH(tempRoots, this->hElement.getCartanPart());
   DynkinDiagramRootSubalgebra tempDiagram;
   tempDiagram.ambientBilinearForm = this->getOwnerWeyl().cartanSymmetric;
   tempDiagram.ambientRootSystem = this->getOwnerWeyl().rootSystem;
   tempDiagram.computeDiagramInputIsSimple(tempRoots);
   this->preferredAmbientSimpleBasis = tempRoots;
-  this->hCharacteristic.setSize(theDimension);
-  for (int i = 0; i < theDimension; i ++) {
+  this->hCharacteristic.setSize(dimension);
+  for (int i = 0; i < dimension; i ++) {
     this->hCharacteristic[i] = this->getOwnerSemisimpleAlgebra().weylGroup.rootScalarCartanRoot(
       this->hElement.getCartanPart(), this->preferredAmbientSimpleBasis[i]
     );

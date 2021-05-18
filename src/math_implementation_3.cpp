@@ -1850,21 +1850,21 @@ StateMaintainerCurrentFolder::~StateMaintainerCurrentFolder() {
   global.changeDirectory(this->currentFolderPhysicalAbsolute);
 }
 
-void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& variables, int theDimension) {
+void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& variables, int dimension) {
   MacroRegisterFunctionWithName("DrawingVariables::drawCoordSystemBuffer");
   Vector<Rational> tempRoot;
   Vector<Rational> zeroRoot;
-  zeroRoot.makeZero(theDimension);
+  zeroRoot.makeZero(dimension);
   std::string colorText ="#64c064";
-  for (int i = 0; i < theDimension; i ++) {
-    tempRoot.makeEi(theDimension, i);
+  for (int i = 0; i < dimension; i ++) {
+    tempRoot.makeEi(dimension, i);
     std::string tempS;
     tempS = tempRoot.toString();
     variables.drawLineBetweenTwoVectorsBufferRational(zeroRoot, tempRoot, "gray", 1);
     variables.drawTextAtVectorBufferRational(tempRoot, tempS, "#94c894");
     variables.drawCircleAtVectorBufferRational(tempRoot, colorText, 2);
   }
-  variables.theBuffer.basisToDrawCirclesAt.makeEiBasis(theDimension);
+  variables.theBuffer.basisToDrawCirclesAt.makeEiBasis(dimension);
 }
 
 void DrawingVariables::drawLineBufferOld(
@@ -3206,14 +3206,14 @@ void OnePartialFraction::readFromFile(PartialFractions& owner, std::fstream& inp
   this->computeIndicesNonZeroMultiplicities();
 }
 
-void OnePartialFraction::computeOneCheckSum(PartialFractions& owner, Rational& output, int theDimension) const {
+void OnePartialFraction::computeOneCheckSum(PartialFractions& owner, Rational& output, int dimension) const {
   if (this->flagAnErrorHasOccurredTimeToPanic) {
   }
   Vector<Rational> CheckSumRoot = OnePartialFractionDenominator::GetCheckSumRoot(owner.AmbientDimension);
   Rational tempRat;
   for (int i = 0; i < this->indicesNonZeroMultiplicities.size; i ++) {
     this->denominator[this->indicesNonZeroMultiplicities[i]].computeOneCheckSum(
-      tempRat, owner.startingVectors[this->indicesNonZeroMultiplicities[i]], theDimension
+      tempRat, owner.startingVectors[this->indicesNonZeroMultiplicities[i]], dimension
     );
     output.multiplyBy(tempRat);
   }
@@ -3452,25 +3452,25 @@ void OnePartialFraction::getNElongationPolynomialWithMonomialContribution(
   List<int>& theSelectedIndices,
   List<int>& theCoefficients,
   List<int>& theGreatestElongations,
-  int theIndex,
+  int index,
   Polynomial<LargeInteger>& output,
-  int theDimension
+  int dimension
 ) {
   MonomialPolynomial tempM;
   tempM.makeOne();
-  for (int i = 0; i < theIndex; i ++) {
+  for (int i = 0; i < index; i ++) {
     int tempI = theSelectedIndices[i];
-    for (int j = 0; j < theDimension; j ++) {
+    for (int j = 0; j < dimension; j ++) {
       tempM.multiplyByVariable(j, startingVectors[tempI][j] * theCoefficients[i] * theGreatestElongations[i]);
     }
   }
   this->getNElongationPolynomial(
     startingVectors,
-    theSelectedIndices[theIndex],
-    theGreatestElongations[theIndex],
-    theCoefficients[theIndex],
+    theSelectedIndices[index],
+    theGreatestElongations[index],
+    theCoefficients[index],
     output,
-    theDimension
+    dimension
   );
   output.multiplyBy(tempM);
 }
@@ -3655,14 +3655,14 @@ void OnePartialFraction::getNElongationPolynomial(
   int baseElongation,
   int LengthOfGeometricSeries,
   Polynomial<LargeInteger>& output,
-  int theDimension
+  int dimension
 ) {
   output.makeZero();
   MonomialPolynomial tempM;
   tempM.makeOne();
   if (LengthOfGeometricSeries > 0) {
     for (int i = 0; i < LengthOfGeometricSeries; i ++) {
-      for (int j = 0; j < theDimension; j ++) {
+      for (int j = 0; j < dimension; j ++) {
         Rational power = startingVectors[index][j] * baseElongation * i;
         tempM.setVariable(j, power);
       }
@@ -3670,7 +3670,7 @@ void OnePartialFraction::getNElongationPolynomial(
     }
   } else {
     for (int i = - 1; i >= LengthOfGeometricSeries; i --) {
-      for (int j = 0; j < theDimension; j ++) {
+      for (int j = 0; j < dimension; j ++) {
         Rational power = startingVectors[index][j] * baseElongation * i;
         tempM.setVariable(j, power);
       }
@@ -3707,18 +3707,18 @@ void OnePartialFraction::makePolynomialFromOneNormal(
   }
 }
 
-void OnePartialFraction::computeNormals(PartialFractions& owner, Vectors<Rational>& output, int theDimension, Matrix<Rational>& buffer) {
+void OnePartialFraction::computeNormals(PartialFractions& owner, Vectors<Rational>& output, int dimension, Matrix<Rational>& buffer) {
   Vectors<Rational> dens;
   Vector<Rational> tempRoot;
-  tempRoot.setSize(theDimension);
+  tempRoot.setSize(dimension);
   dens.size = 0;
   output.size = 0;
-  for (int i = 0; i < theDimension; i ++) {
+  for (int i = 0; i < dimension; i ++) {
     tempRoot = owner.startingVectors[this->indicesNonZeroMultiplicities[i]];
     dens.addOnTop(tempRoot);
   }
   Rational tempRat;
-  for (int i = 0; i < theDimension; i ++) {
+  for (int i = 0; i < dimension; i ++) {
     dens.computeNormalExcludingIndex(tempRoot, i, buffer);
     tempRat = tempRoot.scalarEuclidean(dens[i]);
     if (tempRat.isEqualToZero()) {
@@ -4709,16 +4709,16 @@ void OnePartialFractionDenominator::initialize() {
 }
 
 void OnePartialFractionDenominator::computeOneCheckSum(
-  Rational& output, const Vector<Rational>& theExp, int theDimension
+  Rational& output, const Vector<Rational>& theExp, int dimension
 ) {
   output = 1;
   std::string tempS;
-  Vector<Rational> CheckSumRoot = OnePartialFractionDenominator::GetCheckSumRoot(theDimension);
+  Vector<Rational> CheckSumRoot = OnePartialFractionDenominator::GetCheckSumRoot(dimension);
   for (int i = 0; i < this->Elongations.size; i ++) {
     Rational tempRat, tempRat2, tempRat3;
     tempRat = 1;
     tempRat2 = 1;
-    for (int j = 0; j < theDimension; j ++) {
+    for (int j = 0; j < dimension; j ++) {
       if (OnePartialFraction::flagAnErrorHasOccurredTimeToPanic) {
         tempS = theExp.toString();
       }
@@ -4791,25 +4791,25 @@ void OnePartialFractionDenominator::oneFractionToStringBasisChange(
   std::string& output,
   bool LatexFormat,
   int indexInFraction,
-  int theDimension,
+  int dimension,
   FormatExpressions& PolyFormatLocal
 ) {
   std::stringstream out;
   Vector<Rational> tempRoot2, tempRoot;
-  tempRoot.setSize(theDimension);
-  tempRoot2.setSize(theDimension);
+  tempRoot.setSize(dimension);
+  tempRoot2.setSize(dimension);
   int NumCoords;
   if (UsingVarChange) {
     NumCoords = VarChange.numberOfRows;
     tempRoot2 = owner.startingVectors[indexInFraction];
     for (int i = 0; i < NumCoords; i ++) {
       tempRoot[i] = 0;
-      for (int j = 0; j < theDimension; j ++) {
+      for (int j = 0; j < dimension; j ++) {
         tempRoot[i] += tempRoot2[j] * VarChange.elements[i][j];
       }
     }
   } else {
-    NumCoords = theDimension;
+    NumCoords = dimension;
     tempRoot = owner.startingVectors[indexInFraction];
   }
   tempRoot *= this->Elongations[indexElongation];
@@ -4843,7 +4843,7 @@ std::string OnePartialFractionDenominator::toString() {
   std::stringstream out;
   std::string tempS;
   for (int k = 0; k < this->multiplicities.size; k ++) {
-    //this->oneFractionToStringBasisChange(owner, k, VarChange, UsingVarChange, tempS, LatexFormat, index, theDimension, PolyFormatLocal);
+    //this->oneFractionToStringBasisChange(owner, k, VarChange, UsingVarChange, tempS, LatexFormat, index, dimension, PolyFormatLocal);
     out << tempS;
   }
   out << " ";
@@ -5181,8 +5181,8 @@ void DynkinType::getTypesWithMults(List<DynkinSimpleType>& output) const {
   List<DynkinSimpleType> componentsSorted;
   this->getSortedDynkinTypes(componentsSorted);
   for (int i = 0; i < componentsSorted.size; i ++) {
-    int theIndex = this->monomials.getIndex(componentsSorted[i]);
-    for (int j = 0; j < this->getMultiplicity(theIndex); j ++) {
+    int index = this->monomials.getIndex(componentsSorted[i]);
+    for (int j = 0; j < this->getMultiplicity(index); j ++) {
       output.addOnTop(componentsSorted[i]);
     }
   }
@@ -5279,18 +5279,18 @@ void DynkinType::getLettersTypesMultiplicities(
   List<DynkinSimpleType> componentsSorted;
   this->getSortedDynkinTypes(componentsSorted);
   for (int i = 0; i < componentsSorted.size; i ++) {
-    int theIndex = this->monomials.getIndex(componentsSorted[i]);
+    int index = this->monomials.getIndex(componentsSorted[i]);
     if (outputLetters != nullptr) {
-      outputLetters->addOnTop((*this)[theIndex].letter);
+      outputLetters->addOnTop((*this)[index].letter);
     }
     if (outputRanks != nullptr) {
-      outputRanks->addOnTop((*this)[theIndex].rank);
+      outputRanks->addOnTop((*this)[index].rank);
     }
     if (outputFirstCoRootLengthsSquared != nullptr) {
-      outputFirstCoRootLengthsSquared->addOnTop((*this)[theIndex].cartanSymmetricInverseScale);
+      outputFirstCoRootLengthsSquared->addOnTop((*this)[index].cartanSymmetricInverseScale);
     }
     if (outputMults != nullptr) {
-      outputMults->addOnTop(this->getMultiplicity(theIndex));
+      outputMults->addOnTop(this->getMultiplicity(index));
     }
   }
 }
@@ -5586,8 +5586,8 @@ void DynkinType::getCartanSymmetricDefaultLengthKeepComponentOrder(Matrix<Ration
   this->getSortedDynkinTypes(sortedMons);
   DynkinSimpleType currentType;
   for (int j = 0; j < sortedMons.size; j ++) {
-    int theIndex = this->monomials.getIndex(sortedMons[j]);
-    int mult = this->getMultiplicity(theIndex);
+    int index = this->monomials.getIndex(sortedMons[j]);
+    int mult = this->getMultiplicity(index);
     currentType.makeArbitrary(sortedMons[j].letter, sortedMons[j].rank, 1);
     currentType.cartanSymmetricInverseScale = 1;//= currentType.getDefaultCoRootLengthSquared(0);
     for (int k = 0; k < mult; k ++) {
@@ -7666,8 +7666,8 @@ void WeylGroupData::getMatrixReflection(Vector<Rational>& reflectionRoot, Matrix
 void WeylGroupData::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2) {
   MacroRegisterFunctionWithName("WeylGroup::getCoxeterPlane");
   this->computeRho(true);
-  int theDimension = this->getDimension();
-  if (theDimension < 2) {
+  int dimension = this->getDimension();
+  if (dimension < 2) {
     return;
   }
   ElementWeylGroup element;
@@ -7695,26 +7695,26 @@ void WeylGroupData::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double>
   List<Vector<Complex<double> > > theEigenSpaceList;
   eigenMat.getZeroEigenSpace(theEigenSpaceList);
   Vectors<Complex<double> > theEigenSpace;
-  outputBasis1.setSize(theDimension);
-  outputBasis2.setSize(theDimension);
+  outputBasis1.setSize(dimension);
+  outputBasis2.setSize(dimension);
   theEigenSpace.operator=(theEigenSpaceList);
   DrawOperations tempDO;
-  tempDO.initDimensions(theDimension);
+  tempDO.initDimensions(dimension);
   tempDO.graphicsUnit = DrawOperations::graphicsUnitDefault;
   theEigenSpace.operator=(theEigenSpaceList);
-  for (int i = 0; i < theDimension; i ++) {
-    for (int j = 0; j < theDimension; j ++) {
+  for (int i = 0; i < dimension; i ++) {
+    for (int j = 0; j < dimension; j ++) {
       tempDO.bilinearForm.elements[i][j] = this->cartanSymmetric.elements[i][j].getDoubleValue();
     }
   }
   if (theEigenSpace.size > 0) {
     if (coxeterNumber > 2) {
-      for (int j = 0; j < theDimension; j ++) {
+      for (int j = 0; j < dimension; j ++) {
         outputBasis1[j] = theEigenSpace[0][j].realPart;
         outputBasis2[j] = theEigenSpace[0][j].imaginaryPart;
       }
     } else if (coxeterNumber == 1 && theEigenSpace.size > 1) {
-      for (int j = 0; j < theDimension; j ++) {
+      for (int j = 0; j < dimension; j ++) {
         outputBasis1[j] = theEigenSpace[0][j].realPart;
         outputBasis2[j] = theEigenSpace[1][j].realPart;
       }
@@ -7736,8 +7736,8 @@ void WeylGroupData::drawRootSystem(
   if (wipeCanvas) {
     output.initialize();
   }
-  int theDimension = this->getDimension();
-  if (theDimension == 1) {
+  int dimension = this->getDimension();
+  if (dimension == 1) {
     Vector<Rational> tempRoot, tempZero;
     tempZero.makeZero(2);
     tempRoot.makeEi(2, 0);
@@ -7751,11 +7751,11 @@ void WeylGroupData::drawRootSystem(
   }
   this->computeRho(true);
   Vector<Rational> ZeroRoot;
-  ZeroRoot.makeZero(theDimension);
-  output.initDimensions(theDimension);
+  ZeroRoot.makeZero(dimension);
+  output.initDimensions(dimension);
   output.graphicsUnit = DrawOperations::graphicsUnitDefault;
-  for (int i = 0; i < theDimension; i ++) {
-    for (int j = 0; j < theDimension; j ++) {
+  for (int i = 0; i < dimension; i ++) {
+    for (int j = 0; j < dimension; j ++) {
       output.bilinearForm.elements[i][j] = this->cartanSymmetric.elements[i][j].getDoubleValue();
     }
   }
@@ -7775,8 +7775,8 @@ void WeylGroupData::drawRootSystem(
   List<double> lengths;
   lengths.setSize(RootSystemSorted.size);
   for (int i = 0; i < this->rootSystem.size; i ++) {
-    tempRoot.setSize(theDimension);
-    for (int j = 0; j < theDimension; j ++) {
+    tempRoot.setSize(dimension);
+    for (int j = 0; j < dimension; j ++) {
       tempRoot[j] = this->rootSystem[i][j].getDoubleValue();
     }
     double Length1 = this->rootScalarCartanRoot(tempRoot, output.basisProjectionPlane[0]);
@@ -7827,10 +7827,10 @@ void WeylGroupData::drawRootSystem(
   }
   Vector<Rational> tempRootRat;
   Vectors<Rational> epsNotationSimpleBasis;
-  epsNotationSimpleBasis.makeEiBasis(theDimension);
+  epsNotationSimpleBasis.makeEiBasis(dimension);
   this->getEpsilonCoordinates(epsNotationSimpleBasis, epsNotationSimpleBasis);
-  for (int i = 0; i < theDimension; i ++) {
-    tempRootRat.makeEi(theDimension, i);
+  for (int i = 0; i < dimension; i ++) {
+    tempRootRat.makeEi(dimension, i);
     output.drawCircleAtVectorBufferRational(tempRootRat, "red", 1);
     output.drawCircleAtVectorBufferRational(tempRootRat, "red", 3);
     output.drawCircleAtVectorBufferRational(tempRootRat, "red", 4);
@@ -8510,15 +8510,15 @@ std::string KazhdanLusztigPolynomials::toString(FormatExpressions* format) {
 
 void KazhdanLusztigPolynomials::generatePartialBruhatOrder() {
   MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::generatePartialBruhatOrder");
-  int theDimension = this->weylGroup->cartanSymmetric.numberOfRows;
+  int dimension = this->weylGroup->cartanSymmetric.numberOfRows;
   Vector<Rational> ZeroRoot;
-  ZeroRoot.makeZero(theDimension);
+  ZeroRoot.makeZero(dimension);
   this->bruhatOrder.setSize(this->size);
   this->inverseBruhatOrder.setSize(this->size);
   this->simpleReflectionsActionList.setSize(this->size);
   for (int i = 0; i < this->size; i ++) {
-    this->simpleReflectionsActionList[i].reserve(theDimension);
-    for (int j = 0; j < theDimension; j ++) {
+    this->simpleReflectionsActionList[i].reserve(dimension);
+    for (int j = 0; j < dimension; j ++) {
       Vector<Rational> tempRoot, tempRoot2;
       tempRoot = (*this)[i];
       tempRoot2 = (*this)[i];
@@ -8588,9 +8588,9 @@ void KazhdanLusztigPolynomials::mergeBruhatLists(int fromList, int toList) {
 }
 
 int KazhdanLusztigPolynomials::chamberIndicatorToIndex(Vector<Rational>& ChamberIndicator) {
-  int theDimension = this->weylGroup->cartanSymmetric.numberOfRows;
+  int dimension = this->weylGroup->cartanSymmetric.numberOfRows;
   Vector<Rational> tempRoot;
-  tempRoot.setSize(theDimension);
+  tempRoot.setSize(dimension);
   Vector<Rational> ChamberIndicatorPlusRho;
   ChamberIndicatorPlusRho = (ChamberIndicator);
   ChamberIndicatorPlusRho += this->weylGroup->rho;
@@ -8676,7 +8676,7 @@ bool KazhdanLusztigPolynomials::computeKLPolys(WeylGroupData* weylGroup) {
 
 void KazhdanLusztigPolynomials::computeRPolys() {
   MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::computeRPolys");
-  int theDimension = this->weylGroup->getDimension();
+  int dimension = this->weylGroup->getDimension();
   this->rPolynomials.setSize(this->size);
   for (int i = 0; i < this->size; i ++) {
     this->explored[i] = false;
@@ -8692,7 +8692,7 @@ void KazhdanLusztigPolynomials::computeRPolys() {
     int a = this->findMaximalBruhatNonExplored(ExploredFromTop);
     while (a != - 1) {
       bool tempBool = false;
-      for (int j = 0; j < theDimension; j ++) {
+      for (int j = 0; j < dimension; j ++) {
         if (this->computeRxy(a, this->lowestNonExplored, j)) {
           tempBool = true;
           break;
@@ -10036,7 +10036,7 @@ void Cone::intersectHyperplane(Vector<Rational>& theNormal, Cone& outputConeLowe
   if (theNormal.isEqualToZero()) {
     global.fatal << "zero normal not allowed. " << global.fatal;
   }
-  int theDimension = theNormal.size;
+  int dimension = theNormal.size;
   Matrix<Rational> tempMat, theEmbedding, theProjection;
   tempMat.assignVectorRow(theNormal);
   Vectors<Rational> theBasis;
@@ -10048,11 +10048,11 @@ void Cone::intersectHyperplane(Vector<Rational>& theNormal, Cone& outputConeLowe
   theEmbedding.transpose();
   theBasis.addOnTop(theNormal);
   Vectors<Rational> tempRoots, tempRoots2, tempRoots3;
-  tempRoots.makeEiBasis(theDimension);
+  tempRoots.makeEiBasis(dimension);
   tempRoots.getCoordinatesInBasis(theBasis, tempRoots2);
   theProjection.assignVectorsToRows(tempRoots2);
   theProjection.transpose();
-  theProjection.resize(theDimension - 1, theDimension, false);
+  theProjection.resize(dimension - 1, dimension, false);
   Vectors<Rational> newNormals = this->normals;
   theProjection.actOnVectorsColumn(newNormals, Rational::zero());
   bool tempBool = outputConeLowerDim.createFromNormals(newNormals);
@@ -10067,9 +10067,9 @@ bool Cone::getRootFromLPolynomialConstantTermGoesToLastVariable(Polynomial<Ratio
   }
   output.makeZero(inputLPoly.minimalNumberOfVariables() + 1);
   for (int i = 0; i < inputLPoly.size(); i ++) {
-    int theIndex;
-    if (inputLPoly[i].::MonomialPolynomial::isOneLetterFirstDegree(&theIndex)) {
-      output[theIndex] = inputLPoly.coefficients[i];
+    int index;
+    if (inputLPoly[i].::MonomialPolynomial::isOneLetterFirstDegree(&index)) {
+      output[index] = inputLPoly.coefficients[i];
     } else {
       *output.lastObject() = inputLPoly.coefficients[i];
     }
@@ -10244,14 +10244,14 @@ Vector<Rational> OnePartialFractionDenominator::GetCheckSumRoot(int NumVars) {
   return output;
 }
 
-bool PartialFractions::removeRedundantShortRootsIndex(int theIndex, Vector<Rational>* Indicator) {
-  if (!(*this)[theIndex].rootIsInFractionCone(*this, Indicator)) {
+bool PartialFractions::removeRedundantShortRootsIndex(int index, Vector<Rational>* Indicator) {
+  if (!(*this)[index].rootIsInFractionCone(*this, Indicator)) {
     return false;
   }
   bool found = false;
-  for (int k = 0; k < (*this)[theIndex].indicesNonZeroMultiplicities.size; k ++) {
-    int currentIndex = (*this)[theIndex].indicesNonZeroMultiplicities[k];
-    const OnePartialFractionDenominator& currentFrac = (*this)[theIndex].denominator[currentIndex];
+  for (int k = 0; k < (*this)[index].indicesNonZeroMultiplicities.size; k ++) {
+    int currentIndex = (*this)[index].indicesNonZeroMultiplicities[k];
+    const OnePartialFractionDenominator& currentFrac = (*this)[index].denominator[currentIndex];
     if (currentFrac.Elongations.size > 1) {
       found = true;
       break;
@@ -10264,7 +10264,7 @@ bool PartialFractions::removeRedundantShortRootsIndex(int theIndex, Vector<Ratio
   Rational localStartCheckSum, localEndCheckSum;
   std::string tempS;
   Polynomial<LargeInteger> tempIP, currentCoeff;
-  this->popMonomial(theIndex, thePF, currentCoeff);
+  this->popMonomial(index, thePF, currentCoeff);
   for (int k = 0; k < thePF.indicesNonZeroMultiplicities.size; k ++) {
     int currentIndex = thePF.indicesNonZeroMultiplicities[k];
     OnePartialFractionDenominator& currentFrac = thePF.denominator[currentIndex];
@@ -10609,17 +10609,17 @@ bool Cone::isRegularToBasis(
   const Vectors<Rational>& basis,
   Vector<Rational>& input,
   Vector<Rational>& outputFailingNormal,
-  int theDimension
+  int dimension
 ) {
   Selection WallSelection;
   WallSelection.initialize(basis.size);
-  LargeInteger x = MathRoutines::nChooseK(basis.size, theDimension - 1);
+  LargeInteger x = MathRoutines::nChooseK(basis.size, dimension - 1);
   Matrix<Rational> bufferMat;
   Vector<Rational> candidate;
   Rational theScalarProduct;
   for (int i = 0; i < x; i ++) {
-    WallSelection.incrementSelectionFixedCardinality(theDimension - 1);
-    if (basis.computeNormalFromSelection(candidate, WallSelection, bufferMat, theDimension)) {
+    WallSelection.incrementSelectionFixedCardinality(dimension - 1);
+    if (basis.computeNormalFromSelection(candidate, WallSelection, bufferMat, dimension)) {
       candidate.scalarEuclidean(input, theScalarProduct);
       if (theScalarProduct.isEqualToZero()) {
         outputFailingNormal = candidate;
@@ -10961,11 +10961,11 @@ void DrawOperations::modifyToOrthonormalNoShiftSecond(Vector<double>& root1, Vec
 }
 
 void DrawOperations::computeProjectionsEiVectors() {
-  int theDimension = this->bilinearForm.numberOfRows;
-  this->projectionsEiVectors.setSizeMakeMatrix(theDimension, 2);
+  int dimension = this->bilinearForm.numberOfRows;
+  this->projectionsEiVectors.setSizeMakeMatrix(dimension, 2);
   Vector<double> tempRoot;
-  for (int i = 0; i < theDimension; i ++) {
-    tempRoot.makeEi(theDimension, i);
+  for (int i = 0; i < dimension; i ++) {
+    tempRoot.makeEi(dimension, i);
     this->projectionsEiVectors[i][0] = this->bilinearForm.scalarProduct(tempRoot, this->basisProjectionPlane[0]);
     this->projectionsEiVectors[i][1] = this->bilinearForm.scalarProduct(tempRoot, this->basisProjectionPlane[1]);
   }
@@ -11336,11 +11336,11 @@ void PiecewiseQuasipolynomial::operator*=(const Rational& other) {
 void PiecewiseQuasipolynomial::operator+=(const PiecewiseQuasipolynomial& other) {
   this->makeCommonRefinement(other);
   for (int i = 0; i < this->theProjectivizedComplex.size; i ++) {
-    int theIndex = other.theProjectivizedComplex.getLowestIndexChamberContaining(
+    int index = other.theProjectivizedComplex.getLowestIndexChamberContaining(
       this->theProjectivizedComplex[i].getInternalPoint()
     );
-    if (theIndex != - 1) {
-      this->theQPs[i] += other.theQPs[theIndex];
+    if (index != - 1) {
+      this->theQPs[i] += other.theQPs[index];
     }
   }
 }
@@ -11600,11 +11600,11 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(const Vector<Ratio
   }
   Vector<Rational> AffineInput = input;
   AffineInput.setSize(input.size - 1);
-  int theIndex = this->theProjectivizedComplex.getLowestIndexChamberContaining(input);
-  if (theIndex == - 1) {
+  int index = this->theProjectivizedComplex.getLowestIndexChamberContaining(input);
+  if (index == - 1) {
     return 0;
   }
-  result = this->theQPs[theIndex].evaluate(AffineInput);
+  result = this->theQPs[index].evaluate(AffineInput);
   // The following for loop is for self-check purposes only.
   // Comment it out as soon as
   // the code has been tested sufficiently.
@@ -11618,10 +11618,10 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(const Vector<Ratio
             break;
           }
           FormatExpressions tempFormat;
-          global.comments << "<hr>Error!!! Failed on chamber " << theIndex + 1 << " and " << i + 1;
+          global.comments << "<hr>Error!!! Failed on chamber " << index + 1 << " and " << i + 1;
           global.comments << "<br>Evaluating at point " << AffineInput.toString() << "<br>";
-          global.comments << "<br>Chamber " << theIndex + 1 << ": " << this->theProjectivizedComplex[theIndex].toString(&tempFormat);
-          global.comments << "<br>QP: " << this->theQPs[theIndex].toString(true, false);
+          global.comments << "<br>Chamber " << index + 1 << ": " << this->theProjectivizedComplex[index].toString(&tempFormat);
+          global.comments << "<br>QP: " << this->theQPs[index].toString(true, false);
           global.comments << "<br>value: " << result.toString();
           global.comments << "<br><br>Chamber " << i + 1 << ": " << this->theProjectivizedComplex[i].toString(&tempFormat);
           global.comments << "<br>QP: " << this->theQPs[i].toString(true, false);

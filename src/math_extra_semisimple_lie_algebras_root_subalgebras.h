@@ -60,7 +60,7 @@ public:
   void RelationOneSideToStringCoordForm(
     std::string& output, List<Rational>& coeffs, Vectors<Rational>& theRoots, bool EpsilonForm
   );
-  void getSumAlphas(Vector<Rational>& output, int theDimension);
+  void getSumAlphas(Vector<Rational>& output, int dimension);
   bool checkForBugs(RootSubalgebra& owner, Vectors<Rational>& NilradicalRoots);
   void sortRelation(RootSubalgebra& owner);
   bool operator==(const ConeRelation& right) {

@@ -174,9 +174,9 @@ public:
   void assignElementLieAlgebra(
     const ElementSemisimpleLieAlgebra<Rational>& input, SemisimpleLieAlgebra& inputOwner, const Coefficient& ringUnit = 1
   );
-  void makeOneGenerator(int theIndex, SemisimpleLieAlgebra& inputOwner, const Coefficient& ringUnit);
-  void makeOneGeneratorCoefficientOne(int theIndex, SemisimpleLieAlgebra& inputOwners, const Coefficient& ringUnit = 1);
-  void makeOneGeneratorCoefficientOne(int theIndex, int numVars, SemisimpleLieAlgebra& inputOwner);
+  void makeOneGenerator(int index, SemisimpleLieAlgebra& inputOwner, const Coefficient& ringUnit);
+  void makeOneGeneratorCoefficientOne(int index, SemisimpleLieAlgebra& inputOwners, const Coefficient& ringUnit = 1);
+  void makeOneGeneratorCoefficientOne(int index, int numVars, SemisimpleLieAlgebra& inputOwner);
   void makeOneGeneratorCoefficientOne(
     const Vector<Rational>& rootSpace, SemisimpleLieAlgebra& inputOwner, const Coefficient& ringUnit = 1
   ) {

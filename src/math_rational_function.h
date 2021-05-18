@@ -65,7 +65,7 @@ public:
   bool checkConsistency() const;
   void setNumberOfVariables(int goalNumVars);
   void setNumberOfVariablesSubstituteDeletedByOne(int newNumVars);
-  void makeOneLetterMonomial(int theIndex, const Coefficient& theCoeff, int ExpectedNumVars = 0);
+  void makeOneLetterMonomial(int index, const Coefficient& theCoeff, int ExpectedNumVars = 0);
   void getNumerator(Polynomial<Coefficient>& output) const;
   void getDenominator(Polynomial<Coefficient>& output) const;
   bool isNegative();

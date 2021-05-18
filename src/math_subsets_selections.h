@@ -338,10 +338,10 @@ bool Vectors<Coefficient>::computeNormalFromSelectionAndTwoExtraRoots(Vector<Coe
   if (this->size == 0) {
     return false;
   }
-  int theDimension = this->objects[0].size;
-  output.setSize(theDimension);
-  bufferMat.initialize(theSelection.cardinalitySelection + 2, theDimension);
-  for (int j = 0; j < theDimension; j ++) {
+  int dimension = this->objects[0].size;
+  output.setSize(dimension);
+  bufferMat.initialize(theSelection.cardinalitySelection + 2, dimension);
+  for (int j = 0; j < dimension; j ++) {
     for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
       bufferMat.elements[i][j].assign(this->objects[theSelection.elements[i]].objects[j]);
     }
@@ -402,14 +402,14 @@ bool Vectors<Coefficient>::computeNormalExcludingIndex(
   if (this->size == 0) {
     return false;
   }
-  int theDimension = this->objects[0].size;
-  output.setSize(theDimension);
-  bufferMatrix.initialize(this->size - 1, theDimension);
+  int dimension = this->objects[0].size;
+  output.setSize(dimension);
+  bufferMatrix.initialize(this->size - 1, dimension);
   int k = - 1;
   for (int i = 0; i < this->size; i ++) {
     if (i != index) {
       k ++;
-      for (int j = 0; j < theDimension; j ++) {
+      for (int j = 0; j < dimension; j ++) {
         bufferMatrix.elements[k][j] = (*this)[i][j];
       }
     }
@@ -427,13 +427,13 @@ bool Vectors<Coefficient>::computeNormalFromSelection(
   Vector<Coefficient>& output,
   Selection& theSelection,
   Matrix<Coefficient>& bufferMatrix,
-  int theDimension
+  int dimension
 ) const {
   Selection nonPivotPoints;
-  output.setSize(theDimension);
-  bufferMatrix.initialize(theSelection.cardinalitySelection, theDimension);
+  output.setSize(dimension);
+  bufferMatrix.initialize(theSelection.cardinalitySelection, dimension);
   for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
-    for (int j = 0; j < theDimension; j ++) {
+    for (int j = 0; j < dimension; j ++) {
       bufferMatrix.elements[i][j] = this->objects[theSelection.elements[i]].objects[j];
     }
   }
@@ -456,13 +456,13 @@ bool Vectors<Coefficient>::computeNormalFromSelectionAndExtraRoot(
   if (this->size == 0) {
     return false;
   }
-  int theDimension = this->objects[0].size;
-  output.setSize(theDimension);
+  int dimension = this->objects[0].size;
+  output.setSize(dimension);
   Matrix<Coefficient> matOutputEmpty;
   Selection& nonPivotPoints = bufferSel;
-  bufferMatrix.initialize(theSelection.cardinalitySelection + 1, theDimension);
+  bufferMatrix.initialize(theSelection.cardinalitySelection + 1, dimension);
   matOutputEmpty.initialize(- 1, - 1);
-  for (int j = 0; j < theDimension; j ++) {
+  for (int j = 0; j < dimension; j ++) {
     for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
       bufferMatrix.elements[i][j].assign(this->objects[theSelection.elements[i]][j]);
     }
@@ -478,12 +478,12 @@ bool Vectors<Coefficient>::computeNormalFromSelectionAndExtraRoot(
 
 template <class Coefficient>
 void Vectors<Coefficient>::gaussianEliminationForNormalComputation(
-  Matrix<Coefficient>& inputMatrix, Selection& outputNonPivotPoints, int theDimension
+  Matrix<Coefficient>& inputMatrix, Selection& outputNonPivotPoints, int dimension
 ) const {
-  inputMatrix.initialize(this->size, theDimension);
-  outputNonPivotPoints.initialize(theDimension);
+  inputMatrix.initialize(this->size, dimension);
+  outputNonPivotPoints.initialize(dimension);
   for (int i = 0; i < this->size; i ++) {
-    for (int j = 0; j < theDimension; j ++) {
+    for (int j = 0; j < dimension; j ++) {
       inputMatrix(i, j) = (*this)[i][j];
     }
   }
@@ -495,7 +495,7 @@ int Vectors<Coefficient>::getRankElementSpan(Matrix<Coefficient>* buffer, Select
   if (this->size == 0) {
     return 0;
   }
-  int theDimension = this->objects[0].size;
+  int dimension = this->objects[0].size;
   MemorySaving<Matrix<Coefficient> > emergencyMatBuf;
   MemorySaving<Selection> emergencySelBuf;
   if (buffer == nullptr) {
@@ -504,8 +504,8 @@ int Vectors<Coefficient>::getRankElementSpan(Matrix<Coefficient>* buffer, Select
   if (bufferSelection == nullptr) {
     bufferSelection = &emergencySelBuf.getElement();
   }
-  this->gaussianEliminationForNormalComputation(*buffer, *bufferSelection, theDimension);
-  return (theDimension - bufferSelection->cardinalitySelection);
+  this->gaussianEliminationForNormalComputation(*buffer, *bufferSelection, dimension);
+  return (dimension - bufferSelection->cardinalitySelection);
 }
 
 template <class Coefficient>
@@ -554,14 +554,14 @@ bool Vectors<Coefficient>::linearAlgebraForVertexComputation(
   if (this->size == 0) {
     return false;
   }
-  int theDimension = this->objects[0].size;
-  output.setSize(theDimension);
-  if (theDimension - 1 != theSelection.cardinalitySelection) {
+  int dimension = this->objects[0].size;
+  output.setSize(dimension);
+  if (dimension - 1 != theSelection.cardinalitySelection) {
     global.fatal << "Dimensions don't match. " << global.fatal;
   }
-  buffer.initialize(theDimension - 1, theDimension);
-  for (int i = 0; i < theDimension - 1; i ++) {
-    for (int j = 0; j < theDimension; j ++) {
+  buffer.initialize(dimension - 1, dimension);
+  for (int i = 0; i < dimension - 1; i ++) {
+    for (int j = 0; j < dimension; j ++) {
       buffer.elements[i][j] = (this->externalWalls[theSelection.elements[i]].normal[j]);
     }
   }

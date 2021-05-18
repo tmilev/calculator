@@ -807,10 +807,10 @@ public:
       }
     }
   }
-  void makeZeroMatrix(int theDimension, const Coefficient& ringZero = 0) {
-    this->initialize(theDimension, theDimension);
-    for (int i = 0; i < theDimension; i ++) {
-      for (int j = 0; j < theDimension; j ++) {
+  void makeZeroMatrix(int dimension, const Coefficient& ringZero = 0) {
+    this->initialize(dimension, dimension);
+    for (int i = 0; i < dimension; i ++) {
+      for (int j = 0; j < dimension; j ++) {
         this->elements[i][j] = ringZero;
       }
     }
@@ -1322,24 +1322,24 @@ bool Vectors<Coefficient>::conesIntersect(
     }
     return false;
   }
-  int theDimension = strictCone[0].size;
+  int dimension = strictCone[0].size;
   int numCols = strictCone.size + nonStrictCone.size;
-  matA.initialize(theDimension + 1, numCols);
-  matb.initialize(theDimension + 1, 1);
-  matb.makeZero(); matb.elements[theDimension][0].makeOne();
+  matA.initialize(dimension + 1, numCols);
+  matb.initialize(dimension + 1, 1);
+  matb.makeZero(); matb.elements[dimension][0].makeOne();
   for (int i = 0; i < strictCone.size; i ++) {
-    for (int k = 0; k < theDimension; k ++) {
+    for (int k = 0; k < dimension; k ++) {
       matA.elements[k][i].assign(strictCone[i][k]);
     }
-    matA.elements[theDimension][i].makeOne();
+    matA.elements[dimension][i].makeOne();
   }
   for (int i = 0; i < nonStrictCone.size; i ++) {
     int currentCol = i + strictCone.size;
-    for (int k = 0; k < theDimension; k ++) {
+    for (int k = 0; k < dimension; k ++) {
       matA.elements[k][currentCol].assign(nonStrictCone[i][k]);
       matA.elements[k][currentCol].negate();
     }
-    matA.elements[theDimension][currentCol].makeZero();
+    matA.elements[dimension][currentCol].makeZero();
   }
   if (!Matrix<Rational>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
     matA, matb, outputLinearCombo
@@ -1470,12 +1470,12 @@ bool Vectors<Coefficient>::computeNormal(Vector<Coefficient>& output, int inputD
     }
     return false;
   }
-  int theDimension = this->objects[0].size;
+  int dimension = this->objects[0].size;
   Matrix<Coefficient> tempMatrix;
   Selection nonPivotPoints;
-  nonPivotPoints.initialize(theDimension);
-  output.setSize(theDimension);
-  this->gaussianEliminationForNormalComputation(tempMatrix, nonPivotPoints, theDimension);
+  nonPivotPoints.initialize(dimension);
+  output.setSize(dimension);
+  this->gaussianEliminationForNormalComputation(tempMatrix, nonPivotPoints, dimension);
   if (nonPivotPoints.cardinalitySelection != 1) {
     return false;
   }
@@ -2153,13 +2153,13 @@ public:
     }
     return result;
   }
-  bool cleanupMonomialIndex(int theIndex) {
-    if (theIndex == - 1) {
+  bool cleanupMonomialIndex(int index) {
+    if (index == - 1) {
       return false;
     }
     // Note: operator != is not required to be defined
     // for our coefficients; operator == is.
-    bool coefficientIsZero = (this->coefficients[theIndex] == 0);
+    bool coefficientIsZero = (this->coefficients[index] == 0);
     if (!coefficientIsZero) {
       return false;
     }
@@ -2170,8 +2170,8 @@ public:
     }
     bool oldFlagDeallocated = this->flagDeallocated;
     this->flagDeallocated = true;
-    this->monomials.removeIndexSwapWithLast(theIndex);
-    this->coefficients.removeIndexSwapWithLast(theIndex);
+    this->monomials.removeIndexSwapWithLast(index);
+    this->coefficients.removeIndexSwapWithLast(index);
     this->flagDeallocated = oldFlagDeallocated;
     return true;
   }
@@ -2314,14 +2314,14 @@ public:
     this->cleanupMonomialIndex(this->subtractMonomialNoCoefficientCleanUpReturnIndex(inputMon, inputCoeff));
   }
   Coefficient getCoefficientOf(const TemplateMonomial& inputMon) const {
-    int theIndex = this->monomials.getIndex(inputMon);
-    if (theIndex == - 1) {
+    int index = this->monomials.getIndex(inputMon);
+    if (index == - 1) {
       if (this->coefficients.size > 0) {
         return this->coefficients[0].zero();
       }
       return Coefficient::zeroStatic();
     }
-    return this->coefficients[theIndex];
+    return this->coefficients[index];
   }
   bool operator>(const LinearCombination<TemplateMonomial, Coefficient>& other) const {
     if (this->size() > other.size()) {
@@ -2514,8 +2514,8 @@ public:
       }
     }
   }
-  const TemplateMonomial& operator[](int theIndex) const {
-    return this->monomials[theIndex];
+  const TemplateMonomial& operator[](int index) const {
+    return this->monomials[index];
   }
   void operator=(const TemplateMonomial& other) {
     TemplateMonomial otherCopy = other;
@@ -3309,7 +3309,7 @@ public:
     Polynomial<Coefficient>& substitution, int index, PolynomialSubstitution<Coefficient>& finalSubstitution
   );
   bool getOneVariablePolynomialSolution(const Polynomial<Coefficient>& polynomial, Coefficient& outputSolution);
-  void setSerreLikeSolutionIndex(int theIndex, const Coefficient& theConst);
+  void setSerreLikeSolutionIndex(int index, const Coefficient& theConst);
   void getSubstitutionFromPartialSolutionSerreLikeSystem(PolynomialSubstitution<Coefficient>& outputSub);
   std::string toStringSerreLikeSolution();
   static int getNumberOfVariablesToSolveFor(const List<Polynomial<Coefficient> >& input);
@@ -3806,7 +3806,7 @@ public:
   static unsigned int hashFunction(const OnePartialFractionDenominator& input) {
     return input.hashFunction();
   }
-  void computeOneCheckSum(Rational& output, const Vector<Rational>& theExp, int theDimension);
+  void computeOneCheckSum(Rational& output, const Vector<Rational>& theExp, int dimension);
   void operator=(OnePartialFractionDenominator& right);
   bool operator==(OnePartialFractionDenominator& right);
   std::string toString();
@@ -3818,7 +3818,7 @@ public:
     std::string& output,
     bool LatexFormat,
     int indexInFraction,
-    int theDimension,
+    int dimension,
     FormatExpressions& PolyFormatLocal
   );
 };
@@ -4283,7 +4283,7 @@ bool Vectors<Coefficient>::getNormalSeparatingCones(
   Matrix<Rational> matA;
   Matrix<Rational> matb;
   Vector<Rational> matX;
-  int theDimension = coneStrictlyPositiveCoeffs[0].size;
+  int dimension = coneStrictlyPositiveCoeffs[0].size;
   if (coneStrictlyPositiveCoeffs.size == 0) {
     if (coneNonNegativeCoeffs.size > 0) {
       outputNormal.makeZero(coneNonNegativeCoeffs[0].size);
@@ -4291,34 +4291,34 @@ bool Vectors<Coefficient>::getNormalSeparatingCones(
     return true;
   }
   int numRows = coneStrictlyPositiveCoeffs.size + coneNonNegativeCoeffs.size;
-  matA.initialize(numRows, theDimension * 2 + numRows);
+  matA.initialize(numRows, dimension * 2 + numRows);
   matA.makeZero();
   matb.initialize(numRows, 1);
   matb.makeZero();
   for (int i = 0; i < coneStrictlyPositiveCoeffs.size; i ++) {
-    for (int k = 0; k < theDimension; k ++) {
+    for (int k = 0; k < dimension; k ++) {
       matA.elements[i][k].assign(coneStrictlyPositiveCoeffs.objects[i].objects[k]);
-      matA.elements[i][k + theDimension].assign(matA.elements[i][k]);
-      matA.elements[i][k + theDimension].negate();
+      matA.elements[i][k + dimension].assign(matA.elements[i][k]);
+      matA.elements[i][k + dimension].negate();
     }
     matb.elements[i][0].makeOne();
-    matA.elements[i][theDimension * 2 + i].makeMinusOne();
+    matA.elements[i][dimension * 2 + i].makeMinusOne();
   }
   for (int i = 0; i < coneNonNegativeCoeffs.size; i ++) {
     int currentRow = i + coneStrictlyPositiveCoeffs.size;
-    for (int k = 0; k < theDimension; k ++) {
+    for (int k = 0; k < dimension; k ++) {
       matA.elements[currentRow][k].assign(coneNonNegativeCoeffs.objects[i].objects[k]);
-      matA.elements[currentRow][k + theDimension].assign(matA.elements[currentRow][k]);
-      matA.elements[currentRow][k + theDimension].negate();
+      matA.elements[currentRow][k + dimension].assign(matA.elements[currentRow][k]);
+      matA.elements[currentRow][k + dimension].negate();
     }
-    matA.elements[currentRow][2 * theDimension + currentRow].makeOne();
+    matA.elements[currentRow][2 * dimension + currentRow].makeOne();
   }
   bool result = Matrix<Rational>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
     matA, matb, &matX
   );
-  outputNormal.makeZero(theDimension);
-  for (int i = 0; i < theDimension; i ++) {
-    outputNormal[i] = matX[i] - matX[i + theDimension];
+  outputNormal.makeZero(dimension);
+  for (int i = 0; i < dimension; i ++) {
+    outputNormal[i] = matX[i] - matX[i + dimension];
   }
   if (result) {
     Rational tempRat;
@@ -5191,9 +5191,9 @@ public:
     return output;
   }
   bool removeRedundantShortRootsClassicalRootSystem(
-    PartialFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInteger>& buffer1, int theDimension
+    PartialFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInteger>& buffer1, int dimension
   );
-  bool removeRedundantShortRoots(PartialFractions& owner, Vector<Rational>* Indicator, int theDimension);
+  bool removeRedundantShortRoots(PartialFractions& owner, Vector<Rational>* Indicator, int dimension);
   bool AlreadyAccountedForInGUIDisplay;
   static bool flagAnErrorHasOccurredTimeToPanic;
   static std::fstream TheBigDump;
@@ -5217,7 +5217,7 @@ public:
     Polynomial<Rational>& output
   );
   void computeNormals(
-    PartialFractions& owner, Vectors<Rational>& output, int theDimension, Matrix<Rational>& buffer
+    PartialFractions& owner, Vectors<Rational>& output, int dimension, Matrix<Rational>& buffer
   );
   int computeGainingMultiplicityIndexInLinearRelation(
     bool flagUsingOrlikSolomon, Matrix<Rational>& theLinearRelation
@@ -5243,7 +5243,7 @@ public:
     List<Vector<Rational> >& startingVectors
   );
   void computeOneCheckSum(
-    PartialFractions& owner, Rational& output, int theDimension
+    PartialFractions& owner, Rational& output, int dimension
   ) const;
   bool reduceMeOnce(
     const Polynomial<LargeInteger>& myCoeff,
@@ -5333,9 +5333,9 @@ public:
     List<int>& theSelectedIndices,
     List<int>& theCoefficients,
     List<int>& theGreatestElongations,
-    int theIndex,
+    int index,
     Polynomial<LargeInteger>& output,
-    int theDimension
+    int dimension
   );
   void getNElongationPolynomial(
     List<Vector<Rational> >& startingVectors,
@@ -5343,9 +5343,9 @@ public:
     int baseElongation,
     int LengthOfGeometricSeries,
     Polynomial<LargeInteger>& output,
-    int theDimension
+    int dimension
   );
-  static void getNElongationPolynomial(Vector<Rational>& exponent, int n, Polynomial<LargeInteger>& output, int theDimension);
+  static void getNElongationPolynomial(Vector<Rational>& exponent, int n, Polynomial<LargeInteger>& output, int dimension);
   int getNumberProportionalVectorsClassicalRootSystems(PartialFractions& owner);
   bool operator==(const OnePartialFraction& right) const;
   void operator=(const OnePartialFraction& right);
@@ -5402,7 +5402,7 @@ public:
     const Vectors<Rational>& basis,
     Vector<Rational>& r,
     Vector<Rational>& outputFailingNormal,
-    int theDimension
+    int dimension
   );
   static bool regularizeToBasis(
     const Vectors<Rational> &basis,
@@ -5706,7 +5706,7 @@ public:
   //row index is the index of the Vector<Rational> ; column(second) index is the coordinate index
   void removeRedundantShortRootsClassicalRootSystem(Vector<Rational>* Indicator);
   void removeRedundantShortRoots(Vector<Rational>* Indicator);
-  bool removeRedundantShortRootsIndex(int theIndex, Vector<Rational>* Indicator);
+  bool removeRedundantShortRootsIndex(int index, Vector<Rational>* Indicator);
   bool splitClassicalRootSystem(bool ShouldElongate, Vector<Rational>* Indicator);
   bool split(Vector<Rational>* Indicator);
   void computeKostantFunctionFromWeylGroup(

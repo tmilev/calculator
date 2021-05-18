@@ -782,7 +782,7 @@ bool Crypto::verifyJWTagainstKnownKeys(
     }
     return false;
   }
-  int theIndex = - 1;
+  int index = - 1;
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "Seeking key: <b style =\"color:brown\">" << keyIDstring << "</b>. ";
   }
@@ -790,11 +790,11 @@ bool Crypto::verifyJWTagainstKnownKeys(
     Crypto::loadKnownCertificates(commentsOnFailure, commentsGeneral);
     for (int j = 0; j < Crypto::knownCertificates.size; j ++) {
       if (keyIDstring == Crypto::knownCertificates[j].keyid) {
-        theIndex = j;
+        index = j;
         break;
       }
     }
-    if (theIndex != - 1 || i == 1) {
+    if (index != - 1 || i == 1) {
       break;
     }
     if (commentsGeneral != nullptr && i == 0) {
@@ -808,7 +808,7 @@ bool Crypto::verifyJWTagainstKnownKeys(
     theCrawler.theTSL.openSSLData.name = "public key fetcher";
     theCrawler.updatePublicKeys(commentsOnFailure, commentsGeneral);
   }
-  if (theIndex == - 1) {
+  if (index == - 1) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<b style =\"color:red\">Could not find key id: "
       << keyIDstring << "</b>. ";
@@ -819,7 +819,7 @@ bool Crypto::verifyJWTagainstKnownKeys(
     *commentsGeneral << "<b style =\"color:green\">Found key id: "
     << keyIDstring << ".</b>";
   }
-  PublicKeyRSA& currentCert = Crypto::knownCertificates[theIndex];
+  PublicKeyRSA& currentCert = Crypto::knownCertificates[index];
   return theToken.verifyRSA256(
     currentCert.theModulus, currentCert.theExponent, commentsOnFailure, commentsGeneral
   );

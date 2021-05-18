@@ -253,7 +253,7 @@ public:
     bool useSpanTag
   );
   void drawString(DrawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle);
-  void drawCoordSystemBuffer(DrawingVariables& variables, int theDimension);
+  void drawCoordSystemBuffer(DrawingVariables& variables, int dimension);
   void drawLineDirectly(
     double x1, double y1, double x2, double y2, uint32_t thePenStyle, int colorIndex, double lineWidth
   );

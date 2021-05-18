@@ -325,16 +325,16 @@ void RationalFraction<Coefficient>::greatestCommonDivisor(
 
 template<class Coefficient>
 void RationalFraction<Coefficient>::makeOneLetterMonomial(
-  int theIndex, const Coefficient& theCoeff, int ExpectedNumVars
+  int index, const Coefficient& theCoeff, int ExpectedNumVars
 ) {
-  if (theIndex < 0) {
+  if (index < 0) {
     global.fatal << "I am asked to create "
     << "Monomial which has a variable of negative index "
-    << theIndex << ". " << global.fatal;
+    << index << ". " << global.fatal;
   }
   this->expressionType = this->typePolynomial;
-  ExpectedNumVars = MathRoutines::maximum(theIndex + 1, ExpectedNumVars);
-  this->numerator.getElement().makeDegreeOne(ExpectedNumVars, theIndex, theCoeff);
+  ExpectedNumVars = MathRoutines::maximum(index + 1, ExpectedNumVars);
+  this->numerator.getElement().makeDegreeOne(ExpectedNumVars, index, theCoeff);
 }
 
 template<class Coefficient>

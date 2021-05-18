@@ -160,9 +160,9 @@ public:
     }
     return true;
   }
-  static Vector<Coefficient> getEi(int theDimension, int theIndex) {
+  static Vector<Coefficient> getEi(int dimension, int index) {
     Vector<Coefficient> output;
-    output.makeEi(theDimension, theIndex);
+    output.makeEi(dimension, index);
     return output;
   }
   bool isNegativeOrZero() {
@@ -425,11 +425,11 @@ public:
       }
     }
   }
-  bool findIndexFirstNonZeroCoordinateFromTheLeft(int& theIndex) {
-    theIndex = - 1;
+  bool findIndexFirstNonZeroCoordinateFromTheLeft(int& index) {
+    index = - 1;
     for (int i = 0; i < this->size; i ++) {
       if (!this->objects[i].isEqualToZero()) {
-        theIndex = i;
+        index = i;
         return true;
       }
     }
@@ -793,10 +793,10 @@ class Vectors: public List<Vector<Coefficient> > {
   bool linearSpanContainsVector(
     const Vector<Coefficient>& input, Matrix<Coefficient>& bufferMatrix, Selection& bufferSelection
   ) const;
-  void makeEiBasis(int theDimension) {
-    this->setSize(theDimension);
+  void makeEiBasis(int dimension) {
+    this->setSize(dimension);
     for (int i = 0; i < this->size; i ++) {
-      this->objects[i].makeEi(theDimension, i);
+      this->objects[i].makeEi(dimension, i);
     }
   }
   bool linearSpanContainsVector(const Vector<Coefficient>& input) const;
@@ -815,8 +815,8 @@ class Vectors: public List<Vector<Coefficient> > {
     List<Vector<Coefficient> >& coneNonNegativeCoeffs,
     Vector<Coefficient>& outputNormal
   );
-  void average(Vector<Coefficient>& output, int theDimension) {
-    this->sum(output, theDimension);
+  void average(Vector<Coefficient>& output, int dimension) {
+    this->sum(output, dimension);
     if (this->size == 0) {
       return;
     }
@@ -899,7 +899,7 @@ class Vectors: public List<Vector<Coefficient> > {
     Vector<Coefficient>& output,
     Selection& theSelection,
     Matrix<Coefficient>& bufferMatrix,
-    int theDimension
+    int dimension
   ) const;
   bool computeNormalFromSelectionAndExtraRoot(
     Vector<Coefficient>& output,
@@ -918,7 +918,7 @@ class Vectors: public List<Vector<Coefficient> > {
   );
   bool computeNormal(Vector<Coefficient>& output, int inputDimension);
   void gaussianEliminationForNormalComputation(
-    Matrix<Coefficient>& inputMatrix, Selection& outputNonPivotPoints, int theDimension
+    Matrix<Coefficient>& inputMatrix, Selection& outputNonPivotPoints, int dimension
   ) const;
   //the below function returns a n row 1 column matrix with the coefficients in the obvious order
   bool getLinearDependence(Matrix<Coefficient>& outputTheLinearCombination);

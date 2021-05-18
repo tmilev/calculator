@@ -514,9 +514,9 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightTransposeAntiAutomorp
     }
     intermediateAccum *= leftMonCoeff;
     Accum += intermediateAccum;
-    int theIndex = intermediateAccum.monomials.getIndex(constMon);
-    if (theIndex != - 1) {
-      output += intermediateAccum.coefficients[theIndex];
+    int index = intermediateAccum.monomials.getIndex(constMon);
+    if (index != - 1) {
+      output += intermediateAccum.coefficients[index];
     }
   }
   if (logStream != nullptr) {
@@ -534,11 +534,11 @@ void MonomialUniversalEnveloping<Coefficient>::modOutVermaRelations(
   const Coefficient& ringZero
 ) {
   int numPosRoots = this->getOwner().getNumberOfPositiveRoots();
-  int theDimension = this->getOwner().getRank();
+  int dimension = this->getOwner().getRank();
   outputCoeff = ringUnit;
   for (int i = this->generatorsIndices.size - 1; i >= 0; i --) {
     int indexCurrentGenerator = this->generatorsIndices[i];
-    if (indexCurrentGenerator >= numPosRoots + theDimension) {
+    if (indexCurrentGenerator >= numPosRoots + dimension) {
       this->makeOne(*this->owner);
       outputCoeff = ringZero;
       return;
@@ -546,7 +546,7 @@ void MonomialUniversalEnveloping<Coefficient>::modOutVermaRelations(
     if (indexCurrentGenerator < numPosRoots) {
       return;
     }
-    if (indexCurrentGenerator >= numPosRoots && indexCurrentGenerator < numPosRoots + theDimension) {
+    if (indexCurrentGenerator >= numPosRoots && indexCurrentGenerator < numPosRoots + dimension) {
       if (substitutionHiGoesToIthElement == 0) {
         this->makeOne(*this->owner);
         outputCoeff = ringZero;
@@ -618,8 +618,8 @@ std::string MonomialUniversalEnveloping<Coefficient>::toString(FormatExpressions
   }
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
     Coefficient& power = this->powers[i];
-    int theIndex = this->generatorsIndices[i];
-    tempS = this->getOwner().getStringFromChevalleyGenerator(theIndex, format);
+    int index = this->generatorsIndices[i];
+    tempS = this->getOwner().getStringFromChevalleyGenerator(index, format);
     out << tempS;
     if (!power.isEqualToOne()) {
       out << "^";
@@ -638,15 +638,15 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(
   //std::stringstream out;
   this->makeZero(theOwner);
   WeylGroupData& theWeyl = this->getOwner().weylGroup;
-  int theDimension = theWeyl.cartanSymmetric.numberOfRows;
+  int dimension = theWeyl.cartanSymmetric.numberOfRows;
   Vector<Rational> tempRoot1, tempRoot2;
 //  Matrix<Rational> killingForm;
-//  killingForm.initialize(theDimension, theDimension);
-//  for (int i = 0; i < theDimension; i ++)
-//  { tempRoot1.makeEi(theDimension, i);
-//    for (int j = 0; j < theDimension; j ++)
+//  killingForm.initialize(dimension, dimension);
+//  for (int i = 0; i < dimension; i ++)
+//  { tempRoot1.makeEi(dimension, i);
+//    for (int j = 0; j < dimension; j ++)
 //    { killingForm.elements[i][j] = 0;
-//      tempRoot2.makeEi(theDimension, j);
+//      tempRoot2.makeEi(dimension, j);
 //      for (int k = 0; k<theWeyl.RootSystem.size; k++)
 //        killingForm.elements[i][j] += theWeyl.rootScalarCartanRoot(tempRoot1, theWeyl.RootSystem.objects[k])* theWeyl.rootScalarCartanRoot(tempRoot2, theWeyl.RootSystem.objects[k]);
 //    }
@@ -664,8 +664,8 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(
   invertedSymCartan = theWeyl.cartanSymmetric;
   invertedSymCartan.invert();
 ////////////////////////////////////////////////////////////////////////
-  for (int i = 0; i < theDimension; i ++) {
-    tempRoot1.makeEi(theDimension, i);
+  for (int i = 0; i < dimension; i ++) {
+    tempRoot1.makeEi(dimension, i);
   //implementation without the ninja formula:
 //    killingForm.actOnVectorColumn(tempRoot1, tempRoot2);
 //    element1.makeCartanGenerator(tempRoot1, numVars, theOwner);
@@ -719,8 +719,8 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(
 //  tempPolyFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   //this->DebugString= out.str();
 //  Vector<Rational> tempRoot;
-//  for (int i = 0; i < theDimension; i ++)
-//  { tempRoot.makeEi(theDimension, i);
+//  for (int i = 0; i < dimension; i ++)
+//  { tempRoot.makeEi(dimension, i);
 //    if (!length1Explored)
 //    { length1= theWeyl.rootScalarCartanRoot(tempRoot, tempRoot);
 //      length1Explored = true;
@@ -777,23 +777,23 @@ void ElementUniversalEnveloping<Coefficient>::cleanUpZeroCoefficient() {
 
 template <class Coefficient>
 void ElementUniversalEnveloping<Coefficient>::makeOneGenerator(
-  int theIndex, SemisimpleLieAlgebra& inputOwner, const Coefficient& ringUnit
+  int index, SemisimpleLieAlgebra& inputOwner, const Coefficient& ringUnit
 ) {
   this->makeZero(inputOwner);
   MonomialUniversalEnveloping<Coefficient> tempMon;
   tempMon.makeOne(inputOwner);
-  tempMon.multiplyByGeneratorPowerOnTheRight(theIndex, ringUnit);
+  tempMon.multiplyByGeneratorPowerOnTheRight(index, ringUnit);
   this->addMonomial(tempMon, ringUnit);
 }
 
 template <class Coefficient>
 void ElementUniversalEnveloping<Coefficient>::makeOneGeneratorCoefficientOne(
-  int theIndex, SemisimpleLieAlgebra& inputOwner, const Coefficient& ringUnit
+  int index, SemisimpleLieAlgebra& inputOwner, const Coefficient& ringUnit
 ) {
   this->makeZero(inputOwner);
   MonomialUniversalEnveloping<Coefficient> tempMon;
   tempMon.makeOne(inputOwner);
-  tempMon.multiplyByGeneratorPowerOnTheRight(theIndex, ringUnit);
+  tempMon.multiplyByGeneratorPowerOnTheRight(index, ringUnit);
   this->addMonomial(tempMon, ringUnit);
 }
 
@@ -877,12 +877,12 @@ void ElementUniversalEnveloping<Coefficient>::makeCartanGenerator(
   MonomialUniversalEnveloping<Coefficient> tempMon;
   this->makeZero(inputOwner);
   tempMon.makeOne(inputOwner);
-  int theDimension = this->getOwner().weylGroup.cartanSymmetric.numberOfRows;
+  int dimension = this->getOwner().weylGroup.cartanSymmetric.numberOfRows;
   int numPosRoots = this->getOwner().weylGroup.rootsOfBorel.size;
   tempMon.generatorsIndices.setSize(1);
   tempMon.powers.setSize(1);
   Coefficient tempCF;
-  for (int i = 0; i < theDimension; i ++) {
+  for (int i = 0; i < dimension; i ++) {
     if (!input[i].isEqualToZero()) {
       (*tempMon.generatorsIndices.lastObject()) = i + numPosRoots;
       *tempMon.powers.lastObject() = 1;
@@ -926,7 +926,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::getElementUniversalEnvelop
 ) {
   ElementUniversalEnveloping<Coefficient> Accum;
   ElementUniversalEnveloping<Coefficient> tempMon;
-  int theIndex;
+  int index;
   int theDegree;
   Accum.makeConstant(this->Coefficient, inputOwner);
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
@@ -941,7 +941,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::getElementUniversalEnvelop
       Accum *= tempMon;
     } else {
       if (this->owner->theOrder[this->generatorsIndices[i]].isCoefficientOneChevalleyGenerator()) {
-        tempMon.makeOneGeneratorCoefficientOne(theIndex, inputOwner, this->Coefficient.getOne(), this->Coefficient.GetZero());
+        tempMon.makeOneGeneratorCoefficientOne(index, inputOwner, this->Coefficient.getOne(), this->Coefficient.GetZero());
         tempMon[0].powers[0] = this->powers[i];
         Accum *= tempMon;
       } else {
@@ -1355,11 +1355,11 @@ bool ElementUniversalEnvelopingOrdered<Coefficient>::isProportionalTo(
     return false;
   }
   MonomialUniversalEnvelopingOrdered<Coefficient>& monomial = (*this)[0];
-  int theIndex = other.getIndex(monomial);
-  if (theIndex == - 1) {
+  int index = other.getIndex(monomial);
+  if (index == - 1) {
     return false;
   }
-  MonomialUniversalEnvelopingOrdered<Coefficient>& otherMon = other[theIndex];
+  MonomialUniversalEnvelopingOrdered<Coefficient>& otherMon = other[index];
   monomial.ComputeDebugString();
   otherMon.ComputeDebugString();
   outputTimesMeEqualsOther = otherMon.theCoefficient;
@@ -1405,11 +1405,11 @@ template <class Coefficient>
 void ElementUniversalEnvelopingOrdered<Coefficient>::addMonomialNoCleanUpZeroCoefficient(
   const MonomialUniversalEnvelopingOrdered<Coefficient>& input
 ) {
-  int theIndex = this->getIndex(input);
-  if (theIndex == - 1) {
+  int index = this->getIndex(input);
+  if (index == - 1) {
     this->addOnTop(input);
   } else {
-    this->objects[theIndex].theCoefficient += input.theCoefficient;
+    this->objects[index].theCoefficient += input.theCoefficient;
   }
 }
 
@@ -1682,8 +1682,8 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::commutingLeftIndexAroundRi
       return true;
     }
     int numPosRoots = this->owner->theOwner->weylGroup.rootsOfBorel.size;
-    int theDimension = this->owner->theOwner->weylGroup.cartanSymmetric.numberOfRows;
-    if (rightGeneratorIndex >= numPosRoots && rightGeneratorIndex < numPosRoots + theDimension) {
+    int dimension = this->owner->theOwner->weylGroup.cartanSymmetric.numberOfRows;
+    if (rightGeneratorIndex >= numPosRoots && rightGeneratorIndex < numPosRoots + dimension) {
       ElementSemisimpleLieAlgebra<Rational> element;
       this->owner->theOwner->lieBracket(
         this->owner->theOrder[leftGeneratorIndex], this->owner->theOrder[rightGeneratorIndex], element
@@ -1782,9 +1782,9 @@ std::string MonomialUniversalEnvelopingOrdered<Coefficient>::toString(
   out << tempS;
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
     Coefficient& power = this->powers[i];
-    int theIndex = this->generatorsIndices[i];
+    int index = this->generatorsIndices[i];
     bool usebrackets = false;
-    tempS = this->owner->theOwner->getStringFromChevalleyGenerator(theIndex, PolyFormatLocal);
+    tempS = this->owner->theOwner->getStringFromChevalleyGenerator(index, PolyFormatLocal);
     if (usebrackets) {
       out << "(";
     }
@@ -1903,11 +1903,11 @@ void ElementUniversalEnvelopingOrdered<Coefficient>::assignElementLieAlgebra(
   tempMon.generatorsIndices.setSize(1);
   tempMon.powers.setSize(1);
   tempMon.powers.objects[0] = ringUnit;
-  for (int theIndex = 0; theIndex < elementRootForm.size; theIndex ++) {
-    if (elementRootForm.objects[theIndex] != 0) {
+  for (int index = 0; index < elementRootForm.size; index ++) {
+    if (elementRootForm.objects[index] != 0) {
       tempMon.theCoefficient = ringUnit;
-      tempMon.theCoefficient *= elementRootForm.objects[theIndex];
-      tempMon.generatorsIndices[0] = theIndex;
+      tempMon.theCoefficient *= elementRootForm.objects[index];
+      tempMon.generatorsIndices[0] = index;
       this->addOnTop(tempMon);
     }
   }
@@ -1957,13 +1957,13 @@ void ElementUniversalEnvelopingOrdered<Coefficient>::addMonomial(
   if (input.isEqualToZero()) {
     return;
   }
-  int theIndex = this->getIndex(input);
-  if (theIndex == - 1) {
+  int index = this->getIndex(input);
+  if (index == - 1) {
     this->addOnTop(input);
   } else {
-    this->objects[theIndex].theCoefficient += input.theCoefficient;
-    if (this->objects[theIndex].theCoefficient.isEqualToZero()) {
-      this->removeIndexSwapWithLast(theIndex);
+    this->objects[index].theCoefficient += input.theCoefficient;
+    if (this->objects[index].theCoefficient.isEqualToZero()) {
+      this->removeIndexSwapWithLast(index);
     }
   }
 }
@@ -2009,17 +2009,17 @@ void MonomialUniversalEnvelopingOrdered<Coefficient>::modOutVermaRelations(
   const Coefficient& ringZero
 ) {
   int numPosRoots = this->owner->theOwner->getNumberOfPositiveRoots();
-  int theDimension = this->owner->theOwner->getRank();
+  int dimension = this->owner->theOwner->getRank();
   for (int i = this->generatorsIndices.size - 1; i >= 0; i --) {
     int indexCurrentGenerator = this->generatorsIndices[i];
-    if (indexCurrentGenerator >= numPosRoots + theDimension) {
+    if (indexCurrentGenerator >= numPosRoots + dimension) {
       this->makeZero(ringZero, *this->owner);
       return;
     }
     if (indexCurrentGenerator < numPosRoots) {
       return;
     }
-    if (indexCurrentGenerator >= numPosRoots &&  indexCurrentGenerator < numPosRoots + theDimension) {
+    if (indexCurrentGenerator >= numPosRoots &&  indexCurrentGenerator < numPosRoots + dimension) {
       int theDegree;
       if (!this->powers[i].isSmallInteger(theDegree)) {
         return;

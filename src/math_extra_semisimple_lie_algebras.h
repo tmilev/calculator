@@ -104,8 +104,8 @@ public:
       output.addMonomial(theGen, theCf);
     }
   }
-  int getOppositeGeneratorIndex(int theIndex) {
-    return this->getNumberOfGenerators() - theIndex - 1;
+  int getOppositeGeneratorIndex(int index) {
+    return this->getNumberOfGenerators() - index - 1;
   }
   // Returns whether the generator is in a root space that
   // is a simple one. For sl(n), the simple roots are

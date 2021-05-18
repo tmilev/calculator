@@ -1450,15 +1450,15 @@ bool CalculatorHTML::computeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
     "the answer tag does not have a valid id. Please fix the problem template.</b>";
     return false;
   }
-  int theIndex = this->getAnswerIndex(desiredAnswerId);
-  if (theIndex == - 1) {
+  int index = this->getAnswerIndex(desiredAnswerId);
+  if (index == - 1) {
     global.fatal << "This is not supposed to happen: problem has syntactic element with answerId: "
     << desiredAnswerId << " but the answerId is missing from the list of known answer ids. "
     << this->problemData.toStringAvailableAnswerIds() << global.fatal;
   }
-  Answer& currentA = this->problemData.answers.values[theIndex];
-  if (theIndex < this->answerHighlights.size) {
-    currentA.htmlAnswerHighlight = this->answerHighlights[theIndex];
+  Answer& currentA = this->problemData.answers.values[index];
+  if (index < this->answerHighlights.size) {
+    currentA.htmlAnswerHighlight = this->answerHighlights[index];
   } else {
     currentA.htmlAnswerHighlight = "";
   }

@@ -1236,19 +1236,24 @@ bool SemisimpleSubalgebras::computeStructureRealFormsSlTwos() {
   this->makeEmptyCandidateSubalgebra(emptyCandidate);
   this->addSubalgebraToStack(emptyCandidate, 0, 0);
   for (int i = 0; i < this->slTwoSubalgebras.size; i ++) {
-    this->computeStructureRealFormOneSlTwo(this->slTwoSubalgebras[i]);
+    this->computeStructureRealFormOneSlTwo(this->slTwoSubalgebras.getElement(i));
   }
   return true;
 }
 
 bool SemisimpleSubalgebras::computeStructureRealFormOneSlTwo(
-  const SlTwoSubalgebra& input
+  SlTwoSubalgebra& input
 ) {
   CandidateSemisimpleSubalgebra candidate;
   candidate.indexInducedFrom = 0;
   DynkinType incomingType;
   input.computeDynkinTypeEmbedded(incomingType);
   this->makeCandidateSubalgebra(incomingType, candidate);
+  Matrix<Rational> matrix;
+  matrix.makeZeroMatrix(1, 0);
+  matrix(0, 0) = 2;
+  candidate.subalgebraNonEmbeddedDefaultScale =
+  &this->subalgebrasNonDefaultCartanAndScale.getValueCreateNoInitialization(matrix);
   this->addSubalgebraIfNewSetToStackTop(candidate);
   this->removeLastSubalgebraFromStack();
   return true;
@@ -1515,7 +1520,7 @@ const Vector<Rational>& OrbitIteratorRootActionWeylGroupAutomorphisms::getCurren
   if (this->flagOrbitIsBuffered) {
     return this->orbitBuffer[this->currentIndexInBuffer];
   }
-  return this->theIterator.getCurrentElement();
+  return this->iterator.getCurrentElement();
 }
 
 bool OrbitIteratorRootActionWeylGroupAutomorphisms::checkConsistency() {
@@ -1550,7 +1555,7 @@ bool OrbitIteratorRootActionWeylGroupAutomorphisms::checkConsistency() {
 bool OrbitIteratorRootActionWeylGroupAutomorphisms::incrementReturnFalseIfPastLast() {
   MacroRegisterFunctionWithName("OrbitIteratorRootActionWeylGroupAutomorphisms::incrementReturnFalseIfPastLast");
   this->checkConsistency();
-  this->theIterator.checkInitialization();
+  this->iterator.checkInitialization();
   if (this->flagOrbitIsBuffered) {
     this->currentIndexInBuffer ++;
     if (this->currentIndexInBuffer >= this->orbitSize) {
@@ -1561,9 +1566,9 @@ bool OrbitIteratorRootActionWeylGroupAutomorphisms::incrementReturnFalseIfPastLa
   }
   this->currentIndexInBuffer ++;
   if (this->flagOrbitEnumeratedOnce) {
-    return this->theIterator.incrementReturnFalseIfPastLastFALSE();
+    return this->iterator.incrementReturnFalseIfPastLastFALSE();
   }
-  if (!this->theIterator.incrementReturnFalseIfPastLastFALSE()) {
+  if (!this->iterator.incrementReturnFalseIfPastLastFALSE()) {
     this->orbitSize = this->currentIndexInBuffer;
     if (this->computedSize != - 1) {
       if (this->computedSize != this->orbitSize) {
@@ -1587,30 +1592,30 @@ bool OrbitIteratorRootActionWeylGroupAutomorphisms::incrementReturnFalseIfPastLa
     return false;
   }
   if (this->orbitBuffer.size < this->maxOrbitBufferSize) {
-    this->orbitBuffer.addOnTop(this->theIterator.getCurrentElement());
+    this->orbitBuffer.addOnTop(this->iterator.getCurrentElement());
   }
   return true;
 }
 
 void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize() {
   MacroRegisterFunctionWithName("OrbitFDRepIteratorWeylGroupAutomorphisms::initialize");
-  this->theIterator.checkInitialization();
+  this->iterator.checkInitialization();
   this->currentIndexInBuffer = 0;
   if (this->flagOrbitIsBuffered) {
     return;
   }
-  this->theIterator.initialize(
-    this->theIterator.theGroupGeneratingElements, this->orbitDefiningElement, this->theIterator.theGroupAction
+  this->iterator.initialize(
+    this->iterator.theGroupGeneratingElements, this->orbitDefiningElement, this->iterator.theGroupAction
   );
-  if (this->theIterator.theGroupGeneratingElements.size > 0) {
-    WeylGroupAutomorphisms& ownerGroup = *this->theIterator.theGroupGeneratingElements[0].owner;
+  if (this->iterator.theGroupGeneratingElements.size > 0) {
+    WeylGroupAutomorphisms& ownerGroup = *this->iterator.theGroupGeneratingElements[0].owner;
     this->computedSize = ownerGroup.getOrbitSize(this->orbitDefiningElement);
     if (this->computedSize > this->maxOrbitBufferSize) {
       this->maxOrbitBufferSize = 0;
       this->orbitBuffer.setSize(0);
     }
   }
-  this->theIterator.checkInitialization();
+  this->iterator.checkInitialization();
 }
 
 void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize(
@@ -1633,12 +1638,12 @@ void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize(
     this->orbitBuffer.setSize(0);
     this->orbitBuffer.addOnTop(this->orbitDefiningElement);
   }
-  this->theIterator.initialize(inputGenerators, this->orbitDefiningElement, this->theIterator.theGroupAction);
+  this->iterator.initialize(inputGenerators, this->orbitDefiningElement, this->iterator.theGroupAction);
 }
 
 OrbitIteratorRootActionWeylGroupAutomorphisms::OrbitIteratorRootActionWeylGroupAutomorphisms() {
-  this->theIterator.theGroupAction.name = "WeylGroupAutomorphismRootAction";
-  this->theIterator.theGroupAction.actOn = ElementWeylGroupAutomorphisms::actOn;
+  this->iterator.theGroupAction.name = "WeylGroupAutomorphismRootAction";
+  this->iterator.theGroupAction.actOn = ElementWeylGroupAutomorphisms::actOn;
   this->reset();
 }
 
@@ -1650,7 +1655,7 @@ void OrbitIteratorRootActionWeylGroupAutomorphisms::reset() {
   this->currentIndexInBuffer = - 1;
   this->maxOrbitBufferSize = 5000000;
   this->orbitBuffer.setSize(0);
-  this->theIterator.resetNoActionChange();
+  this->iterator.resetNoActionChange();
 }
 
 std::string OrbitIteratorRootActionWeylGroupAutomorphisms::toString() const {
@@ -1667,7 +1672,7 @@ std::string OrbitIteratorRootActionWeylGroupAutomorphisms::toString() const {
     out << "<br>The orbit is buffered, the orbit elements are: " << this->orbitBuffer.toString();
   } else {
     out << "<br>The orbit is either too large or not yet fully enumerated. "
-    << this->theIterator.toStringLayerSize() << ". The current buffer size is: " << this->orbitBuffer.size << ". ";
+    << this->iterator.toStringLayerSize() << ". The current buffer size is: " << this->orbitBuffer.size << ". ";
     if (this->currentIndexInBuffer + 1 > this->orbitBuffer.size) {
       out << "The orbit buffer appears to have exceeded the allowed maximum, "
       << "I am enumerating without storing the elements. ";
@@ -2143,14 +2148,21 @@ bool SemisimpleSubalgebras::computeCurrentHCandidates() {
   return true;
 }
 
-void SemisimpleSubalgebras::addSubalgebraIfNewSetToStackTop(CandidateSemisimpleSubalgebra& input) {
+void SemisimpleSubalgebras::addSubalgebraIfNewSetToStackTop(
+  CandidateSemisimpleSubalgebra& input
+) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::addSubalgebraIfNewSetToStackTop");
   this->checkConsistencyHs();
   if (this->subalgebras.contains(input.cartanElementsSubalgebra)) {
     input = this->subalgebras.values[this->subalgebras.getIndex(input.cartanElementsSubalgebra)];
-    if (!input.weylNonEmbedded->dynkinType.isEqualToZero() && input.indexInOwner == - 1) {
-      global.fatal << "This is not supposed to happen: subalgebra of type "
-      << input.weylNonEmbedded->dynkinType.toString() << " has index in owner - 1. " << global.fatal;
+    if (
+      !input.weylNonEmbedded->dynkinType.isEqualToZero() &&
+      input.indexInOwner == - 1
+    ) {
+      global.fatal
+      << "This is not supposed to happen: subalgebra of type "
+      << input.weylNonEmbedded->dynkinType.toString()
+      << " has index in owner - 1. " << global.fatal;
     }
   } else {
     input.indexInOwner = this->subalgebras.values.size;
@@ -2166,8 +2178,10 @@ void SemisimpleSubalgebras::addSubalgebraToStack(
   int inputNumberOfHCandidatesExplored
 ) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::addSubalgebraToStack");
+  input.checkFullInitialization();
   if (input.indexInOwner == - 1 && !input.weylNonEmbedded->dynkinType.isEqualToZero()) {
-    global.fatal << "Adding to stack subalgebra with indexInOwner equal to - 1 is forbidden. " << global.fatal;
+    global.fatal << "Adding to stack subalgebra with "
+    << "indexInOwner equal to - 1 is forbidden. " << global.fatal;
   }
   if (input.cartanElementsSubalgebra.size != input.hsScaledToActByTwoInOrderOfCreation.size) {
     global.fatal << "In order to add subalgebra "
@@ -2175,7 +2189,7 @@ void SemisimpleSubalgebras::addSubalgebraToStack(
     << " to the stack I need to know the order of creation of its h-vectors. "
     << global.fatal;
   }
-  input.computeCentralizerTypeFailureAllowed();//<- trying to compute the centralizer of a subalgebra on the stack.
+  input.computeCentralizerTypeFailureAllowed(); //<- trying to compute the centralizer of a subalgebra on the stack.
   this->currentSubalgebraChain.addOnTop(input);
   this->currentPossibleLargerDynkinTypes.setSize(this->currentSubalgebraChain.size);
   this->currentRootInjections.setSize(this->currentSubalgebraChain.size);
@@ -2389,12 +2403,12 @@ void DynkinSimpleType::getAutomorphismActingOnVectorColumn(MatrixTensor<Rational
   }
   if (this->letter == 'D') {
     if (this->rank == 4) {
-      //Here be D_4 triality.
-      //The automorphism group of Dynkin Diagram D_4 is S3
-      //The triple node is always fixed:
+      // Here be D_4 triality.
+      // The automorphism group of Dynkin Diagram D_4 is S3
+      // The triple node is always fixed:
       output.addMonomial(MonomialMatrix(1, 1), 1);
       if (AutoIndex == 1) {
-        //Permutation (12), AutoIndex = 1
+        // Permutation (12), AutoIndex = 1
         output.addMonomial(MonomialMatrix(0, 2), 1);
         output.addMonomial(MonomialMatrix(2, 0), 1);
         output.addMonomial(MonomialMatrix(3, 3), 1);
@@ -2404,17 +2418,17 @@ void DynkinSimpleType::getAutomorphismActingOnVectorColumn(MatrixTensor<Rational
         output.addMonomial(MonomialMatrix(2, 3), 1);
         output.addMonomial(MonomialMatrix(3, 2), 1);
       } else if (AutoIndex == 3) {
-        //Permutation (12)(23)=(123), AutoIndex =3
+        // Permutation (12)(23)=(123), AutoIndex =3
         output.addMonomial(MonomialMatrix(0, 2), 1);
         output.addMonomial(MonomialMatrix(2, 3), 1);
         output.addMonomial(MonomialMatrix(3, 0), 1);
       } else if (AutoIndex == 4) {
-        //Permutation (23)(12)=(132), AutoIndex =4
+        // Permutation (23)(12)=(132), AutoIndex =4
         output.addMonomial(MonomialMatrix(0, 3), 1);
         output.addMonomial(MonomialMatrix(2, 0), 1);
         output.addMonomial(MonomialMatrix(3, 2), 1);
       } else if (AutoIndex == 5) {
-        //Permutation (12)(23)(12)=(13), AutoIndex =5
+        // Permutation (12)(23)(12)=(13), AutoIndex =5
         output.addMonomial(MonomialMatrix(0, 3), 1);
         output.addMonomial(MonomialMatrix(2, 2), 1);
         output.addMonomial(MonomialMatrix(3, 0), 1);
@@ -2431,10 +2445,11 @@ void DynkinSimpleType::getAutomorphismActingOnVectorColumn(MatrixTensor<Rational
     }
   }
   if (this->letter == 'E' && this->rank == 6) {
-    //We gotta flip the Dynkin diagram of E_6. Note that the extra 1-length sticking root comes second and
-    //and the triple node comes fourth.
-    //Therefore, we must swap the 1st root with the 6th and the third root
-    //with the 5th. Conventions, conventions... no way around 'em!
+     // We gotta flip the Dynkin diagram of E_6.
+     // Note that the extra 1-length sticking root comes second and
+     // and the triple node comes fourth.
+     // Therefore, we must swap the 1st root with the 6th and the third root
+     // with the 5th. Conventions, conventions... no way around 'em!
      output.addMonomial(MonomialMatrix(1, 1), 1);
      output.addMonomial(MonomialMatrix(3, 3), 1);
      output.addMonomial(MonomialMatrix(0, 5), 1);
@@ -2444,13 +2459,14 @@ void DynkinSimpleType::getAutomorphismActingOnVectorColumn(MatrixTensor<Rational
   }
   Rational tempRat = output.getDeterminant();
   if (tempRat != 1 && tempRat != - 1) {
-    FormatExpressions theFormat;
-    theFormat.flagUseHTML = false;
-    theFormat.flagUseLatex = true;
+    FormatExpressions format;
+    format.flagUseHTML = false;
+    format.flagUseLatex = true;
     global.fatal << "The determinant of the automorphism matrix "
     << "of the Dynkin graph must be +/- 1, it is instead "
     << tempRat.toString() << ". The auto matrix is: "
-    << HtmlRoutines::getMathNoDisplay(output.toStringMatrixForm(&theFormat)) << " and the dynkin type is: "
+    << HtmlRoutines::getMathNoDisplay(output.toStringMatrixForm(&format))
+    << " and the dynkin type is: "
     << this->toString() << "." << global.fatal;
   }
 }
@@ -2568,12 +2584,17 @@ bool CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo(
         canBeRaisingReflection = false;
       }
       if (scalarProduct < 0) {
-        global.fatal << "While trying to realize type " << this->weylNonEmbedded->dynkinType.toString()
-        << ", the candidate h elements of the semisimple subalgebra are supposed to be maximally dominant, "
-        << "however the scalar product of the positive root " << currentPosRoot.toString() << " with the subalgebra root "
+        global.fatal << "While trying to realize type "
+        << this->weylNonEmbedded->dynkinType.toString()
+        << ", the candidate h elements of the semisimple "
+        << "subalgebra are supposed to be maximally dominant, "
+        << "however the scalar product of the positive root "
+        << currentPosRoot.toString() << " with the subalgebra root "
         << this->hsScaledToActByTwoInOrderOfCreation[l].toString()
-        << " is negative, while the very same positive root has had zero scalar products with all "
-        << " preceding roots. Hnew equals: " << hNewActingByTwo.toString() << " Here are all preceding roots: "
+        << " is negative, while the very same positive "
+        << "root has had zero scalar products with all "
+        << "preceding roots. Hnew equals: " << hNewActingByTwo.toString()
+        << " Here are all preceding roots: "
         << this->hsScaledToActByTwoInOrderOfCreation.toString() << global.fatal;
       }
     }
@@ -2669,7 +2690,10 @@ bool CandidateSemisimpleSubalgebra::computeSystem(bool attemptToChooseCentalizer
 
 bool CandidateSemisimpleSubalgebra::checkGeneratorsBracketToHs() {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::checkGeneratorsBracketToHs");
-  if (this->negativeGenerators.size != this->positiveGenerators.size || this->negativeGenerators.size != this->weylNonEmbedded->getDimension()) {
+  if (
+    this->negativeGenerators.size != this->positiveGenerators.size ||
+    this->negativeGenerators.size != this->weylNonEmbedded->getDimension()
+  ) {
     return false;
   }
   ElementSemisimpleLieAlgebra<AlgebraicNumber> goalH, lieBracket;
@@ -2784,23 +2808,41 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(bool attemptToChooseCenta
     this->systemToSolve.addOnTop(determinant);
   }
   if (this->unknownNegativeGenerators.size != this->unknownPositiveGenerators.size) {
-    global.fatal << "Error: number of unknown negative generators differs from number of unknown positive ones. " << global.fatal;
+    global.fatal << "Error: number of unknown negative generators "
+    << "differs from number of unknown positive ones. "
+    << global.fatal;
   }
   for (int i = 0; i < this->unknownNegativeGenerators.size; i ++) {
-    desiredHpart = this->cartanElementsScaledToActByTwo[i];//<-implicit type conversion here!
+    desiredHpart = this->cartanElementsScaledToActByTwo[i]; //<-implicit type conversion here!
     goalValue.makeCartanGenerator(desiredHpart, *this->owner->owner);
-    this->getAmbientSemisimpleLieAlgebra().lieBracket(this->unknownPositiveGenerators[i], this->unknownNegativeGenerators[i], lieBracketMinusGoalValue);
+    this->getAmbientSemisimpleLieAlgebra().lieBracket(
+      this->unknownPositiveGenerators[i],
+      this->unknownNegativeGenerators[i],
+      lieBracketMinusGoalValue
+    );
     lieBracketMinusGoalValue -= goalValue;
     this->addToSystem(lieBracketMinusGoalValue);
     for (int j = 0; j < this->unknownCartanCentralizerBasis.size; j ++) {
-      this->getAmbientSemisimpleLieAlgebra().lieBracket(this->unknownNegativeGenerators[i], this->unknownCartanCentralizerBasis[j], lieBracketMinusGoalValue);
+      this->getAmbientSemisimpleLieAlgebra().lieBracket(
+        this->unknownNegativeGenerators[i],
+        this->unknownCartanCentralizerBasis[j],
+        lieBracketMinusGoalValue
+      );
       this->addToSystem(lieBracketMinusGoalValue);
-      this->getAmbientSemisimpleLieAlgebra().lieBracket(this->unknownPositiveGenerators[i], this->unknownCartanCentralizerBasis[j], lieBracketMinusGoalValue);
+      this->getAmbientSemisimpleLieAlgebra().lieBracket(
+        this->unknownPositiveGenerators[i],
+        this->unknownCartanCentralizerBasis[j],
+        lieBracketMinusGoalValue
+      );
       this->addToSystem(lieBracketMinusGoalValue);
     }
     for (int j = 0; j < this->unknownPositiveGenerators.size; j ++) {
       if (i != j) {
-        this->getAmbientSemisimpleLieAlgebra().lieBracket(this->unknownNegativeGenerators[i], this->unknownPositiveGenerators[j], lieBracketMinusGoalValue);
+        this->getAmbientSemisimpleLieAlgebra().lieBracket(
+          this->unknownNegativeGenerators[i],
+          this->unknownPositiveGenerators[j],
+          lieBracketMinusGoalValue
+        );
         this->addToSystem(lieBracketMinusGoalValue);
         Vector<Rational> posRoot1, posRoot2;
         posRoot1.makeEi(this->weylNonEmbedded->getDimension(), i);
@@ -2883,13 +2925,13 @@ void CandidateSemisimpleSubalgebra::extendToModule(List<ElementSemisimpleLieAlge
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > vectorSpace;
   HashedList<ChevalleyGenerator> bufferList;
   vectorSpace = inputOutput;
-  ProgressReport theReport;
+  ProgressReport report;
   for (int i = 0; i < inputOutput.size; i ++) {
     for (int j = 0; j < this->negativeGenerators.size; j ++) {
       std::stringstream reportStream;
       reportStream << "extendToModule: Lie bracket of element of index "
       << i + 1 << " and negative generator index " << j+ 1 << ".";
-      theReport.report(reportStream.str());
+      report.report(reportStream.str());
       this->getAmbientSemisimpleLieAlgebra().lieBracket(this->negativeGenerators[j], inputOutput[i], element);
       vectorSpace.addOnTop(element);
       element.gaussianEliminationByRowsDeleteZeroRows(vectorSpace, nullptr, &bufferList);
@@ -2958,10 +3000,13 @@ bool CandidateSemisimpleSubalgebra::checkModuleDimensions() const {
     FormatExpressions format;
     format.flagCandidateSubalgebraShortReportOnly = false;
     global.fatal << "<br><b>Fatal error while computing candidate "
-    << this->weylNonEmbedded->dynkinType.toString() << ": dimensions do not add up correctly. "
+    << this->weylNonEmbedded->dynkinType.toString()
+    << ": dimensions do not add up correctly. "
     << "I am getting total module dimension sum " << totalDimension
-    << " instead of " << this->getAmbientSemisimpleLieAlgebra().getNumberOfGenerators()
-    << ".</b> Here is a detailed subalgebra printout. " << this->toString(&format, false) << global.fatal;
+    << " instead of "
+    << this->getAmbientSemisimpleLieAlgebra().getNumberOfGenerators()
+    << ".</b> Here is a detailed subalgebra printout. "
+    << this->toString(&format, false) << global.fatal;
   }
   return true;
 }

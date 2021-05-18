@@ -369,16 +369,16 @@ void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation(
 }
 
 template <class Coefficient>
-void WeylGroupData::raiseToMaximallyDominant(List<Vector<Coefficient> >& theWeights) {
+void WeylGroupData::raiseToMaximallyDominant(List<Vector<Coefficient> >& weights) {
   bool found;
-  for (int i = 0; i < theWeights.size; i ++) {
+  for (int i = 0; i < weights.size; i ++) {
     do {
       found = false;
       for (int j = 0; j < this->rootsOfBorel.size; j ++) {
-        if (this->rootScalarCartanRoot(this->rootsOfBorel[j], theWeights[i]) < 0) {
+        if (this->rootScalarCartanRoot(this->rootsOfBorel[j], weights[i]) < 0) {
           bool isGood = true;
           for (int k = 0; k < i; k ++) {
-            if (this->rootScalarCartanRoot(this->rootsOfBorel[j], theWeights[k]) > 0) {
+            if (this->rootScalarCartanRoot(this->rootsOfBorel[j], weights[k]) > 0) {
               isGood = false;
               break;
             }
@@ -386,8 +386,8 @@ void WeylGroupData::raiseToMaximallyDominant(List<Vector<Coefficient> >& theWeig
           if (!isGood) {
             continue;
           }
-          for (int k = 0; k < theWeights.size; k ++) {
-            this->reflectBetaWithRespectToAlpha(this->rootsOfBorel[j], theWeights[k], false, theWeights[k]);
+          for (int k = 0; k < weights.size; k ++) {
+            this->reflectBetaWithRespectToAlpha(this->rootsOfBorel[j], weights[k], false, weights[k]);
           }
           found = true;
         }
@@ -444,7 +444,7 @@ bool CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant(
     theSSalgebra->weylGroup.raiseToMaximallyDominant(theHWs);
   } else {
     WeylGroupAutomorphisms theOuterAutos;
-    theOuterAutos.theWeyl = &theSSalgebra->weylGroup;
+    theOuterAutos.weylGroup = &theSSalgebra->weylGroup;
     theOuterAutos.raiseToMaximallyDominant(theHWs);
   }
   out << "<br>Maximally dominant output: " << theHWs.toString();
@@ -485,17 +485,17 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
   )) {
     return output.makeError("Failed to extract highest weight", calculator);
   }
-  WeylGroupData theWeyl;
-  theWeyl.makeFromDynkinType(dynkinType);
+  WeylGroupData weyl;
+  weyl.makeFromDynkinType(dynkinType);
   theHWsimpleCoords = theHWfundCoords;
-  theHWfundCoords = theWeyl.getFundamentalCoordinatesFromSimple(theHWsimpleCoords);
+  theHWfundCoords = weyl.getFundamentalCoordinatesFromSimple(theHWsimpleCoords);
   std::stringstream out, latexReport;
   Vectors<Polynomial<Rational> > theHWs;
   FormatExpressions theFormat = theContext.getFormat();
   theHWs.addOnTop(theHWsimpleCoords);
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   WeylGroupAutomorphisms theOuterAutos;
-  theOuterAutos.theWeyl = &theWeyl;
+  theOuterAutos.weylGroup = &weyl;
   if (!theOuterAutos.generateOuterOrbit(
     theHWs, outputOrbit, &theOuterAutos.allElements, 1921 * 2
   )) {
@@ -511,7 +511,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
   bool useMathTag = outputOrbit.size < 150;
   Matrix<Rational> epsCoordMat;
   Polynomial<Rational> zero;
-  theWeyl.dynkinType.getEpsilonMatrix(epsCoordMat);
+  weyl.dynkinType.getEpsilonMatrix(epsCoordMat);
   for (int i = 0; i < outputOrbit.size; i ++) {
     theFormat.simpleRootLetter = "\\alpha";
     theFormat.fundamentalWeightLetter = "\\psi";
@@ -520,7 +520,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
     epsCoordMat.actOnVectorColumn(epsVect, zero);
     std::string orbitEltStringEpsilonCoords = epsVect.toStringLetterFormat("\\varepsilon", &theFormat);
     std::string weightEltString =
-    theWeyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).toStringLetterFormat
+    weyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).toStringLetterFormat
     (theFormat.fundamentalWeightLetter, &theFormat);
     out << "<tr>" << "<td>"
     << (useMathTag ? HtmlRoutines::getMathNoDisplay(theOuterAutos.allElements[i].toString()) : theOuterAutos.allElements[i].toString())
@@ -588,13 +588,13 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   }
   Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords, currentWeight;
   Polynomial<Rational> zero;
-  WeylGroupData& theWeyl = theSSalgebra.content->weylGroup;
+  WeylGroupData& weyl = theSSalgebra.content->weylGroup;
   if (!useFundCoords) {
     theHWsimpleCoords = theWeight;
-    theHWfundCoords = theWeyl.getFundamentalCoordinatesFromSimple(theWeight);
+    theHWfundCoords = weyl.getFundamentalCoordinatesFromSimple(theWeight);
   } else {
     theHWfundCoords = theWeight;
-    theHWsimpleCoords = theWeyl.getSimpleCoordinatesFromFundamental(theWeight, zero);
+    theHWsimpleCoords = weyl.getSimpleCoordinatesFromFundamental(theWeight, zero);
   }
   std::stringstream out, latexReport;
   Vectors<Polynomial<Rational> > theHWs;
@@ -624,29 +624,29 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   LargeInteger tempInt;
   bool useMathTag = outputOrbit.size < 150;
   Matrix<Rational> epsCoordMat;
-  theWeyl.dynkinType.getEpsilonMatrix(epsCoordMat);
+  weyl.dynkinType.getEpsilonMatrix(epsCoordMat);
   GraphWeightedLabeledEdges integralPositiveRootReflectionGraph;
   integralPositiveRootReflectionGraph.numNodes = outputOrbit.size;
   integralPositiveRootReflectionGraph.nodeLabels.setSize(outputOrbit.size);
   theFormat.flagUseFrac = true;
   for (int i = 0; i < outputOrbit.size; i ++) {
     integralPositiveRootReflectionGraph.nodeLabels[i] =
-    "$" + theWeyl.getEpsilonCoordinates(outputOrbit[i]).toStringEpsilonFormat(&theFormat) + "$ = $" +
-    theWeyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).toStringLetterFormat("\\psi") + "$";
+    "$" + weyl.getEpsilonCoordinates(outputOrbit[i]).toStringEpsilonFormat(&theFormat) + "$ = $" +
+    weyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).toStringLetterFormat("\\psi") + "$";
   }
   ElementWeylGroup currentElt;
   Vector<Polynomial<Rational> > differenceVector;
   Rational currentCoordDifference;
-  for (int i = 0; i <outputOrbit.size; i ++) {
-    for (int j = 0; j < theWeyl.rootsOfBorel.size; j ++) {
+  for (int i = 0; i < outputOrbit.size; i ++) {
+    for (int j = 0; j < weyl.rootsOfBorel.size; j ++) {
       currentWeight = outputOrbit[i];
-      currentElt.MakeRootReflection(theWeyl.rootsOfBorel[j], theWeyl);
+      currentElt.MakeRootReflection(weyl.rootsOfBorel[j], weyl);
       if (useRho) {
-        currentWeight += theWeyl.rho;
+        currentWeight += weyl.rho;
       }
-      theWeyl.actOn(currentElt, currentWeight);
+      weyl.actOn(currentElt, currentWeight);
       if (useRho) {
-        currentWeight -= theWeyl.rho;
+        currentWeight -= weyl.rho;
       }
       differenceVector = outputOrbit[i] - currentWeight;
       bool isGood = !differenceVector.isEqualToZero();
@@ -676,7 +676,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     epsCoordMat.actOnVectorColumn(epsVect, zero);
     std::string orbitEltStringEpsilonCoords = epsVect.toStringLetterFormat("\\varepsilon", &theFormat);
     std::string weightEltString=
-    theWeyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).toStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
+    weyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).toStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
     out << "<tr>" << "<td>"
     << (useMathTag ? HtmlRoutines::getMathNoDisplay(orbitGeneratingSet[i].toString()) : orbitGeneratingSet[i].toString())
     << "</td><td>"
@@ -695,10 +695,10 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
       bool isGood = true;
       for (int j = orbitGeneratingSet[i].generatorsLastAppliedFirst.size - 1; j >= 0; j --) {
         int simpleIndex = orbitGeneratingSet[i].generatorsLastAppliedFirst[j].index;
-        theExp = theWeyl.getScalarProductSimpleRoot(currentWeight, simpleIndex);
-        theWeyl.reflectRhoSimple(simpleIndex, currentWeight);
+        theExp = weyl.getScalarProductSimpleRoot(currentWeight, simpleIndex);
+        weyl.reflectRhoSimple(simpleIndex, currentWeight);
         theExp *= 2;
-        theExp /= theWeyl.cartanSymmetric.elements[simpleIndex][simpleIndex];
+        theExp /= weyl.cartanSymmetric.elements[simpleIndex][simpleIndex];
         theExp += Rational(1);
         if (theExp.isInteger(&tempInt)) {
           if (tempInt < 0) {
@@ -787,7 +787,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements
   }
   FiniteGroup<Matrix<Rational> > groupNoOuterAutos;
   WeylGroupAutomorphisms theAutomorphismGroup;
-  theAutomorphismGroup.theWeyl = &theGroupData;
+  theAutomorphismGroup.weylGroup = &theGroupData;
   theAutomorphismGroup.computeOuterAutoGenerators();
   groupNoOuterAutos.generators.setSize(theGroupData.getDimension());
   Vector<Rational> simpleRoot;
@@ -1818,13 +1818,13 @@ bool CalculatorFunctionsWeylGroup::signSignatureRootSubsystemsFromKostkaNumbers(
   if (!output.isOfType<WeylGroupData>()) {
     return false;
   }
-  WeylGroupData& theWeyl = output.getValueNonConst<WeylGroupData>();
-  if (theWeyl.getDimension() > 12) {
+  WeylGroupData& weyl = output.getValueNonConst<WeylGroupData>();
+  if (weyl.getDimension() > 12) {
     return calculator << "<hr>Computing sign signatures restricted up to rank 12.";
   }
   char type = 'X';
   int rank = - 1;
-  if (!theWeyl.dynkinType.isSimple(&type, &rank)) {
+  if (!weyl.dynkinType.isSimple(&type, &rank)) {
     return calculator << "This function is implemented for simple classical Weyl groups only.";
   }
   if (type != 'A' && type != 'B' && type != 'C' && type != 'D') {
@@ -1862,18 +1862,18 @@ bool CalculatorFunctionsWeylGroup::signSignatureRootSubsystems(
   if (!output.isOfType<WeylGroupData>()) {
     return false;
   }
-  WeylGroupData& theWeyl = output.getValueNonConst<WeylGroupData>();
-  if (theWeyl.getDimension() > 8) {
+  WeylGroupData& weyl = output.getValueNonConst<WeylGroupData>();
+  if (weyl.getDimension() > 8) {
     calculator << "<hr>Computing sign signatures restricted up to rank 8.";
     return false;
   }
   std::stringstream out;
   List<SubgroupDataRootReflections> parabolicSubgroupS, extendedParabolicSubgroups,
   allRootSubgroups, finalSubGroups;
-  if (!theWeyl.loadSignSignatures(finalSubGroups)) {
-    theWeyl.getSignSignatureParabolics(parabolicSubgroupS);
-    theWeyl.getSignSignatureExtendedParabolics(extendedParabolicSubgroups);
-    theWeyl.getSignSignatureAllRootSubsystems(allRootSubgroups);
+  if (!weyl.loadSignSignatures(finalSubGroups)) {
+    weyl.getSignSignatureParabolics(parabolicSubgroupS);
+    weyl.getSignSignatureExtendedParabolics(extendedParabolicSubgroups);
+    weyl.getSignSignatureAllRootSubsystems(allRootSubgroups);
     List<Pair<std::string, List<Rational>, MathRoutines::hashString> > tauSigPairs;
     finalSubGroups.reserve(allRootSubgroups.size);
     Pair<std::string, List<Rational>, MathRoutines::hashString> currentTauSig;
@@ -1898,7 +1898,7 @@ bool CalculatorFunctionsWeylGroup::signSignatureRootSubsystems(
       }
     }
   }
-  out << theWeyl.toStringSignSignatureRootSubsystem(finalSubGroups);
+  out << weyl.toStringSignSignatureRootSubsystem(finalSubGroups);
   return output.assignValue(out.str(), calculator);
 }
 
@@ -1940,11 +1940,11 @@ bool CalculatorFunctionsWeylGroup::isOuterAutoWeylGroup(
     << " columns and " << matrix.numberOfRows << " rows.";
     return false;
   }
-  WeylGroupData theWeyl;
-  theWeyl.makeFromDynkinType(dynkinType);
-  theWeyl.computeRho(true);
+  WeylGroupData weyl;
+  weyl.makeFromDynkinType(dynkinType);
+  weyl.computeRho(true);
   WeylGroupAutomorphisms theAutomorphisms;
-  theAutomorphisms.theWeyl = &theWeyl;
+  theAutomorphisms.weylGroup = &weyl;
   MatrixTensor<Rational> theOp;
   theOp = matrix;
   if (theAutomorphisms.isElementWeylGroupOrOuterAutomorphisms(theOp)) {
@@ -2477,16 +2477,16 @@ bool CalculatorFunctionsWeylGroup::makeVirtualWeylRep(
   }
   GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& inputRep =
   input.getValueNonConst<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
-  WeylGroupData* theWeylData = inputRep.ownerGroup->generators[0].owner;
+  WeylGroupData* weylData = inputRep.ownerGroup->generators[0].owner;
   if (
     inputRep.ownerGroup->irreducibleRepresentations.size<inputRep.ownerGroup->conjugacyClassCount() &&
-    theWeylData->group.ComputeIrreducibleRepresentationsWithFormulas
+    weylData->group.ComputeIrreducibleRepresentationsWithFormulas
   ) {
-    theWeylData->group.ComputeIrreducibleRepresentationsWithFormulas(theWeylData->group);
+    weylData->group.ComputeIrreducibleRepresentationsWithFormulas(weylData->group);
   }
   if (inputRep.ownerGroup->irreducibleRepresentations.size<inputRep.ownerGroup->conjugacyClassCount()) {
-    theWeylData->computeInitialIrreducibleRepresentations();
-    theWeylData->group.computeIrreducibleRepresentationsTodorsVersion();
+    weylData->computeInitialIrreducibleRepresentations();
+    weylData->group.computeIrreducibleRepresentationsTodorsVersion();
   }
   VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> outputRep;
   outputRep.assignRepresentation(inputRep);

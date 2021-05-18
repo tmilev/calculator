@@ -46,7 +46,7 @@ struct BranchingData {
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms WeylFDSmall;
   bool flagUseNilWeightGeneratorOrder;
   bool flagAscendingGeneratorOrder;
-  std::string getStringCasimirProjector(int theIndex, const Rational& additionalMultiple);
+  std::string getStringCasimirProjector(int index, const Rational& additionalMultiple);
   template <class Coefficient>
   Vector<Coefficient> projectWeight(Vector<Coefficient>& input);
   void resetOutputData();
@@ -74,8 +74,8 @@ public:
   // The i^th column of the matrix gives the coordinates of the i^th Chevalley generator
   // in the current coordinates
   Matrix<Rational> chevalleyGeneratorsInCurrentCoordinates;
-  void assignGeneratorCoefficientOne(int theIndex, ElementSemisimpleLieAlgebra<Rational>& output) {
-    output.operator=(this->theOrder[theIndex]);
+  void assignGeneratorCoefficientOne(int index, ElementSemisimpleLieAlgebra<Rational>& output) {
+    output.operator=(this->theOrder[index]);
   }
   SemisimpleLieAlgebraOrdered();
   bool checkInitialization() const;
@@ -162,7 +162,7 @@ public:
     PolynomialSubstitution<Rational>& outputSub,
     Matrix<LargeInteger>& outputMat,
     LargeIntegerUnsigned& ouputDen,
-    int theIndex
+    int index
   );
   void sortMultiplicities();
   void getSubstitutionFromNonParametricArray(
@@ -255,13 +255,13 @@ public:
     const Coefficient& ringZero = 0
   );
   void commuteConsecutiveIndicesLeftIndexAroundRight(
-    int theIndeX,
+    int index,
     ElementUniversalEnvelopingOrdered<Coefficient>& output,
     const Coefficient& ringUnit = 1,
     const Coefficient& ringZero = 0
   );
   void commuteConsecutiveIndicesRightIndexAroundLeft(
-    int theIndeX,
+    int index,
     ElementUniversalEnvelopingOrdered<Coefficient>& output,
     const Coefficient& ringUnit = 1,
     const Coefficient& ringZero = 0

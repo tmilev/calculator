@@ -613,7 +613,6 @@ public:
     Vector<Rational>& output,
     bool lookingForHighest
   );
-  void addCharacter(const ClassFunction<WeylGroupData::WeylGroupBase, Rational>& X);
   void computeRho(bool recompute);
   std::string toStringRootsAndRootReflections(FormatExpressions* format = nullptr);
   std::string toString(FormatExpressions* format = nullptr);
@@ -621,12 +620,12 @@ public:
   std::string toStringCppCharTable(FormatExpressions* format = nullptr);
   std::string toStringIrreducibleRepresentationLabel(int irrepIndex);
   std::string toStringSignSignatureRootSubsystem(const List<SubgroupDataRootReflections>& inputSubgroups);
-  void makeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared = nullptr);
+  void makeArbitrarySimple(char weylGroupLetter, int n, const Rational* firstCoRootLengthSquared = nullptr);
   void makeFromDynkinType(const DynkinType& inputType);
   void makeFinalSteps();
   void initializeGenerators();
   template <class Coefficient>
-  LargeInteger getOrbitSize(Vector<Coefficient>& theWeight);
+  LargeInteger getOrbitSize(Vector<Coefficient>& weight);
   void makeMeFromMyCartanSymmetric();
   void makeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType);
   void computeCoCartanSymmetricFromCartanSymmetric();
@@ -743,9 +742,9 @@ public:
     bool* stabilizerFound = nullptr,
     ElementWeylGroup* raisingElt = nullptr
   );
-  bool areMaximallyDominantGroupInner(List<Vector<Rational> >& theWeights);
+  bool areMaximallyDominantGroupInner(List<Vector<Rational> >& weights);
   template <class Coefficient>
-  void raiseToMaximallyDominant(List<Vector<Coefficient> >& theWeights);
+  void raiseToMaximallyDominant(List<Vector<Coefficient> >& weights);
   void getCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2);
   void getSimpleReflectionMatrix(int indexSimpleRoot, Matrix<Rational>& output) const;
   ElementWeylGroup simpleConjugation(int i, const ElementWeylGroup& vv);
@@ -1063,7 +1062,7 @@ public:
   bool flagOuterAutosGeneratorsComputed;
   bool flagAllOuterAutosComputed;
   bool flagDeallocated;
-  WeylGroupData* theWeyl;
+  WeylGroupData* weylGroup;
   FinitelyGeneratedMatrixMonoid<Rational> outerAutomorphisms;
   HashedList<ElementWeylGroupAutomorphisms> allElements;
   void computeOuterAutoGenerators();
@@ -1119,10 +1118,10 @@ void WeylGroupAutomorphisms::actOn(
   for (int i = theGroupElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
     SimpleReflectionOrOuterAutomorphism& currentGenerator = theGroupElement.generatorsLastAppliedFirst[i];
     if (!currentGenerator.flagIsOuter) {
-      this->theWeyl->reflectSimple(currentGenerator.index, outputVector);
+      this->weylGroup->reflectSimple(currentGenerator.index, outputVector);
     } else {
       if (!this->flagAllOuterAutosComputed) {
-        global.fatal << "Weyl group of type " << this->theWeyl->dynkinType.toString()
+        global.fatal << "Weyl group of type " << this->weylGroup->dynkinType.toString()
         << " does not have its outer autos computed at a place where it should. " << global.fatal;
       }
       this->outerAutomorphisms.generators[currentGenerator.index].actOnVectorColumn(outputVector, outputVector);
@@ -1554,7 +1553,7 @@ class OrbitIteratorWeylGroup: public OrbitIterator<ElementWeylGroup, ElementWeyl
 };
 
 class OrbitIteratorRootActionWeylGroupAutomorphisms {
-  OrbitIterator<ElementWeylGroupAutomorphisms, Vector<Rational> > theIterator;
+  OrbitIterator<ElementWeylGroupAutomorphisms, Vector<Rational> > iterator;
   List<Vector<Rational> > orbitBuffer;
   Vector<Rational> orbitDefiningElement;
   int maxOrbitBufferSize;
@@ -1572,12 +1571,14 @@ public:
   std::string toStringSize() const;
   bool checkConsistency();
   void initialize();
-  void initialize(const List<ElementWeylGroupAutomorphisms>& inputGenerators,
-    const Vector<Rational>& inputElement);
+  void initialize(
+    const List<ElementWeylGroupAutomorphisms>& inputGenerators,
+    const Vector<Rational>& inputElement
+  );
 };
 
 template <typename Coefficient>
-std::ostream& operator<<(std::ostream& out, const ClassFunction<WeylGroupData, Coefficient>& X);
+std::ostream& operator<<(std::ostream& out, const ClassFunction<WeylGroupData, Coefficient>& data);
 
 template <typename elementSomeGroup>
 class Coset {

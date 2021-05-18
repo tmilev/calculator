@@ -84,9 +84,9 @@ void MeshTriangles::plotGrid(int theColor) {
 }
 
 double MeshTriangles::getValueAtPoint(const Vector<double>& thePoint) {
-  int theIndex = this->theEvaluatedPoints.getIndex(thePoint);
-  if (theIndex != - 1) {
-    return this->theEvaluatedPoints.values[theIndex];
+  int index = this->theEvaluatedPoints.getIndex(thePoint);
+  if (index != - 1) {
+    return this->theEvaluatedPoints.values[index];
   }
   this->knownValues[this->knownValues.size - 2] = thePoint[0];
   this->knownValues[this->knownValues.size - 1] = thePoint[1];
@@ -2191,9 +2191,9 @@ bool CalculatorFunctionsPlot::plotSurface(Calculator& calculator, const Expressi
   }
   for (int i = 1; i < input.size(); i ++) {
     if (input[i].startsWith(calculator.opIn(), 3)) {
-      int theIndex = thePlot.variablesInPlay.getIndex(input[i][1]);
-      if (theIndex < 0 || theIndex > 2) {
-        // theIndex > 2 should never happen
+      int index = thePlot.variablesInPlay.getIndex(input[i][1]);
+      if (index < 0 || index > 2) {
+        // index > 2 should never happen
         continue;
       }
       if (input[i][2].size() != 3) {
@@ -2204,7 +2204,7 @@ bool CalculatorFunctionsPlot::plotSurface(Calculator& calculator, const Expressi
           calculator, input[i][2][j + 1], jsConverter
         );
         if (isGood) {
-          isGood = jsConverter.isOfType<std::string>(&thePlot.variableRangesJS[theIndex][j]);
+          isGood = jsConverter.isOfType<std::string>(&thePlot.variableRangesJS[index][j]);
         }
         if (!isGood) {
           return calculator << "Failed to convert "

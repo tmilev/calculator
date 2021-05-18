@@ -1208,11 +1208,11 @@ public:
     }
   }
   void removeFirstOccurenceSwapWithLast(const Object& o) {
-    int theIndex = this->getIndex(o);
-    if (theIndex == - 1) {
+    int index = this->getIndex(o);
+    if (index == - 1) {
       return;
     }
-    this->removeIndexSwapWithLast(theIndex);
+    this->removeIndexSwapWithLast(index);
   }
   const List<int>& getHashArray(int hashIndex) const {
     return this->hashBuckets[hashIndex];

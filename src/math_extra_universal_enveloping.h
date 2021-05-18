@@ -98,7 +98,7 @@ public:
   // the negative and positive rootss.
   void simplify(ElementUniversalEnveloping<Coefficient>& output, const Coefficient& ringUnit = 1);
   void commuteABntoBnAPlusLowerOrder(
-    int theIndeX, ElementUniversalEnveloping<Coefficient>& output, const Coefficient& ringUnit = 1
+    int index, ElementUniversalEnveloping<Coefficient>& output, const Coefficient& ringUnit = 1
   );
   void commuteAnBtoBAnPlusLowerOrder(
     int indexA, ElementUniversalEnveloping<Coefficient>& output, const Coefficient& ringUnit = 1

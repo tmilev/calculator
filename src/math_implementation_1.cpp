@@ -32,16 +32,16 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
       newWeight = theWeight + genWeight;
       if (newWeight.isEqualToZero() || this->weylGroup.isARoot(newWeight)) {
         theWeight = newWeight;
-        int theIndex = this->getGeneratorIndexFromRoot(- genWeight);
-        outputIndicesFormatAd0Ad1Ad2etc.addOnTop(theIndex);
+        int index = this->getGeneratorIndexFromRoot(- genWeight);
+        outputIndicesFormatAd0Ad1Ad2etc.addOnTop(index);
         if (!theWeight.isEqualToZero()) {
           int currentIndex = this->weylGroup.rootSystem.getIndex(theWeight);
-          theIndex = this->getRootIndexFromGenerator(theIndex);
-          if (!this->computedChevalleyConstants.elements[theIndex][currentIndex]) {
+          index = this->getRootIndexFromGenerator(index);
+          if (!this->computedChevalleyConstants.elements[index][currentIndex]) {
             global.fatal
             << "For some reason I am not computed. Here is me: " << this->toString() << global.fatal;
           }
-          outputMultiplyLieBracketsToGetGenerator /= this->chevalleyConstants.elements[theIndex][currentIndex];
+          outputMultiplyLieBracketsToGetGenerator /= this->chevalleyConstants.elements[index][currentIndex];
         }
         break;
       }
@@ -361,14 +361,14 @@ bool LittelmannPath::generateOrbit(
         bool found = true;
         currentPath = hashedOutput[lowestNonExplored];
         currentSequence = outputOperators[lowestNonExplored];
-        int theIndex = parabolicSelectionSelectedAreInLeviPart.elements[j];
+        int index = parabolicSelectionSelectedAreInLeviPart.elements[j];
         while (found) {
           found = false;
-          currentPath.actByEAlpha(theIndex);
+          currentPath.actByEAlpha(index);
           if (!currentPath.isEqualToZero()) {
             if (hashedOutput.addOnTopNoRepetition(currentPath)) {
               found = true;
-              currentSequence.addOnTop(theIndex);
+              currentSequence.addOnTop(index);
               outputOperators.addOnTop(currentSequence);
               if (!currentPath.minimaAreIntegral()) {
                 global.comments << "<hr>Found a bad path:<br> ";
@@ -382,11 +382,11 @@ bool LittelmannPath::generateOrbit(
         currentSequence = outputOperators[lowestNonExplored];
         while (found) {
           found = false;
-          currentPath.actByFAlpha(theIndex);
+          currentPath.actByFAlpha(index);
           if (!currentPath.isEqualToZero()) {
             if (hashedOutput.addOnTopNoRepetition(currentPath)) {
               found = true;
-              currentSequence.addOnTop(- theIndex - 1);
+              currentSequence.addOnTop(- index - 1);
               outputOperators.addOnTop(currentSequence);
               if (!currentPath.minimaAreIntegral()) {
                 global.comments << "<hr>Found a bad path:<br> ";
@@ -673,9 +673,9 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
     }
     intermediateAccum *= rightMonCoeff;
     Accum += intermediateAccum;
-    int theIndex = intermediateAccum.getIndex(constMon);
-    if (theIndex != - 1) {
-      output += intermediateAccum.coefficients[theIndex];
+    int index = intermediateAccum.getIndex(constMon);
+    if (index != - 1) {
+      output += intermediateAccum.coefficients[index];
     }
   }
   if (logStream != nullptr) {
@@ -804,10 +804,10 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   for (int i = 0; i < this->nilradicalSmall.size; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& eltImage =
     this->theHmm.imagesAllChevalleyGenerators[this->indicesNilradicalSmall[i]];
-    int theIndex = this->NilModPreNil.getIndex(eltImage);
-    if (theIndex != - 1) {
-      this->NilModPreNil.removeIndexSwapWithLast(theIndex);
-      this->weightsNilModPreNil.removeIndexSwapWithLast(theIndex);
+    int index = this->NilModPreNil.getIndex(eltImage);
+    if (index != - 1) {
+      this->NilModPreNil.removeIndexSwapWithLast(index);
+      this->weightsNilModPreNil.removeIndexSwapWithLast(index);
       continue;
     }
     bool isGood = false;
@@ -846,14 +846,14 @@ void BranchingData::initAssumingParSelAndHmmInittedPart2Subgroups() {
   this->WeylFDSmall.computeRootSubsystem();
 }
 
-std::string BranchingData::getStringCasimirProjector(int theIndex, const Rational& additionalMultiple) {
+std::string BranchingData::getStringCasimirProjector(int index, const Rational& additionalMultiple) {
   Vector<RationalFraction<Rational> > weightDifference;
   std::stringstream formulaStream1;
   HashedList<Vector<RationalFraction<Rational> > > accountedDiffs;
   accountedDiffs.setExpectedSize(this->g2Weights.size);
   bool found = false;
   for (int i = 0; i < this->g2Weights.size; i ++) {
-    weightDifference = this->g2Weights[i] - this->g2Weights[theIndex];
+    weightDifference = this->g2Weights[i] - this->g2Weights[index];
     if (weightDifference.isPositive() && !accountedDiffs.contains(weightDifference)) {
       accountedDiffs.addOnTop(weightDifference);
       if (additionalMultiple != 1) {

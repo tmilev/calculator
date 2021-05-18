@@ -2540,26 +2540,26 @@ class MonomialVector {
     return output;
   }
   public:
-  int theIndex;
-  MonomialVector(): theIndex(- 1) {
+  int monomialIndex;
+  MonomialVector(): monomialIndex(- 1) {
   }
-  MonomialVector(int inputIndex): theIndex(inputIndex) {
+  MonomialVector(int inputIndex): monomialIndex(inputIndex) {
   }
   std::string toString(FormatExpressions* format = nullptr) const;
   unsigned int hashFunction() const {
-    return static_cast<unsigned int>(this->theIndex);
+    return static_cast<unsigned int>(this->monomialIndex);
   }
   static unsigned int hashFunction(const MonomialVector& input) {
     return input.hashFunction();
   }
   bool operator==(const MonomialVector& other) const {
-    return this->theIndex == other.theIndex;
+    return this->monomialIndex == other.monomialIndex;
   }
   void makeEi(int inputIndex) {
-    this->theIndex = inputIndex;
+    this->monomialIndex = inputIndex;
   }
   bool operator>(const MonomialVector& other) const {
-    return this->theIndex > other.theIndex;
+    return this->monomialIndex > other.monomialIndex;
   }
 };
 
@@ -2575,7 +2575,7 @@ class VectorSparse : public LinearCombination<MonomialVector, Coefficient> {
   int getLargestParticipatingBasisIndex() {
     int result = - 1;
     for (int i = 0; i < this->size(); i ++) {
-      result = MathRoutines::maximum(result, (*this)[i].theIndex);
+      result = MathRoutines::maximum(result, (*this)[i].monomialIndex);
     }
     return result;
   }
@@ -6542,7 +6542,7 @@ public:
     this->makeZero();
     for (int i = 0; i < inputVectors.size; i ++) {
       for (int j = 0; j < inputVectors[i].size(); j ++) {
-        this->addMonomial(MonomialMatrix(inputVectors[i][j].theIndex, i), inputVectors[i].coefficients[j]);
+        this->addMonomial(MonomialMatrix(inputVectors[i][j].monomialIndex, i), inputVectors[i].coefficients[j]);
       }
     }
   }
@@ -6551,7 +6551,7 @@ public:
     this->makeZero();
     for (int i = 0; i < inputVectors.size; i ++) {
       for (int j = 0; j < inputVectors[i].size(); j ++) {
-        this->addMonomial(MonomialMatrix(i, inputVectors[i][j].theIndex), inputVectors[i].coefficients[j]);
+        this->addMonomial(MonomialMatrix(i, inputVectors[i][j].monomialIndex), inputVectors[i].coefficients[j]);
       }
     }
   }
@@ -6626,8 +6626,8 @@ public:
     MonomialVector tempVM;
     for (int i = 0; i < this->size(); i ++) {
       for (int j = 0; j < inputOutput.size(); j ++) {
-        if ((*this)[i].dualIndex == inputOutput[j].theIndex) {
-          tempVM.theIndex = (*this)[i].vIndex;
+        if ((*this)[i].dualIndex == inputOutput[j].monomialIndex) {
+          tempVM.monomialIndex = (*this)[i].vIndex;
           element = this->coefficients[i];
           element *= inputOutput.coefficients[j];
           output.addMonomial(tempVM, element);

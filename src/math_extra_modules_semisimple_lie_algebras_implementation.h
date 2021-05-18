@@ -29,13 +29,13 @@ Rational ModuleSSalgebra<Coefficient>::highestWeightTrace(
   const MonomialTensor<int, HashFunctions::hashFunction>& oldRight = thePair.object2;
   newLeft = thePair.object1;
   (*newLeft.powers.lastObject()) -= 1;
-  int theIndex = *newLeft.generatorsIndices.lastObject();
+  int index = *newLeft.generatorsIndices.lastObject();
   if (*newLeft.powers.lastObject() == 0) {
     newLeft.generatorsIndices.size --;
     newLeft.powers.size --;
   }
-  int theIndexMinus = 2 * this->getOwner().getNumberOfPositiveRoots() + this->getOwner().getRank() - theIndex - 1;
-  int theSimpleIndex = theIndex - this->getOwner().getNumberOfPositiveRoots() - this->getOwner().getRank();
+  int indexMinus = 2 * this->getOwner().getNumberOfPositiveRoots() + this->getOwner().getRank() - index - 1;
+  int theSimpleIndex = index - this->getOwner().getNumberOfPositiveRoots() - this->getOwner().getRank();
   MonomialTensor<int, HashFunctions::hashFunction> Accum;
   Accum.powers.reserve(oldRight.powers.size);
   Accum.generatorsIndices.reserve(oldRight.generatorsIndices.size);
@@ -44,7 +44,7 @@ Rational ModuleSSalgebra<Coefficient>::highestWeightTrace(
   Rational summand;
   WeylGroupData& theWeyl = this->getOwner().weylGroup;
   for (int i = 0; i < oldRight.generatorsIndices.size; i ++) {
-    if (oldRight.generatorsIndices[i] == theIndexMinus) {
+    if (oldRight.generatorsIndices[i] == indexMinus) {
       summand = 0;
       newRight = Accum;
       newRight.multiplyByGeneratorPowerOnTheRight(oldRight.generatorsIndices[i], oldRight.powers[i] - 1);
@@ -659,18 +659,18 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
     currentNonReducedElement.makeOne(this->getOwner());
     tempMonInt.makeConstant();
     for (int j = currentPath.size - 1; j >= 0; j --) {
-      int theIndex = currentPath[j];
-      if (theIndex > 0) {
-        theIndex ++;
+      int index = currentPath[j];
+      if (index > 0) {
+        index ++;
       }
       currentNonReducedElement.multiplyByGeneratorPowerOnTheRight(
-        this->getOwner().getGeneratorFromDisplayIndex(theIndex), ringUnit
+        this->getOwner().getGeneratorFromDisplayIndex(index), ringUnit
       );
-      tempMonInt.multiplyByGeneratorPowerOnTheRight(this->getOwner().getGeneratorFromDisplayIndex(theIndex), 1);
+      tempMonInt.multiplyByGeneratorPowerOnTheRight(this->getOwner().getGeneratorFromDisplayIndex(index), 1);
     }
     Vector<Rational>& hwCurrent = *this->thePaths[i].waypoints.lastObject();
-    int theIndex = this->theModuleWeightsSimpleCoords.getIndex(hwCurrent);
-    if (theIndex == - 1) {
+    int index = this->theModuleWeightsSimpleCoords.getIndex(hwCurrent);
+    if (index == - 1) {
       out2 << "Error: could not generate all weights in the weight support. Maybe they are too many? Allowed "
       << "# of weights is 10000";
       if (outputReport != nullptr) {
@@ -678,8 +678,8 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
       }
       return false;
     }
-    this->theGeneratingWordsGrouppedByWeight[theIndex].addOnTop(currentNonReducedElement);
-    this->theGeneratingWordsIntGrouppedByWeight[theIndex].addOnTop(tempMonInt);
+    this->theGeneratingWordsGrouppedByWeight[index].addOnTop(currentNonReducedElement);
+    this->theGeneratingWordsIntGrouppedByWeight[index].addOnTop(tempMonInt);
   }
   this->theGeneratingWordsNonReduced.clear();
   this->theGeneratingWordsNonReduced.setExpectedSize(this->thePaths.size);
@@ -728,15 +728,15 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
     for (int k = 0; k < 2; k ++) {
       for (int j = 0; j < this->getOwner().getRank(); j ++) {
         if (this->parabolicSelectionSelectedAreElementsLevi.selected[j]) {
-          int theIndex = this->getOwner().getNumberOfPositiveRoots() - j - 1;
+          int index = this->getOwner().getNumberOfPositiveRoots() - j - 1;
           if (k == 1) {
-            theIndex = this->getOwner().getNumberOfPositiveRoots() + this->getOwner().getRank() + j;
+            index = this->getOwner().getNumberOfPositiveRoots() + this->getOwner().getRank() + j;
           }
-          tempSSElt.makeGenerator(theIndex, this->getOwner());
+          tempSSElt.makeGenerator(index, this->getOwner());
           if (outputReport != nullptr) {
             out2 << "<hr>Simple generator: " << tempSSElt.toString(&global.defaultFormat.getElement());
           }
-          MatrixTensor<Coefficient>& matrix = this->getActionGeneratorIndex(theIndex);
+          MatrixTensor<Coefficient>& matrix = this->getActionGeneratorIndex(index);
           std::stringstream tempStream;
           tempStream << "computing action simple generator index " << (2 * k - 1) * (j + 1) << " ... ";
           theReport.report(tempStream.str());
@@ -1037,7 +1037,7 @@ void ModuleSSalgebra<Coefficient>::getAdActionHomogenousElt(
     outputCurrentList.setSize(currentWordList.size);
     Vector<Rational>& currentWeight = this->theModuleWeightsSimpleCoords[i];
     targetWeight = currentWeight + weightUEEltSimpleCoords;
-    int theIndex = this->theModuleWeightsSimpleCoords.getIndex(targetWeight);
+    int index = this->theModuleWeightsSimpleCoords.getIndex(targetWeight);
     for (int j = 0; j < currentWordList.size; j ++) {
       std::stringstream progressStream;
       progressStream << "Computing action of "
@@ -1046,13 +1046,13 @@ void ModuleSSalgebra<Coefficient>::getAdActionHomogenousElt(
       << ", word " << j + 1 << " out of " << currentWordList.size << "...";
       theReport.report(progressStream.str());
       ElementUniversalEnveloping<Coefficient>& currentOutputWord = outputCurrentList[j];
-      if (theIndex == - 1) {
+      if (index == - 1) {
         currentOutputWord.makeZero(*this->theAlgebras, this->indexAlgebra);
       } else {
         theElt = inputHomogeneous;
         theElt.multiplyBy(currentWordList[j], ringUnit);
         this->expressAsLinearCombinationHomogenousElement(
-          theElt, currentOutputWord, theIndex, this->theHWDualCoordsBaseFielD, ringUnit, ringZero
+          theElt, currentOutputWord, index, this->theHWDualCoordsBaseFielD, ringUnit, ringZero
         );
       }
       progressStream << " done!";
@@ -1160,9 +1160,9 @@ bool ElementTensorsGeneralizedVermas<Coefficient>::multiplyOnTheLeft(
     if (!theUE.powers[i].isSmallInteger(&power)) {
       return false;
     }
-    int theIndex = theUE.generatorsIndices[i];
+    int index = theUE.generatorsIndices[i];
     for (int j = 0; j < power; j ++) {
-      output.multiplyByElementLieAlg(buffer, ownerAlgebra, theIndex, ringUnit);
+      output.multiplyByElementLieAlg(buffer, ownerAlgebra, index, ringUnit);
       output = buffer;
     }
   }
@@ -1861,12 +1861,12 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
       if (!currentMon.powers[k].isSmallInteger(&power)) {
         break;
       }
-      int theIndex = currentMon.generatorsIndices[k];
-      if (theMod.hasFreeAction(theIndex)) {
+      int index = currentMon.generatorsIndices[k];
+      if (theMod.hasFreeAction(index)) {
         break;
       }
       tempMat2 = tempMat1;
-      tempMat1 = theMod.getActionGeneratorIndex(theIndex);
+      tempMat1 = theMod.getActionGeneratorIndex(index);
       tempMat1.raiseToPower(power);
       tempMat1 *= tempMat2;
       currentMon.powers.size --;

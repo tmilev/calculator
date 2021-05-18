@@ -35,36 +35,36 @@ public:
     return this->getIndex(inputKey) != - 1;
   }
   void removeKey(const key& theKey) {
-    int theIndex = this->keys.getIndex(theKey);
-    if (theIndex == - 1) {
+    int index = this->keys.getIndex(theKey);
+    if (index == - 1) {
       return;
     }
-    this->keys.removeIndexSwapWithLast(theIndex);
-    this->values.removeIndexSwapWithLast(theIndex);
+    this->keys.removeIndexSwapWithLast(index);
+    this->values.removeIndexSwapWithLast(index);
   }
   const value& getValueNoFail(const key& input) const {
-    int theIndex = this->keys.getIndex(input);
-    if (theIndex == - 1) {
+    int index = this->keys.getIndex(input);
+    if (index == - 1) {
       fatalCrash("Map does not contain key at a place where that is not allowed. ");
     }
-    return this->values[theIndex];
+    return this->values[index];
   }
   value getValue(const key& input, const value& resultIfMissing) const {
-    int theIndex = this->keys.getIndex(input);
-    if (theIndex == - 1) {
+    int index = this->keys.getIndex(input);
+    if (index == - 1) {
       return resultIfMissing;
     }
-    return this->values[theIndex];
+    return this->values[index];
   }
   value& getValueCreate(const key& input) {
-    int theIndex = this->keys.getIndex(input);
-    if (theIndex == - 1) {
-      theIndex = this->keys.size;
+    int index = this->keys.getIndex(input);
+    if (index == - 1) {
+      index = this->keys.size;
       this->keys.addOnTop(input);
       value object;
       this->values.addOnTop(object);
     }
-    return this->values[theIndex];
+    return this->values[index];
   }
   value& getValueCreateNoInitialization(const key& input) {
     int index = this->keys.getIndex(input);

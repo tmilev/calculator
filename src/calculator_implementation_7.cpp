@@ -1088,15 +1088,15 @@ bool CalculatorFunctions::innerChildExpression(Calculator& calculator, const Exp
   if (input.size() != 3) {
     return false;
   }
-  int theIndex = 0;
-  if (!input[2].isSmallInteger(&theIndex)) {
+  int index = 0;
+  if (!input[2].isSmallInteger(&index)) {
     return false;
   }
-  theIndex --;
-  if (theIndex < 0 || theIndex >= input[1].size()) {
+  index --;
+  if (index < 0 || index >= input[1].size()) {
     return false;
   }
-  output = input[1][theIndex];
+  output = input[1][index];
   return true;
 }
 
@@ -1134,12 +1134,12 @@ bool CalculatorFunctions::innerDereferenceSequenceOrMatrix(
   ) {
     return false;
   }
-  int theIndex;
-  if (!input[2].isSmallInteger(&theIndex)) {
+  int index;
+  if (!input[2].isSmallInteger(&index)) {
     return false;
   }
-  if (theIndex > 0 && theIndex < input[1].size()) {
-    output = input[1][theIndex];
+  if (index > 0 && index < input[1].size()) {
+    output = input[1][index];
     return true;
   }
   return false;
@@ -1156,12 +1156,12 @@ bool CalculatorFunctions::innerDereferenceSequenceStatements(
   if (!input[1].startsWith(calculator.opCommandSequence())) {
     return false;
   }
-  int theIndex;
-  if (!input[2].isSmallInteger(&theIndex)) {
+  int index;
+  if (!input[2].isSmallInteger(&index)) {
     return false;
   }
-  if (theIndex > 0 && theIndex < input[1].size()) {
-    output = input[1][theIndex];
+  if (index > 0 && index < input[1].size()) {
+    output = input[1][index];
     return true;
   }
   return false;
@@ -3900,11 +3900,11 @@ bool CalculatorFunctions::innerCoefficientsPowersOf(
   List<Expression> theCFsIncludingZeros;
   Expression currentCF;
   for (int i = 0; i < highestPowerPlus1; i ++) {
-    int theIndex = coefficients.monomials.getIndex(MonomialVector(i));
-    if (theIndex == - 1) {
+    int index = coefficients.monomials.getIndex(MonomialVector(i));
+    if (index == - 1) {
       currentCF.assignValue(0, calculator);
     } else {
-      currentCF = coefficients.coefficients[theIndex];
+      currentCF = coefficients.coefficients[index];
     }
     theCFsIncludingZeros.addOnTop(currentCF);
   }
@@ -7427,9 +7427,9 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
     theIntsReduced[i] = theInts[i] % theSize;
   }
   List<LargeIntegerUnsigned> theList;
-  List<int> theIndexStack;
+  List<int> indexStack;
   theList.initializeFillInObject(theSize, 0);
-  theIndexStack.reserve(theSize);
+  indexStack.reserve(theSize);
   LargeIntegerUnsigned theMod;
   theMod = static_cast<unsigned>(theSize);
   int numElementsCovered = 0;
@@ -7438,7 +7438,7 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
       numElementsCovered ++;
     }
     theList[theIntsReduced[i]] = static_cast<unsigned>(theInts[i]);
-    theIndexStack.addOnTop(theIntsReduced[i]);
+    indexStack.addOnTop(theIntsReduced[i]);
   }
   LargeIntegerUnsigned currentIndexLarge, currentDistance, maxDistanceGenerated;
   int currentIndex;
@@ -7448,16 +7448,16 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
   << theInts;
   int numElementsNotAddedToStack = 0;
   maxDistanceGenerated = 0;
-  for (int i = 0; i < theIndexStack.size; i ++) {
+  for (int i = 0; i < indexStack.size; i ++) {
     for (int j = 0; j < theIntsReduced.size; j ++) {
-      currentIndexLarge = static_cast<unsigned>(theIndexStack[i]);
+      currentIndexLarge = static_cast<unsigned>(indexStack[i]);
       currentIndexLarge *= static_cast<unsigned>(theIntsReduced[j]);
       currentIndexLarge %= theMod;
       if (!currentIndexLarge.isIntegerFittingInInt(&currentIndex)) {
         return calculator << "An internal check has failed. "
         << "This shouldn't happen, this is possibly a programming bug.";
       }
-      currentDistance = theList[theIndexStack[i]];
+      currentDistance = theList[indexStack[i]];
       currentDistance += static_cast<unsigned>(theIntsReduced[j]);
       if (theList[currentIndex] > 0) {
         if (theList[currentIndex] < currentDistance) {
@@ -7465,7 +7465,7 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
           if (numElementsNotAddedToStack % 50000 == 0) {
             std::stringstream out;
             out << "While computing product distance, explored " << i + 1 << " out of "
-            << theIndexStack.size << " indices. " << numElementsNotAddedToStack
+            << indexStack.size << " indices. " << numElementsNotAddedToStack
             << " candidates were not added to the stack. "
             << "Number of elements reached: " << numElementsCovered << ". "
             << "Max distance generated while searching: " << maxDistanceGenerated.toString();
@@ -7481,17 +7481,17 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
       if (currentDistance > maxDistanceGenerated) {
         maxDistanceGenerated = currentDistance;
       }
-      theIndexStack.addOnTop(currentIndex);
-      if (theIndexStack.size % 10000 == 0) {
+      indexStack.addOnTop(currentIndex);
+      if (indexStack.size % 10000 == 0) {
         std::stringstream out;
         out << "While computing product distance, explored " << i + 1 << " out of "
-        << theIndexStack.size << " indices. " << numElementsNotAddedToStack << " candidates were not added to the stack. "
+        << indexStack.size << " indices. " << numElementsNotAddedToStack << " candidates were not added to the stack. "
         << "Number of elements reached: " << numElementsCovered << ". "
         << "Max distance generated while searching: " << maxDistanceGenerated.toString();
         theReport.report(out.str());
       }
     }
-    if (theIndexStack.size > 1000000000) {
+    if (indexStack.size > 1000000000) {
       return calculator << "While computing product distance, exceeded allowed stack size of 1000000000";
     }
   }
@@ -7928,11 +7928,11 @@ public:
     this->computeCurrentEContributionToNextLayer();
     return true;
   }
-  Rational getStringWidthTruncated(int theIndex) {
+  Rational getStringWidthTruncated(int index) {
     return this->charWidth *
     MathRoutines::minimum(
       this->maxNumCharsInString,
-      static_cast<signed>(this->displayedExpressionStrings[theIndex].size())
+      static_cast<signed>(this->displayedExpressionStrings[index].size())
     );
   }
   Rational getLayerWidth(int layerIndex) {

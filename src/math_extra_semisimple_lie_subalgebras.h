@@ -236,7 +236,7 @@ public:
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
   );
   void getGenericLinearCombinationInvolvedPosGens(
-    int theIndex, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
+    int index, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
   );
   void computeCentralizerIsWellChosen();
   void adjustCentralizerAndRecompute(bool allowNonPolynomialSystemFailure);
@@ -566,7 +566,7 @@ public:
   );
   bool computeStructureRealFormsSlTwos();
   bool computeStructureRealFormOneSlTwo(
-    const SlTwoSubalgebra& input
+    SlTwoSubalgebra& input
   );
   bool computeStructureRealFormsInitialize(
     SemisimpleLieAlgebra& newOwner,

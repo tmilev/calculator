@@ -408,11 +408,11 @@ bool ExpressionContext::mergeDifferentialOperatorsOnce(
   for (int i = 0; i < this->variables.size; i ++) {
     const Expression& variable= this->variables[i];
     const Expression& differentialOperatorVariable = this->differentialOperatorVariables[i];
-    int theIndex = outputContext.variables.getIndex(variable);
-    if (differentialOperatorVariablesFound.selected[theIndex]) {
+    int index = outputContext.variables.getIndex(variable);
+    if (differentialOperatorVariablesFound.selected[index]) {
       if (
         differentialOperatorVariable !=
-        outputContext.differentialOperatorVariables[theIndex]
+        outputContext.differentialOperatorVariables[index]
       ) {
         return *this->owner
         << "<hr>Failed to merge context "
@@ -420,12 +420,12 @@ bool ExpressionContext::mergeDifferentialOperatorsOnce(
         << outputContext.toString()
         << " because " << variable.toString()
         << " has two different corresponding differential operator variables: "
-        << outputContext.differentialOperatorVariables[theIndex].toString()
+        << outputContext.differentialOperatorVariables[index].toString()
         << " and " << differentialOperatorVariable.toString();
       }
     }
-    differentialOperatorVariablesFound.addSelectionAppendNewIndex(theIndex);
-    outputContext.differentialOperatorVariables[theIndex] = this->differentialOperatorVariables[i];
+    differentialOperatorVariablesFound.addSelectionAppendNewIndex(index);
+    outputContext.differentialOperatorVariables[index] = this->differentialOperatorVariables[i];
   }
   // Generate missing differntial operator variables.
   for (int i = 0; i < this->differentialOperatorVariables.size; i ++) {

@@ -10,12 +10,12 @@ const int ElementZmodP::maximumModulusForUserFacingPolynomialDivision = 10000;
 
 std::string MonomialVector::toString(FormatExpressions* format) const {
   if (format != nullptr) {
-    if (this->theIndex < format->vectorSpaceEiBasisNames.size && this->theIndex >= 0) {
-      return format->vectorSpaceEiBasisNames[this->theIndex];
+    if (this->monomialIndex < format->vectorSpaceEiBasisNames.size && this->monomialIndex >= 0) {
+      return format->vectorSpaceEiBasisNames[this->monomialIndex];
     }
   }
   std::stringstream out;
-  out << "e_{" << this->theIndex + 1 << "}";
+  out << "e_{" << this->monomialIndex + 1 << "}";
   return out.str();
 }
 
@@ -359,10 +359,10 @@ bool AlgebraicClosureRationals::reduceMe(
     zToTheNth.makeMonomial(0, i, 1);
     zToTheNth.divideBy(smallestFactor, tempP, remainderAfterReduction, &MonomialPolynomial::orderDefault());
     for (int j = 0; j < remainderAfterReduction.size(); j ++) {
-      int theIndex = - 1;
-      remainderAfterReduction[j](0).isSmallInteger(&theIndex);
+      int index = - 1;
+      remainderAfterReduction[j](0).isSmallInteger(&index);
       projectionGeneratorCoordinates.addMonomial(
-        MonomialMatrix(theIndex, i),
+        MonomialMatrix(index, i),
         remainderAfterReduction.coefficients[j]
       );
     }
@@ -444,7 +444,7 @@ void AlgebraicClosureRationals::getAdditionTo(
   }
   output.makeZero();
   for (int i = 0; i < input.element.size(); i ++) {
-    int currentIndex = input.element[i].theIndex;
+    int currentIndex = input.element[i].monomialIndex;
     if (
       currentIndex < 0 ||
       currentIndex >= this->basisInjections[input.basisIndex].size
@@ -473,14 +473,14 @@ void AlgebraicClosureRationals::getMultiplicationBy(
   MatrixTensor<Rational> currentMat;
   for (int i = 0; i < inputAdditiveForm.size(); i ++) {
     if (
-      inputAdditiveForm[i].theIndex < 0 ||
-      inputAdditiveForm[i].theIndex >= this->latestBasis.size
+      inputAdditiveForm[i].monomialIndex < 0 ||
+      inputAdditiveForm[i].monomialIndex >= this->latestBasis.size
     ) {
       global.fatal << "Element " << input.toString()
-      << " has bad index, namely, " << inputAdditiveForm[i].theIndex
+      << " has bad index, namely, " << inputAdditiveForm[i].monomialIndex
       << ". The algebraic closure is: " << this->toString() << ". " << global.fatal;
     }
-    currentMat = this->latestBasis[inputAdditiveForm[i].theIndex];
+    currentMat = this->latestBasis[inputAdditiveForm[i].monomialIndex];
     currentMat *= inputAdditiveForm.coefficients[i];
     output += currentMat;
   }
@@ -574,7 +574,7 @@ bool AlgebraicNumber::operator==(const Rational& other) const {
   if (this->element.size() != 1) {
     return false;
   }
-  if (this->element[0].theIndex != 0) {
+  if (this->element[0].monomialIndex != 0) {
     return false;
   }
   return this->element.coefficients[0] == other;
@@ -885,7 +885,7 @@ void AlgebraicNumber::invert() {
     }
     bool isGood = (this->element.size() == 1);
     if (isGood) {
-      isGood = (this->element[0].theIndex == 0);
+      isGood = (this->element[0].monomialIndex == 0);
     }
     if (!isGood) {
       global.fatal << "Algebraic number has no owner, "
@@ -996,7 +996,7 @@ bool AlgebraicNumber::checkConsistency() const {
   if (this->owner == nullptr) {
     if (!this->isRational()) {
       for (int i = 0; i < this->element.size(); i ++) {
-        global.comments << "<br>index: " << this->element[i].theIndex << ", coefficient: "
+        global.comments << "<br>index: " << this->element[i].monomialIndex << ", coefficient: "
         << this->element.coefficients[i];
       }
       global.fatal << "Detected non-rational algebraic number with zero owner. " << global.fatal;
@@ -1155,7 +1155,7 @@ bool AlgebraicNumber::evaluatesToDouble(double* outputWhichDouble) const {
   Selection currentRadicalSelection;
   double currentMultiplicand = 0;
   for (int i = 0; i < this->element.size(); i ++) {
-    this->owner->getRadicalSelectionFromIndex(this->element[i].theIndex, currentRadicalSelection);
+    this->owner->getRadicalSelectionFromIndex(this->element[i].monomialIndex, currentRadicalSelection);
     if (outputWhichDouble != nullptr) {
       currentMultiplicand = this->element.coefficients[i].getDoubleValue();
     }
@@ -1407,7 +1407,7 @@ bool AlgebraicNumber::isRational(Rational* whichRational) const {
     return true;
   }
   for (int i = 0; i < this->element.size(); i ++) {
-    if (this->element[i].theIndex != 0) {
+    if (this->element[i].monomialIndex != 0) {
       return false;
     } else if (whichRational != nullptr) {
       *whichRational = this->element.coefficients[i];

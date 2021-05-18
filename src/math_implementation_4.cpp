@@ -1251,14 +1251,14 @@ void Permutation::getPermutationLthElementIsTheImageofLthIndex(List<int>& output
   }
 }
 
-bool WeylGroupData::areMaximallyDominantGroupInner(List<Vector<Rational> >& theWeights) {
+bool WeylGroupData::areMaximallyDominantGroupInner(List<Vector<Rational> >& weights) {
   MacroRegisterFunctionWithName("WeylGroup::AreMaximallyDominantInner");
-  for (int i = 0; i < theWeights.size; i ++) {
+  for (int i = 0; i < weights.size; i ++) {
     for (int j = 0; j < this->rootsOfBorel.size; j ++) {
-      if (this->rootScalarCartanRoot(this->rootsOfBorel[j], theWeights[i]) < 0) {
+      if (this->rootScalarCartanRoot(this->rootsOfBorel[j], weights[i]) < 0) {
         bool reflectionDoesRaise = true;
         for (int k = 0; k < i; k ++) {
-          if (this->rootScalarCartanRoot(this->rootsOfBorel[j], theWeights[k]) > 0) {
+          if (this->rootScalarCartanRoot(this->rootsOfBorel[j], weights[k]) > 0) {
             reflectionDoesRaise = false;
             break;
           }
@@ -1276,7 +1276,7 @@ bool WeylGroupAutomorphisms::checkInitialization() const {
   if (this->flagDeallocated) {
     global.fatal << "Use after free of Weyl group automorphism. " << global.fatal;
   }
-  if (this->theWeyl == nullptr) {
+  if (this->weylGroup == nullptr) {
     global.fatal << "Non-initialized Weyl group automorphisms. " << global.fatal;
   }
   return true;
@@ -1288,13 +1288,13 @@ bool WeylGroupAutomorphisms::areMaximallyDominantGroupOuter(List<Vector<Rational
   MemorySaving<Vectors<Rational> > theWeightsCopy;
   Vector<Rational> zeroWeight;
   this->computeOuterAutomorphisms();
-  zeroWeight.makeZero(this->theWeyl->getDimension());
+  zeroWeight.makeZero(this->weylGroup->getDimension());
   for (int i = 0; i < theWeights.size; i ++) {
-    for (int j = 0; j < this->theWeyl->rootsOfBorel.size; j ++) {
-      if (this->theWeyl->rootScalarCartanRoot(this->theWeyl->rootsOfBorel[j], theWeights[i]) < 0) {
+    for (int j = 0; j < this->weylGroup->rootsOfBorel.size; j ++) {
+      if (this->weylGroup->rootScalarCartanRoot(this->weylGroup->rootsOfBorel[j], theWeights[i]) < 0) {
         bool reflectionDoesRaise = true;
         for (int k = 0; k < i; k ++) {
-          if (this->theWeyl->rootScalarCartanRoot(this->theWeyl->rootsOfBorel[j], theWeights[k]) > 0) {
+          if (this->weylGroup->rootScalarCartanRoot(this->weylGroup->rootsOfBorel[j], theWeights[k]) > 0) {
             reflectionDoesRaise = false;
             break;
           }
@@ -2097,12 +2097,14 @@ void GeneralizedVermaModuleCharacters::getProjection(
 }
 
 void GeneralizedVermaModuleCharacters::getSubstitutionFromIndex(
-  PolynomialSubstitution<Rational>& outputSub, Matrix<LargeInteger>& outputMat, LargeIntegerUnsigned& outputDen, int theIndex
+  PolynomialSubstitution<Rational>& outputSub,
+  Matrix<LargeInteger>& outputMat,
+  LargeIntegerUnsigned& outputDen, int index
 ) {
-  Matrix<Rational>& theOperator = this->theLinearOperators[theIndex];
+  Matrix<Rational>& theOperator = this->theLinearOperators[index];
   int dimLargerAlgebra = theOperator.numberOfColumns;
   int dimSmallerAlgebra = theOperator.numberOfRows;
-  Vector<Rational>& theTranslation = this->theTranslationS[theIndex];
+  Vector<Rational>& theTranslation = this->theTranslationS[index];
   Matrix<Rational> tempMat;
   tempMat.initialize(dimLargerAlgebra + dimSmallerAlgebra + 1, dimSmallerAlgebra);
   tempMat.makeZero();

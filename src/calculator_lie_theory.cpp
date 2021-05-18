@@ -661,8 +661,8 @@ bool CalculatorLieTheory::littelmannOperator(Calculator& calculator, const Expre
   if (input.hasBoundVariables()) {
     return false;
   }
-  int theIndex = 0;
-  if (!input.isSmallInteger(&theIndex)) {
+  int index = 0;
+  if (!input.isSmallInteger(&index)) {
     return output.makeError(
       "The argument of the Littelmann root operator is "
       "expected to be a small integer, instead you gave me " +
@@ -670,10 +670,10 @@ bool CalculatorLieTheory::littelmannOperator(Calculator& calculator, const Expre
       calculator
     );
   }
-  if (theIndex == 0) {
+  if (index == 0) {
     return output.makeError("The index of the Littelmann root operator is expected to be non-zero", calculator);
   }
-  return output.assignValue(theIndex, calculator);
+  return output.assignValue(index, calculator);
 }
 
 bool CalculatorLieTheory::LSPath(Calculator& calculator, const Expression& input, Expression& output) {
@@ -947,11 +947,11 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
           out << "<td>" << HtmlRoutines::getMathNoDisplay(tempS2) << "</td>";
           out << "<td>" << theG2B3Data.theShapovalovProducts[eigenIndexcounter].toString(&theG2B3Data.theFormat);
           out << "</td>";
-          int theIndex = - 1;
-          numEigenVectors.isSmallInteger(&theIndex);
-          if (theIndex - eigenIndexcounter - 1 > 0) {
+          int index = - 1;
+          numEigenVectors.isSmallInteger(&index);
+          if (index - eigenIndexcounter - 1 > 0) {
             List<Rational> tempList, tempList2;
-            latexTable2 << " $v_{\\lambda," <<  theIndex- eigenIndexcounter - 1 << "} $&";
+            latexTable2 << " $v_{\\lambda," <<  index- eigenIndexcounter - 1 << "} $&";
             Polynomial<Rational> tempP;
             theG2B3Data.theShapovalovProducts[eigenIndexcounter].getNumerator(tempP);
             tempP.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
@@ -3233,19 +3233,19 @@ bool CalculatorLieTheory::cartanGenerator(Calculator& calculator, const Expressi
     << "but the output is a zero pointer to a semisimple Lie algebra. "
     << global.fatal;
   }
-  int theIndex;
-  if (!input[2].isSmallInteger(&theIndex)) {
+  int index;
+  if (!input[2].isSmallInteger(&index)) {
     return false;
   }
   if (
-    theIndex == 0 ||
-    theIndex > theSSalg.content->getNumberOfPositiveRoots() ||
-    theIndex < - theSSalg.content->getNumberOfPositiveRoots()
+    index == 0 ||
+    index > theSSalg.content->getNumberOfPositiveRoots() ||
+    index < - theSSalg.content->getNumberOfPositiveRoots()
   ) {
     return output.makeError("Bad Cartan subalgebra generator index.", calculator);
   }
   ElementSemisimpleLieAlgebra<Rational> theElt;
-  Vector<Rational> theH = theSSalg.content->weylGroup.rootSystem[theSSalg.content->getRootIndexFromDisplayIndex(theIndex)];
+  Vector<Rational> theH = theSSalg.content->weylGroup.rootSystem[theSSalg.content->getRootIndexFromDisplayIndex(index)];
   theElt.makeCartanGenerator(theH, *theSSalg.content);
   ElementUniversalEnveloping<RationalFraction<Rational> > theUE;
   theUE.assignElementLieAlgebra(theElt, *theSSalg.content);

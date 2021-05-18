@@ -71,10 +71,10 @@ public:
     }
     return false;
   }
-  void removeIndexSwapWithLast(int theIndex) {
+  void removeIndexSwapWithLast(int index) {
     //This is not thread-safe
-    this->killElementIndex(theIndex);
-    this->references[theIndex] = this->references[this->size - 1];
+    this->killElementIndex(index);
+    this->references[index] = this->references[this->size - 1];
     this->references[this->size - 1] = 0;
     this->size --;
   }

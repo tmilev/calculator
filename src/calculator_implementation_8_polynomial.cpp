@@ -756,8 +756,8 @@ std::string PolynomialDivisionReport<Coefficient>::getSpacedMonomialsWithHighlig
     return out.str();
   }
   for (int i = 0; i < this->allMonomials.size; i ++) {
-    int theIndex = polynomial.monomials.getIndex(this->allMonomials[i]);
-    if (theIndex == - 1) {
+    int index = polynomial.monomials.getIndex(this->allMonomials[i]);
+    if (index == - 1) {
       if (useColumnSeparator) {
         if (i != this->allMonomials.size - 1) {
           out << "&&";
@@ -803,7 +803,7 @@ std::string PolynomialDivisionReport<Coefficient>::getSpacedMonomialsWithHighlig
     countMons ++;
     std::string monWithSign =
     Polynomial<Coefficient>::getBlendCoefficientAndMonomial(
-      polynomial[theIndex], polynomial.coefficients[theIndex], true, &this->owner->format
+      polynomial[index], polynomial.coefficients[index], true, &this->owner->format
     );
     std::string sign = monWithSign.substr(0, 1);
     std::string monNoSign = monWithSign.substr(1);

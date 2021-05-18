@@ -3011,7 +3011,7 @@ void RootSubalgebras::computeAllReductiveRootSAsInit() {
   for (int i = 0; i < this->owner->getRank(); i ++) {
     this->validScales.addOnTopNoRepetition(2 / this->owner->weylGroup.cartanSymmetric(i, i));
   }
-  this->weylGroupAutomorphisms.theWeyl = &this->getOwnerWeyl();
+  this->weylGroupAutomorphisms.weylGroup = &this->getOwnerWeyl();
 }
 
 void RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder() {

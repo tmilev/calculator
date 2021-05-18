@@ -7403,9 +7403,9 @@ void WeylGroupData::makeFromDynkinTypeDefaultLengthKeepComponentOrder(const Dynk
   this->makeFinalSteps();
 }
 
-void WeylGroupData::makeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared) {
+void WeylGroupData::makeArbitrarySimple(char weylGroupLetter, int n, const Rational* firstCoRootLengthSquared) {
   DynkinType inputType;
-  inputType.makeSimpleType(WeylGroupLetter, n, firstCoRootLengthSquared);
+  inputType.makeSimpleType(weylGroupLetter, n, firstCoRootLengthSquared);
   this->makeFromDynkinType(inputType);
 }
 
@@ -7413,12 +7413,12 @@ WeylGroupAutomorphisms::WeylGroupAutomorphisms() {
   this->flagAllOuterAutosComputed = false;
   this->flagDeallocated = false;
   this->flagOuterAutosGeneratorsComputed = false;
-  this->theWeyl = nullptr;
+  this->weylGroup = nullptr;
 }
 
 WeylGroupAutomorphisms::~WeylGroupAutomorphisms() {
   this->flagDeallocated = true;
-  this->theWeyl = nullptr;
+  this->weylGroup = nullptr;
 }
 
 void WeylGroupAutomorphisms::computeOuterAutomorphisms() {
@@ -7439,14 +7439,14 @@ void WeylGroupAutomorphisms::computeOuterAutoGenerators() {
   }
   this->checkInitialization();
   List<MatrixTensor<Rational> >& theGens = this->outerAutomorphisms.generators;
-  this->theWeyl->dynkinType.getOuterAutosGeneratorsActOnVectorColumn(theGens);
+  this->weylGroup->dynkinType.getOuterAutosGeneratorsActOnVectorColumn(theGens);
   for (int i = 0; i < theGens.size; i ++) {
     if (
-      theGens[i].getMinimumNumberOfColumnsNumberOfRows() != this->theWeyl->getDimension() ||
-      theGens[i].getMinimalNumberOfColumns() != this->theWeyl->getDimension() ||
-      theGens[i].getMinimalNumberOfRows() != this->theWeyl->getDimension()
+      theGens[i].getMinimumNumberOfColumnsNumberOfRows() != this->weylGroup->getDimension() ||
+      theGens[i].getMinimalNumberOfColumns() != this->weylGroup->getDimension() ||
+      theGens[i].getMinimalNumberOfRows() != this->weylGroup->getDimension()
     ) {
-      global.fatal << "Bad outer automorphisms, type " << this->theWeyl->dynkinType.toString() << "." << global.fatal;
+      global.fatal << "Bad outer automorphisms, type " << this->weylGroup->dynkinType.toString() << "." << global.fatal;
     }
   }
   this->flagOuterAutosGeneratorsComputed = true;
@@ -7625,22 +7625,22 @@ LargeInteger WeylGroupAutomorphisms::getOrbitSize(Vector<Rational>& theWeight) {
   for (int i = 0; i < this->outerAutomorphisms.elements.size; i ++) {
     Vector<Rational> candidate;
     this->outerAutomorphisms.elements[i].actOnVectorColumn(theWeight, candidate);
-    this->theWeyl->raiseToDominantWeight(candidate);
+    this->weylGroup->raiseToDominantWeight(candidate);
     highestWeights.addOnTopNoRepetition(candidate);
   }
-  return this->theWeyl->getOrbitSize(theWeight) * highestWeights.size;
+  return this->weylGroup->getOrbitSize(theWeight) * highestWeights.size;
 }
 
 bool WeylGroupAutomorphisms::isElementWeylGroupOrOuterAutomorphisms(const MatrixTensor<Rational>& matrix) {
   MacroRegisterFunctionWithName("WeylGroup::IsElementGroupOrOuterAuto");
   this->computeOuterAutomorphisms();
   Vector<Rational> theRhoImage;
-  matrix.actOnVectorColumn(this->theWeyl->rho, theRhoImage);
+  matrix.actOnVectorColumn(this->weylGroup->rho, theRhoImage);
   ElementWeylGroup theElementCandidate;
-  this->theWeyl->raiseToDominantWeight(theRhoImage, nullptr, nullptr, &theElementCandidate);
+  this->weylGroup->raiseToDominantWeight(theRhoImage, nullptr, nullptr, &theElementCandidate);
   Matrix<Rational> theCandidateMat;
   MatrixTensor<Rational> candidateMatrixTensorForm, candidateMatrixWithOuterAutomorphisms;
-  this->theWeyl->getMatrixStandardRepresentation(theElementCandidate, theCandidateMat);
+  this->weylGroup->getMatrixStandardRepresentation(theElementCandidate, theCandidateMat);
   candidateMatrixTensorForm = theCandidateMat;
   for (int i = 0; i < this->outerAutomorphisms.elements.size; i ++) {
     candidateMatrixWithOuterAutomorphisms = this->outerAutomorphisms.elements[i];

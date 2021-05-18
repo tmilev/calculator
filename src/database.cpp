@@ -938,11 +938,11 @@ bool UserCalculator::isAcceptableDatabaseInput(const std::string& input, std::st
 
 std::string UserCalculator::GetSelectedRowEntry(const std::string& theKey) {
   MacroRegisterFunctionWithName("UserCalculator::GetSelectedRowEntry");
-  int theIndex = this->selectedRowFieldNamesUnsafe.getIndex(theKey);
-  if (theIndex == - 1) {
+  int index = this->selectedRowFieldNamesUnsafe.getIndex(theKey);
+  if (index == - 1) {
     return "";
   }
-  return this->selectedRowFieldsUnsafe[theIndex];
+  return this->selectedRowFieldsUnsafe[index];
 }
 
 bool Database::User::sendActivationEmail(

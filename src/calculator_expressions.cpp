@@ -1446,8 +1446,8 @@ void Expression::setSize(int desiredSize) {
 
 bool Expression::setChild(int childIndexInMe, const Expression& inputChild) {
   this->checkInitialization();
-  int theIndexOfTheExpression = this->owner->addChildExpression(inputChild);
-  this->children.setObjectAtIndex(childIndexInMe, theIndexOfTheExpression);
+  int indexOfTheExpression = this->owner->addChildExpression(inputChild);
+  this->children.setObjectAtIndex(childIndexInMe, indexOfTheExpression);
   return true;
 }
 
@@ -3235,12 +3235,12 @@ std::string Expression::toStringAllSlidersInExpression() const {
       out << boxNames[i] << " not found. ";
       continue;
     }
-    int theIndex = theSliders.getIndex(boxNames[i]);
-    if (this->owner->objectContainer.userInputBoxSliderDisplayed[theIndex]) {
+    int index = theSliders.getIndex(boxNames[i]);
+    if (this->owner->objectContainer.userInputBoxSliderDisplayed[index]) {
       continue;
     }
-    this->owner->objectContainer.userInputBoxSliderDisplayed[theIndex] = true;
-    InputBox& theBox = theSliders.values[theIndex];
+    this->owner->objectContainer.userInputBoxSliderDisplayed[index] = true;
+    InputBox& theBox = theSliders.values[index];
     std::string theSliderName = theBox.getSliderName();
     out << "<input name='"
     << theSliderName

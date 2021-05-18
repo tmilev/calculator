@@ -58,9 +58,9 @@ JSData& JSData::operator[](int i) {
 }
 
 JSData JSData::getValue(const std::string& key) {
-  int theIndex = this->getKeyIndex(key);
-  if (theIndex != - 1) {
-    return this->objects.values[theIndex];
+  int index = this->getKeyIndex(key);
+  if (index != - 1) {
+    return this->objects.values[index];
   }
   JSData result;
   result.elementType = JSData::token::tokenUndefined;

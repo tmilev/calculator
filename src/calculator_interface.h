@@ -371,7 +371,7 @@ private:
   template<class Coefficient>
   bool makeSum(Calculator& calculator, const LinearCombination<Expression, Coefficient>& summands);
   bool makeSum(Calculator& calculator, const List<Expression>& summands);
-  bool makeProduct(Calculator& owner, const List<Expression>& theMultiplicands);
+  bool makeProduct(Calculator& owner, const List<Expression>& multiplicands);
   bool makeProduct(Calculator& owner, const Expression& left, const Expression& right);
   int getNumberOfColumns() const;
   bool makeSequenceCommands(Calculator& owner, List<std::string>& inputKeys, List<Expression>& inputValues);
@@ -382,9 +382,9 @@ private:
   bool makeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex = 2);
   bool makeSqrt(Calculator& owner, const Expression& argument, const Rational& radicalSuperIndex = 2);
 
-  bool makeXOXOdotsOX(Calculator& owner, int theOp, const List<Expression>& theOpands);
-  bool makeOXdotsX(Calculator& owner, int theOp, const List<Expression>& input);
-  bool makeOX(Calculator& owner, int theOp, const Expression& opArgument);
+  bool makeXOXOdotsOX(Calculator& owner, int operation, const List<Expression>& theOpands);
+  bool makeOXdotsX(Calculator& owner, int operation, const List<Expression>& input);
+  bool makeOX(Calculator& owner, int operation, const Expression& opArgument);
   bool sequencefy();
   bool isSuitableForSubstitution() const;
   bool isSuitableForRecursion() const;
@@ -396,12 +396,12 @@ private:
   void assignXOXToChild(
     int childIndex,
     Calculator& owner,
-    int theOp,
+    int operation,
     const Expression& left,
     const Expression& right
   ) {
     Expression tempE;
-    tempE.makeXOX(owner, theOp, left, right);
+    tempE.makeXOX(owner, operation, left, right);
     this->setChild(childIndex, tempE);
   }
   std::string lispify() const;

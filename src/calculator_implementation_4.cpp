@@ -687,13 +687,13 @@ bool Calculator::collectCoefficientsPowersVariables(
   const Expression& input, const Expression& theVariable, VectorSparse<Expression>& outputPositionIiscoeffXtoIth
 ) {
   MacroRegisterFunctionWithName("Calculator::collectCoefficientsPowersVariables");
-  List<Expression> theSummands, currentMultiplicands, remainingMultiplicands;
+  List<Expression> summands, currentMultiplicands, remainingMultiplicands;
   Calculator& calculator = *input.owner;
-  calculator.collectOpands(input, calculator.opPlus(), theSummands);
+  calculator.collectOpands(input, calculator.opPlus(), summands);
   Expression currentCoeff;
   outputPositionIiscoeffXtoIth.makeZero();
-  for (int i = 0; i < theSummands.size; i ++) {
-    calculator.collectOpands(theSummands[i], calculator.opTimes(), currentMultiplicands);
+  for (int i = 0; i < summands.size; i ++) {
+    calculator.collectOpands(summands[i], calculator.opTimes(), currentMultiplicands);
     bool found = false;
     for (int j = 0; j < currentMultiplicands.size; j ++) {
       const Expression& currentE = currentMultiplicands[j];
@@ -721,7 +721,7 @@ bool Calculator::collectCoefficientsPowersVariables(
       }
     }
     if (!found) {
-      outputPositionIiscoeffXtoIth.addMonomial(MonomialVector(0), theSummands[i]);
+      outputPositionIiscoeffXtoIth.addMonomial(MonomialVector(0), summands[i]);
     }
   }
   return true;
@@ -814,35 +814,35 @@ bool Calculator::functionCollectSummandsCombine(
   outputSum.makeZero();
   LinearCombination<Expression, AlgebraicNumber> sumOverAlgebraicNumbers;
   LinearCombination<Expression, double> sumOverDoubles;
-  Rational coeffRat = 1;
-  AlgebraicNumber coeffAlg = 1;
-  double coeffDouble = 1;
+  Rational coefficientRational = 1;
+  AlgebraicNumber coefficientAlgebraic = 1;
+  double coefficientDouble = 1;
   bool hasNAN = false;
   for (int i = 0; i < summands.size; i ++) {
     if (summands[i].isEqualToZero()) {
       continue;
     }
     if (summands[i].startsWith(calculator.opTimes(), 3)) {
-      if (summands[i][1].isOfType<Rational>(&coeffRat)) {
-        outputSum.addMonomial(summands[i][2], coeffRat);
+      if (summands[i][1].isOfType<Rational>(&coefficientRational)) {
+        outputSum.addMonomial(summands[i][2], coefficientRational);
         continue;
-      } else if (summands[i][1].isOfType<AlgebraicNumber>(&coeffAlg)) {
-        if (coeffAlg.isRational(&coeffRat)) {
-          outputSum.addMonomial(summands[i][2], coeffRat);
+      } else if (summands[i][1].isOfType<AlgebraicNumber>(&coefficientAlgebraic)) {
+        if (coefficientAlgebraic.isRational(&coefficientRational)) {
+          outputSum.addMonomial(summands[i][2], coefficientRational);
           continue;
         }
-        sumOverAlgebraicNumbers.addMonomial(summands[i][2], coeffAlg);
+        sumOverAlgebraicNumbers.addMonomial(summands[i][2], coefficientAlgebraic);
         continue;
-      } else if (summands[i][1].isOfType<double>(&coeffDouble)) {
-        sumOverDoubles.addMonomial(summands[i][2], coeffDouble);
-        if (std::isnan(coeffDouble)) {
+      } else if (summands[i][1].isOfType<double>(&coefficientDouble)) {
+        sumOverDoubles.addMonomial(summands[i][2], coefficientDouble);
+        if (std::isnan(coefficientDouble)) {
           hasNAN = true;
         }
         continue;
       }
     }
-    if (summands[i].isRational(&coeffRat)) {
-      outputSum.addMonomial(calculator.expressionOne(), coeffRat);
+    if (summands[i].isRational(&coefficientRational)) {
+      outputSum.addMonomial(calculator.expressionOne(), coefficientRational);
     } else {
       outputSum.addMonomial(summands[i], 1);
     }
@@ -914,7 +914,7 @@ bool Calculator::outerPowerRaiseToFirst(Calculator& calculator, const Expression
   return false;
 }
 
-bool Expression::makeXOXOdotsOX(Calculator& owner, int theOp, const List<Expression>& input) {
+bool Expression::makeXOXOdotsOX(Calculator& owner, int operation, const List<Expression>& input) {
   MacroRegisterFunctionWithName("Expression::makeXOXOdotsOX");
   if (input.size == 0) {
     global.fatal
@@ -924,9 +924,9 @@ bool Expression::makeXOXOdotsOX(Calculator& owner, int theOp, const List<Express
     *this = input[0];
     return true;
   }
-  this->makeXOX(owner, theOp, input[input.size - 2], *input.lastObject());
+  this->makeXOX(owner, operation, input[input.size - 2], *input.lastObject());
   for (int i = input.size - 3; i >= 0; i --) {
-    this->makeXOX(owner, theOp, input[i], *this);
+    this->makeXOX(owner, operation, input[i], *this);
   }
   return true;
 }

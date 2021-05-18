@@ -5055,11 +5055,11 @@ bool Expression::makeProduct(Calculator& owner, const Expression& left, const Ex
   return this->makeXOX(owner, owner.opTimes(), left, right);
 }
 
-bool Expression::makeProduct(Calculator& owner, const List<Expression>& theMultiplicands) {
-  if (theMultiplicands.size == 0) {
+bool Expression::makeProduct(Calculator& owner, const List<Expression>& multiplicands) {
+  if (multiplicands.size == 0) {
     return this->assignValue(1, owner);
   }
-  return this->makeXOXOdotsOX(owner, owner.opTimes(), theMultiplicands);
+  return this->makeXOXOdotsOX(owner, owner.opTimes(), multiplicands);
 }
 
 bool Expression::makeSum(Calculator& owner, const List<Expression>& summands) {
@@ -5070,7 +5070,7 @@ bool Expression::makeSum(Calculator& owner, const List<Expression>& summands) {
   return this->makeXOXOdotsOX(owner, owner.opPlus(), summands);
 }
 
-bool Expression::makeOXdotsX(Calculator& owner, int theOp, const List<Expression>& theOpands) {
+bool Expression::makeOXdotsX(Calculator& owner, int operation, const List<Expression>& theOpands) {
   MacroRegisterFunctionWithName("Expression::makeOXdotsX");
   if (theOpands.size == 0) {
     global.fatal << "zero opands not allowed at this point. " << global.fatal;
@@ -5081,7 +5081,7 @@ bool Expression::makeOXdotsX(Calculator& owner, int theOp, const List<Expression
   }
   *this = *theOpands.lastObject();
   for (int i = theOpands.size - 2; i >= 0; i --) {
-    this->makeXOX(owner, theOp, theOpands[i], *this);
+    this->makeXOX(owner, operation, theOpands[i], *this);
   }
   this->checkConsistencyRecursively();
   return true;
@@ -5167,14 +5167,14 @@ bool Expression::makeXOX(Calculator& owner, int theOp, const Expression& left, c
   return this->addChildOnTop(right);
 }
 
-bool Expression::makeOX(Calculator& owner, int theOp, const Expression& opArgument) {
+bool Expression::makeOX(Calculator& owner, int operation, const Expression& opArgument) {
   if (&opArgument == this) {
     Expression copyE = opArgument;
-    return this->makeOX(owner, theOp, copyE);
+    return this->makeOX(owner, operation, copyE);
   }
   this->reset(owner);
   this->data = owner.opList();
-  this->addChildAtomOnTop(theOp);
+  this->addChildAtomOnTop(operation);
   return this->addChildOnTop(opArgument);
 }
 

@@ -627,11 +627,11 @@ bool CalculatorFunctions::innerGetFirstSummandContaining(
   if (!input.startsWithGivenOperation("GetFirstSummandContaining", 3)) {
     return false;
   }
-  List<Expression> theSummands;
-  calculator.collectOpands(input[1], calculator.opPlus(), theSummands);
-  for (int i = 0; i < theSummands.size; i ++) {
-    if (theSummands[i].containsAsSubExpressionNoBuiltInTypes(input[2])) {
-      output = theSummands[i];
+  List<Expression> summands;
+  calculator.collectOpands(input[1], calculator.opPlus(), summands);
+  for (int i = 0; i < summands.size; i ++) {
+    if (summands[i].containsAsSubExpressionNoBuiltInTypes(input[2])) {
+      output = summands[i];
       return true;
     }
   }
@@ -654,21 +654,21 @@ bool CalculatorFunctions::innerGetSummand(
     if (summandIndex < 0) {
       return false;
     }
-    List<Expression> theSummands;
+    List<Expression> summands;
     List<Expression> theSums;
-    calculator.collectOpands(theExpression, calculator.opPlus(), theSummands);
-    for (int i = 0; i < theSummands.size; i ++) {
-      if (theSummands[i].containsAsSubExpressionNoBuiltInTypes(calculator.opSum())) {
-        theSums.addOnTop(theSummands[i]);
-        theSummands.removeIndexShiftDown(i);
+    calculator.collectOpands(theExpression, calculator.opPlus(), summands);
+    for (int i = 0; i < summands.size; i ++) {
+      if (summands[i].containsAsSubExpressionNoBuiltInTypes(calculator.opSum())) {
+        theSums.addOnTop(summands[i]);
+        summands.removeIndexShiftDown(i);
         i --;
       }
     }
     if (theSums.size > 1) {
       return false;
     }
-    if (summandIndex < theSummands.size) {
-      output = theSummands[summandIndex];
+    if (summandIndex < summands.size) {
+      output = summands[summandIndex];
       return true;
     }
     if (theSums.size == 0) {
@@ -678,16 +678,16 @@ bool CalculatorFunctions::innerGetSummand(
     output.addChildAtomOnTop("GetSummand");
     output.addChildOnTop(theSums[0]);
     Expression shiftE;
-    shiftE.assignValue(theSummands.size, calculator);
+    shiftE.assignValue(summands.size, calculator);
     return output.addChildOnTop(input[2] - shiftE);
   }
-  List<Expression> theMultiplicands;
-  theExpression.getMultiplicandsRecursive(theMultiplicands);
-  Expression theSum = *theMultiplicands.lastObject();
-  theMultiplicands.removeLastObject();
+  List<Expression> multiplicands;
+  theExpression.getMultiplicandsRecursive(multiplicands);
+  Expression theSum = *multiplicands.lastObject();
+  multiplicands.removeLastObject();
   Expression theCoeff;
-  if (theMultiplicands.size > 0) {
-    theCoeff.makeProduct(calculator, theMultiplicands);
+  if (multiplicands.size > 0) {
+    theCoeff.makeProduct(calculator, multiplicands);
   } else {
     theCoeff.assignValue(1, calculator);
   }
@@ -2148,20 +2148,20 @@ bool CalculatorFunctions::innerIsLinearOrConstantIn(
   if (input.size() < 3) {
     return false;
   }
-  List<List<Expression> > theSummands;
-  if (!calculator.getSumProductsExpressions(input[2], theSummands)) {
+  List<List<Expression> > summands;
+  if (!calculator.getSumProductsExpressions(input[2], summands)) {
     return calculator << "Failed to extract sum from "
     << input[2].toString();
   }
-  for (int i = 0; i < theSummands.size; i ++) {
+  for (int i = 0; i < summands.size; i ++) {
     bool found = false;
-    for (int j = 0; j < theSummands[i].size; j ++) {
-      if (theSummands[i][j] == input[1]) {
+    for (int j = 0; j < summands[i].size; j ++) {
+      if (summands[i][j] == input[1]) {
         if (found) {
           return output.assignValue(0, calculator);
         }
         found = true;
-      } else if (!theSummands[i][j].evaluatesToDouble()) {
+      } else if (!summands[i][j].evaluatesToDouble()) {
         return output.assignValue(0, calculator);
       }
     }
@@ -2176,26 +2176,26 @@ bool CalculatorFunctions::isProductLinearOrConstantTermsIn(
   if (input.size() < 3) {
     return false;
   }
-  List<Expression> theMultiplicands;
-  if (!calculator.collectOpands(input[2], calculator.opTimes(),theMultiplicands)) {
+  List<Expression> multiplicands;
+  if (!calculator.collectOpands(input[2], calculator.opTimes(),multiplicands)) {
     return calculator << "Could not extract multiplicands from: "
     << input[2].toString();
   }
-  for (int k = 0; k < theMultiplicands.size; k ++) {
-    List<List<Expression> > theSummands;
-    if (!calculator.getSumProductsExpressions(theMultiplicands[k], theSummands)) {
+  for (int k = 0; k < multiplicands.size; k ++) {
+    List<List<Expression> > summands;
+    if (!calculator.getSumProductsExpressions(multiplicands[k], summands)) {
       return calculator << "Failed to extract sum from "
-      << theMultiplicands[k].toString();
+      << multiplicands[k].toString();
     }
-    for (int i = 0; i < theSummands.size; i ++) {
+    for (int i = 0; i < summands.size; i ++) {
       bool found = false;
-      for (int j = 0; j < theSummands[i].size; j ++) {
-        if (theSummands[i][j] == input[1]) {
+      for (int j = 0; j < summands[i].size; j ++) {
+        if (summands[i][j] == input[1]) {
           if (found) {
             return output.assignValue(0, calculator);
           }
           found = true;
-        } else if (!theSummands[i][j].evaluatesToDouble()) {
+        } else if (!summands[i][j].evaluatesToDouble()) {
           return output.assignValue(0, calculator);
         }
       }
@@ -2415,35 +2415,35 @@ bool CalculatorFunctions::innerIsProductTermsUpToPower(
       desiredMaxPower = 1;
     }
   }
-  List<Expression> theMultiplicands;
-  if (!calculator.collectOpands(input[2], calculator.opTimes(), theMultiplicands)) {
+  List<Expression> multiplicands;
+  if (!calculator.collectOpands(input[2], calculator.opTimes(), multiplicands)) {
     return calculator << "Could not extract multiplicands from: "
     << input[2].toString();
   }
 
-  for (int k = 0; k < theMultiplicands.size; k ++) {
-    List<List<Expression> > theSummands;
-    if (!calculator.getSumProductsExpressions(theMultiplicands[k], theSummands)) {
+  for (int k = 0; k < multiplicands.size; k ++) {
+    List<List<Expression> > summands;
+    if (!calculator.getSumProductsExpressions(multiplicands[k], summands)) {
       return calculator << "Failed to extract sum from "
-      << theMultiplicands[k].toString();
+      << multiplicands[k].toString();
     }
-    for (int i = 0; i < theSummands.size; i ++) {
+    for (int i = 0; i < summands.size; i ++) {
       LargeInteger foundPower = 0;
-      for (int j = 0; j < theSummands[i].size; j ++) {
-        if (theSummands[i][j] == theBase) {
+      for (int j = 0; j < summands[i].size; j ++) {
+        if (summands[i][j] == theBase) {
           foundPower ++;
           continue;
         }
-        if (theSummands[i][j].startsWith(calculator.opPower(), 3)) {
-          if (theSummands[i][j][1] == theBase) {
+        if (summands[i][j].startsWith(calculator.opPower(), 3)) {
+          if (summands[i][j][1] == theBase) {
             LargeInteger localPower;
-            if (theSummands[i][j][2].isInteger(&localPower)) {
+            if (summands[i][j][2].isInteger(&localPower)) {
               foundPower += localPower;
               continue;
             }
           }
         }
-        if (!theSummands[i][j].evaluatesToDouble()) {
+        if (!summands[i][j].evaluatesToDouble()) {
           return output.assignValue(0, calculator);
         }
       }

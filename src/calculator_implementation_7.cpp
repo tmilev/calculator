@@ -975,7 +975,7 @@ bool CalculatorFunctionsTrigonometry::cos(Calculator& calculator, const Expressi
 }
 
 bool CalculatorFunctionsTrigonometry::tan(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::tan");
+  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::tan");
   if (input.size() != 2) {
     return false;
   }
@@ -987,7 +987,7 @@ bool CalculatorFunctionsTrigonometry::tan(Calculator& calculator, const Expressi
 }
 
 bool CalculatorFunctionsTrigonometry::cotangent(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::tan");
+  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::cotangent");
   if (input.size() != 2) {
     return false;
   }
@@ -999,7 +999,7 @@ bool CalculatorFunctionsTrigonometry::cotangent(Calculator& calculator, const Ex
 }
 
 bool CalculatorFunctionsTrigonometry::sec(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::sec");
+  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::sec");
   if (input.size() != 2) {
     return false;
   }
@@ -1011,7 +1011,7 @@ bool CalculatorFunctionsTrigonometry::sec(Calculator& calculator, const Expressi
 }
 
 bool CalculatorFunctionsTrigonometry::csc(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::csc");
+  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::csc");
   if (input.size() != 2) {
     return false;
   }
@@ -1024,13 +1024,13 @@ bool CalculatorFunctionsTrigonometry::csc(Calculator& calculator, const Expressi
 
 bool Calculator::getSumProductsExpressions(const Expression& inputSum, List<List<Expression> >& outputSumMultiplicands) {
   MacroRegisterFunctionWithName("Calculator::getSumProductsExpressions");
-  List<Expression> theSummands, currentMultiplicands;
+  List<Expression> summands, currentMultiplicands;
   outputSumMultiplicands.setSize(0);
-  if (!this->collectOpands(inputSum, this->opPlus(), theSummands)) {
+  if (!this->collectOpands(inputSum, this->opPlus(), summands)) {
     return false;
   }
-  for (int i = 0; i < theSummands.size; i ++) {
-    this->collectOpands(theSummands[i], this->opTimes(), currentMultiplicands);
+  for (int i = 0; i < summands.size; i ++) {
+    this->collectOpands(summands[i], this->opTimes(), currentMultiplicands);
     outputSumMultiplicands.addOnTop(currentMultiplicands);
   }
   return true;
@@ -1041,7 +1041,7 @@ bool CalculatorFunctions::coefficientOf(Calculator& calculator, const Expression
   if (input.size() != 3) {
     return false;
   }
-  List<List<Expression> > theSummands;
+  List<List<Expression> > summands;
   List<Expression> currentListMultiplicands, survivingSummands;
   Expression currentMultiplicand;
   if (input[2].startsWith(calculator.opDivide())) {
@@ -1052,14 +1052,14 @@ bool CalculatorFunctions::coefficientOf(Calculator& calculator, const Expression
     }
     return output.makeXOX(calculator, calculator.opDivide(), output, input[2][2]);
   }
-  if (!calculator.getSumProductsExpressions(input[2], theSummands)) {
+  if (!calculator.getSumProductsExpressions(input[2], summands)) {
     return calculator << "Failed to extract product of expressions from "
     << input[2].toString();
   }
-  for (int i = 0; i < theSummands.size; i ++) {
+  for (int i = 0; i < summands.size; i ++) {
     bool isGood = false;
-    for (int j = 0; j < theSummands[i].size; j ++) {
-      if (theSummands[i][j] == input[1]) {
+    for (int j = 0; j < summands[i].size; j ++) {
+      if (summands[i][j] == input[1]) {
         if (isGood) {
           isGood = false;
           break;
@@ -1071,9 +1071,9 @@ bool CalculatorFunctions::coefficientOf(Calculator& calculator, const Expression
       continue;
     }
     currentListMultiplicands.setSize(0);
-    for (int j = 0; j < theSummands[i].size; j ++) {
-      if (theSummands[i][j] != input[1]) {
-        currentListMultiplicands.addOnTop(theSummands[i][j]);
+    for (int j = 0; j < summands[i].size; j ++) {
+      if (summands[i][j] != input[1]) {
+        currentListMultiplicands.addOnTop(summands[i][j]);
       }
     }
     currentMultiplicand.makeProduct(calculator, currentListMultiplicands);

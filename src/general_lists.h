@@ -1630,7 +1630,7 @@ public:
   // the string operations required to generate some progress reports
   // are expected to cost more than the mathematical computations
   // they are reporting.
-  void report(const std::string& theReport);
+  void report(const std::string& stringToReport);
   bool tickAndWantReport();
   ProgressReport(const std::string& inputName = "") {
     this->name = inputName;

@@ -551,8 +551,8 @@ MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionSimpleGenerato
             this->applyTransposeAntiAutomorphism(currentPair.object1);
             currentPair.object2 = otherWordList[k];
           }
-          ProgressReport theReport;
-          theScalarProds[k] = this->highestWeightTrace(currentPair, &theReport);
+          ProgressReport report;
+          theScalarProds[k] = this->highestWeightTrace(currentPair, &report);
         }
         this->bilinearFormsInverted[weightLevelIndex].actOnVectorColumn(theScalarProds);
         for (int k = 0; k < theScalarProds.size; k ++) {
@@ -575,7 +575,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   bool computeSimpleGens
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::makeFromHW");
-  ProgressReport theReport;
+  ProgressReport report;
   this->owner = &inputAlgebra;
   SemisimpleLieAlgebra& theAlgebrA = inputAlgebra;
 
@@ -741,9 +741,9 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
           MatrixTensor<Coefficient>& matrix = this->getActionGeneratorIndex(index);
           std::stringstream tempStream;
           tempStream << "computing action simple generator index " << (2 * k - 1) * (j + 1) << " ... ";
-          theReport.report(tempStream.str());
+          report.report(tempStream.str());
           tempStream << " done!";
-          theReport.report(tempStream.str());
+          report.report(tempStream.str());
           if (outputReport != nullptr) {
             if (this->getDimension() < 50) {
               out2 << "<br>Matrix of elemenent in the m_i basis:<br>" << HtmlRoutines::getMathNoDisplay(matrix.toString(), 5000);
@@ -770,7 +770,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
     *outputReport = out2.str();
   }
   this->flagIsInitialized = true;
-  theReport.report("Done with module generation");
+  report.report("Done with module generation");
   return true;
 }
 
@@ -779,8 +779,8 @@ void ModuleSSalgebra<Coefficient>::intermediateStepForMakeFromHW(
   const Coefficient& ringUnit, const Coefficient& ringZero
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::intermediateStepForMakeFromHW");
-  ProgressReport theReport;
-  ProgressReport theReport2;
+  ProgressReport report;
+  ProgressReport report2;
   Vector<Rational> targetWeight;
   this->bilinearFormsAtEachWeightLevel.setSize(this->generatingWordsGrouppedByWeight.size);
   this->bilinearFormsInverted.setSize(this->generatingWordsGrouppedByWeight.size);
@@ -802,8 +802,8 @@ void ModuleSSalgebra<Coefficient>::intermediateStepForMakeFromHW(
         tempStream << " Computing Shapovalov form layer " << l << " out of " << this->generatingWordsGrouppedByWeight.size
         << " between indices " << i + 1 << " and " << j + 1 << " out of " << currentWordList.size;
         numScalarProducts ++;
-        currentBF.elements[i][j] = this->highestWeightTransposeAntiAutomorphismBilinearFormSimpleGeneratorsOnly(currentWordListInt[i], currentWordListInt[j], &theReport2);
-        theReport.report(tempStream.str());
+        currentBF.elements[i][j] = this->highestWeightTransposeAntiAutomorphismBilinearFormSimpleGeneratorsOnly(currentWordListInt[i], currentWordListInt[j], &report2);
+        report.report(tempStream.str());
         if (i != j) {
           currentBF.elements[j][i] = currentBF.elements[i][j];
         }
@@ -872,7 +872,7 @@ void ModuleSSalgebra<Coefficient>::getElementsNilradical(
 template<class Coefficient>
 void ModuleSSalgebra<Coefficient>::checkConsistency() {
   MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::TestConsistency");
-  ProgressReport theReport;
+  ProgressReport report;
   MatrixTensor<Coefficient> left, right, output, otherOutput, tempMat, diffMat;
   for (int i = 0; i < this->getOwner().getNumberOfGenerators(); i ++) {
     for (int j = 0; j < this->getOwner().getNumberOfGenerators(); j ++) {
@@ -906,7 +906,7 @@ void ModuleSSalgebra<Coefficient>::checkConsistency() {
         tempStream << "tested index " << i + 1
         << " out of " << this->getOwner().getNumberOfGenerators()
         << ", " << j + 1 << " out of " << this->getOwner().getNumberOfGenerators();
-        theReport.report(tempStream.str());
+        report.report(tempStream.str());
       }
     }
   }
@@ -1032,7 +1032,7 @@ void ModuleSSalgebra<Coefficient>::getAdActionHomogenousElt(
   outputSortedByArgumentWeight.setSize(this->generatingWordsGrouppedByWeight.size);
   ElementUniversalEnveloping<Coefficient> element;
   std::string generatorString = inputHomogeneous.toString();
-  ProgressReport theReport;
+  ProgressReport report;
   for (int i = 0; i < this->generatingWordsGrouppedByWeight.size; i ++) {
     List<MonomialUniversalEnveloping<Coefficient> >& currentWordList = this->generatingWordsGrouppedByWeight[i];
     List<ElementUniversalEnveloping<Coefficient> >& outputCurrentList = outputSortedByArgumentWeight[i];
@@ -1046,7 +1046,7 @@ void ModuleSSalgebra<Coefficient>::getAdActionHomogenousElt(
       << generatorString << " on weight layer " << i + 1
       << " out of " << this->generatingWordsGrouppedByWeight.size
       << ", word " << j + 1 << " out of " << currentWordList.size << "...";
-      theReport.report(progressStream.str());
+      report.report(progressStream.str());
       ElementUniversalEnveloping<Coefficient>& currentOutputWord = outputCurrentList[j];
       if (index == - 1) {
         currentOutputWord.makeZero(*this->owner);
@@ -1058,7 +1058,7 @@ void ModuleSSalgebra<Coefficient>::getAdActionHomogenousElt(
         );
       }
       progressStream << " done!";
-      theReport.report(progressStream.str());
+      report.report(progressStream.str());
     }
   }
 }
@@ -1564,8 +1564,8 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   std::stringstream tempStream1;
   tempStream1 << "Started splitting the f.d. part of the " << theHmm.range().toStringLieAlgebraName() << "-module with highest weight in fund coords "
   << this->character[0].weightFundamentalCoordinates.toString();
-  ProgressReport theReport;
-  theReport.report(tempStream1.str());
+  ProgressReport report;
+  report.report(tempStream1.str());
   List<List<Vector<Coefficient> > > eigenSpacesPerSimpleGenerator;
   Selection InvertedLeviInSmall;
   InvertedLeviInSmall = LeviInSmall;
@@ -1591,12 +1591,12 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
     std::stringstream tempStream3;
     double timeAtStart1 = global.getElapsedSeconds();
     tempStream3 << "Computing eigenspace corresponding to " << currentElt.toString() << "...";
-    theReport.report(tempStream3.str());
+    report.report(tempStream3.str());
     Matrix<Coefficient> currentOpMat;
     currentOp.getMatrix(currentOpMat, this->getDimension());
     currentOpMat.getZeroEigenSpace(eigenSpacesPerSimpleGenerator[i]);
     tempStream3 << " done in " << global.getElapsedSeconds() - timeAtStart1 << " seconds. ";
-    theReport.report(tempStream3.str());
+    report.report(tempStream3.str());
     if (i == 0) {
       theFinalEigenSpace = eigenSpacesPerSimpleGenerator[i];
     } else {
@@ -1604,11 +1604,11 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
       double timeAtStart2 = global.getElapsedSeconds();
       tempStream4 << "Intersecting with eigenspace corresponding to " << currentElt.toString() << "...";
       tempSpace1 = theFinalEigenSpace;
-      theReport.report(tempStream4.str());
+      report.report(tempStream4.str());
       tempSpace2 = eigenSpacesPerSimpleGenerator[i];
       theFinalEigenSpace.intersectTwoLinearSpaces(tempSpace1, tempSpace2, theFinalEigenSpace);
       tempStream4 << " done in " << global.getElapsedSeconds() - timeAtStart2 << " seconds. ";
-      theReport.report(tempStream4.str());
+      report.report(tempStream4.str());
     }
   }
   out << "<br>Eigenvectors: <table>";
@@ -1665,7 +1665,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   readyForLatexComsumption << "\\hline \n<br> \\end{tabular}";
   out << "<br>Your ready for LaTeX consumption text follows.<br>";
   out << readyForLatexComsumption.str();
-  theReport.report("splitFDpartOverFKLeviRedSubalg done!");
+  report.report("splitFDpartOverFKLeviRedSubalg done!");
   if (comments != nullptr) {
     *comments << out.str();
   }
@@ -1780,7 +1780,7 @@ void MonomialGeneralizedVerma<Coefficient>::multiplyMeByUEEltOnTheLeft(
   MonomialGeneralizedVerma<Coefficient> currentMon;
   output.makeZero();
   ElementSumGeneralizedVermas<Coefficient> buffer;
-  ProgressReport theReport;
+  ProgressReport report;
   if (!this->getOwner().owner->flagHasNilradicalOrder) {
     global.fatal << "Calling generalized verma module simplification requires nilradical order on the generators. "
     << global.fatal;
@@ -1794,10 +1794,10 @@ void MonomialGeneralizedVerma<Coefficient>::multiplyMeByUEEltOnTheLeft(
     std::stringstream reportStream;
     reportStream << "reducing mon: " << currentMon.toString()
     << ", index" << j + 1 << " out of " << theUE.size() << "...";
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
     currentMon.reduceMe(buffer);
     reportStream << " done.";
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
     buffer *= theUE.coefficients[j];
     output += buffer;
   }
@@ -1847,7 +1847,7 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
   MonomialUniversalEnveloping<Coefficient> currentMon;
   MonomialGeneralizedVerma<Coefficient> newMon;
   MatrixTensor<Coefficient> tempMat1, tempMat2;
-  ProgressReport theReport;
+  ProgressReport report;
   Coefficient theCF;
   for (int l = 0; l < theUEelt.size(); l ++) {
     currentMon = theUEelt[l];
@@ -1858,7 +1858,7 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
       << l + 1 << " out of "
       << theUEelt.size() << " and letter index " << currentMon.powers.size - k
       << " out of " << currentMon.powers.size << "...";
-      theReport.report(reportStream.str());
+      report.report(reportStream.str());
       int power = - 1;
       if (!currentMon.powers[k].isSmallInteger(&power)) {
         break;
@@ -1874,7 +1874,7 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
       currentMon.powers.size --;
       currentMon.generatorsIndices.size --;
       reportStream << "done!";
-      theReport.report(reportStream.str());
+      report.report(reportStream.str());
     }
     newMon.owner = this->owner;
     for (int i = 0; i < tempMat1.size(); i ++) {

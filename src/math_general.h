@@ -3261,7 +3261,7 @@ class GroebnerBasisComputation {
     const MonomialPolynomial& leadingMonomial,
     const Coefficient& leadingCoefficient,
     int index,
-    ProgressReport* theReport
+    ProgressReport* report
   );
   std::string toStringDivision(Polynomial<Coefficient>& toBeDivided);
   std::string toStringStatusGroebnerBasisTransformation();

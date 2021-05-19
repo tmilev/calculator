@@ -6713,7 +6713,7 @@ bool CalculatorFunctions::innerAllVectorPartitions(Calculator& calculator, const
   }
   std::stringstream out;
   int numFound = 0;
-  ProgressReport theReport;
+  ProgressReport report;
   out << thePartition.toStringPartitioningVectors();
   while (thePartition.incrementReturnFalseIfPastLast()) {
     out << "<br>" << thePartition.toStringOnePartition(thePartition.currentPartition);
@@ -6722,7 +6722,7 @@ bool CalculatorFunctions::innerAllVectorPartitions(Calculator& calculator, const
       std::stringstream reportStream;
       reportStream << "Found " << numFound << " partitions of " << thePartition.goalVector.toString()
       << "<br>Current partition: " << thePartition.currentPartition;
-      theReport.report(reportStream.str());
+      report.report(reportStream.str());
     }
   }
   return output.assignValue(out.str(), calculator);
@@ -7287,11 +7287,11 @@ bool CalculatorFunctions::innerTestIndicator(
     dummyComment[i] = 'a';
   }
   global.response.initiate("Triggered by test indicator. ");
-  ProgressReport theReport;
+  ProgressReport report;
   for (int i = 0; i < numRuns; i ++) {
     std::stringstream reportStream;
     reportStream << " Running indicator test, " << i + 1 << " out of " << numRuns << ".";
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
     global.fallAsleep(4000);
   }
   std::stringstream out;
@@ -7442,7 +7442,7 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
   }
   LargeIntegerUnsigned currentIndexLarge, currentDistance, maxDistanceGenerated;
   int currentIndex;
-  ProgressReport theReport;
+  ProgressReport report;
   std::stringstream reportstream;
   reportstream << "Finding product distance mod " << theMod.toString() << " w.r.t. elements "
   << theInts;
@@ -7469,7 +7469,7 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
             << " candidates were not added to the stack. "
             << "Number of elements reached: " << numElementsCovered << ". "
             << "Max distance generated while searching: " << maxDistanceGenerated.toString();
-            theReport.report(out.str());
+            report.report(out.str());
           }
           continue;
         }
@@ -7488,7 +7488,7 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
         << indexStack.size << " indices. " << numElementsNotAddedToStack << " candidates were not added to the stack. "
         << "Number of elements reached: " << numElementsCovered << ". "
         << "Max distance generated while searching: " << maxDistanceGenerated.toString();
-        theReport.report(out.str());
+        report.report(out.str());
       }
     }
     if (indexStack.size > 1000000000) {
@@ -7567,7 +7567,7 @@ bool CalculatorFunctions::innerSolveProductSumEquationOverSetModN(
   LargeIntegerUnsigned theModLarge;
   theModLarge = static_cast<unsigned>(theMod);
   int numTestedSoFar = 0;
-  ProgressReport theReport;
+  ProgressReport report;
   LargeIntegerUnsigned oneUI = 1;
   while (thePartition.incrementReturnFalseIfPastLast()) {
     LargeIntegerUnsigned theProduct = 1;
@@ -7594,7 +7594,7 @@ bool CalculatorFunctions::innerSolveProductSumEquationOverSetModN(
     numTestedSoFar ++;
     std::stringstream reportStream;
     reportStream << numTestedSoFar << " tested so far ...";
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
   }
   return output.assignValue(std::string("Couldn't find solution"), calculator);
 }
@@ -7636,7 +7636,7 @@ bool Calculator::Test::calculatorTestRun() {
   global.setWebInput(WebAPI::request::debugFlag, "false");
   this->calculatorTestPrepare();
   Calculator theTester;
-  ProgressReport theReport;
+  ProgressReport report;
   FormatExpressions theFormat;
   theFormat.flagExpressionIsFinal = true;
   if (this->numberOfTests <= 0) {
@@ -7659,14 +7659,14 @@ bool Calculator::Test::calculatorTestRun() {
     << this->commands.size() << ", atom: " << currentTest.atom
     << ", command:\n"
     << currentTest.command << Logger::endL;
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
     theTester.initialize(Calculator::Mode::full);
     theTester.checkConsistencyAfterInitialization();
     theTester.evaluate(currentTest.command);
     currentTest.actualResult = theTester.programExpression.toString(&theFormat);
     reportStream << "<br>Result: " << theTester.programExpression.toString();
     reportStream << "<br>Done in: " << global.getElapsedSeconds() - this->startTime << " seconds. ";
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
   }
   global.setWebInput(WebAPI::request::debugFlag, this->debugFlagAtStart);
   return this->processResults();

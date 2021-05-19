@@ -1386,8 +1386,8 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
   QuasiPolynomial tempQP;
   this->theMultiplicities.setSize(this->projectivizedChambeR.size);
   this->numNonZeroMults = 0;
-  ProgressReport theReport;
-  ProgressReport theReport2;
+  ProgressReport report;
+  ProgressReport report2;
   for (int i = 0; i < this->projectivizedChambeR.size; i ++) {
     QuasiPolynomial& currentSum = this->theMultiplicities.objects[i];
     currentSum.makeZeroOverLattice(this->theExtendedIntegralLatticeMatForM);
@@ -1403,7 +1403,7 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
       }
       std::stringstream tempStream;
       tempStream << " Chamber " << i + 1 << " translation " << k + 1;
-      theReport.report(tempStream.str());
+      report.report(tempStream.str());
     }
     if (!currentSum.isEqualToZero()) {
       this->numNonZeroMults ++;
@@ -1411,13 +1411,13 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
     std::stringstream tempStream;
     tempStream << " So far " << i + 1 << " out of " << this->projectivizedChambeR.size << " processed " << this->numNonZeroMults
     << " non-zero total.";
-    theReport2.report(tempStream.str());
+    report2.report(tempStream.str());
     out << "\nChamber " << i + 1 << ": the quasipolynomial is: " << currentSum.toString(false, false);
     out << "\nThe chamber is: " << this->projectivizedChambeR[i].toString(&theFormat);
   }
 //  this->projectivizedChamber.ComputeDebugString();
 //  out << "\n\n" << this->projectivizedChamber.DebugString;
-  theReport.report(out.str());
+  report.report(out.str());
   this->theMultiplicitiesMaxOutputReport2 << out.str();
 }
 
@@ -1993,7 +1993,7 @@ void GeneralizedVermaModuleCharacters::initTheMaxComputation() {
 //  int theProjectivizedDim= theAffineDim + 1;
   ZnLattice.makeZn(theAffineDim);
   this->numNonZeroMults = 0;
-  ProgressReport theReport;
+  ProgressReport report;
   ConeLatticeAndShift currentCLS;
   Vector<Rational> theLPtoMax;
   for (int i = 0; i < this->theMultiplicities.size; i ++) {
@@ -2011,7 +2011,7 @@ void GeneralizedVermaModuleCharacters::initTheMaxComputation() {
       std::stringstream out;
       out << "Initialized " << i + 1 << " out of " << this->theMaxComputation.theConesLargerDim.size
       << "; so far " << this->numNonZeroMults << " non-zero multiplicities";
-      theReport.report(out.str());
+      report.report(out.str());
     }
   }
 }
@@ -2136,13 +2136,13 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjective(
 
 void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep1() {
   this->smallerAlgebraChamber.initializeFromDirectionsAndRefine(this->GmodKNegWeightsBasisChanged);
-  ProgressReport theReport1;
-  ProgressReport theReport2;
-  theReport1.report(this->smallerAlgebraChamber.toString(false));
+  ProgressReport report1;
+  ProgressReport report2;
+  report1.report(this->smallerAlgebraChamber.toString(false));
   this->log << "Directions for making the chamber basis changed: " << this->GmodKNegWeightsBasisChanged.toString()
   << "\n Resulting chamber before projectivization:\n "
   << this->smallerAlgebraChamber.toString(false);
-  theReport2.report(this->log.str());
+  report2.report(this->log.str());
 }
 
 void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
@@ -2151,7 +2151,7 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
   Cone currentProjectiveCone;
   Vectors<Rational> tempRoots;
   Vector<Rational> wallToSliceWith;
-  ProgressReport theReport;
+  ProgressReport report;
   projectivizedChamberFinal.initialize();
   for (int i = 0; i < this->smallerAlgebraChamber.size; i ++) {
     Cone& currentAffineCone = this->smallerAlgebraChamber.objects[i];
@@ -2160,7 +2160,7 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
       this->transformToWeylProjective(0, currentAffineCone.normals[j], tempRoots[j]);
     }
     tempRoots.addListOnTop(this->PreimageWeylChamberLargerAlgebra.normals);
-    theReport.report(tempRoots.toString());
+    report.report(tempRoots.toString());
     currentProjectiveCone.createFromNormals(tempRoots);
     projectivizedChamberFinal.addNonRefinedChamberOnTopNoRepetition(currentProjectiveCone);
   }
@@ -2184,7 +2184,7 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
       i --;
     }
   }
-  theReport.report(out.str());
+  report.report(out.str());
   projectivizedChamberFinal.indexLowestNonRefinedChamber = 0;
   this->projectivizedChambeR= projectivizedChamberFinal;
   for (int k = 1; k < this->theLinearOperators.size; k ++) {
@@ -2197,5 +2197,5 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
     }
   }
   out << "projectivized chamber chopped non-dominant part:\n"  << this->projectivizedChambeR.toString(false);
-  theReport.report(out.str());
+  report.report(out.str());
 }

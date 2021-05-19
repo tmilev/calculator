@@ -289,7 +289,7 @@ void GroebnerBasisComputation<Coefficient>::oneDivisonSubStepWithBasis(
   const MonomialPolynomial& leadingMonomial,
   const Coefficient& leadingCoefficient,
   int index,
-  ProgressReport* theReport
+  ProgressReport* report
 ) {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::oneDivisonSubStepWithBasis");
   const MonomialPolynomial& leadingMonomialBasis = this->basis[index].leadingMonomial;
@@ -319,7 +319,7 @@ void GroebnerBasisComputation<Coefficient>::oneDivisonSubStepWithBasis(
   if (this->flagDoLogDivision) {
     this->divisionReport.getElement().intermediateSubtractands.addOnTop(buffer);
   }
-  if (this->flagDoProgressReport && theReport != nullptr) {
+  if (this->flagDoProgressReport && report != nullptr) {
     std::stringstream out;
     out << "Monomial operation count: " << this->numberMonomialOperations;
     if (this->maximumMonomialOperations > 0) {
@@ -339,7 +339,7 @@ void GroebnerBasisComputation<Coefficient>::oneDivisonSubStepWithBasis(
     << " of basis element: " << index + 1
     << " out of " << this->basis.size << "\n<br>"
     << remainder.size() << " monomials in current remainder.";
-    theReport->report(out.str());
+    report->report(out.str());
   }
   remainder -= buffer;
   this->numberMonomialOperations += buffer.size();
@@ -982,7 +982,7 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
   List<Polynomial<Coefficient> >& inputSystem, const Rational& aValueToTryOnPreferredVariable
 ) {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::trySettingValueToVariable");
-  ProgressReport theReport1;
+  ProgressReport report1;
   PolynomialSystem<Coefficient>& heuristicAttempt = this->computationUsedInRecursiveCalls.getElement();
   this->setUpRecursiveComputation(heuristicAttempt);
   int variableIndex = this->getPreferredSerreSystemSubstitutionIndex(inputSystem);
@@ -999,7 +999,7 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
     MonomialPolynomial monomial(variableIndex);
     out << this->toStringImpliedSubstitutions() << "Attempting an (a priori random) substitution:<br>"
     << monomial.toString(&this->format()) << "=" << aValueToTryOnPreferredVariable << ";";
-    theReport1.report(out.str());
+    report1.report(out.str());
   }
   heuristicAttempt.setSerreLikeSolutionIndex(variableIndex, aValueToTryOnPreferredVariable);
   for (int i = 0; i < inputSystem.size; i ++) {
@@ -1039,7 +1039,7 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
   List<Polynomial<Coefficient> >& inputSystem, const MonomialPolynomial& monomial
 ) {
   MacroRegisterFunctionWithName("PolynomialSystem::solveWhenSystemHasSingleMonomial");
-  ProgressReport theReport1;
+  ProgressReport report1;
   List<Polynomial<Coefficient> > inputSystemCopy = inputSystem;
   bool allProvenToHaveNoSolution = true;
   for (int i = 0; i < monomial.minimalNumberOfVariables(); i ++) {
@@ -1051,7 +1051,7 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
       MonomialPolynomial tempMon(i);
       out << "The system has the single monomial: " << monomial.toString(&this->format())
       << "<br>Trying case:<br>" << tempMon.toString(&this->format()) << "= 0;";
-      theReport1.report(out.str());
+      report1.report(out.str());
     }
     PolynomialSubstitution<Coefficient> theSub;
     theSub.makeIdentitySubstitution(this->systemSolution.size);

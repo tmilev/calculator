@@ -503,10 +503,10 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerCandidateSubalgebraPrecomputed");
   owner.checkInitialization();
-  ProgressReport theReport;
+  ProgressReport report;
   std::stringstream reportStream;
   reportStream << "Loading precomputed semisimple subalgebra. ";
-  theReport.report(reportStream.str());
+  report.report(reportStream.str());
   Expression DynkinTypeE, ElementsCartanE, generatorsE;
   if (
     !CalculatorConversions::innerLoadKey(calculator, input, "DynkinType", DynkinTypeE) ||
@@ -515,7 +515,7 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
     return false;
   }
   reportStream << "Extracted types: " << DynkinTypeE.toString() << ". ";
-  theReport.report(reportStream.str());
+  report.report(reportStream.str());
   outputSubalgebra.owner = &owner;
   DynkinType theNonEmbeddedDynkinType;
   if (!CalculatorConversions::functionDynkinType(
@@ -526,13 +526,13 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
     << DynkinTypeE.toString() << "<hr>";
   }
   reportStream << "Non embedded Dynkin type: " << DynkinTypeE.toString() << ". ";
-  theReport.report(reportStream.str());
+  report.report(reportStream.str());
   outputSubalgebra.weylNonEmbedded = &
   calculator.objectContainer.getWeylGroupDataCreateIfNotPresent(theNonEmbeddedDynkinType);
   outputSubalgebra.weylNonEmbedded->makeFromDynkinType(theNonEmbeddedDynkinType);
   int theRank = owner.owner->getRank();
   reportStream << "Extracting matrix of Cartan elements. ";
-  theReport.report(reportStream.str());
+  report.report(reportStream.str());
   Matrix<Rational> theHs;
   if (!calculator.functionGetMatrix(ElementsCartanE, theHs, nullptr, theRank, nullptr)) {
     return calculator << "<hr>Failed to load Cartan elements for candidate subalgebra of type "
@@ -561,7 +561,7 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
     }
   }
   reportStream << "Extracting generators ... ";
-  theReport.report(reportStream.str());
+  report.report(reportStream.str());
   outputSubalgebra.positiveGenerators.setSize(0);
   outputSubalgebra.negativeGenerators.setSize(0);
   if (CalculatorConversions::innerLoadKey(calculator, input, "generators", generatorsE)) {
@@ -634,10 +634,10 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   }
   SemisimpleLieAlgebra* ownerSemisimple = nullptr;
   Expression tempE;
-  ProgressReport theReport;
+  ProgressReport report;
   std::stringstream reportStream;
   reportStream << "Extracting semisimple Lie algebra ... ";
-  theReport.report(reportStream.str());
+  report.report(reportStream.str());
   if (!CalculatorConversions::functionSemisimpleLieAlgebra(
     calculator, theAmbientTypeE, tempE, ownerSemisimple
   )) {
@@ -645,16 +645,16 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     << "failed to extract ambient semisimple Lie algebra. ";
   }
   reportStream << " type: " << ownerSemisimple->weylGroup.dynkinType.toString() << ". ";
-  theReport.report(reportStream.str());
+  report.report(reportStream.str());
 
   SemisimpleSubalgebras& theSAs =
   calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSemisimple->weylGroup.dynkinType);
   theSAs.subalgebrasNonEmbedded = &calculator.objectContainer.semisimpleLieAlgebras;
   theSAs.owner = ownerSemisimple;
   reportStream << " Initializing data structures... ";
-  theReport.report(reportStream.str());
+  report.report(reportStream.str());
   reportStream << " done. Fetching subalgebra list ... ";
-  theReport.report(reportStream.str());
+  report.report(reportStream.str());
   theSAsE.sequencefy();
   theSAs.subalgebras.setExpectedSize(theSAsE.size() - 1);
   theSAs.subalgebras.clear();
@@ -665,14 +665,14 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   theSAs.flagComputeNilradicals = false;
   theSAs.millisecondsComputationStart = global.getElapsedMilliseconds();
   reportStream << " done. <br>Total subalgebras: " << theSAsE.size() - 1 << ". ";
-  theReport.report(reportStream.str());
+  report.report(reportStream.str());
 
   for (int i = 1; i < theSAsE.size(); i ++) {
     std::stringstream reportStream2;
     reportStream2 << reportStream.str() << "Subalgebra "
     << i << " is being loaded from expression "
     << theSAsE[i].toString() << ".";
-    theReport.report(reportStream2.str());
+    report.report(reportStream2.str());
     CandidateSemisimpleSubalgebra currentCandidate;
     if (!CalculatorConversions::innerCandidateSubalgebraPrecomputed(
       calculator, theSAsE[i], tempE, currentCandidate, theSAs
@@ -696,7 +696,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   }
   reportStream << "Subalgebra loading done, total "
   << theSAs.subalgebras.values.size << " subalgebras loaded. ";
-  theReport.report(reportStream.str());
+  report.report(reportStream.str());
   theSAs.toStringExpressionString = CalculatorConversions::stringFromSemisimpleSubalgebras;
   if (!theSAs.loadState(currentChainInt, numExploredTypes, numExploredHs, calculator.comments)) {
     return false;

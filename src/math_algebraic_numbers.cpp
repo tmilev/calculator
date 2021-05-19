@@ -1034,13 +1034,13 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
     return;
   }
   bool doReport = (this->element.size() * other.element.size() > 100);
-  ProgressReport theReport;
+  ProgressReport report;
   if (doReport) {
     std::stringstream reportStream;
     reportStream << "Large multiplication:<br>"
     << this->toString() << "\n<br>by<br>\n" << other.toString()
     << "\n<br>...";
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
   }
   this->checkCommonOwner(other);
   MatrixTensor<Rational> leftMatrix, rightMatrix;

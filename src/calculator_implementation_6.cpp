@@ -286,14 +286,14 @@ bool CalculatorHTML::Test::builtInMultiple(
 ) {
   List<int> randomSeeds;
   randomSeeds.setSize(numberOfRepetitions);
-  ProgressReport theReport;
+  ProgressReport report;
   for (int i = 0; i < numberOfRepetitions; i ++) {
     randomSeeds[i] = inputRandomSeed + i;
     std::stringstream reportStream;
     reportStream << "Testing problems, round "
     << i + 1 << " out of " << numberOfRepetitions
     << ", starting random seed: " << randomSeeds[i] << ". ";
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
     CalculatorHTML::Test tester;
     if (!tester.builtIn(inputFirstFileIndex, inputFilesToInterpret, randomSeeds[i])) {
       if (comments != nullptr) {
@@ -326,7 +326,7 @@ bool CalculatorHTML::Test::builtIn(
   this->filesToInterpret = inputFilesToInterpret;
   this->randomSeed = inputRandomSeed;
 
-  ProgressReport theReport;
+  ProgressReport report;
   if (!this->computeTotalFiles()) {
     return false;
   }
@@ -373,7 +373,7 @@ bool CalculatorHTML::Test::builtIn(
     if (global.flagRunningConsoleTest) {
       global << reportStream.str() << Logger::endL;
     }
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
     if (!currentTest.run()) {
       result = false;
     }
@@ -2902,14 +2902,14 @@ bool CalculatorFunctions::innerGenerateMultiplicativelyClosedSet(
   }
   int numGenerators = theSet.size;
   Expression theProduct, evaluatedProduct;
-  ProgressReport theReport;
+  ProgressReport report;
   for (int i = 0; i < theSet.size; i ++) {
     for (int j = 0; j < numGenerators; j ++) {
       theProduct.makeProduct(calculator, theSet[j], theSet[i]);
       std::stringstream reportStream;
       reportStream << "found " << theSet.size << "elements so far, exploring element " << i + 1;
       reportStream << "<br>Evaluating: " << theProduct.toString();
-      theReport.report(reportStream.str());
+      report.report(reportStream.str());
       calculator.evaluateExpression(calculator, theProduct, evaluatedProduct);
       //if (evaluatedProduct == theSet[0])
       //{

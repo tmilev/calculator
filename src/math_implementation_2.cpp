@@ -425,14 +425,14 @@ bool LargeIntegerUnsigned::isPossiblyPrime(
     oddFactorOfNminusOne /= 2;
     exponentOfThePowerTwoFactorOfNminusOne ++;
   }
-  ProgressReport theReport;
+  ProgressReport report;
   for (int i = 0; i < millerRabinTries; i ++) {
-    if (theReport.tickAndWantReport()) {
+    if (report.tickAndWantReport()) {
       std::stringstream reportStream;
       reportStream << "Testing whether " << this->toStringAbbreviate()
       << " is prime using Miller-Rabin test " << i + 1 << " out of "
       << millerRabinTries << ". ";
-      theReport.report(reportStream.str());
+      report.report(reportStream.str());
     }
     if (!this->isPossiblyPrimeMillerRabinOnce(
       aFewPrimes[i],

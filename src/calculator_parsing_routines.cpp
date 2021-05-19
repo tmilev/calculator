@@ -1951,7 +1951,7 @@ bool Calculator::extractExpressions(Expression& outputExpression, std::string* o
   int minMillisecondsPerReport = 200;
   this->statistics.startParsing = global.getElapsedMilliseconds();
   this->statistics.lastStopwatchParsing = this->statistics.startParsing;
-  ProgressReport theReport;
+  ProgressReport report;
   for (
     this->counterInSyntacticSoup = 0;
     this->counterInSyntacticSoup < (*this->currrentSyntacticSoup).size;
@@ -1966,7 +1966,7 @@ bool Calculator::extractExpressions(Expression& outputExpression, std::string* o
         std::stringstream reportStream;
         reportStream << "Processed " << this->counterInSyntacticSoup << " out of " << (*this->currrentSyntacticSoup).size
         << " syntactic elements. ";
-        theReport.report(reportStream.str());
+        report.report(reportStream.str());
       }
     }
     (*this->currentSyntacticStack).addOnTop((*this->currrentSyntacticSoup)[this->counterInSyntacticSoup]);

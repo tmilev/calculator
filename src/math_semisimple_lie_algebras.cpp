@@ -417,12 +417,12 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
   nonExploredRoots.makeFullSelection(posRoots.size);
   Vector<Rational> tempRoot;
   std::stringstream out;
-  ProgressReport theReport;
+  ProgressReport report;
   double startTimer = - 1;
-  if (theReport.tickAndWantReport()) {
+  if (report.tickAndWantReport()) {
     out << "Initializing matrix for structure constant computation of " << this->toStringLieAlgebraName() << "... ";
     startTimer = global.getElapsedSeconds();
-    theReport.report(out.str());
+    report.report(out.str());
   }
   for (int i = 0; i < this->weylGroup.rootSystem.size; i ++) {
     for (int j = i; j < this->weylGroup.rootSystem.size; j ++) {
@@ -438,10 +438,10 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
     }
   }
   double startStructureConstantComputation = - 1;
-  if (theReport.tickAndWantReport()) {
+  if (report.tickAndWantReport()) {
     out << "done in " << global.getElapsedSeconds() - startTimer
     << " seconds.<br> " << "Computing structure constants...";
-    theReport.report(out.str());
+    report.report(out.str());
     startStructureConstantComputation = global.getElapsedSeconds();
   }
   Rational tempRat;
@@ -491,18 +491,18 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
     nonExploredRoots.computeIndicesFromSelection();
   }
   double startMultTable = - 1;
-  if (theReport.tickAndWantReport()) {
+  if (report.tickAndWantReport()) {
     out << " done in " << global.getElapsedSeconds() - startStructureConstantComputation
     << " seconds.<br> Computing Lie bracket pairing (``multiplication'') table...";
-    theReport.report(out.str());
+    report.report(out.str());
     startMultTable = global.getElapsedSeconds();
   }
   this->computeLieBracketTable();
-  if (theReport.tickAndWantReport()) {
+  if (report.tickAndWantReport()) {
     out << " done in " << global.getElapsedSeconds() - startMultTable
     << " seconds. Total structure constant computation time: "
     << global.getElapsedSeconds() - startTimer << " seconds. ";
-    theReport.report(out.str());
+    report.report(out.str());
   }
   if (this->getNumberOfPositiveRoots() <= 0) {
     global.fatal << "Number of positive roots of a "
@@ -803,8 +803,8 @@ void SemisimpleLieAlgebra::makeChevalleyTestReport(int i, int j, int k, int Tota
   out2 << "i: " << i + 1 << " of " << Total << " j: " << j + 1 << " of "
   << Total << " k: " << k + 1 << " of " << Total;
   out3 << "Total progress: " << x << " out of " << (Total * Total * Total);
-  ProgressReport theReport;
-  theReport.report(out2.str() + out3.str());
+  ProgressReport report;
+  report.report(out2.str() + out3.str());
 }
 
 void SemisimpleLieAlgebra::computeOneAutomorphism(Matrix<Rational>& outputAuto, bool useNegativeRootsFirst) {

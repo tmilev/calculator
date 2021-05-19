@@ -221,7 +221,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "SlTwoRealFormStructure{}(a_3)",
     "Calculator::slTwoRealFormStructureComputeOnDemand",
     "SlTwoRealFormStructure",
-    innerInvisible
+    innerAdminNoTest
   );
   this->addOperationHandler(
     "SlTwoRealFormStructureForceRecompute",

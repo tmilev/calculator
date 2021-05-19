@@ -88,7 +88,7 @@ void QuasiDifferentialOperator<Coefficient>::generateBasisLieAlgebra(
   FormatExpressions* format
 ) {
   MacroRegisterFunctionWithName("QuasiDifferentialOperator::generateBasisLieAlgebra");
-  ProgressReport theReport;
+  ProgressReport report;
   HashedList<QuasiDifferentialMononomial> bufferMons;
   List< LinearCombination<QuasiDifferentialMononomial, Coefficient> > elementsConverted;
   elementsConverted = inputElements;
@@ -101,15 +101,15 @@ void QuasiDifferentialOperator<Coefficient>::generateBasisLieAlgebra(
     for (int i = 0; i < elementsConverted.size; i ++) {
       for (int j = i + 1; j < elementsConverted.size; j ++) {
         tempQDO = elementsConverted[i];
-        std::stringstream report;
-        report << "Lie bracketing elements " << " of indices " << i + 1
+        std::stringstream reportStream;
+        reportStream << "Lie bracketing elements " << " of indices " << i + 1
         << " and " << j + 1 << " out of " << elementsConverted.size << "<br> "
         << tempQDO.toString(format) << "<br> with element <br>"
         << elementsConverted[j].toString(format) << " to get <br>";
         tempQDO.lieBracketMeOnTheRight(elementsConverted[j]);
-        theReport.report(report.str());
+        report.report(reportStream.str());
         report << tempQDO.toString(format);
-        theReport.report(report.str());
+        report.report(reportStream.str());
         elementsConverted.addOnTop(tempQDO);
         QuasiDifferentialOperator::gaussianEliminationByRows(elementsConverted, 0, &bufferMons);
         numTimesEliminationWasExecuted ++;

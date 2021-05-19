@@ -228,12 +228,12 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::restrictRepr
   output.basis.getGramMatrix(output.gramMatrixInverted, 0);
   output.gramMatrixInverted.invert();
   output.theCharacter = remainingCharacter;
-  ProgressReport theReport;
+  ProgressReport report;
   for (int i = 0; i < this->generators.size; i ++) {
-    if (theReport.tickAndWantReport()) {
+    if (report.tickAndWantReport()) {
       std::stringstream reportStream;
       reportStream << "Restricting the action of generator of index " << i;
-      theReport.report(reportStream.str());
+      report.report(reportStream.str());
     }
     Matrix<Coefficient>::matrixInBasis(this->generators[i], output.generators[i], output.basis, output.gramMatrixInverted);
   }

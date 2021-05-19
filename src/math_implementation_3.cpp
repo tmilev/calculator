@@ -205,7 +205,7 @@ bool ProgressReport::tickAndWantReport() {
   return this->ticks == 0;
 }
 
-void ProgressReport::report(const std::string& theReport) {
+void ProgressReport::report(const std::string& stringToReport) {
   if (!this->flagInitialized) {
     return;
   }
@@ -217,7 +217,7 @@ void ProgressReport::report(const std::string& theReport) {
     return;
   }
   if (global.progressReportStrings[this->threadIndex].size > this->currentLevel) {
-    global.progressReportStrings[this->threadIndex][this->currentLevel] = theReport;
+    global.progressReportStrings[this->threadIndex][this->currentLevel] = stringToReport;
     global.makeReport();
   }
 }
@@ -3813,16 +3813,16 @@ void PartialFractions::compareCheckSums() {
   if (!this->flagUsingCheckSum) {
     return;
   }
-  ProgressReport theReport1;
-  ProgressReport theReport2;
+  ProgressReport report1;
+  ProgressReport report2;
   if (!this->flagDiscardingFractions) {
     this->computeOneCheckSum(this->EndCheckSum);
     if (!this->StartCheckSum.isEqualTo(this->EndCheckSum) || this->flagAnErrorHasOccurredTimeToPanic) {
       std::stringstream out1, out2;
       out1 << "Starting checksum: " << this->StartCheckSum.toString();
       out2 << "  Ending checksum: " << this->EndCheckSum.toString();
-      theReport1.report(out1.str());
-      theReport2.report(out2.str());
+      report1.report(out1.str());
+      report2.report(out2.str());
     }
     if (!this->StartCheckSum.isEqualTo(this->EndCheckSum)) {
       global.fatal << "The checksum of the partial fractions failed. " << global.fatal;
@@ -4372,23 +4372,23 @@ void PartialFractions::makeProgressReportSplittingMainPart() {
     out1 << " + " << this->NumRelevantNonReducedFractions << " relevant unreduced ";
   }
   out1 << " out of " << this->size() << " total fractions";
-  ProgressReport theReport1;
-  ProgressReport theReport2;
-  ProgressReport theReport3;
-  theReport1.report(out1.str());
+  ProgressReport report1;
+  ProgressReport report2;
+  ProgressReport report3;
+  report1.report(out1.str());
   out2 << this->NumMonomialsInNumeratorsRelevantFractions << " relevant reduced + "
   << this->NumMonomialsInNumeratorsIrrelevantFractions << " disjoint = "
   << this->NumMonomialsInNumeratorsRelevantFractions + this->NumMonomialsInNumeratorsIrrelevantFractions << " out of "
   << this->numberOfMonomialsInTheNumerators << " total monomials in the numerators";
-  theReport2.report(out2.str());
+  report2.report(out2.str());
   if (this->NumGeneratorsInTheNumerators != 0) {
     out3 << this->NumGeneratorsRelevenatFractions << " relevant reduced + "
     << this->NumGeneratorsIrrelevantFractions << " disjoint = "
     << this->NumGeneratorsIrrelevantFractions + this->NumGeneratorsRelevenatFractions
     << " out of " << this->NumGeneratorsInTheNumerators << " total generators in the numerators";
-    theReport3.report(out3.str());
+    report3.report(out3.str());
   } else {
-    theReport3.report("");
+    report3.report("");
   }
 }
 
@@ -4398,17 +4398,17 @@ void PartialFractions::makeProgressVPFcomputation() {
     return;
   }
   std::stringstream out2;
-  ProgressReport theReport;
+  ProgressReport report;
   out2 << "Processed " << this->NumProcessedForVPFfractions << " out of "
   << this->NumberRelevantReducedFractions << " relevant fractions";
-  theReport.report(out2.str());
+  report.report(out2.str());
 }
 
 void PartialFractions::computeOneCheckSum(Rational& output) {
   output.makeZero();
   Vector<Rational> CheckSumRoot = OnePartialFractionDenominator::GetCheckSumRoot(this->AmbientDimension);
-  ProgressReport theReport;
-  ProgressReport theReport2;
+  ProgressReport report;
+  ProgressReport report2;
   for (int i = 0; i < this->size(); i ++) {
     Rational currentCheckSum, tempRat;
     (*this)[i].computeOneCheckSum(*this, currentCheckSum, this->AmbientDimension);
@@ -4418,13 +4418,13 @@ void PartialFractions::computeOneCheckSum(Rational& output) {
     if (this->flagMakingProgressReport) {
       std::stringstream out;
       out << "Checksum " << i + 1 << " out of " << this->size();
-      theReport.report(out.str());
+      report.report(out.str());
     }
   }
   if (this->flagMakingProgressReport) {
     std::stringstream out;
     out << "Checksum: " << output.toString();
-    theReport2.report(out.str());
+    report2.report(out.str());
   }
 }
 
@@ -4463,7 +4463,7 @@ void PartialFractions::run(Vectors<Rational>& input) {
 
 void PartialFractions::removeRedundantShortRoots(Vector<Rational>* Indicator) {
   Rational startCheckSum;
-  ProgressReport theReport;
+  ProgressReport report;
   if (OnePartialFraction::MakingConsistencyCheck) {
     this->computeOneCheckSum(startCheckSum);
   }
@@ -4473,7 +4473,7 @@ void PartialFractions::removeRedundantShortRoots(Vector<Rational>* Indicator) {
       if (this->flagMakingProgressReport) {
         std::stringstream out;
         out << "Elongating denominator " << i + 1 << " out of " << this->size();
-        theReport.report(out.str());
+        report.report(out.str());
       }
     }
   }
@@ -9620,9 +9620,9 @@ void OnePartialFraction::getVectorPartitionFunction(
 }
 
 bool PartialFractions::getVectorPartitionFunction(QuasiPolynomial& output, Vector<Rational>& newIndicator) {
-  ProgressReport theReport;
+  ProgressReport report;
   if (this->assureIndicatorRegularity(newIndicator)) {
-    theReport.report("Indicator modified to regular");
+    report.report("Indicator modified to regular");
   }
   this->resetRelevanceIsComputed();
   if (!this->checkForMinimalityDecompositionWithRespectToRoot(&newIndicator)) {
@@ -11177,12 +11177,12 @@ void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& op
       matrix.elements[i][j] = operations.projectionsEiVectors[i][j];
     }
   }
-  ProgressReport theReport;
+  ProgressReport report;
   std::stringstream out;
   out << "before elimination:\n" << matrix.toString();
   matrix.gaussianEliminationEuclideanDomain(nullptr, ImpreciseDouble::minusOne(), ImpreciseDouble::getOne());
   out << "after elimination:\n" << matrix.toString();
-  theReport.report(out.str());
+  report.report(out.str());
 }
 
 void DrawOperations::operator+=(const DrawOperations& other) {
@@ -11837,13 +11837,13 @@ std::string ConeLatticeAndShiftMaxComputation::toString(FormatExpressions* forma
 
 void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep3() {
   this->theFinalRougherLattice = this->theConesLargerDim[0].theLattice;
-  ProgressReport theReport;
-  ProgressReport theReport2;
+  ProgressReport report;
+  ProgressReport report2;
   for (int i = 1; i < this->theConesLargerDim.size; i ++) {
     this->theFinalRougherLattice.intersectWith(this->theConesLargerDim[i].theLattice);
     std::stringstream tempStream;
     tempStream << "intersecing lattice " << i + 1 << " out of " << this->theConesLargerDim.size;
-    theReport.report(tempStream.str());
+    report.report(tempStream.str());
   }
   this->theFinalRepresentatives.size = 0;
   Vectors<Rational> tempRoots, tempRoots2;
@@ -11857,7 +11857,7 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep3() {
     std::stringstream tempStream;
     tempStream << "Computing representative " << i + 1 << " out of " << this->theConesLargerDim.size;
     tempStream << "\nSo far " << this->theFinalRepresentatives.size << " found.";
-    theReport2.report(tempStream.str());
+    report2.report(tempStream.str());
   }
   this->complexStartingPerRepresentative.setSize(this->theFinalRepresentatives.size);
   this->startingLPtoMaximize.setSize(this->theFinalRepresentatives.size);
@@ -11909,13 +11909,13 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep3() {
 void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep4() {
   this->complexRefinedPerRepresentative.setSize(this->theFinalRepresentatives.size);
   this->theMaximaCandidates.setSize(this->theFinalRepresentatives.size);
-  ProgressReport theReport;
+  ProgressReport report;
   for (int i = 0; i < this->theFinalRepresentatives.size; i ++) {
     ConeComplex& currentComplex = this->complexRefinedPerRepresentative[i];
     currentComplex.initFromCones(this->complexStartingPerRepresentative[i], true);
     std::stringstream tempStream;
     tempStream << "Processing representative " << i + 1 << " out of " << this->theFinalRepresentatives.size;
-    theReport.report(tempStream.str());
+    report.report(tempStream.str());
     currentComplex.refine();
     this->theMaximaCandidates[i].setSize(currentComplex.size);
     for (int j = 0; j < currentComplex.size; j ++) {
@@ -11950,9 +11950,9 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep1(
   PauseThread& thePauseController
 ) {
   FormatExpressions tempFormat;
-  ProgressReport theReport1;
-  ProgressReport theReport2;
-  ProgressReport theReport3;
+  ProgressReport report1;
+  ProgressReport report2;
+  ProgressReport report3;
   for (; this->numProcessedNonParam< this->numNonParaM; this->numProcessedNonParam ++) {
     while (this->theConesLargerDim.size > 0) {
       ConeLatticeAndShift& currentCLS = *this->theConesLargerDim.lastObject();
@@ -11972,9 +11972,9 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep1(
       tempStream1 << "Processing " << this->numProcessedNonParam + 1 << " out of " << this->numNonParaM;
       tempStream2 << "Remaining cones: " << this->theConesLargerDim.size;
       tempStream3 << "Cones smaller dim total: " << this->theConesSmallerDim.size;
-      theReport1.report(tempStream1.str());
-      theReport2.report(tempStream2.str());
-      theReport3.report(tempStream3.str());
+      report1.report(tempStream1.str());
+      report2.report(tempStream2.str());
+      report3.report(tempStream3.str());
     }
     this->LPtoMaximizeLargerDim = this->LPtoMaximizeSmallerDim;
     this->theConesLargerDim = this->theConesSmallerDim;
@@ -12045,11 +12045,11 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
     );
     return;
   }
-  ProgressReport theReport;
+  ProgressReport report;
   if (outputAppend.size >= 10) {
     std::stringstream tempStream;
     tempStream << "<hr><hr><hr><hr>The bad cone:" << this->theProjectivizedCone.toString(&theFormat);
-    theReport.report(tempStream.str());
+    report.report(tempStream.str());
   }
   ConeComplex complexBeforeProjection;
   complexBeforeProjection.initialize();
@@ -12167,7 +12167,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
         theProjectionLatticeLevel.actOnVectorColumn(exitRepresentatives[j], tempCLS.theShift);
         outputAppend.addOnTop(tempCLS);
         if (tempCLS.getDimensionProjectivized() == 0) {
-          theReport.report(tempTempRoots.toString());
+          report.report(tempTempRoots.toString());
           while (true) {
           }
         }
@@ -12383,12 +12383,12 @@ void ConeComplex::refineAndSort() {
 }
 
 void ConeComplex::refine() {
-  ProgressReport theReport;
+  ProgressReport report;
   while (this->indexLowestNonRefinedChamber < this->size) {
     this->refineOneStep();
     std::stringstream out;
     out << "Refined " << this->indexLowestNonRefinedChamber << " out of " << this->size;
-    theReport.report(out.str());
+    report.report(out.str());
   }
 }
 
@@ -12698,8 +12698,8 @@ void ConeComplex::initFromCones(
 ) {
   Cone tempCone;
   this->clear();
-  ProgressReport theReport;
-  theReport.report(normalsOfCones.toString());
+  ProgressReport report;
+  report.report(normalsOfCones.toString());
   for (int i = 0; i < normalsOfCones.size; i ++) {
     if (tempCone.createFromNormals(
       normalsOfCones[i], useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
@@ -12708,7 +12708,7 @@ void ConeComplex::initFromCones(
     }
     std::stringstream out;
     out << "Initializing cone " << i + 1 << " out of " << normalsOfCones.size;
-    theReport.report(out.str());
+    report.report(out.str());
   }
   Vector<Rational> tempRoot;
   this->splittingNormals.clear();
@@ -12723,7 +12723,7 @@ void ConeComplex::initFromCones(
       out << "\nProcessed " << j + 1 << " out of " << this->objects[i].normals.size
       << " walls of the current chamber.";
       out << "\nTotal # of distinct walls found: " << this->splittingNormals.size;
-      theReport.report(out.str());
+      report.report(out.str());
     }
   }
 }

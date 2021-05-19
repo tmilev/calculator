@@ -425,12 +425,12 @@ void RationalFraction<Coefficient>::operator*=(const Polynomial<Coefficient>& ot
     return;
   }
   Polynomial<Coefficient> commonDivisor, theResult, tempP;
-  ProgressReport theReport;
-  if (theReport.tickAndWantReport()) {
+  ProgressReport report;
+  if (report.tickAndWantReport()) {
     std::stringstream out;
     out << "Multiplying " << this->toString(&global.defaultFormat.getElement()) << " by "
     << other.toString(&global.defaultFormat.getElement());
-    theReport.report(out.str());
+    report.report(out.str());
   }
   RationalFraction<Coefficient>::greatestCommonDivisor(this->denominator.getElement(), other, commonDivisor);
   this->numerator.getElement() *= other;
@@ -447,12 +447,12 @@ void RationalFraction<Coefficient>::operator*=(const Polynomial<Coefficient>& ot
   this->denominator.getElement() = theResult;
   this->reduceMemory();
   this->simplifyLeadingCoefficientOnly();
-  if (theReport.tickAndWantReport()) {
+  if (report.tickAndWantReport()) {
     std::stringstream out;
     out << "Multiplying " << this->toString(&global.defaultFormat.getElement()) << " by "
     << other.toString(&global.defaultFormat.getElement());
     out << " and the result is:\n" << this->toString();
-    theReport.report(out.str());
+    report.report(out.str());
   }
 }
 
@@ -525,11 +525,11 @@ void RationalFraction<Coefficient>::operator*=(const RationalFraction<Coefficien
     return;
   }
   Polynomial<Coefficient> theGCD1, theGCD2, tempP1, tempP2;
-  ProgressReport theReport;
-  if (theReport.tickAndWantReport()) {
+  ProgressReport report;
+  if (report.tickAndWantReport()) {
     std::stringstream out;
     out << "Multiplying " << this->toString() << " by " << other.toString();
-    theReport.report(out.str());
+    report.report(out.str());
   }
   RationalFraction<Coefficient>::greatestCommonDivisor(other.denominator.getElementConst(), this->numerator.getElement(), theGCD1);
   RationalFraction<Coefficient>::greatestCommonDivisor(this->denominator.getElement(), other.numerator.getElementConst(), theGCD2);
@@ -556,11 +556,11 @@ void RationalFraction<Coefficient>::operator*=(const RationalFraction<Coefficien
   this->numerator.getElement() *= tempP1;
   this->reduceMemory();
   this->simplifyLeadingCoefficientOnly();
-  if (theReport.tickAndWantReport()) {
+  if (report.tickAndWantReport()) {
     std::stringstream out;
     out << "Multiplying " << this->toString() << " by " << other.toString();
     out << " and the result is:\n" << this->toString();
-    theReport.report(out.str());
+    report.report(out.str());
   }
 }
 

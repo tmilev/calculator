@@ -813,7 +813,7 @@ bool Calculator::EvaluateLoop::outputHasErrors() {
 }
 
 void Calculator::EvaluateLoop::reportChildEvaluation(Expression& output, int childIndex) {
-  if (!this->theReport.tickAndWantReport()) {
+  if (!this->report.tickAndWantReport()) {
     return;
   }
   std::stringstream ruleStream, reportStream;
@@ -835,7 +835,7 @@ void Calculator::EvaluateLoop::reportChildEvaluation(Expression& output, int chi
   }
   reportStream << "Evaluating at recursion depth " << this->owner->recursionDepth << ":<br><b>"
   << StringRoutines::stringShortenInsertDots(output[childIndex].toString(), 100) << "</b>";
-  theReport.report(reportStream.str());
+  report.report(reportStream.str());
 }
 
 bool Calculator::EvaluateLoop::evaluateChildren(
@@ -1075,7 +1075,7 @@ bool Calculator::evaluateExpression(
     calculator.statistics.callsSinceReport = 0;
     std::stringstream reportStream;
     reportStream << "Evaluating: " << input.toString();
-    state.theReport.report(reportStream.str());
+    state.report.report(reportStream.str());
   }
   if (calculator.flagLogFullTreeCrunching && calculator.recursionDepth < 3) {
     calculator << "<br>";

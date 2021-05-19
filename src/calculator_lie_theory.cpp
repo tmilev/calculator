@@ -540,7 +540,7 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(Calculator& calculator, con
   std::stringstream latexReport;
   latexReport << "\\documentclass{article} <br>\\usepackage{longtable}\\begin{document}<br>\n\n\n\n\n";
   latexReport << " \\begin{longtable}{|lllll|} ";
-  ProgressReport theReport;
+  ProgressReport report;
   bool ConjectureBholds = true;
   bool ConjectureCholds = true;
   LittelmannPath hwPath;
@@ -569,7 +569,7 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(Calculator& calculator, con
       << i + 1 << " out of " << theRanks.size << ",  highest weight "
       << currentHW.toString() << ", dim: " << currentAlg.weylGroup.weylDimFormulaFundamentalCoords(currentHW)
       << ", index " << j + 1 << " out of " << theHws.size;
-      theReport.report(reportStream.str());
+      report.report(reportStream.str());
       latexReport << "$" << currentHW.toStringLetterFormat("\\omega") << "$ &"
       << currentAlg.weylGroup.weylDimFormulaFundamentalCoords(currentHW) << "&";
       hwPath.makeFromWeightInSimpleCoords(
@@ -583,7 +583,7 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(Calculator& calculator, con
       );
       reportStream << "\nPath orbit size = " << theStrings.size
       << " generated in " << global.getElapsedSeconds() << " seconds. ";
-      theReport.report(reportStream.str());
+      report.report(reportStream.str());
       for (int k = 0; k < theStrings.size; k ++) {
         LittelmannPath& currentPath = tempList[k];
         tempMon = theStrings[k];
@@ -624,7 +624,7 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(Calculator& calculator, con
       else {
         latexReport << " & \\textbf{BAD}";
         out << "<td><b>Is bad!!!!</b></td>";
-        theReport.report("BAD BAD BAD!!!");
+        report.report("BAD BAD BAD!!!");
         foundBad = true;
         break;
       }*/

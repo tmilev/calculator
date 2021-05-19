@@ -57,7 +57,7 @@ bool FiniteGroup<elementSomeGroup>::computeAllElementsLargeGroup(bool andWords, 
     this->words.setSize(1);
     this->words.lastObject()->setSize(0);
   }
-  ProgressReport theReport(1000, GlobalVariables::Response::ReportType::general);
+  ProgressReport report(1000, GlobalVariables::Response::ReportType::general);
   // Warning: not checking whether the generators have repetitions.
   for (int j = 0; j < this->elements.size; j ++) {
     for (int i = 0; i < this->generators.size; i ++) {
@@ -71,7 +71,7 @@ bool FiniteGroup<elementSomeGroup>::computeAllElementsLargeGroup(bool andWords, 
           this->getWordByFormula(*this, currentElement, *this->words.lastObject());
         }
       }
-      if (theReport.tickAndWantReport()) {
+      if (report.tickAndWantReport()) {
         std::stringstream reportStream;
         LargeInteger sizeByFla = this->sizeByFormulaOrNegative1();
         reportStream << "So far, generated " << this->elements.size << " elements";
@@ -79,7 +79,7 @@ bool FiniteGroup<elementSomeGroup>::computeAllElementsLargeGroup(bool andWords, 
           reportStream << " out of " << sizeByFla.toString();
         }
         reportStream << ".";
-        theReport.report(reportStream.str());
+        report.report(reportStream.str());
       }
       if (maximumElements > 0) {
         if (this->elements.size > maximumElements) {
@@ -88,11 +88,11 @@ bool FiniteGroup<elementSomeGroup>::computeAllElementsLargeGroup(bool andWords, 
       }
     }
   }
-  theReport.ticksPerReport = 1;
-  if (theReport.tickAndWantReport()) {
+  report.ticksPerReport = 1;
+  if (report.tickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "Generated group with a total of " << this->elements.size << " elements. ";
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
   }
   this->sizePrivate = this->elements.size;
   this->flagAllElementsAreComputed = true;
@@ -590,7 +590,7 @@ bool FiniteGroup<elementSomeGroup>::computeConjugacyClassesRepresentatives() {
   // First we compute the generator's conjugacy classes:
   this->computeGeneratorsConjugacyClasses();
 
-  ProgressReport theReport;
+  ProgressReport report;
   elementSomeGroup currentElement;
   LargeInteger groupSizeByFla = this->sizeByFormulaOrNegative1();
   this->flagCharPolysAreComputed = true;
@@ -600,12 +600,12 @@ bool FiniteGroup<elementSomeGroup>::computeConjugacyClassesRepresentatives() {
     // in case there are two non-conjugate elements with the same char poly.
     for (int i = 0; i < this->conjugacyClasses.size; i ++) {
       for (int j = 0; j < this->unionGeneratorsCC.size; j ++) {
-        if (theReport.tickAndWantReport()) {
+        if (report.tickAndWantReport()) {
           std::stringstream reportStream;
           reportStream << "Exploring conjugacy class " << i + 1
           << " out of " << this->conjugacyClasses.size
           << " generator " << j + 1 << " out of " << this->unionGeneratorsCC.size;
-          theReport.report(reportStream.str());
+          report.report(reportStream.str());
         }
         currentElement = this->conjugacyClasses[i].representative * this->unionGeneratorsCC[j];
         this->registerConjugacyClass(currentElement, phase == 0);
@@ -793,7 +793,7 @@ bool WeylGroupAutomorphisms::generateOuterOrbit(
   ElementWeylGroupAutomorphisms currentElt;
   int numElementsToReserve = MathRoutines::minimum(upperLimitNumberOfElements, 1000000);
   output.setExpectedSize(numElementsToReserve);
-  ProgressReport theReport(3000, GlobalVariables::Response::ReportType::general);
+  ProgressReport report(3000, GlobalVariables::Response::ReportType::general);
   SimpleReflectionOrOuterAutomorphism theGen;
   if (outputSubset != nullptr) {
     currentElt.makeIdentity(*this);
@@ -824,12 +824,12 @@ bool WeylGroupAutomorphisms::generateOuterOrbit(
           return false;
         }
       }
-      if (theReport.tickAndWantReport()) {
+      if (report.tickAndWantReport()) {
         std::stringstream reportStream;
         reportStream << "Generating outer orbit, " << output.size
         << " elements found so far, Weyl group type: "
         << this->weylGroup->dynkinType.toString() << ". ";
-        theReport.report(reportStream.str());
+        report.report(reportStream.str());
       }
     }
   }
@@ -938,16 +938,16 @@ bool WeylGroupData::generateOrbit(
     outputSubset->clear();
     outputSubset->addOnTop(currentElt);
   }
-  ProgressReport theReport(1000, GlobalVariables::Response::ReportType::general);
+  ProgressReport report(1000, GlobalVariables::Response::ReportType::general);
   SimpleReflection theGen;
   for (int i = 0; i < output.size; i ++) {
     for (int j = 0; j < this->cartanSymmetric.numberOfRows; j ++) {
       currentRoot = output[i];
-      if (theReport.tickAndWantReport()) {
+      if (report.tickAndWantReport()) {
         std::stringstream reportStream;
         reportStream << "So far found " << i + 1 << " elements in the orbit(s) of the starting weight(s) "
         << weights.toString() << ". ";
-        theReport.report(reportStream.str());
+        report.report(reportStream.str());
       }
       if (!RhoAction) {
         this->reflectSimple(j, currentRoot);
@@ -1138,7 +1138,7 @@ bool WeylGroupData::freudenthalFormula(
   outputMultsSimpleCoords[0] = 1;
   Explored[0] = true;
   Coefficient BufferCoeff;
-  ProgressReport theReport;
+  ProgressReport report;
   for (int k = 1; k < outputDominantWeightsSimpleCoords.size; k ++) {
     Explored[k] = true;
     Coefficient& currentAccum = outputMultsSimpleCoords[k];
@@ -1184,7 +1184,7 @@ bool WeylGroupData::freudenthalFormula(
     std::stringstream out;
     out << " Computed the multiplicities of " << k + 1 << " out of "
     << outputDominantWeightsSimpleCoords.size << " dominant weights in the support.";
-    theReport.report(out.str());
+    report.report(out.str());
   }
   return true;
 }
@@ -1424,7 +1424,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getClassFunc
   this->ownerGroup->checkInitializationFiniteDimensionalRepresentationComputation();
   outputMat.makeZeroMatrix(this->getDimension());
   int numClasses = this->ownerGroup->conjugacyClassCount();
-  ProgressReport theReport;
+  ProgressReport report;
   for (int cci = 0; cci < numClasses; cci ++) {
     if (inputChar[cci] == 0) {
       continue;
@@ -1452,20 +1452,20 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getClassFunc
             this->computeAllElementImages();
           }
           this->classFunctionMatrices[cci] += this->theElementImages[currentCC.indicesEltsInOwner[i]];
-          if (theReport.tickAndWantReport()) {
+          if (report.tickAndWantReport()) {
             std::stringstream reportstream;
             reportstream << " Computing conjugacy class " << currentCC.indicesEltsInOwner[i] + 1
             << " (total num classes is " << numClasses << ").";
-            theReport.report(reportstream.str());
+            report.report(reportstream.str());
           }
         }
       }
-      if (theReport.tickAndWantReport()) {
+      if (report.tickAndWantReport()) {
         std::stringstream reportstream;
         reportstream << "<br>Class function matrix of conjugacy class " << cci + 1
         << " (total num classes is " << numClasses << ") computed to be: "
         << this->classFunctionMatrices[cci].toString();
-        theReport.report(reportstream.str());
+        report.report(reportstream.str());
       }
     }
     for (int j = 0; j < outputMat.numberOfRows; j ++) {
@@ -1811,7 +1811,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::f
   outputMultsSimpleCoords[0] = 1;
   Vector<Coefficient> convertor;
   Coefficient bufferCoeff;
-  ProgressReport theReport;
+  ProgressReport report;
   for (int k = 1; k < outputDomWeightsSimpleCoordsLeviPart.size; k ++) {
     Explored[k] = true;
     Coefficient& currentAccum = outputMultsSimpleCoords[k];
@@ -1856,7 +1856,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::f
     std::stringstream out;
     out << " Computed the multiplicities of " << k + 1 << " out of "
     << outputDomWeightsSimpleCoordsLeviPart.size << " dominant weights in the support.";
-    theReport.report(out.str());
+    report.report(out.str());
   }
   outputDominantWeightsSimpleCoordS.clear();
   outputDominantWeightsSimpleCoordS.setExpectedSize(outputDomWeightsSimpleCoordsLeviPart.size);
@@ -2095,17 +2095,17 @@ void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentationsTodorsVersi
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational> newRep;
   int NumClasses = this->conjugacyClassCount();
   VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> decompositionNewRep;
-  ProgressReport theReport1;
+  ProgressReport report1;
   //  int indexFirstPredefinedRep = 1; //<-this should be the index of the sign rep.
   //  int indexLastPredefinedrep = 2; //<-this should be the index of the standard rep.
   for (int i = 0; i < appendOnlyIrrepsList.size && this->irreducibleRepresentations.size != NumClasses; i ++) {
     for (int j = 0; j < initialcount; j ++) {
-      if (theReport1.tickAndWantReport()) {
+      if (report1.tickAndWantReport()) {
         std::stringstream reportStream;
         reportStream << this->irreducibleRepresentations.size << " irreducible representations found so far. ";
         reportStream << "<br>Decomposing " << appendOnlyIrrepsList[j].theCharacter
         << " * " << appendOnlyIrrepsList[i].theCharacter << "\n";
-        theReport1.report(reportStream.str());
+        report1.report(reportStream.str());
       }
       newRep = appendOnlyIrrepsList[j];//we are initializing by the sign or natural rep.
       newRep *= appendOnlyIrrepsList[i];
@@ -2115,7 +2115,7 @@ void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentationsTodorsVersi
       }
     }
   }
-  if (theReport1.tickAndWantReport()) {
+  if (report1.tickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "Irrep table:";
     for (int i = 0; i < this->irreducibleRepresentations.size; i ++) {
@@ -2126,7 +2126,7 @@ void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentationsTodorsVersi
     for (int i = 0; i < this->irreducibleRepresentations.size; i ++) {
       reportStream << "<hr>irrep " << i + 1 << "<br>" << this->irreps_grcam[i].toString(&tempFormat);
     }
-    theReport1.report(reportStream.str());
+    report1.report(reportStream.str());
   }
   this->flagCharTableIsComputed = true;
   this->flagIrrepsAreComputed = true;

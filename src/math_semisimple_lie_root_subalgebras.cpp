@@ -420,11 +420,11 @@ void RootSubalgebra::possibleNilradicalComputation(Selection& selKmods, RootSuba
 }
 
 void RootSubalgebra::makeProgressReportGeneratorAutomorphisms(int progress, int outOf, int found) {
-  ProgressReport theReport;
+  ProgressReport report;
   std::stringstream out4, out5;
   out5 << progress + 1 << " out of " << outOf << " checked; ";
   out5 << found << " found pos. generators";
-  theReport.report(out5.str());
+  report.report(out5.str());
 }
 
 void RootSubalgebra::makeProgressReportpossibleNilradicalComputation(RootSubalgebras& owner) {
@@ -464,17 +464,17 @@ void RootSubalgebra::generateKModuleLieBracketTable(List<List<List<int> > >& out
   out << "Computing pairing table for the module decomposition of the root subalgebra of type "
   << this->dynkinDiagram.toString()
   << "\n<br>\nwith centralizer " << this->centralizerDiagram.toString();
-  ProgressReport theReport;
-  theReport.report(out.str());
-  ProgressReport theReport2(10, GlobalVariables::Response::ReportType::general);
+  ProgressReport report;
+  report.report(out.str());
+  ProgressReport report2(10, GlobalVariables::Response::ReportType::general);
   for (int i = 0; i < this->modules.size; i ++) {
     output[i].setSize(this->modules.size);
     for (int j = 0; j < this->modules.size; j ++) {
       this->KModuleLieBracketKmodule(i, j, oppositeKmods, output[i][j]);
-      if (theReport2.tickAndWantReport()) {
+      if (report2.tickAndWantReport()) {
         std::stringstream out5;
         out5 << "Computing pairing table: " << i * this->modules.size + j + 1 << " out of " << numTotal;
-        theReport2.report(out5.str());
+        report2.report(out5.str());
       }
     }
   }
@@ -3030,12 +3030,12 @@ void RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder() {
   currentSA.owner = this;
   basis.makeEiBasis(this->owner->getRank());
   List<RootSubalgebra> currentList;
-  ProgressReport theReport;
+  ProgressReport report;
   for (int i = 0; i < 2; i ++) {
     currentList.setSize(0);
     int counter = 0;
     do {
-      if (theReport.tickAndWantReport()) {
+      if (report.tickAndWantReport()) {
         std::stringstream reportStream;
         if (i == 0) {
           reportStream << "Exploring which of the subalgebras are parabolic. ";
@@ -3045,7 +3045,7 @@ void RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder() {
         reportStream << "Current " << (i == 0 ? "pseudo-parabolic " : "parabolic ") << "selection: "
         << parSel.toString() << ", total  " << counter << " selections explored. ";
         counter ++;
-        theReport.report(reportStream.str());
+        report.report(reportStream.str());
       }
       basis.subSelection(parSel, currentBasis);
       if (currentBasis.getRankElementSpan() != currentBasis.size) {
@@ -3095,7 +3095,7 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
   this->computeAllReductiveRootSAsInit();
   HashedList<Vector<Rational> > tempVs;
   this->flagPrintGAPinput = this->owner->weylGroup.loadGAPRootSystem(tempVs);
-  ProgressReport theReport2;
+  ProgressReport report2;
   RootSubalgebra currentSA;
   currentSA.owner = this;
   currentSA.computeEssentialsIfNew();
@@ -3104,7 +3104,7 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
   this->subalgebras.addOnTop(currentSA);
   std::string reportString;
   for (int i = 0; i < this->subalgebras.size; i ++) {
-    if (theReport2.tickAndWantReport()) {
+    if (report2.tickAndWantReport()) {
       std::stringstream reportStream;
       for (int j = 0; j < this->subalgebras[i].potentialExtensionDynkinTypes.size; j ++) {
         reportStream << this->subalgebras[i].potentialExtensionDynkinTypes[j].toString();
@@ -3118,14 +3118,14 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
       if (this->subalgebras[i].highestWeightsPrimalSimple[j].isEqualToZero()) {
         continue;
       }
-      if (theReport2.tickAndWantReport()) {
+      if (report2.tickAndWantReport()) {
         std::stringstream out;
         out << "Exploring extensions of subalgebra " << i + 1
         << " out of " << this->subalgebras.size << ". Type current SA: "
         << this->subalgebras[i].dynkinType.toString() << ". Possible standard parabolic extensions: "
         << reportString << ". Exploring extension by lowest weight vector of module "
         << j + 1 << " out of " << this->subalgebras[i].modules.size;
-        theReport2.report(out.str());
+        report2.report(out.str());
       }
       currentSA.initNoOwnerReset();
       currentSA.simpleRootsReductiveSubalgebra = this->subalgebras[i].simpleRootsReductiveSubalgebra;
@@ -3144,36 +3144,36 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
     }
   }
   std::stringstream reportStream;
-  if (theReport2.tickAndWantReport()) {
+  if (report2.tickAndWantReport()) {
     reportStream << "Reductive root subalgebra computation done: total " << this->subalgebras.size
     << " subalgebras. Proceeding to sort the subalgebras...";
-    theReport2.report(reportStream.str());
+    report2.report(reportStream.str());
   }
   this->sortDescendingOrderBySSRank();
-  if (theReport2.tickAndWantReport()) {
+  if (report2.tickAndWantReport()) {
     reportStream << "done. ";
-    theReport2.report(reportStream.str());
+    report2.report(reportStream.str());
   }
   if (this->flagComputeConeCondition) {
-    if (theReport2.tickAndWantReport()) {
+    if (report2.tickAndWantReport()) {
       reportStream << "Proceeding to compute the module pairing tables ... ";
-      theReport2.report(reportStream.str());
+      report2.report(reportStream.str());
     }
     this->computeKmodMultTables();
-    if (theReport2.tickAndWantReport()) {
+    if (report2.tickAndWantReport()) {
       reportStream << " done. ";
-      theReport2.report(reportStream.str());
+      report2.report(reportStream.str());
     }
   }
   if (this->flagPrintParabolicPseudoParabolicInfo) {
-    if (theReport2.tickAndWantReport()) {
+    if (report2.tickAndWantReport()) {
       reportStream << "Computing which subalgebras are pseudo parabolic/parabolic/neither... ";
-      theReport2.report(reportStream.str());
+      report2.report(reportStream.str());
     }
     this->computeParabolicPseudoParabolicNeitherOrder();
-    if (theReport2.tickAndWantReport()) {
+    if (report2.tickAndWantReport()) {
       reportStream << " done. ";
-      theReport2.report(reportStream.str());
+      report2.report(reportStream.str());
     }
   }
 }
@@ -3628,7 +3628,7 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasContainingInputUpToIsomo
   }
   bufferSAs[RecursionDepth].genK = bufferSAs[RecursionDepth - 1].genK;
   bufferSAs[RecursionDepth].owner = this;
-  ProgressReport theReport;
+  ProgressReport report;
   for (int k = 0; k < bufferSAs[RecursionDepth - 1].modules.size; k ++) {
     if (bufferSAs[RecursionDepth - 1].highestWeightsPrimalSimple[k].isPositive()) {
       bufferSAs[RecursionDepth].genK.addOnTop(bufferSAs[RecursionDepth - 1].highestWeightsPrimalSimple[k]);
@@ -3636,7 +3636,7 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasContainingInputUpToIsomo
       std::stringstream out;
       out << "Included root " << k + 1 << " out of " << bufferSAs[RecursionDepth - 1].modules.size
       << " Total found SAs: " << this->subalgebras.size;
-      theReport.report(out.str());
+      report.report(out.str());
       int indexSA = this->indexSubalgebra(bufferSAs[RecursionDepth]);
       if (indexSA == - 1) {
         bufferSAs[RecursionDepth].computeEssentials();
@@ -3663,8 +3663,8 @@ void RootSubalgebras::makeProgressReportAutomorphisms(
     out4 << "truncated ";
   }
   out4 << "group preserving k: " << theSubgroup.allElements.size;
-  ProgressReport theReport;
-  theReport.report(out1.str() + out4.str());
+  ProgressReport report;
+  report.report(out1.str() + out4.str());
 }
 
 void RootSubalgebras::generateActionKintersectBIsos(RootSubalgebra& theRootSA) {
@@ -3687,7 +3687,7 @@ void RootSubalgebras::computeActionNormalizerOfCentralizerIntersectNilradical(
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& theSubgroup = this->CentralizerIsomorphisms.lastObject();
   this->ActionsNormalizerCentralizerNilradical.setSize(theSubgroup.allElements.size - 1);
   Vector<Rational> tempRoot;
-  ProgressReport theReport;
+  ProgressReport report;
   for (int i = 0; i < theSubgroup.allElements.size - 1; i ++) {
     this->ActionsNormalizerCentralizerNilradical[i].setSize(theRootSA.modules.size);
     for (int j = 0; j < theRootSA.modules.size; j ++) {
@@ -3699,7 +3699,7 @@ void RootSubalgebras::computeActionNormalizerOfCentralizerIntersectNilradical(
     if (global.response.monitoringAllowed()) {
       std::stringstream out;
       out << "Computing action of element " << i + 1 << " out of " << theSubgroup.allElements.size;
-      theReport.report(out.str());
+      report.report(out.str());
     }
   }
 }

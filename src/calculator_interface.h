@@ -2504,7 +2504,7 @@ public:
     int opIndexParent;
     int numberOfTransformations;
     int indexInCache;
-    ProgressReport theReport;
+    ProgressReport report;
     bool reductionOccurred;
     Expression* output;
     Expression* history;

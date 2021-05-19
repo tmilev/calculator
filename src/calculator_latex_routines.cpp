@@ -114,10 +114,10 @@ void LaTeXCrawler::buildFreecalc() {
   }
   inputFile.seekg(0);
   std::string buffer;
-  ProgressReport theReport;
+  ProgressReport report;
   std::stringstream reportStream;
   reportStream << "Processing input file: extracting lecture numbers...";
-  theReport.report(reportStream.str());
+  report.report(reportStream.str());
   bool isLecture = false;
   bool isHomework = false;
   int currentLineIndex = - 1;
@@ -199,7 +199,7 @@ void LaTeXCrawler::buildFreecalc() {
   }
   reportStream << " done. Extracted: " << theLectureNumbers.size
   << " homework/lecture numbers. Preparing Homework/Lecture content ... ";
-  theReport.report(reportStream.str());
+  report.report(reportStream.str());
   if (isLecture && isHomework) {
     this->displayResult << "I was not able to determine whether the file is a homework or a lecture file. Aborting.";
     return;
@@ -251,7 +251,7 @@ void LaTeXCrawler::buildFreecalc() {
     }
   }
   reportStream << " done. Proceding to compile homeworks/lectures. ";
-  theReport.report(reportStream.str());
+  report.report(reportStream.str());
   if (isLecture) {
     this->displayResult << "<table><tr><td>Lecture number</td><td>Lecture name</td><td>Lecture pdf</td>"
     << "<td>Lecture handout pdf</td><td>Comments</td></tr>";
@@ -326,10 +326,10 @@ void LaTeXCrawler::buildFreecalc() {
     currentSysCommand = "pdflatex --shell-escape " + this->fileNameWorkingCopy;
     executedCommands << "<br>" << currentSysCommand;
     reportStream << currentSysCommand;
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
     global.externalCommandNoOutput(currentSysCommand, true);
     reportStream << "<b>[x2]</b>";
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
     global.externalCommandNoOutput(currentSysCommand, true);
     std::stringstream thePdfFileNameHandout;
     if (isLecture) {
@@ -350,12 +350,12 @@ void LaTeXCrawler::buildFreecalc() {
 
     executedCommands << "<br>" << currentSysCommand;
     reportStream << "<br>Lecture/Homework " << i + 1 << " handout compiled, renaming file ... ";
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
     global.externalCommandNoOutput(currentSysCommand, true);
     reportStream << " done.";
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
     if (!isLecture) {
-      theReport.report(reportStream.str());
+      report.report(reportStream.str());
       resultTable << "<td>" << thePdfFileNameHandout.str() << "</td>";
       resultTable << "</tr>";
       continue;
@@ -373,7 +373,7 @@ void LaTeXCrawler::buildFreecalc() {
     currentSysCommand = "pdflatex --shell-escape " + this->fileNameWorkingCopy;
     executedCommands << "<br>" << currentSysCommand;
     reportStream << currentSysCommand;
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
     global.externalCommandNoOutput(currentSysCommand, true);
     std::stringstream thePdfFileNameNormal;
     thePdfFileNameNormal << "./" << lectureProjectorFolder << "Lecture"
@@ -382,10 +382,10 @@ void LaTeXCrawler::buildFreecalc() {
     currentSysCommand = "mv " + theFileNameWorkingCopyPDF + " " + thePdfFileNameNormal.str();
     executedCommands << "<br>" << currentSysCommand;
     reportStream << "<br>Lecture " << i + 1 << " regular slides compiled, renaming file ... ";
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
     global.externalCommandNoOutput(currentSysCommand, true);
     reportStream << " done.";
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
     resultTable << "<td>" << thePdfFileNameNormal.str() << "</td>" << "<td>" << thePdfFileNameHandout.str() << "</td>";
     resultTable << "</tr>";
   }
@@ -422,7 +422,7 @@ void LaTeXCrawler::buildFreecalc() {
       currentSysCommand = "pdflatex --shell-escape " + this->fileNameWorkingCopy;
       executedCommands << "<br>" << currentSysCommand;
       reportStream << currentSysCommand;
-      theReport.report(reportStream.str());
+      report.report(reportStream.str());
       global.externalCommandNoOutput(currentSysCommand, true);
       std::stringstream thePdfFileNameNormal;
       thePdfFileNameNormal << "./";
@@ -436,10 +436,10 @@ void LaTeXCrawler::buildFreecalc() {
       currentSysCommand = "mv " + theFileNameWorkingCopyPDF + " " + thePdfFileNameNormal.str();
       executedCommands << "<br>" << currentSysCommand;
       reportStream << "<br>Slide " << i + 1 << ", run " << k << " compiled, renaming file ... ";
-      theReport.report(reportStream.str());
+      report.report(reportStream.str());
       global.externalCommandReturnOutput(currentSysCommand);
       reportStream << " done.";
-      theReport.report(reportStream.str());
+      report.report(reportStream.str());
       resultTable << "<td>" << thePdfFileNameNormal.str() << "</td>";
       resultTable << "</tr>";
     }
@@ -913,7 +913,7 @@ bool LaTeXCrawler::buildOrFetchFromCachePDF(
 bool LaTeXCrawler::buildTopicList(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("LaTeXcrawler::buildTopicList");
   StateMaintainerCurrentFolder preserveCurrentFolder;
-  ProgressReport theReport;
+  ProgressReport report;
   CalculatorHTML topicParser;
   std::stringstream temp;
   if (commentsGeneral == nullptr) {
@@ -950,7 +950,7 @@ bool LaTeXCrawler::buildTopicList(std::stringstream* commentsOnFailure, std::str
     numProcessed ++;
     reportStream << "Processing homework pdfs: "
     << numProcessed << " out of " << numSlidePairsToBuild << ". ";
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
 
     for (int i = 0; i < currentElt.sourceHomework.size; i ++) {
       LaTeXCrawler::FileWithOption file;
@@ -1001,7 +1001,7 @@ bool LaTeXCrawler::buildTopicList(std::stringstream* commentsOnFailure, std::str
     << numProcessed << " out of " << numSlidePairsToBuild << ". ";
     reportStream << "<br>Slide file names: "
     << this->slideFileNamesVirtualWithPatH.toStringCommaDelimited();
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
 
     this->slideFileNamesVirtualWithPatH.setSize(topicParser.slidesSourcesHeaders.size);
     this->addSlidesOnTop(currentElt.sourceSlides);

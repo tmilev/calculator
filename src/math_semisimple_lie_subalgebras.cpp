@@ -272,18 +272,18 @@ void SubalgebraSemisimpleLieAlgebra::computeCartanSubalgebra() {
   this->cartanSubalgebra.setSize(0);
   currentCentralizer = this->basis;
   ElementSemisimpleLieAlgebra<AlgebraicNumber> candidateElement;
-  ProgressReport theReport0, theReport1;
+  ProgressReport report0, report1;
   std::stringstream reportStream0;
   reportStream0 << "Computing Cartan subalgebra of a subalgebra of "
   << this->owner->weylGroup.dynkinType.toString()
   << " with basis " << this->basis.toStringCommaDelimited();
-  theReport0.report(reportStream0.str());
+  report0.report(reportStream0.str());
   while (currentCentralizer.size > this->cartanSubalgebra.size) {
     std::stringstream reportStream1;
     reportStream1 << "Currently, the Cartan subalgebra basis candidates are: "
     << this->cartanSubalgebra.toStringCommaDelimited() << "; remaining centralizer: "
     << currentCentralizer.toStringCommaDelimited();
-    theReport1.report(reportStream1.str());
+    report1.report(reportStream1.str());
     if (this->cartanSubalgebra.size > this->owner->getRank()) {
       // We must have made a programming error.
       global.fatal
@@ -1229,13 +1229,9 @@ bool SemisimpleSubalgebras::computeStructureRealFormsSlTwos() {
   CandidateSemisimpleSubalgebra emptyCandidate;
   this->makeEmptyCandidateSubalgebra(emptyCandidate);
   this->addSubalgebraToStack(emptyCandidate, 0, 0);
-  global.comments << "<br>DEBUG: Number of sl two subalgebras: "
-  << this->slTwoSubalgebras.size;
   for (int i = 0; i < this->slTwoSubalgebras.size; i ++) {
     this->computeStructureRealFormOneSlTwo(this->slTwoSubalgebras.getElement(i));
   }
-  global.comments << "<br>DEBUG: cartanElementsScaledToActByTwo: "
-  << this->subalgebrasNonDefaultCartanAndScale.keys.toString();
   return true;
 }
 
@@ -1722,15 +1718,15 @@ void SemisimpleSubalgebras::getHCandidates(
   List<int>& currentRootInjection
 ) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::getHCandidates");
-  ProgressReport theReport1;
-  ProgressReport theReport2;
-  ProgressReport theReport3;
+  ProgressReport report1;
+  ProgressReport report2;
+  ProgressReport report3;
   int baseRank = currentType.getRank() - 1;
   DynkinSimpleType theSmallType = currentType.getSmallestSimpleType();
-  if (theReport1.tickAndWantReport()) {
+  if (report1.tickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "the latest root of the candidate simple component " << theSmallType.toString();
-    theReport1.report(reportStream.str());
+    report1.report(reportStream.str());
   }
   int indexNewRooT = *currentRootInjection.lastObject();
   int indexNewRootInSmallType = indexNewRooT - currentType.getRank() + theSmallType.rank;
@@ -1738,7 +1734,7 @@ void SemisimpleSubalgebras::getHCandidates(
   theSmallType.getDefaultRootLengthSquared(indexNewRootInSmallType);
   outputHCandidatesScaledToActByTwo.setSize(0);
   for (int j = 0; j < this->slTwoSubalgebras.size; j ++) {
-    if (theReport2.tickAndWantReport()) {
+    if (report2.tickAndWantReport()) {
       std::stringstream reportStreamX;
       reportStreamX << "Trying to realize via orbit number " << j + 1 << ".";
       if (this->slTwoSubalgebras[j].lengthHSquared != desiredHScaledToActByTwoLengthSquared) {
@@ -1749,7 +1745,7 @@ void SemisimpleSubalgebras::getHCandidates(
         << this->slTwoSubalgebras.size << " does not have the required length of "
         << desiredHScaledToActByTwoLengthSquared.toString();
       }
-      theReport2.report(reportStreamX.str());
+      report2.report(reportStreamX.str());
     }
     if (this->slTwoSubalgebras[j].lengthHSquared != desiredHScaledToActByTwoLengthSquared) {
       continue;
@@ -1765,21 +1761,21 @@ void SemisimpleSubalgebras::getHCandidates(
     do {
       currentCandidate = currentOrbit.getCurrentElement();
       if (newCandidate.isGoodHNewActingByTwo(currentCandidate, currentRootInjection)) {
-        if (theReport3.tickAndWantReport()) {
+        if (report3.tickAndWantReport()) {
           std::stringstream out2, out3;
           out3 << "So far, found " << outputHCandidatesScaledToActByTwo.size + 1 << " good candidates. ";
-          theReport2.report(out3.str());
+          report2.report(out3.str());
           out2 << "sl(2) orbit " << j + 1 << ". " << currentOrbit.toString();
           out2 << "Current element has desired scalar products. ";
-          theReport3.report(out2.str());
+          report3.report(out2.str());
         }
         outputHCandidatesScaledToActByTwo.addOnTop(currentOrbit.getCurrentElement());
       } else {
-        if (theReport3.tickAndWantReport()) {
+        if (report3.tickAndWantReport()) {
           std::stringstream out2;
           out2 << "sl(2) orbit " << j + 1 << ". " << currentOrbit.toString()
           << "\n<br>Current element is not a valid candidate. ";
-          theReport3.report(out2.str());
+          report3.report(out2.str());
         }
       }
     } while (currentOrbit.incrementReturnFalseIfPastLast());
@@ -1787,7 +1783,7 @@ void SemisimpleSubalgebras::getHCandidates(
       std::stringstream out2;
       out2 << "Sl(2) orbit " << j + 1 << ": extension to " << currentType.toString()
       << " not possible because there were no h candidates.";
-      theReport1.report(out2.str());
+      report1.report(out2.str());
     }
   }
 }
@@ -1991,12 +1987,10 @@ bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits(
 
 bool CandidateSemisimpleSubalgebra::computeCentralizerTypeFailureAllowed() {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::computeCentralizerTypeFailureAllowed");
-  global.comments << "<br>DEBUG: Compute centralizer of " << this->getAmbientWeyl().dynkinType.toString();
   this->checkFullInitialization();
   if (this->getRank() != 1) {
     return false;
   }
-  global.comments << "<br>DEBUG: Here i am!";
   Vector<Rational> hElement = this->cartanElementsScaledToActByTwo[0];
   int indexSl2 = - 1;
   bool mustBeTrue =  this->owner->slTwoSubalgebras.containsSl2WithGivenH(hElement, &indexSl2);
@@ -2192,7 +2186,6 @@ void SemisimpleSubalgebras::addSubalgebraIfNewSetToStackTop(
     input.indexInOwner = this->subalgebras.values.size;
     this->subalgebras.setKeyValue(input.cartanElementsSubalgebra, input);
   }
-  global.comments << "DEBUG: add on top: " << input.toStringType();
   input.computeAndVerifyFromGeneratorsAndHs();
   this->addSubalgebraToStack(input, 0, 0);
 }
@@ -3665,7 +3658,7 @@ bool NilradicalCandidate::tryFindingLInfiniteRelations() {
     }
   }
 //  this->ConeStrongIntersection.makeZero(this->ConeStrongIntersection.size);
-  ProgressReport theReport;
+  ProgressReport report;
   this->flagComputedRelativelyStrongIntersections = true;
   for (int i = 1; i < this->nilradicalWeights.size + 1 && i < 5; i ++) {
     LargeInteger numberOfCycles = MathRoutines::nChooseK(this->nilradicalWeights.size, i);
@@ -3675,7 +3668,7 @@ bool NilradicalCandidate::tryFindingLInfiniteRelations() {
       std::stringstream out;
       out << "<br>Trying " << i + 1 << "-tuples (up to 5-tuples): "
       << j + 1 << " out of " << numberOfCycles << " cycles to process. ";
-      theReport.report(out.str());
+      report.report(out.str());
       if (this->isCommutingSelectionNilradicalElements(this->nilradicalSubselection)) {
         this->computeTheTwoConesRelativeToNilradicalSubset();
         if (this->nilradicalSubsetWeights.conesIntersect(
@@ -3805,11 +3798,11 @@ void NilradicalCandidate::computeTheTwoCones() {
 
 void CandidateSemisimpleSubalgebra::enumerateAllNilradicals() {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::enumerateAllNilradicals");
-  ProgressReport theReport;
-  ProgressReport theReport2;
+  ProgressReport report;
+  ProgressReport report2;
   std::stringstream reportStream;
   reportStream << "Enumerating recursively nilradicals of type " << this->toStringTypeAndHs() << "...";
-  theReport.report(reportStream.str());
+  report.report(reportStream.str());
   this->fernandoKacNilradicalCandidates.setSize(0);
   List<int> theSel;
   this->recursionDepthCounterForNilradicalGeneration = 0;
@@ -3835,7 +3828,7 @@ void CandidateSemisimpleSubalgebra::enumerateAllNilradicals() {
     std::stringstream reportStream2;
     reportStream2 << "Processing nilradical: "
     << i + 1 << " out of " << this->fernandoKacNilradicalCandidates.size;
-    theReport2.report(reportStream2.str());
+    report2.report(reportStream2.str());
     this->fernandoKacNilradicalCandidates[i].processMe();
   }
   this->numberOfConeIntersections = 0;
@@ -7276,8 +7269,8 @@ bool CandidateSemisimpleSubalgebra::isDirectSummandOf(const CandidateSemisimpleS
   }
   List<Vector<Rational> > conjugationCandidates;
   Vectors<Rational> currentComponent;
-  ProgressReport theReport;
-  if (theReport.tickAndWantReport()) {
+  ProgressReport report;
+  if (report.tickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "Computing whether "
     << this->weylNonEmbedded->dynkinType << " is direct summand of "
@@ -7294,7 +7287,7 @@ bool CandidateSemisimpleSubalgebra::isDirectSummandOf(const CandidateSemisimpleS
         reportStream << "<br>" << HtmlRoutines::getMathNoDisplay(theOuterAutos.elements[i].toStringMatrixForm(&theFormat));
       }
     }
-    theReport.report(reportStream.str());
+    report.report(reportStream.str());
   }
   do {
     for (int k = 0; k < theOuterAutos.elements.size; k ++) {
@@ -7339,7 +7332,7 @@ int CandidateSemisimpleSubalgebra::getNumberOfModules() const {
 
 void SemisimpleSubalgebras::computePairingTablesAndFKFTtypes() {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::computePairingTablesAndFKFTtypes");
-  ProgressReport theReport;
+  ProgressReport report;
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
     CandidateSemisimpleSubalgebra& currentSubalgebra = this->subalgebras.values[i];
     if (!currentSubalgebra.flagCentralizerIsWellChosen || !currentSubalgebra.flagSystemSolved) {
@@ -7348,24 +7341,24 @@ void SemisimpleSubalgebras::computePairingTablesAndFKFTtypes() {
     if (!this->flagcomputePairingTable) {
       continue;
     }
-    if (theReport.tickAndWantReport()) {
+    if (report.tickAndWantReport()) {
       std::stringstream reportStream2;
       reportStream2 << "Computing pairing table of subalgebra number " << i + 1
       << " out of " << this->subalgebras.values.size
       << ". The subalgebra is of type " << this->subalgebras.values[i].toStringTypeAndHs() << "... ";
-      theReport.report(reportStream2.str());
+      report.report(reportStream2.str());
     }
     if (currentSubalgebra.isRegularSubalgebra()) {
       continue;
     }
     currentSubalgebra.computePairingTable();
-    if (theReport.tickAndWantReport()) {
+    if (report.tickAndWantReport()) {
       std::stringstream reportStream2;
       reportStream2 << "Computing pairing table of subalgebra number " << i + 1
       << " out of " << this->subalgebras.values.size
       << ". The subalgebra is of type " << this->subalgebras.values[i].toStringTypeAndHs()
       << "... DONE. Computing Fernando-Kac subalgebra candidates.";
-      theReport.report(reportStream2.str());
+      report.report(reportStream2.str());
     }
     if (this->flagComputeNilradicals && !this->subalgebras.values[i].isRegularSubalgebra()) {
       currentSubalgebra.enumerateAllNilradicals();
@@ -7391,8 +7384,8 @@ void SemisimpleSubalgebras::hookUpCentralizers(bool allowNonPolynomialSystemFail
 
   HashedList<int, HashFunctions::hashFunction> theCandidatePermutationHashed;
   theCandidatePermutationHashed = theCandidatePermutation;
-  ProgressReport theReport1, theReport2;
-  theReport1.report("<hr>\nHooking up centralizers ");
+  ProgressReport report1, report2;
+  report1.report("<hr>\nHooking up centralizers ");
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
     if (!this->subalgebras.values[i].flagSystemSolved) {
       continue;
@@ -7405,7 +7398,7 @@ void SemisimpleSubalgebras::hookUpCentralizers(bool allowNonPolynomialSystemFail
     reportStream2 << "Computing centralizer of subalgebra number " << i + 1
     << " out of " << this->subalgebras.values.size
     << ". The subalgebra is of type " << currentSubalgebra.toStringTypeAndHs() << ". ";
-    theReport2.report(reportStream2.str());
+    report2.report(reportStream2.str());
     currentSubalgebra.indexInOwner = i;
     currentSubalgebra.indexInducedFrom = theCandidatePermutationHashed.getIndex(currentSubalgebra.indexInducedFrom);
     currentSubalgebra.indicesDirectSummandSuperAlgebra.setSize(0);
@@ -7436,7 +7429,7 @@ void SemisimpleSubalgebras::hookUpCentralizers(bool allowNonPolynomialSystemFail
       << this->owner->getRank() << ". " << global.fatal;
     }
   }
-  theReport1.report("<hr>\nCentralizers computed, adjusting centralizers with respect to the Cartan subalgebra.");
+  report1.report("<hr>\nCentralizers computed, adjusting centralizers with respect to the Cartan subalgebra.");
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
     if (!this->subalgebras.values[i].flagSystemSolved) {
       continue;
@@ -7445,10 +7438,10 @@ void SemisimpleSubalgebras::hookUpCentralizers(bool allowNonPolynomialSystemFail
     reportStream2 << "Adjusting the centralizer of subalgebra number " << i + 1
     << " out of " << this->subalgebras.values.size
     << ". The subalgebra is of type " << this->subalgebras.values[i].toStringTypeAndHs() << ". ";
-    theReport2.report(reportStream2.str());
+    report2.report(reportStream2.str());
     this->subalgebras.values[i].adjustCentralizerAndRecompute(allowNonPolynomialSystemFailure);
   }
-  theReport1.report("<hr>\nComputing pairing tables.");
+  report1.report("<hr>\nComputing pairing tables.");
   if (this->flagcomputeModuleDecompositionsition) {
     for (int i = 0; i < this->subalgebras.values.size; i ++) {
       if (this->subalgebras.values[i].flagCentralizerIsWellChosen && this->subalgebras.values[i].flagSystemSolved) {
@@ -7456,7 +7449,7 @@ void SemisimpleSubalgebras::hookUpCentralizers(bool allowNonPolynomialSystemFail
         reportStream2 << "Computing primal module decomposition of subalgebra number " << i + 1
         << " out of " << this->subalgebras.values.size
         << ". The subalgebra is of type " << this->subalgebras.values[i].toStringTypeAndHs() << ". ";
-        theReport2.report(reportStream2.str());
+        report2.report(reportStream2.str());
         this->subalgebras.values[i].computePrimalModuleDecomposition();
       }
     }
@@ -7525,7 +7518,6 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
   }
   ////////////////
   this->bilinearFormSimplePrimal = this->weylNonEmbedded->cartanSymmetric;
-  global.comments << "DEBUG: this->bilinearFormSimplePrimal: " << this->bilinearFormSimplePrimal.toString();
   Matrix<Rational> centralizerPart, matrixFundamentalCoordinatesSimple, diagonalMatrix, diagMatrix2, bilinearFormInverted;
   // global.Comments << "<hr>Cartan of Centralizer: " << this->CartanOfCentralizer.toString() << "<br>Cartan symmetric: "
   // << this->owner->owner->theWeyl.cartanSymmetric.toString();
@@ -7540,8 +7532,6 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
   diagMatrix2.initialize(this->bilinearFormSimplePrimal.numberOfRows, this->bilinearFormSimplePrimal.numberOfColumns);
   diagonalMatrix.makeZero();
   diagMatrix2.makeZero();
-  global.comments << "DEBUG: cartan symmetric: "
-  << this->subalgebraNonEmbeddedDefaultScale->weylGroup.cartanSymmetric.toString();
   for (int i = 0; i < this->bilinearFormSimplePrimal.numberOfRows; i ++) {
     if (i < this->cartanElementsSubalgebra.size) {
       diagonalMatrix(i, i) = this->subalgebraNonEmbeddedDefaultScale->weylGroup.cartanSymmetric(i, i) / 2;
@@ -7551,7 +7541,6 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
       diagMatrix2(i, i) = 1;
     }
   }
-  global.comments << "DEBUG: got to here";
   matrixFundamentalCoordinatesSimple = bilinearFormInverted;
   matrixFundamentalCoordinatesSimple *= diagonalMatrix;
   this->matMultiplyFundCoordsToGetSimple = bilinearFormInverted;

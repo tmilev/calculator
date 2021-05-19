@@ -787,7 +787,7 @@ class Vectors: public List<Vector<Coefficient> > {
   void selectionToMatrix(Selection& theSelection, int outputDimension, Matrix<Coefficient>& output);
   void selectionToMatrixAppend(Selection& theSelection, int outputDimension, Matrix<Coefficient>& output, int startRowIndex);
   void selectionToMatrix(Selection& theSelection, int outputDimension, Matrix<Coefficient>& output, int startRowIndex);
-  void getGramMatrix(Matrix<Coefficient>& output, const Matrix<Rational>* theBilinearForm = nullptr) const;
+  void getGramMatrix(Matrix<Coefficient>& output, const Matrix<Rational>* bilinearForm = nullptr) const;
   void getMatrixRootsToRows(Matrix<Rational>& output) const;
   void getOrthogonalComplement(Vectors<Coefficient>& output, Matrix<Rational>* bilinearForm = nullptr);
   bool linearSpanContainsVector(
@@ -1143,12 +1143,12 @@ bool Vector<Coefficient>::getIntegralCoordsInBasisIfTheyExist(
 }
 
 template<class Coefficient>
-void Vectors<Coefficient>::getGramMatrix(Matrix<Coefficient>& output, const Matrix<Rational>* theBilinearForm) const {
+void Vectors<Coefficient>::getGramMatrix(Matrix<Coefficient>& output, const Matrix<Rational>* bilinearForm) const {
   output.resize(this->size, this->size, false);
   for (int i = 0; i < this->size; i ++) {
     for (int j = i; j < this->size; j ++) {
-      if (theBilinearForm != nullptr) {
-        Vector<Coefficient>::scalarProduct(this->objects[i], this->objects[j], *theBilinearForm, output.elements[i][j]);
+      if (bilinearForm != nullptr) {
+        Vector<Coefficient>::scalarProduct(this->objects[i], this->objects[j], *bilinearForm, output.elements[i][j]);
       } else {
         output(i, j) = (*this)[i].scalarEuclidean((*this)[j]);
       }

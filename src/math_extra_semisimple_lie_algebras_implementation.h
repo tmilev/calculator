@@ -272,6 +272,7 @@ void SemisimpleLieAlgebra::getCommonCentralizer(
   const List<ElementSemisimpleLieAlgebra<Coefficient> >& inputElementsToCentralize,
   List<ElementSemisimpleLieAlgebra<Coefficient> >& outputCentralizingElements
 ) {
+  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::getCommonCentralizer");
   Matrix<Coefficient> tempAd, commonAd;
   for (int i = 0; i < inputElementsToCentralize.size; i ++) {
     this->getAdjoint(tempAd, inputElementsToCentralize[i]);
@@ -304,14 +305,14 @@ void SemisimpleLieAlgebra::lieBracket(
   }
   int maxNumMonsFinal = g1.size() * g2.size();
   output.setExpectedSize(maxNumMonsFinal);
-  Coefficient theCoeff;
+  Coefficient coefficient;
   ElementSemisimpleLieAlgebra<Coefficient> buffer;
   for (int i = 0; i < g1.size(); i ++) {
     for (int j = 0; j < g2.size(); j ++) {
       buffer = this->lieBrackets.elements[g1[i].generatorIndex][g2[j].generatorIndex];
-      theCoeff = g1.coefficients[i];
-      theCoeff *= g2.coefficients[j];
-      buffer *= theCoeff;
+      coefficient = g1.coefficients[i];
+      coefficient *= g2.coefficients[j];
+      buffer *= coefficient;
       output += buffer;
     }
   }

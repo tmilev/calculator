@@ -7,27 +7,27 @@
 
 class ConeRelation {
 public:
-  Vectors<Rational> Alphas;
-  Vectors<Rational> Betas;
-  List<Rational> AlphaCoeffs;
-  List<Rational> BetaCoeffs;
-  List<List<int> > AlphaKComponents;
-  List<List<int> > BetaKComponents;
-  int IndexOwnerRootSubalgebra;
+  Vectors<Rational> alphas;
+  Vectors<Rational> betas;
+  List<Rational> alphaCoefficients;
+  List<Rational> betaCoefficients;
+  List<List<int> > alphaKComponents;
+  List<List<int> > betaKComponents;
+  int indexOwnerRootSubalgebra;
   bool generateAutomorphisms(ConeRelation& right);
   DynkinDiagramRootSubalgebra diagram;
-  DynkinDiagramRootSubalgebra theDiagramRelAndK;
+  DynkinDiagramRootSubalgebra diagramRelationAndK;
   std::string relationString;
   std::string stringConnectedComponents;
   void computeDiagramAndDiagramRelationsAndK(RootSubalgebra& owner);
   void computeDiagramRelationsAndK(RootSubalgebra& owner);
-  void fixRepeatingRoots(Vectors<Rational>& theRoots, List<Rational>& coeffs);
+  void fixRepeatingRoots(Vectors<Rational>& roots, List<Rational>& coefficients);
   void relationOneSideToString(
     std::string& output,
     const std::string& letterType,
-    List<Rational>& coeffs,
+    List<Rational>& coefficients,
     List<List<int> >& kComponents,
-    Vectors<Rational>& theRoots,
+    Vectors<Rational>& roots,
     bool useLatex,
     RootSubalgebra& owner
   );
@@ -51,14 +51,14 @@ public:
     this->toString(this->relationString, owner, true, includeScalarsProducts, includeMixedScalarProducts);
   }
   void makeLookCivilized(RootSubalgebra& owner);
-  bool IsStrictlyWeaklyProhibiting(
-    RootSubalgebra& owner, Vectors<Rational>& NilradicalRoots, RootSubalgebras& owners, int indexInOwner
+  bool isStrictlyWeaklyProhibiting(
+    RootSubalgebra& owner, Vectors<Rational>& nilradicalRoots, RootSubalgebras& owners, int indexInOwner
   );
   void FixRightHandSide(RootSubalgebra& owner, Vectors<Rational>& NilradicalRoots);
   bool leftSortedBiggerThanOrEqualToRight(List<int>& left, List<int>& right);
   void ComputeKComponents(Vectors<Rational>& input, List<List<int> >& output, RootSubalgebra& owner);
   void RelationOneSideToStringCoordForm(
-    std::string& output, List<Rational>& coeffs, Vectors<Rational>& theRoots, bool EpsilonForm
+    std::string& output, List<Rational>& coefficients, Vectors<Rational>& roots, bool epsilonForm
   );
   void getSumAlphas(Vector<Rational>& output, int dimension);
   bool checkForBugs(RootSubalgebra& owner, Vectors<Rational>& NilradicalRoots);
@@ -73,13 +73,13 @@ public:
     return input.hashFunction();
   }
   ConeRelation() {
-   this->IndexOwnerRootSubalgebra = - 1;
+   this->indexOwnerRootSubalgebra = - 1;
   }
 };
 
 class ConeRelations: public HashedList<ConeRelation> {
 public:
-  int NumAllowedLatexLines;
+  int numberOfAllowedLatexLines;
   bool flagIncludeSmallerRelations;
   bool flagIncludeCoordinateRepresentation;
   bool flagIncludeSubalgebraDataInDebugString;
@@ -92,7 +92,7 @@ public:
   void readFromFile(std::fstream& input, RootSubalgebras& owner);
   void addRelationNoRepetition(ConeRelation& input, RootSubalgebras& owners);
   ConeRelations() {
-    this->NumAllowedLatexLines = 40;
+    this->numberOfAllowedLatexLines = 40;
     this->flagIncludeSmallerRelations = true;
     this->flagIncludeCoordinateRepresentation = false;
     this->flagIncludeSubalgebraDataInDebugString = false;
@@ -114,10 +114,10 @@ public:
 
   int numberOfNilradicalsAllowed;
   int numberOfConeConditionFailures;
-  int NumRelationsWithStronglyPerpendicularDecomposition;
+  int numberOfRelationsWithStronglyPerpendicularDecomposition;
   //int NumRelationsgreaterLengthThan2;
-  int NumGmodKtableRowsAllowedLatex;
-  int NumTotalSubalgebras;
+  int numberOfGModKTableRowsAllowedLatex;
+  int totalSubalgebras;
   int indexInducingSubalgebra;
   bool flagFirstRoundCounting;
   bool flagComputeConeCondition;
@@ -125,24 +125,24 @@ public:
   bool flagDeallocated;
   List<List<ElementSemisimpleLieAlgebra<Rational> > > modules;
   List<ElementSemisimpleLieAlgebra<Rational> > highestVectors;
-  List<Vectors<Rational> > WeightsModulesNONPrimalSimple;
-  List<Vectors<Rational> > WeightsModulesNONPrimalFundamental;
-  List<Vectors<Rational> > WeightsModulesPrimalSimple;
+  List<Vectors<Rational> > weightsModulesNONPrimalSimple;
+  List<Vectors<Rational> > weightsModulesNONPrimalFundamental;
+  List<Vectors<Rational> > weightsModulesPrimalSimple;
   List<Vector<Rational> > highestWeightsNonPrimalFundamental;
 
   List<Vector<Rational> > highestWeightsPrimalSimple;
-  List<Vector<Rational> > LowestWeightsPrimalSimple;
+  List<Vector<Rational> > lowestWeightsPrimalSimple;
 
 //  HashedList<Vector<Rational> > highestWeightsPrimal;
 
-  CharacterSemisimpleLieAlgebraModule<Rational> ModuleDecompoHighestWeights;
+  CharacterSemisimpleLieAlgebraModule<Rational> moduleDecompositionHighestWeights;
   List<int> indicesSubalgebrasContainingK;
   List<List<List<int> > > pairingTable;
-  List<int> theOppositeKmods;
+  List<int> oppositeKModules;
   DynkinDiagramRootSubalgebra dynkinDiagram;
-  DynkinDiagramRootSubalgebra theCentralizerDiagram;
-  DynkinType theDynkinType;
-  DynkinType theCentralizerDynkinType;
+  DynkinDiagramRootSubalgebra centralizerDiagram;
+  DynkinType dynkinType;
+  DynkinType centralizerDynkinType;
   List<List<int> > coneRelationsBuffer;
   List<int> coneRelationsNumSameTypeComponentsTaken;
   List<DynkinDiagramRootSubalgebra> relationsDiagrams;
@@ -157,15 +157,15 @@ public:
   Selection nilradicalKmodules;
   Selection centralizerKmodules;
   Vectors<Rational> testedRootsAlpha;
-  Vectors<Rational> CentralizerRoots;
-  Vectors<Rational> SimpleBasisCentralizerRoots;
+  Vectors<Rational> centralizerRoots;
+  Vectors<Rational> simpleBasisCentralizerRoots;
   Vectors<Rational> SimpleBasisKEpsCoords;
   Vectors<Rational> SimpleBasisgEpsCoords;
   List<Vectors<Rational> > kModulesKepsCoords;
   List<Vectors<Rational> > kModulesgEpsCoords;
   List<Vectors<Rational> > positiveRootsKConnectedComponents;
-  List<Selection> theKEnumerations;
-  List<int> theKComponentRanks;
+  List<Selection> kEnumerations;
+  List<int> kComponentRanks;
   RootSubalgebras* owner;
   HashedList<Vector<Rational> > bufferForModuleGeneration;
   Matrix<Rational> scalarProdMatrixPermuted, scalarProdMatrixOrdered;
@@ -200,7 +200,7 @@ public:
   );
   bool isEquivalentToByDiagramsAndDimensions(const RootSubalgebra& other) const;
   void computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators();
-  bool isGeneratingSingularVectors(int indexKmod, Vectors<Rational>& NilradicalRoots);
+  bool isGeneratingSingularVectors(int indexKmod, Vectors<Rational>& nilradicalRoots);
   bool rootIsInCentralizer(const Vector<Rational>& input);
   bool isSubalgebraBorelHighest(const Vector<Rational>& input);
   bool isSubalgebraBorelLowest(const Vector<Rational>& input);
@@ -209,15 +209,15 @@ public:
   void computeEpsilonCoordinatesWithRespectToSubalgebra();
   bool attemptTheTripleTrick(ConeRelation& theRel, Vectors<Rational>& NilradicalRoots);
   bool attemptTheTripleTrickWRTSubalgebra(
-    ConeRelation& theRel, Vectors<Rational>& highestWeightsAllowed, Vectors<Rational>& NilradicalRoots
+    ConeRelation& relation, Vectors<Rational>& highestWeightsAllowed, Vectors<Rational>& nilradicalRoots
   );
   void extractRelations(
     Matrix<Rational>& matA,
     Matrix<Rational>& matX,
-    Vectors<Rational>& NilradicalRoots,
+    Vectors<Rational>& nilradicalRoots,
     RootSubalgebras& owner,
     int indexInOwner,
-    Vectors<Rational>& Ksingular
+    Vectors<Rational>& kSingular
   );
   bool generateIsomorphismsPreservingBorel(
     RootSubalgebra& right, SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms* outputAutomorphisms
@@ -299,8 +299,8 @@ public:
   bool coneConditionHolds(
     RootSubalgebras& owner,
     int indexInOwner,
-    Vectors<Rational>& NilradicalRoots,
-    Vectors<Rational>& Ksingular,
+    Vectors<Rational>& nilradicalRoots,
+    Vectors<Rational>& kSingular,
     bool doextractRelations
   );
   void possibleNilradicalComputation(Selection& selKmods, RootSubalgebras& owner, int indexInOwner);

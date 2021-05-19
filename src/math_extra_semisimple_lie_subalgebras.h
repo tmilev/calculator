@@ -94,7 +94,9 @@ public:
 };
 
 class CandidateSemisimpleSubalgebra {
-  friend std::ostream& operator << (std::ostream& output, const CandidateSemisimpleSubalgebra& candidate) {
+  friend std::ostream& operator<<(
+    std::ostream& output, const CandidateSemisimpleSubalgebra& candidate
+  ) {
     output << candidate.toString(nullptr, false);
     return output;
   }
@@ -103,7 +105,7 @@ public:
   WeylGroupData* weylNonEmbedded;
   SemisimpleLieAlgebra* subalgebraNonEmbeddedDefaultScale;
   DynkinDiagramRootSubalgebra centralizerSubDiagram;
-  DynkinType theCentralizerType;
+  DynkinType centralizerType;
 
   List<Vectors<Rational> > cartanSubalgebrasByComponentScaledToActByTwo;
   List<AlgebraicNumber> ratiosKillingsByComponent;
@@ -291,6 +293,7 @@ public:
   );
   void computeCharactersPrimalModules();
   void computePairingTable();
+  bool computeFromGenerators(bool allowNonPolynomialSystemFailure);
   void computeSinglePair(int leftIndex, int rightIndex, List<int>& output);
   int getNumberOfModules() const;
   void computePairKWeightElementAndModule(

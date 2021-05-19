@@ -1271,6 +1271,7 @@ bool SemisimpleSubalgebras::computeStructureRealFormOneSlTwo(
   if (!candidate.computeFromGenerators(false)) {
     return false;
   }
+  candidate.adjustCentralizerAndRecompute(false);
   this->addSubalgebraIfNewSetToStackTop(candidate);
   this->removeLastSubalgebraFromStack();
   return true;
@@ -7525,7 +7526,7 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
   ////////////////
   this->bilinearFormSimplePrimal = this->weylNonEmbedded->cartanSymmetric;
   global.comments << "DEBUG: this->bilinearFormSimplePrimal: " << this->bilinearFormSimplePrimal.toString();
-  Matrix<Rational> centralizerPart, matFundCoordsSimple, diagonalMatrix, diagMatrix2, bilinearFormInverted;
+  Matrix<Rational> centralizerPart, matrixFundamentalCoordinatesSimple, diagonalMatrix, diagMatrix2, bilinearFormInverted;
   // global.Comments << "<hr>Cartan of Centralizer: " << this->CartanOfCentralizer.toString() << "<br>Cartan symmetric: "
   // << this->owner->owner->theWeyl.cartanSymmetric.toString();
   this->cartanOfCentralizer.getGramMatrix(centralizerPart, &this->owner->owner->weylGroup.cartanSymmetric);
@@ -7551,14 +7552,14 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
     }
   }
   global.comments << "DEBUG: got to here";
-  matFundCoordsSimple = bilinearFormInverted;
-  matFundCoordsSimple *= diagonalMatrix;
+  matrixFundamentalCoordinatesSimple = bilinearFormInverted;
+  matrixFundamentalCoordinatesSimple *= diagonalMatrix;
   this->matMultiplyFundCoordsToGetSimple = bilinearFormInverted;
   this->matMultiplyFundCoordsToGetSimple *= diagMatrix2;
-  this->bilinearFormFundamentalPrimal = matFundCoordsSimple;
+  this->bilinearFormFundamentalPrimal = matrixFundamentalCoordinatesSimple;
   this->bilinearFormFundamentalPrimal.transpose();
   this->bilinearFormFundamentalPrimal *= this->bilinearFormSimplePrimal;
-  this->bilinearFormFundamentalPrimal *= matFundCoordsSimple;
+  this->bilinearFormFundamentalPrimal *= matrixFundamentalCoordinatesSimple;
 /*  this->inducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.initialize(this->getAmbientWeyl().getDimension(), this->getPrimalRank());
   for (int i = 0; i < this->getRank(); i ++)
     this->inducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.assignVectorToColumnKeepOtherColsIntactNoInit

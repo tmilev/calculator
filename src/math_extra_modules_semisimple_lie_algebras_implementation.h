@@ -11,23 +11,23 @@
 template<class Coefficient>
 Rational ModuleSSalgebra<Coefficient>::highestWeightTrace(
   const Pair<MonomialTensor<int, HashFunctions::hashFunction>,
-  MonomialTensor<int, HashFunctions::hashFunction> >& thePair,
-  ProgressReport* theProgressReport
+  MonomialTensor<int, HashFunctions::hashFunction> >& pair,
+  ProgressReport* progressReport
 ) {
-  MacroRegisterFunctionWithName("ModuleSSalgebra::hwTrace");
-  int indexInCache = this->cachedPairs.getIndex(thePair);
+  MacroRegisterFunctionWithName("ModuleSSalgebra::highestWeightTrace");
+  int indexInCache = this->cachedPairs.getIndex(pair);
   if (indexInCache != - 1) {
     return this->cachedTraces[indexInCache];
   }
-  if (thePair.object1.generatorsIndices.size == 0) {
+  if (pair.object1.generatorsIndices.size == 0) {
     return 1;
   }
   Pair<MonomialTensor<int, HashFunctions::hashFunction>,
   MonomialTensor<int, HashFunctions::hashFunction> > newPair;
   MonomialTensor<int, HashFunctions::hashFunction>& newLeft = newPair.object1;
   MonomialTensor<int, HashFunctions::hashFunction>& newRight = newPair.object2;
-  const MonomialTensor<int, HashFunctions::hashFunction>& oldRight = thePair.object2;
-  newLeft = thePair.object1;
+  const MonomialTensor<int, HashFunctions::hashFunction>& oldRight = pair.object2;
+  newLeft = pair.object1;
   (*newLeft.powers.lastObject()) -= 1;
   int index = *newLeft.generatorsIndices.lastObject();
   if (*newLeft.powers.lastObject() == 0) {
@@ -39,7 +39,7 @@ Rational ModuleSSalgebra<Coefficient>::highestWeightTrace(
   MonomialTensor<int, HashFunctions::hashFunction> Accum;
   Accum.powers.reserve(oldRight.powers.size);
   Accum.generatorsIndices.reserve(oldRight.generatorsIndices.size);
-  Vector<Rational> RemainingWeight;
+  Vector<Rational> remainingWeight;
   Rational result = 0;
   Rational summand;
   WeylGroupData& theWeyl = this->getOwner().weylGroup;
@@ -48,20 +48,20 @@ Rational ModuleSSalgebra<Coefficient>::highestWeightTrace(
       summand = 0;
       newRight = Accum;
       newRight.multiplyByGeneratorPowerOnTheRight(oldRight.generatorsIndices[i], oldRight.powers[i] - 1);
-      RemainingWeight.makeZero(theWeyl.getDimension());
+      remainingWeight.makeZero(theWeyl.getDimension());
       for (int j = i + 1; j < oldRight.generatorsIndices.size; j ++) {
         newRight.multiplyByGeneratorPowerOnTheRight(oldRight.generatorsIndices[j], oldRight.powers[j]);
-        RemainingWeight += theWeyl.rootSystem[oldRight.generatorsIndices[j]] * oldRight.powers[j];
+        remainingWeight += theWeyl.rootSystem[oldRight.generatorsIndices[j]] * oldRight.powers[j];
       }
-      RemainingWeight += this->highestWeightFiniteDimensionalPartSimpleCoordinates;
-      summand += theWeyl.getScalarProductSimpleRoot(RemainingWeight, theSimpleIndex);
+      remainingWeight += this->highestWeightFiniteDimensionalPartSimpleCoordinates;
+      summand += theWeyl.getScalarProductSimpleRoot(remainingWeight, theSimpleIndex);
       summand *= 2;
       summand /= theWeyl.cartanSymmetric.elements[theSimpleIndex][theSimpleIndex];
       summand += 1;
       summand -= oldRight.powers[i];
       if (!summand.isEqualToZero()) {
         summand *= this->highestWeightTrace(
-          newPair, theProgressReport
+          newPair, progressReport
         );
       }
       summand *= oldRight.powers[i];
@@ -70,15 +70,15 @@ Rational ModuleSSalgebra<Coefficient>::highestWeightTrace(
     Accum.generatorsIndices.addOnTop(oldRight.generatorsIndices[i]);
     Accum.powers.addOnTop(oldRight.powers[i]);
   }
-  if (this->cachedPairs.size < this->MaxNumCachedPairs) {
-    this->cachedPairs.addOnTop(thePair);
+  if (this->cachedPairs.size < this->maximumNumberOfCachedPairs) {
+    this->cachedPairs.addOnTop(pair);
     this->cachedTraces.addOnTop(result);
   }
-  if (theProgressReport != nullptr && this->cachedPairs.size < 500000) {
+  if (progressReport != nullptr && this->cachedPairs.size < 500000) {
     std::stringstream tempStream;
     tempStream << "Number of cached pairs: " << this->cachedPairs.size
     << " at recursion depth " << global.customStackTrace.size;
-    theProgressReport->report(tempStream.str());
+    progressReport->report(tempStream.str());
   }
   return result;
 }
@@ -99,7 +99,7 @@ template<class Coefficient>
 Rational ModuleSSalgebra<Coefficient>::highestWeightTransposeAntiAutomorphismBilinearFormSimpleGeneratorsOnly(
   const MonomialTensor<int, HashFunctions::hashFunction>& leftMon,
   const MonomialTensor<int, HashFunctions::hashFunction>& rightMon,
-  ProgressReport* theProgressReport
+  ProgressReport* progressReport
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::hwtaabfSimpleGensOnly");
   const MonomialTensor<int, HashFunctions::hashFunction>* left = &leftMon;
@@ -111,97 +111,99 @@ Rational ModuleSSalgebra<Coefficient>::highestWeightTransposeAntiAutomorphismBil
   pair.object1 = *left;
   pair.object2 = *right;
   this->applyTransposeAntiAutomorphism(pair.object1);
-  Rational result = this->highestWeightTrace(pair, theProgressReport);
-  if (theProgressReport != nullptr) {
+  Rational result = this->highestWeightTrace(pair, progressReport);
+  if (progressReport != nullptr) {
     std::stringstream tempStream;
     tempStream << this->cachedPairs.size << " total cached pairs";
-    theProgressReport->report(tempStream.str());
+    progressReport->report(tempStream.str());
   }
   return result;
 }
 
 template<class Coefficient>
-void ModuleSSalgebra<Coefficient>::substitution(const PolynomialSubstitution<Rational>& theSub) {
-  for (int i = 0; i < this->actionsGeneratorsMaT.size; i ++) {
-    this->actionsGeneratorsMaT[i].substitution(theSub);
+void ModuleSSalgebra<Coefficient>::substitution(
+  const PolynomialSubstitution<Rational>& variableImages
+) {
+  for (int i = 0; i < this->actionsGeneratorsMatrix.size; i ++) {
+    this->actionsGeneratorsMatrix[i].substitution(variableImages);
   }
   for (int i = 0; i < this->actionsGeneratorS.size; i ++) {
     for (int j = 0; j < this->actionsGeneratorS[i].size; j ++) {
       for (int k = 0; k < this->actionsGeneratorS[i][j].size; k ++) {
-        this->actionsGeneratorS[i][j][k].substitution(theSub);
+        this->actionsGeneratorS[i][j][k].substitution(variableImages);
       }
     }
   }
   List<MonomialUniversalEnveloping<Coefficient> > oldGeneratingWordsNonReduced;
-  oldGeneratingWordsNonReduced = this->theGeneratingWordsNonReduced;
-  this->theGeneratingWordsNonReduced.clear();
+  oldGeneratingWordsNonReduced = this->generatingWordsNonReduced;
+  this->generatingWordsNonReduced.clear();
   for (int i = 0; i < oldGeneratingWordsNonReduced.size; i ++) {
-    oldGeneratingWordsNonReduced[i].substitution(theSub);
-    this->theGeneratingWordsNonReduced.addOnTop(oldGeneratingWordsNonReduced[i]);
+    oldGeneratingWordsNonReduced[i].substitution(variableImages);
+    this->generatingWordsNonReduced.addOnTop(oldGeneratingWordsNonReduced[i]);
   }
-  for (int i = 0; i < this->theGeneratingWordsGrouppedByWeight.size; i ++) {
-    for (int j = 0; j < this->theGeneratingWordsGrouppedByWeight[i].size; j ++) {
-      this->theGeneratingWordsGrouppedByWeight[i][j].substitution(theSub);
+  for (int i = 0; i < this->generatingWordsGrouppedByWeight.size; i ++) {
+    for (int j = 0; j < this->generatingWordsGrouppedByWeight[i].size; j ++) {
+      this->generatingWordsGrouppedByWeight[i][j].substitution(variableImages);
     }
   }
   for (int i = 0; i < this->bilinearFormsAtEachWeightLevel.size; i ++) {
-    this->bilinearFormsAtEachWeightLevel[i].substitution(theSub);
-    this->bilinearFormsInverted[i].substitution(theSub);
+    this->bilinearFormsAtEachWeightLevel[i].substitution(variableImages);
+    this->bilinearFormsInverted[i].substitution(variableImages);
   }
-  for (int i = 0; i < this->theHWDualCoordsBaseFielD.size; i ++) {
-    this->theHWDualCoordsBaseFielD[i].substitution(theSub, Rational::one(), nullptr);
-    this->theHWFundamentalCoordsBaseField[i].substitution(theSub, Rational::one(), nullptr);
-    this->theHWSimpleCoordSBaseField[i].substitution(theSub, Rational::one(), nullptr);
+  for (int i = 0; i < this->highestWeightDualCoordinatesBaseField.size; i ++) {
+    this->highestWeightDualCoordinatesBaseField[i].substitution(variableImages, Rational::one(), nullptr);
+    this->highestWeightFundamentalCoordinatesBaseField[i].substitution(variableImages, Rational::one(), nullptr);
+    this->highestWeightSimpleCoordinatesBaseField[i].substitution(variableImages, Rational::one(), nullptr);
   }
 }
 
 template <class Coefficient>
 MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionGeneratorIndex(int generatorIndex) {
-  MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::getActionGeneratorIndex");
+  MacroRegisterFunctionWithName("ModuleSSalgebra::getActionGeneratorIndex");
   int numGenerators = this->getOwner().getNumberOfGenerators();
   if (generatorIndex < 0 || generatorIndex >= numGenerators) {
     global.fatal << "Bad generator index: " << generatorIndex << ". " << global.fatal;
   }
   if (this->ComputedGeneratorActions.selected[generatorIndex]) {
-    return this->actionsGeneratorsMaT[generatorIndex];
+    return this->actionsGeneratorsMatrix[generatorIndex];
   }
   this->ComputedGeneratorActions.addSelectionAppendNewIndex(generatorIndex);
   if (this->hasFreeAction(generatorIndex)) {
     global.fatal << "Due to a change in "
     << "implementation of the generalized Verma module class. " << global.fatal;
-    this->actionsGeneratorsMaT[generatorIndex].makeZero();
-    return this->actionsGeneratorsMaT[generatorIndex];
+    this->actionsGeneratorsMatrix[generatorIndex].makeZero();
+    return this->actionsGeneratorsMatrix[generatorIndex];
   }
   if (this->hasZeroActionFDpart(generatorIndex)) {
-    this->actionsGeneratorsMaT[generatorIndex].makeZero();
-    return this->actionsGeneratorsMaT[generatorIndex];
+    this->actionsGeneratorsMatrix[generatorIndex].makeZero();
+    return this->actionsGeneratorsMatrix[generatorIndex];
   }
   if (this->getOwner().isSimpleGenerator(generatorIndex)) {
     return this->getActionSimpleGeneratorIndex(generatorIndex);
   }
-  MatrixTensor<Coefficient>& output = this->actionsGeneratorsMaT[generatorIndex];
+  MatrixTensor<Coefficient>& output = this->actionsGeneratorsMatrix[generatorIndex];
   if (this->getOwner().isGeneratorFromCartan(generatorIndex)) {
     output.makeZero();
     MonomialMatrix monomial;
     Vector<Coefficient> weightH;
-    Coefficient tempCF, hwCFshift;
+    Coefficient coefficient, highestWeightCoefficientShift;
     weightH.makeEi(this->getOwner().getRank(), generatorIndex - this->getOwner().getNumberOfPositiveRoots());
-    hwCFshift = this->getOwner().weylGroup.rootScalarCartanRoot(weightH, this->theHWSimpleCoordSBaseField);
-    hwCFshift -= this->getOwner().weylGroup.rootScalarCartanRoot(weightH, this->highestWeightFiniteDimensionalPartSimpleCoordinates);
-    for (int i = 0; i < this->theGeneratingWordsNonReduced.size; i ++) {
-      Vector<Rational>& theWeight = this->theGeneratingWordsWeightsPlusWeightFDpart[i];
-      tempCF = this->getOwner().weylGroup.rootScalarCartanRoot(weightH, theWeight);
-      tempCF += hwCFshift;
+    highestWeightCoefficientShift = this->getOwner().weylGroup.rootScalarCartanRoot(weightH, this->highestWeightSimpleCoordinatesBaseField);
+    highestWeightCoefficientShift -= this->getOwner().weylGroup.rootScalarCartanRoot(weightH, this->highestWeightFiniteDimensionalPartSimpleCoordinates);
+    for (int i = 0; i < this->generatingWordsNonReduced.size; i ++) {
+      Vector<Rational>& weight = this->theGeneratingWordsWeightsPlusWeightFDpart[i];
+      coefficient = this->getOwner().weylGroup.rootScalarCartanRoot(weightH, weight);
+      coefficient += highestWeightCoefficientShift;
       monomial.isIdentity = false;
       monomial.vIndex = i;
       monomial.dualIndex = i;
-      output.addMonomial(monomial, tempCF);
+      output.addMonomial(monomial, coefficient);
     }
     return output;
   }
   List<int> adActions;
-  Rational theCoeff;
-  this->getOwner().getChevalleyGeneratorAsLieBracketsSimpleGenerators(generatorIndex, adActions, theCoeff);
+  Rational coefficient;
+  this->getOwner().getChevalleyGeneratorAsLieBracketsSimpleGenerators(generatorIndex, adActions, coefficient);
   MatrixTensor<Coefficient> tempO;
   output = this->getActionGeneratorIndex(*adActions.lastObject());
   for (int i = adActions.size - 2; i >= 0; i --) {
@@ -209,7 +211,7 @@ MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionGeneratorIndex
     output.lieBracketOnTheLeft(tempO);
   }
   Coefficient tempCF;
-  tempCF = theCoeff;
+  tempCF = coefficient;
   output *= tempCF;
   return output;
 }
@@ -230,18 +232,18 @@ void ModuleSSalgebra<Coefficient>::getMatrixHomogenousElt(
   output.makeZero();
   for (int j = 0; j < outputSortedByArgumentWeight.size; j ++) {
     for (int k = 0; k < outputSortedByArgumentWeight[j].size; k ++) {
-      MonomialUniversalEnveloping<Coefficient>& currentMon = this->theGeneratingWordsGrouppedByWeight[j][k];
+      MonomialUniversalEnveloping<Coefficient>& currentMon = this->generatingWordsGrouppedByWeight[j][k];
       ElementUniversalEnveloping<Coefficient>& imageCurrentMon = outputSortedByArgumentWeight[j][k];
-      int indexColumn = this->theGeneratingWordsNonReduced.getIndex(currentMon);
+      int indexColumn = this->generatingWordsNonReduced.getIndex(currentMon);
       if (indexColumn == - 1) {
         global.fatal << "Column index equals -1. " << global.fatal;
       }
       for (int l = 0; l < imageCurrentMon.size; l ++) {
-        int indexRow = this->theGeneratingWordsNonReduced.getIndex(imageCurrentMon[l]);
+        int indexRow = this->generatingWordsNonReduced.getIndex(imageCurrentMon[l]);
         if (indexRow == - 1) {
           global.fatal << "Negative row index not allowed. " << global.fatal;
         }
-        output.addMonomial(MonomialMatrix(indexRow, indexColumn), imageCurrentMon.theCoeffs[l]);
+        output.addMonomial(MonomialMatrix(indexRow, indexColumn), imageCurrentMon.coefficients[l]);
       }
     }
   }
@@ -401,11 +403,11 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::splitOverLevi");
   this->checkInitialization();
-  if (this->theChaR.size() != 1) {
+  if (this->character.size() != 1) {
     if (report != nullptr) {
       std::stringstream out;
       out << "I have been instructed only to split modules that are irreducible over the ambient Lie algebra";
-      out << " Instead I got the character " << this->theChaR.toString() << " (" << this->theChaR.size() << " monomials)";
+      out << " Instead I got the character " << this->character.toString() << " (" << this->character.size() << " monomials)";
       *report = out.str();
     }
     return;
@@ -419,7 +421,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
   subWeyl.ambientWeyl = &this->owner->weylGroup;
   MemorySaving<CharacterSemisimpleLieAlgebraModule<Coefficient> > buffer;
   CharacterSemisimpleLieAlgebraModule<Coefficient>& charWRTsubalgebra = (outputChar == 0) ? buffer.getElement() : *outputChar;
-  this->theChaR.splitOverLeviMonomialsEncodeHighestWeight(
+  this->character.splitOverLeviMonomialsEncodeHighestWeight(
     report, charWRTsubalgebra, splittingParSel, this->parabolicSelectionNonSelectedAreElementsLevi, subWeyl
   );
   std::stringstream out;
@@ -463,12 +465,12 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
   std::stringstream readyForLatexComsumption;
   readyForLatexComsumption << "\\begin{tabular}{|lll|}\n <br>";
   readyForLatexComsumption << "\\hline\\multicolumn{3}{|c|}{Highest weight $"
-  << this->theHWFundamentalCoordsBaseField.toStringLetterFormat("\\omega") << "$}\\\\\n<br>";
+  << this->highestWeightFundamentalCoordinatesBaseField.toStringLetterFormat("\\omega") << "$}\\\\\n<br>";
   readyForLatexComsumption << "weight fund. coord.& singular vector \\\\\\hline\n<br>";
   Vector<Coefficient> currentWeight;
   Vector<Coefficient> hwFundCoordsNilPart;
-  hwFundCoordsNilPart = this->theHWFundamentalCoordsBaseField;
-  hwFundCoordsNilPart -= this->theHWFDpartFundamentalCoordS;
+  hwFundCoordsNilPart = this->highestWeightFundamentalCoordinatesBaseField;
+  hwFundCoordsNilPart -= this->highestWeightFiniteDimensionalPartFundamentalCoordinates;
   ElementUniversalEnveloping<Coefficient> currentElt, element;
   for (int j = 0; j < theFinalEigenSpace.size; j ++) {
     out << "<tr><td>";
@@ -478,7 +480,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
     for (int i = 0; i < currentVect.size; i ++) {
       if (!(currentVect[i].isEqualToZero())) {
         element.makeZero(this->getOwner());
-        element.addMonomial(this->theGeneratingWordsNonReduced[i], 1);
+        element.addMonomial(this->generatingWordsNonReduced[i], 1);
         element *= currentVect[i];
         currentElt += element;
         lastNonZeroIndex = i;
@@ -521,15 +523,15 @@ MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionSimpleGenerato
   Vector<Rational> genWeight = this->getOwner().getWeightOfGenerator(generatorIndex);
   Vector<Rational> targetWeight;
   Pair<MonomialTensor<int, HashFunctions::hashFunction>, MonomialTensor<int, HashFunctions::hashFunction> > currentPair;
-  MatrixTensor<Coefficient>& outputMat = this->actionsGeneratorsMaT[generatorIndex];
+  MatrixTensor<Coefficient>& outputMat = this->actionsGeneratorsMatrix[generatorIndex];
   Vector<Coefficient> theScalarProds;
   outputMat.makeZero();
-  for (int i = 0; i < this->theGeneratingWordsGrouppedByWeight.size; i ++) {
+  for (int i = 0; i < this->generatingWordsGrouppedByWeight.size; i ++) {
     List<MonomialTensor<int, HashFunctions::hashFunction> >& currentWordList =
     this->theGeneratingWordsIntGrouppedByWeight[i];
-    const Vector<Rational>& currentWeight = this->theModuleWeightsSimpleCoords[i];
+    const Vector<Rational>& currentWeight = this->moduleWeightsSimpleCoordinates[i];
     targetWeight = currentWeight + genWeight;
-    int weightLevelIndex = this->theModuleWeightsSimpleCoords.getIndex(targetWeight);
+    int weightLevelIndex = this->moduleWeightsSimpleCoordinates.getIndex(targetWeight);
     if (weightLevelIndex != - 1) {
       int columnOffset = this->getOffsetFromWeightIndex(i);
       int rowOffset = this->getOffsetFromWeightIndex(weightLevelIndex);
@@ -594,30 +596,30 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   this->parabolicSelectionSelectedAreElementsLevi = this->parabolicSelectionNonSelectedAreElementsLevi;
   this->parabolicSelectionSelectedAreElementsLevi.invertSelection();
 
-  this->theHWFundamentalCoordsBaseField = HWFundCoords;
-  this->theHWDualCoordsBaseFielD.setSize(theRank);
-  this->theHWFDpartFundamentalCoordS.setSize(theRank);
+  this->highestWeightFundamentalCoordinatesBaseField = HWFundCoords;
+  this->highestWeightDualCoordinatesBaseField.setSize(theRank);
+  this->highestWeightFiniteDimensionalPartFundamentalCoordinates.setSize(theRank);
 
   for (int i = 0; i < theRank; i ++) {
-    this->theHWFDpartFundamentalCoordS[i] = 0;
+    this->highestWeightFiniteDimensionalPartFundamentalCoordinates[i] = 0;
     if (this->parabolicSelectionSelectedAreElementsLevi.selected[i]) {
       int theCoord;
-      if (!this->theHWFundamentalCoordsBaseField[i].isSmallInteger(&theCoord)) {
+      if (!this->highestWeightFundamentalCoordinatesBaseField[i].isSmallInteger(&theCoord)) {
         if (outputReport != nullptr) {
           *outputReport = "The given module over the Levi part is not finite dimensional";
         }
         return false;
       }
-      this->theHWFDpartFundamentalCoordS[i] = theCoord;
+      this->highestWeightFiniteDimensionalPartFundamentalCoordinates[i] = theCoord;
     }
-    this->theHWDualCoordsBaseFielD[i] = this->theHWFundamentalCoordsBaseField[i];
-    this->theHWDualCoordsBaseFielD[i] *= theWeyl.cartanSymmetric.elements[i][i] / 2;
+    this->highestWeightDualCoordinatesBaseField[i] = this->highestWeightFundamentalCoordinatesBaseField[i];
+    this->highestWeightDualCoordinatesBaseField[i] *= theWeyl.cartanSymmetric.elements[i][i] / 2;
   }
 
-  this->highestWeightFiniteDimensionalPartSimpleCoordinates = theWeyl.getSimpleCoordinatesFromFundamental(this->theHWFDpartFundamentalCoordS, Rational::zero());
-  this->highestWeightFiniteDimensionalPartDualCoordinates = theWeyl.getDualCoordinatesFromFundamental(this->theHWFDpartFundamentalCoordS);
-  this->theHWSimpleCoordSBaseField = theWeyl.getSimpleCoordinatesFromFundamental(this->theHWFundamentalCoordsBaseField, ringZero);
-  this->theChaR.makeFromWeight(this->theHWSimpleCoordSBaseField, this->owner);
+  this->highestWeightFiniteDimensionalPartSimpleCoordinates = theWeyl.getSimpleCoordinatesFromFundamental(this->highestWeightFiniteDimensionalPartFundamentalCoordinates, Rational::zero());
+  this->highestWeightFiniteDimensionalPartDualCoordinates = theWeyl.getDualCoordinatesFromFundamental(this->highestWeightFiniteDimensionalPartFundamentalCoordinates);
+  this->highestWeightSimpleCoordinatesBaseField = theWeyl.getSimpleCoordinatesFromFundamental(this->highestWeightFundamentalCoordinatesBaseField, ringZero);
+  this->character.makeFromWeight(this->highestWeightSimpleCoordinatesBaseField, this->owner);
 
   unsigned long long startingNumRationalOperations =
   Rational::totalLargeAdditions +
@@ -635,21 +637,21 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
     }
     return false;
   }
-  this->theModuleWeightsSimpleCoords.clear();
+  this->moduleWeightsSimpleCoordinates.clear();
   Weight<Coefficient> tempCharMon;
   tempCharMon.owner = nullptr;
-  this->theCharOverH.makeZero();
+  this->characterOverH.makeZero();
   for (int i = 0; i < this->thePaths.size; i ++) {
-    this->theModuleWeightsSimpleCoords.addOnTopNoRepetition(*this->thePaths[i].waypoints.lastObject());
+    this->moduleWeightsSimpleCoordinates.addOnTopNoRepetition(*this->thePaths[i].waypoints.lastObject());
     tempCharMon.weightFundamentalCoordinates = theWeyl.getFundamentalCoordinatesFromSimple(*this->thePaths[i].waypoints.lastObject());
-    this->theCharOverH.addMonomial(tempCharMon, 1);
+    this->characterOverH.addMonomial(tempCharMon, 1);
   }
-  this->theModuleWeightsSimpleCoords.quickSortAscending();
+  this->moduleWeightsSimpleCoordinates.quickSortAscending();
   std::stringstream out2;
-  this->theGeneratingWordsGrouppedByWeight.setSize(this->theModuleWeightsSimpleCoords.size);
-  this->theGeneratingWordsIntGrouppedByWeight.setSize(this->theModuleWeightsSimpleCoords.size);
-  for (int i = 0; i < this->theGeneratingWordsGrouppedByWeight.size; i ++) {
-    this->theGeneratingWordsGrouppedByWeight[i].size = 0;
+  this->generatingWordsGrouppedByWeight.setSize(this->moduleWeightsSimpleCoordinates.size);
+  this->theGeneratingWordsIntGrouppedByWeight.setSize(this->moduleWeightsSimpleCoordinates.size);
+  for (int i = 0; i < this->generatingWordsGrouppedByWeight.size; i ++) {
+    this->generatingWordsGrouppedByWeight[i].size = 0;
     this->theGeneratingWordsIntGrouppedByWeight[i].size = 0;
   }
   MonomialUniversalEnveloping<Coefficient> currentNonReducedElement;
@@ -669,7 +671,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
       tempMonInt.multiplyByGeneratorPowerOnTheRight(this->getOwner().getGeneratorFromDisplayIndex(index), 1);
     }
     Vector<Rational>& hwCurrent = *this->thePaths[i].waypoints.lastObject();
-    int index = this->theModuleWeightsSimpleCoords.getIndex(hwCurrent);
+    int index = this->moduleWeightsSimpleCoordinates.getIndex(hwCurrent);
     if (index == - 1) {
       out2 << "Error: could not generate all weights in the weight support. Maybe they are too many? Allowed "
       << "# of weights is 10000";
@@ -678,26 +680,26 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
       }
       return false;
     }
-    this->theGeneratingWordsGrouppedByWeight[index].addOnTop(currentNonReducedElement);
+    this->generatingWordsGrouppedByWeight[index].addOnTop(currentNonReducedElement);
     this->theGeneratingWordsIntGrouppedByWeight[index].addOnTop(tempMonInt);
   }
-  this->theGeneratingWordsNonReduced.clear();
-  this->theGeneratingWordsNonReduced.setExpectedSize(this->thePaths.size);
+  this->generatingWordsNonReduced.clear();
+  this->generatingWordsNonReduced.setExpectedSize(this->thePaths.size);
   this->theGeneratingWordsNonReducedInt.clear();
   this->theGeneratingWordsNonReducedInt.setExpectedSize(this->thePaths.size);
-  this->theGeneratingWordsNonReduced.size = 0;
+  this->generatingWordsNonReduced.size = 0;
   this->theGeneratingWordsWeightsPlusWeightFDpart.setSize(0);
   this->theGeneratingWordsWeightsPlusWeightFDpart.reserve(this->thePaths.size);
-  for (int i = 0; i < this->theGeneratingWordsGrouppedByWeight.size; i ++) {
-    List<MonomialUniversalEnveloping<Coefficient> >& currentList = this->theGeneratingWordsGrouppedByWeight[i];
+  for (int i = 0; i < this->generatingWordsGrouppedByWeight.size; i ++) {
+    List<MonomialUniversalEnveloping<Coefficient> >& currentList = this->generatingWordsGrouppedByWeight[i];
     List<MonomialTensor<int, HashFunctions::hashFunction> >& currentListInt = this->theGeneratingWordsIntGrouppedByWeight[i];
     currentList.quickSortDescending();
     currentListInt.quickSortDescending();
     for (int j = 0; j < currentList.size; j ++) {
       //wordCounter ++;
-      this->theGeneratingWordsNonReduced.addOnTop(currentList[j]);
+      this->generatingWordsNonReduced.addOnTop(currentList[j]);
       this->theGeneratingWordsNonReducedInt.addOnTop(currentListInt[j]);
-      this->theGeneratingWordsWeightsPlusWeightFDpart.addOnTop(this->theModuleWeightsSimpleCoords[i]);
+      this->theGeneratingWordsWeightsPlusWeightFDpart.addOnTop(this->moduleWeightsSimpleCoordinates[i]);
     }
   }
   this->intermediateStepForMakeFromHW(ringUnit, ringZero);
@@ -780,24 +782,24 @@ void ModuleSSalgebra<Coefficient>::intermediateStepForMakeFromHW(
   ProgressReport theReport;
   ProgressReport theReport2;
   Vector<Rational> targetWeight;
-  this->bilinearFormsAtEachWeightLevel.setSize(this->theGeneratingWordsGrouppedByWeight.size);
-  this->bilinearFormsInverted.setSize(this->theGeneratingWordsGrouppedByWeight.size);
+  this->bilinearFormsAtEachWeightLevel.setSize(this->generatingWordsGrouppedByWeight.size);
+  this->bilinearFormsInverted.setSize(this->generatingWordsGrouppedByWeight.size);
   this->ComputedGeneratorActions.initialize(this->getOwner().getNumberOfGenerators());
   this->actionsGeneratorS.setSize(this->getOwner().getNumberOfGenerators());
-  this->actionsGeneratorsMaT.setSize(this->getOwner().getNumberOfGenerators());
+  this->actionsGeneratorsMatrix.setSize(this->getOwner().getNumberOfGenerators());
   int numScalarProducts = 0;
   this->flagConjectureBholds = true;
   this->flagConjectureCholds = true;
-  for (int l = 0; l < this->theGeneratingWordsGrouppedByWeight.size; l ++) {
+  for (int l = 0; l < this->generatingWordsGrouppedByWeight.size; l ++) {
     Matrix<Coefficient>& currentBF = this->bilinearFormsAtEachWeightLevel[l];
     List<MonomialUniversalEnveloping<Coefficient> >& currentWordList =
-    this->theGeneratingWordsGrouppedByWeight[l];
+    this->generatingWordsGrouppedByWeight[l];
     List<MonomialTensor<int, HashFunctions::hashFunction> >& currentWordListInt = this->theGeneratingWordsIntGrouppedByWeight[l];
     currentBF.initialize(currentWordList.size, currentWordList.size);
     for (int i = 0; i < currentWordList.size; i ++) {
       for (int j = i; j < currentWordList.size; j ++) {
         std::stringstream tempStream;
-        tempStream << " Computing Shapovalov form layer " << l << " out of " << this->theGeneratingWordsGrouppedByWeight.size
+        tempStream << " Computing Shapovalov form layer " << l << " out of " << this->generatingWordsGrouppedByWeight.size
         << " between indices " << i + 1 << " and " << j + 1 << " out of " << currentWordList.size;
         numScalarProducts ++;
         currentBF.elements[i][j] = this->highestWeightTransposeAntiAutomorphismBilinearFormSimpleGeneratorsOnly(currentWordListInt[i], currentWordListInt[j], &theReport2);
@@ -834,7 +836,7 @@ void ModuleSSalgebra<Coefficient>::getElementsNilradical(
 ) {
   SemisimpleLieAlgebra& ownerSS = this->getOwner();
   ownerSS.orderNilradical(this->parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
-  ElementUniversalEnveloping<ResultType> theElt;
+  ElementUniversalEnveloping<ResultType> element;
   output.setSize(0);
   output.reserve(ownerSS.getNumberOfPositiveRoots());
 
@@ -862,8 +864,8 @@ void ModuleSSalgebra<Coefficient>::getElementsNilradical(
     }
   }
   for (int i = 0; i < outputListOfGenerators->size; i ++) {
-    theElt.makeOneGeneratorCoefficientOne(outputListOfGenerators->objects[i], *this->owner);
-    output.addOnTop(theElt);
+    element.makeOneGeneratorCoefficientOne(outputListOfGenerators->objects[i], *this->owner);
+    output.addOnTop(element);
   }
 }
 
@@ -879,8 +881,8 @@ void ModuleSSalgebra<Coefficient>::checkConsistency() {
       output = right;
       output.lieBracketOnTheLeft(left);
       ElementSemisimpleLieAlgebra<Rational> leftGen, rightGen, outputGen;
-      leftGen.makeGenerator(i, *this->theAlgebras, this->indexAlgebra);
-      rightGen.makeGenerator(j, *this->theAlgebras, this->indexAlgebra);
+      leftGen.makeGenerator(i, *this->owner);
+      rightGen.makeGenerator(j, *this->owner);
       this->getOwner().lieBracket(leftGen, rightGen, outputGen);
       otherOutput.makeZero();
       for (int k = 0; k < outputGen.size(); k ++) {
@@ -922,15 +924,15 @@ void ModuleSSalgebra<Coefficient>::checkConsistency() {
 template <class Coefficient>
 void ModuleSSalgebra<Coefficient>::getFDchar(CharacterSemisimpleLieAlgebraModule<Coefficient>& output) {
   output.makeZero();
-  if (this->theHWFundamentalCoordsBaseField.size <= 0) {
+  if (this->highestWeightFundamentalCoordinatesBaseField.size <= 0) {
     return;
   }
   Weight<Coefficient> tempMon;
   tempMon.owner = &this->getOwner();
   WeylGroupData& theWeyl = this->getOwner().weylGroup;
-  for (int i = 0; i < this->theModuleWeightsSimpleCoords.size; i ++) {
-    tempMon.weightFundamentalCoordinates = theWeyl.getFundamentalCoordinatesFromSimple(this->theModuleWeightsSimpleCoords[i]);
-    output.addMonomial(tempMon, this->theGeneratingWordsGrouppedByWeight[i].size);
+  for (int i = 0; i < this->moduleWeightsSimpleCoordinates.size; i ++) {
+    tempMon.weightFundamentalCoordinates = theWeyl.getFundamentalCoordinatesFromSimple(this->moduleWeightsSimpleCoordinates[i]);
+    output.addMonomial(tempMon, this->generatingWordsGrouppedByWeight[i].size);
   }
 }
 
@@ -945,7 +947,7 @@ void ModuleSSalgebra<Coefficient>::expressAsLinearCombinationHomogenousElement(
 ) {
   Vector <Coefficient> theScalarProducts;
   List<MonomialUniversalEnveloping<Coefficient> >& inputBasis =
-  this->theGeneratingWordsGrouppedByWeight[indexInputBasis];
+  this->generatingWordsGrouppedByWeight[indexInputBasis];
   theScalarProducts.setSize(inputBasis.size);
 
   for (int i = 0; i < inputBasis.size; i ++) {
@@ -960,11 +962,11 @@ void ModuleSSalgebra<Coefficient>::expressAsLinearCombinationHomogenousElement(
     );
   }
   this->bilinearFormsInverted[indexInputBasis].actOnVectorColumn(theScalarProducts, ringZero);
-  outputHomogeneous.makeZero(*this->theAlgebras, this->indexAlgebra);
+  outputHomogeneous.makeZero(*this->owner);
   ElementUniversalEnveloping<Coefficient> element;
   for (int i = 0; i < theScalarProducts.size; i ++) {
-    element.makeZero(*this->theAlgebras, this->indexAlgebra);
-    element.addMonomial(this->theGeneratingWordsGrouppedByWeight[indexInputBasis][i], ringUnit);
+    element.makeZero(*this->owner);
+    element.addMonomial(this->generatingWordsGrouppedByWeight[indexInputBasis][i], ringUnit);
     element *= theScalarProducts[i];
     outputHomogeneous += element;
   }
@@ -972,11 +974,11 @@ void ModuleSSalgebra<Coefficient>::expressAsLinearCombinationHomogenousElement(
 
 template <class Coefficient>
 void ModuleSSalgebra<Coefficient>::reset() {
-  this->actionsGeneratorsMaT.setSize(0);
+  this->actionsGeneratorsMatrix.setSize(0);
   this->actionsGeneratorS.setSize(0);
   this->ComputedGeneratorActions.initialize(0);
   this->owner = nullptr;
-  this->theGeneratingWordsNonReduced.clear();
+  this->generatingWordsNonReduced.clear();
   // Note: for some reason, the linker fails to resolve without the explicit template
   // specialization below.
   // [Update:] made a bug report on this in the gcc bug tracker.
@@ -984,7 +986,7 @@ void ModuleSSalgebra<Coefficient>::reset() {
   this->theGeneratingWordsNonReducedInt.clear();
   this->theGeneratingWordsWeightsPlusWeightFDpart.setSize(0);
   this->thePaths.setSize(0);
-  this->theGeneratingWordsGrouppedByWeight.setSize(0);
+  this->generatingWordsGrouppedByWeight.setSize(0);
   this->theGeneratingWordsIntGrouppedByWeight.setSize(0);
   //List<ElementUniversalEnveloping<Coefficient> > theSimpleGens;
   //List<List<List<ElementUniversalEnveloping<Coefficient> > > > actionsSimpleGens;
@@ -992,16 +994,16 @@ void ModuleSSalgebra<Coefficient>::reset() {
   this->bilinearFormsAtEachWeightLevel.setSize(0);
   this->bilinearFormsInverted.setSize(0);
   //Vectors<Rational> weightsSimpleGens;
-  this->theHWDualCoordsBaseFielD.setSize(0);
-  this->theHWSimpleCoordSBaseField.setSize(0);
-  this->theHWFundamentalCoordsBaseField.setSize(0);
+  this->highestWeightDualCoordinatesBaseField.setSize(0);
+  this->highestWeightSimpleCoordinatesBaseField.setSize(0);
+  this->highestWeightFundamentalCoordinatesBaseField.setSize(0);
   this->highestWeightFiniteDimensionalPartDualCoordinates.setSize(0);
   this->highestWeightFiniteDimensionalPartSimpleCoordinates.setSize(0);
-  this->theHWFDpartFundamentalCoordS.setSize(0);
+  this->highestWeightFiniteDimensionalPartFundamentalCoordinates.setSize(0);
   //List<List<Matrix<Coefficient> > >
-  this->theModuleWeightsSimpleCoords.clear();
-  this->theCharOverH.makeZero();
-  this->theChaR.makeZero();
+  this->moduleWeightsSimpleCoordinates.clear();
+  this->characterOverH.makeZero();
+  this->character.makeZero();
   this->parabolicSelectionNonSelectedAreElementsLevi.initialize(0);
   this->parabolicSelectionSelectedAreElementsLevi.initialize(0);
   this->highestWeightVectorNotation = "";
@@ -1015,7 +1017,7 @@ void ModuleSSalgebra<Coefficient>::reset() {
   this->flagConjectureCholds = true;
   this->NumCachedPairsBeforeSimpleGen = 0;
   this->NumRationalMultiplicationsAndAdditionsBeforeSimpleGen = 0;
-  this->MaxNumCachedPairs = 1000000;
+  this->maximumNumberOfCachedPairs = 1000000;
 }
 
 template <class Coefficient>
@@ -1027,32 +1029,32 @@ void ModuleSSalgebra<Coefficient>::getAdActionHomogenousElt(
   const Coefficient& ringZero
 ) {
   Vector<Rational> targetWeight;
-  outputSortedByArgumentWeight.setSize(this->theGeneratingWordsGrouppedByWeight.size);
-  ElementUniversalEnveloping<Coefficient> theElt;
+  outputSortedByArgumentWeight.setSize(this->generatingWordsGrouppedByWeight.size);
+  ElementUniversalEnveloping<Coefficient> element;
   std::string generatorString = inputHomogeneous.toString();
   ProgressReport theReport;
-  for (int i = 0; i < this->theGeneratingWordsGrouppedByWeight.size; i ++) {
-    List<MonomialUniversalEnveloping<Coefficient> >& currentWordList = this->theGeneratingWordsGrouppedByWeight[i];
+  for (int i = 0; i < this->generatingWordsGrouppedByWeight.size; i ++) {
+    List<MonomialUniversalEnveloping<Coefficient> >& currentWordList = this->generatingWordsGrouppedByWeight[i];
     List<ElementUniversalEnveloping<Coefficient> >& outputCurrentList = outputSortedByArgumentWeight[i];
     outputCurrentList.setSize(currentWordList.size);
-    Vector<Rational>& currentWeight = this->theModuleWeightsSimpleCoords[i];
+    Vector<Rational>& currentWeight = this->moduleWeightsSimpleCoordinates[i];
     targetWeight = currentWeight + weightUEEltSimpleCoords;
-    int index = this->theModuleWeightsSimpleCoords.getIndex(targetWeight);
+    int index = this->moduleWeightsSimpleCoordinates.getIndex(targetWeight);
     for (int j = 0; j < currentWordList.size; j ++) {
       std::stringstream progressStream;
       progressStream << "Computing action of "
       << generatorString << " on weight layer " << i + 1
-      << " out of " << this->theGeneratingWordsGrouppedByWeight.size
+      << " out of " << this->generatingWordsGrouppedByWeight.size
       << ", word " << j + 1 << " out of " << currentWordList.size << "...";
       theReport.report(progressStream.str());
       ElementUniversalEnveloping<Coefficient>& currentOutputWord = outputCurrentList[j];
       if (index == - 1) {
-        currentOutputWord.makeZero(*this->theAlgebras, this->indexAlgebra);
+        currentOutputWord.makeZero(*this->owner);
       } else {
-        theElt = inputHomogeneous;
-        theElt.multiplyBy(currentWordList[j], ringUnit);
+        element = inputHomogeneous;
+        element.multiplyBy(currentWordList[j], ringUnit);
         this->expressAsLinearCombinationHomogenousElement(
-          theElt, currentOutputWord, index, this->theHWDualCoordsBaseFielD, ringUnit, ringZero
+          element, currentOutputWord, index, this->highestWeightDualCoordinatesBaseField, ringUnit, ringZero
         );
       }
       progressStream << " done!";
@@ -1136,7 +1138,7 @@ void ElementTensorsGeneralizedVermas<Coefficient>::makeHWV(
   currentCoeff = ringUnit;
   tensorMon.monomials.setSize(1);
   MonomialGeneralizedVerma<Coefficient>& monomial = tensorMon.monomials[0];
-  monomial.indexFDVector = theOwner.theGeneratingWordsNonReduced.size - 1;
+  monomial.indexFDVector = theOwner.generatingWordsNonReduced.size - 1;
   monomial.makeConstant(theOwner);
   this->makeZero();
   this->addMonomial(tensorMon, ringUnit);
@@ -1144,7 +1146,7 @@ void ElementTensorsGeneralizedVermas<Coefficient>::makeHWV(
 
 template <class Coefficient>
 bool ElementTensorsGeneralizedVermas<Coefficient>::multiplyOnTheLeft(
-  const MonomialUniversalEnveloping<Coefficient>& theUE,
+  const MonomialUniversalEnveloping<Coefficient>& element,
   ElementTensorsGeneralizedVermas<Coefficient>& output,
   SemisimpleLieAlgebra& ownerAlgebra,
   const Coefficient& ringUnit
@@ -1155,12 +1157,12 @@ bool ElementTensorsGeneralizedVermas<Coefficient>::multiplyOnTheLeft(
   }
   output = *this;
   ElementTensorsGeneralizedVermas<Coefficient> buffer;
-  for (int i = theUE.powers.size - 1; i >= 0; i --) {
+  for (int i = element.powers.size - 1; i >= 0; i --) {
     int power;
-    if (!theUE.powers[i].isSmallInteger(&power)) {
+    if (!element.powers[i].isSmallInteger(&power)) {
       return false;
     }
-    int index = theUE.generatorsIndices[i];
+    int index = element.generatorsIndices[i];
     for (int j = 0; j < power; j ++) {
       output.multiplyByElementLieAlg(buffer, ownerAlgebra, index, ringUnit);
       output = buffer;
@@ -1179,8 +1181,8 @@ void ElementTensorsGeneralizedVermas<Coefficient>::multiplyByElementLieAlg(
   output.makeZero();
   MonomialTensorGeneralizedVermas<Coefficient> accumMon, monActedOn;
   ElementSumGeneralizedVermas<Coefficient> element;
-  ElementUniversalEnveloping<Coefficient> theGenerator;
-  theGenerator.makeOneGenerator(indexGenerator, ownerAlgebra, ringUnit);
+  ElementUniversalEnveloping<Coefficient> generator;
+  generator.makeOneGenerator(indexGenerator, ownerAlgebra, ringUnit);
   Coefficient currentCoeff;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialTensorGeneralizedVermas<Coefficient>& currentMon = (*this)[i];
@@ -1188,7 +1190,7 @@ void ElementTensorsGeneralizedVermas<Coefficient>::multiplyByElementLieAlg(
     for (int j = 0; j < currentMon.monomials.size; j ++) {
       element.makeZero();
       element.addMonomial(currentMon.monomials[j], ringUnit);
-      element.multiplyMeByUEEltOnTheLeft(theGenerator);
+      element.multiplyMeByUEEltOnTheLeft(generator);
       for (int k = 0; k < element.size(); k ++) {
         currentCoeff = this->coefficients[i];
         currentCoeff *= element.coefficients[k];
@@ -1215,17 +1217,17 @@ void ElementTensorsGeneralizedVermas<Coefficient>::tensorOnTheRight(
   }
   int maxNumMonsFinal = this->size() * right.size();
   ElementTensorsGeneralizedVermas<Coefficient> output;
-  MonomialTensorGeneralizedVermas<Coefficient> bufferMon;
+  MonomialTensorGeneralizedVermas<Coefficient> monomial;
   output.makeZero();
   output.setExpectedSize(maxNumMonsFinal);
-  Coefficient theCoeff;
+  Coefficient coefficient;
   for (int i = 0; i < right.size(); i ++) {
     for (int j = 0; j < this->size(); j ++) {
-      bufferMon = (*this)[j];
-      bufferMon *= right[i];
-      theCoeff = this->coefficients[j];
-      theCoeff *= right.coefficients[i];
-      output.addMonomial(bufferMon, theCoeff);
+      monomial = (*this)[j];
+      monomial *= right[i];
+      coefficient = this->coefficients[j];
+      coefficient *= right.coefficients[i];
+      output.addMonomial(monomial, coefficient);
     }
   }
   *this = output;
@@ -1245,11 +1247,11 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format) co
   out << "<br>Parabolic selection: "
   << this->parabolicSelectionNonSelectedAreElementsLevi.toString();
   out << "<br>Highest weight of Generalized Verma module in fundamental coordinates: "
-  << this->theHWFundamentalCoordsBaseField.toString();
+  << this->highestWeightFundamentalCoordinatesBaseField.toString();
   out << "<br>In simple coordinates: "
-  << this->theHWSimpleCoordSBaseField.toString();
+  << this->highestWeightSimpleCoordinatesBaseField.toString();
   out << "<br>Finite dimensional part h. w. fundamental coordinates: "
-  << this->theHWFDpartFundamentalCoordS.toString();
+  << this->highestWeightFiniteDimensionalPartFundamentalCoordinates.toString();
   out << "<br>Finite dimensinoal part h. w. simple coords: "
   << this->highestWeightFiniteDimensionalPartSimpleCoordinates.toString();
   out << "<br>Inducing module character (over the Cartan subalgebra): ";
@@ -1257,10 +1259,10 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format) co
   latexFormat.flagUseLatex = true;
   latexFormat.flagUseHTML = false;
   latexFormat.maximumLineLength = 0;
-  if (this->theCharOverH.size() < 100) {
-    out << HtmlRoutines::getMathNoDisplay(this->theCharOverH.toString(&latexFormat));
+  if (this->characterOverH.size() < 100) {
+    out << HtmlRoutines::getMathNoDisplay(this->characterOverH.toString(&latexFormat));
   } else {
-    out << this->theCharOverH.toString();
+    out << this->characterOverH.toString();
   }
   out << "<br>Dimensionn of the finite dimensional part of the module: " << this->getDimension();
   out << "<br>A module basis follows.";
@@ -1268,8 +1270,8 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format) co
   ElementWeylGroup tempWelt;
   int wordCounter = 0;
   SimpleReflection aGen;
-  for (int i = 0; i < this->theGeneratingWordsGrouppedByWeight.size; i ++) {
-    List<MonomialUniversalEnveloping<Coefficient> >& currentList = this->theGeneratingWordsGrouppedByWeight[i];
+  for (int i = 0; i < this->generatingWordsGrouppedByWeight.size; i ++) {
+    List<MonomialUniversalEnveloping<Coefficient> >& currentList = this->generatingWordsGrouppedByWeight[i];
     List<MonomialTensor<int, HashFunctions::hashFunction> >& currentListInt = this->theGeneratingWordsIntGrouppedByWeight[i];
     for (int j = 0; j < currentList.size; j ++) {
       wordCounter ++;
@@ -1280,20 +1282,20 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format) co
       }
       out << "<tr><td>m_{ " << wordCounter << "} </td><td>"
       << currentList[j].toString(&global.defaultFormat.getElement())
-      << "  v_\\lambda</td><td>" << tempWelt.toString() << "</td> </tr>";
+      << " v_\\lambda</td><td>" << tempWelt.toString() << "</td> </tr>";
     }
   }
   out << "</table>";
 
-  out << "<br>Character: " << this->theChaR.toString();
+  out << "<br>Character: " << this->character.toString();
   out << "<br>Computed generator actions ("
   << this->ComputedGeneratorActions.cardinalitySelection << " out of "
-  << this->actionsGeneratorsMaT.size << " computed actions) follow. "
+  << this->actionsGeneratorsMatrix.size << " computed actions) follow. "
   << "Note that generator actions are computed on demand, only the simple "
   << "Chevalley generators are computed by default. ";
   out << "<table><tr><td>Generator</td><td>Action</td></tr>";
   ElementSemisimpleLieAlgebra<Rational> tempSSElt;
-  for (int i = 0; i < this->actionsGeneratorsMaT.size; i ++) {
+  for (int i = 0; i < this->actionsGeneratorsMatrix.size; i ++) {
     if (this->ComputedGeneratorActions.selected[i]) {
       tempSSElt.makeGenerator(i, theAlgebrA);
       out << "<tr>";
@@ -1303,20 +1305,20 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format) co
       out << "<td>";
       if (this->getDimension() < 28) {
         Matrix<Coefficient> outputMat;
-        this->actionsGeneratorsMaT[i].getMatrix(outputMat, this->getDimension());
+        this->actionsGeneratorsMatrix[i].getMatrix(outputMat, this->getDimension());
         out
         << HtmlRoutines::getMathNoDisplay(outputMat.toString(&latexFormat), 5000)
         << " = ";
-        out << this->actionsGeneratorsMaT[i].toString();
+        out << this->actionsGeneratorsMatrix[i].toString();
       } else {
-        out << this->actionsGeneratorsMaT[i].toString();
+        out << this->actionsGeneratorsMatrix[i].toString();
       }
       out << "</td></tr>";
     }
   }
   out << "</table>";
   DrawingVariables theDV;
-  this->theCharOverH.drawMeAssumeCharIsOverCartan(theWeyl, theDV);
+  this->characterOverH.drawMeAssumeCharIsOverCartan(theWeyl, theDV);
   out << " A picture of the weight support follows. "
   << theDV.getHTMLDiv(theWeyl.getDimension(), false);
 
@@ -1324,8 +1326,8 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format) co
   for (int k = 0; k < this->bilinearFormsAtEachWeightLevel.size; k ++) {
     Matrix<Coefficient>& theBF = this->bilinearFormsAtEachWeightLevel[k];
     Matrix<Coefficient>& theBFinverted = this->bilinearFormsInverted[k];
-    out << "<hr>weight in simple coords: " << this->theModuleWeightsSimpleCoords[k].toString();
-    List<MonomialUniversalEnveloping<Coefficient> >& currentList = this->theGeneratingWordsGrouppedByWeight[k];
+    out << "<hr>weight in simple coords: " << this->moduleWeightsSimpleCoordinates[k].toString();
+    List<MonomialUniversalEnveloping<Coefficient> >& currentList = this->generatingWordsGrouppedByWeight[k];
     for (int i = 0; i < currentList.size; i ++) {
       MonomialUniversalEnveloping<Coefficient>& currentElt = currentList[i];
       out << "<br>monomial " << i + 1 << ": "
@@ -1366,9 +1368,9 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format) co
 
 template <class Coefficient>
 bool ModuleSSalgebra<Coefficient>::isNotInParabolic(int generatorIndex) {
-  Vector<Rational> theWeight = this->getOwner().getWeightOfGenerator(generatorIndex);
+  Vector<Rational> weight = this->getOwner().getWeightOfGenerator(generatorIndex);
   for (int j = 0; j < this->parabolicSelectionNonSelectedAreElementsLevi.cardinalitySelection; j ++) {
-    if (!(theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]] < 0)) {
+    if (!(weight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]] < 0)) {
       return true;
     }
   }
@@ -1377,9 +1379,9 @@ bool ModuleSSalgebra<Coefficient>::isNotInParabolic(int generatorIndex) {
 
 template <class Coefficient>
 bool ModuleSSalgebra<Coefficient>::isNotInLevi(int generatorIndex) {
-  Vector<Rational> theWeight = this->getOwner().getWeightOfGenerator(generatorIndex);
+  Vector<Rational> weight = this->getOwner().getWeightOfGenerator(generatorIndex);
   for (int j = 0; j < this->parabolicSelectionNonSelectedAreElementsLevi.cardinalitySelection; j ++) {
-    if (!theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]].isEqualToZero()) {
+    if (!weight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]].isEqualToZero()) {
       return true;
     }
   }
@@ -1399,7 +1401,7 @@ void ModuleSSalgebra<Coefficient>::getGenericUnMinusElt(
   RationalFraction<Rational> rationalFunction;
   output.makeZero(*this->owner);
   MonomialUniversalEnveloping<RationalFraction<Rational> > monomial;
-  monomial.makeConstant(*this->theAlgebras, this->indexAlgebra);
+  monomial.makeConstant();
   int variableShift = 0;
   if (shiftPowersByNumVarsBaseField) {
     variableShift = this->minimalNumberOfVariables();
@@ -1466,7 +1468,7 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
   int varShift = this->minimalNumberOfVariables();
   ElementWeylAlgebra<Rational> weylPartSummand, exponentContribution, oneIndexContribution,
   eulerOperatorContribution;
-  Polynomial<Rational> tempP1, negativeExponentDenominatorContribution, theCoeff;
+  Polynomial<Rational> tempP1, negativeExponentDenominatorContribution, coefficient;
   QuasiDifferentialMononomial monQDO, monQDO2;
   Rational tempRat;
   output.makeZero();
@@ -1493,27 +1495,27 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
       endoPart *= tempMT;
     }
     exponentContribution.makeOne();
-    theCoeff = result.coefficients[i];
+    coefficient = result.coefficients[i];
     for (int j = 0; j < indicesNilrad.size; j ++) {
       currentMon.powers[j].getConstantTerm(currentShift);
       ElementWeylAlgebra<Rational>::getStandardOrderDifferentialOperatorCorrespondingToNRaisedTo(
         currentShift, j + varShift, oneIndexContribution, negativeExponentDenominatorContribution
       );
       exponentContribution *= oneIndexContribution;
-      theCoeff.divideBy(negativeExponentDenominatorContribution, theCoeff, tempP1, &MonomialPolynomial::orderDefault());
+      coefficient.divideBy(negativeExponentDenominatorContribution, coefficient, tempP1, &MonomialPolynomial::orderDefault());
       if (!tempP1.isEqualToZero()) {
         global.fatal << "This is a mathematical error! "
         << "Something is very wrong with embedding semisimple Lie algebras in Weyl algebras. "
         << global.fatal;
       }
     }
-    for (int l = 0; l < theCoeff.size(); l ++) {
-      if (!this->getActionEulerOperatorPart(theCoeff[l], eulerOperatorContribution)) {
+    for (int l = 0; l < coefficient.size(); l ++) {
+      if (!this->getActionEulerOperatorPart(coefficient[l], eulerOperatorContribution)) {
         return false;
       }
       weylPartSummand = exponentContribution;
       weylPartSummand *= eulerOperatorContribution;
-      weylPartSummand *= theCoeff.coefficients[l];
+      weylPartSummand *= coefficient.coefficients[l];
       for (int j = 0; j < weylPartSummand.size(); j ++) {
         for (int k = 0; k < endoPart.size(); k ++) {
           monQDO.matrixMonomial = endoPart[k];
@@ -1543,12 +1545,12 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   std::stringstream* comments
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg");
-  if (this->theChaR.size() != 1) {
+  if (this->character.size() != 1) {
     if (comments != nullptr) {
       std::stringstream out;
       out << "I have been instructed only to split modules that are irreducible over the ambient Lie algebra";
-      out << " Instead I got the character " << this->theChaR.toString()
-      << " (" << this->theChaR.size() << " monomials)";
+      out << " Instead I got the character " << this->character.toString()
+      << " (" << this->character.size() << " monomials)";
       *comments << out.str();
     }
     return;
@@ -1561,7 +1563,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   out << "<br>Parabolic selection: " << LeviInSmall.toString();
   std::stringstream tempStream1;
   tempStream1 << "Started splitting the f.d. part of the " << theHmm.range().toStringLieAlgebraName() << "-module with highest weight in fund coords "
-  << this->theChaR[0].weightFundamentalCoordinates.toString();
+  << this->character[0].weightFundamentalCoordinates.toString();
   ProgressReport theReport;
   theReport.report(tempStream1.str());
   List<List<Vector<Coefficient> > > eigenSpacesPerSimpleGenerator;
@@ -1613,12 +1615,12 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   std::stringstream readyForLatexComsumption;
   readyForLatexComsumption << "\\begin{tabular}{|lll|}\n <br>";
   readyForLatexComsumption << "\\hline\\multicolumn{3}{|c|}{Highest weight $"
-  << this->theHWFundamentalCoordsBaseField.toStringLetterFormat("\\omega") << "$}\\\\\n<br>";
+  << this->highestWeightFundamentalCoordinatesBaseField.toStringLetterFormat("\\omega") << "$}\\\\\n<br>";
   readyForLatexComsumption << "weight fund. coord.& singular vector \\\\\\hline\n<br>";
   Vector<Coefficient> currentWeight;
   Vector<Coefficient> hwFundCoordsNilPart;
-  hwFundCoordsNilPart = this->theHWFundamentalCoordsBaseField;
-  hwFundCoordsNilPart -= this->theHWFDpartFundamentalCoordS;
+  hwFundCoordsNilPart = this->highestWeightFundamentalCoordinatesBaseField;
+  hwFundCoordsNilPart -= this->highestWeightFiniteDimensionalPartFundamentalCoordinates;
   ElementUniversalEnveloping<Coefficient> currentElt, element;
   if (outputEigenVectors != nullptr) {
     outputEigenVectors->setSize(0);
@@ -1631,7 +1633,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
     for (int i = 0; i < currentVect.size; i ++) {
       if (!(currentVect[i].isEqualToZero())) {
         element.makeZero(this->getOwner());
-        element.addMonomial(this->theGeneratingWordsNonReduced[i], 1);
+        element.addMonomial(this->generatingWordsNonReduced[i], 1);
         element *= currentVect[i];
         currentElt += element;
         lastNonZeroIndex = i;
@@ -1696,7 +1698,7 @@ std::string MonomialTensorGeneralizedVermas<Coefficient>::toString(FormatExpress
   std::stringstream out;
   if (this->monomials.size > 1) {
     for (int i = 0; i < this->monomials.size; i ++) {
-      bool ishwv = this->monomials[i].isHWV();
+      bool ishwv = this->monomials[i].isHighestWeightVector();
       if (!ishwv) {
         out << "(";
       }
@@ -1737,7 +1739,7 @@ std::string MonomialGeneralizedVerma<Coefficient>::toString(FormatExpressions* f
   bool needsCdot = (tempS != "1" && tempS != "-" && tempS != "");
   std::stringstream out;
   out << tempS;
-  tempS = theMod.theGeneratingWordsNonReduced[this->indexFDVector].toString(format);
+  tempS = theMod.generatingWordsNonReduced[this->indexFDVector].toString(format);
   if (tempS != "1") {
     out << tempS;
   }
@@ -1825,8 +1827,8 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
   output.makeZero();
   MonomialUniversalEnveloping<Coefficient> tempMon;
   tempMon = this->monomialCoefficientOne;
-  tempMon *= theMod.theGeneratingWordsNonReduced[this->indexFDVector];
-  int indexCheck = theMod.theGeneratingWordsNonReduced.getIndex(tempMon);
+  tempMon *= theMod.generatingWordsNonReduced[this->indexFDVector];
+  int indexCheck = theMod.generatingWordsNonReduced.getIndex(tempMon);
   if (!this->owner->owner->flagHasNilradicalOrder) {
     global.fatal << "Owner needs nilradical order!!!" << global.fatal;
   }
@@ -1901,7 +1903,7 @@ void ElementSumGeneralizedVermas<Coefficient>::makeHWV(
 ) {
   this->makeZero();
   MonomialGeneralizedVerma<Coefficient> monomial;
-  monomial.indexFDVector = theOwner.theGeneratingWordsNonReduced.size - 1;
+  monomial.indexFDVector = theOwner.generatingWordsNonReduced.size - 1;
   monomial.monomialCoefficientOne.makeOne(theOwner.getOwner());
   monomial.owner = &theOwner;
   this->addMonomial(monomial, ringUnit);
@@ -1923,7 +1925,7 @@ bool ElementSumGeneralizedVermas<Coefficient>::extractElementUniversalEnveloping
       return false;
     }
     tempMon = currentMon.monomialCoefficientOne;
-    tempMon *= currentMon.getOwner().theGeneratingWordsNonReduced[currentMon.indexFDVector];
+    tempMon *= currentMon.getOwner().generatingWordsNonReduced[currentMon.indexFDVector];
     output.addMonomial(tempMon, this->coefficients[i]);
   }
   return true;

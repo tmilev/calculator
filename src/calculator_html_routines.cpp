@@ -51,13 +51,13 @@ bool CalculatorHtmlFunctions::evaluateSymbols(
   if (!argument.isOfType(&theString)) {
     return false;
   }
-  List<SyntacticElement> theElts;
-  calculator.parseFillDictionary(theString, theElts);
+  List<SyntacticElement> elements;
+  calculator.parseFillDictionary(theString, elements);
   Expression evaluatedE;
   std::stringstream out;
   bool previousWasInteger = false;
-  for (int i = 0; i < theElts.size; i ++) {
-    SyntacticElement& currentElt = theElts[i];
+  for (int i = 0; i < elements.size; i ++) {
+    SyntacticElement& currentElt = elements[i];
     if (currentElt.controlIndex == calculator.conVariable()) {
       calculator.evaluateExpression(calculator, currentElt.data, evaluatedE);
       out << evaluatedE.toString();

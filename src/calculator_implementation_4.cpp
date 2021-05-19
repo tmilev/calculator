@@ -486,10 +486,10 @@ bool CalculatorBasics::standardIsDenotedBy(Calculator& calculator, const Express
   output.setChildAtomValue(0, calculator.opDefine());
   ////
   if (withNotation.isOfType<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >()) {
-    if (withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >().isHWV()) {
-      MonomialGeneralizedVerma<RationalFraction<Rational> >& theElt =
+    if (withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >().isHighestWeightVector()) {
+      MonomialGeneralizedVerma<RationalFraction<Rational> >& element =
       withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >()[0].monomials[0];
-      theElt.getOwner().highestWeightVectorNotation = theNotation.toString();
+      element.getOwner().highestWeightVectorNotation = theNotation.toString();
     }
   }
   return true;
@@ -2156,8 +2156,8 @@ void ObjectContainer::reset() {
   this->allAlgebraicNumbers.clear();
   this->littelmannOperators.clear();
   this->slTwoSubalgebras.setSize(0);
-  this->theWeights.clear();
-  this->theWeightsPoly.clear();
+  this->weights.clear();
+  this->weightsPolynomial.clear();
   this->hyperOctahedralGroups.setSize(0);
   this->elementsHyperOctGroup.clear();
   this->pseudoRandom.setRandomSeedSmall(static_cast<uint32_t>(time(nullptr)));

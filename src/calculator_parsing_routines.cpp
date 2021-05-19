@@ -977,20 +977,20 @@ bool Calculator::replaceXXXbyE() {
 }
 
 bool Calculator::replaceOXdotsXbyEXdotsX(int numberOfXs) {
-  SyntacticElement& theElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1 - numberOfXs];
-  theElt.data.makeAtom(this->getOperationIndexFromControlIndex(theElt.controlIndex), *this);
+  SyntacticElement& element = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1 - numberOfXs];
+  element.data.makeAtom(this->getOperationIndexFromControlIndex(element.controlIndex), *this);
   if (this->flagLogSyntaxRules) {
     std::stringstream out;
     out << "[Rule: Calculator::replaceOXdotsXbyEXdotsX: " << numberOfXs << "]";
     this->parsingLog += out.str();
   }
-  theElt.controlIndex = this->conExpression();
+  element.controlIndex = this->conExpression();
   return true;
 }
 
 bool Calculator::replaceOXbyEX() {
-  SyntacticElement& theElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
-  theElt.data.makeAtom(this->getOperationIndexFromControlIndex(theElt.controlIndex), *this);
+  SyntacticElement& element = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
+  element.data.makeAtom(this->getOperationIndexFromControlIndex(element.controlIndex), *this);
   if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::replaceOXbyEX]";
   }
@@ -998,18 +998,18 @@ bool Calculator::replaceOXbyEX() {
 }
 
 bool Calculator::replaceObyE() {
-  SyntacticElement& theElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1];
-  theElt.data.makeAtom(this->getOperationIndexFromControlIndex(theElt.controlIndex), *this);
+  SyntacticElement& element = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1];
+  element.data.makeAtom(this->getOperationIndexFromControlIndex(element.controlIndex), *this);
   if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceObyE]";
   }
-  theElt.controlIndex = this->conExpression();
+  element.controlIndex = this->conExpression();
   return true;
 }
 
 bool Calculator::replaceXXbyEX() {
-  SyntacticElement& theElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
-  theElt.controlIndex = this->conExpression();
+  SyntacticElement& element = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
+  element.controlIndex = this->conExpression();
   if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::replaceXXbyEX]";
   }
@@ -1070,10 +1070,10 @@ bool Calculator::replaceXEXByEContainingOE(int inputOpIndex) {
 }
 
 bool Calculator::replaceXXByEEmptySequence() {
-  SyntacticElement& theElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
-  theElt.data.reset(*this, 1);
-  theElt.data.addChildAtomOnTop(this->opSequence());
-  theElt.controlIndex = this->conExpression();
+  SyntacticElement& element = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
+  element.data.reset(*this, 1);
+  element.data.addChildAtomOnTop(this->opSequence());
+  element.controlIndex = this->conExpression();
   return this->decreaseStackSetCharacterRanges(1);
 }
 
@@ -1086,16 +1086,16 @@ bool Calculator::isNonBoundVariableInContext(int inputOperation) {
 }
 
 bool Calculator::replaceXXVXdotsXbyE_BOUND_XdotsX(int numberOfXs) {
-  SyntacticElement& theElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - numberOfXs - 1];
-  int theBoundVar = theElt.data.data;
+  SyntacticElement& element = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - numberOfXs - 1];
+  int theBoundVar = element.data.data;
   if (this->isNonBoundVariableInContext(theBoundVar)) {
     std::stringstream out;
     out << "Syntax error. In the same syntactic scope, the string "
     << this->operations.keys[theBoundVar]
     << " is first used to denote a non-bound variable "
     << "but later to denote a bound variable. This is not allowed. ";
-    theElt.errorString = out.str();
-    theElt.controlIndex = this->conError();
+    element.errorString = out.str();
+    element.controlIndex = this->conError();
     this->decreaseStackSetCharacterRanges(numberOfXs);
     this->replaceXXYByY();
     return true;
@@ -1103,29 +1103,29 @@ bool Calculator::replaceXXVXdotsXbyE_BOUND_XdotsX(int numberOfXs) {
   if (!this->isBoundVariableInContext(theBoundVar)) {
     this->boundVariablesInContext.addOnTopNoRepetition(theBoundVar);
   }
-  theElt.data.reset(*this, 2);
-  theElt.data.addChildAtomOnTop(this->opBind());
-  theElt.data.addChildAtomOnTop(theBoundVar);
-  theElt.controlIndex = this->conExpression();
+  element.data.reset(*this, 2);
+  element.data.addChildAtomOnTop(this->opBind());
+  element.data.addChildAtomOnTop(theBoundVar);
+  element.controlIndex = this->conExpression();
   this->decreaseStackSetCharacterRanges(numberOfXs);
   this->replaceXXYByY();
   return true;
 }
 
 bool Calculator::replaceVXdotsXbyE_NONBOUND_XdotsX(int numberOfXs) {
-  SyntacticElement& theElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1 - numberOfXs];
-  int theBoundVar = theElt.data.data;
+  SyntacticElement& element = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1 - numberOfXs];
+  int theBoundVar = element.data.data;
   if (this->isBoundVariableInContext(theBoundVar)) {
-    theElt.data.reset(*this, 2);
-    theElt.data.addChildAtomOnTop(this->opBind());
-    theElt.data.addChildAtomOnTop(theBoundVar);
+    element.data.reset(*this, 2);
+    element.data.addChildAtomOnTop(this->opBind());
+    element.data.addChildAtomOnTop(theBoundVar);
   } else {
-    theElt.data.makeAtom(theBoundVar, *this);
+    element.data.makeAtom(theBoundVar, *this);
     if (!this->isNonBoundVariableInContext(theBoundVar)) {
       this->nonBoundVariablesInContext.addOnTop(theBoundVar);
     }
   }
-  theElt.controlIndex = this->conExpression();
+  element.controlIndex = this->conExpression();
   return true;
 }
 
@@ -1150,14 +1150,14 @@ bool Calculator::replaceOOEEXbyEXpowerLike() {
 }
 
 bool Calculator::replaceCXByE() {
-  SyntacticElement& theElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
-  theElt.controlIndex = this->conExpression();
+  SyntacticElement& element = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
+  element.controlIndex = this->conExpression();
   return this->popTopSyntacticStack();
 }
 
 bool Calculator::replaceCXByEX() {
-  SyntacticElement& theElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
-  theElt.controlIndex = this->conExpression();
+  SyntacticElement& element = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
+  element.controlIndex = this->conExpression();
   return true;
 }
 
@@ -1216,8 +1216,8 @@ bool Calculator::replaceMatrixXByE() {
 
 bool Calculator::replaceMatrixEXByMatrixNewRow() {
   SyntacticElement& matrixElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3];
-  SyntacticElement& theElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
-  matrixElt.dataList.lastObject()->addChildOnTop(theElt.data);
+  SyntacticElement& element = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
+  matrixElt.dataList.lastObject()->addChildOnTop(element.data);
   matrixElt.dataList.setSize(matrixElt.dataList.size + 1);
   matrixElt.dataList.lastObject()->makeSequence(*this);
   if (this->flagLogSyntaxRules) {
@@ -1228,8 +1228,8 @@ bool Calculator::replaceMatrixEXByMatrixNewRow() {
 
 bool Calculator::replaceMatrixEXByMatrix() {
   SyntacticElement& matrixElement = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3];
-  SyntacticElement& theElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
-  matrixElement.dataList.lastObject()->addChildOnTop(theElt.data);
+  SyntacticElement& element = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
+  matrixElement.dataList.lastObject()->addChildOnTop(element.data);
   if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::replaceMatrixEXByMatrix]";
   }
@@ -1238,8 +1238,8 @@ bool Calculator::replaceMatrixEXByMatrix() {
 
 bool Calculator::replaceMatrixEXByMatrixX() {
   SyntacticElement& matrixElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3];
-  SyntacticElement& theElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
-  matrixElt.dataList.lastObject()->addChildOnTop(theElt.data);
+  SyntacticElement& element = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
+  matrixElt.dataList.lastObject()->addChildOnTop(element.data);
   if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::replaceMatrixEXByMatrixX]";
   }
@@ -1247,8 +1247,8 @@ bool Calculator::replaceMatrixEXByMatrixX() {
 }
 
 bool Calculator::replaceAXbyEX() {
-  SyntacticElement& theElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
-  theElt.controlIndex = this->conExpression();
+  SyntacticElement& element = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
+  element.controlIndex = this->conExpression();
   return true;
 }
 
@@ -1285,11 +1285,11 @@ bool Calculator::replaceIntegerDotIntegerByE() {
 }
 
 bool Calculator::replaceIntegerXbyEX() {
-  SyntacticElement& theElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
-  theElt.controlIndex = this->conExpression();
+  SyntacticElement& element = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
+  element.controlIndex = this->conExpression();
   Rational value;
-  value.assignString(theElt.data.getValue<std::string>());
-  theElt.data.assignValue(value, *this);
+  value.assignString(element.data.getValue<std::string>());
+  element.data.assignValue(value, *this);
   return true;
 }
 

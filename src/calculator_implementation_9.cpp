@@ -512,27 +512,27 @@ bool CalculatorFunctions::innerPrintAllVectorPartitions(Calculator& calculator, 
   for (int i = 0; i < thePartition.size; i ++) {
     thePartition[i] = 0;
   }
-  Vector<Rational> theWeight, tmpWt;
+  Vector<Rational> weight, tmpWt;
   Vectors<Rational>& rootsBorel = theSSalgebra.weylGroup.rootsOfBorel;
   int counter = 0;
   int totalCycles = 0;
-  theWeight.makeZero(theSSalgebra.getRank());
+  weight.makeZero(theSSalgebra.getRank());
   int i = rootsBorel.size;
   while (i > 0 && counter < 10000) {
     totalCycles ++;
-    if (theWeight == theHW) {
+    if (weight == theHW) {
       tmpWt = thePartition;
       out << "<br>" << tmpWt.toStringLetterFormat("\\alpha");
       counter ++;
     }
-    if (!(theHW - theWeight).isPositive() || i > rootsBorel.size) {
+    if (!(theHW - weight).isPositive() || i > rootsBorel.size) {
       if (i <= rootsBorel.size) {
-        theWeight -= rootsBorel[i - 1] * thePartition[i - 1];
+        weight -= rootsBorel[i - 1] * thePartition[i - 1];
         thePartition[i - 1] = 0;
       }
       i --;
       if (i > 0) {
-        theWeight += rootsBorel[i - 1];
+        weight += rootsBorel[i - 1];
         thePartition[i - 1] ++;
       }
     } else {

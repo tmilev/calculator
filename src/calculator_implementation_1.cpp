@@ -979,13 +979,13 @@ bool Expression::assignStringParsed(
     result = commands;
   }
   if (substitutions != nullptr) {
-    MapList<Expression, Expression> theSubs;
+    MapList<Expression, Expression> substitutionMap;
     for (int i = 0; i < substitutions->size(); i ++) {
-      Expression theSubbed;
-      theSubbed.makeAtom(substitutions->keys[i], owner);
-      theSubs.setKeyValue(theSubbed, substitutions->values[i]);
+      Expression substituted;
+      substituted.makeAtom(substitutions->keys[i], owner);
+      substitutionMap.setKeyValue(substituted, substitutions->values[i]);
     }
-    result.substituteRecursively(theSubs);
+    result.substituteRecursively(substitutionMap);
   }
   *this = result;
   return true;

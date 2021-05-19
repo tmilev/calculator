@@ -3489,7 +3489,7 @@ void OnePartialFraction::applyGeneralizedSzenesVergneFormula(
   Polynomial<LargeInteger> tempP;
   Polynomial<LargeInteger> ComputationalBufferCoefficient;
   output.makeZero();
-  int theDim = startingVectors[0].size;
+  int dimension = startingVectors[0].size;
   SelectionWithDifferentMaxMultiplicities TheBigBadIndexingSet;
   TheBigBadIndexingSet.initPart1(theSelectedIndices.size);
   int totalMultiplicity;
@@ -3517,7 +3517,7 @@ void OnePartialFraction::applyGeneralizedSzenesVergneFormula(
         }
         tempFrac.denominator[theSelectedIndices[k]].addMultiplicity(- multiplicityChange, theGreatestElongations[k]);
         this->getNElongationPolynomialWithMonomialContribution(
-          startingVectors, theSelectedIndices, theCoefficients, theGreatestElongations, k, tempP, theDim
+          startingVectors, theSelectedIndices, theCoefficients, theGreatestElongations, k, tempP, dimension
         );
         tempP.raiseToPower(multiplicityChange, 1);
         ComputationalBufferCoefficient *= (tempP);
@@ -3557,7 +3557,7 @@ void OnePartialFraction::applySzenesVergneFormula(
   Polynomial<LargeInteger> tempP, CoefficientBuffer;
   MonomialPolynomial tempM;
   output.makeZero();
-  int theDim = startingVectors[0].size;
+  int dimension = startingVectors[0].size;
   CoefficientBuffer.makeOne();
   for (int i = 0; i < theSelectedIndices.size; i ++) {
     tempFrac.assign(*this);
@@ -3569,13 +3569,13 @@ void OnePartialFraction::applySzenesVergneFormula(
     tempM.makeOne();
     for (int j = 0; j < i; j ++) {
       int tempElongation = this->denominator[theSelectedIndices[j]].getLargestElongation();
-      for (int k = 0; k < theDim; k ++) {
+      for (int k = 0; k < dimension; k ++) {
         Rational incomingPower = startingVectors[theSelectedIndices[j]][k] * theElongations[j] * tempElongation;
         tempM.multiplyByVariable(k, incomingPower);
       }
     }
     CoefficientBuffer.multiplyBy(tempM);
-    this->getNElongationPolynomial(startingVectors, theSelectedIndices[i], LargestElongation, theElongations[i], tempP, theDim);
+    this->getNElongationPolynomial(startingVectors, theSelectedIndices[i], LargestElongation, theElongations[i], tempP, dimension);
     CoefficientBuffer *= tempP;
     tempFrac.computeIndicesNonZeroMultiplicities();
     output.addMonomial(tempFrac, CoefficientBuffer);
@@ -4564,14 +4564,14 @@ void PartialFractions::computeSupport(List<Vectors<Rational> >& output) {
 }
 
 bool PartialFractions::isHigherThanWithRespectToWeight(
-  const Vector<Rational>& left, const Vector<Rational>& r, const Vector<Rational>& theWeights
+  const Vector<Rational>& left, const Vector<Rational>& r, const Vector<Rational>& weights
 ) {
   if (left.size != r.size) {
     global.fatal << "Left and right vectors need equal dimensions. " << global.fatal;
   }
   Rational accum = 0;
   for (int i = 0; i < left.size; i ++) {
-    accum += (left[i] - r[i]) * theWeights[i];
+    accum += (left[i] - r[i]) * weights[i];
   }
   return (accum > 0);
 }
@@ -7002,7 +7002,7 @@ bool WeylGroupData::isRegular(Vector<Rational>& input, int* indexFirstPerpendicu
   return true;
 }
 
-LargeInteger WeylGroupData::sizeByFormulaOrNegative1(char weylLetter, int theDim) {
+LargeInteger WeylGroupData::sizeByFormulaOrNegative1(char weylLetter, int dimension) {
   //Humphreys, Introduction to Lie algebras and representation theory(1980), page 66, Table 1
   if (
     weylLetter != 'A' &&
@@ -7017,23 +7017,23 @@ LargeInteger WeylGroupData::sizeByFormulaOrNegative1(char weylLetter, int theDim
   }
   LargeInteger theOutput = 1;
   if (weylLetter == 'A') {
-    theOutput = Rational::factorial(theDim + 1);
+    theOutput = Rational::factorial(dimension + 1);
   }
   if (weylLetter == 'B' || weylLetter == 'C') {
-    theOutput = Rational::factorial(theDim)*Rational::twoToTheNth(theDim);
+    theOutput = Rational::factorial(dimension)*Rational::twoToTheNth(dimension);
   }
   if (weylLetter == 'D') {
-    theOutput = Rational::factorial(theDim)*Rational::twoToTheNth(theDim - 1);
+    theOutput = Rational::factorial(dimension)*Rational::twoToTheNth(dimension - 1);
   }
   if (weylLetter == 'E') {
-    if (theDim == 6) {
+    if (dimension == 6) {
       theOutput = 51840;
     }
-    if (theDim == 7) {
+    if (dimension == 7) {
       theOutput = 1024;
       theOutput *= 81 * 35;
     }
-    if (theDim == 8) {
+    if (dimension == 8) {
       theOutput = 1024 * 16;
       theOutput *= 81 * 3;
       theOutput *= 25 * 7;
@@ -7618,17 +7618,17 @@ void WeylGroupData::getExtremeElementInOrbit(
   }
 }
 
-LargeInteger WeylGroupAutomorphisms::getOrbitSize(Vector<Rational>& theWeight) {
+LargeInteger WeylGroupAutomorphisms::getOrbitSize(Vector<Rational>& weight) {
   MacroRegisterFunctionWithName("WeylGroupAutomorphisms::getOrbitSize");
   this->checkInitialization();
   HashedList<Vector<Rational> > highestWeights;
   for (int i = 0; i < this->outerAutomorphisms.elements.size; i ++) {
     Vector<Rational> candidate;
-    this->outerAutomorphisms.elements[i].actOnVectorColumn(theWeight, candidate);
+    this->outerAutomorphisms.elements[i].actOnVectorColumn(weight, candidate);
     this->weylGroup->raiseToDominantWeight(candidate);
     highestWeights.addOnTopNoRepetition(candidate);
   }
-  return this->weylGroup->getOrbitSize(theWeight) * highestWeights.size;
+  return this->weylGroup->getOrbitSize(weight) * highestWeights.size;
 }
 
 bool WeylGroupAutomorphisms::isElementWeylGroupOrOuterAutomorphisms(const MatrixTensor<Rational>& matrix) {
@@ -7959,12 +7959,12 @@ bool WeylGroupData::containsRootNonStronglyPerpendicularTo(Vectors<Rational>& th
 
 void WeylGroupData::getMatrixStandardRepresentation(const ElementWeylGroup& input, Matrix<Rational>& outputMatrix) const {
   Vector<Rational> tempRoot;
-  int theDim = this->cartanSymmetric.numberOfRows;
-  outputMatrix.initialize(theDim, theDim);
-  for (int i = 0; i < theDim; i ++) {
-    tempRoot.makeEi(theDim, i);
+  int dimension = this->cartanSymmetric.numberOfRows;
+  outputMatrix.initialize(dimension, dimension);
+  for (int i = 0; i < dimension; i ++) {
+    tempRoot.makeEi(dimension, i);
     this->actOn(input, tempRoot, tempRoot);
-    for (int j = 0; j < theDim; j ++) {
+    for (int j = 0; j < dimension; j ++) {
       outputMatrix(j, i) = tempRoot[j];
     }
   }
@@ -9175,7 +9175,7 @@ bool Lattice::getAllRepresentatives(const Lattice& rougherLattice, Vectors<Ratio
   thePeriodVectors.setSize(this->basis.numberOfRows);
   Vector<Rational> tempRoot, tempRoot2;
   int col = 0;
-  int theDim = this->getDimension();
+  int dimension = this->getDimension();
   Rational currentPeriod;
   LargeInteger currentPeriodInt;
   for (int i = 0; i < this->basis.numberOfRows; i ++) {
@@ -9202,7 +9202,7 @@ bool Lattice::getAllRepresentatives(const Lattice& rougherLattice, Vectors<Ratio
   int NumCycles = theCoeffSelection.totalNumberSubsetsSmallInt();
   output.setSize(NumCycles);
   for (int i = 0; i < NumCycles; i ++, theCoeffSelection.incrementReturnFalseIfPastLast()) {
-    output[i].makeZero(theDim);
+    output[i].makeZero(dimension);
     for (int j = 0; j < theCoeffSelection.multiplicities.size; j ++) {
       output[i] += thePeriodVectors[j] * theCoeffSelection.multiplicities[j];
     }
@@ -9557,11 +9557,11 @@ void QuasiPolynomial::makeZeroOverLattice(Lattice& theLattice) {
   this->valueOnEachLatticeShift.size = 0;
 }
 
-void QuasiPolynomial::makeZeroLatticeZn(int theDim) {
-  if (theDim <= 0) {
+void QuasiPolynomial::makeZeroLatticeZn(int dimension) {
+  if (dimension <= 0) {
     global.fatal << "Negative dimension not allowed. " << global.fatal;
   }
-  this->ambientLatticeReduced.makeZn(theDim);
+  this->ambientLatticeReduced.makeZn(dimension);
   this->latticeShifts.size = 0;
   this->valueOnEachLatticeShift.size = 0;
 }
@@ -10359,10 +10359,10 @@ bool SlTwoInSlN::computeInvariantsOfDegree(
   basisMonsAll.makeZero();
   MonomialPolynomial monomial;
   monomial.makeOne();
-  Vector<Rational> theWeight;
+  Vector<Rational> weight;
   Vector<Rational> theCartanAction;
   theCartanAction.setSize(this->dimension);
-  theWeight.setSize(this->dimension);
+  weight.setSize(this->dimension);
   for (int j = 0; j < this->dimension; j ++) {
     theCartanAction[j] = this->hElement.elements[j][j];
   }
@@ -10371,10 +10371,10 @@ bool SlTwoInSlN::computeInvariantsOfDegree(
   for (int i = 0; i < numberOfCycles; i ++, selection.incrementSubsetFixedCardinality(degree)) {
     for (int j = 0; j < this->dimension; j ++) {
       monomial.setVariable(j, selection.multiplicities[j]);
-      theWeight[j] = monomial[j];
+      weight[j] = monomial[j];
     }
     basisMonsAll.addMonomial(monomial, monomialCoeff);
-    if (theWeight.scalarEuclidean(theCartanAction).isEqualToZero()) {
+    if (weight.scalarEuclidean(theCartanAction).isEqualToZero()) {
       basisMonsZeroWeight.addMonomial(monomial, monomialCoeff);
     }
   }
@@ -10804,20 +10804,20 @@ int DrawOperations::getDimensionFromBilinearForm() {
   return this->bilinearForm.numberOfRows;
 }
 
-void DrawOperations::initDimensions(int theDim) {
-  if (theDim < 2) {
-    theDim = 2;
+void DrawOperations::initDimensions(int dimension) {
+  if (dimension < 2) {
+    dimension = 2;
   }
-  this->bilinearForm.makeIdentityMatrix(theDim, 1, 0);
-  this->projectionsEiVectors.setSizeMakeMatrix(theDim, 2);
-  this->basisProjectionPlane.makeEiBasis(theDim);
+  this->bilinearForm.makeIdentityMatrix(dimension, 1, 0);
+  this->projectionsEiVectors.setSizeMakeMatrix(dimension, 2);
+  this->basisProjectionPlane.makeEiBasis(dimension);
   this->basisProjectionPlane.size = 2;
 /*  for (int i = 0; i < tempBasis[1].size; i ++)
     tempBasis[1][i] =2*i + 1;
   for (int i = 0; i < tempBasis[0].size; i ++)
     tempBasis[0][i] =3*i +2;*/
   this->modifyToOrthonormalNoShiftSecond(this->basisProjectionPlane[1], this->basisProjectionPlane[0]);
-  this->basisToDrawCirclesAt.makeEiBasis(theDim);
+  this->basisToDrawCirclesAt.makeEiBasis(dimension);
   this->selectedCircleMinus2noneMinus1Center = - 2;
   this->centerX = 300;
   this->centerY = 300;
@@ -10837,16 +10837,16 @@ int DrawOperations::getDimensionFirstDimensionDependentOperation() {
 }
 
 void DrawOperations::ensureProperInitialization() {
-  int theDim = this->getDimensionFirstDimensionDependentOperation();
-  bool isGood = (this->projectionsEiVectors.size == theDim && this->bilinearForm.numberOfRows == theDim);
+  int dimension = this->getDimensionFirstDimensionDependentOperation();
+  bool isGood = (this->projectionsEiVectors.size == dimension && this->bilinearForm.numberOfRows == dimension);
   if (isGood) {
     isGood = this->basisProjectionPlane.size == 2;
   }
   if (isGood) {
-    isGood = this->basisProjectionPlane[0].size == theDim;
+    isGood = this->basisProjectionPlane[0].size == dimension;
   }
   if (!isGood) {
-    this->initDimensions(theDim);
+    this->initDimensions(dimension);
   }
 }
 
@@ -10910,8 +10910,8 @@ void DrawOperations::click(double x , double y) {
   if (this->areWithinClickTolerance(x, y, this->centerX, this->centerY)) {
     this->selectedCircleMinus2noneMinus1Center = - 1;
   }
-  int theDim = this->bilinearForm.numberOfRows;
-  for (int i = 0; i < theDim; i ++) {
+  int dimension = this->bilinearForm.numberOfRows;
+  for (int i = 0; i < dimension; i ++) {
     double Xbasis, Ybasis;
     this->getCoordsDrawingComputeAll(this->basisToDrawCirclesAt[i], Xbasis, Ybasis);
     if (this->areWithinClickTolerance(x, y, Xbasis, Ybasis)) {
@@ -11283,12 +11283,12 @@ bool Cone::getLatticePointsInCone(
   }
   Vector<Rational> theActualShift = theShift;
   theLattice.reduceVector(theActualShift);
-  int theDimAffine = this->getDimension();
+  int dimensionAffine = this->getDimension();
   if (lastCoordinateIsOne) {
-    theDimAffine --;
+    dimensionAffine --;
   }
   SelectionWithMaxMultiplicity boundingBox;
-  boundingBox.initMaxMultiplicity(theDimAffine, upperBoundPointsInEachDim*2);
+  boundingBox.initMaxMultiplicity(dimensionAffine, upperBoundPointsInEachDim*2);
   // format of the boundingBox:
   // if bounding box shows a vector (x_1, ...) then
   // it corresponds to a vector with coodinates (x_1-upperBoundPointsInEachDim, x_2-upperBoundPointsInEachDim, ...)
@@ -12031,14 +12031,14 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
 ) {
   Vector<Rational> direction;
   FormatExpressions theFormat;
-  int theDimProjectivized = this->getDimensionProjectivized();
+  int dimensionProjectivized = this->getDimensionProjectivized();
   Matrix<Rational> theProjectionLatticeLevel;
-  theProjectionLatticeLevel.initialize(theDimProjectivized - 2, theDimProjectivized - 1);
+  theProjectionLatticeLevel.initialize(dimensionProjectivized - 2, dimensionProjectivized - 1);
   theProjectionLatticeLevel.makeZero();
   for (int i = 0; i < theProjectionLatticeLevel.numberOfRows; i ++) {
     theProjectionLatticeLevel.elements[i][i + 1] = 1;
   }
-  direction.makeEi(theDimProjectivized, 0);
+  direction.makeEi(dimensionProjectivized, 0);
   if (!this->theProjectivizedCone.vertices.linearSpanContainsVector(direction)) {
     this->findExtremaInDirectionOverLatticeOneNonParamDegenerateCase(
       theLPToMaximizeAffine, outputAppendLPToMaximizeAffine, outputAppend, theProjectionLatticeLevel
@@ -12068,7 +12068,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   Vectors<Rational> exitRepresentatives, exitWallsShifted;
   Lattice exitRougherLattice;
   ConeLatticeAndShift tempCLS;
-  directionSmallerDim.makeEi(theDimProjectivized - 1, 0);
+  directionSmallerDim.makeEi(dimensionProjectivized - 1, 0);
   Vectors<Rational> theNewNormals;
   for (int i = 0; i < complexBeforeProjection.size; i ++) {
     const Cone& currentCone = complexBeforeProjection[i];
@@ -12098,7 +12098,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
           );
           exitNormalAffine = currentNormal;
           exitNormalLatticeLevel = exitNormalAffine;
-          exitNormalLatticeLevel.setSize(theDimProjectivized - 1);
+          exitNormalLatticeLevel.setSize(dimensionProjectivized - 1);
           foundExitNormal = true;
         } else {
           enteringNormalAffine = currentNormal;
@@ -12171,7 +12171,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
           while (true) {
           }
         }
-        if (tempCLS.getDimensionProjectivized() != theDimProjectivized - 1) {
+        if (tempCLS.getDimensionProjectivized() != dimensionProjectivized - 1) {
           global.fatal << "Projectivized dimension not correct. " << global.fatal;
         }
       }
@@ -12182,25 +12182,25 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
 void ConeComplex::getNewVerticesAppend(
   Cone& myDyingCone, const Vector<Rational>& killerNormal, HashedList<Vector<Rational> >& outputVertices
 ) {
-  int theDimMinusTwo = killerNormal.size - 2;
-  int theDim = killerNormal.size;
-  LargeInteger numberOfCycles = MathRoutines::nChooseK(myDyingCone.normals.size, theDimMinusTwo);
+  int dimensionMinusTwo = killerNormal.size - 2;
+  int dimension = killerNormal.size;
+  LargeInteger numberOfCycles = MathRoutines::nChooseK(myDyingCone.normals.size, dimensionMinusTwo);
   Selection theSel;
   Selection nonPivotPoints;
   theSel.initialize(myDyingCone.normals.size);
   Matrix<Rational> theLinearAlgebra;
-  theLinearAlgebra.initialize(theDimMinusTwo + 1, theDim);
+  theLinearAlgebra.initialize(dimensionMinusTwo + 1, dimension);
   Vector<Rational> tempRoot;
   for (int i = 0; i < numberOfCycles; i ++) {
-    theSel.incrementSelectionFixedCardinality(theDimMinusTwo);//, indexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore);
-    for (int j = 0; j < theDimMinusTwo; j ++) {
+    theSel.incrementSelectionFixedCardinality(dimensionMinusTwo);//, indexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore);
+    for (int j = 0; j < dimensionMinusTwo; j ++) {
       Vector<Rational>& currentNormal = myDyingCone.normals[theSel.elements[j]];
-      for (int k = 0; k < theDim; k ++) {
+      for (int k = 0; k < dimension; k ++) {
         theLinearAlgebra.elements[j][k] = currentNormal[k];
       }
     }
-    for (int k = 0; k < theDim; k ++) {
-      theLinearAlgebra.elements[theDimMinusTwo][k] = killerNormal[k];
+    for (int k = 0; k < dimension; k ++) {
+      theLinearAlgebra.elements[dimensionMinusTwo][k] = killerNormal[k];
     }
     theLinearAlgebra.gaussianEliminationByRows(nullptr, &nonPivotPoints);
     if (nonPivotPoints.cardinalitySelection == 1) {
@@ -12398,10 +12398,10 @@ void Cone::computeVerticesFromNormalsNoFakeVertices() {
   for (int i = 0; i < this->normals.size; i ++) {
     Cone::scaleNormalizeByPositive(this->normals[i]);
   }
-  int theDim = this->normals[0].size;
+  int dimension = this->normals[0].size;
   theSel.initialize(this->normals.size);
-  LargeInteger numCycles = theSel.getNumberOfCombinationsFixedCardinality(theDim - 1);
-  if (theDim == 1) {
+  LargeInteger numCycles = theSel.getNumberOfCombinationsFixedCardinality(dimension - 1);
+  if (dimension == 1) {
     numCycles = 0;
     bool foundNegative = false;
     bool foundPositive = false;
@@ -12425,11 +12425,11 @@ void Cone::computeVerticesFromNormalsNoFakeVertices() {
   }
   Matrix<Rational> matrix;
   Vector<Rational> tempRoot;
-  matrix.initialize(theDim - 1, theDim);
+  matrix.initialize(dimension - 1, dimension);
   for (int i = 0; i < numCycles; i ++) {
-    theSel.incrementSelectionFixedCardinality(theDim - 1);
+    theSel.incrementSelectionFixedCardinality(dimension - 1);
     for (int j = 0; j < theSel.cardinalitySelection; j ++) {
-      for (int k = 0; k < theDim; k ++) {
+      for (int k = 0; k < dimension; k ++) {
         matrix.elements[j][k] = this->normals[theSel.elements[j]][k];
       }
     }
@@ -12588,10 +12588,10 @@ bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
   Matrix<Rational> tempMat;
   Selection tempSel;
   int rankVerticesSpan = inputVertices.getRankElementSpan(&tempMat, &tempSel);
-  int theDim = inputVertices.getDimension();
+  int dimension = inputVertices.getDimension();
   Vectors<Rational> extraVertices;
   extraVertices.setSize(0);
-  if (rankVerticesSpan < theDim) {
+  if (rankVerticesSpan < dimension) {
     Matrix<Rational> tempMat;
     tempMat.assignVectorsToRows(inputVertices);
     tempMat.getZeroEigenSpace(extraVertices);
@@ -12609,7 +12609,7 @@ bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
     for (int j = 0; j < theSelection.cardinalitySelection; j ++) {
       extraVertices.addOnTop(inputVertices[theSelection.elements[j]]);
     }
-    if (extraVertices.computeNormal(normalCandidate, theDim)) {
+    if (extraVertices.computeNormal(normalCandidate, dimension)) {
       bool hasPositive = false;
       bool hasNegative = false;
       for (int j = 0; j < inputVertices.size; j ++) {
@@ -12632,7 +12632,7 @@ bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
         this->normals.addOnTopNoRepetition(normalCandidate);
       }
     }
-    extraVertices.size = theDim - rankVerticesSpan;
+    extraVertices.size = dimension - rankVerticesSpan;
   }
   return this->createFromNormals(this->normals);
 }
@@ -12644,9 +12644,9 @@ bool Cone::createFromNormals(
   this->flagIsTheZeroCone = false;
   this->LowestIndexNotCheckedForChopping = 0;
   this->LowestIndexNotCheckedForSlicingInDirection = 0;
-  int theDim = 1;
+  int dimension = 1;
   if (inputNormals.size > 0) {
-    theDim = inputNormals[0].size;
+    dimension = inputNormals[0].size;
   }
   this->normals = inputNormals;
   for (int i = 0; i < this->normals.size; i ++) {
@@ -12659,9 +12659,9 @@ bool Cone::createFromNormals(
   Matrix<Rational> tempMat;
   Selection tempSel;
   if (!useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices) {
-    for (int i = 0; i < theDim && this->normals.getRankElementSpan(&tempMat, &tempSel) < theDim; i ++) {
+    for (int i = 0; i < dimension && this->normals.getRankElementSpan(&tempMat, &tempSel) < dimension; i ++) {
       Vector<Rational> tempRoot;
-      tempRoot.makeEi(theDim, i);
+      tempRoot.makeEi(dimension, i);
       if (!this->normals.linearSpanContainsVector(tempRoot, tempMat, tempSel)) {
         numAddedFakeWalls ++;
         this->normals.addOnTop(tempRoot);
@@ -12815,19 +12815,19 @@ bool ConeComplex::findMaxLFOverConeProjective(
   if (input.normals.size < 1 || inputLinPolys.size < 1) {
     return false;
   }
-  int theDim = input.normals[0].size;
+  int dimension = input.normals[0].size;
   HyperPlanesCorrespondingToLF.setSize(inputLinPolys.size);
   for (int i = 0; i < inputLinPolys.size; i ++) {
     Polynomial<Rational>& currentPoly = inputLinPolys[i];
     if (currentPoly.totalDegree() != 1 ) {
       global.comments << "The total degree must be one, instead it is "
-      << currentPoly.totalDegree() << ". The dimension of the cone is " << theDim;
+      << currentPoly.totalDegree() << ". The dimension of the cone is " << dimension;
       return false;
     }
     Vector<Rational>& newWall = HyperPlanesCorrespondingToLF[i];
-    newWall.makeZero(theDim);
+    newWall.makeZero(dimension);
     for (int j = 0; j < currentPoly.size(); j ++) {
-      for (int k = 0; k < theDim; k ++) {
+      for (int k = 0; k < dimension; k ++) {
         if (currentPoly[j](k) == 1) {
           newWall[k] = currentPoly.coefficients[j];
           break;
@@ -12916,7 +12916,7 @@ void Lattice::refineByOtherLattice(const Lattice& other) {
   if (other.getDimension() != this->getDimension()) {
     global.fatal << "Dimension mismatch. " << global.fatal;
   }
-  int theDim = this->getDimension();
+  int dimension = this->getDimension();
   LargeIntegerUnsigned oldDen = this->denominator;
   LargeIntegerUnsigned::leastCommonMultiple(other.denominator, oldDen, this->denominator);
   LargeIntegerUnsigned scaleThis, scaleOther;
@@ -12926,7 +12926,7 @@ void Lattice::refineByOtherLattice(const Lattice& other) {
   LargeInteger tempI;
   tempI = scaleThis;
   this->basis *= tempI;
-  this->basis.resize(this->basis.numberOfRows+other.basis.numberOfRows, theDim, true);
+  this->basis.resize(this->basis.numberOfRows+other.basis.numberOfRows, dimension, true);
   for (int i = oldNumRows; i < this->basis.numberOfRows; i ++) {
     for (int j = 0; j < this->basis.numberOfColumns; j ++) {
       this->basis.elements[i][j] = other.basis.elements[i - oldNumRows][j] * scaleOther;

@@ -18,42 +18,42 @@ class NilradicalCandidate {
   bool flagNilradicalConesStronglyIntersect;
   bool flagComputedRelativelyStrongIntersections;
   bool flagRestrictedCentralizerConditionHoldS;
-  bool flagParabolicACextendsToParabolicAC;
+  bool flagParabolicACExtendsToParabolicAC;
 
   bool flagLinfiniteRelFound;
   DynkinDiagramRootSubalgebra leviDiagramAmbient, leviDiagramSmall;
   //0->not selected; 1->selected; 2->undecided.
   List<int> nilradicalSelection;
-  Vector<Rational> ConeIntersection;
-  Vector<Rational> ConeStrongIntersection;
-  Vector<Rational> ConeRelativelyStrongIntersection;
+  Vector<Rational> coneIntersection;
+  Vector<Rational> coneStrongIntersection;
+  Vector<Rational> coneRelativelyStrongIntersection;
   //  Vector<Rational> LInfiniteRelation;
-  Vector<Rational> ConeSeparatingNormal;
+  Vector<Rational> coneSeparatingNormal;
   Vectors<Rational> nilradicalWeights;
-  Vectors<Rational> theNonFKhws;
-  Vectors<Rational> theNonFKhwsStronglyTwoSided;
+  Vectors<Rational> nonFernandoKacHighestWeights;
+  Vectors<Rational> nonFernandoKacHighestWeightsStronglyTwoSided;
 
   List<int> ownerModulesNilradicalElements;
   List<int> ownerModulestheNonFKhwVectors;
 
   Vectors<Rational> leviRootsAmbienT;
-  Vectors<Rational> leviRootsSmallPrimalFundCoords;
+  Vectors<Rational> leviRootsSmallPrimalFundamentalCoordinates;
 
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNonFKhwVectors;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNonFKHVectorsStronglyTwoSided;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNilradical;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNilradicalElementOpposites;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > nonFernandoKacHighestWeightVectors;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > nonFernandoKacHighestVectorsStronglyTwoSided;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > nilradical;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > nilradicalElementOpposites;
   Selection nilradicalSubselection;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNilradicalSubset;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNonFKhwVectorsStrongRelativeToSubset;
-  Vectors<Rational> theNilradicalSubsetWeights;
-  Vectors<Rational> theNonFKhwVectorsStrongRelativeToSubsetWeights;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > nilradicalSubset;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > nonFernandoKacHighestWeightVectorsStrongRelativeToSubset;
+  Vectors<Rational> nilradicalSubsetWeights;
+  Vectors<Rational> nonFernandoKacHighestWeightVectorsStrongRelativeToSubsetWeights;
 
   NilradicalCandidate();
   void reset();
   void checkInitialization() const;
   bool isStronglySingular(int moduleIndex);
-  bool isStronglySingularRelativeToSubset(int nonFKweightIndex);
+  bool isStronglySingularRelativeToSubset(int nonFernandoKacWeightIndex);
   Vector<Rational> getConeStrongIntersectionWeight() const;
   Vector<Rational> getNilradicalLinearCombination() const;
   void getModGeneratedByNonHighestWeightVectorAndNilradElement(
@@ -64,12 +64,12 @@ class NilradicalCandidate {
   ) const;
   bool tryFindingLInfiniteRelations();
   void computeParabolicACExtendsToParabolicAC();
-  bool isCommutingSelectionNilradicalElements(Selection& inputNilradSelection);
+  bool isCommutingSelectionNilradicalElements(Selection& inputNilradicalSelection);
   void processMe();
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringTableElementWithWeights(
-    const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& theElts,
-    const Vectors<Rational>& theWeights
+    const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& elements,
+    const Vectors<Rational>& weights
   ) const;
   void computeTheTwoCones();
   void computeTheTwoConesRelativeToNilradicalSubset();
@@ -125,7 +125,7 @@ public:
   List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > unknownNegativeGenerators;
   List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > unknownCartanCentralizerBasis;
 
-//  Vector<Rational> aSolution;
+  //  Vector<Rational> aSolution;
   List<List<ChevalleyGenerator> > involvedPositiveGenerators;
   List<List<ChevalleyGenerator> > involvedNegativeGenerators;
   CharacterSemisimpleLieAlgebraModule<Rational> characterFundamentalCoordinatesRelativeToCartan;
@@ -352,7 +352,7 @@ public:
   std::string toStringModuleDecomposition(FormatExpressions* format = nullptr) const;
   std::string toStringModuleDecompositionLaTeX(FormatExpressions* format = nullptr) const;
   std::string toStringDrawWeights(FormatExpressions* format = nullptr) const;
-  std::string toStringDrawWeightsHelper(int indexModule, const Vector<Rational>& theWeight) const;
+  std::string toStringDrawWeightsHelper(int indexModule, const Vector<Rational>& weight) const;
   //std::string ToStringDrawWeightsVersion2(FormatExpressions* format = nullptr) const;
   bool operator>(const CandidateSemisimpleSubalgebra& other) const;
 };
@@ -467,6 +467,7 @@ public:
   }
   void makeEmptyCandidateSubalgebra(CandidateSemisimpleSubalgebra& output);
   void makeCandidateSubalgebra(const DynkinType& input, CandidateSemisimpleSubalgebra& output);
+  void makeCandidateFromSlTwo(SlTwoSubalgebra& candidate, CandidateSemisimpleSubalgebra& output);
   bool incrementReturnFalseIfPastLast();
   bool removeLastSubalgebraFromStack();
   bool getCentralizerTypeIfComputableAndKnown(const DynkinType& input, DynkinType& output);

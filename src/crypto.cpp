@@ -1611,13 +1611,13 @@ LargeIntegerUnsigned Crypto::rsaEncrypt(
     global.fatal << "The modulus and the exponent are not allowed to be zero while running RSA. "
     << "The modulus: " << theModulus.toString() << "; the exponent: " << theExponent.toString() << global.fatal;
   }
-  ElementZmodP theElt, theOne;
-  theElt.modulus = theModulus;
+  ElementZmodP element, theOne;
+  element.modulus = theModulus;
   theOne.value = 1;
   theOne.modulus = theModulus;
-  theElt.assignRational(theMessage);
-  MathRoutines::raiseToPower(theElt, theExponent, theOne);
-  return theElt.value;
+  element.assignRational(theMessage);
+  MathRoutines::raiseToPower(element, theExponent, theOne);
+  return element.value;
 }
 
 std::string JSONWebToken::toString() {

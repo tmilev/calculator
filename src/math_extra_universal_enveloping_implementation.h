@@ -15,10 +15,10 @@ Coefficient SemisimpleLieAlgebra::getKillingFormProductWRTLevi(
   ElementSemisimpleLieAlgebra<Coefficient> adadAppliedToMon, element;
   ChevalleyGenerator baseGen;
   Vector<Rational> rootsNotInLeviVectorForm = rootsNotInLevi;
-  Vector<Rational> theWeight;
+  Vector<Rational> weight;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
-    theWeight = this->getWeightOfGenerator(i);
-    if (theWeight.scalarEuclidean(rootsNotInLeviVectorForm) != 0) {
+    weight = this->getWeightOfGenerator(i);
+    if (weight.scalarEuclidean(rootsNotInLeviVectorForm) != 0) {
       continue;
     }
     baseGen.makeGenerator(*this, i);
@@ -46,21 +46,21 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimirWRTLeviParabolic(
   Selection rootsNotInLEvi = theLeviRoots;
   rootsNotInLEvi.invertSelection();
   Vector<Rational> rootsNotInLeviVectorForm = rootsNotInLEvi;
-  Vector<Rational> theWeightLeft, theWeightRight;
+  Vector<Rational> weightLeft, weightRight;
   this->makeZero(theOwner);
   MonomialUniversalEnveloping<Coefficient> monomial;
   Rational theCF;
   //Coefficient theCFconverted;
   for (int i = 0; i < theOwner.getNumberOfGenerators(); i ++) {
-    theWeightLeft = theOwner.getWeightOfGenerator(i);
-    if (theWeightLeft.scalarEuclidean(rootsNotInLeviVectorForm) != 0) {
+    weightLeft = theOwner.getWeightOfGenerator(i);
+    if (weightLeft.scalarEuclidean(rootsNotInLeviVectorForm) != 0) {
       continue;
     }
-    if (theWeightLeft.isEqualToZero()) {
+    if (weightLeft.isEqualToZero()) {
       continue;
     }
     monomial.makeOne(theOwner);
-    int indexOpposite = theOwner.getGeneratorIndexFromRoot(- theWeightLeft);
+    int indexOpposite = theOwner.getGeneratorIndexFromRoot(- weightLeft);
     monomial.generatorsIndices.addOnTop(i);
     monomial.generatorsIndices.addOnTop(indexOpposite);
     monomial.powers.addOnTop(1);
@@ -75,10 +75,10 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimirWRTLeviParabolic(
   killingRestrictedToCartan.initialize(theLeviRoots.cardinalitySelection, theLeviRoots.cardinalitySelection);
   for (int i = 0; i < theLeviRoots.cardinalitySelection; i ++) {
     for (int j = i; j < theLeviRoots.cardinalitySelection; j ++) {
-      theWeightLeft.makeEi(theOwner.getRank(), theLeviRoots.elements[i]);
-      theWeightRight.makeEi(theOwner.getRank(), theLeviRoots.elements[j]);
-      leftE.makeCartanGenerator(theWeightLeft, theOwner);
-      rightE.makeCartanGenerator(theWeightRight, theOwner);
+      weightLeft.makeEi(theOwner.getRank(), theLeviRoots.elements[i]);
+      weightRight.makeEi(theOwner.getRank(), theLeviRoots.elements[j]);
+      leftE.makeCartanGenerator(weightLeft, theOwner);
+      rightE.makeCartanGenerator(weightRight, theOwner);
       killingRestrictedToCartan(i, j) = theOwner.getKillingFormProductWRTLevi(leftE, rightE, rootsNotInLEvi);
       killingRestrictedToCartan(j, i) = killingRestrictedToCartan(i, j);
     }
@@ -87,14 +87,14 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimirWRTLeviParabolic(
   ElementUniversalEnveloping<Coefficient> leftUE, rightUE;
   Vector<Rational> currentEj;
   for (int i = 0; i < theLeviRoots.cardinalitySelection; i ++) {
-    theWeightLeft.makeEi(theOwner.getRank(), theLeviRoots.elements[i]);
-    theWeightRight.makeZero(theOwner.getRank());
+    weightLeft.makeEi(theOwner.getRank(), theLeviRoots.elements[i]);
+    weightRight.makeZero(theOwner.getRank());
     for (int j = 0; j < theLeviRoots.cardinalitySelection; j ++) {
       currentEj.makeEi(theOwner.getRank(), theLeviRoots.elements[j]);
-      theWeightRight += currentEj * killingRestrictedToCartan(i, j);
+      weightRight += currentEj * killingRestrictedToCartan(i, j);
     }
-    leftUE.makeCartanGenerator(theWeightLeft, theOwner);
-    rightUE.makeCartanGenerator(theWeightRight, theOwner);
+    leftUE.makeCartanGenerator(weightLeft, theOwner);
+    rightUE.makeCartanGenerator(weightRight, theOwner);
     leftUE *= rightUE;
     *this += leftUE;
   }
@@ -1084,18 +1084,18 @@ void ElementVermaModuleOrdered<Coefficient>::getBasisFromSpanOfElements(
   const RationalFraction<Rational>& RFOne,
   const RationalFraction<Rational>& RFZero
 ) {
-  List<ElementUniversalEnvelopingOrdered<Coefficient> > theEltsUEform;
-  theEltsUEform.setSize(theElements.size);
+  List<ElementUniversalEnvelopingOrdered<Coefficient> > elementsUEform;
+  elementsUEform.setSize(theElements.size);
   for (int i = 0; i < theElements.size; i ++) {
-    theEltsUEform[i] = theElements[i].theElT;
+    elementsUEform[i] = theElements[i].elementInternal;
   }
   List<ElementUniversalEnvelopingOrdered<Coefficient> > theBasisUEform;
   ElementUniversalEnvelopingOrdered<Coefficient>::getBasisFromSpanOfElements(
-    theEltsUEform, outputCoordinates, theBasisUEform, RFOne, RFZero, global
+    elementsUEform, outputCoordinates, theBasisUEform, RFOne, RFZero, global
   );
   outputTheBasis.setSize(theBasisUEform.size);
   for (int i = 0; i < theBasisUEform.size; i ++) {
-    outputTheBasis[i].theElT = theBasisUEform[i];
+    outputTheBasis[i].elementInternal = theBasisUEform[i];
     outputTheBasis[i].theSubNthElementIsImageNthCoordSimpleBasis = theElements[0].theSubNthElementIsImageNthCoordSimpleBasis;
   }
 }
@@ -1107,17 +1107,17 @@ bool ElementVermaModuleOrdered<Coefficient>::getCoordinatesInBasis(
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) const {
-  List<ElementUniversalEnvelopingOrdered<Coefficient> > theEltsUEform;
-  theEltsUEform.setSize(theBasis.size);
+  List<ElementUniversalEnvelopingOrdered<Coefficient> > elementsUEform;
+  elementsUEform.setSize(theBasis.size);
   for (int i = 0; i < theBasis.size; i ++) {
-    theEltsUEform.objects[i] = theBasis.objects[i].theElT;
+    elementsUEform.objects[i] = theBasis.objects[i].elementInternal;
   }
-  return this->theElT.getCoordinatesInBasis(theEltsUEform, output, ringUnit, ringZero);
+  return this->elementInternal.getCoordinatesInBasis(elementsUEform, output, ringUnit, ringZero);
 }
 
 template<class Coefficient>
 bool ElementVermaModuleOrdered<Coefficient>::needsParenthesisForMultiplication() const {
-  return this->theElT.needsParenthesisForMultiplication();
+  return this->elementInternal.needsParenthesisForMultiplication();
 }
 
 template <class Coefficient>
@@ -1126,12 +1126,12 @@ void ElementVermaModuleOrdered<Coefficient>::assignElementUniversalEnvelopingOrd
   const ElementVermaModuleOrdered<Coefficient>& ringZero,
   const Coefficient& ringUnit
 ) {
-  this->theElT.operator=(input);
+  this->elementInternal.operator=(input);
   if (ringZero.theSubNthElementIsImageNthCoordSimpleBasis.size != 3) {
     global.fatal << "ringZero.theSubNthElementIsImageNthCoordSimpleBasis.size is not equal to 3 as expected. " << global.fatal;
   }
   this->theSubNthElementIsImageNthCoordSimpleBasis = ringZero.theSubNthElementIsImageNthCoordSimpleBasis;
-  this->theElT.modOutVermaRelationsOld(false, this->theSubNthElementIsImageNthCoordSimpleBasis, ringUnit);
+  this->elementInternal.modOutVermaRelationsOld(false, this->theSubNthElementIsImageNthCoordSimpleBasis, ringUnit);
 }
 
 template <class Coefficient>
@@ -1142,17 +1142,17 @@ void ElementVermaModuleOrdered<Coefficient>::multiplyOnTheLeft(
   const Coefficient& ringZero
 ) {
   ElementUniversalEnvelopingOrdered<Coefficient> element;
-  element.assignElementLieAlgebra(other, ringUnit, ringZero, *this->theElT.owner);
-  element *= this->theElT;
-  output.theElT = element;
-  output.theElT.simplify(ringUnit, ringZero);
-  output.theElT.modOutVermaRelationsOld(false, this->theSubNthElementIsImageNthCoordSimpleBasis, ringUnit);
+  element.assignElementLieAlgebra(other, ringUnit, ringZero, *this->elementInternal.owner);
+  element *= this->elementInternal;
+  output.elementInternal = element;
+  output.elementInternal.simplify(ringUnit, ringZero);
+  output.elementInternal.modOutVermaRelationsOld(false, this->theSubNthElementIsImageNthCoordSimpleBasis, ringUnit);
 }
 
 template <class Coefficient>
 std::string ElementVermaModuleOrdered<Coefficient>::toString(const FormatExpressions& theFormat) const {
   std::stringstream out;
-  std::string tempS = MathRoutines::toStringBrackets(this->theElT, theFormat);
+  std::string tempS = MathRoutines::toStringBrackets(this->elementInternal, theFormat);
   if (tempS.size() > 1) {
     out << "(";
   }
@@ -1176,11 +1176,11 @@ void ElementVermaModuleOrdered<Coefficient>::actOnMe(
   const Coefficient& ringZero
 ) const {
   ElementUniversalEnvelopingOrdered<Coefficient> element;
-  element.assignElementLieAlgebra(actingElt, ringUnit, ringZero, *this->theElT.owner);
-  element.lieBracketOnTheRight(this->theElT, output.theElT);
-  output.theElT.simplify(ringUnit, ringZero);
+  element.assignElementLieAlgebra(actingElt, ringUnit, ringZero, *this->elementInternal.owner);
+  element.lieBracketOnTheRight(this->elementInternal, output.elementInternal);
+  output.elementInternal.simplify(ringUnit, ringZero);
   output.theSubNthElementIsImageNthCoordSimpleBasis = this->theSubNthElementIsImageNthCoordSimpleBasis;
-  output.theElT.modOutVermaRelationsOld(false, this->theSubNthElementIsImageNthCoordSimpleBasis, ringUnit);
+  output.elementInternal.modOutVermaRelationsOld(false, this->theSubNthElementIsImageNthCoordSimpleBasis, ringUnit);
 }
 
 template<class Coefficient>

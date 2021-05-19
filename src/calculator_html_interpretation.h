@@ -158,8 +158,8 @@ public:
   //  Rational maxCorrectAnswersInAllChildren;
   void computeID(int elementIndex, TopicElementParser& owner);
   void reset();
-  friend std::ostream& operator << (std::ostream& output, const TopicElement& theElt) {
-    output << theElt.toString();
+  friend std::ostream& operator << (std::ostream& output, const TopicElement& element) {
+    output << element.toString();
     return output;
   }
   bool isError();

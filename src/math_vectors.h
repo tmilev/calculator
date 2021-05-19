@@ -264,10 +264,10 @@ public:
   // Returns the number by which the vector was multiplied.
   void scaleNormalizeFirstNonZero();
   void makeAffineUsingLastCoordinate() {
-    Coefficient theElt;
-    theElt = *this->lastObject();
+    Coefficient element;
+    element = *this->lastObject();
     this->size --;
-    this->operator/=(theElt);
+    this->operator/=(element);
   }
   bool assignMatrixDetectRowOrColumn(const Matrix<Coefficient>& input) {
     if (input.numberOfColumns == 1) {
@@ -286,15 +286,15 @@ public:
     }
     return false;
   }
-  void makeZero(int theDim) {
-    this->setSize(theDim);
-    for (int i = 0; i < theDim; i ++) {
+  void makeZero(int dimension) {
+    this->setSize(dimension);
+    for (int i = 0; i < dimension; i ++) {
       (*this)[i] = 0;
     }
   }
-  void makeZero(int theDim, const Coefficient& zeroCoefficient) {
-    this->setSize(theDim);
-    for (int i = 0; i < theDim; i ++) {
+  void makeZero(int dimension, const Coefficient& zeroCoefficient) {
+    this->setSize(dimension);
+    for (int i = 0; i < dimension; i ++) {
       (*this)[i] = zeroCoefficient;
     }
   }
@@ -405,7 +405,7 @@ public:
     Matrix<Coefficient>& bufferMatGaussianEliminationCC,
     Matrix<Coefficient>& bufferMatGaussianElimination,
     const Coefficient& ringUnit,
-    const Coefficient& theRingMinusUnit,
+    const Coefficient& negativeOne,
     const Coefficient& ringZero
   );
   void GetVectorsPerpendicularTo(
@@ -835,7 +835,7 @@ class Vectors: public List<Vector<Coefficient> > {
     const Vectors<Coefficient>& inputBasis,
     Vectors<Coefficient>& output,
     const Coefficient& ringUnit,
-    const Coefficient& theRingMinusUnit,
+    const Coefficient& negativeOne,
     const Coefficient& ringZero
   ) const {
     Matrix<Coefficient> bufferMatGaussianEliminationCC, bufferMatGaussianElimination;
@@ -848,7 +848,7 @@ class Vectors: public List<Vector<Coefficient> > {
         bufferMatGaussianEliminationCC,
         bufferMatGaussianElimination,
         ringUnit,
-        theRingMinusUnit,
+        negativeOne,
         ringZero
       )) {
         result = false;
@@ -862,7 +862,7 @@ class Vectors: public List<Vector<Coefficient> > {
     Matrix<Coefficient>& bufferMatGaussianEliminationCC,
     Matrix<Coefficient>& bufferMatGaussianElimination,
     const Coefficient& ringUnit,
-    const Coefficient& theRingMinusUnit,
+    const Coefficient& negativeOne,
     const Coefficient& ringZero
   ) const {
     bool result = true;
@@ -874,7 +874,7 @@ class Vectors: public List<Vector<Coefficient> > {
         bufferMatGaussianEliminationCC,
         bufferMatGaussianElimination,
         ringUnit,
-        theRingMinusUnit,
+        negativeOne,
         ringZero
       )) {
         result = false;
@@ -975,7 +975,7 @@ class Vectors: public List<Vector<Coefficient> > {
     }
     return - 1;
   }
-  void beefUpWithEiToLinearlyIndependentBasis(int theDim);
+  void beefUpWithEiToLinearlyIndependentBasis(int dimension);
   void chooseABasis();
   static void intersectTwoLinearSpaces(
     const List<Vector<Coefficient> >& firstSpace,
@@ -1099,7 +1099,7 @@ bool Vector<Coefficient>::getIntegralCoordsInBasisIfTheyExist(
   Matrix<Coefficient>& bufferMatGaussianEliminationCC,
   Matrix<Coefficient>& bufferMatGaussianElimination,
   const Coefficient& ringUnit,
-  const Coefficient& theRingMinusUnit,
+  const Coefficient& negativeOne,
   const Coefficient& ringZero
 ) {
   int dimension = this->size;
@@ -1111,7 +1111,7 @@ bool Vector<Coefficient>::getIntegralCoordsInBasisIfTheyExist(
   }
   bufferMatGaussianEliminationCC.makeIdentityMatrix(bufferMatGaussianElimination.numberOfRows, ringUnit, ringZero);
   bufferMatGaussianElimination.gaussianEliminationEuclideanDomain(
-    &bufferMatGaussianEliminationCC, theRingMinusUnit, ringUnit
+    &bufferMatGaussianEliminationCC, negativeOne, ringUnit
   );
   Vector<Coefficient> tempRoot, theCombination;
   if (this == &output) {

@@ -311,7 +311,7 @@ void MatrixTensor<Coefficient>::operator*=(
 template <class Coefficient>
 void Matrix<Coefficient>::gaussianEliminationEuclideanDomain(
   Matrix<Coefficient>* otherMatrix,
-  const Coefficient& theRingMinusUnit,
+  const Coefficient& negativeOne,
   const Coefficient& ringUnit,
   bool (*comparisonGEQFunction) (const Coefficient& left, const Coefficient& right)
 ) {
@@ -336,7 +336,7 @@ void Matrix<Coefficient>::gaussianEliminationEuclideanDomain(
     if (foundPivotRow != - 1) {
       this->switchRowsWithCarbonCopy(row, foundPivotRow, otherMatrix);
       if (this->elements[row][col].isNegative()) {
-        this->rowTimesScalarWithCarbonCopy(row, theRingMinusUnit, otherMatrix);
+        this->rowTimesScalarWithCarbonCopy(row, negativeOne, otherMatrix);
       }
       int ExploringRow = row + 1;
       while (ExploringRow < this->numberOfRows) {
@@ -349,7 +349,7 @@ void Matrix<Coefficient>::gaussianEliminationEuclideanDomain(
         Coefficient& pivotElement = this->elements[row][col];
         Coefficient& otherElt = this->elements[ExploringRow][col];
         if (otherElt.isNegative()) {
-          this->rowTimesScalarWithCarbonCopy(ExploringRow, theRingMinusUnit, otherMatrix);
+          this->rowTimesScalarWithCarbonCopy(ExploringRow, negativeOne, otherMatrix);
         }
         bool isSmallerOrEqualTo = comparisonGEQFunction == 0 ? pivotElement <= otherElt :
         comparisonGEQFunction(otherElt, pivotElement);
@@ -396,38 +396,38 @@ void Vectors<Coefficient>::chooseABasis() {
 }
 
 template <class Coefficient>
-void Vectors<Coefficient>::beefUpWithEiToLinearlyIndependentBasis(int theDim) {
-  Selection BufferSel;
+void Vectors<Coefficient>::beefUpWithEiToLinearlyIndependentBasis(int dimension) {
+  Selection selection;
   Matrix<Coefficient> Buffer;
-  if (this->size != 0 && theDim != this->getDimension()) {
+  if (this->size != 0 && dimension != this->getDimension()) {
     global.fatal << "Vector dimension is incorrect. " << global.fatal;
   }
-  int currentRank = this->getRankElementSpan(Buffer, BufferSel);
-  if (currentRank == theDim) {
+  int currentRank = this->getRankElementSpan(Buffer, selection);
+  if (currentRank == dimension) {
     return;
   }
   Vector<Coefficient> theVect;
-  for (int i = 0; i < theDim && currentRank < theDim; i ++) {
-    theVect.makeEi(theDim, i);
+  for (int i = 0; i < dimension && currentRank < dimension; i ++) {
+    theVect.makeEi(dimension, i);
     this->addOnTop(theVect);
-    int candidateRank = this->getRankElementSpan(Buffer, BufferSel);
+    int candidateRank = this->getRankElementSpan(Buffer, selection);
     if (candidateRank > currentRank) {
       currentRank = candidateRank;
     } else {
       this->size --;
     }
   }
-  if (currentRank != theDim) {
+  if (currentRank != dimension) {
     global.fatal << "Rank does not match dimension. " << global.fatal;
   }
 }
 
 template <class Coefficient>
 bool Vectors<Coefficient>::linearSpanContainsVector(const Vector<Coefficient>& input) const {
-    Matrix<Coefficient> buffer;
-    Selection bufferSelection;
-    return this->linearSpanContainsVector(input, buffer, bufferSelection);
-  }
+  Matrix<Coefficient> buffer;
+  Selection bufferSelection;
+  return this->linearSpanContainsVector(input, buffer, bufferSelection);
+}
 
 template <class Coefficient>
 void Vectors<Coefficient>::selectBasisInSubspace(
@@ -445,27 +445,27 @@ void Vectors<Coefficient>::selectBasisInSubspace(
   MacroRegisterFunctionWithName("Vectors::selectBasisInSubspace");
   ProgressReport reportTask(1, GlobalVariables::Response::ReportType::gaussianElimination);
   ProgressReport reportProgress(200, GlobalVariables::Response::ReportType::gaussianElimination);
-  int theDim = input[0].size;
+  int dimension = input[0].size;
   if (reportTask.tickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "Selecting a basis of a vector space with " << input.size
-    << " generators in dimension " << theDim << "... " ;
+    << " generators in dimension " << dimension << "... " ;
     reportTask.report(reportStream.str());
   }
   Matrix<Coefficient> matrix;
-  int MaxNumRows = MathRoutines::minimum(input.size, theDim);
-  matrix.initialize(MaxNumRows, theDim);
+  int maximumNumberOfRows = MathRoutines::minimum(input.size, dimension);
+  matrix.initialize(maximumNumberOfRows, dimension);
   int currentRow = 0;
   for (int i = 0; i < input.size; i ++) {
-    for (int j = 0; j < theDim; j ++) {
+    for (int j = 0; j < dimension; j ++) {
       matrix(currentRow, j) = input[i][j];
     }
     currentRow ++;
-    if (currentRow == MaxNumRows || i == input.size - 1) {
+    if (currentRow == maximumNumberOfRows || i == input.size - 1) {
       matrix.gaussianEliminationByRows(0, 0, &outputSelectedPivotColumns);
       currentRow = outputSelectedPivotColumns.cardinalitySelection;
     }
-    if (currentRow == MaxNumRows) {
+    if (currentRow == maximumNumberOfRows) {
       break;
     }
   }
@@ -476,7 +476,7 @@ void Vectors<Coefficient>::selectBasisInSubspace(
   if (reportProgress.tickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "Selecting a basis of a vector space with " << input.size
-    << " generators in dimension " << theDim << "... done. " ;
+    << " generators in dimension " << dimension << "... done. " ;
     reportProgress.report(reportStream.str());
   }
 }

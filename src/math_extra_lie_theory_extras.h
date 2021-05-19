@@ -13,7 +13,7 @@
 struct BranchingData {
   HomomorphismSemisimpleLieAlgebra theHmm;
   FormatExpressions theFormat;
-  Vector<RationalFraction<Rational> > theWeightFundCoords;
+  Vector<RationalFraction<Rational> > weightFundamentalCoordinates;
   CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > theAmbientChar;
   CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > theSmallCharFDpart;
   Selection selInducing;
@@ -420,7 +420,7 @@ public:
     return true;
   }
   void makeCasimir(SemisimpleLieAlgebraOrdered& theOwner, int numVars);
-  void actOnMe(const ElementSemisimpleLieAlgebra<Rational>& theElt, ElementUniversalEnvelopingOrdered& output);
+  void actOnMe(const ElementSemisimpleLieAlgebra<Rational>& element, ElementUniversalEnvelopingOrdered& output);
   void lieBracketOnTheRight(const ElementUniversalEnvelopingOrdered& right, ElementUniversalEnvelopingOrdered& output);
   void lieBracketOnTheRight(
     const ElementSemisimpleLieAlgebra<Rational>& right,
@@ -480,11 +480,11 @@ public:
 template <class Coefficient>
 class ElementVermaModuleOrdered {
 public:
-  ElementUniversalEnvelopingOrdered<Coefficient> theElT;
+  ElementUniversalEnvelopingOrdered<Coefficient> elementInternal;
   PolynomialSubstitution<Coefficient> theSubNthElementIsImageNthCoordSimpleBasis;
   std::string toString(const FormatExpressions& theFormat) const;
   bool isEqualToZero() const {
-    return this->theElT.isEqualToZero();
+    return this->elementInternal.isEqualToZero();
   }
   bool needsParenthesisForMultiplication() const;
   void assignElementUniversalEnvelopingOrderedTimesHighestWeightVector(
@@ -516,15 +516,15 @@ public:
     Coefficient& outputTimesMeEqualsOther,
     const Coefficient& ringZero
   ) const {
-    return this->theElT.isProportionalTo(other.theElT, outputTimesMeEqualsOther, ringZero);
+    return this->elementInternal.isProportionalTo(other.elementInternal, outputTimesMeEqualsOther, ringZero);
   }
   void makeZero(SemisimpleLieAlgebraOrdered& owner, PolynomialSubstitution<Rational>& incomingSub) {
-    this->theElT.makeZero(owner);
+    this->elementInternal.makeZero(owner);
     this->theSubNthElementIsImageNthCoordSimpleBasis = incomingSub;
   }
   template <class CoefficientTypeOther>
   void operator*=(const CoefficientTypeOther& theConst) {
-    this->theElT.operator*=(theConst);
+    this->elementInternal.operator*=(theConst);
   }
   void multiplyOnTheLeft(
     const ElementSemisimpleLieAlgebra<Rational>& other,
@@ -533,19 +533,19 @@ public:
     const Coefficient& ringZero
   );
   void clearDenominators(Coefficient& outputWasMultipliedBy, const Coefficient& ringUnit) {
-    this->theElT.clearDenominators(outputWasMultipliedBy, ringUnit);
+    this->elementInternal.clearDenominators(outputWasMultipliedBy, ringUnit);
   }
   void operator/=(const Coefficient& theConst) {
-    this->theElT.operator/=(theConst);
+    this->elementInternal.operator/=(theConst);
   }
   void operator-=(const ElementVermaModuleOrdered& other) {
-    this->theElT -= other.theElT;
+    this->elementInternal -= other.elementInternal;
   }
   void operator+=(const ElementVermaModuleOrdered& other) {
-    this->theElT += other.theElT;
+    this->elementInternal += other.elementInternal;
   }
   void operator=(const ElementVermaModuleOrdered& other) {
-    this->theElT = other.theElT;
+    this->elementInternal = other.elementInternal;
     this->theSubNthElementIsImageNthCoordSimpleBasis = other.theSubNthElementIsImageNthCoordSimpleBasis;
   }
 };

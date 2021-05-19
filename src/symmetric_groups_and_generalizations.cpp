@@ -1256,12 +1256,12 @@ void HyperoctahedralGroupData::spechtModuleOfPartititons(
     subgenids.removeIndexShiftDown(positive.n - 1);
   }
   auto PxM = this->group->parabolicKindaSubgroupGeneratorSubset(subgenids);
-  auto pxmr = PxM.theSubgroup->getEmptyRationalRepresentation();
-  pxmr.generators.setExpectedSize(PxM.theSubgroup->generators.size);
+  auto pxmr = PxM.subgroupContent->getEmptyRationalRepresentation();
+  pxmr.generators.setExpectedSize(PxM.subgroupContent->generators.size);
   pxmr.generators.addListOnTop(pozm);
   pxmr.generators.addListOnTop(negm);
   int cur = pxmr.generators.size;
-  pxmr.generators.setSize(PxM.theSubgroup->generators.size);
+  pxmr.generators.setSize(PxM.subgroupContent->generators.size);
   int repRank = pxmr.generators[0].numberOfRows;
   if (repRank == 0) {
     repRank = 1;

@@ -890,7 +890,7 @@ void AlgebraicNumber::invert() {
     if (!isGood) {
       global.fatal << "Algebraic number has no owner, "
       << "so it must be rational, but it appears to be not. "
-      << "Its theElt vector is: " << this->element.toString() << global.fatal;
+      << "Its element vector is: " << this->element.toString() << global.fatal;
     }
     this->element.coefficients[0].invert();
     return;
@@ -1182,7 +1182,7 @@ bool AlgebraicNumber::assignRationalQuadraticRadical(
   AlgebraicClosureRationals& inputOwner,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("AlgebraicNumber::AssignRationalRadical");
+  MacroRegisterFunctionWithName("AlgebraicNumber::assignRationalQuadraticRadical");
   this->checkConsistency();
   if (input == 0) {
     return false;

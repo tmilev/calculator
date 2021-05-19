@@ -395,7 +395,7 @@ class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coef
     return this->drawMe(outputDetails, theDrawingVars, upperBoundWeights, false);
   }
   int getPositiveNStringSuchThatWeightMinusNAlphaIsWeight(
-    const Weight<Coefficient>& theWeightInFundCoords, const Vector<Coefficient>& theAlphaInFundCoords
+    const Weight<Coefficient>& weightInFundCoords, const Vector<Coefficient>& theAlphaInFundCoords
   );
   bool drawMeWithMultiplicities(std::string& outputDetails, DrawingVariables& theDrawingVars, int upperBoundWeights) {
     return this->drawMe(outputDetails, theDrawingVars, upperBoundWeights, true);

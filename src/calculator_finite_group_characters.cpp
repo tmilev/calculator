@@ -404,50 +404,50 @@ bool CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant(
     return output.makeError("Raising to maximally dominant takes at least 2 arguments, type and vector", calculator);
   }
   const Expression& semisimpleLieAlgebraNode = input[1];
-  WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
+  WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebraWithContext;
   if (!CalculatorConversions::convert(
     semisimpleLieAlgebraNode,
     CalculatorConversions::functionSemisimpleLieAlgebra,
-    semisimpleLieAlgebra
+    semisimpleLieAlgebraWithContext
   )) {
     return output.makeError("Error extracting Lie algebra.", calculator);
   }
-  SemisimpleLieAlgebra* theSSalgebra = semisimpleLieAlgebra.content;
-  Vectors<Rational> theHWs;
-  theHWs.setSize(input.size() - 2);
+  SemisimpleLieAlgebra* semisimpleLieAlgebra = semisimpleLieAlgebraWithContext.content;
+  Vectors<Rational> highestWeights;
+  highestWeights.setSize(input.size() - 2);
   bool isGood = true;
   for (int i = 2; i < input.size(); i ++) {
     if (!calculator.getVector<Rational>(
-      input[i], theHWs[i - 2], nullptr, theSSalgebra->getRank()
+      input[i], highestWeights[i - 2], nullptr, semisimpleLieAlgebra->getRank()
     )) {
       isGood = false;
       break;
     }
   }
   if (!isGood && input.size() == 3) {
-    Matrix<Rational> theHWsMatForm;
+    Matrix<Rational> highestWeightsMatForm;
     if (calculator.functionGetMatrix(
-      input[2], theHWsMatForm, nullptr, theSSalgebra->getRank()
+      input[2], highestWeightsMatForm, nullptr, semisimpleLieAlgebra->getRank()
     )) {
-      theHWsMatForm.getVectorsFromRows(theHWs);
+      highestWeightsMatForm.getVectorsFromRows(highestWeights);
       isGood = true;
     }
   }
-  if (theHWs.size == 0 || !isGood) {
+  if (highestWeights.size == 0 || !isGood) {
     return output.makeError("Failed to extract rational vectors from expression " + input.toString() + ". ", calculator);
   }
   std::stringstream out;
-  out << "Input: " << theHWs.toString()
+  out << "Input: " << highestWeights.toString()
   << ", simultaneously raising to maximally dominant in Weyl group of type "
-  << theSSalgebra->weylGroup.dynkinType.toString();
+  << semisimpleLieAlgebra->weylGroup.dynkinType.toString();
   if (!useOuter) {
-    theSSalgebra->weylGroup.raiseToMaximallyDominant(theHWs);
+    semisimpleLieAlgebra->weylGroup.raiseToMaximallyDominant(highestWeights);
   } else {
     WeylGroupAutomorphisms theOuterAutos;
-    theOuterAutos.weylGroup = &theSSalgebra->weylGroup;
-    theOuterAutos.raiseToMaximallyDominant(theHWs);
+    theOuterAutos.weylGroup = &semisimpleLieAlgebra->weylGroup;
+    theOuterAutos.raiseToMaximallyDominant(highestWeights);
   }
-  out << "<br>Maximally dominant output: " << theHWs.toString();
+  out << "<br>Maximally dominant output: " << highestWeights.toString();
   return output.assignValue(out.str(), calculator);
 }
 
@@ -474,7 +474,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
       return false;
     }
   }
-  Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords;
+  Vector<Polynomial<Rational> > theHWfundCoords, highestWeightsimpleCoords;
   ExpressionContext theContext(calculator);
   if (!calculator.getVector(
     vectorNode,
@@ -487,17 +487,17 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
   }
   WeylGroupData weyl;
   weyl.makeFromDynkinType(dynkinType);
-  theHWsimpleCoords = theHWfundCoords;
-  theHWfundCoords = weyl.getFundamentalCoordinatesFromSimple(theHWsimpleCoords);
+  highestWeightsimpleCoords = theHWfundCoords;
+  theHWfundCoords = weyl.getFundamentalCoordinatesFromSimple(highestWeightsimpleCoords);
   std::stringstream out, latexReport;
-  Vectors<Polynomial<Rational> > theHWs;
+  Vectors<Polynomial<Rational> > highestWeights;
   FormatExpressions theFormat = theContext.getFormat();
-  theHWs.addOnTop(theHWsimpleCoords);
+  highestWeights.addOnTop(highestWeightsimpleCoords);
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   WeylGroupAutomorphisms theOuterAutos;
   theOuterAutos.weylGroup = &weyl;
   if (!theOuterAutos.generateOuterOrbit(
-    theHWs, outputOrbit, &theOuterAutos.allElements, 1921 * 2
+    highestWeights, outputOrbit, &theOuterAutos.allElements, 1921 * 2
   )) {
     out << "Failed to generate the entire orbit "
     << "(maybe too large?), generated the first " << outputOrbit.size
@@ -542,23 +542,23 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitSize(
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::weylGroupOrbitSize");
   //double startTimeForDebug= global.getElapsedSeconds();
   WithContext<SemisimpleLieAlgebra*> theAlgebra;
-  Vector<Rational> theWeightRat;
+  Vector<Rational> weightRational;
   if (calculator.getTypeWeight<Rational>(
-    calculator, input, theWeightRat, theAlgebra, nullptr
+    calculator, input, weightRational, theAlgebra, nullptr
   )) {
-    Rational result = theAlgebra.content->weylGroup.getOrbitSize(theWeightRat);
+    Rational result = theAlgebra.content->weylGroup.getOrbitSize(weightRational);
     return output.assignValue(result, calculator);
   }
-  SemisimpleLieAlgebra* theSSalgebra = theAlgebra.content;
-  Vector<Polynomial<Rational> > theWeightPoly;
+  SemisimpleLieAlgebra* semisimpleLieAlgebra = theAlgebra.content;
+  Vector<Polynomial<Rational> > weightPolynomial;
   if (calculator.getTypeWeight<Polynomial<Rational> >(
     calculator,
     input,
-    theWeightPoly,
+    weightPolynomial,
     theAlgebra,
     CalculatorConversions::functionPolynomial<Rational>
   )) {
-    Rational result = theSSalgebra->weylGroup.getOrbitSize(theWeightPoly);
+    Rational result = semisimpleLieAlgebra->weylGroup.getOrbitSize(weightPolynomial);
     return output.assignValue(result, calculator);
   }
   return false;
@@ -575,37 +575,37 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   if (!input.isListNElements(3)) {
     return output.makeError("weylOrbit takes two arguments", calculator);
   }
-  WithContext<SemisimpleLieAlgebra*> theSSalgebra;
-  Vector<Polynomial<Rational> > theWeight;
+  WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
+  Vector<Polynomial<Rational> > weight;
   if (!calculator.getTypeWeight(
     calculator,
     input,
-    theWeight,
-    theSSalgebra,
+    weight,
+    semisimpleLieAlgebra,
     CalculatorConversions::functionPolynomial<Rational>
   )) {
     return false;
   }
-  Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords, currentWeight;
+  Vector<Polynomial<Rational> > theHWfundCoords, highestWeightSimpleCoords, currentWeight;
   Polynomial<Rational> zero;
-  WeylGroupData& weyl = theSSalgebra.content->weylGroup;
+  WeylGroupData& weyl = semisimpleLieAlgebra.content->weylGroup;
   if (!useFundCoords) {
-    theHWsimpleCoords = theWeight;
-    theHWfundCoords = weyl.getFundamentalCoordinatesFromSimple(theWeight);
+    highestWeightSimpleCoords = weight;
+    theHWfundCoords = weyl.getFundamentalCoordinatesFromSimple(weight);
   } else {
-    theHWfundCoords = theWeight;
-    theHWsimpleCoords = weyl.getSimpleCoordinatesFromFundamental(theWeight, zero);
+    theHWfundCoords = weight;
+    highestWeightSimpleCoords = weyl.getSimpleCoordinatesFromFundamental(weight, zero);
   }
   std::stringstream out, latexReport;
-  Vectors<Polynomial<Rational> > theHWs;
+  Vectors<Polynomial<Rational> > highestWeights;
   FormatExpressions theFormat;
-  theSSalgebra.context.getFormat(theFormat);
+  semisimpleLieAlgebra.context.getFormat(theFormat);
 //  theFormat.fundamentalWeightLetter ="\\psi";
-  theHWs.addOnTop(theHWsimpleCoords);
+  highestWeights.addOnTop(highestWeightSimpleCoords);
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   HashedList<ElementWeylGroup> orbitGeneratingSet;
   Polynomial<Rational> theExp;
-  if (!theSSalgebra.content->weylGroup.generateOrbit(theHWs, useRho, outputOrbit, false, 1921, &orbitGeneratingSet, 1921)) {
+  if (!semisimpleLieAlgebra.content->weylGroup.generateOrbit(highestWeights, useRho, outputOrbit, false, 1921, &orbitGeneratingSet, 1921)) {
     out << "Failed to generate the entire orbit (maybe too large?), generated the first " << outputOrbit.size << " elements only.";
   } else {
     out << "The orbit has " << outputOrbit.size << " elements.";
@@ -690,8 +690,8 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     << (outputOrbit[0] - outputOrbit[i]).toStringLetterFormat(theFormat.simpleRootLetter, &theFormat)
     << "$\\\\\n<br>";
     if (useRho) {
-      currentWeight = theHWsimpleCoords;
-      standardElt.makeOne(*theSSalgebra.content);
+      currentWeight = highestWeightSimpleCoords;
+      standardElt.makeOne(*semisimpleLieAlgebra.content);
       bool isGood = true;
       for (int j = orbitGeneratingSet[i].generatorsLastAppliedFirst.size - 1; j >= 0; j --) {
         int simpleIndex = orbitGeneratingSet[i].generatorsLastAppliedFirst[j].index;
@@ -706,7 +706,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
             break;
           }
         }
-        standardElt.multiplyByGeneratorPowerOnTheLeft(theSSalgebra.content->getNumberOfPositiveRoots() - simpleIndex - 1, theExp);
+        standardElt.multiplyByGeneratorPowerOnTheLeft(semisimpleLieAlgebra.content->getNumberOfPositiveRoots() - simpleIndex - 1, theExp);
       }
       out << "<td>";
       if (isGood) {
@@ -2135,20 +2135,20 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraWeight(
     return calculator << "<hr>The third argument of MakeWeight is bad: must be one of the "
     << "keywords: epsilon, fundamental, simple. ";
   }
-  int theWeightIndex = - 1;
-  if (!input[2].isSmallInteger(&theWeightIndex)) {
+  int weightIndex = - 1;
+  if (!input[2].isSmallInteger(&weightIndex)) {
     return false;
   }
   if (theCoordsString != "epsilon") {
-    if (theWeightIndex < 1 || theWeightIndex> theSSowner->getRank()) {
+    if (weightIndex < 1 || weightIndex> theSSowner->getRank()) {
       std::stringstream errorStream;
       errorStream << "The second argument of the MakeWeight function "
       << "needs to be index of a weight between 1 and the Lie algebra rank. "
-      << "However, the index is " << theWeightIndex << ".";
+      << "However, the index is " << weightIndex << ".";
       return output.makeError(errorStream.str(), calculator);
     }
     Vector<Polynomial<Rational> > EiVector;
-    EiVector.makeEi(theSSowner->getRank(), theWeightIndex - 1);
+    EiVector.makeEi(theSSowner->getRank(), weightIndex - 1);
     if (theCoordsString == "fundamental") {
       resultWeight.weightFundamentalCoordinates = EiVector;
     } else if (theCoordsString == "simple") {
@@ -2158,13 +2158,13 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraWeight(
     Vector<Rational> EiVector;
     EiVector.makeZero(theSSowner->getRank());
     Vector<Rational> tempV = theSSowner->weylGroup.getEpsilonCoordinates(EiVector);
-    if (theWeightIndex>tempV.size || theWeightIndex < 1) {
+    if (weightIndex>tempV.size || weightIndex < 1) {
       std::stringstream errorStream;
       errorStream << "The second argument of the MakeWeight function needs to be index of a weight between 1 and " << tempV.size
-      << ". However, the index is " << theWeightIndex << ".";
+      << ". However, the index is " << weightIndex << ".";
       return output.makeError(errorStream.str(), calculator);
     }
-    EiVector.makeEi(tempV.size, theWeightIndex - 1);
+    EiVector.makeEi(tempV.size, weightIndex - 1);
     resultWeight.weightFundamentalCoordinates = theSSowner->weylGroup.getFundamentalCoordinatesFromEpsilon(EiVector);
   }
   resultWeight.owner = theSSowner;
@@ -2227,17 +2227,17 @@ bool CalculatorFunctionsWeylGroup::representElementHyperOctahedral(
   if (input.size() != 3) {
     return calculator << "Representating takes 2 arguments: element and rep.";
   }
-  ElementHyperoctahedralGroupR2 theElt;
+  ElementHyperoctahedralGroupR2 element;
   GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> theRep;
-  if (!input[1].isOfType(&theElt)) {
+  if (!input[1].isOfType(&element)) {
     return calculator << "Failed to extract element of hyperoctahedral group from " << input[1].toString();
   }
   if (!input[2].isOfType(&theRep)) {
     return calculator << "Failed to extract representation from " << input[2].toString();
   }
   Matrix<Rational> result;
-  if (!theRep.getMatrixOfElement(theElt, result)) {
-    return calculator << "Failed to get matrix of element " << theElt.toString()
+  if (!theRep.getMatrixOfElement(element, result)) {
+    return calculator << "Failed to get matrix of element " << element.toString()
     << " from representation: " << theRep.toString();
   }
   return output.assignMatrix(result, calculator, nullptr, false);
@@ -2403,26 +2403,26 @@ bool CalculatorFunctionsWeylGroup::weylGroupElement(
   )) {
     return output.makeError("Error extracting Lie algebra.", calculator);
   }
-  ElementWeylGroup theElt;
-  theElt.generatorsLastAppliedFirst.reserve(input.size() - 2);
+  ElementWeylGroup element;
+  element.generatorsLastAppliedFirst.reserve(input.size() - 2);
   for (int i = 2; i < input.size(); i ++) {
     int tmp;
     if (!input[i].isSmallInteger(& tmp)) {
       return false;
     }
-    theElt.multiplyOnTheRightBySimpleReflection(tmp - 1);
+    element.multiplyOnTheRightBySimpleReflection(tmp - 1);
   }
-  theElt.owner = &thePointer.content->weylGroup;
-  for (int i = 0; i < theElt.generatorsLastAppliedFirst.size; i ++) {
+  element.owner = &thePointer.content->weylGroup;
+  for (int i = 0; i < element.generatorsLastAppliedFirst.size; i ++) {
     if (
-      theElt.generatorsLastAppliedFirst[i].index >= thePointer.content->getRank() ||
-      theElt.generatorsLastAppliedFirst[i].index < 0
+      element.generatorsLastAppliedFirst[i].index >= thePointer.content->getRank() ||
+      element.generatorsLastAppliedFirst[i].index < 0
     ) {
       return output.makeError("Bad reflection index", calculator);
     }
   }
-  theElt.makeCanonical();
-  return output.assignValue(theElt, calculator);
+  element.makeCanonical();
+  return output.assignValue(element, calculator);
 }
 
 template <typename somegroup, typename Coefficient>

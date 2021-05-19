@@ -583,7 +583,7 @@ void getTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup>
 
   SubgroupData<FiniteGroup<ElementWeylGroup>, ElementWeylGroup> HD;
   HD.initFromGroupAndGenerators(G.group, gens);
-  FiniteGroup<ElementWeylGroup>& H = *HD.theSubgroup;
+  FiniteGroup<ElementWeylGroup>& H = *HD.subgroupContent;
   H.computeAllElements(true, - 1);
   Vector<Rational> HXs;
   H.getSignCharacter(HXs);

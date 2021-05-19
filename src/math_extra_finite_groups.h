@@ -730,14 +730,14 @@ public:
   }
   template <class Coefficient>
   Coefficient weylDimensionFormulaSimpleCoordinates(
-    Vector<Coefficient>& theWeightInSimpleCoords,
+    Vector<Coefficient>& weightInSimpleCoords,
     const Coefficient& ringUnit = 1
   );
   template <class Coefficient>
   Coefficient weylDimFormulaFundamentalCoords(Vector<Coefficient>& weightFundCoords);
   template <class Coefficient>
   void raiseToDominantWeight(
-    Vector<Coefficient>& theWeight,
+    Vector<Coefficient>& weight,
     int* sign = nullptr,
     bool* stabilizerFound = nullptr,
     ElementWeylGroup* raisingElt = nullptr
@@ -826,7 +826,7 @@ public:
   void generateRootSubsystem(Vectors<Rational>& theRoots);
   template <class Coefficient>
   bool generateOrbit(
-    Vectors<Coefficient>& theWeights,
+    Vectors<Coefficient>& weights,
     bool RhoAction,
     HashedList<Vector<Coefficient> >& output,
     bool UseMinusRho,
@@ -836,7 +836,7 @@ public:
   );
   template <class Coefficient>
   bool generateOrbit(
-    Vector<Coefficient>& theWeight,
+    Vector<Coefficient>& weight,
     bool RhoAction,
     HashedList<Vector<Coefficient> >& output,
     bool UseMinusRho,
@@ -844,10 +844,10 @@ public:
     HashedList<ElementWeylGroup>* outputSubset = nullptr,
     int upperLimitNumberOfElements = - 1
   ) {
-    Vectors<Coefficient> theWeights;
-    theWeights.addOnTop(theWeight);
+    Vectors<Coefficient> weights;
+    weights.addOnTop(weight);
     return this->generateOrbit(
-      theWeights, RhoAction, output, UseMinusRho, expectedOrbitSize, outputSubset, upperLimitNumberOfElements
+      weights, RhoAction, output, UseMinusRho, expectedOrbitSize, outputSubset, upperLimitNumberOfElements
     );
   }
 //  int GetNumRootsFromFormula();
@@ -1008,9 +1008,9 @@ public:
   // without changing the inputH-sign of any Vector<Rational>  that had a non-zero scalar product to begin with
   void perturbWeightToRegularWithRespectToRootSystem(const Vector<Rational>& inputH, Vector<Rational>& output);
   template <class Coefficient>
-  bool isDominantWithRespectToGenerator(const Vector<Coefficient>& theWeight, int generatorIndex);
+  bool isDominantWithRespectToGenerator(const Vector<Coefficient>& weight, int generatorIndex);
   template <class Coefficient>
-  bool isDominantWeight(const Vector<Coefficient>& theWeight);
+  bool isDominantWeight(const Vector<Coefficient>& weight);
   static void transformToSimpleBasisGenerators(
     Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem
   );
@@ -1071,14 +1071,14 @@ public:
   ~WeylGroupAutomorphisms();
   template <class Coefficient>
   bool generateOuterOrbit(
-    Vectors<Coefficient>& theWeights,
+    Vectors<Coefficient>& weights,
     HashedList<Vector<Coefficient> >& output,
     HashedList<ElementWeylGroupAutomorphisms>* outputSubset = nullptr,
     int upperLimitNumberOfElements = - 1
   );
-  LargeInteger getOrbitSize(Vector<Rational>& theWeight);
+  LargeInteger getOrbitSize(Vector<Rational>& weight);
   bool isElementWeylGroupOrOuterAutomorphisms(const MatrixTensor<Rational>& matrix);
-  bool areMaximallyDominantGroupOuter(List<Vector<Rational> >& theWeights);
+  bool areMaximallyDominantGroupOuter(List<Vector<Rational> >& weights);
   bool checkInitialization() const;
 
   template <class Coefficient>
@@ -1088,7 +1088,7 @@ public:
     Vector<Coefficient>& outputVector
   ) const;
   template <class Coefficient>
-  void raiseToMaximallyDominant(List<Vector<Coefficient> >& theWeights);
+  void raiseToMaximallyDominant(List<Vector<Coefficient> >& weights);
 };
 
 template<class Coefficient>
@@ -1606,9 +1606,9 @@ std::string Coset<elementSomeGroup>::toString() const {
 template <class someGroup, class elementSomeGroup>
 class SubgroupData {
 public:
-  someGroup *theGroup;
-  someGroup *theSubgroup;
-  someGroup theSubgroupMayBeHere;
+  someGroup *groupContent;
+  someGroup *subgroupContent;
+  someGroup subgroupMayBeHere;
   // one for each supergroup generator.  for word translation.
   List<List<int> > superGeneratorSubWords;
   List<bool> superGeneratorSubWordExists;
@@ -1620,8 +1620,8 @@ public:
   void initialize();
   void makeSubgroupOf(someGroup& G) {
     this->initialize();
-    this->theGroup = &G;
-    this->theSubgroup = &this->theSubgroupMayBeHere;
+    this->groupContent = &G;
+    this->subgroupContent = &this->subgroupMayBeHere;
   }
   LargeInteger sizeByFormulaOrNegative1() const {
     return - 1;
@@ -1662,7 +1662,7 @@ bool translatableWordsSubgroupElementGetWord(
   FiniteGroup<elementSomeGroup>& H, const elementSomeGroup& g, List<int>& out
 ) {
   List<int> superword;
-  H.parentRelationship->theGroup->getWord(g, superword);
+  H.parentRelationship->groupContent->getWord(g, superword);
   out.setSize(0);
   for (int i = 0; i < superword.size; i ++) {
     if (!H.parentRelationship->superGeneratorSubWordExists[superword[i]]) {
@@ -1715,8 +1715,8 @@ bool SubgroupData<someGroup, elementSomeGroup>::sameCosetAs(elementSomeGroup& g1
     return sameCosetAsByFormula(this, g1, g2);
   }
   this->computeCosets();
-  int g1i = this->theGroup->theElements.getIndex(g1);
-  int g2i = this->theGroup->theElements.getIndex(g2);
+  int g1i = this->groupContent->theElements.getIndex(g1);
+  int g2i = this->groupContent->theElements.getIndex(g2);
   for (int i = 0; i < this->cosets.size; i ++) {
     if (this->cosets[i].BSContains(g1i)) {
       if (this->cosets[i].BSContains(g2i)) {
@@ -1738,7 +1738,7 @@ int SubgroupData<someGroup, elementSomeGroup>::getCosetId(elementSomeGroup& g) {
     if (!flagCosetSetsComputed) {
       this->computeCosets();
     }
-    gi = this->theGroup->elements.getIndex(g);
+    gi = this->groupContent->elements.getIndex(g);
   }
   for (int i = 0; i < this->cosets.size; i ++) {
     if (this->sameCosetAsByFormula) {
@@ -1760,19 +1760,19 @@ template <typename someGroup, typename elementSomeGroup>
 template <typename Coefficient>
 void SubgroupData<someGroup, elementSomeGroup>::quotientGroupPermutationRepresentation(GroupRepresentation<someGroup, Coefficient>& out) {
   this->computeCosets();
-  out.ownerGroup = this->theGroup;
+  out.ownerGroup = this->groupContent;
   out.identifyingString = "Quotient Permutation representation";
   global.comments << "Subgroup::quotientGroupPermutationRepresentation: Permuting " << cosets.size << " cosets.\n";
-  out.generators.setSize(this->theGroup->generators.size);
-  for (int i = 0; i < this->theGroup->generators.size; i ++) {
+  out.generators.setSize(this->groupContent->generators.size);
+  for (int i = 0; i < this->groupContent->generators.size; i ++) {
     out.generators[i].initialize(this->cosets.size, this->cosets.size);
     out.generators[i].makeZero();
     for (int ci = 0; ci <out.generators[i].numberOfColumns; ci ++) {
-      elementSomeGroup g =  this->theGroup->generators[i] * this->cosets[ci].representative;
+      elementSomeGroup g =  this->groupContent->generators[i] * this->cosets[ci].representative;
       int j = this->getCosetId(g);
       out.generators[i](j, ci) = 1;
     }
-    global.comments << "Element " << this->theGroup->generators[i] << " of coset " << this->getCosetId(this->theGroup->generators[i]);
+    global.comments << "Element " << this->groupContent->generators[i] << " of coset " << this->getCosetId(this->groupContent->generators[i]);
     global.comments << " permutes the other cosets as\n" << out.generators[i].toStringPlainText() << '\n';
   }
 }
@@ -1788,24 +1788,24 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<someGroup, elementSomeG
   GroupRepresentation<someGroup, Coefficient> qr;
   this->quotientGroupPermutationRepresentation(qr);
   GroupRepresentation<someGroup, Coefficient> sr;
-  sr.ownerGroup = this->theGroup;
-  sr.generators.setSize(this->theGroup->generators.size);
+  sr.ownerGroup = this->groupContent;
+  sr.generators.setSize(this->groupContent->generators.size);
   // in TODO: make random FiniteGroups capable of finding their conjugacy classes in less than at least 5 minutes
   global.comments << "inducing from subgroup representation:\n";
-  for (int i = 0; i < this->theSubgroup->generators.size; i ++) {
-    global.comments << this->theSubgroup->generators[i] << '\n' << in.generators[i].toStringPlainText() << '\n';
+  for (int i = 0; i < this->subgroupContent->generators.size; i ++) {
+    global.comments << this->subgroupContent->generators[i] << '\n' << in.generators[i].toStringPlainText() << '\n';
   }
-  for (int i = 0; i < this->theGroup->generators.size; i ++) {
+  for (int i = 0; i < this->groupContent->generators.size; i ++) {
     elementSomeGroup g;
-    int csi = this->getCosetId(this->theGroup->generators[i]);
+    int csi = this->getCosetId(this->groupContent->generators[i]);
     if (csi == 0) {
-      g = this->theGroup->generators[i];
+      g = this->groupContent->generators[i];
     } else {
       elementSomeGroup cg = cosets[csi].representative;
       cg.invert();
-      g = cg * this->theGroup->generators[i];
+      g = cg * this->groupContent->generators[i];
     }
-    global.comments << "element " << this->theGroup->generators[i] << " belongs to coset " << csi;
+    global.comments << "element " << this->groupContent->generators[i] << " belongs to coset " << csi;
     global.comments << " represented by " << cosets[csi].representative << " and corresponds to subgroup element " << g;
     in.getMatrixOfElement(g, sr.generators[i]);
     global.comments << " which is assigned matrix\n" << sr.generators[i].toStringPlainText() << '\n';
@@ -1813,18 +1813,18 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<someGroup, elementSomeG
   GroupRepresentation<someGroup, Coefficient> out;
   out.makeTensorRepresentation(qr,sr);
   global.comments << "Subgroup representation: " << sr.toString() << "\n";
-  for (int i = 0; i < this->theGroup->generators.size; i ++) {
-    global.comments << this->theGroup->generators[i] << ' ' << sr.generators[i].getTrace() << '\n'
+  for (int i = 0; i < this->groupContent->generators.size; i ++) {
+    global.comments << this->groupContent->generators[i] << ' ' << sr.generators[i].getTrace() << '\n'
     << sr.generators[i].toStringPlainText() << '\n';
   }
   global.comments << "Quotient representation: " << qr.toString() << "\n";
-  for (int i = 0; i < this->theGroup->generators.size; i ++) {
-    global.comments << this->theGroup->generators[i] << ' ' << qr.generators[i].getTrace() << '\n'
+  for (int i = 0; i < this->groupContent->generators.size; i ++) {
+    global.comments << this->groupContent->generators[i] << ' ' << qr.generators[i].getTrace() << '\n'
     << qr.generators[i].toStringPlainText() << '\n';
   }
   global.comments << "Induced representation: " << out.toString() << '\n';
   for (int i = 0; i <out.generators.size; i ++) {
-    global.comments << this->theGroup->generators[i] << ' ' << out.generators[i].getTrace() << '\n'
+    global.comments << this->groupContent->generators[i] << ' ' << out.generators[i].getTrace() << '\n'
     << out.generators[i].toStringPlainText() << '\n';
   }
   return out;
@@ -1836,12 +1836,12 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<someGroup, elementSomeG
   GroupRepresentation<someGroup, Coefficient>& in
 ) {
   GroupRepresentation<someGroup, Coefficient> out;
-  out.generators.setSize(this->theGroup->generators.size);
-  for (int i = 0; i < this->theGroup->generators.size; i ++) {
+  out.generators.setSize(this->groupContent->generators.size);
+  for (int i = 0; i < this->groupContent->generators.size; i ++) {
     this->computeCosets();
     // parent->generators[i] = cg * h
     // g1 * g2 = cg1 * h1 * cg2 * h2
-    elementSomeGroup g = this->theGroup->generators[i];
+    elementSomeGroup g = this->groupContent->generators[i];
 
     if (in.generators.size == 0) {
       out.generators[i].makeZeroMatrix(1 * this->cosets.size);
@@ -1860,9 +1860,9 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<someGroup, elementSomeG
       out.generators[i].assignBlock(ikblock, kcsi * ikblock.numberOfRows, ci * ikblock.numberOfColumns);
     }
   }
-  out.ownerGroup = this->theGroup;
+  out.ownerGroup = this->groupContent;
   for (int i = 0; i < out.generators.size; i ++) {
-    global.comments << this->theGroup->generators[i] << ' ' << out.generators[i].getTrace() << '\n'
+    global.comments << this->groupContent->generators[i] << ' ' << out.generators[i].getTrace() << '\n'
     << out.generators[i].toStringPlainText() << '\n';
   }
   if (!out.verifyRepresentation()) {
@@ -1873,12 +1873,12 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<someGroup, elementSomeG
     ingroup.generators = in.generators;
     global.comments << "Generator commutation relations for input representation:\n"
     << ingroup.prettyPrintGeneratorCommutationRelations();
-    global.comments << "a quotient group of\n" << this->theSubgroup->prettyPrintGeneratorCommutationRelations();
+    global.comments << "a quotient group of\n" << this->subgroupContent->prettyPrintGeneratorCommutationRelations();
     FiniteGroup<Matrix<Coefficient> > outgroup;
     outgroup.generators = out.generators;
     global.comments << "Generator commutation relations for 'representation':\n"
     << outgroup.prettyPrintGeneratorCommutationRelations();
-    global.comments << "It was supposed to be a quotient group of\n" << this->theGroup->prettyPrintGeneratorCommutationRelations();
+    global.comments << "It was supposed to be a quotient group of\n" << this->groupContent->prettyPrintGeneratorCommutationRelations();
     global.fatal << "Error in induceRepresentation. " << global.fatal;
   }
   return out;
@@ -1961,7 +1961,7 @@ public:
   Vector<Rational> getRho();
   template <class Coefficient>
   void raiseToDominantWeightInner(
-    Vector<Coefficient>& theWeight, int* sign = nullptr, bool* stabilizerFound = nullptr
+    Vector<Coefficient>& weight, int* sign = nullptr, bool* stabilizerFound = nullptr
   );
   template <class Coefficient>
   bool freudenthalFormulaIrrepIsWRTLeviPart(
@@ -2003,12 +2003,12 @@ public:
   // The body of this function must
   // appear after the definitions of isDominantWithRespectToGenerator.
   template <class Coefficient>
-  bool isDominantWeight(const Vector<Coefficient>& theWeight);
+  bool isDominantWeight(const Vector<Coefficient>& weight);
   template <class Coefficient>
-  bool isDominantWithRespectToGenerator(const Vector<Coefficient>& theWeight, int generatorIndex);
+  bool isDominantWithRespectToGenerator(const Vector<Coefficient>& weight, int generatorIndex);
   template <class Coefficient>
   Coefficient weylDimensionFormulaInnerSimpleCoords(
-    const Vector<Coefficient>& theWeightInnerSimpleCoords,
+    const Vector<Coefficient>& weightInnerSimpleCoords,
     const Coefficient& ringUnit = Coefficient::one()
   );
   void findQuotientRepresentatives(int UpperLimit);

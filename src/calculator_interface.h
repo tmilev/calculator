@@ -1139,8 +1139,8 @@ public:
   HashedListReferences<LittelmannPath> lakshmibaiSeshadriPaths;
   HashedListReferences<MatrixTensor<Rational> > matrixTensorRationals;
   HashedListReferences<ElementZmodP> elementsModP;
-  HashedListReferences<Weight<Rational> > theWeights;
-  HashedListReferences<Weight<Polynomial<Rational> > > theWeightsPoly;
+  HashedListReferences<Weight<Rational> > weights;
+  HashedListReferences<Weight<Polynomial<Rational> > > weightsPolynomial;
   ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational > > hyperoctahedralRepresentations;
   ListReferences<Plot> allPlots;
   List<bool> userInputBoxSliderDisplayed;

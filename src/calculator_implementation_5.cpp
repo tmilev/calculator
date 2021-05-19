@@ -705,18 +705,18 @@ bool CalculatorFunctionsIntegration::integrateDefiniteIntegral(
       }
     }
   }
-  Expression theSubTop(calculator), theSubBottom(calculator);
-  theSubTop.addChildAtomOnTop(calculator.opDefine());
-  theSubTop.addChildOnTop(theVariableE);
-  theSubBottom = theSubTop;
-  theSubBottom.addChildOnTop(theSetE[1]);
-  theSubTop.addChildOnTop(theSetE[2]);
+  Expression substitutionTop(calculator), substitutionBottom(calculator);
+  substitutionTop.addChildAtomOnTop(calculator.opDefine());
+  substitutionTop.addChildOnTop(theVariableE);
+  substitutionBottom = substitutionTop;
+  substitutionBottom.addChildOnTop(theSetE[1]);
+  substitutionTop.addChildOnTop(theSetE[2]);
   Expression theTopCommands(calculator), theBottomCommands(calculator);
   theTopCommands.addChildAtomOnTop(calculator.opCommandSequence());
   theBottomCommands.addChildAtomOnTop(calculator.opCommandSequence());
 
-  theTopCommands.addChildOnTop(theSubTop);
-  theBottomCommands.addChildOnTop(theSubBottom);
+  theTopCommands.addChildOnTop(substitutionTop);
+  theBottomCommands.addChildOnTop(substitutionBottom);
 
   theTopCommands.addChildOnTop(solvedIntegral);
   theBottomCommands.addChildOnTop(solvedIntegral);

@@ -65,11 +65,11 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat(
   const Expression* rightE;
   leftE = &input[1];
   rightE = &input[2];
-  ElementZmodP theElt1, theElt2;
+  ElementZmodP element1, element2;
   for (int i = 0; i < 2; i ++, MathRoutines::swap(leftE, rightE)) {
-    if (leftE->isOfType<ElementZmodP>(&theElt1)) {
-      if (rightE->isOfType<ElementZmodP>(&theElt2)) {
-        if (theElt1.modulus != theElt2.modulus) {
+    if (leftE->isOfType<ElementZmodP>(&element1)) {
+      if (rightE->isOfType<ElementZmodP>(&element2)) {
+        if (element1.modulus != element2.modulus) {
           return false;
         }
       } else {
@@ -77,15 +77,15 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat(
         if (!rightE->isOfType<Rational>(&tempRat)) {
           return false;
         }
-        theElt2.modulus = theElt1.modulus;
-        if (!theElt2.assignRational(tempRat)) {
+        element2.modulus = element1.modulus;
+        if (!element2.assignRational(tempRat)) {
           return false;
         }
       }
-      theElt1 *= theElt2;
+      element1 *= element2;
       ExpressionContext context(calculator);
-      context.setDefaultModulus(theElt1.modulus);
-      return output.assignValueWithContext(theElt1, context, calculator);
+      context.setDefaultModulus(element1.modulus);
+      return output.assignValueWithContext(element1, context, calculator);
     }
   }
   return false;
@@ -102,11 +102,11 @@ bool CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat(
   const Expression* rightE;
   leftE = &input[1];
   rightE = &input[2];
-  ElementZmodP theElt1, theElt2;
+  ElementZmodP element1, element2;
   for (int i = 0; i < 2; i ++, MathRoutines::swap(leftE, rightE)) {
-    if (leftE->isOfType<ElementZmodP>(&theElt1)) {
-      if (rightE->isOfType<ElementZmodP>(&theElt2)) {
-        if (theElt1.modulus != theElt2.modulus) {
+    if (leftE->isOfType<ElementZmodP>(&element1)) {
+      if (rightE->isOfType<ElementZmodP>(&element2)) {
+        if (element1.modulus != element2.modulus) {
           return false;
         }
       } else {
@@ -114,23 +114,23 @@ bool CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat(
         if (!rightE->isOfType<Rational>(&tempRat)) {
           return false;
         }
-        theElt2.modulus = theElt1.modulus;
-        if (!theElt2.assignRational(tempRat)) {
+        element2.modulus = element1.modulus;
+        if (!element2.assignRational(tempRat)) {
           return false;
         }
       }
       if (i == 1) {
-        MathRoutines::swap(theElt1, theElt2);
+        MathRoutines::swap(element1, element2);
       }
-      if (!(theElt1 /= theElt2)) {
+      if (!(element1 /= element2)) {
         std::stringstream out;
         out << "Got division by zero while attempting to divide "
-        << theElt1.toString() << " by " << theElt2.toString();
+        << element1.toString() << " by " << element2.toString();
         return output.makeError(out.str(), calculator);
       }
       ExpressionContext context(calculator);
-      context.setDefaultModulus(theElt1.modulus);
-      return output.assignValueWithContext(theElt1, context, calculator);
+      context.setDefaultModulus(element1.modulus);
+      return output.assignValueWithContext(element1, context, calculator);
     }
   }
   return false;
@@ -412,7 +412,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly(
   if (!input.mergeContextsMyAruments(inputConverted, &calculator.comments)) {
     return false;
   }
-  Weight<Polynomial<Rational> > theWeight;
+  Weight<Polynomial<Rational> > weight;
   Rational cfRat;
   Polynomial<Rational> theCoefficient;
   if (!inputConverted[1].isOfType<Polynomial<Rational> >(&theCoefficient)) {
@@ -421,11 +421,11 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly(
     }
     theCoefficient = cfRat;
   }
-  if (!inputConverted[2].isOfType<Weight<Polynomial<Rational> > >(&theWeight)) {
+  if (!inputConverted[2].isOfType<Weight<Polynomial<Rational> > >(&weight)) {
     return false;
   }
-  theWeight *= theCoefficient;
-  return output.assignValueWithContext(theWeight, inputConverted[2].getContext(), calculator);
+  weight *= theCoefficient;
+  return output.assignValueWithContext(weight, inputConverted[2].getContext(), calculator);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(
@@ -440,26 +440,26 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(
   if (!input.mergeContextsMyAruments(inputConverted, &calculator.comments)) {
     return false;
   }
-  Weight<Polynomial<Rational> > theWeight;
-  if (!inputConverted[2].isOfType<Weight<Polynomial<Rational> > >(&theWeight)) {
+  Weight<Polynomial<Rational> > weight;
+  if (!inputConverted[2].isOfType<Weight<Polynomial<Rational> > >(&weight)) {
     return false;
   }
   if (!inputConverted[1].isOfType<ElementWeylGroup>()) {
     return false;
   }
-  ElementWeylGroup theElt = inputConverted[1].getValue<ElementWeylGroup>();
-  if (theElt.owner != &theWeight.owner->weylGroup) {
+  ElementWeylGroup element = inputConverted[1].getValue<ElementWeylGroup>();
+  if (element.owner != &weight.owner->weylGroup) {
     return calculator << "<hr>Possible user input error: attempting to apply Weyl group "
     << "element to weight corresponding to different Weyl group.";
   }
   Polynomial<Rational> zero;
-  Vector<Polynomial<Rational> > theWeightSimpleCoords = theElt.owner->getSimpleCoordinatesFromFundamental(
-    theWeight.weightFundamentalCoordinates,
+  Vector<Polynomial<Rational> > weightSimpleCoords = element.owner->getSimpleCoordinatesFromFundamental(
+    weight.weightFundamentalCoordinates,
     zero
   );
-  theElt.actOn(theWeightSimpleCoords);
-  theWeight.weightFundamentalCoordinates = theElt.owner->getFundamentalCoordinatesFromSimple(theWeightSimpleCoords);
-  return output.assignValueWithContext(theWeight, inputConverted[2].getContext(), calculator);
+  element.actOn(weightSimpleCoords);
+  weight.weightFundamentalCoordinates = element.owner->getFundamentalCoordinatesFromSimple(weightSimpleCoords);
+  return output.assignValueWithContext(weight, inputConverted[2].getContext(), calculator);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElements(
@@ -2859,8 +2859,8 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger(
   }
   const Expression& leftE = input[1];
   const Expression& rightE = input[2];
-  ElementZmodP theElt;
-  if (!leftE.isOfType(&theElt)) {
+  ElementZmodP element;
+  if (!leftE.isOfType(&element)) {
     return false;
   }
   LargeInteger power = 0;
@@ -2868,17 +2868,17 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger(
     return false;
   }
   if (power < 0) {
-    ElementZmodP copy = theElt;
-    theElt.makeOne(theElt.modulus);
-    theElt /= copy;
+    ElementZmodP copy = element;
+    element.makeOne(element.modulus);
+    element /= copy;
     power *= - 1;
   }
   ElementZmodP unit;
-  unit.makeOne(theElt.modulus);
-  MathRoutines::raiseToPower(theElt, power, unit);
+  unit.makeOne(element.modulus);
+  MathRoutines::raiseToPower(element, power, unit);
   ExpressionContext context(calculator);
-  context.setDefaultModulus(theElt.modulus);
-  return output.assignValueWithContext(theElt, context, calculator);
+  context.setDefaultModulus(element.modulus);
+  return output.assignValueWithContext(element, context, calculator);
 }
 
 bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveRationalElementByInteger(
@@ -2890,8 +2890,8 @@ bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveRationalElementByInteg
   }
   const Expression& leftE = input[1];
   const Expression& rightE = input[2];
-  ElementEllipticCurve<Rational> theElt;
-  if (!leftE.isOfType(&theElt)) {
+  ElementEllipticCurve<Rational> element;
+  if (!leftE.isOfType(&element)) {
     return false;
   }
   int power = 0;
@@ -2899,13 +2899,13 @@ bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveRationalElementByInteg
     return false;
   }
   if (power < 0) {
-    theElt.invert();
+    element.invert();
     power *= - 1;
   }
   ElementEllipticCurve<Rational> unit;
-  unit.makeOne(theElt.owner);
-  MathRoutines::raiseToPower(theElt, power, unit);
-  return output.assignValueWithContext(theElt, input[1].getContext(), calculator);
+  unit.makeOne(element.owner);
+  MathRoutines::raiseToPower(element, power, unit);
+  return output.assignValueWithContext(element, input[1].getContext(), calculator);
 }
 
 bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger(
@@ -2917,8 +2917,8 @@ bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger(
   }
   const Expression& leftE = input[1];
   const Expression& rightE = input[2];
-  ElementEllipticCurve<ElementZmodP> theElt;
-  if (!leftE.isOfType(&theElt)) {
+  ElementEllipticCurve<ElementZmodP> element;
+  if (!leftE.isOfType(&element)) {
     return false;
   }
   LargeInteger power = 0;
@@ -2926,13 +2926,13 @@ bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger(
     return false;
   }
   if (power < 0) {
-    theElt.invert();
+    element.invert();
     power *= - 1;
   }
   ElementEllipticCurve<ElementZmodP> unit;
-  unit.makeOne(theElt.owner);
-  MathRoutines::raiseToPower(theElt, power, unit);
-  return output.assignValueWithContext(theElt, input[1].getContext(), calculator);
+  unit.makeOne(element.owner);
+  MathRoutines::raiseToPower(element, power, unit);
+  return output.assignValueWithContext(element, input[1].getContext(), calculator);
 }
 
 bool CalculatorFunctionsBinaryOps::polynomialModPModuloPolynomialModP(

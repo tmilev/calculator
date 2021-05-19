@@ -948,16 +948,16 @@ template <class someGroup, class elementSomeGroup>
 std::string SubgroupData<someGroup, elementSomeGroup>::toString(FormatExpressions* format) {
   MacroRegisterFunctionWithName("SubgroupData::toString");
   (void) format;
-  if (this->theGroup == nullptr) {
+  if (this->groupContent == nullptr) {
     return "(not initialized (no owner group))";
   }
-  if (this->theSubgroup == nullptr) {
+  if (this->subgroupContent == nullptr) {
     return "(not initialized (subgroup pointer is 0))";
   }
   std::stringstream out;
-  out << "<br>\nSubgroup: " << this->theSubgroup->toString();
+  out << "<br>\nSubgroup: " << this->subgroupContent->toString();
 
-  out << "<br>\nOwner group: " << this->theGroup->toString();
+  out << "<br>\nOwner group: " << this->groupContent->toString();
 
   return out.str();
 }
@@ -979,13 +979,13 @@ std::string SubgroupDataWeylGroup::toString(FormatExpressions* format) {
 void SubgroupDataWeylGroup::ComputeTauSignature() {
   MacroRegisterFunctionWithName("SubgroupWeylGroup::ComputeTauSignature");
   this->checkInitialization();
-  if (!this->theSubgroupData.theGroup->flagCCRepresentativesComputed) {
-    this->theSubgroupData.theGroup->computeConjugacyClassSizesAndRepresentatives();
+  if (!this->theSubgroupData.groupContent->flagCCRepresentativesComputed) {
+    this->theSubgroupData.groupContent->computeConjugacyClassSizesAndRepresentatives();
   }
-  this->theSubgroupData.theGroup->checkConjugacyClassRepresentationsMatchCCSizes();
-  this->theSubgroupData.theGroup->checkOrthogonalityCharacterTable();
+  this->theSubgroupData.groupContent->checkConjugacyClassRepresentationsMatchCCSizes();
+  this->theSubgroupData.groupContent->checkOrthogonalityCharacterTable();
   Vector<Rational> Xs;
-  this->theSubgroupData.theSubgroup->getSignCharacter(Xs);
+  this->theSubgroupData.subgroupContent->getSignCharacter(Xs);
   this->theSubgroupData.computeCCRepresentativesPreimages();
   //if (global.printOutThisKindaThing)
   //{
@@ -999,18 +999,18 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
   //global.Comments << this->theSubgroupData.ccRepresentativesPreimages.toStringCommaDelimited() << '\n';
  //}
 
-  this->tauSignature.setSize(this->theSubgroupData.theGroup->conjugacyClassCount());
+  this->tauSignature.setSize(this->theSubgroupData.groupContent->conjugacyClassCount());
 
   Vector<Rational> XiS;
-  XiS.makeZero(this->theSubgroupData.theSubgroup->conjugacyClasses.size);
-  for (int i = 0; i < this->theSubgroupData.theGroup->conjugacyClasses.size; i ++) {
+  XiS.makeZero(this->theSubgroupData.subgroupContent->conjugacyClasses.size);
+  for (int i = 0; i < this->theSubgroupData.groupContent->conjugacyClasses.size; i ++) {
     ClassFunction<FiniteGroup<ElementWeylGroup>, Rational>& XiG =
     this->theWeylData->group.characterTable[i];
     //global.Comments << "Restricting character: " << Xip.toString() << "<br>";
-    for (int j = 0; j < this->theSubgroupData.theSubgroup->conjugacyClasses.size; j ++) {
+    for (int j = 0; j < this->theSubgroupData.subgroupContent->conjugacyClasses.size; j ++) {
       XiS[j] = XiG[this->theSubgroupData.ccRepresentativesPreimages[j]];
     }
-    this->tauSignature[i] = this->theSubgroupData.theSubgroup->getHermitianProduct(Xs, XiS);
+    this->tauSignature[i] = this->theSubgroupData.subgroupContent->getHermitianProduct(Xs, XiS);
     //global.Comments << "<br>Hermitian product of " << Xs.toString() << " and "
     //<< XiS.toString() << " = " << this->tauSignature[i];
     if (!this->tauSignature[i].isSmallInteger()) {
@@ -1022,23 +1022,23 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
 void SubgroupDataRootReflections::computeCCSizesRepresentativesPreimages() {
   MacroRegisterFunctionWithName("SubgroupRootReflections::computeCCSizesRepresentativesPreimages");
   if (this->theDynkinType == this->theWeylData->dynkinType && this->theWeylData->group.flagCCRepresentativesComputed) {
-    this->theSubgroupData.theSubgroup->conjugacyClasses.setSize(this->theSubgroupData.theGroup->conjugacyClasses.size);
-    for (int i = 0; i < this->theSubgroupData.theSubgroup->conjugacyClasses.size; i ++) {
-      this->theSubgroupData.theSubgroup->conjugacyClasses[i].flagRepresentativeComputed = true;
-      this->theSubgroupData.theSubgroup->conjugacyClasses[i].representative = this->theSubgroupData.theGroup->conjugacyClasses[i].representative;
-      this->theSubgroupData.theSubgroup->conjugacyClasses[i].size = this->theSubgroupData.theGroup->conjugacyClasses[i].size;
-      this->theSubgroupData.theSubgroup->conjugacyClasses[i].flagElementsComputed = false;
+    this->theSubgroupData.subgroupContent->conjugacyClasses.setSize(this->theSubgroupData.groupContent->conjugacyClasses.size);
+    for (int i = 0; i < this->theSubgroupData.subgroupContent->conjugacyClasses.size; i ++) {
+      this->theSubgroupData.subgroupContent->conjugacyClasses[i].flagRepresentativeComputed = true;
+      this->theSubgroupData.subgroupContent->conjugacyClasses[i].representative = this->theSubgroupData.groupContent->conjugacyClasses[i].representative;
+      this->theSubgroupData.subgroupContent->conjugacyClasses[i].size = this->theSubgroupData.groupContent->conjugacyClasses[i].size;
+      this->theSubgroupData.subgroupContent->conjugacyClasses[i].flagElementsComputed = false;
     }
-    this->theSubgroupData.ccRepresentativesPreimages.setSize(this->theSubgroupData.theGroup->conjugacyClasses.size);
+    this->theSubgroupData.ccRepresentativesPreimages.setSize(this->theSubgroupData.groupContent->conjugacyClasses.size);
     for (int i = 0; i < this->theSubgroupData.ccRepresentativesPreimages.size; i ++) {
       this->theSubgroupData.ccRepresentativesPreimages[i] = i;
     }
-    this->theSubgroupData.theSubgroup->flagCCRepresentativesComputed = true;
+    this->theSubgroupData.subgroupContent->flagCCRepresentativesComputed = true;
   } else {
     if (this->theDynkinType.getRank() <= 6) {
-      this->theSubgroupData.theSubgroup->computeConjugacyClassesFromAllElements();
+      this->theSubgroupData.subgroupContent->computeConjugacyClassesFromAllElements();
     } else {
-      this->theSubgroupData.theSubgroup->computeConjugacyClassSizesAndRepresentatives();
+      this->theSubgroupData.subgroupContent->computeConjugacyClassSizesAndRepresentatives();
     }
 
     this->theSubgroupData.computeCCRepresentativesPreimages();
@@ -1048,18 +1048,18 @@ void SubgroupDataRootReflections::computeCCSizesRepresentativesPreimages() {
 void SubgroupDataRootReflections::initializeGenerators() {
   MacroRegisterFunctionWithName("SubgroupRootReflections::initializeGenerators");
   if (this->theDynkinType.getRank() == 0) {
-    this->theSubgroupData.theSubgroup->generators.setSize(1);
-    this->theSubgroupData.theSubgroup->generators[0].makeIdentity(*this->theSubgroupData.theGroup);
+    this->theSubgroupData.subgroupContent->generators.setSize(1);
+    this->theSubgroupData.subgroupContent->generators[0].makeIdentity(*this->theSubgroupData.groupContent);
     return;
   }
   int d = this->SubCartanSymmetric.numberOfRows;
   this->theSubgroupData.generatorPreimages.setSize(d);
-  this->theSubgroupData.theSubgroup->generators.setSize(d);
+  this->theSubgroupData.subgroupContent->generators.setSize(d);
   ElementWeylGroup currentReflection;
   for (int i = 0; i < d; i ++) {
     currentReflection.MakeRootReflection(this->generatingSimpleRoots[i], *this->theWeylData);
-    this->theSubgroupData.generatorPreimages[i] = this->theSubgroupData.theGroup->elements.getIndex(currentReflection);
-    this->theSubgroupData.theSubgroup->generators[i] = currentReflection;
+    this->theSubgroupData.generatorPreimages[i] = this->theSubgroupData.groupContent->elements.getIndex(currentReflection);
+    this->theSubgroupData.subgroupContent->generators[i] = currentReflection;
   }
 }
 

@@ -1209,7 +1209,7 @@ public:
   );
   void gaussianEliminationEuclideanDomain(
     Matrix<Coefficient>* otherMatrix = 0,
-    const Coefficient& theRingMinusUnit = - 1,
+    const Coefficient& negativeOne = - 1,
     const Coefficient& ringUnit = 1,
     bool (*comparisonGEQFunction) (const Coefficient& left, const Coefficient& right) = 0
   );
@@ -5133,7 +5133,7 @@ public:
   void makeFromPolynomialShiftAndLattice(
     const Polynomial<Rational>& inputPoly, const MonomialPolynomial& theShift, const Lattice& theLattice
   );
-  void makeZeroLatticeZn(int theDim);
+  void makeZeroLatticeZn(int dimension);
   void makeZeroOverLattice(Lattice& theLattice);
   bool isEqualToZero() const {
     return this->valueOnEachLatticeShift.size == 0;
@@ -5716,7 +5716,7 @@ public:
     Vector<Rational>* ChamberIndicator
   );
   bool isHigherThanWithRespectToWeight(
-    const Vector<Rational>& left, const Vector<Rational>& r, const Vector<Rational>& theWeights
+    const Vector<Rational>& left, const Vector<Rational>& r, const Vector<Rational>& weights
   );
   void computeSupport(List<Vectors<Rational> >& output);
   void computeOneCheckSum(Rational& output);
@@ -6395,9 +6395,9 @@ public:
     List<VectorSparse<Coefficient> >& output, int MinNumRows = - 1
   );
   bool isIdentity() const {
-    int theDim = this->getMinimumNumberOfColumnsNumberOfRows();
+    int dimension = this->getMinimumNumberOfColumnsNumberOfRows();
     Selection theSel;
-    theSel.initialize(theDim);
+    theSel.initialize(dimension);
     for (int i = 0; i < this->size(); i ++) {
       if ((*this)[i].vIndex != (*this)[i].dualIndex) {
         return false;
@@ -6407,7 +6407,7 @@ public:
       }
       theSel.addSelectionAppendNewIndex((*this)[i].vIndex);
     }
-    return theSel.cardinalitySelection == theDim;
+    return theSel.cardinalitySelection == dimension;
   }
   bool isPositiveDefinite() {
     Matrix<Coefficient> other;
@@ -6514,13 +6514,13 @@ public:
     this->getMatrix(tempMat, this->getMinimumNumberOfColumnsNumberOfRows());
     return tempMat.toString(format);
   }
-  void getMatrix(Matrix<Coefficient>& output, int theDim) const {
-    theDim = MathRoutines::maximum(theDim, this->getMinimumNumberOfColumnsNumberOfRows());
-    output.initialize(theDim, theDim);
+  void getMatrix(Matrix<Coefficient>& output, int dimension) const {
+    dimension = MathRoutines::maximum(dimension, this->getMinimumNumberOfColumnsNumberOfRows());
+    output.initialize(dimension, dimension);
     output.makeZero();
     for (int i = 0; i < this->size(); i ++) {
       if ((*this)[i].isIdentity) {
-        for (int j = 0; j < theDim; j ++) {
+        for (int j = 0; j < dimension; j ++) {
           output(j, j) += this->coefficients[i];
         }
       } else {

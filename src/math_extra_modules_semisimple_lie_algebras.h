@@ -60,7 +60,7 @@ class MonomialGeneralizedVerma {
     return this->monomialCoefficientOne > other.monomialCoefficientOne;
   }
   void reduceMe(ElementSumGeneralizedVermas<Coefficient>& output) const;
-  bool isHWV() const {
+  bool isHighestWeightVector() const {
     if (!this->monomialCoefficientOne.isEqualToOne()) {
       return false;
     }
@@ -171,11 +171,11 @@ public:
     }
     return true;
   }
-  bool isHWV() const {
+  bool isHighestWeightVector() const {
     if (this->monomials.size != 1) {
       return false;
     }
-    return this->monomials[0].isHWV();
+    return this->monomials[0].isHighestWeightVector();
   }
   bool operator>(const MonomialTensorGeneralizedVermas<Coefficient>& other) const {
     if (this->monomials.size > other.monomials.size) {
@@ -193,23 +193,23 @@ public:
 
 template <class Coefficient>
 class ModuleSSalgebra {
-  List<MatrixTensor<Coefficient> > actionsGeneratorsMaT;
+  List<MatrixTensor<Coefficient> > actionsGeneratorsMatrix;
   List<List<List<ElementUniversalEnveloping<Coefficient> > > > actionsGeneratorS;
   Selection ComputedGeneratorActions;
   Rational highestWeightTransposeAntiAutomorphismBilinearFormSimpleGeneratorsOnly(
     const MonomialTensor<int, HashFunctions::hashFunction>& leftMon,
     const MonomialTensor<int, HashFunctions::hashFunction>& rightMon,
-    ProgressReport* theProgressReport = nullptr
+    ProgressReport* progressReport = nullptr
   );
   Rational highestWeightTrace(
     const Pair<MonomialTensor<int, HashFunctions::hashFunction>,
-    MonomialTensor<int, HashFunctions::hashFunction> >& thePair,
-    ProgressReport* theProgressReport = nullptr
+    MonomialTensor<int, HashFunctions::hashFunction> >& pair,
+    ProgressReport* progressReport = nullptr
   );
   void checkConsistency();
 public:
   SemisimpleLieAlgebra* owner;
-  HashedList<MonomialUniversalEnveloping<Coefficient> > theGeneratingWordsNonReduced;
+  HashedList<MonomialUniversalEnveloping<Coefficient> > generatingWordsNonReduced;
   // Note: for some reason, the linker fails to resolve without the explicit template
   // specialization below.
   // [Update:] made a bug report on this in the gcc bug tracker.
@@ -217,7 +217,7 @@ public:
   HashedListSpecialized<MonomialTensor<int, HashFunctions::hashFunction> > theGeneratingWordsNonReducedInt;
   Vectors<Rational> theGeneratingWordsWeightsPlusWeightFDpart;
   List<LittelmannPath> thePaths;
-  List<List<MonomialUniversalEnveloping<Coefficient> > > theGeneratingWordsGrouppedByWeight;
+  List<List<MonomialUniversalEnveloping<Coefficient> > > generatingWordsGrouppedByWeight;
   List<List<MonomialTensor<int, HashFunctions::hashFunction> > > theGeneratingWordsIntGrouppedByWeight;
   // List<ElementUniversalEnveloping<Coefficient> > theSimpleGens;
   // List<List<List<ElementUniversalEnveloping<Coefficient> > > > actionsSimpleGens;
@@ -225,16 +225,16 @@ public:
   List<Matrix<Coefficient> > bilinearFormsAtEachWeightLevel;
   List<Matrix<Coefficient> > bilinearFormsInverted;
   // Vectors<Rational> weightsSimpleGens;
-  Vector<Coefficient> theHWDualCoordsBaseFielD;
-  Vector<Coefficient> theHWSimpleCoordSBaseField;
-  Vector<Coefficient> theHWFundamentalCoordsBaseField;
+  Vector<Coefficient> highestWeightDualCoordinatesBaseField;
+  Vector<Coefficient> highestWeightSimpleCoordinatesBaseField;
+  Vector<Coefficient> highestWeightFundamentalCoordinatesBaseField;
   Vector<Rational> highestWeightFiniteDimensionalPartDualCoordinates;
   Vector<Rational> highestWeightFiniteDimensionalPartSimpleCoordinates;
-  Vector<Rational> theHWFDpartFundamentalCoordS;
+  Vector<Rational> highestWeightFiniteDimensionalPartFundamentalCoordinates;
   // List<List<Matrix<Coefficient> > >
-  HashedList<Vector<Rational> > theModuleWeightsSimpleCoords;
-  CharacterSemisimpleLieAlgebraModule<Coefficient> theCharOverH;
-  CharacterSemisimpleLieAlgebraModule<Coefficient> theChaR;
+  HashedList<Vector<Rational> > moduleWeightsSimpleCoordinates;
+  CharacterSemisimpleLieAlgebraModule<Coefficient> characterOverH;
+  CharacterSemisimpleLieAlgebraModule<Coefficient> character;
   Selection parabolicSelectionNonSelectedAreElementsLevi;
   Selection parabolicSelectionSelectedAreElementsLevi;
   std::string highestWeightVectorNotation;
@@ -252,27 +252,27 @@ public:
   bool flagDeallocated;
   int NumCachedPairsBeforeSimpleGen;
   int NumRationalMultiplicationsAndAdditionsBeforeSimpleGen;
-  int MaxNumCachedPairs;
+  int maximumNumberOfCachedPairs;
   void reset();
   bool operator==(const ModuleSSalgebra<Coefficient>& other) {
     return
     this->owner == other.owner &&
-    this->theHWFundamentalCoordsBaseField == other.theHWFundamentalCoordsBaseField &&
+    this->highestWeightFundamentalCoordinatesBaseField == other.highestWeightFundamentalCoordinatesBaseField &&
     this->parabolicSelectionNonSelectedAreElementsLevi == other.parabolicSelectionNonSelectedAreElementsLevi;
   }
   bool hasFreeAction(int generatorIndex) const {
-    Vector<Rational> theWeight = this->getOwner().getWeightOfGenerator(generatorIndex);
+    Vector<Rational> weight = this->getOwner().getWeightOfGenerator(generatorIndex);
     for (int i = 0; i < this->parabolicSelectionNonSelectedAreElementsLevi.cardinalitySelection; i ++) {
-      if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]].isNegative()) {
+      if (weight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]].isNegative()) {
         return true;
       }
     }
     return false;
   }
   bool hasZeroActionFDpart(int generatorIndex) const {
-    Vector<Rational> theWeight = this->getOwner().getWeightOfGenerator(generatorIndex);
+    Vector<Rational> weight = this->getOwner().getWeightOfGenerator(generatorIndex);
     for (int i = 0; i < this->parabolicSelectionNonSelectedAreElementsLevi.cardinalitySelection; i ++) {
-      if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]].isPositive()) {
+      if (weight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]].isPositive()) {
         return true;
       }
     }
@@ -281,33 +281,33 @@ public:
   int getOffsetFromWeightIndex(int weightIndex) {
     int result = 0;
     for (int i = 0; i < weightIndex; i ++) {
-      result += this->theGeneratingWordsGrouppedByWeight[i].size;
+      result += this->generatingWordsGrouppedByWeight[i].size;
     }
     return result;
   }
   void applyTransposeAntiAutomorphism(MonomialTensor<int, HashFunctions::hashFunction>& monomial);
   void getFDchar(CharacterSemisimpleLieAlgebraModule<Coefficient>& output);
-  void substitution(const PolynomialSubstitution<Rational>& theSub);
-//  List<ElementUniversalEnveloping<Coefficient> > theGeneratingWordsLittelmannForm;
-//  HashedList<MonomialUniversalEnveloping<Coefficient> > theGeneratingMonsPBWform;
-//  List
-//  List<Matrix<Coefficient> > ActionsChevalleyGenerators;
+  void substitution(const PolynomialSubstitution<Rational>& variableImages);
+  //  List<ElementUniversalEnveloping<Coefficient> > theGeneratingWordsLittelmannForm;
+  //  HashedList<MonomialUniversalEnveloping<Coefficient> > theGeneratingMonsPBWform;
+  //  List
+  //  List<Matrix<Coefficient> > ActionsChevalleyGenerators;
   MatrixTensor<Coefficient>& getActionGeneratorIndex(int generatorIndex);
   MatrixTensor<Coefficient>& getActionSimpleGeneratorIndex(int generatorIndex);
   int minimalNumberOfVariables() {
-    if (this->theHWFundamentalCoordsBaseField.size <= 0) {
+    if (this->highestWeightFundamentalCoordinatesBaseField.size <= 0) {
       return - 1;
     }
     int result = 0;
-    for (int i = 0; i < this->theHWFundamentalCoordsBaseField.size; i ++) {
+    for (int i = 0; i < this->highestWeightFundamentalCoordinatesBaseField.size; i ++) {
       result = MathRoutines::maximum(
-        result, this->theHWFundamentalCoordsBaseField[i].minimalNumberOfVariables()
+        result, this->highestWeightFundamentalCoordinatesBaseField[i].minimalNumberOfVariables()
       );
     }
     return result;
   }
   int getDimension() const {
-    return this->theGeneratingWordsNonReduced.size;
+    return this->generatingWordsNonReduced.size;
   }
   bool checkInitialization() const {
     if (this->flagDeallocated) {
@@ -364,7 +364,7 @@ public:
       return this->highestWeightVectorNotation;
     }
     std::stringstream out;
-    out << "v_{" << this->theHWFundamentalCoordsBaseField.toString(format)
+    out << "v_{" << this->highestWeightFundamentalCoordinatesBaseField.toString(format)
     << ", " << this->parabolicSelectionNonSelectedAreElementsLevi.toString() << "}";
     return out.str();
     //    return "hwv{}("+ this->getOwner().toStringLieAlgebraName(false) + "," + this->theHWFundamentalCoordsBaseField.toString(theFormat) + ","
@@ -418,7 +418,7 @@ public:
     bool ascending
   );
   bool getActionEulerOperatorPart(const MonomialPolynomial& coefficient, ElementWeylAlgebra<Rational>& outputDO);
-  ModuleSSalgebra() : owner(nullptr), flagIsInitialized(false), flagDeallocated(false), MaxNumCachedPairs(1000000) {
+  ModuleSSalgebra() : owner(nullptr), flagIsInitialized(false), flagDeallocated(false), maximumNumberOfCachedPairs(1000000) {
   }
   ~ModuleSSalgebra() {
     this->flagDeallocated = true;
@@ -438,7 +438,7 @@ public:
     const Coefficient& ringUnit
   ) const;
   bool multiplyOnTheLeft(
-    const MonomialUniversalEnveloping<Coefficient>& theUE,
+    const MonomialUniversalEnveloping<Coefficient>& element,
     ElementTensorsGeneralizedVermas<Coefficient>& output,
     SemisimpleLieAlgebra& ownerAlgebra,
     const Coefficient& ringUnit
@@ -453,14 +453,14 @@ public:
     const Coefficient& ringUnit
   ) const;
   void multiplyBy(const ElementTensorsGeneralizedVermas<Coefficient>& standsOnTheRight);
-  bool isHWV() const {
+  bool isHighestWeightVector() const {
     if (this->coefficients.size != 1) {
       return false;
     }
     if (!this->coefficients[0].isEqualToOne()) {
       return false;
     }
-    return (*this)[0].isHWV();
+    return (*this)[0].isHighestWeightVector();
   }
   void makeHWV(ModuleSSalgebra<Coefficient>& theOwner, const Coefficient& ringUnit);
   void substitution(const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<Coefficient> >& theMods);

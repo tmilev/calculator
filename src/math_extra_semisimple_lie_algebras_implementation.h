@@ -319,11 +319,11 @@ void SemisimpleLieAlgebra::lieBracket(
 
 template <class Coefficient>
 void ElementSemisimpleLieAlgebra<Coefficient>::actOnMe(
-  const ElementSemisimpleLieAlgebra<Coefficient>& theElt,
+  const ElementSemisimpleLieAlgebra<Coefficient>& element,
   ElementSemisimpleLieAlgebra<Coefficient>& output,
   SemisimpleLieAlgebra& owner
 ) {
-  owner.lieBracket(theElt, *this, output);
+  owner.lieBracket(element, *this, output);
 }
 
 template <class Coefficient>

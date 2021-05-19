@@ -453,7 +453,7 @@ int Expression::addObjectReturnIndex(const
 Weight<Rational>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.theWeights
+  return this->owner->objectContainer.weights
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -462,7 +462,7 @@ int Expression::addObjectReturnIndex(const
 Weight<Polynomial<Rational> >
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.theWeightsPoly
+  return this->owner->objectContainer.weightsPolynomial
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -852,7 +852,7 @@ Weight<Polynomial<Rational> >& Expression::getValueNonConst() const {
     global.fatal << "Expression not of required type "
     << "LittelmannPath. The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->objectContainer.theWeightsPoly.getElement(this->getLastChild().data);
+  return this->owner->objectContainer.weightsPolynomial.getElement(this->getLastChild().data);
 }
 
 template < >
@@ -2748,11 +2748,11 @@ bool Expression::toStringBuiltIn<ElementWeylGroup >(
 ) {
   (void) format;
   FormatExpressions localFormat;
-  const ElementWeylGroup& theElt = input.getValue<ElementWeylGroup>();
+  const ElementWeylGroup& element = input.getValue<ElementWeylGroup>();
   localFormat.flagUseLatex = true;
   localFormat.flagUseHTML = false;
   localFormat.flagUseReflectionNotation = true;
-  out << theElt.toString(&localFormat);
+  out << element.toString(&localFormat);
   return true;
 }
 
@@ -2764,12 +2764,12 @@ bool Expression::toStringBuiltIn<GroupRepresentation<FiniteGroup<ElementWeylGrou
 ) {
   (void) format;
   FormatExpressions localFormat;
-  const GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& theElt =
+  const GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& element =
   input.getValue<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
   localFormat.flagUseLatex = true;
   localFormat.flagUseHTML = false;
   localFormat.flagUseReflectionNotation = true;
-  out << theElt.toString(&localFormat);
+  out << element.toString(&localFormat);
   return true;
 }
 
@@ -2782,12 +2782,12 @@ bool Expression::toStringBuiltIn<VirtualRepresentation<FiniteGroup<ElementWeylGr
   (void) format;
   FormatExpressions formatLocal;
   input.getContext().getFormat(formatLocal);
-  const VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& theElt =
+  const VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& element =
   input.getValue<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
   formatLocal.flagUseLatex = true;
   formatLocal.flagUseHTML = false;
   formatLocal.flagUseReflectionNotation = true;
-  out << theElt.toString(&formatLocal);
+  out << element.toString(&formatLocal);
   return true;
 }
 
@@ -3228,36 +3228,36 @@ std::string Expression::toStringAllSlidersInExpression() const {
     this->owner->objectContainer.resetSliders();
   }
   MapReferences<std::string, InputBox, MathRoutines::hashString>&
-  theSliders = this->owner->objectContainer.userInputTextBoxesWithValues;
+  sliders = this->owner->objectContainer.userInputTextBoxesWithValues;
   std::stringstream out;
   for (int i = 0; i < boxNames.size; i ++) {
-    if (!theSliders.contains(boxNames[i])) {
+    if (!sliders.contains(boxNames[i])) {
       out << boxNames[i] << " not found. ";
       continue;
     }
-    int index = theSliders.getIndex(boxNames[i]);
+    int index = sliders.getIndex(boxNames[i]);
     if (this->owner->objectContainer.userInputBoxSliderDisplayed[index]) {
       continue;
     }
     this->owner->objectContainer.userInputBoxSliderDisplayed[index] = true;
-    InputBox& theBox = theSliders.values[index];
-    std::string theSliderName = theBox.getSliderName();
+    InputBox& box = sliders.values[index];
+    std::string theSliderName = box.getSliderName();
     out << "<input name='"
     << theSliderName
     << "' type='range'";
     double theReader = 0;
     out << std::fixed;
     out.precision(4);
-    if (theBox.min.evaluatesToDouble(&theReader)) {
+    if (box.min.evaluatesToDouble(&theReader)) {
       out << "min='" << theReader << "' ";
     }
-    if (theBox.max.evaluatesToDouble(&theReader)) {
+    if (box.max.evaluatesToDouble(&theReader)) {
       out << "max='" << theReader << "' ";
     }
-    if (theBox.step.evaluatesToDouble(&theReader)) {
+    if (box.step.evaluatesToDouble(&theReader)) {
       out << "step ='" << theReader << "' ";
     }
-    if (theBox.value.evaluatesToDouble(&theReader)) {
+    if (box.value.evaluatesToDouble(&theReader)) {
       out << "value='" << theReader << "' ";
     } else {
       out << "value='1' ";

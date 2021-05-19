@@ -742,9 +742,9 @@ bool CalculatorFunctions::fourierTransformElementWeylAlgebra(
   if (!argument.isOfType<ElementWeylAlgebra<Rational> >()) {
     return false;
   }
-  ElementWeylAlgebra<Rational> theElt;
-  argument.getValue<ElementWeylAlgebra<Rational> >().fourierTransform(theElt);
-  return output.assignValueWithContext(theElt, argument.getContext(), calculator);
+  ElementWeylAlgebra<Rational> element;
+  argument.getValue<ElementWeylAlgebra<Rational> >().fourierTransform(element);
+  return output.assignValueWithContext(element, argument.getContext(), calculator);
 }
 
 bool CalculatorFunctionsBasic::logarithmBase(Calculator& calculator, const Expression& input, Expression& output) {

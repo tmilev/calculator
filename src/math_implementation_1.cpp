@@ -20,22 +20,22 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
     outputMultiplyLieBracketsToGetGenerator = this->weylGroup.cartanSymmetric.elements[simpleIndex][simpleIndex] / 2;
     return;
   }
-  Vector<Rational> theWeight = this->getWeightOfGenerator(generatorIndex);
+  Vector<Rational> weight = this->getWeightOfGenerator(generatorIndex);
   outputMultiplyLieBracketsToGetGenerator = 1;
   Vector<Rational> genWeight, newWeight;
-  while (!theWeight.isEqualToZero()) {
+  while (!weight.isEqualToZero()) {
     for (int i = 0; i < this->getRank(); i ++) {
       genWeight.makeEi(this->getRank(), i);
-      if (theWeight.isPositive()) {
+      if (weight.isPositive()) {
         genWeight.negate();
       }
-      newWeight = theWeight + genWeight;
+      newWeight = weight + genWeight;
       if (newWeight.isEqualToZero() || this->weylGroup.isARoot(newWeight)) {
-        theWeight = newWeight;
+        weight = newWeight;
         int index = this->getGeneratorIndexFromRoot(- genWeight);
         outputIndicesFormatAd0Ad1Ad2etc.addOnTop(index);
-        if (!theWeight.isEqualToZero()) {
-          int currentIndex = this->weylGroup.rootSystem.getIndex(theWeight);
+        if (!weight.isEqualToZero()) {
+          int currentIndex = this->weylGroup.rootSystem.getIndex(weight);
           index = this->getRootIndexFromGenerator(index);
           if (!this->computedChevalleyConstants.elements[index][currentIndex]) {
             global.fatal
@@ -113,10 +113,10 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
   if (this->owner == nullptr) {
     global.fatal << "zero owner not allowed here. " << global.fatal;
   }
-  WeylGroupData& theWeyl = *this->owner;
-  theWeyl.computeRho(true);
-  Vector<Rational>& alpha = theWeyl.rootsOfBorel[indexAlpha];
-  Rational LengthAlpha = theWeyl.rootScalarCartanRoot(alpha, alpha);
+  WeylGroupData& weylGroup = *this->owner;
+  weylGroup.computeRho(true);
+  Vector<Rational>& alpha = weylGroup.rootsOfBorel[indexAlpha];
+  Rational LengthAlpha = weylGroup.rootScalarCartanRoot(alpha, alpha);
   Vector<Rational> alphaScaled = alpha * 2 / LengthAlpha;
   for (int i = 0; i < this->waypoints.size; i ++) {
     Rational tempRat = this->owner->rootScalarCartanRoot(this->waypoints[i], alphaScaled);
@@ -131,7 +131,7 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
   }
   int precedingIndex = 0;
   for (int i = 0; i <= minIndex; i ++) {
-    Rational tempScalar = theWeyl.rootScalarCartanRoot(this->waypoints[i], alphaScaled);
+    Rational tempScalar = weylGroup.rootScalarCartanRoot(this->waypoints[i], alphaScaled);
     if (tempScalar >= theMin + 1) {
       precedingIndex = i;
     }
@@ -152,7 +152,7 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
     minIndex ++;
     Vector<Rational>& r1 = this->waypoints[precedingIndex];
     Vector<Rational>& r2 = this->waypoints[precedingIndex - 1];
-    Rational s1 = theWeyl.rootScalarCartanRoot(r1, alphaScaled);
+    Rational s1 = weylGroup.rootScalarCartanRoot(r1, alphaScaled);
     Rational x = (theMin + 1 - s2) / (s1 - s2);
     this->waypoints[precedingIndex] = (r1 - r2) * x + r2;
   }
@@ -162,9 +162,9 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
   Rational minDist = 0;
   for (int i = 0; i < differences.size; i ++) {
     differences[i] = this->waypoints[i + precedingIndex + 1] - this->waypoints[i + precedingIndex];
-    currentDist += theWeyl.rootScalarCartanRoot(differences[i], alphaScaled);
+    currentDist += weylGroup.rootScalarCartanRoot(differences[i], alphaScaled);
     if (currentDist < minDist) {
-      theWeyl.reflectSimple(indexAlpha, differences[i]);
+      weylGroup.reflectSimple(indexAlpha, differences[i]);
       minDist = currentDist;
     }
   }
@@ -189,8 +189,8 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
   }
   Rational theMin = 0;
   int minIndex = - 1;
-  WeylGroupData& theWeyl = *this->owner;
-  Vector<Rational>& alpha = theWeyl.rootsOfBorel[indexAlpha];
+  WeylGroupData& weylGroup = *this->owner;
+  Vector<Rational>& alpha = weylGroup.rootsOfBorel[indexAlpha];
   Rational LengthAlpha = this->owner->rootScalarCartanRoot(alpha, alpha);
   Vector<Rational> alphaScaled = alpha * 2 / LengthAlpha;
   for (int i = 0; i < this->waypoints.size; i ++) {
@@ -207,7 +207,7 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
   }
   int succeedingIndex = 0;
   for (int i = this->waypoints.size - 1; i >= minIndex; i --) {
-    Rational tempScalar = theWeyl.rootScalarCartanRoot(alphaScaled, this->waypoints[i]);
+    Rational tempScalar = weylGroup.rootScalarCartanRoot(alphaScaled, this->waypoints[i]);
     if (tempScalar >= theMin + 1) {
       succeedingIndex = i;
     }
@@ -221,10 +221,10 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
     for (int i = this->waypoints.size - 1; i >= succeedingIndex + 1; i --) {
       this->waypoints[i] = this->waypoints[i - 1];
     }
-    //Rational scalarNext = theWeyl.rootScalarCartanRoot(this->waypoints[succeedingIndex], alphaScaled);
+    //Rational scalarNext = weylGroup.rootScalarCartanRoot(this->waypoints[succeedingIndex], alphaScaled);
     Vector<Rational>& r1 = this->waypoints[succeedingIndex];
     Vector<Rational>& r2 = this->waypoints[succeedingIndex - 1];
-    Rational s2 = theWeyl.rootScalarCartanRoot(r2, alphaScaled);
+    Rational s2 = weylGroup.rootScalarCartanRoot(r2, alphaScaled);
     Rational x = (theMin + 1 - s2) / (s1 - s2);
     this->waypoints[succeedingIndex] = (r1 - r2) * x + r2;
   }
@@ -233,9 +233,9 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
   Rational currentDist = 0;
   for (int i = 0; i < succeedingIndex - minIndex; i ++) {
     diff = this->waypoints[i + minIndex + 1] - oldWayPoint;
-    currentDist += theWeyl.rootScalarCartanRoot(diff, alphaScaled);
+    currentDist += weylGroup.rootScalarCartanRoot(diff, alphaScaled);
     if (currentDist > 0) {
-      theWeyl.reflectSimple(indexAlpha, diff);
+      weylGroup.reflectSimple(indexAlpha, diff);
       currentDist = 0;
     }
     oldWayPoint = this->waypoints[i + minIndex + 1];
@@ -280,22 +280,22 @@ bool LittelmannPath::minimaAreIntegral() {
   if (this->waypoints.size == 0) {
     return true;
   }
-  List<Rational> theMinima;
-  WeylGroupData& theWeyl = *this->owner;
-  int theDim = theWeyl.getDimension();
-  theMinima.setSize(theDim);
-  for (int i = 0; i < theDim; i ++) {
-    theMinima[i] = theWeyl.getScalarProductSimpleRoot(this->waypoints[0], i) * 2 / theWeyl.cartanSymmetric.elements[i][i];
+  List<Rational> minima;
+  WeylGroupData& weyl = *this->owner;
+  int dimension = weyl.getDimension();
+  minima.setSize(dimension);
+  for (int i = 0; i < dimension; i ++) {
+    minima[i] = weyl.getScalarProductSimpleRoot(this->waypoints[0], i) * 2 / weyl.cartanSymmetric.elements[i][i];
   }
   for (int i = 1; i < this->waypoints.size; i ++) {
-    for (int j = 0; j < theDim; j ++) {
-      theMinima[j] = MathRoutines::minimum(theWeyl.getScalarProductSimpleRoot(
-        this->waypoints[i], j) * 2 / theWeyl.cartanSymmetric.elements[j][j], theMinima[j]
+    for (int j = 0; j < dimension; j ++) {
+      minima[j] = MathRoutines::minimum(weyl.getScalarProductSimpleRoot(
+        this->waypoints[i], j) * 2 / weyl.cartanSymmetric.elements[j][j], minima[j]
       );
     }
   }
-  for (int i = 0; i < theDim; i ++) {
-    if (!theMinima[i].isSmallInteger()) {
+  for (int i = 0; i < dimension; i ++) {
+    if (!minima[i].isSmallInteger()) {
       return false;
     }
   }
@@ -335,7 +335,7 @@ bool LittelmannPath::generateOrbit(
 ) {
   HashedList<LittelmannPath> hashedOutput;
   hashedOutput.addOnTop(*this);
-  int theDim = this->owner->getDimension();
+  int dimension = this->owner->getDimension();
   outputOperators.setSize(1);
   outputOperators[0].setSize(0);
   List<int> currentSequence;
@@ -345,7 +345,7 @@ bool LittelmannPath::generateOrbit(
   LittelmannPath currentPath;
   bool result = true;
   Selection parabolicSelectionSelectedAreInLeviPart;
-  parabolicSelectionSelectedAreInLeviPart.initialize(theDim);
+  parabolicSelectionSelectedAreInLeviPart.initialize(dimension);
   if (parabolicNonSelectedAreInLeviPart != nullptr) {
     parabolicSelectionSelectedAreInLeviPart = *parabolicNonSelectedAreInLeviPart;
     parabolicSelectionSelectedAreInLeviPart.invertSelection();
@@ -416,11 +416,11 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) {
-  WeylGroupData& theWeyl = this->owner->theOwner->weylGroup;
+  WeylGroupData& weyl = this->owner->theOwner->weylGroup;
   Vector<Rational> theHWsimpleCoordsTrue = theHWsimpleCoords;
-  theWeyl.raiseToDominantWeight(theHWsimpleCoordsTrue);
-  Vector<Rational> theHWdualCoords = theWeyl.getDualCoordinatesFromFundamental(
-    theWeyl.getFundamentalCoordinatesFromSimple(theHWsimpleCoordsTrue)
+  weyl.raiseToDominantWeight(theHWsimpleCoordsTrue);
+  Vector<Rational> theHWdualCoords = weyl.getDualCoordinatesFromFundamental(
+    weyl.getFundamentalCoordinatesFromSimple(theHWsimpleCoordsTrue)
   );
   List<Coefficient> theSub;
   theSub.setSize(theHWdualCoords.size);
@@ -445,11 +445,11 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
       return false;
     }
     int rootIndex = this->owner->theOwner->getRootIndexFromGenerator(currentElt[0].generatorIndex);
-    const Vector<Rational>& currentRoot = theWeyl.rootSystem[rootIndex];
+    const Vector<Rational>& currentRoot = weyl.rootSystem[rootIndex];
     for (int j = 0; j < power; j ++) {
       currentWeight += currentRoot;
       testWeight = currentWeight;
-      theWeyl.raiseToDominantWeight(testWeight);
+      weyl.raiseToDominantWeight(testWeight);
       if (!(theHWsimpleCoordsTrue - testWeight).isPositiveOrZero()) {
         this->makeZero(ringZero, *this->owner);
         return true;
@@ -691,18 +691,18 @@ std::string ElementUniversalEnveloping<Coefficient>::isInProperSubmodule(
   std::stringstream out;
   List<ElementUniversalEnveloping<Coefficient> > theOrbit;
   theOrbit.reserve(1000);
-  ElementUniversalEnveloping<Coefficient> theElt;
-  int theDim = this->getOwner().getRank();
+  ElementUniversalEnveloping<Coefficient> element;
+  int dimension = this->getOwner().getRank();
   int numPosRoots = this->getOwner().getNumberOfPositiveRoots();
   theOrbit.addOnTop(*this);
   for (int i = 0; i < theOrbit.size; i ++) {
-    for (int j = 0; j < theDim; j ++) {
-      theElt.makeOneGenerator(j + numPosRoots + theDim, *this->owner, ringUnit);
-      theElt *= theOrbit[i];
-      theElt.simplify(ringUnit);
-      theElt.modOutVermaRelations(substitutionHiGoesToIthElement, ringUnit, ringZero);
-      if (!theElt.isEqualToZero()) {
-        theOrbit.addOnTop(theElt);
+    for (int j = 0; j < dimension; j ++) {
+      element.makeOneGenerator(j + numPosRoots + dimension, *this->owner, ringUnit);
+      element *= theOrbit[i];
+      element.simplify(ringUnit);
+      element.modOutVermaRelations(substitutionHiGoesToIthElement, ringUnit, ringZero);
+      if (!element.isEqualToZero()) {
+        theOrbit.addOnTop(element);
       }
     }
   }

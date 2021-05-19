@@ -1282,19 +1282,19 @@ bool WeylGroupAutomorphisms::checkInitialization() const {
   return true;
 }
 
-bool WeylGroupAutomorphisms::areMaximallyDominantGroupOuter(List<Vector<Rational> >& theWeights) {
+bool WeylGroupAutomorphisms::areMaximallyDominantGroupOuter(List<Vector<Rational> >& weights) {
   MacroRegisterFunctionWithName("WeylGroup::areMaximallyDominantGroupOuter");
   this->checkInitialization();
-  MemorySaving<Vectors<Rational> > theWeightsCopy;
+  MemorySaving<Vectors<Rational> > weightsCopy;
   Vector<Rational> zeroWeight;
   this->computeOuterAutomorphisms();
   zeroWeight.makeZero(this->weylGroup->getDimension());
-  for (int i = 0; i < theWeights.size; i ++) {
+  for (int i = 0; i < weights.size; i ++) {
     for (int j = 0; j < this->weylGroup->rootsOfBorel.size; j ++) {
-      if (this->weylGroup->rootScalarCartanRoot(this->weylGroup->rootsOfBorel[j], theWeights[i]) < 0) {
+      if (this->weylGroup->rootScalarCartanRoot(this->weylGroup->rootsOfBorel[j], weights[i]) < 0) {
         bool reflectionDoesRaise = true;
         for (int k = 0; k < i; k ++) {
-          if (this->weylGroup->rootScalarCartanRoot(this->weylGroup->rootsOfBorel[j], theWeights[k]) > 0) {
+          if (this->weylGroup->rootScalarCartanRoot(this->weylGroup->rootsOfBorel[j], weights[k]) > 0) {
             reflectionDoesRaise = false;
             break;
           }
@@ -1305,11 +1305,11 @@ bool WeylGroupAutomorphisms::areMaximallyDominantGroupOuter(List<Vector<Rational
       }
     }
     for (int j = 0; j < this->outerAutomorphisms.elements.size; j ++) {
-      theWeightsCopy.getElement() = theWeights;
-      this->outerAutomorphisms.elements[j].actOnVectorsColumn(theWeightsCopy.getElement());
+      weightsCopy.getElement() = weights;
+      this->outerAutomorphisms.elements[j].actOnVectorsColumn(weightsCopy.getElement());
       bool isGood = true;
       for (int k = 0; k < i; k ++) {
-        if (!(theWeightsCopy.getElement()[k] - theWeights[k]).isPositiveOrZero()) {
+        if (!(weightsCopy.getElement()[k] - weights[k]).isPositiveOrZero()) {
           isGood = false;
           break;
         }
@@ -1317,7 +1317,7 @@ bool WeylGroupAutomorphisms::areMaximallyDominantGroupOuter(List<Vector<Rational
       if (!isGood) {
         continue;
       }
-      if (!(theWeightsCopy.getElement()[i] - theWeights[i]).IsGreaterThanLexicographic(zeroWeight)) {
+      if (!(weightsCopy.getElement()[i] - weights[i]).IsGreaterThanLexicographic(zeroWeight)) {
         continue;
       }
       return false;

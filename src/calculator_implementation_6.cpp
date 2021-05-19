@@ -702,15 +702,15 @@ bool CalculatorFunctions::innerGetSummand(
   if (!theBottomBoundary.startsWith(calculator.opDefine(), 3)) {
     return false;
   }
-  Expression theSub = theBottomBoundary;
+  Expression substitution = theBottomBoundary;
   Expression //oneE,
   valueToSubWith;
   //oneE.assignValue(1, calculator);
   valueToSubWith = theBottomBoundary[2] + input[2];
-  theSub.setChild(2, valueToSubWith);
+  substitution.setChild(2, valueToSubWith);
   Expression theCommandSequence(calculator);
   theCommandSequence.addChildAtomOnTop(calculator.opCommandSequence());
-  theCommandSequence.addChildOnTop(theSub);
+  theCommandSequence.addChildOnTop(substitution);
   theCommandSequence.addChildOnTop(theCoeff * theSum[2]);
   return output.makeXOX(calculator, calculator.opUnderscore(), theCommandSequence, calculator.expressionTwo());
 }
@@ -1356,16 +1356,16 @@ bool CalculatorFunctions::innerSubList(Calculator& calculator, const Expression&
   if (boundVars.size == 0) {
     return output.makeSequence(calculator, nullptr);
   }
-  Expression theSubbed, toBeSubbed, subbedSimplified;
+  Expression substituted, toBeSubbed, subbedSimplified;
   toBeSubbed.reset(calculator);
   toBeSubbed.addChildAtomOnTop(calculator.opBind());
   toBeSubbed.addChildOnTop(boundVars[0]);
   List<Expression> theList;
   for (int i = 1; i < input[1].size(); i ++) {
-    theSubbed = input[2];
-    theSubbed.substituteRecursively(toBeSubbed, input[1][i]);
-    if (!calculator.evaluateExpression(calculator, theSubbed, subbedSimplified)) {
-      return calculator << "Failed to evaluate " << theSubbed.toString();
+    substituted = input[2];
+    substituted.substituteRecursively(toBeSubbed, input[1][i]);
+    if (!calculator.evaluateExpression(calculator, substituted, subbedSimplified)) {
+      return calculator << "Failed to evaluate " << substituted.toString();
     }
     if (subbedSimplified.isEqualToOne()) {
       theList.addOnTop(input[1][i]);

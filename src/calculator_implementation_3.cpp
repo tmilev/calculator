@@ -19,14 +19,14 @@
 
 template <>
 bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::isDominantWithRespectToGenerator<RationalFraction<Rational> >(
-  const Vector<RationalFraction<Rational> >& theWeight, int generatorIndex
+  const Vector<RationalFraction<Rational> >& weight, int generatorIndex
 ) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::isDominantWithRespectToGenerator");
   this->checkInitialization();
   Vector<RationalFraction<Rational> > tempVect;
   RationalFraction<Rational> tempRF;
   tempVect = this->simpleRootsInner[generatorIndex].getVectorRational();
-  tempRF = this->ambientWeyl->rootScalarCartanRoot(theWeight, tempVect);
+  tempRF = this->ambientWeyl->rootScalarCartanRoot(weight, tempVect);
   if (tempRF.expressionType != tempRF.typeConstant) {
     global.fatal << "This might or might not be a programming mistake: "
     << "I am being asked whether a weight "
@@ -35,7 +35,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::i
     << "whose reflections generate the ambient group, "
     << "however one of the scalar products in question was non-constant. "
     << "More precisely, the scalar product of "
-    << theWeight.toString() << " and " << tempVect.toString() << " "
+    << weight.toString() << " and " << tempVect.toString() << " "
     << "equals " << tempRF.toString() << ". "
     << "I cannot decide (more precisely, do not want to *silently* decide for you) "
     << "whether a non-constant function is to be declared positive or not. "
@@ -51,20 +51,20 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::i
 
 template <>
 bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::isDominantWithRespectToGenerator<Rational>(
-  const Vector<Rational>& theWeight, int generatorIndex
+  const Vector<Rational>& weight, int generatorIndex
 ) {
   this->checkInitialization();
-  return !this->ambientWeyl->rootScalarCartanRoot(theWeight, this->simpleRootsInner[generatorIndex]).isNegative();
+  return !this->ambientWeyl->rootScalarCartanRoot(weight, this->simpleRootsInner[generatorIndex]).isNegative();
 }
 
 template <>
 bool WeylGroupData::isDominantWithRespectToGenerator<RationalFraction<Rational> >(
-  const Vector<RationalFraction<Rational> >& theWeight, int generatorIndex
+  const Vector<RationalFraction<Rational> >& weight, int generatorIndex
 ) {
   Vector<Rational> tempVect;
   RationalFraction<Rational> tempRF;
   tempVect.makeEi(this->getDimension(), generatorIndex);
-  tempRF = this->rootScalarCartanRoot(theWeight, tempVect);
+  tempRF = this->rootScalarCartanRoot(weight, tempVect);
   if (tempRF.expressionType != tempRF.typeConstant) {
     global.fatal << "This might or might not be a programming mistake: "
     << "I am being asked whether a weight "
@@ -73,7 +73,7 @@ bool WeylGroupData::isDominantWithRespectToGenerator<RationalFraction<Rational> 
     << "whose reflections generate the ambient group, "
     << "however one of the scalar products in question was non-constant. "
     << "More precisely, the scalar product of "
-    << theWeight.toString() << " and " << tempVect.toString() << " "
+    << weight.toString() << " and " << tempVect.toString() << " "
     << "equals " << tempRF.toString() << ". "
     << "I cannot decide (more precisely, do not want to *silently* decide for you) "
     << "whether a non-constant function is positive or not. "
@@ -89,8 +89,8 @@ bool WeylGroupData::isDominantWithRespectToGenerator<RationalFraction<Rational> 
 }
 
 template <>
-bool WeylGroupData::isDominantWithRespectToGenerator<Rational>(const Vector<Rational>& theWeight, int generatorIndex) {
-  return !this->getScalarProductSimpleRoot(theWeight, generatorIndex).isNegative();
+bool WeylGroupData::isDominantWithRespectToGenerator<Rational>(const Vector<Rational>& weight, int generatorIndex) {
+  return !this->getScalarProductSimpleRoot(weight, generatorIndex).isNegative();
 }
 
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::makeParabolicFromSelectionSimpleRoots(

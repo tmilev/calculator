@@ -2279,7 +2279,7 @@ public:
     void calculatorTestPrepare();
     bool calculatorTestRun();
   };
-  static bool innerAutomatedTest(Calculator& calculator, const Expression& input, Expression& output);
+  static bool automatedTest(Calculator& calculator, const Expression& input, Expression& output);
   int getNumberOfBuiltInFunctions();
   static bool outerStandardFunction(
     Calculator& calculator,
@@ -2656,9 +2656,9 @@ public:
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& output,
     SemisimpleLieAlgebra& owner
   );
-  static bool innerDynkinTypE(Calculator& calculator, const Expression& input, DynkinType& output);
+  static bool dynkinType(Calculator& calculator, const Expression& input, DynkinType& output);
   static bool functionDynkinType(Calculator& calculator, const Expression& input, DynkinType& output);
-  static bool innerDynkinSimpleTypE(Calculator& calculator, const Expression& input, DynkinSimpleType& output);
+  static bool dynkinSimpleType(Calculator& calculator, const Expression& input, DynkinSimpleType& output);
   static bool functionDynkinSimpleType(Calculator& calculator, const Expression& input, DynkinSimpleType& output);
   static bool innerSlTwoSubalgebraPrecomputed(Calculator& calculator, const Expression& input, SlTwoSubalgebra& output);
   static bool innerLoadFromObject(Calculator& calculator, const Expression& input, RationalFraction<Rational>& output);
@@ -2675,7 +2675,7 @@ public:
   static bool functionPolynomialWithExponentLimit(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerRationalFunction(Calculator& calculator, const Expression& input, Expression& output);
+  static bool rationalFunction(Calculator& calculator, const Expression& input, Expression& output);
   template <class Coefficient>
   static bool functionRationalFunction(
     Calculator& calculator,
@@ -2744,7 +2744,7 @@ public:
   );
   static std::string stringFromSemisimpleSubalgebras(SemisimpleSubalgebras& input);
 
-  static bool innerExpressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(
+  static bool expressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(
     Calculator& calculator, const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input, Expression& output
   );
   static bool innerExpressionFromUE(
@@ -2753,7 +2753,7 @@ public:
     Expression& output,
     ExpressionContext* inputContext = nullptr
   );
-  static bool innerStoreCandidateSubalgebra(Calculator& calculator, const CandidateSemisimpleSubalgebra& input, Expression& output);
+  static bool storeCandidateSubalgebra(Calculator& calculator, const CandidateSemisimpleSubalgebra& input, Expression& output);
   static bool innerExpressionFromDynkinType(Calculator& calculator, const DynkinType& input, Expression& output);
   static bool innerExpressionFromDynkinSimpleType(Calculator& calculator, const DynkinSimpleType& input, Expression& output);
   static bool innerExpressionFromElementSemisimpleLieAlgebraRationals(

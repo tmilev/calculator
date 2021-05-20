@@ -1133,11 +1133,11 @@ void Calculator::initializeFunctionsStandard() {
 
   this->addOperationHandler(
     "MakeRationalFunction",
-    CalculatorConversions::innerRationalFunction,
+    CalculatorConversions::rationalFunction,
     "",
     "Creates a built-in rational function.",
     "MakeRationalFunction{}(x_1 + MakeRationalFunction{}x_1 + x_2)",
-    "CalculatorConversions::innerRationalFunctioN",
+    "CalculatorConversions::rationalFunction",
     "MakeRationalFunction",
     innerStandard
   );
@@ -2324,7 +2324,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "DeterminantPolynomial",
-    CalculatorFunctions::innerDeterminantPolynomial,
+    CalculatorFunctions::determinantPolynomial,
     "",
     "Attempts to convert the entries of the matrix "
     "to polynomials and computes the determinant polynomial. "
@@ -4535,8 +4535,8 @@ void Calculator::initializeFunctionsStandard() {
     this->opRationalFunction(),
     this->opRational(),
     "Raises rational function to small integer power. ",
-    "x = RationalFunction{}x;\n"
-    "y = RationalFunction{}y;\n"
+    "x = MakeRationalFunction{}x;\n"
+    "y = MakeRationalFunction{}y;\n"
     "(x/y)^3",
     "CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberPolynomialBySmallInteger",
     "PowerRationalFractionByInteger",
@@ -5053,18 +5053,22 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctions::innerConstantFunction,
     "",
     "If x is a constant, replaces x{}({{anything}})=x; ",
-    "0{}3;2{}y;(\\sqrt{}2){}x;",
+    "0{}3;\n"
+    "2{}y;\n"
+    "(\\sqrt{}2){}x;",
     "CalculatorFunctions::innerConstantFunction",
     "ConstantFunction",
     compositeStandard
   );
   this->addOperationHandler(
     "RationalFunction",
-    CalculatorFunctions::innerRationalFunctionSubstitution,
+    CalculatorFunctions::rationalFunctionSubstitution,
     "",
     "If x is a constant, replaces x{}({{anything}})=x; ",
-    "0{}3;2{}y;(\\sqrt{}2){}x;",
-    "CalculatorFunctions::innerRationalFunctionSubstitution",
+    "0{}3;\n"
+    "2{}y;\n"
+    "(\\sqrt{}2){}x;",
+    "CalculatorFunctions::rationalFunctionSubstitution",
     "RationalFunctionSubstitution",
     compositeStandard
   );

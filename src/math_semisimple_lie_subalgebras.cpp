@@ -412,8 +412,6 @@ void SemisimpleSubalgebras::checkFileWritePermissions() {
   FileOperations::getPhysicalFileNameFromVirtual(
     this->owner->fileNames.virtualFolderName(), testFileFolderPhysical, false, false, nullptr
   );
-  global.externalCommandNoOutput("mkdir " + testFileFolderPhysical, true);
-
   if (!FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(testFile, testFileNameRelative, false, true, false)) {
     global.fatal << "<br>This may or may not be a programming error. I requested to create file "
     << this->virtualNameMainFile1
@@ -1011,7 +1009,7 @@ bool SemisimpleSubalgebras::loadState(
 }
 
 bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::findTheSemisimpleSubalgebrasContinue");
+  MacroRegisterFunctionWithName("SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue");
   ProgressReport report;
   std::stringstream reportstream;
   reportstream << "State at beginning of computation: " << this->toStringProgressReport();
@@ -1026,8 +1024,8 @@ bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
   ProgressReport report2;
   std::stringstream reportStream2;
   reportStream2 << "Found a total of "
-  << this->subalgebras.values.size << " subalgebras. Proceding to"
-  << " adjust centralizers. ";
+  << this->subalgebras.values.size << " subalgebras. Proceding to "
+  << "adjust centralizers. ";
   report2.report(reportStream2.str());
   if (this->targetDynkinType.isEqualToZero()) {
     this->hookUpCentralizers(false);
@@ -1039,7 +1037,7 @@ bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
 }
 
 void SemisimpleSubalgebras::findSemisimpleSubalgebrasInitialize() {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::findTheSemisimpleSubalgebrasInitialize");
+  MacroRegisterFunctionWithName("SemisimpleSubalgebras::findSemisimpleSubalgebrasInitialize");
   this->checkConsistency();
   if (this->owner == nullptr) {
     global.fatal << "<hr>Owner of semisimple subalgebras is zero." << global.fatal;
@@ -1219,6 +1217,7 @@ bool SemisimpleSubalgebras::computeStructureRealForms(
   this->computeStructureRealFormsInitialize(
     newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras
   );
+  this->slTwoSubalgebras.checkMinimalContainingRootSubalgebras();
   this->owner->findSl2Subalgebras(newOwner, this->slTwoSubalgebras, &ownerField);
   this->computeStructureRealFormsSlTwos();
   return true;
@@ -2601,11 +2600,11 @@ bool CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo(
   Rational scalarProduct;
   int indexHneW = *rootInjections.lastObject();
   for  (int i = 0; i < this->getAmbientWeyl().rootsOfBorel.size; i ++) {
-    Vector<Rational>& currentPosRoot = this->getAmbientWeyl().rootsOfBorel[i];
+    Vector<Rational>& currentPositiveRoot = this->getAmbientWeyl().rootsOfBorel[i];
     bool canBeRaisingReflection = true;
     for (int l = 0; l < this->hsScaledToActByTwoInOrderOfCreation.size && canBeRaisingReflection; l ++) {
       scalarProduct = this->getAmbientWeyl().rootScalarCartanRoot(
-        currentPosRoot, this->hsScaledToActByTwoInOrderOfCreation[l]
+        currentPositiveRoot, this->hsScaledToActByTwoInOrderOfCreation[l]
       );
       if (scalarProduct > 0) {
         canBeRaisingReflection = false;
@@ -2616,7 +2615,7 @@ bool CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo(
         << ", the candidate h elements of the semisimple "
         << "subalgebra are supposed to be maximally dominant, "
         << "however the scalar product of the positive root "
-        << currentPosRoot.toString() << " with the subalgebra root "
+        << currentPositiveRoot.toString() << " with the subalgebra root "
         << this->hsScaledToActByTwoInOrderOfCreation[l].toString()
         << " is negative, while the very same positive "
         << "root has had zero scalar products with all "
@@ -2626,7 +2625,7 @@ bool CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo(
       }
     }
     if (canBeRaisingReflection) {
-      if (this->getAmbientWeyl().rootScalarCartanRoot(currentPosRoot, hNewActingByTwo) < 0) {
+      if (this->getAmbientWeyl().rootScalarCartanRoot(currentPositiveRoot, hNewActingByTwo) < 0) {
         return false;
       }
     }
@@ -2668,12 +2667,14 @@ int CharacterSemisimpleLieAlgebraModule<Coefficient>::getIndexExtremeWeightRelat
   return - 1;
 }
 
-bool CandidateSemisimpleSubalgebra::isWeightSystemSpaceIndex(int index, const Vector<Rational>& ambientRootTestedForWeightSpace) {
+bool CandidateSemisimpleSubalgebra::isWeightSystemSpaceIndex(
+  int index, const Vector<Rational>& ambientRootTestedForWeightSpace
+) {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::isWeightSystemSpaceIndex");
   for (int k = 0; k < this->cartanElementsSubalgebra.size; k ++) {
-    Rational desiredScalarProd = this->subalgebraNonEmbeddedDefaultScale->weylGroup.cartanSymmetric(index, k);
+    Rational desiredScalarProduct = this->subalgebraNonEmbeddedDefaultScale->weylGroup.cartanSymmetric(index, k);
     Rational actualScalar = this->getAmbientWeyl().rootScalarCartanRoot(this->cartanElementsSubalgebra[k], ambientRootTestedForWeightSpace);
-    if (desiredScalarProd != actualScalar) {
+    if (desiredScalarProduct != actualScalar) {
       return false;
     }
   }
@@ -2686,24 +2687,24 @@ bool CandidateSemisimpleSubalgebra::computeSystem(bool attemptToChooseCentalizer
   this->involvedNegativeGenerators.setSize(this->cartanElementsScaledToActByTwo.size);
   this->involvedPositiveGenerators.setSize(this->cartanElementsScaledToActByTwo.size);
   for (int i = 0; i < this->cartanElementsScaledToActByTwo.size; i ++) {
-    List<ChevalleyGenerator>& currentInvolvedPosGens = this->involvedPositiveGenerators[i];
-    List<ChevalleyGenerator>& currentInvolvedNegGens = this->involvedNegativeGenerators[i];
-    currentInvolvedNegGens.setExpectedSize(this->getAmbientWeyl().getDimension() * 2);
-    currentInvolvedPosGens.setExpectedSize(this->getAmbientWeyl().getDimension() * 2);
-    currentInvolvedNegGens.setSize(0);
-    currentInvolvedPosGens.setSize(0);
+    List<ChevalleyGenerator>& currentInvolvedPositiveGenerators = this->involvedPositiveGenerators[i];
+    List<ChevalleyGenerator>& currentInvolvedNegativeGenerators = this->involvedNegativeGenerators[i];
+    currentInvolvedNegativeGenerators.setExpectedSize(this->getAmbientWeyl().getDimension() * 2);
+    currentInvolvedPositiveGenerators.setExpectedSize(this->getAmbientWeyl().getDimension() * 2);
+    currentInvolvedNegativeGenerators.setSize(0);
+    currentInvolvedPositiveGenerators.setSize(0);
     for (int j = 0; j < this->getAmbientWeyl().rootSystem.size; j ++) {
-      int indexCurGen = this->getAmbientSemisimpleLieAlgebra().getGeneratorFromRootIndex(j);
+      int indexCurrentGenerator = this->getAmbientSemisimpleLieAlgebra().getGeneratorFromRootIndex(j);
       int opIndex = this->getAmbientSemisimpleLieAlgebra().getGeneratorIndexFromRoot(- this->getAmbientWeyl().rootSystem[j]);
-      currentGen.makeGenerator(*this->owner->owner, indexCurGen);
+      currentGen.makeGenerator(*this->owner->owner, indexCurrentGenerator);
       currentOpGen.makeGenerator(*this->owner->owner, opIndex);
       if (this->isWeightSystemSpaceIndex(i, this->getAmbientWeyl().rootSystem[j])) {
-        currentInvolvedPosGens.addOnTop(currentGen);
-        currentInvolvedNegGens.addOnTop(currentOpGen);
+        currentInvolvedPositiveGenerators.addOnTop(currentGen);
+        currentInvolvedNegativeGenerators.addOnTop(currentOpGen);
       }
     }
-    if (currentInvolvedNegGens.size == 0) {
-      if (currentInvolvedPosGens.size != 0) {
+    if (currentInvolvedNegativeGenerators.size == 0) {
+      if (currentInvolvedPositiveGenerators.size != 0) {
         global.fatal << "The number of involved negative generators is different "
         << "from the number of involved positive generators. " << global.fatal;
       }
@@ -4648,16 +4649,17 @@ void SlTwoSubalgebra::toStringModuleDecompositionMinimalContainingRegularSAs(
   if (useHtml) {
     out << "<table><tr><td align='center'>Char.</td>";
     for (int i = 0; i < this->indicesMinimalContainingRootSubalgebras.size; i ++) {
-      RootSubalgebra& subalgebra = owner.rootSubalgebras.subalgebras[this->indicesMinimalContainingRootSubalgebras[i]];
+      RootSubalgebra& rootSubalgebra = owner.rootSubalgebras.subalgebras[this->indicesMinimalContainingRootSubalgebras[i]];
       out << "<td align='center'>Decomp. "
-      << subalgebra.dynkinDiagram.toString() << "</td>";
+      << rootSubalgebra.dynkinDiagram.toString() << "</td>";
     }
     out << "</tr>\n";
   }
   out << "<tr><td align='center'> " << this->hCharacteristic.toString() << "</td>";
+  this->checkIndicesMinimalContainingRootSubalgebras();
   for (int k = 0; k < this->indicesMinimalContainingRootSubalgebras.size; k ++) {
-    RootSubalgebra& theSA = owner.rootSubalgebras.subalgebras[this->indicesMinimalContainingRootSubalgebras[k]];
-    tempS = theSA.dynkinDiagram.toString();
+    RootSubalgebra& rootSubalgebra = owner.rootSubalgebras.subalgebras[this->indicesMinimalContainingRootSubalgebras[k]];
+    tempS = rootSubalgebra.dynkinDiagram.toString();
     if (useHtml) {
       out << "<td align='center'>";
     }
@@ -4921,8 +4923,9 @@ void SlTwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner) {
   this->indicesSl2DecompositionFormulas.setSize(0);
   this->badHCharacteristics.setSize(0);
   this->indexZeroWeight = - 1;
-  this->owner = & inputOwner;
+  this->owner = &inputOwner;
   this->rootSubalgebras.owner = &inputOwner;
+  this->clear();
 }
 
 void SemisimpleLieAlgebra::findSl2Subalgebras(
@@ -4938,15 +4941,24 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(
     << inputOwner.weylGroup.dynkinType.toString();
     report0.report(reportStream0.str());
   }
+
   inputOwner.checkConsistency();
   output.reset(inputOwner);
+  global.comments << "<br>DEBUG: Output size after reset: " << output.size << "<br>";
   output.checkConsistency();
   output.getOwner().computeChevalleyConstants();
   output.rootSubalgebras.owner = &inputOwner;
+  global.comments << "<br>DEBUG: here i am pt 0";
+  output.checkMinimalContainingRootSubalgebras();
   output.rootSubalgebras.computeAllReductiveRootSubalgebrasUpToIsomorphism();
-  //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, global);
+  global.comments << "<br>DEBUG: here i am pt 0.5";
+  output.checkMinimalContainingRootSubalgebras();
+  global.comments << "<br>DEBUG: here i am pt 0.6";
   output.indicesSl2sContainedInRootSubalgebras.setSize(output.rootSubalgebras.subalgebras.size);
   output.indicesSl2sContainedInRootSubalgebras.reserve(output.rootSubalgebras.subalgebras.size * 2);
+  global.comments << "<br>DEBUG: here i am pt 1";
+  output.checkMinimalContainingRootSubalgebras();
+  global.comments << "<br>DEBUG: here i am pt2.";
   for (int i = 0; i < output.indicesSl2sContainedInRootSubalgebras.size; i ++) {
     output.indicesSl2sContainedInRootSubalgebras[i].size = 0;
   }
@@ -4955,7 +4967,8 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(
     std::stringstream tempStream;
     tempStream << "\nExploring root subalgebra "
     << output.rootSubalgebras.subalgebras[i].dynkinDiagram.toString()
-    << " (" << (i + 1) << " out of " << output.rootSubalgebras.subalgebras.size << ")\n";
+    << " (" << (i + 1) << " out of "
+    << output.rootSubalgebras.subalgebras.size << ")\n";
     report.report(tempStream.str());
     output.rootSubalgebras.subalgebras[i].getSsl2SubalgebrasAppendListNoRepetition(output, i, algebraicClosure);
   }
@@ -4976,20 +4989,24 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(
     }
   }
   inputOwner.checkConsistency();
-  for (int i = 0; i <output.size; i ++) {
-    output.getElement(i).indicesMinimalContainingRootSubalgebras.reserve(output.getElement(i).indicesContainingRootSubalgebras.size);
-    output.getElement(i).indicesMinimalContainingRootSubalgebras.size = 0;
-    for (int j = 0; j < output.getElement(i).indicesContainingRootSubalgebras.size; j ++) {
+  global.comments << "<br>DEBUG: here i am, output size is: " << output.size;
+  output.checkMinimalContainingRootSubalgebras();
+  global.comments << "<br>DEBUG: check OK! output size: " << output.size;
+  for (int i = 0; i < output.size; i ++) {
+    SlTwoSubalgebra& currentSubalgebra = output.getElement(i);
+    currentSubalgebra.indicesMinimalContainingRootSubalgebras.reserve(currentSubalgebra.indicesContainingRootSubalgebras.size);
+    currentSubalgebra.indicesMinimalContainingRootSubalgebras.size = 0;
+    for (int j = 0; j < currentSubalgebra.indicesContainingRootSubalgebras.size; j ++) {
       bool isMinimalContaining = true;
-      for (int k = 0; k < output.getElement(i).indicesContainingRootSubalgebras.size; k ++) {
-        RootSubalgebra& theOtherRootSA = output.rootSubalgebras.subalgebras[output.getElement(i).indicesContainingRootSubalgebras[k]];
-        if (theOtherRootSA.indicesSubalgebrasContainingK.contains(output.getElement(i).indicesContainingRootSubalgebras[j])) {
-          isMinimalContaining= false;
+      for (int k = 0; k < currentSubalgebra.indicesContainingRootSubalgebras.size; k ++) {
+        RootSubalgebra& otherRootSubalgebra = output.rootSubalgebras.subalgebras[currentSubalgebra.indicesContainingRootSubalgebras[k]];
+        if (otherRootSubalgebra.indicesSubalgebrasContainingK.contains(currentSubalgebra.indicesContainingRootSubalgebras[j])) {
+          isMinimalContaining = false;
           break;
         }
       }
       if (isMinimalContaining) {
-        output.getElement(i).indicesMinimalContainingRootSubalgebras.addOnTopNoRepetition(output.getElement(i).indicesContainingRootSubalgebras[j]);
+        currentSubalgebra.indicesMinimalContainingRootSubalgebras.addOnTopNoRepetition(currentSubalgebra.indicesContainingRootSubalgebras[j]);
       }
     }
     output.checkConsistency();
@@ -5048,12 +5065,12 @@ bool CandidateSemisimpleSubalgebra::checkMaximalDominance() const {
   this->checkBasicInitialization();
   Rational scalarProduct;
   for (int i = 0; i < this->getAmbientWeyl().rootsOfBorel.size; i ++) {
-    Vector<Rational>& currentPosRoot = this->getAmbientWeyl().rootsOfBorel[i];
+    Vector<Rational>& currentPositiveRoot = this->getAmbientWeyl().rootsOfBorel[i];
     bool canBeRaisingReflection = true;
     for (int k = 0; k < this->cartanSubalgebrasByComponentScaledToActByTwo.size && canBeRaisingReflection; k ++) {
       for (int l = 0; l < this->cartanSubalgebrasByComponentScaledToActByTwo[k].size && canBeRaisingReflection; l ++) {
         scalarProduct = this->getAmbientWeyl().rootScalarCartanRoot(
-          currentPosRoot, this->cartanSubalgebrasByComponentScaledToActByTwo[k][l]
+          currentPositiveRoot, this->cartanSubalgebrasByComponentScaledToActByTwo[k][l]
         );
         if (scalarProduct > 0) {
           canBeRaisingReflection = false;
@@ -5061,7 +5078,7 @@ bool CandidateSemisimpleSubalgebra::checkMaximalDominance() const {
         if (scalarProduct < 0) {
           global.fatal << "The candidate h elements "
           << "of the semisimple subalgebra are supposed to be maximally dominant, "
-          << "however the scalar product of the positive root " << currentPosRoot.toString()
+          << "however the scalar product of the positive root " << currentPositiveRoot.toString()
           << " with the subalgebra root "
           << this->cartanSubalgebrasByComponentScaledToActByTwo[k][l].toString()
           << " is negative, while the very same positive root has had zero scalar products with all "
@@ -5073,6 +5090,27 @@ bool CandidateSemisimpleSubalgebra::checkMaximalDominance() const {
     }
   }
   return true;
+}
+
+bool SlTwoSubalgebras::checkMinimalContainingRootSubalgebras() const {
+  this->checkInitialization();
+  this->checkConsistency();
+  for (int i = 0; i < this->size; i ++) {
+    const SlTwoSubalgebra& current = (*this)[i];
+    if (current.container != this) {
+      global.fatal << "Corrupt sl(2) subalgebra." << global.fatal;
+    }
+    (*this)[i].checkIndicesMinimalContainingRootSubalgebras();
+  }
+  global.comments << "<br>DEBUG: check minimal containing root subalgebras OK; output size: " << this->size << "<br>";
+  return true;
+}
+
+void SlTwoSubalgebras::checkInitialization() const {
+  if (this->owner == nullptr) {
+    global.fatal << "<br>Object SlTwoSubalgebras "
+    << "is not initialized, although it is supposed to be. " << global.fatal;
+  }
 }
 
 bool SlTwoSubalgebras::checkConsistency() const {
@@ -5132,6 +5170,16 @@ bool SlTwoSubalgebras::containsSl2WithGivenHCharacteristic(
   return false;
 }
 
+bool SlTwoSubalgebra::checkIndicesMinimalContainingRootSubalgebras() const {
+  for (int i = 0; i < this->indicesMinimalContainingRootSubalgebras.size; i ++) {
+    int indexMinimalContainer = this->indicesMinimalContainingRootSubalgebras[i];
+    if (indexMinimalContainer >= this->container->rootSubalgebras.subalgebras.size) {
+      global.fatal << "Corrupt root subalgebra index: " << indexMinimalContainer << global.fatal;
+    }
+  }
+  return true;
+}
+
 bool SlTwoSubalgebra::attemptToComputeCentralizer() {
   MacroRegisterFunctionWithName("SlTwoSubalgebra::attemptToComputeCentralizer");
   this->flagCentralizerIsRegular = false;
@@ -5146,9 +5194,11 @@ bool SlTwoSubalgebra::attemptToComputeCentralizer() {
     << "is not a small integer. This shouldn't happen. "
     << global.fatal;
   }
+  this->checkIndicesMinimalContainingRootSubalgebras();
   for (int i = 0; i < this->indicesMinimalContainingRootSubalgebras.size; i ++) {
+    int indexMinimalContainer = this->indicesMinimalContainingRootSubalgebras[i];
     RootSubalgebra& currentMinimalContainer =
-    this->container->rootSubalgebras.subalgebras[this->indicesMinimalContainingRootSubalgebras[i]];
+    this->container->rootSubalgebras.subalgebras[indexMinimalContainer];
     Rational dimOfSSpartOfCentralizerOfRootSA =
     currentMinimalContainer.centralizerDynkinType.getRankRational() +
     currentMinimalContainer.centralizerDynkinType.getRootSystemSize();
@@ -5184,11 +5234,12 @@ void SlTwoSubalgebra::computeModuleDecompositionsitionOfMinimalContainingRegular
   MacroRegisterFunctionWithName("SlTwoSubalgebra::computeModuleDecompositionsitionOfMinimalContainingRegularSAs");
   this->moduleDecompositionMinimalContainingRootSubalgebras.setSize(this->indicesMinimalContainingRootSubalgebras.size);
   List<int> buffer;
+  this->checkIndicesMinimalContainingRootSubalgebras();
   for (int i = 0; i < this->indicesMinimalContainingRootSubalgebras.size; i ++) {
-    RootSubalgebra& theSA = owner.rootSubalgebras.subalgebras[this->indicesMinimalContainingRootSubalgebras[i]];
+    RootSubalgebra& subalgebra = owner.rootSubalgebras.subalgebras[this->indicesMinimalContainingRootSubalgebras[i]];
     this->computeModuleDecompositionsition(
-      theSA.positiveRootsReductiveSubalgebra,
-      theSA.simpleRootsReductiveSubalgebra.size,
+      subalgebra.positiveRootsReductiveSubalgebra,
+      subalgebra.simpleRootsReductiveSubalgebra.size,
       this->moduleDecompositionMinimalContainingRootSubalgebras[i],
       buffer
     );
@@ -5382,10 +5433,10 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
   out2 << "<br> Given a root subsystem P, and a root subsubsystem P_0, "
   << "in (10.2) of Semisimple subalgebras of semisimple Lie algebras, "
   << "E. Dynkin defines "
-  << " a numerical constant e(P, P_0) (which we call Dynkin epsilon). "
+  << "a numerical constant e(P, P_0) (which we call Dynkin epsilon). "
   << "<br>In Theorem 10.3, Dynkin proves that if an sl(2) is an "
   << "S-subalgebra in "
-  << " the root subalgebra generated by P, such that it has "
+  << "the root subalgebra generated by P, such that it has "
   << "characteristic 2 for all simple roots of P lying in P_0, then "
   << "e(P, P_0)= 0. ";
 
@@ -5405,9 +5456,9 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
       } else {
         out2 << "<br><b>It turns out that in the current case of Cartan element h = "
         << this->badHCharacteristics[i] << " we have that, for a certain P, "
-        << " e(P, P_0) equals 0, but I failed to realize the corresponding sl(2) as a subalgebra of that P. "
+        << "e(P, P_0) equals 0, but I failed to realize the corresponding sl(2) as a subalgebra of that P. "
         << "However, it turns out that h "
-        << " is indeed an S-subalgebra of a smaller root subalgebra P'.</b>";
+        << "is indeed an S-subalgebra of a smaller root subalgebra P'.</b>";
       }
     }
     if (!allbadAreGoodInTheirBadness) {
@@ -5494,6 +5545,7 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
     if (useHtml) {
       out << "</td><td>";
     }
+    currentSubalgebra.checkIndicesMinimalContainingRootSubalgebras();
     for (int j = 0; j < currentSubalgebra.indicesMinimalContainingRootSubalgebras.size; j ++) {
       RootSubalgebra& currentRootSubalgebra = this->rootSubalgebras.subalgebras[currentSubalgebra.indicesMinimalContainingRootSubalgebras[j]];
       out << "<a href='" << displayPathAlgebra << "rootSubalgebra_"

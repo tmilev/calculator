@@ -444,9 +444,9 @@ public:
   // the one used in MonomialUniversalEnveloping
   List<ElementSemisimpleLieAlgebra<Rational> > imagesAllChevalleyGenerators;
   List<ElementSemisimpleLieAlgebra<Rational> > domainAllChevalleyGenerators;
-  List<ElementSemisimpleLieAlgebra<Rational> > GmodK;
-  Vectors<Rational> RestrictedRootSystem;
-  Vectors<Rational> ImagesCartanDomain;
+  List<ElementSemisimpleLieAlgebra<Rational> > gModK;
+  Vectors<Rational> restrictedRootSystem;
+  Vectors<Rational> imagesCartanDomain;
   SemisimpleLieAlgebra& domain() {
     if (this->domainAlg == nullptr) {
       global.fatal << "Non-initialized HomomorphismSemisimpleLieAlgebra. " << global.fatal;
@@ -462,7 +462,7 @@ public:
   HomomorphismSemisimpleLieAlgebra(): domainAlg(nullptr), rangeAlg(nullptr) {
   }
   void getWeightsGmodKInSimpleCoordinatesK(Vectors<Rational>& outputWeights) {
-    this->getWeightsWrtKInSimpleCoordinatesK(outputWeights, this->GmodK);
+    this->getWeightsWrtKInSimpleCoordinatesK(outputWeights, this->gModK);
   }
   void getWeightsKInSimpleCoordinatesK(Vectors<Rational>& outputWeights) {
     this->getWeightsWrtKInSimpleCoordinatesK(outputWeights, this->imagesAllChevalleyGenerators);
@@ -495,7 +495,7 @@ public:
   );
   bool applyHomomorphism(
     const MonomialUniversalEnveloping<RationalFraction<Rational> >& input,
-    const RationalFraction<Rational>& theCoeff,
+    const RationalFraction<Rational>& coefficient,
     ElementUniversalEnveloping<RationalFraction<Rational> >& output
   );
 };

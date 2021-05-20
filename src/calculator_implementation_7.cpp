@@ -1276,11 +1276,11 @@ bool CalculatorFunctionsAlgebraic::printAlgebraicClosureStatus(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   (void) input;
-  FormatExpressions theFormat;
-  theFormat.flagUseHTML = false;
-  theFormat.flagUseLatex = true;
+  FormatExpressions format;
+  format.flagUseHTML = false;
+  format.flagUseLatex = true;
   return output.assignValue(
-    calculator.objectContainer.algebraicClosure.toStringFull(&theFormat),
+    calculator.objectContainer.algebraicClosure.toStringFull(&format),
     calculator
   );
 }
@@ -2054,7 +2054,7 @@ bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorith
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals");
   IntegralRationalFunctionComputation computation(&calculator);
-  bool isGood = CalculatorConversions::innerRationalFunction(calculator, input, computation.inputExpression);
+  bool isGood = CalculatorConversions::rationalFunction(calculator, input, computation.inputExpression);
   if (isGood) {
     isGood = computation.inputExpression.isOfType<RationalFraction<Rational> >();
   }
@@ -3547,10 +3547,10 @@ bool CalculatorFunctionsIntegration::integralOperator(
   return output.setChild(2, newIntegrand);
 }
 
-bool CalculatorFunctions::innerRationalFunctionSubstitution(
+bool CalculatorFunctions::rationalFunctionSubstitution(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerRationalFunctionSubstitution");
+  MacroRegisterFunctionWithName("CalculatorFunctions::rationalFunctionSubstitution");
   if (input.size() != 2) {
     return false;
   }
@@ -3596,19 +3596,19 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   std::stringstream out, outLaTeX;
 
   RationalFraction<Rational> tempElement;
-  FormatExpressions theFormat;
-  theContext.getFormat(theFormat);
-  theFormat.flagUseLatex = true;
-  theFormat.flagUseHTML = false;
-  theFormat.flagUseFrac = true;
-  theFormat.matrixColumnVerticalLineIndex = matrix.numberOfColumns - 1;
+  FormatExpressions format;
+  theContext.getFormat(format);
+  format.flagUseLatex = true;
+  format.flagUseHTML = false;
+  format.flagUseFrac = true;
+  format.matrixColumnVerticalLineIndex = matrix.numberOfColumns - 1;
   out << "Computing "
-  << HtmlRoutines::getMathNoDisplay(matrix.toString(&theFormat) + "^{- 1}");
+  << HtmlRoutines::getMathNoDisplay(matrix.toString(&format) + "^{- 1}");
   extendedMatrix = matrix;
   extendedMatrix.appendMatrixOnTheRight(outputMat);
-  out << "<br>" << HtmlRoutines::getMathNoDisplay(extendedMatrix.toString(&theFormat)) ;
+  out << "<br>" << HtmlRoutines::getMathNoDisplay(extendedMatrix.toString(&format)) ;
   outLaTeX << "\\begin{tabular}{ll}";
-  outLaTeX << "$" << extendedMatrix.toString(& theFormat) << "$";
+  outLaTeX << "$" << extendedMatrix.toString(& format) << "$";
 
   for (int i = 0; i < matrix.numberOfColumns; i ++) {
     tempI = matrix.findPivot(i, NumFoundPivots);
@@ -3620,24 +3620,24 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
         outLaTeX << "& Swap row " << NumFoundPivots + 1 << " and row " << tempI + 1 << ". ";
         extendedMatrix = matrix;
         extendedMatrix.appendMatrixOnTheRight(outputMat);
-        out << "<br>" << HtmlRoutines::getMathNoDisplay(outputMat.toString(&theFormat));
-        outLaTeX << "\\\\" << "$" << outputMat.toString(&theFormat) << "$";
+        out << "<br>" << HtmlRoutines::getMathNoDisplay(outputMat.toString(&format));
+        outLaTeX << "\\\\" << "$" << outputMat.toString(&format) << "$";
       }
       tempElement = matrix(NumFoundPivots, i);
       tempElement.invert();
       if (tempElement != 1) {
         out << "<br> multiply row number " << NumFoundPivots + 1 << " by "
-        << tempElement.toString(&theFormat) << ": ";
+        << tempElement.toString(&format) << ": ";
         outLaTeX << "& multiply row number " << NumFoundPivots + 1 << " by $"
-        << tempElement.toString(&theFormat) << "$. \\\\";
+        << tempElement.toString(&format) << "$. \\\\";
       }
       matrix.rowTimesScalar(NumFoundPivots, tempElement);
       outputMat.rowTimesScalar(NumFoundPivots, tempElement);
       if (tempElement != 1) {
         extendedMatrix = matrix;
         extendedMatrix.appendMatrixOnTheRight(outputMat);
-        out << HtmlRoutines::getMathNoDisplay(extendedMatrix.toString(&theFormat));
-        outLaTeX << "$" << extendedMatrix.toString(&theFormat) << "$";
+        out << HtmlRoutines::getMathNoDisplay(extendedMatrix.toString(&format));
+        outLaTeX << "$" << extendedMatrix.toString(&format) << "$";
       }
       bool found = false;
       for (int j = 0; j < matrix.numberOfRows; j ++) {
@@ -3657,9 +3657,9 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
             }
             found = true;
             out << " Row index " << NumFoundPivots + 1 << " times "
-            << tempElement.toString(&theFormat) << " added to row index " << j + 1;
+            << tempElement.toString(&format) << " added to row index " << j + 1;
             outLaTeX << " Row index " << NumFoundPivots + 1 << " times $"
-            << tempElement.toString(&theFormat) << "$ added to row index " << j + 1 << "\\\\";
+            << tempElement.toString(&format) << "$ added to row index " << j + 1 << "\\\\";
           }
         }
       }
@@ -3669,14 +3669,14 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
         outLaTeX << "\\\\";
         extendedMatrix = matrix;
         extendedMatrix.appendMatrixOnTheRight(outputMat);
-        out << HtmlRoutines::getMathNoDisplay(extendedMatrix.toString(&theFormat));
-        outLaTeX << "$" << extendedMatrix.toString(&theFormat) << "$";
+        out << HtmlRoutines::getMathNoDisplay(extendedMatrix.toString(&format));
+        outLaTeX << "$" << extendedMatrix.toString(&format) << "$";
       }
       NumFoundPivots ++;
     }
   }
   outLaTeX << "\\end{tabular}";
-  theFormat.matrixColumnVerticalLineIndex = - 1;
+  format.matrixColumnVerticalLineIndex = - 1;
   if (NumFoundPivots < matrix.numberOfRows) {
     out << "<br>Matrix to the right of the vertical line not "
     << "transformed to the identity matrix => "
@@ -3687,10 +3687,10 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   } else {
     out << "<br>The inverse of the starting matrix "
     << "can be read off on the matrix to the left of the id matrix: "
-    << HtmlRoutines::getMathNoDisplay(outputMat.toString(&theFormat));
+    << HtmlRoutines::getMathNoDisplay(outputMat.toString(&format));
     outLaTeX << " The inverse matrix can now be read off as the matrix "
     << "to the left of the identity matrix: $"
-    << outputMat.toString(&theFormat) << "$";
+    << outputMat.toString(&format) << "$";
   }
   out << "Output in LaTeX: <br><br>" << outLaTeX.str();
   return output.assignValue(out.str(), calculator);
@@ -3719,14 +3719,14 @@ bool CalculatorFunctions::innerInvertMatrixVerbose(
   int NumFoundPivots = 0;
   std::stringstream out;
   Rational tempElement;
-  FormatExpressions theFormat;
-  theFormat.flagUseLatex = true;
-  theFormat.flagUseHTML = false;
-  theFormat.matrixColumnVerticalLineIndex = mat.numberOfColumns - 1;
-  out << "Computing " << HtmlRoutines::getMathNoDisplay(mat.toString(&theFormat) + "^{- 1}");
+  FormatExpressions format;
+  format.flagUseLatex = true;
+  format.flagUseHTML = false;
+  format.matrixColumnVerticalLineIndex = mat.numberOfColumns - 1;
+  out << "Computing " << HtmlRoutines::getMathNoDisplay(mat.toString(&format) + "^{- 1}");
   tempMat = mat;
   tempMat.appendMatrixOnTheRight(outputMat);
-  out << "<br>" << HtmlRoutines::getMathNoDisplay(tempMat.toString(&theFormat));
+  out << "<br>" << HtmlRoutines::getMathNoDisplay(tempMat.toString(&format));
   for (int i = 0; i < mat.numberOfColumns; i ++) {
     tempI = mat.findPivot(i, NumFoundPivots);
     if (tempI != - 1) {
@@ -3738,7 +3738,7 @@ bool CalculatorFunctions::innerInvertMatrixVerbose(
         tempMat = mat;
         tempMat.appendMatrixOnTheRight(outputMat);
         out << "<br>"
-        << HtmlRoutines::getMathNoDisplay(outputMat.toString(&theFormat));
+        << HtmlRoutines::getMathNoDisplay(outputMat.toString(&format));
       }
       tempElement = mat.elements[NumFoundPivots][i];
       tempElement.invert();
@@ -3751,7 +3751,7 @@ bool CalculatorFunctions::innerInvertMatrixVerbose(
       if (tempElement != 1) {
         tempMat = mat;
         tempMat.appendMatrixOnTheRight(outputMat);
-        out << HtmlRoutines::getMathNoDisplay(tempMat.toString(&theFormat));
+        out << HtmlRoutines::getMathNoDisplay(tempMat.toString(&format));
       }
       bool found = false;
       for (int j = 0; j < mat.numberOfRows; j ++) {
@@ -3776,7 +3776,7 @@ bool CalculatorFunctions::innerInvertMatrixVerbose(
         out << ": <br> ";
         tempMat = mat;
         tempMat.appendMatrixOnTheRight(outputMat);
-        out << HtmlRoutines::getMathNoDisplay(tempMat.toString(&theFormat));
+        out << HtmlRoutines::getMathNoDisplay(tempMat.toString(&format));
       }
       NumFoundPivots ++;
     }
@@ -3788,7 +3788,7 @@ bool CalculatorFunctions::innerInvertMatrixVerbose(
   } else {
     out << "<br>The inverse of the starting matrix can "
     << "be read off on the matrix to the left of the id matrix: "
-    << HtmlRoutines::getMathNoDisplay(outputMat.toString(&theFormat));
+    << HtmlRoutines::getMathNoDisplay(outputMat.toString(&format));
   }
   return output.assignValue(out.str(), calculator);
 }
@@ -6636,21 +6636,21 @@ bool CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calcula
     out << "<b>This code is has been set to run up to ambient Lie algebra of rank 8. </b>";
     return output.assignValue(out.str(), calculator);
   }
-  SemisimpleSubalgebras& theSSsubalgebras =
+  SemisimpleSubalgebras& semisimpleSubalgebras =
   calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.weylGroup.dynkinType);
-  theSSsubalgebras.toStringExpressionString = CalculatorConversions::stringFromSemisimpleSubalgebras;
+  semisimpleSubalgebras.toStringExpressionString = CalculatorConversions::stringFromSemisimpleSubalgebras;
 
   out << "Attempting to embed "
   << smallSubalgebraPointer.content->weylGroup.dynkinType.toString()
   << " in " << ownerSS.toStringLieAlgebraName();
-  theSSsubalgebras.findTheSemisimpleSubalgebrasFromScratch(
+  semisimpleSubalgebras.findTheSemisimpleSubalgebrasFromScratch(
     ownerSS,
     calculator.objectContainer.algebraicClosure,
     calculator.objectContainer.semisimpleLieAlgebras,
     calculator.objectContainer.slTwoSubalgebras,
     &smallSubalgebraPointer.content->weylGroup.dynkinType
   );
-  return output.assignValue(theSSsubalgebras, calculator);
+  return output.assignValue(semisimpleSubalgebras, calculator);
 }
 
 bool CalculatorFunctions::innerAllPartitions(Calculator& calculator, const Expression& input, Expression& output) {
@@ -7635,10 +7635,10 @@ bool Calculator::Test::calculatorTestRun() {
   this->debugFlagAtStart = global.getWebInput(WebAPI::request::debugFlag);
   global.setWebInput(WebAPI::request::debugFlag, "false");
   this->calculatorTestPrepare();
-  Calculator theTester;
+  Calculator tester;
   ProgressReport report;
-  FormatExpressions theFormat;
-  theFormat.flagExpressionIsFinal = true;
+  FormatExpressions format;
+  format.flagExpressionIsFinal = true;
   if (this->numberOfTests <= 0) {
     this->numberOfTests = this->commands.size() - this->startIndex;
     if (this->numberOfTests < 0) {
@@ -7660,11 +7660,11 @@ bool Calculator::Test::calculatorTestRun() {
     << ", command:\n"
     << currentTest.command << Logger::endL;
     report.report(reportStream.str());
-    theTester.initialize(Calculator::Mode::full);
-    theTester.checkConsistencyAfterInitialization();
-    theTester.evaluate(currentTest.command);
-    currentTest.actualResult = theTester.programExpression.toString(&theFormat);
-    reportStream << "<br>Result: " << theTester.programExpression.toString();
+    tester.initialize(Calculator::Mode::full);
+    tester.checkConsistencyAfterInitialization();
+    tester.evaluate(currentTest.command);
+    currentTest.actualResult = tester.programExpression.toString(&format);
+    reportStream << "<br>Result: " << tester.programExpression.toString();
     reportStream << "<br>Done in: " << global.getElapsedSeconds() - this->startTime << " seconds. ";
     report.report(reportStream.str());
   }

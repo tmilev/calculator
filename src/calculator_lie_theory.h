@@ -53,9 +53,9 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    Vectors<RationalFraction<Rational> >& theHWs,
-    BranchingData& theG2B3Data,
-    ExpressionContext &theContext
+    Vectors<RationalFraction<Rational> >& highestWeights,
+    BranchingData& g2inB3Data,
+    ExpressionContext &context
   );
   static bool printB3G2branchingTable(
     Calculator& calculator, const Expression& input, Expression& output
@@ -65,7 +65,7 @@ public:
     const Expression& input,
     Expression& output,
     Vectors<RationalFraction<Rational> >& outputHWs,
-    BranchingData& theG2B3Data,
+    BranchingData& g2InB3Data,
     ExpressionContext &theContext
   );
   static bool writeGenVermaModAsDiffOperators(

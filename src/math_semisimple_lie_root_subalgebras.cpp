@@ -862,7 +862,7 @@ void RootSubalgebra::extractRelations(
   if (owner.flagLookingForMinimalRels) {
     relation.FixRightHandSide(*this, nilradicalRoots);
     relation.makeLookCivilized(*this);
-    owner.theMinRels.addRelationNoRepetition(relation, owner);
+    owner.minimalRelations.addRelationNoRepetition(relation, owner);
   }
   bool tempBool = this->attemptTheTripleTrick(relation, nilradicalRoots);
   if (tempBool) {
@@ -1550,6 +1550,7 @@ void RootSubalgebra::initNoOwnerReset() {
   this->numHeirsRejectedSameModuleDecompo = 0;
   this->numHeirsRejectedBadAngleS = 0;
   this->numHeirsRejectedNotMaxWRTouterAuto = 0;
+  this->indicesSubalgebrasContainingK.clear();
 }
 
 void RootSubalgebra::initForNilradicalGeneration() {
@@ -2221,12 +2222,12 @@ bool RootSubalgebra::checkForMaximalDominanceCartanSubalgebra() {
   Vectors<Rational> simpleBasisOriginalOrderCopy;
   for (int i = 0; i < this->outerSAautos.elements.size; i ++) {
     if (!this->outerSAautos.elements[i].isIdentity()) {
-      simpleBasisOriginalOrderCopy = this->simpleBasisKinOrderOfGeneration;
+      simpleBasisOriginalOrderCopy = this->simpleBasisKInOrderOfGeneration;
       this->outerSAautos.elements[i].actOnVectorsColumn(simpleBasisOriginalOrderCopy);
       this->getAmbientWeylAutomorphisms().raiseToMaximallyDominant(simpleBasisOriginalOrderCopy);
       for (int j = 0; j < simpleBasisOriginalOrderCopy.size; j ++) {
-        if (simpleBasisOriginalOrderCopy[j] != this->simpleBasisKinOrderOfGeneration[j]) {
-          if (simpleBasisOriginalOrderCopy[j].IsGreaterThanLexicographic(this->simpleBasisKinOrderOfGeneration[j])) {
+        if (simpleBasisOriginalOrderCopy[j] != this->simpleBasisKInOrderOfGeneration[j]) {
+          if (simpleBasisOriginalOrderCopy[j].IsGreaterThanLexicographic(this->simpleBasisKInOrderOfGeneration[j])) {
             if (this->indexInducingSubalgebra != - 1) {
               this->owner->subalgebras[this->indexInducingSubalgebra].numHeirsRejectedNotMaxWRTouterAuto ++;
             }
@@ -2285,7 +2286,7 @@ bool RootSubalgebra::computeEssentialsIfNew() {
     this->owner->subalgebras[this->indexInducingSubalgebra].potentialExtensionRootPermutations;
     List<Matrix<Rational> >& extensionCartanSymmetrics =
     this->owner->subalgebras[this->indexInducingSubalgebra].potentialExtensionCartanSymmetrics;
-    for (int i = 0; i <extensionRootPermutations.size && goodPermutation == - 1; i ++) {
+    for (int i = 0; i < extensionRootPermutations.size && goodPermutation == - 1; i ++) {
       this->scalarProdMatrixOrdered.makeZeroMatrix(this->simpleRootsReductiveSubalgebra.size);
       for (int j = 0; j < this->simpleRootsReductiveSubalgebra.size; j ++) {
         for (int k = 0; k < this->simpleRootsReductiveSubalgebra.size; k ++) {
@@ -2317,8 +2318,8 @@ bool RootSubalgebra::computeEssentialsIfNew() {
   if (this->simpleRootsReductiveSubalgebra.getRankElementSpan() != this->simpleRootsReductiveSubalgebra.size) {
     global.fatal << "<br>simple basis vectors not linearly independent! " << global.fatal;
   }
-  if (!this->getAmbientWeylAutomorphisms().areMaximallyDominantGroupOuter(this->simpleBasisKinOrderOfGeneration)) {
-    Vectors<Rational> tempVs = this->simpleBasisKinOrderOfGeneration;
+  if (!this->getAmbientWeylAutomorphisms().areMaximallyDominantGroupOuter(this->simpleBasisKInOrderOfGeneration)) {
+    Vectors<Rational> tempVs = this->simpleBasisKInOrderOfGeneration;
     tempVs.removeLastObject();
     if (!this->getAmbientWeylAutomorphisms().areMaximallyDominantGroupOuter(tempVs)) {
       global.fatal << "<br>First vectors "
@@ -2983,6 +2984,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
         output.indicesSl2sContainedInRootSubalgebras[indexRootSAinContainer].addOnTop(output.size);
         sl2.indexInContainer = output.size;
         output.addOnTop(sl2);
+        output.lastObject()->checkIndicesMinimalContainingRootSubalgebras();
       }
     } else {
       output.badHCharacteristics.addOnTop(characteristicH);
@@ -3096,12 +3098,12 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
   HashedList<Vector<Rational> > tempVs;
   this->flagPrintGAPinput = this->owner->weylGroup.loadGAPRootSystem(tempVs);
   ProgressReport report2;
-  RootSubalgebra currentSA;
-  currentSA.owner = this;
-  currentSA.computeEssentialsIfNew();
-  currentSA.computePotentialExtensions();
+  RootSubalgebra rootSubalgebra;
+  rootSubalgebra.owner = this;
+  rootSubalgebra.computeEssentialsIfNew();
+  rootSubalgebra.computePotentialExtensions();
   this->subalgebras.reserve(this->getOwnerWeyl().rootsOfBorel.size);
-  this->subalgebras.addOnTop(currentSA);
+  this->subalgebras.addOnTop(rootSubalgebra);
   std::string reportString;
   for (int i = 0; i < this->subalgebras.size; i ++) {
     if (report2.tickAndWantReport()) {
@@ -3122,24 +3124,28 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
         std::stringstream out;
         out << "Exploring extensions of subalgebra " << i + 1
         << " out of " << this->subalgebras.size << ". Type current SA: "
-        << this->subalgebras[i].dynkinType.toString() << ". Possible standard parabolic extensions: "
+        << this->subalgebras[i].dynkinType.toString()
+        << ". Possible standard parabolic extensions: "
         << reportString << ". Exploring extension by lowest weight vector of module "
         << j + 1 << " out of " << this->subalgebras[i].modules.size;
         report2.report(out.str());
       }
-      currentSA.initNoOwnerReset();
-      currentSA.simpleRootsReductiveSubalgebra = this->subalgebras[i].simpleRootsReductiveSubalgebra;
-      currentSA.simpleRootsReductiveSubalgebra.addOnTop(this->subalgebras[i].lowestWeightsPrimalSimple[j]);
-      currentSA.simpleBasisKinOrderOfGeneration = this->subalgebras[i].simpleBasisKinOrderOfGeneration;
-      currentSA.simpleBasisKinOrderOfGeneration.addOnTop(this->subalgebras[i].lowestWeightsPrimalSimple[j]);
-      currentSA.indexInducingSubalgebra = i;
-      if (!currentSA.computeEssentialsIfNew()) {
+      rootSubalgebra.initNoOwnerReset();
+      rootSubalgebra.simpleRootsReductiveSubalgebra = this->subalgebras[i].simpleRootsReductiveSubalgebra;
+      rootSubalgebra.simpleRootsReductiveSubalgebra.addOnTop(this->subalgebras[i].lowestWeightsPrimalSimple[j]);
+      rootSubalgebra.simpleBasisKInOrderOfGeneration = this->subalgebras[i].simpleBasisKInOrderOfGeneration;
+      rootSubalgebra.simpleBasisKInOrderOfGeneration.addOnTop(this->subalgebras[i].lowestWeightsPrimalSimple[j]);
+      rootSubalgebra.indexInducingSubalgebra = i;
+      if (!rootSubalgebra.computeEssentialsIfNew()) {
         continue;
       }
-      if (currentSA.simpleRootsReductiveSubalgebra.getRankElementSpan() != currentSA.simpleRootsReductiveSubalgebra.size) {
+      if (
+        rootSubalgebra.simpleRootsReductiveSubalgebra.getRankElementSpan() !=
+        rootSubalgebra.simpleRootsReductiveSubalgebra.size
+      ) {
         global.fatal << "<br>simple basis vectors not linearly independent! " << global.fatal;
       }
-      this->subalgebras.addOnTop(currentSA);
+      this->subalgebras.addOnTop(rootSubalgebra);
       this->subalgebras.lastObject()->computePotentialExtensions();
     }
   }
@@ -3187,7 +3193,7 @@ void RootSubalgebras::computeAllRootSubalgebrasUpToIsomorphism(int StartingIndex
     this->subalgebras[i].flagComputeConeCondition = this->flagComputeConeCondition;
     this->subalgebras[i].generatePossibleNilradicals(
       localController,
-      this->ImpiedSelectionsNilradical,
+      this->impiedSelectionsNilradical,
       this->parabolicsCounterNilradicalGeneration,
       false,
       *this,
@@ -3195,7 +3201,7 @@ void RootSubalgebras::computeAllRootSubalgebrasUpToIsomorphism(int StartingIndex
     );
     if (i != NumToBeProcessed+StartingIndex - 1) {
       this->subalgebras[i + 1].generatePossibleNilradicalsInit(
-        this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration
+        this->impiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration
       );
     }
   }
@@ -3216,21 +3222,21 @@ void RootSubalgebras::computeLProhibitingRelations() {
     this->storedNilradicals.setSize(this->subalgebras.size);
   }
   for (;
-    this->IndexCurrentSANilradicalsGeneration < this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration;
-    this->IndexCurrentSANilradicalsGeneration ++
+    this->indexCurrentSubalgebraNilradicalsGeneration < this->numberReductiveRootSubalgebrasToBeProcessedNilradicalsGeneration;
+    this->indexCurrentSubalgebraNilradicalsGeneration ++
   ) {
-    this->subalgebras[this->IndexCurrentSANilradicalsGeneration].flagComputeConeCondition = this->flagComputeConeCondition;
-    this->subalgebras[this->IndexCurrentSANilradicalsGeneration].generatePossibleNilradicals(
+    this->subalgebras[this->indexCurrentSubalgebraNilradicalsGeneration].flagComputeConeCondition = this->flagComputeConeCondition;
+    this->subalgebras[this->indexCurrentSubalgebraNilradicalsGeneration].generatePossibleNilradicals(
       localController,
-      this->ImpiedSelectionsNilradical,
+      this->impiedSelectionsNilradical,
       this->parabolicsCounterNilradicalGeneration,
       this->flagUsingParabolicsInCentralizers,
       *this,
-      this->IndexCurrentSANilradicalsGeneration
+      this->indexCurrentSubalgebraNilradicalsGeneration
     );
-    if (this->IndexCurrentSANilradicalsGeneration != this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration - 1) {
-      this->subalgebras[this->IndexCurrentSANilradicalsGeneration + 1].generatePossibleNilradicalsInit(
-        this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration
+    if (this->indexCurrentSubalgebraNilradicalsGeneration != this->numberReductiveRootSubalgebrasToBeProcessedNilradicalsGeneration - 1) {
+      this->subalgebras[this->indexCurrentSubalgebraNilradicalsGeneration + 1].generatePossibleNilradicalsInit(
+        this->impiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration
       );
     }
   }
@@ -3684,17 +3690,17 @@ void RootSubalgebras::computeActionNormalizerOfCentralizerIntersectNilradical(
   Selection& SelectedBasisRoots, RootSubalgebra& theRootSA
 ) {
   this->computeNormalizerOfCentralizerIntersectNilradical(SelectedBasisRoots, theRootSA);
-  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& theSubgroup = this->CentralizerIsomorphisms.lastObject();
-  this->ActionsNormalizerCentralizerNilradical.setSize(theSubgroup.allElements.size - 1);
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& theSubgroup = this->centralizerIsomorphisms.lastObject();
+  this->actionsNormalizerCentralizerNilradical.setSize(theSubgroup.allElements.size - 1);
   Vector<Rational> tempRoot;
   ProgressReport report;
   for (int i = 0; i < theSubgroup.allElements.size - 1; i ++) {
-    this->ActionsNormalizerCentralizerNilradical[i].setSize(theRootSA.modules.size);
+    this->actionsNormalizerCentralizerNilradical[i].setSize(theRootSA.modules.size);
     for (int j = 0; j < theRootSA.modules.size; j ++) {
       tempRoot = theRootSA.highestWeightsPrimalSimple[j];
       theSubgroup.actByNonSimpleElement(i + 1, tempRoot);
       int tempI = theRootSA.getIndexKModuleContainingRoot(tempRoot);
-      this->ActionsNormalizerCentralizerNilradical[i][j] = tempI;
+      this->actionsNormalizerCentralizerNilradical[i][j] = tempI;
     }
     if (global.response.monitoringAllowed()) {
       std::stringstream out;
@@ -3714,12 +3720,12 @@ void RootSubalgebras::computeNormalizerOfCentralizerIntersectNilradical(
       selectedRootsBasisCentralizer.addOnTop(theRootSA.simpleBasisCentralizerRoots[i]);
     }
   }
-  this->CentralizerIsomorphisms.reserve(this->subalgebras.size);
+  this->centralizerIsomorphisms.reserve(this->subalgebras.size);
   this->centralizerOuterIsomorphisms.reserve(this->subalgebras.size);
 
-  this->CentralizerIsomorphisms.setSize(this->CentralizerIsomorphisms.size + 1);
-  this->centralizerOuterIsomorphisms.setSize(this->CentralizerIsomorphisms.size);
-  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& outputSubgroup = this->CentralizerIsomorphisms.lastObject();
+  this->centralizerIsomorphisms.setSize(this->centralizerIsomorphisms.size + 1);
+  this->centralizerOuterIsomorphisms.setSize(this->centralizerIsomorphisms.size);
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& outputSubgroup = this->centralizerIsomorphisms.lastObject();
   outputSubgroup.ambientWeyl = &theRootSA.getAmbientWeyl();
   this->makeProgressReportAutomorphisms(outputSubgroup, theRootSA);
   theRootSA.generateIsomorphismsPreservingBorel(theRootSA, &outputSubgroup);
@@ -3757,12 +3763,12 @@ void RootSubalgebras::initForNilradicalGeneration() {
   this->NumSubalgebrasProcessed = 0;
   this->numberOfConeConditionFailures = 0;
   this->NumSubalgebrasCounted = 0;
-  this->IndexCurrentSANilradicalsGeneration = 0;
+  this->indexCurrentSubalgebraNilradicalsGeneration = 0;
   this->ReportStringNonNilradicalParabolic = "";
-  this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration = this->subalgebras.size - 1;
+  this->numberReductiveRootSubalgebrasToBeProcessedNilradicalsGeneration = this->subalgebras.size - 1;
   if (this->subalgebras.size > 0) {
     this->subalgebras[0].generatePossibleNilradicalsInit(
-      this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration
+      this->impiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration
     );
     this->NumconeConditionHoldsBySSpart.initializeFillInObject(this->subalgebras.size, 0);
   }
@@ -3772,8 +3778,8 @@ bool RootSubalgebras::approveKModuleSelectionWRTActionsNormalizerCentralizerNilr
   if (!this->flagUsingActionsNormalizerCentralizerNilradical) {
     return true;
   }
-  for (int i = 0; i < this->ActionsNormalizerCentralizerNilradical.size; i ++) {
-    if (!this->approveSelAgainstOneGenerator(this->ActionsNormalizerCentralizerNilradical[i], targetSel)) {
+  for (int i = 0; i < this->actionsNormalizerCentralizerNilradical.size; i ++) {
+    if (!this->approveSelAgainstOneGenerator(this->actionsNormalizerCentralizerNilradical[i], targetSel)) {
       return false;
     }
   }
@@ -3784,9 +3790,9 @@ void RootSubalgebras::raiseSelectionUntilApproval(Selection& targetSel) {
   bool raised = true;
   while (raised) {
     raised = false;
-    for (int i = 0; i < this->ActionsNormalizerCentralizerNilradical.size; i ++) {
-      if (!this->approveSelAgainstOneGenerator(this->ActionsNormalizerCentralizerNilradical[i], targetSel)) {
-        this->applyOneGenerator(this->ActionsNormalizerCentralizerNilradical[i], targetSel);
+    for (int i = 0; i < this->actionsNormalizerCentralizerNilradical.size; i ++) {
+      if (!this->approveSelAgainstOneGenerator(this->actionsNormalizerCentralizerNilradical[i], targetSel)) {
+        this->applyOneGenerator(this->actionsNormalizerCentralizerNilradical[i], targetSel);
         raised = true;
       }
     }

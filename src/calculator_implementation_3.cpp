@@ -315,16 +315,16 @@ void Calculator::makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output) {
   output.imagesSimpleChevalleyGenerators[3] = g_m2;
   output.imagesSimpleChevalleyGenerators[2] = g_m1plusg_m3;
   output.computeHomomorphismFromImagesSimpleChevalleyGenerators();
-  output.getRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(output.RestrictedRootSystem);
+  output.getRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(output.restrictedRootSystem);
 }
 
 void BranchingData::resetOutputData() {
-  this->theEigenVectorS.setSize(0);
-  this->theEigenVectorsLevi.setSize(0);
+  this->eigenVectors.setSize(0);
+  this->eigenVectorsLevi.setSize(0);
   this->outputEigenWords.setSize(0);
   this->g2Weights.setSize(0);
   this->outputWeightsFundCoordS.setSize(0);
-  this->theCharacterDifferences.clear();
+  this->characterDifferences.clear();
 }
 
 void WeylGroupData::getHighestWeightsAllRepresentationsDimensionLessThanOrEqualTo(
@@ -658,10 +658,10 @@ Calculator::Test::Test(Calculator& inputOwner) {
   this->flagTestResultsExist = true;
 }
 
-bool Calculator::innerAutomatedTest(
+bool Calculator::automatedTest(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerAutomatedTest");
+  MacroRegisterFunctionWithName("Calculator::automatedTest");
   if (!global.userDefaultHasAdminRights()) {
     return calculator << "Automated test requires administrator access";
   }

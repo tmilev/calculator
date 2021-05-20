@@ -252,7 +252,7 @@ void Calculator::initializeFunctionsExtra() {
 
   this->addOperationHandler(
     "TestCalculatorAll",
-    Calculator::innerAutomatedTest,
+    Calculator::automatedTest,
     "",
     "Runs an automated test of built in functions "
     "against a set of known good results. "
@@ -260,7 +260,7 @@ void Calculator::initializeFunctionsExtra() {
     "If positive, the second argument gives the number of tests to run. "
     "Else, when the second argument is negative or zero, we run all tests. ",
     "TestCalculatorAll{}(0, 0)",
-    "Calculator::innerAutomatedTest",
+    "Calculator::automatedTest",
     "TestCalculatorAll",
     innerAdminNoTest
   );

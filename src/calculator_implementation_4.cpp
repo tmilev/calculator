@@ -2107,16 +2107,20 @@ bool ObjectContainer::checkConsistencyAfterReset() {
     << this->weylGroupVirtualRepresentations.size << " elements. " << global.fatal;
   }
   if (this->polynomialsRational.size != 0) {
-    global.fatal << "The rational polynomials are expected to be empty, have: " << this->polynomialsRational.size << " elements instead. " << global.fatal;
+    global.fatal << "The rational polynomials are expected to be empty, have: "
+    << this->polynomialsRational.size << " elements instead. " << global.fatal;
   }
   if (this->allRationals.size != 0) {
-    global.fatal << "Rationals expected to be empty, have: " << this->allRationals.size << " elements instead. " << global.fatal;
+    global.fatal << "Rationals expected to be empty, have: "
+    << this->allRationals.size << " elements instead. " << global.fatal;
   }
   if (this->doubleNumbers.size != 1) {
-    global.fatal << "Doubles expected to be have exactly 1 element (namely, nan), have: " << this->doubleNumbers.size << " elements instead. " << global.fatal;
+    global.fatal << "Doubles expected to be have exactly 1 element (namely, nan), have: "
+    << this->doubleNumbers.size << " elements instead. " << global.fatal;
   }
   if (this->allAlgebraicNumbers.size != 0) {
-    global.fatal << "Algebraic numbers expected to be empty, have: " << this->allAlgebraicNumbers.size << " elements instead. " << global.fatal;
+    global.fatal << "Algebraic numbers expected to be empty, have: "
+    << this->allAlgebraicNumbers.size << " elements instead. " << global.fatal;
   }
   return true;
 }

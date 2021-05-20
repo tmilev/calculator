@@ -40,10 +40,10 @@ public:
   void blockSignals();
   void unblockSignals();
   void initializeSignals();
-  static SignalsInfrastructure& theSignals();
+  static SignalsInfrastructure& signals();
 };
 
-SignalsInfrastructure& SignalsInfrastructure::theSignals() {
+SignalsInfrastructure& SignalsInfrastructure::signals() {
   static SignalsInfrastructure result;
   return result;
 }
@@ -55,12 +55,12 @@ SignalsInfrastructure::SignalsInfrastructure() {
 }
 
 // This class locks/unlocks all signals within its scope
-class Signallock {
-  Signallock() {
-    SignalsInfrastructure::theSignals().blockSignals();
+class SignalLock {
+  SignalLock() {
+    SignalsInfrastructure::signals().blockSignals();
   }
-  ~Signallock() {
-    SignalsInfrastructure::theSignals().unblockSignals();
+  ~SignalLock() {
+    SignalsInfrastructure::signals().unblockSignals();
   }
 };
 
@@ -77,12 +77,12 @@ void SignalsInfrastructure::unblockSignals() {
 }
 
 void SignalsInfrastructure::blockSignals() {
-  sigset_t* theSignals = nullptr;
+  sigset_t* signals = nullptr;
   if (!this->flagSignalsAreStored) {
     // Store signals on first run.
-    theSignals = &this->oldSignals;
+    signals = &this->oldSignals;
   }
-  int error = sigprocmask(SIG_BLOCK, &this->allSignals, theSignals);
+  int error = sigprocmask(SIG_BLOCK, &this->allSignals, signals);
   this->flagSignalsAreStored = true;
   if (error < 0) {
     global
@@ -2667,7 +2667,7 @@ void WebServer::stopKillAll() {
   for (int i = 0; i < this->theWorkers.size; i ++) {
     this->terminateChildSystemCall(i);
   }
-  SignalsInfrastructure::theSignals().unblockSignals();
+  SignalsInfrastructure::signals().unblockSignals();
   global << "Waiting for child processes to exit. " << Logger::endL;
   int workersStillInUse = 0;
   int waitAttempts = 0;
@@ -2699,7 +2699,7 @@ void WebServer::stopKillAll() {
 }
 
 void WebServer::stop() {
-  SignalsInfrastructure::theSignals().unblockSignals();
+  SignalsInfrastructure::signals().unblockSignals();
   this->releaseEverything();
   this->releaseEverything();
   exit(0);
@@ -2833,7 +2833,7 @@ void WebServer::handleTooManyConnections(const std::string& incomingUserAddress)
     }
   }
   theTimes.quickSortAscending(nullptr, &theIndices);
-  if (!SignalsInfrastructure::theSignals().flagSignalsAreBlocked) {
+  if (!SignalsInfrastructure::signals().flagSignalsAreBlocked) {
     global.fatal << "Signals must be blocked at this point of code. " << global.fatal;
   }
   for (int j = 0; j < theTimes.size; j ++) {
@@ -3101,7 +3101,7 @@ bool WebServer::initBindToPorts() {
 }
 
 void WebServer::initializeSignals() {
-  SignalsInfrastructure::theSignals().initializeSignals();
+  SignalsInfrastructure::signals().initializeSignals();
 }
 
 void SignalsInfrastructure::initializeSignals() {
@@ -3406,9 +3406,9 @@ int WebServer::run() {
   while (true) {
     // Main accept() loop.
     theListener.zeroSocketSet();
-    SignalsInfrastructure::theSignals().unblockSignals();
+    SignalsInfrastructure::signals().unblockSignals();
     theListener.selectWrapper();
-    SignalsInfrastructure::theSignals().blockSignals();
+    SignalsInfrastructure::signals().blockSignals();
     if (global.flagServerDetailedLog) {
       global << Logger::green << "Detail: select success. " << Logger::endL;
     }
@@ -3506,7 +3506,7 @@ int WebServer::run() {
         << "Time elapsed: " << global.getElapsedSeconds()
         << " second(s). Calling sigprocmask. " << Logger::endL;
       }
-      SignalsInfrastructure::theSignals().unblockSignals();
+      SignalsInfrastructure::signals().unblockSignals();
       if (global.flagServerDetailedLog) {
         global << Logger::green << "Detail: sigprocmask success, running... " << Logger::endL;
       }

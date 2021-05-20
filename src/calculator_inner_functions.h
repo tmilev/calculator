@@ -349,7 +349,7 @@ public:
   static bool innerCompositeConstTimesAnyActOn(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerCompositeApowerBevaluatedAtC(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerConstantFunction(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerRationalFunctionSubstitution(Calculator& calculator, const Expression& input, Expression& output);
+  static bool rationalFunctionSubstitution(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerGetPointsImplicitly(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerCompositeDifferentiateLog(Calculator& calculator, const Expression& input, Expression& output);
@@ -572,7 +572,7 @@ public:
   static bool innerGenerateMultiplicativelyClosedSet(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerDeterminantPolynomial(Calculator& calculator, const Expression& input, Expression& output);
+  static bool determinantPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerInvertMatrixVerbose(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerSuffixNotationForPostScript(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIsInteger(Calculator& calculator, const Expression& input, Expression& output);

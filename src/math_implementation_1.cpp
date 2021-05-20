@@ -738,22 +738,22 @@ bool ElementUniversalEnveloping<Coefficient>::convertToRationalCoefficient(Eleme
 
 void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   MacroRegisterFunctionWithName("BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups");
-  this->WeylFDSmallAsSubInLarge.ambientWeyl = &this->theHmm.range().weylGroup;
-  this->WeylFDSmall.ambientWeyl = &this->theHmm.domain().weylGroup;
-  this->WeylFD.ambientWeyl = &this->theHmm.range().weylGroup;
-  this->selSmallParSel.initialize(WeylFDSmall.ambientWeyl->getDimension());
-  for (int i = 0; i < this->theHmm.ImagesCartanDomain.size; i ++) {
-    Vector<Rational>& currentV = this->theHmm.ImagesCartanDomain[i];
+  this->weylGroupFiniteDimensionalSmallAsSubgroupInLarge.ambientWeyl = &this->homomorphism.range().weylGroup;
+  this->weylGroupFiniteDimensionalSmall.ambientWeyl = &this->homomorphism.domain().weylGroup;
+  this->weylGroupFiniteDimensional.ambientWeyl = &this->homomorphism.range().weylGroup;
+  this->smallParabolicSelection.initialize(weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension());
+  for (int i = 0; i < this->homomorphism.imagesCartanDomain.size; i ++) {
+    Vector<Rational>& currentV = this->homomorphism.imagesCartanDomain[i];
     this->generatorsSmallSub.addOnTop(currentV);
     for (int j = 0; j < currentV.size; j ++) {
-      if (!currentV[j].isEqualToZero() && this->selInducing.selected[j]) {
+      if (!currentV[j].isEqualToZero() && this->inducing.selected[j]) {
         this->generatorsSmallSub.removeLastObject();
-        this->selSmallParSel.addSelectionAppendNewIndex(i);
+        this->smallParabolicSelection.addSelectionAppendNewIndex(i);
         break;
       }
     }
   }
-  this->NilModPreNil.setSize(0);
+  this->nilradicalModuloPreimageNilradical.setSize(0);
   this->nilradicalSmall.setSize(0);
   this->nilradicalLarge.setSize(0);
   this->weightsNilradicalLarge.setSize(0);
@@ -762,22 +762,22 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   this->indicesNilradicalLarge.setSize(0);
   this->indicesNilradicalSmall.setSize(0);
   ElementSemisimpleLieAlgebra<Rational> element;
-  WeylGroupData& theLargeWeyl = this->theHmm.range().weylGroup;
-  WeylGroupData& theSmallWeyl = this->theHmm.domain().weylGroup;
-  int numB3NegGenerators = this->theHmm.range().getNumberOfPositiveRoots();
-  int numG2NegGenerators = this->theHmm.domain().getNumberOfPositiveRoots();
+  WeylGroupData& theLargeWeyl = this->homomorphism.range().weylGroup;
+  WeylGroupData& theSmallWeyl = this->homomorphism.domain().weylGroup;
+  int numB3NegGenerators = this->homomorphism.range().getNumberOfPositiveRoots();
+  int numG2NegGenerators = this->homomorphism.domain().getNumberOfPositiveRoots();
   for (int i = 0; i < numB3NegGenerators; i ++) {
     const Vector<Rational>& currentWeight = theLargeWeyl.rootSystem[i];
     bool isInNilradical = false;
-    for (int k = 0; k < this->selInducing.cardinalitySelection; k ++) {
-      if (!currentWeight[this->selInducing.elements[k]].isEqualToZero()) {
+    for (int k = 0; k < this->inducing.cardinalitySelection; k ++) {
+      if (!currentWeight[this->inducing.elements[k]].isEqualToZero()) {
         isInNilradical = true;
         break;
       }
     }
     if (isInNilradical) {
       this->weightsNilradicalLarge.addOnTop(currentWeight);
-      element.makeGenerator(i, this->theHmm.range());
+      element.makeGenerator(i, this->homomorphism.range());
       this->nilradicalLarge.addOnTop(element);
       this->indicesNilradicalLarge.addOnTop(i);
     }
@@ -785,28 +785,28 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   for (int i = 0; i < numG2NegGenerators; i ++) {
     const Vector<Rational>& currentWeight = theSmallWeyl.rootSystem[i];
     bool isInNilradical = false;
-    for (int k = 0; k < this->selSmallParSel.cardinalitySelection; k ++) {
-      if (!currentWeight[this->selSmallParSel.elements[k]].isEqualToZero()) {
+    for (int k = 0; k < this->smallParabolicSelection.cardinalitySelection; k ++) {
+      if (!currentWeight[this->smallParabolicSelection.elements[k]].isEqualToZero()) {
         isInNilradical = true;
         break;
       }
     }
     if (isInNilradical) {
       this->weightsNilradicalSmall.addOnTop(currentWeight);
-      element.makeGenerator(i, this->theHmm.domain());
+      element.makeGenerator(i, this->homomorphism.domain());
       this->nilradicalSmall.addOnTop(element);
       this->indicesNilradicalSmall.addOnTop(i);
     }
   }
-  this->NilModPreNil = this->nilradicalLarge;
+  this->nilradicalModuloPreimageNilradical = this->nilradicalLarge;
   this->weightsNilModPreNil = this->weightsNilradicalLarge;
   Vector<Rational> proj;
   for (int i = 0; i < this->nilradicalSmall.size; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& eltImage =
-    this->theHmm.imagesAllChevalleyGenerators[this->indicesNilradicalSmall[i]];
-    int index = this->NilModPreNil.getIndex(eltImage);
+    this->homomorphism.imagesAllChevalleyGenerators[this->indicesNilradicalSmall[i]];
+    int index = this->nilradicalModuloPreimageNilradical.getIndex(eltImage);
     if (index != - 1) {
-      this->NilModPreNil.removeIndexSwapWithLast(index);
+      this->nilradicalModuloPreimageNilradical.removeIndexSwapWithLast(index);
       this->weightsNilModPreNil.removeIndexSwapWithLast(index);
       continue;
     }
@@ -815,7 +815,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
       proj = this->projectWeight(this->weightsNilModPreNil[j]);
       if (proj == this->weightsNilradicalSmall[i]) {
         isGood = true;
-        this->NilModPreNil.removeIndexSwapWithLast(j);
+        this->nilradicalModuloPreimageNilradical.removeIndexSwapWithLast(j);
         this->weightsNilModPreNil.removeIndexSwapWithLast(j);
         break;
       }
@@ -836,14 +836,14 @@ BranchingData::BranchingData() {
 
 void BranchingData::initAssumingParSelAndHmmInittedPart2Subgroups() {
   List<Vectors<Rational> > emptyList;
-  this->WeylFDSmallAsSubInLarge.computeSubGroupFromGeneratingReflections(&this->generatorsSmallSub, &emptyList, 1000, true);
-  this->WeylFDSmall.makeParabolicFromSelectionSimpleRoots(
-    *this->WeylFDSmall.ambientWeyl, this->selSmallParSel, 1000
+  this->weylGroupFiniteDimensionalSmallAsSubgroupInLarge.computeSubGroupFromGeneratingReflections(&this->generatorsSmallSub, &emptyList, 1000, true);
+  this->weylGroupFiniteDimensionalSmall.makeParabolicFromSelectionSimpleRoots(
+    *this->weylGroupFiniteDimensionalSmall.ambientWeyl, this->smallParabolicSelection, 1000
   );
-  this->WeylFD.makeParabolicFromSelectionSimpleRoots(this->theHmm.range().weylGroup, this->selInducing, 1000);
-  this->WeylFD.computeRootSubsystem();
-  this->WeylFDSmallAsSubInLarge.computeRootSubsystem();
-  this->WeylFDSmall.computeRootSubsystem();
+  this->weylGroupFiniteDimensional.makeParabolicFromSelectionSimpleRoots(this->homomorphism.range().weylGroup, this->inducing, 1000);
+  this->weylGroupFiniteDimensional.computeRootSubsystem();
+  this->weylGroupFiniteDimensionalSmallAsSubgroupInLarge.computeRootSubsystem();
+  this->weylGroupFiniteDimensionalSmall.computeRootSubsystem();
 }
 
 std::string BranchingData::getStringCasimirProjector(int index, const Rational& additionalMultiple) {
@@ -857,9 +857,9 @@ std::string BranchingData::getStringCasimirProjector(int index, const Rational& 
     if (weightDifference.isPositive() && !accountedDiffs.contains(weightDifference)) {
       accountedDiffs.addOnTop(weightDifference);
       if (additionalMultiple != 1) {
-        formulaStream1 << additionalMultiple.toString(&this->theFormat);
+        formulaStream1 << additionalMultiple.toString(&this->format);
       }
-      formulaStream1 << "(i(\\bar c) - (" << this->theChars[i].toString(&this->theFormat) << "))";
+      formulaStream1 << "(i(\\bar c) - (" << this->allCharacters[i].toString(&this->format) << "))";
       found = true;
     }
   }

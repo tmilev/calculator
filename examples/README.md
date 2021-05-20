@@ -629,7 +629,7 @@ Assumes that the numerator and denominator of a fraction commute. Divides the tw
 ```
 Equivalent to (a/b){}x = (a{}x)/(b{}x) 
 
-Operator or function \* is overloaded with 70 total handlers.
+Operator or function \* is overloaded with 71 total handlers.
 
 *\** [MultiplyMatrixByMatrix] {CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cbegin%7bpmatrix%7d%201%26%20%202%20%5c%5c%5c%5c%203%26%205%5c%5cend%7bpmatrix%7d%5c%5cbegin%7bpmatrix%7d%201%26%20-2%20%5c%5c%5c%5c%203%26%205%5c%5cend%7bpmatrix%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -973,13 +973,21 @@ WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}
 ```
 Multiplies rational number by a rational function.
 
-*\** [MultiplyPolynomialByRationalFunction] {CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction}. 
+*\** [MultiplyPolynomialByRationalFraction] {CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Polynomial%7b%7d%28x%20%2b1%29MakeRationalFunction%7b%7d%28%5c%5cfrac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%3b%5cnMakeRationalFunction%7b%7d%28%5c%5cfrac%7b-2x%20-2%7d%7bx%5e2-x%20%7d%29MakeRationalFunction%7b%7d%28%5c%5cfrac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Polynomial{}(x +1)MakeRationalFunction{}(\frac{-2x -2}{x^2+x });
 MakeRationalFunction{}(\frac{-2x -2}{x^2-x })MakeRationalFunction{}(\frac{-2x -2}{x^2+x })
 ```
-Multiplies rational function by a rational function.
+Multiplies polynomial by a rational fraction.
+
+*\** [MultiplyRationalFractionByPolynomial] {CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Polynomial%7b%7d%28x%20%2b1%29MakeRationalFunction%7b%7d%28%5c%5cfrac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%3b%5cnMakeRationalFunction%7b%7d%28%5c%5cfrac%7b-2x%20-2%7d%7bx%5e2-x%20%7d%29MakeRationalFunction%7b%7d%28%5c%5cfrac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+Polynomial{}(x +1)MakeRationalFunction{}(\frac{-2x -2}{x^2+x });
+MakeRationalFunction{}(\frac{-2x -2}{x^2-x })MakeRationalFunction{}(\frac{-2x -2}{x^2+x })
+```
+Multiplies rational fraction by polynomial.
 
 *\** [MultiplyRationalFunctionByRationalFunction] {CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Polynomial%7b%7d%28x%20%2b1%29MakeRationalFunction%7b%7d%28%5c%5cfrac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%3b%5cnMakeRationalFunction%7b%7d%28%5c%5cfrac%7b-2x%20-2%7d%7bx%5e2-x%20%7d%29MakeRationalFunction%7b%7d%28%5c%5cfrac%7b-2x%20-2%7d%7bx%5e2%2bx%20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -1448,7 +1456,7 @@ z
 ```
 The operation =: is the "is denoted by" operation. The expression a =:b always reduces to a =b. In addition to the transformation, the pair of expressions a, b is registered in a special global "registry". This has the following effect. Every time the expression b is met, it is displayed on the screen as a. We note that subsequent occurrences of the expression a will first be replaced by b (as mandated by the a =b command), but then displayed on the screen as a.
 
-Operator or function ^ is overloaded with 34 total handlers.
+Operator or function ^ is overloaded with 35 total handlers.
 
 *^* [EulerFormula] {CalculatorFunctions::eulerFormulaAsLaw}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOnRules%28%5c%22EulerFormula%5c%22%29%3b%5cne%5e%7bi%20x%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -1585,14 +1593,25 @@ Replaces p^0 by 1. Notice that 0^0 is defined to be 1.An explanation of that def
 ```
 x = Polynomial{}x; y = Polynomial{}y;(x +2y+x y+x^2+3y^2)^3
 ```
-Raises poly to small integer power. 
+Raises polynomial to small integer power. 
 
 *^* [PowerPolynomialAlgebraicNumbersBySmallInteger] {CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberPolynomialBySmallInteger}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%20%3d%20Polynomial%7b%7dx%3b%20y%20%3d%20Polynomial%7b%7dy%3b%28x%20%2b%5c%5csqrt%7b2%7dy%2bx%20y%2bx%5e2%2b%5c%5csqrt%7b3%7dy%5e2%29%5e3%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%20%3d%20Polynomial%7b%7dx%3b%5cny%20%3d%20Polynomial%7b%7dy%3b%5cn%28x%20%2b%5c%5csqrt%7b2%7dy%2bx%20y%2bx%5e2%2b%5c%5csqrt%7b3%7dy%5e2%29%5e3%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-x = Polynomial{}x; y = Polynomial{}y;(x +\sqrt{2}y+x y+x^2+\sqrt{3}y^2)^3
+x = Polynomial{}x;
+y = Polynomial{}y;
+(x +\sqrt{2}y+x y+x^2+\sqrt{3}y^2)^3
 ```
-Raises polynomial over algebraic numbers to small integer power. 
+Raises a polynomial over the algebraic numbers to small integer power. 
+
+*^* [PowerRationalFractionByInteger] {CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberPolynomialBySmallInteger}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%20%3d%20MakeRationalFunction%7b%7dx%3b%5cny%20%3d%20MakeRationalFunction%7b%7dy%3b%5cn%28x%2fy%29%5e3%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+x = MakeRationalFunction{}x;
+y = MakeRationalFunction{}y;
+(x/y)^3
+```
+Raises rational function to small integer power. 
 
 *^* [PowerPolynomialModuloIntegerBySmallInteger] {CalculatorFunctionsBinaryOps::innerPowerPolynomialModuloIntegerBySmallInteger}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%20%3d%20PolynomialModP%7b%7d%28x%5e2%20%2b%20x%20%2b%201%2c%207%29%3b%5cna%5e20%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -2096,9 +2115,11 @@ Integrates building blocks IIb.
 Attempts to split an integral of a rational function into building block integrals. 
 
 *Rational* (_composite_) [ConstantFunction] {CalculatorFunctions::innerConstantFunction}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%220%7b%7d3%3b2%7b%7dy%3b%28%5c%5csqrt%7b%7d2%29%7b%7dx%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%220%7b%7d3%3b%5cn2%7b%7dy%3b%5cn%28%5c%5csqrt%7b%7d2%29%7b%7dx%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-0{}3;2{}y;(\sqrt{}2){}x;
+0{}3;
+2{}y;
+(\sqrt{}2){}x;
 ```
 If x is a constant, replaces x{}({{anything}})=x; 
 
@@ -2111,10 +2132,12 @@ If x is a constant, replaces x{}({{anything}})=x;
 ```
 If x is a constant, replaces x{}({{anything}})=x; 
 
-*RationalFunction* (_composite_) [RationalFunctionSubstitution] {CalculatorFunctions::innerRationalFunctionSubstitution}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%220%7b%7d3%3b2%7b%7dy%3b%28%5c%5csqrt%7b%7d2%29%7b%7dx%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*RationalFunction* (_composite_) [RationalFunctionSubstitution] {CalculatorFunctions::rationalFunctionSubstitution}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%220%7b%7d3%3b%5cn2%7b%7dy%3b%5cn%28%5c%5csqrt%7b%7d2%29%7b%7dx%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-0{}3;2{}y;(\sqrt{}2){}x;
+0{}3;
+2{}y;
+(\sqrt{}2){}x;
 ```
 If x is a constant, replaces x{}({{anything}})=x; 
 
@@ -2686,7 +2709,7 @@ d/dx (\log x)
 ```
 Differentiates log.
 
-*MakeRationalFunction* [MakeRationalFunction] {CalculatorConversions::innerRationalFunctioN}. 
+*MakeRationalFunction* [MakeRationalFunction] {CalculatorConversions::rationalFunction}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22MakeRationalFunction%7b%7d%28x_1%20%2b%20MakeRationalFunction%7b%7dx_1%20%2b%20x_2%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 MakeRationalFunction{}(x_1 + MakeRationalFunction{}x_1 + x_2)
@@ -3110,11 +3133,13 @@ GetVariablesExcludeNamedConstants{}(e^x + x +5 +\arctan x + x *y +x^y+x^{y^z}); 
 Gets the variables on which the expression depends. Includes the named constants. Here, the word ``variables'' is to be thought of as ``free variables'' but the possibility for small distinctions is reserved (to allow dealing with named constants, reserved keywords, etc.). 
 
 *PlotPoint* [PlotPoint] {CalculatorFunctions::plotPoint}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotPoint%7b%7d%28%281%2c%202%5c%5cpi%29%2c%20blue%29%3b%5cnPlotPoint%7b%7d%28%28%281%2c%202%29%2c%20%282%2c3%29%29%2c%20blue%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotPoint%7b%7d%28%281%2c%202%5c%5cpi%29%2c%20blue%29%3b%5cnPlotPoint%7b%7d%28%28%281%2c%202%29%2c%20%282%2c3%29%29%2c%20blue%29%3b%5cna%20%3d%20MakeInputBox%28name%20%3d%20a%2c%20value%20%3d%203%29%3b%5cna%20%3d%20MakeInputBox%28name%20%3d%20b%2c%20value%20%3d%205%29%3b%5cnPlotPoint%28%28a%2c%20b%29%2c%20red%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotPoint{}((1, 2\pi), blue);
 PlotPoint{}(((1, 2), (2,3)), blue);
-
+a = MakeInputBox(name = a, value = 3);
+a = MakeInputBox(name = b, value = 5);
+PlotPoint((a, b), red)
 ```
 <b>Calculus teaching function.</b> Plots a point from x and y coordinate. Can also be used for multiple points. See the example for how to use for a single and multiple points.
 
@@ -4483,12 +4508,26 @@ x * y
 ```
 Creates character of a semisimple Lie algebra finite dimensional irreducible module. First argument gives type, second argument gives highest weight in fundamental coordinates.
 
-*GetLinksToSimpleLieAlgebraPrintouts* [GetLinksToSimpleLieAlgebraPrintouts] {Calculator::getLinksToSimpleLieAlgerbas}. (invisible) 
+*GetLinksToSimpleLieAlgebraPrintouts* [GetLinksToSimpleLieAlgebraPrintouts] {Calculator::getLinksToSimpleLieAlgebras}. (invisible) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GetLinksToSimpleLieAlgebraPrintouts%7b%7d0%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 GetLinksToSimpleLieAlgebraPrintouts{}0
 ```
 Gets simple Lie algebra links to the calculator.
+
+*SlTwoRealFormStructure* [SlTwoRealFormStructure] {Calculator::slTwoRealFormStructureComputeOnDemand}. (admin only) 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22SlTwoRealFormStructure%7b%7d%28a_3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+SlTwoRealFormStructure{}(a_3)
+```
+Computes the Lie algebra structure over Kostant-Sekiguchi sl twos w.r.t. maximally compact real form.
+
+*SlTwoRealFormStructureForceRecompute* [SlTwoRealFormStructureForceRecompute] {Calculator::slTwoRealFormStructureForceRecompute}. (invisible) 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22SlTwoRealFormStructureForceRecompute%7b%7d%28a_3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+SlTwoRealFormStructureForceRecompute{}(a_3)
+```
+Same as SlTwoRealFormStructure but forces a recompute. 
 
 *ConesIntersection* [ConesIntersection] {Calculator::innerConesIntersect}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22v_1%20%3d%20%281%2c%202%2c%203%29%3b%5cnv_2%20%3d%20%281%2c%203%2c%202%29%3b%5cnv_3%20%3d%20%283%2c%201%2c%201%29%3b%5cnv_4%20%3d%20%28-%202%2c%202%2c%202%29%3b%5cnConesIntersection%7b%7d%28%28v_1%2c%20v_2%29%2c%20%28v_3%2c%20v_4%20%29%29%3b%5cnConesIntersection%7b%7d%28%28v_1%2c%20v_2%29%2c%20%28v_3%2c%20-%20v_4%29%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -4670,7 +4709,7 @@ Computes the n by n tables of 1) Kazhdan-Lusztig polynomials, 2) R polynomials a
 ```
 RootSubsystem(F_4, (0, 1, 0, 0), (0, 0, 1, 0), (1, 1, 2, 2))
 ```
-Generates a root subsystem of a simple type. First argument indicates simple type, second, third,... arguments give the generating roots. 
+Generates a root subsystem of a simple type. First argument indicates simple type, second, third, ... arguments give the generating roots. 
 
 *PrintRootSubalgebras* [PrintRootSubalgebras] {CalculatorFunctions::printRootSAs}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrintRootSubalgebras%28E_6%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -5283,7 +5322,7 @@ formatCPPDirectory{}("src/")
 ```
 Format cpp directory. 
 
-*TestCalculatorAll* [TestCalculatorAll] {Calculator::innerAutomatedTest}. (admin only) 
+*TestCalculatorAll* [TestCalculatorAll] {Calculator::automatedTest}. (admin only) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TestCalculatorAll%7b%7d%280%2c%200%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 TestCalculatorAll{}(0, 0)

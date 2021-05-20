@@ -1997,7 +1997,7 @@ std::iostream& operator<<(std::iostream& output, const Polynomial<Coefficient>& 
 template <class TemplateMonomial, class Coefficient>
 std::ostream& operator<<(
   std::ostream& output,
-  const LinearCombination<TemplateMonomial, Coefficient>& theCollection
+  const LinearCombination<TemplateMonomial, Coefficient>& collection
 );
 
 template <class TemplateMonomial, class Coefficient>
@@ -2006,7 +2006,7 @@ private:
   void addOnTop(const MonomialPolynomial& tempP);//<-to guard the now unsafe base class method
   void clear();//<-to guard the now unsafe base class method
   friend std::ostream& operator<< <TemplateMonomial, Coefficient>(
-    std::ostream& output, const LinearCombination<TemplateMonomial, Coefficient>& theCollection
+    std::ostream& output, const LinearCombination<TemplateMonomial, Coefficient>& collection
   );
 
   std::string getTermString(

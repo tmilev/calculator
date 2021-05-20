@@ -151,7 +151,7 @@ public:
   Vectors<Rational> genK;
   Vectors<Rational> simpleRootsReductiveSubalgebra;
   Vectors<Rational> simpleBasisKScaledToActByTwo;
-  Vectors<Rational> simpleBasisKinOrderOfGeneration;
+  Vectors<Rational> simpleBasisKInOrderOfGeneration;
   Vectors<Rational> positiveRootsReductiveSubalgebra;
   HashedList<Vector<Rational> > allRootsSubalgebra;
   Selection nilradicalKmodules;
@@ -348,20 +348,20 @@ public:
   List<RootSubalgebra> subalgebras;
   ConeRelations badRelations;
   ConeRelations goodRelations;
-  ConeRelations theMinRels;
-  List<List<int> > ActionsNormalizerCentralizerNilradical;
+  ConeRelations minimalRelations;
+  List<List<int> > actionsNormalizerCentralizerNilradical;
   ListReferences<SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms> centralizerOuterIsomorphisms;
-  ListReferences<SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms> CentralizerIsomorphisms;
+  ListReferences<SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms> centralizerIsomorphisms;
   //Code used in nilradical generation:
-  List<Selection> ImpiedSelectionsNilradical;
+  List<Selection> impiedSelectionsNilradical;
   List<List<List<int> > > storedNilradicals;
   HashedList<Rational> validScales;
   SemisimpleLieAlgebra* owner;
   WeylGroupAutomorphisms weylGroupAutomorphisms;
   int parabolicsCounterNilradicalGeneration;
   List<int> numNilradicalsBySA;
-  int IndexCurrentSANilradicalsGeneration;
-  int NumReductiveRootSAsToBeProcessedNilradicalsGeneration;
+  int indexCurrentSubalgebraNilradicalsGeneration;
+  int numberReductiveRootSubalgebrasToBeProcessedNilradicalsGeneration;
   List<int> CountersNilradicalsGeneration;
   List<int> NumconeConditionHoldsBySSpart;
   List<RootSubalgebra> theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither;
@@ -610,6 +610,7 @@ public:
     List<int>& outputModuleDimensions
   );
   Rational getDynkinIndex() const;
+  bool checkIndicesMinimalContainingRootSubalgebras() const;
   void computeModuleDecompositionsitionAmbientLieAlgebra();
   bool attemptToComputeCentralizer();
   bool attemptExtendingHFtoHEFWithRespectToSubalgebra(
@@ -689,12 +690,8 @@ public:
     return this->getOwner() == other.getOwner();
   }
   bool checkConsistency() const;
-  void checkInitialization() const {
-    if (this->owner == nullptr) {
-      global.fatal << "<br>Object SlTwoSubalgebras "
-      << "is not initialized, although it is supposed to be. " << global.fatal;
-    }
-  }
+  bool checkMinimalContainingRootSubalgebras() const;
+  void checkInitialization() const;
   WeylGroupData& getOwnerWeyl() const {
     return this->getOwner().weylGroup;
   }

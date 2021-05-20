@@ -166,26 +166,26 @@ public:
     bool accessUltraSensitiveFolders = false
   );
   static bool openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_UltraSensitiveOptions(
-    std::fstream& theFile,
-    const std::string& theFileName,
-    bool OpenInAppendMode,
+    std::fstream& file,
+    const std::string& fileName,
+    bool openInAppendMode,
     bool truncate,
     bool openAsBinary,
     bool accessSensitiveFolders = false,
     bool accessUltraSensitiveFolders = false
   );
   static bool openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
-    std::fstream& theFile,
-    const std::string& theFileName,
-    bool OpenInAppendMode,
+    std::fstream& file,
+    const std::string& fileName,
+    bool openInAppendMode,
     bool truncate,
     bool openAsBinary,
     bool accessSensitiveFolders = false
   );
   static bool openFileUnsecure(
-    std::fstream& theFile,
-    const std::string& theFileName,
-    bool OpenInAppendMode,
+    std::fstream& file,
+    const std::string& fileName,
+    bool openInAppendMode,
     bool truncate,
     bool openAsBinary
   );

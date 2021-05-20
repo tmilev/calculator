@@ -536,10 +536,10 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
   std::stringstream out;
   std::string tempS;
   inputData.initAssumingParSelAndHmmInitted();
-  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& WeylFDSmallAsSubInLarge = inputData.WeylFDSmallAsSubInLarge;
-  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& WeylFDSmall = inputData.WeylFDSmall;
-  SemisimpleLieAlgebra& theSmallAlgebra = inputData.theHmm.domain();
-  Vectors<Rational>& embeddingsSimpleEiGoesTo = inputData.theHmm.ImagesCartanDomain;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& weylGroupFiniteDimensionalSmallAsSubgroupInLarge = inputData.weylGroupFiniteDimensionalSmallAsSubgroupInLarge;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& weylGroupFiniteDimensionalSmall = inputData.weylGroupFiniteDimensionalSmall;
+  SemisimpleLieAlgebra& theSmallAlgebra = inputData.homomorphism.domain();
+  Vectors<Rational>& embeddingsSimpleEiGoesTo = inputData.homomorphism.imagesCartanDomain;
 
   CharacterSemisimpleLieAlgebraModule charAmbientFDWeyl, remainingCharProjected, remainingCharDominantLevI;
 
@@ -549,7 +549,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
   Coefficient bufferCoeff, highestCoeff;
   for (int i = 0; i < this->size(); i ++) {
     const Weight<Coefficient>& currentMon = (*this)[i];
-    if (!inputData.WeylFD.freudenthalFormulaIrrepIsWRTLeviPart(
+    if (!inputData.weylGroupFiniteDimensional.freudenthalFormulaIrrepIsWRTLeviPart(
       currentMon.weightFundamentalCoordinates,
       tempHashedRoots,
       tempMults,
@@ -572,7 +572,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
   Vectors<Coefficient> orbitDom;
   for (int i = 0; i < charAmbientFDWeyl.size(); i ++) {
     orbitDom.setSize(0);
-    if (!inputData.WeylFD.generateOrbitReturnFalseIfTruncated(
+    if (!inputData.weylGroupFiniteDimensional.generateOrbitReturnFalseIfTruncated(
       theWeyL.getSimpleCoordinatesFromFundamental(
         charAmbientFDWeyl[i].weightFundamentalCoordinates
       ),
@@ -589,7 +589,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
     }
     tempMon.owner = this->getOwner();
     for (int k = 0; k < orbitDom.size; k ++) {
-      if (WeylFDSmallAsSubInLarge.isDominantWeight(orbitDom[k])) {
+      if (weylGroupFiniteDimensionalSmallAsSubgroupInLarge.isDominantWeight(orbitDom[k])) {
         tempMon.weightFundamentalCoordinates = theWeyL.getFundamentalCoordinatesFromSimple(orbitDom[k]);
         remainingCharDominantLevI.addMonomial(tempMon, charAmbientFDWeyl.coefficients[i]);
       }
@@ -603,12 +603,12 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
   << HtmlRoutines::getMathNoDisplay(remainingCharDominantLevI.toString(&theFormat));
   remainingCharProjected.makeZero();
   Vector<Coefficient> fundCoordsSmaller, inSimpleCoords;
-  fundCoordsSmaller.setSize(WeylFDSmall.ambientWeyl->getDimension());
+  fundCoordsSmaller.setSize(weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension());
   for (int i = 0; i < remainingCharDominantLevI.size(); i ++) {
     inSimpleCoords = theWeyL.getSimpleCoordinatesFromFundamental(remainingCharDominantLevI[i].weightFundamentalCoordinates);
-    for (int j = 0; j < WeylFDSmall.ambientWeyl->getDimension(); j ++) {
+    for (int j = 0; j < weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension(); j ++) {
       fundCoordsSmaller[j] = theWeyL.rootScalarCartanRoot(inSimpleCoords, embeddingsSimpleEiGoesTo[j]);
-      fundCoordsSmaller[j] /= WeylFDSmall.ambientWeyl->cartanSymmetric(j, j) / 2;
+      fundCoordsSmaller[j] /= weylGroupFiniteDimensionalSmall.ambientWeyl->cartanSymmetric(j, j) / 2;
     }
     tempMon.owner = &theSmallAlgebra;
     tempMon.weightFundamentalCoordinates = fundCoordsSmaller;
@@ -620,10 +620,10 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
     localHighest = *remainingCharProjected.monomials.lastObject();
     for (bool Found = true; Found;) {
       Found = false;
-      for (int i = 0; i < WeylFDSmall.RootsOfBorel.size; i ++) {
+      for (int i = 0; i < weylGroupFiniteDimensionalSmall.RootsOfBorel.size; i ++) {
         tempMon = localHighest;
-        simpleGeneratorBaseField = WeylFDSmall.RootsOfBorel[i]; // <- implicit type conversion here!
-        tempMon.weightFundamentalCoordinates += WeylFDSmall.ambientWeyl->getFundamentalCoordinatesFromSimple(
+        simpleGeneratorBaseField = weylGroupFiniteDimensionalSmall.RootsOfBorel[i]; // <- implicit type conversion here!
+        tempMon.weightFundamentalCoordinates += weylGroupFiniteDimensionalSmall.ambientWeyl->getFundamentalCoordinatesFromSimple(
           simpleGeneratorBaseField
         );
         if (remainingCharProjected.monomials.contains(tempMon)) {
@@ -634,7 +634,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
     }
     highestCoeff = remainingCharProjected.coefficients[remainingCharProjected.monomials.getIndex(localHighest)];
     output.addMonomial(localHighest, highestCoeff);
-    if (!WeylFDSmall.freudenthalFormulaIrrepIsWRTLeviPart(
+    if (!weylGroupFiniteDimensionalSmall.freudenthalFormulaIrrepIsWRTLeviPart(
       localHighest.weightFundamentalCoordinates, tempHashedRoots, tempMults, tempS, 10000
     )) {
       if (report != nullptr) {
@@ -645,7 +645,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
     for (int i = 0; i < tempHashedRoots.size; i ++) {
       tempMon.owner = &theSmallAlgebra;
       tempMon.weightFundamentalCoordinates =
-      WeylFDSmall.ambientWeyl->getFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
+      weylGroupFiniteDimensionalSmall.ambientWeyl->getFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
       bufferCoeff = tempMults[i];
       bufferCoeff *= highestCoeff;
       remainingCharProjected.subtractMonomial(tempMon, bufferCoeff);
@@ -659,22 +659,22 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
     std::string tempS;
     output.drawMeNoMultiplicities(tempS, theDV1, 10000);
     Vector<Rational> tempRoot, tempRoot2;
-    WeylFDSmall.ambientWeyl->group.computeAllElements(false, 20);
+    weylGroupFiniteDimensionalSmall.ambientWeyl->group.computeAllElements(false, 20);
     out << "<hr>";
     for (int i = 0; i < output.size(); i ++) {
-      tempRoot = WeylFDSmall.ambientWeyl->getSimpleCoordinatesFromFundamental(
+      tempRoot = weylGroupFiniteDimensionalSmall.ambientWeyl->getSimpleCoordinatesFromFundamental(
         output[i].weightFundamentalCoordinates
       ).getVectorRational();
       std::stringstream tempStream;
       tempStream << output.coefficients[i].toString();
       theDV1.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
-      for (int j = 1; j < WeylFDSmall.ambientWeyl->group.elements.size; j ++) {
+      for (int j = 1; j < weylGroupFiniteDimensionalSmall.ambientWeyl->group.elements.size; j ++) {
         tempRoot2 = tempRoot;
-        WeylFDSmall.ambientWeyl->actOnRhoModified(j, tempRoot2);
+        weylGroupFiniteDimensionalSmall.ambientWeyl->actOnRhoModified(j, tempRoot2);
         theDV1.drawCircleAtVectorBufferRational(tempRoot2, "#a00000", 5);
       }
     }
-    out << "<hr>" << theDV1.getHTMLDiv(WeylFDSmall.ambientWeyl->getDimension(), false);
+    out << "<hr>" << theDV1.getHTMLDiv(weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension(), false);
     *report = out.str();
   }
   return true;

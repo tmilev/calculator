@@ -2461,10 +2461,10 @@ bool CalculatorFunctions::innerScaleToLeadingUnit(Calculator& calculator, const 
     return false;
   }
   const Expression& argument = input[1];
-  LinearCombination<Expression, Rational> theCollection;
-  calculator.functionCollectSummandsCombine(calculator, argument, theCollection);
-  theCollection /= theCollection.getLeadingCoefficient(nullptr);
-  return output.makeSum(calculator, theCollection);
+  LinearCombination<Expression, Rational> collection;
+  calculator.functionCollectSummandsCombine(calculator, argument, collection);
+  collection /= collection.getLeadingCoefficient(nullptr);
+  return output.makeSum(calculator, collection);
 }
 
 bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic(
@@ -2484,17 +2484,17 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic(
   if (exponent.getDenominator() != 2) {
     return false;
   }
-  Expression theRadical, reduced;
-  theRadical.makeXOX(calculator, calculator.opSqrt(), calculator.expressionTwo(), input[1]);
-  if (!CalculatorFunctions::innerSqrt(calculator, theRadical, reduced)) {
+  Expression radical, reduced;
+  radical.makeXOX(calculator, calculator.opSqrt(), calculator.expressionTwo(), input[1]);
+  if (!CalculatorFunctions::innerSqrt(calculator, radical, reduced)) {
     return false;
   }
   if (!reduced.isOfType<AlgebraicNumber>()) {
     return false;
   }
-  Expression theIntegerPower;
-  theIntegerPower.assignValue(Rational(exponent.getNumerator()), calculator);
-  return output.makeXOX(calculator, calculator.opPower(),reduced, theIntegerPower);
+  Expression integerPower;
+  integerPower.assignValue(Rational(exponent.getNumerator()), calculator);
+  return output.makeXOX(calculator, calculator.opPower(), reduced, integerPower);
 }
 
 bool CalculatorFunctions::innerNewtonsMethod(Calculator& calculator, const Expression& input, Expression& output) {
@@ -2684,24 +2684,24 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   if (coefficientXcubed == 0) {
     return calculator << "Did not find cube term in your curve.";
   }
-  Rational coefficientXlinear = - polynomial.getCoefficientOf(xLinear);
+  Rational coefficientXLinear = - polynomial.getCoefficientOf(xLinear);
   Rational constCoefficient = - polynomial.getConstantTerm();
   EllipticCurveWeierstrassNormalForm& curveConstants = isRational ? eltRational.owner : eltZmodP.owner;
   if (
-    !coefficientXlinear.isInteger(&curveConstants.linearCoefficient) ||
+    !coefficientXLinear.isInteger(&curveConstants.linearCoefficient) ||
     !constCoefficient.isInteger(&curveConstants.constantTerm)
   ) {
     return calculator << "At the moment only integer elliptic curve coefficients are supported. Your coefficients were: "
-    << coefficientXlinear << ", " << constCoefficient << ". ";
+    << coefficientXLinear << ", " << constCoefficient << ". ";
   }
-  int numNonZeroGoodCoeffs = 2;
-  if (coefficientXlinear != 0) {
-    numNonZeroGoodCoeffs ++;
+  int numberOfNonZeroGoodCoefficients = 2;
+  if (coefficientXLinear != 0) {
+    numberOfNonZeroGoodCoefficients ++;
   }
   if (constCoefficient != 0) {
-    numNonZeroGoodCoeffs ++;
+    numberOfNonZeroGoodCoefficients ++;
   }
-  if (numNonZeroGoodCoeffs != polynomial.size()) {
+  if (numberOfNonZeroGoodCoefficients != polynomial.size()) {
     return calculator << "It appears your curve: " << curveE.toString()
     << " is not of the form y^2 = x^3 + ax + b. ";
   }
@@ -2807,13 +2807,13 @@ bool CalculatorFunctionsCrypto::testASN1Decode(
   if (!input[1].isOfType(&data)) {
     return false;
   }
-  AbstractSyntaxNotationOneSubsetDecoder theDecoder;
+  AbstractSyntaxNotationOneSubsetDecoder decoder;
   List<unsigned char> dataList;
   dataList = data;
   std::stringstream commentsOnError;
   std::stringstream out;
   ASNElement result;
-  if (!theDecoder.decode(dataList, 0, result, &commentsOnError)) {
+  if (!decoder.decode(dataList, 0, result, &commentsOnError)) {
     out << "Failed to decode.<br>" << commentsOnError.str();
   } else {
     List<unsigned char> recoded;
@@ -2821,7 +2821,7 @@ bool CalculatorFunctionsCrypto::testASN1Decode(
     std::string originalHex = Crypto::convertStringToHex(data, 0, false);
     std::string recodedHex = Crypto::convertListUnsignedCharsToHex(recoded);
     out << StringRoutines::Differ::differenceHTMLStatic(originalHex, recodedHex, "original", "recoded");
-    out << theDecoder.toStringAnnotateBinary();
+    out << decoder.toStringAnnotateBinary();
   }
   return output.assignValue(out.str(), calculator);
 }
@@ -2842,18 +2842,18 @@ bool CalculatorFunctions::innerIsInteger(Calculator& calculator, const Expressio
   return true;
 }
 
-bool CalculatorFunctions::innerDeterminantPolynomial(
+bool CalculatorFunctions::determinantPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerDeterminantPolynomial");
+  MacroRegisterFunctionWithName("CalculatorFunctions::determinantPolynomial");
   if (input.size() != 2) {
     return false;
   }
-  Matrix<Polynomial<Rational> > matPol;
+  Matrix<Polynomial<Rational> > matrixPolynomial;
   ExpressionContext context(calculator);
   if (!calculator.functionGetMatrix(
     input[1],
-    matPol,
+    matrixPolynomial,
     &context,
     - 1,
     CalculatorConversions::functionPolynomial<Rational>
@@ -2861,13 +2861,13 @@ bool CalculatorFunctions::innerDeterminantPolynomial(
     return calculator << "<hr>Failed to convert the input to "
     << "matrix of polynomials. ";
   }
-  if (matPol.numberOfRows != matPol.numberOfColumns) {
+  if (matrixPolynomial.numberOfRows != matrixPolynomial.numberOfColumns) {
     return output.makeError("<hr>Failed to compute determinant: matrix is non-square. ", calculator);
   }
-  if (matPol.numberOfRows > 8) {
+  if (matrixPolynomial.numberOfRows > 8) {
     return calculator << "<hr>Failed to compute determinant: "
     << "matrix is larger than 8 x 8, and your matrix had "
-    << matPol.numberOfRows << " rows. Note that you can compute "
+    << matrixPolynomial.numberOfRows << " rows. Note that you can compute "
     << "determinant using the \\det function which "
     << "does Gaussian elimination "
     << "and will work for large rational matrices. "
@@ -2875,7 +2875,7 @@ bool CalculatorFunctions::innerDeterminantPolynomial(
     << "polynomial entries. ";
   }
   Polynomial<Rational> outputPoly;
-  outputPoly.makeDeterminantFromSquareMatrix(matPol);
+  outputPoly.makeDeterminantFromSquareMatrix(matrixPolynomial);
   return output.assignValueWithContext(outputPoly, context, calculator);
 }
 
@@ -2895,41 +2895,41 @@ bool CalculatorFunctions::innerGenerateMultiplicativelyClosedSet(
     calculator << "The upper computation limit I got was 0 or less; I replaced it with the default value "
     << upperLimit << ".";
   }
-  HashedList<Expression> theSet;
-  theSet.setExpectedSize(input.size() - 2);
+  HashedList<Expression> set;
+  set.setExpectedSize(input.size() - 2);
   for (int i = 2; i < input.size(); i ++) {
-    theSet.addOnTop(input[i]);
+    set.addOnTop(input[i]);
   }
-  int numGenerators = theSet.size;
-  Expression theProduct, evaluatedProduct;
+  int numGenerators = set.size;
+  Expression product, evaluatedProduct;
   ProgressReport report;
-  for (int i = 0; i < theSet.size; i ++) {
+  for (int i = 0; i < set.size; i ++) {
     for (int j = 0; j < numGenerators; j ++) {
-      theProduct.makeProduct(calculator, theSet[j], theSet[i]);
+      product.makeProduct(calculator, set[j], set[i]);
       std::stringstream reportStream;
-      reportStream << "found " << theSet.size << "elements so far, exploring element " << i + 1;
-      reportStream << "<br>Evaluating: " << theProduct.toString();
+      reportStream << "found " << set.size << "elements so far, exploring element " << i + 1;
+      reportStream << "<br>Evaluating: " << product.toString();
       report.report(reportStream.str());
-      calculator.evaluateExpression(calculator, theProduct, evaluatedProduct);
-      //if (evaluatedProduct == theSet[0])
+      calculator.evaluateExpression(calculator, product, evaluatedProduct);
+      //if (evaluatedProduct == set[0])
       //{
       //}
-      theSet.addOnTopNoRepetition(evaluatedProduct);
-      if (theSet.size >upperLimit) {
+      set.addOnTopNoRepetition(evaluatedProduct);
+      if (set.size >upperLimit) {
         std::stringstream out;
         out << "<hr>While generating multiplicatively closed set, I went above the upper limit of "
         << upperLimit << " elements.";
         evaluatedProduct.makeError(out.str(), calculator);
-        theSet.addOnTop(evaluatedProduct);
-        i = theSet.size; break;
+        set.addOnTop(evaluatedProduct);
+        i = set.size; break;
       }
     }
   }
-  calculator << "<hr>Generated a list of " << theSet.size << " elements";
-  output.reset(calculator, theSet.size + 1);
+  calculator << "<hr>Generated a list of " << set.size << " elements";
+  output.reset(calculator, set.size + 1);
   output.addChildAtomOnTop(calculator.opSequence());
-  for (int i = 0; i < theSet.size; i ++) {
-    output.addChildOnTop(theSet[i]);
+  for (int i = 0; i < set.size; i ++) {
+    output.addChildOnTop(set[i]);
   }
   return true;
 }
@@ -2942,26 +2942,26 @@ bool CalculatorFunctionsLinearAlgebra::functionToMatrix(Calculator& calculator, 
   const Expression& leftE   = input[1];
   const Expression& middleE = input[2];
   const Expression& rightE  = input[3];
-  int numRows, numCols;
-  if (!middleE.isIntegerFittingInInt(&numRows) || !rightE.isIntegerFittingInInt(&numCols)) {
+  int numberOfRows, numberOfColumns;
+  if (!middleE.isIntegerFittingInInt(&numberOfRows) || !rightE.isIntegerFittingInInt(&numberOfColumns)) {
     return false;
   }
-  if (numRows <= 0 || numCols <= 0) {
+  if (numberOfRows <= 0 || numberOfColumns <= 0) {
     return false;
   }
-  LargeInteger numRowsTimesCols = numRows;
-  numRowsTimesCols *= numCols ;
-  if (numRowsTimesCols > 10000) {
-    calculator << "Max number of matrix entries is 10000. You requested " << numRows
-    << " rows and " << numCols
-    << " columns, total: " << numRowsTimesCols.toString() << " entries<br>";
+  LargeInteger numberOfRowsTimesColumns = numberOfRows;
+  numberOfRowsTimesColumns *= numberOfColumns ;
+  if (numberOfRowsTimesColumns > 10000) {
+    calculator << "Max number of matrix entries is 10000. You requested " << numberOfRows
+    << " rows and " << numberOfColumns
+    << " columns, total: " << numberOfRowsTimesColumns.toString() << " entries<br>";
     return false;
   }
   Matrix<Expression> resultMat;
-  resultMat.initialize(numRows, numCols);
+  resultMat.initialize(numberOfRows, numberOfColumns);
   Expression leftIE, rightIE;
-  for (int i = 0; i < numRows; i ++) {
-    for (int j = 0; j < numCols; j ++) {
+  for (int i = 0; i < numberOfRows; i ++) {
+    for (int j = 0; j < numberOfColumns; j ++) {
       leftIE.assignValue(i + 1, calculator);
       rightIE.assignValue(j + 1, calculator);
       resultMat.elements[i][j].reset(calculator, 3);
@@ -3037,7 +3037,7 @@ bool CalculatorFunctions::innerSuffixNotationForPostScript(Calculator& calculato
   std::stringstream out;
   out.precision(7);
   bool hasDoubleValue = false;
-  double theDoubleValue = - 1;
+  double doubleValue = - 1;
   Rational rational;
   if (input.isOfType<Rational>(&rational)) {
     if (
@@ -3048,17 +3048,17 @@ bool CalculatorFunctions::innerSuffixNotationForPostScript(Calculator& calculato
       return output.assignValue(out.str(), calculator);
     }
     hasDoubleValue = true;
-    theDoubleValue = input.getValue<Rational>().getDoubleValue();
+    doubleValue = input.getValue<Rational>().getDoubleValue();
   }
   if (input.isOfType<AlgebraicNumber>()) {
-    hasDoubleValue = input.getValue<AlgebraicNumber>().evaluatesToDouble(&theDoubleValue);
+    hasDoubleValue = input.getValue<AlgebraicNumber>().evaluatesToDouble(&doubleValue);
   }
   if (input.isOfType<double>()) {
     hasDoubleValue = true;
-    theDoubleValue = input.getValue<double>();
+    doubleValue = input.getValue<double>();
   }
   if (hasDoubleValue) {
-    out << " " << FloatingPoint::doubleToString(theDoubleValue);
+    out << " " << FloatingPoint::doubleToString(doubleValue);
     return output.assignValue(out.str(), calculator);
   }
   Expression currentE;
@@ -3115,9 +3115,9 @@ bool CalculatorFunctions::innerIsRational(Calculator& calculator, const Expressi
 bool CalculatorFunctions::innerFreudenthalFull(Calculator& calculator, const Expression& input, Expression& output) {
   Vector<Rational> hwFundamental, hwSimple;
   Selection tempSel;
-  WithContext<SemisimpleLieAlgebra*> theSSalg;
+  WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (!calculator.getTypeHighestWeightParabolic<Rational>(
-    calculator, input, output, hwFundamental, tempSel, theSSalg, nullptr
+    calculator, input, output, hwFundamental, tempSel, semisimpleLieAlgebra, nullptr
   )) {
     return output.makeError("Failed to extract highest weight and algebra", calculator);
   }
@@ -3128,8 +3128,8 @@ bool CalculatorFunctions::innerFreudenthalFull(Calculator& calculator, const Exp
     return output.makeError("Failed to extract highest weight. ", calculator);
   }
   CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
-  hwSimple = theSSalg.content->weylGroup.getSimpleCoordinatesFromFundamental(hwFundamental, Rational::zero());
-  startingChar.makeFromWeight(hwSimple, theSSalg.content);
+  hwSimple = semisimpleLieAlgebra.content->weylGroup.getSimpleCoordinatesFromFundamental(hwFundamental, Rational::zero());
+  startingChar.makeFromWeight(hwSimple, semisimpleLieAlgebra.content);
   std::string reportString;
   if (!startingChar.freudenthalEvaluateMeFullCharacter(resultChar, 10000, &reportString)) {
     return output.makeError(reportString, calculator);
@@ -3142,9 +3142,9 @@ bool CalculatorFunctions::innerFreudenthalFull(Calculator& calculator, const Exp
 bool CalculatorFunctions::innerFreudenthalFormula(Calculator& calculator, const Expression& input, Expression& output) {
   Vector<Rational> hwFundamental, hwSimple;
   Selection tempSel;
-  WithContext<SemisimpleLieAlgebra*> theSSalg;
+  WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (!calculator.getTypeHighestWeightParabolic<Rational>(
-    calculator, input, output, hwFundamental, tempSel, theSSalg, nullptr
+    calculator, input, output, hwFundamental, tempSel, semisimpleLieAlgebra, nullptr
   )) {
     return output.makeError("Failed to extract highest weight and algebra", calculator);
   }
@@ -3155,8 +3155,8 @@ bool CalculatorFunctions::innerFreudenthalFormula(Calculator& calculator, const 
     return output.makeError("Failed to extract highest weight. ", calculator);
   }
   CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
-  hwSimple = theSSalg.content->weylGroup.getSimpleCoordinatesFromFundamental(hwFundamental, Rational::zero());
-  startingChar.makeFromWeight(hwSimple, theSSalg.content);
+  hwSimple = semisimpleLieAlgebra.content->weylGroup.getSimpleCoordinatesFromFundamental(hwFundamental, Rational::zero());
+  startingChar.makeFromWeight(hwSimple, semisimpleLieAlgebra.content);
   std::string reportString;
   if (!startingChar.freudenthalEvalMeDominantWeightsOnly(resultChar, 10000, &reportString)) {
     return output.makeError(reportString, calculator);

@@ -174,6 +174,7 @@ bool Calculator::Test::parseDecimal(Calculator& ownerInitialized) {
 bool Calculator::Test::builtInFunctionsABTest(Calculator& ownerInitialized) {
   Calculator::Test test(ownerInitialized);
   test.calculatorTestPrepare();
+  global.userInputStringIfAvailable = "";
   if (!test.calculatorTestRun()) {
     std::stringstream crashFileWriteReport;
     std::stringstream crashFile;

@@ -11,14 +11,14 @@
 // the following data is isolated in a struct because it is
 // way too large a lump to pass separately
 struct BranchingData {
-  HomomorphismSemisimpleLieAlgebra theHmm;
-  FormatExpressions theFormat;
+  HomomorphismSemisimpleLieAlgebra homomorphism;
+  FormatExpressions format;
   Vector<RationalFraction<Rational> > weightFundamentalCoordinates;
-  CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > theAmbientChar;
-  CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > theSmallCharFDpart;
-  Selection selInducing;
-  Selection selSmallParSel;
-  Selection SelSplittingParSel;
+  CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > ambientCharacter;
+  CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > smallCharacterFiniteDimensionalPart;
+  Selection inducing;
+  Selection smallParabolicSelection;
+  Selection splittingParabolicSelection;
   Vectors<Rational> weightsNilradicalLarge;
   Vectors<Rational> weightsNilradicalSmall;
   Vectors<Rational> weightsNilModPreNil;
@@ -26,24 +26,24 @@ struct BranchingData {
   List<int> indicesNilradicalLarge;
   List<ElementSemisimpleLieAlgebra<Rational> > nilradicalLarge;
   List<ElementSemisimpleLieAlgebra<Rational> > nilradicalSmall;
-  List<ElementSemisimpleLieAlgebra<Rational> > NilModPreNil;
+  List<ElementSemisimpleLieAlgebra<Rational> > nilradicalModuloPreimageNilradical;
   Vectors<RationalFraction<Rational> > outputWeightsFundCoordS;
   Vectors<RationalFraction<Rational> > outputWeightsSimpleCoords;
   Vectors<RationalFraction<Rational> > g2Weights;
   Vectors<RationalFraction<Rational> > g2DualWeights;
   Vectors<RationalFraction<Rational> > leviEigenSpace;
   Vectors<Rational> generatorsSmallSub;
-  HashedList<RationalFraction<Rational> > theCharacterDifferences;
+  HashedList<RationalFraction<Rational> > characterDifferences;
   List<ElementUniversalEnveloping<RationalFraction<Rational> > > outputEigenWords;
-  List<RationalFraction<Rational> > theChars;
-  List<ElementSumGeneralizedVermas<RationalFraction<Rational> > > theEigenVectorS;
-  List<ElementUniversalEnveloping<RationalFraction<Rational> > > theUEelts;
+  List<RationalFraction<Rational> > allCharacters;
+  List<ElementSumGeneralizedVermas<RationalFraction<Rational> > > eigenVectors;
+  List<ElementUniversalEnveloping<RationalFraction<Rational> > > elementsUniversalEnveloping;
   List<Rational> additionalMultipliers;
-  List<RationalFraction<Rational> > theShapovalovProducts;
-  List<ElementSumGeneralizedVermas<RationalFraction<Rational> > > theEigenVectorsLevi;
-  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms WeylFD;
-  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms WeylFDSmallAsSubInLarge;
-  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms WeylFDSmall;
+  List<RationalFraction<Rational> > shapovalovProducts;
+  List<ElementSumGeneralizedVermas<RationalFraction<Rational> > > eigenVectorsLevi;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms weylGroupFiniteDimensional;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms weylGroupFiniteDimensionalSmallAsSubgroupInLarge;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms weylGroupFiniteDimensionalSmall;
   bool flagUseNilWeightGeneratorOrder;
   bool flagAscendingGeneratorOrder;
   std::string getStringCasimirProjector(int index, const Rational& additionalMultiple);
@@ -89,12 +89,12 @@ template <class Coefficient>
 Vector<Coefficient> BranchingData::projectWeight(Vector<Coefficient>& input) {
   Vector<Coefficient> result;
   Vector<Coefficient> fundCoordsSmaller;
-  fundCoordsSmaller.makeZero(this->theHmm.domain().getRank());
-  for (int j = 0; j < this->theHmm.domain().getRank(); j ++) {
-    fundCoordsSmaller[j] = this->theHmm.range().weylGroup.rootScalarCartanRoot(input, theHmm.ImagesCartanDomain[j]);
-    fundCoordsSmaller[j] /= this->theHmm.domain().weylGroup.cartanSymmetric.elements[j][j] / 2;
+  fundCoordsSmaller.makeZero(this->homomorphism.domain().getRank());
+  for (int j = 0; j < this->homomorphism.domain().getRank(); j ++) {
+    fundCoordsSmaller[j] = this->homomorphism.range().weylGroup.rootScalarCartanRoot(input, homomorphism.imagesCartanDomain[j]);
+    fundCoordsSmaller[j] /= this->homomorphism.domain().weylGroup.cartanSymmetric.elements[j][j] / 2;
   }
-  result = this->theHmm.domain().weylGroup.getSimpleCoordinatesFromFundamental(
+  result = this->homomorphism.domain().weylGroup.getSimpleCoordinatesFromFundamental(
     fundCoordsSmaller, Coefficient::zero()
   );
   return result;

@@ -1536,26 +1536,26 @@ std::string FileOperations::getCurrentFolder() {
 }
 
 bool FileOperations::openFileUnsecure(
-  std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary
+  std::fstream& file, const std::string& fileName, bool openInAppendMode, bool truncate, bool openAsBinary
 ) {
-  if (OpenInAppendMode) {
+  if (openInAppendMode) {
     if (openAsBinary) {
-      theFile.open(theFileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::app | std::fstream::binary);
+      file.open(fileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::app | std::fstream::binary);
     } else {
-      theFile.open(theFileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::app);
+      file.open(fileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::app);
     }
   } else {
     if (openAsBinary) {
-      theFile.open(theFileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::binary);
+      file.open(fileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::binary);
     } else {
       if (truncate) {
-        theFile.open(theFileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::trunc);
+        file.open(fileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::trunc);
       } else {
-        theFile.open(theFileName.c_str(), std::fstream::in | std::fstream::out);
+        file.open(fileName.c_str(), std::fstream::in | std::fstream::out);
       }
     }
   }
-  return theFile.is_open();
+  return file.is_open();
 }
 
 bool FileOperations::openFileUnsecureReadOnly(std::ifstream& theFile, const std::string& theFileName, bool openAsBinary) {
@@ -1736,17 +1736,17 @@ bool FileOperations::getPhysicalFileNameFromVirtual(
 }
 
 bool FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
-  std::fstream& theFile,
-  const std::string& theFileName,
-  bool OpenInAppendMode,
+  std::fstream& file,
+  const std::string& fileName,
+  bool openInAppendMode,
   bool truncate,
   bool openAsBinary,
   bool accessSensitiveFolders
 ) {
   return FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_UltraSensitiveOptions(
-    theFile,
-    theFileName,
-    OpenInAppendMode,
+    file,
+    fileName,
+    openInAppendMode,
     truncate,
     openAsBinary,
     accessSensitiveFolders
@@ -1754,9 +1754,9 @@ bool FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
 }
 
 bool FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_UltraSensitiveOptions(
-  std::fstream& theFile,
-  const std::string& theFileName,
-  bool OpenInAppendMode,
+  std::fstream& file,
+  const std::string& fileName,
+  bool openInAppendMode,
   bool truncate,
   bool openAsBinary,
   bool accessSensitiveFolders,
@@ -1765,7 +1765,7 @@ bool FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_Ultr
   std::string computedFileName;
   // USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
   if (!FileOperations::getPhysicalFileNameFromVirtual(
-    theFileName,
+    fileName,
     computedFileName,
     accessSensitiveFolders,
     accessUltraSensitiveFolders,
@@ -1778,7 +1778,7 @@ bool FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_Ultr
   mkDirCommand << "mkdir -p " << folderName;
   global.externalCommandReturnOutput(mkDirCommand.str());
   return FileOperations::openFileCreateIfNotPresentUnsecure(
-    theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary
+    file, computedFileName, openInAppendMode, truncate, openAsBinary
   );
 }
 

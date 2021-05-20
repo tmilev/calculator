@@ -203,7 +203,7 @@ bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure) {
   if (!Database::get().mongoDB.initialize()) {
     return false;
   }
-  MongoCollection theCollection(this->collectionName);
+  MongoCollection collection(this->collectionName);
   if (this->query != nullptr) {
     global.fatal << "At this point of code, query is supposed to be 0. " << global.fatal;
   }
@@ -213,7 +213,7 @@ bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure) {
     &this->theError
   );
   bool result = mongoc_collection_remove(
-    theCollection.collection,
+    collection.collection,
     MONGOC_REMOVE_SINGLE_REMOVE,
     this->query,
     nullptr,
@@ -249,7 +249,7 @@ bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOn
   if (!Database::get().mongoDB.initialize()) {
     return false;
   }
-  MongoCollection theCollection(this->collectionName);
+  MongoCollection collection(this->collectionName);
   if (this->query != nullptr) {
     global.fatal << "At this point of code, query is supposed to be 0. " << global.fatal;
   }
@@ -267,7 +267,7 @@ bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOn
   }
   this->updateResult = bson_new();
   bool result = mongoc_collection_insert_one(
-    theCollection.collection, this->update, nullptr, this->updateResult, &this->theError
+    collection.collection, this->update, nullptr, this->updateResult, &this->theError
   );
   if (!result) {
     if (commentsOnFailure != nullptr) {
@@ -292,7 +292,7 @@ bool MongoQuery::updateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
   if (!Database::get().mongoDB.initialize()) {
     return false;
   }
-  MongoCollection theCollection(this->collectionName);
+  MongoCollection collection(this->collectionName);
   if (this->query != nullptr) {
     global.fatal << "At this point of code, query is supposed to be 0. " << global.fatal;
   }
@@ -318,7 +318,7 @@ bool MongoQuery::updateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
   bool result = false;
   if (doUpsert) {
     result = mongoc_collection_update_one(
-      theCollection.collection,
+      collection.collection,
       this->query,
       this->update,
       this->options,
@@ -327,7 +327,7 @@ bool MongoQuery::updateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
     );
   } else {
     result = mongoc_collection_update_one(
-      theCollection.collection, this->query, this->update, nullptr, this->updateResult, &this->theError
+      collection.collection, this->query, this->update, nullptr, this->updateResult, &this->theError
     );
   }
   if (!result) {
@@ -388,7 +388,7 @@ bool MongoQuery::FindMultiple(
   if (!Database::get().mongoDB.initialize()) {
     return false;
   }
-  MongoCollection theCollection(this->collectionName);
+  MongoCollection collection(this->collectionName);
   if (commentsGeneralNonSensitive != nullptr && global.userDefaultHasAdminRights()) {
     *commentsGeneralNonSensitive
     << "Query: " << this->findQuery << ". Options: " << inputOptions.toString(nullptr);
@@ -431,7 +431,7 @@ bool MongoQuery::FindMultiple(
     }
   }
   this->cursor = mongoc_collection_find_with_opts(
-    theCollection.collection, this->query, this->options, nullptr
+    collection.collection, this->query, this->options, nullptr
   );
   if (this->cursor == nullptr) {
     if (commentsOnFailure != nullptr) {
@@ -1190,18 +1190,18 @@ bool Database::Mongo::fetchCollectionNames(
   mongoc_database_get_collection_names_with_opts(
     static_cast<mongoc_database_t*>(this->database), &opts, &error
   );
-  char **theCollectionChars = mongoc_database_get_collection_names_with_opts(
+  char **collectionChars = mongoc_database_get_collection_names_with_opts(
     static_cast<mongoc_database_t*>(this->database), &opts, &error
   );
   bool result = true;
   output.setSize(0);
-  if (theCollectionChars != nullptr) {
-    for (int i = 0; theCollectionChars[i]; i ++) {
-      std::string currentCollection(theCollectionChars[i]);
+  if (collectionChars != nullptr) {
+    for (int i = 0; collectionChars[i]; i ++) {
+      std::string currentCollection(collectionChars[i]);
       output.addOnTop(currentCollection);
     }
-    bson_strfreev(theCollectionChars);
-    theCollectionChars = nullptr;
+    bson_strfreev(collectionChars);
+    collectionChars = nullptr;
   } else {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to fetch all collections. ";
@@ -1313,13 +1313,13 @@ JSData Database::toJSONFetchItem(const List<std::string>& labelStrings) {
     result["error"] = out.str();
     return result;
   }
-  JSData theRows;
-  theRows.elementType = JSData::token::tokenArray;
-  theRows.listObjects = rowsJSON;
+  JSData rows;
+  rows.elementType = JSData::token::tokenArray;
+  rows.listObjects = rowsJSON;
   if (flagDebuggingAdmin) {
     result["findQuery"] = findQuery;
   }
-  result["rows"] = theRows;
+  result["rows"] = rows;
   result["totalRows"] = static_cast<int>(totalItems);
   return result;
 }
@@ -1333,13 +1333,13 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
     if (global.userDebugFlagOn() != 0) {
       result[WebAPI::result::comments] = "Requested table empty, returning list of tables. ";
     }
-    List<std::string> theCollectionNames;
-    if (Database::fetchCollectionNames(theCollectionNames, &out)) {
+    List<std::string> collectionNamesList;
+    if (Database::fetchCollectionNames(collectionNamesList, &out)) {
       JSData collectionNames;
       collectionNames.elementType = JSData::token::tokenArray;
-      collectionNames.listObjects.setSize(theCollectionNames.size);
-      for (int i = 0; i < theCollectionNames.size; i ++) {
-        collectionNames[i] = theCollectionNames[i];
+      collectionNames.listObjects.setSize(collectionNamesList.size);
+      for (int i = 0; i < collectionNamesList.size; i ++) {
+        collectionNames[i] = collectionNamesList[i];
       }
       result["collections"] = collectionNames;
     } else {
@@ -1376,10 +1376,10 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
     }
     return result;
   }
-  JSData theRows;
-  theRows.elementType = JSData::token::tokenArray;
-  theRows.listObjects = rowsJSON;
-  result["rows"] = theRows;
+  JSData rows;
+  rows.elementType = JSData::token::tokenArray;
+  rows.listObjects = rowsJSON;
+  result["rows"] = rows;
   result["totalRows"] = static_cast<int>(totalItems);
   return result;
 }
@@ -1388,30 +1388,30 @@ std::string Database::toHtmlDatabaseCollection(const std::string& currentTable) 
   MacroRegisterFunctionWithName("Database::ToStringDatabaseCollection");
   std::stringstream out;
   if (currentTable == "") {
-    List<std::string> theCollectionNames;
-    if (this->fetchCollectionNames(theCollectionNames, &out)) {
-      out << "There are " << theCollectionNames.size << " collections. ";
-      for (int i = 0; i < theCollectionNames.size; i ++) {
+    List<std::string> collectionNames;
+    if (this->fetchCollectionNames(collectionNames, &out)) {
+      out << "There are " << collectionNames.size << " collections. ";
+      for (int i = 0; i < collectionNames.size; i ++) {
         out << "<br>";
         out << "<a href=\"" << global.displayNameExecutable
         << "?request=database&currentDatabaseTable="
-        << theCollectionNames[i] << "\">" << theCollectionNames[i] << "</a>";
+        << collectionNames[i] << "\">" << collectionNames[i] << "</a>";
       }
     }
     return out.str();
   }
   out << "Current table: " << currentTable << "<br>";
   List<std::string> theLabels;
-  List<List<std::string> > theRows;
+  List<List<std::string> > rows;
   long long totalItems = - 1;
-  if (!Database::FetchTable(currentTable, theLabels, theRows, &totalItems, &out)) {
+  if (!Database::FetchTable(currentTable, theLabels, rows, &totalItems, &out)) {
     return out.str();
   }
   out << "Total: " << totalItems << ". ";
-  if (totalItems > theRows.size) {
-    out << "Only the first " << theRows.size << " are displayed. ";
+  if (totalItems > rows.size) {
+    out << "Only the first " << rows.size << " are displayed. ";
   }
-  out << "<br>" << HtmlRoutines::toHtmlTable(theLabels, theRows, true);
+  out << "<br>" << HtmlRoutines::toHtmlTable(theLabels, rows, true);
   return out.str();
 }
 

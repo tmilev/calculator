@@ -447,43 +447,43 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
   Rational tempRat;
   while (nonExploredRoots.cardinalitySelection > 0) {
     int theBorelIndex = nonExploredRoots.elements[0];
-    Rational theHeight = posRoots[theBorelIndex].sumCoordinates();
+    Rational height = posRoots[theBorelIndex].sumCoordinates();
     for (int i = 1; i < nonExploredRoots.cardinalitySelection; i ++) {
       tempRat = posRoots[nonExploredRoots.elements[i]].sumCoordinates();
-      if (theHeight.isGreaterThan(tempRat)) {
-        theHeight = tempRat;
+      if (height.isGreaterThan(tempRat)) {
+        height = tempRat;
         theBorelIndex = nonExploredRoots.elements[i];
       }
     }
     Vector<Rational>& theRoot = posRoots[theBorelIndex];
     int index = this->weylGroup.rootSystem.getIndex(theRoot);
     Vector<Rational> smallRoot2;
-    int FirstIndexFirstPosChoice = - 1;
-    int SecondIndexFirstPosChoice = - 1;
-    Rational CurrentHeight;
+    int firstIndexFirstPositiveChoice = - 1;
+    int secondIndexFirstPositiveChoice = - 1;
+    Rational currentHeight;
     for (int i = 0; i < this->weylGroup.rootsOfBorel.size; i ++) {
       Vector<Rational>& smallRoot1 = this->weylGroup.rootsOfBorel[i];
-      CurrentHeight = smallRoot1.sumCoordinates();
-      int FirstPosIndex = this->weylGroup.rootSystem.getIndex(smallRoot1);
-      int FirstNegIndex = this->weylGroup.rootSystem.getIndex(- smallRoot1);
-      if (theHeight.isGreaterThan(CurrentHeight)) {
+      currentHeight = smallRoot1.sumCoordinates();
+      int firstPositiveIndex = this->weylGroup.rootSystem.getIndex(smallRoot1);
+      int firstNegativeIndex = this->weylGroup.rootSystem.getIndex(- smallRoot1);
+      if (height.isGreaterThan(currentHeight)) {
         smallRoot2 = theRoot - smallRoot1;
         int SecondPosIndex = this->weylGroup.rootSystem.getIndex(smallRoot2);
-        if (FirstPosIndex<SecondPosIndex) {
-          int SecondNegIndex = this->weylGroup.rootSystem.getIndex(- smallRoot2);
-          if (FirstIndexFirstPosChoice == - 1) {
-            FirstIndexFirstPosChoice = FirstPosIndex;
-            SecondIndexFirstPosChoice = SecondPosIndex;
+        if (firstPositiveIndex<SecondPosIndex) {
+          int secondNegativeIndex = this->weylGroup.rootSystem.getIndex(- smallRoot2);
+          if (firstIndexFirstPositiveChoice == - 1) {
+            firstIndexFirstPositiveChoice = firstPositiveIndex;
+            secondIndexFirstPositiveChoice = SecondPosIndex;
             int power;
             this->getMaxQForWhichBetaMinusQAlphaisARoot(smallRoot1, smallRoot2, power);
-            this->chevalleyConstants.elements[FirstNegIndex][SecondNegIndex] = - 1 - power;
-            this->computedChevalleyConstants.elements[FirstNegIndex][SecondNegIndex] = true;
+            this->chevalleyConstants.elements[firstNegativeIndex][secondNegativeIndex] = - 1 - power;
+            this->computedChevalleyConstants.elements[firstNegativeIndex][secondNegativeIndex] = true;
           } else {
             this->computeOneChevalleyConstant(
-              FirstIndexFirstPosChoice, SecondIndexFirstPosChoice, FirstNegIndex, SecondNegIndex, index
+              firstIndexFirstPositiveChoice, secondIndexFirstPositiveChoice, firstNegativeIndex, secondNegativeIndex, index
             );
           }
-          this->exploitSymmetryAndCyclicityChevalleyConstants(FirstNegIndex, SecondNegIndex);
+          this->exploitSymmetryAndCyclicityChevalleyConstants(firstNegativeIndex, secondNegativeIndex);
         }
       }
     }
@@ -511,19 +511,19 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
 }
 
 void SemisimpleLieAlgebra::computeLieBracketTable() {
-  int numPosRoots = this->weylGroup.rootsOfBorel.size;
-  int theRank = this->weylGroup.cartanSymmetric.numberOfRows;
-  int numRoots = numPosRoots * 2;
-  int numGenerators = numRoots + theRank;
-  this->lieBrackets.initialize(numGenerators, numGenerators);
-  //  this->theLiebracketPairingIndices.initialize(numGenerators, numGenerators);
-  this->UEGeneratorOrderIncludingCartanElts.initializeFillInObject(numGenerators, - 1);
+  int numberOfPositiveRoots = this->weylGroup.rootsOfBorel.size;
+  int rank = this->weylGroup.cartanSymmetric.numberOfRows;
+  int numRoots = numberOfPositiveRoots * 2;
+  int numberOfGenerators = numRoots + rank;
+  this->lieBrackets.initialize(numberOfGenerators, numberOfGenerators);
+  //  this->theLiebracketPairingIndices.initialize(numberOfGenerators, numberOfGenerators);
+  this->UEGeneratorOrderIncludingCartanElts.initializeFillInObject(numberOfGenerators, - 1);
   //  this->theLiebracketPairingIndices.makeZero(- 1);
   //  this->OppositeRootSpaces.initializeFillInObject(numRoots+dimension, - 1);
   Vector<Rational> leftWeight, rightWeight, hRoot;
-  for (int i = 0; i < numGenerators; i ++) {
+  for (int i = 0; i < numberOfGenerators; i ++) {
     leftWeight = this->getWeightOfGenerator(i);
-    for (int j = i; j < numGenerators; j ++) {
+    for (int j = i; j < numberOfGenerators; j ++) {
       rightWeight = this->getWeightOfGenerator(j);
       if (leftWeight.isEqualToZero() && rightWeight.isEqualToZero()) {
         this->lieBrackets.elements[i][j].makeZero();
@@ -531,7 +531,7 @@ void SemisimpleLieAlgebra::computeLieBracketTable() {
       }
       if (leftWeight.isEqualToZero() && !rightWeight.isEqualToZero()) {
         this->lieBrackets.elements[i][j].makeGenerator(j, *this);
-        hRoot.makeEi(theRank, i - numPosRoots);
+        hRoot.makeEi(rank, i - numberOfPositiveRoots);
         this->lieBrackets.elements[i][j] *= Vector<Rational>::scalarProduct(
           hRoot, rightWeight, this->weylGroup.cartanSymmetric
         );
@@ -539,7 +539,7 @@ void SemisimpleLieAlgebra::computeLieBracketTable() {
       }
       if (!leftWeight.isEqualToZero() && rightWeight.isEqualToZero()) {
         this->lieBrackets.elements[i][j].makeGenerator(i, *this);
-        hRoot.makeEi(theRank, j - numPosRoots);
+        hRoot.makeEi(rank, j - numberOfPositiveRoots);
         this->lieBrackets.elements[i][j] *= - Vector<Rational>::scalarProduct(
           hRoot, leftWeight, this->weylGroup.cartanSymmetric
         );
@@ -564,13 +564,13 @@ void SemisimpleLieAlgebra::computeLieBracketTable() {
       }
     }
   }
-  for (int i = 0; i < numGenerators; i ++) {
-    for (int j = i + 1; j < numGenerators; j ++) {
+  for (int i = 0; i < numberOfGenerators; i ++) {
+    for (int j = i + 1; j < numberOfGenerators; j ++) {
       this->lieBrackets.elements[j][i] = this->lieBrackets.elements[i][j];
       this->lieBrackets.elements[j][i] *= - 1;
     }
   }
-  for (int i = 0; i < numGenerators; i ++) {
+  for (int i = 0; i < numberOfGenerators; i ++) {
     this->UEGeneratorOrderIncludingCartanElts[i] = i;
   }
 }
@@ -578,8 +578,9 @@ void SemisimpleLieAlgebra::computeLieBracketTable() {
 void SemisimpleLieAlgebra::exploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ) {
   const Vector<Rational>& rootI = this->weylGroup.rootSystem[indexI];
   const Vector<Rational>& rootJ = this->weylGroup.rootSystem[indexJ];
-  if ((rootI + rootJ).isEqualToZero())
+  if ((rootI + rootJ).isEqualToZero()) {
     global.fatal << "Sum or roots not allowed to be zero here. " << global.fatal;
+  }
   //int indexMinusI = this->theWeyl.RootSystem.getIndex(-rootI);
   //int indexMinusJ = this->theWeyl.RootSystem.getIndex(-rootJ);
   //this->ComputeDebugString();
@@ -992,10 +993,10 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
   this->domain().computeChevalleyConstants();
   this->range().computeChevalleyConstants();
   int theDomainDimension = this->domain().weylGroup.cartanSymmetric.numberOfRows;
-  Selection NonExplored;
+  Selection nonExplored;
   int numRoots = this->domain().weylGroup.rootSystem.size;
-  NonExplored.initialize(numRoots);
-  NonExplored.makeFullSelection();
+  nonExplored.initialize(numRoots);
+  nonExplored.makeFullSelection();
   List<ElementSemisimpleLieAlgebra<Rational> > tempDomain, tempRange;
   tempDomain.setSize(numRoots+theDomainDimension);
   tempRange.setSize(numRoots+theDomainDimension);
@@ -1009,29 +1010,29 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
       generator.makeGenerator(this->domain(), this->domain().getGeneratorIndexFromRoot(tempRoot));
       tempDomain[index].addMonomial(generator, 1);
       tempRange[index] = this->imagesSimpleChevalleyGenerators[i +j*theDomainDimension];
-      NonExplored.removeSelection(index);
+      nonExplored.removeSelection(index);
     }
   }
   Vector<Rational> right;
-  while (NonExplored.cardinalitySelection > 0) {
-    for (int i = 0; i < NonExplored.cardinalitySelection; i ++) {
-      int index = NonExplored.elements[i];
+  while (nonExplored.cardinalitySelection > 0) {
+    for (int i = 0; i < nonExplored.cardinalitySelection; i ++) {
+      int index = nonExplored.elements[i];
       const Vector<Rational>& current = this->domain().weylGroup.rootSystem[index];
-      for (int j = 0; j < NonExplored.numberOfElements; j ++) {
-        if (!NonExplored.selected[j]) {
+      for (int j = 0; j < nonExplored.numberOfElements; j ++) {
+        if (!nonExplored.selected[j]) {
           const Vector<Rational>& left = this->domain().weylGroup.rootSystem[j];
           right = current - left;
           if (this->domain().weylGroup.isARoot(right)) {
             int leftIndex = this->domain().weylGroup.rootSystem.getIndex(left);
             int rightIndex = this->domain().weylGroup.rootSystem.getIndex(right);
-            if (!NonExplored.selected[rightIndex]) {
+            if (!nonExplored.selected[rightIndex]) {
               ElementSemisimpleLieAlgebra<Rational>& leftDomainElt = tempDomain[leftIndex];
               ElementSemisimpleLieAlgebra<Rational>& rightDomainElt = tempDomain[rightIndex];
               this->domain().lieBracket(leftDomainElt, rightDomainElt, tempDomain[index]);
               ElementSemisimpleLieAlgebra<Rational>& leftRangeElt = tempRange[leftIndex];
               ElementSemisimpleLieAlgebra<Rational>& rightRangeElt = tempRange[rightIndex];
               this->range().lieBracket(leftRangeElt, rightRangeElt, tempRange[index]);
-              NonExplored.removeSelection(index);
+              nonExplored.removeSelection(index);
               break;
             }
           }
@@ -1092,14 +1093,14 @@ void HomomorphismSemisimpleLieAlgebra::projectOntoSmallCartan(Vector<Rational>& 
 
 bool HomomorphismSemisimpleLieAlgebra::applyHomomorphism(
   const MonomialUniversalEnveloping<RationalFraction<Rational> >& input,
-  const RationalFraction<Rational>& theCoeff,
+  const RationalFraction<Rational>& coefficient,
   ElementUniversalEnveloping<RationalFraction<Rational> >& output
 ) {
   ElementUniversalEnveloping<RationalFraction<Rational> > element;
   output.makeZero(this->range());
   RationalFraction<Rational> polyOne;
   polyOne.makeOne();
-  output.makeConstant(theCoeff, this->range());
+  output.makeConstant(coefficient, this->range());
   for (int i = 0; i < input.generatorsIndices.size; i ++) {
     if (input.generatorsIndices[i] >= this->imagesAllChevalleyGenerators.size) {
       return false;
@@ -1173,11 +1174,11 @@ void HomomorphismSemisimpleLieAlgebra::makeGinGWithIdentity(
   this->rangeAlg = this->domainAlg;
   this->domainAlg->weylGroup.makeArbitrarySimple(weylLetter, weylDimension);
   this->domain().computeChevalleyConstants();
-  int numPosRoots = this->domain().weylGroup.rootsOfBorel.size;
-  this->imagesAllChevalleyGenerators.setSize(numPosRoots * 2 + weylDimension);
-  this->domainAllChevalleyGenerators.setSize(numPosRoots * 2 + weylDimension);
+  int numberOfPositiveRoots = this->domain().weylGroup.rootsOfBorel.size;
+  this->imagesAllChevalleyGenerators.setSize(numberOfPositiveRoots * 2 + weylDimension);
+  this->domainAllChevalleyGenerators.setSize(numberOfPositiveRoots * 2 + weylDimension);
   this->imagesSimpleChevalleyGenerators.setSize(weylDimension * 2);
-  for (int i = 0; i < 2 * numPosRoots + weylDimension; i ++) {
+  for (int i = 0; i < 2 * numberOfPositiveRoots + weylDimension; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& element1 = this->imagesAllChevalleyGenerators[i];
     ElementSemisimpleLieAlgebra<Rational>& element2 = this->domainAllChevalleyGenerators[i];
     element2.makeGenerator(i, this->domain());
@@ -1187,7 +1188,7 @@ void HomomorphismSemisimpleLieAlgebra::makeGinGWithIdentity(
     ElementSemisimpleLieAlgebra<Rational>& element1 = this->imagesSimpleChevalleyGenerators[i];
     element1.makeGenerator(i, this->range());
     ElementSemisimpleLieAlgebra<Rational>& element2 = this->imagesSimpleChevalleyGenerators[weylDimension + i];
-    element2.makeGenerator(i + numPosRoots, this->range());
+    element2.makeGenerator(i + numberOfPositiveRoots, this->range());
   }
 }
 
@@ -1227,20 +1228,20 @@ void HomomorphismSemisimpleLieAlgebra::getRestrictionAmbientRootSystemToTheSmall
   Matrix<Rational> tempMat;
   tempMat = this->domain().weylGroup.cartanSymmetric;
   tempMat.invert();
-  int numPosRootsDomain = this->domain().weylGroup.rootsOfBorel.size;
+  int numberOfPositiveRootsDomain = this->domain().weylGroup.rootsOfBorel.size;
   output.setSize(theRootSystem.size);
   Vector<Rational> theScalarProducts;
   theScalarProducts.setSize(rankSA);
   for (int i = 0; i < theRootSystem.size; i ++) {
     for (int j = 0; j < rankSA; j ++) {
-      ElementSemisimpleLieAlgebra<Rational>& currentH = this->imagesAllChevalleyGenerators[j + numPosRootsDomain];
+      ElementSemisimpleLieAlgebra<Rational>& currentH = this->imagesAllChevalleyGenerators[j + numberOfPositiveRootsDomain];
       theScalarProducts[j] = this->range().weylGroup.rootScalarCartanRoot(currentH.getCartanPart(), theRootSystem[i]);
     }
     tempMat.actOnVectorColumn(theScalarProducts, output[i]);
   }
-  this->ImagesCartanDomain.setSize(rankSA);
+  this->imagesCartanDomain.setSize(rankSA);
   for (int i = 0; i < rankSA; i ++) {
-    this->ImagesCartanDomain[i] = this->imagesAllChevalleyGenerators[i +numPosRootsDomain].getCartanPart();
+    this->imagesCartanDomain[i] = this->imagesAllChevalleyGenerators[i +numberOfPositiveRootsDomain].getCartanPart();
   }
 }
 
@@ -1445,12 +1446,12 @@ bool SemisimpleLieAlgebra::isGeneratorFromCartan(int index) const {
 }
 
 int SemisimpleLieAlgebra::getRootIndexFromDisplayIndex(int index) {
-  int numPosRoots = this->weylGroup.rootsOfBorel.size;
+  int numberOfPositiveRoots = this->weylGroup.rootsOfBorel.size;
   if (index < 0) {
-    return index + numPosRoots;
+    return index + numberOfPositiveRoots;
   }
   if (index > 0) {
-    return index + numPosRoots - 1;
+    return index + numberOfPositiveRoots - 1;
   }
   return - 1;
 }

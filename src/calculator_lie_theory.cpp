@@ -350,9 +350,9 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
   MacroRegisterFunctionWithName("Calculator::splitFDpartB3overG2inner");
   ModuleSSalgebra<RationalFraction<Rational> > theModCopy;
   theModCopy.makeFromHW(
-    theG2B3Data.theHmm.range(),
+    theG2B3Data.homomorphism.range(),
     theG2B3Data.weightFundamentalCoordinates,
-    theG2B3Data.selInducing,
+    theG2B3Data.inducing,
     Rational::one(),
     Rational::zero(),
     nullptr,
@@ -360,13 +360,13 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
   );
   theG2B3Data.resetOutputData();
   theG2B3Data.initAssumingParSelAndHmmInitted();
-  theG2B3Data.SelSplittingParSel = theG2B3Data.selInducing;
-  if (theG2B3Data.SelSplittingParSel.selected[0] != theG2B3Data.SelSplittingParSel.selected[2]) {
-    theG2B3Data.SelSplittingParSel.addSelectionAppendNewIndex(0);
-    theG2B3Data.SelSplittingParSel.addSelectionAppendNewIndex(2);
+  theG2B3Data.splittingParabolicSelection = theG2B3Data.inducing;
+  if (theG2B3Data.splittingParabolicSelection.selected[0] != theG2B3Data.splittingParabolicSelection.selected[2]) {
+    theG2B3Data.splittingParabolicSelection.addSelectionAppendNewIndex(0);
+    theG2B3Data.splittingParabolicSelection.addSelectionAppendNewIndex(2);
   }
   Vector<Rational> splittingParSel;
-  splittingParSel = theG2B3Data.SelSplittingParSel;
+  splittingParSel = theG2B3Data.splittingParabolicSelection;
 
   calculator.objectContainer.theCategoryOmodules.addNoRepetitionOrReturnIndexFirst(theModCopy);
   int theModIndex = calculator.objectContainer.theCategoryOmodules.getIndex(theModCopy);
@@ -376,8 +376,8 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
   calculator << "<hr>Time elapsed before making B3 irrep: " << global.getElapsedSeconds();
   double timeAtStart = global.getElapsedSeconds();
   theMod.splitFDpartOverFKLeviRedSubalg(
-    theG2B3Data.theHmm,
-    theG2B3Data.selSmallParSel,
+    theG2B3Data.homomorphism,
+    theG2B3Data.smallParabolicSelection,
     &theG2B3Data.outputEigenWords,
     &theG2B3Data.outputWeightsFundCoordS,
     &theG2B3Data.leviEigenSpace,
@@ -387,9 +387,9 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
   theG2B3Data.g2Weights.setSize(theG2B3Data.outputWeightsFundCoordS.size);
   theG2B3Data.g2DualWeights.setSize(theG2B3Data.outputWeightsFundCoordS.size);
   Matrix<Rational> invertedG2cartanMat;
-  invertedG2cartanMat = theG2B3Data.theHmm.domain().weylGroup.cartanSymmetric;
+  invertedG2cartanMat = theG2B3Data.homomorphism.domain().weylGroup.cartanSymmetric;
   invertedG2cartanMat.invert();
-  WeylGroupData& rangeWeyl = theG2B3Data.theHmm.range().weylGroup;
+  WeylGroupData& rangeWeyl = theG2B3Data.homomorphism.range().weylGroup;
   RationalFraction<Rational> zero(Rational::zero());
   RationalFraction<Rational> one(Rational::one());
   theG2B3Data.outputWeightsSimpleCoords = rangeWeyl.getSimpleCoordinatesFromFundamental(
@@ -399,78 +399,78 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
   weightSimpleCoordinates = rangeWeyl.getSimpleCoordinatesFromFundamental(
     theG2B3Data.weightFundamentalCoordinates, zero
   );
-  theG2B3Data.theAmbientChar.makeFromWeight(weightSimpleCoordinates, &theG2B3Data.theHmm.range());
-  theG2B3Data.theSmallCharFDpart.makeZero();
+  theG2B3Data.ambientCharacter.makeFromWeight(weightSimpleCoordinates, &theG2B3Data.homomorphism.range());
+  theG2B3Data.smallCharacterFiniteDimensionalPart.makeZero();
   CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > tempMon;
   for (int i = 0; i < theG2B3Data.outputWeightsSimpleCoords.size; i ++) {
     Vector<RationalFraction<Rational> >& currentWeight = theG2B3Data.outputWeightsSimpleCoords[i];
     Vector<RationalFraction<Rational> >& currentG2Weight = theG2B3Data.g2Weights[i];
     Vector<RationalFraction<Rational> >& currentG2DualWeight = theG2B3Data.g2DualWeights[i];
     currentG2DualWeight.setSize(2);
-    currentG2DualWeight[0] = theG2B3Data.theHmm.range().weylGroup.rootScalarCartanRoot(
-      currentWeight, theG2B3Data.theHmm.ImagesCartanDomain[0]
+    currentG2DualWeight[0] = theG2B3Data.homomorphism.range().weylGroup.rootScalarCartanRoot(
+      currentWeight, theG2B3Data.homomorphism.imagesCartanDomain[0]
     );
     //<-note: implicit type conversion: the return type is the left coefficient type.
-    currentG2DualWeight[1] = theG2B3Data.theHmm.range().weylGroup.rootScalarCartanRoot(
-      currentWeight, theG2B3Data.theHmm.ImagesCartanDomain[1]
+    currentG2DualWeight[1] = theG2B3Data.homomorphism.range().weylGroup.rootScalarCartanRoot(
+      currentWeight, theG2B3Data.homomorphism.imagesCartanDomain[1]
     );
     //<-note: implicit type conversion: the return type is the left coefficient type.
     invertedG2cartanMat.actOnVectorColumn(currentG2DualWeight, currentG2Weight, zero);//<-g2weight is now computed;
-    tempMon.makeFromWeight(currentG2Weight, &theG2B3Data.theHmm.domain());
-    theG2B3Data.theSmallCharFDpart += tempMon;
+    tempMon.makeFromWeight(currentG2Weight, &theG2B3Data.homomorphism.domain());
+    theG2B3Data.smallCharacterFiniteDimensionalPart += tempMon;
   }
   ElementUniversalEnveloping<RationalFraction<Rational> > theG2Casimir, theG2CasimirCopy, imageCasimirInB3, element;
-  theG2Casimir.makeCasimir(theG2B3Data.theHmm.domain());
+  theG2Casimir.makeCasimir(theG2B3Data.homomorphism.domain());
 
-  theG2B3Data.theChars.setSize(theG2B3Data.outputWeightsFundCoordS.size);
+  theG2B3Data.allCharacters.setSize(theG2B3Data.outputWeightsFundCoordS.size);
   for (int i = 0; i < theG2B3Data.outputWeightsSimpleCoords.size; i ++) {
     Vector<RationalFraction<Rational> >& currentG2DualWeight = theG2B3Data.g2DualWeights[i];
     theG2CasimirCopy = theG2Casimir;
     theG2CasimirCopy.modOutVermaRelations(&currentG2DualWeight, one, zero);
     if (theG2CasimirCopy.isEqualToZero()) {
-      theG2B3Data.theChars[i] = 0;
+      theG2B3Data.allCharacters[i] = 0;
     } else {
-      theG2B3Data.theChars[i] = theG2CasimirCopy.coefficients[0];
+      theG2B3Data.allCharacters[i] = theG2CasimirCopy.coefficients[0];
     }
   }
-  theG2B3Data.theEigenVectorsLevi.setSize(theG2B3Data.g2Weights.size);
-  theG2B3Data.theEigenVectorS.setSize(theG2B3Data.g2Weights.size);
+  theG2B3Data.eigenVectorsLevi.setSize(theG2B3Data.g2Weights.size);
+  theG2B3Data.eigenVectors.setSize(theG2B3Data.g2Weights.size);
   theG2B3Data.additionalMultipliers.setSize(theG2B3Data.g2Weights.size);
-  theG2B3Data.theShapovalovProducts.setSize(theG2B3Data.g2Weights.size);
-  theG2B3Data.theUEelts.setSize(theG2B3Data.g2Weights.size);
-  ElementSumGeneralizedVermas<RationalFraction<Rational> >& theHWV = *theG2B3Data.theEigenVectorsLevi.lastObject();
+  theG2B3Data.shapovalovProducts.setSize(theG2B3Data.g2Weights.size);
+  theG2B3Data.elementsUniversalEnveloping.setSize(theG2B3Data.g2Weights.size);
+  ElementSumGeneralizedVermas<RationalFraction<Rational> >& theHWV = *theG2B3Data.eigenVectorsLevi.lastObject();
   theHWV.makeHWV(theMod, one);
   theHWV *= - 1;
-  *theG2B3Data.theEigenVectorS.lastObject() = theHWV;
+  *theG2B3Data.eigenVectors.lastObject() = theHWV;
   Vector<RationalFraction<Rational> > weightDifference;
-  theG2B3Data.theHmm.applyHomomorphism(theG2Casimir, imageCasimirInB3);
+  theG2B3Data.homomorphism.applyHomomorphism(theG2Casimir, imageCasimirInB3);
   theG2Casimir.checkConsistency();
   imageCasimirInB3.checkConsistency();
   RationalFraction<Rational> charDiff;
-  theG2B3Data.theHmm.range().orderNilradical(
+  theG2B3Data.homomorphism.range().orderNilradical(
     theMod.parabolicSelectionNonSelectedAreElementsLevi,
     theG2B3Data.flagUseNilWeightGeneratorOrder,
     theG2B3Data.flagAscendingGeneratorOrder
   );
   for (int k = 0; k < theG2B3Data.g2Weights.size; k ++) {
-    ElementSumGeneralizedVermas<RationalFraction<Rational> >& currentTensorEltLevi = theG2B3Data.theEigenVectorsLevi[k];
-    ElementSumGeneralizedVermas<RationalFraction<Rational> >& currentTensorEltEigen = theG2B3Data.theEigenVectorS[k];
-    ElementUniversalEnveloping<RationalFraction<Rational> >& currentUEelt = theG2B3Data.theUEelts[k];
+    ElementSumGeneralizedVermas<RationalFraction<Rational> >& currentTensorEltLevi = theG2B3Data.eigenVectorsLevi[k];
+    ElementSumGeneralizedVermas<RationalFraction<Rational> >& currentTensorEltEigen = theG2B3Data.eigenVectors[k];
+    ElementUniversalEnveloping<RationalFraction<Rational> >& currentUEelt = theG2B3Data.elementsUniversalEnveloping[k];
     currentTensorEltLevi = theHWV;
     currentTensorEltLevi.multiplyMeByUEEltOnTheLeft(theG2B3Data.outputEigenWords[k]);
     currentTensorEltEigen = currentTensorEltLevi;
-    if (theG2B3Data.selInducing.cardinalitySelection > 0) {
+    if (theG2B3Data.inducing.cardinalitySelection > 0) {
       for (int j = 0; j < theG2B3Data.g2Weights.size; j ++) {
         weightDifference = theG2B3Data.g2Weights[j] - theG2B3Data.g2Weights[k];
         if (weightDifference.isPositive()) {
           theG2CasimirCopy = imageCasimirInB3;
-          element.makeConstant(theG2B3Data.theChars[j], theG2B3Data.theHmm.range());
+          element.makeConstant(theG2B3Data.allCharacters[j], theG2B3Data.homomorphism.range());
           theG2CasimirCopy -= element;
           theG2CasimirCopy *= Rational(12);
           currentTensorEltEigen.multiplyMeByUEEltOnTheLeft(theG2CasimirCopy);
-          charDiff = theG2B3Data.theChars[j];
-          charDiff -= *theG2B3Data.theChars.lastObject();
-          theG2B3Data.theCharacterDifferences.addOnTopNoRepetition(charDiff);
+          charDiff = theG2B3Data.allCharacters[j];
+          charDiff -= *theG2B3Data.allCharacters.lastObject();
+          theG2B3Data.characterDifferences.addOnTopNoRepetition(charDiff);
         }
       }
     }
@@ -480,7 +480,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
     }
     currentTensorEltEigen.extractElementUniversalEnveloping(currentUEelt, *theMod.owner);
     currentUEelt.highestWeightTransposeAntiAutomorphismBilinearForm(
-      currentUEelt, theG2B3Data.theShapovalovProducts[k], &theMod.highestWeightDualCoordinatesBaseField, one, zero, nullptr
+      currentUEelt, theG2B3Data.shapovalovProducts[k], &theMod.highestWeightDualCoordinatesBaseField, one, zero, nullptr
     );
   }
   return output.assignValue(out.str(), calculator);
@@ -728,16 +728,16 @@ bool CalculatorLieTheory::kazhdanLuzstigCoeffificents(Calculator& calculator, co
     << " has " << theWeyl.group.getSize().toString() << ".";
     return output.assignValue(out.str(), calculator);
   }
-  FormatExpressions theFormat;
-  theFormat.polynomialAlphabet.setSize(1);
-  theFormat.polynomialAlphabet[0] = "q";
+  FormatExpressions format;
+  format.polynomialAlphabet.setSize(1);
+  format.polynomialAlphabet[0] = "q";
   out << "Our notation follows that of the original Kazhdan-Lusztig paper, "
   << "Representations of Coxeter Groups and Hecke Algebras.<br>";
   out << " The algebra: " << theSSalgebra.content->toStringLieAlgebraName();
   KazhdanLusztigPolynomials theKLpolys;
   theKLpolys.computeKLPolys(&theWeyl);
-  theFormat.flagUseHTML = true;
-  out << theKLpolys.toString(&theFormat);
+  format.flagUseHTML = true;
+  out << theKLpolys.toString(&format);
   return output.assignValue(out.str(), calculator);
 }
 
@@ -809,15 +809,15 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  Vectors<RationalFraction<Rational> >& theHWs,
-  BranchingData& theG2B3Data,
-  ExpressionContext& theContext
+  Vectors<RationalFraction<Rational> >& highestWeights,
+  BranchingData& g2inB3Data,
+  ExpressionContext& context
 ) {
   MacroRegisterFunctionWithName("Calculator::printB3G2branchingIntermediate");
   (void) input;
   std::stringstream out, timeReport;
   std::stringstream latexTable, latexTable2;
-  bool isFD = (theG2B3Data.selInducing.cardinalitySelection == 0);
+  bool isFD = (g2inB3Data.inducing.cardinalitySelection == 0);
   if (isFD) {
     out << "<table border =\"1\"><tr><td>$so(7)$-highest weight</td><td>Decomposition over $G_2$</td>"
     <<  "<td>$G_2\\cap b$-eigenvectors </td></tr>";
@@ -827,10 +827,10 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
     << "\\endhead \n<br>";
   } else {
     out << "Let " << HtmlRoutines::getMathNoDisplay("p\\subset so(7)") << " be the "
-    << theG2B3Data.selInducing.toString() << "-parabolic subalgebra"
+    << g2inB3Data.inducing.toString() << "-parabolic subalgebra"
     << " and let " << HtmlRoutines::getMathNoDisplay("{p}'= p\\cap G_2")
     << ". Then  " << HtmlRoutines::getMathNoDisplay("{p}'") << " is the "
-    << theG2B3Data.selSmallParSel.toString() << "- parabolic subalgebra of G_2"
+    << g2inB3Data.smallParabolicSelection.toString() << "- parabolic subalgebra of G_2"
     << "<br> <table border =\"1\"><tr><td>$so(7)$-highest weight</td>"
     << "<td>character difference from top</td>"
     << "<td>Decomposition of inducing module over "
@@ -840,17 +840,17 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
     << HtmlRoutines::getMathNoDisplay("G_2\\cap b")
     << "-eigenvectors</td><td>Shapovalov square</td></tr>";
     latexTable << "\\begin{longtable}{|cccclll|} \\caption{\\label{tableB3fdsOverG2charsAndHWV"
-    << theG2B3Data.selInducing.toString() << "} "
-    << "Decomposition of inducing $" << theG2B3Data.selInducing.toString() << "$-$\\mathfrak p$-module over $"
-    << theG2B3Data.selSmallParSel.toString() << "$-$\\mathfrak p'=\\mathfrak p\\cap G_2$}\\\\"
+    << g2inB3Data.inducing.toString() << "} "
+    << "Decomposition of inducing $" << g2inB3Data.inducing.toString() << "$-$\\mathfrak p$-module over $"
+    << g2inB3Data.smallParabolicSelection.toString() << "$-$\\mathfrak p'=\\mathfrak p\\cap G_2$}\\\\"
     << "\\hline $\\mathfrak p-inducing$& dim. &$\\mathfrak p' decomp. $&dim.&"
     << " $\\mathfrak b \\cap \\mathfrak p'$-singular vectors & Casimir projector "
     << "& Corresp. $\\mathfrak b \\cap G_2$-singular vectors  \\\\ \\hline"
     << "\\endhead \n<br>";
   }
-  theContext.getFormat(theG2B3Data.theFormat);
-  theG2B3Data.theFormat.flagUseLatex = true;
-  theG2B3Data.theFormat.numberOfAmpersandsPerNewLineForLaTeX = 0;
+  context.getFormat(g2inB3Data.format);
+  g2inB3Data.format.flagUseLatex = true;
+  g2inB3Data.format.numberOfAmpersandsPerNewLineForLaTeX = 0;
   Expression tempExpression;
   RationalFraction<Rational> rfZero, rfOne;
   rfZero.makeZero();
@@ -858,94 +858,94 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
   latexTable2 << "\\begin{longtable}{|rll|}\\caption"
   << "{Values of $x_1$ for each $v_{\\lambda,i}$}\\label{tableCriticalValuesvlambda}"
   << "\\endhead";
-  for (int i = 0; i < theHWs.size; i ++) {
-    theG2B3Data.weightFundamentalCoordinates = theHWs[i];
-    CalculatorLieTheory::splitFDpartB3overG2inner(calculator, theG2B3Data, tempExpression);
+  for (int i = 0; i < highestWeights.size; i ++) {
+    g2inB3Data.weightFundamentalCoordinates = highestWeights[i];
+    CalculatorLieTheory::splitFDpartB3overG2inner(calculator, g2inB3Data, tempExpression);
     timeReport << tempExpression.getValue<std::string>();
     RationalFraction<Rational> numEigenVectors;
     numEigenVectors = rfZero;
-    for (int j = 0; j < theG2B3Data.theSmallCharFDpart.size(); j ++) {
-      numEigenVectors += theG2B3Data.theSmallCharFDpart.coefficients[j];
+    for (int j = 0; j < g2inB3Data.smallCharacterFiniteDimensionalPart.size(); j ++) {
+      numEigenVectors += g2inB3Data.smallCharacterFiniteDimensionalPart.coefficients[j];
     }
-    theG2B3Data.theFormat.customPlusSign = "";
+    g2inB3Data.format.customPlusSign = "";
     int eigenIndexcounter = 0;
     if (i != 0) {
       latexTable2 << "\\hline\\multicolumn{3}{|c|}{$\\lambda ="
-      << theG2B3Data.weightFundamentalCoordinates.toStringLetterFormat("\\omega", &theG2B3Data.theFormat)
+      << g2inB3Data.weightFundamentalCoordinates.toStringLetterFormat("\\omega", &g2inB3Data.format)
       << "$}\\\\vector& coefficient of $v_\\lambda$ in $Sh_{\\lambda,i}$ &$x_1\\notin$ \\\\\\hline";
     }
-    for (int k = 0; k < theG2B3Data.theSmallCharFDpart.size(); k ++) {
+    for (int k = 0; k < g2inB3Data.smallCharacterFiniteDimensionalPart.size(); k ++) {
       CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > tempChar;
-      tempChar.addMonomial(theG2B3Data.theSmallCharFDpart[k], theG2B3Data.theSmallCharFDpart.coefficients[k]);
+      tempChar.addMonomial(g2inB3Data.smallCharacterFiniteDimensionalPart[k], g2inB3Data.smallCharacterFiniteDimensionalPart.coefficients[k]);
       int multiplicity = 0;
-      theG2B3Data.theSmallCharFDpart.coefficients[k].isSmallInteger(&multiplicity);
+      g2inB3Data.smallCharacterFiniteDimensionalPart.coefficients[k].isSmallInteger(&multiplicity);
       for (int counter = 0; counter < multiplicity; counter ++, eigenIndexcounter ++) {
         out << "<tr>";
         if (k == 0 && counter == 0) {
-          theG2B3Data.theFormat.customPlusSign = "\\oplus ";
-          theG2B3Data.theFormat.fundamentalWeightLetter = "\\omega";
-          out << "<td rowspan =\"" << numEigenVectors.toString() << "\">" << theG2B3Data.theAmbientChar.toString(&theG2B3Data.theFormat) << "</td> ";
+          g2inB3Data.format.customPlusSign = "\\oplus ";
+          g2inB3Data.format.fundamentalWeightLetter = "\\omega";
+          out << "<td rowspan =\"" << numEigenVectors.toString() << "\">" << g2inB3Data.ambientCharacter.toString(&g2inB3Data.format) << "</td> ";
           if (!isFD) {
             out << "<td rowspan =\"" << numEigenVectors.toString() << "\">";
-            for (int charcounter1 = 0; charcounter1 < theG2B3Data.theCharacterDifferences.size; charcounter1 ++) {
-              std::string tempS = theG2B3Data.theFormat.customPlusSign;
-              theG2B3Data.theFormat.customPlusSign = "";
-              out << "A_{" << charcounter1 << "}=" << theG2B3Data.theCharacterDifferences[charcounter1].toString(&theG2B3Data.theFormat) << ";";
-              if (charcounter1 != theG2B3Data.theCharacterDifferences.size - 1) {
+            for (int charcounter1 = 0; charcounter1 < g2inB3Data.characterDifferences.size; charcounter1 ++) {
+              std::string tempS = g2inB3Data.format.customPlusSign;
+              g2inB3Data.format.customPlusSign = "";
+              out << "A_{" << charcounter1 << "}=" << g2inB3Data.characterDifferences[charcounter1].toString(&g2inB3Data.format) << ";";
+              if (charcounter1 != g2inB3Data.characterDifferences.size - 1) {
                 out << "<br>";
               }
-              theG2B3Data.theFormat.customPlusSign = tempS;
+              g2inB3Data.format.customPlusSign = tempS;
             }
             out << "</td> ";
           }
-          latexTable << "\\multirow{" << theG2B3Data.theEigenVectorS.size  << "}{*}{$"
-          << theG2B3Data.theAmbientChar.toString(&theG2B3Data.theFormat) << "$}";
+          latexTable << "\\multirow{" << g2inB3Data.eigenVectors.size  << "}{*}{$"
+          << g2inB3Data.ambientCharacter.toString(&g2inB3Data.format) << "$}";
           Vector<RationalFraction<Rational> > theSimpleCoordinates;
-          theSimpleCoordinates = theG2B3Data.WeylFD.ambientWeyl->getSimpleCoordinatesFromFundamental(
-            theG2B3Data.theAmbientChar[0].weightFundamentalCoordinates,
+          theSimpleCoordinates = g2inB3Data.weylGroupFiniteDimensional.ambientWeyl->getSimpleCoordinatesFromFundamental(
+            g2inB3Data.ambientCharacter[0].weightFundamentalCoordinates,
             RationalFraction<Rational>::oneRational()
           );
           RationalFraction<Rational> theWeylSize;
-          theWeylSize = theG2B3Data.WeylFD.weylDimensionFormulaInnerSimpleCoords(theSimpleCoordinates);
-          latexTable << "& \\multirow{" << theG2B3Data.theEigenVectorS.size  << "}{*}{$"
-          << theWeylSize.toString(&theG2B3Data.theFormat)
+          theWeylSize = g2inB3Data.weylGroupFiniteDimensional.weylDimensionFormulaInnerSimpleCoords(theSimpleCoordinates);
+          latexTable << "& \\multirow{" << g2inB3Data.eigenVectors.size  << "}{*}{$"
+          << theWeylSize.toString(&g2inB3Data.format)
           << "$}";
         } else {
           latexTable << "&";
         }
         latexTable << " & ";
         if (counter == 0) {
-          theG2B3Data.theFormat.fundamentalWeightLetter = "\\psi";
-          theG2B3Data.theFormat.customPlusSign = "\\oplus ";
-          out << "<td rowspan =\"" << multiplicity << " \">" << tempChar.toString(&theG2B3Data.theFormat) << "</td>";
+          g2inB3Data.format.fundamentalWeightLetter = "\\psi";
+          g2inB3Data.format.customPlusSign = "\\oplus ";
+          out << "<td rowspan =\"" << multiplicity << " \">" << tempChar.toString(&g2inB3Data.format) << "</td>";
           latexTable << "\\multirow{" << multiplicity  << "}{*}{$";
-          latexTable << tempChar.toString(&theG2B3Data.theFormat) << "$}";
+          latexTable << tempChar.toString(&g2inB3Data.format) << "$}";
           latexTable << "&\\multirow{" << multiplicity  << "}{*}{$";
           if (multiplicity > 1) {
             latexTable << multiplicity << "\\times";
           }
           Vector<RationalFraction<Rational> > theSimpleCoordinates;
-          theSimpleCoordinates = theG2B3Data.WeylFDSmall.ambientWeyl->getSimpleCoordinatesFromFundamental(
+          theSimpleCoordinates = g2inB3Data.weylGroupFiniteDimensionalSmall.ambientWeyl->getSimpleCoordinatesFromFundamental(
             tempChar[0].weightFundamentalCoordinates, RationalFraction<Rational>::zeroRational()
           );
           RationalFraction<Rational> dimension;
-          dimension = theG2B3Data.WeylFDSmall.weylDimensionFormulaInnerSimpleCoords(theSimpleCoordinates, rfOne);
-          latexTable << dimension.toString(&theG2B3Data.theFormat) << "$}";
+          dimension = g2inB3Data.weylGroupFiniteDimensionalSmall.weylDimensionFormulaInnerSimpleCoords(theSimpleCoordinates, rfOne);
+          latexTable << dimension.toString(&g2inB3Data.format) << "$}";
         } else {
           latexTable << "&";
         }
         latexTable << "&";
-        theG2B3Data.theFormat.customPlusSign = "";
-        out << "<td>" << HtmlRoutines::getMathNoDisplay(theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].toString(&theG2B3Data.theFormat)) << "</td>";
-        theG2B3Data.theFormat.maximumLineLength = 20;
-        latexTable << "$\\begin{array}{l}" << theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].toString(&theG2B3Data.theFormat) << "\\end{array}$ \n";
+        g2inB3Data.format.customPlusSign = "";
+        out << "<td>" << HtmlRoutines::getMathNoDisplay(g2inB3Data.eigenVectorsLevi[eigenIndexcounter].toString(&g2inB3Data.format)) << "</td>";
+        g2inB3Data.format.maximumLineLength = 20;
+        latexTable << "$\\begin{array}{l}" << g2inB3Data.eigenVectorsLevi[eigenIndexcounter].toString(&g2inB3Data.format) << "\\end{array}$ \n";
         if (!isFD) {
-          std::string tempS1 = theG2B3Data.getStringCasimirProjector(eigenIndexcounter, 12);
-          std::string tempS2 = "("+ theG2B3Data.theUEelts[eigenIndexcounter].toString(&theG2B3Data.theFormat) + ")\\cdot v_\\lambda";
+          std::string tempS1 = g2inB3Data.getStringCasimirProjector(eigenIndexcounter, 12);
+          std::string tempS2 = "("+ g2inB3Data.elementsUniversalEnveloping[eigenIndexcounter].toString(&g2inB3Data.format) + ")\\cdot v_\\lambda";
           out << "<td>" << HtmlRoutines::getMathNoDisplay(tempS1) << "</td>";
-          out << "<td>" << theG2B3Data.additionalMultipliers[eigenIndexcounter].toString() << "</td>";
+          out << "<td>" << g2inB3Data.additionalMultipliers[eigenIndexcounter].toString() << "</td>";
           out << "<td>" << HtmlRoutines::getMathNoDisplay(tempS2) << "</td>";
-          out << "<td>" << theG2B3Data.theShapovalovProducts[eigenIndexcounter].toString(&theG2B3Data.theFormat);
+          out << "<td>" << g2inB3Data.shapovalovProducts[eigenIndexcounter].toString(&g2inB3Data.format);
           out << "</td>";
           int index = - 1;
           numEigenVectors.isSmallInteger(&index);
@@ -953,9 +953,9 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
             List<Rational> tempList, tempList2;
             latexTable2 << " $v_{\\lambda," <<  index- eigenIndexcounter - 1 << "} $&";
             Polynomial<Rational> tempP;
-            theG2B3Data.theShapovalovProducts[eigenIndexcounter].getNumerator(tempP);
+            g2inB3Data.shapovalovProducts[eigenIndexcounter].getNumerator(tempP);
             tempP.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
-            latexTable2 << "$\\begin{array}{l}" << tempP.toString(&theG2B3Data.theFormat) << "\\end{array}$ & ";
+            latexTable2 << "$\\begin{array}{l}" << tempP.toString(&g2inB3Data.format) << "\\end{array}$ & ";
             if (tempP.findOneVariableRationalRoots(tempList)) {
               tempList2.addOnTopNoRepetition(tempList);
               out << "<td>Rational roots: " << tempList.toString() << "</td>";
@@ -976,7 +976,7 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
         }
         out << "</tr>";
       }
-      if (k != theG2B3Data.theSmallCharFDpart.size() - 1) {
+      if (k != g2inB3Data.smallCharacterFiniteDimensionalPart.size() - 1) {
         if (isFD) {
           latexTable << "\\cline{3-5}";
         } else {
@@ -1020,11 +1020,11 @@ bool CalculatorLieTheory::printB3G2branchingTable(
 
 bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::printB3G2branchingTableCharsOnly");
-  BranchingData theg2b3data;
+  BranchingData g3InB3Data;
   ExpressionContext theContext(calculator);
   Vectors<RationalFraction<Rational> > theHWs;
   CalculatorLieTheory::printB3G2branchingTableCommon(
-    calculator, input, output, theHWs, theg2b3data, theContext
+    calculator, input, output, theHWs, g3InB3Data, theContext
   );
   if (output.isError()) {
     return true;
@@ -1032,7 +1032,7 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(Calculator& calculato
   CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > theCharacter, outputChar;
   std::stringstream out;
   std::stringstream latexTable;
-  bool isFD = (theg2b3data.selInducing.cardinalitySelection == 0);
+  bool isFD = (g3InB3Data.inducing.cardinalitySelection == 0);
   if (isFD) {
     out << "<table>"
     << "<tr><td>$so(7)$-highest weight</td>"
@@ -1042,10 +1042,10 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(Calculator& calculato
     << "\\hline$so(7)$-module & ~~~~~~ decomposition over $G_2$\\endhead \\hline\n<br>";
   } else {
     out << "Let " << HtmlRoutines::getMathNoDisplay("p\\subset so(7)") << " be the "
-    << theg2b3data.selInducing.toString() << "-parabolic subalgebra "
+    << g3InB3Data.inducing.toString() << "-parabolic subalgebra "
     << "and let " << HtmlRoutines::getMathNoDisplay("{p}'= p\\cap G_2")
     << ". Then  " << HtmlRoutines::getMathNoDisplay("{p}'") << " is the "
-    << theg2b3data.selSmallParSel.toString() << "- parabolic subalgebra of G_2"
+    << g3InB3Data.smallParabolicSelection.toString() << "- parabolic subalgebra of G_2"
     << "<br> <table><tr><td>$so(7)$-highest weight</td>"
     << "<td>Dimension of inducing fin. dim. "
     << HtmlRoutines::getMathNoDisplay(" p")
@@ -1055,56 +1055,56 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(Calculator& calculato
     << " <td>Highest weight <br> is sufficiently generic <br> if none of <br>the following vanish</td>"
     << "</tr>";
     latexTable << "\\begin{longtable}{|p{2cm}l|} \\caption{\\label{tableB3fdsOverG2charsonly"
-    << theg2b3data.selInducing.toString() << "} "
+    << g3InB3Data.inducing.toString() << "} "
     << "Decompositions of inducing $\\mathfrak{p}" << "_{"
-    << theg2b3data.selInducing.toString()
+    << g3InB3Data.inducing.toString()
     << "}" << "$-modules over $\\bar{ \\mathfrak {l}}$"
     << ", where $\\mathfrak{l}$ is the reductive Levi part of "
-    << "$\\mathfrak{p}" << "_{" << theg2b3data.selInducing.toString()
+    << "$\\mathfrak{p}" << "_{" << g3InB3Data.inducing.toString()
     <<  "}$ and $\\bar{\\mathfrak {l}}$ is the reductive Levi part of $\\bar{\\mathfrak {p}} _{"
-    << theg2b3data.selSmallParSel.toString()  << "}$" << " } \\\\"
+    << g3InB3Data.smallParabolicSelection.toString()  << "}$" << " } \\\\"
     << "\\hline $V_\\lambda(\\mathfrak l)$ " << "& Decomposition over $\\bar { \\mathfrak l}$ "
     << "\\endhead \\hline\n<br>";
   }
-  theg2b3data.theFormat.flagUseLatex = true;
+  g3InB3Data.format.flagUseLatex = true;
   ElementUniversalEnveloping<RationalFraction<Rational> > theCasimir, theCentralCharacter, resultChar;
   RationalFraction<Rational> minusOne(Rational(- 1));
   HashedList<ElementUniversalEnveloping<RationalFraction<Rational> > > theCentralChars;
-  theCasimir.makeCasimir(theg2b3data.theHmm.domain());
-  WeylGroupData& smallWeyl = theg2b3data.theHmm.domain().weylGroup;
+  theCasimir.makeCasimir(g3InB3Data.homomorphism.domain());
+  WeylGroupData& smallWeyl = g3InB3Data.homomorphism.domain().weylGroup;
   for (int k = 0; k < theHWs.size; k ++) {
     theCharacter.makeFromWeight(
-      theg2b3data.theHmm.range().weylGroup.getSimpleCoordinatesFromFundamental(
+      g3InB3Data.homomorphism.range().weylGroup.getSimpleCoordinatesFromFundamental(
         theHWs[k], RationalFraction<Rational>::zeroRational()
       ),
-      &theg2b3data.theHmm.range()
+      &g3InB3Data.homomorphism.range()
     );
-    theCharacter.splitCharacterOverReductiveSubalgebra(nullptr, outputChar, theg2b3data);
-    theg2b3data.theFormat.fundamentalWeightLetter = "\\omega";
-    out << "<tr><td> " << theCharacter.toString(&theg2b3data.theFormat) << "</td> ";
+    theCharacter.splitCharacterOverReductiveSubalgebra(nullptr, outputChar, g3InB3Data);
+    g3InB3Data.format.fundamentalWeightLetter = "\\omega";
+    out << "<tr><td> " << theCharacter.toString(&g3InB3Data.format) << "</td> ";
     Vector<RationalFraction<Rational> > simpleCoordinates;
-    simpleCoordinates = theg2b3data.WeylFD.ambientWeyl->getSimpleCoordinatesFromFundamental(
+    simpleCoordinates = g3InB3Data.weylGroupFiniteDimensional.ambientWeyl->getSimpleCoordinatesFromFundamental(
       theCharacter[0].weightFundamentalCoordinates,
       RationalFraction<Rational>::zeroRational()
     );
     RationalFraction<Rational> dimension;
-    dimension = theg2b3data.WeylFD.weylDimensionFormulaInnerSimpleCoords(simpleCoordinates);
+    dimension = g3InB3Data.weylGroupFiniteDimensional.weylDimensionFormulaInnerSimpleCoords(simpleCoordinates);
     out << "<td>" << dimension.toString() << "</td>";
-    latexTable << " $ " << theCharacter.toString(&theg2b3data.theFormat) << " $ ";
-    theg2b3data.theFormat.fundamentalWeightLetter = "\\psi";
-    out << "<td>" << outputChar.toString(&theg2b3data.theFormat) << "</td>";
+    latexTable << " $ " << theCharacter.toString(&g3InB3Data.format) << " $ ";
+    g3InB3Data.format.fundamentalWeightLetter = "\\psi";
+    out << "<td>" << outputChar.toString(&g3InB3Data.format) << "</td>";
     out << "<td>";
-    theg2b3data.theFormat.customPlusSign = "\\oplus ";
+    g3InB3Data.format.customPlusSign = "\\oplus ";
     Vector<RationalFraction<Rational> > leftWeightSimple, leftWeightDual, rightWeightSimple, rightWeightDual;
     theCentralChars.clear();
     for (int i = 0; i < outputChar.size(); i ++) {
       if (!outputChar.coefficients[i].isEqualToOne()) {
         out << outputChar.coefficients[i].toString() << " x ";
       }
-      simpleCoordinates = theg2b3data.WeylFDSmall.ambientWeyl->getSimpleCoordinatesFromFundamental(
+      simpleCoordinates = g3InB3Data.weylGroupFiniteDimensionalSmall.ambientWeyl->getSimpleCoordinatesFromFundamental(
         outputChar[i].weightFundamentalCoordinates, RationalFraction<Rational>::zeroRational()
       );
-      dimension = theg2b3data.WeylFDSmall.weylDimensionFormulaInnerSimpleCoords(simpleCoordinates);
+      dimension = g3InB3Data.weylGroupFiniteDimensionalSmall.weylDimensionFormulaInnerSimpleCoords(simpleCoordinates);
       out << dimension;
       if (i != outputChar.size() - 1) {
         out << "+";
@@ -1131,16 +1131,16 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(Calculator& calculato
       }
     }
     out << "</td>";
-    theg2b3data.theFormat.maximumLineLength = 80;
-    latexTable << "& $\\begin{array}{l} " << outputChar.toString(&theg2b3data.theFormat) << "\\end{array} $ ";
-    theg2b3data.theFormat.customPlusSign = "";
+    g3InB3Data.format.maximumLineLength = 80;
+    latexTable << "& $\\begin{array}{l} " << outputChar.toString(&g3InB3Data.format) << "\\end{array} $ ";
+    g3InB3Data.format.customPlusSign = "";
     if (!isFD && theCentralChars.size > 0) {
       out << "<td>";
       latexTable << " \\\\\n<br> ";
       latexTable << "\\multicolumn{2}{|p{11.6cm}|}{ \\tiny Strong Condition B: ";
       for (int l = 0; l < theCentralChars.size; l ++) {
-        out << theCentralChars[l].toString(&theg2b3data.theFormat) << "<br> ";
-        latexTable << "$" << theCentralChars[l].toString(&theg2b3data.theFormat) << "\\neq 0$";
+        out << theCentralChars[l].toString(&g3InB3Data.format) << "<br> ";
+        latexTable << "$" << theCentralChars[l].toString(&g3InB3Data.format) << "\\neq 0$";
         if (l != theCentralChars.size - 1) {
           latexTable << ", ";
         }
@@ -1633,22 +1633,23 @@ bool CalculatorLieTheory::splitFDpartB3overG2(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorLieTheory::splitFDpartB3overG2");
-  BranchingData theG2B3Data;
+  BranchingData g3InB3Data;
   ExpressionContext context(calculator);
-  CalculatorLieTheory::splitFDpartB3overG2Init(calculator, input, output, theG2B3Data, context);
+  CalculatorLieTheory::splitFDpartB3overG2Init(calculator, input, output, g3InB3Data, context);
   if (output.isError()) {
     return true;
   }
   Vectors<RationalFraction<Rational> > theHWs;
-  theHWs.addOnTop(theG2B3Data.weightFundamentalCoordinates);
-  return CalculatorLieTheory::printB3G2branchingIntermediate(calculator, input, output, theHWs, theG2B3Data, context);
+  theHWs.addOnTop(g3InB3Data.weightFundamentalCoordinates);
+  return CalculatorLieTheory::printB3G2branchingIntermediate(calculator, input, output, theHWs, g3InB3Data, context);
 }
 
-bool CalculatorLieTheory::printB3G2branchingTableCommon(Calculator& calculator,
+bool CalculatorLieTheory::printB3G2branchingTableCommon(
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   Vectors<RationalFraction<Rational> >& outputHWs,
-  BranchingData& theG2B3Data,
+  BranchingData& g2InB3Data,
   ExpressionContext& theContext
 ) {
   MacroRegisterFunctionWithName("Calculator::printB3G2branchingTableCommon");
@@ -1656,23 +1657,23 @@ bool CalculatorLieTheory::printB3G2branchingTableCommon(Calculator& calculator,
   SelectionWithMaxMultiplicity theHWenumerator;
   int desiredHeight = 0;
   if (!CalculatorLieTheory::printB3G2branchingTableInit(
-    calculator, input, output, theG2B3Data, desiredHeight, theContext
+    calculator, input, output, g2InB3Data, desiredHeight, theContext
   )) {
     return false;
   }
   if (output.isError()) {
     return true;
   }
-  Selection invertedSelInducing = theG2B3Data.selInducing;
-  theContext.getFormat(theG2B3Data.theFormat);
+  Selection invertedSelInducing = g2InB3Data.inducing;
+  theContext.getFormat(g2InB3Data.format);
   invertedSelInducing.invertSelection();
   outputHWs.setSize(0);
   for (int j = 0; j <= desiredHeight; j ++) {
-    theHWenumerator.initMaxMultiplicity(3 - theG2B3Data.selInducing.cardinalitySelection, j);
+    theHWenumerator.initMaxMultiplicity(3 - g2InB3Data.inducing.cardinalitySelection, j);
     theHWenumerator.incrementSubsetFixedCardinality(j);
     LargeInteger numberOfCycles = theHWenumerator.numberOfCombinationsOfCardinality(j);
     for (int i = 0; i < numberOfCycles; i ++, theHWenumerator.incrementSubsetFixedCardinality(j)) {
-      theHWrf = theG2B3Data.weightFundamentalCoordinates;
+      theHWrf = g2InB3Data.weightFundamentalCoordinates;
       for (int k = 0; k < invertedSelInducing.cardinalitySelection; k ++) {
         theHWrf[invertedSelInducing.elements[k]] += theHWenumerator.multiplicities[k];
       }
@@ -1694,8 +1695,8 @@ bool CalculatorLieTheory::splitFDpartB3overG2old(
   std::stringstream out;
   CalculatorLieTheory::splitFDpartB3overG2inner(calculator, theG2B3Data, output);
   out << "<br>Highest weight: " << theG2B3Data.weightFundamentalCoordinates.toString() << "<br>Parabolic selection: "
-  << theG2B3Data.selInducing.toString() << "<br>common Levi part of G_2 and B_3: "
-  << theG2B3Data.selSmallParSel.toString();
+  << theG2B3Data.inducing.toString() << "<br>common Levi part of G_2 and B_3: "
+  << theG2B3Data.smallParabolicSelection.toString();
   out
   << "<table border =\"1\"><tr><td>word</td><td>B_3-weight simple coords</td><td>B_3-weight fund. coords </td>"
   << "<td>G_2 simple coordinates</td><td>G2-fund. coords</td><td>G2-dual coordinates</td><td>character</td></tr>";
@@ -1715,9 +1716,9 @@ bool CalculatorLieTheory::splitFDpartB3overG2old(
     out << "<tr><td>" << theG2B3Data.outputEigenWords[i].toString() << "</td><td> "
     << currentWeightSimpleB3coords.toString() << "</td><td> " << currentWeightFundB3coords.toString()
     << "</td><td>" << currentG2Weight.toStringLetterFormat("\\alpha") << "</td><td> "
-    << theG2B3Data.theHmm.domain().weylGroup.getFundamentalCoordinatesFromSimple(currentG2Weight).toString()
+    << theG2B3Data.homomorphism.domain().weylGroup.getFundamentalCoordinatesFromSimple(currentG2Weight).toString()
     << "</td><td> " << currentG2DualWeight.toString() << "</td>";
-    out << "<td>" << HtmlRoutines::getMathNoDisplay(theG2B3Data.theChars[i].toString()) << "</td>";
+    out << "<td>" << HtmlRoutines::getMathNoDisplay(theG2B3Data.allCharacters[i].toString()) << "</td>";
     out << "</tr>";
   }
   readyForLatexConsumptionTable1 << "\\hline \n";
@@ -1732,12 +1733,12 @@ bool CalculatorLieTheory::splitFDpartB3overG2old(
     for (int j = 0; j < theG2B3Data.g2Weights.size; j ++) {
       weightDifference = theG2B3Data.g2Weights[j] - theG2B3Data.g2Weights[k];
       if (weightDifference.isPositive()) {
-        formulaStream1 << "(12(i(\\bar c) - " << theG2B3Data.theChars[j].toString() <<  "))";
+        formulaStream1 << "(12(i(\\bar c) - " << theG2B3Data.allCharacters[j].toString() <<  "))";
       }
     }
     formulaStream1 << "v_\\lambda";
     out << HtmlRoutines::getMathNoDisplay(formulaStream1.str())
-    << "</td><td>" << HtmlRoutines::getMathNoDisplay(theG2B3Data.theEigenVectorS[k].toString()) << "</td></tr>";
+    << "</td><td>" << HtmlRoutines::getMathNoDisplay(theG2B3Data.eigenVectors[k].toString()) << "</td></tr>";
   }
   out << "</table>";
   out << "<br>Time final: " << global.getElapsedSeconds();
@@ -1787,16 +1788,16 @@ bool CalculatorLieTheory::splitFDpartB3overG2CharsOutput(
   }
   std::stringstream out;
   out << "<br>Highest weight: " << theG2B3Data.weightFundamentalCoordinates.toString() << "<br>Parabolic selection: "
-  << theG2B3Data.selInducing.toString();
+  << theG2B3Data.inducing.toString();
   std::string report;
   CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > tempChar;
   CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > startingChar;
   Vector<RationalFraction<Rational> > simpleWeight;
-  simpleWeight = theG2B3Data.theHmm.range().weylGroup.getSimpleCoordinatesFromFundamental(
+  simpleWeight = theG2B3Data.homomorphism.range().weylGroup.getSimpleCoordinatesFromFundamental(
     theG2B3Data.weightFundamentalCoordinates,
     RationalFraction<Rational>::zeroRational()
   );
-  startingChar.makeFromWeight(simpleWeight, &theG2B3Data.theHmm.range());
+  startingChar.makeFromWeight(simpleWeight, &theG2B3Data.homomorphism.range());
   startingChar.splitCharacterOverReductiveSubalgebra(&report, tempChar, theG2B3Data);
   out << report;
   return output.assignValue(out.str(), calculator);
@@ -1829,11 +1830,11 @@ bool CalculatorLieTheory::splitFDpartB3overG2Init(
       calculator
     );
   }
-  calculator.makeHmmG2InB3(theG2B3Data.theHmm);
-  theG2B3Data.selInducing.initialize(3);
+  calculator.makeHmmG2InB3(theG2B3Data.homomorphism);
+  theG2B3Data.inducing.initialize(3);
   for (int i = 0; i < theG2B3Data.weightFundamentalCoordinates.size; i ++) {
     if (!theG2B3Data.weightFundamentalCoordinates[i].isSmallInteger()) {
-      theG2B3Data.selInducing.addSelectionAppendNewIndex(i);
+      theG2B3Data.inducing.addSelectionAppendNewIndex(i);
     }
   }
   theG2B3Data.initAssumingParSelAndHmmInittedPart1NoSubgroups();
@@ -2373,50 +2374,55 @@ bool CalculatorLieTheory::growDynkinType(
   if (input.size() != 3) {
     return false;
   }
-  const Expression& theSmallerTypeE = input[1];
-  DynkinType theSmallDynkinType;
+  const Expression& smallerTypeE = input[1];
+  DynkinType smallDynkinType;
   if (!CalculatorConversions::functionDynkinType(
-    calculator, theSmallerTypeE, theSmallDynkinType
+    calculator, smallerTypeE, smallDynkinType
   )) {
     return false;
   }
-  WithContext<SemisimpleLieAlgebra*> theSSalg;
+  WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (!CalculatorConversions::convert(
-    input[2], CalculatorConversions::functionSemisimpleLieAlgebra, theSSalg
+    input[2], CalculatorConversions::functionSemisimpleLieAlgebra, semisimpleLieAlgebra
   )) {
     return output.makeError("Error extracting ambient Lie algebra.", calculator);
   }
-  SemisimpleSubalgebras tempSas;
-  tempSas.initHookUpPointers(
-    *theSSalg.content,
+  SemisimpleSubalgebras subalgebras;
+  subalgebras.initHookUpPointers(
+    *semisimpleLieAlgebra.content,
     &calculator.objectContainer.algebraicClosure,
     &calculator.objectContainer.semisimpleLieAlgebras,
     &calculator.objectContainer.slTwoSubalgebras
   );
-  tempSas.computeSl2sInitOrbitsForComputationOnDemand();
-  if (!tempSas.ranksAndIndicesFit(theSmallDynkinType)) {
+  subalgebras.slTwoSubalgebras.checkMinimalContainingRootSubalgebras();
+  subalgebras.computeSl2sInitOrbitsForComputationOnDemand();
+  if (!subalgebras.ranksAndIndicesFit(smallDynkinType)) {
     return output.makeError(
-      "Error: type " + theSmallDynkinType.toString() + " does not fit inside " + theSSalg.content->weylGroup.dynkinType.toString(),
+      "Error: type " + smallDynkinType.toString() +
+      " does not fit inside " +
+      semisimpleLieAlgebra.content->weylGroup.dynkinType.toString(),
       calculator
     );
   }
   List<DynkinType> largerTypes;
   List<List<int> > imagesSimpleRoots;
-  if (!tempSas.growDynkinType(theSmallDynkinType, largerTypes, &imagesSimpleRoots)) {
+  if (!subalgebras.growDynkinType(smallDynkinType, largerTypes, &imagesSimpleRoots)) {
     return output.makeError(
-      "Error: growing type " + theSmallDynkinType.toString() + " inside " + theSSalg.content->weylGroup.dynkinType.toString() + " failed. ",
+      "Error: growing type " + smallDynkinType.toString() +
+      " inside " + semisimpleLieAlgebra.content->weylGroup.dynkinType.toString() +
+      " failed. ",
       calculator
     );
   }
   std::stringstream out;
-  out << "Inside " << theSSalg.content->weylGroup.dynkinType.toString()
-  << ", input type " << theSmallDynkinType.toString();
+  out << "Inside " << semisimpleLieAlgebra.content->weylGroup.dynkinType.toString()
+  << ", input type " << smallDynkinType.toString();
   if (largerTypes.size == 0) {
     out << " cannot grow any further. ";
   } else {
     CandidateSemisimpleSubalgebra tempCandidate;
     out << " can grow to the following types. <br>";
-    out << "<table border =\"1\">"
+    out << "<table border='1'>"
     << "<td>Larger type</td>"
     << "<td>Root injection</td>"
     << "<td>Highest weight module containing new simple generator</td></tr>";
@@ -2430,7 +2436,7 @@ bool CalculatorLieTheory::growDynkinType(
         }
       }
       out << "</td><td>";
-      Vector<Rational> currentHighestWeight = tempSas.getHighestWeightFundamentalNewComponentFromImagesOldSimpleRootsAndNewRoot(
+      Vector<Rational> currentHighestWeight = subalgebras.getHighestWeightFundamentalNewComponentFromImagesOldSimpleRootsAndNewRoot(
         largerTypes[i], imagesSimpleRoots[i], tempCandidate
       );
       out << HtmlRoutines::getMathNoDisplay(
@@ -2450,31 +2456,31 @@ bool CalculatorLieTheory::computeSemisimpleSubalgebras(
   if (input.size() != 2) {
     return calculator << "Semisimple subalgebras function expects 1 argument. ";
   }
-  WithContext<SemisimpleLieAlgebra*> ownerSSPointer;
+  WithContext<SemisimpleLieAlgebra*> lieAlgebraPointer;
   if (!CalculatorConversions::convert(
-    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, ownerSSPointer
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, lieAlgebraPointer
   )) {
     return output.makeError("Error extracting Lie algebra.", calculator);
   }
-  SemisimpleLieAlgebra& ownerSS = *ownerSSPointer.content;
+  SemisimpleLieAlgebra& lieAlgebra = *lieAlgebraPointer.content;
   std::stringstream out;
-  if (ownerSS.getRank() > 6) {
+  if (lieAlgebra.getRank() > 6) {
     out << "<b>This code is completely experimental and has been set to run up to rank 6. "
     << "As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
     return output.assignValue(out.str(), calculator);
   }
-  SemisimpleSubalgebras& theSSsubalgebras =
-  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.weylGroup.dynkinType);
-  theSSsubalgebras.flagcomputePairingTable = false;
-  theSSsubalgebras.flagComputeNilradicals = false;
-  theSSsubalgebras.findTheSemisimpleSubalgebrasFromScratch(
-    ownerSS,
+  SemisimpleSubalgebras& semisimpleSubalgebras =
+  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(lieAlgebra.weylGroup.dynkinType);
+  semisimpleSubalgebras.flagcomputePairingTable = false;
+  semisimpleSubalgebras.flagComputeNilradicals = false;
+  semisimpleSubalgebras.findTheSemisimpleSubalgebrasFromScratch(
+    lieAlgebra,
     calculator.objectContainer.algebraicClosure,
     calculator.objectContainer.semisimpleLieAlgebras,
     calculator.objectContainer.slTwoSubalgebras,
     nullptr
   );
-  return output.assignValue(theSSsubalgebras, calculator);
+  return output.assignValue(semisimpleSubalgebras, calculator);
 }
 
 template < >
@@ -2506,7 +2512,7 @@ bool CalculatorLieTheory::computePairingTablesAndFKFTsubalgebras(
   FileOperations::openFileCreateIfNotPresentVirtual(file, "output/" + fileName, false, true, false);
   file << subalgebras.toString(&tempFormat, false);
   std::stringstream out;
-  out << "<a href=\"" << global.displayPathOutputFolder << "FKFTcomputation.html\">FKFTcomputation.html</a>";
+  out << "<a href='" << global.displayPathOutputFolder << "FKFTcomputation.html'>FKFTcomputation.html</a>";
   return output.assignValue(out.str(), calculator);
 }
 
@@ -2527,7 +2533,7 @@ bool CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras(
     out << "<br>Chain " << i + 1 << ": LoadSemisimpleSubalgebras{}( "
     << subalgebras.owner->weylGroup.dynkinType.toString() << ", (";
     for (int j = 0; j < chains[i].size; j ++) {
-      CalculatorConversions::innerStoreCandidateSubalgebra(
+      CalculatorConversions::storeCandidateSubalgebra(
         calculator, subalgebras.subalgebras.values[chains[i][j]], currentChainE
       );
       out << currentChainE.toString();
@@ -2543,7 +2549,7 @@ bool CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras(
 bool CalculatorLieTheory::getPrincipalSl2Index(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::getPrincipalSl2Index");
   DynkinType dynkinType;
-  if (!CalculatorConversions::innerDynkinTypE(calculator, input, dynkinType)) {
+  if (!CalculatorConversions::dynkinType(calculator, input, dynkinType)) {
     return calculator << "Failed to convert "
     << input.toString() << " to DynkinType.";
   }
@@ -2555,7 +2561,7 @@ bool CalculatorLieTheory::getDynkinIndicesSlTwoSubalgebras(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::getDynkinIndicesSlTwoSubalgebras");
   DynkinType dynkinType;
-  if (!CalculatorConversions::innerDynkinTypE(calculator, input, dynkinType)) {
+  if (!CalculatorConversions::dynkinType(calculator, input, dynkinType)) {
     return calculator << "Failed to convert "
     << input.toString() << " to DynkinType.";
   }
@@ -2594,48 +2600,48 @@ bool CalculatorLieTheory::generateVectorSpaceClosedWithRespectToLieBracket(
   inputModded.removeChildShiftDown(1);
   ExpressionContext context(calculator);
   if (!calculator.getVectorFromFunctionArguments(inputModded, theOps, &context)) {
-    Vector<ElementUniversalEnveloping<RationalFraction<Rational> > > theLieAlgElts;
+    Vector<ElementUniversalEnveloping<RationalFraction<Rational> > > lieAlgebraElements;
     context.initialize(calculator);
-    if (!calculator.getVectorFromFunctionArguments(inputModded, theLieAlgElts, &context)) {
+    if (!calculator.getVectorFromFunctionArguments(inputModded, lieAlgebraElements, &context)) {
       return calculator
       << "<hr>Failed to extract elements of Weyl algebra and "
       << "failed to extract elements of UE algebra from input "
       << input.toString();
     }
-    FormatExpressions theFormat;
-    context.getFormat(theFormat);
+    FormatExpressions format;
+    context.getFormat(format);
     std::stringstream out;
     out << "Starting elements: <br>";
-    for (int i = 0; i < theLieAlgElts.size; i ++) {
-      out << HtmlRoutines::getMathNoDisplay(theLieAlgElts[i].toString(&theFormat)) << "<br>";
+    for (int i = 0; i < lieAlgebraElements.size; i ++) {
+      out << HtmlRoutines::getMathNoDisplay(lieAlgebraElements[i].toString(&format)) << "<br>";
     }
-    bool success = MathRoutines::generateVectorSpaceClosedWithRespectToLieBracket(theLieAlgElts, upperBound);
+    bool success = MathRoutines::generateVectorSpaceClosedWithRespectToLieBracket(lieAlgebraElements, upperBound);
     if (!success) {
       out << "<br>Did not succeed with generating vector space, "
       << "instead got a vector space with basis "
-      << theLieAlgElts.size << " exceeding the limit. "
+      << lieAlgebraElements.size << " exceeding the limit. "
       << "The basis generated before exceeding the limit was: "
-      << theLieAlgElts.toString();
+      << lieAlgebraElements.toString();
     } else {
       out << "<br>Lie bracket generates vector space of dimension "
-      << theLieAlgElts.size << " with basis:";
-      for (int i = 0; i < theLieAlgElts.size; i ++) {
+      << lieAlgebraElements.size << " with basis:";
+      for (int i = 0; i < lieAlgebraElements.size; i ++) {
         out << "<br>";
-        if (theLieAlgElts.size > 50) {
-          out << theLieAlgElts[i].toString(&theFormat);
+        if (lieAlgebraElements.size > 50) {
+          out << lieAlgebraElements[i].toString(&format);
         } else {
-          out << HtmlRoutines::getMathNoDisplay(theLieAlgElts[i].toString(&theFormat));
+          out << HtmlRoutines::getMathNoDisplay(lieAlgebraElements[i].toString(&format));
         }
       }
     }
     return output.assignValue(out.str(), calculator);
   }
-  FormatExpressions theFormat;
-  context.getFormat(theFormat);
+  FormatExpressions format;
+  context.getFormat(format);
   std::stringstream out;
   out << "Starting elements: <br>";
   for (int i = 0; i < theOps.size; i ++) {
-    out << HtmlRoutines::getMathNoDisplay(theOps[i].toString(&theFormat)) << "<br>";
+    out << HtmlRoutines::getMathNoDisplay(theOps[i].toString(&format)) << "<br>";
   }
   bool success = MathRoutines::generateVectorSpaceClosedWithRespectToLieBracket(theOps, upperBound);
   if (!success) {
@@ -2650,9 +2656,9 @@ bool CalculatorLieTheory::generateVectorSpaceClosedWithRespectToLieBracket(
     for (int i = 0; i < theOps.size; i ++) {
       out << "<br>";
       if (theOps.size > 50) {
-        out << theOps[i].toString(&theFormat);
+        out << theOps[i].toString(&format);
       } else {
-        out << HtmlRoutines::getMathNoDisplay(theOps[i].toString(&theFormat));
+        out << HtmlRoutines::getMathNoDisplay(theOps[i].toString(&format));
       }
     }
   }
@@ -2747,7 +2753,7 @@ bool CalculatorLieTheory::canBeExtendedParabolicallyTo(
 bool CalculatorLieTheory::getSymmetricCartan(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorLieTheory::getSymmetricCartan");
   DynkinType dynkinType;
-  if (!CalculatorConversions::innerDynkinTypE(calculator, input, dynkinType)) {
+  if (!CalculatorConversions::dynkinType(calculator, input, dynkinType)) {
     return calculator << "Failed to convert " << input.toString() << " to DynkinType.";
   }
   std::stringstream out;
@@ -3045,7 +3051,7 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
   }
   std::stringstream out;
   WithContext<SemisimpleLieAlgebra*> ownerAlgebra;
-  SemisimpleLieAlgebra* ownerSSPointer = nullptr;
+  SemisimpleLieAlgebra* ownerAlgebraPointer = nullptr;
   bool isAlreadySubalgebrasObject = input[1].isOfType<SemisimpleSubalgebras>();
   int maximumRank = 8;
   if (global.userDefaultHasAdminRights()) {
@@ -3059,8 +3065,8 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
     )) {
       return output.makeError("Error extracting Lie algebra.", calculator);
     }
-    ownerSSPointer = ownerAlgebra.content;
-    if (ownerSSPointer->getRank() > maximumRank) {
+    ownerAlgebraPointer = ownerAlgebra.content;
+    if (ownerAlgebraPointer->getRank() > maximumRank) {
       out << "<b>This code is has been set to run up to rank "
       << maximumRank << ". "
       << "As soon as the algorithms are mature enough, "
@@ -3068,15 +3074,15 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
       return output.assignValue(out.str(), calculator);
     }
   } else {
-    ownerSSPointer = input[1].getValue<SemisimpleSubalgebras>().owner;
+    ownerAlgebraPointer = input[1].getValue<SemisimpleSubalgebras>().owner;
   }
-  if (ownerSSPointer == nullptr) {
+  if (ownerAlgebraPointer == nullptr) {
     global.fatal
     << "Zero pointer to semisimple Lie algebra: this shouldn't happen. "
     << global.fatal;
   }
-  SemisimpleLieAlgebra& ownerLieAlgebra = *ownerSSPointer;
-  std::string dynkinString = ownerSSPointer->weylGroup.dynkinType.toString();
+  SemisimpleLieAlgebra& ownerLieAlgebra = *ownerAlgebraPointer;
+  std::string dynkinString = ownerAlgebraPointer->weylGroup.dynkinType.toString();
   global.relativePhysicalNameOptionalProgressReport = "progress_subalgebras_" + dynkinString;
   global.relativePhysicalNameOptionalResult = "result_subalgebras_" + dynkinString;
   SemisimpleSubalgebras& subalgebras =

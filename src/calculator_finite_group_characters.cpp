@@ -919,7 +919,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint");
   DynkinType dynkinType;
-  if (!CalculatorConversions::innerDynkinTypE(calculator, input, dynkinType)) {
+  if (!CalculatorConversions::dynkinType(calculator, input, dynkinType)) {
     return output.makeError("Failed to extract Dynkin type from argument. ", calculator);
   }
   std::stringstream out, outCommand;

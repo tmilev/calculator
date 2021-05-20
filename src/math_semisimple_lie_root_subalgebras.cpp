@@ -43,7 +43,7 @@ void RootSubalgebra::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double
     tempGroup.ambientWeyl = &this->getAmbientWeyl();
     tempGroup.simpleRootsInner = this->dynkinDiagram.simpleBasesConnectedComponents[i];
     tempGroup.computeRootSubsystem();
-    Vector<Rational>& lastRoot = *tempGroup.RootSubsystem.lastObject();
+    Vector<Rational>& lastRoot = *tempGroup.rootSubsystem.lastObject();
     Vector<Rational> lastRootInSimpleCoords;
     lastRoot.getCoordinatesInBasis(tempGroup.simpleRootsInner, lastRootInSimpleCoords);
     coxeterNumber = MathRoutines::maximum(lastRootInSimpleCoords.sumCoordinates().numeratorShort, coxeterNumber);
@@ -1239,7 +1239,7 @@ bool RootSubalgebra::isAnIsomorphism(
     }
   }
   if (outputAutomorphisms != nullptr) {
-    outputAutomorphisms->ExternalAutomorphisms.addOnTop(tempRoots);
+    outputAutomorphisms->externalAutomorphisms.addOnTop(tempRoots);
   }
   return true;
 }
@@ -1823,7 +1823,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
   bool* domainAndRangeGenerateNonIsoSAs
 ) {
   if (outputAutomorphisms != nullptr) {
-    outputAutomorphisms->ExternalAutomorphisms.size = 0;
+    outputAutomorphisms->externalAutomorphisms.size = 0;
   }
   if (domainAndRangeGenerateNonIsoSAs != nullptr) {
     *domainAndRangeGenerateNonIsoSAs = false;
@@ -1901,7 +1901,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
       }
       if (outputAutomorphisms != nullptr) {
         theDomainRootSA.makeProgressReportGeneratorAutomorphisms(
-          l + NumAutosCentralizer * j, tempI2 * NumAutosCentralizer, outputAutomorphisms->ExternalAutomorphisms.size
+          l + NumAutosCentralizer * j, tempI2 * NumAutosCentralizer, outputAutomorphisms->externalAutomorphisms.size
         );
       }
       tempAutosCentralizer.incrementReturnFalseIfPastLast();
@@ -1921,7 +1921,7 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
     return false;
   }
   if (outputAutomorphisms != nullptr) {
-    outputAutomorphisms->ExternalAutomorphisms.size = 0;
+    outputAutomorphisms->externalAutomorphisms.size = 0;
     outputAutomorphisms->simpleRootsInner.size = 0;
     outputAutomorphisms->simpleRootsInner = this->simpleBasisCentralizerRoots;
   }
@@ -1989,7 +1989,7 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
             this->makeProgressReportGeneratorAutomorphisms(
               l + NumAutosCentralizer * (k + NumAutos * (j + i * tempI2)),
               tempI1 * tempI2 * NumAutos * NumAutosCentralizer,
-              outputAutomorphisms->ExternalAutomorphisms.size
+              outputAutomorphisms->externalAutomorphisms.size
             );
           }
           tempAutosCentralizer.incrementReturnFalseIfPastLast();
@@ -3348,7 +3348,7 @@ void RootSubalgebras::toStringCentralizerIsomorphisms(
   for (int i = fromIndex; i < NumToProcess; i ++) {
     RootSubalgebra& current = this->subalgebras[i];
     SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& theOuterIsos = this->centralizerOuterIsomorphisms[i];
-    theOuterIsos.computeSubGroupFromGeneratingReflections(&emptyRoots, &theOuterIsos.ExternalAutomorphisms, 0, true);
+    theOuterIsos.computeSubGroupFromGeneratingReflections(&emptyRoots, &theOuterIsos.externalAutomorphisms, 0, true);
     Rational numInnerIsos = current.centralizerDiagram.getSizeCorrespondingWeylGroupByFormula();
     if (useHtml) {
       out << "<td>";
@@ -3730,10 +3730,10 @@ void RootSubalgebras::computeNormalizerOfCentralizerIntersectNilradical(
   this->makeProgressReportAutomorphisms(outputSubgroup, theRootSA);
   theRootSA.generateIsomorphismsPreservingBorel(theRootSA, &outputSubgroup);
   outputSubgroup.computeSubGroupFromGeneratingReflections(
-    &selectedRootsBasisCentralizer, &outputSubgroup.ExternalAutomorphisms, this->UpperLimitNumElementsWeyl, false
+    &selectedRootsBasisCentralizer, &outputSubgroup.externalAutomorphisms, this->UpperLimitNumElementsWeyl, false
   );
   outputSubgroup.simpleRootsInner = selectedRootsBasisCentralizer;
-  this->centralizerOuterIsomorphisms.lastObject().ExternalAutomorphisms = outputSubgroup.ExternalAutomorphisms;
+  this->centralizerOuterIsomorphisms.lastObject().externalAutomorphisms = outputSubgroup.externalAutomorphisms;
   this->centralizerOuterIsomorphisms.lastObject().ambientWeyl = &this->getOwnerWeyl();
   this->makeProgressReportAutomorphisms(outputSubgroup, theRootSA);
 }
@@ -4414,9 +4414,9 @@ bool ConeRelation::isStrictlyWeaklyProhibiting(
   }
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms tempSubgroup;
   tempSubgroup.ambientWeyl = &(owner.getAmbientWeyl());
-  tempSubgroup.computeSubGroupFromGeneratingReflections(&tempRoots, &tempSubgroup.ExternalAutomorphisms, 0, true);
+  tempSubgroup.computeSubGroupFromGeneratingReflections(&tempRoots, &tempSubgroup.externalAutomorphisms, 0, true);
   Vectors<Rational> NilradicalIntersection, genSingHW;
-  tempRoots = tempSubgroup.RootSubsystem;
+  tempRoots = tempSubgroup.rootSubsystem;
   nilradicalRoots.intersectWith(tempRoots, NilradicalIntersection);
   for (int i = 0; i < owner.highestWeightsPrimalSimple.size; i ++) {
     if (

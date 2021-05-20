@@ -231,7 +231,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "SlTwoRealFormStructureForceRecompute{}(a_3)",
     "Calculator::slTwoRealFormStructureForceRecompute",
     "SlTwoRealFormStructureForceRecompute",
-    innerInvisible
+    // TODO(tmilev): change to an automatically-tested version when this is fixed.
+    innerAdminNoTest
   );
   this->addOperationHandler(
     "ConesIntersection",
@@ -933,7 +934,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "EmbedSemisimpleInSemisimple",
-    CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra,
+    CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra,
     "",
     "Tries to find all embeddings of the first semisimple type into the second. "
     "Records all intermediate subalgebras. ",

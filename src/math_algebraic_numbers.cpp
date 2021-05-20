@@ -410,15 +410,24 @@ bool AlgebraicClosureRationals::reduceMe(
   return true;
 }
 
+bool AlgebraicClosureRationals::checkElement(const AlgebraicNumber& input) const {
+  input.checkConsistency();
+  if (input.owner != nullptr && input.owner != this) {
+    global.fatal << "Element has a different algebraic closure owner." << global.fatal;
+  }
+  return true;
+}
+
 void AlgebraicClosureRationals::getAdditionTo(
   const AlgebraicNumber& input, VectorSparse<Rational>& output
 ) {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::getAdditionTo");
   if (&output == &input.element) {
-    AlgebraicNumber anCopy = input;
-    this->getAdditionTo(anCopy, output);
+    AlgebraicNumber copy = input;
+    this->getAdditionTo(copy, output);
     return;
   }
+  this->checkElement(input);
   if (input.owner == nullptr) {
     if (input.element.size() > 0) {
       output.makeEi(0, input.element.coefficients[0]);
@@ -992,6 +1001,17 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other) {
 bool AlgebraicNumber::checkConsistency() const {
   if (this->flagDeallocated) {
     global.fatal << "Use after free of AlgebraicNumber. " << global.fatal;
+  }
+  if (this->owner != nullptr) {
+    if (
+      this->basisIndex < 0 ||
+      this->basisIndex >= this->owner->basisInjections.size
+    ) {
+      global.fatal
+      << "Element has out-of-range basis index "
+      << this->basisIndex << ". "
+      << global.fatal;
+    }
   }
   if (this->owner == nullptr) {
     if (!this->isRational()) {

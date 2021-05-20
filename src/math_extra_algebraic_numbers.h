@@ -217,6 +217,7 @@ public:
   void appendAdditiveEiBasis();
   void assignDefaultBasisDisplayNames();
   void reset();
+  bool checkElement(const AlgebraicNumber& input) const;
   bool checkConsistency() const;
   AlgebraicClosureRationals() {
     this->reset();

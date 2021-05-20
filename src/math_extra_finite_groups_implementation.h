@@ -1579,7 +1579,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::a
       tempI -= this->simpleRootsInner.size;
       tempRoot.makeZero(input.size);
       for (int j = 0; j < output.size; j ++) {
-        tempRoot2 = this->ExternalAutomorphisms[tempI][j];
+        tempRoot2 = this->externalAutomorphisms[tempI][j];
         tempRoot2 *= output[j];
         tempRoot += tempRoot2;
       }
@@ -1606,12 +1606,12 @@ Coefficient SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
   Coefficient Result, buffer;
   Vector<Coefficient> rhoOverNewRing, rootOfBorelNewRing, sumWithRho;//<-to facilitate type conversion!
   Vector<Rational> rho;
-  this->RootsOfBorel.sum(rho, this->ambientWeyl->getDimension());
+  this->rootsOfBorel.sum(rho, this->ambientWeyl->getDimension());
   rho /= 2;
   rhoOverNewRing = rho;//<-type conversion here!
   Result = ringUnit;
-  for (int i = 0; i < this->RootsOfBorel.size; i ++) {
-    rootOfBorelNewRing = this->RootsOfBorel[i]; //<-type conversion here!
+  for (int i = 0; i < this->rootsOfBorel.size; i ++) {
+    rootOfBorelNewRing = this->rootsOfBorel[i]; //<-type conversion here!
     sumWithRho = rhoOverNewRing + weightInnerSimpleCoords;
     buffer = this->ambientWeyl->rootScalarCartanRoot(sumWithRho, rootOfBorelNewRing);
     buffer /= this->ambientWeyl->rootScalarCartanRoot(rhoOverNewRing, rootOfBorelNewRing);
@@ -1664,11 +1664,11 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
     int bufferIndexShift = lowestUnexploredHeightDiff % topHeightRootSystemPlusOne;
     HashedList<Vector<Coefficient> >& currentHashes = outputWeightsByHeight[bufferIndexShift];
     for (int lowest = 0; lowest < currentHashes.size; lowest ++) {
-      for (int i = 0; i < this->RootsOfBorel.size; i ++) {
+      for (int i = 0; i < this->rootsOfBorel.size; i ++) {
         currentWeight = currentHashes[lowest];
-        currentWeight -= this->RootsOfBorel[i];
+        currentWeight -= this->rootsOfBorel[i];
         if (this->isDominantWeight(currentWeight)) {
-          int currentIndexShift = this->RootsOfBorel[i].sumCoordinates().numeratorShort;
+          int currentIndexShift = this->rootsOfBorel[i].sumCoordinates().numeratorShort;
           currentIndexShift = (currentIndexShift + bufferIndexShift) % topHeightRootSystemPlusOne;
           if (outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(currentWeight)) {
             numTotalWeightsFound ++;
@@ -1749,8 +1749,8 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
     if (restrictToInner) {
       continue;
     }
-    for (int j = 1; j < this->ExternalAutomorphisms.size; j ++) {
-      ExternalAutosOverAmbientField = this->ExternalAutomorphisms[j];
+    for (int j = 1; j < this->externalAutomorphisms.size; j ++) {
+      ExternalAutosOverAmbientField = this->externalAutomorphisms[j];
       theOrbit[i].getCoordinatesInBasis(ExternalAutosOverAmbientField, tempRoot);
       theOrbit.addOnTopNoRepetition(tempRoot);
     }
@@ -1780,7 +1780,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::f
   hwSimpleCoordsNilPart = inputHWfundamentalCoords;
   for (int i = 0; i < hwSimpleCoordsLeviPart.size; i ++) {
     EiVect.makeEi(hwSimpleCoordsLeviPart.size, i);
-    if (!this->RootsOfBorel.contains(EiVect)) {
+    if (!this->rootsOfBorel.contains(EiVect)) {
       hwSimpleCoordsLeviPart[i] = ringZero;
     } else {
       hwSimpleCoordsNilPart[i] = ringZero;
@@ -1816,9 +1816,9 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::f
     Explored[k] = true;
     Coefficient& currentAccum = outputMultsSimpleCoords[k];
     currentAccum = 0;
-    for (int j = 0; j < this->RootsOfBorel.size; j ++) {
+    for (int j = 0; j < this->rootsOfBorel.size; j ++) {
       for (int i = 1; ; i ++) {
-        convertor = this->RootsOfBorel[j];
+        convertor = this->rootsOfBorel[j];
         convertor *= i;
         currentWeight = outputDomWeightsSimpleCoordsLeviPart[k] + convertor;
         currentDominantRepresentative = currentWeight;
@@ -1837,7 +1837,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::f
           outputDetails = errorLog.str();
           return false;
         }
-        convertor = this->RootsOfBorel[j];//<-implicit type conversion here!
+        convertor = this->rootsOfBorel[j];//<-implicit type conversion here!
         bufferCoeff = this->ambientWeyl->rootScalarCartanRoot(currentWeight, convertor);
         bufferCoeff *= outputMultsSimpleCoords[index];
         currentAccum += bufferCoeff;

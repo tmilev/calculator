@@ -358,7 +358,7 @@ private:
   bool isEqualToMOne() const;
   bool isKnownToBeNonNegative() const;
   bool isNegativeConstant() const;
-  bool makeIdentityMatrixExpressions(int theDim, Calculator& inputBoss);
+  bool makeIdentityMatrixExpressions(int dimension, Calculator& inputBoss);
   bool makeAtom(int input, Calculator& newBoss);
   // TODO(tmilev): rename to MakeOperation
   bool makeAtom(const std::string& atomName, Calculator& newBoss);
@@ -2754,7 +2754,7 @@ public:
     ExpressionContext* inputContext = nullptr
   );
   static bool storeCandidateSubalgebra(Calculator& calculator, const CandidateSemisimpleSubalgebra& input, Expression& output);
-  static bool innerExpressionFromDynkinType(Calculator& calculator, const DynkinType& input, Expression& output);
+  static bool expressionFromDynkinType(Calculator& calculator, const DynkinType& input, Expression& output);
   static bool innerExpressionFromDynkinSimpleType(Calculator& calculator, const DynkinSimpleType& input, Expression& output);
   static bool innerExpressionFromElementSemisimpleLieAlgebraRationals(
     Calculator& calculator, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output
@@ -2786,7 +2786,7 @@ public:
   );
   static bool innerSlTwoSubalgebraPrecomputed(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerLoadSemisimpleSubalgebras(Calculator& calculator, const Expression& inpuT, Expression& output);
-  static bool innerExpressionFromChevalleyGenerator(
+  static bool expressionFromChevalleyGenerator(
     Calculator& calculator, const ChevalleyGenerator& input, Expression& output
   );
   static bool innerExpressionFromMonomialUE(

@@ -303,6 +303,10 @@ public:
   );
   bool isWeightSystemSpaceIndex(int index, const Vector<Rational>& ambientRootTestedForWeightSpace);
   void addHIncomplete(const Vector<Rational>& hElement);
+  static bool checkElementSemisimpleLieAlgebra(
+    const ElementSemisimpleLieAlgebra<AlgebraicNumber>& toBeChecked
+  );
+  bool checkAll() const;
   bool checkBasicInitialization() const;
   bool checkCandidateInitialization() const;
   bool checkFullInitialization() const;
@@ -368,12 +372,14 @@ public:
   DynkinType targetDynkinType;
   SlTwoSubalgebras slTwoSubalgebras;
   MapReferences<DynkinType, SemisimpleLieAlgebra>* subalgebrasNonEmbedded;
+
   MapReferences<Matrix<Rational>, SemisimpleLieAlgebra> subalgebrasNonDefaultCartanAndScale;
   List<List<Rational> > cachedDynkinIndicesSl2subalgebrasSimpleTypes;
   HashedList<DynkinSimpleType> cachedDynkinSimpleTypesWithComputedSl2Subalgebras;
   List<OrbitIteratorRootActionWeylGroupAutomorphisms> orbits;
   HashedList<Rational> orbitHElementLengths;
   HashedList<DynkinSimpleType> orbitDynkinIndices;
+
   // if an entry in orbit sizes is - 1 this means the corresponding orbit size has not been computed yet.
   int maxStoredOrbitSize;
   std::string comments;
@@ -403,7 +409,7 @@ public:
   bool flagcomputePairingTable;
   bool flagcomputeModuleDecompositionsition;
   bool flagComputeNilradicals;
-  bool flagProduceLaTeXtables;
+  bool flagProduceLaTeXTables;
   bool flagAttemptToAdjustCentralizers;
   int64_t millisecondsComputationStart;
   int64_t millisecondsComputationEnd;
@@ -485,12 +491,13 @@ public:
     MapReferences<DynkinType, SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
     ListReferences<SlTwoSubalgebras>* inputSl2sOfSubalgebras
   );
-  void reset();
+  void resetPointers();
+  void resetComputations();
   ~SemisimpleSubalgebras() {
     this->flagDeallocated = true;
   }
   SemisimpleSubalgebras(): flagDeallocated(false) {
-    this->reset();
+    this->resetPointers();
   }
   void addSubalgebraIfNewSetToStackTop(CandidateSemisimpleSubalgebra& input);
   void addSubalgebraToStack(
@@ -502,6 +509,8 @@ public:
   bool checkConsistencyHs() const;
   bool checkConsistency() const;
   bool checkInitialization() const;
+  bool checkIsEmpty() const;
+  bool checkAll() const;
   std::string toStringState(FormatExpressions* format = nullptr);
   std::string toStringCurrentChain(FormatExpressions* format = nullptr);
   std::string toStringProgressReport(FormatExpressions* format = nullptr);

@@ -2004,21 +2004,21 @@ bool CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart(
   Vector<Rational> inducingParSel, splittingParSel;
   SemisimpleLieAlgebra& ownerSS = *ownerSSPointer.content;
   WeylGroupData& theWeyl = ownerSS.weylGroup;
-  int theDim = ownerSS.getRank();
+  int dimension = ownerSS.getRank();
   ExpressionContext finalContext(calculator);
   if (!calculator.getVector<RationalFraction<Rational> >(
     weightNode,
     weightFundCoords,
     &finalContext,
-    theDim,
+    dimension,
     CalculatorConversions::functionRationalFunction<Rational>
   )) {
     return output.makeError("Failed to extract highest weight from the second argument.", calculator);
   }
-  if (!calculator.getVector<Rational>(inducingParNode, inducingParSel, &finalContext, theDim, nullptr)) {
+  if (!calculator.getVector<Rational>(inducingParNode, inducingParSel, &finalContext, dimension, nullptr)) {
     return output.makeError("Failed to extract parabolic selection from the third argument", calculator);
   }
-  if (!calculator.getVector<Rational>(splittingParNode, splittingParSel, &finalContext, theDim, nullptr)) {
+  if (!calculator.getVector<Rational>(splittingParNode, splittingParSel, &finalContext, dimension, nullptr)) {
     return output.makeError("Failed to extract parabolic selection from the fourth argument", calculator);
   }
   calculator << "Your input weight in fundamental coordinates: " << weightFundCoords.toString();
@@ -2797,10 +2797,10 @@ bool CalculatorLieTheory::drawWeightSupportWithMults(
   std::stringstream out;
   CharacterSemisimpleLieAlgebraModule<Rational> theChar;
   theChar.makeFromWeight(highestWeightSimpleCoords, theSSalgpointer.content);
-  DrawingVariables theDV;
+  DrawingVariables drawingVariables;
   std::string report;
-  theChar.drawMeWithMultiplicities(report, theDV, 10000);
-  out << report << theDV.getHTMLDiv(theWeyl.getDimension(), true);
+  theChar.drawMeWithMultiplicities(report, drawingVariables, 10000);
+  out << report << drawingVariables.getHTMLDiv(theWeyl.getDimension(), true);
   return output.assignValue(out.str(), calculator);
 }
 

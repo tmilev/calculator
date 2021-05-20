@@ -900,7 +900,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   List<ElementWeylGroup>& output
 ) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::getGroupElementsIndexedAsAmbientGroup");
-  if (this->ExternalAutomorphisms.size > 0) {
+  if (this->externalAutomorphisms.size > 0) {
     global.fatal << "This is  a programming error: a function meant for subgroups that are "
     << "Weyl groups of Levi parts of parabolics "
     << "is called on a subgroup that is not of that type. "

@@ -51,7 +51,7 @@ public:
     }
     this->initDimensions(tempMat, draggableBasis, startingPlane);
   }
-  void initDimensions(int theDim);
+  void initDimensions(int dimension);
   int getDimensionFirstDimensionDependentOperation();
   int getDimensionFromBilinearForm();
   void getCoordsDrawingComputeAll(Vector<double>& input, double& X1, double& Y1) {
@@ -244,7 +244,7 @@ public:
   static std::string getColorHtmlFromColorIndex(int colorIndex);
   std::string getColorPsTricksFromColorIndex(int colorIndex);
   static bool getColorIntFromColorString(const std::string& input, int& output);
-  DrawOperations theBuffer;
+  DrawOperations operations;
   int getActualPenStyleFromFlagsAnd(int inputPenStyle);
   int getActualTextStyleFromFlagsAnd(int inputTextStyle);
 
@@ -252,7 +252,7 @@ public:
     int dimension,
     bool useSpanTag
   );
-  void drawString(DrawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle);
+  void drawString(DrawElementInputOutput& drawData, const std::string& input, int fontSize, int textStyle);
   void drawCoordSystemBuffer(DrawingVariables& variables, int dimension);
   void drawLineDirectly(
     double x1, double y1, double x2, double y2, uint32_t thePenStyle, int colorIndex, double lineWidth
@@ -273,7 +273,7 @@ public:
   void drawLineBetweenTwoVectorsBufferRational(
     const Vector<Rational>& r1, const Vector<Rational>& r2, const std::string& color, double lineWidth = 1
   ) {
-    this->theBuffer.drawLineBetweenTwoVectorsBufferRational(r1, r2, color, lineWidth);
+    this->operations.drawLineBetweenTwoVectorsBufferRational(r1, r2, color, lineWidth);
   }
   void drawCircleAtVector(
     const Vector<Rational>& point,
@@ -282,7 +282,7 @@ public:
     const std::string& frameId = "",
     int frameIndex = - 1
   ) {
-    this->theBuffer.drawCircleAtVectorBufferRational(point, color, radius, frameId, frameIndex);
+    this->operations.drawCircleAtVectorBufferRational(point, color, radius, frameId, frameIndex);
   }
   void drawPath(
     const Vectors<Rational>& theVectors,
@@ -291,12 +291,12 @@ public:
     const std::string& frameId = "",
     int frameIndex = - 1
   ) {
-    this->theBuffer.drawPath(theVectors, color, lineWidth, frameId, frameIndex);
+    this->operations.drawPath(theVectors, color, lineWidth, frameId, frameIndex);
   }
   void drawLineBetweenTwoVectorsBufferDouble(
     const Vector<double>& r1, const Vector<double>& r2, const std::string& color, double lineWidth = 1
   ) {
-    this->theBuffer.drawLineBetweenTwoVectorsBufferDouble(r1, r2, color, lineWidth);
+    this->operations.drawLineBetweenTwoVectorsBufferDouble(r1, r2, color, lineWidth);
   }
   void drawTextAtVectorBufferRational(const Vector<Rational>& point, const std::string& inputText, const std::string& color);
   void drawTextAtVectorBufferDouble(const Vector<double>& point, const std::string& inputText, int textColor, int theTextStyle);

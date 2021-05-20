@@ -817,11 +817,11 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(Matrix<Rational>& outputAuto, 
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theAutos;
   theRootSA.generateAutomorphismsPreservingBorel(theAutos);
   Matrix<Rational> mapOnRootSpaces;
-  int theAutoIndex = theAutos.ExternalAutomorphisms.size > 1 ? 1 : 0;
+  int theAutoIndex = theAutos.externalAutomorphisms.size > 1 ? 1 : 0;
   /*if (this->theWeyl.WeylLetter == 'D' && dimension ==4)
     theAutoIndex =2;
 */
-  mapOnRootSpaces.assignVectorsToRows(theAutos.ExternalAutomorphisms[theAutoIndex]);
+  mapOnRootSpaces.assignVectorsToRows(theAutos.externalAutomorphisms[theAutoIndex]);
   mapOnRootSpaces.transpose();
 //  mapOnRootSpaces.ComputeDebugString();
 //  Matrix<Rational>  theDet =mapOnRootSpaces;

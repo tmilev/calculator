@@ -6607,16 +6607,16 @@ bool CalculatorFunctions::functionEvaluateToDouble(
   return output.assignValue(theValue, calculator);
 }
 
-bool CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra");
+bool CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra");
   if (input.size() != 3) {
     return output.makeError("I expect two arguments - the two semisimple subalgebras.", calculator);
   }
-  const Expression& EsmallSA = input[1];
-  const Expression& ElargeSA = input[2];
+  const Expression& eSmallSA = input[1];
+  const Expression& eLargeSA = input[2];
   WithContext<SemisimpleLieAlgebra*> smallSubalgebraPointer;
   if (!CalculatorConversions::convert(
-    EsmallSA,
+    eSmallSA,
     CalculatorConversions::functionSemisimpleLieAlgebra,
     smallSubalgebraPointer
   )) {
@@ -6624,27 +6624,27 @@ bool CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calcula
   }
   WithContext<SemisimpleLieAlgebra*> largeSubalgebraPointer;
   if (!CalculatorConversions::convert(
-    ElargeSA,
+    eLargeSA,
     CalculatorConversions::functionSemisimpleLieAlgebra,
     largeSubalgebraPointer
   )) {
     return output.makeError("Error extracting Lie algebra.", calculator);
   }
-  SemisimpleLieAlgebra& ownerSS = *largeSubalgebraPointer.content;
+  SemisimpleLieAlgebra& semisimpleLieAlgebra = *largeSubalgebraPointer.content;
   std::stringstream out;
-  if (ownerSS.getRank() > 8) {
+  if (semisimpleLieAlgebra.getRank() > 8) {
     out << "<b>This code is has been set to run up to ambient Lie algebra of rank 8. </b>";
     return output.assignValue(out.str(), calculator);
   }
   SemisimpleSubalgebras& semisimpleSubalgebras =
-  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.weylGroup.dynkinType);
+  calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(semisimpleLieAlgebra.weylGroup.dynkinType);
   semisimpleSubalgebras.toStringExpressionString = CalculatorConversions::stringFromSemisimpleSubalgebras;
 
   out << "Attempting to embed "
   << smallSubalgebraPointer.content->weylGroup.dynkinType.toString()
-  << " in " << ownerSS.toStringLieAlgebraName();
+  << " in " << semisimpleLieAlgebra.toStringLieAlgebraName();
   semisimpleSubalgebras.findTheSemisimpleSubalgebrasFromScratch(
-    ownerSS,
+    semisimpleLieAlgebra,
     calculator.objectContainer.algebraicClosure,
     calculator.objectContainer.semisimpleLieAlgebras,
     calculator.objectContainer.slTwoSubalgebras,
@@ -6658,20 +6658,20 @@ bool CalculatorFunctions::innerAllPartitions(Calculator& calculator, const Expre
   if (input.size() != 2) {
     return false;
   }
-  int theRank = - 1;
-  if (!input[1].isSmallInteger(&theRank)) {
+  int rank = - 1;
+  if (!input[1].isSmallInteger(&rank)) {
     return false;
   }
-  if (theRank > 33 || theRank < 0) {
+  if (rank > 33 || rank < 0) {
     return calculator
     << "Partitions printouts are limited "
     << "from n = 0 to n = 33, your input was: "
     << input[1].toString();
   }
   List<Partition> thePartitions;
-  Partition::GetPartitions(thePartitions, theRank);
+  Partition::GetPartitions(thePartitions, rank);
   std::stringstream out;
-  out << "The partitions of " << theRank << " (total: " << thePartitions.size << ")"
+  out << "The partitions of " << rank << " (total: " << thePartitions.size << ")"
   << ": ";
   for (int i = 0; i < thePartitions.size; i ++) {
     out << "<br>" << thePartitions[i].toString();

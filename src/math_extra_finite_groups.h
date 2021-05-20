@@ -816,10 +816,10 @@ public:
   int getDimension() const {
     return this->cartanSymmetric.numberOfRows;
   }
-  void computeWeylGroupAndRootsOfBorel(Vectors<Rational>& output);
-  void computeRootsOfBorel(Vectors<Rational>& output);
+  void computeWeylGroupAndrootsOfBorel(Vectors<Rational>& output);
+  void computerootsOfBorel(Vectors<Rational>& output);
   static LargeInteger getSizeByFormulaImplementation(FiniteGroup<ElementWeylGroup>& G);
-  static LargeInteger sizeByFormulaOrNegative1(char weylLetter, int theDim);
+  static LargeInteger sizeByFormulaOrNegative1(char weylLetter, int dimension);
   bool isARoot(const Vector<Rational>& input) const {
     return this->rootSystem.contains(input);
   }
@@ -1940,9 +1940,9 @@ public:
   // Here, outer automorphism are recorded using type Vectors<Rational>.
   // Here, the i^th automorphism entry gives the image
   // of the i^th simple inner root.
-  List<Vectors<Rational> > ExternalAutomorphisms;
-  HashedList<Vector<Rational> > RootSubsystem;
-  Vectors<Rational> RootsOfBorel;
+  List<Vectors<Rational> > externalAutomorphisms;
+  HashedList<Vector<Rational> > rootSubsystem;
+  Vectors<Rational> rootsOfBorel;
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms();
   ~SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms();
   bool checkInitialization();
@@ -1951,7 +1951,7 @@ public:
   std::string toStringBruhatGraph();
   std::string toStringCosetGraph();
   std::string toStringFromLayersAndArrows(
-    List<List<List<int> > >& arrows, List<List<int> >& Layers, int GraphWidth, bool useAmbientIndices
+    List<List<List<int> > >& arrows, List<List<int> >& layers, int graphWidth, bool useAmbientIndices
   );
   std::string toString(bool displayElements = true) {
     std::string tempS;
@@ -1973,12 +1973,12 @@ public:
   );
   bool makeParabolicFromSelectionSimpleRoots(
     WeylGroupData& inputWeyl,
-    const Selection& ZeroesMeanSimpleRootSpaceIsInParabolic,
+    const Selection& zeroesMeanSimpleRootSpaceIsInParabolic,
     int upperLimitNumberOfElements
   );
   void makeParabolicFromSelectionSimpleRoots(
     WeylGroupData& inputWeyl,
-    const Vector<Rational>& ZeroesMeanSimpleRootSpaceIsInParabolic,
+    const Vector<Rational>& zeroesMeanSimpleRootSpaceIsInParabolic,
     int upperLimitNumberOfElements
   );
   bool getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
@@ -1996,7 +1996,7 @@ public:
   );
   bool drawContour(
     const Vector<Rational>& highestWeightSimpleCoord,
-    DrawingVariables& theDV,
+    DrawingVariables& drawingVariables,
     const std::string& color,
     int UpperBoundVertices
   );

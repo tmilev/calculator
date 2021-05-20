@@ -94,10 +94,10 @@ bool WeylGroupData::isDominantWithRespectToGenerator<Rational>(const Vector<Rati
 }
 
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::makeParabolicFromSelectionSimpleRoots(
-  WeylGroupData& inputWeyl, const Vector<Rational>& ZeroesMeanSimpleRootSpaceIsInParabolic, int upperLimitNumberOfElements
+  WeylGroupData& inputWeyl, const Vector<Rational>& zeroesMeanSimpleRootSpaceIsInParabolic, int upperLimitNumberOfElements
 ) {
   Selection tempSel;
-  tempSel = ZeroesMeanSimpleRootSpaceIsInParabolic;
+  tempSel = zeroesMeanSimpleRootSpaceIsInParabolic;
   this->makeParabolicFromSelectionSimpleRoots(inputWeyl, tempSel, upperLimitNumberOfElements);
 }
 
@@ -112,8 +112,8 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   std::stringstream out;
   Vector<Rational> highestWeightTrue = highestWeightSimpleCoords;
   Vectors<Rational> basisEi;
-  int theDim = this->ambientWeyl->getDimension();
-  basisEi.makeEiBasis(theDim);
+  int dimension = this->ambientWeyl->getDimension();
+  basisEi.makeEiBasis(dimension);
   this->raiseToDominantWeightInner(highestWeightTrue);
   Vector<Rational> highestWeightFundCoords = this->ambientWeyl->getFundamentalCoordinatesFromSimple(highestWeightTrue);
   if (!highestWeightFundCoords.sumCoordinates().isSmallInteger()) {
@@ -338,14 +338,14 @@ void WeylGroupData::getHighestWeightsAllRepresentationsDimensionLessThanOrEqualT
   Vector<Rational> current;
   current.makeZero(this->getDimension());
   output.addOnTop(current);
-  Rational theDim;
+  Rational dimension;
   Rational dimBound = inputDimBound + 1;
   for (int i = 0; i < output.size; i ++) {
     current = output[i];
     for (int k = 0; k < this->getDimension(); k ++) {
       current[k] += 1;
-      theDim = this->weylDimFormulaFundamentalCoords(current);
-      if (theDim < dimBound) {
+      dimension = this->weylDimFormulaFundamentalCoords(current);
+      if (dimension < dimBound) {
         output.addOnTopNoRepetition(current);
       }
       current[k] -= 1;

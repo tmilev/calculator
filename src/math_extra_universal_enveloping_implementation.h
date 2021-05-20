@@ -725,8 +725,8 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(
 //    { length1= theWeyl.rootScalarCartanRoot(tempRoot, tempRoot);
 //      length1Explored = true;
 //      coefficient1= 0;
-//      for (int j = 0; j < theWeyl.RootsOfBorel.size; j ++)
-//      { coefficient1+= theWeyl.rootScalarCartanRoot(tempRoot, theWeyl.RootsOfBorel.objects[j])*theWeyl.rootScalarCartanRoot(tempRoot, theWeyl.RootsOfBorel.objects[j]);
+//      for (int j = 0; j < theWeyl.rootsOfBorel.size; j ++)
+//      { coefficient1+= theWeyl.rootScalarCartanRoot(tempRoot, theWeyl.rootsOfBorel.objects[j])*theWeyl.rootScalarCartanRoot(tempRoot, theWeyl.rootsOfBorel.objects[j]);
 //        coef
 //      }
 //    }
@@ -803,7 +803,7 @@ bool ElementUniversalEnveloping<Coefficient>::getLieAlgebraElementIfPossible(
 ) const {
   output.makeZero();
 //  SemisimpleLieAlgebra& theOwner = this->owners->objects[this->indexInOwners];
-//  int numPosRoots = theOwner.theWeyl.RootsOfBorel.size;
+//  int numPosRoots = theOwner.theWeyl.rootsOfBorel.size;
   Coefficient theExponent;
   ChevalleyGenerator tempChevalley;
   for (int i = 0; i < this->size(); i ++) {

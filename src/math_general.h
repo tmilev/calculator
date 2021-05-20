@@ -2805,7 +2805,7 @@ public:
   void drawElement(DrawElementInputOutput& theDrawData, FormatExpressions& PolyFormatLocal);
 
   // void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<Coefficient> >& output, int UpToPower);
-  int getMaximumPowerOfVariableIndex(int VariableIndex);
+  int getMaximumPowerOfVariableIndex(int variableIndex);
   bool operator<=(const Coefficient& other) const;
   bool operator<(const Coefficient& other) const;
   bool operator>(const Polynomial<Coefficient>& other) const;
@@ -5513,18 +5513,18 @@ public:
 
 class ConeLatticeAndShift {
   public:
-  Cone theProjectivizedCone;
-  Lattice theLattice;
-  Vector<Rational> theShift;
+  Cone projectivizedCone;
+  Lattice lattice;
+  Vector<Rational> shift;
   void findExtremaInDirectionOverLatticeOneNonParametric(
     Vector<Rational>& theLPToMaximizeAffine,
     Vectors<Rational>& outputAppendLPToMaximizeAffine,
     List<ConeLatticeAndShift>& outputAppend
   );
   void operator=(const ConeLatticeAndShift& other) {
-    this->theProjectivizedCone = other.theProjectivizedCone;
-    this->theLattice = other.theLattice;
-    this->theShift = other.theShift;
+    this->projectivizedCone = other.projectivizedCone;
+    this->lattice = other.lattice;
+    this->shift = other.shift;
   }
   void writeToFile(std::fstream& output);
   void findExtremaInDirectionOverLatticeOneNonParamDegenerateCase(
@@ -5536,10 +5536,10 @@ class ConeLatticeAndShift {
   bool readFromFile(std::fstream& input);
   std::string toString(FormatExpressions& format);
   int getDimensionProjectivized() {
-    return this->theProjectivizedCone.getDimension();
+    return this->projectivizedCone.getDimension();
   }
   int getDimensionAffine() {
-    return this->theProjectivizedCone.getDimension() - 1;
+    return this->projectivizedCone.getDimension() - 1;
   }
 };
 
@@ -5639,7 +5639,7 @@ class PartialFractions: public LinearCombination<OnePartialFraction, Polynomial<
   bool splitPartial();
   void initCommon();
 public:
-  int AmbientDimension;
+  int ambientDimension;
   int IndexLowestNonProcessed;
   int IndexCurrentlyProcessed;
   int HighestIndex;

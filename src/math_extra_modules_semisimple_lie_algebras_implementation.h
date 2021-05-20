@@ -1317,10 +1317,10 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format) co
     }
   }
   out << "</table>";
-  DrawingVariables theDV;
-  this->characterOverH.drawMeAssumeCharIsOverCartan(theWeyl, theDV);
+  DrawingVariables drawingVariables;
+  this->characterOverH.drawMeAssumeCharIsOverCartan(theWeyl, drawingVariables);
   out << " A picture of the weight support follows. "
-  << theDV.getHTMLDiv(theWeyl.getDimension(), false);
+  << drawingVariables.getHTMLDiv(theWeyl.getDimension(), false);
 
   bool isBad = false;
   for (int k = 0; k < this->bilinearFormsAtEachWeightLevel.size; k ++) {

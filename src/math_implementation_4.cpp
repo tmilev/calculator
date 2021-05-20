@@ -1444,15 +1444,15 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   theDraggableBasis.makeEiBasis(theSmallDim);
   WeylGroupData tmpWeyl;
   tmpWeyl.makeArbitrarySimple('A', 2);
-  drawOps.theBuffer.initDimensions(tmpWeyl.cartanSymmetric, theDraggableBasis, theDraggableBasis);
+  drawOps.operations.initDimensions(tmpWeyl.cartanSymmetric, theDraggableBasis, theDraggableBasis);
   FormatExpressions theFormat;
-  drawOps.theBuffer.basisProjectionPlane[0][0] = 1;
-  drawOps.theBuffer.basisProjectionPlane[0][1] = 0;
-  drawOps.theBuffer.basisProjectionPlane[1][0] = 1;
-  drawOps.theBuffer.basisProjectionPlane[1][1] = 1;
-  drawOps.theBuffer.modifyToOrthonormalNoShiftSecond
-  (drawOps.theBuffer.basisProjectionPlane[1], drawOps.theBuffer.basisProjectionPlane[0]);
-  drawOps.theBuffer.graphicsUnit = 50;
+  drawOps.operations.basisProjectionPlane[0][0] = 1;
+  drawOps.operations.basisProjectionPlane[0][1] = 0;
+  drawOps.operations.basisProjectionPlane[1][0] = 1;
+  drawOps.operations.basisProjectionPlane[1][1] = 1;
+  drawOps.operations.modifyToOrthonormalNoShiftSecond
+  (drawOps.operations.basisProjectionPlane[1], drawOps.operations.basisProjectionPlane[0]);
+  drawOps.operations.graphicsUnit = 50;
   PiecewiseQuasipolynomial theStartingPoly, theSubbedPoly, Accum;
   std::string tempS;
   theStartingPoly.makeVPF(this->GmodKNegWeightsBasisChanged, tempS);
@@ -1630,7 +1630,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->weylLarger = &input.range().weylGroup;
   this->weylSmaller = &input.domain().weylGroup;
   WeylGroupData& theWeYl = input.range().weylGroup;
-//  input.projectOntoSmallCartan(theWeyl.RootsOfBorel, tempRoots);
+//  input.projectOntoSmallCartan(theWeyl.rootsOfBorel, tempRoots);
   this->log << "projections: " << tempRoots.toString();
   theWeYl.group.computeAllElements(false);
   this->NonIntegralOriginModificationBasisChanged ="(1/2,1/2)";
@@ -1998,9 +1998,9 @@ void GeneralizedVermaModuleCharacters::initTheMaxComputation() {
   Vector<Rational> theLPtoMax;
   for (int i = 0; i < this->theMultiplicities.size; i ++) {
     if (! this->theMultiplicities[i].isEqualToZero()) {
-      currentCLS.theProjectivizedCone = this->projectivizedChambeR[i];
-      currentCLS.theShift.makeZero(theAffineDim);
-      currentCLS.theLattice = ZnLattice;
+      currentCLS.projectivizedCone = this->projectivizedChambeR[i];
+      currentCLS.shift.makeZero(theAffineDim);
+      currentCLS.lattice = ZnLattice;
       bool tempBool = this->theMultiplicities[i].valueOnEachLatticeShift[0].getRootFromLinearPolynomialConstantTermLastVariable(theLPtoMax);
       if (!tempBool) {
         global.fatal << "This should not happen. " << global.fatal;

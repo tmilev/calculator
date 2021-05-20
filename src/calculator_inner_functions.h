@@ -457,7 +457,7 @@ public:
   static bool innerDegreesToRadians(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerEvaluateToDoublE(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionEvaluateToDouble(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calculator& calculator, const Expression& input, Expression& output);
+  static bool embedSemisimpleAlgebraInSemisimpleAlgebra(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerAllPartitions(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAllVectorPartitions(Calculator& calculator, const Expression& input, Expression& output);

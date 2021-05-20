@@ -620,9 +620,9 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
     localHighest = *remainingCharProjected.monomials.lastObject();
     for (bool Found = true; Found;) {
       Found = false;
-      for (int i = 0; i < weylGroupFiniteDimensionalSmall.RootsOfBorel.size; i ++) {
+      for (int i = 0; i < weylGroupFiniteDimensionalSmall.rootsOfBorel.size; i ++) {
         tempMon = localHighest;
-        simpleGeneratorBaseField = weylGroupFiniteDimensionalSmall.RootsOfBorel[i]; // <- implicit type conversion here!
+        simpleGeneratorBaseField = weylGroupFiniteDimensionalSmall.rootsOfBorel[i]; // <- implicit type conversion here!
         tempMon.weightFundamentalCoordinates += weylGroupFiniteDimensionalSmall.ambientWeyl->getFundamentalCoordinatesFromSimple(
           simpleGeneratorBaseField
         );
@@ -655,9 +655,9 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
   out << "<br>Character w.r.t the Levi part of the parabolic of the small algebra: "
   << HtmlRoutines::getMathNoDisplay(output.toString(&theFormat));
   if (report != nullptr) {
-    DrawingVariables theDV1;
+    DrawingVariables drawingVariables1;
     std::string tempS;
-    output.drawMeNoMultiplicities(tempS, theDV1, 10000);
+    output.drawMeNoMultiplicities(tempS, drawingVariables1, 10000);
     Vector<Rational> tempRoot, tempRoot2;
     weylGroupFiniteDimensionalSmall.ambientWeyl->group.computeAllElements(false, 20);
     out << "<hr>";
@@ -667,14 +667,14 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
       ).getVectorRational();
       std::stringstream tempStream;
       tempStream << output.coefficients[i].toString();
-      theDV1.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
+      drawingVariables1.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
       for (int j = 1; j < weylGroupFiniteDimensionalSmall.ambientWeyl->group.elements.size; j ++) {
         tempRoot2 = tempRoot;
         weylGroupFiniteDimensionalSmall.ambientWeyl->actOnRhoModified(j, tempRoot2);
-        theDV1.drawCircleAtVectorBufferRational(tempRoot2, "#a00000", 5);
+        drawingVariables1.drawCircleAtVectorBufferRational(tempRoot2, "#a00000", 5);
       }
     }
-    out << "<hr>" << theDV1.getHTMLDiv(weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension(), false);
+    out << "<hr>" << drawingVariables1.getHTMLDiv(weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension(), false);
     *report = out.str();
   }
   return true;

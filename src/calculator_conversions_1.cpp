@@ -35,9 +35,9 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionSemisimpleLieAlgebra");
-  SemisimpleLieAlgebra* dummySA;
+  SemisimpleLieAlgebra* dummySubalgebra;
   return CalculatorConversions::functionSemisimpleLieAlgebra(
-    calculator, input, output, dummySA
+    calculator, input, output, dummySubalgebra
   );
 }
 
@@ -48,9 +48,9 @@ bool CalculatorConversions::innerSemisimpleLieAlgebra(
   if (input.size() != 2) {
     return calculator << "Semisimple Lie algebra expects a single argument. ";
   }
-  SemisimpleLieAlgebra* dummySA;
+  SemisimpleLieAlgebra* dummySubalgebra;
   return CalculatorConversions::functionSemisimpleLieAlgebra(
-    calculator, input[1], output, dummySA
+    calculator, input[1], output, dummySubalgebra
   );
 }
 
@@ -60,8 +60,8 @@ bool CalculatorConversions::innerLoadWeylGroup(Calculator& calculator, const Exp
   if (!CalculatorConversions::dynkinType(calculator, input, dynkinType)) {
     return false;
   }
-  SemisimpleLieAlgebra& theSA = calculator.objectContainer.getLieAlgebraCreateIfNotPresent(dynkinType);
-  return output.assignValue(theSA.weylGroup, calculator);
+  SemisimpleLieAlgebra& subalgebra = calculator.objectContainer.getLieAlgebraCreateIfNotPresent(dynkinType);
+  return output.assignValue(subalgebra.weylGroup, calculator);
 }
 
 bool CalculatorConversions::dynkinSimpleType(
@@ -273,7 +273,7 @@ bool CalculatorConversions::innerStoreSemisimpleLieAlgebra(
     return output.makeError("Asking to store non-semisimple Lie algebra as such is not allowed. ", calculator);
   }
   SemisimpleLieAlgebra* owner = input[1].getValueNonConst<SemisimpleLieAlgebra*>();
-  return CalculatorConversions::innerExpressionFromDynkinType(calculator, owner->weylGroup.dynkinType, output);
+  return CalculatorConversions::expressionFromDynkinType(calculator, owner->weylGroup.dynkinType, output);
 }
 
 bool CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraRationals(
@@ -290,10 +290,10 @@ bool CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraRation
   return output.makeSum(calculator, monomials);
 }
 
-bool CalculatorConversions::innerExpressionFromDynkinType(
+bool CalculatorConversions::expressionFromDynkinType(
   Calculator& calculator, const DynkinType& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromDynkinType");
+  MacroRegisterFunctionWithName("CalculatorConversions::expressionFromDynkinType");
   LinearCombination<Expression, AlgebraicNumber> monomials;
   monomials.makeZero();
   Expression currentMonomial;
@@ -313,6 +313,7 @@ bool CalculatorConversions::expressionFromElementSemisimpleLieAlgebraAlgebraicNu
   Expression currentMonomial;
   for (int i = 0; i < input.size(); i ++) {
     CalculatorConversions::expressionFromChevalleyGenerator(calculator, input[i], currentMonomial);
+    input.coefficients[i].checkConsistency();
     monomials.addMonomial(currentMonomial, input.coefficients[i]);
   }
   return output.makeSum(calculator, monomials);
@@ -468,7 +469,7 @@ bool CalculatorConversions::storeCandidateSubalgebra(
   List<std::string> keys;
   List<Expression> values;
   input.checkBasicInitialization();
-  CalculatorConversions::innerExpressionFromDynkinType(
+  CalculatorConversions::expressionFromDynkinType(
     calculator, input.weylNonEmbedded->dynkinType, currentE
   );
   keys.addOnTop("DynkinType");
@@ -478,6 +479,7 @@ bool CalculatorConversions::storeCandidateSubalgebra(
   currentE.assignMatrix(conversionMatrix, calculator, nullptr, false);
   keys.addOnTop("ElementsCartan");
   values.addOnTop(currentE);
+  input.checkAll();
   if (input.flagSystemSolved) {
     Expression listGenerators;
     listGenerators.makeSequence(calculator);
@@ -720,11 +722,11 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
 
 std::string CalculatorConversions::stringFromSemisimpleSubalgebras(SemisimpleSubalgebras& input) {
   MacroRegisterFunctionWithName("CalculatorConversions::stringFromSemisimpleSubalgebras");
-  Expression tempE;
+  Expression expression;
   FormatExpressions format;
-  CalculatorConversions::storeSemisimpleSubalgebras(global.calculator().getElement(), input, tempE);
+  CalculatorConversions::storeSemisimpleSubalgebras(global.calculator().getElement(), input, expression);
   format.flagUseHTML = true;
-  return tempE.toString(&format);
+  return expression.toString(&format);
 }
 
 bool CalculatorConversions::storeSemisimpleSubalgebras(
@@ -734,7 +736,7 @@ bool CalculatorConversions::storeSemisimpleSubalgebras(
   Expression dynkinTypeE;
   List<std::string> keys;
   List<Expression> values;
-  if (!CalculatorConversions::innerExpressionFromDynkinType(
+  if (!CalculatorConversions::expressionFromDynkinType(
     calculator, input.owner->weylGroup.dynkinType, dynkinTypeE
   )) {
     return false;
@@ -769,6 +771,7 @@ bool CalculatorConversions::storeSemisimpleSubalgebras(
   Expression subalgebrasListE, candidateE;
   subalgebrasListE.makeSequence(calculator);
   subalgebrasListE.setExpectedSize(input.subalgebras.values.size + 1);
+  input.checkAll();
   for (int i = 0; i < input.subalgebras.values.size; i ++) {
     if (!CalculatorConversions::storeCandidateSubalgebra(calculator, input.subalgebras.values[i], candidateE)) {
       return false;

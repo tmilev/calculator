@@ -987,32 +987,32 @@ void Polynomial<Coefficient>::assignMinimalPolynomial(const Matrix<Coefficient>&
     << "minimimal polynomial of a non-square matrix. "
     << global.fatal;
   }
-  int theDim = input.numberOfColumns;
+  int dimension = input.numberOfColumns;
   this->makeOne();
-  Vectors<Coefficient> theBasis;
-  Vector<Coefficient> theVectorPowers;
+  Vectors<Coefficient> basis;
+  Vector<Coefficient> vectorPowers;
   Vector<Coefficient> firstDependentPower;
   Polynomial<Coefficient> currentFactor;
   MonomialPolynomial tempM;
-  for (int col = 0; col < theDim; col ++) {
-    theVectorPowers.makeEi(theDim,col);
-    theBasis.setSize(0);
-    theBasis.addOnTop(theVectorPowers);
-    for (int i = 0; i < theDim; i ++) {
-      input.actOnVectorColumn(*theBasis.lastObject(), theVectorPowers, Coefficient::zero());
-      if (theBasis.linearSpanContainsVector(theVectorPowers)) {
+  for (int i = 0; i < dimension; i ++) {
+    vectorPowers.makeEi(dimension, i);
+    basis.setSize(0);
+    basis.addOnTop(vectorPowers);
+    for (int i = 0; i < dimension; i ++) {
+      input.actOnVectorColumn(*basis.lastObject(), vectorPowers, Coefficient::zero());
+      if (basis.linearSpanContainsVector(vectorPowers)) {
         break;
       }
-      theBasis.addOnTop(theVectorPowers);
+      basis.addOnTop(vectorPowers);
     }
-    theVectorPowers.getCoordinatesInBasis(theBasis, firstDependentPower);
-    currentFactor.setExpectedSize(theBasis.size + 1);
+    vectorPowers.getCoordinatesInBasis(basis, firstDependentPower);
+    currentFactor.setExpectedSize(basis.size + 1);
     currentFactor.makeZero();
-    for (int i = 0; i < theBasis.size; i ++) {
+    for (int i = 0; i < basis.size; i ++) {
       tempM.makeEi(0, i, 1);
       currentFactor.addMonomial(tempM, - firstDependentPower[i]);
     }
-    tempM.makeEi(0, theBasis.size, 1);
+    tempM.makeEi(0, basis.size, 1);
     currentFactor.addMonomial(tempM, 1);
     *this = MathRoutines::leastCommonMultiple(*this, currentFactor);
   }
@@ -1020,11 +1020,11 @@ void Polynomial<Coefficient>::assignMinimalPolynomial(const Matrix<Coefficient>&
 }
 
 template <class Coefficient>
-int Polynomial<Coefficient>::getMaximumPowerOfVariableIndex(int VariableIndex) {
+int Polynomial<Coefficient>::getMaximumPowerOfVariableIndex(int variableIndex) {
   int result = 0;
   for (int i = 0; i < this->size(); i ++) {
-    result = MathRoutines::maximum(result, (*this)[i](VariableIndex).numeratorShort);
-    if (!(*this)[i](VariableIndex).isSmallInteger()) {
+    result = MathRoutines::maximum(result, (*this)[i](variableIndex).numeratorShort);
+    if (!(*this)[i](variableIndex).isSmallInteger()) {
       global.fatal << "Function getMaximumPowerOfVariableIndex "
       << "called on a polynomial whose monomials "
       << "have degrees that are not small integers. "
@@ -1314,7 +1314,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringLaTeX() {
     this->allMonomials.addOnTopNoRepetition(subtracands[i].monomials);
   }
   //List<std::string> basisColorStyles;
-  //basisColorStyles.setSize(this->theBasis.size);
+  //basisColorStyles.setSize(this->basis.size);
   this->allMonomials.quickSortDescending(&this->owner->polynomialOrder.monomialOrder);
   this->owner->format.flagUseLatex = true;
   out << this->owner->toStringLetterOrder(true);
@@ -1443,7 +1443,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
     }
   }
   //List<std::string> basisColorStyles;
-  //basisColorStyles.setSize(this->theBasis.size);
+  //basisColorStyles.setSize(this->basis.size);
   this->allMonomials.quickSortDescending(&this->owner->polynomialOrder.monomialOrder);
   out << this->owner->toStringLetterOrder(false);
   out << "<br>";

@@ -45,7 +45,7 @@ std::string QuasiDifferentialMononomial::toString(FormatExpressions* format) con
 
 Vector<Rational> SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::getRho() {
   Vector<Rational> result;
-  this->RootsOfBorel.sum(result, this->ambientWeyl->getDimension());
+  this->rootsOfBorel.sum(result, this->ambientWeyl->getDimension());
   result /= 2;
   return result;
 }
@@ -83,7 +83,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::c
     this->simpleRootsInner = *inputRoots;
   }
   if (inputExternalAutos != nullptr) {
-    this->ExternalAutomorphisms = *inputExternalAutos;
+    this->externalAutomorphisms = *inputExternalAutos;
   }
   this->ambientWeyl->transformToSimpleBasisGenerators(this->simpleRootsInner, this->ambientWeyl->rootSystem);
   this->computeRootSubsystem();
@@ -120,8 +120,8 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::c
         this->allElements.addOnTop(currentElement);
       }
     }
-    for (int j = 1; j < this->ExternalAutomorphisms.size; j ++) {
-      orbitRho[i].getCoordinatesInBasis(this->ExternalAutomorphisms[j], currentRoot);
+    for (int j = 1; j < this->externalAutomorphisms.size; j ++) {
+      orbitRho[i].getCoordinatesInBasis(this->externalAutomorphisms[j], currentRoot);
       if (!orbitRho.contains(currentRoot)) {
         orbitRho.addOnTop(currentRoot);
         currentElement = this->allElements[i];
@@ -286,7 +286,7 @@ void DrawingVariables::drawLineDirectly(
   int colorIndex,
   double lineWidth
 ) {
-  this->theBuffer.drawLineBuffer(x1, y1, x2, y2, thePenStyle, colorIndex, lineWidth);
+  this->operations.drawLineBuffer(x1, y1, x2, y2, thePenStyle, colorIndex, lineWidth);
 }
 
 void DrawOperations::drawHighlightGroup(
@@ -409,32 +409,32 @@ void DrawingVariables::drawLineBuffer(
   int colorIndex,
   double lineWidth
 ) {
-  this->theBuffer.drawLineBuffer(x1, y1, x2, y2, thePenStyle, colorIndex, lineWidth);
+  this->operations.drawLineBuffer(x1, y1, x2, y2, thePenStyle, colorIndex, lineWidth);
 }
 
 void DrawingVariables::drawTextBuffer(double X1, double Y1, const std::string& inputText, int color) {
-  this->theBuffer.drawTextBuffer(X1, Y1, inputText, color, this->fontSizeNormal, this->TextStyleNormal);
+  this->operations.drawTextBuffer(X1, Y1, inputText, color, this->fontSizeNormal, this->TextStyleNormal);
 }
 
 void DrawingVariables::drawString(
-  DrawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle
+  DrawElementInputOutput& drawData, const std::string& input, int fontSize, int textStyle
 ) {
-  theDrawData.outputHeight = 0; theDrawData.outputWidth = 0;
+  drawData.outputHeight = 0; drawData.outputWidth = 0;
   if (input == "") {
     return;
   }
   for (unsigned int i = 0; i < input.size(); i ++) {
     std::string tempS;
     tempS = input.at(i);
-    this->theBuffer.drawTextBuffer(
-      theDrawData.outputWidth + theDrawData.topLeftCornerX,
-      theDrawData.outputHeight + theDrawData.topLeftCornerY,
+    this->operations.drawTextBuffer(
+      drawData.outputWidth + drawData.topLeftCornerX,
+      drawData.outputHeight + drawData.topLeftCornerY,
       tempS,
       0,
-      theFontSize,
-      theTextStyle
+      fontSize,
+      textStyle
     );
-    theDrawData.outputWidth += static_cast<int>(static_cast<double>(theFontSize) / 1.15);
+    drawData.outputWidth += static_cast<int>(static_cast<double>(fontSize) / 1.15);
   }
 }
 

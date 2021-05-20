@@ -937,9 +937,9 @@ bool Expression::makeAtom(int input, Calculator& newBoss) {
   return true;
 }
 
-bool Expression::makeIdentityMatrixExpressions(int theDim, Calculator& inputBoss) {
+bool Expression::makeIdentityMatrixExpressions(int dimension, Calculator& inputBoss) {
   Matrix<Expression> matrix;
-  matrix.makeIdentityMatrix(theDim, inputBoss.expressionOne(), inputBoss.expressionZero());
+  matrix.makeIdentityMatrix(dimension, inputBoss.expressionOne(), inputBoss.expressionZero());
   return this->assignMatrixExpressions(matrix, inputBoss, false, true);
 }
 

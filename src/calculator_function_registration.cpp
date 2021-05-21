@@ -3982,7 +3982,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarByMatrix,
+    CalculatorFunctionsBinaryOps::multiplyAnyScalarByMatrix,
     "",
     "Multiplies a rational number by a matrix",
     "2\\begin{pmatrix}  1& 2& 3\\\\2& 1& 0 \\end{pmatrix}",
@@ -4420,7 +4420,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors,
+    CalculatorFunctionsBinaryOps::powerRationalByRationalReducePrimeFactors,
     this->opRational(),
     this->opRational(),
     "If a rational number is small enough to factor, reduces the "

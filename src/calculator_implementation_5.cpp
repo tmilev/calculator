@@ -1412,7 +1412,7 @@ bool CalculatorFunctions::innerSqrt(
       ratPower.invert();
       theExponentE.assignValue(ratPower, calculator);
       powerE.makeXOX(calculator,calculator.opPower(), input[2], theExponentE);
-      if (CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors(
+      if (CalculatorFunctionsBinaryOps::powerRationalByRationalReducePrimeFactors(
         calculator, powerE, powerEreduced
       )) {
         if (powerEreduced != powerE && powerEreduced != input) {

@@ -1531,7 +1531,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddUEToAny,
+    CalculatorFunctionsBinaryOps::addUniversalEnvelopingAlgebraElementToAny,
     this->opElementUEOverRF(),
     this->opElementUEOverRF(),
     "Adds an element of UE (Universal Enveloping algebra) to an element of UE.",

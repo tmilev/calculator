@@ -19,7 +19,7 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool addRationalOrPolynomialOrRationalFunctionToRationalFunction(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAddUEToAny(Calculator& calculator, const Expression& input, Expression& output);
+  static bool addUniversalEnvelopingAlgebraElementToAny(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAddEltTensorToEltTensor(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAddNumberOrPolynomialToNumberOrPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAddPlotToPlot(Calculator& calculator, const Expression& input, Expression& output);
@@ -65,7 +65,7 @@ public:
   static bool innerMultiplyLRObyLRO(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyLRObyLSPath(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyEltZmodPorRatByEltZmodPorRat(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyAnyScalarByMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyAnyScalarByMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyAnyScalarBySequence(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplySequenceByAnyScalar(Calculator& calculator, const Expression& input, Expression& output);
   static bool multiplySequenceByMatrix(Calculator& calculator, const Expression& input, Expression& output);
@@ -126,7 +126,7 @@ public:
   static bool innerPowerMatrixNumbersByLargeIntegerIfPossible(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerPowerRationalByRationalOutputAlgebraic(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPowerRationalByRationalReducePrimeFactors(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerRationalByRationalReducePrimeFactors(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerRationalByInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerPolynomialBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerAlgebraicNumberPolynomialBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);

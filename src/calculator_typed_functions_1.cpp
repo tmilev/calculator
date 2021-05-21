@@ -665,7 +665,7 @@ bool CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomia
   return CalculatorFunctionsBinaryOps::multiplyTypeByType<Polynomial<Rational> >(calculator, input, output);
 }
 
-bool CalculatorFunctionsBinaryOps::innerAddUEToAny(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctionsBinaryOps::addUniversalEnvelopingAlgebraElementToAny(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddUEToAny");
   return CalculatorFunctionsBinaryOps::addTypeToType<ElementUniversalEnveloping<RationalFraction<Rational> > >(
     calculator, input, output
@@ -1592,10 +1592,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixExpressionsBySmallInteger(
   return output.assignMatrixExpressions(matrix, calculator, true, true);
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors(
+bool CalculatorFunctionsBinaryOps::powerRationalByRationalReducePrimeFactors(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::powerRationalByRationalReducePrimeFactors");
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
@@ -1614,10 +1614,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
   }
   if (!base.isInteger()) {
     if (base.getNumerator() == 1) {
-      Expression theDenBase, theDenominator;
-      theDenBase.assignValue(Rational(base.getDenominator()), calculator);
-      theDenominator.makeXOX(calculator, calculator.opPower(), theDenBase, input[2]);
-      output = calculator.expressionOne() / theDenominator;
+      Expression denominatorBase, denominator;
+      denominatorBase.assignValue(Rational(base.getDenominator()), calculator);
+      denominator.makeXOX(calculator, calculator.opPower(), denominatorBase, input[2]);
+      output = calculator.expressionOne() / denominator;
       return true;
     }
   }
@@ -1628,18 +1628,18 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
   LargeIntegerUnsigned exponentDenominator = exponentWorking.getDenominator();
   LargeIntegerUnsigned exponentNumeratorNoSign = exponentWorking.getNumerator().value;
   List<LargeInteger> numeratorFactors, denominatorFactors;
-  List<int> numeratorPowersInt, denominatorPowersInt;
+  List<int> numeratorPowersInteger, denominatorPowersInteger;
   if (!base.getPrimeFactorsAbsoluteValue(
     numeratorFactors,
-    numeratorPowersInt,
+    numeratorPowersInteger,
     denominatorFactors,
-    denominatorPowersInt
+    denominatorPowersInteger
   )) {
     return false;
   }
   List<LargeIntegerUnsigned> numeratorPowers, denominatorPowers;
-  numeratorPowers = numeratorPowersInt;
-  denominatorPowers = denominatorPowersInt;
+  numeratorPowers = numeratorPowersInteger;
+  denominatorPowers = denominatorPowersInteger;
   for (int i = 0; i < numeratorFactors.size; i ++) {
     numeratorPowers[i] *= exponentNumeratorNoSign;
   }
@@ -1647,10 +1647,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
     denominatorPowers[i] *= exponentNumeratorNoSign;
   }
   exponentWorking /= exponentNumeratorNoSign;
-  Rational outsideOfTheRadical = 1;
+  Rational outsideOfRadical = 1;
   LargeInteger currentInsidePower, currentOutsidePower, currentOutside;
   LargeIntegerUnsigned currentPower;
-  int currentInsidePowerInt = - 1, currentOutsidePowerInt = - 1;
+  int currentInsidePowerInteger = - 1, currentOutsidePowerInteger = - 1;
   for (int k = 0; k < 2; k ++) {
     List<LargeIntegerUnsigned>& currentPowers = (k == 0) ? numeratorPowers : denominatorPowers;
     List<LargeInteger>& currentFactors = (k == 0) ? numeratorFactors : denominatorFactors;
@@ -1658,96 +1658,96 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
       currentPower = currentPowers[i];
       currentInsidePower = currentPower % exponentDenominator;
       currentOutsidePower = currentPower / exponentDenominator;
-      if (!currentInsidePower.isIntegerFittingInInt(&currentInsidePowerInt)) {
+      if (!currentInsidePower.isIntegerFittingInInt(&currentInsidePowerInteger)) {
         return false;
       }
-      if (!currentOutsidePower.isIntegerFittingInInt(&currentOutsidePowerInt)) {
+      if (!currentOutsidePower.isIntegerFittingInInt(&currentOutsidePowerInteger)) {
         return false;
       }
       if (
-        currentInsidePowerInt > 1000 ||
-        currentInsidePowerInt < - 1000 ||
-        currentOutsidePowerInt > 1000 ||
-        currentOutsidePowerInt < - 1000
+        currentInsidePowerInteger > 1000 ||
+        currentInsidePowerInteger < - 1000 ||
+        currentOutsidePowerInteger > 1000 ||
+        currentOutsidePowerInteger < - 1000
       ) {
         return false;
       }
-      currentPowers[i] = static_cast<unsigned>(currentInsidePowerInt);
+      currentPowers[i] = static_cast<unsigned>(currentInsidePowerInteger);
       currentOutside = currentFactors[i];
-      currentOutside.raiseToPower(currentOutsidePowerInt);
+      currentOutside.raiseToPower(currentOutsidePowerInteger);
       if (k == 0) {
-        outsideOfTheRadical *= currentOutside;
+        outsideOfRadical *= currentOutside;
       } else {
-        outsideOfTheRadical /= currentOutside;
+        outsideOfRadical /= currentOutside;
       }
     }
   }
-  LargeIntegerUnsigned theGCD = 1;
+  LargeIntegerUnsigned greatestCommonDivisor = 1;
   if (numeratorPowers.size > 0) {
-    theGCD = numeratorPowers[0];
+    greatestCommonDivisor = numeratorPowers[0];
   } else if (denominatorPowers.size > 0) {
-    theGCD = denominatorPowers[0];
+    greatestCommonDivisor = denominatorPowers[0];
   }
   for (int i = 0; i < numeratorPowers.size; i ++) {
-    theGCD = MathRoutines::greatestCommonDivisor(theGCD, numeratorPowers[i]);
+    greatestCommonDivisor = MathRoutines::greatestCommonDivisor(greatestCommonDivisor, numeratorPowers[i]);
   }
   for (int i = 0; i < denominatorPowers.size; i ++) {
-    theGCD = MathRoutines::greatestCommonDivisor(theGCD, denominatorPowers[i]);
+    greatestCommonDivisor = MathRoutines::greatestCommonDivisor(greatestCommonDivisor, denominatorPowers[i]);
   }
-  if (theGCD > 0) {
+  if (greatestCommonDivisor > 0) {
     for (int i = 0; i < numeratorPowers.size; i ++) {
-      numeratorPowers[i] /= theGCD;
+      numeratorPowers[i] /= greatestCommonDivisor;
     }
     for (int i = 0; i < denominatorPowers.size; i ++) {
-      denominatorPowers[i] /= theGCD;
+      denominatorPowers[i] /= greatestCommonDivisor;
     }
-    exponentWorking *= theGCD;
+    exponentWorking *= greatestCommonDivisor;
     exponentDenominator = exponentWorking.getDenominator();
   }
-  Rational insideTheRadical = 1;
+  Rational insideRadical = 1;
   LargeInteger currentContribution, currentNumerator = 1, currentDenominator = 1;
-  int currentExpSmallInt = - 1;
+  int currentExponentSmallInteger = - 1;
   for (int i = 0; i < numeratorPowers.size; i ++) {
     currentContribution = numeratorFactors[i];
-    if (!numeratorPowers[i].isIntegerFittingInInt(&currentExpSmallInt)) {
+    if (!numeratorPowers[i].isIntegerFittingInInt(&currentExponentSmallInteger)) {
       return false;
     }
-    currentContribution.raiseToPower(currentExpSmallInt);
+    currentContribution.raiseToPower(currentExponentSmallInteger);
     currentNumerator *= currentContribution;
   }
   for (int i = 0; i < denominatorPowers.size; i ++) {
     currentContribution = denominatorFactors[i];
-    if (!denominatorPowers[i].isIntegerFittingInInt(&currentExpSmallInt)) {
+    if (!denominatorPowers[i].isIntegerFittingInInt(&currentExponentSmallInteger)) {
       return false;
     }
-    currentContribution.raiseToPower(currentExpSmallInt);
+    currentContribution.raiseToPower(currentExponentSmallInteger);
     currentDenominator *= currentContribution;
   }
-  insideTheRadical = currentNumerator;
-  insideTheRadical /= currentDenominator;
+  insideRadical = currentNumerator;
+  insideRadical /= currentDenominator;
   if (base < 0) {
     exponentDenominator = exponentWorking.getDenominator();//<-just in case
     if (exponentDenominator % 2 == 1) {
-      outsideOfTheRadical *= - 1;
+      outsideOfRadical *= - 1;
     } else {
-      insideTheRadical *= - 1;
+      insideRadical *= - 1;
     }
   }
   if (
     exponentStarting == exponentWorking &&
-    outsideOfTheRadical == 1 &&
-    base == insideTheRadical
+    outsideOfRadical == 1 &&
+    base == insideRadical
   ) {
     return false;
   }
-  Expression insideTheRadicalE, theRadicalE, theRadicalCFE, exponentE;
+  Expression insideRadicalE, theRadicalE, theRadicalCFE, exponentE;
   if (exponentWorking < 0) {
-    outsideOfTheRadical.invert();
+    outsideOfRadical.invert();
   }
-  theRadicalCFE.assignValue(outsideOfTheRadical, calculator);
-  insideTheRadicalE.assignValue(insideTheRadical, calculator);
+  theRadicalCFE.assignValue(outsideOfRadical, calculator);
+  insideRadicalE.assignValue(insideRadical, calculator);
   exponentE.assignValue(exponentWorking, calculator);
-  theRadicalE.makeXOX(calculator, calculator.opPower(), insideTheRadicalE, exponentE);
+  theRadicalE.makeXOX(calculator, calculator.opPower(), insideRadicalE, exponentE);
   return output.makeProduct(calculator, theRadicalCFE, theRadicalE);
 }
 
@@ -1759,16 +1759,16 @@ bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRationalToDoubleOrRational(
   if (!input.isListNElements(3)) {
     return false;
   }
-  Rational base, exp;
-  double baseDouble, expDouble;
+  Rational base, exponent;
+  double baseDouble, exponentDouble;
   if (input[1].isRational(&base)) {
     baseDouble = base.getDoubleValue();
   } else if (!input[1].isOfType(&baseDouble)) {
     return false;
   }
-  if (input[2].isRational(&exp)) {
-    expDouble = exp.getDoubleValue();
-  } else if (!input[2].isOfType(&expDouble)) {
+  if (input[2].isRational(&exponent)) {
+    exponentDouble = exponent.getDoubleValue();
+  } else if (!input[2].isOfType(&exponentDouble)) {
     return false;
   }
   if (baseDouble < 0) {
@@ -1776,21 +1776,21 @@ bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRationalToDoubleOrRational(
       return false;
     }
     int power = 0;
-    if (exp.isEven()) {
-      if (!exp.isSmallInteger(&power)) {
+    if (exponent.isEven()) {
+      if (!exponent.isSmallInteger(&power)) {
         return false;
       }
       return output.assignValue(FloatingPoint::power(- baseDouble, power), calculator);
     }
     baseDouble *= - 1;
-    return output.assignValue(- FloatingPoint::power(baseDouble, expDouble), calculator);
+    return output.assignValue(- FloatingPoint::power(baseDouble, exponentDouble), calculator);
   }
   if (baseDouble == 0.0) {
-    if (expDouble > 0) {
+    if (exponentDouble > 0) {
       return output.assignValue<double>(0, calculator);
     }
   }
-  return output.assignValue(FloatingPoint::power(baseDouble, expDouble), calculator);
+  return output.assignValue(FloatingPoint::power(baseDouble, exponentDouble), calculator);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRationalByDoubleOrRational(
@@ -1867,7 +1867,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg(
   return output.assignValue(leftC, calculator);
 }
 
-bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarByMatrix(
+bool CalculatorFunctionsBinaryOps::multiplyAnyScalarByMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarByMatrix");

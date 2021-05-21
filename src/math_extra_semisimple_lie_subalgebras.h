@@ -344,7 +344,7 @@ public:
   ) const;
   std::string toStringType(FormatExpressions* format = nullptr) const;
   std::string toStringTypeAndHs(FormatExpressions* format = nullptr) const;
-  std::string toStringGenerators(FormatExpressions* format, bool writeToHardDisk) const;
+  std::string toStringGenerators(FormatExpressions* format) const;
   std::string toString(FormatExpressions* format, bool writeToHardDisk) const;
   std::string toStringSystem(FormatExpressions* format = nullptr) const;
   std::string toStringSystemPart2(FormatExpressions* format = nullptr) const;

@@ -549,7 +549,7 @@ bool ElementUniversalEnveloping<Coefficient>::getBasisFromSpanOfElements(
 
 template<class Coefficient>
 void ElementUniversalEnveloping<Coefficient>::modToMinDegreeFormFDRels(
-  const Vector<Rational>& theHWinSimpleCoords,
+  const Vector<Rational>& highestWeightInSimpleCoordinates,
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) {
@@ -563,7 +563,7 @@ void ElementUniversalEnveloping<Coefficient>::modToMinDegreeFormFDRels(
       this->owner->UEGeneratorOrderIncludingCartanElts.swapTwoIndices(j, numPosRoots - 1);
       this->simplify(ringUnit);
       this->owner->UEGeneratorOrderIncludingCartanElts.swapTwoIndices(j, numPosRoots - 1);
-      if (this->modOutFDRelationsExperimental(theHWinSimpleCoords, ringUnit, ringZero)) {
+      if (this->modOutFDRelationsExperimental(highestWeightInSimpleCoordinates, ringUnit, ringZero)) {
         Found = true;
       }
     }

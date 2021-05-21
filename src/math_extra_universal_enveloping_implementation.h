@@ -33,68 +33,68 @@ Coefficient SemisimpleLieAlgebra::getKillingFormProductWRTLevi(
 
 template <class Coefficient>
 void ElementUniversalEnveloping<Coefficient>::makeCasimirWRTLeviParabolic(
-  SemisimpleLieAlgebra& theOwner, const Selection& theLeviRoots
+  SemisimpleLieAlgebra& owner, const Selection& leviRoots
 ) {
   MacroRegisterFunctionWithName("ElementUniversalEnveloping::makeCasimirWRTLeviParabolic");
-  if (theLeviRoots.cardinalitySelection == 0) {
-    this->makeZero(theOwner);
+  if (leviRoots.cardinalitySelection == 0) {
+    this->makeZero(owner);
     return;
   }
   Coefficient result = 0;
   ElementSemisimpleLieAlgebra<Rational> leftE, rightE;
   ChevalleyGenerator baseGen;
-  Selection rootsNotInLEvi = theLeviRoots;
+  Selection rootsNotInLEvi = leviRoots;
   rootsNotInLEvi.invertSelection();
   Vector<Rational> rootsNotInLeviVectorForm = rootsNotInLEvi;
   Vector<Rational> weightLeft, weightRight;
-  this->makeZero(theOwner);
+  this->makeZero(owner);
   MonomialUniversalEnveloping<Coefficient> monomial;
   Rational theCF;
   //Coefficient theCFconverted;
-  for (int i = 0; i < theOwner.getNumberOfGenerators(); i ++) {
-    weightLeft = theOwner.getWeightOfGenerator(i);
+  for (int i = 0; i < owner.getNumberOfGenerators(); i ++) {
+    weightLeft = owner.getWeightOfGenerator(i);
     if (weightLeft.scalarEuclidean(rootsNotInLeviVectorForm) != 0) {
       continue;
     }
     if (weightLeft.isEqualToZero()) {
       continue;
     }
-    monomial.makeOne(theOwner);
-    int indexOpposite = theOwner.getGeneratorIndexFromRoot(- weightLeft);
+    monomial.makeOne(owner);
+    int indexOpposite = owner.getGeneratorIndexFromRoot(- weightLeft);
     monomial.generatorsIndices.addOnTop(i);
     monomial.generatorsIndices.addOnTop(indexOpposite);
     monomial.powers.addOnTop(1);
     monomial.powers.addOnTop(1);
-    leftE.makeGenerator(i, theOwner);
-    rightE.makeGenerator(indexOpposite, theOwner);
-    theCF = theOwner.getKillingFormProductWRTLevi(leftE, rightE, rootsNotInLEvi);
+    leftE.makeGenerator(i, owner);
+    rightE.makeGenerator(indexOpposite, owner);
+    theCF = owner.getKillingFormProductWRTLevi(leftE, rightE, rootsNotInLEvi);
     theCF.invert();
     this->addMonomial(monomial, theCF);
   }
   Matrix<Rational> killingRestrictedToCartan;
-  killingRestrictedToCartan.initialize(theLeviRoots.cardinalitySelection, theLeviRoots.cardinalitySelection);
-  for (int i = 0; i < theLeviRoots.cardinalitySelection; i ++) {
-    for (int j = i; j < theLeviRoots.cardinalitySelection; j ++) {
-      weightLeft.makeEi(theOwner.getRank(), theLeviRoots.elements[i]);
-      weightRight.makeEi(theOwner.getRank(), theLeviRoots.elements[j]);
-      leftE.makeCartanGenerator(weightLeft, theOwner);
-      rightE.makeCartanGenerator(weightRight, theOwner);
-      killingRestrictedToCartan(i, j) = theOwner.getKillingFormProductWRTLevi(leftE, rightE, rootsNotInLEvi);
+  killingRestrictedToCartan.initialize(leviRoots.cardinalitySelection, leviRoots.cardinalitySelection);
+  for (int i = 0; i < leviRoots.cardinalitySelection; i ++) {
+    for (int j = i; j < leviRoots.cardinalitySelection; j ++) {
+      weightLeft.makeEi(owner.getRank(), leviRoots.elements[i]);
+      weightRight.makeEi(owner.getRank(), leviRoots.elements[j]);
+      leftE.makeCartanGenerator(weightLeft, owner);
+      rightE.makeCartanGenerator(weightRight, owner);
+      killingRestrictedToCartan(i, j) = owner.getKillingFormProductWRTLevi(leftE, rightE, rootsNotInLEvi);
       killingRestrictedToCartan(j, i) = killingRestrictedToCartan(i, j);
     }
   }
   killingRestrictedToCartan.invert();
   ElementUniversalEnveloping<Coefficient> leftUE, rightUE;
   Vector<Rational> currentEj;
-  for (int i = 0; i < theLeviRoots.cardinalitySelection; i ++) {
-    weightLeft.makeEi(theOwner.getRank(), theLeviRoots.elements[i]);
-    weightRight.makeZero(theOwner.getRank());
-    for (int j = 0; j < theLeviRoots.cardinalitySelection; j ++) {
-      currentEj.makeEi(theOwner.getRank(), theLeviRoots.elements[j]);
+  for (int i = 0; i < leviRoots.cardinalitySelection; i ++) {
+    weightLeft.makeEi(owner.getRank(), leviRoots.elements[i]);
+    weightRight.makeZero(owner.getRank());
+    for (int j = 0; j < leviRoots.cardinalitySelection; j ++) {
+      currentEj.makeEi(owner.getRank(), leviRoots.elements[j]);
       weightRight += currentEj * killingRestrictedToCartan(i, j);
     }
-    leftUE.makeCartanGenerator(weightLeft, theOwner);
-    rightUE.makeCartanGenerator(weightRight, theOwner);
+    leftUE.makeCartanGenerator(weightLeft, owner);
+    rightUE.makeCartanGenerator(weightRight, owner);
     leftUE *= rightUE;
     *this += leftUE;
   }
@@ -105,15 +105,15 @@ template <class Coefficient>
 void ElementUniversalEnveloping<Coefficient>::modOutVermaRelations(
   const Vector<Coefficient>* substitutionHiGoesToIthElement, const Coefficient& ringUnit, const Coefficient& ringZero
 ) {
-  MonomialUniversalEnveloping<Coefficient> tempMon;
+  MonomialUniversalEnveloping<Coefficient> monomial;
   ElementUniversalEnveloping<Coefficient> output;
   output.makeZero(*this->owner);
-  Coefficient acquiredCoeff;
+  Coefficient acquiredCoefficient;
   for (int i = 0; i < this->size(); i ++) {
-    tempMon = (*this)[i];
-    tempMon.modOutVermaRelations(acquiredCoeff, substitutionHiGoesToIthElement, ringUnit, ringZero);
-    acquiredCoeff *= this->coefficients[i];
-    output.addMonomial(tempMon, acquiredCoeff);
+    monomial = (*this)[i];
+    monomial.modOutVermaRelations(acquiredCoefficient, substitutionHiGoesToIthElement, ringUnit, ringZero);
+    acquiredCoefficient *= this->coefficients[i];
+    output.addMonomial(monomial, acquiredCoefficient);
   }
   this->operator=(output);
 }
@@ -132,7 +132,8 @@ void ElementUniversalEnveloping<Coefficient>::lieBracketOnTheLeft(const ElementS
 
 template<class Coefficient>
 bool MonomialUniversalEnveloping<Coefficient>::adjointRepresentationAction(
-  const ElementUniversalEnveloping<Coefficient>& input, ElementUniversalEnveloping<Coefficient>& output
+  const ElementUniversalEnveloping<Coefficient>& input,
+  ElementUniversalEnveloping<Coefficient>& output
 ) const {
   output.makeZero(*this->owner);
   ElementSemisimpleLieAlgebra<Rational> element;

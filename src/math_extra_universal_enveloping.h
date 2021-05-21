@@ -142,7 +142,9 @@ public:
     std::stringstream* logStream = nullptr
   );
   std::string isInProperSubmodule(
-    const Vector<Coefficient>* substitutionHiGoesToIthElement, const Coefficient& ringUnit, const Coefficient& ringZero
+    const Vector<Coefficient>* substitutionHiGoesToIthElement,
+    const Coefficient& ringUnit,
+    const Coefficient& ringZero
   );
   bool highestWeightTransposeAntiAutomorphismBilinearForm(
     const ElementUniversalEnveloping<Coefficient>&right,
@@ -204,7 +206,7 @@ public:
   }
   void multiplyBy(const MonomialUniversalEnveloping<Coefficient>& standsOnTheRight, const Coefficient& theCoeff);
   void modToMinDegreeFormFDRels(
-    const Vector<Rational> & theHWinSimpleCoords, const Coefficient& ringUnit, const Coefficient& ringZero
+    const Vector<Rational>& highestWeightInSimpleCoordinates, const Coefficient& ringUnit, const Coefficient& ringZero
   );
   void modOutVermaRelations(
     const Vector<Coefficient>* substitutionHiGoesToIthElement,
@@ -256,7 +258,7 @@ public:
     const PolynomialSubstitution<Rational>& theSub
   );
   void makeCasimir(SemisimpleLieAlgebra& theOwner);
-  void makeCasimirWRTLeviParabolic(SemisimpleLieAlgebra& theOwner, const Selection& theLeviRoots);
+  void makeCasimirWRTLeviParabolic(SemisimpleLieAlgebra& owner, const Selection& leviRoots);
   static void lieBracket(
     const ElementUniversalEnveloping<Coefficient>& left,
     const ElementUniversalEnveloping<Coefficient>& right,

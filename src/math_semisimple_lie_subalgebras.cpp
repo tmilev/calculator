@@ -6675,8 +6675,6 @@ std::string SemisimpleSubalgebras::toStringAlgebraLink(
   if (actualindexSubalgebra < 0) {
     return "(non-initialized)";
   }
-//  bool shortReportOnly = theFormat == 0 ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
-  bool useMouseHover = format == nullptr ? true : !format->flagUseMathSpanPureVsMouseHover;
   std::stringstream out;
   bool makeLink = writeToHardDisk;
   if (this->subalgebras.values[actualindexSubalgebra].flagSystemProvedToHaveNoSolution) {
@@ -6687,11 +6685,7 @@ std::string SemisimpleSubalgebras::toStringAlgebraLink(
     out << "<a href='" << this->getDisplayFileNameSubalgebraRelative(actualindexSubalgebra, format)
     << "' id='semisimple_subalgebra_" << this->getDisplayIndexFromActual(actualindexSubalgebra)
     << "' style='text-decoration: none'>";
-    if (useMouseHover) {
-      out << HtmlRoutines::getMathNoDisplay(typeString);
-    } else {
-      out << HtmlRoutines::getMathNoDisplay(typeString);
-    }
+    out << HtmlRoutines::getMathNoDisplay(typeString);
     out << "</a> ";
   } else {
     out << typeString << "";
@@ -6705,8 +6699,8 @@ std::string CandidateSemisimpleSubalgebra::toStringCartanSubalgebra(FormatExpres
   bool useHtml = format == nullptr ? true : format->flagUseHTML;
   bool useMouseHover = format == nullptr ? true : !format->flagUseMathSpanPureVsMouseHover;
 
-  List<DynkinSimpleType> theSimpleTypes;
-  this->weylNonEmbedded->dynkinType.getTypesWithMults(theSimpleTypes);
+  List<DynkinSimpleType> simpleTypes;
+  this->weylNonEmbedded->dynkinType.getTypesWithMults(simpleTypes);
   FormatExpressions tempFormat;
   tempFormat.ambientWeylLetter = this->getAmbientWeyl().dynkinType[0].letter;
   tempFormat.ambientCartanSymmetricInverseScale = this->getAmbientWeyl().dynkinType[0].cartanSymmetricInverseScale;
@@ -6714,19 +6708,23 @@ std::string CandidateSemisimpleSubalgebra::toStringCartanSubalgebra(FormatExpres
   for (int i = 0; i < this->cartanSubalgebrasByComponentScaledToActByTwo.size; i ++) {
     if (useLaTeX && useHtml) {
       if (useMouseHover) {
-        out << HtmlRoutines::getMathNoDisplay(theSimpleTypes[i].toString(&tempFormat), 1000) << ": ";
+        out << HtmlRoutines::getMathNoDisplay(simpleTypes[i].toString(&tempFormat), 1000) << ": ";
       } else {
-        out << HtmlRoutines::getMathNoDisplay(theSimpleTypes[i].toString(&tempFormat), 1000) << ": ";
+        out << HtmlRoutines::getMathNoDisplay(simpleTypes[i].toString(&tempFormat), 1000) << ": ";
       }
     } else {
-      out << theSimpleTypes[i].toString(&tempFormat) << ":";
+      out << simpleTypes[i].toString(&tempFormat) << ":";
     }
     for (int j = 0; j < this->cartanSubalgebrasByComponentScaledToActByTwo[i].size; j ++) {
       out << this->cartanSubalgebrasByComponentScaledToActByTwo[i][j].toString() << ": "
       << this->getAmbientWeyl().rootScalarCartanRoot(
-        this->cartanSubalgebrasByComponentScaledToActByTwo[i][j],this->cartanSubalgebrasByComponentScaledToActByTwo[i][j]
+        this->cartanSubalgebrasByComponentScaledToActByTwo[i][j],
+        this->cartanSubalgebrasByComponentScaledToActByTwo[i][j]
       );
-      if (j != this->cartanSubalgebrasByComponentScaledToActByTwo[i].size - 1 || i != this->cartanSubalgebrasByComponentScaledToActByTwo.size - 1) {
+      if (
+        j != this->cartanSubalgebrasByComponentScaledToActByTwo[i].size - 1 ||
+        i != this->cartanSubalgebrasByComponentScaledToActByTwo.size - 1
+      ) {
         out << ", ";
       }
     }
@@ -6751,7 +6749,6 @@ std::string CandidateSemisimpleSubalgebra::toStringCentralizer(FormatExpressions
     return "";
   }
   std::stringstream out;
-  bool useMouseHover = format == nullptr ? true : !format->flagUseMathSpanPureVsMouseHover;
   if (this->flagCentralizerIsWellChosen && this->centralizerRank != 0 ) {
     out << "<br>Centralizer: ";
     Rational dimToralPartCentralizer = this->centralizerRank;
@@ -6763,22 +6760,14 @@ std::string CandidateSemisimpleSubalgebra::toStringCentralizer(FormatExpressions
         out << " + ";
       }
     } else if (!this->centralizerType.isEqualToZero()) {
-      if (useMouseHover) {
-        out << HtmlRoutines::getMathNoDisplay(this->centralizerType.toString());
-      } else {
-        out << HtmlRoutines::getMathNoDisplay(this->centralizerType.toString());
-      }
+      out << HtmlRoutines::getMathNoDisplay(this->centralizerType.toString());
       out << " (can't determine subalgebra number - subalgebras computed partially?)";
       dimToralPartCentralizer -= this->centralizerType.getRank();
     }
     if (dimToralPartCentralizer != 0) {
       std::stringstream toralPartStream;
       toralPartStream << "T_{" << dimToralPartCentralizer.toString() << "}";
-      if (useMouseHover) {
-        out << HtmlRoutines::getMathNoDisplay(toralPartStream.str());
-      } else {
-        out << HtmlRoutines::getMathNoDisplay(toralPartStream.str());
-      }
+      out << HtmlRoutines::getMathNoDisplay(toralPartStream.str());
       out << " (toral part, subscript = dimension)";
     }
     out << ". ";
@@ -7012,44 +7001,24 @@ std::string CandidateSemisimpleSubalgebra::toStringTypeAndHs(FormatExpressions* 
 }
 
 std::string CandidateSemisimpleSubalgebra::toStringGenerators(
-  FormatExpressions* format, bool writeToHardDisk
+  FormatExpressions* format
 ) const {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::toStringGenerators");
   if (this->basis.size == 0) {
     return "";
   }
-  bool useLaTeX = format == nullptr ? true : format->flagUseLatex;
-  bool useHtml = format == nullptr ? true : format->flagUseHTML;
-  bool shortReportOnly = format == nullptr ? true : format->flagCandidateSubalgebraShortReportOnly;
-  bool useMouseHover = ((shortReportOnly && !format->flagUseMathSpanPureVsMouseHover) || !writeToHardDisk);
   std::stringstream out;
   out << "<br>Dimension of subalgebra generated by predefined or computed generators: "
   << this->basis.size << "." << "<br>Negative simple generators: ";
   for (int i = 0; i < this->negativeGenerators.size; i ++) {
-    if (useHtml && useLaTeX) {
-      if (useMouseHover) {
-        out << HtmlRoutines::getMathNoDisplay(this->negativeGenerators[i].toString(format), 2000);
-      } else {
-        out << HtmlRoutines::getMathNoDisplay(this->negativeGenerators[i].toString(format), 2000);
-      }
-    } else {
-      out << this->negativeGenerators[i].toString(format);
-    }
+    out << HtmlRoutines::getMathNoDisplay(this->negativeGenerators[i].toString(format), 2000);
     if (i != this->negativeGenerators.size - 1) {
       out << ", ";
     }
   }
   out << "<br>Positive simple generators: ";
   for (int i = 0; i < this->positiveGenerators.size; i ++) {
-    if (useHtml && useLaTeX) {
-      if (useMouseHover) {
-        out << HtmlRoutines::getMathNoDisplay(this->positiveGenerators[i].toString(format), 2000);
-      } else {
-        out << HtmlRoutines::getMathNoDisplay(this->positiveGenerators[i].toString(format), 2000);
-      }
-    } else {
-      out << this->positiveGenerators[i].toString(format);
-    }
+    out << HtmlRoutines::getMathNoDisplay(this->positiveGenerators[i].toString(format), 2000);
     if (i != this->positiveGenerators.size - 1) {
       out << ", ";
     }
@@ -7124,7 +7093,7 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* format, b
     << this->owner->getDisplayFileNameFKFTNilradicals(this->indexInOwner, format)
     << "'>Detailed information on isotypical nilradicals. </a><hr>";
   }
-  out << this->toStringGenerators(format, writeToHardDisk);
+  out << this->toStringGenerators(format);
   FormatExpressions tempFormat;
   tempFormat.flagUseLatex = true;
   tempFormat.flagUseHTML = false;
@@ -7150,19 +7119,19 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* format, b
   } else {
     out << this->weylNonEmbedded->coCartanSymmetric.toString(format);
   }
-  FormatExpressions charFormatNonConst;
+  FormatExpressions characterFormatNonConstant;
   if (!this->characterFormat.isZeroPointer()) {
-    charFormatNonConst = this->characterFormat.getElementConst();
+    characterFormatNonConstant = this->characterFormat.getElementConst();
   }
   out << "<br>Decomposition of ambient Lie algebra: ";
   if (useLaTeX) {
     if (useMouseHover) {
-      out << HtmlRoutines::getMathNoDisplay(this->characterNonPrimalFundamentalCoordinates.toString(&charFormatNonConst), 20000);
+      out << HtmlRoutines::getMathNoDisplay(this->characterNonPrimalFundamentalCoordinates.toString(&characterFormatNonConstant), 20000);
     } else {
-      out << HtmlRoutines::getMathNoDisplay(this->characterNonPrimalFundamentalCoordinates.toString(&charFormatNonConst), 20000);
+      out << HtmlRoutines::getMathNoDisplay(this->characterNonPrimalFundamentalCoordinates.toString(&characterFormatNonConstant), 20000);
     }
   } else {
-    out << this->characterNonPrimalFundamentalCoordinates.toString(&charFormatNonConst);
+    out << this->characterNonPrimalFundamentalCoordinates.toString(&characterFormatNonConstant);
   }
   if (this->cartanOfCentralizer.size > 0) {
     out << "<br>Primal decomposition of the ambient Lie algebra. "
@@ -7170,12 +7139,12 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* format, b
     << "(please note the order is not the same as above). ";
     if (useLaTeX) {
       if (useMouseHover) {
-        out << HtmlRoutines::getMathNoDisplay(this->primalCharacter.toString(&charFormatNonConst), 20000);
+        out << HtmlRoutines::getMathNoDisplay(this->primalCharacter.toString(&characterFormatNonConstant), 20000);
       } else {
-        out << HtmlRoutines::getMathNoDisplay(this->primalCharacter.toString(&charFormatNonConst), 20000);
+        out << HtmlRoutines::getMathNoDisplay(this->primalCharacter.toString(&characterFormatNonConstant), 20000);
       }
     } else
-      out << this->primalCharacter.toString(&charFormatNonConst);
+      out << this->primalCharacter.toString(&characterFormatNonConstant);
   }
   if (this->flagCentralizerIsWellChosen&& weightsAreCoordinated) {
     int numZeroWeights = 0;
@@ -7231,7 +7200,7 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* format, b
     out << "</tr><tr><td>weight</td>";
     for (int i = 0; i < this->highestWeightsNonPrimalNonSorted.size; i ++) {
       out << "<td>\\("
-      << this->highestWeightsNonPrimalNonSorted[i].toStringLetterFormat("\\omega", &charFormatNonConst)
+      << this->highestWeightsNonPrimalNonSorted[i].toStringLetterFormat("\\omega", &characterFormatNonConstant)
       << "\\)</td>";
     }
     out << "</tr>";
@@ -7239,7 +7208,7 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* format, b
       out << "<tr><td>weights rel. to Cartan of (centralizer+semisimple s.a.). </td>";
       for (int i = 0; i < this->highestWeightsPrimalNonSorted.size; i ++) {
         out << "<td>\\("
-        << this->highestWeightsPrimalNonSorted[i].toStringLetterFormat("\\omega", &charFormatNonConst)
+        << this->highestWeightsPrimalNonSorted[i].toStringLetterFormat("\\omega", &characterFormatNonConstant)
         << "\\)</td>";
       }
       out << "</tr>";

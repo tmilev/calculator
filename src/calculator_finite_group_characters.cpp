@@ -1662,7 +1662,7 @@ Rational KostkaNumber::ComputeTypeBParabolicSignMultiplicity(
   tempP = rightPartition;
   tempP.transpose();
   rightKN.partition = tempP.p;
-  theSelection.initFromInts(parabolicPartition.p);
+  theSelection.initializeFromIntegers(parabolicPartition.p);
   do {
     complementSelection.setSize(parabolicPartition.p.size);
     for (int k = 0; k < theSelection.capacities.size; k ++) {

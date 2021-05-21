@@ -1958,7 +1958,7 @@ public:
   int opEllipticCurveElementsZmodP() {
     return this->operations.getIndexNoFail("ellipticCurveElementsZmodP");
   }
-  int opRationalFunction() {
+  int opRationalFraction() {
     return this->operations.getIndexNoFail("RationalFunction");
   }
   int opRationalFunctionAlgebraicCoefficients() {
@@ -3090,7 +3090,7 @@ bool Expression::assignValue(const Type& inputValue, Calculator& owner) {
   if (
     currentType == owner.opEltZmodP() ||
     currentType == owner.opPolynomialRational() ||
-    currentType == owner.opRationalFunction() ||
+    currentType == owner.opRationalFraction() ||
     currentType == owner.opElementTensorGVM() ||
     currentType == owner.opElementUEOverRF() ||
     currentType == owner.opElementWeylAlgebra() ||

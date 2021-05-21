@@ -196,7 +196,10 @@ public:
   void getCoxeterElement(Matrix<Rational>& output);
   void computePotentialExtensions();
   void getSsl2SubalgebrasAppendListNoRepetition(
-    SlTwoSubalgebras& output, int indexRootSAinContainer, AlgebraicClosureRationals* algebraicClosure
+    SlTwoSubalgebras& output,
+    int indexRootSubalgebraInContainer,
+    bool computeRealForm,
+    AlgebraicClosureRationals* algebraicClosure
   );
   bool isEquivalentToByDiagramsAndDimensions(const RootSubalgebra& other) const;
   void computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators();
@@ -618,6 +621,7 @@ public:
     Selection& zeroCharacteristics,
     Vectors<Rational>& simpleBasisSubalgebras,
     Vector<Rational>& h,
+    bool computeRealForm,
     AlgebraicClosureRationals* inputAlgebraicClosure
   );
   bool attemptRealizingKostantSekiguchi();

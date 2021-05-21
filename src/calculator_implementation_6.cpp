@@ -2755,7 +2755,7 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
     algebra.writeHTML(true, false);
     SlTwoSubalgebras slTwoSubalgebras(algebra);
     slTwoSubalgebras.rootSubalgebras.flagPrintParabolicPseudoParabolicInfo = true;
-    algebra.findSl2Subalgebras(algebra, slTwoSubalgebras, &calculator.objectContainer.algebraicClosure);
+    algebra.findSl2Subalgebras(algebra, slTwoSubalgebras, true, &calculator.objectContainer.algebraicClosure);
     slTwoSubalgebras.writeHTML();
     algebra.writeHTML(true, false);
     if (allTypes[i].hasPrecomputedSubalgebras()) {

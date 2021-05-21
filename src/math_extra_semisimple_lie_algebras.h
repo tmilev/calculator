@@ -254,6 +254,7 @@ public:
   static void findSl2Subalgebras(
     SemisimpleLieAlgebra& inputOwner,
     SlTwoSubalgebras& output,
+    bool computeRealForm,
     AlgebraicClosureRationals* algebraicClosure
   );
   template<class Coefficient>

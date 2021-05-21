@@ -159,8 +159,8 @@ public:
   int totalNumberSubsetsSmallInt();
   int totalMultiplicity();
   int maximumTotalMultiplicity();
-  void initFromInts(int* theMaxMults, int numberMaxMults);
-  void initFromInts(const List<int>& theMaxMults);
+  void initializeFromIntegers(int* maximalMultiplicities, int numberOfMaximalMultiplicities);
+  void initializeFromIntegers(const List<int>& maximalMultiplicities);
   bool hasSameMaxMultiplicities(SelectionWithDifferentMaxMultiplicities& other) {
     return this->capacities.isEqualTo(other.capacities);
   }

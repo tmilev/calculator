@@ -855,7 +855,7 @@ bool CalculatorFunctions::innerSumAsOperatorToSumInternalNotation(
   return output.addChildOnTop(argumentE);
 }
 
-bool CalculatorFunctions::innerSumTimesExpressionToSumOf(
+bool CalculatorFunctions::sumTimesExpressionToSumOf(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSumTimesExpressionToSumOf");

@@ -469,7 +469,7 @@ bool Expression::assignMatrixExpressions(
       matrixType.addChildAtomOnTop(owner.opPolynomialAlgebraicNumbers());
       break;
     case typeRF:
-      matrixType.addChildAtomOnTop(owner.opRationalFunction());
+      matrixType.addChildAtomOnTop(owner.opRationalFraction());
       break;
     default:
       break;

@@ -327,7 +327,7 @@ public:
 
   static bool innerMultiplySequence(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerSumSequence(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSumTimesExpressionToSumOf(Calculator& calculator, const Expression& input, Expression& output);
+  static bool sumTimesExpressionToSumOf(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerSumAsOperatorToSumInternalNotation(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerHandleUnderscorePowerLimits(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerPolynomialize(Calculator& calculator, const Expression& input, Expression& output);
@@ -394,8 +394,8 @@ public:
   static bool innerGetUserDefinedSubExpressions(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool divideByNumber(Calculator& calculator, const Expression& input, Expression& output);
-  static bool outerDivCancellations(Calculator& calculator, const Expression& input, Expression& output);
-  static bool outerAssociateDivisionDivision(Calculator& calculator, const Expression& input, Expression& output);
+  static bool divisionCancellations(Calculator& calculator, const Expression& input, Expression& output);
+  static bool associateDivisionDivision(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerAssociateAdivBdivCpowerD(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerEqualEqual(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerEqualEqualEqual(Calculator& calculator, const Expression& input, Expression& output);

@@ -2673,7 +2673,7 @@ bool CalculatorFunctions::outerAssociateAdivBdivCpowerD(
   return output.makeXOX(calculator, calculator.opDivide(), numeratorE, denominatorE);
 }
 
-bool CalculatorFunctions::outerDivCancellations(
+bool CalculatorFunctions::divisionCancellations(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::outerDivCancellations");
@@ -2695,7 +2695,7 @@ bool CalculatorFunctions::outerDivCancellations(
   return false;
 }
 
-bool CalculatorFunctions::outerAssociateDivisionDivision(
+bool CalculatorFunctions::associateDivisionDivision(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::outerAssociateDivisionDivision");
@@ -3295,7 +3295,7 @@ bool CalculatorFunctions::innerCompareExpressionsNumerically(
   }
   knownValues.setSize(knownEs.size);
   SelectionWithDifferentMaxMultiplicities theSamplingSelector;
-  theSamplingSelector.initFromInts(numSamples);
+  theSamplingSelector.initializeFromIntegers(numSamples);
   if (theSamplingSelector.totalNumberOfSubsets() > 1000000) {
     return calculator << "The total number of sampling points, "
     << theSamplingSelector.totalNumberOfSubsets().toString() << " exceeds "

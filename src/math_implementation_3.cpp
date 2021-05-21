@@ -3433,7 +3433,7 @@ bool OnePartialFraction::reduceMeOnce(
     hasImprovement = false;
     for (int i = 0; i < this->indicesNonZeroMultiplicities.size; i ++) {
       for (int j = 0; j < this->denominator[indicesNonZeroMultiplicities[i]].multiplicities.size; j ++) {
-        this->denominator[indicesNonZeroMultiplicities[i]].GetPolynomialDenominator(denominator, j, startingVectors[indicesNonZeroMultiplicities[i]]);
+        this->denominator[indicesNonZeroMultiplicities[i]].getPolynomialDenominator(denominator, j, startingVectors[indicesNonZeroMultiplicities[i]]);
         outputCoeff.divideBy(denominator, quotient, remainderDivision, &MonomialPolynomial::orderDefault());
         if (remainderDivision.isEqualToZero()) {
           this->decreasePowerOneFraction(indicesNonZeroMultiplicities[i], 1);
@@ -3889,9 +3889,9 @@ bool PartialFractions::splitPartial() {
   return true;
 }
 
-bool PartialFractions::splitClassicalRootSystem(bool ShouldElongate, Vector<Rational>* Indicator) {
-  (void) ShouldElongate;
-  (void) Indicator;
+bool PartialFractions::splitClassicalRootSystem(bool shouldElongate, Vector<Rational>* indicator) {
+  (void) shouldElongate;
+  (void) indicator;
   global.fatal << "Split classical root system not implemented" << global.fatal;
     /*this->IndexLowestNonProcessed = 0;
   this->prepareIndicatorVariables();
@@ -3933,7 +3933,7 @@ bool PartialFractions::splitClassicalRootSystem(bool ShouldElongate, Vector<Rati
   this->compareCheckSums();
   this->IndexLowestNonProcessed = this->size;
   this->makeProgressReportSplittingMainPart();*/
-  return this->checkForMinimalityDecompositionWithRespectToRoot(Indicator);
+  return this->checkForMinimalityDecompositionWithRespectToRoot(indicator);
 }
 
 bool PartialFractions::checkForMinimalityDecompositionWithRespectToRoot(Vector<Rational>* theRoot) {
@@ -4461,14 +4461,14 @@ void PartialFractions::run(Vectors<Rational>& input) {
   this->split(nullptr);
 }
 
-void PartialFractions::removeRedundantShortRoots(Vector<Rational>* Indicator) {
+void PartialFractions::removeRedundantShortRoots(Vector<Rational>* indicator) {
   Rational startCheckSum;
   ProgressReport report;
   if (OnePartialFraction::MakingConsistencyCheck) {
     this->computeOneCheckSum(startCheckSum);
   }
   for (int i = 0; i < this->size(); i ++) {
-    if (this->removeRedundantShortRootsIndex(i, Indicator)) {
+    if (this->removeRedundantShortRootsIndex(i, indicator)) {
       i --;
       if (this->flagMakingProgressReport) {
         std::stringstream out;
@@ -4479,8 +4479,8 @@ void PartialFractions::removeRedundantShortRoots(Vector<Rational>* Indicator) {
   }
 }
 
-void PartialFractions::removeRedundantShortRootsClassicalRootSystem(Vector<Rational>* Indicator) {
-  (void) Indicator;
+void PartialFractions::removeRedundantShortRootsClassicalRootSystem(Vector<Rational>* indicator) {
+  (void) indicator;
   /*PartFraction tempFrac;
   Polynomial<LargeInt> buffer;
   for (int i = 0; i < this->size; i ++) {
@@ -4578,16 +4578,16 @@ bool PartialFractions::isHigherThanWithRespectToWeight(
 
 //NOTE NOTE NOTE: To be fixed: you gotta use the preceding function to sort the theVPbasis!
 void PartialFractions::computeKostantFunctionFromWeylGroup(
-  char WeylGroupLetter, int WeylGroupNumber, QuasiPolynomial& output, Vector<Rational>* ChamberIndicator
+  char weylGroupLetter, int weylGroupNumber, QuasiPolynomial& output, Vector<Rational>* chamberIndicator
 ) {
   this->initCommon();
   Vectors<Rational> theVPbasis;
-  Vector<Rational> tempWeight; tempWeight.setSize(WeylGroupNumber);
+  Vector<Rational> tempWeight; tempWeight.setSize(weylGroupNumber);
   WeylGroupData tempW;
-  tempW.makeArbitrarySimple(WeylGroupLetter, WeylGroupNumber);
+  tempW.makeArbitrarySimple(weylGroupLetter, weylGroupNumber);
   tempW.computeRho(true);
   theVPbasis = tempW.rootsOfBorel;
-  if (WeylGroupLetter == 'B') {
+  if (weylGroupLetter == 'B') {
     for (int i = 0; i < theVPbasis.size; i ++) {
       Rational tempRat;
       Vector<Rational> tempRoot;
@@ -4598,7 +4598,7 @@ void PartialFractions::computeKostantFunctionFromWeylGroup(
       }
     }
   }
-  if (WeylGroupLetter == 'D') {
+  if (weylGroupLetter == 'D') {
     Vector<Rational> tempRoot;
     tempRoot.makeZero(this->ambientDimension);
     tempRoot[this->ambientDimension - 1] = 1;
@@ -4622,13 +4622,13 @@ void PartialFractions::computeKostantFunctionFromWeylGroup(
   //  this->initFromRoots(theVPbasis, 0);
   //this->flagSplitTestModeNoNumerators = true;
   //  this->split(ChamberIndicator);
-  if (!this->checkForMinimalityDecompositionWithRespectToRoot(ChamberIndicator)) {
+  if (!this->checkForMinimalityDecompositionWithRespectToRoot(chamberIndicator)) {
     global.fatal << "Minimality decomposition missing. " << global.fatal;
   }
   //return;
   Vector<Rational> tempRoot;
-  if (ChamberIndicator != nullptr) {
-    tempRoot = *ChamberIndicator;
+  if (chamberIndicator != nullptr) {
+    tempRoot = *chamberIndicator;
   } else {
     tempRoot.makeZero(this->ambientDimension);
   }
@@ -4646,7 +4646,7 @@ unsigned int OnePartialFractionDenominator::hashFunction() const {
   return static_cast<unsigned>(this->getTotalMultiplicity());
 }
 
-void OnePartialFractionDenominator::GetPolynomialDenominator(
+void OnePartialFractionDenominator::getPolynomialDenominator(
   Polynomial<LargeInteger>& output, int MultiplicityIndex, Vector<Rational>& theExponent
 ) {
   if (MultiplicityIndex >= this->multiplicities.size) {
@@ -5121,19 +5121,19 @@ LargeInteger SelectionWithDifferentMaxMultiplicities::totalNumberOfSubsets() {
   return result;
 }
 
-void SelectionWithDifferentMaxMultiplicities::initFromInts(int* theMaxMults, int numberMaxMults) {
-  this->multiplicities.initializeFillInObject(numberMaxMults, 0);
-  this->capacities.setSize(numberMaxMults);
+void SelectionWithDifferentMaxMultiplicities::initializeFromIntegers(int* maximalMultiplicities, int numberOfMaximalMultiplicities) {
+  this->multiplicities.initializeFillInObject(numberOfMaximalMultiplicities, 0);
+  this->capacities.setSize(numberOfMaximalMultiplicities);
   for (int i = 0; i < this->capacities.size; i ++) {
-    this->capacities[i] = theMaxMults[i];
+    this->capacities[i] = maximalMultiplicities[i];
   }
-  this->elements.initializeFillInObject(numberMaxMults, 0);
+  this->elements.initializeFillInObject(numberOfMaximalMultiplicities, 0);
 }
 
-void SelectionWithDifferentMaxMultiplicities::initFromInts(const List<int>& theMaxMults) {
-  this->multiplicities.initializeFillInObject(theMaxMults.size, 0);
-  this->elements.initializeFillInObject(theMaxMults.size, 0);
-  this->capacities = theMaxMults;
+void SelectionWithDifferentMaxMultiplicities::initializeFromIntegers(const List<int>& maximalMultiplicities) {
+  this->multiplicities.initializeFillInObject(maximalMultiplicities.size, 0);
+  this->elements.initializeFillInObject(maximalMultiplicities.size, 0);
+  this->capacities = maximalMultiplicities;
 }
 
 int ::SelectionWithDifferentMaxMultiplicities::totalMultiplicity() {
@@ -9199,7 +9199,7 @@ bool Lattice::getAllRepresentatives(const Lattice& rougherLattice, Vectors<Ratio
     thePeriods[i] --;
   }
   SelectionWithDifferentMaxMultiplicities theCoeffSelection;
-  theCoeffSelection.initFromInts(thePeriods);
+  theCoeffSelection.initializeFromIntegers(thePeriods);
   int NumCycles = theCoeffSelection.totalNumberSubsetsSmallInt();
   output.setSize(NumCycles);
   for (int i = 0; i < NumCycles; i ++, theCoeffSelection.incrementReturnFalseIfPastLast()) {
@@ -9870,12 +9870,12 @@ bool QuasiPolynomial::substitutionFewerVariables(const PolynomialSubstitution<Ra
   return true;
 }
 
-bool Lattice::substitutionHomogeneous(const PolynomialSubstitution<Rational>& theSub) {
-  Matrix<Rational> matSub;
-  if (!this->getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(theSub, matSub)) {
+bool Lattice::substitutionHomogeneous(const PolynomialSubstitution<Rational>& substitution) {
+  Matrix<Rational> matrixSubstitution;
+  if (!this->getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(substitution, matrixSubstitution)) {
     return false;
   }
-  return this->substitutionHomogeneous(matSub);
+  return this->substitutionHomogeneous(matrixSubstitution);
 }
 
 bool Lattice::getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(
@@ -9951,22 +9951,24 @@ void Lattice::intersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& t
   this->makeFromRoots(resultBasis);
 }
 
-void Lattice::intersectWithLinearSubspaceSpannedBy(const Vectors<Rational>& theSubspaceBasis) {
-  Vectors<Rational> theNormals;
+void Lattice::intersectWithLinearSubspaceSpannedBy(const Vectors<Rational>& subspaceBasis) {
+  Vectors<Rational> normals;
   Matrix<Rational> matrix;
-  theSubspaceBasis.getMatrixRootsToRows(matrix);
-  matrix.getZeroEigenSpace(theNormals);
-  this->intersectWithLinearSubspaceGivenByNormals(theNormals);
+  subspaceBasis.getMatrixRootsToRows(matrix);
+  matrix.getZeroEigenSpace(normals);
+  this->intersectWithLinearSubspaceGivenByNormals(normals);
 }
 
-void Lattice::intersectWithLinearSubspaceGivenByNormals(const Vectors<Rational>& theSubspaceNormals) {
-  for (int i = 0; i < theSubspaceNormals.size; i ++) {
-    this->intersectWithLinearSubspaceGivenByNormal(theSubspaceNormals[i]);
+void Lattice::intersectWithLinearSubspaceGivenByNormals(const Vectors<Rational>& subspaceNormals) {
+  for (int i = 0; i < subspaceNormals.size; i ++) {
+    this->intersectWithLinearSubspaceGivenByNormal(subspaceNormals[i]);
   }
 }
 
-bool Lattice::substitutionHomogeneous(const Matrix<Rational> & theSub, Lattice& resultIsSubsetOf) {
-  (void) theSub;
+bool Lattice::substitutionHomogeneous(
+  const Matrix<Rational>& substitution, Lattice& resultIsSubsetOf
+) {
+  (void) substitution;
   (void) resultIsSubsetOf;
   global.fatal << "Not implemented yet. " << global.fatal;
  /*Vectors<Rational> preimageBasis;
@@ -9983,14 +9985,14 @@ bool Lattice::substitutionHomogeneous(const Matrix<Rational> & theSub, Lattice& 
 return false;
 }
 
-bool Lattice::substitutionHomogeneous(const Matrix<Rational>& theSub) {
-  int targetDim = theSub.numberOfColumns;
-  if (theSub.numberOfRows != this->getDimension()) {
+bool Lattice::substitutionHomogeneous(const Matrix<Rational>& substitution) {
+  int targetDim = substitution.numberOfColumns;
+  if (substitution.numberOfRows != this->getDimension()) {
     return false;
   }
   int startingDim = this->getDimension();
   Matrix<Rational> matrix, oldBasisTransformed, matRelationBetweenStartingVariables;
-  matrix = theSub;
+  matrix = substitution;
   oldBasisTransformed = this->basisRationalForm;
   oldBasisTransformed.transpose();
   Selection nonPivotPoints;
@@ -10034,30 +10036,30 @@ void QuasiPolynomial::operator*=(const Rational& scalar) {
   }
 }
 
-void Cone::intersectHyperplane(Vector<Rational>& theNormal, Cone& outputConeLowerDim) {
-  if (theNormal.isEqualToZero()) {
+void Cone::intersectHyperplane(Vector<Rational>& normal, Cone& outputConeLowerDimension) {
+  if (normal.isEqualToZero()) {
     global.fatal << "zero normal not allowed. " << global.fatal;
   }
-  int dimension = theNormal.size;
-  Matrix<Rational> tempMat, theEmbedding, theProjection;
-  tempMat.assignVectorRow(theNormal);
-  Vectors<Rational> theBasis;
-  tempMat.getZeroEigenSpace(theBasis);
-  if (theBasis.size != theNormal.size - 1) {
+  int dimension = normal.size;
+  Matrix<Rational> tempMat, embedding, projection;
+  tempMat.assignVectorRow(normal);
+  Vectors<Rational> basis;
+  tempMat.getZeroEigenSpace(basis);
+  if (basis.size != normal.size - 1) {
     global.fatal << "Plane intersection: normals don't match. " << global.fatal;
   }
-  theEmbedding.assignVectorsToRows(theBasis);
-  theEmbedding.transpose();
-  theBasis.addOnTop(theNormal);
+  embedding.assignVectorsToRows(basis);
+  embedding.transpose();
+  basis.addOnTop(normal);
   Vectors<Rational> tempRoots, tempRoots2, tempRoots3;
   tempRoots.makeEiBasis(dimension);
-  tempRoots.getCoordinatesInBasis(theBasis, tempRoots2);
-  theProjection.assignVectorsToRows(tempRoots2);
-  theProjection.transpose();
-  theProjection.resize(dimension - 1, dimension, false);
+  tempRoots.getCoordinatesInBasis(basis, tempRoots2);
+  projection.assignVectorsToRows(tempRoots2);
+  projection.transpose();
+  projection.resize(dimension - 1, dimension, false);
   Vectors<Rational> newNormals = this->normals;
-  theProjection.actOnVectorsColumn(newNormals, Rational::zero());
-  bool tempBool = outputConeLowerDim.createFromNormals(newNormals);
+  projection.actOnVectorsColumn(newNormals, Rational::zero());
+  bool tempBool = outputConeLowerDimension.createFromNormals(newNormals);
   if (tempBool) {
     global.fatal << "Create from normals failed. " << global.fatal;
   }
@@ -10246,8 +10248,8 @@ Vector<Rational> OnePartialFractionDenominator::GetCheckSumRoot(int NumVars) {
   return output;
 }
 
-bool PartialFractions::removeRedundantShortRootsIndex(int index, Vector<Rational>* Indicator) {
-  if (!(*this)[index].rootIsInFractionCone(*this, Indicator)) {
+bool PartialFractions::removeRedundantShortRootsIndex(int index, Vector<Rational>* indicator) {
+  if (!(*this)[index].rootIsInFractionCone(*this, indicator)) {
     return false;
   }
   bool found = false;
@@ -11672,7 +11674,7 @@ void Lattice::getDefaultFundamentalDomainInternalPoint(Vector<Rational>& output)
   output /= 2;
 }
 
-bool PartialFractions::split(Vector<Rational>* Indicator) {
+bool PartialFractions::split(Vector<Rational>* indicator) {
   //PartFraction::flagAnErrorHasOccurredTimeToPanic = true;
   //this->flagAnErrorHasOccurredTimeToPanic = true;
   if (!this->flagInitialized) {
@@ -11682,7 +11684,7 @@ bool PartialFractions::split(Vector<Rational>* Indicator) {
     this->flagInitialized = true;
   }
   if (this->splitPartial()) {
-    this->removeRedundantShortRoots(Indicator);
+    this->removeRedundantShortRoots(indicator);
     this->compareCheckSums();
     this->IndexLowestNonProcessed = this->size();
     this->makeProgressReportSplittingMainPart();

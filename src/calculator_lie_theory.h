@@ -119,17 +119,18 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    bool showSLtwos,
+    bool showSLTwos,
+    bool computeRealFormSlTwos,
     bool mustRecompute
   );
-  static bool printRootSAs(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorLieTheory::rootSubalgebrasAndSlTwos(calculator, input, output, false, false);
+  static bool printRootSubalgebras(Calculator& calculator, const Expression& input, Expression& output) {
+    return CalculatorLieTheory::rootSubalgebrasAndSlTwos(calculator, input, output, false, false, false);
   }
   static bool printRootSubalgebrasForceRecompute(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorLieTheory::rootSubalgebrasAndSlTwos(calculator, input, output, false, true);
+    return CalculatorLieTheory::rootSubalgebrasAndSlTwos(calculator, input, output, false, false, true);
   }
   static bool printSlTwos(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorLieTheory::rootSubalgebrasAndSlTwos(calculator, input, output, true, false);
+    return CalculatorLieTheory::rootSubalgebrasAndSlTwos(calculator, input, output, true, false, false);
   }
   static bool weylDimFormula(Calculator& calculator, const Expression& input, Expression& output);
   static bool decomposeCharGenVerma(Calculator& calculator, const Expression& input, Expression& output);

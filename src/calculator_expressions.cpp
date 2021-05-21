@@ -69,7 +69,7 @@ int Expression::getTypeOperation<ElementEllipticCurve<ElementZmodP> >() const {
 template < >
 int Expression::getTypeOperation<RationalFraction<Rational> >() const {
   this->checkInitialization();
-  return this->owner->opRationalFunction();
+  return this->owner->opRationalFraction();
 }
 
 template < >

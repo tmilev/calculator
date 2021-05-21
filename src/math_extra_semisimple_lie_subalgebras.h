@@ -541,7 +541,7 @@ public:
   );
   //void RegisterPossibleCandidate(CandidateSemisimpleSubalgebra& theCandidate);
   void hookUpCentralizers(bool allowNonPolynomialSystemFailure);
-  void computeSl2sInitOrbitsForComputationOnDemand();
+  void computeSl2sInitOrbitsForComputationOnDemand(bool computeRealSlTwos);
   bool findTheSemisimpleSubalgebrasFromScratch(
     SemisimpleLieAlgebra& newOwner,
     AlgebraicClosureRationals& ownerField,

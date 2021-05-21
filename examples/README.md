@@ -442,7 +442,7 @@ Equivalent to (a +b){}x = (a{}x) +(b{}x)
 ```
 Transforms a - b to a +(- 1) * b and - b to (- 1) * b. Equivalent to a rule -{{b}}=MinusOne * b; {{a}}-{{b}}=a + MinusOne * b
 
-Operator or function / is overloaded with 23 total handlers.
+Operator or function / is overloaded with 26 total handlers.
 
 */* [SumProductNotationToOperatorRelativeToDivision] {CalculatorFunctions::innerSumTimesExpressionToSumOf}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotExpressionTree%28%20%20%5c%5csum%5c%5climits_%7bb%7d%5ec%29%3b%5cnPlotExpressionTree%28%20%5c%5csum%5c%5climits_%7bb%7d%5ec%2aa%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -573,7 +573,7 @@ a = 0.5; b= 0.5; c = DoubleValue{}3.3; a/c; c/a; c/c
 ```
 Divides doubles. 
 
-*/* [DivideDoubleByDouble] {CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble}. 
+*/* [DivideDoubleByDouble] {CalculatorFunctionsBinaryOps::divideDoubleByDouble}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%20%3d%200.5%3b%5cnb%20%3d%200.5%3b%5cnc%20%3d%20DoubleValue%7b%7d3.3%3b%5cna%2fc%3b%5cnc%2fa%3b%5cnc%2fc%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 a = 0.5;
@@ -585,7 +585,7 @@ c/c
 ```
 Divides doubles. 
 
-*/* [DivideRationalByPolynomial] {CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial}. 
+*/* [DivideRationalByPolynomial] {CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22z%20%3d%20Polynomial%7b%7d%28x%5e2%2by%5e2%29%3b%5cn1%2fz%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 z = Polynomial{}(x^2+y^2);
@@ -600,6 +600,32 @@ Polynomial{}(-x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}+x_{2}+ 1)/
 Polynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+ 1) 
 ```
 Divides polynomial by polynomial (to get a rational function). 
+
+*/* [DivideRationalFractionByPolynomial] {CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22MakeRationalFunction%28x%29%2fPolynomial%28y%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+MakeRationalFunction(x)/Polynomial(y) 
+```
+Divides rational fraction by polynomial (to get a rational fraction). 
+
+*/* [DividePolynomialByRationalFraction] {CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Polynomial%28x%29%20%2f%5cnMakeRationalFunction%28y%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+Polynomial(x) /
+MakeRationalFunction(y) 
+```
+Divides rational fraction by polynomial (to get a rational fraction). 
+
+*/* [DivideRationalFractionByRationalFraction] {CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22MakeRationalFunction%7b%7d%28x%29%20%2f%20MakeRationalFunction%7b%7d%28y%29%3b%5cnPolynomial%7b%7d%28x%29%20%2f%20MakeRationalFunction%7b%7d%28y%29%3b%5cnMakeRationalFunction%7b%7d%28x%29%20%2f%20Polynomial%7b%7d%28y%29%3b%5cnMakeRationalFunction%7b%7d%28x%29%20%2f%202%3b%5cn2%20%2f%20MakeRationalFunction%7b%7d%28y%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+MakeRationalFunction{}(x) / MakeRationalFunction{}(y);
+Polynomial{}(x) / MakeRationalFunction{}(y);
+MakeRationalFunction{}(x) / Polynomial{}(y);
+MakeRationalFunction{}(x) / 2;
+2 / MakeRationalFunction{}(y)
+```
+Divides rational fraction by a rational fraction. 
 
 */* [DividePolynomialModPByPolynomialModP] {CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolynomialModP%7b%7d%28x%5e5%2b5x%5e3%2bx%5e2%2b4x%2b1%2c%207%29%20%2f%20PolynomialModP%7b%7d%28x%5e5%2b6x%5e3%2bx%5e2%2b5x%2b1%2c%207%29%3b%5cnPolynomialModP%7b%7d%28x%5e3-x%2b1%2c%203%29%20%2f%20PolynomialModP%7b%7d%28x%5e2%2b2%2c%203%29%3b%5cnPolynomialModP%7b%7d%28x%5e3-x%2b1%2c%203%29%20%2f%20PolynomialModP%7b%7d%28x%5e2%2b2%2c%207%29%3b%5cnPolynomialModP%7b%7d%28x%5e3-x%2b1%2c%206%29%20%2f%20PolynomialModP%7b%7d%282x%5e2%2b2%2c%206%29%3b%5cnPolynomialModP%7b%7d%28x%5e3-x%2b1%2c%2021%29%20%2f%20PolynomialModP%7b%7d%282x%5e2%2b2%2c%2021%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -1488,7 +1514,7 @@ Converts degrees to radians
 ```
 Handles expressions of the form \limits_a^b
 
-*^* [PowerIntegerByInteger] {CalculatorFunctionsBinaryOps::innerPowerRationalByInteger}. 
+*^* [PowerIntegerByInteger] {CalculatorFunctionsBinaryOps::powerRationalByInteger}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%7b3%5e3%7d%5e3%3b%203%5e%7b3%5e3%7d%3b%203%5e3%5e3%3b%200%5e3%3b%200%5e%7b-3%7d%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 {3^3}^3; 3^{3^3}; 3^3^3; 0^3; 0^{-3}; 
@@ -1604,7 +1630,7 @@ y = Polynomial{}y;
 ```
 Raises a polynomial over the algebraic numbers to small integer power. 
 
-*^* [PowerRationalFractionByInteger] {CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberPolynomialBySmallInteger}. 
+*^* [PowerRationalFractionByInteger] {CalculatorFunctionsBinaryOps::powerRationalFractionBySmallInteger}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%20%3d%20MakeRationalFunction%7b%7dx%3b%5cny%20%3d%20MakeRationalFunction%7b%7dy%3b%5cn%28x%2fy%29%5e3%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 x = MakeRationalFunction{}x;
@@ -3133,12 +3159,12 @@ GetVariablesExcludeNamedConstants{}(e^x + x +5 +\arctan x + x *y +x^y+x^{y^z}); 
 Gets the variables on which the expression depends. Includes the named constants. Here, the word ``variables'' is to be thought of as ``free variables'' but the possibility for small distinctions is reserved (to allow dealing with named constants, reserved keywords, etc.). 
 
 *PlotPoint* [PlotPoint] {CalculatorFunctions::plotPoint}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotPoint%7b%7d%28%281%2c%202%5c%5cpi%29%2c%20blue%29%3b%5cnPlotPoint%7b%7d%28%28%281%2c%202%29%2c%20%282%2c3%29%29%2c%20blue%29%3b%5cna%20%3d%20MakeInputBox%28name%20%3d%20a%2c%20value%20%3d%203%29%3b%5cna%20%3d%20MakeInputBox%28name%20%3d%20b%2c%20value%20%3d%205%29%3b%5cnPlotPoint%28%28a%2c%20b%29%2c%20red%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotPoint%7b%7d%28%281%2c%202%5c%5cpi%29%2c%20blue%29%3b%5cnPlotPoint%7b%7d%28%28%281%2c%202%29%2c%20%282%2c3%29%29%2c%20blue%29%3b%5cna%20%3d%20MakeInputBox%28name%20%3d%20a%2c%20value%20%3d%203%29%3b%5cnb%20%3d%20MakeInputBox%28name%20%3d%20b%2c%20value%20%3d%205%29%3b%5cnPlotPoint%28%28a%2c%20b%29%2c%20red%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotPoint{}((1, 2\pi), blue);
 PlotPoint{}(((1, 2), (2,3)), blue);
 a = MakeInputBox(name = a, value = 3);
-a = MakeInputBox(name = b, value = 5);
+b = MakeInputBox(name = b, value = 5);
 PlotPoint((a, b), red)
 ```
 <b>Calculus teaching function.</b> Plots a point from x and y coordinate. Can also be used for multiple points. See the example for how to use for a single and multiple points.
@@ -4522,7 +4548,7 @@ SlTwoRealFormStructure{}(a_3)
 ```
 Computes the Lie algebra structure over Kostant-Sekiguchi sl twos w.r.t. maximally compact real form.
 
-*SlTwoRealFormStructureForceRecompute* [SlTwoRealFormStructureForceRecompute] {Calculator::slTwoRealFormStructureForceRecompute}. (invisible) 
+*SlTwoRealFormStructureForceRecompute* [SlTwoRealFormStructureForceRecompute] {Calculator::slTwoRealFormStructureForceRecompute}. (admin only) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22SlTwoRealFormStructureForceRecompute%7b%7d%28a_3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 SlTwoRealFormStructureForceRecompute{}(a_3)
@@ -4711,7 +4737,7 @@ RootSubsystem(F_4, (0, 1, 0, 0), (0, 0, 1, 0), (1, 1, 2, 2))
 ```
 Generates a root subsystem of a simple type. First argument indicates simple type, second, third, ... arguments give the generating roots. 
 
-*PrintRootSubalgebras* [PrintRootSubalgebras] {CalculatorFunctions::printRootSAs}. 
+*PrintRootSubalgebras* [PrintRootSubalgebras] {CalculatorLieTheory::printRootSubalgebras}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrintRootSubalgebras%28E_6%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PrintRootSubalgebras(E_6)

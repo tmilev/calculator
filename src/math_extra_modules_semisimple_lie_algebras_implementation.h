@@ -42,21 +42,21 @@ Rational ModuleSSalgebra<Coefficient>::highestWeightTrace(
   Vector<Rational> remainingWeight;
   Rational result = 0;
   Rational summand;
-  WeylGroupData& theWeyl = this->getOwner().weylGroup;
+  WeylGroupData& weylGroup = this->getOwner().weylGroup;
   for (int i = 0; i < oldRight.generatorsIndices.size; i ++) {
     if (oldRight.generatorsIndices[i] == indexMinus) {
       summand = 0;
       newRight = Accum;
       newRight.multiplyByGeneratorPowerOnTheRight(oldRight.generatorsIndices[i], oldRight.powers[i] - 1);
-      remainingWeight.makeZero(theWeyl.getDimension());
+      remainingWeight.makeZero(weylGroup.getDimension());
       for (int j = i + 1; j < oldRight.generatorsIndices.size; j ++) {
         newRight.multiplyByGeneratorPowerOnTheRight(oldRight.generatorsIndices[j], oldRight.powers[j]);
-        remainingWeight += theWeyl.rootSystem[oldRight.generatorsIndices[j]] * oldRight.powers[j];
+        remainingWeight += weylGroup.rootSystem[oldRight.generatorsIndices[j]] * oldRight.powers[j];
       }
       remainingWeight += this->highestWeightFiniteDimensionalPartSimpleCoordinates;
-      summand += theWeyl.getScalarProductSimpleRoot(remainingWeight, theSimpleIndex);
+      summand += weylGroup.getScalarProductSimpleRoot(remainingWeight, theSimpleIndex);
       summand *= 2;
-      summand /= theWeyl.cartanSymmetric.elements[theSimpleIndex][theSimpleIndex];
+      summand /= weylGroup.cartanSymmetric.elements[theSimpleIndex][theSimpleIndex];
       summand += 1;
       summand -= oldRight.powers[i];
       if (!summand.isEqualToZero()) {
@@ -288,7 +288,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
   Weight<Coefficient> tempMon, localHighest;
   List<Coefficient> tempMults;
   HashedList<Vector<Coefficient> > tempHashedRoots;
-  WeylGroupData& theWeyL = this->getOwner()->weylGroup;
+  WeylGroupData& weylGroup = this->getOwner()->weylGroup;
   charAmbientFDWeyl.makeZero();
   Coefficient bufferCoeff, highestCoeff;
   out << "Starting character: " << this->toString();
@@ -305,7 +305,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
     }
     for (int j = 0; j < tempHashedRoots.size; j ++) {
       bufferCoeff = this->coefficients[i];
-      tempMon.weightFundamentalCoordinates = theWeyL.getFundamentalCoordinatesFromSimple(tempHashedRoots[j]);
+      tempMon.weightFundamentalCoordinates = weylGroup.getFundamentalCoordinatesFromSimple(tempHashedRoots[j]);
       bufferCoeff *= tempMults[j];
       charAmbientFDWeyl.addMonomial(tempMon, bufferCoeff);
     }
@@ -317,7 +317,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
   for (int i = 0; i < charAmbientFDWeyl.size(); i ++) {
     orbitDom.setSize(0);
     if (!theFDWeyl.generateOrbitReturnFalseIfTruncated(
-      theWeyL.getSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordinates), orbitDom, false, 10000
+      weylGroup.getSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordinates), orbitDom, false, 10000
     )) {
       out << "failed to generate the complement-sub-Weyl-orbit of weight "
       << this->getOwner()->weylGroup.getSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordinates).toString();
@@ -328,7 +328,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
     }
     for (int k = 0; k < orbitDom.size; k ++) {
       if (outputWeylSub.isDominantWeight(orbitDom[k])) {
-        tempMon.weightFundamentalCoordinates = theWeyL.getFundamentalCoordinatesFromSimple(orbitDom[k]);
+        tempMon.weightFundamentalCoordinates = weylGroup.getFundamentalCoordinatesFromSimple(orbitDom[k]);
         remainingCharDominantLevi.addMonomial(tempMon, charAmbientFDWeyl.coefficients[i]);
       }
     }
@@ -363,7 +363,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
     }
     for (int i = 0; i < tempHashedRoots.size; i ++) {
       tempMon.owner = this->getOwner();
-      tempMon.weightFundamentalCoordinates = theWeyL.getFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
+      tempMon.weightFundamentalCoordinates = weylGroup.getFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
       bufferCoeff = tempMults[i];
       bufferCoeff *= highestCoeff;
       remainingCharDominantLevi.subtractMonomial(tempMon, bufferCoeff);
@@ -380,13 +380,13 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
     << "simple reflections of one another, "
     << "with respect to a simple root of the Levi part of the parabolic subalgebra. ";
     for (int i = 0; i < output.size(); i ++) {
-      tempRoot = theWeyL.getSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordinates).getVectorRational();
+      tempRoot = weylGroup.getSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordinates).getVectorRational();
       outputWeylSub.drawContour(tempRoot, drawingVariables, "#a0a000", 1000);
       std::stringstream tempStream;
       tempStream << output.coefficients[i].toString();
       drawingVariables.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
     }
-    out << "<hr>" << drawingVariables.getHTMLDiv(theWeyL.getDimension(), false);
+    out << "<hr>" << drawingVariables.getHTMLDiv(weylGroup.getDimension(), false);
     *report = out.str();
   }
   return true;
@@ -448,7 +448,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
   Vectors<Coefficient> tempSpace1, tempSpace2;
   MemorySaving<Vectors<Coefficient> > tempEigenVects;
   Vectors<Coefficient>& theFinalEigenSpace = (outputEigenSpace == 0) ? tempEigenVects.getElement() : *outputEigenSpace;
-  //WeylGroup& theWeyL = this->theAlgebra.theWeyl;
+  //WeylGroup& weylGroup = this->theAlgebra.weylGroup;
   theFinalEigenSpace.makeEiBasis(this->getDimension());
   for (int i = 0; i < splittingParSelectedInLevi.cardinalitySelection; i ++) {
     int theGenIndex = splittingParSelectedInLevi.elements[i] +
@@ -588,7 +588,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
     << " the parabolic section indicates rank of "
     << selNonSelectedAreElementsLevi.numberOfElements << ". " << global.fatal;
   }
-  WeylGroupData& theWeyl = theAlgebrA.weylGroup;
+  WeylGroupData& weylGroup = theAlgebrA.weylGroup;
   this->cachedPairs.clear();
   this->cachedTraces.setSize(0);
 
@@ -613,12 +613,12 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
       this->highestWeightFiniteDimensionalPartFundamentalCoordinates[i] = theCoord;
     }
     this->highestWeightDualCoordinatesBaseField[i] = this->highestWeightFundamentalCoordinatesBaseField[i];
-    this->highestWeightDualCoordinatesBaseField[i] *= theWeyl.cartanSymmetric.elements[i][i] / 2;
+    this->highestWeightDualCoordinatesBaseField[i] *= weylGroup.cartanSymmetric.elements[i][i] / 2;
   }
 
-  this->highestWeightFiniteDimensionalPartSimpleCoordinates = theWeyl.getSimpleCoordinatesFromFundamental(this->highestWeightFiniteDimensionalPartFundamentalCoordinates, Rational::zero());
-  this->highestWeightFiniteDimensionalPartDualCoordinates = theWeyl.getDualCoordinatesFromFundamental(this->highestWeightFiniteDimensionalPartFundamentalCoordinates);
-  this->highestWeightSimpleCoordinatesBaseField = theWeyl.getSimpleCoordinatesFromFundamental(this->highestWeightFundamentalCoordinatesBaseField, ringZero);
+  this->highestWeightFiniteDimensionalPartSimpleCoordinates = weylGroup.getSimpleCoordinatesFromFundamental(this->highestWeightFiniteDimensionalPartFundamentalCoordinates, Rational::zero());
+  this->highestWeightFiniteDimensionalPartDualCoordinates = weylGroup.getDualCoordinatesFromFundamental(this->highestWeightFiniteDimensionalPartFundamentalCoordinates);
+  this->highestWeightSimpleCoordinatesBaseField = weylGroup.getSimpleCoordinatesFromFundamental(this->highestWeightFundamentalCoordinatesBaseField, ringZero);
   this->character.makeFromWeight(this->highestWeightSimpleCoordinatesBaseField, this->owner);
 
   unsigned long long startingNumRationalOperations =
@@ -627,7 +627,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   Rational::totalLargeMultiplications +
   Rational::totalSmallMultiplications;
   LittelmannPath startingPath;
-  startingPath.makeFromWeightInSimpleCoords(this->highestWeightFiniteDimensionalPartSimpleCoordinates, theWeyl);
+  startingPath.makeFromWeightInSimpleCoords(this->highestWeightFiniteDimensionalPartSimpleCoordinates, weylGroup);
   List<List<int> > generatorsIndices;
   if (!startingPath.generateOrbit(
     this->thePaths, generatorsIndices, 1000, &this->parabolicSelectionNonSelectedAreElementsLevi
@@ -643,7 +643,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   this->characterOverH.makeZero();
   for (int i = 0; i < this->thePaths.size; i ++) {
     this->moduleWeightsSimpleCoordinates.addOnTopNoRepetition(*this->thePaths[i].waypoints.lastObject());
-    tempCharMon.weightFundamentalCoordinates = theWeyl.getFundamentalCoordinatesFromSimple(*this->thePaths[i].waypoints.lastObject());
+    tempCharMon.weightFundamentalCoordinates = weylGroup.getFundamentalCoordinatesFromSimple(*this->thePaths[i].waypoints.lastObject());
     this->characterOverH.addMonomial(tempCharMon, 1);
   }
   this->moduleWeightsSimpleCoordinates.quickSortAscending();
@@ -929,9 +929,9 @@ void ModuleSSalgebra<Coefficient>::getFDchar(CharacterSemisimpleLieAlgebraModule
   }
   Weight<Coefficient> tempMon;
   tempMon.owner = &this->getOwner();
-  WeylGroupData& theWeyl = this->getOwner().weylGroup;
+  WeylGroupData& weylGroup = this->getOwner().weylGroup;
   for (int i = 0; i < this->moduleWeightsSimpleCoordinates.size; i ++) {
-    tempMon.weightFundamentalCoordinates = theWeyl.getFundamentalCoordinatesFromSimple(this->moduleWeightsSimpleCoordinates[i]);
+    tempMon.weightFundamentalCoordinates = weylGroup.getFundamentalCoordinatesFromSimple(this->moduleWeightsSimpleCoordinates[i]);
     output.addMonomial(tempMon, this->generatingWordsGrouppedByWeight[i].size);
   }
 }
@@ -1240,7 +1240,7 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format) co
     return "(Error: module not initialized)";
   }
   SemisimpleLieAlgebra& theAlgebrA = *this->owner;
-  WeylGroupData& theWeyl = theAlgebrA.weylGroup;
+  WeylGroupData& weylGroup = theAlgebrA.weylGroup;
   std::stringstream out;
   out << "<br>Semisimple Lie algebra acting on generalized Verma module: "
   << theAlgebrA.toStringLieAlgebraName() << ".";
@@ -1277,7 +1277,7 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format) co
       wordCounter ++;
       tempWelt.generatorsLastAppliedFirst.setSize(currentListInt[j].generatorsIndices.size);
       for (int k = 0; k < currentListInt[j].generatorsIndices.size; k ++) {
-        aGen.makeSimpleReflection(theWeyl.rootsOfBorel.size - 1 - currentListInt[j].generatorsIndices[k]);
+        aGen.makeSimpleReflection(weylGroup.rootsOfBorel.size - 1 - currentListInt[j].generatorsIndices[k]);
         tempWelt.generatorsLastAppliedFirst[k] = aGen;
       }
       out << "<tr><td>m_{ " << wordCounter << "} </td><td>"
@@ -1318,9 +1318,9 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format) co
   }
   out << "</table>";
   DrawingVariables drawingVariables;
-  this->characterOverH.drawMeAssumeCharIsOverCartan(theWeyl, drawingVariables);
+  this->characterOverH.drawMeAssumeCharIsOverCartan(weylGroup, drawingVariables);
   out << " A picture of the weight support follows. "
-  << drawingVariables.getHTMLDiv(theWeyl.getDimension(), false);
+  << drawingVariables.getHTMLDiv(weylGroup.getDimension(), false);
 
   bool isBad = false;
   for (int k = 0; k < this->bilinearFormsAtEachWeightLevel.size; k ++) {

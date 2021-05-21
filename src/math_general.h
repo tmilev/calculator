@@ -3795,7 +3795,7 @@ public:
   void addMultiplicity(int MultiplicityIncrement, int Elongation);
   int indexLargestElongation();
   int getLargestElongation();
-  void GetPolynomialDenominator(Polynomial<LargeInteger>& output, int MultiplicityIndex, Vector<Rational>& theExponent);
+  void getPolynomialDenominator(Polynomial<LargeInteger>& output, int MultiplicityIndex, Vector<Rational>& theExponent);
   int getMultiplicityLargestElongation();
   int getLeastCommonMultipleElongations();
   int getTotalMultiplicity() const;
@@ -3865,15 +3865,15 @@ template<typename Coefficient>
 void Matrix<Coefficient>::nonPivotPointsToEigenVectorMatrixForm(
   Selection& nonPivotPoints, Matrix<Coefficient>& output
 ) {
-  int RowCounter = 0;
+  int rowCounter = 0;
   output.initialize(this->numberOfColumns, 1);
   for (int i = 0; i < this->numberOfColumns; i ++) {
     if (!nonPivotPoints.selected[i]) {
       output(i, 0) = 0;
       for (int j = 0; j < nonPivotPoints.cardinalitySelection; j ++) {
-        output(i, 0) -= this->elements[RowCounter][nonPivotPoints.elements[j]];
+        output(i, 0) -= this->elements[rowCounter][nonPivotPoints.elements[j]];
       }
-      RowCounter ++;
+      rowCounter ++;
     } else {
       output(i, 0) = 1;
     }
@@ -3887,15 +3887,15 @@ void Matrix<Coefficient>::nonPivotPointsToEigenVector(
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) {
-  int RowCounter = 0;
+  int rowCounter = 0;
   output.setSize(this->numberOfColumns);
   for (int i = 0; i < this->numberOfColumns; i ++) {
     if (!nonPivotPoints.selected[i]) {
       output[i] = ringZero;
       for (int j = 0; j < nonPivotPoints.cardinalitySelection; j ++) {
-        output[i] -= this->elements[RowCounter][nonPivotPoints.elements[j]];
+        output[i] -= this->elements[rowCounter][nonPivotPoints.elements[j]];
       }
-      RowCounter ++;
+      rowCounter ++;
     } else {
       output[i] = ringUnit;
     }
@@ -4188,12 +4188,12 @@ int Matrix<Coefficient>::findPositiveGCDCoefficientNumeratorsTruncated() {
 
 template <class Coefficient>
 void Matrix<Coefficient>::scaleToIntegralForMinimalRationalHeightNoSignChange() {
-  Rational tempRat;
-  tempRat.assignNumeratorAndDenominator(
+  Rational rational;
+  rational.assignNumeratorAndDenominator(
     this->findPositiveLCMCoefficientDenominatorsTruncated(),
     this->findPositiveGCDCoefficientNumeratorsTruncated()
   );
-  *this *= tempRat;
+  *this *= rational;
 }
 
 template <class Coefficient>
@@ -4738,7 +4738,7 @@ std::string Matrix<Coefficient>::toString(FormatExpressions* format) const {
         out << "</td>";
       }
       if (!useHtml && !useLatex) {
-        out << ", \t ";
+        out << ", ";
       }
     }
     if (useHtml) {
@@ -5051,8 +5051,8 @@ public:
   void applyLinearMap(Matrix<Rational>& linearMap, Lattice& output);
   void intersectWithBothOfMaximalRank(const Lattice& other);
   void getDualLattice(Lattice& output) const;
-  bool isInLattice(const Vector<Rational>& theVector) const {
-    Vector<Rational> tempVect = theVector;
+  bool isInLattice(const Vector<Rational>& vector) const {
+    Vector<Rational> tempVect = vector;
     if (!this->reduceVector(tempVect)) {
       return false;
     }
@@ -5071,17 +5071,17 @@ public:
   // 1  1
   // 1 - 1
   // 1  0
-  bool substitutionHomogeneous(const Matrix<Rational>& theSub);
-  bool substitutionHomogeneous(const PolynomialSubstitution<Rational>& theSub);
+  bool substitutionHomogeneous(const Matrix<Rational>& substitution);
+  bool substitutionHomogeneous(const PolynomialSubstitution<Rational>& substitution);
   // The following function follows the same convention
   // as the preceding except that we allow n < m. However,
   // in order to assure that the preimage of the lattice is a lattice,
   // we provide as input an ambient lattice
   // in the new vector space of dimension m.
-  bool substitutionHomogeneous(const Matrix<Rational>& theSub, Lattice& resultIsSubsetOf);
+  bool substitutionHomogeneous(const Matrix<Rational>& substitution, Lattice& resultIsSubsetOf);
   void reduce();
-  void intersectWithLinearSubspaceSpannedBy(const Vectors<Rational>& theSubspaceBasis);
-  void intersectWithLinearSubspaceGivenByNormals(const Vectors<Rational>& theSubspaceNormals);
+  void intersectWithLinearSubspaceSpannedBy(const Vectors<Rational>& subspaceBasis);
+  void intersectWithLinearSubspaceGivenByNormals(const Vectors<Rational>& subspaceNormals);
   void intersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& theNormal);
   static bool getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(
     const PolynomialSubstitution<Rational>& theSub, Matrix<Rational>& output
@@ -5499,7 +5499,7 @@ public:
     this->flagIsTheZeroCone = true;
     //this->flagHasSufficientlyManyVertices = true;
   }
-  void intersectHyperplane(Vector<Rational>& theNormal, Cone& outputConeLowerDim);
+  void intersectHyperplane(Vector<Rational>& normal, Cone& outputConeLowerDimension);
   bool getRootFromLPolynomialConstantTermGoesToLastVariable(Polynomial<Rational>& inputLPoly, Vector<Rational>& output);
   bool solveLPolynomialEqualsZeroIAmProjective(Polynomial<Rational>& inputLPoly, Cone& outputCone);
   bool solveLQuasiPolyEqualsZeroIAmProjective(QuasiPolynomial& inputLQP, List<Cone>& outputConesOverEachLatticeShift);
@@ -5704,16 +5704,16 @@ public:
   void initAndSplit(Vectors<Rational>& input);
   void run(Vectors<Rational>& input);
   //row index is the index of the Vector<Rational> ; column(second) index is the coordinate index
-  void removeRedundantShortRootsClassicalRootSystem(Vector<Rational>* Indicator);
-  void removeRedundantShortRoots(Vector<Rational>* Indicator);
-  bool removeRedundantShortRootsIndex(int index, Vector<Rational>* Indicator);
-  bool splitClassicalRootSystem(bool ShouldElongate, Vector<Rational>* Indicator);
-  bool split(Vector<Rational>* Indicator);
+  void removeRedundantShortRootsClassicalRootSystem(Vector<Rational>* indicator);
+  void removeRedundantShortRoots(Vector<Rational>* indicator);
+  bool removeRedundantShortRootsIndex(int index, Vector<Rational>* indicator);
+  bool splitClassicalRootSystem(bool shouldElongate, Vector<Rational>* indicator);
+  bool split(Vector<Rational>* indicator);
   void computeKostantFunctionFromWeylGroup(
-    char WeylGroupLetter,
-    int WeylGroupNumber,
+    char weylGroupLetter,
+    int weylGroupNumber,
     QuasiPolynomial& output,
-    Vector<Rational>* ChamberIndicator
+    Vector<Rational>* chamberIndicator
   );
   bool isHigherThanWithRespectToWeight(
     const Vector<Rational>& left, const Vector<Rational>& r, const Vector<Rational>& weights

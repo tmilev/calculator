@@ -2602,6 +2602,7 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
   Selection& zeroCharacteristics,
   Vectors<Rational>& simpleBasisSubalgebras,
   Vector<Rational>& h,
+  bool computeRealForm,
   AlgebraicClosureRationals* inputAlgebraicClosure
 ) {
   MacroRegisterFunctionWithName("SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra");
@@ -2643,8 +2644,10 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
   this->participatingPositiveRoots.addListOnTop(selectedExtraPositiveRoots);
   LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > cartanInvolutionStandard;
   LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >* cartanInvolutionToRespect = nullptr;
-  if (this->hasImplementedStandardCartanInvolution(&cartanInvolutionStandard)) {
-    cartanInvolutionToRespect = &cartanInvolutionStandard;
+  if (computeRealForm) {
+    if (this->hasImplementedStandardCartanInvolution(&cartanInvolutionStandard)) {
+      cartanInvolutionToRespect = &cartanInvolutionStandard;
+    }
   }
   this->initializeHEFSystemFromFCoefficients(
     h,
@@ -2669,7 +2672,9 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
     );
     this->eElement.addMonomial(generator, result.elements[i][0]);
   }
-  this->attemptRealizingKostantSekiguchi();
+  if (computeRealForm) {
+    this->attemptRealizingKostantSekiguchi();
+  }
   return true;
 }
 
@@ -2847,7 +2852,8 @@ void SlTwoSubalgebra::initializeHEFSystemFromFCoefficientsPartTwo() {
 
 void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
   SlTwoSubalgebras& output,
-  int indexRootSAinContainer,
+  int indexRootSubalgebraInContainer,
+  bool computeRealForm,
   AlgebraicClosureRationals* algebraicClosure
 ) {
   MacroRegisterFunctionWithName("RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition");
@@ -2973,15 +2979,16 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
       selectionRootsWithZeroCharacteristic,
       reflectedSimpleBasisK,
       characteristicH,
+      computeRealForm,
       algebraicClosure
     )) {
       int indexIsoSl2 = - 1;
-      sl2.makeReportPrecomputations(indexRootSAinContainer, *this);
+      sl2.makeReportPrecomputations(indexRootSubalgebraInContainer, *this);
       if (output.containsSl2WithGivenHCharacteristic(sl2.hCharacteristic, &indexIsoSl2)) {
-        output.getElement(indexIsoSl2).indicesContainingRootSubalgebras.addOnTop(indexRootSAinContainer);
-        output.indicesSl2sContainedInRootSubalgebras[indexRootSAinContainer].addOnTop(indexIsoSl2);
+        output.getElement(indexIsoSl2).indicesContainingRootSubalgebras.addOnTop(indexRootSubalgebraInContainer);
+        output.indicesSl2sContainedInRootSubalgebras[indexRootSubalgebraInContainer].addOnTop(indexIsoSl2);
       } else {
-        output.indicesSl2sContainedInRootSubalgebras[indexRootSAinContainer].addOnTop(output.size);
+        output.indicesSl2sContainedInRootSubalgebras[indexRootSubalgebraInContainer].addOnTop(output.size);
         sl2.indexInContainer = output.size;
         output.addOnTop(sl2);
         output.lastObject()->checkIndicesMinimalContainingRootSubalgebras();

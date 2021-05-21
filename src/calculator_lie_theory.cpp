@@ -1166,15 +1166,15 @@ bool CalculatorLieTheory::printGeneralizedVermaModule(
 ) {
   MacroRegisterFunctionWithName("CalculatorLieTheory::printGeneralizedVermaModule");
   Selection selectionParSel;
-  Vector<RationalFraction<Rational> > theHWfundcoords;
-  WithContext<SemisimpleLieAlgebra*> theSSalgebra;
+  Vector<RationalFraction<Rational> > highestWeightFundamentalCoordinates;
+  WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (!calculator.getTypeHighestWeightParabolic(
     calculator,
     input,
     output,
-    theHWfundcoords,
+    highestWeightFundamentalCoordinates,
     selectionParSel,
-    theSSalgebra,
+    semisimpleLieAlgebra,
     CalculatorConversions::functionRationalFunction<Rational>
   )) {
     return output.makeError("Failed to extract highest weight vector data", calculator);
@@ -1186,10 +1186,10 @@ bool CalculatorLieTheory::printGeneralizedVermaModule(
   if (!CalculatorLieTheory::highestWeightVectorCommon(
     calculator,
     output,
-    theHWfundcoords,
+    highestWeightFundamentalCoordinates,
     selectionParSel,
-    theSSalgebra.context,
-    theSSalgebra.content,
+    semisimpleLieAlgebra.context,
+    semisimpleLieAlgebra.content,
     false
   )) {
     return output.makeError("Failed to create Generalized Verma module", calculator);
@@ -1199,8 +1199,8 @@ bool CalculatorLieTheory::printGeneralizedVermaModule(
   }
   ElementTensorsGeneralizedVermas<RationalFraction<Rational> > element;
   element = output.getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >();
-  ModuleSSalgebra<RationalFraction<Rational> >& theModule = *element[0].monomials[0].owner;
-  return output.assignValue(theModule.toString(), calculator);
+  ModuleSSalgebra<RationalFraction<Rational> >& module = *element[0].monomials[0].owner;
+  return output.assignValue(module.toString(), calculator);
 }
 
 bool CalculatorLieTheory::writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel(
@@ -1923,7 +1923,8 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  bool showSLtwos,
+  bool showSLTwos,
+  bool computeRealFormSlTwos,
   bool mustRecompute
 ) {
   MacroRegisterFunctionWithName("CalculatorLieTheory::rootSAsAndSltwos");
@@ -1963,6 +1964,7 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
     semisimpleLieAlgebra.content->findSl2Subalgebras(
       *semisimpleLieAlgebra.content,
       slTwoSubalgebras,
+      computeRealFormSlTwos,
       &calculator.objectContainer.algebraicClosure
     );
     slTwoSubalgebras.writeHTML(&format);
@@ -1971,7 +1973,7 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
     out << "The table is precomputed and served from the hard disk. <br>";
   }
   out << "<a href='"
-  << (showSLtwos ? outSltwoMainFile.str() : outRootHtmlDisplayName.str())
+  << (showSLTwos ? outSltwoMainFile.str() : outRootHtmlDisplayName.str())
   << "' target='_blank'>"
   << semisimpleLieAlgebra.content->toStringLieAlgebraName() << " </a>";
   return output.assignValue(out.str(), calculator);
@@ -2395,7 +2397,7 @@ bool CalculatorLieTheory::growDynkinType(
     &calculator.objectContainer.slTwoSubalgebras
   );
   subalgebras.slTwoSubalgebras.checkMinimalContainingRootSubalgebras();
-  subalgebras.computeSl2sInitOrbitsForComputationOnDemand();
+  subalgebras.computeSl2sInitOrbitsForComputationOnDemand(false);
   if (!subalgebras.ranksAndIndicesFit(smallDynkinType)) {
     return output.makeError(
       "Error: type " + smallDynkinType.toString() +

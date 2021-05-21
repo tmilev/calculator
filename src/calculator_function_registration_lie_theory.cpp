@@ -700,12 +700,12 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "PrintRootSubalgebras",
-    CalculatorLieTheory::printRootSAs,
+    CalculatorLieTheory::printRootSubalgebras,
     "",
     "Prints sl(2) subalgebras and root subalgebras. "
     "The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",
     "PrintRootSubalgebras(E_6)",
-    "CalculatorFunctions::printRootSAs",
+    "CalculatorLieTheory::printRootSubalgebras",
     "PrintRootSubalgebras",
     innerStandard
   );
@@ -1674,7 +1674,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor,
-    this->opRationalFunction(),
+    this->opRationalFraction(),
     this->opElementTensorGVM(),
     "Handles multiplying rational function number by an element of tensor product of generalized Verma modules. "
     "Not fully tested and documented at the moment. "
@@ -1778,7 +1778,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "^",
     CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF,
     this->opElementUEOverRF(),
-    this->opRationalFunction(),
+    this->opRationalFraction(),
     "Provided that an element of Universal Enveloping algebra is a single generator "
     "(raised to arbitrary formal RF power) with coefficient 1, raises "
     "(formally) the element of the UE to arbitrary RF power. ",

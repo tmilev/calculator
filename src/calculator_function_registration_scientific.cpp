@@ -678,7 +678,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger,
+    CalculatorFunctionsBinaryOps::powerElementWeylAlgebraBySmallInteger,
     this->opElementWeylAlgebra(),
     this->opRational(),
     "Raises element of Weyl algebra to integer power. ",

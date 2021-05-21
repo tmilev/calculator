@@ -1944,7 +1944,7 @@ void Calculator::initializeFunctionsStandard() {
     "PlotPoint{}((1, 2\\pi), blue);\n"
     "PlotPoint{}(((1, 2), (2,3)), blue);\n"
     "a = MakeInputBox(name = a, value = 3);\n"
-    "a = MakeInputBox(name = b, value = 5);\n"
+    "b = MakeInputBox(name = b, value = 5);\n"
     "PlotPoint((a, b), red)",
     "CalculatorFunctions::plotPoint",
     "PlotPoint",
@@ -3245,8 +3245,8 @@ void Calculator::initializeFunctionsStandard() {
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrRationalFunctionToRationalFunction,
-    this->opRationalFunction(),
-    this->opRationalFunction(),
+    this->opRationalFraction(),
+    this->opRationalFraction(),
     "Adds a rational function to a rational function. ",
     "WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}(a_2, (1,1)) ",
     "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF",
@@ -3427,7 +3427,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "*",
-    CalculatorFunctions::innerSumTimesExpressionToSumOf,
+    CalculatorFunctions::sumTimesExpressionToSumOf,
     "",
     "Transforms \\sum\\limits_{b}^c* a to (\\sum\\limits_b^c){} a. ",
     "PlotExpressionTree(  \\sum\\limits_{b}^c);\n"
@@ -3438,7 +3438,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "/",
-    CalculatorFunctions::innerSumTimesExpressionToSumOf,
+    CalculatorFunctions::sumTimesExpressionToSumOf,
     "",
     "Transforms \\sum\\limits_{b}^c* a to (\\sum\\limits_b^c){} a. ",
     "PlotExpressionTree(  \\sum\\limits_{b}^c);\n"
@@ -3905,7 +3905,7 @@ void Calculator::initializeFunctionsStandard() {
     "*",
     CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFraction,
     this->opRational(),
-    this->opRationalFunction(),
+    this->opRationalFraction(),
     "Multiplies rational number by a rational function.",
     "WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}(a_2, (1,1)) ",
     "CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction",
@@ -3916,7 +3916,7 @@ void Calculator::initializeFunctionsStandard() {
     "*",
     CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFraction,
     this->opPolynomialRational(),
-    this->opRationalFunction(),
+    this->opRationalFraction(),
     "Multiplies polynomial by a rational fraction.",
     "Polynomial{}(x +1)MakeRationalFunction{}(\\frac{-2x -2}{x^2+x });\n"
     "MakeRationalFunction{}(\\frac{-2x -2}{x^2-x })MakeRationalFunction{}(\\frac{-2x -2}{x^2+x })",
@@ -3927,7 +3927,7 @@ void Calculator::initializeFunctionsStandard() {
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFraction,
-    this->opRationalFunction(),
+    this->opRationalFraction(),
     this->opPolynomialRational(),
     "Multiplies rational fraction by polynomial.",
     "Polynomial{}(x +1)MakeRationalFunction{}(\\frac{-2x -2}{x^2+x });\n"
@@ -3939,8 +3939,8 @@ void Calculator::initializeFunctionsStandard() {
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFraction,
-    this->opRationalFunction(),
-    this->opRationalFunction(),
+    this->opRationalFraction(),
+    this->opRationalFraction(),
     "Multiplies rational function by a rational function.",
     "Polynomial{}(x +1)MakeRationalFunction{}(\\frac{-2x -2}{x^2+x });\n"
     "MakeRationalFunction{}(\\frac{-2x -2}{x^2-x })MakeRationalFunction{}(\\frac{-2x -2}{x^2+x })",
@@ -4107,7 +4107,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "/",
-    CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat,
+    CalculatorFunctionsBinaryOps::divideEltZmodPorRatByEltZmodPorRat,
     this->opEltZmodP(),
     this->opEltZmodP(),
     "Divides elements of Z/pZ. ",
@@ -4140,7 +4140,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "/",
-    CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,
+    CalculatorFunctionsBinaryOps::divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational,
     this->opAlgebraicNumber(),
     this->opAlgebraicNumber(),
     "Divides algebraic numbers. ",
@@ -4151,7 +4151,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "/",
-    CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,
+    CalculatorFunctionsBinaryOps::divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational,
     this->opRational(),
     this->opAlgebraicNumber(),
     "Divides rational by algebraic number. ",
@@ -4162,7 +4162,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "/",
-    CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,
+    CalculatorFunctionsBinaryOps::divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational,
     this->opAlgebraicNumber(),
     this->opRational(),
     "Divides algebraic number by rational. ",
@@ -4217,7 +4217,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "/",
-    CalculatorFunctions::outerDivCancellations,
+    CalculatorFunctions::divisionCancellations,
     "",
     "Division cancellations. Substitutes (a/b)/(a/d) with d/a and (a/b)/(c/b) with a/c. ",
     "(a/b)/(a/d); (a/b)/(c/b)",
@@ -4227,7 +4227,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "/",
-    CalculatorFunctions::outerAssociateDivisionDivision,
+    CalculatorFunctions::associateDivisionDivision,
     "",
     "Substitutes (a/b)/c =a/(c*b); a/(b/c)=a*c/b. "
     "Note the order of multiplication in the rules: this operation is safe "
@@ -4274,7 +4274,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "/",
-    CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble,
+    CalculatorFunctionsBinaryOps::divideDoubleByDouble,
     this->opRational(),
     this->opDouble(),
     "Divides doubles. ",
@@ -4285,7 +4285,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "/",
-    CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble,
+    CalculatorFunctionsBinaryOps::divideDoubleByDouble,
     this->opDouble(),
     this->opDouble(),
     "Divides doubles. ",
@@ -4295,24 +4295,25 @@ void Calculator::initializeFunctionsStandard() {
     "a/c;\n"
     "c/a;\n"
     "c/c",
-    "CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble",
+    "CalculatorFunctionsBinaryOps::divideDoubleByDouble",
     "DivideDoubleByDouble",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "/",
-    CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial,
+    CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial,
     this->opRational(),
     this->opPolynomialRational(),
     "Divides rational by polynomial (to get a rational function).",
-    "z = Polynomial{}(x^2+y^2);\n1/z",
-    "CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial",
+    "z = Polynomial{}(x^2+y^2);\n"
+    "1/z",
+    "CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial",
     "DivideRationalByPolynomial",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "/",
-    CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial,
+    CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial,
     this->opPolynomialRational(),
     this->opPolynomialRational(),
     "Divides polynomial by polynomial (to get a rational function). ",
@@ -4320,6 +4321,44 @@ void Calculator::initializeFunctionsStandard() {
     "Polynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+ 1) ",
     "CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial",
     "DividePolynomialByPolynomial",
+    innerStandard
+  );
+  this->addOperationBinaryInnerHandlerWithTypes(
+    "/",
+    CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial,
+    this->opRationalFraction(),
+    this->opPolynomialRational(),
+    "Divides rational fraction by polynomial (to get a rational fraction). ",
+    "MakeRationalFunction(x)/Polynomial(y) ",
+    "CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial",
+    "DivideRationalFractionByPolynomial",
+    innerStandard
+  );
+  this->addOperationBinaryInnerHandlerWithTypes(
+    "/",
+    CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial,
+    this->opPolynomialRational(),
+    this->opRationalFraction(),
+    "Divides rational fraction by polynomial (to get a rational fraction). ",
+    "Polynomial(x) /\n"
+    "MakeRationalFunction(y) ",
+    "CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial",
+    "DividePolynomialByRationalFraction",
+    innerStandard
+  );
+  this->addOperationBinaryInnerHandlerWithTypes(
+    "/",
+    CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial,
+    this->opRationalFraction(),
+    this->opRationalFraction(),
+    "Divides rational fraction by a rational fraction. ",
+    "MakeRationalFunction{}(x) / MakeRationalFunction{}(y);\n"
+    "Polynomial{}(x) / MakeRationalFunction{}(y);\n"
+    "MakeRationalFunction{}(x) / Polynomial{}(y);\n"
+    "MakeRationalFunction{}(x) / 2;\n"
+    "2 / MakeRationalFunction{}(y)",
+    "CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial",
+    "DivideRationalFractionByRationalFraction",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
@@ -4353,12 +4392,12 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerRationalByInteger,
+    CalculatorFunctionsBinaryOps::powerRationalByInteger,
     this->opRational(),
     this->opRational(),
     "Raises rational to power, provided the power is a small integer. ",
     "{3^3}^3; 3^{3^3}; 3^3^3; 0^3; 0^{-3}; ",
-    "CalculatorFunctionsBinaryOps::innerPowerRationalByInteger",
+    "CalculatorFunctionsBinaryOps::powerRationalByInteger",
     "PowerIntegerByInteger",
     innerStandard
   );
@@ -4532,19 +4571,21 @@ void Calculator::initializeFunctionsStandard() {
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::powerRationalFractionBySmallInteger,
-    this->opRationalFunction(),
+    this->opRationalFraction(),
     this->opRational(),
     "Raises rational function to small integer power. ",
     "x = MakeRationalFunction{}x;\n"
     "y = MakeRationalFunction{}y;\n"
-    "(x/y)^3",
-    "CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberPolynomialBySmallInteger",
+    "(x/y)^3;\n"
+    "(x/y)^-3;\n"
+    "(x/y)^3-(x/y)^-3",
+    "CalculatorFunctionsBinaryOps::powerRationalFractionBySmallInteger",
     "PowerRationalFractionByInteger",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerPolynomialModuloIntegerBySmallInteger,
+    CalculatorFunctionsBinaryOps::powerPolynomialModuloIntegerBySmallInteger,
     this->opPolynomialModuloInteger(),
     this->opRational(),
     "Raises polynomial modulo an integer to a small integer power. ",
@@ -4556,7 +4597,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerPolynomialModPModuloPolynomialModPBySmallInteger,
+    CalculatorFunctionsBinaryOps::powerPolynomialModPModuloPolynomialModPBySmallInteger,
     this->opPolynomialModuloPolynomialModuloInteger(),
     this->opRational(),
     "Raises polynomial modulo an integer to a small integer power. ",

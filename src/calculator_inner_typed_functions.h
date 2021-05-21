@@ -106,18 +106,18 @@ public:
   static bool lieBracketJacobiIdentityIfNeeded(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool divideRationalByRational(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDivideDoubleByDouble(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat(
+  static bool divideDoubleByDouble(Calculator& calculator, const Expression& input, Expression& output);
+  static bool divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational(
     Calculator& calculator, const Expression& input, Expression& output
   );
 
   static bool innerDividePolynomialModuloIntegerByPolynomialModuloInteger(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial(
+  static bool divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerDivideEltZmodPorRatByEltZmodPorRat(Calculator& calculator, const Expression& input, Expression& output);
+  static bool divideEltZmodPorRatByEltZmodPorRat(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool powerMatrixBuiltInBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerMatrixExpressionsBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
@@ -125,16 +125,16 @@ public:
 
   static bool innerPowerRationalByRationalOutputAlgebraic(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerRationalByRationalReducePrimeFactors(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPowerRationalByInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerRationalByInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerPolynomialBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerAlgebraicNumberPolynomialBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerRationalFractionBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPowerPolynomialModuloIntegerBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPowerPolynomialModPModuloPolynomialModPBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerPolynomialModuloIntegerBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerPolynomialModPModuloPolynomialModPBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerPowerAlgebraicNumberBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerRadicalAlgebraicNumberPositiveDefault(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPowerEWABySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerElementWeylAlgebraBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerElementUEbyRatOrPolyOrRF(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerDoubleOrRationalToDoubleOrRational(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerSequenceOrMatrixByT(Calculator& calculator, const Expression& input, Expression& output);
@@ -400,7 +400,7 @@ bool CalculatorConversions::functionRationalFunction(
       );
     }
     if (input.startsWith(calculator.opDivide())) {
-      return CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial(
+      return CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial(
         calculator, intermediate, output
       );
     }

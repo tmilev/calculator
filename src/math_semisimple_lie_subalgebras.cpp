@@ -109,33 +109,33 @@ bool SemisimpleLieAlgebra::attemptFindingHEF(
   std::stringstream* logStream
 ) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::AttemptFindingHEF");
-  List<Polynomial<AlgebraicNumber> > theSystem;
+  List<Polynomial<AlgebraicNumber> > input;
   PolynomialSystem<AlgebraicNumber> system;
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > mustBeZero;
   this->lieBracket(inputOutputH, inputOutputE, mustBeZero);
   mustBeZero -= inputOutputE * 2;
   for (int i = 0; i < mustBeZero.size(); i ++) {
-    theSystem.addOnTop(mustBeZero.coefficients[i]);
+    input.addOnTop(mustBeZero.coefficients[i]);
   }
   this->lieBracket(inputOutputH, inputOutputF, mustBeZero);
   mustBeZero += inputOutputF * 2;
   for (int i = 0; i < mustBeZero.size(); i ++) {
-    theSystem.addOnTop(mustBeZero.coefficients[i]);
+    input.addOnTop(mustBeZero.coefficients[i]);
   }
   this->lieBracket(inputOutputE, inputOutputF, mustBeZero);
   mustBeZero -= inputOutputH;
   for (int i = 0; i < mustBeZero.size(); i ++) {
-    theSystem.addOnTop(mustBeZero.coefficients[i]);
+    input.addOnTop(mustBeZero.coefficients[i]);
   }
   if (logStream != nullptr) {
     *logStream << "The system to solve: ";
-    for (int i = 0; i < theSystem.size; i ++) {
-      *logStream << "<br>" << theSystem[i].toString() << " = 0 ";
+    for (int i = 0; i < input.size; i ++) {
+      *logStream << "<br>" << input[i].toString() << " = 0 ";
     }
   }
   system.groebner.maximumPolynomialDivisions = 2001;
   system.groebner.polynomialOrder.monomialOrder.setComparison(MonomialPolynomial::greaterThan_rightLargerWins);
-  system.solveSerreLikeSystem(theSystem);
+  system.solveSerreLikeSystem(input);
   if (!system.flagSystemSolvedOverBaseField) {
     if (logStream != nullptr) {
       if (system.flagSystemProvenToHaveNoSolution) {
@@ -901,11 +901,12 @@ void SemisimpleSubalgebras::getCentralizerChains(List<List<int> >& outputChains)
   }
 }
 
-void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand() {
+void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand(bool computeRealSlTwos) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand");
   this->getSemisimpleOwner().findSl2Subalgebras(
     this->getSemisimpleOwner(),
     this->slTwoSubalgebras,
+    computeRealSlTwos,
     this->ownerField
   );
   this->orbitHElementLengths.clear();
@@ -1060,7 +1061,7 @@ void SemisimpleSubalgebras::findSemisimpleSubalgebrasInitialize() {
     }
     logFile.close();
   }
-  this->computeSl2sInitOrbitsForComputationOnDemand();
+  this->computeSl2sInitOrbitsForComputationOnDemand(false);
   this->currentSubalgebraChain.setExpectedSize(this->owner->getRank() + 2);
   this->currentSubalgebraChain.setSize(0);
 }
@@ -1222,7 +1223,9 @@ bool SemisimpleSubalgebras::computeStructureRealForms(
     newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras
   );
   this->slTwoSubalgebras.checkMinimalContainingRootSubalgebras();
-  this->owner->findSl2Subalgebras(newOwner, this->slTwoSubalgebras, &ownerField);
+  this->owner->findSl2Subalgebras(
+    newOwner, this->slTwoSubalgebras, true, &ownerField
+  );
   this->computeStructureRealFormsSlTwos();
   return true;
 }
@@ -1870,7 +1873,7 @@ void DynkinType::getDynkinIndicesSl2SubalgebrasSimpleType(
     simpleAlgebra.weylGroup.makeArbitrarySimple(typeDefaultScale.letter, typeDefaultScale.rank);
     simpleAlgebra.computeChevalleyConstants();
     simpleAlgebra.findSl2Subalgebras(
-      simpleAlgebra, sl2s, algebraicClosure
+      simpleAlgebra, sl2s, false, algebraicClosure
     );
     dynkinSimpleTypesWithComputedSl2Subalgebras.addOnTop(typeDefaultScale);
     outputIndicesDefaultScale.setExpectedSize(sl2s.size);
@@ -1884,7 +1887,7 @@ void DynkinType::getDynkinIndicesSl2SubalgebrasSimpleType(
   ];
   outputDynkinIndices.setExpectedSize(outputIndicesDefaultScale.size);
   outputDynkinIndices.clear();
-  for (int i = 0; i <outputIndicesDefaultScale.size; i ++) {
+  for (int i = 0; i < outputIndicesDefaultScale.size; i ++) {
     outputDynkinIndices.addOnTop(outputIndicesDefaultScale[i] * desiredType.cartanSymmetricInverseScale);
   }
 }
@@ -1898,7 +1901,7 @@ void DynkinType::getDynkinIndicesSl2Subalgebras(
   MacroRegisterFunctionWithName("DynkinType::getDynkinIndicesSl2Subalgebras");
   List<DynkinSimpleType> dynkinTypes;
   this->getTypesWithMults(dynkinTypes);
-  List<List<Rational> > DynkinIndicesPerType;
+  List<List<Rational> > dynkinIndicesPerType;
   HashedList<Rational> bufferIndices;
   for (int i = 0; i < dynkinTypes.size; i ++) {
     this->getDynkinIndicesSl2SubalgebrasSimpleType(
@@ -1908,22 +1911,22 @@ void DynkinType::getDynkinIndicesSl2Subalgebras(
       bufferIndices,
       algebraicClosure
     );
-    DynkinIndicesPerType.setSize(DynkinIndicesPerType.size + 1);
-    DynkinIndicesPerType.lastObject()->addOnTop(0);
-    DynkinIndicesPerType.lastObject()->addListOnTop(bufferIndices);
+    dynkinIndicesPerType.setSize(dynkinIndicesPerType.size + 1);
+    dynkinIndicesPerType.lastObject()->addOnTop(0);
+    dynkinIndicesPerType.lastObject()->addListOnTop(bufferIndices);
   }
   SelectionWithDifferentMaxMultiplicities dynkinIndexSelector;
-  List<int> theMults;
-  theMults.setSize(dynkinTypes.size);
-  for (int i = 0; i < theMults.size; i ++) {
-    theMults[i] = DynkinIndicesPerType[i].size - 1;
+  List<int> multiplicities;
+  multiplicities.setSize(dynkinTypes.size);
+  for (int i = 0; i < multiplicities.size; i ++) {
+    multiplicities[i] = dynkinIndicesPerType[i].size - 1;
   }
-  dynkinIndexSelector.initFromInts(theMults);
+  dynkinIndexSelector.initializeFromIntegers(multiplicities);
   outputDynkinIndices.clear();
   while (dynkinIndexSelector.incrementReturnFalseIfPastLast()) {
     Rational currentIndex = 0;
     for (int i = 0; i < dynkinIndexSelector.multiplicities.size; i ++) {
-      currentIndex += DynkinIndicesPerType[i][dynkinIndexSelector.multiplicities[i]];
+      currentIndex += dynkinIndicesPerType[i][dynkinIndexSelector.multiplicities[i]];
     }
     outputDynkinIndices.addOnTopNoRepetition(currentIndex);
   }
@@ -1944,7 +1947,7 @@ bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits(
       << global.fatal;
     }
   }
-  simpleSummandSelection.initFromInts(multiplicities);
+  simpleSummandSelection.initializeFromIntegers(multiplicities);
   DynkinType currentComplementSummand, centralizerOfComplementOfCurrentSummand, currentSummand;
   HashedList<Rational> theDynkinIndicesCurrentSummand, theDynkinIndicesCentralizerComplementCurrentSummand;
   while (simpleSummandSelection.incrementReturnFalseIfPastLast()) {
@@ -5000,6 +5003,7 @@ void SlTwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner) {
 void SemisimpleLieAlgebra::findSl2Subalgebras(
   SemisimpleLieAlgebra& inputOwner,
   SlTwoSubalgebras& output,
+  bool computeRealForm,
   AlgebraicClosureRationals* algebraicClosure
 ) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::findSl2Subalgebras");
@@ -5031,7 +5035,9 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(
     << " (" << (i + 1) << " out of "
     << output.rootSubalgebras.subalgebras.size << ")\n";
     report.report(tempStream.str());
-    output.rootSubalgebras.subalgebras[i].getSsl2SubalgebrasAppendListNoRepetition(output, i, algebraicClosure);
+    output.rootSubalgebras.subalgebras[i].getSsl2SubalgebrasAppendListNoRepetition(
+      output, i, computeRealForm, algebraicClosure
+    );
   }
   //sort subalgebras by dynkin index
   List<int> permutation, indexMap;

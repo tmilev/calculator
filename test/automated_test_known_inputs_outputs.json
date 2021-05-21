@@ -2149,7 +2149,7 @@
   },
   {
     "input":"g_{{i}} = GetChevalleyGenerator{}(b_3, i);\nh_{{i}} = GetCartanGenerator{}(b_3, i);\nCartanSA(g_1 + g_3, g_-1 + g_-3, g_2, g_-2);",
-    "output":"({g}_{{{i}}}=GetChevalleyGenerator{}\\left({b}_{3}, {{i}}\\right);{h}_{{{i}}}=GetCartanGenerator{}\\left({b}_{3}, {{i}}\\right);CartanSA{}\\left(UEE{}(g_{3}+g_{1}), UEE{}(g_{-1}+g_{-3}), UEE{}(g_{2}), UEE{}(g_{-2})\\right))"
+    "output":"({g}_{{{i}}}=GetChevalleyGenerator{}\\left({b}_{3}, {{i}}\\right);{h}_{{{i}}}=GetCartanGenerator{}\\left({b}_{3}, {{i}}\\right);\"A subalgebra of dimension 14 lying in B^{1}_3.<br>The subalgebra has basis: g_{3}+g_{1}, g_{-1}+g_{-3}, g_{2}, g_{-2}, 2h_{3}+h_{1}, -g_{5}+g_{4}, -2g_{7}-2g_{6}, -6g_{8}, -g_{-4}+g_{-5}, -2g_{-6}-2g_{-7}, 6g_{-8}, h_{2}, -6g_{9}, -6g_{-9}\")"
   },
   {
     "input":"\\partial_{{i}} = ElementWeylAlgebraDO{}(\\partial_i, x_i);\nx_{{i}} = ElementWeylAlgebraPoly{}(\\partial_i, x_i); g_1 = (- x_{5} \\partial_{5}^{2} - x_{4} \\partial_{4} \\partial_{5}  - x_{3} \\partial_{3} \\partial_{5} - x_{2} \\partial_{2} \\partial_{5} + x_{1} \\partial_{2} \\partial_{4} +x_{1} \\partial_{3}^{2});\ng_- 1 = x_5;\ng_2 = x_{5} \\partial_{4} - x_{2} \\partial_{1};\ng_-2 = (x_{4} \\partial_{5} - x_{1} \\partial_{2});\ng_3 = (2x_{4} \\partial_{3} - x_{3} \\partial_{2});\ng_-3 = (x_{3} \\partial_{4} - 2x_{2} \\partial_{3});\nGenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3, g_-3);\nGenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_2, g_-2, g_3, g_-3);\nGenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3);\nq_{{i}} = GetChevalleyGenerator{}(F_4, i);\ns_2 = - q_{- 5} - q_{-6};\ns_1 = q_{20} + q_{19};\ns_- 1 = - q_{- 19} - q_{- 20};\ns_-2 = 2q_{6} + 2q_{5};\nGenerateVectorSpaceClosedWithRespectToLieBracket(52, s_1, s_2, s_- 1, s_-2);",
@@ -2225,7 +2225,7 @@
   },
   {
     "input":"Crawl(\"freecalc/homework/referenceallproblemsbycourse/calculusimasterproblemsheet.tex\")",
-    "output":"Crawl{}\\left(\"freecalc/homework/referenceallproblemsbycourse/calculusimasterproblemsheet.tex\"\\right)"
+    "output":"\"Output file: <a href=\\\"/output/latexOutput.tex\\\">latexOutput.tex</a>\""
   },
   {
     "input":"suffixNotationForPostScript{}((1/3 + a + b) * c)",

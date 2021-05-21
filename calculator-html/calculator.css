@@ -560,7 +560,7 @@ a.linkProgressReport {
 }
 
 #divCalculatorMainInputOutput{
-  overflow: auto;
+  overflow: hidden;
   height: 100%;
 }
 
@@ -675,6 +675,10 @@ textarea.currentFileNameArea {
   overflow-x: hidden;
 }
 
+body {
+  overflow: hidden;
+}
+
 div.divOnePageApp {
   /* class assigned to main one page container at run time. */
   display: flex;
@@ -682,6 +686,7 @@ div.divOnePageApp {
   width: 100%;
   height: 100%;
   visibility: visible;
+  overflow: hidden;
 }
 
 div.divPage {
@@ -689,6 +694,10 @@ div.divPage {
   height: 100%;
   overflow: auto;
   position: relative;
+}
+
+#divCalculatorPage {
+  overflow:hidden;
 }
 
 div.divTheMainMenu {
@@ -699,7 +708,7 @@ div.divTheMainMenu {
   width: 10%;
   position: absolute;
   right: 0.8%;
-  overflow:none;
+  overflow:auto;
 }
 
 div.divMainMenuCollapsed {

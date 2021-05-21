@@ -724,7 +724,7 @@ div.divTheMainMenu {
   width: 10%;
   position: absolute;
   right: 0.8%;
-  overflow:none;
+  overflow:auto;
 }
 
 div.divMainMenuCollapsed {

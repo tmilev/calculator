@@ -1448,6 +1448,10 @@
     "output":"(0;not{}\\left(a\\right);1;1)"
   },
   {
+    "input":"a=\\begin{pmatrix}1&1\\\\ 1&0\\end{pmatrix};\nDiagonalizeMatrix a",
+    "output":"(a=\\begin{pmatrix}1 & 1\\\\ \n1 & 0 \\end{pmatrix};\\left(\\begin{pmatrix}-\\frac{\\sqrt{5}}{2}+\\frac{1}{2} & \\frac{\\sqrt{5}}{2}+\\frac{1}{2}\\\\ \n1 & 1 \\end{pmatrix}, \\begin{pmatrix}-\\frac{\\sqrt{5}}{2}+\\frac{1}{2} & 0\\\\ \n0 & \\frac{\\sqrt{5}}{2}+\\frac{1}{2} \\end{pmatrix}, \\begin{pmatrix}-\\frac{\\sqrt{5}}{5} & \\frac{\\sqrt{5}}{10}+\\frac{1}{2}\\\\ \n\\frac{\\sqrt{5}}{5} & -\\frac{\\sqrt{5}}{10}+\\frac{1}{2} \\end{pmatrix}\\right))"
+  },
+  {
     "input":"X =FunctionToMatrix{}(A,5,5);\n A{}({{a}},{{b}})=a/b;\n X; \\det {} X",
     "output":"(X=\\begin{pmatrix}A{}\\left(1, 1\\right) & A{}\\left(1, 2\\right) & A{}\\left(1, 3\\right) & A{}\\left(1, 4\\right) & A{}\\left(1, 5\\right)\\\\ \nA{}\\left(2, 1\\right) & A{}\\left(2, 2\\right) & A{}\\left(2, 3\\right) & A{}\\left(2, 4\\right) & A{}\\left(2, 5\\right)\\\\ \nA{}\\left(3, 1\\right) & A{}\\left(3, 2\\right) & A{}\\left(3, 3\\right) & A{}\\left(3, 4\\right) & A{}\\left(3, 5\\right)\\\\ \nA{}\\left(4, 1\\right) & A{}\\left(4, 2\\right) & A{}\\left(4, 3\\right) & A{}\\left(4, 4\\right) & A{}\\left(4, 5\\right)\\\\ \nA{}\\left(5, 1\\right) & A{}\\left(5, 2\\right) & A{}\\left(5, 3\\right) & A{}\\left(5, 4\\right) & A{}\\left(5, 5\\right) \\end{pmatrix};A{}\\left({{a}}, {{b}}\\right)=\\frac{{{a}}}{{{b}}};\\begin{pmatrix}1 & \\frac{1}{2} & \\frac{1}{3} & \\frac{1}{4} & \\frac{1}{5}\\\\ \n2 & 1 & \\frac{2}{3} & \\frac{1}{2} & \\frac{2}{5}\\\\ \n3 & \\frac{3}{2} & 1 & \\frac{3}{4} & \\frac{3}{5}\\\\ \n4 & 2 & \\frac{4}{3} & 1 & \\frac{4}{5}\\\\ \n5 & \\frac{5}{2} & \\frac{5}{3} & \\frac{5}{4} & 1 \\end{pmatrix};0)"
   },
@@ -2145,7 +2149,7 @@
   },
   {
     "input":"g_{{i}} = GetChevalleyGenerator{}(b_3, i);\nh_{{i}} = GetCartanGenerator{}(b_3, i);\nCartanSA(g_1 + g_3, g_-1 + g_-3, g_2, g_-2);",
-    "output":"({g}_{{{i}}}=GetChevalleyGenerator{}\\left({b}_{3}, {{i}}\\right);{h}_{{{i}}}=GetCartanGenerator{}\\left({b}_{3}, {{i}}\\right);\"A subalgebra of dimension 14 lying in B^{1}_3.<br>The subalgebra has basis: g_{3}+g_{1}, g_{-1}+g_{-3}, g_{2}, g_{-2}, 2h_{3}+h_{1}, -g_{5}+g_{4}, -2g_{7}-2g_{6}, -6g_{8}, -g_{-4}+g_{-5}, -2g_{-6}-2g_{-7}, 6g_{-8}, h_{2}, -6g_{9}, -6g_{-9}\")"
+    "output":"({g}_{{{i}}}=GetChevalleyGenerator{}\\left({b}_{3}, {{i}}\\right);{h}_{{{i}}}=GetCartanGenerator{}\\left({b}_{3}, {{i}}\\right);CartanSA{}\\left(UEE{}(g_{3}+g_{1}), UEE{}(g_{-1}+g_{-3}), UEE{}(g_{2}), UEE{}(g_{-2})\\right))"
   },
   {
     "input":"\\partial_{{i}} = ElementWeylAlgebraDO{}(\\partial_i, x_i);\nx_{{i}} = ElementWeylAlgebraPoly{}(\\partial_i, x_i); g_1 = (- x_{5} \\partial_{5}^{2} - x_{4} \\partial_{4} \\partial_{5}  - x_{3} \\partial_{3} \\partial_{5} - x_{2} \\partial_{2} \\partial_{5} + x_{1} \\partial_{2} \\partial_{4} +x_{1} \\partial_{3}^{2});\ng_- 1 = x_5;\ng_2 = x_{5} \\partial_{4} - x_{2} \\partial_{1};\ng_-2 = (x_{4} \\partial_{5} - x_{1} \\partial_{2});\ng_3 = (2x_{4} \\partial_{3} - x_{3} \\partial_{2});\ng_-3 = (x_{3} \\partial_{4} - 2x_{2} \\partial_{3});\nGenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3, g_-3);\nGenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_2, g_-2, g_3, g_-3);\nGenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3);\nq_{{i}} = GetChevalleyGenerator{}(F_4, i);\ns_2 = - q_{- 5} - q_{-6};\ns_1 = q_{20} + q_{19};\ns_- 1 = - q_{- 19} - q_{- 20};\ns_-2 = 2q_{6} + 2q_{5};\nGenerateVectorSpaceClosedWithRespectToLieBracket(52, s_1, s_2, s_- 1, s_-2);",
@@ -2201,7 +2205,7 @@
   },
   {
     "input":"LispifyFull(e^x)",
-    "output":"\"(20 , 102 , 471 )\""
+    "output":"\"(20 , 102 , 472 )\""
   },
   {
     "input":"TestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog=\");\nTestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog\")",
@@ -2221,7 +2225,7 @@
   },
   {
     "input":"Crawl(\"freecalc/homework/referenceallproblemsbycourse/calculusimasterproblemsheet.tex\")",
-    "output":"\"Output file: <a href=\\\"/output/latexOutput.tex\\\">latexOutput.tex</a>\""
+    "output":"Crawl{}\\left(\"freecalc/homework/referenceallproblemsbycourse/calculusimasterproblemsheet.tex\"\\right)"
   },
   {
     "input":"suffixNotationForPostScript{}((1/3 + a + b) * c)",

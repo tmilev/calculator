@@ -3355,6 +3355,14 @@ not{}1;not{}a; not{}0; not{}(3==4)
 ```
 If the argument is a small integer, returns 1 if the argument is 0 and 1 the argument is non-zero. If the argument is not a small integer, does nothing. 
 
+*DiagonalizeMatrix* [DiagonalizeMatrix] {Calculator::diagonalizeMatrix}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%3d%5c%5cbegin%7bpmatrix%7d1%261%5c%5c%5c%5c%201%260%5c%5cend%7bpmatrix%7d%3b%5cnDiagonalizeMatrix%20a%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+a=\begin{pmatrix}1&1\\ 1&0\end{pmatrix};
+DiagonalizeMatrix a
+```
+Tries to diagonalize a matrix (Jordan normal form). As of writing, will succeed only when the eigenvalues are rational or use quadratic radicals and the Jordan normal form is diagonal. When successful, returns a list of three matrices, X, A and X^-1, such that XAX^-1 equals the orignal matrix and A is in Jordan normal form.
+
 *FunctionToMatrix* [FunctionToMatrix] {Calculator::innerFunctionToMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3dFunctionToMatrix%7b%7d%28A%2c5%2c5%29%3b%5cn%20A%7b%7d%28%7b%7ba%7d%7d%2c%7b%7bb%7d%7d%29%3da%2fb%3b%5cn%20X%3b%20%5c%5cdet%20%7b%7d%20X%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```

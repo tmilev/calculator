@@ -1748,7 +1748,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF,
+    CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction,
     this->opElementUEOverRF(),
     this->opRational(),
     "Raises element of universal enveloping to integer power. "
@@ -1756,13 +1756,13 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "a single generator with coefficient 1, the exponent will be carried out formally. ",
     "g_{{i}}= GetChevalleyGenerator{}(G_2, i); h_{{i}}= GetCartanGenerator{}(G_2, i) ;"
     "\n (g_1+g_2)^2+ g_1^{1/2}",
-    "CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF",
+    "CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction",
     "PowerElementUniversalEnvelopingBySmallInteger",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF,
+    CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction,
     this->opElementUEOverRF(),
     this->opPolynomialRational(),
     "Provided that an element of Universal Enveloping algebra is "
@@ -1770,13 +1770,13 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "raises (formally) the element of the UE to arbitrary polynomial power. ",
     "g_{{i}}= GetChevalleyGenerator{}(G_2, i); h_{{i}}= GetCartanGenerator{}(G_2, i) ;\n"
     "((((g_1)^{Polynomial{}x})^{Polynomial{}y}) +g_2)^2",
-    "CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF",
+    "CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction",
     "PowerUEelementToPolyPower",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF,
+    CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction,
     this->opElementUEOverRF(),
     this->opRationalFraction(),
     "Provided that an element of Universal Enveloping algebra is a single generator "
@@ -1784,7 +1784,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "(formally) the element of the UE to arbitrary RF power. ",
     "g_{{i}}= GetChevalleyGenerator{}(G_2, i); h_{{i}}= GetCartanGenerator{}(G_2, i);\n "
     "((((g_1)^{Polynomial{}x})^{Polynomial{}y}) +g_2)^2",
-    "CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF",
+    "CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction",
     "PowerUEelementToRFPower",
     innerStandard
   );

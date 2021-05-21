@@ -516,7 +516,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA,
+    CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra,
     this->opRational(),
     this->opElementWeylAlgebra(),
     "Adds a rational or polynomial to element Weyl algebra. ",
@@ -528,7 +528,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA,
+    CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra,
     this->opPolynomialRational(),
     this->opElementWeylAlgebra(),
     "Adds a rational or polynomial to element Weyl algebra. ",
@@ -540,7 +540,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA,
+    CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra,
     this->opElementWeylAlgebra(),
     this->opPolynomialRational(),
     "Adds a rational or polynomial to element Weyl algebra. ",
@@ -552,7 +552,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA,
+    CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra,
     this->opElementWeylAlgebra(),
     this->opElementWeylAlgebra(),
     "Adds a rational or polynomial to element Weyl algebra. ",

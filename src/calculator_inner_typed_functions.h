@@ -10,12 +10,14 @@ public:
   template <class Type>
   static bool multiplyTypeByType(Calculator& calculator, const Expression& input, Expression& output);
   template <class Type>
-  static bool innerAddTypeToType(Calculator& calculator, const Expression& input, Expression& output);
+  static bool addTypeToType(Calculator& calculator, const Expression& input, Expression& output);
   template <class Type>
   static bool divideTypeByType(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerAddDoubleOrRationalToDoubleOrRational(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAddRatOrPolyOrEWAToRatOrPolyOrEWA(Calculator& calculator, const Expression& input, Expression& output);
+  static bool addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool addRationalOrPolynomialOrRationalFunctionToRationalFunction(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAddUEToAny(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAddEltTensorToEltTensor(Calculator& calculator, const Expression& input, Expression& output);
@@ -111,7 +113,7 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
 
-  static bool innerDividePolynomialModuloIntegerByPolynomialModuloInteger(
+  static bool dividePolynomialModuloIntegerByPolynomialModuloInteger(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial(
@@ -135,7 +137,7 @@ public:
   static bool innerPowerAlgebraicNumberBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerRadicalAlgebraicNumberPositiveDefault(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerElementWeylAlgebraBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPowerElementUEbyRatOrPolyOrRF(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerDoubleOrRationalToDoubleOrRational(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerSequenceOrMatrixByT(Calculator& calculator, const Expression& input, Expression& output);
 
@@ -174,10 +176,10 @@ bool CalculatorFunctionsBinaryOps::multiplyTypeByType(
 }
 
 template <class Type>
-bool CalculatorFunctionsBinaryOps::innerAddTypeToType(
+bool CalculatorFunctionsBinaryOps::addTypeToType(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddTypeToType");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::addTypeToType");
   if (input.size() != 3) {
     return false;
   }

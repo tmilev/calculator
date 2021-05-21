@@ -4380,7 +4380,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "/",
-    CalculatorFunctionsBinaryOps::innerDividePolynomialModuloIntegerByPolynomialModuloInteger,
+    CalculatorFunctionsBinaryOps::dividePolynomialModuloIntegerByPolynomialModuloInteger,
     this->opPolynomialModuloInteger(),
     this->opPolynomialModuloInteger(),
     "Divides polynomial modulo integer by another polynomial modulo integer. ",
@@ -4389,7 +4389,7 @@ void Calculator::initializeFunctionsStandard() {
     "PolynomialModP{}(x^3-x+1, 3) / PolynomialModP{}(x^2+2, 7);\n"
     "PolynomialModP{}(x^3-x+1, 6) / PolynomialModP{}(2x^2+2, 6);\n"
     "PolynomialModP{}(x^3-x+1, 21) / PolynomialModP{}(2x^2+2, 21);\n",
-    "CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial",
+    "CalculatorFunctionsBinaryOps::dividePolynomialModuloIntegerByPolynomialModuloInteger",
     "DividePolynomialModPByPolynomialModP",
     innerStandard
   );

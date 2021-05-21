@@ -397,7 +397,7 @@ bool CalculatorFunctionsBinaryOps::innerAddWeightToWeight(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddWeightToWeight");
-  return CalculatorFunctionsBinaryOps::innerAddTypeToType<Weight<Polynomial<Rational> > >(calculator, input, output);
+  return CalculatorFunctionsBinaryOps::addTypeToType<Weight<Polynomial<Rational> > >(calculator, input, output);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly(
@@ -627,10 +627,10 @@ bool CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrRationalFunctionToRa
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrRationalFunctionToRationalFunction");
-  if (CalculatorFunctionsBinaryOps::innerAddTypeToType<RationalFraction<Rational> >(calculator, input, output)) {
+  if (CalculatorFunctionsBinaryOps::addTypeToType<RationalFraction<Rational> >(calculator, input, output)) {
     return true;
   }
-  if (CalculatorFunctionsBinaryOps::innerAddTypeToType<RationalFraction<AlgebraicNumber> >(
+  if (CalculatorFunctionsBinaryOps::addTypeToType<RationalFraction<AlgebraicNumber> >(
     calculator, input, output
   )) {
     return true;
@@ -638,11 +638,11 @@ bool CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrRationalFunctionToRa
   return false;
 }
 
-bool CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA(
+bool CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
-  return CalculatorFunctionsBinaryOps::innerAddTypeToType<ElementWeylAlgebra<Rational> >(calculator, input, output);
+  return CalculatorFunctionsBinaryOps::addTypeToType<ElementWeylAlgebra<Rational> >(calculator, input, output);
 }
 
 bool CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial(
@@ -667,7 +667,7 @@ bool CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomia
 
 bool CalculatorFunctionsBinaryOps::innerAddUEToAny(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddUEToAny");
-  return CalculatorFunctionsBinaryOps::innerAddTypeToType<ElementUniversalEnveloping<RationalFraction<Rational> > >(
+  return CalculatorFunctionsBinaryOps::addTypeToType<ElementUniversalEnveloping<RationalFraction<Rational> > >(
     calculator, input, output
   );
 }
@@ -766,7 +766,7 @@ bool CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor");
-  return CalculatorFunctionsBinaryOps::innerAddTypeToType<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >(
+  return CalculatorFunctionsBinaryOps::addTypeToType<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >(
     calculator, input, output
   );
 }
@@ -786,15 +786,15 @@ bool CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomia
     rightE.isOfType<AlgebraicNumber>() ||
     rightE.isOfType<Polynomial<AlgebraicNumber> >()
   ) {
-    return CalculatorFunctionsBinaryOps::innerAddTypeToType<Polynomial<AlgebraicNumber> >(calculator, input, output);
+    return CalculatorFunctionsBinaryOps::addTypeToType<Polynomial<AlgebraicNumber> >(calculator, input, output);
   }
-  return CalculatorFunctionsBinaryOps::innerAddTypeToType<Polynomial<Rational> >(calculator, input, output);
+  return CalculatorFunctionsBinaryOps::addTypeToType<Polynomial<Rational> >(calculator, input, output);
 }
 
 bool CalculatorFunctionsBinaryOps::addPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::addPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger");
   if (input.size() != 3) {
     return false;
   }
@@ -871,10 +871,10 @@ bool CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToPolynomialMo
   return output.assignValueWithContext(left, inputContextsMerged[1].getContext(), calculator);
 }
 
-bool CalculatorFunctionsBinaryOps::innerDividePolynomialModuloIntegerByPolynomialModuloInteger(
+bool CalculatorFunctionsBinaryOps::dividePolynomialModuloIntegerByPolynomialModuloInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerDividePolynomialModuloIntegerByPolynomialModuloInteger");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::dividePolynomialModuloIntegerByPolynomialModuloInteger");
   if (input.size() != 3) {
     return false;
   }
@@ -1375,9 +1375,9 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(
   if (!input[1].isOfType(&base)) {
     return false;
   }
-  Rational powerRat, baseRat;
-  if (input[2].isRational(&powerRat)) {
-    if (powerRat.getDenominator() == 2) {
+  Rational powerRational, baseRat;
+  if (input[2].isRational(&powerRational)) {
+    if (powerRational.getDenominator() == 2) {
       if (base.isRational(&baseRat)) {
         if (base.assignRationalQuadraticRadical(
           baseRat,
@@ -1387,7 +1387,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(
           base.checkConsistency();
           output = input;
           Expression newPower, newBase;
-          newPower.assignValue(powerRat * 2, calculator);
+          newPower.assignValue(powerRational * 2, calculator);
           newBase.assignValue(base, calculator);
           return output.makeXOX(
             calculator,
@@ -1433,8 +1433,8 @@ bool CalculatorFunctionsBinaryOps::powerElementWeylAlgebraBySmallInteger(
   bool mustCheckForRationalPower = false;
   mustCheckForRationalPower = !input[2].isSmallInteger(&power);
   if (mustCheckForRationalPower || power < 0) {
-    Rational powerRat;
-    if (!input[2].isOfType<Rational>(&powerRat)) {
+    Rational powerRational;
+    if (!input[2].isOfType<Rational>(&powerRational)) {
       return false;
     }
     bool isMon = true;
@@ -1445,17 +1445,17 @@ bool CalculatorFunctionsBinaryOps::powerElementWeylAlgebraBySmallInteger(
     }
     if (!isMon) {
       return calculator << "<hr>Failed to raise " << base.toString() << " to power "
-      << powerRat.toString() << ": the exponent is not a "
+      << powerRational.toString() << ": the exponent is not a "
       << "small integer and the base is not a coefficient one monomial. ";
     }
     ElementWeylAlgebra<Rational> finalOutput;
     MonomialWeylAlgebra monomial = base[0];
-    monomial.polynomialPart.raiseToPower(powerRat);
-    monomial.differentialPart.raiseToPower(powerRat);
+    monomial.polynomialPart.raiseToPower(powerRational);
+    monomial.differentialPart.raiseToPower(powerRational);
     for (int i = 0; i < monomial.polynomialPart.minimalNumberOfVariables(); i ++) {
       if (monomial.polynomialPart(i) != 0 && monomial.differentialPart(i) != 0) {
         return calculator << "<hr>Failed to raise " << base.toString() << " to power "
-        << powerRat.toString() << ": the exponent is not a "
+        << powerRational.toString() << ": the exponent is not a "
         << "small integer, the base is a monomial, however the monomial "
         << "contains derivative and polynomial with respect to the same variable. ";
       }
@@ -1480,7 +1480,7 @@ bool CalculatorFunctionsBinaryOps::powerElementWeylAlgebraBySmallInteger(
 bool CalculatorFunctionsBinaryOps::powerRationalByInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerRationalByInteger");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::powerRationalByInteger");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
@@ -1509,10 +1509,10 @@ bool CalculatorFunctionsBinaryOps::powerRationalByInteger(
   return output.assignValue(base, calculator);
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(
+bool CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;

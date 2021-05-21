@@ -248,6 +248,18 @@
     "output":"MakeRationalFunction{}(\\frac{-{x}_{2} -1}{{x}_{2} -1})"
   },
   {
+    "input":"MakeRationalFunction(x)/Polynomial(y) ",
+    "output":"\\left(\\frac{MakeRationalFunction{}(x )}{Polynomial}\\right)y"
+  },
+  {
+    "input":"Polynomial(x) /\nMakeRationalFunction(y) ",
+    "output":"\\left(\\frac{Polynomial{}(x )}{MakeRationalFunction}\\right)y"
+  },
+  {
+    "input":"MakeRationalFunction{}(x) / MakeRationalFunction{}(y);\nPolynomial{}(x) / MakeRationalFunction{}(y);\nMakeRationalFunction{}(x) / Polynomial{}(y);\nMakeRationalFunction{}(x) / 2;\n2 / MakeRationalFunction{}(y)",
+    "output":"(MakeRationalFunction{}(\\frac{x }{y });MakeRationalFunction{}(\\frac{x }{y });MakeRationalFunction{}(\\frac{x }{y });MakeRationalFunction{}(\\frac{x }{2});MakeRationalFunction{}(\\frac{2}{y }))"
+  },
+  {
     "input":"PolynomialModP{}(x^5+5x^3+x^2+4x+1, 7) / PolynomialModP{}(x^5+6x^3+x^2+5x+1, 7);\nPolynomialModP{}(x^3-x+1, 3) / PolynomialModP{}(x^2+2, 3);\nPolynomialModP{}(x^3-x+1, 3) / PolynomialModP{}(x^2+2, 7);\nPolynomialModP{}(x^3-x+1, 6) / PolynomialModP{}(2x^2+2, 6);\nPolynomialModP{}(x^3-x+1, 21) / PolynomialModP{}(2x^2+2, 21);\n",
     "output":"(\\frac{PolynomialModP{}(x^{3}+4x +1, 7)} {PolynomialModP{}(x^{3}+5x +1, 7)};\\frac{PolynomialModP{}(x^{3}+2x +1, 3)} {PolynomialModP{}(x^{2}+2, 3)};\\frac{PolynomialModP{}(x^{3}+2x +1, 3)}{PolynomialModP{}(x^{2}+2, 7)};\\frac{PolynomialModP{}(x^{3}+5x +1, 6)}{PolynomialModP{}(2x^{2}+2, 6)};\\frac{PolynomialModP{}(x^{3}+20x +1, 21)}{PolynomialModP{}(2x^{2}+2, 21)})"
   },
@@ -660,8 +672,8 @@
     "output":"(x=Polynomial{}(x );y=Polynomial{}(y );PolynomialAlgebraicNumbers{}(x^{6}+3x^{5}y +\\left(3\\sqrt{3}+3\\right)x^{4}y^{2}+\\left(6\\sqrt{3}+1\\right)x^{3}y^{3}+\\left(3\\sqrt{3}+9\\right)x^{2}y^{4}+9x y^{5}+3\\sqrt{3}y^{6}+3x^{5}+\\left(3\\sqrt{2}+6\\right)x^{4}y +\\left(6\\sqrt{3}+6\\sqrt{2}+3\\right)x^{3}y^{2}+\\left(6\\sqrt{6}+6\\sqrt{3}+3\\sqrt{2}\\right)x^{2}y^{3}+\\left(6\\sqrt{6}+9\\right)x y^{4}+9\\sqrt{2}y^{5}+3x^{4}+\\left(6\\sqrt{2}+3\\right)x^{3}y +\\left(3\\sqrt{3}+6\\sqrt{2}+6\\right)x^{2}y^{2}+\\left(6\\sqrt{6}+6\\right)x y^{3}+6\\sqrt{3}y^{4}+x^{3}+3\\sqrt{2}x^{2}y +6x y^{2}+2\\sqrt{2}y^{3}))"
   },
   {
-    "input":"x = MakeRationalFunction{}x;\ny = MakeRationalFunction{}y;\n(x/y)^3",
-    "output":"(x=MakeRationalFunction{}(x );y=MakeRationalFunction{}(y );\\left(\\frac{MakeRationalFunction{}(x )}{MakeRationalFunction{}(y )}\\right)^{3})"
+    "input":"x = MakeRationalFunction{}x;\ny = MakeRationalFunction{}y;\n(x/y)^3;\n(x/y)^-3;\n(x/y)^3-(x/y)^-3",
+    "output":"(x=MakeRationalFunction{}(x );y=MakeRationalFunction{}(y );MakeRationalFunction{}(\\frac{x^{3}}{y^{3}});MakeRationalFunction{}(\\frac{y^{3}}{x^{3}});MakeRationalFunction{}(\\frac{x^{6}-y^{6}}{x^{3}y^{3}}))"
   },
   {
     "input":"a = PolynomialModP{}(x^2 + x + 1, 7);\na^20",

@@ -1631,11 +1631,13 @@ y = Polynomial{}y;
 Raises a polynomial over the algebraic numbers to small integer power. 
 
 *^* [PowerRationalFractionByInteger] {CalculatorFunctionsBinaryOps::powerRationalFractionBySmallInteger}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%20%3d%20MakeRationalFunction%7b%7dx%3b%5cny%20%3d%20MakeRationalFunction%7b%7dy%3b%5cn%28x%2fy%29%5e3%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%20%3d%20MakeRationalFunction%7b%7dx%3b%5cny%20%3d%20MakeRationalFunction%7b%7dy%3b%5cn%28x%2fy%29%5e3%3b%5cn%28x%2fy%29%5e-3%3b%5cn%28x%2fy%29%5e3-%28x%2fy%29%5e-3%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 x = MakeRationalFunction{}x;
 y = MakeRationalFunction{}y;
-(x/y)^3
+(x/y)^3;
+(x/y)^-3;
+(x/y)^3-(x/y)^-3
 ```
 Raises rational function to small integer power. 
 

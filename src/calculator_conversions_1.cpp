@@ -476,7 +476,7 @@ bool CalculatorConversions::storeCandidateSubalgebra(
   values.addOnTop(currentE);
   Matrix<Rational> conversionMatrix;
   conversionMatrix.assignVectorsToRows(input.cartanElementsScaledToActByTwo);
-  currentE.assignMatrix(conversionMatrix, calculator, nullptr, false);
+  currentE.makeMatrix(conversionMatrix, calculator, nullptr, false);
   keys.addOnTop("ElementsCartan");
   values.addOnTop(currentE);
   input.checkAll();
@@ -1084,7 +1084,7 @@ bool CalculatorConversions::functionMatrixRational(
   if (!calculator.functionGetMatrix(input, outputMatrix, nullptr, - 1, nullptr)) {
     return calculator << "<br>Failed to get matrix of rationals. ";
   }
-  return output.assignMatrix(outputMatrix, calculator);
+  return output.makeMatrix(outputMatrix, calculator);
 }
 
 bool CalculatorConversions::innerMatrixRationalTensorForM(
@@ -1172,7 +1172,7 @@ bool CalculatorConversions::functionMatrixAlgebraic(
   if (!calculator.functionGetMatrix(input, outputMat)) {
     return false;
   }
-  return output.assignMatrix(outputMat, calculator);
+  return output.makeMatrix(outputMat, calculator);
 }
 
 bool CalculatorConversions::innerMatrixRationalFunction(
@@ -1198,7 +1198,7 @@ bool CalculatorConversions::functionMatrixRationalFunction(
   )) {
     return calculator << "<hr>Failed to get matrix of rational functions. ";
   }
-  output.assignMatrix(outputMat, calculator, &context);
+  output.makeMatrix(outputMat, calculator, &context);
   output.checkConsistency();
   return true;
 }

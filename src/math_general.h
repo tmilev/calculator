@@ -886,7 +886,14 @@ public:
       }
     }
     return true;
-  }
+  }  
+  bool jordanNormalForm(
+    Matrix<AlgebraicNumber>& outputLeft,
+    Matrix<AlgebraicNumber>& outputDiagonalized,
+    Matrix<AlgebraicNumber>& outputRight,
+    AlgebraicClosureRationals& ownerField,
+    std::stringstream* comments
+  );
   void getVectorFromColumn(int columnIndex, Vector<Coefficient>& output) const;
   void getVectorFromRow(int rowIndex, Vector<Coefficient>& output) const;
   int findPivot(int columnIndex, int rowStartIndex);
@@ -1228,7 +1235,7 @@ public:
     matrixCopy.getZeroEigenSpaceModifyMe(output);
   }
   void getZeroEigenSpaceModifyMe(List<Vector<Coefficient> >& output);
-  void getEigenspaceModifyMe(const Coefficient &inputEigenValue, List<Vector<Coefficient> >& outputEigenspace) {
+  void getEigenspaceModifyMe(const Coefficient& inputEigenValue, List<Vector<Coefficient> >& outputEigenspace) {
     for (int i = 0; i < this->numberOfColumns; i ++) {
       this->elements[i][i] -= inputEigenValue;
     }
@@ -2313,8 +2320,8 @@ public:
   void subtractMonomial(const TemplateMonomial& inputMon, const Coefficient& inputCoeff) {
     this->cleanupMonomialIndex(this->subtractMonomialNoCoefficientCleanUpReturnIndex(inputMon, inputCoeff));
   }
-  Coefficient getCoefficientOf(const TemplateMonomial& inputMon) const {
-    int index = this->monomials.getIndex(inputMon);
+  Coefficient getCoefficientOf(const TemplateMonomial& inputMonomial) const {
+    int index = this->monomials.getIndex(inputMonomial);
     if (index == - 1) {
       if (this->coefficients.size > 0) {
         return this->coefficients[0].zero();
@@ -2716,6 +2723,11 @@ public:
   bool findOneVariableRationalRoots(List<Rational>& output);
   Coefficient getDiscriminant();
   void getCoefficientInFrontOfLinearTermVariableIndex(int index, Coefficient& output);
+  Coefficient getCoefficientInFrontOfLinearTermVariableIndex(int index) {
+    Coefficient result;
+    this->getCoefficientInFrontOfLinearTermVariableIndex(index, result);
+    return result;
+  }
   void makeMonomial(
     int letterIndex,
     const Rational& power,
@@ -3322,6 +3334,16 @@ public:
   void initializeForSystemSolution();
   bool shouldReport();
   FormatExpressions& format();
+};
+
+// Solves polynomial equations in one variable, using shortcut
+// methods and avoiding use of algebraic number machinery.
+class PolynomialSolverWithQuadraticRadicalsUnivariate {
+public:
+  List<AlgebraicNumber> solutions;
+  AlgebraicClosureRationals* ownerField;
+  PolynomialSolverWithQuadraticRadicalsUnivariate(AlgebraicClosureRationals& inputField);
+  bool solvePolynomialWithRadicals(const Polynomial<Rational>& input, std::stringstream* commentsOnFailure);
 };
 
 template <class TemplateMonomial, class Coefficient>

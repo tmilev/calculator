@@ -40,6 +40,7 @@ let domElements = {
     calculator: {
       editorComments: "calculatorEditorComments",
       editorCommentsDebug: "calculatorEditorDebug",
+      equationEditorFontSizeSlider: "equationEditorFontSizeSlider",
       inputMain: "mainInputID",
       monitoring: {
         progressTimer: "idProgressReportTimer",

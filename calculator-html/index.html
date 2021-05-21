@@ -170,71 +170,72 @@
     <!--divSelectCourse-->
     <div id="divCalculatorPage" class="divPage">
       <div id="divCalculatorMainInputOutput">
-        <table id="tableCalculatorAndOutput" class="tableCalculatorInputs">
-          <tr>
-            <td>
-              <table class="tableCalculatorInputs">
-                <tr>
-                  <td>
-                    <input type="hidden" name="request" id="request" value="compute">
-                    <textarea class="textareaCalculatorMain" rows="3" cols="30" id="mainInputID"></textarea>
-                  </td>
-                  <td>
-                    <span id="calculatorEditorComments" style="white-space:nowrap">Equation assistant</span>
-                    <br>
-                    <div style="font-size: 48px; font-family: 'Times New Roman'; vertical-align:top"
-                      id="mainInputEditorField"></div>
-                    <br>
-                    <span id="calculatorEditorDebug"> </span>
-                  </td>
-                  <td>
-                    <div class="mqButtonPanel" style="vertical-align:top" id="mainInputEditorFieldButtons"
-                      buttons="algebra, logarithms, integrals, matrices"></div>
-                  </td>
-                  <td>
-                    <span id="spanDebugCalculatorPage">
-                    </span>
-                  </td>
-                  <td>
-                    <span id="idAutocompletePanel">
-                      <span id="idAutocompleteHints" style="font-size: x-small">
-                        Ctrl+space = autocomplete<br>
-                        Ctrl+arrow = select
-                      </span>
+        <div style="height:25%;overflow:auto;">
+          <table class="tableCalculatorInputs">
+            <tr>
+              <td>
+                <input type="hidden" name="request" id="request" value="compute">
+                <textarea class="textareaCalculatorMain" rows="3" cols="30" id="mainInputID"></textarea>
+              </td>
+              <td>
+                <span id="calculatorEditorComments" style="white-space:nowrap">Equation assistant</span><br>
+                <input id="equationEditorFontSizeSlider" type="range" min="8" max="100" value="48">
+                <br>
+                <div style="font-size: 48px; font-family: 'Times New Roman'; vertical-align:top"
+                  id="mainInputEditorField"></div>
+                <br>
+                <span id="calculatorEditorDebug"> </span>
+              </td>
+              <td>
+                <div class="mqButtonPanel" style="vertical-align:top" id="mainInputEditorFieldButtons"
+                  buttons="algebra, logarithms, integrals, matrices"></div>
+              </td>
+              <td>
+                <span id="spanDebugCalculatorPage">
+                </span>
+              </td>
+              <td>
+                <span id="idAutocompletePanel">
+                  <span id="idAutocompleteHints" style="font-size: x-small">
+                    Ctrl+space = autocomplete<br>
+                    Ctrl+arrow = select
+                  </span>
+                  <br>
+                  <div id="idAutocompleteSpan" style="display:block; overflow:auto;" height="100px"></div>
+                  <span id="idAutocompleteDebug"></span>
+                </span>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div style="height:80%;overflow:auto;">
+          <table id="tableCalculatorAndOutput" class="tableCalculatorInputs">
+            <tr>
+              <td>
+                <table>
+                  <tr>
+                    <td>
+                      <button class="buttonPreview" title="Shift + Enter = shortcut from input text box. " name="Go"
+                        onclick="window.calculator.calculator.submitComputation(); event.preventDefault();">
+                        Go
+                      </button>
+                      <span><button class="buttonSubmit" id="buttonPauseToggle">Pause</button></span>
+                      <span id="calculatorInputProgress"></span>
+                      <span id="idProgressReportTimer"></span>
                       <br>
-                      <div id="idAutocompleteSpan" style="display:block; overflow:auto;" height="100px"></div>
-                      <span id="idAutocompleteDebug"></span>
-                    </span>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <table>
-                <tr>
-                  <td>
-                    <button class="buttonPreview" title="Shift + Enter = shortcut from input text box. " name="Go"
-                      onclick="window.calculator.calculator.submitComputation(); event.preventDefault();">
-                      Go
-                    </button>
-                    <span><button class="buttonSubmit" id="buttonPauseToggle">Pause</button></span>
-                    <span id="calculatorInputProgress"></span>
-                    <span id="idProgressReportTimer"></span>
-                    <br>
-                    <span id="spanComputationLink"></span>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <span id="spanCalculatorMainOutput"></span>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
+                      <span id="spanComputationLink"></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span id="spanCalculatorMainOutput"></span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </div>
         <!--tableCalculatorAndOutput-->
       </div>
       <div id="divCalculatorExamplesContainer">

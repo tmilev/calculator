@@ -15,6 +15,7 @@ class CalculatorEquationEditor {
     this.keyPressHandler = keyPressHandler;
     this.theLaTeXString = null;
     this.extractor = new EditorInputExtractor();
+    this.slider = document.getElementById(ids.domElements.pages.calculator.equationEditorFontSizeSlider);
   }
 
   initialize() {
@@ -55,6 +56,20 @@ class CalculatorEquationEditor {
       autocomplete.suggestWord();
       this.writeIntoEquationEditor();
     });
+    this.slider.addEventListener("change", () => {
+      this.clickSlider();
+    });
+    this.slider.addEventListener("input", () => {
+      this.clickSlider();
+    });
+  }
+
+  clickSlider() {
+    let editor = this.calculatorPanel.equationEditor;
+    this.calculatorPanel.equationEditorContainer.style.fontSize = `${this.slider.value}px`;
+    editor.updateDOM();
+    editor.rootNode.focusRestore(1);
+    editor.writeDebugInfo(null);
   }
 
   isSeparatorCharacter(theChar) {

@@ -883,19 +883,19 @@ bool Expression::setContextAtLeastEqualTo(
       return true;
     }
     inputOutputMinContext = newContext;
-    Matrix<RationalFraction<Rational> > newMat;
-    this->owner->functionGetMatrix(*this, newMat, &newContext);
+    Matrix<RationalFraction<Rational> > newMatrix;
+    this->owner->functionGetMatrix(*this, newMatrix, &newContext);
     PolynomialSubstitution<Rational> substitution;
     oldContext.polynomialSubstitutionNoFailure<Rational>(newContext, substitution, Rational::one());
-    for (int i = 0; i < newMat.numberOfRows; i ++) {
-      for (int j = 0; j < newMat.numberOfColumns; j ++) {
-        if (!newMat(i, j).substitution(substitution, Rational::one(), commentsOnFailure)) {
+    for (int i = 0; i < newMatrix.numberOfRows; i ++) {
+      for (int j = 0; j < newMatrix.numberOfColumns; j ++) {
+        if (!newMatrix(i, j).substitution(substitution, Rational::one(), commentsOnFailure)) {
           return *this->owner << "Failed to carry out the substitution "
           << substitution.toString() << " in the matrix " << this->toString() << ". ";
         }
       }
     }
-    return this->assignMatrix(newMat, *this->owner, &inputOutputMinContext);
+    return this->makeMatrix(newMatrix, *this->owner, &inputOutputMinContext);
   }
   this->owner->comments << "Expression " << this->toString()
   << " is of built-in type but is not handled by Expression::setContextAtLeastEqualTo. ";

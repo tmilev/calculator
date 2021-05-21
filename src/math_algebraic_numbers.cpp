@@ -19,6 +19,57 @@ std::string MonomialVector::toString(FormatExpressions* format) const {
   return out.str();
 }
 
+PolynomialSolverWithQuadraticRadicalsUnivariate::PolynomialSolverWithQuadraticRadicalsUnivariate(
+  AlgebraicClosureRationals& inputField
+) {
+  this->ownerField = &inputField;
+}
+
+bool PolynomialSolverWithQuadraticRadicalsUnivariate::solvePolynomialWithRadicals(
+  const Polynomial<Rational>& input,
+  std::stringstream* commentsOnFailure
+) {
+  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationFiniteFields> factorization;
+  if (!factorization.factor(input, nullptr, commentsOnFailure)) {
+    if (commentsOnFailure!= nullptr) {
+      *commentsOnFailure << "Failed to factor the characteristic polynomial.";
+    }
+    return false;
+  }
+  this->solutions.clear();
+  for (int i = 0; i < factorization.reduced.size; i ++) {
+    Polynomial<Rational>& factor = factorization.reduced[i];
+    if (factor.totalDegreeInt() > 2) {
+      if (commentsOnFailure!= nullptr) {
+        *commentsOnFailure << "Characteristic polynomial has factor of degree larger than 2.";
+      }
+      return false;
+    }
+    if (factor.isLinear()) {
+      this->solutions.addOnTop(
+        - factor.getConstantTerm() /
+        factor.getCoefficientInFrontOfLinearTermVariableIndex(0)
+      );
+    } else {
+      Rational a = factor.getCoefficientOf(MonomialPolynomial(0, 2));
+      Rational b = factor.getCoefficientOf(MonomialPolynomial(0, 1));
+      Rational c = factor.getCoefficientOf(MonomialPolynomial(0, 0));
+      Rational discriminant = b * b - 4 * a * c;
+      AlgebraicNumber squareRootDiscriminant;
+      if (!squareRootDiscriminant.assignRationalQuadraticRadical(
+        discriminant, *this->ownerField, commentsOnFailure
+      )) {
+        return false;
+      }
+      AlgebraicNumber leftRoot = (squareRootDiscriminant * (- 1) - b) / (2 * a);
+      AlgebraicNumber rightRoot = (squareRootDiscriminant - b) / (2 * a);
+      this->solutions.addOnTop(leftRoot);
+      this->solutions.addOnTop(rightRoot);
+    }
+  }
+  return true;
+}
+
 int AlgebraicClosureRationals::getDimensionOverRationals() const {
   return this->latestBasis.size;
 }

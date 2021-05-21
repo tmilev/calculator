@@ -171,13 +171,6 @@ private:
     bool reduceOneRowToSequenceAndOneByOneToNonMatrix,
     bool dontReduceTypes
   );
-  template<class Coefficient>
-  bool assignMatrix(
-    const Matrix<Coefficient>& input,
-    Calculator& owner,
-    ExpressionContext const* inputContext = nullptr,
-    bool reduceOneRowToSequenceAndOneByOneToNonMatrix = true
-  );
   bool divisionByMeShouldBeWrittenInExponentForm() const;
   bool isCalculatorStatusChanger() const;
   bool isList() const;
@@ -376,7 +369,14 @@ private:
   int getNumberOfColumns() const;
   bool makeSequenceCommands(Calculator& owner, List<std::string>& inputKeys, List<Expression>& inputValues);
   bool makeSequenceStatements(Calculator& owner, List<Expression>* inputStatements = nullptr);
-  bool makeMatrix(Calculator& owner, Matrix<Expression>* inputMatrix = nullptr);
+  template<class Coefficient>
+  bool makeMatrix(
+    const Matrix<Coefficient>& input,
+    Calculator& owner,
+    ExpressionContext const* inputContext = nullptr,
+    bool reduceOneRowToSequenceAndOneByOneToNonMatrix = true
+  );
+  bool makeMatrix(Matrix<Expression>* inputMatrix, Calculator& owner);
   bool makeSequence(Calculator& owner, List<Expression>* inputSequence = nullptr);
   bool makeXOX(Calculator& owner, int theOp, const Expression& left, const Expression& right);
   bool makeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex = 2);
@@ -3281,15 +3281,15 @@ bool Calculator::getTypeHighestWeightParabolic(
 }
 
 template <class Coefficient>
-bool Expression::assignMatrix(
+bool Expression::makeMatrix(
   const Matrix<Coefficient>& input,
   Calculator& owner,
   const ExpressionContext* inputContext,
   bool reduceOneRowToSequenceAndOneByOneToNonMatrix
 ) {
   MacroRegisterFunctionWithName("Expression::assignMatrix");
-  Matrix<Expression> matrixEs;
-  matrixEs.initialize(input.numberOfRows, input.numberOfColumns);
+  Matrix<Expression> matrixExpressions;
+  matrixExpressions.initialize(input.numberOfRows, input.numberOfColumns);
   Expression currentElt;
   for (int i = 0; i < input.numberOfRows; i ++) {
     for (int j = 0; j < input.numberOfColumns; j ++) {
@@ -3298,11 +3298,11 @@ bool Expression::assignMatrix(
       } else {
         currentElt.assignValueWithContext(input(i, j), *inputContext, owner);
       }
-      matrixEs(i, j) = currentElt;
+      matrixExpressions(i, j) = currentElt;
     }
   }
   return this->assignMatrixExpressions(
-    matrixEs, owner, reduceOneRowToSequenceAndOneByOneToNonMatrix, false
+    matrixExpressions, owner, reduceOneRowToSequenceAndOneByOneToNonMatrix, false
   );
 }
 

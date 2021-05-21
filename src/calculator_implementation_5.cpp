@@ -362,19 +362,19 @@ bool CalculatorFunctions::innerGetPointsImplicitly(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetPointsImplicitly");
-  MeshTriangles theMesh;
-  if (!theMesh.computePoints(calculator, input, false)) {
+  MeshTriangles mesh;
+  if (!mesh.computePoints(calculator, input, false)) {
     return false;
   }
-  HashedList<Vector<double>, MathRoutines::hashVectorDoubles> thePoints;
-  List<PlotObject>& plots = theMesh.theCurve.getPlots();
+  HashedList<Vector<double>, MathRoutines::hashVectorDoubles> points;
+  List<PlotObject>& plots = mesh.theCurve.getPlots();
   for (int i = 0; i < plots.size; i ++) {
-    thePoints.addOnTopNoRepetition(plots[i].pointsDouble[0]);
-    thePoints.addOnTopNoRepetition(plots[i].pointsDouble[1]);
+    points.addOnTopNoRepetition(plots[i].pointsDouble[0]);
+    points.addOnTopNoRepetition(plots[i].pointsDouble[1]);
   }
   Matrix<double> matrix;
-  matrix.assignVectorsToRows(thePoints);
-  return output.assignMatrix(matrix, calculator);
+  matrix.assignVectorsToRows(points);
+  return output.makeMatrix(matrix, calculator);
 }
 
 bool CalculatorFunctionsPlot::plotImplicitFunction(
@@ -486,7 +486,7 @@ bool CalculatorConversions::functionMatrixDouble(
   )) {
     return calculator << "<br>Failed to get matrix of doubles. ";
   }
-  return output.assignMatrix(matrix, calculator);
+  return output.makeMatrix(matrix, calculator);
 }
 
 bool CalculatorFunctionsIntegration::integratePullConstant(
@@ -1198,7 +1198,7 @@ bool CalculatorFunctionsPlot::plotRectangle(
   return output.assignValue(thePlot, calculator);
 }
 
-bool CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT(
+bool CalculatorFunctions::solveUnivariatePolynomialWithRadicalsWithRespectTo(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT");

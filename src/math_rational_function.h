@@ -70,6 +70,7 @@ public:
   void getDenominator(Polynomial<Coefficient>& output) const;
   bool isNegative();
   void clearDenominators(RationalFraction<Coefficient>& outputWasMultipliedBy);
+  void operator+=(int coefficient);
   void operator+=(const Polynomial<Coefficient>& other);
   void operator+=(const RationalFraction<Coefficient>& other);
   bool operator==(int other) const;
@@ -87,7 +88,6 @@ public:
   // and the denominator and numerator have relatively prime coefficients.
   // Returns the number by which the element was multiplied.
   Rational scaleToIntegral();
-  void operator+=(int theConstant);
   void operator*=(const RationalFraction<Coefficient>& other);
   void operator*=(const Polynomial<Coefficient>& other);
   void operator*=(const MonomialPolynomial& other);
@@ -109,6 +109,18 @@ public:
   void makeConstant(const Coefficient& coefficient) {
     this->makeZero();
     this->constantValue = coefficient;
+  }
+  bool isPolynomial(Polynomial<Coefficient>* whichPolynomial) const {
+    if (
+      this->expressionType != this->typePolynomial &&
+      this->expressionType == this->typeConstant
+    ) {
+      return false;
+    }
+    if (whichPolynomial != nullptr) {
+      this->getNumerator(*whichPolynomial);
+    }
+    return true;
   }
   bool isConstant(Rational* whichConstant = nullptr) const;
   bool isInteger() const;

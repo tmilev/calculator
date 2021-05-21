@@ -1204,7 +1204,7 @@ bool Calculator::replaceMatrixXByE() {
     }
     matrixElement.data.assignMatrixExpressions(matrix, *this, true, true);
   } else {
-    matrixElement.data.makeMatrix(*this);
+    matrixElement.data.makeMatrix(nullptr, *this);
   }
   matrixElement.dataList.setSize(0);
   matrixElement.controlIndex = this->conExpression();

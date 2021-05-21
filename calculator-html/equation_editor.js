@@ -4940,6 +4940,7 @@ class MathNode {
   }
 
   computeDimensionsMatrix() {
+    this.boundingBox = new BoundingBox();
     this.boundingBox.height = this.children[0].boundingBox.height;
     this.boundingBox.width = this.children[0].boundingBox.width;
     this.boundingBox.fractionLineHeight = this.children[0].boundingBox.fractionLineHeight;
@@ -4985,6 +4986,7 @@ class MathNode {
     let betweenRows = 10;
     for (let i = 0; i < numberOfRows; i++) {
       let row = this.children[i];
+      row.boundingBox = new BoundingBox();
       row.mergeBoundingBoxesHorizontallyAlignedElements();
       row.boundingBox.top = top;
       top += row.boundingBox.height + betweenRows;

@@ -234,6 +234,7 @@ public:
   static bool minimalPolynomialMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool characteristicPolynomialMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionToMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool diagonalizeMatrix(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 class CalculatorFunctions {
@@ -437,7 +438,7 @@ public:
   static bool innerOrIdentical(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAnd(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerSolveUnivariatePolynomialWithRadicalsWRT(
+  static bool solveUnivariatePolynomialWithRadicalsWithRespectTo(
     Calculator& calculator, const Expression& input, Expression& output
   );
 

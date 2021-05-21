@@ -2240,7 +2240,7 @@ bool CalculatorFunctionsWeylGroup::representElementHyperOctahedral(
     return calculator << "Failed to get matrix of element " << element.toString()
     << " from representation: " << theRep.toString();
   }
-  return output.assignMatrix(result, calculator, nullptr, false);
+  return output.makeMatrix(result, calculator, nullptr, false);
 }
 
 bool CalculatorFunctionsWeylGroup::hyperOctahedralGetOneRepresentation(

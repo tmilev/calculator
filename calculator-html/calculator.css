@@ -1668,3 +1668,7 @@ button.buttonSolve:hover {
   border: 2px solid blue;
   border-radius: 3px;
 }
+
+#spanCalculatorMainOutput {
+  height: 80%;
+}

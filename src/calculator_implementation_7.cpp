@@ -1269,7 +1269,7 @@ bool CalculatorFunctionsAlgebraic::convertAlgebraicNumberToMatrix(
   algebraicNumber.owner->getMultiplicationBy(algebraicNumber, numberMatrixTensor);
   Matrix<Rational> result;
   numberMatrixTensor.getMatrix(result, dimension);
-  return output.assignMatrix(result, calculator);
+  return output.makeMatrix(result, calculator);
 }
 
 bool CalculatorFunctionsAlgebraic::printAlgebraicClosureStatus(
@@ -5208,13 +5208,13 @@ void Expression::getBlocksOfCommutativity(HashedListSpecialized<Expression>& inp
   inputOutputList.addOnTopNoRepetition(*this);
 }
 
-bool Expression::makeMatrix(Calculator& owner, Matrix<Expression>* inputMatrix) {
+bool Expression::makeMatrix(Matrix<Expression>* inputMatrix, Calculator& owner) {
   MacroRegisterFunctionWithName("Expression::makeMatrix");
   if (inputMatrix == nullptr) {
     this->reset(owner);
-    Expression matrixID(owner);
-    matrixID.addChildAtomOnTop(owner.opMatrix());
-    this->addChildOnTop(matrixID);
+    Expression emptyMatrix(owner);
+    emptyMatrix.addChildAtomOnTop(owner.opMatrix());
+    this->addChildOnTop(emptyMatrix);
     return true;
   }
   return this->assignMatrixExpressions(*inputMatrix, owner, true, true);
@@ -5594,7 +5594,7 @@ bool CalculatorFunctions::innerInvertMatrix(Calculator& calculator, const Expres
       return output.makeError("Matrix determinant is zero.", calculator);
     }
     matrix.invert();
-    return output.assignMatrix(matrix, calculator);
+    return output.makeMatrix(matrix, calculator);
   }
   Matrix<AlgebraicNumber> matrixAlg;
   if (calculator.functionGetMatrix(input, matrixAlg)) {
@@ -5608,7 +5608,7 @@ bool CalculatorFunctions::innerInvertMatrix(Calculator& calculator, const Expres
     return output.makeError("Matrix determinant is zero.", calculator);
   }
   matrixAlg.invert();
-  return output.assignMatrix(matrixAlg, calculator);
+  return output.makeMatrix(matrixAlg, calculator);
 }
 
 bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& calculator, const Expression& input, Expression& output) {

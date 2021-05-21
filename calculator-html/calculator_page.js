@@ -84,8 +84,8 @@ class AtomHandler {
     resultString += this.description;
     resultString += `<br><b>Example:</b>`;
     resultString += `<br>${this.example}</calculatorExampleInfo>`;
-    let theLink = calculator.getComputationLink(this.example);
-    resultString += `<a href = '#${theLink}' class = "linkInfo">Example</a>`;
+    let link = calculator.getComputationLink(this.example);
+    resultString += `<a href = '#${link}' class = "linkInfo">Example</a>`;
     resultString += ` [${this.ruleName}]`;
     return resultString;
   }

@@ -16,6 +16,7 @@
 #include "string_constants.h"
 #include <iomanip>
 #include "math_extra_semisimple_lie_algebras_implementation.h"
+#include "math_rational_function_implementation.h"
 
 CalculatorHTML::Test::Test() {
   this->filesToInterpret = 0;
@@ -2911,17 +2912,18 @@ bool CalculatorFunctions::innerGenerateMultiplicativelyClosedSet(
       reportStream << "<br>Evaluating: " << product.toString();
       report.report(reportStream.str());
       calculator.evaluateExpression(calculator, product, evaluatedProduct);
-      //if (evaluatedProduct == set[0])
+      //if (evaluatedProduct == theSet[0])
       //{
       //}
       set.addOnTopNoRepetition(evaluatedProduct);
-      if (set.size >upperLimit) {
+      if (set.size > upperLimit) {
         std::stringstream out;
         out << "<hr>While generating multiplicatively closed set, I went above the upper limit of "
         << upperLimit << " elements.";
         evaluatedProduct.makeError(out.str(), calculator);
         set.addOnTop(evaluatedProduct);
-        i = set.size; break;
+        i = set.size;
+        break;
       }
     }
   }
@@ -2934,7 +2936,111 @@ bool CalculatorFunctions::innerGenerateMultiplicativelyClosedSet(
   return true;
 }
 
-bool CalculatorFunctionsLinearAlgebra::functionToMatrix(Calculator& calculator, const Expression& input, Expression& output) {
+template<>
+bool Matrix<Rational>::jordanNormalForm(
+  Matrix<AlgebraicNumber>& outputLeft,
+  Matrix<AlgebraicNumber>& outputDiagonalized,
+  Matrix<AlgebraicNumber>& outputRight,
+  AlgebraicClosureRationals& ownerField,
+  std::stringstream* comments
+) {
+  Matrix<RationalFraction<Rational> > characteristicMatrix;
+  characteristicMatrix = *this;
+  Polynomial<Rational> minusLambda;
+  minusLambda.makeMonomial(0, 1, - 1);
+  int dimension = this->numberOfColumns;
+  for (int i = 0; i < dimension; i ++) {
+    characteristicMatrix(i, i) += minusLambda;
+  }
+  RationalFraction<Rational> characteristicPolynomialComputer;
+  characteristicMatrix.computeDeterminantOverwriteMatrix(characteristicPolynomialComputer);
+  Polynomial<Rational> characteristicPolynomial;
+  if (!characteristicPolynomialComputer.isPolynomial(&characteristicPolynomial)) {
+    // We have made a programming error.
+    global.fatal << "The characteristic polynomial should not be an honest rational fraction. "
+    << global.fatal;
+  }
+  PolynomialSolverWithQuadraticRadicalsUnivariate solver(ownerField);
+  if (!solver.solvePolynomialWithRadicals(characteristicPolynomial, comments)) {
+    return false;
+  }
+  Matrix<AlgebraicNumber> diagonalizer;
+  diagonalizer.makeZeroMatrix(dimension);
+  List<Vector<AlgebraicNumber> > allEigenVectors;
+  for (int i = 0; i < solver.solutions.size; i ++) {
+    List<Vector<AlgebraicNumber> > currentEigenVectors;
+    diagonalizer = *this;
+    diagonalizer.getEigenspaceModifyMe(solver.solutions[i], currentEigenVectors);
+    allEigenVectors.addListOnTop(currentEigenVectors);
+  }
+  if (allEigenVectors.size != dimension) {
+    if (comments != nullptr) {
+      *comments << "The Jordan normal form of the matrix is not diagonal; "
+      << "diagonalization is not implemented yet.";
+    }
+    return false;
+  }
+  outputLeft.makeZeroMatrix(dimension);
+  outputDiagonalized.makeZeroMatrix(dimension);
+  outputRight.makeZeroMatrix(dimension);
+  for (int i = 0; i < dimension; i ++) {
+    for (int j = 0; j < dimension; j ++) {
+      outputLeft(i, j) = allEigenVectors[j][i];
+    }
+  }
+  outputRight = outputLeft;
+  if (!outputRight.invert()) {
+    global.fatal << "The eigenvector matrix must be invertible." << global.fatal;
+  }
+  outputDiagonalized = *this;
+  outputDiagonalized = outputRight;
+  Matrix<AlgebraicNumber> converted;
+  converted = *this;
+  outputDiagonalized *= converted;
+  outputDiagonalized *= outputLeft;
+  return true;
+}
+
+bool CalculatorFunctionsLinearAlgebra::diagonalizeMatrix(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsLinearAlgebra::diagonalizeMatrix");
+  if (input.size() != 2) {
+    return false;
+  }
+  Matrix<Rational> matrix;
+  if (!calculator.functionGetMatrix(input[1], matrix)) {
+    return false;
+  }
+  if (!matrix.isSquare()) {
+    return calculator
+    << "Diagonalization (Jordan normal form) is allowed only for square matrices. ";
+  }
+  Matrix<AlgebraicNumber> eigenMatrix, jordanNormalForm, eigenMatrixInverted;
+  std::stringstream comments;
+  if (!matrix.jordanNormalForm(
+    eigenMatrix,
+    jordanNormalForm,
+    eigenMatrixInverted,
+    calculator.objectContainer.algebraicClosure,
+    &comments
+  )) {
+    return calculator << "Failed to compute the Jordan normal form." << comments.str();
+  }
+  List<Expression> result;
+  Expression eigenMatrixExpression, jordanNormalFormExpression, eigenMatrixInvertedExpression;
+  eigenMatrixExpression.makeMatrix(eigenMatrix, calculator);
+  jordanNormalFormExpression.makeMatrix(jordanNormalForm, calculator);
+  eigenMatrixInvertedExpression.makeMatrix(eigenMatrixInverted, calculator);
+  result.addOnTop(eigenMatrixExpression);
+  result.addOnTop(jordanNormalFormExpression);
+  result.addOnTop(eigenMatrixInvertedExpression);
+  return output.makeSequence(calculator, &result);
+}
+
+bool CalculatorFunctionsLinearAlgebra::functionToMatrix(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsLinearAlgebra::functionToMatrix");
   if (!input.isListNElements(4)) {
     return false;

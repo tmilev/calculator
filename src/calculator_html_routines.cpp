@@ -52,18 +52,18 @@ bool CalculatorHtmlFunctions::evaluateSymbols(
     return false;
   }
   List<SyntacticElement> elements;
-  calculator.parseFillDictionary(theString, elements);
+  calculator.parser.parseFillDictionary(theString, elements);
   Expression evaluatedE;
   std::stringstream out;
   bool previousWasInteger = false;
   for (int i = 0; i < elements.size; i ++) {
     SyntacticElement& currentElt = elements[i];
-    if (currentElt.controlIndex == calculator.conVariable()) {
+    if (currentElt.controlIndex == calculator.parser.conVariable()) {
       calculator.evaluateExpression(calculator, currentElt.data, evaluatedE);
       out << evaluatedE.toString();
       continue;
     }
-    if (currentElt.controlIndex == calculator.conInteger()) {
+    if (currentElt.controlIndex == calculator.parser.conInteger()) {
       if (!previousWasInteger) {
         out << "{";
       }
@@ -75,7 +75,7 @@ bool CalculatorHtmlFunctions::evaluateSymbols(
       out << "}";
     }
     previousWasInteger = false;
-    out << calculator.controlSequences[currentElt.controlIndex];
+    out << calculator.parser.controlSequences[currentElt.controlIndex];
   }
   if (previousWasInteger) {
     out << "}";

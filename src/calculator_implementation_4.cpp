@@ -16,6 +16,7 @@
 #include <cfloat>
 
 Calculator::Calculator() {
+  this->parser.initialize(this);
   this->numOutputFileS = 0;
   this->flagHideLHS = false;
   this->flagUseHtml = true;
@@ -1763,7 +1764,7 @@ JSData Calculator::toJSONOutputAndSpecials() {
     return result;
   }
   result[WebAPI::result::performance] = this->toJSONPerformance();
-  result[WebAPI::result::parsingLog] = this->parsingLog;
+  result[WebAPI::result::parsingLog] = this->parser.parsingLog;
   return result;
 }
 
@@ -1804,10 +1805,10 @@ void Calculator::computeAutoCompleteKeyWords() {
   for (int i = 0; i < this->namedRules.size(); i ++) {
     this->autoCompleteKeyWords.addOnTopNoRepetition(this->namedRules.keys[i]);
   }
-  for (int i = 0; i < this->controlSequences.size; i ++) {
-    if (this->controlSequences[i].size() > 0) {
-      if (MathRoutines::isALatinLetter(this->controlSequences[i][0])) {
-        autoCompleteKeyWords.addOnTopNoRepetition(this->controlSequences[i]);
+  for (int i = 0; i < this->parser.controlSequences.size; i ++) {
+    if (this->parser.controlSequences[i].size() > 0) {
+      if (MathRoutines::isALatinLetter(this->parser.controlSequences[i][0])) {
+        autoCompleteKeyWords.addOnTopNoRepetition(this->parser.controlSequences[i]);
       }
     }
   }
@@ -1921,11 +1922,11 @@ std::string Calculator::toString() {
   << "The object container is the data "
   << "structure storing all c++ built-in data types "
   << "requested by the user<br> " << this->objectContainer.toString();
-  out << "<hr>Control sequences (" << this->controlSequences.size
+  out << "<hr>Control sequences (" << this->parser.controlSequences.size
   << " total):\n<br>\n";
-  for (int i = 0; i < this->controlSequences.size; i ++) {
-    out << openTag1 << this->controlSequences[i] << closeTag1;
-    if (i != this->controlSequences.size) {
+  for (int i = 0; i < this->parser.controlSequences.size; i ++) {
+    out << openTag1 << this->parser.controlSequences[i] << closeTag1;
+    if (i != this->parser.controlSequences.size) {
       out << ", ";
     }
   }
@@ -1965,38 +1966,7 @@ std::string Calculator::toString() {
   return out2.str();
 }
 
-std::string Calculator::toStringSyntacticStackHTMLSimple() {
-  MacroRegisterFunctionWithName("Calculator::toStringSyntacticStackHTMLSimple");
-  if (this->currentSyntacticStack->size == 0) {
-    global.fatal << "Unexpected empty syntactic stack." << global.fatal;
-  }
-  std::stringstream out;
-  bool isBad = ((*this->currentSyntacticStack).size > this->numberOfEmptyTokensStart + 1);
-  SyntacticElement& lastSyntacticElt = *(*this->currentSyntacticStack).lastObject();
-  if ((*this->currentSyntacticStack).size == this->numberOfEmptyTokensStart + 1) {
-    if (lastSyntacticElt.controlIndex != this->conExpression()) {
-      isBad = true;
-    }
-  }
-  if (!isBad) {
-    out << this->currentSyntacticStack->lastObject()->data.toString();
-    return out.str();
-  }
-  for (int i = this->numberOfEmptyTokensStart; i < (*this->currentSyntacticStack).size; i ++) {
-    SyntacticElement& currentElt = (*this->currentSyntacticStack)[i];
-    if (currentElt.isCommandEnclosure()) {
-      continue;
-    }
-    if (currentElt.controlIndex != this->conExpression()) {
-      out << " <b style='color:red'>" << currentElt.toStringSyntaxRole(*this) << "</b> ";
-    } else {
-      out << currentElt.data.toString();
-    }
-  }
-  return out.str();
-}
-
-std::string Calculator::toStringSyntacticStackHTMLTable(
+std::string CalculatorParser::toStringSyntacticStackHTMLTable(
   bool includeLispifiedExpressions, bool ignoreCommandEnclosures
 ) {
   MacroRegisterFunctionWithName("Calculator::toStringSyntacticStackHTMLTable");

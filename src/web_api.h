@@ -80,7 +80,7 @@ class WebAPIResponse {
   bool processAssignTeacherToSection();
   bool processExamPageJSON();
   bool processTemplateJSON();
-  bool processLoginUserInfo(const std::string &comments);
+  bool processLoginUserInfo(const std::string& comments);
   bool processSelectCourseJSON();
   bool processExamPageInterpreter();
   bool processLogout();

@@ -85,11 +85,11 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   << answer.commandsBeforeAnswerNoEnclosuresForDEBUGGING
   << answer.commandsSolutionOnly;
   interpreter.evaluate(answerCommands.str());
-  if (interpreter.syntaxErrors != "") {
+  if (interpreter.parser.syntaxErrors != "") {
     out << "<b style = 'color:red'>Failed to compose the solution. "
     << "Likely there is a bug with the problem. </b>"
     << "<br>" << CalculatorHTML::bugsGenericMessage << "<br>Details: <br>"
-    << interpreter.toStringSyntacticStackHTMLSimple();
+    << interpreter.parser.toStringSyntacticStackHTMLSimple();
     result[WebAPI::result::resultHtml] = out.str();
     result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
     return result;
@@ -298,9 +298,9 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   << studentAnswerSream.str();
 
   interpreter.evaluate(studentAnswerWithComments.str());
-  if (interpreter.syntaxErrors != "") {
+  if (interpreter.parser.syntaxErrors != "") {
     errorStream << "<b style ='color:red'>Parsing failure:</b><br>"
-    << interpreter.toStringSyntacticStackHTMLSimple();
+    << interpreter.parser.toStringSyntacticStackHTMLSimple();
     result[WebAPI::result::error] = errorStream.str();
     result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
     result[WebAPI::result::resultHtml] = out.str();
@@ -312,14 +312,14 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
     return result;
   }
-  FormatExpressions theFormat;
-  theFormat.flagUseLatex = true;
-  theFormat.flagUsePmatrix = true;
+  FormatExpressions format;
+  format.flagUseLatex = true;
+  format.flagUsePmatrix = true;
   const Expression& studentAnswerNoContextE =
   interpreter.programExpression[interpreter.programExpression.size() - 1];
   out << "<b style='color:magenta'>Interpreting as:</b><br>";
   out << "\\(\\displaystyle "
-  << studentAnswerNoContextE.toString(&theFormat) << "\\)";
+  << studentAnswerNoContextE.toString(&format) << "\\)";
   Calculator interpreterWithAdvice;
   interpreterWithAdvice.flagUseLnInsteadOfLog = true;
   interpreterWithAdvice.initialize(Calculator::Mode::educational);
@@ -352,7 +352,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     calculatorInputStreamNoEnclosures.str(), "Input link"
   );
   interpreterWithAdvice.evaluate(calculatorInputStream.str());
-  if (interpreterWithAdvice.syntaxErrors != "") {
+  if (interpreterWithAdvice.parser.syntaxErrors != "") {
     out << "<br><b style='color:red'>"
     << "Something went wrong when parsing your answer "
     << "in the context of the current problem. "
@@ -385,7 +385,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     return result;
   }
   if (hasCommentsBeforeSubmission){
-    out << WebAPIResponse::getCommentsInterpretation(interpreterWithAdvice, 3, theFormat);
+    out << WebAPIResponse::getCommentsInterpretation(interpreterWithAdvice, 3, format);
   }
   result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
   if (global.userDefaultHasAdminRights() && global.userDebugFlagOn()) {
@@ -1316,7 +1316,7 @@ bool AnswerCheckerNoProblem::checkAnswer(bool* outputIsCorrect) {
   this->interpreter.flagPlotNoControls = true;
   this->interpreter.evaluate(this->completedProblem);
   this->answerIsCorrect = false;
-  if (this->interpreter.flagAbortComputationASAP || interpreter.syntaxErrors != "") {
+  if (this->interpreter.flagAbortComputationASAP || this->interpreter.parser.syntaxErrors != "") {
     std::stringstream out;
     if (this->interpreter.errorsPublic.str() != "") {
       out << "While checking your answer, got the error: "
@@ -1335,8 +1335,8 @@ bool AnswerCheckerNoProblem::checkAnswer(bool* outputIsCorrect) {
     isolatedInterpreter.flagWriteLatexPlots = false;
     isolatedInterpreter.flagPlotNoControls = true;
     isolatedInterpreter.evaluate("(" + this->answerGiven + ")");
-    if (isolatedInterpreter.syntaxErrors != "") {
-      out << isolatedInterpreter.toStringSyntacticStackHTMLSimple();
+    if (isolatedInterpreter.parser.syntaxErrors != "") {
+      out << isolatedInterpreter.parser.toStringSyntacticStackHTMLSimple();
     } else {
       out << isolatedInterpreter.outputString;
     }
@@ -1399,7 +1399,7 @@ void AnswerCheckerNoProblem::computeVerificationString() {
   out << this->answerGiven;
   out << "\\)";
   std::string errorMessage;
-  errorMessage = this->interpreter.toStringIsCorrectAsciiCalculatorString(this->answerGiven);
+  errorMessage = this->interpreter.parser.toStringIsCorrectAsciiCalculatorString(this->answerGiven);
   if (errorMessage != "") {
     out << "<br>" << errorMessage
     << "<hr><b>If you entered this expression through the "
@@ -1732,7 +1732,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   << "{}(" << currentA.commandAnswerOnGiveUp << ");";
   answerCommandsNoEnclosure << currentA.commandAnswerOnGiveUp;
   interpreter.evaluate(answerCommands.str());
-  if (interpreter.syntaxErrors != "") {
+  if (interpreter.parser.syntaxErrors != "") {
     out << "<b style='color:red'>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b>";
     if (global.userDefaultHasProblemComposingRights()) {
@@ -1741,7 +1741,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
       );
     }
     out << "<br>" << CalculatorHTML::bugsGenericMessage << "<br>Details: <br>"
-    << interpreter.toStringSyntacticStackHTMLSimple();
+    << interpreter.parser.toStringSyntacticStackHTMLSimple();
     result[WebAPI::result::resultHtml] = out.str();
     int64_t elapsedTime = global.getElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::millisecondsComputation] = elapsedTime;

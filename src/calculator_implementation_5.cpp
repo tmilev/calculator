@@ -788,7 +788,7 @@ bool CalculatorFunctions::innerNumerator(Calculator& calculator, const Expressio
   return true;
 }
 
-bool CalculatorFunctions::innerDenominator(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::denominator(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerDenominator");
   if (input.size() != 2) {
     return false;
@@ -1291,7 +1291,7 @@ bool CalculatorFunctions::solveUnivariatePolynomialWithRadicalsWithRespectTo(
   return false;
 }
 
-bool CalculatorFunctions::innerOperatorBounds(
+bool CalculatorFunctions::operatorBounds(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPowerIntToAny");
@@ -1358,7 +1358,7 @@ bool CalculatorFunctions::innerPowerExponentToLog(
   return false;
 }
 
-bool CalculatorFunctions::innerDistributeExponent(
+bool CalculatorFunctions::distributeExponent(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerDistributeExponent");
@@ -1690,7 +1690,7 @@ bool CalculatorFunctionsPlot::plotSegment(Calculator& calculator, const Expressi
   return output.assignValue(thePlot, calculator);
 }
 
-bool CalculatorFunctions::innerThaw(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::thaw(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerThaw");
   if (input.size() < 2) {
     return false;

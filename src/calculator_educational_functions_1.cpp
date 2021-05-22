@@ -141,9 +141,9 @@ void CompareExpressions::processComparisonRestricted() {
 JSData Calculator::extractSolution() {
   MacroRegisterFunctionWithName("Calculator::extractSolution");
   JSData result;
-  if (this->syntaxErrors != "") {
+  if (this->parser.syntaxErrors != "") {
     result[WebAPI::result::error] = "Failed to parse.";
-    result[WebAPI::result::syntaxErrors] = this->toStringSyntacticStackHTMLSimple();
+    result[WebAPI::result::syntaxErrors] = this->parser.toStringSyntacticStackHTMLSimple();
     return result;
   }
   JSData solutionJSON;
@@ -177,14 +177,14 @@ void CompareExpressions::compare(
 void CompareExpressions::comparePartTwo(Calculator& calculator) {
   MacroRegisterFunctionWithName("Calculator::compareExpressions");
   calculator.statistics.initialize();
-  if (!calculator.parseNoEmbeddingInCommand(this->givenString, this->given)) {
-    this->syntaxErrorsLeftRaw = "Error parsing given expression." + calculator.syntaxErrors;
-    this->syntaxErrorsLeftFormatted = calculator.toStringSyntacticStackHTMLSimple();
+  if (!calculator.parser.parseNoEmbeddingInCommand(this->givenString, this->given)) {
+    this->syntaxErrorsLeftRaw = "Error parsing given expression." + calculator.parser.syntaxErrors;
+    this->syntaxErrorsLeftFormatted = calculator.parser.toStringSyntacticStackHTMLSimple();
     return;
   }
-  if (!calculator.parseNoEmbeddingInCommand(this->desiredString, this->desired)) {
-    this->syntaxErrorsRightRaw =  "Error parsing desired expression." + calculator.syntaxErrors;
-    this->syntaxErrorsRightFormatted = calculator.toStringSyntacticStackHTMLSimple();
+  if (!calculator.parser.parseNoEmbeddingInCommand(this->desiredString, this->desired)) {
+    this->syntaxErrorsRightRaw =  "Error parsing desired expression." + calculator.parser.syntaxErrors;
+    this->syntaxErrorsRightFormatted = calculator.parser.toStringSyntacticStackHTMLSimple();
     return;
   }
   this->comparisonExpression.makeXOX(

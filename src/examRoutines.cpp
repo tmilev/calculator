@@ -1366,7 +1366,7 @@ bool CalculatorHTML::prepareAndExecuteCommands(Calculator& interpreter, std::str
   interpreter.evaluate(this->problemData.commandsGenerateProblem);
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("calculator evaluation time");
-  bool result = !interpreter.flagAbortComputationASAP && interpreter.syntaxErrors == "";
+  bool result = !interpreter.flagAbortComputationASAP && interpreter.parser.syntaxErrors == "";
   if (!result && comments != nullptr) {
     *comments << "<br>Failed to interpret your file. "
     << HtmlRoutines::getCalculatorComputationAnchorSameURL(

@@ -627,7 +627,7 @@ MakeRationalFunction{}(x) / 2;
 ```
 Divides rational fraction by a rational fraction. 
 
-*/* [DividePolynomialModPByPolynomialModP] {CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial}. 
+*/* [DividePolynomialModPByPolynomialModP] {CalculatorFunctionsBinaryOps::dividePolynomialModuloIntegerByPolynomialModuloInteger}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolynomialModP%7b%7d%28x%5e5%2b5x%5e3%2bx%5e2%2b4x%2b1%2c%207%29%20%2f%20PolynomialModP%7b%7d%28x%5e5%2b6x%5e3%2bx%5e2%2b5x%2b1%2c%207%29%3b%5cnPolynomialModP%7b%7d%28x%5e3-x%2b1%2c%203%29%20%2f%20PolynomialModP%7b%7d%28x%5e2%2b2%2c%203%29%3b%5cnPolynomialModP%7b%7d%28x%5e3-x%2b1%2c%203%29%20%2f%20PolynomialModP%7b%7d%28x%5e2%2b2%2c%207%29%3b%5cnPolynomialModP%7b%7d%28x%5e3-x%2b1%2c%206%29%20%2f%20PolynomialModP%7b%7d%282x%5e2%2b2%2c%206%29%3b%5cnPolynomialModP%7b%7d%28x%5e3-x%2b1%2c%2021%29%20%2f%20PolynomialModP%7b%7d%282x%5e2%2b2%2c%2021%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PolynomialModP{}(x^5+5x^3+x^2+4x+1, 7) / PolynomialModP{}(x^5+6x^3+x^2+5x+1, 7);
@@ -1407,7 +1407,7 @@ Operator or function \sqrt is overloaded with 2 total handlers.
 ```
 Square root of a rational, implemented as algebraic extension of the rationals. 
 
-*\sqrt* [innerDistributeSqrt] {Calculator::innerDistributeSqrt}. 
+*\sqrt* [DistributeSqrt] {Calculator::distributeSqrt}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%20TurnOffApproximations%200%3b%20%5c%5csqrt%7b%5c%5cfrac%7b676%7d%7b25%7d%20ln%203%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
  TurnOffApproximations 0; \sqrt{\frac{676}{25} ln 3}
@@ -1776,7 +1776,7 @@ x^1000001
 ```
 Exponentiates element of a Weyl group to an integer power. 
 
-*^* [PowerElementUniversalEnvelopingBySmallInteger] {CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF}. 
+*^* [PowerElementUniversalEnvelopingBySmallInteger] {CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20GetChevalleyGenerator%7b%7d%28G_2%2c%20i%29%3b%20h_%7b%7bi%7d%7d%3d%20GetCartanGenerator%7b%7d%28G_2%2c%20i%29%20%3b%5cn%20%28g_1%2bg_2%29%5e2%2b%20g_1%5e%7b1%2f2%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 g_{{i}}= GetChevalleyGenerator{}(G_2, i); h_{{i}}= GetCartanGenerator{}(G_2, i) ;
@@ -1784,7 +1784,7 @@ g_{{i}}= GetChevalleyGenerator{}(G_2, i); h_{{i}}= GetCartanGenerator{}(G_2, i) 
 ```
 Raises element of universal enveloping to integer power. If the exponent is non-positive integer but the element of the UE is a single generator with coefficient 1, the exponent will be carried out formally. 
 
-*^* [PowerUEelementToPolyPower] {CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF}. 
+*^* [PowerUEelementToPolyPower] {CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20GetChevalleyGenerator%7b%7d%28G_2%2c%20i%29%3b%20h_%7b%7bi%7d%7d%3d%20GetCartanGenerator%7b%7d%28G_2%2c%20i%29%20%3b%5cn%28%28%28%28g_1%29%5e%7bPolynomial%7b%7dx%7d%29%5e%7bPolynomial%7b%7dy%7d%29%20%2bg_2%29%5e2%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 g_{{i}}= GetChevalleyGenerator{}(G_2, i); h_{{i}}= GetCartanGenerator{}(G_2, i) ;
@@ -1792,7 +1792,7 @@ g_{{i}}= GetChevalleyGenerator{}(G_2, i); h_{{i}}= GetCartanGenerator{}(G_2, i) 
 ```
 Provided that an element of Universal Enveloping algebra is a single generator (raised to arbitrary formal polynomial power) with coefficient 1, raises (formally) the element of the UE to arbitrary polynomial power. 
 
-*^* [PowerUEelementToRFPower] {CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF}. 
+*^* [PowerUEelementToRFPower] {CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20GetChevalleyGenerator%7b%7d%28G_2%2c%20i%29%3b%20h_%7b%7bi%7d%7d%3d%20GetCartanGenerator%7b%7d%28G_2%2c%20i%29%3b%5cn%20%28%28%28%28g_1%29%5e%7bPolynomial%7b%7dx%7d%29%5e%7bPolynomial%7b%7dy%7d%29%20%2bg_2%29%5e2%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 g_{{i}}= GetChevalleyGenerator{}(G_2, i); h_{{i}}= GetCartanGenerator{}(G_2, i);

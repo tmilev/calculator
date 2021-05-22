@@ -877,6 +877,8 @@ class Function {
   bool checkConsistency() const;
 };
 
+class CalculatorParser;
+
 class SyntacticElement {
   public:
   int controlIndex;
@@ -885,15 +887,15 @@ class SyntacticElement {
   Expression data;
   List<Expression> dataList;
   std::string errorString;
-  std::string toStringHumanReadable(Calculator& owner, bool includeLispifiedExpressions) const;
-  std::string toStringSyntaxRole(const Calculator& owner) const;
+  std::string toStringHumanReadable(CalculatorParser& owner, bool includeLispifiedExpressions) const;
+  std::string toStringSyntaxRole(const CalculatorParser& owner) const;
   SyntacticElement() {
     this->controlIndex = 0; //controlIndex = 0 *MUST* point to the empty control sequence.
     this->errorString = "";
     this->numNonBoundVariablesInherited = - 1; // - 1 stands for unknown
     this->numBoundVariablesInherited = - 1; // - 1 stands for unknown
   }
-  std::string getIntegerStringCrashIfNot(Calculator& owner);
+  std::string getIntegerStringCrashIfNot(CalculatorParser& owner);
   bool isCommandEnclosure() const;
 };
 
@@ -1173,372 +1175,36 @@ public:
   ~StateMaintainerCalculator();
 };
 
-class Calculator {
-  template<typename AnyType>
-  friend Calculator& operator<<(Calculator& output, const AnyType& any) {
-    output.comments << any;
-    return output;
-  }
-  bool parse(
-    const std::string& input,
-    bool stripCommandSequence,
-    Expression& output
-  );
-public:
-  class OperationHandlers {
-  public:
-    std::string atom;
-    List<Function> handlers;
-    List<Function> compositeHandlers;
-    bool flagDeallocated;
-    OperationHandlers();
-    ~OperationHandlers();
-    List<Function> mergeHandlers();
-    bool checkConsistency();
-    JSData toJSON();
-    std::string toStringRuleStatusUser();
-  };
-  class Atoms {
-  public:
-    static std::string commandEnclosure;
-    static std::string setInputBox;
-    static std::string setRandomSeed;
-    static std::string sort;
-    static std::string transpose;
-    static std::string approximations;
-    static std::string turnOnRules;
-    static std::string turnOffRules;
-  };
-
-  // Initialization mode for the calculator.
-  // Allows to avoid bootstrapping a number of
-  // functions/operations.
-  enum Mode {
-    // Run in full scientific mode;
-    // initialize all scientific functions.
-    full,
-    // Initialize only the functions required for
-    // basic mathematics. Integrals and
-    // commutative algebra are included but not
-    // representation theory, Lie theory and other
-    // advanced functions
-    educational
-  };
-
-  Mode mode;
-
-  // Operations parametrize the expression elements.
-  // Operations are the labels of the atom nodes of the expression tree.
-  MapReferences<std::string, MemorySaving<OperationHandlers>, HashFunctions::hashFunction> operations;
-
-  HashedList<std::string, MathRoutines::hashString> atomsThatAllowCommutingOfCompositesStartingWithThem;
-  HashedList<std::string, MathRoutines::hashString> atomsNotAllowingChainRule;
-  HashedList<std::string, MathRoutines::hashString> builtInTypes;
-  HashedList<std::string, MathRoutines::hashString> arithmeticOperations;
-  HashedList<std::string, MathRoutines::hashString> knownOperationsInterpretedAsFunctionsMultiplicatively;
-  HashedList<std::string, MathRoutines::hashString> knownFunctionsWithComplexRange;
-  HashedList<std::string, MathRoutines::hashString> atomsThatFreezeArguments;
-  HashedList<std::string, MathRoutines::hashString> atomsWhoseExponentsAreInterpretedAsFunctions;
-  HashedList<std::string, MathRoutines::hashString> atomsNotInterpretedAsFunctions;
-  HashedList<std::string, MathRoutines::hashString> atomsThatMustNotBeCached;
-  HashedList<std::string, MathRoutines::hashString> autoCompleteKeyWords;
-  HashedList<std::string, MathRoutines::hashString> stringsThatSplitIfFollowedByDigit;
-
-  MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction> toStringHandlersAtoms;
-  MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction> toStringHandlersComposite;
-  MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction> toStringDataHandlers;
-
-  MapList<std::string, List<std::string>, MathRoutines::hashString> predefinedWordSplits;
-  class NamedRuleLocation {
-  public:
-    // Operation for which the named rule was registered.
-    // Since each rule name can be registered only once,
-    // this is unique.
-    std::string containerOperation;
-    bool isComposite;
-    int index;
-    NamedRuleLocation();
-  };
-  MapList<std::string, NamedRuleLocation, MathRoutines::hashString> namedRules;
-
-  // Calculator functions have as arguments two expressions passed by reference,
-  // const Expression& input and Expression& output. Calculator functions
-  // return bool. It is forbidden to pass the same object as input and output.
-  // If a calculator function returns false this
-  // means that the calculator failed to evaluate the
-  // function. If that is the case, the value of output is not specified and
-  // *MUST NOT* be used in the calling function.
-  // If a function returns true this means that output contains the result of the function.
-  // Note that the output of a function may be of type Error. Error results come, like any other
-  // result, with a true return from the function.
-  //-----------------------------------------------
-  // In addition, built-in functions are split into two flavors:
-  // inner functions (or just "functions")
-  // and outer functions (or "laws").
-  // The only difference between inner functions and outer functions is the
-  // way they are applied when the calculator reduces an expression.
-  //
-  // Suppose the calculator is reducing Expression X.
-  // 1. Outer functions ("laws").
-  // 1.1. Let X be expression whose first child is an atom equal to the name of the outer function.
-  // 1.2  Call the outer function with input argument equal to X.
-  // 1.3. If the outer function returns true but the output argument is identically equal to
-  //      X, nothing is done (the action of the outer function is ignored).
-  // 1.4. If an outer function returns true and the output argument is different from X,
-  //      X is replaced by this output.
-  // 2. Inner functions ("functions").
-  // 2.1. Let X be expression whose first child is an atom equal to the name of the inner function. We define Argument as follows.
-  // 2.1.1. If X has two children, Argument is set to the second child of X.
-  // 2.1.2. If X does not have two children, Argument is set to be equal to the entire X.
-  // 2.2. The inner function is called with input argument equal to Argument.
-  // 2.3. If the inner function returns true, X is substituted with
-  //      the output argument of the inner function, else nothing is done.
-  //
-  // As explained above, the distinction between inner functions and outer functions
-  // is only practical. The notions of inner and outer functions do not apply to user-defined
-  // substitution rules entered via the calculator. User-defined substitution rules are
-  // processed like outer functions, with the
-  // major difference that even if their output coincides
-  // with their input the substitution is carried out, resulting in an infinite cycle.
-  // Here, by ``infinite cycle'' we either mean a 100% CPU run until the timeout& algebraic
-  // safety kicks in, or error interception with a ``detected substitution cycle'' or
-  // similar error message.
-  //
-  //----------------------------------------------------------
-  // Control sequences parametrize the syntactical elements
-  HashedList<std::string, MathRoutines::hashString> controlSequences;
-
-  HashedList<Expression> knownDoubleConstants;
-  List<double> knownDoubleConstantValues;
-
-  int maximumRecursionDepth;
-  int recursionDepth;
-  int depthRecursionReached;
-  int maximumAlgebraicTransformationsPerExpression;
-  int maximumLatexChars;
-  int numberExpectedExpressionsAtInitialization;
-
-  class EvaluationStatistics {
-  public:
-    int expressionsEvaluated;
-    int callsSinceReport;
-    int maximumCallsBeforeReportGeneration;
-    int totalSubstitutions;
-    int numberOfListsStart;
-    int numberListResizesStart;
-    int numberHashResizesStart;
-    int totalPatternMatchesPerformed;
-    int totalEvaluationLoops;
-    long long int numberOfSmallAdditionsStart;
-    long long int numberOfSmallMultiplicationsStart;
-    long long int numberOfSmallGreatestCommonDivisorsStart;
-    long long int numberOfLargeAdditionsStart;
-    long long int numberOfLargeMultiplicationsStart;
-    long long int numberOfLargeGreatestCommonDivisorsStart;
-    int64_t millisecondsLastLog;
-    int64_t startTimeEvaluationMilliseconds;
-    int64_t startParsing;
-    int64_t lastStopwatchParsing;
-    EvaluationStatistics();
-    void initialize();
-    void reset();
-  };
-  EvaluationStatistics statistics;
-  ///////////////////////////////////////////////////////////////////////////
-  bool flagAbortComputationASAP;
-  bool flagTimeLimitErrorDetected;
-  bool flagFirstErrorEncountered;
-  bool flagMaxRecursionErrorEncountered;
-  bool flagMaxTransformationsErrorEncountered;
-  bool flagNewContextNeeded;
-
-  bool flagUsePredefinedWordSplits;
-
-  bool flagPlotShowJavascriptOnly;
-  bool flagPlotNoControls;
-
-  bool flagLogSyntaxRules;
-  bool flagUseLnInsteadOfLog;
-  bool flagUseLnAbsInsteadOfLogForIntegrationNotation;
-  bool flagLogEvaluation;
-  bool flagUseNumberColors;
-  bool flagLogRules;
-  bool flagUseBracketsForIntervals;
-  bool flagLogCache;
-  bool flagLogpatternMatching;
-  bool flagLogFullTreeCrunching;
-  bool flagHideLHS;
-  bool flagHidePolynomialBuiltInTypeIndicator;
-  bool flagDisplayFullExpressionTree;
-  bool flagUseFracInRationalLaTeX;
-  bool flagUseHtml;
-  bool flagDisplayContext;
-  bool flagHasGraphics;
-  bool flagWriteLatexPlots;
-
-  bool flagForkingprocessAllowed;
-
-  int numberOfPredefinedAtoms;
+class CalculatorParser {
+private:
+  // Point to the calculator object that contains the parser;
+  // set in the constructor of Calculator.
+  Calculator* owner;
   int numberOfEmptyTokensStart;
-  Expression programExpression;
   int counterInSyntacticSoup;
+  bool flagLogSyntaxRules;
   List<SyntacticElement> syntacticSoup;
   List<SyntacticElement> syntacticStack;
 
   List<SyntacticElement>* currrentSyntacticSoup;
   List<SyntacticElement>* currentSyntacticStack;
-
-  class ExpressionCache {
-  public:
-    int ruleState;
-    bool flagNonCacheable;
-    bool flagFinalized;
-    Expression reducesTo;
-    ExpressionCache();
-  };
-  // Cached expressions per rule stack.
-  MapList<Expression, Calculator::ExpressionCache> cachedExpressions;
-  ////
-  HashedList<Expression> evaluatedExpressionsStack;
   HashedList<int, HashFunctions::hashFunction> nonBoundVariablesInContext;
   HashedList<int, HashFunctions::hashFunction> boundVariablesInContext;
-
-  Expression ruleStack;
-
-  HashedListReferences<Expression> allChildExpressions;
-  List<unsigned int> allChildExpressionHashes;
-
+  HashedList<std::string, MathRoutines::hashString> stringsThatSplitIfFollowedByDigit;
+  MapList<std::string, List<std::string>, MathRoutines::hashString> predefinedWordSplits;
+public:
+  // Control sequences parametrize the syntactical elements
+  HashedList<std::string, MathRoutines::hashString> controlSequences;
   std::string syntaxErrors;
-  List<std::string> evaluationErrors;
-
-  // std::string inputStringRawestOfTheRaw;
-  std::string inputString;
-  std::string outputString;
-  JSData outputJS;
-
-  std::string outputCommentsString;
   std::string parsingLog;
-  ObjectContainer objectContainer;
-
-  std::string javaScriptDisplayingIndicator;
-  int numOutputFileS;
-  std::string userLabel;
-  // List<std::string> logEvaluationSteps;
-  std::stringstream comments;
-  std::stringstream errorsPublic;
-  FormatExpressions formatVisibleStrings;
-  bool approximationsBanned();
-  std::string toStringRuleStatusUser();
-  std::string toString();
-  JSData toJSONPerformance();
-  Expression getNewBoundVariable();
-  Expression getNewAtom();
-  void computeAutoCompleteKeyWords();
-  void writeAutoCompleteKeyWordsToFile();
-  std::string toStringOutputAndSpecials();
-  class Examples {
-    std::string toStringOneOperationHandler(
-      const std::string& escapedAtom,
-      bool isComposite,
-      const Function& function
-    );
-    std::string escape(const std::string& atom);
-  public:
-    Calculator* owner;
-    HashedList<std::string, HashFunctions::hashFunction> toBeEscaped;
-    // Generates a JSON with all functions and their documentation.
-    JSData toJSONFunctionHandlers();
-    // Writes a readme file in folder examples/Readme.md.
-    bool writeExamplesReadme();
-    std::string getExamplesReadmeFragment();
-    Examples();
-    class Test {
-    public:
-      static bool compose();
-      static bool all();
-    };
-  };
-  Examples examples;
-  // The purpose of the operator below is to save on typing
-  // when returning false with a comment.
-  operator bool() const {
-    return false;
-  }
-  // Adds an expression to the global list of expressions that are children of another expression.
-  int addChildExpression(const Expression& child);
-  void registerCalculatorFunction(Function& inputFunction, int indexOperation);
-  std::string toStringSemismipleLieAlgebraLinksFromHardDrive(
-    const std::string& prefixFolder,
-    const DynkinType& dynkinType,
-    FormatExpressions* format = nullptr
-  );
-  bool isBoundVariableInContext(int inputOperation);
-  bool isNonBoundVariableInContext(int inputOperation);
-  Function& getFunctionHandlerFromNamedRule(const std::string& inputRuleName);
-  bool checkPredefinedFunctionNameRepetitions();
-  bool checkOperationHandlers();
-  bool checkConsistencyAfterInitialization();
-  // To make operations read only, we make operations private and return const pointer to it.
-  const HashedList<std::string, HashFunctions::hashFunction>& getOperations() {
-    return this->operations.keys;
-  }
-  const HashedList<std::string, MathRoutines::hashString>& getBuiltInTypes() {
-    return this->builtInTypes;
-  }
-  const List<Function>* getOperationHandlers(int operation);
-  const List<Function>* getOperationCompositeHandlers(int operation);
-  SyntacticElement getSyntacticElementEnd() {
-    SyntacticElement result;
-    result.controlIndex = this->controlSequences.getIndex(";");
-    return result;
-  }
-  bool decreaseStackSetCharacterRanges(int decrease) {
-    if (decrease <= 0) {
-      return true;
-    }
-    if ((*this->currentSyntacticStack).size - decrease <= 0) {
-      global.fatal << "Bad stack decrease. " << global.fatal;
-    }
-    (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size - decrease);
-    return true;
-  }
-  Expression expressionZero();
-  Expression expressionOne();
-  Expression expressionTwo();
-  Expression expressionFour();
-  Expression expressionMinusOne();
-  Expression expressionHalf();
-  Expression expressionMinusHalf();
-  Expression expressionInfinity();
-  Expression expressionMinusInfinity();
-  void logFunctionWithTime(Function& input, int64_t startTime);
-  void logTime(int64_t startTime);
-  void logPublicError(const std::string& theError);
-  bool decreaseStackExceptLast(int decrease);
-  bool decreaseStackExceptLastTwo(int decrease);
-  std::string toStringSyntacticStackHTMLTable(
-    bool includeLispifiedExpressions, bool ignoreCommandEnclosures
-  );
-  std::string toStringSyntacticStackHTMLSimple();
-  std::string writeDefaultLatexFileReturnHtmlLink(
-    const std::string& fileContent,
-    std::string* outputFileNameNoExtension,
-    bool useLatexDviPSpsToPNG = false
-  );
-  bool parseEmbedInCommandSequence(
-    const std::string& input,
-    Expression& output
-  );
-  bool parseNoEmbeddingInCommand(
-    const std::string& input,
-    Expression& output
-  );
-  std::string toStringIsCorrectAsciiCalculatorString(const std::string& input);
+private:
   bool isInterpretedAsEmptySpace(const std::string& input);
   bool isInterpretedAsEmptySpace(unsigned char input);
   bool isSeparatorFromTheLeftGeneral(const std::string& input);
   bool isSeparatorFromTheLeftForDefinition(const std::string& input);
   bool isSeparatorFromTheLeftForList(const std::string& input);
+  bool isBoundVariableInContext(int inputOperation);
+  bool isNonBoundVariableInContext(int inputOperation);
   bool isStandardCalculatorCharacter(unsigned char input);
   bool isSeparatorFromTheLeftForInterval(const std::string& input);
   bool isSeparatorFromTheRightGeneral(const std::string& input);
@@ -1546,8 +1212,6 @@ public:
   bool isSeparatorFromTheRightForList(const std::string& input);
   bool allowsPowerInPreceding(const std::string& lookAhead);
   bool allowsPowerInNext(const std::string& lookBehind);
-  bool recursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo = "");
-
   bool allowsLimitProcessInPreceding(const std::string& lookAhead);
   bool allowsApplyFunctionInPreceding(const std::string& lookAhead);
   bool allowsIfInPreceding(const std::string& lookAhead);
@@ -1561,10 +1225,17 @@ public:
   bool allowsTimesInPreceding(const std::string& lookAhead);
   bool allowsTensorInPreceding(const std::string& lookAhead);
   bool allowsDivideInPreceding(const std::string& lookAhead);
+  void addTrigonometricSplit(
+    const std::string& trigonometricFunction, const List<std::string>& variables
+  );
+  bool decreaseStackSetCharacterRanges(int decrease);
+  SyntacticElement getSyntacticElementEnd();
   bool popTopSyntacticStack() {
     (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size - 1);
     return true;
   }
+  bool replaceXXVXdotsXbyE_BOUND_XdotsX(int numberOfXs);
+  bool replaceVXdotsXbyE_NONBOUND_XdotsX(int numberOfXs);
   bool replaceEXXEXEBy_CofEEE(int controlIndex);
   bool replaceEXXEXEXBy_CofEEE_X(int controlIndex);
   bool replaceEOXbyEX();
@@ -1703,44 +1374,13 @@ public:
   bool replaceXXByEmptyString();
   bool replaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   bool replaceXXbyE();
-  bool getMatrixExpressions(
-    const Expression& input,
-    Matrix<Expression>& output,
-    int desiredNumberOfRows = - 1,
-    int desiredNumberOfColumns = - 1
-  );
-  bool getMatrixExpressionsFromArguments(
-    const Expression& input,
-    Matrix<Expression>& output,
-    int desiredNumRows = - 1,
-    int desiredNumCols = - 1
-  );
-  void makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);
-  bool replaceXXVXdotsXbyE_BOUND_XdotsX(int numberOfXs);
-  bool replaceVXdotsXbyE_NONBOUND_XdotsX(int numberOfXs);
-  int getOperationIndexFromControlIndex(int controlIndex);
-  int getExpressionIndex();
-  SyntacticElement getEmptySyntacticElement();
-  bool accountRule(const Expression& ruleE, StateMaintainerCalculator& ruleStackMaintainer);
-  bool applyOneRule();
   void resetStack() {
     SyntacticElement emptyElement = this->getEmptySyntacticElement();
     (*this->currentSyntacticStack).initializeFillInObject(this->numberOfEmptyTokensStart, emptyElement);
   }
-  int conError() {
-    return this->controlSequences.getIndexNoFail("Error");
-  }
-  int conExpression() {
-    return this->controlSequences.getIndexNoFail("Expression");
-  }
-  int conVariable() {
-    return this->controlSequences.getIndexNoFail("Variable");
-  }
+  SyntacticElement getEmptySyntacticElement();
   int conBindVariable() {
     return this->controlSequences.getIndexNoFail("{{}}");
-  }
-  int conInteger() {
-    return this->controlSequences.getIndexNoFail("Integer");
   }
   int conEqualEqual() {
     return this->controlSequences.getIndexNoFail("==");
@@ -1775,12 +1415,6 @@ public:
   int conIsDenotedBy() {
     return this->controlSequences.getIndexNoFail("=:");
   }
-  int conSequenceStatements() {
-    return this->controlSequences.getIndexNoFail("SequenceStatements");
-  }
-  int conSequence() {
-    return this->controlSequences.getIndexNoFail("Sequence");
-  }
   int conSequenceNoRepetition() {
     return this->controlSequences.getIndexNoFail("SequenceNoRepetition");
   }
@@ -1802,6 +1436,400 @@ public:
   int conEndProgram() {
     return this->controlSequences.getIndexNoFail("EndProgram");
   }
+  void parseFillDictionary(const std::string& input);
+  bool extractExpressions(Expression& outputExpression, std::string* outputErrors);
+  int getOperationIndexFromControlIndex(int controlIndex);
+  bool decreaseStackExceptLast(int decrease);
+  bool decreaseStackExceptLastTwo(int decrease);
+  bool applyOneRule();
+  bool isLeftSeparator(unsigned char c);
+  bool isRightSeparator(unsigned char c);
+  bool shouldSplitOutsideQuotes(const std::string& left, char right);
+  bool parseEmbedInCommandSequence(
+    const std::string& input,
+    Expression& output
+  );
+  int getExpressionIndex();
+public:
+  int conSequence() {
+    return this->controlSequences.getIndexNoFail("Sequence");
+  }
+  int conError() {
+    return this->controlSequences.getIndexNoFail("Error");
+  }
+  int conExpression() {
+    return this->controlSequences.getIndexNoFail("Expression");
+  }
+  int conVariable() {
+    return this->controlSequences.getIndexNoFail("Variable");
+  }
+  int conInteger() {
+    return this->controlSequences.getIndexNoFail("Integer");
+  }
+  int conSequenceStatements() {
+    return this->controlSequences.getIndexNoFail("SequenceStatements");
+  }
+  std::string toStringIsCorrectAsciiCalculatorString(const std::string& input);
+  std::string toStringSyntacticStackHTMLTable(
+    bool includeLispifiedExpressions, bool ignoreCommandEnclosures
+  );
+  bool parseNoEmbeddingInCommand(
+    const std::string& input,
+    Expression& output
+  );
+  bool parse(
+    const std::string& input,
+    bool stripCommandSequence,
+    Expression& output
+  );
+  bool parseAndExtractExpressionsDefault(
+    const std::string& input,
+    Expression& output
+  );
+  bool parseAndExtractExpressions(
+    const std::string& input,
+    Expression& output,
+    List<SyntacticElement>& outputAllSyntacticElements,
+    List<SyntacticElement>& outputSyntacticStack,
+    std::string* outputSyntacticErrors
+  );
+  void parseFillDictionary(const std::string& input, List<SyntacticElement>& output);
+  void initialize(Calculator* inputOwner) {
+    this->owner = inputOwner;
+  }
+  void initializeControlSequences();
+  void initializeStringsThatSplitIfFollowedByDigit();
+  void initializePredefinedWordSplits();
+  std::string toStringSyntacticStackHTMLSimple();
+  void reset();
+  void parseConsumeQuote(const std::string& input, unsigned int& indexOfLast, List<SyntacticElement>& output);
+};
+
+class Calculator {
+  template<typename AnyType>
+  friend Calculator& operator<<(Calculator& output, const AnyType& any) {
+    output.comments << any;
+    return output;
+  }
+public:
+  class OperationHandlers {
+  public:
+    std::string atom;
+    List<Function> handlers;
+    List<Function> compositeHandlers;
+    bool flagDeallocated;
+    OperationHandlers();
+    ~OperationHandlers();
+    List<Function> mergeHandlers();
+    bool checkConsistency();
+    JSData toJSON();
+    std::string toStringRuleStatusUser();
+  };
+  class Atoms {
+  public:
+    static std::string commandEnclosure;
+    static std::string setInputBox;
+    static std::string setRandomSeed;
+    static std::string sort;
+    static std::string transpose;
+    static std::string approximations;
+    static std::string turnOnRules;
+    static std::string turnOffRules;
+  };
+
+  // Initialization mode for the calculator.
+  // Allows to avoid bootstrapping a number of
+  // functions/operations.
+  enum Mode {
+    // Run in full scientific mode;
+    // initialize all scientific functions.
+    full,
+    // Initialize only the functions required for
+    // basic mathematics. Integrals and
+    // commutative algebra are included but not
+    // representation theory, Lie theory and other
+    // advanced functions
+    educational
+  };
+
+  Mode mode;
+
+  // Operations parametrize the expression elements.
+  // Operations are the labels of the atom nodes of the expression tree.
+  MapReferences<std::string, MemorySaving<OperationHandlers>, HashFunctions::hashFunction> operations;
+
+  HashedList<std::string, MathRoutines::hashString> atomsThatAllowCommutingOfCompositesStartingWithThem;
+  HashedList<std::string, MathRoutines::hashString> atomsNotAllowingChainRule;
+  HashedList<std::string, MathRoutines::hashString> builtInTypes;
+  HashedList<std::string, MathRoutines::hashString> arithmeticOperations;
+  HashedList<std::string, MathRoutines::hashString> knownOperationsInterpretedAsFunctionsMultiplicatively;
+  HashedList<std::string, MathRoutines::hashString> knownFunctionsWithComplexRange;
+  HashedList<std::string, MathRoutines::hashString> atomsThatFreezeArguments;
+  HashedList<std::string, MathRoutines::hashString> atomsWhoseExponentsAreInterpretedAsFunctions;
+  HashedList<std::string, MathRoutines::hashString> atomsNotInterpretedAsFunctions;
+  HashedList<std::string, MathRoutines::hashString> atomsThatMustNotBeCached;
+  HashedList<std::string, MathRoutines::hashString> autoCompleteKeyWords;
+
+  MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction> toStringHandlersAtoms;
+  MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction> toStringHandlersComposite;
+  MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction> toStringDataHandlers;
+
+  class NamedRuleLocation {
+  public:
+    // Operation for which the named rule was registered.
+    // Since each rule name can be registered only once,
+    // this is unique.
+    std::string containerOperation;
+    bool isComposite;
+    int index;
+    NamedRuleLocation();
+  };
+  MapList<std::string, NamedRuleLocation, MathRoutines::hashString> namedRules;
+
+  // Calculator functions have as arguments two expressions passed by reference,
+  // const Expression& input and Expression& output. Calculator functions
+  // return bool. It is forbidden to pass the same object as input and output.
+  // If a calculator function returns false this
+  // means that the calculator failed to evaluate the
+  // function. If that is the case, the value of output is not specified and
+  // *MUST NOT* be used in the calling function.
+  // If a function returns true this means that output contains the result of the function.
+  // Note that the output of a function may be of type Error. Error results come, like any other
+  // result, with a true return from the function.
+  //-----------------------------------------------
+  // In addition, built-in functions are split into two flavors:
+  // inner functions (or just "functions")
+  // and outer functions (or "laws").
+  // The only difference between inner functions and outer functions is the
+  // way they are applied when the calculator reduces an expression.
+  //
+  // Suppose the calculator is reducing Expression X.
+  // 1. Outer functions ("laws").
+  // 1.1. Let X be expression whose first child is an atom equal to the name of the outer function.
+  // 1.2  Call the outer function with input argument equal to X.
+  // 1.3. If the outer function returns true but the output argument is identically equal to
+  //      X, nothing is done (the action of the outer function is ignored).
+  // 1.4. If an outer function returns true and the output argument is different from X,
+  //      X is replaced by this output.
+  // 2. Inner functions ("functions").
+  // 2.1. Let X be expression whose first child is an atom equal to the name of the inner function. We define Argument as follows.
+  // 2.1.1. If X has two children, Argument is set to the second child of X.
+  // 2.1.2. If X does not have two children, Argument is set to be equal to the entire X.
+  // 2.2. The inner function is called with input argument equal to Argument.
+  // 2.3. If the inner function returns true, X is substituted with
+  //      the output argument of the inner function, else nothing is done.
+  //
+  // As explained above, the distinction between inner functions and outer functions
+  // is only practical. The notions of inner and outer functions do not apply to user-defined
+  // substitution rules entered via the calculator. User-defined substitution rules are
+  // processed like outer functions, with the
+  // major difference that even if their output coincides
+  // with their input the substitution is carried out, resulting in an infinite cycle.
+  // Here, by ``infinite cycle'' we either mean a 100% CPU run until the timeout& algebraic
+  // safety kicks in, or error interception with a ``detected substitution cycle'' or
+  // similar error message.
+  //
+  //----------------------------------------------------------
+
+  HashedList<Expression> knownDoubleConstants;
+  List<double> knownDoubleConstantValues;
+
+  int maximumRecursionDepth;
+  int recursionDepth;
+  int depthRecursionReached;
+  int maximumAlgebraicTransformationsPerExpression;
+  int maximumLatexChars;
+  int numberExpectedExpressionsAtInitialization;
+
+  class EvaluationStatistics {
+  public:
+    int expressionsEvaluated;
+    int callsSinceReport;
+    int maximumCallsBeforeReportGeneration;
+    int totalSubstitutions;
+    int numberOfListsStart;
+    int numberListResizesStart;
+    int numberHashResizesStart;
+    int totalPatternMatchesPerformed;
+    int totalEvaluationLoops;
+    long long int numberOfSmallAdditionsStart;
+    long long int numberOfSmallMultiplicationsStart;
+    long long int numberOfSmallGreatestCommonDivisorsStart;
+    long long int numberOfLargeAdditionsStart;
+    long long int numberOfLargeMultiplicationsStart;
+    long long int numberOfLargeGreatestCommonDivisorsStart;
+    int64_t millisecondsLastLog;
+    int64_t startTimeEvaluationMilliseconds;
+    int64_t startParsing;
+    int64_t lastStopwatchParsing;
+    EvaluationStatistics();
+    void initialize();
+    void reset();
+  };
+  EvaluationStatistics statistics;
+  ///////////////////////////////////////////////////////////////////////////
+  bool flagAbortComputationASAP;
+  bool flagTimeLimitErrorDetected;
+  bool flagFirstErrorEncountered;
+  bool flagMaxRecursionErrorEncountered;
+  bool flagMaxTransformationsErrorEncountered;
+  bool flagNewContextNeeded;
+
+  bool flagUsePredefinedWordSplits;
+
+  bool flagPlotShowJavascriptOnly;
+  bool flagPlotNoControls;
+
+  bool flagUseLnInsteadOfLog;
+  bool flagUseLnAbsInsteadOfLogForIntegrationNotation;
+  bool flagLogEvaluation;
+  bool flagUseNumberColors;
+  bool flagLogRules;
+  bool flagUseBracketsForIntervals;
+  bool flagLogCache;
+  bool flagLogpatternMatching;
+  bool flagLogFullTreeCrunching;
+  bool flagHideLHS;
+  bool flagHidePolynomialBuiltInTypeIndicator;
+  bool flagDisplayFullExpressionTree;
+  bool flagUseFracInRationalLaTeX;
+  bool flagUseHtml;
+  bool flagDisplayContext;
+  bool flagHasGraphics;
+  bool flagWriteLatexPlots;
+
+  bool flagForkingprocessAllowed;
+
+  int numberOfPredefinedAtoms;
+  Expression programExpression;
+
+  CalculatorParser parser;
+
+  class ExpressionCache {
+  public:
+    int ruleState;
+    bool flagNonCacheable;
+    bool flagFinalized;
+    Expression reducesTo;
+    ExpressionCache();
+  };
+  // Cached expressions per rule stack.
+  MapList<Expression, Calculator::ExpressionCache> cachedExpressions;
+  ////
+  HashedList<Expression> evaluatedExpressionsStack;
+
+  Expression ruleStack;
+
+  HashedListReferences<Expression> allChildExpressions;
+  List<unsigned int> allChildExpressionHashes;
+
+  List<std::string> evaluationErrors;
+
+  // std::string inputStringRawestOfTheRaw;
+  std::string inputString;
+  std::string outputString;
+  JSData outputJS;
+
+  std::string outputCommentsString;
+  ObjectContainer objectContainer;
+
+  std::string javaScriptDisplayingIndicator;
+  int numOutputFileS;
+  std::string userLabel;
+  // List<std::string> logEvaluationSteps;
+  std::stringstream comments;
+  std::stringstream errorsPublic;
+  FormatExpressions formatVisibleStrings;
+  bool approximationsBanned();
+  std::string toStringRuleStatusUser();
+  std::string toString();
+  JSData toJSONPerformance();
+  Expression getNewBoundVariable();
+  Expression getNewAtom();
+  void computeAutoCompleteKeyWords();
+  void writeAutoCompleteKeyWordsToFile();
+  std::string toStringOutputAndSpecials();
+  class Examples {
+    std::string toStringOneOperationHandler(
+      const std::string& escapedAtom,
+      bool isComposite,
+      const Function& function
+    );
+    std::string escape(const std::string& atom);
+  public:
+    Calculator* owner;
+    HashedList<std::string, HashFunctions::hashFunction> toBeEscaped;
+    // Generates a JSON with all functions and their documentation.
+    JSData toJSONFunctionHandlers();
+    // Writes a readme file in folder examples/Readme.md.
+    bool writeExamplesReadme();
+    std::string getExamplesReadmeFragment();
+    Examples();
+    class Test {
+    public:
+      static bool compose();
+      static bool all();
+    };
+  };
+  Examples examples;
+  // The purpose of the operator below is to save on typing
+  // when returning false with a comment.
+  operator bool() const {
+    return false;
+  }
+  // Adds an expression to the global list of expressions that are children of another expression.
+  int addChildExpression(const Expression& child);
+  void registerCalculatorFunction(Function& inputFunction, int indexOperation);
+  std::string toStringSemismipleLieAlgebraLinksFromHardDrive(
+    const std::string& prefixFolder,
+    const DynkinType& dynkinType,
+    FormatExpressions* format = nullptr
+  );
+  Function& getFunctionHandlerFromNamedRule(const std::string& inputRuleName);
+  bool checkPredefinedFunctionNameRepetitions();
+  bool checkOperationHandlers();
+  bool checkConsistencyAfterInitialization();
+  // To make operations read only, we make operations private and return const pointer to it.
+  const HashedList<std::string, HashFunctions::hashFunction>& getOperations() {
+    return this->operations.keys;
+  }
+  const HashedList<std::string, MathRoutines::hashString>& getBuiltInTypes() {
+    return this->builtInTypes;
+  }
+  const List<Function>* getOperationHandlers(int operation);
+  const List<Function>* getOperationCompositeHandlers(int operation);
+  Expression expressionZero();
+  Expression expressionOne();
+  Expression expressionTwo();
+  Expression expressionFour();
+  Expression expressionMinusOne();
+  Expression expressionHalf();
+  Expression expressionMinusHalf();
+  Expression expressionInfinity();
+  Expression expressionMinusInfinity();
+  void logFunctionWithTime(Function& input, int64_t startTime);
+  void logTime(int64_t startTime);
+  void logPublicError(const std::string& theError);
+  std::string writeDefaultLatexFileReturnHtmlLink(
+    const std::string& fileContent,
+    std::string* outputFileNameNoExtension,
+    bool useLatexDviPSpsToPNG = false
+  );
+  bool recursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo = "");
+  bool getMatrixExpressions(
+    const Expression& input,
+    Matrix<Expression>& output,
+    int desiredNumberOfRows = - 1,
+    int desiredNumberOfColumns = - 1
+  );
+  bool getMatrixExpressionsFromArguments(
+    const Expression& input,
+    Matrix<Expression>& output,
+    int desiredNumRows = - 1,
+    int desiredNumCols = - 1
+  );
+  void makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);
+  bool accountRule(const Expression& ruleE, StateMaintainerCalculator& ruleStackMaintainer);
   int opEltZmodP() {
     return this->operations.getIndexNoFail("EltZmodP");
   }
@@ -2410,7 +2438,6 @@ public:
   int addOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName);
   void addOperationNoRepetitionAllowed(const std::string& operation);
   void addOperationBuiltInType(const std::string& operationBuiltIn);
-  void addTrigonometricSplit(const std::string& trigonometricFunction, const List<std::string>& variables);
   void addKnownDoubleConstant(const std::string& constantName, double value);
   void addOperationBinaryInnerHandlerWithTypes(
     const std::string& operation,
@@ -2452,12 +2479,10 @@ public:
   void reset();
   void initialize(Calculator::Mode desiredMode);
   void initializeToStringHandlers();
-  void initializePredefinedWordSplits();
   void initializeAtomsThatFreezeArguments();
   void initializeBuiltInsFreezeArguments();
   void initializeAtomsNonCacheable();
   void initializeAtomsThatAllowCommutingOfArguments();
-  void initializeStringsThatSplitIfFollowedByDigit();
   void initializeOperationsInterpretedAsFunctionsMultiplicatively();
   void initializeOperationsThatAreKnownFunctions();
   void initializeArithmeticOperations();
@@ -2471,7 +2496,6 @@ public:
   void initializeFunctionsSemisimpleLieAlgebras();
   void initializePredefinedStandardOperationsWithoutHandler();
   void initializeAdminFunctions();
-  bool extractExpressions(Expression& outputExpression, std::string* outputErrors);
   JSData toJSONOutputAndSpecials();
   void evaluateCommands();
   JSData extractSolution();
@@ -2553,21 +2577,8 @@ public:
   void evaluate(const std::string& input);
   // Attempts to interpret the input string as a high-school or calculus problem and solve it.
   JSData solve(const std::string& input);
-  bool parseAndExtractExpressions(
-    const std::string& input,
-    Expression& output,
-    List<SyntacticElement>& outputAllSyntacticElements,
-    List<SyntacticElement>& outputSyntacticStack,
-    std::string* outputSyntacticErrors
-  );
   // For internal use only; will crash the calculator if the input has syntax errors.
   Expression parseOrCrash(const std::string& input, bool stripCommandSequence);
-  bool isLeftSeparator(unsigned char c);
-  bool isRightSeparator(unsigned char c);
-  bool shouldSplitOutsideQuotes(const std::string& left, char right);
-  void parseFillDictionary(const std::string& input, List<SyntacticElement>& output);
-  void parseConsumeQuote(const std::string& input, unsigned int& indexOfLast, List<SyntacticElement>& output);
-  void parseFillDictionary(const std::string& input);
 };
 
 class CalculatorBasics {

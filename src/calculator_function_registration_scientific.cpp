@@ -694,7 +694,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationHandler(
     "ElementWeylAlgebra",
-    CalculatorFunctions::innerCompositeEWAactOnPoly,
+    CalculatorFunctions::compositeElementWeylAlgebraActOnPolynomial,
     "",
     "Differential operation acting on a polynomial. ",
     "x = ElementWeylAlgebraPoly{}(\\partial, x);\\partial = ElementWeylAlgebraDO{}(\\partial, x);\n"

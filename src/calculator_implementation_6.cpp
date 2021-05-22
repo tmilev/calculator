@@ -1308,7 +1308,7 @@ bool CalculatorFunctions::functionFactorInteger(Calculator& calculator, const Ex
   }
 }
 
-bool CalculatorFunctions::innerFactorOutNumberContent(
+bool CalculatorFunctions::factorOutNumberContent(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFactorOutNumberContent");
@@ -2326,7 +2326,7 @@ bool CalculatorFunctionsTrigonometry::cosineOfAngleSumToTrigonometry(
   return true;
 }
 
-bool CalculatorFunctions::innerDistributeSqrt(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::distributeSqrt(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerDistributeSqrt");
   if (!input.startsWith(calculator.opSqrt(), 3)) {
     return false;

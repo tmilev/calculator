@@ -967,7 +967,7 @@ bool Expression::assignStringParsed(
   Expression commands, result;
   List<SyntacticElement> outputSyntacticSoup, outputSyntacticStack;
   std::string outputSyntacticErrors;
-  if (!owner.parseAndExtractExpressions(
+  if (!owner.parser.parseAndExtractExpressions(
     input, commands, outputSyntacticSoup, outputSyntacticStack, &outputSyntacticErrors
   )) {
     this->assignValue(outputSyntacticErrors, owner);

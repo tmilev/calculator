@@ -1100,7 +1100,7 @@ bool CalculatorFunctions::innerChildExpression(Calculator& calculator, const Exp
   return true;
 }
 
-bool CalculatorFunctions::innerDereferenceInterval(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::dereferenceInterval(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerDereferenceInterval");
   (void) calculator;
   if (!input.startsWith(calculator.opUnderscore(), 3)) {
@@ -2125,7 +2125,7 @@ bool CalculatorFunctions::innerCompositeConstTimesAnyActOn(
   return output.makeXOX(calculator, calculator.opTimes(), input[0][1], functionActsOnE);
 }
 
-bool CalculatorFunctions::innerCompositeEWAactOnPoly(
+bool CalculatorFunctions::compositeElementWeylAlgebraActOnPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerCompositeEWAactOnPoly");
@@ -2798,8 +2798,8 @@ bool CalculatorFunctionsDifferentiation::differentiateAtimesB(
   return output.makeXOX(calculator, calculator.opPlus(), leftSummand, rightSummand);
 }
 
-bool CalculatorFunctions::innerPowerAnyToZero(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPowerAnyToZero");
+bool CalculatorFunctions::powerAnyToZero(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::powerAnyToZero");
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
@@ -2962,7 +2962,7 @@ bool CalculatorFunctions::outerCommuteAtimesBtimesCifUnivariate(
   return output.makeXOX(calculator, calculator.opTimes(), middleExpression, rightMultiplicand);
 }
 
-bool CalculatorFunctions::innerGetFreeVariablesIncludeNamedConstants(
+bool CalculatorFunctions::getFreeVariablesIncludeNamedConstants(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetFreeVariables");
@@ -2976,7 +2976,7 @@ bool CalculatorFunctions::innerGetFreeVariablesIncludeNamedConstants(
   return output.makeSequence(calculator, &outputList);
 }
 
-bool CalculatorFunctions::innerGetFreeVariablesExcludeNamedConstants(
+bool CalculatorFunctions::getFreeVariablesExcludeNamedConstants(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetFreeVariables");
@@ -3062,7 +3062,7 @@ bool CalculatorFunctions::sortTerms(
   return true;
 }
 
-bool CalculatorFunctions::innerCompareFunctionsNumerically(
+bool CalculatorFunctions::compareFunctionsNumerically(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerCompareFunctionsNumerically");
@@ -3118,7 +3118,7 @@ bool CalculatorFunctions::innerCompareFunctionsNumerically(
   return output.assignValue(1, calculator);
 }
 
-bool CalculatorFunctions::innerCompareExpressionsNumericallyAtPoints(
+bool CalculatorFunctions::compareExpressionsNumericallyAtPoints(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerCompareExpressionsNumericallyAtPoints");
@@ -3213,7 +3213,7 @@ bool CalculatorFunctions::innerCompareExpressionsNumericallyAtPoints(
   return output.assignValue(1, calculator);
 }
 
-bool CalculatorFunctions::innerCompareExpressionsNumerically(
+bool CalculatorFunctions::compareExpressionsNumerically(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerCompareFunctionsNumerically");

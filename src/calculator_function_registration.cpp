@@ -361,7 +361,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "Thaw",
-    CalculatorFunctions::innerThaw,
+    CalculatorFunctions::thaw,
     "",
     "If the argument is frozen, removes the top "
     "freeze command and returns the argument, "
@@ -562,7 +562,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "Denominator",
-    CalculatorFunctions::innerDenominator,
+    CalculatorFunctions::denominator,
     "",
     "If the expression is a fraction, returns the denominator, "
     "else returns 1. ",
@@ -1907,7 +1907,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "GetVariablesExcludeNamedConstants",
-    CalculatorFunctions::innerGetFreeVariablesExcludeNamedConstants,
+    CalculatorFunctions::getFreeVariablesExcludeNamedConstants,
     "",
     "Gets the variables on which the expression depends. "
     "Excludes the named constants. Here, the word ``variables'' is to be thought of as "
@@ -1921,7 +1921,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "GetVariablesIncludeNamedConstants",
-    CalculatorFunctions::innerGetFreeVariablesIncludeNamedConstants,
+    CalculatorFunctions::getFreeVariablesIncludeNamedConstants,
     "",
     "Gets the variables on which the expression depends. Includes the named constants. "
     "Here, the word ``variables'' is to be thought of as "
@@ -2086,7 +2086,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "CompareFunctionsNumerically",
-    CalculatorFunctions::innerCompareFunctionsNumerically,
+    CalculatorFunctions::compareFunctionsNumerically,
     "",
     "<b>Calculus teaching function.</b> Compares two one-variable functions numerically. "
     "First two arguments give the two functions. "
@@ -2103,7 +2103,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "CompareExpressionsNumerically",
-    CalculatorFunctions::innerCompareExpressionsNumerically,
+    CalculatorFunctions::compareExpressionsNumerically,
     "",
     "Compares two expressions numerically. "
     "First two arguments give the two functions. The third argument gives the precision. "
@@ -2118,7 +2118,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "CompareExpressionsNumericallyAtPoints",
-    CalculatorFunctions::innerCompareExpressionsNumericallyAtPoints,
+    CalculatorFunctions::compareExpressionsNumericallyAtPoints,
     "",
     "<b>Calculus teaching function.</b> Compares "
     "two expressions numerically. First two arguments "
@@ -2679,7 +2679,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "FactorOutNumberContent",
-    CalculatorFunctions::innerFactorOutNumberContent,
+    CalculatorFunctions::factorOutNumberContent,
     "",
     "Factors out the rational number content of an additive expression. "
     "The expression part of the result "
@@ -4545,7 +4545,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "^",
-    CalculatorFunctions::innerPowerAnyToZero,
+    CalculatorFunctions::powerAnyToZero,
     "",
     "Replaces p^0 by 1. "
     "Notice that 0^0 is defined to be 1."
@@ -4700,7 +4700,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "^",
-    CalculatorFunctions::innerDistributeExponent,
+    CalculatorFunctions::distributeExponent,
     "",
     "If a is a positive constant, substitutes (a*b)^c with a^c b^c.",
     "(a*b)^n; (\\sqrt(2)*b)^2",
@@ -4710,12 +4710,12 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "\\sqrt",
-    CalculatorFunctions::innerDistributeSqrt,
+    CalculatorFunctions::distributeSqrt,
     "",
     "If a is a positive constant, substitutes sqrt(a b) by sqrt(a) sqrt(b).",
     " TurnOffApproximations 0; \\sqrt{\\frac{676}{25} ln 3}",
-    "Calculator::innerDistributeSqrt",
-    "innerDistributeSqrt",
+    "Calculator::distributeSqrt",
+    "DistributeSqrt",
     innerStandard
   );
   this->addOperationHandler(
@@ -4730,7 +4730,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "^",
-    CalculatorFunctions::innerOperatorBounds,
+    CalculatorFunctions::operatorBounds,
     "",
     "Replaces \\int_a^b by (\\int, a, b) .",
     "A =\\int_a^b; Lispify(A); PlotExpressionTree(A); ",
@@ -4740,7 +4740,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "_",
-    CalculatorFunctions::innerOperatorBounds,
+    CalculatorFunctions::operatorBounds,
     "",
     "Takes care of the integral superscript notation \\int^a ",
     "\\int^a_b f dx; \\int_a^b f dx",
@@ -4774,7 +4774,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "_",
-    CalculatorFunctions::innerDereferenceInterval,
+    CalculatorFunctions::dereferenceInterval,
     "",
     "Dereferences an interval, as illustrated by the example. ",
     "%UseBracketForIntervals\n"
@@ -5266,24 +5266,6 @@ void Calculator::initializeAtomsNotGoodForChainRule() {
   this->atomsNotAllowingChainRule.addOnTopNoRepetitionMustBeNew("Bind");
 }
 
-void Calculator::initializeStringsThatSplitIfFollowedByDigit() {
-  MacroRegisterFunctionWithName("Calculator::initializeStringsThatSplitIfFollowedByDigit");
-  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\cdot");
-  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\circ");
-  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\frac");
-  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\ln");
-  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\log");
-  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\sin");
-  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\cos");
-  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\tan");
-  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\cot");
-  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\sec");
-  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\csc");
-  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\arctan");
-  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\arcsin");
-  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\arccos");
-}
-
 void Calculator::initializeAtomsThatAllowCommutingOfArguments() {
   MacroRegisterFunctionWithName("Calculator::initializeAtomsThatAllowCommutingOfArguments");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.setExpectedSize(30);
@@ -5373,31 +5355,32 @@ void Calculator::initializeBuiltInAtomsNotInterpretedAsFunctions() {
   this->atomsNotInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew("i");
 }
 
-void Calculator::addTrigonometricSplit(
-  const std::string& trigonometricFunction, const List<std::string>& variables
+void CalculatorParser::addTrigonometricSplit(
+  const std::string& trigonometricFunction,
+  const List<std::string>& variables
 ) {
   MacroRegisterFunctionWithName("Calculator::addTrigonometricSplit");
-  List<std::string> theSplit;
+  List<std::string> split;
   for (int i = 0; i < variables.size; i ++) {
     const std::string& variable = variables[i];
-    theSplit.setSize(0);
-    theSplit.addOnTop("\\" + trigonometricFunction);
-    theSplit.addOnTop(variable);
-    this->predefinedWordSplits.setKeyValue(trigonometricFunction + variable, theSplit);
-    this->predefinedWordSplits.setKeyValue("\\" + trigonometricFunction + variable, theSplit);
-    theSplit.setSize(0);
-    theSplit.addOnTop(variable);
-    theSplit.addOnTop("\\" + trigonometricFunction);
-    this->predefinedWordSplits.setKeyValue(variable + trigonometricFunction, theSplit);
-    this->predefinedWordSplits.setKeyValue(variable + "\\" + trigonometricFunction, theSplit);
+    split.setSize(0);
+    split.addOnTop("\\" + trigonometricFunction);
+    split.addOnTop(variable);
+    this->predefinedWordSplits.setKeyValue(trigonometricFunction + variable, split);
+    this->predefinedWordSplits.setKeyValue("\\" + trigonometricFunction + variable, split);
+    split.setSize(0);
+    split.addOnTop(variable);
+    split.addOnTop("\\" + trigonometricFunction);
+    this->predefinedWordSplits.setKeyValue(variable + trigonometricFunction, split);
+    this->predefinedWordSplits.setKeyValue(variable + "\\" + trigonometricFunction, split);
   }
   for (int i = 0; i < variables.size; i ++) {
     for (int j = 0; j < variables.size; j ++) {
-      theSplit.setSize(0);
-      theSplit.addOnTop(variables[i]);
-      theSplit.addOnTop("\\" + trigonometricFunction);
-      theSplit.addOnTop(variables[j]);
-      this->predefinedWordSplits.setKeyValue(variables[i] + trigonometricFunction + variables[j], theSplit);
+      split.setSize(0);
+      split.addOnTop(variables[i]);
+      split.addOnTop("\\" + trigonometricFunction);
+      split.addOnTop(variables[j]);
+      this->predefinedWordSplits.setKeyValue(variables[i] + trigonometricFunction + variables[j], split);
     }
   }
 }
@@ -5460,7 +5443,7 @@ void Calculator::initializeToStringHandlers() {
   this->addOneStringAtomHandler(this->opSqrt()                  , Expression::toStringSqrt                        );
   this->addOneStringAtomHandler(this->opFactorial()             , Expression::toStringFactorial                   );
   this->addOneStringAtomHandler(this->opAbsoluteValue()         , Expression::toStringAbsoluteValue               );
-  this->addOneStringAtomHandler(this->opPower()              , Expression::toStringPower                       );
+  this->addOneStringAtomHandler(this->opPower()                 , Expression::toStringPower                       );
   this->addOneStringAtomHandler(this->opPlus()                  , Expression::toStringPlus                        );
   this->addOneStringAtomHandler(this->opDirectSum()             , Expression::toStringDirectSum                   );
   this->addOneStringAtomHandler(this->opMinus()                 , Expression::toStringMinus                       );
@@ -5522,28 +5505,6 @@ void Calculator::initializeToStringHandlers() {
   this->addOneBuiltInHandler<AlgebraicNumber                                                          >();
   this->addOneBuiltInHandler<LittelmannPath                                                           >();
   this->addOneBuiltInHandler<ElementWeylAlgebra<Rational>                                             >();
-}
-
-void Calculator::initializePredefinedWordSplits() {
-  MacroRegisterFunctionWithName("Calculator::initializePredefinedWordSplits");
-  List<std::string> theSplit;
-  List<std::string> theVars;
-  theVars.addOnTop("x");
-  theVars.addOnTop("y");
-  theSplit.setSize(0);
-  theSplit.addOnTop("x");
-  theSplit.addOnTop("y");
-  this->predefinedWordSplits.setKeyValue("xy", theSplit);
-  theSplit.setSize(0);
-  theSplit.addOnTop("y");
-  theSplit.addOnTop("x");
-  this->predefinedWordSplits.setKeyValue("yx", theSplit);
-  this->addTrigonometricSplit("sin", theVars);
-  this->addTrigonometricSplit("cos", theVars);
-  this->addTrigonometricSplit("tan", theVars);
-  this->addTrigonometricSplit("cot", theVars);
-  this->addTrigonometricSplit("sec", theVars);
-  this->addTrigonometricSplit("csc", theVars);
 }
 
 void Calculator::initializeBuiltInsFreezeArguments() {

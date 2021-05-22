@@ -283,15 +283,15 @@ public:
 
   static bool crossProduct(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerDistributeExponent(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDistributeSqrt(Calculator& calculator, const Expression& input, Expression& output);
+  static bool distributeExponent(Calculator& calculator, const Expression& input, Expression& output);
+  static bool distributeSqrt(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool fourierTransformElementWeylAlgebra(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerSqrt(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool factorInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionFactorInteger(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerFactorOutNumberContent(Calculator& calculator, const Expression& input, Expression& output);
+  static bool factorOutNumberContent(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool isProductLinearOrConstantTermsIn(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIsProductTermsUpToPower(Calculator& calculator, const Expression& input, Expression& output);
@@ -304,12 +304,12 @@ public:
   );
 
   static bool matchesPattern(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerThaw(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGetFreeVariablesIncludeNamedConstants(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGetFreeVariablesExcludeNamedConstants(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCompareFunctionsNumerically(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCompareExpressionsNumerically(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCompareExpressionsNumericallyAtPoints(Calculator& calculator, const Expression& input, Expression& output);
+  static bool thaw(Calculator& calculator, const Expression& input, Expression& output);
+  static bool getFreeVariablesIncludeNamedConstants(Calculator& calculator, const Expression& input, Expression& output);
+  static bool getFreeVariablesExcludeNamedConstants(Calculator& calculator, const Expression& input, Expression& output);
+  static bool compareFunctionsNumerically(Calculator& calculator, const Expression& input, Expression& output);
+  static bool compareExpressionsNumerically(Calculator& calculator, const Expression& input, Expression& output);
+  static bool compareExpressionsNumericallyAtPoints(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerEnsureExpressionDependsOnlyOnMandatoryVariables(
     Calculator& calculator, const Expression& input, Expression& output, bool excludeNamedConstants
@@ -339,14 +339,14 @@ public:
   static bool innerSubList(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerApplyToList(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerNumerator(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDenominator(Calculator& calculator, const Expression& input, Expression& output);
+  static bool denominator(Calculator& calculator, const Expression& input, Expression& output);
 
 
-  static bool innerDereferenceInterval(Calculator& calculator, const Expression& input, Expression& output);
+  static bool dereferenceInterval(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerDereferenceSequenceOrMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerDereferenceSequenceStatements(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerCompositeEWAactOnPoly(Calculator& calculator, const Expression& input, Expression& output);
+  static bool compositeElementWeylAlgebraActOnPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerCompositeConstTimesAnyActOn(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerCompositeApowerBevaluatedAtC(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerConstantFunction(Calculator& calculator, const Expression& input, Expression& output);
@@ -355,8 +355,8 @@ public:
   static bool innerGetPointsImplicitly(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerCompositeDifferentiateLog(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerOperatorBounds(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPowerAnyToZero(Calculator& calculator, const Expression& input, Expression& output);
+  static bool operatorBounds(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerAnyToZero(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerExponentToLog(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerNewtonsMethod(Calculator& calculator, const Expression& input, Expression& output);
 

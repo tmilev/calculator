@@ -109,7 +109,7 @@ bool Calculator::Test::parseAllExamples(Calculator& ownerInitialized) {
         << currentHandler.calculatorIdentifier << global.fatal;
       }
       Expression notUsed;
-      if (!ownerInitialized.parse(currentHandler.example, false, notUsed)) {
+      if (!ownerInitialized.parser.parse(currentHandler.example, false, notUsed)) {
         global.fatal << "Failed to parse built-in example for rule: "
         << currentHandler.calculatorIdentifier
         << ". The example was: " << currentHandler.example << ". "
@@ -124,7 +124,7 @@ bool Calculator::Test::parseConsumeQuote(Calculator& ownerInitialized) {
   std::string input = "\"\\\"\\\\\\\"\"";
   List<SyntacticElement> output;
   unsigned int index = 0;
-  ownerInitialized.parseConsumeQuote(input, index, output);
+  ownerInitialized.parser.parseConsumeQuote(input, index, output);
   if (output.size != 3) {
     global.fatal << "Expected 3 output elements in parseConsumeQuote, got: "
     << output.size << ". Input: " << input << global.fatal;
@@ -132,7 +132,8 @@ bool Calculator::Test::parseConsumeQuote(Calculator& ownerInitialized) {
   std::string result = output[1].data.toString();
   std::string expected = "\\\"\\\\\\\"";
   if (result != expected) {
-    global.fatal << "Input: " << input << "; unexpected content of consumed quote:\n" << result
+    global.fatal << "Input: " << input
+    << "; unexpected content of consumed quote:\n" << result
     << "\nexpected:\n" << expected  << global.fatal;
   }
   return true;
@@ -142,7 +143,7 @@ bool Calculator::Test::parseQuotes(Calculator& ownerInitialized) {
   std::string input = "\"\\\"\\\\\\\"\"";
   std::string expected = "\"\\\"\\\\\\\"\"";
   Expression output;
-  if (!ownerInitialized.parseNoEmbeddingInCommand(input, output)) {
+  if (!ownerInitialized.parser.parseNoEmbeddingInCommand(input, output)) {
     global.fatal << "Failed to parse: " << input << global.fatal;
   }
   std::string result = output.toString();

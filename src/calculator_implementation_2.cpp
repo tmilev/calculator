@@ -1245,50 +1245,15 @@ bool Calculator::processOneExpressionOnePatternOneSubstitution(
   return true;
 }
 
-bool Calculator::parse(
-  const std::string& input,
-  bool stripCommandSequence,
-  Expression& output
-) {
-  if (!this->parseAndExtractExpressions(
-    input, output, this->syntacticSoup, this->syntacticStack, nullptr
-  )) {
-    return false;
-  }
-  if (stripCommandSequence) {
-    if (output.startsWith(this->opCommandSequence(), 2)) {
-      output = output[1];
-    }
-  }
-  return true;
-}
-
 Expression Calculator::parseOrCrash(
   const std::string& input, bool stripCommandSequence
 ) {
   Expression result;
-  if (!this->parse(input, stripCommandSequence, result)) {
+  if (!this->parser.parse(input, stripCommandSequence, result)) {
     global.fatal << "Failed to parse: " << input
     << " with a function that does not allow failure."
     << global.fatal;
   }
-  return result;
-}
-
-bool Calculator::parseAndExtractExpressions(
-  const std::string& input,
-  Expression& output,
-  List<SyntacticElement>& outputAllSyntacticElements,
-  List<SyntacticElement>& outputSyntacticStack,
-  std::string* outputSyntacticErrors
-) {
-  MacroRegisterFunctionWithName("Calculator::parseAndExtractExpressions");
-  this->currentSyntacticStack = &outputSyntacticStack;
-  this->currrentSyntacticSoup = &outputAllSyntacticElements;
-  this->parseFillDictionary(input);
-  bool result = this->extractExpressions(output, outputSyntacticErrors);
-  this->currentSyntacticStack = &this->syntacticStack;
-  this->currrentSyntacticSoup = &this->syntacticSoup;
   return result;
 }
 
@@ -1310,12 +1275,9 @@ void Calculator::evaluate(const std::string& input) {
   MacroRegisterFunctionWithName("Calculator::evaluate");
   this->statistics.initialize();
   this->inputString = input;
-  this->parseAndExtractExpressions(
+  this->parser.parseAndExtractExpressionsDefault(
     input,
-    this->programExpression,
-    this->syntacticSoup,
-    this->syntacticStack,
-    &this->syntaxErrors
+    this->programExpression
   );
   this->evaluateCommands();
 }
@@ -1325,12 +1287,9 @@ JSData Calculator::solve(const std::string& input) {
   this->statistics.initialize();
   // this->inputString = input;
   Expression toBeSolved;
-  if (!this->parseAndExtractExpressions(
+  if (!this->parser.parseAndExtractExpressionsDefault(
     input,
-    toBeSolved,
-    this->syntacticSoup,
-    this->syntacticStack,
-    &this->syntaxErrors
+    toBeSolved
   )) {
     return this->extractSolution();
   }
@@ -1342,14 +1301,14 @@ JSData Calculator::solve(const std::string& input) {
 void Calculator::evaluateCommands() {
   MacroRegisterFunctionWithName("Calculator::evaluateCommands");
   std::stringstream out;
-  if (this->syntaxErrors != "") {
+  if (this->parser.syntaxErrors != "") {
     if (!global.flagRunningConsoleRegular) {
       out << "<hr><b>Syntax errors encountered</b><br>";
     } else {
       out << Logger::consoleRed() << "Syntax errors encountered: " << Logger::consoleNormal();
     }
-    this->outputJS[WebAPI::result::syntaxErrors] = this->toStringSyntacticStackHTMLSimple();
-    out << this->syntaxErrors;
+    this->outputJS[WebAPI::result::syntaxErrors] = this->parser.toStringSyntacticStackHTMLSimple();
+    out << this->parser.syntaxErrors;
     out << "<hr>";
   }
   Expression startingExpression = this->programExpression;
@@ -1384,7 +1343,7 @@ void Calculator::evaluateCommands() {
     << this->programExpression.toString(&global.defaultFormat.getElement())
     << Logger::consoleNormal() << std::endl;
   } else if (!this->flagDisplayFullExpressionTree) {
-    std::string badCharactersString = this->toStringIsCorrectAsciiCalculatorString(this->inputString);
+    std::string badCharactersString = this->parser.toStringIsCorrectAsciiCalculatorString(this->inputString);
     if (badCharactersString != "") {
       out << badCharactersString << "<hr>";
       this->outputJS[WebAPI::result::badInput] = badCharactersString;
@@ -1404,7 +1363,7 @@ void Calculator::evaluateCommands() {
     this->outputJS[WebAPI::result::resultLabel] = result;
     out << resultString;
   } else {
-    std::string badCharsString = this->toStringIsCorrectAsciiCalculatorString(this->inputString);
+    std::string badCharsString = this->parser.toStringIsCorrectAsciiCalculatorString(this->inputString);
     if (badCharsString != "") {
       out << badCharsString << "<hr>";
       this->outputJS[WebAPI::result::badInput] = badCharsString;

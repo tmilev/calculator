@@ -103,7 +103,6 @@ public:
   static bool drawExpressionGraphFull(Calculator& calculator, const Expression& input, Expression& output) {
     return CalculatorFunctionsPlot::drawExpressionGraphWithOptions(calculator, input, output, true);
   }
-
 };
 
 class CalculatorFunctionsTrigonometry {
@@ -294,8 +293,8 @@ public:
   static bool factorOutNumberContent(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool isProductLinearOrConstantTermsIn(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIsProductTermsUpToPower(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIsLinearOrConstantIn(Calculator& calculator, const Expression& input, Expression& output);
+  static bool isProductTermsUpToPower(Calculator& calculator, const Expression& input, Expression& output);
+  static bool isLinearOrConstantIn(Calculator& calculator, const Expression& input, Expression& output);
   static bool coefficientOf(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerConstTermRelative(Calculator& calculator, const Expression& input, Expression& output);
 
@@ -324,7 +323,7 @@ public:
   ) {
     return CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(calculator, input, output, false);
   }
-  static bool innerEnsureExpressionDependsOnlyOnStandard(Calculator& calculator, const Expression& input, Expression& output);
+  static bool ensureExpressionDependsOnlyOnStandard(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerMultiplySequence(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerSumSequence(Calculator& calculator, const Expression& input, Expression& output);
@@ -343,7 +342,7 @@ public:
 
 
   static bool dereferenceInterval(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDereferenceSequenceOrMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool dereferenceSequenceOrMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerDereferenceSequenceStatements(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool compositeElementWeylAlgebraActOnPolynomial(Calculator& calculator, const Expression& input, Expression& output);
@@ -376,7 +375,7 @@ public:
   static bool sortTerms(Calculator& calculator, const Expression& input, Expression& output);
   static bool addTerms(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerIsPrimeMillerRabin(Calculator& calculator, const Expression& input, Expression& output);
+  static bool isPrimeMillerRabin(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIsPossiblyPrime(Calculator& calculator, const Expression& input, Expression& output);
   static bool leastCommonMultipleInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool greatestCommonDivisorInteger(Calculator& calculator, const Expression& input, Expression& output);
@@ -449,7 +448,7 @@ public:
     Expression& output
   );
   static bool innerContains(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerExpressionLeafs(Calculator& calculator, const Expression& input, Expression& output);
+  static bool expressionLeafs(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerLispify(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerLispifyFull(Calculator& calculator, const Expression& input, Expression& output);
@@ -472,7 +471,7 @@ public:
     int maxiumDimension
   );
 
-  static bool innerDeterminant(Calculator& calculator, const Expression& input, Expression& output);
+  static bool determinant(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerHighestWeightTransposeAntiAutomorphismBilinearForm(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerCoefficientsPowersOf(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIntervalOpenFromSequence(Calculator& calculator, const Expression& input, Expression& output);
@@ -509,22 +508,22 @@ public:
   ) {
     return CalculatorFunctions::solveSerreLikeSystem(calculator, input, output, false, false);
   }
-  static bool innerSolveSerreLikeSystemUpperLimit(
+  static bool solveSerreLikeSystemUpperLimit(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
     return CalculatorFunctions::solveSerreLikeSystem(calculator, input, output, true, false);
   }
-  static bool innerSolveSerreLikeSystemAlgebraic(
+  static bool solveSerreLikeSystemAlgebraic(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
     return CalculatorFunctions::solveSerreLikeSystem(calculator, input, output, false, true);
   }
-  static bool innerSolveSerreLikeSystemAlgebraicUpperLimit(
+  static bool solveSerreLikeSystemAlgebraicUpperLimit(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
     return CalculatorFunctions::solveSerreLikeSystem(calculator, input, output, true, true);
   }
-  static bool innerFetchWebPagePOST(Calculator& calculator, const Expression& input, Expression& output);
+  static bool fetchWebPagePOST(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerFetchWebPageGET(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerFetchKnownPublicKeys(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerSendEmailWithMailGun(Calculator& calculator, const Expression& input, Expression& output);
@@ -561,10 +560,10 @@ public:
     return CalculatorFunctions::innerEWAorPoly(calculator, input, output, false);
   }
   static bool innerEWAorPoly(Calculator& calculator, const Expression& input, Expression& output, bool assignPoly);
-  static bool innerOperationBinary(Calculator& calculator, const Expression& input, Expression& output, int theOp);
+  static bool operationBinary(Calculator& calculator, const Expression& input, Expression& output, int operation);
   static bool innerInterpolatePoly(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerTimes(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorFunctions::innerOperationBinary(calculator, input, output, calculator.opTimes());
+    return CalculatorFunctions::operationBinary(calculator, input, output, calculator.opTimes());
   }
   static bool innerReverseOrder(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerReverseOrderRecursively(Calculator& calculator, const Expression& input, Expression& output);

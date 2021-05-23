@@ -70,3 +70,7 @@ div.divSemisimpleLieAlgebraStructureMainPage {
 h1 {
   text-align: center;
 }
+
+body {
+  overflow: auto;
+}

@@ -15,11 +15,11 @@
 //
 // Pure composite elements have empty ASNAtoms,
 // and their children ASNElements are recorded
-// in theElements array.
+// in elements array.
 //
 // Non-pure composite elements have both non-empty
 // ASNAtom and their children ASNElements are recorded
-// in theElements array.
+// in elements array.
 //
 // Finally, non-composite elements have their
 // theElemetns array of length zero and have their
@@ -61,7 +61,7 @@ public:
   std::string error;
   std::string comment;
   List<unsigned char> ASNAtom;
-  List<ASNElement> theElements;
+  List<ASNElement> elements;
   ASNElement();
   void computeTag();
   bool hasBit7Set() const;
@@ -274,7 +274,7 @@ public:
   int maxRecursionDepth;
   int dataPointer;
   bool flagMustDecodeAll;
-  const List<unsigned char>* rawDatA;
+  const List<unsigned char>* rawData;
   ASNElement* decodedData;
   typedef bool (*typeDecoder)(
     AbstractSyntaxNotationOneSubsetDecoder& thisPointer, std::stringstream* commentsOnError

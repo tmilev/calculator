@@ -457,9 +457,9 @@ bool PolynomialFactorizationKronecker::oneFactor(
     valuesAtRemainingPoints.makeZero(theValuesAtPoints.size);
     Rational firstValue;
     bool isGood = false; //<-we shall first check if the divisor is constant.
-    for (int j = 0; j < divisorSelection.theElements.size; j ++) {
+    for (int j = 0; j < divisorSelection.elements.size; j ++) {
       currentPointContribution = 1;
-      for (int k = 0; k < divisorSelection[j].theElements.size; k ++) {
+      for (int k = 0; k < divisorSelection[j].elements.size; k ++) {
         currentPrimePowerContribution = primeFactorsAtPoints[j][k];
         currentPrimePowerContribution.raiseToPower(divisorSelection[j][k].amount);
         currentPointContribution *= currentPrimePowerContribution;
@@ -803,18 +803,18 @@ bool PolynomialFactorizationFiniteFields::tryFactor(SelectionFixedRank& selectio
   start.makeOne(this->modulusHenselLift);
   start /= this->scaleProductLift;
   product.makeConstant(start);
-  for (int i = 0; i < selection.theSelection.cardinalitySelection; i ++) {
-    product *= this->factorsLifted[selection.theSelection.elements[i]];
+  for (int i = 0; i < selection.selection.cardinalitySelection; i ++) {
+    product *= this->factorsLifted[selection.selection.elements[i]];
   }
   Polynomial<Rational> candidate;
   ElementZmodP::convertPolynomialModularToPolynomialIntegral(product, candidate, true);
   if (!this->output->accountReducedFactor(candidate, false)) {
     return false;
   }
-  selection.theSelection.invertSelection();
+  selection.selection.invertSelection();
   List<Polynomial<ElementZmodP> > factorsLiftedTrimmed;
-  for (int i = 0; i < selection.theSelection.cardinalitySelection; i ++) {
-    factorsLiftedTrimmed.addOnTop(this->factorsLifted[selection.theSelection.elements[i]]);
+  for (int i = 0; i < selection.selection.cardinalitySelection; i ++) {
+    factorsLiftedTrimmed.addOnTop(this->factorsLifted[selection.selection.elements[i]]);
   }
   this->factorsLifted = factorsLiftedTrimmed;
   return true;

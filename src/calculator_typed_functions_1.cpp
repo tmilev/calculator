@@ -2759,8 +2759,8 @@ bool CalculatorFunctionsBinaryOps::addMatrixRationalFractionsToMatrixRationalFra
     return false;
   }
   leftMatrix += rightMatrix;
-  ExpressionContext theContext = leftE.getContext();
-  return output.makeMatrix(leftMatrix, calculator, &theContext);
+  ExpressionContext context = leftE.getContext();
+  return output.makeMatrix(leftMatrix, calculator, &context);
 }
 
 bool CalculatorFunctionsBinaryOps::addMatrixTensorToMatrixTensor(

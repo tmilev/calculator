@@ -1184,14 +1184,14 @@ void Calculator::initializeFunctionsStandard() {
 
   this->addOperationHandler(
     "EnsureExpressionDependsOnlyOn",
-    CalculatorFunctions::innerEnsureExpressionDependsOnlyOnStandard,
+    CalculatorFunctions::ensureExpressionDependsOnlyOnStandard,
     "",
     "Ensures the expression in the first argument depends only on the free variables given in the remaining arguments. "
     "Returns a warning string if that is not the case, else returns an empty string. "
     "Intended to warn users of potentially mistyped expressions. ",
     "EnsureExpressionDependsOnlyOn(\\sin (\\ln x) x y, x, y);\n"
     "EnsureExpressionDependsOnlyOn(\\sin (\\ln x) x y, x);",
-    "CalculatorFunctions::innerEnsureExpressionDependsOnlyOnStandard",
+    "CalculatorFunctions::ensureExpressionDependsOnlyOnStandard",
     "EnsureExpressionDependsOnlyOn",
     innerStandard
   );
@@ -2327,7 +2327,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "\\det",
-    CalculatorFunctions::innerDeterminant,
+    CalculatorFunctions::determinant,
     "",
     "Tries to convert to a matrix of rationals or matrix of rational "
     "functions and computes the determinant if "
@@ -2803,7 +2803,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "IsLinearOrConstantIn",
-    CalculatorFunctions::innerIsLinearOrConstantIn,
+    CalculatorFunctions::isLinearOrConstantIn,
     "",
     "Returns one if the second argument is linear in the first. "
     "All variables are treated as non-constants. ",
@@ -2834,7 +2834,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "IsProductTermsUpToPower",
-    CalculatorFunctions::innerIsProductTermsUpToPower,
+    CalculatorFunctions::isProductTermsUpToPower,
     "",
     "Returns true if the expression is a product of terms of power up to the given power. "
     "Although this is subject to change, at the moment "
@@ -4750,7 +4750,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "_",
-    CalculatorFunctions::innerDereferenceSequenceOrMatrix,
+    CalculatorFunctions::dereferenceSequenceOrMatrix,
     "",
     "Dereferences a sequence or a matrix. "
     "The syntax is as illustrated by the example. ",
@@ -4985,7 +4985,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "ExpressionLeafs",
-    CalculatorFunctions::innerExpressionLeafs,
+    CalculatorFunctions::expressionLeafs,
     "",
     "Returns a sequence without repetition of all leafs "
     "making up an expression. "

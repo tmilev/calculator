@@ -204,7 +204,7 @@ public:
     }
     return result;
   }
-  void multiplyBy(const MonomialUniversalEnveloping<Coefficient>& standsOnTheRight, const Coefficient& theCoeff);
+  void multiplyBy(const MonomialUniversalEnveloping<Coefficient>& standsOnTheRight, const Coefficient& coefficient);
   void modToMinDegreeFormFDRels(
     const Vector<Rational>& highestWeightInSimpleCoordinates, const Coefficient& ringUnit, const Coefficient& ringZero
   );

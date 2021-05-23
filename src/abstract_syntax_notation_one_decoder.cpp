@@ -32,7 +32,7 @@ bool ASNElement::hasBit8Set() const {
 }
 
 void AbstractSyntaxNotationOneSubsetDecoder::reset() {
-  this->rawDatA = nullptr;
+  this->rawData = nullptr;
   this->decodedData = nullptr;
   this->dataPointer = 0;
 }
@@ -52,7 +52,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::checkInitialization() const {
   if (this->decodedData == nullptr) {
     global.fatal << "Uninitialized ASN1 output json. " << global.fatal;
   }
-  if (this->rawDatA == nullptr) {
+  if (this->rawData == nullptr) {
     global.fatal << "Uninitialized ASN1 raw data. " << global.fatal;
   }
   return true;
@@ -64,10 +64,10 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decodeLengthIncrementDataPointer(
   if (!this->decodeLengthIncrementDataPointerNoCheck(output)) {
     return false;
   }
-  if (output.lengthPromised + this->dataPointer > this->rawDatA->size) {
+  if (output.lengthPromised + this->dataPointer > this->rawData->size) {
     std::stringstream errorStream;
     errorStream << "Element length: " << output.lengthPromised << " plus element body offset: "
-    << this->dataPointer << " exceeds the total byte length: " << this->rawDatA->size << ". ";
+    << this->dataPointer << " exceeds the total byte length: " << this->rawData->size << ". ";
     output.error = errorStream.str();
     return false;
   }
@@ -79,7 +79,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decodeLengthIncrementDataPointerNoC
 ) {
   output.lengthPromised = 0;
   int startDataPointer = this->dataPointer;
-  unsigned char currentByte = (*this->rawDatA)[this->dataPointer];
+  unsigned char currentByte = (*this->rawData)[this->dataPointer];
   if (currentByte < 128) { // 128 = 0x80
     output.lengthPromised = currentByte;
     this->dataPointer ++;
@@ -98,7 +98,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decodeLengthIncrementDataPointerNoC
     if (this->pointerIsBad(output)) {
       return false;
     }
-    unsigned char nextByte = (*this->rawDatA)[this->dataPointer];
+    unsigned char nextByte = (*this->rawData)[this->dataPointer];
     length += static_cast<signed>(static_cast<unsigned int>(nextByte));
     this->dataPointer ++;
   }
@@ -115,7 +115,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decodeLengthIncrementDataPointerNoC
 bool AbstractSyntaxNotationOneSubsetDecoder::pointerIsBad(
   ASNElement& outputError
 ) {
-  if (this->dataPointer >= this->rawDatA->size || this->dataPointer < 0) {
+  if (this->dataPointer >= this->rawData->size || this->dataPointer < 0) {
     outputError.error = "Unexpected overflow error: data pointer is negative. ";
     return true;
   }
@@ -129,7 +129,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decodeSequenceLikeContent(
   ASNElement nextElement;
   int numberOfDecoded = 0;
   // We reserve 32 bytes per object - a reasonable assumption.
-  output.theElements.reserve(output.lengthPromised / 32);
+  output.elements.reserve(output.lengthPromised / 32);
   while (this->dataPointer < lastIndexPlusOne) {
     int lastPointer = this->dataPointer;
     bool isGood = this->decodeCurrent(nextElement);
@@ -143,7 +143,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decodeSequenceLikeContent(
       global.fatal << "Decode current "
       << "did not increment the data pointer. " << global.fatal;
     }
-    output.theElements.addOnTop(nextElement);
+    output.elements.addOnTop(nextElement);
     numberOfDecoded ++;
   }
   return true;
@@ -159,16 +159,16 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decodeBitString(
   ASNElement subDecoderResult;
   subDecoder.recursionDepthGuard = this->recursionDepthGuard + 1;
   bool insidePadded = false;
-  if (offsetAtStart < this->rawDatA->size) {
-    if ((*this->rawDatA)[offsetAtStart] == 0) {
+  if (offsetAtStart < this->rawData->size) {
+    if ((*this->rawData)[offsetAtStart] == 0) {
       offsetAtStart ++;
       insidePadded = true;
     }
   }
-  if (subDecoder.decode(*this->rawDatA, offsetAtStart, subDecoderResult, nullptr)) {
+  if (subDecoder.decode(*this->rawData, offsetAtStart, subDecoderResult, nullptr)) {
     if (subDecoder.dataPointer == this->dataPointer) {
-      output.theElements.setSize(0);
-      output.theElements.addOnTop(subDecoderResult);
+      output.elements.setSize(0);
+      output.elements.addOnTop(subDecoderResult);
       if (insidePadded) {
         output.flagHeaderPadded = true;
       }
@@ -182,7 +182,7 @@ void AbstractSyntaxNotationOneSubsetDecoder::decodeASNAtomContent(
 ) {
   output.ASNAtom.setSize(output.lengthPromised);
   for (int i = 0; i < output.lengthPromised; i ++) {
-    output.ASNAtom[i] = (*this->rawDatA)[this->dataPointer + i];
+    output.ASNAtom[i] = (*this->rawData)[this->dataPointer + i];
   }
   this->dataPointer += output.lengthPromised;
 }
@@ -258,8 +258,8 @@ void ASNElement::writeBytesConst(List<unsigned char>& output) const {
   if (this->ASNAtom.size > 0) {
     output.addListOnTop(this->ASNAtom);
   } else {
-    for (int i = 0; i < this->theElements.size; i ++) {
-      this->theElements[i].writeBytesConst(output);
+    for (int i = 0; i < this->elements.size; i ++) {
+      this->elements[i].writeBytesConst(output);
     }
   }
 }
@@ -276,8 +276,8 @@ void ASNElement::writeBytesUpdatePromisedLength(List<unsigned char>& output) {
   if (this->ASNAtom.size > 0) {
     output.addListOnTop(this->ASNAtom);
   } else {
-    for (int i = 0; i < this->theElements.size; i ++) {
-      this->theElements[i].writeBytesUpdatePromisedLength(output);
+    for (int i = 0; i < this->elements.size; i ++) {
+      this->elements[i].writeBytesUpdatePromisedLength(output);
     }
   }
 }
@@ -293,19 +293,19 @@ void ASNElement::writeBytesASNAtom(
 }
 
 bool ASNElement::isComposite() const {
-  return this->theElements.size > 0;
+  return this->elements.size > 0;
 }
 
 bool ASNElement::isPureComposite() const {
-  return this->theElements.size > 0 && this->ASNAtom.size == 0;
+  return this->elements.size > 0 && this->ASNAtom.size == 0;
 }
 
 bool ASNElement::isNonPureComposite() const {
-  return this->theElements.size > 0 && this->ASNAtom.size > 0;
+  return this->elements.size > 0 && this->ASNAtom.size > 0;
 }
 
 ASNElement& ASNElement::operator[](int index) {
-  return this->theElements[index];
+  return this->elements[index];
 }
 
 bool ASNElement::hasSubElementGetCopy(
@@ -346,14 +346,14 @@ bool ASNElement::hasSubElementTemplate(
   thisPointerType* current = thisPointer;
   for (int i = 0; i < desiredIndices.size; i ++) {
     int currentIndex = desiredIndices[i];
-    if (currentIndex >= current->theElements.size) {
+    if (currentIndex >= current->elements.size) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "ASN element is missing composite index: "
         << desiredIndices.sliceCopy(0, i + 1).toStringCommaDelimited() << ". ";
       }
       return false;
     }
-    current = &(current->theElements[currentIndex]);
+    current = &(current->elements[currentIndex]);
     if (i < desiredTypes.size) {
       unsigned char desiredTag = desiredTypes[i];
       if (
@@ -509,8 +509,8 @@ void ASNElement::writeAnnotations(List<serialization::Marker>& output) {
   output.addOnTop(serialization::Marker(
     this->offsetLastWrite + 1 + lengthOfLengthEncoding, this->lengthPromised, bodyStream.str()
   ));
-  for (int i = 0; i < this->theElements.size; i ++) {
-    this->theElements[i].writeAnnotations(output);
+  for (int i = 0; i < this->elements.size; i ++) {
+    this->elements[i].writeAnnotations(output);
   }
 }
 
@@ -564,17 +564,17 @@ void ASNElement::toJSON(JSData& output) const {
     output[ASNElement::JSLabels::lengthEncoding] = output[ASNElement::JSLabels::lengthEncoding].stringValue + "00";
   }
   output[ASNElement::JSLabels::isConstructed] = this->flagIsConstructed;
-  output[ASNElement::JSLabels::numberOfChildren] = this->theElements.size;
+  output[ASNElement::JSLabels::numberOfChildren] = this->elements.size;
   if (this->comment != "") {
     output[ASNElement::JSLabels::comment] = this->comment;
   }
   if (this->isComposite()) {
     JSData children;
     children.elementType = JSData::token::tokenArray;
-    children.listObjects.reserve(this->theElements.size);
-    for (int i = 0; i < this->theElements.size; i ++) {
+    children.listObjects.reserve(this->elements.size);
+    for (int i = 0; i < this->elements.size; i ++) {
       JSData incoming;
-      this->theElements[i].toJSON(incoming);
+      this->elements[i].toJSON(incoming);
       children.listObjects.addOnTop(incoming);
     }
     output[ASNElement::JSLabels::children] = children;
@@ -605,9 +605,9 @@ void ASNElement::toJSON(JSData& output) const {
       }
     }
     if (this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02) {
-      LargeInteger theInt;
-      this->isInteger(&theInt, nullptr);
-      output[ASNElement::JSLabels::interpretation] = theInt.toString();
+      LargeInteger integer;
+      this->isInteger(&integer, nullptr);
+      output[ASNElement::JSLabels::interpretation] = integer.toString();
     }
   }
 }
@@ -717,7 +717,7 @@ ASNElement::ASNElement() {
 void ASNElement::reset() {
   this->resetExceptContent();
   this->ASNAtom.setSize(0);
-  this->theElements.setSize(0);
+  this->elements.setSize(0);
 }
 
 void ASNElement::resetExceptContent() {
@@ -775,7 +775,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decodeCurrent(
   if (this->pointerIsBad(output)) {
     return false;
   }
-  output.startByte = (*this->rawDatA)[this->dataPointer];
+  output.startByte = (*this->rawData)[this->dataPointer];
   output.computeTag();
   this->dataPointer ++;
   if (this->pointerIsBad(output)) {
@@ -835,7 +835,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decode(
   int maxAllowedSize = 1000000000;
   if (inputRawData.size >= maxAllowedSize) {
     if (commentsOnError != nullptr) {
-      *commentsOnError << "Input size: " << this->rawDatA->size
+      *commentsOnError << "Input size: " << this->rawData->size
       << " too large, max allowed: " << maxAllowedSize << ". ";
     }
     return false;
@@ -843,7 +843,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decode(
   this->reset();
   this->dataPointer = inputOffset;
   this->decodedData = &output;
-  this->rawDatA = &inputRawData;
+  this->rawData = &inputRawData;
   this->checkInitialization();
   this->decodedData->reset();
   if (!this->decodeCurrent(*this->decodedData)) {
@@ -852,10 +852,10 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decode(
     }
     return false;
   }
-  if (this->dataPointer < this->rawDatA->size && this->flagMustDecodeAll) {
+  if (this->dataPointer < this->rawData->size && this->flagMustDecodeAll) {
     if (commentsOnError != nullptr) {
       *commentsOnError << "Decoded " << this->dataPointer
-      << " bytes but the input had: " << this->rawDatA->size << ". ";
+      << " bytes but the input had: " << this->rawData->size << ". ";
     }
     return false;
   }
@@ -906,12 +906,12 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::toStringAnnotateBinary() {
   }
   std::stringstream out;
   out << "<script " << WebAPI::result::scriptType << "='abstractSyntaxNotationAnnotate'>";
-  out << "[\"" << Crypto::convertListUnsignedCharsToHex(*this->rawDatA) << "\"";
+  out << "[\"" << Crypto::convertListUnsignedCharsToHex(*this->rawData) << "\"";
   out << ", ";
   out << this->decodedData->toString();
   out << ", ";
   List<unsigned char> idNonHexed;
-  Crypto::computeSha256(*this->rawDatA, idNonHexed);
+  Crypto::computeSha256(*this->rawData, idNonHexed);
   std::string theID = Crypto::convertListUnsignedCharsToHex(idNonHexed);
   out << "\"" << theID << "\"";
   out << "]";
@@ -1220,9 +1220,9 @@ bool ASNObject::loadFieldsFromASNSequence(
     }
     return false;
   }
-  for (int i = 0; i < input.theElements.size; i ++) {
+  for (int i = 0; i < input.elements.size; i ++) {
     ASNObject current;
-    if (!current.loadFromASN(input.theElements[i], commentsOnFailure)) {
+    if (!current.loadFromASN(input.elements[i], commentsOnFailure)) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Failed to load certificate entry index: " << i << ". ";
       }
@@ -1245,27 +1245,27 @@ bool ASNObject::loadFromASN(
   MacroRegisterFunctionWithName("ASNObject::loadFromASN");
   if (
     input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::set0x11 ||
-    input.theElements.size != 1
+    input.elements.size != 1
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "ASNObject outer layer must be a one-element set, instead is of type: "
-      << input.getType() << " and has " << input.theElements.size << " elements. ";
+      << input.getType() << " and has " << input.elements.size << " elements. ";
     }
     return false;
   }
-  const ASNElement& internal = input.theElements[0];
+  const ASNElement& internal = input.elements[0];
 
   if (
     internal.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10 ||
-    internal.theElements.size != 2
+    internal.elements.size != 2
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "ASNObject JSON representation must be a two-element sequence. ";
     }
     return false;
   }
-  this->objectId = internal.theElements[0];
+  this->objectId = internal.elements[0];
   if (this->objectId.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier0x06) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Missing objectIdentifierBytes key. ";
@@ -1279,7 +1279,7 @@ bool ASNObject::loadFromASN(
     return false;
   }
   *this = ASNObject::objectIdsToNames().getValueCreateNoInitialization(this->objectId.ASNAtom);
-  const ASNElement& second = internal.theElements[1];
+  const ASNElement& second = internal.elements[1];
   if (second.isComposite()) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "ASN object content is required to be non-composite. ";
@@ -1322,19 +1322,19 @@ void ASNElement::makeSet(
   this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::set0x11;
   this->startByte = this->tag;
   this->setStartByteFlags(setLeadingBit, setSecondMostSignificantBit, constructed);
-  this->theElements.setSize(numberOfEmptyElements);
+  this->elements.setSize(numberOfEmptyElements);
 }
 
 void ASNElement::makeSequence(const List<ASNElement>& input) {
   this->makeSequence(input.size);
-  this->theElements = input;
+  this->elements = input;
 }
 
 void ASNElement::makeSequence(int numberOfEmptyElements) {
   this->reset();
   this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10;
   this->startByte = this->tag + 32;
-  this->theElements.setSize(numberOfEmptyElements);
+  this->elements.setSize(numberOfEmptyElements);
 }
 
 void TBSCertificateInfo::computeASNSignatureAlgorithmIdentifier(ASNElement& output) {
@@ -1357,7 +1357,7 @@ void TBSCertificateInfo::computeASNVersionWrapper(ASNElement& output) {
   output.startByte = 160;
   ASNElement versionInteger;
   versionInteger.makeInteger(this->version);
-  output.theElements.addOnTop(versionInteger);
+  output.elements.addOnTop(versionInteger);
 }
 
 void ASNElement::setStartByteFlags(
@@ -1382,7 +1382,7 @@ void ASNElement::makeBitStringEmpty(
   this->startByte = this->tag;
   this->setStartByteFlags(setLeadingBit, setSecondMostSignificantBit, setConstructed);
   this->ASNAtom.setSize(0);
-  this->theElements.setSize(0);
+  this->elements.setSize(0);
 }
 
 void ASNElement::makeBitString(const List<unsigned char>& input) {
@@ -1406,7 +1406,7 @@ void TBSCertificateInfo::computeASNSignature(ASNElement& output) {
   output[0][0].makeObjectId(ASNObject::objectIdFromNameNoFail(ASNObject::names::RSAEncryption));
   output[0][1].makeNull();
   output[1].makeBitStringEmpty(false, false, false);
-  output[1].theElements.setSize(1);
+  output[1].elements.setSize(1);
   ASNElement& signatureSerializer = output[1][0];
   signatureSerializer.makeSequence(2);
   signatureSerializer[0].makeInteger(this->subjectPublicKey.theExponent);
@@ -1437,8 +1437,8 @@ void ASNElement::makeBitStringSequence(const List<ASNElement>& input) {
   this->makeSequence(input);
   this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03;
   this->startByte = this->tag + 128 + 32;
-  for (int i = 0; i < this->theElements.size; i ++) {
-    this->theElements[i].writeBytesUpdatePromisedLength(this->ASNAtom);
+  for (int i = 0; i < this->elements.size; i ++) {
+    this->elements[i].writeBytesUpdatePromisedLength(this->ASNAtom);
   }
   this->lengthPromised = this->ASNAtom.size;
 }
@@ -1476,7 +1476,7 @@ void TBSCertificateInfo::Organization::computeASN(ASNElement& output) {
       continue;
     }
     current->computeASN(next);
-    output.theElements.addOnTop(next);
+    output.elements.addOnTop(next);
   }
 }
 
@@ -1532,7 +1532,7 @@ std::string X509Certificate::toString() {
   decoderRecoded.decodedData = &this->recodedASN;
   List<unsigned char> recodedBytes;
   this->recodedASN.writeBytesUpdatePromisedLength(recodedBytes);
-  decoderRecoded.rawDatA = &recodedBytes;
+  decoderRecoded.rawData = &recodedBytes;
   out << "<br><b>Recoded (" << recodedBytes.size << " bytes).</b><br>";
   out << decoderRecoded.toStringAnnotateBinary();
 
@@ -1542,7 +1542,7 @@ std::string X509Certificate::toString() {
   } else {
     AbstractSyntaxNotationOneSubsetDecoder decoderSource;
     decoderSource.decodedData = &this->sourceASN;
-    decoderSource.rawDatA = &this->sourceBinary;
+    decoderSource.rawData = &this->sourceBinary;
     out << decoderSource.toStringAnnotateBinary();
   }
   return out.str();
@@ -1730,8 +1730,8 @@ void PrivateKeyRSA::hashAndPadPKCS1(
   default:
     global.fatal << "Non-allowed or non-implemented value for the hash algorithm. " << global.fatal;
   }
-  encoder.theElements[1].makeOctetString(inputHashed);
-  hashObject.computeASN(encoder.theElements[0]);
+  encoder.elements[1].makeOctetString(inputHashed);
+  hashObject.computeASN(encoder.elements[0]);
   List<unsigned char> payload;
   encoder.writeBytesUpdatePromisedLength(payload);
   int numberOfFFs = this->byteSize - payload.size - 3;
@@ -1894,7 +1894,7 @@ bool TBSCertificateInfo::loadExtensions(
     }
     return false;
   }
-  this->extensions = input.theElements;
+  this->extensions = input.elements;
   return true;
 }
 
@@ -1904,21 +1904,21 @@ bool TBSCertificateInfo::loadValidity(
   MacroRegisterFunctionWithName("TBSCertificateInfo::loadValidity");
   if (
     input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10 ||
-    input.theElements.size != 2
+    input.elements.size != 2
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Validity element must be a sequence of two elements. ";
     }
     return false;
   }
-  if (!input.theElements[0].isTime() || !input.theElements[1].isTime()) {
+  if (!input.elements[0].isTime() || !input.elements[1].isTime()) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Validity elements must be of type time. ";
     }
     return false;
   }
-  this->validityNotBefore = input.theElements[0];
-  this->validityNotAfter = input.theElements[1];
+  this->validityNotBefore = input.elements[0];
+  this->validityNotAfter = input.elements[1];
   return true;
 }
 
@@ -1982,7 +1982,7 @@ bool TBSCertificateInfo::loadASNAlgorithmIdentifier(
 ) {
   if (
     input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10 ||
-    input.theElements.size != 2
+    input.elements.size != 2
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Algorithm identifier outer layer must be a sequence of two elements. ";
@@ -2018,7 +2018,7 @@ bool TBSCertificateInfo::loadASNAlgorithmIdentifier(
 
 bool TBSCertificateInfo::load(const ASNElement& input, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TBSCertificateInfo::load");
-  if (input.theElements.size < 7) {
+  if (input.elements.size < 7) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Certificate ASN element needs at least 7 fields. ";
     }
@@ -2041,26 +2041,26 @@ bool TBSCertificateInfo::load(const ASNElement& input, std::stringstream* commen
     return false;
   }
   if (!this->loadASNAlgorithmIdentifier(
-    input.theElements[2], this->signatureAlgorithmIdentifier, commentsOnFailure
+    input.elements[2], this->signatureAlgorithmIdentifier, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load certificate signature algorithm identifier. ";
     }
     return false;
   }
-  if (!this->issuer.loadFromASN(input.theElements[3], commentsOnFailure)) {
+  if (!this->issuer.loadFromASN(input.elements[3], commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load issuer (authority that signed the certificate). ";
     }
     return false;
   }
-  if (!this->loadValidity(input.theElements[4], commentsOnFailure)) {
+  if (!this->loadValidity(input.elements[4], commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load validity. ";
     }
     return false;
   }
-  if (!this->subject.loadFromASN(input.theElements[5], commentsOnFailure)) {
+  if (!this->subject.loadFromASN(input.elements[5], commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load subject (owner of advertised public key). ";
     }
@@ -2092,8 +2092,8 @@ bool TBSCertificateInfo::load(const ASNElement& input, std::stringstream* commen
     }
     return false;
   }
-  if (input.theElements.size >= 8) {
-    return this->loadExtensions(input.theElements[7], commentsOnFailure);
+  if (input.elements.size >= 8) {
+    return this->loadExtensions(input.elements[7], commentsOnFailure);
   }
   return true;
 }
@@ -2109,7 +2109,7 @@ bool X509Certificate::loadFromASNEncoded(
     }
     return false;
   }
-  if (this->sourceASN.theElements.size != 3) {
+  if (this->sourceASN.elements.size != 3) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Certificate ASN needs exactly three elements. ";
     }

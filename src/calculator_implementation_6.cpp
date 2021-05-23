@@ -2142,7 +2142,7 @@ bool CalculatorFunctions::innerIntersectEmptySet(
   return false;
 }
 
-bool CalculatorFunctions::innerIsLinearOrConstantIn(
+bool CalculatorFunctions::isLinearOrConstantIn(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIsLinearOrConstantIn");
@@ -2395,7 +2395,7 @@ bool CalculatorFunctions::expressiontoUTF8String(
   return output.assignValue(input[1].toUTF8String(), calculator);
 }
 
-bool CalculatorFunctions::innerIsProductTermsUpToPower(
+bool CalculatorFunctions::isProductTermsUpToPower(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIsProductTermsUpToPower");
@@ -2706,14 +2706,14 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
     return calculator << "It appears your curve: " << curveE.toString()
     << " is not of the form y^2 = x^3 + ax + b. ";
   }
-  ExpressionContext theContext(calculator);
-  theContext.addVariable(xE);
-  theContext.addVariable(yE);
+  ExpressionContext context(calculator);
+  context.addVariable(xE);
+  context.addVariable(yE);
   if (isRational) {
-    return output.assignValueWithContext(eltRational, theContext, calculator);
+    return output.assignValueWithContext(eltRational, context, calculator);
   }
   if (isElementZmodP) {
-    return output.assignValueWithContext(eltZmodP, theContext, calculator);
+    return output.assignValueWithContext(eltZmodP, context, calculator);
   }
   return false;
 }

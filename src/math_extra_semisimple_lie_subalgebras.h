@@ -316,10 +316,10 @@ public:
   WeylGroupAutomorphisms& getAmbientWeylAutomorphisms() const;
   void computeCartanOfCentralizer();
   void computePrimalModuleDecomposition();
-  void computePrimalModuleDecompositionHWsHWVsOnly();
-  void computePrimalModuleDecompositionHWVsOnly(HashedList<Vector<Rational> >& inputHighestWeights);
-  void computePrimalModuleDecompositionHighestWeightsOnly(HashedList<Vector<Rational> >& outputHWsCoords);
-  void computePrimalModuleDecompositionHighestWeightsOnlyLastPart();
+  void computePrimalModuleDecompositionHighestWeightsAndHighestWeightVectors();
+  void computePrimalModuleDecompositionHighestWeightVectors(HashedList<Vector<Rational> >& inputHighestWeights);
+  void computePrimalModuleDecompositionHighestWeights(HashedList<Vector<Rational> >& outputHWsCoords);
+  void computePrimalModuleDecompositionHighestWeightsLastPart();
   void getPrimalWeightProjectionFundamentalCoordinates(
     const Vector<Rational>& inputAmbientWeight,
     Vector<Rational>& output
@@ -407,7 +407,7 @@ public:
   bool flagRealizedAllCandidates;
   bool flagAttemptToSolveSystems;
   bool flagcomputePairingTable;
-  bool flagcomputeModuleDecompositionsition;
+  bool flagComputeModuleDecomposition;
   bool flagComputeNilradicals;
   bool flagProduceLaTeXTables;
   bool flagAttemptToAdjustCentralizers;

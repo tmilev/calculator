@@ -357,9 +357,9 @@ bool CalculatorConversions::functionPolynomialWithExponentLimit(
   }
   Polynomial<Coefficient> monomial;
   monomial.makeMonomial(0, 1, 1);
-  ExpressionContext theContext(calculator);
-  theContext.makeOneVariable(input);
-  return output.assignValueWithContext(monomial, theContext, calculator);
+  ExpressionContext context(calculator);
+  context.makeOneVariable(input);
+  return output.assignValueWithContext(monomial, context, calculator);
 }
 
 template <class Coefficient>
@@ -448,10 +448,10 @@ bool CalculatorConversions::functionRationalFunction(
       return true;
     }
   }
-  ExpressionContext theContext(calculator);
-  theContext.makeOneVariable(input);
+  ExpressionContext context(calculator);
+  context.makeOneVariable(input);
   RationalFraction<Coefficient> rationalFunction;
   rationalFunction.makeOneLetterMonomial(0, Coefficient::oneStatic());
-  return output.assignValueWithContext(rationalFunction, theContext, calculator);
+  return output.assignValueWithContext(rationalFunction, context, calculator);
 }
 #endif

@@ -475,11 +475,11 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
     }
   }
   Vector<Polynomial<Rational> > theHWfundCoords, highestWeightsimpleCoords;
-  ExpressionContext theContext(calculator);
+  ExpressionContext context(calculator);
   if (!calculator.getVector(
     vectorNode,
     theHWfundCoords,
-    &theContext,
+    &context,
     dynkinType.getRank(),
     CalculatorConversions::functionPolynomial<Rational>
   )) {
@@ -491,7 +491,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
   theHWfundCoords = weyl.getFundamentalCoordinatesFromSimple(highestWeightsimpleCoords);
   std::stringstream out, latexReport;
   Vectors<Polynomial<Rational> > highestWeights;
-  FormatExpressions theFormat = theContext.getFormat();
+  FormatExpressions theFormat = context.getFormat();
   highestWeights.addOnTop(highestWeightsimpleCoords);
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   WeylGroupAutomorphisms theOuterAutos;
@@ -2168,9 +2168,9 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraWeight(
     resultWeight.weightFundamentalCoordinates = theSSowner->weylGroup.getFundamentalCoordinatesFromEpsilon(EiVector);
   }
   resultWeight.owner = theSSowner;
-  ExpressionContext theContext(calculator);
-  theContext.setAmbientSemisimpleLieAlgebra(*theSSowner);
-  return output.assignValueWithContext(resultWeight, theContext, calculator);
+  ExpressionContext context(calculator);
+  context.setAmbientSemisimpleLieAlgebra(*theSSowner);
+  return output.assignValueWithContext(resultWeight, context, calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::lieAlgebraRhoWeight(
@@ -2189,11 +2189,11 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraRhoWeight(
     return calculator << "<hr>Failed to load semisimple Lie algebra. ";
   }
   theSSowner->checkConsistency();
-  ExpressionContext theContext(calculator);
-  theContext.setAmbientSemisimpleLieAlgebra(*theSSowner);
+  ExpressionContext context(calculator);
+  context.setAmbientSemisimpleLieAlgebra(*theSSowner);
   resultWeight.weightFundamentalCoordinates = theSSowner->weylGroup.getFundamentalCoordinatesFromSimple(theSSowner->weylGroup.rho);
   resultWeight.owner = theSSowner;
-  return output.assignValueWithContext(resultWeight, theContext, calculator);
+  return output.assignValueWithContext(resultWeight, context, calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::testSpechtModules(

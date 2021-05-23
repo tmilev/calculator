@@ -1026,7 +1026,6 @@ void ElementUniversalEnvelopingOrdered<Coefficient>::substitutionCoefficients(Po
     currentMon.substitutionCoefficients(theSub);
     endResult.addMonomial(currentMon);
   }
-//  endResult.simplify(theContext);
   this->operator=(endResult);
 }
 
@@ -1038,7 +1037,7 @@ void ElementUniversalEnveloping<Coefficient>::makeZero(SemisimpleLieAlgebra& inp
 
 template <class Coefficient>
 void ElementUniversalEnveloping<Coefficient>::multiplyBy(
-  const MonomialUniversalEnveloping<Coefficient>& standsOnTheRight, const Coefficient& theCoeff
+  const MonomialUniversalEnveloping<Coefficient>& standsOnTheRight, const Coefficient& coefficient
 ) {
   if (standsOnTheRight.generatorsIndices.size == 0) {
     return;
@@ -1052,7 +1051,7 @@ void ElementUniversalEnveloping<Coefficient>::multiplyBy(
     tempMon = (*this)[i];
     tempMon *= standsOnTheRight;
     newCoeff = this->coefficients[i];
-    newCoeff *= theCoeff;
+    newCoeff *= coefficient;
     output.addMonomial(tempMon, newCoeff);
   }
   *this = output;

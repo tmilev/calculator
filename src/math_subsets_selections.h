@@ -205,48 +205,48 @@ class SelectionOneItem {
 template <class Base>
 class Incrementable {
 public:
-  List<Base> theElements;
+  List<Base> elements;
   Base& operator[](int i) {
-    return this->theElements[i];
+    return this->elements[i];
   }
   LargeInteger totalCombinations() {
     LargeInteger result = 1;
-    for (int i = 0; i < this->theElements.size; i ++) {
-      result *= this->theElements[i].totalCombinations();
+    for (int i = 0; i < this->elements.size; i ++) {
+      result *= this->elements[i].totalCombinations();
     }
     return result;
   }
   bool incrementReturnFalseIfPastLast() {
-    for (int i = this->theElements.size - 1; i >= 0; i --) {
-      if (this->theElements[i].incrementReturnFalseIfPastLast()) {
+    for (int i = this->elements.size - 1; i >= 0; i --) {
+      if (this->elements[i].incrementReturnFalseIfPastLast()) {
         return true;
       }
     }
     return false;
   }
-  void initFromMults(int inputBase, int numElts) {
-    this->theElements.setSize(numElts);
-    for (int i = 0; i < this->theElements.size; i ++) {
-      this->theElements[i].initFromMults(inputBase);
+  void initFromMults(int inputBase, int numberOfElements) {
+    this->elements.setSize(numberOfElements);
+    for (int i = 0; i < this->elements.size; i ++) {
+      this->elements[i].initFromMults(inputBase);
     }
   }
   template<class Element>
   void initFromMults(const List<Element>& input, int useOnlyNElementsOnly = 0) {
     if (useOnlyNElementsOnly > 0 && useOnlyNElementsOnly <= input.size) {
-      this->theElements.setSize(useOnlyNElementsOnly);
+      this->elements.setSize(useOnlyNElementsOnly);
     } else {
-      this->theElements.setSize(input.size);
+      this->elements.setSize(input.size);
     }
-    for (int i = 0; i < this->theElements.size; i ++) {
-      this->theElements[i].initFromMults(input[i]);
+    for (int i = 0; i < this->elements.size; i ++) {
+      this->elements[i].initFromMults(input[i]);
     }
   }
   std::string toString() const {
     std::stringstream out;
     out << "(";
-    for (int i = 0; i < this->theElements.size; i ++) {
-      out << this->theElements[i].toString();
-      if (i != this->theElements.size - 1) {
+    for (int i = 0; i < this->elements.size; i ++) {
+      out << this->elements[i].toString();
+      if (i != this->elements.size - 1) {
         out << ", ";
       }
     }
@@ -257,11 +257,11 @@ public:
 
 class SelectionFixedRank {
 public:
-  Selection theSelection;
+  Selection selection;
   int desiredSubsetSize;
   LargeInteger totalCombinations() {
     LargeInteger result;
-    MathRoutines::nChooseK(theSelection.numberOfElements, desiredSubsetSize, result);
+    MathRoutines::nChooseK(selection.numberOfElements, desiredSubsetSize, result);
     return result;
   }
   void setNumberOfItemsAndDesiredSubsetSize(int inputDesiredSubsetSize, int inputNumItems) {
@@ -270,19 +270,19 @@ public:
       << inputDesiredSubsetSize << " out of "
       << inputNumItems << " elements, which does not make sense. " << global.fatal;
     }
-    this->theSelection.initialize(inputNumItems);
+    this->selection.initialize(inputNumItems);
     this->desiredSubsetSize = inputDesiredSubsetSize;
     if (this->desiredSubsetSize > 0) {
-      this->theSelection.incrementSelectionFixedCardinality(this->desiredSubsetSize);
+      this->selection.incrementSelectionFixedCardinality(this->desiredSubsetSize);
     }
   }
   std::string toString() const {
-    return this->theSelection.toString();
+    return this->selection.toString();
   }
   bool incrementReturnFalseIfPastLast() {
-    this->theSelection.incrementSelectionFixedCardinality(this->desiredSubsetSize);
+    this->selection.incrementSelectionFixedCardinality(this->desiredSubsetSize);
     for (int i = 0; i < this->desiredSubsetSize; i ++) {
-      if (!this->theSelection.selected[i]) {
+      if (!this->selection.selected[i]) {
         return true;
       }
     }
@@ -327,7 +327,8 @@ class SelectionPositiveIntegers {
 };
 
 template<class Coefficient>
-bool Vectors<Coefficient>::computeNormalFromSelectionAndTwoExtraRoots(Vector<Coefficient>& output,
+bool Vectors<Coefficient>::computeNormalFromSelectionAndTwoExtraRoots(
+  Vector<Coefficient>& output,
   Vector<Coefficient>& extraRoot1,
   Vector<Coefficient>& extraRoot2,
   Selection& theSelection,
@@ -425,16 +426,16 @@ bool Vectors<Coefficient>::computeNormalExcludingIndex(
 template<class Coefficient>
 bool Vectors<Coefficient>::computeNormalFromSelection(
   Vector<Coefficient>& output,
-  Selection& theSelection,
+  Selection& selection,
   Matrix<Coefficient>& bufferMatrix,
   int dimension
 ) const {
   Selection nonPivotPoints;
   output.setSize(dimension);
-  bufferMatrix.initialize(theSelection.cardinalitySelection, dimension);
-  for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
+  bufferMatrix.initialize(selection.cardinalitySelection, dimension);
+  for (int i = 0; i < selection.cardinalitySelection; i ++) {
     for (int j = 0; j < dimension; j ++) {
-      bufferMatrix.elements[i][j] = this->objects[theSelection.elements[i]].objects[j];
+      bufferMatrix.elements[i][j] = this->objects[selection.elements[i]].objects[j];
     }
   }
   bufferMatrix.gaussianEliminationByRows(0, &nonPivotPoints);
@@ -448,10 +449,10 @@ bool Vectors<Coefficient>::computeNormalFromSelection(
 template<class Coefficient>
 bool Vectors<Coefficient>::computeNormalFromSelectionAndExtraRoot(
   Vector<Coefficient>& output,
-  Vector<Coefficient>& ExtraRoot,
-  Selection& theSelection,
+  Vector<Coefficient>& extraRoot,
+  Selection& selection,
   Matrix<Coefficient>& bufferMatrix,
-  Selection& bufferSel
+  Selection& bufferSelection
 ) {
   if (this->size == 0) {
     return false;
@@ -459,14 +460,14 @@ bool Vectors<Coefficient>::computeNormalFromSelectionAndExtraRoot(
   int dimension = this->objects[0].size;
   output.setSize(dimension);
   Matrix<Coefficient> matOutputEmpty;
-  Selection& nonPivotPoints = bufferSel;
-  bufferMatrix.initialize(theSelection.cardinalitySelection + 1, dimension);
+  Selection& nonPivotPoints = bufferSelection;
+  bufferMatrix.initialize(selection.cardinalitySelection + 1, dimension);
   matOutputEmpty.initialize(- 1, - 1);
   for (int j = 0; j < dimension; j ++) {
-    for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
-      bufferMatrix.elements[i][j].assign(this->objects[theSelection.elements[i]][j]);
+    for (int i = 0; i < selection.cardinalitySelection; i ++) {
+      bufferMatrix.elements[i][j].assign(this->objects[selection.elements[i]][j]);
     }
-    bufferMatrix.elements[theSelection.cardinalitySelection][j].assign(ExtraRoot[j]);
+    bufferMatrix.elements[selection.cardinalitySelection][j].assign(extraRoot[j]);
   }
   bufferMatrix.gaussianEliminationByRows(matOutputEmpty, nonPivotPoints);
   if (nonPivotPoints.cardinalitySelection != 1) {

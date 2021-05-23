@@ -14,10 +14,10 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionRemainder(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::polynomialDivisionRemainder");
-  ExpressionContext theContext(calculator);
+  ExpressionContext context(calculator);
   Vector<Polynomial<AlgebraicNumber> > polynomials;
   if (!calculator.getListPolynomialVariableLabelsLexicographic(
-    input, polynomials, theContext
+    input, polynomials, context
   )) {
     return output.makeError("Failed to extract list of polynomials. ", calculator);
   }
@@ -33,7 +33,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionRemainder(
   Polynomial<AlgebraicNumber> outputRemainder;
   computation.remainderDivisionByBasis(polynomials[0], outputRemainder, - 1);
   Expression polynomialExpression;
-  polynomialExpression.assignValueWithContext(outputRemainder, theContext, calculator);
+  polynomialExpression.assignValueWithContext(outputRemainder, context, calculator);
   output.reset(calculator);
   output.addChildAtomOnTop("MakeExpression");
   output.addChildOnTop(polynomialExpression);
@@ -92,10 +92,10 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
   List<MonomialPolynomial>::Comparator* monomialOrder
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionVerbose");
-  ExpressionContext theContext(calculator);
+  ExpressionContext context(calculator);
   Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
   if (!calculator.getListPolynomialVariableLabelsLexicographic(
-    input, polynomialsRational, theContext
+    input, polynomialsRational, context
   )) {
     return output.makeError(
       "Failed to extract list of polynomials. ",
@@ -116,7 +116,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
     computation.polynomialOrder.monomialOrder = *monomialOrder;
   }
   computation.remainderDivisionByBasis(polynomialsRational[0], computation.remainderDivision, - 1);
-  theContext.getFormat(computation.format);
+  context.getFormat(computation.format);
   computation.format.flagUseLatex = true;
   computation.format.flagUseFrac = true;
   std::stringstream latexOutput;
@@ -136,10 +136,10 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionSlidesGrLex");
-  ExpressionContext theContext(calculator);
+  ExpressionContext context(calculator);
   Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
   if (!calculator.getListPolynomialVariableLabelsLexicographic(
-    input, polynomialsRational, theContext
+    input, polynomialsRational, context
   )) {
     return output.makeError("Failed to extract list of polynomials. ", calculator);
   }
@@ -164,7 +164,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
     return calculator << "Failed to extract integer from first argument";
   }
   computation.remainderDivisionByBasis(polynomialsRational[1], computation.remainderDivision, - 1);
-  theContext.getFormat(computation.format);
+  context.getFormat(computation.format);
   computation.format.flagUseLatex = true;
   computation.format.flagUseFrac = true;
   std::stringstream latexOutput;
@@ -249,9 +249,9 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionQuotient(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionQuotient");
-  ExpressionContext theContext(calculator);
+  ExpressionContext context(calculator);
   Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
-  if (!calculator.getListPolynomialVariableLabelsLexicographic(input, polynomialsRational, theContext)) {
+  if (!calculator.getListPolynomialVariableLabelsLexicographic(input, polynomialsRational, context)) {
     return output.makeError("Failed to extract list of polynomials. ", calculator);
   }
   GroebnerBasisComputation<AlgebraicNumber> computation;
@@ -270,7 +270,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionQuotient(
   for (int i = 0; i < computation.quotients.size; i ++) {
     currentE.reset(calculator);
     currentE.addChildAtomOnTop("MakeExpression");
-    polynomialExpression.assignValueWithContext(computation.quotients[i], theContext, calculator);
+    polynomialExpression.assignValueWithContext(computation.quotients[i], context, calculator);
     currentE.addChildOnTop(polynomialExpression);
     theList.addOnTop(currentE);
   }
@@ -1056,11 +1056,11 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
   for (int i = 1; i < input.size(); i ++) {
     output.addChildOnTop(input[i]);
   }
-  ExpressionContext theContext(calculator);
+  ExpressionContext context(calculator);
   if (!calculator.getVectorFromFunctionArguments<Polynomial<Rational> >(
     output,
     inputVector,
-    &theContext,
+    &context,
     - 1,
     CalculatorConversions::functionPolynomial<Rational>
   )) {
@@ -1068,7 +1068,7 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
   }
   Vector<Polynomial<Rational> > relations, theGens;
   FormatExpressions theFormat;
-  theContext.getFormat(theFormat);
+  context.getFormat(theFormat);
   for (char i = 0; i < 26; i ++) {
     char currentLetter = 'a' + i;
     std::string currentStr;
@@ -1202,18 +1202,18 @@ bool CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePo
     return CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultipleAlgebraic(calculator, input, output, doGCD);
   }
   Vector<Polynomial<Rational> > polynomials;
-  ExpressionContext theContext(calculator);
+  ExpressionContext context(calculator);
   if (!calculator.getVectorFromFunctionArguments(
     input,
     polynomials,
-    &theContext,
+    &context,
     2,
     CalculatorConversions::functionPolynomial<Rational>
   )) {
     return output.makeError("Failed to extract a list of 2 polynomials. ", calculator);
   }
   return CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
-    calculator, polynomials[0], polynomials[1], theContext, output, doGCD
+    calculator, polynomials[0], polynomials[1], context, output, doGCD
   );
 }
 

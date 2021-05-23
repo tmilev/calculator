@@ -632,7 +632,7 @@ bool CalculatorFunctions::innerFetchWebPageGET(Calculator& calculator, const Exp
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerFetchWebPagePOST(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::fetchWebPagePOST(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFetchWebPagePOST");
   if (!global.userDefaultHasAdminRights()) {
     return output.assignValue(std::string("Fetching web pages available only for logged-in admins. "), calculator);

@@ -930,10 +930,10 @@ bool CalculatorFunctions::innerMultiplySequence(
   return output.makeProduct(calculator, terms);
 }
 
-bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnStandard(
+bool CalculatorFunctions::ensureExpressionDependsOnlyOnStandard(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerEnsureExpressionDependsOnlyOnStandard");
+  MacroRegisterFunctionWithName("CalculatorFunctions::ensureExpressionDependsOnlyOnStandard");
   if (input.size() < 3) {
     return false;
   }

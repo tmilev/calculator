@@ -378,12 +378,12 @@ bool CalculatorFunctions::nistEllipticCurveGenerator(
   if (!generator.makeGeneratorNISTCurve(inputString, &calculator.comments)) {
     return false;
   }
-  ExpressionContext theContext(calculator);
+  ExpressionContext context(calculator);
   List<std::string> variables;
   variables.addOnTop("x");
   variables.addOnTop("y");
-  theContext.setVariablesFromStrings(variables);
-  return output.assignValueWithContext(generator, theContext, calculator);
+  context.setVariablesFromStrings(variables);
+  return output.assignValueWithContext(generator, context, calculator);
 }
 
 bool CalculatorFunctions::stringDifference(
@@ -1120,7 +1120,7 @@ bool CalculatorFunctions::dereferenceInterval(Calculator& calculator, const Expr
   return false;
 }
 
-bool CalculatorFunctions::innerDereferenceSequenceOrMatrix(
+bool CalculatorFunctions::dereferenceSequenceOrMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerDereferenceSequenceOrMatrix");
@@ -1176,7 +1176,7 @@ bool CalculatorFunctions::solveSerreLikeSystem(
 ) {
   MacroRegisterFunctionWithName("Calculator::solveSerreLikeSystem");
   Vector<Polynomial<Rational> > polynomialsRational;
-  ExpressionContext theContext(calculator);
+  ExpressionContext context(calculator);
   bool useArguments =
   input.startsWith(calculator.getOperations().getIndexNoFail("FindOneSolutionSerreLikePolynomialSystem")) ||
   input.startsWith(calculator.getOperations().getIndexNoFail("FindOneSolutionSerreLikePolynomialSystemAlgebraic")) ||
@@ -1187,7 +1187,7 @@ bool CalculatorFunctions::solveSerreLikeSystem(
     if (!calculator.getVectorFromFunctionArguments(
       input,
       polynomialsRational,
-      &theContext,
+      &context,
       0,
       CalculatorConversions::functionPolynomial<Rational>
     )) {
@@ -1197,7 +1197,7 @@ bool CalculatorFunctions::solveSerreLikeSystem(
     if (!calculator.getVector(
       input,
       polynomialsRational,
-      &theContext,
+      &context,
       0,
       CalculatorConversions::functionPolynomial<Rational>
     )) {
@@ -1205,7 +1205,7 @@ bool CalculatorFunctions::solveSerreLikeSystem(
     }
   }
   PolynomialSystem<AlgebraicNumber> system;
-  theContext.getFormat(system.groebner.format);
+  context.getFormat(system.groebner.format);
   List<int> upperLimits = List<int>({201, 1000});
   if (useUpperLimit) {
     for (int i = 0; i < 2; i ++) {
@@ -1232,7 +1232,7 @@ bool CalculatorFunctions::solveSerreLikeSystem(
   system.flagUseTheMonomialBranchingOptimization = true;
   system.solveSerreLikeSystem(polynomials);
   std::stringstream out;
-  out << "<br>The context vars:<br>" << theContext.toString();
+  out << "<br>The context vars:<br>" << context.toString();
   out << "<br>The polynomials: " << polynomials.toString(&system.groebner.format);
   out << "<br>Total number of polynomial computations: "
   << system.numberOfSerreSystemComputations;
@@ -3581,7 +3581,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   if (calculator.functionGetMatrix(converted, matrix)) {
     return calculator << "Failed to get matrix of rational functions. ";
   }
-  ExpressionContext theContext = converted.getContext();
+  ExpressionContext context = converted.getContext();
   if (matrix.numberOfRows != matrix.numberOfColumns || matrix.numberOfColumns < 1) {
     std::stringstream out;
     out << "The matrix " << matrix.toString( ) << " has "
@@ -3597,7 +3597,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
 
   RationalFraction<Rational> tempElement;
   FormatExpressions format;
-  theContext.getFormat(format);
+  context.getFormat(format);
   format.flagUseLatex = true;
   format.flagUseHTML = false;
   format.flagUseFrac = true;
@@ -5421,7 +5421,7 @@ bool CalculatorFunctions::innerContains(
   }
 }
 
-bool CalculatorFunctions::innerExpressionLeafs(
+bool CalculatorFunctions::expressionLeafs(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerExpressionLeafs");
@@ -5532,7 +5532,7 @@ bool CalculatorFunctions::innerIsPossiblyPrime(Calculator& calculator, const Exp
   return output.assignValue(result, calculator);
 }
 
-bool CalculatorFunctions::innerIsPrimeMillerRabin(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::isPrimeMillerRabin(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIsPrimeMillerRabin");
   if (input.size() != 2) {
     return false;
@@ -6774,7 +6774,7 @@ bool CalculatorFunctions::functionDeterminant(
   return output.assignValueWithContext(result, context, calculator);
 }
 
-bool CalculatorFunctions::innerDeterminant(
+bool CalculatorFunctions::determinant(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerDeterminant");

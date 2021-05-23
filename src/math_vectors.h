@@ -897,16 +897,16 @@ class Vectors: public List<Vector<Coefficient> > {
   );
   bool computeNormalFromSelection(
     Vector<Coefficient>& output,
-    Selection& theSelection,
+    Selection& selection,
     Matrix<Coefficient>& bufferMatrix,
     int dimension
   ) const;
   bool computeNormalFromSelectionAndExtraRoot(
     Vector<Coefficient>& output,
-    Vector<Coefficient>& ExtraRoot,
-    Selection& theSelection,
+    Vector<Coefficient>& extraRoot,
+    Selection& selection,
     Matrix<Coefficient>& bufferMatrix,
-    Selection& bufferSel
+    Selection& bufferSelection
   );
   bool computeNormalFromSelectionAndTwoExtraRoots(
     Vector<Coefficient>& output,

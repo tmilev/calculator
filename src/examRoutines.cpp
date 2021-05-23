@@ -1783,13 +1783,13 @@ void CalculatorHTML::computeDeadlinesAllSectionsNoInheritance(TopicElement& inpu
   }
 }
 
-std::string CalculatorHTML::toStringInterprettedCommands(Calculator &theInterpreter, List<SyntacticElementHTML>& theElements) {
+std::string CalculatorHTML::toStringInterprettedCommands(Calculator &theInterpreter, List<SyntacticElementHTML>& elements) {
   MacroRegisterFunctionWithName("CalculatorHTML::toStringInterprettedCommands");
   std::stringstream out;
   out << "<table>";
   int commandCounter = theInterpreter.programExpression.size() - 1;
-  for (int eltCounter = theElements.size - 1; eltCounter > 0; eltCounter --) {
-    SyntacticElementHTML& currentElt = theElements[eltCounter];
+  for (int eltCounter = elements.size - 1; eltCounter > 0; eltCounter --) {
+    SyntacticElementHTML& currentElt = elements[eltCounter];
     std::string currentEltString = currentElt.getTagClass() + "[" + currentElt.content.substr(0, 10) + "...]";
     if (!currentElt.isInterpretedByCalculatorOnGeneration()) {
       out << "<tr><td>" << currentEltString << "</td>"

@@ -157,7 +157,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationHandler(
     "IsPrimeMillerRabin",
-    CalculatorFunctions::innerIsPrimeMillerRabin,
+    CalculatorFunctions::isPrimeMillerRabin,
     "",
     "Checks whether the number is prime by the Miller-Rabin test. ",
     "A =100!+ 1; IsPrimeMillerRabin(A);\n"
@@ -332,7 +332,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationHandler(
     "FindOneSolutionSerreLikePolynomialSystemUpperLimit",
-    CalculatorFunctions::innerSolveSerreLikeSystemUpperLimit,
+    CalculatorFunctions::solveSerreLikeSystemUpperLimit,
     "",
     "Same as FindOneSolutionSerreLikePolynomialSystem "
     "but the first argument gives upper limits "
@@ -361,25 +361,25 @@ void Calculator::initializeFunctionsScientificBasic() {
     "x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13}, "
     "x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13}, "
     "x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13} - 1)",
-    "CalculatorFunctions::innerSolveSerreLikeSystemUpperLimit",
+    "CalculatorFunctions::solveSerreLikeSystemUpperLimit",
     "FindOneSolutionSerreLikePolynomialSystemUpperLimit",
     innerStandard
   );
   this->addOperationHandler(
     "FindOneSolutionSerreLikePolynomialSystemAlgebraic",
-    CalculatorFunctions::innerSolveSerreLikeSystemAlgebraic,
+    CalculatorFunctions::solveSerreLikeSystemAlgebraic,
     "",
     "Same as FindOneSolutionSerreLikePolynomialSystem "
     "but starts directly over algebraic closure. ",
     "FindOneSolutionSerreLikePolynomialSystemAlgebraic"
     "(x^2 + 1, y x z - 1, z^2 x + y - 1, w u)",
-    "CalculatorFunctions::innerSolveSerreLikeSystemAlgebraic",
+    "CalculatorFunctions::solveSerreLikeSystemAlgebraic",
     "FindOneSolutionSerreLikePolynomialSystemAlgebraic",
     innerStandard
   );
   this->addOperationHandler(
     "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit",
-    CalculatorFunctions::innerSolveSerreLikeSystemAlgebraicUpperLimit,
+    CalculatorFunctions::solveSerreLikeSystemAlgebraicUpperLimit,
     "",
     "Same as FindOneSolutionSerreLikePolynomialSystemAlgebraic "
     "but the first argument gives upper limits to the number of "
@@ -388,7 +388,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit(\n"
     "10000,10000,\n"
     "x^2+ 1, y x z - 1, z^2 x +y - 1, w u)",
-    "CalculatorFunctions::innerSolveSerreLikeSystemAlgebraicUpperLimit",
+    "CalculatorFunctions::solveSerreLikeSystemAlgebraicUpperLimit",
     "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit",
     innerStandard
   );

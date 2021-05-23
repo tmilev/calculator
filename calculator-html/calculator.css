@@ -1609,10 +1609,6 @@ div.abstractSyntaxOneElementTree div.abstractSyntaxOneElementTree  {
   padding-left: 5px
 }
 
-/*span.abstractSyntaxOneElement:hover {
-  background-color:lightyellow;
-}*/
-
 span.abstractSyntaxOneContent:hover {
   background-color: lightgreen;
 }

@@ -489,9 +489,9 @@ bool CalculatorFunctions::innerPrintAllVectorPartitions(Calculator& calculator, 
   SemisimpleLieAlgebra* theSSowner = algebra.content;
 
   SemisimpleLieAlgebra& theSSalgebra = *theSSowner;
-  ExpressionContext theContext(calculator);
+  ExpressionContext context(calculator);
   Vector<Rational> theHW;
-  if (!calculator.getVector<Rational>(input[2], theHW, &theContext, theSSalgebra.getRank())) {
+  if (!calculator.getVector<Rational>(input[2], theHW, &context, theSSalgebra.getRank())) {
     return output.makeError("Failed to extract weight you want partitioned from " + input[2].toString(), calculator);
   }
   Vector<int> theHWint;
@@ -564,22 +564,22 @@ bool CalculatorFunctions::innerInterpolatePoly(
     << convertedE.toString();
   }
   Polynomial<Rational> interPoly;
-  Vector<Rational> theArgs, theValues;
-  pointsOfInterpoly.getVectorFromColumn(0, theArgs);
-  pointsOfInterpoly.getVectorFromColumn(1, theValues);
-  interPoly.interpolate(theArgs, theValues);
-  ExpressionContext theContext(calculator);
-  theContext.makeOneVariableFromString("x");
-  return output.assignValueWithContext(interPoly, theContext, calculator);
+  Vector<Rational> arguments, values;
+  pointsOfInterpoly.getVectorFromColumn(0, arguments);
+  pointsOfInterpoly.getVectorFromColumn(1, values);
+  interPoly.interpolate(arguments, values);
+  ExpressionContext context(calculator);
+  context.makeOneVariableFromString("x");
+  return output.assignValueWithContext(interPoly, context, calculator);
 }
 
-bool CalculatorFunctions::innerOperationBinary(
+bool CalculatorFunctions::operationBinary(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  int theOp
+  int operation
 ) {
-  MemorySaving<Calculator::OperationHandlers>& theOperation = calculator.operations.values[theOp];
+  MemorySaving<Calculator::OperationHandlers>& theOperation = calculator.operations.values[operation];
   if (theOperation.isZeroPointer()) {
     return false;
   }

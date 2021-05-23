@@ -1021,10 +1021,10 @@ bool CalculatorLieTheory::printB3G2branchingTable(
 bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::printB3G2branchingTableCharsOnly");
   BranchingData g3InB3Data;
-  ExpressionContext theContext(calculator);
+  ExpressionContext context(calculator);
   Vectors<RationalFraction<Rational> > theHWs;
   CalculatorLieTheory::printB3G2branchingTableCommon(
-    calculator, input, output, theHWs, g3InB3Data, theContext
+    calculator, input, output, theHWs, g3InB3Data, context
   );
   if (output.isError()) {
     return true;
@@ -1309,7 +1309,7 @@ bool CalculatorLieTheory::killingForm(Calculator& calculator, const Expression& 
   if (!Expression::mergeContexts(leftE, rightE)) {
     return false;
   }
-  ExpressionContext theContext = leftE.getContext();
+  ExpressionContext context = leftE.getContext();
   ElementUniversalEnveloping<RationalFraction<Rational> > left, right;
   if (
     !leftE.isOfType<ElementUniversalEnveloping<RationalFraction<Rational> > >(&left) ||
@@ -1327,7 +1327,7 @@ bool CalculatorLieTheory::killingForm(Calculator& calculator, const Expression& 
   if (left.getLieAlgebraElementIfPossible(leftEltSS) && right.getLieAlgebraElementIfPossible(rightEltSS)) {
     return output.assignValue(leftEltSS.getOwner()->getKillingForm(leftEltSS, rightEltSS), calculator);
   }
-  return output.assignValueWithContext(left.getKillingFormProduct(right), theContext, calculator);
+  return output.assignValueWithContext(left.getKillingFormProduct(right), context, calculator);
 }
 
 bool CalculatorLieTheory::highestWeightVector(Calculator& calculator, const Expression& input, Expression& output) {
@@ -1650,14 +1650,14 @@ bool CalculatorLieTheory::printB3G2branchingTableCommon(
   Expression& output,
   Vectors<RationalFraction<Rational> >& outputHWs,
   BranchingData& g2InB3Data,
-  ExpressionContext& theContext
+  ExpressionContext& context
 ) {
   MacroRegisterFunctionWithName("Calculator::printB3G2branchingTableCommon");
   Vector<RationalFraction<Rational> > theHWrf;
   SelectionWithMaxMultiplicity theHWenumerator;
   int desiredHeight = 0;
   if (!CalculatorLieTheory::printB3G2branchingTableInit(
-    calculator, input, output, g2InB3Data, desiredHeight, theContext
+    calculator, input, output, g2InB3Data, desiredHeight, context
   )) {
     return false;
   }
@@ -1665,7 +1665,7 @@ bool CalculatorLieTheory::printB3G2branchingTableCommon(
     return true;
   }
   Selection invertedSelInducing = g2InB3Data.inducing;
-  theContext.getFormat(g2InB3Data.format);
+  context.getFormat(g2InB3Data.format);
   invertedSelInducing.invertSelection();
   outputHWs.setSize(0);
   for (int j = 0; j <= desiredHeight; j ++) {
@@ -2787,9 +2787,9 @@ bool CalculatorLieTheory::drawWeightSupportWithMults(
     return output.makeError("Error extracting Lie algebra.", calculator);
   }
   Vector<Rational> highestWeightFundCoords;
-  ExpressionContext theContext(calculator);
+  ExpressionContext context(calculator);
   if (!calculator.getVector<Rational>(
-    hwNode, highestWeightFundCoords, &theContext, theSSalgpointer.content->getRank(), nullptr
+    hwNode, highestWeightFundCoords, &context, theSSalgpointer.content->getRank(), nullptr
   )) {
     return output.makeError("Failed to extract highest weight vector", calculator);
   }
@@ -3256,10 +3256,10 @@ bool CalculatorLieTheory::cartanGenerator(Calculator& calculator, const Expressi
   element.makeCartanGenerator(theH, *theSSalg.content);
   ElementUniversalEnveloping<RationalFraction<Rational> > theUE;
   theUE.assignElementLieAlgebra(element, *theSSalg.content);
-  ExpressionContext theContext(calculator);
+  ExpressionContext context(calculator);
   int theAlgIndex = calculator.objectContainer.semisimpleLieAlgebras.getIndex(theSSalg.content->weylGroup.dynkinType);
-  theContext.setIndexAmbientSemisimpleLieAlgebra(theAlgIndex);
-  return output.assignValueWithContext(theUE, theContext, calculator);
+  context.setIndexAmbientSemisimpleLieAlgebra(theAlgIndex);
+  return output.assignValueWithContext(theUE, context, calculator);
 }
 
 bool CalculatorLieTheory::rootSubsystem(Calculator& calculator, const Expression& input, Expression& output) {

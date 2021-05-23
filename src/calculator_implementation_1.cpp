@@ -54,11 +54,11 @@ bool Calculator::getListPolynomialVariableLabelsLexicographic(
   ExpressionContext& outputContext
 ) {
   MacroRegisterFunctionWithName("Calculator::getListPolynomialVariableLabelsLexicographic");
-  ExpressionContext theContextStart(*this);
+  ExpressionContext contextStart(*this);
   if (!this->getVectorFromFunctionArguments(
     input,
     output,
-    &theContextStart,
+    &contextStart,
     0,
     CalculatorConversions::functionPolynomial<AlgebraicNumber>
   )) {
@@ -67,18 +67,18 @@ bool Calculator::getListPolynomialVariableLabelsLexicographic(
   if (output.size < 2) {
     return false;
   }
-  int numVars = theContextStart.numberOfVariables();
+  int numVars = contextStart.numberOfVariables();
   HashedList<Expression> theVars;
   theVars.setExpectedSize(numVars);
   for (int i = 0; i < numVars; i ++) {
-    theVars.addOnTop(theContextStart.getVariable(i));
+    theVars.addOnTop(contextStart.getVariable(i));
   }
   theVars.quickSortAscending();
   PolynomialSubstitution<AlgebraicNumber> substitution;
   substitution.setSize(numVars);
   const AlgebraicNumber& one = this->objectContainer.algebraicClosure.one();
   for (int i = 0; i < substitution.size; i ++) {
-    int currentIndex = theVars.getIndex(theContextStart.getVariable(i));
+    int currentIndex = theVars.getIndex(contextStart.getVariable(i));
     substitution[i].makeMonomial(
       currentIndex,
       1,

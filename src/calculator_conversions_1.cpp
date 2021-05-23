@@ -665,7 +665,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   subalgebras.subalgebras.clear();
   subalgebras.subalgebrasNonEmbedded->setExpectedSize(subalgebrasE.size() - 1);
   subalgebras.flagAttemptToSolveSystems = true;
-  subalgebras.flagcomputeModuleDecompositionsition = true;
+  subalgebras.flagComputeModuleDecomposition = true;
   subalgebras.flagcomputePairingTable = false;
   subalgebras.flagComputeNilradicals = false;
   subalgebras.millisecondsComputationStart = global.getElapsedMilliseconds();
@@ -874,7 +874,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
   ElementSemisimpleLieAlgebra<AlgebraicNumber> currentElt;
   chevalleyGenerator.owner = &owner;
   output.makeZero();
-  ExpressionContext theContext = polyFormE.getContext();
+  ExpressionContext context = polyFormE.getContext();
   for (int j = 0; j < polyForm.size(); j ++) {
     const MonomialPolynomial& currentMon = polyForm[j];
     int chevalleyGeneratorIndex = 0;
@@ -882,7 +882,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
       return calculator << "<hr>Failed to convert semisimple Lie algebra input to linear poly: "
       << input.toString() << ".<hr>";
     }
-    Expression singleChevGenE = theContext.getVariable(chevalleyGeneratorIndex);
+    Expression singleChevGenE = context.getVariable(chevalleyGeneratorIndex);
     if (!singleChevGenE.startsWith(calculator.opUnderscore(), 3)) {
       return calculator << "<hr>Failed to convert: "
       << singleChevGenE.toString()
@@ -951,7 +951,7 @@ bool CalculatorConversions::innerElementUE(
     return calculator << "<hr>Failed to convert " << input[1].toString()
     << " to polynomial. Instead I got " << polyE.toString() << ". <hr>";
   }
-  ExpressionContext theContext = polyE.getContext();
+  ExpressionContext context = polyE.getContext();
   HashedList<Expression> polynomialVariables;
   for (int j = 0; j < theP.size(); j ++) {
     const MonomialPolynomial& currentMon = theP[j];
@@ -968,7 +968,7 @@ bool CalculatorConversions::innerElementUE(
       if (power == 0) {
         continue;
       }
-      Expression singleChevGenE = theContext.getVariable(i);
+      Expression singleChevGenE = context.getVariable(i);
       if (!singleChevGenE.isListNElements(2)) {
         return calculator << "<hr>Failed to convert "
         << input[1].toString() << " to polynomial.<hr>";

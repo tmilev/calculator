@@ -443,8 +443,8 @@ void RootSubalgebra::makeProgressReportpossibleNilradicalComputation(RootSubalge
     } else {
       out1 << "Computing ss part " << this->dynkinDiagram.toString();
       out2 << this->numberOfNilradicalsAllowed << " Nilradicals processed out of " << this->totalSubalgebras;
-      owner.NumSubalgebrasProcessed ++;
-      out3 << "Total # subalgebras processed: " << owner.NumSubalgebrasProcessed;
+      owner.numberOfSubalgebrasProcessed ++;
+      out3 << "Total # subalgebras processed: " << owner.numberOfSubalgebrasProcessed;
       out4 << "Num cone condition failures: " << owner.numberOfConeConditionFailures;
       out5 << "Num failures to find l-prohibiting relations: " << owner.badRelations.size;
       report4.report(out4.str());
@@ -2388,7 +2388,7 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphismOLD(
   this->getOwnerWeyl().computeRho(true);
   //this->initDynkinDiagramsNonDecided(this->ambientWeyl, WeylLetter, WeylRank);
   RootSubalgebras rootSAsGenerateAll;
-  rootSAsGenerateAll.subalgebras.setSize(this->GetOwnerSSalgebra().getRank()*2+ 1);
+  rootSAsGenerateAll.subalgebras.setSize(this->getOwnerSemisimpleLieAlgebra().getRank()*2+ 1);
   rootSAsGenerateAll.subalgebras[0].genK.size = 0;
   rootSAsGenerateAll.subalgebras[0].owner = this;
   rootSAsGenerateAll.subalgebras[0].computeEssentials();
@@ -3191,12 +3191,12 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
   }
 }
 
-void RootSubalgebras::computeAllRootSubalgebrasUpToIsomorphism(int StartingIndex, int NumToBeProcessed) {
+void RootSubalgebras::computeAllRootSubalgebrasUpToIsomorphism(int startingIndex, int numberToBeProcessed) {
   static PauseThread localController;
-  this->NumSubalgebrasProcessed = 0;
+  this->numberOfSubalgebrasProcessed = 0;
   this->numberOfConeConditionFailures = 0;
   this->NumSubalgebrasCounted = 0;
-  for (int i = StartingIndex; i < NumToBeProcessed + StartingIndex; i ++) {
+  for (int i = startingIndex; i < numberToBeProcessed + startingIndex; i ++) {
     this->subalgebras[i].flagComputeConeCondition = this->flagComputeConeCondition;
     this->subalgebras[i].generatePossibleNilradicals(
       localController,
@@ -3206,7 +3206,7 @@ void RootSubalgebras::computeAllRootSubalgebrasUpToIsomorphism(int StartingIndex
       *this,
       i
     );
-    if (i != NumToBeProcessed+StartingIndex - 1) {
+    if (i != numberToBeProcessed + startingIndex - 1) {
       this->subalgebras[i + 1].generatePossibleNilradicalsInit(
         this->impiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration
       );
@@ -3215,10 +3215,10 @@ void RootSubalgebras::computeAllRootSubalgebrasUpToIsomorphism(int StartingIndex
 }
 
 WeylGroupData& RootSubalgebras::getOwnerWeyl() const {
-  return this->GetOwnerSSalgebra().weylGroup;
+  return this->getOwnerSemisimpleLieAlgebra().weylGroup;
 }
 
-SemisimpleLieAlgebra& RootSubalgebras::GetOwnerSSalgebra() const {
+SemisimpleLieAlgebra& RootSubalgebras::getOwnerSemisimpleLieAlgebra() const {
   this->checkInitialization();
   return *this->owner;
 }
@@ -3632,81 +3632,81 @@ int RootSubalgebras::getindexSubalgebraIsomorphicTo(RootSubalgebra& input) {
 }
 
 void RootSubalgebras::computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
-  List<RootSubalgebra>& bufferSAs, int RecursionDepth
+  List<RootSubalgebra>& bufferSubalgebras, int recursionDepth
 ) {
-  this->subalgebras.addOnTop(bufferSAs[RecursionDepth - 1]);
+  this->subalgebras.addOnTop(bufferSubalgebras[recursionDepth - 1]);
   int currentAlgebraIndex = this->subalgebras.size - 1;
-  if (RecursionDepth >= bufferSAs.size) {
-    bufferSAs.setSize(bufferSAs.size + this->getOwnerWeyl().cartanSymmetric.numberOfRows);
+  if (recursionDepth >= bufferSubalgebras.size) {
+    bufferSubalgebras.setSize(bufferSubalgebras.size + this->getOwnerWeyl().cartanSymmetric.numberOfRows);
   }
-  bufferSAs[RecursionDepth].genK = bufferSAs[RecursionDepth - 1].genK;
-  bufferSAs[RecursionDepth].owner = this;
+  bufferSubalgebras[recursionDepth].genK = bufferSubalgebras[recursionDepth - 1].genK;
+  bufferSubalgebras[recursionDepth].owner = this;
   ProgressReport report;
-  for (int k = 0; k < bufferSAs[RecursionDepth - 1].modules.size; k ++) {
-    if (bufferSAs[RecursionDepth - 1].highestWeightsPrimalSimple[k].isPositive()) {
-      bufferSAs[RecursionDepth].genK.addOnTop(bufferSAs[RecursionDepth - 1].highestWeightsPrimalSimple[k]);
-      bufferSAs[RecursionDepth].computeDynkinDiagramKAndCentralizer();
+  for (int k = 0; k < bufferSubalgebras[recursionDepth - 1].modules.size; k ++) {
+    if (bufferSubalgebras[recursionDepth - 1].highestWeightsPrimalSimple[k].isPositive()) {
+      bufferSubalgebras[recursionDepth].genK.addOnTop(bufferSubalgebras[recursionDepth - 1].highestWeightsPrimalSimple[k]);
+      bufferSubalgebras[recursionDepth].computeDynkinDiagramKAndCentralizer();
       std::stringstream out;
-      out << "Included root " << k + 1 << " out of " << bufferSAs[RecursionDepth - 1].modules.size
+      out << "Included root " << k + 1 << " out of " << bufferSubalgebras[recursionDepth - 1].modules.size
       << " Total found SAs: " << this->subalgebras.size;
       report.report(out.str());
-      int indexSA = this->indexSubalgebra(bufferSAs[RecursionDepth]);
+      int indexSA = this->indexSubalgebra(bufferSubalgebras[recursionDepth]);
       if (indexSA == - 1) {
-        bufferSAs[RecursionDepth].computeEssentials();
+        bufferSubalgebras[recursionDepth].computeEssentials();
         this->subalgebras[currentAlgebraIndex].indicesSubalgebrasContainingK.addOnTopNoRepetition(
           this->subalgebras.size
         );
-        this->computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(bufferSAs, RecursionDepth + 1);
+        this->computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(bufferSubalgebras, recursionDepth + 1);
       } else {
         this->subalgebras[currentAlgebraIndex].indicesSubalgebrasContainingK.addOnTopNoRepetition(indexSA);
       }
-      bufferSAs[RecursionDepth].genK.removeIndexSwapWithLast(bufferSAs[RecursionDepth].genK.size - 1);
+      bufferSubalgebras[recursionDepth].genK.removeIndexSwapWithLast(bufferSubalgebras[recursionDepth].genK.size - 1);
     }
   }
 }
 
 void RootSubalgebras::makeProgressReportAutomorphisms(
-  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms &theSubgroup, RootSubalgebra& theRootSA
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& subgroup, RootSubalgebra& rootSubalgebra
 ) {
   std::stringstream out4, out1;
-  out1 << "k_ss: " << theRootSA.dynkinDiagram.toString() << " C(k_ss): "
-  << theRootSA.centralizerDiagram.toString();
+  out1 << "k_ss: " << rootSubalgebra.dynkinDiagram.toString() << " C(k_ss): "
+  << rootSubalgebra.centralizerDiagram.toString();
   out4 << "Num elements ";
-  if (theSubgroup.truncated) {
+  if (subgroup.truncated) {
     out4 << "truncated ";
   }
-  out4 << "group preserving k: " << theSubgroup.allElements.size;
+  out4 << "group preserving k: " << subgroup.allElements.size;
   ProgressReport report;
   report.report(out1.str() + out4.str());
 }
 
-void RootSubalgebras::generateActionKintersectBIsos(RootSubalgebra& theRootSA) {
+void RootSubalgebras::generateActionKintersectBIsos(RootSubalgebra& rootSubalgebra) {
   Selection emptySel;
-  emptySel.initialize(theRootSA.simpleBasisCentralizerRoots.size);
-  this->computeNormalizerOfCentralizerIntersectNilradical(emptySel, theRootSA);
+  emptySel.initialize(rootSubalgebra.simpleBasisCentralizerRoots.size);
+  this->computeNormalizerOfCentralizerIntersectNilradical(emptySel, rootSubalgebra);
 }
 
-void RootSubalgebras::generateKintersectBOuterIsos(RootSubalgebra& theRootSA) {
+void RootSubalgebras::generateKintersectBOuterIsos(RootSubalgebra& rootSubalgebra) {
   Selection fullSel;
-  fullSel.initialize(theRootSA.simpleBasisCentralizerRoots.size);
-  fullSel.incrementSelectionFixedCardinality(theRootSA.simpleBasisCentralizerRoots.size);
-  this->computeNormalizerOfCentralizerIntersectNilradical(fullSel, theRootSA);
+  fullSel.initialize(rootSubalgebra.simpleBasisCentralizerRoots.size);
+  fullSel.incrementSelectionFixedCardinality(rootSubalgebra.simpleBasisCentralizerRoots.size);
+  this->computeNormalizerOfCentralizerIntersectNilradical(fullSel, rootSubalgebra);
 }
 
 void RootSubalgebras::computeActionNormalizerOfCentralizerIntersectNilradical(
-  Selection& SelectedBasisRoots, RootSubalgebra& theRootSA
+  Selection& SelectedBasisRoots, RootSubalgebra& rootSubalgebra
 ) {
-  this->computeNormalizerOfCentralizerIntersectNilradical(SelectedBasisRoots, theRootSA);
+  this->computeNormalizerOfCentralizerIntersectNilradical(SelectedBasisRoots, rootSubalgebra);
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& theSubgroup = this->centralizerIsomorphisms.lastObject();
   this->actionsNormalizerCentralizerNilradical.setSize(theSubgroup.allElements.size - 1);
   Vector<Rational> tempRoot;
   ProgressReport report;
   for (int i = 0; i < theSubgroup.allElements.size - 1; i ++) {
-    this->actionsNormalizerCentralizerNilradical[i].setSize(theRootSA.modules.size);
-    for (int j = 0; j < theRootSA.modules.size; j ++) {
-      tempRoot = theRootSA.highestWeightsPrimalSimple[j];
+    this->actionsNormalizerCentralizerNilradical[i].setSize(rootSubalgebra.modules.size);
+    for (int j = 0; j < rootSubalgebra.modules.size; j ++) {
+      tempRoot = rootSubalgebra.highestWeightsPrimalSimple[j];
       theSubgroup.actByNonSimpleElement(i + 1, tempRoot);
-      int tempI = theRootSA.getIndexKModuleContainingRoot(tempRoot);
+      int tempI = rootSubalgebra.getIndexKModuleContainingRoot(tempRoot);
       this->actionsNormalizerCentralizerNilradical[i][j] = tempI;
     }
     if (global.response.monitoringAllowed()) {
@@ -3718,13 +3718,13 @@ void RootSubalgebras::computeActionNormalizerOfCentralizerIntersectNilradical(
 }
 
 void RootSubalgebras::computeNormalizerOfCentralizerIntersectNilradical(
-  Selection& SelectedBasisRoots, RootSubalgebra& theRootSA
+  Selection& selectedBasisRoots, RootSubalgebra& rootSubalgebra
 ) {
   Vectors<Rational> selectedRootsBasisCentralizer;
   selectedRootsBasisCentralizer.size = 0;
-  for (int i = 0; i <SelectedBasisRoots.numberOfElements; i ++) {
-    if (!SelectedBasisRoots.selected[i]) {
-      selectedRootsBasisCentralizer.addOnTop(theRootSA.simpleBasisCentralizerRoots[i]);
+  for (int i = 0; i <selectedBasisRoots.numberOfElements; i ++) {
+    if (!selectedBasisRoots.selected[i]) {
+      selectedRootsBasisCentralizer.addOnTop(rootSubalgebra.simpleBasisCentralizerRoots[i]);
     }
   }
   this->centralizerIsomorphisms.reserve(this->subalgebras.size);
@@ -3733,16 +3733,16 @@ void RootSubalgebras::computeNormalizerOfCentralizerIntersectNilradical(
   this->centralizerIsomorphisms.setSize(this->centralizerIsomorphisms.size + 1);
   this->centralizerOuterIsomorphisms.setSize(this->centralizerIsomorphisms.size);
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& outputSubgroup = this->centralizerIsomorphisms.lastObject();
-  outputSubgroup.ambientWeyl = &theRootSA.getAmbientWeyl();
-  this->makeProgressReportAutomorphisms(outputSubgroup, theRootSA);
-  theRootSA.generateIsomorphismsPreservingBorel(theRootSA, &outputSubgroup);
+  outputSubgroup.ambientWeyl = &rootSubalgebra.getAmbientWeyl();
+  this->makeProgressReportAutomorphisms(outputSubgroup, rootSubalgebra);
+  rootSubalgebra.generateIsomorphismsPreservingBorel(rootSubalgebra, &outputSubgroup);
   outputSubgroup.computeSubGroupFromGeneratingReflections(
     &selectedRootsBasisCentralizer, &outputSubgroup.externalAutomorphisms, this->UpperLimitNumElementsWeyl, false
   );
   outputSubgroup.simpleRootsInner = selectedRootsBasisCentralizer;
   this->centralizerOuterIsomorphisms.lastObject().externalAutomorphisms = outputSubgroup.externalAutomorphisms;
   this->centralizerOuterIsomorphisms.lastObject().ambientWeyl = &this->getOwnerWeyl();
-  this->makeProgressReportAutomorphisms(outputSubgroup, theRootSA);
+  this->makeProgressReportAutomorphisms(outputSubgroup, rootSubalgebra);
 }
 
 RootSubalgebras::RootSubalgebras() {
@@ -3767,7 +3767,7 @@ RootSubalgebras::RootSubalgebras() {
 }
 
 void RootSubalgebras::initForNilradicalGeneration() {
-  this->NumSubalgebrasProcessed = 0;
+  this->numberOfSubalgebrasProcessed = 0;
   this->numberOfConeConditionFailures = 0;
   this->NumSubalgebrasCounted = 0;
   this->indexCurrentSubalgebraNilradicalsGeneration = 0;
@@ -3777,29 +3777,29 @@ void RootSubalgebras::initForNilradicalGeneration() {
     this->subalgebras[0].generatePossibleNilradicalsInit(
       this->impiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration
     );
-    this->NumconeConditionHoldsBySSpart.initializeFillInObject(this->subalgebras.size, 0);
+    this->numberOfConeConditionHoldsBySemisimplePart.initializeFillInObject(this->subalgebras.size, 0);
   }
 }
 
-bool RootSubalgebras::approveKModuleSelectionWRTActionsNormalizerCentralizerNilradical(Selection& targetSel) {
+bool RootSubalgebras::approveKModuleSelectionWRTActionsNormalizerCentralizerNilradical(Selection& targetSelection) {
   if (!this->flagUsingActionsNormalizerCentralizerNilradical) {
     return true;
   }
   for (int i = 0; i < this->actionsNormalizerCentralizerNilradical.size; i ++) {
-    if (!this->approveSelAgainstOneGenerator(this->actionsNormalizerCentralizerNilradical[i], targetSel)) {
+    if (!this->approveSelAgainstOneGenerator(this->actionsNormalizerCentralizerNilradical[i], targetSelection)) {
       return false;
     }
   }
   return true;
 }
 
-void RootSubalgebras::raiseSelectionUntilApproval(Selection& targetSel) {
+void RootSubalgebras::raiseSelectionUntilApproval(Selection& targetSelection) {
   bool raised = true;
   while (raised) {
     raised = false;
     for (int i = 0; i < this->actionsNormalizerCentralizerNilradical.size; i ++) {
-      if (!this->approveSelAgainstOneGenerator(this->actionsNormalizerCentralizerNilradical[i], targetSel)) {
-        this->applyOneGenerator(this->actionsNormalizerCentralizerNilradical[i], targetSel);
+      if (!this->approveSelAgainstOneGenerator(this->actionsNormalizerCentralizerNilradical[i], targetSelection)) {
+        this->applyOneGenerator(this->actionsNormalizerCentralizerNilradical[i], targetSelection);
         raised = true;
       }
     }
@@ -3836,20 +3836,22 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(std::string& output, bo
   if (!includeMatrixForm) {
     out << "\n\\begin{longtable}{r|l}\n\\multicolumn{2}{c}{";
     if (simpleType == 'B') {
-      out << " $ \\mathfrak{g}\\simeq \\mathrm{so(" << this->getOwnerWeyl().cartanSymmetric.numberOfRows * 2 + 1 << ")}$";
+      out << " $ \\mathfrak{g}\\simeq \\mathrm{so("
+      << this->getOwnerWeyl().cartanSymmetric.numberOfRows * 2 + 1 << ")}$";
     }
     if (simpleType == 'C') {
-      out << " $\\mathfrak{g}\\simeq \\mathrm{sp(" << this->getOwnerWeyl().cartanSymmetric.numberOfRows * 2 << ")}$";
+      out << " $\\mathfrak{g}\\simeq \\mathrm{sp("
+      << this->getOwnerWeyl().cartanSymmetric.numberOfRows * 2 << ")}$";
     }
     out << "} \\\\\\hline";
   }
   for (int i = 0; i < this->subalgebras.size - 1; i ++) {
     if (this->storedNilradicals[i].size > 0) {
-      RootSubalgebra& currentRootSA = this->subalgebras[i];
+      RootSubalgebra& currentRootSubalgebra = this->subalgebras[i];
       tempRoots.size = 0;
-      for (int j = 0; j < currentRootSA.positiveRootsReductiveSubalgebra.size; j ++) {
-        tempRoots.addOnTop(currentRootSA.positiveRootsReductiveSubalgebra[j]);
-        tempRoots.addOnTop(- currentRootSA.positiveRootsReductiveSubalgebra[j]);
+      for (int j = 0; j < currentRootSubalgebra.positiveRootsReductiveSubalgebra.size; j ++) {
+        tempRoots.addOnTop(currentRootSubalgebra.positiveRootsReductiveSubalgebra[j]);
+        tempRoots.addOnTop(- currentRootSubalgebra.positiveRootsReductiveSubalgebra[j]);
       }
       if (includeMatrixForm) {
         out << "\n\n\\noindent\\rule{\\textwidth}{1.5pt}\n\n";
@@ -3857,11 +3859,11 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(std::string& output, bo
         out << "\\hline\\begin{tabular}{r}";
       }
       out << "$\\Delta(\\mathfrak{k})$ is of type "
-      << currentRootSA.dynkinDiagram.toString() << "; ";
+      << currentRootSubalgebra.dynkinDiagram.toString() << "; ";
       if (!includeMatrixForm) {
         out << "\\\\";
       }
-      currentRootSA.getAmbientWeyl().getEpsilonCoordinates(currentRootSA.positiveRootsReductiveSubalgebra, tempRoots2);
+      currentRootSubalgebra.getAmbientWeyl().getEpsilonCoordinates(currentRootSubalgebra.positiveRootsReductiveSubalgebra, tempRoots2);
       tempS = tempRoots2.toStringEpsilonForm(true, false, false);
       out << " $\\Delta^+(\\mathfrak{k})=$ " << tempS;
       if (includeMatrixForm) {
@@ -3875,9 +3877,9 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(std::string& output, bo
         if (currentNilrad.size > 0) {
           numNonSolvableNonReductive ++;
           numNonReductiveCurrent ++;
-          tempRoots.size = currentRootSA.positiveRootsReductiveSubalgebra.size * 2;
+          tempRoots.size = currentRootSubalgebra.positiveRootsReductiveSubalgebra.size * 2;
           for (int k = 0; k < currentNilrad.size; k ++) {
-            tempRoots.addListOnTop(currentRootSA.weightsModulesPrimalSimple[currentNilrad[k]]);
+            tempRoots.addListOnTop(currentRootSubalgebra.weightsModulesPrimalSimple[currentNilrad[k]]);
           }
           this->toStringRootSpaces(tempS, includeMatrixForm, tempRoots);
           out << tempS << "\n";
@@ -3907,7 +3909,7 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(std::string& output, bo
 
 void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrixForm, Vectors<Rational>& input) {
   std::string tempS; std::stringstream out;
-  Vectors<Rational> epsCoords;
+  Vectors<Rational> epsilonCoordinates;
   Matrix<int> tempMat;
   char simpleType;
   int dimension = - 1;
@@ -3916,16 +3918,16 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
     << "called on a non-simple Lie algebra. " << global.fatal;
   }
   if (simpleType == 'B') {
-    this->getOwnerWeyl().getEpsilonCoordinates(input, epsCoords);
+    this->getOwnerWeyl().getEpsilonCoordinates(input, epsilonCoordinates);
     tempMat.makeIdentityMatrix(dimension * 2 + 1, 1, 0);
     tempMat.elements[dimension][dimension] = 0;
-    for (int i = 0; i < epsCoords.size; i ++) {
+    for (int i = 0; i < epsilonCoordinates.size; i ++) {
       bool isShort = false;
       int firstIndex = - 1;
       int secondIndex = - 1;
       bool firstSignIsPositive = true;
       bool secondSignIsPositive = true;
-      Vector<Rational>& currentRoot = epsCoords[i];
+      Vector<Rational>& currentRoot = epsilonCoordinates[i];
       for (int j = 0; j < dimension; j ++) {
         if (currentRoot[j] != 0) {
           isShort = !isShort;
@@ -3947,7 +3949,7 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
         }
       }
       if (!isShort) {
-        bool signsAreDifferent =(firstSignIsPositive !=secondSignIsPositive);
+        bool signsAreDifferent = (firstSignIsPositive != secondSignIsPositive);
         if (signsAreDifferent) {
           int positiveIndex, negativeIndex;
           if (firstSignIsPositive) {
@@ -3980,15 +3982,15 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
     }
   }
   if (simpleType == 'C') {
-    this->getOwnerWeyl().getEpsilonCoordinates(input, epsCoords);
+    this->getOwnerWeyl().getEpsilonCoordinates(input, epsilonCoordinates);
     tempMat.makeIdentityMatrix(dimension * 2, 1, 0);
-    for (int i = 0; i < epsCoords.size; i ++) {
-      bool isLong= false;
+    for (int i = 0; i < epsilonCoordinates.size; i ++) {
+      bool isLong = false;
       int firstIndex = - 1;
       int secondIndex = - 1;
       bool firstSignIsPositive = true;
       bool secondSignIsPositive = true;
-      Vector<Rational>& currentRoot = epsCoords[i];
+      Vector<Rational>& currentRoot = epsilonCoordinates[i];
       for (int j = 0; j < dimension; j ++) {
         if (currentRoot[j] != 0) {
           isLong = !isLong;
@@ -4048,10 +4050,10 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
     out << "\\\\";
   }
   int numNilradicalRootSpaces = 0;
-  for (int i = 0; i < epsCoords.size; i ++) {
-    Vector<Rational>& currentRoot = epsCoords[i];
+  for (int i = 0; i < epsilonCoordinates.size; i ++) {
+    Vector<Rational>& currentRoot = epsilonCoordinates[i];
     tempS = currentRoot.toStringEpsilonFormat();
-    if (!epsCoords.contains(- currentRoot)) {
+    if (!epsilonCoordinates.contains(- currentRoot)) {
       out << tempS << ", ";
       numNilradicalRootSpaces++;
     }
@@ -4093,26 +4095,26 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
   output = out.str();
 }
 
-void RootSubalgebras::applyOneGenerator(List<int>& generator, Selection& targetSel) {
+void RootSubalgebras::applyOneGenerator(List<int>& generator, Selection& targetSelection) {
   Selection tempSel;
-  tempSel.initialize(targetSel.numberOfElements);
-  for (int i = 0; i < targetSel.cardinalitySelection; i ++) {
-    tempSel.addSelectionAppendNewIndex(generator[targetSel.elements[i]]);
+  tempSel.initialize(targetSelection.numberOfElements);
+  for (int i = 0; i < targetSelection.cardinalitySelection; i ++) {
+    tempSel.addSelectionAppendNewIndex(generator[targetSelection.elements[i]]);
   }
-  targetSel = tempSel;
+  targetSelection = tempSel;
 }
 
-bool RootSubalgebras::approveSelAgainstOneGenerator(List<int>& generator, Selection& targetSel) {
+bool RootSubalgebras::approveSelAgainstOneGenerator(List<int>& generator, Selection& targetSelection) {
   Selection tempSel;
-  tempSel.initialize(targetSel.numberOfElements);
-  for (int i = 0; i < targetSel.cardinalitySelection; i ++) {
-    tempSel.addSelectionAppendNewIndex(generator[targetSel.elements[i]]);
+  tempSel.initialize(targetSelection.numberOfElements);
+  for (int i = 0; i < targetSelection.cardinalitySelection; i ++) {
+    tempSel.addSelectionAppendNewIndex(generator[targetSelection.elements[i]]);
   }
   for (int i = 0; i < tempSel.numberOfElements; i ++) {
-    if (targetSel.selected[i] && !tempSel.selected[i]) {
+    if (targetSelection.selected[i] && !tempSel.selected[i]) {
       return true;
     }
-    if (!targetSel.selected[i] && tempSel.selected[i]) {
+    if (!targetSelection.selected[i] && tempSel.selected[i]) {
       return false;
     }
   }

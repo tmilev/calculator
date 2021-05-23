@@ -280,7 +280,7 @@ std::string CalculatorParser::toStringSyntacticStackHTMLSimple() {
 }
 
 void CalculatorParser::initializeStringsThatSplitIfFollowedByDigit() {
-  MacroRegisterFunctionWithName("Calculator::initializeStringsThatSplitIfFollowedByDigit");
+  MacroRegisterFunctionWithName("CalculatorParser::initializeStringsThatSplitIfFollowedByDigit");
   this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\cdot");
   this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\circ");
   this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\frac");

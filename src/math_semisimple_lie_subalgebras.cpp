@@ -663,13 +663,13 @@ std::string SemisimpleSubalgebras::toString(FormatExpressions* format, bool writ
   return out.str();
 }
 
-std::string SemisimpleSubalgebras::toStringSubalgebrasNoHDWrite(FormatExpressions* format) {
+std::string SemisimpleSubalgebras::toStringSubalgebrasNoHDWrite(FormatExpressions* format, bool generateLinks) {
   std::stringstream out;
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
     if (!this->subalgebras.values[i].flagSystemProvedToHaveNoSolution) {
       out << this->toStringSubalgebraNumberWithAmbientLink(i, format) << "\n<br>\n";
     }
-    out << this->subalgebras.values[i].toString(format, false) << "\n<hr>\n ";
+    out << this->subalgebras.values[i].toString(format, generateLinks) << "\n<hr>\n ";
   }
   return out.str();
 }
@@ -725,7 +725,7 @@ std::string SemisimpleSubalgebras::toStringSubalgebrasWithHDWrite(FormatExpressi
   if (format != nullptr) {
     format->flagCandidateSubalgebraShortReportOnly = true;
   }
-  out << this->toStringSubalgebrasNoHDWrite(format);
+  out << this->toStringSubalgebrasNoHDWrite(format, true);
   FormatExpressions formatCopy;
   if (format != nullptr) {
     formatCopy = *format;
@@ -807,7 +807,7 @@ std::string SemisimpleSubalgebras::toStringPart2(FormatExpressions* format, bool
     }
   }
   if (!writeToHardDisk) {
-    out << this->toStringSubalgebrasNoHDWrite(format);
+    out << this->toStringSubalgebrasNoHDWrite(format, false);
   } else {
     out << this->toStringSubalgebrasWithHDWrite(format);
   }
@@ -7035,15 +7035,19 @@ bool CandidateSemisimpleSubalgebra::isRegularSubalgebra() const {
   return true;
 }
 
-std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* format, bool writeToHardDisk) const {
+std::string CandidateSemisimpleSubalgebra::toString(
+  FormatExpressions* format, bool generateLinks
+) const {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::toString");
   std::stringstream out;
   bool useLaTeX = format == nullptr ? true : format->flagUseLatex;
   bool useHtml = format == nullptr ? true : format->flagUseHTML;
   bool shortReportOnly = format == nullptr ? true : format->flagCandidateSubalgebraShortReportOnly;
   bool useMouseHover = format == nullptr ? true : !format->flagUseMathSpanPureVsMouseHover;
+  global.comments << "<br>DEBUG: write to hard disk is: " << generateLinks;
+  global.comments << "<br>" << global.fatal.getStackTraceEtcErrorMessageHTML();
   out << "Subalgebra type: "
-  << this->owner->toStringAlgebraLink(this->indexInOwner, format, writeToHardDisk)
+  << this->owner->toStringAlgebraLink(this->indexInOwner, format, generateLinks)
   << " (click on type for detailed printout).\n";
   out << this->comments;
   if (this->isRegularSubalgebra()) {
@@ -7051,12 +7055,12 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* format, b
   }
   if (this->indexInducedFrom != - 1) {
     out << "<br>Subalgebra is (parabolically) induced from "
-    << this->owner->toStringAlgebraLink(this->indexInducedFrom, format, writeToHardDisk) << ". ";
+    << this->owner->toStringAlgebraLink(this->indexInducedFrom, format, generateLinks) << ". ";
   }
   if (!this->flagCentralizerIsWellChosen) {
     out << "<br>The dimension of the centralizer is: " << this->centralizerDimension.toString();
   }
-  out << this->toStringCentralizer(format, writeToHardDisk);
+  out << this->toStringCentralizer(format, generateLinks);
   if (this->flagSystemProvedToHaveNoSolution) {
     out << " <b>Subalgebra candidate proved to be impossible!</b> ";
     return out.str();
@@ -7075,7 +7079,7 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* format, b
   if (this->indicesDirectSummandSuperAlgebra.size > 0) {
     out << "<br>Contained up to conjugation as a direct summand of: ";
     for (int i = 0; i < this->indicesDirectSummandSuperAlgebra.size; i ++) {
-      out << this->owner->toStringAlgebraLink(this->indicesDirectSummandSuperAlgebra[i], format, writeToHardDisk);
+      out << this->owner->toStringAlgebraLink(this->indicesDirectSummandSuperAlgebra[i], format, generateLinks);
       if (i != this->indicesDirectSummandSuperAlgebra.size - 1) {
         out << ", ";
       }
@@ -7241,7 +7245,7 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* format, b
     }
   }
   shouldDisplaySystem = shouldDisplaySystem || !this->flagSystemSolved || !this->flagCentralizerIsWellChosen;
-  if (writeToHardDisk) {
+  if (generateLinks) {
     shouldDisplaySystem = shouldDisplaySystem && !shortReportOnly;
   }
   if (shouldDisplaySystem) {

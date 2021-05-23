@@ -366,10 +366,10 @@ public:
   int indexCurrentSubalgebraNilradicalsGeneration;
   int numberReductiveRootSubalgebrasToBeProcessedNilradicalsGeneration;
   List<int> CountersNilradicalsGeneration;
-  List<int> NumconeConditionHoldsBySSpart;
+  List<int> numberOfConeConditionHoldsBySemisimplePart;
   List<RootSubalgebra> theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither;
   int RecursionDepthNilradicalsGeneration;
-  int NumSubalgebrasProcessed;
+  int numberOfSubalgebrasProcessed;
   int numberOfConeConditionFailures;
   int NumSubalgebrasCounted;
   int NumLinesPerTableLatex;
@@ -389,19 +389,19 @@ public:
   bool flagStoringNilradicals;
   bool flagPrintGAPinput;
   bool flagPrintParabolicPseudoParabolicInfo;
-  SemisimpleLieAlgebra& GetOwnerSSalgebra() const;
+  SemisimpleLieAlgebra& getOwnerSemisimpleLieAlgebra() const;
   WeylGroupData& getOwnerWeyl() const;
   bool checkInitialization() const;
   bool growDynkinType(const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputPermutationSimpleRoots) const;
   void computeKmodMultTables();
-  bool approveKModuleSelectionWRTActionsNormalizerCentralizerNilradical(Selection& targetSel);
-  bool approveSelAgainstOneGenerator(List<int>& generator, Selection& targetSel);
-  void raiseSelectionUntilApproval(Selection& targetSel);
-  void applyOneGenerator(List<int>& generator, Selection& targetSel);
-  void generateActionKintersectBIsos(RootSubalgebra& theRootSA);
-  void generateKintersectBOuterIsos(RootSubalgebra& theRootSA);
-  void computeActionNormalizerOfCentralizerIntersectNilradical(Selection& SelectedBasisRoots, RootSubalgebra& theRootSA);
-  void computeNormalizerOfCentralizerIntersectNilradical(Selection& SelectedBasisRoots, RootSubalgebra& theRootSA);
+  bool approveKModuleSelectionWRTActionsNormalizerCentralizerNilradical(Selection& targetSelection);
+  bool approveSelAgainstOneGenerator(List<int>& generator, Selection& targetSelection);
+  void raiseSelectionUntilApproval(Selection& targetSelection);
+  void applyOneGenerator(List<int>& generator, Selection& targetSelection);
+  void generateActionKintersectBIsos(RootSubalgebra& rootSubalgebra);
+  void generateKintersectBOuterIsos(RootSubalgebra& rootSubalgebra);
+  void computeActionNormalizerOfCentralizerIntersectNilradical(Selection& selectedBasisRoots, RootSubalgebra& rootSubalgebra);
+  void computeNormalizerOfCentralizerIntersectNilradical(Selection& selectedBasisRoots, RootSubalgebra& rootSubalgebra);
 
   void computeAllReductiveRootSAsInit();
   void computeAllReductiveRootSubalgebrasUpToIsomorphism();
@@ -412,7 +412,7 @@ public:
   int getIndexUpToEquivalenceByDiagramsAndDimensions(const RootSubalgebra& theSA);
   int indexSubalgebra(RootSubalgebra& input);
   void computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
-    List<RootSubalgebra>& bufferSAs, int RecursionDepth
+    List<RootSubalgebra>& bufferSubalgebras, int recursionDepth
   );
   void sortDescendingOrderBySSRank();
   void toStringRootSpaces(std::string& output, bool includeMatrixForm, Vectors<Rational>& input);
@@ -424,9 +424,9 @@ public:
   std::string toStringDynkinTableHTML(FormatExpressions* format);
   std::string toStringDynkinTableFormatToLaTeX(FormatExpressions* format);
   void computeLProhibitingRelations();
-  void computeAllRootSubalgebrasUpToIsomorphism(int StartingIndex, int NumToBeProcessed);
+  void computeAllRootSubalgebrasUpToIsomorphism(int startingIndex, int numberToBeProcessed);
   void makeProgressReportAutomorphisms(
-    SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& theSubgroup, RootSubalgebra& theRootSA
+    SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& subgroup, RootSubalgebra& rootSubalgebra
   );
   void initOwnerMustBeNonZero();
   void initForNilradicalGeneration();

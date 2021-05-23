@@ -345,7 +345,7 @@ public:
   std::string toStringType(FormatExpressions* format = nullptr) const;
   std::string toStringTypeAndHs(FormatExpressions* format = nullptr) const;
   std::string toStringGenerators(FormatExpressions* format) const;
-  std::string toString(FormatExpressions* format, bool writeToHardDisk) const;
+  std::string toString(FormatExpressions* format, bool generateLinks) const;
   std::string toStringSystem(FormatExpressions* format = nullptr) const;
   std::string toStringSystemPart2(FormatExpressions* format = nullptr) const;
   std::string toStringLoadUnknown(FormatExpressions* format = nullptr) const;
@@ -518,7 +518,7 @@ public:
   std::string toString(FormatExpressions* format, bool writeToHardDisk);
   std::string toStringPart2(FormatExpressions* format, bool writeToHardDisk);
   std::string toStringTableSubalgebraLinksTable(FormatExpressions* format);
-  std::string toStringSubalgebrasNoHDWrite(FormatExpressions* format = nullptr);
+  std::string toStringSubalgebrasNoHDWrite(FormatExpressions* format, bool generateLinks);
   std::string toStringSubalgebrasWithHDWrite(FormatExpressions* format = nullptr);
   void writeSubalgebraToFile(FormatExpressions* format, int subalgebraIndex);
   std::string toStringPart3(FormatExpressions* format, bool writeToHardDisk);

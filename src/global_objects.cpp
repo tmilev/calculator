@@ -52,19 +52,17 @@ void initializeGlobalObjects() {
 void HtmlRoutines::makeReportIndicatorFile(const std::string& input) {
   static int counter = - 1;
   counter ++;
-  std::fstream theFile;
+  std::fstream file;
   FileOperations::openFileCreateIfNotPresentVirtual(
-    theFile, "result/output.html", false, true, false
+    file, "result/output.html", false, true, false
   );
-  theFile << " Elapsed calculator time: " << global.getElapsedSeconds() << " second(s).";
-  theFile << input;
-  theFile.flush();
-  theFile.close();
+  file << " Elapsed calculator time: " << global.getElapsedSeconds() << " second(s).";
+  file << input;
+  file.flush();
+  file.close();
 }
 
 void HtmlRoutines::makeStdCoutReport(const std::string& input) {
   global.comments << input;
   HtmlRoutines::makeReportIndicatorFile(input);
 }
-
-

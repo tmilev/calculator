@@ -2784,14 +2784,14 @@ public:
   static bool innerSemisimpleLieAlgebra(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerCandidateSubalgebraPrecomputed(
+  static bool candidateSubalgebraPrecomputed(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
     CandidateSemisimpleSubalgebra& outputPointer,
     SemisimpleSubalgebras& owner
   );
-  static bool innerLoadWeylGroup(Calculator& calculator, const Expression& input, Expression& output);
+  static bool loadWeylGroup(Calculator& calculator, const Expression& input, Expression& output);
   static bool storeSemisimpleSubalgebras(
     Calculator& calculator, const Expression& input, Expression& output
   );

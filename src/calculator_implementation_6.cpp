@@ -1035,39 +1035,39 @@ bool CalculatorFunctionsCrypto::testRSASign(
   if (!input[1].isOfType(&messageString)) {
     return false;
   }
-  PrivateKeyRSA theKey;
+  PrivateKeyRSA key;
   if (
-    !input[2].isIntegerNonNegative(&theKey.primeOne) ||
-    !input[3].isIntegerNonNegative(&theKey.primeTwo)
+    !input[2].isIntegerNonNegative(&key.primeOne) ||
+    !input[3].isIntegerNonNegative(&key.primeTwo)
   ) {
     return calculator << "Failed to extract positive integers from the second and third argument. ";
   }
   if (
-    !theKey.computeFromTwoPrimes(theKey.primeOne, theKey.primeTwo, true, &errorStream)
+    !key.computeFromTwoPrimes(key.primeOne, key.primeTwo, true, &errorStream)
   ) {
     return calculator << "Inputs do not appear to be prime. " << errorStream.str();
   }
   List<unsigned char> message, paddedMessage, signature;
   message = messageString;
-  theKey.hashAndPadPKCS1(message, SignatureAlgorithmSpecification::HashAlgorithm::sha256, paddedMessage);
-  out << "Temporary private key:<br>" << theKey.toString() << "<br>";
-  theKey.signBytesPadPKCS1(message, SignatureAlgorithmSpecification::HashAlgorithm::sha256, signature);
+  key.hashAndPadPKCS1(message, SignatureAlgorithmSpecification::HashAlgorithm::sha256, paddedMessage);
+  out << "Temporary private key:<br>" << key.toString() << "<br>";
+  key.signBytesPadPKCS1(message, SignatureAlgorithmSpecification::HashAlgorithm::sha256, signature);
   out << "Message:<br>" << Crypto::convertListUnsignedCharsToHex(message);
   out << "<br>Padded message digest:<br>" << Crypto::convertListUnsignedCharsToHex(paddedMessage);
   out << "<br>Signature:<br>" << Crypto::convertListUnsignedCharsToHex(signature);
-  ElementZmodP theElement, theOne;
-  theElement.modulus = theKey.thePublicKey.theModulus;
-  theOne.makeOne(theElement.modulus);
-  Crypto::convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(signature, theElement.value);
-  out << "<br>Signature integer:<br>" << theElement.value.toString();
-  MathRoutines::raiseToPower(theElement, theKey.thePublicKey.theExponent, theOne);
+  ElementZmodP element, theOne;
+  element.modulus = key.publicKey.modulus;
+  theOne.makeOne(element.modulus);
+  Crypto::convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(signature, element.value);
+  out << "<br>Signature integer:<br>" << element.value.toString();
+  MathRoutines::raiseToPower(element, key.publicKey.exponent, theOne);
   out << "<br>Signature power e mod n [e = "
-  << theKey.thePublicKey.theExponent << ", n = "
-  << theKey.thePublicKey.theModulus << "]"
-  << ":<br>" << theElement.value.toString();
-  std::string theHex;
-  Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(theElement.value, 0, theHex);
-  out << "<br>Converted to hex:<br>" << theHex;
+  << key.publicKey.exponent << ", n = "
+  << key.publicKey.modulus << "]"
+  << ":<br>" << element.value.toString();
+  std::string hexadecimalString;
+  Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(element.value, 0, hexadecimalString);
+  out << "<br>Converted to hex:<br>" << hexadecimalString;
   return output.assignValue(out.str(), calculator);
 }
 
@@ -1078,25 +1078,25 @@ bool CalculatorFunctionsCrypto::RSAEncrypt(
   if (input.size() != 4) {
     return false;
   }
-  LargeInteger theExponent, theModulus, theMessage, result;
+  LargeInteger theExponent, modulus, theMessage, result;
   if (
-    !input[1].isInteger(& theModulus) ||
+    !input[1].isInteger(&modulus) ||
     !input[2].isInteger(&theExponent) ||
     !input[3].isInteger(&theMessage)
   ) {
     return calculator << "Failed to extract three (large) integers from the arguments of "
     << input.toString();
   }
-  if (theModulus < 0) {
-    theModulus *= - 1;
+  if (modulus < 0) {
+    modulus *= - 1;
   }
-  if (theModulus == 0 || theExponent == 0) {
+  if (modulus == 0 || theExponent == 0) {
     return calculator << "The modulus and exponent must be non-zero.";
   }
-  if (theModulus == 1) {
+  if (modulus == 1) {
     return calculator << "Modulus 1 not allowed";
   }
-  result = Crypto::rsaEncrypt(theModulus.value, theExponent, theMessage);
+  result = Crypto::rsaEncrypt(modulus.value, theExponent, theMessage);
   return output.assignValue(Rational(result), calculator);
 }
 

@@ -133,8 +133,6 @@ public:
   List<Vector<Rational> > highestWeightsPrimalSimple;
   List<Vector<Rational> > lowestWeightsPrimalSimple;
 
-//  HashedList<Vector<Rational> > highestWeightsPrimal;
-
   CharacterSemisimpleLieAlgebraModule<Rational> moduleDecompositionHighestWeights;
   List<int> indicesSubalgebrasContainingK;
   List<List<List<int> > > pairingTable;
@@ -154,7 +152,7 @@ public:
   Vectors<Rational> simpleBasisKInOrderOfGeneration;
   Vectors<Rational> positiveRootsReductiveSubalgebra;
   HashedList<Vector<Rational> > allRootsSubalgebra;
-  Selection nilradicalKmodules;
+  Selection nilradicalKModules;
   Selection centralizerKmodules;
   Vectors<Rational> testedRootsAlpha;
   Vectors<Rational> centralizerRoots;
@@ -230,11 +228,11 @@ public:
   );
   void makeGeneratingSingularVectors(ConeRelation& relation, Vectors<Rational>& nilradicalRoots);
   bool attemptExtensionToIsomorphismNoCentralizer(
-    Vectors<Rational>& Domain,
-    Vectors<Rational>& Range,
-    int RecursionDepth,
+    Vectors<Rational>& domain,
+    Vectors<Rational>& range,
+    int recursionDepth,
     SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms* outputAutomorphisms,
-    bool GenerateAllpossibleExtensions,
+    bool generateAllpossibleExtensions,
     bool* abortKmodule,
     Vectors<Rational>* additionalDomain,
     Vectors<Rational>* additionalRange
@@ -298,7 +296,7 @@ public:
     int indexInOwner
   );
   void generatePossibleNilradicalsInit(List<Selection>& impliedSelections, int& parabolicsCounter);
-  bool coneConditionHolds(RootSubalgebras& owner, int indexInOwner, bool doextractRelations);
+  bool coneConditionHolds(RootSubalgebras& owner, int indexInOwner, bool doExtractRelations);
   bool coneConditionHolds(
     RootSubalgebras& owner,
     int indexInOwner,

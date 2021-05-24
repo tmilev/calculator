@@ -372,7 +372,7 @@ void RootSubalgebra::possibleNilradicalComputation(Selection& selKmods, RootSuba
     this->totalSubalgebras = this->numberOfNilradicalsAllowed;
   }
   if (!this->flagFirstRoundCounting) {
-    this->nilradicalKmodules = selKmods;
+    this->nilradicalKModules = selKmods;
     if (!this->coneConditionHolds(owner, indexInOwner, owner.flagComputingLprohibitingWeights)) {
       this->numberOfConeConditionFailures ++;
       owner.numberOfConeConditionFailures ++;
@@ -553,7 +553,7 @@ void RootSubalgebra::computeHighestVectorsHighestWeights() {
   this->highestVectors.setSize(0);
   this->highestWeightsNonPrimalFundamental.setSize(0);
   ElementSemisimpleLieAlgebra<Rational> currentElt;
-  List<Vector<Rational> >& ambientRootSystem= this->getAmbientWeyl().rootSystem;
+  List<Vector<Rational> >& ambientRootSystem = this->getAmbientWeyl().rootSystem;
   for (int i = 0; i <ambientRootSystem.size; i ++) {
     if (this->isSubalgebraBorelHighest(ambientRootSystem[i])) {
       currentElt.makeGGenerator(ambientRootSystem[i], this->getOwnerLieAlgebra());
@@ -695,8 +695,8 @@ void RootSubalgebra::computeKModules() {
 
 int RootSubalgebra::numberOfRootsInNilradical() {
   int result = 0;
-  for (int i = 0; i < this->nilradicalKmodules.cardinalitySelection; i ++) {
-    result += this->modules[this->nilradicalKmodules.elements[i]].size;
+  for (int i = 0; i < this->nilradicalKModules.cardinalitySelection; i ++) {
+    result += this->modules[this->nilradicalKModules.elements[i]].size;
   }
   return result;
 }
@@ -727,28 +727,28 @@ bool RootSubalgebra::coneConditionHolds(
   return true;
 }
 
-bool RootSubalgebra::coneConditionHolds(RootSubalgebras& owner, int indexInOwner, bool doextractRelations) {
+bool RootSubalgebra::coneConditionHolds(RootSubalgebras& owner, int indexInOwner, bool doExtractRelations) {
   Vectors<Rational> nilradicalRoots;
-  Vectors<Rational> Ksingular;
+  Vectors<Rational> kSingular;
   if (this->modules.size == 0) {
     return true;
   }
   nilradicalRoots.size = 0;
   int counter = 0;
-  for (int i = 0; i < this->nilradicalKmodules.cardinalitySelection; i ++) {
-    Vectors<Rational>& tempKmod = this->weightsModulesPrimalSimple[this->nilradicalKmodules.elements[i]];
+  for (int i = 0; i < this->nilradicalKModules.cardinalitySelection; i ++) {
+    Vectors<Rational>& tempKmod = this->weightsModulesPrimalSimple[this->nilradicalKModules.elements[i]];
     for (int j = 0; j < tempKmod.size; j ++) {
       nilradicalRoots.addOnTop(tempKmod[j]);
       counter ++;
     }
   }
-  Ksingular.size = 0;
+  kSingular.size = 0;
   for (int i = 0; i < this->modules.size; i ++) {
-    if (!this->nilradicalKmodules.selected[i]) {
-      Ksingular.addOnTop(this->highestWeightsPrimalSimple[i]);
+    if (!this->nilradicalKModules.selected[i]) {
+      kSingular.addOnTop(this->highestWeightsPrimalSimple[i]);
     }
   }
-  if (!this->coneConditionHolds(owner, indexInOwner, nilradicalRoots, Ksingular, doextractRelations)) {
+  if (!this->coneConditionHolds(owner, indexInOwner, nilradicalRoots, kSingular, doExtractRelations)) {
     return false;
   } else {
     return true;
@@ -770,9 +770,9 @@ bool RootSubalgebra::checkForSmallRelations(ConeRelation& relation, Vectors<Rati
   bool tempBool;
   int tempI;
   for (int i = 0; i < this->modules.size; i ++) {
-    if (!this->nilradicalKmodules.selected[i]) {
+    if (!this->nilradicalKModules.selected[i]) {
       for (int j = i + 1; j < this->modules.size; j ++) {
-        if (!this->nilradicalKmodules.selected[j]) {
+        if (!this->nilradicalKModules.selected[j]) {
           weightSum = this->highestWeightsPrimalSimple[i];
           weightSum += this->highestWeightsPrimalSimple[j];
           if (!weightSum.isEqualToZero()) {
@@ -907,7 +907,7 @@ bool RootSubalgebra::attemptTheTripleTrick(ConeRelation& theRel, Vectors<Rationa
   Vectors<Rational> tempRoots;
   tempRoots.size = 0;
   for (int i = 0; i < this->modules.size; i ++) {
-    if (!this->nilradicalKmodules.selected[i]) {
+    if (!this->nilradicalKModules.selected[i]) {
       if (this->isGeneratingSingularVectors(i, NilradicalRoots)) {
         tempRoots.addOnTop(this->highestWeightsPrimalSimple[i]);
       }
@@ -1080,33 +1080,33 @@ void RootSubalgebra::computeEpsilonCoordinatesWithRespectToSubalgebra() {
 }
 
 bool RootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
-  Vectors<Rational>& Domain,
-  Vectors<Rational>& Range,
-  int RecursionDepth,
+  Vectors<Rational>& domain,
+  Vectors<Rational>& range,
+  int recursionDepth,
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms* outputAutomorphisms,
-  bool GenerateAllpossibleExtensions,
+  bool generateAllpossibleExtensions,
   bool* abortKmodule,
   Vectors<Rational>* additionalDomain,
   Vectors<Rational>* additionalRange
 ) {
-  int CurrentRank = Domain.getRankElementSpan();
-  if (CurrentRank != Range.getRankElementSpan()) {
+  int currentRank = domain.getRankElementSpan();
+  if (currentRank != range.getRankElementSpan()) {
     global.fatal << "Ranks do not coincide. " << global.fatal;
   }
   if (abortKmodule != nullptr) {
     *abortKmodule = false;
   }
-  if (CurrentRank == this->getAmbientWeyl().cartanSymmetric.numberOfRows) {
-    return this->isAnIsomorphism(Domain, Range, outputAutomorphisms, additionalDomain, additionalRange);
+  if (currentRank == this->getAmbientWeyl().cartanSymmetric.numberOfRows) {
+    return this->isAnIsomorphism(domain, range, outputAutomorphisms, additionalDomain, additionalRange);
   }
-  Vectors<Rational> domainRec = Domain;
-  Vectors<Rational> rangeRec = Range;
+  Vectors<Rational> domainRec = domain;
+  Vectors<Rational> rangeRec = range;
   RootSubalgebra leftSA;
   RootSubalgebra rightSA;
   Rational tempRatD, tempRatR;
   Vector<Rational>& LastRootD = *domainRec.lastObject();
   Vector<Rational>& LastRootR = *rangeRec.lastObject();
-  if (RecursionDepth != 0) {
+  if (recursionDepth != 0) {
     for (int i = 0; i <domainRec.size; i ++) {
       this->getAmbientWeyl().rootScalarCartanRoot(domainRec[i], LastRootD, tempRatD);
       this->getAmbientWeyl().rootScalarCartanRoot(rangeRec[i], LastRootR, tempRatR);
@@ -1121,7 +1121,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
   rightSA.genK=rangeRec;
   leftSA.computeEssentials();
   rightSA.computeEssentials();
-  if (RecursionDepth!= 0) {
+  if (recursionDepth!= 0) {
     if (
       leftSA.dynkinDiagram.toString() != rightSA.dynkinDiagram.toString() ||
       leftSA.centralizerDiagram.toString() != rightSA.centralizerDiagram.toString() ||
@@ -1135,7 +1135,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
   }
   int counter = 0;
   domainRec.addOnTop(leftSA.highestWeightsPrimalSimple[counter]);
-  while (domainRec.getRankElementSpan() == CurrentRank) {
+  while (domainRec.getRankElementSpan() == currentRank) {
     counter ++;
     if (leftSA.modules.size <= counter) {
       global.fatal << "Left subalgebra modules not allowed to be empty. " << global.fatal;
@@ -1147,14 +1147,14 @@ bool RootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
   for (int i = 0; i < leftSA.modules.size; i ++) {
     if (leftSA.modules[i].size > leftSA.modules[counter].size) {
       domainRec.lastObject()->operator=(leftSA.highestWeightsPrimalSimple[i]);
-      if (domainRec.getRankElementSpan() == CurrentRank) {
+      if (domainRec.getRankElementSpan() == currentRank) {
         domainRec.lastObject()->operator=(leftSA.highestWeightsPrimalSimple[counter]);
       } else {
         counter = i;
       }
     }
   }
-  if (!(domainRec.getRankElementSpan() == CurrentRank + 1)) {
+  if (!(domainRec.getRankElementSpan() == currentRank + 1)) {
     global.fatal << "Ranks do not match. " << global.fatal;
   }
   Vectors<Rational>& firstKmodLeft = leftSA.weightsModulesPrimalSimple[counter];
@@ -1164,20 +1164,20 @@ bool RootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
     if (firstKmodLeft.size == rightSA.modules[i].size) {
       for (int j = 0; j < firstKmodLeft.size; j ++) {
         rangeRec.addOnTop(rightSA.weightsModulesPrimalSimple[i][j]);
-        if (rangeRec.getRankElementSpan() != (CurrentRank + 1)) {
+        if (rangeRec.getRankElementSpan() != (currentRank + 1)) {
           continue;
         }
         if (this->attemptExtensionToIsomorphismNoCentralizer(
           domainRec,
           rangeRec,
-          RecursionDepth + 1,
+          recursionDepth + 1,
           outputAutomorphisms,
-          GenerateAllpossibleExtensions,
+          generateAllpossibleExtensions,
           &tempBool,
           additionalDomain,
           additionalRange
         )) {
-          if (!GenerateAllpossibleExtensions) {
+          if (!generateAllpossibleExtensions) {
             return true;
           } else {
             result = true;
@@ -2260,7 +2260,7 @@ void RootSubalgebra::computeEssentials() {
   this->computeCentralizerFromKModulesAndSortKModules();
   this->computeModuleDecompositionAmbientAlgebraDimensionsOnly();
   this->checkRankInequality();
-  this->nilradicalKmodules.initialize(this->modules.size);
+  this->nilradicalKModules.initialize(this->modules.size);
 }
 
 bool RootSubalgebra::computeEssentialsIfNew() {
@@ -4429,7 +4429,7 @@ bool ConeRelation::isStrictlyWeaklyProhibiting(
   nilradicalRoots.intersectWith(tempRoots, NilradicalIntersection);
   for (int i = 0; i < owner.highestWeightsPrimalSimple.size; i ++) {
     if (
-      !owner.nilradicalKmodules.selected[i] &&
+      !owner.nilradicalKModules.selected[i] &&
       tempRoots.contains(owner.highestWeightsPrimalSimple[i]) &&
       owner.isGeneratingSingularVectors(i, NilradicalIntersection)
     ) {

@@ -1844,7 +1844,7 @@ void SSLRecord::prepareServerHello2Certificate() {
 
 bool SSLRecord::prepareServerHello3SecretExchange(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("SSLRecord::prepareServerHello3SecretExchange");
-  if (this->owner->privateKey.thePublicKey.theModulus.isEqualToZero()) {
+  if (this->owner->privateKey.publicKey.modulus.isEqualToZero()) {
     if (!this->owner->privateKey.computeFromTwoPrimes(
       this->owner->privateKey.primeOne,
       this->owner->privateKey.primeTwo,

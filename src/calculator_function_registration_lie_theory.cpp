@@ -224,13 +224,13 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     innerAdminNoTest
   );
   this->addOperationHandler(
-    "SlTwoRealFormStructureForceRecompute",
+    "SlTwoRealFormStructureRecompute",
     CalculatorLieTheory::slTwoRealFormStructureForceRecompute,
     "",
     "Same as SlTwoRealFormStructure but forces a recompute. ",
     "SlTwoRealFormStructureForceRecompute{}(a_3)",
     "Calculator::slTwoRealFormStructureForceRecompute",
-    "SlTwoRealFormStructureForceRecompute",
+    "SlTwoRealFormStructureRecompute",
     // TODO(tmilev): change to an automatically-tested version when this is fixed.
     innerAdminNoTest
   );

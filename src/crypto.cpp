@@ -489,11 +489,11 @@ std::string Crypto::convertListUnsignedCharsToBase64(
   return result;
 }
 
-uint32_t Crypto::leftRotateAsIfBigEndian(uint32_t input, int numBitsToRotate) {
+uint32_t Crypto::leftRotateAsIfBigEndian(uint32_t input, int numberOfBitsToRotate) {
   uint32_t result = input;
   //Can be improved for speed but since not using bit operators,
   //this should be ultra portable
-  for (int i = 0; i < numBitsToRotate; i ++) {
+  for (int i = 0; i < numberOfBitsToRotate; i ++) {
     uint32_t last_bit = result / 2147483648;
     result *= 2;
     result += last_bit;
@@ -501,31 +501,31 @@ uint32_t Crypto::leftRotateAsIfBigEndian(uint32_t input, int numBitsToRotate) {
   return result;
 }
 
-uint32_t Crypto::rightShiftAsIfBigEndian(uint32_t input, int numBitsToShift) {
+uint32_t Crypto::rightShiftAsIfBigEndian(uint32_t input, int numberOfBitsToShift) {
   uint32_t result = input;
   //Can be improved for speed but since not using bit operators,
   //this should be ultra portable
-  for (int i = 0; i < numBitsToShift; i ++) {
+  for (int i = 0; i < numberOfBitsToShift; i ++) {
     result /= 2;
   }
   return result;
 }
 
-uint32_t Crypto::leftShiftAsIfBigEndian(uint32_t input, int numBitsToShift) {
+uint32_t Crypto::leftShiftAsIfBigEndian(uint32_t input, int numberOfBitsToShift) {
   uint32_t result = input;
   //Can be improved for speed but since not using bit operators,
   //this should be ultra portable
-  for (int i = 0; i < numBitsToShift; i ++) {
+  for (int i = 0; i < numberOfBitsToShift; i ++) {
     result *= 2;
   }
   return result;
 }
 
-uint32_t Crypto::rightRotateAsIfBigEndian(uint32_t input, int numBitsToRotate) {
+uint32_t Crypto::rightRotateAsIfBigEndian(uint32_t input, int numberOfBitsToRotate) {
   uint32_t result = input;
   //Can be improved for speed but since not using bit operators,
   //this should be ultra portable
-  for (int i = 0; i < numBitsToRotate; i ++) {
+  for (int i = 0; i < numberOfBitsToRotate; i ++) {
     uint32_t rightBit = result % 2;
     result /= 2;
     if (rightBit > 0) {
@@ -535,23 +535,23 @@ uint32_t Crypto::rightRotateAsIfBigEndian(uint32_t input, int numBitsToRotate) {
   return result;
 }
 
-uint64_t Crypto::leftRotateAsIfBigEndian64(uint64_t input, int numBitsToRotate) {
-  uint64_t left = input << numBitsToRotate;
-  uint64_t right = input >> (64 - numBitsToRotate);
+uint64_t Crypto::leftRotateAsIfBigEndian64(uint64_t input, int numberOfBitsToRotate) {
+  uint64_t left = input << numberOfBitsToRotate;
+  uint64_t right = input >> (64 - numberOfBitsToRotate);
   return left | right;
 }
 
-uint64_t Crypto::rightShiftAsIfBigEndian64(uint64_t input, int numBitsToShift) {
-  return input >> numBitsToShift;
+uint64_t Crypto::rightShiftAsIfBigEndian64(uint64_t input, int numberOfBitsToShift) {
+  return input >> numberOfBitsToShift;
 }
 
-uint64_t Crypto::leftShiftAsIfBigEndian64(uint64_t input, int numBitsToShift) {
-  return input << numBitsToShift;
+uint64_t Crypto::leftShiftAsIfBigEndian64(uint64_t input, int numberOfBitsToShift) {
+  return input << numberOfBitsToShift;
 }
 
-uint64_t Crypto::rightRotateAsIfBigEndian64(uint64_t input, int numBitsToRotate) {
-  uint64_t left = input << (64 - numBitsToRotate);
-  uint64_t right = input >> numBitsToRotate;
+uint64_t Crypto::rightRotateAsIfBigEndian64(uint64_t input, int numberOfBitsToRotate) {
+  uint64_t left = input << (64 - numberOfBitsToRotate);
+  uint64_t right = input >> numberOfBitsToRotate;
   return left | right;
 }
 
@@ -1064,13 +1064,15 @@ bool Crypto::convertLargeUnsignedToBase64SignificantDigitsFirst(
 }
 
 bool Crypto::convertBase64ToLargeUnsigned(
-  const std::string& inputBase64, LargeIntegerUnsigned& output, std::stringstream* commentsOnFailure
+  const std::string& inputBase64,
+  LargeIntegerUnsigned& output,
+  std::stringstream* commentsOnFailure
 ) {
-  List<unsigned char> theBitStream;
-  if (!Crypto::convertBase64ToBitStream(inputBase64, theBitStream, commentsOnFailure)) {
+  List<unsigned char> bitStream;
+  if (!Crypto::convertBase64ToBitStream(inputBase64, bitStream, commentsOnFailure)) {
     return false;
   }
-  Crypto::convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(theBitStream, output);
+  Crypto::convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(bitStream, output);
   return true;
 }
 
@@ -1129,7 +1131,10 @@ void Crypto::convertLargeIntUnsignedToBase58SignificantDigitsFIRST(
 }
 
 bool Crypto::convertBase58SignificantDigitsFIRSTToLargeIntUnsigned(
-  const std::string& input, LargeIntegerUnsigned& output, int& numberOfLeadingZeroes, std::stringstream* commentsOnFailure
+  const std::string& input,
+  LargeIntegerUnsigned& output,
+  int& numberOfLeadingZeroes,
+  std::stringstream* commentsOnFailure
 ) {
   output = 0;
   bool result = true;
@@ -1478,7 +1483,7 @@ bool PublicKeyRSA::loadFromJSON(JSData& input, std::stringstream* commentsOnFail
   }
   this->algorithm = "";
   this->keyid = "";
-  this->theModulusString = "";
+  this->modulusString = "";
   this->theExponentString = "";
   if (input.hasKey("alg")) {
     this->algorithm = input.getValue("alg").stringValue;
@@ -1487,7 +1492,7 @@ bool PublicKeyRSA::loadFromJSON(JSData& input, std::stringstream* commentsOnFail
     this->keyid = input.getValue("kid").stringValue;
   }
   if (input.hasKey("n")) {
-    this->theModulusString = input.getValue("n").stringValue;
+    this->modulusString = input.getValue("n").stringValue;
   }
   if (input.hasKey("e")) {
     this->theExponentString = input.getValue("e").stringValue;
@@ -1497,10 +1502,10 @@ bool PublicKeyRSA::loadFromJSON(JSData& input, std::stringstream* commentsOnFail
 
 bool PublicKeyRSA::loadFromModulusAndExponentStrings(std::stringstream *commentsOnFailure) {
   MacroRegisterFunctionWithName("CertificateRSA::loadFromModulusAndExponentStrings");
-  if (!Crypto::convertBase64ToLargeUnsigned(this->theModulusString, this->theModulus, commentsOnFailure)) {
+  if (!Crypto::convertBase64ToLargeUnsigned(this->modulusString, this->modulus, commentsOnFailure)) {
     return false;
   }
-  if (!Crypto::convertBase64ToLargeUnsigned(this->theExponentString, this->theExponent, commentsOnFailure)) {
+  if (!Crypto::convertBase64ToLargeUnsigned(this->theExponentString, this->exponent, commentsOnFailure)) {
     return false;
   }
   return true;
@@ -1550,11 +1555,11 @@ std::string PublicKeyRSA::toString() {
   std::stringstream out;
   out << "Algorithm: " << this->algorithm << "\n<br>\n";
   out << "Keyid: "     << this->keyid << "\n<br>\n";
-  out << "Modulus [string, math]: [" << this->theModulusString
-  << ", " << this->theModulus.toString() << "]" << "\n<br>\n";
+  out << "Modulus [string, math]: [" << this->modulusString
+  << ", " << this->modulus.toString() << "]" << "\n<br>\n";
   out << "Exponent [string, math]: " << "["
   << this->theExponentString << ", "
-  << this->theExponent.toString()
+  << this->exponent.toString()
   << "]\n\n";
   return out.str();
 }

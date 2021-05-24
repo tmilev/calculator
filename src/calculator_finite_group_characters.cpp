@@ -727,7 +727,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupLoadOrComputeCharTable(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::weylGroupLoadOrComputeCharTable");
-  if (!CalculatorConversions::innerLoadWeylGroup(calculator, input, output)) {
+  if (!CalculatorConversions::loadWeylGroup(calculator, input, output)) {
     return false;
   }
   WeylGroupData& theGroup = output.getValueNonConst<WeylGroupData>();
@@ -746,7 +746,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClasseS(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::weylGroupConjugacyClasseS");
-  if (!CalculatorConversions::innerLoadWeylGroup(calculator, input, output)) {
+  if (!CalculatorConversions::loadWeylGroup(calculator, input, output)) {
     return false;
   }
   WeylGroupData& theGroup = output.getValueNonConst<WeylGroupData>();
@@ -770,11 +770,11 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements
   if (!CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesFromAllElements(calculator, input, output)) {
     return false;
   }
-  WeylGroupData& theGroupData = output.getValueNonConst<WeylGroupData>();
+  WeylGroupData& groupData = output.getValueNonConst<WeylGroupData>();
   char dynkinType ='X';
   int theRank = - 1;
   bool hasOuterAutosAndIsSimple = false;
-  if (theGroupData.dynkinType.isSimple(&dynkinType, &theRank)) {
+  if (groupData.dynkinType.isSimple(&dynkinType, &theRank)) {
     if (dynkinType == 'D' || dynkinType == 'A') {
       hasOuterAutosAndIsSimple = true;
     }
@@ -787,19 +787,19 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements
   }
   FiniteGroup<Matrix<Rational> > groupNoOuterAutos;
   WeylGroupAutomorphisms theAutomorphismGroup;
-  theAutomorphismGroup.weylGroup = &theGroupData;
+  theAutomorphismGroup.weylGroup = &groupData;
   theAutomorphismGroup.computeOuterAutoGenerators();
-  groupNoOuterAutos.generators.setSize(theGroupData.getDimension());
+  groupNoOuterAutos.generators.setSize(groupData.getDimension());
   Vector<Rational> simpleRoot;
-  for (int i = 0; i < theGroupData.getDimension(); i ++) {
-    simpleRoot.makeEi(theGroupData.getDimension(), i);
-    theGroupData.getMatrixReflection(simpleRoot, groupNoOuterAutos.generators[i]);
+  for (int i = 0; i < groupData.getDimension(); i ++) {
+    simpleRoot.makeEi(groupData.getDimension(), i);
+    groupData.getMatrixReflection(simpleRoot, groupNoOuterAutos.generators[i]);
   }
   //if (false)
   Matrix<Rational> currentAuto;
   List<Matrix<Rational> > outerAutos;
   for (int i = 0; i < theAutomorphismGroup.outerAutomorphisms.generators.size; i ++) {
-    theAutomorphismGroup.outerAutomorphisms.generators[i].getMatrix(currentAuto, theGroupData.getDimension());
+    theAutomorphismGroup.outerAutomorphisms.generators[i].getMatrix(currentAuto, groupData.getDimension());
     outerAutos.addOnTop(currentAuto);
   }
   std::stringstream out;
@@ -843,48 +843,48 @@ bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesFromAllElements(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesFromAllElements");
-  if (!CalculatorConversions::innerLoadWeylGroup(calculator, input, output)) {
+  if (!CalculatorConversions::loadWeylGroup(calculator, input, output)) {
     return false;
   }
-  WeylGroupData& theGroupData = output.getValueNonConst<WeylGroupData>();
-  if (theGroupData.getDimension() > 7) {
+  WeylGroupData& groupData = output.getValueNonConst<WeylGroupData>();
+  if (groupData.getDimension() > 7) {
     calculator << "<hr>Loaded Dynkin type "
-    << theGroupData.dynkinType.toString() << " of rank "
-    << theGroupData.getDimension() << " but I've been told "
+    << groupData.dynkinType.toString() << " of rank "
+    << groupData.getDimension() << " but I've been told "
     << "not to compute when the rank is larger than 7. ";
     return false;
   }
   double timeStart1 = global.getElapsedSeconds();
-  theGroupData.group.computeConjugacyClassesFromAllElements();
+  groupData.group.computeConjugacyClassesFromAllElements();
   //std::stringstream out;
   calculator << "<hr>Computed conjugacy classes of "
-  << theGroupData.toString() << " in " << global.getElapsedSeconds() - timeStart1
+  << groupData.toString() << " in " << global.getElapsedSeconds() - timeStart1
   << " second(s). ";
-  return output.assignValue(theGroupData, calculator);
+  return output.assignValue(groupData, calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesRepresentatives(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesRepresentatives");
-  if (!CalculatorConversions::innerLoadWeylGroup(calculator, input, output)) {
+  if (!CalculatorConversions::loadWeylGroup(calculator, input, output)) {
     return false;
   }
-  WeylGroupData& theGroupData = output.getValueNonConst<WeylGroupData>();
-  theGroupData.checkConsistency();
-  if (theGroupData.getDimension() > 8) {
-    return calculator << "<hr>Loaded Dynkin type " << theGroupData.dynkinType.toString()
-    << " of rank " << theGroupData.getDimension() << " but I've been told "
+  WeylGroupData& groupData = output.getValueNonConst<WeylGroupData>();
+  groupData.checkConsistency();
+  if (groupData.getDimension() > 8) {
+    return calculator << "<hr>Loaded Dynkin type " << groupData.dynkinType.toString()
+    << " of rank " << groupData.getDimension() << " but I've been told "
     << "not to compute when the rank is larger than 8. ";
   }
-  theGroupData.checkConsistency();
+  groupData.checkConsistency();
   double timeStart1 = global.getElapsedSeconds();
-  theGroupData.checkConsistency();
-  theGroupData.group.computeConjugacyClassSizesAndRepresentatives();
+  groupData.checkConsistency();
+  groupData.group.computeConjugacyClassSizesAndRepresentatives();
   calculator << "<hr> Computed conjugacy classes representatives of "
-  << theGroupData.dynkinType.toString() << " in " << global.getElapsedSeconds()-timeStart1
+  << groupData.dynkinType.toString() << " in " << global.getElapsedSeconds()-timeStart1
   << " second(s). ";
-  return output.assignValue(theGroupData, calculator);
+  return output.assignValue(groupData, calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::weylGroupIrrepsAndCharTableComputeFromScratch(
@@ -897,20 +897,20 @@ bool CalculatorFunctionsWeylGroup::weylGroupIrrepsAndCharTableComputeFromScratch
   if (!output.isOfType<WeylGroupData>()) {
     return true;
   }
-  WeylGroupData& theGroupData = output.getValueNonConst<WeylGroupData>();
-  theGroupData.computeInitialIrreducibleRepresentations();
-  theGroupData.group.computeIrreducibleRepresentationsTodorsVersion();
+  WeylGroupData& groupData = output.getValueNonConst<WeylGroupData>();
+  groupData.computeInitialIrreducibleRepresentations();
+  groupData.group.computeIrreducibleRepresentationsTodorsVersion();
   FormatExpressions tempFormat;
   tempFormat.flagUseLatex = true;
   tempFormat.flagUseHTML = false;
   std::stringstream out;
   out << "Character table: ";
-  out << theGroupData.group.prettyPrintCharacterTable();
+  out << groupData.group.prettyPrintCharacterTable();
   out << "<br>Explicit realizations of each representation follow.";
-  for (int i = 0; i < theGroupData.group.irreducibleRepresentations.size; i ++) {
-    out << "<hr>" << theGroupData.group.irreducibleRepresentations[i].toString(&tempFormat);
+  for (int i = 0; i < groupData.group.irreducibleRepresentations.size; i ++) {
+    out << "<hr>" << groupData.group.irreducibleRepresentations[i].toString(&tempFormat);
   }
-  out << theGroupData.toString(&tempFormat);
+  out << groupData.toString(&tempFormat);
   return output.assignValue(out.str(), calculator);
 }
 
@@ -1812,7 +1812,7 @@ bool CalculatorFunctionsWeylGroup::signSignatureRootSubsystemsFromKostkaNumbers(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::signSignatureRootSubsystems");
   std::stringstream out;
-  if (!CalculatorConversions::innerLoadWeylGroup(calculator, input, output)) {
+  if (!CalculatorConversions::loadWeylGroup(calculator, input, output)) {
     return false;
   }
   if (!output.isOfType<WeylGroupData>()) {
@@ -1856,7 +1856,7 @@ bool CalculatorFunctionsWeylGroup::signSignatureRootSubsystems(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::signSignatureRootSubsystems");
-  if (!CalculatorConversions::innerLoadWeylGroup(calculator, input, output)) {
+  if (!CalculatorConversions::loadWeylGroup(calculator, input, output)) {
     return false;
   }
   if (!output.isOfType<WeylGroupData>()) {

@@ -188,8 +188,8 @@ class SelectionOneItem {
     }
     return this->amount != 0;
   }
-  void initFromMults(int theMult) {
-    this->maximumMultiplicity = theMult;
+  void initializeFromMultiplicities(int inputMultiplicity) {
+    this->maximumMultiplicity = inputMultiplicity;
     this->amount = 0;
   }
   std::string toString() const {
@@ -224,21 +224,21 @@ public:
     }
     return false;
   }
-  void initFromMults(int inputBase, int numberOfElements) {
+  void initializeFromMultiplicities(int inputBase, int numberOfElements) {
     this->elements.setSize(numberOfElements);
     for (int i = 0; i < this->elements.size; i ++) {
-      this->elements[i].initFromMults(inputBase);
+      this->elements[i].initializeFromMultiplicities(inputBase);
     }
   }
   template<class Element>
-  void initFromMults(const List<Element>& input, int useOnlyNElementsOnly = 0) {
+  void initializeFromMultiplicities(const List<Element>& input, int useOnlyNElementsOnly = 0) {
     if (useOnlyNElementsOnly > 0 && useOnlyNElementsOnly <= input.size) {
       this->elements.setSize(useOnlyNElementsOnly);
     } else {
       this->elements.setSize(input.size);
     }
     for (int i = 0; i < this->elements.size; i ++) {
-      this->elements[i].initFromMults(input[i]);
+      this->elements[i].initializeFromMultiplicities(input[i]);
     }
   }
   std::string toString() const {
@@ -264,13 +264,13 @@ public:
     MathRoutines::nChooseK(selection.numberOfElements, desiredSubsetSize, result);
     return result;
   }
-  void setNumberOfItemsAndDesiredSubsetSize(int inputDesiredSubsetSize, int inputNumItems) {
-    if (inputDesiredSubsetSize < 0 || inputNumItems < 0) {
+  void setNumberOfItemsAndDesiredSubsetSize(int inputDesiredSubsetSize, int inputNumberOfItems) {
+    if (inputDesiredSubsetSize < 0 || inputNumberOfItems < 0) {
       global.fatal << "Request to initialize a selection of size "
       << inputDesiredSubsetSize << " out of "
-      << inputNumItems << " elements, which does not make sense. " << global.fatal;
+      << inputNumberOfItems << " elements, which does not make sense. " << global.fatal;
     }
-    this->selection.initialize(inputNumItems);
+    this->selection.initialize(inputNumberOfItems);
     this->desiredSubsetSize = inputDesiredSubsetSize;
     if (this->desiredSubsetSize > 0) {
       this->selection.incrementSelectionFixedCardinality(this->desiredSubsetSize);
@@ -300,8 +300,8 @@ class SelectionPositiveIntegers {
   LargeIntegerUnsigned getGrading() {
     return this->integers.sumCoordinates();
   }
-  void initialize(int numIntegers) {
-    this->integers.makeZero(numIntegers);
+  void initialize(int numberOfIntegers) {
+    this->integers.makeZero(numberOfIntegers);
   }
   void setFirstInGradeLevel(const LargeIntegerUnsigned& inputGradingLevel) {
     this->integers[0] = inputGradingLevel;
@@ -331,49 +331,49 @@ bool Vectors<Coefficient>::computeNormalFromSelectionAndTwoExtraRoots(
   Vector<Coefficient>& output,
   Vector<Coefficient>& extraRoot1,
   Vector<Coefficient>& extraRoot2,
-  Selection& theSelection,
-  Matrix<Coefficient>& bufferMat,
-  Selection& bufferSel
+  Selection& selection,
+  Matrix<Coefficient>& bufferMatrix,
+  Selection& bufferSelection
 ) {
-  Selection& nonPivotPoints = bufferSel;
+  Selection& nonPivotPoints = bufferSelection;
   if (this->size == 0) {
     return false;
   }
   int dimension = this->objects[0].size;
   output.setSize(dimension);
-  bufferMat.initialize(theSelection.cardinalitySelection + 2, dimension);
+  bufferMatrix.initialize(selection.cardinalitySelection + 2, dimension);
   for (int j = 0; j < dimension; j ++) {
-    for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
-      bufferMat.elements[i][j].assign(this->objects[theSelection.elements[i]].objects[j]);
+    for (int i = 0; i < selection.cardinalitySelection; i ++) {
+      bufferMatrix.elements[i][j].assign(this->objects[selection.elements[i]].objects[j]);
     }
-    bufferMat.elements[theSelection.cardinalitySelection][j].assign(extraRoot1.objects[j]);
-    bufferMat.elements[theSelection.cardinalitySelection + 1][j].assign(extraRoot2.objects[j]);
+    bufferMatrix.elements[selection.cardinalitySelection][j].assign(extraRoot1.objects[j]);
+    bufferMatrix.elements[selection.cardinalitySelection + 1][j].assign(extraRoot2.objects[j]);
   }
-  bufferMat.gaussianEliminationByRows(0, nonPivotPoints);
+  bufferMatrix.gaussianEliminationByRows(0, nonPivotPoints);
   if (nonPivotPoints.cardinalitySelection != 1) {
     return false;
   }
-  bufferMat.nonPivotPointsToEigenVector(nonPivotPoints, output);
+  bufferMatrix.nonPivotPointsToEigenVector(nonPivotPoints, output);
   return true;
 }
 
 template <typename Coefficient>
 void Vectors<Coefficient>::selectionToMatrix(
-  Selection& theSelection, int outputDimension, Matrix<Coefficient>& output
+  Selection& selection, int outputDimension, Matrix<Coefficient>& output
 ) {
-  output.initialize(outputDimension, theSelection.cardinalitySelection);
-  this->selectionToMatrix(theSelection, outputDimension, output, 0);
+  output.initialize(outputDimension, selection.cardinalitySelection);
+  this->selectionToMatrix(selection, outputDimension, output, 0);
 }
 
 template <typename Coefficient>
 void Vectors<Coefficient>::selectionToMatrixAppend(
-  Selection& theSelection,
+  Selection& selection,
   int outputDimension,
   Matrix<Coefficient>& output,
   int startRowIndex
 ) {
-  for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
-    Vector<Coefficient>& tempRoot = this->objects[theSelection.elements[i]];
+  for (int i = 0; i < selection.cardinalitySelection; i ++) {
+    Vector<Coefficient>& tempRoot = this->objects[selection.elements[i]];
     for (int j = 0; j < outputDimension; j ++) {
       output.elements[startRowIndex + i][j] = tempRoot[j];
     }
@@ -382,13 +382,13 @@ void Vectors<Coefficient>::selectionToMatrixAppend(
 
 template <typename Coefficient>
 void Vectors<Coefficient>::selectionToMatrix(
-  Selection& theSelection,
+  Selection& selection,
   int outputDimension,
   Matrix<Coefficient>& output,
   int startRowIndex
 ) {
-  for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
-    Vector<Rational>& tempRoot = this->objects[theSelection.elements[i]];
+  for (int i = 0; i < selection.cardinalitySelection; i ++) {
+    Vector<Rational>& tempRoot = this->objects[selection.elements[i]];
     for (int j = 0; j < outputDimension; j ++) {
       output.elements[startRowIndex + i][j] = tempRoot[j];
     }

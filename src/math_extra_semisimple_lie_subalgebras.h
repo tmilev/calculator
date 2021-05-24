@@ -177,7 +177,6 @@ public:
   List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > modules;
   List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > modulesSl2Opposite;
   List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > modulesIsotypicallyMerged;
-  // List<List<ElementSemisimpleLieAlgebra<Rational> > > ModulesSemisimpleSubalgebra;
 
   List<Vectors<Rational> > weightsModulesNONprimal;
   List<Vectors<Rational> > weightsModulesPrimal;
@@ -248,7 +247,7 @@ public:
   );
   bool createAndAddExtendBaseSubalgebra(
     const CandidateSemisimpleSubalgebra& baseSubalgebra,
-    Vector<Rational>& newHrescaledToActByTwo,
+    Vector<Rational>& newHRescaledToActByTwo,
     const DynkinType& newType,
     const List<int>& rootInjection
   );
@@ -326,7 +325,7 @@ public:
   ) const;
   bool checkGeneratorsBracketToHs();
   void getWeightProjectionFundamentalCoordinates(
-    const Vector<Rational>& inputAmbientweight,
+    const Vector<Rational>& inputAmbientWeight,
     Vector<Rational>& output
   ) const;
   bool computeSystem(bool attemptToChooseCentalizer, bool allowNonPolynomialSystemFailure);

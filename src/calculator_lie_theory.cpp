@@ -1889,19 +1889,20 @@ bool CalculatorLieTheory::slTwoRealFormStructure(
 
   std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile, outKostantSekiguchi;
 
-  std::string displayFolder = ownerLieAlgebra.content->fileNames.displayFolderName("output/");
+  SemisimpleLieAlgebra::FileNames& fileNames = ownerLieAlgebra.content->fileNames;
+  std::string displayFolder = fileNames.displayFolderName("output/");
 
-  outSltwoMainFile << displayFolder << ownerLieAlgebra.content->fileNames.fileNameRelativePathSlTwoSubalgebras();
-  outRootHtmlFileName    << displayFolder << ownerLieAlgebra.content->fileNames.fileNameNoPathRootSubalgebras();
-  outRootHtmlDisplayName << displayFolder << ownerLieAlgebra.content->fileNames.fileNameNoPathRootSubalgebras();
-  outKostantSekiguchi << displayFolder << ownerLieAlgebra.content->fileNames.fileNameSlTwoRealFormSubalgebraStructure();
+  outSltwoMainFile << displayFolder << fileNames.fileNameRelativePathSlTwoSubalgebras();
+  outRootHtmlFileName << displayFolder << fileNames.fileNameNoPathRootSubalgebras();
+  outRootHtmlDisplayName << displayFolder << fileNames.fileNameNoPathRootSubalgebras();
+  outKostantSekiguchi << displayFolder << fileNames.fileNameSlTwoRealFormSubalgebraStructure();
   std::stringstream out;
   out << "<a href='"
   << outKostantSekiguchi.str()
   << "' target='_blank'>"
-  << ownerLieAlgebra.content->toStringLieAlgebraName() << " </a>";
-  if (!FileOperations::fileExistsVirtual(outKostantSekiguchi.str()) && !forceRecompute) {
-    out << "The table is precomputed and served from the hard disk. <br>";
+  << ownerLieAlgebra.content->toStringLieAlgebraName() << "</a>";
+  if (FileOperations::fileExistsVirtual(outKostantSekiguchi.str()) && !forceRecompute) {
+    out << "<br>The table is precomputed and served from the hard disk. <br>";
     return output.assignValue(out.str(), calculator);
   }
 

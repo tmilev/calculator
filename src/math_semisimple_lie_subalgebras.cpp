@@ -1255,11 +1255,16 @@ void SemisimpleSubalgebras::makeCandidateFromSlTwo(
   matrix(0, 0) = 2;
   candidate.subalgebraNonEmbeddedDefaultScale =
   &this->subalgebrasNonDefaultCartanAndScale.getValueCreateNoInitialization(matrix);
-  candidate.subalgebraNonEmbeddedDefaultScale->weylGroup.makeFromDynkinType(incomingType);
+  DynkinType aOneDefaultScale;
+  aOneDefaultScale.makeSimpleType('A', 1);
+  candidate.subalgebraNonEmbeddedDefaultScale->weylGroup.makeFromDynkinType(aOneDefaultScale);
   Vector<Rational> hElement = input.hElement.getCartanPart();
   candidate.cartanElementsScaledToActByTwo.addOnTop(hElement);
   candidate.cartanElementsSubalgebra.addOnTop(hElement);
   candidate.hsScaledToActByTwoInOrderOfCreation.addOnTop(hElement);
+  candidate.cartanSubalgebrasByComponentScaledToActByTwo.setSize(1);
+  candidate.cartanSubalgebrasByComponentScaledToActByTwo[0].setSize(1);
+  candidate.cartanSubalgebrasByComponentScaledToActByTwo[0][0] = hElement;
 }
 
 bool SemisimpleSubalgebras::computeStructureRealFormOneSlTwo(
@@ -1287,7 +1292,9 @@ bool SemisimpleSubalgebras::writeFilesRealForms(std::stringstream* outputStream)
   FormatExpressions format;
   this->computeFolderNames(format);
   std::stringstream content;
-  content << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
+  content << "<html><title>"
+  << "Semisimple subalgebras of the semisimple Lie algebras: "
+  << "the subalgebras of "
   << this->owner->weylGroup.dynkinType.toString()
   << "</title>";
   content << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements();
@@ -1297,6 +1304,7 @@ bool SemisimpleSubalgebras::writeFilesRealForms(std::stringstream* outputStream)
   content << "</body></html>";
   std::string fileName = this->owner->fileNames.virtualFolderName() +
   this->owner->fileNames.fileNameSlTwoRealFormSubalgebraStructure();
+  this->slTwoSubalgebras.writeHTML(nullptr);
   return FileOperations::writeFileVirual(fileName, content.str(), outputStream);
 }
 
@@ -1427,7 +1435,6 @@ void CandidateSemisimpleSubalgebra::setUpInjectionHs(
   this->cartanSubalgebrasByComponentScaledToActByTwo = baseSubalgebra.cartanSubalgebrasByComponentScaledToActByTwo;
   int indexOffset = this->weylNonEmbedded->dynkinType.getRank() - newComponent.rank;
   int newIndexInNewComponent = 0;
-//  if (!newComponent.isEqualToZero())
   newIndexInNewComponent = *rootInjection.lastObject() - indexOffset;
   if (newComponent.rank == 1) {
     this->cartanSubalgebrasByComponentScaledToActByTwo.setSize(this->cartanSubalgebrasByComponentScaledToActByTwo.size + 1);
@@ -1502,12 +1509,12 @@ bool SemisimpleSubalgebras::setUpParabolicInductionDataPrecomputedSubalgebra(
 
 bool CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra(
   const CandidateSemisimpleSubalgebra& baseSubalgebra,
-  Vector<Rational>& newHrescaledToActByTwo,
+  Vector<Rational>& newHRescaledToActByTwo,
   const DynkinType& newType,
   const List<int>& rootInjection
 ) {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra");
-  this->setUpInjectionHs(baseSubalgebra, newType, rootInjection, &newHrescaledToActByTwo);
+  this->setUpInjectionHs(baseSubalgebra, newType, rootInjection, &newHRescaledToActByTwo);
   this->indexInducedFrom = baseSubalgebra.indexInOwner;
   this->rootInjectionsFromInducer = rootInjection;
   //induction history is complete.
@@ -3184,7 +3191,9 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecomposition() {
           this->weightsModulesPrimal[i][j] = primalProjection;
         } else {
           if (this->weightsModulesNONprimal[i][j] != projection || this->weightsModulesPrimal[i][j] != primalProjection) {
-            global.fatal << "This is a programming or mathematical error. Given two isomorphic modules over "
+            global.fatal
+            << "This is a programming or mathematical error. "
+            << "Given two isomorphic modules over "
             << "the semisimple subalgebra (i.e., same highest weights), "
             << "and the same order of generation of weights, I got different order "
             << "of the lower weights of the modules. "
@@ -4198,30 +4207,30 @@ bool CandidateSemisimpleSubalgebra::compareLeftGreaterThanRight(const Vector<Rat
 }
 
 void CandidateSemisimpleSubalgebra::getWeightProjectionFundamentalCoordinates(
-  const Vector<Rational>& inputAmbientweight, Vector<Rational>& output
+  const Vector<Rational>& inputAmbientWeight, Vector<Rational>& output
 ) const {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::getWeightProjectionFundamentalCoordinates");
   this->checkFullInitialization();
   output.setSize(this->cartanElementsSubalgebra.size);
   for (int j = 0; j < this->cartanElementsSubalgebra.size; j ++) {
-    output[j] = this->getAmbientWeyl().rootScalarCartanRoot(inputAmbientweight, this->cartanElementsSubalgebra[j]) * 2 /
+    output[j] = this->getAmbientWeyl().rootScalarCartanRoot(inputAmbientWeight, this->cartanElementsSubalgebra[j]) * 2 /
     this->subalgebraNonEmbeddedDefaultScale->weylGroup.cartanSymmetric(j, j);
   }
 }
 
 void CandidateSemisimpleSubalgebra::getPrimalWeightProjectionFundamentalCoordinates(
-  const Vector<Rational>& inputAmbientweight, Vector<Rational>& output
+  const Vector<Rational>& inputAmbientWeight, Vector<Rational>& output
 ) const {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::getPrimalWeightProjectionFundamentalCoordinates");
   this->checkFullInitialization();
   output.setSize(this->cartanElementsSubalgebra.size +this->cartanOfCentralizer.size);
   for (int j = 0; j < this->cartanElementsSubalgebra.size; j ++) {
-    output[j] = this->getAmbientWeyl().rootScalarCartanRoot(inputAmbientweight, this->cartanElementsSubalgebra[j]) * 2 /
+    output[j] = this->getAmbientWeyl().rootScalarCartanRoot(inputAmbientWeight, this->cartanElementsSubalgebra[j]) * 2 /
     this->subalgebraNonEmbeddedDefaultScale->weylGroup.cartanSymmetric(j, j);
   }
   for (int j = 0; j < this->cartanOfCentralizer.size; j ++) {
     output[j + this->cartanElementsSubalgebra.size] = this->getAmbientWeyl().rootScalarCartanRoot(
-      inputAmbientweight, this->cartanOfCentralizer[j]
+      inputAmbientWeight, this->cartanOfCentralizer[j]
     ) * 2;
   }
 }
@@ -4236,10 +4245,12 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecompositionHighestWeigh
   Vector<Rational> currentRoot;
   List<Vector<Rational> > sortingWeights;
   for (int i = 0; i < this->highestVectorsNonSorted.size; i ++) {
-    currentRoot = this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(this->highestVectorsNonSorted[i][0].generatorIndex);
-    Vector<Rational>& currentHWPrimal = this->highestWeightsPrimalNonSorted[i];
-    this->getPrimalWeightProjectionFundamentalCoordinates(currentRoot, currentHWPrimal);
-    sortingWeights.addOnTop(currentHWPrimal);
+    currentRoot = this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(
+      this->highestVectorsNonSorted[i][0].generatorIndex
+    );
+    Vector<Rational>& currentHighestWeightPrimal = this->highestWeightsPrimalNonSorted[i];
+    this->getPrimalWeightProjectionFundamentalCoordinates(currentRoot, currentHighestWeightPrimal);
+    sortingWeights.addOnTop(currentHighestWeightPrimal);
   }
   sortingWeights.quickSortAscendingCustom(*this, &this->highestVectorsNonSorted);
   List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > modulesComputer;
@@ -4925,7 +4936,8 @@ void SlTwoSubalgebra::initialize() {
 }
 
 void SlTwoSubalgebra::computeDynkinTypeEmbedded(DynkinType& output) const {
-  output.makeSimpleType('A', 1, &this->lengthHSquared);
+  Rational halfLength = this->lengthHSquared / 2;
+  output.makeSimpleType('A', 1, &halfLength);
 }
 
 bool SlTwoSubalgebra::checkConsistency() const {
@@ -5672,7 +5684,7 @@ std::string SlTwoSubalgebras::toString(FormatExpressions* format) {
 }
 
 void SlTwoSubalgebras::writeHTML(FormatExpressions* format) {
-  MacroRegisterFunctionWithName("SlTwoSubalgebras::toHTML");
+  MacroRegisterFunctionWithName("SlTwoSubalgebras::writeHTML");
   std::string virtualFileName = this->owner->fileNames.virtualFolderName() + this->owner->fileNames.fileNameRelativePathSlTwoSubalgebras();
   ProgressReport report;
   report.report("Preparing html pages for sl(2) subalgebras. This might take a while.");
@@ -5691,7 +5703,8 @@ void SlTwoSubalgebras::writeHTML(FormatExpressions* format) {
   << " '>";
   out << SemisimpleLieAlgebra::toHTMLCalculatorBodyOnload();
   out << this->owner->toHTMLCalculatorMainDiv();
-  out << "<h1>\\(sl(2)\\)-subalgebras of " << this->owner->toStringLieAlgebraNameFullHTML() << "</h1>";
+  out << "<h1>\\(sl(2)\\)-subalgebras of "
+  << this->owner->toStringLieAlgebraNameFullHTML() << "</h1>";
   out << this->owner->toStringHTMLMenuStructureSummary("../", true, true, false, true);
   out << this->toString(format);
   out << "</div>";
@@ -5699,7 +5712,8 @@ void SlTwoSubalgebras::writeHTML(FormatExpressions* format) {
   out << "</html>";
   std::stringstream commentsOnError;
   if (!FileOperations::writeFileVirual(virtualFileName, out.str(), &commentsOnError)) {
-    global.fatal << "Failed to write sl(2)-subalgebras. " << commentsOnError.str() << global.fatal;
+    global.fatal << "Failed to write sl(2)-subalgebras. "
+    << commentsOnError.str() << global.fatal;
   }
 }
 
@@ -6711,6 +6725,9 @@ std::string CandidateSemisimpleSubalgebra::toStringCartanSubalgebra(FormatExpres
   tempFormat.ambientWeylLetter = this->getAmbientWeyl().dynkinType[0].letter;
   tempFormat.ambientCartanSymmetricInverseScale = this->getAmbientWeyl().dynkinType[0].cartanSymmetricInverseScale;
   out << "<br>Elements Cartan subalgebra scaled to act by two by components: ";
+  if (this->cartanSubalgebrasByComponentScaledToActByTwo.size == 0) {
+    out << "[not computed]";
+  }
   for (int i = 0; i < this->cartanSubalgebrasByComponentScaledToActByTwo.size; i ++) {
     if (useLaTeX && useHtml) {
       if (useMouseHover) {

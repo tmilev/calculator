@@ -784,9 +784,9 @@ class Vectors: public List<Vector<Coefficient> > {
     }
     return false;
   }
-  void selectionToMatrix(Selection& theSelection, int outputDimension, Matrix<Coefficient>& output);
-  void selectionToMatrixAppend(Selection& theSelection, int outputDimension, Matrix<Coefficient>& output, int startRowIndex);
-  void selectionToMatrix(Selection& theSelection, int outputDimension, Matrix<Coefficient>& output, int startRowIndex);
+  void selectionToMatrix(Selection& selection, int outputDimension, Matrix<Coefficient>& output);
+  void selectionToMatrixAppend(Selection& selection, int outputDimension, Matrix<Coefficient>& output, int startRowIndex);
+  void selectionToMatrix(Selection& selection, int outputDimension, Matrix<Coefficient>& output, int startRowIndex);
   void getGramMatrix(Matrix<Coefficient>& output, const Matrix<Rational>* bilinearForm = nullptr) const;
   void getMatrixRootsToRows(Matrix<Rational>& output) const;
   void getOrthogonalComplement(Vectors<Coefficient>& output, Matrix<Rational>* bilinearForm = nullptr);
@@ -912,9 +912,9 @@ class Vectors: public List<Vector<Coefficient> > {
     Vector<Coefficient>& output,
     Vector<Coefficient>& extraRoot1,
     Vector<Coefficient>& extraRoot2,
-    Selection& theSelection,
-    Matrix<Coefficient>& bufferMat,
-    Selection& bufferSel
+    Selection& selection,
+    Matrix<Coefficient>& bufferMatrix,
+    Selection& bufferSelection
   );
   bool computeNormal(Vector<Coefficient>& output, int inputDimension);
   void gaussianEliminationForNormalComputation(
@@ -1266,25 +1266,25 @@ bool AffineHyperplane<Coefficient>::projectFromFacetNormal(Vector<Coefficient>& 
 
 template <class Coefficient>
 bool AffineHyperplane<Coefficient>::containsPoint(Vector<Coefficient>& thePoint) {
-  Rational tempRat1, tempRat2;
-  tempRat1 = this->normal.scalarEuclidean(thePoint);
-  tempRat2 = this->normal.scalarEuclidean(this->affinePoint);
-  return tempRat2.isEqualTo(tempRat1);
+  Rational scalarProductPoint, scalarProductInternalPoint;
+  scalarProductPoint = this->normal.scalarEuclidean(thePoint);
+  scalarProductInternalPoint = this->normal.scalarEuclidean(this->affinePoint);
+  return scalarProductInternalPoint.isEqualTo(scalarProductPoint);
 }
 
 template <class Coefficient>
 bool AffineHyperplane<Coefficient>::hasCommonPointWithPositiveTwoToTheNthQuadrant() {
-  Rational tempRat;
-  tempRat = this->normal.scalarEuclidean(this->affinePoint);
-  if (tempRat.isEqualToZero()) {
+  Rational scalarProductWithInternal;
+  scalarProductWithInternal = this->normal.scalarEuclidean(this->affinePoint);
+  if (scalarProductWithInternal.isEqualToZero()) {
     return true;
   }
   for (int i = 0; i < this->normal.size; i ++) {
-    Rational& tempRat2 = this->normal[i];
-    if (tempRat.isNegative() && tempRat2.isNegative()) {
+    Rational& scalarProduct = this->normal[i];
+    if (scalarProductWithInternal.isNegative() && scalarProduct.isNegative()) {
       return true;
     }
-    if (tempRat.isPositive() && tempRat2.isPositive()) {
+    if (scalarProductWithInternal.isPositive() && scalarProduct.isPositive()) {
       return true;
     }
   }

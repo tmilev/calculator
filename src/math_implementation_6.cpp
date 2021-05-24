@@ -376,59 +376,59 @@ bool PolynomialFactorizationKronecker::oneFactor(
   int degreeLeft = degree / 2;
   Vector<Rational> allPointsOfEvaluation;
   List<List<LargeInteger> > primeFactorsAtPoints;
-  List<List<int> > thePrimeFactorsMults;
-  Vector<Rational> theValuesAtPoints, valuesAtRemainingPoints;
+  List<List<int> > primeFactorsMults;
+  Vector<Rational> valuesAtPoints, valuesAtRemainingPoints;
   allPointsOfEvaluation.setSize(degree + 1);
   primeFactorsAtPoints.setSize(degreeLeft + 1);
-  thePrimeFactorsMults.setSize(degreeLeft + 1);
+  primeFactorsMults.setSize(degreeLeft + 1);
   allPointsOfEvaluation[0] = 0;
   for (int i = 1; i < allPointsOfEvaluation.size; i ++) {
     allPointsOfEvaluation[i] = (i % 2 == 1) ? i / 2 + 1 : - (i / 2);
   }
-  Vector<Rational> theArgument;
-  theArgument.setSize(1);
-  theValuesAtPoints.setSize(allPointsOfEvaluation.size);
+  Vector<Rational> argument;
+  argument.setSize(1);
+  valuesAtPoints.setSize(allPointsOfEvaluation.size);
   LargeInteger tempLI;
   for (int i = 0; i < allPointsOfEvaluation.size; i ++) {
-    theArgument[0] = allPointsOfEvaluation[i];
-    theValuesAtPoints[i] = this->current.evaluate(theArgument);
-    if (theValuesAtPoints[i].isEqualToZero()) {
+    argument[0] = allPointsOfEvaluation[i];
+    valuesAtPoints[i] = this->current.evaluate(argument);
+    if (valuesAtPoints[i].isEqualToZero()) {
       Polynomial<Rational> incomingFactor;
-      incomingFactor.makeDegreeOne(1, 0, 1, - theArgument[0]);
+      incomingFactor.makeDegreeOne(1, 0, 1, - argument[0]);
       this->output->accountReducedFactor(incomingFactor, true);
       return true;
     }
     if (i > degreeLeft) {
       continue;
     }
-    theValuesAtPoints[i].isInteger(&tempLI);
+    valuesAtPoints[i].isInteger(&tempLI);
     if (!tempLI.value.factor(
-      primeFactorsAtPoints[i], thePrimeFactorsMults[i], 0, 3, commentsOnFailure
+      primeFactorsAtPoints[i], primeFactorsMults[i], 0, 3, commentsOnFailure
     )) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
         << "<br>Aborting polynomial factorization: "
         << "failed to factor the integer "
-        << theValuesAtPoints[i].toString()
+        << valuesAtPoints[i].toString()
         << " (most probably the integer is too large).";
       }
       return false;
     }
     primeFactorsAtPoints[i].addOnTop(- 1);
-    thePrimeFactorsMults[i].addOnTop(1);
+    primeFactorsMults[i].addOnTop(1);
   }
   Incrementable<Incrementable<SelectionOneItem> > divisorSelection;
   Vectors<Rational> valuesLeftInterpolands;
-  Vector<Rational> PointsOfInterpolationLeft;
-  PointsOfInterpolationLeft.reserve(degreeLeft + 1);
+  Vector<Rational> pointsOfInterpolationLeft;
+  pointsOfInterpolationLeft.reserve(degreeLeft + 1);
   Rational currentPrimePowerContribution, currentPointContribution;
   for (int i = 0; i <= degreeLeft; i ++) {
-    PointsOfInterpolationLeft.addOnTop(allPointsOfEvaluation[i]);
+    pointsOfInterpolationLeft.addOnTop(allPointsOfEvaluation[i]);
   }
-  divisorSelection.initFromMults(thePrimeFactorsMults);
+  divisorSelection.initializeFromMultiplicities(primeFactorsMults);
   valuesLeftInterpolands.setSize(degreeLeft + 1);
   Polynomial<Rational>::getValuesLagrangeInterpolands(
-    PointsOfInterpolationLeft, allPointsOfEvaluation, valuesLeftInterpolands
+    pointsOfInterpolationLeft, allPointsOfEvaluation, valuesLeftInterpolands
   );
   ProgressReport report(1000, GlobalVariables::Response::ReportType::general);
   LargeInteger total = divisorSelection.totalCombinations();
@@ -454,7 +454,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
       }
       return false;
     }
-    valuesAtRemainingPoints.makeZero(theValuesAtPoints.size);
+    valuesAtRemainingPoints.makeZero(valuesAtPoints.size);
     Rational firstValue;
     bool isGood = false; //<-we shall first check if the divisor is constant.
     for (int j = 0; j < divisorSelection.elements.size; j ++) {
@@ -483,7 +483,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
         isGood = false;
         break;
       }
-      currentPointContribution = theValuesAtPoints[j] / valuesAtRemainingPoints[j];
+      currentPointContribution = valuesAtPoints[j] / valuesAtRemainingPoints[j];
       if (!currentPointContribution.isInteger()) {
         isGood = false;
         break;
@@ -494,7 +494,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
     }
     Polynomial<Rational> incoming;
     incoming.interpolate(
-      PointsOfInterpolationLeft,
+      pointsOfInterpolationLeft,
       valuesAtRemainingPoints
     );
     if (this->output->accountNonReducedFactor(incoming)) {

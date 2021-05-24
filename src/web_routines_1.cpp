@@ -821,7 +821,7 @@ bool Crypto::verifyJWTagainstKnownKeys(
   }
   PublicKeyRSA& currentCert = Crypto::knownCertificates[index];
   return theToken.verifyRSA256(
-    currentCert.theModulus, currentCert.theExponent, commentsOnFailure, commentsGeneral
+    currentCert.modulus, currentCert.exponent, commentsOnFailure, commentsGeneral
   );
 }
 

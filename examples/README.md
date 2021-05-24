@@ -2773,7 +2773,7 @@ s_1 = MakeMatrixRFs{}((1 - t, 2), (3, 2 - t))
 ```
 Creates an internal C++ matrix structure from double list of polynomial functions. 
 
-*EnsureExpressionDependsOnlyOn* [EnsureExpressionDependsOnlyOn] {CalculatorFunctions::innerEnsureExpressionDependsOnlyOnStandard}. 
+*EnsureExpressionDependsOnlyOn* [EnsureExpressionDependsOnlyOn] {CalculatorFunctions::ensureExpressionDependsOnlyOnStandard}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22EnsureExpressionDependsOnlyOn%28%5c%5csin%20%28%5c%5cln%20x%29%20x%20y%2c%20x%2c%20y%29%3b%5cnEnsureExpressionDependsOnlyOn%28%5c%5csin%20%28%5c%5cln%20x%29%20x%20y%2c%20x%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 EnsureExpressionDependsOnlyOn(\sin (\ln x) x y, x, y);
@@ -4378,7 +4378,7 @@ x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+ 1, x_{11}x_{24}-x_{10}x_{23}
 ```
 Attempts to heuristically solve a system of polynomial of equations over the rationals. The input system of equations can be arbitrary, however it is assumed that the system is Serre-like, i.e., comes from the Serre relations governing the embedding of a semisimple Lie algebra in a semisimple Lie algebra. This suggests a certain heuristic solution strategy (will be documented as the code matures). To emphasize, the algorithm is heuristic and not guaranteed to work. The result of the function is a printout with one of the possible outcomes.<br>Outcome 1. While processing the polynomial system, the computation limit was hit. The computation was aborted. No information on the system can be given (except that it is large). <br>Outcome 2. The reduced Groebner basis of the system is {1}. Therefore the system is contradictory - no solution exists. <br>Outcome 3. The reduced Groebner basis was found and is not equal to {1}. Therefore a solution over the complex numbers exists. However, no such solution was found. <br>Outcome 4. A solution was found and is presented to the user.
 
-*FindOneSolutionSerreLikePolynomialSystemUpperLimit* [FindOneSolutionSerreLikePolynomialSystemUpperLimit] {CalculatorFunctions::innerSolveSerreLikeSystemUpperLimit}. 
+*FindOneSolutionSerreLikePolynomialSystemUpperLimit* [FindOneSolutionSerreLikePolynomialSystemUpperLimit] {CalculatorFunctions::solveSerreLikeSystemUpperLimit}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FindOneSolutionSerreLikePolynomialSystemUpperLimit%7b%7d%28%5cn100%2c10000%2c%5cnx_%7b12%7dx_%7b24%7d-x_%7b10%7dx_%7b22%7d-2x_%7b8%7dx_%7b20%7d-x_%7b7%7dx_%7b19%7d%2b%201%2c%20x_%7b11%7dx_%7b24%7d-x_%7b10%7dx_%7b23%7d-x_%7b8%7dx_%7b21%7d%2c%20x_%7b9%7dx_%7b24%7d-x_%7b8%7dx_%7b23%7d%2bx_%7b7%7dx_%7b21%7d%2c%20x_%7b6%7dx_%7b24%7d%2b2x_%7b5%7dx_%7b23%7d-x_%7b4%7dx_%7b22%7d%2b2x_%7b3%7dx_%7b21%7d-2x_%7b2%7dx_%7b20%7d-x_%7b1%7dx_%7b19%7d%2c%20x_%7b12%7dx_%7b23%7d-x_%7b11%7dx_%7b22%7d-x_%7b9%7dx_%7b20%7d%2c%20x_%7b11%7dx_%7b23%7d%2bx_%7b10%7dx_%7b22%7d%2bx_%7b8%7dx_%7b20%7d-%201%2c%20x_%7b9%7dx_%7b23%7d%2bx_%7b8%7dx_%7b22%7d-x_%7b7%7dx_%7b20%7d%2c%20x_%7b12%7dx_%7b21%7d-x_%7b11%7dx_%7b20%7d%2bx_%7b9%7dx_%7b19%7d%2c%20x_%7b11%7dx_%7b21%7d%2bx_%7b10%7dx_%7b20%7d-x_%7b8%7dx_%7b19%7d%2c%20x_%7b9%7dx_%7b21%7d%2bx_%7b8%7dx_%7b20%7d%2bx_%7b7%7dx_%7b19%7d-%201%2c%20x_%7b12%7dx_%7b18%7d%2b2x_%7b11%7dx_%7b17%7d-x_%7b10%7dx_%7b16%7d%2b2x_%7b9%7dx_%7b15%7d-2x_%7b8%7dx_%7b14%7d-x_%7b7%7dx_%7b13%7d%2c%20x_%7b6%7dx_%7b18%7d-x_%7b4%7dx_%7b16%7d-2x_%7b2%7dx_%7b14%7d-x_%7b1%7dx_%7b13%7d%2b%201%2c%20x_%7b5%7dx_%7b18%7d%2bx_%7b4%7dx_%7b17%7d%2bx_%7b2%7dx_%7b15%7d%2c%20x_%7b3%7dx_%7b18%7d%2bx_%7b2%7dx_%7b17%7d-x_%7b1%7dx_%7b15%7d%2c%20x_%7b6%7dx_%7b17%7d%2bx_%7b5%7dx_%7b16%7d%2bx_%7b3%7dx_%7b14%7d%2c%20x_%7b5%7dx_%7b17%7d%2bx_%7b4%7dx_%7b16%7d%2bx_%7b2%7dx_%7b14%7d%20-%201%2c%20x_%7b3%7dx_%7b17%7d%2bx_%7b2%7dx_%7b16%7d-x_%7b1%7dx_%7b14%7d%2c%20x_%7b6%7dx_%7b15%7d%2bx_%7b5%7dx_%7b14%7d-x_%7b3%7dx_%7b13%7d%2c%20x_%7b5%7dx_%7b15%7d%2bx_%7b4%7dx_%7b14%7d-x_%7b2%7dx_%7b13%7d%2c%20x_%7b3%7dx_%7b15%7d%2bx_%7b2%7dx_%7b14%7d%2bx_%7b1%7dx_%7b13%7d%20-%201%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 FindOneSolutionSerreLikePolynomialSystemUpperLimit{}(
@@ -4387,14 +4387,14 @@ x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+ 1, x_{11}x_{24}-x_{10}x_{23}
 ```
 Same as FindOneSolutionSerreLikePolynomialSystem but the first argument gives upper limits to the number of polynomial computations that can be carried out, and the second number the number of monomial computations. 
 
-*FindOneSolutionSerreLikePolynomialSystemAlgebraic* [FindOneSolutionSerreLikePolynomialSystemAlgebraic] {CalculatorFunctions::innerSolveSerreLikeSystemAlgebraic}. 
+*FindOneSolutionSerreLikePolynomialSystemAlgebraic* [FindOneSolutionSerreLikePolynomialSystemAlgebraic] {CalculatorFunctions::solveSerreLikeSystemAlgebraic}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FindOneSolutionSerreLikePolynomialSystemAlgebraic%28x%5e2%20%2b%201%2c%20y%20x%20z%20-%201%2c%20z%5e2%20x%20%2b%20y%20-%201%2c%20w%20u%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 FindOneSolutionSerreLikePolynomialSystemAlgebraic(x^2 + 1, y x z - 1, z^2 x + y - 1, w u)
 ```
 Same as FindOneSolutionSerreLikePolynomialSystem but starts directly over algebraic closure. 
 
-*FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit* [FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit] {CalculatorFunctions::innerSolveSerreLikeSystemAlgebraicUpperLimit}. 
+*FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit* [FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit] {CalculatorFunctions::solveSerreLikeSystemAlgebraicUpperLimit}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit%28%5cn10000%2c10000%2c%5cnx%5e2%2b%201%2c%20y%20x%20z%20-%201%2c%20z%5e2%20x%20%2by%20-%201%2c%20w%20u%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit(

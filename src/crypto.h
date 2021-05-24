@@ -13,10 +13,10 @@ public:
   static const unsigned int defaultExponent = 65537;
   std::string algorithm;
   std::string keyid;
-  std::string theModulusString;
+  std::string modulusString;
   std::string theExponentString;
-  LargeIntegerUnsigned theModulus;
-  LargeIntegerUnsigned theExponent;
+  LargeIntegerUnsigned modulus;
+  LargeIntegerUnsigned exponent;
   bool loadFromJSON(
     JSData& input,
     std::stringstream* commentsOnFailure,
@@ -34,7 +34,7 @@ public:
   LargeIntegerUnsigned primeTwo;
   LargeIntegerUnsigned carmichaelTotientOfModulus;
   LargeIntegerUnsigned privateExponent;
-  PublicKeyRSA thePublicKey;
+  PublicKeyRSA publicKey;
   int bitSize; // = ceiling(log_2 (pimeOne * primeTwo))
   int byteSize; // = ceiling (bitSize / 8)
   List<unsigned char> sourceBinary;
@@ -292,15 +292,15 @@ public:
   static void convertUint128toBigendianListUnsignedCharAppendResult(
     uint64_t input, List<unsigned char>& outputAppend
   );
-  static uint32_t leftRotateAsIfBigEndian(uint32_t input, int numBitsToRotate);
-  static uint32_t rightRotateAsIfBigEndian(uint32_t input, int numBitsToRotate);
-  static uint32_t rightShiftAsIfBigEndian(uint32_t input, int numBitsToShift);
-  static uint32_t leftShiftAsIfBigEndian(uint32_t input, int numBitsToShift);
+  static uint32_t leftRotateAsIfBigEndian(uint32_t input, int numberOfBitsToRotate);
+  static uint32_t rightRotateAsIfBigEndian(uint32_t input, int numberOfBitsToRotate);
+  static uint32_t rightShiftAsIfBigEndian(uint32_t input, int numberOfBitsToShift);
+  static uint32_t leftShiftAsIfBigEndian(uint32_t input, int numberOfBitsToShift);
 
-  static uint64_t leftRotateAsIfBigEndian64(uint64_t input, int numBitsToRotate);
-  static uint64_t rightRotateAsIfBigEndian64(uint64_t input, int numBitsToRotate);
-  static uint64_t rightShiftAsIfBigEndian64(uint64_t input, int numBitsToShift);
-  static uint64_t leftShiftAsIfBigEndian64(uint64_t input, int numBitsToShift);
+  static uint64_t leftRotateAsIfBigEndian64(uint64_t input, int numberOfBitsToRotate);
+  static uint64_t rightRotateAsIfBigEndian64(uint64_t input, int numberOfBitsToRotate);
+  static uint64_t rightShiftAsIfBigEndian64(uint64_t input, int numberOfBitsToShift);
+  static uint64_t leftShiftAsIfBigEndian64(uint64_t input, int numberOfBitsToShift);
 
   static void initSha256();
   static void initSha512();

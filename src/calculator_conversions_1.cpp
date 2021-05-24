@@ -54,8 +54,8 @@ bool CalculatorConversions::innerSemisimpleLieAlgebra(
   );
 }
 
-bool CalculatorConversions::innerLoadWeylGroup(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerLoadWeylGroup");
+bool CalculatorConversions::loadWeylGroup(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("Calculator::loadWeylGroup");
   DynkinType dynkinType;
   if (!CalculatorConversions::dynkinType(calculator, input, dynkinType)) {
     return false;
@@ -499,14 +499,14 @@ bool CalculatorConversions::storeCandidateSubalgebra(
   return output.makeSequenceCommands(calculator, keys, values);
 }
 
-bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
+bool CalculatorConversions::candidateSubalgebraPrecomputed(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
   CandidateSemisimpleSubalgebra& outputSubalgebra,
   SemisimpleSubalgebras& owner
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerCandidateSubalgebraPrecomputed");
+  MacroRegisterFunctionWithName("CalculatorConversions::candidateSubalgebraPrecomputed");
   owner.checkInitialization();
   ProgressReport report;
   std::stringstream reportStream;
@@ -522,9 +522,9 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
   reportStream << "Extracted types: " << dynkinTypeE.toString() << ". ";
   report.report(reportStream.str());
   outputSubalgebra.owner = &owner;
-  DynkinType theNonEmbeddedDynkinType;
+  DynkinType nonEmbeddedDynkinType;
   if (!CalculatorConversions::functionDynkinType(
-    calculator, dynkinTypeE, theNonEmbeddedDynkinType
+    calculator, dynkinTypeE, nonEmbeddedDynkinType
   )) {
     return calculator
     << "<hr>Failed to load dynkin type of candidate subalgebra from "
@@ -533,8 +533,8 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
   reportStream << "Non embedded Dynkin type: " << dynkinTypeE.toString() << ". ";
   report.report(reportStream.str());
   outputSubalgebra.weylNonEmbedded = &
-  calculator.objectContainer.getWeylGroupDataCreateIfNotPresent(theNonEmbeddedDynkinType);
-  outputSubalgebra.weylNonEmbedded->makeFromDynkinType(theNonEmbeddedDynkinType);
+  calculator.objectContainer.getWeylGroupDataCreateIfNotPresent(nonEmbeddedDynkinType);
+  outputSubalgebra.weylNonEmbedded->makeFromDynkinType(nonEmbeddedDynkinType);
   int rank = owner.owner->getRank();
   reportStream << "Extracting matrix of Cartan elements. ";
   report.report(reportStream.str());
@@ -545,7 +545,8 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
   }
   if (hElements.numberOfRows != outputSubalgebra.weylNonEmbedded->getDimension()) {
     return calculator << "<hr>Failed to load Cartan elements: I expected "
-    << outputSubalgebra.weylNonEmbedded->getDimension() << " elements, but failed to get them.";
+    << outputSubalgebra.weylNonEmbedded->getDimension()
+    << " elements, but failed to get them.";
   }
   List<int> ranks, multiplicities;
   outputSubalgebra.weylNonEmbedded->dynkinType.getLettersTypesMultiplicities(nullptr, &ranks, &multiplicities, nullptr);
@@ -571,18 +572,18 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
   outputSubalgebra.negativeGenerators.setSize(0);
   if (CalculatorConversions::innerLoadKey(calculator, input, "generators", generatorsE)) {
     generatorsE.sequencefy();
-    ElementSemisimpleLieAlgebra<AlgebraicNumber> curGenAlgebraic;
+    ElementSemisimpleLieAlgebra<AlgebraicNumber> currentGeneratorAlgebraic;
     for (int i = 1; i < generatorsE.size(); i ++) {
       if (!CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(
-        calculator, generatorsE[i], curGenAlgebraic, *owner.owner
+        calculator, generatorsE[i], currentGeneratorAlgebraic, *owner.owner
       )) {
         return calculator << "<hr>Failed to load semisimple Lie algebra element from expression "
         << generatorsE[i].toString() << ". ";
       }
       if (i % 2 == 1) {
-        outputSubalgebra.negativeGenerators.addOnTop(curGenAlgebraic);
+        outputSubalgebra.negativeGenerators.addOnTop(currentGeneratorAlgebraic);
       } else {
-        outputSubalgebra.positiveGenerators.addOnTop(curGenAlgebraic);
+        outputSubalgebra.positiveGenerators.addOnTop(currentGeneratorAlgebraic);
       }
     }
     outputSubalgebra.flagSystemProvedToHaveNoSolution = false;
@@ -590,11 +591,11 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
   } else {
     return calculator << "<hr>Failed to extract subalgebra generators from expression " << input.toString() << ". ";
   }
-  SemisimpleLieAlgebra& currentNonEmbededSA =
+  SemisimpleLieAlgebra& currentNonEmbededSubalgebra =
   owner.subalgebrasNonEmbedded->getValueCreateNoInitialization(outputSubalgebra.weylNonEmbedded->dynkinType);
   outputSubalgebra.indexNonEmbeddedMeStandard =
   owner.subalgebrasNonEmbedded->getIndex(outputSubalgebra.weylNonEmbedded->dynkinType);
-  currentNonEmbededSA.weylGroup.computeRho(true);
+  currentNonEmbededSubalgebra.weylGroup.computeRho(true);
   outputSubalgebra.weylNonEmbedded->computeRho(true); //<- this line may be unnecessary, the
   //two Weyl groups may coincide depending on some implementation decisions I am about to take
   //some time soon.
@@ -679,7 +680,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     << subalgebrasE[i].toString() << ".";
     report.report(reportStream2.str());
     CandidateSemisimpleSubalgebra currentCandidate;
-    if (!CalculatorConversions::innerCandidateSubalgebraPrecomputed(
+    if (!CalculatorConversions::candidateSubalgebraPrecomputed(
       calculator, subalgebrasE[i], tempE, currentCandidate, subalgebras
     )) {
       return calculator

@@ -3,6 +3,7 @@ const InputPanelData = require("./initialize_buttons").InputPanelData;
 const autocomplete = require("./autocomplete");
 const initializeButtons = require("./initialize_buttons");
 const ids = require("./ids_dom_elements");
+const processMonitoring = require("./process_monitoring");
 
 class CalculatorEquationEditor {
   constructor(

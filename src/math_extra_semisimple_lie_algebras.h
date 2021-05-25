@@ -292,6 +292,11 @@ public:
     const Coefficient& coefficient,
     Matrix<Coefficient>& output
   );
+  // Whether the ambient Lie algebra has a Cartan involution that has been implemented.
+  template <typename Coefficient>
+  bool hasImplementedStandardCartanInvolution(
+    LinearMapSemisimpleLieAlgebra<Coefficient>* whichInvolution
+  );
 };
 
 template <class Coefficient>

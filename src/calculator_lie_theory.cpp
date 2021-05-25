@@ -2283,7 +2283,7 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
   Weight<RationalFraction<Rational> > monomial;
   theChar.makeZero();
   FormatExpressions formatChars;
-  formatChars.FDrepLetter = "L";
+  formatChars.finiteDimensionalRepresentationLetter = "L";
   formatChars.fundamentalWeightLetter = "\\omega";
   formatChars.flagUseLatex = true;
   subgroup.ambientWeyl = theKLpolys.weylGroup;
@@ -2474,7 +2474,7 @@ bool CalculatorLieTheory::computeSemisimpleSubalgebras(
   }
   SemisimpleSubalgebras& semisimpleSubalgebras =
   calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(lieAlgebra.weylGroup.dynkinType);
-  semisimpleSubalgebras.flagcomputePairingTable = false;
+  semisimpleSubalgebras.flagComputePairingTable = false;
   semisimpleSubalgebras.flagComputeNilradicals = false;
   semisimpleSubalgebras.findTheSemisimpleSubalgebrasFromScratch(
     lieAlgebra,
@@ -2500,7 +2500,7 @@ bool CalculatorLieTheory::computePairingTablesAndFKFTsubalgebras(
     return calculator << "<hr>Input of ComputeFKFT must be of type semisimple subalgebras. ";
   }
   SemisimpleSubalgebras& subalgebras = input[1].getValueNonConst<SemisimpleSubalgebras>();
-  subalgebras.flagcomputePairingTable = true;
+  subalgebras.flagComputePairingTable = true;
   subalgebras.flagComputeNilradicals = true;
   subalgebras.computePairingTablesAndFKFTtypes();
   output = input;

@@ -707,7 +707,7 @@ void ElementSemisimpleLieAlgebra<Coefficient>::getBasisFromSpanOfElements(
   outputBasis.setSize(theRootForm.size);
   for (int i = 0; i < theRootForm.size; i ++) {
     ElementSemisimpleLieAlgebra& currentElt = outputBasis[i];
-    currentElt.assignVectorNegRootSpacesCartanPosRootSpaces(
+    currentElt.assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(
       theRootForm[i], (*currentElt.ownerArray)[currentElt.indexOfOwnerAlgebra]
     );
   }

@@ -2994,7 +2994,7 @@ FormatExpressions::FormatExpressions() {
   this->chevalleyHgeneratorLetter = "h";
   this->polyDefaultLetter = "x";
   this->weylAlgebraDefaultLetter = "\\partial";
-  this->FDrepLetter = "V";
+  this->finiteDimensionalRepresentationLetter = "V";
   this->simpleRootLetter = "\\eta";
   this->maximumLineLength = 100;
   this->flagPassCustomCoeffMonSeparatorToCoeffs = false;
@@ -3013,7 +3013,6 @@ FormatExpressions::FormatExpressions() {
   this->flagIncludeLieAlgebraTypes = true;
   this->flagUseReflectionNotation = false;
   this->flagIncludeMutableInformation = true;
-  this->flagUseMathSpanPureVsMouseHover = false;
   this->flagDynkinTypeDontUsePlusAndExponent = false;
   this->flagSupressDynkinIndexOne = false;
   this->flagFormatWeightAsVectorSpaceIndex = true;
@@ -3182,7 +3181,7 @@ void OnePartialFraction::writeToFile(std::fstream& output) const {
   for (int j = 0; j < this->denominator.size; j ++) {
     output << this->denominator[j].multiplicities.size << " ";
     for (int i = 0; i < this->denominator[j].multiplicities.size; i ++) {
-      output << this->denominator[j].multiplicities[i] << " " << this->denominator[j].Elongations[i] << " ";
+      output << this->denominator[j].multiplicities[i] << " " << this->denominator[j].elongations[i] << " ";
     }
   }
 }
@@ -3198,9 +3197,9 @@ void OnePartialFraction::readFromFile(PartialFractions& owner, std::fstream& inp
   for (int j = 0; j < this->denominator.size; j ++) {
     input >> tempI;
     this->denominator[j].multiplicities.setSize(tempI);
-    this->denominator[j].Elongations.setSize(tempI);
+    this->denominator[j].elongations.setSize(tempI);
     for (int i = 0; i < this->denominator[j].multiplicities.size; i ++) {
-      input >> this->denominator[j].multiplicities[i] >> this->denominator[j].Elongations[i];
+      input >> this->denominator[j].multiplicities[i] >> this->denominator[j].elongations[i];
     }
   }
   this->computeIndicesNonZeroMultiplicities();
@@ -3742,7 +3741,7 @@ void OnePartialFraction::initialize(int numRoots) {
   this->indicesNonZeroMultiplicities.size = 0;
   this->denominator.setSize(numRoots);
   for (int i = 0; i < this->denominator.size; i ++) {
-    this->denominator[i].Elongations.setSize(0);
+    this->denominator[i].elongations.setSize(0);
     this->denominator[i].multiplicities.setSize(0);
   }
 }
@@ -4639,7 +4638,7 @@ void PartialFractions::computeKostantFunctionFromWeylGroup(
 
 void OnePartialFractionDenominator::operator=(OnePartialFractionDenominator& right) {
   this->multiplicities = right.multiplicities;
-  this->Elongations = right.Elongations;
+  this->elongations = right.elongations;
 }
 
 unsigned int OnePartialFractionDenominator::hashFunction() const {
@@ -4647,28 +4646,28 @@ unsigned int OnePartialFractionDenominator::hashFunction() const {
 }
 
 void OnePartialFractionDenominator::getPolynomialDenominator(
-  Polynomial<LargeInteger>& output, int MultiplicityIndex, Vector<Rational>& theExponent
+  Polynomial<LargeInteger>& output, int multiplicityIndex, Vector<Rational>& exponent
 ) {
-  if (MultiplicityIndex >= this->multiplicities.size) {
+  if (multiplicityIndex >= this->multiplicities.size) {
     global.fatal << "Bad multiplicity. " << global.fatal;
   }
   MonomialPolynomial tempM;
   output.makeOne();
   tempM.makeOne();
-  for (int i = 0; i < theExponent.size; i ++) {
-    tempM.setVariable(i, theExponent[i] * this->Elongations[MultiplicityIndex]);
+  for (int i = 0; i < exponent.size; i ++) {
+    tempM.setVariable(i, exponent[i] * this->elongations[multiplicityIndex]);
   }
   output.addMonomial(tempM, - 1);
 }
 
 int OnePartialFractionDenominator::getLargestElongation() {
-  int result = this->Elongations[0];
-  for (int i = 1; i < this->Elongations.size; i ++) {
-    if (this->Elongations[i] == result) {
+  int result = this->elongations[0];
+  for (int i = 1; i < this->elongations.size; i ++) {
+    if (this->elongations[i] == result) {
       global.fatal << "Elongation does not math the result. " << global.fatal;
     }
-    if (this->Elongations[i] > result) {
-      result = this->Elongations[i];
+    if (this->elongations[i] > result) {
+      result = this->elongations[i];
     }
   }
   return result;
@@ -4676,18 +4675,18 @@ int OnePartialFractionDenominator::getLargestElongation() {
 
 int OnePartialFractionDenominator::getLeastCommonMultipleElongations() {
   int result = 1;
-  for (int i = 0; i < this->Elongations.size; i ++) {
-    if (this->Elongations[i] == 0) {
+  for (int i = 0; i < this->elongations.size; i ++) {
+    if (this->elongations[i] == 0) {
       global.fatal << "Elongation not allowed to be zero. " << global.fatal;
     }
-    result = MathRoutines::leastCommonMultiple(this->Elongations[i], result);
+    result = MathRoutines::leastCommonMultiple(this->elongations[i], result);
   }
   return result;
 }
 
 int OnePartialFractionDenominator::getTotalMultiplicity() const {
   int result = 0;
-  for (int i = 0; i < this->Elongations.size; i ++) {
+  for (int i = 0; i < this->elongations.size; i ++) {
     result += this->multiplicities[i];
   }
   return result;
@@ -4695,8 +4694,8 @@ int OnePartialFractionDenominator::getTotalMultiplicity() const {
 
 int OnePartialFractionDenominator::indexLargestElongation() {
   int result = 0;
-  for (int i = 1; i < this->Elongations.size; i ++) {
-    if (this->Elongations[i] > this->Elongations[result]) {
+  for (int i = 1; i < this->elongations.size; i ++) {
+    if (this->elongations[i] > this->elongations[result]) {
       result = i;
     }
   }
@@ -4704,27 +4703,27 @@ int OnePartialFractionDenominator::indexLargestElongation() {
 }
 
 void OnePartialFractionDenominator::initialize() {
-  this->Elongations.setSize(0);
+  this->elongations.setSize(0);
   this->multiplicities.setSize(0);
 }
 
 void OnePartialFractionDenominator::computeOneCheckSum(
-  Rational& output, const Vector<Rational>& theExp, int dimension
+  Rational& output, const Vector<Rational>& exponent, int dimension
 ) {
   output = 1;
   std::string tempS;
   Vector<Rational> CheckSumRoot = OnePartialFractionDenominator::GetCheckSumRoot(dimension);
-  for (int i = 0; i < this->Elongations.size; i ++) {
+  for (int i = 0; i < this->elongations.size; i ++) {
     Rational tempRat, tempRat2, tempRat3;
     tempRat = 1;
     tempRat2 = 1;
     for (int j = 0; j < dimension; j ++) {
       if (OnePartialFraction::flagAnErrorHasOccurredTimeToPanic) {
-        tempS = theExp.toString();
+        tempS = exponent.toString();
       }
       tempRat3 = CheckSumRoot[j];
       if (!tempRat3.isEqualToZero()) {
-        tempRat3.raiseToPower((theExp[j] * this->Elongations[i]).numeratorShort);
+        tempRat3.raiseToPower((exponent[j] * this->elongations[i]).numeratorShort);
       }
       tempRat2 *= tempRat3;
       if (OnePartialFraction::flagAnErrorHasOccurredTimeToPanic) {
@@ -4753,9 +4752,9 @@ void OnePartialFractionDenominator::computeOneCheckSum(
 int OnePartialFractionDenominator::getMultiplicityLargestElongation() {
   int result = 0;
   int LargestElongationFound = 0;
-  for (int i = 0; i < this->Elongations.size; i ++) {
-    if (LargestElongationFound< this->Elongations[i]) {
-      LargestElongationFound = this->Elongations[i];
+  for (int i = 0; i < this->elongations.size; i ++) {
+    if (LargestElongationFound< this->elongations[i]) {
+      LargestElongationFound = this->elongations[i];
       result = this->multiplicities[i];
     }
   }
@@ -4766,9 +4765,9 @@ void OnePartialFractionDenominator::addMultiplicity(int MultiplicityIncrement, i
   if (MultiplicityIncrement == 0) {
     return;
   }
-  int ElongationIndex = this->Elongations.getIndex(Elongation);
+  int ElongationIndex = this->elongations.getIndex(Elongation);
   if (ElongationIndex == - 1) {
-    this->Elongations.addOnTop(Elongation);
+    this->elongations.addOnTop(Elongation);
     int tempI = 0;
     this->multiplicities.addOnTop(tempI);
     ElongationIndex = this->multiplicities.size - 1;
@@ -4779,48 +4778,48 @@ void OnePartialFractionDenominator::addMultiplicity(int MultiplicityIncrement, i
   }
   if (this->multiplicities[ElongationIndex] == 0) {
     this->multiplicities.popIndexSwapWithLast(ElongationIndex);
-    this->Elongations.popIndexSwapWithLast(ElongationIndex);
+    this->elongations.popIndexSwapWithLast(ElongationIndex);
   }
 }
 
 void OnePartialFractionDenominator::oneFractionToStringBasisChange(
   PartialFractions& owner,
   int indexElongation,
-  Matrix<LargeInteger>& VarChange,
-  bool UsingVarChange,
+  Matrix<LargeInteger>& variableChange,
+  bool usingVariableChange,
   std::string& output,
-  bool LatexFormat,
+  bool latexFormat,
   int indexInFraction,
   int dimension,
-  FormatExpressions& PolyFormatLocal
+  FormatExpressions& polynomialFormatLocal
 ) {
   std::stringstream out;
   Vector<Rational> tempRoot2, tempRoot;
   tempRoot.setSize(dimension);
   tempRoot2.setSize(dimension);
-  int NumCoords;
-  if (UsingVarChange) {
-    NumCoords = VarChange.numberOfRows;
+  int numberOfCoordinates;
+  if (usingVariableChange) {
+    numberOfCoordinates = variableChange.numberOfRows;
     tempRoot2 = owner.startingVectors[indexInFraction];
-    for (int i = 0; i < NumCoords; i ++) {
+    for (int i = 0; i < numberOfCoordinates; i ++) {
       tempRoot[i] = 0;
       for (int j = 0; j < dimension; j ++) {
-        tempRoot[i] += tempRoot2[j] * VarChange.elements[i][j];
+        tempRoot[i] += tempRoot2[j] * variableChange.elements[i][j];
       }
     }
   } else {
-    NumCoords = dimension;
+    numberOfCoordinates = dimension;
     tempRoot = owner.startingVectors[indexInFraction];
   }
-  tempRoot *= this->Elongations[indexElongation];
-  if (!LatexFormat) {
+  tempRoot *= this->elongations[indexElongation];
+  if (!latexFormat) {
     out << "1/(1-";
   } else {
     out << "\\frac{1}{(1-";
   }
-  for (int i = 0; i < NumCoords; i ++) {
+  for (int i = 0; i < numberOfCoordinates; i ++) {
     if (tempRoot[i] != 0) {
-      out << PolyFormatLocal.getPolynomialLetter(i);
+      out << polynomialFormatLocal.getPolynomialLetter(i);
       if (tempRoot[i] != 1) {
         out << "^{" << tempRoot[i].toString() << "}";
       }
@@ -4830,7 +4829,7 @@ void OnePartialFractionDenominator::oneFractionToStringBasisChange(
   if (this->multiplicities[indexElongation] > 1) {
     out << "^" << this->multiplicities[indexElongation];
   }
-  if (LatexFormat) {
+  if (latexFormat) {
     out << "}";
   }
   output = out.str();
@@ -4851,22 +4850,22 @@ std::string OnePartialFractionDenominator::toString() {
 }
 
 bool OnePartialFractionDenominator::operator==(OnePartialFractionDenominator& right) {
-  if (this->Elongations.size != right.Elongations.size) {
+  if (this->elongations.size != right.elongations.size) {
     return false;
   }
-  for (int i = 0; i < this->Elongations.size; i ++) {
-    bool Found = false;
-    for (int j = 0; j < right.Elongations.size; j ++) {
-      if (this->Elongations[i] == right.Elongations[j]) {
+  for (int i = 0; i < this->elongations.size; i ++) {
+    bool found = false;
+    for (int j = 0; j < right.elongations.size; j ++) {
+      if (this->elongations[i] == right.elongations[j]) {
         if (this->multiplicities[i] != right.multiplicities[j]) {
           return false;
         } else {
-          Found = true;
+          found = true;
           break;
         }
       }
     }
-    if (!Found) {
+    if (!found) {
       return false;
     }
   }
@@ -5295,7 +5294,6 @@ void DynkinType::getLettersTypesMultiplicities(
   }
 }
 
-
 std::string DynkinType::getWeylGroupName(FormatExpressions* format) const {
   return this->toString(format);
 }
@@ -5362,16 +5360,16 @@ bool DynkinType::grow(
   }
   // Rational minCoRootLengthSquared = - 1;
   // growth is allowed from the minimal component only
-  DynkinSimpleType minComponent;
+  DynkinSimpleType minimalComponent;
   Rational coefficientMinimalComponent;
   List<int> currentRootInjection;
-  this->getMinimalMonomial(minComponent, coefficientMinimalComponent);
+  this->getMinimalMonomial(minimalComponent, coefficientMinimalComponent);
   if (coefficientMinimalComponent == 1) {
     DynkinType typeMinusMin = (*this);
-    typeMinusMin.subtractMonomial(minComponent, 1);
+    typeMinusMin.subtractMonomial(minimalComponent, 1);
     List<DynkinSimpleType> simpleTypes;
     List<List<int> > lastComponentRootInjections;
-    minComponent.grow(simpleTypes, &lastComponentRootInjections);
+    minimalComponent.grow(simpleTypes, &lastComponentRootInjections);
     currentRootInjection.setSize(this->getRank() + 1);
     for (int i = 0; i < simpleTypes.size; i ++) {
       bool isGood = true;
@@ -5401,7 +5399,7 @@ bool DynkinType::grow(
   DynkinSimpleType currentA1;
   for (int i = 0; i < allowedInverseScales.size; i ++) {
     currentA1.makeArbitrary('A', 1, allowedInverseScales[i]);
-    if (minComponent < currentA1) {
+    if (minimalComponent < currentA1) {
       continue;
     }
     output.addOnTop(*this);
@@ -9572,10 +9570,10 @@ void OnePartialFraction::getRootsFromDenominator(PartialFractions& owner, Vector
   for (int i = 0; i < this->indicesNonZeroMultiplicities.size; i ++) {
     output[i] = owner.startingVectors[this->indicesNonZeroMultiplicities[i]];
     OnePartialFractionDenominator& current = this->denominator[this->indicesNonZeroMultiplicities[i]];
-    if (current.Elongations.size != 1) {
+    if (current.elongations.size != 1) {
       global.fatal << "Elongations expected to have a single element. " << global.fatal;
     }
-    output[i] *= current.Elongations[0];
+    output[i] *= current.elongations[0];
   }
 }
 
@@ -10256,7 +10254,7 @@ bool PartialFractions::removeRedundantShortRootsIndex(int index, Vector<Rational
   for (int k = 0; k < (*this)[index].indicesNonZeroMultiplicities.size; k ++) {
     int currentIndex = (*this)[index].indicesNonZeroMultiplicities[k];
     const OnePartialFractionDenominator& currentFrac = (*this)[index].denominator[currentIndex];
-    if (currentFrac.Elongations.size > 1) {
+    if (currentFrac.elongations.size > 1) {
       found = true;
       break;
     }
@@ -10274,9 +10272,9 @@ bool PartialFractions::removeRedundantShortRootsIndex(int index, Vector<Rational
     OnePartialFractionDenominator& currentFrac = thePF.denominator[currentIndex];
     int LCMElongations = currentFrac.getLeastCommonMultipleElongations();
     tempS = this->startingVectors[currentIndex].toString();
-    while (currentFrac.Elongations.size > 1) {
-      for (int i = 0; i < currentFrac.Elongations.size; i ++) {
-        int ElongationValue = currentFrac.Elongations[i];
+    while (currentFrac.elongations.size > 1) {
+      for (int i = 0; i < currentFrac.elongations.size; i ++) {
+        int ElongationValue = currentFrac.elongations[i];
         if (ElongationValue != LCMElongations) {
           int numSummands = LCMElongations / ElongationValue;
           thePF.getNElongationPolynomial(

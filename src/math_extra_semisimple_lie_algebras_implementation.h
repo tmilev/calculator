@@ -29,7 +29,7 @@ std::string Weight<Coefficient>::toString(FormatExpressions* format) const {
     useOmega = (format->fundamentalWeightLetter == "");
     oldCustomPlus = format->customPlusSign;
     format->customPlusSign = "";
-    VectorSpaceLetter = format->FDrepLetter;
+    VectorSpaceLetter = format->finiteDimensionalRepresentationLetter;
   }
   if (useOmega) {
     out << VectorSpaceLetter << "_{" << this->weightFundamentalCoordinates.toStringLetterFormat("\\omega", format) << "}";
@@ -283,7 +283,7 @@ void SemisimpleLieAlgebra::getCommonCentralizer(
   outputCentralizingElements.setSize(outputV.size);
   for (int i = 0; i < outputV.size; i ++) {
     ElementSemisimpleLieAlgebra<Coefficient>& currentElt = outputCentralizingElements[i];
-    currentElt.assignVectorNegRootSpacesCartanPosRootSpaces(outputV[i], *this);
+    currentElt.assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(outputV[i], *this);
   }
 }
 
@@ -373,7 +373,7 @@ void ElementSemisimpleLieAlgebra<Coefficient>::makeGGenerator(
 }
 
 template <class Coefficient>
-void ElementSemisimpleLieAlgebra<Coefficient>::assignVectorNegRootSpacesCartanPosRootSpaces(
+void ElementSemisimpleLieAlgebra<Coefficient>::assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(
   const Vector<Coefficient>& input, SemisimpleLieAlgebra& owner
 ) {
   //Changing RootSystem order invalidates this function!
@@ -789,5 +789,125 @@ bool SemisimpleLieAlgebra::accumulateChevalleyGeneratorStandardRepresentationInT
   }
   output(rowIndex, columnIndex) += coefficient;
   return true;
+}
+
+template <typename Coefficient>
+bool SemisimpleLieAlgebra::hasImplementedStandardCartanInvolution(
+  LinearMapSemisimpleLieAlgebra<Coefficient>* whichInvolution
+) {
+  char dynkinType = 0;
+  if (!this->weylGroup.dynkinType.isSimple(&dynkinType)) {
+    return false;
+  }
+  if (dynkinType != 'A') {
+    return false;
+  }
+  if (whichInvolution == nullptr) {
+    return true;
+  }
+  whichInvolution->imagesChevalleyGenerators.setSize(
+    this->getNumberOfGenerators()
+  );
+  int numberOfPositiveRoots = this->getNumberOfPositiveRoots();
+  int rank = this->getRank();
+  for (int i = 0; i < numberOfPositiveRoots; i ++) {
+    const Vector<Rational>& root = this->weylGroup.rootsOfBorel[i];
+    ChevalleyGenerator positive;
+    positive.makeGeneratorRootSpace(*this, root);
+    ChevalleyGenerator negative;
+    negative.makeGeneratorRootSpace(*this, - root);
+    whichInvolution->imagesChevalleyGenerators[positive.generatorIndex].makeGGenerator(- root, *this);
+    whichInvolution->imagesChevalleyGenerators[positive.generatorIndex] *= - 1;
+    whichInvolution->imagesChevalleyGenerators[negative.generatorIndex].makeGGenerator(root, *this);
+    whichInvolution->imagesChevalleyGenerators[negative.generatorIndex] *= - 1;
+  }
+  for (int i = 0; i < rank; i ++) {
+    ElementSemisimpleLieAlgebra<Coefficient>& current =
+    whichInvolution->imagesChevalleyGenerators[numberOfPositiveRoots + i];
+    Vector<Rational> root;
+    root.makeEi(rank, i);
+    current.makeCartanGenerator(root, *this);
+  }
+  return true;
+}
+
+template <class Coefficient>
+void LinearMapSemisimpleLieAlgebra<Coefficient>::applyTo(
+  const ElementSemisimpleLieAlgebra<Coefficient>& input,
+  ElementSemisimpleLieAlgebra<Coefficient>& output
+) {
+  MacroRegisterFunctionWithName("LinearMapSemisimpleLieAlgebra::applyTo");
+  if (&input == &output) {
+    ElementSemisimpleLieAlgebra<Coefficient> copy = input;
+    this->applyTo(copy, output);
+    return;
+  }
+  output.makeZero();
+  ElementSemisimpleLieAlgebra<Coefficient> contribution;
+  for (int i = 0; i < input.size(); i ++) {
+    const ChevalleyGenerator& current = input.monomials[i];
+    ElementSemisimpleLieAlgebra<Coefficient> contribution =
+    this->imagesChevalleyGenerators[current.generatorIndex];
+    contribution *= input.coefficients[i];
+    output += contribution;
+  }
+}
+
+template <class Coefficient>
+SemisimpleLieAlgebra& LinearMapSemisimpleLieAlgebra<Coefficient>::owner() {
+  for (int i = 0; i < this->imagesChevalleyGenerators.size; i ++) {
+    ElementSemisimpleLieAlgebra<Coefficient>& current = this->imagesChevalleyGenerators[i];
+    if (current.size() == 0) {
+      continue;
+    }
+    return *current.getOwner();
+  }
+  global.fatal
+  << "owner() function called on zero or empty linear map of semisimple lie algebras."
+  << global.fatal;
+  SemisimpleLieAlgebra* empty = nullptr;
+  return *empty;
+}
+
+template <class Coefficient>
+void LinearMapSemisimpleLieAlgebra<Coefficient>::findEigenSpace(
+  const Coefficient& eigenValue,
+  List<ElementSemisimpleLieAlgebra<Coefficient> >& outputBasis
+) {
+  MacroRegisterFunctionWithName("LinearMapSemisimpleLieAlgebra::findEigenSpace");
+  outputBasis.clear();
+  Matrix<Coefficient> matrix;
+  this->getMatrix(matrix);
+  List<Vector<Coefficient> > eigenSpace;
+  matrix.getEigenspaceModifyMe(eigenValue, eigenSpace);
+  ChevalleyGenerator generator;
+  SemisimpleLieAlgebra& ownerAlgebra = this->owner();
+  for (int i = 0; i < eigenSpace.size; i ++) {
+    ElementSemisimpleLieAlgebra<Coefficient> next;
+    Vector<Coefficient>& current = eigenSpace[i];
+    for (int j = 0; j < current.size; i ++) {
+      generator.makeGenerator(ownerAlgebra, j);
+      next.addMonomial(generator, current[j]);
+    }
+    outputBasis.addOnTop(next);
+  }
+}
+
+template <class Coefficient>
+void LinearMapSemisimpleLieAlgebra<Coefficient>::getMatrix(Matrix<Coefficient>& output) {
+  MacroRegisterFunctionWithName("LinearMapSemisimpleLieAlgebra::getMatrix");
+  if (this->imagesChevalleyGenerators.size == 0) {
+    output.makeZero();
+    return;
+  }
+  output.makeZeroMatrix(this->imagesChevalleyGenerators.size, 0);
+  for (int i = 0; i < this->imagesChevalleyGenerators.size; i ++) {
+    ElementSemisimpleLieAlgebra<Coefficient>& current = this->imagesChevalleyGenerators[i];
+    for (int j = 0; j < current.size(); j ++) {
+      const ChevalleyGenerator& currentMonomial = current.monomials[j];
+      int rowIndex = currentMonomial.generatorIndex;
+      output(rowIndex, i) = current.coefficients[j];
+    }
+  }
 }
 #endif

@@ -637,10 +637,6 @@ public:
     LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >* cartanInvolutionPreservedByEMinusF
   );
   void initializeHEFSystemFromFCoefficientsPartTwo();
-  // Whether the ambient Lie algebra has a Cartan involution that has been implemented.
-  bool hasImplementedStandardCartanInvolution(
-    LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >* whichInvolution
-  );
   void computeModuleDecompositionsitionOfMinimalContainingRegularSAs(SlTwoSubalgebras& owner);
   bool moduleDecompositionFitsInto(const SlTwoSubalgebra& other) const;
   static bool moduleDecompositionLeftFitsIntoRight(

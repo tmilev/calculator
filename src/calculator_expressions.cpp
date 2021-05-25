@@ -2816,7 +2816,6 @@ bool Expression::toStringBuiltIn<SemisimpleSubalgebras>(
   formatLocal.flagUseHTML = true;
   formatLocal.flagCandidateSubalgebraShortReportOnly = false;
   formatLocal.flagIncludeMutableInformation = false;
-  formatLocal.flagUseMathSpanPureVsMouseHover = false;
   out << subalgebras.toString(&formatLocal, false);
   return true;
 }

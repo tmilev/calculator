@@ -2558,45 +2558,6 @@ std::string SlTwoSubalgebra::toStringTriple(FormatExpressions* format) const {
   return HtmlRoutines::getMathNoDisplay(out.str());
 }
 
-bool SlTwoSubalgebra::hasImplementedStandardCartanInvolution(
-  LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >* whichInvolution
-) {
-  char dynkinType = 0;
-  if (!this->owner->weylGroup.dynkinType.isSimple(&dynkinType)) {
-    return false;
-  }
-  if (dynkinType != 'A') {
-    return false;
-  }
-  if (whichInvolution == nullptr) {
-    return true;
-  }
-  whichInvolution->imagesChevalleyGenerators.setSize(
-    this->owner->getNumberOfGenerators()
-  );
-  int numberOfPositiveRoots = this->owner->getNumberOfPositiveRoots();
-  int rank = this->owner->getRank();
-  for (int i = 0; i < numberOfPositiveRoots; i ++) {
-    const Vector<Rational>& root = this->owner->weylGroup.rootsOfBorel[i];
-    ChevalleyGenerator positive;
-    positive.makeGeneratorRootSpace(*this->owner, root);
-    ChevalleyGenerator negative;
-    negative.makeGeneratorRootSpace(*this->owner, - root);
-    whichInvolution->imagesChevalleyGenerators[positive.generatorIndex].makeGGenerator(- root, *this->owner);
-    whichInvolution->imagesChevalleyGenerators[positive.generatorIndex] *= - 1;
-    whichInvolution->imagesChevalleyGenerators[negative.generatorIndex].makeGGenerator(root, *this->owner);
-    whichInvolution->imagesChevalleyGenerators[negative.generatorIndex] *= - 1;
-  }
-  for (int i = 0; i < rank; i ++) {
-    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& current =
-    whichInvolution->imagesChevalleyGenerators[numberOfPositiveRoots + i];
-    Vector<Rational> root;
-    root.makeEi(rank, i);
-    current.makeCartanGenerator(root, *this->owner);
-  }
-  return true;
-}
-
 bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
   Vectors<Rational>& rootsWithCharacteristic2,
   Selection& zeroCharacteristics,
@@ -2645,7 +2606,7 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
   LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > cartanInvolutionStandard;
   LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >* cartanInvolutionToRespect = nullptr;
   if (computeRealForm) {
-    if (this->hasImplementedStandardCartanInvolution(&cartanInvolutionStandard)) {
+    if (this->owner->hasImplementedStandardCartanInvolution(&cartanInvolutionStandard)) {
       cartanInvolutionToRespect = &cartanInvolutionStandard;
     }
   }

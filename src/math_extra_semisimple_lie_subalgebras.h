@@ -198,6 +198,23 @@ public:
   Rational centralizerRank;
   Rational centralizerDimension;
 
+  // The W-conjecture is an ongoing research project b-w D. King, T. Milev, A.Noel.
+  // Details may or may not be written up in a scientific paper pending outcomes.
+  class WConjecture {
+  public:
+    LinearMapSemisimpleLieAlgebra<AlgebraicNumber> cartanInvolutionAmbient;
+    // \mathfrak{p} is the negative one eigenspace of the Cartan involution;
+    // \mathfrak{k} is the plus one eigenspace of the Cartan involution.
+    // The ambient Lie algebra decomposes as \mathfrak{k}\oplus \mathfrak{p}.
+    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisPAmbient;
+    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisKAmbient;
+    CandidateSemisimpleSubalgebra* owner;
+    void compute();
+    std::string toString() const;
+    std::string toStringRealForm() const;
+    std::string toStringElementSemisimpleLieAlgebraOrMatrix(const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& input) const;
+  };
+  WConjecture wConjecture;
   bool flagDeallocated;
   CandidateSemisimpleSubalgebra();
   ~CandidateSemisimpleSubalgebra();
@@ -395,7 +412,7 @@ public:
   List<List<DynkinType> > currentPossibleLargerDynkinTypes;
   List<List<List<int> > > currentRootInjections;
   List<Vectors<Rational> > currentHCandidatesScaledToActByTwo;
-  //end current computation state variables.
+  // end current computation state variables.
 
   // The map keys are used to search for subalgebras quickly.
   MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra> slTwoSubalgebrasRealForm;
@@ -405,7 +422,10 @@ public:
   MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra> subalgebras;
   bool flagRealizedAllCandidates;
   bool flagAttemptToSolveSystems;
-  bool flagcomputePairingTable;
+  // This flag determines whether our computation is over
+  // the real forms of the Lie algebra.
+  bool flagRealForms;
+  bool flagComputePairingTable;
   bool flagComputeModuleDecomposition;
   bool flagComputeNilradicals;
   bool flagProduceLaTeXTables;

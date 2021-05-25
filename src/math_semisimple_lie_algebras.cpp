@@ -1065,7 +1065,7 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
   for (int i = 0; i < this->imagesAllChevalleyGenerators.size; i ++) {
     this->domainAllChevalleyGenerators[i].elementToVectorNegativeRootSpacesFirst(tempRoot);
     tempMat.actOnVectorColumn(tempRoot, imageRoot);
-    this->imagesAllChevalleyGenerators[i].assignVectorNegRootSpacesCartanPosRootSpaces(imageRoot, this->range());
+    this->imagesAllChevalleyGenerators[i].assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(imageRoot, this->range());
   }
   return true;
 }

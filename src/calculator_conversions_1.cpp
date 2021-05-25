@@ -667,7 +667,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   subalgebras.subalgebrasNonEmbedded->setExpectedSize(subalgebrasE.size() - 1);
   subalgebras.flagAttemptToSolveSystems = true;
   subalgebras.flagComputeModuleDecomposition = true;
-  subalgebras.flagcomputePairingTable = false;
+  subalgebras.flagComputePairingTable = false;
   subalgebras.flagComputeNilradicals = false;
   subalgebras.millisecondsComputationStart = global.getElapsedMilliseconds();
   reportStream << " done. <br>Total subalgebras: " << subalgebrasE.size() - 1 << ". ";

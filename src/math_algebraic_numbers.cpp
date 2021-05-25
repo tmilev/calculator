@@ -1123,6 +1123,9 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
   this->basisIndex = this->owner->basisInjections.size - 1;
   this->element.makeEi(0);
   leftMatrix.actOnVectorColumn(this->element);
+  if (doReport) {
+    report.report("Large multiplication done.");
+  }
 }
 
 void AlgebraicNumber::squareRootDefault(std::stringstream* commentsOnError) {

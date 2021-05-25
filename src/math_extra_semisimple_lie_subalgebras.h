@@ -208,11 +208,13 @@ public:
     // The ambient Lie algebra decomposes as \mathfrak{k}\oplus \mathfrak{p}.
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisPAmbient;
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisKAmbient;
-    CandidateSemisimpleSubalgebra* owner;
-    void compute();
-    std::string toString() const;
-    std::string toStringRealForm() const;
-    std::string toStringElementSemisimpleLieAlgebraOrMatrix(const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& input) const;
+    void compute(CandidateSemisimpleSubalgebra& owner);
+    std::string toString(const CandidateSemisimpleSubalgebra& owner) const;
+    std::string toStringRealForm(const CandidateSemisimpleSubalgebra& owner) const;
+    std::string toStringElementSemisimpleLieAlgebraOrMatrix(
+      const CandidateSemisimpleSubalgebra& owner,
+      const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& input
+    ) const;
   };
   WConjecture wConjecture;
   bool flagDeallocated;
@@ -233,7 +235,7 @@ public:
   bool computeCentralizerTypeFailureAllowed();
   bool isDirectSummandOf(const CandidateSemisimpleSubalgebra& other);
   void getGenericCartanCentralizerLinearCombination(
-    int indexCartanCentralizerGen,
+    int indexCartanCentralizerGenerator,
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
   );
   void getGenericPositiveGeneratorLinearCombination(
@@ -242,7 +244,7 @@ public:
   );
   bool isExtremeWeight(int moduleIndex, int indexInIsoComponent) const;
   void getGenericNegativeGeneratorLinearCombination(
-    int indexNegGens,
+    int indexNegativeGenerators,
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
   );
   bool isRegularSubalgebra() const;

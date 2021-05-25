@@ -522,8 +522,8 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
   }
   ///////////////////
   int tempI;
-  int numFoundPivots = 0;
-  int maxRankMat = MathRoutines::minimum(this->numberOfRows, this->numberOfColumns);
+  int numberOfPivots = 0;
+  int maximumMatrixRank = MathRoutines::minimum(this->numberOfRows, this->numberOfColumns);
   Coefficient tempElement;
   if (outputNonPivotColumns != nullptr) {
     outputNonPivotColumns->initialize(this->numberOfColumns);
@@ -544,7 +544,7 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
   }
   // Initialization done! Time to do actual work:
   for (int i = 0; i < this->numberOfColumns; i ++) {
-    if (numFoundPivots == maxRankMat) {
+    if (numberOfPivots == maximumMatrixRank) {
       if (outputNonPivotColumns != nullptr) {
         for (int j = i; j < this->numberOfColumns; j ++) {
           outputNonPivotColumns->addSelectionAppendNewIndex(j);
@@ -552,7 +552,7 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
       }
       break;
     }
-    tempI = this->findPivot(i, numFoundPivots);
+    tempI = this->findPivot(i, numberOfPivots);
     if (tempI == - 1) {
       if (outputNonPivotColumns != nullptr) {
         outputNonPivotColumns->addSelectionAppendNewIndex(i);
@@ -569,8 +569,8 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
         }
         *humanReadableReport << "</td><td style='border-bottom:1pt solid black;'><div style='display:inline-block;min-width:100px'>Selected pivot column "
         << i + 1 << ". ";
-        if (numFoundPivots != tempI) {
-          *humanReadableReport << "Swapping rows so the pivot row is number " << numFoundPivots << ". ";
+        if (numberOfPivots != tempI) {
+          *humanReadableReport << "Swapping rows so the pivot row is number " << numberOfPivots << ". ";
         }
       } else {
         if (formatAsLinearSystem) {
@@ -579,26 +579,27 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
           *humanReadableReport << "\\(" << this->toStringLatex(format) << "\\)";
         }
         *humanReadableReport << "& Selected pivot column " << i + 1 << ". ";
-        if (numFoundPivots != tempI) {
-          *humanReadableReport << "Swapping rows so the pivot row is number " << numFoundPivots << ". ";
+        if (numberOfPivots != tempI) {
+          *humanReadableReport << "Swapping rows so the pivot row is number "
+          << numberOfPivots << ". ";
         }
       }
     }
     if (outputPivotColumns != nullptr) {
       outputPivotColumns->addSelectionAppendNewIndex(i);
     }
-    this->switchRows(numFoundPivots, tempI);
+    this->switchRows(numberOfPivots, tempI);
     if (carbonCopyMatrix != 0) {
-      carbonCopyMatrix->switchRows(numFoundPivots, tempI);
+      carbonCopyMatrix->switchRows(numberOfPivots, tempI);
     }
-    tempElement = this->elements[numFoundPivots][i];
+    tempElement = this->elements[numberOfPivots][i];
     tempElement.invert();
-    this->rowTimesScalar(numFoundPivots, tempElement);
+    this->rowTimesScalar(numberOfPivots, tempElement);
     if (carbonCopyMatrix != 0) {
-      carbonCopyMatrix->rowTimesScalar(numFoundPivots, tempElement);
+      carbonCopyMatrix->rowTimesScalar(numberOfPivots, tempElement);
     }
     for (int j = 0; j < this->numberOfRows; j ++) {
-      if (j != numFoundPivots) {
+      if (j != numberOfPivots) {
         if (!this->elements[j][i].isEqualToZero()) {
           tempElement = this->elements[j][i];
           tempElement.negate();
@@ -607,13 +608,13 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
             reportStream << "Gaussian elimination ("
             << this->numberOfRows << "x" << this->numberOfColumns
             << "): column " << i + 1 << " out of " << this->numberOfColumns
-            << ".\n<br>Pivot row: " << numFoundPivots + 1
+            << ".\n<br>Pivot row: " << numberOfPivots + 1
             << ", eliminating row " << j + 1 << " out of " << this->numberOfRows;
             report.report(reportStream.str());
           }
-          this->addTwoRows(numFoundPivots, j, i, tempElement);
+          this->addTwoRows(numberOfPivots, j, i, tempElement);
           if (carbonCopyMatrix != 0) {
-            carbonCopyMatrix->addTwoRows(numFoundPivots, j, 0, tempElement);
+            carbonCopyMatrix->addTwoRows(numberOfPivots, j, 0, tempElement);
           }
         }
       }
@@ -625,23 +626,27 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
         *humanReadableReport << "Eliminated the non-zero entries in the pivot column. \\\\\\hline\n";
       }
     }
-    numFoundPivots ++;
+    numberOfPivots ++;
   }
   if (humanReadableReport != nullptr) {
     if (useHtmlInReport) {
       if (formatAsLinearSystem) {
-        *humanReadableReport << "<tr><td>" << HtmlRoutines::getMathNoDisplay(this->toStringSystemLatex(carbonCopyMatrix, format), - 1)
+        *humanReadableReport << "<tr><td>"
+        << HtmlRoutines::getMathNoDisplay(this->toStringSystemLatex(carbonCopyMatrix, format), - 1)
         << "</td><td> Final result.</td></tr></table>\n\n\n\n";
       } else {
-        *humanReadableReport << "<tr><td>" << HtmlRoutines::getMathNoDisplay(this->toStringLatex(format))
+        *humanReadableReport << "<tr><td>"
+        << HtmlRoutines::getMathNoDisplay(this->toStringLatex(format))
         << "</td><td> Final result.</td></tr></table>\n\n\n\n";
       }
     } else {
       if (formatAsLinearSystem) {
-        *humanReadableReport << "\\(" << this->toStringSystemLatex(carbonCopyMatrix, format)
+        *humanReadableReport << "\\("
+        << this->toStringSystemLatex(carbonCopyMatrix, format)
         << "\\)& Final result.\\\\\n";
       } else {
-        *humanReadableReport << "\\(" << this->toStringLatex(format) << "\\)& Final result.\\\\\n";
+        *humanReadableReport << "\\("
+        << this->toStringLatex(format) << "\\)& Final result.\\\\\n";
       }
       *humanReadableReport << "\\end{longtable}";
     }

@@ -1531,18 +1531,18 @@ bool Matrix<Coefficient>::invert() {
   if (this->numberOfColumns == 0) {
     global.fatal << "0 by 0 matrix inversion is not allowed. " << global.fatal;
   }
-  Matrix theInverse;
-  theInverse.makeIdentityMatrix(
+  Matrix inverse;
+  inverse.makeIdentityMatrix(
     this->numberOfRows,
     (*this)(0, 0).one(),
     (*this)(0, 0).zero()
   );
   Selection nonPivotColumns;
-  this->gaussianEliminationByRows(&theInverse, &nonPivotColumns, 0);
+  this->gaussianEliminationByRows(&inverse, &nonPivotColumns, 0);
   if (nonPivotColumns.cardinalitySelection != 0) {
     return false;
   }
-  *this = theInverse;
+  *this = inverse;
   return true;
 }
 

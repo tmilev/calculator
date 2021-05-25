@@ -91,7 +91,7 @@ class Monitor {
       if (status === "noReport") {
         progressReportContent += "No report on last ping. ";
       } else if (status === "unpaused") {
-        progressReportContent += "Recently unpaused.";
+        progressReportContent += "Recently unpaused. ";
       } else {
         doUpdateCalculatorPage = true;
       }

@@ -705,6 +705,7 @@ bool SemisimpleLieAlgebra::getElementStandardRepresentation(
   const ElementSemisimpleLieAlgebra<Coefficient>& element,
   Matrix<Coefficient>& output
 ) {
+  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::getElementStandardRepresentation");
   char dynkinType = 0;
   if (!this->weylGroup.dynkinType.isSimple(&dynkinType, nullptr)) {
     return false;
@@ -863,7 +864,8 @@ SemisimpleLieAlgebra& LinearMapSemisimpleLieAlgebra<Coefficient>::owner() {
     return *current.getOwner();
   }
   global.fatal
-  << "owner() function called on zero or empty linear map of semisimple lie algebras."
+  << "owner() function called on zero or empty "
+  << "linear map of semisimple lie algebras. "
   << global.fatal;
   SemisimpleLieAlgebra* empty = nullptr;
   return *empty;
@@ -885,7 +887,7 @@ void LinearMapSemisimpleLieAlgebra<Coefficient>::findEigenSpace(
   for (int i = 0; i < eigenSpace.size; i ++) {
     ElementSemisimpleLieAlgebra<Coefficient> next;
     Vector<Coefficient>& current = eigenSpace[i];
-    for (int j = 0; j < current.size; i ++) {
+    for (int j = 0; j < current.size; j ++) {
       generator.makeGenerator(ownerAlgebra, j);
       next.addMonomial(generator, current[j]);
     }

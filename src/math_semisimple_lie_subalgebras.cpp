@@ -3245,12 +3245,6 @@ void CandidateSemisimpleSubalgebra::WConjecture::compute(
   slTwoWrapper.addOnTop(ownerSl2.hAlgebraic);
   slTwoWrapper.addOnTop(ownerSl2.eKostantSekiguchi);
   slTwoWrapper.addOnTop(ownerSl2.fKostantSekiguchi);
-  owner.owner->owner->getCommonCentralizer(slTwoWrapper, this->basisCentralizerOfSl2);
-  ElementSemisimpleLieAlgebra<AlgebraicNumber>::intersectVectorSpaces(
-    this->basisCentralizerOfSl2,
-    owner.owner->wConjecture.basisPAmbient,
-    this->basisCentralizerOfSl2InP
-  );
 }
 
 void CandidateSemisimpleSubalgebra::computePrimalModuleDecomposition() {

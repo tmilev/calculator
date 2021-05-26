@@ -198,23 +198,14 @@ public:
   Rational centralizerRank;
   Rational centralizerDimension;
 
-  // The W-conjecture is an ongoing research project b-w D. King, T. Milev, A.Noel.
-  // Details may or may not be written up in a scientific paper pending outcomes.
   class WConjecture {
   public:
-    LinearMapSemisimpleLieAlgebra<AlgebraicNumber> cartanInvolutionAmbient;
-    // \mathfrak{p} is the negative one eigenspace of the Cartan involution;
-    // \mathfrak{k} is the plus one eigenspace of the Cartan involution.
-    // The ambient Lie algebra decomposes as \mathfrak{k}\oplus \mathfrak{p}.
-    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisPAmbient;
-    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisKAmbient;
-    void compute(CandidateSemisimpleSubalgebra& owner);
+    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisCentralizerOfHInP;
+    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisCentralizerOfH;
+    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisCentralizerOfSl2;
+    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisOrthogonalComplementOfCentralizerOfSl2;
+    void compute(CandidateSemisimpleSubalgebra& owner, SlTwoSubalgebra& ownerSl2);
     std::string toString(const CandidateSemisimpleSubalgebra& owner) const;
-    std::string toStringRealForm(const CandidateSemisimpleSubalgebra& owner) const;
-    std::string toStringElementSemisimpleLieAlgebraOrMatrix(
-      const CandidateSemisimpleSubalgebra& owner,
-      const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& input
-    ) const;
   };
   WConjecture wConjecture;
   bool flagDeallocated;
@@ -242,7 +233,7 @@ public:
     int indexPositiveGenerators,
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
   );
-  bool isExtremeWeight(int moduleIndex, int indexInIsoComponent) const;
+  bool isExtremeWeight(int moduleIndex, int indexInIsomorphismComponent) const;
   void getGenericNegativeGeneratorLinearCombination(
     int indexNegativeGenerators,
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
@@ -292,7 +283,7 @@ public:
     std::stringstream* logStream = nullptr
   );
   void extendToModule(List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& inputOutput);
-  Vector<Rational> getPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input) const;
+  Vector<Rational> getPrimalWeightFirstGenerator(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input) const;
   Vector<Rational> getNonPrimalWeightFirstGenerator(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input) const;
   void computeKsl2Triples();
   void computeKsl2TriplesGetOppositeElementsInOppositeModule(
@@ -315,7 +306,7 @@ public:
   void computeSinglePair(int leftIndex, int rightIndex, List<int>& output);
   int getNumberOfModules() const;
   void computePairKWeightElementAndModule(
-    const ElementSemisimpleLieAlgebra<AlgebraicNumber>& leftKweightElt,
+    const ElementSemisimpleLieAlgebra<AlgebraicNumber>& leftKWeightElement,
     int rightIndex,
     List<int>& output
   );
@@ -336,7 +327,7 @@ public:
   void computePrimalModuleDecomposition();
   void computePrimalModuleDecompositionHighestWeightsAndHighestWeightVectors();
   void computePrimalModuleDecompositionHighestWeightVectors(HashedList<Vector<Rational> >& inputHighestWeights);
-  void computePrimalModuleDecompositionHighestWeights(HashedList<Vector<Rational> >& outputHWsCoords);
+  void computePrimalModuleDecompositionHighestWeights(HashedList<Vector<Rational> >& outputHighestWeightsCoordinates);
   void computePrimalModuleDecompositionHighestWeightsLastPart();
   void getPrimalWeightProjectionFundamentalCoordinates(
     const Vector<Rational>& inputAmbientWeight,
@@ -441,20 +432,38 @@ public:
   std::string displayNameMainFile1WithPath;
 
   std::string virtualNameMainFile1;
+  class WConjecture {
+  public:
+    // The W-conjecture is an ongoing research project b-w D. King, T. Milev, A.Noel.
+    // Details may or may not be written up in a scientific paper pending outcomes.
+    LinearMapSemisimpleLieAlgebra<AlgebraicNumber> cartanInvolutionAmbient;
+    // \mathfrak{p} is the negative one eigenspace of the Cartan involution;
+    // \mathfrak{k} is the plus one eigenspace of the Cartan involution.
+    // The ambient Lie algebra decomposes as \mathfrak{k}\oplus \mathfrak{p}.
+    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisPAmbient;
+    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisKAmbient;
+    std::string toStringRealForm(const SemisimpleSubalgebras& owner) const;
+    std::string toStringElementSemisimpleLieAlgebraOrMatrix(
+      const SemisimpleSubalgebras& owner,
+      const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& input
+    ) const;
+    void compute(SemisimpleSubalgebras& owner);
+  };
+  WConjecture wConjecture;
 
   // Possible values:
   // 1. nulltpr.
   // 2. CalculatorConversions::innerStringFromSemisimpleSubalgebras.
   std::string (*toStringExpressionString)(SemisimpleSubalgebras& input);
   bool loadState(
-    List<int>& currentChainInt,
+    List<int>& currentChainIntegers,
     List<int>& numberOfExploredTypes,
     List<int>& numberOfExploredHs,
     std::stringstream& reportStream
   );
   int getDisplayIndexFromActual(int actualindexSubalgebra) const;
   std::string toStringSubalgebraNumberWithAmbientLink(
-    int actualindexSubalgebra, FormatExpressions* format
+    int actualIndexSubalgebra, FormatExpressions* format
   ) const;
   void computeFolderNames(FormatExpressions& outputFormat);
   void checkFileWritePermissions();
@@ -464,7 +473,7 @@ public:
     FormatExpressions* format,
     bool writeToHardDisk
   ) const;
-  std::string getRelativePhysicalFileNameSubalgebra(int actualindexSubalgebra) const;
+  std::string getRelativePhysicalFileNameSubalgebra(int actualIndexSubalgebra) const;
   std::string getDisplayFileNameSubalgebraRelative(
     int actualindexSubalgebra, FormatExpressions* format
   ) const;
@@ -560,7 +569,6 @@ public:
     const List<int>& imagesOldSimpleRootsAndNewRoot,
     CandidateSemisimpleSubalgebra& subalgebraToBeModified
   );
-  //void RegisterPossibleCandidate(CandidateSemisimpleSubalgebra& theCandidate);
   void hookUpCentralizers(bool allowNonPolynomialSystemFailure);
   void computeSl2sInitOrbitsForComputationOnDemand(bool computeRealSlTwos);
   bool findTheSemisimpleSubalgebrasFromScratch(

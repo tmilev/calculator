@@ -211,7 +211,12 @@ public:
   void computeChevalleyConstants();
   template<class Coefficient>
   Coefficient getKillingForm(
-    const ElementSemisimpleLieAlgebra<Coefficient>& left, const ElementSemisimpleLieAlgebra<Coefficient>& right
+    const ElementSemisimpleLieAlgebra<Coefficient>& left,
+    const ElementSemisimpleLieAlgebra<Coefficient>& right
+  );
+  template<class Coefficient>
+  void getKillingFormBilinearFormMatrix(
+    Matrix<Coefficient>& output
   );
   template <class Coefficient>
   Coefficient getKillingFormProductWRTLevi(
@@ -225,8 +230,8 @@ public:
     const ElementSemisimpleLieAlgebra<Coefficient>& g2,
     ElementSemisimpleLieAlgebra<Coefficient>& output
   );
-  //Setup: \gamma +\delta =\epsilon +\zeta =\eta is a Vector<Rational> .
-  //then the below function computes n_{-\epsilon, -\zeta}
+  // Setup: \gamma +\delta =\epsilon +\zeta =\eta is a Vector<Rational> .
+  // then the below function computes n_{-\epsilon, -\zeta}
   void computeOneChevalleyConstant(int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta);
   void exploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ);
   void exploitSymmetryChevalleyConstants(int indexI, int indexJ);
@@ -263,11 +268,11 @@ public:
   void getAdjoint(MatrixTensor<Coefficient>& output, ElementSemisimpleLieAlgebra<Coefficient>& e);
   void makeChevalleyTestReport(int i, int j, int k, int Total);
   bool isInTheWeightSupport(Vector<Rational>& weight, Vector<Rational>& highestWeight);
-  void createEmbeddingFromFDModuleHaving1dimWeightSpaces(Vector<Rational>& theHighestWeight);
+  void createEmbeddingFromFDModuleHaving1dimWeightSpaces(Vector<Rational>& highestWeight);
   int getLengthStringAlongAlphaThroughBeta(
     Vector<Rational>& alpha, Vector<Rational>& beta, int& distanceToHighestWeight, Vectors<Rational>& weightSupport
   );
-  void computeOneAutomorphism(Matrix<Rational>& outputAuto,  bool useNegativeRootsFirst);
+  void computeOneAutomorphism(Matrix<Rational>& outputAutomorphism,  bool useNegativeRootsFirst);
   bool operator==(const SemisimpleLieAlgebra& other) const {
     return this->weylGroup == other.weylGroup;
   }

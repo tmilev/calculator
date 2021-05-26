@@ -1438,13 +1438,13 @@ void Matrix<Element>::resize(int r, int c, bool preserveValues, const Element* c
 
 template <typename Coefficient>
 void Vectors<Coefficient>::getMatrixRootsToRows(Matrix<Rational>& output) const {
-  int tempNumCols = 0;
+  int numberOfColumns = 0;
   if (this->size != 0) {
-    tempNumCols = static_cast<int>(this->objects[0].size);
+    numberOfColumns = static_cast<int>(this->objects[0].size);
   }
-  output.initialize(static_cast<int>(this->size), tempNumCols);
+  output.initialize(static_cast<int>(this->size), numberOfColumns);
   for (int i = 0; i < this->size; i ++) {
-    for (int j = 0; j < tempNumCols; j ++) {
+    for (int j = 0; j < numberOfColumns; j ++) {
       output.elements[i][j] = this->objects[i][j];
     }
   }
@@ -1457,8 +1457,10 @@ void Vectors<Coefficient>::getOrthogonalComplement(Vectors<Coefficient>& output,
       output.makeEiBasis(bilinearForm->numberOfRows);
       return;
     }
-    global.fatal << "Finding orthogonal complement of zero vectors without specifying a bilinear form is "
-    << " forbidden: I can't determine the dimension of the ambient vector space. " << global.fatal;
+    global.fatal << "Finding orthogonal complement of zero "
+    << "vectors without specifying a bilinear form is "
+    << " forbidden: I can't determine the dimension "
+    << "of the ambient vector space. " << global.fatal;
   }
   Matrix<Coefficient> matrix;
   matrix.assignVectorsToRows(*this);
@@ -4064,17 +4066,6 @@ public:
       return nullptr;
     }
     return (*this)[0].owner;
-  }
-  bool getCoordinatesInBasis(
-    const List<ElementSemisimpleLieAlgebra<Coefficient> >& basis,
-    Vector<RationalFraction<Rational> >& output
-  ) const {
-    Vector<Rational> tempVect;
-    if (!this->getCoordinatesInBasis(basis, tempVect)) {
-      return false;
-    }
-    output.setSize(tempVect.size);
-    return true;
   }
   static void getBasisFromSpanOfElements(
     List<ElementSemisimpleLieAlgebra>& elements,
@@ -6996,6 +6987,7 @@ template <class Coefficient>
 bool ElementSemisimpleLieAlgebra<Coefficient>::getCoordinatesInBasis(
   const List<ElementSemisimpleLieAlgebra>& basis, Vector<Coefficient>& output
 ) const {
+  MacroRegisterFunctionWithName("ElementSemisimpleLieAlgebra::getCoordinatesInBasis");
   if (basis.size == 0) {
     return false;
   }
@@ -7003,15 +6995,14 @@ bool ElementSemisimpleLieAlgebra<Coefficient>::getCoordinatesInBasis(
     output.makeZero(basis.size);
     return true;
   }
-  MacroRegisterFunctionWithName("ElementSemisimpleLieAlgebra::getCoordinatesInBasis");
-  Vectors<Coefficient> basisVector;
+  Vectors<Coefficient> basisVectors;
   Vector<Coefficient> element;
-  basisVector.setSize(basis.size);
+  basisVectors.setSize(basis.size);
   for (int i = 0 ; i < basis.size; i ++) {
-    basis[i].elementToVectorNegativeRootSpacesFirst(basisVector[i]);
+    basis[i].elementToVectorNegativeRootSpacesFirst(basisVectors[i]);
   }
   this->elementToVectorNegativeRootSpacesFirst(element);
-  return element.getCoordinatesInBasis(basisVector, output);
+  return element.getCoordinatesInBasis(basisVectors, output);
 }
 
 template <class Coefficient>

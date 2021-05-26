@@ -273,13 +273,13 @@ void SemisimpleLieAlgebra::getCommonCentralizer(
   List<ElementSemisimpleLieAlgebra<Coefficient> >& outputCentralizingElements
 ) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::getCommonCentralizer");
-  Matrix<Coefficient> tempAd, commonAd;
+  Matrix<Coefficient> currentAdjointOperator, commonAdjointOperator;
   for (int i = 0; i < inputElementsToCentralize.size; i ++) {
-    this->getAdjoint(tempAd, inputElementsToCentralize[i]);
-    commonAd.appendMatrixToTheBottom(tempAd);
+    this->getAdjoint(currentAdjointOperator, inputElementsToCentralize[i]);
+    commonAdjointOperator.appendMatrixToTheBottom(currentAdjointOperator);
   }
   Vectors<Coefficient> outputV;
-  commonAd.getZeroEigenSpace(outputV);
+  commonAdjointOperator.getZeroEigenSpace(outputV);
   outputCentralizingElements.setSize(outputV.size);
   for (int i = 0; i < outputV.size; i ++) {
     ElementSemisimpleLieAlgebra<Coefficient>& currentElt = outputCentralizingElements[i];
@@ -595,12 +595,12 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
       }
     }
   }
-  FormatExpressions theFormat;
-  theFormat.flagUseLatex = true;
-  theFormat.customPlusSign = "\\oplus ";
-  theFormat.fundamentalWeightLetter = "\\omega";
+  FormatExpressions format;
+  format.flagUseLatex = true;
+  format.customPlusSign = "\\oplus ";
+  format.fundamentalWeightLetter = "\\omega";
   out << "<br>Character w.r.t Levi part of the parabolic of the larger algebra: "
-  << HtmlRoutines::getMathNoDisplay(remainingCharDominantLevI.toString(&theFormat));
+  << HtmlRoutines::getMathNoDisplay(remainingCharDominantLevI.toString(&format));
   remainingCharProjected.makeZero();
   Vector<Coefficient> fundCoordsSmaller, inSimpleCoords;
   fundCoordsSmaller.setSize(weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension());
@@ -651,9 +651,9 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
       remainingCharProjected.subtractMonomial(tempMon, bufferCoeff);
     }
   }
-  theFormat.fundamentalWeightLetter = "\\psi";
+  format.fundamentalWeightLetter = "\\psi";
   out << "<br>Character w.r.t the Levi part of the parabolic of the small algebra: "
-  << HtmlRoutines::getMathNoDisplay(output.toString(&theFormat));
+  << HtmlRoutines::getMathNoDisplay(output.toString(&format));
   if (report != nullptr) {
     DrawingVariables drawingVariables1;
     std::string tempS;
@@ -678,6 +678,12 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
     *report = out.str();
   }
   return true;
+}
+
+template <class Coefficient>
+void SemisimpleLieAlgebra::getKillingFormBilinearFormMatrix(
+  Matrix<Coefficient>& output
+) {
 }
 
 template <class Coefficient>
@@ -828,6 +834,7 @@ bool SemisimpleLieAlgebra::hasImplementedStandardCartanInvolution(
     Vector<Rational> root;
     root.makeEi(rank, i);
     current.makeCartanGenerator(root, *this);
+    current *= - 1;
   }
   return true;
 }

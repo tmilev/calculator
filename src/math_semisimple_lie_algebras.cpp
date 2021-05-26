@@ -808,7 +808,9 @@ void SemisimpleLieAlgebra::makeChevalleyTestReport(int i, int j, int k, int Tota
   report.report(out2.str() + out3.str());
 }
 
-void SemisimpleLieAlgebra::computeOneAutomorphism(Matrix<Rational>& outputAuto, bool useNegativeRootsFirst) {
+void SemisimpleLieAlgebra::computeOneAutomorphism(
+  Matrix<Rational>& outputAutomorphism, bool useNegativeRootsFirst
+) {
   global.fatal << "Not implemented yet!!!!!" << global.fatal;
   RootSubalgebra theRootSA;
 //  theRootSA.initialize(*this);
@@ -894,7 +896,7 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(Matrix<Rational>& outputAuto, 
       Domain[i].elementToVectorNegativeRootSpacesFirst(vectorsLeft[i]);
     }
   }
-  outputAuto.makeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight);
+  outputAutomorphism.makeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight);
 }
 
 bool SemisimpleLieAlgebra::isInTheWeightSupport(
@@ -908,8 +910,8 @@ bool SemisimpleLieAlgebra::isInTheWeightSupport(
   return true;
 }
 
-void SemisimpleLieAlgebra::createEmbeddingFromFDModuleHaving1dimWeightSpaces(Vector<Rational>& theHighestWeight) {
-  (void) theHighestWeight;
+void SemisimpleLieAlgebra::createEmbeddingFromFDModuleHaving1dimWeightSpaces(Vector<Rational>& highestWeight) {
+  (void) highestWeight;
   /*Vectors<Rational> weightSupport;
   this->GenerateWeightSupport(theHighestWeight, weightSupport);
   int highestWeight, distanceToHW;

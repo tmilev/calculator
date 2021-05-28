@@ -578,10 +578,10 @@ bool ElementUniversalEnveloping<Coefficient>::applyMinusTransposeAutoOnMe() {
   result.makeZero(*this->owner);
   int numPosRoots = this->getOwner().getNumberOfPositiveRoots();
   int theRank = this->getOwner().getRank();
-  Coefficient theCoeff;
+  Coefficient coefficient;
   for (int i = 0; i < this->size; i ++) {
     MonomialUniversalEnveloping<Coefficient>& currentMon = this->objects[i];
-    theCoeff = this->coefficients[i];
+    coefficient = this->coefficients[i];
     tempMon.owner = currentMon.owner;
     tempMon.powers.size = 0;
     tempMon.generatorsIndices.size = 0;
@@ -598,10 +598,10 @@ bool ElementUniversalEnveloping<Coefficient>::applyMinusTransposeAutoOnMe() {
       }
       tempMon.multiplyByGeneratorPowerOnTheRight(theGenerator, currentMon.powers[j]);
       if (power % 2 == 1) {
-        theCoeff *= - 1;
+        coefficient *= - 1;
       }
     }
-    result.addMonomial(tempMon, theCoeff);
+    result.addMonomial(tempMon, coefficient);
   }
   *this = result;
   return true;
@@ -717,11 +717,11 @@ template <class Coefficient>
 bool ElementUniversalEnveloping<Coefficient>::convertToRationalCoefficient(ElementUniversalEnveloping<Rational>& output) {
   output.makeZero(*this->owner);
   MonomialUniversalEnveloping<Rational> tempMon;
-  Rational theCoeff;
+  Rational coefficient;
   for (int i = 0; i < this->size; i ++) {
     MonomialUniversalEnveloping<Coefficient>& currentMon = this->objects[i];
     tempMon.makeOne(*this->owner);
-    if (!this->coefficients[i].isConstant(theCoeff)) {
+    if (!this->coefficients[i].isConstant(coefficient)) {
       return false;
     }
     for (int j = 0; j < currentMon.powers.size; j ++) {

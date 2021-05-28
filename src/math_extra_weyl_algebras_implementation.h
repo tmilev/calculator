@@ -338,7 +338,7 @@ void ElementWeylAlgebra<Coefficient>::fourierTransform(ElementWeylAlgebra<Coeffi
     return;
   }
   LargeInteger totalDeg;
-  Coefficient theCoeff;
+  Coefficient coefficient;
   output.makeZero();
   MonomialWeylAlgebra monomial;
   for (int i = 0; i < this->size(); i ++) {
@@ -349,11 +349,11 @@ void ElementWeylAlgebra<Coefficient>::fourierTransform(ElementWeylAlgebra<Coeffi
     }
     monomial.differentialPart = currentMon.polynomialPart;
     monomial.polynomialPart = currentMon.differentialPart;
-    theCoeff = this->coefficients[i];
+    coefficient = this->coefficients[i];
     if (totalDeg.isEven()) {
-      theCoeff *= - 1;
+      coefficient *= - 1;
     }
-    output.addMonomial(monomial, theCoeff);
+    output.addMonomial(monomial, coefficient);
   }
 }
 

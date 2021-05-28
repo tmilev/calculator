@@ -283,11 +283,11 @@ public:
     this->owners = other.owners;
     this->indexInOwners = other.indexInOwners;
     MonomialUniversalEnveloping<Coefficient> tempMon;
-    Coefficient theCoeff;
+    Coefficient coefficient;
     for (int i = 0; i < other.size; i ++) {
       tempMon = other[i];
-      theCoeff = other.coefficients[i];
-      this->addMonomial(tempMon, theCoeff);
+      coefficient = other.coefficients[i];
+      this->addMonomial(tempMon, coefficient);
     }
   }
   void operator=(const Rational& other) {

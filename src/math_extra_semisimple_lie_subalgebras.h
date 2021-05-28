@@ -203,7 +203,9 @@ public:
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisCentralizerOfHInP;
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisCentralizerOfH;
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisCentralizerOfSl2;
-    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisOrthogonalComplementOfCentralizerOfSl2;
+    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisCentralizerOfSl2InP;
+    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisOrthogonalComplementOfCentralizerOfSl2InP;
+    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisOrthogonalComplementOfCentralizerOfSl2InPIntersectedWithCentralizerOfHInP;
     void compute(CandidateSemisimpleSubalgebra& owner, SlTwoSubalgebra& ownerSl2);
     std::string toString(const CandidateSemisimpleSubalgebra& owner) const;
   };
@@ -443,7 +445,7 @@ public:
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisPAmbient;
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisKAmbient;
     Matrix<Rational> killingForm;
-    Matrix<Rational> killingFormRescaled;
+    Matrix<AlgebraicNumber> killingFormRescaled;
     std::string toStringRealForm(const SemisimpleSubalgebras& owner) const;
     std::string toStringElementSemisimpleLieAlgebraOrMatrix(
       const SemisimpleSubalgebras& owner,

@@ -2436,13 +2436,13 @@ void VirtualRepresentation<somegroup, Coefficient>::operator*=(const VirtualRepr
   WeylGroupRepresentation<Rational> tempRep;
   for (int i = 0; i < this->coefficientsIrreps.size; i ++)
     for (int j = 0; j<other.coefficientsIrreps.size; j ++) {
-      Rational theCoeff= this->coefficientsIrreps[i]*other.coefficientsIrreps[j];
-      if (theCoeff== 0)
+      Rational coefficient= this->coefficientsIrreps[i]*other.coefficientsIrreps[j];
+      if (coefficient== 0)
         continue;
       tempRep = this->ownerGroup->irreps[i];
       tempRep*= this->ownerGroup->irreps[j];
       tempRep.decomposeTodorsVersion(currentContribution, 0);
-      output.coefficientsIrreps+= currentContribution*theCoeff;
+      output.coefficientsIrreps+= currentContribution*coefficient;
     }
   *this = output;*/
 }

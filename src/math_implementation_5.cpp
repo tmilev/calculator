@@ -696,7 +696,7 @@ void ElementSemisimpleLieAlgebra<Coefficient>::getBasisFromSpanOfElements(
   theRootForm.setSize(elements.size);
   for (int i = 0; i < elements.size; i ++) {
     ElementSemisimpleLieAlgebra& currentElt = elements[i];
-    currentElt.elementToVectorNegativeRootSpacesFirst(theRootForm[i]);
+    currentElt.toVectorNegativeRootSpacesFirst(theRootForm[i]);
   }
 //  int theRank = 0; int numRoots = 0;
 //  if (theElements.size > 0)
@@ -864,11 +864,11 @@ void SlTwoInSlN::extractHighestWeightVectorsFromVector(
   Matrix<Rational> remainder;
   remainder = input;
   Matrix<Rational> component, highestWeightVector, tempMat;
-  Rational theCoeff, tempRat;
+  Rational coefficient, tempRat;
   int largestPowerNotKillingInput;
   while (!remainder.isEqualToZero() ) {
     this->climbUpFromVector(remainder, highestWeightVector, largestPowerNotKillingInput);
-    this->climbDownFromHighestWeightAlongSl2String(highestWeightVector, component, theCoeff, largestPowerNotKillingInput);
+    this->climbDownFromHighestWeightAlongSl2String(highestWeightVector, component, coefficient, largestPowerNotKillingInput);
     for (int i = 0; i < this->projectors.size; i ++) {
       Matrix<Rational>& currentProjector = this->projectors[i];
       tempMat = highestWeightVector;
@@ -880,7 +880,7 @@ void SlTwoInSlN::extractHighestWeightVectorsFromVector(
       }
     }
     global.fatal << "Extract highest vector not fully implemented yet. " << global.fatal;
-    component /= theCoeff;
+    component /= coefficient;
     outputDecompositionOfInput.addOnTop(component);
     remainder -= component;
   }

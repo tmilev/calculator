@@ -4191,12 +4191,12 @@ void OnePartialFraction::getPolyReduceMonomialByMonomial(
   MonomialPolynomial tempMon;
   tempMon.makeOne();
   output.makeZero();
-  LargeInteger theCoeff = 1;
+  LargeInteger coefficient = 1;
   if (StartMonomialPower > 0) {
     if (DenPowerReduction != startDenominatorPower) {
-      theCoeff = MathRoutines::nChooseK(StartMonomialPower, DenPowerReduction);
-      theCoeff *= MathRoutines::parity(DenPowerReduction);
-      output.addMonomial(tempMon, theCoeff);
+      coefficient = MathRoutines::nChooseK(StartMonomialPower, DenPowerReduction);
+      coefficient *= MathRoutines::parity(DenPowerReduction);
+      output.addMonomial(tempMon, coefficient);
     } else {
       if (StartMonomialPower < startDenominatorPower) {
         global.fatal << "Start monomial power: " << StartMonomialPower << " smaller than start denominator power: "
@@ -4205,23 +4205,23 @@ void OnePartialFraction::getPolyReduceMonomialByMonomial(
       for (int k = 0; k <= StartMonomialPower - startDenominatorPower; k++) {
         tempMon = theExponent;
         tempMon.raiseToPower(k);
-        theCoeff = MathRoutines::parity(startDenominatorPower) * MathRoutines::nChooseK(
+        coefficient = MathRoutines::parity(startDenominatorPower) * MathRoutines::nChooseK(
           StartMonomialPower - 1 - k, startDenominatorPower - 1
         );
-        output.addMonomial(tempMon, theCoeff);
+        output.addMonomial(tempMon, coefficient);
       }
     }
   }
   if (StartMonomialPower < 0) {
     if (DenPowerReduction != startDenominatorPower) {
-      theCoeff = MathRoutines::nChooseK(- StartMonomialPower - 1 + DenPowerReduction, DenPowerReduction);
-      output.addMonomial(tempMon, theCoeff);
+      coefficient = MathRoutines::nChooseK(- StartMonomialPower - 1 + DenPowerReduction, DenPowerReduction);
+      output.addMonomial(tempMon, coefficient);
     } else {
       for (int k = 1; k <= - StartMonomialPower; k ++) {
         tempMon = theExponent;
         tempMon.raiseToPower(- k);
-        theCoeff = MathRoutines::nChooseK(startDenominatorPower - StartMonomialPower - 1 - k, startDenominatorPower - 1);
-        output.addMonomial(tempMon, theCoeff);
+        coefficient = MathRoutines::nChooseK(startDenominatorPower - StartMonomialPower - 1 - k, startDenominatorPower - 1);
+        output.addMonomial(tempMon, coefficient);
       }
     }
   }
@@ -9594,7 +9594,7 @@ void OnePartialFraction::computePolynomialCorrespondingToOneMonomial(
 
 
 void OnePartialFraction::getVectorPartitionFunction(
-  PartialFractions& owner, Polynomial<LargeInteger>& theCoeff, QuasiPolynomial& output
+  PartialFractions& owner, Polynomial<LargeInteger>& coefficient, QuasiPolynomial& output
 ) const {
   QuasiPolynomial shiftedPoly;
   Vectors<Rational> theNormals, theLatticeGenerators;
@@ -9609,9 +9609,9 @@ void OnePartialFraction::getVectorPartitionFunction(
   theNormalsMatForm.invert();
   theNormals.assignMatrixColumns(theNormalsMatForm);
   output.makeZeroLatticeZn(owner.ambientDimension);
-  for (int i = 0; i < theCoeff.size(); i ++) {
-    this->computePolynomialCorrespondingToOneMonomial(shiftedPoly, theCoeff[i], theNormals, theLattice);
-    shiftedPoly *= theCoeff.coefficients[i];
+  for (int i = 0; i < coefficient.size(); i ++) {
+    this->computePolynomialCorrespondingToOneMonomial(shiftedPoly, coefficient[i], theNormals, theLattice);
+    shiftedPoly *= coefficient.coefficients[i];
     output += shiftedPoly;
   }
 }

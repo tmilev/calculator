@@ -193,7 +193,7 @@ public:
   // powers gives the powers of the generators in the order specified in the owner
   List<int> generatorsIndices;
   List<Coefficient> powers;
-  Coefficient theCoefficient;
+  Coefficient coefficient;
   static bool flagAnErrorHasOccurredTimeToPanic;
   void multiplyBy(
     const MonomialUniversalEnveloping<Coefficient>& other,
@@ -469,7 +469,7 @@ public:
       currentMon.Coefficient.clearDenominators(currentCoeff);
       for (int j = 0; j < this->size; j ++) {
         if (j != i) {
-          this->objects[j].theCoefficient *= currentCoeff;
+          this->objects[j].coefficient *= currentCoeff;
         }
       }
       outputWasMultipliedBy *= currentCoeff;

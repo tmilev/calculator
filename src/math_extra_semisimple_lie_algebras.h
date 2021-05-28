@@ -97,11 +97,11 @@ public:
   ) {
     output.makeZero();
     ChevalleyGenerator theGen;
-    Polynomial<Coefficient> theCf;
+    Polynomial<Coefficient> coefficient;
     for (int i = 0; i < this->getNumberOfPositiveRoots(); i ++) {
       theGen.makeGenerator(*this, i);
-      theCf.makeMonomial(indexFirstVar + i, 1, 1);
-      output.addMonomial(theGen, theCf);
+      coefficient.makeMonomial(indexFirstVar + i, 1, 1);
+      output.addMonomial(theGen, coefficient);
     }
   }
   int getOppositeGeneratorIndex(int index) {

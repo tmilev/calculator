@@ -3162,8 +3162,10 @@ void SemisimpleSubalgebras::WConjecture::compute(SemisimpleSubalgebras& owner) {
   ProgressReport report;
   report.report("Computing Killing form.");
   owner.owner->getKillingFormMatrix(this->killingForm);
-  this->killingFormRescaled = this->killingForm;
-  this->killingFormRescaled.scaleToIntegralForMinimalRationalHeightNoSignChange();
+  Matrix<Rational> killingFormRescaledRational;
+  killingFormRescaledRational= this->killingForm;
+  killingFormRescaledRational.scaleToIntegralForMinimalRationalHeightNoSignChange();
+  this->killingFormRescaled = killingFormRescaledRational;
   report.report("Computing k, p");
   this->cartanInvolutionAmbient.findEigenSpace(1, this->basisKAmbient);
   this->cartanInvolutionAmbient.findEigenSpace(- 1, this->basisPAmbient);
@@ -3238,8 +3240,22 @@ std::string CandidateSemisimpleSubalgebra::WConjecture::toString(
   out << owner.owner->wConjecture.toStringElementSemisimpleLieAlgebraOrMatrix(*owner.owner, this->basisCentralizerOfSl2);
   out << "</div></div>";
   out << "Centalizer of sl(2) in p: <br>";
-  // out << "<div class='lieAlgebraPanel'>";
-  // out << "<div>";
+  out << "<div class='lieAlgebraPanel'>";
+  out << "<div>";
+  out << owner.owner->wConjecture.toStringElementSemisimpleLieAlgebraOrMatrix(*owner.owner, this->basisCentralizerOfSl2InP);
+  out << "</div></div>";
+  out << "Orthogonal complement of centalizer of sl(2) in p: <br>";
+  out << "<div class='lieAlgebraPanel'>";
+  out << "<div>";
+  out << owner.owner->wConjecture.toStringElementSemisimpleLieAlgebraOrMatrix(*owner.owner, this->basisCentralizerOfSl2InP);
+  out << "</div></div>";
+  out << "centralizer of H intersected with orthogonal complement of centralizer of the sl(2) intersected with p. <br>";
+  out << "<div class='lieAlgebraPanel'>";
+  out << "<div>";
+  out << owner.owner->wConjecture.toStringElementSemisimpleLieAlgebraOrMatrix(
+    *owner.owner, this->basisOrthogonalComplementOfCentralizerOfSl2InPIntersectedWithCentralizerOfHInP
+  );
+  out << "</div></div>";
   return out.str();
 }
 
@@ -3259,6 +3275,30 @@ void CandidateSemisimpleSubalgebra::WConjecture::compute(
   slTwoWrapper.addOnTop(ownerSl2.hAlgebraic);
   slTwoWrapper.addOnTop(ownerSl2.eKostantSekiguchi);
   slTwoWrapper.addOnTop(ownerSl2.fKostantSekiguchi);
+  owner.owner->owner->getCommonCentralizer(slTwoWrapper, this->basisCentralizerOfSl2);
+  ElementSemisimpleLieAlgebra<AlgebraicNumber>::intersectVectorSpaces(
+    this->basisCentralizerOfSl2,
+    owner.owner->wConjecture.basisPAmbient,
+    this->basisCentralizerOfSl2InP
+  );
+  Vectors<AlgebraicNumber> centralizerOfSl2InP;
+  centralizerOfSl2InP.setSize(this->basisCentralizerOfSl2InP.size);
+  for (int i = 0; i < this->basisCentralizerOfSl2InP.size; i ++) {
+    this->basisCentralizerOfSl2InP[i].toVectorNegativeRootSpacesFirst(centralizerOfSl2InP[i]);
+  }
+  Vectors<AlgebraicNumber> orthogonalComplement;
+  centralizerOfSl2InP.getOrthogonalComplement(orthogonalComplement, &owner.owner->wConjecture.killingFormRescaled);
+  this->basisOrthogonalComplementOfCentralizerOfSl2InP.setSize(orthogonalComplement.size);
+  for (int i = 0; i < orthogonalComplement.size; i ++) {
+    this->basisOrthogonalComplementOfCentralizerOfSl2InP[i].assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(
+      orthogonalComplement[i], *owner.owner->owner
+    );
+  }
+  ElementSemisimpleLieAlgebra<AlgebraicNumber>::intersectVectorSpaces(
+    this->basisOrthogonalComplementOfCentralizerOfSl2InP,
+    this->basisCentralizerOfHInP,
+    this->basisOrthogonalComplementOfCentralizerOfSl2InPIntersectedWithCentralizerOfHInP
+  );
 }
 
 void CandidateSemisimpleSubalgebra::computePrimalModuleDecomposition() {
@@ -7720,7 +7760,7 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
   highestWeightsNonSorted.setSize(this->highestVectorsNonSorted.size);
   for (int i = 0; i < this->highestVectorsNonSorted.size; i ++) {
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& currentElement = this->highestVectorsNonSorted[i];
-    currentElement.elementToVectorNegativeRootSpacesFirst(highestWeightsNonSorted[i]);
+    currentElement.toVectorNegativeRootSpacesFirst(highestWeightsNonSorted[i]);
   }
   ElementSemisimpleLieAlgebra<AlgebraicNumber> element;
   Vector<Rational> tempV;
@@ -7728,7 +7768,7 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
   for (int i = 0; i < this->getAmbientSemisimpleLieAlgebra().getRank(); i ++) {
     tempV.makeEi(this->getAmbientSemisimpleLieAlgebra().getRank(), i);
     element.makeCartanGenerator(tempV, this->getAmbientSemisimpleLieAlgebra());
-    element.elementToVectorNegativeRootSpacesFirst(cartanGenerators[i]);
+    element.toVectorNegativeRootSpacesFirst(cartanGenerators[i]);
   }
   Vectors<AlgebraicNumber> outputCartanCentralizer;
   Vector<AlgebraicNumber> centralizerH;

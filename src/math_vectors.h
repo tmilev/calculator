@@ -226,7 +226,7 @@ public:
   static void vectorPlusVectorTimesScalar(
     const Vector<Coefficient>& r1,
     const Vector<Coefficient>& r2,
-    const Coefficient& theCoeff,
+    const Coefficient& coefficient,
     Vector<Coefficient>& output
   ) {
     Coefficient tempRat;
@@ -236,7 +236,7 @@ public:
     output = r1;
     for (int i = 0; i < r1.size; i ++) {
       tempRat = r2[i];
-      tempRat *= theCoeff;
+      tempRat *= coefficient;
       output.objects[i] += (tempRat);
     }
   }
@@ -371,24 +371,24 @@ public:
   inline void shiftToTheLeftOnePosition() {
     this->shiftToTheLeft(1);
   }
-  void shiftToTheLeft(int numPositions) {
-    if (numPositions > this->size) {
+  void shiftToTheLeft(int numberOfPositions) {
+    if (numberOfPositions > this->size) {
       global.fatal << "Bad vector shift. " << global.fatal;
     }
-    for (int i = 0; i < this->size - numPositions; i ++) {
-      this->objects[i] = this->objects[i + numPositions];
+    for (int i = 0; i < this->size - numberOfPositions; i ++) {
+      this->objects[i] = this->objects[i + numberOfPositions];
     }
-    this->size -= numPositions;
+    this->size -= numberOfPositions;
   }
-  void shiftToTheRightInsertZeroes(int numPositions, const Coefficient& ringZero) {
-    if (numPositions < 0) {
+  void shiftToTheRightInsertZeroes(int numberOfPositions, const Coefficient& ringZero) {
+    if (numberOfPositions < 0) {
       global.fatal << "Bad vector shift, cannot fill with zeroes. " << global.fatal;
     }
-    this->setSize(this->size + numPositions);
-    for (int i = this->size - 1; i >= numPositions; i --) {
-      this->objects[i] = this->objects[i - numPositions];
+    this->setSize(this->size + numberOfPositions);
+    for (int i = this->size - 1; i >= numberOfPositions; i --) {
+      this->objects[i] = this->objects[i - numberOfPositions];
     }
-    for (int i = 0; i < numPositions; i ++) {
+    for (int i = 0; i < numberOfPositions; i ++) {
       this->objects[i] = ringZero;
     }
   }
@@ -789,7 +789,7 @@ class Vectors: public List<Vector<Coefficient> > {
   void selectionToMatrix(Selection& selection, int outputDimension, Matrix<Coefficient>& output, int startRowIndex);
   void getGramMatrix(Matrix<Coefficient>& output, const Matrix<Rational>* bilinearForm = nullptr) const;
   void getMatrixRootsToRows(Matrix<Rational>& output) const;
-  void getOrthogonalComplement(Vectors<Coefficient>& output, Matrix<Rational>* bilinearForm = nullptr);
+  void getOrthogonalComplement(Vectors<Coefficient>& output, Matrix<Coefficient>* bilinearForm = nullptr);
   bool linearSpanContainsVector(
     const Vector<Coefficient>& input, Matrix<Coefficient>& bufferMatrix, Selection& bufferSelection
   ) const;

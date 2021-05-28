@@ -1000,11 +1000,11 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolynomialBySmallInteger(
     if (base.size() == 1) {
       Polynomial<Rational> outputPoly;
       MonomialPolynomial monomial = base[0];
-      Rational theCF = base.coefficients[0];
-      theCF.raiseToPower(power);
+      Rational coefficient = base.coefficients[0];
+      coefficient.raiseToPower(power);
       monomial.raiseToPower(power);
       outputPoly.makeZero();
-      outputPoly.addMonomial(monomial, theCF);
+      outputPoly.addMonomial(monomial, coefficient);
       return output.assignValueWithContext(outputPoly, input[1].getContext(), calculator);
     }
     base.raiseToPower(- power, 1);
@@ -2322,7 +2322,7 @@ bool CalculatorFunctionsBinaryOps::lieBracketExtractConstant(
   if (!input.startsWith(calculator.opLieBracket(), 3)) {
     return false;
   }
-  Rational theCF = 1;
+  Rational coefficient = 1;
   Rational tempRat;
   Expression leftE = input[1];
   Expression rightE = input[2];
@@ -2330,14 +2330,14 @@ bool CalculatorFunctionsBinaryOps::lieBracketExtractConstant(
   if (input[1].startsWith(calculator.opTimes(), 3)) {
     if (input[1][1].isOfType(&tempRat)) {
       found = true;
-      theCF *= tempRat;
+      coefficient *= tempRat;
       leftE = input[1][2];
     }
   }
   if (input[2].startsWith(calculator.opTimes(), 3)) {
     if (input[2][1].isOfType(&tempRat)) {
       found = true;
-      theCF *= tempRat;
+      coefficient *= tempRat;
       rightE = input[2][2];
     }
   }
@@ -2346,7 +2346,7 @@ bool CalculatorFunctionsBinaryOps::lieBracketExtractConstant(
   }
   Expression theBracket;
   theBracket.makeXOX(calculator, calculator.opLieBracket(), leftE, rightE);
-  output.assignValue(theCF, calculator);
+  output.assignValue(coefficient, calculator);
   output *= theBracket;
   return true;
 }

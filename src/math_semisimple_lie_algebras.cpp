@@ -887,13 +887,13 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(
   vectorsRight.setSize(Range.size);
   if (!useNegativeRootsFirst) {
     for (int i = 0; i < Range.size; i ++) {
-      Range[i].elementToVectorNegativeRootSpacesFirst(vectorsRight[i]);
-      Domain[i].elementToVectorNegativeRootSpacesFirst(vectorsLeft[i]);
+      Range[i].toVectorNegativeRootSpacesFirst(vectorsRight[i]);
+      Domain[i].toVectorNegativeRootSpacesFirst(vectorsLeft[i]);
     }
   } else {
     for (int i = 0; i < Range.size; i ++) {
-      Range[i].elementToVectorNegativeRootSpacesFirst(vectorsRight[i]);
-      Domain[i].elementToVectorNegativeRootSpacesFirst(vectorsLeft[i]);
+      Range[i].toVectorNegativeRootSpacesFirst(vectorsRight[i]);
+      Domain[i].toVectorNegativeRootSpacesFirst(vectorsLeft[i]);
     }
   }
   outputAutomorphism.makeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight);
@@ -1053,8 +1053,8 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
   vectorsLeft.setSize(tempDomain.size);
   vectorsRight.setSize(tempDomain.size);
   for (int i = 0; i < tempRange.size; i ++) {
-    tempDomain[i].elementToVectorNegativeRootSpacesFirst(vectorsLeft[i]);
-    tempRange[i].elementToVectorNegativeRootSpacesFirst(vectorsRight[i]);
+    tempDomain[i].toVectorNegativeRootSpacesFirst(vectorsLeft[i]);
+    tempRange[i].toVectorNegativeRootSpacesFirst(vectorsRight[i]);
   }
   Matrix<Rational> tempMat;
   tempMat.makeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight);
@@ -1065,7 +1065,7 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
     this->domainAllChevalleyGenerators[i].makeGenerator(i, this->domain());
   }
   for (int i = 0; i < this->imagesAllChevalleyGenerators.size; i ++) {
-    this->domainAllChevalleyGenerators[i].elementToVectorNegativeRootSpacesFirst(tempRoot);
+    this->domainAllChevalleyGenerators[i].toVectorNegativeRootSpacesFirst(tempRoot);
     tempMat.actOnVectorColumn(tempRoot, imageRoot);
     this->imagesAllChevalleyGenerators[i].assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(imageRoot, this->range());
   }
@@ -1253,12 +1253,12 @@ bool HomomorphismSemisimpleLieAlgebra::checkClosednessLieBracket() {
   Vector<Rational> tempRoot;
   tempRoots.setSize(this->imagesAllChevalleyGenerators.size);
   for (int i = 0; i < tempRoots.size; i ++) {
-    this->imagesAllChevalleyGenerators[i].elementToVectorNegativeRootSpacesFirst(tempRoots[i]);
+    this->imagesAllChevalleyGenerators[i].toVectorNegativeRootSpacesFirst(tempRoots[i]);
   }
   for (int i = 0; i < this->imagesAllChevalleyGenerators.size; i ++) {
     for (int j = 0; j < this->imagesAllChevalleyGenerators.size; j ++) {
       this->range().lieBracket(this->imagesAllChevalleyGenerators[i], this->imagesAllChevalleyGenerators[j], element);
-      element.elementToVectorNegativeRootSpacesFirst(tempRoot);
+      element.toVectorNegativeRootSpacesFirst(tempRoot);
       if (!tempRoots.linearSpanContainsVector(tempRoot)) {
         return false;
       }

@@ -3907,15 +3907,15 @@ bool Expression::toStringDifferential3(
     needsParen = false;
   }
   bool rightNeedsParen = (!input[1].isAtom()) && (!input[1].isBuiltInType());
-  std::string theCoeff = input[2].toString(format);
-  if (theCoeff == "1") {
+  std::string coefficient = input[2].toString(format);
+  if (coefficient == "1") {
     needsParen = false;
-    theCoeff = "";
+    coefficient = "";
   }
   if (needsParen) {
     out << "\\left(";
   }
-  out << theCoeff;
+  out << coefficient;
   if (needsParen) {
     out << "\\right)";
   }

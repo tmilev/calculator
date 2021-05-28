@@ -3897,7 +3897,7 @@ bool CalculatorFunctions::innerCoefficientsPowersOf(
     return calculator << "<hr>Failed to evaluate Calculator::collectCoefficientsPowersVariables";
   }
   int highestPowerPlus1 = coefficients.getLargestParticipatingBasisIndex() + 1;
-  List<Expression> theCFsIncludingZeros;
+  List<Expression> coefficientExpressionsIncludingZeros;
   Expression currentCF;
   for (int i = 0; i < highestPowerPlus1; i ++) {
     int index = coefficients.monomials.getIndex(MonomialVector(i));
@@ -3906,9 +3906,9 @@ bool CalculatorFunctions::innerCoefficientsPowersOf(
     } else {
       currentCF = coefficients.coefficients[index];
     }
-    theCFsIncludingZeros.addOnTop(currentCF);
+    coefficientExpressionsIncludingZeros.addOnTop(currentCF);
   }
-  return output.makeSequence(calculator, &theCFsIncludingZeros);
+  return output.makeSequence(calculator, &coefficientExpressionsIncludingZeros);
 }
 
 bool CalculatorFunctions::innerConstTermRelative(Calculator& calculator, const Expression& input, Expression& output) {
@@ -4352,8 +4352,8 @@ bool CalculatorFunctionsIntegration::integratePullImaginaryUnit(
   if (theVariableE == iE) {
     return false;
   }
-  Expression theCF, theNoCFintegrand, theNoImIntegrand, outputIntegralNoCF;
-  functionExpression.getCoefficientMultiplicandForm(theCF, theNoCFintegrand);
+  Expression coefficientExpression, theNoCFintegrand, theNoImIntegrand, outputIntegralNoCF;
+  functionExpression.getCoefficientMultiplicandForm(coefficientExpression, theNoCFintegrand);
 
   if (theNoCFintegrand == iE) {
     theNoImIntegrand.assignValue(1, calculator);
@@ -4365,9 +4365,9 @@ bool CalculatorFunctionsIntegration::integratePullImaginaryUnit(
   } else {
     return false;
   }
-  theCF *= iE;
+  coefficientExpression *= iE;
   outputIntegralNoCF.makeIntegral(calculator, integrationSetE,theNoImIntegrand,theVariableE);
-  output = theCF * outputIntegralNoCF;
+  output = coefficientExpression * outputIntegralNoCF;
   return true;
 }
 

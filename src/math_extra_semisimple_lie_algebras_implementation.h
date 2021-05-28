@@ -354,7 +354,7 @@ Vector<Coefficient> ElementSemisimpleLieAlgebra<Coefficient>::getCartanPart() co
 }
 
 template <class Coefficient>
-void ElementSemisimpleLieAlgebra<Coefficient>::elementToVectorNegativeRootSpacesFirst(Vector<Coefficient>& output) const {
+void ElementSemisimpleLieAlgebra<Coefficient>::toVectorNegativeRootSpacesFirst(Vector<Coefficient>& output) const {
   if (this->isEqualToZero()) {
     output.makeZero(0);
     return;
@@ -505,7 +505,7 @@ std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::multiplyBy(const C
   CharacterSemisimpleLieAlgebraModule result, summand;
   result.makeZero();
   std::string potentialError;
-  Coefficient theCF;
+  Coefficient coefficient;
   for (int i = 0; i < this->size(); i ++) {
     for (int j = 0; j < other.size(); j ++) {
       const Weight<Rational>& left = (*this)[i];
@@ -514,9 +514,9 @@ std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::multiplyBy(const C
       if (potentialError != "") {
         return potentialError;
       }
-      theCF = this->coefficients[i];
-      theCF *= other.coefficients[j];
-      summand *= theCF;
+      coefficient = this->coefficients[i];
+      coefficient *= other.coefficients[j];
+      summand *= coefficient;
       result += summand;
     }
   }

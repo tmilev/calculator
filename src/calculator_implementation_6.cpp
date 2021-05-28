@@ -686,11 +686,11 @@ bool CalculatorFunctions::innerGetSummand(
   theExpression.getMultiplicandsRecursive(multiplicands);
   Expression theSum = *multiplicands.lastObject();
   multiplicands.removeLastObject();
-  Expression theCoeff;
+  Expression coeffExpression;
   if (multiplicands.size > 0) {
-    theCoeff.makeProduct(calculator, multiplicands);
+    coeffExpression.makeProduct(calculator, multiplicands);
   } else {
-    theCoeff.assignValue(1, calculator);
+    coeffExpression.assignValue(1, calculator);
   }
   if (!theSum.startsWith(calculator.opSum(), 3)) {
     return false;
@@ -712,7 +712,7 @@ bool CalculatorFunctions::innerGetSummand(
   Expression theCommandSequence(calculator);
   theCommandSequence.addChildAtomOnTop(calculator.opCommandSequence());
   theCommandSequence.addChildOnTop(substitution);
-  theCommandSequence.addChildOnTop(theCoeff * theSum[2]);
+  theCommandSequence.addChildOnTop(coeffExpression * theSum[2]);
   return output.makeXOX(calculator, calculator.opUnderscore(), theCommandSequence, calculator.expressionTwo());
 }
 

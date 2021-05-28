@@ -1251,10 +1251,10 @@ bool CalculatorLieTheory::writeGeneralizedVermaModuleAsDifferentialOperatorUpToL
   RFZero.makeZero();
   Selection selInducing;
   selInducing.makeFullSelection(theRank);
-  int theCoeff;
+  int coefficient;
   for (int i = 0; i < theRank; i ++) {
-    if (highestWeightFundCoords[i].isSmallInteger(&theCoeff)) {
-      if (theCoeff == 0) {
+    if (highestWeightFundCoords[i].isSmallInteger(&coefficient)) {
+      if (coefficient == 0) {
         selInducing.removeSelection(i);
       }
     }
@@ -1415,16 +1415,16 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   Expression hwvFD, hwvGenVerma;
   selParSel1.makeFullSelection(theRank);
   selFD.initialize(theRank);
-  int theCoeff;
+  int coefficient;
   for (int i = 0; i < theRank; i ++) {
-    if (highestWeightFundCoords[i].isSmallInteger(&theCoeff)) {
-      if (theCoeff >= 0) {
+    if (highestWeightFundCoords[i].isSmallInteger(&coefficient)) {
+      if (coefficient >= 0) {
         selParSel1.removeSelection(i);
       }
     }
     bool isGood = false;
-    if (theFDhw[i].isSmallInteger(&theCoeff)) {
-      if (theCoeff >= 0) {
+    if (theFDhw[i].isSmallInteger(&coefficient)) {
+      if (coefficient >= 0) {
         isGood = true;
       }
     }

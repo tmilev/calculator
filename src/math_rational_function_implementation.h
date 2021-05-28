@@ -325,7 +325,7 @@ void RationalFraction<Coefficient>::greatestCommonDivisor(
 
 template<class Coefficient>
 void RationalFraction<Coefficient>::makeOneLetterMonomial(
-  int index, const Coefficient& theCoeff, int ExpectedNumVars
+  int index, const Coefficient& coefficient, int ExpectedNumVars
 ) {
   if (index < 0) {
     global.fatal << "I am asked to create "
@@ -334,7 +334,7 @@ void RationalFraction<Coefficient>::makeOneLetterMonomial(
   }
   this->expressionType = this->typePolynomial;
   ExpectedNumVars = MathRoutines::maximum(index + 1, ExpectedNumVars);
-  this->numerator.getElement().makeDegreeOne(ExpectedNumVars, index, theCoeff);
+  this->numerator.getElement().makeDegreeOne(ExpectedNumVars, index, coefficient);
 }
 
 template<class Coefficient>

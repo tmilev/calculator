@@ -995,7 +995,7 @@ public:
   void makeIdentity(
     const Matrix<Coefficient>& prototype,
     const Coefficient& ringZero = 0,
-    const Coefficient& theRingOne = 1
+    const Coefficient& ringOne = 1
   );
   // If m1 corresponds to a linear operator from V1 to V2 and
   // m2 to a linear operator from W1 to W2, then the result of the below function
@@ -1003,17 +1003,18 @@ public:
   // this means you write the matrix m1 in the upper left corner m2 in the lower right
   // and everything else you fill with zeros
   void assignDirectSum(Matrix<Coefficient>& m1, Matrix<Coefficient>& m2);
-  // if S and T are endomorphisms of V and W, build the matrix of SⓧT that acts on
-  // VⓧW with basis (v1ⓧw1,v1ⓧw2,...,v2ⓧw1,v2ⓧw2,...vnⓧwn)
+  // if S and T are endomorphisms of V and W, build the matrix of S \otimes T that acts on
+  // V \otimes W with basis
+  // (v1 \otimes w1, v1 \otimes w2, ..., v2 \otimes w1, v2 \otimes w2, ..., vn \otimes wn)
   void assignTensorProduct(const Matrix<Coefficient>& left, const Matrix<Coefficient>& right);
   void assignVectorsToRows(const List<Vector<Coefficient> >& input) {
-    int numCols = - 1;
+    int desiredNumberOfColumns = 0;
     if (input.size > 0) {
-      numCols = input[0].size;
+      desiredNumberOfColumns = input[0].size;
     }
-    this->initialize(input.size, numCols);
+    this->initialize(input.size, desiredNumberOfColumns);
     for (int i = 0; i < input.size; i ++) {
-      for (int j = 0; j < numCols; j ++) {
+      for (int j = 0; j < this->numberOfColumns; j ++) {
         this->elements[i][j] = input[i][j];
       }
     }
@@ -1045,12 +1046,15 @@ public:
       this->elements[rowIndex][i] = input[i];
     }
   }
-  void assignVectorToColumnKeepOtherColsIntactNoInit(int colIndex, const Vector<Coefficient>& input) {
-    if (input.size != this->numberOfRows || colIndex >= this->numberOfColumns || colIndex < 0) {
-      global.fatal << "In assignVectorToColumnKeepOtherColsIntactNoInit: bad vector/matrix dimensions. "  << global.fatal;
+  void assignVectorToColumnKeepOtherColsIntactNoInit(int columnIndex, const Vector<Coefficient>& input) {
+    if (input.size != this->numberOfRows || columnIndex >= this->numberOfColumns || columnIndex < 0) {
+      global.fatal
+      << "In assignVectorToColumnKeepOtherColsIntactNoInit: "
+      << "bad vector/matrix dimensions. "
+      << global.fatal;
     }
     for (int i = 0; i < this->numberOfRows; i ++) {
-      this->elements[i][colIndex] = input[i];
+      this->elements[i][columnIndex] = input[i];
     }
   }
   void assignBlock(Matrix<Coefficient>& block, int starti, int startj) {
@@ -1380,7 +1384,7 @@ void Matrix<Element>::resize(int r, int c, bool preserveValues, const Element* c
   int newActualNumCols = MathRoutines::maximum(this->actualNumberOfColumns, c);
   int newActualNumRows = MathRoutines::maximum(this->actualNumberOfRows, r);
   if (r > this->actualNumberOfRows || c > this->actualNumberOfColumns) {
-    newElements  = new Element * [newActualNumRows];
+    newElements  = new Element* [newActualNumRows];
 #ifdef AllocationLimitsSafeguard
   GlobalStatistics::globalPointerCounter += newActualNumRows;
   GlobalStatistics::checkPointerCounters();
@@ -1439,7 +1443,10 @@ void Vectors<Coefficient>::getMatrixRootsToRows(Matrix<Rational>& output) const 
 }
 
 template <typename Coefficient>
-void Vectors<Coefficient>::getOrthogonalComplement(Vectors<Coefficient>& output, Matrix<Rational>* bilinearForm) {
+void Vectors<Coefficient>::getOrthogonalComplement(
+  Vectors<Coefficient>& output, Matrix<Coefficient>* bilinearForm
+) {
+  MacroRegisterFunctionWithName("Vectors::getOrthogonalComplement");
   if (this->size == 0) {
     if (bilinearForm != nullptr) {
       output.makeEiBasis(bilinearForm->numberOfRows);
@@ -1447,7 +1454,7 @@ void Vectors<Coefficient>::getOrthogonalComplement(Vectors<Coefficient>& output,
     }
     global.fatal << "Finding orthogonal complement of zero "
     << "vectors without specifying a bilinear form is "
-    << " forbidden: I can't determine the dimension "
+    << "forbidden: I can't determine the dimension "
     << "of the ambient vector space. " << global.fatal;
   }
   Matrix<Coefficient> matrix;
@@ -1846,12 +1853,12 @@ template <typename Element>
 void Matrix<Element>::makeIdentity(
   const Matrix<Element>& prototype,
   const Element& ringZero,
-  const Element& theRingOne
+  const Element& ringOne
 ) {
   this->initialize(prototype.numberOfRows, prototype.numberOfColumns);
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
-      this->elements[i][j] = i == j ? theRingOne : ringZero;
+      this->elements[i][j] = i == j ? ringOne : ringZero;
     }
   }
 }
@@ -2591,7 +2598,7 @@ class ElementMonomialAlgebra: public LinearCombination<TemplateMonomial, Coeffic
   ) const;
   void multiplyBy(
     const TemplateMonomial& other,
-    const Coefficient& theCoeff,
+    const Coefficient& coefficient,
     ElementMonomialAlgebra<TemplateMonomial, Coefficient>& output,
     ElementMonomialAlgebra<TemplateMonomial, Coefficient>& bufferPoly,
     TemplateMonomial& bufferMon
@@ -2608,11 +2615,11 @@ class ElementMonomialAlgebra: public LinearCombination<TemplateMonomial, Coeffic
   }
   void multiplyBy(
     const MonomialPolynomial& other,
-    const Coefficient& theCoeff,
+    const Coefficient& coefficient,
     ElementMonomialAlgebra<TemplateMonomial, Coefficient>& output
   ) const {
     this->multiplyBy(other, output);
-    output *= theCoeff;
+    output *= coefficient;
   }
 
   void multiplyOnTheLeft(
@@ -2736,7 +2743,7 @@ public:
   void makePolynomialFromDirectionAndNormal(
     Vector<Coefficient>& direction,
     Vector<Coefficient>& normal,
-    Coefficient& Correction
+    Coefficient& correction
   );
   // Constructs a linear system from a system of linear polynomials equal to zero.
   // Returns false if the polynomials are not linear.
@@ -4039,7 +4046,7 @@ public:
   bool isElementCartan() const;
   void makeCartanGenerator(const Vector<Coefficient>& elementH, SemisimpleLieAlgebra& inputOwners);
   void makeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner);
-  void elementToVectorNegativeRootSpacesFirst(Vector<Coefficient>& output) const;
+  void toVectorNegativeRootSpacesFirst(Vector<Coefficient>& output) const;
   void assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(
     const Vector<Coefficient>& input,
     SemisimpleLieAlgebra& owner
@@ -4074,8 +4081,8 @@ public:
   bool isCoefficientOneChevalleyGenerator();
   bool isProportionalTo(const ElementSemisimpleLieAlgebra<Coefficient>& other) const {
     Vector<Rational> left, right;
-    this->elementToVectorNegativeRootSpacesFirst(left);
-    other.elementToVectorNegativeRootSpacesFirst(right);
+    this->toVectorNegativeRootSpacesFirst(left);
+    other.toVectorNegativeRootSpacesFirst(right);
     return left.isProportionalTo(right);
   }
   bool isProportionalTo(
@@ -4083,8 +4090,8 @@ public:
     Rational& outputTimesMeEqualsInput
   ) const {
     Vector<Rational> tempRoot1, tempRoot2;
-    this->elementToVectorNegativeRootSpacesFirst(tempRoot1);
-    other.elementToVectorNegativeRootSpacesFirst(tempRoot2);
+    this->toVectorNegativeRootSpacesFirst(tempRoot1);
+    other.toVectorNegativeRootSpacesFirst(tempRoot2);
     return tempRoot1.isProportionalTo(tempRoot2, outputTimesMeEqualsInput);
   }
   unsigned int hashFunction() const {
@@ -4254,16 +4261,16 @@ void Matrix<Coefficient>::assignMatrixIntegerWithDenominator(
 
 template <class Coefficient>
 void Polynomial<Coefficient>::makePolynomialFromDirectionAndNormal(
-  Vector<Coefficient>& direction, Vector<Coefficient>& normal, Coefficient& Correction
+  Vector<Coefficient>& direction, Vector<Coefficient>& normal, Coefficient& correction
 ) {
-  Rational tempRat2 = Vector<Coefficient>::scalarEuclidean(direction, normal);
+  Rational scalarProduct = Vector<Coefficient>::scalarEuclidean(direction, normal);
   this->makeZero();
   MonomialPolynomial tempM;
   for (int i = 0; i < direction.size; i ++) {
     tempM.makeEi(i);
-    this->addMonomial(tempM, normal.objects[i] / tempRat2);
+    this->addMonomial(tempM, normal.objects[i] / scalarProduct);
   }
-  *this += Correction;
+  *this += correction;
 }
 
 template <class Coefficient>
@@ -4401,6 +4408,7 @@ void Matrix<Coefficient>::actOnMonomialAsDifferentialOperator(
 
 template <typename Coefficient>
 void Matrix<Coefficient>::getZeroEigenSpaceModifyMe(List<Vector<Coefficient> >& output) {
+  MacroRegisterFunctionWithName("Matrix::getZeroEigenSpaceModifyMe");
   if (this->numberOfRows == 0) {
     output.setSize(this->numberOfColumns);
     for (int i = 0; i < this->numberOfColumns; i ++) {
@@ -5218,7 +5226,7 @@ public:
     PartialFractions& owner, Vectors<Rational>& output
   ) const;
   void getVectorPartitionFunction(
-    PartialFractions& owner, Polynomial<LargeInteger>& theCoeff, QuasiPolynomial& output
+    PartialFractions& owner, Polynomial<LargeInteger>& coefficient, QuasiPolynomial& output
   ) const;
   void decomposeAMinusNB(
     int indexA,
@@ -6992,9 +7000,9 @@ bool ElementSemisimpleLieAlgebra<Coefficient>::getCoordinatesInBasis(
   Vector<Coefficient> element;
   basisVectors.setSize(basis.size);
   for (int i = 0 ; i < basis.size; i ++) {
-    basis[i].elementToVectorNegativeRootSpacesFirst(basisVectors[i]);
+    basis[i].toVectorNegativeRootSpacesFirst(basisVectors[i]);
   }
-  this->elementToVectorNegativeRootSpacesFirst(element);
+  this->toVectorNegativeRootSpacesFirst(element);
   return element.getCoordinatesInBasis(basisVectors, output);
 }
 

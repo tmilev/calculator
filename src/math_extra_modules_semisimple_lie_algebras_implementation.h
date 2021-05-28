@@ -1848,7 +1848,7 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
   MonomialGeneralizedVerma<Coefficient> newMon;
   MatrixTensor<Coefficient> tempMat1, tempMat2;
   ProgressReport report;
-  Coefficient theCF;
+  Coefficient coefficient;
   for (int l = 0; l < theUEelt.size(); l ++) {
     currentMon = theUEelt[l];
     tempMat1.makeIdentitySpecial();
@@ -1888,9 +1888,9 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
       if (otherIndex != - 1) {
         newMon.monomialCoefficientOne = currentMon;
         newMon.indexFDVector = otherIndex;
-        theCF = theUEelt.coefficients[l];
-        theCF *= tempMat1.coefficients[i];
-        output.addMonomial(newMon, theCF);
+        coefficient = theUEelt.coefficients[l];
+        coefficient *= tempMat1.coefficients[i];
+        output.addMonomial(newMon, coefficient);
       }
     }
   }

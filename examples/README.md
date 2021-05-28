@@ -4558,7 +4558,7 @@ SlTwoRealFormStructure{}(a_3)
 ```
 Computes the Lie algebra structure over Kostant-Sekiguchi sl twos w.r.t. maximally compact real form.
 
-*SlTwoRealFormStructureForceRecompute* [SlTwoRealFormStructureForceRecompute] {Calculator::slTwoRealFormStructureForceRecompute}. (admin only) 
+*SlTwoRealFormStructureRecompute* [SlTwoRealFormStructureRecompute] {Calculator::slTwoRealFormStructureForceRecompute}. (admin only) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22SlTwoRealFormStructureForceRecompute%7b%7d%28a_3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 SlTwoRealFormStructureForceRecompute{}(a_3)

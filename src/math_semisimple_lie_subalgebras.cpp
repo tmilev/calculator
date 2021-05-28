@@ -3229,27 +3229,31 @@ std::string CandidateSemisimpleSubalgebra::WConjecture::toString(
   out << "<div>";
   out << owner.owner->wConjecture.toStringElementSemisimpleLieAlgebraOrMatrix(*owner.owner, this->basisCentralizerOfH);
   out << "</div></div>";
-  out << "Centalizer of H in p: <br>";
+  out << "\\(\\mathfrak p ^H\\) = centralizer of H in p: <br>";
   out << "<div class='lieAlgebraPanel'>";
   out << "<div>";
   out << owner.owner->wConjecture.toStringElementSemisimpleLieAlgebraOrMatrix(*owner.owner, this->basisCentralizerOfHInP);
   out << "</div></div>";
-  out << "Centalizer of sl(2): <br>";
+  out << "\\(\\mathfrak g^{\\mathfrak s} \\) "
+  << "= centralizer of sl(2): <br>";
   out << "<div class='lieAlgebraPanel'>";
   out << "<div>";
   out << owner.owner->wConjecture.toStringElementSemisimpleLieAlgebraOrMatrix(*owner.owner, this->basisCentralizerOfSl2);
   out << "</div></div>";
-  out << "Centalizer of sl(2) in p: <br>";
+  out << "\\(\\mathfrak p ^{\\mathfrak s}\\) "
+  << "= centralizer of sl(2) in p: <br>";
   out << "<div class='lieAlgebraPanel'>";
   out << "<div>";
   out << owner.owner->wConjecture.toStringElementSemisimpleLieAlgebraOrMatrix(*owner.owner, this->basisCentralizerOfSl2InP);
   out << "</div></div>";
-  out << "Orthogonal complement of centalizer of sl(2) in p: <br>";
+  out << "\\( (\\mathfrak p ^\\mathfrak s)^\\perp \\) "
+  << "= orthogonal complement of centalizer of sl(2) in p: <br>";
   out << "<div class='lieAlgebraPanel'>";
   out << "<div>";
   out << owner.owner->wConjecture.toStringElementSemisimpleLieAlgebraOrMatrix(*owner.owner, this->basisCentralizerOfSl2InP);
   out << "</div></div>";
-  out << "centralizer of H intersected with orthogonal complement of centralizer of the sl(2) intersected with p. <br>";
+  out << "\\(\\mathfrak p ^H \\cap (\\mathfrak p ^\\mathfrak s)^\\perp \\) "
+  << "= centralizer of H intersected with orthogonal complement of centralizer of the sl(2) intersected with p. <br>";
   out << "<div class='lieAlgebraPanel'>";
   out << "<div>";
   out << owner.owner->wConjecture.toStringElementSemisimpleLieAlgebraOrMatrix(

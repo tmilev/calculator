@@ -177,35 +177,35 @@ void ElementUniversalEnveloping<Coefficient>::simplify(
 ) {
   ElementUniversalEnveloping<Coefficient> buffer;
   ElementUniversalEnveloping<Coefficient> outpuT;
-  MonomialUniversalEnveloping<Coefficient> tempMon;
-  Coefficient currentCoeff;
+  MonomialUniversalEnveloping<Coefficient> monomial;
+  Coefficient currentCoefficient;
   outpuT.makeZero(*this->owner);
   for (; this->size() > 0;) {
     // FormatExpressions tempFormat;
     //tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
-    this->popMonomial(this->size() - 1, tempMon, currentCoeff);
+    this->popMonomial(this->size() - 1, monomial, currentCoefficient);
     bool reductionOccurred = false;
-    for (int i = 0; i < tempMon.generatorsIndices.size - 1; i ++) {
-      if (!this->getOwner().areOrderedProperly(tempMon.generatorsIndices[i], tempMon.generatorsIndices[i + 1])) {
-        if (tempMon.switchConsecutiveIndicesIfTheyCommute(i)) {
-          this->addMonomial(tempMon, currentCoeff);
+    for (int i = 0; i < monomial.generatorsIndices.size - 1; i ++) {
+      if (!this->getOwner().areOrderedProperly(monomial.generatorsIndices[i], monomial.generatorsIndices[i + 1])) {
+        if (monomial.switchConsecutiveIndicesIfTheyCommute(i)) {
+          this->addMonomial(monomial, currentCoefficient);
           reductionOccurred = true;
           break;
         }
-        if (tempMon.commutingAnBtoBAnPlusLowerOrderAllowed(
-          tempMon.powers[i], tempMon.generatorsIndices[i], tempMon.powers[i + 1], tempMon.generatorsIndices[i + 1]
+        if (monomial.commutingAnBtoBAnPlusLowerOrderAllowed(
+          monomial.powers[i], monomial.generatorsIndices[i], monomial.powers[i + 1], monomial.generatorsIndices[i + 1]
         )) {
-          tempMon.commuteAnBtoBAnPlusLowerOrder(i, buffer, ringUnit);
-          buffer *= currentCoeff;
+          monomial.commuteAnBtoBAnPlusLowerOrder(i, buffer, ringUnit);
+          buffer *= currentCoefficient;
           *this += buffer;
           reductionOccurred = true;
           break;
         }
-        if (tempMon.commutingABntoBnAPlusLowerOrderAllowed(
-          tempMon.powers[i], tempMon.generatorsIndices[i], tempMon.powers[i + 1], tempMon.generatorsIndices[i + 1]
+        if (monomial.commutingABntoBnAPlusLowerOrderAllowed(
+          monomial.powers[i], monomial.generatorsIndices[i], monomial.powers[i + 1], monomial.generatorsIndices[i + 1]
         )) {
-          tempMon.commuteABntoBnAPlusLowerOrder(i, buffer, ringUnit);
-          buffer *= currentCoeff;
+          monomial.commuteABntoBnAPlusLowerOrder(i, buffer, ringUnit);
+          buffer *= currentCoefficient;
           *this += buffer;
           reductionOccurred = true;
           break;
@@ -213,7 +213,7 @@ void ElementUniversalEnveloping<Coefficient>::simplify(
       }
     }
     if (!reductionOccurred) {
-      outpuT.addMonomial(tempMon, currentCoeff);
+      outpuT.addMonomial(monomial, currentCoefficient);
     }
   }
   *this = outpuT;
@@ -274,12 +274,12 @@ void MonomialUniversalEnveloping<Coefficient>::commuteAnBtoBAnPlusLowerOrder(
     return;
   }
   output.makeZero(*this->owner);
-  MonomialUniversalEnveloping<Coefficient> tempMon;
-  tempMon.makeOne(*this->owner);
-  tempMon.powers.setExpectedSize(this->generatorsIndices.size + 2);
-  tempMon.generatorsIndices.setExpectedSize(this->generatorsIndices.size + 2);
-  tempMon.powers.size = 0;
-  tempMon.generatorsIndices.size = 0;
+  MonomialUniversalEnveloping<Coefficient> monomial;
+  monomial.makeOne(*this->owner);
+  monomial.powers.setExpectedSize(this->generatorsIndices.size + 2);
+  monomial.generatorsIndices.setExpectedSize(this->generatorsIndices.size + 2);
+  monomial.powers.size = 0;
+  monomial.generatorsIndices.size = 0;
   int rightGeneratorIndeX = this->generatorsIndices[indexA + 1];
   int leftGeneratorIndeX = this->generatorsIndices[indexA];
   Coefficient theRightPoweR, leftPower;
@@ -290,10 +290,10 @@ void MonomialUniversalEnveloping<Coefficient>::commuteAnBtoBAnPlusLowerOrder(
   Coefficient acquiredCoefficienT, incomingAcquiredCoefficienT;
   acquiredCoefficienT = ringUnit;
   for (int i = 0; i < indexA; i ++) {
-    tempMon.multiplyByGeneratorPowerOnTheRight(this->generatorsIndices[i], this->powers[i]);
+    monomial.multiplyByGeneratorPowerOnTheRight(this->generatorsIndices[i], this->powers[i]);
   }
   MonomialUniversalEnveloping<Coefficient> startMon;
-  startMon = tempMon;
+  startMon = monomial;
   ElementSemisimpleLieAlgebra<Rational> adAToTheIthOfB, aElt;
   adAToTheIthOfB.makeGenerator(rightGeneratorIndeX, *this->owner);
   aElt.makeGenerator(leftGeneratorIndeX, *this->owner);
@@ -305,16 +305,16 @@ void MonomialUniversalEnveloping<Coefficient>::commuteAnBtoBAnPlusLowerOrder(
   do {
     for (int i = 0; i < adAToTheIthOfB.size(); i ++) {
       int newGeneratorIndex = adAToTheIthOfB[i].generatorIndex;
-      tempMon = startMon;
+      monomial = startMon;
       incomingAcquiredCoefficienT = acquiredCoefficienT;
       incomingAcquiredCoefficienT *= adAToTheIthOfB.coefficients[i];
-      tempMon.multiplyByGeneratorPowerOnTheRight(newGeneratorIndex, ringUnit);
-      tempMon.multiplyByGeneratorPowerOnTheRight(leftGeneratorIndeX, leftPower);
-      tempMon.multiplyByGeneratorPowerOnTheRight(rightGeneratorIndeX, theRightPoweR);
+      monomial.multiplyByGeneratorPowerOnTheRight(newGeneratorIndex, ringUnit);
+      monomial.multiplyByGeneratorPowerOnTheRight(leftGeneratorIndeX, leftPower);
+      monomial.multiplyByGeneratorPowerOnTheRight(rightGeneratorIndeX, theRightPoweR);
       for (int i = indexA + 2; i < this->generatorsIndices.size; i ++) {
-        tempMon.multiplyByGeneratorPowerOnTheRight(this->generatorsIndices[i], this->powers[i]);
+        monomial.multiplyByGeneratorPowerOnTheRight(this->generatorsIndices[i], this->powers[i]);
       }
-      output.addMonomial(tempMon, incomingAcquiredCoefficienT);
+      output.addMonomial(monomial, incomingAcquiredCoefficienT);
     }
     powerDroP ++;
     acquiredCoefficienT *= leftPower;
@@ -334,12 +334,12 @@ void MonomialUniversalEnveloping<Coefficient>::commuteABntoBnAPlusLowerOrder(
     return;
   }
   output.makeZero(*this->owner);
-  MonomialUniversalEnveloping<Coefficient> tempMon;
-  tempMon.makeOne(*this->owner);
-  tempMon.powers.setExpectedSize(this->generatorsIndices.size + 2);
-  tempMon.generatorsIndices.setExpectedSize(this->generatorsIndices.size + 2);
-  tempMon.powers.size = 0;
-  tempMon.generatorsIndices.size = 0;
+  MonomialUniversalEnveloping<Coefficient> monomial;
+  monomial.makeOne(*this->owner);
+  monomial.powers.setExpectedSize(this->generatorsIndices.size + 2);
+  monomial.generatorsIndices.setExpectedSize(this->generatorsIndices.size + 2);
+  monomial.powers.size = 0;
+  monomial.generatorsIndices.size = 0;
   int rightGeneratorIndex = this->generatorsIndices[index + 1];
   int leftGeneratorIndex = this->generatorsIndices[index];
   Coefficient rightPower, leftPower;
@@ -350,11 +350,11 @@ void MonomialUniversalEnveloping<Coefficient>::commuteABntoBnAPlusLowerOrder(
   Coefficient acquiredCoefficient, incomingAcquiredCoefficient;
   acquiredCoefficient = ringUnit;
   for (int i = 0; i < index; i ++) {
-    tempMon.multiplyByGeneratorPowerOnTheRight(this->generatorsIndices[i], this->powers[i]);
+    monomial.multiplyByGeneratorPowerOnTheRight(this->generatorsIndices[i], this->powers[i]);
   }
-  tempMon.multiplyByGeneratorPowerOnTheRight(this->generatorsIndices[index], leftPower);
+  monomial.multiplyByGeneratorPowerOnTheRight(this->generatorsIndices[index], leftPower);
   MonomialUniversalEnveloping<Coefficient> startMon;
-  startMon = tempMon;
+  startMon = monomial;
   ElementSemisimpleLieAlgebra<Rational> adResult, element, rightGeneratorElt;
   adResult.makeGenerator(leftGeneratorIndex, *this->owner);
   rightGeneratorElt.makeGenerator(rightGeneratorIndex, *this->owner);
@@ -366,15 +366,15 @@ void MonomialUniversalEnveloping<Coefficient>::commuteABntoBnAPlusLowerOrder(
   do {
     for (int i = 0; i < adResult.size(); i ++) {
       int theNewGeneratorIndex = adResult[i].generatorIndex;
-      tempMon = startMon;
-      tempMon.multiplyByGeneratorPowerOnTheRight(rightGeneratorIndex, rightPower);
+      monomial = startMon;
+      monomial.multiplyByGeneratorPowerOnTheRight(rightGeneratorIndex, rightPower);
       incomingAcquiredCoefficient = acquiredCoefficient;
       incomingAcquiredCoefficient *= adResult.coefficients[i];
-      tempMon.multiplyByGeneratorPowerOnTheRight(theNewGeneratorIndex, ringUnit);
+      monomial.multiplyByGeneratorPowerOnTheRight(theNewGeneratorIndex, ringUnit);
       for (int i = index + 2; i < this->generatorsIndices.size; i ++) {
-        tempMon.multiplyByGeneratorPowerOnTheRight(this->generatorsIndices[i], this->powers[i]);
+        monomial.multiplyByGeneratorPowerOnTheRight(this->generatorsIndices[i], this->powers[i]);
       }
-      output.addMonomial(tempMon, incomingAcquiredCoefficient);
+      output.addMonomial(monomial, incomingAcquiredCoefficient);
     }
     acquiredCoefficient *= rightPower;
     rightPower -= 1;

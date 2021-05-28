@@ -1301,6 +1301,7 @@ class LaTeXConstants {
       "end": "\\end",
       "frac": "\\frac",
       "mathcal": "\\mathcal",
+      "mathfrak": "\\mathfrak",
       "mathbb": "\\mathbb",
       "langle": "\\langle",
       "rangle": "\\rangle",
@@ -1336,6 +1337,7 @@ class LaTeXConstants {
       "nearrow": "\u2197",
       "searrow": "\u2198",
       "swarrow": "\u2199",
+      "perp": "\u27C2",
       "pm": "\u00B1",
       "det": "det",
       "geq": "\u2265",
@@ -1466,6 +1468,35 @@ class LaTeXConstants {
       "X": "\uD835\uDCB3",
       "Y": "\uD835\uDCB4",
       "Z": "\uD835\uDCB5",
+    };
+    /**@type{Object.<string, string>} */
+    this.mathfrakEquivalents = {
+      "a": "\uD835\uDD1E",
+      "b": "\uD835\uDD1F",
+      "c": "\uD835\uDD20",
+      "d": "\uD835\uDD21",
+      "e": "\uD835\uDD22",
+      "f": "\uD835\uDD23",
+      "g": "\uD835\uDD24",
+      "h": "\uD835\uDD25",
+      "i": "\uD835\uDD26",
+      "j": "\uD835\uDD27",
+      "k": "\uD835\uDD28",
+      "l": "\uD835\uDD29",
+      "m": "\uD835\uDD2A",
+      "n": "\uD835\uDD2B",
+      "o": "\uD835\uDD2C",
+      "p": "\uD835\uDD2D",
+      "q": "\uD835\uDD2E",
+      "r": "\uD835\uDD2F",
+      "s": "\uD835\uDD30",
+      "t": "\uD835\uDD31",
+      "u": "\uD835\uDD32",
+      "v": "\uD835\uDD33",
+      "w": "\uD835\uDD34",
+      "x": "\uD835\uDD35",
+      "y": "\uD835\uDD36",
+      "z": "\uD835\uDD37",
     };
     /**@type{Object.<string, string>} */
     this.mathbbEquivalents = {
@@ -2048,6 +2079,11 @@ class LaTeXParser {
     }
     if (secondToLast.syntacticRole === "\\mathcal") {
       if (this.specialFont(latexConstants.mathcalEquivalents)) {
+        return true;
+      }
+    }
+    if (secondToLast.syntacticRole === "\\mathfrak") {
+      if (this.specialFont(latexConstants.mathfrakEquivalents)) {
         return true;
       }
     }

@@ -1277,8 +1277,8 @@ bool CalculatorLieTheory::writeGeneralizedVermaModuleAsDifferentialOperatorUpToL
       theHws.addOnTop(theHWrf);
     }
   }
-  FormatExpressions theFormat;
-  hwContext.getFormat(theFormat);
+  FormatExpressions format;
+  hwContext.getFormat(format);
   return CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
     calculator,
     input,
@@ -2096,12 +2096,12 @@ bool CalculatorLieTheory::weylDimFormula(Calculator& calculator, const Expressio
   RationalFraction<Rational> rfOne;
   rfOne.makeOne();
   Vector<RationalFraction<Rational> > weightInSimpleCoords;
-  FormatExpressions theFormat;
-  theSSowner.context.getFormat(theFormat);
+  FormatExpressions format;
+  theSSowner.context.getFormat(format);
   weightInSimpleCoords = theSSowner.content->weylGroup.getSimpleCoordinatesFromFundamental(weight);
   calculator << "<br>Weyl dim formula input: simple coords: "
-  << weightInSimpleCoords.toString(&theFormat)
-  << ", fundamental coords: " << weight.toString(&theFormat);
+  << weightInSimpleCoords.toString(&format)
+  << ", fundamental coords: " << weight.toString(&format);
   RationalFraction<Rational> tempRF = theSSowner.content->weylGroup.weylDimensionFormulaSimpleCoordinates(weightInSimpleCoords);
   return output.assignValueWithContext(tempRF, theSSowner.context, calculator);
 }
@@ -2141,8 +2141,8 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(Calculator& calculator,
   out << "<br>Number of elements of the Weyl group of the Levi part: " << subgroup.allElements.size;
   out << "<br>Number of elements of the ambient Weyl: "
   << subgroup.ambientWeyl->group.elements.size;
-  FormatExpressions theFormat;
-  theSSalgPointer.context.getFormat(theFormat);
+  FormatExpressions format;
+  theSSalgPointer.context.getFormat(format);
   if (subgroup.allElements.size > 498) {
     if (subgroup.ambientWeyl->sizeByFormulaOrNegative1('E', 6) <= subgroup.ambientWeyl->group.getSize()) {
       out << "Weyl group is too large. <br>";
@@ -2183,7 +2183,7 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(Calculator& calculator,
     << "the elements of the subgroup. <br>";
     out << "<table><tr><td>Element</td><td>weight simple coords</td>"
     << "<td>weight fund. coords</td></tr>";
-    theFormat.fundamentalWeightLetter = "\\omega";
+    format.fundamentalWeightLetter = "\\omega";
     for (int i = 0; i < subgroup.RepresentativesQuotientAmbientOrder.size; i ++) {
       ElementWeylGroup& current = subgroup.RepresentativesQuotientAmbientOrder[i];
       out << "<tr><td>"
@@ -2192,11 +2192,11 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(Calculator& calculator,
       theHWsimplecoords = theSSalgebra.weylGroup.getSimpleCoordinatesFromFundamental(theHWfundcoords, RationalFraction<Rational>::zeroRational());
       theSSalgebra.weylGroup.actOnRhoModified(subgroup.RepresentativesQuotientAmbientOrder[i], theHWsimplecoords);
       out << "<td>"
-      << (useJavascript ? HtmlRoutines::getMathNoDisplay(theHWsimplecoords.toString(&theFormat))
-      : theHWsimplecoords.toString(&theFormat))
+      << (useJavascript ? HtmlRoutines::getMathNoDisplay(theHWsimplecoords.toString(&format))
+      : theHWsimplecoords.toString(&format))
       << "</td>";
       tempRoot = theSSalgebra.weylGroup.getFundamentalCoordinatesFromSimple(theHWsimplecoords);
-      std::string theFundString = tempRoot.toStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
+      std::string theFundString = tempRoot.toStringLetterFormat(format.fundamentalWeightLetter, &format);
       out << "<td>" << (useJavascript ? HtmlRoutines::getMathNoDisplay(theFundString): theFundString)
       << "</td>";
       out << "</tr>";
@@ -2231,9 +2231,9 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
     return true;
   }
   std::stringstream out;
-  FormatExpressions theFormat;
-  theSSlieAlg.context.getFormat(theFormat);
-  out << "<br>Highest weight: " << theHWfundcoords.toString(&theFormat)
+  FormatExpressions format;
+  theSSlieAlg.context.getFormat(format);
+  out << "<br>Highest weight: " << theHWfundcoords.toString(&format)
   << "<br>Parabolic selection: " << parSel.toString();
   theHWFundCoordsFDPart = theHWfundcoords;
   for (int i = 0; i < parSel.cardinalitySelection; i ++) {

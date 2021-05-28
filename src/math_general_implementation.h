@@ -75,15 +75,15 @@ std::ostream& operator<< (std::ostream& output, const Matrix<Coefficient>& matri
   int lastMatRowIndexToHide = matrix.numberOfRows;
   int firstMatColIndexToHide = matrix.numberOfColumns;
   int lastMatColIndexToHide = matrix.numberOfColumns;
-  FormatExpressions& theFormat = global.defaultFormat.getElement();
-  if (theFormat.flagSuppressLongMatrices) {
-    if (matrix.numberOfRows > theFormat.maximumMatrixDisplayedRows) {
-      firstMatRowIndexToHide = theFormat.maximumMatrixDisplayedRows / 2;
-      lastMatRowIndexToHide = matrix.numberOfRows - 1 - theFormat.maximumMatrixDisplayedRows / 2;
+  FormatExpressions& format = global.defaultFormat.getElement();
+  if (format.flagSuppressLongMatrices) {
+    if (matrix.numberOfRows > format.maximumMatrixDisplayedRows) {
+      firstMatRowIndexToHide = format.maximumMatrixDisplayedRows / 2;
+      lastMatRowIndexToHide = matrix.numberOfRows - 1 - format.maximumMatrixDisplayedRows / 2;
     }
-    if (matrix.numberOfColumns > theFormat.maximumMatrixLineLength) {
-      firstMatColIndexToHide = theFormat.maximumMatrixLineLength / 2;
-      lastMatColIndexToHide = matrix.numberOfColumns - 1 - theFormat.maximumMatrixLineLength / 2;
+    if (matrix.numberOfColumns > format.maximumMatrixLineLength) {
+      firstMatColIndexToHide = format.maximumMatrixLineLength / 2;
+      lastMatColIndexToHide = matrix.numberOfColumns - 1 - format.maximumMatrixLineLength / 2;
     }
   }
   for (int i = 0; i < matrix.numberOfRows; i ++) {

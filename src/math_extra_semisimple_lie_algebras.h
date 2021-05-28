@@ -215,7 +215,7 @@ public:
     const ElementSemisimpleLieAlgebra<Coefficient>& right
   );
   template<class Coefficient>
-  void getKillingFormBilinearFormMatrix(
+  void getKillingFormMatrix(
     Matrix<Coefficient>& output
   );
   template <class Coefficient>

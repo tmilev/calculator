@@ -367,8 +367,8 @@ public:
     out << "v_{" << this->highestWeightFundamentalCoordinatesBaseField.toString(format)
     << ", " << this->parabolicSelectionNonSelectedAreElementsLevi.toString() << "}";
     return out.str();
-    //    return "hwv{}("+ this->getOwner().toStringLieAlgebraName(false) + "," + this->theHWFundamentalCoordsBaseField.toString(theFormat) + ","
-    //    + Vector<Rational> (this->parabolicSelectionNonSelectedAreElementsLevi).toString(theFormat) + ")";
+    //    return "hwv{}("+ this->getOwner().toStringLieAlgebraName(false) + "," + this->theHWFundamentalCoordsBaseField.toString(format) + ","
+    //    + Vector<Rational> (this->parabolicSelectionNonSelectedAreElementsLevi).toString(format) + ")";
   }
   void splitOverLevi(
     std::string* report,

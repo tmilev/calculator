@@ -167,21 +167,21 @@ std::string WebAPIResponse::setProblemDeadline() {
 }
 
 std::string WebAPIResponse::getSanitizedComment(
-  const Expression& input, FormatExpressions& theFormat, bool& resultIsPlot
+  const Expression& input, FormatExpressions& format, bool& resultIsPlot
 ) {
   MacroRegisterFunctionWithName("WebAPIReponse::getSanitizedComment");
-  theFormat.flagUseQuotes = false;
+  format.flagUseQuotes = false;
   resultIsPlot = false;
   std::string theString;
   if (input.isOfType<std::string>(&theString)) {
     if (StringRoutines::stringBeginsWith(theString, "Approximations have been")) {
       return "";
     }
-    return input.toString(&theFormat);
+    return input.toString(&format);
   }
   if (input.isOfType<Plot>()) {
     resultIsPlot = true;
-    return input.toString(&theFormat);
+    return input.toString(&format);
   }
   if (input.hasType<Plot>()) {
     return "";
@@ -196,16 +196,16 @@ std::string WebAPIResponse::getSanitizedComment(
   ) {
     return "";
   }
-  return input.toString(&theFormat);
+  return input.toString(&format);
 }
 
 std::string WebAPIResponse::getCommentsInterpretation(
-  Calculator& interpreterWithAdvice, int indexShift, FormatExpressions& theFormat
+  Calculator& interpreterWithAdvice, int indexShift, FormatExpressions& format
 ) {
   MacroRegisterFunctionWithName("WebAPIReponse::getCommentsInterpretation");
   std::stringstream out;
-  theFormat.flagExpressionIsFinal = true;
-  theFormat.flagIncludeExtraHtmlDescriptionsInPlots = false;
+  format.flagExpressionIsFinal = true;
+  format.flagIncludeExtraHtmlDescriptionsInPlots = false;
   interpreterWithAdvice.objectContainer.resetPlots();
   if (indexShift >= interpreterWithAdvice.programExpression.size()) {
     return "";
@@ -213,12 +213,12 @@ std::string WebAPIResponse::getCommentsInterpretation(
   const Expression& currentE = interpreterWithAdvice.programExpression[indexShift][1];
   bool resultIsPlot = false;
   if (!currentE.startsWith(interpreterWithAdvice.opCommandSequence())) {
-    out << WebAPIResponse::getSanitizedComment(currentE, theFormat, resultIsPlot);
+    out << WebAPIResponse::getSanitizedComment(currentE, format, resultIsPlot);
     return out.str();
   }
   std::string currentS;
   for (int i = 1; i < currentE.size(); i ++) {
-    currentS = WebAPIResponse::getSanitizedComment(currentE[i], theFormat, resultIsPlot);
+    currentS = WebAPIResponse::getSanitizedComment(currentE[i], format, resultIsPlot);
     if (StringRoutines::stringTrimWhiteSpace(currentS) == "") {
       continue;
     }

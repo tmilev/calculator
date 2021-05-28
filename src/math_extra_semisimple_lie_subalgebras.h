@@ -442,6 +442,8 @@ public:
     // The ambient Lie algebra decomposes as \mathfrak{k}\oplus \mathfrak{p}.
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisPAmbient;
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisKAmbient;
+    Matrix<Rational> killingForm;
+    Matrix<Rational> killingFormRescaled;
     std::string toStringRealForm(const SemisimpleSubalgebras& owner) const;
     std::string toStringElementSemisimpleLieAlgebraOrMatrix(
       const SemisimpleSubalgebras& owner,

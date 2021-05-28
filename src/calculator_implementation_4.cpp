@@ -677,7 +677,7 @@ bool CalculatorBasics::rightDistributeBracketIsOnTheRight(
       return false;
     }
   }
-//  int theFormat = input.format;
+//  int format = input.format;
   Expression leftE, rightE;
   leftE.makeXOX(calculator, multiplicativeOperation, input[1], input[2][1]);
   rightE.makeXOX(calculator, multiplicativeOperation, input[1], input[2][2]);

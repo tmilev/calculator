@@ -66,8 +66,8 @@ bool CodeFormatter::formatCPPDirectory(const std::string& inputDirectory, std::s
     }
   }
   for (int i = 0; i < newFileNames.size; i ++) {
-    CodeFormatter theFormatter;
-    if (!theFormatter.formatCPPSourceCode(oldFileNames[i], newFileNames[i], comments)) {
+    CodeFormatter formatter;
+    if (!formatter.formatCPPSourceCode(oldFileNames[i], newFileNames[i], comments)) {
       return false;
     }
   }

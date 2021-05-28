@@ -3127,6 +3127,16 @@ std::string SemisimpleSubalgebras::WConjecture::toStringRealForm(
 ) const {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::WConjecture::toStringRealForm");
   std::stringstream out;
+  FormatExpressions matrixFormat;
+  matrixFormat.flagUseLatex = true;
+  out << "Killing form: ";
+  out << "<div class='lieAlgebraPanel'><div>";
+  out << HtmlRoutines::getMathNoDisplay(this->killingForm.toString(&matrixFormat));
+  out << "</div></div>";
+  out << "Killing form rescaled: ";
+  out << "<div class='lieAlgebraPanel'><div>";
+  out << HtmlRoutines::getMathNoDisplay(this->killingFormRescaled.toString(&matrixFormat));
+  out << "</div></div>";
   out << "Basis of k (1-eigenspace of Cartan involution): ";
   out << "<div class='lieAlgebraPanel'><div>";
   out << this->toStringElementSemisimpleLieAlgebraOrMatrix(owner, this->basisKAmbient);
@@ -3139,6 +3149,7 @@ std::string SemisimpleSubalgebras::WConjecture::toStringRealForm(
 }
 
 void SemisimpleSubalgebras::WConjecture::compute(SemisimpleSubalgebras& owner) {
+  MacroRegisterFunctionWithName("SemisimpleSubalgebras::WConjecture::compute");
   if (!owner.flagRealForms) {
     return;
   }
@@ -3149,6 +3160,10 @@ void SemisimpleSubalgebras::WConjecture::compute(SemisimpleSubalgebras& owner) {
     return;
   }
   ProgressReport report;
+  report.report("Computing Killing form.");
+  owner.owner->getKillingFormMatrix(this->killingForm);
+  this->killingFormRescaled = this->killingForm;
+  this->killingFormRescaled.scaleToIntegralForMinimalRationalHeightNoSignChange();
   report.report("Computing k, p");
   this->cartanInvolutionAmbient.findEigenSpace(1, this->basisKAmbient);
   this->cartanInvolutionAmbient.findEigenSpace(- 1, this->basisPAmbient);
@@ -3223,9 +3238,8 @@ std::string CandidateSemisimpleSubalgebra::WConjecture::toString(
   out << owner.owner->wConjecture.toStringElementSemisimpleLieAlgebraOrMatrix(*owner.owner, this->basisCentralizerOfSl2);
   out << "</div></div>";
   out << "Centalizer of sl(2) in p: <br>";
-  out << "<div class='lieAlgebraPanel'>";
-  out << "<div>";
-
+  // out << "<div class='lieAlgebraPanel'>";
+  // out << "<div>";
   return out.str();
 }
 

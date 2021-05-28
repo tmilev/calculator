@@ -1140,19 +1140,7 @@ public:
     }
   }
   LargeIntegerUnsigned findPositiveLCMCoefficientDenominators();
-  void operator-=(const Matrix<Coefficient>& right) {
-    if (this->numberOfRows != right.numberOfRows || this->numberOfColumns != right.numberOfColumns) {
-      global.fatal << "Attempt to subtract from matrix with "
-      << this->numberOfRows << " rows and " << this->numberOfColumns
-      << " columns a matrix with " << right.numberOfRows << " rows and "
-      << right.numberOfColumns << " columns. " << global.fatal;
-    }
-    for (int i = 0; i < this->numberOfRows; i ++) {
-      for (int j = 0; j < this->numberOfColumns; j ++) {
-        (*this)(i, j) -= right(i, j);
-      }
-    }
-  }
+  void operator-=(const Matrix<Coefficient>& right);
   void writeToFile(std::fstream& output);
   bool readFromFile(std::fstream& input);
   void operator/=(const Coefficient& input) {
@@ -1258,15 +1246,15 @@ public:
     Rational& outputChangeGradient,
     bool& hasAPotentialLeavingVariable
   );
-  static void getMaxMovementAndLeavingVariableRow(Rational& maxMovement,
+  static void getMaxMovementAndLeavingVariableRow(
+    Rational& maxMovement,
     int& leavingVariableRow,
     int enteringVariable,
     Matrix<Coefficient>& tempMatA,
     Vector<Coefficient>& inputVectorX,
     Selection& BaseVariables
   );
-  int findPositiveLCMCoefficientDenominatorsTruncated();
-  int findPositiveGCDCoefficientNumeratorsTruncated();
+  LargeInteger findPositiveGCDCoefficientNumerators();
   Matrix<Coefficient> operator-(const Matrix<Coefficient>& right) const {
     Matrix<Coefficient> tempMat =(*this);
     tempMat -= right;
@@ -4130,14 +4118,18 @@ public:
 };
 
 template <class Coefficient>
-int Matrix<Coefficient>::findPositiveLCMCoefficientDenominatorsTruncated() {
-  int result = 1;
+void Matrix<Coefficient>::operator-=(const Matrix<Coefficient>& right) {
+  if (this->numberOfRows != right.numberOfRows || this->numberOfColumns != right.numberOfColumns) {
+    global.fatal << "Attempt to subtract from matrix with "
+    << this->numberOfRows << " rows and " << this->numberOfColumns
+    << " columns a matrix with " << right.numberOfRows << " rows and "
+    << right.numberOfColumns << " columns. " << global.fatal;
+  }
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
-      result *= this->elements[i][j].denominatorShort / Rational::greatestCommonDivisorSigned(result, this->elements[i][j].denominatorShort);
+      (*this)(i, j) -= right(i, j);
     }
   }
-  return result;
 }
 
 template <class Coefficient>
@@ -4167,39 +4159,40 @@ void Matrix<Coefficient>::getMatrixIntegerWithDenominator(
 }
 
 template <class Coefficient>
-int Matrix<Coefficient>::findPositiveGCDCoefficientNumeratorsTruncated() {
-  int result = 1;
+LargeInteger Matrix<Coefficient>::findPositiveGCDCoefficientNumerators() {
+  LargeIntegerUnsigned result = 0;
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
-      if (this->elements[i][j].numeratorShort != 0) {
-        result = Rational::greatestCommonDivisorSigned(result, this->elements[i][j].numeratorShort);
+      const Rational& current = (*this)(i, j);
+      if (current.isEqualToZero()) {
+        continue;
       }
+      if (result.isEqualToZero()) {
+        result = current.getNumerator().value;
+        continue;
+      }
+      result = LargeIntegerUnsigned::greatestCommonDivisor(result, current.getNumerator().value);
     }
   }
   if (result == 0) {
-    global.fatal << "Crash in Matrix::findPositiveGCDCoefficientNumeratorsTruncated. " << global.fatal;
-  }
-  if (result < 0) {
-    result = - result;
+    result = 1;
   }
   return result;
 }
 
 template <class Coefficient>
 void Matrix<Coefficient>::scaleToIntegralForMinimalRationalHeightNoSignChange() {
-  Rational rational;
-  rational.assignNumeratorAndDenominator(
-    this->findPositiveLCMCoefficientDenominatorsTruncated(),
-    this->findPositiveGCDCoefficientNumeratorsTruncated()
-  );
-  *this *= rational;
+  Rational scale;
+  scale = this->findPositiveLCMCoefficientDenominators();
+  scale /= this->findPositiveGCDCoefficientNumerators();
+  *this *= scale;
 }
 
 template <class Coefficient>
-Coefficient Matrix<Coefficient> ::getDeterminant() {
-  Matrix<Coefficient> tempMat = *this;
+Coefficient Matrix<Coefficient>::getDeterminant() {
+  Matrix<Coefficient> matrix = *this;
   Coefficient result;
-  tempMat.computeDeterminantOverwriteMatrix(result);
+  matrix.computeDeterminantOverwriteMatrix(result);
   return result;
 }
 
@@ -5370,8 +5363,8 @@ public:
   int LowestIndexNotCheckedForSlicingInDirection;
   std::string toString(FormatExpressions* format = nullptr) const;
   void transformToWeylProjective(ConeComplex& owner);
-  std::string drawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
-  std::string drawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
+  std::string drawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& format);
+  std::string drawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& format);
   void getLinesContainedInCone(Vectors<Rational>& output);
   void translateMeMyLastCoordinateAffinization(Vector<Rational>& theTranslationVector);
   bool isHonest1DEdgeAffine(const Vector<Rational>& vertex1, const Vector<Rational>& vertex2) const {
@@ -5410,14 +5403,14 @@ public:
   bool drawMeLastCoordinateAffine(
     bool InitDrawVars,
     DrawingVariables& theDrawingVariables,
-    FormatExpressions& theFormat,
+    FormatExpressions& format,
     const std::string& ChamberWallColor = nullptr
   ) const;
   bool drawMeProjective(
     Vector<Rational>* coordCenterTranslation,
     bool initTheDrawVars,
     DrawingVariables& theDrawingVariables,
-    FormatExpressions& theFormat
+    FormatExpressions& format
   ) const;
   bool isInCone(const Vector<Rational>& point) const;
   bool isInCone(const Vectors<Rational>& vertices) const {
@@ -5568,7 +5561,7 @@ public:
   bool addNonRefinedChamberOnTopNoRepetition(const Cone& newCone);
   void popChamberSwapWithLast(int index);
   void getAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(Vectors<Rational>& output) const;
-  bool drawMeLastCoordinateAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
+  bool drawMeLastCoordinateAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& format);
   void translateMeMyLastCoordinateAffinization(Vector<Rational> & theTranslationVector);
   void initializeFromDirectionsAndRefine(Vectors<Rational>& inputVectors);
   void initializeFromAffineDirectionsAndRefine(Vectors<Rational>& inputDirections, Vectors<Rational>& inputAffinePoints);
@@ -5577,7 +5570,7 @@ public:
     Vector<Rational>* coordCenterTranslation,
     bool InitDrawVars,
     DrawingVariables& theDrawingVariables,
-    FormatExpressions& theFormat
+    FormatExpressions& format
   );
   std::string drawMeToHtmlProjective(DrawingVariables& drawingVariables, FormatExpressions& format);
   std::string toString(bool useHtml = false);
@@ -5688,7 +5681,7 @@ public:
   void computeTable(int dimension);
   void prepareCheckSums();
   std::string doTheFullComputationReturnLatexFileString(
-    Vectors<Rational>& toBePartitioned, FormatExpressions& theFormat, std::string* outputHtml
+    Vectors<Rational>& toBePartitioned, FormatExpressions& format, std::string* outputHtml
   );
   bool argumentsAllowed(Vectors<Rational>& theArguments, std::string& outputWhatWentWrong);
   bool assureIndicatorRegularity(Vector<Rational> & theIndicator);
@@ -5722,13 +5715,13 @@ public:
   void popIndexHashChooseSwapByLowestNonProcessedAndAccount(int index, Vector<Rational>* Indicator);
   void prepareIndicatorVariables();
   void initFromOtherPartialFractions(PartialFractions& input);
-  std::string toString(FormatExpressions& theFormat) {
+  std::string toString(FormatExpressions& format) {
     std::string tempS;
-    this->toString(tempS, theFormat);
+    this->toString(tempS, format);
     return tempS;
   }
-  void toString(std::string& output, FormatExpressions& theFormat);
-  int toString(std::string& output, bool LatexFormat, FormatExpressions& theFormat);
+  void toString(std::string& output, FormatExpressions& format);
+  int toString(std::string& output, bool LatexFormat, FormatExpressions& format);
   int toStringBasisChange(
     std::string& output, bool LatexFormat, FormatExpressions& PolyFormatLocal
   );

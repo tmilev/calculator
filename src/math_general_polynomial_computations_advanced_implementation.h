@@ -1451,20 +1451,20 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
     &MonomialPolynomial::orderForGreatestCommonDivisor()
   );
   if (!remainderBuffer.isEqualToZero() || output.isEqualToZero()) {
-    FormatExpressions theFormat;
-    theFormat.polynomialAlphabet.addOnTop("x");
-    theFormat.polynomialAlphabet.addOnTop("y");
+    FormatExpressions format;
+    format.polynomialAlphabet.addOnTop("x");
+    format.polynomialAlphabet.addOnTop("y");
     global.fatal
     << "<br>While computing the gcd of left = "
-    << left.toString(&theFormat) << "<br>and right = "
-    << right.toString(&theFormat) << "<br>I got that left * right = "
-    << productBuffer.toString(&theFormat)
+    << left.toString(&format) << "<br>and right = "
+    << right.toString(&format) << "<br>I got that left * right = "
+    << productBuffer.toString(&format)
     << "<br>, and that lcm(left, right) = "
-    << leastCommonMultipleBuffer.toString(&theFormat)
+    << leastCommonMultipleBuffer.toString(&format)
     << "<br>but at the same time "
     << "right * left divided by lcm (left, right) equals<br>"
-    << output.toString(&theFormat)
-    << "<br>with remainder " << remainderBuffer.toString(&theFormat)
+    << output.toString(&format)
+    << "<br>with remainder " << remainderBuffer.toString(&format)
     << ", which is imposible."
     << global.fatal;
   }
@@ -1629,10 +1629,10 @@ bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::checkFacto
 
 template <class Coefficient, class OneFactorFinder>
 std::string PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::toStringResult(
-  FormatExpressions *theFormat
+  FormatExpressions *format
 ) const {
   std::stringstream out;
-  std::string constantFactorString = this->constantFactor.toString(theFormat);
+  std::string constantFactorString = this->constantFactor.toString(format);
   if (this->nonReduced.size + this->reduced.size == 0) {
     return constantFactorString;
   }
@@ -1644,13 +1644,13 @@ std::string PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::toS
   }
   out << constantFactorString;
   for (int i = 0; i < this->reduced.size; i ++) {
-    out << "(" << this->reduced[i].toString(theFormat) << ")";
+    out << "(" << this->reduced[i].toString(format) << ")";
   }
   if (this->nonReduced.size > 0) {
     out << "[[";
   }
   for (int i = 0; i < this->nonReduced.size; i ++) {
-    out << "(" << this->nonReduced[i].toString(theFormat) << ")";
+    out << "(" << this->nonReduced[i].toString(format) << ")";
   }
   if (this->nonReduced.size > 0) {
     out << "]]";

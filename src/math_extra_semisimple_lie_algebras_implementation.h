@@ -681,9 +681,18 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
 }
 
 template <class Coefficient>
-void SemisimpleLieAlgebra::getKillingFormBilinearFormMatrix(
+void SemisimpleLieAlgebra::getKillingFormMatrix(
   Matrix<Coefficient>& output
 ) {
+  output.makeZeroMatrix(this->getNumberOfGenerators(), 0);
+  ElementSemisimpleLieAlgebra<Coefficient> left, right;
+  for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
+    left.makeGenerator(i, *this);
+    for (int j = 0; j < this->getNumberOfGenerators(); j ++) {
+      right.makeGenerator(j, *this);
+      output(i, j) = this->getKillingForm(left, right);
+    }
+  }
 }
 
 template <class Coefficient>
@@ -693,15 +702,15 @@ Coefficient SemisimpleLieAlgebra::getKillingForm(
 ) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::getKillingForm");
   Coefficient result = 0;
-  ElementSemisimpleLieAlgebra<Coefficient> adadAppliedToMon, element;
-  ChevalleyGenerator baseGen;
+  ElementSemisimpleLieAlgebra<Coefficient> adadAppliedToMonomial, element;
+  ChevalleyGenerator baseGenerator;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
-    baseGen.makeGenerator(*this, i);
-    adadAppliedToMon.makeZero();
-    adadAppliedToMon.addMonomial(baseGen, 1);
-    this->lieBracket(right, adadAppliedToMon, element);
-    this->lieBracket(left, element, adadAppliedToMon);
-    result += adadAppliedToMon.getCoefficientOf(baseGen);
+    baseGenerator.makeGenerator(*this, i);
+    adadAppliedToMonomial.makeZero();
+    adadAppliedToMonomial.addMonomial(baseGenerator, 1);
+    this->lieBracket(right, adadAppliedToMonomial, element);
+    this->lieBracket(left, element, adadAppliedToMonomial);
+    result += adadAppliedToMonomial.getCoefficientOf(baseGenerator);
   }
   return result;
 }

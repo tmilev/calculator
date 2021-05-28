@@ -300,7 +300,7 @@ std::string GraphWeightedLabeledEdges::toStringPsTricks(FormatExpressions* forma
   this->computeDisplayGroups();
   this->checkConsistency();
   std::stringstream out;
-//  out << this->toStringNodesAndEdges(theFormat);
+//  out << this->toStringNodesAndEdges(format);
   out << "<br>\\documentclass{article}<br>\n\n";
   out << "\\usepackage{pstricks}\\usepackage{lscape}\\usepackage{auto-pst-pdf}\\usepackage{pst-plot}<br>\n";
   out << "\\begin{document}<br>\n";

@@ -153,7 +153,7 @@ public:
   std::string prepareReport();
   GeneralizedVermaModuleCharacters();
   bool checkInitialization() const;
-  std::string prepareReportOneCone(FormatExpressions& theFormat, const Cone& theCone);
+  std::string prepareReportOneCone(FormatExpressions& format, const Cone& theCone);
   void getProjection(int indexOperator, const Vector<Rational>& input, Vector<Rational> & output);
   void splitByMultiplicityFreeWall(Cone& theCone, ConeComplex& output);
   void initTheMaxComputation();
@@ -482,7 +482,7 @@ class ElementVermaModuleOrdered {
 public:
   ElementUniversalEnvelopingOrdered<Coefficient> elementInternal;
   PolynomialSubstitution<Coefficient> theSubNthElementIsImageNthCoordSimpleBasis;
-  std::string toString(const FormatExpressions& theFormat) const;
+  std::string toString(const FormatExpressions& format) const;
   bool isEqualToZero() const {
     return this->elementInternal.isEqualToZero();
   }

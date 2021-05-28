@@ -193,7 +193,7 @@ std::string SemisimpleLieAlgebra::toHTML(
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::toHTMLCalculator");
   WeylGroupData& theWeyl = this->weylGroup;
   std::stringstream out;
-  FormatExpressions theFormat, latexFormat;
+  FormatExpressions format, latexFormat;
   latexFormat.flagUseLatex = true;
   latexFormat.flagUseHTML = false;
   out << "<h1>Lie algebra " << this->toStringLieAlgebraNameFullHTML() << "</h1>";
@@ -225,7 +225,7 @@ std::string SemisimpleLieAlgebra::toHTML(
         element1.makeGenerator(i, *this);
         tempRoot = this->getWeightOfGenerator(i);
         theWeyl.getEpsilonCoordinates(tempRoot, tempRoot2);
-        out << "$" << element1.toString(&theFormat) << "$&$" << tempRoot.toString() << "$";
+        out << "$" << element1.toString(&format) << "$&$" << tempRoot.toString() << "$";
         out << "&$" << tempRoot2.toStringLetterFormat("\\varepsilon") << "$";
         out << "\\\\\n";
       }
@@ -721,7 +721,7 @@ void SemisimpleLieAlgebra::computeOneChevalleyConstant(
 
 bool SemisimpleLieAlgebra::testForConsistency() {
   //HashedList<Vector<Rational> >& theRoots = this->theWeyl.RootSystem;
-  FormatExpressions& theFormat = global.defaultFormat.getElement();
+  FormatExpressions& format = global.defaultFormat.getElement();
   ElementSemisimpleLieAlgebra<Rational> g1, g2, g3, g23, g31, g12, g123, g231, g312, temp;
   //this->ComputeDebugString(false, false, global);
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
@@ -743,12 +743,12 @@ bool SemisimpleLieAlgebra::testForConsistency() {
           global.fatal
           << "The computed structure constants are wrong: the Jacobi identity fails. "
           << "More precisely, I get that "
-          << "<br>[" << g1.toString(&theFormat) << ", " << g2.toString(&theFormat) << "] =" << g12.toString(&theFormat)
-          << "<br>[" << g2.toString(&theFormat) << ", " << g3.toString(&theFormat) << "] =" << g23.toString(&theFormat)
-          << "<br>[" << g3.toString(&theFormat) << ", " << g1.toString(&theFormat) << "] =" << g31.toString(&theFormat)
-          << "<br>g123= " << g123.toString(&theFormat)
-          << "<br>g231=" << g231.toString(&theFormat)
-          << "<br>g312=" << g312.toString(&theFormat) << "<br>"
+          << "<br>[" << g1.toString(&format) << ", " << g2.toString(&format) << "] =" << g12.toString(&format)
+          << "<br>[" << g2.toString(&format) << ", " << g3.toString(&format) << "] =" << g23.toString(&format)
+          << "<br>[" << g3.toString(&format) << ", " << g1.toString(&format) << "] =" << g31.toString(&format)
+          << "<br>g123= " << g123.toString(&format)
+          << "<br>g231=" << g231.toString(&format)
+          << "<br>g312=" << g312.toString(&format) << "<br>"
           << global.fatal;
           return false;
         }

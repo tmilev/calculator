@@ -2131,8 +2131,8 @@ StringRoutines::Differ::Differ() {
 }
 
 std::string StringRoutines::Differ::toString() {
-  FormatExpressions theFormat;
-  theFormat.flagUseHTML = true;
+  FormatExpressions format;
+  format.flagUseHTML = true;
   std::stringstream out;
   out << "Matrix:<br>" << this->matrixLongestCommonSubsequence.getElement() << "<br>"
   << "Common string sizes:<br>"
@@ -3322,12 +3322,12 @@ bool OnePartialFraction::checkForOrlikSolomonAdmissibility(List<int>& theSelecte
 }
 
 int OnePartialFraction::computeGainingMultiplicityIndexInLinearRelation(
-  bool flagUsingOrlikSolomon, Matrix<Rational>& theLinearRelation
+  bool flagUsingOrlikSolomon, Matrix<Rational>& linearRelation
 ) {
   int DesireToSelectAsGainingMultiplicity = - 1;
   int result = - 1;
-  for (int i = 0; i < theLinearRelation.numberOfRows; i ++) {
-    if (!theLinearRelation.elements[i][0].isEqualToZero()) {
+  for (int i = 0; i < linearRelation.numberOfRows; i ++) {
+    if (!linearRelation.elements[i][0].isEqualToZero()) {
       int currentIndex = this->indicesNonZeroMultiplicities[i];
       int candidateDesire;
       if (!flagUsingOrlikSolomon) {
@@ -3348,13 +3348,13 @@ int OnePartialFraction::computeGainingMultiplicityIndexInLinearRelation(
 }
 
 bool OnePartialFraction::decomposeFromLinearRelation(
-  Matrix<Rational>& theLinearRelation,
+  Matrix<Rational>& linearRelation,
   LinearCombination<OnePartialFraction, Polynomial<LargeInteger> >& output,
   bool flagUsingOSbasis,
   List<Vector<Rational> >& startingVectors
 ) {
- //  theLinearRelation.ComputeDebugString();
-  //theLinearRelation.ComputeDebugString();
+ //  linearRelation.ComputeDebugString();
+  //linearRelation.ComputeDebugString();
   int GainingMultiplicityIndexInLinRelation = - 1;
   int GainingMultiplicityIndex = - 1;
   int ElongationGainingMultiplicityIndex = - 1;
@@ -3364,27 +3364,25 @@ bool OnePartialFraction::decomposeFromLinearRelation(
   ParticipatingIndices.size = 0;
   theCoefficients.size = 0;
   theGreatestElongations.size = 0;
-  GainingMultiplicityIndexInLinRelation = this->computeGainingMultiplicityIndexInLinearRelation(flagUsingOSbasis, theLinearRelation);
+  GainingMultiplicityIndexInLinRelation = this->computeGainingMultiplicityIndexInLinearRelation(flagUsingOSbasis, linearRelation);
   GainingMultiplicityIndex = this->indicesNonZeroMultiplicities[GainingMultiplicityIndexInLinRelation];
   int tempI = this->denominator[GainingMultiplicityIndex].getLargestElongation();
-  theLinearRelation.elements[GainingMultiplicityIndexInLinRelation][0].multiplyByInt(tempI);
-  //theLinearRelation.ComputeDebugString();
-  theLinearRelation.scaleToIntegralForMinimalRationalHeightNoSignChange();
-  if (this->flagAnErrorHasOccurredTimeToPanic) {
-  }
-  ElongationGainingMultiplicityIndex = theLinearRelation.elements[GainingMultiplicityIndexInLinRelation][0].numeratorShort;
+  linearRelation.elements[GainingMultiplicityIndexInLinRelation][0].multiplyByInt(tempI);
+  //linearRelation.ComputeDebugString();
+  linearRelation.scaleToIntegralForMinimalRationalHeightNoSignChange();
+  ElongationGainingMultiplicityIndex = linearRelation.elements[GainingMultiplicityIndexInLinRelation][0].numeratorShort;
   if (ElongationGainingMultiplicityIndex < 0) {
     ElongationGainingMultiplicityIndex = - ElongationGainingMultiplicityIndex;
   } else {
-    theLinearRelation *= - 1;
+    linearRelation *= - 1;
   }
-  //theLinearRelation.ComputeDebugString();
-  for (int i = 0; i < theLinearRelation.numberOfRows; i ++) {
-    if (i != GainingMultiplicityIndexInLinRelation && !theLinearRelation.elements[i][0].isEqualToZero()) {
+  //linearRelation.ComputeDebugString();
+  for (int i = 0; i < linearRelation.numberOfRows; i ++) {
+    if (i != GainingMultiplicityIndexInLinRelation && !linearRelation.elements[i][0].isEqualToZero()) {
       int tempI = this->indicesNonZeroMultiplicities[i];
       ParticipatingIndices.addOnTop(tempI);
       theGreatestElongations.addOnTop(this->denominator[tempI].getLargestElongation());
-      theCoefficients.addOnTop(theLinearRelation.elements[i][0].numeratorShort);
+      theCoefficients.addOnTop(linearRelation.elements[i][0].numeratorShort);
     }
   }
   if (!flagUsingOSbasis) {
@@ -4229,8 +4227,8 @@ void OnePartialFraction::getPolyReduceMonomialByMonomial(
   }
 }
 
-int PartialFractions::toString(std::string& output, bool LatexFormat, FormatExpressions& theFormat) {
-  return this->toStringBasisChange(output, LatexFormat, theFormat);
+int PartialFractions::toString(std::string& output, bool LatexFormat, FormatExpressions& format) {
+  return this->toStringBasisChange(output, LatexFormat, format);
 }
 
 int PartialFractions::toFileOutput(std::fstream& output, bool LatexFormat) {
@@ -4519,8 +4517,8 @@ bool PartialFractions::verifyFileComputedContributions() {
   return(tempSize >= tempI);
 }
 
-void PartialFractions::toString(std::string& output, FormatExpressions& theFormat) {
-  this->toString(output, theFormat.flagUseLatex, theFormat);
+void PartialFractions::toString(std::string& output, FormatExpressions& format) {
+  this->toString(output, format.flagUseLatex, format);
 }
 
 void PartialFractions::writeToFile(std::fstream& output) {
@@ -7194,9 +7192,9 @@ std::string WeylGroupData::toStringCppConjugacyClasses(FormatExpressions* format
   std::stringstream out;
   out << "<hr>Here is the c++ input code for the conjugacy class table.";
   out << "<br>";
-  FormatExpressions theFormatNoDynkinTypePlusesExponents;
-  theFormatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent = true;
-  out << "bool loadConjugacyClasses" << this->dynkinType.toString(&theFormatNoDynkinTypePlusesExponents)
+  FormatExpressions formatNoDynkinTypePlusesExponents;
+  formatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent = true;
+  out << "bool loadConjugacyClasses" << this->dynkinType.toString(&formatNoDynkinTypePlusesExponents)
   << "(WeylGroup& output)\n<br>{ ";
   out << "output.computeRho(true);";
   out << "\n<br>&nbsp;&nbsp;WeylGroup::ConjugacyClass emptyClass;";
@@ -9650,7 +9648,7 @@ bool PartialFractions::getVectorPartitionFunction(QuasiPolynomial& output, Vecto
 }
 
 std::string PartialFractions::doTheFullComputationReturnLatexFileString(
-  Vectors<Rational>& toBePartitioned, FormatExpressions& theFormat, std::string* outputHtml
+  Vectors<Rational>& toBePartitioned, FormatExpressions& format, std::string* outputHtml
 ) {
   std::string whatWentWrong;
   global.fatal << "Not implemented yet. " << global.fatal;
@@ -9669,7 +9667,7 @@ std::string PartialFractions::doTheFullComputationReturnLatexFileString(
   //  this->theChambersOld.drawOutput(global.theDrawingVariables, tempRoot, 0);
   //  this->theChambersOld.thePauseController.exitComputation();
   DrawingVariables drawingVariables;
-  this->theChambers.drawMeProjective(nullptr, true, drawingVariables, theFormat);
+  this->theChambers.drawMeProjective(nullptr, true, drawingVariables, format);
   outHtml << drawingVariables.getHTMLDiv(this->ambientDimension, false);
   Vector<Rational> tempRoot;
   tempRoot.makeZero(this->ambientDimension);
@@ -9680,9 +9678,9 @@ std::string PartialFractions::doTheFullComputationReturnLatexFileString(
   << " a given set of vectors.  You requested the vector partition function with respect to the set of vectors: ";
   global.fatal << global.fatal;
 //  out << this->theChambersOld.theDirections.ElementToStringGeneric();
-  out << "\n\n The corresponding generating function is: " << this->toString(theFormat) << "= (after splitting acording to algorithm)";
+  out << "\n\n The corresponding generating function is: " << this->toString(format) << "= (after splitting acording to algorithm)";
   this->split(nullptr);
-  out << this->toString(theFormat);
+  out << this->toString(format);
   global.fatal << global.fatal;
 //  out << "Therefore the vector partition function is given by " << this->theChambersOld.GetNumNonZeroPointers()
 //        << " quasipolynomials depending on which set of linear inequalities is satisfied (each such set we call ``Chamber'').";
@@ -9698,15 +9696,15 @@ std::string PartialFractions::doTheFullComputationReturnLatexFileString(
       Cone& currentChamber = this->theChambers[i];
       tempIndicator = currentChamber.getInternalPoint();
       this->getVectorPartitionFunction(tempQP, tempIndicator);
-      out << "\n\n" << currentChamber.toString(true, false, true, false, theFormat);
-      out << "\n\nQuasipolynomial: " << tempQP.toString(false, true, theFormat);
-      outHtml << "<hr>Chamber: " << currentChamber.toString(false, true, true, false, theFormat);
+      out << "\n\n" << currentChamber.toString(true, false, true, false, format);
+      out << "\n\nQuasipolynomial: " << tempQP.toString(false, true, format);
+      outHtml << "<hr>Chamber: " << currentChamber.toString(false, true, true, false, format);
       bool useHtml = false;
       if (tempQP.valueOnEachLatticeShift.size >0)
         if (tempQP.valueOnEachLatticeShift[0].size<30)
           useHtml = true;
       outHtml << "<br>Quasi-polynomial: " <<
-      HtmlRoutines::GetHtmlMathDivFromLatexFormulA(tempQP.toString(useHtml, true, theFormat));
+      HtmlRoutines::GetHtmlMathDivFromLatexFormulA(tempQP.toString(useHtml, true, format));
     }
     */
   out << "\\end{document}";
@@ -10556,7 +10554,7 @@ std::string ConeComplex::drawMeToHtmlProjective(
 }
 
 bool ConeComplex::drawMeLastCoordinateAffine(
-  bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat
+  bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& format
 ) {
   bool result = true;
   if (InitDrawVars) {
@@ -10565,7 +10563,7 @@ bool ConeComplex::drawMeLastCoordinateAffine(
 
   theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->getDimension() - 1);
   for (int i = 0; i < this->size; i ++) {
-    result = this->objects[i].drawMeLastCoordinateAffine(InitDrawVars, theDrawingVariables, theFormat) && result;
+    result = this->objects[i].drawMeLastCoordinateAffine(InitDrawVars, theDrawingVariables, format) && result;
     std::stringstream tempStream;
     tempStream << i + 1;
     Vector<Rational> tempRoot = this->objects[i].getInternalPoint();
@@ -10576,7 +10574,7 @@ bool ConeComplex::drawMeLastCoordinateAffine(
 }
 
 bool ConeComplex::drawMeProjective(
-  Vector<Rational>* coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat
+  Vector<Rational>* coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& format
 ) {
   bool result = true;
   Vector<Rational> tempRoot;
@@ -10602,7 +10600,7 @@ bool ConeComplex::drawMeProjective(
     }
   }
   for (int i = 0; i < this->size; i ++) {
-    result = ((*this)[i].drawMeProjective(coordCenterTranslation, false, theDrawingVariables, theFormat) && result);
+    result = ((*this)[i].drawMeProjective(coordCenterTranslation, false, theDrawingVariables, format) && result);
   }
   return result;
 }
@@ -10653,10 +10651,10 @@ bool Cone::regularizeToBasis(
 bool Cone::drawMeLastCoordinateAffine(
   bool InitDrawVars,
   DrawingVariables& theDrawingVariables,
-  FormatExpressions& theFormat,
+  FormatExpressions& format,
   const std::string& ChamberWallColor
 ) const {
-  (void) theFormat;
+  (void) format;
   Vector<Rational> ZeroRoot;
   ZeroRoot.makeZero(this->getDimension() - 1);
   Vectors<Rational> VerticesScaled;
@@ -10700,7 +10698,7 @@ bool Cone::drawMeLastCoordinateAffine(
   return foundBadVertex;
 }
 
-std::string Cone::drawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat) {
+std::string Cone::drawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& format) {
   if (this->flagIsTheZeroCone) {
     return "The cone is empty. ";
   }
@@ -10712,14 +10710,14 @@ std::string Cone::drawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariab
   }
   std::stringstream out;
   theDrawingVariables.operations.makeMeAStandardBasis(this->getDimension() - 1);
-  bool foundBadVertex = this->drawMeLastCoordinateAffine(false, theDrawingVariables, theFormat);
+  bool foundBadVertex = this->drawMeLastCoordinateAffine(false, theDrawingVariables, format);
   theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->getDimension() - 1);
   if (foundBadVertex) {
     out << "<br>The cone does not lie in the upper half-space. ";
   } else {
     out << theDrawingVariables.getHTMLDiv(this->getDimension() - 1, false);
   }
-  out << "<br>" << this->toString(&theFormat);
+  out << "<br>" << this->toString(&format);
   return out.str();
 }
 
@@ -10727,9 +10725,9 @@ bool Cone::drawMeProjective(
   Vector<Rational>* coordCenterTranslation,
   bool initTheDrawVars,
   DrawingVariables& theDrawingVariables,
-  FormatExpressions& theFormat
+  FormatExpressions& format
 ) const {
-  (void) theFormat;
+  (void) format;
   Vector<Rational> ZeroRoot, coordCenter;
   ZeroRoot.makeZero(this->getDimension());
   if (coordCenterTranslation == nullptr) {
@@ -10781,7 +10779,7 @@ bool Cone::drawMeProjective(
   return true;
 }
 
-std::string Cone::drawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat) {
+std::string Cone::drawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& format) {
   if (this->flagIsTheZeroCone) {
     return "The cone is the zero cone (i.e. contains only the origin).";
   }
@@ -10791,14 +10789,14 @@ std::string Cone::drawMeToHtmlProjective(DrawingVariables& theDrawingVariables, 
   std::stringstream out;
   if (this->vertices.size < 1) {
     out << "There has been a programming error. The cone is empty.<br>"
-    << this->toString(&theFormat);
+    << this->toString(&format);
     return out.str();
   }
   theDrawingVariables.operations.makeMeAStandardBasis(this->getDimension());
-  this->drawMeProjective(nullptr, true, theDrawingVariables, theFormat);
+  this->drawMeProjective(nullptr, true, theDrawingVariables, format);
   theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->getDimension());
   out << theDrawingVariables.getHTMLDiv(this->getDimension(), false);
-  out << "<br>" << this->toString(&theFormat);
+  out << "<br>" << this->toString(&format);
   return out.str();
 }
 
@@ -11354,14 +11352,14 @@ bool PiecewiseQuasipolynomial::makeVPF(Vectors<Rational>& theRoots, std::string&
   }
   this->NumVariables = theRoots.getDimension();
   PartialFractions theFracs;
-  FormatExpressions theFormat;
+  FormatExpressions format;
   std::stringstream out;
   std::string whatWentWrong;
 
   theFracs.initFromRoots(theRoots);
-  out << HtmlRoutines::getMathNoDisplay(theFracs.toString(theFormat));
+  out << HtmlRoutines::getMathNoDisplay(theFracs.toString(format));
   theFracs.split(nullptr);
-  out << HtmlRoutines::getMathNoDisplay(theFracs.toString(theFormat));
+  out << HtmlRoutines::getMathNoDisplay(theFracs.toString(format));
   // theFracs.theChambers.initializeFromDirectionsAndRefine(theRoots);
   global.fatal << "Not implemented. " << global.fatal ;
   //  theFracs.theChambersOld.AmbientDimension = theRoots[0].size;
@@ -11494,7 +11492,7 @@ void PiecewiseQuasipolynomial::translateArgument(Vector<Rational>& translateToBe
 
 std::string PiecewiseQuasipolynomial::toString(bool useLatex, bool useHtml) {
   std::stringstream out;
-  FormatExpressions theFormat;
+  FormatExpressions format;
   for (int i = 0; i < this->theProjectivizedComplex.size; i ++) {
     const Cone& currentCone = this->theProjectivizedComplex[i];
     QuasiPolynomial& currentQP = this->theQPs[i];
@@ -11502,7 +11500,7 @@ std::string PiecewiseQuasipolynomial::toString(bool useLatex, bool useHtml) {
     if (useHtml) {
       out << "<br>";
     }
-    out << currentCone.toString(&theFormat);
+    out << currentCone.toString(&format);
     if (useHtml) {
       out << "<br>";
     }
@@ -11521,7 +11519,7 @@ void PiecewiseQuasipolynomial::drawMe(
   Cone* RestrictingChamber,
   Vector<Rational>* distinguishedPoint
 ) {
-  FormatExpressions theFormat;
+  FormatExpressions format;
   Vectors<Rational> latticePoints;
   HashedList<Vector<Rational> > theLatticePointsFinal;
   List<std::string> theLatticePointColors;
@@ -11536,7 +11534,7 @@ void PiecewiseQuasipolynomial::drawMe(
     if (isZeroChamber) {
       chamberWallColor = ZeroColor;
     }
-    this->theProjectivizedComplex[i].drawMeLastCoordinateAffine(false, theDrawingVars, theFormat, chamberWallColor);
+    this->theProjectivizedComplex[i].drawMeLastCoordinateAffine(false, theDrawingVars, format, chamberWallColor);
     std::stringstream tempStream;
     tempStream << i + 1;
     Vector<Rational> tempRoot = this->theProjectivizedComplex[i].getInternalPoint();
@@ -11817,7 +11815,7 @@ std::string ConeLatticeAndShiftMaxComputation::toString(FormatExpressions* forma
   DrawingVariables theDrawingVariables;
   Polynomial<Rational>  tempP;
   for (int i = 0; i < this->theConesLargerDim.size; i ++) {
-    out << "";// << this->theConesLargerDim[i].toString(theFormat);
+    out << "";// << this->theConesLargerDim[i].toString(format);
     //out << "<br>" << this->LPtoMaximizeLargerDim[i].toString();
     theDrawingVariables.operations.initialize();
     out << "<br>" << this->theConesLargerDim[i].projectivizedCone.drawMeToHtmlLastCoordAffine(theDrawingVariables, *format);
@@ -12032,7 +12030,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   List<ConeLatticeAndShift>& outputAppend
 ) {
   Vector<Rational> direction;
-  FormatExpressions theFormat;
+  FormatExpressions format;
   int dimensionProjectivized = this->getDimensionProjectivized();
   Matrix<Rational> theProjectionLatticeLevel;
   theProjectionLatticeLevel.initialize(dimensionProjectivized - 2, dimensionProjectivized - 1);
@@ -12050,7 +12048,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   ProgressReport report;
   if (outputAppend.size >= 10) {
     std::stringstream tempStream;
-    tempStream << "<hr><hr><hr><hr>The bad cone:" << this->projectivizedCone.toString(&theFormat);
+    tempStream << "<hr><hr><hr><hr>The bad cone:" << this->projectivizedCone.toString(&format);
     report.report(tempStream.str());
   }
   ConeComplex complexBeforeProjection;
@@ -12115,7 +12113,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
         exitRepresentatives[j], exitNormalAffine, directionSmallerDimOnLattice, exitRepresentatives[j]
       );
     }
-    global.comments << "<hr><hr><hr>" << currentCone.toString(&theFormat);
+    global.comments << "<hr><hr><hr>" << currentCone.toString(&format);
     global.comments << "<br>Entering normal: " << ((foundEnteringNormal) ? enteringNormalAffine.toString() : "not found");
     global.comments << "<br>Exit normal: " << ((foundExitNormal) ? exitNormalAffine.toString() : "not found");
     global.comments << "<br>The shifted lattice representatives: " << exitRepresentatives.toString()
@@ -12144,7 +12142,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
       tempCLS.projectivizedCone.createFromNormals(tempTempRoots);
       /*if (!tempBool) {
         std::stringstream tempStream;
-        tempStream << "The bad starting cone (cone number " << i + 1 << "):" << this->toString(theFormat) << "<hr><hr><hr><hr>The bad cone:" << tempCLS.toString(theFormat);
+        tempStream << "The bad starting cone (cone number " << i + 1 << "):" << this->toString(format) << "<hr><hr><hr><hr>The bad cone:" << tempCLS.toString(format);
         tempStream << "<br>\n\n" << this->theProjectivizedCone.normals.toString(false, false, false);
         tempStream << "\n\n<br>\n\n" << complexBeforeProjection.toString(false, true);
         if (!foundEnteringNormal)
@@ -12164,7 +12162,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
         while (true){}
       }*/
       //if (!tempBool)global.fatal << global.fatal;
-      //global.Comments << tempCLS.theProjectivizedCone.toString(false, true, true, true, theFormat);
+      //global.Comments << tempCLS.theProjectivizedCone.toString(false, true, true, true, format);
       if (!tempCLS.projectivizedCone.flagIsTheZeroCone) {
         theProjectionLatticeLevel.actOnVectorColumn(exitRepresentatives[j], tempCLS.shift);
         outputAppend.addOnTop(tempCLS);
@@ -12778,7 +12776,7 @@ std::string Cone::toString(FormatExpressions* format) const {
 
 std::string ConeComplex::toString(bool useHtml) {
   std::stringstream out;
-  FormatExpressions theFormat;
+  FormatExpressions format;
   out << "Number of chambers: " << this->size;
   if (useHtml) {
     out << "<br>";
@@ -12790,7 +12788,7 @@ std::string ConeComplex::toString(bool useHtml) {
   out << "normals of walls to refine by: ";
   Vectors<Rational> tempRoots;
   tempRoots = this->splittingNormals;
-  out << tempRoots.toString(&theFormat);
+  out << tempRoots.toString(&format);
   if (this->slicingDirections.size > 0) {
     if (useHtml) {
       out << "<br>\n";
@@ -12805,7 +12803,7 @@ std::string ConeComplex::toString(bool useHtml) {
     if (useHtml) {
       out << "<br>";
     }
-    out << this->objects[i].toString(&theFormat) << "\n\n\n";
+    out << this->objects[i].toString(&format) << "\n\n\n";
   }
   return out.str();
 }

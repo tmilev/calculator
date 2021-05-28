@@ -1150,9 +1150,9 @@ void ElementVermaModuleOrdered<Coefficient>::multiplyOnTheLeft(
 }
 
 template <class Coefficient>
-std::string ElementVermaModuleOrdered<Coefficient>::toString(const FormatExpressions& theFormat) const {
+std::string ElementVermaModuleOrdered<Coefficient>::toString(const FormatExpressions& format) const {
   std::stringstream out;
-  std::string tempS = MathRoutines::toStringBrackets(this->elementInternal, theFormat);
+  std::string tempS = MathRoutines::toStringBrackets(this->elementInternal, format);
   if (tempS.size() > 1) {
     out << "(";
   }

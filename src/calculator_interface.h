@@ -745,9 +745,9 @@ public:
   ExpressionContext context;
   BuiltIn content;
   std::string toStringContentWithFormat() {
-    FormatExpressions theFormat;
-    this->context.getFormat(theFormat);
-    return this->content.toString(&theFormat);
+    FormatExpressions format;
+    this->context.getFormat(format);
+    return this->content.toString(&format);
   }
   WithContext() {
   }

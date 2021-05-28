@@ -132,7 +132,7 @@ class WebAPIResponse {
   static std::string getCommentsInterpretation(
     Calculator& interpreterWithAdvice,
     int indexShift,
-    FormatExpressions& theFormat
+    FormatExpressions& format
   );
 
   static JSData getSelectCourseJSON();
@@ -163,7 +163,7 @@ class WebAPIResponse {
     const std::string& hostWebAddressWithPort
   );
   static std::string getSanitizedComment(
-    const Expression& input, FormatExpressions& theFormat, bool& resultIsPlot
+    const Expression& input, FormatExpressions& format, bool& resultIsPlot
   );
   class Test {
   public:

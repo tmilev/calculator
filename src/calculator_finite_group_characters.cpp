@@ -491,7 +491,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
   theHWfundCoords = weyl.getFundamentalCoordinatesFromSimple(highestWeightsimpleCoords);
   std::stringstream out, latexReport;
   Vectors<Polynomial<Rational> > highestWeights;
-  FormatExpressions theFormat = context.getFormat();
+  FormatExpressions format = context.getFormat();
   highestWeights.addOnTop(highestWeightsimpleCoords);
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   WeylGroupAutomorphisms theOuterAutos;
@@ -513,22 +513,22 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
   Polynomial<Rational> zero;
   weyl.dynkinType.getEpsilonMatrix(epsCoordMat);
   for (int i = 0; i < outputOrbit.size; i ++) {
-    theFormat.simpleRootLetter = "\\alpha";
-    theFormat.fundamentalWeightLetter = "\\psi";
-    std::string orbitEltString = outputOrbit[i].toString(&theFormat);
+    format.simpleRootLetter = "\\alpha";
+    format.fundamentalWeightLetter = "\\psi";
+    std::string orbitEltString = outputOrbit[i].toString(&format);
     Vector<Polynomial<Rational> > epsVect = outputOrbit[i];
     epsCoordMat.actOnVectorColumn(epsVect, zero);
-    std::string orbitEltStringEpsilonCoords = epsVect.toStringLetterFormat("\\varepsilon", &theFormat);
+    std::string orbitEltStringEpsilonCoords = epsVect.toStringLetterFormat("\\varepsilon", &format);
     std::string weightEltString =
     weyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).toStringLetterFormat
-    (theFormat.fundamentalWeightLetter, &theFormat);
+    (format.fundamentalWeightLetter, &format);
     out << "<tr>" << "<td>"
     << (useMathTag ? HtmlRoutines::getMathNoDisplay(theOuterAutos.allElements[i].toString()) : theOuterAutos.allElements[i].toString())
     << "</td><td>" << (useMathTag ? HtmlRoutines::getMathNoDisplay(orbitEltString) : orbitEltString) << "</td><td>"
     << (useMathTag ? HtmlRoutines::getMathNoDisplay(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
     << "</td><td>" << (useMathTag ? HtmlRoutines::getMathNoDisplay(weightEltString) : weightEltString) << "</td>";
-    latexReport << "$" << theOuterAutos.allElements[i].toString(&theFormat) << "$ & $" << orbitEltStringEpsilonCoords << "$ & $"
-    << weightEltString << "$ & $" << (outputOrbit[0]-outputOrbit[i]).toStringLetterFormat(theFormat.simpleRootLetter, &theFormat) << "$\\\\\n<br>";
+    latexReport << "$" << theOuterAutos.allElements[i].toString(&format) << "$ & $" << orbitEltStringEpsilonCoords << "$ & $"
+    << weightEltString << "$ & $" << (outputOrbit[0]-outputOrbit[i]).toStringLetterFormat(format.simpleRootLetter, &format) << "$\\\\\n<br>";
     out << "</tr>";
   }
   latexReport << "\\end{longtable}";
@@ -598,9 +598,9 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   }
   std::stringstream out, latexReport;
   Vectors<Polynomial<Rational> > highestWeights;
-  FormatExpressions theFormat;
-  semisimpleLieAlgebra.context.getFormat(theFormat);
-//  theFormat.fundamentalWeightLetter ="\\psi";
+  FormatExpressions format;
+  semisimpleLieAlgebra.context.getFormat(format);
+//  format.fundamentalWeightLetter ="\\psi";
   highestWeights.addOnTop(highestWeightSimpleCoords);
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   HashedList<ElementWeylGroup> orbitGeneratingSet;
@@ -628,10 +628,10 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   GraphWeightedLabeledEdges integralPositiveRootReflectionGraph;
   integralPositiveRootReflectionGraph.numNodes = outputOrbit.size;
   integralPositiveRootReflectionGraph.nodeLabels.setSize(outputOrbit.size);
-  theFormat.flagUseFrac = true;
+  format.flagUseFrac = true;
   for (int i = 0; i < outputOrbit.size; i ++) {
     integralPositiveRootReflectionGraph.nodeLabels[i] =
-    "$" + weyl.getEpsilonCoordinates(outputOrbit[i]).toStringEpsilonFormat(&theFormat) + "$ = $" +
+    "$" + weyl.getEpsilonCoordinates(outputOrbit[i]).toStringEpsilonFormat(&format) + "$ = $" +
     weyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).toStringLetterFormat("\\psi") + "$";
   }
   ElementWeylGroup currentElt;
@@ -669,14 +669,14 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   integralPositiveRootReflectionGraph.checkConsistency();
   out << integralPositiveRootReflectionGraph.toStringPsTricks(nullptr);
   for (int i = 0; i < outputOrbit.size; i ++) {
-    theFormat.simpleRootLetter = "\\alpha";
-    theFormat.fundamentalWeightLetter = "\\psi";
-    std::string orbitEltString = outputOrbit[i].toString(&theFormat);
+    format.simpleRootLetter = "\\alpha";
+    format.fundamentalWeightLetter = "\\psi";
+    std::string orbitEltString = outputOrbit[i].toString(&format);
     Vector<Polynomial<Rational> > epsVect = outputOrbit[i];
     epsCoordMat.actOnVectorColumn(epsVect, zero);
-    std::string orbitEltStringEpsilonCoords = epsVect.toStringLetterFormat("\\varepsilon", &theFormat);
+    std::string orbitEltStringEpsilonCoords = epsVect.toStringLetterFormat("\\varepsilon", &format);
     std::string weightEltString=
-    weyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).toStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
+    weyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).toStringLetterFormat(format.fundamentalWeightLetter, &format);
     out << "<tr>" << "<td>"
     << (useMathTag ? HtmlRoutines::getMathNoDisplay(orbitGeneratingSet[i].toString()) : orbitGeneratingSet[i].toString())
     << "</td><td>"
@@ -685,9 +685,9 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     << "</td><td>"
     << (useMathTag ? HtmlRoutines::getMathNoDisplay(weightEltString) : weightEltString)
     << "</td>";
-    latexReport << "$" << orbitGeneratingSet[i].toString(&theFormat) << "$ & $" << orbitEltStringEpsilonCoords
+    latexReport << "$" << orbitGeneratingSet[i].toString(&format) << "$ & $" << orbitEltStringEpsilonCoords
     << "$ & $" <<  weightEltString << "$ & $"
-    << (outputOrbit[0] - outputOrbit[i]).toStringLetterFormat(theFormat.simpleRootLetter, &theFormat)
+    << (outputOrbit[0] - outputOrbit[i]).toStringLetterFormat(format.simpleRootLetter, &format)
     << "$\\\\\n<br>";
     if (useRho) {
       currentWeight = highestWeightSimpleCoords;
@@ -710,7 +710,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
       }
       out << "<td>";
       if (isGood) {
-        out << HtmlRoutines::getMathNoDisplay(standardElt.toString(&theFormat));
+        out << HtmlRoutines::getMathNoDisplay(standardElt.toString(&format));
       } else {
         out << "-";
       }
@@ -993,9 +993,9 @@ bool CalculatorFunctionsWeylGroup::tensorWeylReps(Calculator& calculator, const 
   if (!input[2].isOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > (&rightRep)) {
     return false;
   }
-  FormatExpressions theFormat;
-  theFormat.flagUseLatex = true;
-  theFormat.flagUseHTML = false;
+  FormatExpressions format;
+  format.flagUseLatex = true;
+  format.flagUseHTML = false;
   if (leftRep.ownerGroup != rightRep.ownerGroup) {
     return output.makeError("Error: attempting to tensor irreps with different owner groups. ", calculator);
   }
@@ -1563,8 +1563,8 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
   outLaTeX << "\\\\";
   out << "</tr>";
   ///////////////////////////////////////
-  FormatExpressions theFormat;
-  theFormat.flagSupressDynkinIndexOne = true;
+  FormatExpressions format;
+  format.flagSupressDynkinIndexOne = true;
   for (int i = 0; i < partitionsParabolics.size; i ++) {
     int typeBsize = rank - partitionsParabolics[i].n;
     DynkinType dynkinType;
@@ -1583,7 +1583,7 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
       theSimpleType.makeArbitrary('B', typeBsize, 1);
       dynkinType.addMonomial(theSimpleType, 1);
     }
-    outLaTeX << "&$" << dynkinType.toString(&theFormat) << "$";
+    outLaTeX << "&$" << dynkinType.toString(&format) << "$";
   }
   outLaTeX << "\\\\";
   ///////////////////////////////////////

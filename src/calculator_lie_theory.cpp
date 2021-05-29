@@ -1905,7 +1905,10 @@ bool CalculatorLieTheory::slTwoRealFormStructure(
     out << "<br>The table is precomputed and served from the hard disk. <br>";
     return output.assignValue(out.str(), calculator);
   }
-
+  if (!global.userDefaultHasAdminRights()) {
+    return calculator << "The real form structure is not precomputed. "
+    << "Triggering a computation requires a logged-in administrator.";
+  }
   SemisimpleSubalgebras& subalgebras =
   calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(
     ownerLieAlgebra.content->weylGroup.dynkinType

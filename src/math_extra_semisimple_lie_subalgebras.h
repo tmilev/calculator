@@ -126,12 +126,17 @@ public:
   List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > unknownPositiveGenerators;
   List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > unknownNegativeGenerators;
   List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > unknownCartanCentralizerBasis;
-
-  //  Vector<Rational> aSolution;
   List<List<ChevalleyGenerator> > involvedPositiveGenerators;
   List<List<ChevalleyGenerator> > involvedNegativeGenerators;
+  // Character of the ambient Lie algebra with
+  // respect to (Cartan subalgebra of) sl(2).
   CharacterSemisimpleLieAlgebraModule<Rational> characterFundamentalCoordinatesRelativeToCartan;
+  // Character of the ambient Lie algebra with respect to sl(2),
+  // i.e., formal sum of the highest weights of the k-modules.
   CharacterSemisimpleLieAlgebraModule<Rational> characterNonPrimalFundamentalCoordinates;
+  // Formal sum of the highest weights of the k-modules,
+  // with modules additionally subdivided by their weights
+  // with respect to the Cartan subalgebra of the centralizer of k.
   CharacterSemisimpleLieAlgebraModule<Rational> primalCharacter;
   Vectors<Rational> posistiveRootsPerpendicularToPrecedingWeights;
   Vectors<Rational> cartanOfCentralizer;
@@ -200,14 +205,27 @@ public:
 
   class WConjecture {
   public:
+    bool flagWConjectureHolds;
+    bool flagSlTwoIsSmall;
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisCentralizerOfHInP;
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisCentralizerOfH;
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisCentralizerOfSl2;
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisCentralizerOfSl2InP;
+    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisCentralizerOfSl2InK;
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisOrthogonalComplementOfCentralizerOfSl2InP;
+    // The vector space whose basis is below is called W, from where the WConjecture derives its name.
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisOrthogonalComplementOfCentralizerOfSl2InPIntersectedWithCentralizerOfHInP;
+    // A human-readable math formula that describes w_1, w_2 \in W
+    // such that [w_1, w_2] \in the centralizer of sl(2) in k.
+    List<std::string> triplesNotViolatingWConjecture;
+    // Same as above but with [w_1, w_2] \notin the centralizer of sl(2) in k.
+    List<std::string> triplesViolatingWConjecture;
+    WConjecture();
     void compute(CandidateSemisimpleSubalgebra& owner, SlTwoSubalgebra& ownerSl2);
+    void processOnePair( int indexLeft, int indexRight);
     std::string toString(const CandidateSemisimpleSubalgebra& owner) const;
+    std::string toStringLieBracketTriples(const List<std::string>& triple) const;
+    void computeSmallOrbits(const CandidateSemisimpleSubalgebra& owner);
   };
   WConjecture wConjecture;
   bool flagDeallocated;
@@ -446,12 +464,16 @@ public:
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basisKAmbient;
     Matrix<Rational> killingForm;
     Matrix<AlgebraicNumber> killingFormRescaled;
+    int numberOfSmallSlTwos;
     std::string toStringRealForm(const SemisimpleSubalgebras& owner) const;
     std::string toStringElementSemisimpleLieAlgebraOrMatrix(
       const SemisimpleSubalgebras& owner,
-      const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& input
+      const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& input,
+      const std::string& notationLetter
     ) const;
-    void compute(SemisimpleSubalgebras& owner);
+    void computeBeforeSubalgebras(SemisimpleSubalgebras& owner);
+    void computeAfterSubalgebras(SemisimpleSubalgebras& owner);
+    bool wConjectureHolds(SemisimpleSubalgebras& owner);
   };
   WConjecture wConjecture;
 
@@ -533,9 +555,8 @@ public:
   SemisimpleSubalgebras(): flagDeallocated(false) {
     this->resetPointers();
   }
-  void addSubalgebraIfNewSetToStackTop(CandidateSemisimpleSubalgebra& input);
-  void addSubalgebraToStack(
-    CandidateSemisimpleSubalgebra& input,
+  CandidateSemisimpleSubalgebra* addSubalgebraIfNewSetToStackTop(const CandidateSemisimpleSubalgebra& input);
+  void addSubalgebraToStack(CandidateSemisimpleSubalgebra& input,
     int inputNumberOfLargerTypesExplored,
     int inputNumberOfHCandidatesExplored
   );
@@ -613,6 +634,9 @@ public:
   bool computeStructureRealFormsSlTwos();
   bool computeStructureRealFormOneSlTwo(
     SlTwoSubalgebra& input
+  );
+  bool computeStructureRealFormOneSlTwoPartTwo(
+    CandidateSemisimpleSubalgebra& added, SlTwoSubalgebra& input
   );
   bool computeStructureRealFormsInitialize(
     SemisimpleLieAlgebra& newOwner,

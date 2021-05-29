@@ -184,8 +184,8 @@ public:
   bool checkInitialization() const;
   bool checkConsistency() const;
   bool checkScalarProductMatrixOrdered() const;
-  Vector<Rational> getFundamentalCoordinatessOverSubalgebraSemisimplePart(const Vector<Rational>& inputGweightSimpleCoords) const;
-  Vector<Rational> getSimpleCoordinatesOverSubalgebraSemisimplePart(const Vector<Rational>& inputGweightSimpleCoords) const;
+  Vector<Rational> getFundamentalCoordinatessOverSubalgebraSemisimplePart(const Vector<Rational>& inputGWeightSimpleCoordinates) const;
+  Vector<Rational> getSimpleCoordinatesOverSubalgebraSemisimplePart(const Vector<Rational>& inputGWeightSimpleCoordinates) const;
   inline int getNumberOfModules() const {
     return this->highestVectors.size;
   }
@@ -208,13 +208,13 @@ public:
   bool compareLeftGreaterThanRight(const Vector<Rational>& weightLeft, const Vector<Rational>& weightRight);
   bool rootIsInNilradicalParabolicCentralizer(Selection& positiveSimpleRootsSel, Vector<Rational>& input);
   void computeEpsilonCoordinatesWithRespectToSubalgebra();
-  bool attemptTheTripleTrick(ConeRelation& theRel, Vectors<Rational>& NilradicalRoots);
+  bool attemptTheTripleTrick(ConeRelation& relation, Vectors<Rational>& nilradicalRoots);
   bool attemptTheTripleTrickWRTSubalgebra(
     ConeRelation& relation, Vectors<Rational>& highestWeightsAllowed, Vectors<Rational>& nilradicalRoots
   );
   void extractRelations(
-    Matrix<Rational>& matA,
-    Matrix<Rational>& matX,
+    Matrix<Rational>& matrixA,
+    Matrix<Rational>& matrixX,
     Vectors<Rational>& nilradicalRoots,
     RootSubalgebras& owner,
     int indexInOwner,
@@ -310,7 +310,7 @@ public:
   std::string toStringLieBracketTable(bool useLaTeX, bool useHtml, RootSubalgebra& owner);
   bool rootsDefineSubalgebra(Vectors<Rational>& theRoots);
   void generateKModuleLieBracketTable(List<List<List<int> > >& output, List<int>& oppositeKmods);
-  void KModuleLieBracketKmodule(int index1, int index2, List<int>& oppositeKmods, List<int>& output);
+  void kModuleLieBracketKModule(int index1, int index2, List<int>& oppositeKModules, List<int>& output);
   void computeDynkinDiagramKAndCentralizer();
   bool checkRankInequality() const;
   bool computeEssentialsIfNew();

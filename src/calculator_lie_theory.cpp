@@ -3292,13 +3292,13 @@ bool CalculatorLieTheory::rootSubsystem(Calculator& calculator, const Expression
     outputRoots.addOnTop(currentRoot);
   }
   std::stringstream out;
-  DynkinDiagramRootSubalgebra theDiagram;
+  DynkinDiagramRootSubalgebra diagram;
   theWeyl.transformToSimpleBasisGenerators(outputRoots, theWeyl.rootSystem);
-  theDiagram.ambientBilinearForm = theWeyl.cartanSymmetric;
-  theDiagram.ambientRootSystem = theWeyl.rootSystem;
-  theDiagram.computeDiagramInputIsSimple(outputRoots);
-  out << "Diagram final: " << theDiagram.toString()
-  << ". Simple basis: " << theDiagram.simpleBasesConnectedComponents.toString();
+  diagram.ambientBilinearForm = theWeyl.cartanSymmetric;
+  diagram.ambientRootSystem = theWeyl.rootSystem;
+  diagram.computeDiagramInputIsSimple(outputRoots);
+  out << "Diagram final: " << diagram.toString()
+  << ". Simple basis: " << diagram.simpleBasesConnectedComponents.toString();
   return output.assignValue(out.str(), calculator);
 }
 

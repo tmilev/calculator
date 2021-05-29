@@ -470,7 +470,7 @@ void RootSubalgebra::generateKModuleLieBracketTable(List<List<List<int> > >& out
   for (int i = 0; i < this->modules.size; i ++) {
     output[i].setSize(this->modules.size);
     for (int j = 0; j < this->modules.size; j ++) {
-      this->KModuleLieBracketKmodule(i, j, oppositeKmods, output[i][j]);
+      this->kModuleLieBracketKModule(i, j, oppositeKmods, output[i][j]);
       if (report2.tickAndWantReport()) {
         std::stringstream out5;
         out5 << "Computing pairing table: " << i * this->modules.size + j + 1 << " out of " << numTotal;
@@ -491,21 +491,23 @@ bool RootSubalgebra::isARootOrZero(const Vector<Rational>& input) {
   return input.isEqualToZero() || this->isARoot(input);
 }
 
-void RootSubalgebra::KModuleLieBracketKmodule(int index1, int index2, List<int>& oppositeKmods, List<int>& output) {
-  MacroRegisterFunctionWithName("RootSubalgebra::KModuleLieBracketKmodule");
-  ElementSemisimpleLieAlgebra<Rational> theLieBracket;
+void RootSubalgebra::kModuleLieBracketKModule(
+  int index1, int index2, List<int>& oppositeKModules, List<int>& output
+) {
+  MacroRegisterFunctionWithName("RootSubalgebra::kModuleLieBracketKModule");
+  ElementSemisimpleLieAlgebra<Rational> lieBracket;
   output.size = 0;
   for (int i = 0; i < this->modules[index1].size; i ++) {
     for (int j = 0; j < this->modules[index2].size; j ++) {
       Vector<Rational>& leftWeight = this->weightsModulesPrimalSimple[index1][i];
       Vector<Rational>& rightWeight = this->weightsModulesPrimalSimple[index2][j];
-      this->getOwnerLieAlgebra().lieBracket(this->modules[index1][i],this->modules[index2][j], theLieBracket);
-      if (theLieBracket.isEqualToZero()) {
+      this->getOwnerLieAlgebra().lieBracket(this->modules[index1][i],this->modules[index2][j], lieBracket);
+      if (lieBracket.isEqualToZero()) {
         continue;
       }
-      if (theLieBracket.isElementCartan()) {
-        oppositeKmods[index1] = index2;
-        oppositeKmods[index2] = index1;
+      if (lieBracket.isElementCartan()) {
+        oppositeKModules[index1] = index2;
+        oppositeKModules[index2] = index1;
         continue;
       }
       Vector<Rational> weightSum= leftWeight +rightWeight;
@@ -519,18 +521,22 @@ void RootSubalgebra::KModuleLieBracketKmodule(int index1, int index2, List<int>&
   }
 }
 
-Vector<Rational> RootSubalgebra::getFundamentalCoordinatessOverSubalgebraSemisimplePart(const Vector<Rational>& inputGweightSimpleCoords) const {
-  MacroRegisterFunctionWithName("RootSubalgebra::GetFundamentalCoordsOverK");
+Vector<Rational> RootSubalgebra::getFundamentalCoordinatessOverSubalgebraSemisimplePart(
+  const Vector<Rational>& inputGWeightSimpleCoordinates
+) const {
+  MacroRegisterFunctionWithName("RootSubalgebra::getFundamentalCoordinatessOverSubalgebraSemisimplePart");
   Vector<Rational> output;
   output.makeZero(this->simpleRootsReductiveSubalgebra.size);
   for (int i = 0; i < this->simpleRootsReductiveSubalgebra.size; i ++) {
-    output[i] = this->getAmbientWeyl().rootScalarCartanRoot(inputGweightSimpleCoords, this->simpleRootsReductiveSubalgebra[i]) * 2 /
+    output[i] = this->getAmbientWeyl().rootScalarCartanRoot(inputGWeightSimpleCoordinates, this->simpleRootsReductiveSubalgebra[i]) * 2 /
     this->getAmbientWeyl().rootScalarCartanRoot(this->simpleRootsReductiveSubalgebra[i], this->simpleRootsReductiveSubalgebra[i]);
   }
   return output;
 }
 
-Vector<Rational> RootSubalgebra::getSimpleCoordinatesOverSubalgebraSemisimplePart(const Vector<Rational>& inputGweightSimpleCoords) const {
+Vector<Rational> RootSubalgebra::getSimpleCoordinatesOverSubalgebraSemisimplePart(
+  const Vector<Rational>& inputGWeightSimpleCoordinates
+) const {
   MacroRegisterFunctionWithName("RootSubalgebra::getSimpleCoordinatesOverSubalgebraSemisimplePart");
   Vector<Rational> result;
   result.makeZero(this->simpleRootsReductiveSubalgebra.size);
@@ -538,7 +544,7 @@ Vector<Rational> RootSubalgebra::getSimpleCoordinatesOverSubalgebraSemisimplePar
     return result;
   }
   for (int i = 0; i < this->simpleRootsReductiveSubalgebra.size; i ++) {
-    result[i] = this->getAmbientWeyl().rootScalarCartanRoot(inputGweightSimpleCoords, this->simpleRootsReductiveSubalgebra[i]);
+    result[i] = this->getAmbientWeyl().rootScalarCartanRoot(inputGWeightSimpleCoordinates, this->simpleRootsReductiveSubalgebra[i]);
   }
   this->scalarProdInvertedMatrixOrdered.actOnVectorColumn(result);
   return result;
@@ -596,9 +602,9 @@ void RootSubalgebra::computeModuleFromHighestVector(int moduleIndex) {
   if (this->highestWeightsPrimalSimple[moduleIndex].isEqualToZero()) {
     zeroSpace.addOnTop(this->highestVectors[moduleIndex].getCartanPart());
   } else {
-    for (int j = 0; j<currentWeights.size; j ++) {
-      for (int k = 0; k< this->simpleRootsReductiveSubalgebra.size; k++) {
-        currentWeight = currentWeights[j]-this->simpleRootsReductiveSubalgebra[k];
+    for (int j = 0; j < currentWeights.size; j ++) {
+      for (int k = 0; k < this->simpleRootsReductiveSubalgebra.size; k++) {
+        currentWeight = currentWeights[j] - this->simpleRootsReductiveSubalgebra[k];
         if (this->isARoot(currentWeight)) {
           currentWeights.addOnTopNoRepetition(currentWeight);
         }
@@ -611,7 +617,7 @@ void RootSubalgebra::computeModuleFromHighestVector(int moduleIndex) {
       }
     }
     currentWeight.makeZero(this->getOwnerLieAlgebra().getRank());
-    for (int i = 0; i <zeroSpace.size; i ++) {
+    for (int i = 0; i < zeroSpace.size; i ++) {
       currentWeights.addOnTop(currentWeight);
     }
   }
@@ -665,10 +671,10 @@ void RootSubalgebra::computeModulesFromHighestVectors() {
 void RootSubalgebra::computeModuleDecomposition() {
   MacroRegisterFunctionWithName("RootSubalgebra::computeModuleDecomposition");
   this->moduleDecompositionHighestWeights.makeZero();
-  Weight<Rational> theM;
+  Weight<Rational> weight;
   for (int i = 0; i < this->modules.size; i ++) {
-    theM.weightFundamentalCoordinates = this->highestWeightsNonPrimalFundamental[i];
-    this->moduleDecompositionHighestWeights.addMonomial(theM, 1);
+    weight.weightFundamentalCoordinates = this->highestWeightsNonPrimalFundamental[i];
+    this->moduleDecompositionHighestWeights.addMonomial(weight, 1);
   }
 }
 
@@ -684,11 +690,11 @@ void RootSubalgebra::computeKModules() {
   this->computeModuleDecomposition();
   this->computeModuleDecompositionAmbientAlgebraDimensionsOnly();
   //Handle the elements of the Cartan.
-  int dimFinal = 0;
+  int dimensionFinal = 0;
   for (int i = 0; i < this->modules.size; i ++) {
-    dimFinal += this->modules[i].size;
+    dimensionFinal += this->modules[i].size;
   }
-  if (dimFinal != this->getOwnerLieAlgebra().getNumberOfGenerators()) {
+  if (dimensionFinal != this->getOwnerLieAlgebra().getNumberOfGenerators()) {
     global.fatal << "Sum of k-module dimensions does not equal the dimension of the ambient Lie algebra. " << global.fatal;
   }
 }
@@ -717,10 +723,10 @@ bool RootSubalgebra::coneConditionHolds(
   Vectors<Rational>& kSingular,
   bool doextractRelations
 ) {
-  Matrix<Rational> tempA, tempB;
+  Matrix<Rational> matrixA, matrixB;
   if (Vectors<Rational>::conesIntersect(nilradicalRoots, kSingular, nullptr, nullptr)) {
     if (doextractRelations) {
-      this->extractRelations(tempA, tempB, nilradicalRoots, owner, indexInOwner, kSingular);
+      this->extractRelations(matrixA, matrixB, nilradicalRoots, owner, indexInOwner, kSingular);
     }
     return false;
   }
@@ -847,8 +853,8 @@ void RootSubalgebra::matrixToRelation(
 }
 
 void RootSubalgebra::extractRelations(
-  Matrix<Rational>& matA,
-  Matrix<Rational>& matX,
+  Matrix<Rational>& matrixA,
+  Matrix<Rational>& matrixX,
   Vectors<Rational>& nilradicalRoots,
   RootSubalgebras& owner,
   int indexInOwner,
@@ -871,7 +877,7 @@ void RootSubalgebra::extractRelations(
     owner.goodRelations.addRelationNoRepetition(relation, owner);
   } else {
     //if (!this->checkForSmallRelations(theRel, NilradicalRoots))
-    this->matrixToRelation(relation, matA, matX, dimension, nilradicalRoots);
+    this->matrixToRelation(relation, matrixA, matrixX, dimension, nilradicalRoots);
     this->makeGeneratingSingularVectors(relation, nilradicalRoots);
     relation.FixRightHandSide(*this, nilradicalRoots);
     relation.makeLookCivilized(*this);
@@ -903,17 +909,17 @@ void RootSubalgebra::extractRelations(
   }
 }
 
-bool RootSubalgebra::attemptTheTripleTrick(ConeRelation& theRel, Vectors<Rational>& NilradicalRoots) {
+bool RootSubalgebra::attemptTheTripleTrick(ConeRelation& relation, Vectors<Rational>& nilradicalRoots) {
   Vectors<Rational> tempRoots;
   tempRoots.size = 0;
   for (int i = 0; i < this->modules.size; i ++) {
     if (!this->nilradicalKModules.selected[i]) {
-      if (this->isGeneratingSingularVectors(i, NilradicalRoots)) {
+      if (this->isGeneratingSingularVectors(i, nilradicalRoots)) {
         tempRoots.addOnTop(this->highestWeightsPrimalSimple[i]);
       }
     }
   }
-  return this->attemptTheTripleTrickWRTSubalgebra(theRel, tempRoots, NilradicalRoots);
+  return this->attemptTheTripleTrickWRTSubalgebra(relation, tempRoots, nilradicalRoots);
 }
 
 bool RootSubalgebra::attemptTheTripleTrickWRTSubalgebra(
@@ -923,7 +929,7 @@ bool RootSubalgebra::attemptTheTripleTrickWRTSubalgebra(
   SelectionWithMaxMultiplicity selection;
   Vectors<Rational> chosenAlphas;
   int rank = this->getOwnerLieAlgebra().getRank();
-  DynkinDiagramRootSubalgebra theDiagram;
+  DynkinDiagramRootSubalgebra diagram;
   for (int i = 2; i <= MathRoutines::maximum(highestWeightsAllowed.size, rank); i ++) {
     selection.initMaxMultiplicity(highestWeightsAllowed.size, i);
     LargeInteger numberOfElements = selection.numberOfCombinationsOfCardinality(i);
@@ -944,11 +950,11 @@ bool RootSubalgebra::attemptTheTripleTrickWRTSubalgebra(
         )) {
           int startNumBetas = relation.betas.size;
           chosenAlphas.addListOnTop(relation.betas);
-          theDiagram.computeDiagramTypeModifyInput(chosenAlphas, this->getAmbientWeyl());
-          int rank = theDiagram.rankTotal();
+          diagram.computeDiagramTypeModifyInput(chosenAlphas, this->getAmbientWeyl());
+          int rank = diagram.rankTotal();
           if (
-            rank > 4 || theDiagram.toString() == "B^{2}_4" ||
-            theDiagram.toString() == "C^{2}_4"
+            rank > 4 || diagram.toString() == "B^{2}_4" ||
+            diagram.toString() == "C^{2}_4"
           ) {
             int goalNumBetas = 2;
             relation.betas.size = 0; relation.betaCoefficients.size = 0;
@@ -1201,24 +1207,24 @@ bool RootSubalgebra::isAnIsomorphism(
   Vectors<Rational>* additionalDomain,
   Vectors<Rational>* additionalRange
 ) {
-  Matrix<Rational> matB;
+  Matrix<Rational> matrixB;
   Vectors<Rational> tempRoots;
   int dimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
   tempRoots.setSize(dimension);
-  matB.initialize(dimension, dimension);
+  matrixB.initialize(dimension, dimension);
   for (int i = 0; i < dimension; i ++) {
     for (int j = 0; j < dimension; j ++) {
-      matB.elements[i][j] = domain[i][j];
+      matrixB.elements[i][j] = domain[i][j];
     }
     tempRoots[i].makeZero(dimension);
   }
-  matB.invert();
+  matrixB.invert();
   Rational tempRat2;
   for (int k = 0; k < dimension; k ++) {
     for (int i = 0; i < dimension; i ++) {
       for (int j = 0; j < dimension; j ++) {
         tempRat2 = range[j][k];
-        tempRat2.multiplyBy(matB.elements[i][j]);
+        tempRat2.multiplyBy(matrixB.elements[i][j]);
         tempRoots[i][k] += tempRat2;
       }
     }
@@ -1344,7 +1350,8 @@ std::string RootSubalgebra::toString(FormatExpressions* format) {
   out << "<br>Heirs rejected due to having symmetric Cartan type outside "
   << "of list dictated by parabolic heirs: " << this->numHeirsRejectedBadAngleS
   << "<br>Heirs rejected due to not being maximally dominant: " << this->numHeirsRejectedNotMaximallyDominant
-  << "<br>Heirs rejected due to not being maximal with respect to small Dynkin diagram automorphism that extends to "
+  << "<br>Heirs rejected due to not being maximal "
+  << "with respect to small Dynkin diagram automorphism that extends to "
   << "ambient automorphism: " << this->numHeirsRejectedNotMaximallyDominant
   << "<br>Heirs rejected due to having ambient Lie algebra "
   << "decomposition iso to an already found subalgebra: " << this->numHeirsRejectedSameModuleDecompo;

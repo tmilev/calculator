@@ -1092,8 +1092,8 @@ void SubgroupDataRootReflections::makeFromRoots(WeylGroupData& G, const Vectors<
   this->theSubgroupData.makeSubgroupOf(G.group);
   this->theWeylData = &G;
   this->generatingSimpleRoots = inputRootReflections;
-  DynkinDiagramRootSubalgebra theDiagram;
-  theDiagram.computeDiagramTypeModifyInput(this->generatingSimpleRoots, G);
+  DynkinDiagramRootSubalgebra diagram;
+  diagram.computeDiagramTypeModifyInput(this->generatingSimpleRoots, G);
   int d = this->generatingSimpleRoots.size;
   this->SubCartanSymmetric.initialize(d, d);
   for (int ii = 0; ii < d; ii ++) {
@@ -1105,7 +1105,7 @@ void SubgroupDataRootReflections::makeFromRoots(WeylGroupData& G, const Vectors<
   }
   this->computeDynkinType();
   DynkinType verificationType;
-  theDiagram.getDynkinType(verificationType);
+  diagram.getDynkinType(verificationType);
   if (this->theDynkinType != verificationType) {
     global.fatal << "Two different comptuations of the Dynkin type a set of roots did not coincide. " << global.fatal;
   }

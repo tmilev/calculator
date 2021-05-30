@@ -4100,6 +4100,8 @@ class BoundingBox {
     this.heightBeforeTransform = - 1;
     /** @type{number}*/
     this.widthBeforeTransform = - 1;
+    /** @type{number}*/
+    this.fontSizeInPixels = 0;
   }
 
   /** @returns {number} */
@@ -4196,10 +4198,6 @@ class MathNode {
     this.latexExtraStyle = "";
     /** @type{Object} Reserved for data specific to particular MathNode types.*/
     this.extraData = null;
-  }
-
-  fontSizeRatioToPercentString() {
-    return `${this.type.fontSizeRatio * 100}%`
   }
 
   createDOMElementIfMissing() {
@@ -4321,7 +4319,7 @@ class MathNode {
       this.element.style.fontWeight = this.type.fontWeight;
     }
     if (this.type.fontSizeRatio !== 1) {
-      this.element.style.fontSize = this.fontSizeRatioToPercentString();
+      this.element.style.fontSize = `${this.type.fontSizeRatio * 100}%`;
     }
     if (this.initialContent !== "") {
       if (this.type.type === knownTypes.formInput.type) {
@@ -7526,8 +7524,9 @@ class MathNode {
     result.setAttributeNS(null, "x", boundingBoxFromParent.left + this.boundingBox.left);
     result.setAttributeNS(null, "y", boundingBoxFromParent.top + this.boundingBox.top + this.boundingBox.fractionLineHeight);
     result.setAttributeNS(null, "fill", "red");
-    if (this.type.fontSizeRatio != 1) {
-      result.setAttributeNS(null, "font-size", this.fontSizeRatioToPercentString());
+    let fontSize = this.type.fontSizeRatio * boundingBoxFromParent.fontSizeInPixels;
+    if (fontSize != 0) {
+      result.setAttributeNS(null, "font-size", `${fontSize}px`);
     }
     result.appendChild(document.createTextNode(this.textContentOrInitialContent()));
 
@@ -7543,6 +7542,7 @@ class MathNode {
     let shiftedBoundingBox = new BoundingBox();
     shiftedBoundingBox.left = this.boundingBox.left + boundingBoxFromParent.left;
     shiftedBoundingBox.top = this.boundingBox.top + boundingBoxFromParent.top;
+    shiftedBoundingBox.fontSizeInPixels = this.type.fontSizeRatio * boundingBoxFromParent.fontSizeInPixels;
     for (let i = 0; i < this.children.length; i++) {
       this.children[i].toScalableVectorGraphics(container, shiftedBoundingBox);
     }
@@ -7973,7 +7973,6 @@ class MathNodeHorizontalMath extends MathNode {
     for (let i = 0; i < this.children.length; i++) {
       let child = this.children[i];
       child.toScalableVectorGraphics(container, boundingBoxForChildren);
-      // boundingBoxForChildren.left = boundingBoxFromParent.left + child.boundingBox.left + child.boundingBox.width;
     }
   }
 }
@@ -8014,6 +8013,19 @@ class MathNodeRoot extends MathNode {
     } else {
       this.boundingBox.height += this.boundingBox.fractionLineHeight * 2 - lineHeight;
     }
+  }
+
+  toScalableVectorGraphics(
+    /**@type{SVGElement}*/
+    container,
+    /**@type{BoundingBox} */
+    boundingBoxFromParent,
+  ) {
+    let boundingBox = new BoundingBox();
+    boundingBox.top = boundingBoxFromParent.top;
+    boundingBox.left = boundingBoxFromParent.left;
+    boundingBox.fontSizeInPixels = parseInt(window.getComputedStyle(this.element, null).getPropertyValue("font-size"));
+    this.children[0].toScalableVectorGraphics(container, boundingBox);
   }
 }
 

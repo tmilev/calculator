@@ -1256,7 +1256,9 @@ bool SemisimpleSubalgebras::computeStructureRealFormsSlTwos() {
   this->flagRealForms = true;
   this->wConjecture.computeBeforeSubalgebras(*this);
   for (int i = 0; i < this->slTwoSubalgebras.size; i ++) {
-    this->computeStructureRealFormOneSlTwo(this->slTwoSubalgebras.getElement(i));
+    this->computeStructureRealFormOneSlTwo(
+      this->slTwoSubalgebras.getElement(i), i
+    );
   }
   this->wConjecture.computeAfterSubalgebras(*this);
   return true;
@@ -1288,11 +1290,12 @@ void SemisimpleSubalgebras::makeCandidateFromSlTwo(
 }
 
 bool SemisimpleSubalgebras::computeStructureRealFormOneSlTwo(
-  SlTwoSubalgebra& input
+  SlTwoSubalgebra& input, int indexInSlTwos
 ) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::computeStructureRealFormOneSlTwo");
   CandidateSemisimpleSubalgebra candidate;
   this->makeCandidateFromSlTwo(input, candidate);
+  candidate.indexInSlTwos = indexInSlTwos;
   candidate.positiveGenerators.addOnTop(input.eKostantSekiguchi);
   candidate.negativeGenerators.addOnTop(input.fKostantSekiguchi);
   candidate.flagSystemSolved = true;
@@ -1544,6 +1547,10 @@ bool CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra(
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra");
   this->setUpInjectionHs(baseSubalgebra, newType, rootInjection, &newHRescaledToActByTwo);
   this->indexInducedFrom = baseSubalgebra.indexInOwner;
+  if (this->getRank() == 1) {
+    this->indexInSlTwos = - 1;
+    this->owner->slTwoSubalgebras.containsSl2WithGivenH(newHRescaledToActByTwo, &this->indexInSlTwos);
+  }
   this->rootInjectionsFromInducer = rootInjection;
   //induction history is complete.
   if (this->owner->setUpParabolicInductionDataPrecomputedSubalgebra(*this)) {
@@ -3586,6 +3593,7 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecomposition() {
 void CandidateSemisimpleSubalgebra::reset(SemisimpleSubalgebras* inputOwner) {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::reset");
   this->owner = inputOwner;
+  this->indexInSlTwos = - 1;
   this->indexInOwner = - 1;
   this->indexInducedFrom = - 1;
   this->indexNonEmbeddedMeNonStandardCartan = - 1;
@@ -7427,6 +7435,12 @@ std::string CandidateSemisimpleSubalgebra::toString(
   out << this->comments;
   if (this->isRegularSubalgebra()) {
     out << "<br>The subalgebra is regular (= the semisimple part of a root subalgebra). ";
+  }
+  if (this->indexInSlTwos != - 1) {
+    out << "<hr style='max-width:300px;margin:0px;'>"
+    << "This is an <b>sl(2) subalgebra</b>; details follow [info from sl(2) tables].<br>";
+    out << this->owner->slTwoSubalgebras[this->indexInSlTwos].toString();
+    out << "<hr style='max-width:300px;margin:0px;'>";
   }
   if (this->indexInducedFrom != - 1) {
     out << "<br>Subalgebra is (parabolically) induced from "

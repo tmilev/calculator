@@ -145,6 +145,8 @@ public:
   SemisimpleSubalgebras* owner;
   int indexInOwner;
   int indexInducedFrom;
+  // If the subalgebra is an sl(2), contains its location in the sl2Subalgebras array, else equals -1.
+  int indexInSlTwos;
   List<int> rootInjectionsFromInducer;
   int indexNonEmbeddedMeStandard;
   int indexNonEmbeddedMeNonStandardCartan;
@@ -633,7 +635,8 @@ public:
   );
   bool computeStructureRealFormsSlTwos();
   bool computeStructureRealFormOneSlTwo(
-    SlTwoSubalgebra& input
+    SlTwoSubalgebra& input,
+    int indexInSlTwos
   );
   bool computeStructureRealFormOneSlTwoPartTwo(
     CandidateSemisimpleSubalgebra& added, SlTwoSubalgebra& input

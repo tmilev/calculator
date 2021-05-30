@@ -909,7 +909,7 @@ class MathNodeFactory {
     subscript,
   ) {
     let result = new MathNodeOperatorWithSubscript(equationEditor);
-    let subscriptNode = new MathNode(equationEditor, knownTypes.operatorSubscript);
+    let subscriptNode = new MathNodeOperatorSubscript(equationEditor);
     let subscriptScale = 0.8;
     subscriptNode.type.fontSizeRatio = subscriptScale;
     subscriptNode.type.minHeightScale = subscriptScale;
@@ -4198,6 +4198,10 @@ class MathNode {
     this.extraData = null;
   }
 
+  fontSizeRatioToPercentString() {
+    return `${this.type.fontSizeRatio * 100}%`
+  }
+
   createDOMElementIfMissing() {
     if (this.element !== null) {
       // Element already created;
@@ -4317,7 +4321,7 @@ class MathNode {
       this.element.style.fontWeight = this.type.fontWeight;
     }
     if (this.type.fontSizeRatio !== 1) {
-      this.element.style.fontSize = `${this.type.fontSizeRatio * 100}%`;
+      this.element.style.fontSize = this.fontSizeRatioToPercentString();
     }
     if (this.initialContent !== "") {
       if (this.type.type === knownTypes.formInput.type) {
@@ -6290,25 +6294,6 @@ class MathNode {
     return true;
   }
 
-  /** @returns {boolean} whether reduction occurred. */
-  applyBackspaceToTheLeftEndOfOperatorSubscript() {
-    let operatorWithSuperAndSubscript = this.parent;
-    let superscript = operatorWithSuperAndSubscript.children[0];
-    let subscript = operatorWithSuperAndSubscript.children[2];
-    let horizontal = mathNodeFactory.horizontalMathFromArray(
-      this.equationEditor,
-      [superscript.children[0], subscript.children[0]],
-    );
-    horizontal.normalizeHorizontalMath();
-    let parent = operatorWithSuperAndSubscript.parent;
-    let indexOperator = operatorWithSuperAndSubscript.indexInParent;
-    parent.replaceChildAtPosition(indexOperator, horizontal);
-    parent.normalizeHorizontalMath();
-    parent.updateDOM();
-    parent.focusRestore();
-    return true;
-  }
-
   /** @returns {boolean} whether backspace was applied */
   applyBackspaceToTheLeftHorizontalMathParent() {
     let parent = this.parent;
@@ -7394,7 +7379,7 @@ class MathNode {
     return sibling.focus(- endToFocus);
   }
 
-  /** @returns {boolean} whether focus request was find. */
+  /** @returns {boolean} whether focus request was found. */
   focusCancelOnce() {
     if (this.desiredCaretPosition !== - 1) {
       this.desiredCaretPosition = - 1;
@@ -7541,9 +7526,11 @@ class MathNode {
     result.setAttributeNS(null, "x", boundingBoxFromParent.left + this.boundingBox.left);
     result.setAttributeNS(null, "y", boundingBoxFromParent.top + this.boundingBox.top + this.boundingBox.fractionLineHeight);
     result.setAttributeNS(null, "fill", "red");
-    // result.style.color = "blue";
-    //    result.
+    if (this.type.fontSizeRatio != 1) {
+      result.setAttributeNS(null, "font-size", this.fontSizeRatioToPercentString());
+    }
     result.appendChild(document.createTextNode(this.textContentOrInitialContent()));
+
     container.appendChild(result);
   }
 
@@ -7986,7 +7973,7 @@ class MathNodeHorizontalMath extends MathNode {
     for (let i = 0; i < this.children.length; i++) {
       let child = this.children[i];
       child.toScalableVectorGraphics(container, boundingBoxForChildren);
-      boundingBoxForChildren.left = boundingBoxFromParent.left + child.boundingBox.left + child.boundingBox.width;
+      // boundingBoxForChildren.left = boundingBoxFromParent.left + child.boundingBox.left + child.boundingBox.width;
     }
   }
 }
@@ -8728,8 +8715,27 @@ class MathNodeOperatorWithSuperAndSubscript extends MathNode {
     }
     return new LatexWithAnnotation(result);
   }
+
   applyBackspaceToTheRight() {
     return this.applyBackspaceToTheRightAsLeftArrow();
+  }
+
+  /** @returns {boolean} whether reduction occurred. */
+  applyBackspaceToTheLeftEndOfOperatorSubscript() {
+    let superscript = this.children[0];
+    let subscript = this.children[2];
+    let horizontal = mathNodeFactory.horizontalMathFromArray(
+      this.equationEditor,
+      [superscript.children[0], subscript.children[0]],
+    );
+    horizontal.normalizeHorizontalMath();
+    let parent = this.parent;
+    let indexOperator = this.indexInParent;
+    parent.replaceChildAtPosition(indexOperator, horizontal);
+    parent.normalizeHorizontalMath();
+    parent.updateDOM();
+    parent.focusRestore();
+    return true;
   }
 }
 
@@ -8762,6 +8768,24 @@ class MathNodeOperatorWithSubscript extends MathNode {
   ) {
     super(equationEditor, knownTypes.operatorWithSubscript);
   }
+
+  /** @returns {boolean} whether reduction occurred. */
+  applyBackspaceToTheLeftEndOfOperatorSubscript() {
+    let subscript = this.children[1];
+    let horizontal = mathNodeFactory.horizontalMathFromArray(
+      this.equationEditor,
+      [subscript.children[0]],
+    );
+    horizontal.normalizeHorizontalMath();
+    let parent = this.parent;
+    let indexOperator = this.indexInParent;
+    parent.replaceChildAtPosition(indexOperator, horizontal);
+    parent.normalizeHorizontalMath();
+    parent.updateDOM();
+    parent.focusRestore();
+    return true;
+  }
+
 }
 
 class MathNodeOperatorSubscript extends MathNode {
@@ -8771,8 +8795,9 @@ class MathNodeOperatorSubscript extends MathNode {
   ) {
     super(equationEditor, knownTypes.operatorSubscript);
   }
+
   applyBackspaceToTheLeft() {
-    return this.applyBackspaceToTheLeftEndOfOperatorSubscript();
+    return this.parent.applyBackspaceToTheLeftEndOfOperatorSubscript();
   }
 }
 
@@ -8783,8 +8808,9 @@ class MathNodeOperatorSuperscript extends MathNode {
   ) {
     super(equationEditor, knownTypes.operatorSuperscript);
   }
+
   applyBackspaceToTheLeft() {
-    return this.applyBackspaceToTheLeftEndOfOperatorSubscript();
+    return this.parent.applyBackspaceToTheLeftEndOfOperatorSubscript();
   }
 }
 

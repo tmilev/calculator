@@ -30,7 +30,6 @@ class MathNodeType {
     this.normalizeConstructorInput(input);
     this.arrows = input["arrows"];
     this.type = input["type"];
-    this.minHeightScale = input["minHeightScale"];
     this.width = input["width"];
     this.height = input["height"];
     this.display = input["display"];
@@ -82,7 +81,6 @@ const knownTypeDefaults = {
   "height": "",
   "minWidth": "",
   "display": "inline-block",
-  "minHeightScale": 0,
   "verticalAlign": "",
   "fontSizeRatio": 1,
   "fontWeight": "",
@@ -242,7 +240,6 @@ const knownTypes = {
     "type": "numerator",
     "borderBottom": "1px solid black",
     "fontSizeRatio": defaultFractionScale,
-    "minHeightScale": defaultFractionScale,
     "arrows": {
       "ArrowUp": arrowMotion.firstAtomToTheLeft,
       "ArrowDown": arrowMotion.firstAtomToTheRight,
@@ -254,7 +251,6 @@ const knownTypes = {
   denominator: new MathNodeType({
     "type": "denominator",
     "fontSizeRatio": defaultFractionScale,
-    "minHeightScale": defaultFractionScale,
     "arrows": {
       "ArrowUp": arrowMotion.firstAtomToTheLeft,
       "ArrowDown": arrowMotion.firstAtomToTheRight,
@@ -275,7 +271,6 @@ const knownTypes = {
   exponent: new MathNodeType({
     "type": "exponent",
     "fontSizeRatio": 0.75,
-    "minHeightScale": 0.75,
   }),
   baseWithSubscript: new MathNodeType({
     "type": "baseWithSubscript",
@@ -320,7 +315,6 @@ const knownTypes = {
   subscript: new MathNodeType({
     "type": "subscript",
     "fontSizeRatio": 0.75,
-    "minHeightScale": 0.75,
   }),
   sqrt: new MathNodeType({
     "type": "sqrt",
@@ -344,7 +338,6 @@ const knownTypes = {
   radicalExponentBox: new MathNodeType({
     "type": "radicalExponentBox",
     "fontSizeRatio": 0.75,
-    "minHeightScale": 0.75,
   }),
   radicalUnderBox: new MathNodeType({
     "type": "radicalUnderBox",
@@ -371,17 +364,14 @@ const knownTypes = {
   operatorStandalone: new MathNodeType({
     "type": "operatorStandalone",
     "fontSizeRatio": 1.8,
-    "minHeightScale": 1.8,
   }),
   operatorSubscript: new MathNodeType({
     "type": "operatorSubscript",
     "fontSizeRatio": 0.55,
-    "minHeightScale": 0.55,
   }),
   operatorSuperscript: new MathNodeType({
     "type": "operatorSuperscript",
     "fontSizeRatio": 0.55,
-    "minHeightScale": 0.55,
   }),
 };
 
@@ -912,11 +902,9 @@ class MathNodeFactory {
     let subscriptNode = new MathNodeOperatorSubscript(equationEditor);
     let subscriptScale = 0.8;
     subscriptNode.type.fontSizeRatio = subscriptScale;
-    subscriptNode.type.minHeightScale = subscriptScale;
     let operatorNode = new MathNode(equationEditor, knownTypes.operatorStandalone);
     let operatorScale = 1;
     operatorNode.type.fontSizeRatio = operatorScale;
-    operatorNode.type.minHeightScale = operatorScale;
     subscriptNode.appendChild(this.horizontalMath(equationEditor, subscript));
     operatorNode.appendChild(this.atomImmutable(equationEditor, operator));
     result.appendChild(operatorNode);
@@ -4210,7 +4198,6 @@ class MathNode {
     } else {
       this.element = document.createElement("div");
     }
-    const fontSize = 20;
     if (
       (this.type.type === knownTypes.eventCatcher.type || this.type.type === knownTypes.atom.type) &&
       this.equationEditor.options.editable
@@ -4294,9 +4281,6 @@ class MathNode {
     this.element.style.width = this.type.width;
     this.element.style.height = this.type.height;
     this.element.style.display = this.type.display;
-    if (this.type.minHeightScale !== 0) {
-      this.element.style.minHeight = this.type.minHeightScale * fontSize / 1.6;
-    }
     if (this.type.minWidth !== "") {
       this.element.style.minWidth = this.type.minWidth;
     }
@@ -4735,21 +4719,6 @@ class MathNode {
     base.boundingBox.top = superscript.boundingBox.height + brace.boundingBox.height;
   }
 
-  computeDimensionsFraction() {
-    let numerator = this.children[0];
-    let denominator = this.children[1];
-    let extraSpaceBetweenNumeratorAndDenominator = 3;
-    this.boundingBox.fractionLineHeight = numerator.boundingBox.height + 1;
-    this.boundingBox.height = numerator.boundingBox.height + denominator.boundingBox.height + extraSpaceBetweenNumeratorAndDenominator;
-    this.boundingBox.width = Math.max(numerator.boundingBox.width, denominator.boundingBox.width) + 4;
-    this.boundingBox.needsMiddleAlignment = true;
-    numerator.boundingBox.width = this.boundingBox.width;
-    denominator.boundingBox.width = this.boundingBox.width;
-    denominator.boundingBox.top = numerator.boundingBox.height + extraSpaceBetweenNumeratorAndDenominator;
-    numerator.computeBoundingBoxLeftSingleChild();
-    denominator.computeBoundingBoxLeftSingleChild();
-  }
-
   computeDimensionsOperatorStandalone() {
     let child = this.children[0];
     // see latexConstants.operatorWithSuperAndSubscript
@@ -5075,10 +5044,6 @@ class MathNode {
     }
     if (this.type.type === knownTypes.radicalUnderBox.type) {
       this.computeDimensionsRadicalUnderBox();
-      return;
-    }
-    if (this.type.type === knownTypes.fraction.type) {
-      this.computeDimensionsFraction();
       return;
     }
     if (this.type.type === knownTypes.operatorWithSuperAndSubscript.type) {
@@ -7514,6 +7479,17 @@ class MathNode {
     return ancestor.type.type !== knownTypes.root.type;
   }
 
+  boundingBoxForChildren(
+    /**@type{BoundingBox} */
+    boundingBoxFromParent,
+  ) {
+    let result = new BoundingBox();
+    result.left = this.boundingBox.left + boundingBoxFromParent.left;
+    result.top = this.boundingBox.top + boundingBoxFromParent.top;
+    result.fontSizeInPixels = this.type.fontSizeRatio * boundingBoxFromParent.fontSizeInPixels;
+    return result;
+  }
+
   toScalableVectorGraphicsAtomic(
     /**@type{SVGElement}*/
     container,
@@ -7522,15 +7498,28 @@ class MathNode {
   ) {
     let result = document.createElementNS("http://www.w3.org/2000/svg", "text");
     result.setAttributeNS(null, "x", boundingBoxFromParent.left + this.boundingBox.left);
-    result.setAttributeNS(null, "y", boundingBoxFromParent.top + this.boundingBox.top + this.boundingBox.fractionLineHeight);
+    let height = boundingBoxFromParent.top + this.boundingBox.top + this.boundingBox.height;
+    result.setAttributeNS(null, "y", height);
+    result.setAttributeNS(null, "alignment-baseline", "text-bottom");
     result.setAttributeNS(null, "fill", "red");
     let fontSize = this.type.fontSizeRatio * boundingBoxFromParent.fontSizeInPixels;
     if (fontSize != 0) {
       result.setAttributeNS(null, "font-size", `${fontSize}px`);
     }
     result.appendChild(document.createTextNode(this.textContentOrInitialContent()));
-
     container.appendChild(result);
+  }
+
+  toScalableVectorGraphicsBase(
+    /**@type{SVGElement}*/
+    container,
+    /**@type{BoundingBox} */
+    boundingBoxFromParent,
+  ) {
+    let shiftedBoundingBox = this.boundingBoxForChildren(boundingBoxFromParent);
+    for (let i = 0; i < this.children.length; i++) {
+      this.children[i].toScalableVectorGraphics(container, shiftedBoundingBox);
+    }
   }
 
   toScalableVectorGraphics(
@@ -7539,13 +7528,7 @@ class MathNode {
     /**@type{BoundingBox} */
     boundingBoxFromParent,
   ) {
-    let shiftedBoundingBox = new BoundingBox();
-    shiftedBoundingBox.left = this.boundingBox.left + boundingBoxFromParent.left;
-    shiftedBoundingBox.top = this.boundingBox.top + boundingBoxFromParent.top;
-    shiftedBoundingBox.fontSizeInPixels = this.type.fontSizeRatio * boundingBoxFromParent.fontSizeInPixels;
-    for (let i = 0; i < this.children.length; i++) {
-      this.children[i].toScalableVectorGraphics(container, shiftedBoundingBox);
-    }
+    this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
   }
 
   toString() {
@@ -7815,6 +7798,37 @@ class MathNodeFraction extends MathNode {
     equationEditor,
   ) {
     super(equationEditor, knownTypes.fraction);
+    this.extraSpaceBetweenNumeratorAndDenominator = 3;
+  }
+
+  computeDimensions() {
+    let numerator = this.children[0];
+    let denominator = this.children[1];
+    this.boundingBox.fractionLineHeight = numerator.boundingBox.height + 1;
+    this.boundingBox.height = numerator.boundingBox.height + denominator.boundingBox.height + this.extraSpaceBetweenNumeratorAndDenominator;
+    this.boundingBox.width = Math.max(numerator.boundingBox.width, denominator.boundingBox.width) + 4;
+    this.boundingBox.needsMiddleAlignment = true;
+    numerator.boundingBox.width = this.boundingBox.width;
+    denominator.boundingBox.width = this.boundingBox.width;
+    denominator.boundingBox.top = numerator.boundingBox.height + this.extraSpaceBetweenNumeratorAndDenominator;
+    numerator.computeBoundingBoxLeftSingleChild();
+    denominator.computeBoundingBoxLeftSingleChild();
+  }
+
+  toScalableVectorGraphics(
+    /**@type{SVGElement}*/
+    container,
+    /**@type{BoundingBox} */
+    boundingBoxFromParent,
+  ) {
+    this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
+    let result = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    result.setAttributeNS(null, "x1", boundingBoxFromParent.left + this.boundingBox.left);
+    result.setAttributeNS(null, "x2", boundingBoxFromParent.left + this.boundingBox.left + this.boundingBox.width);
+    result.setAttributeNS(null, "y1", boundingBoxFromParent.top + this.boundingBox.fractionLineHeight);
+    result.setAttributeNS(null, "y2", boundingBoxFromParent.top + this.boundingBox.fractionLineHeight);
+    result.setAttributeNS(null, "stroke", "black");
+    container.appendChild(result);
   }
 
   /** @returns {LatexWithAnnotation} */
@@ -7841,6 +7855,7 @@ class MathNodeFraction extends MathNode {
   applyBackspaceToTheRight() {
     return this.applyBackspaceToTheRightAsLeftArrow();
   }
+
 }
 
 class MathNodeNumerator extends MathNode {
@@ -7967,12 +7982,10 @@ class MathNodeHorizontalMath extends MathNode {
     /**@type{BoundingBox} */
     boundingBoxFromParent,
   ) {
-    let boundingBoxForChildren = new BoundingBox();
-    boundingBoxForChildren.top = this.boundingBox.top + boundingBoxFromParent.top;
-    boundingBoxForChildren.left = this.boundingBox.left + boundingBoxFromParent.left;
+    let boundingBox = this.boundingBoxForChildren(boundingBoxFromParent);
     for (let i = 0; i < this.children.length; i++) {
       let child = this.children[i];
-      child.toScalableVectorGraphics(container, boundingBoxForChildren);
+      child.toScalableVectorGraphics(container, boundingBox);
     }
   }
 }
@@ -8025,6 +8038,9 @@ class MathNodeRoot extends MathNode {
     boundingBox.top = boundingBoxFromParent.top;
     boundingBox.left = boundingBoxFromParent.left;
     boundingBox.fontSizeInPixels = parseInt(window.getComputedStyle(this.element, null).getPropertyValue("font-size"));
+    // It seems that tall elements are clipped.
+    // TODO(tmilev): figure out how this works.
+    // boundingBox.top += boundingBox.fontSizeInPixels / 5;
     this.children[0].toScalableVectorGraphics(container, boundingBox);
   }
 }
@@ -8203,6 +8219,7 @@ class MathNodeFormInput extends MathNode {
     this.name = name;
     this.initialContent = this.value;
   }
+
   computeDimensions() {
     this.computeDimensionsStandard();
     this.boundingBox.height = this.equationEditor.standardAtomHeight;
@@ -8230,6 +8247,7 @@ class MathNodeExponent extends MathNode {
   ) {
     super(equationEditor, knownTypes.exponent);
   }
+
   applyBackspaceToTheLeft() {
     return this.applyBackspaceToTheLeftChildWithSiblingWrapper();
   }
@@ -8242,6 +8260,7 @@ class MathNodeSubscript extends MathNode {
   ) {
     super(equationEditor, knownTypes.subscript);
   }
+
   applyBackspaceToTheLeft() {
     return this.applyBackspaceToTheLeftChildWithSiblingWrapper();
   }
@@ -8376,6 +8395,7 @@ class MathNodeAbsoluteValue extends MathNodeDelimiterMark {
     super(equationEditor, left);
     this.left = left;
   }
+
   verticallyStretch(
     /** @type {number}*/
     heightToEnclose,
@@ -8486,6 +8506,7 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
     super(equationEditor, left);
     this.left = left;
   }
+
   verticallyStretch(
     /** @type {number}*/
     heightToEnclose,
@@ -8525,6 +8546,7 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
     super(equationEditor, left);
     this.left = left;
   }
+
   verticallyStretch(
     /** @type {number}*/
     heightToEnclose,
@@ -8797,7 +8819,6 @@ class MathNodeOperatorWithSubscript extends MathNode {
     parent.focusRestore();
     return true;
   }
-
 }
 
 class MathNodeOperatorSubscript extends MathNode {

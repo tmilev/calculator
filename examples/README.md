@@ -4551,7 +4551,7 @@ GetLinksToSimpleLieAlgebraPrintouts{}0
 ```
 Gets simple Lie algebra links to the calculator.
 
-*SlTwoRealFormStructure* [SlTwoRealFormStructure] {Calculator::slTwoRealFormStructureComputeOnDemand}. (admin only) 
+*SlTwoRealFormStructure* [SlTwoRealFormStructure] {Calculator::slTwoRealFormStructureComputeOnDemand}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22SlTwoRealFormStructure%7b%7d%28a_3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 SlTwoRealFormStructure{}(a_3)

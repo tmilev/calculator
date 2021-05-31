@@ -7500,8 +7500,7 @@ class MathNode {
     result.setAttributeNS(null, "x", boundingBoxFromParent.left + this.boundingBox.left);
     let height = boundingBoxFromParent.top + this.boundingBox.top + this.boundingBox.height;
     result.setAttributeNS(null, "y", height);
-    result.setAttributeNS(null, "alignment-baseline", "text-bottom");
-    result.setAttributeNS(null, "fill", "red");
+    result.setAttributeNS(null, "alignment-baseline", "text-after-edge");
     let fontSize = this.type.fontSizeRatio * boundingBoxFromParent.fontSizeInPixels;
     if (fontSize != 0) {
       result.setAttributeNS(null, "font-size", `${fontSize}px`);
@@ -7799,6 +7798,7 @@ class MathNodeFraction extends MathNode {
   ) {
     super(equationEditor, knownTypes.fraction);
     this.extraSpaceBetweenNumeratorAndDenominator = 3;
+    this.extraWidth = 4;
   }
 
   computeDimensions() {
@@ -7806,7 +7806,7 @@ class MathNodeFraction extends MathNode {
     let denominator = this.children[1];
     this.boundingBox.fractionLineHeight = numerator.boundingBox.height + 1;
     this.boundingBox.height = numerator.boundingBox.height + denominator.boundingBox.height + this.extraSpaceBetweenNumeratorAndDenominator;
-    this.boundingBox.width = Math.max(numerator.boundingBox.width, denominator.boundingBox.width) + 4;
+    this.boundingBox.width = Math.max(numerator.boundingBox.width, denominator.boundingBox.width) + this.extraWidth;
     this.boundingBox.needsMiddleAlignment = true;
     numerator.boundingBox.width = this.boundingBox.width;
     denominator.boundingBox.width = this.boundingBox.width;
@@ -7824,7 +7824,7 @@ class MathNodeFraction extends MathNode {
     this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
     let result = document.createElementNS("http://www.w3.org/2000/svg", "line");
     result.setAttributeNS(null, "x1", boundingBoxFromParent.left + this.boundingBox.left);
-    result.setAttributeNS(null, "x2", boundingBoxFromParent.left + this.boundingBox.left + this.boundingBox.width);
+    result.setAttributeNS(null, "x2", boundingBoxFromParent.left + this.boundingBox.left + this.boundingBox.width + this.extraWidth / 2);
     result.setAttributeNS(null, "y1", boundingBoxFromParent.top + this.boundingBox.fractionLineHeight);
     result.setAttributeNS(null, "y2", boundingBoxFromParent.top + this.boundingBox.fractionLineHeight);
     result.setAttributeNS(null, "stroke", "black");

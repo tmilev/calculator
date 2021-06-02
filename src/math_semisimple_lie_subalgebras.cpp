@@ -3314,7 +3314,7 @@ std::string CandidateSemisimpleSubalgebra::WConjecture::toString(
   << "= orthogonal complement of centalizer of sl(2) in p: <br>";
   out << "<div class='lieAlgebraPanel'>";
   out << "<div>";
-  out << owner.owner->wConjecture.toStringElementSemisimpleLieAlgebraOrMatrix(*owner.owner, this->basisCentralizerOfSl2InP, "");
+  out << owner.owner->wConjecture.toStringElementSemisimpleLieAlgebraOrMatrix(*owner.owner, this->basisOrthogonalComplementOfCentralizerOfSl2InP, "");
   out << "</div></div>";
   out << "\\(W=\\mathfrak p ^H \\cap (\\mathfrak p ^\\mathfrak s)^\\perp \\) "
   << "= centralizer of H intersected with orthogonal complement of centralizer of the sl(2) intersected with p. <br>";

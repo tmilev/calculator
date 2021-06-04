@@ -24,6 +24,8 @@ let domElements = {
       anchorThisPage: "socraticLinkToThisPage",
       link: "socraticLink",
       editorSolveProblemDebug: "editorSolveProblemSocraticDebug",
+      buttonMain: "buttonSolveSocratic",
+      solution: "divSocraticSolution"
     },
     privacyPolicy: {
       div: "divPrivacyPolicy",

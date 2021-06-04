@@ -30,6 +30,30 @@ class SolverSocratic {
         this.setAnchor(this.inputElement().value);
       });
     }
+    /**@type{HTMLButtonElement} */
+    this.buttonSolve = document.getElementById(ids.domElements.pages.solveSocratic.buttonMain);
+    if (this.buttonSolve !== null) {
+      this.buttonSolve.addEventListener('click', () => {
+        this.solve();
+      });
+    }
+    /**@type{HTMLElement} */
+    this.socraticSolution = document.getElementById(ids.domElements.pages.solveSocratic.solution);
+    /**@type{string} 
+     * We store our socratic key with byte entries shifted so it does not appear in the javascript as plain text. 
+     * Of course, this is not intended to be secure, 
+     * but a protection that the api key pop up easily in searches.
+     */
+    this.keyShifted = "FNfX~H|TUY^t{\\y~8INq[OWRMf~5h_YY66gunl";
+  }
+
+  /**@return{string} */
+  getKey() {
+    let result = "";
+    for (let i = 0; i < this.keyShifted.length; i++) {
+      result += String.fromCharCode(this.keyShifted.charCodeAt(i) - 5);
+    }
+    return result;
   }
 
   /**@returns{HTMLInputElement} */
@@ -161,6 +185,24 @@ class SolverSocratic {
       anchorThisPage.style.display = "";
     }
     anchorThisPage.href = window.location;
+  }
+
+  solve() {
+    let url = "https://bloom-pa.googleapis.com/v1/solve:math?";
+    url += `key=${this.getKey()}&`;
+    url += `queries=2x`;
+    submitRequest.submitGET({
+      url: url,
+      callback: (text) => {
+        this.solveCallback(text);
+      },
+    });
+  }
+  solveCallback(
+    /**@type{string} */ text
+  ) {
+    this.socraticSolution.textContent = text;
+
   }
 }
 

@@ -3255,7 +3255,7 @@ bool CandidateSemisimpleSubalgebra::checkModuleDimensions() const {
 
 void CandidateSemisimpleSubalgebra::computeRatioKillingsByComponent() {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::computeRatioKillingsByComponent");
-  ElementSemisimpleLieAlgebra<AlgebraicNumber> currentElement, adActionElt, adadActionElt;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> currentElement, adActionElement, adAdActionElement;
   Vector<AlgebraicNumber> linearCombination;
   this->ratiosKillingsByComponent.setSize(this->cartanSubalgebrasByComponentScaledToActByTwo.size);
   Matrix<AlgebraicNumber> adMatrix;
@@ -3263,9 +3263,9 @@ void CandidateSemisimpleSubalgebra::computeRatioKillingsByComponent() {
     currentElement.makeCartanGenerator(this->cartanSubalgebrasByComponentScaledToActByTwo[i][0], this->getAmbientSemisimpleLieAlgebra());
     AlgebraicNumber result = 0;
     for (int k = 0; k < this->basis.size; k ++) {
-      this->getAmbientSemisimpleLieAlgebra().lieBracket(currentElement, this->basis[k], adActionElt);
-      this->getAmbientSemisimpleLieAlgebra().lieBracket(currentElement, adActionElt, adadActionElt);
-      bool tempB = currentElement.linearSpanContainsGetFirstLinearCombination(this->basis, adadActionElt, linearCombination);
+      this->getAmbientSemisimpleLieAlgebra().lieBracket(currentElement, this->basis[k], adActionElement);
+      this->getAmbientSemisimpleLieAlgebra().lieBracket(currentElement, adActionElement, adAdActionElement);
+      bool tempB = currentElement.linearSpanContainsGetFirstLinearCombination(this->basis, adAdActionElement, linearCombination);
       if (!tempB) {
         global.fatal << "Candidate subalgebra not closed under Lie bracket. " << global.fatal;
       }
@@ -3671,7 +3671,8 @@ void CandidateSemisimpleSubalgebra::computeSinglePair(int leftIndex, int rightIn
   for (int i = 0; i < leftModule.size; i ++) {
     if (report.tickAndWantReport()) {
       std::stringstream reportStream;
-      reportStream << "Bracketing element number " << i + 1 << " out of " << leftModule.size << " with other module. ";
+      reportStream << "Bracketing element number " << i + 1
+      << " out of " << leftModule.size << " with other module. ";
       report.report(reportStream.str());
     }
     this->computePairKWeightElementAndModule(leftModule[i], rightIndex, tempList);
@@ -3745,15 +3746,15 @@ void CandidateSemisimpleSubalgebra::computeCharactersPrimalModules() {
     }
   }
   this->oppositeModulesByChar.setSize(this->modules.size);
-  List<CharacterSemisimpleLieAlgebraModule<Rational> > theDualMods;
-  theDualMods.setSize(this->modules.size);
+  List<CharacterSemisimpleLieAlgebraModule<Rational> > dualModules;
+  dualModules.setSize(this->modules.size);
   for (int i = 0; i < this->modules.size; i ++) {
-    this->charactersPrimalModules[i].getDual(theDualMods[i]);
+    this->charactersPrimalModules[i].getDual(dualModules[i]);
     this->oppositeModulesByChar[i].setSize(0);
   }
   for (int i = 0; i < this->modules.size; i ++) {
     for (int j = i; j < this->modules.size; j ++) {
-      if ((this->charactersPrimalModules[i] - theDualMods[j]).isEqualToZero()) {
+      if ((this->charactersPrimalModules[i] - dualModules[j]).isEqualToZero()) {
         this->oppositeModulesByChar[i].addOnTop(j);
         if (i != j) {
           this->oppositeModulesByChar[j].addOnTop(i);
@@ -4030,7 +4031,7 @@ void NilradicalCandidate::computeParabolicACExtendsToParabolicAC() {
       global.fatal << "This is a mathematical error. "
       << "Something is very wrong. "
       << "The ambient parabolic subalgebra has components "
-      << " of type A and C, but intesects the centralizer "
+      << "of type A and C, but intesects the centralizer "
       << "in components of type B and D. "
       << "This must be impossible according to "
       << "the PSZ paper and the restriction of "
@@ -4246,7 +4247,8 @@ void CandidateSemisimpleSubalgebra::enumerateAllNilradicals() {
   if (this->fernandoKacNilradicalCandidates.size < 1) {
     global.fatal << "While enumerating nilradicals of "
     << this->weylNonEmbedded->dynkinType.toString()
-    << " got 0 nilradical candidates which is impossible (the zero nilradical is always possible). " << global.fatal;
+    << " got 0 nilradical candidates which is impossible ("
+    << "the zero nilradical is always possible). " << global.fatal;
   }
   for (int i = 0; i < this->fernandoKacNilradicalCandidates.size; i ++) {
     std::stringstream reportStream2;
@@ -4304,7 +4306,7 @@ void Vector<Coefficient>::perturbNormalRelativeToVectorsInGeneralPosition(
   theCone.createFromVertices(nonStrictConeNonPositiveScalar);
   Coefficient scalarThis;
   Coefficient scalarOther;
-  Coefficient theScale;
+  Coefficient scale;
   Vector<Rational> currentModifier;
   Vectors<Rational> allVectors = theCone.vertices;
   allVectors.addListOnTop(vectorsToBeInGeneralPosition);
@@ -4321,16 +4323,16 @@ void Vector<Coefficient>::perturbNormalRelativeToVectorsInGeneralPosition(
       if (!foundModifier) {
         continue;
       }
-      theScale = 1;
+      scale = 1;
       for (int j = 0; j < vectorsToBeInGeneralPosition.size; j ++) {
         scalarThis = this->scalarEuclidean(vectorsToBeInGeneralPosition[j]);
         scalarOther = currentModifier.scalarEuclidean(vectorsToBeInGeneralPosition[j]);
         if (scalarOther * scalarThis < 0) {
-          theScale = MathRoutines::minimum(theScale, - (scalarThis / scalarOther) / 2);
+          scale = MathRoutines::minimum(scale, - (scalarThis / scalarOther) / 2);
         }
       }
     }
-    *this += currentModifier * theScale;
+    *this += currentModifier * scale;
     for (int i = 0; i < nonStrictConeNonPositiveScalar.size; i ++) {
       if (this->scalarEuclidean(nonStrictConeNonPositiveScalar[i]) < 0) {
         global.fatal << "<br>During perturbation, the splitting normal " << this->toString()
@@ -4341,8 +4343,10 @@ void Vector<Coefficient>::perturbNormalRelativeToVectorsInGeneralPosition(
           this->scalarEuclidean(nonStrictConeNonPositiveScalar[i]) == 0 &&
           oldThis.scalarEuclidean(nonStrictConeNonPositiveScalar[i]) > 0
         ) {
-          global.fatal << "<br>During perturbation, the splitting normal " << this->toString()
-          << " lost  positive scalar product with " << nonStrictConeNonPositiveScalar[i].toString() << "." << global.fatal;
+          global.fatal << "<br>During perturbation, the splitting normal "
+          << this->toString()
+          << " lost  positive scalar product with "
+          << nonStrictConeNonPositiveScalar[i].toString() << "." << global.fatal;
         }
       }
     }
@@ -4399,7 +4403,8 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicalSelection(const Lis
   return out.str();
 }
 
-bool CandidateSemisimpleSubalgebra::isPossibleNilradicalCarryOutSelectionImplications(List<int>& selection, std::stringstream* logStream
+bool CandidateSemisimpleSubalgebra::isPossibleNilradicalCarryOutSelectionImplications(
+  List<int>& selection, std::stringstream* logStream
 ) {
   if (this->fernandoKacNilradicalCandidates.size > 100) {
     if (logStream != nullptr) {

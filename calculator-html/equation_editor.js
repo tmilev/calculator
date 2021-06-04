@@ -4749,56 +4749,6 @@ class MathNode {
     this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
   }
 
-  computeDimensionsOperatorWithSuperAndSubscript() {
-    let superscript = this.children[0];
-    let operator = this.children[1];
-    let subscript = this.children[2];
-    let extraSpaceBelowSuperscriptPercent = 0.1;
-    let extraSpaceBelowOperatorPercent = 0.1;
-    let operatorContent = operator.children[0].initialContent;
-    let extraSpaceBelowOperatorCustom = {
-      // integral
-      "\u222B": - 0.1,
-    };
-    if (operatorContent in extraSpaceBelowOperatorCustom) {
-      extraSpaceBelowOperatorPercent = extraSpaceBelowOperatorCustom[operatorContent];
-    }
-    let extraSpaceBelowSuperscript = operator.boundingBox.height * extraSpaceBelowSuperscriptPercent;
-    let extraSpaceBelowOperator = operator.boundingBox.height * extraSpaceBelowOperatorPercent;
-    superscript.boundingBox.top = 0;
-    operator.boundingBox.top = superscript.boundingBox.height + extraSpaceBelowSuperscript;
-    subscript.boundingBox.top = superscript.boundingBox.height + extraSpaceBelowSuperscript + operator.boundingBox.height + extraSpaceBelowOperator;
-    this.boundingBox.height =
-      superscript.boundingBox.height + operator.boundingBox.height + subscript.boundingBox.height +
-      extraSpaceBelowOperator + extraSpaceBelowSuperscript;
-    this.boundingBox.width = Math.max(superscript.boundingBox.width, operator.boundingBox.width, subscript.boundingBox.width);
-    this.boundingBox.fractionLineHeight = superscript.boundingBox.height + extraSpaceBelowSuperscript + operator.boundingBox.fractionLineHeight;
-    this.boundingBox.needsMiddleAlignment = true;
-    superscript.boundingBox.width = this.boundingBox.width;
-    subscript.boundingBox.width = this.boundingBox.width;
-    operator.boundingBox.width = this.boundingBox.width;
-    superscript.computeBoundingBoxLeftSingleChild();
-    operator.computeBoundingBoxLeftSingleChild();
-    subscript.computeBoundingBoxLeftSingleChild();
-  }
-
-  computeDimensionsOperatorWithSubscript() {
-    let operator = this.children[0];
-    let subscript = this.children[1];
-    let extraSpaceBelowOperatorPercent = 0.1;
-    let extraSpaceBelowOperator = operator.boundingBox.height * extraSpaceBelowOperatorPercent;
-    operator.boundingBox.top = 0;
-    subscript.boundingBox.top = operator.boundingBox.height + extraSpaceBelowOperator;
-    this.boundingBox.height = operator.boundingBox.height + extraSpaceBelowOperator + subscript.boundingBox.height;
-    this.boundingBox.width = Math.max(operator.boundingBox.width, subscript.boundingBox.width);
-    this.boundingBox.fractionLineHeight = operator.boundingBox.fractionLineHeight;
-    this.boundingBox.needsMiddleAlignment = true;
-    subscript.boundingBox.width = this.boundingBox.width;
-    operator.boundingBox.width = this.boundingBox.width;
-    operator.computeBoundingBoxLeftSingleChild();
-    subscript.computeBoundingBoxLeftSingleChild();
-  }
-
   containsFractionLineRecursive() {
     if (this.type.type === knownTypes.fraction.type) {
       return true;
@@ -5044,14 +4994,6 @@ class MathNode {
     }
     if (this.type.type === knownTypes.radicalUnderBox.type) {
       this.computeDimensionsRadicalUnderBox();
-      return;
-    }
-    if (this.type.type === knownTypes.operatorWithSuperAndSubscript.type) {
-      this.computeDimensionsOperatorWithSuperAndSubscript();
-      return;
-    }
-    if (this.type.type === knownTypes.operatorWithSubscript.type) {
-      this.computeDimensionsOperatorWithSubscript();
       return;
     }
     if (this.type.type === knownTypes.operatorStandalone.type) {
@@ -7486,29 +7428,40 @@ class MathNode {
     let result = new BoundingBox();
     result.left = this.boundingBox.left + boundingBoxFromParent.left;
     result.top = this.boundingBox.top + boundingBoxFromParent.top;
+    result.width = this.boundingBox.width;
+    result.height = this.boundingBox.height;
     result.fontSizeInPixels = this.type.fontSizeRatio * boundingBoxFromParent.fontSizeInPixels;
     return result;
   }
 
+  /**@returns{BoundingBox} the bounding box of the result. */
   toScalableVectorGraphicsAtomic(
     /**@type{SVGElement}*/
     container,
     /**@type{BoundingBox} */
     boundingBoxFromParent,
   ) {
-    let result = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    result.setAttributeNS(null, "x", boundingBoxFromParent.left + this.boundingBox.left);
+    let graphics = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    graphics.setAttributeNS(null, "x", boundingBoxFromParent.left + this.boundingBox.left);
     let height = boundingBoxFromParent.top + this.boundingBox.top + this.boundingBox.height;
-    result.setAttributeNS(null, "y", height);
-    result.setAttributeNS(null, "alignment-baseline", "text-after-edge");
+    graphics.setAttributeNS(null, "y", height);
+    graphics.setAttributeNS(null, "alignment-baseline", "text-after-edge");
     let fontSize = this.type.fontSizeRatio * boundingBoxFromParent.fontSizeInPixels;
     if (fontSize != 0) {
-      result.setAttributeNS(null, "font-size", `${fontSize}px`);
+      graphics.setAttributeNS(null, "font-size", `${fontSize}px`);
     }
-    result.appendChild(document.createTextNode(this.textContentOrInitialContent()));
-    container.appendChild(result);
+    graphics.appendChild(document.createTextNode(this.textContentOrInitialContent()));
+    container.appendChild(graphics);
+    let boundingBox = graphics.getBBox();
+    let result = new BoundingBox();
+    result.height = boundingBox.height;
+    result.top = boundingBox.top;
+    result.width = boundingBox.width;
+    result.left = boundingBox.left;
+    return result;
   }
 
+  /**@returns{BoundingBox} the bounding box of the result. */
   toScalableVectorGraphicsBase(
     /**@type{SVGElement}*/
     container,
@@ -7519,15 +7472,17 @@ class MathNode {
     for (let i = 0; i < this.children.length; i++) {
       this.children[i].toScalableVectorGraphics(container, shiftedBoundingBox);
     }
+    return shiftedBoundingBox;
   }
 
+  /**@returns{BoundingBox} the bounding box of the result. */
   toScalableVectorGraphics(
     /**@type{SVGElement}*/
     container,
     /**@type{BoundingBox} */
     boundingBoxFromParent,
   ) {
-    this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
+    return this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
   }
 
   toString() {
@@ -7721,9 +7676,9 @@ class ScalableVectorGraphicsWriter {
     input,
   ) {
     this.underConstruction = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    this.underConstruction.setAttributeNS(null, "width", input.boundingBox.width);
-    this.underConstruction.setAttributeNS(null, "height", input.boundingBox.height);
-    input.toScalableVectorGraphics(this.underConstruction, new BoundingBox());
+    let boundingBox = input.toScalableVectorGraphics(this.underConstruction, new BoundingBox());
+    this.underConstruction.setAttributeNS(null, "width", boundingBox.width);
+    this.underConstruction.setAttributeNS(null, "height", boundingBox.height);
     return this.underConstruction;
   }
 }
@@ -7987,6 +7942,7 @@ class MathNodeHorizontalMath extends MathNode {
       let child = this.children[i];
       child.toScalableVectorGraphics(container, boundingBox);
     }
+    return boundingBox;
   }
 }
 
@@ -8038,10 +7994,7 @@ class MathNodeRoot extends MathNode {
     boundingBox.top = boundingBoxFromParent.top;
     boundingBox.left = boundingBoxFromParent.left;
     boundingBox.fontSizeInPixels = parseInt(window.getComputedStyle(this.element, null).getPropertyValue("font-size"));
-    // It seems that tall elements are clipped.
-    // TODO(tmilev): figure out how this works.
-    // boundingBox.top += boundingBox.fontSizeInPixels / 5;
-    this.children[0].toScalableVectorGraphics(container, boundingBox);
+    return this.children[0].toScalableVectorGraphics(container, boundingBox);
   }
 }
 
@@ -8771,6 +8724,42 @@ class MathNodeOperatorWithSuperAndSubscript extends MathNode {
     parent.focusRestore();
     return true;
   }
+
+  /** Computes the dimensions of the DOM.
+   * @override 
+   */
+  computeDimensions() {
+    let superscript = this.children[0];
+    let operator = this.children[1];
+    let subscript = this.children[2];
+    let extraSpaceBelowSuperscriptPercent = 0.1;
+    let extraSpaceBelowOperatorPercent = 0.1;
+    let operatorContent = operator.children[0].initialContent;
+    let extraSpaceBelowOperatorCustom = {
+      // integral
+      "\u222B": - 0.1,
+    };
+    if (operatorContent in extraSpaceBelowOperatorCustom) {
+      extraSpaceBelowOperatorPercent = extraSpaceBelowOperatorCustom[operatorContent];
+    }
+    let extraSpaceBelowSuperscript = operator.boundingBox.height * extraSpaceBelowSuperscriptPercent;
+    let extraSpaceBelowOperator = operator.boundingBox.height * extraSpaceBelowOperatorPercent;
+    superscript.boundingBox.top = 0;
+    operator.boundingBox.top = superscript.boundingBox.height + extraSpaceBelowSuperscript;
+    subscript.boundingBox.top = superscript.boundingBox.height + extraSpaceBelowSuperscript + operator.boundingBox.height + extraSpaceBelowOperator;
+    this.boundingBox.height =
+      superscript.boundingBox.height + operator.boundingBox.height + subscript.boundingBox.height +
+      extraSpaceBelowOperator + extraSpaceBelowSuperscript;
+    this.boundingBox.width = Math.max(superscript.boundingBox.width, operator.boundingBox.width, subscript.boundingBox.width);
+    this.boundingBox.fractionLineHeight = superscript.boundingBox.height + extraSpaceBelowSuperscript + operator.boundingBox.fractionLineHeight;
+    this.boundingBox.needsMiddleAlignment = true;
+    superscript.boundingBox.width = this.boundingBox.width;
+    subscript.boundingBox.width = this.boundingBox.width;
+    operator.boundingBox.width = this.boundingBox.width;
+    superscript.computeBoundingBoxLeftSingleChild();
+    operator.computeBoundingBoxLeftSingleChild();
+    subscript.computeBoundingBoxLeftSingleChild();
+  }
 }
 
 class MathNodeOperatorStandalone extends MathNode {
@@ -8818,6 +8807,26 @@ class MathNodeOperatorWithSubscript extends MathNode {
     parent.updateDOM();
     parent.focusRestore();
     return true;
+  }
+
+  /**
+   * @override
+   */
+  computeDimensions() {
+    let operator = this.children[0];
+    let subscript = this.children[1];
+    let extraSpaceBelowOperatorPercent = 0.1;
+    let extraSpaceBelowOperator = operator.boundingBox.height * extraSpaceBelowOperatorPercent;
+    operator.boundingBox.top = 0;
+    subscript.boundingBox.top = operator.boundingBox.height + extraSpaceBelowOperator;
+    this.boundingBox.height = operator.boundingBox.height + extraSpaceBelowOperator + subscript.boundingBox.height;
+    this.boundingBox.width = Math.max(operator.boundingBox.width, subscript.boundingBox.width);
+    this.boundingBox.fractionLineHeight = operator.boundingBox.fractionLineHeight;
+    this.boundingBox.needsMiddleAlignment = true;
+    subscript.boundingBox.width = this.boundingBox.width;
+    operator.boundingBox.width = this.boundingBox.width;
+    operator.computeBoundingBoxLeftSingleChild();
+    subscript.computeBoundingBoxLeftSingleChild();
   }
 }
 

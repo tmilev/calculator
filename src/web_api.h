@@ -153,13 +153,13 @@ class WebAPIResponse {
   static std::string toStringAssignSection();
   static std::string toStringUserDetails(
     bool adminsOnly,
-    List<JSData>& theUsers,
+    List<JSData>& users,
     const std::string& hostWebAddressWithPort
   );
   static std::string toStringUserScores();
   static std::string toStringUserDetailsTable(
     bool adminsOnly,
-    List<JSData>& theUsers,
+    List<JSData>& users,
     const std::string& hostWebAddressWithPort
   );
   static std::string getSanitizedComment(
@@ -227,10 +227,10 @@ public:
     const std::string& input, bool usePlusesForSpacebars
   );
   static std::string convertStringToHtmlString(
-    const std::string& theString, bool doReplaceNewLineByBr
+    const std::string& inputString, bool doReplaceNewLineByBr
   );
   static std::string convertStringToHtmlStringRestrictSize(
-    const std::string& theString, bool doReplaceNewLineByBr, int maxStringSize
+    const std::string& inputString, bool doReplaceNewLineByBr, int maxStringSize
   );
   static std::string convertStringEscapeQuotesAndBackslashes(
     const std::string& input
@@ -302,9 +302,9 @@ public:
     const std::string& input, int upperNumChars = 10000
   );
   static std::string getStyleButtonLikeHtml();
-  static std::string clearNewLines(const std::string& theString);
-  static std::string backslashQuotes(const std::string& theString);
-  static std::string clearSlashes(const std::string& theString);
+  static std::string clearNewLines(const std::string& inputString);
+  static std::string backslashQuotes(const std::string& inputString);
+  static std::string clearSlashes(const std::string& inputString);
   static std::string cleanUpForLaTeXLabelUse(const std::string& inputString);
   static bool isRepresentedByItselfInURLs(char input);
   static void clearDollarSigns(std::string& theString, std::string& output);

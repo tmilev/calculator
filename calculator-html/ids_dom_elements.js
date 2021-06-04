@@ -64,6 +64,10 @@ let domElements = {
       calculatorLink: "divCompareExpressionsCalculatorLink",
       progress: "progressReportCompareExpressions",
     },
+    compareExpressionsSocratic: {
+      div: "divCompareExpressionsSocraticPage",
+
+    },
     login: {
       divLoginCalculatorPanel: "divLoginCalculatorPanel",
       userNameReport: "divLoginPanelUsernameReport"

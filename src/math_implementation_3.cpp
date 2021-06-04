@@ -377,34 +377,34 @@ std::string HtmlRoutines::doubleBackslashes(const std::string& input) {
   return out.str();
 }
 
-std::string HtmlRoutines::clearNewLines(const std::string& input) {
+std::string HtmlRoutines::clearNewLines(const std::string& inputString) {
   std::stringstream out;
-  for (unsigned i = 0; i < input.size(); i ++) {
-    if (input[i] == '\n' || input[i] == '\r') {
+  for (unsigned i = 0; i < inputString.size(); i ++) {
+    if (inputString[i] == '\n' || inputString[i] == '\r') {
       out << " ";
     } else {
-      out << input[i];
+      out << inputString[i];
     }
   }
   return out.str();
 }
 
-std::string HtmlRoutines::backslashQuotes(const std::string& input) {
+std::string HtmlRoutines::backslashQuotes(const std::string& inputString) {
   std::stringstream out;
-  for (unsigned i = 0; i < input.size(); i ++) {
-    if (input[i] == '"') {
+  for (unsigned i = 0; i < inputString.size(); i ++) {
+    if (inputString[i] == '"') {
       out << "\\";
     }
-    out << input[i];
+    out << inputString[i];
   }
   return out.str();
 }
 
-std::string HtmlRoutines::clearSlashes(const std::string& theString) {
+std::string HtmlRoutines::clearSlashes(const std::string& inputString) {
   std::stringstream out;
-  for (unsigned int i = 0; i < theString.size(); i ++) {
-    if (theString[i] != '\\') {
-      out << theString[i];
+  for (unsigned int i = 0; i < inputString.size(); i ++) {
+    if (inputString[i] != '\\') {
+      out << inputString[i];
     }
   }
   return out.str();
@@ -794,9 +794,9 @@ std::string HtmlRoutines::convertStringEscapeNewLinesQuotesBackslashes(const std
 }
 
 std::string HtmlRoutines::convertStringToHtmlStringRestrictSize(
-  const std::string& theString, bool doReplaceNewLineByBr, int maxStringSize
+  const std::string& inputString, bool doReplaceNewLineByBr, int maxStringSize
 ) {
-  std::string result = HtmlRoutines::convertStringToHtmlString(theString, doReplaceNewLineByBr);
+  std::string result = HtmlRoutines::convertStringToHtmlString(inputString, doReplaceNewLineByBr);
   if (maxStringSize > 0) {
     if (static_cast<signed>(result.size()) > maxStringSize) {
       std::stringstream resultStream;
@@ -809,11 +809,11 @@ std::string HtmlRoutines::convertStringToHtmlStringRestrictSize(
 }
 
 std::string HtmlRoutines::convertStringToHtmlString(
-  const std::string& theString, bool doReplaceNewLineByBr
+  const std::string& inputString, bool doReplaceNewLineByBr
 ) {
   std::string result;
   HtmlRoutines::convertStringToHtmlStringReturnTrueIfModified(
-    theString, result, doReplaceNewLineByBr
+    inputString, result, doReplaceNewLineByBr
   );
   return result;
 }

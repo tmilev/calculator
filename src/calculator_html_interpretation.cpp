@@ -1972,7 +1972,7 @@ std::string WebAPIResponse::getScoresPage() {
 }
 
 std::string WebAPIResponse::toStringUserDetailsTable(
-  bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort
+  bool adminsOnly, List<JSData>& users, const std::string& hostWebAddressWithPort
 ) {
   MacroRegisterFunctionWithName("WebAPIReponse::toStringUserDetailsTable");
   if (!global.flagDatabaseCompiled) {
@@ -1999,8 +1999,8 @@ std::string WebAPIResponse::toStringUserDetailsTable(
   List<List<std::string> > activatedAccountBucketsBySection;
   List<List<std::string> > preFilledLinkBucketsBySection;
   List<List<std::string> > nonActivatedAccountBucketsBySection;
-  for (int i = 0; i < theUsers.size; i ++) {
-    currentUser.loadFromJSON(theUsers[i]);
+  for (int i = 0; i < users.size; i ++) {
+    currentUser.loadFromJSON(users[i]);
     if (flagFilterCourse && (
       currentUser.courseInDB != currentCourse ||
       currentUser.instructorInDB != global.userDefault.username
@@ -2021,8 +2021,8 @@ std::string WebAPIResponse::toStringUserDetailsTable(
   nonActivatedAccountBucketsBySection.setSize(theSections.size);
   preFilledLinkBucketsBySection.setSize(theSections.size);
   int numActivatedUsers = 0;
-  for (int i = 0; i < theUsers.size; i ++) {
-    currentUser.loadFromJSON(theUsers[i]);
+  for (int i = 0; i < users.size; i ++) {
+    currentUser.loadFromJSON(users[i]);
     if (currentUser.courseInDB.find('%') != std::string::npos) {
       out << "<b style = \"color:red\">Non-expected behavior: user: "
       << currentUser.username
@@ -2144,7 +2144,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
       }
     }
   }
-  out << "\n" << theUsers.size << " user(s)";
+  out << "\n" << users.size << " user(s)";
   if (numActivatedUsers > 0) {
     out << ", <span style='color:red'>" << numActivatedUsers
     << " have not activated their accounts. </span>";
@@ -2638,7 +2638,7 @@ std::string WebAPIResponse::toStringUserScores() {
 }
 
 std::string WebAPIResponse::toStringUserDetails(
-  bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort
+  bool adminsOnly, List<JSData>& users, const std::string& hostWebAddressWithPort
 ) {
   MacroRegisterFunctionWithName("WebAPIReponse::toStringUserDetails");
   std::stringstream out;
@@ -2687,7 +2687,7 @@ std::string WebAPIResponse::toStringUserDetails(
   << "', 'addUsers'"
   << " )\"> Add users</button> ";
   out << "<br><span id =\"" << idOutput << "\">\n";
-  out << WebAPIResponse::toStringUserDetailsTable(adminsOnly, theUsers, hostWebAddressWithPort);
+  out << WebAPIResponse::toStringUserDetailsTable(adminsOnly, users, hostWebAddressWithPort);
   out << "</span>";
   return out.str();
 }

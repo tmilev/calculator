@@ -19,9 +19,10 @@ const mathTypeSet = require("./math_typeset");
 const themes = require("./themes");
 const solver = require("./solve");
 const solve = require("./solve");
-const compareExpressions = require("./compare_expressions").compareExpressions;
-const storage = require("./storage").storage;
 const solveSocratic = require("./solve_socratic");
+const compareExpressions = require("./compare_expressions").compareExpressions;
+const compareExpressionsSocratic = require("./compare_expressions_socratic").compareExpressionsSocratic;
+const storage = require("./storage").storage;
 
 class User {
   constructor() {
@@ -104,6 +105,20 @@ class Page {
         selectFunction: () => {
           solveSocratic.solver.selectPage();
         }
+      },
+      compareExpressions: {
+        name: "compareExpressions",
+        id: ids.domElements.pages.compareExpressions.div,
+        selectFunction: () => {
+          compareExpressions.selectPage();
+        },
+      },
+      compareExpressionsSocratic: {
+        name: "compareExpressionsSocratic",
+        id: ids.domElements.pages.compareExpressionsSocratic.div,
+        selectFunction: () => {
+          compareExpressionsSocratic.selectPage();
+        },
       },
       selectCourse: {
         name: "selectCourse",
@@ -209,11 +224,6 @@ class Page {
         container: null,
         selectFunction: accountManagement.updateAccountsPage,
       },
-      compareExpressions: {
-        name: "compareExpressions",
-        id: ids.domElements.pages.compareExpressions.div,
-        selectFunction: compareExpressions.selectPage.bind(compareExpressions),
-      },
     };
     this.defaultPage = "calculator";
     if (document.getElementById(ids.domElements.applicationIdentifiers.compareExpressions)) {
@@ -311,14 +321,14 @@ class Page {
       return;
     }
     try {
-      let theProfilePicElement = document.createElement("IMG");
-      theProfilePicElement.setAttribute("src", this.user.googleProfile.picture);
-      theProfilePicElement.setAttribute("alt", this.user.googleProfile.name);
-      theProfilePicElement.setAttribute("id", "imgProfilePicture");
-      theProfilePicElement.setAttribute("title", this.user.googleProfile.name);
-      theProfilePicElement.setAttribute("className", "profilePicture");
-      //theProfilePicElement.setAttribute("width", 50);
-      document.getElementById("divProfilePicture").appendChild(theProfilePicElement);
+      let profilePicElement = document.createElement("IMG");
+      profilePicElement.setAttribute("src", this.user.googleProfile.picture);
+      profilePicElement.setAttribute("alt", this.user.googleProfile.name);
+      profilePicElement.setAttribute("id", "imgProfilePicture");
+      profilePicElement.setAttribute("title", this.user.googleProfile.name);
+      profilePicElement.setAttribute("className", "profilePicture");
+      //profilePicElement.setAttribute("width", 50);
+      document.getElementById("divProfilePicture").appendChild(profilePicElement);
     } catch (e) {
       console.log("Failed to set profile picture: " + e);
     }
@@ -408,10 +418,10 @@ class Page {
     let debugSpan = document.getElementById(ids.domElements.spanDebugFlagToggleReport);
     if (debugOn) {
       solve.solver.setDebugLogContainer();
-      debugSpan.innerHTML = "Debug <b style = 'color:red'>on</b>";
+      debugSpan.innerHTML = "Debug <b style='color:red'>on</b>";
     } else {
       solve.solver.setDebugLogContainer();
-      debugSpan.innerHTML = "Debug <b style = 'color:green'>off</b>";
+      debugSpan.innerHTML = "Debug <b style='color:green'>off</b>";
     }
   }
 
@@ -453,7 +463,7 @@ class Page {
           radioHTML += "checked = 'true'";
         }
         radioHTML += `>`;
-        radioHTML += `<span class = "radioMark"></span>`;
+        radioHTML += `<span class='radioMark'></span>`;
         radioHTML += this.user.sectionsTaught[counterSections];
         radioHTML += `</label>`
       }

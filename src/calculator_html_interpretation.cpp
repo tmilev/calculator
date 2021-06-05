@@ -616,7 +616,7 @@ std::string WebAPIResponse::getApp(bool appendBuildHash) {
 }
 
 std::string WebAPIResponse::getCompareExpressionsPage(bool appendBuildHash) {
-  return WebAPIResponse::getHTMLAllInOneJavascriptCSS("/calculator-html/compare_expressions.html", appendBuildHash);
+  return WebAPIResponse::getHTMLAllInOneJavascriptCSS("/calculator-html/compare_expressions_calculator.html", appendBuildHash);
 }
 
 JSData Course::toJSON() const {

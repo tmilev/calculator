@@ -2970,7 +2970,8 @@ class EquationEditor {
       return;
     }
     this.options.svgContainer.textContent = "";
-    this.options.svgContainer.appendChild(new ScalableVectorGraphicsWriter().typeset(this.rootNode));
+    let graphicsWriter = new ScalableVectorGraphicsWriter();
+    this.options.svgContainer.appendChild(graphicsWriter.typeset(this.rootNode));
   }
 
   writeDebugInfo(
@@ -4864,45 +4865,6 @@ class MathNode {
   computeDimensionsNumerator() {
     this.computeDimensionsStandard();
     this.boundingBox.height = this.children[0].boundingBox.height;
-  }
-
-  verticallyStretchSqrt(
-    /** @type {number}*/
-    heightToEnclose,
-  ) {
-    let decoration = this.children[0];
-    let left = this.children[1];
-    let right = this.children[2];
-    let heightRatioRight = 0.5;
-    let heightToWidthRatio = 0.1;
-    let maxWidthHalfCheck = 10;
-    let preferredWidth = heightToEnclose * heightToWidthRatio;
-
-    decoration.boundingBox.width = 3;
-    decoration.boundingBox.height = 1;
-    decoration.boundingBox.top = heightToEnclose * (1 - heightRatioRight);
-    if (preferredWidth > maxWidthHalfCheck) {
-      preferredWidth = maxWidthHalfCheck;
-    }
-
-    left.boundingBox.height = heightToEnclose * heightRatioRight;
-    left.boundingBox.width = preferredWidth;
-    left.boundingBox.top = heightToEnclose * (1 - heightRatioRight);
-    left.boundingBox.left = decoration.boundingBox.width - 1;
-
-    right.boundingBox.height = heightToEnclose;
-    right.boundingBox.width = 1;
-    right.boundingBox.left = left.boundingBox.left + preferredWidth;
-    right.boundingBox.top = 0;
-
-    left.boundingBox.transformOrigin = "top left";
-    right.boundingBox.transformOrigin = "top left";
-    let leftSkew = left.boundingBox.width / left.boundingBox.height;
-    left.boundingBox.transform = `matrix(1,0,${leftSkew},1,0,0)`;
-    let rightSkew = preferredWidth / right.boundingBox.height;
-    right.boundingBox.transform = `matrix(1,0,${-rightSkew},1,${preferredWidth},0)`;
-    this.boundingBox.height = heightToEnclose;
-    this.boundingBox.width = left.boundingBox.width + preferredWidth + decoration.boundingBox.width;
   }
 
   computeDimensionsMatrix() {
@@ -7380,7 +7342,6 @@ class MathNode {
     return result;
   }
 
-  /**@returns{BoundingBox} the bounding box of the result. */
   toScalableVectorGraphicsAtomic(
     /**@type{SVGElement}*/
     container,
@@ -7402,16 +7363,8 @@ class MathNode {
     }
     graphics.appendChild(document.createTextNode(this.textContentOrInitialContent()));
     container.appendChild(graphics);
-    let boundingBox = graphics.getBBox();
-    let result = new BoundingBox();
-    result.height = boundingBox.height;
-    result.top = boundingBox.top;
-    result.width = boundingBox.width;
-    result.left = boundingBox.left;
-    return result;
   }
 
-  /**@returns{BoundingBox} the bounding box of the result. */
   toScalableVectorGraphicsBase(
     /**@type{SVGElement}*/
     container,
@@ -7422,17 +7375,15 @@ class MathNode {
     for (let i = 0; i < this.children.length; i++) {
       this.children[i].toScalableVectorGraphics(container, shiftedBoundingBox);
     }
-    return shiftedBoundingBox;
   }
 
-  /**@returns{BoundingBox} the bounding box of the result. */
   toScalableVectorGraphics(
     /**@type{SVGElement}*/
     container,
     /**@type{BoundingBox} */
     boundingBoxFromParent,
   ) {
-    return this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
+    this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
   }
 
   toString() {
@@ -7626,9 +7577,9 @@ class ScalableVectorGraphicsWriter {
     input,
   ) {
     this.underConstruction = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    let boundingBox = input.toScalableVectorGraphics(this.underConstruction, new BoundingBox());
-    this.underConstruction.setAttributeNS(null, "width", boundingBox.width);
-    this.underConstruction.setAttributeNS(null, "height", boundingBox.height);
+    input.toScalableVectorGraphics(this.underConstruction, new BoundingBox());
+    this.underConstruction.setAttributeNS(null, "width", input.boundingBox.width);
+    this.underConstruction.setAttributeNS(null, "height", input.boundingBox.height);
     return this.underConstruction;
   }
 }
@@ -7896,7 +7847,6 @@ class MathNodeHorizontalMath extends MathNode {
       let child = this.children[i];
       child.toScalableVectorGraphics(container, boundingBox);
     }
-    return boundingBox;
   }
 
   computeDimensions() {
@@ -8028,7 +7978,7 @@ class MathNodeRoot extends MathNode {
     boundingBox.top = boundingBoxFromParent.top;
     boundingBox.left = boundingBoxFromParent.left;
     boundingBox.fontSizeInPixels = parseInt(window.getComputedStyle(this.element, null).getPropertyValue("font-size"));
-    return this.children[0].toScalableVectorGraphics(container, boundingBox);
+    this.children[0].toScalableVectorGraphics(container, boundingBox);
   }
 }
 
@@ -8119,6 +8069,45 @@ class MathNodeSqrtSign extends MathNode {
   ) {
     super(equationEditor, knownTypes.sqrtSign);
   }
+
+  verticallyStretchSqrt(
+    /** @type {number}*/
+    heightToEnclose,
+  ) {
+    let decoration = this.children[0];
+    let left = this.children[1];
+    let right = this.children[2];
+    let heightRatioRight = 0.5;
+    let heightToWidthRatio = 0.1;
+    let maxWidthHalfCheck = 10;
+    let preferredWidth = heightToEnclose * heightToWidthRatio;
+
+    decoration.boundingBox.width = 3;
+    decoration.boundingBox.height = 1;
+    decoration.boundingBox.top = heightToEnclose * (1 - heightRatioRight);
+    if (preferredWidth > maxWidthHalfCheck) {
+      preferredWidth = maxWidthHalfCheck;
+    }
+
+    left.boundingBox.height = heightToEnclose * heightRatioRight;
+    left.boundingBox.width = preferredWidth;
+    left.boundingBox.top = heightToEnclose * (1 - heightRatioRight);
+    left.boundingBox.left = decoration.boundingBox.width - 1;
+
+    right.boundingBox.height = heightToEnclose;
+    right.boundingBox.width = 1;
+    right.boundingBox.left = left.boundingBox.left + preferredWidth;
+    right.boundingBox.top = 0;
+
+    left.boundingBox.transformOrigin = "top left";
+    right.boundingBox.transformOrigin = "top left";
+    let leftSkew = left.boundingBox.width / left.boundingBox.height;
+    left.boundingBox.transform = `matrix(1,0,${leftSkew},1,0,0)`;
+    let rightSkew = preferredWidth / right.boundingBox.height;
+    right.boundingBox.transform = `matrix(1,0,${-rightSkew},1,${preferredWidth},0)`;
+    this.boundingBox.height = heightToEnclose;
+    this.boundingBox.width = left.boundingBox.width + preferredWidth + decoration.boundingBox.width;
+  }
 }
 
 class MathNodeSqrt extends MathNode {
@@ -8127,6 +8116,8 @@ class MathNodeSqrt extends MathNode {
     equationEditor,
   ) {
     super(equationEditor, knownTypes.sqrt);
+    this.sqrtProportionOverlapped = 0.7;
+    this.widthSqrtSign = 0.99;
   }
 
   /** @returns {LatexWithAnnotation} */
@@ -8156,20 +8147,23 @@ class MathNodeSqrt extends MathNode {
     return result;
   }
 
+  sqrtSignLeftShift() {
+    let radicalExponentBox = this.children[0];
+    let sqrtSign = this.children[1];
+    return Math.max(0, radicalExponentBox.boundingBox.width - sqrtSign.boundingBox.width * this.sqrtProportionOverlapped);
+  }
+
   computeDimensions() {
     let radicalExponentBox = this.children[0];
     let sqrtSign = this.children[1];
     let underTheRadical = this.children[2];
     // The proportion of the width of the sqrt sign that overlaps with the radical exponent.
-    let sqrtProportionOverlapped = 0.7;
-    let extraWidth = Math.max(0, radicalExponentBox.boundingBox.width - sqrtSign.boundingBox.width * sqrtProportionOverlapped);
     // The top of the sqrt sign may not connect perfectly with the overline of the under-the-radical content.
     // The following variable compensates for that.
     sqrtSign.verticallyStretchSqrt(underTheRadical.boundingBox.height);
     radicalExponentBox.boundingBox.top = - 0.15 * radicalExponentBox.boundingBox.height;
-    let widthSqrtSign = 0.99;// 0.92;
-    sqrtSign.boundingBox.left = extraWidth;
-    underTheRadical.boundingBox.left = sqrtSign.boundingBox.left + sqrtSign.boundingBox.width * widthSqrtSign;
+    sqrtSign.boundingBox.left = this.sqrtSignLeftShift();
+    underTheRadical.boundingBox.left = sqrtSign.boundingBox.left + sqrtSign.boundingBox.width * this.widthSqrtSign;
     this.boundingBox = new BoundingBox();
     this.boundingBox.height = underTheRadical.boundingBox.height * 1.15;
     this.boundingBox.fractionLineHeight = underTheRadical.boundingBox.fractionLineHeight + 2.2;
@@ -8177,6 +8171,45 @@ class MathNodeSqrt extends MathNode {
     this.boundingBox.width = underTheRadical.boundingBox.left + underTheRadical.boundingBox.width + extraSpaceAfterRadical;
     this.boundingBox.needsMiddleAlignment = underTheRadical.boundingBox.needsMiddleAlignment;
   }
+
+  toScalableVectorGraphics(
+    /**@type{SVGElement}*/
+    container,
+    /**@type{BoundingBox} */
+    boundingBoxFromParent,
+  ) {
+    this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
+    let result = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    let sqrtSign = this.children[1];
+    let decoration = sqrtSign.children[0];
+    let leftStroke = sqrtSign.children[1];
+    let rightStroke = sqrtSign.children[2];
+    let overline = this.children[2];
+    let sqrtTop = boundingBoxFromParent.top + this.boundingBox.top + sqrtSign.boundingBox.top;
+    let sqrtLeft = boundingBoxFromParent.left + this.boundingBox.left + sqrtSign.boundingBox.left;
+    let bottom = sqrtTop + leftStroke.boundingBox.top + leftStroke.boundingBox.height;
+    let midX = sqrtLeft + rightStroke.boundingBox.left;
+    let decorationY = sqrtTop + decoration.boundingBox.top;
+    let decorationLeft = sqrtLeft + decoration.boundingBox.left;
+    let decorationRight = decorationLeft + decoration.boundingBox.width;
+    let topY = sqrtTop + rightStroke.boundingBox.top;
+    let rightX = boundingBoxFromParent.left + this.boundingBox.left + overline.boundingBox.left;
+    let overlineRight = boundingBoxFromParent.left + this.boundingBox.left + overline.boundingBox.left + overline.boundingBox.width;
+    let path = `M ${decorationLeft} ${decorationY} L ${decorationRight} ${decorationY} `;
+    path += `L ${decorationRight} ${decorationY} `;
+    path += `L ${midX} ${bottom} `;
+    path += `L ${rightX} ${topY} `;
+    path += `L ${overlineRight} ${topY} `;
+    result.setAttributeNS(null, "d", path);
+    let color = this.type.colorText;
+    if (color === "") {
+      color = "black";
+    }
+    result.setAttributeNS(null, "stroke", color);
+    result.setAttributeNS(null, "fill", "none");
+    container.appendChild(result);
+  }
+
 
   applyBackspaceToTheRight() {
     return this.applyBackspaceToTheRightAsLeftArrow();

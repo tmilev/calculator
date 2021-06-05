@@ -8513,12 +8513,12 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
     this.boundingBox.width = Math.min(this.boundingBox.height / 4, 20);
     this.element.style.borderLeft = "";
     this.element.style.borderRight = "";
-    let scale = this.boundingBox.width / this.boundingBox.height;
+    let scale = this.scale();
 
     let radius = this.boundingBox.height / 2;
     let child = this.children[0];
     child.element.style.borderRadius = `${radius}px`;
-    child.element.style.borderWidth = `${this.parenthesisThickness / scale}px`;
+    child.element.style.borderWidth = `${this.borderWidth()}px`;
     child.boundingBox.width = this.boundingBox.height;
     child.boundingBox.height = this.boundingBox.height;
     child.boundingBox.transformOrigin = "top left";
@@ -8526,12 +8526,20 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
     child.boundingBox.transform = `matrix(${scale},0,0,1,0,0)`;
   }
 
+  scale() {
+    return this.boundingBox.width / this.boundingBox.height;
+  }
+
+  borderWidth() {
+    return this.parenthesisThickness / this.scale();
+  }
+
   horizontalShift() {
     let shift = this.boundingBox.width / 3.5;
     if (this.left) {
       return shift;
     } else {
-      return -shift;
+      return - shift;
     }
   }
 
@@ -8557,17 +8565,32 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
     if (!this.left) {
       x += this.boundingBox.width;
     }
-    let y1 = boundingBoxFromParent.top + this.boundingBox.top;
-    let y2 = boundingBoxFromParent.top + this.boundingBox.height;
-    let move = `M ${x} ${y1}`; // move to point
-    let line = `L ${x} ${y2}`; // line
-    let command = `${move} ${line}`;
+    let startY = boundingBoxFromParent.top + this.boundingBox.top;
+    let endY = boundingBoxFromParent.top + this.boundingBox.height;
+    if (this.left) {
+      let swap = startY;
+      startY = endY;
+      endY = swap;
+    }
+    let rx = this.boundingBox.width / 2;
+    let rxInner = rx - this.borderWidth();
+    if (rxInner < 0) {
+      rxInner = rx / 2;
+    }
+    let ry = this.boundingBox.height / 2;
+    let degrees = 180;
+
+    let moveBottom = `M ${x} ${startY}`; // move to point.
+    let arcOuter = `A ${rx} ${ry} ${degrees} 1 1 ${x} ${endY}`;
+    let arcInner = `A ${rxInner} ${ry} ${degrees} 0 0 ${x} ${startY}`;
+    let command = `${moveBottom} ${arcOuter} ${arcInner}`;
     result.setAttributeNS(null, "d", command);
     let color = this.type.colorText;
     if (color === "") {
       color = "black";
     }
-    result.setAttributeNS(null, "stroke", color);
+    result.setAttributeNS(null, "stroke", "none");
+    result.setAttributeNS(null, "fill", color);
     container.appendChild(result);
   }
 }

@@ -190,7 +190,7 @@ class SolverSocratic {
   solve() {
     let url = "https://bloom-pa.googleapis.com/v1/solve:math?";
     url += `key=${this.getKey()}&`;
-    url += `queries=2x`;
+    url += `query=2x`;
     submitRequest.submitGET({
       url: url,
       callback: (text) => {

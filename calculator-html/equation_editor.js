@@ -2781,7 +2781,9 @@ class EquationEditor {
     this.backslashPosition = - 1;
     /**@type {string} */
     this.positionDebugString = "";
-    /**@type {boolean} */
+    /** @type {string} */
+    this.fontFamily = "";
+    /** @type {boolean} */
     this.hasFocusDOM = false;
     /**@type{boolean} If changing this.container's font size, set this to true before the change, and back to false after.*/
     this.resizingEditorFont = false;
@@ -2800,6 +2802,13 @@ class EquationEditor {
     /** @type{MathNode|null} */
     this.eventCatcher = null;
     this.prepareEventCatcher();
+  }
+
+  getFontFamily() {
+    if (this.fontFamily === "") {
+      this.fontFamily = this.container.style.fontFamily;
+    }
+    return this.fontFamily;
   }
 
   focusEventCatcher() {
@@ -4944,7 +4953,7 @@ class MathNode {
     for (let i = 0; i < numberOfRows; i++) {
       let row = this.children[i];
       row.boundingBox = new BoundingBox();
-      row.mergeBoundingBoxesHorizontallyAlignedElements();
+      row.mergeVerticalComponentsBoundingBoxesHorizontallyAlignedElements();
       row.boundingBox.top = top;
       top += row.boundingBox.height + betweenRows;
     }
@@ -4963,10 +4972,6 @@ class MathNode {
   computeDimensions() {
     if (this.isAtomic()) {
       this.computeDimensionsAtomic();
-      return;
-    }
-    if (this.isDelimiter()) {
-      this.computeDimensionsDelimiter();
       return;
     }
     if (this.type.type === knownTypes.error.type) {
@@ -5015,18 +5020,22 @@ class MathNode {
       this.computeDimensionsOverLine();
       return;
     }
-    if (this.type.type === knownTypes.horizontalMath.type) {
-      this.computeDimensionsHorizontalMath();
-      return;
-    }
     this.computeDimensionsStandard();
   }
 
   computeDimensionsStandard() {
-    this.computeDimensionsHorizontalMath();
+    this.boundingBox = new BoundingBox();
+    this.computeDimensionsParenthesesHeight();
+    for (let i = 0; i < this.children.length; i++) {
+      let child = this.children[i];
+      child.boundingBox.left = this.boundingBox.width;
+      this.boundingBox.width += child.boundingBox.width;
+    }
+    this.mergeVerticalComponentsBoundingBoxesHorizontallyAlignedElements();
+    this.computeMiddleAlignment();
   }
 
-  computeDimensionsHorizontalMathParenthesesHeight() {
+  computeDimensionsParenthesesHeight() {
     // Compute parentheses height
     /** @type {number[]} */
     let enclosedHeights = [];
@@ -5034,13 +5043,13 @@ class MathNode {
     /** @type {number[]} */
     let indicesOpenedParentheses = [];
     for (let i = 0; i < this.children.length; i++) {
-      this.computeDimensionsHorizontalMathParenthesesAccountChild(
+      this.computeDimensionsParenthesesAccountChild(
         i, enclosedHeights, enclosedFractionLineHeights, indicesOpenedParentheses,
       );
     }
   }
 
-  computeDimensionsHorizontalMathParenthesesAccountChild(
+  computeDimensionsParenthesesAccountChild(
     /** @type {number} */
     index,
     /** @type {number[]} */
@@ -5079,7 +5088,7 @@ class MathNode {
     }
   }
 
-  mergeBoundingBoxesHorizontallyAlignedElements() {
+  mergeVerticalComponentsBoundingBoxesHorizontallyAlignedElements() {
     // Compute fraction line height.
     for (let i = 0; i < this.children.length; i++) {
       let child = this.children[i];
@@ -5103,18 +5112,6 @@ class MathNode {
     }
   }
 
-  computeDimensionsHorizontalMath() {
-    this.boundingBox = new BoundingBox();
-    this.computeDimensionsHorizontalMathParenthesesHeight();
-    for (let i = 0; i < this.children.length; i++) {
-      let child = this.children[i];
-      child.boundingBox.left = this.boundingBox.width;
-      this.boundingBox.width += child.boundingBox.width;
-    }
-    this.mergeBoundingBoxesHorizontallyAlignedElements();
-    this.computeMiddleAlignment();
-    this.computeLineBreaks();
-  }
 
   computeMiddleAlignment() {
     for (let i = 0; i < this.children.length; i++) {
@@ -5123,57 +5120,6 @@ class MathNode {
         this.boundingBox.needsMiddleAlignment = true;
         return;
       }
-    }
-  }
-
-  computeLineBreaks() {
-    if (this.type.type !== knownTypes.horizontalMath.type) {
-      return;
-    }
-    if (this.parent === null) {
-      return;
-    }
-    if (this.parent.type.type !== knownTypes.root.type) {
-      return;
-    }
-    if (this.equationEditor.options.lineBreakWidth <= 0) {
-      return;
-    }
-    this.computeLineBreaksParthTwo(this.equationEditor.options.lineBreakWidth);
-  }
-
-  computeLineBreaksParthTwo(
-    /**@type{number} */
-    width,
-  ) {
-    // this.equationEditor.rootNode.boundingBox.needsMiddleAlignment = false;
-    let widthBroken = 0;
-    let row = 0;
-    this.boundingBox.lineHeight = this.boundingBox.height;
-    let finalWidth = 0;
-    let hasMoreThanOneLine = false;
-    let lastLineOverFlown = false;
-    for (let i = 0; i < this.children.length; i++) {
-      let child = this.children[i];
-      let widthSoFar = child.boundingBox.left + child.boundingBox.width;
-      let currentLineWidth = widthSoFar - widthBroken;
-      if (lastLineOverFlown && currentLineWidth > 0) {
-        hasMoreThanOneLine = true;
-        row++;
-        lastLineOverFlown = false;
-      }
-      finalWidth = Math.max(currentLineWidth, finalWidth);
-      child.boundingBox.top += this.boundingBox.lineHeight * row;
-      child.boundingBox.left -= widthBroken;
-      if (currentLineWidth > width) {
-        widthBroken = widthSoFar;
-        lastLineOverFlown = true;
-      }
-    }
-    this.boundingBox.height = this.boundingBox.lineHeight * (row + 1);
-    this.boundingBox.width = finalWidth;
-    if (!hasMoreThanOneLine) {
-      this.boundingBox.lineHeight = - 1;
     }
   }
 
@@ -7446,9 +7392,13 @@ class MathNode {
     let height = boundingBoxFromParent.top + this.boundingBox.top + this.boundingBox.height;
     graphics.setAttributeNS(null, "y", height);
     graphics.setAttributeNS(null, "alignment-baseline", "text-after-edge");
+    graphics.setAttributeNS(null, "font-family", this.equationEditor.getFontFamily());
     let fontSize = this.type.fontSizeRatio * boundingBoxFromParent.fontSizeInPixels;
     if (fontSize != 0) {
       graphics.setAttributeNS(null, "font-size", `${fontSize}px`);
+    }
+    if (this.type.colorText !== "") {
+      graphics.setAttributeNS(null, "font-color", this.type.colorText);
     }
     graphics.appendChild(document.createTextNode(this.textContentOrInitialContent()));
     container.appendChild(graphics);
@@ -7780,9 +7730,13 @@ class MathNodeFraction extends MathNode {
     let result = document.createElementNS("http://www.w3.org/2000/svg", "line");
     result.setAttributeNS(null, "x1", boundingBoxFromParent.left + this.boundingBox.left);
     result.setAttributeNS(null, "x2", boundingBoxFromParent.left + this.boundingBox.left + this.boundingBox.width + this.extraWidth / 2);
-    result.setAttributeNS(null, "y1", boundingBoxFromParent.top + this.boundingBox.fractionLineHeight);
-    result.setAttributeNS(null, "y2", boundingBoxFromParent.top + this.boundingBox.fractionLineHeight);
-    result.setAttributeNS(null, "stroke", "black");
+    result.setAttributeNS(null, "y1", boundingBoxFromParent.top + this.boundingBox.top + this.boundingBox.fractionLineHeight);
+    result.setAttributeNS(null, "y2", boundingBoxFromParent.top + this.boundingBox.top + this.boundingBox.fractionLineHeight);
+    let color = this.type.colorText;
+    if (color === "") {
+      color = "black";
+    }
+    result.setAttributeNS(null, "stroke", color);
     container.appendChild(result);
   }
 
@@ -7944,6 +7898,73 @@ class MathNodeHorizontalMath extends MathNode {
     }
     return boundingBox;
   }
+
+  computeDimensions() {
+    this.computeDimensionsHorizontalMath();
+  }
+
+  // Same as computeDimensions but easier to code search.
+  computeDimensionsHorizontalMath() {
+    this.boundingBox = new BoundingBox();
+    this.computeDimensionsParenthesesHeight();
+    for (let i = 0; i < this.children.length; i++) {
+      let child = this.children[i];
+      child.boundingBox.left = this.boundingBox.width;
+      this.boundingBox.width += child.boundingBox.width;
+    }
+    this.mergeVerticalComponentsBoundingBoxesHorizontallyAlignedElements();
+    this.computeMiddleAlignment();
+    this.computeLineBreaks();
+  }
+
+  computeLineBreaks() {
+    if (this.parent === null) {
+      return;
+    }
+    if (this.parent.type.type !== knownTypes.root.type) {
+      return;
+    }
+    if (this.equationEditor.options.lineBreakWidth <= 0) {
+      return;
+    }
+    this.computeLineBreaksPartTwo(this.equationEditor.options.lineBreakWidth);
+  }
+
+  computeLineBreaksPartTwo(
+    /**@type{number} */
+    width,
+  ) {
+    // this.equationEditor.rootNode.boundingBox.needsMiddleAlignment = false;
+    let widthBroken = 0;
+    let row = 0;
+    this.boundingBox.lineHeight = this.boundingBox.height;
+    let finalWidth = 0;
+    let hasMoreThanOneLine = false;
+    let lastLineOverFlown = false;
+    for (let i = 0; i < this.children.length; i++) {
+      let child = this.children[i];
+      let widthSoFar = child.boundingBox.left + child.boundingBox.width;
+      let currentLineWidth = widthSoFar - widthBroken;
+      if (lastLineOverFlown && currentLineWidth > 0) {
+        hasMoreThanOneLine = true;
+        row++;
+        lastLineOverFlown = false;
+      }
+      finalWidth = Math.max(currentLineWidth, finalWidth);
+      child.boundingBox.top += this.boundingBox.lineHeight * row;
+      child.boundingBox.left -= widthBroken;
+      if (currentLineWidth > width) {
+        widthBroken = widthSoFar;
+        lastLineOverFlown = true;
+      }
+    }
+    this.boundingBox.height = this.boundingBox.lineHeight * (row + 1);
+    this.boundingBox.width = finalWidth;
+    if (!hasMoreThanOneLine) {
+      this.boundingBox.lineHeight = - 1;
+    }
+  }
+
 }
 
 class MathNodeGenericBox extends MathNode {
@@ -7953,6 +7974,19 @@ class MathNodeGenericBox extends MathNode {
   ) {
     super(equationEditor, knownTypes.genericMathBox);
   }
+
+  toLatexWithAnnotation(
+    /**@type{ToLatexOptions|null} */
+    options,
+  ) {
+    let childLatex = this.children[0].toLatexWithAnnotation(options);
+    let color = this.type.colorText;
+    if (color === "") {
+      return new LatexWithAnnotation(`{${childLatex.latex}}`)
+    }
+    return new LatexWithAnnotation(`{\\color{${color}}{${childLatex.latex}}}`);
+  }
+
 }
 
 class MathNodeRoot extends MathNode {
@@ -8277,6 +8311,10 @@ class MathNodeLeftDelimiter extends MathNode {
   applyBackspaceToTheRight() {
     return this.applyBackspaceToTheRightDelimiter();
   }
+
+  computeDimensions() {
+    this.computeDimensionsDelimiter();
+  }
 }
 
 class MathNodeRightDelimiter extends MathNode {
@@ -8308,6 +8346,10 @@ class MathNodeRightDelimiter extends MathNode {
   applyBackspaceToTheRight() {
     return this.applyBackspaceToTheRightDelimiter();
   }
+
+  computeDimensions() {
+    this.computeDimensionsDelimiter();
+  }
 }
 
 class MathNodeDelimiterMark extends MathNode {
@@ -8336,6 +8378,7 @@ class MathNodeDelimiterMark extends MathNode {
     this.boundingBox.height = heightToEnclose * scaleHeight;
     this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
   }
+
 }
 
 class MathNodeAbsoluteValue extends MathNodeDelimiterMark {
@@ -8479,13 +8522,53 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
     child.boundingBox.width = this.boundingBox.height;
     child.boundingBox.height = this.boundingBox.height;
     child.boundingBox.transformOrigin = "top left";
+    child.boundingBox.left += this.horizontalShift();
+    child.boundingBox.transform = `matrix(${scale},0,0,1,0,0)`;
+  }
+
+  horizontalShift() {
     let shift = this.boundingBox.width / 3.5;
     if (this.left) {
-      child.boundingBox.left = shift;
+      return shift;
     } else {
-      child.boundingBox.left = - shift;
+      return -shift;
     }
-    child.boundingBox.transform = `matrix(${scale},0,0,1,0,0)`;
+  }
+
+  toScalableVectorGraphics(
+    /**@type{SVGElement}*/
+    container,
+    /**@type{BoundingBox} */
+    boundingBoxFromParent,
+  ) {
+    this.toScalableVectorGraphicsParenthesis(container, boundingBoxFromParent);
+  }
+
+  // Same as toScalableVectorGraphics but easier to code search.
+  toScalableVectorGraphicsParenthesis(
+    /**@type{SVGElement}*/
+    container,
+    /**@type{BoundingBox} */
+    boundingBoxFromParent,
+  ) {
+    this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
+    let result = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    let x = boundingBoxFromParent.left + this.boundingBox.left + this.horizontalShift();
+    if (!this.left) {
+      x += this.boundingBox.width;
+    }
+    let y1 = boundingBoxFromParent.top + this.boundingBox.top;
+    let y2 = boundingBoxFromParent.top + this.boundingBox.height;
+    let move = `M ${x} ${y1}`; // move to point
+    let line = `L ${x} ${y2}`; // line
+    let command = `${move} ${line}`;
+    result.setAttributeNS(null, "d", command);
+    let color = this.type.colorText;
+    if (color === "") {
+      color = "black";
+    }
+    result.setAttributeNS(null, "stroke", color);
+    container.appendChild(result);
   }
 }
 

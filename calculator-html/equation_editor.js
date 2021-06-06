@@ -8850,7 +8850,6 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
     result.setAttributeNS(null, "stroke", "none");
     result.setAttributeNS(null, "fill", color);
     container.appendChild(result);
-
   }
 }
 
@@ -8944,6 +8943,30 @@ class MathNodeVerticalLine extends MathNode {
     equationEditor,
   ) {
     super(equationEditor, knownTypes.verticalLineInTable);
+  }
+
+  toScalableVectorGraphics(
+    /**@type{SVGElement}*/
+    container,
+    /**@type{BoundingBox} */
+    boundingBoxFromParent,
+  ) {
+    this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
+    let result = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    let x = this.boundingBox.left + boundingBoxFromParent.left;
+    let yHigh = this.boundingBox.top + boundingBoxFromParent.top;
+    let yLow = yHigh + this.boundingBox.height;
+
+    result.setAttributeNS(null, "x1", x);
+    result.setAttributeNS(null, "x2", x);
+    result.setAttributeNS(null, "y1", yLow);
+    result.setAttributeNS(null, "y2", yHigh);
+    let color = this.type.colorText;
+    if (color === "") {
+      color = "black";
+    }
+    result.setAttributeNS(null, "stroke", color);
+    container.appendChild(result);
   }
 }
 

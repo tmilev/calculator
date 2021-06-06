@@ -1,3 +1,4 @@
+const equationEditor = require("./equation_editor");
 const panels = require("./panels");
 
 let ids = {
@@ -7,6 +8,8 @@ let ids = {
 
 function bootstrap() {
   console.log("Bootstrapping Lie algebra page.");
+  equationEditor.typeset(document.body, null);
+
   let elementsWithPanels = document.getElementsByClassName(ids.panelClassName);
   for (let i = 0; i < elementsWithPanels.length; i++) {
     let current = elementsWithPanels[i];

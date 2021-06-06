@@ -9589,7 +9589,7 @@ function typeset(
   toBeModified,
   /**@type{Function|null} */
   callbackEquationCreation,
-  /** @type {{style: string, sanitizeLatexSource: boolean, removeDisplayStyle: boolean, boolean, svgAndDOM: boolean, extraAttributes: Object<string, string>}} */
+  /** @type {{style: string, sanitizeLatexSource: boolean, removeDisplayStyle: boolean, boolean, svgOnly: boolean, svgAndDOM: boolean, extraAttributes: Object<string, string>}} */
   // sanitizeLatexSource: whether to convert the original latex to parsed one.
   // removeDisplayStyle: whether to remove \\displaystyle from latex source.
   // logTiming: whether to log in the console timing statistics.

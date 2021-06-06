@@ -31,6 +31,8 @@ class TypeSetter {
       removeDisplayStyle: true,
       logTiming: this.logTiming,
       extraAttributes: extraAttributes,
+      svgOnly: false,
+      svgAndDOM: false,
     },
     );
   }

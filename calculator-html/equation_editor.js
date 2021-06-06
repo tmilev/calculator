@@ -2991,6 +2991,7 @@ class EquationEditor {
       return;
     }
     this.containerSVG.textContent = "";
+    // this.containerSVG.contentEditable = true;
     let graphicsWriter = new ScalableVectorGraphicsWriter();
     let svgElement = graphicsWriter.typeset(this.rootNode);
     svgElement.style.display = "inline-block";
@@ -4252,6 +4253,7 @@ class MathNode {
       this.element = document.createElement("input");
     } else {
       this.element = document.createElement("div");
+      //this.element = document.createTextNode("");
     }
     if (
       (this.type.type === knownTypes.eventCatcher.type || this.type.type === knownTypes.atom.type) &&
@@ -7401,7 +7403,12 @@ class MathNode {
     if (this.type.colorText !== "") {
       graphics.setAttributeNS(null, "font-color", this.type.colorText);
     }
-    graphics.appendChild(document.createTextNode(this.textContentOrInitialContent()));
+    let content = this.textContentOrInitialContent();
+    let element = document.createTextNode(content);
+    //let element = document.createElement("div");
+    //element.contentEditable = true;
+    //element.textContent = content;
+    graphics.appendChild(element);
     container.appendChild(graphics);
   }
 

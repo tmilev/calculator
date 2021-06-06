@@ -7715,7 +7715,6 @@ class MathNodeFraction extends MathNode {
   applyBackspaceToTheRight() {
     return this.applyBackspaceToTheRightAsLeftArrow();
   }
-
 }
 
 class MathNodeNumerator extends MathNode {
@@ -8036,6 +8035,31 @@ class MathNodeCancel extends MathNode {
     let stretch = content.boundingBox.width / cancelSign.boundingBox.height;
     cancelSign.boundingBox.transformOrigin = "top left";
     cancelSign.boundingBox.transform = `matrix(1,0,${-stretch},1,${content.boundingBox.width},0)`;
+  }
+
+  toScalableVectorGraphics(
+    /**@type{SVGElement}*/
+    container,
+    /**@type{BoundingBox} */
+    boundingBoxFromParent,
+  ) {
+    this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
+    let leftX = boundingBoxFromParent.left + this.boundingBox.left;
+    let leftY = boundingBoxFromParent.top + this.boundingBox.top + this.boundingBox.height;
+    let rightX = boundingBoxFromParent.left + this.boundingBox.left + this.boundingBox.width;
+    let rightY = boundingBoxFromParent.top + this.boundingBox.top;
+
+    let result = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    result.setAttributeNS(null, "x1", leftX);
+    result.setAttributeNS(null, "y1", leftY);
+    result.setAttributeNS(null, "x2", rightX);
+    result.setAttributeNS(null, "y2", rightY);
+    let color = this.type.colorText;
+    if (color === "") {
+      color = "black";
+    }
+    result.setAttributeNS(null, "stroke", color);
+    container.appendChild(result);
   }
 }
 

@@ -34,9 +34,9 @@
     const options = new EquationEditorOptions({
       latexInput: document.getElementById("latex-input-test"),
       debugLogContainer: document.getElementById("debug"),
-      svgContainer: document.getElementById("svgContainer"),
     });
-    editor = new EquationEditor(editorElement, options);
+    let svgContainer = document.getElementById("svgContainer");
+    editor = new EquationEditor(editorElement, options, svgContainer);
     // The \caret command indicates the desired location of the caret. 
     (new EquationEditorButtonFactory("\\frac{123}{\\caret}\\sqrt{7}", false, "", "")).attachToClickById("custom-button", editor);
     buttonFactories.fraction.attachToClickById("fraction-button", editor)

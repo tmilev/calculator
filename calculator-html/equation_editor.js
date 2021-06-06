@@ -1077,9 +1077,8 @@ class MathNodeWithCaretPosition {
   }
 }
 
-/** @returns {EquationEditor} 
- * Converts the textContent of an html element to typeset math.
- */
+/** @returns {EquationEditor} */
+// Converts the textContent of an html element to typeset math.
 function mathFromElement(
   /**@type{HTMLElement} */
   container,
@@ -1091,6 +1090,8 @@ function mathFromElement(
   removeDisplayStyle,
   /**@type{Function|null} callback after the element has been typeset.*/
   callback,
+  /**@type{HTMLElement} */
+  containerSVG,
 ) {
   let content = container.textContent;
   if (content === null) {
@@ -1103,6 +1104,7 @@ function mathFromElement(
     sanitizeLatexSource,
     removeDisplayStyle,
     callback,
+    containerSVG
   );
 }
 
@@ -1120,6 +1122,8 @@ function mathFromLatex(
   removeDisplayStyle,
   /**@type{Function|null} callback after the element has been typeset*/
   callback,
+  /**@type{HTMLElement} */
+  containerSVG,
 ) {
   let lineBreakWidthString = container.getAttribute("lineBreakWidth");
   let lineBreakWidth = 0;
@@ -1132,7 +1136,7 @@ function mathFromLatex(
     removeDisplayStyle: removeDisplayStyle,
     logTiming: true,
     lineBreakWidth: lineBreakWidth,
-  }));
+  }), containerSVG);
   result.writeLatex(latex);
   if (callback !== undefined && callback !== null) {
     callback(result);
@@ -2492,8 +2496,6 @@ class EquationEditorOptions {
     /**@type{HTMLElement|null} */
     this.debugLogContainer = options.debugLogContainer;
     /**@type{HTMLElement|null} */
-    this.svgContainer = options.svgContainer;
-    /**@type{HTMLElement|null} */
     this.latexInput = options.latexInput;
     /** @type{boolean} */
     this.logTiming = options.logTiming;
@@ -2509,9 +2511,6 @@ class EquationEditorOptions {
      * the editor and the MathNode being edited.
     */
     this.editHandler = options.editHandler;
-    if (this.svgContainer === undefined) {
-      this.svgContainer = null;
-    }
     if (this.editable === undefined) {
       this.editable = true;
     }
@@ -2716,9 +2715,16 @@ class EquationEditor {
     containerGiven,
     /** @type{EquationEditorOptions|null} */
     options,
+    /** @type{HTMLElement} */
+    containerSVGGiven,
   ) {
     /** @type{HTMLElement} */
     this.container = containerGiven;
+    /** @type{HTMLElement|null} */
+    this.containerSVG = containerSVGGiven;
+    if (this.containerSVG === undefined) {
+      this.containerSVG = null;
+    }
     /** @type{HTMLElement|null} */
     this.latexContainer = null;
     this.container.style.display = "inline-block";
@@ -2965,12 +2971,17 @@ class EquationEditor {
   }
 
   writeSVG() {
-    if (this.options.svgContainer === null) {
+    if (this.containerSVG === null) {
       return;
     }
-    this.options.svgContainer.textContent = "";
+    this.containerSVG.textContent = "";
     let graphicsWriter = new ScalableVectorGraphicsWriter();
-    this.options.svgContainer.appendChild(graphicsWriter.typeset(this.rootNode));
+    this.containerSVG.appendChild(graphicsWriter.typeset(this.rootNode));
+    if (this.rootNode.boundingBox.needsMiddleAlignment) {
+      this.containerSVG.style.verticalAlign = "middle";
+    } else {
+      this.containerSVG.style.verticalAlign = "text-bottom";
+    }
   }
 
   writeDebugInfo(
@@ -8646,7 +8657,11 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
   ) {
     this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
     let result = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    let x = boundingBoxFromParent.left + this.boundingBox.left + this.horizontalShift();
+    let extraShift = this.parenthesisThickness + 1;
+    if (!this.left) {
+      extraShift *= -1;
+    }
+    let x = boundingBoxFromParent.left + this.boundingBox.left + this.horizontalShift() + extraShift;
     if (!this.left) {
       x += this.boundingBox.width;
     }
@@ -9279,6 +9294,10 @@ class MathTagCoverter {
       verticalAlign: styleComputer.style.verticalAlign,
       marginBottom: styleComputer.style.marginBottom,
     };
+    /**@type{HTMLElement[]} */
+    this.mathElementsDOM = [];
+    /**@type{HTMLElement[]} */
+    this.mathElementsSVG = [];
   }
 
   convertTags(
@@ -9310,9 +9329,15 @@ class MathTagCoverter {
       mathTag.style.verticalAlign = this.style.verticalAlign;
       mathTag.style.marginBottom = this.style.marginBottom;
       mathTag.style.maxWidth = this.style.maxWidth;
-      newChildren.push(mathTag);
       for (let label in this.extraAttributes) {
         mathTag.setAttribute(label, this.extraAttributes[label]);
+      }
+      this.mathElementsDOM.push(mathTag);
+      newChildren.push(mathTag);
+      if (this.svgAndDOM) {
+        let mathTagSVG = document.createElement("span");
+        this.mathElementsSVG.push(mathTagSVG);
+        newChildren.push(mathTagSVG);
       }
     }
     let previousIndex = toBeConverted[toBeConverted.length - 1].closeIndex + 1;
@@ -9387,6 +9412,11 @@ class MathTagCoverter {
     this.elementProcessed = toBeModified;
     this.startTime = (new Date()).getTime();
     this.lastTimeSample = this.startTime;
+    let mathElements = document.getElementsByClassName("mathcalculator");
+    for (let i = 0; i < mathElements.length; i++) {
+      this.mathElementsDOM.push(mathElements[i]);
+      this.mathElementsSVG.push(null);
+    }
     if (this.elementProcessed !== null) {
       this.convertTagsRecursive(this.elementProcessed, 0);
     }
@@ -9417,20 +9447,20 @@ class MathTagCoverter {
   }
 
   typesetMathTags(
-    /**@type{Function|null} callback after the element has been typeset*/
+    /**@type{Function|null} callback after the element has been typeset */
     callback,
   ) {
-    let mathElements = document.getElementsByClassName("mathcalculator");
     if (this.elementsToTypeset < 0) {
-      this.elementsToTypeset = mathElements.length;
+      this.elementsToTypeset = this.mathElementsDOM.length;
       this.typesetTotal = 0;
     }
-    for (; this.typesetTotal < mathElements.length; this.typesetTotal++) {
+    for (; this.typesetTotal < this.mathElementsDOM.length; this.typesetTotal++) {
       if (this.postponeTypeset(callback)) {
         return;
       }
       /** @type {HTMLElement} */
-      let element = mathElements[this.typesetTotal];
+      let element = this.mathElementsDOM[this.typesetTotal];
+      let elementSVG = this.mathElementsSVG[this.typesetTotal];
       if (element["typeset"] === "true") {
         continue;
       }
@@ -9442,6 +9472,7 @@ class MathTagCoverter {
         this.sanitizeLatexSource,
         this.removeDisplayStyle,
         callback,
+        elementSVG,
       );
       let typeSetTime = (new Date()).getTime() - startTime;
       if (this.logTiming) {

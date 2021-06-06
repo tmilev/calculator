@@ -3627,8 +3627,12 @@ class EquationEditor {
     if (ancestor.type.type !== knownTypes.horizontalMath.type) {
       ancestor = ancestor.beefUpToHorizontalParent().parent;
       if (ancestor === null) {
-        // Common ancestor is not of type horizontal math. Don't split.
-        return null;
+        // The common ancestor is the root node. 
+        let result = new SplitBySelectionResult(this.rootNode.children[0]);
+        for (let i = 0; i < result.ancestor.children.length; i++) {
+          result.split.push(result.ancestor.children[i]);
+        }
+        return result;
       }
     }
     if (start.element === ancestor || end.element === ancestor) {

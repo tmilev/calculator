@@ -116,7 +116,7 @@ Sample buttons:
 &lt;button id="custom-button"&gt;custom&lt;/button&gt;
 &lt;hr&gt;
 Typeset all math in the 'toBeTypeSet' tag.
-&lt;button id="typeSetButton" onclick="typeset(document.getElementById('toBeTypeSet'), '', false, false, false);"&gt;typeset&lt;/button&gt;
+&lt;button id="typeSetButton" onclick="typeset(document.getElementById('toBeTypeSet'));"&gt;typeset&lt;/button&gt;
 
 &lt;div id='toBeTypeSet'&gt;
 \(\frac{-b\pm \sqrt{b^2-4ac}}{2a}\)
@@ -133,7 +133,7 @@ Typeset all math in the 'toBeTypeSet' tag.
 
   <h2>Test page for static math content.</h2>
   <button id="typeSetButton"
-    onclick="typeset(document.getElementById('mathTagTester'), '', false, false, true);">typeset</button>
+    onclick="typeset(document.getElementById('mathTagTester'), null, {sanitizeLatexSource: false, removeDisplayStyle:false, logTiming: true});">typeset</button>
   <br>
   <span id="mathTagTester">
     Example content to be typeset follow.

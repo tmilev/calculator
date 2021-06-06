@@ -25,12 +25,13 @@ class TypeSetter {
     }
     equationEditor.typeset(
       element,
-      styleOverride,
-      false,
-      true,
-      this.logTiming,
-      callbackEquationCreation,
-      extraAttributes,
+      callbackEquationCreation, {
+      style: styleOverride,
+      sanitizeLatexSource: false,
+      removeDisplayStyle: true,
+      logTiming: this.logTiming,
+      extraAttributes: extraAttributes,
+    },
     );
   }
 }

@@ -401,10 +401,9 @@ class MathNodeFactory {
     return result;
   }
 
-  /** @returns{MathNode} 
-   * Returns a horizontal math with content given by the input array.
-   * Normalizes the input but does not ensure editable atoms at the ends. 
-   */
+  /** @returns{MathNode} */
+  // Returns a horizontal math with content given by the input array.
+  // Normalizes the input but does not ensure editable atoms at the ends. 
   horizontalMathFromArray(
     /** @type {EquationEditor} */
     equationEditor,
@@ -1720,39 +1719,38 @@ const latexConstants = new LaTeXConstants();
 
 class LaTeXParser {
   constructor(
-    /**@type{EquationEditor} */
+    /** @type{EquationEditor} */
     equationEditor,
-    /**@type{string} */
+    /** @type{string} */
     latex,
   ) {
-    /**@type{EquationEditor} */
+    /** @type{EquationEditor} */
     this.equationEditor = equationEditor;
-    /**@type{string} */
+    /** @type{string} */
     this.latex = latex;
-    /**@type {MathNode} */
+    /** @type {MathNode} */
     this.result = new MathNode(equationEditor, knownTypes.horizontalMath);
-    /**@type{string[]} */
+    /** @type{string[]} */
     this.words = [];
-    /**@type{SyntancticElement[]} */
+    /** @type{SyntancticElement[]} */
     this.parsingStack = [];
-    /**@type {number} 
-     * Dummy elements are prepended to the parsing stack  
-     * so parsing rules can safely assume a minimal number 
-     * of syntanctic elements. 
-     */
+    /** @type {number} */
+    // Dummy elements are prepended to the parsing stack  
+    // so parsing rules can safely assume a minimal number 
+    // of syntanctic elements. 
     this.dummyParsingElements = 6;
-    /**@type{boolean} */
+    /** @type{boolean} */
     this.debug = false;
-    /**@type{HTMLElement[][]} */
+    /** @type{HTMLElement[][]} */
     this.reductionLog = [];
-    /**@type{string} */
+    /** @type{string} */
     this.lastRuleName = "";
-    /**@type{number} */
+    /** @type{number} */
     this.startTime = 0;
-    /**@type{boolean} Whether the special command \caret is found. 
-     * Used to indicate the position of the 
-     * caret when the latex is used in an editable box.
-     */
+    /** @type{boolean} */
+    // Whether the special command \caret is found. 
+    // Used to indicate the position of the 
+    // caret when the latex is used in an editable box.
     this.caretFound = false;
   }
 
@@ -1782,7 +1780,7 @@ class LaTeXParser {
     }
   }
 
-  /**@returns{MathNode} */
+  /** @returns{MathNode} */
   parse() {
     this.startTime = new Date().getTime();
     this.initialize();
@@ -1826,7 +1824,7 @@ class LaTeXParser {
     return secondToLastElement.node;
   }
 
-  /**@returns{MathNode} */
+  /** @returns{MathNode} */
   constructError() {
     let error = mathNodeFactory.error(this.equationEditor, this.latex);
     let left = mathNodeFactory.atom(this.equationEditor, "");
@@ -1836,7 +1834,7 @@ class LaTeXParser {
 
   /** @returns{boolean} */
   reduceStack(
-    /**@type {SyntancticElement} */
+    /** @type {SyntancticElement} */
     syntacticElement,
   ) {
     let numberOfRuleApplications = 0;
@@ -1867,7 +1865,7 @@ class LaTeXParser {
 
   /** @returns{boolean} */
   decreaseParsingStack(
-    /**@type{number} */
+    /** @type{number} */
     elementsToRemove,
   ) {
     this.parsingStack.length = this.parsingStack.length - elementsToRemove;
@@ -1876,11 +1874,11 @@ class LaTeXParser {
 
   /** @returns{boolean} */
   replaceParsingStackTop(
-    /**@type{MathNode|null} */
+    /** @type{MathNode|null} */
     node,
-    /**@type{string} */
+    /** @type{string} */
     syntancticValue,
-    /**@type{number} */
+    /** @type{number} */
     indexToRemove,
   ) {
     return this.replaceParsingStackRange(node, syntancticValue, indexToRemove, - 1);
@@ -1888,13 +1886,13 @@ class LaTeXParser {
 
   /** @returns{boolean} */
   replaceParsingStackRange(
-    /**@type{MathNode|null} */
+    /** @type{MathNode|null} */
     node,
-    /**@type{string} */
+    /** @type{string} */
     syntancticRole,
-    /**@type{number} */
+    /** @type{number} */
     firstIndexToRemove,
-    /**@type{number} */
+    /** @type{number} */
     lastIndexToRemove,
   ) {
     if (firstIndexToRemove < 0) {
@@ -1913,9 +1911,9 @@ class LaTeXParser {
     return true;
   }
 
-  /**@returns{HtmlElement[]} */
+  /** @returns{HtmlElement[]} */
   toHtmlStackDebug(
-    /**@type{string} */
+    /** @type{string} */
     ruleName,
   ) {
     let result = [];
@@ -1929,7 +1927,7 @@ class LaTeXParser {
     return result;
   }
 
-  /**@returns{HtmlElement[]} */
+  /** @returns{HtmlElement[]} */
   toHtmlDebug() {
     let result = [];
     for (let i = 0; i < this.reductionLog.length; i++) {
@@ -1970,7 +1968,8 @@ class LaTeXParser {
     return this.replaceParsingStackTop(node, "", - 2);
   }
 
-  /**@returns{boolean} Applies the first possible rule to the top of the parsing stack. */
+  /** @returns{boolean} */
+  // Applies the first possible rule to the top of the parsing stack.
   applyOneRule() {
     let last = this.parsingStack[this.parsingStack.length - 1];
     if (latexConstants.isWhiteSpace(last.content)) {
@@ -9429,24 +9428,40 @@ class MathTagCoverter {
 function typeset(
   /**@type{HTMLElement} */
   toBeModified,
-  /** @type {string} */
-  style,
-  /**@type{boolean} whether to convert the original latex to parsed one.*/
-  sanitizeLatexSource,
-  /**@type{boolean} whether to remove \\displaystyle from latex source.*/
-  removeDisplayStyle,
-  /**@type{boolean} whether to log in the console timing statistics.*/
-  logTiming,
   /**@type{Function|null} */
   callbackEquationCreation,
-  /**@type{Object<string,string>} */
-  extraAttributes,
+  /** @type {{style: string, sanitizeLatexSource: boolean, removeDisplayStyle: boolean, boolean,extraAttributes: Object<string, string>}} */
+  // sanitizeLatexSource: whether to convert the original latex to parsed one.
+  // removeDisplayStyle: whether to remove \\displaystyle from latex source.
+  // logTiming: whether to log in the console timing statistics.
+  // extraAttributes: an string-key string-value object.
+  options,
 ) {
+  if (callbackEquationCreation === undefined) {
+    callbackEquationCreation = null;
+  }
+  if (options === null || options === undefined) {
+    options = {};
+  }
+  let style = options.style;
   if (style === "") {
     style = "font-family:'Times New Roman'; display:inline-block;";
   }
+  if (style === undefined || style === null) {
+    style = "";
+  }
+  let sanitizeLatexSource = options.sanitizeLatexSource;
+  let removeDisplayStyle = options.removeDisplayStyle;
+  let logTiming = options.logTiming;
+  let extraAttributes = options.extraAttributes;
   if (logTiming) {
     console.log("Logging parsing speed times; to turn off, set logTiming=false.")
+  }
+  if (sanitizeLatexSource === undefined) {
+    sanitizeLatexSource = false;
+  }
+  if (removeDisplayStyle === undefined) {
+    removeDisplayStyle = false;
   }
   new MathTagCoverter(
     style,

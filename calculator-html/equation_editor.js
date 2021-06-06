@@ -8659,7 +8659,7 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
     let result = document.createElementNS("http://www.w3.org/2000/svg", "path");
     let extraShift = this.parenthesisThickness + 1;
     if (!this.left) {
-      extraShift *= -1;
+      extraShift *= - 1;
     }
     let x = boundingBoxFromParent.left + this.boundingBox.left + this.horizontalShift() + extraShift;
     if (!this.left) {
@@ -8706,6 +8706,14 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
     this.left = left;
   }
 
+  radius() {
+    let radius = Math.floor(this.boundingBox.height / 12);
+    if (radius < 2) {
+      radius = 2;
+    }
+    return radius;
+  }
+
   verticallyStretch(
     /** @type {number}*/
     heightToEnclose,
@@ -8715,10 +8723,7 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
     this.verticallyStretchCommon(heightToEnclose, fractionLineHeightEnclosed);
     let topBar = this.children[1];
     let bottomBar = this.children[4];
-    let radius = Math.floor(this.boundingBox.height / 12);
-    if (radius < 2) {
-      radius = 2;
-    }
+    let radius = this.radius();
     let heightBar = (this.boundingBox.height - 4 * radius) / 2;
     this.boundingBox.width = radius * 2 + 1;
     this.boundingBox.height += radius;
@@ -8788,6 +8793,64 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
       bottomQuarterCircle.element.style.borderBottomRightRadius = radiusString;
       bottomQuarterCircle.element.style.borderRight = borderStyleString;
     }
+  }
+
+  toScalableVectorGraphics(
+    /**@type{SVGElement}*/
+    container,
+    /**@type{BoundingBox} */
+    boundingBoxFromParent,
+  ) {
+    this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
+    let result = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    let radius = this.radius();
+    let leftShift = boundingBoxFromParent.left + this.boundingBox.left;
+    let xMiddle = leftShift + radius;
+    let xStickyPart = leftShift;
+    let xEnd = leftShift;
+    if (this.left) {
+      xEnd += radius * 2;
+    } else {
+      xStickyPart += radius * 2;
+    }
+    let yHigh = boundingBoxFromParent.top + this.boundingBox.top;
+    let yLow = yHigh + this.boundingBox.height;
+    let yMiddle = (yHigh + yLow) / 2;
+    let arcChoiceBottom = 0;
+    let arcChoiceOther = 1;
+    if (this.left) {
+      arcChoiceBottom = 1;
+      arcChoiceOther = 0;
+    }
+
+    let path = `M ${xEnd} ${yLow} `;
+    path += `A ${radius} ${radius} 0 0 ${arcChoiceBottom} ${xMiddle} ${yLow - radius} `;
+    path += `L ${xMiddle} ${yMiddle + radius} `;
+    path += `A ${radius} ${radius} 0 0 ${arcChoiceOther} ${xStickyPart} ${yMiddle} `;
+    path += `A ${radius} ${radius} 0 0 ${arcChoiceOther} ${xMiddle} ${yMiddle - radius} `;
+    path += `L ${xMiddle} ${yHigh + radius} `;
+    path += `A ${radius} ${radius} 0 0 ${arcChoiceBottom} ${xEnd} ${yHigh} `;
+
+    let thicknessShift = this.parenthesisThickness;
+    if (!this.left) {
+      thicknessShift *= -1;
+    }
+    path += `A ${radius} ${radius} 0 0 ${arcChoiceOther} ${xMiddle + thicknessShift} ${yHigh + radius} `;
+    path += `L ${xMiddle + thicknessShift} ${yMiddle - radius} `;
+    path += `A ${radius} ${radius} 0 0 ${arcChoiceBottom} ${xStickyPart + thicknessShift} ${yMiddle} `;
+    path += `A ${radius} ${radius} 0 0 ${arcChoiceBottom} ${xMiddle + thicknessShift} ${yMiddle + radius} `;
+    path += `L ${xMiddle + thicknessShift} ${yLow - radius} `;
+    path += `A ${radius} ${radius} 0 0 ${arcChoiceOther} ${xEnd} ${yLow} `;
+
+    result.setAttributeNS(null, "d", path);
+    let color = this.type.colorText;
+    if (color === "") {
+      color = "black";
+    }
+    result.setAttributeNS(null, "stroke", "none");
+    result.setAttributeNS(null, "fill", color);
+    container.appendChild(result);
+
   }
 }
 

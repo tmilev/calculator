@@ -9214,17 +9214,43 @@ class MathTagData {
 
 class MathTagCoverter {
   constructor(
-    /**@type{string} */
-    style,
-    /**@type{boolean} */
-    sanitizeLatexSource,
-    /**@type{boolean} whether to remove \\displaystyle from latex source.*/
-    removeDisplayStyle,
-    /**@type{boolean} whether to log timing information. */
-    logTiming,
-    /**@type{Object<string,string>} */
-    extraAttributes,
+    /** @type {{style: string, sanitizeLatexSource: boolean, removeDisplayStyle: boolean, boolean, svgAndDOM: boolean, extraAttributes: Object<string, string>}} */
+    // sanitizeLatexSource: whether to convert the original latex to parsed one.
+    // removeDisplayStyle: whether to remove \\displaystyle from latex source.
+    // logTiming: whether to log in the console timing statistics.
+    // extraAttributes: an string-key string-value object.
+    options,
   ) {
+    if (options === null || options === undefined) {
+      options = {};
+    }
+    /**@type{boolean} */
+    this.sanitizeLatexSource = options.sanitizeLatexSource;
+    if (this.sanitizeLatexSource === undefined) {
+      this.sanitizeLatexSource = false;
+    }
+    /**@type{boolean} */
+    this.removeDisplayStyle = options.removeDisplayStyle;
+    if (this.removeDisplayStyle === undefined) {
+      this.removeDisplayStyle = false;
+    }
+    /**@type{boolean} */
+    this.logTiming = options.logTiming;
+    if (this.logTiming === undefined || this.logTiming === null) {
+      this.logTiming = false;
+    }
+    if (this.logTiming) {
+      console.log("Logging parsing speed times; to turn off, set logTiming=false.")
+    }
+    this.extraAttributes = options.extraAttributes;
+    if (this.extraAttributes === null || this.extraAttributes === undefined) {
+      this.extraAttributes = {};
+    }
+    /**@type{boolean} */
+    this.svgAndDOM = options.svgAndDOM;
+    if (this.svgAndDOM === undefined || this.svgAndDOM === null) {
+      this.svgAndDOM = false;
+    }
     /**@type{HTMLElement|null} */
     this.elementProcessed = null;
     /**@type{number} */
@@ -9237,14 +9263,15 @@ class MathTagCoverter {
     this.elementsToTypeset = - 1;
     /**@type{number} */
     this.typesetTotal = 0;
+    let style = options.style;
+    if (style === "") {
+      style = "font-family:'Times New Roman'; display:inline-block;";
+    }
+    if (style === undefined || style === null) {
+      style = "";
+    }
     let styleComputer = document.createElement("DIV");
     styleComputer.style = style;
-    /**@type{boolean} */
-    this.sanitizeLatexSource = sanitizeLatexSource;
-    /**@type{boolean} */
-    this.removeDisplayStyle = removeDisplayStyle;
-    /**@type{boolean} */
-    this.logTiming = logTiming;
     this.style = {
       fontFamily: styleComputer.style.fontFamily,
       display: styleComputer.style.display,
@@ -9252,7 +9279,6 @@ class MathTagCoverter {
       verticalAlign: styleComputer.style.verticalAlign,
       marginBottom: styleComputer.style.marginBottom,
     };
-    this.extraAttributes = extraAttributes;
   }
 
   convertTags(
@@ -9430,7 +9456,7 @@ function typeset(
   toBeModified,
   /**@type{Function|null} */
   callbackEquationCreation,
-  /** @type {{style: string, sanitizeLatexSource: boolean, removeDisplayStyle: boolean, boolean,extraAttributes: Object<string, string>}} */
+  /** @type {{style: string, sanitizeLatexSource: boolean, removeDisplayStyle: boolean, boolean, svgAndDOM: boolean, extraAttributes: Object<string, string>}} */
   // sanitizeLatexSource: whether to convert the original latex to parsed one.
   // removeDisplayStyle: whether to remove \\displaystyle from latex source.
   // logTiming: whether to log in the console timing statistics.
@@ -9440,35 +9466,8 @@ function typeset(
   if (callbackEquationCreation === undefined) {
     callbackEquationCreation = null;
   }
-  if (options === null || options === undefined) {
-    options = {};
-  }
-  let style = options.style;
-  if (style === "") {
-    style = "font-family:'Times New Roman'; display:inline-block;";
-  }
-  if (style === undefined || style === null) {
-    style = "";
-  }
-  let sanitizeLatexSource = options.sanitizeLatexSource;
-  let removeDisplayStyle = options.removeDisplayStyle;
-  let logTiming = options.logTiming;
-  let extraAttributes = options.extraAttributes;
-  if (logTiming) {
-    console.log("Logging parsing speed times; to turn off, set logTiming=false.")
-  }
-  if (sanitizeLatexSource === undefined) {
-    sanitizeLatexSource = false;
-  }
-  if (removeDisplayStyle === undefined) {
-    removeDisplayStyle = false;
-  }
   new MathTagCoverter(
-    style,
-    sanitizeLatexSource,
-    removeDisplayStyle,
-    logTiming,
-    extraAttributes,
+    options,
   ).typeset(
     toBeModified,
     callbackEquationCreation,

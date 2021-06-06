@@ -8610,7 +8610,7 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
       endY = swap;
     }
     let rx = this.boundingBox.width / 2;
-    let rxInner = rx - this.borderWidth();
+    let rxInner = rx - this.parenthesisThickness;
     if (rxInner < 0) {
       rxInner = rx / 2;
     }

@@ -2725,16 +2725,19 @@ class EquationEditor {
     if (this.containerSVG === undefined) {
       this.containerSVG = null;
     }
-    /** @type{HTMLElement|null} */
-    this.latexContainer = null;
-    this.container.style.display = "inline-block";
-    this.container.style.position = "relative";
-    this.container.textContent = "";
     /** @type{EquationEditorOptions} */
     this.options = new EquationEditorOptions({});
     if (options !== null && options !== undefined) {
       this.options = options;
     }
+    /** @type{HTMLElement|null} */
+    this.latexContainer = null;
+    this.initializeContainer(this.container);
+    this.initializeContainer(this.containerSVG);
+    /** @type{number} */
+    this.containerDesiredHeight = 0;
+    /** @type{number} */
+    this.containerDesiredWidth = 0;
     this.rootNode = mathNodeFactory.rootMath(this);
     if (!this.options.editable) {
       this.rootNode.type.borderStyle = "";
@@ -2742,9 +2745,6 @@ class EquationEditor {
       this.rootNode.type.margin = "";
       this.rootNode.type.cursor = "";
       this.rootNode.type.minWidth = "";
-    } else {
-      this.container.style.margin = "2px";
-      this.container.style.padding = "2px";
     }
     /**@type{boolean} whether there's a pending writeLatex event to be trigerred when the event is visible. */
     this.pendingWriteLatex = false;
@@ -2807,6 +2807,22 @@ class EquationEditor {
     /** @type{MathNode|null} */
     this.eventCatcher = null;
     this.prepareEventCatcher();
+  }
+
+  initializeContainer(
+    /**@type{HTMLElement|null} */
+    inputContainer,
+  ) {
+    if (inputContainer === null) {
+      return;
+    }
+    inputContainer.style.display = "inline-block";
+    inputContainer.style.position = "relative";
+    inputContainer.textContent = "";
+    if (this.options.editable) {
+      inputContainer.style.margin = "2px";
+      inputContainer.style.padding = "2px";
+    }
   }
 
   getFontFamily() {
@@ -2976,9 +2992,14 @@ class EquationEditor {
     }
     this.containerSVG.textContent = "";
     let graphicsWriter = new ScalableVectorGraphicsWriter();
-    this.containerSVG.appendChild(graphicsWriter.typeset(this.rootNode));
-    this.containerSVG.style.width = this.rootNode.boundingBox.width;
-    this.containerSVG.style.height = this.rootNode.boundingBox.height;
+    let svgElement = graphicsWriter.typeset(this.rootNode);
+    svgElement.style.display = "inline-block";
+    svgElement.style.position = "absolute";
+    svgElement.style.left = this.rootNode.boundingBox.left;
+    svgElement.style.top = this.rootNode.boundingBox.top;
+    this.containerSVG.appendChild(svgElement);
+    this.containerSVG.style.width = this.containerDesiredWidth;
+    this.containerSVG.style.height = this.containerDesiredHeight;
     if (this.rootNode.boundingBox.needsMiddleAlignment) {
       this.containerSVG.style.verticalAlign = "middle";
     } else {
@@ -3111,6 +3132,9 @@ class EquationEditor {
     this.writeSVG();
     this.writeDebugInfo(parser);
     this.container.setAttribute("latexsource", latex);
+    if (this.containerSVG !== null) {
+      this.containerSVG.setAttribute("latexsource", latex);
+    }
     this.setLastFocused(this.rootNode.rightmostAtomChild());
     return true;
   }
@@ -3505,19 +3529,23 @@ class EquationEditor {
     return new KeyHandlerResult(true, true);
   }
 
+  computeContainerDimensions() {
+    let boundingRectangle = this.rootNode.element.getBoundingClientRect();
+    // Bounding box may not be computed correctly at this point in Firefox.
+    this.containerDesiredHeight = Math.max(boundingRectangle.height, this.rootNode.boundingBox.height, this.standardAtomHeight);
+    if (this.options.editable) {
+      this.containerDesiredHeight += 2;
+    }
+    // Bounding box may not be computed correctly at this point in Firefox.
+    this.containerDesiredWidth = Math.max(boundingRectangle.width, this.rootNode.boundingBox.width);
+  }
+
   updateAlignment() {
     this.rootNode.computeBoundingBox();
     this.rootNode.doAlign();
-    let boundingRectangle = this.rootNode.element.getBoundingClientRect();
-    // Bounding box may not be computed correctly at this point in Firefox.
-    let desiredHeight = Math.max(boundingRectangle.height, this.rootNode.boundingBox.height, this.standardAtomHeight);
-    // Bounding box may not be computed correctly at this point in Firefox.
-    let desiredWidth = Math.max(boundingRectangle.width, this.rootNode.boundingBox.width);
-    if (this.options.editable) {
-      desiredHeight += 2;
-    }
-    this.container.style.height = desiredHeight;
-    this.container.style.width = desiredWidth;
+    this.computeContainerDimensions();
+    this.container.style.height = this.containerDesiredHeight;
+    this.container.style.width = this.containerDesiredWidth;
     if (this.rootNode.boundingBox.needsMiddleAlignment && !this.options.editable) {
       this.container.style.verticalAlign = "middle";
     } else {
@@ -9397,6 +9425,18 @@ class MathTagCoverter {
     this.mathElementsSVG = [];
   }
 
+  /** @returns{HTMLElement} */
+  getMathTagEmpty() {
+    let mathTag = document.createElement("DIV");
+    mathTag.style.fontFamily = this.style.fontFamily;
+    mathTag.style.display = this.style.display;
+    mathTag.style.fontSize = this.style.fontSize;
+    mathTag.style.verticalAlign = this.style.verticalAlign;
+    mathTag.style.marginBottom = this.style.marginBottom;
+    mathTag.style.maxWidth = this.style.maxWidth;
+    return mathTag;
+  }
+
   convertTags(
     /**@type{HTMLElement} */
     toBeModified,
@@ -9417,15 +9457,9 @@ class MathTagCoverter {
       if (intermediateContent.length > 0) {
         newChildren.push(document.createTextNode(intermediateContent));
       }
-      let mathTag = document.createElement("DIV");
-      mathTag.className = "mathcalculator";
+      let mathTag = this.getMathTagEmpty();
       mathTag.textContent = toBeConverted[i].content;
-      mathTag.style.fontFamily = this.style.fontFamily;
-      mathTag.style.display = this.style.display;
-      mathTag.style.fontSize = this.style.fontSize;
-      mathTag.style.verticalAlign = this.style.verticalAlign;
-      mathTag.style.marginBottom = this.style.marginBottom;
-      mathTag.style.maxWidth = this.style.maxWidth;
+      mathTag.className = "mathcalculator";
       for (let label in this.extraAttributes) {
         mathTag.setAttribute(label, this.extraAttributes[label]);
       }
@@ -9434,7 +9468,8 @@ class MathTagCoverter {
       if (this.svgOnly) {
         this.mathElementsSVG.push(mathTag);
       } else if (this.svgAndDOM) {
-        let mathTagSVG = document.createElement("span");
+        let mathTagSVG = this.getMathTagEmpty();
+        mathTagSVG.className = "mathcalculatorSVG";
         this.mathElementsSVG.push(mathTagSVG);
         newChildren.push(mathTagSVG);
       }

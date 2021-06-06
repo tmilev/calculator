@@ -2977,6 +2977,8 @@ class EquationEditor {
     this.containerSVG.textContent = "";
     let graphicsWriter = new ScalableVectorGraphicsWriter();
     this.containerSVG.appendChild(graphicsWriter.typeset(this.rootNode));
+    this.containerSVG.style.width = this.rootNode.boundingBox.width;
+    this.containerSVG.style.height = this.rootNode.boundingBox.height;
     if (this.rootNode.boundingBox.needsMiddleAlignment) {
       this.containerSVG.style.verticalAlign = "middle";
     } else {
@@ -3106,6 +3108,7 @@ class EquationEditor {
     this.rootNode.appendChild(newContent);
     this.updateDOM();
     this.updateAlignment();
+    this.writeSVG();
     this.writeDebugInfo(parser);
     this.container.setAttribute("latexsource", latex);
     this.setLastFocused(this.rootNode.rightmostAtomChild());
@@ -4491,7 +4494,6 @@ class MathNode {
   updateDOM() {
     this.updateDOMRecursive(0);
     this.equationEditor.updateAlignment();
-    this.equationEditor.writeSVG();
   }
 
   /** @returns {number} 
@@ -9315,10 +9317,12 @@ class MathTagData {
 
 class MathTagCoverter {
   constructor(
-    /** @type {{style: string, sanitizeLatexSource: boolean, removeDisplayStyle: boolean, boolean, svgAndDOM: boolean, extraAttributes: Object<string, string>}} */
+    /** @type {{style: string, sanitizeLatexSource: boolean, removeDisplayStyle: boolean, boolean, svgOnly: boolean, svgAndDOM: boolean, extraAttributes: Object<string, string>}} */
     // sanitizeLatexSource: whether to convert the original latex to parsed one.
     // removeDisplayStyle: whether to remove \\displaystyle from latex source.
     // logTiming: whether to log in the console timing statistics.
+    // svgAndDOM: generate both a DOM and an SVG equation side-by side. Use for debugging only.
+    // svgOnly: use svg instead of DOM output.
     // extraAttributes: an string-key string-value object.
     options,
   ) {
@@ -9352,8 +9356,15 @@ class MathTagCoverter {
     if (this.svgAndDOM === undefined || this.svgAndDOM === null) {
       this.svgAndDOM = false;
     }
+    /**@type{boolean} */
+    this.svgOnly = options.svgOnly;
+    if (this.svgOnly === null || this.svgOnly === undefined) {
+      this.svgOnly = false;
+    }
     /**@type{HTMLElement|null} */
     this.elementProcessed = null;
+    /**@type{HTMLElement|null} */
+    this.hiddenContainer = null;
     /**@type{number} */
     this.startTime = 0;
     /**@type{number} */
@@ -9420,7 +9431,9 @@ class MathTagCoverter {
       }
       this.mathElementsDOM.push(mathTag);
       newChildren.push(mathTag);
-      if (this.svgAndDOM) {
+      if (this.svgOnly) {
+        this.mathElementsSVG.push(mathTag);
+      } else if (this.svgAndDOM) {
         let mathTagSVG = document.createElement("span");
         this.mathElementsSVG.push(mathTagSVG);
         newChildren.push(mathTagSVG);
@@ -9499,12 +9512,12 @@ class MathTagCoverter {
     this.startTime = (new Date()).getTime();
     this.lastTimeSample = this.startTime;
     let mathElements = document.getElementsByClassName("mathcalculator");
+    if (this.elementProcessed !== null) {
+      this.convertTagsRecursive(this.elementProcessed, 0);
+    }
     for (let i = 0; i < mathElements.length; i++) {
       this.mathElementsDOM.push(mathElements[i]);
       this.mathElementsSVG.push(null);
-    }
-    if (this.elementProcessed !== null) {
-      this.convertTagsRecursive(this.elementProcessed, 0);
     }
     this.typesetMathTags(callback);
   }
@@ -9552,7 +9565,7 @@ class MathTagCoverter {
       }
       element["typeset"] = "true";
       let startTime = (new Date()).getTime();
-      mathFromElement(
+      let editor = mathFromElement(
         element,
         false,
         this.sanitizeLatexSource,
@@ -9560,6 +9573,9 @@ class MathTagCoverter {
         callback,
         elementSVG,
       );
+      if (this.svgOnly) {
+        editor.container = null;
+      }
       let typeSetTime = (new Date()).getTime() - startTime;
       if (this.logTiming) {
         console.log(`Typeset of element ${this.typesetTotal + 1} out of ${this.elementsToTypeset} took ${typeSetTime} ms.`);

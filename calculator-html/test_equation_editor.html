@@ -24,6 +24,7 @@
     document.getElementById("font-size").textContent = `${slider.value}px`;
     editor.resizingEditorFont = true;
     editor.updateDOM();
+    editor.writeSVG();
     editor.rootNode.focusRestore(1);
     editor.writeDebugInfo(null);
     editor.resizingEditorFont = false;
@@ -133,7 +134,7 @@ Typeset all math in the 'toBeTypeSet' tag.
 
   <h2>Test page for static math content.</h2>
   <button id="typeSetButton"
-    onclick="typeset(document.getElementById('mathTagTester'), null, {sanitizeLatexSource: false, removeDisplayStyle:false, logTiming: true, svgAndDOM: true});">typeset</button>
+    onclick="typeset(document.getElementById('mathTagTester'), null, {sanitizeLatexSource: false, removeDisplayStyle:false, logTiming: true, svgAndDOM: true, svgOnly: true});">typeset</button>
   <br>
   <span id="mathTagTester">
     Example content to be typeset follow.

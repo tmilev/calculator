@@ -4948,10 +4948,6 @@ class MathNode {
       throw "This case should be handled by MathNodeSqrt.computeDimensions()";
       return;
     }
-    if (this.type.type === knownTypes.sqrtSign.type) {
-      this.computeDimensionsSqrtSign();
-      return;
-    }
     if (this.type.type === knownTypes.matrixRow.type) {
       return;
     }
@@ -7940,7 +7936,6 @@ class MathNodeGenericBox extends MathNode {
     }
     return new LatexWithAnnotation(`{\\color{${color}}{${childLatex.latex}}}`);
   }
-
 }
 
 class MathNodeRoot extends MathNode {
@@ -8476,6 +8471,36 @@ class MathNodeSquareBrackets extends MathNodeDelimiterMark {
       this.element.style.borderBottom = `solid`;
       this.element.style.borderWidth = `${this.parenthesisThickness}px`;
     }
+  }
+
+  toScalableVectorGraphics(
+    /**@type{SVGElement}*/
+    container,
+    /**@type{BoundingBox} */
+    boundingBoxFromParent,
+  ) {
+    this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
+    let result = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    let xStart = boundingBoxFromParent.left + this.boundingBox.left;
+    let xMiddle = boundingBoxFromParent.left + this.boundingBox.left;
+    if (this.left) {
+      xStart += this.boundingBox.width;
+    } else {
+      xMiddle += this.boundingBox.width;
+    }
+    let yHigh = boundingBoxFromParent.top + this.boundingBox.top;
+    let yLow = yHigh + this.boundingBox.height - this.parenthesisThickness;
+    yHigh += this.parenthesisThickness;
+
+    let command = `M ${xStart} ${yLow} L ${xMiddle} ${yLow} L ${xMiddle} ${yHigh} L ${xStart} ${yHigh}`; // move to point.
+    result.setAttributeNS(null, "d", command);
+    let color = this.type.colorText;
+    if (color === "") {
+      color = "black";
+    }
+    result.setAttributeNS(null, "stroke", color);
+    result.setAttributeNS(null, "fill", "none");
+    container.appendChild(result);
   }
 }
 

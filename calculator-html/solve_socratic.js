@@ -39,7 +39,7 @@ class SolverSocratic {
     }
     /**@type{HTMLElement} */
     this.socraticSolution = document.getElementById(ids.domElements.pages.solveSocratic.solution);
-    /**@type{string} 
+    /** @type{string} 
      * We store our socratic key with byte entries shifted so it does not appear in the javascript as plain text. 
      * Of course, this is not intended to be secure, 
      * but a protection that the api key pop up easily in searches.
@@ -47,7 +47,7 @@ class SolverSocratic {
     this.keyShifted = "FNfX~H|TUY^t{\\y~8INq[OWRMf~5h_YY66gunl";
   }
 
-  /**@return{string} */
+  /** @return{string} */
   getKey() {
     let result = "";
     for (let i = 0; i < this.keyShifted.length; i++) {

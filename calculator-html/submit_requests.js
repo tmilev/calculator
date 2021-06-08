@@ -150,7 +150,9 @@ class RequestWithProgress {
     this.sendPrepare();
     this.xhr.open("POST", this.address, true);
     this.xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    this.details = `POST ${this.address}<br>message: ${miscellaneous.shortenString(200, parameters)}`
+    if (typeof parameters === "string") {
+      this.details = `POST ${this.address}<br>message: ${miscellaneous.shortenString(200, parameters)}`;
+    }
     this.recordProgressStarted();
     this.xhr.send(parameters);
   }

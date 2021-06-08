@@ -68,7 +68,20 @@ let domElements = {
     },
     compareExpressionsSocratic: {
       div: "divCompareExpressionsSocraticPage",
-
+      resultUserFriendly: "resultUserFriendlySocratic",
+      resultRaw: "resultRawSocratic",
+      resultFormatted: "resultFormattedSocratic",
+      givenPanel: "divGivenPanelSocratic",
+      desiredPanel: "divDesiredPanelSocratic",
+      givenEquationEditor: "divGivenEquationEditorSocratic",
+      desiredEquationEditor: "divDesiredEquationEditorSocratic",
+      buttonCompare: "buttonCompareExpressionsSocratic",
+      desiredRawInput: "inputDesiredRawInputSocratic",
+      givenRawInput: "inputGivenRawInputSocratic",
+      resultUserFriendly: "compareExpressionsResultUserFriendlySocratic",
+      resultRaw: "divCompareExpressionsResultRawSocratic",
+      resultFormatted: "divCompareExpressionsResultFormattedSocratic",
+      progress: "progressReportCompareExpressionsSocratic",
     },
     login: {
       divLoginCalculatorPanel: "divLoginCalculatorPanel",

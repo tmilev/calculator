@@ -1303,15 +1303,15 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringLaTeX() {
   this->checkInitialization();
   std::stringstream out;
   List<Polynomial<Coefficient> >& remainders = this->intermediateRemainders;
-  List<Polynomial<Coefficient> >& subtracands = this->intermediateSubtractands;
+  List<Polynomial<Coefficient> >& subtrahends = this->intermediateSubtractands;
   this->owner->format.monomialOrder = this->owner->polynomialOrder.monomialOrder;
   std::string highlightedColor = "red";
   this->allMonomials.addOnTopNoRepetition(this->startingPolynomial.monomials);
   for (int i = 0; i < remainders.size; i ++) {
     this->allMonomials.addOnTopNoRepetition(remainders[i].monomials);
   }
-  for (int i = 0; i < subtracands.size; i ++) {
-    this->allMonomials.addOnTopNoRepetition(subtracands[i].monomials);
+  for (int i = 0; i < subtrahends.size; i ++) {
+    this->allMonomials.addOnTopNoRepetition(subtrahends[i].monomials);
   }
   //List<std::string> basisColorStyles;
   //basisColorStyles.setSize(this->basis.size);
@@ -1350,10 +1350,10 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringLaTeX() {
     << this->getPolynomialStringSpacedMonomialsLaTeX(
       remainders[i], &highlightedColor, &this->intermediateHighlightedMons[i]
     ) << "\\\\\n";
-    if (i < subtracands.size) {
+    if (i < subtrahends.size) {
       out << "&";
       out << this->getPolynomialStringSpacedMonomialsLaTeX(
-        subtracands[i], &highlightedColor
+        subtrahends[i], &highlightedColor
       ) << "\\\\\\cline{2-" << this->allMonomials.size + 1 << "}";
     }
   }
@@ -1431,15 +1431,15 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
   this->checkInitialization();
   std::stringstream out;
   List<Polynomial<Coefficient> >& remainders = this->intermediateRemainders;
-  List<Polynomial<Coefficient> >& subtracands = this->intermediateSubtractands;
+  List<Polynomial<Coefficient> >& subtrahends = this->intermediateSubtractands;
   this->owner->format.monomialOrder = this->owner->polynomialOrder.monomialOrder;
   std::string underlineStyle = " style ='white-space: nowrap; border-bottom:1px solid black;'";
   this->allMonomials.clear();
   this->allMonomials.addOnTopNoRepetition(this->startingPolynomial.monomials);
   for (int i = 0; i < remainders.size; i ++) {
     this->allMonomials.addOnTopNoRepetition(remainders[i].monomials);
-    if (i < subtracands.size) {
-      this->allMonomials.addOnTopNoRepetition(subtracands[i].monomials);
+    if (i < subtrahends.size) {
+      this->allMonomials.addOnTopNoRepetition(subtrahends[i].monomials);
     }
   }
   //List<std::string> basisColorStyles;
@@ -1478,17 +1478,17 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
     << " as intermediate highlighted mons: "
     << this->intermediateHighlightedMons.size << global.fatal;
   }
-  if (remainders.size != subtracands.size + 1) {
-    global.fatal << "Remainders should equal subtracands plus one. " << global.fatal;
+  if (remainders.size != subtrahends.size + 1) {
+    global.fatal << "Remainders should equal subtrahends plus one. " << global.fatal;
   }
   for (int i = 0; i < remainders.size; i ++) {
     out << "<tr><td></td>"
     << this->getPolynomialStringSpacedMonomialsHtml(
       remainders[i], "", &this->intermediateHighlightedMons[i]
     ) << "</tr>";
-    if (i < subtracands.size) {
+    if (i < subtrahends.size) {
       out << "<tr><td>-</td></tr>";
-      out << "<tr><td></td>" << this->getPolynomialStringSpacedMonomialsHtml(subtracands[i], underlineStyle)
+      out << "<tr><td></td>" << this->getPolynomialStringSpacedMonomialsHtml(subtrahends[i], underlineStyle)
       << "</tr>";
     }
   }

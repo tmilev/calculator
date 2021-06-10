@@ -2,8 +2,7 @@
 const ids = require("./ids_dom_elements");
 const InputPanelData = require("./initialize_buttons").InputPanelData;
 const storage = require("./storage").storage;
-const submit = require("./submit_requests");
-const miscellaneous = require("./miscellaneous_frontend");
+const jsonToHtml = require("./json_to_html");
 
 class CompareExpressionsSocratic {
   constructor() {
@@ -102,23 +101,22 @@ class CompareExpressionsSocratic {
   }
 
   doCompare() {
-    let url = `https://bloom-pa.googleapis.com/v1/math:grade?key=${this.getKey()}`;
+    let url = `https://bloom-pa.googleapis.com/v1/math:grade?alt=json&key=${this.getKey()}`;
     let payload = JSON.stringify({
-      "given_answer": {
-        "text": "x",
+      "givenAnswer": {
+        "text": this.givenData,
       },
+      "desiredAnswers": [{
+        "text": this.desiredData,
+      }],
     });
-    submit.submitPOST({
-      url: url,
-      callback: (input) => {
-        this.writeResult(input);
-      },
-      parameters: payload,
-      progress: ids.domElements.pages.compareExpressionsSocratic.progress,
-      panelOptions: {
-        dontCollapsePanel: true,
-      },
-    });
+    let xhr = new XMLHttpRequest();
+    xhr.onload = () => {
+      this.writeResult(xhr.responseText);
+    }
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Content-type", "application/json");
+    xhr.send(payload);
   }
 
   writeResult(
@@ -126,7 +124,7 @@ class CompareExpressionsSocratic {
     input,
   ) {
     try {
-      let result = miscellaneous.jsonUnescapeParse(input);
+      let result = JSON.parse(input);
       this.resultBoxRaw.textContent = JSON.stringify(result);
       this.resultBoxFormatted.textContent = "";
       jsonToHtml.writeJSONtoDOMComponent(result, this.resultBoxFormatted);

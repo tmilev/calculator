@@ -56,3 +56,5 @@ output/outputFileCommandLine.html
 output/latexOutput.tex
 
 public_html/MathJax-2.7-latest
+
+emsdk

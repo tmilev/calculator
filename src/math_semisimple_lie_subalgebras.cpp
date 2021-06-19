@@ -533,14 +533,12 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebrasSummaryLaTeX(For
   int numIsotypicallyCompleteNilrads = 0;
   int numFailingConeCondition = 0;
   int numNoLinfRelFound = 0;
-  int numNonCentralizerConditionWithConeCondition = 0;
   int totalBadParabolics = 0;
 
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
     numIsotypicallyCompleteNilrads += this->subalgebras.values[i].fernandoKacNilradicalCandidates.size;
     numFailingConeCondition += this->subalgebras.values[i].numberOfConeIntersections;
     numNoLinfRelFound += this->subalgebras.values[i].numberOfCasesNoLInfiniteRelationFound;
-    numNonCentralizerConditionWithConeCondition += this->subalgebras.values[i].numberOfCentralizerConditionFailsConeConditionHolds;
     totalBadParabolics += this->subalgebras.values[i].numberOfBadParabolics;
   }
   if (totalBadParabolics > 0) {

@@ -629,9 +629,9 @@ bool CalculatorFunctions::innerEWAorPoly(Calculator& calculator, const Expressio
   );
   ElementWeylAlgebra<Rational> outputEWA;
   if (assignPoly) {
-    outputEWA.makexi(0, 1);
+    outputEWA.makexi(0);
   } else {
-    outputEWA.makedi(0, 1);
+    outputEWA.makedi(0);
   }
   return output.assignValueWithContext(outputEWA, endContext, calculator);
 }

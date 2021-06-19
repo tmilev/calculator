@@ -396,7 +396,7 @@ int Expression::addObjectReturnIndex(const
 double
 & inputValue) const {
   this->checkInitialization();
-  if (std::isnan(inputValue)) {
+  if (isnan(inputValue)) {
     return 0;
   }
   return this->owner->objectContainer.doubleNumbers
@@ -1980,7 +1980,7 @@ bool Expression::isPositiveNumber() const {
   if (!this->evaluatesToDouble(&theDouble)) {
     return false;
   }
-  if (std::isnan(theDouble)) {
+  if (isnan(theDouble)) {
     return false;
   }
   return theDouble > 0;
@@ -2234,16 +2234,16 @@ bool Expression::operator>(const Expression& other) const {
   bool leftEvalsToDouble = this->evaluatesToDouble(&left);
   bool rightEvalsToDouble = other.evaluatesToDouble(&right);
   if (leftEvalsToDouble && rightEvalsToDouble) {
-    if (std::isnan(left) && std::isnan(right)) {
+    if (isnan(left) && isnan(right)) {
       return false; //WARNING nan == nan evaluates to false!
     }
     // left != right generates a bizarre warning:
     // "comparing floating point with == or != is unsafe".
     if ((left - right) != 0.0) {
-      if (std::isnan(left)) {
+      if (isnan(left)) {
         return true;
       }
-      if (std::isnan(right)) {
+      if (isnan(right)) {
         return false;
       }
       return left > right;

@@ -2298,8 +2298,14 @@ void StringRoutines::Differ::extractResult(
 // https://en.wikipedia.org/wiki/Longest_common_subsequence_problem
 bool StringRoutines::Differ::computeDifference(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("StringRoutines::Differ::computeDifference");
-  LargeInteger leftSize = left.size();
-  LargeInteger rightSize = right.size();
+  LargeInteger leftSize;
+  // Warning: putting this in the line above may cause ambiguous conversions,
+  // depending on your compiler.
+  leftSize = left.size();
+  // Warning: putting this in the line above may cause ambiguous conversions,
+  // depending on your compiler.
+  LargeInteger rightSize;
+  rightSize = right.size();
   if (leftSize * rightSize > this->maximumMatrixSize) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -3489,12 +3495,9 @@ void OnePartialFraction::applyGeneralizedSzenesVergneFormula(
   int dimension = startingVectors[0].size;
   SelectionWithDifferentMaxMultiplicities TheBigBadIndexingSet;
   TheBigBadIndexingSet.initPart1(theSelectedIndices.size);
-  int totalMultiplicity;
-  totalMultiplicity = 0;
   for (int i = 0; i < theSelectedIndices.size; i ++) {
     int tempI = this->denominator[theSelectedIndices[i]].getMultiplicityLargestElongation() - 1;
     TheBigBadIndexingSet.capacities[i] = tempI;
-    totalMultiplicity += tempI;
   }
   for (int i = 0; i < theSelectedIndices.size; i ++) {
     TheBigBadIndexingSet.clearNoMaxMultiplicitiesChange();

@@ -553,7 +553,7 @@ void WebCrawler::fetchWebPagePart2(
     }
     return;
   }
-  if (expectedLength == this->bodyReceivedWithHeader.size()) {
+  if (expectedLength == static_cast<int64_t>(this->bodyReceivedWithHeader.size())) {
     this->bodyReceived = this->bodyReceivedWithHeader;
     return;
   }

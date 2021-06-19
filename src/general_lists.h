@@ -418,7 +418,7 @@ public:
     return static_cast<unsigned int>(input);
   }
   static unsigned int hashFunction(const double& input) {
-    if (std::isnan(input)) {
+    if (isnan(input)) {
       return 5;
     }
     return static_cast<unsigned>(input * 10000);

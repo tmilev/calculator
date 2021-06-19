@@ -2205,28 +2205,25 @@ bool CalculatorFunctionsListsAndSets::intersection(Calculator& calculator, const
   if (!input.startsWith(calculator.opIntersection())) {
     return false;
   }
-  int numElts = 1;
   for (int i = 1; i < input.size(); i ++) {
     if (!input[i].isSequenceNElements()) {
       return false;
-    } else {
-      numElts += input[i].size() - 1;
     }
   }
-  List<List<Expression> > theListsToBeIntersected;
-  theListsToBeIntersected.setSize(input.size() - 1);
+  List<List<Expression> > toBeIntersected;
+  toBeIntersected.setSize(input.size() - 1);
   for (int i = 1; i < input.size(); i ++) {
-    theListsToBeIntersected[i - 1].reserve(input[i].size());
+    toBeIntersected[i - 1].reserve(input[i].size());
     for (int j = 1; j < input[i].size(); j ++) {
-      theListsToBeIntersected[i - 1].addOnTop(input[i][j]);
+      toBeIntersected[i - 1].addOnTop(input[i][j]);
     }
   }
-  if (theListsToBeIntersected.size == 0) {
+  if (toBeIntersected.size == 0) {
     return false;
   }
-  List<Expression> outputList = theListsToBeIntersected[0];
-  for (int i = 1; i < theListsToBeIntersected.size; i ++) {
-    outputList.intersectWith(theListsToBeIntersected[i], outputList);
+  List<Expression> outputList = toBeIntersected[0];
+  for (int i = 1; i < toBeIntersected.size; i ++) {
+    outputList.intersectWith(toBeIntersected[i], outputList);
   }
   return output.makeSequence(calculator, &outputList);
 }
@@ -6068,7 +6065,7 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
     )) {
       bool hasOneGoodPoint = false;
       for (int i = 0; i < thePointsDouble.size; i ++) {
-        if (!std::isnan(thePointsDouble[i][1])) {
+        if (!isnan(thePointsDouble[i][1])) {
           hasOneGoodPoint = true;
           break;
         }
@@ -7064,7 +7061,7 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
       if (signChange) {
         *whichDouble *= - 1;
       }
-      return !std::isnan(*whichDouble) && !std::isinf(*whichDouble);
+      return !isnan(*whichDouble) && !std::isinf(*whichDouble);
     }
     if ((*this).startsWith(calculator.opSqrt(), 3)) {
       bool signChange = false;
@@ -7094,7 +7091,7 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
       if (signChange) {
         *whichDouble *= - 1;
       }
-      return !std::isnan(*whichDouble) && !std::isinf(*whichDouble);
+      return !isnan(*whichDouble) && !std::isinf(*whichDouble);
     }
     if ((*this).startsWith(calculator.opDivide(), 3)) {
       if (rightD == 0.0) {

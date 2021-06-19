@@ -417,7 +417,7 @@ public:
     bool useNilWeight,
     bool ascending
   );
-  bool getActionEulerOperatorPart(const MonomialPolynomial& coefficient, ElementWeylAlgebra<Rational>& outputDO);
+  bool getActionEulerOperatorPart(const MonomialPolynomial& coefficient, ElementWeylAlgebra<Rational>& output);
   ModuleSSalgebra() : owner(nullptr), flagIsInitialized(false), flagDeallocated(false), maximumNumberOfCachedPairs(1000000) {
   }
   ~ModuleSSalgebra() {

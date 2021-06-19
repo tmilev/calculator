@@ -2243,7 +2243,7 @@ public:
   UDPolynomial<Coefficient> timesXn(int n) const;
   // Quick divisibility test
   // bool DivisibleBy(const UDPolynomial<Coefficient>& divisor) const;
-  struct DivisionResult<UDPolynomial<Coefficient> > divideBy(const UDPolynomial<Coefficient>& right) const;
+  DivisionResult<UDPolynomial<Coefficient> > divideBy(const UDPolynomial<Coefficient>& right) const;
   UDPolynomial<Coefficient> operator/(const UDPolynomial<Coefficient>& divisor) const;
   UDPolynomial<Coefficient> operator%(const UDPolynomial<Coefficient>& divisor) const;
   void operator/=(const Coefficient& right);

@@ -1673,12 +1673,12 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
 
 template <class Coefficient>
 bool ModuleSSalgebra<Coefficient>::getActionEulerOperatorPart(
-  const MonomialPolynomial& coefficient, ElementWeylAlgebra<Rational>& outputDO
+  const MonomialPolynomial& coefficient, ElementWeylAlgebra<Rational>& output
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra::getActionEulerOperatorPart");
   int powerMonCoeff = 0;
-  ElementWeylAlgebra<Rational> currentMonContribution;
-  outputDO.makeOne();
+  ElementWeylAlgebra<Rational> currentMonomialContribution;
+  output.makeOne();
   for (int i = 0; i < coefficient.minimalNumberOfVariables(); i ++) {
     if (!coefficient(i).isSmallInteger(&powerMonCoeff)) {
       global.fatal
@@ -1686,9 +1686,9 @@ bool ModuleSSalgebra<Coefficient>::getActionEulerOperatorPart(
       << "I have an exponent with non-small integer entry. "
       << global.fatal;
     }
-    currentMonContribution.makexidj(i, i, 0);
-    currentMonContribution.raiseToPower(powerMonCoeff);
-    outputDO *= currentMonContribution;
+    currentMonomialContribution.makexidj(i, i);
+    currentMonomialContribution.raiseToPower(powerMonCoeff);
+    output *= currentMonomialContribution;
   }
   return true;
 }

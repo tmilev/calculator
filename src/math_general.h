@@ -6059,11 +6059,11 @@ public:
   void makeGEpsPlusEpsInTypeD(int i, int j, int NumVars);
   void makeGEpsMinusEpsInTypeD(int i, int j, int NumVars);
   void makeGMinusEpsMinusEpsInTypeD(int i, int j, int NumVars);
-  void makexixj(int i, int j, int NumVars);
-  void makexi(int i, int NumVars);
-  void makedi(int i, int NumVars);
-  void makedidj(int i, int j, int NumVars);
-  void makexidj(int i, int j, int NumVars);
+  void makexixj(int i, int j);
+  void makexi(int i);
+  void makedi(int i);
+  void makedidj(int i, int j);
+  void makexidj(int i, int j);
   static void getStandardOrderDifferentialOperatorCorrespondingToNRaisedTo(
     const Rational& inputRationalPower,
     int indexVar,
@@ -6847,7 +6847,6 @@ std::ostream& operator<<(std::ostream& output, const LinearCombination<TemplateM
   List<TemplateMonomial> sortedMons;
   sortedMons = collection.monomials;
   sortedMons.quickSortDescending();
-  int cutOffCounter = 0;
   for (int i = 0; i < sortedMons.size; i ++) {
     TemplateMonomial& currentMon = sortedMons[i];
     std::stringstream tempStream;
@@ -6868,15 +6867,12 @@ std::ostream& operator<<(std::ostream& output, const LinearCombination<TemplateM
       if (tempS1.size() > 0) {
         if (tempS1[0] != '-') {
           output << "+";
-          cutOffCounter += 1;
         }
       } else {
         output << "+";
-        cutOffCounter += 1;
       }
     }
     output << tempS1;
-    cutOffCounter += tempS1.size();
   }
   return output;
 }

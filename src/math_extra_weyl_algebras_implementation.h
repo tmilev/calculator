@@ -211,7 +211,7 @@ void ElementWeylAlgebra<Coefficient>::makeGMinusEpsMinusEpsInTypeD(int i, int j,
 }
 
 template <class Coefficient>
-void ElementWeylAlgebra<Coefficient>::makedidj(int i, int j, int NumVars) {
+void ElementWeylAlgebra<Coefficient>::makedidj(int i, int j) {
   this->makeZero();
   MonomialWeylAlgebra tempMon;
   tempMon.makeOne();
@@ -221,7 +221,7 @@ void ElementWeylAlgebra<Coefficient>::makedidj(int i, int j, int NumVars) {
 }
 
 template <class Coefficient>
-void ElementWeylAlgebra<Coefficient>::makexixj(int i, int j, int NumVars) {
+void ElementWeylAlgebra<Coefficient>::makexixj(int i, int j) {
   this->makeZero();
   MonomialWeylAlgebra tempMon;
   tempMon.makeOne();
@@ -231,8 +231,7 @@ void ElementWeylAlgebra<Coefficient>::makexixj(int i, int j, int NumVars) {
 }
 
 template <class Coefficient>
-void ElementWeylAlgebra<Coefficient>::makexi(int i, int NumVars) {
-  (void) NumVars;
+void ElementWeylAlgebra<Coefficient>::makexi(int i) {
   this->makeZero();
   MonomialWeylAlgebra tempMon;
   tempMon.makeOne();
@@ -241,8 +240,7 @@ void ElementWeylAlgebra<Coefficient>::makexi(int i, int NumVars) {
 }
 
 template <class Coefficient>
-void ElementWeylAlgebra<Coefficient>::makedi(int i, int NumVars) {
-  (void) NumVars;
+void ElementWeylAlgebra<Coefficient>::makedi(int i) {
   this->makeZero();
   MonomialWeylAlgebra tempMon;
   tempMon.makeOne();
@@ -251,8 +249,7 @@ void ElementWeylAlgebra<Coefficient>::makedi(int i, int NumVars) {
 }
 
 template <class Coefficient>
-void ElementWeylAlgebra<Coefficient>::makexidj(int i, int j, int NumVars) {
-  (void) NumVars;
+void ElementWeylAlgebra<Coefficient>::makexidj(int i, int j) {
   this->makeZero();
   MonomialWeylAlgebra tempMon;
   tempMon.makeOne();

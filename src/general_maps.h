@@ -59,9 +59,9 @@ public:
   value& getValueCreate(const key& input) {
     int index = this->keys.getIndex(input);
     if (index == - 1) {
+      value object;
       index = this->keys.size;
       this->keys.addOnTop(input);
-      value object;
       this->values.addOnTop(object);
     }
     return this->values[index];

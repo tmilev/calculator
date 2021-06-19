@@ -39,12 +39,14 @@ endif
 CFLAGS=-Wpedantic -Wall -Wextra -std=c++0x $(OPTIMIZATION_FLAGS) -c
 LDFLAGS=-pthread $(OPTIMIZATION_FLAGS)
 LIBRARIES_INCLUDED_AT_THE_END=
-CXX=g++
+compiler=g++
 
 ifeq ($(llvm), 1)
-	CXX=clang-3.8
-else
-	CXX=g++
+	compiler=clang-3.8
+endif
+
+ifeq ($(wasm), 1)
+    compiler=./emsdk/upstream/emscripten/emcc
 endif
 
 ifeq ($(AllocationStatistics), 1)
@@ -228,14 +230,14 @@ DIRECTORIES=$(dir $(OBJECTS))
 all: bin_calculator 
 
 bin_calculator: $(OBJECTS)
-	$(CXX) $(LDFLAGS) $(OBJECTS) -o ./calculator $(LIBRARIES_INCLUDED_AT_THE_END)
+	$(compiler) $(LDFLAGS) $(OBJECTS) -o ./calculator $(LIBRARIES_INCLUDED_AT_THE_END)
 
 testrun: calculator
 	time ./calculator test
 
 bin/%.o:src/%.cpp
 	mkdir -p $(@D)
-	$(CXX) $(CFLAGS) -MMD -MP $< -o $@
+	$(compiler) $(CFLAGS) -MMD -MP $< -o $@
 	
 clean:
 	rm -f $(OBJECTS) $(DEPENDENCIES) ./calculator

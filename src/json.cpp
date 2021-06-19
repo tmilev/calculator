@@ -386,7 +386,7 @@ bool JSData::convertTwoByteHexToUnsignedChar(
   );
   if (leftHex < 0) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to interpret value " << static_cast<uint>(inputLeft)
+      *commentsOnFailure << "Failed to interpret value " << static_cast<unsigned int>(inputLeft)
       << " [" << inputLeft << "] as a hex digit. ";
     }
     return false;
@@ -425,7 +425,7 @@ bool JSData::readstringConsumeUnicodeFourHexAppendUtf8(
     if (!JSData::convertTwoByteHexToUnsignedChar(left, right, next, commentsOnFailure)) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Failed to read hex characters with value: "
-        << static_cast<uint>(left) << ", " << static_cast<uint>(right)
+        << static_cast<unsigned int>(left) << ", " << static_cast<unsigned int>(right)
         << ", ["
         << left << ", " << right << "] at positions "
         << leftIndex << ", " << rightIndex << " (currentIndex: "

@@ -40,6 +40,8 @@ CFLAGS=-Wpedantic -Wall -Wextra -std=c++0x $(OPTIMIZATION_FLAGS) -c -pthread
 LDFLAGS=-pthread $(OPTIMIZATION_FLAGS)
 LIBRARIES_INCLUDED_AT_THE_END=
 compiler=g++
+TARGET=calculator
+OBJECT_FILE_OUTPUT=bin/
 
 ifeq ($(llvm), 1)
 	compiler=clang-3.8
@@ -50,6 +52,8 @@ ifeq ($(wasm), 1)
     CFLAGS+=-DMACRO_use_wasm 
     LDFLAGS+=-s LLD_REPORT_UNDEFINED
     $(info [1;31mWeb assembly: turning off ssl and mongoDB.[0m) 
+    TARGET=html-common/calculator.html
+    OBJECT_FILE_OUTPUT=bin/wasm/
     nossl=1
     noMongo=1
 endif
@@ -211,12 +215,12 @@ SOURCES_RELATIVE_PATH_CC=\
 OBJECTS=
 
 ifneq ($(noPublicDomain), 1) 
-OBJECTS+=$(addprefix bin/, $(SOURCES_PUBLIC_DOMAIN_RELATIVE_PATH_CPP:.cpp=.o))
+OBJECTS+=$(addprefix $(OBJECT_FILE_OUTPUT), $(SOURCES_PUBLIC_DOMAIN_RELATIVE_PATH_CPP:.cpp=.o))
 endif
 
-OBJECTS+=$(addprefix bin/, $(SOURCES_RELATIVE_PATH:.cpp=.o))
-OBJECTS+=$(addprefix bin/, $(SOURCES_RELATIVE_PATH_C:.c=.o))
-OBJECTS+=$(addprefix bin/, $(SOURCES_RELATIVE_PATH_CC:.cc=.o))
+OBJECTS+=$(addprefix $(OBJECT_FILE_OUTPUT), $(SOURCES_RELATIVE_PATH:.cpp=.o))
+OBJECTS+=$(addprefix $(OBJECT_FILE_OUTPUT), $(SOURCES_RELATIVE_PATH_C:.c=.o))
+OBJECTS+=$(addprefix $(OBJECT_FILE_OUTPUT), $(SOURCES_RELATIVE_PATH_CC:.cc=.o))
 
 
 DEPENDENCIES=$(OBJECTS:.o=.d)
@@ -235,12 +239,12 @@ DIRECTORIES=$(dir $(OBJECTS))
 all: bin_calculator 
 
 bin_calculator: $(OBJECTS)
-	$(compiler) $(LDFLAGS) $(OBJECTS) -o ./calculator $(LIBRARIES_INCLUDED_AT_THE_END)
+	$(compiler) $(LDFLAGS) $(OBJECTS) -o $(TARGET) $(LIBRARIES_INCLUDED_AT_THE_END)
 
 testrun: calculator
 	time ./calculator test
 
-bin/%.o:src/%.cpp
+$(OBJECT_FILE_OUTPUT)%.o:src/%.cpp
 	mkdir -p $(@D)
 	$(compiler) $(CFLAGS) -MMD -MP $< -o $@
 	

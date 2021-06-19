@@ -25,7 +25,10 @@ test/test_database.json
 
 bin/*
 calculator
-calculator.wasm
+html-common/calculator.html
+html-common/calculator.js
+html-common/calculator.wasm
+html-common/calculator.worker.js
 output/crash_test.html
 
 testFileWritePermissionsSSsas.txt

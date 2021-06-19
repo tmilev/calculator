@@ -52,7 +52,7 @@ ifeq ($(wasm), 1)
     CFLAGS+=-DMACRO_use_wasm 
     LDFLAGS+=-s LLD_REPORT_UNDEFINED
     $(info [1;31mWeb assembly: turning off ssl and mongoDB.[0m) 
-    TARGET=html-common/calculator.html
+    TARGET=html-common/calculator.js
     OBJECT_FILE_OUTPUT=bin/wasm/
     nossl=1
     noMongo=1
@@ -200,6 +200,7 @@ SOURCES_RELATIVE_PATH=\
     transport_layer_security_openssl.cpp \
     transport_layer_security_test.cpp \
     web_routines_1.cpp \
+    web_assembly.cpp \
     webserver_fork.cpp
 
 SOURCES_PUBLIC_DOMAIN_RELATIVE_PATH_CPP=\

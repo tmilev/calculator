@@ -57,42 +57,6 @@
 class GlobalVariables;
 extern GlobalVariables global;
 
-class StdoutClass {
-public:
-  template <typename anyType>
-  StdoutClass& operator<<(const anyType& toBePiped) {
-    if (this->theOutputFunction == nullptr) {
-      std::cout << toBePiped;
-    } else {
-      std::stringstream out;
-      out << toBePiped;
-      this->theOutputFunction(out.str());
-    }
-    return *this;
-  }
-  template <typename anyType>
-  StdoutClass& operator<<(anyType& toBePiped) {
-    if (this->theOutputFunction == nullptr) {
-      std::cout << toBePiped;
-    } else {
-      std::stringstream out;
-      out << toBePiped;
-      this->theOutputFunction(out.str());
-    }
-    return *this;
-  }
-  void (*theOutputFunction)(const std::string& stringToOutput);
-  void (*flushOutputFunction)();
-  StdoutClass(): theOutputFunction(nullptr), flushOutputFunction(nullptr){}
-  void flush() {
-    if (this->flushOutputFunction == nullptr) {
-      std::cout.flush();
-      return;
-    }
-    this->flushOutputFunction();
-  }
-};
-
 void fatalCrash(const std::string& input);
 
 #endif

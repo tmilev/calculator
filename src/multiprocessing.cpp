@@ -625,7 +625,7 @@ void Pipe::readOnce(bool dontCrashOnFail) {
 
 Logger::Logger() {
   this->flagInitialized = false;
-  this->theFileName = "";
+  this->fileName = "";
   this->currentColor = Logger::normalColor;
   this->flagTagColorHtmlOpened = false;
   this->flagTagColorConsoleOpened = false;
@@ -645,39 +645,39 @@ void Logger::reset() {
   this->flagTagColorHtmlOpened = false;
   this->flagTagColorConsoleOpened = false;
   this->flagStopWritingToFile = false;
-  this->MaxLogSize = //10000
+  this->maximumLogSize = //10000
   50000000;
-  if (this->theFileName == "") {
+  if (this->fileName == "") {
     this->flagStopWritingToFile = true;
     return;
   }
-  if (this->theFile.is_open()) {
-    this->theFile.close();
+  if (this->logFile.is_open()) {
+    this->logFile.close();
   }
   FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
-    this->theFile, this->theFileName, false, true, false, true
+    this->logFile, this->fileName, false, true, false, true
   );
-  if (!this->theFile.is_open()) {
+  if (!this->logFile.is_open()) {
     this->currentColor = Logger::red;
     std::string computedFileName;
     FileOperations::getPhysicalFileNameFromVirtual(
-      this->theFileName, computedFileName, true, false, nullptr
+      this->fileName, computedFileName, true, false, nullptr
     );
     std::cout << this->openTagConsole() << "Could not open log file with virtual name: "
-    << this->theFileName << " and computed name: "
+    << this->fileName << " and computed name: "
     << computedFileName << this->closeTagConsole()
     << std::endl;
   }
-  this->theFile.seekg(0);
-  this->theFile.seekp(0);
+  this->logFile.seekg(0);
+  this->logFile.seekp(0);
 }
 
 void Logger::checkLogSize() {
   this->initializeIfNeeded();
-  if (theFile.tellp() > this->MaxLogSize) {
+  if (logFile.tellp() > this->maximumLogSize) {
     if (this->flagResetLogFileWhenTooLarge) {
       this->reset();
-      if (this->MaxLogSize > 1000) {
+      if (this->maximumLogSize > 1000) {
         *this << Logger::endL << "Log file reset. " << Logger::endL;
       }
     } else {
@@ -689,8 +689,8 @@ void Logger::checkLogSize() {
 void Logger::flush() {
   this->initializeIfNeeded();
   std::cout.flush();
-  theFile.flush();
-  theFile.clear();
+  logFile.flush();
+  logFile.clear();
 }
 
 std::string Logger::consoleBlue() {
@@ -771,27 +771,27 @@ std::string Logger::openTagHtml() {
   out << Logger::closeTagHtml();
   switch (this->currentColor) {
     case Logger::red:
-      out << "<span style =\"color:red\">";
+      out << "<span style='color:red'>";
       this->flagTagColorHtmlOpened = true;
       return out.str();
     case Logger::green:
-      out << "<span style =\"color:green\">";
+      out << "<span style='color:green'>";
       this->flagTagColorHtmlOpened = true;
       return out.str();
     case Logger::blue:
-      out << "<span style =\"color:blue\">";
+      out << "<span style='color:blue'>";
       this->flagTagColorHtmlOpened = true;
       return out.str();
     case Logger::yellow:
-      out << "<span style =\"color:yellow\">";
+      out << "<span style='color:yellow'>";
       this->flagTagColorHtmlOpened = true;
       return out.str();
     case Logger::orange:
-      out << "<span style =\"color:orange\">";
+      out << "<span style='color:orange'>";
       this->flagTagColorHtmlOpened = true;
       return out.str();
     case Logger::purple:
-      out << "<span style =\"color:purple\">";
+      out << "<span style='color:purple'>";
       this->flagTagColorHtmlOpened = true;
       return out.str();
     default:
@@ -928,7 +928,7 @@ Logger& Logger::operator<<(const Logger::StringHighligher& input) {
   return *this;
 }
 
-Logger& Logger::operator<<(const std::string& input) {
+Logger& Logger::logString(const std::string& input) {
   if (input.size() == 0) {
     return *this;
   }
@@ -982,7 +982,7 @@ Logger& Logger::operator<<(const std::string& input) {
   return *this;
 }
 
-Logger& Logger::operator<<(const loggerSpecialSymbols& input) {
+Logger& Logger::logSpecialSymbol(const loggerSpecialSymbols& input) {
   this->initializeIfNeeded();
   this->checkLogSize();
   bool doUseColors =
@@ -995,17 +995,17 @@ Logger& Logger::operator<<(const loggerSpecialSymbols& input) {
       std::cout << this->getStampShort() << this->bufferStandardOutput;
       this->bufferStandardOutput.clear();
       if (doUseColors) {
-        std::cout << this->closeTagConsole() << std::endl;
+        std::cout << this->closeTagConsole();
       }
-      std::cout.flush();
+      std::cout << std::endl;
       this->currentColor = Logger::normalColor;
       if (this->flagStopWritingToFile) {
         return *this;
       }
       this->bufferFile += this->closeTagHtml() + "\n<br>\n";
-      theFile << this->getStamp() << this->bufferFile;
+      logFile << this->getStamp() << this->bufferFile;
       this->bufferFile = "";
-      theFile.flush();
+      logFile.flush();
       return *this;
     case Logger::red:
     case Logger::blue:
@@ -1021,7 +1021,7 @@ Logger& Logger::operator<<(const loggerSpecialSymbols& input) {
       if (this->flagStopWritingToFile) {
         return *this;
       }
-      this->theFile << this->openTagHtml();
+      this->logFile << this->openTagHtml();
       return *this;
     case Logger::normalColor:
       if (doUseColors) {
@@ -1031,7 +1031,7 @@ Logger& Logger::operator<<(const loggerSpecialSymbols& input) {
       if (this->flagStopWritingToFile) {
         return *this;
       }
-      theFile << this->closeTagHtml();
+      logFile << this->closeTagHtml();
       return *this;
     // default:
     //   ;

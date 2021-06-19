@@ -47,11 +47,11 @@ class Logger {
   };
   StringHighligher nextHighlighter;
   int currentColor;
-  int MaxLogSize;
-  std::string theFileName;
+  int maximumLogSize;
+  std::string fileName;
   std::string bufferFile;
   std::string bufferStandardOutput;
-  std::fstream theFile;
+  std::fstream logFile;
   bool flagStopWritingToFile;
   bool flagInitialized;
   bool flagTagColorHtmlOpened;
@@ -77,8 +77,17 @@ class Logger {
   void initializeIfNeeded();
   void reset();
   Logger& operator<<(const Logger::StringHighligher& input);
-  Logger& operator<<(const std::string& input);
-  Logger& operator<<(const loggerSpecialSymbols& input);
+  Logger& operator<<(const std::string& input) {
+    // The operator overloading causes issues qtcreator finding the right method,
+    // so redirecting to something that's easy to find.
+    return this->logString(input);
+  }
+  // Logs special logger symbols such as console color control.
+  // Also the flushing of the log happens here (on an end-line special symbol).
+  Logger& operator<<(const loggerSpecialSymbols& input) {
+    return this->logSpecialSymbol(input);
+  }
+  Logger& logSpecialSymbol(const loggerSpecialSymbols& input);
   void flush();
   template <typename Type>
   Logger& operator<<(const Type& toBePrinted) {
@@ -86,6 +95,7 @@ class Logger {
   }
   template <typename Type>
   Logger& doTheLogging(const Type& toBePrinted);
+  Logger& logString(const std::string& input);
 };
 
 // All global objects are either
@@ -208,6 +218,7 @@ public:
   bool flagRunningConsoleRegular;
   bool flagRunningConsoleTest;
   bool flagRunningBuiltInWebServer;
+  bool flagRunningWebAssembly;
 
   // bool flagTesting;
   // webserver flags and variables

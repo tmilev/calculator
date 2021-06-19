@@ -1497,6 +1497,7 @@ void WebServer::initializeMainMIMETypes() {
   this->MIMETypes.setKeyValue(".ttf" , "application/octet-stream"     );
   this->MIMETypes.setKeyValue(".svg" , "image/svg+xml"                );
   this->MIMETypes.setKeyValue(".woff", "application/font-woff"        );
+  this->MIMETypes.setKeyValue(".wasm", "application/wasm"             );
 }
 
 std::string WebWorker::mimeTypeFromFileExtension(const std::string& fileExtension) {

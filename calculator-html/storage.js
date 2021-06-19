@@ -232,6 +232,20 @@ class StorageCalculator {
           showInURLOnPages: { "compareExpressions": true },
         }),
       },
+      compareSocratic: {
+        given: new StorageVariable({
+          name: "givenSocratic",
+          nameURL: "compareGivenExpressionSocratic",
+          nameLocalStorage: "compareGivenExpressionSocratic",
+          showInURLOnPages: { "compareExpressionsSocratic": true },
+        }),
+        desired: new StorageVariable({
+          name: "desiredSocratic",
+          nameURL: "compareGivenExpressionSocratic",
+          nameLocalStorage: "compareDesiredExpressionSocratic",
+          showInURLOnPages: { "compareExpressionsSocratic": true },
+        }),
+      },
       currentSectionComputed: new StorageVariable({
         name: "currentSectionComputed",
         nameLocalStorage: "currentSectionComputed"

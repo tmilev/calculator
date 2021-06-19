@@ -520,7 +520,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
   this->checkInitialization();
   std::stringstream out;
   List<Polynomial<Coefficient> >& theRemainders = this->intermediateRemainders;
-  List<Polynomial<Coefficient> >& subtracands = this->intermediateSubtractands;
+  List<Polynomial<Coefficient> >& subtrahends = this->intermediateSubtractands;
   this->owner->format.monomialOrder = this->owner->polynomialOrder.monomialOrder;
   bool oneDivisor = (this->owner->basis.size == 1);
   this->allMonomials.clear();
@@ -528,8 +528,8 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
   for (int i = 0; i < theRemainders.size; i ++) {
     this->allMonomials.addOnTopNoRepetition(theRemainders[i].monomials);
   }
-  for (int i = 0; i < subtracands.size; i ++) {
-    this->allMonomials.addOnTopNoRepetition(subtracands[i].monomials);
+  for (int i = 0; i < subtrahends.size; i ++) {
+    this->allMonomials.addOnTopNoRepetition(subtrahends[i].monomials);
   }
   auto& basis = this->owner->basis;
   for (int i = 0; i < basis.size; i ++) {
@@ -550,17 +550,17 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
   List<int> dummyList;
   dummyListList.setSize(this->allMonomials.size);
   dummyList.initializeFillInObject(this->allMonomials.size, - 1);
-  this->firstNonZeroIndicesPerIntermediateSubtracand.initializeFillInObject(subtracands.size, 0);
+  this->firstNonZeroIndicesPerIntermediateSubtracand.initializeFillInObject(subtrahends.size, 0);
   this->highlightMonsRemainders.initializeFillInObject(theRemainders.size,   dummyListList);
-  this->highlightMonsSubtracands.initializeFillInObject(subtracands.size, dummyListList);
+  this->highlightMonsSubtrahends.initializeFillInObject(subtrahends.size, dummyListList);
   this->highlightMonsQuotients.initializeFillInObject(basis.size, dummyListList);
   this->highlightMonsDivisors.initializeFillInObject (basis.size, dummyListList);
   this->fcAnswerMonsRemainders.initializeFillInObject(theRemainders.size, dummyList);
-  this->fcAnswerMonsSubtracands.initializeFillInObject(subtracands.size, dummyList);
+  this->fcAnswerMonsSubtrahends.initializeFillInObject(subtrahends.size, dummyList);
   this->fcAnswerMonsQuotients.initializeFillInObject(basis.size, dummyList);
   this->fcAnswerMonsDivisors.initializeFillInObject(basis.size, dummyList);
   this->uncoverAllMonsRemainders.initializeFillInObject(theRemainders.size, 1);
-  this->uncoverAllMonsSubtracands.initializeFillInObject(subtracands.size, 1);
+  this->uncoverAllMonsSubtrahends.initializeFillInObject(subtrahends.size, 1);
   this->uncoverAllMonsQuotients.initializeFillInObject(basis.size, 1);
   this->uncoverAllMonsDivisors.initializeFillInObject(basis.size, 1);
   this->uncoverMonsFinalRemainder.initializeFillInObject(this->allMonomials.size, - 1);
@@ -571,8 +571,8 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
   for (int i = 0; i < theRemainders.size; i ++) {
     this->computeHighLightsFromRemainder(i, currentSlideNumer);
   }
-  for (int i = 0; i < subtracands.size; i ++) {
-    this->firstNonZeroIndicesPerIntermediateSubtracand[i] = subtracands[i].getIndexLeadingMonomial(
+  for (int i = 0; i < subtrahends.size; i ++) {
+    this->firstNonZeroIndicesPerIntermediateSubtracand[i] = subtrahends[i].getIndexLeadingMonomial(
       nullptr,
       nullptr,
       &this->owner->polynomialOrder.monomialOrder
@@ -678,22 +678,22 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
       true
     )
     << "\\\\";
-    if (i < subtracands.size) {
-      out << "\\uncover<" << this->uncoverAllMonsSubtracands[i] << "->{";
-      out << "\\uncover<" << this->uncoverAllMonsSubtracands[i] + 2
-      << "->{\\alertNoH{" << this->uncoverAllMonsSubtracands[i] + 2
-      << ", " << this->uncoverAllMonsSubtracands[i] + 3
+    if (i < subtrahends.size) {
+      out << "\\uncover<" << this->uncoverAllMonsSubtrahends[i] << "->{";
+      out << "\\uncover<" << this->uncoverAllMonsSubtrahends[i] + 2
+      << "->{\\alertNoH{" << this->uncoverAllMonsSubtrahends[i] + 2
+      << ", " << this->uncoverAllMonsSubtrahends[i] + 3
       << "}{"
       << "$\\overline{\\phantom{A}}$"
       << "}}";
       out << "&";
       out << this->getSpacedMonomialsWithHighlightLaTeX(
-        subtracands[i],
-        &this->highlightMonsSubtracands[i],
-        &this->fcAnswerMonsSubtracands[i],
+        subtrahends[i],
+        &this->highlightMonsSubtrahends[i],
+        &this->fcAnswerMonsSubtrahends[i],
         nullptr,
         nullptr,
-        this->uncoverAllMonsSubtracands[i],
+        this->uncoverAllMonsSubtrahends[i],
         true
       );
       out << "\\\\\\cline{"
@@ -960,7 +960,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
       this->allMonomials.getIndex(currentDivisor[i])
     ].addOnTop(currentSlideNumber);
   }
-  this->uncoverAllMonsSubtracands[remainderIndex] = currentSlideNumber;
+  this->uncoverAllMonsSubtrahends[remainderIndex] = currentSlideNumber;
   this->divisionLog << "\\only<"
   << currentSlideNumber << ", "
   << currentSlideNumber + 1
@@ -985,11 +985,11 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
       this->allMonomials.getIndex(currentDivisor[i])
     ].addOnTop(currentSlideNumber);
   }
-  if (this->fcAnswerMonsSubtracands[remainderIndex].size != this->allMonomials.size) {
-    this->fcAnswerMonsSubtracands[remainderIndex].initializeFillInObject(this->allMonomials.size, - 1);
+  if (this->fcAnswerMonsSubtrahends[remainderIndex].size != this->allMonomials.size) {
+    this->fcAnswerMonsSubtrahends[remainderIndex].initializeFillInObject(this->allMonomials.size, - 1);
   }
   for (int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++) {
-    this->fcAnswerMonsSubtracands[remainderIndex][
+    this->fcAnswerMonsSubtrahends[remainderIndex][
       this->allMonomials.getIndex(this->intermediateSubtractands[remainderIndex][i])
     ] = currentSlideNumber;
   }
@@ -1000,7 +1000,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     ].addOnTop(currentSlideNumber);
   }
   for (int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++) {
-    this->highlightMonsSubtracands[remainderIndex][
+    this->highlightMonsSubtrahends[remainderIndex][
       this->allMonomials.getIndex(this->intermediateSubtractands[remainderIndex][i])
     ].addOnTop(currentSlideNumber);
   }
@@ -1014,7 +1014,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     ].addOnTop(currentSlideNumber);
   }
   for (int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++) {
-    this->highlightMonsSubtracands[remainderIndex][
+    this->highlightMonsSubtrahends[remainderIndex][
       this->allMonomials.getIndex(this->intermediateSubtractands[remainderIndex][i])
     ].addOnTop(currentSlideNumber);
   }

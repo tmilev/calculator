@@ -3,13 +3,50 @@
 <head>
   <script type="text/javascript" src="/calculator-html/javascript_all_in_one.js"></script>
   <link type="text/css" rel="stylesheet" href="/calculator-html/calculator.css">
+  <!--script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script-->
 </head>
 
 <body onload="window.calculator.mainPage.selectPage('compareExpressionsSocratic');">
   <span id="calculatorDefaultsEnabled"></span>
   <div id="divCompareExpressions">
     <div id="divCompareExpressionsSocraticPage" class="divPage">
-      Hello world!
+      <table>
+        <tr>
+          <td style="text-align:center">
+            <div id="divGivenPanelSocratic" class="buttonPanel" style="margin:auto;"></div>
+          </td>
+          <td style="text-align:center">
+            <div id="divDesiredPanelSocratic"></div>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align:center">
+            <div id="divGivenEquationEditorSocratic"></div>
+          </td>
+          <td style="text-align:center">
+            <div id="divDesiredEquationEditorSocratic"></div>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align:center">Given raw:
+            <br>
+            <input type="text" id="inputGivenRawInputSocratic">
+          </td>
+          <td style="text-align:center">Desired raw:
+            <br>
+            <input type="text" id="inputDesiredRawInputSocratic">
+          </td>
+        </tr>
+      </table>
+      <button id="buttonCompareExpressionsSocratic" class="buttonStandard">compare</button>
+      <div id="progressReportCompareExpressionsSocratic"></div>
+      <div id="compareExpressionsResultUserFriendlySocratic" style="font-size: x-large;"></div>
+      <hr>
+      <b style='color:green'>Raw result:</b>
+      <div id="divCompareExpressionsResultRawSocratic"></div>
+      <hr>
+      <b style='color:purple'>Formatted result:</b>
+      <div id="divCompareExpressionsResultFormattedSocratic"></div>
     </div>
   </div>
 </body>

@@ -472,7 +472,7 @@ bool ProblemDataAdministrative::getWeightFromCourse(
   if (outputAsGivenByInstructor == nullptr) {
     outputAsGivenByInstructor = &tempString;
   }
-  *outputAsGivenByInstructor = this->problemWeightsPerCourse.getValueCreate(theCourseNonURLed);
+  *outputAsGivenByInstructor = this->problemWeightsPerCourse.getValueCreateEmpty(theCourseNonURLed);
   return output.assignStringFailureAllowed(*outputAsGivenByInstructor);
 }
 
@@ -1002,7 +1002,7 @@ bool ProblemData::loadFromOldFormat(const std::string& inputData, std::stringstr
   if (global.userRequestRequiresLoadingRealExamData()) {
     if (theMap.contains(WebAPI::problem::randomSeed)) {
       global.comments << "Loading random seed from old format.";
-      this->randomSeeD = static_cast<uint32_t>(atoi(theMap.getValueCreate(WebAPI::problem::randomSeed).c_str()));
+      this->randomSeeD = static_cast<uint32_t>(atoi(theMap.getValueCreateEmpty(WebAPI::problem::randomSeed).c_str()));
       this->flagRandomSeedGiven = true;
     }
   }
@@ -1026,14 +1026,14 @@ bool ProblemData::loadFromOldFormat(const std::string& inputData, std::stringstr
     }
     if (currentQuestionMap.contains("numCorrectSubmissions")) {
       currentA.numCorrectSubmissions =
-      atoi(currentQuestionMap.getValueCreate("numCorrectSubmissions").c_str());
+      atoi(currentQuestionMap.getValueCreateEmpty("numCorrectSubmissions").c_str());
     }
     if (currentQuestionMap.contains("numSubmissions")) {
       currentA.numSubmissions =
-      atoi(currentQuestionMap.getValueCreate("numSubmissions").c_str());
+      atoi(currentQuestionMap.getValueCreateEmpty("numSubmissions").c_str());
     }
     if (currentQuestionMap.contains("firstCorrectAnswer")) {
-      currentA.firstCorrectAnswerURLed = currentQuestionMap.getValueCreate("firstCorrectAnswer");
+      currentA.firstCorrectAnswerURLed = currentQuestionMap.getValueCreateEmpty("firstCorrectAnswer");
       currentA.firstCorrectAnswerClean = HtmlRoutines::convertURLStringToNormal(currentA.firstCorrectAnswerURLed, false);
       currentA.firstCorrectAnswerURLed = HtmlRoutines::convertStringToURLString(currentA.firstCorrectAnswerClean, false); //url-encoding back the cleaned up answer:
       //this protects from the possibility that currentA.firstCorrectAnswerURLed was not encoded properly.

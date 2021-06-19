@@ -186,7 +186,7 @@ public:
   // int externalCommandNoOutput(const std::string& theCommand)
   int (*pointerExternalCommandNoOutput)(const std::string& theSystemCommand);
   // When non-null, usually points to:
-  // std::string externalCommandReturnStandartOut(const std::string& inputCommand)
+  // std::string externalCommandReturnStandardOut(const std::string& inputCommand)
   std::string (*pointerExternalCommandReturnOutput)(const std::string& theSystemCommand);
   // When non-null, usually points to:
   // int externalCommandStream(const std::string& inputCommand)

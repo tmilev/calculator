@@ -164,7 +164,7 @@ bool Database::FallBack::findIndexOneNolocksMinusOneNotFound(
     }
     return false;
   }
-  Database::FallBack::Index& currentIndex = indices.getValueCreate(key);
+  Database::FallBack::Index& currentIndex = indices.getValueCreateEmpty(key);
   if (query.value.elementType != JSData::token::tokenString) {
     if (commentsOnNotFound != nullptr) {
       *commentsOnNotFound << "At the moment, only string value queries are supported.";
@@ -261,7 +261,7 @@ bool Database::FallBack::readAndIndexDatabase(std::stringstream* commentsOnFailu
     return false;
   }
   for (int i = 0; i < this->knownIndices.size; i ++) {
-    this->indices.getValueCreate(this->knownIndices[i]);
+    this->indices.getValueCreateEmpty(this->knownIndices[i]);
   }
   for (int i = 0; i < this->reader.objects.size(); i ++) {
     std::string collection = this->reader.objects.keys[i];
@@ -289,8 +289,8 @@ void Database::FallBack::indexOneRecord(
     if (keyToIndexBy.elementType != JSData::token::tokenString) {
       continue;
     }
-    Database::FallBack::Index& currentIndex = this->indices.getValueCreate(indexLabel);
-    currentIndex.locations.getValueCreate(keyToIndexBy.stringValue).addOnTop(row);
+    Database::FallBack::Index& currentIndex = this->indices.getValueCreateEmpty(indexLabel);
+    currentIndex.locations.getValueCreateEmpty(keyToIndexBy.stringValue).addOnTop(row);
   }
 }
 

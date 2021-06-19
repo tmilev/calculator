@@ -1243,7 +1243,7 @@ int Calculator::addOperationNoRepetitionOrReturnIndexFirst(const std::string& th
   int result = this->operations.getIndex(theOpName);
   if (result == - 1) {
     result = this->operations.size();
-    this->operations.getValueCreate(theOpName);
+    this->operations.getValueCreateEmpty(theOpName);
   }
   return result;
 }
@@ -1258,7 +1258,7 @@ void Calculator::addOperationNoRepetitionAllowed(const std::string& operation) {
     global.fatal << "Operation " << operation
     << " already created. " << global.fatal;
   }
-  this->operations.getValueCreate(operation);
+  this->operations.getValueCreateEmpty(operation);
 }
 
 Function::Function() {
@@ -1311,7 +1311,7 @@ void Calculator::addOperationBinaryInnerHandlerWithTypes(
   int indexOperation = this->operations.getIndex(operation);
   if (indexOperation == - 1) {
     indexOperation = this->operations.size();
-    this->operations.getValueCreate(operation);
+    this->operations.getValueCreateEmpty(operation);
   }
   List<int> empty;
   Function innerFunction(
@@ -1388,7 +1388,7 @@ void Calculator::addOperationHandler(
   int indexOperation = this->operations.getIndex(operation);
   if (indexOperation == - 1) {
     indexOperation = this->operations.size();
-    this->operations.getValueCreate(operation);
+    this->operations.getValueCreateEmpty(operation);
   }
   List<int> parentOperationsThatBanHandler;
   if (parentsThatBanHandler != nullptr) {

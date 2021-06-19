@@ -2233,7 +2233,7 @@ int ProblemData::getExpectedNumberOfAnswers(
     }
   }
   if (global.problemExpectedNumberOfAnswers.contains(problemName)) {
-    return global.problemExpectedNumberOfAnswers.getValueCreate(problemName);
+    return global.problemExpectedNumberOfAnswers.getValueCreate(problemName, 0);
   }
   global << Logger::yellow << "Couldn't find problem info in DB for: "
   << problemName << ", trying to read problem from hd. " << Logger::endL;
@@ -2318,7 +2318,7 @@ void UserCalculator::computePointsEarned(
     }
     if (theTopics != nullptr) {
       if (theTopics->contains(problemName)) {
-        TopicElement& currentElt = theTopics->getValueCreate(problemName);
+        TopicElement& currentElt = theTopics->getValueCreateEmpty(problemName);
         this->pointsMax += currentWeight;
         for (int j = 0; j < currentElt.parentTopics.size; j ++) {
           (*theTopics).values[currentElt.parentTopics[j]].totalPointsEarned += currentP.points;

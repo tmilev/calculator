@@ -94,7 +94,7 @@ bool CalculatorHTML::mergeProblemWeight(
     if (!outputAppendProblemInfo.contains(currentProblemName)) {
       outputAppendProblemInfo.setKeyValue(currentProblemName, emptyData);
     }
-    ProblemData& currentProblemValue = outputAppendProblemInfo.getValueCreate(currentProblemName);
+    ProblemData& currentProblemValue = outputAppendProblemInfo.getValueCreateEmpty(currentProblemName);
     JSData& currentWeight = currentProblem[DatabaseStrings::labelProblemWeight];
     if (currentWeight.elementType == JSData::token::tokenString) {
       currentProblemValue.adminData.problemWeightsPerCourse.setKeyValue(currentCourse, currentWeight.stringValue);
@@ -145,7 +145,7 @@ bool CalculatorHTML::mergeProblemDeadline(
     if (!outputAppendProblemInfo.contains(currentProbName)) {
       outputAppendProblemInfo.setKeyValue(currentProbName, emptyData);
     }
-    ProblemData& currentProblemValue = outputAppendProblemInfo.getValueCreate(currentProbName);
+    ProblemData& currentProblemValue = outputAppendProblemInfo.getValueCreateEmpty(currentProbName);
     JSData& currentDeadlines = currentProblem[DatabaseStrings::labelDeadlines];
     if (currentDeadlines.elementType == JSData::token::tokenObject) {
       for (int j = 0; j < currentDeadlines.objects.size(); j ++) {
@@ -245,7 +245,7 @@ bool CalculatorHTML::mergeOneProblemAdminData(
     this->currentUser.problemData.setKeyValue(inputProblemName, inputProblemInfo);
   }
   ProblemDataAdministrative& currentProblem =
-  this->currentUser.problemData.getValueCreate(inputProblemName).adminData;
+  this->currentUser.problemData.getValueCreateEmpty(inputProblemName).adminData;
   MapList<std::string, std::string, MathRoutines::hashString>&
   currentDeadlines = currentProblem.deadlinesPerSection;
   MapList<std::string, std::string, MathRoutines::hashString>&
@@ -390,7 +390,7 @@ bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
   }
 
   if (this->currentUser.problemData.contains(this->fileName)) {
-    this->problemData = this->currentUser.problemData.getValueCreate(this->fileName);
+    this->problemData = this->currentUser.problemData.getValueCreateEmpty(this->fileName);
   }
   global.userDefault = this->currentUser;
   return true;
@@ -652,7 +652,7 @@ std::string CalculatorHTML::toStringProblemInfo(const std::string& theFileName, 
   if (global.flagDatabaseCompiled) {
     bool problemAlreadySolved = false;
     if (this->currentUser.problemData.contains(theFileName)) {
-      ProblemData& theProbData = this->currentUser.problemData.getValueCreate(theFileName);
+      ProblemData& theProbData = this->currentUser.problemData.getValueCreateEmpty(theFileName);
       if (theProbData.numCorrectlyAnswered >= theProbData.answers.size()) {
         problemAlreadySolved = true;
       }
@@ -1594,7 +1594,7 @@ std::string CalculatorHTML::getDeadlineNoInheritance(const std::string& id) {
   if (!currentProb.deadlinesPerSection.contains(this->currentUser.sectionComputed)) {
     return "";
   }
-  return currentProb.deadlinesPerSection.getValueCreate(this->currentUser.sectionComputed);
+  return currentProb.deadlinesPerSection.getValueCreateEmpty(this->currentUser.sectionComputed);
 }
 
 std::string CalculatorHTML::getDeadline(
@@ -1613,13 +1613,13 @@ std::string CalculatorHTML::getDeadline(
   if (topicIndex == - 1) {
     return problemName + " not found in topic list. ";
   }
-  TopicElement& currentTopic = this->topics.theTopics.getValueCreate(problemName);
+  TopicElement& currentTopic = this->topics.theTopics.getValueCreateEmpty(problemName);
   for (int i = currentTopic.parentTopics.size - 1; i >= 0; i --) {
     const std::string& containerName = this->topics.theTopics.keys[currentTopic.parentTopics[i]];
     if (this->currentUser.problemData.contains(containerName)) {
       ProblemDataAdministrative& currentProblem =
       this->currentUser.problemData.getValueCreateNoInitialization(containerName).adminData;
-      result = currentProblem.deadlinesPerSection.getValueCreate(sectionNumber);
+      result = currentProblem.deadlinesPerSection.getValueCreateEmpty(sectionNumber);
       if (StringRoutines::stringTrimWhiteSpace(result) != "") {
         outputIsInherited = (containerName != problemName);
         return result;
@@ -1779,7 +1779,7 @@ void CalculatorHTML::computeDeadlinesAllSectionsNoInheritance(TopicElement& inpu
     ProblemDataAdministrative& currentProb =
     this->currentUser.problemData.getValueCreateNoInitialization(inputOutput.id).adminData;
     inputOutput.deadlinesPerSectioN[i] =
-    currentProb.deadlinesPerSection.getValueCreate(this->databaseStudentSections[i]);
+    currentProb.deadlinesPerSection.getValueCreateEmpty(this->databaseStudentSections[i]);
   }
 }
 
@@ -2766,7 +2766,7 @@ bool CalculatorHTML::extractOneAnswerId(
     newAnswer.answerId = currentId;
     this->problemData.answers.setKeyValue(currentId, newAnswer);
   }
-  Answer& current = this->problemData.answers.getValueCreate(currentId);
+  Answer& current = this->problemData.answers.getValueCreateEmpty(currentId);
   if (current.flagAnswerVerificationFound) {
     if (comments != nullptr) {
       *comments << "<b>Answer with id: "
@@ -2811,7 +2811,7 @@ bool CalculatorHTML::processOneSolution(
       }
       return false;
     }
-    processor.currentAnswer = &this->problemData.answers.getValueCreate(answerId);
+    processor.currentAnswer = &this->problemData.answers.getValueCreateEmpty(answerId);
     return true;
   }
   processor.contentWithoutSolutionElements.addOnTop(input);
@@ -3086,7 +3086,7 @@ void CalculatorHTML::computeProblemLabel() {
   if (!this->topics.theTopics.contains(this->fileName)) {
     return;
   }
-  TopicElement& current = this->topics.theTopics.getValueCreate(this->fileName);
+  TopicElement& current = this->topics.theTopics.getValueCreateEmpty(this->fileName);
   current.computeLinks(*this, true);
   this->outputProblemLabel = current.problemNumberString;
   this->outputProblemTitle = current.title;
@@ -3162,7 +3162,7 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& interpreter, std::strin
     global.requestType != "templateNoLogin"
   ) {
     if (this->topics.theTopics.contains(this->fileName)) {
-      TopicElement& current = this->topics.theTopics.getValueCreate(this->fileName);
+      TopicElement& current = this->topics.theTopics.getValueCreateEmpty(this->fileName);
       current.computeLinks(*this, true);
       problemLabel = current.displayTitle + "&nbsp;&nbsp;";
     }
@@ -3174,7 +3174,7 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& interpreter, std::strin
     if (global.flagDatabaseCompiled) {
       bool problemAlreadySolved = false;
       if (this->currentUser.problemData.contains(this->fileName)) {
-        ProblemData& theProbData = this->currentUser.problemData.getValueCreate(this->fileName);
+        ProblemData& theProbData = this->currentUser.problemData.getValueCreateEmpty(this->fileName);
         if (theProbData.numCorrectlyAnswered >= theProbData.answers.size()) {
           problemAlreadySolved = true;
         }
@@ -3326,7 +3326,7 @@ std::string CalculatorHTML::toStringProblemScoreFull(const std::string& theFileN
   }
   Rational currentWeight;
   if (this->currentUser.problemData.contains(theFileName)) {
-    ProblemData& theProbData = this->currentUser.problemData.getValueCreate(theFileName);
+    ProblemData& theProbData = this->currentUser.problemData.getValueCreateEmpty(theFileName);
     if (!theProbData.flagProblemWeightIsOK) {
       out << "<span style =\"color:orange\">No point weight assigned yet. </span>";
       if (!theProbData.adminData.getWeightFromCourse(this->currentUser.courseComputed, currentWeight)) {
@@ -3378,7 +3378,7 @@ std::string CalculatorHTML::toStringProblemScoreShort(const std::string& theFile
   Rational currentWeight;
   std::string currentWeightAsGivenByInstructor;
   if (this->currentUser.problemData.contains(theFileName)) {
-    theProbData = this->currentUser.problemData.getValueCreate(theFileName);
+    theProbData = this->currentUser.problemData.getValueCreateEmpty(theFileName);
     Rational percentSolved = 0, totalPoints = 0;
     percentSolved.assignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.answers.size());
     theProbData.flagProblemWeightIsOK = theProbData.adminData.getWeightFromCourse(
@@ -3681,7 +3681,7 @@ void TopicElementParser::insertTopicBundle(TopicElementParser::TopicLine& input)
     this->bundleStack.addOnTop(input);
     return;
   }
-  List<TopicElementParser::TopicLine>& currentBundle = this->knownTopicBundles.getValueCreate(bundleId);
+  List<TopicElementParser::TopicLine>& currentBundle = this->knownTopicBundles.getValueCreateEmpty(bundleId);
   for (int i = currentBundle.size - 1; i >= 0; i --) {
     this->bundleStack.addOnTop(currentBundle[i]);
   }
@@ -3728,7 +3728,7 @@ void TopicElementParser::loadTopicBundleFile(
       }
     } else {
       for (int i = 0; i < bundleNameStack.size; i ++) {
-        this->knownTopicBundles.getValueCreate(bundleNameStack[i]).addOnTop(currentLine);
+        this->knownTopicBundles.getValueCreateEmpty(bundleNameStack[i]).addOnTop(currentLine);
       }
     }
   }
@@ -4415,7 +4415,7 @@ JSData TopicElement::toJSON(CalculatorHTML& owner) {
   MacroRegisterFunctionWithName("TopicElement::toJSON");
   JSData output;
   output["title"] = this->title;
-  std::string elementType = owner.topics.elementNames.getValueCreate(this->type);
+  std::string elementType = owner.topics.elementNames.getValueCreateEmpty(this->type);
   if (elementType == "") {
     elementType = "not documented";
   }
@@ -4450,7 +4450,7 @@ JSData TopicElement::toJSON(CalculatorHTML& owner) {
   output[WebAPI::problem::idProblem] = this->id;
   if (global.flagDatabaseCompiled) {
     if (owner.currentUser.problemData.contains(this->problemFileName)) {
-      ProblemData& currentData = owner.currentUser.problemData.getValueCreate(this->problemFileName);
+      ProblemData& currentData = owner.currentUser.problemData.getValueCreateEmpty(this->problemFileName);
       output["correctlyAnswered"] = currentData.numCorrectlyAnswered;
       output["totalQuestions"] = currentData.answers.size();
       Rational currentWeight;

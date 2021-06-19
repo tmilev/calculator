@@ -36,7 +36,7 @@ $(info Optimization flag selected. [1;31mThis may slow down compilation a great
 OPTIMIZATION_FLAGS+=-O2
 endif
 
-CFLAGS=-Wpedantic -Wall -Wextra -std=c++0x $(OPTIMIZATION_FLAGS) -c
+CFLAGS=-Wpedantic -Wall -Wextra -std=c++0x $(OPTIMIZATION_FLAGS) -c -pthread
 LDFLAGS=-pthread $(OPTIMIZATION_FLAGS)
 LIBRARIES_INCLUDED_AT_THE_END=
 compiler=g++
@@ -47,6 +47,11 @@ endif
 
 ifeq ($(wasm), 1)
     compiler=./emsdk/upstream/emscripten/emcc
+    CFLAGS+=-DMACRO_use_wasm 
+    LDFLAGS+=-s LLD_REPORT_UNDEFINED
+    $(info [1;31mWeb assembly: turning off ssl and mongoDB.[0m) 
+    nossl=1
+    noMongo=1
 endif
 
 ifeq ($(AllocationStatistics), 1)
@@ -59,7 +64,7 @@ endif
 ## We include mysql and ssl depending on their availability
 ## This code may need more work in the future
 ifeq ($(noMongo), 1)
-$(info [1;31mNo mongo requested.[0m) 
+$(info [1;31mNo mongoDB requested.[0m) 
 else
 mongoLocation =
 ifneq ($(wildcard /usr/local/lib/libmongoc-1.0.so),)#location of mongoC in Ubuntu

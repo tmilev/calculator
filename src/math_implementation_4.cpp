@@ -480,7 +480,7 @@ std::string GlobalVariables::toStringCalculatorArgumentsNoNavigation(List<std::s
 }
 
 std::string GlobalVariables::getWebInput(const std::string& inputName) {
-  return this->webArguments.getValueCreate(inputName);
+  return this->webArguments.getValueCreateEmpty(inputName);
 }
 
 void GlobalVariables::makeReport() {

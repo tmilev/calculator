@@ -178,7 +178,8 @@ int externalCommandNoOutput(const std::string& theCommand) {
   return system(theCommand.c_str());
 }
 
-std::string externalCommandReturnStandartOut(const std::string& inputCommand) {
+#ifndef MACRO_use_wasm
+std::string externalCommandReturnStandardOut(const std::string& inputCommand) {
   std::string inputCommandWithRedirection = inputCommand + " 2>&1";
   std::shared_ptr<FILE> pipe(popen(inputCommandWithRedirection.c_str(), "r"), pclose);
   if (!pipe) {
@@ -217,6 +218,20 @@ int externalCommandStreamOutput(const std::string& inputCommand) {
   }
   return result;
 }
+
+#else
+std::string externalCommandReturnStandardOut(const std::string& inputCommand) {
+  global.fatal
+  << "In externalCommandReturnStandardOut(...): external commands such as: "
+  << inputCommand << " are not allowed. " << global.fatal;
+  return "";
+}
+
+int externalCommandStreamOutput(const std::string& inputCommand) {
+  global.fatal << "In externalCommandStreamOutput(...): external commands such as: " << inputCommand << " are not allowed. " << global.fatal;
+  return - 1;
+}
+#endif
 
 void callChDirWrapper(const std::string& theDir) {
   int systemOutput = chdir(theDir.c_str());

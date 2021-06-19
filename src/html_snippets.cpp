@@ -70,8 +70,8 @@ const std::string& HtmlRoutines::getFile(
   MacroRegisterFunctionWithName("HtmlRoutines::getFile");
   std::string theID = fileNameVirtual + additionalBeginTag + additionalEndTag;
   if (global.flagCachingInternalFilesOn) {
-    if (HtmlRoutines::preLoadedFiles().getValueCreate(theID) != "") {
-      return HtmlRoutines::preLoadedFiles().getValueCreate(theID);
+    if (HtmlRoutines::preLoadedFiles().getValueCreateEmpty(theID) != "") {
+      return HtmlRoutines::preLoadedFiles().getValueCreateEmpty(theID);
     }
   }
   std::stringstream out, commentsOnFailure;
@@ -81,7 +81,7 @@ const std::string& HtmlRoutines::getFile(
   } else {
     global << Logger::red << "File: "
     << fileNameVirtual << " not found. " << commentsOnFailure.str() << Logger::endL;
-    out << "<b style =\"color:red\">Failed to load file: [" << fileNameVirtual
+    out << "<b style='color:red'>Failed to load file: [" << fileNameVirtual
     << "]. Comments: " << commentsOnFailure.str() << "</b>";
   }
   HtmlRoutines::preLoadedFiles().setKeyValue(theID, out.str());

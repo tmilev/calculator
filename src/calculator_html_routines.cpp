@@ -18,7 +18,7 @@ bool CalculatorHtmlFunctions::userInputBox(
   }
   std::string boxName = CalculatorHtmlFunctions::getUserInputBoxName(input);
   if (calculator.objectContainer.userInputTextBoxesWithValues.contains(boxName)) {
-    return output.assignValue(calculator.objectContainer.userInputTextBoxesWithValues.getValueCreate(boxName), calculator);
+    return output.assignValue(calculator.objectContainer.userInputTextBoxesWithValues.getValueCreateEmpty(boxName), calculator);
   }
   InputBox newBox;
   newBox.name = boxName;
@@ -104,9 +104,9 @@ bool CalculatorHtmlFunctions::setInputBox(
     return calculator << "Input box with name: " << boxName << " already has value.";
   }
   InputBox& box =
-  calculator.objectContainer.userInputTextBoxesWithValues.getValueCreate(boxName);
+  calculator.objectContainer.userInputTextBoxesWithValues.getValueCreateEmpty(boxName);
   box.name = boxName;
-  box.value = arguments.getValueCreate("value");
+  box.value = arguments.getValueCreateEmpty("value");
   std::stringstream out;
   out << "Set value to input box name: " << boxName;
   return output.assignValue(out.str(), calculator);
@@ -118,16 +118,16 @@ std::string CalculatorHtmlFunctions::getUserInputBoxName(const Expression& theBo
     return "non-initialized-expression";
   }
   Calculator& calculator = *theBox.owner;
-  MapList<std::string, Expression, MathRoutines::hashString> theArguments;
-  if (!CalculatorConversions::innerLoadKeysFromStatementList(calculator, theBox, theArguments)) {
+  MapList<std::string, Expression, MathRoutines::hashString> arguments;
+  if (!CalculatorConversions::innerLoadKeysFromStatementList(calculator, theBox, arguments)) {
     return "corrupt-box";
   }
-  if (!theArguments.contains("name")) {
+  if (!arguments.contains("name")) {
     return "box-without-name";
   }
-  std::string theBoxName = "faultyBoxName";
-  if (!theArguments.getValueCreate("name").isOfType<std::string>(&theBoxName)) {
-    theBoxName = theArguments.getValueCreate("name").toString();
+  std::string boxName = "faultyBoxName";
+  if (!arguments.getValueCreateEmpty("name").isOfType<std::string>(&boxName)) {
+    boxName = arguments.getValueCreateEmpty("name").toString();
   }
-  return theBoxName;
+  return boxName;
 }

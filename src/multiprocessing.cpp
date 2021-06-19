@@ -4,6 +4,7 @@
 #include <fcntl.h> //<- setting of flags for pipes and the like (example: making a pipe non-blocking).
 #include <unistd.h>
 #include <netdb.h> //<-addrinfo and related data structures defined here
+#include <sys/select.h> // <- fdset here.
 #include "webserver.h"
 
 std::string MutexProcess::currentProcessName = "S: ";

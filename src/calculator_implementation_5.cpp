@@ -2218,20 +2218,20 @@ bool CalculatorFunctionsPlot::plotSurface(Calculator& calculator, const Expressi
     calculator, input, theKeys, &calculator.comments, true
   )) {
     if (theKeys.contains("color1")) {
-      thePlot.colorUV = theKeys.getValueCreate("color1").toString();
+      thePlot.colorUV = theKeys.getValueCreateEmpty("color1").toString();
     }
     if (theKeys.contains("color2")) {
-      thePlot.colorVU = theKeys.getValueCreate("color2").toString();
+      thePlot.colorVU = theKeys.getValueCreateEmpty("color2").toString();
     }
     MapList<std::string, std::string, MathRoutines::hashString> keysToConvert;
-    keysToConvert.getValueCreate("numSegments1");
-    keysToConvert.getValueCreate("numSegments2");
-    keysToConvert.getValueCreate("lineWidth");
+    keysToConvert.getValueCreateEmpty("numSegments1");
+    keysToConvert.getValueCreateEmpty("numSegments2");
+    keysToConvert.getValueCreateEmpty("lineWidth");
     for (int i = 0; i < keysToConvert.size(); i ++) {
       if (!theKeys.contains(keysToConvert.keys[i])) {
         continue;
       }
-      Expression expressionToConvert = theKeys.getValueCreate(keysToConvert.keys[i]);
+      Expression expressionToConvert = theKeys.getValueCreateEmpty(keysToConvert.keys[i]);
       bool isGood = CalculatorFunctions::functionMakeJavascriptExpression(
         calculator, expressionToConvert, jsConverter
       );
@@ -2245,14 +2245,14 @@ bool CalculatorFunctionsPlot::plotSurface(Calculator& calculator, const Expressi
       }
     }
     thePlot.numberOfSegmentsJS.setSize(2);
-    if (keysToConvert.getValueCreate("numSegments1") != "") {
-      thePlot.numberOfSegmentsJS[0] = keysToConvert.getValueCreate("numSegments1");
+    if (keysToConvert.getValueCreateEmpty("numSegments1") != "") {
+      thePlot.numberOfSegmentsJS[0] = keysToConvert.getValueCreateEmpty("numSegments1");
     }
-    if (keysToConvert.getValueCreate("numSegments2") != "") {
-      thePlot.numberOfSegmentsJS[1] = keysToConvert.getValueCreate("numSegments2");
+    if (keysToConvert.getValueCreateEmpty("numSegments2") != "") {
+      thePlot.numberOfSegmentsJS[1] = keysToConvert.getValueCreateEmpty("numSegments2");
     }
-    if (keysToConvert.getValueCreate("lineWidth") != "") {
-      thePlot.lineWidthJS = keysToConvert.getValueCreate("lineWidth");
+    if (keysToConvert.getValueCreateEmpty("lineWidth") != "") {
+      thePlot.lineWidthJS = keysToConvert.getValueCreateEmpty("lineWidth");
     }
   }
   if (

@@ -217,7 +217,7 @@ void JSData::setKeyValue(const std::string& key, const JSData& value) {
 
 JSData& JSData::operator[](const std::string& key) {
   this->elementType = JSData::token::tokenObject;
-  return this->objects.getValueCreate(key);
+  return this->objects.getValueCreateEmpty(key);
 }
 
 void JSData::operator=(const List<unsigned char>& other) {

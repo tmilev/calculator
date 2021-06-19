@@ -56,13 +56,23 @@ public:
     }
     return this->values[index];
   }
-  value& getValueCreate(const key& input) {
+  value& getValueCreateEmpty(const key& input) {
     int index = this->keys.getIndex(input);
     if (index == - 1) {
-      value object;
+      value empty;
       index = this->keys.size;
       this->keys.addOnTop(input);
-      this->values.addOnTop(object);
+      this->values.addOnTop(empty);
+    }
+    return this->values[index];
+  }
+
+  value& getValueCreate(const key& input, const value& initialValue) {
+    int index = this->keys.getIndex(input);
+    if (index == - 1) {
+      index = this->keys.size;
+      this->keys.addOnTop(input);
+      this->values.addOnTop(initialValue);
     }
     return this->values[index];
   }

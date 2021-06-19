@@ -10,6 +10,8 @@ TEMPLATE=app
 
 DEFINES+=MACRO_use_open_ssl
 DEFINES+=MACRO_use_MongoDB
+DEFINES+=MACRO_use_wasm
+
 
 LIBS+=-lmongoc-1.0
 LIBS+=-lbson-1.0

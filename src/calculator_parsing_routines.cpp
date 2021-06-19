@@ -1593,7 +1593,7 @@ bool CalculatorParser::replaceVbyVdotsVAccordingToPredefinedWordSplits() {
     global.fatal << "Predefined word splits array does not contain the variable: " << theE.data.toString()
     << ". This should not happen in the body of this function. " << global.fatal;
   }
-  List<std::string>& split = this->predefinedWordSplits.getValueCreate(currentVar);
+  List<std::string>& split = this->predefinedWordSplits.getValueCreateEmpty(currentVar);
   SyntacticElement newElt;
   this->popTopSyntacticStack();
   *(this->owner) << "Predefined symbol replacement: replacing "

@@ -571,7 +571,7 @@ bool Calculator::Test::processOneTest(JSData& input) {
     << " is missing its expected output. " << Logger::endL;
     return false;
   }
-  Calculator::Test::OneTest& currentTest = this->commands.getValueCreate(command);
+  Calculator::Test::OneTest& currentTest = this->commands.getValueCreateEmpty(command);
   currentTest.expectedResult = input["output"].stringValue;
   return true;
 }

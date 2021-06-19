@@ -4580,3 +4580,39 @@ void WebWorker::queueStringForSendingNoHeader(const std::string& stringToSend, b
     this->remainingBytesToSend[static_cast<signed>(i) + oldSize] = stringToSend[i];
   }
 }
+
+
+void WebServer::initializeRandomBytes() {
+  Crypto::Random::initializeRandomBytes();
+}
+
+bool WebServer::createProcessMutex() {
+  WebWorker& worker = this->getActiveWorker();
+  if (!worker.pauseWorker.createMe(this->toStringWorkerToWorker() + "pause mutex", true)) {
+    global << "Failed to create process mutex: "
+    << worker.pauseWorker.name << "\n";
+    return false;
+  }
+  if (!worker.writingReportFile.createMe(this->toStringWorkerToWorker() + "output file mutex", true)) {
+    global << "Failed to create process mutex: "
+    << worker.writingReportFile.name << "\n";
+    return false;
+  }
+  return true;
+}
+
+void WebServer::computeActiveWorkerId() {
+  List<unsigned char> incomingId;
+  Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(incomingId, 32);
+  WebWorker& worker = this->getActiveWorker();
+  if (worker.workerId != "") {
+    this->workerIds.removeKey(worker.workerId);
+  }
+  worker.workerId = Crypto::convertListUnsignedCharsToHex(incomingId);
+  this->workerIds.setKeyValue(worker.workerId, this->activeWorker);
+  if (this->workerIds.size() > 2 * this->theWorkers.size) {
+    global << Logger::red
+    << "Warning: worker ids exceeds twice the number of workers. "
+    << "This may be a memory leak. " << Logger::endL;
+  }
+}

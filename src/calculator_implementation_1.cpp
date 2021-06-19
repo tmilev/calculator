@@ -491,7 +491,7 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
   JSData plotUpdaters;
   for (int i = 0; i < this->parameterNames.size; i ++) {
     InputBox& currentBox = owner.objectContainer.
-    userInputTextBoxesWithValues.getValueCreate(this->parameterNames[i]);
+    userInputTextBoxesWithValues.getValueCreateEmpty(this->parameterNames[i]);
     plotUpdaters[currentBox.getSliderName()] = this->getCanvasName();
   }
   result["plotUpdaters"] = plotUpdaters;
@@ -900,7 +900,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   result[Plot::Labels::messagesName] = messages;
   result["plotUpdaters"].elementType = JSData::token::tokenArray;
   for (int i = 0; i < this->parameterNames.size; i ++) {
-    InputBox& currentBox = owner.objectContainer.userInputTextBoxesWithValues.getValueCreate(this->parameterNames[i]);
+    InputBox& currentBox = owner.objectContainer.userInputTextBoxesWithValues.getValueCreateEmpty(this->parameterNames[i]);
     result["plotUpdaters"][i] = currentBox.getSliderName();
   }
   JSData plotObjects = JSData::makeEmptyArray();
@@ -1015,7 +1015,7 @@ void Expression::substituteRecursively(
   MapList<Expression, Expression>& substitutions
 ) {
   if (substitutions.contains(*this)) {
-    (*this) = substitutions.getValueCreate(*this);
+    (*this) = substitutions.getValueCreateEmpty(*this);
     return;
   }
   this->substituteRecursivelyInChildren(substitutions);
@@ -1030,7 +1030,7 @@ void Expression::substituteRecursivelyInChildren(
   Expression tempE;
   for (int i = 0; i < this->size(); i ++) {
     if (substitutions.contains((*this)[i])) {
-      this->setChild(i, substitutions.getValueCreate((*this)[i]));
+      this->setChild(i, substitutions.getValueCreateEmpty((*this)[i]));
     } else {
       tempE = (*this)[i];
       tempE.substituteRecursivelyInChildren(substitutions);

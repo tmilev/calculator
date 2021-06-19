@@ -464,7 +464,7 @@ bool Calculator::expressionMatchesPattern(
     if (!matchedExpressions.contains(pattern)) {
       matchedExpressions.setKeyValue(pattern, input);
     }
-    if (matchedExpressions.getValueCreate(pattern) != input) {
+    if (matchedExpressions.getValueCreateEmpty(pattern) != input) {
       return false;
     }
     if (commentsGeneral != nullptr) {
@@ -1014,7 +1014,7 @@ bool Calculator::EvaluateLoop::reduceOnce() {
 }
 
 bool Calculator::EvaluateLoop::reduceUsingCache() {
-  ExpressionCache& cache = this->owner->cachedExpressions.getValueCreate(*this->output);
+  ExpressionCache& cache = this->owner->cachedExpressions.getValueCreateEmpty(*this->output);
   if (!cache.flagFinalized || cache.flagNonCacheable) {
     return false;
   }
@@ -1037,7 +1037,7 @@ bool Calculator::EvaluateLoop::reduceUsingCache() {
 void Calculator::EvaluateLoop::writeCache() {
   for (int i = 0; i < this->intermediateOutputs.size; i ++) {
     Calculator::ExpressionCache& cache =
-    this->owner->cachedExpressions.getValueCreate(
+    this->owner->cachedExpressions.getValueCreateEmpty(
       this->intermediateOutputs[i]
     );
     if (this->flagIsNonCacheable) {
@@ -1188,7 +1188,7 @@ void Calculator::specializeBoundVariables(Expression& toBeSubbedIn, MapList<Expr
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
   if (toBeSubbedIn.isListOfTwoAtomsStartingWith(this->opBind())) {
     if (matchedPairs.contains(toBeSubbedIn)) {
-      toBeSubbedIn = matchedPairs.getValueCreate(toBeSubbedIn);
+      toBeSubbedIn = matchedPairs.getValueCreateEmpty(toBeSubbedIn);
       //this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+ 1, MaxRecursionDepth);
       return;
     }

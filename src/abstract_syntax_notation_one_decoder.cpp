@@ -224,7 +224,7 @@ std::string ASNElement::interpretAsObjectIdentifierGetNameAndId() const {
   if (!ASNObject::objectIdsToNames().contains(this->ASNAtom)) {
     out << "[unknown]";
   } else {
-    out << ASNObject::objectIdsToNames().getValueCreate(this->ASNAtom).name;
+    out << ASNObject::objectIdsToNames().getValueCreateEmpty(this->ASNAtom).name;
   }
   return out.str();
 }

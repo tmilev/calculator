@@ -15,7 +15,7 @@ int WebAssembly::main(int argc, char **argv) {
 
 extern "C" {
 int myFunction(char* stringInput, int length) {
-  std::cout << "HEllo world";
+  std::cout << "Hello world";
   std::string input(stringInput, length);
     std::cout << "MyFunction was called. Length: " << length << "; input: " << input;
     return -15;

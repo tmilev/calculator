@@ -50,7 +50,11 @@ double FloatingPoint::absFloating(double argument) {
 }
 
 bool FloatingPoint::isNaN(const double &argument) {
+#ifdef MACRO_use_wasm
+  return isnan(argument);
+#else
   return std::isnan(argument);
+#endif
 }
 
 double FloatingPoint::logFloating(double argument) {

@@ -417,12 +417,7 @@ public:
   static unsigned int hashFunction(const bool& input) {
     return static_cast<unsigned int>(input);
   }
-  static unsigned int hashFunction(const double& input) {
-    if (isnan(input)) {
-      return 5;
-    }
-    return static_cast<unsigned>(input * 10000);
-  }
+  static unsigned int hashFunction(const double& input);
   static unsigned int hashFunction(const std::string& input) {
     size_t numCycles = input.size();
     unsigned int result = 0;

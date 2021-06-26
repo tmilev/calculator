@@ -458,7 +458,7 @@ void Plot::setExpectedPlotObjects(int expectedSize) {
 
 bool Plot::isOKVector(const Vector<double>& input) {
   for (int i = 0; i < input.size; i ++) {
-    if (isnan(input[i])) {
+    if (FloatingPoint::isNaN(input[i])) {
       return false;
     }
   }

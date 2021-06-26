@@ -6065,7 +6065,7 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
     )) {
       bool hasOneGoodPoint = false;
       for (int i = 0; i < thePointsDouble.size; i ++) {
-        if (!isnan(thePointsDouble[i][1])) {
+        if (!FloatingPoint::isNaN(thePointsDouble[i][1])) {
           hasOneGoodPoint = true;
           break;
         }
@@ -7061,7 +7061,7 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
       if (signChange) {
         *whichDouble *= - 1;
       }
-      return !isnan(*whichDouble) && !std::isinf(*whichDouble);
+      return !FloatingPoint::isNaN(*whichDouble) && !std::isinf(*whichDouble);
     }
     if ((*this).startsWith(calculator.opSqrt(), 3)) {
       bool signChange = false;
@@ -7091,7 +7091,7 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
       if (signChange) {
         *whichDouble *= - 1;
       }
-      return !isnan(*whichDouble) && !std::isinf(*whichDouble);
+      return !FloatingPoint::isNaN(*whichDouble) && !std::isinf(*whichDouble);
     }
     if ((*this).startsWith(calculator.opDivide(), 3)) {
       if (rightD == 0.0) {

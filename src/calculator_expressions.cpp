@@ -396,7 +396,7 @@ int Expression::addObjectReturnIndex(const
 double
 & inputValue) const {
   this->checkInitialization();
-  if (isnan(inputValue)) {
+  if (FloatingPoint::isNaN(inputValue)) {
     return 0;
   }
   return this->owner->objectContainer.doubleNumbers
@@ -1980,7 +1980,7 @@ bool Expression::isPositiveNumber() const {
   if (!this->evaluatesToDouble(&theDouble)) {
     return false;
   }
-  if (isnan(theDouble)) {
+  if (FloatingPoint::isNaN(theDouble)) {
     return false;
   }
   return theDouble > 0;
@@ -2234,16 +2234,16 @@ bool Expression::operator>(const Expression& other) const {
   bool leftEvalsToDouble = this->evaluatesToDouble(&left);
   bool rightEvalsToDouble = other.evaluatesToDouble(&right);
   if (leftEvalsToDouble && rightEvalsToDouble) {
-    if (isnan(left) && isnan(right)) {
+    if (FloatingPoint::isNaN(left) && FloatingPoint::isNaN(right)) {
       return false; //WARNING nan == nan evaluates to false!
     }
     // left != right generates a bizarre warning:
     // "comparing floating point with == or != is unsafe".
     if ((left - right) != 0.0) {
-      if (isnan(left)) {
+      if (FloatingPoint::isNaN(left)) {
         return true;
       }
-      if (isnan(right)) {
+      if (FloatingPoint::isNaN(right)) {
         return false;
       }
       return left > right;

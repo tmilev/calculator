@@ -49,6 +49,10 @@ double FloatingPoint::absFloating(double argument) {
   return argument >= 0 ? argument : - argument;
 }
 
+bool FloatingPoint::isNaN(const double &argument) {
+  return std::isnan(argument);
+}
+
 double FloatingPoint::logFloating(double argument) {
   return log(argument);
 }
@@ -71,6 +75,13 @@ double FloatingPoint::floorFloating(double argument) {
 
 double FloatingPoint::power(double base, double exponent) {
   return pow(base, exponent);
+}
+
+unsigned int HashFunctions::hashFunction(const double& input) {
+  if (FloatingPoint::isNaN(input)) {
+    return 5;
+  }
+  return static_cast<unsigned>(input * 10000);
 }
 
 unsigned int MathRoutines::hashDouble(const double& input) {

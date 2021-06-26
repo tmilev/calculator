@@ -33,6 +33,7 @@ public:
   static double sqrtFloating(double argument);
   static double power(double base, double exponent);
   static double logFloating(double argument);
+  static bool isNaN(const double& argument);
   static double floorFloating(double argument);
   static std::string doubleToString(double input);
 };

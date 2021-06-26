@@ -836,7 +836,7 @@ bool Calculator::functionCollectSummandsCombine(
         continue;
       } else if (summands[i][1].isOfType<double>(&coefficientDouble)) {
         sumOverDoubles.addMonomial(summands[i][2], coefficientDouble);
-        if (isnan(coefficientDouble)) {
+        if (FloatingPoint::isNaN(coefficientDouble)) {
           hasNAN = true;
         }
         continue;

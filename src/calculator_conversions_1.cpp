@@ -340,10 +340,10 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
   const Expression& expressionF = input[2];
   const Expression& expressionE = input[3];
   ElementSemisimpleLieAlgebra<Rational> elementF, elementE;
-  if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(calculator, expressionF, elementF, *output.owner)) {
+  if (!CalculatorConversions::loadElementSemisimpleLieAlgebraRationalCoefficients(calculator, expressionF, elementF, *output.owner)) {
     return calculator << "<hr>Failed to extract f element while loading sl(2) subalgebra<hr>";
   }
-  if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(calculator, expressionE, elementE, *output.owner)) {
+  if (!CalculatorConversions::loadElementSemisimpleLieAlgebraRationalCoefficients(calculator, expressionE, elementE, *output.owner)) {
     return calculator << "<hr>Failed to extract e element while loading sl(2) subalgebra<hr>";
   }
   if (elementE.isEqualToZero() || elementF.isEqualToZero()) {
@@ -574,7 +574,7 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
     generatorsE.sequencefy();
     ElementSemisimpleLieAlgebra<AlgebraicNumber> currentGeneratorAlgebraic;
     for (int i = 1; i < generatorsE.size(); i ++) {
-      if (!CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(
+      if (!CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
         calculator, generatorsE[i], currentGeneratorAlgebraic, *owner.owner
       )) {
         return calculator << "<hr>Failed to load semisimple Lie algebra element from expression "
@@ -829,7 +829,7 @@ bool CalculatorConversions::innerExpressionFromUE(
   return output.makeSum(calculator, theUEE);
 }
 
-bool CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(
+bool CalculatorConversions::loadElementSemisimpleLieAlgebraRationalCoefficients(
   Calculator& calculator,
   const Expression& input,
   ElementSemisimpleLieAlgebra<Rational>& output,
@@ -837,7 +837,7 @@ bool CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs");
   ElementSemisimpleLieAlgebra<AlgebraicNumber> outputAlgebraic;
-  if (!CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(
+  if (!CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
     calculator, input, outputAlgebraic, owner
   )) {
     return calculator << "<hr> Failed to obtain semisimple Lie algebra element from "
@@ -855,7 +855,7 @@ bool CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(
   return true;
 }
 
-bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(
+bool CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
   Calculator& calculator,
   const Expression& input,
   ElementSemisimpleLieAlgebra<AlgebraicNumber>& output,

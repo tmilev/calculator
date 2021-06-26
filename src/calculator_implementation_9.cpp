@@ -160,7 +160,7 @@ bool CalculatorFunctions::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& c
   }
   SemisimpleLieAlgebra* ownerSemisimple = ownerAlgebra.content;
   ElementSemisimpleLieAlgebra<Rational> theErational;
-  if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(
+  if (!CalculatorConversions::loadElementSemisimpleLieAlgebraRationalCoefficients(
     calculator, input[2], theErational, *ownerSemisimple
   )) {
     return output.makeError("Failed to extract element of semisimple Lie algebra. ", calculator);
@@ -178,47 +178,6 @@ bool CalculatorFunctions::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& c
     out << "<br>Couldn't extend E to sl(2)-triple. The log stream follows. " << logStream.str();
   }
   return output.assignValue(out.str(), calculator);
-}
-
-bool CalculatorFunctions::innerAdCommonEigenSpaces(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerAdCommonEigenSpaces");
-  if (input.size() < 3) {
-    return output.makeError(
-      "Function ad common eigenspaces needs at least 2 arguments - type and at least one element of the algebra.",
-      calculator
-    );
-  }
-  WithContext<SemisimpleLieAlgebra*> algebra;
-  if (!CalculatorConversions::convert(
-    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
-  )) {
-    return output.makeError("Error extracting Lie algebra.", calculator);
-  }
-  SemisimpleLieAlgebra* ownerSemisimple = algebra.content;
-  List<ElementSemisimpleLieAlgebra<Rational> > theOperators, outputElts;
-  theOperators.reserve(input.size() - 2);
-  ElementSemisimpleLieAlgebra<Rational> element;
-  for (int i = 2; i < input.size(); i ++) {
-    if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(
-      calculator, input[i], element, *ownerSemisimple
-    )) {
-      return output.makeError("Failed to extract element of semisimple Lie algebra. ", calculator);
-    }
-    theOperators.addOnTop(element);
-  }
-  ownerSemisimple->getCommonCentralizer(theOperators, outputElts);
-  std::stringstream out;
-  out << "<br>EigenSpace basis (" << outputElts.size << " elements total):<br> (";
-  for (int i = 0; i < outputElts.size; i ++) {
-    ElementSemisimpleLieAlgebra<Rational>& currentElt = outputElts[i];
-    out << currentElt.toString();
-    if (i != outputElts.size - 1) {
-      out << ", ";
-    }
-  }
-  out << ")";
-  output.assignValue(out.str(), calculator);
-  return true;
 }
 
 bool CalculatorFunctions::innerZmodP(Calculator& calculator, const Expression& input, Expression& output) {

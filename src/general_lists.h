@@ -223,13 +223,13 @@ public:
   static bool isADigit(char theChar, int* whichDigit = nullptr);
   template <class Type>
   static bool generateVectorSpaceClosedWithRespectToLieBracket(List<Type>& inputOutputElts, int upperDimensionBound) {
-    return MathRoutines::generateVectorSpaceClosedWRTOperation(
+    return MathRoutines::generateVectorSpaceClosedWithRespectToOperation(
       inputOutputElts, upperDimensionBound, Type::lieBracket
     );
   }
   static Vector<double> getVectorDouble(Vector<Rational>& input);
   template <class Type>
-  static bool generateVectorSpaceClosedWRTOperation(
+  static bool generateVectorSpaceClosedWithRespectToOperation(
     List<Type>& inputOutputElts,
     int upperDimensionBound,
     void (*theBinaryOperation)(const Type& left, const Type& right, Type& output)

@@ -1,0 +1,29 @@
+<!doctype html>
+
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>WASM instantiateStreaming() test</title>
+
+</head>
+<!--script src='calculator.worker.js'>
+</script-->
+<script src='calculator.js'>
+</script>
+<script>
+  function runMain() {
+    let wrapped = Module.cwrap('myFunction', 'number', ['string', 'number']);
+    let value = document.getElementById("input").value;
+    wrapped(value, value.length);
+  }
+</script>
+
+<body>
+  <textarea id="input"></textarea>
+  <button onclick="runMain();">Go</button>
+
+
+</body>
+
+</html>

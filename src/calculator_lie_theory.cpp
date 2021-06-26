@@ -1864,6 +1864,84 @@ bool CalculatorLieTheory::slTwoRealFormStructureComputeOnDemand(
   return CalculatorLieTheory::slTwoRealFormStructure(calculator, input, output, false);
 }
 
+bool CalculatorLieTheory::getElementsInSameLieAlgebra(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  SemisimpleLieAlgebra*& outputOwner,
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
+) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::getElementsInSameLieAlgebra");
+  if (input.size() < 3) {
+    output.makeError(
+      "Function ad common eigenspaces needs at least 2 arguments - "
+      "type and at least one element of the algebra.",
+      calculator
+    );
+    return false;
+  }
+  WithContext<SemisimpleLieAlgebra*> algebra;
+  if (!CalculatorConversions::convert(
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
+  )) {
+    output.makeError("Error extracting Lie algebra.", calculator);
+    return false;
+  }
+  outputOwner = algebra.content;
+  outputElements.reserve(input.size() - 2);
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> element;
+  for (int i = 2; i < input.size(); i ++) {
+    if (!CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
+      calculator, input[i], element, *outputOwner
+    )) {
+      output.makeError("Failed to extract element of semisimple Lie algebra. ", calculator);
+      return false;
+    }
+    outputElements.addOnTop(element);
+  }
+  return true;
+}
+
+bool CalculatorLieTheory::adCommonEigenSpaces(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::adCommonEigenSpaces");
+  SemisimpleLieAlgebra* ownerSemisimple = nullptr;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > elements, outputElements;
+  if (!CalculatorLieTheory::getElementsInSameLieAlgebra(
+    calculator, input, output, ownerSemisimple, elements
+  )) {
+    return true;
+  }
+  ownerSemisimple->getCommonCentralizer(elements, outputElements);
+  std::stringstream out;
+  out << "<br>Starting elements: " << elements.toStringCommaDelimited();
+  out << "<br>EigenSpace basis (" << outputElements.size << " elements total):<br> (";
+  for (int i = 0; i < outputElements.size; i ++) {
+    ElementSemisimpleLieAlgebra<AlgebraicNumber>& current = outputElements[i];
+    out << current.toString();
+    if (i != outputElements.size - 1) {
+      out << ", ";
+    }
+  }
+  out << ")";
+  output.assignValue(out.str(), calculator);
+  return true;
+}
+
+bool CalculatorLieTheory::isReductiveLieSubalgebra(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::isReductiveLieSubalgebra");
+  SemisimpleLieAlgebra* ownerSemisimple = nullptr;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > elements, outputElements;
+  if (!CalculatorLieTheory::getElementsInSameLieAlgebra(
+    calculator, input, output, ownerSemisimple, elements
+  )) {
+    return true;
+  }
+  global.comments << "Not implemented yet.";
+  return false;
+}
+
 bool CalculatorLieTheory::slTwoRealFormStructure(
   Calculator& calculator,
   const Expression& input,
@@ -2701,12 +2779,12 @@ bool CalculatorLieTheory::casimirWithRespectToLevi(
 }
 
 template <class Type>
-bool MathRoutines::generateVectorSpaceClosedWRTOperation(
+bool MathRoutines::generateVectorSpaceClosedWithRespectToOperation(
   List<Type>& inputOutputElts,
   int upperDimensionBound,
   void (*theBinaryOperation)(const Type& left, const Type& right, Type& output)
 ) {
-  MacroRegisterFunctionWithName("MathRoutines::generateVectorSpaceClosedWRTOperation");
+  MacroRegisterFunctionWithName("MathRoutines::generateVectorSpaceClosedWithRespectToOperation");
   inputOutputElts[0].gaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
   Type operationResult;
   ProgressReport report1(1, GlobalVariables::Response::ReportType::gaussianElimination);

@@ -547,7 +547,6 @@ public:
   static bool innerAttemptExtendingEtoHEFwithHinCartan(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerAdCommonEigenSpaces(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerConesIntersect(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPerturbSplittingNormal(Calculator& calculator, const Expression& input, Expression& output);

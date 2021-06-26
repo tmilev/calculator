@@ -163,9 +163,24 @@ public:
   static bool getLinksToSimpleLieAlgebras(Calculator& calculator, const Expression& input, Expression& output);
   static bool slTwoRealFormStructure(Calculator& calculator, const Expression& input, Expression& output, bool forceRecompute);
   static bool slTwoRealFormStructureForceRecompute(
-    Calculator& calculator, const Expression& input, Expression& output);
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool getElementsInSameLieAlgebra(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    SemisimpleLieAlgebra*& outputOwner,
+    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
+  );
+  static bool adCommonEigenSpaces(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool isReductiveLieSubalgebra(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool slTwoRealFormStructureComputeOnDemand(
-    Calculator& calculator, const Expression& input, Expression& output);
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool characterSemisimpleLieAlgebraFiniteDimensional(Calculator& calculator, const Expression& input, Expression& output);
   static bool printSemisimpleSubalgebras(
     Calculator& calculator,

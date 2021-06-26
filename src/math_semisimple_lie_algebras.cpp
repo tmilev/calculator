@@ -191,28 +191,27 @@ std::string SemisimpleLieAlgebra::toHTML(
   bool verbose, bool flagWriteLatexPlots
 ) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::toHTMLCalculator");
-  WeylGroupData& theWeyl = this->weylGroup;
   std::stringstream out;
   FormatExpressions format, latexFormat;
   latexFormat.flagUseLatex = true;
   latexFormat.flagUseHTML = false;
   out << "<h1>Lie algebra " << this->toStringLieAlgebraNameFullHTML() << "</h1>";
-  out << "<br>Weyl group size: " << theWeyl.group.getSize().toString() << ".<br>";
+  out << "<br>Weyl group size: " << this->weylGroup.group.getSize().toString() << ".<br>";
   if (!verbose) {
     out << "<br>To get extra details: ";
     std::stringstream tempStream;
-    tempStream << "PrintSemisimpleLieAlgebra{}(" << theWeyl.dynkinType << ")";
+    tempStream << "PrintSemisimpleLieAlgebra{}(" << this->weylGroup.dynkinType << ")";
     out << HtmlRoutines::getCalculatorComputationAnchorSameURL(tempStream.str(), "")
     << "<br>";
   } else {
     DrawingVariables drawingVariables;
-    theWeyl.drawRootSystem(drawingVariables, true, true, nullptr, true, nullptr);
+    this->weylGroup.drawRootSystem(drawingVariables, true, true, nullptr, true, nullptr);
     out << "A drawing of the root system in its corresponding Coxeter plane. "
     << "A basis of the plane was computed as explained by the website of John Stembridge. "
     << "<br>The darker red dots can be dragged with the mouse to rotate the picture."
     << "<br>The grey lines are the edges of the Weyl chamber.<br>"
-    << drawingVariables.getHTMLDiv(theWeyl.getDimension(), true);
-    out << theWeyl.toStringRootsAndRootReflections();
+    << drawingVariables.getHTMLDiv(this->weylGroup.getDimension(), true);
+    out << this->weylGroup.toStringRootsAndRootReflections();
     out << " The resulting Lie bracket pairing table follows. <hr> "
     << this->toString(&global.defaultFormat.getElement());
     if (flagWriteLatexPlots) {
@@ -224,7 +223,7 @@ std::string SemisimpleLieAlgebra::toHTML(
       for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
         element1.makeGenerator(i, *this);
         tempRoot = this->getWeightOfGenerator(i);
-        theWeyl.getEpsilonCoordinates(tempRoot, tempRoot2);
+        this->weylGroup.getEpsilonCoordinates(tempRoot, tempRoot2);
         out << "$" << element1.toString(&format) << "$&$" << tempRoot.toString() << "$";
         out << "&$" << tempRoot2.toStringLetterFormat("\\varepsilon") << "$";
         out << "\\\\\n";
@@ -234,33 +233,39 @@ std::string SemisimpleLieAlgebra::toHTML(
   }
   out << "We define the symmetric Cartan matrix <br>by requesting that the entry in the i-th row and j-th column<br> "
   << " be the scalar product of the i^th and j^th roots. The symmetric Cartan matrix is:<br>"
-  << HtmlRoutines::getMathNoDisplay(theWeyl.cartanSymmetric.toString(&latexFormat));
+  << HtmlRoutines::getMathNoDisplay(this->weylGroup.cartanSymmetric.toString(&latexFormat));
   out << "<br>Let the (i, j)^{th} entry of the symmetric Cartan matrix be a_{ij}. "
   << "<br> Then we define the co-symmetric Cartan matrix as "
   << " the matrix whose (i, j)^{th} entry equals 4*a_{ij}/(a_{ii}*a_{jj}). "
   << "In other words, the co-symmetric Cartan matrix is the "
   << "symmetric Cartan matrix of the dual root system. The co-symmetric Cartan matrix equals:<br>"
-  << HtmlRoutines::getMathNoDisplay(theWeyl.coCartanSymmetric.toStringLatex());
-  out << "<br>The determinant of the symmetric Cartan matrix is: " << theWeyl.cartanSymmetric.getDeterminant().toString();
+  << HtmlRoutines::getMathNoDisplay(this->weylGroup.coCartanSymmetric.toStringLatex());
+  out << "<br>The determinant of the symmetric Cartan matrix is: " << this->weylGroup.cartanSymmetric.getDeterminant().toString();
   Vectors<Rational> fundamentalWeights, fundamentalWeightsEpsForm;
-  theWeyl.getFundamentalWeightsInSimpleCoordinates(fundamentalWeights);
+  this->weylGroup.getFundamentalWeightsInSimpleCoordinates(fundamentalWeights);
   Vectors<Rational> simpleBasis, simplebasisEpsCoords;
-  out << "<hr> Half sum of positive roots: " << theWeyl.rho.toString();
+  out << "<hr> Half sum of positive roots: " << this->weylGroup.rho.toString();
   Vector<Rational> tempRoot;
-  theWeyl.getEpsilonCoordinates(theWeyl.rho, tempRoot);
+  this->weylGroup.getEpsilonCoordinates(this->weylGroup.rho, tempRoot);
   out << "= " << HtmlRoutines::getMathNoDisplay(tempRoot.toStringLetterFormat("\\varepsilon"));
   out << "<hr>The fundamental weights (the j^th fundamental weight has scalar product 1 "
   << "<br>with the j^th simple root times 2 divided by the root length squared,<br> "
   << " and 0 with the remaining simple roots): ";
-  theWeyl.getEpsilonCoordinates(fundamentalWeights, fundamentalWeightsEpsForm);
-  out << "<table>";
+  this->weylGroup.getEpsilonCoordinates(fundamentalWeights, fundamentalWeightsEpsForm);
+  std::stringstream fundamentalWeightsStream;
+  FormatExpressions latexFormatWithFractions;
+  latexFormatWithFractions.flagUseHTML = false;
+  latexFormatWithFractions.flagUseFrac = true;
+  latexFormatWithFractions.flagUseLatex = true;
+  fundamentalWeightsStream << "\\begin{array}{rcl}";
   for (int i = 0; i < fundamentalWeights.size; i ++) {
-    out << "<tr><td style =\"white-space: nowrap\">" << fundamentalWeights[i].toString()
-    << "</td><td> =</td><td style =\"white-space: nowrap\"> "
-    << HtmlRoutines::getMathNoDisplay(fundamentalWeightsEpsForm[i].toStringEpsilonFormat())
-    << "</td></tr>";
+    fundamentalWeightsStream << fundamentalWeights[i].toString(&latexFormatWithFractions)
+    << "&=&"
+    << fundamentalWeightsEpsForm[i].toStringEpsilonFormat(&latexFormatWithFractions)
+    << "\\\\\n";
   }
-  out << "</table>";
+  fundamentalWeightsStream << "\\end{array}";
+  out << "<br>" << HtmlRoutines::getMathNoDisplay(fundamentalWeightsStream.str());
   out << "<hr>Below is the simple basis realized in epsilon coordinates. "
   << "Please note that the epsilon coordinate realizations "
   << "do not have long roots of length of 2 in types G and C. "
@@ -268,33 +273,35 @@ std::string SemisimpleLieAlgebra::toHTML(
   << "of the epsilon coordinate realizations in types G and C "
   << "does not equal the  corresponding symmetric Cartan matrix. "
   << "<table>";
-  simpleBasis.makeEiBasis(theWeyl.getDimension());
-  theWeyl.getEpsilonCoordinates(simpleBasis, simplebasisEpsCoords);
+  simpleBasis.makeEiBasis(this->weylGroup.getDimension());
+  this->weylGroup.getEpsilonCoordinates(simpleBasis, simplebasisEpsCoords);
+  std::stringstream simpleBasisStream;
+  simpleBasisStream << "\\begin{array}{rcl}";
   for (int i = 0; i < simplebasisEpsCoords.size; i ++) {
-    out << "<tr><td style =\"white-space: nowrap\">" << simpleBasis[i].toString()
-    << " </td><td>=</td> <td style =\"white-space: nowrap\">"
-    << HtmlRoutines::getMathNoDisplay(simplebasisEpsCoords[i].toStringEpsilonFormat())
-    << "</td></tr>";
+    simpleBasisStream << simpleBasis[i].toString(&latexFormatWithFractions)
+    << "&=&"
+    << simplebasisEpsCoords[i].toStringEpsilonFormat(&latexFormatWithFractions) << "\\\\";
   }
-  out << "</table>";
+  simpleBasisStream << "\\end{array}";
+  out << "<br>" << HtmlRoutines::getMathNoDisplay(simpleBasisStream.str());
   DynkinSimpleType tempSimpleType;
-  if (theWeyl.dynkinType.isSimple(
+  if (this->weylGroup.dynkinType.isSimple(
     &tempSimpleType.letter, &tempSimpleType.rank, &tempSimpleType.cartanSymmetricInverseScale
   )) {
     if (tempSimpleType.cartanSymmetricInverseScale == 1) {
       Matrix<Rational> tempM, tempM2;
-      theWeyl.dynkinType.getEpsilonMatrix(tempM);
+      this->weylGroup.dynkinType.getEpsilonMatrix(tempM);
       tempM2 = tempM;
       tempM2.transpose();
       tempM2.multiplyOnTheRight(tempM);
       tempM2 *= 2 / tempSimpleType.getEpsilonRealizationLongRootLengthSquared();
-      if (!(tempM2 == theWeyl.cartanSymmetric)) {
+      if (!(tempM2 == this->weylGroup.cartanSymmetric)) {
         global.fatal << "This is a (non-critical) programming error: "
         << "the epsilon coordinates of the vectors are incorrect. "
         << "Please fix function DynkinType::getEpsilonMatrix. "
         << "The matrix of the epsilon coordinates is " << tempM.toString()
         << ", the Symmetric Cartan matrix is "
-        << theWeyl.cartanSymmetric.toString() << ", and the "
+        << this->weylGroup.cartanSymmetric.toString() << ", and the "
         << "transpose of the epsilon matrix times the epsilon matrix: "
         << tempM2.toString() << ". " << global.fatal;
       }

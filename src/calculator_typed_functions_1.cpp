@@ -2846,6 +2846,10 @@ bool CalculatorFunctionsBinaryOps::binomialCoefficient(
     for (int i = 0; i < K; i ++) {
       output *= input[1] - i;
     }
+    Expression factorial, kExpression;
+    kExpression.assignValue(K, calculator);
+    factorial.makeOX(calculator, calculator.opFactorial(), kExpression);
+    output /= factorial;
     return true;
   }
   return false;

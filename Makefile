@@ -50,9 +50,11 @@ endif
 ifeq ($(wasm), 1)
     compiler=./emsdk/upstream/emscripten/emcc
     CFLAGS+=-DMACRO_use_wasm 
-    LDFLAGS+=-s LLD_REPORT_UNDEFINED
+    # CFLAGS+=-s BUILD_AS_WORKER=1
+    CFLAGS+=-s EXPORTED_FUNCTIONS='["myFunction"]'
+    LDFLAGS+=-s LLD_REPORT_UNDEFINED -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap"]' -s EXPORTED_FUNCTIONS='["_myFunction", "_main"]'
     $(info [1;31mWeb assembly: turning off ssl and mongoDB.[0m) 
-    TARGET=html-common/calculator.js
+    TARGET=calculator-html/web_assembly/calculator.js
     OBJECT_FILE_OUTPUT=bin/wasm/
     nossl=1
     noMongo=1

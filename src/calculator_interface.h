@@ -2655,13 +2655,13 @@ class CalculatorConversions {
 public:
   ////////////////////Conversion from expression tree/////////////////////////////////
   // conversions from expression tree to type
-  static bool innerElementSemisimpleLieAlgebraRationalCoeffs(
+  static bool loadElementSemisimpleLieAlgebraRationalCoefficients(
     Calculator& calculator,
     const Expression& input,
     ElementSemisimpleLieAlgebra<Rational>& output,
     SemisimpleLieAlgebra& owner
   );
-  static bool innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(
+  static bool loadElementSemisimpleLieAlgebraAlgebraicNumbers(
     Calculator& calculator,
     const Expression& input,
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& output,

@@ -147,12 +147,12 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "AdCommonEigenspace",
-    CalculatorFunctions::innerAdCommonEigenSpaces,
+    CalculatorLieTheory::adCommonEigenSpaces,
     "",
     "Computes common eigenspace of the adjoint action of semisimple Lie "
     "algebra elements inside the semisimple Lie algebra. ",
     "AdCommonEigenspace{}(F_4, -5 (g_{9}) +3 (g_{13}) +5 (g_{16}) +4 (g_{10}), g_{14}+g_{22}+g_{20})",
-    "Calculator::innerAdCommonEigenSpaces",
+    "CalculatorLieTheory::adCommonEigenSpaces",
     "AdCommonEigenspace",
     innerStandard
   );
@@ -231,8 +231,27 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "SlTwoRealFormStructureForceRecompute{}(a_3)",
     "Calculator::slTwoRealFormStructureForceRecompute",
     "SlTwoRealFormStructureRecompute",
-    // TODO(tmilev): change to an automatically-tested version when this is fixed.
+    // TODO(tmilev): change to an automatically-tested version when sufficiently mature.
     innerAdminNoTest
+  );
+  this->addOperationHandler(
+    "IsReductiveLieSubalgebra",
+    CalculatorLieTheory::isReductiveLieSubalgebra,
+    "",
+    "Given a set of elements of a semisimple lie algebra, "
+    "tries to determine whether the Lie subalgebra they generate "
+    "is reductive and what is its type.",
+    "(F_4,\n"
+    "g_{-1}, g_{6}   , g_{9}+g_{2},\n"
+    "g_{10}, g_{13}  , g_{16}+g_{2},\n"
+    "g_{17}-6/5g_{14}, g_{19}+8/5g_{14},\n"
+    "g_{20}+g_{14}   , g_{21},\n"
+    "g_{22}, g_{23}  ,\n"
+    "g_{24}\n"
+    ")",
+    "Calculator::isReductiveLieSubalgebra",
+    "IsReductiveLieSubalgebra",
+    innerStandard
   );
   this->addOperationHandler(
     "ConesIntersection",

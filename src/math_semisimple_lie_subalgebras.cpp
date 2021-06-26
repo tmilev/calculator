@@ -1258,6 +1258,7 @@ bool SemisimpleSubalgebras::computeStructureRealFormsSlTwos() {
       this->slTwoSubalgebras.getElement(i), i
     );
   }
+  // this->hookUpCentralizers(true);
   this->wConjecture.computeAfterSubalgebras(*this);
   return true;
 }
@@ -3086,7 +3087,7 @@ void LinearCombination<TemplateMonomial, Coefficient>::intersectVectorSpaces(
   List<LinearCombinationTemplate>& outputIntersection,
   HashedList<TemplateMonomial>* seedMonomials
 ) {
-  MacroRegisterFunctionWithName("MonomialCollection::intersectVectorSpaces");
+  MacroRegisterFunctionWithName("LinearCombination::intersectVectorSpaces");
   List<LinearCombinationTemplate> workingSpace = vectorSpace1;
   List<LinearCombinationTemplate> vectorSpace2Eliminated = vectorSpace2;
   LinearCombination<TemplateMonomial, Coefficient>::gaussianEliminationByRowsDeleteZeroRows(vectorSpace2Eliminated, nullptr, seedMonomials);
@@ -3211,7 +3212,7 @@ void SemisimpleSubalgebras::WConjecture::computeBeforeSubalgebras(SemisimpleSuba
   report.report("Computing Killing form.");
   owner.owner->getKillingFormMatrix(this->killingForm);
   Matrix<Rational> killingFormRescaledRational;
-  killingFormRescaledRational= this->killingForm;
+  killingFormRescaledRational = this->killingForm;
   killingFormRescaledRational.scaleToIntegralForMinimalRationalHeightNoSignChange();
   this->killingFormRescaled = killingFormRescaledRational;
   report.report("Computing k, p");
@@ -3276,6 +3277,26 @@ void CandidateSemisimpleSubalgebra::computeRatioKillingsByComponent() {
   }
 }
 
+std::string CandidateSemisimpleSubalgebra::WConjecture::toStringWConjectureHolds() const {
+  std::stringstream out;
+  if (this->triplesViolatingWConjecture.size == 0) {
+    if (this->flagSlTwoIsSmall) {
+      out << "<b style='color:green'>W-conjecture holds</b>";
+    } else {
+      out << "<b style='color:blue'>[W,W]-condition holds</b> but the subalgebra is not small.";
+    }
+  } else {
+    if (!this->flagWConjectureHolds){
+      out << "<b style='color:red'>W-conjecture does not hold</b>";
+    } else {
+      out << "<b style='color:blue'>The [W,W]-condition</b> "
+      << "<b style='color:red'>fails</b> "
+      << "but that's OK as the subalgebra is not small.</b>";
+    }
+  }
+  return out.str();
+}
+
 std::string CandidateSemisimpleSubalgebra::WConjecture::toString(
   const CandidateSemisimpleSubalgebra& owner
 ) const {
@@ -3303,7 +3324,7 @@ std::string CandidateSemisimpleSubalgebra::WConjecture::toString(
   out << owner.owner->wConjecture.toStringElementSemisimpleLieAlgebraOrMatrix(*owner.owner, this->basisCentralizerOfSl2, "");
   out << "</div></div>";
   out << "\\(\\mathfrak p ^{\\mathfrak s}\\) "
-  << "= centralizer of sl(2) in p: <br>";
+  << "= centralizer of sl(2) in \\(\\mathfrak p\\): <br>";
   out << "<div class='lieAlgebraPanel'>";
   out << "<div>";
   out << owner.owner->wConjecture.toStringElementSemisimpleLieAlgebraOrMatrix(*owner.owner, this->basisCentralizerOfSl2InP, "");
@@ -3312,7 +3333,9 @@ std::string CandidateSemisimpleSubalgebra::WConjecture::toString(
   << "= orthogonal complement of centalizer of sl(2) in p: <br>";
   out << "<div class='lieAlgebraPanel'>";
   out << "<div>";
-  out << owner.owner->wConjecture.toStringElementSemisimpleLieAlgebraOrMatrix(*owner.owner, this->basisOrthogonalComplementOfCentralizerOfSl2InP, "");
+  out << owner.owner->wConjecture.toStringElementSemisimpleLieAlgebraOrMatrix(
+    *owner.owner, this->basisOrthogonalComplementOfCentralizerOfSl2InP, ""
+  );
   out << "</div></div>";
   out << "\\(W=\\mathfrak p ^H \\cap (\\mathfrak p ^\\mathfrak s)^\\perp \\) "
   << "= centralizer of H intersected with orthogonal complement of centralizer of the sl(2) intersected with p. <br>";
@@ -3324,20 +3347,7 @@ std::string CandidateSemisimpleSubalgebra::WConjecture::toString(
     "w"
   );
   out << "</div></div>";
-  if (this->triplesViolatingWConjecture.size == 0) {
-    if (this->flagSlTwoIsSmall) {
-      out << "<b style='color:green'>W-conjecture holds</b>";
-    } else {
-      out << "<b style='color:blue'>[W,W]-condition holds</b> but the subalgebra is not small.";
-    }
-  } else {
-    if (!this->flagWConjectureHolds){
-      out << "<b style='color:red'>W-conjecture does not hold</b>";
-    } else {
-      out << "<b style='color:blue'>The [W,W]-condition fails</b> "
-      << "but that's OK as the subalgebra is not small.</b>";
-    }
-  }
+  out << this->toStringWConjectureHolds();
   if (this->triplesNotViolatingWConjecture.size > 0) {
     out << "<br>Lie brackets between the basis elements of \\(W\\) "
     << "that <b style='color:green'>lie in \\(\\mathfrak k^{\\mathfrak s}\\)</b>. "
@@ -3407,7 +3417,8 @@ void CandidateSemisimpleSubalgebra::WConjecture::compute(
       orthogonalComplement[i], *owner.owner->owner
     );
   }
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& wSpace = this->basisOrthogonalComplementOfCentralizerOfSl2InPIntersectedWithCentralizerOfHInP;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& wSpace =
+  this->basisOrthogonalComplementOfCentralizerOfSl2InPIntersectedWithCentralizerOfHInP;
   ElementSemisimpleLieAlgebra<AlgebraicNumber>::intersectVectorSpaces(
     this->basisOrthogonalComplementOfCentralizerOfSl2InP,
     this->basisCentralizerOfHInP,
@@ -7172,13 +7183,15 @@ std::string CandidateSemisimpleSubalgebra::toStringCentralizer(FormatExpressions
     );
   }
   if (!this->flagCentralizerIsWellChosen) {
-    out << "<br><b style='color:red'>The Cartan of the centralizer "
-    << "does not lie in the ambient Cartan (the computation was too large?).</b> "
-    << "The intersection of the ambient Cartan with the centralizer is of dimension "
-    << this->cartanOfCentralizer.size << " instead of the desired dimension "
-    << this->centralizerRank.toString() << ". ";
-    //else
-    //  out << "<br><b style='color:red'>I was unable to compute the centralizer (not all subalgebras were computed?).</b> ";
+    if (this->centralizerRank >= 0) {
+      out << "<br><b style='color:red'>The Cartan of the centralizer "
+      << "does not lie in the ambient Cartan (the computation was too large?).</b> "
+      << "The intersection of the ambient Cartan with the centralizer is of dimension "
+      << this->cartanOfCentralizer.size << " instead of the desired dimension "
+      << this->centralizerRank.toString() << ". ";
+    } else  {
+      out << "<br><b style='color:red'>Centralizer type not computed.</b>";
+    }
   }
   if (this->centralizerRank != 0) {
     out << "<br>Basis of Cartan of centralizer: ";
@@ -7205,8 +7218,32 @@ std::string CandidateSemisimpleSubalgebra::toStringCentralizerDebugData(FormatEx
   return out.str();
 }
 
+void CandidateSemisimpleSubalgebra::computeCentralizerManually() {
+  MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::computeCentralizerManually");
+  this->owner->owner->getCommonCentralizer(this->basis, this->centralizerManualBasis);
+  this->centralizerRank = - 1;
+  this->flagCentralizerTypeIsComputed = false;
+  global.comments << "Centralizer manual basis: "
+  << this->centralizerManualBasis.toString();
+  this->killingFormCentralizer.initialize(
+    this->centralizerManualBasis.size, this->centralizerManualBasis.size
+  );
+  for (int i = 0; i < this->centralizerManualBasis.size; i ++) {
+    for (int j = 0; j < this->centralizerManualBasis.size; j ++) {
+      this->killingFormCentralizer(i, j) = this->owner->owner->getKillingForm(
+        this->centralizerManualBasis[i],
+        this->centralizerManualBasis[j]
+      );
+    }
+  }
+  global.comments << "DEBUG: killing form centralizer: \\("
+  << this->killingFormCentralizer.toStringLatex()
+  << "\\)";
+}
+
 void CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen() {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen");
+  this->flagCentralizerIsWellChosen = false;
   if (this->flagSystemProvedToHaveNoSolution) {
     global.comments << "This is unexpected, but not considered an error: "
     << "I am asked to compute the centralizer of "
@@ -7246,12 +7283,25 @@ void CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen() {
         << centralizerTypeAlternative.toString() << global.fatal;
       }
     }
-    if (this->centralizerRank>this->owner->owner->getRank()) {
-      global.fatal << "Something is wrong." << this->toStringCentralizerDebugData() << global.fatal;
+    if (this->centralizerRank > this->owner->owner->getRank()) {
+      global.fatal << "Something is wrong: the rank of the centralizer "
+      << "is larger than the rank of the owner."
+      << this->toStringCentralizerDebugData() << global.fatal;
     }
   } else {
     if (this->centralizerDimension + this->getRank() > this->owner->owner->getRank()) {
-      global.fatal << "Something is wrong. " << this->toStringCentralizerDebugData() << global.fatal;
+      // When this happens, one of two things holds.
+      // 1. We don't have the max containing semisimple container computed, say, this is a partial run
+      // where not all semisimple algebras were found.
+      // 2. This is a semisimple subalgebra that is not contained in another larger proper semisimple subalgebra.
+      // In this case, the centralizer of the present subalgebra must necessarily be
+      // diagonal (inside the ambient Cartan). But as the rank computation above shows, that is not
+      // the case. We must have made a serious programming mistake.
+      // We assume the best - that 1) holds.
+      this->computeCentralizerManually();
+      if (!this->flagCentralizerIsWellChosen) {
+        return;
+      }
     }
   }
   this->flagCentralizerIsWellChosen = (this->centralizerRank == this->cartanOfCentralizer.size);
@@ -7440,10 +7490,11 @@ std::string CandidateSemisimpleSubalgebra::toString(
     out << "<br>The subalgebra is regular (= the semisimple part of a root subalgebra). ";
   }
   if (this->indexInSlTwos != - 1) {
+    out << "<br>" << this->wConjecture.toStringWConjectureHolds();
     out << "<hr style='max-width:300px;margin:0px;'>"
     << "This is an <b>sl(2) subalgebra</b>; details follow [info from sl(2) tables].<br>";
     out << this->owner->slTwoSubalgebras[this->indexInSlTwos].toString();
-    out << "<hr style='max-width:300px;margin:0px;'>";
+    out << "<hr style='max-width:100px;margin:0px;'>";
   }
   if (this->indexInducedFrom != - 1) {
     out << "<br>Subalgebra is (parabolically) induced from "
@@ -7770,12 +7821,17 @@ void CandidateSemisimpleSubalgebra::adjustCentralizerAndRecompute(bool allowNonP
     return;
   }
   this->computeCentralizerIsWellChosen();
-  if (this->owner->flagAttemptToAdjustCentralizers) {
-    if (!this->flagCentralizerIsWellChosen) {
-      this->computeSystem(true, allowNonPolynomialSystemFailure);
-      this->computeCentralizerIsWellChosen();
-    }
+  if (!this->owner->flagAttemptToAdjustCentralizers) {
+    return;
   }
+  if (this->flagCentralizerIsWellChosen) {
+    return;
+  }
+  if (!this->flagCentralizerTypeIsComputed) {
+    return;
+  }
+  this->computeSystem(true, allowNonPolynomialSystemFailure);
+  this->computeCentralizerIsWellChosen();
 }
 
 int CandidateSemisimpleSubalgebra::getNumberOfModules() const {
@@ -7884,13 +7940,17 @@ void SemisimpleSubalgebras::hookUpCentralizers(bool allowNonPolynomialSystemFail
     if (currentSubalgebra.centralizerRank > this->owner->getRank()) {
       global.fatal << "Subalgebra " << currentSubalgebra.toStringType() << " has rank "
       << currentSubalgebra.centralizerRank.toString()
-      << " but the ambient Lie algebra isonly of rank "
+      << " but the ambient Lie algebra is only of rank "
       << this->owner->getRank() << ". " << global.fatal;
     }
   }
   report1.report("<hr>\nCentralizers computed, adjusting centralizers with respect to the Cartan subalgebra.");
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
-    if (!this->subalgebras.values[i].flagSystemSolved) {
+    CandidateSemisimpleSubalgebra& currentSubalgebra = this->subalgebras.values[i];
+    if (!currentSubalgebra.flagSystemSolved) {
+      continue;
+    }
+    if (!currentSubalgebra.flagCentralizerTypeIsComputed) {
       continue;
     }
     std::stringstream reportStream2;

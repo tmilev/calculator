@@ -104,8 +104,6 @@ class CandidateSemisimpleSubalgebra {
 public:
   WeylGroupData* weylNonEmbedded;
   SemisimpleLieAlgebra* subalgebraNonEmbeddedDefaultScale;
-  DynkinDiagramRootSubalgebra centralizerSubDiagram;
-  DynkinType centralizerType;
 
   List<Vectors<Rational> > cartanSubalgebrasByComponentScaledToActByTwo;
   List<AlgebraicNumber> ratiosKillingsByComponent;
@@ -204,6 +202,10 @@ public:
   std::string nilradicalGenerationLog;
   Rational centralizerRank;
   Rational centralizerDimension;
+  DynkinDiagramRootSubalgebra centralizerSubDiagram;
+  DynkinType centralizerType;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > centralizerManualBasis;
+  Matrix<AlgebraicNumber> killingFormCentralizer;
 
   class WConjecture {
   public:
@@ -225,6 +227,7 @@ public:
     WConjecture();
     void compute(CandidateSemisimpleSubalgebra& owner, SlTwoSubalgebra& ownerSl2);
     void processOnePair( int indexLeft, int indexRight);
+    std::string toStringWConjectureHolds() const;
     std::string toString(const CandidateSemisimpleSubalgebra& owner) const;
     std::string toStringLieBracketTriples(const List<std::string>& triple) const;
     void computeSmallOrbits(const CandidateSemisimpleSubalgebra& owner);
@@ -272,6 +275,7 @@ public:
     int index, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
   );
   void computeCentralizerIsWellChosen();
+  void computeCentralizerManually();
   void adjustCentralizerAndRecompute(bool allowNonPolynomialSystemFailure);
   void computeRatioKillingsByComponent();
   void addToSystem(

@@ -8,6 +8,16 @@ int WebAssembly::main(int argc, char **argv) {
   (void) argv;
   global.flagRunningWebAssembly = true;
   global << "Hello world" << Logger::endL;
+  std::string command;
+  global << "Your command: " << command << Logger::endL;
   return 0;
 }
 
+extern "C" {
+int myFunction(char* stringInput, int length) {
+  std::cout << "HEllo world";
+  std::string input(stringInput, length);
+    std::cout << "MyFunction was called. Length: " << length << "; input: " << input;
+    return -15;
+}
+}

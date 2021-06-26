@@ -4507,7 +4507,7 @@ GetCartanGenerator{}(G_2, 1)
 ```
 First argument must be a semisimple Lie algebra, second argument must be a number between 1 and K, where K is the rank of the Lie algebra. In this case the function returns the element of the Cartan subalgebra that is dual to the simple root with the same index. Note that this element of the Cartan subalgebra is proportional to a Chevalley-Weyl generator with a coefficient of proportionality equal to 2/(simple root length squared) ).
 
-*AdCommonEigenspace* [AdCommonEigenspace] {Calculator::innerAdCommonEigenSpaces}. 
+*AdCommonEigenspace* [AdCommonEigenspace] {CalculatorLieTheory::adCommonEigenSpaces}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22AdCommonEigenspace%7b%7d%28F_4%2c%20-5%20%28g_%7b9%7d%29%20%2b3%20%28g_%7b13%7d%29%20%2b5%20%28g_%7b16%7d%29%20%2b4%20%28g_%7b10%7d%29%2c%20g_%7b14%7d%2bg_%7b22%7d%2bg_%7b20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 AdCommonEigenspace{}(F_4, -5 (g_{9}) +3 (g_{13}) +5 (g_{16}) +4 (g_{10}), g_{14}+g_{22}+g_{20})
@@ -4564,6 +4564,20 @@ Computes the Lie algebra structure over Kostant-Sekiguchi sl twos w.r.t. maximal
 SlTwoRealFormStructureForceRecompute{}(a_3)
 ```
 Same as SlTwoRealFormStructure but forces a recompute. 
+
+*IsReductiveLieSubalgebra* [IsReductiveLieSubalgebra] {Calculator::isReductiveLieSubalgebra}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28F_4%2c%5cng_%7b-1%7d%2c%20g_%7b6%7d%20%20%20%2c%20g_%7b9%7d%2bg_%7b2%7d%2c%5cng_%7b10%7d%2c%20g_%7b13%7d%20%20%2c%20g_%7b16%7d%2bg_%7b2%7d%2c%5cng_%7b17%7d-6%2f5g_%7b14%7d%2c%20g_%7b19%7d%2b8%2f5g_%7b14%7d%2c%5cng_%7b20%7d%2bg_%7b14%7d%20%20%20%2c%20g_%7b21%7d%2c%5cng_%7b22%7d%2c%20g_%7b23%7d%20%20%2c%5cng_%7b24%7d%5cn%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+(F_4,
+g_{-1}, g_{6}   , g_{9}+g_{2},
+g_{10}, g_{13}  , g_{16}+g_{2},
+g_{17}-6/5g_{14}, g_{19}+8/5g_{14},
+g_{20}+g_{14}   , g_{21},
+g_{22}, g_{23}  ,
+g_{24}
+)
+```
+Given a set of elements of a semisimple lie algebra, tries to determine whether the Lie subalgebra they generate is reductive and what is its type.
 
 *ConesIntersection* [ConesIntersection] {Calculator::innerConesIntersect}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22v_1%20%3d%20%281%2c%202%2c%203%29%3b%5cnv_2%20%3d%20%281%2c%203%2c%202%29%3b%5cnv_3%20%3d%20%283%2c%201%2c%201%29%3b%5cnv_4%20%3d%20%28-%202%2c%202%2c%202%29%3b%5cnConesIntersection%7b%7d%28%28v_1%2c%20v_2%29%2c%20%28v_3%2c%20v_4%20%29%29%3b%5cnConesIntersection%7b%7d%28%28v_1%2c%20v_2%29%2c%20%28v_3%2c%20-%20v_4%29%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)

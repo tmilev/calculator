@@ -10,6 +10,7 @@ const storage = require("./storage");
 const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
 const calculatorPageEditor = require("./calculator_page_editor");
 const equationEditor = require("./equation_editor");
+const calculatorWasm = require("./web_assembly/calculator_wasm");
 
 class AtomHandler {
   constructor() {
@@ -199,6 +200,20 @@ class Calculator {
     }
     this.initialized = true;
     this.editor.initialize();
+    let buttonGo = document.getElementById(ids.domElements.pages.calculator.buttonGoCalculatorPage);
+    if (buttonGo === null) {
+      return;
+    }
+    buttonGo.addEventListener('click', () => {
+      this.submitComputation();
+    });
+    let buttonGoWasm = document.getElementById(ids.domElements.pages.calculator.buttonGoWebAssembly);
+    if (buttonGoWasm === null) {
+      return;
+    }
+    buttonGoWasm.addEventListener('click', () => {
+      this.submitComputationWithWasm();
+    })
   }
 
   selectCalculatorPage() {
@@ -209,13 +224,19 @@ class Calculator {
   submitComputation() {
     processMonitoring.monitor.clearTimeout();
     let calculatorInput = document.getElementById(ids.domElements.pages.calculator.inputMain).value;
-    this.typeset();
     if (calculatorInput === this.lastSubmittedInput) {
       return;
     }
     this.lastSubmittedInput = calculatorInput;
     // submitComputationPartTwo is called by a callback in the function below:
     storage.storage.variables.calculator.input.setAndStore(this.lastSubmittedInput);
+  }
+
+  submitComputationWithWasm() {
+    processMonitoring.monitor.clearTimeout();
+    let calculatorInput = document.getElementById(ids.domElements.pages.calculator.inputMain).value;
+    this.lastSubmittedInput = calculatorInput;
+    calculatorWasm.calculatorWasm.callMain(calculatorInput);
   }
 
   /**@returns {String} */
@@ -489,7 +510,9 @@ class Calculator {
     submitRequests.submitPOST({
       url: url,
       parameters: parameters,
-      callback: this.defaultOnLoadInjectScriptsAndProcessLaTeX.bind(this),
+      callback: (input) => {
+        this.defaultOnLoadInjectScriptsAndProcessLaTeX(input);
+      },
       progress: ids.domElements.pages.calculator.progress,
     });
   }

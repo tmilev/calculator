@@ -207,6 +207,7 @@ public:
   static std::string portHTTPSOpenSSL                        ;
   static std::string portHTTPSBuiltIn                        ;
   // Folder links follow.
+  static std::string calculatorWasm            ;
   static std::string calculatorHTML            ;
   static std::string HTMLCommon                ;
   static std::string HTMLCommonFonts           ;

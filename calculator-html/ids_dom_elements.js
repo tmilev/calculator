@@ -44,6 +44,8 @@ let domElements = {
       editorCommentsDebug: "calculatorEditorDebug",
       equationEditorFontSizeSlider: "equationEditorFontSizeSlider",
       inputMain: "mainInputID",
+      buttonGoCalculatorPage: "buttonGoCalculatorPage",
+      buttonGoWebAssembly: "buttonGoWebAssembly",
       monitoring: {
         progressTimer: "idProgressReportTimer",
         spanStatus: "spanMonitoringStatus",

@@ -528,6 +528,17 @@ std::string WebAPIResponse::getOnePageJS() {
       << "specifically white-listed as ok. \");";
       builder.jsFileContents[i] = moduleNotFound.str();
     }
+    if (builder.jsFileNames[i] == "/calculator-html/web_assembly/calculator.js") {
+      // Special exception for web assembly.
+      // Save ourselves lots of headache and
+      // configuration by manually inserting the snippets we
+      // care about into the auto-generated calculator.js file.
+      builder.jsFileContents[i] += "module.exports={\n"
+      "TTY,"
+      "Module,"
+      "intArrayFromString,"
+      "};";
+    }
   }
   return builder.getOnePageJavascriptBrowserify();
 }

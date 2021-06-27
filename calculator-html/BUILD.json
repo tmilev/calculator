@@ -51,5 +51,7 @@
   "/calculator-html/graphics_serialization.js",
   "/calculator-html/dynamic_javascript.js",
   "/calculator-html/calculator_page_editor.js",
-  "/calculator-html/lie_algebras.js"
+  "/calculator-html/lie_algebras.js",
+  "/calculator-html/web_assembly/calculator_wasm.js",
+  "/calculator-html/web_assembly/calculator.js"
 ]

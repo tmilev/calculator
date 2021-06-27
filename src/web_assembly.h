@@ -5,7 +5,9 @@
 
 class WebAssembly {
 public:
+  static int numberOfMainLoopCalls;
   static int main(int argc, char **argv);
+  static void mainLoop();
 };
 
 #endif

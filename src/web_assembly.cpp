@@ -2,6 +2,10 @@
 // For additional information refer to the file "calculator.h".
 #include "web_assembly.h"
 #include "general_logging_global_variables.h"
+#include "calculator_interface.h"
+#include "string_constants.h"
+#include "system_functions_global_objects.h"
+#include <string.h>
 #ifdef MACRO_use_wasm
 #include "../emsdk/upstream/emscripten/system/include/emscripten.h"
 #endif
@@ -9,10 +13,20 @@
 int WebAssembly::numberOfMainLoopCalls = 0;
 
 extern "C" {
-  int callCalculator(char* inputBuffer) {
+  char* callCalculator(char* inputBuffer) {
+    global.flagRunningWebAssembly = true;
+    initializeGlobalObjects();
     std::string input(inputBuffer);
-    std::cout << "Hello world: input: " << input << std::endl;
-    return - 1;
+    Calculator calculator;
+    calculator.initialize(Calculator::Mode::full);
+    JSData result;
+    calculator.evaluate(input);
+    result = calculator.toJSONOutputAndSpecials();
+    result[WebAPI::result::commentsGlobal] = global.comments.getCurrentReset();
+    std::string resultString = result.toString();
+    char* buffer = new char[resultString.size() + 1];
+    strcpy (buffer, resultString.c_str());
+    return buffer;
   }
 }
 
@@ -21,17 +35,15 @@ int WebAssembly::main(int argc, char **argv) {
   (void) argv;
   global.flagRunningWebAssembly = true;
 #ifdef MACRO_use_wasm
-  emscripten_set_main_loop(WebAssembly::mainLoop, 4, false);
+//  emscripten_set_main_loop(WebAssembly::mainLoop, 1, false);
 #endif
+  std::cout << "About to exit main loop." << std::endl;
   return 0;
 }
 
 void WebAssembly::mainLoop() {
   WebAssembly::numberOfMainLoopCalls ++;
-  // std::string input;
-  // std::cin >> input;
   std::cout << "Main loop calls: " << WebAssembly::numberOfMainLoopCalls << std::endl;
-  // std::cout << "Input: " << input << std::endl;
 }
 
 

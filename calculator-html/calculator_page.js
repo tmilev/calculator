@@ -236,7 +236,9 @@ class Calculator {
     processMonitoring.monitor.clearTimeout();
     let calculatorInput = document.getElementById(ids.domElements.pages.calculator.inputMain).value;
     this.lastSubmittedInput = calculatorInput;
-    calculatorWasm.calculatorWasm.callMain(calculatorInput);
+    calculatorWasm.calculatorWasm.callMain(calculatorInput, (input) => {
+      this.defaultOnLoadInjectScriptsAndProcessLaTeX(input);
+    });
   }
 
   /**@returns {String} */

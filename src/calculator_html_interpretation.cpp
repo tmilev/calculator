@@ -534,9 +534,11 @@ std::string WebAPIResponse::getOnePageJS() {
       // configuration by manually inserting the snippets we
       // care about into the auto-generated calculator.js file.
       builder.jsFileContents[i] += "module.exports={\n"
-      "TTY,"
-      "Module,"
-      "intArrayFromString,"
+      "TTY,\n"
+      "Module,\n"
+      "intArrayFromString,\n"
+      "addOnInit,\n"
+      "_free,\n"
       "};";
     }
   }

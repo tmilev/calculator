@@ -5,6 +5,7 @@
 
 class WebAssembly {
 public:
+  static const int bufferSize = 1000000;
   static int numberOfMainLoopCalls;
   static int main(int argc, char **argv);
   static void mainLoop();

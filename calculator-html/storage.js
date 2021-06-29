@@ -321,7 +321,16 @@ class StorageCalculator {
           nameLocalStorage: "monitoring",
           nameURL: "monitoring",
           nameCookie: "monitoring",
-          showInURLByDefault: true,
+          showInURLOnPages: {
+            "calculator": true,
+          },
+        }),
+        useWebAssembly: new StorageVariable({
+          name: "useWebAssembly",
+          nameURL: "useWebAssembly",
+          showInURLOnPages: {
+            "calculator": true,
+          },
         }),
       },
       user: {

@@ -569,7 +569,6 @@ class Page {
     if (monitoring === "true") {
       monitorResult.innerHTML = "Monitor <b style='color:red'>on</b>";
       document.getElementById(ids.domElements.switch.monitoring).checked = true;
-      pauseButton.style.display = "";
     } else {
       document.getElementById(ids.domElements.switch.monitoring).checked = false;
       monitorResult.innerHTML = "Monitor <b style='color:green'>off</b>";

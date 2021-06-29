@@ -207,13 +207,6 @@ class Calculator {
     buttonGo.addEventListener('click', () => {
       this.submitComputation();
     });
-    let buttonGoWasm = document.getElementById(ids.domElements.pages.calculator.buttonGoWebAssembly);
-    if (buttonGoWasm === null) {
-      return;
-    }
-    buttonGoWasm.addEventListener('click', () => {
-      this.submitComputationWithWasm();
-    })
   }
 
   selectCalculatorPage() {
@@ -399,9 +392,9 @@ class Calculator {
     /**@type{Function} */
     typeSetCallback,
   ) {
-    if (storage.storage.variables.currentPage.getValue() !== "calculator") {
-      return;
-    }
+    // if (storage.storage.variables.currentPage.getValue() !== "calculator") {
+    //  return;
+    //}
     if (this.flagTypeset === true) {
       return;
     }

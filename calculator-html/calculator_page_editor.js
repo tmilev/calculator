@@ -31,11 +31,14 @@ class CalculatorEquationEditor {
       },
     });
     this.calculatorPanel.initialize();
-    document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle).addEventListener(
+    let pauseButton = document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle);
+    pauseButton.addEventListener(
       "click", () => {
         processMonitoring.monitor.togglePause();
       }
     )
+    pauseButton.style.display = "none";
+
     let inputMain = this.inputMainTextbox();
     inputMain.addEventListener("keypress", (e) => {
       this.keyPressHandler(e);

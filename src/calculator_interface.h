@@ -27,7 +27,7 @@ private:
     this->children.size = 0;
     this->data = - 1;
   }
-  static const int maximumCharactersInLatexPrintout = 5001;
+  static const int maximumCharactersInLatexPrintout = 30001;
   bool setChild(int childIndexInMe, int childIndexInBoss);
   // Definitions.
   // 1. Fundamentals.

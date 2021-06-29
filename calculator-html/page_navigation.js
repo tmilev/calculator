@@ -551,6 +551,11 @@ class Page {
     }
   }
 
+  /**@returns {HTMLButtonElement} */
+  pauseButton() {
+    return document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle);
+  }
+
   setMonitoringComponent() {
     let monitoring = this.storage.variables.calculator.monitoring.value;
     if (monitoring !== "false") {
@@ -560,14 +565,15 @@ class Page {
     if (monitorResult === null) {
       return;
     }
+    let pauseButton = this.pauseButton();
     if (monitoring === "true") {
-      monitorResult.innerHTML = "Monitor <b style = 'color:red'>on</b>";
+      monitorResult.innerHTML = "Monitor <b style='color:red'>on</b>";
       document.getElementById(ids.domElements.switch.monitoring).checked = true;
-      document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle).style.display = "";
+      pauseButton.style.display = "";
     } else {
       document.getElementById(ids.domElements.switch.monitoring).checked = false;
-      monitorResult.innerHTML = "Monitor <b style = 'color:green'>off</b>";
-      document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle).style.display = "none";
+      monitorResult.innerHTML = "Monitor <b style='color:green'>off</b>";
+      pauseButton.style.display = "none";
     }
   }
 }

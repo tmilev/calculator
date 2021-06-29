@@ -18,6 +18,10 @@ class Monitor {
     this.ownerCalculator = null;
   }
 
+  pauseButton() {
+    return document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle);
+  }
+
   start(
     /**@type{String} */
     workerId,
@@ -27,7 +31,9 @@ class Monitor {
     this.timeOutCounter = 0;
     this.timeOutOldCounter = 0;
     this.currentWorkerId = workerId;
-    document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle).innerHTML = "Pause";
+    let pauseButton = this.pauseButton();
+    pauseButton.innerHTML = "Pause";
+    pauseButton.style.display = "";
     this.progressReport();
   }
 
@@ -41,7 +47,7 @@ class Monitor {
     }
     this.timeOutOldCounter = this.timeOutCounter;
     this.timeOutCounter += this.timeIncrement;
-    var sURL = "";
+    let sURL = "";
     sURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.indicator}`;
     sURL += `&${pathnames.urlFields.requests.workerId}=${this.currentWorkerId}`;
     submitRequests.submitGET({
@@ -57,17 +63,23 @@ class Monitor {
     clearTimeout(this.currentTimeOutHandler);
   }
 
+  pauseButtonMarkFinished() {
+    let pauseButton = this.pauseButton();
+    pauseButton.innerHTML = "finished";
+    pauseButton.style.display = "none";
+  }
+
   callbackPauseRequest(input, output) {
-    var progressReportContent = "";
+    let progressReportContent = "";
     if (input === "") {
       this.clearTimeout();
       this.currentTimeOutHandler = setTimeout(this.progressReport.bind(this), this.timeIncrement * 1000);
       return;
     }
-    var indicatorButton = document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle);
+    let indicatorButton = this.pauseButton();
     this.ownerCalculator.parsedComputation = miscellaneous.jsonUnescapeParse(input);
-    var status = this.ownerCalculator.parsedComputation.status;
-    var doUpdateCalculatorPage = false;
+    let status = this.ownerCalculator.parsedComputation.status;
+    let doUpdateCalculatorPage = false;
     if (status === undefined || status === null) {
       if (this.ownerCalculator.parsedComputation.error !== null && this.ownerCalculator.parsedComputation.error !== undefined) {
         status = "error";
@@ -78,11 +90,11 @@ class Monitor {
     if (status === "error") {
       this.isFinished = true;
       this.isPaused = false;
-      indicatorButton.innerHTML = "finished";
+      this.pauseButtonMarkFinished();
     } else if (status === "finished" || status === "crash") {
       this.isFinished = true;
       this.isPaused = false;
-      indicatorButton.innerHTML = "finished";
+      this.pauseButtonMarkFinished();
       doUpdateCalculatorPage = true;
     } else if (status === "paused") {
       this.isPaused = true;
@@ -102,14 +114,14 @@ class Monitor {
     }
     progressReportContent += `Refreshing every ${this.timeIncrement} second(s). `;
     progressReportContent += `Client time: ~${Math.floor(this.timeOutOldCounter)} second(s)<br>`;
-    var progReportTimer = document.getElementById(ids.domElements.pages.calculator.monitoring.progressTimer);
+    let progReportTimer = document.getElementById(ids.domElements.pages.calculator.monitoring.progressTimer);
     progReportTimer.innerHTML = progressReportContent;
 
     if (doUpdateCalculatorPage) {
       this.ownerCalculator.panels.length = 0;
-      var buffer = new BufferCalculator();
+      let buffer = new BufferCalculator();
       this.ownerCalculator.writeResult(buffer, this.ownerCalculator.parsedComputation, this.ownerCalculator.panels);
-      var resultComponent = document.getElementById(ids.domElements.spanCalculatorMainOutput);
+      let resultComponent = document.getElementById(ids.domElements.spanCalculatorMainOutput);
       resultComponent.innerHTML = buffer.toString();
       this.ownerCalculator.afterWriteOutput();
     }
@@ -119,7 +131,7 @@ class Monitor {
     if (this.isFinished) {
       return;
     }
-    var pauseURL = "";
+    let pauseURL = "";
     pauseURL += `${pathnames.urls.calculatorAPI}?`;
     if (!this.isPaused) {
       pauseURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.pause}&`;

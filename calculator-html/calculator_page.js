@@ -171,13 +171,13 @@ class Calculator {
     /**@type{HTMLElement} */
     button,
   ) {
-    let theExamples = document.getElementById(ids.domElements.calculatorExamples);
-    let theURL = "";
-    theURL += pathnames.urls.calculatorAPI;
-    theURL += `?${pathnames.urlFields.request}=${pathnames.urlFields.requests.calculatorExamplesJSON}`;
-    if (theExamples.innerHTML.length < 300) {
+    let examples = document.getElementById(ids.domElements.calculatorExamples);
+    let url = "";
+    url += pathnames.urls.calculatorAPI;
+    url += `?${pathnames.urlFields.request}=${pathnames.urlFields.requests.calculatorExamplesJSON}`;
+    if (examples.innerHTML.length < 300) {
       submitRequests.submitGET({
-        url: theURL,
+        url: url,
         callback: (input) => {
           this.processExamples(input);
         },
@@ -186,7 +186,7 @@ class Calculator {
       button.innerHTML = "&#9660;";
     } else {
       this.adjustCalculatorPageSize();
-      if (!theExamples.classList.contains("hiddenClass")) {
+      if (!examples.classList.contains("hiddenClass")) {
         button.innerHTML = "&#9660;";
       } else {
         button.innerHTML = "&#9656;";
@@ -475,10 +475,10 @@ class Calculator {
     try {
       this.parsedComputation = miscellaneousFrontend.jsonUnescapeParse(input);
       let buffer = new BufferCalculator();
-      let progReportTimer = document.getElementById(
+      let progressReportTimer = document.getElementById(
         ids.domElements.pages.calculator.monitoring.progressTimer,
       );
-      progReportTimer.innerHTML = "";
+      progressReportTimer.innerHTML = "";
       this.writeResult(buffer, this.parsedComputation, this.panels);
       inputHtml = buffer.toString();
     } catch (e) {

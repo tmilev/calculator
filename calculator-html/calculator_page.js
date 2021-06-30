@@ -225,15 +225,6 @@ class Calculator {
     storage.storage.variables.calculator.input.setAndStore(this.lastSubmittedInput);
   }
 
-  submitComputationWithWasm() {
-    processMonitoring.monitor.clearTimeout();
-    let calculatorInput = document.getElementById(ids.domElements.pages.calculator.inputMain).value;
-    this.lastSubmittedInput = calculatorInput;
-    calculatorWasm.calculatorWasm.callMain(calculatorInput, (input) => {
-      this.defaultOnLoadInjectScriptsAndProcessLaTeX(input);
-    });
-  }
-
   /**@returns {String} */
   getComputationLink(input) {
     let theURL = {
@@ -490,6 +481,20 @@ class Calculator {
   }
 
   submitComputationPartTwo(input) {
+    if (storage.storage.variables.calculator.useWebAssembly.value === "true") {
+      this.submitComputationToWebAssembly(input);
+      return;
+    }
+    this.submitComputationToBackend(input);
+  }
+
+  submitComputationToWebAssembly(input) {
+    calculatorWasm.calculatorWasm.callMain(input, (result) => {
+      this.defaultOnLoadInjectScriptsAndProcessLaTeX(result);
+    });
+  }
+
+  submitComputationToBackend(input) {
     //<- this function is called by a callback trigerred when calling
     //thePage.storage.variables.calculator.input.setAndStore(...)
     let thePage = window.calculator.mainPage;

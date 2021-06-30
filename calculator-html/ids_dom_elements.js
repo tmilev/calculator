@@ -108,6 +108,8 @@ let domElements = {
   labelNewEmail: "labelNewEmail",
   switch: {
     monitoring: "sliderMonitoring",
+    sliderWebAssembly: "sliderWebAssembly",
+    spanWebAssemblyStatus: "spanWebAssemblyStatus",
   },
   calculatorExamples: "divCalculatorExamples",
   spanCalculatorMainOutput: "spanCalculatorMainOutput",

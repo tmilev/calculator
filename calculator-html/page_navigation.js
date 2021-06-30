@@ -250,6 +250,9 @@ class Page {
     this.storage.variables.calculator.monitoring.callbackOnValueChange = (value) => {
       this.setMonitoringComponent();
     };
+    this.storage.variables.calculator.useWebAssembly.callbackOnValueChange = (value) => {
+      this.setWebAssemblySlider();
+    };
     this.storage.variables.theme.callbackOnValueChange = (value) => {
       themes.theme.doChangeTheme(value);
     };
@@ -283,8 +286,18 @@ class Page {
     return false;
   }
 
+
+
   initHandlers() {
     window.addEventListener("hashchange", this.storage.loadSettings.bind(this.storage));
+    let monitor = document.getElementById(ids.domElements.switch.monitoring);
+    monitor.addEventListener("change", () => {
+      this.toggleMonitoring();
+    });
+    let webAssembly = document.getElementById(ids.domElements.switch.sliderWebAssembly);
+    webAssembly.addEventListener("change", () => {
+      this.toggleWebAssembly();
+    });
   }
 
   initMenuBar() {
@@ -554,6 +567,38 @@ class Page {
   /**@returns {HTMLButtonElement} */
   pauseButton() {
     return document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle);
+  }
+
+  toggleWebAssembly() {
+    let webAssembly = this.storage.variables.calculator.useWebAssembly;
+    if (webAssembly.value !== "true") {
+      webAssembly.setAndStore("true");
+    } else {
+      webAssembly.setAndStore("false");
+    }
+  }
+
+  setWebAssemblySlider() {
+    let webAssembly = this.storage.variables.calculator.useWebAssembly.value;
+    if (webAssembly !== "true") {
+      webAssembly = "false";
+    }
+    let webAssemblyStatus = document.getElementById(ids.domElements.switch.spanWebAssemblyStatus);
+    let webAssemblySlider = document.getElementById(ids.domElements.switch.sliderWebAssembly);
+    if (webAssemblyStatus === null) {
+      return;
+    }
+    let buttonGo = document.getElementById(ids.domElements.pages.calculator.buttonGoCalculatorPage);
+
+    if (webAssembly === "true") {
+      webAssemblySlider.checked = true;
+      webAssemblyStatus.innerHTML = "Web assembly <b style='color:red'>ON</b>";
+      buttonGo.innerHTML = "Go <b style='color:red'>wasm</b>";
+    } else {
+      webAssemblySlider.checked = false;
+      webAssemblyStatus.innerHTML = "Web assembly <b style='color:green'>off</b>";
+      buttonGo.innerHTML = "Go";
+    }
   }
 
   setMonitoringComponent() {

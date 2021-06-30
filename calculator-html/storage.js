@@ -328,6 +328,7 @@ class StorageCalculator {
         useWebAssembly: new StorageVariable({
           name: "useWebAssembly",
           nameURL: "useWebAssembly",
+          nameLocalStorage: "useWebAssembly",
           showInURLOnPages: {
             "calculator": true,
           },

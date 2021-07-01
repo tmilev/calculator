@@ -1,14 +1,10 @@
 // Licensed to you under the Apache 2.0 license.
-'use strict';
 // The formatting in this file follows
-// auto-code formatting of the closure compiler,
+// an auto-code formatting associated with the closure compiler.
 
-var module;
-if (module === undefined) {
-  module = {
-    exports: null,
-  };
-}
+// We are not using 'use strict' as that creates
+// a "uselessCode" compiler error with
+// the closure compiler.
 
 class MathNodeType {
   normalizeConstructorInput(input) {
@@ -2655,17 +2651,19 @@ class LaTeXParser {
   }
 }
 
-
-
 class EquationEditorOptions {
   constructor(
     /**
-     * @type{{ editable:boolean, removeDisplayStyle:(boolean|undefined),
-     * sanitizeLatexSource:(boolean|undefined),
-     * debugLogContainer:(HTMLElement|null|undefined),
-     * latexInput:(HTMLInputElement|null|undefined),
-     * editHandler:(Function|null|undefined), lineBreakWidth:
-     * (number|undefined), logTiming:(boolean|undefined)}}
+     * @type{{
+     * editable: boolean,
+     * removeDisplayStyle: (boolean|undefined),
+     * sanitizeLatexSource: (boolean|undefined),
+     * debugLogContainer: (HTMLElement|null|undefined),
+     * latexInput: (HTMLInputElement|null|undefined),
+     * editHandler: (Function|null|undefined),
+     * lineBreakWidth: (number|undefined),
+     * logTiming: (boolean|undefined)
+     * }}
      */
     options,
   ) {
@@ -2899,7 +2897,7 @@ class EquationEditor {
     containerGiven,
     /** @type{EquationEditorOptions|null} */
     options,
-    /** @type{HTMLElement} */
+    /** @type{HTMLElement|null} */
     containerSVGGiven,
   ) {
     /** @type{HTMLElement} */
@@ -10270,11 +10268,8 @@ class EquationEditorButtonFactory {
   ) {
     let result =
         /** @type{HTMLButtonElement} */ (document.createElement('button'));
-    if (this.additionalStyle !== undefined && this.additionalStyle !== null &&
-      this.additionalStyle !== '') {
-      for (let label in this.additionalStyle) {
-        result.style[label] = this.additionalStyle[label];
-      }
+    for (let label in this.additionalStyle) {
+      result.style[label] = this.additionalStyle[label];
     }
     result.textContent = this.label;
     return this.attachToClick(result, editor);
@@ -10322,11 +10317,25 @@ let buttonFactories = {
   'sqrt': new EquationEditorButtonFactory('\\sqrt', true, '\u221A', null),
   'fraction':
     new EquationEditorButtonFactory('\\frac{\\caret}{}', false, '/', null),
-  'divide': new EquationEditorButtonFactory('/', true, '(\u2022)/(\u2022)', null),
+  'divide':
+    new EquationEditorButtonFactory('/', true, '(\u2022)/(\u2022)', null),
   'exponent': new EquationEditorButtonFactory('^', true, '^', null),
   'matrix2x2': new EquationEditorButtonFactory(
     '\\begin{pmatrix}\\caret&\\\\&\\end{pmatrix}', false, '2x2', null),
 };
+
+/**
+ * When using as a commonJS module inside the calculator project, the content of
+ * this file is inserted into a function body, which receives as an argument a
+ * variable called module. Modifications to module.exports are then visible to
+ * the caller of this functions, i.e., to external javascript files.
+ */
+var module;
+if (module === undefined) {
+  module = {
+    exports: null,
+  };
+}
 
 module.exports = {
   typeset,
@@ -10340,11 +10349,4 @@ module.exports = {
   latexConstants,
   MathNode,
   knownTypes,
-};
-
-/** @type {Object}*/
-var exports;
-exports = {
-  EquationEditor,
-  EquationEditorOptions,
 };

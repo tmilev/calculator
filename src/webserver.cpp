@@ -4063,6 +4063,8 @@ void WebServer::initializeMainAddresses() {
   this->addressStartsNotNeedingLogin.addOnTop("favicon.ico");
   this->addressStartsNotNeedingLogin.addOnTop("/favicon.ico");
   this->addressStartsNotNeedingLogin.addOnTop("/calculator_html/");
+  this->addressStartsNotNeedingLogin.addOnTop("calculator.wasm");
+  this->addressStartsNotNeedingLogin.addOnTop("/calculator.wasm");
   this->addressStartsNotNeedingLogin.addOnTop("/src/");
   this->addressStartsNotNeedingLogin.addOnTop("/output/");
   this->addressStartsNotNeedingLogin.addOnTop("/css/");

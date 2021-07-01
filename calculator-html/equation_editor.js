@@ -3190,8 +3190,8 @@ class EquationEditor {
     let svgElement = graphicsWriter.typeset(this.rootNode);
     svgElement.style.display = 'inline-block';
     svgElement.style.position = 'absolute';
-    svgElement.style.left = `${this.rootNode.boundingBox.left}`;
-    svgElement.style.top = `${this.rootNode.boundingBox.top}`;
+    svgElement.style.left = `${this.rootNode.boundingBox.left}px`;
+    svgElement.style.top = `${this.rootNode.boundingBox.top}px`;
     this.containerSVG.appendChild(svgElement);
     this.containerSVG.style.width = this.containerDesiredWidth;
     this.containerSVG.style.height = this.containerDesiredHeight;
@@ -3751,8 +3751,8 @@ class EquationEditor {
     this.rootNode.computeBoundingBox();
     this.rootNode.doAlign();
     this.computeContainerDimensions();
-    this.container.style.height = this.containerDesiredHeight;
-    this.container.style.width = this.containerDesiredWidth;
+    this.container.style.height = `${this.containerDesiredHeight}px`;
+    this.container.style.width = `${this.containerDesiredWidth}px`;
     if (this.rootNode.boundingBox.needsMiddleAlignment &&
       !this.options.editable) {
       this.container.style.verticalAlign = 'middle';
@@ -5402,13 +5402,13 @@ class MathNode {
       this.element.style.transform = this.boundingBox.transform;
     }
     if (this.element.style.width !== 'auto') {
-      this.element.style.width = this.boundingBox.width;
+      this.element.style.width = `${this.boundingBox.width}px`;
     }
     if (this.element.style.height !== 'auto') {
-      this.element.style.height = this.boundingBox.height;
+      this.element.style.height = `${this.boundingBox.height}px`;
     }
-    this.element.style.left = `${this.boundingBox.left}`;
-    this.element.style.top = `${this.boundingBox.top}`;
+    this.element.style.left = `${this.boundingBox.left}px`;
+    this.element.style.top = `${this.boundingBox.top}px`;
     for (let i = 0; i < this.children.length; i++) {
       this.children[i].doAlign();
     }

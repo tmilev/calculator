@@ -3,14 +3,20 @@ const equationEditor = require("./equation_editor");
 
 class TypeSetter {
   constructor() {
-    this.defaultStyle = "vertical-align:text-bottom; font-family:'Times New Roman'; font-size:120%; display:inline-block; margin-bottom:-0.1em";
+    this.defaultStyle = {
+      verticalAlign: "text-bottom",
+      fontFamily: "Times New Roman",
+      fontSize: "120%",
+      display: "inline-block",
+      marginBottom: "-0.1em",
+    };
     this.logTiming = false;
   }
 
   typesetSoft(
     /**@type {HTMLElement|string} */
     element,
-    /**@type {string} */
+    /**@type {(Object.<string,string>|null)} */
     styleOverride,
     /**@type{Function|null} */
     callbackEquationCreation,
@@ -20,7 +26,7 @@ class TypeSetter {
     if (typeof element === "string") {
       element = document.getElementById(element);
     }
-    if (styleOverride === "") {
+    if (styleOverride === null) {
       styleOverride = this.defaultStyle;
     }
     equationEditor.typeset(

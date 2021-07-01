@@ -204,7 +204,11 @@ class DynamicJavascript {
     }
     typeset.typesetter.typesetSoft(
       output,
-      "font-size: 20px; font-family:'Times New Roman'; display:inline-block;",
+      {
+        fontSize: "20px",
+        fontFamily: "Times New Roman",
+        display: "inline-block"
+      },
       (editor) => {
         this.bootstrapSlider(editor, output);
         if (typeSetCallback !== null && typeSetCallback !== undefined) {

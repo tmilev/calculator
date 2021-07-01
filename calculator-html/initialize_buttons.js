@@ -482,24 +482,24 @@ class InputPanelData {
       this.addLatexCommand("-", "-");
       this.addLatexCommand("\\cdot", "*");
       this.addLatexCommand("\\frac{\\caret}{}", "/");
-      this.addKeySequence(["/"], "(\u2022)/(\u2022)", "font-size:10px"); // \u2022 = bullet.
+      this.addKeySequence(["/"], "(\u2022)/(\u2022)", { fontSize: "10px" }); // \u2022 = bullet.
       this.addLatexCommand("\\sqrt{\\caret}", "\u221A");
       this.addKeySequence(["^"], "^");
       this.addKeySequence(["("], "(");
       this.addKeySequence([")"], ")");
     }
     if (this.flagButtons.trigonometry.selected || includeAll) {
-      this.addLatexCommand("\\sin", "sin", "font-size:10px; ");
-      this.addLatexCommand("\\cos", "cos", "font-size:10px; ");
-      this.addLatexCommand("\\tan", "tan", "font-size:10px; ");
-      this.addLatexCommand("\\cot", "cot", "font-size:10px; ");
-      this.addLatexCommand("\\sec", "sec", "font-size:10px; ");
-      this.addLatexCommand("\\csc", "csc", "font-size:10px; ");
+      this.addLatexCommand("\\sin", "sin", { fontSize: "10px" });
+      this.addLatexCommand("\\cos", "cos", { fontSize: "10px" });
+      this.addLatexCommand("\\tan", "tan", { fontSize: "10px" });
+      this.addLatexCommand("\\cot", "cot", { fontSize: "10px" });
+      this.addLatexCommand("\\sec", "sec", { fontSize: "10px" });
+      this.addLatexCommand("\\csc", "csc", { fontSize: "10px" });
     }
     if (this.flagButtons.inverseTrigonometry.selected || includeAll) {
-      this.addLatexCommand("\\arcsin", "asin", "font-size:7px");
-      this.addLatexCommand("\\arccos", "acos", "font-size:7px");
-      this.addLatexCommand("\\arctan", "atan", "font-size:7px");
+      this.addLatexCommand("\\arcsin", "asin", { fontSize: "7px" });
+      this.addLatexCommand("\\arccos", "acos", { fontSize: "7px" });
+      this.addLatexCommand("\\arctan", "atan", { fontSize: "7px" });
     }
     if (this.flagButtons.comma.selected || includeAll) {
       this.addLatexCommand(",", ",");
@@ -517,7 +517,7 @@ class InputPanelData {
       this.addLatexCommand("=", "=");
     }
     if (this.flagButtons.logarithms.selected || noOptions || includeAll) {
-      this.addLatexCommand("\\log_{} ", "log_", "font-size:10px; ");
+      this.addLatexCommand("\\log_{} ", "log_", { fontSize: "10px" });
       this.addLatexCommand("{}_{}", "_");
       this.addLatexCommand("\\ln", "ln");
       this.addLatexCommand("e", "e");
@@ -526,12 +526,12 @@ class InputPanelData {
       this.addLatexCommand("\\infty", "\u221E");
     }
     if (this.flagButtons.limits.selected || includeAll) {
-      this.addLatexCommand(" DNE ", "DNE", "font-size: 7px");
+      this.addLatexCommand(" DNE ", "DNE", { fontSize: "7px" });
     }
     if (this.flagButtons.series.selected || noOptions || includeAll) {
       this.addLatexCommand("\\sum", "\u03A3");
       this.addLatexCommand("!", "!");
-      this.addLatexCommand("\\binom{\\caret}{}", "binom", "font-size : 7px;");
+      this.addLatexCommand("\\binom{\\caret}{}", "binom", { fontSize: "7px" });
     }
     if (noOptions || includeAll) {
       this.addLatexCommand("\\circ", "\u2218");
@@ -545,10 +545,10 @@ class InputPanelData {
       this.addLatexCommand("\\in", "\u2208");
     }
     if (this.flagButtons.matrix.selected || includeAll) {
-      this.addLatexCommand("\\begin{pmatrix} \\\\ \\end{pmatrix}", "2x1", "font-size : 7px;", true);
-      this.addLatexCommand("\\begin{pmatrix} \\\\ \\\\ \\end{pmatrix}", "3x1", "font-size : 7px;", true);
-      this.addLatexCommand("\\begin{pmatrix} & \\\\ & \\end{pmatrix}", "2x2", "font-size : 7px;", true);
-      this.addLatexCommand("\\begin{pmatrix} & & \\\\ & & \\\\ & & \\end{pmatrix}", "3x3", "font-size : 7px;", true);
+      this.addLatexCommand("\\begin{pmatrix}\\caret \\\\ \\end{pmatrix}", "2x1", { fontSize: "7px" });
+      this.addLatexCommand("\\begin{pmatrix}\\caret \\\\ \\\\ \\end{pmatrix}", "3x1", { fontSize: "7px" });
+      this.addLatexCommand("\\begin{pmatrix}\\caret & \\\\ & \\end{pmatrix}", "2x2", { fontSize: "7px" });
+      this.addLatexCommand("\\begin{pmatrix}\\caret & & \\\\ & & \\\\ & & \\end{pmatrix}", "3x3", { fontSize: "7px" });
     }
     if (this.flagButtons.angles.selected || noOptions || includeAll) {
       this.addLatexCommand("\\alpha", "\u03B1");
@@ -559,7 +559,7 @@ class InputPanelData {
       this.addKeySequence(["^", "\\circ"], "^\u2218");
     }
     if (this.flagButtons.newtonsMethod.selected || includeAll) {
-      this.addLatexCommand(["NewtonsMethod(\\caret,,)"], "Newton", "font-size: 6px", false);
+      this.addLatexCommand(["NewtonsMethod(\\caret,,)"], "Newton", { fontSize: "6px" });
     }
   }
 

@@ -10240,7 +10240,7 @@ class EquationEditorButtonFactory {
     isKeyPress,
     /** @type{string} */
     label,
-    /** @type{string} */
+    /** @type{Object.<string, string>|null} */
     additionalStyle,
   ) {
     /** @type{Array.<EquationEditorAction>} */
@@ -10249,10 +10249,10 @@ class EquationEditorButtonFactory {
       this.commands.push(new EquationEditorAction(command, isKeyPress));
     }
     this.label = label;
-    /** @type {string} */
+    /** @type {Object.<string, string>} */
     this.additionalStyle = additionalStyle;
     if (this.additionalStyle === null || this.additionalStyle === undefined) {
-      this.additionalStyle = '';
+      this.additionalStyle = {};
     }
   }
 
@@ -10319,13 +10319,13 @@ class EquationEditorButtonFactory {
 }
 
 let buttonFactories = {
-  'sqrt': new EquationEditorButtonFactory('\\sqrt', true, '\u221A', ''),
+  'sqrt': new EquationEditorButtonFactory('\\sqrt', true, '\u221A', null),
   'fraction':
-    new EquationEditorButtonFactory('\\frac{\\caret}{}', false, '/', ''),
-  'divide': new EquationEditorButtonFactory('/', true, '(\u2022)/(\u2022)', ''),
-  'exponent': new EquationEditorButtonFactory('^', true, '^', ''),
+    new EquationEditorButtonFactory('\\frac{\\caret}{}', false, '/', null),
+  'divide': new EquationEditorButtonFactory('/', true, '(\u2022)/(\u2022)', null),
+  'exponent': new EquationEditorButtonFactory('^', true, '^', null),
   'matrix2x2': new EquationEditorButtonFactory(
-    '\\begin{pmatrix}\\caret&\\\\&\\end{pmatrix}', false, '2x2', ''),
+    '\\begin{pmatrix}\\caret&\\\\&\\end{pmatrix}', false, '2x2', null),
 };
 
 module.exports = {

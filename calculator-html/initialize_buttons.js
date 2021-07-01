@@ -1,9 +1,7 @@
 "use strict";
-const submitRequests = require("./submit_requests");
 const panels = require("./panels");
 const pathnames = require("./pathnames");
 const ids = require("./ids_dom_elements");
-const miscellaneous = require("./miscellaneous_frontend");
 const equation_editor = require("./equation_editor");
 const storage = require("./storage");
 const EquationEditorAction = require("./equation_editor").EquationEditorAction;
@@ -11,27 +9,6 @@ const EquationEditor = require("./equation_editor").EquationEditor;
 const EquationEditorButtonFactory = require("./equation_editor").EquationEditorButtonFactory;
 const EquationEditorOptions = require("./equation_editor").EquationEditorOptions;
 const datePicker = require("./date_picker").datePicker;
-
-let keyWordsKnownToMathQuill = [
-  'sqrt',
-  'frac',
-  'cdot',
-  'left',
-  'right',
-  'infty',
-  'otimes',
-  'times',
-  'oplus',
-  'pmatrix',
-  'int',
-  'begin',
-  'end',
-  'alpha',
-  'pi',
-  'beta',
-  'cup',
-  'cap',
-];
 
 let charsToSplit = ['x', 'y'];
 let panelsCollapseStatus = {};

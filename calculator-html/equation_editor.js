@@ -1,7 +1,7 @@
 // Licensed to you under the Apache 2.0 license.
 'use strict';
 // The formatting in this file follows
-// auto-code formatting of the closure compiler.
+// auto-code formatting of the closure compiler,
 
 var module;
 if (module === undefined) {

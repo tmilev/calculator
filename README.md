@@ -25,7 +25,7 @@ Inspired by MathQuill (we continue to love that editor - best wishes to the Math
 - No fonts: uses Times New Roman by default. Chose Times New Roman as that seemed to be most-likely-to-be-available out-of-the-box on Linux, Chromebook, Mac and Windows.
 - No css files.
 - No external dependencies whatsoever, not even jquery.
-- No more build system headaches: just copy and paste one single javascript file and you're done.
+- No more build system headaches: just copy and paste one [single javascript file](calculator_html/equation_editor.js) and you're done.
 - Matrix support from the start.
 - Will construct math tags from content enclosed in \\(...\\) just like MathJax; can be used as a drop-in replacement.
 

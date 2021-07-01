@@ -18,7 +18,7 @@ index.html.
 server and requires no action. 
 
 - The javascript_all_in.one.js contains an object in which the keys are the 
-javascript file names (prefixed with /calculator-html/ and with the .js suffix stripped).
+javascript file names (prefixed with /calculator_html/ and with the .js suffix stripped).
 
 - The script browserifier.js is executed. 
 
@@ -34,11 +34,11 @@ module.exports is used.
 
 2. We also have means to bootstrap an arbitrary npm commonJS module as a part of
 javascript_all_in_one.js. All such modules are bootstrapped through
-the single javascript file /calculator-html/external-build/output.js.
+the single javascript file /calculator_html/external-build/output.js.
 This file is pre-built: in the present paragraph we explain how to make that build.
 
 - In order to build output.js, you need a node server with npm installed.
-- Navigate to calculator-html/external.
+- Navigate to calculator_html/external.
 - Install the dependencies
 
 ```
@@ -52,7 +52,7 @@ npm run browserify
 ```
 
 ### Additional javascript sources
-All script tags with sources not in /calculator-html/ are interpreted as
+All script tags with sources not in /calculator_html/ are interpreted as
 regular html scripts. Such external sources are located in /html-common/
 or any other directory accessible without admin privileges through the calculator.
 

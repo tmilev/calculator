@@ -1306,13 +1306,13 @@ List<List<std::string> >& FileOperations::initializeFolderVirtualLinksDefaults()
   // substitution order matters, earlier substitutions are processed first.
   // Once a substitution is found, no more substitutions are carried out.
   result = List<List<std::string> >({
-    List<std::string>({Configuration::calculatorWasm            , "calculator-html/web_assembly/calculator.wasm"}),
+    List<std::string>({Configuration::calculatorWasm            , "calculator_html/web_assembly/calculator.wasm"}),
     List<std::string>({Configuration::examples                  , "examples/"                                   }),
     List<std::string>({Configuration::HTMLAceSrcMin             , "html-common/ace/src-min/"                    }),
     List<std::string>({Configuration::HTMLCommonFonts           , "html-common/fonts"                           }),
     List<std::string>({Configuration::HTMLCommonFont            , "html-common/fonts"                           }),
     List<std::string>({Configuration::HTMLCommon                , "html-common/"                                }),
-    List<std::string>({Configuration::calculatorHTML            , "calculator-html/"                            }),
+    List<std::string>({Configuration::calculatorHTML            , "calculator_html/"                            }),
     List<std::string>({Configuration::publicHTML                , "public_html/"                                }),
     List<std::string>({Configuration::certificatesPublic        , "certificates-public/"                        }),
     List<std::string>({Configuration::sourceCode                , "src/"                                        }),
@@ -1326,7 +1326,7 @@ List<List<std::string> >& FileOperations::initializeFolderVirtualLinksDefaults()
     List<std::string>({Configuration::laTeXMaterials            , "../LaTeX-materials/"                         }),
     List<std::string>({Configuration::slidesVideo               , "../slides-video/"                            }),
     List<std::string>({Configuration::freecalc                  , "../freecalc/"                                }),
-    List<std::string>({"favicon.ico"                            , "calculator-html/favicon.ico"                 }),
+    List<std::string>({"favicon.ico"                            , "calculator_html/favicon.ico"                 }),
   });
   FileOperations::checkFolderLinks();
   return result;

@@ -3179,7 +3179,7 @@ void WebServer::writeVersionJSFile() {
   out << "module.exports = {\nserverInformation,\n};\n";
   std::fstream theFileStream;
   FileOperations::openFileCreateIfNotPresentVirtual(
-    theFileStream, "/calculator-html/server_information.js", false, true, false, false
+    theFileStream, "/calculator_html/server_information.js", false, true, false, false
   );
   theFileStream << out.str();
 }
@@ -4062,7 +4062,7 @@ void WebServer::initializeMainAddresses() {
   MacroRegisterFunctionWithName("WebServer::initializeMainAddresses");
   this->addressStartsNotNeedingLogin.addOnTop("favicon.ico");
   this->addressStartsNotNeedingLogin.addOnTop("/favicon.ico");
-  this->addressStartsNotNeedingLogin.addOnTop("/calculator-html/");
+  this->addressStartsNotNeedingLogin.addOnTop("/calculator_html/");
   this->addressStartsNotNeedingLogin.addOnTop("/src/");
   this->addressStartsNotNeedingLogin.addOnTop("/output/");
   this->addressStartsNotNeedingLogin.addOnTop("/css/");

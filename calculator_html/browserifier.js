@@ -19,7 +19,7 @@ class Browserifier {
     };
     this.allModules = {};
     this.sanitizedFileNameContents = {};
-    this.calculatorHtmlBaseFolder = "/calculator-html/";
+    this.calculatorHtmlBaseFolder = "/calculator_html/";
   }
 
   require(
@@ -39,7 +39,7 @@ class Browserifier {
   }
 
   browserifyAndRun() {
-    let expectedStart = "/calculator-html/";
+    let expectedStart = "/calculator_html/";
     for (let fileName in this.theJSContent) {
       let newFileName = "";
       if (!fileName.startsWith(expectedStart)) {

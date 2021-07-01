@@ -26,7 +26,7 @@ test/test_database.json
 bin/*
 calculator
 
-calculator-html/web_assembly/calculator.wasm
+calculator_html/web_assembly/calculator.wasm
 output/crash_test.html
 
 testFileWritePermissionsSSsas.txt
@@ -47,8 +47,8 @@ external-source
 
 configuration
 
-calculator-html/autocomplete_keywords.js
-calculator-html/server_information.js
+calculator_html/autocomplete_keywords.js
+calculator_html/server_information.js
 src/.qmake.stash
 
 output/progress_subalgebras_*

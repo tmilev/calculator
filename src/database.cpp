@@ -424,7 +424,7 @@ void GlobalVariables::initModifiableDatabaseFields() {
   modifiableData.addOnTop(currentEntry);
   std::fstream outputFile;
   FileOperations::openFileCreateIfNotPresentVirtual(
-    outputFile, "/calculator-html/modifiable_database_fields.js", false, true, false
+    outputFile, "/calculator_html/modifiable_database_fields.js", false, true, false
   );
 
   JSData modifiableDataJSON;

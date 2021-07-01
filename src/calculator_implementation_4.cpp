@@ -1790,7 +1790,7 @@ void Calculator::writeAutoCompleteKeyWordsToFile() {
   out << "module.exports = {theAutocompleteDictionary};";
   std::fstream theFileStream;
   FileOperations::openFileCreateIfNotPresentVirtual(
-    theFileStream, "/calculator-html/autocomplete_keywords.js",
+    theFileStream, "/calculator_html/autocomplete_keywords.js",
     false, true, false, false
   );
   theFileStream << out.str();

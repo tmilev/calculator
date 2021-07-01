@@ -495,7 +495,7 @@ void BuilderApplication::buildHtmlJavascriptPage(bool appendBuildHash) {
 }
 
 bool BuilderApplication::fileNameAllowedToBeMissing(const std::string& input) {
-  if (input == "/calculator-html/external/build/output-min.js") {
+  if (input == "/calculator_html/external/build/output-min.js") {
     return true;
   }
   return  false;
@@ -505,7 +505,7 @@ std::string WebAPIResponse::getOnePageJS() {
   MacroRegisterFunctionWithName("WebAPIReponse::getOnePageJS");
   BuilderApplication builder;
   std::stringstream errorStream;
-  if (!builder.loadJavascriptFileNames("/calculator-html/BUILD.json", &errorStream)) {
+  if (!builder.loadJavascriptFileNames("/calculator_html/BUILD.json", &errorStream)) {
     errorStream << "<b>Failed to load the BUILD.json list of javascript sources.</b>";
     return errorStream.str();
   }
@@ -528,7 +528,7 @@ std::string WebAPIResponse::getOnePageJS() {
       << "specifically white-listed as ok. \");";
       builder.jsFileContents[i] = moduleNotFound.str();
     }
-    if (builder.jsFileNames[i] == "/calculator-html/web_assembly/calculator.js") {
+    if (builder.jsFileNames[i] == "/calculator_html/web_assembly/calculator.js") {
       // Special exception for web assembly.
       // Save ourselves lots of headache and
       // configuration by manually inserting the snippets we
@@ -598,7 +598,7 @@ std::string BuilderApplication::getOnePageJavascriptBrowserify() {
     out << "\n},\n";
   }
   out << "};\n"
-  << "theJSContent['/calculator-html/browserifier'](null, null, null);\n"
+  << "theJSContent['/calculator_html/browserifier'](null, null, null);\n"
   << "\n}) ();";
   return out.str();
 }
@@ -625,11 +625,11 @@ std::string WebAPIResponse::getHTMLAllInOneJavascriptCSS(
 }
 
 std::string WebAPIResponse::getApp(bool appendBuildHash) {
-  return WebAPIResponse::getHTMLAllInOneJavascriptCSS("/calculator-html/index.html", appendBuildHash);
+  return WebAPIResponse::getHTMLAllInOneJavascriptCSS("/calculator_html/index.html", appendBuildHash);
 }
 
 std::string WebAPIResponse::getCompareExpressionsPage(bool appendBuildHash) {
-  return WebAPIResponse::getHTMLAllInOneJavascriptCSS("/calculator-html/compare_expressions_calculator.html", appendBuildHash);
+  return WebAPIResponse::getHTMLAllInOneJavascriptCSS("/calculator_html/compare_expressions_calculator.html", appendBuildHash);
 }
 
 JSData Course::toJSON() const {

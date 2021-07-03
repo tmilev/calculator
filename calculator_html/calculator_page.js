@@ -10,7 +10,7 @@ const storage = require("./storage");
 const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
 const calculatorPageEditor = require("./calculator_page_editor");
 const equationEditor = require("./equation_editor");
-const calculatorWasm = require("./web_assembly/calculator_wasm");
+const calculatorWebAssembly = require("./web_assembly/calculator_web_assembly");
 
 class AtomHandler {
   constructor() {
@@ -489,7 +489,7 @@ class Calculator {
   }
 
   submitComputationToWebAssembly(input) {
-    calculatorWasm.calculatorWasm.callMain(input, (result) => {
+    calculatorWebAssembly.calculatorWebAssembly.callMain(input, (result) => {
       this.defaultOnLoadInjectScriptsAndProcessLaTeX(result);
     });
   }

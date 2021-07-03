@@ -52,6 +52,6 @@
   "/calculator_html/dynamic_javascript.js",
   "/calculator_html/calculator_page_editor.js",
   "/calculator_html/lie_algebras.js",
-  "/calculator_html/web_assembly/calculator_wasm.js",
+  "/calculator_html/web_assembly/calculator_web_assembly.js",
   "/calculator_html/web_assembly/calculator.js"
 ]

@@ -14,9 +14,6 @@ class Browserifier {
       }
       this.browserifyAndRun();
     }
-    window.calculator = {
-      browserifier: this,
-    };
     this.allModules = {};
     this.sanitizedFileNameContents = {};
     this.calculatorHtmlBaseFolder = "/calculator_html/";

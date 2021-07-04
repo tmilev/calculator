@@ -47,6 +47,8 @@ function initializeGlobals() {
   }
 }
 
+// Loads all modules using require statements and 
+// initializes the calculator page or web worker.
 function loadGlobals() {
   let calculator = window.calculator;
   calculator.login = require("./login");
@@ -70,7 +72,6 @@ function loadGlobals() {
   calculator.panels = require("./panels");
   calculator.database = require("./database");
   calculator.themes = require("./themes");
-  //calculator.mathjax = require("./mathjax-calculator-setup");
   calculator.graphicsNDimensions = require("./graphics_n_dimensions");
   calculator.dynamicJavascript = require("./dynamic_javascript");
   calculator.processMonitoring = require("./process_monitoring");

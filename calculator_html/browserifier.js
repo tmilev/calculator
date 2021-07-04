@@ -1,21 +1,41 @@
 // The present file is the entry point of the entire
 // javascript library.
 "use strict";
-// require is closure variable that is constructed by the calculator builder
-// and contains an object whose keys are the file names of the scripts.
-// The values of the object are functions that enclose the contents of each script.
-/**@type{Object<string,Function>} */
+/**
+ * An object with keys the names of all scripts and values 
+ * that are wrappers of the scripts.
+ * 
+ * Normally, require is a variable that contains a reference to  
+ * the Browserifier.require function below.
+ * However, this variable has no use in the present script
+ * which defines the require function, and so the calculator 
+ * hijacks it to submit the script wrappers.
+ * 
+ * The values of the object are the 
+ * function(require, module, export) { *** } 
+ * enclosures of each script, with the script in place of the ***.
+ * 
+ * @type{Object<string,Function>} 
+ */
 var require;
+
+/**
+ * The entry script: the first require()-d script.
+ * 
+ * Normally, module is a variable that contains 
+ * a reference to Browserifier.allModules object defined below.
+ * However, this variable has no use in the present script which
+ * defines the allModules object, and so the calculator
+ * hijacks it to inject the name of the entry point script.
+ *  
+ * @type{string}
+ */
+var module;
 
 class Browserifier {
   constructor() {
     this.jsContent = require;
-    document.onreadystatechange = () => {
-      if (document.readyState !== 'complete') {
-        return;
-      }
-      this.browserifyAndRun();
-    }
+    this.entryPoint = module;
     this.allModules = {};
     this.sanitizedFileNameContents = {};
     this.calculatorHtmlBaseFolder = "/calculator_html/";
@@ -48,9 +68,12 @@ class Browserifier {
       newFileName = `./${fileEnd}`;
       this.sanitizedFileNameContents[newFileName] = jsContent[fileName];
     }
-    this.require('./app');
+    if (this.entryPoint === null) {
+      this.entryPoint = "./app";
+    }
+    this.require(this.entryPoint);
   }
 }
 
 // This is the first and only function call that will be executed by loading the javascript library.
-new Browserifier();
+new Browserifier().browserifyAndRun();

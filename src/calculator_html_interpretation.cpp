@@ -45,9 +45,9 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
 
   }
   std::string lastStudentAnswerID;
-  MapList<std::string, std::string, MathRoutines::hashString>& theArgs = global.webArguments;
-  for (int i = 0; i < theArgs.size(); i ++) {
-    StringRoutines::stringBeginsWith(theArgs.keys[i], WebAPI::problem::calculatorAnswerPrefix, &lastStudentAnswerID);
+  MapList<std::string, std::string, MathRoutines::hashString>& arguments = global.webArguments;
+  for (int i = 0; i < arguments.size(); i ++) {
+    StringRoutines::stringBeginsWith(arguments.keys[i], WebAPI::problem::calculatorAnswerPrefix, &lastStudentAnswerID);
   }
   int indexLastAnswerId = problem.getAnswerIndex(lastStudentAnswerID);
   if (indexLastAnswerId == - 1) {
@@ -453,29 +453,29 @@ JSData WebAPIResponse::clonePageResult() {
 
 void BuilderApplication::initializeTags(bool appendBuildHash) {
   this->allInOneJavascriptTagOriginal =
-  "<script type=\"text/javascript\" src=\"" + WebAPI::request::onePageJS + "\"></script>";
+  "<script type='text/javascript' src='" + WebAPI::request::onePageJS + "'></script>";
   std::string virtualJavascriptFileName = WebAPI::request::onePageJS;
   if (appendBuildHash) {
     virtualJavascriptFileName = FileOperations::GetVirtualNameWithHash(WebAPI::request::onePageJS);
   }
   this->allInOneJavascriptTagDesired =
-  "<script src=\"" +
+  "<script src='" +
   virtualJavascriptFileName +
-  "\" onerror = 'errorLoadingScript(this);'></script>\n";
+  "' onerror = 'errorLoadingScript(this);'></script>\n";
   this->calculatorCSSTagOriginal =
-  "<link type=\"text/css\" rel=\"stylesheet\" href=\"" + WebAPI::request::calculatorCSS + "\">";
+  "<link type='text/css' rel='stylesheet' href='" + WebAPI::request::calculatorCSS + "'>";
   std::string virtualCSSFileName = WebAPI::request::calculatorCSS;
   if (appendBuildHash) {
     virtualCSSFileName = FileOperations::GetVirtualNameWithHash(WebAPI::request::calculatorCSS);
   }
   this->calculatorCSSTagDesired =
-  "<link type=\"text/css\" rel=\"stylesheet\" href=\"" +
+  "<link type='text/css' rel='stylesheet' href='" +
   virtualCSSFileName +
-  "\" onerror = 'errorLoadingScript(this);'>";
+  "' onerror = 'errorLoadingScript(this);'>";
 }
 
 void BuilderApplication::buildHtmlJavascriptPage(bool appendBuildHash) {
-  MacroRegisterFunctionWithName("WebAPIReponse::buildHtmlJavascriptPage");
+  MacroRegisterFunctionWithName("BuilderApplication::buildHtmlJavascriptPage");
   this->initializeTags(appendBuildHash);
   this->htmlJSbuild = this->htmlRaw;
   if (!StringRoutines::replaceOnce(
@@ -616,7 +616,7 @@ std::string WebAPIResponse::getHTMLAllInOneJavascriptCSS(
     false,
     &errorStream
   )) {
-    out << "<html><body><b>Failed to load the application file. "
+    out << "<html><body><b>Failed to load the application file. </b>"
     << "Further comments follow. " << errorStream.str() << "</body></html>";
     return out.str();
   }

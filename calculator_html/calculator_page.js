@@ -489,7 +489,7 @@ class Calculator {
   }
 
   submitComputationToWebAssembly(input) {
-    startCalculatorWebAssemblyWorker.worker.callMain(input, (result) => {
+    startCalculatorWebAssemblyWorker.calculatorWorker.compute(input, (result) => {
       this.defaultOnLoadInjectScriptsAndProcessLaTeX(result);
     });
   }

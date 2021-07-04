@@ -1,5 +1,4 @@
 "use strict";
-const mainPage = require("./page_navigation");
 
 //declare globals:
 
@@ -80,27 +79,27 @@ function loadGlobals() {
   //initialize everything not initilized while loading:
   calculator.crypto = require("./crypto");
   require("./external/build/output-min");
-  calculator.mainPage = new mainPage.Page();
+  let pageModule = require("./page_navigation");
+  calculator.mainPage = new pageModule.Page();
   if (calculator.flagRunMainPage) {
     calculator.mainPage.initializeCalculatorPage();
   }
 }
 
 function initializeAndLoad() {
-  if (window === null || window === undefined || document === null || document === undefined) {
-    runWebWorker();
-    return;
-  }
-  runApplication();
-}
-
-function runApplication() {
   initializeGlobals();
   loadGlobals();
 }
 
-function runWebWorker() {
-  require("./web_assembly/calculator_web_assembly");
+function run() {
+  document.onreadystatechange = () => {
+    if (document.readyState !== 'complete') {
+      return;
+    }
+    initializeAndLoad();
+  }
 }
 
-initializeAndLoad();
+run();
+
+

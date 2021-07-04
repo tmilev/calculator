@@ -86,5 +86,21 @@ function loadGlobals() {
   }
 }
 
-initializeGlobals();
-loadGlobals();
+function initializeAndLoad() {
+  if (window === null || window === undefined || document === null || document === undefined) {
+    runWebWorker();
+    return;
+  }
+  runApplication();
+}
+
+function runApplication() {
+  initializeGlobals();
+  loadGlobals();
+}
+
+function runWebWorker() {
+  require("./web_assembly/calculator_web_assembly");
+}
+
+initializeAndLoad();

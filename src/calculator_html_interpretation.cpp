@@ -587,7 +587,7 @@ std::string BuilderApplication::getOnePageJavascriptBrowserify() {
   MacroRegisterFunctionWithName("BuilderApplication::getOnePageJavascriptBrowserify");
   std::stringstream out;
   out << "(()=>{\n"
-  << "let theJSContent = {\n";
+  << "let jsContent = {\n";
   for (int i = 0; i < this->jsFileContents.size; i ++) {
     std::string fileNameNoJS;
     if (!StringRoutines::stringEndsWith(this->jsFileNames[i], ".js", &fileNameNoJS)) {
@@ -598,7 +598,7 @@ std::string BuilderApplication::getOnePageJavascriptBrowserify() {
     out << "\n},\n";
   }
   out << "};\n"
-  << "theJSContent['/calculator_html/browserifier'](null, null, null);\n"
+  << "jsContent['/calculator_html/browserifier'](jsContent, null, null);\n"
   << "\n}) ();";
   return out.str();
 }

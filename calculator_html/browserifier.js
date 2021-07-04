@@ -1,13 +1,15 @@
 // The present file is the entry point of the entire
 // javascript library.
 "use strict";
+// require is closure variable that is constructed by the calculator builder
+// and contains an object whose keys are the file names of the scripts.
+// The values of the object are functions that enclose the contents of each script.
+/**@type{Object<string,Function>} */
+var require;
+
 class Browserifier {
   constructor() {
-    // theJSContent is closure variable that is constructed by the calculator builder
-    // and contains an object whose keys are the file names of the scripts.
-    // The values of the object are functions that enclose the contents of each script.
-    /**@type{Object<string,Function>} */
-    this.theJSContent = theJSContent;
+    this.jsContent = require;
     document.onreadystatechange = () => {
       if (document.readyState !== 'complete') {
         return;
@@ -37,14 +39,14 @@ class Browserifier {
 
   browserifyAndRun() {
     let expectedStart = "/calculator_html/";
-    for (let fileName in this.theJSContent) {
+    for (let fileName in this.jsContent) {
       let newFileName = "";
       if (!fileName.startsWith(expectedStart)) {
         continue;
       }
-      var fileEnd = fileName.slice(expectedStart.length);
+      let fileEnd = fileName.slice(expectedStart.length);
       newFileName = `./${fileEnd}`;
-      this.sanitizedFileNameContents[newFileName] = theJSContent[fileName];
+      this.sanitizedFileNameContents[newFileName] = jsContent[fileName];
     }
     this.require('./app');
   }

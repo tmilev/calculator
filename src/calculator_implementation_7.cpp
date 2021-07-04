@@ -7683,7 +7683,7 @@ bool CalculatorFunctions::crash(
   MacroRegisterFunctionWithName("CalculatorFunctions::crash");
   (void) input;
   global.fatal << "This is a test of the crashing mechanism. "
-  << "A file report must have been written. "
+  << "A file report must have been written, unless running web assembly. "
   << "The crash file report is not accessible through the calculator's webserver. "
   << "It can be reached locally in the results/crashes folder of the calculator or, "
   << "if running remotely, through an administrator ssh connection. "

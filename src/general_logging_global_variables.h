@@ -398,7 +398,16 @@ public:
     void firstRun();
     static std::string getStackTraceEtcErrorMessageHTML();
     static std::string getStackTraceEtcErrorMessageConsole();
-    Crasher& operator<<(const Crasher& dummyCrasherSignalsActualCrash);
+    Crasher& doCrash(const Crasher& dummyCrasherSignalsActualCrash);
+    void writeCrashFile();
+    // Syntactic sugar for crashing, so we can write:
+    //
+    // global.fatal << "explanation for crash" << global.fatal;
+    //
+    // for a single-line crashing.
+    Crasher& operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
+      return this->doCrash(dummyCrasherSignalsActualCrash);
+    }
     template <class AnyObject>
     Crasher& operator<<(const AnyObject& input) {
       this->firstRun();

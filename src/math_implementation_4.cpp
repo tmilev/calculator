@@ -39,7 +39,9 @@ void GlobalVariables::Crasher::firstRun() {
   this->flagCrashInitiated = true;
 }
 
-GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVariables::Crasher& dummyCrasherSignalsActualCrash) {
+GlobalVariables::Crasher& GlobalVariables::Crasher::doCrash(
+  const Crasher& dummyCrasherSignalsActualCrash
+) {
   (void) dummyCrasherSignalsActualCrash;
   this->firstRun();
   if (this->flagFinishingCrash) {
@@ -82,46 +84,7 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
       this->crashReportConsolE << global.toStringProgressReportNoThreadData(false);
     }
   }
-  if (!global.flagNotAllocated) {
-    if (!global.calculator().isZeroPointer()) {
-      if (global.calculator().getElement().comments.str() != "") {
-        this->crashReportHtml << "<hr>Additional comments follow. " << global.calculator().getElement().comments.str();
-      }
-    }
-    std::fstream theFile;
-    bool openSuccess = FileOperations::openFileCreateIfNotPresentVirtual(
-      theFile,
-      "crashes/" + global.relativePhysicalNameCrashReport,
-      false,
-      true,
-      false,
-      true,
-      true
-    );
-    if (openSuccess) {
-      this->crashReportHtml << "<hr>Crash dumped in folder "
-      << "results/crashes/. Not visible through the web server. "
-      << "If running locally, simply open the results/crashes "
-      << "folder within your calculator folder. "
-      << "If running remotely, you will need an ssh connection. ";
-      this->crashReportConsolE << "Crash dumped in file: " << Logger::consoleGreen()
-      << global.relativePhysicalNameCrashReport << Logger::consoleNormal() << "\n";
-    } else {
-      this->crashReportHtml << "<hr>Failed to open crash report file: "
-      << global.relativePhysicalNameCrashReport
-      << ". check file permissions. ";
-      this->crashReportConsolE << "Failed to open crash report file: "
-      << Logger::consoleRed()
-      << global.relativePhysicalNameCrashReport
-      << Logger::consoleNormal() << "\n";
-    }
-    theFile << this->crashReportFile.str();
-    theFile.flush();
-    theFile.close();
-  } else {
-    this->crashReportHtml << "GlobalVariables.flagNotAllocated is true. ";
-    this->crashReportConsolE << "GlobalVariables.flagNotAllocated is true. ";
-  }
+  this->writeCrashFile();
   std::cout << this->crashReportConsolE.str() << std::endl;
   JSData output;
   output[WebAPI::result::crashReport] = this->crashReportHtml.str();
@@ -129,6 +92,55 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
   global.response.writeResponse(output, true);
   std::exit(- 1);
   return *this;
+}
+
+void GlobalVariables::Crasher::writeCrashFile() {
+  if (global.flagNotAllocated) {
+    this->crashReportHtml << "GlobalVariables.flagNotAllocated is true. ";
+    this->crashReportConsolE << "GlobalVariables.flagNotAllocated is true. ";
+    return;
+  }
+  if (global.flagRunningWebAssembly) {
+    this->crashReportHtml << "Crash while running web assembly.";
+    this->crashReportConsolE << "Crash while running web assembly.";
+    return;
+  }
+  if (!global.calculator().isZeroPointer()) {
+    if (global.calculator().getElement().comments.str() != "") {
+      this->crashReportHtml << "<hr>Additional comments follow. "
+      << global.calculator().getElement().comments.str();
+    }
+  }
+  std::fstream crashFile;
+  bool openSuccess = FileOperations::openFileCreateIfNotPresentVirtual(
+    crashFile,
+    "crashes/" + global.relativePhysicalNameCrashReport,
+    false,
+    true,
+    false,
+    true,
+    true
+  );
+  if (openSuccess) {
+    this->crashReportHtml << "<hr>Crash dumped in folder "
+    << "results/crashes/. Not visible through the web server. "
+    << "If running locally, simply open the results/crashes "
+    << "folder within your calculator folder. "
+    << "If running remotely, you will need an ssh connection. ";
+    this->crashReportConsolE << "Crash dumped in file: " << Logger::consoleGreen()
+    << global.relativePhysicalNameCrashReport << Logger::consoleNormal() << "\n";
+  } else {
+    this->crashReportHtml << "<hr>Failed to open crash report file: "
+    << global.relativePhysicalNameCrashReport
+    << ". check file permissions. ";
+    this->crashReportConsolE << "Failed to open crash report file: "
+    << Logger::consoleRed()
+    << global.relativePhysicalNameCrashReport
+    << Logger::consoleNormal() << "\n";
+  }
+  crashFile << this->crashReportFile.str();
+  crashFile.flush();
+  crashFile.close();
 }
 
 std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageHTML() {

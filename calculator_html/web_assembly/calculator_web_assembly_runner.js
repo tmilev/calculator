@@ -49,7 +49,6 @@ class Runner {
         this.postComputationToMainThread(result);
       })
     }
-    console.log("DEBUG: message data: " + e.data);
   }
 
   loadWebAssemblyDriver() {

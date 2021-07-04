@@ -489,8 +489,19 @@ class Calculator {
   }
 
   submitComputationToWebAssembly(input) {
+    let requestWithProgress = new submitRequests.RequestWithProgress(
+      "",
+      "",
+      false,
+      ids.domElements.pages.calculator.progress,
+      null,
+      {},
+      `wasm:${encodeURIComponent(input)}`,
+    );
+    requestWithProgress.recordProgressStarted();
     startCalculatorWebAssemblyWorker.calculatorWorker.compute(input, (result) => {
       this.defaultOnLoadInjectScriptsAndProcessLaTeX(result);
+      requestWithProgress.recordProgressDone();
     });
   }
 

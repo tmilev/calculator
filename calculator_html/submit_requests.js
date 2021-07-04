@@ -107,6 +107,8 @@ class RequestWithProgress {
     callback,
     /**@type{{dontCollapsePanel:boolean, width:number}} */
     panelOptions,
+    /**@type{string|null|undefined} */
+    additionalDetails,
   ) {
     /**@type{XMLHttpRequest|null} */
     this.xhr = null;
@@ -128,6 +130,11 @@ class RequestWithProgress {
     }
     this.startTime = 0;
     this.details = "";
+    /** @type{string} */
+    this.additionalDetails = additionalDetails;
+    if (this.additionalDetails === null || this.additionalDetails === undefined) {
+      this.additionalDetails = "";
+    }
   }
 
   sendPrepare() {
@@ -165,7 +172,7 @@ class RequestWithProgress {
     this.panel.initialize(true);
     this.startTime = new Date().getTime();
     this.panel.setPanelLabel(`<b style = "color:orange">Sent</b>`)
-    this.panel.setPanelContent(this.details);
+    this.panel.setPanelContent(this.additionalDetails + this.details);
   }
 
   responseStandard() {
@@ -258,4 +265,5 @@ function submitPOST(
 module.exports = {
   submitGET,
   submitPOST,
+  RequestWithProgress,
 };

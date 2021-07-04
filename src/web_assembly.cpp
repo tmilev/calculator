@@ -34,10 +34,7 @@ int WebAssembly::main(int argc, char **argv) {
   (void) argc;
   (void) argv;
   global.flagRunningWebAssembly = true;
-#ifdef MACRO_use_wasm
-//  emscripten_set_main_loop(WebAssembly::mainLoop, 1, false);
-#endif
-  std::cout << "About to exit main loop." << std::endl;
+  std::cout << "Web assembly main function does nothing; exiting." << std::endl;
   return 0;
 }
 
@@ -45,5 +42,3 @@ void WebAssembly::mainLoop() {
   WebAssembly::numberOfMainLoopCalls ++;
   std::cout << "Main loop calls: " << WebAssembly::numberOfMainLoopCalls << std::endl;
 }
-
-

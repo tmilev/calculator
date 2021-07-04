@@ -16,7 +16,9 @@ class CalculatorWorker {
     /** @type{function} */
     callback
   ) {
-    this.worker = new Worker("/calculator_html/web_assembly/calculator_web_assembly_all_in_one.js");
+    if (this.worker === null) {
+      this.worker = new Worker("/calculator_html/web_assembly/calculator_web_assembly_all_in_one.js");
+    }
     this.worker.postMessage(["compute", input]);
     this.worker.onmessage = (message) => {
       this.receiveResult(message.data, callback);

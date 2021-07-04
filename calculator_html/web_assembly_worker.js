@@ -16,9 +16,11 @@ class CalculatorWorker {
     /** @type{function} */
     callback
   ) {
-    console.log("DEBUG: Got input " + input);
-    this.worker = new Worker("/calculator_html/javascript_all_in_one.js");
-    this.worker.postMessage("DEBUG: hello world!");
+    this.worker = new Worker("/calculator_html/web_assembly/calculator_web_assembly_all_in_one.js");
+    this.worker.postMessage(["compute", input]);
+    this.worker.onmessage = (message) => {
+      this.receiveResult(message.data, callback);
+    }
   }
 
   receiveResult(
@@ -27,7 +29,6 @@ class CalculatorWorker {
     /** @type{function} */
     callback,
   ) {
-    console.log("DEBUG: Received from worker: " + data);
     callback(data);
   }
 }

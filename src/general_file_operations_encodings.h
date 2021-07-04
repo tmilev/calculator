@@ -189,7 +189,11 @@ public:
     bool truncate,
     bool openAsBinary
   );
-  static bool openFileUnsecureReadOnly(std::ifstream& theFile, const std::string& theFileName, bool openAsBinary);
+  static bool openFileUnsecureReadOnly(
+    std::ifstream& file,
+    const std::string& fileName,
+    bool openAsBinary
+  );
   static bool openFileVirtual(
     std::fstream& theFile,
     const std::string& theFileName,

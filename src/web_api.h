@@ -25,7 +25,7 @@ public:
   void initializeTags(bool appendBuildHash);
   bool fileNameAllowedToBeMissing(const std::string& input);
   void buildHtmlJavascriptPage(bool appendBuildHash);
-  std::string getOnePageJavascriptBrowserify();
+  std::string getBrowserificationAssembled(const std::string& entryPoint);
   bool loadJavascriptFileNames(
     const std::string& buildFileNameVirtual,
     std::stringstream* commentsOnFailure
@@ -74,6 +74,7 @@ class WebAPIResponse {
   bool processCheckAnswer(bool hideDesiredAnswer);
   JSData checkAnswer(bool hideDesiredAnswer);
   bool processCalculatorOnePageJS(bool appendBuildHash);
+  bool processCalculatorWebWorkerJS(bool appendBuildHash);
   bool processTopicListJSON();
   bool processSolveJSON();
   bool processScoresInCoursePage();
@@ -143,6 +144,11 @@ class WebAPIResponse {
   );
   static std::string getCompareExpressionsPage(bool appendBuildHash);
   static std::string getOnePageJS();
+  static std::string getCalculatorWorkerJS();
+  static std::string getBrowserification(
+    const std::string& buildJSONVirtualFileName,
+    const std::string& scriptEntryPoint
+  );
   static std::string getScoresInCoursePage();
   static std::string setProblemDeadline();
   static std::string setProblemWeight();

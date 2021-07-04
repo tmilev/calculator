@@ -29,6 +29,8 @@ public:
     static std::string calculatorHTML;
     static std::string onePageJS;
     static std::string onePageJSWithHash;
+    static std::string calculatorWorkerJS;
+    static std::string calculatorWorkerJSWithHash;
     static std::string calculatorCSS;
     static std::string lieAlgebrasCSS;
     static std::string userInfoJSON;

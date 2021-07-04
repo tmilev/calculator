@@ -1560,13 +1560,15 @@ bool FileOperations::openFileUnsecure(
   return file.is_open();
 }
 
-bool FileOperations::openFileUnsecureReadOnly(std::ifstream& theFile, const std::string& theFileName, bool openAsBinary) {
+bool FileOperations::openFileUnsecureReadOnly(
+  std::ifstream& file, const std::string& fileName, bool openAsBinary
+) {
   if (openAsBinary) {
-    theFile.open(theFileName.c_str(), std::fstream::in | std::fstream::binary);
+    file.open(fileName.c_str(), std::fstream::in | std::fstream::binary);
   } else {
-    theFile.open(theFileName.c_str(), std::fstream::in);
+    file.open(fileName.c_str(), std::fstream::in);
   }
-  return theFile.is_open();
+  return file.is_open();
 }
 
 std::string FileOperations::GetVirtualNameWithHash(const std::string& inputFileName) {

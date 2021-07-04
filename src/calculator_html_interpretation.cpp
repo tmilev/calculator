@@ -502,11 +502,25 @@ bool BuilderApplication::fileNameAllowedToBeMissing(const std::string& input) {
 }
 
 std::string WebAPIResponse::getOnePageJS() {
-  MacroRegisterFunctionWithName("WebAPIReponse::getOnePageJS");
+  MacroRegisterFunctionWithName("WebAPIResponse::getOnePageJS");
+  return WebAPIResponse::getBrowserification("/calculator_html/BUILD.json", "./app");
+}
+
+std::string WebAPIResponse::getCalculatorWorkerJS() {
+  MacroRegisterFunctionWithName("WebAPIResponse::getCalculatorWorkerJS");
+  return WebAPIResponse::getBrowserification("/calculator_html/web_assembly/BUILD.json", "./web_assembly/calculator_web_assembly_runner");
+}
+
+std::string WebAPIResponse::getBrowserification(
+  const std::string& buildJSONVirtualFileName,
+  const std::string& scriptEntryPoint
+){
+  MacroRegisterFunctionWithName("WebAPIReponse::getBrowserification");
   BuilderApplication builder;
   std::stringstream errorStream;
-  if (!builder.loadJavascriptFileNames("/calculator_html/BUILD.json", &errorStream)) {
-    errorStream << "<b>Failed to load the BUILD.json list of javascript sources.</b>";
+  if (!builder.loadJavascriptFileNames(buildJSONVirtualFileName, &errorStream)) {
+    errorStream << "<b>Failed to load the javascript build json file: "
+    << buildJSONVirtualFileName << "</b>";
     return errorStream.str();
   }
   builder.jsFileContents.setSize(builder.jsFileNames.size);
@@ -542,7 +556,7 @@ std::string WebAPIResponse::getOnePageJS() {
       "};";
     }
   }
-  return builder.getOnePageJavascriptBrowserify();
+  return builder.getBrowserificationAssembled(scriptEntryPoint);
 }
 
 bool BuilderApplication::loadJavascriptFileNames(
@@ -583,8 +597,8 @@ bool BuilderApplication::loadJavascriptFileNames(
   return true;
 }
 
-std::string BuilderApplication::getOnePageJavascriptBrowserify() {
-  MacroRegisterFunctionWithName("BuilderApplication::getOnePageJavascriptBrowserify");
+std::string BuilderApplication::getBrowserificationAssembled(const std::string& entryPoint) {
+  MacroRegisterFunctionWithName("BuilderApplication::getBrowserificationAssembled");
   std::stringstream out;
   out << "(()=>{\n"
   << "let jsContent = {\n";
@@ -598,8 +612,9 @@ std::string BuilderApplication::getOnePageJavascriptBrowserify() {
     out << "\n},\n";
   }
   out << "};\n"
-  << "jsContent['/calculator_html/browserifier'](jsContent, null, null);\n"
-  << "\n}) ();";
+  << "jsContent['/calculator_html/browserifier'](jsContent, '"
+  << entryPoint << "', null);\n"
+  << "\n})();";
   return out.str();
 }
 

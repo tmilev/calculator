@@ -182,7 +182,12 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     return this->processCalculatorOnePageJS(false);
   } else if ("/" + global.requestType == WebAPI::request::onePageJSWithHash) {
     return this->processCalculatorOnePageJS(true);
+  } else if ("/" + global.requestType == WebAPI::request::calculatorWorkerJS) {
+    return this->processCalculatorWebWorkerJS(false);
+  } else if ("/" + global.requestType == WebAPI::request::calculatorWorkerJSWithHash) {
+    return this->processCalculatorWebWorkerJS(true);
   }
+  global << "DEBUG: here we are, the request: " <<  global.requestType << Logger::endL;
   return false;
 }
 
@@ -474,6 +479,18 @@ bool WebAPIResponse::processCheckAnswer(bool hideDesiredAnswer) {
   this->owner->setHeaderOKNoContentLength("", "text/html");
   JSData resultJSON = WebAPIResponse::checkAnswer(hideDesiredAnswer);
   return global.response.writeResponse(resultJSON);
+  return true;
+}
+
+bool WebAPIResponse::processCalculatorWebWorkerJS(bool appendBuildHash) {
+  MacroRegisterFunctionWithName("WebAPIResponse::processCalculatorWebWorkerJS");
+  if (appendBuildHash) {
+    this->owner->setHeaderOKNoContentLength(WebAPI::headerCacheControl, "text/javascript");
+  } else {
+    this->owner->setHeaderOKNoContentLength("", "text/javascript");
+  }
+  this->owner->writeToBody(WebAPIResponse::getCalculatorWorkerJS());
+  this->owner->sendPending();
   return true;
 }
 

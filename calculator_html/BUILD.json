@@ -1,5 +1,4 @@
 [
-  "/calculator_html/",
   "/calculator_html/browserifier.js",
   "/calculator_html/pathnames.js",
   "/calculator_html/server_information.js",
@@ -52,6 +51,5 @@
   "/calculator_html/dynamic_javascript.js",
   "/calculator_html/calculator_page_editor.js",
   "/calculator_html/lie_algebras.js",
-  "/calculator_html/web_assembly/start_worker.js",
-  "/calculator_html/web_assembly/calculator.js"
+  "/calculator_html/web_assembly_worker.js"
 ]

@@ -4020,6 +4020,7 @@ void WebServer::initializeMainHashes() {
     WebAPI::request::calculatorHTML
   );
   WebAPI::request::onePageJSWithHash = FileOperations::GetVirtualNameWithHash(WebAPI::request::onePageJS);
+  WebAPI::request::calculatorWorkerJSWithHash = FileOperations::GetVirtualNameWithHash(WebAPI::request::calculatorWorkerJS);
 }
 
 void WebServer::initializeMainRequests() {
@@ -4097,6 +4098,8 @@ void WebServer::initializeMainAddresses() {
 
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(WebAPI::request::onePageJS);
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(WebAPI::request::onePageJSWithHash);
+  this->addressStartsInterpretedAsCalculatorRequest.addOnTop(WebAPI::request::calculatorWorkerJS);
+  this->addressStartsInterpretedAsCalculatorRequest.addOnTop(WebAPI::request::calculatorWorkerJSWithHash);
 
   // FORBIDDEN:
   // this->addressStartsNotNeedingLogin.addOnTop("logout");

@@ -1424,15 +1424,7 @@ FS.ignorePermissions = false;
 
 TTY.init();
 SOCKFS.root = FS.mount(SOCKFS, {}, null);
-PIPEFS.root = FS.mount(PIPEFS, {}, null);
   callRuntimeCallbacks(__ATINIT__);
-}
-
-function preMain() {
-  checkStackCookie();
-  if (ENVIRONMENT_IS_PTHREAD) return; // PThreads reuse the runtime from the main thread.
-  
-  callRuntimeCallbacks(__ATMAIN__);
 }
 
 function exitRuntime() {
@@ -1810,8 +1802,8 @@ var tempI64;
 // === Body ===
 
 var ASM_CONSTS = {
-  684760: function() {throw 'Canceled!'},  
- 684778: function($0, $1) {setTimeout(function() { __emscripten_do_dispatch_to_thread($0, $1); }, 0);}
+  630472: function() {throw 'Canceled!'},  
+ 630490: function($0, $1) {setTimeout(function() { __emscripten_do_dispatch_to_thread($0, $1); }, 0);}
 };
 function initPthreadsJS(){ PThread.initRuntime(); }
 
@@ -4864,87 +4856,210 @@ function initPthreadsJS(){ PThread.initRuntime(); }
         else assert(high === -1);
         return low;
       }};
-  function ___sys__newselect(nfds, readfds, writefds, exceptfds, timeout) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(3, 1, nfds, readfds, writefds, exceptfds, timeout);
+  function ___sys_chdir(path) {
+  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(3, 1, path);
   try {
   
-      // readfds are supported,
-      // writefds checks socket open status
-      // exceptfds not supported
-      // timeout is always 0 - fully async
-      assert(nfds <= 64, 'nfds must be less than or equal to 64');  // fd sets have 64 bits // TODO: this could be 1024 based on current musl headers
-      assert(!exceptfds, 'exceptfds not supported');
+      path = SYSCALLS.getStr(path);
+      FS.chdir(path);
+      return 0;
+    } catch (e) {
+    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
+    return -e.errno;
+  }
+  }
   
-      var total = 0;
-      
-      var srcReadLow = (readfds ? HEAP32[((readfds)>>2)] : 0),
-          srcReadHigh = (readfds ? HEAP32[(((readfds)+(4))>>2)] : 0);
-      var srcWriteLow = (writefds ? HEAP32[((writefds)>>2)] : 0),
-          srcWriteHigh = (writefds ? HEAP32[(((writefds)+(4))>>2)] : 0);
-      var srcExceptLow = (exceptfds ? HEAP32[((exceptfds)>>2)] : 0),
-          srcExceptHigh = (exceptfds ? HEAP32[(((exceptfds)+(4))>>2)] : 0);
+
+  function ___sys_fcntl64(fd, cmd, varargs) {
+  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(4, 1, fd, cmd, varargs);
+  SYSCALLS.varargs = varargs;
+  try {
   
-      var dstReadLow = 0,
-          dstReadHigh = 0;
-      var dstWriteLow = 0,
-          dstWriteHigh = 0;
-      var dstExceptLow = 0,
-          dstExceptHigh = 0;
-  
-      var allLow = (readfds ? HEAP32[((readfds)>>2)] : 0) |
-                   (writefds ? HEAP32[((writefds)>>2)] : 0) |
-                   (exceptfds ? HEAP32[((exceptfds)>>2)] : 0);
-      var allHigh = (readfds ? HEAP32[(((readfds)+(4))>>2)] : 0) |
-                    (writefds ? HEAP32[(((writefds)+(4))>>2)] : 0) |
-                    (exceptfds ? HEAP32[(((exceptfds)+(4))>>2)] : 0);
-  
-      var check = function(fd, low, high, val) {
-        return (fd < 32 ? (low & val) : (high & val));
-      };
-  
-      for (var fd = 0; fd < nfds; fd++) {
-        var mask = 1 << (fd % 32);
-        if (!(check(fd, allLow, allHigh, mask))) {
-          continue;  // index isn't in the set
+      var stream = SYSCALLS.getStreamFromFD(fd);
+      switch (cmd) {
+        case 0: {
+          var arg = SYSCALLS.get();
+          if (arg < 0) {
+            return -28;
+          }
+          var newStream;
+          newStream = FS.open(stream.path, stream.flags, 0, arg);
+          return newStream.fd;
         }
-  
-        var stream = FS.getStream(fd);
-        if (!stream) throw new FS.ErrnoError(8);
-  
-        var flags = SYSCALLS.DEFAULT_POLLMASK;
-  
-        if (stream.stream_ops.poll) {
-          flags = stream.stream_ops.poll(stream);
+        case 1:
+        case 2:
+          return 0;  // FD_CLOEXEC makes no sense for a single process.
+        case 3:
+          return stream.flags;
+        case 4: {
+          var arg = SYSCALLS.get();
+          stream.flags |= arg;
+          return 0;
         }
-  
-        if ((flags & 1) && check(fd, srcReadLow, srcReadHigh, mask)) {
-          fd < 32 ? (dstReadLow = dstReadLow | mask) : (dstReadHigh = dstReadHigh | mask);
-          total++;
+        case 12:
+        /* case 12: Currently in musl F_GETLK64 has same value as F_GETLK, so omitted to avoid duplicate case blocks. If that changes, uncomment this */ {
+          
+          var arg = SYSCALLS.get();
+          var offset = 0;
+          // We're always unlocked.
+          HEAP16[(((arg)+(offset))>>1)] = 2;
+          return 0;
         }
-        if ((flags & 4) && check(fd, srcWriteLow, srcWriteHigh, mask)) {
-          fd < 32 ? (dstWriteLow = dstWriteLow | mask) : (dstWriteHigh = dstWriteHigh | mask);
-          total++;
-        }
-        if ((flags & 2) && check(fd, srcExceptLow, srcExceptHigh, mask)) {
-          fd < 32 ? (dstExceptLow = dstExceptLow | mask) : (dstExceptHigh = dstExceptHigh | mask);
-          total++;
+        case 13:
+        case 14:
+        /* case 13: Currently in musl F_SETLK64 has same value as F_SETLK, so omitted to avoid duplicate case blocks. If that changes, uncomment this */
+        /* case 14: Currently in musl F_SETLKW64 has same value as F_SETLKW, so omitted to avoid duplicate case blocks. If that changes, uncomment this */
+          
+          
+          return 0; // Pretend that the locking is successful.
+        case 16:
+        case 8:
+          return -28; // These are for sockets. We don't have them fully implemented yet.
+        case 9:
+          // musl trusts getown return values, due to a bug where they must be, as they overlap with errors. just return -1 here, so fnctl() returns that, and we set errno ourselves.
+          setErrNo(28);
+          return -1;
+        default: {
+          return -28;
         }
       }
+    } catch (e) {
+    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
+    return -e.errno;
+  }
+  }
   
-      if (readfds) {
-        HEAP32[((readfds)>>2)] = dstReadLow;
-        HEAP32[(((readfds)+(4))>>2)] = dstReadHigh;
+
+  function ___sys_getcwd(buf, size) {
+  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(5, 1, buf, size);
+  try {
+  
+      if (size === 0) return -28;
+      var cwd = FS.cwd();
+      var cwdLengthInBytes = lengthBytesUTF8(cwd);
+      if (size < cwdLengthInBytes + 1) return -68;
+      stringToUTF8(cwd, buf, size);
+      return buf;
+    } catch (e) {
+    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
+    return -e.errno;
+  }
+  }
+  
+
+  function ___sys_getdents64(fd, dirp, count) {
+  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(6, 1, fd, dirp, count);
+  try {
+  
+      var stream = SYSCALLS.getStreamFromFD(fd)
+      if (!stream.getdents) {
+        stream.getdents = FS.readdir(stream.path);
       }
-      if (writefds) {
-        HEAP32[((writefds)>>2)] = dstWriteLow;
-        HEAP32[(((writefds)+(4))>>2)] = dstWriteHigh;
+  
+      var struct_size = 280;
+      var pos = 0;
+      var off = FS.llseek(stream, 0, 1);
+  
+      var idx = Math.floor(off / struct_size);
+  
+      while (idx < stream.getdents.length && pos + struct_size <= count) {
+        var id;
+        var type;
+        var name = stream.getdents[idx];
+        if (name[0] === '.') {
+          id = 1;
+          type = 4; // DT_DIR
+        } else {
+          var child = FS.lookupNode(stream.node, name);
+          id = child.id;
+          type = FS.isChrdev(child.mode) ? 2 :  // DT_CHR, character device.
+                 FS.isDir(child.mode) ? 4 :     // DT_DIR, directory.
+                 FS.isLink(child.mode) ? 10 :   // DT_LNK, symbolic link.
+                 8;                             // DT_REG, regular file.
+        }
+        (tempI64 = [id>>>0,(tempDouble=id,(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? ((Math.min((+(Math.floor((tempDouble)/4294967296.0))), 4294967295.0))|0)>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)],HEAP32[((dirp + pos)>>2)] = tempI64[0],HEAP32[(((dirp + pos)+(4))>>2)] = tempI64[1]);
+        (tempI64 = [(idx + 1) * struct_size>>>0,(tempDouble=(idx + 1) * struct_size,(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? ((Math.min((+(Math.floor((tempDouble)/4294967296.0))), 4294967295.0))|0)>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)],HEAP32[(((dirp + pos)+(8))>>2)] = tempI64[0],HEAP32[(((dirp + pos)+(12))>>2)] = tempI64[1]);
+        HEAP16[(((dirp + pos)+(16))>>1)] = 280;
+        HEAP8[(((dirp + pos)+(18))>>0)] = type;
+        stringToUTF8(name, dirp + pos + 19, 256);
+        pos += struct_size;
+        idx += 1;
       }
-      if (exceptfds) {
-        HEAP32[((exceptfds)>>2)] = dstExceptLow;
-        HEAP32[(((exceptfds)+(4))>>2)] = dstExceptHigh;
+      FS.llseek(stream, idx * struct_size, 0);
+      return pos;
+    } catch (e) {
+    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
+    return -e.errno;
+  }
+  }
+  
+
+  function ___sys_ioctl(fd, op, varargs) {
+  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(7, 1, fd, op, varargs);
+  SYSCALLS.varargs = varargs;
+  try {
+  
+      var stream = SYSCALLS.getStreamFromFD(fd);
+      switch (op) {
+        case 21509:
+        case 21505: {
+          if (!stream.tty) return -59;
+          return 0;
+        }
+        case 21510:
+        case 21511:
+        case 21512:
+        case 21506:
+        case 21507:
+        case 21508: {
+          if (!stream.tty) return -59;
+          return 0; // no-op, not actually adjusting terminal settings
+        }
+        case 21519: {
+          if (!stream.tty) return -59;
+          var argp = SYSCALLS.get();
+          HEAP32[((argp)>>2)] = 0;
+          return 0;
+        }
+        case 21520: {
+          if (!stream.tty) return -59;
+          return -28; // not supported
+        }
+        case 21531: {
+          var argp = SYSCALLS.get();
+          return FS.ioctl(stream, op, argp);
+        }
+        case 21523: {
+          // TODO: in theory we should write to the winsize struct that gets
+          // passed in, but for now musl doesn't read anything on it
+          if (!stream.tty) return -59;
+          return 0;
+        }
+        case 21524: {
+          // TODO: technically, this ioctl call should change the window size.
+          // but, since emscripten doesn't have any concept of a terminal window
+          // yet, we'll just silently throw it away as we do TIOCGWINSZ
+          if (!stream.tty) return -59;
+          return 0;
+        }
+        default: abort('bad ioctl syscall ' + op);
       }
-      
-      return total;
+    } catch (e) {
+    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
+    return -e.errno;
+  }
+  }
+  
+
+  function ___sys_open(path, flags, varargs) {
+  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(8, 1, path, flags, varargs);
+  SYSCALLS.varargs = varargs;
+  try {
+  
+      var pathname = SYSCALLS.getStr(path);
+      var mode = varargs ? SYSCALLS.get() : 0;
+      var stream = FS.open(pathname, flags, mode);
+      return stream.fd;
     } catch (e) {
     if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
     return -e.errno;
@@ -5708,17 +5823,19 @@ function initPthreadsJS(){ PThread.initRuntime(); }
   
         return null;
       }};
-  function ___sys_accept4(fd, addr, addrlen, flags) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(4, 1, fd, addr, addrlen, flags);
+  function ___sys_recvfrom(fd, buf, len, flags, addr, addrlen) {
+  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(9, 1, fd, buf, len, flags, addr, addrlen);
   try {
   
       var sock = getSocketFromFD(fd);
-      var newsock = sock.sock_ops.accept(sock);
+      var msg = sock.sock_ops.recvmsg(sock, len);
+      if (!msg) return 0; // socket is closed
       if (addr) {
-        var errno = writeSockaddr(addr, newsock.family, DNS.lookup_name(newsock.daddr), newsock.dport, addrlen);
+        var errno = writeSockaddr(addr, sock.family, DNS.lookup_name(msg.addr), msg.port, addrlen);
         assert(!errno);
       }
-      return newsock.stream.fd;
+      HEAPU8.set(msg.buffer, buf);
+      return msg.buffer.byteLength;
     } catch (e) {
     if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
     return -e.errno;
@@ -5865,503 +5982,8 @@ function initPthreadsJS(){ PThread.initRuntime(); }
       info.addr = DNS.lookup_addr(info.addr) || info.addr;
       return info;
     }
-  function ___sys_bind(fd, addr, addrlen) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(5, 1, fd, addr, addrlen);
-  try {
-  
-      var sock = getSocketFromFD(fd);
-      var info = getSocketAddress(addr, addrlen);
-      sock.sock_ops.bind(sock, info.addr, info.port);
-      return 0;
-    } catch (e) {
-    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
-    return -e.errno;
-  }
-  }
-  
-
-  function ___sys_chdir(path) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(6, 1, path);
-  try {
-  
-      path = SYSCALLS.getStr(path);
-      FS.chdir(path);
-      return 0;
-    } catch (e) {
-    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
-    return -e.errno;
-  }
-  }
-  
-
-  function ___sys_connect(fd, addr, addrlen) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(7, 1, fd, addr, addrlen);
-  try {
-  
-      var sock = getSocketFromFD(fd);
-      var info = getSocketAddress(addr, addrlen);
-      sock.sock_ops.connect(sock, info.addr, info.port);
-      return 0;
-    } catch (e) {
-    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
-    return -e.errno;
-  }
-  }
-  
-
-  function ___sys_fcntl64(fd, cmd, varargs) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(8, 1, fd, cmd, varargs);
-  SYSCALLS.varargs = varargs;
-  try {
-  
-      var stream = SYSCALLS.getStreamFromFD(fd);
-      switch (cmd) {
-        case 0: {
-          var arg = SYSCALLS.get();
-          if (arg < 0) {
-            return -28;
-          }
-          var newStream;
-          newStream = FS.open(stream.path, stream.flags, 0, arg);
-          return newStream.fd;
-        }
-        case 1:
-        case 2:
-          return 0;  // FD_CLOEXEC makes no sense for a single process.
-        case 3:
-          return stream.flags;
-        case 4: {
-          var arg = SYSCALLS.get();
-          stream.flags |= arg;
-          return 0;
-        }
-        case 12:
-        /* case 12: Currently in musl F_GETLK64 has same value as F_GETLK, so omitted to avoid duplicate case blocks. If that changes, uncomment this */ {
-          
-          var arg = SYSCALLS.get();
-          var offset = 0;
-          // We're always unlocked.
-          HEAP16[(((arg)+(offset))>>1)] = 2;
-          return 0;
-        }
-        case 13:
-        case 14:
-        /* case 13: Currently in musl F_SETLK64 has same value as F_SETLK, so omitted to avoid duplicate case blocks. If that changes, uncomment this */
-        /* case 14: Currently in musl F_SETLKW64 has same value as F_SETLKW, so omitted to avoid duplicate case blocks. If that changes, uncomment this */
-          
-          
-          return 0; // Pretend that the locking is successful.
-        case 16:
-        case 8:
-          return -28; // These are for sockets. We don't have them fully implemented yet.
-        case 9:
-          // musl trusts getown return values, due to a bug where they must be, as they overlap with errors. just return -1 here, so fnctl() returns that, and we set errno ourselves.
-          setErrNo(28);
-          return -1;
-        default: {
-          return -28;
-        }
-      }
-    } catch (e) {
-    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
-    return -e.errno;
-  }
-  }
-  
-
-  function ___sys_getcwd(buf, size) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(9, 1, buf, size);
-  try {
-  
-      if (size === 0) return -28;
-      var cwd = FS.cwd();
-      var cwdLengthInBytes = lengthBytesUTF8(cwd);
-      if (size < cwdLengthInBytes + 1) return -68;
-      stringToUTF8(cwd, buf, size);
-      return buf;
-    } catch (e) {
-    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
-    return -e.errno;
-  }
-  }
-  
-
-  function ___sys_getdents64(fd, dirp, count) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(10, 1, fd, dirp, count);
-  try {
-  
-      var stream = SYSCALLS.getStreamFromFD(fd)
-      if (!stream.getdents) {
-        stream.getdents = FS.readdir(stream.path);
-      }
-  
-      var struct_size = 280;
-      var pos = 0;
-      var off = FS.llseek(stream, 0, 1);
-  
-      var idx = Math.floor(off / struct_size);
-  
-      while (idx < stream.getdents.length && pos + struct_size <= count) {
-        var id;
-        var type;
-        var name = stream.getdents[idx];
-        if (name[0] === '.') {
-          id = 1;
-          type = 4; // DT_DIR
-        } else {
-          var child = FS.lookupNode(stream.node, name);
-          id = child.id;
-          type = FS.isChrdev(child.mode) ? 2 :  // DT_CHR, character device.
-                 FS.isDir(child.mode) ? 4 :     // DT_DIR, directory.
-                 FS.isLink(child.mode) ? 10 :   // DT_LNK, symbolic link.
-                 8;                             // DT_REG, regular file.
-        }
-        (tempI64 = [id>>>0,(tempDouble=id,(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? ((Math.min((+(Math.floor((tempDouble)/4294967296.0))), 4294967295.0))|0)>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)],HEAP32[((dirp + pos)>>2)] = tempI64[0],HEAP32[(((dirp + pos)+(4))>>2)] = tempI64[1]);
-        (tempI64 = [(idx + 1) * struct_size>>>0,(tempDouble=(idx + 1) * struct_size,(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? ((Math.min((+(Math.floor((tempDouble)/4294967296.0))), 4294967295.0))|0)>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)],HEAP32[(((dirp + pos)+(8))>>2)] = tempI64[0],HEAP32[(((dirp + pos)+(12))>>2)] = tempI64[1]);
-        HEAP16[(((dirp + pos)+(16))>>1)] = 280;
-        HEAP8[(((dirp + pos)+(18))>>0)] = type;
-        stringToUTF8(name, dirp + pos + 19, 256);
-        pos += struct_size;
-        idx += 1;
-      }
-      FS.llseek(stream, idx * struct_size, 0);
-      return pos;
-    } catch (e) {
-    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
-    return -e.errno;
-  }
-  }
-  
-
-  function ___sys_getpid() {
-      return 42;
-    }
-
-  function ___sys_ioctl(fd, op, varargs) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(11, 1, fd, op, varargs);
-  SYSCALLS.varargs = varargs;
-  try {
-  
-      var stream = SYSCALLS.getStreamFromFD(fd);
-      switch (op) {
-        case 21509:
-        case 21505: {
-          if (!stream.tty) return -59;
-          return 0;
-        }
-        case 21510:
-        case 21511:
-        case 21512:
-        case 21506:
-        case 21507:
-        case 21508: {
-          if (!stream.tty) return -59;
-          return 0; // no-op, not actually adjusting terminal settings
-        }
-        case 21519: {
-          if (!stream.tty) return -59;
-          var argp = SYSCALLS.get();
-          HEAP32[((argp)>>2)] = 0;
-          return 0;
-        }
-        case 21520: {
-          if (!stream.tty) return -59;
-          return -28; // not supported
-        }
-        case 21531: {
-          var argp = SYSCALLS.get();
-          return FS.ioctl(stream, op, argp);
-        }
-        case 21523: {
-          // TODO: in theory we should write to the winsize struct that gets
-          // passed in, but for now musl doesn't read anything on it
-          if (!stream.tty) return -59;
-          return 0;
-        }
-        case 21524: {
-          // TODO: technically, this ioctl call should change the window size.
-          // but, since emscripten doesn't have any concept of a terminal window
-          // yet, we'll just silently throw it away as we do TIOCGWINSZ
-          if (!stream.tty) return -59;
-          return 0;
-        }
-        default: abort('bad ioctl syscall ' + op);
-      }
-    } catch (e) {
-    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
-    return -e.errno;
-  }
-  }
-  
-
-  function ___sys_listen(fd, backlog) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(12, 1, fd, backlog);
-  try {
-  
-      var sock = getSocketFromFD(fd);
-      sock.sock_ops.listen(sock, backlog);
-      return 0;
-    } catch (e) {
-    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
-    return -e.errno;
-  }
-  }
-  
-
-  function ___sys_open(path, flags, varargs) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(13, 1, path, flags, varargs);
-  SYSCALLS.varargs = varargs;
-  try {
-  
-      var pathname = SYSCALLS.getStr(path);
-      var mode = varargs ? SYSCALLS.get() : 0;
-      var stream = FS.open(pathname, flags, mode);
-      return stream.fd;
-    } catch (e) {
-    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
-    return -e.errno;
-  }
-  }
-  
-
-  var PIPEFS={BUCKET_BUFFER_SIZE:8192,mount:function (mount) {
-        // Do not pollute the real root directory or its child nodes with pipes
-        // Looks like it is OK to create another pseudo-root node not linked to the FS.root hierarchy this way
-        return FS.createNode(null, '/', 16384 | 511 /* 0777 */, 0);
-      },createPipe:function () {
-        var pipe = {
-          buckets: []
-        };
-  
-        pipe.buckets.push({
-          buffer: new Uint8Array(PIPEFS.BUCKET_BUFFER_SIZE),
-          offset: 0,
-          roffset: 0
-        });
-  
-        var rName = PIPEFS.nextname();
-        var wName = PIPEFS.nextname();
-        var rNode = FS.createNode(PIPEFS.root, rName, 4096, 0);
-        var wNode = FS.createNode(PIPEFS.root, wName, 4096, 0);
-  
-        rNode.pipe = pipe;
-        wNode.pipe = pipe;
-  
-        var readableStream = FS.createStream({
-          path: rName,
-          node: rNode,
-          flags: 0,
-          seekable: false,
-          stream_ops: PIPEFS.stream_ops
-        });
-        rNode.stream = readableStream;
-  
-        var writableStream = FS.createStream({
-          path: wName,
-          node: wNode,
-          flags: 1,
-          seekable: false,
-          stream_ops: PIPEFS.stream_ops
-        });
-        wNode.stream = writableStream;
-  
-        return {
-          readable_fd: readableStream.fd,
-          writable_fd: writableStream.fd
-        };
-      },stream_ops:{poll:function (stream) {
-          var pipe = stream.node.pipe;
-  
-          if ((stream.flags & 2097155) === 1) {
-            return (256 | 4);
-          } else {
-            if (pipe.buckets.length > 0) {
-              for (var i = 0; i < pipe.buckets.length; i++) {
-                var bucket = pipe.buckets[i];
-                if (bucket.offset - bucket.roffset > 0) {
-                  return (64 | 1);
-                }
-              }
-            }
-          }
-  
-          return 0;
-        },ioctl:function (stream, request, varargs) {
-          return ERRNO_CODES.EINVAL;
-        },fsync:function (stream) {
-          return ERRNO_CODES.EINVAL;
-        },read:function (stream, buffer, offset, length, position /* ignored */) {
-          var pipe = stream.node.pipe;
-          var currentLength = 0;
-  
-          for (var i = 0; i < pipe.buckets.length; i++) {
-            var bucket = pipe.buckets[i];
-            currentLength += bucket.offset - bucket.roffset;
-          }
-  
-          assert(buffer instanceof ArrayBuffer || buffer instanceof SharedArrayBuffer || ArrayBuffer.isView(buffer));
-          var data = buffer.subarray(offset, offset + length);
-  
-          if (length <= 0) {
-            return 0;
-          }
-          if (currentLength == 0) {
-            // Behave as if the read end is always non-blocking
-            throw new FS.ErrnoError(ERRNO_CODES.EAGAIN);
-          }
-          var toRead = Math.min(currentLength, length);
-  
-          var totalRead = toRead;
-          var toRemove = 0;
-  
-          for (var i = 0; i < pipe.buckets.length; i++) {
-            var currBucket = pipe.buckets[i];
-            var bucketSize = currBucket.offset - currBucket.roffset;
-  
-            if (toRead <= bucketSize) {
-              var tmpSlice = currBucket.buffer.subarray(currBucket.roffset, currBucket.offset);
-              if (toRead < bucketSize) {
-                tmpSlice = tmpSlice.subarray(0, toRead);
-                currBucket.roffset += toRead;
-              } else {
-                toRemove++;
-              }
-              data.set(tmpSlice);
-              break;
-            } else {
-              var tmpSlice = currBucket.buffer.subarray(currBucket.roffset, currBucket.offset);
-              data.set(tmpSlice);
-              data = data.subarray(tmpSlice.byteLength);
-              toRead -= tmpSlice.byteLength;
-              toRemove++;
-            }
-          }
-  
-          if (toRemove && toRemove == pipe.buckets.length) {
-            // Do not generate excessive garbage in use cases such as
-            // write several bytes, read everything, write several bytes, read everything...
-            toRemove--;
-            pipe.buckets[toRemove].offset = 0;
-            pipe.buckets[toRemove].roffset = 0;
-          }
-  
-          pipe.buckets.splice(0, toRemove);
-  
-          return totalRead;
-        },write:function (stream, buffer, offset, length, position /* ignored */) {
-          var pipe = stream.node.pipe;
-  
-          assert(buffer instanceof ArrayBuffer || buffer instanceof SharedArrayBuffer || ArrayBuffer.isView(buffer));
-          var data = buffer.subarray(offset, offset + length);
-  
-          var dataLen = data.byteLength;
-          if (dataLen <= 0) {
-            return 0;
-          }
-  
-          var currBucket = null;
-  
-          if (pipe.buckets.length == 0) {
-            currBucket = {
-              buffer: new Uint8Array(PIPEFS.BUCKET_BUFFER_SIZE),
-              offset: 0,
-              roffset: 0
-            };
-            pipe.buckets.push(currBucket);
-          } else {
-            currBucket = pipe.buckets[pipe.buckets.length - 1];
-          }
-  
-          assert(currBucket.offset <= PIPEFS.BUCKET_BUFFER_SIZE);
-  
-          var freeBytesInCurrBuffer = PIPEFS.BUCKET_BUFFER_SIZE - currBucket.offset;
-          if (freeBytesInCurrBuffer >= dataLen) {
-            currBucket.buffer.set(data, currBucket.offset);
-            currBucket.offset += dataLen;
-            return dataLen;
-          } else if (freeBytesInCurrBuffer > 0) {
-            currBucket.buffer.set(data.subarray(0, freeBytesInCurrBuffer), currBucket.offset);
-            currBucket.offset += freeBytesInCurrBuffer;
-            data = data.subarray(freeBytesInCurrBuffer, data.byteLength);
-          }
-  
-          var numBuckets = (data.byteLength / PIPEFS.BUCKET_BUFFER_SIZE) | 0;
-          var remElements = data.byteLength % PIPEFS.BUCKET_BUFFER_SIZE;
-  
-          for (var i = 0; i < numBuckets; i++) {
-            var newBucket = {
-              buffer: new Uint8Array(PIPEFS.BUCKET_BUFFER_SIZE),
-              offset: PIPEFS.BUCKET_BUFFER_SIZE,
-              roffset: 0
-            };
-            pipe.buckets.push(newBucket);
-            newBucket.buffer.set(data.subarray(0, PIPEFS.BUCKET_BUFFER_SIZE));
-            data = data.subarray(PIPEFS.BUCKET_BUFFER_SIZE, data.byteLength);
-          }
-  
-          if (remElements > 0) {
-            var newBucket = {
-              buffer: new Uint8Array(PIPEFS.BUCKET_BUFFER_SIZE),
-              offset: data.byteLength,
-              roffset: 0
-            };
-            pipe.buckets.push(newBucket);
-            newBucket.buffer.set(data);
-          }
-  
-          return dataLen;
-        },close:function (stream) {
-          var pipe = stream.node.pipe;
-          pipe.buckets = null;
-        }},nextname:function () {
-        if (!PIPEFS.nextname.current) {
-          PIPEFS.nextname.current = 0;
-        }
-        return 'pipe[' + (PIPEFS.nextname.current++) + ']';
-      }};
-  function ___sys_pipe(fdPtr) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(14, 1, fdPtr);
-  try {
-  
-      if (fdPtr == 0) {
-        throw new FS.ErrnoError(21);
-      }
-  
-      var res = PIPEFS.createPipe();
-  
-      HEAP32[((fdPtr)>>2)] = res.readable_fd;
-      HEAP32[(((fdPtr)+(4))>>2)] = res.writable_fd;
-  
-      return 0;
-    } catch (e) {
-    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
-    return -e.errno;
-  }
-  }
-  
-
-  function ___sys_recvfrom(fd, buf, len, flags, addr, addrlen) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(15, 1, fd, buf, len, flags, addr, addrlen);
-  try {
-  
-      var sock = getSocketFromFD(fd);
-      var msg = sock.sock_ops.recvmsg(sock, len);
-      if (!msg) return 0; // socket is closed
-      if (addr) {
-        var errno = writeSockaddr(addr, sock.family, DNS.lookup_name(msg.addr), msg.port, addrlen);
-        assert(!errno);
-      }
-      HEAPU8.set(msg.buffer, buf);
-      return msg.buffer.byteLength;
-    } catch (e) {
-    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
-    return -e.errno;
-  }
-  }
-  
-
   function ___sys_sendto(fd, message, length, flags, addr, addr_len) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(16, 1, fd, message, length, flags, addr, addr_len);
+  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(10, 1, fd, message, length, flags, addr, addr_len);
   try {
   
       var sock = getSocketFromFD(fd);
@@ -6381,7 +6003,7 @@ function initPthreadsJS(){ PThread.initRuntime(); }
   
 
   function ___sys_setsockopt(fd) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(17, 1, fd);
+  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(11, 1, fd);
   try {
   
       return -50; // The option is unknown at the level indicated.
@@ -6391,42 +6013,6 @@ function initPthreadsJS(){ PThread.initRuntime(); }
   }
   }
   
-
-  function ___sys_socket(domain, type, protocol) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(18, 1, domain, type, protocol);
-  try {
-  
-      var sock = SOCKFS.createSocket(domain, type, protocol);
-      assert(sock.stream.fd < 64); // XXX ? select() assumes socket fd values are in 0..63
-      return sock.stream.fd;
-    } catch (e) {
-    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
-    return -e.errno;
-  }
-  }
-  
-
-  function ___sys_stat64(path, buf) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(19, 1, path, buf);
-  try {
-  
-      path = SYSCALLS.getStr(path);
-      return SYSCALLS.doStat(FS.stat, path, buf);
-    } catch (e) {
-    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
-    return -e.errno;
-  }
-  }
-  
-
-  function ___sys_wait4(pid, wstart, options, rusage) {try {
-  
-      return -52; // unsupported feature
-    } catch (e) {
-    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
-    return -e.errno;
-  }
-  }
 
   function __emscripten_notify_thread_queue(targetThreadId, mainThreadId) {
       if (targetThreadId == mainThreadId) {
@@ -6863,7 +6449,7 @@ function initPthreadsJS(){ PThread.initRuntime(); }
     }
   
   function _emscripten_set_canvas_element_size_main_thread(target, width, height) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(20, 1, target, width, height);
+  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(12, 1, target, width, height);
    return _emscripten_set_canvas_element_size_calling_thread(target, width, height); }
   
   function _emscripten_set_canvas_element_size(target, width, height) {
@@ -7101,7 +6687,7 @@ function initPthreadsJS(){ PThread.initRuntime(); }
       return getEnvStrings.strings;
     }
   function _environ_get(__environ, environ_buf) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(21, 1, __environ, environ_buf);
+  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(13, 1, __environ, environ_buf);
   try {
   
       var bufSize = 0;
@@ -7120,7 +6706,7 @@ function initPthreadsJS(){ PThread.initRuntime(); }
   
 
   function _environ_sizes_get(penviron_count, penviron_buf_size) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(22, 1, penviron_count, penviron_buf_size);
+  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(14, 1, penviron_count, penviron_buf_size);
   try {
   
       var strings = getEnvStrings();
@@ -7145,7 +6731,7 @@ function initPthreadsJS(){ PThread.initRuntime(); }
     }
 
   function _fd_close(fd) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(23, 1, fd);
+  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(15, 1, fd);
   try {
   
       var stream = SYSCALLS.getStreamFromFD(fd);
@@ -7159,7 +6745,7 @@ function initPthreadsJS(){ PThread.initRuntime(); }
   
 
   function _fd_read(fd, iov, iovcnt, pnum) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(24, 1, fd, iov, iovcnt, pnum);
+  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(16, 1, fd, iov, iovcnt, pnum);
   try {
   
       var stream = SYSCALLS.getStreamFromFD(fd);
@@ -7174,7 +6760,7 @@ function initPthreadsJS(){ PThread.initRuntime(); }
   
 
   function _fd_seek(fd, offset_low, offset_high, whence, newOffset) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(25, 1, fd, offset_low, offset_high, whence, newOffset);
+  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(17, 1, fd, offset_low, offset_high, whence, newOffset);
   try {
   
       
@@ -7201,7 +6787,7 @@ function initPthreadsJS(){ PThread.initRuntime(); }
   
 
   function _fd_write(fd, iov, iovcnt, pnum) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(26, 1, fd, iov, iovcnt, pnum);
+  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(18, 1, fd, iov, iovcnt, pnum);
   try {
   
       var stream = SYSCALLS.getStreamFromFD(fd);
@@ -7215,245 +6801,11 @@ function initPthreadsJS(){ PThread.initRuntime(); }
   }
   
 
-  function _fork() {
-      // pid_t fork(void);
-      // http://pubs.opengroup.org/onlinepubs/000095399/functions/fork.html
-      // We don't support multiple processes.
-      setErrNo(52);
-      return -1;
-    }
-
-  var GAI_ERRNO_MESSAGES={};
-  function _gai_strerror(val) {
-      var buflen = 256;
-  
-      // On first call to gai_strerror we initialise the buffer and populate the error messages.
-      if (!_gai_strerror.buffer) {
-          _gai_strerror.buffer = _malloc(buflen);
-  
-          GAI_ERRNO_MESSAGES['0'] = 'Success';
-          GAI_ERRNO_MESSAGES['' + -1] = 'Invalid value for \'ai_flags\' field';
-          GAI_ERRNO_MESSAGES['' + -2] = 'NAME or SERVICE is unknown';
-          GAI_ERRNO_MESSAGES['' + -3] = 'Temporary failure in name resolution';
-          GAI_ERRNO_MESSAGES['' + -4] = 'Non-recoverable failure in name res';
-          GAI_ERRNO_MESSAGES['' + -6] = '\'ai_family\' not supported';
-          GAI_ERRNO_MESSAGES['' + -7] = '\'ai_socktype\' not supported';
-          GAI_ERRNO_MESSAGES['' + -8] = 'SERVICE not supported for \'ai_socktype\'';
-          GAI_ERRNO_MESSAGES['' + -10] = 'Memory allocation failure';
-          GAI_ERRNO_MESSAGES['' + -11] = 'System error returned in \'errno\'';
-          GAI_ERRNO_MESSAGES['' + -12] = 'Argument buffer overflow';
-      }
-  
-      var msg = 'Unknown error';
-  
-      if (val in GAI_ERRNO_MESSAGES) {
-        if (GAI_ERRNO_MESSAGES[val].length > buflen - 1) {
-          msg = 'Message too long'; // EMSGSIZE message. This should never occur given the GAI_ERRNO_MESSAGES above.
-        } else {
-          msg = GAI_ERRNO_MESSAGES[val];
-        }
-      }
-  
-      writeAsciiToMemory(msg, _gai_strerror.buffer);
-      return _gai_strerror.buffer;
-    }
-
-  function _getaddrinfo(node, service, hint, out) {
-  if (ENVIRONMENT_IS_PTHREAD) return _emscripten_proxy_to_main_thread_js(27, 1, node, service, hint, out);
-  
-      // Note getaddrinfo currently only returns a single addrinfo with ai_next defaulting to NULL. When NULL
-      // hints are specified or ai_family set to AF_UNSPEC or ai_socktype or ai_protocol set to 0 then we
-      // really should provide a linked list of suitable addrinfo values.
-      var addrs = [];
-      var canon = null;
-      var addr = 0;
-      var port = 0;
-      var flags = 0;
-      var family = 0;
-      var type = 0;
-      var proto = 0;
-      var ai, last;
-  
-      function allocaddrinfo(family, type, proto, canon, addr, port) {
-        var sa, salen, ai;
-        var errno;
-  
-        salen = family === 10 ?
-          28 :
-          16;
-        addr = family === 10 ?
-          inetNtop6(addr) :
-          inetNtop4(addr);
-        sa = _malloc(salen);
-        errno = writeSockaddr(sa, family, addr, port);
-        assert(!errno);
-  
-        ai = _malloc(32);
-        HEAP32[(((ai)+(4))>>2)] = family;
-        HEAP32[(((ai)+(8))>>2)] = type;
-        HEAP32[(((ai)+(12))>>2)] = proto;
-        HEAP32[(((ai)+(24))>>2)] = canon;
-        HEAP32[(((ai)+(20))>>2)] = sa;
-        if (family === 10) {
-          HEAP32[(((ai)+(16))>>2)] = 28;
-        } else {
-          HEAP32[(((ai)+(16))>>2)] = 16;
-        }
-        HEAP32[(((ai)+(28))>>2)] = 0;
-  
-        return ai;
-      }
-  
-      if (hint) {
-        flags = HEAP32[((hint)>>2)];
-        family = HEAP32[(((hint)+(4))>>2)];
-        type = HEAP32[(((hint)+(8))>>2)];
-        proto = HEAP32[(((hint)+(12))>>2)];
-      }
-      if (type && !proto) {
-        proto = type === 2 ? 17 : 6;
-      }
-      if (!type && proto) {
-        type = proto === 17 ? 2 : 1;
-      }
-  
-      // If type or proto are set to zero in hints we should really be returning multiple addrinfo values, but for
-      // now default to a TCP STREAM socket so we can at least return a sensible addrinfo given NULL hints.
-      if (proto === 0) {
-        proto = 6;
-      }
-      if (type === 0) {
-        type = 1;
-      }
-  
-      if (!node && !service) {
-        return -2;
-      }
-      if (flags & ~(1|2|4|
-          1024|8|16|32)) {
-        return -1;
-      }
-      if (hint !== 0 && (HEAP32[((hint)>>2)] & 2) && !node) {
-        return -1;
-      }
-      if (flags & 32) {
-        // TODO
-        return -2;
-      }
-      if (type !== 0 && type !== 1 && type !== 2) {
-        return -7;
-      }
-      if (family !== 0 && family !== 2 && family !== 10) {
-        return -6;
-      }
-  
-      if (service) {
-        service = UTF8ToString(service);
-        port = parseInt(service, 10);
-  
-        if (isNaN(port)) {
-          if (flags & 1024) {
-            return -2;
-          }
-          // TODO support resolving well-known service names from:
-          // http://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.txt
-          return -8;
-        }
-      }
-  
-      if (!node) {
-        if (family === 0) {
-          family = 2;
-        }
-        if ((flags & 1) === 0) {
-          if (family === 2) {
-            addr = _htonl(2130706433);
-          } else {
-            addr = [0, 0, 0, 1];
-          }
-        }
-        ai = allocaddrinfo(family, type, proto, null, addr, port);
-        HEAP32[((out)>>2)] = ai;
-        return 0;
-      }
-  
-      //
-      // try as a numeric address
-      //
-      node = UTF8ToString(node);
-      addr = inetPton4(node);
-      if (addr !== null) {
-        // incoming node is a valid ipv4 address
-        if (family === 0 || family === 2) {
-          family = 2;
-        }
-        else if (family === 10 && (flags & 8)) {
-          addr = [0, 0, _htonl(0xffff), addr];
-          family = 10;
-        } else {
-          return -2;
-        }
-      } else {
-        addr = inetPton6(node);
-        if (addr !== null) {
-          // incoming node is a valid ipv6 address
-          if (family === 0 || family === 10) {
-            family = 10;
-          } else {
-            return -2;
-          }
-        }
-      }
-      if (addr != null) {
-        ai = allocaddrinfo(family, type, proto, node, addr, port);
-        HEAP32[((out)>>2)] = ai;
-        return 0;
-      }
-      if (flags & 4) {
-        return -2;
-      }
-  
-      //
-      // try as a hostname
-      //
-      // resolve the hostname to a temporary fake address
-      node = DNS.lookup_name(node);
-      addr = inetPton4(node);
-      if (family === 0) {
-        family = 2;
-      } else if (family === 10) {
-        addr = [0, 0, _htonl(0xffff), addr];
-      }
-      ai = allocaddrinfo(family, type, proto, null, addr, port);
-      HEAP32[((out)>>2)] = ai;
-      return 0;
-    }
-  
-
-  function _getentropy(buffer, size) {
-      if (!_getentropy.randomDevice) {
-        _getentropy.randomDevice = getRandomDevice();
-      }
-      for (var i = 0; i < size; i++) {
-        HEAP8[(((buffer)+(i))>>0)] = _getentropy.randomDevice()
-      }
-      return 0;
-    }
-
   function _gettimeofday(ptr) {
       var now = Date.now();
       HEAP32[((ptr)>>2)] = (now/1000)|0; // seconds
       HEAP32[(((ptr)+(4))>>2)] = ((now % 1000)*1000)|0; // microseconds
       return 0;
-    }
-
-  function _kill(pid, sig) {
-      // http://pubs.opengroup.org/onlinepubs/000095399/functions/kill.html
-      // Makes no sense in a single-process environment.
-  	  // Should kill itself somtimes depending on `pid`
-      err('Calling stub instead of kill()');
-      setErrNo(ERRNO_CODES.EPERM);
-      return -1;
     }
 
   function _mktime(tmPtr) {
@@ -7737,27 +7089,6 @@ function initPthreadsJS(){ PThread.initRuntime(); }
 
   function _setTempRet0(val) {
       setTempRet0(val);
-    }
-
-  function _sigaction(signum, act, oldact) {
-      //int sigaction(int signum, const struct sigaction *act, struct sigaction *oldact);
-      err('Calling stub instead of sigaction()');
-      return 0;
-    }
-
-  function _sigemptyset(set) {
-      HEAP32[((set)>>2)] = 0;
-      return 0;
-    }
-
-  function _sigfillset(set) {
-      HEAP32[((set)>>2)] = -1>>>0;
-      return 0;
-    }
-
-  function _sigprocmask() {
-      err('Calling stub instead of sigprocmask()');
-      return 0;
     }
 
   function __isLeapYear(year) {
@@ -8225,7 +7556,7 @@ var GLctx;;
 
  // proxiedFunctionTable specifies the list of functions that can be called either synchronously or asynchronously from other threads in postMessage()d or internally queued events. This way a pthread in a Worker can synchronously access e.g. the DOM on the main thread.
 
-var proxiedFunctionTable = [null,_atexit,_tzset,___sys__newselect,___sys_accept4,___sys_bind,___sys_chdir,___sys_connect,___sys_fcntl64,___sys_getcwd,___sys_getdents64,___sys_ioctl,___sys_listen,___sys_open,___sys_pipe,___sys_recvfrom,___sys_sendto,___sys_setsockopt,___sys_socket,___sys_stat64,_emscripten_set_canvas_element_size_main_thread,_environ_get,_environ_sizes_get,_fd_close,_fd_read,_fd_seek,_fd_write,_getaddrinfo];
+var proxiedFunctionTable = [null,_atexit,_tzset,___sys_chdir,___sys_fcntl64,___sys_getcwd,___sys_getdents64,___sys_ioctl,___sys_open,___sys_recvfrom,___sys_sendto,___sys_setsockopt,_emscripten_set_canvas_element_size_main_thread,_environ_get,_environ_sizes_get,_fd_close,_fd_read,_fd_seek,_fd_write];
 
 var ASSERTIONS = true;
 
@@ -8265,25 +7596,15 @@ var asmLibraryArg = {
   "__cxa_throw": ___cxa_throw,
   "__gmtime_r": ___gmtime_r,
   "__localtime_r": ___localtime_r,
-  "__sys__newselect": ___sys__newselect,
-  "__sys_accept4": ___sys_accept4,
-  "__sys_bind": ___sys_bind,
   "__sys_chdir": ___sys_chdir,
-  "__sys_connect": ___sys_connect,
   "__sys_fcntl64": ___sys_fcntl64,
   "__sys_getcwd": ___sys_getcwd,
   "__sys_getdents64": ___sys_getdents64,
-  "__sys_getpid": ___sys_getpid,
   "__sys_ioctl": ___sys_ioctl,
-  "__sys_listen": ___sys_listen,
   "__sys_open": ___sys_open,
-  "__sys_pipe": ___sys_pipe,
   "__sys_recvfrom": ___sys_recvfrom,
   "__sys_sendto": ___sys_sendto,
   "__sys_setsockopt": ___sys_setsockopt,
-  "__sys_socket": ___sys_socket,
-  "__sys_stat64": ___sys_stat64,
-  "__sys_wait4": ___sys_wait4,
   "_emscripten_notify_thread_queue": __emscripten_notify_thread_queue,
   "abort": _abort,
   "difftime": _difftime,
@@ -8306,22 +7627,13 @@ var asmLibraryArg = {
   "fd_read": _fd_read,
   "fd_seek": _fd_seek,
   "fd_write": _fd_write,
-  "fork": _fork,
-  "gai_strerror": _gai_strerror,
-  "getaddrinfo": _getaddrinfo,
-  "getentropy": _getentropy,
   "gettimeofday": _gettimeofday,
   "initPthreadsJS": initPthreadsJS,
-  "kill": _kill,
   "memory": wasmMemory,
   "mktime": _mktime,
   "pthread_create": _pthread_create,
   "pthread_join": _pthread_join,
   "setTempRet0": _setTempRet0,
-  "sigaction": _sigaction,
-  "sigemptyset": _sigemptyset,
-  "sigfillset": _sigfillset,
-  "sigprocmask": _sigprocmask,
   "strftime": _strftime,
   "strftime_l": _strftime_l,
   "system": _system,
@@ -8336,9 +7648,6 @@ var ___errno_location = Module["___errno_location"] = createExportWrapper("__err
 
 /** @type {function(...*):?} */
 var _pthread_self = Module["_pthread_self"] = createExportWrapper("pthread_self");
-
-/** @type {function(...*):?} */
-var _main = Module["_main"] = createExportWrapper("main");
 
 /** @type {function(...*):?} */
 var _callCalculator = Module["_callCalculator"] = createExportWrapper("callCalculator");
@@ -8459,8 +7768,8 @@ var dynCall_jiji = Module["dynCall_jiji"] = createExportWrapper("dynCall_jiji");
 /** @type {function(...*):?} */
 var dynCall_viijii = Module["dynCall_viijii"] = createExportWrapper("dynCall_viijii");
 
-var __emscripten_allow_main_runtime_queued_calls = Module['__emscripten_allow_main_runtime_queued_calls'] = 684308;
-var __emscripten_main_thread_futex = Module['__emscripten_main_thread_futex'] = 701592;
+var __emscripten_allow_main_runtime_queued_calls = Module['__emscripten_allow_main_runtime_queued_calls'] = 630016;
+var __emscripten_main_thread_futex = Module['__emscripten_main_thread_futex'] = 646400;
 
 
 
@@ -8721,53 +8030,6 @@ dependenciesFulfilled = function runCaller() {
   if (!calledRun) dependenciesFulfilled = runCaller; // try this again later, after new deps are fulfilled
 };
 
-function callMain(args) {
-  assert(runDependencies == 0, 'cannot call main when async dependencies remain! (listen on Module["onRuntimeInitialized"])');
-  assert(__ATPRERUN__.length == 0, 'cannot call main when preRun functions remain to be called');
-
-  var entryFunction = Module['_main'];
-
-  args = args || [];
-
-  var argc = args.length+1;
-  var argv = stackAlloc((argc + 1) * 4);
-  HEAP32[argv >> 2] = allocateUTF8OnStack(thisProgram);
-  for (var i = 1; i < argc; i++) {
-    HEAP32[(argv >> 2) + i] = allocateUTF8OnStack(args[i - 1]);
-  }
-  HEAP32[(argv >> 2) + argc] = 0;
-
-  try {
-
-    var ret = entryFunction(argc, argv);
-
-    // In PROXY_TO_PTHREAD builds, we should never exit the runtime below, as
-    // execution is asynchronously handed off to a pthread.
-      // if we're not running an evented main loop, it's time to exit
-      exit(ret, /* implicit = */ true);
-  }
-  catch(e) {
-    if (e instanceof ExitStatus) {
-      // exit() throws this once it's done to make sure execution
-      // has been stopped completely
-      return;
-    } else if (e == 'unwind') {
-      // running an evented main loop, don't immediately exit
-      return;
-    } else {
-      var toLog = e;
-      if (e && typeof e === 'object' && e.stack) {
-        toLog = [e, e.stack];
-      }
-      err('exception thrown: ' + toLog);
-      quit_(1, e);
-    }
-  } finally {
-    calledMain = true;
-
-  }
-}
-
 function stackCheckInit() {
   // This is normally called automatically during __wasm_call_ctors but need to
   // get these values before even running any of the ctors so we call it redundantly
@@ -8811,11 +8073,9 @@ function run(args) {
 
     initRuntime();
 
-    preMain();
-
     if (Module['onRuntimeInitialized']) Module['onRuntimeInitialized']();
 
-    if (shouldRunNow) callMain(args);
+    assert(!Module['_main'], 'compiled without a main, but one is present. if you added it from JS, use Module["onRuntimeInitialized"]');
 
     postRun();
   }
@@ -8929,11 +8189,6 @@ if (Module['preInit']) {
     Module['preInit'].pop()();
   }
 }
-
-// shouldRunNow refers to calling main(), not run().
-var shouldRunNow = true;
-
-if (Module['noInitialRun']) shouldRunNow = false;
 
 if (ENVIRONMENT_IS_PTHREAD) {
   // The default behaviour for pthreads is always to exit once they return

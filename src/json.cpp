@@ -7,13 +7,13 @@
 void JSData::operator=(const LargeInteger& other) {
   this->reset();
   this->elementType = JSData::token::tokenLargeInteger;
-  this->theInteger.getElement() = other;
+  this->integerValue.getElement() = other;
 }
 
 void JSData::operator=(int other) {
   this->reset();
   this->elementType = JSData::token::tokenLargeInteger;
-  this->theInteger.getElement() = other;
+  this->integerValue.getElement() = other;
 }
 
 void JSData::operator=(const bool other) {
@@ -43,7 +43,7 @@ void JSData::operator=(const JSData& other) {
   this->elementType = other.elementType;
   this->booleanValue = other.booleanValue;
   this->floatValue = other.floatValue;
-  this->theInteger = other.theInteger;
+  this->integerValue = other.integerValue;
   this->stringValue = other.stringValue;
   this->listObjects = other.listObjects;
   this->objects = other.objects;
@@ -85,13 +85,13 @@ bool JSData::hasCompositeKeyOfType(
   )) {
     return false;
   }
-  if (container.theInteger.getElement() < 0) {
+  if (container.integerValue.getElement() < 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Error: integer is negative. ";
     }
     return false;
   }
-  output = container.theInteger.getElement().value;
+  output = container.integerValue.getElement().value;
   return true;
 }
 
@@ -238,12 +238,12 @@ void JSData::operator=(const List<JSData>& other) {
 
 void JSData::operator=(int64_t input) {
   this->elementType = JSData::token::tokenLargeInteger;
-  this->theInteger.getElement().assignInt64(input);
+  this->integerValue.getElement().assignInt64(input);
 }
 
 bool JSData::isIntegerFittingInInt(int* whichInteger) {
   if (this->elementType == JSData::token::tokenLargeInteger) {
-    return this->theInteger.getElement().isIntegerFittingInInt(whichInteger);
+    return this->integerValue.getElement().isIntegerFittingInInt(whichInteger);
   }
   if (this->elementType == JSData::token::tokenFloat) {
     double floatRounded = static_cast<double>(static_cast<int>(this->floatValue));
@@ -349,14 +349,14 @@ bool JSData::tryToComputeType(std::stringstream* commentsOnFailure) {
   }
   if (this->stringValue.size() > 0) {
     if (this->stringValue[0] == '-' || MathRoutines::isADigit(this->stringValue[0])) {
-      this->theInteger.freeMemory();
+      this->integerValue.freeMemory();
       this->elementType = JSData::token::tokenUndefined;
       Rational parser;
       if (parser.assignStringFailureAllowed(this->stringValue)) {
         LargeInteger theInt;
         if (parser.isInteger(&theInt)) {
           this->elementType = JSData::token::tokenLargeInteger;
-          this->theInteger.getElement() = theInt;
+          this->integerValue.getElement() = theInt;
           this->stringValue = "";
           return true;
         }
@@ -791,7 +791,7 @@ somestream& JSData::intoStream(
       out << this->floatValue;
       return out;
     case JSData::token::tokenLargeInteger:
-      out << this->theInteger.getElementConst().toString();
+      out << this->integerValue.getElementConst().toString();
       return out;
     case JSData::token::tokenBool:
       if (this->booleanValue == true) {
@@ -970,9 +970,9 @@ void JSData::reset(char inputType) {
   this->stringValue = "";
   this->listObjects.setSize(0);
   this->objects.clear();
-  this->theInteger.freeMemory();
+  this->integerValue.freeMemory();
   if (inputType == JSData::token::tokenLargeInteger) {
-    this->theInteger.getElement().assignInteger(0);
+    this->integerValue.getElement().assignInteger(0);
   }
 }
 
@@ -985,7 +985,7 @@ std::string JSData::toString(const JSData::PrintOptions* options) const {
 unsigned int JSData::hashFunction() const {
   switch (this->elementType) {
   case JSData::token::tokenLargeInteger:
-    return this->theInteger.getElementConst().hashFunction();
+    return this->integerValue.getElementConst().hashFunction();
   case JSData::token::tokenArray:
     return this->listObjects.hashFunction();
   case JSData::token::tokenObject:

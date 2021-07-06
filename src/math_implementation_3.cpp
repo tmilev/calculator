@@ -7695,31 +7695,31 @@ void WeylGroupData::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double>
       }
     }
   }
-  List<Vector<Complex<double> > > theEigenSpaceList;
-  eigenMat.getZeroEigenSpace(theEigenSpaceList);
-  Vectors<Complex<double> > theEigenSpace;
+  List<Vector<Complex<double> > > eigenSpaceList;
+  eigenMat.getZeroEigenSpace(eigenSpaceList);
+  Vectors<Complex<double> > eigenSpace;
   outputBasis1.setSize(dimension);
   outputBasis2.setSize(dimension);
-  theEigenSpace.operator=(theEigenSpaceList);
+  eigenSpace.operator=(eigenSpaceList);
   DrawOperations tempDO;
   tempDO.initDimensions(dimension);
   tempDO.graphicsUnit = DrawOperations::graphicsUnitDefault;
-  theEigenSpace.operator=(theEigenSpaceList);
+  eigenSpace.operator=(eigenSpaceList);
   for (int i = 0; i < dimension; i ++) {
     for (int j = 0; j < dimension; j ++) {
       tempDO.bilinearForm.elements[i][j] = this->cartanSymmetric.elements[i][j].getDoubleValue();
     }
   }
-  if (theEigenSpace.size > 0) {
+  if (eigenSpace.size > 0) {
     if (coxeterNumber > 2) {
       for (int j = 0; j < dimension; j ++) {
-        outputBasis1[j] = theEigenSpace[0][j].realPart;
-        outputBasis2[j] = theEigenSpace[0][j].imaginaryPart;
+        outputBasis1[j] = eigenSpace[0][j].realPart;
+        outputBasis2[j] = eigenSpace[0][j].imaginaryPart;
       }
-    } else if (coxeterNumber == 1 && theEigenSpace.size > 1) {
+    } else if (coxeterNumber == 1 && eigenSpace.size > 1) {
       for (int j = 0; j < dimension; j ++) {
-        outputBasis1[j] = theEigenSpace[0][j].realPart;
-        outputBasis2[j] = theEigenSpace[1][j].realPart;
+        outputBasis1[j] = eigenSpace[0][j].realPart;
+        outputBasis2[j] = eigenSpace[1][j].realPart;
       }
     }
     tempDO.modifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
@@ -8898,8 +8898,8 @@ void LaTeXProcedures::endLatexDocument(std::fstream& output) {
   output << "\\end{document}";
 }
 
-void LaTeXProcedures::getStringFromColorIndex(int ColorIndex, std::string &output, DrawingVariables& drawInput) {
-  switch(ColorIndex) {
+void LaTeXProcedures::getStringFromColorIndex(int colorIndex, std::string &output, DrawingVariables& drawInput) {
+  switch(colorIndex) {
     case 0:
       output.assign("black");
       break;
@@ -8931,38 +8931,38 @@ void LaTeXProcedures::getStringFromColorIndex(int ColorIndex, std::string &outpu
       output.assign("black");
       break;
   }
-  if (ColorIndex == drawInput.getColorFromChamberIndex(1)) {
+  if (colorIndex == drawInput.getColorFromChamberIndex(1)) {
     output.assign("blue");
   }
-  if (ColorIndex == drawInput.getColorFromChamberIndex(2)) {
+  if (colorIndex == drawInput.getColorFromChamberIndex(2)) {
     output.assign("purple");
   }
-  if (ColorIndex == drawInput.getColorFromChamberIndex(3)) {
+  if (colorIndex == drawInput.getColorFromChamberIndex(3)) {
     output.assign("green");
   }
-  if (ColorIndex == drawInput.getColorFromChamberIndex(4)) {
+  if (colorIndex == drawInput.getColorFromChamberIndex(4)) {
     output.assign("cyan");
   }
-  if (ColorIndex == drawInput.getColorFromChamberIndex(5)) {
+  if (colorIndex == drawInput.getColorFromChamberIndex(5)) {
     output.assign("red");
   }
-  if (ColorIndex == drawInput.getColorFromChamberIndex(6)) {
+  if (colorIndex == drawInput.getColorFromChamberIndex(6)) {
     output.assign("purple");
   }
-  if (ColorIndex == drawInput.getColorFromChamberIndex(7)) {
+  if (colorIndex == drawInput.getColorFromChamberIndex(7)) {
     output.assign("cyan");
   }
 }
 
-void LaTeXProcedures::drawTextDirectly(double X1, double Y1, const std::string& theText, int ColorIndex, std::fstream& output) {
+void LaTeXProcedures::drawTextDirectly(double X1, double Y1, const std::string& text, int ColorIndex, std::fstream& output) {
   (void) ColorIndex;
   output.precision(4);
-  X1 -= theText.length() * LaTeXProcedures::TextPrintCenteringAdjustmentX;
+  X1 -= text.length() * LaTeXProcedures::TextPrintCenteringAdjustmentX;
   Y1 += LaTeXProcedures::TextPrintCenteringAdjustmentY;
   X1 /= LaTeXProcedures::ScaleFactor;
   Y1 /= LaTeXProcedures::ScaleFactor;
   output << "\\put(" << X1 - LaTeXProcedures::FigureCenterCoordSystemX << ", "
-  << LaTeXProcedures::FigureCenterCoordSystemY - Y1 << "){\\tiny{" << theText << "}}";
+  << LaTeXProcedures::FigureCenterCoordSystemY - Y1 << "){\\tiny{" << text << "}}";
 }
 
 void LaTeXProcedures::drawline(
@@ -8971,7 +8971,7 @@ void LaTeXProcedures::drawline(
   double X2,
   double Y2,
   uint32_t thePenStyle,
-  int ColorIndex,
+  int colorIndex,
   std::fstream& output,
   DrawingVariables& drawInput
 ) {
@@ -8987,7 +8987,7 @@ void LaTeXProcedures::drawline(
   if (thePenStyle == static_cast<unsigned>(DrawingVariables::PenStyleDashed)) {
     tempS = "lightgray";
   } else {
-    LaTeXProcedures::getStringFromColorIndex(ColorIndex, tempS, drawInput);
+    LaTeXProcedures::getStringFromColorIndex(colorIndex, tempS, drawInput);
   }
   output << "\\psline[linewidth = 0.3pt, linecolor =" << tempS << "]("
   << X1 - LaTeXProcedures::FigureCenterCoordSystemX << ", "
@@ -8997,32 +8997,32 @@ void LaTeXProcedures::drawline(
 }
 
 void WeylGroupData::transformToSimpleBasisGenerators(
-  Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem
+  Vectors<Rational>& generators, const HashedList<Vector<Rational> >& inputRootSystem
 ) {
   MacroRegisterFunctionWithName("WeylGroup::transformToSimpleBasisGenerators");
-  for (int i = 0; i < theGens.size; i ++) {
-    if (!theGens[i].isPositiveOrZero()) {
-      theGens[i].negate();
+  for (int i = 0; i < generators.size; i ++) {
+    if (!generators[i].isPositiveOrZero()) {
+      generators[i].negate();
     }
   }
   bool reductionOccured = true;
   Vector<Rational> tempRoot;
   while (reductionOccured) {
     reductionOccured = false;
-    for (int i = 0; i < theGens.size; i ++) {
-      for (int j = i + 1; j < theGens.size; j ++) {
-        tempRoot = theGens[i];
-        tempRoot -= theGens[j];
+    for (int i = 0; i < generators.size; i ++) {
+      for (int j = i + 1; j < generators.size; j ++) {
+        tempRoot = generators[i];
+        tempRoot -= generators[j];
         if (tempRoot.isEqualToZero()) {
-          theGens.removeIndexSwapWithLast(j);
+          generators.removeIndexSwapWithLast(j);
           reductionOccured = true;
         }
         if (inputRootSystem.contains(tempRoot)) {
           if (!tempRoot.isPositiveOrZero()) {
             tempRoot.negate();
-            theGens[j] = tempRoot;
+            generators[j] = tempRoot;
           } else {
-            theGens[i] = tempRoot;
+            generators[i] = tempRoot;
           }
           reductionOccured = true;
         }
@@ -9064,37 +9064,39 @@ void Vector<Coefficient>::perturbNoZeroScalarProductWithMe(const List<Vector<Coe
   }
 }
 
-void WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem) {
-  if (theGens.size == 0) {
+void WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(
+  Vectors<Rational>& generators, const HashedList<Vector<Rational> >& inputRootSystem
+) {
+  if (generators.size == 0) {
     return;
   }
   MacroRegisterFunctionWithName("WeylGroup::transformToSimpleBasisGeneratorsArbitraryCoordinates");
   Vector<Rational> theH;
-  theH.makeZero(theGens[0].size);
+  theH.makeZero(generators[0].size);
   theH.perturbNoZeroScalarProductWithMe(inputRootSystem);
-  for (int i = 0; i < theGens.size; i ++) {
-    if (theGens[i].scalarEuclidean(theH) < 0) {
-      theGens[i].negate();
+  for (int i = 0; i < generators.size; i ++) {
+    if (generators[i].scalarEuclidean(theH) < 0) {
+      generators[i].negate();
     }
   }
   bool reductionOccured = true;
   Vector<Rational> tempRoot;
   while (reductionOccured) {
     reductionOccured = false;
-    for (int i = 0; i < theGens.size; i ++) {
-      for (int j = i + 1; j < theGens.size; j ++) {
-        tempRoot = theGens[i];
-        tempRoot -= theGens[j];
+    for (int i = 0; i < generators.size; i ++) {
+      for (int j = i + 1; j < generators.size; j ++) {
+        tempRoot = generators[i];
+        tempRoot -= generators[j];
         if (tempRoot.isEqualToZero()) {
-          theGens.removeIndexSwapWithLast(j);
+          generators.removeIndexSwapWithLast(j);
           reductionOccured = true;
         }
         if (inputRootSystem.contains(tempRoot)) {
           if (tempRoot.scalarEuclidean(theH) < 0) {
             tempRoot.negate();
-            theGens[j] = tempRoot;
+            generators[j] = tempRoot;
           } else {
-            theGens[i] = tempRoot;
+            generators[i] = tempRoot;
           }
           reductionOccured = true;
         }
@@ -9103,30 +9105,32 @@ void WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(Vectors
   }
 }
 
-void WeylGroupData::transformToSimpleBasisGeneratorsWithRespectToH(Vectors<Rational>& theGens, const Vector<Rational>& theH) {
-  for (int i = 0; i < theGens.size; i ++) {
-    if (!this->isPositiveOrPerpWithRespectToH(theGens[i], theH)) {
-      theGens[i].negate();
+void WeylGroupData::transformToSimpleBasisGeneratorsWithRespectToH(
+  Vectors<Rational>& generators, const Vector<Rational>& theH
+) {
+  for (int i = 0; i < generators.size; i ++) {
+    if (!this->isPositiveOrPerpWithRespectToH(generators[i], theH)) {
+      generators[i].negate();
     }
   }
   bool reductionOccured = true;
   Vector<Rational> tempRoot;
   while (reductionOccured) {
     reductionOccured = false;
-    for (int i = 0; i < theGens.size; i ++) {
-      for (int j = i + 1; j < theGens.size; j ++) {
-        tempRoot = theGens[i];
-        tempRoot -= theGens[j];
+    for (int i = 0; i < generators.size; i ++) {
+      for (int j = i + 1; j < generators.size; j ++) {
+        tempRoot = generators[i];
+        tempRoot -= generators[j];
         if (tempRoot.isEqualToZero()) {
-          theGens.removeIndexSwapWithLast(j);
+          generators.removeIndexSwapWithLast(j);
           reductionOccured = true;
         }
         if (this->rootSystem.getIndex(tempRoot) != - 1) {
           if (!this->isPositiveOrPerpWithRespectToH(tempRoot, theH)) {
             tempRoot.negate();
-            theGens[j] = tempRoot;
+            generators[j] = tempRoot;
           } else {
-            theGens[i] = tempRoot;
+            generators[i] = tempRoot;
           }
           reductionOccured = true;
         }
@@ -9220,28 +9224,28 @@ bool Lattice::getClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralSte
   Vector<Rational>& theDirection,
   Vector<Rational>& outputPoint
 ) {
-  Vector<Rational> theNormal = theAffineHyperplane;
-  theNormal.setSize(theAffineHyperplane.size - 1);
+  Vector<Rational> normal = theAffineHyperplane;
+  normal.setSize(theAffineHyperplane.size - 1);
   Rational theShift = - (*theAffineHyperplane.lastObject());
-  if (theNormal.scalarEuclidean(startingPoint) == theShift) {
+  if (normal.scalarEuclidean(startingPoint) == theShift) {
     outputPoint = startingPoint;
     return true;
   }
-  if (theDirection.scalarEuclidean(theNormal).isEqualToZero()) {
+  if (theDirection.scalarEuclidean(normal).isEqualToZero()) {
     return false;
   }
-  Rational theMovement = (theShift - startingPoint.scalarEuclidean(theNormal)) / theDirection.scalarEuclidean(theNormal);
+  Rational theMovement = (theShift - startingPoint.scalarEuclidean(normal)) / theDirection.scalarEuclidean(normal);
   global.comments << "<br>the movement: " << theMovement.toString() << ", (" << theShift.toString()
-  << " - " << startingPoint.scalarEuclidean(theNormal).toString() << ")/ "
-  << theDirection.scalarEuclidean(theNormal).toString() << ", ";
+  << " - " << startingPoint.scalarEuclidean(normal).toString() << ")/ "
+  << theDirection.scalarEuclidean(normal).toString() << ", ";
   if (!theMovement.isInteger()) {
     global.comments << "the movement is not integral; ";
     theMovement.assignFloor();
-    if (theDirection.scalarEuclidean(theNormal).isPositive()) {
+    if (theDirection.scalarEuclidean(normal).isPositive()) {
       theMovement += 1;
     }
   }
-  global.comments << "the normal: " << theNormal.toString() << ", the direction: "
+  global.comments << "the normal: " << normal.toString() << ", the direction: "
   << theDirection.toString() << ", the shift: " << theShift.toString()
   << ", the movement: " << theMovement.toString() << ", startingPoint: " << startingPoint.toString();
   outputPoint = startingPoint;
@@ -9315,11 +9319,11 @@ bool Lattice::findOnePreimageInLatticeOf(
   return result;
 }
 
-void Lattice::intersectWithPreimageOfLattice(const Matrix<Rational> & theLinearMap, const Lattice& other) {
+void Lattice::intersectWithPreimageOfLattice(const Matrix<Rational>& linearMap, const Lattice& other) {
   Vectors<Rational> startingBasis, imageStartingBasis, basisImageIntersection, ImageBasisInImageStartingBasisCoords;
   Vectors<Rational> resultNonKernelPart, result, tempRoots;
   startingBasis.assignMatrixRows(this->basisRationalForm);
-  theLinearMap.actOnVectorsColumn(startingBasis, imageStartingBasis);
+  linearMap.actOnVectorsColumn(startingBasis, imageStartingBasis);
   Lattice ImageLattice;
   ImageLattice.makeFromRoots(imageStartingBasis);
   ImageLattice.intersectWith(other);
@@ -9344,7 +9348,7 @@ void Lattice::intersectWithPreimageOfLattice(const Matrix<Rational> & theLinearM
   }
   Lattice KernelPart;
   KernelPart = *this;
-  tempRoots.assignMatrixRows(theLinearMap);
+  tempRoots.assignMatrixRows(linearMap);
   KernelPart.intersectWithLinearSubspaceGivenByNormals(tempRoots);
   result.assignMatrixRows(KernelPart.basisRationalForm);
   result.addListOnTop(resultNonKernelPart);
@@ -9384,7 +9388,11 @@ void Lattice::intersectWith(const Lattice& other) {
 
 void Lattice::intersectWithBothOfMaximalRank(const Lattice& other) {
   Lattice dualLatticeThis, dualLatticeOther;
-  if (this->basis.numberOfRows != this->getDimension() || this->getDimension() != other.getDimension() || other.basis.numberOfRows != this->getDimension()) {
+  if (
+    this->basis.numberOfRows != this->getDimension() ||
+    this->getDimension() != other.getDimension() ||
+    other.basis.numberOfRows != this->getDimension()
+  ) {
     global.fatal << "Bad dimensions. " << global.fatal;
   }
   this->getDualLattice(dualLatticeThis);
@@ -9514,14 +9522,16 @@ std::string QuasiPolynomial::toString(bool useHtml, bool useLatex, FormatExpress
 }
 
 void QuasiPolynomial::makeFromPolynomialShiftAndLattice(
-  const Polynomial<Rational>& inputPoly, const MonomialPolynomial& theShift, const Lattice& theLattice
+  const Polynomial<Rational>& inputPoly,
+  const MonomialPolynomial& shift,
+  const Lattice& lattice
 ) {
-  this->ambientLatticeReduced = theLattice;
+  this->ambientLatticeReduced = lattice;
   this->latticeShifts.setSize(1);
   Vector<Rational>& firstShift = this->latticeShifts[0];
-  firstShift.setSize(theLattice.getDimension());
-  for (int i = 0; i < theLattice.getDimension(); i ++) {
-    firstShift[i] = theShift(i);
+  firstShift.setSize(lattice.getDimension());
+  for (int i = 0; i < lattice.getDimension(); i ++) {
+    firstShift[i] = shift(i);
   }
   this->ambientLatticeReduced.reduceVector(this->latticeShifts[0]);
   this->valueOnEachLatticeShift.setSize(1);
@@ -9604,20 +9614,20 @@ void OnePartialFraction::getVectorPartitionFunction(
   PartialFractions& owner, Polynomial<LargeInteger>& coefficient, QuasiPolynomial& output
 ) const {
   QuasiPolynomial shiftedPoly;
-  Vectors<Rational> theNormals, theLatticeGenerators;
+  Vectors<Rational> normals, latticeGenerators;
   if (OnePartialFraction::MakingConsistencyCheck) {
     OnePartialFraction::CheckSum.makeZero();
   }
-  this->getRootsFromDenominator(owner, theLatticeGenerators);
-  Lattice theLattice;
-  theLattice.makeFromRoots(theLatticeGenerators);
-  Matrix<Rational>  theNormalsMatForm;
-  theNormalsMatForm.assignVectorsToRows(theLatticeGenerators);
-  theNormalsMatForm.invert();
-  theNormals.assignMatrixColumns(theNormalsMatForm);
+  this->getRootsFromDenominator(owner, latticeGenerators);
+  Lattice lattice;
+  lattice.makeFromRoots(latticeGenerators);
+  Matrix<Rational> normalsMatForm;
+  normalsMatForm.assignVectorsToRows(latticeGenerators);
+  normalsMatForm.invert();
+  normals.assignMatrixColumns(normalsMatForm);
   output.makeZeroLatticeZn(owner.ambientDimension);
   for (int i = 0; i < coefficient.size(); i ++) {
-    this->computePolynomialCorrespondingToOneMonomial(shiftedPoly, coefficient[i], theNormals, theLattice);
+    this->computePolynomialCorrespondingToOneMonomial(shiftedPoly, coefficient[i], normals, lattice);
     shiftedPoly *= coefficient.coefficients[i];
     output += shiftedPoly;
   }
@@ -9834,19 +9844,21 @@ void QuasiPolynomial::substitution(
   tempQP.substitution(mapFromNewSpaceToOldSpace, ambientLatticeNewSpace, output);
 }
 
-bool QuasiPolynomial::substitutionFewerVariables(const PolynomialSubstitution<Rational>& theSub, QuasiPolynomial& output) const {
-  Matrix<Rational> theLatticeSub;
-  if (!this->ambientLatticeReduced.getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(theSub, theLatticeSub)) {
+bool QuasiPolynomial::substitutionFewerVariables(
+  const PolynomialSubstitution<Rational>& substitution, QuasiPolynomial& output
+) const {
+  Matrix<Rational> latticeSubstitution;
+  if (!this->ambientLatticeReduced.getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(substitution, latticeSubstitution)) {
     return false;
   }
   Matrix<Rational> theSubLatticeShift;
   output.ambientLatticeReduced = this->ambientLatticeReduced;
-  if (!output.ambientLatticeReduced.substitutionHomogeneous(theLatticeSub)) {
+  if (!output.ambientLatticeReduced.substitutionHomogeneous(latticeSubstitution)) {
     return false;
   }
-  theSubLatticeShift.initialize(theLatticeSub.numberOfRows, 1);
+  theSubLatticeShift.initialize(latticeSubstitution.numberOfRows, 1);
   for (int i = 0; i < theSubLatticeShift.numberOfRows; i ++) {
-    theSub[i].getConstantTerm(theSubLatticeShift.elements[i][0], Rational(0));
+    substitution[i].getConstantTerm(theSubLatticeShift.elements[i][0], Rational(0));
   }
   Matrix<Rational> shiftImage, shiftMatForm;
   output.latticeShifts.size = 0;
@@ -9858,13 +9870,13 @@ bool QuasiPolynomial::substitutionFewerVariables(const PolynomialSubstitution<Ra
   for (int i = 0; i < this->latticeShifts.size; i ++) {
     shiftMatForm.assignVectorColumn(this->latticeShifts[i]);
     shiftMatForm -= theSubLatticeShift;
-    if (theLatticeSub.solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(theLatticeSub, shiftMatForm, shiftImage)) {
+    if (latticeSubstitution.solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(latticeSubstitution, shiftMatForm, shiftImage)) {
       tempRoot.assignMatrixDetectRowOrColumn(shiftImage);
       tempP = this->valueOnEachLatticeShift[i];
-      bool tempB = tempP.substitution(theSub, Rational::one());
+      bool tempB = tempP.substitution(substitution, Rational::one());
       if (!tempB) {
         global.fatal << "Substitution "
-        << theSub.toString() << " into polynomial " << tempP.toString()
+        << substitution.toString() << " into polynomial " << tempP.toString()
         << " failed but the current function does not handle this properly. " << global.fatal;
       }
       output.addLatticeShift(tempP, tempRoot);
@@ -9882,64 +9894,64 @@ bool Lattice::substitutionHomogeneous(const PolynomialSubstitution<Rational>& su
 }
 
 bool Lattice::getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(
-  const PolynomialSubstitution<Rational>& theSub, Matrix<Rational>& output
+  const PolynomialSubstitution<Rational>& substitution, Matrix<Rational>& output
 ) {
-  if (theSub.size < 1) {
+  if (substitution.size < 1) {
     return false;
   }
-  int theTargetDim = 0;
-  for (int i = 0; i < theSub.size; i ++) {
-    theTargetDim = MathRoutines::maximum(theTargetDim, theSub[i].minimalNumberOfVariables());
+  int targetDimension = 0;
+  for (int i = 0; i < substitution.size; i ++) {
+    targetDimension = MathRoutines::maximum(targetDimension, substitution[i].minimalNumberOfVariables());
   }
-  output.initialize(theSub.size, theTargetDim);
-  for (int i = 0; i < theSub.size; i ++) {
-    Polynomial<Rational>& currentPoly = theSub[i];
+  output.initialize(substitution.size, targetDimension);
+  for (int i = 0; i < substitution.size; i ++) {
+    Polynomial<Rational>& currentPoly = substitution[i];
     if (!currentPoly.isLinear()) {
       return false;
     }
-    for (int j = 0; j < theTargetDim; j ++) {
+    for (int j = 0; j < targetDimension; j ++) {
       currentPoly.getCoefficientInFrontOfLinearTermVariableIndex(j, output.elements[i][j]);
     }
   }
   return true;
 }
 
-void Lattice::intersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& theNormal) {
+void Lattice::intersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& normal) {
   Vectors<Rational> startingBasis, resultBasis;
   startingBasis.assignMatrixRows(this->basisRationalForm);
-  Vector<Rational> theScalarProducts;
-  theScalarProducts.setSize(startingBasis.size);
+  Vector<Rational> scalarProducts;
+  scalarProducts.setSize(startingBasis.size);
   for (int i = 0; i < this->basisRationalForm.numberOfRows; i ++) {
-    theScalarProducts[i] = theNormal.scalarEuclidean(startingBasis[i]);
+    scalarProducts[i] = normal.scalarEuclidean(startingBasis[i]);
   }
-  if (theScalarProducts.isEqualToZero()) {
+  if (scalarProducts.isEqualToZero()) {
     return;
   }
-  int pivotColumnIndex = theScalarProducts.getIndexLastNonZeroCoordinate();
-  Rational pivotCoeff = theScalarProducts[pivotColumnIndex];
-  theScalarProducts /= - pivotCoeff;
+  int pivotColumnIndex = scalarProducts.getIndexLastNonZeroCoordinate();
+  Rational pivotCoeff = scalarProducts[pivotColumnIndex];
+  scalarProducts /= - pivotCoeff;
   Vectors<Rational> eigenSpacePlusOrthogonalComponent;
-  eigenSpacePlusOrthogonalComponent.setSize(theScalarProducts.size);
-  for (int i = 0; i < theScalarProducts.size; i ++) {
+  eigenSpacePlusOrthogonalComponent.setSize(scalarProducts.size);
+  for (int i = 0; i < scalarProducts.size; i ++) {
     if (i != pivotColumnIndex) {
       Vector<Rational>& currentRoot = eigenSpacePlusOrthogonalComponent[i];
-      currentRoot.makeZero(theScalarProducts.size);
+      currentRoot.makeZero(scalarProducts.size);
       currentRoot[i] = 1;
-      currentRoot[pivotColumnIndex] = theScalarProducts[i];
+      currentRoot[pivotColumnIndex] = scalarProducts[i];
     }
   }
-  theScalarProducts.scaleNormalizeFirstNonZero();
-  eigenSpacePlusOrthogonalComponent[pivotColumnIndex] = theScalarProducts;
+  scalarProducts.scaleNormalizeFirstNonZero();
+  eigenSpacePlusOrthogonalComponent[pivotColumnIndex] = scalarProducts;
   Lattice eigenLattice, theZnLattice;
   eigenLattice.makeFromRoots(eigenSpacePlusOrthogonalComponent);
-  theZnLattice.makeZn(theScalarProducts.size);
+  theZnLattice.makeZn(scalarProducts.size);
   theZnLattice.intersectWithBothOfMaximalRank(eigenLattice);
-  resultBasis.reserve(theScalarProducts.size - 1);
+  resultBasis.reserve(scalarProducts.size - 1);
   Vector<Rational> tempRoot, resultRoot; Rational orthogonalComponent;
   for (int i = 0; i < theZnLattice.basisRationalForm.numberOfRows; i ++) {
     theZnLattice.basisRationalForm.getVectorFromRow(i, tempRoot);
-    orthogonalComponent = tempRoot.scalarEuclidean(theScalarProducts) / theScalarProducts.scalarEuclidean(theScalarProducts);
-    tempRoot -= theScalarProducts * orthogonalComponent;
+    orthogonalComponent = tempRoot.scalarEuclidean(scalarProducts) / scalarProducts.scalarEuclidean(scalarProducts);
+    tempRoot -= scalarProducts * orthogonalComponent;
     if (!orthogonalComponent.isInteger()) {
       global.fatal << "Orthogonal component is supposed to be an integer. " << global.fatal;
     }
@@ -10011,16 +10023,16 @@ bool Lattice::substitutionHomogeneous(const Matrix<Rational>& substitution) {
       matRelationBetweenStartingVariables.elements[i][j] = oldBasisTransformed.elements[i + numNonZeroRows][j];
     }
   }
-  Vectors<Rational> theEigenSpace;
-  matRelationBetweenStartingVariables.getZeroEigenSpaceModifyMe(theEigenSpace);
-  for (int i = 0; i < theEigenSpace.size; i ++) {
-    Cone::scaleNormalizeByPositive(theEigenSpace[i]);
+  Vectors<Rational> eigenSpace;
+  matRelationBetweenStartingVariables.getZeroEigenSpaceModifyMe(eigenSpace);
+  for (int i = 0; i < eigenSpace.size; i ++) {
+    Cone::scaleNormalizeByPositive(eigenSpace[i]);
   }
-  oldBasisTransformed.actOnVectorsColumn(theEigenSpace);
+  oldBasisTransformed.actOnVectorsColumn(eigenSpace);
   this->basisRationalForm.initialize(targetDim, targetDim);
   for (int i = 0; i < targetDim; i ++) {
     for (int j = 0; j < targetDim; j ++) {
-      this->basisRationalForm.elements[i][j] = theEigenSpace[i][j];
+      this->basisRationalForm.elements[i][j] = eigenSpace[i][j];
     }
   }
   this->basisRationalForm.getMatrixIntegerWithDenominator(this->basis, this->denominator);
@@ -10085,11 +10097,11 @@ bool Cone::getRootFromLPolynomialConstantTermGoesToLastVariable(Polynomial<Ratio
 }
 
 bool Cone::solveLPolynomialEqualsZeroIAmProjective(Polynomial<Rational>& inputLPoly, Cone& outputCone) {
-  Vector<Rational> theNormal;
-  if (!this->getRootFromLPolynomialConstantTermGoesToLastVariable(inputLPoly, theNormal)) {
+  Vector<Rational> normal;
+  if (!this->getRootFromLPolynomialConstantTermGoesToLastVariable(inputLPoly, normal)) {
     return false;
   }
-  this->intersectHyperplane(theNormal, outputCone);
+  this->intersectHyperplane(normal, outputCone);
   return true;
 }
 
@@ -11998,12 +12010,12 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParamDegenerate
 ) {
   Matrix<Rational> matVertices;
   matVertices.assignVectorsToRows(this->projectivizedCone.vertices);
-  Vectors<Rational> theNormals;
-  matVertices.getZeroEigenSpaceModifyMe(theNormals);
+  Vectors<Rational> normals;
+  matVertices.getZeroEigenSpaceModifyMe(normals);
   Vector<Rational> preferredNormal;
-  for (int i = 0; i < theNormals.size; i ++) {
-    if (!theNormals[i][0].isEqualToZero()) {
-      preferredNormal = theNormals[i];
+  for (int i = 0; i < normals.size; i ++) {
+    if (!normals[i][0].isEqualToZero()) {
+      preferredNormal = normals[i];
       break;
     }
   }

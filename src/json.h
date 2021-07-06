@@ -44,7 +44,7 @@ public:
   bool booleanValue;
   double floatValue;
   std::string stringValue;
-  MemorySaving<LargeInteger> theInteger;
+  MemorySaving<LargeInteger> integerValue;
   ListReferences<JSData> listObjects;
   MapReferences<std::string, JSData, MathRoutines::hashString> objects;
   unsigned int hashFunction() const;

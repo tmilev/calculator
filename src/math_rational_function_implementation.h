@@ -5,7 +5,6 @@
 
 #include "math_rational_function.h"
 
-
 template<class Coefficient>
 bool RationalFraction<Coefficient>::convertToType(int inputExpressionType) {
   MacroRegisterFunctionWithName("RationalFunction::convertToType");

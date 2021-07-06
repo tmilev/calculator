@@ -928,10 +928,10 @@ bool WebAPIResponse::processForgotLogin() {
   }
   std::stringstream out;
   if (!global.userDefaultHasAdminRights()) {
-    Database::get().theUser.logoutViaDatabase();
+    Database::get().user.logoutViaDatabase();
   }
-  UserCalculator theUser;
-  theUser.email = HtmlRoutines::convertURLStringToNormal(global.getWebInput("email"), false);
+  UserCalculator user;
+  user.email = HtmlRoutines::convertURLStringToNormal(global.getWebInput("email"), false);
   WebCrawler theCrawler;
   out << "<br><b> "
   << "Please excuse our verbose technical messages.</b>"
@@ -942,16 +942,16 @@ bool WebAPIResponse::processForgotLogin() {
     result[WebAPI::result::comments] = out.str();
     return global.response.writeResponse(result, false);
   }
-  if (!theUser.exists(&out)) {
+  if (!user.exists(&out)) {
     out << "<br><b style ='color:red'>"
-    << "We failed to find your email: " << theUser.email << " in our records. "
+    << "We failed to find your email: " << user.email << " in our records. "
     << "</b>";
     result[WebAPI::result::comments] = out.str();
     return global.response.writeResponse(result, false);
   }
-  if (!theUser.loadFromDatabase(&out, &out)) {
+  if (!user.loadFromDatabase(&out, &out)) {
     out << "<br><b style='color:red'>"
-    << "Failed to fetch user info for email: " << theUser.email
+    << "Failed to fetch user info for email: " << user.email
     << "</b>";
     result[WebAPI::result::comments] = out.str();
     return global.response.writeResponse(result, false);
@@ -960,9 +960,9 @@ bool WebAPIResponse::processForgotLogin() {
   << "Your email is on record. "
   << "</b>";
   if (!global.userDefaultHasAdminRights()) {
-    this->owner->doSetEmail(theUser, &out, &out, nullptr);
+    this->owner->doSetEmail(user, &out, &out, nullptr);
   } else {
-    this->owner->doSetEmail(theUser, &out, &out, &out);
+    this->owner->doSetEmail(user, &out, &out, &out);
   }
   out << "<br>Response time: " << global.getElapsedSeconds() << " second(s); "
   << global.getElapsedSeconds() << " second(s) spent creating account. ";
@@ -978,10 +978,10 @@ JSData WebWorker::getSignUpRequestResult() {
     result["error"] = "Database not available (cannot sign up). ";
     return result;
   }
-  Database::get().theUser.logoutViaDatabase();
-  UserCalculator theUser;
-  theUser.username = HtmlRoutines::convertURLStringToNormal(global.getWebInput("desiredUsername"), false);
-  theUser.email = HtmlRoutines::convertURLStringToNormal(global.getWebInput("email"), false);
+  Database::get().user.logoutViaDatabase();
+  UserCalculator user;
+  user.username = HtmlRoutines::convertURLStringToNormal(global.getWebInput("desiredUsername"), false);
+  user.email = HtmlRoutines::convertURLStringToNormal(global.getWebInput("email"), false);
   std::stringstream generalCommentsStream;
   std::stringstream outputStream;
   generalCommentsStream
@@ -992,24 +992,24 @@ JSData WebWorker::getSignUpRequestResult() {
     result[WebAPI::result::comments] = generalCommentsStream.str();
     return result;
   }
-  if (theUser.username == "") {
+  if (user.username == "") {
     errorStream << "Empty username not allowed. ";
     result["error"] = errorStream.str();
     result[WebAPI::result::comments] = generalCommentsStream.str();
     return result;
   }
-  if (!EmailRoutines::isOKEmail(theUser.email, &generalCommentsStream)) {
+  if (!EmailRoutines::isOKEmail(user.email, &generalCommentsStream)) {
     errorStream << "Your email address does not appear to be valid. ";
     result["error"] = errorStream.str();
     result[WebAPI::result::comments] = generalCommentsStream.str();
     return result;
   }
-  if (theUser.exists(&generalCommentsStream)) {
+  if (user.exists(&generalCommentsStream)) {
     errorStream
     << "Either the username ("
-    << theUser.username
+    << user.username
     << ") or the email ("
-    << theUser.email
+    << user.email
     << ") you requested is already taken.";
     result["error"] = errorStream.str();
     result[WebAPI::result::comments] = generalCommentsStream.str();
@@ -1017,12 +1017,12 @@ JSData WebWorker::getSignUpRequestResult() {
   } else {
     outputStream << "<b style ='color:green'>"
     << "Username ("
-    << theUser.username
+    << user.username
     << ") with email ("
-    << theUser.email
+    << user.email
     << ") is available. </b>";
   }
-  if (!theUser.storeToDatabase(false, &errorStream)) {
+  if (!user.storeToDatabase(false, &errorStream)) {
     errorStream << "Failed to store error stream. ";
     result["error"] = errorStream.str();
     result[WebAPI::result::comments] = generalCommentsStream.str();
@@ -1035,7 +1035,7 @@ JSData WebWorker::getSignUpRequestResult() {
   }
   //int fixThis;
   //adminOutputStream = &generalCommentsStream;
-  this->doSetEmail(theUser, &errorStream, &generalCommentsStream, adminOutputStream);
+  this->doSetEmail(user, &errorStream, &generalCommentsStream, adminOutputStream);
   result["error"] = errorStream.str();
   result[WebAPI::result::comments] = generalCommentsStream.str();
   result[WebAPI::result::resultHtml] = outputStream.str();

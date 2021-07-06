@@ -1012,12 +1012,12 @@ public:
   template <class Coefficient>
   bool isDominantWeight(const Vector<Coefficient>& weight);
   static void transformToSimpleBasisGenerators(
-    Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem
+    Vectors<Rational>& generators, const HashedList<Vector<Rational> >& inputRootSystem
   );
   static void transformToSimpleBasisGeneratorsArbitraryCoordinates(
-    Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem
+    Vectors<Rational>& generators, const HashedList<Vector<Rational> >& inputRootSystem
   );
-  void transformToSimpleBasisGeneratorsWithRespectToH(Vectors<Rational>& theGens, const Vector<Rational>& theH);
+  void transformToSimpleBasisGeneratorsWithRespectToH(Vectors<Rational>& generators, const Vector<Rational>& theH);
   int operator()(int i, int j) const;
   bool operator==(const WeylGroupData& other) const;
   void operator+=(const WeylGroupData& other);

@@ -1143,8 +1143,8 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
   }
   ProblemData& currentProblemData = this->problem.problemData;
   Answer& currentA = currentProblemData.answers.values[this->answerIndex];
-  UserCalculator& theUser = this->problem.currentUser;
-  theUser.::UserCalculatorData::operator=(global.userDefault);
+  UserCalculator& user = this->problem.currentUser;
+  user.::UserCalculatorData::operator=(global.userDefault);
   bool deadLinePassed = false;
   bool hasDeadline = true;
   double secondsTillDeadline = - 1;
@@ -1153,25 +1153,25 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
     hasDeadline = false;
   }
   std::string theSQLstring;
-  theSQLstring = theUser.sectionComputed;
+  theSQLstring = user.sectionComputed;
   if (hasDeadline) {
     bool unused = false;
-    std::string theDeadlineString = this->problem.getDeadline(
+    std::string deadlineString = this->problem.getDeadline(
       this->problem.fileName,
       HtmlRoutines::convertStringToURLString(theSQLstring, false),
       unused
     );
 
-    if (theDeadlineString == "" || theDeadlineString == " ") {
+    if (deadlineString == "" || deadlineString == " ") {
       hasDeadline = false;
     } else {
       TimeWrapper now, deadline; //<-needs a fix for different time formats.
       // <-For the time being, we hard-code it
       // to month/day/year format (no time to program it better).
       std::stringstream badDateStream;
-      if (!deadline.assignMonthDayYear(theDeadlineString, badDateStream)) {
+      if (!deadline.assignMonthDayYear(deadlineString, badDateStream)) {
         out << "<b>Problem reading deadline. </b> The deadline string was: "
-        << theDeadlineString << ". Comments: "
+        << deadlineString << ". Comments: "
         << "<span style='color:red'>" << badDateStream.str() << "</span>"
         << "This should not happen. "
         << CalculatorHTML::bugsGenericMessage << "";
@@ -1202,8 +1202,8 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
     }
   }
   std::stringstream comments;
-  theUser.setProblemData(this->problem.fileName, currentProblemData);
-  if (!theUser.storeProblemData(this->problem.fileName, &comments)) {
+  user.setProblemData(this->problem.fileName, currentProblemData);
+  if (!user.storeProblemData(this->problem.fileName, &comments)) {
     out << "<b>This shouldn't happen and may be a bug: "
     << "failed to store your answer in the database. "
     << CalculatorHTML::bugsGenericMessage
@@ -1635,7 +1635,7 @@ std::string WebAPIResponse::addUserEmails(const std::string& hostWebAddressWithP
   bool doSendEmails = global.requestType == "sendEmails" ?  true : false;
   int numNewUsers = 0;
   int numUpdatedUsers = 0;
-  bool createdUsers = Database::get().theUser.addUsersFromEmails(
+  bool createdUsers = Database::get().user.addUsersFromEmails(
     inputEmails, userPasswords, userRole, userGroup, comments, numNewUsers, numUpdatedUsers
   );
   if (createdUsers) {

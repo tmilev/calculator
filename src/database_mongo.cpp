@@ -512,20 +512,19 @@ bool Database::Mongo::deleteDatabase(std::stringstream* commentsOnFailure) {
 #endif
 }
 
-void Database::Mongo::createHashIndex(
-  const std::string& collectionName, const std::string& theKey
+void Database::Mongo::createHashIndex(const std::string& collectionName, const std::string& key
 ) {
   (void) collectionName;
-  (void) theKey;
+  (void) key;
   #ifdef MACRO_use_MongoDB
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::createHashIndex");
   MongoQuery query;
-  std::stringstream theCommand;
-  theCommand << "{\"createIndexes\":\"" << collectionName << "\", \"indexes\": [{\"key\":{\""
-  << theKey << "\": \"hashed\"}, \"name\": \"" << collectionName  << "_" << theKey << "_hash\"" << "}]} ";
+  std::stringstream command;
+  command << "{\"createIndexes\":\"" << collectionName << "\", \"indexes\": [{\"key\":{\""
+  << key << "\": \"hashed\"}, \"name\": \"" << collectionName  << "_" << key << "_hash\"" << "}]} ";
   query.command = bson_new_from_json(
-    reinterpret_cast<const uint8_t*>(theCommand.str().c_str()),
-    static_cast<signed>(theCommand.str().size()),
+    reinterpret_cast<const uint8_t*>(command.str().c_str()),
+    static_cast<signed>(command.str().size()),
     &query.theError
   );
   mongoc_database_write_command_with_opts(
@@ -685,7 +684,7 @@ bool Database::Mongo::findOneFromSome(
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::findOneFromSome");
+  MacroRegisterFunctionWithName("Database::Mongo::findOneFromSome");
   #ifdef MACRO_use_MongoDB
   MongoQuery query;
   if (!Database::Mongo::getOrFindQuery(findOrQueries, query.findQuery, commentsOnFailure)) {
@@ -722,7 +721,7 @@ bool Database::Mongo::getOrFindQuery(
   std::string& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::getOrFindQuery");
+  MacroRegisterFunctionWithName("Database::Mongo::getOrFindQuery");
   (void) commentsOnFailure;
   std::stringstream queryStream;
   queryStream << "{\"$or\": [";
@@ -794,12 +793,12 @@ bool Database::matchesPattern(
 }
 
 bool Database::isDeleteable(
-  const List<std::string>& theLabels, List<std::string>** outputPattern, std::stringstream* commentsOnFailure
+  const List<std::string>& labels, List<std::string>** outputPattern, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::isDeleteable");
   for (int i = 0; i < global.databaseModifiableFields.size; i ++) {
     if (Database::matchesPattern(
-      theLabels, global.databaseModifiableFields[i]
+      labels, global.databaseModifiableFields[i]
     )) {
       if (outputPattern != nullptr) {
         *outputPattern = &global.databaseModifiableFields[i];
@@ -808,17 +807,17 @@ bool Database::isDeleteable(
     }
   }
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Labels: " << theLabels.toStringCommaDelimited()
+    *commentsOnFailure << "Labels: " << labels.toStringCommaDelimited()
     << " do not match any modifiable field pattern. ";
   }
   return false;
 }
 
 bool Database::getLabels(
-  const JSData& fieldEntries, List<std::string>& output, std::stringstream* commentsOnFailure
+  const JSData& fieldEntries, List<std::string>& labels, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::getLabels");
-  output.setSize(0);
+  labels.setSize(0);
   for (int i = 0; i < fieldEntries.listObjects.size; i ++) {
     if (fieldEntries.listObjects[i].elementType != JSData::token::tokenString) {
       if (commentsOnFailure != nullptr) {
@@ -826,32 +825,32 @@ bool Database::getLabels(
       }
       return false;
     }
-    output.addOnTop(fieldEntries.listObjects[i].stringValue);
+    labels.addOnTop(fieldEntries.listObjects[i].stringValue);
   }
   return true;
 }
 
 bool Database::isDeleteable(
-  const JSData& theEntry, List<std::string>** outputPattern, std::stringstream* commentsOnFailure
+  const JSData& entry, List<std::string>** outputPattern, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::isDeleteable");
-  if (theEntry.elementType != JSData::token::tokenObject || !theEntry.hasKey(DatabaseStrings::labelFields)) {
+  if (entry.elementType != JSData::token::tokenObject || !entry.hasKey(DatabaseStrings::labelFields)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "The labels json is required to be an object of the form {fields: [tableName, objectId,...]}. ";
     }
     return false;
   }
-  List<std::string> theLabels;
+  List<std::string> labels;
   if (!Database::getLabels(
-    theEntry.objects.getValueNoFail("fields"), theLabels, commentsOnFailure
+    entry.objects.getValueNoFail("fields"), labels, commentsOnFailure
   )) {
     return false;
   }
-  return Database::isDeleteable(theLabels, outputPattern, commentsOnFailure);
+  return Database::isDeleteable(labels, outputPattern, commentsOnFailure);
 }
 
-bool Database::deleteOneEntry(const JSData& theEntry, std::stringstream* commentsOnFailure) {
+bool Database::deleteOneEntry(const JSData& entry, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("Database::deleteOneEntry");
   if (!global.userDefaultHasAdminRights()) {
     if (commentsOnFailure != nullptr) {
@@ -860,43 +859,43 @@ bool Database::deleteOneEntry(const JSData& theEntry, std::stringstream* comment
     return false;
   }
   List<std::string>* labelTypes = nullptr;
-  if (!isDeleteable(theEntry, &labelTypes, commentsOnFailure)) {
+  if (!isDeleteable(entry, &labelTypes, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Entry: " << theEntry.toString(nullptr) << " not deleteable.";
+      *commentsOnFailure << "Entry: " << entry.toString(nullptr) << " not deleteable.";
     }
     return false;
   }
-  List<std::string> theLabels;
+  List<std::string> labels;
   if (!Database::getLabels(
-    theEntry.objects.getValueNoFail(DatabaseStrings::labelFields),
-    theLabels,
+    entry.objects.getValueNoFail(DatabaseStrings::labelFields),
+    labels,
     commentsOnFailure
   )) {
     return false;
   }
-  if (theLabels.size < 2) {
+  if (labels.size < 2) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "When deleting an object, it needs at least two labels: table name and objectid. "
-      << "Your input appears to have only " << theLabels.size << " entries: " << theLabels.toStringCommaDelimited()
+      << "Your input appears to have only " << labels.size << " entries: " << labels.toStringCommaDelimited()
       << ". ";
     }
     return false;
   }
   QueryExact findQuery(
-    theLabels[0],
+    labels[0],
     List<std::string>({
       DatabaseStrings::labelIdMongo,
       DatabaseStrings::objectSelectorMongo
     }),
-    theLabels[1]
+    labels[1]
   );
-  std::string tableName = theLabels[0];
-  if (theLabels.size == 0) {
+  std::string tableName = labels[0];
+  if (labels.size == 0) {
     return this->deleteOneEntryById(findQuery, commentsOnFailure);
   }
   return Database::deleteOneEntryUnsetUnsecure(
-    findQuery, theLabels, commentsOnFailure
+    findQuery, labels, commentsOnFailure
   );
 }
 
@@ -1178,7 +1177,7 @@ bool Database::fetchCollectionNames(
   if (global.flagDatabaseCompiled) {
     return Database::get().mongoDB.fetchCollectionNames(output, commentsOnFailure);
   }
-  return this->theFallBack.fetchCollectionNames(output, commentsOnFailure);
+  return this->fallBack.fetchCollectionNames(output, commentsOnFailure);
 }
 
 bool Database::Mongo::fetchCollectionNames(
@@ -1233,19 +1232,19 @@ bool Database::FetchTable(
   Database::get().findFromJSON(
     tableName, findQuery, rowsJSON, 200, totalItems, commentsOnFailure
   );
-  HashedList<std::string, MathRoutines::hashString> theLabels;
+  HashedList<std::string, MathRoutines::hashString> labels;
   for (int i = 0; i < rowsJSON.size; i ++) {
     for (int j = 0; j < rowsJSON[i].objects.size(); j ++) {
-      theLabels.addOnTopNoRepetition(rowsJSON[i].objects.keys[j]);
+      labels.addOnTopNoRepetition(rowsJSON[i].objects.keys[j]);
     }
   }
-  outputLabels = theLabels;
+  outputLabels = labels;
   outputRows.setSize(rowsJSON.size);
   for (int i = 0; i < rowsJSON.size; i ++) {
-    outputRows[i].setSize(theLabels.size);
-    for (int j = 0; j < theLabels.size; j ++) {
-      if (rowsJSON[i].objects.contains(theLabels[j])) {
-        outputRows[i][j] = rowsJSON[i].getValue(theLabels[j]).toString(nullptr);
+    outputRows[i].setSize(labels.size);
+    for (int j = 0; j < labels.size; j ++) {
+      if (rowsJSON[i].objects.contains(labels[j])) {
+        outputRows[i][j] = rowsJSON[i].getValue(labels[j]).toString(nullptr);
       } else {
         outputRows[i][j] = "";
       }
@@ -1401,17 +1400,17 @@ std::string Database::toHtmlDatabaseCollection(const std::string& currentTable) 
     return out.str();
   }
   out << "Current table: " << currentTable << "<br>";
-  List<std::string> theLabels;
+  List<std::string> labels;
   List<List<std::string> > rows;
   long long totalItems = - 1;
-  if (!Database::FetchTable(currentTable, theLabels, rows, &totalItems, &out)) {
+  if (!Database::FetchTable(currentTable, labels, rows, &totalItems, &out)) {
     return out.str();
   }
   out << "Total: " << totalItems << ". ";
   if (totalItems > rows.size) {
     out << "Only the first " << rows.size << " are displayed. ";
   }
-  out << "<br>" << HtmlRoutines::toHtmlTable(theLabels, rows, true);
+  out << "<br>" << HtmlRoutines::toHtmlTable(labels, rows, true);
   return out.str();
 }
 

@@ -603,9 +603,9 @@ public:
       return;
     }
     if (this->numberOfColumns < standsBelow.numberOfColumns) {
-      Coefficient theZero;
-      theZero = 0;
-      this->resize(this->numberOfRows, standsBelow.numberOfColumns, true, &theZero);
+      Coefficient zero;
+      zero = 0;
+      this->resize(this->numberOfRows, standsBelow.numberOfColumns, true, &zero);
     }
     // So far, we have guaranteed that this and
     // &standsBelow have the same number of columns and
@@ -1244,7 +1244,8 @@ public:
     Matrix<Coefficient>& matb,
     Vector<Coefficient>* outputSolution = 0
   );
-  static void computePotentialChangeGradient(Matrix<Coefficient>& matA,
+  static void computePotentialChangeGradient(
+    Matrix<Coefficient>& matA,
     Selection& baseVariables,
     int numberOfTrueVariables,
     int columnIndex,
@@ -1586,7 +1587,7 @@ void Matrix<Coefficient>::multiplyOnTheLeft(
   if (this->numberOfRows != standsOnTheLeft.numberOfColumns) {
     global.fatal << "Attempt to multiply a matrix with "
     << standsOnTheLeft.numberOfColumns
-    << " columns by a matrix with " << this->numberOfRows << "rows. " << global.fatal;
+    << " columns by a matrix with " << this->numberOfRows << " rows. " << global.fatal;
   }
   Coefficient tempEl;
   output.initialize(standsOnTheLeft.numberOfRows, this->numberOfColumns);
@@ -3860,22 +3861,22 @@ public:
     double X2,
     double Y2,
     uint32_t thePenStyle,
-    int ColorIndex,
+    int colorIndex,
     std::fstream& output,
     DrawingVariables& drawInput
   );
-  static void drawTextDirectly(double X1, double Y1, const std::string& theText, int ColorIndex, std::fstream& output);
+  static void drawTextDirectly(double X1, double Y1, const std::string& text, int ColorIndex, std::fstream& output);
   static void beginDocument(std::fstream& output);
   static void endLatexDocument(std::fstream& output);
   static void beginPSTricks(std::fstream& output);
   static void endPSTricks(std::fstream& output);
-  static void getStringFromColorIndex(int ColorIndex, std::string &output, DrawingVariables& drawInput);
+  static void getStringFromColorIndex(int colorIndex, std::string &output, DrawingVariables& drawInput);
 };
 
 class Permutation: public SelectionWithDifferentMaxMultiplicities {
 public:
   void initPermutation(int n);
-  void initPermutation(List<int>& disjointSubsets, int TotalNumElements);
+  void initPermutation(List<int>& disjointSubsets, int totalNumberOfElements);
   void incrementAndGetPermutation(List<int>& output);
   void getPermutationLthElementIsTheImageofLthIndex(List<int>& output);
   int getNumberOfPermutations() {
@@ -5024,7 +5025,7 @@ public:
     const Matrix<Rational>& theLinearMap, const Vectors<Rational>& input, Vectors<Rational>& output
   );
   void intersectWithPreimageOfLattice(
-    const Matrix<Rational> & theLinearMap, const Lattice& other
+    const Matrix<Rational> & linearMap, const Lattice& other
   );
   void intersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Rational>& outputGenerator);
   static bool getClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralStepsInDirection(
@@ -5085,7 +5086,7 @@ public:
   void intersectWithLinearSubspaceGivenByNormals(const Vectors<Rational>& subspaceNormals);
   void intersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& theNormal);
   static bool getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(
-    const PolynomialSubstitution<Rational>& theSub, Matrix<Rational>& output
+    const PolynomialSubstitution<Rational>& substitution, Matrix<Rational>& output
   );
   // Returning false means that the lattice given as rougher
   // is not actually rougher than the current one
@@ -5132,7 +5133,7 @@ public:
   void addLatticeShift(const Polynomial<Rational>& input, const Vector<Rational>& inputShift);
   void makeRougherLattice(const Lattice& latticeToRoughenBy);
   void makeFromPolynomialShiftAndLattice(
-    const Polynomial<Rational>& inputPoly, const MonomialPolynomial& theShift, const Lattice& theLattice
+    const Polynomial<Rational>& inputPoly, const MonomialPolynomial& shift, const Lattice& lattice
   );
   void makeZeroLatticeZn(int dimension);
   void makeZeroOverLattice(Lattice& theLattice);
@@ -5155,7 +5156,7 @@ public:
     QuasiPolynomial& output
   );
   bool substitutionFewerVariables(
-    const PolynomialSubstitution<Rational>& theSub, QuasiPolynomial& output
+    const PolynomialSubstitution<Rational>& substitution, QuasiPolynomial& output
   ) const;
   void operator+=(const QuasiPolynomial& other);
   QuasiPolynomial(){}

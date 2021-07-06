@@ -25,12 +25,12 @@ bool Database::User::setPassword(
     comments << "Changing passwords allowed for logged-in users only. ";
     return false;
   }
-  UserCalculator theUser;
-  theUser.username = inputUsername;
-  theUser.enteredPassword = inputNewPassword;
-  bool result = theUser.setPassword(&comments);
-  theUser.resetAuthenticationToken(&comments);
-  outputAuthenticationToken = theUser.actualAuthenticationToken;
+  UserCalculator user;
+  user.username = inputUsername;
+  user.enteredPassword = inputNewPassword;
+  bool result = user.setPassword(&comments);
+  user.resetAuthenticationToken(&comments);
+  outputAuthenticationToken = user.actualAuthenticationToken;
   return result;
 }
 
@@ -45,13 +45,13 @@ bool Database::User::userExists(
   if (!global.flagLoggedIn) {
     return false;
   }
-  JSData theUserQuery;
-  theUserQuery[DatabaseStrings::labelUsername] = inputUsername;
-  List<JSData> theUsers;
+  JSData userQuery;
+  userQuery[DatabaseStrings::labelUsername] = inputUsername;
+  List<JSData> allUsers;
   this->owner->findFromJSON(
-    DatabaseStrings::tableUsers, theUserQuery, theUsers, - 1, nullptr, &comments
+    DatabaseStrings::tableUsers, userQuery, allUsers, - 1, nullptr, &comments
   );
-  return theUsers.size > 0;
+  return allUsers.size > 0;
 }
 
 bool Database::User::userDefaultHasInstructorRights() {
@@ -78,9 +78,9 @@ bool Database::User::logoutViaDatabase() {
   if (!global.flagLoggedIn) {
     return true;
   }
-  UserCalculator theUser;
-  theUser.UserCalculatorData::operator=(global.userDefault);
-  theUser.resetAuthenticationToken(nullptr);
+  UserCalculator user;
+  user.UserCalculatorData::operator=(global.userDefault);
+  user.resetAuthenticationToken(nullptr);
   global.setWebInput("authenticationToken", "");
   global.cookiesToBeSent.setKeyValue("authenticationToken", "");
   return true;
@@ -316,7 +316,7 @@ bool Database::updateOne(
   if (global.flagDatabaseCompiled) {
     return this->mongoDB.updateOne(findQuery, dataToMerge, commentsOnFailure);
   } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    return this->theFallBack.updateOne(findQuery, dataToMerge, commentsOnFailure);
+    return this->fallBack.updateOne(findQuery, dataToMerge, commentsOnFailure);
   }
   if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "Database::updateOne fail: no DB compiled and fallback is disabled. ";
@@ -332,7 +332,7 @@ bool Database::findOneFromSome(
   if (global.flagDatabaseCompiled) {
     return this->mongoDB.findOneFromSome(findOrQueries, output, commentsOnFailure);
   } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    return this->theFallBack.findOneFromSome(findOrQueries, output, commentsOnFailure);
+    return this->fallBack.findOneFromSome(findOrQueries, output, commentsOnFailure);
   } else {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Database::findOneFromSome failed. "
@@ -346,7 +346,7 @@ bool Database::deleteDatabase(std::stringstream* commentsOnFailure) {
   if (global.flagDatabaseCompiled) {
     return this->mongoDB.deleteDatabase(commentsOnFailure);
   } else {
-    return this->theFallBack.deleteDatabase(commentsOnFailure);
+    return this->fallBack.deleteDatabase(commentsOnFailure);
   }
 }
 
@@ -357,7 +357,7 @@ void Database::createHashIndex(
   if (global.flagDatabaseCompiled) {
     this->mongoDB.createHashIndex(collectionName, theKey);
   } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    this->theFallBack.createHashIndex(collectionName, theKey);
+    this->fallBack.createHashIndex(collectionName, theKey);
   }
 }
 
@@ -382,8 +382,8 @@ bool Database::initializeWorker() {
 
 bool Database::initializeServer() {
   MacroRegisterFunctionWithName("Database::initializeServer");
-  this->theUser.owner = this;
-  this->theFallBack.owner = this;
+  this->user.owner = this;
+  this->fallBack.owner = this;
   this->flagInitializedServer = true;
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     return true;
@@ -394,7 +394,7 @@ bool Database::initializeServer() {
   global << Logger::red << "Calculator compiled without (mongoDB) database support. "
   << Logger::green << "Using " << Logger::red
   << "**SLOW** " << Logger::green << "fall-back JSON storage." << Logger::endL;
-  this->theFallBack.initialize();
+  this->fallBack.initialize();
   return true;
 }
 
@@ -627,7 +627,7 @@ bool UserCalculator::loadFromDatabase(std::stringstream* commentsOnFailure, std:
   MacroRegisterFunctionWithName("UserCalculator::FetchOneUserRow");
   (void) commentsGeneral;
   double startTime = global.getElapsedSeconds();
-  if (!Database::get().theUser.loadUserInformation(*this, commentsOnFailure)) {
+  if (!Database::get().user.loadUserInformation(*this, commentsOnFailure)) {
     return false;
   }
   this->computeCourseInformation();

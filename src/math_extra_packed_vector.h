@@ -697,14 +697,14 @@ void ExportCharTable(FiniteGroup<elementSomeGroup>& G, JSData& data) {
     representatives.listObjects[i].listObjects.setSize(reprefs.size);
     for (int j = 0; j < reprefs.size; j ++) {
       representatives.listObjects[i].listObjects[j].elementType = JSData::token::tokenLargeInteger;
-      representatives.listObjects[i].listObjects[j].theInteger.getElement() = reprefs[j];
+      representatives.listObjects[i].listObjects[j].integerValue.getElement() = reprefs[j];
     }
   }
   sizes.elementType = JSData::token::tokenArray;
   sizes.listObjects.setSize(G.conjugacyClassCount());
   for (int i = 0; i < G.conjugacyClassCount(); i ++) {
     sizes.listObjects[i].elementType = JSData::token::tokenLargeInteger;
-    sizes.listObjects[i].theInteger.getElement() = G.conjugacyClasses[i].size;
+    sizes.listObjects[i].integerValue.getElement() = G.conjugacyClasses[i].size;
   }
   characters.elementType = JSData::token::tokenArray;
   characters.listObjects.setSize(G.characterTable.size);

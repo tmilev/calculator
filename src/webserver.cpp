@@ -110,23 +110,23 @@ bool WebWorker::checkConsistency() {
   return true;
 }
 
-std::string WebWorker::openIndentTag(const std::string& theTag) {
+std::string WebWorker::openIndentTag(const std::string& tag) {
   std::stringstream out;
   for (int i = 0; i < this->indentationLevelHTML; i ++) {
     out << "  ";
   }
-  out << theTag << "\n";
+  out << tag << "\n";
   this->indentationLevelHTML ++;
   return out.str();
 }
 
-std::string WebWorker::closeIndentTag(const std::string& theTag) {
+std::string WebWorker::closeIndentTag(const std::string& tag) {
   std::stringstream out;
   this->indentationLevelHTML --;
   for (int i = 0; i < this->indentationLevelHTML; i ++) {
     out << "  ";
   }
-  out << theTag << "\n";
+  out << tag << "\n";
   return out.str();
 }
 
@@ -137,7 +137,7 @@ void WebServer::initSSL() {
     return;
   }
   //////////////////////////////////////////////////////////////////////////
-  this->theTLS.initializeNonThreadSafeOnFirstCall(true);
+  this->transportLayerSecurity.initializeNonThreadSafeOnFirstCall(true);
 }
 
 bool WebServer::sslServerSideHandShake(std::stringstream* commentsOnFailure) {
@@ -147,7 +147,7 @@ bool WebServer::sslServerSideHandShake(std::stringstream* commentsOnFailure) {
   if (!global.flagUsingSSLinCurrentConnection) {
     return false;
   }
-  return this->theTLS.handShakeIamServer(this->getActiveWorker().connectedSocketID, commentsOnFailure);
+  return this->transportLayerSecurity.handShakeIamServer(this->getActiveWorker().connectedSocketID, commentsOnFailure);
 }
 
 bool WebWorker::receiveAll() {
@@ -175,9 +175,9 @@ bool WebWorker::receiveAll() {
   std::string errorString;
   double numSecondsAtStart = global.getElapsedSeconds();
   int numBytesInBuffer = 0;
-  List<char>& readBuffer = this->parent->theTLS.readBuffer;
+  List<char>& readBuffer = this->parent->transportLayerSecurity.readBuffer;
   while (true) {
-    numBytesInBuffer = this->parent->theTLS.readOnce(this->connectedSocketID, &errorString, nullptr, true);
+    numBytesInBuffer = this->parent->transportLayerSecurity.readOnce(this->connectedSocketID, &errorString, nullptr, true);
     if (numBytesInBuffer >= 0) {
       break;
     }
@@ -233,7 +233,7 @@ bool WebWorker::receiveAll() {
       this->displayUserInput = this->error;
       return false;
     }
-    numBytesInBuffer = this->parent->theTLS.readOnce(
+    numBytesInBuffer = this->parent->transportLayerSecurity.readOnce(
       this->connectedSocketID,
       &errorString,
       nullptr,
@@ -298,7 +298,7 @@ void WebWorker::sendAllBytesNoHeaders() {
       << Logger::endL;
       return;
     }
-    int bytesSent = this->parent->theTLS.writeOnce(
+    int bytesSent = this->parent->transportLayerSecurity.writeOnce(
       this->connectedSocketID,
       this->remainingBytesToSend,
       &errorString,
@@ -309,7 +309,7 @@ void WebWorker::sendAllBytesNoHeaders() {
     if (bytesSent < 0) {
       global << Logger::red << "WebWorker::SendAllBytes: writeOnce failed. " << Logger::blue
       << "Socket: " << this->connectedSocketID << ". " << Logger::endL;
-      this->parent->theTLS.openSSLData.clearErrorQueue(bytesSent);
+      this->parent->transportLayerSecurity.openSSLData.clearErrorQueue(bytesSent);
       return;
     }
     if (bytesSent == 0) {
@@ -558,57 +558,57 @@ bool WebWorker::loginProcedure(std::stringstream& argumentProcessingFailureComme
   }
 
   MapList<std::string, std::string, MathRoutines::hashString>& theArgs = global.webArguments;
-  UserCalculatorData& theUser = global.userDefault;
-  theUser.username = HtmlRoutines::convertURLStringToNormal(
+  UserCalculatorData& user = global.userDefault;
+  user.username = HtmlRoutines::convertURLStringToNormal(
     global.getWebInput("username"), true
   );
-  if (theUser.username.find('%') != std::string::npos) {
+  if (user.username.find('%') != std::string::npos) {
     argumentProcessingFailureComments << "<b>Unusual behavior: % sign in username.</b>";
   }
-  theUser.enteredAuthenticationToken = HtmlRoutines::convertURLStringToNormal(
+  user.enteredAuthenticationToken = HtmlRoutines::convertURLStringToNormal(
     global.getWebInput("authenticationToken"), false
   );
-  theUser.enteredGoogleToken = HtmlRoutines::convertURLStringToNormal(
+  user.enteredGoogleToken = HtmlRoutines::convertURLStringToNormal(
     global.getWebInput("googleToken"), false
   );
-  theUser.enteredActivationToken = HtmlRoutines::convertURLStringToNormal(
+  user.enteredActivationToken = HtmlRoutines::convertURLStringToNormal(
     global.getWebInput("activationToken"), false
   );
-  theUser.enteredPassword = HtmlRoutines::convertStringToURLString(
+  user.enteredPassword = HtmlRoutines::convertStringToURLString(
     HtmlRoutines::convertURLStringToNormal(global.getWebInput("password"), true), false
   );
   // <-Passwords are ONE-LAYER url-encoded
   // <-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
   // <-Incoming pluses must be re-coded as spaces (%20).
 
-  theUser.flagEnteredPassword = (theUser.enteredPassword != "");
-  if (theUser.flagEnteredPassword) {
-    theUser.flagMustLogin = true;
-    theUser.enteredGoogleToken = "";
-    theUser.enteredAuthenticationToken = "";
-    theUser.enteredActivationToken = "";
-    theUser.flagEnteredAuthenticationToken = false;
-    theUser.flagEnteredActivationToken = false;
+  user.flagEnteredPassword = (user.enteredPassword != "");
+  if (user.flagEnteredPassword) {
+    user.flagMustLogin = true;
+    user.enteredGoogleToken = "";
+    user.enteredAuthenticationToken = "";
+    user.enteredActivationToken = "";
+    user.flagEnteredAuthenticationToken = false;
+    user.flagEnteredActivationToken = false;
     global.flagLogInAttempted = true;
     if (global.userDebugFlagOn() && comments != nullptr) {
       *comments << "Password was entered: all other authentication methods ignored. ";
     }
   }
-  if (theUser.enteredActivationToken != "") {
-    theUser.enteredGoogleToken = "";
-    theUser.enteredAuthenticationToken = "";
-    theUser.flagEnteredAuthenticationToken = false;
-    theUser.flagEnteredActivationToken = true;
+  if (user.enteredActivationToken != "") {
+    user.enteredGoogleToken = "";
+    user.enteredAuthenticationToken = "";
+    user.flagEnteredAuthenticationToken = false;
+    user.flagEnteredActivationToken = true;
     global.flagLogInAttempted = true;
     if (global.userDebugFlagOn() && comments != nullptr) {
       *comments << "Activation token entered: authentication token and google token ignored. ";
     }
   }
-  if (theUser.username != "") {
-    theUser.enteredGoogleToken = "";
+  if (user.username != "") {
+    user.enteredGoogleToken = "";
   }
-  if (theUser.enteredAuthenticationToken != "") {
-    theUser.flagEnteredAuthenticationToken = true;
+  if (user.enteredAuthenticationToken != "") {
+    user.flagEnteredAuthenticationToken = true;
     global.flagLogInAttempted = true;
   }
   /////////////////////////////////////////////
@@ -619,88 +619,88 @@ bool WebWorker::loginProcedure(std::stringstream& argumentProcessingFailureComme
   // already are in big trouble - so this really shouldn't be such a big deal.
   /////////////////////////////////////////////
   if (
-    !theUser.flagEnteredPassword &&
-    !theUser.flagEnteredAuthenticationToken &&
-    theUser.enteredActivationToken == "" &&
-    theUser.enteredGoogleToken == ""
+    !user.flagEnteredPassword &&
+    !user.flagEnteredAuthenticationToken &&
+    user.enteredActivationToken == "" &&
+    user.enteredGoogleToken == ""
   ) {
-    return !theUser.flagMustLogin;
+    return !user.flagMustLogin;
   }
   if (!global.flagUsingSSLinCurrentConnection) {
     return false;
   }
   bool doAttemptGoogleTokenLogin = false;
-  if (theUser.enteredGoogleToken != "") {
+  if (user.enteredGoogleToken != "") {
     if (
-      theUser.enteredActivationToken == "" &&
-      theUser.enteredPassword == "" &&
-      theUser.enteredAuthenticationToken == ""
+      user.enteredActivationToken == "" &&
+      user.enteredPassword == "" &&
+      user.enteredAuthenticationToken == ""
     ) {
-      theUser.username = "";
+      user.username = "";
       doAttemptGoogleTokenLogin = true;
     }
-    if (theUser.username == "") {
+    if (user.username == "") {
       doAttemptGoogleTokenLogin = true;
     }
-  } else if (theUser.username == "") {
-    return !theUser.flagMustLogin;
+  } else if (user.username == "") {
+    return !user.flagMustLogin;
   }
   bool changingPass =
   global.requestType == WebAPI::request::changePassword ||
   global.requestType == WebAPI::request::activateAccountJSON;
 
   if (changingPass) {
-    theUser.enteredAuthenticationToken = "";
+    user.enteredAuthenticationToken = "";
   }
   if (doAttemptGoogleTokenLogin) {
     bool tokenIsGood = false;
-    global.flagLoggedIn = Database().get().theUser.loginViaGoogleTokenCreateNewAccountIfNeeded(
-      theUser, &argumentProcessingFailureComments, nullptr, tokenIsGood
+    global.flagLoggedIn = Database().get().user.loginViaGoogleTokenCreateNewAccountIfNeeded(
+      user, &argumentProcessingFailureComments, nullptr, tokenIsGood
     );
     if (tokenIsGood && !global.flagLoggedIn && comments != nullptr) {
       *comments << "Your authentication is valid but I have problems with my database records. ";
     }
   } else if (
-    theUser.enteredAuthenticationToken != "" ||
-    theUser.enteredPassword != "" ||
-    theUser.enteredActivationToken != ""
+    user.enteredAuthenticationToken != "" ||
+    user.enteredPassword != "" ||
+    user.enteredActivationToken != ""
   ) {
-    global.flagLoggedIn = Database().get().theUser.loginViaDatabase(
-      theUser, &argumentProcessingFailureComments
+    global.flagLoggedIn = Database().get().user.loginViaDatabase(
+      user, &argumentProcessingFailureComments
     );
   }
   global.cookiesToBeSent.setKeyValue(
     "username",
-    HtmlRoutines::convertStringToURLString(theUser.username, false)
+    HtmlRoutines::convertStringToURLString(user.username, false)
     // <-User name must be stored in URL-encoded fashion, NO PLUSES.
   );
-  if (global.flagLoggedIn && theUser.enteredActivationToken == "") {
+  if (global.flagLoggedIn && user.enteredActivationToken == "") {
     // In case the user logged in with password, we need
     // to give the user the correct authentication token.
     global.cookiesToBeSent.setKeyValue(
       DatabaseStrings::labelAuthenticationToken,
-      HtmlRoutines::convertStringToURLString(theUser.actualAuthenticationToken, false)
+      HtmlRoutines::convertStringToURLString(user.actualAuthenticationToken, false)
       // <-URL-encoded fashion, NO PLUSES.
     );
     global.setWebInput(
       DatabaseStrings::labelAuthenticationToken,
-      HtmlRoutines::convertStringToURLString(theUser.actualAuthenticationToken, false)
+      HtmlRoutines::convertStringToURLString(user.actualAuthenticationToken, false)
     );
   } else {
     global.cookiesToBeSent.setKeyValue("authenticationToken", "0");
   }
   bool shouldDisplayMessage = false;
-  if (!global.flagLoggedIn && theUser.username != "") {
-    if (theUser.flagEnteredPassword || theUser.flagEnteredActivationToken) {
+  if (!global.flagLoggedIn && user.username != "") {
+    if (user.flagEnteredPassword || user.flagEnteredActivationToken) {
       shouldDisplayMessage = true;
     }
-    if (theUser.flagEnteredAuthenticationToken) {
-      if (theUser.enteredActivationToken != "0" && theUser.enteredActivationToken != "") {
+    if (user.flagEnteredAuthenticationToken) {
+      if (user.enteredActivationToken != "0" && user.enteredActivationToken != "") {
         shouldDisplayMessage = true;
       }
     }
   }
-  theUser.clearAuthenticationTokenAndPassword();
+  user.clearAuthenticationTokenAndPassword();
   if (shouldDisplayMessage) {
     argumentProcessingFailureComments << "Invalid user and/or authentication. ";
   }
@@ -1048,7 +1048,7 @@ int WebWorker::getIndexIfRunningWorkerId(
   // of requesting a unique id.
   int indexOther = this->parent->workerIds.getValue(workerId, - 1);
   if (indexOther >= 0) {
-    this->parent->theWorkers[indexOther].writingReportFile.lock();
+    this->parent->allWorkers[indexOther].writingReportFile.lock();
   }
   bool success = FileOperations::loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     "results/" + workerId,
@@ -1058,7 +1058,7 @@ int WebWorker::getIndexIfRunningWorkerId(
     &commentsOnError
   );
   if (indexOther >= 0) {
-    this->parent->theWorkers[indexOther].writingReportFile.unlock();
+    this->parent->allWorkers[indexOther].writingReportFile.unlock();
   }
   if (!success) {
     commentsOnError << "Failed to load your output with id: " << workerId << ". ";
@@ -1084,7 +1084,7 @@ int WebWorker::getIndexIfRunningWorkerId(
     global.fatal << "Corrupt index worker: indexOther: " << indexOther
     << "; indexFromFile: " << indexFromFile << ". " << global.fatal;
   }
-  if (indexOther >= this->parent->theWorkers.size) {
+  if (indexOther >= this->parent->allWorkers.size) {
     // Possible causes of this situation:
     // 1) worker id was created in a worker process that was fired up after the current
     // worker.
@@ -1124,7 +1124,7 @@ JSData WebWorker::processComputationIndicatorJSData() {
     this->flagKeepAlive = false;
     return result;
   }
-  WebWorker& otherWorker = this->parent->theWorkers[otherIndex];
+  WebWorker& otherWorker = this->parent->allWorkers[otherIndex];
   // Request a progress report from the running worker, non-blocking.
   otherWorker.workerToWorkerRequestIndicator.writeOnceAfterEmptying("!", true);
   return result;
@@ -1797,8 +1797,8 @@ bool WebWorker::correctRequestsBEFORELoginReturnFalseIfModified() {
 
 bool WebWorker::redirectIfNeeded(std::stringstream& argumentProcessingFailureComments) {
   MacroRegisterFunctionWithName("WebWorker::redirectIfNeeded");
-  UserCalculatorData& theUser = global.userDefault;
-  if (!theUser.flagEnteredPassword) {
+  UserCalculatorData& user = global.userDefault;
+  if (!user.flagEnteredPassword) {
     return false;
   }
   if (
@@ -1970,7 +1970,7 @@ int WebWorker::serveClient() {
   global.flagComputationComplete = false;
   global.userDefault.flagMustLogin = true;
   global.userDefault.flagStopIfNoLogin = true;
-  UserCalculatorData& theUser = global.userDefault;
+  UserCalculatorData& user = global.userDefault;
   this->response.reset(*this);
   if (
     this->requestTypE != this->requestGet &&
@@ -2035,10 +2035,10 @@ int WebWorker::serveClient() {
     this->response.processPing();
     return 0;
   }
-  theUser.flagMustLogin = this->parent->requiresLogin(
+  user.flagMustLogin = this->parent->requiresLogin(
     global.requestType, this->addressComputed
   );
-  if (!theUser.flagMustLogin) {
+  if (!user.flagMustLogin) {
     comments << "Login not needed. ";
   }
   if (this->requireSSL() && !global.flagUsingSSLinCurrentConnection) {
@@ -2057,17 +2057,17 @@ int WebWorker::serveClient() {
     this->sendPending();
     return 0;
   }
-  theUser.flagStopIfNoLogin = (
+  user.flagStopIfNoLogin = (
     !global.flagLoggedIn &&
     global.flagUsingSSLinCurrentConnection &&
-    theUser.flagMustLogin
+    user.flagMustLogin
   );
-  if (theUser.flagStopIfNoLogin) {
+  if (user.flagStopIfNoLogin) {
     if (global.requestType == WebAPI::request::changePassword) {
-      theUser.flagStopIfNoLogin = false;
+      user.flagStopIfNoLogin = false;
     }
   }
-  if (theUser.flagStopIfNoLogin) {
+  if (user.flagStopIfNoLogin) {
     if (
       global.requestType != WebAPI::request::logout &&
       global.requestType != WebAPI::request::login
@@ -2084,7 +2084,7 @@ int WebWorker::serveClient() {
   }
   if (
     argumentProcessingFailureComments.str() != "" && (
-      theUser.flagMustLogin ||
+      user.flagMustLogin ||
       global.requestType == WebAPI::request::userInfoJSON
     )
   ) {
@@ -2208,9 +2208,9 @@ void WebWorker::writeAfterTimeoutShowIndicator(const std::string& message) {
     global.toStringProgressReportNoThreadData(true), true
   );
   this->sendPending();
-  for (int i = 0; i < this->parent->theWorkers.size; i ++) {
+  for (int i = 0; i < this->parent->allWorkers.size; i ++) {
     if (i != this->indexInParent) {
-      this->parent->theWorkers[i].release();
+      this->parent->allWorkers[i].release();
     }
   }
   this->parent->release(this->connectedSocketID);
@@ -2242,12 +2242,12 @@ std::string WebWorker::toStringStatus() const {
   }
   if (this->flagInUse) {
     if (this->parent->activeWorker == this->indexInParent) {
-      out << ", <b style ='color:green'>current process</b>";
+      out << ", <b style='color:green'>current process</b>";
     } else {
       out << ", <b>in use</b>";
     }
-    out << ", <a href=\"calculator?request=monitor&mainInput="
-    << this->indexInParent + 1 << "\">monitor process "
+    out << ", <a href='calculator?request=monitor&mainInput="
+    << this->indexInParent + 1 << "'>monitor process "
     << this->indexInParent + 1 << "</a>";
   } else {
     out << ", not in use";
@@ -2301,9 +2301,9 @@ bool WebServer::checkConsistency() {
 
 void WebServer::releaseEverything() {
   this->checkConsistency();
-  this->theTLS.free();
-  for (int i = 0; i < this->theWorkers.size; i ++) {
-    this->theWorkers[i].release();
+  this->transportLayerSecurity.free();
+  for (int i = 0; i < this->allWorkers.size; i ++) {
+    this->allWorkers[i].release();
   }
   this->activeWorker = - 1;
   if (global.flagServerDetailedLog) {
@@ -2380,9 +2380,9 @@ void WebServer::reapChildren() {
   do {
     waitResult = waitpid(- 1, nullptr, exitFlags);
     if (waitResult > 0) {
-      for (int i = 0; i < this->theWorkers.size; i++) {
-        if (this->theWorkers[i].ProcessPID == waitResult) {
-          this->theWorkers[i].flagExited = true;
+      for (int i = 0; i < this->allWorkers.size; i++) {
+        if (this->allWorkers[i].ProcessPID == waitResult) {
+          this->allWorkers[i].flagExited = true;
           this->statistics.processesReaped ++;
         }
       }
@@ -2392,11 +2392,11 @@ void WebServer::reapChildren() {
 
 WebWorker& WebServer::getActiveWorker() {
   MacroRegisterFunctionWithName("WebServer::getActiveWorker");
-  if (this->activeWorker < 0 || this->activeWorker >= this->theWorkers.size) {
-    global.fatal << "Active worker index is " << this->activeWorker << " however I have " << this->theWorkers.size
+  if (this->activeWorker < 0 || this->activeWorker >= this->allWorkers.size) {
+    global.fatal << "Active worker index is " << this->activeWorker << " however I have " << this->allWorkers.size
     << " workers. " << global.fatal;
   }
-  return this->theWorkers[this->activeWorker];
+  return this->allWorkers[this->activeWorker];
 }
 
 void WebServer::wrapUp() {
@@ -2431,18 +2431,18 @@ void WebServer::workerTimerPing(int64_t pingTime) {
 
 void WebServer::releaseNonActiveWorkers() {
   MacroRegisterFunctionWithName("WebServer::releaseNonActiveWorkers");
-  for (int i = 0; i < this->theWorkers.size; i ++) {
+  for (int i = 0; i < this->allWorkers.size; i ++) {
     if (i != this->activeWorker) {
-      this->theWorkers[i].releaseKeepInUseFlag();
+      this->allWorkers[i].releaseKeepInUseFlag();
     }
   }
 }
 
 void WebServer::releaseSocketsNonActiveWorkers() {
   MacroRegisterFunctionWithName("WebServer::releaseSocketsNonActiveWorkers");
-  for (int i = 0; i < this->theWorkers.size; i ++) {
+  for (int i = 0; i < this->allWorkers.size; i ++) {
     if (i != this->activeWorker) {
-      this->release(this->theWorkers[i].connectedSocketID);
+      this->release(this->allWorkers[i].connectedSocketID);
     }
   }
 }
@@ -2450,7 +2450,7 @@ void WebServer::releaseSocketsNonActiveWorkers() {
 bool WebServer::emergencyRemoval_LastCreatedWorker() {
   this->getActiveWorker().release();
   this->activeWorker = - 1;
-  this->theWorkers.setSize(this->theWorkers.size - 1);
+  this->allWorkers.setSize(this->allWorkers.size - 1);
   return false;
 }
 
@@ -2467,27 +2467,27 @@ bool WebServer::createNewActiveWorker() {
     return false;
   }
   bool found = false;
-  for (int i = 0; i < this->theWorkers.size; i ++) {
-    if (!this->theWorkers[i].flagInUse) {
+  for (int i = 0; i < this->allWorkers.size; i ++) {
+    if (!this->allWorkers[i].flagInUse) {
       this->activeWorker = i;
       found = true;
       break;
     }
   }
   if (this->activeWorker == - 1) {
-    this->activeWorker = this->theWorkers.size;
-    this->theWorkers.setSize(this->theWorkers.size + 1);
+    this->activeWorker = this->allWorkers.size;
+    this->allWorkers.setSize(this->allWorkers.size + 1);
   }
   this->getActiveWorker().indexInParent = this->activeWorker;
   this->getActiveWorker().parent = this;
   this->getActiveWorker().pingMessage = "";
   if (found) {
-    this->theWorkers[this->activeWorker].flagInUse = true;
-    this->theWorkers[this->activeWorker].flagExited = false;
+    this->allWorkers[this->activeWorker].flagInUse = true;
+    this->allWorkers[this->activeWorker].flagExited = false;
     return true;
   }
   this->getActiveWorker().release();
-  this->theWorkers[this->activeWorker].flagInUse = false; //<-until everything is initialized, we cannot be in use.
+  this->allWorkers[this->activeWorker].flagInUse = false; //<-until everything is initialized, we cannot be in use.
   std::stringstream stowstream, wtosStream;
   stowstream << "S->W" << this->activeWorker + 1 << ": ";
   wtosStream << "W" << this->activeWorker + 1 << "->S: ";
@@ -2517,11 +2517,11 @@ bool WebServer::createNewActiveWorker() {
   }
   global << Logger::green
   << "Allocated new worker & plumbing data structures. Total worker data structures: "
-  << this->theWorkers.size << ". "
+  << this->allWorkers.size << ". "
   << Logger::endL;
-  this->theWorkers[this->activeWorker].workerId = "";
-  this->theWorkers[this->activeWorker].flagInUse = true;
-  this->theWorkers[this->activeWorker].flagExited = false;
+  this->allWorkers[this->activeWorker].workerId = "";
+  this->allWorkers[this->activeWorker].flagInUse = true;
+  this->allWorkers[this->activeWorker].flagExited = false;
 
   return true;
 }
@@ -2553,7 +2553,7 @@ std::string WebServer::toStringConnectionSummary() {
   out << "<b>Server status.</b> Server time: local: "
   << now.toStringLocal() << ", gm: " << now.toStringGM() << ".<br>";
   int64_t timeRunning = - 1;
-  if (this->activeWorker < 0 || this->activeWorker >= this->theWorkers.size) {
+  if (this->activeWorker < 0 || this->activeWorker >= this->allWorkers.size) {
     timeRunning = global.getElapsedMilliseconds();
   } else {
     timeRunning = this->getActiveWorker().millisecondsLastPingServerSideOnly;
@@ -2585,14 +2585,14 @@ std::string WebServer::toStringStatusForLogFile() {
   std::stringstream out;
   out << this->toStringConnectionSummary();
   int numInUse = 0;
-  for (int i = 0; i < this->theWorkers.size; i ++) {
-    if (this->theWorkers[i].flagInUse) {
+  for (int i = 0; i < this->allWorkers.size; i ++) {
+    if (this->allWorkers[i].flagInUse) {
       numInUse ++;
     }
   }
   out << "<hr>Currently, there are " << numInUse
   << " worker(s) in use. The peak number of worker(s)/concurrent connections was "
-  << this->theWorkers.size << ". ";
+  << this->allWorkers.size << ". ";
   out
   << "<br>kill commands: " << this->statistics.processKilled
   << ", processes reaped: " << this->statistics.processesReaped
@@ -2612,16 +2612,16 @@ std::string WebServer::toStringStatusAll() {
   }
   out << this->toStringStatusForLogFile();
   out << "<hr>";
-  out << "<a href=\"/LogFiles/server_starts_and_unexpected_restarts.html\">" << "Log files</a><br>";
-  out << "<a href=\"/LogFiles/" << GlobalVariables::getDateForLogFiles() << "/\">" << "Current log files</a><hr>";
+  out << "<a href='/LogFiles/server_starts_and_unexpected_restarts.html'>" << "Log files</a><br>";
+  out << "<a href='/LogFiles/" << GlobalVariables::getDateForLogFiles() << "/'>" << "Current log files</a><hr>";
   if (this->activeWorker == - 1) {
     out << "This is a server process.";
   } else {
     out << "This is a worker process. Active worker: " << this->activeWorker + 1 << ". ";
     out << "<br>" << this->toStringStatusActive();
   }
-  for (int i = 0; i < this->theWorkers.size; i ++) {
-    WebWorker& currentWorker = this->theWorkers[i];
+  for (int i = 0; i < this->allWorkers.size; i ++) {
+    WebWorker& currentWorker = this->allWorkers[i];
     if (!currentWorker.flagInUse) {
       continue;
     }
@@ -2630,8 +2630,8 @@ std::string WebServer::toStringStatusAll() {
   }
   out << "<hr>";
   out << "Connections: " << this->currentlyConnectedAddresses.toString();
-  for (int i = 0; i < this->theWorkers.size; i ++) {
-    out << "<hr>" << this->theWorkers[i].toStringStatus();
+  for (int i = 0; i < this->allWorkers.size; i ++) {
+    out << "<hr>" << this->allWorkers[i].toStringStatus();
   }
   return out.str();
 }
@@ -2665,7 +2665,7 @@ void WebServer::stopKillAll() {
   }
   global << Logger::red << "Server restart requested. " << Logger::endL;
   global << "Sending kill signal to all copies of the calculator. " << Logger::endL;
-  for (int i = 0; i < this->theWorkers.size; i ++) {
+  for (int i = 0; i < this->allWorkers.size; i ++) {
     this->terminateChildSystemCall(i);
   }
   SignalsInfrastructure::signals().unblockSignals();
@@ -2675,8 +2675,8 @@ void WebServer::stopKillAll() {
   int maximumWaitAttempts = 30;
   while (true) {
     workersStillInUse = 0;
-    for (int i = 0 ; i < this->theWorkers.size; i ++) {
-      if (!this->theWorkers[i].flagExited && this->theWorkers[i].flagInUse) {
+    for (int i = 0 ; i < this->allWorkers.size; i ++) {
+      if (!this->allWorkers[i].flagExited && this->allWorkers[i].flagInUse) {
         workersStillInUse ++;
         break;
       }
@@ -2792,16 +2792,16 @@ void WebServer::terminateProcessId(int processId) {
 
 void WebServer::terminateChildSystemCall(int i) {
   // Signal lock not needed: signals are unlocked outside of the select loop.
-  if (!this->theWorkers[i].flagInUse || this->theWorkers[i].flagExited) {
+  if (!this->allWorkers[i].flagInUse || this->allWorkers[i].flagExited) {
     return;
   }
   this->markChildNotInUse(i);
-  if (this->theWorkers[i].ProcessPID > 0) {
+  if (this->allWorkers[i].ProcessPID > 0) {
     if (global.flagServerDetailedLog) {
       global << "Detail: " << " killing child index: " << i << "." << Logger::endL;
     }
-    this->terminateProcessId(this->theWorkers[i].ProcessPID);
-    this->theWorkers[i].ProcessPID = - 1;
+    this->terminateProcessId(this->allWorkers[i].ProcessPID);
+    this->allWorkers[i].ProcessPID = - 1;
   }
 }
 
@@ -2825,10 +2825,10 @@ void WebServer::handleTooManyConnections(const std::string& incomingUserAddress)
   }
   List<double> theTimes;
   List<int> theIndices;
-  for (int i = 0; i < this->theWorkers.size; i ++) {
-    if (this->theWorkers[i].flagInUse) {
-      if (this->theWorkers[i].userAddress == incomingAddress) {
-        theTimes.addOnTop(this->theWorkers[i].millisecondsServerAtWorkerStart);
+  for (int i = 0; i < this->allWorkers.size; i ++) {
+    if (this->allWorkers[i].flagInUse) {
+      if (this->allWorkers[i].userAddress == incomingAddress) {
+        theTimes.addOnTop(this->allWorkers[i].millisecondsServerAtWorkerStart);
         theIndices.addOnTop(i);
       }
     }
@@ -2851,10 +2851,10 @@ void WebServer::handleTooManyConnections(const std::string& incomingUserAddress)
     std::stringstream errorStream;
     errorStream
     << "Terminating child " << theIndices[j] + 1 << " with PID "
-    << this->theWorkers[theIndices[j]].ProcessPID
+    << this->allWorkers[theIndices[j]].ProcessPID
     << ": address: " << incomingAddress << " opened more than "
     << this->maxNumWorkersPerIPAdress << " simultaneous connections. ";
-    this->theWorkers[theIndices[j]].pingMessage = errorStream.str();
+    this->allWorkers[theIndices[j]].pingMessage = errorStream.str();
     global << Logger::red << errorStream.str() << Logger::endL;
   }
   if (global.flagServerDetailedLog) {
@@ -2864,7 +2864,7 @@ void WebServer::handleTooManyConnections(const std::string& incomingUserAddress)
 }
 
 void WebServer::markChildNotInUse(int childIndex) {
-  WebWorker& worker = this->theWorkers[childIndex];
+  WebWorker& worker = this->allWorkers[childIndex];
   worker.flagInUse = false;
   this->currentlyConnectedAddresses.subtractMonomial(
     worker.userAddress, 1
@@ -2874,7 +2874,7 @@ void WebServer::markChildNotInUse(int childIndex) {
 }
 
 void WebServer::processOneChildMessage(int childIndex, int& outputNumInUse) {
-  std::string messageString = this->theWorkers[childIndex].pipeWorkerToServerControls.getLastRead();
+  std::string messageString = this->allWorkers[childIndex].pipeWorkerToServerControls.getLastRead();
   this->markChildNotInUse(childIndex);
   std::stringstream commentsOnFailure;
   JSData workerMessage;
@@ -2896,10 +2896,10 @@ void WebServer::processOneChildMessage(int childIndex, int& outputNumInUse) {
   ) {
     int incomingAllRequests = workerMessage[
       WebServer::Statististics::allRequestsString
-    ].theInteger.getElement().getIntValueTruncated();
+    ].integerValue.getElement().getIntValueTruncated();
     int incomingPingRequests = workerMessage[
       WebServer::Statististics::pingRequestsString
-    ].theInteger.getElement().getIntValueTruncated();
+    ].integerValue.getElement().getIntValueTruncated();
     this->statistics.allRequests += incomingAllRequests;
     this->statistics.pingRequests += incomingPingRequests;
     if (incomingPingRequests > 0) {
@@ -2915,10 +2915,10 @@ void WebServer::processOneChildMessage(int childIndex, int& outputNumInUse) {
 }
 
 void WebServer::recycleOneChild(int childIndex, int& numberInUse) {
-  if (!this->theWorkers[childIndex].flagInUse) {
+  if (!this->allWorkers[childIndex].flagInUse) {
     return;
   }
-  WebWorker& currentWorker = this->theWorkers[childIndex];
+  WebWorker& currentWorker = this->allWorkers[childIndex];
   PipePrimitive& currentControlPipe = currentWorker.pipeWorkerToServerControls;
   if (currentControlPipe.flagReadEndBlocks) {
     global.fatal << "Pipe: " << currentControlPipe.toString() << " has blocking read end. " << global.fatal;
@@ -2976,17 +2976,17 @@ void WebServer::handleTooManyWorkers(int& numInUse) {
     }
     return;
   }
-  for (int i = 0; i < this->theWorkers.size && numInUse > 1; i ++) {
-    if (!this->theWorkers[i].flagInUse) {
+  for (int i = 0; i < this->allWorkers.size && numInUse > 1; i ++) {
+    if (!this->allWorkers[i].flagInUse) {
       continue;
     }
     this->terminateChildSystemCall(i);
     std::stringstream errorStream;
     errorStream
     << "Terminating child " << i + 1 << " with PID "
-    << this->theWorkers[i].ProcessPID
+    << this->allWorkers[i].ProcessPID
     << ": too many workers in use. ";
-    this->theWorkers[i].pingMessage = errorStream.str();
+    this->allWorkers[i].pingMessage = errorStream.str();
     global << Logger::red << errorStream.str() << Logger::endL;
     numInUse --;
     this->statistics.processKilled ++;
@@ -3009,12 +3009,12 @@ void WebServer::recycleChildrenIfPossible() {
     global << Logger::red << "Detail: recycleChildrenIfPossible start. " << Logger::endL;
   }
   int numInUse = 0;
-  for (int i = 0; i < this->theWorkers.size; i ++) {
-    if (this->theWorkers[i].flagInUse) {
+  for (int i = 0; i < this->allWorkers.size; i ++) {
+    if (this->allWorkers[i].flagInUse) {
       numInUse ++;
     }
   }
-  for (int i = 0; i < this->theWorkers.size; i ++) {
+  for (int i = 0; i < this->allWorkers.size; i ++) {
     this->recycleOneChild(i, numInUse);
   }
   this->handleTooManyWorkers(numInUse);
@@ -3031,7 +3031,7 @@ bool WebServer::initPrepareWebServerALL() {
   return true;
 }
 
-bool WebServer::initBindToOnePort(const std::string& thePort, int& outputListeningSocket) {
+bool WebServer::initBindToOnePort(const std::string& port, int& outputListeningSocket) {
   MacroRegisterFunctionWithName("WebServer::initBindToOnePort");
   addrinfo hints;
   addrinfo *servinfo = nullptr;
@@ -3043,7 +3043,7 @@ bool WebServer::initBindToOnePort(const std::string& thePort, int& outputListeni
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE; // use my IP
   // loop through all the results and bind to the first we can
-  rv = getaddrinfo(nullptr, thePort.c_str(), &hints, &servinfo);
+  rv = getaddrinfo(nullptr, port.c_str(), &hints, &servinfo);
   if (rv != 0) {
     global << "getaddrinfo: " << gai_strerror(rv) << Logger::endL;
     return false;
@@ -3061,7 +3061,7 @@ bool WebServer::initBindToOnePort(const std::string& thePort, int& outputListeni
     if (bind(outputListeningSocket, p->ai_addr, p->ai_addrlen) == - 1) {
       close(outputListeningSocket);
       outputListeningSocket = - 1;
-      global << "Error: bind failed at port: " << thePort << ". Error: "
+      global << "Error: bind failed at port: " << port << ". Error: "
       << this->toStringLastErrorDescription() << Logger::endL;
       continue;
     }
@@ -3075,7 +3075,7 @@ bool WebServer::initBindToOnePort(const std::string& thePort, int& outputListeni
   }
   freeaddrinfo(servinfo); // all done with this structure
   if (outputListeningSocket == - 1) {
-    global.fatal << "Failed to bind to port: " << thePort << ". " << global.fatal;
+    global.fatal << "Failed to bind to port: " << port << ". " << global.fatal;
   }
   return true;
 }
@@ -3274,7 +3274,7 @@ void Listener::computeUserAddress() {
 }
 
 TransportLayerSecurity& TransportLayerSecurity::defaultTLS_READ_ONLY() {
-  return global.server().theTLS;
+  return global.server().transportLayerSecurity;
 }
 
 int WebServer::daemon() {
@@ -3364,7 +3364,7 @@ int WebServer::run() {
     // Creates key files if absent. Does not call any openssl functions.
     std::stringstream commentsOnFailure;
     TransportLayerSecurity::initializeNonThreadSafePartsCommon();
-    this->theTLS.initSSLKeyFiles(&commentsOnFailure);
+    this->transportLayerSecurity.initSSLKeyFiles(&commentsOnFailure);
   }
   global.logs.server.reset();
   global.logs.serverMonitor.reset();
@@ -3395,7 +3395,7 @@ int WebServer::run() {
   global.initModifiableDatabaseFields();
   HtmlRoutines::loadStrings();
   this->initSSL();
-  this->theTLS.initializeNonThreadSafeOnFirstCall(true);
+  this->transportLayerSecurity.initializeNonThreadSafeOnFirstCall(true);
   if (!this->initPrepareWebServerALL()) {
     return 1;
   }
@@ -3539,10 +3539,10 @@ void WebServer::computeSSLFlags() {
 
   if (this->lastListeningSocket == this->listeningSocketHTTPSBuiltIn) {
     global.flagUsingSSLinCurrentConnection = true;
-    this->theTLS.flagUseBuiltInTlS = true;
+    this->transportLayerSecurity.flagUseBuiltInTlS = true;
   } else if (this->lastListeningSocket == this->listeningSocketHTTPSOpenSSL){
     global.flagUsingSSLinCurrentConnection = true;
-    this->theTLS.flagUseBuiltInTlS = false;
+    this->transportLayerSecurity.flagUseBuiltInTlS = false;
   }
   this->getActiveWorker().flagUsingSSLInWorkerProcess = global.flagUsingSSLinCurrentConnection;
 }
@@ -4616,7 +4616,7 @@ void WebServer::computeActiveWorkerId() {
   }
   worker.workerId = Crypto::convertListUnsignedCharsToHex(incomingId);
   this->workerIds.setKeyValue(worker.workerId, this->activeWorker);
-  if (this->workerIds.size() > 2 * this->theWorkers.size) {
+  if (this->workerIds.size() > 2 * this->allWorkers.size) {
     global << Logger::red
     << "Warning: worker ids exceeds twice the number of workers. "
     << "This may be a memory leak. " << Logger::endL;

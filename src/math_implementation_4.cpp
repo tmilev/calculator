@@ -1231,8 +1231,8 @@ void Permutation::initPermutation(int n) {
   }
 }
 
-void Permutation::initPermutation(List<int>& disjointSubsets, int TotalNumElements) {
-  this->initPart1(TotalNumElements);
+void Permutation::initPermutation(List<int>& disjointSubsets, int totalNumberOfElements) {
+  this->initPart1(totalNumberOfElements);
   int counter = 0;
   for (int i = 0; i < disjointSubsets.size; i ++) {
     for (int j = 0; j < disjointSubsets[i]; j ++) {
@@ -1240,9 +1240,9 @@ void Permutation::initPermutation(List<int>& disjointSubsets, int TotalNumElemen
       this->multiplicities[counter] = 0;
       counter ++;
     }
-    TotalNumElements -= disjointSubsets[i];
+    totalNumberOfElements -= disjointSubsets[i];
   }
-  if (TotalNumElements != 0) {
+  if (totalNumberOfElements != 0) {
     global.fatal << "Permutations with 0 elements not allowed. " << global.fatal;
   }
 }

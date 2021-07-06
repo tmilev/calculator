@@ -11,7 +11,7 @@ bool CalculatorFunctionsCrypto::x509CertificateServer(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::x509CertificateServer");
   (void) input;
-  std::string result = Crypto::convertListUnsignedCharsToBase64(global.server().theTLS.theServer.certificate.sourceBinary, false);
+  std::string result = Crypto::convertListUnsignedCharsToBase64(global.server().transportLayerSecurity.theServer.certificate.sourceBinary, false);
   return output.assignValue(result, calculator);
 }
 

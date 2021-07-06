@@ -221,7 +221,7 @@ bool WebAPIResponse::processUnpauseWorker() {
     this->owner->flagKeepAlive = false;
     return global.response.writeResponse(progressReader, false);
   }
-  WebWorker& otherWorker = this->owner->parent->theWorkers[indexWorker];
+  WebWorker& otherWorker = this->owner->parent->allWorkers[indexWorker];
   if (!otherWorker.pauseWorker.unlock()) {
     result[WebAPI::result::error] = "Failed to unpause process";
   } else {
@@ -239,7 +239,7 @@ bool WebAPIResponse::processPauseWorker() {
     this->owner->flagKeepAlive = false;
     return global.response.writeResponse(progressReader, false);
   }
-  WebWorker& otherWorker = this->owner->parent->theWorkers[indexWorker];
+  WebWorker& otherWorker = this->owner->parent->allWorkers[indexWorker];
   if (otherWorker.pauseWorker.lock()) {
     result[WebAPI::result::status] = "paused";
   } else {
@@ -271,8 +271,8 @@ bool WebAPIResponse::processChangePassword(const std::string& reasonForNoAuthent
     result[WebAPI::result::error] = "Database not compiled";
     return global.response.writeResponse(result, false);
   }
-  UserCalculatorData& theUser = global.userDefault;
-  theUser.enteredAuthenticationToken = "";
+  UserCalculatorData& user = global.userDefault;
+  user.enteredAuthenticationToken = "";
   if (!global.flagUsingSSLinCurrentConnection) {
     result[WebAPI::result::error] = "Please use secure connection.";
     return global.response.writeResponse(result);
@@ -318,8 +318,8 @@ bool WebAPIResponse::processChangePassword(const std::string& reasonForNoAuthent
   }
   std::stringstream commentsOnFailure;
   std::string newAuthenticationToken;
-  if (!Database::get().theUser.setPassword(
-    theUser.username,
+  if (!Database::get().user.setPassword(
+    user.username,
     newPassword,
     newAuthenticationToken,
     commentsOnFailure
@@ -328,7 +328,7 @@ bool WebAPIResponse::processChangePassword(const std::string& reasonForNoAuthent
     return global.response.writeResponse(result);
   }
   JSData setQuery;
-  QueryExact findQuery(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, theUser.username);
+  QueryExact findQuery(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, user.username);
   setQuery[DatabaseStrings::labelActivationToken] = "activated";
   if (!Database::get().updateOne(
     findQuery, setQuery, &commentsOnFailure
@@ -442,7 +442,7 @@ bool WebAPIResponse::processActivateAccount() {
 bool WebAPIResponse::processLogout() {
   MacroRegisterFunctionWithName("WebAPIResponse::processLogout");
   this->owner->setHeaderOKNoContentLength("");
-  Database::get().theUser.logoutViaDatabase();
+  Database::get().user.logoutViaDatabase();
   return this->processLoginUserInfo("Coming from logout");
 }
 

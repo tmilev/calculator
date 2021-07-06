@@ -1085,9 +1085,9 @@ class ListZeroAfterUse {
 template <class ObjectType1, class ObjectType2, unsigned int hashFunction1(const ObjectType1&), unsigned int hashFunction2(const ObjectType2&)>
 class Pair {
   friend std::ostream& operator << (
-    std::ostream& output, const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& thePair
+    std::ostream& output, const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& pair
   ) {
-    output << "("  << thePair.object1 << ", " <<  thePair.object2 << ")";
+    output << "("  << pair.object1 << ", " <<  pair.object2 << ")";
     return output;
   }
 public:

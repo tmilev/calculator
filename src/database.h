@@ -112,7 +112,7 @@ public:
     bool loadUserInformation(UserCalculatorData& output, std::stringstream* commentsOnFailure);
     User();
   };
-  User theUser;
+  User user;
 
   class FallBack {
   public:
@@ -178,7 +178,7 @@ public:
     std::string toStringIndices() const;
     FallBack();
   };
-  FallBack theFallBack;
+  FallBack fallBack;
 
   class Mongo {
   public:
@@ -195,7 +195,7 @@ public:
     bool initialize();
     void shutdown();
     bool deleteDatabase(std::stringstream *commentsOnFailure);
-    void createHashIndex(const std::string& collectionName, const std::string& theKey);
+    void createHashIndex(const std::string& collectionName, const std::string& key);
     bool fetchCollectionNames(
       List<std::string>& output, std::stringstream* commentsOnFailure
     );
@@ -306,7 +306,7 @@ public:
     long long* totalItems = nullptr,
     std::stringstream* commentsOnFailure = nullptr
   );
-  bool deleteOneEntry(const JSData& theEntry, std::stringstream* commentsOnFailure);
+  bool deleteOneEntry(const JSData& entry, std::stringstream* commentsOnFailure);
   bool deleteOneEntryById(
     const QueryExact& findQuery,
     std::stringstream* commentsOnFailure
@@ -322,16 +322,16 @@ public:
   JSData toJSONDatabaseFetch(const std::string& incomingLabels);
   static bool getLabels(
     const JSData& fieldEntries,
-    List<std::string>& theLabels,
+    List<std::string>& labels,
     std::stringstream* commentsOnFailure
   );
   static bool isDeleteable(
-    const List<std::string>& theLabels,
+    const List<std::string>& labels,
     List<std::string>** outputPattern,
     std::stringstream* commentsOnFailure
   );
   static bool isDeleteable(
-    const JSData& theEntry,
+    const JSData& entry,
     List<std::string>** outputPattern,
     std::stringstream* commentsOnFailure
   );

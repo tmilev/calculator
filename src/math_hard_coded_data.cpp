@@ -1151,7 +1151,7 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
     readerSubgroup.generatingSimpleRoots.setSize(0);
     for (int j = 0; j < currentSGdata.listObjects[0].listObjects[2].listObjects.size; j ++) {
       int theInt = 0;
-      currentSGdata.listObjects[0].listObjects[2].listObjects[j].theInteger.getElement().isIntegerFittingInInt(&theInt);
+      currentSGdata.listObjects[0].listObjects[2].listObjects[j].integerValue.getElement().isIntegerFittingInInt(&theInt);
       readerSubgroup.generatingSimpleRoots.addOnTop(gapRootSystem[- 1 + theInt]);
     }
     DynkinDiagramRootSubalgebra theSAdiagram;
@@ -1180,7 +1180,7 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
     }
     readerSubgroup.tauSignature.setSize(inputGroup.group.characterTable.size);
     for (int j = 0; j < readerSubgroup.tauSignature.size; j ++) {
-      readerSubgroup.tauSignature[j] = currentSGdata.listObjects[1].listObjects[j].theInteger.getElement();
+      readerSubgroup.tauSignature[j] = currentSGdata.listObjects[1].listObjects[j].integerValue.getElement();
     }
     outputSubgroups.addOnTop(readerSubgroup);
   }

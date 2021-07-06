@@ -78,8 +78,8 @@ public:
   WebAPIResponse response;
   std::string error;
   void prepareFullMessageHeaderAndFooter();
-  std::string openIndentTag(const std::string& theTag);
-  std::string closeIndentTag(const std::string& theTag);
+  std::string openIndentTag(const std::string& tag);
+  std::string closeIndentTag(const std::string& tag);
   JSData processComputationIndicatorJSData();
   int getIndexIfRunningWorkerId(JSData& outputComputationStatus);
   int processFolderOrFile();
@@ -239,7 +239,7 @@ public:
   bool flagReapingChildren;
   bool flagDeallocated;
   std::string pingAuthentication;
-  TransportLayerSecurity theTLS;
+  TransportLayerSecurity transportLayerSecurity;
   LinearCombination<MonomialWrapper<std::string, MathRoutines::hashString>, LargeInteger> currentlyConnectedAddresses;
   std::string portHTTP;
   std::string portHTTPSOpenSSL;
@@ -247,7 +247,7 @@ public:
   std::string portHTTPSDefault;
   List<int> theListeningSockets;
   //List<int> theListeningSocketsReadyToAccept;
-  ListReferences<WebWorker> theWorkers;
+  ListReferences<WebWorker> allWorkers;
   MapList<std::string, int, MathRoutines::hashString> workerIds;
 
   HashedList<std::string, MathRoutines::hashString> requestsNotNeedingLogin;
@@ -311,7 +311,7 @@ public:
   bool initPrepareWebServerALL();
   void initializeSignals();
   bool initBindToPorts();
-  bool initBindToOnePort(const std::string& thePort, int& outputListeningSocket);
+  bool initBindToOnePort(const std::string& port, int& outputListeningSocket);
   void initPortsITry();
   void initListeningSockets();
   void initSSL();

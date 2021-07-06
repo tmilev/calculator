@@ -12,12 +12,12 @@ class Matrix;
 class StringRoutines {
 public:
   static bool stringBeginsWith(
-    const std::string& theString,
+    const std::string& input,
     const std::string& desiredBeginning,
     std::string* outputStringEnd = nullptr
   );
   static bool stringEndsWith(
-    const std::string& theString,
+    const std::string& input,
     const std::string& desiredEnd,
     std::string* outputStringBeginning = nullptr
   );

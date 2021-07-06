@@ -760,8 +760,8 @@ public:
   );
   bool hasStronglyPerpendicularDecompositionWRT(
     Vector<Rational>& input,
-    int UpperBoundNumBetas,
-    Vectors<Rational>& theSet,
+    int upperBoundNumBetas,
+    Vectors<Rational>& set,
     Vectors<Rational>& output,
     List<Rational>& outputCoeffs,
     bool IntegralCoefficientsOnly

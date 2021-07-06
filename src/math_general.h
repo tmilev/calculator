@@ -5180,7 +5180,7 @@ private:
   friend class partFractionPolynomialSubstitution;
 public:
   std::string DebugString;
-  int LastDistinguishedIndex;
+  int lastDistinguishedIndex;
   int FileStoragePosition;
   bool PowerSeriesCoefficientIsComputed;
   bool IsIrrelevant;

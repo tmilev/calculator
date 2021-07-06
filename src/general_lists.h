@@ -220,7 +220,7 @@ public:
   static bool isADigit(const std::string& input, int* whichDigit = nullptr);
   static bool hasDecimalDigitsOnly(const std::string& input);
   static bool isHexDigit(char digitCandidate);
-  static bool isADigit(char theChar, int* whichDigit = nullptr);
+  static bool isADigit(char input, int* whichDigit = nullptr);
   template <class Type>
   static bool generateVectorSpaceClosedWithRespectToLieBracket(List<Type>& inputOutputElts, int upperDimensionBound) {
     return MathRoutines::generateVectorSpaceClosedWithRespectToOperation(

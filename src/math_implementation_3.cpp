@@ -1887,9 +1887,9 @@ void DrawingVariables::drawTextAtVectorBufferRational(
 }
 
 void DrawingVariables::drawTextAtVectorBufferDouble(
-  const Vector<double>& point, const std::string& inputText, int textColor, int theTextStyle
+  const Vector<double>& point, const std::string& inputText, int textColor, int textStyle
 ) {
-  this->operations.drawTextAtVectorBufferDouble(point, inputText, textColor, this->fontSizeNormal, theTextStyle);
+  this->operations.drawTextAtVectorBufferDouble(point, inputText, textColor, this->fontSizeNormal, textStyle);
 }
 
 void DrawingVariables::drawCircleAtVectorBufferRational(
@@ -1952,52 +1952,52 @@ bool WeylGroupData::isStronglyPerpendicularTo(const Vector<Rational>& input, con
 
 bool WeylGroupData::hasStronglyPerpendicularDecompositionWRT(
   Vector<Rational>& input,
-  int UpperBoundNumBetas,
-  Vectors<Rational>& theSet,
+  int upperBoundNumBetas,
+  Vectors<Rational>& set,
   Vectors<Rational>& output,
   List<Rational>& outputCoeffs,
   bool IntegralCoefficientsOnly
 ) {
-  if (UpperBoundNumBetas > 0 && output.size > UpperBoundNumBetas) {
+  if (upperBoundNumBetas > 0 && output.size > upperBoundNumBetas) {
     return false;
   }
   if (input.isEqualToZero()) {
     return true;
   }
-  if (theSet.size == 0) {
+  if (set.size == 0) {
     return false;
   }
   if (output.size == 0) {
-    if (theSet.contains(input)) {
+    if (set.contains(input)) {
       output.setSize(1);
       *output.lastObject() = input;
       outputCoeffs.setSize(1);
       outputCoeffs.lastObject()->makeOne();
       return true;
     }
-    output.reserve(theSet.size);
-    outputCoeffs.reserve(theSet.size);
+    output.reserve(set.size);
+    outputCoeffs.reserve(set.size);
   }
   Vectors<Rational> theNewSet;
-  theNewSet.reserve(theSet.size);
+  theNewSet.reserve(set.size);
   Vector<Rational> tempRoot;
   Rational tempRat;
-  for (int indexFirstNonZeroRoot = 0; indexFirstNonZeroRoot < theSet.size; indexFirstNonZeroRoot ++) {
-    Vector<Rational>& currentRoot = theSet[indexFirstNonZeroRoot];
+  for (int indexFirstNonZeroRoot = 0; indexFirstNonZeroRoot < set.size; indexFirstNonZeroRoot ++) {
+    Vector<Rational>& currentRoot = set[indexFirstNonZeroRoot];
     tempRat = this->rootScalarCartanRoot(input, currentRoot)/this->rootScalarCartanRoot(currentRoot, currentRoot);
     if (tempRat.isPositive()) {
       if (!IntegralCoefficientsOnly || tempRat.denominatorShort == 1) {
          theNewSet.size = 0;
-         for (int i = indexFirstNonZeroRoot; i < theSet.size; i ++) {
-           if (this->isStronglyPerpendicularTo(currentRoot, theSet[i])) {
-             theNewSet.addOnTop(theSet[i]);
+         for (int i = indexFirstNonZeroRoot; i < set.size; i ++) {
+           if (this->isStronglyPerpendicularTo(currentRoot, set[i])) {
+             theNewSet.addOnTop(set[i]);
            }
          }
          outputCoeffs.addOnTop(tempRat);
          output.addOnTop(currentRoot);
          tempRoot = input - currentRoot * tempRat;
          if (this->hasStronglyPerpendicularDecompositionWRT(
-          tempRoot, UpperBoundNumBetas, theNewSet, output, outputCoeffs, IntegralCoefficientsOnly
+          tempRoot, upperBoundNumBetas, theNewSet, output, outputCoeffs, IntegralCoefficientsOnly
          )) {
            return true;
          }
@@ -2072,10 +2072,10 @@ std::string StringRoutines::Differ::differenceHTMLStatic(
   const std::string& labelLeft,
   const std::string& labelRight
 ) {
-  StringRoutines::Differ theDiffer;
-  theDiffer.left = inputLeft;
-  theDiffer.right = inputRight;
-  return theDiffer.differenceHTML(
+  StringRoutines::Differ differ;
+  differ.left = inputLeft;
+  differ.right = inputRight;
+  return differ.differenceHTML(
     labelLeft, labelRight
   );
 }
@@ -2386,15 +2386,15 @@ std::string StringRoutines::stringTrimToLengthForDisplay(const std::string& inpu
   }
   std::stringstream abbreviationStream;
   abbreviationStream << "...(" << input.size() << " characters) ...";
-  int numCharsAtEnds = (static_cast<signed>(input.size()) - desiredLength20AtLeast) / 2;
+  int numberOfCharactersAtEnds = (static_cast<signed>(input.size()) - desiredLength20AtLeast) / 2;
   std::stringstream out;
-  for (int i = 0; i < numCharsAtEnds; i ++) {
+  for (int i = 0; i < numberOfCharactersAtEnds; i ++) {
     out << input[static_cast<unsigned>(i)];
   }
   out << abbreviationStream.str();
-  for (int i = 0; i < numCharsAtEnds; i ++) {
+  for (int i = 0; i < numberOfCharactersAtEnds; i ++) {
     out << input[
-      static_cast<unsigned>(static_cast<signed>(input.size()) - numCharsAtEnds + i)
+      static_cast<unsigned>(static_cast<signed>(input.size()) - numberOfCharactersAtEnds + i)
     ];
   }
   return out.str();
@@ -2589,36 +2589,36 @@ int MathRoutines::factorial(int n) {
 }
 
 bool StringRoutines::stringEndsWith(
-  const std::string& theString, const std::string& desiredEnd, std::string* outputStringBeginning
+  const std::string& input, const std::string& desiredEnd, std::string* outputStringBeginning
 ) {
   MacroRegisterFunctionWithName("StringRoutines::stringEndsWith");
   if (desiredEnd.size() == 0) {
     if (outputStringBeginning == nullptr) {
-      *outputStringBeginning = theString;
+      *outputStringBeginning = input;
     }
     return true;
   }
-  int indexInTheString = static_cast<signed>(theString.size()) - 1;
+  int indexInTheString = static_cast<signed>(input.size()) - 1;
   for (int i = static_cast<signed>(desiredEnd.size()) - 1; i >= 0; i --) {
     if (indexInTheString < 0) {
       return false;
     }
-    if (desiredEnd[static_cast<unsigned>(i)] != theString[static_cast<unsigned>(indexInTheString)]) {
+    if (desiredEnd[static_cast<unsigned>(i)] != input[static_cast<unsigned>(indexInTheString)]) {
       return false;
     }
     indexInTheString --;
   }
   if (outputStringBeginning != nullptr) {
-    *outputStringBeginning = theString.substr(0, theString.size() - desiredEnd.size());
+    *outputStringBeginning = input.substr(0, input.size() - desiredEnd.size());
   }
   return true;
 }
 
 bool StringRoutines::stringBeginsWith(
-  const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd
+  const std::string& input, const std::string& desiredBeginning, std::string* outputStringEnd
 ) {
   std::string actualBeginning, stringEnd;
-  StringRoutines::splitStringInTwo(theString, static_cast<int>(desiredBeginning.size()), actualBeginning, stringEnd);
+  StringRoutines::splitStringInTwo(input, static_cast<int>(desiredBeginning.size()), actualBeginning, stringEnd);
   bool result = (actualBeginning == desiredBeginning);
   //outputstring is only modified if result is true
   if (result && outputStringEnd != nullptr) {
@@ -2646,11 +2646,11 @@ bool MathRoutines::hasDecimalDigitsOnly(const std::string& input) {
   return true;
 }
 
-bool MathRoutines::isADigit(char theChar, int* whichDigit) {
-  int theDigit = theChar - '0';
-  bool result = (theDigit < 10 && theDigit >= 0);
+bool MathRoutines::isADigit(char input, int* whichDigit) {
+  int digit = input - '0';
+  bool result = (digit < 10 && digit >= 0);
   if (result && whichDigit != nullptr) {
-    *whichDigit = theDigit;
+    *whichDigit = digit;
   }
   return result;
 }
@@ -2833,9 +2833,9 @@ void Selection::initSelectionFixedCardinality(int card) {
   this->cardinalitySelection = card;
 }
 
-void Selection::incrementSelectionFixedCardinality(int card) {
+void Selection::incrementSelectionFixedCardinality(int cardinality) {
   //example of the order of generation of all combinations
-  // when card = 2 and maximumSize = 5. The second column indicates the
+  // when cardinality = 2 and maximumSize = 5. The second column indicates the
   //state of the array at the point in code marked with *** below
   //11000 (->10000) indexLastZeroWithOneBefore: 2 NumOnesAfterLastZeroWithOneBefore: 0
   //10100 (->10000) indexLastZeroWithOneBefore: 3 NumOnesAfterLastZeroWithOneBefore: 0
@@ -2847,22 +2847,22 @@ void Selection::incrementSelectionFixedCardinality(int card) {
   //00110 (->00100) indexLastZeroWithOneBefore: 4 NumOnesAfterLastZeroWithOneBefore: 0
   //00101 (->00000) indexLastZeroWithOneBefore: 3 NumOnesAfterLastZeroWithOneBefore: 1
   //00011
-  if (card > this->numberOfElements) {
+  if (cardinality > this->numberOfElements) {
     return;
   }
-  if (this->cardinalitySelection != card) {
-    this->initSelectionFixedCardinality(card);
+  if (this->cardinalitySelection != cardinality) {
+    this->initSelectionFixedCardinality(cardinality);
     return;
   }
-  if (card == this->numberOfElements || card == 0) {
+  if (cardinality == this->numberOfElements || cardinality == 0) {
     return;
   }
   int indexLastZeroWithOneBefore = - 1;
-  int NumOnesAfterLastZeroWithOneBefore = 0;
+  int numberOfOnesAfterLastZeroWithOneBefore = 0;
   for (int i = this->numberOfElements - 1; i >= 0; i --) {
     if (this->selected[i]) {
       if (indexLastZeroWithOneBefore == - 1) {
-        NumOnesAfterLastZeroWithOneBefore ++;
+        numberOfOnesAfterLastZeroWithOneBefore ++;
       } else {
         break;
       }
@@ -2871,16 +2871,16 @@ void Selection::incrementSelectionFixedCardinality(int card) {
     }
   }
   if (indexLastZeroWithOneBefore == 0) {
-    this->initSelectionFixedCardinality(card);
+    this->initSelectionFixedCardinality(cardinality);
     return;
   }
-  for (int i = 0; i < NumOnesAfterLastZeroWithOneBefore + 1; i ++) {
+  for (int i = 0; i < numberOfOnesAfterLastZeroWithOneBefore + 1; i ++) {
     this->selected[this->elements[this->cardinalitySelection - i - 1]] = false;
   }
   //***At this point in time the second column is recorded
-  for (int i = 0; i < NumOnesAfterLastZeroWithOneBefore + 1; i ++) {
+  for (int i = 0; i < numberOfOnesAfterLastZeroWithOneBefore + 1; i ++) {
     this->selected[i + indexLastZeroWithOneBefore] = true;
-    this->elements[this->cardinalitySelection + i - NumOnesAfterLastZeroWithOneBefore - 1] = i + indexLastZeroWithOneBefore;
+    this->elements[this->cardinalitySelection + i - numberOfOnesAfterLastZeroWithOneBefore - 1] = i + indexLastZeroWithOneBefore;
   }
 }
 
@@ -3091,14 +3091,14 @@ bool OnePartialFraction::reduceOnceGeneralMethodNoOSBasis(
   for (int i = 0; i < this->indicesNonZeroMultiplicities.size; i ++) {
     tempRoot.setSize(owner.ambientDimension);
     int currentIndex = this->indicesNonZeroMultiplicities[i];
-    if (currentIndex == this->LastDistinguishedIndex) {
+    if (currentIndex == this->lastDistinguishedIndex) {
       IndexInLinRelationOfLastGainingMultiplicityIndex = i;
     }
     tempRoot = owner.startingVectors[currentIndex] * this->denominator[currentIndex].getLargestElongation();
     tempRoots.addOnTop(tempRoot);
     bool ShouldDecompose;
     ShouldDecompose = tempRoots.getLinearDependence(tempMat);
-    if (ShouldDecompose && this->LastDistinguishedIndex != - 1) {
+    if (ShouldDecompose && this->lastDistinguishedIndex != - 1) {
       if (IndexInLinRelationOfLastGainingMultiplicityIndex == - 1) {
         ShouldDecompose = false;
       } else {
@@ -3110,7 +3110,7 @@ bool OnePartialFraction::reduceOnceGeneralMethodNoOSBasis(
       return true;
     }
   }
-  this->LastDistinguishedIndex = - 1;
+  this->lastDistinguishedIndex = - 1;
   return false;
 }
 
@@ -3125,13 +3125,13 @@ bool OnePartialFraction::reduceOnceGeneralMethod(
   }
   Matrix<Rational>& tempMat = bufferMat;
   bufferVectors.size = 0;
-  this->LastDistinguishedIndex = this->getSmallestNonZeroIndexGreaterThanOrEqualTo(owner, this->LastDistinguishedIndex);
+  this->lastDistinguishedIndex = this->getSmallestNonZeroIndexGreaterThanOrEqualTo(owner, this->lastDistinguishedIndex);
   int IndexInLinRelationOfLastGainingMultiplicityIndex = - 1;
   Vector<Rational> tempRoot;
   for (int i = 0; i < this->indicesNonZeroMultiplicities.size; i ++) {
     tempRoot.setSize(owner.ambientDimension);
     int currentIndex = this->indicesNonZeroMultiplicities[i];
-    if (currentIndex == this->LastDistinguishedIndex) {
+    if (currentIndex == this->lastDistinguishedIndex) {
       IndexInLinRelationOfLastGainingMultiplicityIndex = i;
     }
     tempRoot = owner.startingVectors[currentIndex];
@@ -3140,8 +3140,8 @@ bool OnePartialFraction::reduceOnceGeneralMethod(
     bool ShouldDecompose;
     ShouldDecompose = bufferVectors.getLinearDependence(tempMat);
     if (ShouldDecompose && (
-      this->LastDistinguishedIndex != - 1 ||
-      this->LastDistinguishedIndex == owner.startingVectors.size
+      this->lastDistinguishedIndex != - 1 ||
+      this->lastDistinguishedIndex == owner.startingVectors.size
     )) {
       if (IndexInLinRelationOfLastGainingMultiplicityIndex == - 1) {
         ShouldDecompose = false;
@@ -3179,7 +3179,7 @@ void OnePartialFraction::assign(const OnePartialFraction& p) {
   this->indicesNonZeroMultiplicities = (p.indicesNonZeroMultiplicities);
   this->IsIrrelevant = p.IsIrrelevant;
   this->RelevanceIsComputed = p.RelevanceIsComputed;
-  this->LastDistinguishedIndex = p.LastDistinguishedIndex;
+  this->lastDistinguishedIndex = p.lastDistinguishedIndex;
 }
 
 void OnePartialFraction::assignNoIndicesNonZeroMults(OnePartialFraction& p) {
@@ -3396,7 +3396,7 @@ bool OnePartialFraction::decomposeFromLinearRelation(
     }
   }
   if (!flagUsingOSbasis) {
-    this->LastDistinguishedIndex = GainingMultiplicityIndex;
+    this->lastDistinguishedIndex = GainingMultiplicityIndex;
   }
   if (OnePartialFraction::flagAnErrorHasOccurredTimeToPanic) {
   }
@@ -3737,7 +3737,7 @@ OnePartialFraction::OnePartialFraction() {
   this->PowerSeriesCoefficientIsComputed = false;
   this->AlreadyAccountedForInGUIDisplay = false;
   this->FileStoragePosition = - 1;
-  this->LastDistinguishedIndex = - 1;
+  this->lastDistinguishedIndex = - 1;
   this->RelevanceIsComputed = false;
 }
 
@@ -7753,8 +7753,8 @@ void WeylGroupData::drawRootSystem(
     return;
   }
   this->computeRho(true);
-  Vector<Rational> ZeroRoot;
-  ZeroRoot.makeZero(dimension);
+  Vector<Rational> zeroRoot;
+  zeroRoot.makeZero(dimension);
   output.initDimensions(dimension);
   output.graphicsUnit = DrawOperations::graphicsUnitDefault;
   for (int i = 0; i < dimension; i ++) {
@@ -7818,7 +7818,7 @@ void WeylGroupData::drawRootSystem(
   output.centerX = 300;
   output.centerY = 300;
   for (int i = 0; i < RootSystemSorted.size; i ++) {
-    output.drawLineBetweenTwoVectorsBufferRational(ZeroRoot, RootSystemSorted[i], "green", 1);
+    output.drawLineBetweenTwoVectorsBufferRational(zeroRoot, RootSystemSorted[i], "green", 1);
     output.drawCircleAtVectorBufferRational(RootSystemSorted[i], "#ff00ff", 2);
     for (int j = i + 1; j < RootSystemSorted.size; j ++) {
       differenceRoot = RootSystemSorted[i] - RootSystemSorted[j];
@@ -8515,8 +8515,8 @@ std::string KazhdanLusztigPolynomials::toString(FormatExpressions* format) {
 void KazhdanLusztigPolynomials::generatePartialBruhatOrder() {
   MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::generatePartialBruhatOrder");
   int dimension = this->weylGroup->cartanSymmetric.numberOfRows;
-  Vector<Rational> ZeroRoot;
-  ZeroRoot.makeZero(dimension);
+  Vector<Rational> zeroRoot;
+  zeroRoot.makeZero(dimension);
   this->bruhatOrder.setSize(this->size);
   this->inverseBruhatOrder.setSize(this->size);
   this->simpleReflectionsActionList.setSize(this->size);
@@ -10674,8 +10674,8 @@ bool Cone::drawMeLastCoordinateAffine(
   const std::string& ChamberWallColor
 ) const {
   (void) format;
-  Vector<Rational> ZeroRoot;
-  ZeroRoot.makeZero(this->getDimension() - 1);
+  Vector<Rational> zeroRoot;
+  zeroRoot.makeZero(this->getDimension() - 1);
   Vectors<Rational> VerticesScaled;
   VerticesScaled = this->vertices;
   Rational tempRat;
@@ -10747,10 +10747,10 @@ bool Cone::drawMeProjective(
   FormatExpressions& format
 ) const {
   (void) format;
-  Vector<Rational> ZeroRoot, coordCenter;
-  ZeroRoot.makeZero(this->getDimension());
+  Vector<Rational> zeroRoot, coordCenter;
+  zeroRoot.makeZero(this->getDimension());
   if (coordCenterTranslation == nullptr) {
-    coordCenter = ZeroRoot;
+    coordCenter = zeroRoot;
   } else {
     coordCenter = *coordCenterTranslation;
   }
@@ -10771,13 +10771,13 @@ bool Cone::drawMeProjective(
     for (int i = 0; i < this->getDimension(); i ++) {
       tempRoot.makeEi(this->getDimension(), i);
       theDrawingVariables.drawLineBetweenTwoVectorsBufferRational(
-        ZeroRoot + coordCenter, tempRoot + coordCenter, "gray", 1
+        zeroRoot + coordCenter, tempRoot + coordCenter, "gray", 1
       );
     }
   }
   for (int i = 0; i < this->vertices.size; i ++) {
     theDrawingVariables.drawLineBetweenTwoVectorsBufferRational(
-      ZeroRoot + coordCenter, VerticesScaled[i] * 10000 + coordCenter, "gray", 1
+      zeroRoot + coordCenter, VerticesScaled[i] * 10000 + coordCenter, "gray", 1
     );
   }
   for (int k = 0; k < this->normals.size; k ++) {

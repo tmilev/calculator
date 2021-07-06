@@ -1,7 +1,16 @@
 // Licensed to you under the Apache 2.0 license.
+//
+// Documentation of the equation editor can be found in: 
+//
+// https://calculator-algebra.org:8166/calculator_html/test_equation_editor.html
+//
+// The source code of the editor can be found in:
+//
+// https://github.com/tmilev/calculator
+//
 // The formatting in this file follows
 // an auto-code formatting associated with the closure compiler.
-
+//
 // We are not using 'use strict' as that creates
 // a "uselessCode" compiler error with
 // the closure compiler.

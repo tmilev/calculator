@@ -64,7 +64,7 @@ public:
   void shrinkMaxSize();
   void makeSubSelection(Selection& selection, Selection& subSelection);
   void initSelectionFixedCardinality(int card);
-  void incrementSelectionFixedCardinality(int card);
+  void incrementSelectionFixedCardinality(int cardinality);
   void invertSelection() {
     for (int i = 0; i < this->numberOfElements; i ++) {
       this->selected[i] = !this->selected[i];

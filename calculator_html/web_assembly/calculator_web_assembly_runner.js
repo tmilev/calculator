@@ -20,7 +20,7 @@ class Runner {
     return tty.input.shift();
   }
 
-  callMain(
+  callCalculator(
     /**@type {string} */
     input,
     /**@type {function} */
@@ -36,7 +36,7 @@ class Runner {
       return;
     }
     setTimeout(() => {
-      this.callMain(input, callback);
+      this.callCalculator(input, callback);
     }, 100);
   }
 
@@ -45,7 +45,7 @@ class Runner {
     let request = message[0];
     let computationInput = message[1];
     if (request === "compute") {
-      this.callMain(computationInput, (/**@type{string} */ result) => {
+      this.callCalculator(computationInput, (/**@type{string} */ result) => {
         this.postComputationToMainThread(result);
       })
     }

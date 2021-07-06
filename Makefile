@@ -50,7 +50,6 @@ endif
 ifeq ($(wasm), 1)
     compiler=./emsdk/upstream/emscripten/emcc
     CFLAGS+=-DMACRO_use_wasm 
-    # CFLAGS+=-s BUILD_AS_WORKER=1
     CFLAGS+=-s
     LDFLAGS+=-s LLD_REPORT_UNDEFINED -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap"]' -s EXPORTED_FUNCTIONS='["_callCalculator"]'
     $(info [1;31mWeb assembly: turning off ssl and mongoDB.[0m) 

@@ -3271,7 +3271,7 @@ class EquationEditor {
     latex,
   ) {
     if (this.container === null) {
-      throw 'Attempt to write to non-initialized equation editor.';
+      throw new Error('Attempt to write to non-initialized equation editor.');
     }
     if (this.observer === null) {
       // Please note: Intersection observer is a recent addition to web
@@ -4444,7 +4444,7 @@ class MathNode {
     type,
   ) {
     if (!(equationEditor instanceof EquationEditor)) {
-      throw (`Unexpected equation editor ${equationEditor}`);
+      throw new Error(`Unexpected equation editor ${equationEditor}`);
     }
     /** @type {Array<MathNode>} */
     this.children = [];
@@ -5154,7 +5154,7 @@ class MathNode {
   }
 
   verticallyStretch(unused1, unused2) {
-    throw 'verticallyStretch not defined for a general MathNode';
+    throw new Error('verticallyStretch not defined for a general MathNode');
   }
 
   verticallyStretchParenthesis(
@@ -5258,7 +5258,7 @@ class MathNode {
       return;
     }
     if (this.type.type === knownTypes.sqrt.type) {
-      throw 'This case should be handled by MathNodeSqrt.computeDimensions()';
+      throw new Error('This case should be handled by MathNodeSqrt.computeDimensions()');
     }
     if (this.type.type === knownTypes.matrixRow.type) {
       return;
@@ -5581,7 +5581,7 @@ class MathNode {
       return;
     }
     if (this.equationEditor === null) {
-      throw 'Equation editor cannot be null here';
+      throw new Error('Equation editor cannot be null here');
     }
     let parser = new LaTeXParser(
         /** @type{EquationEditor} */(this.equationEditor), data);

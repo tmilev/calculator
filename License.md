@@ -24,8 +24,5 @@ As of 2018, April 26, the license has been changed to the Apache License, Versio
 The calculator includes prebuilt files from the following projects. 
 Their respective licenses have been listed here for your reference; 
 please visit the respective project sites for precise licensing information.
-1. MathJax, included in minified form (Apache 2.0).
-2. MathQuill, included in minified form, licensed under Mozilla Public License 2.0.
-3. Ace Editor, included in minified form, licensed under BSD license.
-4. JQuery, included in minified form, licensed under MIT License.
-
+1. Ace Editor, included in minified form, licensed under BSD license.
+2. All projects listed in calculator_html/external/package.json.

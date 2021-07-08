@@ -420,7 +420,7 @@ class InputPanelData {
     additionalStyle,
   ) {
     let buttonFactory = new EquationEditorButtonFactory(
-      command, false, label, additionalStyle,
+      command, false, label, additionalStyle, null,
     );
     this.buttonFactories.push(buttonFactory);
   }

@@ -89,7 +89,7 @@ function createEditor() {
   const options = new EquationEditorOptions({
     // Can you edit the math or is it static math?
     editable: true, 
-    // Bind a raw LaTeX input box to the editor. Editing the box updates automatically updates the editor.  
+    // Bind a raw LaTeX input box to the editor. Editing the box automatically updates the editor.  
     latexInput:document.getElementById('latex'),
     // Set to true to have your LaTeX sanitized to a preferred mathematical equivalent.
     sanitizeLatexSource: false, 
@@ -131,6 +131,45 @@ Typeset all math in the 'toBeTypeSet' tag.
   as a regular commonJS module in node.js projects with
   <span class='code'>require('./equation_editor');</span>. All code is under the Apache 2.0 license
   (i.e., you are free to use it, modify it and include it in your sites and products).
+
+  <h3>An minimal example with default button panels.</h3>
+  See the example rendered <a href='example_equation_editor_with_panel.html'>here</a>.
+
+  <pre class='code'>
+  &lt;html&gt;  
+  &lt;script type="text/javascript" src="equation_editor.js"&gt;&lt;/script&gt;
+  &lt;script&gt;
+  function createEditor() {
+    const options = new EquationEditorOptions({
+      // Can you edit the math or is it static math?
+      editable: true, 
+    });
+    let editor = new EquationEditor(document.getElementById('editor'), options);
+    let panel = new EquationButtonPanel(
+      // The editor to go with the button panel.
+      editor, 
+      // Render the button panel here.
+      document.getElementById('panel'), 
+      { 
+        collapseButton:document.getElementById('collapse'),
+        expandButton:document.getElementById('expand'),
+      },
+    );
+    panel.constructPanelDOM();
+    editor.updateDOM();
+    editor.rootNode.focus(- 1);
+  }
+  &lt;/script&gt;
+  &lt;body onload="createEditor()"&gt;
+  &lt;div id='panel'&gt; &lt;/div&gt;  
+  &lt;button id='collapse'&gt;collapse &amp#9650; &lt;/button&gt;  
+  &lt;button id='expand'&gt;expand &amp#9660;&lt;/button&gt;  
+  &lt;/br&gt;  
+  &lt;div id='editor' style="font-size: 72px; font-family:'Times New Roman'"&gt; &lt;/div&gt;
+  &lt;/body&gt;
+  &lt;/html&gt; 
+</pre>
+
 
   <h2>Test page for static math content.</h2>
   <button id="typeSetButton"

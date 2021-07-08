@@ -1,0 +1,34 @@
+<html>
+<script type="text/javascript" src="equation_editor.js"></script>
+<script>
+  function createEditor() {
+    const options = new EquationEditorOptions({
+      // Can you edit the math or is it static math?
+      editable: true,
+    });
+    let editor = new EquationEditor(document.getElementById('editor'), options);
+    let panel = new EquationButtonPanel(
+      // The editor to go with the button panel.
+      editor,
+      // Render the button panel here.
+      document.getElementById('panel'),
+      {
+        collapseButton: document.getElementById('collapse'),
+        expandButton: document.getElementById('expand'),
+      },
+    );
+    panel.constructPanelDOM();
+    editor.updateDOM();
+    editor.rootNode.focus(- 1);
+  }
+</script>
+
+<body onload="createEditor()">
+  <div id='panel'> </div>
+  <button id='collapse'>collapse &#9650; </button>
+  <button id='expand'>expand &#9660;</button>
+  </br>
+  <div id='editor' style="font-size: 72px; font-family:'Times New Roman'"> </div>
+</body>
+
+</html>

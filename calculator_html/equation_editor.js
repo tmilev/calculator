@@ -10249,6 +10249,8 @@ class EquationEditorButtonFactory {
     label,
     /** @type{Object.<string, string>|null} */
     additionalStyle,
+    /** @type{string|null|undefined} */
+    className,
   ) {
     /** @type{Array.<EquationEditorAction>} */
     this.commands = [];
@@ -10260,6 +10262,11 @@ class EquationEditorButtonFactory {
     this.additionalStyle = additionalStyle;
     if (this.additionalStyle === null || this.additionalStyle === undefined) {
       this.additionalStyle = {};
+    }
+    /** @type {string} */
+    this.className = "";
+    if (className !== null && className !== undefined) {
+      this.className = className;
     }
   }
 
@@ -10281,6 +10288,9 @@ class EquationEditorButtonFactory {
       result.style[label] = this.additionalStyle[label];
     }
     result.textContent = this.label;
+    if (this.className !== "") {
+      result.className = this.className;
+    }
     return this.attachToClick(result, editor);
   }
 
@@ -10322,16 +10332,211 @@ class EquationEditorButtonFactory {
   }
 }
 
+/** 
+ * @returns{EquationEditorButtonFactory} 
+ * An alternative constructor that constructs a button factory from a sequence of key presses.
+ */
+function equationEditorButtonFactoryFromKeySequence(
+  /** @type{Array.<string>} */
+  keys,
+  /** @type{label} */
+  label,
+  /** @type{Object.<string, string>|null} */
+  additionalStyle,
+  /** @type{string|null} */
+  className,
+) {
+  let result = new EquationEditorButtonFactory("", true, label, additionalStyle, className);
+  for (let i = 0; i < keys.length; i++) {
+    result.addEditorAction(new EquationEditorAction(keys[i], true));
+  }
+  return result;
+}
+
 let buttonFactories = {
-  'sqrt': new EquationEditorButtonFactory('\\sqrt', true, '\u221A', null),
-  'fraction':
-    new EquationEditorButtonFactory('\\frac{\\caret}{}', false, '/', null),
+  'plus': new EquationEditorButtonFactory('+', true, '+', { 'width': '100%' }),
+  'minus': new EquationEditorButtonFactory('-', true, '-', { 'width': '100%' }),
+  'product': new EquationEditorButtonFactory('*', true, '*', { 'width': '100%' }),
   'divide':
-    new EquationEditorButtonFactory('/', true, '(\u2022)/(\u2022)', null),
-  'exponent': new EquationEditorButtonFactory('^', true, '^', null),
+    new EquationEditorButtonFactory('/', true, '/', { 'width': '100%' }),
+  'exponent': new EquationEditorButtonFactory('^', true, '^', { 'width': '100%' }),
+  'fraction':
+    new EquationEditorButtonFactory('\\frac{\\caret}{}', false, '(\u2022)/(\u2022)', { 'width': '100%' }),
+  'leftParenthesis': new EquationEditorButtonFactory('(', true, '(', { 'width': '100%' }),
+  'rightParenthesis': new EquationEditorButtonFactory(')', true, ')', { 'width': '100%' }),
+  'sqrt': new EquationEditorButtonFactory('\\sqrt', true, '\u221A', { 'width': '100%' }),
+  'integral': new EquationEditorButtonFactory('\\int', false, '\u222B', { 'width': '100%' }),
+  'sum': new EquationEditorButtonFactory('\\sum', false, '\u03A3', { 'width': '100%' }),
   'matrix2x2': new EquationEditorButtonFactory(
-    '\\begin{pmatrix}\\caret&\\\\&\\end{pmatrix}', false, '2x2', null),
+    '\\begin{pmatrix}\\caret&\\\\&\\end{pmatrix}', false, '2x2', { 'width': '100%' }),
+  'pi': new EquationEditorButtonFactory('\\pi', false, '\u03C0', { 'width': '100%' }),
+  'degrees': equationEditorButtonFactoryFromKeySequence(['^', '\\circ'], '\u2218', { 'width': '100%' }),
+  'alpha': new EquationEditorButtonFactory('alpha', false, '\u03B1', { 'width': '100%' }),
+  'beta': new EquationEditorButtonFactory('beta', false, '\u03B2', { 'width': '100%' }),
+  'underscore': new EquationEditorButtonFactory('_', true, '_', { 'width': '100%' }),
+  'limit': new EquationEditorButtonFactory('\\lim_{\\caret}', false, 'lim', { 'width': '100%' }),
 };
+
+class EquationButtonPanel {
+  constructor(
+    /**@type{EquationEditor} */
+    editor,
+    /**@type{HTMLElement} */
+    panelContainer,
+    /** @type{{
+     * numberOfColumns: number|undefined,
+     * useDefaultButtonFactories: boolean|undefined,
+     * expandButton: HTMLButtonElement|undefined,
+     * collapseButton: HTMLButtonElement|undefined,
+     * startsExpanded: boolean|undefined,
+     * }} 
+     */
+    options,
+  ) {
+    /** @type{EquationEditor} */
+    this.editor = editor;
+    /** @type{HTMLElement} */
+    this.panelContainer = panelContainer;
+    /** @type{HTMLElement|null} */
+    this.expandableDiv = null;
+    /** @type{HTMLTableElement|null} */
+    this.buttonTable = null;
+    /** @type{string} Computed height property of the panel when expanded, if known. */
+    this.panelHeight = "";
+    /** @type{HTMLButtonElement|null} */
+    this.collapseButton = options.collapseButton;
+    if (this.collapseButton === undefined) {
+      /** @type{HTMLButtonElement} */
+      this.collapseButton = null;
+    }
+    /** @type{HTMLButtonElement|null} */
+    this.expandButton = options.expandButton;
+    if (this.collapseButton === undefined) {
+      /** @type{HTMLButtonElement} */
+      this.expandButton = null;
+    }
+    /**@type{number} */
+    this.numberOfColumns = options.numberOfColumns;
+    if (this.numberOfColumns === undefined) {
+      this.numberOfColumns = 6;
+    }
+    /** @type{Array.<EquationEditorButtonFactory>}  */
+    this.desiredButtons = [];
+    /** @type{boolean} */
+    this.startsExpanded = options.startsExpanded;
+    if (this.startsExpanded === undefined) {
+      this.startsExpanded = true;
+    }
+    /** @type{boolean} */
+    this.expanded = false;
+    if (options.useDefaultButtonFactories === true || options.useDefaultButtonFactories === undefined) {
+      this.desiredButtons = [
+        buttonFactories['plus'],
+        buttonFactories['minus'],
+        buttonFactories['product'],
+        buttonFactories['divide'],
+        buttonFactories['exponent'],
+        buttonFactories['fraction'],
+        buttonFactories['leftParenthesis'],
+        buttonFactories['rightParenthesis'],
+        buttonFactories['sqrt'],
+        buttonFactories['integral'],
+        buttonFactories['sum'],
+        buttonFactories['matrix2x2'],
+        buttonFactories['pi'],
+        buttonFactories['degrees'],
+        buttonFactories['alpha'],
+        buttonFactories['beta'],
+        buttonFactories['underscore'],
+        buttonFactories['limit'],
+      ];
+    }
+  }
+
+  /** Adds a button factory to the list of button factories. Call before constructPanelDOM.*/
+  addButtonFactory(
+    /** @type{string} */
+    command,
+    /** @type{boolean} */
+    isKeyPress,
+    /** @type{string} */
+    label,
+    /** @type{Object.<string, string>|null} */
+    additionalStyle,
+    /** @type{string|null} */
+    className,
+  ) {
+    this.buttonFactories.add(new EquationEditorButtonFactory(command, isKeyPress, label, additionalStyle, className));
+  }
+
+  constructPanelDOM() {
+    this.panelContainer.textContent = "";
+    this.buttonTable = document.createElement("table");
+    let currentRow = this.buttonTable.insertRow(- 1);
+    for (let i = 0; i < this.desiredButtons.length; i++) {
+      if (currentRow.cells.length >= this.numberOfColumns) {
+        currentRow = this.buttonTable.insertRow(- 1);
+      }
+      let currentFactory = this.desiredButtons[i];
+      currentRow.insertCell(- 1).appendChild(currentFactory.getButton(this.editor));
+    }
+    this.expandableDiv = document.createElement("div");
+    this.expandableDiv.appendChild(this.buttonTable);
+    this.expandableDiv.style.transition = 'all 1s';
+    this.panelContainer.appendChild(this.expandableDiv);
+    this.expanded = this.startsExpanded;
+    if (this.collapseButton !== null) {
+      this.collapseButton.addEventListener('click', () => {
+        this.collapse();
+      });
+    }
+    if (this.expandButton !== null) {
+      this.expandButton.addEventListener('click', () => {
+        this.expand();
+      });
+    }
+    this.panelHeight = window.getComputedStyle(this.expandableDiv).height;
+    setTimeout(() => {
+      this.matchExpandedStatus();
+    }, 0);
+  }
+
+  collapse() {
+    this.expanded = false;
+    this.matchExpandedStatus();
+  }
+
+  expand() {
+    this.expanded = true;
+    this.matchExpandedStatus();
+  }
+
+  matchExpandedStatus() {
+    if (this.expanded) {
+      this.expandableDiv.style.maxHeight = this.panelHeight;
+      this.expandableDiv.style.height = this.panelHeight;
+      setTimeout(() => {
+        this.buttonTable.style.display = '';
+      }, 1000);
+      if (this.expandButton !== null) {
+        this.expandButton.style.display = 'none';
+      }
+      if (this.collapseButton !== null) {
+        this.collapseButton.style.display = '';
+      }
+    } else {
+      this.expandableDiv.style.maxHeight = "0px";
+      this.expandableDiv.style.height = "0px";
+      this.buttonTable.style.display = 'none';
+      if (this.expandButton !== null) {
+        this.expandButton.style.display = '';
+      }
+      if (this.collapseButton !== null) {
+        this.collapseButton.style.display = 'none';
+      }
+    }
+  }
+}
 
 /**
  * When using as a commonJS module inside the calculator project, the content of
@@ -10353,6 +10558,7 @@ module.exports = {
   EquationEditorAction,
   buttonFactories,
   EquationEditorOptions,
+  EquationButtonPanel,
   mathFromLatex,
   mathFromElement,
   latexConstants,

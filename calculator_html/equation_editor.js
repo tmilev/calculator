@@ -10425,7 +10425,13 @@ class EquationEditorButtonPanel {
    * panel.
    * @param{HTMLElement} panelContainer The html element in which to write the
    * panel. The element's content will be cleared.
-   * @param options The options used to construct
+   * @param{{
+   * numberOfColumns: (number|undefined),
+   * useDefaultButtonFactories: (boolean|undefined),
+   * expandButton: (HTMLButtonElement|null|undefined),
+   * collapseButton: (HTMLButtonElement|null|undefined),
+   * startsExpanded: (boolean|undefined),
+   * }} options The options used to construct
    * the panel. numberOfColumns is the number of button columns to use in the
    * panel. useDefaultButtonFactories indicates that we should generate a
    * predefined set of buttons. collapseButton, expandButton provide a pair of
@@ -10532,7 +10538,9 @@ class EquationEditorButtonPanel {
     this.panelContainer.textContent = '';
     this.buttonTable =
         /** @type{HTMLTableElement}*/ (document.createElement('table'));
-    let currentRow = this.buttonTable.insertRow(-1);
+    /** @type{HTMLTableRowElement} */
+    let currentRow =
+        /** @type{HTMLTableRowElement} */ (this.buttonTable.insertRow(-1));
     for (let i = 0; i < this.desiredButtons.length; i++) {
       if (currentRow.cells.length >= this.numberOfColumns) {
         currentRow = this.buttonTable.insertRow(-1);

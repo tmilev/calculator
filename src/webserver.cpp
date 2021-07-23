@@ -2338,8 +2338,8 @@ WebServer::WebServer() {
   this->listeningSocketHTTPSOpenSSL = - 1;
   this->highestSocketNumber = - 1;
   this->flagReapingChildren = false;
-  this->maxNumWorkersPerIPAdress = 24;
-  this->maxTotalUsedWorkers = 40;
+  this->maximumNumberOfWorkersPerIPAdress = 64;
+  this->maximumTotalUsedWorkers = 120;
   this->webServerPingIntervalInSeconds = 10;
   this->previousServerStatReport = 0;
   this->previousServerStatDetailedReport = 0;
@@ -2572,9 +2572,9 @@ std::string WebServer::toStringConnectionSummary() {
 
   out << "<br>"
   << "<b>The following policies are quite strict and will be relaxed in the future.</b><br>"
-  << this->maxTotalUsedWorkers << " global maximum of simultaneous non-closed connections allowed. "
+  << this->maximumTotalUsedWorkers << " global maximum of simultaneous non-closed connections allowed. "
   << "When the limit is exceeded, all connections except a randomly chosen one will be terminated. "
-  << "<br>" << this->maxNumWorkersPerIPAdress
+  << "<br>" << this->maximumNumberOfWorkersPerIPAdress
   << " maximum simultaneous connection per IP address. "
   << "When the limit is exceeded, all connections from that IP address are terminated. ";
   return out.str();
@@ -2818,26 +2818,26 @@ void WebServer::handleTooManyConnections(const std::string& incomingUserAddress)
   incomingAddress(incomingUserAddress);
   bool purgeIncomingAddress = (
     this->currentlyConnectedAddresses.getCoefficientOf(incomingAddress) >
-    this->maxNumWorkersPerIPAdress
+    this->maximumNumberOfWorkersPerIPAdress
   );
   if (!purgeIncomingAddress) {
     return;
   }
-  List<double> theTimes;
-  List<int> theIndices;
+  List<double> times;
+  List<int> indices;
   for (int i = 0; i < this->allWorkers.size; i ++) {
     if (this->allWorkers[i].flagInUse) {
       if (this->allWorkers[i].userAddress == incomingAddress) {
-        theTimes.addOnTop(this->allWorkers[i].millisecondsServerAtWorkerStart);
-        theIndices.addOnTop(i);
+        times.addOnTop(this->allWorkers[i].millisecondsServerAtWorkerStart);
+        indices.addOnTop(i);
       }
     }
   }
-  theTimes.quickSortAscending(nullptr, &theIndices);
+  times.quickSortAscending(nullptr, &indices);
   if (!SignalsInfrastructure::signals().flagSignalsAreBlocked) {
     global.fatal << "Signals must be blocked at this point of code. " << global.fatal;
   }
-  for (int j = 0; j < theTimes.size; j ++) {
+  for (int j = 0; j < times.size; j ++) {
     // Child processes exit completely when their sigchld
     // signal has been handled.
     // Signal processing is blocked outside of the select loop.
@@ -2846,15 +2846,15 @@ void WebServer::handleTooManyConnections(const std::string& incomingUserAddress)
     // at this point in code.
     // In particular, it should not be possible to terminate by accident
     // a pid that is not owned by the server.
-    this->terminateChildSystemCall(theIndices[j]);
+    this->terminateChildSystemCall(indices[j]);
     this->statistics.processKilled ++;
     std::stringstream errorStream;
     errorStream
-    << "Terminating child " << theIndices[j] + 1 << " with PID "
-    << this->allWorkers[theIndices[j]].ProcessPID
+    << "Terminating child " << indices[j] + 1 << " with PID "
+    << this->allWorkers[indices[j]].ProcessPID
     << ": address: " << incomingAddress << " opened more than "
-    << this->maxNumWorkersPerIPAdress << " simultaneous connections. ";
-    this->allWorkers[theIndices[j]].pingMessage = errorStream.str();
+    << this->maximumNumberOfWorkersPerIPAdress << " simultaneous connections. ";
+    this->allWorkers[indices[j]].pingMessage = errorStream.str();
     global << Logger::red << errorStream.str() << Logger::endL;
   }
   if (global.flagServerDetailedLog) {
@@ -2969,7 +2969,7 @@ void WebServer::recycleOneChild(int childIndex, int& numberInUse) {
 }
 
 void WebServer::handleTooManyWorkers(int& numInUse) {
-  if (numInUse <= this->maxTotalUsedWorkers) {
+  if (numInUse <= this->maximumTotalUsedWorkers) {
     if (global.flagServerDetailedLog) {
       global << Logger::green
       << "Detail: recycleChildrenIfPossible exit point 1. " << Logger::endL;

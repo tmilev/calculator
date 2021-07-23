@@ -210,8 +210,8 @@ public:
   int listeningSocketHTTPSDefault;
   int lastListeningSocket;
   int highestSocketNumber;
-  int maxNumWorkersPerIPAdress;
-  int maxTotalUsedWorkers;
+  int maximumNumberOfWorkersPerIPAdress;
+  int maximumTotalUsedWorkers;
   class Statististics {
   public:
     static const std::string allRequestsString;

@@ -27,7 +27,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::i
   RationalFraction<Rational> tempRF;
   tempVect = this->simpleRootsInner[generatorIndex].getVectorRational();
   tempRF = this->ambientWeyl->rootScalarCartanRoot(weight, tempVect);
-  if (tempRF.expressionType != tempRF.typeConstant) {
+  if (tempRF.expressionType != RationalFraction<Rational>::TypeExpression::typeConstant) {
     global.fatal << "This might or might not be a programming mistake: "
     << "I am being asked whether a weight "
     << "with rational function coefficients is dominant. "
@@ -65,7 +65,7 @@ bool WeylGroupData::isDominantWithRespectToGenerator<RationalFraction<Rational> 
   RationalFraction<Rational> tempRF;
   tempVect.makeEi(this->getDimension(), generatorIndex);
   tempRF = this->rootScalarCartanRoot(weight, tempVect);
-  if (tempRF.expressionType != tempRF.typeConstant) {
+  if (tempRF.expressionType != RationalFraction<Rational>::TypeExpression::typeConstant) {
     global.fatal << "This might or might not be a programming mistake: "
     << "I am being asked whether a weight "
     << "with rational function coefficients is dominant. "
@@ -376,7 +376,16 @@ bool Expression::assignMatrixExpressions(
   Expression matrixType(owner);
   matrixType.addChildAtomOnTop(owner.opMatrix());
   this->addChildOnTop(matrixType);
-  enum MatrixType {typeUnknown, typeRat, typeDouble, typeAlgebraic, typePolyRat, typePolyAlg, typeRF, typeExpression};
+  enum MatrixType {
+    typeUnknown,
+    typeRational,
+    typeDouble,
+    typeAlgebraic,
+    typePolynomialRational,
+    typePolynomialAlgebraic,
+    typeRationalFraction,
+    typeExpression
+  };
   MatrixType outType = typeUnknown;
   Expression currentRow;
   for (int i = 0; i < input.numberOfRows; i ++) {
@@ -387,17 +396,17 @@ bool Expression::assignMatrixExpressions(
       currentRow.addChildOnTop(input(i, j));
       MatrixType inType;
       if (input(i, j).isOfType<Rational>()) {
-        inType = typeRat;
+        inType = typeRational;
       } else if (input(i, j).isOfType<AlgebraicNumber>()) {
         inType = typeAlgebraic;
       } else if (input(i, j).isOfType<double>()) {
         inType = typeDouble;
       } else if (input(i, j).isOfType<Polynomial<Rational> >()) {
-        inType = typePolyRat;
+        inType = typePolynomialRational;
       } else if (input(i, j).isOfType<Polynomial<AlgebraicNumber> >()) {
         inType = typeAlgebraic;
       } else if (input(i, j).isOfType<RationalFraction<Rational> >()) {
-        inType = typeRF;
+        inType = typeRationalFraction;
       } else {
         inType = typeExpression;
       }
@@ -405,42 +414,42 @@ bool Expression::assignMatrixExpressions(
         outType = inType;
       }
       if (inType == typeAlgebraic) {
-        if (outType == typeRat) {
+        if (outType == typeRational) {
           outType = inType;
           continue;
         }
-        if (outType == typeDouble || outType == typeAlgebraic || outType == typePolyAlg) {
+        if (outType == typeDouble || outType == typeAlgebraic || outType == typePolynomialAlgebraic) {
           continue;
         }
         outType = typeExpression;
         continue;
       } else if (inType == typeDouble) {
-        if (outType == typeRat || outType == typeAlgebraic || outType == typeDouble) {
+        if (outType == typeRational || outType == typeAlgebraic || outType == typeDouble) {
           outType = inType;
           continue;
         }
         outType = typeExpression;
         continue;
-      } else if (inType == typePolyRat) {
-        if (outType == typeRat) {
+      } else if (inType == typePolynomialRational) {
+        if (outType == typeRational) {
           outType = inType;
           continue;
         }
-        if (outType == typeAlgebraic || outType == typePolyAlg) {
-          outType = typePolyAlg;
+        if (outType == typeAlgebraic || outType == typePolynomialAlgebraic) {
+          outType = typePolynomialAlgebraic;
           continue;
         }
         outType = typeExpression;
         continue;
-      } else if (inType == typePolyAlg) {
-        if (outType == typeRat || outType == typeAlgebraic || outType == typePolyRat || outType == typePolyAlg) {
+      } else if (inType == typePolynomialAlgebraic) {
+        if (outType == typeRational || outType == typeAlgebraic || outType == typePolynomialRational || outType == typePolynomialAlgebraic) {
           outType = inType;
           continue;
         }
         outType = typeExpression;
         continue;
-      } else if (inType == typeRF) {
-        if (outType == typeRat || outType == typePolyRat) {
+      } else if (inType == typeRationalFraction) {
+        if (outType == typeRational || outType == typePolynomialRational) {
           outType = inType;
           continue;
         }
@@ -453,7 +462,7 @@ bool Expression::assignMatrixExpressions(
     this->addChildOnTop(currentRow);
   }
   switch(outType) {
-    case typeRat:
+    case typeRational:
       matrixType.addChildAtomOnTop(owner.opRational());
       break;
     case typeDouble:
@@ -462,13 +471,13 @@ bool Expression::assignMatrixExpressions(
     case typeAlgebraic:
       matrixType.addChildAtomOnTop(owner.opAlgebraicNumber());
       break;
-    case typePolyRat:
+    case typePolynomialRational:
       matrixType.addChildAtomOnTop(owner.opPolynomialRational());
       break;
-    case typePolyAlg:
+    case typePolynomialAlgebraic:
       matrixType.addChildAtomOnTop(owner.opPolynomialAlgebraicNumbers());
       break;
-    case typeRF:
+    case typeRationalFraction:
       matrixType.addChildAtomOnTop(owner.opRationalFraction());
       break;
     default:

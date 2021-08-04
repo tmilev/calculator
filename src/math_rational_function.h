@@ -27,7 +27,7 @@ public:
   MemorySaving<Polynomial<Coefficient> > denominator;
   Coefficient constantValue;
   int expressionType;
-  enum typeExpression {
+  enum TypeExpression {
     typeConstant = 0,
     typePolynomial = 1,
     typeRationalFunction = 2,
@@ -112,8 +112,8 @@ public:
   }
   bool isPolynomial(Polynomial<Coefficient>* whichPolynomial) const {
     if (
-      this->expressionType != this->typePolynomial &&
-      this->expressionType == this->typeConstant
+      this->expressionType != TypeExpression::typePolynomial &&
+      this->expressionType == TypeExpression::typeConstant
     ) {
       return false;
     }
@@ -126,10 +126,10 @@ public:
   bool isInteger() const;
   bool isSmallInteger(int* whichInteger = nullptr) const;
   bool isEqualToZero() const {
-    return this->expressionType == this->typeConstant && this->constantValue.isEqualToZero();
+    return this->expressionType == TypeExpression::typeConstant && this->constantValue.isEqualToZero();
   }
   bool isEqualToOne() const {
-    return this->expressionType == this->typeConstant && this->constantValue.isEqualToOne();
+    return this->expressionType == TypeExpression::typeConstant && this->constantValue.isEqualToOne();
   }
   bool isEqualTo(const RationalFraction<Coefficient>& other) const;
   static bool getRelations(

@@ -808,7 +808,7 @@ bool SemisimpleLieAlgebra::accumulateChevalleyGeneratorStandardRepresentationInT
 }
 
 template <typename Coefficient>
-bool SemisimpleLieAlgebra::hasImplementedStandardCartanInvolution(
+bool SemisimpleLieAlgebra::hasImplementedCartanInvolutionMaximallyCompactCase(
   LinearMapSemisimpleLieAlgebra<Coefficient>* whichInvolution
 ) {
   char dynkinType = 0;

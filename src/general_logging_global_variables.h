@@ -59,7 +59,7 @@ class Logger {
   bool flagResetLogFileWhenTooLarge;
   Logger();
   void checkLogSize();
-  enum loggerSpecialSymbols{ endL, red, blue, yellow, green, purple, cyan, normalColor, orange};
+  enum LoggerSpecialSymbols{ endL, red, blue, yellow, green, purple, cyan, normalColor, orange};
   static std::string consoleRed();
   static std::string consoleBlue();
   static std::string consoleYellow();
@@ -84,10 +84,10 @@ class Logger {
   }
   // Logs special logger symbols such as console color control.
   // Also the flushing of the log happens here (on an end-line special symbol).
-  Logger& operator<<(const loggerSpecialSymbols& input) {
+  Logger& operator<<(const LoggerSpecialSymbols& input) {
     return this->logSpecialSymbol(input);
   }
-  Logger& logSpecialSymbol(const loggerSpecialSymbols& input);
+  Logger& logSpecialSymbol(const LoggerSpecialSymbols& input);
   void flush();
   template <typename Type>
   Logger& operator<<(const Type& toBePrinted) {

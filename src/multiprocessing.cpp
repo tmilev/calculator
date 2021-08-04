@@ -982,7 +982,7 @@ Logger& Logger::logString(const std::string& input) {
   return *this;
 }
 
-Logger& Logger::logSpecialSymbol(const loggerSpecialSymbols& input) {
+Logger& Logger::logSpecialSymbol(const LoggerSpecialSymbols& input) {
   this->initializeIfNeeded();
   this->checkLogSize();
   bool doUseColors =

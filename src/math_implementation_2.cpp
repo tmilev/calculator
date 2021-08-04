@@ -1774,11 +1774,11 @@ bool Rational::getSquareRootIfRational(Rational& output) const {
   if (*this < 0) {
     return false;
   }
-  LargeInteger theNum = this->getNumerator();
+  LargeInteger numerator = this->getNumerator();
   LargeIntegerUnsigned theDen = this->getDenominator();
   List<LargeInteger> primeFactorsNum, primeFactorsDen;
   List<int> multsNum, multsDen;
-  if (!theNum.value.factor(primeFactorsNum, multsNum, 0, 3, nullptr)) {
+  if (!numerator.value.factor(primeFactorsNum, multsNum, 0, 3, nullptr)) {
     return false;
   }
   if (!theDen.factor(primeFactorsDen, multsDen, 0, 3, nullptr)) {

@@ -2613,7 +2613,7 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
   LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > cartanInvolutionStandard;
   LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >* cartanInvolutionToRespect = nullptr;
   if (computeRealForm) {
-    if (this->owner->hasImplementedStandardCartanInvolution(&cartanInvolutionStandard)) {
+    if (this->owner->hasImplementedCartanInvolutionMaximallyCompactCase(&cartanInvolutionStandard)) {
       cartanInvolutionToRespect = &cartanInvolutionStandard;
     }
   }

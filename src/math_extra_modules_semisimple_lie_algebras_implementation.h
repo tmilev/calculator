@@ -1485,7 +1485,7 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
       tempMat1 = this->getActionGeneratorIndex(currentMon.generatorsIndices[j]);
       tempMT.makeZero();
       for (int k = 0; k < tempMat1.size(); k ++) {
-        if (tempMat1.coefficients[k].expressionType == RationalFraction<Rational>::typeRationalFunction) {
+        if (tempMat1.coefficients[k].expressionType == RationalFraction<Rational>::TypeExpression::typeRationalFunction) {
           return false;
         }
         tempMat1.coefficients[k].getNumerator(tempP1);

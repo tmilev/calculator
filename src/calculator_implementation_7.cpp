@@ -1812,8 +1812,8 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
   this->context.getFormat(this->currentFormat);
   if (
     this->rationalFraction.minimalNumberOfVariables() < 1 ||
-    this->rationalFraction.expressionType == this->rationalFraction.typeConstant ||
-    this->rationalFraction.expressionType == this->rationalFraction.typePolynomial
+    this->rationalFraction.expressionType == RationalFraction<Rational>::TypeExpression::typeConstant ||
+    this->rationalFraction.expressionType == RationalFraction<Rational>::TypeExpression::typePolynomial
   ) {
     this->printoutPartialFractionsHtml << this->rationalFraction.toString(&this->currentFormat)
     << " is already split into partial fractions. ";

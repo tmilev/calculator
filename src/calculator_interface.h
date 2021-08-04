@@ -3401,7 +3401,7 @@ bool CalculatorConversions::expressionFromRationalFraction(
   Polynomial<Coefficient> numerator, denominator;
   input.getNumerator(numerator);
 
-  if (input.isConstant() || input.expressionType == input.typePolynomial) {
+  if (input.isConstant() || input.expressionType == RationalFraction<Coefficient>::TypeExpression::typePolynomial) {
     return CalculatorConversions::expressionFromPolynomial<Coefficient>(calculator, numerator, output, inputContext);
   }
   Expression numeratorExpression, denominatorExpression;

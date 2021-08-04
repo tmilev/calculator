@@ -5,6 +5,47 @@
 
 #include "math_extra_finite_groups.h"
 
+// Represents a Satake diagram as defined in
+// Shôrô Araki,
+// "On root systems and an infinitesimal
+// classification of irreducible symmetric spaces", 1962.
+//
+class SatakeDiagram {
+public:
+  // This is the column 1 entry of Table 5.11 in the paper mentioned above.
+  enum DiagramType {
+    AI,
+    AII,
+    AIII,
+    AIV,
+    BI,
+    BII,
+    CI,
+    CII,
+    DI,
+    DII,
+    DIII,
+    EI,
+    EII,
+    EIII,
+    EIV,
+    EV,
+    EVI,
+    EVII,
+    EVIII,
+    EIX,
+    FI,
+    FII,
+    G
+  };
+  DiagramType satakeType;
+  // Some of the classical satake types depend on an additional parameter,
+  // smaller than the rank of the ambient complex Lie algebra.
+  int parameter;
+  // Rank of the simple root system.
+  int rank;
+};
+
 class SemisimpleLieAlgebra {
 private:
   void operator=(const SemisimpleLieAlgebra& other);
@@ -299,7 +340,12 @@ public:
   );
   // Whether the ambient Lie algebra has a Cartan involution that has been implemented.
   template <typename Coefficient>
-  bool hasImplementedStandardCartanInvolution(
+  bool hasImplementedCartanInvolution(
+    const SatakeDiagram& satakeDiagram,
+    LinearMapSemisimpleLieAlgebra<Coefficient>* whichInvolution
+  );
+  template <typename Coefficient>
+  bool hasImplementedCartanInvolutionMaximallyCompactCase(
     LinearMapSemisimpleLieAlgebra<Coefficient>* whichInvolution
   );
 };

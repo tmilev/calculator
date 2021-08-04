@@ -2602,14 +2602,14 @@ bool Expression::toStringBuiltIn<RationalFraction<ElementZmodP> >(
   formatLocal.flagSuppressModP = true;
   formatLocal.flagUseFrac = true;
   const RationalFraction<ElementZmodP>& data = input.getValue<RationalFraction<ElementZmodP> >();
-  if (data.expressionType == data.typeRationalFunction) {
+  if (data.expressionType == RationalFraction<ElementZmodP>::TypeExpression::typeRationalFunction) {
     ElementZmodP constantSample = data.numerator.getElementConst().coefficients[0];
     out << "\\frac{"
     << constantSample.toStringPolynomial(data.numerator.getElementConst(), &formatLocal)
     << "} {"
     << constantSample.toStringPolynomial(data.denominator.getElementConst(), &formatLocal)
     << "}";
-  } else if (data.expressionType == data.typePolynomial) {
+  } else if (data.expressionType == RationalFraction<ElementZmodP>::TypeExpression::typePolynomial) {
     ElementZmodP constantSample = data.numerator.getElementConst().coefficients[0];
     out << constantSample.toStringPolynomial(data.numerator.getElementConst(), &formatLocal);
   } else {

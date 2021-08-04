@@ -3202,7 +3202,7 @@ void SemisimpleSubalgebras::WConjecture::computeBeforeSubalgebras(SemisimpleSuba
   if (!owner.flagRealForms) {
     return;
   }
-  if (!owner.owner->hasImplementedStandardCartanInvolution(
+  if (!owner.owner->hasImplementedCartanInvolutionMaximallyCompactCase(
     &this->cartanInvolutionAmbient
   )) {
     global.comments << "I couldn't figure out the required Cartan involution. ";

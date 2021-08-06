@@ -81,16 +81,18 @@ function getClonePanel(
 function getEditPanel(
   /**@type{string} */
   fileName,
+  /** @type{boolean} Whether online edit is allowed. */
+  withInstructorRights,
+  /** @type{boolean} Show a source button without full admin rights. */
+  showSource,
 ) {
-  let thePage = window.calculator.mainPage;
-  let doGenerate = !thePage.flagProblemPageOnly;
-
-  if (!thePage.flagProblemPageOnly) {
-    if (!thePage.user.hasProblemEditRights() || thePage.studentView()) {
-      doGenerate = false;
-    }
+  if (withInstructorRights === undefined) {
+    withInstructorRights = false;
   }
-  if (!doGenerate) {
+  if (showSource === undefined) {
+    showSource = false;
+  }
+  if (!withInstructorRights && !showSource) {
     return document.createTextNode("");
   }
   if (fileName === "" || fileName === undefined || fileName === null) {
@@ -100,12 +102,20 @@ function getEditPanel(
   result.className = "spanFileInfo";
   let saveEdit = document.createElement("BUTTON");
   saveEdit.className = "buttonSaveEdit";
-  saveEdit.innerHTML = "Edit";
-  saveEdit.style.width = "50px";
+  saveEdit.style.width = "";
+  if (withInstructorRights) {
+    saveEdit.textContent = "Edit";
+  } else {
+    saveEdit.style.background = "#fed8b1";
+    saveEdit.textContent = "Problem source code";
+  }
   saveEdit.addEventListener('click', () => {
-    selectEditPage(fileName);
+    selectEditPage(fileName, withInstructorRights);
   });
   result.appendChild(saveEdit);
+  if (!withInstructorRights) {
+    return result;
+  }
   result.appendChild(document.createTextNode(` ${fileName} `));
   let clonePanel = document.createElement("BUTTON");
   clonePanel.className = "accordionLike";
@@ -253,7 +263,9 @@ function getNavigationEditButton(problemId, contentHTML) {
   return navigationButton;
 }
 
-function writeNextPreviousEditButton(currentlyEditedPage) {
+function writeNextPreviousEditButton(
+  currentlyEditedPage,
+) {
   let thePage = window.calculator.mainPage;
   let problem = thePage.getProblemByIdOrNull(currentlyEditedPage);
   if (problem === null) {
@@ -271,7 +283,21 @@ function writeNextPreviousEditButton(currentlyEditedPage) {
   }
 }
 
-function selectEditPage(currentlyEditedPage) {
+function selectEditPage(
+  /**@type{string} */
+  currentlyEditedPage,
+  /** @type{boolean} Whether online edit is allowed. */
+  withInstructorRights,
+) {
+  if (withInstructorRights === undefined) {
+    withInstructorRights = false;
+  }
+  let saveButton = document.getElementById(ids.domElements.buttonSaveEdit);
+  if (withInstructorRights) {
+    saveButton.style.visibility = "";
+  } else {
+    saveButton.style.visibility = "hidden";
+  }
   let thePage = window.calculator.mainPage;
   let storageVariables = thePage.storage.variables;
   let fileNameSources = [

@@ -584,7 +584,7 @@ class Problem {
   }
 
   getEditPanel() {
-    return editPage.getEditPanel(decodeURIComponent(this.problemId));
+    return editPage.getEditPanel(decodeURIComponent(this.problemId), this.hasInstructorRightsNotViewingAsStudent(), true);
   }
 
   /**@returns{HTMLElement[]} */
@@ -773,9 +773,14 @@ class Problem {
     dynamicJavascript.bootstrapAllScripts(this.outputElement);
   }
 
+  hasInstructorRightsNotViewingAsStudent() {
+    let thePage = window.calculator.mainPage;
+    return thePage.hasInstructorRightsNotViewingAsStudent();
+  }
+
   toStringDeadline() {
     let thePage = window.calculator.mainPage;
-    if (thePage.user.hasInstructorRights() && !thePage.studentView()) {
+    if (thePage.hasInstructorRightsNotViewingAsStudent()) {
       return "Deadlines";
     }
     if (thePage.user.hasInstructorRights() && thePage.studentView()) {
@@ -1188,9 +1193,9 @@ function writeEditCoursePagePanel() {
   let panel = document.getElementById(ids.domElements.courseEditPanel);
   panel.innerHTML = "";
   let courseHome = thePage.storage.variables.currentCourse.courseHome.getValue()
-  panel.appendChild(editPage.getEditPanel(courseHome));
+  panel.appendChild(editPage.getEditPanel(courseHome, thePage.hasInstructorRightsNotViewingAsStudent(), false));
   let topicList = thePage.storage.variables.currentCourse.topicList.getValue();
-  panel.appendChild(editPage.getEditPanel(topicList));
+  panel.appendChild(editPage.getEditPanel(topicList, thePage.hasInstructorRightsNotViewingAsStudent(), false));
   if (
     allProblems.theTopics.topicBundleFile !== undefined &&
     allProblems.theTopics.topicBundleFile !== null &&
@@ -1202,7 +1207,7 @@ function writeEditCoursePagePanel() {
       counterTopicBundle++
     ) {
       let nextToEdit = allProblems.theTopics.topicBundleFile[counterTopicBundle];
-      panel.appendChild(editPage.getEditPanel(nextToEdit));
+      panel.appendChild(editPage.getEditPanel(nextToEdit, thePage.hasInstructorRightsNotViewingAsStudent(), false));
     }
   }
 }

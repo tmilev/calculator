@@ -4057,6 +4057,7 @@ void WebServer::initializeMainRequests() {
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::userInfoJSON);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::serverStatusJSON);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::submitAnswerHardcoded);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::editPage);
 }
 
 void WebServer::initializeMainAddresses() {

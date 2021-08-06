@@ -23,13 +23,13 @@ function afterLoadSelectCoursePage(incomingPage, result) {
   if (userHasProblemEditRights) {
     var problemInfoBar = document.createElement("div");
     problemInfoBar.className = "problemInfoBar";
-    problemInfoBar.appendChild(editPage.getEditPanel("/coursesavailable/default.txt"));
+    problemInfoBar.appendChild(editPage.getEditPanel("/coursesavailable/default.txt", thePage.hasInstructorRightsNotViewingAsStudent(), false));
     result.push(problemInfoBar);
   }
   var courseContainer = document.createElement("div");
   courseContainer.style.textAlign = "center";
   courseContainer.style.width = "100%";
-  for (var counterCourses = 0; counterCourses < thePage.theCourses.length; counterCourses ++) {
+  for (var counterCourses = 0; counterCourses < thePage.theCourses.length; counterCourses++) {
     var currentCourse = thePage.theCourses[counterCourses];
     var isRoughDraft = false;
     if (currentCourse.roughDraft === "true" || currentCourse.roughDraft === true) {

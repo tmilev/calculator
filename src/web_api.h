@@ -87,7 +87,7 @@ class WebAPIResponse {
   bool processLogout();
   bool processSignUp();
   bool processForgotLogin();
-  bool processEditPageJSON();
+  bool processEditPageJSON(bool showSourceRelaxed);
 
   void reset(WebWorker& inputOwner);
   bool serveResponseFalseIfUnrecognized(
@@ -111,7 +111,13 @@ class WebAPIResponse {
   static JSData getProblemSolutionJSON();
   static JSData getAnswerOnGiveUp();
 
-  static JSData getEditPageJSON();
+  static JSData getEditPageJSON(
+    // When this is set, will returns the source of the problem
+    // even though the user has no admin rights.
+    // Intended for non-teaching uses when anonymous
+    // users of the system are allowed to peek inside the source.
+    bool showSourceRelaxed
+  );
   static std::string getJavascriptCaptcha();
   static std::string getCaptchaDiv();
   static JSData getExamPageJSON();

@@ -914,51 +914,59 @@ JSData WebAPIResponse::getExamPageJSON() {
   return output;
 }
 
-JSData WebAPIResponse::getEditPageJSON() {
+JSData WebAPIResponse::getEditPageJSON(
+  bool showSourceRelaxed
+) {
   MacroRegisterFunctionWithName("WebAPIReponse::getEditPageJSON");
   JSData output;
   if (
     !global.flagLoggedIn ||
     !global.userDefaultHasAdminRights()
   ) {
-    output[WebAPI::result::error] = "Only logged-in admins are allowed to edit pages.";
-    return output;
+    if (!showSourceRelaxed){
+      output[WebAPI::result::error] = "Only logged-in admins are allowed to edit pages.";
+      return output;
+    } else {
+      output[WebAPI::result::comments] =
+      "<b>Only logged-in admins are allowed to edit pages.</b> "
+      "The source code of the problems can also be found on github.";
+    }
   }
-  CalculatorHTML theFile;
-  theFile.loadFileNames();
+  CalculatorHTML editedFile;
+  editedFile.loadFileNames();
   std::stringstream failureStream;
-  if (!theFile.loadMe(false, global.getWebInput(WebAPI::problem::randomSeed), &failureStream)) {
+  if (!editedFile.loadMe(false, global.getWebInput(WebAPI::problem::randomSeed), &failureStream)) {
     std::stringstream errorStream;
     errorStream << " <b>Failed to load file: ["
-    << theFile.fileName << "], perhaps the file does not exist. </b>"
+    << editedFile.fileName << "], perhaps the file does not exist. </b>"
     << failureStream.str();
     output[WebAPI::result::error] = errorStream.str();
     return output;
   }
-  if (!theFile.parser.parseHTML(&failureStream)) {
+  if (!editedFile.parser.parseHTML(&failureStream)) {
     std::stringstream errorStream;
-    errorStream << "<b>Failed to parse file: " << theFile.fileName
+    errorStream << "<b>Failed to parse file: " << editedFile.fileName
     << ".</b> Details:<br>" << failureStream.str();
     output[WebAPI::result::error] = errorStream.str();
     //return output.toString(false);
   }
   HashedList<std::string, MathRoutines::hashString> theAutocompleteKeyWords;
-  theFile.initBuiltInSpanClasses();
+  editedFile.initBuiltInSpanClasses();
   std::stringstream comments;
-  if (theFile.courseHome == theFile.fileName || theFile.topicListFileName == theFile.fileName) {
-    theFile.loadAndParseTopicList(comments);
-    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.parser.calculatorClasses);
-    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.parser.calculatorClassesAnswerFields);
-    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorTopicElementNames);
-    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.topics.knownTopicBundles.keys);
+  if (editedFile.courseHome == editedFile.fileName || editedFile.topicListFileName == editedFile.fileName) {
+    editedFile.loadAndParseTopicList(comments);
+    theAutocompleteKeyWords.addOnTopNoRepetition(editedFile.parser.calculatorClasses);
+    theAutocompleteKeyWords.addOnTopNoRepetition(editedFile.parser.calculatorClassesAnswerFields);
+    theAutocompleteKeyWords.addOnTopNoRepetition(editedFile.calculatorTopicElementNames);
+    theAutocompleteKeyWords.addOnTopNoRepetition(editedFile.topics.knownTopicBundles.keys);
   } else {
     Calculator tempCalculator;
     tempCalculator.initialize(Calculator::Mode::educational);
     tempCalculator.computeAutoCompleteKeyWords();
-    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.parser.calculatorClasses);
+    theAutocompleteKeyWords.addOnTopNoRepetition(editedFile.parser.calculatorClasses);
     theAutocompleteKeyWords.addOnTopNoRepetition(tempCalculator.autoCompleteKeyWords);
-    theFile.initAutocompleteExtras();
-    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.autoCompleteExtras);
+    editedFile.initAutocompleteExtras();
+    theAutocompleteKeyWords.addOnTopNoRepetition(editedFile.autoCompleteExtras);
   }
   JSData theAutoCompleteWordsJS;
   theAutoCompleteWordsJS.elementType = JSData::token::tokenArray;
@@ -966,7 +974,7 @@ JSData WebAPIResponse::getEditPageJSON() {
     theAutoCompleteWordsJS[i] = theAutocompleteKeyWords[i];
   }
   output["autoComplete"] = theAutoCompleteWordsJS;
-  output["content"] = HtmlRoutines::convertStringToURLString(theFile.parser.inputHtml, false);
+  output["content"] = HtmlRoutines::convertStringToURLString(editedFile.parser.inputHtml, false);
   return output;
 }
 

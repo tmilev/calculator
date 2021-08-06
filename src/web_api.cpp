@@ -138,7 +138,7 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     comments << argumentProcessingFailureComments.str();
     return this->processLoginUserInfo(comments.str());
   } else if (global.requestType == WebAPI::request::editPage) {
-    return this->processEditPageJSON();
+    return this->processEditPageJSON(true);
   } else if (global.requestType == WebAPI::request::modifyPage) {
     return this->processModifyPage();
   } else if (
@@ -626,10 +626,12 @@ bool WebAPIResponse::processDatabaseModifyEntry() {
   return global.response.writeResponse(result);
 }
 
-bool WebAPIResponse::processEditPageJSON() {
+bool WebAPIResponse::processEditPageJSON(
+  bool showSourceRelaxed
+) {
   MacroRegisterFunctionWithName("WebAPIResponse::processEditPageJSON");
   this->owner->setHeaderOKNoContentLength("");
-  return global.response.writeResponse(WebAPIResponse::getEditPageJSON());
+  return global.response.writeResponse(WebAPIResponse::getEditPageJSON(showSourceRelaxed));
 }
 
 bool WebAPIResponse::processSlidesOrHomeworkFromSource() {

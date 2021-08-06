@@ -452,6 +452,10 @@ class Page {
     this.selectPage(this.storage.variables.currentPage.getValue());
   }
 
+  hasInstructorRightsNotViewingAsStudent() {
+    return this.user.hasInstructorRights() && !this.studentView();
+  }
+
   studentView() {
     return this.storage.variables.flagStudentView.isTrue();
   }

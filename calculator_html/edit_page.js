@@ -197,7 +197,14 @@ function initEditorAce() {
   editorAce = ace.edit(ids.domElements.divEditorAce);
 }
 
-function selectEditPageCallback(input, outputComponent) {
+function selectEditPageCallback(
+  input,
+  /**@type{boolean} Injects error html from server dangerously.*/
+  injectHTMLDangerously,
+) {
+  if (injectHTMLDangerously === undefined) {
+    injectHTMLDangerously = false;
+  }
   try {
     let parsedInput = miscellaneous.jsonUnescapeParse(input);
     ace.require("ace/ext/language_tools");
@@ -210,10 +217,11 @@ function selectEditPageCallback(input, outputComponent) {
     editorAce.$blockScrolling = Infinity;
     let incomingContent = "";
     let errorSpan = document.getElementById(ids.domElements.spanErrorsEditPage);
-    if (parsedInput.error !== null && parsedInput.error !== undefined) {
-      errorSpan.innerHTML = `<br>${parsedInput.error}`;
+    errorSpan.textContent = "";
+    if (!injectHTMLDangerously) {
+      miscellaneous.writeHtmlElementsFromCommentsAndErrors(parsedInput, errorSpan);
     } else {
-      errorSpan.innerHTML = "";
+      miscellaneous.writeHtmlFromCommentsAndErrors(parsedInput, errorSpan);
     }
     if (parsedInput.content !== null && parsedInput.content !== undefined) {
       incomingContent = decodeURIComponent(parsedInput.content);
@@ -289,9 +297,6 @@ function selectEditPage(
   /** @type{boolean} Whether online edit is allowed. */
   withInstructorRights,
 ) {
-  if (withInstructorRights === undefined) {
-    withInstructorRights = false;
-  }
   let saveButton = document.getElementById(ids.domElements.buttonSaveEdit);
   if (withInstructorRights) {
     saveButton.style.visibility = "";
@@ -299,6 +304,9 @@ function selectEditPage(
     saveButton.style.visibility = "hidden";
   }
   let thePage = window.calculator.mainPage;
+  if (withInstructorRights === undefined) {
+    withInstructorRights = thePage.hasInstructorRightsNotViewingAsStudent();
+  }
   let storageVariables = thePage.storage.variables;
   let fileNameSources = [
     storageVariables.editor.currentlyEditedPage,
@@ -339,7 +347,9 @@ function selectEditPage(
   theURL += `${pathnames.urlFields.problem.fileName}=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}`;
   submitRequests.submitGET({
     url: theURL,
-    callback: selectEditPageCallback,
+    callback: function (input) {
+      selectEditPageCallback(input, withInstructorRights);
+    },
     progress: ids.domElements.spanProgressReportGeneral,
   });
 }

@@ -928,8 +928,8 @@ JSData WebAPIResponse::getEditPageJSON(
       return output;
     } else {
       output[WebAPI::result::comments] =
-      "<b>Only logged-in admins are allowed to edit pages.</b> "
-      "The source code of the problems can also be found on github.";
+      "Only logged-in admins can edit pages. "
+      "The problem source code is also on github.";
     }
   }
   CalculatorHTML editedFile;

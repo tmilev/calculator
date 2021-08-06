@@ -106,6 +106,27 @@ function htmlElementsFromCommentsAndErrors(input) {
   return result;
 }
 
+function writeHtmlFromCommentsAndErrors(
+  /** @type{any} */
+  input,
+  /** @type{HTMLElement} */
+  output,
+) {
+  output.innerHTML = htmlFromCommentsAndErrors(input);
+}
+
+function writeHtmlElementsFromCommentsAndErrors(
+  /** @type{any} */
+  input,
+  /** @type{HTMLElement} */
+  output,
+) {
+  let elements = htmlElementsFromCommentsAndErrors(input);
+  for (let i = 0; i < elements.length; i++) {
+    output.appendChild(elements[i]);
+  }
+}
+
 function shortenString(charsOnEachSide, input) {
   if (charsOnEachSide * 2 + 3 > input.length) {
     return input;
@@ -206,6 +227,8 @@ module.exports = {
   switchMenu,
   appendHtml,
   appendHtmlToArray,
+  writeHtmlFromCommentsAndErrors,
+  writeHtmlElementsFromCommentsAndErrors,
   htmlFromCommentsAndErrors,
   htmlElementsFromCommentsAndErrors,
   shortenString,

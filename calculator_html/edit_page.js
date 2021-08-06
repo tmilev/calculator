@@ -297,15 +297,15 @@ function selectEditPage(
   /** @type{boolean} Whether online edit is allowed. */
   withInstructorRights,
 ) {
-  let saveButton = document.getElementById(ids.domElements.buttonSaveEdit);
-  if (withInstructorRights) {
-    saveButton.style.visibility = "";
-  } else {
-    saveButton.style.visibility = "hidden";
-  }
   let thePage = window.calculator.mainPage;
   if (withInstructorRights === undefined) {
     withInstructorRights = thePage.hasInstructorRightsNotViewingAsStudent();
+  }
+  let saveButton = document.getElementById(ids.domElements.buttonSaveEdit);
+  if (withInstructorRights) {
+    saveButton.disabled = false;
+  } else {
+    saveButton.disabled = true;
   }
   let storageVariables = thePage.storage.variables;
   let fileNameSources = [

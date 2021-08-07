@@ -37,7 +37,6 @@ OPTIMIZATION_FLAGS+=-O2
 endif
 
 CFLAGS=-Wpedantic -Wall -Wextra -std=c++0x $(OPTIMIZATION_FLAGS) -c -pthread
-LDFLAGS=-pthread $(OPTIMIZATION_FLAGS)
 LIBRARIES_INCLUDED_AT_THE_END=
 compiler=g++
 TARGET=calculator
@@ -51,13 +50,19 @@ ifeq ($(wasm), 1)
     compiler=./emsdk/upstream/emscripten/emcc
     CFLAGS+=-DMACRO_use_wasm 
     CFLAGS+=-s
+    # No pthread
+    LDFLAGS=$(OPTIMIZATION_FLAGS)
     LDFLAGS+=-s LLD_REPORT_UNDEFINED -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap"]' -s EXPORTED_FUNCTIONS='["_callCalculator"]'
     $(info [1;31mWeb assembly: turning off ssl and mongoDB.[0m) 
     TARGET=calculator_html/web_assembly/calculator.js
     OBJECT_FILE_OUTPUT=bin/wasm/
     nossl=1
     noMongo=1
+else
+    LDFLAGS=-pthread $(OPTIMIZATION_FLAGS)
 endif
+
+
 
 ifeq ($(AllocationStatistics), 1)
 	CFLAGS+=-DAllocationStatistics

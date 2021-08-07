@@ -164,7 +164,7 @@ void TimeoutThread::run() {
 }
 
 void RunTimerThread(int threadIndex) {
-  global.theThreadData[threadIndex].theId = std::this_thread::get_id();
+  global.threadData[threadIndex].theId = std::this_thread::get_id();
   MacroRegisterFunctionWithName("RunTimerThread");
   TimeoutThread theThread;
   theThread.run();

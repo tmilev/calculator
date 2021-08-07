@@ -10,6 +10,7 @@
 #include "string_constants.h"
 #include "math_rational_function.h"
 #include <dirent.h>
+#include <unistd.h>
 #include "math_extra_modules_semisimple_lie_algebras.h"
 #include "crypto.h"
 
@@ -412,12 +413,12 @@ std::string HtmlRoutines::clearSlashes(const std::string& inputString) {
 }
 
 void HtmlRoutines::subEqualitiesWithSimeq(
-  std::string& theString, std::string& output
+  std::string& input, std::string& output
 ) {
   std::stringstream out;
-  for (unsigned int i = 0; i < theString.size(); i ++) {
-    if (theString[i] != '=') {
-      out << theString[i];
+  for (unsigned int i = 0; i < input.size(); i ++) {
+    if (input[i] != '=') {
+      out << input[i];
     } else {
       out << "\\simeq ";
     }
@@ -838,22 +839,22 @@ bool FileOperations::isFolderUnsecure(const std::string& theFolderName) {
 }
 
 std::string FileOperations::getFileExtensionWithDot(
-  const std::string& theFileName, std::string* outputFileNameNoExtension
+  const std::string& fileName, std::string* outputFileNameNoExtension
 ) {
   MacroRegisterFunctionWithName("FileOperations::getFileExtensionWithDot");
-  if (theFileName == "" || theFileName.size() <= 0) {
+  if (fileName == "" || fileName.size() <= 0) {
     return "";
   }
-  if (&theFileName == outputFileNameNoExtension) {
-    std::string theCopy = theFileName;
-    return FileOperations::getFileExtensionWithDot(theCopy, outputFileNameNoExtension);
+  if (&fileName == outputFileNameNoExtension) {
+    std::string copy = fileName;
+    return FileOperations::getFileExtensionWithDot(copy, outputFileNameNoExtension);
   }
-  for (int i = static_cast<signed>(theFileName.size() - 1); i >= 0; i --) {
-    if (theFileName[static_cast<unsigned>(i)] == '.') {
+  for (int i = static_cast<signed>(fileName.size() - 1); i >= 0; i --) {
+    if (fileName[static_cast<unsigned>(i)] == '.') {
       if (outputFileNameNoExtension != nullptr) {
-        *outputFileNameNoExtension = theFileName.substr(0, static_cast<unsigned>(i));
+        *outputFileNameNoExtension = fileName.substr(0, static_cast<unsigned>(i));
       }
-      return theFileName.substr(static_cast<unsigned>(i), std::string::npos);
+      return fileName.substr(static_cast<unsigned>(i), std::string::npos);
     }
   }
   return "";
@@ -1034,7 +1035,7 @@ std::string FileOperations::getPathFromFileNameWithPath(const std::string& fileN
 }
 
 bool FileOperations::getFolderFileNamesVirtual(
-  const std::string& theFolderName,
+  const std::string& folderName,
   List<std::string>& outputFileNamesNoPath,
   List<std::string>* outputFileTypesWithDot,
   bool accessSensitiveFolders,
@@ -1044,7 +1045,7 @@ bool FileOperations::getFolderFileNamesVirtual(
   MacroRegisterFunctionWithName("FileOperations::getFolderFileNamesVirtual");
   std::string computedFolderName;
   if (!FileOperations::getPhysicalFileNameFromVirtual(
-    theFolderName,
+    folderName,
     computedFolderName,
     accessSensitiveFolders,
     accessULTRASensitiveFolders,
@@ -1380,11 +1381,11 @@ bool FileOperations::checkFolderLinks() {
 }
 
 bool FileOperations::fileExistsVirtualCustomizedReadOnly(
-  const std::string& theFileName, std::stringstream* commentsOnFailure
+  const std::string& fileName, std::stringstream* commentsOnFailure
 ) {
   std::string computedFileName;
   if (!FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
-    theFileName, computedFileName, commentsOnFailure
+    fileName, computedFileName, commentsOnFailure
   )) {
     return false;
   }
@@ -1392,14 +1393,14 @@ bool FileOperations::fileExistsVirtualCustomizedReadOnly(
 }
 
 bool FileOperations::fileExistsVirtual(
-  const std::string& theFileName,
+  const std::string& fileName,
   bool accessSensitiveFolders,
   bool accessULTRASensitiveFolders,
   std::stringstream* commentsOnFailure
 ) {
   std::string computedFileName;
   if (!FileOperations::getPhysicalFileNameFromVirtual(
-    theFileName,
+    fileName,
     computedFileName,
     accessSensitiveFolders,
     accessULTRASensitiveFolders,
@@ -1413,10 +1414,10 @@ bool FileOperations::fileExistsVirtual(
   return FileOperations::fileExistsUnsecure(computedFileName);
 }
 
-bool FileOperations::fileExistsUnsecure(const std::string& theFileName) {
-  std::fstream theFile;
-  theFile.open(theFileName.c_str(), std::fstream::in);
-  if (theFile.is_open()) {
+bool FileOperations::fileExistsUnsecure(const std::string& fileName) {
+  std::fstream fileStream;
+  fileStream.open(fileName.c_str(), std::fstream::in);
+  if (fileStream.is_open()) {
     return true;
   } else {
     return false;
@@ -1424,23 +1425,23 @@ bool FileOperations::fileExistsUnsecure(const std::string& theFileName) {
 }
 
 bool FileOperations::openFileVirtualReadOnly(
-  std::ifstream& theFile,
-  const std::string& theFileName,
+  std::ifstream& file,
+  const std::string& fileName,
   bool openAsBinary,
   bool accessSensitiveFolders
 ) {
   std::string computedFileName;
   if (!FileOperations::getPhysicalFileNameFromVirtual(
-    theFileName, computedFileName, accessSensitiveFolders, false, nullptr
+    fileName, computedFileName, accessSensitiveFolders, false, nullptr
   )) {
     return false;
   }
-  return FileOperations::openFileUnsecureReadOnly(theFile, computedFileName, openAsBinary);
+  return FileOperations::openFileUnsecureReadOnly(file, computedFileName, openAsBinary);
 }
 
 bool FileOperations::openFileVirtualCustomizedWriteOnly(
-  std::fstream& theFile,
-  const std::string& theFileName,
+  std::fstream& file,
+  const std::string& fileName,
   bool OpenInAppendMode,
   bool truncate,
   bool openAsBinary,
@@ -1449,18 +1450,18 @@ bool FileOperations::openFileVirtualCustomizedWriteOnly(
   MacroRegisterFunctionWithName("FileOperations::openFileVirtualCustomizedWriteOnly");
   std::string computedFileName;
   if (!FileOperations::getPhysicalFileNameFromVirtualCustomizedWriteOnly(
-    theFileName, computedFileName, commentsOnFailure
+    fileName, computedFileName, commentsOnFailure
   )) {
     return false;
   }
   return FileOperations::openFileUnsecure(
-    theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary
+    file, computedFileName, OpenInAppendMode, truncate, openAsBinary
   );
 }
 
 bool FileOperations::openFileVirtualCustomizedWriteOnlyCreateIfNeeded(
-  std::fstream& theFile,
-  const std::string& theFileName,
+  std::fstream& file,
+  const std::string& fileName,
   bool OpenInAppendMode,
   bool truncate,
   bool openAsBinary,
@@ -1469,18 +1470,18 @@ bool FileOperations::openFileVirtualCustomizedWriteOnlyCreateIfNeeded(
   MacroRegisterFunctionWithName("FileOperations::openFileVirtualCustomizedWriteOnly");
   std::string computedFileName;
   if (!FileOperations::getPhysicalFileNameFromVirtualCustomizedWriteOnly(
-    theFileName, computedFileName, commentsOnFailure
+    fileName, computedFileName, commentsOnFailure
   )) {
     return false;
   }
   return FileOperations::openFileCreateIfNotPresentUnsecure(
-    theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary
+    file, computedFileName, OpenInAppendMode, truncate, openAsBinary
   );
 }
 
 bool FileOperations::openFileVirtualCustomizedReadOnly(
-  std::fstream& theFile,
-  const std::string& theFileName,
+  std::fstream& file,
+  const std::string& fileName,
   bool OpenInAppendMode,
   bool truncate,
   bool openAsBinary,
@@ -1489,18 +1490,18 @@ bool FileOperations::openFileVirtualCustomizedReadOnly(
   MacroRegisterFunctionWithName("FileOperations::openFileVirtualCustomizedReadOnly");
   std::string computedFileName;
   if (!FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
-    theFileName, computedFileName, commentsOnFailure
+    fileName, computedFileName, commentsOnFailure
   )) {
     return false;
   }
   return FileOperations::openFileUnsecure(
-    theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary
+    file, computedFileName, OpenInAppendMode, truncate, openAsBinary
   );
 }
 
 bool FileOperations::openFileVirtual(
-  std::fstream& theFile,
-  const std::string& theFileName,
+  std::fstream& file,
+  const std::string& fileName,
   bool OpenInAppendMode,
   bool truncate,
   bool openAsBinary,
@@ -1508,16 +1509,14 @@ bool FileOperations::openFileVirtual(
 ) {
   std::string computedFileName;
   if (!FileOperations::getPhysicalFileNameFromVirtual(
-    theFileName, computedFileName, accessSensitiveFolders, false, nullptr
+    fileName, computedFileName, accessSensitiveFolders, false, nullptr
   )) {
     return false;
   }
   return FileOperations::openFileUnsecure(
-    theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary
+    file, computedFileName, OpenInAppendMode, truncate, openAsBinary
   );
 }
-
-#include <unistd.h>
 
 std::string FileOperations::getWouldBeFolderAfterHypotheticalChdirNonThreadSafe(const std::string& wouldBePath) {
   StateMaintainerCurrentFolder maintainFolder;
@@ -1787,8 +1786,8 @@ bool FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_Ultr
 }
 
 bool FileOperations::openFileCreateIfNotPresentVirtual(
-  std::fstream& theFile,
-  const std::string& theFileName,
+  std::fstream& file,
+  const std::string& fileName,
   bool OpenInAppendMode,
   bool truncate,
   bool openAsBinary,
@@ -1798,52 +1797,56 @@ bool FileOperations::openFileCreateIfNotPresentVirtual(
   std::string computedFileName;
   // USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
   if (!FileOperations::getPhysicalFileNameFromVirtual(
-    theFileName, computedFileName, accessSensitiveFolders, accessUltraSensitiveFolders, nullptr
+    fileName, computedFileName, accessSensitiveFolders, accessUltraSensitiveFolders, nullptr
   )) {
     return false;
   }
   return FileOperations::openFileCreateIfNotPresentUnsecure(
-    theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary
+    file, computedFileName, OpenInAppendMode, truncate, openAsBinary
   );
 }
 
 bool FileOperations::openFileCreateIfNotPresentUnsecure(
-  std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary
+  std::fstream& file,
+  const std::string& fileName,
+  bool OpenInAppendMode,
+  bool truncate,
+  bool openAsBinary
 ) {
   //USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
   if (OpenInAppendMode) {
     if (openAsBinary) {
-      theFile.open(theFileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::app | std::fstream::binary);
+      file.open(fileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::app | std::fstream::binary);
     } else {
-      theFile.open(theFileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::app);
+      file.open(fileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::app);
     }
   } else {
     if (openAsBinary) {
-      theFile.open(theFileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::binary);
+      file.open(fileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::binary);
     } else {
       if (truncate) {
-        theFile.open(theFileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::trunc);
+        file.open(fileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::trunc);
       } else {
-        theFile.open(theFileName.c_str(), std::fstream::in | std::fstream::out);
+        file.open(fileName.c_str(), std::fstream::in | std::fstream::out);
       }
     }
   }
-  if (theFile.is_open()) {
-    theFile.clear();
-    theFile.seekp(0, std::ios_base::end);
-    long tempI = theFile.tellp();
+  if (file.is_open()) {
+    file.clear();
+    file.seekp(0, std::ios_base::end);
+    long tempI = file.tellp();
     if (tempI > 0) {
       if (!OpenInAppendMode) {
-        theFile.seekp(0);
-        theFile.seekg(0);
+        file.seekp(0);
+        file.seekg(0);
       }
       return true;
     }
   }
-  theFile.close();
-  theFile.open(theFileName.c_str(), std::fstream::out | std::fstream::in | std::fstream::trunc);
-  theFile.clear();
-  return theFile.is_open();
+  file.close();
+  file.open(fileName.c_str(), std::fstream::out | std::fstream::in | std::fstream::trunc);
+  file.clear();
+  return file.is_open();
 }
 
 StateMaintainerCurrentFolder::StateMaintainerCurrentFolder() {
@@ -3253,8 +3256,10 @@ std::string OnePartialFraction::toString(
   return out.str();
 }
 
-bool OnePartialFraction::rootIsInFractionCone(PartialFractions& owner, Vector<Rational>* theRoot) const {
-  if (theRoot == nullptr) {
+bool OnePartialFraction::rootIsInFractionCone(
+  PartialFractions& owner, Vector<Rational>* root
+) const {
+  if (root == nullptr) {
     return true;
   }
   if (this->RelevanceIsComputed) {
@@ -6863,9 +6868,9 @@ void WeylGroupData::actOnAffineHyperplaneByGroupElement(
 }
 
 bool WeylGroupData::getWordByFormulaImplementation(
-  FiniteGroup<ElementWeylGroup>& G, const ElementWeylGroup& g, List<int>& out
+  FiniteGroup<ElementWeylGroup>& group, const ElementWeylGroup& g, List<int>& out
 ) {
-  (void) G;// avoid unused parameter warning, portable.
+  (void) group;// avoid unused parameter warning, portable.
   out.setSize(g.generatorsLastAppliedFirst.size);
   for (int i = 0; i < g.generatorsLastAppliedFirst.size; i ++) {
     out[i] = g.generatorsLastAppliedFirst[i].index;
@@ -7951,9 +7956,9 @@ bool WeylGroupData::isElementWeylGroup(const MatrixTensor<Rational>& matrix) {
   return candidateMatrix == inputMatrix;
 }
 
-bool WeylGroupData::containsRootNonStronglyPerpendicularTo(Vectors<Rational>& theVectors, Vector<Rational>& input) {
+bool WeylGroupData::containsRootNonStronglyPerpendicularTo(Vectors<Rational>& vectors, Vector<Rational>& input) {
   for (int i = 0; i < this->group.elements.size; i ++) {
-    if (this->isARoot(theVectors[i] + input)) {
+    if (this->isARoot(vectors[i] + input)) {
       return true;
     }
   }
@@ -8221,18 +8226,18 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
     return "id";
   }
   List<List<List<int> > > arrows;
-  List<List<int> > Layers;
+  List<List<int> > layers;
   Vector<Rational> tempRoot;
-  Layers.reserve(this->RepresentativesQuotientAmbientOrder.size);
+  layers.reserve(this->RepresentativesQuotientAmbientOrder.size);
   int GraphWidth = 1;
   int oldLayerElementLength = - 1;
   for (int i = 0; i < this->RepresentativesQuotientAmbientOrder.size; i ++) {
     if (this->RepresentativesQuotientAmbientOrder[i].generatorsLastAppliedFirst.size != oldLayerElementLength) {
-      Layers.setSize(Layers.size + 1);
+      layers.setSize(layers.size + 1);
       oldLayerElementLength = this->RepresentativesQuotientAmbientOrder[i].generatorsLastAppliedFirst.size;
     }
-    Layers.lastObject()->addOnTop(i);
-    GraphWidth =MathRoutines::maximum(GraphWidth, Layers.lastObject()->size);
+    layers.lastObject()->addOnTop(i);
+    GraphWidth =MathRoutines::maximum(GraphWidth, layers.lastObject()->size);
   }
   for (int i = 0; i < this->RepresentativesQuotientAmbientOrder.size; i ++) {
     tempRoot = this->ambientWeyl->rho;
@@ -8240,16 +8245,16 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
       this->ambientWeyl->group.elements.getIndex(this->RepresentativesQuotientAmbientOrder[i]), tempRoot, false, false
     );
   }
-  arrows.setSize(Layers.size);
-  for (int i = 0; i < Layers.size; i ++) {
-    arrows[i].setSize(Layers[i].size);
-    for (int j = 0; j < Layers[i].size; j ++) {
+  arrows.setSize(layers.size);
+  for (int i = 0; i < layers.size; i ++) {
+    arrows[i].setSize(layers[i].size);
+    for (int j = 0; j < layers[i].size; j ++) {
       for (int k = 0; k < this->RepresentativesQuotientAmbientOrder.size; k ++) {
         if (this->ambientWeyl->leftIsHigherInBruhatOrderThanRight(
-          this->RepresentativesQuotientAmbientOrder[k], this->RepresentativesQuotientAmbientOrder[Layers[i][j]]
+          this->RepresentativesQuotientAmbientOrder[k], this->RepresentativesQuotientAmbientOrder[layers[i][j]]
         )) {
           if (
-            this->RepresentativesQuotientAmbientOrder[Layers[i][j]].generatorsLastAppliedFirst.size ==
+            this->RepresentativesQuotientAmbientOrder[layers[i][j]].generatorsLastAppliedFirst.size ==
             this->RepresentativesQuotientAmbientOrder[k].generatorsLastAppliedFirst.size - 1
           ) {
             arrows[i][j].addOnTop(k);
@@ -8258,7 +8263,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
       }
     }
   }
-  return this->toStringFromLayersAndArrows(arrows, Layers, GraphWidth, true);
+  return this->toStringFromLayersAndArrows(arrows, layers, GraphWidth, true);
 }
 
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::findQuotientRepresentatives(int UpperLimit) {
@@ -8291,18 +8296,18 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::d
   int UpperBoundVertices
 ) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::drawContour");
-  HashedList<Vector<Rational> > theOrbit;
-  theOrbit.addOnTop(highestWeightSimpleCoord);
+  HashedList<Vector<Rational> > orbit;
+  orbit.addOnTop(highestWeightSimpleCoord);
   WeylGroupData& theWeyl = *this->ambientWeyl;
   Vector<Rational> tempRoot;
-  for (int i = 0; i < theOrbit.size; i ++) {
+  for (int i = 0; i < orbit.size; i ++) {
     for (int j = 0; j < this->simpleRootsInner.size; j ++) {
-      tempRoot = theOrbit[i];
+      tempRoot = orbit[i];
       theWeyl.reflectBetaWithRespectToAlpha(this->simpleRootsInner[j], tempRoot, false, tempRoot);
-      if (theOrbit.addOnTopNoRepetition(tempRoot)) {
-        drawingVariables.drawLineBetweenTwoVectorsBufferRational(theOrbit[i], tempRoot, color, 1);
+      if (orbit.addOnTopNoRepetition(tempRoot)) {
+        drawingVariables.drawLineBetweenTwoVectorsBufferRational(orbit[i], tempRoot, color, 1);
       }
-      if (theOrbit.size > UpperBoundVertices) {
+      if (orbit.size > UpperBoundVertices) {
         return false;
       }
     }

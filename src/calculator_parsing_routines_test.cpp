@@ -172,6 +172,10 @@ bool Calculator::Test::parseDecimal(Calculator& ownerInitialized) {
   return true;
 }
 
+Calculator::Test::OneTest::OneTest() {
+  this->requresAdminAccess = false;
+}
+
 bool Calculator::Test::builtInFunctionsABTest(Calculator& ownerInitialized) {
   Calculator::Test test(ownerInitialized);
   test.calculatorTestPrepare();

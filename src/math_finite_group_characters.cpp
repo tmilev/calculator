@@ -925,7 +925,7 @@ void SubgroupDataRootReflections::computeDynkinType() {
   WeylGroupData tempGroup;
   tempGroup.cartanSymmetric = this->SubCartanSymmetric;
   tempGroup.makeMeFromMyCartanSymmetric();
-  this->theDynkinType = tempGroup.dynkinType;
+  this->dynkinType = tempGroup.dynkinType;
 }
 
 SubgroupDataWeylGroup::SubgroupDataWeylGroup() {
@@ -1021,7 +1021,7 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
 
 void SubgroupDataRootReflections::computeCCSizesRepresentativesPreimages() {
   MacroRegisterFunctionWithName("SubgroupRootReflections::computeCCSizesRepresentativesPreimages");
-  if (this->theDynkinType == this->theWeylData->dynkinType && this->theWeylData->group.flagCCRepresentativesComputed) {
+  if (this->dynkinType == this->theWeylData->dynkinType && this->theWeylData->group.flagCCRepresentativesComputed) {
     this->theSubgroupData.subgroupContent->conjugacyClasses.setSize(this->theSubgroupData.groupContent->conjugacyClasses.size);
     for (int i = 0; i < this->theSubgroupData.subgroupContent->conjugacyClasses.size; i ++) {
       this->theSubgroupData.subgroupContent->conjugacyClasses[i].flagRepresentativeComputed = true;
@@ -1035,7 +1035,7 @@ void SubgroupDataRootReflections::computeCCSizesRepresentativesPreimages() {
     }
     this->theSubgroupData.subgroupContent->flagCCRepresentativesComputed = true;
   } else {
-    if (this->theDynkinType.getRank() <= 6) {
+    if (this->dynkinType.getRank() <= 6) {
       this->theSubgroupData.subgroupContent->computeConjugacyClassesFromAllElements();
     } else {
       this->theSubgroupData.subgroupContent->computeConjugacyClassSizesAndRepresentatives();
@@ -1047,7 +1047,7 @@ void SubgroupDataRootReflections::computeCCSizesRepresentativesPreimages() {
 
 void SubgroupDataRootReflections::initializeGenerators() {
   MacroRegisterFunctionWithName("SubgroupRootReflections::initializeGenerators");
-  if (this->theDynkinType.getRank() == 0) {
+  if (this->dynkinType.getRank() == 0) {
     this->theSubgroupData.subgroupContent->generators.setSize(1);
     this->theSubgroupData.subgroupContent->generators[0].makeIdentity(*this->theSubgroupData.groupContent);
     return;
@@ -1106,7 +1106,7 @@ void SubgroupDataRootReflections::makeFromRoots(WeylGroupData& G, const Vectors<
   this->computeDynkinType();
   DynkinType verificationType;
   diagram.getDynkinType(verificationType);
-  if (this->theDynkinType != verificationType) {
+  if (this->dynkinType != verificationType) {
     global.fatal << "Two different comptuations of the Dynkin type a set of roots did not coincide. " << global.fatal;
   }
   this->initializeGenerators();

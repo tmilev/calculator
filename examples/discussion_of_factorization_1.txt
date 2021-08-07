@@ -1,0 +1,7 @@
+36(x-\frac{\sqrt{33}}{24}+\frac{7}{24})(x+\frac{\sqrt{33}}{24}+\frac{7}{24});
+
+36 \left(a^2-\frac{\sqrt{33}}{24}+\frac{7}{24}\right) \left(a^2+\frac{\sqrt{33}}{24}+\frac{7}{24}\right);
+
+36(a-\sqrt{\frac{7+\sqrt{33}}{24}})(a+\sqrt{\frac{7+\sqrt{33}}{24}})(a-\sqrt{\frac{7-\sqrt{33}}{24}})(a+\sqrt{\frac{7-\sqrt{33}}{24}});
+\sqrt{\frac{7+\sqrt{33}}{24}};36(a-\frac{\sqrt{33}}{12}-\frac{1}{4})(a-\frac{\sqrt{33}}{12}+\frac{1}{4})(a+\frac{\sqrt{33}}{12}+\frac{1}{4})(a+\frac{\sqrt{33}}{12}-\frac{1}{4});
+\sqrt{\frac{7-\sqrt{33}}{24}}

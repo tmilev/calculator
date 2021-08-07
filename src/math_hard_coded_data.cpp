@@ -1156,11 +1156,11 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
     }
     DynkinDiagramRootSubalgebra theSAdiagram;
     theSAdiagram.computeDiagramTypeModifyInput(readerSubgroup.generatingSimpleRoots, inputGroup);
-    theSAdiagram.getDynkinType(readerSubgroup.theDynkinType);
-    if (readerSubgroup.theDynkinType.toString() != sgString) {
+    theSAdiagram.getDynkinType(readerSubgroup.dynkinType);
+    if (readerSubgroup.dynkinType.toString() != sgString) {
       global.fatal << "Corrupt JSon data: hard-coded Dynkin type is: "
       << sgString << " but dynkin type is computed to be: "
-      << readerSubgroup.theDynkinType.toString() << global.fatal;
+      << readerSubgroup.dynkinType.toString() << global.fatal;
     }
     if (currentSGdata.listObjects[1].listObjects.size != inputGroup.group.characterTable.size) {
       global.fatal << "Corrupt JSon or non-initialized Weyl group: tau signature has " << currentSGdata.listObjects[1].listObjects.size

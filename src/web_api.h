@@ -321,7 +321,7 @@ public:
   static bool isRepresentedByItselfInURLs(char input);
   static void clearDollarSigns(std::string& theString, std::string& output);
   static void subEqualitiesWithSimeq(
-    std::string& theString, std::string& output
+    std::string& input, std::string& output
   );
   static bool accountOneInputPercentEncodedString(
     const std::string& fieldName,

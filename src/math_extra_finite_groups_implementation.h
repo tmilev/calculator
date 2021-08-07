@@ -977,11 +977,11 @@ bool WeylGroupData::generateOrbit(
 }
 
 template <class Coefficient>
-void WeylGroupData::reflectMinusRhoSimple(int index, Vector<Coefficient>& theVector) const {
+void WeylGroupData::reflectMinusRhoSimple(int index, Vector<Coefficient>& vector) const {
   Coefficient alphaShift, tempRat;
   alphaShift = 0;
   for (int i = 0; i < this->cartanSymmetric.numberOfColumns; i ++) {
-    tempRat = theVector[i];
+    tempRat = vector[i];
     tempRat *= this->cartanSymmetric.elements[index][i];
     alphaShift += tempRat;
   }
@@ -990,7 +990,7 @@ void WeylGroupData::reflectMinusRhoSimple(int index, Vector<Coefficient>& theVec
   Coefficient one;
   one = 1;
   alphaShift += one;
-  theVector[index] += alphaShift;
+  vector[index] += alphaShift;
 }
 
 template <class Coefficient>

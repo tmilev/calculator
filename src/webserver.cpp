@@ -1987,7 +1987,7 @@ int WebWorker::serveClient() {
     this->processUnknown();
     return 0;
   }
-  if (global.theThreads.size <= 1) {
+  if (global.allThreads.size <= 1) {
     global.fatal << "Number of threads must be at least 2 in this point of code..." << global.fatal;
   }
   this->extractHostInfo();

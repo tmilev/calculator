@@ -2279,10 +2279,12 @@ public:
       std::string atom;
       std::string functionAdditionalIdentifier;
       std::string command;
-      // empty string = not computed
+      bool requresAdminAccess;
+      // empty string = not computed.
       std::string actualResult;
-      // empty string = not known
+      // empty string = not known.
       std::string expectedResult;
+      OneTest();
     };
     MapList<std::string, Calculator::Test::OneTest, MathRoutines::hashString> commands;
     JSData storedResults;

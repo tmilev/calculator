@@ -318,8 +318,8 @@ public:
     Response();
   };
   Response response;
-  ListReferences<std::thread> theThreads;
-  ListReferences<ThreadData> theThreadData;
+  ListReferences<std::thread> allThreads;
+  ListReferences<ThreadData> threadData;
   ListReferences<ListReferences<StackInfo> > customStackTrace;
   ListReferences<ListReferences<std::string> > progressReportStrings;
   List<std::string> programArguments;

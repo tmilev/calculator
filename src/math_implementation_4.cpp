@@ -148,19 +148,19 @@ std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageHTML() {
   out << "A partial stack trace follows (function calls not explicitly logged not included).";
   out << "<table><tr>";
   for (int threadCounter = 0; threadCounter < global.customStackTrace.size; threadCounter ++) {
-    if (threadCounter >= global.theThreadData.size) {
+    if (threadCounter >= global.threadData.size) {
       out << "<td><b>WARNING: the stack trace reports "
       << global.customStackTrace.size
       << " threads but the thread data array has record of only "
-      << global.theThreadData.size
+      << global.threadData.size
       << " threads. " << "</b></td>";
       break;
     }
-    out << "<td>" << global.theThreadData[threadCounter].toStringHtml() << "</td>";
+    out << "<td>" << global.threadData[threadCounter].toStringHtml() << "</td>";
   }
   out << "</tr> <tr>";
   for (int threadCounter = 0; threadCounter<global.customStackTrace.size; threadCounter ++) {
-    if (threadCounter >= global.theThreadData.size) {
+    if (threadCounter >= global.threadData.size) {
       break;
     }
     if (ThreadData::getCurrentThreadId() != threadCounter) {
@@ -187,9 +187,9 @@ std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageHTML() {
 std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageConsole() {
   std::stringstream out;
   for (int threadCounter = 0; threadCounter<global.customStackTrace.size; threadCounter ++) {
-    if (threadCounter >= global.theThreadData.size) {
+    if (threadCounter >= global.threadData.size) {
       out << "WARNING: stack trace reports " << global.customStackTrace.size << " threads "
-      << "while I have only " << global.theThreadData.size << " registered threads. ";
+      << "while I have only " << global.threadData.size << " registered threads. ";
       break;
     }
     out << "********************\r\nThread index " << threadCounter << ": \r\n";
@@ -246,7 +246,7 @@ std::string GlobalVariables::toStringThreadData(bool useHTML) {
     if (useHTML) {
       out << "<hr><b>";
     }
-    out << this->theThreadData[threadIndex].toStringHtml();
+    out << this->threadData[threadIndex].toStringHtml();
     if (useHTML) {
       out << "</b><br>";
     }
@@ -326,7 +326,7 @@ std::string GlobalVariables::toStringProgressReportConsole() {
       //<-to avoid coordinating threads
       continue;
     }
-    reportStream << this->theThreadData[threadIndex].toStringConsole();
+    reportStream << this->threadData[threadIndex].toStringConsole();
     for (int i = 0; i < this->progressReportStrings[threadIndex].size; i ++) {
       reportStream << this->progressReportStrings[threadIndex][i];
     }

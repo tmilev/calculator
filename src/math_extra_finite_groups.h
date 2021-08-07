@@ -273,7 +273,7 @@ public:
   void computeConjugacyClassesFromConjugacyClassIndicesInAllElements(const List<List<int> >& ccIndices);
 
   void computeCCSizeOrCCFromRepresentative(ConjugacyClass& inputOutputClass, bool storeCC);
-  bool registerConjugacyClass(const elementSomeGroup& theRepresentative, bool dontAddIfSameInvariants);
+  bool registerConjugacyClass(const elementSomeGroup& inputRepresentative, bool dontAddIfSameInvariants);
   bool computeConjugacyClassesRepresentatives();
   void computeGeneratorsConjugacyClasses();
   void computeConjugacyClassSizesAndRepresentatives(bool useComputeCCSizesRepresentativesWords = true);
@@ -606,7 +606,7 @@ public:
   bool loadSignSignatures(List<SubgroupDataRootReflections>& outputSubgroups);
   void computeOrLoadCharacterTable(std::stringstream* reportStream = nullptr);
   void computeOrLoadConjugacyClasses(std::stringstream* reportStream = nullptr);
-  static void computeIrreducibleRepresentationsWithFormulasImplementation(FiniteGroup<ElementWeylGroup>& G);
+  static void computeIrreducibleRepresentationsWithFormulasImplementation(FiniteGroup<ElementWeylGroup>& g);
   void computeExtremeRootInTheSameKMod(
     const Vectors<Rational>& inputSimpleBasisK,
     const Vector<Rational>& inputRoot,
@@ -631,7 +631,7 @@ public:
   void computeCoCartanSymmetricFromCartanSymmetric();
   bool checkConsistency() const;
   static bool getWordByFormulaImplementation(
-    FiniteGroup<ElementWeylGroup>& G, const ElementWeylGroup& g, List<int>& out
+    FiniteGroup<ElementWeylGroup>& group, const ElementWeylGroup& g, List<int>& out
   );
   void getSignCharacter(Vector<Rational>& out);
   void getStandardRepresentation(
@@ -646,7 +646,7 @@ public:
   void generateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors<Rational>& output);
   bool loadGAPRootSystem(HashedList<Vector<Rational> >& outputPositiveRootSystem) const;
   Rational getKillingDividedByTraceRatio();
-  bool containsRootNonStronglyPerpendicularTo(Vectors<Rational>& theVectors, Vector<Rational>& input);
+  bool containsRootNonStronglyPerpendicularTo(Vectors<Rational>& vectors, Vector<Rational>& input);
   int numberOfRootsConnectedTo(Vectors<Rational>& theVectors, Vector<Rational>& input);
   void getHighestWeightsAllRepresentationsDimensionLessThanOrEqualTo(
     List<Vector<Rational> >& outputHighestWeightsFundCoords, int inputDimBound
@@ -903,34 +903,34 @@ public:
     this->actOn(theGroupElement, inputOutput, inputOutput);
   }
   template <class Coefficient>
-  void actOn(int indexOfWeylElement, Vector<Coefficient>& theVector) const {
-    this->actOn(this->group.elements[indexOfWeylElement], theVector, theVector);
+  void actOn(int indexOfWeylElement, Vector<Coefficient>& vector) const {
+    this->actOn(this->group.elements[indexOfWeylElement], vector, vector);
   }
   template <class Coefficient>
   void actOn(
-    const ElementWeylGroup& theGroupElement,
+    const ElementWeylGroup& groupElement,
     const Vector<Coefficient>& inputVector,
     Vector<Coefficient>& outputVector
   ) const {
     outputVector = inputVector;
-    for (int i = theGroupElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
-      this->reflectSimple(theGroupElement.generatorsLastAppliedFirst[i].index, outputVector);
+    for (int i = groupElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
+      this->reflectSimple(groupElement.generatorsLastAppliedFirst[i].index, outputVector);
     }
   }
   template <class Coefficient>
-  void actOnRhoModified(const ElementWeylGroup& theGroupElement, Vector<Coefficient>& theVector) const {
+  void actOnRhoModified(const ElementWeylGroup& theGroupElement, Vector<Coefficient>& vector) const {
     Vector<Coefficient> tempV;
-    theVector += this->rho;
-    this->actOn(theGroupElement, theVector, tempV);
-    theVector = tempV;
-    theVector -= this->rho;
+    vector += this->rho;
+    this->actOn(theGroupElement, vector, tempV);
+    vector = tempV;
+    vector -= this->rho;
   }
   template <class Coefficient>
-  void actOnRhoModified(int indexOfWeylElement, Vector<Coefficient>& theVector) const {
-    this->actOnRhoModified(this->group.elements[indexOfWeylElement], theVector);
+  void actOnRhoModified(int indexOfWeylElement, Vector<Coefficient>& vector) const {
+    this->actOnRhoModified(this->group.elements[indexOfWeylElement], vector);
   }
   template <class Coefficient>
-  void actOnDual(int index,Vector<Coefficient>& theVector, bool RhoAction, const Coefficient& ringZero);
+  void actOnDual(int index,Vector<Coefficient>& vector, bool RhoAction, const Coefficient& ringZero);
   //theRoot is a list of the simple coordinates of the Vector<Rational>
   //theRoot serves as both input and output
   void actOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& root, bool rhoAction);
@@ -953,7 +953,7 @@ public:
   template <class Coefficient>
   void reflectRhoSimple(int index, Vector<Coefficient>& vector) const;
   template <class Coefficient>
-  void reflectMinusRhoSimple(int index, Vector<Coefficient>& theVector) const;
+  void reflectMinusRhoSimple(int index, Vector<Coefficient>& vector) const;
   ElementWeylGroup getRootReflection(int rootIndex);
   void getWord(int g, List<int>& out) const;
   void getWord(const ElementWeylGroup& g, List<int>& out) const {
@@ -1155,7 +1155,7 @@ public:
 
   template <typename Coefficient>
   GroupRepresentation<FiniteGroup<elementFirstGroup>, Coefficient> pullbackRepresentation(
-    GroupRepresentation<FiniteGroup<elementSecondGroup>, Coefficient> M2
+    const GroupRepresentation<FiniteGroup<elementSecondGroup>, Coefficient>& M2
   ) {
     GroupRepresentation<FiniteGroup<elementFirstGroup>, Coefficient> out;
     out.ownerGroup = this->preimageGroup;
@@ -1186,7 +1186,7 @@ public:
   bool checkInitialization() const;
 
   template <typename elementSomeGroup>
-  bool getMatrixOfElement(const elementSomeGroup& g, Matrix<Coefficient>& out);
+  bool getMatrixOfElement(const elementSomeGroup& g, Matrix<Coefficient>& out) const;
 
   void computeCharacter() const;
   ClassFunction<someGroup, Coefficient> getCharacter() {
@@ -1272,7 +1272,9 @@ public:
 
 template <typename someGroup, typename Coefficient>
 template <typename elementSomeGroup>
-bool GroupRepresentation<someGroup, Coefficient>::getMatrixOfElement(const elementSomeGroup& g, Matrix<Coefficient>& out) {
+bool GroupRepresentation<someGroup, Coefficient>::getMatrixOfElement(
+  const elementSomeGroup& g, Matrix<Coefficient>& out
+) const {
   out.makeIdentity(this->generators[0]);
   List<int> word;
   if (!this->ownerGroup->getWord(g, word)) {
@@ -1772,8 +1774,10 @@ void SubgroupData<someGroup, elementSomeGroup>::quotientGroupPermutationRepresen
       int j = this->getCosetId(g);
       out.generators[i](j, ci) = 1;
     }
-    global.comments << "Element " << this->groupContent->generators[i] << " of coset " << this->getCosetId(this->groupContent->generators[i]);
-    global.comments << " permutes the other cosets as\n" << out.generators[i].toStringPlainText() << '\n';
+    global.comments << "Element " << this->groupContent->generators[i]
+    << " of coset " << this->getCosetId(this->groupContent->generators[i]);
+    global.comments << " permutes the other cosets as\n"
+    << out.generators[i].toStringPlainText() << '\n';
   }
 }
 
@@ -1878,7 +1882,8 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<someGroup, elementSomeG
     outgroup.generators = out.generators;
     global.comments << "Generator commutation relations for 'representation':\n"
     << outgroup.prettyPrintGeneratorCommutationRelations();
-    global.comments << "It was supposed to be a quotient group of\n" << this->groupContent->prettyPrintGeneratorCommutationRelations();
+    global.comments << "It was supposed to be a quotient group of\n"
+    << this->groupContent->prettyPrintGeneratorCommutationRelations();
     global.fatal << "Error in induceRepresentation. " << global.fatal;
   }
   return out;
@@ -1906,7 +1911,7 @@ class SubgroupDataRootReflections : public SubgroupDataWeylGroup {
 public:
   SubgroupData<FiniteGroup<ElementWeylGroup>, ElementWeylGroup> subGroupDataContainer;
   Matrix<Rational> SubCartanSymmetric;
-  DynkinType theDynkinType;
+  DynkinType dynkinType;
   Vectors<Rational> generatingSimpleRoots;
   bool flagIsParabolic;
   bool flagIsExtendedParabolic;
@@ -1915,7 +1920,7 @@ public:
   void makeParabolicSubgroup(WeylGroupData& G, const Selection& inputGeneratingSimpleRoots);
   void makeFromRoots(WeylGroupData& G, const Vectors<Rational>& inputRootReflections);
   LargeInteger sizeByFormulaOrNegative1() const {
-    return this->theDynkinType.getWeylGroupSizeByFormula();
+    return this->dynkinType.getWeylGroupSizeByFormula();
   }
   void computeDynkinType();
   void computeCCSizesRepresentativesPreimages();
@@ -2433,32 +2438,32 @@ int FiniteGroup<elementSomeGroup>::invert(int g) const {
 
 template <class elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::registerConjugacyClass(
-  const elementSomeGroup& theRepresentative, bool dontAddIfSameInvariants
+  const elementSomeGroup& inputRepresentative, bool dontAddIfSameInvariants
 ) {
   MacroRegisterFunctionWithName("FiniteGroup::registerConjugacyClass");
-  ConjugacyClass theClass;
-  theClass.representative = theRepresentative;
-  Polynomial<Rational> theCharPoly;
-  theClass.representative.getCharacteristicPolynomialStandardRepresentation(theCharPoly);
-  if (this->characterPolynomialsConjugacyClassesStandardRepresentation.contains(theCharPoly)) {
+  ConjugacyClass conjugacyClass;
+  conjugacyClass.representative = inputRepresentative;
+  Polynomial<Rational> characterPolynomial;
+  conjugacyClass.representative.getCharacteristicPolynomialStandardRepresentation(characterPolynomial);
+  if (this->characterPolynomialsConjugacyClassesStandardRepresentation.contains(characterPolynomial)) {
     for (int i = 0; i < this->conjugacyClasses.size; i ++) {
       elementSomeGroup& otherRepresentative = this->conjugacyClasses[i].representative;
       if (!dontAddIfSameInvariants) {
-        if (this->areConjugate(theClass.representative, otherRepresentative)) {
+        if (this->areConjugate(conjugacyClass.representative, otherRepresentative)) {
           return false;
         }
       } else {
-        if (!theClass.representative.hasDifferentConjugacyInvariantsFrom(otherRepresentative)) {
+        if (!conjugacyClass.representative.hasDifferentConjugacyInvariantsFrom(otherRepresentative)) {
           return false;
         }
       }
     }
   }
-  theClass.flagRepresentativeComputed = true;
-  this->computeCCSizeOrCCFromRepresentative(theClass, false);
-  this->conjugacyClasses.addOnTop(theClass);
-  this->characterPolynomialsConjugacyClassesStandardRepresentation.addOnTop(theCharPoly);
-  this->sizePrivate += theClass.size;
+  conjugacyClass.flagRepresentativeComputed = true;
+  this->computeCCSizeOrCCFromRepresentative(conjugacyClass, false);
+  this->conjugacyClasses.addOnTop(conjugacyClass);
+  this->characterPolynomialsConjugacyClassesStandardRepresentation.addOnTop(characterPolynomial);
+  this->sizePrivate += conjugacyClass.size;
   this->conjugacyClasses.quickSortAscending();
   return true;
 }

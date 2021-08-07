@@ -415,8 +415,8 @@ public:
   bool assignString(const std::string& other, std::stringstream* commentsOnFailure);
   std::string toString();
   bool verifyRSA256(
-    const LargeIntegerUnsigned& theModulus,
-    const LargeIntegerUnsigned& theExponent,
+    const LargeIntegerUnsigned& modulus,
+    const LargeIntegerUnsigned& exponent,
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral
   );

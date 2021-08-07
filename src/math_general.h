@@ -5175,7 +5175,7 @@ class OnePartialFraction {
 private:
   void findPivot();
   void findInitialPivot();
-  bool rootIsInFractionCone (PartialFractions& owner, Vector<Rational>* theRoot) const;
+  bool rootIsInFractionCone (PartialFractions& owner, Vector<Rational>* root) const;
   friend class PartialFractions;
   friend class partFractionPolynomialSubstitution;
 public:
@@ -7038,7 +7038,7 @@ std::string Vectors<Coefficient>::toInequalitiesString(
       if (useLatex) {
         out << "\\geq " << (- (*current.lastObject())).toString() << "\\\\";
       } else {
-        out << "=>" <<  (- (*current.lastObject())).toString();
+        out << "=>" << (- (*current.lastObject())).toString();
       }
     }
     if (tempS == "") {

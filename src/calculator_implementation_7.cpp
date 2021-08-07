@@ -7617,6 +7617,7 @@ void Calculator::Test::calculatorTestPrepare() {
           continue;
         }
         Calculator::Test::OneTest oneTest;
+        oneTest.requresAdminAccess = currentFunction.options.adminOnly;
         oneTest.command = currentFunction.example;
         oneTest.atom = this->owner->operations.keys[i];
         oneTest.functionAdditionalIdentifier = currentFunction.additionalIdentifier;
@@ -7656,6 +7657,11 @@ bool Calculator::Test::calculatorTestRun() {
     << this->commands.size() << ", atom: " << currentTest.atom
     << ", command:\n"
     << currentTest.command << Logger::endL;
+    StateMaintainer<bool> maintainOriginalValueDatabaseFlag;
+    maintainOriginalValueDatabaseFlag.initialize(global.flagDisableDatabaseLogEveryoneAsAdmin);
+    if (currentTest.requresAdminAccess) {
+      global.flagDisableDatabaseLogEveryoneAsAdmin = true;
+    }
     report.report(reportStream.str());
     tester.initialize(Calculator::Mode::full);
     tester.checkConsistencyAfterInitialization();

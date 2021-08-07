@@ -63,9 +63,9 @@ public:
     }
     return result;
   }
-  bool contains(const Object& theObject) const {
+  bool contains(const Object& inputObject) const {
     for (int i = 0; i < this->size; i ++) {
-      if ((*this)[i] == theObject) {
+      if ((*this)[i] == inputObject) {
         return true;
       }
     }
@@ -103,8 +103,8 @@ public:
   // Resizes the array. When enlarged, the array will increase by a
   // fixed percent, which gurantees that N non-trivial resizes
   // will result in exponential in N growth.
-  void setExpectedSize(int theSize) {
-    int newSize = (theSize * 6) / 5;
+  void setExpectedSize(int desiredSize) {
+    int newSize = (desiredSize * 6) / 5;
     if (newSize > 0) {
       this->allocateElements(newSize);
     }
@@ -227,8 +227,8 @@ class HashedListReferences : public HashTemplate<Object, ListReferences<Object>,
   //Note The following function specializations are declared entirely in order to
   //facilitate autocomplete in my current IDE. If I find a better autocompletion
   //IDE the following should be removed.
-  inline void addOnTopNoRepetition(const List<Object>& theList) {
-    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addOnTopNoRepetition(theList);
+  inline void addOnTopNoRepetition(const List<Object>& inputList) {
+    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addOnTopNoRepetition(inputList);
   }
   inline bool addOnTopNoRepetition(const Object& o) {
     return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addOnTopNoRepetition(o);
@@ -236,17 +236,17 @@ class HashedListReferences : public HashTemplate<Object, ListReferences<Object>,
   inline void addOnTop(const Object& o) {
     this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addOnTop(o);
   }
-  inline void addListOnTop(const List<Object>& theList) {
-    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addListOnTop(theList);
+  inline void addListOnTop(const List<Object>& inputList) {
+    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addListOnTop(inputList);
   }
   inline bool contains(const Object& o) const {
     return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::contains(o);
   }
-  inline bool contains(const List<Object>& theList) const {
-    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::contains(theList);
+  inline bool contains(const List<Object>& inputList) const {
+    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::contains(inputList);
   }
-  Object& getElement(int theObjectIndex) const {
-    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::getElement(theObjectIndex);
+  Object& getElement(int objectIndex) const {
+    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::getElement(objectIndex);
   }
   int getIndex(const Object& o) const {
     return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::getIndex(o);

@@ -1635,8 +1635,8 @@ std::string JSONWebToken::toString() {
 }
 
 bool JSONWebToken::verifyRSA256(
-  const LargeIntegerUnsigned& theModulus,
-  const LargeIntegerUnsigned& theExponent,
+  const LargeIntegerUnsigned& modulus,
+  const LargeIntegerUnsigned& exponent,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
@@ -1647,9 +1647,9 @@ bool JSONWebToken::verifyRSA256(
   List<uint32_t> outputSha, RSAresultInts;
   Crypto::computeSha256(payload, outputSha);
   if (commentsGeneral != nullptr) {
-    LargeIntegerUnsigned theSha;
-    Crypto::convertListUint32ToLargeIntegerUnsignedLittleEndian(outputSha, theSha);
-    *commentsGeneral << "<br>Sha256 of payload: " << theSha.toString();
+    LargeIntegerUnsigned shaSum;
+    Crypto::convertListUint32ToLargeIntegerUnsignedLittleEndian(outputSha, shaSum);
+    *commentsGeneral << "<br>Sha256 of payload: " << shaSum.toString();
   }
   LargeIntegerUnsigned theSignatureInt;
   if (!Crypto::convertBase64ToLargeUnsigned(this->signatureBase64, theSignatureInt, commentsOnFailure)) {
@@ -1660,14 +1660,14 @@ bool JSONWebToken::verifyRSA256(
   // if (commentsGeneral != nullptr) {
   //   timeStart = global.getElapsedSeconds();
   // }
-  if (theModulus == 0 || theExponent == 0) {
+  if (modulus == 0 || exponent == 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "The modulus and the exponent must be non-zero. "
-      << "The mod is: " << theModulus << "; the exponent is: " << theExponent;
+      << "The mod is: " << modulus << "; the exponent is: " << exponent;
     }
     return false;
   }
-  LargeIntegerUnsigned RSAresult = Crypto::rsaEncrypt(theModulus, theExponent, theSignatureInt);
+  LargeIntegerUnsigned RSAresult = Crypto::rsaEncrypt(modulus, exponent, theSignatureInt);
   // In order to have reproducible comments, we don't want to log time.
   // if (commentsGeneral != nullptr) {
   //
@@ -1686,7 +1686,7 @@ bool JSONWebToken::verifyRSA256(
     result = (RSAresultInts == outputSha);
   }
   if ((!result && commentsOnFailure != nullptr) || commentsGeneral != nullptr) {
-    std::string RSAresultTrimmedHex, theShaHex, RSAresultHex, RSAresultBase64;
+    std::string RSAresultTrimmedHex, shaHex, RSAresultHex, RSAresultBase64;
     LargeIntegerUnsigned theShaUI;
     Crypto::convertListUint32ToLargeIntegerUnsignedLittleEndian(
       outputSha, theShaUI
@@ -1694,7 +1694,7 @@ bool JSONWebToken::verifyRSA256(
     RSAresultBase64 = Crypto::convertStringToBase64Standard(RSAresultBitstream);
     Crypto::convertStringToHex(RSAresultBitstream, RSAresultHex, 0, false);
     Crypto::convertStringToHex(RSAresultLast32bytes, RSAresultTrimmedHex, 0, false);
-    Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(theShaUI, 0, theShaHex);
+    Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(theShaUI, 0, shaHex);
     if (!result && commentsOnFailure != nullptr) {
       *commentsOnFailure << "<br><b style =\"color:red\">Token invalid: the "
       << "SHA does not match the RSA result. </b>";
@@ -1705,7 +1705,7 @@ bool JSONWebToken::verifyRSA256(
       *commentsGeneral
       << "<br>Sha integer: " << theShaUI.toString()
       << "<br>Encrypted signature: " << RSAresult.toString()
-      << "<br>sha hex: " << theShaHex
+      << "<br>sha hex: " << shaHex
       << "<br>RSAresult hex: " << RSAresultHex
       << "<br>trimmed: " << RSAresultTrimmedHex
       << "<br>RSAresult base64: " << RSAresultBase64;

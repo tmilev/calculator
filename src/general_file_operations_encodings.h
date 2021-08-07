@@ -106,15 +106,15 @@ public:
   static bool isFileNameSafeForSystemCommands(const std::string& fileName, std::stringstream* commentsOnFailure);
   static std::string getFileNameFromFileNameWithPath(const std::string& fileName);
   static std::string getPathFromFileNameWithPath(const std::string& fileName);
-  static std::string getFileExtensionWithDot(const std::string& theFileName, std::string* outputFileNameNoExtension = nullptr);
-  static bool fileExistsUnsecure(const std::string& theFileName);
+  static std::string getFileExtensionWithDot(const std::string& fileName, std::string* outputFileNameNoExtension = nullptr);
+  static bool fileExistsUnsecure(const std::string& fileName);
   static bool fileExistsVirtual(
-    const std::string& theFileName,
+    const std::string& fileName,
     bool accessSensitiveFolders = false,
     bool accessULTRASensitiveFolders = false,
     std::stringstream* commentsOnFailure = nullptr
   );
-  static bool fileExistsVirtualCustomizedReadOnly(const std::string& theFileName, std::stringstream* commentsOnFailure);
+  static bool fileExistsVirtualCustomizedReadOnly(const std::string& fileName, std::stringstream* commentsOnFailure);
   static bool isFolderUnsecure(const std::string& theFolderName);
   static bool getFolderFileNamesUnsecure(
     const std::string& folderName,
@@ -125,12 +125,12 @@ public:
   static std::string getCurrentFolder();
   static std::string getWouldBeFolderAfterHypotheticalChdirNonThreadSafe(const std::string& wouldBePath);
   static bool getFolderFileNamesVirtual(
-    const std::string& theFolderName,
+    const std::string& folderName,
     List<std::string>& outputFileNamesNoPath,
     List<std::string>* outputFileTypesWithDot = nullptr,
     bool accessSensitiveFolders = false,
     bool accessULTRASensitiveFolders = false,
-    std::stringstream *commentsOnFailure = nullptr
+    std::stringstream* commentsOnFailure = nullptr
   );
   static bool getPhysicalFileNameFromVirtualCustomizedReadOnly(
     const std::string& inputFileName,
@@ -151,14 +151,15 @@ public:
     std::stringstream* commentsOnFailure
   );
   static bool openFileCreateIfNotPresentUnsecure(
-    std::fstream& theFile,
-    const std::string& theFileName,
+    std::fstream& file,
+    const std::string& fileName,
     bool OpenInAppendMode,
     bool truncate,
     bool openAsBinary
   );
-  static bool openFileCreateIfNotPresentVirtual(std::fstream& theFile,
-    const std::string& theFileName,
+  static bool openFileCreateIfNotPresentVirtual(
+    std::fstream& file,
+    const std::string& fileName,
     bool OpenInAppendMode,
     bool truncate,
     bool openAsBinary,
@@ -195,40 +196,40 @@ public:
     bool openAsBinary
   );
   static bool openFileVirtual(
-    std::fstream& theFile,
-    const std::string& theFileName,
+    std::fstream& file,
+    const std::string& fileName,
     bool OpenInAppendMode,
     bool truncate,
     bool openAsBinary,
     bool accessSensitiveFolders = false
   );
   static bool openFileVirtualCustomizedReadOnly(
-    std::fstream& theFile,
-    const std::string& theFileName,
+    std::fstream& file,
+    const std::string& fileName,
     bool OpenInAppendMode,
     bool truncate,
     bool openAsBinary,
     std::stringstream* commentsOnFailure
   );
   static bool openFileVirtualCustomizedWriteOnly(
-    std::fstream& theFile,
-    const std::string& theFileName,
+    std::fstream& file,
+    const std::string& fileName,
     bool OpenInAppendMode,
     bool truncate,
     bool openAsBinary,
     std::stringstream* commentsOnFailure
   );
   static bool openFileVirtualCustomizedWriteOnlyCreateIfNeeded(
-    std::fstream& theFile,
-    const std::string& theFileName,
+    std::fstream& file,
+    const std::string& fileName,
     bool OpenInAppendMode,
     bool truncate,
     bool openAsBinary,
     std::stringstream* commentsOnFailure
   );
   static bool openFileVirtualReadOnly(
-    std::ifstream& theFile,
-    const std::string& theFileName,
+    std::ifstream& file,
+    const std::string& fileName,
     bool openAsBinary,
     bool accessSensitiveFolders = false
   );

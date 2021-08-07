@@ -171,8 +171,8 @@ ThreadData::~ThreadData() {
 
 void GlobalVariables::joinAllThreads() {
   this->flagComputationFinishedAllOutputSentClosing = true;
-  for (int i = 1; i < this->theThreads.size; i ++) {
-    this->theThreads[i].join();
+  for (int i = 1; i < this->allThreads.size; i ++) {
+    this->allThreads[i].join();
   }
 }
 
@@ -186,31 +186,31 @@ void ThreadData::registerFirstThread(const std::string& inputName) {
 
 ThreadData& ThreadData::registerNewThread(const std::string& inputName) {
   ListReferences<ThreadData>& theThreadData =
-  global.theThreadData;
+  global.threadData;
   ThreadData newThreadData;
   newThreadData.name = inputName;
   newThreadData.index = theThreadData.size;
   theThreadData.addOnTop(newThreadData);
-  global.theThreads.setSize(theThreadData.size);
+  global.allThreads.setSize(theThreadData.size);
   global.customStackTrace.reserve(2);
   global.progressReportStrings.reserve(2);
   global.customStackTrace.setSize(theThreadData.size);
   global.progressReportStrings.setSize(theThreadData.size);
   global.customStackTrace.lastObject().reserve(30);
   global.progressReportStrings.lastObject().reserve(30);
-  return global.theThreadData.lastObject();
+  return global.threadData.lastObject();
 }
 
 void ThreadData::createThread(void (*InputFunction)(int), const std::string& inputName) {
   MutexlockGuard(global.mutexRegisterNewThread);
   ThreadData& theData = ThreadData::registerNewThread(inputName);
   std::thread newThread(InputFunction, theData.index);
-  global.theThreads.lastObject().swap(newThread);
+  global.allThreads.lastObject().swap(newThread);
 }
 
 int ThreadData::getCurrentThreadId() {
   std::thread::id currentId = std::this_thread::get_id();
-  ListReferences<ThreadData>& theThreadData = global.theThreadData;
+  ListReferences<ThreadData>& theThreadData = global.threadData;
   for (int i = 0; i < theThreadData.size; i ++) {
     if (currentId == theThreadData[i].theId) {
       return i;
@@ -252,20 +252,20 @@ std::string ThreadData::toStringConsole() const {
 
 std::string ThreadData::toStringAllThreadsHtml() {
   std::stringstream out;
-  out << global.theThreadData.size << " threads registered. <br> "
-  << global.theThreads.size << " total threads.<br>";
-  for (int i = 0; i < global.theThreadData.size; i ++) {
-    out << global.theThreadData[i].toStringHtml() << "<br>";
+  out << global.threadData.size << " threads registered. <br> "
+  << global.allThreads.size << " total threads.<br>";
+  for (int i = 0; i < global.threadData.size; i ++) {
+    out << global.threadData[i].toStringHtml() << "<br>";
   }
   return out.str();
 }
 
 std::string ThreadData::toStringAllThreadsConsole() {
   std::stringstream out;
-  out << global.theThreadData.size << " threads registered. "
-  << global.theThreads.size << " total threads.\n";
-  for (int i = 0; i < global.theThreadData.size; i ++) {
-    out << global.theThreadData[i].toStringConsole() << "\n";
+  out << global.threadData.size << " threads registered. "
+  << global.allThreads.size << " total threads.\n";
+  for (int i = 0; i < global.threadData.size; i ++) {
+    out << global.threadData[i].toStringConsole() << "\n";
   }
   return out.str();
 }

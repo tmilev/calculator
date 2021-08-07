@@ -288,10 +288,10 @@ bool Matrix<Element>::getEigenspacesProvidedAllAreIntegralWithEigenValueSmallerT
   return false;
 }
 
-void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation(FiniteGroup<ElementWeylGroup> &G) {
+void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation(FiniteGroup<ElementWeylGroup>& g) {
   List<char> letters;
   List<int> ranks;
-  WeylGroupData& WD = *(G.generators[0].owner);
+  WeylGroupData& WD = *(g.generators[0].owner);
   WD.dynkinType.getLettersTypesMultiplicities(&letters, &ranks, nullptr);
   // When WeylGroupRepresentation is merged with GroupRepresentation,
   // and WeylGroupData split from FiniteGroup<ElementWeylGroup<WeylGroup> >
@@ -305,10 +305,10 @@ void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation(
     for (int i = 0; i < thePartitions.size; i ++) {
       GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> irrep;
       thePartitions[i].spechtModuleMatricesOfTranspositionsjjplusone(irrep.generators);
-      irrep.ownerGroup = &G;
+      irrep.ownerGroup = &g;
       irrep.identifyingString = thePartitions[i].toString();
       irrep.computeCharacter();
-      G.addIrreducibleRepresentation(irrep);
+      g.addIrreducibleRepresentation(irrep);
     }
   } else if ((letters.size == 1) && (letters[0] == 'B')) {
     int theRank = ranks[0];
@@ -316,8 +316,8 @@ void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation(
     HOG.makeHyperoctahedralGroup(theRank);
     HOG.allSpechtModules();
     GroupHomomorphism<ElementWeylGroup, ElementHyperoctahedralGroupR2> phi;
-    phi.preimageGroup = &G;
-    phi.generatorImages.setSize(G.generators.size);
+    phi.preimageGroup = &g;
+    phi.generatorImages.setSize(g.generators.size);
     for (int i = 0; i < phi.generatorImages.size - 1; i ++) {
       phi.generatorImages[i].h.addTransposition(i, i + 1);
     }
@@ -329,21 +329,21 @@ void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation(
     FiniteGroup<ElementHyperoctahedralGroupR2> phiG;
     phiG.generators = phi.generatorImages;
     global << phiG.prettyPrintGeneratorCommutationRelations();
-    global << G.prettyPrintGeneratorCommutationRelations();
+    global << g.prettyPrintGeneratorCommutationRelations();
     global << "pulling back irreps:\n";
     for (int i = 0; i < HOG.group->irreducibleRepresentations.size; i ++) {
       auto irrep = phi.pullbackRepresentation(HOG.group->irreducibleRepresentations[i]);
       irrep.computeCharacter();
       global << HOG.group->irreducibleRepresentations[i].character << "->" << irrep.character << '\n';
-      G.addIrreducibleRepresentation(irrep);
+      g.addIrreducibleRepresentation(irrep);
     }
   } else if ((letters.size == 1) && (letters[0] == 'D')) {
     int theRank = ranks[0];
     HyperoctahedralGroupData HOG;
     HOG.makeHyperoctahedralGroup(theRank + 1);
     GroupHomomorphism<ElementWeylGroup, ElementHyperoctahedralGroupR2> inclusionMap;
-    inclusionMap.preimageGroup = &G;
-    inclusionMap.generatorImages.setSize(G.generators.size);
+    inclusionMap.preimageGroup = &g;
+    inclusionMap.generatorImages.setSize(g.generators.size);
     for (int i = 0; i < inclusionMap.generatorImages.size - 1; i ++) {
       inclusionMap.generatorImages[i].h.addTransposition(i, i + 1);
       inclusionMap.generatorImages[i].k.toggleBit(i);
@@ -358,14 +358,14 @@ void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation(
     imG.generators = inclusionMap.generatorImages;
     global << HOG.group->prettyPrintGeneratorCommutationRelations() << '\n';
     global << imG.prettyPrintGeneratorCommutationRelations();
-    global << G.prettyPrintGeneratorCommutationRelations() << '\n';
+    global << g.prettyPrintGeneratorCommutationRelations() << '\n';
   }
   // silently fail instead of crashing to support calling into this and if it doesn't
   // work then using brute force
   //  else
   //    global.fatal << "ComputeIrreducibleRepresentationsUsingSpechtModules: Type "
   // << this->theDynkinType << " is unsupported.  If you think it should work, edit " << __FILE__ << ":" << __LINE__ << global.fatal;
-  global << G.prettyPrintCharacterTable() << '\n';
+  global << g.prettyPrintCharacterTable() << '\n';
 }
 
 template <class Coefficient>
@@ -1212,11 +1212,11 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(const List<Subgrou
     mainTableStream << "Irrep label";
     if (this->dynkinType.isSimple(&simpleType.letter, &simpleType.rank, &simpleType.cartanSymmetricInverseScale)) {
       for (int i = startIndex; i < startIndexNextCol; i ++) {
-        mainTableStream << "&$" << inputSubgroups[i].theDynkinType.toString(&formatSupressUpperIndexOne) << "$";
+        mainTableStream << "&$" << inputSubgroups[i].dynkinType.toString(&formatSupressUpperIndexOne) << "$";
       }
     } else {
       for (int i = startIndex; i < startIndexNextCol; i ++) {
-        mainTableStream << "&$" << inputSubgroups[i].theDynkinType.toString() << "$";
+        mainTableStream << "&$" << inputSubgroups[i].dynkinType.toString() << "$";
       }
     }
     for (int i = 0; i < this->group.conjugacyClassCount(); i ++) {
@@ -1246,12 +1246,12 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(const List<Subgrou
     }
     if (this->dynkinType.isSimple(&simpleType.letter, &simpleType.rank, &simpleType.cartanSymmetricInverseScale)) {
       for (int i = 0; i < inputSubgroups.size; i ++) {
-        out << "<td>" << inputSubgroups[i].theDynkinType.toString(&formatSupressUpperIndexOne)
+        out << "<td>" << inputSubgroups[i].dynkinType.toString(&formatSupressUpperIndexOne)
         << "</td>";
       }
     } else {
       for (int i = 0; i < inputSubgroups.size; i ++) {
-        out << "<td>" << inputSubgroups[i].theDynkinType.toString() << "</td>";
+        out << "<td>" << inputSubgroups[i].dynkinType.toString() << "</td>";
       }
     }
     out << "</tr>";
@@ -1889,7 +1889,7 @@ bool CalculatorFunctionsWeylGroup::signSignatureRootSubsystems(
         currentSGs = &allRootSubgroups;
       }
       for (int i = 0; i < currentSGs->size; i ++) {
-        currentTauSig.object1 = (*currentSGs)[i].theDynkinType.toString();
+        currentTauSig.object1 = (*currentSGs)[i].dynkinType.toString();
         currentTauSig.object2 = (*currentSGs)[i].tauSignature;
         if (!tauSigPairs.contains(currentTauSig)) {
           tauSigPairs.addOnTop(currentTauSig);

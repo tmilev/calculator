@@ -215,6 +215,11 @@ JSData Calculator::ExpressionHistoryEnumerator::Step::toJSON() {
   for (int i = 0; i < this->annotations.size; i ++) {
     annotationJSON[i] = this->annotations[i];
   }
+  if (this->content.isOfType<std::string>()) {
+    result[WebAPI::result::SolutionData::expressionType] = "string";
+  } else {
+    result[WebAPI::result::SolutionData::expressionType] = "expression";
+  }
   result[WebAPI::result::SolutionData::annotations] = annotationJSON;
   return result;
 }

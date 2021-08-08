@@ -145,6 +145,7 @@ public:
       static std::string steps;
       static std::string transformation;
       static std::string annotations;
+      static std::string expressionType;
     };
   };
   struct frontend {

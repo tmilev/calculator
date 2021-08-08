@@ -7236,9 +7236,6 @@ void CandidateSemisimpleSubalgebra::computeCentralizerManually() {
       );
     }
   }
-  global.comments << "DEBUG: killing form centralizer: \\("
-  << this->killingFormCentralizer.toStringLatex()
-  << "\\)";
 }
 
 void CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen() {

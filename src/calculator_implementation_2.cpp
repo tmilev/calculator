@@ -1293,6 +1293,9 @@ JSData Calculator::solve(const std::string& input) {
   )) {
     return this->extractSolution();
   }
+  if (toBeSolved.startsWith(this->opCommandSequence(), 2)) {
+    toBeSolved = toBeSolved[1];
+  }
   this->programExpression.makeOX(*this, this->opSolveJSON(), toBeSolved);
   this->evaluateCommands();
   return this->extractSolution();

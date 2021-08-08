@@ -68,6 +68,9 @@ const urlFields = {
     messagesName: "messagesName",
     solution: {
       steps: "solutionSteps",
+      transformation: "transformation",
+      expressionType: "expressionType",
+      annotations: "annotations",
     },
     comparison: {
       errorEvaluation: "errorEvaluation",

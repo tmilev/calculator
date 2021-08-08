@@ -61,7 +61,7 @@ public:
     std::string& output, List<Rational>& coefficients, Vectors<Rational>& roots, bool epsilonForm
   );
   void getSumAlphas(Vector<Rational>& output, int dimension);
-  bool checkForBugs(RootSubalgebra& owner, Vectors<Rational>& NilradicalRoots);
+  bool checkForBugs(RootSubalgebra& owner, Vectors<Rational>& nilradicalRoots);
   void sortRelation(RootSubalgebra& owner);
   bool operator==(const ConeRelation& right) {
     return this->relationString == right.relationString;

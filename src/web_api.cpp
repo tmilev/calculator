@@ -187,7 +187,6 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
   } else if ("/" + global.requestType == WebAPI::request::calculatorWorkerJSWithHash) {
     return this->processCalculatorWebWorkerJS(true);
   }
-  global << "DEBUG: here we are, the request: " <<  global.requestType << Logger::endL;
   return false;
 }
 

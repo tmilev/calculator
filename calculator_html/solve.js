@@ -104,8 +104,11 @@ class Solver {
   solve() {
     let input = this.equationEditor.rootNode.toLatex();
     let inputCalculator = `SolveJSON(${input})`;
-    document.getElementById(ids.domElements.pages.calculator.inputMain).value = inputCalculator;
-    calculator.calculator.submitComputation();
+    let mainInput = document.getElementById(ids.domElements.pages.calculator.inputMain);
+    if (mainInput !== null) {
+      mainInput.value = inputCalculator;
+      calculator.calculator.submitComputation();
+    }
     // Will trigger solveFromStorage; 
     // injection of the method happens in Page.initializeStorageCallbacks.
     storage.variables.solve.problemToAutoSolve.setAndStore(input, true, false);
@@ -160,24 +163,50 @@ class Solver {
       return;
     }
     this.solutionBox.textContent = "";
-    let stepElements = this.getSolutionSteps(steps);
-    for (let i = 0; i < stepElements.length; i++) {
-      this.solutionBox.appendChild(stepElements[i]);
-    }
+    this.solutionBox.appendChild(this.getSolutionSteps(steps));
   }
 
   /**@returns{Array.<HTMLElement>} */
   getSolutionSteps(steps) {
-    let result = [];
+    let table = document.createElement("table");
+    table.style.margin = "auto";
     for (let i = 0; i < steps.length; i++) {
-      result.push(getOneSolutionStep(steps[i]));
+      let row = table.insertRow();
+      let cell = row.insertCell();
+      cell.appendChild(this.getOneSolutionTransformation(steps[i]));
+      cell.style.textAlign = "center";
+      cell = row.insertCell();
+      cell.appendChild(this.getOneSolutionStepComment(steps[i]));
+      cell.style.borderLeft = "1px solid black";
+    }
+    return table;
+  }
+
+  /**@returns{HTMLElement} */
+  getOneSolutionTransformation(step) {
+    let result = document.createElement("span");
+    result.style.fontSize = "48px";
+    let expression = step[pathnames.urlFields.result.solution.transformation];
+    let expressionType = step[pathnames.urlFields.result.solution.expressionType];
+    if (expressionType === "string") {
+      result.textContent = expression;
+    } else {
+      result.textContent = `\\(${expression}\\)`;
     }
     return result;
   }
 
   /**@returns{HTMLElement} */
-  getOneSolutionStep(step) {
-    return document.createElement("div");
+  getOneSolutionStepComment(step) {
+    let result = document.createElement("span");
+    let annotations = step[pathnames.urlFields.result.solution.annotations];
+    for (let i = 0; i < annotations.length; i++) {
+      let element = document.createElement("span");
+      element.textContent = annotations[i];
+      element.style.fontSize = "small";
+      result.appendChild(element);
+    }
+    return result;
   }
 }
 

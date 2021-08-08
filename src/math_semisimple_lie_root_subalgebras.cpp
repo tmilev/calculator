@@ -4142,25 +4142,25 @@ void ConeRelation::RelationOneSideToStringCoordForm(
   std::string& output, List<Rational>& coefficients, Vectors<Rational>& roots, bool epsilonForm
 ) {
   std::stringstream out;
-  std::string tempS;
+  std::string coefficientString;
   for (int i = 0; i < roots.size; i ++) {
-    tempS = coefficients[i].toString();
-    if (tempS == "1") {
-      tempS = "";
+    coefficientString = coefficients[i].toString();
+    if (coefficientString == "1") {
+      coefficientString = "";
     }
-    if (tempS == "- 1" || tempS == "-1") {
-      tempS = "-";
+    if (coefficientString == "- 1" || coefficientString == "-1") {
+      coefficientString = "-";
     }
-    if ((tempS == "0")) {
+    if ((coefficientString == "0")) {
       global.fatal << "zero not allowed at this point of code. " << global.fatal;
     }
-    out << tempS;
+    out << coefficientString;
     if (!epsilonForm) {
-      tempS = roots[i].toString();
+      coefficientString = roots[i].toString();
     } else {
-      tempS = roots[i].toStringEpsilonFormat();
+      coefficientString = roots[i].toStringEpsilonFormat();
     }
-    out << "(" << tempS << ")";
+    out << "(" << coefficientString << ")";
     if (i != roots.size - 1) {
       out << " + ";
     }
@@ -4181,7 +4181,7 @@ void ConeRelation::relationOneSideToString(
     global.fatal << "The number of coefficients must equal the number of roots. " << global.fatal;
   }
   std::stringstream out;
-  std::string tempS;
+  std::string coefficientString;
   if (useLatex) {
     out << "\\begin{tabular}{";
     for (int i = 0; i < roots.size; i ++) {
@@ -4190,20 +4190,20 @@ void ConeRelation::relationOneSideToString(
     out << "}";
   }
   for (int i = 0; i < roots.size; i ++) {
-    tempS = coefficients[i].toString();
-    if (tempS == "1") {
-      tempS = "";
+    coefficientString = coefficients[i].toString();
+    if (coefficientString == "1") {
+      coefficientString = "";
     }
-    if (tempS == "- 1" || tempS == "-1") {
-      tempS = "-";
+    if (coefficientString == "- 1" || coefficientString == "-1") {
+      coefficientString = "-";
     }
-    if ((tempS == "0")) {
+    if ((coefficientString == "0")) {
       global.fatal << "zero not allowed here. " << global.fatal;
     }
-    out << tempS;
+    out << coefficientString;
     if (!useLatex) {
-      tempS = roots[i].toString();
-      out << "(" << tempS << ")";
+      coefficientString = roots[i].toString();
+      out << "(" << coefficientString << ")";
       if (i != roots.size - 1) {
         out << " + ";
       }
@@ -4260,7 +4260,7 @@ int ConeRelation::toString(
   bool includeScalarsProductsEachSide,
   bool includeMixedScalarProducts
 ) {
-  std::string tempS;
+  std::string relationString;
   std::stringstream out;
   if (this->alphaCoefficients.size != this->alphas.size || this->betaCoefficients.size != this->betas.size) {
     global.fatal << "Number of coefficients is wrong. " << global.fatal;
@@ -4273,7 +4273,7 @@ int ConeRelation::toString(
     this->betas, owners.subalgebras[this->indexOwnerRootSubalgebra], this->betaKComponents
   );
   this->relationOneSideToString(
-    tempS,
+    relationString,
     "\\alpha",
     this->alphaCoefficients,
     this->alphaKComponents,
@@ -4281,7 +4281,7 @@ int ConeRelation::toString(
     useLatex,
     owners.subalgebras[this->indexOwnerRootSubalgebra]
   );
-  out << tempS;
+  out << relationString;
   if (useLatex) {
     out << " &\\begin{tabular}{c} ";
   }
@@ -4290,7 +4290,7 @@ int ConeRelation::toString(
     out << " \\\\~ \\end{tabular} & ";
   }
   this->relationOneSideToString(
-    tempS,
+    relationString,
     "\\beta",
     this->betaCoefficients,
     this->betaKComponents,
@@ -4298,33 +4298,33 @@ int ConeRelation::toString(
     useLatex,
     owners.subalgebras[this->indexOwnerRootSubalgebra]
   );
-  out << tempS;
+  out << relationString;
   if (useLatex) {
     out << " & ";
   }
   this->diagram.toString();
-  out << tempS;
+  out << relationString;
   this->diagramRelationAndK.toString();
   if (useLatex) {
     out << " & ";
   }
-  out << tempS;
+  out << relationString;
   if (includeScalarsProductsEachSide) {
     out << " & ";
     latexLineCounter += this->rootsToScalarProductString(
-      this->alphas, this->alphas, "\\alpha", "\\alpha", tempS, owners.subalgebras[this->indexOwnerRootSubalgebra]
+      this->alphas, this->alphas, "\\alpha", "\\alpha", relationString, owners.subalgebras[this->indexOwnerRootSubalgebra]
     );
-    out << tempS;
+    out << relationString;
     latexLineCounter += this->rootsToScalarProductString(
-      this->betas, this->betas, "\\beta", "\\beta", tempS, owners.subalgebras[this->indexOwnerRootSubalgebra]
+      this->betas, this->betas, "\\beta", "\\beta", relationString, owners.subalgebras[this->indexOwnerRootSubalgebra]
     );
-    out << " " << tempS;
+    out << " " << relationString;
   }
   if (includeMixedScalarProducts) {
     latexLineCounter += this->rootsToScalarProductString(
-      this->alphas, this->betas, "\\alpha", "\\beta", tempS, owners.subalgebras[this->indexOwnerRootSubalgebra]
+      this->alphas, this->betas, "\\alpha", "\\beta", relationString, owners.subalgebras[this->indexOwnerRootSubalgebra]
     );
-    out << tempS;
+    out << relationString;
   }
   out << "\n";
   output = out.str();
@@ -4339,7 +4339,8 @@ int ConeRelation::rootsToScalarProductString(
   std::string& output,
   RootSubalgebra& owner
 ) {
-  std::string tempS; std::stringstream out;
+  std::string coefficientString;
+  std::stringstream out;
   int numLinesLatex = 0;
   Rational tempRat;
   for (int i = 0; i < inputLeft.size; i ++) {
@@ -4347,9 +4348,9 @@ int ConeRelation::rootsToScalarProductString(
       if (i < j || letterTypeLeft != letterTypeRight) {
         owner.getAmbientWeyl().rootScalarCartanRoot(inputLeft[i], inputRight[j], tempRat);
         if (!tempRat.isEqualToZero()) {
-          tempS = tempRat.toString();
+          coefficientString = tempRat.toString();
           out << "$\\langle" << letterTypeLeft << "_" << i + 1
-          << ", " << letterTypeRight << "_" << j + 1 << "\\rangle =" << tempS << "$, ";
+          << ", " << letterTypeRight << "_" << j + 1 << "\\rangle =" << coefficientString << "$, ";
           numLinesLatex ++;
         }
       }
@@ -4474,18 +4475,18 @@ void ConeRelation::FixRightHandSide(RootSubalgebra& owner, Vectors<Rational>& Ni
   }
 }
 
-bool ConeRelation::checkForBugs(RootSubalgebra& owner, Vectors<Rational>& NilradicalRoots) {
+bool ConeRelation::checkForBugs(RootSubalgebra& owner, Vectors<Rational>& nilradicalRoots) {
   for (int i = 0; i < this->alphas.size; i ++) {
     int tempI = owner.highestWeightsPrimalSimple.getIndex(this->alphas[i]);
     if (tempI == - 1) {
       return false;
     }
-    if (NilradicalRoots.contains(this->alphas[i])) {
+    if (nilradicalRoots.contains(this->alphas[i])) {
       return false;
     }
   }
   for (int i = 0; i < this->betas.size; i ++) {
-    if (!NilradicalRoots.contains(this->betas[i])) {
+    if (!nilradicalRoots.contains(this->betas[i])) {
       return false;
     }
   }
@@ -4494,7 +4495,7 @@ bool ConeRelation::checkForBugs(RootSubalgebra& owner, Vectors<Rational>& Nilrad
 
 void ConeRelation::getSumAlphas(Vector<Rational>& output, int dimension) {
   if (this->alphaCoefficients.size != this->alphas.size) {
-    global.fatal << "Wrong number of alpha coefficients" << global.fatal;
+    global.fatal << "Wrong number of alpha coefficients." << global.fatal;
   }
   output.makeZero(dimension);
   Vector<Rational> tempRoot;
@@ -4625,7 +4626,7 @@ void ConeRelations::getLatexHeaderAndFooter(std::string& outputHeader, std::stri
 
 void ConeRelations::toString(std::string& output, RootSubalgebras& owners, bool useLatex) {
   std::stringstream out;
-  std::string tempS, header, footer;
+  std::string coefficientString, header, footer;
   Vectors<Rational> tempAlphas, tempBetas;
   this->getLatexHeaderAndFooter(header, footer);
   if (useLatex) {
@@ -4642,8 +4643,8 @@ void ConeRelations::toString(std::string& output, RootSubalgebras& owners, bool 
         << "}\\\\\n\\hline\\hline";
       }
     }
-    lineCounter += this->objects[i].toString(tempS, owners, useLatex, true, true);
-    out << tempS;
+    lineCounter += this->objects[i].toString(coefficientString, owners, useLatex, true, true);
+    out << coefficientString;
     if (useLatex) {
       out << "\\\\";
     }
@@ -4652,10 +4653,10 @@ void ConeRelations::toString(std::string& output, RootSubalgebras& owners, bool 
       lineCounter += 2;
       out << "\\multicolumn{5}{c}{$\\varepsilon$-form~relative~to~"
       << "the~subalgebra~generated~by~$\\mathfrak{k}$~and~the~relation}\\\\\n";
-      this->objects[i].RelationOneSideToStringCoordForm(tempS, this->objects[i].alphaCoefficients, tempAlphas, true);
-      out << "\\multicolumn{5}{c}{" << tempS;
-      this->objects[i].RelationOneSideToStringCoordForm(tempS, this->objects[i].betaCoefficients, tempBetas, true);
-      out << "=" << tempS; //<<"~~~~";
+      this->objects[i].RelationOneSideToStringCoordForm(coefficientString, this->objects[i].alphaCoefficients, tempAlphas, true);
+      out << "\\multicolumn{5}{c}{" << coefficientString;
+      this->objects[i].RelationOneSideToStringCoordForm(coefficientString, this->objects[i].betaCoefficients, tempBetas, true);
+      out << "=" << coefficientString; //<<"~~~~";
       out << "}\\\\\\hline\n";
     }
     if (lineCounter>this->numberOfAllowedLatexLines) {

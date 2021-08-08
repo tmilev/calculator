@@ -155,9 +155,7 @@ bool CalculatorFunctions::solveUnivariatePolynomialWithRadicalsWithRespectTo(
 }
 
 bool ProblemWithSolution::solve(Calculator& calculator) {
-  global.comments << "DEBUG: solvin: " << this->toBeSolved.toString() << "        ";
   if (this->solveEquation(calculator)) {
-  global.comments << "DEBUG: solve equatoin goood goood!!!!!!!!!!!!";
     return true;
   }
   return this->solveOther(calculator);
@@ -166,22 +164,17 @@ bool ProblemWithSolution::solve(Calculator& calculator) {
 bool ProblemWithSolution::solveEquation(Calculator& calculator) {
   MacroRegisterFunctionWithName("ProblemWithSolution::solveEquation");
   if (!this->toBeSolved.startsWith(calculator.opDefine(), 3)) {
-  global.comments << "DEBUG: not with opdefine!!!! " << this->toBeSolved << " childcount: "
-  << this->toBeSolved.size() << " First elt: " << this->toBeSolved[0].toString()
-  << " second elt: " << this->toBeSolved[1].toString();
     return false;
   }
   Expression leftMinusRight;
   if (!CalculatorFunctions::functionEqualityToArithmeticExpression(
     calculator, this->toBeSolved, leftMinusRight
   )) {
-  global.comments << "DEBUG: couldnt do ittttt!!!!";
     return false;
   }
   HashedList<Expression> freeVariables;
   leftMinusRight.getFreeVariables(freeVariables, false);
   if (freeVariables.size == 1) {
-  global.comments << "DEBUG: HEREHREHREHREHERH";
     UnivariateEquation equation;
     equation.variable = freeVariables.getElement(0);
     equation.equationAllTermsOnLeftHandSide = leftMinusRight;
@@ -205,7 +198,6 @@ bool ProblemWithSolution::solveEquation(Calculator& calculator) {
     this->steps.addOnTop(finalAnswer);
     return true;
   }
-  global.comments << "DEBUG:: free vars: " << freeVariables ;
   WithContext<Polynomial<Rational> > polynomial;
   if (!CalculatorConversions::convertToPolynomial(leftMinusRight, polynomial)) {
     this->addAnnotationStep(calculator, "Sorry, I've only been taught to solve polynomial equations.");
@@ -254,9 +246,7 @@ bool CalculatorEducationalFunctions::solveJSON(
   }
   ProblemWithSolution problem;
   problem.toBeSolved = input[1];
-  global.comments << "DEBUG: TO BE SOLVED: " << problem.toBeSolved.toString() << "         ";
   problem.solve(calculator);
-  global.comments << "DEBUG: at end, solve json is: " << problem.toJSON();
   return output.assignValue(problem.toJSON(), calculator);
 }
 
@@ -374,7 +364,6 @@ JSData Calculator::extractSolution() {
     result[WebAPI::result::syntaxErrors] = this->parser.toStringSyntacticStackHTMLSimple();
     return result;
   }
-  global.comments << "DEBUG: prog expr is: " << this->programExpression;
   JSData solutionJSON;
   if (!this->programExpression.isOfType(&solutionJSON)) {
     result[WebAPI::result::error] = "Could not solve your problem. ";

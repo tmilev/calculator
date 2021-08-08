@@ -1196,7 +1196,8 @@ public:
   // Control sequences parametrize the syntactical elements
   HashedList<std::string, MathRoutines::hashString> controlSequences;
   std::string syntaxErrors;
-  std::string parsingLog;
+  List<std::string> parsingLog;
+  std::string lastRuleName;
 private:
   // Sets an expression value and syntactic role to a given position in the stack.
   bool setStackValue(const Expression& newExpression, const std::string& newRole, int stackOffset);
@@ -1440,17 +1441,9 @@ private:
   int conEndProgram() {
     return this->controlSequences.getIndexNoFail("EndProgram");
   }
-  int conIntegralUnderscore() {
-    return this->controlSequences.getIndexNoFail("\\int_{*}");
-  }
-  int conIntegralSuperScript() {
-    return this->controlSequences.getIndexNoFail("\\int^{*}");
-  }
-  int conIntegralSuperSubScript() {
-    return this->controlSequences.getIndexNoFail("\\int_{*}^{**}");
-  }
   bool isDefiniteIntegral(const std::string& syntacticRole);
   void parseFillDictionary(const std::string& input);
+  void logParsingOperation();
   bool extractExpressions(Expression& outputExpression, std::string* outputErrors);
   int getOperationIndexFromControlIndex(int controlIndex);
   bool decreaseStackExceptLast(int decrease);
@@ -1480,6 +1473,15 @@ public:
   }
   int conInteger() {
     return this->controlSequences.getIndexNoFail("Integer");
+  }
+  int conIntegralUnderscore() {
+    return this->controlSequences.getIndexNoFail("\\int_{*}");
+  }
+  int conIntegralSuperScript() {
+    return this->controlSequences.getIndexNoFail("\\int^{*}");
+  }
+  int conIntegralSuperSubScript() {
+    return this->controlSequences.getIndexNoFail("\\int_{*}^{**}");
   }
   int conSequenceStatements() {
     return this->controlSequences.getIndexNoFail("SequenceStatements");

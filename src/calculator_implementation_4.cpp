@@ -1986,7 +1986,7 @@ std::string CalculatorParser::toStringSyntacticStackHTMLTable(
     out << this->currentSyntacticStack->lastObject()->toStringHumanReadable(*this, includeLispifiedExpressions);
     return out.str();
   }
-  out << "<table style =\"vertical-align:top;border-spacing:0px 0px;\"><tr>";
+  out << "<table style='vertical-align:top;border-spacing:0px 0px;'><tr>";
   int counter = 0;
   for (int i = this->numberOfEmptyTokensStart; i < (*this->currentSyntacticStack).size; i ++) {
     SyntacticElement& currentElt = (*this->currentSyntacticStack)[i];
@@ -1996,8 +1996,8 @@ std::string CalculatorParser::toStringSyntacticStackHTMLTable(
       }
     }
     out
-    << "<td style =\"vertical-align:top;background-color:"
-    << ((counter % 2 == 0) ? "#FAFAFA" : "#F0F0F0" ) << "\">"
+    << "<td style='vertical-align:top;background-color:"
+    << ((counter % 2 == 0) ? "#FAFAFA" : "#F0F0F0" ) << "'>"
     << currentElt.toStringHumanReadable(*this, includeLispifiedExpressions)
     << "</td>";
     counter ++;

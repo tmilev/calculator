@@ -102,8 +102,8 @@ Vector<Coefficient> BranchingData::projectWeight(Vector<Coefficient>& input) {
 
 class GeneralizedVermaModuleCharacters {
 public:
-  PauseThread thePauseControlleR;
-  List<Matrix<Rational> > theLinearOperators;
+  PauseThread pauseController;
+  List<Matrix<Rational> > linearOperators;
   // the first k variables correspond to the Cartan of the smaller Lie algebra
   // the next l variables correspond to the Cartan of the larger Lie algebra
   // the last variable is the projectivization

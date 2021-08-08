@@ -781,7 +781,6 @@ void ModuleSSalgebra<Coefficient>::intermediateStepForMakeFromHW(
   MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::intermediateStepForMakeFromHW");
   ProgressReport report;
   ProgressReport report2;
-  Vector<Rational> targetWeight;
   this->bilinearFormsAtEachWeightLevel.setSize(this->generatingWordsGrouppedByWeight.size);
   this->bilinearFormsInverted.setSize(this->generatingWordsGrouppedByWeight.size);
   this->ComputedGeneratorActions.initialize(this->getOwner().getNumberOfGenerators());
@@ -809,10 +808,10 @@ void ModuleSSalgebra<Coefficient>::intermediateStepForMakeFromHW(
         }
       }
     }
-    Matrix<Coefficient> tempMat;
-    tempMat = currentBF;
+    Matrix<Coefficient> determinantComputer;
+    determinantComputer = currentBF;
     Coefficient tempRat;
-    tempMat.computeDeterminantOverwriteMatrix(tempRat, ringUnit, ringZero);
+    determinantComputer.computeDeterminantOverwriteMatrix(tempRat, ringUnit, ringZero);
     if (!tempRat.isEqualToZero()) {
       this->bilinearFormsInverted[l] = currentBF;
       this->bilinearFormsInverted[l].invert();
@@ -871,9 +870,9 @@ void ModuleSSalgebra<Coefficient>::getElementsNilradical(
 
 template<class Coefficient>
 void ModuleSSalgebra<Coefficient>::checkConsistency() {
-  MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::TestConsistency");
+  MacroRegisterFunctionWithName("ModuleSSalgebra::checkConsistency");
   ProgressReport report;
-  MatrixTensor<Coefficient> left, right, output, otherOutput, tempMat, diffMat;
+  MatrixTensor<Coefficient> left, right, output, otherOutput, matrix, diffMat;
   for (int i = 0; i < this->getOwner().getNumberOfGenerators(); i ++) {
     for (int j = 0; j < this->getOwner().getNumberOfGenerators(); j ++) {
       left = this->getActionGeneratorIndex(i);
@@ -886,9 +885,9 @@ void ModuleSSalgebra<Coefficient>::checkConsistency() {
       this->getOwner().lieBracket(leftGen, rightGen, outputGen);
       otherOutput.makeZero();
       for (int k = 0; k < outputGen.size(); k ++) {
-        tempMat = this->getActionGeneratorIndex(outputGen[k].generatorIndex);
-        tempMat *= outputGen.coefficients[k];
-        otherOutput += tempMat;
+        matrix = this->getActionGeneratorIndex(outputGen[k].generatorIndex);
+        matrix *= outputGen.coefficients[k];
+        otherOutput += matrix;
       }
       diffMat = otherOutput;
       diffMat -= output;
@@ -1463,7 +1462,7 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
   result.simplify(onePolynomial);
   MatrixTensor<Polynomial<Rational> > endoPart, tempMT, idMT;
   idMT.makeIdentitySpecial();
-  MatrixTensor<RationalFraction<Rational> > tempMat1;
+  MatrixTensor<RationalFraction<Rational> > matrix;
 
   int varShift = this->minimalNumberOfVariables();
   ElementWeylAlgebra<Rational> weylPartSummand, exponentContribution, oneIndexContribution,
@@ -1482,14 +1481,14 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
       if (!currentMon.powers[j].isSmallInteger(&power)) {
         return false;
       }
-      tempMat1 = this->getActionGeneratorIndex(currentMon.generatorsIndices[j]);
+      matrix = this->getActionGeneratorIndex(currentMon.generatorsIndices[j]);
       tempMT.makeZero();
-      for (int k = 0; k < tempMat1.size(); k ++) {
-        if (tempMat1.coefficients[k].expressionType == RationalFraction<Rational>::TypeExpression::typeRationalFunction) {
+      for (int k = 0; k < matrix.size(); k ++) {
+        if (matrix.coefficients[k].expressionType == RationalFraction<Rational>::TypeExpression::typeRationalFunction) {
           return false;
         }
-        tempMat1.coefficients[k].getNumerator(tempP1);
-        tempMT.addMonomial(tempMat1[k], tempP1);
+        matrix.coefficients[k].getNumerator(tempP1);
+        tempMT.addMonomial(matrix[k], tempP1);
       }
       MathRoutines::raiseToPower(tempMT, power, idMT);
       endoPart *= tempMT;
@@ -1581,12 +1580,12 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   for (int i = 0; i < InvertedLeviInSmall.cardinalitySelection; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& currentElt =
     theHmm.imagesSimpleChevalleyGenerators[InvertedLeviInSmall.elements[i]];
-    MatrixTensor<Coefficient> currentOp, tempMat;
+    MatrixTensor<Coefficient> currentOp, matrix;
     currentOp.makeZero();
     for (int j = 0; j < currentElt.size(); j ++) {
-      tempMat = this->getActionGeneratorIndex(currentElt[j].generatorIndex);
-      tempMat *= currentElt.coefficients[j];
-      currentOp += tempMat;
+      matrix = this->getActionGeneratorIndex(currentElt[j].generatorIndex);
+      matrix *= currentElt.coefficients[j];
+      currentOp += matrix;
     }
     std::stringstream tempStream3;
     double timeAtStart1 = global.getElapsedSeconds();
@@ -1721,7 +1720,7 @@ std::string MonomialGeneralizedVerma<Coefficient>::toString(FormatExpressions* f
   if (this->owner == nullptr) {
     global.fatal << "Non-initialized generalized Verma monomial (owner is 0)." << global.fatal;
   }
-  ModuleSSalgebra<Coefficient>& theMod = *this->owner;
+  ModuleSSalgebra<Coefficient>& module = *this->owner;
   std::string tempS;
   if (tempS == "1") {
     tempS = "";
@@ -1739,7 +1738,7 @@ std::string MonomialGeneralizedVerma<Coefficient>::toString(FormatExpressions* f
   bool needsCdot = (tempS != "1" && tempS != "-" && tempS != "");
   std::stringstream out;
   out << tempS;
-  tempS = theMod.generatingWordsNonReduced[this->indexFDVector].toString(format);
+  tempS = module.generatingWordsNonReduced[this->indexFDVector].toString(format);
   if (tempS != "1") {
     out << tempS;
   }
@@ -1748,7 +1747,7 @@ std::string MonomialGeneralizedVerma<Coefficient>::toString(FormatExpressions* f
     out << "\\cdot ";
   }
   if (includeV) {
-    out << theMod.elementToStringHWV(format);
+    out << module.elementToStringHWV(format);
   }
   return out.str();
 }
@@ -1823,12 +1822,12 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
   ElementSumGeneralizedVermas<Coefficient>& output
 ) const {
   MacroRegisterFunctionWithName("MonomialGeneralizedVerma::reduceMe");
-  ModuleSSalgebra<Coefficient>& theMod = *this->owner;
+  ModuleSSalgebra<Coefficient>& module = *this->owner;
   output.makeZero();
   MonomialUniversalEnveloping<Coefficient> tempMon;
   tempMon = this->monomialCoefficientOne;
-  tempMon *= theMod.generatingWordsNonReduced[this->indexFDVector];
-  int indexCheck = theMod.generatingWordsNonReduced.getIndex(tempMon);
+  tempMon *= module.generatingWordsNonReduced[this->indexFDVector];
+  int indexCheck = module.generatingWordsNonReduced.getIndex(tempMon);
   if (!this->owner->owner->flagHasNilradicalOrder) {
     global.fatal << "Owner needs nilradical order!!!" << global.fatal;
   }
@@ -1846,12 +1845,12 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
 
   MonomialUniversalEnveloping<Coefficient> currentMon;
   MonomialGeneralizedVerma<Coefficient> newMon;
-  MatrixTensor<Coefficient> tempMat1, tempMat2;
+  MatrixTensor<Coefficient> matrix1, matrix2;
   ProgressReport report;
   Coefficient coefficient;
   for (int l = 0; l < theUEelt.size(); l ++) {
     currentMon = theUEelt[l];
-    tempMat1.makeIdentitySpecial();
+    matrix1.makeIdentitySpecial();
     for (int k = currentMon.powers.size - 1; k >= 0; k --) {
       std::stringstream reportStream;
       reportStream << "accounting monomial " << currentMon.toString() << " of index "
@@ -1864,37 +1863,37 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
         break;
       }
       int index = currentMon.generatorsIndices[k];
-      if (theMod.hasFreeAction(index)) {
+      if (module.hasFreeAction(index)) {
         break;
       }
-      tempMat2 = tempMat1;
-      tempMat1 = theMod.getActionGeneratorIndex(index);
-      tempMat1.raiseToPower(power);
-      tempMat1 *= tempMat2;
+      matrix2 = matrix1;
+      matrix1 = module.getActionGeneratorIndex(index);
+      matrix1.raiseToPower(power);
+      matrix1 *= matrix2;
       currentMon.powers.size --;
       currentMon.generatorsIndices.size --;
       reportStream << "done!";
       report.report(reportStream.str());
     }
     newMon.owner = this->owner;
-    for (int i = 0; i < tempMat1.size(); i ++) {
+    for (int i = 0; i < matrix1.size(); i ++) {
       int otherIndex = - 1;
-      if (tempMat1[i].dualIndex == this->indexFDVector) {
-        otherIndex = tempMat1[i].vIndex;
+      if (matrix1[i].dualIndex == this->indexFDVector) {
+        otherIndex = matrix1[i].vIndex;
       }
-      if (tempMat1[i].isIdentity) {
+      if (matrix1[i].isIdentity) {
         otherIndex = this->indexFDVector;
       }
       if (otherIndex != - 1) {
         newMon.monomialCoefficientOne = currentMon;
         newMon.indexFDVector = otherIndex;
         coefficient = theUEelt.coefficients[l];
-        coefficient *= tempMat1.coefficients[i];
+        coefficient *= matrix1.coefficients[i];
         output.addMonomial(newMon, coefficient);
       }
     }
   }
-  theMod.getOwner().orderStandardAscending();
+  module.getOwner().orderStandardAscending();
 }
 
 template <class Coefficient>

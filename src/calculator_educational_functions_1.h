@@ -4,15 +4,38 @@
 #define CALCULATOR_EDUCATIONAL_FUNCTIONS
 #include "calculator_interface.h"
 
+class UnivariateEquation {
+public:
+  Expression variable;
+  Expression equationAllTermsOnLeftHandSide;
+  Expression simplified;
+  List<Expression> solutions;
+  bool solve(Calculator& calculator);
+  // Returns a list of solutions.
+  // For the equation (x-1)(x-2)=0,
+  // the solutions would be the list (1,2).
+  bool getSolutions(Calculator& calculator, Expression& output);
+  // Returns a mathematically well-formed list of solutions.
+  // For the equation (x-1)(x-2)=0,
+  // this returns the expression (x=1,x=2).
+  bool getSolutionEquations(Calculator& calculator, Expression& output);
+  bool getOneSolutionEquation(int solutionIndex, Calculator& calculator, Expression& output);
+};
+
 class ProblemWithSolution {
 public:
   Expression toBeSolved;
   std::string simplification;
   std::string factorization;
-
-  std::string solution;
-  Expression finalExpression;
+  Expression solutionsNonSimplified;
+  Expression solutionsSimplified;
+  List<Calculator::ExpressionHistoryEnumerator::Step> steps;
   std::string error;
+  std::string comments;
+  void addAnnotationStep(Calculator& calculator, const std::string& input);
+  bool solve(Calculator& calculator);
+  bool solveOther(Calculator& calculator);
+  bool solveEquation(Calculator& calculator);
   JSData toJSON();
 };
 

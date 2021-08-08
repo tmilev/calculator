@@ -42,14 +42,14 @@ public:
     this->computeProjectionsEiVectors();
   }
   void initDimensions(Matrix<Rational>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane) {
-    Matrix<double> tempMat;
-    tempMat.initialize(bilinearForm.numberOfRows, bilinearForm.numberOfColumns);
+    Matrix<double> matrix;
+    matrix.initialize(bilinearForm.numberOfRows, bilinearForm.numberOfColumns);
     for (int i = 0; i < bilinearForm.numberOfRows; i ++) {
       for (int j = 0; j < bilinearForm.numberOfColumns; j ++) {
-        tempMat.elements[i][j] = bilinearForm.elements[i][j].getDoubleValue();
+        matrix.elements[i][j] = bilinearForm.elements[i][j].getDoubleValue();
       }
     }
-    this->initDimensions(tempMat, draggableBasis, startingPlane);
+    this->initDimensions(matrix, draggableBasis, startingPlane);
   }
   void initDimensions(int dimension);
   int getDimensionFirstDimensionDependentOperation();

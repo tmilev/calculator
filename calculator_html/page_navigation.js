@@ -286,18 +286,20 @@ class Page {
     return false;
   }
 
-
-
   initHandlers() {
     window.addEventListener("hashchange", this.storage.loadSettings.bind(this.storage));
     let monitor = document.getElementById(ids.domElements.switch.monitoring);
-    monitor.addEventListener("change", () => {
-      this.toggleMonitoring();
-    });
+    if (monitor !== null) {
+      monitor.addEventListener("change", () => {
+        this.toggleMonitoring();
+      });
+    }
     let webAssembly = document.getElementById(ids.domElements.switch.sliderWebAssembly);
-    webAssembly.addEventListener("change", () => {
-      this.toggleWebAssembly();
-    });
+    if (webAssembly !== null) {
+      webAssembly.addEventListener("change", () => {
+        this.toggleWebAssembly();
+      });
+    }
   }
 
   initMenuBar() {

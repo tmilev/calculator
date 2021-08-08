@@ -525,7 +525,7 @@ bool CalculatorFunctionsIntegration::integrateSqrtOneMinusXsquared(
     return false;
   }
   Expression a, b, c;
-  if (!CalculatorFunctions::extractQuadraticCoeffsWRTvariable(theFunNoCoeff[1], theVariableE, a, b, c)) {
+  if (!CalculatorFunctions::extractQuadraticCoefficientsWithRespectToVariable(theFunNoCoeff[1], theVariableE, a, b, c)) {
     return false;
   }
   if (!b.isEqualToZero()) {
@@ -579,7 +579,7 @@ bool CalculatorFunctionsIntegration::integrateXpowerNePowerAx(
       continue;
     }
     powerOfEE = exponentPartE[2];
-    if (!CalculatorFunctions::extractLinearCoeffsWRTvariable(powerOfEE, theVariableE, aE, bE)) {
+    if (!CalculatorFunctions::extractLinearCoefficientsWithRespectToVariable(powerOfEE, theVariableE, aE, bE)) {
       continue;
     }
     if (!aE.isConstantNumber() || !bE.isConstantNumber()) {
@@ -634,7 +634,7 @@ bool CalculatorFunctionsIntegration::integrateSqrtXsquaredMinusOne(
     return false;
   }
   Expression a, b, c;
-  if (!CalculatorFunctions::extractQuadraticCoeffsWRTvariable(theFunNoCoeff[1], theVariableE, a, b, c)) {
+  if (!CalculatorFunctions::extractQuadraticCoefficientsWithRespectToVariable(theFunNoCoeff[1], theVariableE, a, b, c)) {
     return false;
   }
   if (!b.isEqualToZero()) {
@@ -1196,99 +1196,6 @@ bool CalculatorFunctionsPlot::plotRectangle(
   thePlot.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 255));
   thePlot.colorFillRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 255, 255));
   return output.assignValue(thePlot, calculator);
-}
-
-bool CalculatorFunctions::solveUnivariatePolynomialWithRadicalsWithRespectTo(
-  Calculator& calculator, const Expression& input, Expression& output
-) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT");
-  if (input.size() != 3) {
-    return calculator << "SolveFor takes as input three arguments. ";
-  }
-  if (input[1].hasBoundVariables()) {
-    return false;
-  }
-  if (input[2].hasBoundVariables()) {
-    return false;
-  }
-  Expression powers;
-  Expression modifiedInput = input;
-  if (!modifiedInput[2].startsWith(calculator.opDefine())) {
-    if (!CalculatorFunctions::innerCoefficientsPowersOf(calculator, modifiedInput, powers)) {
-      return calculator << "Failed to extract the coefficients of " << modifiedInput[1].toString()
-      << " in " << modifiedInput[2].toString();
-    }
-  } else {
-    Expression convertedEqualityE, convertedSimplifiedEqualityE;
-    if (!CalculatorFunctions::functionEqualityToArithmeticExpression(calculator, modifiedInput[2], convertedEqualityE)) {
-      return calculator << "Failed to interpret the equality " << modifiedInput[2].toString();
-    }
-    if (!Calculator::evaluateExpression(calculator, convertedEqualityE, convertedSimplifiedEqualityE)) {
-      return calculator << "Failed to simplify: " << convertedEqualityE.toString();
-    }
-    modifiedInput.setChild(2, convertedSimplifiedEqualityE);
-    if (!CalculatorFunctions::innerCoefficientsPowersOf(calculator, modifiedInput, powers)) {
-      return calculator << "Failed to extract the coefficients of " << modifiedInput[1].toString()
-      << " in " << modifiedInput[2].toString() << " which was obtained from the equality "
-      << input[2].toString();
-    }
-  }
-  if (!powers.isSequenceNElements()) {
-    return calculator << "This is not supposed to happen: expression "
-    << powers.toString() << " should be a list. This may be a programming bug. ";
-  }
-  if (powers.size() == 2) {
-    return calculator << "Cannot solve: " << modifiedInput[2].toString()
-    << ". The expression does not depend on " << modifiedInput[1].toString()
-    << ". The coefficients of "
-    << modifiedInput[1].toString() << " are: " << powers.toString();
-  }
-  if (powers.size() == 3) {
-    output = powers[1];
-    output *= - 1;
-    output /= powers[2];
-    return true;
-  }
-  if (powers.size() == 4) {
-    const Expression& a = powers[3];
-    const Expression& b = powers[2];
-    const Expression& c = powers[1];
-    output.makeSequence(calculator);
-    Expression currentRoot;
-    Expression theDiscriminant;
-    theDiscriminant = b * b - a * c * 4;
-    Expression sqrtDiscriminant;
-    sqrtDiscriminant.makeSqrt(calculator, theDiscriminant, 2);
-    currentRoot = (b * (- 1) - sqrtDiscriminant) / (a * 2);
-    output.addChildOnTop(currentRoot);
-    currentRoot = (b * (- 1) + sqrtDiscriminant) / (a * 2);
-    output.addChildOnTop(currentRoot);
-    return true;
-  }
-  Polynomial<Rational> polynomial;
-  for (int i = powers.size() - 1; i >= 1; i --) {
-    MonomialPolynomial oneVariable(0, 1);
-    polynomial *= oneVariable;
-    Rational coefficient;
-    if (!powers[i].isRational(&coefficient)) {
-      return false;
-    }
-    polynomial += coefficient;
-  }
-  List<AlgebraicNumber> solutions;
-  if (PolynomialFactorizationKronecker::solvePolynomial(
-    polynomial,
-    solutions,
-    calculator.objectContainer.algebraicClosure,
-    &calculator.comments
-  )) {
-    output.makeSequence(calculator);
-    for (int i = 0; i < solutions.size; i ++) {
-      output.addChildValueOnTop(solutions[i]);
-    }
-    return true;
-  }
-  return false;
 }
 
 bool CalculatorFunctions::operatorBounds(

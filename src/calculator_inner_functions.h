@@ -133,7 +133,7 @@ public:
 class CalculatorFunctionsIntegration {
 public:
   static bool integrateRationalFunctionSplitToBuidingBlocks(Calculator& calculator, const Expression& input, Expression& output);
-  static bool integrateRationalFunctionBuidingBlockIa(Calculator& calculator, const Expression& input, Expression& output);
+  static bool integrateRationalFunctionBuildingBlockIa(Calculator& calculator, const Expression& input, Expression& output);
   static bool integrateRationalFunctionBuidingBlockIb(Calculator& calculator, const Expression& input, Expression& output);
   static bool integrateRationalFunctionBuidingBlockIIaandIIIa(
     Calculator& calculator, const Expression& input, Expression& output
@@ -296,7 +296,7 @@ public:
   static bool isProductTermsUpToPower(Calculator& calculator, const Expression& input, Expression& output);
   static bool isLinearOrConstantIn(Calculator& calculator, const Expression& input, Expression& output);
   static bool coefficientOf(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerConstTermRelative(Calculator& calculator, const Expression& input, Expression& output);
+  static bool constantTermRelative(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool compositeArithmeticOperationEvaluatedOnArgument(
     Calculator& calculator, const Expression& input, Expression& output
@@ -336,7 +336,7 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool innerSubList(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerApplyToList(Calculator& calculator, const Expression& input, Expression& output);
+  static bool applyToList(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerNumerator(Calculator& calculator, const Expression& input, Expression& output);
   static bool denominator(Calculator& calculator, const Expression& input, Expression& output);
 
@@ -412,16 +412,16 @@ public:
   static bool innerDifferentialOfPolynomial(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerIsDifferentialOneFormOneVariable(Calculator& calculator, const Expression& input, Expression& output);
-  static bool extractQuadraticCoeffsWRTvariable(
-    const Expression& theQuadratic,
-    const Expression& theVariable,
+  static bool extractQuadraticCoefficientsWithRespectToVariable(
+    const Expression& quadratic,
+    const Expression& variable,
     Expression& outputCoeffVarSquared,
     Expression& outputCoeffLinTerm,
     Expression& outputConstTerm
   );
-  static bool extractLinearCoeffsWRTvariable(
-    const Expression& theLinearExpression,
-    const Expression& theVariable,
+  static bool extractLinearCoefficientsWithRespectToVariable(
+    const Expression& linearExpression,
+    const Expression& variable,
     Expression& outputCoeffLinTerm,
     Expression& outputConstTerm
   );
@@ -473,7 +473,7 @@ public:
 
   static bool determinant(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerHighestWeightTransposeAntiAutomorphismBilinearForm(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCoefficientsPowersOf(Calculator& calculator, const Expression& input, Expression& output);
+  static bool coefficientsPowersOf(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIntervalOpenFromSequence(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIntervalClosedFromSequence(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIntervalLeftClosedFromSequence(Calculator& calculator, const Expression& input, Expression& output);

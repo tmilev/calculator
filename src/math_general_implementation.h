@@ -384,11 +384,11 @@ void Matrix<Coefficient>::gaussianEliminationEuclideanDomain(
 template <class Coefficient>
 void Vectors<Coefficient>::chooseABasis() {
   Vectors<Rational> output;
-  Matrix<Coefficient> tempMat;
-  Selection tempSel;
+  Matrix<Coefficient> toBeEliminated;
+  Selection selection;
   for (int i = 0; i < this->size; i ++) {
     output.addOnTop(this->objects[i]);
-    if (output.getRankElementSpan(&tempMat, &tempSel) < output.size) {
+    if (output.getRankElementSpan(&toBeEliminated, &selection) < output.size) {
       output.removeLastObject();
     }
   }
@@ -398,19 +398,19 @@ void Vectors<Coefficient>::chooseABasis() {
 template <class Coefficient>
 void Vectors<Coefficient>::beefUpWithEiToLinearlyIndependentBasis(int dimension) {
   Selection selection;
-  Matrix<Coefficient> Buffer;
+  Matrix<Coefficient> buffer;
   if (this->size != 0 && dimension != this->getDimension()) {
     global.fatal << "Vector dimension is incorrect. " << global.fatal;
   }
-  int currentRank = this->getRankElementSpan(Buffer, selection);
+  int currentRank = this->getRankElementSpan(buffer, selection);
   if (currentRank == dimension) {
     return;
   }
-  Vector<Coefficient> theVect;
+  Vector<Coefficient> vector;
   for (int i = 0; i < dimension && currentRank < dimension; i ++) {
-    theVect.makeEi(dimension, i);
-    this->addOnTop(theVect);
-    int candidateRank = this->getRankElementSpan(Buffer, selection);
+    vector.makeEi(dimension, i);
+    this->addOnTop(vector);
+    int candidateRank = this->getRankElementSpan(buffer, selection);
     if (candidateRank > currentRank) {
       currentRank = candidateRank;
     } else {

@@ -1,8 +1,249 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator_educational_functions_1.h"
+#include "calculator_inner_functions.h"
 #include "string_constants.h"
 #include "macros.h"
+
+bool UnivariateEquation::getSolutions(Calculator& calculator, Expression& output) {
+  if (this->solutions.size == 1) {
+    output = this->solutions[0];
+    return true;
+  }
+  return output.makeSequence(calculator, &this->solutions);
+}
+
+bool UnivariateEquation::getOneSolutionEquation(
+  int solutionIndex, Calculator& calculator, Expression& output
+) {
+  return output.makeXOX(
+    calculator,
+    calculator.opDefine(),
+    this->variable,
+    this->solutions[solutionIndex]
+  );
+}
+
+bool UnivariateEquation::getSolutionEquations(Calculator& calculator, Expression& output) {
+  if (this->solutions.size == 1) {
+    return this->getOneSolutionEquation(0, calculator, output);
+  }
+  output.makeSequence(calculator);
+  for (int i = 0; i < this->solutions.size; i ++) {
+    Expression nextSolution;
+    this->getOneSolutionEquation(i, calculator, nextSolution);
+    output.addChildOnTop(nextSolution);
+  }
+  return true;
+}
+
+bool UnivariateEquation::solve(Calculator& calculator){
+  if (!Calculator::evaluateExpression(
+    calculator, this->equationAllTermsOnLeftHandSide, this->simplified
+  )) {
+    return calculator << "Failed to simplify: "
+    << this->equationAllTermsOnLeftHandSide.toString();
+  }
+  Expression powers;
+  Expression powerExtractor;
+  powerExtractor.makeXOX(
+    calculator,
+    calculator.opCoefficientsPowersOf(),
+    this->variable,
+    this->simplified
+  );
+  if (!CalculatorFunctions::coefficientsPowersOf(
+    calculator, powerExtractor, powers
+  )) {
+    std::string simplifiedString = this->simplified.toString();
+    calculator << "Failed to extract the coefficients of "
+    << this->variable.toString()
+    << " in " << simplifiedString << ". ";
+    std::string originalString = this->equationAllTermsOnLeftHandSide.toString();
+    if (originalString != simplifiedString) {
+      calculator << "This was obtained from the original epxression "
+      << this->equationAllTermsOnLeftHandSide.toString();
+    }
+    return false;
+  }
+  if (!powers.isSequenceNElements()) {
+    return calculator << "This is not supposed to happen: expression "
+    << powers.toString()
+    << " should be a list. This may be a programming bug. ";
+  }
+  if (powers.size() == 2) {
+    return calculator << "Cannot solve: " << this->equationAllTermsOnLeftHandSide.toString()
+    << ". The expression does not depend on " << this->variable.toString()
+    << ". The coefficients of "
+    << this->variable.toString() << " are: " << powers.toString();
+  }
+  if (powers.size() == 3) {
+    Expression solution;
+    solution = powers[1];
+    solution *= - 1;
+    solution /= powers[2];
+    this->solutions.addOnTop(solution);
+    return true;
+  }
+  if (powers.size() == 4) {
+    const Expression& a = powers[3];
+    const Expression& b = powers[2];
+    const Expression& c = powers[1];
+    Expression currentRoot;
+    Expression discriminant;
+    discriminant = b * b - a * c * 4;
+    Expression sqrtDiscriminant;
+    sqrtDiscriminant.makeSqrt(calculator, discriminant, 2);
+    currentRoot = (b * (- 1) - sqrtDiscriminant) / (a * 2);
+    this->solutions.addOnTop(currentRoot);
+    currentRoot = (b * (- 1) + sqrtDiscriminant) / (a * 2);
+    this->solutions.addOnTop(currentRoot);
+    return true;
+  }
+  Polynomial<Rational> polynomial;
+  for (int i = powers.size() - 1; i >= 1; i --) {
+    MonomialPolynomial oneVariable(0, 1);
+    polynomial *= oneVariable;
+    Rational coefficient;
+    if (!powers[i].isRational(&coefficient)) {
+      return false;
+    }
+    polynomial += coefficient;
+  }
+  List<AlgebraicNumber> solutions;
+  if (PolynomialFactorizationKronecker::solvePolynomial(
+    polynomial,
+    solutions,
+    calculator.objectContainer.algebraicClosure,
+    &calculator.comments
+  )) {
+    for (int i = 0; i < solutions.size; i ++) {
+      Expression currentSolution;
+      currentSolution.assignValue(solutions[i], calculator);
+      this->solutions.addOnTop(currentSolution);
+    }
+    return true;
+  }
+  return false;
+}
+
+bool CalculatorFunctions::solveUnivariatePolynomialWithRadicalsWithRespectTo(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::solveUnivariatePolynomialWithRadicalsWithRespectTo");
+  if (input.size() != 3) {
+    return calculator << "SolveFor takes as input three arguments. ";
+  }
+  if (input[1].hasBoundVariables()) {
+    return false;
+  }
+  if (input[2].hasBoundVariables()) {
+    return false;
+  }
+  Expression modifiedInput = input;
+  UnivariateEquation equation;
+  equation.variable = modifiedInput[1];
+  if (!modifiedInput[2].startsWith(calculator.opDefine())) {
+    equation.equationAllTermsOnLeftHandSide = modifiedInput[2];
+  } else if (!CalculatorFunctions::functionEqualityToArithmeticExpression(calculator, modifiedInput[2], equation.equationAllTermsOnLeftHandSide)) {
+    return calculator << "Failed to interpret the equality " << modifiedInput[2].toString();
+  }
+  if (!equation.solve(calculator)) {
+    return false;
+  }
+  return equation.getSolutions(calculator, output);
+}
+
+bool ProblemWithSolution::solve(Calculator& calculator) {
+  global.comments << "DEBUG: solvin: " << this->toBeSolved.toString() << "        ";
+  if (this->solveEquation(calculator)) {
+  global.comments << "DEBUG: solve equatoin goood goood!!!!!!!!!!!!";
+    return true;
+  }
+  return this->solveOther(calculator);
+}
+
+bool ProblemWithSolution::solveEquation(Calculator& calculator) {
+  MacroRegisterFunctionWithName("ProblemWithSolution::solveEquation");
+  if (!this->toBeSolved.startsWith(calculator.opDefine(), 3)) {
+  global.comments << "DEBUG: not with opdefine!!!! " << this->toBeSolved << " childcount: "
+  << this->toBeSolved.size() << " First elt: " << this->toBeSolved[0].toString()
+  << " second elt: " << this->toBeSolved[1].toString();
+    return false;
+  }
+  Expression leftMinusRight;
+  if (!CalculatorFunctions::functionEqualityToArithmeticExpression(
+    calculator, this->toBeSolved, leftMinusRight
+  )) {
+  global.comments << "DEBUG: couldnt do ittttt!!!!";
+    return false;
+  }
+  HashedList<Expression> freeVariables;
+  leftMinusRight.getFreeVariables(freeVariables, false);
+  if (freeVariables.size == 1) {
+  global.comments << "DEBUG: HEREHREHREHREHERH";
+    UnivariateEquation equation;
+    equation.variable = freeVariables.getElement(0);
+    equation.equationAllTermsOnLeftHandSide = leftMinusRight;
+    if (!equation.solve(calculator)) {
+      this->addAnnotationStep(
+        calculator,
+        "Sorry, I haven't been taught how to solve this equation."
+      );
+      return true;
+    }
+    equation.getSolutionEquations(calculator, this->solutionsNonSimplified);
+    this->solutionsSimplified = this->solutionsNonSimplified;
+    calculator.evaluateExpression(calculator, this->solutionsNonSimplified, this->solutionsSimplified);
+    if (this->solutionsNonSimplified != this->solutionsSimplified) {
+      Calculator::ExpressionHistoryEnumerator::Step step;
+      step.assignContentAndAnnotation(this->solutionsNonSimplified, "non-simplified solutions");
+      this->steps.addOnTop(step);
+    }
+    Calculator::ExpressionHistoryEnumerator::Step finalAnswer;
+    finalAnswer.assignContentAndAnnotation(this->solutionsSimplified, "final answer");
+    this->steps.addOnTop(finalAnswer);
+    return true;
+  }
+  global.comments << "DEBUG:: free vars: " << freeVariables ;
+  WithContext<Polynomial<Rational> > polynomial;
+  if (!CalculatorConversions::convertToPolynomial(leftMinusRight, polynomial)) {
+    this->addAnnotationStep(calculator, "Sorry, I've only been taught to solve polynomial equations.");
+    return true;
+  }
+  if (polynomial.content.minimalNumberOfVariables() == 2) {
+    this->addAnnotationStep(calculator, "This is an equation in two variables. Such equations are plots of curves. ");
+    return true;
+  }
+  return false;
+}
+
+void ProblemWithSolution::addAnnotationStep(Calculator& calculator, const std::string& input) {
+  Calculator::ExpressionHistoryEnumerator::Step step;
+  step.content.assignValue(input, calculator);
+  this->steps.addOnTop(step);
+}
+
+bool ProblemWithSolution::solveOther(Calculator& calculator) {
+  MacroRegisterFunctionWithName("ProblemWithSolution::solveOther");
+  bool outputNonCacheable = false;
+  Calculator::ExpressionHistoryEnumerator history;
+  calculator.evaluateExpression(
+    calculator,
+    this->toBeSolved,
+    this->solutionsSimplified,
+    outputNonCacheable,
+    - 1,
+    &history.history
+  );
+  history.owner = &calculator;
+  std::stringstream commentsOnFailure;
+  if (!history.computeRecursively(0, &commentsOnFailure)) {
+    this->error = commentsOnFailure.str();
+  }
+  history.toSteps(this->steps);
+  return false;
+}
 
 bool CalculatorEducationalFunctions::solveJSON(
   Calculator& calculator, const Expression& input, Expression& output
@@ -13,22 +254,9 @@ bool CalculatorEducationalFunctions::solveJSON(
   }
   ProblemWithSolution problem;
   problem.toBeSolved = input[1];
-  bool outputNonCacheable = false;
-  Calculator::ExpressionHistoryEnumerator history;
-  calculator.evaluateExpression(
-    calculator,
-    problem.toBeSolved,
-    problem.finalExpression,
-    outputNonCacheable,
-    - 1,
-    &history.history
-  );
-  history.owner = &calculator;
-  std::stringstream commentsOnFailure;
-  if (!history.computeRecursively(0, &commentsOnFailure)) {
-    problem.error = commentsOnFailure.str();
-  }
-  problem.solution = history.toStringExpressionHistoryMerged();
+  global.comments << "DEBUG: TO BE SOLVED: " << problem.toBeSolved.toString() << "         ";
+  problem.solve(calculator);
+  global.comments << "DEBUG: at end, solve json is: " << problem.toJSON();
   return output.assignValue(problem.toJSON(), calculator);
 }
 
@@ -146,6 +374,7 @@ JSData Calculator::extractSolution() {
     result[WebAPI::result::syntaxErrors] = this->parser.toStringSyntacticStackHTMLSimple();
     return result;
   }
+  global.comments << "DEBUG: prog expr is: " << this->programExpression;
   JSData solutionJSON;
   if (!this->programExpression.isOfType(&solutionJSON)) {
     result[WebAPI::result::error] = "Could not solve your problem. ";
@@ -260,8 +489,13 @@ JSData CompareExpressions::toJSON() const {
 JSData ProblemWithSolution::toJSON() {
   JSData result;
   result[WebAPI::result::SolutionData::input] = this->toBeSolved.toString();
-  result[WebAPI::result::SolutionData::steps] = this->solution;
-  result[WebAPI::result::SolutionData::finalExpression] = this->finalExpression.toString();
+  JSData stepsJSON = JSData::makeEmptyArray();
+  for (int i = 0; i < this->steps.size; i ++){
+    stepsJSON[i] = this->steps[i].toJSON();
+  }
+  result[WebAPI::result::SolutionData::steps] = stepsJSON;
+  result[WebAPI::result::SolutionData::finalExpression] = this->solutionsSimplified.toString();
+  result[WebAPI::result::SolutionData::comments] = this->comments;
   result[WebAPI::result::error] = this->error;
   return result;
 }

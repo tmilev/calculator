@@ -1119,11 +1119,11 @@ public:
     if (!found) {
       return input.isEqualToZero();
     }
-    Matrix<Coefficient> tempMat;
-    tempMat = *this;
-    tempMat *= outputTimesMeEqualsInput;
-    tempMat -= input;
-    return tempMat.isEqualToZero();
+    Matrix<Coefficient> mustBeZero;
+    mustBeZero = *this;
+    mustBeZero *= outputTimesMeEqualsInput;
+    mustBeZero -= input;
+    return mustBeZero.isEqualToZero();
   }
   //returns true if the system has a solution, false otherwise
   bool rowEchelonFormToLinearSystemSolution(
@@ -1166,9 +1166,9 @@ public:
     this->multiplyOnTheRight(input);
   }
   void lieBracketWith(Matrix<Coefficient>& right) {
-    Matrix<Coefficient> tempMat;
-    this->lieBracket(*this, right, tempMat);
-    *this = tempMat;
+    Matrix<Coefficient> result;
+    this->lieBracket(*this, right, result);
+    *this = result;
   }
   static void lieBracket(const Matrix<Coefficient>& left, const Matrix<Coefficient>& right, Matrix<Coefficient>& output) {
     if (
@@ -1178,13 +1178,13 @@ public:
     ) {
       global.fatal << "In lieBracket: bad dimensions of matrices. " << global.fatal;
     }
-    Matrix<Coefficient> tempPlus, tempMinus;
-    tempPlus = (right);
-    tempPlus.multiplyOnTheLeft(left);
-    tempMinus = (left);
-    tempMinus.multiplyOnTheLeft(right);
-    tempPlus -= (tempMinus);
-    output = tempPlus;
+    Matrix<Coefficient> firstSummand, subtracand;
+    firstSummand = (right);
+    firstSummand.multiplyOnTheLeft(left);
+    subtracand = (left);
+    subtracand.multiplyOnTheLeft(right);
+    firstSummand -= (subtracand);
+    output = firstSummand;
   }
   // The Gaussian elimination below brings the matrix to a row-echelon form,
   // that is, makes the matrix be something like (example is 4x5):
@@ -1256,15 +1256,15 @@ public:
     Rational& maxMovement,
     int& leavingVariableRow,
     int enteringVariable,
-    Matrix<Coefficient>& tempMatA,
+    Matrix<Coefficient>& matrixA,
     Vector<Coefficient>& inputVectorX,
     Selection& BaseVariables
   );
   LargeInteger findPositiveGCDCoefficientNumerators();
   Matrix<Coefficient> operator-(const Matrix<Coefficient>& right) const {
-    Matrix<Coefficient> tempMat =(*this);
-    tempMat -= right;
-    return tempMat;
+    Matrix<Coefficient> result =(*this);
+    result -= right;
+    return result;
   }
   Matrix<Coefficient> operator*(const Matrix<Coefficient>& right) const;
   Vector<Coefficient> operator*(const Vector<Coefficient>& v) const;
@@ -1477,15 +1477,15 @@ bool Vectors<Coefficient>::computeNormal(Vector<Coefficient>& output, int inputD
     return false;
   }
   int dimension = this->objects[0].size;
-  Matrix<Coefficient> tempMatrix;
+  Matrix<Coefficient> eliminated;
   Selection nonPivotPoints;
   nonPivotPoints.initialize(dimension);
   output.setSize(dimension);
-  this->gaussianEliminationForNormalComputation(tempMatrix, nonPivotPoints, dimension);
+  this->gaussianEliminationForNormalComputation(eliminated, nonPivotPoints, dimension);
   if (nonPivotPoints.cardinalitySelection != 1) {
     return false;
   }
-  tempMatrix.nonPivotPointsToEigenVector(nonPivotPoints, output);
+  eliminated.nonPivotPointsToEigenVector(nonPivotPoints, output);
   return true;
 }
 
@@ -1567,9 +1567,9 @@ void Matrix<Coefficient>::conjugationAction(
 
 template <typename Coefficient>
 void Matrix<Coefficient>::multiplyOnTheLeft(const Matrix<Coefficient>& standsOnTheLeft, const Coefficient& ringZero) {
-  Matrix<Coefficient> tempMat;
-  this->multiplyOnTheLeft(standsOnTheLeft, tempMat, ringZero);
-  this->operator=(tempMat);
+  Matrix<Coefficient> result;
+  this->multiplyOnTheLeft(standsOnTheLeft, result, ringZero);
+  this->operator=(result);
 }
 
 template <typename Coefficient>
@@ -3111,10 +3111,10 @@ class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
     return tempS;
   }
   bool operator==(const PolynomialSubstitution& right);
-  void makeSubstitutionFromMatrixIntegerAndDenominator(Matrix<LargeInteger>& matrix, LargeIntegerUnsigned& Den) {
-    Matrix<Rational> tempMat;
-    tempMat.assignMatrixIntegerWithDenominator(matrix, Den);
-    this->makeLinearSubstitutionConstantTermsLastRow(tempMat);
+  void makeSubstitutionFromMatrixIntegerAndDenominator(Matrix<LargeInteger>& matrix, LargeIntegerUnsigned& denominator) {
+    Matrix<Rational> rescaled;
+    rescaled.assignMatrixIntegerWithDenominator(matrix, denominator);
+    this->makeLinearSubstitutionConstantTermsLastRow(rescaled);
   }
   void toString(std::string& output, int numDisplayedEltsMinus1ForAll) const {
     std::stringstream out;
@@ -4366,15 +4366,15 @@ void Matrix<Coefficient>::getMaxMovementAndLeavingVariableRow(
   Rational& maxMovement,
   int& leavingVariableRow,
   int enteringVariable,
-  Matrix<Coefficient>& tempMatA,
+  Matrix<Coefficient>& matrixA,
   Vector<Coefficient>& inputVectorX,
   Selection& BaseVariables
 ) {
   leavingVariableRow = - 1;
   maxMovement.makeZero();
-  for (int i = 0; i < tempMatA.numberOfRows; i ++) {
+  for (int i = 0; i < matrixA.numberOfRows; i ++) {
     Rational tempRat;
-    tempRat.assign(tempMatA.elements[i][enteringVariable]);
+    tempRat.assign(matrixA.elements[i][enteringVariable]);
     if (tempRat.isPositive()) {
       tempRat.invert();
       tempRat.multiplyBy(inputVectorX[BaseVariables.elements[i]]);
@@ -5280,7 +5280,7 @@ public:
     LinearCombination<OnePartialFraction,
     Polynomial<LargeInteger> >& output,
     Vectors<Rational>& bufferVectors,
-    Matrix<Rational>& bufferMat
+    Matrix<Rational>& bufferMatrix
   );
   bool reduceOnceGeneralMethod(
     PartialFractions& owner,
@@ -5578,8 +5578,8 @@ public:
   std::string drawMeToHtmlLastCoordAffine(DrawingVariables& drawingVariables, FormatExpressions& format);
   bool drawMeProjective(
     Vector<Rational>* coordCenterTranslation,
-    bool InitDrawVars,
-    DrawingVariables& theDrawingVariables,
+    bool initDrawVars,
+    DrawingVariables& drawingVariables,
     FormatExpressions& format
   );
   std::string drawMeToHtmlProjective(DrawingVariables& drawingVariables, FormatExpressions& format);
@@ -6512,9 +6512,9 @@ public:
     if (this->isEqualToZero()) {
       return "(0)";
     }
-    Matrix<Coefficient> tempMat;
-    this->getMatrix(tempMat, this->getMinimumNumberOfColumnsNumberOfRows());
-    return tempMat.toString(format);
+    Matrix<Coefficient> matrix;
+    this->getMatrix(matrix, this->getMinimumNumberOfColumnsNumberOfRows());
+    return matrix.toString(format);
   }
   void getMatrix(Matrix<Coefficient>& output, int dimension) const {
     dimension = MathRoutines::maximum(dimension, this->getMinimumNumberOfColumnsNumberOfRows());

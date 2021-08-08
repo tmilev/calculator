@@ -15,6 +15,7 @@ let domElements = {
       editorButtonPanel: "editorSolveButtonPanel",
       editorSolveProblemDebug: "editorSolveProblemDebug",
       solutionBox: "solutionBox",
+      commentsBox: "solutionCommentsBox",
     },
     solveSocratic: {
       editor: "editorSolveProblemSocratc",

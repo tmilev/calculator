@@ -1401,7 +1401,6 @@ public:
   GroupRepresentationCarriesAllMatrices* parent;
   Vectors<Coefficient> basis;
   Matrix<Coefficient> gramMatrixInverted;
-  public:
   bool flagCharacterIsComputed;
   somegroup* ownerGroup;
   List<std::string> names;
@@ -1479,6 +1478,7 @@ public:
     this->generators[generatorIndex] = input;
   }
   bool operator>(const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other) const;
+  void computeAllGeneratorImagesFromSimple();
   //  bool operator<(const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other) const;
 };
 

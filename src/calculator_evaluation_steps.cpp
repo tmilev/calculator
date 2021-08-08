@@ -1,6 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator_interface.h"
+#include "string_constants.h"
 
 void Calculator::ExpressionHistoryEnumerator::initializeComputation() {
   MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::initializeComputation");
@@ -167,11 +168,71 @@ std::string Calculator::ExpressionHistoryEnumerator::toStringDebug() {
   std::stringstream out;
   out << "<b>History</b><br>" << this->history.toStringTreeHtml(- 1) << "<hr>";
   out << "" << this->history.toStringSemiFull() << "<hr>";
-  // out << "Current state: " << this->currentState.toString()
-  // << "<br>";
-  // out << "Current subtree: " << this->currentSubTree.toString();
-
   return out.str();
+}
+
+void Calculator::ExpressionHistoryEnumerator::toStepsNoMerging(
+  List<Calculator::ExpressionHistoryEnumerator::Step>& outputSteps
+) {
+  output.setSize(0);
+  for (int j = 0; j < this->output.size; j ++) {
+    Calculator::ExpressionHistoryEnumerator::Step currentStep;
+    this->toOneStep(j, currentStep);
+    outputSteps.addOnTop(currentStep);
+  }
+}
+
+void Calculator::ExpressionHistoryEnumerator::toSteps(
+  List<Calculator::ExpressionHistoryEnumerator::Step>& outputSteps
+) {
+  List<Calculator::ExpressionHistoryEnumerator::Step> stepsUnmerged;
+  this->toStepsNoMerging(stepsUnmerged);
+  outputSteps.setSize(0);
+  std::string previousExpressionString;
+  for (int j = 0; j < stepsUnmerged.size; j ++) {
+    Calculator::ExpressionHistoryEnumerator::Step& current = stepsUnmerged[j];
+    std::string currentString = current.content.toString();
+    if (currentString == previousExpressionString) {
+      if (outputSteps.size > 0) {
+        outputSteps.lastObject()->mergeAnnotations(current.annotations);
+      }
+      continue;
+    }
+    outputSteps.addOnTop(current);
+  }
+}
+
+void Calculator::ExpressionHistoryEnumerator::Step::mergeAnnotations(
+  const List<std::string>& incoming
+) {
+  this->annotations.addListOnTop(incoming);
+}
+
+JSData Calculator::ExpressionHistoryEnumerator::Step::toJSON() {
+  JSData result;
+  result[WebAPI::result::SolutionData::transformation] = this->content.toString();
+  JSData annotationJSON = JSData::makeEmptyArray();
+  for (int i = 0; i < this->annotations.size; i ++) {
+    annotationJSON[i] = this->annotations[i];
+  }
+  result[WebAPI::result::SolutionData::annotations] = annotationJSON;
+  return result;
+}
+
+void Calculator::ExpressionHistoryEnumerator::Step::assignContentAndAnnotation(
+  const Expression& input, const std::string& oneAnnotation
+) {
+  this->content = input;
+  this->annotations.setSize(0);
+  this->annotations.addOnTop(oneAnnotation);
+}
+
+void Calculator::ExpressionHistoryEnumerator::toOneStep(
+  int stepIndex,
+  Calculator::ExpressionHistoryEnumerator::Step& outputStep
+) {
+  outputStep.annotations.addListOnTop(this->rulesNames[stepIndex]);
+  outputStep.content = this->output[stepIndex];
 }
 
 std::string Calculator::ExpressionHistoryEnumerator::toStringExpressionHistoryMerged() {

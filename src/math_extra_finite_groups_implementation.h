@@ -1043,9 +1043,9 @@ Coefficient WeylGroupData::weylDimensionFormulaSimpleCoordinates(
 
 template<class Coefficient>
 Vector<Coefficient> WeylGroupData::getFundamentalCoordinatesFromSimple(const Vector<Coefficient>& inputInFundamentalCoords) {
-  Matrix<Rational>& tempMat = *this->getMatrixSimpleToFundamentalCoords();
+  Matrix<Rational>& fundamentalCoordinates = *this->getMatrixSimpleToFundamentalCoords();
   Vector<Coefficient> result = inputInFundamentalCoords;
-  tempMat.actOnVectorColumn(result, Coefficient::zero());
+  fundamentalCoordinates.actOnVectorColumn(result, Coefficient::zero());
   return result;
 }
 
@@ -1075,10 +1075,10 @@ Vector<Coefficient> WeylGroupData::getSimpleCoordinatesFromFundamental(
   const Vector<Coefficient>& inputInFundamentalCoords,
   const Coefficient& zero
 ) {
-  Matrix<Rational>& tempMat = *this->getMatrixFundamentalToSimpleCoords();
+  Matrix<Rational>& transitionMatrix = *this->getMatrixFundamentalToSimpleCoords();
   Vector<Coefficient> result;
   result = inputInFundamentalCoords;
-  tempMat.actOnVectorColumn(result, zero);
+  transitionMatrix.actOnVectorColumn(result, zero);
   return result;
 }
 
@@ -1087,10 +1087,10 @@ Vectors<Coefficient> WeylGroupData::getSimpleCoordinatesFromFundamental(
   const Vectors<Coefficient>& inputInFundamentalCoords,
   const Coefficient& zero
 ) {
-  Matrix<Rational>& tempMat = *this->getMatrixFundamentalToSimpleCoords();
+  Matrix<Rational>& transitionMatrix = *this->getMatrixFundamentalToSimpleCoords();
   Vectors<Coefficient> result;
   result = inputInFundamentalCoords;
-  tempMat.actOnVectorsColumn(result, zero);
+  transitionMatrix.actOnVectorsColumn(result, zero);
   return result;
 }
 

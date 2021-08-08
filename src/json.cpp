@@ -754,7 +754,6 @@ somestream& JSData::intoStream(
   somestream& out,
   const JSData::PrintOptions* optionsIncoming
 ) const {
-  //MacroRegisterFunctionWithName("JSData::intoStream");
   std::string whiteSpaceOuter = "";
   std::string whiteSpaceInner = "";
   JSData::PrintOptions options;

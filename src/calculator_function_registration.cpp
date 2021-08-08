@@ -550,13 +550,13 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "ApplyToList",
-    CalculatorFunctions::innerApplyToList,
+    CalculatorFunctions::applyToList,
     "",
     "Applies a transformation to each element of a list. ",
     "SolveForX{}{{a}} = SolveFor(x, {{a}});\n"
     "SolveForX(x^2 + 2);\n"
     "ApplyToList(SolveForX,(x^2 + 1, x^2 - x - 2))",
-    "CalculatorFunctions::innerApplyToList",
+    "CalculatorFunctions::applyToList",
     "ApplyToList",
     innerStandard
   );
@@ -567,7 +567,7 @@ void Calculator::initializeFunctionsStandard() {
     "If the expression is a fraction, returns the denominator, "
     "else returns 1. ",
     "Denominator(a/b); Denominator(1+ 1/x)",
-    "CalculatorFunctions::innerDenominator",
+    "CalculatorFunctions::denominator",
     "Denominator",
     innerStandard
   );
@@ -620,7 +620,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "Polynomial",
-    CalculatorConversions::innerPolynomial<Rational>,
+    CalculatorConversions::getPolynomial<Rational>,
     "",
     "Creates a polynomial expression with rational coefficients. ",
     "Polynomial{}((x-2y+z- 1)^2(x +y-z));"
@@ -631,7 +631,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "PolynomialAlgebraicNumbers",
-    CalculatorConversions::innerPolynomial<AlgebraicNumber>,
+    CalculatorConversions::getPolynomial<AlgebraicNumber>,
     "",
     "Creates a polynomial expression with algebraic number coefficients. ",
     "PolynomialAlgebraicNumbers{}((x + \\sqrt{2})^2 (\\sqrt{3}x - \\sqrt{5}));",
@@ -957,7 +957,7 @@ void Calculator::initializeFunctionsStandard() {
   //else we risk infinite substitution cycle. The reasons are implementation-specific.
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIa,
+    CalculatorFunctionsIntegration::integrateRationalFunctionBuildingBlockIa,
     "",
     "Integrates building block Ia.  ",
     "\\int (\\frac{3}{(x / 2 - 1)}) dx ",
@@ -2773,21 +2773,21 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "CoefficientsPowersOf",
-    CalculatorFunctions::innerCoefficientsPowersOf,
+    CalculatorFunctions::coefficientsPowersOf,
     "",
     "Extracts the coefficients of the powers of the first argument in the second argument.",
     "CoefficientsPowersOf(x, a x^2+ b *3 x +c +\\pi +3)",
-    "CalculatorFunctions::innerCoefficientsPowersOf",
+    "CalculatorFunctions::coefficientsPowersOf",
     "CoefficientsPowersOf",
     innerStandard
   );
   this->addOperationHandler(
     "ConstantTerm",
-    CalculatorFunctions::innerConstTermRelative,
+    CalculatorFunctions::constantTermRelative,
     "",
     "Extracts term constant relative to the variable in the first argument. ",
     "ConstantTerm(y,  x y x +3 +2z)",
-    "CalculatorFunctions::innerConstTermRelative",
+    "CalculatorFunctions::constantTermRelative",
     "ConstantTerm",
     innerStandard
   );

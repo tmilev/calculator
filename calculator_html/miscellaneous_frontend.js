@@ -100,6 +100,12 @@ function htmlElementsFromCommentsAndErrors(input) {
     }
     let incoming = document.createElement("div");
     incoming.textContent = current;
+    if (extraTags[i] === pathnames.urlFields.result.error) {
+      let errorTag = document.createElement("b");
+      errorTag.style.color = "red";
+      errorTag.textContent = "Error.";
+      result.push(errorTag);
+    }
     result.push(incoming);
     result.push(document.createElement("br"));
   }
@@ -122,6 +128,7 @@ function writeHtmlElementsFromCommentsAndErrors(
   output,
 ) {
   let elements = htmlElementsFromCommentsAndErrors(input);
+  output.textContent = "";
   for (let i = 0; i < elements.length; i++) {
     output.appendChild(elements[i]);
   }

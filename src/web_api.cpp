@@ -409,7 +409,6 @@ JSData WebAPIResponse::solveJSON() {
   result[WebAPI::result::solution] = solution;
   result[WebAPI::result::commentsGlobal] = global.comments.getCurrentReset();
   global.flagComputationComplete = true;
-  result[WebAPI::result::error] = "not implemented yet.";
   return result;
 }
 

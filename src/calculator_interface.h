@@ -2166,6 +2166,12 @@ public:
   int opSolveJSON() {
     return this->operations.getIndexNoFail("SolveJSON");
   }
+  int opSolveFor() {
+    return this->operations.getIndexNoFail("SolveFor");
+  }
+  int opCoefficientsPowersOf() {
+    return this->operations.getIndexNoFail("CoefficientsPowersOf");
+  }
   int opDirectSum() {
     return this->operations.getIndexNoFail("\\oplus");
   }
@@ -2553,6 +2559,14 @@ public:
   void reduce(Calculator::EvaluateLoop& state);
   class ExpressionHistoryEnumerator {
   public:
+    class Step {
+    public:
+      Expression content;
+      List<std::string> annotations;
+      void assignContentAndAnnotation(const Expression& input, const std::string& oneAnnotation);
+      void mergeAnnotations(const List<std::string>& incoming);
+      JSData toJSON();
+    };
     Calculator* owner;
     int recursionDepth;
     int maximumRecursionDepth;
@@ -2573,6 +2587,9 @@ public:
       }
       return true;
     }
+    void toSteps(List<Calculator::ExpressionHistoryEnumerator::Step>& outputSteps);
+    void toStepsNoMerging(List<Calculator::ExpressionHistoryEnumerator::Step>& outputSteps);
+    void toOneStep(int stepIndex, Calculator::ExpressionHistoryEnumerator::Step& outputStep);
     std::string toStringExpressionHistoryMerged();
     std::string toStringDebug();
   };
@@ -2678,7 +2695,7 @@ public:
   static bool innerAlgebraicNumber(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPolynomialModuloInteger(Calculator& calculator, const Expression& input, Expression& output);
   template <class Coefficient>
-  static bool innerPolynomial(Calculator& calculator, const Expression& input, Expression& output);
+  static bool getPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   // Conversions from expression tree to expression containing type.
   template <class Coefficient>
   static bool functionPolynomial(Calculator& calculator, const Expression& input, Expression& output) {
@@ -2835,6 +2852,16 @@ public:
       return false;
     }
     return output.isOfType<Type>();
+  }
+  template <class Coefficient>
+  static bool convertToPolynomial(
+    const Expression& input,
+    WithContext<Polynomial<Coefficient> >& output
+  ) {
+    MacroRegisterFunctionWithName("CalculatorConversions::convertToPolynomial");
+    return CalculatorConversions::convert(
+      input, CalculatorConversions::getPolynomial<Coefficient>, output
+    );
   }
   template <class Type>
   static bool convert(

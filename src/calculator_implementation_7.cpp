@@ -1289,34 +1289,29 @@ bool CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinPoly(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinPoly");
-  Expression polynomialExpression;
-  if (!CalculatorConversions::innerPolynomial<AlgebraicNumber>(
-    calculator, input, polynomialExpression
+  WithContext<Polynomial<AlgebraicNumber> > polynomial;
+  if (!CalculatorConversions::convertToPolynomial(
+    calculator, polynomial
   )) {
     return calculator << "<hr>Failed to convert "
     << input.toString() << " to polynomial. ";
   }
-  WithContext<Polynomial<AlgebraicNumber> > polynomial;
-  if (!polynomialExpression.isOfTypeWithContext(&polynomial)) {
-    return calculator << "<hr>Failed to convert " << input.toString()
-    << " to polynomial, instead got " << polynomialExpression.toString();
-  }
   if (polynomial.context.numberOfVariables() != 1) {
     return calculator
     << "<hr>After conversion, I got the polynomial "
-    << polynomialExpression.toString()
+    << polynomial.toStringContentWithFormat()
     << ", which is not in one variable.";
   }
-  AlgebraicNumber theAN;
+  AlgebraicNumber algebraicNumber;
   std::stringstream commentsOnFailure;
-  if (!theAN.constructFromMinimalPolynomial(
+  if (!algebraicNumber.constructFromMinimalPolynomial(
     polynomial.content,
     calculator.objectContainer.algebraicClosure,
     &commentsOnFailure
   )) {
     return calculator << "Failed to construct minimal polynomial. " << commentsOnFailure.str();
   }
-  return output.assignValue(theAN, calculator);
+  return output.assignValue(algebraicNumber, calculator);
 }
 
 bool CalculatorFunctions::innerCompositeApowerBevaluatedAtC(
@@ -3568,7 +3563,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerInvertMatrixVerbose");
-  Matrix<RationalFraction<Rational> > matrix, outputMat, extendedMatrix;
+  Matrix<RationalFraction<Rational> > matrix, outputMatrix, extendedMatrix;
   Expression converted;
   if (!CalculatorConversions::innerMatrixRationalFunction(
     calculator, input, converted
@@ -3586,10 +3581,10 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
     << "The matrix is not square.";
     return output.makeError(out.str(), calculator);
   }
-  outputMat.makeIdentityMatrix(
+  outputMatrix.makeIdentityMatrix(
   matrix.numberOfRows,RationalFraction<Rational>::oneRational(), RationalFraction<Rational>::zeroRational());
   int tempI;
-  int NumFoundPivots = 0;
+  int numberOfFoundPivots = 0;
   std::stringstream out, outLaTeX;
 
   RationalFraction<Rational> tempElement;
@@ -3602,48 +3597,48 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   out << "Computing "
   << HtmlRoutines::getMathNoDisplay(matrix.toString(&format) + "^{- 1}");
   extendedMatrix = matrix;
-  extendedMatrix.appendMatrixOnTheRight(outputMat);
+  extendedMatrix.appendMatrixOnTheRight(outputMatrix);
   out << "<br>" << HtmlRoutines::getMathNoDisplay(extendedMatrix.toString(&format)) ;
   outLaTeX << "\\begin{tabular}{ll}";
   outLaTeX << "$" << extendedMatrix.toString(& format) << "$";
 
   for (int i = 0; i < matrix.numberOfColumns; i ++) {
-    tempI = matrix.findPivot(i, NumFoundPivots);
+    tempI = matrix.findPivot(i, numberOfFoundPivots);
     if (tempI != - 1) {
-      if (tempI != NumFoundPivots) {
-        matrix.switchRows(NumFoundPivots, tempI);
-        outputMat.switchRows (NumFoundPivots, tempI);
-        out << "<br>Swap row " << NumFoundPivots + 1 << " and row " << tempI + 1 << ": ";
-        outLaTeX << "& Swap row " << NumFoundPivots + 1 << " and row " << tempI + 1 << ". ";
+      if (tempI != numberOfFoundPivots) {
+        matrix.switchRows(numberOfFoundPivots, tempI);
+        outputMatrix.switchRows (numberOfFoundPivots, tempI);
+        out << "<br>Swap row " << numberOfFoundPivots + 1 << " and row " << tempI + 1 << ": ";
+        outLaTeX << "& Swap row " << numberOfFoundPivots + 1 << " and row " << tempI + 1 << ". ";
         extendedMatrix = matrix;
-        extendedMatrix.appendMatrixOnTheRight(outputMat);
-        out << "<br>" << HtmlRoutines::getMathNoDisplay(outputMat.toString(&format));
-        outLaTeX << "\\\\" << "$" << outputMat.toString(&format) << "$";
+        extendedMatrix.appendMatrixOnTheRight(outputMatrix);
+        out << "<br>" << HtmlRoutines::getMathNoDisplay(outputMatrix.toString(&format));
+        outLaTeX << "\\\\" << "$" << outputMatrix.toString(&format) << "$";
       }
-      tempElement = matrix(NumFoundPivots, i);
+      tempElement = matrix(numberOfFoundPivots, i);
       tempElement.invert();
       if (tempElement != 1) {
-        out << "<br> multiply row number " << NumFoundPivots + 1 << " by "
+        out << "<br> multiply row number " << numberOfFoundPivots + 1 << " by "
         << tempElement.toString(&format) << ": ";
-        outLaTeX << "& multiply row number " << NumFoundPivots + 1 << " by $"
+        outLaTeX << "& multiply row number " << numberOfFoundPivots + 1 << " by $"
         << tempElement.toString(&format) << "$. \\\\";
       }
-      matrix.rowTimesScalar(NumFoundPivots, tempElement);
-      outputMat.rowTimesScalar(NumFoundPivots, tempElement);
+      matrix.rowTimesScalar(numberOfFoundPivots, tempElement);
+      outputMatrix.rowTimesScalar(numberOfFoundPivots, tempElement);
       if (tempElement != 1) {
         extendedMatrix = matrix;
-        extendedMatrix.appendMatrixOnTheRight(outputMat);
+        extendedMatrix.appendMatrixOnTheRight(outputMatrix);
         out << HtmlRoutines::getMathNoDisplay(extendedMatrix.toString(&format));
         outLaTeX << "$" << extendedMatrix.toString(&format) << "$";
       }
       bool found = false;
       for (int j = 0; j < matrix.numberOfRows; j ++) {
-        if (j != NumFoundPivots) {
+        if (j != numberOfFoundPivots) {
           if (!matrix.elements[j][i].isEqualToZero()) {
             tempElement = matrix.elements[j][i];
             tempElement.negate();
-            matrix.addTwoRows(NumFoundPivots, j, i, tempElement);
-            outputMat.addTwoRows(NumFoundPivots, j, 0, tempElement);
+            matrix.addTwoRows(numberOfFoundPivots, j, i, tempElement);
+            outputMatrix.addTwoRows(numberOfFoundPivots, j, 0, tempElement);
             if (!found) {
               out << "<br>";
               outLaTeX << "&";
@@ -3653,9 +3648,9 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
               outLaTeX << ", ";
             }
             found = true;
-            out << " Row index " << NumFoundPivots + 1 << " times "
+            out << " Row index " << numberOfFoundPivots + 1 << " times "
             << tempElement.toString(&format) << " added to row index " << j + 1;
-            outLaTeX << " Row index " << NumFoundPivots + 1 << " times $"
+            outLaTeX << " Row index " << numberOfFoundPivots + 1 << " times $"
             << tempElement.toString(&format) << "$ added to row index " << j + 1 << "\\\\";
           }
         }
@@ -3665,16 +3660,16 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
         outLaTeX << "\\end{tabular}";
         outLaTeX << "\\\\";
         extendedMatrix = matrix;
-        extendedMatrix.appendMatrixOnTheRight(outputMat);
+        extendedMatrix.appendMatrixOnTheRight(outputMatrix);
         out << HtmlRoutines::getMathNoDisplay(extendedMatrix.toString(&format));
         outLaTeX << "$" << extendedMatrix.toString(&format) << "$";
       }
-      NumFoundPivots ++;
+      numberOfFoundPivots ++;
     }
   }
   outLaTeX << "\\end{tabular}";
   format.matrixColumnVerticalLineIndex = - 1;
-  if (NumFoundPivots < matrix.numberOfRows) {
+  if (numberOfFoundPivots < matrix.numberOfRows) {
     out << "<br>Matrix to the right of the vertical line not "
     << "transformed to the identity matrix => "
     << "starting matrix is not invertible. ";
@@ -3684,10 +3679,10 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   } else {
     out << "<br>The inverse of the starting matrix "
     << "can be read off on the matrix to the left of the id matrix: "
-    << HtmlRoutines::getMathNoDisplay(outputMat.toString(&format));
+    << HtmlRoutines::getMathNoDisplay(outputMatrix.toString(&format));
     outLaTeX << " The inverse matrix can now be read off as the matrix "
     << "to the left of the identity matrix: $"
-    << outputMat.toString(&format) << "$";
+    << outputMatrix.toString(&format) << "$";
   }
   out << "Output in LaTeX: <br><br>" << outLaTeX.str();
   return output.assignValue(out.str(), calculator);
@@ -3702,90 +3697,90 @@ bool CalculatorFunctions::innerInvertMatrixVerbose(
     return calculator << "Failed to get matrix from: " << input.toString();
   }
 
-  Matrix<Rational> mat, outputMat, tempMat;
+  Matrix<Rational> matrix, outputMatrix, augmentedMatrix;
   if (!calculator.functionGetMatrix(
-    converted, mat
+    converted, matrix
   )) {
     return CalculatorFunctions::innerInvertMatrixRFsVerbose(calculator, input, output);
   }
-  if (mat.numberOfRows != mat.numberOfColumns || mat.numberOfColumns < 1) {
+  if (matrix.numberOfRows != matrix.numberOfColumns || matrix.numberOfColumns < 1) {
     return output.makeError("The matrix is not square", calculator);
   }
-  outputMat.makeIdentityMatrix(mat.numberOfRows);
+  outputMatrix.makeIdentityMatrix(matrix.numberOfRows);
   int tempI;
-  int NumFoundPivots = 0;
+  int numberOfFoundPivots = 0;
   std::stringstream out;
   Rational tempElement;
   FormatExpressions format;
   format.flagUseLatex = true;
   format.flagUseHTML = false;
-  format.matrixColumnVerticalLineIndex = mat.numberOfColumns - 1;
-  out << "Computing " << HtmlRoutines::getMathNoDisplay(mat.toString(&format) + "^{- 1}");
-  tempMat = mat;
-  tempMat.appendMatrixOnTheRight(outputMat);
-  out << "<br>" << HtmlRoutines::getMathNoDisplay(tempMat.toString(&format));
-  for (int i = 0; i < mat.numberOfColumns; i ++) {
-    tempI = mat.findPivot(i, NumFoundPivots);
+  format.matrixColumnVerticalLineIndex = matrix.numberOfColumns - 1;
+  out << "Computing " << HtmlRoutines::getMathNoDisplay(matrix.toString(&format) + "^{- 1}");
+  augmentedMatrix = matrix;
+  augmentedMatrix.appendMatrixOnTheRight(outputMatrix);
+  out << "<br>" << HtmlRoutines::getMathNoDisplay(augmentedMatrix.toString(&format));
+  for (int i = 0; i < matrix.numberOfColumns; i ++) {
+    tempI = matrix.findPivot(i, numberOfFoundPivots);
     if (tempI != - 1) {
-      if (tempI != NumFoundPivots) {
-        mat.switchRows(NumFoundPivots, tempI);
-        outputMat.switchRows (NumFoundPivots, tempI);
-        out << "<br>switch row " << NumFoundPivots + 1
+      if (tempI != numberOfFoundPivots) {
+        matrix.switchRows(numberOfFoundPivots, tempI);
+        outputMatrix.switchRows (numberOfFoundPivots, tempI);
+        out << "<br>switch row " << numberOfFoundPivots + 1
         << " and row " << tempI + 1 << ": ";
-        tempMat = mat;
-        tempMat.appendMatrixOnTheRight(outputMat);
+        augmentedMatrix = matrix;
+        augmentedMatrix.appendMatrixOnTheRight(outputMatrix);
         out << "<br>"
-        << HtmlRoutines::getMathNoDisplay(outputMat.toString(&format));
+        << HtmlRoutines::getMathNoDisplay(outputMatrix.toString(&format));
       }
-      tempElement = mat.elements[NumFoundPivots][i];
+      tempElement = matrix.elements[numberOfFoundPivots][i];
       tempElement.invert();
       if (tempElement != 1) {
-        out << "<br> multiply row " << NumFoundPivots + 1
+        out << "<br> multiply row " << numberOfFoundPivots + 1
         << " by " << tempElement << ": ";
       }
-      mat.rowTimesScalar(NumFoundPivots, tempElement);
-      outputMat.rowTimesScalar(NumFoundPivots, tempElement);
+      matrix.rowTimesScalar(numberOfFoundPivots, tempElement);
+      outputMatrix.rowTimesScalar(numberOfFoundPivots, tempElement);
       if (tempElement != 1) {
-        tempMat = mat;
-        tempMat.appendMatrixOnTheRight(outputMat);
-        out << HtmlRoutines::getMathNoDisplay(tempMat.toString(&format));
+        augmentedMatrix = matrix;
+        augmentedMatrix.appendMatrixOnTheRight(outputMatrix);
+        out << HtmlRoutines::getMathNoDisplay(augmentedMatrix.toString(&format));
       }
       bool found = false;
-      for (int j = 0; j < mat.numberOfRows; j ++) {
-        if (j != NumFoundPivots) {
-          if (!mat.elements[j][i].isEqualToZero()) {
-            tempElement = mat.elements[j][i];
+      for (int j = 0; j < matrix.numberOfRows; j ++) {
+        if (j != numberOfFoundPivots) {
+          if (!matrix.elements[j][i].isEqualToZero()) {
+            tempElement = matrix.elements[j][i];
             tempElement.negate();
-            mat.addTwoRows(NumFoundPivots, j, i, tempElement);
-            outputMat.addTwoRows(NumFoundPivots, j, 0, tempElement);
+            matrix.addTwoRows(numberOfFoundPivots, j, i, tempElement);
+            outputMatrix.addTwoRows(numberOfFoundPivots, j, 0, tempElement);
             if (!found) {
               out << "<br>";
             } else {
               out << ", ";
             }
             found = true;
-            out << " Row index " << NumFoundPivots + 1 << " times "
+            out << " Row index " << numberOfFoundPivots + 1 << " times "
             << tempElement << " added to row index " << j + 1;
           }
         }
       }
       if (found) {
         out << ": <br> ";
-        tempMat = mat;
-        tempMat.appendMatrixOnTheRight(outputMat);
-        out << HtmlRoutines::getMathNoDisplay(tempMat.toString(&format));
+        augmentedMatrix = matrix;
+        augmentedMatrix.appendMatrixOnTheRight(outputMatrix);
+        out << HtmlRoutines::getMathNoDisplay(augmentedMatrix.toString(&format));
       }
-      NumFoundPivots ++;
+      numberOfFoundPivots ++;
     }
   }
-  if (NumFoundPivots < mat.numberOfRows) {
+  if (numberOfFoundPivots < matrix.numberOfRows) {
     out << "<br>Matrix to the right of the vertical line not "
     << "transformed to the identity matrix => "
     << "starting matrix is not invertible. ";
   } else {
     out << "<br>The inverse of the starting matrix can "
     << "be read off on the matrix to the left of the id matrix: "
-    << HtmlRoutines::getMathNoDisplay(outputMat.toString(&format));
+    << HtmlRoutines::getMathNoDisplay(outputMatrix.toString(&format));
   }
   return output.assignValue(out.str(), calculator);
 }
@@ -3880,17 +3875,17 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionSplitToBuidingBloc
   return true;
 }
 
-bool CalculatorFunctions::innerCoefficientsPowersOf(
+bool CalculatorFunctions::coefficientsPowersOf(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerCoefficientsPowersOf");
+  MacroRegisterFunctionWithName("CalculatorFunctions::coefficientsPowersOf");
   if (input.size() != 3) {
     return false;
   }
-  const Expression& theVarE = input[1];
-  const Expression& theExpressionE = input[2];
+  const Expression& variable = input[1];
+  const Expression& processed = input[2];
   VectorSparse<Expression> coefficients;
-  if (!calculator.collectCoefficientsPowersVariables(theExpressionE, theVarE, coefficients)) {
+  if (!calculator.collectCoefficientsPowersVariables(processed, variable, coefficients)) {
     return calculator << "<hr>Failed to evaluate Calculator::collectCoefficientsPowersVariables";
   }
   int highestPowerPlus1 = coefficients.getLargestParticipatingBasisIndex() + 1;
@@ -3908,32 +3903,34 @@ bool CalculatorFunctions::innerCoefficientsPowersOf(
   return output.makeSequence(calculator, &coefficientExpressionsIncludingZeros);
 }
 
-bool CalculatorFunctions::innerConstTermRelative(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerConstTermRelative");
+bool CalculatorFunctions::constantTermRelative(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::constantTermRelative");
   if (!input.startsWithGivenOperation("ConstantTerm")) {
     return false;
   }
-  Expression coeffExtractor, theCoeffs;
-  coeffExtractor = input;
-  coeffExtractor.setChildAtomValue(0, "ConstantTerm");
-  if (!CalculatorFunctions::innerCoefficientsPowersOf(calculator, coeffExtractor, theCoeffs)) {
+  Expression coefficientExtractor, coefficients;
+  coefficientExtractor = input;
+  coefficientExtractor.setChildAtomValue(0, "ConstantTerm");
+  if (!CalculatorFunctions::coefficientsPowersOf(
+    calculator, coefficientExtractor, coefficients
+  )) {
     return false;
   }
-  if (theCoeffs.isSequenceNElements()) {
-    if (theCoeffs.size() > 1) {
-      output = theCoeffs[1];
+  if (coefficients.isSequenceNElements()) {
+    if (coefficients.size() > 1) {
+      output = coefficients[1];
       return true;
     }
   }
   return false;
 }
 
-bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIa(
+bool CalculatorFunctionsIntegration::integrateRationalFunctionBuildingBlockIa(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIa");
-  Expression functionExpression, theVariableE;
-  if (!input.isIndefiniteIntegralFdx(&theVariableE, &functionExpression)) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateRationalFunctionBuildingBlockIa");
+  Expression functionExpression, variable;
+  if (!input.isIndefiniteIntegralFdx(&variable, &functionExpression)) {
     return false;
   }
   if (!functionExpression.startsWith(calculator.opDivide(), 3)) {
@@ -3945,7 +3942,7 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIa(
   if (!A.isConstantNumber()) {
     return false;
   }
-  if (!CalculatorFunctions::extractLinearCoeffsWRTvariable(axPlusb, theVariableE, a, b)) {
+  if (!CalculatorFunctions::extractLinearCoefficientsWithRespectToVariable(axPlusb, variable, a, b)) {
     return false;
   }
   if (!a.isConstantNumber() || !b.isConstantNumber()) {
@@ -3966,9 +3963,9 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIa(
 bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIb(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIa");
-  Expression functionExpression, theVariableE;
-  if (!input.isIndefiniteIntegralFdx(&theVariableE, &functionExpression)) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIb");
+  Expression functionExpression, variable;
+  if (!input.isIndefiniteIntegralFdx(&variable, &functionExpression)) {
     return false;
   }
   if (!functionExpression.startsWith(calculator.opDivide(), 3)) {
@@ -3988,7 +3985,7 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIb(
   }
   Expression a, b;
   const Expression& axPlusb = axPlusbPowerN[1];
-  if (!CalculatorFunctions::extractLinearCoeffsWRTvariable(axPlusb, theVariableE, a, b)) {
+  if (!CalculatorFunctions::extractLinearCoefficientsWithRespectToVariable(axPlusb, variable, a, b)) {
     return false;
   }
   if (!a.isConstantNumber() || !b.isConstantNumber()) {
@@ -4008,63 +4005,63 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIb(
   return true;
 }
 
-bool CalculatorFunctions::extractQuadraticCoeffsWRTvariable(
-  const Expression& theQuadratic,
-  const Expression& theVariable,
+bool CalculatorFunctions::extractQuadraticCoefficientsWithRespectToVariable(
+  const Expression& quadratic,
+  const Expression& variable,
   Expression& outputCoeffVarSquared,
   Expression& outputCoeffLinTerm,
   Expression& outputConstTerm
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::extractQuadraticCoeffsWRTvariable");
-  VectorSparse<Expression> theCoeffs;
-  if (theQuadratic.owner == nullptr) {
+  VectorSparse<Expression> coefficients;
+  if (quadratic.owner == nullptr) {
     return false;
   }
-  Calculator& calculator = *theQuadratic.owner;
-  if (!calculator.collectCoefficientsPowersVariables(theQuadratic, theVariable, theCoeffs)) {
+  Calculator& calculator = *quadratic.owner;
+  if (!calculator.collectCoefficientsPowersVariables(quadratic, variable, coefficients)) {
     return false;
   }
-  if (theCoeffs.getLargestParticipatingBasisIndex() != 2) {
+  if (coefficients.getLargestParticipatingBasisIndex() != 2) {
     return false;
   }
   outputCoeffVarSquared.assignValue(0, calculator);
   outputCoeffLinTerm.assignValue(0, calculator);
   outputConstTerm.assignValue(0, calculator);
-  if (theCoeffs.monomials.contains(MonomialVector(0))) {
-    outputConstTerm = theCoeffs.getCoefficientOf(MonomialVector(0));
+  if (coefficients.monomials.contains(MonomialVector(0))) {
+    outputConstTerm = coefficients.getCoefficientOf(MonomialVector(0));
   }
-  if (theCoeffs.monomials.contains(MonomialVector(1))) {
-    outputCoeffLinTerm = theCoeffs.getCoefficientOf(MonomialVector(1));
+  if (coefficients.monomials.contains(MonomialVector(1))) {
+    outputCoeffLinTerm = coefficients.getCoefficientOf(MonomialVector(1));
   }
-  if (theCoeffs.monomials.contains(MonomialVector(2))) {
-    outputCoeffVarSquared = theCoeffs.getCoefficientOf(MonomialVector(2));
+  if (coefficients.monomials.contains(MonomialVector(2))) {
+    outputCoeffVarSquared = coefficients.getCoefficientOf(MonomialVector(2));
   }
   return true;
 }
 
-bool CalculatorFunctions::extractLinearCoeffsWRTvariable(
-  const Expression& theLinearExpression,
-  const Expression& theVariable,
+bool CalculatorFunctions::extractLinearCoefficientsWithRespectToVariable(
+  const Expression& linearExpression,
+  const Expression& variable,
   Expression& outputCoeffLinTerm,
   Expression& outputConstTerm
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::extractLinearCoeffsWRTvariable");
-  VectorSparse<Expression> theCoeffs;
-  if (theLinearExpression.owner == nullptr) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::extractLinearCoefficientsWithRespectToVariable");
+  VectorSparse<Expression> coefficients;
+  if (linearExpression.owner == nullptr) {
     return false;
   }
-  Calculator& calculator = *theLinearExpression.owner;
-  calculator.collectCoefficientsPowersVariables(theLinearExpression, theVariable, theCoeffs);
-  if (theCoeffs.getLargestParticipatingBasisIndex() > 1) {
+  Calculator& calculator = *linearExpression.owner;
+  calculator.collectCoefficientsPowersVariables(linearExpression, variable, coefficients);
+  if (coefficients.getLargestParticipatingBasisIndex() > 1) {
     return false;
   }
   outputCoeffLinTerm.assignValue(0, calculator);
   outputConstTerm.assignValue(0, calculator);
-  if (theCoeffs.monomials.contains(MonomialVector(1))) {
-    outputCoeffLinTerm = theCoeffs.getCoefficientOf(MonomialVector(1));
+  if (coefficients.monomials.contains(MonomialVector(1))) {
+    outputCoeffLinTerm = coefficients.getCoefficientOf(MonomialVector(1));
   }
-  if (theCoeffs.monomials.contains(MonomialVector(0))) {
-    outputConstTerm = theCoeffs.getCoefficientOf(MonomialVector(0));
+  if (coefficients.monomials.contains(MonomialVector(0))) {
+    outputConstTerm = coefficients.getCoefficientOf(MonomialVector(0));
   }
   return true;
 }
@@ -4082,10 +4079,10 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIaand
   }
   Expression denNoPower = functionExpression[2];
   Expression a, b, c, A, B;
-  if (!CalculatorFunctions::extractQuadraticCoeffsWRTvariable(denNoPower, x, a, b, c)) {
+  if (!CalculatorFunctions::extractQuadraticCoefficientsWithRespectToVariable(denNoPower, x, a, b, c)) {
     return false;
   }
-  if (!CalculatorFunctions::extractLinearCoeffsWRTvariable(functionExpression[1], x, A, B)) {
+  if (!CalculatorFunctions::extractLinearCoefficientsWithRespectToVariable(functionExpression[1], x, A, B)) {
     return false;
   }
   if (
@@ -4163,7 +4160,7 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIIb(
   if (!functionExpression[1].isEqualToOne()) {
     return false;
   }
-  if (!CalculatorFunctions::extractQuadraticCoeffsWRTvariable(denNoPower, x, a, b, c)) {
+  if (!CalculatorFunctions::extractQuadraticCoefficientsWithRespectToVariable(denNoPower, x, a, b, c)) {
     return false;
   }
   if (!a.isEqualToOne() || !b.isConstantNumber() || !c.isConstantNumber()) {
@@ -4229,10 +4226,10 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIb(
   }
   Expression denNoPower = functionExpression[2][1];
   Expression a, b, c, A, B;
-  if (!CalculatorFunctions::extractQuadraticCoeffsWRTvariable(denNoPower, x, a, b, c)) {
+  if (!CalculatorFunctions::extractQuadraticCoefficientsWithRespectToVariable(denNoPower, x, a, b, c)) {
     return false;
   }
-  if (!CalculatorFunctions::extractLinearCoeffsWRTvariable(functionExpression[1], x, A, B)) {
+  if (!CalculatorFunctions::extractLinearCoefficientsWithRespectToVariable(functionExpression[1], x, A, B)) {
     return false;
   }
   if (A.isEqualToZero()) { //building block is of type IIIb
@@ -7503,29 +7500,29 @@ bool CalculatorFunctions::innerSolveProductSumEquationOverSetModN(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSolveProductSumEquationOverSetModN");
-  Expression theModuloE, theIntegersE, theProductE, theSumE;
-  if (!CalculatorConversions::innerLoadKey(calculator, input, "theMod", theModuloE)) {
+  Expression modulusExpression, integersExpression, theProductE, theSumE;
+  if (!CalculatorConversions::innerLoadKey(calculator, input, "theMod", modulusExpression)) {
     return calculator << "<hr>Value theMod not found.";
   }
-  int theMod;
-  if (!theModuloE.isIntegerFittingInInt(&theMod)) {
-    return calculator << " <hr> Failed to extract modulus from " << theModuloE.toString();
+  int modulusSmall;
+  if (!modulusExpression.isIntegerFittingInInt(&modulusSmall)) {
+    return calculator << " <hr> Failed to extract modulus from " << modulusExpression.toString();
   }
-  if (theMod == 0) {
+  if (modulusSmall == 0) {
     return calculator << "<hr>zero modulus not allowed.";
   }
-  if (theMod < 0) {
-    theMod *= - 1;
+  if (modulusSmall < 0) {
+    modulusSmall *= - 1;
   }
-  if (theMod > 10000000) {
+  if (modulusSmall > 10000000) {
     return calculator << "<hr>I've been instructed to compute with moduli no larger than 10000000.";
   }
-  if (!CalculatorConversions::innerLoadKey(calculator, input, "theSet", theIntegersE)) {
+  if (!CalculatorConversions::innerLoadKey(calculator, input, "theSet", integersExpression)) {
     return calculator << "<hr>Value theSet not found.";
   }
   List<int> theInts;
-  if (!calculator.getVectorInt(theIntegersE, theInts)) {
-    return calculator << "<hr>Failed to extract integer list from " << theIntegersE.toString();
+  if (!calculator.getVectorInt(integersExpression, theInts)) {
+    return calculator << "<hr>Failed to extract integer list from " << integersExpression.toString();
   }
   for (int i = 0; i < theInts.size; i ++) {
     if (theInts[i] <= 0) {
@@ -7549,39 +7546,39 @@ bool CalculatorFunctions::innerSolveProductSumEquationOverSetModN(
   if (!theSumE.isSmallInteger(&theSum)) {
     return calculator << "Failed to extract small integer from " << theSumE.toString();
   }
-  VectorPartition thePartition;
-  Vectors<Rational> theOneDimVectors;
-  theOneDimVectors.setSize(theInts.size);
+  VectorPartition vectorPartition;
+  Vectors<Rational> oneDimensionalVectors;
+  oneDimensionalVectors.setSize(theInts.size);
   for (int i = 0; i < theInts.size; i ++) {
-    theOneDimVectors[i].makeZero(1);
-    theOneDimVectors[i][0] = theInts[i];
+    oneDimensionalVectors[i].makeZero(1);
+    oneDimensionalVectors[i][0] = theInts[i];
   }
-  thePartition.goalVector.makeZero(1);
-  thePartition.goalVector[0] = theSum;
-  if (!thePartition.initialize(theOneDimVectors, thePartition.goalVector)) {
+  vectorPartition.goalVector.makeZero(1);
+  vectorPartition.goalVector[0] = theSum;
+  if (!vectorPartition.initialize(oneDimensionalVectors, vectorPartition.goalVector)) {
     return calculator << "Failed to initialize the computation. ";
   }
-  LargeIntegerUnsigned theModLarge;
-  theModLarge = static_cast<unsigned>(theMod);
+  LargeIntegerUnsigned modulusLarge;
+  modulusLarge = static_cast<unsigned>(modulusSmall);
   int numTestedSoFar = 0;
   ProgressReport report;
   LargeIntegerUnsigned oneUI = 1;
-  while (thePartition.incrementReturnFalseIfPastLast()) {
+  while (vectorPartition.incrementReturnFalseIfPastLast()) {
     LargeIntegerUnsigned theProduct = 1;
-    for (int i = 0; i < thePartition.currentPartition.size; i ++) {
+    for (int i = 0; i < vectorPartition.currentPartition.size; i ++) {
       LargeIntegerUnsigned theNumber = static_cast<unsigned>(theInts[i]);
-      MathRoutines::raiseToPower(theNumber, thePartition.currentPartition[i], oneUI);
+      MathRoutines::raiseToPower(theNumber, vectorPartition.currentPartition[i], oneUI);
       theProduct *= theNumber;
-      theProduct %= theModLarge;
+      theProduct %= modulusLarge;
     }
     if (theProduct == goalProduct.value) {
       std::stringstream out;
       out << "Found one solution: ";
-      for (int i = 0; i < thePartition.currentPartition.size; i ++) {
-        if (thePartition.currentPartition[i] > 0) {
+      for (int i = 0; i < vectorPartition.currentPartition.size; i ++) {
+        if (vectorPartition.currentPartition[i] > 0) {
           out << theInts[i];
-          if (thePartition.currentPartition[i] > 1) {
-            out << "^{" << thePartition.currentPartition[i] << "}";
+          if (vectorPartition.currentPartition[i] > 1) {
+            out << "^{" << vectorPartition.currentPartition[i] << "}";
           }
           out << " ";
         }
@@ -7786,7 +7783,7 @@ public:
   List<int> layerSizes;
   List<int> layerFirstIndices;
   List<List<int> > arrows;
-  Plot thePlot;
+  Plot plot;
   List<Expression> currentLayer;
   List<Expression> nextLayer;
   List<Expression> currentEchildrenTruncated;
@@ -7973,8 +7970,8 @@ public:
     this->initialize();
     while (this->incrementReturnFalseIfPastLast()) {
     }
-    this->thePlot.dimension = 2;
-    this->thePlot.flagIncludeCoordinateSystem = false;
+    this->plot.dimension = 2;
+    this->plot.flagIncludeCoordinateSystem = false;
     this->nodePositions.setSize(this->displayedExpressionStrings.size);
     for (int i = 0; i < this->layerFirstIndices.size; i ++) {
       this->computeLayerPositions(i);
@@ -7994,7 +7991,7 @@ public:
         theSegment.pointsDouble.addOnTop(arrowBase);
         theSegment.pointsDouble.addOnTop(arrowHead);
         theSegment.colorJS = "black";
-        this->thePlot += theSegment;
+        this->plot += theSegment;
       }
       if (this->displayedExpressionStrings[i] != "") {
         PlotObject theText;
@@ -8005,13 +8002,13 @@ public:
         theText.plotString =
         HtmlRoutines::clearNewLines
         (HtmlRoutines::backslashQuotes(HtmlRoutines::doubleBackslashes(this->displayedExpressionStrings[i]) ));
-        thePlot += theText;
+        plot += theText;
       } else {
         PlotObject thePoint;
         thePoint.plotType = "point";
         thePoint.colorJS = "blue";
         thePoint.pointsDouble.addOnTop(this->nodePositionsDouble[i]);
-        this->thePlot += thePoint;
+        this->plot += thePoint;
       }
     }
   }
@@ -8026,7 +8023,7 @@ bool CalculatorFunctionsPlot::drawExpressionGraphWithOptions(
   theEdrawer.owner = &calculator;
   theEdrawer.baseExpression = input;
   theEdrawer.drawToDrawingVariables();
-  return output.assignValue(theEdrawer.thePlot, calculator);
+  return output.assignValue(theEdrawer.plot, calculator);
 }
 
 bool CalculatorFunctions::setRandomSeed(

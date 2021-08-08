@@ -1424,9 +1424,9 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
   std::stringstream out2;
   std::stringstream out;
   out2 << this->toString() << "\n";
-  Matrix<Rational> tempMat;
-  this->simpleRootsReductiveSubalgebra.getMatrixRootsToRows(tempMat);
-  tempMat.invert();
+  Matrix<Rational> inverted;
+  this->simpleRootsReductiveSubalgebra.getMatrixRootsToRows(inverted);
+  inverted.invert();
   int counter = 0;
   HashedList<Vector<Rational> >& AllRoots = this->getAmbientWeyl().rootSystem;
   for (int i = 0; i <AllRoots.size; i ++) {
@@ -1436,7 +1436,7 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
         linComb[j].makeZero();
         for (int k = 0; k < dimension; k++) {
           Rational tempRat;
-          tempRat.assign(tempMat.elements[k][j]);
+          tempRat.assign(inverted.elements[k][j]);
           tempRat.multiplyBy(AllRoots[i][k]);
           linComb[j] += tempRat;
         }
@@ -1479,9 +1479,9 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
       Vectors<Rational> tempRoots;
       tempRoots =(this->simpleRootsReductiveSubalgebra);
       tempRoots[l] =(tempRoot);
-      Matrix<Rational> tempMat;
-      tempRoots.getMatrixRootsToRows(tempMat);
-      tempMat.invert();
+      Matrix<Rational> inverted;
+      tempRoots.getMatrixRootsToRows(inverted);
+      inverted.invert();
       for (int i = 0; i <AllRoots.size; i ++) {
         Vector<Rational> linComb;
         if (this->allRootsSubalgebra.getIndex(AllRoots.objects[i]) == - 1) {
@@ -1489,7 +1489,7 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
             linComb[j].makeZero();
             for (int k = 0; k < dimension; k++) {
               Rational tempRat;
-              tempRat.assign(tempMat.elements[k][j]);
+              tempRat.assign(inverted.elements[k][j]);
               tempRat.multiplyBy(AllRoots[i][k]);
               linComb[j] += tempRat;
             }
@@ -1873,17 +1873,17 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
   int tempI2= permComponentsCentralizer.totalNumberSubsetsSmallInt();
   int NumAutosCentralizer = tempAutosCentralizer.totalNumberSubsetsSmallInt();
   permComponentsCentralizer.getPermutationLthElementIsTheImageofLthIndex(tempPermutation2);
-  Matrix<Rational> tempMat;
+  Matrix<Rational> rankComputer;
   Selection tempSel;
   for (int i = 0; i <domain.size; i ++) {
     isoDomain.addOnTop(domain[i]);
-    if (isoDomain.getRankElementSpan(&tempMat, &tempSel) < isoDomain.size) {
+    if (isoDomain.getRankElementSpan(&rankComputer, &tempSel) < isoDomain.size) {
       isoDomain.removeLastObject();
     } else {
       isoRange.addOnTop(range[i]);
     }
   }
-  if (isoRange.getRankElementSpan(&tempMat, &tempSel) < isoRange.size) {
+  if (isoRange.getRankElementSpan(&rankComputer, &tempSel) < isoRange.size) {
     return false;
   }
   int givenSize = isoDomain.size;
@@ -2013,12 +2013,12 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
 void RootSubalgebra::doKRootsEnumeration() {
   this->kEnumerations.setSize(this->positiveRootsKConnectedComponents.size);
   this->kComponentRanks.setSize(this->positiveRootsKConnectedComponents.size);
-  Matrix<Rational> tempMat;
+  Matrix<Rational> rankComputer;
   Selection tempSel;
   for (int i = 0; i < this->positiveRootsKConnectedComponents.size; i ++) {
     this->kEnumerations[i].initialize(this->positiveRootsKConnectedComponents[i].size);
     this->kComponentRanks[i] =
-    this->positiveRootsKConnectedComponents[i].getRankElementSpan(&tempMat, &tempSel);
+    this->positiveRootsKConnectedComponents[i].getRankElementSpan(&rankComputer, &tempSel);
   }
   this->doKRootsEnumerationRecursively(0);
 }
@@ -2040,19 +2040,18 @@ void RootSubalgebra::doKRootsEnumerationRecursively(int indexEnumeration) {
 
 void RootSubalgebra::subalgebraEnumerationsToLinearCombinations() {
   int dimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
-  Matrix<Rational> tempMat;
-  Selection tempSelection;
-  tempMat.initialize(dimension, dimension);
+  Matrix<Rational> matrix;
+  matrix.initialize(dimension, dimension);
   int counter = 0;
   for (int i = 0; i < this->positiveRootsKConnectedComponents.size; i ++) {
     this->positiveRootsKConnectedComponents[i].selectionToMatrixAppend(
-      this->kEnumerations[i], dimension, tempMat, counter
+      this->kEnumerations[i], dimension, matrix, counter
     );
     counter += this->kComponentRanks[i];
   }
-  //tempMat.ComputeDebugString();
-  if (tempMat.invert()) {
-    //tempMat.ComputeDebugString();
+  //matrix.ComputeDebugString();
+  if (matrix.invert()) {
+    //matrix.ComputeDebugString();
     for (int l = 0; l < this->testedRootsAlpha.size; l ++) {
       Vector<Rational> linComb;
       Vector<Rational>& TestedRootAlpha = this->testedRootsAlpha[l];
@@ -2060,7 +2059,7 @@ void RootSubalgebra::subalgebraEnumerationsToLinearCombinations() {
         linComb[j].makeZero();
         for (int k = 0; k < dimension; k ++) {
           Rational tempRat;
-          tempRat.assign(tempMat.elements[k][j]);
+          tempRat.assign(matrix.elements[k][j]);
           tempRat.multiplyBy(TestedRootAlpha[k]);
           linComb[j] += tempRat;
         }
@@ -3878,7 +3877,7 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(std::string& output, bo
 void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrixForm, Vectors<Rational>& input) {
   std::string tempS; std::stringstream out;
   Vectors<Rational> epsilonCoordinates;
-  Matrix<int> tempMat;
+  Matrix<int> matrix;
   char simpleType;
   int dimension = - 1;
   if (!this->getOwnerWeyl().dynkinType.isSimple(&simpleType, &dimension)) {
@@ -3887,8 +3886,8 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
   }
   if (simpleType == 'B') {
     this->getOwnerWeyl().getEpsilonCoordinates(input, epsilonCoordinates);
-    tempMat.makeIdentityMatrix(dimension * 2 + 1, 1, 0);
-    tempMat.elements[dimension][dimension] = 0;
+    matrix.makeIdentityMatrix(dimension * 2 + 1, 1, 0);
+    matrix.elements[dimension][dimension] = 0;
     for (int i = 0; i < epsilonCoordinates.size; i ++) {
       bool isShort = false;
       int firstIndex = - 1;
@@ -3927,31 +3926,31 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
             positiveIndex = secondIndex;
             negativeIndex = firstIndex;
           }
-          tempMat.elements[positiveIndex][negativeIndex] = 1;
-          tempMat.elements[dimension + 1 + negativeIndex][dimension + 1 + positiveIndex] = - 1;
+          matrix.elements[positiveIndex][negativeIndex] = 1;
+          matrix.elements[dimension + 1 + negativeIndex][dimension + 1 + positiveIndex] = - 1;
         } else {
           if (firstSignIsPositive) {
-            tempMat.elements[firstIndex][secondIndex + dimension + 1] = 1;
-            tempMat.elements[secondIndex][firstIndex + dimension + 1] = - 1;
+            matrix.elements[firstIndex][secondIndex + dimension + 1] = 1;
+            matrix.elements[secondIndex][firstIndex + dimension + 1] = - 1;
           } else {
-            tempMat.elements[dimension + 1 + firstIndex][secondIndex] = 1;
-            tempMat.elements[dimension + 1 + secondIndex][firstIndex] = - 1;
+            matrix.elements[dimension + 1 + firstIndex][secondIndex] = 1;
+            matrix.elements[dimension + 1 + secondIndex][firstIndex] = - 1;
           }
         }
       } else {
         if (firstSignIsPositive) {
-          tempMat.elements[firstIndex][dimension] = 1;
-          tempMat.elements[dimension][dimension + 1 + firstIndex] = - 1;
+          matrix.elements[firstIndex][dimension] = 1;
+          matrix.elements[dimension][dimension + 1 + firstIndex] = - 1;
         } else {
-          tempMat.elements[dimension][firstIndex] = 1;
-          tempMat.elements[firstIndex + 1 + dimension][dimension] = - 1;
+          matrix.elements[dimension][firstIndex] = 1;
+          matrix.elements[firstIndex + 1 + dimension][dimension] = - 1;
         }
       }
     }
   }
   if (simpleType == 'C') {
     this->getOwnerWeyl().getEpsilonCoordinates(input, epsilonCoordinates);
-    tempMat.makeIdentityMatrix(dimension * 2, 1, 0);
+    matrix.makeIdentityMatrix(dimension * 2, 1, 0);
     for (int i = 0; i < epsilonCoordinates.size; i ++) {
       bool isLong = false;
       int firstIndex = - 1;
@@ -3990,22 +3989,22 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
             positiveIndex = secondIndex;
             negativeIndex = firstIndex;
           }
-          tempMat.elements[positiveIndex][negativeIndex] = 1;
-          tempMat.elements[dimension + negativeIndex][dimension + positiveIndex] = - 1;
+          matrix.elements[positiveIndex][negativeIndex] = 1;
+          matrix.elements[dimension + negativeIndex][dimension + positiveIndex] = - 1;
         } else {
           if (firstSignIsPositive) {
-            tempMat.elements[firstIndex][secondIndex + dimension] = 1;
-            tempMat.elements[secondIndex][firstIndex + dimension] = 1;
+            matrix.elements[firstIndex][secondIndex + dimension] = 1;
+            matrix.elements[secondIndex][firstIndex + dimension] = 1;
           } else {
-            tempMat.elements[dimension + firstIndex][secondIndex] = 1;
-            tempMat.elements[dimension + secondIndex][firstIndex] = 1;
+            matrix.elements[dimension + firstIndex][secondIndex] = 1;
+            matrix.elements[dimension + secondIndex][firstIndex] = 1;
           }
         }
       } else {
         if (firstSignIsPositive) {
-          tempMat.elements[firstIndex][dimension + firstIndex] = 1;
+          matrix.elements[firstIndex][dimension + firstIndex] = 1;
         } else {
-          tempMat.elements[dimension + firstIndex][firstIndex] = 1;
+          matrix.elements[dimension + firstIndex][firstIndex] = 1;
         }
       }
     }
@@ -4033,25 +4032,25 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
   }
   if (includeMatrixForm) {
     out << "\\end{tabular} & $\\mathfrak{l}=\\left(\\begin{array}{";
-    for (int i = 0; i < tempMat.numberOfColumns; i ++) {
+    for (int i = 0; i < matrix.numberOfColumns; i ++) {
       out << "c";
       if (simpleType == 'B' && (i == dimension - 1 || i == dimension)) {
         out << "|";
       }
     }
     out << "}";
-    for (int i = 0; i < tempMat.numberOfRows; i ++) {
+    for (int i = 0; i < matrix.numberOfRows; i ++) {
       if (simpleType == 'B' && (i == dimension || i == dimension + 1)) {
         out << "\\hline";
       }
-      for (int j = 0; j < tempMat.numberOfColumns; j ++) {
-        if (tempMat.elements[i][j] != 0 && tempMat.elements[j][i] == 0) {
+      for (int j = 0; j < matrix.numberOfColumns; j ++) {
+        if (matrix.elements[i][j] != 0 && matrix.elements[j][i] == 0) {
           out << "\\blacktriangle";
         }
-        if (tempMat.elements[i][j] != 0 && tempMat.elements[j][i] != 0) {
+        if (matrix.elements[i][j] != 0 && matrix.elements[j][i] != 0) {
           out << "\\bullet";
         }
-        if (j != tempMat.numberOfColumns - 1) {
+        if (j != matrix.numberOfColumns - 1) {
           out << "&";
         } else {
           out << "\\\\";

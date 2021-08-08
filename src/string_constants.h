@@ -141,7 +141,10 @@ public:
     struct SolutionData {
       static std::string input;
       static std::string finalExpression;
+      static std::string comments;
       static std::string steps;
+      static std::string transformation;
+      static std::string annotations;
     };
   };
   struct frontend {

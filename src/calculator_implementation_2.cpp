@@ -1318,7 +1318,7 @@ void Calculator::evaluateCommands() {
   if (!global.flagRunningConsoleRegular) {
     report.report("Evaluating expressions, current expression stack:\n");
   }
-  this->evaluateExpression(*this, this->programExpression, this->programExpression);
+  this->evaluateExpression(*this, startingExpression, this->programExpression);
   if (this->recursionDepth != 0) {
     global.fatal << "The starting recursion "
     << "depth before evaluation was 0, but after evaluation it is "

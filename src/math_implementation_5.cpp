@@ -682,9 +682,9 @@ void HomomorphismSemisimpleLieAlgebra::getWeightsWrtKInSimpleCoordinatesK(
       currentWeight[j] = tempRat;
     }
   }
-  Matrix<Rational> tempMat = this->domain().weylGroup.cartanSymmetric;
-  tempMat.invert();
-  tempMat.actOnVectorsColumn(outputWeights);
+  Matrix<Rational> invertedCartan = this->domain().weylGroup.cartanSymmetric;
+  invertedCartan.invert();
+  invertedCartan.actOnVectorsColumn(outputWeights);
 }
 
 template <class Coefficient>
@@ -863,7 +863,7 @@ void SlTwoInSlN::extractHighestWeightVectorsFromVector(
   outputTheHWVectors.size = 0;
   Matrix<Rational> remainder;
   remainder = input;
-  Matrix<Rational> component, highestWeightVector, tempMat;
+  Matrix<Rational> component, highestWeightVector, matrix;
   Rational coefficient, tempRat;
   int largestPowerNotKillingInput;
   while (!remainder.isEqualToZero() ) {
@@ -871,12 +871,12 @@ void SlTwoInSlN::extractHighestWeightVectorsFromVector(
     this->climbDownFromHighestWeightAlongSl2String(highestWeightVector, component, coefficient, largestPowerNotKillingInput);
     for (int i = 0; i < this->projectors.size; i ++) {
       Matrix<Rational>& currentProjector = this->projectors[i];
-      tempMat = highestWeightVector;
-      tempMat.multiplyOnTheLeft(currentProjector);
-      if (!tempMat.isEqualToZero()) {
-        tempMat.findFirstNonZeroElementSearchEntireRow(tempRat);
-        tempMat /= tempRat;
-        outputTheHWVectors.addOnTop(tempMat);
+      matrix = highestWeightVector;
+      matrix.multiplyOnTheLeft(currentProjector);
+      if (!matrix.isEqualToZero()) {
+        matrix.findFirstNonZeroElementSearchEntireRow(tempRat);
+        matrix /= tempRat;
+        outputTheHWVectors.addOnTop(matrix);
       }
     }
     global.fatal << "Extract highest vector not fully implemented yet. " << global.fatal;
@@ -891,19 +891,19 @@ void SlTwoInSlN::extractHighestWeightVectorsFromVector(
 }
 
 void SlTwoInSlN::climbUpFromVector(Matrix<Rational>& input, Matrix<Rational>& outputLastNonZero, int& largestPowerNotKillingInput) {
-  Matrix<Rational>  tempMat;
+  Matrix<Rational> matrix;
   if (&input == &outputLastNonZero) {
     global.fatal << "Input not allowed to coincide with the output. " << global.fatal;
   }
   outputLastNonZero = input;
   largestPowerNotKillingInput = 0;
   for (
-    Matrix<Rational>::lieBracket(this->eElement, outputLastNonZero, tempMat);
-    !tempMat.isEqualToZero();
-    Matrix<Rational>::lieBracket(this->eElement, outputLastNonZero, tempMat)
+    Matrix<Rational>::lieBracket(this->eElement, outputLastNonZero, matrix);
+    !matrix.isEqualToZero();
+    Matrix<Rational>::lieBracket(this->eElement, outputLastNonZero, matrix)
   ) {
     largestPowerNotKillingInput ++;
-    outputLastNonZero = tempMat;
+    outputLastNonZero = matrix;
   }
 }
 
@@ -977,23 +977,23 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
   << this->eElement.toStringWithBlocks(this->thePartition) << endMath;
   out << newLine << beginMath << "f =" << this->elementMatrixToTensorString(this->fElement, useHtml) << "="
   << this->fElement.toStringWithBlocks(this->thePartition) << endMath;
-  Matrix<Rational>  tempMat;
-  tempMat.initialize(this->dimension, this->dimension);
+  Matrix<Rational> matrix;
+  matrix.initialize(this->dimension, this->dimension);
   List<Matrix<Rational> > Decomposition, theHwCandidatesBeforeProjection, theHwCandidatesProjected;
   this->highestWeightVectors.size = 0;
   this->gModKModules.size = 0;
   for (int i = 0; i < this->dimension; i ++) {
     for (int j = 0; j < this->dimension; j ++) {
-      tempMat.makeZero();
-      tempMat.elements[i][j] = 1;
-      this->extractHighestWeightVectorsFromVector(tempMat, Decomposition, theHwCandidatesBeforeProjection);
+      matrix.makeZero();
+      matrix.elements[i][j] = 1;
+      this->extractHighestWeightVectorsFromVector(matrix, Decomposition, theHwCandidatesBeforeProjection);
       theHwCandidatesProjected.size = 0;
       for (int k = 0; k < theHwCandidatesBeforeProjection.size; k ++) {
         for (int l = 0; l < this->projectors.size; l ++) {
-          tempMat = theHwCandidatesBeforeProjection[k];
-          tempMat.multiplyOnTheLeft(this->projectors[l]);
-          if (!tempMat.isEqualToZero()) {
-            theHwCandidatesProjected.addOnTop(tempMat);
+          matrix = theHwCandidatesBeforeProjection[k];
+          matrix.multiplyOnTheLeft(this->projectors[l]);
+          if (!matrix.isEqualToZero()) {
+            theHwCandidatesProjected.addOnTop(matrix);
           }
         }
       }
@@ -1005,11 +1005,11 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
           List<Matrix<Rational> >& currentMod = *this->gModKModules.lastObject();
           currentMod.size = 0;
           for (
-            tempMat = currentHighest;
-            !tempMat.isEqualToZero();
-            Matrix<Rational>::lieBracket(this->fElement, tempMat, tempMat)
+            matrix = currentHighest;
+            !matrix.isEqualToZero();
+            Matrix<Rational>::lieBracket(this->fElement, matrix, matrix)
           ) {
-            currentMod.addOnTop(tempMat);
+            currentMod.addOnTop(matrix);
           }
         }
       }
@@ -1060,21 +1060,21 @@ std::string SlTwoInSlN::pairTwoIndices(List<int>& output, int leftIndex, int rig
   output.size = 0;
   List<Matrix<Rational> >& leftElements = this->gModKModules[leftIndex];
   List<Matrix<Rational> >& rightElements = this->gModKModules[rightIndex];
-  Matrix<Rational> tempMat;
+  Matrix<Rational> matrix;
   List<Matrix<Rational> > HighestWeightsContainingModules;
   List<Matrix<Rational> > tempDecomposition;
   for (int i = 0; i < leftElements.size; i ++) {
     for (int j = 0; j < rightElements.size; j ++) {
       Matrix<Rational>& leftElt = leftElements[i];
       Matrix<Rational>& rightElt = rightElements[j];
-      Matrix<Rational>::lieBracket(leftElt, rightElt, tempMat);
-      if (!tempMat.isEqualToZero()) {
-        this->extractHighestWeightVectorsFromVector(tempMat, tempDecomposition, HighestWeightsContainingModules);
+      Matrix<Rational>::lieBracket(leftElt, rightElt, matrix);
+      if (!matrix.isEqualToZero()) {
+        this->extractHighestWeightVectorsFromVector(matrix, tempDecomposition, HighestWeightsContainingModules);
         for (int k = 0; k < HighestWeightsContainingModules.size; k ++) {
           output.addOnTopNoRepetition(this->getModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k]));
           if (this->getModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k]) == - 1) {
             global.comments << newLine << beginMath << "[" << leftElt.toString(&latexFormat) << ", "
-            << rightElt.toString(&latexFormat) << "] =" << tempMat.toString(&latexFormat) << endMath;
+            << rightElt.toString(&latexFormat) << "] =" << matrix.toString(&latexFormat) << endMath;
           }
         }
       }

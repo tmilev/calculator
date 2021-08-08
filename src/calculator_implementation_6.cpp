@@ -1196,9 +1196,7 @@ bool CalculatorFunctions::innerIsSquareFreePolynomial(
     return false;
   }
   WithContext<Polynomial<Rational> > polynomial;
-  if (!CalculatorConversions::convert(
-    input, CalculatorConversions::innerPolynomial<Rational>, polynomial
-  )) {
+  if (!CalculatorConversions::convertToPolynomial(input, polynomial)) {
     return false;
   }
   std::stringstream out;
@@ -1375,7 +1373,7 @@ bool CalculatorFunctions::innerSubList(Calculator& calculator, const Expression&
   return output.makeSequence(calculator, &theList);
 }
 
-bool CalculatorFunctions::innerApplyToList(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::applyToList(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerApplyToList");
   if (input.size() != 3) {
     return false;

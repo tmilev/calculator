@@ -18,7 +18,7 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   // this function return true if Ax = b >= 0 has a solution with x >= 0 and records a solution x at outputPoint
   // else returns false, where b is a given nonnegative column vector, A is an n by m matrix
   // and x is a column vector with m entries
-  Matrix<Rational> tempMatA;
+  Matrix<Rational> workingMatrix;
   Vector<Rational> matX;
   Selection BaseVariables;
   Rational GlobalGoal;
@@ -39,20 +39,19 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
     return false;
   }
   int numberOfTrueVariables = matA.numberOfColumns;
-  //tempMatb.assign(matb);
-  tempMatA.initialize(matA.numberOfRows, numberOfTrueVariables + matA.numberOfRows);
+  workingMatrix.initialize(matA.numberOfRows, numberOfTrueVariables + matA.numberOfRows);
   HashedList<Selection> VisitedVertices;
   VisitedVertices.clear();
-  BaseVariables.initialize(tempMatA.numberOfColumns);
-  tempMatA.makeZero();
-  matX.makeZero(tempMatA.numberOfColumns);
+  BaseVariables.initialize(workingMatrix.numberOfColumns);
+  workingMatrix.makeZero();
+  matX.makeZero(workingMatrix.numberOfColumns);
   for (int j = 0; j < matA.numberOfColumns; j ++) {
     for (int i = 0; i < matA.numberOfRows; i ++) {
-      tempMatA.elements[i][j].assign(matA.elements[i][j]);
+      workingMatrix.elements[i][j].assign(matA.elements[i][j]);
     }
   }
   for (int j = 0; j < matA.numberOfRows; j ++) {
-    tempMatA.elements[j][j + numberOfTrueVariables].makeOne();
+    workingMatrix.elements[j][j + numberOfTrueVariables].makeOne();
     matX[j + numberOfTrueVariables] = (matb.elements[j][0]);
     BaseVariables.addSelectionAppendNewIndex(j + numberOfTrueVariables);
   }
@@ -61,11 +60,11 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   bool WeHaveNotEnteredACycle = true;
   while (EnteringVariable != - 1 && WeHaveNotEnteredACycle && GlobalGoal.isPositive()) {
     EnteringVariable = - 1; ChangeGradient.makeZero();
-    for (int i = 0; i < tempMatA.numberOfColumns; i ++) {
+    for (int i = 0; i < workingMatrix.numberOfColumns; i ++) {
       if (!BaseVariables.selected[i]) {
         Rational PotentialChangeGradient; bool hasAPotentialLeavingVariable;
         Matrix<Rational>::computePotentialChangeGradient(
-          tempMatA, BaseVariables, numberOfTrueVariables, i, PotentialChangeGradient, hasAPotentialLeavingVariable
+          workingMatrix, BaseVariables, numberOfTrueVariables, i, PotentialChangeGradient, hasAPotentialLeavingVariable
         );
         if (PotentialChangeGradient.isGreaterThanOrEqualTo(ChangeGradient) && hasAPotentialLeavingVariable) {
           EnteringVariable = i;
@@ -77,21 +76,21 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       int LeavingVariableRow;
       Rational MaxMovement;
       Matrix<Rational>::getMaxMovementAndLeavingVariableRow(
-        MaxMovement, LeavingVariableRow, EnteringVariable, tempMatA, matX, BaseVariables
+        MaxMovement, LeavingVariableRow, EnteringVariable, workingMatrix, matX, BaseVariables
       );
       Rational tempRat, tempTotalChange;
-      if (tempMatA.elements[LeavingVariableRow][EnteringVariable].isEqualToZero()) {
+      if (workingMatrix.elements[LeavingVariableRow][EnteringVariable].isEqualToZero()) {
         global.fatal << "The leaving-entering coefficient is not allowed to be zero. " << global.fatal;
       }
-      tempRat.assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
+      tempRat.assign(workingMatrix.elements[LeavingVariableRow][EnteringVariable]);
       tempRat.invert();
-      for (int i = 0; i < tempMatA.numberOfRows; i ++) {
-        if (!tempMatA.elements[i][BaseVariables.elements[i]].isEqualTo(1)) {
+      for (int i = 0; i < workingMatrix.numberOfRows; i ++) {
+        if (!workingMatrix.elements[i][BaseVariables.elements[i]].isEqualTo(1)) {
           global.fatal << "The base variable coefficient is required to be 1 at this point of code. "
           << global.fatal;
         }
       }
-      tempMatA.rowTimesScalar(LeavingVariableRow, tempRat);
+      workingMatrix.rowTimesScalar(LeavingVariableRow, tempRat);
       tempTotalChange.assign(MaxMovement);
       tempTotalChange.multiplyBy(ChangeGradient);
       matX[EnteringVariable] += MaxMovement;
@@ -106,14 +105,14 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
           WeHaveNotEnteredACycle = false;
         }
       }
-      for (int i = 0; i < tempMatA.numberOfRows; i ++) {
-        if (!tempMatA.elements[i][EnteringVariable].isEqualToZero()&& i != LeavingVariableRow) {
-          tempRat.assign(tempMatA.elements[i][EnteringVariable]);
+      for (int i = 0; i < workingMatrix.numberOfRows; i ++) {
+        if (!workingMatrix.elements[i][EnteringVariable].isEqualToZero()&& i != LeavingVariableRow) {
+          tempRat.assign(workingMatrix.elements[i][EnteringVariable]);
           tempRat.multiplyBy(MaxMovement);
           matX[BaseVariables.elements[i]] -= tempRat;
-          tempRat.assign(tempMatA.elements[i][EnteringVariable]);
+          tempRat.assign(workingMatrix.elements[i][EnteringVariable]);
           tempRat.negate();
-          tempMatA.addTwoRows(LeavingVariableRow, i, 0, tempRat);
+          workingMatrix.addTwoRows(LeavingVariableRow, i, 0, tempRat);
         }
         if (i == LeavingVariableRow) {
           matX[BaseVariables.elements[i]] = 0;
@@ -126,8 +125,8 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       BaseVariables.elements[LeavingVariableRow] = EnteringVariable;
       BaseVariables.selected[EnteringVariable] = true;
       //BaseVariables.ComputeDebugString();
-      for (int i = 0; i < tempMatA.numberOfRows; i ++) {
-        if (!tempMatA.elements[i][BaseVariables.elements[i]].isEqualTo(1)) {
+      for (int i = 0; i < workingMatrix.numberOfRows; i ++) {
+        if (!workingMatrix.elements[i][BaseVariables.elements[i]].isEqualTo(1)) {
           global.fatal << "New base variable expected to be equal to 1. " << global.fatal;
         }
       }

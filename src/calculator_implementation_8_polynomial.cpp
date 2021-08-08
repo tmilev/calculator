@@ -6,7 +6,7 @@
 #include "math_rational_function_implementation.h"
 
 template <>
-bool CalculatorConversions::innerPolynomial<Rational>(Calculator& calculator, const Expression& input, Expression& output);
+bool CalculatorConversions::getPolynomial<Rational>(Calculator& calculator, const Expression& input, Expression& output);
 template <>
 bool CalculatorConversions::functionPolynomial<Rational>(Calculator& calculator, const Expression& input, Expression& output);
 
@@ -287,7 +287,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFields(
   MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::factorPolynomialFiniteFields");
   WithContext<Polynomial<Rational> > polynomial;
   if (!CalculatorConversions::convert(
-    input, CalculatorConversions::innerPolynomial<Rational>, polynomial
+    input, CalculatorConversions::getPolynomial<Rational>, polynomial
   )) {
     return false;
   }
@@ -330,7 +330,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
   MacroRegisterFunctionWithName("Calculator::factorPolynomialKronecker");
   WithContext<Polynomial<Rational> > polynomial;
   if (!CalculatorConversions::convert(
-    input, CalculatorConversions::innerPolynomial<Rational>, polynomial
+    input, CalculatorConversions::getPolynomial<Rational>, polynomial
   )) {
     return false;
   }
@@ -370,9 +370,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialRational(
 ) {
   MacroRegisterFunctionWithName("Calculator::factorPolynomialRational");
   WithContext<Polynomial<Rational> > polynomial;
-  if (!CalculatorConversions::convert(
-    input, CalculatorConversions::innerPolynomial<Rational>, polynomial
-  )) {
+  if (!CalculatorConversions::convertToPolynomial(input, polynomial)) {
     return false;
   }
   if (polynomial.content.minimalNumberOfVariables() > 1) {

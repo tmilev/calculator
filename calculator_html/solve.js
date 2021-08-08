@@ -23,6 +23,8 @@ class Solver {
     this.flagPendingSolutionTypeset = false;
     /**@type{HTMLElement} */
     this.solutionBox = document.getElementById(ids.domElements.pages.solve.solutionBox);
+    /**@type{HTMLElement} */
+    this.commentsBox = document.getElementById(ids.domElements.pages.solve.commentsBox);
   }
 
   selectPage() {
@@ -132,13 +134,50 @@ class Solver {
   ) {
     try {
       let solution = miscellaneous.jsonUnescapeParse(input);
+      miscellaneous.writeHtmlElementsFromCommentsAndErrors(solution, this.commentsBox);
       let steps = solution["solution"]["solution"][pathnames.urlFields.result.solution.steps];
-      this.solutionBox.textContent = `${steps}`;
+      this.writeSteps(steps);
       this.flagPendingSolutionTypeset = true;
       this.processPendingTypeset();
     } catch (e) {
-      this.solutionBox.innerHTML = `<b style='color:red'>${e}</b><br>${input}`;
+      this.solutionBox.textContent = "";
+      let boldElement = document.createElement("b");
+      boldElement.style.color = "red";
+      boldElement.textContent = e;
+      this.solutionBox.appendChild(boldElement);
+      this.solutionBox.appendChild(document.createElement("br"));
+      this.solutionBox.appendChild(document.createTextNode(input));
     }
+  }
+
+  writeSteps(steps) {
+    if (!Array.isArray(steps)) {
+      this.solutionBox.textContent = "Error";
+      return;
+    }
+    if (steps.length === 0) {
+      this.solutionBox.textContent = "Sorry, I couldn't do anything useful.";
+      return;
+    }
+    this.solutionBox.textContent = "";
+    let stepElements = this.getSolutionSteps(steps);
+    for (let i = 0; i < stepElements.length; i++) {
+      this.solutionBox.appendChild(stepElements[i]);
+    }
+  }
+
+  /**@returns{Array.<HTMLElement>} */
+  getSolutionSteps(steps) {
+    let result = [];
+    for (let i = 0; i < steps.length; i++) {
+      result.push(getOneSolutionStep(steps[i]));
+    }
+    return result;
+  }
+
+  /**@returns{HTMLElement} */
+  getOneSolutionStep(step) {
+    return document.createElement("div");
   }
 }
 

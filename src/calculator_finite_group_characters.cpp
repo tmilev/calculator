@@ -53,21 +53,21 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::checkAllSimp
   return true;
 }
 
-/*template <typename somegroup, typename Coefficient>
+template <typename somegroup, typename Coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::checkRepresentationIsMultiplicativelyClosed() {
   HashedList<Matrix<Rational> > tempList;
   tempList.addOnTop(this->theElementImages);
-  Matrix<Rational> tempMat;
+  Matrix<Rational> matrix;
   ElementWeylGroup element;
   for (int i = 0; i < tempList.size; i ++) {
     for (int j = 0; j < tempList.size; j ++) {
-      tempMat = tempList[i];
-      tempMat.multiplyOnTheLeft(tempList[j]);
+      matrix = tempList[i];
+      matrix.multiplyOnTheLeft(tempList[j]);
       element = this->ownerGroup->theElements[j];
       element *= this->ownerGroup->theElements[i];
       element.makeCanonical();
       int targetIndex = this->ownerGroup->theElements.getIndex(element);
-      if (!(tempMat == this->theElementImages[targetIndex])) {
+      if (!(matrix == this->theElementImages[targetIndex])) {
         global.fatal << "this is a programming error: element " << i + 1 << " times element "
         << j + 1 << " is outside of the set, i.e.,  "
         << tempList[i].toString() << " * " << tempList[j].toString() << " is bad. " << global.fatal;
@@ -75,12 +75,11 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::checkReprese
     }
   }
 }
-*/
 
-/*
+
 template <typename somegroup, typename Coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::ComputeAllGeneratorImagesFromSimple(GlobalVariables* global) {
-  MacroRegisterFunctionWithName("GroupRepresentationCarriesAllMatrices::ComputeAllGeneratorImagesFromSimple");
+void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::computeAllGeneratorImagesFromSimple() {
+  MacroRegisterFunctionWithName("GroupRepresentationCarriesAllMatrices::computeAllGeneratorImagesFromSimple");
   this->checkInitialization();
   this->ownerGroup->checkInitializationFiniteDimensionalRepresentationComputation();
   HashedList<ElementWeylGroup> ElementsExplored;
@@ -92,12 +91,13 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::ComputeAllGe
   ElementsExplored.addOnTop(currentElt);
   List<ElementWeylGroup> theGens;
   theGens.setSize(theRank);
-  for (int i = 0; i < theRank; i ++)
+  for (int i = 0; i < theRank; i ++) {
     theGens[i].makeSimpleReflection(i, *this->ownerGroup);
-  for (int i = 0; i <ElementsExplored.size; i ++) {
+  }
+  for (int i = 0; i < ElementsExplored.size; i ++) {
     int indexParentElement = this->ownerGroup->theElements.getIndex(ElementsExplored[i]);
     for (int j = 0; j < theRank; j ++) {
-      currentElt = theGens[j]* ElementsExplored[i];
+      currentElt = theGens[j] * ElementsExplored[i];
       if (!ElementsExplored.contains(currentElt)) {
         int indexCurrentElt = this->ownerGroup->theElements.getIndex(currentElt);
         this->theElementIsComputed[indexCurrentElt] = true;
@@ -113,7 +113,6 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::ComputeAllGe
   //{
   //}
 }
-*/
 
 // This method uses auto everywhere, and a lot of copying data in order to use auto
 template <typename somegroup, typename Coefficient>
@@ -265,14 +264,14 @@ bool Matrix<Element>::getEigenspacesProvidedAllAreIntegralWithEigenValueSmallerT
   theMinPoly.assignMinimalPolynomial(*this);
   Vector<Element> theEigenValueCandidate;
   theEigenValueCandidate.setSize(1);
-  Matrix<Rational> tempMat;
+  Matrix<Rational> eigenSpaceMatrix;
   for (int ii = 0; ii < upperLimitComputations; ii ++) {
     int i = ((ii + 1) / 2) * (2 * (ii % 2) - 1); // 0, 1, - 1, 2, - 2, 3, - 3,...
     theEigenValueCandidate[0] = i;
     if (theMinPoly.evaluate(theEigenValueCandidate) == 0) {
-      tempMat = *this;
+      eigenSpaceMatrix = *this;
       output.setSize(output.size + 1);
-      tempMat.getEigenspaceModifyMe(theEigenValueCandidate[0], *output.lastObject());
+      eigenSpaceMatrix.getEigenspaceModifyMe(theEigenValueCandidate[0], *output.lastObject());
       if (output.lastObject()->size == 0) {
         global.fatal << "This is a programmig error: " << theEigenValueCandidate[0].toString()
         << " is a zero of the minimal polynomial "
@@ -2397,9 +2396,9 @@ bool CalculatorFunctionsWeylGroup::weylGroupElement(
   if (input.size() < 2) {
     return output.makeError("Function WeylElement needs to know what group the element belongs to", calculator);
   }
-  WithContext<SemisimpleLieAlgebra*> thePointer;
+  WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebraPointer;
   if (!CalculatorConversions::convert(
-    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, thePointer
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, semisimpleLieAlgebraPointer
   )) {
     return output.makeError("Error extracting Lie algebra.", calculator);
   }
@@ -2412,10 +2411,10 @@ bool CalculatorFunctionsWeylGroup::weylGroupElement(
     }
     element.multiplyOnTheRightBySimpleReflection(tmp - 1);
   }
-  element.owner = &thePointer.content->weylGroup;
+  element.owner = &semisimpleLieAlgebraPointer.content->weylGroup;
   for (int i = 0; i < element.generatorsLastAppliedFirst.size; i ++) {
     if (
-      element.generatorsLastAppliedFirst[i].index >= thePointer.content->getRank() ||
+      element.generatorsLastAppliedFirst[i].index >= semisimpleLieAlgebraPointer.content->getRank() ||
       element.generatorsLastAppliedFirst[i].index < 0
     ) {
       return output.makeError("Bad reflection index", calculator);
@@ -2429,22 +2428,23 @@ template <typename somegroup, typename Coefficient>
 void VirtualRepresentation<somegroup, Coefficient>::operator*=(const VirtualRepresentation<somegroup, Coefficient>& other) {
   MacroRegisterFunctionWithName("VirtualRepresentation::operator*=");
   (void) other;
-  global.fatal << "Not implemented yet. " << global.fatal;
-/*  WeylGroupVirtualRepresentation<Coefficient> output, currentContribution;
-  output.ownerGroup = this->ownerGroup;
-  output.coefficientsIrreps.makeZero(this->coefficientsIrreps.size);
-  WeylGroupRepresentation<Rational> tempRep;
-  for (int i = 0; i < this->coefficientsIrreps.size; i ++)
-    for (int j = 0; j<other.coefficientsIrreps.size; j ++) {
-      Rational coefficient= this->coefficientsIrreps[i]*other.coefficientsIrreps[j];
-      if (coefficient== 0)
+  VirtualRepresentation<somegroup, Coefficient> output, currentContribution;
+  output.makeZero();
+  for (int i = 0; i < this->size(); i ++) {
+    for (int j = 0; j < other.size(); j ++) {
+      Rational coefficient = this->coefficients[i] * other.coefficients[j];
+      if (coefficient == 0) {
         continue;
-      tempRep = this->ownerGroup->irreps[i];
-      tempRep*= this->ownerGroup->irreps[j];
-      tempRep.decomposeTodorsVersion(currentContribution, 0);
-      output.coefficientsIrreps+= currentContribution*coefficient;
+      }
+      ClassFunction<somegroup, Coefficient> productNonDecomposed;
+      productNonDecomposed = this->monomials[i] * other.monomials[j];
+      global.fatal << "Must decompose representation" << global.fatal;
+      // TODO(tmilev): make this work again.
+      // productNonDecomposed.decomposeTodorsVersion(currentContribution, 0);
+      output += currentContribution * coefficient;
     }
-  *this = output;*/
+  }
+  *this = output;
 }
 
 template <typename somegroup, typename Coefficient>

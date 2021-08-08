@@ -3081,13 +3081,13 @@ bool OnePartialFraction::reduceOnceGeneralMethodNoOSBasis(
   PartialFractions& owner,
   LinearCombination<OnePartialFraction, Polynomial<LargeInteger> >& output,
   Vectors<Rational>& bufferVectors,
-  Matrix<Rational>& bufferMat
+  Matrix<Rational>& bufferMatrix
 ) {
   if (this->indicesNonZeroMultiplicities.size == owner.ambientDimension) {
     return false;
   }
   Vectors<Rational>& tempRoots = bufferVectors;
-  Matrix<Rational>& tempMat = bufferMat;
+  Matrix<Rational>& linearDependenceExtractor = bufferMatrix;
   tempRoots.size = 0;
   int IndexInLinRelationOfLastGainingMultiplicityIndex = - 1;
   Vector<Rational> tempRoot;
@@ -3100,16 +3100,16 @@ bool OnePartialFraction::reduceOnceGeneralMethodNoOSBasis(
     tempRoot = owner.startingVectors[currentIndex] * this->denominator[currentIndex].getLargestElongation();
     tempRoots.addOnTop(tempRoot);
     bool ShouldDecompose;
-    ShouldDecompose = tempRoots.getLinearDependence(tempMat);
+    ShouldDecompose = tempRoots.getLinearDependence(linearDependenceExtractor);
     if (ShouldDecompose && this->lastDistinguishedIndex != - 1) {
       if (IndexInLinRelationOfLastGainingMultiplicityIndex == - 1) {
         ShouldDecompose = false;
       } else {
-        ShouldDecompose = !tempMat.elements[IndexInLinRelationOfLastGainingMultiplicityIndex][0].isEqualToZero();
+        ShouldDecompose = !linearDependenceExtractor.elements[IndexInLinRelationOfLastGainingMultiplicityIndex][0].isEqualToZero();
       }
     }
     if (ShouldDecompose) {
-      this->decomposeFromLinearRelation(tempMat, output, owner.flagUsingOrlikSolomonBasis, owner.startingVectors);
+      this->decomposeFromLinearRelation(linearDependenceExtractor, output, owner.flagUsingOrlikSolomonBasis, owner.startingVectors);
       return true;
     }
   }
@@ -3126,7 +3126,7 @@ bool OnePartialFraction::reduceOnceGeneralMethod(
   if (this->indicesNonZeroMultiplicities.size == owner.ambientDimension) {
     return false;
   }
-  Matrix<Rational>& tempMat = bufferMat;
+  Matrix<Rational>& linearDependenceExtractor = bufferMat;
   bufferVectors.size = 0;
   this->lastDistinguishedIndex = this->getSmallestNonZeroIndexGreaterThanOrEqualTo(owner, this->lastDistinguishedIndex);
   int IndexInLinRelationOfLastGainingMultiplicityIndex = - 1;
@@ -3141,7 +3141,7 @@ bool OnePartialFraction::reduceOnceGeneralMethod(
     tempRoot *= this->denominator[currentIndex].getLargestElongation();
     bufferVectors.addOnTop(tempRoot);
     bool ShouldDecompose;
-    ShouldDecompose = bufferVectors.getLinearDependence(tempMat);
+    ShouldDecompose = bufferVectors.getLinearDependence(linearDependenceExtractor);
     if (ShouldDecompose && (
       this->lastDistinguishedIndex != - 1 ||
       this->lastDistinguishedIndex == owner.startingVectors.size
@@ -3149,13 +3149,13 @@ bool OnePartialFraction::reduceOnceGeneralMethod(
       if (IndexInLinRelationOfLastGainingMultiplicityIndex == - 1) {
         ShouldDecompose = false;
       } else {
-        ShouldDecompose = !tempMat.elements[IndexInLinRelationOfLastGainingMultiplicityIndex][0].isEqualToZero();
+        ShouldDecompose = !linearDependenceExtractor.elements[IndexInLinRelationOfLastGainingMultiplicityIndex][0].isEqualToZero();
       }
     }
     if (ShouldDecompose) {
       if (this->flagAnErrorHasOccurredTimeToPanic) {
       }
-      this->decomposeFromLinearRelation(tempMat, output, owner.flagUsingOrlikSolomonBasis, owner.startingVectors);
+      this->decomposeFromLinearRelation(linearDependenceExtractor, output, owner.flagUsingOrlikSolomonBasis, owner.startingVectors);
       if (this->flagAnErrorHasOccurredTimeToPanic) {
       }
       return true;
@@ -4038,22 +4038,22 @@ void OnePartialFraction::reduceMonomialByMonomial(PartialFractions& owner, int m
     this->ComputeDebugString(owner);
     owner.NumRunsReduceMonomialByMonomial ++;
   }
-  Matrix<Rational> & tempMat = global.matReduceMonomialByMonomial.getElement();
+  Matrix<Rational> & matrix = global.matReduceMonomialByMonomial.getElement();
   Matrix<Rational> & startAsIdMat = global.matIdMatrix.getElement();
   Matrix<Rational> & matColumn = global.matOneColumn.getElement();
   Matrix<Rational> & matLinComb = global.matReduceMonomialByMonomial2.getElement();
   Selection tempSel;
   MonomialPolynomial tempMon;
   Vector<Rational> tempRoot;
-  tempMat.initialize(owner.AmbientDimension, (int) this->IndicesNonZeroMults.size);
+  matrix.initialize(owner.AmbientDimension, (int) this->IndicesNonZeroMults.size);
   for (int i = 0; i < this->IndicesNonZeroMults.size; i ++)
     for (int j = 0; j<owner.AmbientDimension; j ++)
-      tempMat.elements[j][i] =(owner.startingVectors[this->IndicesNonZeroMults[i]][j]*this->objects[this->IndicesNonZeroMults[i]].getLargestElongation());
+      matrix.elements[j][i] =(owner.startingVectors[this->IndicesNonZeroMults[i]][j]*this->objects[this->IndicesNonZeroMults[i]].getLargestElongation());
   if (this->flagAnErrorHasOccurredTimeToPanic) {
 
   }
   startAsIdMat.makeIdentityMatrix(owner.AmbientDimension);
-  Matrix<Rational> ::gaussianEliminationByRows(tempMat, startAsIdMat, tempSel, false);
+  Matrix<Rational> ::gaussianEliminationByRows(matrix, startAsIdMat, tempSel, false);
   if (this->flagAnErrorHasOccurredTimeToPanic) {
 
   }
@@ -4073,7 +4073,7 @@ void OnePartialFraction::reduceMonomialByMonomial(PartialFractions& owner, int m
     tempFrac.assignDenominatorOnly(*this);
     tempFrac.Coefficient.makeZero(this->Coefficient.NumVars);
     tempFrac.Coefficient.addMonomial(this->Coefficient[k], this->Coefficient.theCoeffs[k]);
-    if (tempMat.rowEchelonFormToLinearSystemSolution(tempSel, matColumn, matLinComb)) {
+    if (matrix.rowEchelonFormToLinearSystemSolution(tempSel, matColumn, matLinComb)) {
       tempMon = this->Coefficient[k];
       if (this->flagAnErrorHasOccurredTimeToPanic) {
 
@@ -7464,7 +7464,7 @@ void WeylGroupData::getEpsilonCoordinatesWRTsubalgebra(
   Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output
 ) {
   Matrix<Rational> basisChange;
-  Matrix<Rational> tempMat;
+  Matrix<Rational> epsilonMatrix;
   DynkinDiagramRootSubalgebra tempDyn;
   Vectors<Rational> simpleBasis;
   Vectors<Rational> coordsInNewBasis;
@@ -7484,9 +7484,9 @@ void WeylGroupData::getEpsilonCoordinatesWRTsubalgebra(
   basisChange.resize(0, 0, true);
   for (int i = 0; i < tempDyn.simpleComponentTypes.size; i ++) {
     DynkinSimpleType::getEpsilonMatrix(
-      tempDyn.simpleComponentTypes[i].letter, tempDyn.simpleComponentTypes[i].rank, tempMat
+      tempDyn.simpleComponentTypes[i].letter, tempDyn.simpleComponentTypes[i].rank, epsilonMatrix
     );
-    basisChange.directSumWith(tempMat, Rational(0));
+    basisChange.directSumWith(epsilonMatrix, Rational(0));
   }
   simpleBasis.assignListList(tempDyn.simpleBasesConnectedComponents);
   coordsInNewBasis.setSize(input.size);
@@ -7515,29 +7515,29 @@ LargeInteger WeylGroupData::getSizeByFormulaImplementation(FiniteGroup<ElementWe
 }
 
 void WeylGroupData::getWeylChamber(Cone& output) {
-  Matrix<Rational> tempMat;
-  tempMat = this->cartanSymmetric;
-  tempMat.invert();
+  Matrix<Rational> invertedCartan;
+  invertedCartan = this->cartanSymmetric;
+  invertedCartan.invert();
   Vectors<Rational> tempRoots;
-  tempRoots.assignMatrixRows(tempMat);
+  tempRoots.assignMatrixRows(invertedCartan);
   output.createFromVertices(tempRoots);
 }
 
 void WeylGroupData::getFundamentalWeightsInSimpleCoordinates(Vectors<Rational>& output) {
-  Matrix<Rational> tempMat;
-  tempMat = this->cartanSymmetric;
+  Matrix<Rational> result;
+  result = this->cartanSymmetric;
   Rational tempRat;
   for (int i = 0; i < this->getDimension(); i ++) {
     tempRat = 2 / this->cartanSymmetric.elements[i][i];
-    tempMat.rowTimesScalar(i, tempRat);
+    result.rowTimesScalar(i, tempRat);
   }
-  tempMat.transpose();
-  tempMat.invert();
-  output.assignMatrixRows(tempMat);
+  result.transpose();
+  result.invert();
+  output.assignMatrixRows(result);
 }
 
 void WeylGroupData::getIntegralLatticeInSimpleCoordinates(Lattice& output) {
-  output.basisRationalForm= this->cartanSymmetric;
+  output.basisRationalForm = this->cartanSymmetric;
   Vector<Rational> tempRoot;
   for (int i = 0; i < this->getDimension(); i ++) {
     tempRoot.makeEi(this->getDimension(), i);
@@ -7680,12 +7680,12 @@ void WeylGroupData::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double>
   }
   ElementWeylGroup element;
   this->getCoxeterElement(element);
-  Matrix<Rational> matCoxeterElt, tempMat;
+  Matrix<Rational> matCoxeterElt, matrix;
   this->getMatrixStandardRepresentation(element, matCoxeterElt);
-  tempMat = matCoxeterElt;
+  matrix = matCoxeterElt;
   int coxeterNumber = this->rootSystem.lastObject()->sumCoordinates().numeratorShort + 1;
   for (int i = 0; i < coxeterNumber - 1; i ++) {
-    tempMat.multiplyOnTheLeft(matCoxeterElt);
+    matrix.multiplyOnTheLeft(matCoxeterElt);
   }
   Complex<double> theEigenValue;
   theEigenValue.realPart = FloatingPoint::cosFloating(2 * MathRoutines::pi() / coxeterNumber);
@@ -8164,12 +8164,12 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::t
   out << HtmlRoutines::getMathNoDisplay(head.str());
   if (this->externalAutomorphisms.size > 0) {
     out << "<br>Outer automorphisms: \n";
-    Matrix<Rational> tempMat;
+    Matrix<Rational> automorphismMatrix;
     head2 << "\\begin{array}{rcl}";
     for (int i = 0; i < this->externalAutomorphisms.size; i ++) {
-      tempMat.assignVectorsToRows(this->externalAutomorphisms[i]);
-      tempMat.transpose();
-      head2 << "a_{" << i + 1 << "}&= &" << tempMat.toString(&latexFormat) << "\\\\";
+      automorphismMatrix.assignVectorsToRows(this->externalAutomorphisms[i]);
+      automorphismMatrix.transpose();
+      head2 << "a_{" << i + 1 << "}&= &" << automorphismMatrix.toString(&latexFormat) << "\\\\";
     }
     head2 << "\\end{array}";
     out << HtmlRoutines::getMathNoDisplay(head2.str());
@@ -9302,11 +9302,11 @@ void Lattice::getDualLattice(Lattice& output) const {
   if (this->getRank() != this->getDimension()) {
     return;
   }
-  Matrix<Rational> tempMat;
-  tempMat = this->basisRationalForm;
-  tempMat.invert();
-  tempMat.transpose();
-  tempMat.getMatrixIntegerWithDenominator(output.basis, output.denominator);
+  Matrix<Rational> dualMatrix;
+  dualMatrix = this->basisRationalForm;
+  dualMatrix.invert();
+  dualMatrix.transpose();
+  dualMatrix.getMatrixIntegerWithDenominator(output.basis, output.denominator);
   output.reduce();
 }
 
@@ -9317,10 +9317,10 @@ bool Lattice::findOnePreimageInLatticeOf(
   thisBasis.assignMatrixRows(this->basisRationalForm);
   theLinearMap.actOnVectorsColumn(thisBasis, Rational(0));
   bool result = input.getIntegralCoordsInBasisIfTheyExist(thisBasis, output, 1, - 1, 0);
-  Matrix<Rational> tempMat;
-  tempMat = this->basisRationalForm;
-  tempMat.transpose();
-  tempMat.actOnVectorsColumn(output);
+  Matrix<Rational> matrix;
+  matrix = this->basisRationalForm;
+  matrix.transpose();
+  matrix.actOnVectorsColumn(output);
   return result;
 }
 
@@ -10061,10 +10061,10 @@ void Cone::intersectHyperplane(Vector<Rational>& normal, Cone& outputConeLowerDi
     global.fatal << "zero normal not allowed. " << global.fatal;
   }
   int dimension = normal.size;
-  Matrix<Rational> tempMat, embedding, projection;
-  tempMat.assignVectorRow(normal);
+  Matrix<Rational> kernelComputer, embedding, projection;
+  kernelComputer.assignVectorRow(normal);
   Vectors<Rational> basis;
-  tempMat.getZeroEigenSpace(basis);
+  kernelComputer.getZeroEigenSpace(basis);
   if (basis.size != normal.size - 1) {
     global.fatal << "Plane intersection: normals don't match. " << global.fatal;
   }
@@ -10402,9 +10402,9 @@ bool SlTwoInSlN::computeInvariantsOfDegree(
       basisMonsZeroWeight.addMonomial(monomial, monomialCoeff);
     }
   }
-  Matrix<Rational> tempMat;
-  tempMat.initialize(basisMonsAll.size() * 2, basisMonsZeroWeight.size());
-  Polynomial<Rational>  tempP;
+  Matrix<Rational> matrix;
+  matrix.initialize(basisMonsAll.size() * 2, basisMonsZeroWeight.size());
+  Polynomial<Rational> tempP;
   for (int l = 0; l < 2; l ++) {
     for (int k = 0; k < basisMonsZeroWeight.size(); k ++) {
       if (l == 0) {
@@ -10416,15 +10416,15 @@ bool SlTwoInSlN::computeInvariantsOfDegree(
         int indexInResult = tempP.monomials.getIndex(basisMonsAll[j]);
         int currentRow = l * basisMonsAll.size() + j;
         if (indexInResult == - 1) {
-          tempMat.elements[currentRow][k] = 0;
+          matrix.elements[currentRow][k] = 0;
         } else {
-          tempMat.elements[currentRow][k] = tempP.coefficients[indexInResult];
+          matrix.elements[currentRow][k] = tempP.coefficients[indexInResult];
         }
       }
     }
   }
   Vectors<Rational> tempRoots;
-  tempMat.getZeroEigenSpaceModifyMe(tempRoots);
+  matrix.getZeroEigenSpaceModifyMe(tempRoots);
   output.setSize(tempRoots.size);
   for (int i = 0; i < output.size; i ++) {
     Polynomial<Rational>& current = output[i];
@@ -10598,33 +10598,36 @@ bool ConeComplex::drawMeLastCoordinateAffine(
 }
 
 bool ConeComplex::drawMeProjective(
-  Vector<Rational>* coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& format
+  Vector<Rational>* coordCenterTranslation,
+  bool initDrawVars,
+  DrawingVariables& drawingVariables,
+  FormatExpressions& format
 ) {
   bool result = true;
   Vector<Rational> tempRoot;
   Vectors<Rational> tempRoots;
-  Matrix<Rational> tempMat;
+  Matrix<Rational> matrix;
   if (this->getDimension() <= 1) {
     return false;
   }
-  if (InitDrawVars) {
-    theDrawingVariables.operations.initialize();
-    theDrawingVariables.operations.initDimensions(this->getDimension());
-    theDrawingVariables.operations.makeMeAStandardBasis(this->getDimension());
-    theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->getDimension());
+  if (initDrawVars) {
+    drawingVariables.operations.initialize();
+    drawingVariables.operations.initDimensions(this->getDimension());
+    drawingVariables.operations.makeMeAStandardBasis(this->getDimension());
+    drawingVariables.drawCoordSystemBuffer(drawingVariables, this->getDimension());
     if (this->getDimension() > 2) {
       this->ConvexHull.getInternalPoint(tempRoot);
-      tempMat.assignVectorRow(tempRoot);
-      tempMat.getZeroEigenSpace(tempRoots);
+      matrix.assignVectorRow(tempRoot);
+      matrix.getZeroEigenSpace(tempRoots);
       for (int i = 0; i < 2; i ++) {
         for (int j = 0; j < this->getDimension(); j ++) {
-          theDrawingVariables.operations.basisProjectionPlane[i][j] = tempRoots[i][j].getDoubleValue();
+          drawingVariables.operations.basisProjectionPlane[i][j] = tempRoots[i][j].getDoubleValue();
         }
       }
     }
   }
   for (int i = 0; i < this->size; i ++) {
-    result = ((*this)[i].drawMeProjective(coordCenterTranslation, false, theDrawingVariables, format) && result);
+    result = ((*this)[i].drawMeProjective(coordCenterTranslation, false, drawingVariables, format) && result);
   }
   return result;
 }
@@ -11288,10 +11291,10 @@ void Lattice::getRootOnLatticeSmallestPositiveProportionalTo(
   theBasis.assignMatrixRows(this->basisRationalForm);
   input.getCoordinatesInBasis(theBasis, tempRoot);
   Cone::scaleNormalizeByPositive(tempRoot);
-  Matrix<Rational> tempMat;
-  tempMat = this->basisRationalForm;
-  tempMat.transpose();
-  tempMat.actOnVectorColumn(tempRoot, output);
+  Matrix<Rational> matrix;
+  matrix = this->basisRationalForm;
+  matrix.transpose();
+  matrix.actOnVectorColumn(tempRoot, output);
 }
 
 bool Cone::getLatticePointsInCone(
@@ -12482,10 +12485,10 @@ bool Cone::eliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
   Vectors<Rational> verticesOnWall;
   if (numAddedFakeWalls != 0) {
     //we modify the normals so that they lie in the subspace spanned by the vertices
-    Matrix<Rational> tempMat, matNormals, gramMatrixInverted;
-    tempMat.assignVectorsToRows(this->vertices);
+    Matrix<Rational> matrix, matNormals, gramMatrixInverted;
+    matrix.assignVectorsToRows(this->vertices);
     Vectors<Rational> NormalsToSubspace;
-    tempMat.getZeroEigenSpaceModifyMe(NormalsToSubspace);
+    matrix.getZeroEigenSpaceModifyMe(NormalsToSubspace);
     if (NormalsToSubspace.size > 0) {
       matNormals.assignVectorsToRows(NormalsToSubspace);
       // global.Comments << "<br>normals to the subspace spanned by the vertices: " << NormalsToSubspace.toString();
@@ -12516,9 +12519,9 @@ bool Cone::eliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
       }
     }
   }
-  Matrix<Rational> tempMatX;
+  Matrix<Rational> matrixX;
   Selection tempSelX;
-  int DesiredRank = this->vertices.getRankElementSpan(&tempMatX, &tempSelX);
+  int DesiredRank = this->vertices.getRankElementSpan(&matrixX, &tempSelX);
   if (DesiredRank > 1) {
     for (int i = 0; i < this->normals.size; i ++) {
       Vector<Rational>& currentNormal = this->normals[i];
@@ -12527,7 +12530,7 @@ bool Cone::eliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
       for (int j = 0; j < this->vertices.size; j ++) {
         if (currentNormal.scalarEuclidean(this->vertices[j]).isEqualToZero()) {
           verticesOnWall.addOnTop(this->vertices[j]);
-          int theRank = verticesOnWall.getRankElementSpan(&tempMatX, &tempSelX);
+          int theRank = verticesOnWall.getRankElementSpan(&matrixX, &tempSelX);
           if (theRank < verticesOnWall.size) {
             verticesOnWall.removeLastObject();
           } else {
@@ -12609,16 +12612,15 @@ bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
     return false;
   }
   this->normals.size = 0;
-  Matrix<Rational> tempMat;
+  Matrix<Rational> matrix;
   Selection tempSel;
-  int rankVerticesSpan = inputVertices.getRankElementSpan(&tempMat, &tempSel);
+  int rankVerticesSpan = inputVertices.getRankElementSpan(&matrix, &tempSel);
   int dimension = inputVertices.getDimension();
   Vectors<Rational> extraVertices;
   extraVertices.setSize(0);
   if (rankVerticesSpan < dimension) {
-    Matrix<Rational> tempMat;
-    tempMat.assignVectorsToRows(inputVertices);
-    tempMat.getZeroEigenSpace(extraVertices);
+    matrix.assignVectorsToRows(inputVertices);
+    matrix.getZeroEigenSpace(extraVertices);
     for (int i = 0; i < extraVertices.size; i ++) {
       this->normals.addOnTop(extraVertices[i]);
       this->normals.addOnTop(-extraVertices[i]);
@@ -12680,13 +12682,13 @@ bool Cone::createFromNormals(
     }
   }
   int numAddedFakeWalls = 0;
-  Matrix<Rational> tempMat;
+  Matrix<Rational> matrix;
   Selection tempSel;
   if (!useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices) {
-    for (int i = 0; i < dimension && this->normals.getRankElementSpan(&tempMat, &tempSel) < dimension; i ++) {
+    for (int i = 0; i < dimension && this->normals.getRankElementSpan(&matrix, &tempSel) < dimension; i ++) {
       Vector<Rational> tempRoot;
       tempRoot.makeEi(dimension, i);
-      if (!this->normals.linearSpanContainsVector(tempRoot, tempMat, tempSel)) {
+      if (!this->normals.linearSpanContainsVector(tempRoot, matrix, tempSel)) {
         numAddedFakeWalls ++;
         this->normals.addOnTop(tempRoot);
       }
@@ -12966,9 +12968,9 @@ void Lattice::makeFromMatrix(const Matrix<Rational>& input) {
 }
 
 void Lattice::makeFromRoots(const Vectors<Rational>& input) {
-  Matrix<Rational> tempMat;
-  tempMat.assignVectorsToRows(input);
-  tempMat.getMatrixIntegerWithDenominator(this->basis, this->denominator);
+  Matrix<Rational> rescaled;
+  rescaled.assignVectorsToRows(input);
+  rescaled.getMatrixIntegerWithDenominator(this->basis, this->denominator);
   this->reduce();
 }
 

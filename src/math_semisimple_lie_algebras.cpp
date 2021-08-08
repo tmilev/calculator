@@ -1063,8 +1063,8 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
     tempDomain[i].toVectorNegativeRootSpacesFirst(vectorsLeft[i]);
     tempRange[i].toVectorNegativeRootSpacesFirst(vectorsRight[i]);
   }
-  Matrix<Rational> tempMat;
-  tempMat.makeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight);
+  Matrix<Rational> linearSpaceMap;
+  linearSpaceMap.makeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight);
   Vector<Rational> imageRoot;
   this->domainAllChevalleyGenerators.setSize(tempDomain.size);
   this->imagesAllChevalleyGenerators.setSize(tempDomain.size);
@@ -1073,7 +1073,7 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
   }
   for (int i = 0; i < this->imagesAllChevalleyGenerators.size; i ++) {
     this->domainAllChevalleyGenerators[i].toVectorNegativeRootSpacesFirst(tempRoot);
-    tempMat.actOnVectorColumn(tempRoot, imageRoot);
+    linearSpaceMap.actOnVectorColumn(tempRoot, imageRoot);
     this->imagesAllChevalleyGenerators[i].assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(imageRoot, this->range());
   }
   return true;
@@ -1234,9 +1234,9 @@ class SlTwoInSlN;
 void HomomorphismSemisimpleLieAlgebra::getRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(Vectors<Rational>& output) {
   List<Vector<Rational> >& theRootSystem= this->range().weylGroup.rootSystem;
   int rankSA = this->domain().weylGroup.getDimension();
-  Matrix<Rational> tempMat;
-  tempMat = this->domain().weylGroup.cartanSymmetric;
-  tempMat.invert();
+  Matrix<Rational> invertedCartan;
+  invertedCartan = this->domain().weylGroup.cartanSymmetric;
+  invertedCartan.invert();
   int numberOfPositiveRootsDomain = this->domain().weylGroup.rootsOfBorel.size;
   output.setSize(theRootSystem.size);
   Vector<Rational> theScalarProducts;
@@ -1246,7 +1246,7 @@ void HomomorphismSemisimpleLieAlgebra::getRestrictionAmbientRootSystemToTheSmall
       ElementSemisimpleLieAlgebra<Rational>& currentH = this->imagesAllChevalleyGenerators[j + numberOfPositiveRootsDomain];
       theScalarProducts[j] = this->range().weylGroup.rootScalarCartanRoot(currentH.getCartanPart(), theRootSystem[i]);
     }
-    tempMat.actOnVectorColumn(theScalarProducts, output[i]);
+    invertedCartan.actOnVectorColumn(theScalarProducts, output[i]);
   }
   this->imagesCartanDomain.setSize(rankSA);
   for (int i = 0; i < rankSA; i ++) {

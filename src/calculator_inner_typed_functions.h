@@ -215,10 +215,10 @@ bool CalculatorFunctionsBinaryOps::divideTypeByType(
 }
 
 template <class Coefficient>
-bool CalculatorConversions::innerPolynomial(
+bool CalculatorConversions::getPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerPolynomial");
+  MacroRegisterFunctionWithName("CalculatorConversions::getPolynomial");
   if (input.size() != 2) {
     return false;
   }

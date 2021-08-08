@@ -25,6 +25,8 @@ class Solver {
     this.solutionBox = document.getElementById(ids.domElements.pages.solve.solutionBox);
     /**@type{HTMLElement} */
     this.commentsBox = document.getElementById(ids.domElements.pages.solve.commentsBox);
+    /**@type{string} */
+    this.resultFontSize = "48px";
   }
 
   selectPage() {
@@ -172,23 +174,36 @@ class Solver {
     table.style.margin = "auto";
     for (let i = 0; i < steps.length; i++) {
       let row = table.insertRow();
-      let cell = row.insertCell();
-      cell.appendChild(this.getOneSolutionTransformation(steps[i]));
-      cell.style.textAlign = "center";
-      cell = row.insertCell();
-      cell.appendChild(this.getOneSolutionStepComment(steps[i]));
-      cell.style.borderLeft = "1px solid black";
+      this.writeSolutionRow(row, steps[i]);
     }
     return table;
+  }
+
+  writeSolutionRow(
+    /**@type{HTMLTableRowElement} */
+    row,
+    step,
+  ) {
+    let cell = row.insertCell();
+    if (step[pathnames.urlFields.result.solution.stepType] === "=") {
+      cell.textContent = "=";
+      cell.style.fontSize = this.resultFontSize;
+    }
+    cell = row.insertCell();
+    cell.appendChild(this.getOneSolutionTransformation(step));
+    cell.style.textAlign = "center";
+    cell = row.insertCell();
+    cell.appendChild(this.getOneSolutionStepComment(step));
+    cell.style.borderLeft = "1px solid black";
   }
 
   /**@returns{HTMLElement} */
   getOneSolutionTransformation(step) {
     let result = document.createElement("span");
-    result.style.fontSize = "48px";
+    result.style.fontSize = this.resultFontSize;
     let expression = step[pathnames.urlFields.result.solution.transformation];
-    let expressionType = step[pathnames.urlFields.result.solution.expressionType];
-    if (expressionType === "string") {
+    let stepType = step[pathnames.urlFields.result.solution.stepType];
+    if (stepType === "string") {
       result.textContent = expression;
     } else {
       result.textContent = `\\(${expression}\\)`;

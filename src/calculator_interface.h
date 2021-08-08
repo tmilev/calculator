@@ -2563,6 +2563,7 @@ public:
     public:
       Expression content;
       List<std::string> annotations;
+      std::string stepType;
       void assignContentAndAnnotation(const Expression& input, const std::string& oneAnnotation);
       void mergeAnnotations(const List<std::string>& incoming);
       JSData toJSON();

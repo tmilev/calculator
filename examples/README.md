@@ -2457,7 +2457,7 @@ SubList{}((1, 2, 3, 4), {{a}} > 2)
 ```
 Extracts a sub-list that contains all elements that satisfy a condition given by the second argument. Use the bound variable syntax {{a}} to address the current element of the list.
 
-*ApplyToList* [ApplyToList] {CalculatorFunctions::innerApplyToList}. 
+*ApplyToList* [ApplyToList] {CalculatorFunctions::applyToList}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22SolveForX%7b%7d%7b%7ba%7d%7d%20%3d%20SolveFor%28x%2c%20%7b%7ba%7d%7d%29%3b%5cnSolveForX%28x%5e2%20%2b%202%29%3b%5cnApplyToList%28SolveForX%2c%28x%5e2%20%2b%201%2c%20x%5e2%20-%20x%20-%202%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 SolveForX{}{{a}} = SolveFor(x, {{a}});
@@ -2466,7 +2466,7 @@ ApplyToList(SolveForX,(x^2 + 1, x^2 - x - 2))
 ```
 Applies a transformation to each element of a list. 
 
-*Denominator* [Denominator] {CalculatorFunctions::innerDenominator}. 
+*Denominator* [Denominator] {CalculatorFunctions::denominator}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Denominator%28a%2fb%29%3b%20Denominator%281%2b%201%2fx%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Denominator(a/b); Denominator(1+ 1/x)
@@ -3606,14 +3606,14 @@ FactorInteger(0);
 ```
 Factors an integer, assuming the integer is small enough. 
 
-*CoefficientsPowersOf* [CoefficientsPowersOf] {CalculatorFunctions::innerCoefficientsPowersOf}. 
+*CoefficientsPowersOf* [CoefficientsPowersOf] {CalculatorFunctions::coefficientsPowersOf}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22CoefficientsPowersOf%28x%2c%20a%20x%5e2%2b%20b%20%2a3%20x%20%2bc%20%2b%5c%5cpi%20%2b3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 CoefficientsPowersOf(x, a x^2+ b *3 x +c +\pi +3)
 ```
 Extracts the coefficients of the powers of the first argument in the second argument.
 
-*ConstantTerm* [ConstantTerm] {CalculatorFunctions::innerConstTermRelative}. 
+*ConstantTerm* [ConstantTerm] {CalculatorFunctions::constantTermRelative}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConstantTerm%28y%2c%20%20x%20y%20x%20%2b3%20%2b2z%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ConstantTerm(y,  x y x +3 +2z)

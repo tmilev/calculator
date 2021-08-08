@@ -174,9 +174,12 @@ std::string Calculator::ExpressionHistoryEnumerator::toStringDebug() {
 void Calculator::ExpressionHistoryEnumerator::toStepsNoMerging(
   List<Calculator::ExpressionHistoryEnumerator::Step>& outputSteps
 ) {
-  output.setSize(0);
+  outputSteps.setSize(0);
   for (int j = 0; j < this->output.size; j ++) {
     Calculator::ExpressionHistoryEnumerator::Step currentStep;
+    if (j > 0) {
+      currentStep.stepType = "=";
+    }
     this->toOneStep(j, currentStep);
     outputSteps.addOnTop(currentStep);
   }
@@ -198,6 +201,7 @@ void Calculator::ExpressionHistoryEnumerator::toSteps(
       }
       continue;
     }
+    previousExpressionString = currentString;
     outputSteps.addOnTop(current);
   }
 }
@@ -215,11 +219,7 @@ JSData Calculator::ExpressionHistoryEnumerator::Step::toJSON() {
   for (int i = 0; i < this->annotations.size; i ++) {
     annotationJSON[i] = this->annotations[i];
   }
-  if (this->content.isOfType<std::string>()) {
-    result[WebAPI::result::SolutionData::expressionType] = "string";
-  } else {
-    result[WebAPI::result::SolutionData::expressionType] = "expression";
-  }
+  result[WebAPI::result::SolutionData::stepType] = this->stepType;
   result[WebAPI::result::SolutionData::annotations] = annotationJSON;
   return result;
 }

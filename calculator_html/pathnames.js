@@ -69,7 +69,7 @@ const urlFields = {
     solution: {
       steps: "solutionSteps",
       transformation: "transformation",
-      expressionType: "expressionType",
+      stepType: "stepType",
       annotations: "annotations",
     },
     comparison: {

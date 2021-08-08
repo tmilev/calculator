@@ -363,15 +363,33 @@ public:
   }
 };
 
+// Maintains a recursion depth counter through constructor/destructor calls.
+// Use like this:
+// RecursionDepthCounter recursionDepthCounter(&this->recursionDepth);
+// <- this is more elegant but some IDEs and compilers
+// complain that recursionDepthCounter is not used, which is non-sense
+// as the object is clearly used through its destructor.
+//
+// or like this:
+//
+// RecursionDepthCounter recursionDepthCounter;
+// recursionDepthCounter.initialize(&this->recursionDepth);
+// <- less elegant but you may get fewer IDE complaints.
 class RecursionDepthCounter {
 public:
   int* counter;
+  RecursionDepthCounter(): counter(nullptr) {
+  }
   RecursionDepthCounter(int* inputCounter): counter(nullptr) {
     if (inputCounter == nullptr) {
       return;
     }
     this->counter = inputCounter;
     (*this->counter) ++;
+  }
+  void initialize(int* inputCounter){
+    this->counter = inputCounter;
+    (*this->counter)++;
   }
   ~RecursionDepthCounter() {
     if (this->counter != nullptr) {

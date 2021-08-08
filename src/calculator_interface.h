@@ -2591,7 +2591,8 @@ public:
     Expression history;
     List<Expression> output;
     List<List<std::string> > rulesNames;
-    // List<List<std::string> > rulesDisplayNames;
+    static List<std::string> ruleIgnoreList;
+    static HashedList<std::string, MathRoutines::hashString> ruleIgnoreListHashList;
     HashedList<std::string, MathRoutines::hashString> rulesToBeIgnored;
     MapList<std::string, std::string, MathRoutines::hashString> rulesDisplayNamesMap;
     bool computeRecursively(int incomingRecursionDepth, std::stringstream* commentsOnFailure);
@@ -2607,6 +2608,15 @@ public:
     }
     void toSteps(List<Calculator::ExpressionHistoryEnumerator::Step>& outputSteps);
     void toStepsNoMerging(List<Calculator::ExpressionHistoryEnumerator::Step>& outputSteps);
+    void toStepsWithMerge(
+      List<Calculator::ExpressionHistoryEnumerator::Step>& unmerged,
+      List<Calculator::ExpressionHistoryEnumerator::Step>& outputSteps
+    );
+    void toStepsCleanUp(
+      List<Calculator::ExpressionHistoryEnumerator::Step>& raw,
+      List<Calculator::ExpressionHistoryEnumerator::Step>& outputSteps
+    );
+    bool isIgnorable(const Calculator::ExpressionHistoryEnumerator::Step& step);
     void toOneStep(int stepIndex, Calculator::ExpressionHistoryEnumerator::Step& outputStep);
     std::string toStringExpressionHistoryMerged();
     std::string toStringDebug();

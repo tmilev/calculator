@@ -1057,8 +1057,9 @@ bool Calculator::evaluateExpression(
   int opIndexParentIfAvailable,
   Expression* outputHistory
 ) {
-  RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   MacroRegisterFunctionWithName("Calculator::evaluateExpression");
+  RecursionDepthCounter recursionCounter;
+  recursionCounter.initialize(&calculator.recursionDepth);
   calculator.statistics.expressionsEvaluated ++;
   calculator.statistics.callsSinceReport ++;
   Calculator::EvaluateLoop state(calculator);

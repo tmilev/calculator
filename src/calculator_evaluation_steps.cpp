@@ -189,11 +189,20 @@ void Calculator::ExpressionHistoryEnumerator::toSteps(
   List<Calculator::ExpressionHistoryEnumerator::Step>& outputSteps
 ) {
   List<Calculator::ExpressionHistoryEnumerator::Step> stepsUnmerged;
+  List<Calculator::ExpressionHistoryEnumerator::Step> stepsMerged;
   this->toStepsNoMerging(stepsUnmerged);
+  this->toStepsWithMerge(stepsUnmerged, stepsMerged);
+  this->toStepsCleanUp(stepsMerged, outputSteps);
+}
+
+void Calculator::ExpressionHistoryEnumerator::toStepsWithMerge(
+  List<Calculator::ExpressionHistoryEnumerator::Step>& unmerged,
+  List<Calculator::ExpressionHistoryEnumerator::Step>& outputSteps
+) {
   outputSteps.setSize(0);
   std::string previousExpressionString;
-  for (int j = 0; j < stepsUnmerged.size; j ++) {
-    Calculator::ExpressionHistoryEnumerator::Step& current = stepsUnmerged[j];
+  for (int j = 0; j < unmerged.size; j ++) {
+    Calculator::ExpressionHistoryEnumerator::Step& current = unmerged[j];
     std::string currentString = current.content.toString();
     if (currentString == previousExpressionString) {
       if (outputSteps.size > 0) {
@@ -204,6 +213,45 @@ void Calculator::ExpressionHistoryEnumerator::toSteps(
     previousExpressionString = currentString;
     outputSteps.addOnTop(current);
   }
+}
+
+List<std::string> Calculator::ExpressionHistoryEnumerator::ruleIgnoreList({
+  "IntegralOperatorFromProduct",
+  "InterpretAsDifferential",
+  "IntegralOperatorFromProduct",
+  "CommuteConstants",
+  "MultiplyByOne"
+});
+HashedList<std::string, MathRoutines::hashString> Calculator::ExpressionHistoryEnumerator::ruleIgnoreListHashList;
+
+void Calculator::ExpressionHistoryEnumerator::toStepsCleanUp(
+  List<Calculator::ExpressionHistoryEnumerator::Step>& raw,
+  List<Calculator::ExpressionHistoryEnumerator::Step>& outputSteps
+) {
+  outputSteps.setSize(0);
+  for (int i = 0; i < raw.size; i ++) {
+    if (this->isIgnorable(raw[i])) {
+      continue;
+    }
+    outputSteps.addOnTop(raw[i]);
+  }
+}
+
+bool Calculator::ExpressionHistoryEnumerator::isIgnorable(
+  const Calculator::ExpressionHistoryEnumerator::Step& step
+) {
+  List<std::string>& ignoreList = Calculator::ExpressionHistoryEnumerator::ruleIgnoreList;
+  HashedList<std::string, MathRoutines::hashString>& ignoreSet =
+  Calculator::ExpressionHistoryEnumerator::ruleIgnoreListHashList;
+  if (ignoreList.size > 0 && ignoreSet.size == 0) {
+    ignoreSet.addListOnTop(ignoreList);
+  }
+  for (int i = 0; i < step.annotations.size; i ++) {
+    if (!ignoreSet.contains(step.annotations[i])) {
+      return false;
+    }
+  }
+  return true;
 }
 
 void Calculator::ExpressionHistoryEnumerator::Step::mergeAnnotations(

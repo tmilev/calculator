@@ -2226,7 +2226,7 @@ bool CalculatorParser::applyOneRule() {
   const std::string& secondToLastS = this->controlSequences[secondToLastE.controlIndex];
   if (secondToLastS == "Integer" && lastS != "Integer" && lastS != ".") {
     if (this->flagLogSyntaxRules) {
-      this->lastRuleName = "[Rule: digit to number]";
+      this->lastRuleName = "digit to number";
     }
     return this->replaceIntegerXbyEX();
   }
@@ -2243,7 +2243,7 @@ bool CalculatorParser::applyOneRule() {
   }
   if (lastS == " " || lastS == "~") {
     if (this->flagLogSyntaxRules) {
-      this->lastRuleName = "[Rule: remove white space]";
+      this->lastRuleName = "remove white space";
     }
     return this->popTopSyntacticStack();
   }
@@ -2377,6 +2377,100 @@ bool CalculatorParser::applyOneRule() {
     this->popTopSyntacticStack();
     return this->popTopSyntacticStack();
   }
+
+  if (
+    thirdToLastS == "\\int" &&
+    secondToLastS == "Expression" &&
+    this->canBeRegardedAsDifferentialForm(lastE)
+  ) {
+    return this->replaceOXXByEXX();
+  }
+  if (
+    this->isDefiniteIntegral(thirdToLastS) &&
+    secondToLastS == "Expression" &&
+    this->canBeRegardedAsDifferentialForm(lastE)
+  ) {
+    return this->setStackValue(thirdToLastE.data, "Expression", - 3);
+  }
+  if (
+    (fifthToLastS == "\\int" || this->isDefiniteIntegral(fifthToLastS)) &&
+    fourthToLastS == "Expression" &&
+    (thirdToLastS == "+" || thirdToLastS == "-") &&
+    secondToLastS == "Expression" &&
+    this->canBeRegardedAsDifferentialForm(lastE)
+  ) {
+    return this->replaceEOEXByEX();
+  }
+  if (
+    fourthToLastS == "\\int" &&
+    thirdToLastS == "_" &&
+    secondToLastS == "Expression"
+  ) {
+    Expression integralAtom;
+    integralAtom.makeAtom("\\int", *this->owner);
+    Expression underscore;
+    underscore.makeXOX(*this->owner, this->owner->opUnderscore(), integralAtom, secondToLastE.data);
+    this->setStackValue(underscore, "\\int_{*}", - 4);
+    return this->decreaseStackExceptLast(2);
+  }
+  if (
+    fourthToLastS == "\\int" &&
+    thirdToLastS == "^" &&
+    secondToLastS == "Expression"
+  ) {
+    Expression integralAtom;
+    integralAtom.makeAtom("\\int", *this->owner);
+    Expression underscore;
+    underscore.makeXOX(*this->owner, this->owner->opPower(), integralAtom, secondToLastE.data);
+    this->lastRuleName = "\\int^{*}";
+    this->setStackValue(underscore, "\\int^{*}", - 4);
+    return this->decreaseStackExceptLast(2);
+  }
+  if (
+    thirdToLastS == "\\int_{*}" &&
+    secondToLastS == "^" &&
+    lastS == "Expression"
+  ) {
+    Expression exponent;
+    exponent.makeXOX(*this->owner, this->owner->opPower(), thirdToLastE.data, lastE.data);
+    this->setStackValue(exponent, "\\int_{*}^{**}", - 3);
+    this->lastRuleName = "\\int_{*}^{**}";
+    return this->decreaseStack(2);
+  }
+  if (
+    fourthToLastS == "\\int_{*}" &&
+    thirdToLastS == "^" &&
+    secondToLastS == "Expression"
+  ) {
+    Expression exponent;
+    exponent.makeXOX(*this->owner, this->owner->opPower(), fourthToLastE.data, secondToLastE.data);
+    this->setStackValue(exponent, "\\int_{*}^{**}", - 4);
+    this->lastRuleName = "[\\int_{*}^{**}]";
+    return this->decreaseStackExceptLast(2);
+  }
+  if (
+    thirdToLastS == "\\int^{*}" &&
+    secondToLastS == "_" &&
+    lastS == "Expression"
+  ) {
+    Expression underscore;
+    underscore.makeXOX(*this->owner, this->owner->opUnderscore(), thirdToLastE.data, lastE.data);
+    this->lastRuleName = "[\\int^{*}_{**}]";
+    this->setStackValue(underscore, "\\int_{*}^{**}", - 3);
+    return this->decreaseStack(2);
+  }
+  if (
+    fourthToLastS == "\\int^{*}" &&
+    thirdToLastS == "_" &&
+    secondToLastS == "Expression"
+  ) {
+    Expression underscore;
+    underscore.makeXOX(*this->owner, this->owner->opUnderscore(), fourthToLastE.data, secondToLastE.data);
+    this->lastRuleName = "\\int^{*}_{**}";
+    this->setStackValue(underscore, "\\int_{*}^{**}", - 4);
+    return this->decreaseStackExceptLast(2);
+  }
+
   if (this->owner->flagUsePredefinedWordSplits) {
     if (lastS == "Variable") {
       if (this->predefinedWordSplits.contains(this->owner->operations.keys[lastE.data.data])) {
@@ -2634,63 +2728,7 @@ bool CalculatorParser::applyOneRule() {
   ) {
     return this->replaceOOEEXbyEXpowerLike();
   }
-  if (
-    thirdToLastS == "\\int" &&
-    secondToLastS == "Expression" &&
-    this->canBeRegardedAsDifferentialForm(lastE)
-  ) {
-    return this->replaceOXXByEXX();
-  }
-  if (
-    this->isDefiniteIntegral(thirdToLastS) &&
-    secondToLastS == "Expression" &&
-    this->canBeRegardedAsDifferentialForm(lastE)
-  ) {
-    return this->setStackValue(thirdToLastE.data, "Expression", - 3);
-  }
-  if (
-    (fifthToLastS == "\\int" || this->isDefiniteIntegral(fifthToLastS)) &&
-    fourthToLastS == "Expression" &&
-    (thirdToLastS == "+" || thirdToLastS == "-") &&
-    secondToLastS == "Expression" &&
-    this->canBeRegardedAsDifferentialForm(lastE)
-  ) {
-    return this->replaceEOEXByEX();
-  }
-  if (
-    fourthToLastS == "\\int" &&
-    thirdToLastS == "_" &&
-    secondToLastS == "Expression"
-  ) {
-    Expression integralAtom;
-    integralAtom.makeAtom("\\int", *this->owner);
-    Expression underscore;
-    underscore.makeXOX(*this->owner, this->owner->opUnderscore(), integralAtom, secondToLastE.data);
-    this->setStackValue(underscore, "\\int_{*}", - 4);
-    return this->decreaseStackExceptLast(2);
-  }
-  if (
-    thirdToLastS == "\\int_{*}" &&
-    secondToLastS == "^" &&
-    lastS == "Expression"
-  ) {
-    Expression exponent;
-    exponent.makeXOX(*this->owner, this->owner->opPower(), thirdToLastE.data, lastE.data);
-    this->setStackValue(exponent, "\\int_{*}^{**}", - 3);
-    this->lastRuleName = "[\\int_{*}^{**}]";
-    return this->decreaseStack(2);
-  }
-  if (
-    thirdToLastS == "\\int^{*}" &&
-    secondToLastS == "_" &&
-    lastS == "Expression"
-  ) {
-    Expression underscore;
-    underscore.makeXOX(*this->owner, this->owner->opUnderscore(), thirdToLastE.data, lastE.data);
-    this->lastRuleName = "[\\int^{*}_{**}]";
-    this->setStackValue(underscore, "\\int_{*}^{**}", - 3);
-    return this->decreaseStack(2);
-  }
+
   if (
     fifthToLastS == "LogBase" && fourthToLastS == "_" && thirdToLastS == "Expression" &&
     secondToLastS == "Expression" && this->allowsTimesInPreceding(lastS)

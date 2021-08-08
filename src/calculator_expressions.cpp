@@ -3475,6 +3475,19 @@ bool Expression::toStringPower(
   bool involvesExponentsInterpretedAsFunctions = false;
   const Expression& firstE = input[1];
   const Expression& secondE = input[2];
+  bool isSuperScriptOfUnderscoredOperator = false;
+  if (firstE.startsWith(commands.opUnderscore(), 3)) {
+    if (firstE[1].isOperationGiven(commands.opIntegral())) {
+      isSuperScriptOfUnderscoredOperator = true;
+    }
+  }
+  if (isSuperScriptOfUnderscoredOperator) {
+    out << firstE[1].toString(format) << "_{"
+    << firstE[2].toString(format) << "}^{"
+    << secondE.toString(format) << "}";
+    return true;
+  }
+
   if (firstE.startsWith(- 1, 2)) {
     bool shouldProceed = firstE[0].isAtomWhoseExponentsAreInterpretedAsFunction() &&
     !secondE.isEqualToMOne() && secondE.isRational();
@@ -4595,6 +4608,8 @@ bool Expression::toStringWithAtomHandler(
     return false;
   }
   int atom = (*this)[0].data;
+  // The handlers are initialized in:
+  // Calculator::initializeToStringHandlers
   if (this->owner->toStringHandlersAtoms.contains(atom)) {
     Expression::ToStringHandler handler =
     this->owner->toStringHandlersAtoms.getValueNoFail(atom);
@@ -4644,7 +4659,8 @@ std::string Expression::toString(
   } else {
     return "(Error:NoOwner)";
   }
-  RecursionDepthCounter recursionCounter(&this->owner->recursionDepth);
+  RecursionDepthCounter recursionCounter;
+  recursionCounter.initialize(&this->owner->recursionDepth);
   this->checkConsistency();
   if (startingExpression != nullptr && unfoldCommandEnclosures) {
     Expression newStart, newMe;

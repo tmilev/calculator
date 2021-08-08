@@ -217,7 +217,13 @@ class Solver {
     let annotations = step[pathnames.urlFields.result.solution.annotations];
     for (let i = 0; i < annotations.length; i++) {
       let element = document.createElement("span");
-      element.textContent = annotations[i];
+      let content;
+      if (i != 0) {
+        content = `, ${annotations[i]}`;
+      } else {
+        content = annotations[i];
+      }
+      element.textContent = content;
       element.style.fontSize = "small";
       result.appendChild(element);
     }

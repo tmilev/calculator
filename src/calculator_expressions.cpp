@@ -4837,14 +4837,17 @@ bool Expression::isAtom() const {
   return !this->isList();
 }
 
-bool Expression::isAtomUserDefined() const {
+bool Expression::isAtomUserDefined(std::string* whichAtom) const {
   if (this->owner == nullptr) {
     return false;
   }
   if (this->isList()) {
     return false;
   }
-  return this->data >= this->owner->numberOfPredefinedAtoms;
+  if (this->data < this->owner->numberOfPredefinedAtoms) {
+    return false;
+  }
+  return this->isOperation(whichAtom);
 }
 
 bool Expression::isOperation(std::string* outputWhichOperation) const {

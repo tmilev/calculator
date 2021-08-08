@@ -20,9 +20,12 @@ bool WebAPIResponse::Test::solveJSON() {
   JSData result = response.solveJSON();
   std::string expected =
   "{\"solution\":{\"solution\":{\"input\":\"1+1\",\"solutionSteps\":"
-  "\"\\\\(\\\\begin{array}{ll|l}&\\n1+1&AddRationals\\\\\\\\=&\\n2\\\\end{array}\\\\)\","
-  "\"finalExpression\":\"2\",\"error\":\"\"}},"
-  "\"commentsGlobal\":\"\",\"error\":\"not implemented yet.\"}";
+  "["
+  "{\"transformation\":\"1+1\",\"stepType\":\"\",\"annotations\":[]},"
+  "{\"transformation\":\"2\",\"stepType\":\"=\",\"annotations\":[\"AddRationals\"]}"
+  "],"
+  "\"finalExpression\":\"2\",\"comments\":\"\",\"error\":\"\"}},"
+  "\"commentsGlobal\":\"\"}";
   std::string got = result.toString();
 
   if (got != expected) {

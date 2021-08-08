@@ -1291,7 +1291,7 @@ bool CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinPoly(
   MacroRegisterFunctionWithName("CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinPoly");
   WithContext<Polynomial<AlgebraicNumber> > polynomial;
   if (!CalculatorConversions::convertToPolynomial(
-    calculator, polynomial
+    input, polynomial
   )) {
     return calculator << "<hr>Failed to convert "
     << input.toString() << " to polynomial. ";
@@ -4312,21 +4312,20 @@ bool CalculatorFunctionsIntegration::integratePowerByUncoveringParenthesisFirst(
   return true;
 }
 
-bool Expression::makeIntegral(
-  Calculator& calculator,
+bool Expression::makeIntegral(Calculator& calculator,
   const Expression& integrationSet,
-  const Expression& theFunction,
-  const Expression& theVariable
+  const Expression& function,
+  const Expression& variable
 ) {
   MacroRegisterFunctionWithName("Expression::makeIntegral");
-  if (this == &theFunction || this == &theVariable || this == &integrationSet) {
-    Expression theFunCopy = theFunction;
-    Expression theVarCopy = theVariable;
+  if (this == &function || this == &variable || this == &integrationSet) {
+    Expression theFunCopy = function;
+    Expression theVarCopy = variable;
     Expression integrationSetCopy = integrationSet;
     return this->makeIntegral(calculator, integrationSetCopy, theFunCopy, theVarCopy);
   }
   Expression theDiffForm;
-  theDiffForm.makeXOX(calculator, calculator.opDifferential(), theVariable, theFunction);
+  theDiffForm.makeXOX(calculator, calculator.opDifferential(), variable, function);
   this->reset(calculator);
   this->addChildAtomOnTop(calculator.opIntegral());
   this->addChildOnTop(integrationSet);

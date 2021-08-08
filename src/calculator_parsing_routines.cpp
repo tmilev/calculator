@@ -176,6 +176,9 @@ void CalculatorParser::initializeControlSequences() {
   this->controlSequences.addOnTopNoRepetitionMustBeNew("arcsin");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("arccos");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("arctan");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\int_{*}");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\int^{*}");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\int_{*}^{**}");
   this->controlSequences.addOnTopNoRepetition(
     this->owner->knownOperationsInterpretedAsFunctionsMultiplicatively
   );
@@ -663,6 +666,11 @@ void Calculator::logPublicError(const std::string& theError) {
   }
 }
 
+bool CalculatorParser::decreaseStack(int decrease) {
+  this->syntacticStack.setSize(this->syntacticStack.size - decrease);
+  return true;
+}
+
 bool CalculatorParser::decreaseStackExceptLast(int decrease) {
   if (decrease <= 0) {
     return true;
@@ -731,6 +739,26 @@ bool CalculatorParser::replaceOXEXByEX() {
   left.data = newExpr;
   left.controlIndex = this->conExpression();
   return this->decreaseStackExceptLast(2);
+}
+
+bool CalculatorParser::canBeRegardedAsDifferentialForm(const std::string& input) {
+  return StringRoutines::stringBeginsWith(input, "d") && input.size() > 1;
+}
+
+bool CalculatorParser::canBeRegardedAsDifferentialForm(const SyntacticElement& input) {
+  std::string role = this->controlSequences[input.controlIndex];
+  std::string whichAtom;
+  if (role == "Variable") {
+    whichAtom = this->owner->operations.keys[input.data.data];
+    return this->canBeRegardedAsDifferentialForm(whichAtom);
+  }
+  if (role != "Expression") {
+    return false;
+  }
+  if (!input.data.isAtomUserDefined(&whichAtom)) {
+    return false;
+  }
+  return this->canBeRegardedAsDifferentialForm(whichAtom);
 }
 
 bool CalculatorParser::replaceOXXByEXX() {
@@ -974,6 +1002,12 @@ bool CalculatorParser::isLeftSeparator(unsigned char c) {
   }
 }
 
+bool CalculatorParser::setStackValue(const Expression& newExpression, const std::string& newRole, int stackOffset) {
+  this->syntacticStack[this->syntacticStack.size + stackOffset].data = newExpression;
+  this->syntacticStack[this->syntacticStack.size + stackOffset].controlIndex = this->controlSequences.getIndexNoFail(newRole);
+  return true;
+}
+
 bool CalculatorParser::isInterpretedAsEmptySpace(const std::string& input) {
   if (input.size() != 1) {
     return false;
@@ -997,24 +1031,19 @@ bool CalculatorParser::isInterpretedAsEmptySpace(unsigned char input) {
 
 void CalculatorParser::initializePredefinedWordSplits() {
   MacroRegisterFunctionWithName("Calculator::initializePredefinedWordSplits");
-  List<std::string> split;
-  List<std::string> theVars;
-  theVars.addOnTop("x");
-  theVars.addOnTop("y");
-  split.setSize(0);
-  split.addOnTop("x");
-  split.addOnTop("y");
-  this->predefinedWordSplits.setKeyValue("xy", split);
-  split.setSize(0);
-  split.addOnTop("y");
-  split.addOnTop("x");
-  this->predefinedWordSplits.setKeyValue("yx", split);
-  this->addTrigonometricSplit("sin", theVars);
-  this->addTrigonometricSplit("cos", theVars);
-  this->addTrigonometricSplit("tan", theVars);
-  this->addTrigonometricSplit("cot", theVars);
-  this->addTrigonometricSplit("sec", theVars);
-  this->addTrigonometricSplit("csc", theVars);
+  List<std::string> splitVariables;
+  splitVariables.addOnTop("x");
+  splitVariables.addOnTop("y");
+  this->predefinedWordSplits.setKeyValue("xy", List<std::string>({"x", "y"}));
+  this->predefinedWordSplits.setKeyValue("xdx", List<std::string>({"x", "dx"}));
+  this->predefinedWordSplits.setKeyValue("yx", List<std::string>({"y", "x"}));
+  this->addTrigonometricSplit("int", splitVariables);
+  this->addTrigonometricSplit("sin", splitVariables);
+  this->addTrigonometricSplit("cos", splitVariables);
+  this->addTrigonometricSplit("tan", splitVariables);
+  this->addTrigonometricSplit("cot", splitVariables);
+  this->addTrigonometricSplit("sec", splitVariables);
+  this->addTrigonometricSplit("csc", splitVariables);
 }
 
 void CalculatorParser::parseFillDictionary(const std::string& input) {
@@ -2583,27 +2612,62 @@ bool CalculatorParser::applyOneRule() {
   ) {
     return this->replaceOOEEXbyEXpowerLike();
   }
-  if (secondToLastS == "\\int" && lastS != "_") {
-    return this->replaceOXbyEX();
-  }
-  if (thirdToLastS == "\\int" && secondToLastS == "_" && lastS == "Expression") {
-    return this->replaceOXdotsXbyEXdotsX(2);
+  if (
+    thirdToLastS == "\\int" &&
+    secondToLastS == "Expression" &&
+    this->canBeRegardedAsDifferentialForm(lastE)
+  ) {
+    return this->replaceOXXByEXX();
   }
   if (
-    fourthToLastS == "\\int" && thirdToLastS == "_" &&
-    secondToLastS == "Expression" && (lastS == "^" || lastS == "EndProgram")
+    this->isDefiniteIntegral(thirdToLastS) &&
+    secondToLastS == "Expression" &&
+    this->canBeRegardedAsDifferentialForm(lastE)
   ) {
-    return this->replaceOXdotsXbyEXdotsX(3);
+    return this->setStackValue(thirdToLastE.data, "Expression", - 3);
   }
   if (
-    fifthToLastS == "\\int" && fourthToLastS == "_" && thirdToLastS == "{}" &&
-    secondToLastS == "^" && lastS == "{}"
+    (fifthToLastS == "\\int" || this->isDefiniteIntegral(fifthToLastS)) &&
+    fourthToLastS == "Expression" &&
+    (thirdToLastS == "+" || thirdToLastS == "-") &&
+    secondToLastS == "Expression" &&
+    this->canBeRegardedAsDifferentialForm(lastE)
   ) {
-    this->popTopSyntacticStack();
-    this->popTopSyntacticStack();
-    this->popTopSyntacticStack();
-    this->replaceOXbyEX();
-    return this->popTopSyntacticStack();
+    return this->replaceEOEXByEX();
+  }
+  if (
+    fourthToLastS == "\\int" &&
+    thirdToLastS == "_" &&
+    secondToLastS == "Expression"
+  ) {
+    Expression integralAtom;
+    integralAtom.makeAtom("\\int", *this->owner);
+    Expression underscore;
+    underscore.makeXOX(*this->owner, this->owner->opUnderscore(), integralAtom, secondToLastE.data);
+    this->setStackValue(underscore, "\\int_{*}", - 4);
+    return this->decreaseStackExceptLast(2);
+  }
+  if (
+    thirdToLastS == "\\int_{*}" &&
+    secondToLastS == "^" &&
+    lastS == "Expression"
+  ) {
+    Expression exponent;
+    exponent.makeXOX(*this->owner, this->owner->opPower(), thirdToLastE.data, lastE.data);
+    this->setStackValue(exponent, "\\int_{*}^{**}", - 3);
+    this->parsingLog += "[\\int_{*}^{**}]";
+    return this->decreaseStack(2);
+  }
+  if (
+    thirdToLastS == "\\int^{*}" &&
+    secondToLastS == "_" &&
+    lastS == "Expression"
+  ) {
+    Expression underscore;
+    underscore.makeXOX(*this->owner, this->owner->opUnderscore(), thirdToLastE.data, lastE.data);
+    this->parsingLog += "[\\int^{*}_{**}]";
+    this->setStackValue(underscore, "\\int_{*}^{**}", - 3);
+    return this->decreaseStack(2);
   }
   if (
     fifthToLastS == "LogBase" && fourthToLastS == "_" && thirdToLastS == "Expression" &&
@@ -3017,4 +3081,11 @@ bool CalculatorParser::applyOneRule() {
     return this->decreaseStackSetCharacterRanges(1);
   }
   return false;
+}
+
+bool CalculatorParser::isDefiniteIntegral(const std::string& syntacticRole) {
+  return
+  syntacticRole == "\\int_{*}" ||
+  syntacticRole == "\\int^{*}" ||
+  syntacticRole == "\\int_{*}^{**}";
 }

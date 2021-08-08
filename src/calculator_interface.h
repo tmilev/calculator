@@ -193,7 +193,7 @@ private:
   bool isMatrixOfType(int* outputNumberOfRows = nullptr, int* outputNumberOfColumns = nullptr) const;
 
   bool isAtom() const;
-  bool isAtomUserDefined() const;
+  bool isAtomUserDefined(std::string* whichAtom = nullptr) const;
   bool isOperationGiven(const std::string& desiredAtom) const;
   bool isOperationGiven(int desiredDataUseMinusOneForAny = - 1) const;
   bool isOperation(int& outputWhichOperationIndex) const;
@@ -358,8 +358,8 @@ private:
   bool makeIntegral(
     Calculator& calculator,
     const Expression& integrationSet,
-    const Expression& theFunction,
-    const Expression& theVariable
+    const Expression& function,
+    const Expression& variable
   );
   template<class Coefficient>
   bool makeSum(Calculator& calculator, const LinearCombination<Expression, Coefficient>& summands);
@@ -1198,6 +1198,8 @@ public:
   std::string syntaxErrors;
   std::string parsingLog;
 private:
+  // Sets an expression value and syntactic role to a given position in the stack.
+  bool setStackValue(const Expression& newExpression, const std::string& newRole, int stackOffset);
   bool isInterpretedAsEmptySpace(const std::string& input);
   bool isInterpretedAsEmptySpace(unsigned char input);
   bool isSeparatorFromTheLeftGeneral(const std::string& input);
@@ -1234,6 +1236,8 @@ private:
     (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size - 1);
     return true;
   }
+  bool canBeRegardedAsDifferentialForm(const SyntacticElement& input);
+  bool canBeRegardedAsDifferentialForm(const std::string& input);
   bool replaceXXVXdotsXbyE_BOUND_XdotsX(int numberOfXs);
   bool replaceVXdotsXbyE_NONBOUND_XdotsX(int numberOfXs);
   bool replaceEXXEXEBy_CofEEE(int controlIndex);
@@ -1436,10 +1440,21 @@ private:
   int conEndProgram() {
     return this->controlSequences.getIndexNoFail("EndProgram");
   }
+  int conIntegralUnderscore() {
+    return this->controlSequences.getIndexNoFail("\\int_{*}");
+  }
+  int conIntegralSuperScript() {
+    return this->controlSequences.getIndexNoFail("\\int^{*}");
+  }
+  int conIntegralSuperSubScript() {
+    return this->controlSequences.getIndexNoFail("\\int_{*}^{**}");
+  }
+  bool isDefiniteIntegral(const std::string& syntacticRole);
   void parseFillDictionary(const std::string& input);
   bool extractExpressions(Expression& outputExpression, std::string* outputErrors);
   int getOperationIndexFromControlIndex(int controlIndex);
   bool decreaseStackExceptLast(int decrease);
+  bool decreaseStack(int decrease);
   bool decreaseStackExceptLastTwo(int decrease);
   bool applyOneRule();
   bool isLeftSeparator(unsigned char c);

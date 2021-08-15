@@ -3423,8 +3423,11 @@ void Calculator::initializeFunctionsStandard() {
     "*",
     CalculatorFunctionsDifferentiation::interpretAsDifferential,
     "",
-    "If circumstances imply it, interprets an atom of the form dx as Differential {} x. ",
-    "(\\int x) dx; \\int x (1 + x) dx; \\int_2^3 x dx; \\int_2^3 x (1 + x) dx",
+    "If contexts implies it, interprets an atom of the form dx as Differential {} x. ",
+    "\\int x dx;"
+    " \\int x (1 + x) dx; "
+    "\\int_2^3 x dx; "
+    "\\int_2^3 x (1 + x) dx",
     "CalculatorFunctions::interpretAsDifferential",
     "InterpretAsDifferential",
     innerStandard
@@ -3434,10 +3437,13 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctionsIntegration::integralOperator,
     "",
     "Transforms integral notation into an integral expression. ",
-    "(\\int x)dx;\n"
+    "\\int x dx;\n"
+    "\\int x d x;\n"
+    "(\\int x) dx;\n"
     "\\int x (1+x) dx;\n"
     "\\int_2^3 x dx;\n"
-    "\\int_2^3 x(1+x)dx",
+    "\\int_2^3 x(1+x)dx;\n"
+    "\\int\\theta d\\theta",
     "CalculatorFunctions::integralOperator",
     "IntegralOperatorFromProduct",
     innerStandard
@@ -4093,11 +4099,11 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "Differential",
-    CalculatorFunctions::innerDifferentialStandardHandler,
+    CalculatorFunctions::differentialStandardHandler,
     "",
     "Transforms Differential{}a to the standard internal form Differential {}(a, 1).",
     "\\int \\theta {\\text d} \\theta",
-    "CalculatorFunctionsBinaryOps::innerDifferentialStandardHandler",
+    "CalculatorFunctions::differentialStandardHandler",
     "DifferentialStandardHandler",
     innerStandard
   );
@@ -4117,7 +4123,7 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctionsIntegration::integralOperator,
     "",
     "Transforms integral notation into an integral expression. ",
-    "(\\int x)dx; \\int x (1+x) dx; \\int_2^3 x dx; \\int_2^3 x(1+x)dx",
+    "\\int x dx; \\int x (1+x) dx; \\int_2^3 x dx; \\int_2^3 x(1+x)dx",
     "CalculatorFunctions::integralOperator",
     "IntegralOperatorFromQuotient",
     innerStandard
@@ -4732,9 +4738,11 @@ void Calculator::initializeFunctionsStandard() {
     "^",
     CalculatorFunctions::operatorBounds,
     "",
-    "Replaces \\int_a^b by (\\int, a, b) .",
-    "A =\\int_a^b; Lispify(A); PlotExpressionTree(A); ",
-    "CalculatorFunctions::innerIntegralUpperBound",
+    "Replaces \\sum_a^b by (\\sum, a, b) .",
+    "A =\\sum_a^b;\n"
+    "Lispify(A);\n"
+    "PlotExpressionTree(A);",
+    "CalculatorFunctions::operatorBounds",
     "OperatorBoundsSuperscript",
     innerStandard
   );

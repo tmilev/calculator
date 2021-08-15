@@ -3187,10 +3187,12 @@ bool Expression::assignValue(Calculator& owner, const Type& inputValue) {
     currentType == owner.opElementWeylAlgebra() ||
     currentType == owner.opWeightLieAlgPoly()
   ) {
-    global.fatal << "This may or may not be a programming error. "
+    global.fatal
     << "Assigning value WITHOUT CONTEXT to data type "
     << owner.getOperations()[currentType]
-    << " is discouraged, and most likely is an error. Crashing to let you know. "
+    << " is considered an error. "
+    << "If you have legitimate reasons for doing so, "
+    << "please refactor by passing empty context."
     << global.fatal;
   }
   ExpressionContext emptyContext(owner);

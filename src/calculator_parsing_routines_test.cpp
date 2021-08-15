@@ -187,7 +187,7 @@ bool Calculator::Test::builtInFunctionsABTest(Calculator& ownerInitialized) {
     << "type = 'text/css' "
     << "rel = 'stylesheet' "
     << "href = '" << WebAPI::request::calculatorCSS << "'>"
-    << "<body>" << test.reportHtml << "</body></html>";
+    << "<body><div style='overflow:auto;height:100%'>" << test.reportHtml << "</div></body></html>";
 
     FileOperations::writeFileVirual("output/crash_test.html", crashFile.str(), &crashFileWriteReport);
     global.fatal << crashFileWriteReport.str() << "Calculator AB test failed with " << test.inconsistencies

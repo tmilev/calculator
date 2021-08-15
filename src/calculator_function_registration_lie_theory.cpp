@@ -175,9 +175,9 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Computes the adjoint matrix of element g. "
     "The adjoint matrix is the matrix of the linear map ad(g):x -> [g,x]."
     "algebra elements inside the semisimple Lie algebra. ",
-    "AdCommonEigenspace{}(F_4, -5 (g_{9}) +3 (g_{13}) +5 (g_{16}) +4 (g_{10}), g_{14}+g_{22}+g_{20})",
-    "CalculatorLieTheory::adCommonEigenSpaces",
-    "AdCommonEigenspace",
+    "No example yet",
+    "CalculatorLieTheory::adjointMatrix",
+    "AdjointMatrix",
     standardOptions
   );
   this->addOperationHandler(

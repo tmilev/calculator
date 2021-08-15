@@ -19,13 +19,11 @@ bool WebAPIResponse::Test::solveJSON() {
   global.setWebInput(WebAPI::request::calculatorInput, "1+1");
   JSData result = response.solveJSON();
   std::string expected =
-  "{\"solution\":{\"solution\":{\"input\":\"1+1\",\"solutionSteps\":"
-  "["
-  "{\"transformation\":\"1+1\",\"stepType\":\"\",\"annotations\":[]},"
-  "{\"transformation\":\"2\",\"stepType\":\"=\",\"annotations\":[\"AddRationals\"]}"
-  "],"
-  "\"finalExpression\":\"2\",\"comments\":\"\",\"error\":\"\"}},"
-  "\"commentsGlobal\":\"\"}";
+    "{\"solution\":{\"solution\":{\"input\":\"1+1\",\"solutionSteps\":"
+    "[{\"transformation\":\"2\",\"stepType\":\"=\",\"annotations\":"
+    "[\"AddRationals\"]}],\"finalExpression\":\"2\",\"comments\":"
+    "\"\",\"error\":\"\"}},\"commentsGlobal\":\"\"}"
+  ;
   std::string got = result.toString();
 
   if (got != expected) {

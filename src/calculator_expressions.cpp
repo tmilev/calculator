@@ -1920,7 +1920,8 @@ bool Expression::assignError(Calculator& owner, const std::string& error) {
   this->checkConsistency();
   this->addChildAtomOnTop(owner.opError());
   this->checkConsistency();
-  return this->addChildValueOnTop(error);
+  std::string errorReplacedWhiteSpace = StringRoutines::replaceAll(error, " ", "~");
+  return this->addChildValueOnTop(errorReplacedWhiteSpace);
 }
 
 bool Expression::isSmallInteger(int* whichInteger) const {
@@ -4092,7 +4093,7 @@ bool Expression::toStringError(
     return false;
   }
   input.checkInitialization();
-  out << "\\text{Error: " << input[1].toString(format) << "}";
+  out << "\\text{Error:~" << input[1].toString(format) << "}";
   return true;
 }
 
@@ -4714,7 +4715,7 @@ std::string Expression::lispify() const {
   if (this->owner == nullptr) {
     return "Error: not initialized";
   }
-  RecursionDepthCounter theCounter(&this->owner->recursionDepth);
+  RecursionDepthCounter depthCounter(&this->owner->recursionDepth);
   if (this->owner->recursionDepth > this->owner->maximumRecursionDepth) {
     return "(error: max recursion depth ...)";
   }

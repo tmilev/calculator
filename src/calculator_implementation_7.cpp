@@ -3412,10 +3412,10 @@ bool CalculatorFunctions::innerIsNonEmptySequence(
   return output.assignValueOLD(1, calculator);
 }
 
-bool CalculatorFunctions::innerDifferentialStandardHandler(
+bool CalculatorFunctions::differentialStandardHandler(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerDifferentialStandardHandler");
+  MacroRegisterFunctionWithName("CalculatorFunctions::differentialStandardHandler");
   if (input.size() != 2) {
     return false;
   }
@@ -3471,6 +3471,24 @@ bool CalculatorFunctions::innerIsDifferentialOneFormOneVariable(
   );
 }
 
+bool CalculatorFunctionsDifferentiation::atomToDifferential(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  std::string differentialString;
+  if (!input.isOperation(&differentialString)) {
+    return false;
+  }
+  if (differentialString.size() <= 1) {
+    return false;
+  }
+  if (differentialString[0] != 'd') {
+    return false;
+  }
+  Expression underTheDifferential;
+  underTheDifferential.makeAtom(differentialString.substr(1, std::string::npos), calculator);
+  return output.makeXOX(calculator, calculator.opDifferential(), underTheDifferential, calculator.expressionOne());
+}
+
 bool CalculatorFunctionsDifferentiation::interpretAsDifferential(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
@@ -3481,33 +3499,38 @@ bool CalculatorFunctionsDifferentiation::interpretAsDifferential(
   if (!input[1].startsWith(calculator.opIntegral())) {
     return false;
   }
-  const Expression& theDiffFormCandidateE = input[2];
-  std::string theDiff;
-  if (theDiffFormCandidateE.isOperation(&theDiff)) {
-    if (theDiff.size() > 1) {
-      if (theDiff[0] == 'd') {
-        Expression variableE, diffFormE;
-        variableE.makeAtom(theDiff.substr(1, std::string::npos), calculator);
-        diffFormE.reset(calculator);
-        diffFormE.addChildAtomOnTop(calculator.opDifferential());
-        diffFormE.addChildOnTop(variableE);
-        diffFormE.addChildRationalOnTop(1);
-        output = input;
-        return output.setChild(2, diffFormE);
-      }
-    }
+  const Expression& differentialFormCandidate = input[2];
+  Expression differentialForm;
+  if (CalculatorFunctionsDifferentiation::atomToDifferential(
+    calculator, differentialFormCandidate,  differentialForm
+  )) {
+    output = input;
+    return output.setChild(2, differentialForm);
   }
-  return false;
+  if (!differentialFormCandidate.startsWithGivenOperation("*", 3)) {
+    return false;
+  }
+  if (!differentialFormCandidate[1].isOperationGiven("d")) {
+    return false;
+  }
+  differentialForm.makeXOX(
+    calculator,
+    calculator.opDifferential(),
+    differentialFormCandidate[2],
+    calculator.expressionOne()
+  );
+  output = input;
+  return output.setChild(2, differentialForm);
 }
 
 bool CalculatorFunctionsIntegration::integralOperator(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::innerCompositeMultiplyIntegralFbyDx");
-  int theOp = calculator.opTimes();
-  if (!input.startsWith(theOp, 3)) {
-    theOp = calculator.opDivide();
-    if (!input.startsWith(theOp, 3)) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integralOperator");
+  int operatorIndex = calculator.opTimes();
+  if (!input.startsWith(operatorIndex, 3)) {
+    operatorIndex = calculator.opDivide();
+    if (!input.startsWith(operatorIndex, 3)) {
       return false;
     }
   }
@@ -3535,15 +3558,19 @@ bool CalculatorFunctionsIntegration::integralOperator(
     return false;
   }
   const Expression& incomingIntegrand = input[2];
+  if (incomingIntegrand.isOperationGiven("d")) {
+    // We have an expression of the form \int x d x.
+    return false;
+  }
   Expression newIntegrand;
   Expression newFun;
   if (incomingIntegrand.isDifferentialOneFormOneVariable()) {
-    newFun.makeXOX(calculator, theOp, startingIntegrand, incomingIntegrand[2]);
+    newFun.makeXOX(calculator, operatorIndex, startingIntegrand, incomingIntegrand[2]);
     newIntegrand.makeXOX(calculator, calculator.opDifferential(), incomingIntegrand[1], newFun);
     output = integralE;
     return output.setChild(2, newIntegrand);
   }
-  newIntegrand.makeXOX(calculator, theOp, startingIntegrand, incomingIntegrand);
+  newIntegrand.makeXOX(calculator, operatorIndex, startingIntegrand, incomingIntegrand);
   output = integralE;
   return output.setChild(2, newIntegrand);
 }

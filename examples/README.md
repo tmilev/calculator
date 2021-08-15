@@ -420,10 +420,10 @@ Adds two elements of tensor products of generalized Verma modules.
 Adds two weights. 
 
 *\+* [AddElementUniversalEnvelopingRationalFunctionCoefficientsToElementUniversalEnvelopingRationalFunctionCoefficients] {CalculatorFunctionsBinaryOps::innerAddUEToAny}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7b%7bi%7d%7d%7d%20%3d%20GetChevalleyGenerator%7b%7d%28F_%7b1%7d%2c%20%7b%7bi%7d%7d%29%3b%5cnh_%7b%7b%7bi%7d%7d%7d%20%3d%20GetCartanGenerator%7b%7d%28F_%7b1%7d%2c%20%7b%7bi%7d%7d%29%3b%5cn%5bg_%7b22%7d%2bg_%7b20%7d%2bg_%7b14%7d%2cg_%7b-%2014%7d%2bg_%7b-20%7d%2bg_%7b-22%7d%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7b%7bi%7d%7d%7d%20%3d%20ChevalleyGenerator%7b%7d%28F_%7b1%7d%2c%20%7b%7bi%7d%7d%29%3b%5cnh_%7b%7b%7bi%7d%7d%7d%20%3d%20CartanGenerator%7b%7d%28F_%7b1%7d%2c%20%7b%7bi%7d%7d%29%3b%5cn%5bg_%7b22%7d%2bg_%7b20%7d%2bg_%7b14%7d%2cg_%7b-%2014%7d%2bg_%7b-20%7d%2bg_%7b-22%7d%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-g_{{{i}}} = GetChevalleyGenerator{}(F_{1}, {{i}});
-h_{{{i}}} = GetCartanGenerator{}(F_{1}, {{i}});
+g_{{{i}}} = ChevalleyGenerator{}(F_{1}, {{i}});
+h_{{{i}}} = CartanGenerator{}(F_{1}, {{i}});
 [g_{22}+g_{20}+g_{14},g_{- 14}+g_{-20}+g_{-22}]
 ```
 Adds an element of UE (Universal Enveloping algebra) to an element of UE.
@@ -453,9 +453,9 @@ PlotExpressionTree( \sum\limits_{b}^c*a)
 Transforms \sum\limits_{b}^c* a to (\sum\limits_b^c){} a. 
 
 */* [IntegralOperatorFromQuotient] {CalculatorFunctions::integralOperator}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28%5c%5cint%20x%29dx%3b%20%5c%5cint%20x%20%281%2bx%29%20dx%3b%20%5c%5cint_2%5e3%20x%20dx%3b%20%5c%5cint_2%5e3%20x%281%2bx%29dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20x%20dx%3b%20%5c%5cint%20x%20%281%2bx%29%20dx%3b%20%5c%5cint_2%5e3%20x%20dx%3b%20%5c%5cint_2%5e3%20x%281%2bx%29dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-(\int x)dx; \int x (1+x) dx; \int_2^3 x dx; \int_2^3 x(1+x)dx
+\int x dx; \int x (1+x) dx; \int_2^3 x dx; \int_2^3 x(1+x)dx
 ```
 Transforms integral notation into an integral expression. 
 
@@ -680,19 +680,22 @@ Multiplies a matrix standing on the left by a sequence/list (matrix-row) standin
 This operation is valid only if the the matrix on the right is a column-vector.
 
 *\** [InterpretAsDifferential] {CalculatorFunctions::interpretAsDifferential}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28%5c%5cint%20x%29%20dx%3b%20%5c%5cint%20x%20%281%20%2b%20x%29%20dx%3b%20%5c%5cint_2%5e3%20x%20dx%3b%20%5c%5cint_2%5e3%20x%20%281%20%2b%20x%29%20dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20x%20dx%3b%20%5c%5cint%20x%20%281%20%2b%20x%29%20dx%3b%20%5c%5cint_2%5e3%20x%20dx%3b%20%5c%5cint_2%5e3%20x%20%281%20%2b%20x%29%20dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-(\int x) dx; \int x (1 + x) dx; \int_2^3 x dx; \int_2^3 x (1 + x) dx
+\int x dx; \int x (1 + x) dx; \int_2^3 x dx; \int_2^3 x (1 + x) dx
 ```
-If circumstances imply it, interprets an atom of the form dx as Differential {} x. 
+If contexts implies it, interprets an atom of the form dx as Differential {} x. 
 
 *\** [IntegralOperatorFromProduct] {CalculatorFunctions::integralOperator}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28%5c%5cint%20x%29dx%3b%5cn%5c%5cint%20x%20%281%2bx%29%20dx%3b%5cn%5c%5cint_2%5e3%20x%20dx%3b%5cn%5c%5cint_2%5e3%20x%281%2bx%29dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20x%20dx%3b%5cn%5c%5cint%20x%20d%20x%3b%5cn%28%5c%5cint%20x%29%20dx%3b%5cn%5c%5cint%20x%20%281%2bx%29%20dx%3b%5cn%5c%5cint_2%5e3%20x%20dx%3b%5cn%5c%5cint_2%5e3%20x%281%2bx%29dx%3b%5cn%5c%5cint%5c%5ctheta%20d%5c%5ctheta%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-(\int x)dx;
+\int x dx;
+\int x d x;
+(\int x) dx;
 \int x (1+x) dx;
 \int_2^3 x dx;
-\int_2^3 x(1+x)dx
+\int_2^3 x(1+x)dx;
+\int\theta d\theta
 ```
 Transforms integral notation into an integral expression. 
 
@@ -1154,27 +1157,27 @@ V * V
 Tensor and decompose two virtual Weyl group representations. 
 
 *\** [MultiplyRationalByUE] {CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20GetChevalleyGenerator%7b%7d%28F_1%2c%20i%29%3b%20h_%7b%7bi%7d%7d%3d%20GetCartanGenerator%7b%7d%28F_1%2c%20i%29%3b%5cn%5bg_%7b22%7d%2bg_%7b20%7d%2bg_%7b14%7d%2cg_%7b17%7d-6%2f5g_%7b14%7d%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28F_1%2c%20i%29%3b%20h_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28F_1%2c%20i%29%3b%5cn%5bg_%7b22%7d%2bg_%7b20%7d%2bg_%7b14%7d%2cg_%7b17%7d-6%2f5g_%7b14%7d%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-g_{{i}}= GetChevalleyGenerator{}(F_1, i); h_{{i}}= GetCartanGenerator{}(F_1, i);
+g_{{i}}= ChevalleyGenerator{}(F_1, i); h_{{i}}= CartanGenerator{}(F_1, i);
 [g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]
 ```
 Multiplies rational number by an element universal enveloping algebra.
 
 *\** [MultiplyUEByUE] {CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20GetChevalleyGenerator%7b%7d%28F_1%2c%20i%29%3bh_%7b%7bi%7d%7d%3d%20GetCartanGenerator%7b%7d%28F_1%2c%20i%29%20%3b%5cn%5bg_%7b22%7d%2bg_%7b20%7d%2bg_%7b14%7d%2cg_%7b17%7d-6%2f5g_%7b14%7d%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28F_1%2c%20i%29%3bh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28F_1%2c%20i%29%20%3b%5cn%5bg_%7b22%7d%2bg_%7b20%7d%2bg_%7b14%7d%2cg_%7b17%7d-6%2f5g_%7b14%7d%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-g_{{i}}= GetChevalleyGenerator{}(F_1, i);h_{{i}}= GetCartanGenerator{}(F_1, i) ;
+g_{{i}}= ChevalleyGenerator{}(F_1, i);h_{{i}}= CartanGenerator{}(F_1, i) ;
 [g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]
 ```
 Multiplies elment Universal enveloping by element universal enveloping algebra.
 
 *\** [MultiplyAnyByEltTensor] {CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%3d%20GetChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%3d%20GetCartanGenerator%7b%7d%28X%2c%20i%29%3b%5cnv%3dHeighestWeightVector%7b%7d%28G_2%2c%20%281%2c0%29%2c%280%2c0%29%29%3b%5cn2%2f5%20v%3b%5cn%283%2f4%20v%29%5c%5cotimes%20v%3b%5cn3%2f4%20%28v%5c%5cotimes%20v%29%3b%5cn%283%2f4%20v%29%5c%5cotimes%20v-3%2f4%20%28v%5c%5cotimes%20v%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28X%2c%20i%29%3b%5cnv%3dHeighestWeightVector%7b%7d%28G_2%2c%20%281%2c0%29%2c%280%2c0%29%29%3b%5cn2%2f5%20v%3b%5cn%283%2f4%20v%29%5c%5cotimes%20v%3b%5cn3%2f4%20%28v%5c%5cotimes%20v%29%3b%5cn%283%2f4%20v%29%5c%5cotimes%20v-3%2f4%20%28v%5c%5cotimes%20v%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X = G_2;
-g_{{i}}= GetChevalleyGenerator{}(X,i);
-h_{{i}}= GetCartanGenerator{}(X, i);
+g_{{i}}= ChevalleyGenerator{}(X,i);
+h_{{i}}= CartanGenerator{}(X, i);
 v=HeighestWeightVector{}(G_2, (1,0),(0,0));
 2/5 v;
 (3/4 v)\otimes v;
@@ -1184,11 +1187,11 @@ v=HeighestWeightVector{}(G_2, (1,0),(0,0));
 Handles multiplying rational number by an element of tensor product of generalized Verma modules. Not fully tested and documented at the moment. Will get more documented in the future. 
 
 *\** [MultiplyPolynomialByElementTensorGeneralVermaModule] {CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%3d%20GetChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%3d%20GetCartanGenerator%7b%7d%28X%2c%20i%29%3b%5cnz%20%3d%20Polynomial%7b%7dy%3b%5cnv%20%3d%20HeighestWeightVector%7b%7d%28G_2%2c%20%28z%2c1%29%2c%281%2c0%29%29%3b%5cn%282%2az%29%20v%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28X%2c%20i%29%3b%5cnz%20%3d%20Polynomial%7b%7dy%3b%5cnv%20%3d%20HeighestWeightVector%7b%7d%28G_2%2c%20%28z%2c1%29%2c%281%2c0%29%29%3b%5cn%282%2az%29%20v%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X = G_2;
-g_{{i}}= GetChevalleyGenerator{}(X,i);
-h_{{i}}= GetCartanGenerator{}(X, i);
+g_{{i}}= ChevalleyGenerator{}(X,i);
+h_{{i}}= CartanGenerator{}(X, i);
 z = Polynomial{}y;
 v = HeighestWeightVector{}(G_2, (z,1),(1,0));
 (2*z) v;
@@ -1197,11 +1200,11 @@ v = HeighestWeightVector{}(G_2, (z,1),(1,0));
 Handles multiplying polynomial by an element of tensor product of generalized Verma modules. Not fully tested and documented at the moment. Will get more documented in the future. 
 
 *\** [MultiplyAnyByTensor] {CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%20%3d%20GetChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%20%3d%20GetCartanGenerator%7b%7d%28X%2c%20i%29%3b%5cnz%20%3d%20Polynomial%7b%7dy%3b%5cnv%20%3d%20HeighestWeightVector%7b%7d%28G_2%2c%20%28z%2c1%29%2c%281%2c0%29%29%3b%5cn1%2fz%20v%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%20%3d%20ChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%20%3d%20CartanGenerator%7b%7d%28X%2c%20i%29%3b%5cnz%20%3d%20Polynomial%7b%7dy%3b%5cnv%20%3d%20HeighestWeightVector%7b%7d%28G_2%2c%20%28z%2c1%29%2c%281%2c0%29%29%3b%5cn1%2fz%20v%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X = G_2;
-g_{{i}} = GetChevalleyGenerator{}(X,i);
-h_{{i}} = GetCartanGenerator{}(X, i);
+g_{{i}} = ChevalleyGenerator{}(X,i);
+h_{{i}} = CartanGenerator{}(X, i);
 z = Polynomial{}y;
 v = HeighestWeightVector{}(G_2, (z,1),(1,0));
 1/z v
@@ -1209,11 +1212,11 @@ v = HeighestWeightVector{}(G_2, (z,1),(1,0));
 Handles multiplying rational function number by an element of tensor product of generalized Verma modules. Not fully tested and documented at the moment. Will get more documented in the future. 
 
 *\** [MultiplyElementUniversalEnvelopingRationalFunctionByElementTensorGeneralizedVermaModule] {CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%3d%20GetChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%3d%20GetCartanGenerator%7b%7d%28X%2c%20i%29%3b%5cnz%3d%20Polynomial%7b%7dy%3b%5cnv%3dHeighestWeightVector%7b%7d%28G_2%2c%20%28z%2c1%29%2c%281%2c0%29%29%3b%5cnh_1%20v%3b%20%5cnh_2%20v%3b%5cn%20g_1%20g_%7b-%201%7d%20v%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28X%2c%20i%29%3b%5cnz%3d%20Polynomial%7b%7dy%3b%5cnv%3dHeighestWeightVector%7b%7d%28G_2%2c%20%28z%2c1%29%2c%281%2c0%29%29%3b%5cnh_1%20v%3b%20%5cnh_2%20v%3b%5cn%20g_1%20g_%7b-%201%7d%20v%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X = G_2;
-g_{{i}}= GetChevalleyGenerator{}(X,i);
-h_{{i}}= GetCartanGenerator{}(X, i);
+g_{{i}}= ChevalleyGenerator{}(X,i);
+h_{{i}}= CartanGenerator{}(X, i);
 z= Polynomial{}y;
 v=HeighestWeightVector{}(G_2, (z,1),(1,0));
 h_1 v; 
@@ -1364,11 +1367,11 @@ g_{- 1}g_{- 1}(v\otimes v);
 Please do note use (or use at your own risk): this is work-in-progress. Will be documented when implemented and tested. Tensor product of generalized Verma modules. 
 
 *\otimes* [TensorElementGeneralizedVermaModuleByElementGeneralizedVermaModule] {CalculatorFunctionsBinaryOps::tensorElementTensorByElementTensor}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%20%3d%20GetChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%3d%20GetCartanGenerator%7b%7d%28X%2c%20i%29%3b%5cnz%3d%20Polynomial%7b%7dy%3b%5cnv%3dHeighestWeightVector%7b%7d%28G_2%2c%20%28z%2c1%29%2c%20%281%2c0%29%29%3b%5cng_%7b-%201%7d%28v%5c%5cotimes%20v%29%3b%5cng_%7b-%201%7dg_%7b-%201%7d%28v%5c%5cotimes%20v%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%20%3d%20ChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28X%2c%20i%29%3b%5cnz%3d%20Polynomial%7b%7dy%3b%5cnv%3dHeighestWeightVector%7b%7d%28G_2%2c%20%28z%2c1%29%2c%20%281%2c0%29%29%3b%5cng_%7b-%201%7d%28v%5c%5cotimes%20v%29%3b%5cng_%7b-%201%7dg_%7b-%201%7d%28v%5c%5cotimes%20v%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X = G_2;
-g_{{i}} = GetChevalleyGenerator{}(X,i);
-h_{{i}}= GetCartanGenerator{}(X, i);
+g_{{i}} = ChevalleyGenerator{}(X,i);
+h_{{i}}= CartanGenerator{}(X, i);
 z= Polynomial{}y;
 v=HeighestWeightVector{}(G_2, (z,1), (1,0));
 g_{- 1}(v\otimes v);
@@ -1448,11 +1451,11 @@ x_{{i}}= Polynomial{}x_i;
 Lie bracket of elements of Weyl algebras = differential operators with polynomial coefficients. 
 
 *[]* [LieBracketSemisimpleLieAlgebras] {CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3dA_1%3b%5cng_%7b%7bi%7d%7d%3d%20GetChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%3d%20GetCartanGenerator%7b%7d%28X%2ci%29%3b%5cn%5bg_1%2cg_%7b-%201%7d%5d%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3dA_1%3b%5cng_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28X%2ci%29%3b%5cn%5bg_1%2cg_%7b-%201%7d%5d%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X =A_1;
-g_{{i}}= GetChevalleyGenerator{}(X,i);
-h_{{i}}= GetCartanGenerator{}(X,i);
+g_{{i}}= ChevalleyGenerator{}(X,i);
+h_{{i}}= CartanGenerator{}(X,i);
 [g_1,g_{- 1}] 
 ```
 Lie bracket of elements of semisimple Lie algebra. 
@@ -1729,12 +1732,14 @@ x^1 + x^2; A^1
 ```
 Realizes the tranformation {{anything}}^1=a. 
 
-*^* [OperatorBoundsSuperscript] {CalculatorFunctions::innerIntegralUpperBound}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%5c%5cint_a%5eb%3b%20Lispify%28A%29%3b%20PlotExpressionTree%28A%29%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*^* [OperatorBoundsSuperscript] {CalculatorFunctions::operatorBounds}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%5c%5csum_a%5eb%3b%5cnLispify%28A%29%3b%5cnPlotExpressionTree%28A%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-A =\int_a^b; Lispify(A); PlotExpressionTree(A); 
+A =\sum_a^b;
+Lispify(A);
+PlotExpressionTree(A);
 ```
-Replaces \int_a^b by (\int, a, b) .
+Replaces \sum_a^b by (\sum, a, b) .
 
 *^* [PowerEllipticCurveElementRationalByInteger] {CalculatorFunctionsBinaryOps::innerPowerEllipticCuveElementByInteger}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g%20%3d%20ElementEllipticCurveNormalForm%28y%5e2%20%3d%20x%5e3%20-%20x%20%2b1%2c%20x%20%3d%203%2c%20y%20%3d%205%29%3b%5cng%5e2%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -1777,25 +1782,25 @@ x^1000001
 Exponentiates element of a Weyl group to an integer power. 
 
 *^* [PowerElementUniversalEnvelopingBySmallInteger] {CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20GetChevalleyGenerator%7b%7d%28G_2%2c%20i%29%3b%20h_%7b%7bi%7d%7d%3d%20GetCartanGenerator%7b%7d%28G_2%2c%20i%29%20%3b%5cn%20%28g_1%2bg_2%29%5e2%2b%20g_1%5e%7b1%2f2%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28G_2%2c%20i%29%3b%20h_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28G_2%2c%20i%29%20%3b%5cn%20%28g_1%2bg_2%29%5e2%2b%20g_1%5e%7b1%2f2%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-g_{{i}}= GetChevalleyGenerator{}(G_2, i); h_{{i}}= GetCartanGenerator{}(G_2, i) ;
+g_{{i}}= ChevalleyGenerator{}(G_2, i); h_{{i}}= CartanGenerator{}(G_2, i) ;
  (g_1+g_2)^2+ g_1^{1/2}
 ```
 Raises element of universal enveloping to integer power. If the exponent is non-positive integer but the element of the UE is a single generator with coefficient 1, the exponent will be carried out formally. 
 
 *^* [PowerUEelementToPolyPower] {CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20GetChevalleyGenerator%7b%7d%28G_2%2c%20i%29%3b%20h_%7b%7bi%7d%7d%3d%20GetCartanGenerator%7b%7d%28G_2%2c%20i%29%20%3b%5cn%28%28%28%28g_1%29%5e%7bPolynomial%7b%7dx%7d%29%5e%7bPolynomial%7b%7dy%7d%29%20%2bg_2%29%5e2%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28G_2%2c%20i%29%3b%20h_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28G_2%2c%20i%29%20%3b%5cn%28%28%28%28g_1%29%5e%7bPolynomial%7b%7dx%7d%29%5e%7bPolynomial%7b%7dy%7d%29%20%2bg_2%29%5e2%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-g_{{i}}= GetChevalleyGenerator{}(G_2, i); h_{{i}}= GetCartanGenerator{}(G_2, i) ;
+g_{{i}}= ChevalleyGenerator{}(G_2, i); h_{{i}}= CartanGenerator{}(G_2, i) ;
 ((((g_1)^{Polynomial{}x})^{Polynomial{}y}) +g_2)^2
 ```
 Provided that an element of Universal Enveloping algebra is a single generator (raised to arbitrary formal polynomial power) with coefficient 1, raises (formally) the element of the UE to arbitrary polynomial power. 
 
 *^* [PowerUEelementToRFPower] {CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20GetChevalleyGenerator%7b%7d%28G_2%2c%20i%29%3b%20h_%7b%7bi%7d%7d%3d%20GetCartanGenerator%7b%7d%28G_2%2c%20i%29%3b%5cn%20%28%28%28%28g_1%29%5e%7bPolynomial%7b%7dx%7d%29%5e%7bPolynomial%7b%7dy%7d%29%20%2bg_2%29%5e2%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28G_2%2c%20i%29%3b%20h_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28G_2%2c%20i%29%3b%5cn%20%28%28%28%28g_1%29%5e%7bPolynomial%7b%7dx%7d%29%5e%7bPolynomial%7b%7dy%7d%29%20%2bg_2%29%5e2%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-g_{{i}}= GetChevalleyGenerator{}(G_2, i); h_{{i}}= GetCartanGenerator{}(G_2, i);
+g_{{i}}= ChevalleyGenerator{}(G_2, i); h_{{i}}= CartanGenerator{}(G_2, i);
  ((((g_1)^{Polynomial{}x})^{Polynomial{}y}) +g_2)^2
 ```
 Provided that an element of Universal Enveloping algebra is a single generator (raised to arbitrary formal RF power) with coefficient 1, raises (formally) the element of the UE to arbitrary RF power. 
@@ -3763,7 +3768,7 @@ Removes the elements of the second set from the elements of the first set. The o
 
 Operator or function Differential is overloaded with 2 total handlers.
 
-*Differential* [DifferentialStandardHandler] {CalculatorFunctionsBinaryOps::innerDifferentialStandardHandler}. 
+*Differential* [DifferentialStandardHandler] {CalculatorFunctions::differentialStandardHandler}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20%5c%5ctheta%20%7b%5c%5ctext%20d%7d%20%5c%5ctheta%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \int \theta {\text d} \theta
@@ -4460,10 +4465,10 @@ ElementEllipticCurveNormalForm(y^2 = x^3 + x + 7, x = 3 mod 101, y = 21 mod 101)
 Makes an elliptic curve from a cubic in normal form, generator letter and base point.
 
 *SemisimpleLieAlgebra* [SemisimpleLieAlgebra] {CalculatorConversions::innerSemisimpleLieAlgebra}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20GetChevalleyGenerator%7b%7d%28SemisimpleLieAlgebra%7b%7dG_2%2c%20i%29%3b%5cnh_%7b%7bi%7d%7d%3d%20GetCartanGenerator%7b%7d%28SemisimpleLieAlgebra%7b%7dG_2%2c%20i%29%3b%5cn%5bg_1%2cg_%7b-%201%7d%5d%3b%20%5cn%5bg_2%2c%20g_%7b-2%7d%5d%3b%20%5cn%5bh_%7b1%7d%2c%20g_6%5d%3b%20%5cn%5bh_2%2c%20g_%7b-6%7d%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28SemisimpleLieAlgebra%7b%7dG_2%2c%20i%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28SemisimpleLieAlgebra%7b%7dG_2%2c%20i%29%3b%5cn%5bg_1%2cg_%7b-%201%7d%5d%3b%20%5cn%5bg_2%2c%20g_%7b-2%7d%5d%3b%20%5cn%5bh_%7b1%7d%2c%20g_6%5d%3b%20%5cn%5bh_2%2c%20g_%7b-6%7d%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-g_{{i}}= GetChevalleyGenerator{}(SemisimpleLieAlgebra{}G_2, i);
-h_{{i}}= GetCartanGenerator{}(SemisimpleLieAlgebra{}G_2, i);
+g_{{i}}= ChevalleyGenerator{}(SemisimpleLieAlgebra{}G_2, i);
+h_{{i}}= CartanGenerator{}(SemisimpleLieAlgebra{}G_2, i);
 [g_1,g_{- 1}]; 
 [g_2, g_{-2}]; 
 [h_{1}, g_6]; 
@@ -4493,19 +4498,39 @@ PrecomputeSemisimpleLieAlgebraStructure 0
 ```
 Function available to logged-in admins only. Precomputes all built-in semisimple Lie algebra information. Argument gives a starting point (0 or negative to start at the beginning). Turn process monitoring on when using this function. 
 
-*GetChevalleyGenerator* [GetChevalleyGenerator] {Calculator::chevalleyGenerator}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5bGetChevalleyGenerator%7b%7d%28G_2%2c%206%29%2c%20GetChevalleyGenerator%7b%7d%28G_2%2c%20-6%29%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*ChevalleyGenerator* [ChevalleyGenerator] {Calculator::chevalleyGenerator}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5bChevalleyGenerator%7b%7d%28G_2%2c%206%29%2c%20ChevalleyGenerator%7b%7d%28G_2%2c%20-6%29%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-[GetChevalleyGenerator{}(G_2, 6), GetChevalleyGenerator{}(G_2, -6)]
+[ChevalleyGenerator{}(G_2, 6), ChevalleyGenerator{}(G_2, -6)]
 ```
 First argument must be a semisimple Lie algebra, second argument must be an integer from -N to N, where N is the number of positive roots of the Lie algebra. The function returns the Chevalley-Weyl generator labeled by the root corresponding to the integer index. The roots are indexed in the ordered displayed by the PrintSemisimpleLieAlgebra function. 
 
-*GetCartanGenerator* [GetCartanGenerator] {Calculator::cartanGenerator}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GetCartanGenerator%7b%7d%28G_2%2c%201%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*CartanGenerator* [CartanGenerator] {Calculator::cartanGenerator}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22CartanGenerator%7b%7d%28G_2%2c%201%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-GetCartanGenerator{}(G_2, 1)
+CartanGenerator{}(G_2, 1)
 ```
 First argument must be a semisimple Lie algebra, second argument must be a number between 1 and K, where K is the rank of the Lie algebra. In this case the function returns the element of the Cartan subalgebra that is dual to the simple root with the same index. Note that this element of the Cartan subalgebra is proportional to a Chevalley-Weyl generator with a coefficient of proportionality equal to 2/(simple root length squared) ).
+
+*StandardRepresentationMatrix* [StandardRepresentationMatrix] {CalculatorLieTheory::adCommonEigenSpaces}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Type%20%3d%20A_4%3b%5cnStandardRepresentationMatrix%7b%7d%28Type%2c%20g_1%29%3b%5cng_%7b%7bj%7d%7d%3dChevalleyGenerator%28Type%2c%20j%29%3b%5cnh_%7b%7bj%7d%7d%3dCartanGenerator%28Type%2c%20j%29%3b%5cnStandardRepresentationMatrix%28g_1%29%3b%5cnStandardRepresentationMatrix%28g_1-g_-1%29%3b%5cnStandardRepresentationMatrix%28%20%28g_1%2bg_2%20-%20g_-1-g_-2%29%5e2%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+Type = A_4;
+StandardRepresentationMatrix{}(Type, g_1);
+g_{{j}}=ChevalleyGenerator(Type, j);
+h_{{j}}=CartanGenerator(Type, j);
+StandardRepresentationMatrix(g_1);
+StandardRepresentationMatrix(g_1-g_-1);
+StandardRepresentationMatrix( (g_1+g_2 - g_-1-g_-2)^2);
+```
+Computes matrix of an element of a semisimple Lie algebra (or its universal enveloping algebra) in a 'natural' representation of the Lie algebra. Implemented for type A only at the moment.Two possible input formats. 1) One argument input. Give as input a Chevalley generator.2) Two argument input. First is the type of the semisimple lie algebra.Second is the chevalley generator, using the letter g.
+
+*AdjointMatrix* [AdjointMatrix] {CalculatorLieTheory::adjointMatrix}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22No%20example%20yet%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+No example yet
+```
+Computes the adjoint matrix of element g. The adjoint matrix is the matrix of the linear map ad(g):x -> [g,x].algebra elements inside the semisimple Lie algebra. 
 
 *AdCommonEigenspace* [AdCommonEigenspace] {CalculatorLieTheory::adCommonEigenSpaces}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22AdCommonEigenspace%7b%7d%28F_4%2c%20-5%20%28g_%7b9%7d%29%20%2b3%20%28g_%7b13%7d%29%20%2b5%20%28g_%7b16%7d%29%20%2b4%20%28g_%7b10%7d%29%2c%20g_%7b14%7d%2bg_%7b22%7d%2bg_%7b20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -4592,10 +4617,10 @@ ConesIntersection{}((v_1, v_2), (v_3, - v_4));
 Takes as input two sequences of vectors, generates two cones, and intersects them using the simplex algorithm. The output is a string report of the operation. The first cone is generated over Z_{&gt;} (``strict cone'') the second cone is generated over Z_{&gt;= 0} (``non-strict cone'').
 
 *HeighestWeightVector* [HeighestWeightVector] {CalculatorFunctions::highestWeightVector}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20GetChevalleyGenerator%7b%7d%28B_3%2c%20i%29%3b%5cnh_%7b%7bi%7d%7d%3d%20GetCartanGenerator%7b%7d%28B_3%2c%20i%29%3b%5cnv_%5c%5cmu%3dHeighestWeightVector%7b%7d%20%28A_3%2c%20%281%2c0%2c1%29%2c%280%2c0%2c0%29%29%3b%5cnv_%5c%5clambda%20%3dHeighestWeightVector%7b%7d%28B_3%2c%20%28x_1%2c0%2c1%29%2c%281%2c0%2c0%29%29%3b%5cnh_1g_%7b-%201%7dv_%5c%5clambda%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28B_3%2c%20i%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28B_3%2c%20i%29%3b%5cnv_%5c%5cmu%3dHeighestWeightVector%7b%7d%20%28A_3%2c%20%281%2c0%2c1%29%2c%280%2c0%2c0%29%29%3b%5cnv_%5c%5clambda%20%3dHeighestWeightVector%7b%7d%28B_3%2c%20%28x_1%2c0%2c1%29%2c%281%2c0%2c0%29%29%3b%5cnh_1g_%7b-%201%7dv_%5c%5clambda%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-g_{{i}}= GetChevalleyGenerator{}(B_3, i);
-h_{{i}}= GetCartanGenerator{}(B_3, i);
+g_{{i}}= ChevalleyGenerator{}(B_3, i);
+h_{{i}}= CartanGenerator{}(B_3, i);
 v_\mu=HeighestWeightVector{} (A_3, (1,0,1),(0,0,0));
 v_\lambda =HeighestWeightVector{}(B_3, (x_1,0,1),(1,0,0));
 h_1g_{- 1}v_\lambda
@@ -4610,9 +4635,9 @@ PrintModule{}(G_2, (2, 0), (0, 0))
 Makes a report on a finite dimensional Lie algebra module, or more generally, on a generalized Verma module (irreducible finite dimensional semisimple Lie algebra modules are a partial case of generalized Verma modules). The first argument gives the semisimple Lie algebra. The second argument gives the highest weight in fundamental coordinates. The third argument parametrizes the parabolic subalgebra, e.g. (1,0) stands for a parabolic subalgebra (lying in algebra of rank 2) with first simple root crossed-out. The second argument is allowed to have entries that are not non-negative integers in the positions in which the third argument has 1's. 
 
 *HighestWeightTAAbf* [HighestWeightTAAbf] {CalculatorFunctions::innerHWTAABF}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7ba%7d%7d%3d%20GetChevalleyGenerator%7b%7d%20%28G_2%2c%20a%29%3b%5cnHighestWeightTAAbf%7b%7d%28g_%7b-%201%7d%20g_%7b-2%7d%2c%20g_%7b-%201%7dg_%7b-2%7d%2c%20%282%2c2%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7ba%7d%7d%3d%20ChevalleyGenerator%7b%7d%20%28G_2%2c%20a%29%3b%5cnHighestWeightTAAbf%7b%7d%28g_%7b-%201%7d%20g_%7b-2%7d%2c%20g_%7b-%201%7dg_%7b-2%7d%2c%20%282%2c2%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-g_{{a}}= GetChevalleyGenerator{} (G_2, a);
+g_{{a}}= ChevalleyGenerator{} (G_2, a);
 HighestWeightTAAbf{}(g_{- 1} g_{-2}, g_{- 1}g_{-2}, (2,2))
 ```
 Highest weight transpose anti-automorphism bilinear form, a.k.a. Shapovalov form. Let M be a Verma module with highest weight vector v given in fundamental coordinates. Let P:M->M be a projection map onto Cv that maps every weight vector of M of weight different from the highest to 0. Let u_1, u_2 be two words in the universal enveloping algebra. Then define HighestWeightTAAbf(u_1,u_2)= Tr_M (P ( taa(u_1) u_2 ), where taa() is the transpose anti-automorphism of g. 
@@ -4654,9 +4679,9 @@ CasimirWRTLevi{}(B_3, (1,0,0))
 Gives the Casimir element of a Levi part of a parabolic subalgebra. First argument = ambient Lie algebra. Second argument = parabolic selection = 1 stands for simple root outside of the Levi component, 0 stands for simple root of the Levi component.
 
 *HmmG2inB3* [HmmG2inB3] {Calculator::embedG2InB3}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7ba%7d%7d%3d%20GetChevalleyGenerator%7b%7d%20%28G_2%2c%20a%29%3b%20HmmG2inB3%7b%7d%28g_1%29%3b%5cnHmmG2inB3%7b%7d%28g_2%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7ba%7d%7d%3d%20ChevalleyGenerator%7b%7d%20%28G_2%2c%20a%29%3b%20HmmG2inB3%7b%7d%28g_1%29%3b%5cnHmmG2inB3%7b%7d%28g_2%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-g_{{a}}= GetChevalleyGenerator{} (G_2, a); HmmG2inB3{}(g_1);
+g_{{a}}= ChevalleyGenerator{} (G_2, a); HmmG2inB3{}(g_1);
 HmmG2inB3{}(g_2) 
 ```
 Embeds elements of the Universal enveloping of G_2 in B_3, following an embedding found in a paper by McGovern.
@@ -4895,14 +4920,14 @@ LoadSemisimpleSubalgebras {}(EmbedSemisimpleInSemisimple{}(G_2, B_3))
 <b>This function is being developed and is not implemented fully yet.</b>Loads a semisimpleSubalgebra from expression. 
 
 *SltwoSubalgebra* [SltwoSubalgebra] {CalculatorConversions::innerSlTwoSubalgebraPrecomputed}. (admin only) 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22SltwoSubalgebra%28%5cnB_%7b3%7d%2c%5cn3%20GetChevalleyGenerator%28%28B%29_%7b3%7d%2c%20-2%29%2c%5cn3%20GetChevalleyGenerator%28%20%28B%29_%7b3%7d%2c%203%29%5cn%2b%206%20GetChevalleyGenerator%28%20%28B%29_%7b3%7d%2c%201%29%5cn%2b%2010%20%2f%203%20GetChevalleyGenerator%28%20%28B%29_%7b3%7d%2c%202%29%5cn%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22SltwoSubalgebra%28%5cnB_%7b3%7d%2c%5cn3%20ChevalleyGenerator%28%28B%29_%7b3%7d%2c%20-2%29%2c%5cn3%20ChevalleyGenerator%28%20%28B%29_%7b3%7d%2c%203%29%5cn%2b%206%20ChevalleyGenerator%28%20%28B%29_%7b3%7d%2c%201%29%5cn%2b%2010%20%2f%203%20ChevalleyGenerator%28%20%28B%29_%7b3%7d%2c%202%29%5cn%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 SltwoSubalgebra(
 B_{3},
-3 GetChevalleyGenerator((B)_{3}, -2),
-3 GetChevalleyGenerator( (B)_{3}, 3)
-+ 6 GetChevalleyGenerator( (B)_{3}, 1)
-+ 10 / 3 GetChevalleyGenerator( (B)_{3}, 2)
+3 ChevalleyGenerator((B)_{3}, -2),
+3 ChevalleyGenerator( (B)_{3}, 3)
++ 6 ChevalleyGenerator( (B)_{3}, 1)
++ 10 / 3 ChevalleyGenerator( (B)_{3}, 2)
 )
 ```
 <b>This function is being developed and is not implemented fully yet. </b>Loads an sl(2) subalgebra from expression. 
@@ -4915,9 +4940,9 @@ Freudenthal{}(B_3, (2,2,2))
 Computes the dominant weights with multiplicities of a finite dimensional module of a highest weight given in fundamental coordinates. The first argument gives the semisimple Lie algebra type, the second argument gives the highest weight in fundamental coordinates. 
 
 *Killing* [Killing] {CalculatorLieTheory::killingForm}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22h_%7b%7bi%7d%7d%3d%20GetCartanGenerator%7b%7d%28F_1%2c%20i%29%3bKF%7b%7d%28%7b%7bi%7d%7d%2c%7b%7bj%7d%7d%29%3dKilling%7b%7d%28h_i%2c%20h_j%29%3bFunctionToMatrix%28KF%2c%204%2c%204%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22h_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28F_1%2c%20i%29%3bKF%7b%7d%28%7b%7bi%7d%7d%2c%7b%7bj%7d%7d%29%3dKilling%7b%7d%28h_i%2c%20h_j%29%3bFunctionToMatrix%28KF%2c%204%2c%204%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-h_{{i}}= GetCartanGenerator{}(F_1, i);KF{}({{i}},{{j}})=Killing{}(h_i, h_j);FunctionToMatrix(KF, 4, 4)
+h_{{i}}= CartanGenerator{}(F_1, i);KF{}({{i}},{{j}})=Killing{}(h_i, h_j);FunctionToMatrix(KF, 4, 4)
 ```
 Computes the Killing form product of two elements of semisimple Lie algebra. 
 
@@ -5117,16 +5142,16 @@ GenerateFiniteMultiplicativelyClosedSet{}(48, s_1, s_2, s_3);
 The first argument gives upper_bound to the number of elements of the set. Generates a finite multiplicatively closed set of at most upper_bound elements, or returns error indicating the multiplicatively closed set is larger than the upper bound.
 
 *CartanSA* [CartanSA] {CalculatorFunctions::constructCartanSubalgebra}. (admin only) 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%20%3d%20GetChevalleyGenerator%7b%7d%28b_3%2c%20i%29%3b%5cnh_%7b%7bi%7d%7d%20%3d%20GetCartanGenerator%7b%7d%28b_3%2c%20i%29%3b%5cnCartanSA%28g_1%20%2b%20g_3%2c%20g_-1%20%2b%20g_-3%2c%20g_2%2c%20g_-2%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%20%3d%20ChevalleyGenerator%7b%7d%28b_3%2c%20i%29%3b%5cnh_%7b%7bi%7d%7d%20%3d%20CartanGenerator%7b%7d%28b_3%2c%20i%29%3b%5cnCartanSA%28g_1%20%2b%20g_3%2c%20g_-1%20%2b%20g_-3%2c%20g_2%2c%20g_-2%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-g_{{i}} = GetChevalleyGenerator{}(b_3, i);
-h_{{i}} = GetCartanGenerator{}(b_3, i);
+g_{{i}} = ChevalleyGenerator{}(b_3, i);
+h_{{i}} = CartanGenerator{}(b_3, i);
 CartanSA(g_1 + g_3, g_-1 + g_-3, g_2, g_-2);
 ```
 Generates a Cartan subalgebra, code is still experimental.
 
 *GenerateVectorSpaceClosedWithRespectToLieBracket* [GenerateVectorSpaceClosedWithRespectToLieBracket] {CalculatorFunctions::generateVectorSpaceClosedWithRespectToLieBracket}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cpartial_%7b%7bi%7d%7d%20%3d%20ElementWeylAlgebraDO%7b%7d%28%5c%5cpartial_i%2c%20x_i%29%3b%5cnx_%7b%7bi%7d%7d%20%3d%20ElementWeylAlgebraPoly%7b%7d%28%5c%5cpartial_i%2c%20x_i%29%3b%20g_1%20%3d%20%28-%20x_%7b5%7d%20%5c%5cpartial_%7b5%7d%5e%7b2%7d%20-%20x_%7b4%7d%20%5c%5cpartial_%7b4%7d%20%5c%5cpartial_%7b5%7d%20%20-%20x_%7b3%7d%20%5c%5cpartial_%7b3%7d%20%5c%5cpartial_%7b5%7d%20-%20x_%7b2%7d%20%5c%5cpartial_%7b2%7d%20%5c%5cpartial_%7b5%7d%20%2b%20x_%7b1%7d%20%5c%5cpartial_%7b2%7d%20%5c%5cpartial_%7b4%7d%20%2bx_%7b1%7d%20%5c%5cpartial_%7b3%7d%5e%7b2%7d%29%3b%5cng_-%201%20%3d%20x_5%3b%5cng_2%20%3d%20x_%7b5%7d%20%5c%5cpartial_%7b4%7d%20-%20x_%7b2%7d%20%5c%5cpartial_%7b1%7d%3b%5cng_-2%20%3d%20%28x_%7b4%7d%20%5c%5cpartial_%7b5%7d%20-%20x_%7b1%7d%20%5c%5cpartial_%7b2%7d%29%3b%5cng_3%20%3d%20%282x_%7b4%7d%20%5c%5cpartial_%7b3%7d%20-%20x_%7b3%7d%20%5c%5cpartial_%7b2%7d%29%3b%5cng_-3%20%3d%20%28x_%7b3%7d%20%5c%5cpartial_%7b4%7d%20-%202x_%7b2%7d%20%5c%5cpartial_%7b3%7d%29%3b%5cnGenerateVectorSpaceClosedWithRespectToLieBracket%7b%7d%2850%2c%20g_1%2c%20g_-%201%2c%20g_2%2c%20g_-2%2c%20g_3%2c%20g_-3%29%3b%5cnGenerateVectorSpaceClosedWithRespectToLieBracket%7b%7d%2850%2c%20g_1%2c%20g_2%2c%20g_-2%2c%20g_3%2c%20g_-3%29%3b%5cnGenerateVectorSpaceClosedWithRespectToLieBracket%7b%7d%2850%2c%20g_1%2c%20g_-%201%2c%20g_2%2c%20g_-2%2c%20g_3%29%3b%5cnq_%7b%7bi%7d%7d%20%3d%20GetChevalleyGenerator%7b%7d%28F_4%2c%20i%29%3b%5cns_2%20%3d%20-%20q_%7b-%205%7d%20-%20q_%7b-6%7d%3b%5cns_1%20%3d%20q_%7b20%7d%20%2b%20q_%7b19%7d%3b%5cns_-%201%20%3d%20-%20q_%7b-%2019%7d%20-%20q_%7b-%2020%7d%3b%5cns_-2%20%3d%202q_%7b6%7d%20%2b%202q_%7b5%7d%3b%5cnGenerateVectorSpaceClosedWithRespectToLieBracket%2852%2c%20s_1%2c%20s_2%2c%20s_-%201%2c%20s_-2%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cpartial_%7b%7bi%7d%7d%20%3d%20ElementWeylAlgebraDO%7b%7d%28%5c%5cpartial_i%2c%20x_i%29%3b%5cnx_%7b%7bi%7d%7d%20%3d%20ElementWeylAlgebraPoly%7b%7d%28%5c%5cpartial_i%2c%20x_i%29%3b%20g_1%20%3d%20%28-%20x_%7b5%7d%20%5c%5cpartial_%7b5%7d%5e%7b2%7d%20-%20x_%7b4%7d%20%5c%5cpartial_%7b4%7d%20%5c%5cpartial_%7b5%7d%20%20-%20x_%7b3%7d%20%5c%5cpartial_%7b3%7d%20%5c%5cpartial_%7b5%7d%20-%20x_%7b2%7d%20%5c%5cpartial_%7b2%7d%20%5c%5cpartial_%7b5%7d%20%2b%20x_%7b1%7d%20%5c%5cpartial_%7b2%7d%20%5c%5cpartial_%7b4%7d%20%2bx_%7b1%7d%20%5c%5cpartial_%7b3%7d%5e%7b2%7d%29%3b%5cng_-%201%20%3d%20x_5%3b%5cng_2%20%3d%20x_%7b5%7d%20%5c%5cpartial_%7b4%7d%20-%20x_%7b2%7d%20%5c%5cpartial_%7b1%7d%3b%5cng_-2%20%3d%20%28x_%7b4%7d%20%5c%5cpartial_%7b5%7d%20-%20x_%7b1%7d%20%5c%5cpartial_%7b2%7d%29%3b%5cng_3%20%3d%20%282x_%7b4%7d%20%5c%5cpartial_%7b3%7d%20-%20x_%7b3%7d%20%5c%5cpartial_%7b2%7d%29%3b%5cng_-3%20%3d%20%28x_%7b3%7d%20%5c%5cpartial_%7b4%7d%20-%202x_%7b2%7d%20%5c%5cpartial_%7b3%7d%29%3b%5cnGenerateVectorSpaceClosedWithRespectToLieBracket%7b%7d%2850%2c%20g_1%2c%20g_-%201%2c%20g_2%2c%20g_-2%2c%20g_3%2c%20g_-3%29%3b%5cnGenerateVectorSpaceClosedWithRespectToLieBracket%7b%7d%2850%2c%20g_1%2c%20g_2%2c%20g_-2%2c%20g_3%2c%20g_-3%29%3b%5cnGenerateVectorSpaceClosedWithRespectToLieBracket%7b%7d%2850%2c%20g_1%2c%20g_-%201%2c%20g_2%2c%20g_-2%2c%20g_3%29%3b%5cnq_%7b%7bi%7d%7d%20%3d%20ChevalleyGenerator%7b%7d%28F_4%2c%20i%29%3b%5cns_2%20%3d%20-%20q_%7b-%205%7d%20-%20q_%7b-6%7d%3b%5cns_1%20%3d%20q_%7b20%7d%20%2b%20q_%7b19%7d%3b%5cns_-%201%20%3d%20-%20q_%7b-%2019%7d%20-%20q_%7b-%2020%7d%3b%5cns_-2%20%3d%202q_%7b6%7d%20%2b%202q_%7b5%7d%3b%5cnGenerateVectorSpaceClosedWithRespectToLieBracket%2852%2c%20s_1%2c%20s_2%2c%20s_-%201%2c%20s_-2%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \partial_{{i}} = ElementWeylAlgebraDO{}(\partial_i, x_i);
 x_{{i}} = ElementWeylAlgebraPoly{}(\partial_i, x_i); g_1 = (- x_{5} \partial_{5}^{2} - x_{4} \partial_{4} \partial_{5}  - x_{3} \partial_{3} \partial_{5} - x_{2} \partial_{2} \partial_{5} + x_{1} \partial_{2} \partial_{4} +x_{1} \partial_{3}^{2});
@@ -5138,7 +5163,7 @@ g_-3 = (x_{3} \partial_{4} - 2x_{2} \partial_{3});
 GenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3, g_-3);
 GenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_2, g_-2, g_3, g_-3);
 GenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3);
-q_{{i}} = GetChevalleyGenerator{}(F_4, i);
+q_{{i}} = ChevalleyGenerator{}(F_4, i);
 s_2 = - q_{- 5} - q_{-6};
 s_1 = q_{20} + q_{19};
 s_- 1 = - q_{- 19} - q_{- 20};

@@ -1201,7 +1201,7 @@ bool CalculatorFunctionsPlot::plotRectangle(
 bool CalculatorFunctions::operatorBounds(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPowerIntToAny");
+  MacroRegisterFunctionWithName("CalculatorFunctions::operatorBounds");
   if (
     !input.startsWith(calculator.opUnderscore(), 3) &&
     !input.startsWith(calculator.opPower(), 3)

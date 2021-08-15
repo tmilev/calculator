@@ -172,6 +172,7 @@ public:
   static bool ddivDxToDiffDivDiffx(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool interpretAsDifferential(Calculator& calculator, const Expression& input, Expression& output);
+  static bool atomToDifferential(Calculator& calculator, const Expression& input, Expression& output);
   static bool differentiateSqrt(Calculator& calculator, const Expression& input, Expression& output);
   static bool differentiateWithRespectToXTimesAny(Calculator& calculator, const Expression& input, Expression& output);
 };
@@ -408,7 +409,7 @@ public:
 
   static bool outerCommuteAtimesBifUnivariate(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerCommuteAtimesBtimesCifUnivariate(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDifferentialStandardHandler(Calculator& calculator, const Expression& input, Expression& output);
+  static bool differentialStandardHandler(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerDifferentialOfPolynomial(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerIsDifferentialOneFormOneVariable(Calculator& calculator, const Expression& input, Expression& output);

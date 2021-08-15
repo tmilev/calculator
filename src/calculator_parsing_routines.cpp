@@ -2211,7 +2211,6 @@ void CalculatorParser::logParsingOperation() {
   }
   this->parsingLog.addOnTop("<hr>");
   this->parsingLog.addOnTop(this->toStringSyntacticStackHTMLTable(false, false));
-  this->parsingLog.addOnTop("&nbsp;&nbsp;&nbsp;");
   this->parsingLog.addOnTop("[" + this->lastRuleName + "]");
 }
 
@@ -2379,9 +2378,14 @@ bool CalculatorParser::applyOneRule() {
   }
 
   if (
+    secondToLastS == "\\int" &&
+    lastS == "Expression"
+  ) {
+    return this->replaceOXbyEX();
+  }
+  if (
     thirdToLastS == "\\int" &&
-    secondToLastS == "Expression" &&
-    this->canBeRegardedAsDifferentialForm(lastE)
+    secondToLastS == "Expression"
   ) {
     return this->replaceOXXByEXX();
   }

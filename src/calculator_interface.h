@@ -1380,6 +1380,7 @@ private:
   bool replaceXEXYByEY();
   bool replaceVbyVdotsVAccordingToPredefinedWordSplits();
   bool replaceAXbyEX();
+  bool replaceAXXbyEXX();
   bool replaceIntegerXbyEX();
   bool replaceIntegerDotIntegerByE();
   bool replaceXXByEEmptySequence();

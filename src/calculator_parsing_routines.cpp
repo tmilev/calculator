@@ -1471,6 +1471,12 @@ bool CalculatorParser::replaceAXbyEX() {
   return true;
 }
 
+bool CalculatorParser::replaceAXXbyEXX() {
+  SyntacticElement& element = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3];
+  element.controlIndex = this->conExpression();
+  return true;
+}
+
 bool CalculatorParser::replaceIntegerXbyEX() {
   SyntacticElement& element = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
   element.controlIndex = this->conExpression();
@@ -2330,10 +2336,10 @@ bool CalculatorParser::applyOneRule() {
   }
   if (secondToLastS == "%" && lastS == "NumberColors") {
     if (!this->owner->flagUseNumberColors) {
-      *this->owner << "<span style =\"color:blue\">Floating point numbers</span> are displayed in "
-      << "<span style =\"color:blue\">blue</span>."
-      << "<br><span style =\"color:red\">Algebraic numbers</span> "
-      << "are displayed in <span style =\"color:red\">red</span>. "
+      *this->owner << "<span style ='color:blue'>Floating point numbers</span> are displayed in "
+      << "<span style='color:blue'>blue</span>."
+      << "<br><span style='color:red'>Algebraic numbers</span> "
+      << "are displayed in <span style='color:red'>red</span>. "
       << "<br>Rational numbers are displayed in default color.";
     }
     this->owner->flagUseNumberColors = true;
@@ -2390,6 +2396,18 @@ bool CalculatorParser::applyOneRule() {
     return this->replaceOXXByEXX();
   }
   if (
+    secondToLastS == "\\int_{*}^{**}" &&
+    lastS == "Expression"
+  ) {
+    return this->replaceAXbyEX();
+  }
+  if (
+    thirdToLastS == "\\int_{*}^{**}" &&
+    secondToLastS == "Expression"
+  ) {
+    return this->replaceAXXbyEXX();
+  }
+  if (
     this->isDefiniteIntegral(thirdToLastS) &&
     secondToLastS == "Expression" &&
     this->canBeRegardedAsDifferentialForm(lastE)
@@ -2438,7 +2456,7 @@ bool CalculatorParser::applyOneRule() {
     Expression exponent;
     exponent.makeXOX(*this->owner, this->owner->opPower(), thirdToLastE.data, lastE.data);
     this->setStackValue(exponent, "\\int_{*}^{**}", - 3);
-    this->lastRuleName = "\\int_{*}^{**}";
+    this->lastRuleName = "int_{*}^{**}";
     return this->decreaseStack(2);
   }
   if (
@@ -2449,7 +2467,7 @@ bool CalculatorParser::applyOneRule() {
     Expression exponent;
     exponent.makeXOX(*this->owner, this->owner->opPower(), fourthToLastE.data, secondToLastE.data);
     this->setStackValue(exponent, "\\int_{*}^{**}", - 4);
-    this->lastRuleName = "[\\int_{*}^{**}]";
+    this->lastRuleName = "int_{*} ^ {**} --> int_{*}^{**}";
     return this->decreaseStackExceptLast(2);
   }
   if (
@@ -2470,7 +2488,7 @@ bool CalculatorParser::applyOneRule() {
   ) {
     Expression underscore;
     underscore.makeXOX(*this->owner, this->owner->opUnderscore(), fourthToLastE.data, secondToLastE.data);
-    this->lastRuleName = "\\int^{*}_{**}";
+    this->lastRuleName = "\\int^{*} _ Expression --> \\int^{*}_{**}";
     this->setStackValue(underscore, "\\int_{*}^{**}", - 4);
     return this->decreaseStackExceptLast(2);
   }

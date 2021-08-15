@@ -1002,17 +1002,17 @@ bool Expression::convertInternally<Polynomial<AlgebraicNumber> >(Expression& out
   if (this->isOfType<Rational>()) {
     Polynomial<AlgebraicNumber> resultP;
     resultP.makeConstant(this->getValue<Rational>());
-    return output.assignValueWithContext(resultP, this->getContext(), *this->owner);
+    return output.assignValueWithContextOLD(resultP, this->getContext(), *this->owner);
   }
   if (this->isOfType<AlgebraicNumber>()) {
     Polynomial<AlgebraicNumber> resultP;
     resultP.makeConstant(this->getValue<AlgebraicNumber>());
-    return output.assignValueWithContext(resultP, this->getContext(), *this->owner);
+    return output.assignValueWithContextOLD(resultP, this->getContext(), *this->owner);
   }
   if (this->isOfType<Polynomial<Rational> >()) {
     Polynomial<AlgebraicNumber> resultP;
     resultP = this->getValue<Polynomial<Rational> >();
-    return output.assignValueWithContext(resultP, this->getContext(), *this->owner);
+    return output.assignValueWithContextOLD(resultP, this->getContext(), *this->owner);
   }
   if (this->isOfType<Polynomial<AlgebraicNumber> >()) {
     output = *this;
@@ -1028,7 +1028,7 @@ bool Expression::convertInternally<Polynomial<Rational> >(Expression& output) co
   if (this->isOfType<Rational>()) {
     Polynomial<Rational> resultP;
     resultP.makeConstant(this->getValue<Rational>());
-    return output.assignValueWithContext(resultP, this->getContext(), *this->owner);
+    return output.assignValueWithContextOLD(resultP, this->getContext(), *this->owner);
   }
   if (this->isOfType<Polynomial<Rational> >()) {
     output = *this;
@@ -1066,7 +1066,7 @@ bool Expression::convertInternally<RationalFraction<Rational> >(Expression& outp
   if (this->isOfType<Rational>()) {
     RationalFraction<Rational> resultRF;
     resultRF.makeConstant(this->getValue<Rational>());
-    return output.assignValueWithContext(
+    return output.assignValueWithContextOLD(
       resultRF, this->getContext(), *this->owner
     );
   }
@@ -1077,12 +1077,12 @@ bool Expression::convertInternally<RationalFraction<Rational> >(Expression& outp
     }
     RationalFraction<Rational> result;
     result.makeConstant(rationalValue);
-    return output.assignValueWithContext(result, this->getContext(), *this->owner);
+    return output.assignValueWithContextOLD(result, this->getContext(), *this->owner);
   }
   if (this->isOfType<Polynomial<Rational> >()) {
     RationalFraction<Rational> result;
     result = this->getValue<Polynomial<Rational> >();
-    return output.assignValueWithContext(
+    return output.assignValueWithContextOLD(
       result, this->getContext(), *this->owner
     );
   }
@@ -1106,14 +1106,14 @@ bool Expression::convertInternally<RationalFraction<AlgebraicNumber> >(Expressio
     AlgebraicNumber value;
     value.assignRational(this->getValue<Rational>(), closure);
     result.makeConstant(value);
-    return output.assignValueWithContext(
+    return output.assignValueWithContextOLD(
       result, this->getContext(), *this->owner
     );
   }
   if (this->isOfType<AlgebraicNumber>()) {
     RationalFraction<AlgebraicNumber> result;
     result.makeConstant(this->getValue<AlgebraicNumber>());
-    return output.assignValueWithContext(
+    return output.assignValueWithContextOLD(
       result, this->getContext(), *this->owner
     );
   }
@@ -1121,7 +1121,7 @@ bool Expression::convertInternally<RationalFraction<AlgebraicNumber> >(Expressio
   if (this->isOfType<Polynomial<AlgebraicNumber> >()) {
     RationalFraction<AlgebraicNumber> result;
     result = this->getValue<Polynomial<AlgebraicNumber> >();
-    return output.assignValueWithContext(
+    return output.assignValueWithContextOLD(
       result, this->getContext(), *this->owner
     );
   }
@@ -1142,12 +1142,12 @@ bool Expression::convertInternally<ElementWeylAlgebra<Rational> >(Expression& ou
   if (this->isOfType<Rational>()) {
     ElementWeylAlgebra<Rational> resultEWA;
     resultEWA.makeConstant(this->getValue<Rational>());
-    return output.assignValueWithContext(resultEWA, this->getContext(), *this->owner);
+    return output.assignValueWithContextOLD(resultEWA, this->getContext(), *this->owner);
   }
   if (this->isOfType<Polynomial<Rational> >()) {
     ElementWeylAlgebra<Rational> resultEWA;
     resultEWA.assignPolynomial(this->getValue<Polynomial<Rational> >());
-    return output.assignValueWithContext(resultEWA, this->getContext(), *this->owner);
+    return output.assignValueWithContextOLD(resultEWA, this->getContext(), *this->owner);
   }
   if (this->isOfType<ElementWeylAlgebra<Rational> >()) {
     output = *this;
@@ -1186,15 +1186,15 @@ bool Expression::convertInternally<ElementUniversalEnveloping<RationalFraction<R
   ElementUniversalEnveloping<RationalFraction<Rational> > outputUE;
   if (this->isOfType<Rational>()) {
     outputUE.makeConstant(this->getValue<Rational>(), *theOwner);
-    return output.assignValueWithContext(outputUE, this->getContext(), *this->owner);
+    return output.assignValueWithContextOLD(outputUE, this->getContext(), *this->owner);
   } else if (this->isOfType<Polynomial<Rational> >()) {
     RationalFraction<Rational> tempRF;
     tempRF = this->getValue<Polynomial<Rational> >();
     outputUE.makeConstant(tempRF, *theOwner);
-    return output.assignValueWithContext(outputUE, this->getContext(), *this->owner);
+    return output.assignValueWithContextOLD(outputUE, this->getContext(), *this->owner);
   } else if (this->isOfType<RationalFraction<Rational> >()) {
     outputUE.makeConstant(this->getValue<RationalFraction<Rational> >(), *theOwner);
-    return output.assignValueWithContext(outputUE, this->getContext(), *this->owner);
+    return output.assignValueWithContextOLD(outputUE, this->getContext(), *this->owner);
   }
   return *this->owner << "<hr>Failed to convert " << this->toString()
   << " to element of universal enveloping -  I don't know how. ";
@@ -1246,7 +1246,7 @@ bool Expression::convertInternally<AlgebraicNumber>(Expression& output) const {
     return false;
   }
   AlgebraicNumber outRat = rational;
-  return output.assignValue(outRat, *this->owner);
+  return output.assignValueOLD(outRat, *this->owner);
 }
 
 template< >
@@ -1259,7 +1259,7 @@ bool Expression::convertInternally<double>(Expression& output) const {
   }
   double outputDouble = 0;
   if (this->evaluatesToDouble(&outputDouble)) {
-    return output.assignValue(outputDouble, *this->owner);
+    return output.assignValueOLD(outputDouble, *this->owner);
   }
   return false;
 }
@@ -1355,7 +1355,7 @@ Expression Expression::zero() {
     return Expression::zeroStatic();
   }
   Expression result;
-  return result.assignValue(0, *this->owner);
+  return result.assignValueOLD(0, *this->owner);
 }
 
 Expression Expression::zeroStatic() {
@@ -1366,7 +1366,7 @@ Expression Expression::zeroStatic() {
 bool Expression::addChildRationalOnTop(const Rational& inputRat) {
   this->checkInitialization();
   Expression ratE;
-  ratE.assignValue(inputRat, *this->owner);
+  ratE.assignValueOLD(inputRat, *this->owner);
   return this->addChildOnTop(ratE);
 }
 
@@ -1915,12 +1915,12 @@ bool Expression::isEqualToZero() const {
   return false;
 }
 
-bool Expression::makeError(const std::string& theError, Calculator& owner) {
+bool Expression::assignError(Calculator& owner, const std::string& error) {
   this->reset(owner, 2);
   this->checkConsistency();
   this->addChildAtomOnTop(owner.opError());
   this->checkConsistency();
-  return this->addChildValueOnTop(theError);
+  return this->addChildValueOnTop(error);
 }
 
 bool Expression::isSmallInteger(int* whichInteger) const {
@@ -2104,7 +2104,7 @@ void Expression::getBaseExponentForm(Expression& outputBase, Expression& outputE
     return;
   }
   outputBase = *this;
-  outputExponent.assignValue(1, *this->owner);
+  outputExponent.assignValueOLD(1, *this->owner);
 }
 
 bool Expression::getContext(ExpressionContext& output) const {
@@ -2192,7 +2192,7 @@ void Expression::getCoefficientMultiplicandForm(Expression& outputCoeff, Express
       return;
     }
   }
-  outputCoeff.assignValue(1, *this->owner);
+  outputCoeff.assignValueOLD(1, *this->owner);
   outputNoCoeff = *this;
 }
 
@@ -5075,7 +5075,7 @@ bool Expression::makeProduct(Calculator& owner, const Expression& left, const Ex
 
 bool Expression::makeProduct(Calculator& owner, const List<Expression>& multiplicands) {
   if (multiplicands.size == 0) {
-    return this->assignValue(1, owner);
+    return this->assignValueOLD(1, owner);
   }
   return this->makeXOXOdotsOX(owner, owner.opTimes(), multiplicands);
 }
@@ -5083,7 +5083,7 @@ bool Expression::makeProduct(Calculator& owner, const List<Expression>& multipli
 bool Expression::makeSum(Calculator& owner, const List<Expression>& summands) {
   MacroRegisterFunctionWithName("Expression::makeSum");
   if (summands.size == 0) {
-    return this->assignValue(0, owner);
+    return this->assignValueOLD(0, owner);
   }
   return this->makeXOXOdotsOX(owner, owner.opPlus(), summands);
 }
@@ -5142,7 +5142,7 @@ void ExpressionContext::makeOneVariableFromString(
 bool Expression::makeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex) {
   MacroRegisterFunctionWithName("Expression::makeSqrt");
   Expression argumentE;
-  argumentE.assignValue(argument, owner);
+  argumentE.assignValueOLD(argument, owner);
   return this->makeSqrt(owner, argumentE, radicalSuperIndex);
 }
 
@@ -5150,7 +5150,7 @@ bool Expression::makeSqrt(Calculator& owner, const Expression& argument, const R
   MacroRegisterFunctionWithName("Expression::makeSqrt");
   this->reset(owner, 3);
   Expression radicalIndexE;
-  radicalIndexE.assignValue(radicalSuperIndex, owner);
+  radicalIndexE.assignValueOLD(radicalSuperIndex, owner);
   this->addChildAtomOnTop(owner.opSqrt());
   this->addChildOnTop(radicalIndexE);
   return this->addChildOnTop(argument);
@@ -5168,12 +5168,12 @@ bool Expression::makeXOX(Calculator& owner, int theOp, const Expression& left, c
   }
   if (right.owner == nullptr) {
     Expression rightCopy;
-    rightCopy.assignValue(right.data, *left.owner);
+    rightCopy.assignValueOLD(right.data, *left.owner);
     return this->makeXOX(owner, theOp, left, rightCopy);
   }
  if (left.owner == nullptr) {
     Expression leftCopy;
-    leftCopy.assignValue(left.data, *right.owner);
+    leftCopy.assignValueOLD(left.data, *right.owner);
     return this->makeXOX(owner, theOp, leftCopy, right);
   }
   left.checkInitialization();

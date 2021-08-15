@@ -149,20 +149,20 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
 bool CalculatorFunctions::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerAttemptExtendingEtoHEFwithHinCartan");
   if (input.size() != 3) {
-    return output.makeError("Function takes 2 arguments - type and an element of the Lie algebra.", calculator);
+    return output.assignError(calculator, "Function takes 2 arguments - type and an element of the Lie algebra.");
   }
   WithContext<SemisimpleLieAlgebra*> ownerAlgebra;
   if (!CalculatorConversions::convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, ownerAlgebra
   )) {
-    return output.makeError("Error extracting Lie algebra.", calculator);
+    return output.assignError(calculator, "Error extracting Lie algebra.");
   }
   SemisimpleLieAlgebra* ownerSemisimple = ownerAlgebra.content;
   ElementSemisimpleLieAlgebra<Rational> theErational;
   if (!CalculatorConversions::loadElementSemisimpleLieAlgebraRationalCoefficients(
     calculator, input[2], theErational, *ownerSemisimple
   )) {
-    return output.makeError("Failed to extract element of semisimple Lie algebra. ", calculator);
+    return output.assignError(calculator, "Failed to extract element of semisimple Lie algebra. ");
   }
   ElementSemisimpleLieAlgebra<AlgebraicNumber> theF, theH, theE;
   theE = theErational;
@@ -176,7 +176,7 @@ bool CalculatorFunctions::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& c
   } else {
     out << "<br>Couldn't extend E to sl(2)-triple. The log stream follows. " << logStream.str();
   }
-  return output.assignValue(out.str(), calculator);
+  return output.assignValueOLD(out.str(), calculator);
 }
 
 bool CalculatorFunctions::innerZmodP(Calculator& calculator, const Expression& input, Expression& output) {
@@ -195,9 +195,9 @@ bool CalculatorFunctions::innerZmodP(Calculator& calculator, const Expression& i
   if (base.isEqualToZero()) {
     return false;
   }
-  LargeIntegerUnsigned theGCD;
-  LargeIntegerUnsigned::greatestCommonDivisor(left.getDenominator(), base.value, theGCD);
-  if (theGCD > 1) {
+  LargeIntegerUnsigned greatestCommonDivisor;
+  LargeIntegerUnsigned::greatestCommonDivisor(left.getDenominator(), base.value, greatestCommonDivisor);
+  if (greatestCommonDivisor > 1) {
     return false;
   }
   ElementZmodP outputElement;
@@ -206,7 +206,7 @@ bool CalculatorFunctions::innerZmodP(Calculator& calculator, const Expression& i
   ExpressionContext context;
   context.initialize(calculator);
   context.setDefaultModulus(outputElement.modulus);
-  return output.assignValueWithContext(outputElement, context, calculator);
+  return output.assignValueWithContextOLD(outputElement, context, calculator);
 }
 
 bool CalculatorFunctions::innerConesIntersect(Calculator& calculator, const Expression& input, Expression& output) {
@@ -232,7 +232,7 @@ bool CalculatorFunctions::innerConesIntersect(Calculator& calculator, const Expr
     << coneNonStrictMatForm.numberOfColumns
     << " and second of dimension "
     << coneStrictMatForm.numberOfColumns << " which is not allowed. ";
-    return output.makeError(out.str(), calculator);
+    return output.assignError(calculator, out.str());
   }
   coneNonStrictMatForm.getVectorsFromRows(coneNonStrictGens);
   coneStrictMatForm.getVectorsFromRows(coneStrictGens);
@@ -276,7 +276,7 @@ bool CalculatorFunctions::innerConesIntersect(Calculator& calculator, const Expr
       << outputSeparatingNormal.scalarEuclidean(coneNonStrictGens[i]).toString();
     }
   }
-  return output.assignValue(out.str(), calculator);
+  return output.assignValueOLD(out.str(), calculator);
 }
 
 bool CalculatorFunctions::innerReverseOrderRecursively(Calculator& calculator, const Expression& input, Expression& output) {
@@ -348,9 +348,9 @@ bool CalculatorFunctions::innerNot(Calculator& calculator, const Expression& inp
     return false;
   }
   if (theInt == 0) {
-    return output.assignValue(1, calculator);
+    return output.assignValueOLD(1, calculator);
   }
-  return output.assignValue(0, calculator);
+  return output.assignValueOLD(0, calculator);
 }
 
 bool CalculatorFunctions::innerPrintZnEnumeration(
@@ -381,7 +381,7 @@ bool CalculatorFunctions::innerPrintZnEnumeration(
     counter ++;
   }
   out << "Total " << counter << " vectors:<br>" << out2.str();
-  return output.assignValue(out.str(), calculator);
+  return output.assignValueOLD(out.str(), calculator);
 }
 
 template <>
@@ -397,24 +397,24 @@ bool CalculatorFunctions::innerPerturbSplittingNormal(Calculator& calculator, co
     out << "Perturbing splitting normal takes 3 arguments: normal, "
     << "positive vectors, and vectors relative to which to perturb. "
     << "Instead I got " << input.size() - 1 << ". ";
-    return output.makeError(out.str(), calculator);
+    return output.assignError(calculator, out.str());
   }
   Vector<Rational> splittingNormal;
   if (!calculator.getVector(input[1], splittingNormal, nullptr)) {
-    return output.makeError("Failed to extract normal from first argument. ", calculator);
+    return output.assignError(calculator, "Failed to extract normal from first argument. ");
   }
   Matrix<Rational> matrix;
   Vectors<Rational> nonStrictCone, vectorsToPerturbRelativeTo;
   if (!calculator.functionGetMatrix(
     input[2], matrix, nullptr, splittingNormal.size, nullptr
   )) {
-    return output.makeError("Failed to extract matrix from second argument. ", calculator);
+    return output.assignError(calculator, "Failed to extract matrix from second argument. ");
   }
   nonStrictCone.assignMatrixRows(matrix);
   if (!calculator.functionGetMatrix(
     input[3], matrix, nullptr, splittingNormal.size, nullptr
   )) {
-    return output.makeError("Failed to extract matrix from third argument. ", calculator);
+    return output.assignError(calculator, "Failed to extract matrix from third argument. ");
   }
   vectorsToPerturbRelativeTo.assignMatrixRows(matrix);
   for (int i = 0; i < nonStrictCone.size; i ++) {
@@ -422,59 +422,59 @@ bool CalculatorFunctions::innerPerturbSplittingNormal(Calculator& calculator, co
       std::stringstream out;
       out << "The normal vector " << splittingNormal.toString()
       << " is has negative scalar product with " << nonStrictCone[i].toString();
-      return output.makeError(out.str(), calculator);
+      return output.assignError(calculator, out.str());
     }
   }
   out << "Perturbing " << splittingNormal.toString() << " relative to cone "
   << nonStrictCone.toString() << " and vectors " << vectorsToPerturbRelativeTo.toString();
   splittingNormal.perturbNormalRelativeToVectorsInGeneralPosition(nonStrictCone, vectorsToPerturbRelativeTo);
   out << "<br>End result: " << splittingNormal.toString();
-  return output.assignValue(out.str(), calculator);
+  return output.assignValueOLD(out.str(), calculator);
 }
 
 bool CalculatorFunctions::innerPrintAllVectorPartitions(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerPrintAllVectorPartitions");
   RecursionDepthCounter theRecursion(&calculator.recursionDepth);
   if (input.size() != 3) {
-    return output.makeError("Function innerPrintAllPartitions expects 2 arguments.", calculator);
+    return output.assignError(calculator, "Function innerPrintAllPartitions expects 2 arguments.");
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
   if (!CalculatorConversions::convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
-    return output.makeError("Error extracting Lie algebra.", calculator);
+    return output.assignError(calculator, "Error extracting Lie algebra.");
   }
-  SemisimpleLieAlgebra* theSSowner = algebra.content;
+  SemisimpleLieAlgebra* semisimpleLieAlgebraPointer = algebra.content;
 
-  SemisimpleLieAlgebra& theSSalgebra = *theSSowner;
+  SemisimpleLieAlgebra& semisimpleLieAlgebra = *semisimpleLieAlgebraPointer;
   ExpressionContext context(calculator);
   Vector<Rational> theHW;
-  if (!calculator.getVector<Rational>(input[2], theHW, &context, theSSalgebra.getRank())) {
-    return output.makeError("Failed to extract weight you want partitioned from " + input[2].toString(), calculator);
+  if (!calculator.getVector<Rational>(input[2], theHW, &context, semisimpleLieAlgebra.getRank())) {
+    return output.assignError(calculator, "Failed to extract weight you want partitioned from " + input[2].toString());
   }
   Vector<int> theHWint;
   theHWint.setSize(theHW.size);
   for (int i = 0; i < theHW.size; i ++) {
     if (!theHW[i].isSmallInteger(&theHWint[i]) || theHW[i] < 0) {
-      return output.makeError(
+      return output.assignError(
+        calculator,
         "The input weight you gave is bad: "
-        "it must consist of non-negative small integers",
-        calculator
+        "it must consist of non-negative small integers"
       );
     }
   }
   std::stringstream out;
   out << "<br>the weight you want partitioned: " << theHWint;
   Vector<int> thePartition;
-  thePartition.setSize(theSSalgebra.getNumberOfPositiveRoots());
+  thePartition.setSize(semisimpleLieAlgebra.getNumberOfPositiveRoots());
   for (int i = 0; i < thePartition.size; i ++) {
     thePartition[i] = 0;
   }
   Vector<Rational> weight, tmpWt;
-  Vectors<Rational>& rootsBorel = theSSalgebra.weylGroup.rootsOfBorel;
+  Vectors<Rational>& rootsBorel = semisimpleLieAlgebra.weylGroup.rootsOfBorel;
   int counter = 0;
   int totalCycles = 0;
-  weight.makeZero(theSSalgebra.getRank());
+  weight.makeZero(semisimpleLieAlgebra.getRank());
   int i = rootsBorel.size;
   while (i > 0 && counter < 10000) {
     totalCycles ++;
@@ -499,7 +499,7 @@ bool CalculatorFunctions::innerPrintAllVectorPartitions(Calculator& calculator, 
   }
   out << "<br>Done in " << totalCycles << " cycles.";
   out << "<br>" << counter << " total partitions ";
-  return output.assignValue(out.str(), calculator);
+  return output.assignValueOLD(out.str(), calculator);
 }
 
 bool CalculatorFunctions::innerInterpolatePoly(
@@ -528,7 +528,7 @@ bool CalculatorFunctions::innerInterpolatePoly(
   interPoly.interpolate(arguments, values);
   ExpressionContext context(calculator);
   context.makeOneVariableFromString("x");
-  return output.assignValueWithContext(interPoly, context, calculator);
+  return output.assignValueWithContextOLD(interPoly, context, calculator);
 }
 
 bool CalculatorFunctions::operationBinary(
@@ -591,7 +591,7 @@ bool CalculatorFunctions::innerEWAorPoly(Calculator& calculator, const Expressio
   } else {
     outputEWA.makedi(0);
   }
-  return output.assignValueWithContext(outputEWA, endContext, calculator);
+  return output.assignValueWithContextOLD(outputEWA, endContext, calculator);
 }
 
 bool CalculatorBasics::extractBaseMultiplication(
@@ -635,7 +635,7 @@ bool CalculatorBasics::extractBaseMultiplication(
   }
   // handle 0 * anything = 0
   if (output[1].isEqualToZero()) {
-    return output.assignValue(0, calculator);
+    return output.assignValueOLD(0, calculator);
   }
   return result;
 }

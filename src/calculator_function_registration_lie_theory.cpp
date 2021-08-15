@@ -9,7 +9,7 @@
 
 void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   MacroRegisterFunctionWithName("Calculator::initializeFunctionsSemisimpleLieAlgebras");
-  Function::Options innerStandard = Function::Options::standard();
+  Function::Options standardOptions = Function::Options::standard();
   Function::Options innerNoTest = Function::Options::innerNoTest();
   Function::Options innerInvisible = Function::Options::innerInvisible();
   Function::Options innerAdminNoTest = Function::Options::adminNoTest();
@@ -58,12 +58,12 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Cartan matrix is given by dividing "
     "the default symmetric "
     "Cartan matrix by the upper index. ",
-    "g_{{i}}= GetChevalleyGenerator{}(SemisimpleLieAlgebra{}G_2, i);\n"
-    "h_{{i}}= GetCartanGenerator{}(SemisimpleLieAlgebra{}G_2, i);\n"
+    "g_{{i}}= ChevalleyGenerator{}(SemisimpleLieAlgebra{}G_2, i);\n"
+    "h_{{i}}= CartanGenerator{}(SemisimpleLieAlgebra{}G_2, i);\n"
     "[g_1,g_{- 1}]; \n[g_2, g_{-2}]; \n[h_{1}, g_6]; \n[h_2, g_{-6}]",
     "CalculatorConversions::innerSemisimpleLieAlgebra",
     "SemisimpleLieAlgebra",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "WriteSemisimpleLieAlgebra",
@@ -74,7 +74,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "WriteSemisimpleLieAlgebra(F_4)",
     "Calculator::writeToHardDiskOrPrintSemisimpleLieAlgebra",
     "WriteSemisimpleLieAlgebra",
-    innerStandard
+    standardOptions
   );
 
   this->addOperationHandler(
@@ -90,7 +90,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "PrintSemisimpleLieAlgebra{}(2 G^5_2 + B_3);",
     "Calculator::printSemisimpleLieAlgebraVerbose",
     "PrintSemisimpleLieAlgebra",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "PrecomputeSemisimpleLieAlgebraStructure",
@@ -106,7 +106,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     innerAdminNoTest
   );
   this->addOperationHandler(
-    "GetChevalleyGenerator",
+    "ChevalleyGenerator",
     CalculatorLieTheory::chevalleyGenerator,
     "",
     "First argument must be a semisimple "
@@ -120,13 +120,13 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "The roots are indexed in the "
     "ordered displayed by the "
     "PrintSemisimpleLieAlgebra function. ",
-    "[GetChevalleyGenerator{}(G_2, 6), GetChevalleyGenerator{}(G_2, -6)]",
+    "[ChevalleyGenerator{}(G_2, 6), ChevalleyGenerator{}(G_2, -6)]",
     "Calculator::chevalleyGenerator",
-    "GetChevalleyGenerator",
-    innerStandard
+    "ChevalleyGenerator",
+    standardOptions
   );
   this->addOperationHandler(
-    "GetCartanGenerator",
+    "CartanGenerator",
     CalculatorLieTheory::cartanGenerator,
     "",
     "First argument must be a semisimple Lie algebra, "
@@ -140,21 +140,56 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "is proportional to a Chevalley-Weyl generator "
     "with a coefficient of proportionality "
     "equal to 2/(simple root length squared) ).",
-    "GetCartanGenerator{}(G_2, 1)",
+    "CartanGenerator{}(G_2, 1)",
     "Calculator::cartanGenerator",
-    "GetCartanGenerator",
-    innerStandard
+    "CartanGenerator",
+    standardOptions
+  );
+  this->addOperationHandler(
+    "StandardRepresentationMatrix",
+    CalculatorLieTheory::standardRepresentationMatrix,
+    "",
+    "Computes matrix of an element of a semisimple Lie algebra "
+    "(or its universal enveloping algebra) "
+    "in a 'natural' representation of the Lie algebra. "
+    "Implemented for type A only at the moment."
+    "Two possible input formats. "
+    "1) One argument input. Give as input a Chevalley generator."
+    "2) Two argument input. First is the type of the semisimple lie algebra."
+    "Second is the chevalley generator, using the letter g.",
+    "Type = A_4;\n"
+    "StandardRepresentationMatrix{}(Type, g_1);\n"
+    "g_{{j}}=ChevalleyGenerator(Type, j);\n"
+    "h_{{j}}=CartanGenerator(Type, j);\n"
+    "StandardRepresentationMatrix(g_1);\n"
+    "StandardRepresentationMatrix(g_1-g_-1);\n"
+    "StandardRepresentationMatrix( (g_1+g_2 - g_-1-g_-2)^2);",
+    "CalculatorLieTheory::adCommonEigenSpaces",
+    "StandardRepresentationMatrix",
+    standardOptions
+  );
+  this->addOperationHandler(
+    "AdjointMatrix",
+    CalculatorLieTheory::adjointMatrix,
+    "",
+    "Computes the adjoint matrix of element g. "
+    "The adjoint matrix is the matrix of the linear map ad(g):x -> [g,x]."
+    "algebra elements inside the semisimple Lie algebra. ",
+    "AdCommonEigenspace{}(F_4, -5 (g_{9}) +3 (g_{13}) +5 (g_{16}) +4 (g_{10}), g_{14}+g_{22}+g_{20})",
+    "CalculatorLieTheory::adCommonEigenSpaces",
+    "AdCommonEigenspace",
+    standardOptions
   );
   this->addOperationHandler(
     "AdCommonEigenspace",
-    CalculatorLieTheory::adCommonEigenSpaces,
+    CalculatorLieTheory::adjointCommonEigenSpaces,
     "",
     "Computes common eigenspace of the adjoint action of semisimple Lie "
     "algebra elements inside the semisimple Lie algebra. ",
     "AdCommonEigenspace{}(F_4, -5 (g_{9}) +3 (g_{13}) +5 (g_{16}) +4 (g_{10}), g_{14}+g_{22}+g_{20})",
     "CalculatorLieTheory::adCommonEigenSpaces",
     "AdCommonEigenspace",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "AttemptExtendingEtoHEFwithHinCartan",
@@ -166,7 +201,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "AttemptExtendingEtoHEFwithHinCartan{}(F_4, g_1+2g_2+3g_3+4g_4)",
     "Calculator::innerAttemptExtendingEtoHEFwithHinCartan",
     "AttemptExtendingEtoHEFwithHinCartan",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "PrintMacdonaldPolys",
@@ -176,7 +211,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "PrintMacdonaldPolys{}(B_3)",
     "CalculatorFunctionsWeylGroup::macdonaldPolys",
     "PrintMacdonaldPolys",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "CharPoly",
@@ -187,7 +222,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "A =\\begin{pmatrix}2 & 3& 5\\\\ 7& 11& 13\\\\ 17&19 &23\\end{pmatrix}; p =MinPolyMatrix{}A",
     "CalculatorFunctions::innerCharPolyMatrix",
     "CharPoly",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "MakeCharacterLieAlg",
@@ -200,7 +235,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "x * y",
     "Calculator::characterSemisimpleLieAlgebraFiniteDimensional",
     "MakeCharacterLieAlg",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "GetLinksToSimpleLieAlgebraPrintouts",
@@ -251,7 +286,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     ")",
     "Calculator::isReductiveLieSubalgebra",
     "IsReductiveLieSubalgebra",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "ConesIntersection",
@@ -270,7 +305,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "ConesIntersection{}((v_1, v_2), (v_3, - v_4));",
     "Calculator::innerConesIntersect",
     "ConesIntersection",
-    innerStandard
+    standardOptions
   );
 
   this->addOperationHandler(
@@ -287,14 +322,14 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "The second argument is allowed to have "
     "entries that are not non-negative integers in the "
     "positions in which the third argument has 1's. ",
-    "g_{{i}}= GetChevalleyGenerator{}(B_3, i);\n"
-    "h_{{i}}= GetCartanGenerator{}(B_3, i);\n"
+    "g_{{i}}= ChevalleyGenerator{}(B_3, i);\n"
+    "h_{{i}}= CartanGenerator{}(B_3, i);\n"
     "v_\\mu=HeighestWeightVector{} (A_3, (1,0,1),(0,0,0));\n"
     "v_\\lambda =HeighestWeightVector{}(B_3, (x_1,0,1),(1,0,0));\n"
     "h_1g_{- 1}v_\\lambda",
     "CalculatorFunctions::highestWeightVector",
     "HeighestWeightVector",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "PrintModule",
@@ -317,7 +352,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "PrintModule{}(G_2, (2, 0), (0, 0))",
     "CalculatorFunctions::printGeneralizedVermaModule",
     "PrintModule",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "HighestWeightTAAbf",
@@ -334,10 +369,10 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "universal enveloping algebra. "
     "Then define HighestWeightTAAbf(u_1,u_2)= Tr_M (P ( taa(u_1) u_2 ), "
     "where taa() is the transpose anti-automorphism of g. ",
-    "g_{{a}}= GetChevalleyGenerator{} (G_2, a);\nHighestWeightTAAbf{}(g_{- 1} g_{-2}, g_{- 1}g_{-2}, (2,2))",
+    "g_{{a}}= ChevalleyGenerator{} (G_2, a);\nHighestWeightTAAbf{}(g_{- 1} g_{-2}, g_{- 1}g_{-2}, (2,2))",
     "CalculatorFunctions::innerHWTAABF",
     "HighestWeightTAAbf",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "WeylDimFormula",
@@ -350,7 +385,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "WeylDimFormula{}(G_2, (x,0));\nWeylDimFormula{}(B_3, (x,0,0));",
     "CalculatorFunctions::weylDimFormula",
     "WeylDimFormula",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "AnimateLittelmannPaths",
@@ -363,7 +398,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "AnimateLittelmannPaths{}(G_2, (2, 0));",
     "CalculatorLieTheory::animateLittelmannPaths",
     "AnimateLittelmannPaths",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "DecomposeInducingRepGenVermaModule",
@@ -384,7 +419,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "DecomposeInducingRepGenVermaModule{}(B_3, (0, 1, 1), (1, 0, 0), (1, 0, 1))",
     "CalculatorFunctions::decomposeFDPartGeneralizedVermaModuleOverLeviPart",
     "DecomposeInducingRepGenVermaModule",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "Casimir",
@@ -394,7 +429,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Casimir{}(G_2)",
     "Calculator::casimir",
     "Casimir",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "CasimirWRTLevi",
@@ -408,7 +443,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "CasimirWRTLevi{}(B_3, (1,0,0))",
     "CalculatorFunctions::casimirWithRespectToLevi",
     "CasimirWRTLevi",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "HmmG2inB3",
@@ -417,11 +452,11 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Embeds elements of the Universal enveloping "
     "of G_2 in B_3, following an embedding found "
     "in a paper by McGovern.",
-    "g_{{a}}= GetChevalleyGenerator{} (G_2, a); "
+    "g_{{a}}= ChevalleyGenerator{} (G_2, a); "
     "HmmG2inB3{}(g_1);\nHmmG2inB3{}(g_2) ",
     "Calculator::embedG2InB3",
     "HmmG2inB3",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "DrawRootSystem",
@@ -449,7 +484,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "DrawRootSystem{}(A_7, (1, 0 , 2, 2, 2, 0, 1), (1, 3, 2, 2, 2, 3, 1))",
     "CalculatorFunctions::drawRootSystem",
     "DrawRootSystem",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "DrawWeightSupportWithMults",
@@ -473,7 +508,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "DrawWeightSupportWithMults{}(G_2, (1, 0))",
     "CalculatorFunctions::drawWeightSupportWithMults",
     "DrawWeightSupportWithMults",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "DrawWeightSupport",
@@ -486,7 +521,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "DrawWeightSupport{}(G_2, (1, 2))",
     "CalculatorFunctions::drawWeightSupport",
     "DrawWeightSupport",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "SplitFDpartB3overG2CharsOnly",
@@ -504,7 +539,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "SplitFDpartB3overG2CharsOnly(x_1, 2, 0)",
     "CalculatorLieTheory::splitFDpartB3overG2CharsOnly",
     "SplitFDpartB3overG2CharsOnly",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "SplitFDpartB3overG2",
@@ -620,7 +655,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ",
     "CalculatorLieTheory::writeGenVermaModAsDiffOperatorsGeneratorOrder",
     "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "MapSemisimpleLieAlgebraInWeylAlgebra",
@@ -643,7 +678,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "MapSemisimpleLieAlgebraInWeylAlgebra{}(B_3, (0, 0, 0), (0, 0, 1), x, \\partial, a); ",
     "Calculator::writeGenVermaModAsDiffOperatorsNilOrderDescending",
     "MapSemisimpleLieAlgebraInWeylAlgebra",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "MapSemisimpleLieAlgebraInWeylAlgebraAllGens",
@@ -678,7 +713,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "MapSemisimpleLieAlgebraInWeylAlgebraAllGens{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ",
     "Calculator::writeGenVermaModAsDiffOperatorsAllGensNilOrderDescending",
     "MapSemisimpleLieAlgebraInWeylAlgebraAllGens",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "KLcoeffs",
@@ -703,7 +738,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "KLcoeffs{}(B_3)",
     "Calculator::kazhdanLuzstigCoeffificents",
     "KLcoeffs",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "RootSubsystem",
@@ -715,7 +750,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "RootSubsystem(F_4, (0, 1, 0, 0), (0, 0, 1, 0), (1, 1, 2, 2))",
     "Calculator::rootSubsystem",
     "RootSubsystem",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "PrintRootSubalgebras",
@@ -726,7 +761,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "PrintRootSubalgebras(E_6)",
     "CalculatorLieTheory::printRootSubalgebras",
     "PrintRootSubalgebras",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "PrintRootSubalgebrasRecompute",
@@ -748,7 +783,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "PrintSlTwoSubalgebras(g_2)",
     "CalculatorFunctions::printSltwos",
     "PrintSlTwoSubalgebras",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "ParabolicsInfoBruhatGraph",
@@ -783,7 +818,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "parabolicsInfoBruhatGraph{}(B_3,(1,0,0),(1,0,0))",
     "CalculatorFunctions::parabolicWeylGroupsBruhatGraph",
     "ParabolicsInfoBruhatGraph",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "TestMonomialBasisConjecture",
@@ -807,7 +842,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "LSpath{}(G_2, (0,0), (2,1) )",
     "Calculator::LSPath",
     "LSpath",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "LROdefine",
@@ -900,7 +935,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "PrintSemisimpleSubalgebras(B_3)",
     "Calculator::printSemisimpleSubalgebrasRegular",
     "PrintSemisimpleSubalgebras",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "PrintSemisimpleSubalgebrasRecompute",
@@ -949,7 +984,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "CanBeExtendedParabolicallyTo(b_3+e_6+a_3, d_4+e_8+f_4)",
     "CalculatorFunctions::canBeExtendedParabolicallyTo",
     "CanBeExtendedParabolicallyTo",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "EmbedSemisimpleInSemisimple",
@@ -982,10 +1017,10 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Loads an sl(2) subalgebra from expression. ",
     "SltwoSubalgebra(\n"
     "B_{3},\n"
-    "3 GetChevalleyGenerator((B)_{3}, -2),\n"
-    "3 GetChevalleyGenerator( (B)_{3}, 3)\n"
-    "+ 6 GetChevalleyGenerator( (B)_{3}, 1)\n"
-    "+ 10 / 3 GetChevalleyGenerator( (B)_{3}, 2)\n"
+    "3 ChevalleyGenerator((B)_{3}, -2),\n"
+    "3 ChevalleyGenerator( (B)_{3}, 3)\n"
+    "+ 6 ChevalleyGenerator( (B)_{3}, 1)\n"
+    "+ 10 / 3 ChevalleyGenerator( (B)_{3}, 2)\n"
     ")",
     "CalculatorConversions::innerSlTwoSubalgebraPrecomputed",
     "SltwoSubalgebra",
@@ -1004,19 +1039,19 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Freudenthal{}(B_3, (2,2,2))",
     "Calculator::innerFreudenthalFormula",
     "Freudenthal",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "Killing",
     CalculatorLieTheory::killingForm,
     "",
     "Computes the Killing form product of two elements of semisimple Lie algebra. ",
-    "h_{{i}}= GetCartanGenerator{}(F_1, i);"
+    "h_{{i}}= CartanGenerator{}(F_1, i);"
     "KF{}({{i}},{{j}})=Killing{}(h_i, h_j);"
     "FunctionToMatrix(KF, 4, 4)",
     "CalculatorLieTheory::killingForm",
     "Killing",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "FreudenthalFull",
@@ -1027,7 +1062,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "FreudenthalFull{}(G_2, (2, 1))",
     "Calculator::innerFreudenthalFull",
     "FreudenthalFull",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "PerturbSplittingNormal",
@@ -1062,7 +1097,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "(1, 2, 4, 2), (1, 3, 4, 2), (2, 3, 4, 2)))",
     "Calculator::innerPerturbSplittingNormal",
     "PerturbSplittingNormal",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "TestSpechtModules",
@@ -1083,7 +1118,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "(s_1 + s_2)(2s_1 + s_2)(3s_1 + s_2)",
     "CalculatorFunctionsWeylGroup::weylGroupElement",
     "MakeElementWeylGroup",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "MakeElementHyperOctahedral",
@@ -1095,7 +1130,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "s * t * s * t",
     "CalculatorConversions::innerMakeElementHyperOctahedral",
     "MakeElementHyperOctahedral",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "WeylGroupClassicalSignMultiplicities",
@@ -1115,7 +1150,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "WeylGroupClassicalSignMultiplicities{}(a_4);\n",
     "CalculatorFunctionsWeylGroup::signSignatureRootSubsystemsFromKostkaNumbers",
     "WeylGroupClassicalSignMultiplicities",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "WeylGroupTauSignatures",
@@ -1171,7 +1206,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "WeylGroupConjugacyClasses{}(f_4);",
     "CalculatorFunctionsWeylGroup::weylGroupConjugacyClasseS",
     "WeylGroupConjugacyClasses",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "WeylGroupCharTable",
@@ -1182,7 +1217,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "WeylGroupCharTable{}(b_3);",
     "CalculatorFunctionsWeylGroup::weylGroupLoadOrComputeCharTable",
     "WeylGroupCharTable",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "WeylGroupIrrepsAndCharTableComputeFromScratch",
@@ -1205,7 +1240,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "WeylOrbitSize(E_8, (3, 3, 3, 7, 7, 11, 13, 13));",
     "CalculatorFunctionsWeylGroup::weylGroupOrbitSize",
     "WeylOrbitSize",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "WeylOrbitSimpleCoords",
@@ -1217,7 +1252,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "WeylOrbitSimpleCoords{}(B_2, (y, y));",
     "CalculatorFunctionsWeylGroup::weylGroupOrbitSimple",
     "WeylOrbitSimpleCoords",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "WeylGroupOrbitOuterSimple",
@@ -1231,7 +1266,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "WeylGroupOrbitOuterSimple{}(D_4, (1, 0, 0, 0))",
     "CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple",
     "WeylGroupOrbitOuterSimple",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "WeylOrbitFundCoords",
@@ -1242,7 +1277,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "WeylOrbitFundCoords{}(B_2, (y, 0));",
     "CalculatorFunctionsWeylGroup::weylGroupOrbitFund",
     "WeylOrbitFundCoords",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "WeylOrbitFundRho",
@@ -1254,7 +1289,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "WeylOrbitFundRho{}(B_2, (y, 0) )",
     "CalculatorFunctionsWeylGroup::weylGroupOrbitFundRho",
     "WeylOrbitFundRho",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "WeylRaiseToMaximallyDominant",
@@ -1270,7 +1305,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "WeylRaiseToMaximallyDominant{}(F_4, (0, - 3, - 4, - 2) , (3, 6, 8, 4));",
     "CalculatorFunctionsWeylGroup::weylNoOuterRaiseToMaximallyDominant",
     "WeylRaiseToMaximallyDominant",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "MakeWeight",
@@ -1288,7 +1323,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "\\eta_3",
     "CalculatorFunctionsWeylGroup::lieAlgebraWeight",
     "MakeWeight",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "MakeRho",
@@ -1298,7 +1333,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "\\rho = MakeRho(B_3);",
     "CalculatorFunctionsWeylGroup::lieAlgebraRhoWeight",
     "MakeRho",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "IsOuterAuto",
@@ -1317,7 +1352,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "IsOuterAuto{}(e_6, A);",
     "CalculatorFunctionsWeylGroup::isOuterAutoWeylGroup",
     "IsOuterAuto",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "WeylOuterRaiseToMaximallyDominant",
@@ -1330,7 +1365,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "WeylOuterRaiseToMaximallyDominant{}(D_4, (0, 0, 1, 0), (1, 0, 0, 0));\n",
     "CalculatorFunctionsWeylGroup::weylOuterRaiseToMaximallyDominant",
     "WeylOuterRaiseToMaximallyDominant",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "GenerateFiniteMultiplicativelyClosedSet",
@@ -1346,15 +1381,15 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "GenerateFiniteMultiplicativelyClosedSet{}(48, s_1, s_2, s_3);",
     "Calculator::innerGenerateMultiplicativelyClosedSet",
     "GenerateFiniteMultiplicativelyClosedSet",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "CartanSA",
     CalculatorLieTheory::constructCartanSubalgebra,
     "",
     "Generates a Cartan subalgebra, code is still experimental.",
-    "g_{{i}} = GetChevalleyGenerator{}(b_3, i);\n"
-    "h_{{i}} = GetCartanGenerator{}(b_3, i);\n"
+    "g_{{i}} = ChevalleyGenerator{}(b_3, i);\n"
+    "h_{{i}} = CartanGenerator{}(b_3, i);\n"
     "CartanSA(g_1 + g_3, g_-1 + g_-3, g_2, g_-2);",
     "CalculatorFunctions::constructCartanSubalgebra",
     "CartanSA",
@@ -1382,7 +1417,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "GenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3, g_-3);\n"
     "GenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_2, g_-2, g_3, g_-3);\n"
     "GenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3);\n"
-    "q_{{i}} = GetChevalleyGenerator{}(F_4, i);\n"
+    "q_{{i}} = ChevalleyGenerator{}(F_4, i);\n"
     "s_2 = - q_{- 5} - q_{-6};\n"
     "s_1 = q_{20} + q_{19};\n"
     "s_- 1 = - q_{- 19} - q_{- 20};\n"
@@ -1390,7 +1425,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "GenerateVectorSpaceClosedWithRespectToLieBracket(52, s_1, s_2, s_- 1, s_-2);",
     "CalculatorFunctions::generateVectorSpaceClosedWithRespectToLieBracket",
     "GenerateVectorSpaceClosedWithRespectToLieBracket",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "WeylGroupNaturalRep",
@@ -1400,7 +1435,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "WeylGroupNaturalRep{}(B_3)",
     "CalculatorFunctionsWeylGroup::weylGroupNaturalRep",
     "WeylGroupNaturalRep",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "WeylGroupGetOuterAutoGenerators",
@@ -1411,7 +1446,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "WeylGroupGetOuterAutoGenerators{}(2D_4)",
     "CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint",
     "WeylGroupGetOuterAutoGenerators",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "MakeVirtualWeylGroupRepresentation",
@@ -1483,7 +1518,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "PrincipalSlTwoIndex(G_2^3 + D_4^2);",
     "CalculatorFunctions::getPrincipalSl2Index",
     "PrincipalSlTwoIndex",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "DynkinIndicesSlTwoSubalgebras",
@@ -1499,7 +1534,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "DynkinIndicesSlTwoSubalgebras(2G_2+G_2^7+F_4+F_4^19);",
     "CalculatorFunctions::getDynkinIndicesSlTwoSubalgebras",
     "DynkinIndicesSlTwoSubalgebras",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "CartanSymmetric",
@@ -1509,7 +1544,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "CartanSymmetric(e^7_6);",
     "CalculatorFunctions::getSymmetricCartan",
     "CartanSymmetric",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "GrowDynkinType",
@@ -1521,7 +1556,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "GrowDynkinType(g^35_2+B^30_2, e_6);",
     "CalculatorFunctions::growDynkinType",
     "GrowDynkinType",
-    innerStandard
+    standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -1533,7 +1568,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "(3/4 v)\\otimes v-3/4 (v\\otimes v)",
     "CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor",
     "AddElementTensorGeneralizedVermaModuleToElementTensorGeneralizedVermaModule",
-    innerStandard
+    standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -1546,7 +1581,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "(1 / 2 + \\lambda) \\varepsilon_1 + 1 / 2 \\varepsilon_2+ 1 / 2 \\varepsilon_3  ",
     "CalculatorFunctionsBinaryOps::innerAddWeightToWeight",
     "AddWeightLieAlgebraPolynomialToWeightLieAlgebraPolynomial",
-    innerStandard
+    standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -1554,12 +1589,12 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     this->opElementUEOverRF(),
     this->opElementUEOverRF(),
     "Adds an element of UE (Universal Enveloping algebra) to an element of UE.",
-    "g_{{{i}}} = GetChevalleyGenerator{}(F_{1}, {{i}});\n"
-    "h_{{{i}}} = GetCartanGenerator{}(F_{1}, {{i}});\n"
+    "g_{{{i}}} = ChevalleyGenerator{}(F_{1}, {{i}});\n"
+    "h_{{{i}}} = CartanGenerator{}(F_{1}, {{i}});\n"
     "[g_{22}+g_{20}+g_{14},g_{- 14}+g_{-20}+g_{-22}]",
     "CalculatorFunctionsBinaryOps::innerAddUEToAny",
     "AddElementUniversalEnvelopingRationalFunctionCoefficientsToElementUniversalEnvelopingRationalFunctionCoefficients",
-    innerStandard
+    standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -1587,7 +1622,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "x * y",
     "CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg",
     "MultiplyCharacterSemisimpleLieAlgebraModuleBy",
-    innerStandard
+    standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -1598,7 +1633,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "x = MakeElementWeylGroup{}(A_2, 1); x*x",
     "CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt",
     "MultiplyWeylGroupElementByWeylGroupElement",
-    innerStandard
+    standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -1614,7 +1649,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "x^1000001",
     "CalculatorFunctionsBinaryOps::innerPowerWeylGroupElementByInteger",
     "PowerWeylGroupElementByInteger",
-    innerStandard
+    standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -1636,11 +1671,11 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     this->opRational(),
     this->opElementUEOverRF(),
     "Multiplies rational number by an element universal enveloping algebra.",
-    "g_{{i}}= GetChevalleyGenerator{}(F_1, i); h_{{i}}= GetCartanGenerator{}(F_1, i);\n"
+    "g_{{i}}= ChevalleyGenerator{}(F_1, i); h_{{i}}= CartanGenerator{}(F_1, i);\n"
     "[g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]",
     "CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE",
     "MultiplyRationalByUE",
-    innerStandard
+    standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -1648,12 +1683,12 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     this->opElementUEOverRF(),
     this->opElementUEOverRF(),
     "Multiplies elment Universal enveloping by element universal enveloping algebra.",
-    "g_{{i}}= GetChevalleyGenerator{}(F_1, i);"
-    "h_{{i}}= GetCartanGenerator{}(F_1, i) ;\n"
+    "g_{{i}}= ChevalleyGenerator{}(F_1, i);"
+    "h_{{i}}= CartanGenerator{}(F_1, i) ;\n"
     "[g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]",
     "CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE",
     "MultiplyUEByUE",
-    innerStandard
+    standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -1664,12 +1699,12 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "tensor product of generalized Verma modules. "
     "Not fully tested and documented at the moment. "
     "Will get more documented in the future. ",
-    "X = G_2;\ng_{{i}}= GetChevalleyGenerator{}(X,i);\nh_{{i}}= GetCartanGenerator{}(X, i);\n"
+    "X = G_2;\ng_{{i}}= ChevalleyGenerator{}(X,i);\nh_{{i}}= CartanGenerator{}(X, i);\n"
     "v=HeighestWeightVector{}(G_2, (1,0),(0,0));\n"
     "2/5 v;\n(3/4 v)\\otimes v;\n3/4 (v\\otimes v);\n(3/4 v)\\otimes v-3/4 (v\\otimes v)",
     "CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor",
     "MultiplyAnyByEltTensor",
-    innerStandard
+    standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -1681,14 +1716,14 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Not fully tested and documented at the moment. "
     "Will get more documented in the future. ",
     "X = G_2;\n"
-    "g_{{i}}= GetChevalleyGenerator{}(X,i);\n"
-    "h_{{i}}= GetCartanGenerator{}(X, i);\n"
+    "g_{{i}}= ChevalleyGenerator{}(X,i);\n"
+    "h_{{i}}= CartanGenerator{}(X, i);\n"
     "z = Polynomial{}y;\n"
     "v = HeighestWeightVector{}(G_2, (z,1),(1,0));\n"
     "(2*z) v;\n",
     "CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor",
     "MultiplyPolynomialByElementTensorGeneralVermaModule",
-    innerStandard
+    standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -1699,14 +1734,14 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Not fully tested and documented at the moment. "
     "Will get more documented in the future. ",
     "X = G_2;\n"
-    "g_{{i}} = GetChevalleyGenerator{}(X,i);\n"
-    "h_{{i}} = GetCartanGenerator{}(X, i);\n"
+    "g_{{i}} = ChevalleyGenerator{}(X,i);\n"
+    "h_{{i}} = CartanGenerator{}(X, i);\n"
     "z = Polynomial{}y;\n"
     "v = HeighestWeightVector{}(G_2, (z,1),(1,0));\n"
     "1/z v",
     "CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor",
     "MultiplyAnyByTensor",
-    innerStandard
+    standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -1717,12 +1752,12 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "tensor product of generalized Verma modules. "
     "Not fully tested and documented at the moment. "
     "Will get more documented in the future. ",
-    "X = G_2;\ng_{{i}}= GetChevalleyGenerator{}(X,i);\nh_{{i}}= GetCartanGenerator{}(X, i);\n"
+    "X = G_2;\ng_{{i}}= ChevalleyGenerator{}(X,i);\nh_{{i}}= CartanGenerator{}(X, i);\n"
     "z= Polynomial{}y;\nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\n"
     "h_1 v; \nh_2 v;\n g_1 g_{- 1} v ",
     "CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor",
     "MultiplyElementUniversalEnvelopingRationalFunctionByElementTensorGeneralizedVermaModule",
-    innerStandard
+    standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -1737,7 +1772,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "s_1s_2s_3s_2s_1 \\mu",
     "CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly",
     "MultiplyWeylGroupElementByWeightLieAlgebraPolynomial",
-    innerStandard
+    standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -1750,7 +1785,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "x = Polynomial{}x; x\\varepsilon_1",
     "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly",
     "MultiplyPolynomialByWeightLieAlgebraPolynomial",
-    innerStandard
+    standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -1763,7 +1798,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "x = Polynomial{}x; x\\varepsilon_1",
     "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly",
     "MultiplyRaitonalByWeightLieAlgebraPolynomial",
-    innerStandard
+    standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -1773,11 +1808,11 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Raises element of universal enveloping to integer power. "
     "If the exponent is non-positive integer but the element of the UE is "
     "a single generator with coefficient 1, the exponent will be carried out formally. ",
-    "g_{{i}}= GetChevalleyGenerator{}(G_2, i); h_{{i}}= GetCartanGenerator{}(G_2, i) ;"
+    "g_{{i}}= ChevalleyGenerator{}(G_2, i); h_{{i}}= CartanGenerator{}(G_2, i) ;"
     "\n (g_1+g_2)^2+ g_1^{1/2}",
     "CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction",
     "PowerElementUniversalEnvelopingBySmallInteger",
-    innerStandard
+    standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -1787,11 +1822,11 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Provided that an element of Universal Enveloping algebra is "
     "a single generator (raised to arbitrary formal polynomial power) with coefficient 1, "
     "raises (formally) the element of the UE to arbitrary polynomial power. ",
-    "g_{{i}}= GetChevalleyGenerator{}(G_2, i); h_{{i}}= GetCartanGenerator{}(G_2, i) ;\n"
+    "g_{{i}}= ChevalleyGenerator{}(G_2, i); h_{{i}}= CartanGenerator{}(G_2, i) ;\n"
     "((((g_1)^{Polynomial{}x})^{Polynomial{}y}) +g_2)^2",
     "CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction",
     "PowerUEelementToPolyPower",
-    innerStandard
+    standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -1801,11 +1836,11 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Provided that an element of Universal Enveloping algebra is a single generator "
     "(raised to arbitrary formal RF power) with coefficient 1, raises "
     "(formally) the element of the UE to arbitrary RF power. ",
-    "g_{{i}}= GetChevalleyGenerator{}(G_2, i); h_{{i}}= GetCartanGenerator{}(G_2, i);\n "
+    "g_{{i}}= ChevalleyGenerator{}(G_2, i); h_{{i}}= CartanGenerator{}(G_2, i);\n "
     "((((g_1)^{Polynomial{}x})^{Polynomial{}y}) +g_2)^2",
     "CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction",
     "PowerUEelementToRFPower",
-    innerStandard
+    standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "\\otimes",
@@ -1816,15 +1851,15 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Not fully tested and documented at the moment. "
     "Will get more documented in the future. ",
     "X = G_2;\n"
-    "g_{{i}} = GetChevalleyGenerator{}(X,i);\n"
-    "h_{{i}}= GetCartanGenerator{}(X, i);\n"
+    "g_{{i}} = ChevalleyGenerator{}(X,i);\n"
+    "h_{{i}}= CartanGenerator{}(X, i);\n"
     "z= Polynomial{}y;\n"
     "v=HeighestWeightVector{}(G_2, (z,1), (1,0));\n"
     "g_{- 1}(v\\otimes v);\n"
     "g_{- 1}g_{- 1}(v\\otimes v)",
     "CalculatorFunctionsBinaryOps::tensorElementTensorByElementTensor",
     "TensorElementGeneralizedVermaModuleByElementGeneralizedVermaModule",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "[]",
@@ -1835,7 +1870,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "[a+b, c]",
     "CalculatorFunctionsBinaryOps::innerLieBracketDistribute",
     "LieBracketDistribute",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "[]",
@@ -1859,7 +1894,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "\\end{pmatrix};",
     "CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant",
     "LieBracketOfMatrices",
-    innerStandard
+    standardOptions
   );
 
   this->addOperationHandler(
@@ -1870,7 +1905,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "[2a, 3b]",
     "CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant",
     "LieBracketConstants",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "[]",
@@ -1878,22 +1913,24 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "",
     "Lie bracket of elements of Weyl algebras = differential operators with polynomial coefficients. ",
     "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
-    "x_{{i}}= Polynomial{}x_i; \n[\\partial_1, x_1]; ",
+    "x_{{i}}= Polynomial{}x_i; \n"
+    "[\\partial_1, x_1]; ",
     "CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA",
     "LieBracketWeylAlgebraElements",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "[]",
     CalculatorFunctionsBinaryOps::lieBracketRatOrUEWithRatOrUE,
     "",
     "Lie bracket of elements of semisimple Lie algebra. ",
-    "X =A_1;\ng_{{i}}= GetChevalleyGenerator{}(X,i);\n"
-    "h_{{i}}= GetCartanGenerator{}(X,i);\n"
+    "X =A_1;\n"
+    "g_{{i}}= ChevalleyGenerator{}(X,i);\n"
+    "h_{{i}}= CartanGenerator{}(X,i);\n"
     "[g_1,g_{- 1}] ",
     "CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE",
     "LieBracketSemisimpleLieAlgebras",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "[]",
@@ -1903,7 +1940,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "[b, a]",
     "CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded",
     "LieBracketSwapTermsIfNeeded",
-    innerStandard
+    standardOptions
   );
   this->addOperationHandler(
     "[]",
@@ -1913,7 +1950,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "[2a,3b] ",
     "CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant",
     "LieBracketJacobiIfNeeded",
-    innerStandard
+    standardOptions
   );
 
   this->addOperationBinaryInnerHandlerWithTypes(
@@ -1926,6 +1963,6 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "V = WeylGroupNaturalRep{}(B_3); V \\otimes V; V * V",
     "CalculatorFunctionsWeylGroup::tensorWeylReps",
     "TensorWeylGroupRepresentationByWeylGroupRepresentation",
-    innerStandard
+    standardOptions
   );
 }

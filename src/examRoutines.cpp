@@ -687,7 +687,7 @@ bool CalculatorHtmlFunctions::interpretProblemGiveUp(
   out << WebAPI::problem::answerGenerationSuccess
   << ":" << result[WebAPI::problem::answerGenerationSuccess] << "<br>";
   out << "<br>resultHTML:<br>" << result[WebAPI::result::resultHtml].stringValue;
-  return output.assignValue(out.str(), calculator);
+  return output.assignValueOLD(out.str(), calculator);
 }
 
 bool CalculatorHtmlFunctions::interpretProblem(
@@ -713,7 +713,7 @@ bool CalculatorHtmlFunctions::interpretProblem(
   }
   out << "<br>Interpretation times (per attempt): "
   << problem.timePerAttempt.toStringCommaDelimited();
-  return output.assignValue(out.str(), calculator);
+  return output.assignValueOLD(out.str(), calculator);
 }
 
 std::string CalculatorHTML::toStringExtractedCommands() {
@@ -3001,7 +3001,7 @@ bool CalculatorHtmlFunctions::extractCalculatorExpressionFromHtml(
   if (!interpreter.parseHTML(&calculator.comments)) {
     return false;
   }
-  return output.assignValue(interpreter.toStringExtractedCommands(), calculator);
+  return output.assignValueOLD(interpreter.toStringExtractedCommands(), calculator);
 }
 
 std::string CalculatorHTML::answerLabels::properties = "properties";

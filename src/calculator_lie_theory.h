@@ -172,7 +172,13 @@ public:
     SemisimpleLieAlgebra*& outputOwner,
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
   );
-  static bool adCommonEigenSpaces(
+  static bool adjointCommonEigenSpaces(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool adjointMatrix(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool standardRepresentationMatrix(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool isReductiveLieSubalgebra(

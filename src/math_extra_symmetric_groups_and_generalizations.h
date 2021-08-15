@@ -1112,7 +1112,7 @@ void Partition::spechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, c
     tm1.powers[i] = 1;
   }
   ElementMonomialAlgebra<MonomialTensor<int, HashFunctions::hashFunction>, scalar> t1, t2;
-  t1.addMonomial(tm1,1);
+  t1.addMonomial(tm1, 1);
   initialTableau.youngSymmetrizerAction(t2, t1);
   List<ElementMonomialAlgebra<MonomialTensor<int, HashFunctions::hashFunction>, scalar> > basisvs;
   SparseSubspaceBasis<

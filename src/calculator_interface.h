@@ -303,28 +303,43 @@ private:
   int getTypeOperation() const;
   template<class Type>
   int addObjectReturnIndex(const Type& inputValue) const;
+
+  // Please keep the Calculator as the first argument for all
+  // assign*(...) functions.
+  bool assignError(Calculator& owner, const std::string& error);
   // note: the following always returns true:
   template <class Type>
-  bool assignValue(const Type& inputValue, Calculator& owner);
+  bool assignValue(Calculator& owner, const Type& inputValue);
+  // Same as assignValue but with shuffled arguments. Deprecated.
+  template <class Type>
+  bool assignValueOLD(const Type& inputValue, Calculator& owner);
   // note: the following always returns true:
   template <class Type>
   bool assignValueWithContext(
+    Calculator& owner,
+    const Type& inputValue,
+    const ExpressionContext& context
+  );
+  // Same as assignValueWithContext but with shuffled arguments. Deprecated.
+  template <class Type>
+  bool assignValueWithContextOLD(
     const Type& inputValue,
     const ExpressionContext& context,
     Calculator& owner
   );
+  // Same as assignValueWithContext but with shuffled arguments. Deprecated.
   template <class BuiltIn>
   bool assignWithContext(
-    const WithContext<BuiltIn>& input,
-    Calculator& owner
+    Calculator& owner,
+    const WithContext<BuiltIn>& input
   ) {
-    return this->assignValueWithContext(input.content, input.context, owner);
+    return this->assignValueWithContext(owner, input.content, input.context);
   }
   template <class Type>
   bool addChildValueOnTop(const Type& inputValue) {
     this->checkInitialization();
     Expression child;
-    child.assignValue(inputValue, *this->owner);
+    child.assignValueOLD(inputValue, *this->owner);
     child.checkConsistency();
     return this->addChildOnTop(child);
   }
@@ -518,7 +533,6 @@ private:
   const Expression& getLastChild() const {
     return (*this)[this->children.size - 1];
   }
-  bool makeError(const std::string& theError, Calculator& owner);
   Expression(const Expression& other): flagDeallocated(false) {
     this->operator=(other);
   }
@@ -588,12 +602,12 @@ private:
   void operator=(const Rational& other) {
     MacroRegisterFunctionWithName("Expression::operator=(Rational)");
     this->checkInitialization();
-    this->assignValue(other, *this->owner);
+    this->assignValueOLD(other, *this->owner);
   }
   void operator=(int other) {
     MacroRegisterFunctionWithName("Expression::operator=(int)");
     this->checkInitialization();
-    this->assignValue(Rational(other), *this->owner);
+    this->assignValueOLD(Rational(other), *this->owner);
   }
   void operator/=(const Expression& other);
   void operator+=(const Expression& other);
@@ -2241,7 +2255,7 @@ public:
   void specializeBoundVariables(Expression& toBeSubbedIn, MapList<Expression, Expression>& matchedPairs);
   Expression* patternMatch(
     const Expression& pattern,
-    Expression& theExpression,
+    Expression& expression,
     MapList<Expression, Expression>& bufferPairs,
     const Expression* condition = nullptr,
     std::stringstream* logStream = nullptr
@@ -3092,16 +3106,16 @@ bool Expression::makeSum(Calculator& calculator,
 ) {
   MacroRegisterFunctionWithName("Expression::makeSum");
   Expression oneE; //used to record the constant term
-  oneE.assignValue<Rational>(1, calculator);
+  oneE.assignValueOLD<Rational>(1, calculator);
   if (summands.isEqualToZero()) {
-    return this->assignValue<Rational>(0, calculator);
+    return this->assignValueOLD<Rational>(0, calculator);
   }
   List<Expression> summandsWithCoeff;
   summandsWithCoeff.setSize(summands.size());
   for (int i = 0; i < summands.size(); i ++) {
     Expression& current = summandsWithCoeff[i];
     if (summands[i] == oneE) {
-      current.assignValue(summands.coefficients[i], calculator);
+      current.assignValueOLD(summands.coefficients[i], calculator);
     } else if (!(summands.coefficients[i] == 1)) {
       current.reset(calculator, 3);
       current.addChildAtomOnTop(calculator.opTimes());
@@ -3140,9 +3154,9 @@ Rational
 
 template <class Type>
 bool Expression::assignValueWithContext(
+  Calculator& owner,
   const Type& inputValue,
-  const ExpressionContext& context,
-  Calculator& owner
+  const ExpressionContext& context
 ) {
   this->reset(owner, 3);
   this->addChildAtomOnTop(this->getTypeOperation<Type>());
@@ -3151,7 +3165,16 @@ bool Expression::assignValueWithContext(
 }
 
 template <class Type>
-bool Expression::assignValue(const Type& inputValue, Calculator& owner) {
+bool Expression::assignValueWithContextOLD(
+  const Type& inputValue,
+  const ExpressionContext& context,
+  Calculator& owner
+) {
+  return this->assignValueWithContext(owner, inputValue, context);
+}
+
+template <class Type>
+bool Expression::assignValue(Calculator& owner, const Type& inputValue) {
   Expression typeComputer;
   typeComputer.owner = &owner;
   int currentType = typeComputer.getTypeOperation<Type>();
@@ -3171,7 +3194,12 @@ bool Expression::assignValue(const Type& inputValue, Calculator& owner) {
     << global.fatal;
   }
   ExpressionContext emptyContext(owner);
-  return this->assignValueWithContext(inputValue, emptyContext, owner);
+  return this->assignValueWithContext(owner, inputValue, emptyContext);
+}
+
+template <class Type>
+bool Expression::assignValueOLD(const Type& inputValue, Calculator& owner) {
+  return this->assignValue(owner, inputValue);
 }
 
 template <class Type>
@@ -3273,12 +3301,12 @@ bool Calculator::getTypeHighestWeightParabolic(
   Expression::FunctionAddress ConversionFun
 ) {
   if (!input.isListNElements(4) && !input.isListNElements(3)) {
-    return output.makeError(
+    return output.assignError(
+      calculator,
       "Function typeHighestWeightParabolic is "
       "expected to have two or three arguments: "
       "semisimple Lie algebra type, highest weight, "
-      "[optional] parabolic selection. ",
-      calculator
+      "[optional] parabolic selection. "
     );
   }
   const Expression& leftE = input[1];
@@ -3288,7 +3316,7 @@ bool Calculator::getTypeHighestWeightParabolic(
     CalculatorConversions::functionSemisimpleLieAlgebra,
     outputAmbientSSalgebra
   )) {
-    return output.makeError("Error extracting Lie algebra.", calculator);
+    return output.assignError(calculator, "Error extracting Lie algebra.");
   }
   SemisimpleLieAlgebra* ambientSSalgebra = outputAmbientSSalgebra.content;
   if (!calculator.getVector<Coefficient>(
@@ -3304,7 +3332,7 @@ bool Calculator::getTypeHighestWeightParabolic(
     << ambientSSalgebra->getRank()
     << " polynomials. The second argument you gave is "
     << middleE.toString() << ".";
-    return output.makeError(tempStream.str(), calculator);
+    return output.assignError(calculator, tempStream.str());
   }
   if (input.isListNElements(4)) {
     Vector<Rational> parabolicSel;
@@ -3322,7 +3350,7 @@ bool Calculator::getTypeHighestWeightParabolic(
       << ambientSSalgebra->getRank()
       << " rationals. The third argument you gave is "
       << rightE.toString() << ".";
-      return output.makeError(tempStream.str(), calculator);
+      return output.assignError(calculator, tempStream.str());
     }
     outputInducingSelection = parabolicSel;
   } else {
@@ -3362,9 +3390,9 @@ bool Expression::makeMatrix(
   for (int i = 0; i < input.numberOfRows; i ++) {
     for (int j = 0; j < input.numberOfColumns; j ++) {
       if (inputContext == nullptr) {
-        currentElt.assignValue(input(i, j), owner);
+        currentElt.assignValueOLD(input(i, j), owner);
       } else {
-        currentElt.assignValueWithContext(input(i, j), *inputContext, owner);
+        currentElt.assignValueWithContextOLD(input(i, j), *inputContext, owner);
       }
       matrixExpressions(i, j) = currentElt;
     }
@@ -3393,7 +3421,7 @@ bool CalculatorConversions::expressionFromPolynomial(
   }
   for (int i = 0; i < input.size(); i ++) {
     if (input[i].isConstant()) {
-      currentTerm.assignValue(1, calculator);
+      currentTerm.assignValueOLD(1, calculator);
       terms.addMonomial(currentTerm, input.coefficients[i]);
       continue;
     }
@@ -3410,7 +3438,7 @@ bool CalculatorConversions::expressionFromPolynomial(
         if (input[i](j) == 1) {
           currentMultTermE = currentBase;
         } else {
-          currentPower.assignValue(input[i](j), calculator);
+          currentPower.assignValueOLD(input[i](j), calculator);
           currentMultTermE.makeXOX(
             calculator, calculator.opPower(), currentBase, currentPower
           );
@@ -3453,7 +3481,7 @@ bool CalculatorConversions::expressionFromRationalFraction(
   MacroRegisterFunctionWithName("CalculatorConversions::expressionFromRationalFraction");
   Rational aConst;
   if (input.isConstant(&aConst)) {
-    return output.assignValue(aConst, calculator);
+    return output.assignValueOLD(aConst, calculator);
   }
   Polynomial<Coefficient> numerator, denominator;
   input.getNumerator(numerator);
@@ -3503,7 +3531,7 @@ bool WithContext<BuiltIn>::setContextAndSerialize(
   if (!this->setContextAtLeast(inputOutputContext, commentsOnFailure)) {
     return false;
   }
-  return output.assignWithContext(*this, *this->context.owner);
+  return output.assignWithContext(*this->context.owner, *this);
 }
 
 template <class BuiltIn>

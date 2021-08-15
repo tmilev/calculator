@@ -320,7 +320,7 @@ bool CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY(
   const Expression* left = &input[1];
   const Expression* right = &input[2];
   if (*left == *right) {
-    constPower.assignValue(2, calculator);
+    constPower.assignValueOLD(2, calculator);
     output.makeXOX(calculator, calculator.opPower(), *left, constPower);
     return true;
   }
@@ -408,7 +408,7 @@ bool CalculatorBasics::checkRule(Calculator& calculator, const Expression& input
   std::stringstream out;
   out << "Bad rule: you are asking me to substitute " << input[1] << " by itself ("
   << input[2] << ")" << " which is an infinite substitution cycle. ";
-  return output.makeError(out.str(), calculator);
+  return output.assignError(calculator, out.str());
 }
 
 bool CalculatorBasics::subZeroDivAnythingWithZero(Calculator& calculator, const Expression& input, Expression& output) {
@@ -417,7 +417,7 @@ bool CalculatorBasics::subZeroDivAnythingWithZero(Calculator& calculator, const 
   }
   if (input[1].isEqualToZero()) {
     if (!input[2].isEqualToZero()) {
-      return output.assignValue(0, calculator);
+      return output.assignValueOLD(0, calculator);
     }
   }
   return false;
@@ -701,7 +701,7 @@ bool Calculator::collectCoefficientsPowersVariables(
       remainingMultiplicands = currentMultiplicands;
       remainingMultiplicands.removeIndexShiftDown(j);
       if (remainingMultiplicands.size == 0) {
-        currentCoeff.assignValue(1, calculator);
+        currentCoeff.assignValueOLD(1, calculator);
       } else {
         currentCoeff.makeProduct(calculator, remainingMultiplicands);
       }
@@ -946,7 +946,7 @@ bool Expression::makeIdentityMatrixExpressions(int dimension, Calculator& inputB
 
 bool CalculatorBasics::evaluateIf(Calculator& calculator, const Expression& input, Expression& output) {
   if (!input.startsWith(calculator.opDefineConditional(), 4)) {
-    return output.makeError("Error: operation :if = takes three arguments.", calculator);
+    return output.assignError(calculator, "Error: operation :if = takes three arguments.");
   }
   Rational conditionRat;
   if (!input[1].isOfType<Rational>(&conditionRat)) {
@@ -968,7 +968,7 @@ bool CalculatorBasics::minus(Calculator& calculator, const Expression& input, Ex
     return false;
   }
   Expression tempE, minusOne;
-  minusOne.assignValue(- 1, calculator);
+  minusOne.assignValueOLD(- 1, calculator);
   if (input.size() == 2) {
     output.makeXOX(calculator, calculator.opTimes(), minusOne, input[1]);
   } else {
@@ -989,12 +989,12 @@ void Expression::operator+=(const Expression& other) {
   }
   if (other.owner == nullptr) {
     Expression otherCopy;
-    otherCopy.assignValue(other.data, *this->owner);
+    otherCopy.assignValueOLD(other.data, *this->owner);
     *this += otherCopy;
     return;
   }
   if (this->owner == nullptr) {
-    this->assignValue(this->data, *other.owner);
+    this->assignValueOLD(this->data, *other.owner);
   }
   if (this->owner != other.owner) {
     global.fatal << "Error: adding expressions with different owners. " << global.fatal;
@@ -1015,12 +1015,12 @@ void Expression::operator-=(const Expression& other) {
   }
   if (other.owner == nullptr) {
     Expression otherCopy;
-    otherCopy.assignValue(other.data, *this->owner);
+    otherCopy.assignValueOLD(other.data, *this->owner);
     (*this) -= otherCopy;
     return;
   }
   if (this->owner == nullptr) {
-    this->assignValue(this->data, *other.owner);
+    this->assignValueOLD(this->data, *other.owner);
   }
   if (this->owner != other.owner) {
     global.fatal << "Error: attempt to add expressions with different owners. " << global.fatal;
@@ -1053,7 +1053,7 @@ Expression Expression::operator*(int other) {
     << global.fatal;
   }
   Expression otherE;
-  otherE.assignValue(other, *this->owner);
+  otherE.assignValueOLD(other, *this->owner);
   result = *this;
   result *= otherE;
   return result;
@@ -1069,7 +1069,7 @@ Expression Expression::operator/(int other) {
     << global.fatal;
   }
   Expression otherE;
-  otherE.assignValue(other, *this->owner);
+  otherE.assignValueOLD(other, *this->owner);
   result = *this;
   result /= otherE;
   return result;
@@ -1108,12 +1108,12 @@ void Expression::operator/=(const Expression& other) {
   }
   if (other.owner == nullptr) {
     Expression otherCopy;
-    otherCopy.assignValue(other.data, *this->owner);
+    otherCopy.assignValueOLD(other.data, *this->owner);
     (*this) /= otherCopy;
     return;
   }
   if (this->owner == nullptr) {
-    this->assignValue(this->data, *other.owner);
+    this->assignValueOLD(this->data, *other.owner);
   }
   if (this->owner != other.owner) {
     global.fatal << "Error: dividing expressions with different owners. " << global.fatal;
@@ -1134,12 +1134,12 @@ void Expression::operator*=(const Expression& other) {
   }
   if (other.owner == nullptr) {
     Expression otherCopy;
-    otherCopy.assignValue(other.data, *this->owner);
+    otherCopy.assignValueOLD(other.data, *this->owner);
     (*this) *= otherCopy;
     return;
   }
   if (this->owner == nullptr) {
-    this->assignValue(this->data, *other.owner);
+    this->assignValueOLD(this->data, *other.owner);
   }
   if (this->owner != other.owner) {
     global.fatal << "Error: adding expressions with different owners. " << global.fatal;

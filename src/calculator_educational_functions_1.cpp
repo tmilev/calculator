@@ -119,7 +119,7 @@ bool UnivariateEquation::solve(Calculator& calculator){
   )) {
     for (int i = 0; i < solutions.size; i ++) {
       Expression currentSolution;
-      currentSolution.assignValue(solutions[i], calculator);
+      currentSolution.assignValueOLD(solutions[i], calculator);
       this->solutions.addOnTop(currentSolution);
     }
     return true;
@@ -212,7 +212,7 @@ bool ProblemWithSolution::solveEquation(Calculator& calculator) {
 
 void ProblemWithSolution::addAnnotationStep(Calculator& calculator, const std::string& input) {
   Calculator::ExpressionHistoryEnumerator::Step step;
-  step.content.assignValue(input, calculator);
+  step.content.assignValueOLD(input, calculator);
   this->steps.addOnTop(step);
 }
 
@@ -247,7 +247,7 @@ bool CalculatorEducationalFunctions::solveJSON(
   ProblemWithSolution problem;
   problem.toBeSolved = input[1];
   problem.solve(calculator);
-  return output.assignValue(problem.toJSON(), calculator);
+  return output.assignValueOLD(problem.toJSON(), calculator);
 }
 
 bool CalculatorEducationalFunctions::compareExpressionsJSON(
@@ -281,11 +281,11 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
   comparison.desired = input[2];
   if (!comparison.desired.getFreeVariables(comparison.freeVariablesDesired, false)) {
     comparison.errorEvaluation = "Unexpected failure to extract free variables from desired answer.";
-    return output.assignValue(comparison.toJSON(), calculator);
+    return output.assignValueOLD(comparison.toJSON(), calculator);
   }
   if (!comparison.given.getFreeVariables(comparison.freeVariablesFound, false)) {
     comparison.errorEvaluation = "Unexpected failure to extract free variables from given answer.";
-    return output.assignValue(comparison.toJSON(), calculator);
+    return output.assignValueOLD(comparison.toJSON(), calculator);
   }
   for (int i = 0; i < comparison.freeVariablesFound.size; i ++) {
     const Expression& current = comparison.freeVariablesFound[i];
@@ -298,7 +298,7 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
     errorStream << "Unexpected symbols: <b style='color:red'>"
     << comparison.unexpectedVariables.toStringCommaDelimited() << "</b>";
     comparison.errorInAnswer = errorStream.str();
-    return output.assignValue(comparison.toJSON(), calculator);
+    return output.assignValueOLD(comparison.toJSON(), calculator);
   }
   comparison.givenSimplified.makeOX(
     calculator,
@@ -347,7 +347,7 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
     comparison.comparisonNoDistributionEvaluated
   );
   comparison.processComparisonRestricted();
-  return output.assignValue(comparison.toJSON(), calculator);
+  return output.assignValueOLD(comparison.toJSON(), calculator);
 }
 
 void CompareExpressions::processComparisonRestricted() {
@@ -497,7 +497,7 @@ bool CalculatorEducationalFunctions::divideByNumberTrivial(
     return false;
   }
   if (input[2].isEqualToZero()) {
-    return output.makeError("Division by zero. ", calculator);
+    return output.assignError(calculator, "Division by zero. ");
   }
   Rational numerator, denominator;
   if (!input[1].isRational(&numerator)) {
@@ -508,7 +508,7 @@ bool CalculatorEducationalFunctions::divideByNumberTrivial(
   }
   Rational result = numerator / denominator;
   if (numerator == result.getNumerator() && denominator == result.getDenominator()) {
-    return output.assignValue(result, calculator);
+    return output.assignValueOLD(result, calculator);
   }
   return false;
 }

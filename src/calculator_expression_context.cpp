@@ -204,7 +204,7 @@ Expression ExpressionContext::getVariable(int variableIndex) const {
     Expression errorE;
     std::stringstream out;
     out << "Context does not have variable index " << variableIndex + 1 << ". ";
-    return errorE.makeError(out.str(), *this->owner);
+    return errorE.assignError(*this->owner, out.str());
   }
   return this->variables[variableIndex];
 }
@@ -435,7 +435,7 @@ bool ExpressionContext::mergeDifferentialOperatorsOnce(
     Expression differentialOperator(*this->owner);
     differentialOperator.addChildAtomOnTop("\\partial");
     Expression variableIndex;
-    variableIndex.assignValue(i, *this->owner);
+    variableIndex.assignValueOLD(i, *this->owner);
     differentialOperator.addChildOnTop(variableIndex);
     if (outputContext.differentialOperatorVariables.contains(
       differentialOperator

@@ -172,7 +172,7 @@ bool CalculatorFunctionsBinaryOps::multiplyTypeByType(
   Type result;
   result = inputContextsMerged[1].getValue<Type>();
   result *= inputContextsMerged[2].getValue<Type>();
-  return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), calculator);
+  return output.assignValueWithContextOLD(result, inputContextsMerged[1].getContext(), calculator);
 }
 
 template <class Type>
@@ -190,7 +190,7 @@ bool CalculatorFunctionsBinaryOps::addTypeToType(
   Type result;
   result = inputContextsMerged[1].getValue<Type>();
   result += inputContextsMerged[2].getValue<Type>();
-  return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), calculator);
+  return output.assignValueWithContextOLD(result, inputContextsMerged[1].getContext(), calculator);
 }
 
 template <class Type>
@@ -206,12 +206,12 @@ bool CalculatorFunctionsBinaryOps::divideTypeByType(
     return false;
   }
   if (inputContextsMerged[2].getValue<Type>().isEqualToZero()) {
-    return output.makeError("Division by zero. ", calculator);
+    return output.assignError(calculator, "Division by zero. ");
   }
   Type result;
   result = inputContextsMerged[1].getValue<Type>();
   result /= inputContextsMerged[2].getValue<Type>();
-  return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), calculator);
+  return output.assignValueWithContextOLD(result, inputContextsMerged[1].getContext(), calculator);
 }
 
 template <class Coefficient>
@@ -244,7 +244,7 @@ bool CalculatorConversions::functionPolynomialWithExponentLimit(
     Polynomial<Coefficient> converted;
     input.isOfType(&polynomial);
     converted = polynomial;
-    return output.assignValueWithContext(converted, input.getContext(), calculator);
+    return output.assignValueWithContextOLD(converted, input.getContext(), calculator);
   }
   if (input.isOfType<Coefficient>() || input.isOfType<Rational>()) {
     if (!input.convertInternally<Polynomial<Coefficient> >(output)) {
@@ -345,21 +345,21 @@ bool CalculatorConversions::functionPolynomialWithExponentLimit(
           monomial.makeMonomial(0, 1, 1);
           ExpressionContext context(calculator);
           context.makeOneVariable(input);
-          return output.assignValueWithContext(monomial, context, calculator);
+          return output.assignValueWithContextOLD(monomial, context, calculator);
         }
         inverted.invert();
         power *= - 1;
         resultP = inverted;
       }
       resultP.raiseToPower(power, 1);
-      return output.assignValueWithContext(resultP, converted.getContext(), calculator);
+      return output.assignValueWithContextOLD(resultP, converted.getContext(), calculator);
     }
   }
   Polynomial<Coefficient> monomial;
   monomial.makeMonomial(0, 1, 1);
   ExpressionContext context(calculator);
   context.makeOneVariable(input);
-  return output.assignValueWithContext(monomial, context, calculator);
+  return output.assignValueWithContextOLD(monomial, context, calculator);
 }
 
 template <class Coefficient>
@@ -422,7 +422,7 @@ bool CalculatorConversions::functionRationalFunction(
       RationalFraction<Coefficient> rationalFunction;
       rationalFunction = leftE.getValue<RationalFraction<Coefficient> >();
       rationalFunction.raiseToPower(theSmallPower);
-      return output.assignValueWithContext(rationalFunction, leftE.getContext(), calculator);
+      return output.assignValueWithContextOLD(rationalFunction, leftE.getContext(), calculator);
     }
     calculator << "<hr>Warning: failed to raise "
     << input[1].toString() << " to power " << input[2].toString()
@@ -452,6 +452,6 @@ bool CalculatorConversions::functionRationalFunction(
   context.makeOneVariable(input);
   RationalFraction<Coefficient> rationalFunction;
   rationalFunction.makeOneLetterMonomial(0, Coefficient::oneStatic());
-  return output.assignValueWithContext(rationalFunction, context, calculator);
+  return output.assignValueWithContextOLD(rationalFunction, context, calculator);
 }
 #endif

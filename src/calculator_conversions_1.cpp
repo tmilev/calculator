@@ -27,7 +27,7 @@ bool CalculatorConversions::expressionFromChevalleyGenerator(
   } else {
     generatorLetterE.makeAtom(calculator.addOperationNoRepetitionOrReturnIndexFirst("g"), calculator);
   }
-  generatorIndexE.assignValue(input.owner->getDisplayIndexFromGenerator(input.generatorIndex), calculator);
+  generatorIndexE.assignValueOLD(input.owner->getDisplayIndexFromGenerator(input.generatorIndex), calculator);
   return output.makeXOX(calculator, calculator.opUnderscore(), generatorLetterE, generatorIndexE);
 }
 
@@ -61,7 +61,7 @@ bool CalculatorConversions::loadWeylGroup(Calculator& calculator, const Expressi
     return false;
   }
   SemisimpleLieAlgebra& subalgebra = calculator.objectContainer.getLieAlgebraCreateIfNotPresent(dynkinType);
-  return output.assignValue(subalgebra.weylGroup, calculator);
+  return output.assignValueOLD(subalgebra.weylGroup, calculator);
 }
 
 bool CalculatorConversions::dynkinSimpleType(
@@ -86,7 +86,7 @@ bool CalculatorConversions::functionDynkinSimpleType(
       scaleE = typeLetterE[2];
       typeLetterE = typeLetterE[1];
     } else {
-      scaleE.assignValue(1, calculator);
+      scaleE.assignValueOLD(1, calculator);
     }
   } else if (input.startsWith(calculator.opPower(), 3)) {
     scaleE = input[2];
@@ -240,7 +240,7 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
   bool newlyCreated = !calculator.objectContainer.semisimpleLieAlgebras.contains(dynkinType);
   outputPointer = &calculator.objectContainer.getLieAlgebraCreateIfNotPresent(dynkinType);
   outputPointer->checkConsistency();
-  output.assignValue(outputPointer, calculator);
+  output.assignValueOLD(outputPointer, calculator);
   if (newlyCreated) {
     outputPointer->computeChevalleyConstants();
     Expression converter;
@@ -260,8 +260,8 @@ bool CalculatorConversions::innerExpressionFromDynkinSimpleType(
   std::string letterS;
   letterS = input.letter;
   letterE.makeAtom(calculator.addOperationNoRepetitionOrReturnIndexFirst(letterS), calculator);
-  indexE.assignValue(input.cartanSymmetricInverseScale, calculator);
-  rankE.assignValue(input.rank, calculator);
+  indexE.assignValueOLD(input.cartanSymmetricInverseScale, calculator);
+  rankE.assignValueOLD(input.rank, calculator);
   letterAndIndexE.makeXOX(calculator, calculator.opPower(), letterE, indexE);
   return output.makeXOX(calculator, calculator.opUnderscore(), letterAndIndexE, rankE);
 }
@@ -270,7 +270,7 @@ bool CalculatorConversions::innerStoreSemisimpleLieAlgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   if (!input[1].isOfType<SemisimpleLieAlgebra*>()) {
-    return output.makeError("Asking to store non-semisimple Lie algebra as such is not allowed. ", calculator);
+    return output.assignError(calculator, "Asking to store non-semisimple Lie algebra as such is not allowed. ");
   }
   SemisimpleLieAlgebra* owner = input[1].getValueNonConst<SemisimpleLieAlgebra*>();
   return CalculatorConversions::expressionFromDynkinType(calculator, owner->weylGroup.dynkinType, output);
@@ -374,7 +374,7 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
   if (!CalculatorConversions::innerSlTwoSubalgebraPrecomputed(calculator, input, tempSL2)) {
     return calculator << "<hr>Failed to load sl(2) subalgebra. ";
   }
-  return output.assignValue(tempSL2.toString(), calculator);
+  return output.assignValueOLD(tempSL2.toString(), calculator);
 }
 
 bool CalculatorConversions::innerAlgebraicNumber(Calculator& calculator, const Expression& input, Expression& output) {
@@ -386,7 +386,7 @@ bool CalculatorConversions::innerAlgebraicNumber(Calculator& calculator, const E
   if (input.isOfType<Rational>()) {
     AlgebraicNumber theNum;
     theNum = input.getValue<Rational>();
-    return output.assignValue(theNum, calculator);
+    return output.assignValueOLD(theNum, calculator);
   }
   return false;
 }
@@ -601,9 +601,9 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
   //some time soon.
   outputSubalgebra.computeHsAndHsScaledToActByTwoFromComponents();
   outputSubalgebra.flagSubalgebraPreloadedButNotVerified = true;
-  return output.makeError(
-    "Candidate subalgebra is not a stand-alone object and its Expression output should not be used. ",
-    calculator
+  return output.assignError(
+    calculator,
+    "Candidate subalgebra is not a stand-alone object and its Expression output should not be used. "
   );
 }
 
@@ -715,10 +715,10 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     << subalgebras.comments << "<br>The progress report for the "
     << "entire computation follows.<br>"
     << subalgebras.toStringProgressReport();
-    return output.assignValue(out.str(), calculator);
+    return output.assignValueOLD(out.str(), calculator);
   }
   subalgebras.millisecondsComputationEnd = global.getElapsedMilliseconds();
-  return output.assignValue(subalgebras, calculator);
+  return output.assignValueOLD(subalgebras, calculator);
 }
 
 std::string CalculatorConversions::stringFromSemisimpleSubalgebras(SemisimpleSubalgebras& input) {
@@ -792,7 +792,7 @@ bool CalculatorConversions::innerExpressionFromMonomialUE(
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromMonomialUE");
   if (input.isConstant()) {
-    return output.assignValue(1, calculator);
+    return output.assignValueOLD(1, calculator);
   }
   ChevalleyGenerator chevalleyGenerator;
   chevalleyGenerator.owner = input.owner;
@@ -1022,7 +1022,7 @@ bool CalculatorConversions::innerElementUE(
   ExpressionContext outputContext(calculator);
   outputContext.setVariables(polynomialVariables);
   outputContext.setAmbientSemisimpleLieAlgebra(owner);
-  return output.assignValueWithContext(outputUE, outputContext, calculator);
+  return output.assignValueWithContextOLD(outputUE, outputContext, calculator);
 }
 
 bool CalculatorConversions::expressionFromBuiltInType(
@@ -1101,7 +1101,7 @@ bool CalculatorConversions::innerMatrixRationalTensorForM(
   }
   MatrixTensor<Rational> outputMatrixTensor;
   outputMatrixTensor = matrixRational;
-  return output.assignValue(outputMatrixTensor, calculator);
+  return output.assignValueOLD(outputMatrixTensor, calculator);
 }
 
 bool CalculatorConversions::functionMatrixRationalTensorForm(
@@ -1114,7 +1114,7 @@ bool CalculatorConversions::functionMatrixRationalTensorForm(
   }
   MatrixTensor<Rational> outputMatrixTensor;
   outputMatrixTensor = matrixRational;
-  return output.assignValue(outputMatrixTensor, calculator);
+  return output.assignValueOLD(outputMatrixTensor, calculator);
 }
 
 bool CalculatorConversions::outerMatrixExpressionsToMatrixOfType(
@@ -1224,7 +1224,7 @@ bool CalculatorConversions::innerLoadFileIntoString(
   )) {
     return false;
   }
-  return output.assignValue(outputString, calculator);
+  return output.assignValueOLD(outputString, calculator);
 }
 
 bool CalculatorConversions::innerMakeElementHyperOctahedral(
@@ -1235,7 +1235,7 @@ bool CalculatorConversions::innerMakeElementHyperOctahedral(
   ElementHyperoctahedralGroupR2 element;
   if (input.isOfType<std::string>(&inputStringFormat)) {
     element.makeFromString(inputStringFormat);
-    return output.assignValue(element, calculator);
+    return output.assignValueOLD(element, calculator);
   }
   if (input.size() < 3) {
     return calculator << "To make elements of hyperoctahedral group we need at least 3 inputs. ";
@@ -1266,7 +1266,7 @@ bool CalculatorConversions::innerMakeElementHyperOctahedral(
       << " had bit values that were not ones and zeroes.";
     }
   }
-  return output.assignValue(element, calculator);
+  return output.assignValueOLD(element, calculator);
 }
 
 bool CalculatorConversions::innerPolynomialModuloInteger(
@@ -1297,5 +1297,5 @@ bool CalculatorConversions::innerPolynomialModuloInteger(
     polynomial.content, converted, modulus.value
   );
   polynomial.context.setDefaultModulus(modulus.value);
-  return output.assignValueWithContext(converted, polynomial.context, calculator);
+  return output.assignValueWithContextOLD(converted, polynomial.context, calculator);
 }

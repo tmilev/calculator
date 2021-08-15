@@ -157,37 +157,37 @@ Calculator::NamedRuleLocation::NamedRuleLocation() {
 
 Expression Calculator::expressionZero() {
   Expression result;
-  result.assignValue(0, *this);
+  result.assignValueOLD(0, *this);
   return result;
 }
 
 Expression Calculator::expressionOne() {
   Expression result;
-  result.assignValue(1, *this);
+  result.assignValueOLD(1, *this);
   return result;
 }
 
 Expression Calculator::expressionMinusOne() {
   Expression result;
-  result.assignValue(- 1, *this);
+  result.assignValueOLD(- 1, *this);
   return result;
 }
 
 Expression Calculator::expressionFour() {
   Expression result;
-  result.assignValue(4, *this);
+  result.assignValueOLD(4, *this);
   return result;
 }
 
 Expression Calculator::expressionTwo() {
   Expression result;
-  result.assignValue(2, *this);
+  result.assignValueOLD(2, *this);
   return result;
 }
 
 Expression Calculator::expressionMinusHalf() {
   Expression result;
-  result.assignValue(Rational(- 1, 2), *this);
+  result.assignValueOLD(Rational(- 1, 2), *this);
   return result;
 }
 
@@ -706,7 +706,7 @@ void Calculator::EvaluateLoop::accountHistoryChildTransformation(
     return;
   }
   Expression incomingHistory, indexE;
-  indexE.assignValue(childIndex, *this->owner);
+  indexE.assignValueOLD(childIndex, *this->owner);
   incomingHistory.makeXOX(
     *this->owner,
     this->owner->opExpressionHistorySetChild(),
@@ -745,7 +745,7 @@ void Calculator::EvaluateLoop::accountHistory(Function* handler, const std::stri
     description << info;
   }
   Expression extraInformation;
-  extraInformation.assignValue(description.str(), *this->owner);
+  extraInformation.assignValueOLD(description.str(), *this->owner);
   incomingHistory.makeXOX(
     *this->owner,
     this->owner->opExpressionHistorySet(),
@@ -804,7 +804,7 @@ bool Calculator::EvaluateLoop::outputHasErrors() {
     << this->output->toString(&this->owner->formatVisibleStrings)
     << "<br>maximum number of algebraic transformations of "
     << this->owner->maximumAlgebraicTransformationsPerExpression << " exceeded.";
-    this->output->makeError(out.str(), *this->owner);
+    this->output->assignError(*this->owner, out.str());
     this->reductionOccurred = true;
     this->owner->flagAbortComputationASAP = true;
     this->owner->flagMaxTransformationsErrorEncountered = true;
@@ -891,7 +891,7 @@ bool Calculator::EvaluateLoop::evaluateChildren(
         out
         << "Failed to account rule: " << (*this->output)[i].toString()
         << ". Most likely the cause is too deeply nested recursion. ";
-        this->output->makeError(out.str(), *this->owner);
+        this->output->assignError(*this->owner, out.str());
         this->owner->flagAbortComputationASAP = true;
       }
     }
@@ -976,7 +976,7 @@ bool Calculator::EvaluateLoop::detectLoops() {
   }
   errorStream << this->output->toString();
   Expression error;
-  error.makeError(errorStream.str(), *this->owner);
+  error.assignError(*this->owner, errorStream.str());
   this->setOutput(error, nullptr, errorStream.str());
   this->owner->flagAbortComputationASAP = true;
   return true;
@@ -1102,7 +1102,7 @@ bool Calculator::evaluateExpression(
     << " but I have already seen that expression in the expression stack. ";
     calculator.flagAbortComputationASAP = true;
     Expression errorE;
-    errorE.makeError(errorStream.str(), calculator);
+    errorE.assignError(calculator, errorStream.str());
     return state.setOutput(errorE, nullptr, "Error");
   }
   // reduction phase:
@@ -1133,7 +1133,7 @@ void Calculator::reduce(Calculator::EvaluateLoop& state) {
 
 Expression* Calculator::patternMatch(
   const Expression& pattern,
-  Expression& theExpression,
+  Expression& expression,
   MapList<Expression, Expression>& bufferPairs,
   const Expression* condition,
   std::stringstream* logStream
@@ -1145,22 +1145,22 @@ Expression* Calculator::patternMatch(
     out << "Error: while trying to evaluate expression, "
     << "the maximum recursion depth of "
     << this->maximumRecursionDepth << " was exceeded";
-    theExpression.makeError(out.str(), *this);
+    expression.assignError(*this, out.str());
     return nullptr;
   }
   pattern.checkInitialization();
-  theExpression.checkInitialization();
+  expression.checkInitialization();
   if (!this->expressionMatchesPattern(
-    pattern, theExpression, bufferPairs, logStream
+    pattern, expression, bufferPairs, logStream
   )) {
     return nullptr;
   }
   if (logStream != nullptr) {
-    (*logStream) << "<hr>found pattern: " << theExpression.toString() << " -> "
+    (*logStream) << "<hr>found pattern: " << expression.toString() << " -> "
     << pattern.toString() << " with " << bufferPairs.toStringHtml();
   }
   if (condition == nullptr) {
-    return &theExpression;
+    return &expression;
   }
   Expression tempExp = *condition;
   tempExp.checkInitialization();
@@ -1179,7 +1179,7 @@ Expression* Calculator::patternMatch(
     << "; evaluating...";
   }
   if (conditionResult.isEqualToOne()) {
-    return &theExpression;
+    return &expression;
   }
   return nullptr;
 }

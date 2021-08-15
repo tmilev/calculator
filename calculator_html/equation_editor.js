@@ -747,7 +747,7 @@ class MathNodeFactory {
     exponentWrapped.appendChild(exponentContainer);
     // Horizontal math wrapper for the base.
     const baseHorizontal =
-      new MathNode(equationEditor, knownTypes.horizontalMath);
+      new MathNodeHorizontalMath(equationEditor, knownTypes.horizontalMath);
     baseHorizontal.appendChild(base);
     baseHorizontal.normalizeHorizontalMath();
     // The base with the exponent.
@@ -773,7 +773,7 @@ class MathNodeFactory {
     subscriptWrapped.appendChild(subscriptContainer);
     // Horizontal math wrapper for the base.
     const baseHorizontal =
-      new MathNode(equationEditor, knownTypes.horizontalMath);
+      new MathNodeHorizontalMath(equationEditor, knownTypes.horizontalMath);
     baseHorizontal.appendChild(base);
     baseHorizontal.normalizeHorizontalMath();
     // The base with the subscript.
@@ -5079,28 +5079,19 @@ class MathNode {
     return false;
   }
 
-  requiresTallExponent(
-    /** @type{MathNode} */
-    base,
-  ) {
-    if (base.type.type !== knownTypes.horizontalMath.type) {
-      return false;
-    }
-    for (let i = base.children.length - 1; i >= 0; i--) {
-      let child = base.children[i];
-      if (child.type.type === knownTypes.matrix.type) {
-        return true;
-      }
-      if (child.type.type === knownTypes.rightDelimiter.type) {
-        return base.boundingBox.needsMiddleAlignment;
-      }
-      if (child.type.type === knownTypes.atom.type) {
-        if (child.textContentOrInitialContent() === '') {
-          continue;
-        }
-      }
-      return false;
-    }
+  /** Whether the expression requries a tall exponent. 
+   * 
+   * By tall exponent we mean how high is an exponent relative to the 
+   * height of base: in x^2, the square should not be too tall, else the formula
+   * looks unnatural. 
+   * 
+   * In \left(\frac{1}{2}\right)^2, the exponent 2 needs to 
+   * be high (close to the tip of the parenthesis) 
+   * for the formula to look natural.
+   * 
+   * @returns{boolean} 
+   */
+  requiresTallExponent() {
     return false;
   }
 
@@ -7746,7 +7737,7 @@ class MathNode {
     }
     const indentation = '-'.repeat(indentationLevel);
     const result = [];
-    let content = `${indentation}${this.type.type}`;
+    let content = `${indentation}${this.type.type}[${this.constructor.name}]`;
     if (this.element !== null) {
       content += `[${this.element.textContent}]`;
     }
@@ -8263,7 +8254,7 @@ class MathNodeBaseWithExponent extends MathNode {
     let base = this.children[0];
     let exponent = this.children[1];
     let overlapRatio = 0.35;
-    if (this.requiresTallExponent(base)) {
+    if (base.requiresTallExponent()) {
       overlapRatio = 0.1;
     }
     let overlap = base.boundingBox.height * overlapRatio;
@@ -8307,6 +8298,10 @@ class MathNodeBaseWithExponent extends MathNode {
     this.boundingBox.fractionLineHeight =
       base.boundingBox.top + base.boundingBox.fractionLineHeight;
     this.computeMiddleAlignment();
+  }
+
+  requiresTallExponent() {
+    return this.children[0].requiresTallExponent();
   }
 }
 
@@ -8395,6 +8390,31 @@ class MathNodeHorizontalMath extends MathNode {
     if (!hasMoreThanOneLine) {
       this.boundingBox.lineHeight = -1;
     }
+  }
+
+  requiresTallExponent() {
+    for (let i = this.children.length - 1; i >= 0; i--) {
+      let child = this.children[i];
+      let childType = child.type.type;
+      if (childType === knownTypes.matrix.type) {
+        return true;
+      }
+      if (childType === knownTypes.rightDelimiter.type) {
+        return this.boundingBox.needsMiddleAlignment;
+      }
+      if (
+        childType === knownTypes.baseWithSubscript.type || childType === knownTypes.baseWithExponent.type
+      ) {
+        return child.requiresTallExponent();
+      }
+      if (childType === knownTypes.atom.type) {
+        if (child.textContentOrInitialContent() === '') {
+          continue;
+        }
+      }
+      return false;
+    }
+    return false;
   }
 }
 
@@ -8832,7 +8852,7 @@ class MathNodeBaseWithSubscript extends MathNode {
     let base = this.children[0];
     let subscript = this.children[1];
     let overlapRatio = 0.35;
-    if (this.requiresTallExponent(base)) {
+    if (base.requiresTallExponent()) {
       overlapRatio = 0.1;
     }
     let overlap = base.boundingBox.height * overlapRatio;
@@ -8891,6 +8911,10 @@ class MathNodeBaseWithSubscript extends MathNode {
 
   applyBackspaceToTheRight() {
     return this.applyBackspaceToTheRightAsLeftArrow();
+  }
+
+  requiresTallExponent() {
+    return this.children[0].requiresTallExponent();
   }
 }
 

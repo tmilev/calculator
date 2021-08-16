@@ -3034,9 +3034,9 @@ bool CalculatorFunctionsLinearAlgebra::diagonalizeMatrix(
   }
   List<Expression> result;
   Expression eigenMatrixExpression, jordanNormalFormExpression, eigenMatrixInvertedExpression;
-  eigenMatrixExpression.makeMatrix(eigenMatrix, calculator);
-  jordanNormalFormExpression.makeMatrix(jordanNormalForm, calculator);
-  eigenMatrixInvertedExpression.makeMatrix(eigenMatrixInverted, calculator);
+  eigenMatrixExpression.makeMatrix(calculator, eigenMatrix);
+  jordanNormalFormExpression.makeMatrix(calculator, jordanNormalForm);
+  eigenMatrixInvertedExpression.makeMatrix(calculator, eigenMatrixInverted);
   result.addOnTop(eigenMatrixExpression);
   result.addOnTop(jordanNormalFormExpression);
   result.addOnTop(eigenMatrixInvertedExpression);

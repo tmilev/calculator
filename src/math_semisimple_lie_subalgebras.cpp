@@ -1684,7 +1684,7 @@ void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize() {
     return;
   }
   this->iterator.initialize(
-    this->iterator.theGroupGeneratingElements, this->orbitDefiningElement, this->iterator.theGroupAction
+    this->iterator.theGroupGeneratingElements, this->orbitDefiningElement, this->iterator.groupAction
   );
   if (this->iterator.theGroupGeneratingElements.size > 0) {
     WeylGroupAutomorphisms& ownerGroup = *this->iterator.theGroupGeneratingElements[0].owner;
@@ -1717,12 +1717,12 @@ void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize(
     this->orbitBuffer.setSize(0);
     this->orbitBuffer.addOnTop(this->orbitDefiningElement);
   }
-  this->iterator.initialize(inputGenerators, this->orbitDefiningElement, this->iterator.theGroupAction);
+  this->iterator.initialize(inputGenerators, this->orbitDefiningElement, this->iterator.groupAction);
 }
 
 OrbitIteratorRootActionWeylGroupAutomorphisms::OrbitIteratorRootActionWeylGroupAutomorphisms() {
-  this->iterator.theGroupAction.name = "WeylGroupAutomorphismRootAction";
-  this->iterator.theGroupAction.actOn = ElementWeylGroupAutomorphisms::actOn;
+  this->iterator.groupAction.name = "WeylGroupAutomorphismRootAction";
+  this->iterator.groupAction.actOn = ElementWeylGroupAutomorphisms::actOn;
   this->reset();
 }
 

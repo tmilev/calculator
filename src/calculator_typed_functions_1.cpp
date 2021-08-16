@@ -1059,7 +1059,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossib
     Matrix<Rational> idMat;
     idMat.makeIdentityMatrix(baseRat.numberOfRows, Rational::one(), Rational::zero());
     MathRoutines::raiseToPower(baseRat, largePower, idMat);
-    return output.makeMatrix(baseRat, calculator);
+    return output.makeMatrix(calculator, baseRat);
   }
   Matrix<AlgebraicNumber> baseAlg;
   if (calculator.functionGetMatrix(matrixE, baseAlg)) {
@@ -1088,7 +1088,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossib
 
     idMat.makeIdentityMatrix(baseAlg.numberOfRows, one, zero);
     MathRoutines::raiseToPower(baseAlg, largePower, idMat);
-    return output.makeMatrix(baseAlg, calculator);
+    return output.makeMatrix(calculator, baseAlg);
   }  
   return false;
 }
@@ -1130,7 +1130,7 @@ bool CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger(
     Matrix<Rational> idMat;
     idMat.makeIdentityMatrix(baseRat.numberOfRows, Rational::one(), Rational::zero());
     MathRoutines::raiseToPower(baseRat, power, idMat);
-    return output.makeMatrix(baseRat, calculator);
+    return output.makeMatrix(calculator, baseRat);
   }
   Matrix<AlgebraicNumber> baseAlg;
   AlgebraicNumber one = calculator.objectContainer.algebraicClosure.one();
@@ -1158,7 +1158,7 @@ bool CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger(
       baseAlg.numberOfRows, one, zero
     );
     MathRoutines::raiseToPower(baseAlg, power, idMat);
-    return output.makeMatrix(baseAlg, calculator);
+    return output.makeMatrix(calculator, baseAlg);
   }
   Matrix<RationalFraction<Rational> > baseRationalFunctionCoefficients;
   ExpressionContext context(calculator);
@@ -1200,7 +1200,7 @@ bool CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger(
       RationalFraction<Rational>::zeroRational()
     );
     MathRoutines::raiseToPower(baseRationalFunctionCoefficients, power, identityMatrix);
-    return output.makeMatrix(baseRationalFunctionCoefficients, calculator, &context);
+    return output.makeMatrix(calculator, baseRationalFunctionCoefficients, &context);
   }
   return false;
 }
@@ -2109,7 +2109,7 @@ bool CalculatorFunctionsBinaryOps::tensorMatrixByMatrix(
   ) {
     Matrix<Rational> resultMatRat;
     resultMatRat.assignTensorProduct(leftMatRat, rightMatRat);
-    return output.makeMatrix(resultMatRat, calculator, nullptr, true);
+    return output.makeMatrix(calculator, resultMatRat, nullptr, true);
   }
   Matrix<Expression> leftMatE, rightMatE, resultMatE;
   if (!calculator.getMatrixExpressions(input[1], leftMatE)) {
@@ -2181,7 +2181,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg(
     }
   }
   matrixAlg *= theScalar;
-  return output.makeMatrix(matrixAlg, calculator);
+  return output.makeMatrix(calculator, matrixAlg);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg(
@@ -2220,7 +2220,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg(
     return output.assignError(calculator, errorStream.str());
   }
   matAlgLeft *= matAlgRight;
-  return output.makeMatrix(matAlgLeft, calculator);
+  return output.makeMatrix(calculator, matAlgLeft);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational(
@@ -2242,7 +2242,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrix
   Rational theScalar;
   if (leftE.isOfType<Rational>(&theScalar)) {
     leftMatrix *= theScalar;
-    return output.makeMatrix(leftMatrix, calculator);
+    return output.makeMatrix(calculator, leftMatrix);
   }
   if (!leftE.isMatrixOfType<Rational>()) {
     return false;
@@ -2254,7 +2254,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrix
     return false;
   }
   leftMatrix.multiplyOnTheRight(rightMatrix);
-  return output.makeMatrix(leftMatrix, calculator);
+  return output.makeMatrix(calculator, leftMatrix);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
@@ -2294,7 +2294,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
     RationalFraction<Rational> theScalar = leftErfForm.getValue<RationalFraction<Rational> >();
     rightMatrix *= theScalar;
     ExpressionContext contextE = leftE.getContext();
-    return output.makeMatrix(rightMatrix, calculator, &contextE);
+    return output.makeMatrix(calculator, rightMatrix, &contextE);
   }
   if (!calculator.functionGetMatrix(leftE, leftMatrix)) {
     return false;
@@ -2304,7 +2304,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
   }
   leftMatrix.multiplyOnTheRight(rightMatrix);
   ExpressionContext contextE = leftE.getContext();
-  return output.makeMatrix(leftMatrix, calculator, &contextE);
+  return output.makeMatrix(calculator, leftMatrix, &contextE);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor(
@@ -2678,7 +2678,7 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRati
         return false;
       }
       leftMatAlg += rightMatAlg;
-      return output.makeMatrix(leftMatAlg, calculator);
+      return output.makeMatrix(calculator, leftMatAlg);
     }
     if (!calculator.functionGetMatrix(rightE, rightMatAlg)) {
       return false;
@@ -2693,7 +2693,7 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRati
       return false;
     }
     leftMatAlg += rightMatAlg;
-    return output.makeMatrix(leftMatAlg, calculator);
+    return output.makeMatrix(calculator, leftMatAlg);
   }
   if (!calculator.functionGetMatrix(leftE, leftMatRat)) {
     return false;
@@ -2714,7 +2714,7 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRati
     return output.assignError(calculator, errorStream.str());
   }
   leftMatRat += rightMatRat;
-  return output.makeMatrix(leftMatRat, calculator);
+  return output.makeMatrix(calculator, leftMatRat);
 }
 
 bool CalculatorFunctionsBinaryOps::setMinus(
@@ -2779,7 +2779,7 @@ bool CalculatorFunctionsBinaryOps::addMatrixRationalFractionsToMatrixRationalFra
   }
   leftMatrix += rightMatrix;
   ExpressionContext context = leftE.getContext();
-  return output.makeMatrix(leftMatrix, calculator, &context);
+  return output.makeMatrix(calculator, leftMatrix, &context);
 }
 
 bool CalculatorFunctionsBinaryOps::addMatrixTensorToMatrixTensor(

@@ -478,7 +478,7 @@ public:
   inline bool operator<(const Vector<Coefficient>& other) const {
     return other > *this;
   }
-  bool IsGreaterThanLexicographic(const Vector<Coefficient>& other) const {
+  bool isGreaterThanLexicographic(const Vector<Coefficient>& other) const {
     return this->::List<Coefficient>::operator>(other);
   }
   bool operator>(const Vector<Coefficient>& other) const {
@@ -822,8 +822,8 @@ class Vectors: public List<Vector<Coefficient> > {
     }
     output /= this->size;
   }
-  void sum(Vector<Coefficient>& output, int resultDim) const {
-    output.makeZero(resultDim);
+  void sum(Vector<Coefficient>& output, int resultDimension) const {
+    output.makeZero(resultDimension);
     for (int i = 0; i < this->size; i ++) {
       output += this->objects[i];
     }
@@ -948,24 +948,24 @@ class Vectors: public List<Vector<Coefficient> > {
     }
     return false;
   }
-  void assignMatrixColumns(Matrix<Coefficient>& mat) {
+  void assignMatrixColumns(Matrix<Coefficient>& matrix) {
     Vector<Coefficient> tempRoot;
-    this->setSize(mat.numberOfColumns);
-    tempRoot.setSize(mat.numberOfRows);
-    for (int i = 0; i < mat.numberOfColumns; i ++) {
-      for (int j = 0; j < mat.numberOfRows; j ++) {
-        tempRoot[j] = mat.elements[j][i];
+    this->setSize(matrix.numberOfColumns);
+    tempRoot.setSize(matrix.numberOfRows);
+    for (int i = 0; i < matrix.numberOfColumns; i ++) {
+      for (int j = 0; j < matrix.numberOfRows; j ++) {
+        tempRoot[j] = matrix.elements[j][i];
       }
       this->objects[i] = tempRoot;
     }
   }
-  void assignMatrixRows(const Matrix<Coefficient>& mat) {
+  void assignMatrixRows(const Matrix<Coefficient>& input) {
     this->size = 0;
-    this->setSize(mat.numberOfRows);
-    for (int i = 0; i < mat.numberOfRows; i ++) {
-      this->objects[i].setSize(mat.numberOfColumns);
-      for (int j = 0; j < mat.numberOfColumns; j ++) {
-        this->objects[i].objects[j] = mat.elements[i][j];
+    this->setSize(input.numberOfRows);
+    for (int i = 0; i < input.numberOfRows; i ++) {
+      this->objects[i].setSize(input.numberOfColumns);
+      for (int j = 0; j < input.numberOfColumns; j ++) {
+        this->objects[i].objects[j] = input.elements[i][j];
       }
     }
   }
@@ -1027,7 +1027,7 @@ bool Vector<Coefficient>::getCoordinatesInBasis(const Vectors<Coefficient>& inpu
   }
   MacroRegisterFunctionWithName("Vector::getCoordinatesInBasis");
   Vectors<Coefficient> bufferVectors;
-  Matrix<Coefficient> bufferMat;
+  Matrix<Coefficient> bufferMatrix;
   if (this->size != inputBasis[0].size) {
     global.fatal << "Attempt to get coordinates of vector of "
     << this->size << " coordinates using a basis whose first vector has "
@@ -1036,15 +1036,15 @@ bool Vector<Coefficient>::getCoordinatesInBasis(const Vectors<Coefficient>& inpu
   bufferVectors.reserve(inputBasis.size + 1);
   bufferVectors.addListOnTop(inputBasis);
   bufferVectors.addOnTop(*this);
-  if (!bufferVectors.getLinearDependence(bufferMat)) {
+  if (!bufferVectors.getLinearDependence(bufferMatrix)) {
     return false;
   }
-  Coefficient tempCF = bufferMat(bufferMat.numberOfRows - 1, 0);
-  bufferMat /= tempCF;
-  output.setSize(bufferMat.numberOfRows - 1);
-  for (int i = 0; i < bufferMat.numberOfRows - 1; i ++) {
-    bufferMat(i, 0).negate();
-    output[i] = bufferMat(i, 0);
+  Coefficient temporaryCoefficient = bufferMatrix(bufferMatrix.numberOfRows - 1, 0);
+  bufferMatrix /= temporaryCoefficient;
+  output.setSize(bufferMatrix.numberOfRows - 1);
+  for (int i = 0; i < bufferMatrix.numberOfRows - 1; i ++) {
+    bufferMatrix(i, 0).negate();
+    output[i] = bufferMatrix(i, 0);
   }
   return true;
 }
@@ -1072,7 +1072,7 @@ bool Vectors<Coefficient>::linearSpanContainsVector(
   const Vector<Coefficient>& input, Matrix<Coefficient>& bufferMatrix, Selection& bufferSelection
 ) const {
   Vectors<Coefficient> tempVectors;
-  tempVectors = (*this);
+  tempVectors = *this;
   tempVectors.addOnTop(input);
   return this->getRankElementSpan(&bufferMatrix, &bufferSelection) ==
   tempVectors.getRankElementSpan(&bufferMatrix, &bufferSelection);
@@ -1113,12 +1113,12 @@ bool Vector<Coefficient>::getIntegralCoordsInBasisIfTheyExist(
   bufferMatGaussianElimination.gaussianEliminationEuclideanDomain(
     &bufferMatGaussianEliminationCC, negativeOne, ringUnit
   );
-  Vector<Coefficient> tempRoot, theCombination;
+  Vector<Coefficient> tempRoot, combination;
   if (this == &output) {
     global.fatal << "Output not allowed to coincide with this object." << global.fatal;
   }
   output.makeZero(inputBasis.size);
-  theCombination = *this;
+  combination = *this;
   int column = 0;
   for (int i = 0; i < inputBasis.size; i ++) {
     for (; column < dimension; column ++) {
@@ -1133,9 +1133,9 @@ bool Vector<Coefficient>::getIntegralCoordsInBasisIfTheyExist(
     output[i] = this->objects[column];
     output[i] /= bufferMatGaussianElimination.elements[i][column];
     tempRoot *= output[i];
-    theCombination -= tempRoot;
+    combination -= tempRoot;
   }
-  if (!theCombination.isEqualToZero()) {
+  if (!combination.isEqualToZero()) {
     return false;
   }
   bufferMatGaussianEliminationCC.actMultiplyVectorRowOnTheRight(output);
@@ -1213,7 +1213,7 @@ public:
   }
   bool projectFromFacetNormal(Vector<Coefficient>& input);
   Vector<Coefficient> projectOnMe(Vector<Coefficient>& input) const;
-  bool containsPoint(Vector<Coefficient> & thePoint);
+  bool containsPoint(Vector<Coefficient>& point);
   void makeFromNormalAndPoint(Vector<Coefficient>& inputPoint, Vector<Coefficient>& inputNormal);
   bool hasCommonPointWithPositiveTwoToTheNthQuadrant();
   bool operator==(const AffineHyperplane& right);
@@ -1239,9 +1239,9 @@ template <class Coefficient>
 Vector<Coefficient> AffineHyperplane<Coefficient>::projectOnMe(Vector<Coefficient>& input) const {
   // output = input + x * normal  and <input + x * normal, normal> = 0 =>
   // x = -<input, normal> / <normal, normal>
-  Coefficient theNormalCoeff = - input.scalarEuclidean(this->normal) / this->normal.scalarEuclidean(this->normal);
+  Coefficient normalCoefficient = - input.scalarEuclidean(this->normal) / this->normal.scalarEuclidean(this->normal);
   Vector<Coefficient> output;
-  output = input + this->normal * theNormalCoeff;
+  output = input + this->normal * normalCoefficient;
   return output;
 }
 
@@ -1265,9 +1265,9 @@ bool AffineHyperplane<Coefficient>::projectFromFacetNormal(Vector<Coefficient>& 
 }
 
 template <class Coefficient>
-bool AffineHyperplane<Coefficient>::containsPoint(Vector<Coefficient>& thePoint) {
+bool AffineHyperplane<Coefficient>::containsPoint(Vector<Coefficient>& point) {
   Rational scalarProductPoint, scalarProductInternalPoint;
-  scalarProductPoint = this->normal.scalarEuclidean(thePoint);
+  scalarProductPoint = this->normal.scalarEuclidean(point);
   scalarProductInternalPoint = this->normal.scalarEuclidean(this->affinePoint);
   return scalarProductInternalPoint.isEqualTo(scalarProductPoint);
 }
@@ -1329,13 +1329,13 @@ public:
     return input.hashFunction();
   }
   int getDimension();
-  void superimposeAffineCones(AffineCones& theOtherComplex);
-  bool wallIsInternalInCone(AffineHyperplane<Rational>& theKillerCandidate);
+  void superimposeAffineCones(AffineCones& otherComplex);
+  bool wallIsInternalInCone(AffineHyperplane<Rational>& killerCandidate);
   // The below function returns true if the system of homogeneous linear inequalities Ax<=b
   // has a solution, false otherwise, where A is a matrix and x and b are column vectors.
   // bool systemLinearInequalitiesHasSolution
   //    (Matrix<Rational> & matA, Matrix<Rational> & matb, Matrix<Rational> & outputPoint);
-  bool splitByAffineHyperplane(AffineHyperplane<Rational>& theKillerPlane, AffineCones& output);
+  bool splitByAffineHyperplane(AffineHyperplane<Rational>& killerPlane, AffineCones& output);
 };
 
 class AffineCones: public HashedList<AffineCone> {

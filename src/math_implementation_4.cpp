@@ -1186,14 +1186,14 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent) {
   return result;
 }
 
-bool AffineCone::splitByAffineHyperplane(AffineHyperplane<Rational>& theKillerPlane, AffineCones& output) {
-  (void) theKillerPlane;
+bool AffineCone::splitByAffineHyperplane(AffineHyperplane<Rational>& killerPlane, AffineCones& output) {
+  (void) killerPlane;
   (void) output;
   return true;
 }
 
-bool AffineCone::wallIsInternalInCone(AffineHyperplane<Rational>& theKillerCandidate) {
-  (void) theKillerCandidate;
+bool AffineCone::wallIsInternalInCone(AffineHyperplane<Rational>& killerCandidate) {
+  (void) killerCandidate;
   return true;
 }
 
@@ -1329,7 +1329,7 @@ bool WeylGroupAutomorphisms::areMaximallyDominantGroupOuter(List<Vector<Rational
       if (!isGood) {
         continue;
       }
-      if (!(weightsCopy.getElement()[i] - weights[i]).IsGreaterThanLexicographic(zeroWeight)) {
+      if (!(weightsCopy.getElement()[i] - weights[i]).isGreaterThanLexicographic(zeroWeight)) {
         continue;
       }
       return false;
@@ -1337,17 +1337,18 @@ bool WeylGroupAutomorphisms::areMaximallyDominantGroupOuter(List<Vector<Rational
   }
   return true;
 }
-void WeylGroupData::generateRootSubsystem(Vectors<Rational>& theRoots) {
+
+void WeylGroupData::generateRootSubsystem(Vectors<Rational>& roots) {
   Vector<Rational> tempRoot;
-  int oldsize = theRoots.size;
+  int oldsize = roots.size;
   for (int i = 0; i < oldsize; i ++) {
-    theRoots.addOnTopNoRepetition(- theRoots[i]);
+    roots.addOnTopNoRepetition(- roots[i]);
   }
-  for (int i = 0; i < theRoots.size; i ++) {
-    for (int j = 0; j < theRoots.size; j ++) {
-      tempRoot = theRoots[i] + theRoots[j];
+  for (int i = 0; i < roots.size; i ++) {
+    for (int j = 0; j < roots.size; j ++) {
+      tempRoot = roots[i] + roots[j];
       if (this->isARoot(tempRoot)) {
-        theRoots.addOnTopNoRepetition(tempRoot);
+        roots.addOnTopNoRepetition(tempRoot);
       }
     }
   }
@@ -1360,10 +1361,10 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
   FileOperations::openFileCreateIfNotPresentVirtual(
     this->theMultiplicitiesMaxOutputReport2, "output/ExtremaPolys.txt", false, true, false
   );
-  this->thePfs.initFromRoots(this->GmodKNegWeightsBasisChanged);
-  out << this->thePfs.toString(format);
-  this->thePfs.split(nullptr);
-  out << "=" << this->thePfs.toString(format);
+  this->partialFractions.initFromRoots(this->GmodKNegWeightsBasisChanged);
+  out << this->partialFractions.toString(format);
+  this->partialFractions.split(nullptr);
+  out << "=" << this->partialFractions.toString(format);
 //  int totalDim= this->theTranslationS[0].size +this->theTranslationsProjecteD[0].size;
   this->theQPsSubstituted.setSize(this->projectivizedChambeR.size);
   global.fatal << "not implemented fully, crashing to let you know. " << global.fatal;
@@ -1387,7 +1388,7 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
         tempStream << "Processing chamber " << i + 1 << " linear operator " << k+ 1;
         global.theIndicatorVariables.ProgressReportStrings[0] = tempStream.str();
         global.makeReport();
-        currentQPNoSub.substitution(this->theLinearOperatorsExtended.objects[k], this->theTranslationsProjectedBasisChanged[k], this->theExtendedIntegralLatticeMatForM, currentQPSub);
+        currentQPNoSub.substitution(this->theLinearOperatorsExtended.objects[k], this->translationsProjectedBasisChanged[k], this->theExtendedIntegralLatticeMatForM, currentQPSub);
         out << "; after substitution we get: " << currentQPSub.toString(false, false);
       }
     }
@@ -1410,7 +1411,7 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
       int index = - 1;//= this->thePfs.theChambersOld.GetFirstChamberIndexContainingPoint(tempRoot);
       if (index != - 1) {
         tempQP = this->theQPsSubstituted[index][k];
-        tempQP *= this->theCoeffs[k];
+        tempQP *= this->coefficients[k];
         currentSum += tempQP;
       }
       std::stringstream tempStream;
@@ -1472,7 +1473,7 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   this->linearOperators[0].actOnVectorColumn(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[0]);
   out << "<br>Input so(7)-highest weight: " << highestWeightLargerAlgSimpleCoords.toString();
   out << "<br>Input parabolics selections: " << parabolicSel.toString();
-  out << "<br>the argument translations: " << this->theTranslationsProjectedBasisChanged.toString();
+  out << "<br>the argument translations: " << this->translationsProjectedBasisChanged.toString();
   out << "<br>Element u_w: projection, multiplication by - 1, and basis change of so(7)-highest weight to G_2: "
   << translationsProjectedFinal[0].toString();
   theStartingPoly.makeVPF(this->GmodKNegWeightsBasisChanged, tempS);
@@ -1504,14 +1505,14 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   Vector<Rational> highestWeightSmallAlgBasisChanged = - translationsProjectedFinal[0];
   for (int i = 0; i < this->linearOperators.size; i ++) {
     this->linearOperators[i].actOnVectorColumn(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[i]);
-    translationsProjectedFinal[i] += this->theTranslationsProjectedBasisChanged[i];
+    translationsProjectedFinal[i] += this->translationsProjectedBasisChanged[i];
     drawOps.drawCircleAtVectorBufferRational(- translationsProjectedFinal[i], "red", 3);
   }
   out << "<br>the translations projected final: " << translationsProjectedFinal.toString();
   Accum.makeZero(theStartingPoly.NumVariables);
   for (int i = 0; i < this->linearOperators.size; i ++) {
     theSubbedPoly = theStartingPoly;
-    theSubbedPoly *= this->theCoeffs[i];
+    theSubbedPoly *= this->coefficients[i];
     theSubbedPoly.translateArgument(translationsProjectedFinal[i]);
     Accum += theSubbedPoly;
   }
@@ -1717,9 +1718,9 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
 
   this->linearOperators.setSize(theSubgroup.allElements.size);
   this->theLinearOperatorsExtended.setSize(theSubgroup.allElements.size);
-  this->theTranslationS.setSize(theSubgroup.allElements.size);
-  this->theTranslationsProjectedBasisChanged.setSize(theSubgroup.allElements.size);
-  this->theCoeffs.setSize(theSubgroup.allElements.size);
+  this->translations.setSize(theSubgroup.allElements.size);
+  this->translationsProjectedBasisChanged.setSize(theSubgroup.allElements.size);
+  this->coefficients.setSize(theSubgroup.allElements.size);
   this->log << " \n******************\nthe subgroup: \n" << theSubgroup.toString() << "\n\n\n\n\n\n";
   this->log << theSubgroup.toStringBruhatGraph();
   this->log << "\nMatrix form of the elements of Weyl group of the Levi part of the parabolic ("
@@ -1729,14 +1730,14 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     theSubgroup.getMatrixOfElement(theSubgroup.allElements[i], currentLinearOperator);
 //    currentLinearOperator.multiplyOnTheLeft(preferredBasisChangeInverse);
     this->log << "\n" << currentLinearOperator.toString(&global.defaultFormat.getElement());
-    currentLinearOperator.actOnVectorColumn(theSubgroup.getRho(), this->theTranslationS[i]);
-    this->theTranslationS[i] -= theSubgroup.getRho();
-    this->theTranslationS[i].negate();
-    theProjectionBasisChanged.actOnVectorColumn(this->theTranslationS[i], this->theTranslationsProjectedBasisChanged[i]);
+    currentLinearOperator.actOnVectorColumn(theSubgroup.getRho(), this->translations[i]);
+    this->translations[i] -= theSubgroup.getRho();
+    this->translations[i].negate();
+    theProjectionBasisChanged.actOnVectorColumn(this->translations[i], this->translationsProjectedBasisChanged[i]);
     if (theSubgroup.allElements[i].generatorsLastAppliedFirst.size % 2 == 0) {
-      this->theCoeffs[i] = 1;
+      this->coefficients[i] = 1;
     } else {
-      this->theCoeffs[i] = - 1;
+      this->coefficients[i] = - 1;
     }
   }
   this->log << "\n\n\nMatrix of the projection operator (basis-changed):\n"
@@ -1758,7 +1759,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
       }
     }
     this->log << "\n\n" << currentLOExtended.toString(&global.defaultFormat.getElement());
-    this->log << this->theTranslationS[k].toString() << ";   " << this->theTranslationsProjectedBasisChanged[k].toString();
+    this->log << this->translations[k].toString() << ";   " << this->translationsProjectedBasisChanged[k].toString();
   }
 
   List<int> displayIndicesReflections;
@@ -1801,7 +1802,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     }
     matrixPoly.actOnVectorColumn(tempVect, tempVect2, polyZero);
     for (int j = 0; j < tempVect2.size; j ++) {
-      tempVect2[j] += this->theTranslationsProjectedBasisChanged[i][j];
+      tempVect2[j] += this->translationsProjectedBasisChanged[i][j];
     }
     this->log << "\n$" << theSubgroup.allElements[i].toString() << "$&$"
     << tempVect2.toString(&format) << "$\\\\";
@@ -2088,7 +2089,7 @@ void GeneralizedVermaModuleCharacters::getProjection(
   int indexOperator, const Vector<Rational>& input, Vector<Rational>& output
 ) {
   Matrix<Rational>& currentExtendedOperator = this->theLinearOperatorsExtended[indexOperator];
-  Vector<Rational>& currentTranslation = this->theTranslationsProjectedBasisChanged[indexOperator];
+  Vector<Rational>& currentTranslation = this->translationsProjectedBasisChanged[indexOperator];
   if (input.lastObject()->isEqualToZero()) {
     global.fatal << "Last coordinate is not supposed to be be zero. " << global.fatal;
   }
@@ -2108,7 +2109,7 @@ void GeneralizedVermaModuleCharacters::getSubstitutionFromIndex(
   Matrix<Rational>& theOperator = this->linearOperators[index];
   int dimLargerAlgebra = theOperator.numberOfColumns;
   int dimSmallerAlgebra = theOperator.numberOfRows;
-  Vector<Rational>& theTranslation = this->theTranslationS[index];
+  Vector<Rational>& theTranslation = this->translations[index];
   Matrix<Rational> matrix;
   matrix.initialize(dimLargerAlgebra + dimSmallerAlgebra + 1, dimSmallerAlgebra);
   matrix.makeZero();
@@ -2127,7 +2128,7 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjective(
   int indexOperator, Vector<Rational>& startingNormal, Vector<Rational>& outputNormal
 ) {
   Matrix<Rational> theOperatorExtended = this->theLinearOperatorsExtended[indexOperator];
-  Vector<Rational>& theTranslation = this->theTranslationsProjectedBasisChanged[indexOperator];
+  Vector<Rational>& theTranslation = this->translationsProjectedBasisChanged[indexOperator];
   //the goddamned sign in front of theTranslation is now checked: it should be + and not -
   Rational theConst;
   startingNormal.scalarEuclidean(this->NonIntegralOriginModificationBasisChanged + theTranslation, theConst);

@@ -62,12 +62,12 @@ struct BranchingData {
 
 class SemisimpleLieAlgebraOrdered {
 public:
-  SemisimpleLieAlgebra* theOwner;
+  SemisimpleLieAlgebra* ownerSemisimpleLieAlgebra;
   // the format of the order is arbitrary except for the following requirements:
   // -All elements of the order must be either 1) nilpotent or 2) elements of the Cartan
   // -Let the number of positive roots be N and the rank be K. Then the indices N,..., N+K- 1 must
   //  correspond to the elements of the Cartan.
-  List<ElementSemisimpleLieAlgebra<Rational> > theOrder;
+  List<ElementSemisimpleLieAlgebra<Rational> > elementOrder;
   // The order of chevalley generators is as follows. First come negative roots,
   // then elements of cartan, then positive Vectors<Rational>
   // The weights are in increasing order
@@ -75,12 +75,12 @@ public:
   // in the current coordinates
   Matrix<Rational> chevalleyGeneratorsInCurrentCoordinates;
   void assignGeneratorCoefficientOne(int index, ElementSemisimpleLieAlgebra<Rational>& output) {
-    output.operator=(this->theOrder[index]);
+    output.operator=(this->elementOrder[index]);
   }
   SemisimpleLieAlgebraOrdered();
   bool checkInitialization() const;
   int getDisplayIndexFromGeneratorIndex(int GeneratorIndex);
-  void getLinearCombinationFrom(ElementSemisimpleLieAlgebra<Rational>& input, Vector<Rational>& theCoeffs);
+  void getLinearCombinationFrom(ElementSemisimpleLieAlgebra<Rational>& input, Vector<Rational>& coefficients);
   void initialize(List<ElementSemisimpleLieAlgebra<Rational> >& inputOrder, SemisimpleLieAlgebra& owner);
   void initDefaultOrder(SemisimpleLieAlgebra& owner);
 };
@@ -88,14 +88,14 @@ public:
 template <class Coefficient>
 Vector<Coefficient> BranchingData::projectWeight(Vector<Coefficient>& input) {
   Vector<Coefficient> result;
-  Vector<Coefficient> fundCoordsSmaller;
-  fundCoordsSmaller.makeZero(this->homomorphism.domain().getRank());
+  Vector<Coefficient> fundamentalCoordinatesSmaller;
+  fundamentalCoordinatesSmaller.makeZero(this->homomorphism.domain().getRank());
   for (int j = 0; j < this->homomorphism.domain().getRank(); j ++) {
-    fundCoordsSmaller[j] = this->homomorphism.range().weylGroup.rootScalarCartanRoot(input, homomorphism.imagesCartanDomain[j]);
-    fundCoordsSmaller[j] /= this->homomorphism.domain().weylGroup.cartanSymmetric.elements[j][j] / 2;
+    fundamentalCoordinatesSmaller[j] = this->homomorphism.range().weylGroup.rootScalarCartanRoot(input, homomorphism.imagesCartanDomain[j]);
+    fundamentalCoordinatesSmaller[j] /= this->homomorphism.domain().weylGroup.cartanSymmetric.elements[j][j] / 2;
   }
   result = this->homomorphism.domain().weylGroup.getSimpleCoordinatesFromFundamental(
-    fundCoordsSmaller, Coefficient::zero()
+    fundamentalCoordinatesSmaller, Coefficient::zero()
   );
   return result;
 }
@@ -108,7 +108,7 @@ public:
   // the next l variables correspond to the Cartan of the larger Lie algebra
   // the last variable is the projectivization
   List<Matrix<Rational> > theLinearOperatorsExtended;
-  Vector<Rational>  NonIntegralOriginModificationBasisChanged;
+  Vector<Rational> NonIntegralOriginModificationBasisChanged;
   std::fstream theMultiplicitiesMaxOutput;
   std::fstream theMultiplicitiesMaxOutputReport2;
   Vectors<Rational> GmodKnegativeWeightS;
@@ -129,10 +129,10 @@ public:
   int numNonZeroMults;
   Selection ParabolicLeviPartRootSpacesZeroStandsForSelected;
   Selection ParabolicSelectionSmallerAlgebra;
-  List<Rational> theCoeffs;
-  Vectors<Rational> theTranslationS;
-  Vectors<Rational> theTranslationsProjectedBasisChanged;
-  PartialFractions thePfs;
+  List<Rational> coefficients;
+  Vectors<Rational> translations;
+  Vectors<Rational> translationsProjectedBasisChanged;
+  PartialFractions partialFractions;
   // List<Cone> allParamSubChambersRepetitionsAllowedConeForm;
   ConeComplex projectivizedParamComplex;
   ConeLatticeAndShiftMaxComputation theMaxComputation;
@@ -154,8 +154,8 @@ public:
   GeneralizedVermaModuleCharacters();
   bool checkInitialization() const;
   std::string prepareReportOneCone(FormatExpressions& format, const Cone& theCone);
-  void getProjection(int indexOperator, const Vector<Rational>& input, Vector<Rational> & output);
-  void splitByMultiplicityFreeWall(Cone& theCone, ConeComplex& output);
+  void getProjection(int indexOperator, const Vector<Rational>& input, Vector<Rational>& output);
+  void splitByMultiplicityFreeWall(Cone& cone, ConeComplex& output);
   void initTheMaxComputation();
   void computeQPsFromChamberComplex();
   void getSubstitutionFromIndex(
@@ -187,8 +187,8 @@ class MonomialUniversalEnvelopingOrdered {
   MonomialUniversalEnvelopingOrdered(const MonomialUniversalEnvelopingOrdered& other);
 public:
   SemisimpleLieAlgebraOrdered* owner;
-  std::string DebugString;
-  std::string toString(FormatExpressions* PolyFormatLocal) const;
+  // std::string DebugString;
+  std::string toString(FormatExpressions* format) const;
   // SelectedIndices gives the non-zero powers of the generators participating in the monomial
   // powers gives the powers of the generators in the order specified in the owner
   List<int> generatorsIndices;
@@ -199,8 +199,8 @@ public:
     const MonomialUniversalEnveloping<Coefficient>& other,
     ElementUniversalEnvelopingOrdered<Coefficient>& output
   );
-  void multiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const Coefficient& power);
-  void multiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, int power);
+  void multiplyByGeneratorPowerOnTheRight(int generatorIndex, const Coefficient& power);
+  void multiplyByGeneratorPowerOnTheRight(int generatorIndex, int power);
   void multiplyByNoSimplify(const MonomialUniversalEnvelopingOrdered& other);
   void makeZero(int numVars, SemisimpleLieAlgebraOrdered& theOwner);
   void makeZero(const Coefficient& ringZero, SemisimpleLieAlgebraOrdered& theOwner);
@@ -230,16 +230,16 @@ public:
     return this->Coefficient.isEqualToZero();
   }
   bool commutingLeftIndexAroundRightIndexAllowed(
-    Coefficient& theLeftPower,
+    Coefficient& leftPower,
     int leftGeneratorIndex,
-    Coefficient& theRightPower,
+    Coefficient& rightPower,
     int rightGeneratorIndex
   );
   bool commutingRightIndexAroundLeftIndexAllowed(
-    Coefficient& theLeftPower, int leftGeneratorIndex, Coefficient& theRightPower, int rightGeneratorIndex
+    Coefficient& leftPower, int leftGeneratorIndex, Coefficient& rightPower, int rightGeneratorIndex
   );
   bool switchConsecutiveIndicesIfTheyCommute(
-    int theLeftIndex,
+    int leftIndex,
     MonomialUniversalEnvelopingOrdered<Coefficient>& output,
     const Coefficient& ringZero = 0
   );
@@ -269,7 +269,7 @@ public:
   MonomialUniversalEnvelopingOrdered() {
     this->owner = nullptr;
   }
-  void substitutionCoefficients(PolynomialSubstitution<Rational>& theSub);
+  void substitutionCoefficients(PolynomialSubstitution<Rational>& substitution);
   bool operator==(const MonomialUniversalEnvelopingOrdered& other) const {
     if (this->owner != other.owner) {
       global.fatal << "Attempt to compare universal enveloping algebra monomials with different owners. " << global.fatal;
@@ -348,7 +348,7 @@ public:
     ElementUniversalEnveloping<Coefficient>& output, SemisimpleLieAlgebra& inputOwner
   );
   bool getLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output) const;
-  void substitutionCoefficients(PolynomialSubstitution<Rational>& theSub);
+  void substitutionCoefficients(PolynomialSubstitution<Rational>& substitution);
   void makeConstant(const Coefficient& coeff, SemisimpleLieAlgebraOrdered& theOwner) {
     this->makeZero(theOwner);
     MonomialUniversalEnvelopingOrdered<Coefficient> tempMon;
@@ -378,11 +378,11 @@ public:
   );
   template<class CoefficientTypeQuotientField>
   static void getBasisFromSpanOfElements(
-    List<ElementUniversalEnvelopingOrdered<Coefficient> >& theElements,
+    List<ElementUniversalEnvelopingOrdered<Coefficient> >& elements,
     Vectors<CoefficientTypeQuotientField>& outputCoords,
     List<ElementUniversalEnvelopingOrdered<Coefficient> >& outputTheBasis,
-    const CoefficientTypeQuotientField& theFieldUnit,
-    const CoefficientTypeQuotientField& theFieldZero
+    const CoefficientTypeQuotientField& fieldUnit,
+    const CoefficientTypeQuotientField& fieldZero
   );
   static void getBasisFromSpanOfElements(
     List<ElementUniversalEnvelopingOrdered>& theElements,
@@ -499,11 +499,11 @@ public:
     const Coefficient& ringZero
   ) const;
   static void getBasisFromSpanOfElements(
-    List<ElementVermaModuleOrdered<Coefficient> >& theElements,
+    List<ElementVermaModuleOrdered<Coefficient> >& elements,
     Vectors<RationalFraction<Rational> >& outputCoordinates,
     List<ElementVermaModuleOrdered>& outputTheBasis,
-    const RationalFraction<Rational>& RFOne,
-    const RationalFraction<Rational>& RFZero
+    const RationalFraction<Rational>& rationalFractionOne,
+    const RationalFraction<Rational>& rationalFractionZero
   );
   bool getCoordinatesInBasis(
     const List<ElementVermaModuleOrdered<Coefficient> >& theBasis,

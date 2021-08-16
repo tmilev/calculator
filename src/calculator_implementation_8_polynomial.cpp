@@ -450,7 +450,7 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
   )) {
     return output.assignError(calculator, commentsOnFailure.str());
   }
-  return output.makeMatrix(result, calculator, context, false);
+  return output.makeMatrix(calculator, result, context, false);
 }
 
 bool CalculatorFunctionsPolynomial::sylvesterMatrix(Calculator& calculator, const Expression& input, Expression& output) {

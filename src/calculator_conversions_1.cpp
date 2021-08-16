@@ -27,7 +27,7 @@ bool CalculatorConversions::expressionFromChevalleyGenerator(
   } else {
     generatorLetterE.makeAtom(calculator.addOperationNoRepetitionOrReturnIndexFirst("g"), calculator);
   }
-  generatorIndexE.assignValueOLD(input.owner->getDisplayIndexFromGenerator(input.generatorIndex), calculator);
+  generatorIndexE.assignValue(calculator, input.owner->getDisplayIndexFromGenerator(input.generatorIndex));
   return output.makeXOX(calculator, calculator.opUnderscore(), generatorLetterE, generatorIndexE);
 }
 
@@ -61,7 +61,7 @@ bool CalculatorConversions::loadWeylGroup(Calculator& calculator, const Expressi
     return false;
   }
   SemisimpleLieAlgebra& subalgebra = calculator.objectContainer.getLieAlgebraCreateIfNotPresent(dynkinType);
-  return output.assignValueOLD(subalgebra.weylGroup, calculator);
+  return output.assignValue(calculator, subalgebra.weylGroup);
 }
 
 bool CalculatorConversions::dynkinSimpleType(
@@ -86,7 +86,7 @@ bool CalculatorConversions::functionDynkinSimpleType(
       scaleE = typeLetterE[2];
       typeLetterE = typeLetterE[1];
     } else {
-      scaleE.assignValueOLD(1, calculator);
+      scaleE.assignValue(calculator, 1);
     }
   } else if (input.startsWith(calculator.opPower(), 3)) {
     scaleE = input[2];
@@ -476,7 +476,7 @@ bool CalculatorConversions::storeCandidateSubalgebra(
   values.addOnTop(currentE);
   Matrix<Rational> conversionMatrix;
   conversionMatrix.assignVectorsToRows(input.cartanElementsScaledToActByTwo);
-  currentE.makeMatrix(conversionMatrix, calculator, nullptr, false);
+  currentE.makeMatrix(calculator, conversionMatrix, nullptr, false);
   keys.addOnTop("ElementsCartan");
   values.addOnTop(currentE);
   input.checkAll();
@@ -1085,7 +1085,7 @@ bool CalculatorConversions::functionMatrixRational(
   if (!calculator.functionGetMatrix(input, outputMatrix, nullptr, - 1, nullptr)) {
     return calculator << "<br>Failed to get matrix of rationals. ";
   }
-  return output.makeMatrix(outputMatrix, calculator);
+  return output.makeMatrix(calculator, outputMatrix);
 }
 
 bool CalculatorConversions::innerMatrixRationalTensorForM(
@@ -1169,11 +1169,11 @@ bool CalculatorConversions::functionMatrixAlgebraic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionMatrixAlgebraic");
-  Matrix<AlgebraicNumber> outputMat;
-  if (!calculator.functionGetMatrix(input, outputMat)) {
+  Matrix<AlgebraicNumber> outputMatrix;
+  if (!calculator.functionGetMatrix(input, outputMatrix)) {
     return false;
   }
-  return output.makeMatrix(outputMat, calculator);
+  return output.makeMatrix(calculator, outputMatrix);
 }
 
 bool CalculatorConversions::innerMatrixRationalFunction(
@@ -1199,7 +1199,7 @@ bool CalculatorConversions::functionMatrixRationalFunction(
   )) {
     return calculator << "<hr>Failed to get matrix of rational functions. ";
   }
-  output.makeMatrix(outputMat, calculator, &context);
+  output.makeMatrix(calculator, outputMat, &context);
   output.checkConsistency();
   return true;
 }

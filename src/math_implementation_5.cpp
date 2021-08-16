@@ -582,35 +582,35 @@ void ElementUniversalEnveloping<Coefficient>::assignFromCoordinateFormWithRespec
 }
 
 bool SemisimpleLieAlgebraOrdered::checkInitialization() const {
-  if (this->theOwner == nullptr) {
+  if (this->ownerSemisimpleLieAlgebra == nullptr) {
     global.fatal << "Use of semisimple Lie algebra without an owner. " << global.fatal;
   }
-  if (this->theOwner->flagDeallocated) {
+  if (this->ownerSemisimpleLieAlgebra->flagDeallocated) {
     global.fatal << "Use after free of semisimple Lie algebra. ";
   }
   return true;
 }
 
 void SemisimpleLieAlgebraOrdered::getLinearCombinationFrom(
-  ElementSemisimpleLieAlgebra<Rational>& input, Vector<Rational>& theCoeffs
+  ElementSemisimpleLieAlgebra<Rational>& input, Vector<Rational>& coefficients
 ) {
   this->checkInitialization();
-  theCoeffs.makeZero(this->theOwner->getNumberOfGenerators());
+  coefficients.makeZero(this->ownerSemisimpleLieAlgebra->getNumberOfGenerators());
   for (int i = 0; i < input.size(); i ++) {
     int index = input[i].generatorIndex;
-    theCoeffs[this->theOwner->getGeneratorFromRootIndex(index)] = input.coefficients[i];
+    coefficients[this->ownerSemisimpleLieAlgebra->getGeneratorFromRootIndex(index)] = input.coefficients[i];
   }
-  int numPosRoots = this->theOwner->getNumberOfPositiveRoots();
+  int numPosRoots = this->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots();
   Vector<Rational> tempH = input.getCartanPart();
-  for (int i = 0; i < this->theOwner->getRank(); i ++) {
-    theCoeffs[numPosRoots + i] = tempH[i];
+  for (int i = 0; i < this->ownerSemisimpleLieAlgebra->getRank(); i ++) {
+    coefficients[numPosRoots + i] = tempH[i];
   }
-  this->chevalleyGeneratorsInCurrentCoordinates.actOnVectorColumn(theCoeffs);
+  this->chevalleyGeneratorsInCurrentCoordinates.actOnVectorColumn(coefficients);
 }
 
 int SemisimpleLieAlgebraOrdered::getDisplayIndexFromGeneratorIndex(int GeneratorIndex) {
-  int numPosRoots = this->theOwner->getNumberOfPositiveRoots();
-  int posRootsPlusRank = numPosRoots + this->theOwner->getRank();
+  int numPosRoots = this->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots();
+  int posRootsPlusRank = numPosRoots + this->ownerSemisimpleLieAlgebra->getRank();
   if (GeneratorIndex >= posRootsPlusRank) {
     return GeneratorIndex - posRootsPlusRank + 1;
   }
@@ -627,15 +627,15 @@ void SemisimpleLieAlgebraOrdered::initialize(
   if (inputOrder.size != owner.getNumberOfGenerators()) {
     return;
   }
-  this->theOwner = &owner;
-  this->theOrder = inputOrder;
+  this->ownerSemisimpleLieAlgebra = &owner;
+  this->elementOrder = inputOrder;
   this->chevalleyGeneratorsInCurrentCoordinates.initialize(owner.getNumberOfGenerators(), owner.getNumberOfGenerators());
   this->chevalleyGeneratorsInCurrentCoordinates.makeZero();
   Vector<Rational> coordsInCurrentBasis;
   ElementSemisimpleLieAlgebra<Rational> currentElt;
   for (int i = 0; i < owner.getNumberOfGenerators(); i ++) {
     currentElt.makeGenerator(i, owner);
-    currentElt.getCoordinatesInBasis(this->theOrder, coordsInCurrentBasis);
+    currentElt.getCoordinatesInBasis(this->elementOrder, coordsInCurrentBasis);
     for (int j = 0; j < coordsInCurrentBasis.size; j ++) {
       this->chevalleyGeneratorsInCurrentCoordinates.elements[j][i] = coordsInCurrentBasis[j];
     }

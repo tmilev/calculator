@@ -317,7 +317,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
   List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> > out;
   List<Vector<Rational> > splittingMatrixKernel;
   if (getNumberOfComponents() == 1) {
-    if (this->ownerGroup->characterTable.getIndex(this->theCharacter) == - 1) {
+    if (this->ownerGroup->characterTable.getIndex(this->character) == - 1) {
       global.comments << "new irrep found, have " << this->ownerGroup->characterTable.size << "\n";
       this->ownerGroup->addIrreducibleRepresentation(*this);
     }
@@ -327,7 +327,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
   List<Vector<Coefficient> > Vb = this->basis;
   List<Vector<Coefficient> > tempVectors;
   for (int i = 0; i < this->ownerGroup->characterTable.size; i ++) {
-    if (this->theCharacter.innerProduct(this->ownerGroup->characterTable[i]) != 0) {
+    if (this->character.innerProduct(this->ownerGroup->characterTable[i]) != 0) {
       global.comments << "contains irrep " << i << "\n";
       this->classFunctionMatrix(this->ownerGroup->characterTable[i], splittingOperatorMatrix);
       splittingOperatorMatrix.getZeroEigenSpaceModifyMe(splittingMatrixKernel);

@@ -895,7 +895,7 @@ bool Expression::setContextAtLeastEqualTo(
         }
       }
     }
-    return this->makeMatrix(newMatrix, *this->owner, &inputOutputMinContext);
+    return this->makeMatrix(*this->owner, newMatrix, &inputOutputMinContext);
   }
   this->owner->comments << "Expression " << this->toString()
   << " is of built-in type but is not handled by Expression::setContextAtLeastEqualTo. ";

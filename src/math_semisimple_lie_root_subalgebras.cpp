@@ -2233,7 +2233,7 @@ bool RootSubalgebra::checkForMaximalDominanceCartanSubalgebra() {
       this->getAmbientWeylAutomorphisms().raiseToMaximallyDominant(simpleBasisOriginalOrderCopy);
       for (int j = 0; j < simpleBasisOriginalOrderCopy.size; j ++) {
         if (simpleBasisOriginalOrderCopy[j] != this->simpleBasisKInOrderOfGeneration[j]) {
-          if (simpleBasisOriginalOrderCopy[j].IsGreaterThanLexicographic(this->simpleBasisKInOrderOfGeneration[j])) {
+          if (simpleBasisOriginalOrderCopy[j].isGreaterThanLexicographic(this->simpleBasisKInOrderOfGeneration[j])) {
             if (this->indexInducingSubalgebra != - 1) {
               this->owner->subalgebras[this->indexInducingSubalgebra].numHeirsRejectedNotMaxWRTouterAuto ++;
             }

@@ -56,7 +56,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::checkAllSimp
 template <typename somegroup, typename Coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::checkRepresentationIsMultiplicativelyClosed() {
   HashedList<Matrix<Rational> > tempList;
-  tempList.addOnTop(this->theElementImages);
+  tempList.addOnTop(this->elementImages);
   Matrix<Rational> matrix;
   ElementWeylGroup element;
   for (int i = 0; i < tempList.size; i ++) {
@@ -67,7 +67,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::checkReprese
       element *= this->ownerGroup->theElements[i];
       element.makeCanonical();
       int targetIndex = this->ownerGroup->theElements.getIndex(element);
-      if (!(matrix == this->theElementImages[targetIndex])) {
+      if (!(matrix == this->elementImages[targetIndex])) {
         global.fatal << "this is a programming error: element " << i + 1 << " times element "
         << j + 1 << " is outside of the set, i.e.,  "
         << tempList[i].toString() << " * " << tempList[j].toString() << " is bad. " << global.fatal;
@@ -84,7 +84,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::computeAllGe
   this->ownerGroup->checkInitializationFiniteDimensionalRepresentationComputation();
   HashedList<ElementWeylGroup> ElementsExplored;
   ElementsExplored.setExpectedSize(this->ownerGroup->theElements.size);
-  this->theElementImages[0].makeIdentityMatrix(this->getDimension());
+  this->elementImages[0].makeIdentityMatrix(this->getDimension());
   ElementWeylGroup currentElt;
   int theRank = this->ownerGroup->getDimension();
   currentElt.makeIdentity(*this->ownerGroup);
@@ -101,7 +101,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::computeAllGe
       if (!ElementsExplored.contains(currentElt)) {
         int indexCurrentElt = this->ownerGroup->theElements.getIndex(currentElt);
         this->theElementIsComputed[indexCurrentElt] = true;
-        this->theElementImages[indexParentElement].multiplyOnTheLeft(this->generators[j], this->theElementImages[indexCurrentElt]);
+        this->elementImages[indexParentElement].multiplyOnTheLeft(this->generators[j], this->elementImages[indexCurrentElt]);
         ElementsExplored.addOnTop(currentElt);
       }
     }
@@ -123,7 +123,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::computeAllEl
   auto elementsExplored = this->ownerGroup->elements;
   elementsExplored.clear();
   elementsExplored.setExpectedSize(this->ownerGroup->elements.size);
-  this->theElementImages[0].makeIdentityMatrix(this->getDimension());
+  this->elementImages[0].makeIdentityMatrix(this->getDimension());
   auto currentElt = this->ownerGroup->generators[0];
   currentElt.makeIdentity(this->ownerGroup->generators[0]);
   int theRank = this->ownerGroup->generators.size;
@@ -137,7 +137,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::computeAllEl
       if (!elementsExplored.contains(currentElt)) {
         int indexCurrentElt = this->ownerGroup->elements.getIndex(currentElt);
         this->elementIsComputed[indexCurrentElt] = true;
-        this->theElementImages[indexParentElement].multiplyOnTheLeft(this->generators[j], this->theElementImages[indexCurrentElt]);
+        this->elementImages[indexParentElement].multiplyOnTheLeft(this->generators[j], this->elementImages[indexCurrentElt]);
         elementsExplored.addOnTop(currentElt);
       }
     }
@@ -170,14 +170,14 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::operator*=(
   }
   GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> output;
   output.initialize(*this->ownerGroup);
-  output.theCharacter = this->theCharacter;
-  output.theCharacter *= other.theCharacter;
+  output.character = this->character;
+  output.character *= other.character;
   for (int i = 0; i < output.generators.size; i ++) {
     output.generators[i].assignTensorProduct(this->generators[i], other.generators[i]);
   }
-  for (int i = 0; i < output.theElementImages.size; i ++) {
+  for (int i = 0; i < output.elementImages.size; i ++) {
     if (this->elementIsComputed[i] && other.elementIsComputed[i]) {
-      output.theElementImages[i].assignTensorProduct(this->theElementImages[i], other.theElementImages[i]);
+      output.elementImages[i].assignTensorProduct(this->elementImages[i], other.elementImages[i]);
       output.elementIsComputed[i] = true;
     }
   }
@@ -226,7 +226,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::restrictRepr
   output.basis = vectorSpaceBasisSubrep;
   output.basis.getGramMatrix(output.gramMatrixInverted, 0);
   output.gramMatrixInverted.invert();
-  output.theCharacter = remainingCharacter;
+  output.character = remainingCharacter;
   ProgressReport report;
   for (int i = 0; i < this->generators.size; i ++) {
     if (report.tickAndWantReport()) {
@@ -2239,7 +2239,7 @@ bool CalculatorFunctionsWeylGroup::representElementHyperOctahedral(
     return calculator << "Failed to get matrix of element " << element.toString()
     << " from representation: " << theRep.toString();
   }
-  return output.makeMatrix(result, calculator, nullptr, false);
+  return output.makeMatrix(calculator, result, nullptr, false);
 }
 
 bool CalculatorFunctionsWeylGroup::hyperOctahedralGetOneRepresentation(

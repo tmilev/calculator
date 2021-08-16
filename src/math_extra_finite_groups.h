@@ -734,7 +734,7 @@ public:
     const Coefficient& ringUnit = 1
   );
   template <class Coefficient>
-  Coefficient weylDimFormulaFundamentalCoords(Vector<Coefficient>& weightFundCoords);
+  Coefficient weylDimFormulaFundamentalCoords(Vector<Coefficient>& weightFundamentalCoords);
   template <class Coefficient>
   void raiseToDominantWeight(
     Vector<Coefficient>& weight,
@@ -823,13 +823,13 @@ public:
   bool isARoot(const Vector<Rational>& input) const {
     return this->rootSystem.contains(input);
   }
-  void generateRootSubsystem(Vectors<Rational>& theRoots);
+  void generateRootSubsystem(Vectors<Rational>& roots);
   template <class Coefficient>
   bool generateOrbit(
     Vectors<Coefficient>& weights,
-    bool RhoAction,
+    bool rhoAction,
     HashedList<Vector<Coefficient> >& output,
-    bool UseMinusRho,
+    bool useMinusRho,
     int expectedOrbitSize = - 1,
     HashedList<ElementWeylGroup>* outputSubset = nullptr,
     int upperLimitNumberOfElements = - 1
@@ -976,7 +976,7 @@ public:
   }
   template<class Coefficient>
   void reflectBetaWithRespectToAlpha(
-    const Vector<Rational>& alpha, const Vector<Coefficient>& Beta, bool RhoAction, Vector<Coefficient>& Output
+    const Vector<Rational>& alpha, const Vector<Coefficient>& beta, bool rhoAction, Vector<Coefficient>& output
   ) const;
   bool isRegular(Vector<Rational>& input, int* indexFirstPerpendicularRoot);
   template <class leftType, class rightType>
@@ -1247,7 +1247,7 @@ public:
   }
   GroupRepresentation(const GroupRepresentationCarriesAllMatrices<someGroup, Coefficient>& in) {
     this->generators = in.generators;
-    this->character = in.theCharacter;
+    this->character = in.character;
     this->flagCharacterIsComputed = in.flagCharacterIsComputed;
   }
   GroupRepresentationCarriesAllMatrices<someGroup, Coefficient> makeGRCAM() const {
@@ -1257,7 +1257,7 @@ public:
     if (this->identifyingString.size() > 0) {
       out.names.addOnTop(this->identifyingString);
     }
-    out.theCharacter = this->character;
+    out.character = this->character;
     return out;
   }
   // Note: the group representation types compute the hash value from the character,
@@ -1387,14 +1387,14 @@ JSData GroupRepresentation<someGroup, Coefficient>::toJSON() {
 
 template <typename somegroup, typename Coefficient>
 class GroupRepresentationCarriesAllMatrices {
-  friend std::ostream& operator << (std::ostream& output, const GroupRepresentationCarriesAllMatrices& theIrrep) {
-    output << theIrrep.toString();
+  friend std::ostream& operator << (std::ostream& output, const GroupRepresentationCarriesAllMatrices& irreducibleRepresentation) {
+    output << irreducibleRepresentation.toString();
     return output;
   }
 public:
-  List<Matrix<Coefficient> > theElementImages;
+  List<Matrix<Coefficient> > elementImages;
   List<bool> elementIsComputed;
-  ClassFunction<somegroup, Coefficient> theCharacter;
+  ClassFunction<somegroup, Coefficient> character;
   List<Matrix<Coefficient> > classFunctionMatrices;
   List<bool> classFunctionMatricesComputed;
   List<Matrix<Coefficient> > generators;
@@ -1460,7 +1460,7 @@ public:
     return result;
   }
   bool operator==(const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other) const {
-    return this->ownerGroup == other.ownerGroup && this->theCharacter == other.theCharacter;
+    return this->ownerGroup == other.ownerGroup && this->character == other.character;
   }
   void spreadVector(const Vector<Coefficient>& input, Vectors<Coefficient>& outputBasisGeneratedSpace);
   std::string getName() const;
@@ -1471,7 +1471,7 @@ public:
   template <typename elementSomeGroup>
   Matrix<Coefficient> getMatrixElement(const elementSomeGroup& input);
   void setElementImage(int elementIndex, const Matrix<Coefficient>& input) {
-    this->theElementImages[elementIndex] = input;
+    this->elementImages[elementIndex] = input;
     this->elementIsComputed[elementIndex] = true;
   }
   void setGenerator(int generatorIndex, const Matrix<Coefficient>& input) {
@@ -1526,11 +1526,11 @@ public:
   HashedList<elementRepresentation>* previousLayer;
   HashedList<elementRepresentation>* currentLayer;
   HashedList<elementRepresentation>* nextLayer;
-  OrbitIterator::GroupActionWithName theGroupAction;
+  OrbitIterator::GroupActionWithName groupAction;
   List<elementGroup> theGroupGeneratingElements;
   int indexCurrentElement;
   OrbitIterator() {
-    this->theGroupAction.actOn = 0;
+    this->groupAction.actOn = 0;
     this->resetNoActionChange();
   }
   bool checkInitialization() const;
@@ -1959,9 +1959,9 @@ public:
     List<List<List<int> > >& arrows, List<List<int> >& layers, int graphWidth, bool useAmbientIndices
   );
   std::string toString(bool displayElements = true) {
-    std::string tempS;
-    this->toString(tempS, displayElements);
-    return tempS;
+    std::string result;
+    this->toString(result, displayElements);
+    return result;
   }
   Vector<Rational> getRho();
   template <class Coefficient>
@@ -2023,7 +2023,10 @@ public:
   ) const;
   template <class Coefficient>
   bool generateOrbitReturnFalseIfTruncated(
-    const Vector<Coefficient>& input, Vectors<Coefficient>& outputOrbit, bool restrictToInner, int upperLimitNumberOfElements
+    const Vector<Coefficient>& input,
+    Vectors<Coefficient>& outputOrbit,
+    bool restrictToInner,
+    int upperLimitNumberOfElements
   );
   bool computeSubGroupFromGeneratingReflections(
     Vectors<Rational>* inputRoots,
@@ -2038,7 +2041,7 @@ public:
   void actByNonSimpleElement(int index, Vector<Coefficient>& input, Vector<Coefficient>& output) const;
   template <class Coefficient>
   void actByElement(
-    const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& theElement,
+    const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& element,
     const Vector<Coefficient>& input,
     Vector<Coefficient>& output
   ) const;

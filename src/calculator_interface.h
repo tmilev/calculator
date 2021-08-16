@@ -386,8 +386,8 @@ private:
   bool makeSequenceStatements(Calculator& owner, List<Expression>* inputStatements = nullptr);
   template<class Coefficient>
   bool makeMatrix(
-    const Matrix<Coefficient>& input,
     Calculator& owner,
+    const Matrix<Coefficient>& input,
     ExpressionContext const* inputContext = nullptr,
     bool reduceOneRowToSequenceAndOneByOneToNonMatrix = true
   );
@@ -2461,7 +2461,7 @@ public:
     const Expression& input,
     Vector<Coefficient>& outputWeightSimpleCoords,
     WithContext<SemisimpleLieAlgebra*>& outputAmbientSSalgebra,
-    Expression::FunctionAddress ConversionFun
+    Expression::FunctionAddress conversionFunction
   );
   template<class Coefficient>
   bool getTypeHighestWeightParabolic(
@@ -2471,11 +2471,11 @@ public:
     Vector<Coefficient>& outputWeightHWFundcoords,
     Selection& outputInducingSelection,
     WithContext<SemisimpleLieAlgebra*>& outputAmbientSSalgebra,
-    Expression::FunctionAddress ConversionFun
+    Expression::FunctionAddress conversionFunction
   );
   void addEmptyHeadedCommand();
   Calculator();
-  int addOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName);
+  int addOperationNoRepetitionOrReturnIndexFirst(const std::string& operationName);
   void addOperationNoRepetitionAllowed(const std::string& operation);
   void addOperationBuiltInType(const std::string& operationBuiltIn);
   void addKnownDoubleConstant(const std::string& constantName, double value);
@@ -3102,7 +3102,8 @@ bool Calculator::functionGetMatrix(
 }
 
 template <class Coefficient>
-bool Expression::makeSum(Calculator& calculator,
+bool Expression::makeSum(
+  Calculator& calculator,
   const LinearCombination<Expression, Coefficient>& summands
 ) {
   MacroRegisterFunctionWithName("Expression::makeSum");
@@ -3237,7 +3238,7 @@ bool Calculator::getTypeWeight(
   const Expression& input,
   Vector<Coefficient>& outputWeightSimpleCoords,
   WithContext<SemisimpleLieAlgebra*>& outputAmbientSemisimpleLieAlgebra,
-  Expression::FunctionAddress ConversionFun
+  Expression::FunctionAddress conversionFunction
 ) {
   MacroRegisterFunctionWithName("Calculator::getTypeWeight");
   if (input.size() != 3) {
@@ -3261,7 +3262,7 @@ bool Calculator::getTypeWeight(
     outputWeightSimpleCoords,
     &outputAmbientSemisimpleLieAlgebra.context,
     ambientSSalgebra->getRank(),
-    ConversionFun
+    conversionFunction
   )) {
     calculator << "Failed to convert the second "
     << "argument of HWV to a list of " << ambientSSalgebra->getRank()
@@ -3301,7 +3302,7 @@ bool Calculator::getTypeHighestWeightParabolic(
   Vector<Coefficient>& outputWeightHWFundcoords,
   Selection& outputInducingSelection,
   WithContext<SemisimpleLieAlgebra*>& outputAmbientSSalgebra,
-  Expression::FunctionAddress ConversionFun
+  Expression::FunctionAddress conversionFunction
 ) {
   if (!input.isListNElements(4) && !input.isListNElements(3)) {
     return output.assignError(
@@ -3327,7 +3328,7 @@ bool Calculator::getTypeHighestWeightParabolic(
     outputWeightHWFundcoords,
     &outputAmbientSSalgebra.context,
     ambientSSalgebra->getRank(),
-    ConversionFun
+    conversionFunction
   )) {
     std::stringstream tempStream;
     tempStream
@@ -3338,11 +3339,11 @@ bool Calculator::getTypeHighestWeightParabolic(
     return output.assignError(calculator, tempStream.str());
   }
   if (input.isListNElements(4)) {
-    Vector<Rational> parabolicSel;
+    Vector<Rational> parabolicSelection;
     const Expression& rightE = input[3];
     if (!calculator.getVector<Rational>(
       rightE,
-      parabolicSel,
+      parabolicSelection,
       &outputAmbientSSalgebra.context,
       ambientSSalgebra->getRank(),
       nullptr
@@ -3355,7 +3356,7 @@ bool Calculator::getTypeHighestWeightParabolic(
       << rightE.toString() << ".";
       return output.assignError(calculator, tempStream.str());
     }
-    outputInducingSelection = parabolicSel;
+    outputInducingSelection = parabolicSelection;
   } else {
     outputInducingSelection.initialize(ambientSSalgebra->getRank());
     for (int i = 0; i < outputWeightHWFundcoords.size; i ++) {
@@ -3381,8 +3382,8 @@ bool Calculator::getTypeHighestWeightParabolic(
 
 template <class Coefficient>
 bool Expression::makeMatrix(
-  const Matrix<Coefficient>& input,
   Calculator& owner,
+  const Matrix<Coefficient>& input,
   const ExpressionContext* inputContext,
   bool reduceOneRowToSequenceAndOneByOneToNonMatrix
 ) {

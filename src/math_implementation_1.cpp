@@ -416,7 +416,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) {
-  WeylGroupData& weyl = this->owner->theOwner->weylGroup;
+  WeylGroupData& weyl = this->owner->ownerSemisimpleLieAlgebra->weylGroup;
   Vector<Rational> theHWsimpleCoordsTrue = theHWsimpleCoords;
   weyl.raiseToDominantWeight(theHWsimpleCoordsTrue);
   Vector<Rational> theHWdualCoords = weyl.getDualCoordinatesFromFundamental(
@@ -428,7 +428,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
     theSub[i] = theHWdualCoords[i];
   }
   this->modOutVermaRelations(&theSub, ringUnit, ringZero);
-  int numPosRoots = this->owner->theOwner->getNumberOfPositiveRoots();
+  int numPosRoots = this->owner->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots();
   Vector<Rational> currentWeight = theHWsimpleCoordsTrue;
   Vector<Rational> testWeight;
   for (int k = this->generatorsIndices.size - 1; k >= 0; k --) {
@@ -436,7 +436,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
     if (indexCurrentGenerator >= numPosRoots) {
       return false;
     }
-    ElementSemisimpleLieAlgebra<Rational>& currentElt = this->owner->theOrder[indexCurrentGenerator];
+    ElementSemisimpleLieAlgebra<Rational>& currentElt = this->owner->elementOrder[indexCurrentGenerator];
     if (!currentElt.getCartanPart().isEqualToZero() || currentElt.size() > 1) {
       return false;
     }
@@ -444,7 +444,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
     if (!this->powers[k].isSmallInteger(power)) {
       return false;
     }
-    int rootIndex = this->owner->theOwner->getRootIndexFromGenerator(currentElt[0].generatorIndex);
+    int rootIndex = this->owner->ownerSemisimpleLieAlgebra->getRootIndexFromGenerator(currentElt[0].generatorIndex);
     const Vector<Rational>& currentRoot = weyl.rootSystem[rootIndex];
     for (int j = 0; j < power; j ++) {
       currentWeight += currentRoot;

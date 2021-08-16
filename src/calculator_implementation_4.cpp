@@ -1239,11 +1239,13 @@ Function& Calculator::getFunctionHandlerFromNamedRule(const std::string& inputNa
   return currentOperation.getElementConst().handlers[current.index];
 }
 
-int Calculator::addOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName) {
-  int result = this->operations.getIndex(theOpName);
+int Calculator::addOperationNoRepetitionOrReturnIndexFirst(
+  const std::string& operationName
+) {
+  int result = this->operations.getIndex(operationName);
   if (result == - 1) {
     result = this->operations.size();
-    this->operations.getValueCreateEmpty(theOpName);
+    this->operations.getValueCreateEmpty(operationName);
   }
   return result;
 }

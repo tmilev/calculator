@@ -374,7 +374,7 @@ bool CalculatorFunctions::innerGetPointsImplicitly(
   }
   Matrix<double> matrix;
   matrix.assignVectorsToRows(points);
-  return output.makeMatrix(matrix, calculator);
+  return output.makeMatrix(calculator, matrix);
 }
 
 bool CalculatorFunctionsPlot::plotImplicitFunction(
@@ -486,7 +486,7 @@ bool CalculatorConversions::functionMatrixDouble(
   )) {
     return calculator << "<br>Failed to get matrix of doubles. ";
   }
-  return output.makeMatrix(matrix, calculator);
+  return output.makeMatrix(calculator, matrix);
 }
 
 bool CalculatorFunctionsIntegration::integratePullConstant(

@@ -82,27 +82,27 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::computeAllGe
   MacroRegisterFunctionWithName("GroupRepresentationCarriesAllMatrices::computeAllGeneratorImagesFromSimple");
   this->checkInitialization();
   this->ownerGroup->checkInitializationFiniteDimensionalRepresentationComputation();
-  HashedList<ElementWeylGroup> ElementsExplored;
-  ElementsExplored.setExpectedSize(this->ownerGroup->theElements.size);
+  HashedList<ElementWeylGroup> elementsExplored;
+  elementsExplored.setExpectedSize(this->ownerGroup->theElements.size);
   this->elementImages[0].makeIdentityMatrix(this->getDimension());
   ElementWeylGroup currentElt;
-  int theRank = this->ownerGroup->getDimension();
+  int rank = this->ownerGroup->getDimension();
   currentElt.makeIdentity(*this->ownerGroup);
-  ElementsExplored.addOnTop(currentElt);
-  List<ElementWeylGroup> theGens;
-  theGens.setSize(theRank);
-  for (int i = 0; i < theRank; i ++) {
-    theGens[i].makeSimpleReflection(i, *this->ownerGroup);
+  elementsExplored.addOnTop(currentElt);
+  List<ElementWeylGroup> generators;
+  generators.setSize(rank);
+  for (int i = 0; i < rank; i ++) {
+    generators[i].makeSimpleReflection(i, *this->ownerGroup);
   }
-  for (int i = 0; i < ElementsExplored.size; i ++) {
-    int indexParentElement = this->ownerGroup->theElements.getIndex(ElementsExplored[i]);
-    for (int j = 0; j < theRank; j ++) {
-      currentElt = theGens[j] * ElementsExplored[i];
-      if (!ElementsExplored.contains(currentElt)) {
+  for (int i = 0; i < elementsExplored.size; i ++) {
+    int indexParentElement = this->ownerGroup->theElements.getIndex(elementsExplored[i]);
+    for (int j = 0; j < rank; j ++) {
+      currentElt = generators[j] * elementsExplored[i];
+      if (!elementsExplored.contains(currentElt)) {
         int indexCurrentElt = this->ownerGroup->theElements.getIndex(currentElt);
         this->theElementIsComputed[indexCurrentElt] = true;
         this->elementImages[indexParentElement].multiplyOnTheLeft(this->generators[j], this->elementImages[indexCurrentElt]);
-        ElementsExplored.addOnTop(currentElt);
+        elementsExplored.addOnTop(currentElt);
       }
     }
   }
@@ -126,14 +126,14 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::computeAllEl
   this->elementImages[0].makeIdentityMatrix(this->getDimension());
   auto currentElt = this->ownerGroup->generators[0];
   currentElt.makeIdentity(this->ownerGroup->generators[0]);
-  int theRank = this->ownerGroup->generators.size;
-  auto& theGens = this->ownerGroup->generators;
+  int rank = this->ownerGroup->generators.size;
+  auto& generators = this->ownerGroup->generators;
 
   elementsExplored.addOnTop(currentElt);
   for (int i = 0; i < elementsExplored.size; i ++) {
     int indexParentElement = this->ownerGroup->elements.getIndex(elementsExplored[i]);
-    for (int j = 0; j < theRank; j ++) {
-      currentElt = theGens[j] * elementsExplored[i];
+    for (int j = 0; j < rank; j ++) {
+      currentElt = generators[j] * elementsExplored[i];
       if (!elementsExplored.contains(currentElt)) {
         int indexCurrentElt = this->ownerGroup->elements.getIndex(currentElt);
         this->elementIsComputed[indexCurrentElt] = true;
@@ -142,11 +142,6 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::computeAllEl
       }
     }
   }
-//  this->checkRepresentationIsMultiplicativelyClosed();
-  //FormatExpressions tempFormat;
-  //tempFormat.flagUseLatex = true;
-  //for (int i = 0; i < this->theElementImages.size; i ++)
-  //{   //}
 }
 
 template <typename somegroup, typename Coefficient>
@@ -217,7 +212,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::restrictRepr
   const ClassFunction<somegroup, Rational>& remainingCharacter,
   GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& output
 ) {
-  MacroRegisterFunctionWithName("WeylGroupRepresentation::restrict");
+  MacroRegisterFunctionWithName("GroupRepresentationCarriesAllMatrices::restrictRepresentation");
   this->checkAllSimpleGeneratorsAreOK();
   if (vectorSpaceBasisSubrep.size == 0) {
     global.fatal << "Restriction of representation to a zero subspace is not allowed. " << global.fatal;
@@ -447,7 +442,7 @@ bool CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant(
     theOuterAutos.raiseToMaximallyDominant(highestWeights);
   }
   out << "<br>Maximally dominant output: " << highestWeights.toString();
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 template <>
@@ -473,11 +468,11 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
       return false;
     }
   }
-  Vector<Polynomial<Rational> > theHWfundCoords, highestWeightsimpleCoords;
+  Vector<Polynomial<Rational> > highestWeightFundamentalCoordinates, highestWeightsimpleCoords;
   ExpressionContext context(calculator);
   if (!calculator.getVector(
     vectorNode,
-    theHWfundCoords,
+    highestWeightFundamentalCoordinates,
     &context,
     dynkinType.getRank(),
     CalculatorConversions::functionPolynomial<Rational>
@@ -486,8 +481,8 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
   }
   WeylGroupData weyl;
   weyl.makeFromDynkinType(dynkinType);
-  highestWeightsimpleCoords = theHWfundCoords;
-  theHWfundCoords = weyl.getFundamentalCoordinatesFromSimple(highestWeightsimpleCoords);
+  highestWeightsimpleCoords = highestWeightFundamentalCoordinates;
+  highestWeightFundamentalCoordinates = weyl.getFundamentalCoordinatesFromSimple(highestWeightsimpleCoords);
   std::stringstream out, latexReport;
   Vectors<Polynomial<Rational> > highestWeights;
   FormatExpressions format = context.getFormat();
@@ -532,7 +527,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
   }
   latexReport << "\\end{longtable}";
   out << "</table>" << "<br> " << latexReport.str();
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorFunctionsWeylGroup::weylGroupOrbitSize(
@@ -546,7 +541,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitSize(
     calculator, input, weightRational, theAlgebra, nullptr
   )) {
     Rational result = theAlgebra.content->weylGroup.getOrbitSize(weightRational);
-    return output.assignValueOLD(result, calculator);
+    return output.assignValue(calculator, result);
   }
   SemisimpleLieAlgebra* semisimpleLieAlgebra = theAlgebra.content;
   Vector<Polynomial<Rational> > weightPolynomial;
@@ -558,7 +553,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitSize(
     CalculatorConversions::functionPolynomial<Rational>
   )) {
     Rational result = semisimpleLieAlgebra->weylGroup.getOrbitSize(weightPolynomial);
-    return output.assignValueOLD(result, calculator);
+    return output.assignValue(calculator, result);
   }
   return false;
 }
@@ -585,14 +580,14 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   )) {
     return false;
   }
-  Vector<Polynomial<Rational> > theHWfundCoords, highestWeightSimpleCoords, currentWeight;
+  Vector<Polynomial<Rational> > highestWeightFundamentalCoordinates, highestWeightSimpleCoords, currentWeight;
   Polynomial<Rational> zero;
   WeylGroupData& weyl = semisimpleLieAlgebra.content->weylGroup;
   if (!useFundCoords) {
     highestWeightSimpleCoords = weight;
-    theHWfundCoords = weyl.getFundamentalCoordinatesFromSimple(weight);
+    highestWeightFundamentalCoordinates = weyl.getFundamentalCoordinatesFromSimple(weight);
   } else {
-    theHWfundCoords = weight;
+    highestWeightFundamentalCoordinates = weight;
     highestWeightSimpleCoords = weyl.getSimpleCoordinatesFromFundamental(weight, zero);
   }
   std::stringstream out, latexReport;
@@ -603,7 +598,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   highestWeights.addOnTop(highestWeightSimpleCoords);
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   HashedList<ElementWeylGroup> orbitGeneratingSet;
-  Polynomial<Rational> theExp;
+  Polynomial<Rational> exponent;
   if (!semisimpleLieAlgebra.content->weylGroup.generateOrbit(highestWeights, useRho, outputOrbit, false, 1921, &orbitGeneratingSet, 1921)) {
     out << "Failed to generate the entire orbit (maybe too large?), generated the first " << outputOrbit.size << " elements only.";
   } else {
@@ -622,8 +617,8 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   MonomialUniversalEnveloping<Polynomial<Rational> > standardElt;
   LargeInteger tempInt;
   bool useMathTag = outputOrbit.size < 150;
-  Matrix<Rational> epsCoordMat;
-  weyl.dynkinType.getEpsilonMatrix(epsCoordMat);
+  Matrix<Rational> epsilonCoordinatesMatrix;
+  weyl.dynkinType.getEpsilonMatrix(epsilonCoordinatesMatrix);
   GraphWeightedLabeledEdges integralPositiveRootReflectionGraph;
   integralPositiveRootReflectionGraph.numNodes = outputOrbit.size;
   integralPositiveRootReflectionGraph.nodeLabels.setSize(outputOrbit.size);
@@ -672,7 +667,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     format.fundamentalWeightLetter = "\\psi";
     std::string orbitEltString = outputOrbit[i].toString(&format);
     Vector<Polynomial<Rational> > epsVect = outputOrbit[i];
-    epsCoordMat.actOnVectorColumn(epsVect, zero);
+    epsilonCoordinatesMatrix.actOnVectorColumn(epsVect, zero);
     std::string orbitEltStringEpsilonCoords = epsVect.toStringLetterFormat("\\varepsilon", &format);
     std::string weightEltString=
     weyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).toStringLetterFormat(format.fundamentalWeightLetter, &format);
@@ -694,18 +689,18 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
       bool isGood = true;
       for (int j = orbitGeneratingSet[i].generatorsLastAppliedFirst.size - 1; j >= 0; j --) {
         int simpleIndex = orbitGeneratingSet[i].generatorsLastAppliedFirst[j].index;
-        theExp = weyl.getScalarProductSimpleRoot(currentWeight, simpleIndex);
+        exponent = weyl.getScalarProductSimpleRoot(currentWeight, simpleIndex);
         weyl.reflectRhoSimple(simpleIndex, currentWeight);
-        theExp *= 2;
-        theExp /= weyl.cartanSymmetric.elements[simpleIndex][simpleIndex];
-        theExp += Rational(1);
-        if (theExp.isInteger(&tempInt)) {
+        exponent *= 2;
+        exponent /= weyl.cartanSymmetric.elements[simpleIndex][simpleIndex];
+        exponent += Rational(1);
+        if (exponent.isInteger(&tempInt)) {
           if (tempInt < 0) {
             isGood = false;
             break;
           }
         }
-        standardElt.multiplyByGeneratorPowerOnTheLeft(semisimpleLieAlgebra.content->getNumberOfPositiveRoots() - simpleIndex - 1, theExp);
+        standardElt.multiplyByGeneratorPowerOnTheLeft(semisimpleLieAlgebra.content->getNumberOfPositiveRoots() - simpleIndex - 1, exponent);
       }
       out << "<td>";
       if (isGood) {
@@ -719,7 +714,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   }
   latexReport << "\\end{longtable}";
   out << "</table>" << "<br> " << latexReport.str();
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorFunctionsWeylGroup::weylGroupLoadOrComputeCharTable(
@@ -738,7 +733,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupLoadOrComputeCharTable(
   std::stringstream reportStream;
   theGroup.computeOrLoadCharacterTable(&reportStream);
   calculator << reportStream.str();
-  return output.assignValueOLD(theGroup, calculator);
+  return output.assignValue(calculator, theGroup);
 }
 
 bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClasseS(
@@ -759,7 +754,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClasseS(
   std::stringstream out;
   theGroup.computeOrLoadConjugacyClasses(&out);
   calculator << out.str();
-  return output.assignValueOLD(theGroup, calculator);
+  return output.assignValue(calculator, theGroup);
 }
 
 bool CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements(
@@ -770,14 +765,14 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements
     return false;
   }
   WeylGroupData& groupData = output.getValueNonConst<WeylGroupData>();
-  char dynkinType ='X';
-  int theRank = - 1;
+  char dynkinType = 'X';
+  int rank = - 1;
   bool hasOuterAutosAndIsSimple = false;
-  if (groupData.dynkinType.isSimple(&dynkinType, &theRank)) {
+  if (groupData.dynkinType.isSimple(&dynkinType, &rank)) {
     if (dynkinType == 'D' || dynkinType == 'A') {
       hasOuterAutosAndIsSimple = true;
     }
-    if (dynkinType == 'E' && theRank == 6) {
+    if (dynkinType == 'E' && rank == 6) {
       hasOuterAutosAndIsSimple = true;
     }
   }
@@ -785,9 +780,9 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements
     return false;
   }
   FiniteGroup<Matrix<Rational> > groupNoOuterAutos;
-  WeylGroupAutomorphisms theAutomorphismGroup;
-  theAutomorphismGroup.weylGroup = &groupData;
-  theAutomorphismGroup.computeOuterAutoGenerators();
+  WeylGroupAutomorphisms automorphismGroup;
+  automorphismGroup.weylGroup = &groupData;
+  automorphismGroup.computeOuterAutoGenerators();
   groupNoOuterAutos.generators.setSize(groupData.getDimension());
   Vector<Rational> simpleRoot;
   for (int i = 0; i < groupData.getDimension(); i ++) {
@@ -797,8 +792,8 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements
   //if (false)
   Matrix<Rational> currentAuto;
   List<Matrix<Rational> > outerAutos;
-  for (int i = 0; i < theAutomorphismGroup.outerAutomorphisms.generators.size; i ++) {
-    theAutomorphismGroup.outerAutomorphisms.generators[i].getMatrix(currentAuto, groupData.getDimension());
+  for (int i = 0; i < automorphismGroup.outerAutomorphisms.generators.size; i ++) {
+    automorphismGroup.outerAutomorphisms.generators[i].getMatrix(currentAuto, groupData.getDimension());
     outerAutos.addOnTop(currentAuto);
   }
   std::stringstream out;
@@ -821,12 +816,12 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements
     << outerAutos[j].toString() << "<br>";
     invertedOuterAuto = outerAutos[j];
     invertedOuterAuto.invert();
-    for (int i = 0; i <groupNoOuterAutos.conjugacyClasses.size; i ++) {
+    for (int i = 0; i < groupNoOuterAutos.conjugacyClasses.size; i ++) {
       conjugatedMat = outerAutos[j];
       conjugatedMat *= groupNoOuterAutos.conjugacyClasses[i].representative;
       conjugatedMat *= invertedOuterAuto;
       int found = - 1;
-      for (int k = 0; k<groupNoOuterAutos.conjugacyClasses.size; k ++) {
+      for (int k = 0; k < groupNoOuterAutos.conjugacyClasses.size; k ++) {
         if (groupNoOuterAutos.conjugacyClasses[k].elements.contains(conjugatedMat)) {
           found = k;
           break;
@@ -835,7 +830,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements
       out << "Maps conj. class " << i + 1 << " -> " << found + 1 << "<br>";
     }
   }
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesFromAllElements(
@@ -859,7 +854,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesFromAllElements(
   calculator << "<hr>Computed conjugacy classes of "
   << groupData.toString() << " in " << global.getElapsedSeconds() - timeStart1
   << " second(s). ";
-  return output.assignValueOLD(groupData, calculator);
+  return output.assignValue(calculator, groupData);
 }
 
 bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesRepresentatives(
@@ -881,9 +876,9 @@ bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesRepresentatives(
   groupData.checkConsistency();
   groupData.group.computeConjugacyClassSizesAndRepresentatives();
   calculator << "<hr> Computed conjugacy classes representatives of "
-  << groupData.dynkinType.toString() << " in " << global.getElapsedSeconds()-timeStart1
+  << groupData.dynkinType.toString() << " in " << global.getElapsedSeconds() - timeStart1
   << " second(s). ";
-  return output.assignValueOLD(groupData, calculator);
+  return output.assignValue(calculator, groupData);
 }
 
 bool CalculatorFunctionsWeylGroup::weylGroupIrrepsAndCharTableComputeFromScratch(
@@ -910,7 +905,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupIrrepsAndCharTableComputeFromScratch
     out << "<hr>" << groupData.group.irreducibleRepresentations[i].toString(&tempFormat);
   }
   out << groupData.toString(&tempFormat);
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint(
@@ -960,7 +955,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint(
       out << "</table>";
     }
   }
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorFunctionsWeylGroup::weylGroupOrbitFundRho(
@@ -969,7 +964,9 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitFundRho(
   return CalculatorFunctionsWeylGroup::weylOrbit(calculator, input, output, true, true);
 }
 
-bool CalculatorFunctionsWeylGroup::weylGroupOrbitFund(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctionsWeylGroup::weylGroupOrbitFund(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   return CalculatorFunctionsWeylGroup::weylOrbit(calculator, input, output, true, false);
 }
 
@@ -979,7 +976,9 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitSimple(
   return CalculatorFunctionsWeylGroup::weylOrbit(calculator, input, output, false, false);
 }
 
-bool CalculatorFunctionsWeylGroup::tensorWeylReps(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctionsWeylGroup::tensorWeylReps(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::tensorWeylReps");
   if (input.size() != 3) {
     return false;
@@ -999,7 +998,7 @@ bool CalculatorFunctionsWeylGroup::tensorWeylReps(Calculator& calculator, const 
     return output.assignError(calculator, "Error: attempting to tensor irreps with different owner groups. ");
   }
   leftRep *= rightRep;
-  return output.assignValueOLD(leftRep, calculator);
+  return output.assignValue(calculator, leftRep);
 }
 
 bool CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylReps(
@@ -1021,7 +1020,7 @@ bool CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylReps(
   VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> outputRep =
   leftE.getValue<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
   outputRep *= rightE.getValue<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
-  return output.assignValueOLD(outputRep, calculator);
+  return output.assignValue(calculator, outputRep);
 }
 
 std::string WeylGroupData::toStringIrreducibleRepresentationLabel(int indexIrrep) {
@@ -1342,7 +1341,7 @@ public:
 //  bool incrementReturnFalseIfPastLast();
   bool initTableaux(std::stringstream* comments = nullptr);
   bool operator==(const KostkaNumber& other) const;
-  static Rational ComputeTypeBParabolicSignMultiplicity(
+  static Rational computeTypeBParabolicSignMultiplicity(
     const Partition& parabolicPartition,
     const Partition& leftPartition,
     const Partition& rightPartition,
@@ -1352,7 +1351,7 @@ public:
   static unsigned int hashFunction(const KostkaNumber& input);
   std::string toString();
   KostkaNumber();
-  bool compute(HashedList<KostkaNumber>* KNcache, std::stringstream* comments = nullptr);
+  bool compute(HashedList<KostkaNumber>* kostkaNumberCache, std::stringstream* comments = nullptr);
 };
 
 class SelectionFixedRankDifferentMaxMultiplicities {
@@ -1436,7 +1435,7 @@ bool KostkaNumber::initTableaux(std::stringstream* comments) {
   return true;
 }
 
-bool KostkaNumber::compute(HashedList<KostkaNumber>* KNcache, std::stringstream* comments) {
+bool KostkaNumber::compute(HashedList<KostkaNumber>* kostkaNumberCache, std::stringstream* comments) {
   MacroRegisterFunctionWithName("KostkaNumber::compute");
   this->value = - 1;
   if (!this->initTableaux(comments)) {
@@ -1454,39 +1453,39 @@ bool KostkaNumber::compute(HashedList<KostkaNumber>* KNcache, std::stringstream*
     }
     return true;
   }
-  SelectionFixedRankDifferentMaxMultiplicities theSel;
-  theSel.initialize();
-  theSel.capacities.setSize(this->partition.size);
+  SelectionFixedRankDifferentMaxMultiplicities selection;
+  selection.initialize();
+  selection.capacities.setSize(this->partition.size);
   for (int i = 0; i < this->partition.size; i ++) {
     if (i != this->partition.size - 1) {
-      theSel.capacities[i] = this->partition[i] - this->partition[i + 1];
+      selection.capacities[i] = this->partition[i] - this->partition[i + 1];
     } else {
-      theSel.capacities[i] = this->partition[i];
+      selection.capacities[i] = this->partition[i];
     }
   }
-  theSel.rank = *this->tuple.lastObject();
+  selection.rank = *this->tuple.lastObject();
   this->value = 0;
-  while (theSel.incrementReturnFalseIfPastLast()) {
+  while (selection.incrementReturnFalseIfPastLast()) {
     KostkaNumber ancestor;
     ancestor.partition = this->partition;
     ancestor.tuple = this->tuple;
     ancestor.tuple.setSize(ancestor.tuple.size - 1);
-    for (int i = 0; i < theSel.multiplicities.size; i ++) {
-      ancestor.partition[i] -= theSel.multiplicities[i];
+    for (int i = 0; i < selection.multiplicities.size; i ++) {
+      ancestor.partition[i] -= selection.multiplicities[i];
     }
-    if (KNcache != nullptr) {
-      int ancestorIndex = KNcache->getIndex(ancestor);
+    if (kostkaNumberCache != nullptr) {
+      int ancestorIndex = kostkaNumberCache->getIndex(ancestor);
       if (ancestorIndex != - 1) {
-        ancestor = KNcache->getElement(ancestorIndex);
-      } else if (!ancestor.compute(KNcache, comments)) {
+        ancestor = kostkaNumberCache->getElement(ancestorIndex);
+      } else if (!ancestor.compute(kostkaNumberCache, comments)) {
         return false;
       } else {
-        if (KNcache->size < this->MaxNumCachedKostkaNumbers) {
-          KNcache->addOnTop(ancestor);
+        if (kostkaNumberCache->size < this->MaxNumCachedKostkaNumbers) {
+          kostkaNumberCache->addOnTop(ancestor);
         }
       }
     } else {
-      if (!ancestor.compute(KNcache, comments)) {
+      if (!ancestor.compute(kostkaNumberCache, comments)) {
         return false;
       }
     }
@@ -1521,14 +1520,14 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
   }
   partitionPairs.quickSortAscending();
   partitionsParabolics.quickSortAscending();
-  Matrix<Rational> theMultTable;
-  theMultTable.initialize(partitionPairs.size, partitionsParabolics.size);
+  Matrix<Rational> multiplicitiesTable;
+  multiplicitiesTable.initialize(partitionPairs.size, partitionsParabolics.size);
   for (int j = 0; j < partitionPairs.size; j ++) {
     out << "V_{\\lambda, \\mu}, "
     << "<br>\\lambda =" << partitionPairs[j].object1.p
     << "<br>\\mu=" << partitionPairs[j].object2.p;
     for (int i = 0; i < partitionsParabolics.size; i ++) {
-      theMultTable(j, i) = KostkaNumber::ComputeTypeBParabolicSignMultiplicity(
+      multiplicitiesTable(j, i) = KostkaNumber::computeTypeBParabolicSignMultiplicity(
         partitionsParabolics[i],
         partitionPairs[j].object1,
         partitionPairs[j].object2,
@@ -1618,8 +1617,8 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
     out << "</td>";
     outLaTeX << "$" << Vstream.str() << "$";
     for (int j = 0; j < partitionsParabolics.size; j ++) {
-      out << "<td>" << theMultTable(i, j) << "</td>";
-      outLaTeX << "&" << "$" << theMultTable(i, j) << "$";
+      out << "<td>" << multiplicitiesTable(i, j) << "</td>";
+      outLaTeX << "&" << "$" << multiplicitiesTable(i, j) << "$";
     }
     outLaTeX << "\\\\";
     out << "</tr>";
@@ -1631,13 +1630,13 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
   return out.str();
 }
 
-Rational KostkaNumber::ComputeTypeBParabolicSignMultiplicity(
+Rational KostkaNumber::computeTypeBParabolicSignMultiplicity(
   const Partition& parabolicPartition,
   const Partition& leftPartition,
   const Partition& rightPartition,
   std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("KostkaNumber::ComputeTypeBParabolicSignMultiplicity");
+  MacroRegisterFunctionWithName("KostkaNumber::computeTypeBParabolicSignMultiplicity");
   int rank = leftPartition.n + rightPartition.n;
   int BcomponentSize = rank - parabolicPartition.n;
   if (comments != nullptr) {
@@ -1653,26 +1652,26 @@ Rational KostkaNumber::ComputeTypeBParabolicSignMultiplicity(
   SelectionWithDifferentMaxMultiplicities theSelection;
   List<int> complementSelection;
   HashedList<KostkaNumber> KNcache;
-  KostkaNumber leftKN, rightKN;
+  KostkaNumber leftKostkaNumber, rightKostkaNumber;
   Partition tempP;
   tempP = leftPartition;
   tempP.transpose();
-  leftKN.partition = tempP.p;
+  leftKostkaNumber.partition = tempP.p;
   tempP = rightPartition;
   tempP.transpose();
-  rightKN.partition = tempP.p;
+  rightKostkaNumber.partition = tempP.p;
   theSelection.initializeFromIntegers(parabolicPartition.p);
   do {
     complementSelection.setSize(parabolicPartition.p.size);
     for (int k = 0; k < theSelection.capacities.size; k ++) {
       complementSelection[k] = parabolicPartition.p[k] - theSelection.multiplicities[k];
     }
-    leftKN.tuple = theSelection.multiplicities;
-    leftKN.compute(&KNcache, nullptr);
-    rightKN.tuple = complementSelection;
-    rightKN.tuple.addOnTop(BcomponentSize);
-    rightKN.compute(&KNcache, nullptr);
-    result += leftKN.value * rightKN.value;
+    leftKostkaNumber.tuple = theSelection.multiplicities;
+    leftKostkaNumber.compute(&KNcache, nullptr);
+    rightKostkaNumber.tuple = complementSelection;
+    rightKostkaNumber.tuple.addOnTop(BcomponentSize);
+    rightKostkaNumber.compute(&KNcache, nullptr);
+    result += leftKostkaNumber.value * rightKostkaNumber.value;
   } while (theSelection.incrementReturnFalseIfPastLast());
   if (comments != nullptr) {
     *comments << result.toString();
@@ -1682,18 +1681,18 @@ Rational KostkaNumber::ComputeTypeBParabolicSignMultiplicity(
 
 std::string SelectionFixedRankDifferentMaxMultiplicities::toString() {
   std::stringstream out;
-  Vector<int> theMults;
-  theMults = this->multiplicities;
-  out << theMults;
+  Vector<int> multiplicitiesVector;
+  multiplicitiesVector = this->multiplicities;
+  out << multiplicitiesVector;
   return out.str();
 }
 
 std::string SelectionFixedRankDifferentMaxMultiplicities::toStringFull() {
   std::stringstream out;
-  Vector<int> theMults, theMaxMults;
-  theMaxMults = this->capacities;
-  theMults = this->multiplicities;
-  out << "multiplicities: " << theMults << "; max: " << theMaxMults
+  Vector<int> multiplicitiesVector, maximulMultiplicities;
+  maximulMultiplicities = this->capacities;
+  multiplicitiesVector = this->multiplicities;
+  out << "multiplicities: " << multiplicitiesVector << "; max: " << maximulMultiplicities
   << "; rank: " << this->rank;
   return out.str();
 }
@@ -1763,47 +1762,47 @@ bool CalculatorFunctionsWeylGroup::kostkaNumber(Calculator& calculator, const Ex
   if (input.size() != 3) {
     return false;
   }
-  KostkaNumber theKN;
+  KostkaNumber computer;
   if (
-    !calculator.getVectorInt(input[1], theKN.partition) ||
-    !calculator.getVectorInt(input[2], theKN.tuple)
+    !calculator.getVectorInt(input[1], computer.partition) ||
+    !calculator.getVectorInt(input[2], computer.tuple)
   ) {
     return calculator << "Failed to extract partition and tuple from input: " << input.toString();
   }
   std::stringstream out;
-  HashedList<KostkaNumber> theKNs;
-  if (theKN.compute(&theKNs, &out)) {
-    out << "<br>Final result: " << theKN.value.toString();
+  HashedList<KostkaNumber> allKostkaNumbers;
+  if (computer.compute(&allKostkaNumbers, &out)) {
+    out << "<br>Final result: " << computer.value.toString();
   }
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorFunctionsWeylGroup::allSelectionsFixedRank(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::kostkaNumber");
+  MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::allSelectionsFixedRank");
   if (input.size() != 3) {
     return false;
   }
-  SelectionFixedRankDifferentMaxMultiplicities theSel;
-  if (!input[1].isSmallInteger(&theSel.rank)) {
+  SelectionFixedRankDifferentMaxMultiplicities selection;
+  if (!input[1].isSmallInteger(&selection.rank)) {
     return false;
   }
-  if (!calculator.getVectorInt(input[2], theSel.capacities)) {
+  if (!calculator.getVectorInt(input[2], selection.capacities)) {
     return calculator << "Failed to extract list of multiplicities from "
     << input[2].toString();
   }
-  if (theSel.rank < 0) {
-    return output.assignValueOLD(0, calculator);
+  if (selection.rank < 0) {
+    return output.assignValue(calculator, 0);
   }
-  theSel.initialize();
+  selection.initialize();
   std::stringstream out;
-  out << "Max multiplicities: " << theSel.capacities << " rank: "
-  << theSel.rank;
-  while (theSel.incrementReturnFalseIfPastLast()) {
-    out << "<br>" << theSel.toString();
+  out << "Max multiplicities: " << selection.capacities << " rank: "
+  << selection.rank;
+  while (selection.incrementReturnFalseIfPastLast()) {
+    out << "<br>" << selection.toString();
   }
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorFunctionsWeylGroup::signSignatureRootSubsystemsFromKostkaNumbers(
@@ -1848,7 +1847,7 @@ bool CalculatorFunctionsWeylGroup::signSignatureRootSubsystemsFromKostkaNumbers(
     }
     return calculator << "Not implemented yet.";
   }
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorFunctionsWeylGroup::signSignatureRootSubsystems(
@@ -1898,7 +1897,7 @@ bool CalculatorFunctionsWeylGroup::signSignatureRootSubsystems(
     }
   }
   out << weyl.toStringSignSignatureRootSubsystem(finalSubGroups);
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 template < >
@@ -1910,11 +1909,11 @@ bool CalculatorFunctionsWeylGroup::decomposeWeylRep(Calculator& calculator, cons
   if (!input.isOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > ()) {
     return false;
   }
-  GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& inputRep =
+  GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& inputRepresentation =
   input.getValueNonConst<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
   VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> outputRep;
-  inputRep.makeGRCAM().decomposeTodorsVersion(outputRep);
-  return output.assignValueOLD(outputRep, calculator);
+  inputRepresentation.makeGRCAM().decomposeTodorsVersion(outputRep);
+  return output.assignValue(calculator, outputRep);
 }
 
 bool CalculatorFunctionsWeylGroup::isOuterAutoWeylGroup(
@@ -1942,14 +1941,14 @@ bool CalculatorFunctionsWeylGroup::isOuterAutoWeylGroup(
   WeylGroupData weyl;
   weyl.makeFromDynkinType(dynkinType);
   weyl.computeRho(true);
-  WeylGroupAutomorphisms theAutomorphisms;
-  theAutomorphisms.weylGroup = &weyl;
-  MatrixTensor<Rational> theOp;
-  theOp = matrix;
-  if (theAutomorphisms.isElementWeylGroupOrOuterAutomorphisms(theOp)) {
-    return output.assignValueOLD(1, calculator);
+  WeylGroupAutomorphisms automorphisms;
+  automorphisms.weylGroup = &weyl;
+  MatrixTensor<Rational> operatorTensorForm;
+  operatorTensorForm = matrix;
+  if (automorphisms.isElementWeylGroupOrOuterAutomorphisms(operatorTensorForm)) {
+    return output.assignValue(calculator, 1);
   }
-  return output.assignValueOLD(0, calculator);
+  return output.assignValue(calculator, 0);
 }
 
 bool CalculatorFunctionsWeylGroup::weylGroupNaturalRep(Calculator& calculator, const Expression& input, Expression& output) {
@@ -1960,18 +1959,18 @@ bool CalculatorFunctionsWeylGroup::weylGroupNaturalRep(Calculator& calculator, c
   if (!output.isOfType<WeylGroupData>()) {
     return false;
   }
-  WeylGroupData& theGroup = output.getValueNonConst<WeylGroupData>();
-  theGroup.computeInitialIrreducibleRepresentations();
-  theGroup.group.computeIrreducibleRepresentationsTodorsVersion();
+  WeylGroupData& weylGroup = output.getValueNonConst<WeylGroupData>();
+  weylGroup.computeInitialIrreducibleRepresentations();
+  weylGroup.group.computeIrreducibleRepresentationsTodorsVersion();
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational> tempRep;
-  theGroup.getStandardRepresentation(tempRep);
-  return output.assignValueOLD(tempRep.makeOtherGroupRepresentationClass(), calculator);
+  weylGroup.getStandardRepresentation(tempRep);
+  return output.assignValue(calculator, tempRep.makeOtherGroupRepresentationClass());
 }
 
 class MonomialMacdonald {
 public:
   SemisimpleLieAlgebra* owner;
-  Selection rootSel;
+  Selection rootSelection;
   bool flagDeallocated;
   MonomialMacdonald(): owner(nullptr), flagDeallocated(false) {
   }
@@ -1984,17 +1983,17 @@ public:
     return true;
   }
   static unsigned int hashFunction(const MonomialMacdonald& input) {
-    return input.rootSel.hashFunction();
+    return input.rootSelection.hashFunction();
   }
   void operator=(const MonomialMacdonald& other) {
     this->owner = other.owner;
-    this->rootSel = other.rootSel;
+    this->rootSelection = other.rootSelection;
     this->flagDeallocated = other.flagDeallocated;
   }
   bool operator==(const MonomialMacdonald& other) const;
-  void MakeFromRootSubsystem(const Vectors<Rational>& inputRoots, SemisimpleLieAlgebra& inputOwner);
-  void ActOnMeSimpleReflection(int indexSimpleReflection, Rational& outputMultiple);
-  void GenerateMyOrbit(HashedList<MonomialMacdonald>& output);
+  void makeFromRootSubsystem(const Vectors<Rational>& inputRoots, SemisimpleLieAlgebra& inputOwner);
+  void actOnMeSimpleReflection(int indexSimpleReflection, Rational& outputMultiple);
+  void generateMyOrbit(HashedList<MonomialMacdonald>& output);
   ~MonomialMacdonald();
 };
 
@@ -2004,43 +2003,43 @@ std::string MonomialMacdonald::toString(FormatExpressions* format) const {
   if (this->owner == nullptr) {
     return "(non-initialized)";
   }
-  if (this->rootSel.cardinalitySelection == 0) {
+  if (this->rootSelection.cardinalitySelection == 0) {
     return "1";
   }
   std::stringstream out;
-  for (int i = 0; i < this->rootSel.cardinalitySelection; i ++) {
-    out << "a_" << this->rootSel.elements[i] << "";
+  for (int i = 0; i < this->rootSelection.cardinalitySelection; i ++) {
+    out << "a_" << this->rootSelection.elements[i] << "";
   }
   return out.str();
 }
 
 bool MonomialMacdonald::operator==(const MonomialMacdonald& other) const {
-  return this->owner == other.owner && this->rootSel == other.rootSel;
+  return this->owner == other.owner && this->rootSelection == other.rootSelection;
 }
 
 MonomialMacdonald::~MonomialMacdonald() {
   this->flagDeallocated = true;
 }
 
-void MonomialMacdonald::GenerateMyOrbit(HashedList<MonomialMacdonald>& output) {
+void MonomialMacdonald::generateMyOrbit(HashedList<MonomialMacdonald>& output) {
   MacroRegisterFunctionWithName("MonomialMacdonald::GenerateMyOrbit");
   output.clear();
   output.addOnTop(*this);
   MonomialMacdonald currentMon;
-  Rational tempRat;
+  Rational coefficient;
   for (int i = 0; i < output.size; i ++) {
     for (int j = 0; j < this->owner->getRank(); j ++) {
       currentMon = output[i];
-      currentMon.ActOnMeSimpleReflection(j, tempRat);
+      currentMon.actOnMeSimpleReflection(j, coefficient);
       output.addOnTopNoRepetition(currentMon);
     }
   }
 }
 
-void MonomialMacdonald::MakeFromRootSubsystem(const Vectors<Rational>& inputRoots, SemisimpleLieAlgebra& inputOwner) {
-  MacroRegisterFunctionWithName("MonomialMacdonald::MakeFromRootSubsystem");
+void MonomialMacdonald::makeFromRootSubsystem(const Vectors<Rational>& inputRoots, SemisimpleLieAlgebra& inputOwner) {
+  MacroRegisterFunctionWithName("MonomialMacdonald::makeFromRootSubsystem");
   this->owner = &inputOwner;
-  this->rootSel.initialize(inputOwner.weylGroup.rootSystem.size);
+  this->rootSelection.initialize(inputOwner.weylGroup.rootSystem.size);
   Vector<Rational> currentV;
   for (int i = 0; i < inputRoots.size; i ++) {
     currentV = inputRoots[i];
@@ -2054,15 +2053,15 @@ void MonomialMacdonald::MakeFromRootSubsystem(const Vectors<Rational>& inputRoot
       << ": the vector " << currentV.toString()
       << " is not a root. " << global.fatal;
     }
-    this->rootSel.addSelectionAppendNewIndex(indexInRoots);
+    this->rootSelection.addSelectionAppendNewIndex(indexInRoots);
   }
-  this->rootSel.computeIndicesFromSelection();
+  this->rootSelection.computeIndicesFromSelection();
 }
 
-void MonomialMacdonald::ActOnMeSimpleReflection(int indexSimpleReflection, Rational& outputMultiple) {
+void MonomialMacdonald::actOnMeSimpleReflection(int indexSimpleReflection, Rational& outputMultiple) {
   Selection originalSel;
-  originalSel = this->rootSel;
-  this->rootSel.initialize(this->owner->weylGroup.rootSystem.size);
+  originalSel = this->rootSelection;
+  this->rootSelection.initialize(this->owner->weylGroup.rootSystem.size);
   Vector<Rational> currentV;
   outputMultiple = 1;
   for (int i = 0; i < originalSel.cardinalitySelection; i ++) {
@@ -2072,7 +2071,7 @@ void MonomialMacdonald::ActOnMeSimpleReflection(int indexSimpleReflection, Ratio
       currentV *= - 1;
       outputMultiple *= - 1;
     }
-    this->rootSel.addSelectionAppendNewIndex(this->owner->weylGroup.rootSystem.getIndex(currentV));
+    this->rootSelection.addSelectionAppendNewIndex(this->owner->weylGroup.rootSystem.getIndex(currentV));
   }
 }
 
@@ -2089,25 +2088,25 @@ bool CalculatorFunctionsWeylGroup::macdonaldPolys(Calculator& calculator, const 
   )) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
-  RootSubalgebras theRootSAs;
-  theRootSAs.owner = algebra.content;
-  theRootSAs.computeAllReductiveRootSubalgebrasUpToIsomorphism();
+  RootSubalgebras rootSubalgebras;
+  rootSubalgebras.owner = algebra.content;
+  rootSubalgebras.computeAllReductiveRootSubalgebrasUpToIsomorphism();
   std::stringstream out;
-  MonomialMacdonald theGenerator;
-  HashedList<MonomialMacdonald> theOrbit;
-  for (int i = 0; i < theRootSAs.subalgebras.size; i ++) {
-    RootSubalgebra& currentRootSA = theRootSAs.subalgebras[i];
-    theGenerator.MakeFromRootSubsystem(currentRootSA.positiveRootsReductiveSubalgebra, *algebra.content);
-    theGenerator.GenerateMyOrbit(theOrbit);
+  MonomialMacdonald generator;
+  HashedList<MonomialMacdonald> orbit;
+  for (int i = 0; i < rootSubalgebras.subalgebras.size; i ++) {
+    RootSubalgebra& currentRootSA = rootSubalgebras.subalgebras[i];
+    generator.makeFromRootSubsystem(currentRootSA.positiveRootsReductiveSubalgebra, *algebra.content);
+    generator.generateMyOrbit(orbit);
     out << "<hr>Root subsystem type " << currentRootSA.dynkinDiagram.toString();
-    out << ". Orbit has " << theOrbit.size << " element(s), here they are: ";
-    for (int j = 0; j < theOrbit.size; j ++) {
-      out << "<br>" << theOrbit[j].toString();
+    out << ". Orbit has " << orbit.size << " element(s), here they are: ";
+    for (int j = 0; j < orbit.size; j ++) {
+      out << "<br>" << orbit[j].toString();
     }
   }
-  out << "Type: " << theRootSAs.owner->weylGroup.dynkinType.toString()
-  << ". Number of root subsystems: " << theRootSAs.subalgebras.size;
-  return output.assignValueOLD(out.str(), calculator);
+  out << "Type: " << rootSubalgebras.owner->weylGroup.dynkinType.toString()
+  << ". Number of root subsystems: " << rootSubalgebras.subalgebras.size;
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorFunctionsWeylGroup::lieAlgebraWeight(
@@ -2119,16 +2118,16 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraWeight(
     return false;
   }
   Expression tempE;
-  SemisimpleLieAlgebra* theSSowner = nullptr;
+  SemisimpleLieAlgebra* semisimpleLieAlgebra = nullptr;
   if (!CalculatorConversions::functionSemisimpleLieAlgebra(
-    calculator, input[1], tempE, theSSowner
+    calculator, input[1], tempE, semisimpleLieAlgebra
   )) {
     return calculator << "<hr>Failed to load semisimple Lie algebra";
   }
-  std::string theCoordsString;
-  bool isGood = input[3].isOperation(&theCoordsString);
+  std::string coordinatesString;
+  bool isGood = input[3].isOperation(&coordinatesString);
   if (isGood) {
-    isGood = (theCoordsString == "epsilon") || (theCoordsString == "fundamental") || (theCoordsString == "simple");
+    isGood = (coordinatesString == "epsilon") || (coordinatesString == "fundamental") || (coordinatesString == "simple");
   }
   if (!isGood) {
     return calculator << "<hr>The third argument of MakeWeight is bad: must be one of the "
@@ -2138,38 +2137,38 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraWeight(
   if (!input[2].isSmallInteger(&weightIndex)) {
     return false;
   }
-  if (theCoordsString != "epsilon") {
-    if (weightIndex < 1 || weightIndex> theSSowner->getRank()) {
+  if (coordinatesString != "epsilon") {
+    if (weightIndex < 1 || weightIndex> semisimpleLieAlgebra->getRank()) {
       std::stringstream errorStream;
       errorStream << "The second argument of the MakeWeight function "
       << "needs to be index of a weight between 1 and the Lie algebra rank. "
       << "However, the index is " << weightIndex << ".";
       return output.assignError(calculator, errorStream.str());
     }
-    Vector<Polynomial<Rational> > EiVector;
-    EiVector.makeEi(theSSowner->getRank(), weightIndex - 1);
-    if (theCoordsString == "fundamental") {
-      resultWeight.weightFundamentalCoordinates = EiVector;
-    } else if (theCoordsString == "simple") {
-      resultWeight.weightFundamentalCoordinates = theSSowner->weylGroup.getFundamentalCoordinatesFromSimple(EiVector);
+    Vector<Polynomial<Rational> > eiVector;
+    eiVector.makeEi(semisimpleLieAlgebra->getRank(), weightIndex - 1);
+    if (coordinatesString == "fundamental") {
+      resultWeight.weightFundamentalCoordinates = eiVector;
+    } else if (coordinatesString == "simple") {
+      resultWeight.weightFundamentalCoordinates = semisimpleLieAlgebra->weylGroup.getFundamentalCoordinatesFromSimple(eiVector);
     }
   } else {
-    Vector<Rational> EiVector;
-    EiVector.makeZero(theSSowner->getRank());
-    Vector<Rational> tempV = theSSowner->weylGroup.getEpsilonCoordinates(EiVector);
-    if (weightIndex>tempV.size || weightIndex < 1) {
+    Vector<Rational> eiVector;
+    eiVector.makeZero(semisimpleLieAlgebra->getRank());
+    Vector<Rational> tempV = semisimpleLieAlgebra->weylGroup.getEpsilonCoordinates(eiVector);
+    if (weightIndex > tempV.size || weightIndex < 1) {
       std::stringstream errorStream;
       errorStream << "The second argument of the MakeWeight function needs to be index of a weight between 1 and " << tempV.size
       << ". However, the index is " << weightIndex << ".";
       return output.assignError(calculator, errorStream.str());
     }
-    EiVector.makeEi(tempV.size, weightIndex - 1);
-    resultWeight.weightFundamentalCoordinates = theSSowner->weylGroup.getFundamentalCoordinatesFromEpsilon(EiVector);
+    eiVector.makeEi(tempV.size, weightIndex - 1);
+    resultWeight.weightFundamentalCoordinates = semisimpleLieAlgebra->weylGroup.getFundamentalCoordinatesFromEpsilon(eiVector);
   }
-  resultWeight.owner = theSSowner;
+  resultWeight.owner = semisimpleLieAlgebra;
   ExpressionContext context(calculator);
-  context.setAmbientSemisimpleLieAlgebra(*theSSowner);
-  return output.assignValueWithContextOLD(resultWeight, context, calculator);
+  context.setAmbientSemisimpleLieAlgebra(*semisimpleLieAlgebra);
+  return output.assignValueWithContext(calculator, resultWeight, context);
 }
 
 bool CalculatorFunctionsWeylGroup::lieAlgebraRhoWeight(
@@ -2180,43 +2179,43 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraRhoWeight(
     return calculator << "Lie algebra rho weight expects a single argument. ";
   }
   Weight<Polynomial<Rational> > resultWeight;
-  SemisimpleLieAlgebra* theSSowner = nullptr;
+  SemisimpleLieAlgebra* semisimpleLieAlgebra = nullptr;
   Expression tempE;
   if (!CalculatorConversions::functionSemisimpleLieAlgebra(
-    calculator, input[1], tempE, theSSowner
+    calculator, input[1], tempE, semisimpleLieAlgebra
   )) {
     return calculator << "<hr>Failed to load semisimple Lie algebra. ";
   }
-  theSSowner->checkConsistency();
+  semisimpleLieAlgebra ->checkConsistency();
   ExpressionContext context(calculator);
-  context.setAmbientSemisimpleLieAlgebra(*theSSowner);
-  resultWeight.weightFundamentalCoordinates = theSSowner->weylGroup.getFundamentalCoordinatesFromSimple(theSSowner->weylGroup.rho);
-  resultWeight.owner = theSSowner;
-  return output.assignValueWithContextOLD(resultWeight, context, calculator);
+  context.setAmbientSemisimpleLieAlgebra(*semisimpleLieAlgebra );
+  resultWeight.weightFundamentalCoordinates = semisimpleLieAlgebra ->weylGroup.getFundamentalCoordinatesFromSimple(semisimpleLieAlgebra ->weylGroup.rho);
+  resultWeight.owner = semisimpleLieAlgebra;
+  return output.assignValueWithContext(calculator, resultWeight, context);
 }
 
 bool CalculatorFunctionsWeylGroup::testSpechtModules(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::testSpechtModules");
-  int theSymmetricGroupRank = 0;
-  if (!input.isSmallInteger(&theSymmetricGroupRank)) {
+  int symmetricGroupRank = 0;
+  if (!input.isSmallInteger(&symmetricGroupRank)) {
     return calculator << "testSpechtModules called with input that is not a small integer, not performing any tests.";
   }
-  if (theSymmetricGroupRank < 1) {
+  if (symmetricGroupRank < 1) {
     return calculator << "testSpechtModules takes as input a small positive integer, instead the input I got was "
-    << theSymmetricGroupRank << ". ";
+    << symmetricGroupRank << ". ";
   }
-  if (theSymmetricGroupRank > 6) {
+  if (symmetricGroupRank > 6) {
     return calculator
     << "For speed/memory reasons, testSpechtModules is currently restricted to take input no larger than 6. Your input was: "
-    << theSymmetricGroupRank;
+    << symmetricGroupRank;
   }
   std::stringstream out;
   out << "User has requested the test of Specht modules of S_"
-  << theSymmetricGroupRank << ". ";
-  Partition::testAllSpechtModules(theSymmetricGroupRank);
-  return output.assignValueOLD(out.str(), calculator);
+  << symmetricGroupRank << ". ";
+  Partition::testAllSpechtModules(symmetricGroupRank);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorFunctionsWeylGroup::representElementHyperOctahedral(
@@ -2227,17 +2226,17 @@ bool CalculatorFunctionsWeylGroup::representElementHyperOctahedral(
     return calculator << "Representating takes 2 arguments: element and rep.";
   }
   ElementHyperoctahedralGroupR2 element;
-  GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> theRep;
+  GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> representation;
   if (!input[1].isOfType(&element)) {
     return calculator << "Failed to extract element of hyperoctahedral group from " << input[1].toString();
   }
-  if (!input[2].isOfType(&theRep)) {
+  if (!input[2].isOfType(&representation)) {
     return calculator << "Failed to extract representation from " << input[2].toString();
   }
   Matrix<Rational> result;
-  if (!theRep.getMatrixOfElement(element, result)) {
+  if (!representation.getMatrixOfElement(element, result)) {
     return calculator << "Failed to get matrix of element " << element.toString()
-    << " from representation: " << theRep.toString();
+    << " from representation: " << representation.toString();
   }
   return output.makeMatrix(calculator, result, nullptr, false);
 }
@@ -2284,9 +2283,6 @@ bool CalculatorFunctionsWeylGroup::hyperOctahedralGetOneRepresentation(
   Partition partitionLeft, partitionRight;
   partitionLeft.fromListInt(inputLeft);
   partitionRight.fromListInt(inputRight);
-  //std::stringstream out;
-  //out << "Left partition is: " << partitionLeft.toString() << ", created from: " << inputLeft;
-  //out << "Right partition is: " << partitionRight.toString() << ", created from: " << inputRight;
   int index = 0;
   for (; index < calculator.objectContainer.hyperOctahedralGroups.size; index ++) {
     if (
@@ -2310,7 +2306,7 @@ bool CalculatorFunctionsWeylGroup::hyperOctahedralGetOneRepresentation(
   HD.spechtModuleOfPartititons(partitionLeft, partitionRight, R);
   //out << R;
   R.computeCharacter();
-  return output.assignValueOLD(R, calculator);
+  return output.assignValue(calculator, R);
 }
 
 bool CalculatorFunctionsWeylGroup::spechtModule(Calculator& calculator, const Expression& input, Expression& output) {
@@ -2342,12 +2338,12 @@ bool CalculatorFunctionsWeylGroup::spechtModule(Calculator& calculator, const Ex
   p.fromListInt(inputInt);
   std::stringstream out;
   out << "Partition is " << p.toString();
-  List<Matrix<Rational> > gens;
-  p.spechtModuleMatricesOfTranspositionsjjplusone(gens);
-  for (int i = 0; i < gens.size; i ++) {
-    out << i << "\n" << gens[i].toStringPlainText() << "\n";
+  List<Matrix<Rational> > generators;
+  p.spechtModuleMatricesOfTranspositionsjjplusone(generators);
+  for (int i = 0; i < generators.size; i ++) {
+    out << i << "\n" << generators[i].toStringPlainText() << "\n";
   }
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorFunctionsWeylGroup::hyperOctahedralAllModulesInducedFromSpechtModules(
@@ -2367,7 +2363,7 @@ bool CalculatorFunctionsWeylGroup::hyperOctahedralAllModulesInducedFromSpechtMod
   HyperoctahedralGroupData groupData;
   groupData.makeHyperoctahedralGroup(rank);
   groupData.allSpechtModules();
-  return output.assignValueOLD(groupData.group->prettyPrintCharacterTable(), calculator);
+  return output.assignValue(calculator, groupData.group->prettyPrintCharacterTable());
 }
 
 bool CalculatorFunctionsWeylGroup::hyperOctahedralPrintGeneratorCommutationRelations(
@@ -2386,7 +2382,7 @@ bool CalculatorFunctionsWeylGroup::hyperOctahedralPrintGeneratorCommutationRelat
   }
   HyperoctahedralGroupData groupData;
   groupData.makeHyperoctahedralGroup(rank);
-  return output.assignValueOLD(groupData.group->prettyPrintGeneratorCommutationRelations(), calculator);
+  return output.assignValue(calculator, groupData.group->prettyPrintGeneratorCommutationRelations());
 }
 
 bool CalculatorFunctionsWeylGroup::weylGroupElement(
@@ -2430,7 +2426,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupElement(
     }
   }
   element.makeCanonical();
-  return output.assignValueOLD(element, calculator);
+  return output.assignValue(calculator, element);
 }
 
 template <typename somegroup, typename Coefficient>
@@ -2484,20 +2480,20 @@ bool CalculatorFunctionsWeylGroup::makeVirtualWeylRep(
   if (!input.isOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()) {
     return false;
   }
-  GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& inputRep =
+  GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& inputRepresentation =
   input.getValueNonConst<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
-  WeylGroupData* weylData = inputRep.ownerGroup->generators[0].owner;
+  WeylGroupData* weylData = inputRepresentation.ownerGroup->generators[0].owner;
   if (
-    inputRep.ownerGroup->irreducibleRepresentations.size<inputRep.ownerGroup->conjugacyClassCount() &&
+    inputRepresentation.ownerGroup->irreducibleRepresentations.size < inputRepresentation.ownerGroup->conjugacyClassCount() &&
     weylData->group.ComputeIrreducibleRepresentationsWithFormulas
   ) {
     weylData->group.ComputeIrreducibleRepresentationsWithFormulas(weylData->group);
   }
-  if (inputRep.ownerGroup->irreducibleRepresentations.size<inputRep.ownerGroup->conjugacyClassCount()) {
+  if (inputRepresentation.ownerGroup->irreducibleRepresentations.size < inputRepresentation.ownerGroup->conjugacyClassCount()) {
     weylData->computeInitialIrreducibleRepresentations();
     weylData->group.computeIrreducibleRepresentationsTodorsVersion();
   }
-  VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> outputRep;
-  outputRep.assignRepresentation(inputRep);
-  return output.assignValueOLD(outputRep, calculator);
+  VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> outputRepresentation;
+  outputRepresentation.assignRepresentation(inputRepresentation);
+  return output.assignValue(calculator, outputRepresentation);
 }

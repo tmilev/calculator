@@ -5022,7 +5022,7 @@ public:
   }
   void intersectWith(const Lattice& other);
   bool findOnePreimageInLatticeOf(
-    const Matrix<Rational>& theLinearMap, const Vectors<Rational>& input, Vectors<Rational>& output
+    const Matrix<Rational>& linearMap, const Vectors<Rational>& input, Vectors<Rational>& output
   );
   void intersectWithPreimageOfLattice(
     const Matrix<Rational> & linearMap, const Lattice& other

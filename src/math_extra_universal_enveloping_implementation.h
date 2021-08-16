@@ -1772,7 +1772,6 @@ template <class Coefficient>
 std::string MonomialUniversalEnvelopingOrdered<Coefficient>::toString(
   FormatExpressions* format
 ) const {
-
   if (this->owner == nullptr) {
     return "Faulty monomial: non-initialized owner. ";
   }

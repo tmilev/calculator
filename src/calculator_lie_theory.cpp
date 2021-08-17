@@ -268,7 +268,7 @@ bool CalculatorLieTheory::highestWeightVectorCommon(
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFraction<Rational> > element;
   //= theElementData.theElementTensorGenVermas.getElement();
-  ListReferences<ModuleSSalgebra<RationalFraction<Rational> > >& theMods = calculator.objectContainer.theCategoryOmodules;
+  ListReferences<ModuleSSalgebra<RationalFraction<Rational> > >& theMods = calculator.objectContainer.categoryOModules;
   int indexOfModule = - 1;
 
   for (int i = 0; i < theMods.size; i ++) {
@@ -368,9 +368,9 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
   Vector<Rational> splittingParSel;
   splittingParSel = theG2B3Data.splittingParabolicSelection;
 
-  calculator.objectContainer.theCategoryOmodules.addNoRepetitionOrReturnIndexFirst(theModCopy);
-  int theModIndex = calculator.objectContainer.theCategoryOmodules.getIndex(theModCopy);
-  ModuleSSalgebra<RationalFraction<Rational> >& theMod = calculator.objectContainer.theCategoryOmodules[theModIndex];
+  calculator.objectContainer.categoryOModules.addNoRepetitionOrReturnIndexFirst(theModCopy);
+  int theModIndex = calculator.objectContainer.categoryOModules.getIndex(theModCopy);
+  ModuleSSalgebra<RationalFraction<Rational> >& theMod = calculator.objectContainer.categoryOModules[theModIndex];
   theMod.getOwner().flagHasNilradicalOrder = true;
   std::stringstream out;
   calculator << "<hr>Time elapsed before making B3 irrep: " << global.getElapsedSeconds();
@@ -1963,11 +1963,37 @@ bool CalculatorLieTheory::standardRepresentationMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorLieTheory::standardRepresentationMatrix");
-  return output.assignError(calculator, "Not implemented yet.");
+  if (input.size() != 2) {
+    return calculator << "Expected a single argument.";
+  }
+  ElementUniversalEnveloping<RationalFraction<Rational> > element;
+  if (!input[1].isOfType(&element)) {
+    return calculator << "Argument expected to be element of universal enveloping.";
+  }
+  if (element.isEqualToZero()) {
+    return false;
+  }
+  ExpressionContext context = input[1].getContext();
+  SemisimpleLieAlgebra& owner = element.getOwner();
+  Matrix<RationalFraction<Rational> > result;
+  owner.getElementStandardRepresentation(element, result, &calculator.comments);
+  Matrix<Expression> resultExpressions;
+  resultExpressions.initialize(result.numberOfRows, result.numberOfColumns);
+  for (int i = 0; i < resultExpressions.numberOfRows; i ++) {
+    for (int j = 0; j < resultExpressions.numberOfColumns; j ++) {
+      Rational whichConstant;
+      if (result(i, j).isConstant(&whichConstant)) {
+        resultExpressions(i, j).assignValue(calculator, whichConstant);
+      } else {
+        resultExpressions(i, j).assignValueWithContext(calculator, result(i, j), context);
+      }
+    }
+  }
+  return output.assignMatrixExpressions(resultExpressions, calculator, false, false);
 }
 
 bool CalculatorLieTheory::adjointMatrix(
-  Calculator &calculator, const Expression &input, Expression &output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   return output.assignError(calculator, "Not implemented yet.");
 }

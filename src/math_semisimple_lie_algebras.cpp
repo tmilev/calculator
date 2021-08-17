@@ -1403,20 +1403,20 @@ void SemisimpleLieAlgebra::orderNilradicalNilWeightDescending(const Selection& p
 }
 
 void SemisimpleLieAlgebra::orderNilradical(
-  const Selection& parSelZeroMeansLeviPart, bool useNilWeight, bool ascending
+  const Selection& parabolicSelectionZeroMeansLeviPart, bool useNilWeight, bool ascending
 ) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::orderNilradical");
   if (useNilWeight) {
     if (ascending) {
-      this->orderNilradicalNilWeightAscending(parSelZeroMeansLeviPart);
+      this->orderNilradicalNilWeightAscending(parabolicSelectionZeroMeansLeviPart);
     } else {
-      this->orderNilradicalNilWeightDescending(parSelZeroMeansLeviPart);
+      this->orderNilradicalNilWeightDescending(parabolicSelectionZeroMeansLeviPart);
     }
   } else {
     if (ascending) {
-      this->orderNilradicalFirstTotalWeightAscending(parSelZeroMeansLeviPart);
+      this->orderNilradicalFirstTotalWeightAscending(parabolicSelectionZeroMeansLeviPart);
     } else {
-      this->orderNilradicalFirstTotalWeightDescending(parSelZeroMeansLeviPart);
+      this->orderNilradicalFirstTotalWeightDescending(parabolicSelectionZeroMeansLeviPart);
     }
   }
 }

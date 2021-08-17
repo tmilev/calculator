@@ -114,8 +114,7 @@ std::ostream& operator<< (std::ostream& output, const Matrix<Coefficient>& matri
 }
 
 template <class Coefficient, typename IntegerType>
-void MathRoutines::raiseToPower(
-  Coefficient& theElement, const IntegerType& power, const Coefficient& ringUnit
+void MathRoutines::raiseToPower(Coefficient& element, const IntegerType& power, const Coefficient& ringUnit
 ) {
   MacroRegisterFunctionWithName("MathRoutines::raiseToPower");
   IntegerType powerCopy;
@@ -127,36 +126,36 @@ void MathRoutines::raiseToPower(
     return;
   }
   if (powerCopy == 0) {
-    theElement = ringUnit;
+    element = ringUnit;
     return;
   }
   ProgressReport reportOne;
   ProgressReport reportTwo(32, GlobalVariables::Response::ReportType::general);
   Coefficient squares;
-  squares = theElement;
+  squares = element;
   if (powerCopy < 4) {
     for (IntegerType i = 1; i < powerCopy; i ++) {
-      theElement *= squares;
+      element *= squares;
     }
     return;
   }
   if (reportOne.tickAndWantReport()) {
     std::stringstream reportStream;
-    reportStream << "Raising " << theElement.toString()
+    reportStream << "Raising " << element.toString()
     << " to power: " << powerCopy;
     reportOne.report(reportStream.str());
   }
-  theElement = ringUnit;
+  element = ringUnit;
   while (powerCopy > 0) {
     if (powerCopy % 2 == 1) {
       if (reportTwo.tickAndWantReport()) {
         std::stringstream reportStream2;
         reportStream2 << "Remaining exponent: " << powerCopy << "<br>";
-        reportStream2 << "Multiplying " << theElement.toString()
+        reportStream2 << "Multiplying " << element.toString()
         << " by " << squares.toString();
         reportTwo.report(reportStream2.str());
       }
-      theElement *= squares;
+      element *= squares;
     }
     powerCopy /= 2;
     if (powerCopy > 0) {

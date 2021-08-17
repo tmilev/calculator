@@ -254,7 +254,7 @@ public:
   static bool isPrimeSimple(int input);
   template <class Coefficient, typename IntegerType>
   static void raiseToPower(
-    Coefficient& theElement,
+    Coefficient& element,
     const IntegerType& power,
     const Coefficient& ringUnit
   );
@@ -1069,8 +1069,8 @@ public:
   }
   bool operator>(const List<Object>& other) const;
   bool operator<(const List<Object>& other) const;
-  void shiftUpExpandOnTop(int StartingIndex);
-  void shiftUpExpandOnTopRepeated(int StartingIndex, int numberOfNewElements);
+  void shiftUpExpandOnTop(int startingIndex);
+  void shiftUpExpandOnTopRepeated(int startingIndex, int numberOfNewElements);
   void assignListList(const List<List<Object> >& input) {
     int count = 0;
     for (int i = 0; i < input.size; i ++) {
@@ -1881,14 +1881,14 @@ bool List<Object>::operator<(const List<Object>& other) const {
 }
 
 template <class Object>
-void List<Object>::shiftUpExpandOnTop(int StartingIndex) {
-  this->shiftUpExpandOnTopRepeated(StartingIndex, 1);
+void List<Object>::shiftUpExpandOnTop(int startingIndex) {
+  this->shiftUpExpandOnTopRepeated(startingIndex, 1);
 }
 
 template <class Object>
-void List<Object>::shiftUpExpandOnTopRepeated(int StartingIndex, int numberOfNewElements) {
+void List<Object>::shiftUpExpandOnTopRepeated(int startingIndex, int numberOfNewElements) {
   this->setSize(this->size + numberOfNewElements);
-  int lowBound = StartingIndex + numberOfNewElements;
+  int lowBound = startingIndex + numberOfNewElements;
   for (int i = this->size - 1; i >= lowBound; i --) {
     this->objects[i] = this->objects[i - numberOfNewElements];
   }

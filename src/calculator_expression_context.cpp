@@ -781,7 +781,7 @@ bool WithContext<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >:
   (void) commentsOnFailure;
   PolynomialSubstitution<Rational> substitution;
   this->context.polynomialSubstitutionNoFailure(newContext, substitution, Rational::one());
-  this->content.substitution(substitution, this->context.owner->objectContainer.theCategoryOmodules);
+  this->content.substitution(substitution, this->context.owner->objectContainer.categoryOModules);
   this->context = newContext;
   return true;
 }

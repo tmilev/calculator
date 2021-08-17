@@ -2003,18 +2003,18 @@ bool CalculatorParser::allowsTensorInPreceding(const std::string& lookAhead) {
   return this->allowsTimesInPreceding(lookAhead) || lookAhead == "\\otimes";
 }
 
-bool CalculatorParser::allowsTimesInNext(const std::string& thePreceding) {
+bool CalculatorParser::allowsTimesInNext(const std::string& preceding) {
   if (
-    thePreceding == "{}" || thePreceding == "^" || thePreceding == "\\sqrt" || thePreceding == "_"
+    preceding == "{}" || preceding == "^" || preceding == "\\sqrt" || preceding == "_"
   ) {
     return false;
   }
   return true;
 }
 
-bool CalculatorParser::allowsTimesInPreceding(const SyntacticElement& thePreceding, const std::string& lookAhead) {
-  if (thePreceding.controlIndex == this->conExpression()) {
-    if (thePreceding.data.isBuiltInAtom()) {
+bool CalculatorParser::allowsTimesInPreceding(const SyntacticElement& preceding, const std::string& lookAhead) {
+  if (preceding.controlIndex == this->conExpression()) {
+    if (preceding.data.isBuiltInAtom()) {
       return lookAhead == "+" || lookAhead == "-" || lookAhead == "*" || lookAhead == "/" ||
       lookAhead == "\\cup" ||
       lookAhead == ")" || lookAhead == "]" || lookAhead == "}" ||

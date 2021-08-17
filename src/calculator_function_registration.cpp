@@ -4848,8 +4848,9 @@ void Calculator::initializeFunctionsStandard() {
     "Please do note use (or use at your own risk): this is work-in-progress. "
     "Will be documented when implemented and tested. Tensor product of "
     "generalized Verma modules. ",
-    "X = G_2;\ng_{{i}}= GetChevalleyGenerator{}(X,i);\n"
-    "h_{{i}}= GetCartanGenerator{}(X,i);\n"
+    "X = G_2;\n"
+    "g_{{i}}= ChevalleyGenerator{}(X,i);\n"
+    "h_{{i}}= CartanGenerator{}(X,i);\n"
     "v=HeighestWeightVector{}(X, (1,0),(0,0));\n"
     "g_{- 1}(v\\otimes v);\n"
     "g_{- 1}g_{- 1}(v\\otimes v); ",

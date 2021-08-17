@@ -134,15 +134,15 @@ public:
   }
   template <class Coefficient>
   void getGenericElementNegativeBorelNilradical(
-    ElementSemisimpleLieAlgebra<Polynomial<Coefficient> >& output, int indexFirstVar = 0
+    ElementSemisimpleLieAlgebra<Polynomial<Coefficient> >& output, int indexFirstVariable = 0
   ) {
     output.makeZero();
-    ChevalleyGenerator theGen;
+    ChevalleyGenerator generator;
     Polynomial<Coefficient> coefficient;
     for (int i = 0; i < this->getNumberOfPositiveRoots(); i ++) {
-      theGen.makeGenerator(*this, i);
-      coefficient.makeMonomial(indexFirstVar + i, 1, 1);
-      output.addMonomial(theGen, coefficient);
+      generator.makeGenerator(*this, i);
+      coefficient.makeMonomial(indexFirstVariable + i, 1, 1);
+      output.addMonomial(generator, coefficient);
     }
   }
   int getOppositeGeneratorIndex(int index) {
@@ -212,7 +212,7 @@ public:
   inline int getRank() const {
     return this->weylGroup.cartanSymmetric.numberOfRows;
   }
-  void orderNilradical(const Selection& parSelZeroMeansLeviPart, bool useNilWeight, bool ascending);
+  void orderNilradical(const Selection& parabolicSelectionZeroMeansLeviPart, bool useNilWeight, bool ascending);
   void orderNilradicalFirstTotalWeightAscending(const Selection& parSelZeroMeansLeviPart);
   void orderNilradicalFirstTotalWeightDescending(const Selection& parSelZeroMeansLeviPart);
   void orderNilradicalNilWeightAscending(const Selection& parSelZeroMeansLeviPart);
@@ -317,7 +317,7 @@ public:
   bool operator==(const SemisimpleLieAlgebra& other) const {
     return this->weylGroup == other.weylGroup;
   }
-  // Returns one possible matrix realization of an element for one particular
+  // Returns the matrix realization of an element for one particular
   // preferred "standard" representation of the lie algebra.
   // As of writing, the "standard" representation is only implemented for
   // sl(n) - the natural (n x n)- matrix realization.
@@ -325,6 +325,13 @@ public:
   bool getElementStandardRepresentation(
     const ElementSemisimpleLieAlgebra<Coefficient>& element,
     Matrix<Coefficient>& output
+  );
+  // Same as the previous function but for elements of the Universal Enveloping Algebra.
+  template<typename Coefficient>
+  bool getElementStandardRepresentation(
+    const ElementUniversalEnveloping<Coefficient>& element,
+    Matrix<Coefficient>& output,
+    std::stringstream* commentsOnFailure
   );
   template<typename Coefficient>
   bool accumulateChevalleyGeneratorStandardRepresentation(

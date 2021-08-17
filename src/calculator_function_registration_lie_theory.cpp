@@ -153,10 +153,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "(or its universal enveloping algebra) "
     "in a 'natural' representation of the Lie algebra. "
     "Implemented for type A only at the moment."
-    "Two possible input formats. "
-    "1) One argument input. Give as input a Chevalley generator."
-    "2) Two argument input. First is the type of the semisimple lie algebra."
-    "Second is the chevalley generator, using the letter g.",
+    "The argument should be a Chevalley generator or an element of the "
+    "Universal enveloping algebra.",
     "Type = A_4;\n"
     "StandardRepresentationMatrix{}(Type, g_1);\n"
     "g_{{j}}=ChevalleyGenerator(Type, j);\n"

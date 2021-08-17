@@ -2102,7 +2102,7 @@ void ObjectContainer::reset() {
   this->weylGroupElements.clear();
   this->weylGroupRepresentations.clear();
   this->weylGroupVirtualRepresentations.clear();
-  this->theCategoryOmodules.setSize(0);
+  this->categoryOModules.setSize(0);
   this->semisimpleLieAlgebras.clear();
   this->semisimpleLieAlgebraPointers.clear();
   this->semisimpleSubalgebras.clear();

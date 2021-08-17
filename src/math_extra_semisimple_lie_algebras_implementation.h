@@ -741,6 +741,57 @@ bool SemisimpleLieAlgebra::getElementStandardRepresentation(
 }
 
 template <typename Coefficient>
+bool SemisimpleLieAlgebra::getElementStandardRepresentation(
+  const ElementUniversalEnveloping<Coefficient>& element,
+  Matrix<Coefficient>& output,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::getElementStandardRepresentation");
+  char dynkinType = 0;
+  if (!this->weylGroup.dynkinType.isSimple(&dynkinType, nullptr)) {
+    return false;
+  }
+  if (dynkinType != 'A') {
+    // Only type A is supported as of writing.
+    return false;
+  }
+  int dimension = this->getRank() + 1;
+  output.makeZeroMatrix(dimension, 0);
+  Matrix<Coefficient> generatorMatrix, monomialMatrix, powerMatrix, identity;
+  identity.makeIdentity(output, 0, 1);
+  Coefficient one, zero;
+  one = 1;
+  zero = 0;
+  for (int i = 0; i < element.size(); i ++) {
+    const MonomialUniversalEnveloping<Coefficient>& monomial = element[i];
+    monomialMatrix.makeIdentity(output, 0, 1);
+    for (int j = 0; j < monomial.generatorsIndices.size; j++) {
+      ChevalleyGenerator generator;
+      generator.makeGenerator(*this, monomial.generatorsIndices[j]);
+      powerMatrix.initialize(dimension, dimension);
+      powerMatrix.makeZero(zero);
+      this->accumulateChevalleyGeneratorStandardRepresentation(
+        generator,
+        one,
+        powerMatrix
+      );
+      int power = 0;
+      if (!monomial.powers[j].isSmallInteger(&power)) {
+        if (commentsOnFailure != nullptr) {
+          *commentsOnFailure << "Failed to extract powers. ";
+        }
+        return false;
+      }
+      MathRoutines::raiseToPower(powerMatrix, power, identity);
+      monomialMatrix.multiplyOnTheRight(powerMatrix);
+    }
+    monomialMatrix *= element.coefficients[i];
+    output += monomialMatrix;
+  }
+  return true;
+}
+
+template <typename Coefficient>
 bool SemisimpleLieAlgebra::accumulateChevalleyGeneratorStandardRepresentation(
   const ChevalleyGenerator& element,
   const Coefficient& coefficient,

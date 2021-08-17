@@ -49,12 +49,14 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
   }
 }
 
-bool PartialFractions::argumentsAllowed(Vectors<Rational>& theArguments, std::string& outputWhatWentWrong) {
-  if (theArguments.size < 1) {
+bool PartialFractions::argumentsAllowed(
+  Vectors<Rational>& arguments, std::string& outputWhatWentWrong
+) {
+  if (arguments.size < 1) {
     return false;
   }
   Cone tempCone;
-  bool result = tempCone.createFromVertices(theArguments);
+  bool result = tempCone.createFromVertices(arguments);
   if (tempCone.isTheEntireSpace()) {
     outputWhatWentWrong = "Error: the vectors you gave as input span the entire space.";
     return false;
@@ -116,8 +118,8 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
   WeylGroupData& weylGroup = *this->owner;
   weylGroup.computeRho(true);
   Vector<Rational>& alpha = weylGroup.rootsOfBorel[indexAlpha];
-  Rational LengthAlpha = weylGroup.rootScalarCartanRoot(alpha, alpha);
-  Vector<Rational> alphaScaled = alpha * 2 / LengthAlpha;
+  Rational lengthAlpha = weylGroup.rootScalarCartanRoot(alpha, alpha);
+  Vector<Rational> alphaScaled = alpha * 2 / lengthAlpha;
   for (int i = 0; i < this->waypoints.size; i ++) {
     Rational tempRat = this->owner->rootScalarCartanRoot(this->waypoints[i], alphaScaled);
     if (tempRat <= theMin) {

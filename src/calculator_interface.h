@@ -1129,7 +1129,7 @@ public:
   MapReferences<DynkinType, SemisimpleSubalgebras> semisimpleSubalgebras;
   HashedListReferences<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > weylGroupRepresentations;
   HashedListReferences<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > weylGroupVirtualRepresentations;
-  ListReferences<ModuleSSalgebra<RationalFraction<Rational> > > theCategoryOmodules;
+  ListReferences<ModuleSSalgebra<RationalFraction<Rational> > > categoryOModules;
   ListReferences<SlTwoSubalgebras> slTwoSubalgebras;
   HashedListReferences<ElementEllipticCurve<ElementZmodP> > ellipticCurveElementsZmodP;
   HashedListReferences<ElementEllipticCurve<Rational> > ellipticCurveElementsRational;
@@ -1157,7 +1157,7 @@ public:
   HashedListReferences<ElementZmodP> elementsModP;
   HashedListReferences<Weight<Rational> > weights;
   HashedListReferences<Weight<Polynomial<Rational> > > weightsPolynomial;
-  ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational > > hyperoctahedralRepresentations;
+  ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> > hyperoctahedralRepresentations;
   ListReferences<Plot> allPlots;
   List<bool> userInputBoxSliderDisplayed;
   MapReferences<std::string, InputBox, MathRoutines::hashString> userInputTextBoxesWithValues;
@@ -1236,8 +1236,8 @@ private:
   bool allowsAndInPreceding(const std::string& lookAhead);
   bool allowsInInPreceding(const std::string& lookAhead);
   bool allowsPlusInPreceding(const std::string& lookAhead);
-  bool allowsTimesInNext(const std::string& thePreceding);
-  bool allowsTimesInPreceding(const SyntacticElement& thePreceding, const std::string& lookAhead);
+  bool allowsTimesInNext(const std::string& preceding);
+  bool allowsTimesInPreceding(const SyntacticElement& preceding, const std::string& lookAhead);
 
   bool allowsTimesInPreceding(const std::string& lookAhead);
   bool allowsTensorInPreceding(const std::string& lookAhead);

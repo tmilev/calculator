@@ -958,9 +958,9 @@ public:
   ) const;
   void multiplyOnTheLeft(const Matrix<Coefficient>& standsOnTheLeft, const Coefficient& ringZero = 0);
   void multiplyOnTheRight(const Matrix<Coefficient>& standsOnTheRight) {
-    Matrix<Coefficient> temp = *this;
+    Matrix<Coefficient> thisCopy = *this;
     *this = standsOnTheRight;
-    this->multiplyOnTheLeft(temp);
+    this->multiplyOnTheLeft(thisCopy);
   }
   void nonPivotPointsToEigenVectorMatrixForm(Selection& nonPivotPoints, Matrix<Coefficient>& output);
   void getVectorsFromRows(List<Vector<Coefficient> >& output) {
@@ -1218,7 +1218,7 @@ public:
   );
   Coefficient getDeterminant();
   Coefficient getTrace() const;
-  void assignMatrixIntegerWithDenominator(Matrix<LargeInteger>& matrix, const LargeIntegerUnsigned& Den);
+  void assignMatrixIntegerWithDenominator(Matrix<LargeInteger>& matrix, const LargeIntegerUnsigned& denominator);
   void scaleToIntegralForMinimalRationalHeightNoSignChange();
   void getMatrixIntegerWithDenominator(Matrix<LargeInteger>& outputMat, LargeIntegerUnsigned& outputDen);
   void lieBracketWith(const Matrix<Coefficient>& right);
@@ -1245,7 +1245,7 @@ public:
     Vector<Coefficient>* outputSolution = 0
   );
   static void computePotentialChangeGradient(
-    Matrix<Coefficient>& matA,
+    Matrix<Coefficient>& matrixA,
     Selection& baseVariables,
     int numberOfTrueVariables,
     int columnIndex,
@@ -1258,7 +1258,7 @@ public:
     int enteringVariable,
     Matrix<Coefficient>& matrixA,
     Vector<Coefficient>& inputVectorX,
-    Selection& BaseVariables
+    Selection& baseVariables
   );
   LargeInteger findPositiveGCDCoefficientNumerators();
   Matrix<Coefficient> operator-(const Matrix<Coefficient>& right) const {
@@ -1589,15 +1589,15 @@ void Matrix<Coefficient>::multiplyOnTheLeft(
     << standsOnTheLeft.numberOfColumns
     << " columns by a matrix with " << this->numberOfRows << " rows. " << global.fatal;
   }
-  Coefficient tempEl;
+  Coefficient coefficient;
   output.initialize(standsOnTheLeft.numberOfRows, this->numberOfColumns);
   for (int i = 0; i < standsOnTheLeft.numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
       output.elements[i][j] = ringZero;
       for (int k = 0; k < this->numberOfRows; k ++) {
-        tempEl = standsOnTheLeft(i, k);
-        tempEl *= this->elements[k][j];
-        output.elements[i][j] += (tempEl);
+        coefficient = standsOnTheLeft(i, k);
+        coefficient *= this->elements[k][j];
+        output.elements[i][j] += coefficient;
       }
     }
   }
@@ -1806,7 +1806,7 @@ void Matrix<Element>::gaussianEliminationByRowsNoRowSwapPivotPointsByRows(
 ) {
   outputPivotPointCols.setSize(this->numberOfRows);
   Element tempElement;
-  for (int i = firstNonProcessedRow; i < this->numRows; i ++) {
+  for (int i = firstNonProcessedRow; i < this->numberOfRows; i ++) {
     int currentPivotCol = - 1;
     for (int j = 0; j < this->numberOfColumns; j ++) {
       if (!this->elements[i][j].isEqualToZero()) {
@@ -2075,9 +2075,9 @@ public:
     LinearCombination<TemplateMonomial, Coefficient>& other,
     const Coefficient& coefficient
   );
-  void popMonomial(int index, TemplateMonomial& outputMonomial, Coefficient& outputCoeff) {
+  void popMonomial(int index, TemplateMonomial& outputMonomial, Coefficient& outputCoefficient) {
     outputMonomial = (*this)[index];
-    outputCoeff = this->coefficients[index];
+    outputCoefficient = this->coefficients[index];
     this->monomials.removeIndexSwapWithLast(index);
     this->coefficients.removeIndexSwapWithLast(index);
   }
@@ -2474,9 +2474,9 @@ public:
     this->addMonomial(tempM, other);
   }
   void operator-=(const Coefficient& other) {
-    TemplateMonomial tempM;
-    tempM.makeOne();
-    this->subtractMonomial(tempM, other);
+    TemplateMonomial monomial;
+    monomial.makeOne();
+    this->subtractMonomial(monomial, other);
   }
   template <class OtherType>
   void assignOtherType(const LinearCombination<TemplateMonomial, Coefficient>& other) {
@@ -2505,8 +2505,8 @@ public:
       this->coefficients[i] /= other;
     }
   }
-  template <class otherType>
-  void operator*=(const otherType& other) {
+  template <class OtherType>
+  void operator*=(const OtherType& other) {
     for (int i = 0; i < this->coefficients.size; i ++) {
       this->coefficients[i] *= other;
       if (i == 0) {
@@ -2532,8 +2532,8 @@ public:
     this->makeZero();
     this->addMonomial(otherCopy, 1);
   }
-  template<class otherType>
-  void operator=(const LinearCombination<TemplateMonomial, otherType>& other) {
+  template<class OtherType>
+  void operator=(const LinearCombination<TemplateMonomial, OtherType>& other) {
     this->coefficients = other.coefficients;
     this->monomials = other.monomials;
   }
@@ -3089,7 +3089,6 @@ class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
   // An element in the x-th row and y-th column
   // is defined as element [x][y].
   void makeExponentSubstitution(Matrix<LargeInteger>& substitution);
-  void addConstant(Coefficient& theConst);
   void multiplyByConstant(Coefficient& r);
   int getHighestIndexSuchThatHigherIndexVariablesDontParticipate() {
     int result = - 1;
@@ -3119,13 +3118,13 @@ class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
   void toString(std::string& output, int numDisplayedEltsMinus1ForAll) const {
     std::stringstream out;
     output.clear();
-    FormatExpressions PolyFormatLocal;
+    FormatExpressions polynomialFormatLocal;
     if (numDisplayedEltsMinus1ForAll == - 1) {
       numDisplayedEltsMinus1ForAll = this->size;
     }
     for (int i = 0; i < this->size; i ++) {
       out << "x_{" << i + 1 << "} \\mapsto "
-      << this->objects[i].toString(&PolyFormatLocal);
+      << this->objects[i].toString(&polynomialFormatLocal);
       if (i != this->size - 1) {
         out << ", ";
       }
@@ -3563,10 +3562,10 @@ bool LinearCombination<TemplateMonomial, Coefficient>::linearSpanContainsGetFirs
   HashedList<TemplateMonomial>* seedMonomials
 ) {
   List<LinearCombinationTemplate> listCopy = inputList;
-  Matrix<Coefficient> theRowOperations;
-  theRowOperations.makeIdentityMatrix(inputList.size);
+  Matrix<Coefficient> rowOperations;
+  rowOperations.makeIdentityMatrix(inputList.size);
   LinearCombination<TemplateMonomial, Coefficient>::gaussianEliminationByRows(
-    listCopy, 0, seedMonomials, &theRowOperations
+    listCopy, 0, seedMonomials, &rowOperations
   );
   LinearCombinationTemplate remainderFromInput = input;
   TemplateMonomial currentMon;
@@ -3585,7 +3584,7 @@ bool LinearCombination<TemplateMonomial, Coefficient>::linearSpanContainsGetFirs
   if (!remainderFromInput.isEqualToZero()) {
     return false;
   }
-  theRowOperations.actMultiplyVectorRowOnTheRight(outputFirstLinearCombination);
+  rowOperations.actMultiplyVectorRowOnTheRight(outputFirstLinearCombination);
   return true;
 }
 
@@ -3619,8 +3618,8 @@ void LinearCombination<TemplateMonomial, Coefficient>::gaussianEliminationByRows
       << global.fatal;
     }
   }
-  MemorySaving<HashedList<TemplateMonomial> > bufferMons;
-  HashedList<TemplateMonomial>& allMons = seedMonomials == 0 ? bufferMons.getElement() : *seedMonomials;
+  MemorySaving<HashedList<TemplateMonomial> > bufferMonomials;
+  HashedList<TemplateMonomial>& allMons = seedMonomials == 0 ? bufferMonomials.getElement() : *seedMonomials;
   if (seedMonomials == 0) {
     int topBoundNumMons = 0;
     for (int i = 0; i < toBeEliminated.size; i ++) {
@@ -4281,9 +4280,9 @@ bool Vectors<Coefficient>::getNormalSeparatingCones(
   List<Vector<Coefficient> >& coneNonNegativeCoeffs,
   Vector<Coefficient>& outputNormal
 ) {
-  Matrix<Rational> matA;
-  Matrix<Rational> matb;
-  Vector<Rational> matX;
+  Matrix<Rational> matrixA;
+  Matrix<Rational> matrixB;
+  Vector<Rational> matrixX;
   int dimension = coneStrictlyPositiveCoeffs[0].size;
   if (coneStrictlyPositiveCoeffs.size == 0) {
     if (coneNonNegativeCoeffs.size > 0) {
@@ -4292,34 +4291,34 @@ bool Vectors<Coefficient>::getNormalSeparatingCones(
     return true;
   }
   int numRows = coneStrictlyPositiveCoeffs.size + coneNonNegativeCoeffs.size;
-  matA.initialize(numRows, dimension * 2 + numRows);
-  matA.makeZero();
-  matb.initialize(numRows, 1);
-  matb.makeZero();
+  matrixA.initialize(numRows, dimension * 2 + numRows);
+  matrixA.makeZero();
+  matrixB.initialize(numRows, 1);
+  matrixB.makeZero();
   for (int i = 0; i < coneStrictlyPositiveCoeffs.size; i ++) {
     for (int k = 0; k < dimension; k ++) {
-      matA.elements[i][k].assign(coneStrictlyPositiveCoeffs.objects[i].objects[k]);
-      matA.elements[i][k + dimension].assign(matA.elements[i][k]);
-      matA.elements[i][k + dimension].negate();
+      matrixA.elements[i][k].assign(coneStrictlyPositiveCoeffs.objects[i].objects[k]);
+      matrixA.elements[i][k + dimension].assign(matrixA.elements[i][k]);
+      matrixA.elements[i][k + dimension].negate();
     }
-    matb.elements[i][0].makeOne();
-    matA.elements[i][dimension * 2 + i].makeMinusOne();
+    matrixB.elements[i][0].makeOne();
+    matrixA.elements[i][dimension * 2 + i].makeMinusOne();
   }
   for (int i = 0; i < coneNonNegativeCoeffs.size; i ++) {
     int currentRow = i + coneStrictlyPositiveCoeffs.size;
     for (int k = 0; k < dimension; k ++) {
-      matA.elements[currentRow][k].assign(coneNonNegativeCoeffs.objects[i].objects[k]);
-      matA.elements[currentRow][k + dimension].assign(matA.elements[currentRow][k]);
-      matA.elements[currentRow][k + dimension].negate();
+      matrixA.elements[currentRow][k].assign(coneNonNegativeCoeffs.objects[i].objects[k]);
+      matrixA.elements[currentRow][k + dimension].assign(matrixA.elements[currentRow][k]);
+      matrixA.elements[currentRow][k + dimension].negate();
     }
-    matA.elements[currentRow][2 * dimension + currentRow].makeOne();
+    matrixA.elements[currentRow][2 * dimension + currentRow].makeOne();
   }
   bool result = Matrix<Rational>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
-    matA, matb, &matX
+    matrixA, matrixB, &matrixX
   );
   outputNormal.makeZero(dimension);
   for (int i = 0; i < dimension; i ++) {
-    outputNormal[i] = matX[i] - matX[i + dimension];
+    outputNormal[i] = matrixX[i] - matrixX[i + dimension];
   }
   if (result) {
     Rational tempRat;
@@ -4341,7 +4340,7 @@ bool Vectors<Coefficient>::getNormalSeparatingCones(
 
 template<class Coefficient>
 void Matrix<Coefficient>::computePotentialChangeGradient(
-  Matrix<Coefficient>& matA,
+  Matrix<Coefficient>& matrixA,
   Selection& baseVariables,
   int numberOfTrueVariables,
   int columnIndex,
@@ -4350,11 +4349,11 @@ void Matrix<Coefficient>::computePotentialChangeGradient(
 ) {
   hasAPotentialLeavingVariable = false;
   outputChangeGradient.makeZero();
-  for (int j = 0; j < matA.numberOfRows; j ++) {
+  for (int j = 0; j < matrixA.numberOfRows; j ++) {
     if (baseVariables.elements[j] >= numberOfTrueVariables) {
-      outputChangeGradient += matA.elements[j][columnIndex];
+      outputChangeGradient += matrixA.elements[j][columnIndex];
     }
-    hasAPotentialLeavingVariable = hasAPotentialLeavingVariable || matA.elements[j][columnIndex].isPositive();
+    hasAPotentialLeavingVariable = hasAPotentialLeavingVariable || matrixA.elements[j][columnIndex].isPositive();
   }
   if (columnIndex >= numberOfTrueVariables) {
     outputChangeGradient -= 1;
@@ -4368,18 +4367,18 @@ void Matrix<Coefficient>::getMaxMovementAndLeavingVariableRow(
   int enteringVariable,
   Matrix<Coefficient>& matrixA,
   Vector<Coefficient>& inputVectorX,
-  Selection& BaseVariables
+  Selection& baseVariables
 ) {
   leavingVariableRow = - 1;
   maxMovement.makeZero();
   for (int i = 0; i < matrixA.numberOfRows; i ++) {
-    Rational tempRat;
-    tempRat.assign(matrixA.elements[i][enteringVariable]);
-    if (tempRat.isPositive()) {
-      tempRat.invert();
-      tempRat.multiplyBy(inputVectorX[BaseVariables.elements[i]]);
-      if (maxMovement.isGreaterThan(tempRat) || (leavingVariableRow == - 1)) {
-        maxMovement.assign(tempRat);
+    Rational pivotCoefficient;
+    pivotCoefficient.assign(matrixA.elements[i][enteringVariable]);
+    if (pivotCoefficient.isPositive()) {
+      pivotCoefficient.invert();
+      pivotCoefficient.multiplyBy(inputVectorX[baseVariables.elements[i]]);
+      if (maxMovement.isGreaterThan(pivotCoefficient) || (leavingVariableRow == - 1)) {
+        maxMovement.assign(pivotCoefficient);
         leavingVariableRow = i;
       }
     }
@@ -4395,15 +4394,15 @@ void Matrix<Coefficient>::actOnMonomialAsDifferentialOperator(
   }
   MonomialPolynomial tempMon;
   output.makeZero();
-  Rational coeff;
+  Rational coefficient;
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
       tempMon = input;
-      coeff = tempMon(j);
-      coeff *= this->elements[i][j];
+      coefficient = tempMon(j);
+      coefficient *= this->elements[i][j];
       tempMon.multiplyByVariable(j, - 1);
       tempMon.multiplyByVariable(i, 1);
-      output.addMonomial(tempMon, coeff);
+      output.addMonomial(tempMon, coefficient);
     }
   }
 }
@@ -4598,14 +4597,14 @@ std::string MonomialTensor<Coefficient, inputHashFunction>::toString(FormatExpre
   if (this->generatorsIndices.size == 0) {
     return "1";
   }
-  std::string theLetter = format == nullptr ?  "g" : format->chevalleyGgeneratorLetter;
+  std::string letter = format == nullptr ?  "g" : format->chevalleyGgeneratorLetter;
   std::string letters = "abcdefghijklmnopqrstuvwxyz";
   std::stringstream out;
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
     if (static_cast<unsigned>(generatorsIndices[i]) < letters.size()) {
       out << letters[this->generatorsIndices[i]];
     } else {
-      out << theLetter << "_{" << this->generatorsIndices[i] << "}";
+      out << letter << "_{" << this->generatorsIndices[i] << "}";
     }
     out << "^{" << this->powers[i] << "}";
   }
@@ -5025,7 +5024,7 @@ public:
     const Matrix<Rational>& linearMap, const Vectors<Rational>& input, Vectors<Rational>& output
   );
   void intersectWithPreimageOfLattice(
-    const Matrix<Rational> & linearMap, const Lattice& other
+    const Matrix<Rational>& linearMap, const Lattice& other
   );
   void intersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Rational>& outputGenerator);
   static bool getClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralStepsInDirection(
@@ -5061,7 +5060,7 @@ public:
     return tempVect.isEqualToZero();
   }
   // returns false if the vector is not in the vector space spanned by the lattice
-  bool reduceVector(Vector<Rational>& theVector) const;
+  bool reduceVector(Vector<Rational>& vector) const;
   // In the following two functions, the format of the matrix theSub of the substitution is as follows.
   // Let the ambient dimension be n, and the coordinates be x_1,..., x_n.
   // Let the new vector space be of dimension m, with coordinates y_1,..., y_m.
@@ -5136,7 +5135,7 @@ public:
     const Polynomial<Rational>& inputPoly, const MonomialPolynomial& shift, const Lattice& lattice
   );
   void makeZeroLatticeZn(int dimension);
-  void makeZeroOverLattice(Lattice& theLattice);
+  void makeZeroOverLattice(Lattice& lattice);
   bool isEqualToZero() const {
     return this->valueOnEachLatticeShift.size == 0;
   }
@@ -5571,8 +5570,8 @@ public:
   bool addNonRefinedChamberOnTopNoRepetition(const Cone& newCone);
   void popChamberSwapWithLast(int index);
   void getAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(Vectors<Rational>& output) const;
-  bool drawMeLastCoordinateAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& format);
-  void translateMeMyLastCoordinateAffinization(Vector<Rational> & theTranslationVector);
+  bool drawMeLastCoordinateAffine(bool initDrawingVariables, DrawingVariables& drawingVariables, FormatExpressions& format);
+  void translateMeMyLastCoordinateAffinization(Vector<Rational>& translationVector);
   void initializeFromDirectionsAndRefine(Vectors<Rational>& inputVectors);
   void initializeFromAffineDirectionsAndRefine(Vectors<Rational>& inputDirections, Vectors<Rational>& inputAffinePoints);
   std::string drawMeToHtmlLastCoordAffine(DrawingVariables& drawingVariables, FormatExpressions& format);
@@ -5584,9 +5583,9 @@ public:
   );
   std::string drawMeToHtmlProjective(DrawingVariables& drawingVariables, FormatExpressions& format);
   std::string toString(bool useHtml = false);
-  int getLowestIndexChamberContaining(const Vector<Rational>& theRoot) const {
+  int getLowestIndexChamberContaining(const Vector<Rational>& root) const {
     for (int i = 0; i < this->size; i ++) {
-      if (this->objects[i].isInCone(theRoot)) {
+      if (this->objects[i].isInCone(root)) {
         return i;
       }
     }
@@ -5693,8 +5692,8 @@ public:
   std::string doTheFullComputationReturnLatexFileString(
     Vectors<Rational>& toBePartitioned, FormatExpressions& format, std::string* outputHtml
   );
-  bool argumentsAllowed(Vectors<Rational>& theArguments, std::string& outputWhatWentWrong);
-  bool assureIndicatorRegularity(Vector<Rational> & theIndicator);
+  bool argumentsAllowed(Vectors<Rational>& arguments, std::string& outputWhatWentWrong);
+  bool assureIndicatorRegularity(Vector<Rational>& indicator);
   void compareCheckSums();
   void computePolynomialCorrespondingToOneMonomial(
     QuasiPolynomial& outputQP,
@@ -6442,16 +6441,16 @@ public:
     int rightDomainDim = right.getMinimalNumberOfColumns();
     //int leftRangeDim= left.getMinimalNumberOfRows();
     int rightRangeDim = right.getMinimalNumberOfRows();
-    MonomialMatrix tempM;
+    MonomialMatrix monomial;
     this->makeZero();
-    Coefficient tempCF;
+    Coefficient coefficient;
     for (int i = 0; i < left.size(); i ++) {
       for (int j = 0; j < right.size(); j ++) {
-        tempM.dualIndex = left[i].dualIndex * rightDomainDim + right[j].dualIndex;
-        tempM.vIndex = left[i].vIndex * rightRangeDim + right[j].vIndex;
-        tempCF = left.coefficients[i];
-        tempCF *= right.coefficients[j];
-        this->addMonomial(tempM, tempCF);
+        monomial.dualIndex = left[i].dualIndex * rightDomainDim + right[j].dualIndex;
+        monomial.vIndex = left[i].vIndex * rightRangeDim + right[j].vIndex;
+        coefficient = left.coefficients[i];
+        coefficient *= right.coefficients[j];
+        this->addMonomial(monomial, coefficient);
       }
     }
   }
@@ -6492,18 +6491,18 @@ public:
     MonomialMatrix monomial;
     output.makeZero();
     output.setExpectedSize(this->size() * standsOnTheLeft.size() * 2);
-    Coefficient tempCF;
+    Coefficient coefficient;
     for (int i = 0; i < this->size(); i ++) {
       for (int j = 0; j < standsOnTheLeft.size(); j ++) {
-        tempCF = this->coefficients[i];
-        tempCF *= standsOnTheLeft.coefficients[j];
+        coefficient = this->coefficients[i];
+        coefficient *= standsOnTheLeft.coefficients[j];
         monomial = standsOnTheLeft[j];
         monomial *= (*this)[i];
-        output.addMonomial(monomial, tempCF);
-        tempCF *= - 1;
+        output.addMonomial(monomial, coefficient);
+        coefficient *= - 1;
         monomial = (*this)[i];
         monomial *= standsOnTheLeft[j];
-        output.addMonomial(monomial, tempCF);
+        output.addMonomial(monomial, coefficient);
       }
     }
     *this = output;
@@ -6569,7 +6568,7 @@ public:
     }
     return false;
   }
-  void gaussianEliminationByRowsMatrix(MatrixTensor<Coefficient>* carbonCopyMat = 0);
+  void gaussianEliminationByRowsMatrix(MatrixTensor<Coefficient>* carbonCopyMatrix = 0);
   template <class otherType>
   void actOnVectorColumn(const Vector<otherType>& input, Vector<otherType>& output) const {
     if (&input == &output) {
@@ -6673,19 +6672,19 @@ void MatrixTensor<Coefficient>::getVectorsSparseFromRowsIncludeZeroRows(
 }
 
 template <class Coefficient>
-void MatrixTensor<Coefficient>::gaussianEliminationByRowsMatrix(MatrixTensor<Coefficient>* carbonCopyMat) {
+void MatrixTensor<Coefficient>::gaussianEliminationByRowsMatrix(MatrixTensor<Coefficient>* carbonCopyMatrix) {
   List<VectorSparse<Coefficient> > theRows, theCarbonCopyRows;
-  int numRows = this->getMinimalNumberOfRows();
-  if (carbonCopyMat != 0) {
-    numRows = MathRoutines::maximum(numRows, carbonCopyMat->getMinimalNumberOfRows());
-    carbonCopyMat->getVectorsSparseFromRowsIncludeZeroRows(theCarbonCopyRows, numRows);
+  int numberOfRows = this->getMinimalNumberOfRows();
+  if (carbonCopyMatrix != 0) {
+    numberOfRows = MathRoutines::maximum(numberOfRows, carbonCopyMatrix->getMinimalNumberOfRows());
+    carbonCopyMatrix->getVectorsSparseFromRowsIncludeZeroRows(theCarbonCopyRows, numberOfRows);
   }
-  this->getVectorsSparseFromRowsIncludeZeroRows(theRows, numRows);
-  List<VectorSparse<Coefficient> >* theCarbonCopyPointer = carbonCopyMat == 0 ? 0 : &theCarbonCopyRows;
+  this->getVectorsSparseFromRowsIncludeZeroRows(theRows, numberOfRows);
+  List<VectorSparse<Coefficient> >* theCarbonCopyPointer = carbonCopyMatrix == 0 ? 0 : &theCarbonCopyRows;
   VectorSparse<Coefficient>::gaussianEliminationByRows(theRows, 0, 0, 0, theCarbonCopyPointer);
   this->assignVectorsToRows(theRows);
-  if (carbonCopyMat != 0) {
-    carbonCopyMat->assignVectorsToRows(theCarbonCopyRows);
+  if (carbonCopyMatrix != 0) {
+    carbonCopyMatrix->assignVectorsToRows(theCarbonCopyRows);
   }
 }
 

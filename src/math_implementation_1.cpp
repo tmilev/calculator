@@ -562,9 +562,9 @@ void ElementUniversalEnveloping<Coefficient>::modToMinDegreeFormFDRels(
   while (Found) {
     Found = false;
     for (int j = numPosRoots - 1; j >= 0; j --) {
-      this->owner->UEGeneratorOrderIncludingCartanElts.swapTwoIndices(j, numPosRoots - 1);
+      this->owner->universalEnvelopingGeneratorOrder.swapTwoIndices(j, numPosRoots - 1);
       this->simplify(ringUnit);
-      this->owner->UEGeneratorOrderIncludingCartanElts.swapTwoIndices(j, numPosRoots - 1);
+      this->owner->universalEnvelopingGeneratorOrder.swapTwoIndices(j, numPosRoots - 1);
       if (this->modOutFDRelationsExperimental(highestWeightInSimpleCoordinates, ringUnit, ringZero)) {
         Found = true;
       }

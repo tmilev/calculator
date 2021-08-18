@@ -84,13 +84,9 @@ public:
   // we put last the positive roots in ascending order.
   Matrix<Rational> chevalleyConstants;
   Matrix<bool> computedChevalleyConstants;
-  //
-  // Matrix<int> theLiebracketPairingIndices;
   Matrix<ElementSemisimpleLieAlgebra<Rational> > lieBrackets;
-  // List<int> OppositeRootSpaces;
-  List<int> UEGeneratorOrderIncludingCartanElts;
-  // std::string pathVirtualNameOutput;
-  // std::string pathRelativePhysicalOutput;
+  // Order on all generators.
+  List<int> universalEnvelopingGeneratorOrder;
 
   bool flagHasNilradicalOrder;
   bool flagDeallocated;
@@ -329,6 +325,13 @@ public:
   // Same as the previous function but for elements of the Universal Enveloping Algebra.
   template<typename Coefficient>
   bool getElementStandardRepresentation(
+    const ElementUniversalEnveloping<Coefficient>& element,
+    Matrix<Coefficient>& output,
+    std::stringstream* commentsOnFailure
+  );
+  // Same as the previous function but for elements of the Universal Enveloping Algebra.
+  template<typename Coefficient>
+  bool getElementAdjoingRepresentation(
     const ElementUniversalEnveloping<Coefficient>& element,
     Matrix<Coefficient>& output,
     std::stringstream* commentsOnFailure

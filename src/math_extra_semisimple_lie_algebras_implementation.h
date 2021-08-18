@@ -749,9 +749,15 @@ bool SemisimpleLieAlgebra::getElementStandardRepresentation(
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::getElementStandardRepresentation");
   char dynkinType = 0;
   if (!this->weylGroup.dynkinType.isSimple(&dynkinType, nullptr)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "getElementStandardRepresentation implemented only for simple Lie algebras.";
+    }
     return false;
   }
   if (dynkinType != 'A') {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "getElementStandardRepresentation implemented only for type A.";
+    }
     // Only type A is supported as of writing.
     return false;
   }

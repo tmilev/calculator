@@ -172,7 +172,9 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "",
     "Computes the adjoint matrix of element g. "
     "The adjoint matrix is the matrix of the linear map ad(g):x -> [g,x]."
-    "algebra elements inside the semisimple Lie algebra. ",
+    "First element g = element of a semisimple Lie algebra. "
+    "Extended to a map on the universal enveloping algebra via: "
+    "ad(g_1, g_2) = ad(g_1)ad(g_2)",
     "No example yet",
     "CalculatorLieTheory::adjointMatrix",
     "AdjointMatrix",

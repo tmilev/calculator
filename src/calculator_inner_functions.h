@@ -404,7 +404,7 @@ public:
   static bool innerMin(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerLessThanOrEqualTo(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerGreaterThanOrEqualTo(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGreaterThan(Calculator& calculator, const Expression& input, Expression& output);
+  static bool greaterThan(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerLessThan(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool outerCommuteAtimesBifUnivariate(Calculator& calculator, const Expression& input, Expression& output);

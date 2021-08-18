@@ -855,8 +855,8 @@ void ModuleSSalgebra<Coefficient>::getElementsNilradical(
   for (int i = 0; i < outputListOfGenerators->size; i ++) {
     for (int j = i + 1; j < outputListOfGenerators->size; j ++) {
       if (
-        ownerSS.UEGeneratorOrderIncludingCartanElts[(*outputListOfGenerators)[i]] >
-        ownerSS.UEGeneratorOrderIncludingCartanElts[(*outputListOfGenerators)[j]]
+        ownerSS.universalEnvelopingGeneratorOrder[(*outputListOfGenerators)[i]] >
+        ownerSS.universalEnvelopingGeneratorOrder[(*outputListOfGenerators)[j]]
       ) {
         outputListOfGenerators->swapTwoIndices(i, j);
       }

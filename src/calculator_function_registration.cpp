@@ -4893,7 +4893,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     ">",
-    CalculatorFunctions::innerGreaterThan,
+    CalculatorFunctions::greaterThan,
     "",
     "Greater than: has similar action to the less than sign. "
     "The following example shows an implementation of commutativity. ",

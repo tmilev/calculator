@@ -7004,11 +7004,13 @@ bool ElementSemisimpleLieAlgebra<Coefficient>::getCoordinatesInBasis(
 }
 
 template <class Coefficient>
-void ElementSemisimpleLieAlgebra<Coefficient>::makeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner) {
+void ElementSemisimpleLieAlgebra<Coefficient>::makeGenerator(
+  int generatorIndex, SemisimpleLieAlgebra& inputOwner
+) {
   this->makeZero();
-  ChevalleyGenerator tempGenerator;
-  tempGenerator.makeGenerator(inputOwner, generatorIndex);
-  this->addMonomial(tempGenerator, 1);
+  ChevalleyGenerator resultGenerator;
+  resultGenerator.makeGenerator(inputOwner, generatorIndex);
+  this->addMonomial(resultGenerator, 1);
 }
 
 template <class Coefficient>

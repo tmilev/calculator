@@ -127,7 +127,8 @@ private:
 public:
   SemisimpleLieAlgebra* owner;
   bool adjointRepresentationAction(
-    const ElementUniversalEnveloping<Coefficient>& input, ElementUniversalEnveloping<Coefficient>& output
+    const ElementUniversalEnveloping<Coefficient>& input,
+    ElementUniversalEnveloping<Coefficient>& output
   ) const;
   bool convertToRationalCoefficient(ElementUniversalEnveloping<Rational>& output);
   bool isEqualToZero() const {
@@ -174,7 +175,9 @@ public:
   bool applyTransposeAntiAutoOnMe();
   void makeCartanGenerator(const Vector<Rational>& input, SemisimpleLieAlgebra& inputOwner);
   void assignElementLieAlgebra(
-    const ElementSemisimpleLieAlgebra<Rational>& input, SemisimpleLieAlgebra& inputOwner, const Coefficient& ringUnit = 1
+    const ElementSemisimpleLieAlgebra<Rational>& input,
+    SemisimpleLieAlgebra& inputOwner,
+    const Coefficient& ringUnit = 1
   );
   void makeOneGenerator(int index, SemisimpleLieAlgebra& inputOwner, const Coefficient& ringUnit);
   void makeOneGeneratorCoefficientOne(int index, SemisimpleLieAlgebra& inputOwners, const Coefficient& ringUnit = 1);
@@ -188,7 +191,8 @@ public:
   }
   Coefficient getKillingFormProduct(const ElementUniversalEnveloping<Coefficient>& right) const;
   void makeZero(SemisimpleLieAlgebra& inputOwner);
-  bool getLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output) const;
+  bool isLieAlgebraElement(ElementSemisimpleLieAlgebra<Coefficient>& whichElement) const;
+  bool isLieAlgebraElementRational(ElementSemisimpleLieAlgebra<Rational>& whichElement) const;
   void makeConstant(const Coefficient& coeff, SemisimpleLieAlgebra& inputOwner) {
     this->makeZero(inputOwner);
     MonomialUniversalEnveloping<Coefficient> tempMon;

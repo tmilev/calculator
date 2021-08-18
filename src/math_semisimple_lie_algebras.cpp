@@ -524,7 +524,7 @@ void SemisimpleLieAlgebra::computeLieBracketTable() {
   int numberOfGenerators = numRoots + rank;
   this->lieBrackets.initialize(numberOfGenerators, numberOfGenerators);
   //  this->theLiebracketPairingIndices.initialize(numberOfGenerators, numberOfGenerators);
-  this->UEGeneratorOrderIncludingCartanElts.initializeFillInObject(numberOfGenerators, - 1);
+  this->universalEnvelopingGeneratorOrder.initializeFillInObject(numberOfGenerators, - 1);
   //  this->theLiebracketPairingIndices.makeZero(- 1);
   //  this->OppositeRootSpaces.initializeFillInObject(numRoots+dimension, - 1);
   Vector<Rational> leftWeight, rightWeight, hRoot;
@@ -578,7 +578,7 @@ void SemisimpleLieAlgebra::computeLieBracketTable() {
     }
   }
   for (int i = 0; i < numberOfGenerators; i ++) {
-    this->UEGeneratorOrderIncludingCartanElts[i] = i;
+    this->universalEnvelopingGeneratorOrder[i] = i;
   }
 }
 
@@ -1364,7 +1364,7 @@ void SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightDescending(const Selec
   tempVect = parSelZeroMeansLeviPart;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
     if (this->getWeightOfGenerator(i).scalarEuclidean(tempVect) < 0) {
-      this->UEGeneratorOrderIncludingCartanElts[i] = - i - this->getNumberOfGenerators() * 5;
+      this->universalEnvelopingGeneratorOrder[i] = - i - this->getNumberOfGenerators() * 5;
     }
   }
 }
@@ -1375,7 +1375,7 @@ void SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightAscending(const Select
   tempVect = parSelZeroMeansLeviPart;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
     if (this->getWeightOfGenerator(i).scalarEuclidean(tempVect) < 0) {
-      this->UEGeneratorOrderIncludingCartanElts[i] = i - this->getNumberOfGenerators() * 5;
+      this->universalEnvelopingGeneratorOrder[i] = i - this->getNumberOfGenerators() * 5;
     }
   }
 }
@@ -1386,7 +1386,7 @@ void SemisimpleLieAlgebra::orderNilradicalNilWeightAscending(const Selection& pa
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
     Rational translationCoeff = this->getWeightOfGenerator(i).scalarEuclidean(tempVect) * this->getNumberOfPositiveRoots();
     if (translationCoeff < 0) {
-      this->UEGeneratorOrderIncludingCartanElts[i] = i + translationCoeff.numeratorShort * this->getNumberOfGenerators() * 5;
+      this->universalEnvelopingGeneratorOrder[i] = i + translationCoeff.numeratorShort * this->getNumberOfGenerators() * 5;
     }
   }
 }
@@ -1397,7 +1397,7 @@ void SemisimpleLieAlgebra::orderNilradicalNilWeightDescending(const Selection& p
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
     Rational translationCoeff = this->getWeightOfGenerator(i).scalarEuclidean(tempVect) * this->getNumberOfPositiveRoots();
     if (translationCoeff < 0) {
-      this->UEGeneratorOrderIncludingCartanElts[i] = - i + translationCoeff.numeratorShort * this->getNumberOfGenerators() * 5;
+      this->universalEnvelopingGeneratorOrder[i] = - i + translationCoeff.numeratorShort * this->getNumberOfGenerators() * 5;
     }
   }
 }
@@ -1428,26 +1428,26 @@ bool SemisimpleLieAlgebra::hasComputedStructureConstants() {
 void SemisimpleLieAlgebra::orderSSalgebraForHWbfComputation() {
   int numberOfPositiveRoots = this->getNumberOfPositiveRoots();
   for (int i = 0; i < numberOfPositiveRoots; i ++) {
-    this->UEGeneratorOrderIncludingCartanElts[i] = - 1;
+    this->universalEnvelopingGeneratorOrder[i] = - 1;
   }
 }
 
 void SemisimpleLieAlgebra::orderStandardAscending() {
   int numGens = this->getNumberOfGenerators();
   for (int i = 0; i < numGens; i ++) {
-    this->UEGeneratorOrderIncludingCartanElts[i] = i;
+    this->universalEnvelopingGeneratorOrder[i] = i;
   }
 }
 
 void SemisimpleLieAlgebra::orderStandardDescending() {
   int numGens = this->getNumberOfGenerators();
   for (int i = 0; i < numGens; i ++) {
-    this->UEGeneratorOrderIncludingCartanElts[i] = numGens - i - 1;
+    this->universalEnvelopingGeneratorOrder[i] = numGens - i - 1;
   }
 }
 
 bool SemisimpleLieAlgebra::areOrderedProperly(int leftIndex, int rightIndex) {
-  return this->UEGeneratorOrderIncludingCartanElts[leftIndex] <= this->UEGeneratorOrderIncludingCartanElts[rightIndex];
+  return this->universalEnvelopingGeneratorOrder[leftIndex] <= this->universalEnvelopingGeneratorOrder[rightIndex];
 }
 
 bool SemisimpleLieAlgebra::isGeneratorFromCartan(int index) const {

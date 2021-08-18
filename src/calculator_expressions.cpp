@@ -291,7 +291,7 @@ bool Expression::convertsInternally(
     return false;
   }
   ElementSemisimpleLieAlgebra<Rational> elementSemisimple;
-  if (!element.getLieAlgebraElementIfPossible(elementSemisimple)) {
+  if (!element.isLieAlgebraElementRational(elementSemisimple)) {
     return false;
   }
   if (whichElement != nullptr) {

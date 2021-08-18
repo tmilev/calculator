@@ -143,10 +143,11 @@ bool MonomialUniversalEnveloping<Coefficient>::adjointRepresentationAction(
     if (!this->powers[i].isSmallInteger(&nextCycleSize)) {
       return false;
     }
+    element.makeGenerator(this->generatorsIndices[i], *this->owner) ;
     for (int j = 0; j < nextCycleSize; j ++) {
-      element.makeGenerator(this->generatorsIndices[i], *this->owner) ;
       output.lieBracketOnTheLeft(element);
     }
+    output.simplify();
   }
   return true;
 }
@@ -437,12 +438,12 @@ bool ElementUniversalEnveloping<Coefficient>::applyTransposeAntiAutoOnMe() {
 }
 
 template <typename Coefficient>
-bool SemisimpleLieAlgebra::getElementAdjoingRepresentation(
+bool SemisimpleLieAlgebra::getElementAdjointRepresentation(
   const ElementUniversalEnveloping<Coefficient>& element,
   Matrix<Coefficient>& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::getElementAdjoingRepresentation");
+  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::getElementAdjointRepresentation");
   int numberOfGenerators = this->getNumberOfGenerators();
   output.makeZeroMatrix(numberOfGenerators, 0);
   Coefficient one;
@@ -460,8 +461,12 @@ bool SemisimpleLieAlgebra::getElementAdjoingRepresentation(
     }
     if (!actionOnBasisElementUniversalEnveloping.isLieAlgebraElement(actionOnBasisElement)) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Element is not in the semisimple Lie algebra.";
+        *commentsOnFailure << "<hr>While computing the ad-action of "
+        << element.toString() << ": element "
+        << actionOnBasisElementUniversalEnveloping.toString()
+        << " is not in the semisimple Lie algebra.";
       }
+      return false;
     }
     for (int j = 0; j < actionOnBasisElement.size(); j ++) {
       int basisIndex = actionOnBasisElement.monomials[j].generatorIndex;

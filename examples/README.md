@@ -1355,11 +1355,11 @@ Z\otimes W
 Same as tensor product of matrices but uses class MatrixTensor instead of class Matrix.
 
 *\otimes* [TensorProductStandard] {Calculator::outerTensor}. (invisible) 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%3d%20GetChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%3d%20GetCartanGenerator%7b%7d%28X%2ci%29%3b%5cnv%3dHeighestWeightVector%7b%7d%28X%2c%20%281%2c0%29%2c%280%2c0%29%29%3b%5cng_%7b-%201%7d%28v%5c%5cotimes%20v%29%3b%5cng_%7b-%201%7dg_%7b-%201%7d%28v%5c%5cotimes%20v%29%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28X%2ci%29%3b%5cnv%3dHeighestWeightVector%7b%7d%28X%2c%20%281%2c0%29%2c%280%2c0%29%29%3b%5cng_%7b-%201%7d%28v%5c%5cotimes%20v%29%3b%5cng_%7b-%201%7dg_%7b-%201%7d%28v%5c%5cotimes%20v%29%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X = G_2;
-g_{{i}}= GetChevalleyGenerator{}(X,i);
-h_{{i}}= GetCartanGenerator{}(X,i);
+g_{{i}}= ChevalleyGenerator{}(X,i);
+h_{{i}}= CartanGenerator{}(X,i);
 v=HeighestWeightVector{}(X, (1,0),(0,0));
 g_{- 1}(v\otimes v);
 g_{- 1}g_{- 1}(v\otimes v); 
@@ -4523,14 +4523,17 @@ StandardRepresentationMatrix(g_1);
 StandardRepresentationMatrix(g_1-g_-1);
 StandardRepresentationMatrix( (g_1+g_2 - g_-1-g_-2)^2);
 ```
-Computes matrix of an element of a semisimple Lie algebra (or its universal enveloping algebra) in a 'natural' representation of the Lie algebra. Implemented for type A only at the moment.Two possible input formats. 1) One argument input. Give as input a Chevalley generator.2) Two argument input. First is the type of the semisimple lie algebra.Second is the chevalley generator, using the letter g.
+Computes matrix of an element of a semisimple Lie algebra (or its universal enveloping algebra) in a 'natural' representation of the Lie algebra. Implemented for type A only at the moment.The argument should be a Chevalley generator or an element of the Universal enveloping algebra.
 
 *AdjointMatrix* [AdjointMatrix] {CalculatorLieTheory::adjointMatrix}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22No%20example%20yet%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Type%20%3d%20A_4%3b%5cng_%7b%7bj%7d%7d%3dChevalleyGenerator%28Type%2c%20j%29%3b%5cnh_%7b%7bj%7d%7d%3dCartanGenerator%28Type%2c%20j%29%3b%5cnAdjointMatrix%28g_2%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-No example yet
+Type = A_4;
+g_{{j}}=ChevalleyGenerator(Type, j);
+h_{{j}}=CartanGenerator(Type, j);
+AdjointMatrix(g_2)
 ```
-Computes the adjoint matrix of element g. The adjoint matrix is the matrix of the linear map ad(g):x -> [g,x].algebra elements inside the semisimple Lie algebra. 
+Computes the adjoint matrix of element g. The adjoint matrix is the matrix of the linear map ad(g):x -> [g,x].First element g = element of a semisimple Lie algebra. Extended to a map on the universal enveloping algebra via: ad(g_1, g_2) = ad(g_1)ad(g_2)
 
 *AdCommonEigenspace* [AdCommonEigenspace] {CalculatorLieTheory::adCommonEigenSpaces}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22AdCommonEigenspace%7b%7d%28F_4%2c%20-5%20%28g_%7b9%7d%29%20%2b3%20%28g_%7b13%7d%29%20%2b5%20%28g_%7b16%7d%29%20%2b4%20%28g_%7b10%7d%29%2c%20g_%7b14%7d%2bg_%7b22%7d%2bg_%7b20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

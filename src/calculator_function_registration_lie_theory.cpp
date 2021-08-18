@@ -175,7 +175,10 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "First element g = element of a semisimple Lie algebra. "
     "Extended to a map on the universal enveloping algebra via: "
     "ad(g_1, g_2) = ad(g_1)ad(g_2)",
-    "No example yet",
+    "Type = A_4;\n"
+    "g_{{j}}=ChevalleyGenerator(Type, j);\n"
+    "h_{{j}}=CartanGenerator(Type, j);\n"
+    "AdjointMatrix(g_2)",
     "CalculatorLieTheory::adjointMatrix",
     "AdjointMatrix",
     standardOptions

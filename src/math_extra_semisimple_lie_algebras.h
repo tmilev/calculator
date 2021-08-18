@@ -331,7 +331,7 @@ public:
   );
   // Same as the previous function but for elements of the Universal Enveloping Algebra.
   template<typename Coefficient>
-  bool getElementAdjoingRepresentation(
+  bool getElementAdjointRepresentation(
     const ElementUniversalEnveloping<Coefficient>& element,
     Matrix<Coefficient>& output,
     std::stringstream* commentsOnFailure

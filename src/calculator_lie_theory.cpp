@@ -2007,13 +2007,13 @@ bool CalculatorLieTheory::adjointMatrix(
     return calculator << "Expected a single argument.";
   }
   ElementUniversalEnveloping<RationalFraction<Rational> > element;
-  if (!input.isOfType(&element)) {
-    return calculator << "Argument expected to be an element of universal enveloping algebra.";
+  if (!input[1].isOfType(&element)) {
+    return calculator << "<hr>Argument expected to be an element of universal enveloping algebra.";
   }
   ExpressionContext context = input[1].getContext();
   SemisimpleLieAlgebra& owner = element.getOwner();
   Matrix<RationalFraction<Rational> > result;
-  owner.getElementAdjoingRepresentation(element, result, &calculator.comments);
+  owner.getElementAdjointRepresentation(element, result, &calculator.comments);
   Matrix<Expression> resultExpressions;
   resultExpressions.initialize(result.numberOfRows, result.numberOfColumns);
   for (int i = 0; i < resultExpressions.numberOfRows; i ++) {

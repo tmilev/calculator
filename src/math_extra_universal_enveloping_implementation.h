@@ -283,10 +283,10 @@ void MonomialUniversalEnveloping<Coefficient>::commuteAnBtoBAnPlusLowerOrder(
   monomial.generatorsIndices.size = 0;
   int rightGeneratorIndeX = this->generatorsIndices[indexA + 1];
   int leftGeneratorIndeX = this->generatorsIndices[indexA];
-  Coefficient theRightPoweR, leftPower;
-  theRightPoweR = this->powers[indexA + 1];
+  Coefficient rightPower, leftPower;
+  rightPower = this->powers[indexA + 1];
   leftPower = this->powers[indexA];
-  theRightPoweR -= 1;
+  rightPower -= 1;
   int powerDroP = 0;
   Coefficient acquiredCoefficienT, incomingAcquiredCoefficienT;
   acquiredCoefficienT = ringUnit;
@@ -298,11 +298,11 @@ void MonomialUniversalEnveloping<Coefficient>::commuteAnBtoBAnPlusLowerOrder(
   ElementSemisimpleLieAlgebra<Rational> adAToTheIthOfB, aElt;
   adAToTheIthOfB.makeGenerator(rightGeneratorIndeX, *this->owner);
   aElt.makeGenerator(leftGeneratorIndeX, *this->owner);
-  //Formula realized:
-  //a^n b =\sum_{i = 0}^\infty \binom{n}{i} (\ad a)^i (b)a^{n-i}
-  //Proof (Dixmier): let L_x stand for left multiplication by x and R_x stand for right multiplication.
-  //Then L_x and R_x commute and L_x-R_x =ad_x, i.e.
-  //(L_a)^n =(R_a +ad_a)^n.
+  // Formula realized:
+  // a^n b =\sum_{i = 0}^\infty \binom{n}{i} (\ad a)^i (b)a^{n-i}
+  // Proof (Dixmier): let L_x stand for left multiplication by x and R_x stand for right multiplication.
+  // Then L_x and R_x commute and L_x-R_x =ad_x, i.e.
+  // (L_a)^n =(R_a +ad_a)^n.
   do {
     for (int i = 0; i < adAToTheIthOfB.size(); i ++) {
       int newGeneratorIndex = adAToTheIthOfB[i].generatorIndex;
@@ -311,7 +311,7 @@ void MonomialUniversalEnveloping<Coefficient>::commuteAnBtoBAnPlusLowerOrder(
       incomingAcquiredCoefficienT *= adAToTheIthOfB.coefficients[i];
       monomial.multiplyByGeneratorPowerOnTheRight(newGeneratorIndex, ringUnit);
       monomial.multiplyByGeneratorPowerOnTheRight(leftGeneratorIndeX, leftPower);
-      monomial.multiplyByGeneratorPowerOnTheRight(rightGeneratorIndeX, theRightPoweR);
+      monomial.multiplyByGeneratorPowerOnTheRight(rightGeneratorIndeX, rightPower);
       for (int i = indexA + 2; i < this->generatorsIndices.size; i ++) {
         monomial.multiplyByGeneratorPowerOnTheRight(this->generatorsIndices[i], this->powers[i]);
       }

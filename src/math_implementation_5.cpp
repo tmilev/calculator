@@ -568,13 +568,13 @@ void RootIndexToPoly(int index, SemisimpleLieAlgebra& theAlgebra, Polynomial<Rat
 
 template <class Coefficient>
 void ElementUniversalEnveloping<Coefficient>::assignFromCoordinateFormWithRespectToBasis(
-  List<ElementUniversalEnveloping<Coefficient> >& theBasis, Vector<Coefficient>& input, SemisimpleLieAlgebra& owner
+  List<ElementUniversalEnveloping<Coefficient> >& basis, Vector<Coefficient>& input, SemisimpleLieAlgebra& owner
 ) {
   this->makeZero(owner);
   ElementUniversalEnveloping<Coefficient> element;
   for (int i = 0; i < input.size; i ++) {
     if (!input[i].isEqualToZero()) {
-      element.operator=(theBasis[i]);
+      element.operator=(basis[i]);
       element.operator*=(input[i]);
       this->operator+=(element);
     }

@@ -906,6 +906,19 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(
   outputAutomorphism.makeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight);
 }
 
+bool SemisimpleLieAlgebra::hasImplementedCartanInvolution(
+  const SatakeDiagram& satakeDiagram,
+  CartanInvolution* whichInvolution,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::hasImplementedCartanInvolution");
+  CartanInvolution outputBuffer;
+  if (whichInvolution == nullptr) {
+    whichInvolution = &outputBuffer;
+  }
+  return whichInvolution->computeFromDiagram(satakeDiagram, *this, commentsOnFailure);
+}
+
 bool SemisimpleLieAlgebra::isInTheWeightSupport(
   Vector<Rational>& weight, Vector<Rational>& highestWeight
 ) {

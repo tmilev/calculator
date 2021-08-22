@@ -473,7 +473,7 @@ public:
   );
 
   static bool determinant(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerHighestWeightTransposeAntiAutomorphismBilinearForm(Calculator& calculator, const Expression& input, Expression& output);
+  static bool highestWeightTransposeAntiAutomorphismBilinearForm(Calculator& calculator, const Expression& input, Expression& output);
   static bool coefficientsPowersOf(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIntervalOpenFromSequence(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIntervalClosedFromSequence(Calculator& calculator, const Expression& input, Expression& output);

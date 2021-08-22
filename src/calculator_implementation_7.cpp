@@ -6878,10 +6878,10 @@ bool CalculatorFunctions::determinant(
   return false;
 }
 
-bool CalculatorFunctions::innerHighestWeightTransposeAntiAutomorphismBilinearForm(
+bool CalculatorFunctions::highestWeightTransposeAntiAutomorphismBilinearForm(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerHighestWeightTransposeAntiAutomorphismBilinearForm");
+  MacroRegisterFunctionWithName("CalculatorFunctions::characteristicPolynomialMatrix");
   RecursionDepthCounter theRecursionCounter(&calculator.recursionDepth);
   if (!input.isListNElements(4)) {
     return output.assignError(

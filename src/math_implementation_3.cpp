@@ -5465,7 +5465,28 @@ bool DynkinType::containsType(char typeLetter) const {
   return false;
 }
 
-bool DynkinType::isSimple(char* outputtype, int* outputRank, Rational* outputLength) const {
+bool DynkinType::isSimpleOfType(char desiredType, int desiredRank) const {
+  char currentType;
+  int currentRank;
+  if (!this->isSimple(&currentType, &currentRank)) {
+    return false;
+  }
+  return currentType == desiredType && currentRank == desiredRank;
+}
+
+bool DynkinType::isSimpleOfType(
+  char desiredType, int* outputRank, Rational* outputLength
+) const {
+  char actualType = 0;
+  if (!this->isSimple(&actualType, outputRank, outputLength)) {
+    return false;
+  }
+  return actualType == desiredType;
+}
+
+bool DynkinType::isSimple(
+  char* outputtype, int* outputRank, Rational* outputLength
+) const {
   if (this->size() != 1) {
     return false;
   }

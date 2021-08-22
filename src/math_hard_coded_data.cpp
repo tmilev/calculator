@@ -1758,16 +1758,16 @@ bool LoadGAPRootSystemE1_8(HashedList<Vector<Rational> >& outputRootSystem) {
 
 bool WeylGroupData::loadGAPRootSystem(HashedList<Vector<Rational> >& outputPositiveRootSystem) const {
   bool result = false;
-  if (this->dynkinType.isOfSimpleType('F', 4)) {
+  if (this->dynkinType.isSimpleOfType('F', 4)) {
     result = LoadGAPRootSystemF1_4(outputPositiveRootSystem);
   }
-  if (this->dynkinType.isOfSimpleType('E', 8)) {
+  if (this->dynkinType.isSimpleOfType('E', 8)) {
     result = LoadGAPRootSystemE1_8(outputPositiveRootSystem);
   }
-  if (this->dynkinType.isOfSimpleType('E', 7)) {
+  if (this->dynkinType.isSimpleOfType('E', 7)) {
     result = LoadGAPRootSystemE1_7(outputPositiveRootSystem);
   }
-  if (this->dynkinType.isOfSimpleType('E', 6)) {
+  if (this->dynkinType.isSimpleOfType('E', 6)) {
     result = LoadGAPRootSystemE1_6(outputPositiveRootSystem);
   }
   if (!result) {

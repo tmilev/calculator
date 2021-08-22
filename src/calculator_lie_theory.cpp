@@ -8,6 +8,8 @@
 #include "math_extra_weyl_algebras_implementation.h"
 #include "math_rational_function_implementation.h"
 
+MapList<std::string, SatakeDiagram::DiagramType, MathRoutines::hashString> SatakeDiagram::mapStringToType;
+
 bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   Calculator& calculator,
   const Expression& input,
@@ -1895,7 +1897,7 @@ bool CalculatorLieTheory::slTwoRealFormStructureComputeOnDemand(
   return CalculatorLieTheory::slTwoRealFormStructure(calculator, input, output, false);
 }
 
-bool CalculatorLieTheory::getElementsInSameLieAlgebra(
+bool CalculatorLieTheory::elementsInSameLieAlgebra(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
@@ -1945,7 +1947,7 @@ bool CalculatorLieTheory::adjointCommonEigenSpaces(
   MacroRegisterFunctionWithName("CalculatorLieTheory::adjointCommonEigenSpaces");
   SemisimpleLieAlgebra* ownerSemisimple = nullptr;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > elements, outputElements;
-  if (!CalculatorLieTheory::getElementsInSameLieAlgebra(
+  if (!CalculatorLieTheory::elementsInSameLieAlgebra(
     calculator, input, output, ownerSemisimple, elements
   )) {
     return true;
@@ -2029,13 +2031,216 @@ bool CalculatorLieTheory::adjointMatrix(
   return output.assignMatrixExpressions(resultExpressions, calculator, false, false);
 }
 
+std::string SatakeDiagram::toString() {
+  std::stringstream out;
+  switch (this->diagram) {
+  case SatakeDiagram::G:
+    out << "G";
+    break;
+  case SatakeDiagram::AI:
+    out << "AI";
+    break;
+  case SatakeDiagram::AII:
+    out << "AII";
+    break;
+  case SatakeDiagram::AIII:
+    out << "AIII";
+    break;
+  case SatakeDiagram::AIV:
+    out << "AIV";
+    break;
+  default:
+    out << "[unknown]";
+  }
+  out << ", " << this->rank << ", " << this->parameter;
+  return out.str();
+}
+
+DynkinType SatakeDiagram::dynkinTypeAmbient() {
+  DynkinType result;
+  switch (this->diagram) {
+  case SatakeDiagram::AI:
+  case SatakeDiagram::AII:
+  case SatakeDiagram::AIII:
+  case SatakeDiagram::AIV:
+    result.makeSimpleType('A', this->rank, nullptr);
+    return result;
+  default:
+    return result;
+  }
+  return result;
+}
+
+void SatakeDiagram::computeMapStringToType() {
+  if (this->mapStringToType.size() != 0) {
+    return;
+  }
+  this->mapStringToType.setKeyValue("AI", SatakeDiagram::AI);
+  this->mapStringToType.setKeyValue("AII", SatakeDiagram::AII);
+  this->mapStringToType.setKeyValue("AIII", SatakeDiagram::AIII);
+  this->mapStringToType.setKeyValue("AIV", SatakeDiagram::AIV);
+  this->mapStringToType.setKeyValue("BI", SatakeDiagram::BI);
+  this->mapStringToType.setKeyValue("CI", SatakeDiagram::CI);
+  this->mapStringToType.setKeyValue("CII", SatakeDiagram::CII);
+  this->mapStringToType.setKeyValue("DI", SatakeDiagram::DI);
+  this->mapStringToType.setKeyValue("DII", SatakeDiagram::DII);
+  this->mapStringToType.setKeyValue("DIII", SatakeDiagram::DIII);
+  this->mapStringToType.setKeyValue("EI", SatakeDiagram::EI);
+  this->mapStringToType.setKeyValue("EII", SatakeDiagram::EII);
+  this->mapStringToType.setKeyValue("EIII", SatakeDiagram::EII);
+  this->mapStringToType.setKeyValue("EIV", SatakeDiagram::EIV);
+  this->mapStringToType.setKeyValue("EV", SatakeDiagram::EV);
+  this->mapStringToType.setKeyValue("EVI", SatakeDiagram::EVI);
+  this->mapStringToType.setKeyValue("EVII", SatakeDiagram::EVII);
+  this->mapStringToType.setKeyValue("EVIII", SatakeDiagram::EVIII);
+  this->mapStringToType.setKeyValue("EIX", SatakeDiagram::EIX);
+  this->mapStringToType.setKeyValue("FI", SatakeDiagram::FI);
+  this->mapStringToType.setKeyValue("FII", SatakeDiagram::FII);
+  this->mapStringToType.setKeyValue("G", SatakeDiagram::G);
+}
+
+bool SatakeDiagram::assignParameter(
+  const std::string& input,
+  int inputRank,
+  int inputParameter,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("SatakeDiagram::assignParameter");
+  this->computeMapStringToType();
+  if (!this->mapStringToType.contains(input)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Unknown Satake diagram type: " << input;
+    }
+    return false;
+  }
+  this->parameter = inputParameter;
+  this->rank = inputRank;
+  if (this->parameter < 0) {
+    this->parameter = 0;
+  }
+  if (this->rank < 0) {
+    this->rank = 0;
+  }
+  return true;
+}
+
+SatakeDiagram::SatakeDiagram() {
+  this->rank = 0;
+  this->parameter = - 1;
+}
+
+std::string CartanInvolution::toString() {
+  std::stringstream out;
+  out << this->satakeDiagram.toString();
+  return out.str();
+}
+
+DynkinType CartanInvolution::dynkinTypeAmbient() {
+  return this->satakeDiagram.dynkinTypeAmbient();
+}
+
+CartanInvolution::CartanInvolution() {
+  this->owner = nullptr;
+}
+
+bool CartanInvolution::computeSimpleRootImagesTypeAI(
+  std::stringstream* commentsOnFailure
+) {
+  if (!this->owner->weylGroup.dynkinType.isSimpleOfType('A')) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Type is not simple type A. ";
+    }
+    return false;
+  }
+  int rank = this->owner->getRank();
+  this->postiveSimpleGeneratorImages.setSize(rank);
+  this->negativeSimpleGeneratorImages.setSize(rank);
+  return true;
+}
+
+bool CartanInvolution::computeSimpleRootImages(
+  std::stringstream* commentsOnFailure
+) {
+  if (this->satakeDiagram.diagram == SatakeDiagram::DiagramType::AI) {
+    return this->computeSimpleRootImagesTypeAI(commentsOnFailure);
+  }
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure
+    << "Not implemented: simple root images for diagram: "
+    << this->satakeDiagram.toString();
+  }
+  return false;
+}
+
+bool CartanInvolution::computeFromDiagram(
+  const SatakeDiagram& inputDiagram,
+  SemisimpleLieAlgebra& inputOwner,
+  std::stringstream* commentsOnFailure
+) {
+  this->owner = &inputOwner;
+  this->satakeDiagram = inputDiagram;
+  if (!this->computeSimpleRootImages(commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to compute simple root images.";
+    }
+    return false;
+  }
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "Not implemented yet.";
+  }
+  return false;
+}
+
+
+
+bool CalculatorLieTheory::cartanInvolution(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::cartanInvolution");
+  if (input.size() != 4 && input.size() != 3) {
+    return calculator << "CartanInvolution takes as input three or two arguments.";
+  }
+  int diagramParameter = 0;
+  if (input.size() == 4) {
+    if (!input[3].isSmallInteger(&diagramParameter)) {
+      return calculator
+      << "Failed to extract small integer from the 3rd argument: "
+      << input[3].toString();
+    }
+  }
+  int rank = 0;
+  if (!input[2].isSmallInteger(&rank)) {
+    return calculator << "Failed to extract small integer from the 2nd argument.";
+  }
+  std::string typeString;
+  if (!input[1].isOfType(&typeString)) {
+    typeString = input[1].toString();
+  }
+  CartanInvolution involution;
+  if (!involution.satakeDiagram.assignParameter(
+    typeString, rank, diagramParameter, &calculator.comments
+  )) {
+    return false;
+  }
+  SemisimpleLieAlgebra owner;
+  calculator.objectContainer.getLieAlgebraCreateIfNotPresent(
+    involution.satakeDiagram.dynkinTypeAmbient()
+  );
+  if (!owner.hasImplementedCartanInvolution(
+    involution.satakeDiagram, &involution, &calculator.comments
+  )) {
+    return false;
+  }
+  return output.assignValue(calculator, involution.toString());
+}
+
 bool CalculatorLieTheory::isReductiveLieSubalgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorLieTheory::isReductiveLieSubalgebra");
   SemisimpleLieAlgebra* ownerSemisimple = nullptr;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > elements, outputElements;
-  if (!CalculatorLieTheory::getElementsInSameLieAlgebra(
+  if (!CalculatorLieTheory::elementsInSameLieAlgebra(
     calculator, input, output, ownerSemisimple, elements
   )) {
     return true;
@@ -2542,14 +2747,14 @@ bool CalculatorLieTheory::constructCartanSubalgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::constructCartanSubalgebra");
-  SubalgebraSemisimpleLieAlgebra theSA;
+  SubalgebraSemisimpleLieAlgebra subalgebra;
   WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> > element;
   if (input.convertsInternally(&element)) {
-    theSA.generators.addOnTop(element.content);
+    subalgebra.generators.addOnTop(element.content);
   } else {
     for (int i = 1; i < input.size(); i ++) {
       if (input[i].convertsInternally(&element)) {
-        theSA.generators.addOnTop(element.content);
+        subalgebra.generators.addOnTop(element.content);
       } else {
         return calculator
         << "Failed to extract element of a semisimple Lie algebra from "
@@ -2557,24 +2762,24 @@ bool CalculatorLieTheory::constructCartanSubalgebra(
       }
     }
   }
-  for (int i = 0; i < theSA.generators.size; i ++) {
-    if (!theSA.generators[i].isEqualToZero()) {
-      if (theSA.owner != nullptr) {
-        if (theSA.owner != theSA.generators[i].getOwner()) {
+  for (int i = 0; i < subalgebra.generators.size; i ++) {
+    if (!subalgebra.generators[i].isEqualToZero()) {
+      if (subalgebra.owner != nullptr) {
+        if (subalgebra.owner != subalgebra.generators[i].getOwner()) {
           return calculator << "The input elements in " << input.toString()
           << " belong to different semisimple Lie algebras";
         }
       }
-      theSA.owner = theSA.generators[i].getOwner();
+      subalgebra.owner = subalgebra.generators[i].getOwner();
     }
   }
-  if (theSA.owner == nullptr) {
+  if (subalgebra.owner == nullptr) {
     return calculator << "Failed to extract input semisimple Lie algebra "
     << "elements from the inputs of " << input.toString();
   }
-  theSA.computeBasis();
-  theSA.computeCartanSubalgebra();
-  return output.assignValueOLD(theSA.toString(), calculator);
+  subalgebra.computeBasis();
+  subalgebra.computeCartanSubalgebra();
+  return output.assignValueOLD(subalgebra.toString(), calculator);
 }
 
 bool CalculatorLieTheory::growDynkinType(

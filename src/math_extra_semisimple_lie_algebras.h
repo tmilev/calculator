@@ -38,13 +38,50 @@ public:
     FII,
     G
   };
-  DiagramType satakeType;
+  DiagramType diagram;
   // Some of the classical satake types depend on an additional parameter,
   // smaller than the rank of the ambient complex Lie algebra.
   int parameter;
   // Rank of the simple root system.
   int rank;
+  static MapList<
+    std::string, SatakeDiagram::DiagramType, MathRoutines::hashString
+  > mapStringToType;
+  SatakeDiagram();
+  void computeMapStringToType();
+  bool assignParameter(
+    const std::string& input,
+    int inputRank,
+    int inputParameter,
+    std::stringstream* commentsOnFailure
+  );
+  DynkinType dynkinTypeAmbient();
+  std::string toString();
 };
+
+class CartanInvolution {
+public:
+  SemisimpleLieAlgebra* owner;
+  SatakeDiagram satakeDiagram;
+  LinearMapSemisimpleLieAlgebra<Rational> linearMap;
+  List<ElementSemisimpleLieAlgebra<Rational> > postiveSimpleGeneratorImages;
+  List<ElementSemisimpleLieAlgebra<Rational> > negativeSimpleGeneratorImages;
+  DynkinType dynkinTypeAmbient();
+  std::string toString();
+  CartanInvolution();
+  bool computeSimpleRootImagesTypeAI(
+    std::stringstream* commentsOnFailure
+  );
+  bool computeSimpleRootImages(
+    std::stringstream* commentsOnFailure
+  );
+  bool computeFromDiagram(
+    const SatakeDiagram& inputDiagram,
+    SemisimpleLieAlgebra& inputOwner,
+    std::stringstream* commentsOnFailure
+  );
+};
+
 
 class SemisimpleLieAlgebra {
 private:
@@ -349,10 +386,10 @@ public:
     Matrix<Coefficient>& output
   );
   // Whether the ambient Lie algebra has a Cartan involution that has been implemented.
-  template <typename Coefficient>
   bool hasImplementedCartanInvolution(
     const SatakeDiagram& satakeDiagram,
-    LinearMapSemisimpleLieAlgebra<Coefficient>* whichInvolution
+    CartanInvolution* whichInvolution,
+    std::stringstream* commentsOnFailure
   );
   template <typename Coefficient>
   bool hasImplementedCartanInvolutionMaximallyCompactCase(

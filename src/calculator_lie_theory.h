@@ -79,17 +79,23 @@ public:
   static bool writeGenVermaModAsDiffOperatorsGeneratorOrder(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
-    return CalculatorLieTheory::writeGenVermaModAsDiffOperators(calculator, input, output, false, false, true);
+    return CalculatorLieTheory::writeGenVermaModAsDiffOperators(
+      calculator, input, output, false, false, true
+    );
   }
   static bool writeGenVermaModAsDiffOperatorsNilOrderDescending(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
-    return CalculatorLieTheory::writeGenVermaModAsDiffOperators(calculator, input, output, false, true, false);
+    return CalculatorLieTheory::writeGenVermaModAsDiffOperators(
+      calculator, input, output, false, true, false
+    );
   }
   static bool writeGenVermaModAsDiffOperatorsAllGensNilOrderDescending(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
-    return CalculatorLieTheory::writeGenVermaModAsDiffOperators(calculator, input, output, true, false, false);
+    return CalculatorLieTheory::writeGenVermaModAsDiffOperators(
+      calculator, input, output, true, false, false
+    );
   }
   static bool printGeneralizedVermaModule(Calculator& calculator, const Expression& input, Expression& output);
   static bool writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel(Calculator& calculator, const Expression& input, Expression& output);
@@ -165,12 +171,15 @@ public:
   static bool slTwoRealFormStructureForceRecompute(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool getElementsInSameLieAlgebra(
+  static bool elementsInSameLieAlgebra(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
     SemisimpleLieAlgebra*& outputOwner,
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
+  );
+  static bool cartanInvolution(
+    Calculator& calculator, const Expression& input, Expression& output
   );
   static bool adjointCommonEigenSpaces(
     Calculator& calculator, const Expression& input, Expression& output
@@ -187,7 +196,9 @@ public:
   static bool slTwoRealFormStructureComputeOnDemand(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool characterSemisimpleLieAlgebraFiniteDimensional(Calculator& calculator, const Expression& input, Expression& output);
+  static bool characterSemisimpleLieAlgebraFiniteDimensional(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool printSemisimpleSubalgebras(
     Calculator& calculator,
     const Expression& input,

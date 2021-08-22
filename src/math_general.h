@@ -340,8 +340,8 @@ public:
   // Two such different representation may differ by extra entries filled in with zeroes.
   static unsigned int hashFunction(const MonomialPolynomial& input) {
     unsigned int result = 0;
-    int numCycles = MathRoutines::minimum(input.monomialBody.size, someRandomPrimesSize);
-    for (int i = 0; i < numCycles; i ++) {
+    int numberOfCycles = MathRoutines::minimum(input.monomialBody.size, someRandomPrimesSize);
+    for (int i = 0; i < numberOfCycles; i ++) {
       result += input.monomialBody[i].hashFunction();
     }
     return result;
@@ -393,9 +393,9 @@ public:
   bool isOneLetterNonConstant(
     int* whichLetter = nullptr, Rational* whichDegree = nullptr
   ) const {
-    int tempI1;
+    int indexBuffer;
     if (whichLetter == nullptr) {
-      whichLetter = &tempI1;
+      whichLetter = &indexBuffer;
     }
     *whichLetter = - 1;
     for (int i = 0; i < this->monomialBody.size; i ++) {
@@ -5855,14 +5855,6 @@ public:
     List<Rational>* outputFirstCoRootLengthsSquared = nullptr
   ) const;
   void getTypesWithMults(List<DynkinSimpleType>& output) const;
-  bool isOfSimpleType(char inputType, int inputRank) const {
-    char currentType;
-    int currentRank;
-    if (!this->isSimple(&currentType, &currentRank)) {
-      return false;
-    }
-    return currentType == inputType && currentRank == inputRank;
-  }
   static void getOuterAutosGeneratorsOneTypeActOnVectorColumn(
     List<MatrixTensor<Rational> >& output,
     const DynkinSimpleType& dynkinType,
@@ -5875,6 +5867,8 @@ public:
     return LinearCombination<DynkinSimpleType, Rational>::hashFunction(input);
   }
   void getOuterAutosGeneratorsActOnVectorColumn(List<MatrixTensor<Rational> >& output);
+  bool isSimpleOfType(char desiredType, int desiredRank) const;
+  bool isSimpleOfType(char desiredType, int* outputRank = nullptr, Rational* outputLength = nullptr) const;
   bool isSimple(char* outputtype = nullptr, int* outputRank = nullptr, Rational* outputLength = nullptr) const;
   void getSortedDynkinTypes(List<DynkinSimpleType>& output) const;
   Rational getPrincipalSlTwoCartanSymmetricInverseScale() const;

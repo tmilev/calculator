@@ -666,7 +666,7 @@ public:
     this->flagDeallocated = true;
   }
   bool isOfSimpleType(char desiredType, int desiredRank) const {
-    return this->dynkinType.isOfSimpleType(desiredType, desiredRank);
+    return this->dynkinType.isSimpleOfType(desiredType, desiredRank);
   }
   Matrix<Rational>* getMatrixFundamentalToSimpleCoords() {
     this->computeFundamentalToSimpleMatrices();

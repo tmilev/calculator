@@ -505,46 +505,46 @@ bool ElementUniversalEnveloping<Coefficient>::getCoordinatesInBasis(
 template<class Coefficient>
 template<class CoefficientTypeQuotientField>
 bool ElementUniversalEnveloping<Coefficient>::getBasisFromSpanOfElements(
-  List<ElementUniversalEnveloping<Coefficient> >& theElements,
+  List<ElementUniversalEnveloping<Coefficient> >& elements,
   Vectors<CoefficientTypeQuotientField>& outputCoords,
-  List<ElementUniversalEnveloping<Coefficient> >& outputTheBasis,
-  const CoefficientTypeQuotientField& theFieldUnit,
-  const CoefficientTypeQuotientField& theFieldZero
+  List<ElementUniversalEnveloping<Coefficient> >& outputBasis,
+  const CoefficientTypeQuotientField& fieldUnit,
+  const CoefficientTypeQuotientField& fieldZero
 ) {
-  if (theElements.size == 0) {
+  if (elements.size == 0) {
     return false;
   }
   ElementUniversalEnveloping<Coefficient> outputCorrespondingMonomials;
-  outputCorrespondingMonomials.makeZero(*theElements[0].owner);
+  outputCorrespondingMonomials.makeZero(*elements[0].owner);
   Vectors<CoefficientTypeQuotientField> outputCoordsBeforeReduction;
-  for (int i = 0; i < theElements.size; i ++) {
-    for (int j = 0; j < theElements[i].size; j ++) {
-      outputCorrespondingMonomials.addOnTopNoRepetition(theElements[i][j]);
+  for (int i = 0; i < elements.size; i ++) {
+    for (int j = 0; j < elements[i].size; j ++) {
+      outputCorrespondingMonomials.addOnTopNoRepetition(elements[i][j]);
     }
   }
-  outputCoordsBeforeReduction.setSize(theElements.size);
-  for (int i = 0; i < theElements.size; i ++) {
+  outputCoordsBeforeReduction.setSize(elements.size);
+  for (int i = 0; i < elements.size; i ++) {
     Vector<CoefficientTypeQuotientField>& currentList = outputCoordsBeforeReduction[i];
     currentList.makeZero(outputCorrespondingMonomials.size);
-    ElementUniversalEnveloping<Coefficient>& currentElt = theElements[i];
+    ElementUniversalEnveloping<Coefficient>& currentElt = elements[i];
     for (int j = 0; j < currentElt.size; j ++) {
       MonomialUniversalEnveloping<Coefficient>& currentMon = currentElt[j];
       currentList[outputCorrespondingMonomials.getIndex(currentMon)] = currentMon.theCoefficient;
     }
   }
-  outputTheBasis.size = 0;
-  outputTheBasis.reserve(theElements.size);
+  outputBasis.size = 0;
+  outputBasis.reserve(elements.size);
   Vectors<CoefficientTypeQuotientField> basisCoordForm;
-  basisCoordForm.reserve(theElements.size);
+  basisCoordForm.reserve(elements.size);
   Selection selectedBasis;
-  outputCoordsBeforeReduction.SelectABasis(basisCoordForm, theFieldZero, selectedBasis);
+  outputCoordsBeforeReduction.SelectABasis(basisCoordForm, fieldZero, selectedBasis);
   for (int i = 0; i < selectedBasis.cardinalitySelection; i ++) {
-    outputTheBasis.addOnTop(theElements.objects[selectedBasis.elements[i]]);
+    outputBasis.addOnTop(elements.objects[selectedBasis.elements[i]]);
   }
   Matrix<Coefficient> bufferMat;
   Vectors<Coefficient> bufferVectors;
   outputCoordsBeforeReduction.getCoordinatesInBasis(
-    basisCoordForm, outputCoords, bufferVectors, bufferMat, theFieldUnit, theFieldZero
+    basisCoordForm, outputCoords, bufferVectors, bufferMat, fieldUnit, fieldZero
   );
   return true;
 }

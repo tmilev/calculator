@@ -170,7 +170,7 @@ public:
   int numberOfCasesNoLInfiniteRelationFound;
   int numberOfBadParabolics;
   int numberOfCentralizerConditionFailsConeConditionHolds;
-  // The highest weight vectors are by definition cartan-centralizer-split
+  // The highest weight vectors are by definition cartan-centralizer-split.
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > highestVectorsNonSorted;
   List<Vector<Rational> > highestWeightsPrimalNonSorted;
   List<Vector<Rational> > highestWeightsNonPrimalNonSorted;
@@ -179,6 +179,14 @@ public:
   HashedList<Vector<Rational> > highestWeightsPrimal;
   List<Vector<Rational> > highestWeightsNonPrimal;
 
+  // A list of lists of all k-modules, grouped by primal highest weight.
+  // A sub-list contains all k-modules of a given primal highest weight.
+  // Each sub-sub-list contains a basis elements of a k-module.
+  // The first element in the list is a highest weight vector.
+  // The last element is a lowest weight vector.
+  // Vectors with higher indices have lower weight
+  // (in the partial order of weights) that vectors
+  // with lower indices.
   List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > modules;
   List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > modulesSl2Opposite;
   List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > modulesIsotypicallyMerged;
@@ -224,13 +232,19 @@ public:
     List<std::string> triplesNotViolatingWConjecture;
     // Same as above but with [w_1, w_2] \notin the centralizer of sl(2) in k.
     List<std::string> triplesViolatingWConjecture;
+
+    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > elementE;
+    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > genericNegativeOneWeightElement;
+    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > adEOfGenericNegativeOneWeightElement;
     WConjecture();
     void compute(CandidateSemisimpleSubalgebra& owner, SlTwoSubalgebra& ownerSl2);
     void processOnePair( int indexLeft, int indexRight);
     std::string toStringWConjectureHolds() const;
     std::string toString(const CandidateSemisimpleSubalgebra& owner) const;
+    std::string toStringAdjointActionNegativeOne() const;
     std::string toStringLieBracketTriples(const List<std::string>& triple) const;
     void computeSmallOrbits(const CandidateSemisimpleSubalgebra& owner);
+    void computeAdEAsPolynomialMap(const CandidateSemisimpleSubalgebra& owner);
   };
   WConjecture wConjecture;
   bool flagDeallocated;

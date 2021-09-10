@@ -3277,6 +3277,14 @@ void CandidateSemisimpleSubalgebra::computeRatioKillingsByComponent() {
   }
 }
 
+std::string CandidateSemisimpleSubalgebra::WConjecture::toStringAdjointActionNegativeOne() const {
+  std::stringstream out;
+  out << "Element e: \\(" << this->elementE.toString() << "\\)";
+  out << "Generic negative 1 weight element: \\(" << this->genericNegativeOneWeightElement.toString() << "\\)";
+  out << "Adjoint: \\(" << this->genericNegativeOneWeightElement.toString() << "\\)";
+  return out.str();
+}
+
 std::string CandidateSemisimpleSubalgebra::WConjecture::toStringWConjectureHolds() const {
   std::stringstream out;
   if (this->triplesViolatingWConjecture.size == 0) {
@@ -3354,6 +3362,7 @@ std::string CandidateSemisimpleSubalgebra::WConjecture::toString(
     << "All zero Lie brackets are omitted.<br>";
     out << this->toStringLieBracketTriples(this->triplesNotViolatingWConjecture);
   }
+  out << this->toStringAdjointActionNegativeOne();
   if (this->triplesViolatingWConjecture.size > 0) {
     out << "<br>Lie brackets between the basis elements of \\(W\\) "
     << "that <b style='color:red'> do not lie in \\(\\mathfrak k^{\\mathfrak s}\\)</b>.<br>";
@@ -3440,6 +3449,44 @@ void CandidateSemisimpleSubalgebra::WConjecture::compute(
   if (this->flagSlTwoIsSmall && this->triplesViolatingWConjecture.size > 0) {
     this->flagWConjectureHolds = false;
   }
+}
+
+void CandidateSemisimpleSubalgebra::WConjecture::computeAdEAsPolynomialMap(
+  const CandidateSemisimpleSubalgebra& owner
+) {
+  MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::WConjecture::computeAdEAsPolynomialMap");
+  this->elementE = owner.positiveGenerators[0];
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > basisElementUnknownCoefficient;
+  Polynomial<AlgebraicNumber> unknownCoefficient;
+  int elementsFound = 0;
+  // Iterate over all modules of a given primal highest weight.
+  // Recall in our terminology,
+  // primal means the weight is taken with respect to
+  // the Cartan of k and the
+  // Cartan of its centralizer.
+  for (int i = 0; i < owner.modules.size; i ++) {
+    // Among the modules with given primal highest weight, iterate over the individual ones.
+    // Two modules with identical highest weight may be ind
+    for (int j = 0; j < owner.modules[i].size; j++) {
+      List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& module = owner.modules[i][j];
+      if ((module.size % 2) != 0) {
+        // A module has an element of weight - 1 only when the module
+        // has even dimension (0-dimension not allowed).
+        continue;
+      }
+      // The last element of the module is the lowest-weight element.
+      basisElementUnknownCoefficient = module[module.size - 1];
+      unknownCoefficient.makeMonomial(elementsFound, 1, 1);
+      basisElementUnknownCoefficient *= unknownCoefficient;
+      this->genericNegativeOneWeightElement += basisElementUnknownCoefficient;
+    }
+  }
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > adEOfGNegativeTwo;
+  owner.owner->owner->lieBracket(
+    this->elementE,
+    this->genericNegativeOneWeightElement,
+    this->adEOfGenericNegativeOneWeightElement
+  );
 }
 
 void CandidateSemisimpleSubalgebra::WConjecture::computeSmallOrbits(const CandidateSemisimpleSubalgebra& owner) {

@@ -77,14 +77,18 @@ ifeq ($(noMongo), 1)
 $(info [1;31mNo mongoDB requested.[0m) 
 else
 mongoLocation =
-ifneq ($(wildcard /usr/local/lib/libmongoc-1.0.so),)#location of mongoC in Ubuntu
-  CFLAGS+=-I/usr/local/include/libmongoc-1.0 -I/usr/local/include/libbson-1.0
-  mongoLocation=/usr/local/
+ifneq ($(wildcard /usr/share/lintian/overrides/libmongoc-1.0-0),) 
+  mongoLocation=/usr/share/lintian/overrides
+endif
+ifneq ($(wildcard /usr/local/lib/libmongoc-1.0.so),) #location of mongoC in Ubuntu
+  mongoLocation=/usr/local/lib
 endif
 ifneq ($(mongoLocation),)
+  CFLAGS+=-I/usr/local/include/libmongoc-1.0 -I/usr/local/include/libbson-1.0
+  CFLAGS+=-I/usr/include/libmongoc-1.0 -I/usr/include/libbson-1.0
   CFLAGS+=-DMACRO_use_MongoDB
 #  LDFLAGS+= -L/usr/local/lib
-  LIBRARIES_INCLUDED_AT_THE_END+=-L/usr/local/lib -lmongoc-1.0 -lbson-1.0
+  LIBRARIES_INCLUDED_AT_THE_END+=-L/$(mongoLocation) -lmongoc-1.0 -lbson-1.0
 $(info [1;32mMongo found.[0m) 
 else
 $(info [1;31mNOT FOUND: Mongo.[0m The calculator will run without a database and proper login.) 

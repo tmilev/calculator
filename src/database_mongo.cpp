@@ -1,6 +1,6 @@
 #ifdef MACRO_use_MongoDB
 #include <mongoc.h>
-#include <bcon.h>
+#include <bson.h>
 #endif //MACRO_use_MongoDB
 #include "database.h"
 #include "json.h"

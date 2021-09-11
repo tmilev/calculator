@@ -21,6 +21,8 @@ LIBS+=-lbson-1.0
 
 INCLUDEPATH+=/usr/local/include/libmongoc-1.0
 INCLUDEPATH+=/usr/local/include/libbson-1.0
+INCLUDEPATH+=/usr/include/libmongoc-1.0
+INCLUDEPATH+=/usr/include/libbson-1.0
 HEADERS += \
     abstract_syntax_notation_one_decoder.h \
     calculator.h \

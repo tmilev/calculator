@@ -817,7 +817,7 @@ public:
     return this->cartanSymmetric.numberOfRows;
   }
   void computeWeylGroupAndrootsOfBorel(Vectors<Rational>& output);
-  void computerootsOfBorel(Vectors<Rational>& output);
+  void computeRootsOfBorel(Vectors<Rational>& output);
   static LargeInteger getSizeByFormulaImplementation(FiniteGroup<ElementWeylGroup>& G);
   static LargeInteger sizeByFormulaOrNegative1(char weylLetter, int dimension);
   bool isARoot(const Vector<Rational>& input) const {

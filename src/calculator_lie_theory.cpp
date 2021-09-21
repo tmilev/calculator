@@ -352,7 +352,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
   MacroRegisterFunctionWithName("Calculator::splitFDpartB3overG2inner");
   ModuleSSalgebra<RationalFraction<Rational> > theModCopy;
   theModCopy.makeFromHW(
-    theG2B3Data.homomorphism.range(),
+    theG2B3Data.homomorphism.coDomainAlgebra(),
     theG2B3Data.weightFundamentalCoordinates,
     theG2B3Data.inducing,
     Rational::one(),
@@ -389,9 +389,9 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
   theG2B3Data.g2Weights.setSize(theG2B3Data.outputWeightsFundCoordS.size);
   theG2B3Data.g2DualWeights.setSize(theG2B3Data.outputWeightsFundCoordS.size);
   Matrix<Rational> invertedG2cartanMat;
-  invertedG2cartanMat = theG2B3Data.homomorphism.domain().weylGroup.cartanSymmetric;
+  invertedG2cartanMat = theG2B3Data.homomorphism.domainAlgebra().weylGroup.cartanSymmetric;
   invertedG2cartanMat.invert();
-  WeylGroupData& rangeWeyl = theG2B3Data.homomorphism.range().weylGroup;
+  WeylGroupData& rangeWeyl = theG2B3Data.homomorphism.coDomainAlgebra().weylGroup;
   RationalFraction<Rational> zero(Rational::zero());
   RationalFraction<Rational> one(Rational::one());
   theG2B3Data.outputWeightsSimpleCoords = rangeWeyl.getSimpleCoordinatesFromFundamental(
@@ -401,7 +401,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
   weightSimpleCoordinates = rangeWeyl.getSimpleCoordinatesFromFundamental(
     theG2B3Data.weightFundamentalCoordinates, zero
   );
-  theG2B3Data.ambientCharacter.makeFromWeight(weightSimpleCoordinates, &theG2B3Data.homomorphism.range());
+  theG2B3Data.ambientCharacter.makeFromWeight(weightSimpleCoordinates, &theG2B3Data.homomorphism.coDomainAlgebra());
   theG2B3Data.smallCharacterFiniteDimensionalPart.makeZero();
   CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > tempMon;
   for (int i = 0; i < theG2B3Data.outputWeightsSimpleCoords.size; i ++) {
@@ -409,20 +409,20 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
     Vector<RationalFraction<Rational> >& currentG2Weight = theG2B3Data.g2Weights[i];
     Vector<RationalFraction<Rational> >& currentG2DualWeight = theG2B3Data.g2DualWeights[i];
     currentG2DualWeight.setSize(2);
-    currentG2DualWeight[0] = theG2B3Data.homomorphism.range().weylGroup.rootScalarCartanRoot(
+    currentG2DualWeight[0] = theG2B3Data.homomorphism.coDomainAlgebra().weylGroup.rootScalarCartanRoot(
       currentWeight, theG2B3Data.homomorphism.imagesCartanDomain[0]
     );
     //<-note: implicit type conversion: the return type is the left coefficient type.
-    currentG2DualWeight[1] = theG2B3Data.homomorphism.range().weylGroup.rootScalarCartanRoot(
+    currentG2DualWeight[1] = theG2B3Data.homomorphism.coDomainAlgebra().weylGroup.rootScalarCartanRoot(
       currentWeight, theG2B3Data.homomorphism.imagesCartanDomain[1]
     );
     //<-note: implicit type conversion: the return type is the left coefficient type.
     invertedG2cartanMat.actOnVectorColumn(currentG2DualWeight, currentG2Weight, zero);//<-g2weight is now computed;
-    tempMon.makeFromWeight(currentG2Weight, &theG2B3Data.homomorphism.domain());
+    tempMon.makeFromWeight(currentG2Weight, &theG2B3Data.homomorphism.domainAlgebra());
     theG2B3Data.smallCharacterFiniteDimensionalPart += tempMon;
   }
   ElementUniversalEnveloping<RationalFraction<Rational> > theG2Casimir, theG2CasimirCopy, imageCasimirInB3, element;
-  theG2Casimir.makeCasimir(theG2B3Data.homomorphism.domain());
+  theG2Casimir.makeCasimir(theG2B3Data.homomorphism.domainAlgebra());
 
   theG2B3Data.allCharacters.setSize(theG2B3Data.outputWeightsFundCoordS.size);
   for (int i = 0; i < theG2B3Data.outputWeightsSimpleCoords.size; i ++) {
@@ -449,7 +449,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
   theG2Casimir.checkConsistency();
   imageCasimirInB3.checkConsistency();
   RationalFraction<Rational> charDiff;
-  theG2B3Data.homomorphism.range().orderNilradical(
+  theG2B3Data.homomorphism.coDomainAlgebra().orderNilradical(
     theMod.parabolicSelectionNonSelectedAreElementsLevi,
     theG2B3Data.flagUseNilWeightGeneratorOrder,
     theG2B3Data.flagAscendingGeneratorOrder
@@ -466,7 +466,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
         weightDifference = theG2B3Data.g2Weights[j] - theG2B3Data.g2Weights[k];
         if (weightDifference.isPositive()) {
           theG2CasimirCopy = imageCasimirInB3;
-          element.makeConstant(theG2B3Data.allCharacters[j], theG2B3Data.homomorphism.range());
+          element.makeConstant(theG2B3Data.allCharacters[j], theG2B3Data.homomorphism.coDomainAlgebra());
           theG2CasimirCopy -= element;
           theG2CasimirCopy *= Rational(12);
           currentTensorEltEigen.multiplyMeByUEEltOnTheLeft(theG2CasimirCopy);
@@ -1075,14 +1075,14 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(Calculator& calculato
   ElementUniversalEnveloping<RationalFraction<Rational> > theCasimir, theCentralCharacter, resultChar;
   RationalFraction<Rational> minusOne(Rational(- 1));
   HashedList<ElementUniversalEnveloping<RationalFraction<Rational> > > theCentralChars;
-  theCasimir.makeCasimir(g3InB3Data.homomorphism.domain());
-  WeylGroupData& smallWeyl = g3InB3Data.homomorphism.domain().weylGroup;
+  theCasimir.makeCasimir(g3InB3Data.homomorphism.domainAlgebra());
+  WeylGroupData& smallWeyl = g3InB3Data.homomorphism.domainAlgebra().weylGroup;
   for (int k = 0; k < theHWs.size; k ++) {
     theCharacter.makeFromWeight(
-      g3InB3Data.homomorphism.range().weylGroup.getSimpleCoordinatesFromFundamental(
+      g3InB3Data.homomorphism.coDomainAlgebra().weylGroup.getSimpleCoordinatesFromFundamental(
         theHWs[k], RationalFraction<Rational>::zeroRational()
       ),
-      &g3InB3Data.homomorphism.range()
+      &g3InB3Data.homomorphism.coDomainAlgebra()
     );
     theCharacter.splitCharacterOverReductiveSubalgebra(nullptr, outputChar, g3InB3Data);
     g3InB3Data.format.fundamentalWeightLetter = "\\omega";
@@ -1743,7 +1743,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2old(
     out << "<tr><td>" << theG2B3Data.outputEigenWords[i].toString() << "</td><td> "
     << currentWeightSimpleB3coords.toString() << "</td><td> " << currentWeightFundB3coords.toString()
     << "</td><td>" << currentG2Weight.toStringLetterFormat("\\alpha") << "</td><td> "
-    << theG2B3Data.homomorphism.domain().weylGroup.getFundamentalCoordinatesFromSimple(currentG2Weight).toString()
+    << theG2B3Data.homomorphism.domainAlgebra().weylGroup.getFundamentalCoordinatesFromSimple(currentG2Weight).toString()
     << "</td><td> " << currentG2DualWeight.toString() << "</td>";
     out << "<td>" << HtmlRoutines::getMathNoDisplay(theG2B3Data.allCharacters[i].toString()) << "</td>";
     out << "</tr>";
@@ -1826,11 +1826,11 @@ bool CalculatorLieTheory::splitFDpartB3overG2CharsOutput(
   CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > tempChar;
   CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > startingChar;
   Vector<RationalFraction<Rational> > simpleWeight;
-  simpleWeight = theG2B3Data.homomorphism.range().weylGroup.getSimpleCoordinatesFromFundamental(
+  simpleWeight = theG2B3Data.homomorphism.coDomainAlgebra().weylGroup.getSimpleCoordinatesFromFundamental(
     theG2B3Data.weightFundamentalCoordinates,
     RationalFraction<Rational>::zeroRational()
   );
-  startingChar.makeFromWeight(simpleWeight, &theG2B3Data.homomorphism.range());
+  startingChar.makeFromWeight(simpleWeight, &theG2B3Data.homomorphism.coDomainAlgebra());
   startingChar.splitCharacterOverReductiveSubalgebra(&report, tempChar, theG2B3Data);
   out << report;
   return output.assignValueOLD(out.str(), calculator);
@@ -2113,6 +2113,7 @@ bool SatakeDiagram::assignParameter(
     }
     return false;
   }
+  this->diagram = this->mapStringToType.getValueNoFail(input);
   this->parameter = inputParameter;
   this->rank = inputRank;
   if (this->parameter < 0) {
@@ -2146,6 +2147,7 @@ CartanInvolution::CartanInvolution() {
 bool CartanInvolution::computeSimpleRootImagesTypeAI(
   std::stringstream* commentsOnFailure
 ) {
+  MacroRegisterFunctionWithName("CartanInvolution::computeSimpleRootImagesTypeAI");
   if (!this->owner->weylGroup.dynkinType.isSimpleOfType('A')) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Type is not simple type A. ";
@@ -2153,21 +2155,33 @@ bool CartanInvolution::computeSimpleRootImagesTypeAI(
     return false;
   }
   int rank = this->owner->getRank();
-  this->postiveSimpleGeneratorImages.setSize(rank);
-  this->negativeSimpleGeneratorImages.setSize(rank);
+  this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
+  this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
+  Vector<Rational> simpleRoot;
+  for (int i = 0; i < rank; i ++) {
+    simpleRoot.makeEi(rank, i);
+    this->automorphism.imagesPositiveSimpleChevalleyGenerators[i].makeGGenerator(simpleRoot, *this->owner);
+    this->automorphism.imagesNegativeSimpleChevalleyGenerators[i].makeGGenerator(- simpleRoot, *this->owner);
+  }
+  global.comments << "DEBUG: Rank: " << rank << " images pos: " << this->automorphism.imagesPositiveSimpleChevalleyGenerators.toString();
+  global.comments << "DEBUG: Constructed images: " << this->automorphism.toString();
   return true;
 }
 
 bool CartanInvolution::computeSimpleRootImages(
   std::stringstream* commentsOnFailure
 ) {
+  MacroRegisterFunctionWithName("CartanInvolution::computeSimpleRootImages");
+  this->automorphism.domain = this->owner;
+  this->automorphism.coDomain = this->owner;
+  this->owner->weylGroup.computeRho(false);
   if (this->satakeDiagram.diagram == SatakeDiagram::DiagramType::AI) {
     return this->computeSimpleRootImagesTypeAI(commentsOnFailure);
   }
   if (commentsOnFailure != nullptr) {
     *commentsOnFailure
-    << "Not implemented: simple root images for diagram: "
-    << this->satakeDiagram.toString();
+    << "Not implemented: Satake diagram: "
+    << this->satakeDiagram.toString() << ". ";
   }
   return false;
 }
@@ -2181,17 +2195,19 @@ bool CartanInvolution::computeFromDiagram(
   this->satakeDiagram = inputDiagram;
   if (!this->computeSimpleRootImages(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to compute simple root images.";
+      *commentsOnFailure << "Failed to compute simple root images. ";
     }
     return false;
   }
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Not implemented yet.";
+  global.comments << "DEBUG: got to here!!!!";
+  if (!this->automorphism.computeHomomorphismFromImagesSimpleChevalleyGenerators(commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to extend images of simple generators to a Cartan involution. ";
+    }
+    return false;
   }
-  return false;
+  return true;
 }
-
-
 
 bool CalculatorLieTheory::cartanInvolution(
   Calculator& calculator, const Expression& input, Expression& output
@@ -2222,8 +2238,9 @@ bool CalculatorLieTheory::cartanInvolution(
   )) {
     return false;
   }
-  SemisimpleLieAlgebra owner;
-  calculator.objectContainer.getLieAlgebraCreateIfNotPresent(
+  global.comments << "DEBUG: got to here. Dynkin diagram: " << involution.satakeDiagram.dynkinTypeAmbient().toString()
+                  << "Rank: " << rank << " param: " << diagramParameter;
+  SemisimpleLieAlgebra& owner = calculator.objectContainer.getLieAlgebraCreateIfNotPresent(
     involution.satakeDiagram.dynkinTypeAmbient()
   );
   if (!owner.hasImplementedCartanInvolution(
@@ -3594,7 +3611,7 @@ bool CalculatorLieTheory::embedG2InB3(Calculator& calculator, const Expression& 
   }
   outputUE.simplify(RationalFraction<Rational>::oneRational());
   ExpressionContext context(calculator);
-  context.setAmbientSemisimpleLieAlgebra(theHmm.range());
+  context.setAmbientSemisimpleLieAlgebra(theHmm.coDomainAlgebra());
   return output.assignValueWithContextOLD(outputUE, context, calculator);
 }
 

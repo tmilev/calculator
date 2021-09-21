@@ -201,10 +201,10 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "May be omitted if the diagram does not admit a parameter. "
     "As of writing, the output is a string that summarizes the "
     "Cartan involution. This is work in progress.",
-    "SatakeDiagram(AI, 3, 0);\n"
-    "SatakeDiagram(AII, 3);\n"
-    "SatakeDiagram(AIII, 4, 2);\n"
-    "SatakeDiagram(AIII, 5, 3);",
+    "CartanInvolution(AI, 3, 0);\n"
+    "CartanInvolution(AII, 3);\n"
+    "CartanInvolution(AIII, 4, 2);\n"
+    "CartanInvolution(AIII, 5, 3);",
     "CalculatorLieTheory::cartanInvolution",
     "CartanInvolution",
     standardOptions

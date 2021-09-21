@@ -3279,8 +3279,8 @@ void CandidateSemisimpleSubalgebra::computeRatioKillingsByComponent() {
 
 std::string CandidateSemisimpleSubalgebra::WConjecture::toStringAdjointActionNegativeOne() const {
   std::stringstream out;
-  out << "Element e: \\(" << this->elementE.toString() << "\\)";
-  out << "Generic negative 1 weight element: \\(" << this->genericNegativeOneWeightElement.toString() << "\\)";
+  out << "Element e: \\(" << this->elementE.toString() << "\\)<br>";
+  out << "Generic negative 1 weight element: \\(" << this->genericNegativeOneWeightElement.toString() << "\\)<br>";
   out << "Adjoint: \\(" << this->genericNegativeOneWeightElement.toString() << "\\)";
   return out.str();
 }
@@ -3445,6 +3445,7 @@ void CandidateSemisimpleSubalgebra::WConjecture::compute(
     }
   }
   this->computeSmallOrbits(owner);
+  this->computeAdEAsPolynomialMap(owner);
   this->flagWConjectureHolds = true;
   if (this->flagSlTwoIsSmall && this->triplesViolatingWConjecture.size > 0) {
     this->flagWConjectureHolds = false;
@@ -3464,6 +3465,7 @@ void CandidateSemisimpleSubalgebra::WConjecture::computeAdEAsPolynomialMap(
   // primal means the weight is taken with respect to
   // the Cartan of k and the
   // Cartan of its centralizer.
+  // global.comments << "DEBUG: Code ran";
   for (int i = 0; i < owner.modules.size; i ++) {
     // Among the modules with given primal highest weight, iterate over the individual ones.
     // Two modules with identical highest weight may be ind

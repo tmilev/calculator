@@ -740,9 +740,9 @@ bool ElementUniversalEnveloping<Coefficient>::convertToRationalCoefficient(Eleme
 
 void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   MacroRegisterFunctionWithName("BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups");
-  this->weylGroupFiniteDimensionalSmallAsSubgroupInLarge.ambientWeyl = &this->homomorphism.range().weylGroup;
-  this->weylGroupFiniteDimensionalSmall.ambientWeyl = &this->homomorphism.domain().weylGroup;
-  this->weylGroupFiniteDimensional.ambientWeyl = &this->homomorphism.range().weylGroup;
+  this->weylGroupFiniteDimensionalSmallAsSubgroupInLarge.ambientWeyl = &this->homomorphism.coDomainAlgebra().weylGroup;
+  this->weylGroupFiniteDimensionalSmall.ambientWeyl = &this->homomorphism.domainAlgebra().weylGroup;
+  this->weylGroupFiniteDimensional.ambientWeyl = &this->homomorphism.coDomainAlgebra().weylGroup;
   this->smallParabolicSelection.initialize(weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension());
   for (int i = 0; i < this->homomorphism.imagesCartanDomain.size; i ++) {
     Vector<Rational>& currentV = this->homomorphism.imagesCartanDomain[i];
@@ -764,10 +764,10 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   this->indicesNilradicalLarge.setSize(0);
   this->indicesNilradicalSmall.setSize(0);
   ElementSemisimpleLieAlgebra<Rational> element;
-  WeylGroupData& theLargeWeyl = this->homomorphism.range().weylGroup;
-  WeylGroupData& theSmallWeyl = this->homomorphism.domain().weylGroup;
-  int numB3NegGenerators = this->homomorphism.range().getNumberOfPositiveRoots();
-  int numG2NegGenerators = this->homomorphism.domain().getNumberOfPositiveRoots();
+  WeylGroupData& theLargeWeyl = this->homomorphism.coDomainAlgebra().weylGroup;
+  WeylGroupData& theSmallWeyl = this->homomorphism.domainAlgebra().weylGroup;
+  int numB3NegGenerators = this->homomorphism.coDomainAlgebra().getNumberOfPositiveRoots();
+  int numG2NegGenerators = this->homomorphism.domainAlgebra().getNumberOfPositiveRoots();
   for (int i = 0; i < numB3NegGenerators; i ++) {
     const Vector<Rational>& currentWeight = theLargeWeyl.rootSystem[i];
     bool isInNilradical = false;
@@ -779,7 +779,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
     }
     if (isInNilradical) {
       this->weightsNilradicalLarge.addOnTop(currentWeight);
-      element.makeGenerator(i, this->homomorphism.range());
+      element.makeGenerator(i, this->homomorphism.coDomainAlgebra());
       this->nilradicalLarge.addOnTop(element);
       this->indicesNilradicalLarge.addOnTop(i);
     }
@@ -795,7 +795,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
     }
     if (isInNilradical) {
       this->weightsNilradicalSmall.addOnTop(currentWeight);
-      element.makeGenerator(i, this->homomorphism.domain());
+      element.makeGenerator(i, this->homomorphism.domainAlgebra());
       this->nilradicalSmall.addOnTop(element);
       this->indicesNilradicalSmall.addOnTop(i);
     }
@@ -842,7 +842,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart2Subgroups() {
   this->weylGroupFiniteDimensionalSmall.makeParabolicFromSelectionSimpleRoots(
     *this->weylGroupFiniteDimensionalSmall.ambientWeyl, this->smallParabolicSelection, 1000
   );
-  this->weylGroupFiniteDimensional.makeParabolicFromSelectionSimpleRoots(this->homomorphism.range().weylGroup, this->inducing, 1000);
+  this->weylGroupFiniteDimensional.makeParabolicFromSelectionSimpleRoots(this->homomorphism.coDomainAlgebra().weylGroup, this->inducing, 1000);
   this->weylGroupFiniteDimensional.computeRootSubsystem();
   this->weylGroupFiniteDimensionalSmallAsSubgroupInLarge.computeRootSubsystem();
   this->weylGroupFiniteDimensionalSmall.computeRootSubsystem();

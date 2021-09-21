@@ -295,26 +295,27 @@ void Calculator::makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output) {
   DynkinType b3Type, g2Type;
   b3Type.makeSimpleType('B', 3);
   g2Type.makeSimpleType('G', 2);
-  output.domainAlg = &this->objectContainer.getLieAlgebraCreateIfNotPresent(g2Type);
-  output.rangeAlg = &this->objectContainer.getLieAlgebraCreateIfNotPresent(b3Type);
+  output.domain = &this->objectContainer.getLieAlgebraCreateIfNotPresent(g2Type);
+  output.coDomain = &this->objectContainer.getLieAlgebraCreateIfNotPresent(b3Type);
 
-  output.range().computeChevalleyConstants();
-  output.domain().computeChevalleyConstants();
+  output.coDomainAlgebra().computeChevalleyConstants();
+  output.domainAlgebra().computeChevalleyConstants();
   ElementSemisimpleLieAlgebra<Rational> g_2, g_1plusg_3, g_m2, g_m1plusg_m3, element;
-  g_2.makeGenerator         (13, output.range());
-  g_m2.makeGenerator        (7,  output.range());
-  g_1plusg_3.makeGenerator  (12, output.range());
-  element.makeGenerator     (14, output.range());
+  g_2.makeGenerator         (13, output.coDomainAlgebra());
+  g_m2.makeGenerator        (7,  output.coDomainAlgebra());
+  g_1plusg_3.makeGenerator  (12, output.coDomainAlgebra());
+  element.makeGenerator     (14, output.coDomainAlgebra());
   g_1plusg_3 += element;
-  g_m1plusg_m3.makeGenerator(6, output.range());
-  element.makeGenerator     (8, output.range());
+  g_m1plusg_m3.makeGenerator(6, output.coDomainAlgebra());
+  element.makeGenerator     (8, output.coDomainAlgebra());
   g_m1plusg_m3 += element;
-  output.imagesSimpleChevalleyGenerators.setSize(4);
-  output.imagesSimpleChevalleyGenerators[0] = g_1plusg_3;
-  output.imagesSimpleChevalleyGenerators[1] = g_2;
-  output.imagesSimpleChevalleyGenerators[3] = g_m2;
-  output.imagesSimpleChevalleyGenerators[2] = g_m1plusg_m3;
-  output.computeHomomorphismFromImagesSimpleChevalleyGenerators();
+  output.imagesPositiveSimpleChevalleyGenerators.setSize(2);
+  output.imagesPositiveSimpleChevalleyGenerators[0] = g_1plusg_3;
+  output.imagesPositiveSimpleChevalleyGenerators[1] = g_2;
+  output.imagesNegativeSimpleChevalleyGenerators.setSize(2);
+  output.imagesNegativeSimpleChevalleyGenerators[0] = g_m1plusg_m3;
+  output.imagesNegativeSimpleChevalleyGenerators[1] = g_m2;
+  output.computeHomomorphismFromImagesSimpleChevalleyGenerators(nullptr);
   output.getRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(output.restrictedRootSystem);
 }
 

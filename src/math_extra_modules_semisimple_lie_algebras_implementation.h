@@ -1561,25 +1561,25 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   }
   out << "<br>Parabolic selection: " << LeviInSmall.toString();
   std::stringstream tempStream1;
-  tempStream1 << "Started splitting the f.d. part of the " << theHmm.range().toStringLieAlgebraName() << "-module with highest weight in fund coords "
+  tempStream1 << "Started splitting the f.d. part of the " << theHmm.coDomainAlgebra().toStringLieAlgebraName() << "-module with highest weight in fund coords "
   << this->character[0].weightFundamentalCoordinates.toString();
   ProgressReport report;
   report.report(tempStream1.str());
   List<List<Vector<Coefficient> > > eigenSpacesPerSimpleGenerator;
-  Selection InvertedLeviInSmall;
-  InvertedLeviInSmall = LeviInSmall;
-  InvertedLeviInSmall.invertSelection();
-  eigenSpacesPerSimpleGenerator.setSize(InvertedLeviInSmall.cardinalitySelection);
+  Selection invertedLeviInSmall;
+  invertedLeviInSmall = LeviInSmall;
+  invertedLeviInSmall.invertSelection();
+  eigenSpacesPerSimpleGenerator.setSize(invertedLeviInSmall.cardinalitySelection);
   Vectors<Coefficient> tempSpace1, tempSpace2;
   MemorySaving<Vectors<Coefficient> > tempEigenVects;
   Vectors<Coefficient>& theFinalEigenSpace = (outputEigenSpace == nullptr) ? tempEigenVects.getElement() : *outputEigenSpace;
   theFinalEigenSpace.setSize(0);
-  if (InvertedLeviInSmall.cardinalitySelection == 0) {
+  if (invertedLeviInSmall.cardinalitySelection == 0) {
     theFinalEigenSpace.makeEiBasis(this->getDimension());
   }
-  for (int i = 0; i < InvertedLeviInSmall.cardinalitySelection; i ++) {
+  for (int i = 0; i < invertedLeviInSmall.cardinalitySelection; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& currentElt =
-    theHmm.imagesSimpleChevalleyGenerators[InvertedLeviInSmall.elements[i]];
+    theHmm.imagesPositiveSimpleChevalleyGenerators[invertedLeviInSmall.elements[i]];
     MatrixTensor<Coefficient> currentOp, matrix;
     currentOp.makeZero();
     for (int j = 0; j < currentElt.size(); j ++) {
@@ -1638,7 +1638,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
         lastNonZeroIndex = i;
       }
     }
-    currentWeight = theHmm.range().weylGroup.getFundamentalCoordinatesFromSimple(
+    currentWeight = theHmm.coDomainAlgebra().weylGroup.getFundamentalCoordinatesFromSimple(
       this->theGeneratingWordsWeightsPlusWeightFDpart[lastNonZeroIndex]
     );//<-implicit type conversion here
     currentWeight += hwFundCoordsNilPart;

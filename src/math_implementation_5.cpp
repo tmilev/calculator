@@ -668,11 +668,11 @@ void HomomorphismSemisimpleLieAlgebra::getWeightsWrtKInSimpleCoordinatesK(
   ElementSemisimpleLieAlgebra<Rational> tempLieElement;
   for (int i = 0; i < inputElts.size; i ++) {
     Vector<Rational>& currentWeight = outputWeights[i];
-    currentWeight.makeZero(this->domain().getRank());
+    currentWeight.makeZero(this->domainAlgebra().getRank());
     ElementSemisimpleLieAlgebra<Rational>& currentLieElt = inputElts[i];
-    for (int j = 0; j < this->domain().getRank(); j ++) {
-      this->range().lieBracket(
-        this->imagesAllChevalleyGenerators[j + this->domain().getNumberOfPositiveRoots()],
+    for (int j = 0; j < this->domainAlgebra().getRank(); j ++) {
+      this->coDomainAlgebra().lieBracket(
+        this->imagesAllChevalleyGenerators[j + this->domainAlgebra().getNumberOfPositiveRoots()],
         currentLieElt,
         tempLieElement
       );
@@ -682,7 +682,7 @@ void HomomorphismSemisimpleLieAlgebra::getWeightsWrtKInSimpleCoordinatesK(
       currentWeight[j] = tempRat;
     }
   }
-  Matrix<Rational> invertedCartan = this->domain().weylGroup.cartanSymmetric;
+  Matrix<Rational> invertedCartan = this->domainAlgebra().weylGroup.cartanSymmetric;
   invertedCartan.invert();
   invertedCartan.actOnVectorsColumn(outputWeights);
 }

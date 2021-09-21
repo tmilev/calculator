@@ -7168,7 +7168,7 @@ bool WeylGroupData::leftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, E
   return (rightImage - leftImage).isPositiveOrZero() && !(rightImage - leftImage).isEqualToZero();
 }
 
-void WeylGroupData::computerootsOfBorel(Vectors<Rational>& output) {
+void WeylGroupData::computeRootsOfBorel(Vectors<Rational>& output) {
   output.size = 0;
   this->rootSystem.clear();
   this->generateRootSystem();

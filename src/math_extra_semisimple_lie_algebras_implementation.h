@@ -369,7 +369,13 @@ template <class Coefficient>
 void ElementSemisimpleLieAlgebra<Coefficient>::makeGGenerator(
   const Vector<Rational>& root, SemisimpleLieAlgebra& inputOwner
 ) {
-  this->makeGenerator(inputOwner.getGeneratorIndexFromRoot(root), inputOwner);
+  int generatorIndex = inputOwner.getGeneratorIndexFromRoot(root);
+  if (generatorIndex < 0) {
+    global.fatal
+    << "Function makeGGenerator does not allow non-root input: "
+    << root.toString() << global.fatal;
+  }
+  this->makeGenerator(generatorIndex, inputOwner);
 }
 
 template <class Coefficient>
@@ -538,7 +544,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
   inputData.initAssumingParSelAndHmmInitted();
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& weylGroupFiniteDimensionalSmallAsSubgroupInLarge = inputData.weylGroupFiniteDimensionalSmallAsSubgroupInLarge;
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& weylGroupFiniteDimensionalSmall = inputData.weylGroupFiniteDimensionalSmall;
-  SemisimpleLieAlgebra& theSmallAlgebra = inputData.homomorphism.domain();
+  SemisimpleLieAlgebra& theSmallAlgebra = inputData.homomorphism.domainAlgebra();
   Vectors<Rational>& embeddingsSimpleEiGoesTo = inputData.homomorphism.imagesCartanDomain;
 
   CharacterSemisimpleLieAlgebraModule charAmbientFDWeyl, remainingCharProjected, remainingCharDominantLevI;

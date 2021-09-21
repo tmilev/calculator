@@ -59,29 +59,7 @@ public:
   std::string toString();
 };
 
-class CartanInvolution {
-public:
-  SemisimpleLieAlgebra* owner;
-  SatakeDiagram satakeDiagram;
-  LinearMapSemisimpleLieAlgebra<Rational> linearMap;
-  List<ElementSemisimpleLieAlgebra<Rational> > postiveSimpleGeneratorImages;
-  List<ElementSemisimpleLieAlgebra<Rational> > negativeSimpleGeneratorImages;
-  DynkinType dynkinTypeAmbient();
-  std::string toString();
-  CartanInvolution();
-  bool computeSimpleRootImagesTypeAI(
-    std::stringstream* commentsOnFailure
-  );
-  bool computeSimpleRootImages(
-    std::stringstream* commentsOnFailure
-  );
-  bool computeFromDiagram(
-    const SatakeDiagram& inputDiagram,
-    SemisimpleLieAlgebra& inputOwner,
-    std::stringstream* commentsOnFailure
-  );
-};
-
+class CartanInvolution;
 
 class SemisimpleLieAlgebra {
 private:
@@ -536,34 +514,30 @@ class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coef
 
 class HomomorphismSemisimpleLieAlgebra {
 public:
-  SemisimpleLieAlgebra* domainAlg;
-  SemisimpleLieAlgebra* rangeAlg;
-  // Let rk=Rank(Domain)
-  // format of ImagesSimpleChevalleyGenerators: the first rk elements give
-  // the images of the Chevalley generators corresponding to simple positive roots
-  // the second rk elements give the images of the Chevalley generators corresponding to simple
-  // negative roots
-  List<ElementSemisimpleLieAlgebra<Rational> > imagesSimpleChevalleyGenerators;
-  // format of ImagesAllChevalleyGenerators: the Generators are given in the same order as
-  // the one used in MonomialUniversalEnveloping
+  SemisimpleLieAlgebra* domain;
+  SemisimpleLieAlgebra* coDomain;
+  List<ElementSemisimpleLieAlgebra<Rational> > imagesPositiveSimpleChevalleyGenerators;
+  List<ElementSemisimpleLieAlgebra<Rational> > imagesNegativeSimpleChevalleyGenerators;
+  // imagesAllChevalleyGenerators are given in the same order as
+  // the one used in MonomialUniversalEnveloping.
   List<ElementSemisimpleLieAlgebra<Rational> > imagesAllChevalleyGenerators;
   List<ElementSemisimpleLieAlgebra<Rational> > domainAllChevalleyGenerators;
   List<ElementSemisimpleLieAlgebra<Rational> > gModK;
   Vectors<Rational> restrictedRootSystem;
   Vectors<Rational> imagesCartanDomain;
-  SemisimpleLieAlgebra& domain() {
-    if (this->domainAlg == nullptr) {
+  SemisimpleLieAlgebra& domainAlgebra() {
+    if (this->domain == nullptr) {
       global.fatal << "Non-initialized HomomorphismSemisimpleLieAlgebra. " << global.fatal;
     }
-    return *this->domainAlg;
+    return *this->domain;
   }
-  SemisimpleLieAlgebra& range() {
-    if (this->rangeAlg == nullptr) {
+  SemisimpleLieAlgebra& coDomainAlgebra() {
+    if (this->coDomain == nullptr) {
       global.fatal << "Non-initialized HomomorphismSemisimpleLieAlgebra. " << global.fatal;
     }
-    return *this->rangeAlg;
+    return *this->coDomain;
   }
-  HomomorphismSemisimpleLieAlgebra(): domainAlg(nullptr), rangeAlg(nullptr) {
+  HomomorphismSemisimpleLieAlgebra(): domain(nullptr), coDomain(nullptr) {
   }
   void getWeightsGmodKInSimpleCoordinatesK(Vectors<Rational>& outputWeights) {
     this->getWeightsWrtKInSimpleCoordinatesK(outputWeights, this->gModK);
@@ -579,19 +553,16 @@ public:
   }
   void toString(std::string& output, bool useHtml);
   void makeGinGWithIdentity(
-    char weylLetter, int weylDimension, MapReferences<DynkinType, SemisimpleLieAlgebra>& ownerOfAlgebras
+    char weylLetter, int rank, MapReferences<DynkinType, SemisimpleLieAlgebra>& ownerOfAlgebras
   );
   void projectOntoSmallCartan(Vector<Rational>& input, Vector<Rational> & output);
   void projectOntoSmallCartan(Vectors<Rational>& input, Vectors<Rational>& output);
   void getMapSmallCartanDualToLargeCartanDual(Matrix<Rational> & output);
-  std::string toString() {
-    std::string tempS;
-    this->toString(tempS);
-    return tempS;
-  }
+  std::string toString(bool useHtml = true);
   void getRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(Vectors<Rational>& output);
-  bool computeHomomorphismFromImagesSimpleChevalleyGenerators();
+  bool computeHomomorphismFromImagesSimpleChevalleyGenerators(std::stringstream* commentsOnFailure);
   bool checkClosednessLieBracket();
+  bool checkInitialization();
   void applyHomomorphism(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output);
   bool applyHomomorphism(
     const ElementUniversalEnveloping<RationalFraction<Rational> >& input,
@@ -603,5 +574,29 @@ public:
     ElementUniversalEnveloping<RationalFraction<Rational> >& output
   );
 };
+
+class CartanInvolution {
+public:
+  SemisimpleLieAlgebra* owner;
+  SatakeDiagram satakeDiagram;
+  LinearMapSemisimpleLieAlgebra<Rational> linearMap;
+  HomomorphismSemisimpleLieAlgebra automorphism;
+  DynkinType dynkinTypeAmbient();
+  std::string toString();
+  CartanInvolution();
+  bool computeSimpleRootImagesTypeAI(
+    std::stringstream* commentsOnFailure
+  );
+  bool computeSimpleRootImages(
+    std::stringstream* commentsOnFailure
+  );
+  bool computeFromDiagram(
+    const SatakeDiagram& inputDiagram,
+    SemisimpleLieAlgebra& inputOwner,
+    std::stringstream* commentsOnFailure
+  );
+};
+
+
 
 #endif

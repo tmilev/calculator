@@ -4945,8 +4945,8 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
   // and make it return 0 (or a pointer to a monomial order, should you
   // wish to use a custom one.
   typename List<TemplateMonomial>::Comparator*
-  theOrder = (format == nullptr) ? 0 : format->getMonomialOrder<TemplateMonomial>();
-  sortedMons.quickSortDescending(theOrder);
+  monomialOrder = (format == nullptr) ? 0 : format->getMonomialOrder<TemplateMonomial>();
+  sortedMons.quickSortDescending(monomialOrder);
   int cutOffCounter = 0;
   bool useCustomPlus = false;
   int maximumLineLength = format == nullptr ? - 1 : format->maximumLineLength;

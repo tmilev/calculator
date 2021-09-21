@@ -587,6 +587,12 @@ public:
   bool computeSimpleRootImagesTypeAI(
     std::stringstream* commentsOnFailure
   );
+  bool computeSimpleRootImagesTypeAII(
+    std::stringstream* commentsOnFailure
+  );
+  bool computeSimpleRootImagesTypeAIII(
+    std::stringstream* commentsOnFailure
+  );
   bool computeSimpleRootImages(
     std::stringstream* commentsOnFailure
   );

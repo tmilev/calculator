@@ -1071,6 +1071,7 @@ template <class Coefficient>
 bool Vectors<Coefficient>::linearSpanContainsVector(
   const Vector<Coefficient>& input, Matrix<Coefficient>& bufferMatrix, Selection& bufferSelection
 ) const {
+  MacroRegisterFunctionWithName("Vectors::linearSpanContainsVector");
   Vectors<Coefficient> tempVectors;
   tempVectors = *this;
   tempVectors.addOnTop(input);

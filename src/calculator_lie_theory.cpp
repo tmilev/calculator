@@ -2133,6 +2133,7 @@ SatakeDiagram::SatakeDiagram() {
 std::string CartanInvolution::toString() {
   std::stringstream out;
   out << this->satakeDiagram.toString();
+  out << this->automorphism.toString();
   return out.str();
 }
 
@@ -2168,6 +2169,90 @@ bool CartanInvolution::computeSimpleRootImagesTypeAI(
   return true;
 }
 
+bool CartanInvolution::computeSimpleRootImagesTypeAII(
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("CartanInvolution::computeSimpleRootImagesTypeAII");
+  if (!this->owner->weylGroup.dynkinType.isSimpleOfType('A')) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Type is not simple type A. ";
+    }
+    return false;
+  }
+  int rank = this->owner->getRank();
+  if (rank % 2 != 1) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Satake diagram of type AII requires odd rank.";
+    }
+    return false;
+  }
+  this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
+  this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
+  Vector<Rational> simpleRoot;
+  for (int i = 0; i < rank; i ++) {
+    simpleRoot.makeEi(rank, i);
+    this->automorphism.imagesPositiveSimpleChevalleyGenerators[i].makeGGenerator(simpleRoot, *this->owner);
+    this->automorphism.imagesNegativeSimpleChevalleyGenerators[i].makeGGenerator(- simpleRoot, *this->owner);
+    if (i % 2 == 0) {
+      this->automorphism.imagesPositiveSimpleChevalleyGenerators[i] *= - 1;
+      this->automorphism.imagesNegativeSimpleChevalleyGenerators[i] *= - 1;
+    }
+  }
+  global.comments << "DEBUG: Rank: " << rank << " images pos: " << this->automorphism.imagesPositiveSimpleChevalleyGenerators.toString();
+  global.comments << "DEBUG: Constructed images: " << this->automorphism.toString();
+  return true;
+}
+
+bool CartanInvolution::computeSimpleRootImagesTypeAIII(
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("CartanInvolution::computeSimpleRootImagesTypeAIII");
+  if (!this->owner->weylGroup.dynkinType.isSimpleOfType('A')) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Type is not simple type A. ";
+    }
+    return false;
+  }
+  int rank = this->owner->getRank();
+  if (this->satakeDiagram.parameter < 0 || this->satakeDiagram.parameter > rank) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Parameter must be between 0 and the rank " << rank << " instead it is: " << this->satakeDiagram.rank;
+    }
+    return false;
+  }
+  int paired = rank - this->satakeDiagram.parameter;
+  if (paired % 2 != 0) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Parameter " << this->satakeDiagram.parameter
+      << " does not have the same parity as the rank: " << rank << ".";
+    }
+    return false;
+  }
+  int numberOfPairs = paired / 2;
+  this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
+  this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
+  Vector<Rational> simpleRootLeft, simpleRootRight;
+  for (int i = 0; i < numberOfPairs; i ++) {
+    simpleRootLeft.makeEi(rank, i);
+    simpleRootRight.makeEi(rank, rank - i - 1);
+    this->automorphism.imagesPositiveSimpleChevalleyGenerators[i].makeGGenerator(simpleRootRight, *this->owner);
+    this->automorphism.imagesNegativeSimpleChevalleyGenerators[i].makeGGenerator(- simpleRootRight, *this->owner);
+    this->automorphism.imagesPositiveSimpleChevalleyGenerators[rank - i - 1].makeGGenerator(simpleRootLeft, *this->owner);
+    this->automorphism.imagesNegativeSimpleChevalleyGenerators[rank - i - 1].makeGGenerator(- simpleRootLeft, *this->owner);
+  }
+  for (int i = 0; i < this->satakeDiagram.parameter; i ++) {
+    int index = numberOfPairs + i;
+    simpleRootLeft.makeEi(rank, index);
+    this->automorphism.imagesPositiveSimpleChevalleyGenerators[index].makeGGenerator(simpleRootLeft, *this->owner);
+    this->automorphism.imagesNegativeSimpleChevalleyGenerators[index].makeGGenerator(- simpleRootLeft, *this->owner);
+    this->automorphism.imagesPositiveSimpleChevalleyGenerators[index] *= - 1;
+    this->automorphism.imagesNegativeSimpleChevalleyGenerators[index] *= - 1;
+  }
+  global.comments << "DEBUG: Rank: " << rank << " images pos: " << this->automorphism.imagesPositiveSimpleChevalleyGenerators.toString();
+  global.comments << "DEBUG: Constructed images: " << this->automorphism.toString();
+  return true;
+}
+
 bool CartanInvolution::computeSimpleRootImages(
   std::stringstream* commentsOnFailure
 ) {
@@ -2177,8 +2262,12 @@ bool CartanInvolution::computeSimpleRootImages(
   this->owner->weylGroup.computeRho(false);
   if (this->satakeDiagram.diagram == SatakeDiagram::DiagramType::AI) {
     return this->computeSimpleRootImagesTypeAI(commentsOnFailure);
+  } else if (this->satakeDiagram.diagram == SatakeDiagram::DiagramType::AII) {
+    return this->computeSimpleRootImagesTypeAII(commentsOnFailure);
+  } else if (this->satakeDiagram.diagram == SatakeDiagram::DiagramType::AIII) {
+    return this->computeSimpleRootImagesTypeAIII(commentsOnFailure);
   }
-  if (commentsOnFailure != nullptr) {
+    if (commentsOnFailure != nullptr) {
     *commentsOnFailure
     << "Not implemented: Satake diagram: "
     << this->satakeDiagram.toString() << ". ";
@@ -2239,7 +2328,7 @@ bool CalculatorLieTheory::cartanInvolution(
     return false;
   }
   global.comments << "DEBUG: got to here. Dynkin diagram: " << involution.satakeDiagram.dynkinTypeAmbient().toString()
-                  << "Rank: " << rank << " param: " << diagramParameter;
+  << "Rank: " << rank << " param: " << diagramParameter;
   SemisimpleLieAlgebra& owner = calculator.objectContainer.getLieAlgebraCreateIfNotPresent(
     involution.satakeDiagram.dynkinTypeAmbient()
   );

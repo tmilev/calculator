@@ -1125,9 +1125,9 @@ void HomomorphismSemisimpleLieAlgebra::projectOntoSmallCartan(Vector<Rational>& 
   Matrix<Rational> invertedSmallCartan;
   invertedSmallCartan = this->domainAlgebra().weylGroup.cartanSymmetric;
   invertedSmallCartan.invert();
-  int theSmallDimension = this->domainAlgebra().weylGroup.cartanSymmetric.numberOfRows;
-  output.makeZero(theSmallDimension);
-  for (int i = 0; i < theSmallDimension; i ++) {
+  int smallDimension = this->domainAlgebra().weylGroup.cartanSymmetric.numberOfRows;
+  output.makeZero(smallDimension);
+  for (int i = 0; i < smallDimension; i ++) {
     output[i] = this->coDomainAlgebra().weylGroup.rootScalarCartanRoot(
       this->imagesAllChevalleyGenerators[this->domainAlgebra().weylGroup.rootsOfBorel.size + i].getCartanPart(), input
     );
@@ -1232,7 +1232,7 @@ void HomomorphismSemisimpleLieAlgebra::makeGinGWithIdentity(
   for (int i = 0; i < rank; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& element1 = this->imagesPositiveSimpleChevalleyGenerators[i];
     element1.makeGenerator(i, this->coDomainAlgebra());
-    ElementSemisimpleLieAlgebra<Rational>& element2 = this->imagesNegativeSimpleChevalleyGenerators[rank + i];
+    ElementSemisimpleLieAlgebra<Rational>& element2 = this->imagesNegativeSimpleChevalleyGenerators[i];
     element2.makeGenerator(i + numberOfPositiveRoots, this->coDomainAlgebra());
   }
 }
@@ -1310,6 +1310,7 @@ bool HomomorphismSemisimpleLieAlgebra::checkInitialization() {
 }
 
 bool HomomorphismSemisimpleLieAlgebra::checkClosednessLieBracket() {
+  MacroRegisterFunctionWithName("HomomorphismSemisimpleLieAlgebra::checkClosednessLieBracket");
   ElementSemisimpleLieAlgebra<Rational> element;
   Vectors<Rational> tempRoots;
   Vector<Rational> tempRoot;
@@ -1320,6 +1321,9 @@ bool HomomorphismSemisimpleLieAlgebra::checkClosednessLieBracket() {
   for (int i = 0; i < this->imagesAllChevalleyGenerators.size; i ++) {
     for (int j = 0; j < this->imagesAllChevalleyGenerators.size; j ++) {
       this->coDomainAlgebra().lieBracket(this->imagesAllChevalleyGenerators[i], this->imagesAllChevalleyGenerators[j], element);
+      if (element.isEqualToZero()) {
+        continue;
+      }
       element.toVectorNegativeRootSpacesFirst(tempRoot);
       if (!tempRoots.linearSpanContainsVector(tempRoot)) {
         return false;

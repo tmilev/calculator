@@ -3465,7 +3465,6 @@ void CandidateSemisimpleSubalgebra::WConjecture::computeAdEAsPolynomialMap(
   // primal means the weight is taken with respect to
   // the Cartan of k and the
   // Cartan of its centralizer.
-  // global.comments << "DEBUG: Code ran";
   for (int i = 0; i < owner.modules.size; i ++) {
     // Among the modules with given primal highest weight, iterate over the individual ones.
     // Two modules with identical highest weight may be ind

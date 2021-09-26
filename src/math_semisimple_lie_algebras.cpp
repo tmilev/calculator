@@ -1028,7 +1028,6 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
     simpleRoot.makeEi(domainRank, i);
     int index = this->domainAlgebra().getGeneratorIndexFromRoot(simpleRoot);
     int indexNegative = this->domainAlgebra().getGeneratorIndexFromRoot(- simpleRoot);
-    global.comments << "DEBUG: index, indexnegative, simpleRoot: " << index << ", " << indexNegative << ", " << simpleRoot.toString();
     tempDomain[index].makeGGenerator(simpleRoot, this->domainAlgebra());
     tempDomain[indexNegative].makeGGenerator(- simpleRoot, this->domainAlgebra());
     tempRange[index] = this->imagesPositiveSimpleChevalleyGenerators[i];
@@ -1038,35 +1037,27 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
   }
   Vector<Rational> rightRoot;
   this->checkInitialization();
-  global.comments << "<br>DEBUG: so far so good. No inf loops please. " << this->toString();
   while (nonComputed.cardinalitySelection > 0) {
-    global.comments << "<hr> DEBUG: And the hmm: " << this->toString() << "<hr>";
     for (int i = 0; i < nonComputed.cardinalitySelection; i ++) {
       int index = nonComputed.elements[i];
-      global.comments << "<br> DEBUG: here 0";
       Vector<Rational> current = this->domainAlgebra().getWeightOfGenerator(index);
-      global.comments << "<br> DEBUG: here 1";
       // Looking for elements left, right such that [left, right] = current.
       for (int leftIndex = 0; leftIndex < nonComputed.numberOfElements; leftIndex ++) {
         if (nonComputed.selected[leftIndex]) {
           // The candidate for left is not computed yet.
           continue;
         }
-        global.comments << "<br> DEBUG: root from index: " << leftIndex;
         Vector<Rational> leftRoot = this->domainAlgebra().getWeightOfGenerator(leftIndex);
-        global.comments << "<br> DEBUG: left root: " << leftRoot;
         rightRoot = current - leftRoot;
         if (!this->domainAlgebra().weylGroup.isARoot(rightRoot)) {
           // Not a candidate for right.
           continue;
         }
         int rightIndex = this->domainAlgebra().getGeneratorIndexFromRoot(rightRoot);
-        global.comments << "<br> DEBUG: right index: " << rightIndex;
         if (nonComputed.selected[rightIndex]) {
           // I have not computed the right generator yet.
           continue;
         }
-        global.comments << "<br> DEBUG: here 2";
         ElementSemisimpleLieAlgebra<Rational>& leftDomainElement = tempDomain[leftIndex];
         ElementSemisimpleLieAlgebra<Rational>& rightDomainElement = tempDomain[rightIndex];
         this->domainAlgebra().lieBracket(leftDomainElement, rightDomainElement, tempDomain[index]);
@@ -1074,12 +1065,10 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
         ElementSemisimpleLieAlgebra<Rational>& rightRangeElement = tempRange[rightIndex];
         this->coDomainAlgebra().lieBracket(leftRangeElement, rightRangeElement, tempRange[index]);
         nonComputed.removeSelection(index);
-        global.comments << "<br> DEBUG: here 3";
         break;
       }
     }
   }
-  global.comments << "DEBUG: No inf loops COMPLETE!!!";
   int numberOfPositiveRoots = this->domainAlgebra().getNumberOfPositiveRoots();
   for (int i = 0; i < domainRank; i ++) {
     simpleRoot.makeEi(domainRank, i);
@@ -1088,7 +1077,6 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
     this->domainAlgebra().lieBracket(tempDomain[leftIndex], tempDomain[rightIndex], tempDomain[numberOfPositiveRoots + i]);
     this->coDomainAlgebra().lieBracket(tempRange[leftIndex], tempRange[rightIndex], tempRange[numberOfPositiveRoots + i]);
   }
-  global.comments << "DEBUG: here be i!";
   Vectors<Rational> vectorsLeft, vectorsRight;
   vectorsLeft.setSize(tempDomain.size);
   vectorsRight.setSize(tempDomain.size);
@@ -1101,7 +1089,6 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
   Vector<Rational> imageRoot;
   this->domainAllChevalleyGenerators.setSize(tempDomain.size);
   this->imagesAllChevalleyGenerators.setSize(tempDomain.size);
-  global.comments << "DEBUG: here be i! pt 2";
   for (int i = 0; i < this->domainAlgebra().getNumberOfGenerators(); i ++) {
     this->domainAllChevalleyGenerators[i].makeGenerator(i, this->domainAlgebra());
   }

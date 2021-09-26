@@ -1597,7 +1597,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor,
+    CalculatorFunctionsBinaryOps::addElementTensorToElementTensor,
     this->opElementTensorGVM(),
     this->opElementTensorGVM(),
     "Adds two elements of tensor products of generalized Verma modules. ",
@@ -1609,7 +1609,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddWeightToWeight,
+    CalculatorFunctionsBinaryOps::addWeightToWeight,
     this->opWeightLieAlgPoly(),
     this->opWeightLieAlgPoly(),
     "Adds two weights. ",
@@ -1704,7 +1704,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE,
+    CalculatorFunctionsBinaryOps::multiplyAnyByElementUniversalEnveloping,
     this->opRational(),
     this->opElementUEOverRF(),
     "Multiplies rational number by an element universal enveloping algebra.",
@@ -1716,7 +1716,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE,
+    CalculatorFunctionsBinaryOps::multiplyAnyByElementUniversalEnveloping,
     this->opElementUEOverRF(),
     this->opElementUEOverRF(),
     "Multiplies elment Universal enveloping by element universal enveloping algebra.",

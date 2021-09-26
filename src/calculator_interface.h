@@ -145,7 +145,7 @@ private:
   bool addChildRationalOnTop(const Rational& inputRat);
   bool addChildOnTop(const Expression& inputChild);
   bool addChildAtomOnTop(const std::string& operationString);
-  bool addChildAtomOnTop(int theOp);
+  bool addChildAtomOnTop(int operationIndex);
   void getBlocksOfCommutativity(HashedListSpecialized<Expression>& inputOutputList) const;
   bool splitProduct(int numDesiredMultiplicandsLeft, Expression& outputLeftMultiplicand, Expression& outputRightMultiplicand) const;
   void getBaseExponentForm(Expression& outputBase, Expression& outputExponent) const;
@@ -367,9 +367,10 @@ private:
   bool isKnownToBeNonNegative() const;
   bool isNegativeConstant() const;
   bool makeIdentityMatrixExpressions(int dimension, Calculator& inputBoss);
-  bool makeAtom(int input, Calculator& newBoss);
+  // bool makeAtom(int input, Calculator& newBoss);
+  bool makeAtom(Calculator& newBoss, int input);
   // TODO(tmilev): rename to MakeOperation
-  bool makeAtom(const std::string& atomName, Calculator& newBoss);
+  bool makeAtom(Calculator& newBoss, const std::string& atomName);
   bool makeIntegral(
     Calculator& calculator,
     const Expression& integrationSet,
@@ -927,7 +928,6 @@ private:
 public:
   struct Labels {
   public:
-    static std::string points;
     static std::string point;
     static std::string path;
     static std::string functionLabel;
@@ -950,6 +950,15 @@ public:
     static std::string text;
     static std::string arguments;
     static std::string parameters;
+  };
+
+  struct PlotTypes {
+  public:
+    static std::string parametricCurve;
+    static std::string segment;
+    static std::string points;
+    static std::string plotFillStart;
+    static std::string plotFillFinish;
   };
 
   std::string plotString;
@@ -977,7 +986,7 @@ public:
   Matrix<Expression> points;
   Matrix<std::string> pointsJS;
   Vectors<double> pointsDouble;
-  List<Vectors<double> > theRectangles;
+  List<Vectors<double> > rectangles;
   // Each rectangle is a list of two 2-dim vectors.
   // The first vector gives the (x, y) - coordinates
   // of the lower left corner of the rectangle.
@@ -989,6 +998,8 @@ public:
   List<Expression> coordinateFunctionsE;
   List<std::string> coordinateFunctionsJS;
   HashedList<Expression> variablesInPlay;
+  List<std::string> variablesInPlayJS;
+
   List<List<std::string> > variableRangesJS;
   Expression leftPoint;
   Expression rightPoint;
@@ -996,7 +1007,6 @@ public:
   Expression paramHighE;
 
   Expression numSegmentsE;
-  List<std::string> variablesInPlayJS;
   // Parameters are user input variables that describe families of curves.
   // As of writing, parameters are input by the front-end via
   // inputs/sliders at the hands of the end-user.
@@ -1013,7 +1023,8 @@ public:
   std::string paramHighJS;
   ////////////////
   JSData toJSONSurfaceImmersion();
-  JSData toJSONCurveImmersionIn3d();
+  // Plot a parametric curve. Works both in 2d and 3d.
+  JSData toJSONParametricCurve();
   std::string toStringDebug();
   void computeYBounds();
   std::string getPlotStringFromFunctionStringAndRanges(
@@ -1027,19 +1038,28 @@ public:
   JSData toJSON2dDrawFunction();
   JSData toJSONSetProjectionScreen();
   JSData toJSONSegment();
-  JSData toJSONParametricCurveInTwoDimensions();
   JSData toJSONPoints();
   JSData toJSONDirectionFieldInTwoDimensions();
   JSData toJSONDrawText();
   JSData toJSONDrawPath();
   JSData toJSONDrawPathFilled();
   JSData toJSONPlotFillStart();
-  JSData toJSONPlotFillEnd();
+  JSData toJSONPlotFillFinish();
+  void makeCircle(
+    const Vector<Rational>& center,
+    const Rational& radius,
+    const std::string& color
+  );
+  void makePlotFillStart();
+  void makePlotFillFinish();
+  void makeSegment(
+    const Vector<Rational>& left, const Vector<Rational>& right
+  );
   PlotObject();
   bool operator==(const PlotObject& other) const;
 };
 
-//the following class is meant to use to draw plots for calculus students.
+// The following class is meant to use to draw plots for calculus students.
 class Plot {
 private:
   std::string canvasNamE;
@@ -1090,6 +1110,13 @@ public:
   bool isOKVector(const Vector<double>& input);
   void addPlotOnTop(PlotObject& input);
   void addPlotsOnTop(Plot& input);
+  void drawSegment(const Vector<Rational>& left, const Vector<Rational>& right);
+  void drawCircle(
+    const Vector<Rational>& center,
+    const Rational& radius,
+    const std::string& color,
+    bool filled
+  );
   List<PlotObject>& getPlots();
   void clearPlotObjects();
   void setExpectedPlotObjects(int expectedSize);

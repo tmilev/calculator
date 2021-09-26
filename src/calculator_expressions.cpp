@@ -1392,7 +1392,7 @@ bool Expression::addChildOnTop(const Expression& inputChild) {
 bool Expression::setChildAtomValue(int childIndex, int atomValue) {
   this->checkInitialization();
   Expression atom;
-  atom.makeAtom(atomValue, *this->owner);
+  atom.makeAtom(*this->owner, atomValue);
   this->children.setObjectAtIndex(
     childIndex,
     this->owner->allChildExpressions.addNoRepetitionOrReturnIndexFirst(atom)
@@ -1413,7 +1413,7 @@ bool Expression::setChildAtomValue(
 ) {
   this->checkInitialization();
   Expression atomExpression;
-  atomExpression.makeAtom(atom, *this->owner);
+  atomExpression.makeAtom(*this->owner, atom);
   this->children.setObjectAtIndex(
     childIndex, this->owner->addChildExpression(atomExpression)
   );
@@ -1460,17 +1460,17 @@ bool Expression::setChild(int childIndexInMe, int childIndexInBoss) {
   return true;
 }
 
-bool Expression::addChildAtomOnTop(int theOp) {
+bool Expression::addChildAtomOnTop(int operationIndex) {
   this->checkInitialization();
   Expression tempE;
-  tempE.makeAtom(theOp, *this->owner);
+  tempE.makeAtom(*this->owner, operationIndex);
   return this->addChildOnTop(tempE);
 }
 
-bool Expression::addChildAtomOnTop(const std::string& theOperationString) {
+bool Expression::addChildAtomOnTop(const std::string& operationString) {
   this->checkInitialization();
   return this->addChildAtomOnTop(
-    this->owner->addOperationNoRepetitionOrReturnIndexFirst(theOperationString)
+    this->owner->addOperationNoRepetitionOrReturnIndexFirst(operationString)
   );
 }
 
@@ -1746,9 +1746,9 @@ bool Expression::containsAsSubExpressionNoBuiltInTypes(int inputAtom) const {
   if (this->owner == nullptr) {
     return false;
   }
-  Expression theE;
-  theE.makeAtom(inputAtom, *this->owner);
-  return this->containsAsSubExpressionNoBuiltInTypes(theE);
+  Expression e;
+  e.makeAtom(*this->owner, inputAtom);
+  return this->containsAsSubExpressionNoBuiltInTypes(e);
 }
 
 bool Expression::isContext() const {
@@ -2091,7 +2091,7 @@ bool Expression::isIntegerFittingInInt(int* whichInteger) const {
   return rational.isIntegerFittingInInt(whichInteger);
 }
 
-bool Expression::makeAtom(const std::string& atomName, Calculator& newBoss) {
+bool Expression::makeAtom(Calculator& newBoss, const std::string& atomName) {
   this->reset(newBoss);
   this->data = newBoss.addOperationNoRepetitionOrReturnIndexFirst(atomName);
   return true;
@@ -5111,7 +5111,7 @@ void ExpressionContext::makeOneVariableCreate(
 ) {
   this->initialize(*this->owner);
   Expression variableWrapper;
-  variableWrapper.makeAtom(variable, *this->owner);
+  variableWrapper.makeAtom(*this->owner, variable);
   this->variables.addOnTop(variableWrapper);
 }
 
@@ -5136,14 +5136,14 @@ void ExpressionContext::makeOneVariableFromString(
 ) {
   this->initialize(*this->owner);
   Expression converted;
-  converted.makeAtom(polynomialVariable, *this->owner);
+  converted.makeAtom(*this->owner, polynomialVariable);
   this->variables.addOnTop(converted);
 }
 
 bool Expression::makeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex) {
   MacroRegisterFunctionWithName("Expression::makeSqrt");
   Expression argumentE;
-  argumentE.assignValueOLD(argument, owner);
+  argumentE.assignValue(owner, argument);
   return this->makeSqrt(owner, argumentE, radicalSuperIndex);
 }
 

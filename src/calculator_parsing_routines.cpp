@@ -777,7 +777,7 @@ bool CalculatorParser::replaceOXXByEXX() {
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Calculator::replaceOXXByEXX]";
   }
-  left.data.makeAtom(this->getOperationIndexFromControlIndex(left.controlIndex), *this->owner);
+  left.data.makeAtom(*this->owner, this->getOperationIndexFromControlIndex(left.controlIndex));
   left.controlIndex = this->conExpression();
   return true;
 }
@@ -874,7 +874,7 @@ bool CalculatorParser::replaceXByCon(int controlIndex) {
 
 bool CalculatorParser::replaceXByO(int operation) {
   (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1].controlIndex = this->conExpression();
-  (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1].data.makeAtom(operation, *this->owner);
+  (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1].data.makeAtom(*this->owner, operation);
   return true;
 }
 
@@ -1106,7 +1106,7 @@ void CalculatorParser::parseConsumeQuote(
   for (indexOfLast ++; indexOfLast < input.size(); indexOfLast ++) {
     char current = input[indexOfLast];
     if (current == '"' && !previousIsUnescapedBackslash) {
-      content.data.makeAtom(consumed, *this->owner);
+      content.data.makeAtom(*this->owner, consumed);
       output.addOnTop(content);
       output.addOnTop(quoteEnd);
       return;
@@ -1118,7 +1118,7 @@ void CalculatorParser::parseConsumeQuote(
     }
     consumed.push_back(current);
   }
-  content.data.makeAtom(consumed, *this->owner);
+  content.data.makeAtom(*this->owner, consumed);
   output.addOnTop(content);
 }
 
@@ -1168,7 +1168,7 @@ void CalculatorParser::parseFillDictionary(
       output.addOnTop(currentElement);
     } else {
       currentElement.controlIndex = this->controlSequences.getIndex("Variable");
-      currentElement.data.makeAtom(this->owner->addOperationNoRepetitionOrReturnIndexFirst(current), *this->owner);
+      currentElement.data.makeAtom(*this->owner, this->owner->addOperationNoRepetitionOrReturnIndexFirst(current));
       output.addOnTop(currentElement);
     }
     current = "";
@@ -1196,7 +1196,7 @@ bool CalculatorParser::replaceXXXbyE() {
 
 bool CalculatorParser::replaceOXdotsXbyEXdotsX(int numberOfXs) {
   SyntacticElement& element = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1 - numberOfXs];
-  element.data.makeAtom(this->getOperationIndexFromControlIndex(element.controlIndex), *this->owner);
+  element.data.makeAtom(*this->owner, this->getOperationIndexFromControlIndex(element.controlIndex));
   if (this->flagLogSyntaxRules) {
     std::stringstream out;
     out << "[Rule: Calculator::replaceOXdotsXbyEXdotsX: " << numberOfXs << "]";
@@ -1208,7 +1208,7 @@ bool CalculatorParser::replaceOXdotsXbyEXdotsX(int numberOfXs) {
 
 bool CalculatorParser::replaceOXbyEX() {
   SyntacticElement& element = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
-  element.data.makeAtom(this->getOperationIndexFromControlIndex(element.controlIndex), *this->owner);
+  element.data.makeAtom(*this->owner, this->getOperationIndexFromControlIndex(element.controlIndex));
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceOXbyEX]";
   }
@@ -1217,7 +1217,7 @@ bool CalculatorParser::replaceOXbyEX() {
 
 bool CalculatorParser::replaceObyE() {
   SyntacticElement& element = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1];
-  element.data.makeAtom(this->getOperationIndexFromControlIndex(element.controlIndex), *this->owner);
+  element.data.makeAtom(*this->owner, this->getOperationIndexFromControlIndex(element.controlIndex));
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Calculator::replaceObyE]";
   }
@@ -1332,15 +1332,15 @@ bool CalculatorParser::replaceXXVXdotsXbyE_BOUND_XdotsX(int numberOfXs) {
 
 bool CalculatorParser::replaceVXdotsXbyE_NONBOUND_XdotsX(int numberOfXs) {
   SyntacticElement& element = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1 - numberOfXs];
-  int theBoundVar = element.data.data;
-  if (this->isBoundVariableInContext(theBoundVar)) {
+  int boundVariable = element.data.data;
+  if (this->isBoundVariableInContext(boundVariable)) {
     element.data.reset(*this->owner, 2);
     element.data.addChildAtomOnTop(this->owner->opBind());
-    element.data.addChildAtomOnTop(theBoundVar);
+    element.data.addChildAtomOnTop(boundVariable);
   } else {
-    element.data.makeAtom(theBoundVar, *this->owner);
-    if (!this->isNonBoundVariableInContext(theBoundVar)) {
-      this->nonBoundVariablesInContext.addOnTop(theBoundVar);
+    element.data.makeAtom(*this->owner, boundVariable);
+    if (!this->isNonBoundVariableInContext(boundVariable)) {
+      this->nonBoundVariablesInContext.addOnTop(boundVariable);
     }
   }
   element.controlIndex = this->conExpression();
@@ -1653,7 +1653,7 @@ bool CalculatorParser::replaceVbyVdotsVAccordingToPredefinedWordSplits() {
   << "(a single variable whose name contains the letters x and y). "
   ;
   for (int i = 0; i < split.size; i ++) {
-    newElt.data.makeAtom(this->owner->addOperationNoRepetitionOrReturnIndexFirst(split[i]), *this->owner);
+    newElt.data.makeAtom(*this->owner, this->owner->addOperationNoRepetitionOrReturnIndexFirst(split[i]));
     newElt.controlIndex = this->controlSequences.getIndex(split[i]);
     if (newElt.controlIndex == - 1) {
       newElt.controlIndex = this->conVariable();
@@ -1833,7 +1833,7 @@ bool CalculatorParser::replaceEXEXByEX() {
 
 bool CalculatorParser::replaceXXbyO(int operation) {
   SyntacticElement& result = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
-  result.data.makeAtom(operation, *this->owner);
+  result.data.makeAtom(*this->owner, operation);
   result.controlIndex = this->conExpression();
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceXXbyO]";
@@ -1843,7 +1843,7 @@ bool CalculatorParser::replaceXXbyO(int operation) {
 
 bool CalculatorParser::replaceXXYbyOY(int operation) {
   SyntacticElement& result = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3];
-  result.data.makeAtom(operation, *this->owner);
+  result.data.makeAtom(*this->owner, operation);
   result.controlIndex = this->conExpression();
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceXXYbyOY]";
@@ -2429,7 +2429,7 @@ bool CalculatorParser::applyOneRule() {
     secondToLastS == "Expression"
   ) {
     Expression integralAtom;
-    integralAtom.makeAtom("\\int", *this->owner);
+    integralAtom.makeAtom(*this->owner, "\\int");
     Expression underscore;
     underscore.makeXOX(*this->owner, this->owner->opUnderscore(), integralAtom, secondToLastE.data);
     this->setStackValue(underscore, "\\int_{*}", - 4);
@@ -2441,7 +2441,7 @@ bool CalculatorParser::applyOneRule() {
     secondToLastS == "Expression"
   ) {
     Expression integralAtom;
-    integralAtom.makeAtom("\\int", *this->owner);
+    integralAtom.makeAtom(*this->owner, "\\int");
     Expression underscore;
     underscore.makeXOX(*this->owner, this->owner->opPower(), integralAtom, secondToLastE.data);
     this->lastRuleName = "\\int^{*}";

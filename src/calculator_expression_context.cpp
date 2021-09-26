@@ -141,7 +141,7 @@ bool ExpressionContext::setVariablesFromStrings(
   this->variables.clear();
   for (int i = 0; i < inputVariables.size; i ++) {
     Expression current;
-    current.makeAtom(inputVariables[i], *this->owner);
+    current.makeAtom(*this->owner, inputVariables[i]);
     this->variables.addOnTop(current);
   }
   return true;

@@ -23,9 +23,9 @@ bool CalculatorConversions::expressionFromChevalleyGenerator(
     input.generatorIndex >= input.owner->getNumberOfPositiveRoots() &&
     input.generatorIndex < input.owner->getNumberOfPositiveRoots() + input.owner->getRank()
   ) {
-    generatorLetterE.makeAtom(calculator.addOperationNoRepetitionOrReturnIndexFirst("h"), calculator);
+    generatorLetterE.makeAtom(calculator, calculator.addOperationNoRepetitionOrReturnIndexFirst("h"));
   } else {
-    generatorLetterE.makeAtom(calculator.addOperationNoRepetitionOrReturnIndexFirst("g"), calculator);
+    generatorLetterE.makeAtom(calculator, calculator.addOperationNoRepetitionOrReturnIndexFirst("g"));
   }
   generatorIndexE.assignValue(calculator, input.owner->getDisplayIndexFromGenerator(input.generatorIndex));
   return output.makeXOX(calculator, calculator.opUnderscore(), generatorLetterE, generatorIndexE);
@@ -240,7 +240,7 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
   bool newlyCreated = !calculator.objectContainer.semisimpleLieAlgebras.contains(dynkinType);
   outputPointer = &calculator.objectContainer.getLieAlgebraCreateIfNotPresent(dynkinType);
   outputPointer->checkConsistency();
-  output.assignValueOLD(outputPointer, calculator);
+  output.assignValue(calculator, outputPointer);
   if (newlyCreated) {
     outputPointer->computeChevalleyConstants();
     Expression converter;
@@ -259,9 +259,9 @@ bool CalculatorConversions::innerExpressionFromDynkinSimpleType(
   Expression letterE, rankE, letterAndIndexE, indexE;
   std::string letterS;
   letterS = input.letter;
-  letterE.makeAtom(calculator.addOperationNoRepetitionOrReturnIndexFirst(letterS), calculator);
-  indexE.assignValueOLD(input.cartanSymmetricInverseScale, calculator);
-  rankE.assignValueOLD(input.rank, calculator);
+  letterE.makeAtom(calculator, calculator.addOperationNoRepetitionOrReturnIndexFirst(letterS));
+  indexE.assignValue(calculator, input.cartanSymmetricInverseScale);
+  rankE.assignValue(calculator, input.rank);
   letterAndIndexE.makeXOX(calculator, calculator.opPower(), letterE, indexE);
   return output.makeXOX(calculator, calculator.opUnderscore(), letterAndIndexE, rankE);
 }
@@ -374,7 +374,7 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
   if (!CalculatorConversions::innerSlTwoSubalgebraPrecomputed(calculator, input, tempSL2)) {
     return calculator << "<hr>Failed to load sl(2) subalgebra. ";
   }
-  return output.assignValueOLD(tempSL2.toString(), calculator);
+  return output.assignValue(calculator, tempSL2.toString());
 }
 
 bool CalculatorConversions::innerAlgebraicNumber(Calculator& calculator, const Expression& input, Expression& output) {
@@ -384,9 +384,9 @@ bool CalculatorConversions::innerAlgebraicNumber(Calculator& calculator, const E
     return true;
   }
   if (input.isOfType<Rational>()) {
-    AlgebraicNumber theNum;
-    theNum = input.getValue<Rational>();
-    return output.assignValueOLD(theNum, calculator);
+    AlgebraicNumber number;
+    number = input.getValue<Rational>();
+    return output.assignValue(calculator, number);
   }
   return false;
 }
@@ -448,7 +448,7 @@ bool CalculatorConversions::innerLoadKey(
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKey");
   Expression theKeyE;
-  theKeyE.makeAtom(inputKey, calculator);
+  theKeyE.makeAtom(calculator, inputKey);
   for (int i = 0; i < inputStatementList.size(); i ++) {
     if (inputStatementList[i].startsWith(calculator.opDefine(), 3)) {
       if (inputStatementList[i][1] == theKeyE) {
@@ -715,10 +715,10 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     << subalgebras.comments << "<br>The progress report for the "
     << "entire computation follows.<br>"
     << subalgebras.toStringProgressReport();
-    return output.assignValueOLD(out.str(), calculator);
+    return output.assignValue(calculator, out.str());
   }
   subalgebras.millisecondsComputationEnd = global.getElapsedMilliseconds();
-  return output.assignValueOLD(subalgebras, calculator);
+  return output.assignValue(calculator, subalgebras);
 }
 
 std::string CalculatorConversions::stringFromSemisimpleSubalgebras(SemisimpleSubalgebras& input) {
@@ -792,7 +792,7 @@ bool CalculatorConversions::innerExpressionFromMonomialUE(
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromMonomialUE");
   if (input.isConstant()) {
-    return output.assignValueOLD(1, calculator);
+    return output.assignValue(calculator, 1);
   }
   ChevalleyGenerator chevalleyGenerator;
   chevalleyGenerator.owner = input.owner;
@@ -1022,7 +1022,7 @@ bool CalculatorConversions::innerElementUE(
   ExpressionContext outputContext(calculator);
   outputContext.setVariables(polynomialVariables);
   outputContext.setAmbientSemisimpleLieAlgebra(owner);
-  return output.assignValueWithContextOLD(outputUE, outputContext, calculator);
+  return output.assignValueWithContext(calculator, outputUE, outputContext);
 }
 
 bool CalculatorConversions::expressionFromBuiltInType(
@@ -1101,7 +1101,7 @@ bool CalculatorConversions::innerMatrixRationalTensorForM(
   }
   MatrixTensor<Rational> outputMatrixTensor;
   outputMatrixTensor = matrixRational;
-  return output.assignValueOLD(outputMatrixTensor, calculator);
+  return output.assignValue(calculator, outputMatrixTensor);
 }
 
 bool CalculatorConversions::functionMatrixRationalTensorForm(
@@ -1114,7 +1114,7 @@ bool CalculatorConversions::functionMatrixRationalTensorForm(
   }
   MatrixTensor<Rational> outputMatrixTensor;
   outputMatrixTensor = matrixRational;
-  return output.assignValueOLD(outputMatrixTensor, calculator);
+  return output.assignValue(calculator, outputMatrixTensor);
 }
 
 bool CalculatorConversions::outerMatrixExpressionsToMatrixOfType(
@@ -1224,7 +1224,7 @@ bool CalculatorConversions::innerLoadFileIntoString(
   )) {
     return false;
   }
-  return output.assignValueOLD(outputString, calculator);
+  return output.assignValue(calculator, outputString);
 }
 
 bool CalculatorConversions::innerMakeElementHyperOctahedral(
@@ -1235,7 +1235,7 @@ bool CalculatorConversions::innerMakeElementHyperOctahedral(
   ElementHyperoctahedralGroupR2 element;
   if (input.isOfType<std::string>(&inputStringFormat)) {
     element.makeFromString(inputStringFormat);
-    return output.assignValueOLD(element, calculator);
+    return output.assignValue(calculator, element);
   }
   if (input.size() < 3) {
     return calculator << "To make elements of hyperoctahedral group we need at least 3 inputs. ";
@@ -1266,7 +1266,7 @@ bool CalculatorConversions::innerMakeElementHyperOctahedral(
       << " had bit values that were not ones and zeroes.";
     }
   }
-  return output.assignValueOLD(element, calculator);
+  return output.assignValue(calculator, element);
 }
 
 bool CalculatorConversions::innerPolynomialModuloInteger(
@@ -1297,5 +1297,5 @@ bool CalculatorConversions::innerPolynomialModuloInteger(
     polynomial.content, converted, modulus.value
   );
   polynomial.context.setDefaultModulus(modulus.value);
-  return output.assignValueWithContextOLD(converted, polynomial.context, calculator);
+  return output.assignValueWithContext(calculator, converted, polynomial.context);
 }

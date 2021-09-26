@@ -20,8 +20,8 @@ public:
   );
   static bool addRationalOrPolynomialOrRationalFunctionToRationalFunction(Calculator& calculator, const Expression& input, Expression& output);
   static bool addUniversalEnvelopingAlgebraElementToAny(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAddEltTensorToEltTensor(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAddNumberOrPolynomialToNumberOrPolynomial(Calculator& calculator, const Expression& input, Expression& output);
+  static bool addElementTensorToElementTensor(Calculator& calculator, const Expression& input, Expression& output);
+  static bool addNumberOrPolynomialToNumberOrPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAddPlotToPlot(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAddSequenceToSequence(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAddMatrixToMatrix(Calculator& calculator, const Expression& input, Expression& output);
@@ -37,7 +37,7 @@ public:
   static bool addRationalToRational(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAddStringToString(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAddElementZModPOrRationalToElementZModPOrRational(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAddPolynomialModuloIntegerToPolynomialModuloInteger(
+  static bool addPolynomialModuloIntegerToPolynomialModuloInteger(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool addPolynomialModuloIntegerToInteger(
@@ -47,8 +47,8 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
 
-  static bool innerAddAlgebraicNumberToAlgebraicNumber(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAddWeightToWeight(Calculator& calculator, const Expression& input, Expression& output);
+  static bool addAlgebraicNumberToAlgebraicNumber(Calculator& calculator, const Expression& input, Expression& output);
+  static bool addWeightToWeight(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerMultiplyEltHypOctByEltHypOct(Calculator& calculator, const Expression& input, Expression& output);
 
@@ -60,7 +60,7 @@ public:
   );
   static bool multiplyPolynomialModPByPolynomialModP(Calculator& calculator, const Expression& input, Expression& output);
   static bool multiplyNumberOrPolynomialByNumberOrPolynomial(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerMultiplyLRObyLRO(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyLRObyLSPath(Calculator& calculator, const Expression& input, Expression& output);
@@ -92,7 +92,7 @@ public:
   static bool innerPowerWeylGroupElementByInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyCharacterByCharacter(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyCharSSLieAlgByCharSSLieAlg(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyAnyByUE(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyAnyByElementUniversalEnveloping(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyAnyByEltTensor(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyEllipticCurveElements(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyEllipticCurveElementsZmodP(Calculator& calculator, const Expression& input, Expression& output);
@@ -123,12 +123,12 @@ public:
 
   static bool powerMatrixBuiltInBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerMatrixExpressionsBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPowerMatrixNumbersByLargeIntegerIfPossible(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerMatrixNumbersByLargeIntegerIfPossible(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerPowerRationalByRationalOutputAlgebraic(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerRationalByRationalReducePrimeFactors(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerRationalByInteger(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPowerPolynomialBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerPolynomialBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerAlgebraicNumberPolynomialBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerRationalFractionBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerPolynomialModuloIntegerBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
@@ -282,7 +282,7 @@ bool CalculatorConversions::functionPolynomialWithExponentLimit(
       return true;
     }
     if (input.isListStartingWithAtom(calculator.opPlus())) {
-      if (!CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial(
+      if (!CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial(
         calculator, computer, candidate
       )) {
         return false;
@@ -310,7 +310,7 @@ bool CalculatorConversions::functionPolynomialWithExponentLimit(
       }
       computer.addChildOnTop(converted);
     }
-    if (!CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial(calculator, computer, candidate)) {
+    if (!CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial(calculator, computer, candidate)) {
       return calculator << "Too many variables";
     }
     output = candidate;

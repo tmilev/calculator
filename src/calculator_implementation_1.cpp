@@ -16,7 +16,6 @@
 #include <cmath>
 #include <cfloat>
 
-std::string PlotObject::Labels::points              = "points";
 std::string PlotObject::Labels::point               = "point";
 std::string PlotObject::Labels::path                = "path";
 std::string PlotObject::Labels::functionLabel       = "function";
@@ -40,6 +39,12 @@ std::string PlotObject::Labels::arguments           = "arguments";
 std::string PlotObject::Labels::parameters          = "parameters";
 std::string PlotObject::Labels::viewWindow          = "viewWindow";
 
+std::string PlotObject::PlotTypes::parametricCurve  = "parametricCurve";
+std::string PlotObject::PlotTypes::points           = "points";
+std::string PlotObject::PlotTypes::segment          = "segment";
+std::string PlotObject::PlotTypes::plotFillStart    = "plotFillStart";
+std::string PlotObject::PlotTypes::plotFillFinish   = "plotFillFinish";
+
 std::string Plot::Labels::canvasName                = "canvasName";
 std::string Plot::Labels::controlsName              = "controlsName";
 std::string Plot::Labels::messagesName              = "messagesName";
@@ -47,6 +52,7 @@ std::string Plot::Labels::graphicsType              = "graphicsType";
 std::string Plot::Labels::graphicsThreeDimensional  = "graphicsThreeDimensional";
 std::string Plot::Labels::graphicsTwoDimensional    = "graphicsTwoDimensional";
 std::string Plot::Labels::plotObjects               = "plotObjects";
+
 
 bool Calculator::getListPolynomialVariableLabelsLexicographic(
   const Expression& input,
@@ -294,7 +300,7 @@ bool PlotObject::operator==(const PlotObject& other) const {
   this->points                         == other.points                       &&
   this->pointsDouble                   == other.pointsDouble                 &&
   this->pointsJS                       == other.pointsJS                     &&
-  this->theRectangles                  == other.theRectangles                &&
+  this->rectangles                  == other.rectangles                &&
   this->plotType                       == other.plotType                     &&
   this->manifoldImmersion              == other.manifoldImmersion            &&
   this->coordinateFunctionsE           == other.coordinateFunctionsE         &&
@@ -440,6 +446,79 @@ void Plot::addPlotOnTop(PlotObject& input) {
   *this += input;
 }
 
+void PlotObject::makeSegment(
+  const Vector<Rational>& left,
+  const Vector<Rational>& right
+) {
+  this->pointsDouble.addOnTop(left.getVectorDouble());
+  this->pointsDouble.addOnTop(right.getVectorDouble());
+  this->plotType = PlotObject::PlotTypes::segment;
+}
+
+void PlotObject::makePlotFillStart() {
+  this->plotType = PlotObject::PlotTypes::plotFillStart;
+}
+
+void PlotObject::makePlotFillFinish() {
+  this->plotType = PlotObject::PlotTypes::plotFillFinish;
+}
+
+void PlotObject::makeCircle(
+  const Vector<Rational>& center,
+  const Rational& radius,
+  const std::string& color
+) {
+  if (center.size < 2) {
+    global.fatal
+    << "The circle dimension must be at least two. "
+    << global.fatal;
+  }
+  this->variableRangesJS.setSize(1);
+  this->variableRangesJS[0].setSize(2);
+  this->variableRangesJS[0][0] = "0";
+  this->variableRangesJS[0][1] = "3.14159";
+  this->paramLowJS  = "0";
+  this->paramHighJS = "2*3.14159";
+  this->numberOfSegmentsJS.setSize(1);
+  this->numberOfSegmentsJS[0] = "30";
+  this->coordinateFunctionsJS.setSize(2);
+  this->variablesInPlayJS.addOnTop("t");
+  std::string radiusString = StringRoutines::toStringElement(radius);
+  this->coordinateFunctionsJS[0] = center[0].toString() + "+" + radiusString + "*Math.cos(t)";
+  this->coordinateFunctionsJS[1] = center[1].toString() + "+" + radiusString + "*Math.sin(t)";
+  this->colorJS = color;
+  this->plotType = PlotObject::PlotTypes::parametricCurve;
+}
+
+void Plot::drawCircle(
+  const Vector<Rational>& center,
+  const Rational& radius,
+  const std::string& color,
+  bool filled
+) {
+  PlotObject circle;
+  circle.makeCircle(center, radius, color);
+  if (filled) {
+    PlotObject plotFillStart;
+    plotFillStart.makePlotFillStart();
+    this->addPlotOnTop(plotFillStart);
+  }
+  this->addPlotOnTop(circle);
+  if (filled) {
+    PlotObject plotFillFinish;
+    plotFillFinish.makePlotFillFinish();
+    this->addPlotOnTop(plotFillFinish);
+  }
+}
+
+void Plot::drawSegment(
+  const Vector<Rational>& left, const Vector<Rational>& right
+) {
+  PlotObject segment;
+  segment.makeSegment(left, right);
+  this->addPlotOnTop(segment);
+}
+
 void Plot::addPlotsOnTop(Plot& input) {
   this->plotObjects.addListOnTop(input.plotObjects);
   this->parameterNames.addOnTopNoRepetition(input.parameterNames);
@@ -542,7 +621,7 @@ std::string PlotObject::toStringDebug() {
   return out.str();
 }
 
-JSData PlotObject::toJSONCurveImmersionIn3d() {
+JSData PlotObject::toJSONParametricCurve() {
   MacroRegisterFunctionWithName("PlotSurfaceIn3d::toJSONCurveImmersionIn3d");
   JSData result;
   this->writeVariables(result);
@@ -676,23 +755,6 @@ JSData PlotObject::toJSON2dDrawFunction() {
   return result;
 }
 
-JSData PlotObject::toJSONParametricCurveInTwoDimensions() {
-  MacroRegisterFunctionWithName("PlotSurfaceIn3d::toJSONParametricCurveInTwoDimensions");
-  JSData result;
-  JSData coordinateFunctions = JSData::makeEmptyArray();
-  for (int i = 0; i < this->coordinateFunctionsJS.size; i ++) {
-    coordinateFunctions[i] = this->coordinateFunction(i);
-  }
-  if (this->coordinateFunctionsJS.size != 2) {
-    return result;
-  }
-  result[PlotObject::Labels::coordinateFunctions] = coordinateFunctions;
-  result[PlotObject::Labels::left] = this->paramLowJS;
-  result[PlotObject::Labels::right] = this->paramHighJS;
-  this->writeColorWidthSegments(result);
-  return result;
-}
-
 JSData PlotObject::manifoldImmersionFunctionsJS() {
   return this->functionFromString("return " + this->manifoldImmersionJS + ";");
 }
@@ -737,7 +799,7 @@ JSData PlotObject::toJSONDrawText() {
 
 JSData PlotObject::toJSONDrawPath() {
   JSData result;
-  result[PlotObject::Labels::points] = this->pointsDouble;
+  result[PlotObject::PlotTypes::segment] = this->pointsDouble;
   this->writeColorLineWidth(result);
   return result;
 }
@@ -766,7 +828,7 @@ JSData PlotObject::toJSONSetProjectionScreen() {
 
 JSData PlotObject::toJSONSegment() {
   JSData result;
-  result[PlotObject::Labels::points] = this->pointsDouble;
+  result[PlotObject::PlotTypes::points] = this->pointsDouble;
   this->writeColorLineWidth(result);
   return result;
 }
@@ -783,19 +845,17 @@ JSData PlotObject::toJSON() {
     result = this->toJSONSegment();
   } else if (correctedPlotType == "surface") {
     result = this->toJSONSurfaceImmersion();
-  } else if (correctedPlotType == "parametricCurve") {
-    result = this->toJSONCurveImmersionIn3d();
+  } else if (correctedPlotType == PlotObject::PlotTypes::parametricCurve) {
+    result = this->toJSONParametricCurve();
   } else if (correctedPlotType == "plotFunction") {
     result = this->toJSON2dDrawFunction();
-  } else if (correctedPlotType == "parametricCurve") {
-    result = this->toJSONParametricCurveInTwoDimensions();
   } else if (correctedPlotType == "plotDirectionField") {
     result = this->toJSONDirectionFieldInTwoDimensions() ;
-  } else if (correctedPlotType == PlotObject::Labels::points) {
+  } else if (correctedPlotType == PlotObject::PlotTypes::points) {
     result = this->toJSONPoints();
   } else if (correctedPlotType == "label") {
     result = this->toJSONDrawText();
-  } else if (correctedPlotType == "plotFillStart") {
+  } else if (correctedPlotType == PlotObject::PlotTypes::plotFillStart) {
     result = this->toJSONPlotFillStart();
   } else if (correctedPlotType == "plotFillFinish") {
     // The plot type carries all information.
@@ -821,7 +881,7 @@ JSData PlotObject::toJSONPoints() {
     }
     points[i] = onePoint;
   }
-  result[PlotObject::Labels::points] = points;
+  result[PlotObject::PlotTypes::points] = points;
   result[PlotObject::Labels::color] = this->colorJS;
   this->writeVariables(result);
   return result;
@@ -982,7 +1042,7 @@ bool Expression::assignStringParsed(
     MapList<Expression, Expression> substitutionMap;
     for (int i = 0; i < substitutions->size(); i ++) {
       Expression substituted;
-      substituted.makeAtom(substitutions->keys[i], owner);
+      substituted.makeAtom(owner, substitutions->keys[i]);
       substitutionMap.setKeyValue(substituted, substitutions->values[i]);
     }
     result.substituteRecursively(substitutionMap);

@@ -193,7 +193,7 @@ Expression Calculator::expressionMinusHalf() {
 
 Expression Calculator::expressionInfinity() {
   Expression result;
-  result.makeAtom(this->opInfinity(), *this);
+  result.makeAtom(*this, this->opInfinity());
   return result;
 }
 
@@ -618,7 +618,7 @@ Expression Calculator::getNewAtom() {
       }
       if (!this->operations.contains(candidate)) {
         Expression result;
-        result.makeAtom(candidate, *this);
+        result.makeAtom(*this, candidate);
         return result;
       }
     }

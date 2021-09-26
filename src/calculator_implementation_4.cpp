@@ -932,7 +932,7 @@ bool Expression::makeXOXOdotsOX(Calculator& owner, int operation, const List<Exp
   return true;
 }
 
-bool Expression::makeAtom(int input, Calculator& newBoss) {
+bool Expression::makeAtom(Calculator& newBoss, int input) {
   this->reset(newBoss);
   this->data = input;
   return true;

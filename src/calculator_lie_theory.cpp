@@ -2164,8 +2164,6 @@ bool CartanInvolution::computeSimpleRootImagesTypeAI(
     this->automorphism.imagesPositiveSimpleChevalleyGenerators[i].makeGGenerator(simpleRoot, *this->owner);
     this->automorphism.imagesNegativeSimpleChevalleyGenerators[i].makeGGenerator(- simpleRoot, *this->owner);
   }
-  global.comments << "DEBUG: Rank: " << rank << " images pos: " << this->automorphism.imagesPositiveSimpleChevalleyGenerators.toString();
-  global.comments << "DEBUG: Constructed images: " << this->automorphism.toString();
   return true;
 }
 
@@ -2198,8 +2196,6 @@ bool CartanInvolution::computeSimpleRootImagesTypeAII(
       this->automorphism.imagesNegativeSimpleChevalleyGenerators[i] *= - 1;
     }
   }
-  global.comments << "DEBUG: Rank: " << rank << " images pos: " << this->automorphism.imagesPositiveSimpleChevalleyGenerators.toString();
-  global.comments << "DEBUG: Constructed images: " << this->automorphism.toString();
   return true;
 }
 
@@ -2248,8 +2244,6 @@ bool CartanInvolution::computeSimpleRootImagesTypeAIII(
     this->automorphism.imagesPositiveSimpleChevalleyGenerators[index] *= - 1;
     this->automorphism.imagesNegativeSimpleChevalleyGenerators[index] *= - 1;
   }
-  global.comments << "DEBUG: Rank: " << rank << " images pos: " << this->automorphism.imagesPositiveSimpleChevalleyGenerators.toString();
-  global.comments << "DEBUG: Constructed images: " << this->automorphism.toString();
   return true;
 }
 
@@ -2288,7 +2282,6 @@ bool CartanInvolution::computeFromDiagram(
     }
     return false;
   }
-  global.comments << "DEBUG: got to here!!!!";
   if (!this->automorphism.computeHomomorphismFromImagesSimpleChevalleyGenerators(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to extend images of simple generators to a Cartan involution. ";
@@ -2296,6 +2289,61 @@ bool CartanInvolution::computeFromDiagram(
     return false;
   }
   return true;
+}
+
+void SatakeDiagram::plot(Plot& output) {
+  this->plotInitialize(output);
+  switch (this->diagram) {
+  case SatakeDiagram::AI:
+    this->plotAI(output);
+    return;
+  case SatakeDiagram::AII:
+    this->plotAII(output);
+    return;
+  default:
+    return;
+  }
+}
+
+void SatakeDiagram::plotInitialize(Plot& output) {
+  output.dimension = 2;
+  output.flagIncludeCoordinateSystem = false;
+}
+
+void SatakeDiagram::plotHorizontalChainOfRoots(Plot& output, int count, Selection& blackedNodes) {
+  Vector<Rational> center;
+  center.makeZero(2);
+  for (int i = 0; i < count; i ++) {
+    center[0] = i * distanceBetweenRootCenters;
+    output.drawCircle(center, radiusOfRootCircle, "black", blackedNodes.selected[i]);
+  }
+  Vector<Rational> left, right;
+  left.makeZero(2);
+  right.makeZero(2);
+  for (int i = 0; i < count - 1; i ++) {
+    left[0] = i * distanceBetweenRootCenters + radiusOfRootCircle;
+    right[0] = (i + 1) * distanceBetweenRootCenters - radiusOfRootCircle;
+    output.drawSegment(left, right);
+  }
+}
+
+void SatakeDiagram::plotAI(Plot& output) {
+  Selection blackedNodes;
+  blackedNodes.initialize(this->rank);
+  this->plotHorizontalChainOfRoots(output, this->rank, blackedNodes);
+}
+
+void SatakeDiagram::plotAII(Plot& output) {
+  Selection blackedNodes;
+  blackedNodes.initialize(this->rank);
+  for (int i = 0; i < this->rank; i += 2) {
+    blackedNodes.addSelectionAppendNewIndex(i);
+  }
+  this->plotHorizontalChainOfRoots(output, this->rank, blackedNodes);
+}
+
+void CartanInvolution::plot(Plot& output) {
+  return this->satakeDiagram.plot(output);
 }
 
 bool CalculatorLieTheory::cartanInvolution(
@@ -2327,8 +2375,6 @@ bool CalculatorLieTheory::cartanInvolution(
   )) {
     return false;
   }
-  global.comments << "DEBUG: got to here. Dynkin diagram: " << involution.satakeDiagram.dynkinTypeAmbient().toString()
-  << "Rank: " << rank << " param: " << diagramParameter;
   SemisimpleLieAlgebra& owner = calculator.objectContainer.getLieAlgebraCreateIfNotPresent(
     involution.satakeDiagram.dynkinTypeAmbient()
   );
@@ -2337,7 +2383,9 @@ bool CalculatorLieTheory::cartanInvolution(
   )) {
     return false;
   }
-  return output.assignValue(calculator, involution.toString());
+  Plot plot;
+  involution.plot(plot);
+  return output.assignValue(calculator, plot.getPlotHtml(calculator) + involution.toString());
 }
 
 bool CalculatorLieTheory::isReductiveLieSubalgebra(

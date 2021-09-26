@@ -695,7 +695,7 @@ bool CalculatorFunctions::stringToAtom(Calculator& calculator, const Expression&
   if (!argument.isOfType(&theString)) {
     return false;
   }
-  return output.makeAtom(theString, calculator);
+  return output.makeAtom(calculator, theString);
 }
 
 bool CalculatorFunctions::expressionToString(
@@ -790,7 +790,7 @@ bool CalculatorFunctionsBasic::logarithm(Calculator& calculator, const Expressio
   argument *= - 1;
   Expression iE, ipiE, piE, lnPart;
   iE.makeSqrt(calculator, Rational(- 1), 2);
-  piE.makeAtom(calculator.opPi(), calculator);
+  piE.makeAtom(calculator, calculator.opPi());
   ipiE.makeXOX(calculator, calculator.opTimes(), piE, iE);
   lnPart.assignValue(calculator, FloatingPoint::logFloating(argument));
   return output.makeXOX(calculator, calculator.opPlus(), lnPart, ipiE);
@@ -823,12 +823,12 @@ bool CalculatorFunctionsTrigonometry::arctan(Calculator& calculator, const Expre
   }
   const Expression& argument = input[1];
   if (argument.isEqualToOne()) {
-    output.makeAtom(calculator.opPi(), calculator);
+    output.makeAtom(calculator, calculator.opPi());
     output /= calculator.expressionFour();
     return true;
   }
   if (argument.isEqualToMOne()) {
-    output.makeAtom(calculator.opPi(), calculator);
+    output.makeAtom(calculator, calculator.opPi());
     output /= calculator.expressionFour();
     output *= calculator.expressionMinusOne();
     return true;
@@ -2416,7 +2416,7 @@ bool CalculatorFunctionsDifferentiation::differentiateX(Calculator& calculator, 
   //////////////////////
   if (argument != theDOvar)
     return false;
-  return output.assignValueOLD<Rational>(1, calculator);
+  return output.assignValue<Rational>(calculator, 1);
 }
 
 bool CalculatorFunctionsDifferentiation::differentiateTrigAndInverseTrig(
@@ -2434,23 +2434,23 @@ bool CalculatorFunctionsDifferentiation::differentiateTrigAndInverseTrig(
   const Expression& argument = input[2];
   //////////////////////
   if (argument.isOperationGiven(calculator.opSin())) {
-    return output.makeAtom(calculator.opCos(), calculator);
+    return output.makeAtom(calculator, calculator.opCos());
   }
   if (argument.isOperationGiven(calculator.opCos())) {
     Expression mOneE, sinE;
-    mOneE.assignValueOLD<Rational>(- 1, calculator);
-    sinE.makeAtom(calculator.opSin(), calculator);
+    mOneE.assignValue<Rational>(calculator, - 1);
+    sinE.makeAtom(calculator, calculator.opSin());
     return output.makeXOX(calculator, calculator.opTimes(), mOneE, sinE);
   }
   if (argument.isOperationGiven(calculator.opTan())) {
     Expression secE, twoE;
-    secE.makeAtom(calculator.opSec(), calculator);
+    secE.makeAtom(calculator, calculator.opSec());
     twoE.assignValue(calculator, 2);
     return output.makeXOX(calculator, calculator.opPower(), secE, twoE);
   }
   if (argument.isOperationGiven(calculator.opCot())) {
     Expression cscE, twoE, cscSquared, mOneE;
-    cscE.makeAtom(calculator.opCsc(), calculator);
+    cscE.makeAtom(calculator, calculator.opCsc());
     twoE.assignValue(calculator, 2);
     cscSquared.makeXOX(calculator, calculator.opPower(), cscE, twoE);
     mOneE.assignValue(calculator, - 1);
@@ -2458,14 +2458,14 @@ bool CalculatorFunctionsDifferentiation::differentiateTrigAndInverseTrig(
   }
   if (argument.isOperationGiven(calculator.opSec())) {
     Expression tanE, secE;
-    tanE.makeAtom(calculator.opTan(), calculator);
-    secE.makeAtom(calculator.opSec(), calculator);
+    tanE.makeAtom(calculator, calculator.opTan());
+    secE.makeAtom(calculator, calculator.opSec());
     return output.makeXOX(calculator, calculator.opTimes(), tanE, secE);
   }
   if (argument.isOperationGiven(calculator.opCsc())) {
     Expression cotE, cscE, mOneE, cotTimesCscE;
-    cotE.makeAtom(calculator.opCot(), calculator);
-    cscE.makeAtom(calculator.opCsc(), calculator);
+    cotE.makeAtom(calculator, calculator.opCot());
+    cscE.makeAtom(calculator, calculator.opCsc());
     mOneE.assignValue(calculator, - 1);
     cotTimesCscE.makeXOX(calculator, calculator.opTimes(), cotE, cscE);
     return output.makeXOX(calculator, calculator.opTimes(), mOneE, cotTimesCscE);
@@ -3483,7 +3483,7 @@ bool CalculatorFunctionsDifferentiation::atomToDifferential(
     return false;
   }
   Expression underTheDifferential;
-  underTheDifferential.makeAtom(differentialString.substr(1, std::string::npos), calculator);
+  underTheDifferential.makeAtom(calculator, differentialString.substr(1, std::string::npos));
   return output.makeXOX(calculator, calculator.opDifferential(), underTheDifferential, calculator.expressionOne());
 }
 
@@ -4375,7 +4375,7 @@ bool CalculatorFunctionsIntegration::integratePullImaginaryUnit(
     return false;
   }
   Expression iE;
-  iE.makeAtom(calculator.opImaginaryUnit(), calculator);
+  iE.makeAtom(calculator, calculator.opImaginaryUnit());
   if (theVariableE == iE) {
     return false;
   }
@@ -4809,8 +4809,8 @@ bool CalculatorFunctionsTrigonometry::convertSineToExponent(
   }
   const Expression& argument = input[1];
   Expression eE, iE, exponentArgument, minusExponentArgument, leftE, rightE;
-  eE.makeAtom(calculator.opE(), calculator);
-  iE.makeAtom(calculator.opImaginaryUnit(), calculator);
+  eE.makeAtom(calculator, calculator.opE());
+  iE.makeAtom(calculator, calculator.opImaginaryUnit());
   exponentArgument = iE * argument;
   minusExponentArgument = exponentArgument * (- 1);
   leftE.makeXOX(calculator, calculator.opPower(), eE, exponentArgument);
@@ -4828,8 +4828,8 @@ bool CalculatorFunctionsTrigonometry::convertCosineToExponent(
   }
   const Expression& argument = input[1];
   Expression eE, iE, exponentArgument, minusExponentArgument, leftE, rightE;
-  eE.makeAtom(calculator.opE(), calculator);
-  iE.makeAtom(calculator.opImaginaryUnit(), calculator);
+  eE.makeAtom(calculator, calculator.opE());
+  iE.makeAtom(calculator, calculator.opImaginaryUnit());
   exponentArgument = iE * argument;
   minusExponentArgument = exponentArgument * (- 1);
   leftE.makeXOX(calculator, calculator.opPower(), eE, exponentArgument);
@@ -4851,7 +4851,7 @@ bool CalculatorFunctions::innerPowerImaginaryUnit(Calculator& calculator, const 
     return false;
   }
   Expression iE;
-  iE.makeAtom(calculator.opImaginaryUnit(), calculator);
+  iE.makeAtom(calculator, calculator.opImaginaryUnit());
   if (power % 4 == 0) {
     return output.assignValue(calculator, 1);
   }
@@ -4881,7 +4881,7 @@ bool CalculatorFunctionsTrigonometry::eulerFormulaAsLaw(
   }
   Expression coefficientOfI, currentE;
   Expression iE;
-  iE.makeAtom(calculator.opImaginaryUnit(), calculator);
+  iE.makeAtom(calculator, calculator.opImaginaryUnit());
   currentE.reset(calculator, 3);
   currentE.addChildAtomOnTop(calculator.opCoefficientOf());
   currentE.addChildOnTop(iE);
@@ -5049,8 +5049,8 @@ bool CalculatorFunctionsDifferentiation::ddivDxToDiffDivDiffx(
   }
   denominatorString.resize(denominatorString.size() - 1);
   Expression numeratorE, denominatorE(calculator), rightDenE;
-  numeratorE.makeAtom(calculator.opDifferential(), calculator);
-  rightDenE.makeAtom(calculator.addOperationNoRepetitionOrReturnIndexFirst(denominatorString), calculator);
+  numeratorE.makeAtom(calculator, calculator.opDifferential());
+  rightDenE.makeAtom(calculator, calculator.addOperationNoRepetitionOrReturnIndexFirst(denominatorString));
   denominatorE.addChildOnTop(numeratorE);
   denominatorE.addChildOnTop(rightDenE);
   return output.makeXOX(calculator, calculator.opDivide(), numeratorE, denominatorE);
@@ -5269,7 +5269,7 @@ bool Expression::makeSequenceCommands(Calculator& owner, List<std::string>& inpu
     << "number of keys and expressions." << global.fatal;
   }
   for (int i = 0; i < inputValues.size; i ++) {
-    currentKey.makeAtom(inputKeys[i], owner);
+    currentKey.makeAtom(owner, inputKeys[i]);
     currentStatement.makeXOX(owner, owner.opDefine(), currentKey, inputValues[i]);
     theStatements.addOnTop(currentStatement);
   }
@@ -5682,8 +5682,8 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& calculator, const Ex
   knownConsts.addListOnTop(calculator.knownDoubleConstants);
   knownValues.addListOnTop(calculator.knownDoubleConstantValues);
   Expression xE, yE;
-  xE.makeAtom("x", calculator);
-  yE.makeAtom("y", calculator);
+  xE.makeAtom(calculator, "x");
+  yE.makeAtom(calculator, "y");
   if (knownConsts.contains(xE) || knownConsts.contains(yE)) {
     return calculator << "The letters x, y appear to be already used to "
     << "denote known constants, I cannot run Euler's method.";
@@ -6051,7 +6051,7 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
   }
   if (plotObject.variablesInPlay.size == 0) {
     Expression xE;
-    xE.makeAtom("x", calculator);
+    xE.makeAtom(calculator, "x");
     plotObject.variablesInPlay.addOnTop(xE);
   }
   plotObject.variablesInPlayJS.setSize(plotObject.variablesInPlay.size);
@@ -6244,7 +6244,7 @@ bool CalculatorFunctionsPlot::plot2DWithBars(Calculator& calculator, const Expre
     MathRoutines::swap(upperBound, lowerBound);
   }
   Expression xValueE, xExpression, theFunValueEnonEvaluated, theFunValueFinal;
-  xExpression.makeAtom(calculator.addOperationNoRepetitionOrReturnIndexFirst("x"), calculator);
+  xExpression.makeAtom(calculator, calculator.addOperationNoRepetitionOrReturnIndexFirst("x"));
   List<double> xValues;
   List<double> fValuesLower;
   List<double> fValuesUpper;
@@ -6458,9 +6458,10 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plotParametricCurve");
   if (input.size() < 4) {
     return calculator
-    << "Parametric curve plots take 3+ arguments. The first argument gives "
-    << "the coordinate functions in the format (f_1, f_2) or (f_1, f_2,f_3), "
-    << " the next two arguments stands for the variable range. ";
+    << "Parametric curve plots take 3+ arguments. "
+    << "The first argument gives "
+    << "the coordinate functions in the format (f_1, f_2) or (f_1, f_2, f_3), "
+    << "the next two arguments stands for the variable range. ";
   }
   if (input.hasBoundVariables()) {
     return false;
@@ -6477,7 +6478,8 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     plot.coordinateFunctionsE[i].getFreeVariables(plot.variablesInPlay, true);
   }
   if (plot.variablesInPlay.size > 1) {
-    return calculator << "Curve is allowed to depend on at most 1 parameter. "
+    return calculator
+    << "Curve is allowed to depend on at most 1 parameter. "
     << "Instead, your curve: " << input.toString()
     << " depends on "
     << plot.variablesInPlay.size << ", namely: "
@@ -6485,7 +6487,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   }
   if (plot.variablesInPlay.size == 0) {
     Expression tempE;
-    tempE.makeAtom("t", calculator);
+    tempE.makeAtom(calculator, "t");
     plot.variablesInPlay.addOnTop(tempE);
   }
   plot.variablesInPlayJS.addOnTop(
@@ -6509,7 +6511,8 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   if (input.size() >= 7) {
     if (!input[6].isSmallInteger(&numberOfPoints)) {
       numberOfPoints = 1000;
-      calculator << "<hr>Could not extract number of points from "
+      calculator
+      << "<hr>Could not extract number of points from "
       << input[6].toString();
     }
     plot.numSegmentsE = input[6];
@@ -6522,8 +6525,8 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   if (input.size() < 7) {
     plot.numSegmentsE.assignValue(calculator, numberOfPoints);
   }
-  List<Expression> theConvertedExpressions;
-  theConvertedExpressions.setSize(plot.dimension);
+  List<Expression> convertedExpressions;
+  convertedExpressions.setSize(plot.dimension);
   plot.paramLowE = input[2];
   plot.paramHighE = input[3];
   if (
@@ -6535,14 +6538,14 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     << plot.paramHighE.toString()
     << " to left and right endpoint of parameter interval. ";
   }
-  Vectors<double> theXs, theYs;
+  Vectors<double> xCoordinates, yCoordinates;
 
   bool isGoodLatexWise = true;
   for (int i = 0; i < plot.dimension; i ++) {
     if (!calculator.callCalculatorFunction(
       CalculatorFunctions::innerSuffixNotationForPostScript,
       plot.coordinateFunctionsE[i],
-      theConvertedExpressions[i]
+      convertedExpressions[i]
     )) {
       calculator << "Failed to extract suffix notation from argument "
       << plot.coordinateFunctionsE[i].toString();
@@ -6554,18 +6557,18 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     std::stringstream outLatex, outHtml;
     outLatex << "\\parametricplot[linecolor =\\fcColorGraph, plotpoints =" << numberOfPoints << "]{"
     << plot.paramLow << "}{" << plot.paramHigh << "}{"
-    << theConvertedExpressions[0].getValue<std::string>()
-    << theConvertedExpressions[1].getValue<std::string>() << "}";
+    << convertedExpressions[0].getValue<std::string>()
+    << convertedExpressions[1].getValue<std::string>() << "}";
     outHtml << "<br>%Calculator input: " << input.toString()
     << "<br>\\parametricplot[linecolor =\\fcColorGraph, plotpoints =" << numberOfPoints << "]{"
     << plot.paramLow << "}{" << plot.paramHigh << "}{"
-    << theConvertedExpressions[0].getValue<std::string>()
-    << theConvertedExpressions[1].getValue<std::string>() << "}";
-    plot.plotString= outLatex.str();
+    << convertedExpressions[0].getValue<std::string>()
+    << convertedExpressions[1].getValue<std::string>() << "}";
+    plot.plotString = outLatex.str();
     plot.plotStringWithHtml = outHtml.str();
   }
   Expression converterE;
-  plot.plotType = "parametricCurve";
+  plot.plotType = PlotObject::PlotTypes::parametricCurve;
   plot.coordinateFunctionsJS.setSize(plot.dimension);
   for (int i = 0; i < plot.dimension; i ++) {
     if (CalculatorFunctions::functionMakeJavascriptExpression(
@@ -6615,7 +6618,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
       numberOfPoints,
       &plot.xLow,
       &plot.xHigh,
-      &theXs
+      &xCoordinates
     )) {
       calculator << "<hr>Failed to evaluate curve function. ";
     }
@@ -6626,15 +6629,15 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
       numberOfPoints,
       &plot.yLow,
       &plot.yHigh,
-      &theYs
+      &yCoordinates
     )) {
       calculator << "<hr>Failed to evaluate curve function. ";
     }
-    plot.pointsDouble.setSize(theXs.size);
-    for (int i = 0; i < theXs.size; i ++) {
+    plot.pointsDouble.setSize(xCoordinates.size);
+    for (int i = 0; i < xCoordinates.size; i ++) {
       plot.pointsDouble[i].setSize(2);
-      plot.pointsDouble[i][0] = theXs[i][1];
-      plot.pointsDouble[i][1] = theYs[i][1];
+      plot.pointsDouble[i][0] = xCoordinates[i][1];
+      plot.pointsDouble[i][1] = yCoordinates[i][1];
     }
   }
   input.hasInputBoxVariables(&plot.parametersInPlay, &plot.parametersInPlayJS);
@@ -6968,12 +6971,12 @@ bool Expression::evaluatesToDoubleInRange(
   }
   HashedList<Expression> knownEs = this->owner->knownDoubleConstants;
   List<double> knownValues = this->owner->knownDoubleConstantValues;
-  Expression theVarNameE;
-  theVarNameE.makeAtom(varName, *this->owner);
-  if (knownEs.contains(theVarNameE)) {
+  Expression variableExpression;
+  variableExpression.makeAtom(*this->owner, varName);
+  if (knownEs.contains(variableExpression)) {
     return *(this->owner) << "Variable name is an already known constant, variable name is bad.";
   }
-  knownEs.addOnTop(theVarNameE);
+  knownEs.addOnTop(variableExpression);
   knownValues.addOnTop(0);
   int numPoints = numIntervals + 1;
   double delta = (highBound - lowBound) / (numIntervals);
@@ -7913,7 +7916,7 @@ public:
       this->currentEchildrenTruncated.addOnTop(this->getCurrentExpression()[i]);
       if (i + 1 + this->indexCurrentChild > this->maximumDisplayedNodes || i > this->maximumAllowedWidth) {
         Expression dotsAtom;
-        dotsAtom.makeAtom(std::string("..."), *this->owner);
+        dotsAtom.makeAtom(*this->owner, std::string("..."));
         this->currentEchildrenTruncated.addOnTop(dotsAtom);
         break;
       }
@@ -8296,7 +8299,7 @@ bool CalculatorFunctions::turnOnApproximations(
   MacroRegisterFunctionWithName("CalculatorFunctions::turnOnApproximations");
   (void) input;
   Expression approximations;
-  approximations.makeAtom(calculator.opApproximations(), calculator);
+  approximations.makeAtom(calculator, calculator.opApproximations());
   Expression onSwitch;
   onSwitch.makeOX(calculator, calculator.opTurnOffRules(), approximations);
   return CalculatorFunctions::turnOnRules(calculator, onSwitch, output);
@@ -8308,7 +8311,7 @@ bool CalculatorFunctions::turnOffApproximations(
   MacroRegisterFunctionWithName("CalculatorFunctions::turnOffApproximations");
   (void) input;
   Expression approximations;
-  approximations.makeAtom(calculator.opApproximations(), calculator);
+  approximations.makeAtom(calculator, calculator.opApproximations());
   Expression offSwitch;
   offSwitch.makeOX(calculator, calculator.opTurnOffRules(), approximations);
   return CalculatorFunctions::turnOffRules(calculator, offSwitch, output);
@@ -8434,7 +8437,7 @@ bool CalculatorFunctions::selectAtRandom(
   if (randomIndex < 0 || randomIndex > input.size() - 1) {
     randomIndex = input.size() - 1;
   }
-  // <-the line above should never be executed
+  // <-The line above should never be executed
   // if the % operator works as it should,
   // but having an extra check never hurts
   // (may be a life saver if I change the code above).

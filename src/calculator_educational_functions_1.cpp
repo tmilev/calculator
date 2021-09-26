@@ -119,7 +119,7 @@ bool UnivariateEquation::solve(Calculator& calculator){
   )) {
     for (int i = 0; i < solutions.size; i ++) {
       Expression currentSolution;
-      currentSolution.assignValueOLD(solutions[i], calculator);
+      currentSolution.assignValue(calculator, solutions[i]);
       this->solutions.addOnTop(currentSolution);
     }
     return true;
@@ -247,7 +247,7 @@ bool CalculatorEducationalFunctions::solveJSON(
   ProblemWithSolution problem;
   problem.toBeSolved = input[1];
   problem.solve(calculator);
-  return output.assignValueOLD(problem.toJSON(), calculator);
+  return output.assignValue(calculator, problem.toJSON());
 }
 
 bool CalculatorEducationalFunctions::compareExpressionsJSON(

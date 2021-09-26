@@ -5,12 +5,18 @@
 
 #include "math_extra_finite_groups.h"
 
+class Plot;
+class CartanInvolution;
+
 // Represents a Satake diagram as defined in
 // Shôrô Araki,
 // "On root systems and an infinitesimal
 // classification of irreducible symmetric spaces", 1962.
 //
 class SatakeDiagram {
+private:
+  void plotInitialize(Plot& output);
+  void plotHorizontalChainOfRoots(Plot& output, int count, Selection& blackedNodes);
 public:
   // This is the column 1 entry of Table 5.11 in the paper mentioned above.
   enum DiagramType {
@@ -39,6 +45,8 @@ public:
     G
   };
   DiagramType diagram;
+  static const int radiusOfRootCircle = 1;
+  static const int distanceBetweenRootCenters = 20;
   // Some of the classical satake types depend on an additional parameter,
   // smaller than the rank of the ambient complex Lie algebra.
   int parameter;
@@ -57,9 +65,12 @@ public:
   );
   DynkinType dynkinTypeAmbient();
   std::string toString();
+  void plot(Plot& output);
+  void plotAI(Plot& output);
+  void plotAII(Plot& output);
+  void plotAIII(Plot& output);
+  void plotAIV(Plot& output);
 };
-
-class CartanInvolution;
 
 class SemisimpleLieAlgebra {
 private:
@@ -601,6 +612,7 @@ public:
     SemisimpleLieAlgebra& inputOwner,
     std::stringstream* commentsOnFailure
   );
+  void plot(Plot& output);
 };
 
 

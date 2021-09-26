@@ -794,8 +794,8 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   }
   plotObject.manifoldImmersion.getFreeVariables(plotObject.variablesInPlay, true);
   Expression xE, yE;
-  xE.makeAtom("x", calculator);
-  yE.makeAtom("y", calculator);
+  xE.makeAtom(calculator, "x");
+  yE.makeAtom(calculator, "y");
   if (plotObject.variablesInPlay.size == 0) {
     plotObject.variablesInPlay.addOnTop(xE);
   }
@@ -1403,20 +1403,20 @@ bool CalculatorFunctionsTrigonometry::arccosAlgebraic(Calculator& calculator, co
       return output.assignValue(calculator, 0);
     }
     if (rational == 0) {
-      output.makeAtom(calculator.opPi(), calculator);
+      output.makeAtom(calculator, calculator.opPi());
       output /= 2;
       return true;
     }
     if (rational == - 1) {
-      return output.makeAtom(calculator.opPi(), calculator);
+      return output.makeAtom(calculator, calculator.opPi());
     }
     if (rational == Rational(1, 2)) {
-      output.makeAtom(calculator.opPi(), calculator);
+      output.makeAtom(calculator, calculator.opPi());
       output /= 3;
       return true;
     }
     if (rational == Rational(- 1, 2)) {
-      output.makeAtom(calculator.opPi(), calculator);
+      output.makeAtom(calculator, calculator.opPi());
       output *= 2;
       output /= 3;
       return true;
@@ -1430,13 +1430,13 @@ bool CalculatorFunctionsTrigonometry::arccosAlgebraic(Calculator& calculator, co
       nullptr
     );
     if (candidate == argument) {
-      output.makeAtom(calculator.opPi(), calculator);
+      output.makeAtom(calculator, calculator.opPi());
       output /= 4;
       return true;
     }
     candidate *= - 1;
     if (candidate ==argument) {
-      output.makeAtom(calculator.opPi(), calculator);
+      output.makeAtom(calculator, calculator.opPi());
       output /= 4;
       output *= 3;
       return true;
@@ -1447,13 +1447,13 @@ bool CalculatorFunctionsTrigonometry::arccosAlgebraic(Calculator& calculator, co
       nullptr
     );
     if (candidate == argument) {
-      output.makeAtom(calculator.opPi(), calculator);
+      output.makeAtom(calculator, calculator.opPi());
       output /= 6;
       return true;
     }
     candidate *= - 1;
     if (candidate == argument) {
-      output.makeAtom(calculator.opPi(), calculator);
+      output.makeAtom(calculator, calculator.opPi());
       output /= 6;
       output *= 5;
       return true;
@@ -1473,7 +1473,7 @@ bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
   Rational rational;
   if (argumentE.isRational(&rational)) {
     if (rational == 1) {
-      output.makeAtom(calculator.opPi(), calculator);
+      output.makeAtom(calculator, calculator.opPi());
       output /= 2;
       return true;
     }
@@ -1481,17 +1481,17 @@ bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
       return output.assignValue(calculator, 0);
     }
     if (rational == - 1) {
-      output.makeAtom(calculator.opPi(), calculator);
+      output.makeAtom(calculator, calculator.opPi());
       output /= - 2;
       return true;
     }
     if (rational == Rational(1, 2)) {
-      output.makeAtom(calculator.opPi(), calculator);
+      output.makeAtom(calculator, calculator.opPi());
       output /= 6;
       return true;
     }
     if (rational == Rational(- 1, 2)) {
-      output.makeAtom(calculator.opPi(), calculator);
+      output.makeAtom(calculator, calculator.opPi());
       output /= - 6;
       return true;
     }
@@ -1504,13 +1504,13 @@ bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
       nullptr
     );
     if (candidate == argument) {
-      output.makeAtom(calculator.opPi(), calculator);
+      output.makeAtom(calculator, calculator.opPi());
       output /= 4;
       return true;
     }
     candidate *= - 1;
     if (candidate == argument) {
-      output.makeAtom(calculator.opPi(), calculator);
+      output.makeAtom(calculator, calculator.opPi());
       output /= - 4;
       return true;
     }
@@ -1520,13 +1520,13 @@ bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
       nullptr
     );
     if (candidate == argument) {
-      output.makeAtom(calculator.opPi(), calculator);
+      output.makeAtom(calculator, calculator.opPi());
       output /= 3;
       return true;
     }
     candidate *= - 1;
     if (candidate == argument) {
-      output.makeAtom(calculator.opPi(), calculator);
+      output.makeAtom(calculator, calculator.opPi());
       output /= - 3;
       return true;
     }
@@ -1580,7 +1580,7 @@ bool CalculatorFunctions::innerDegreesToRadians(
     return false;
   }
   Expression piE;
-  piE.makeAtom(calculator.opPi(), calculator);
+  piE.makeAtom(calculator, calculator.opPi());
   output = input[1] * piE;
   output /= 180;
   return true;
@@ -1864,7 +1864,7 @@ bool CalculatorFunctionsIntervals::intersectIntervals(
     }
   }
   if (leftResult > rightResult) {
-    return output.makeAtom("\\emptyset", calculator);
+    return output.makeAtom(calculator, "\\emptyset");
   }
   if (leftIsClosed && rightIsClosed) {
     return output.makeXOX(calculator, calculator.opIntervalClosed(), leftFinal, rightFinal);

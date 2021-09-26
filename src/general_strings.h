@@ -179,6 +179,12 @@ public:
     std::string toString();
     Differ();
   };
+  template<typename CoefficientType>
+  static std::string toStringElement(CoefficientType x) {
+    std::stringstream result;
+    result << x;
+    return result.str();
+  }
   class Test {
   public:
     static bool all();

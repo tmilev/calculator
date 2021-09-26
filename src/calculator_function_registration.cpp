@@ -2949,7 +2949,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToPolynomialModuloInteger,
+    CalculatorFunctionsBinaryOps::addPolynomialModuloIntegerToPolynomialModuloInteger,
     this->opPolynomialModuloInteger(),
     this->opPolynomialModuloInteger(),
     "Adds polynomials modulo integers. ",
@@ -2991,7 +2991,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber,
+    CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber,
     this->opAlgebraicNumber(),
     this->opAlgebraicNumber(),
     "Adds two algebraic numbers. ",
@@ -3002,7 +3002,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber,
+    CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber,
     this->opAlgebraicNumber(),
     this->opRational(),
     "Adds algebraic number to rational. ",
@@ -3013,7 +3013,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber,
+    CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber,
     this->opRational(),
     this->opAlgebraicNumber(),
     "Adds rational to algebraic number. ",
@@ -3128,7 +3128,7 @@ void Calculator::initializeFunctionsStandard() {
 
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
     this->opRational(),
     this->opPolynomialRational(),
     "Adds a rational to a polynomial. ",
@@ -3139,7 +3139,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
     this->opPolynomialRational(),
     this->opRational(),
     "Adds a polynomial to a rational. ",
@@ -3150,7 +3150,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
     this->opPolynomialRational(),
     this->opPolynomialRational(),
     "Adds a polynomial to a polynomial. ",
@@ -3162,7 +3162,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
     this->opPolynomialAlgebraicNumbers(),
     this->opPolynomialAlgebraicNumbers(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
@@ -3173,7 +3173,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
     this->opAlgebraicNumber(),
     this->opPolynomialAlgebraicNumbers(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
@@ -3184,7 +3184,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
     this->opPolynomialAlgebraicNumbers(),
     this->opAlgebraicNumber(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
@@ -3195,7 +3195,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
     this->opRational(),
     this->opPolynomialAlgebraicNumbers(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
@@ -3206,7 +3206,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
     this->opPolynomialAlgebraicNumbers(),
     this->opRational(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
@@ -3217,7 +3217,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
     this->opPolynomialRational(),
     this->opAlgebraicNumber(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
@@ -3228,7 +3228,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
     this->opPolynomialRational(),
     this->opPolynomialAlgebraicNumbers(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
@@ -3239,7 +3239,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
     this->opPolynomialAlgebraicNumbers(),
     this->opPolynomialRational(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
@@ -3250,7 +3250,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
+    CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
     this->opAlgebraicNumber(),
     this->opPolynomialRational(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
@@ -3673,7 +3673,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP,
+    CalculatorFunctionsBinaryOps::multiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP,
     this->opPolynomialModuloPolynomialModuloInteger(),
     this->opPolynomialModuloPolynomialModuloInteger(),
     "Multiply two polynomials modulo an integer. ",
@@ -4511,7 +4511,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossible,
+    CalculatorFunctionsBinaryOps::powerMatrixNumbersByLargeIntegerIfPossible,
     "",
     "Attempts to exponentiate matrix by a large power. ",
     "X =\\begin{pmatrix} 1 & -1 \\\\ 4 & -3\\end{pmatrix}; X^{-55!- 1}  ",
@@ -4569,7 +4569,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerPolynomialBySmallInteger,
+    CalculatorFunctionsBinaryOps::powerPolynomialBySmallInteger,
     this->opPolynomialRational(),
     this->opRational(),
     "Raises polynomial to small integer power. ",
@@ -5349,7 +5349,7 @@ void Calculator::initializeOperationsThatAreKnownFunctions() {
 void Calculator::addKnownDoubleConstant(const std::string& constantName, double value) {
   this->atomsNotInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew(constantName);
   Expression constant;
-  constant.makeAtom(constantName, *this);
+  constant.makeAtom(*this, constantName);
   this->knownDoubleConstants.addOnTopNoRepetitionMustBeNew(constant);
   this->knownDoubleConstantValues.addOnTop(value);
 }

@@ -955,6 +955,7 @@ public:
   struct PlotTypes {
   public:
     static std::string parametricCurve;
+    static std::string plotFunction;
     static std::string segment;
     static std::string points;
     static std::string plotFillStart;

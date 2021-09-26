@@ -6058,7 +6058,7 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
   plotObject.variablesInPlayJS[0] = plotObject.variablesInPlay[0].toString();
   std::string variableString = plotObject.variablesInPlayJS[0];
   Expression jsConverterE;
-  plotObject.plotType = "plotFunction";
+  plotObject.plotType = PlotObject::PlotTypes::plotFunction;
   if (CalculatorFunctions::functionMakeJavascriptExpression(
     calculator, plotObject.coordinateFunctionsE[0], jsConverterE
   )) {

@@ -40,6 +40,7 @@ std::string PlotObject::Labels::parameters          = "parameters";
 std::string PlotObject::Labels::viewWindow          = "viewWindow";
 
 std::string PlotObject::PlotTypes::parametricCurve  = "parametricCurve";
+std::string PlotObject::PlotTypes::plotFunction     = "plotFunction";
 std::string PlotObject::PlotTypes::points           = "points";
 std::string PlotObject::PlotTypes::segment          = "segment";
 std::string PlotObject::PlotTypes::plotFillStart    = "plotFillStart";
@@ -847,7 +848,7 @@ JSData PlotObject::toJSON() {
     result = this->toJSONSurfaceImmersion();
   } else if (correctedPlotType == PlotObject::PlotTypes::parametricCurve) {
     result = this->toJSONParametricCurve();
-  } else if (correctedPlotType == "plotFunction") {
+  } else if (correctedPlotType == PlotObject::PlotTypes::plotFunction) {
     result = this->toJSON2dDrawFunction();
   } else if (correctedPlotType == "plotDirectionField") {
     result = this->toJSONDirectionFieldInTwoDimensions() ;

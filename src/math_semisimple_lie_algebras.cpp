@@ -1229,9 +1229,14 @@ std::string HomomorphismSemisimpleLieAlgebra::toString(bool useHtml) {
   this->checkInitialization();
   std::stringstream out;
   if (this->checkClosednessLieBracket()) {
-    out << "Lie bracket closes, everything is good!";
+    out << "Checked that the Lie bracket closes.";
   } else {
-    out << "The Lie bracket is incorrect!";
+    out << "The Lie bracket is not closed.";
+  }
+  if (this->checkIsHomomorphism()) {
+    out << "Checked that applying the homomorphism first, "
+    << "then the Lie bracket "
+    << "matches applying Lie bracket first, then homomorphism.";
   }
   if (useHtml) {
     out << "<br>";
@@ -1294,6 +1299,25 @@ bool HomomorphismSemisimpleLieAlgebra::checkInitialization() {
     global.fatal << "Uninitialized homomorphism of semisimple Lie algebras" << global.fatal;
   }
   return true;
+}
+
+bool HomomorphismSemisimpleLieAlgebra::checkIsHomomorphism() {
+  MacroRegisterFunctionWithName("HomomorphismSemisimpleLieAlgebra::checkIsHomomorphism");
+  ElementSemisimpleLieAlgebra<Rational> coDomainElement, domainElement, imageOfDomainElement;
+  for (int i = 0; i < this->imagesAllChevalleyGenerators.size; i ++) {
+    for (int j = 0; j < this->imagesAllChevalleyGenerators.size; j ++) {
+      this->coDomainAlgebra().lieBracket(this->imagesAllChevalleyGenerators[i], this->imagesAllChevalleyGenerators[j], coDomainElement);
+      this->coDomainAlgebra().lieBracket(this->domainAllChevalleyGenerators[i], this->domainAllChevalleyGenerators[j], domainElement);
+      this->applyHomomorphism(domainElement, imageOfDomainElement);
+      if (imageOfDomainElement != coDomainElement) {
+        global.fatal
+        << "Applying the homomorphism first, then Lie bracket "
+        << "does not match doing Lie bracket first, then homomorphism." << global.fatal;
+      }
+    }
+  }
+  return true;
+
 }
 
 bool HomomorphismSemisimpleLieAlgebra::checkClosednessLieBracket() {

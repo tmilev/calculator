@@ -572,6 +572,7 @@ public:
   std::string toString(bool useHtml = true);
   void getRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(Vectors<Rational>& output);
   bool computeHomomorphismFromImagesSimpleChevalleyGenerators(std::stringstream* commentsOnFailure);
+  bool checkIsHomomorphism();
   bool checkClosednessLieBracket();
   bool checkInitialization();
   void applyHomomorphism(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output);

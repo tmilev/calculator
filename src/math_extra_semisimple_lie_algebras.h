@@ -605,6 +605,9 @@ public:
   bool computeSimpleRootImagesTypeAIII(
     std::stringstream* commentsOnFailure
   );
+  bool computeSimpleRootImagesTypeAIV(
+    std::stringstream* commentsOnFailure
+  );
   bool computeSimpleRootImages(
     std::stringstream* commentsOnFailure
   );

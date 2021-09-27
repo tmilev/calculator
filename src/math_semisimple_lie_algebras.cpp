@@ -1229,14 +1229,14 @@ std::string HomomorphismSemisimpleLieAlgebra::toString(bool useHtml) {
   this->checkInitialization();
   std::stringstream out;
   if (this->checkClosednessLieBracket()) {
-    out << "Checked that the Lie bracket closes.";
+    out << "Checked that the Lie bracket closes. ";
   } else {
-    out << "The Lie bracket is not closed.";
+    out << "The Lie bracket is not closed. ";
   }
   if (this->checkIsHomomorphism()) {
     out << "Checked that applying the homomorphism first, "
     << "then the Lie bracket "
-    << "matches applying Lie bracket first, then homomorphism.";
+    << "matches applying Lie bracket first, then homomorphism. ";
   }
   if (useHtml) {
     out << "<br>";

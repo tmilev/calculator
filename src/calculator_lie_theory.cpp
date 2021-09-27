@@ -2132,7 +2132,7 @@ SatakeDiagram::SatakeDiagram() {
 
 std::string CartanInvolution::toString() {
   std::stringstream out;
-  out << this->satakeDiagram.toString();
+  out << this->satakeDiagram.toString() << ". ";
   out << this->automorphism.toString();
   return out.str();
 }
@@ -2300,6 +2300,9 @@ void SatakeDiagram::plot(Plot& output) {
   case SatakeDiagram::AII:
     this->plotAII(output);
     return;
+  case SatakeDiagram::AIII:
+    this->plotAIII(output);
+    return;
   default:
     return;
   }
@@ -2340,6 +2343,13 @@ void SatakeDiagram::plotAII(Plot& output) {
     blackedNodes.addSelectionAppendNewIndex(i);
   }
   this->plotHorizontalChainOfRoots(output, this->rank, blackedNodes);
+}
+
+void SatakeDiagram::plotAIII(Plot& output) {
+  Selection nonBlackedNodes;
+  int topRow = (this->rank - this->parameter) / 2;
+  nonBlackedNodes.initialize(topRow);
+  this->plotHorizontalChainOfRoots(output, topRow, nonBlackedNodes);
 }
 
 void CartanInvolution::plot(Plot& output) {

@@ -3784,8 +3784,8 @@ class EquationEditor {
       this.selectionEnd.element.toLatexWithAnnotation(null).latex;
     let result =
       `Selection: from: ${this.selectionStartExpanded.toString()} to: ${this.selectionEndExpanded.toString()}.`;
-    result += `Actually selected: ${this.selectionStart.toString()} to: ${this.selectionEnd.toString()}.`;
-    result += `Latex from: ${startAnnotationString} to ${endAnnotationString}`;
+    result += ` Actually selected: ${this.selectionStart.toString()} to: ${this.selectionEnd.toString()}.`;
+    result += ` Latex from: ${startAnnotationString} to ${endAnnotationString}`;
     return result;
   }
 
@@ -4134,10 +4134,18 @@ class EquationEditor {
     let startElement = this.selectionStartExpanded.element;
     let endElement = this.selectionEndExpanded.element;
     let parent = startElement.parent;
-    if (parent === null || parent !== endElement.parent ||
-      parent.type.type !== knownTypes.horizontalMath.type) {
-      console.log(
-        'Unexpected form of the selection (null, non-horizontal parent or different parent).');
+    if (parent === null) {
+      // We have selected the entire equation.
+      return;
+    }
+    if (parent.type.type !== knownTypes.horizontalMath.type) {
+      // If the parent node is the root node, this is normal.
+      if (parent.type.type !== knownTypes.root.type) {
+        console.log(
+          'Unexpected form of the selection (null, non-horizontal parent or different parent).');
+        console.log(`Parent type: ${parent.type.type}`);
+        console.log(this.toStringSelection());
+      }
       return;
     }
     let left = startElement.indexInParent;

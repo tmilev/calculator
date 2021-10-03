@@ -5159,10 +5159,19 @@ class MathNode {
 
   computeDimensionsMatrixTable() {
     this.boundingBox = new BoundingBox();
-    let numberOfColumns = this.children[0].children.length;
+    let betweenColumns = 10;
+    let betweenRows = 10;
+    if (this.children.length <= 0) {
+      // empty matrix;
+      this.boundingBox.height = betweenRows;
+      this.boundingBox.width = betweenColumns;
+      this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
+      return;
+    }
+    let firstRow = this.children[0];
+    let numberOfColumns = firstRow.children.length;
     let numberOfRows = this.children.length;
     let left = 0;
-    let betweenColumns = 10;
     for (let i = 0; i < numberOfColumns; i++) {
       this.boundingBox.columnOffsets.push(left);
       let width = 0;
@@ -5184,7 +5193,6 @@ class MathNode {
     }
     let rowWidth = left - betweenColumns;
     let top = 0;
-    let betweenRows = 10;
     for (let i = 0; i < numberOfRows; i++) {
       let row = this.children[i];
       row.boundingBox = new BoundingBox();
@@ -5684,6 +5692,7 @@ class MathNode {
         this.makeCancel();
         return new KeyHandlerResult(true, false);
       case '\\pmatrix':
+      case '\\bmatrix':
       case '\\matrix':
         this.makeMatrix(2, 2);
         return new KeyHandlerResult(true, false);

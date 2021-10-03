@@ -34,8 +34,11 @@
     const options = new EquationEditorOptions({
       // Can you edit the math or is it static math?
       editable: true,
+      latexInput: document.getElementById("latex-input-test"),
+      debugLogContainer: document.getElementById("debug"),
     });
-    editor = new EquationEditor(document.getElementById('editor'), options);
+    let svgContainer = document.getElementById("svgContainer");
+    editor = new EquationEditor(document.getElementById('editor'), options, svgContainer);
     let panel = new EquationEditorButtonPanel(
       // The editor to go with the button panel.
       editor,

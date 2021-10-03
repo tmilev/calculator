@@ -3370,12 +3370,14 @@ class EquationEditor {
       toWriteTo.positionCaretBeforeKeyEvents =
         toWriteTo.textContentOrInitialContent().length;
       toWriteTo.writeLatex(latex);
+      this.writeLatexToInput();
       return;
     }
     let lastFocusedReference = this.focusInformation.lastFocused;
     // Ensure reference to last modified is wiped early.
     this.focusInformation.lastFocused = null;
     lastFocusedReference.writeLatex(latex);
+    this.writeLatexToInput();
   }
 
   accountFrameTime(

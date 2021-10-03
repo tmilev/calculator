@@ -5047,22 +5047,23 @@ class MathNode {
   computeDimensionsOperatorStandalone() {
     let child = this.children[0];
     // see latexConstants.operatorWithSuperAndSubscript
-    let operatorShifts = {
+    let proportionShiftUps = {
       // sum
       '\u03A3': 0.22,
+      //'\u03A3': 0,
       // integral
-      '\u222B': 0.03,
+      '\u222B': 0.3,
     };
     let operatorScales = {
       // sum
       '\u03A3': 2,
       // integral
-      '\u222B': 2,
+      '\u222B': 0.6,
     };
     let proportionShiftUp = 0.1;
     let operatorName = child.initialContent;
-    if (operatorName in operatorShifts) {
-      proportionShiftUp = operatorShifts[operatorName];
+    if (operatorName in proportionShiftUps) {
+      proportionShiftUp = proportionShiftUps[operatorName];
     }
     let operatorScale = 1;
     if (operatorName in operatorScales) {

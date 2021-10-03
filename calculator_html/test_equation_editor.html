@@ -20,7 +20,7 @@
 
 <script>
   function clickSlider(slider) {
-    document.getElementById("equation-editor").style.fontSize = `${slider.value}px`;
+    document.getElementById("editor").style.fontSize = `${slider.value}px`;
     document.getElementById("font-size").textContent = `${slider.value}px`;
     editor.resizingEditorFont = true;
     editor.updateDOM();
@@ -30,46 +30,45 @@
     editor.resizingEditorFont = false;
   }
   var editor = null;
-  function initializePage() {
-    let editorElement = document.getElementById("equation-editor");
+  function createEditor() {
     const options = new EquationEditorOptions({
-      latexInput: document.getElementById("latex-input-test"),
-      debugLogContainer: document.getElementById("debug"),
+      // Can you edit the math or is it static math?
+      editable: true,
     });
-    let svgContainer = document.getElementById("svgContainer");
-    editor = new EquationEditor(editorElement, options, svgContainer);
-    // The \caret command indicates the desired location of the caret. 
-    (new EquationEditorButtonFactory("\\frac{123}{\\caret}\\sqrt{7}", false, "", "")).attachToClickById("custom-button", editor);
-    buttonFactories.fraction.attachToClickById("fraction-button", editor)
-    buttonFactories.divide.attachToClickById("divide-button", editor)
-    buttonFactories.exponent.attachToClickById("exponent-button", editor)
-    buttonFactories.sqrt.attachToClickById("sqrt-button", editor);
-    buttonFactories.matrix2x2.attachToClickById("matrix-button", editor);
+    editor = new EquationEditor(document.getElementById('editor'), options);
+    let panel = new EquationEditorButtonPanel(
+      // The editor to go with the button panel.
+      editor,
+      // Render the button panel here.
+      document.getElementById('panel'),
+      {
+        collapseButton: document.getElementById('collapse'),
+        expandButton: document.getElementById('expand'),
+      },
+    );
+    panel.constructPanelDOM();
     editor.updateDOM();
     editor.rootNode.focus(- 1);
   }
 </script>
 
-<body onload="initializePage()">
+<body onload="createEditor()">
   <h1>A self-contained math equation editor</h1>
   <div style='text-align: center;'>
-    <div id="equation-editor" style="font-size: 72px; font-family:'Times New Roman'"></div>
+    <div id='panel'> </div>
+    <button id='collapse'>collapse &#9650; </button>
+    <button id='expand'>expand &#9660;</button>
+    <br>
+    <div id="editor" style="font-size: 72px; font-family:'Times New Roman'"></div>
     <br>
     <input id="latex-input-test" type="text">
     <br>
     Font size: <span id="font-size">72px</span>
     <input type="range" min="5" max="100" value="72" class="slider" onchange="clickSlider(this);"
       oninput="clickSlider(this);">
-    <br>
-    <button id="fraction-button">/</button>
-    <button id="divide-button">(&bullet;)/(&bullet;)</button>
-    <button id="exponent-button">^</button>
-    <button id="sqrt-button">&Sqrt;</button><br>
-    <button id="matrix-button">2x2 matrix</button><br>
-    <button id="custom-button">custom</button>
   </div>
   <div id="svgContainer"></div><br>
-  <div id="debug" style="display:normal"></div>
+  <!--div id="debug" style="display:normal"></div-->
   <hr>
   <h2>How to use on your web site.</h2>
   Include the script <a
